@@ -1,3 +1,97 @@
+#include "mnu_variant_sprite_placement.h"
+#include "common.h"
+#include "mnu_mantra_sprite_draw.h"
+#include "dsp_channel.h"
+#include "mnu_title_stream.h"
+#include "sdf_chip.h"
+#include "eff_resource_slots.h"
+#include "kwln.h"
+#include "sdf_resource.h"
+#include "eff.h"
+#include "mnu_list.h"
+#include "mnu_profile_progress.h"
+#include "mnu_sprite_resource.h"
+#include "prf_requirement.h"
+#include "sdf_grid.h"
+#include "sdf_task_work.h"
+#include "mnu_scene_work.h"
+
+enum { MNU_VARIANT_X_OFFSET = 2, MNU_VARIANT_Y_OFFSET, MNU_VARIANT_SPRITE_GROUPS };
+extern EffectSlotSet *mnuMantraSpriteSlots[];
+extern MnuVariantSpritePlacement mnuMantraVariantSpritePlacements[];
+extern s32 mnuMantraVariantSpriteSlotView[];
+extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, s32, s32, s32);
+void mnuDrawVariantSpriteBySelector(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+                  s32 selector, s32 flags, f32 scaleX, f32 scaleY, s32 context) {
+    s8 spriteMap[15] = { -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 17, 18 };
+    s32 sprite;
+
+    sprite = spriteMap[(mnuMantraVariantSpritePlacements[placementIndex][MNU_VARIANT_SPRITE_GROUPS] >>
+                        (selector * 4)) & 0xF];
+    if (sprite == -1) {
+        return;
+    }
+    effDrawSpriteWithCornerFade((s32)((f32)(x + mnuMantraVariantSpritePlacements[placementIndex]
+                                           [MNU_VARIANT_X_OFFSET]) * scaleX) << 4,
+                  (s32)((f32)(y + mnuMantraVariantSpritePlacements[placementIndex]
+                                           [MNU_VARIANT_Y_OFFSET]) * scaleY) << 3,
+                  z,
+                  (u32)((f32)(alpha << 8) * 0.0078125f),
+                  flags, mnuMantraVariantSpriteSlotView[0], sprite, context);
+}
+
+void mnuDrawVariantSpriteAtCoordinatePlacement(s32 x, s32 y, s32 z, s32 alpha, s32 groupPlacementIndex,
+                   s32 coordinatePlacementIndex, s32 selector, s32 flags,
+                   f32 scaleX, f32 scaleY, s32 context) {
+    s8 spriteMap[12] = { -1, 12, 26, 27, 13, 14, 15, 16, 20, 21, 23, 24 };
+    s32 sprite;
+
+    selector += 2;
+    sprite = spriteMap[(mnuMantraVariantSpritePlacements[groupPlacementIndex][MNU_VARIANT_SPRITE_GROUPS] >>
+                        (selector * 4)) & 0xF];
+    if (sprite == -1) {
+        return;
+    }
+    effDrawSpriteWithCornerFade((s32)((f32)(x + mnuMantraVariantSpritePlacements[coordinatePlacementIndex]
+                                              [MNU_VARIANT_X_OFFSET]) * scaleX) << 4,
+                  (s32)((f32)(y + mnuMantraVariantSpritePlacements[coordinatePlacementIndex]
+                                              [MNU_VARIANT_Y_OFFSET]) * scaleY) << 3,
+                  z,
+                  (u32)((f32)(alpha << 8) * 0.0078125f),
+                  flags,
+                  mnuMantraVariantSpriteSlotView[0],
+                  sprite,
+                  context);
+}
+
+void mnuDrawScaledVariantSpriteByIndex(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+                   s32 spriteIndex, s32 flags, f32 scaleX, f32 scaleY, s32 context) {
+    {
+        EffectSlotSet *resource =
+            mnuMantraSpriteSlots[mnuMantraVariantSpritePlacements[placementIndex][0]];
+
+        resource->workEntries[spriteIndex].geometry.bounds[2] =
+            (s32)(scaleX * (f32)resource->workEntries[spriteIndex].sourceWidth) << 4;
+        resource->workEntries[spriteIndex].geometry.bounds[3] =
+            (s32)(scaleY * (f32)resource->workEntries[spriteIndex].sourceHeight) << 3;
+    }
+    effDrawSpriteWithCornerFade(
+        (s32)((f32)(x + mnuMantraVariantSpritePlacements[placementIndex][MNU_VARIANT_X_OFFSET]) * scaleX) << 4,
+        (s32)((f32)(y + mnuMantraVariantSpritePlacements[placementIndex][MNU_VARIANT_Y_OFFSET]) * scaleY) << 3,
+        z, (u32)((f32)(alpha << 8) * 0.0078125f), flags,
+        (s32)mnuMantraSpriteSlots[5], spriteIndex, context);
+    {
+        EffectSlotSet *resource =
+            mnuMantraSpriteSlots[mnuMantraVariantSpritePlacements[placementIndex][0]];
+
+        resource->workEntries[spriteIndex].geometry.bounds[2] =
+            resource->workEntries[spriteIndex].sourceWidth << 4;
+        resource->workEntries[spriteIndex].geometry.bounds[3] =
+            resource->workEntries[spriteIndex].sourceHeight << 3;
+    }
+}
+
+
 #include "sdk_ps2.h"
 #include "mnu_variant_sprite_placement.h"
 #include "common.h"
@@ -336,14 +430,14 @@ extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 
 void mnuStopResourceAnimation(void) {
     s32 taskAddress = sdfGetTaskValueByKey(mnuSceneResourceContext, 0);
-    mnuClearListFlagsOneAndTwo(((MnuResourceTask *)taskAddress)->menuList);
+    mnuClearListFlagsOneAndTwo(&((MnuResourceTask *)taskAddress)->menuList->stateFlags);
     mnuMoveResourceListCursor((struct MenuList *)((MnuResourceTask *)taskAddress)->menuList, mnuRetreatListCursorDefault);
 }
 
 /* Clear the list's two animation flags and request its default advance. */
 void mnuResetResourceAnimation(void) {
     s32 taskAddress = sdfGetTaskValueByKey(mnuSceneResourceContext, 0);
-    mnuClearListFlagsOneAndTwo(((MnuResourceTask *)taskAddress)->menuList);
+    mnuClearListFlagsOneAndTwo(&((MnuResourceTask *)taskAddress)->menuList->stateFlags);
     mnuMoveResourceListCursor((struct MenuList *)((MnuResourceTask *)taskAddress)->menuList, mnuAdvanceListCursorDefault);
 }
 
@@ -385,11 +479,11 @@ extern s32 mnuTickInitState(MenuProgressHost *);
 
 extern void mnuCommitTitleStreamReadyState(void);
 
-INCLUDE_RODATA(const s32, "game/code_00250E88", D_003AF758);
+INCLUDE_RODATA(const s32, "game/code_0024F0D0", D_003AF758);
 
-INCLUDE_RODATA(const s32, "game/code_00250E88", D_003AF780);
+INCLUDE_RODATA(const s32, "game/code_0024F0D0", D_003AF780);
 
-INCLUDE_RODATA(const s32, "game/code_00250E88", mnuResourceTaskName);
+INCLUDE_RODATA(const s32, "game/code_0024F0D0", mnuResourceTaskName);
 
 s32 mnuUpdateResourceTaskState(s32 key, MnuResourceTask *task) {
     s32 action=0;
@@ -471,7 +565,7 @@ s32 mnuUpdateResourceTaskState(s32 key, MnuResourceTask *task) {
             task->state=MNU_RESOURCE_TASK_STATE_WAIT_TITLE_STREAM; task->frameCounter=0;
             action=3;
         }
-        if ((dds3PadButtonState[0x26]==0) & (dds3PadButtonState[0x27]==0)) mnuClearListFlagsOneAndTwo(list);
+        if ((dds3PadButtonState[0x26]==0) & (dds3PadButtonState[0x27]==0)) mnuClearListFlagsOneAndTwo(&list->stateFlags);
         if (action != 0) {
             switch (action) {
             case 1:
@@ -498,11 +592,14 @@ extern void mnuDrawMantraScenePlacementSprite(s32, s32, s32, s32, s32);
 
 extern void mnuDrawMantraSceneSpriteGroup(s32, s32, s32, s32, s32);
 
-extern void mnuDrawDisplayModeSprites(s32, s32, s32, s32, s32, s32);
+struct DspDisplayModeWindowContext;
+extern void mnuDrawDisplayModeSprites(s32, s32, s32, s32, struct DspDisplayModeWindowContext *, s32);
 
-extern void itfDspDrawSelectionStrip(s32, s32, s32, s32, s32, s32);
+struct DspWindowContext;
+extern void itfDspDrawSelectionStrip(s32, s32, s32, s32, struct DspWindowContext *, s32);
 
-extern void itfDspInitSelectedWindow(s32, s32, s32, s32, s32, s32);
+struct DspWindowContext;
+extern void itfDspInitSelectedWindow(s32, s32, s32, s32, struct DspWindowContext *, s32);
 
 struct DspTableWindowContext;
 extern void mnuDrawSelectedMantraProfile(s32, s32, s32, s32, struct DspTableWindowContext *, s32);
@@ -536,14 +633,14 @@ s32 mnuDrawMenuFadePhase(s32 unused, MenuFadeWork *work) {
         mnuDrawMantraSceneSpriteSequence(alpha, 0x52);
         mnuDrawMantraScenePlacementSprite(0, 0, 1, alpha, 0x53);
         mnuDrawMantraSceneSpriteGroup(0, 0, 1, alpha, 0x53);
-        mnuDrawDisplayModeSprites(0, 0, 1, alpha, (s32)work, 0x53);
-        itfDspDrawSelectionStrip(0, (s32)((1.0f - shadeFactor) * -24.0f), 1, alpha, (s32)work, 0x53);
+        mnuDrawDisplayModeSprites(0, 0, 1, alpha, (struct DspDisplayModeWindowContext *)work, 0x53);
+        itfDspDrawSelectionStrip(0, (s32)((1.0f - shadeFactor) * -24.0f), 1, alpha, (struct DspWindowContext *)work, 0x53);
         if (fadeRatio < 0.5f) {
             shadeFactor = 0.0f;
         } else {
             shadeFactor = (fadeRatio - 0.5f) * 2.0f;
         }
-        itfDspInitSelectedWindow(0, 0, 1, (s32)(shadeFactor * MNU_SCENE_ALPHA_SCALE), (s32)work, 0x53);
+        itfDspInitSelectedWindow(0, 0, 1, (s32)(shadeFactor * MNU_SCENE_ALPHA_SCALE), (struct DspWindowContext *)work, 0x53);
         mnuDrawSelectedMantraProfile(0, 0, 1, (s32)(fadeRatio * MNU_SCENE_ALPHA_SCALE), (struct DspTableWindowContext *)work, 0x53);
         return 0;
     case 5:
@@ -557,14 +654,14 @@ s32 mnuDrawMenuFadePhase(s32 unused, MenuFadeWork *work) {
         mnuDrawMantraSceneSpriteSequence(alpha, 0x52);
         mnuDrawMantraScenePlacementSprite(0, 0, 1, MNU_SCENE_FULL_ALPHA, 0x53);
         mnuDrawMantraSceneSpriteGroup(0, 0, 1, alpha, 0x53);
-        mnuDrawDisplayModeSprites(0, 0, 1, alpha, (s32)work, 0x53);
-        itfDspDrawSelectionStrip(0, (s32)((1.0f - shadeFactor) * -24.0f), 1, alpha, (s32)work, 0x53);
+        mnuDrawDisplayModeSprites(0, 0, 1, alpha, (struct DspDisplayModeWindowContext *)work, 0x53);
+        itfDspDrawSelectionStrip(0, (s32)((1.0f - shadeFactor) * -24.0f), 1, alpha, (struct DspWindowContext *)work, 0x53);
         if (fadeRatio < 0.5f) {
             shadeFactor = 0.0f;
         } else {
             shadeFactor = (fadeRatio - 0.5f) * 2.0f;
         }
-        itfDspInitSelectedWindow(0, 0, 1, (s32)(shadeFactor * MNU_SCENE_ALPHA_SCALE), (s32)work, 0x53);
+        itfDspInitSelectedWindow(0, 0, 1, (s32)(shadeFactor * MNU_SCENE_ALPHA_SCALE), (struct DspWindowContext *)work, 0x53);
         mnuDrawSelectedMantraProfile(0, 0, 1, (s32)(fadeRatio * MNU_SCENE_ALPHA_SCALE), (struct DspTableWindowContext *)work, 0x53);
         return 0;
     case 2:
@@ -580,9 +677,9 @@ s32 mnuDrawMenuFadePhase(s32 unused, MenuFadeWork *work) {
         mnuDrawMantraSceneSpriteSequence(alpha, 0x52);
         mnuDrawMantraScenePlacementSprite(0, 0, 1, MNU_SCENE_FULL_ALPHA, 0x53);
         mnuDrawMantraSceneSpriteGroup(0, 0, 1, alpha, 0x53);
-        mnuDrawDisplayModeSprites(0, 0, 1, alpha, (s32)work, 0x53);
-        itfDspDrawSelectionStrip(0, (s32)(fadeRatio * 36.0f), 1, alpha, (s32)work, 0x53);
-        itfDspInitSelectedWindow(0, 0, 1, (s32)((1.0f - shadeFactor) * MNU_SCENE_ALPHA_SCALE), (s32)work, 0x53);
+        mnuDrawDisplayModeSprites(0, 0, 1, alpha, (struct DspDisplayModeWindowContext *)work, 0x53);
+        itfDspDrawSelectionStrip(0, (s32)(fadeRatio * 36.0f), 1, alpha, (struct DspWindowContext *)work, 0x53);
+        itfDspInitSelectedWindow(0, 0, 1, (s32)((1.0f - shadeFactor) * MNU_SCENE_ALPHA_SCALE), (struct DspWindowContext *)work, 0x53);
         mnuDrawSelectedMantraProfile(0, 0, 1, alpha, (struct DspTableWindowContext *)work, 0x53);
         return 0;
     case 3:
@@ -601,9 +698,9 @@ s32 mnuDrawMenuFadePhase(s32 unused, MenuFadeWork *work) {
         mnuDrawMantraSceneSpriteSequence(alpha, 0x52);
         mnuDrawMantraScenePlacementSprite(0, 0, 1, alpha, 0x53);
         mnuDrawMantraSceneSpriteGroup(0, 0, 1, alpha, 0x53);
-        mnuDrawDisplayModeSprites(0, 0, 1, alpha, (s32)work, 0x53);
-        itfDspDrawSelectionStrip(0, (s32)((1.0f - fadeRatio) * 36.0f), 1, alpha, (s32)work, 0x53);
-        itfDspInitSelectedWindow(0, 0, 1, (s32)(shadeFactor * MNU_SCENE_ALPHA_SCALE), (s32)work, 0x53);
+        mnuDrawDisplayModeSprites(0, 0, 1, alpha, (struct DspDisplayModeWindowContext *)work, 0x53);
+        itfDspDrawSelectionStrip(0, (s32)((1.0f - fadeRatio) * 36.0f), 1, alpha, (struct DspWindowContext *)work, 0x53);
+        itfDspInitSelectedWindow(0, 0, 1, (s32)(shadeFactor * MNU_SCENE_ALPHA_SCALE), (struct DspWindowContext *)work, 0x53);
         mnuDrawSelectedMantraProfile(0, 0, 1, alpha, (struct DspTableWindowContext *)work, 0x53);
         return 0;
     case 4:
@@ -611,9 +708,9 @@ s32 mnuDrawMenuFadePhase(s32 unused, MenuFadeWork *work) {
         mnuDrawMantraSceneSpriteSequence(MNU_SCENE_FULL_ALPHA, 0x52);
         mnuDrawMantraScenePlacementSprite(0, 0, 1, MNU_SCENE_FULL_ALPHA, 0x53);
         mnuDrawMantraSceneSpriteGroup(0, 0, 1, MNU_SCENE_FULL_ALPHA, 0x53);
-        mnuDrawDisplayModeSprites(0, 0, 1, MNU_SCENE_FULL_ALPHA, (s32)work, 0x53);
-        itfDspDrawSelectionStrip(0, 0, 1, MNU_SCENE_FULL_ALPHA, (s32)work, 0x53);
-        itfDspInitSelectedWindow(0, 0, 1, MNU_SCENE_FULL_ALPHA, (s32)work, 0x53);
+        mnuDrawDisplayModeSprites(0, 0, 1, MNU_SCENE_FULL_ALPHA, (struct DspDisplayModeWindowContext *)work, 0x53);
+        itfDspDrawSelectionStrip(0, 0, 1, MNU_SCENE_FULL_ALPHA, (struct DspWindowContext *)work, 0x53);
+        itfDspInitSelectedWindow(0, 0, 1, MNU_SCENE_FULL_ALPHA, (struct DspWindowContext *)work, 0x53);
         mnuDrawSelectedMantraProfile(0, 0, 1, MNU_SCENE_FULL_ALPHA, (struct DspTableWindowContext *)work, 0x53);
         break;
     case 0:
@@ -922,7 +1019,7 @@ void mnuScrollSceneViewportToEntry(s32 *xCoordinate, s32 *yCoordinate, u16 index
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_00250E88", mnuAdvanceMantraSceneScroll);
+INCLUDE_ASM(const s32, "game/code_0024F0D0", mnuAdvanceMantraSceneScroll);
 
 void mnuUpdateMantraSceneScroll(MenuSceneWork *work) {
     MnuMantraGridEntry *entry =
@@ -1177,13 +1274,13 @@ extern void mnuResetResourceAnimation(void);
 extern void mnuHandleMantraGridInput(MenuSceneWork *);
 extern void mnuReinitializeSceneGrid(s32);
 
-INCLUDE_RODATA(const s32, "game/code_00250E88", D_003AF810);
+INCLUDE_RODATA(const s32, "game/code_0024F0D0", D_003AF810);
 
-INCLUDE_RODATA(const s32, "game/code_00250E88", D_003AF830);
+INCLUDE_RODATA(const s32, "game/code_0024F0D0", D_003AF830);
 
-INCLUDE_RODATA(const s32, "game/code_00250E88", D_003AF840);
+INCLUDE_RODATA(const s32, "game/code_0024F0D0", D_003AF840);
 
-INCLUDE_RODATA(const s32, "game/code_00250E88", D_003AF850);
+INCLUDE_RODATA(const s32, "game/code_0024F0D0", D_003AF850);
 
 s32 mnuUpdateMantraSceneTaskState(s32 key, MenuSceneWork *work) {
     MenuSceneMetadata *metadata;
@@ -1360,7 +1457,7 @@ s32 mnuUpdateMantraSceneTaskState(s32 key, MenuSceneWork *work) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00250E88", mnuDrawMantraSceneFrame);
+INCLUDE_ASM(const s32, "game/code_0024F0D0", mnuDrawMantraSceneFrame);
 
 extern u8 D_0036B410[17][15];
 s32 mnuSelectMantraGridLeftCell(SdfGrid *grid, s32 x, s32 y, u32 from) {
@@ -2251,4 +2348,1994 @@ void mnuDrawSelectedMantraProfile(s32 x, s32 y, s32 z, s32 alpha, DspTableWindow
     }
 }
 
-INCLUDE_SDATA(const s32, "game/code_00250E88", D_003BC440);
+
+#include "common.h"
+
+typedef struct DspDisplayModeUnit {
+    u8 pad00[0x20];
+    s32 displayMode;
+    u8 pad24[0xC];
+    s32 *selectedValue;
+} DspDisplayModeUnit;
+
+typedef struct DspDisplayModeWindowContext {
+    u8 pad00[0xC];
+    DspDisplayModeUnit *unit;
+} DspDisplayModeWindowContext;
+
+extern void mnuDrawPlacedSpriteFromTable(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 context);
+
+void mnuDrawDisplayModeSprites(s32 x, s32 y, s32 layer, s32 scale,
+                   DspDisplayModeWindowContext *window, s32 context) {
+    switch (window->unit->displayMode) {
+    case 3:
+        mnuDrawPlacedSpriteFromTable(x, y, layer, scale, 0x50, context);
+        mnuDrawPlacedSpriteFromTable(x, y, layer, scale, 0x53, context);
+        return;
+    case 4:
+        mnuDrawPlacedSpriteFromTable(x, y, layer, scale, 0x51, context);
+        mnuDrawPlacedSpriteFromTable(x, y, layer, scale, 0x54, context);
+        return;
+    case 5:
+        mnuDrawPlacedSpriteFromTable(x, y, layer, scale, 0x52, context);
+        mnuDrawPlacedSpriteFromTable(x, y, layer, scale, 0x55, context);
+        break;
+    }
+}
+
+
+#include "sdk_ps2.h"
+#include "dsp_entry.h"
+#include "dsp_entry_api.h"
+#include "dsp_name.h"
+#include "common.h"
+#include "sdf_trig.h"
+#include "eff_random.h"
+#include "sdf_chip.h"
+#include "dat_state.h"
+#include "mnu_scene.h"
+#include "mnu_profile_progress.h"
+#include "mnu_mantra_grid.h"
+#include "mnu_scene_work.h"
+#include "mnu_scene_list.h"
+#include "mnu_sprite_placement.h"
+#include "evt_message_window_api.h"
+
+struct EffectSlotSet;
+
+#define MNU_DISPLAY_TEXT_RGB 0xA09DC300
+#define MNU_DISPLAY_DIM_TEXT_RGB 0xA09D7D00
+#define MNU_DISPLAY_ALPHA_MASK 0xFF
+#define MNU_DISPLAY_DIM_ALPHA_SCALE 0.6f
+#define MNU_DISPLAY_TEXT_BUFFER_BYTES 0x20
+#define MNU_SELECTION_ROW_HEIGHT 26
+#define MNU_DISPLAY_FIXED_X_SHIFT 4
+#define MNU_DISPLAY_FIXED_Y_SHIFT 3
+#define MNU_DISPLAY_RECORD_ID_MASK 0xFFFF
+#define MNU_DISPLAY_TEXT_FLAGS 0x80000000
+#define MNU_SELECTED_ROW_SPRITE 12
+#define MNU_UNSELECTED_ROW_SPRITE 14
+
+extern void mnuDrawPlacedSpriteFromTable(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 context);
+
+
+
+extern void mnuCallInitWide(s32, s32, s32, s32, s32);
+
+
+typedef struct DspUnit {
+    u8 pad0[0x1C];
+    s32 *selectedIndex; /* 0x1C */
+    s32 entryCount; /* 0x20 */
+    u8 pad24[0xC];
+    s32 *selectedValue; /* 0x30 */
+} DspUnit;
+
+typedef struct DspWindowContext {
+    u8 pad0[0xC];
+    DspUnit *unit; /* 0xC */
+} DspWindowContext;
+
+typedef struct {
+    u8 pad00[0x1C];
+    void *selectedNode; /* 0x1C */
+    u8 pad20[0xC];
+    void (*drawCallback)();
+    s32 *drawValues; /* 0x30 */
+} DspMenuList;
+
+typedef struct {
+    u8 pad00[0x70];
+    MnuProfileProgress *progress; /* 0x70 */
+} DspMenuListNode;
+
+typedef struct {
+    s8 spriteIndices[7];
+} DspEntrySpriteLookup;
+
+extern DspEntrySpriteLookup D_003BC448[];
+extern DspEntrySpriteLookup D_003BC480[];
+extern char D_003BC450[];
+extern void mnuDrawPlacedSpriteByIndex(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+                                       s32 mode, s32 context);
+extern s32 itfDrawGlyphChainWithWidthQuery(s32, s32, s32, u32, u8, char *, s32, u32);
+
+/* Draw the selection strip from the last row back to the first. */
+void itfDspDrawSelectionStrip(s32 x, s32 y, s32 z, s32 alpha, DspWindowContext *windowContext, s32 drawContext) {
+    DspUnit *displayUnit = windowContext->unit;
+    s32 selectedIndex = *displayUnit->selectedIndex;
+    s32 rowIndex;
+
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, x, y, z, alpha, 0x56, drawContext);
+    rowIndex = displayUnit->entryCount - 1;
+    if (rowIndex >= 0) {
+        do {
+            if (rowIndex == selectedIndex) {
+                mnuDrawPlacedSpriteByIndex(x, y + rowIndex * MNU_SELECTION_ROW_HEIGHT, z, alpha, 0x57, MNU_SELECTED_ROW_SPRITE, drawContext);
+            } else {
+                mnuDrawPlacedSpriteByIndex(x, y + rowIndex * MNU_SELECTION_ROW_HEIGHT, z, alpha, 0x57, MNU_UNSELECTED_ROW_SPRITE, drawContext);
+            }
+            rowIndex--;
+        } while (rowIndex >= 0);
+    }
+}
+
+/* Store the selected value in the display unit and open its scaled window. */
+static inline void itfDspInitializeSelectedWindowWith(
+    void (*initialize)(s32, s32, s32, s32, s32),
+    s32 x, s32 y, s32 z, s32 value, DspUnit *unit, s32 context) {
+    *unit->selectedValue = value;
+    initialize(x << MNU_DISPLAY_FIXED_X_SHIFT, y << MNU_DISPLAY_FIXED_Y_SHIFT,
+               z, (s32)unit, context);
+}
+
+void itfDspInitSelectedWindow(s32 x, s32 y, s32 z, s32 drawValue, DspWindowContext *windowContext, s32 drawContext) {
+    DspUnit *displayUnit = windowContext->unit;
+
+    itfDspInitializeSelectedWindowWith(mnuCallInitWide, x, y, z, drawValue,
+                                       displayUnit, drawContext);
+}
+
+/* Draw one party entry, highlighting the currently selected list node. */
+void mnuDrawMantraPartyListEntry(s32 x, s32 y, s32 layer, DspMenuList *list, DspMenuListNode *node,
+                   s32 drawContext) {
+    char levelText[MNU_DISPLAY_TEXT_BUFFER_BYTES];
+    DspEntrySpriteLookup spriteLookup = D_003BC448[0];
+    MnuProfileProgress *profileProgress = node->progress;
+    s32 alpha = list->drawValues[0];
+    u32 textColor;
+
+    if (list->selectedNode == node) {
+        mnuDrawPlacedSpriteByIndex(x >> MNU_DISPLAY_FIXED_X_SHIFT, y >> MNU_DISPLAY_FIXED_Y_SHIFT, layer, alpha, 0x58,
+                      spriteLookup.spriteIndices[profileProgress->partyRecord->unitId] + 1, drawContext);
+        mnuDrawPlacedSpriteByIndex(x >> MNU_DISPLAY_FIXED_X_SHIFT, y >> MNU_DISPLAY_FIXED_Y_SHIFT, layer, alpha, 0x59, 0xB, drawContext);
+        sprintf(levelText, D_003BC450, profileProgress->partyRecord->level);
+        textColor = alpha & MNU_DISPLAY_ALPHA_MASK;
+        textColor |= MNU_DISPLAY_TEXT_RGB;
+        itfDrawGlyphChainWithWidthQuery((x >> MNU_DISPLAY_FIXED_X_SHIFT) + 0xD5, (y >> MNU_DISPLAY_FIXED_Y_SHIFT) + 0x7D, layer,
+                                       textColor,
+                                       4, levelText, 0, drawContext);
+    } else {
+        mnuDrawPlacedSpriteByIndex(x >> MNU_DISPLAY_FIXED_X_SHIFT, y >> MNU_DISPLAY_FIXED_Y_SHIFT, layer, alpha, 0x58,
+                      spriteLookup.spriteIndices[profileProgress->partyRecord->unitId], drawContext);
+        mnuDrawPlacedSpriteByIndex(x >> MNU_DISPLAY_FIXED_X_SHIFT, y >> MNU_DISPLAY_FIXED_Y_SHIFT, layer, alpha, 0x59, 0xA, drawContext);
+        sprintf(levelText, D_003BC450, profileProgress->partyRecord->level);
+        textColor = alpha & MNU_DISPLAY_ALPHA_MASK;
+        textColor |= MNU_DISPLAY_TEXT_RGB;
+        itfDrawGlyphChainWithWidthQuery((x >> MNU_DISPLAY_FIXED_X_SHIFT) + 0xD5, (y >> MNU_DISPLAY_FIXED_Y_SHIFT) + 0x7D, layer,
+                                       textColor,
+                                       0, levelText, 0, drawContext);
+    }
+}
+
+extern void prfCopyMantraNamePart(u32, s32, void *);
+extern s32 frFontDrawStyledGlyphChainAndMeasure(s32, s32, s32, u32, u8, const u8 *, s32, u32);
+
+/* Fetch the low-16-bit display record ID and draw its text with the supplied attributes and fixed RGB. */
+void itfDspDrawIndexedRecord(s32 x, s32 y, s32 layer, u32 textAttributes, u32 packedEntryId, s32 drawContext) {
+    u32 textColor = textAttributes | MNU_DISPLAY_TEXT_RGB;
+    u32 recordId = packedEntryId & MNU_DISPLAY_RECORD_ID_MASK;
+    u8 recordText[MNU_DISPLAY_TEXT_BUFFER_BYTES];
+
+    memset(recordText, 0, MNU_DISPLAY_TEXT_BUFFER_BYTES);
+    prfCopyMantraNamePart(recordId, 1, recordText);
+    frFontDrawStyledGlyphChainAndMeasure(x + 0x35, y + 0x136, layer, textColor, 4, recordText, MNU_DISPLAY_TEXT_FLAGS, drawContext);
+}
+
+extern char D_003BC458[];
+extern char D_003BC460[];
+extern char D_003BC468[];
+/* Draw the placeholder sprites and dim text. Keep both native formatting calls:
+ * the second replaces the first call's buffer contents before drawing. */
+void mnuDrawDisplayPlaceholder(s32 x, s32 y, s32 layer, s32 alpha, s32 drawContext) {
+    u32 textColor = (u32)((f32)alpha * MNU_DISPLAY_DIM_ALPHA_SCALE) | MNU_DISPLAY_DIM_TEXT_RGB;
+    char placeholderText[MNU_DISPLAY_TEXT_BUFFER_BYTES];
+
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, x, y, layer, alpha, 0x21, drawContext);
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, x, y, layer, alpha, 0x11, drawContext);
+    sprintf(placeholderText, "%s %s %s", D_003BC458, D_003BC458, D_003BC458);
+    sprintf(placeholderText, D_003BC460);
+    frFontDrawStyledGlyphChainAndMeasure(x + 0xB3, y + 0x171, layer, textColor,
+                                      0, placeholderText, MNU_DISPLAY_TEXT_FLAGS, drawContext);
+}
+
+/* Draw a formatted integer value with the same dim sprite/text treatment as the placeholder. */
+void mnuDrawMantraCostValue(s32 x, s32 y, s32 layer, s32 alpha, s32 displayValue, s32 drawContext) {
+    u32 textColor = (u32)((f32)alpha * MNU_DISPLAY_DIM_ALPHA_SCALE) | MNU_DISPLAY_DIM_TEXT_RGB;
+    char valueText[MNU_DISPLAY_TEXT_BUFFER_BYTES];
+
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, x, y, layer, alpha, 0x21, drawContext);
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, x, y, layer, alpha, 0x11, drawContext);
+    sprintf(valueText, D_003BC468, displayValue);
+    itfDrawGlyphChainWithWidthQuery(x + 0xB3, y + 0x173, layer, textColor,
+                                  0, valueText, MNU_DISPLAY_TEXT_FLAGS, drawContext);
+}
+
+extern MnuSpritePlacement mnuMantraCommonSpritePlacements[];
+extern struct EffectSlotSet *mnuMantraSpriteSlots[];
+extern void effDrawSpriteWithCornerFade(s32 x, s32 y, s32 depth, u32 blend, s32 flags,
+                                        s32 textureSetHandle, s32 slotIndex, s32 layer);
+
+/* Submit a corner-faded sprite through the selected effect renderer. */
+static inline void mnuSubmitCornerSpriteWith(
+    void (*draw)(s32, s32, s32, u32, s32, s32, s32, s32),
+    s32 x, s32 y, s32 z, u32 alpha, s32 flags, s32 slot,
+    s32 sprite, s32 context) {
+    draw(x, y, z, alpha, flags, slot, sprite, context);
+}
+
+void mnuDrawMantraPanelSprite(s32 x, s32 y, s32 z, s32 alpha,
+                              u16 unusedSceneId, s32 unusedContext) {
+    struct EffectSlotSet *resource = mnuMantraSpriteSlots[mnuMantraCommonSpritePlacements[41].resourceIndex];
+
+    mnuSubmitCornerSpriteWith(effDrawSpriteWithCornerFade, (x + mnuMantraCommonSpritePlacements[41].x) << 4,
+                  (y + mnuMantraCommonSpritePlacements[41].y) << 3, z,
+                  (u32)((f32)(alpha << 8) * 0.0078125f), 0,
+                  (s32)resource,
+                  mnuMantraCommonSpritePlacements[41].spriteIndex, 0x53);
+}
+
+extern const u8 mnuMantraDisplayParameterLabels[][0x18];
+extern struct FrFontTextBank *frFontGetColoredGlyphResource(void);
+extern s32 prfGetMantraDisplayParameter(u16 profileId);
+extern s32 frFontDrawColoredGlyphChainAndMeasure(s32, s32, u32, u32, u8, u16,
+                                                  struct FrFontTextBank *, u32, s32, s32);
+extern s32 mnuGetMantraSourceValue(u16);
+
+/* Draw the selected mantra's label and remaining source cost. */
+/* Numeric and unavailable cost displays use their respective draw interfaces. */
+static inline void mnuDrawCostValueWith(
+    void (*draw)(s32, s32, s32, s32, s32, s32),
+    s32 x, s32 y, s32 z, s32 alpha, s32 value, s32 context) {
+    draw(x, y, z, alpha, value, context);
+}
+static inline void mnuDrawCostPlaceholderWith(
+    void (*draw)(s32, s32, s32, s32, s32),
+    s32 x, s32 y, s32 z, s32 alpha, s32 context) {
+    draw(x, y, z, alpha, context);
+}
+
+void mnuDrawMantraCostCounter(s32 x, s32 y, s32 z, s32 alpha, s32 sceneId, s32 drawContext) {
+    struct FrFontTextBank *glyphResource = frFontGetColoredGlyphResource();
+    u32 textColor = alpha | MNU_DISPLAY_TEXT_RGB;
+    u32 dimColor = (u32)((f32)alpha * 0.599999964237213134765625f) | MNU_DISPLAY_DIM_TEXT_RGB;
+    u8 label;
+
+    itfDspDrawIndexedRecord(x, y, z, alpha, (u16)sceneId, drawContext);
+    frFontDrawColoredGlyphChainAndMeasure(x + 0x39, y + 0x155, z, textColor, 0, (u16)sceneId, glyphResource, 0, 0,
+                                          drawContext);
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, x, y, z, alpha, 0x3B, drawContext);
+    label = prfGetMantraDisplayParameter((u16)sceneId);
+    if (label != 0) {
+        const u8 *style = mnuMantraDisplayParameterLabels[label - 1];
+        frFontDrawStyledGlyphChainAndMeasure(x + 0xBA, y + 0x171, z, dimColor, 0, style, 0, drawContext);
+    }
+    mnuDrawCostValueWith(mnuDrawMantraCostValue, x + 0x18, y + 0x1A, z, alpha, mnuGetMantraSourceValue((u16)sceneId), drawContext);
+}
+
+/* Draw the profile label and placeholder for an unavailable mantra cost. */
+void mnuDrawMantraCostPlaceholder(s32 x, s32 y, s32 z, s32 alpha, s32 sceneId, s32 drawContext) {
+    struct FrFontTextBank *glyphResource = frFontGetColoredGlyphResource();
+    u32 textColor = (u32)alpha | MNU_DISPLAY_TEXT_RGB;
+    u32 dimColor = (u32)((f32)alpha * 0.599999964237213134765625f) | MNU_DISPLAY_DIM_TEXT_RGB;
+    u8 label;
+
+    itfDspDrawIndexedRecord(x, y, z, (u32)alpha, (u16)sceneId, drawContext);
+    frFontDrawColoredGlyphChainAndMeasure(x + 0x39, y + 0x155, z, textColor, 0, (u16)sceneId, glyphResource, 0, 0,
+                                          drawContext);
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, x, y, z, alpha, 0x3B, drawContext);
+
+    label = prfGetMantraDisplayParameter((u16)sceneId);
+    if (label != 0) {
+        const u8 *style = mnuMantraDisplayParameterLabels[label - 1];
+        frFontDrawStyledGlyphChainAndMeasure(x + 0xBA, y + 0x171, z, dimColor, 0, style, 0, drawContext);
+    }
+
+    mnuDrawCostPlaceholderWith(mnuDrawDisplayPlaceholder, x + 0x18, y + 0x1A, z, alpha, drawContext);
+}
+
+extern DspUnitName *D_003BAA70;
+extern DspMantraName *D_003BAA78;
+extern MnuMantraGridEntry *fldGetSceneMetadataNode(void);
+extern void evtCopyEntryStringToActiveWindow(s32, const char *);
+extern s32 mnuGetMantraSourceValue(u16);
+
+extern MnuProfileProgress *mnuGetSelectedNodeValue(void);
+
+/* Populate the unit and both mantra labels, plus the selected mantra's cost. */
+void itfDspPopulatePrimaryLabels(void) {
+    MnuProfileProgress *selection = mnuGetSelectedNodeValue();
+    MnuMantraGridEntry *scene = fldGetSceneMetadataNode();
+    char text[16];
+
+    evtCopyEntryStringToActiveWindow(0, D_003BAA70[selection->partyRecord->unitId].encodedText);
+    evtCopyEntryStringToActiveWindow(1, D_003BAA78[selection->profileId].encodedText);
+    evtCopyEntryStringToActiveWindow(2, D_003BAA78[scene->sceneId].encodedText);
+    sprintf(text, D_003BC468, mnuGetMantraSourceValue(scene->sceneId));
+    evtCopyEntryStringToActiveWindow(3, text);
+    evtSetMessageWindowOptionWhenOpen(0);
+    fclStartMessage(0);
+    evtStoreValueAndCaptureWindowPanelValue(8);
+}
+
+/* Populate the same menu labels, selecting the alternate display signal. */
+void itfDspPopulateAlternateLabels(void) {
+    MnuProfileProgress *selection = mnuGetSelectedNodeValue();
+    MnuMantraGridEntry *scene = fldGetSceneMetadataNode();
+    char text[16];
+
+    evtCopyEntryStringToActiveWindow(0, D_003BAA70[selection->partyRecord->unitId].encodedText);
+    evtCopyEntryStringToActiveWindow(1, D_003BAA78[selection->profileId].encodedText);
+    evtCopyEntryStringToActiveWindow(2, D_003BAA78[scene->sceneId].encodedText);
+    sprintf(text, D_003BC468, mnuGetMantraSourceValue(scene->sceneId));
+    evtCopyEntryStringToActiveWindow(3, text);
+    evtSetMessageWindowOptionWhenOpen(0);
+    fclStartMessage(1);
+    evtStoreValueAndCaptureWindowPanelValue(8);
+}
+
+/* Populate menu labels for the third display signal. */
+void itfDspPopulateThirdLabels(void) {
+    MnuProfileProgress *selection = mnuGetSelectedNodeValue();
+    MnuMantraGridEntry *scene = fldGetSceneMetadataNode();
+    char text[16];
+
+    evtCopyEntryStringToActiveWindow(0, D_003BAA70[selection->partyRecord->unitId].encodedText);
+    evtCopyEntryStringToActiveWindow(1, D_003BAA78[selection->profileId].encodedText);
+    evtCopyEntryStringToActiveWindow(2, D_003BAA78[scene->sceneId].encodedText);
+    sprintf(text, D_003BC468, mnuGetMantraSourceValue(scene->sceneId));
+    evtCopyEntryStringToActiveWindow(3, text);
+    fclStartMessage(2);
+}
+
+/* Dispatch the menu scene's display-only signals through the message starter.
+ * These transitions do not consume the starter's success result. */
+static inline void itfDspActivateSignalVia(s32 (*startEntry)(s32), s32 entry) {
+    startEntry(entry);
+}
+
+void itfDspSignalA(void) {
+    itfDspActivateSignalVia(fclStartMessage, 3);
+}
+
+void itfDspSignalB(void) {
+    itfDspActivateSignalVia(fclStartMessage, 4);
+}
+
+void itfDspSignalC(void) {
+    itfDspActivateSignalVia(fclStartMessage, 5);
+}
+
+void itfDspSignalD(void) {
+    itfDspActivateSignalVia(fclStartMessage, 6);
+}
+
+void itfDspSignalE(void) {
+    itfDspActivateSignalVia(fclStartMessage, 7);
+}
+
+
+
+
+
+void mnuUpdateSparkle(DspParticle *spark) {
+    spark->timer = spark->timer - 1;
+    if (spark->timer < 0) {
+        if (spark->phase != 0) {
+            spark->phase = 0;
+            spark->timer = spark->timerMax = dds3GetRandFloatA(0) * 30.0f + 1.0f;
+        } else if (dds3GetRandFloatA(0) > 0.7f) {
+            spark->timer = spark->timerMax = dds3GetRandFloatA(0) * 30.0f + 0.0f;
+        } else {
+            spark->phase = 1;
+            spark->timer = spark->timerMax = dds3GetRandFloatA(0) * 60.0f + 45.0f;
+            spark->z = (dds3GetRandFloatA(0) * 2.0f - 1.0f) * 512.0f + 320.0f;
+            spark->size = dds3GetRandFloatA(0) * 10.0f;
+            spark->x = dds3GetRandFloatA(0) * 512.0f + -256.0f;
+            spark->y = dds3GetRandFloatA(0) * 448.0f + -128.0f;
+        }
+    }
+}
+
+
+
+
+void mnuTickMantraSparkParticles(DspParticleState *state) {
+    DspParticle *particle;
+    s32 duration;
+    s32 i;
+
+    state->countdown = state->countdown - 1;
+    if (state->countdown < 0) {
+        duration = dds3GetRandFloatA(0) * 60.0f + 60.0f;
+        state->period = duration;
+        state->countdown = duration;
+        state->strength = dds3GetRandFloatA(0) * 0.20000005f + 0.4f;
+    }
+    /* Advance every particle, including those waiting for their next phase. */
+    particle = state->particles;
+    for (i = 7; i >= 0; i--) {
+        mnuUpdateSparkle(particle);
+        particle++;
+    }
+}
+
+extern void mnuDrawSpriteAtPlacement(s32 x, s32 y, s32 z, s32 alpha, s32 sprite,
+                                     s32 placementIndex, s32 flags, s32 context);
+
+static inline void mnuDrawSpriteAtPlacementWith(
+    void (*draw)(s32, s32, s32, s32, s32, s32, s32, s32),
+    s32 x, s32 y, s32 z, s32 alpha, s32 sprite, s32 placement,
+    s32 flags, s32 context) {
+    draw(x, y, z, alpha, sprite, placement, flags, context);
+}
+
+void mnuDrawMantraSparkParticle(const DspParticle *particle, s32 sprite, s32 surfaceIndex) {
+    f32 fraction;
+    s32 x;
+    s32 y;
+    s32 alpha;
+
+    if (particle->phase == 0) {
+        return;
+    }
+    fraction = 1.0f - (f32)particle->timer / particle->timerMax;
+    x = (s32)(particle->x + fraction * particle->z);
+    y = particle->y;
+    alpha = (s32)(sdfSin(fraction * 3.14159265f) * 25.6f);
+    mnuDrawSpriteAtPlacementWith(mnuDrawSpriteAtPlacement, x, y, 1, alpha, sprite, 0x2D, 0x20, surfaceIndex);
+}
+
+/* Preserve the provider's legacy K&R GS-register argument boundary. */
+extern void sdfSubmitGsTestOneRegisterPacket(u64, u32);
+extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
+extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
+extern void uiDrawActiveSurfaceRegion(s32);
+extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
+
+/* Finish a mantra effect pass using the shared alpha reset, full-surface
+ * clear, and TEST-register restore. */
+static inline void mnuRestoreMantraSurface(
+    void (*submitTest)(u64, u32), s32 surface) {
+    sdfSubmitGsAlphaOneRegisterPacket(0x44, surface);
+    submitTest(0x30000, surface);
+    uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0, surface);
+    submitTest(0x5100DL, surface);
+}
+
+void mnuDrawMantraSparkBackdrop(DspParticleState *state, s32 sprite, s32 surfaceIndex) {
+    s32 i;
+    DspParticle *particle;
+
+    sdfSubmitGsTestOneRegisterPacket(0x30000, surfaceIndex);
+    uiDrawUniformColorRect(0, 0, -1, 0x2000, 0xE00, 0, surfaceIndex);
+    sdfSubmitGsTestOneRegisterPacket(0x3000D, surfaceIndex);
+    uiDrawActiveSurfaceRegion(surfaceIndex);
+    for (i = 0; i < 7; i++) {
+        s32 y = i * 64;
+
+        mnuDrawSpriteAtPlacement(0, y, 0, 0x80, sprite, 0x2C, 0x20, surfaceIndex);
+        mnuDrawSpriteAtPlacement(0x100, y, 0, 0x80, sprite, 0x2C, 0x20, surfaceIndex);
+    }
+    sdfDispatchSurfaceWithPreparedTexturePacket(surfaceIndex);
+    sdfSubmitGsAlphaOneRegisterPacket(0x44, surfaceIndex);
+    sdfSubmitGsTestOneRegisterPacket(0x50000, surfaceIndex);
+    particle = state->particles;
+    for (i = 7; i >= 0; i--) {
+        mnuDrawMantraSparkParticle(particle, sprite, surfaceIndex);
+        particle++;
+    }
+    mnuRestoreMantraSurface(sdfSubmitGsTestOneRegisterPacket, surfaceIndex);
+}
+
+
+#include "sdf_task_work.h"
+
+extern TaskWork *mnuSceneResourceContext;
+extern void mnuUpdateMantraSpriteCueGroups(struct MnuSpriteResourceGroup *resources);
+extern void mnuDrawMantraSpriteCueGroups(s32 x, s32 y, s32 depth, s32 alpha,
+                          struct MnuSpriteResourceGroup *resources, s32 drawArg);
+
+/* Scroll the sprite cues opposite the scene cursor and draw them. */
+static inline void mnuDrawSpriteCueGroupsWith(
+    void (*draw)(s32, s32, s32, s32, struct MnuSpriteResourceGroup *, s32),
+    s32 x, s32 y, s32 z, s32 alpha, struct MnuSpriteResourceGroup *resources,
+    s32 context) {
+    draw(x, y, z, alpha, resources, context);
+}
+
+void mnuDrawMantraSceneBackground(MenuSceneMetadata *scene, s32 alpha, s32 drawArg) {
+    MenuSceneWork *work = (MenuSceneWork *)sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
+
+    if (work != NULL) {
+        s32 x = 0.0f - (f32)work->cursorPosition.x / 775.0f * 256.0f;
+        s32 y = 0.0f - (f32)work->cursorPosition.y / 910.0f * 224.0f;
+
+        mnuUpdateMantraSpriteCueGroups(scene->spriteResources);
+        mnuDrawSpriteCueGroupsWith(mnuDrawMantraSpriteCueGroups, x, y, 1, (f32)alpha * 0.15f, scene->spriteResources, drawArg);
+    }
+}
+
+static inline void mnuDrawSparkBackdropWith(
+    void (*draw)(DspParticleState *, s32, s32),
+    DspParticleState *state, s32 sprite, s32 context) {
+    draw(state, sprite, context);
+}
+
+void mnuDrawMantraSparkScene(MenuSceneMetadata *scene, s32 alpha, s32 context) {
+    DspParticleState *sparkles;
+    f32 factor;
+
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, alpha, 0x2A, context);
+    factor = (f32)scene->sparkles.countdown / (f32)scene->sparkles.period;
+    factor = 1.0f - factor;
+    factor = scene->sparkles.strength * sdfSin(factor * 3.14159265f) +
+             0.2f;
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, (f32)alpha * factor, 0x2B, context);
+    sparkles = &scene->sparkles;
+    mnuTickMantraSparkParticles(sparkles);
+    mnuDrawSparkBackdropWith(mnuDrawMantraSparkBackdrop, sparkles, (s32)mnuMantraSpriteSlots[1], context);
+}
+
+void itfDspDrawMarksA(s32 scale, s32 context) {
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, scale, 0x3A, context);
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, scale, 0x38, context);
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, scale, 0x39, context);
+}
+
+void itfDspDrawMarksB(s32 scale, s32 context) {
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, scale, 0xF, context);
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, scale, 0x10, context);
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, scale, 0x12, context);
+}
+
+extern u32 prfGetCapValue(u16);
+extern u32 ptyGetProfileRecordValue(struct datUnitWork_t *, u16);
+extern u32 mnuGetProfileRequirementFlags(u16);
+
+u32 mnuGetMantraDisplayFlags(MnuMantraGridEntry *entry, MnuProfileProgress *target) {
+    u32 flags = 0;
+    u32 cap;
+
+    if (entry->sceneId == target->profileId) {
+        flags |= MNU_MANTRA_DISPLAY_FLAG_PROFILE_MATCH;
+    }
+    cap = prfGetCapValue(entry->sceneId);
+    if (cap == ptyGetProfileRecordValue(target->partyRecord, entry->sceneId)) {
+        flags |= MNU_MANTRA_DISPLAY_FLAG_AT_CAP;
+    }
+    if (entry->state == MNU_MANTRA_GRID_ENTRY_SECOND_CHECK_OR_PROFILE_FLAG) {
+        flags |= MNU_MANTRA_DISPLAY_FLAG_ENTRY_STATE_1;
+    } else if (entry->state == MNU_MANTRA_GRID_ENTRY_FIRST_CHECK_OR_SPECIAL_PROFILE) {
+        flags |= MNU_MANTRA_DISPLAY_FLAG_ENTRY_STATE_2;
+    } else if ((mnuGetProfileRequirementFlags(entry->sceneId) & 2) != 0) {
+        flags |= MNU_MANTRA_DISPLAY_FLAG_REQUIREMENT_PAIR_SET_FALLBACK;
+    } else {
+        flags |= MNU_MANTRA_DISPLAY_FLAG_REQUIREMENT_PAIR_CLEAR_FALLBACK;
+    }
+    return flags;
+}
+
+void itfDspDrawStrip(s32 x, s32 y, s32 layer, s32 scale, s32 context) {
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, x, y, layer, scale, 4, context);
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, x, y, layer, scale, 5, context);
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, x, y, layer, scale, 0xA, context);
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, x, y, layer, scale, 0xB, context);
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, x, y, layer, scale, 0xC, context);
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, x, y, layer, scale, 0xD, context);
+}
+
+typedef struct DspUnitSpriteLookup {
+    s8 spriteIndices[7];
+} DspUnitSpriteLookup;
+
+extern DspUnitSpriteLookup D_003BC478[];
+extern DspUnitSpriteLookup D_003BC470[];
+extern char D_003BC450[];
+extern s32 frFontQueueFlaggedGlyphAndMeasure(s32, s32, s32, u32, u8, char *, s32, u32);
+
+/* Draw the unit-specific display sprite and its two-column numeric level. */
+void itfDspDrawEntryWithLevel(s32 x, s32 y, s32 layer, DspEntry *entry, s32 scale, s32 context) {
+    DspUnitSpriteLookup lookup = D_003BC470[0];
+    char text[0x10];
+    u32 textColor = scale | 0xA09DC300;
+
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, x, y, layer, scale, lookup.spriteIndices[entry->unitId], context);
+    sprintf(text, D_003BC450, entry->level);
+    frFontQueueFlaggedGlyphAndMeasure(x + 0x1BB, y + 0x173, layer, textColor,
+                                     4, text, 0, context);
+}
+
+/* Select the unit's display sprite; retain the complete signed-byte table copy. */
+void mnuDrawDisplayEntrySpriteFromLookup(s32 x, s32 y, s32 layer, DspEntry *entry, s32 scale, s32 context) {
+    DspUnitSpriteLookup lookup = D_003BC478[0];
+
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, x, y, layer, scale, lookup.spriteIndices[entry->unitId], context);
+}
+
+/* Draw both layers of a display entry and queue its formatted value. */
+void itfDspDrawPartyRecordWithLevel(s32 x, s32 y, s32 layer, datUnitWork_t *entry, s32 scale, s32 context) {
+    DspEntrySpriteLookup lookup = D_003BC480[0];
+    char text[0x10];
+    u32 tag = scale | 0xA09DC300;
+
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, x, y, layer, scale, lookup.spriteIndices[entry->unitId], context);
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, x, y, layer, scale, lookup.spriteIndices[entry->unitId] + 0x14, context);
+    sprintf(text, D_003BC450, entry->level);
+    frFontQueueFlaggedGlyphAndMeasure(x + 0x1BB, y + 0x173, layer, tag,
+                                     4, text, 0, context);
+}
+
+
+s32 mnuDrawPulsingDisplaySprites(s32 frame, s32 scale, s32 context) {
+    f32 wave = (f32)frame / 60.0f;
+    f32 baseScale = (f32)scale;
+    s32 drawScale;
+
+    wave = sdfSin(wave * 3.1415926f);
+
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, scale, 0x1F, context);
+    drawScale = (s32)(baseScale * (wave * 0.5f + 0.5f));
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, drawScale, 0x16, context);
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, drawScale, 0x17, context);
+    drawScale = (s32)(baseScale * 0.5f);
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, drawScale, 0x18, context);
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, drawScale, 0x19, context);
+    if (frame < 60) {
+        return 0;
+    }
+    return 1;
+}
+
+INCLUDE_ASM(const s32, "game/code_0024F0D0", itfUpdateDisplayListNode);
+
+MnuSceneListNode *mnuAllocateDisplayListNode(void) {
+    MnuSceneListNode *node = sdfChipAllocDirect(sizeof(MnuSceneListNode));
+
+    memset(node, 0, 0x14);
+    return node;
+}
+
+MnuSceneListNode *mnuAppendDisplayListNode(MnuSceneListHead *head) {
+    MnuSceneListNode *node = head->first;
+    if (node == NULL) {
+        node = mnuAllocateDisplayListNode();
+        head->first = node;
+    } else {
+        while (node->next != NULL) {
+            node = node->next;
+        }
+        node->next = mnuAllocateDisplayListNode();
+        node = node->next;
+    }
+    return node;
+}
+
+MnuSceneListNode *mnuReleaseDisplayListNodeAndGetNext(MnuSceneListNode *node) {
+    MnuSceneListNode *next;
+
+    next = node->next;
+    sdfChipFreeDirect(node);
+    return next;
+}
+
+void mnuReleaseDisplayListNodes(MnuSceneListHead *head) {
+    MnuSceneListNode *node = head->first;
+
+    while (node != NULL) {
+        node = mnuReleaseDisplayListNodeAndGetNext(node);
+    }
+}
+
+extern s32 itfUpdateDisplayListNode(MnuSceneListNode *, s32, s32);
+
+/* Advance the display list's timer and release completed nodes in order. */
+s32 itfAdvanceDisplayList(MnuSceneListHead *head, s32 scale, s32 context) {
+    s32 *counter = &head->frameCount;
+    MnuSceneListNode *node = head->first;
+    s32 index = 0;
+
+    if (mnuDrawPulsingDisplaySprites(*counter, scale, context) != 0) {
+        *counter = 0;
+    } else {
+        *counter = *counter + 1;
+    }
+    if (node == NULL) {
+        return 1;
+    }
+    do {
+        s32 completed = itfUpdateDisplayListNode(node, index, context);
+
+        index++;
+        if (completed != 0) {
+            node = mnuReleaseDisplayListNodeAndGetNext(node);
+            head->first = node;
+        } else {
+            node = node->next;
+        }
+    } while (node != NULL);
+    return 0;
+}
+
+void itfDspDrawScaledA(s32 unused, s32 scale, s32 context) {
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, scale, 0x16, context);
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, scale * 0.5f, 0x18, context);
+}
+
+void itfDspDrawScaledB(s32 unused, s32 scale, s32 context) {
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, scale, 0x17, context);
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, scale * 0.5f, 0x19, context);
+}
+
+void itfDspDrawPair(s32 x, s32 y, s32 layer, s32 scale, s32 context) {
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, x, y, layer, scale, 0x14, context);
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, x, y, layer, scale, 0x15, context);
+}
+
+void func_00256E88(void) {
+}
+
+#include "eff.h"
+
+/* The common placement table entry's sprite, re-derived at each use as retail does. */
+#define MANTRA_COMMON_SPRITE(i)                                                                              \
+    (&mnuMantraSpriteSlots[mnuMantraCommonSpritePlacements[i].resourceIndex]                                 \
+          ->workEntries[mnuMantraCommonSpritePlacements[i].spriteIndex])
+
+extern void mnuDrawScaledPlacedSprite(s32, s32, s32, s32, s32, s32, f32, f32);
+void func_00256E90(s32 frame, s32 unused, s32 alpha, s32 context) {
+    f32 alphaValue;
+    f32 fade;
+    f32 scale;
+    f32 inset;
+    f32 halfWidth;
+    f32 angle;
+    s32 y;
+
+    if (frame < 5) {
+        fade = ((f32)frame) * 0.25f;
+    } else {
+        fade = 1.0f;
+    }
+    alphaValue = (f32)alpha;
+    scale = 2.0f - fade;
+    inset = fade * 16.0f;
+    halfWidth = ((f32)(MANTRA_COMMON_SPRITE(20)->geometry.bounds[2] >> 5)) * (scale - 1.0f);
+    y = ((f32)(-(MANTRA_COMMON_SPRITE(20)->geometry.bounds[3] >> 4))) * (scale - 1.0f);
+    {
+        s32 scaledAlpha = alphaValue * fade;
+        mnuDrawScaledPlacedSprite((inset + (-16.0f)) - halfWidth, y, 0, scaledAlpha, 20, context, scale,
+                                  scale);
+        mnuDrawScaledPlacedSprite((16.0f - inset) - halfWidth, y, 0, scaledAlpha, 21, context, scale, scale);
+    }
+    fade = ((f32)frame) / 5.0f;
+    angle = fade * 3.141592503f;
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, alphaValue * sdfSin(angle), 20, context);
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 0, alphaValue * sdfSin(angle), 21, context);
+}
+
+#undef MANTRA_COMMON_SPRITE
+
+
+void mnuChooseDisplaySpriteKindFromEntryFlags(MenuSceneWork *obj, s32 scale, s32 context) {
+    MnuProfileProgress *target = mnuGetSelectedNodeValue();
+    MnuMantraGridEntry *entry =
+        (MnuMantraGridEntry *)(u32)obj->gridHandle->cursor->value;
+    u32 flags;
+    s32 kind;
+
+    if (entry != NULL) {
+        flags = mnuGetMantraDisplayFlags(entry, target);
+        if (flags & MNU_MANTRA_DISPLAY_FLAG_PROFILE_MATCH) {
+            kind = 9;
+        } else if (flags & MNU_MANTRA_DISPLAY_FLAG_AT_CAP) {
+            kind = 8;
+        } else if (flags & MNU_MANTRA_DISPLAY_FLAG_ENTRY_STATE_1) {
+            kind = 6;
+        } else {
+            kind = 7;
+        }
+        mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, 0, 0, 1, scale, kind, context);
+    }
+}
+
+
+#include "common.h"
+#include "mnu_mantra_grid.h"
+#include "mnu_scene_work.h"
+
+extern void mnuDrawMantraPanelSprite(s32, s32, s32, s32, u16, s32);
+extern void mnuDrawMantraCostCounter(s32, s32, s32, s32, s32, s32);
+extern void mnuDrawMantraCostPlaceholder(s32, s32, s32, s32, s32, s32);
+
+void mnuDrawSelectedMantraEntry(MenuSceneWork *object, s32 alpha, s32 context) {
+    MnuMantraGridEntry *entry =
+        (MnuMantraGridEntry *)(u32)object->gridHandle->cursor->value;
+
+    if (entry != NULL) {
+        if (object->entryMessageInProgress == 0) {
+            if (entry->state != 3) {
+                if (entry->profileFlag != 0) {
+                    mnuDrawMantraCostPlaceholder(0, 0, 1, alpha, entry->sceneId, context);
+                } else {
+                    mnuDrawMantraCostCounter(0, 0, 1, alpha, entry->sceneId, context);
+                }
+                return;
+            }
+            mnuDrawMantraPanelSprite(0, 0, 1, alpha, entry->sceneId, context);
+        }
+    }
+}
+
+
+
+
+#include "common.h"
+#include "mnu_mantra_sprite_draw.h"
+#include "sdf_task_work.h"
+#include "mnu_profile_progress.h"
+#include "mnu_mantra_grid.h"
+#include "mnu_scene_work.h"
+
+extern void itfDspDrawStrip(s32, s32, s32, s32, s32);
+extern void mnuDrawSelectedMantraEntry(MenuSceneWork *, s32, s32);
+extern void mnuChooseDisplaySpriteKindFromEntryFlags(MenuSceneWork *, s32, s32);
+extern void mnuDrawPlacedSpriteFromTable(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 context);
+
+/* Compose the selected-entry detail and its status-kind overlay. Both draw
+ * stages use the same scene, opacity, and render context. */
+static inline void mnuDrawMantraSelectionDetails(
+    void (*drawEntry)(MenuSceneWork *, s32, s32),
+    void (*drawKind)(MenuSceneWork *, s32, s32),
+    MenuSceneWork *object, s32 scale, s32 context) {
+    drawEntry(object, scale, context);
+    drawKind(object, scale, context);
+}
+
+void mnuDrawMantraPulseStripAndKind(MenuSceneWork *object, s32 scale, s32 context) {
+    itfDspDrawStrip(0, 0, 0, scale, context);
+    mnuDrawMantraSelectionDetails(mnuDrawSelectedMantraEntry,
+                                 mnuChooseDisplaySpriteKindFromEntryFlags,
+                                 object, scale, context);
+}
+
+INCLUDE_ASM(const s32, "game/code_0024F0D0", mnuDrawMantraGridPulseEntry);
+
+extern s16 mnuMantraVariantSpritePlacements[][6];
+extern void sdfSubmitGsTestOneRegisterPacket(u64, u32);
+extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
+extern void uiDrawActiveSurfaceRegion(s32);
+extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
+extern void sdfSubmitGsAlphaOneRegisterPacket(u32, u32);
+extern void mnuAdvanceWrappingFrame(s32 *);
+
+/* Draw the two mantra-entry passes, then restore the surface's GS state. */
+void mnuDrawMantraPulseGridPasses(MenuSceneWork *work, s32 surface) {
+    SdfGrid *grid;
+    SdfGridCell *cell;
+    MnuMantraGridEntry *entry;
+    s32 row;
+    s32 col;
+    s32 x;
+    s32 y;
+
+    grid = work->gridHandle;
+    x = -9 - work->cursorPosition.x;
+    y = 0x45 - work->cursorPosition.y;
+    sdfSubmitGsTestOneRegisterPacket(0x30000, surface);
+    uiDrawUniformColorRect(0, 0, -1, 0x2000, 0xE00, 0, surface);
+    sdfSubmitGsTestOneRegisterPacket(0x3000DL, surface);
+    uiDrawActiveSurfaceRegion(surface);
+    for (row = 0; row < 0x11; row++) {
+        cell = grid->cells + row * grid->width;
+        for (col = 0; col < 15; col++) {
+            if (cell[col].value != 0) {
+                entry = (MnuMantraGridEntry *)(u32)cell[col].value;
+                grid->drawCell(x + mnuMantraVariantSpritePlacements[entry->sceneId][2],
+                               y + mnuMantraVariantSpritePlacements[entry->sceneId][3],
+                               0, grid, &cell[col], surface);
+            }
+        }
+    }
+    sdfSubmitGsTestOneRegisterPacket(0x30000, surface);
+    uiDrawUniformColorRect(0, 0, -1, 0x2000, 0x190, 0, surface);
+    uiDrawUniformColorRect(0, 0xA50, -1, 0x2000, 0x4B0, 0, surface);
+    sdfDispatchSurfaceWithPreparedTexturePacket(surface);
+    sdfSubmitGsAlphaOneRegisterPacket(0x44, surface);
+    sdfSubmitGsTestOneRegisterPacket(0x50000, surface);
+    for (row = 0; row < 0x11; row++) {
+        cell = grid->cells + row * grid->width;
+        for (col = 0; col < 15; col++) {
+            if (cell[col].value != 0) {
+                entry = (MnuMantraGridEntry *)(u32)cell[col].value;
+                grid->drawCell(x + mnuMantraVariantSpritePlacements[entry->sceneId][2],
+                               y + mnuMantraVariantSpritePlacements[entry->sceneId][3],
+                               1, grid, &cell[col], surface);
+            }
+        }
+    }
+    mnuRestoreMantraSurface(sdfSubmitGsTestOneRegisterPacket, surface);
+}
+
+extern void mnuUpdateMantraGridEntry(MnuProfileProgress *, SdfGrid *, SdfGridCell *);
+extern TaskWork *mnuSceneResourceContext;
+
+void mnuAdvanceMantraPulseGridEntries(MnuProfileProgress *selection, SdfGrid *grid) {
+    SdfGridCell *cell;
+    s32 row;
+    s32 col;
+
+    sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
+    for (row = 0; row < 0x11; row++) {
+        cell = grid->cells + row * grid->width;
+        for (col = 0; col < 15; col++) {
+            if (cell[col].value != 0) {
+                mnuUpdateMantraGridEntry(selection, grid, &cell[col]);
+            }
+        }
+    }
+}
+
+
+extern void mnuDrawMantraGridEntry(s32, s32, s32, s32, MnuProfileProgress *, SdfGrid *, SdfGridCell *, s32);
+extern void mnuDrawScaledMantraGridEntry(s32, s32, s32, s32, MnuProfileProgress *, SdfGrid *, f32, f32, SdfGridCell *, s32);
+extern void mnuDrawMantraGridEntryIndicators(s32, s32, s32, s32, MnuProfileProgress *, SdfGrid *, f32, f32, SdfGridCell *, s32);
+extern void mnuDrawMantraCursorTrail(s32, s32, s32, s32, MenuSceneWork *, s32);
+extern void mnuDrawMantraGridFeedback(s32, s32, s32, s32, MnuGridFeedbackState *, s32);
+extern MnuProfileProgress *mnuGetSelectedNodeValue(void);
+extern TaskWork *mnuSceneResourceContext;
+
+/* Draw the mantra pulse band and both entry passes at unit scale, placing the
+ * selected entry with its offsets from the display table. */
+void mnuDrawMantraPulseGridAtUnitScale(s32 x, s32 y, s32 z, s32 alpha,
+                   MnuProfileProgress *selection, SdfGrid *grid,
+                   s32 surface) {
+    MenuSceneWork *display;
+    SdfGridCell *cell;
+    s32 row;
+    s32 n;
+
+    display = (MenuSceneWork *)sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
+    for (row = 0; row < 0xD; row++) {
+        mnuDrawScaledSpriteAtCoordinatePlacement(x, y, z, alpha, row + 0x1F, 0x20, 1.0f, 1.0f, surface);
+    }
+    for (row = 0; row < 0x11; row++) {
+        cell = grid->cells + row * grid->width;
+        n = 0xE;
+        do {
+            if (cell->value != 0) {
+                mnuDrawMantraGridEntry(x, y, z, alpha, selection, grid, cell, surface);
+            }
+            cell++;
+            n--;
+        } while (n >= 0);
+    }
+    n = (display->boundsFlags & MENU_SCENE_REQUIREMENT_GROUP_0_MET) != 0
+            ? 0x1E
+            : 0x1A;
+    for (row = 0; row <= n; row++) {
+        mnuDrawScaledSpriteAtCoordinatePlacement(x, y, z, alpha, row, 0x20, 1.0f, 1.0f, surface);
+    }
+    mnuDrawMantraCursorTrail(0, 0, z, alpha, display, surface);
+    mnuDrawMantraGridFeedback(x + mnuMantraVariantSpritePlacements[selection->profileId][2],
+                  y + mnuMantraVariantSpritePlacements[selection->profileId][3],
+                  z, alpha, &display->gridFeedback, surface);
+    for (row = 0; row < 0x11; row++) {
+        cell = grid->cells + row * grid->width;
+        n = 0xE;
+        do {
+            if (cell->value != 0) {
+                mnuDrawMantraGridEntryIndicators(x, y, z, alpha, selection, grid, 1.0f, 1.0f, cell, surface);
+            }
+            cell++;
+            n--;
+        } while (n >= 0);
+    }
+}
+
+/* One local `n` serves as both the per-row column countdown in the two entry
+ * loops and the final-row bound in the band loop: one declared type, one
+ * neutral name, as a C89 programmer with all declarations at the top would
+ * write. That reuse is what retail's bytes require. */
+void mnuDrawMantraPulseGridAtScale(s32 x, s32 y, s32 z, s32 alpha,
+                   MnuProfileProgress *selection, SdfGrid *grid, s32 surface,
+                   f32 scaleX, f32 scaleY) {
+    MenuSceneWork *display;
+    SdfGridCell *cell;
+    s32 row;
+    s32 n;
+
+    display = (MenuSceneWork *)sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
+    for (row = 0; row < 0xD; row++) {
+        mnuDrawScaledSpriteAtCoordinatePlacement(x, y, z, alpha, row + 0x1F, 0x20, scaleX, scaleY, surface);
+    }
+    for (row = 0; row < 0x11; row++) {
+        cell = grid->cells + row * grid->width;
+        n = 0xE;
+        do {
+            if (cell->value != 0) {
+                mnuDrawScaledMantraGridEntry(x, y, z, alpha, selection, grid, scaleX, scaleY, cell, surface);
+            }
+            cell++;
+            n--;
+        } while (n >= 0);
+    }
+    n = (display->boundsFlags & MENU_SCENE_REQUIREMENT_GROUP_0_MET) != 0
+            ? 0x1E
+            : 0x1A;
+    for (row = 0; row <= n; row++) {
+        mnuDrawScaledSpriteAtCoordinatePlacement(x, y, z, alpha, row, 0x20, scaleX, scaleY, surface);
+    }
+    for (row = 0; row < 0x11; row++) {
+        cell = grid->cells + row * grid->width;
+        n = 0xE;
+        do {
+            if (cell->value != 0) {
+                mnuDrawMantraGridEntryIndicators(x, y, z, alpha, selection, grid, scaleX, scaleY, cell, surface);
+            }
+            cell++;
+            n--;
+        } while (n >= 0);
+    }
+}
+
+/* Advance entry animation before the coordinate trail's wrapping clock. */
+static inline void mnuAdvanceMantraPulseState(
+    void (*advanceEntries)(MnuProfileProgress *, SdfGrid *),
+    void (*advanceFrame)(s32 *),
+    MenuSceneWork *work, MnuProfileProgress *selection) {
+    advanceEntries(selection, work->gridHandle);
+    advanceFrame(&work->coordinateRing.frame);
+}
+
+void mnuUpdateMantraPulseGrid(MenuSceneWork *work, MnuProfileProgress *selection) {
+    mnuAdvanceMantraPulseState(mnuAdvanceMantraPulseGridEntries,
+                               mnuAdvanceWrappingFrame, work, selection);
+}
+
+/* The grid pass supplies its own depth; the frame preserves the caller's amount. */
+void mnuDrawMantraPulseFrame(s32 x, s32 y, s32 depth, s32 amount,
+                            MenuSceneWork *work, s32 surface) {
+    MnuProfileProgress *selection;
+    SdfGrid *grid;
+    s32 offsetX;
+    s32 offsetY;
+
+    selection = mnuGetSelectedNodeValue();
+    mnuUpdateMantraPulseGrid(work, selection);
+    grid = work->gridHandle;
+    offsetX = -9 - work->cursorPosition.x;
+    offsetY = 0x45 - work->cursorPosition.y;
+    sdfSubmitGsTestOneRegisterPacket(0x30000, surface);
+    uiDrawUniformColorRect(0, 0, -1, 0x2000, 0xE00, 0, surface);
+    sdfSubmitGsTestOneRegisterPacket(0x3000DL, surface);
+    uiDrawActiveSurfaceRegion(surface);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, surface);
+    uiDrawUniformColorRect(0, 0x190, 0, 0x2000, 0x8C0, 0x80, surface);
+    sdfSubmitGsTestOneRegisterPacket(0x30000, surface);
+    uiDrawUniformColorRect(0, 0, -1, 0x2000, 0x190, 0, surface);
+    uiDrawUniformColorRect(0, 0xA50, -1, 0x2000, 0x4B0, 0, surface);
+    sdfDispatchSurfaceWithPreparedTexturePacket(surface);
+    sdfSubmitGsAlphaOneRegisterPacket(0x44, surface);
+    sdfSubmitGsTestOneRegisterPacket(0x50000, surface);
+    mnuDrawMantraPulseGridAtUnitScale(x + offsetX, y + offsetY, 1, amount, selection, grid, surface);
+    mnuRestoreMantraSurface(sdfSubmitGsTestOneRegisterPacket, surface);
+}
+
+void mnuDrawMantraGridSelectionMarkers(MenuSceneWork *work, s32 layer) {
+    s32 x = work->entryPosition.x - work->cursorPosition.x - 9;
+    s32 y = work->entryPosition.y - work->cursorPosition.y + 0x45;
+
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, x, y, 0, 0x80, 0x3E, layer);
+    mnuDrawPlacedSpriteVia(mnuDrawPlacedSpriteFromTable, x, y, 0, 0x80, 0x3D, layer);
+}
+
+void mnuCopySceneCoordinates(MenuSceneWork *work) {
+    s32 x = work->entryPosition.x;
+    s32 y = work->entryPosition.y;
+    MenuSceneCoordinate *point = work->coordinateRing.coordinates;
+    s32 remaining = 9;
+
+    do {
+        point->x = x;
+        point->y = y;
+        point++;
+        remaining--;
+    } while (remaining >= 0);
+}
+
+void mnuAdvanceWrappingFrame(s32 *frame) {
+    s32 previous;
+
+    previous = *frame;
+    *frame = previous + 1;
+    if (0x3c < previous + 1) {
+        *frame = 0;
+    }
+}
+
+INCLUDE_ASM(const s32, "game/code_0024F0D0", mnuDrawMantraCursorTrail);
+
+
+
+#include "sdk_ps2.h"
+#include "mnu_variant_sprite_placement.h"
+#include "common.h"
+#include "eff_random.h"
+#include "snd_sequence_volume_pan.h"
+#include "sdf_task_work.h"
+#include "mnu_mantra_grid.h"
+#include "mnu_profile_progress.h"
+#include "prf_profile_cap.h"
+#include "mnu_scene_work.h"
+#include "sdf_grid.h"
+
+extern u32 ptyGetProfileRecordValue(struct datUnitWork_t *, u16);
+
+
+extern u32 D_003E274C[];
+
+extern MnuVariantSpritePlacement mnuMantraVariantSpritePlacements[];
+
+extern void cmpDrawPanelEffCell(u32 startX, u32 startY, u32 startZ, u32 endX, u32 endY, u32 endZ, u32 color, u32 surfaceIndex);
+
+/* Connect prerequisite cells with a straight stroke or a three-stroke bend. */
+void mnuDrawMantraPrerequisiteLink(s32 x, s32 y, s32 z, s32 cellWidth,
+                                 s32 cellHeight, u32 color, s32 direction,
+                                 MnuMantraGridEntry *scene,
+                                 MnuMantraNodeState *states, s32 surface) {
+    MantraPrerequisiteRecord *record;
+    s32 targetId;
+    s16 startX;
+    s16 startY;
+    s16 endX;
+    s16 endY;
+    s32 startOffset = 0;
+    s8 bendInset = 0;
+    s8 targetOffset = 0;
+
+    record = &mnuMantraPrerequisiteRecords[scene->sceneId];
+    targetId = record->ids[direction];
+    startX = x + 0x10;
+    startY = y + 0xA;
+    endX = x + (mnuMantraVariantSpritePlacements[targetId][2] - mnuMantraVariantSpritePlacements[scene->sceneId][2]);
+    endY = y + (mnuMantraVariantSpritePlacements[targetId][3] - mnuMantraVariantSpritePlacements[scene->sceneId][3]);
+    endX -= 4;
+    endY += 0xA;
+
+    if (record->flags[direction] & 4) {
+        u8 sourceRow = states[scene->sceneId].y;
+        u8 targetRow = states[targetId].y;
+
+        targetOffset = (sourceRow - targetRow) * 4;
+        bendInset = ((f32)(endY - startY) / (f32)cellHeight) * 4.0f;
+        if (bendInset < 0) {
+            bendInset = -bendInset;
+        }
+    }
+    if (record->flags[direction] & 2) {
+        startOffset = endY - startY >= 0 ? 4 : -4;
+    }
+    if (startY != endY) {
+        s32 turnX;
+        s32 startPixelY;
+        s32 endPixelY;
+
+        turnX = (endX - (cellWidth >> 3) * 3 + bendInset) << 4;
+        startPixelY = (startY + startOffset) << 3;
+        cmpDrawPanelEffCell(startX << 4, startPixelY, z,
+                               turnX, startPixelY, z, color, surface);
+        endPixelY = (endY + targetOffset) << 3;
+        cmpDrawPanelEffCell(turnX, startPixelY, z,
+                               turnX, endPixelY, z, color, surface);
+        cmpDrawPanelEffCell(turnX, endPixelY, z,
+                               endX << 4, endPixelY, z, color, surface);
+    } else {
+        cmpDrawPanelEffCell(startX << 4, (endY + startOffset) << 3, z,
+                               endX << 4, endY << 3, z, color, surface);
+        /* Native flat stroke uses jal before attachment cleanup. Qualified trace:
+         * sandbox_MatchA/deep_link_F2_trace, rtl.01.sibling call545/reset549;
+         * reset549 is gone by rtl.13.life, after the sibling-call decision. */
+        startOffset = 0;
+    }
+}
+
+u32 mnuGetMantraPrerequisiteFlags(s32 direction, MnuMantraGridEntry *scene, MnuMantraNodeState *states, MnuProfileProgress *target) {
+    MantraPrerequisiteRecord *record = &mnuMantraPrerequisiteRecords[scene->sceneId];
+    u32 flags = 0x100;
+    if (prfGetCapValue(scene->sceneId) == ptyGetProfileRecordValue(target->partyRecord, scene->sceneId)) {
+        flags = 0x101;
+    }
+    if (states[record->ids[direction]].state == 1) {
+        flags |= 0x12;
+    }
+    if (states[record->ids[direction]].state == 2) {
+        flags |= 0x10;
+    }
+    if (prfGetCapValue((u16)record->ids[direction]) ==
+        ptyGetProfileRecordValue(target->partyRecord, (u16)record->ids[direction])) {
+        flags |= 4;
+    }
+    if (record->flags[direction] & 1) {
+        flags |= 8;
+    }
+    return flags;
+}
+
+extern char D_003BC458[];
+extern char D_003BC488[];
+extern char D_003BC490[];
+extern char D_003BC498[];
+extern TaskWork *mnuSceneResourceContext;
+extern MnuProfileProgress *mnuGetSelectedNodeValue(void);
+extern u32 mnuGetMantraDisplayFlags(MnuMantraGridEntry *scene, MnuProfileProgress *target);
+extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
+extern s32 frFontMeasureAndQueueGlyph(s32, s32, s32, u32, const u8 *, s32);
+
+INCLUDE_RODATA(const s32, "game/code_0024F0D0", D_003AF950);
+
+void mnuDrawMantraGraphCell(s32 x, s32 y, s32 z, SdfGrid *grid, SdfGridCell *cell, s32 surface) {
+    u32 prerequisiteFlags[4];
+    MnuMantraGridEntry *scene;
+    MnuProfileProgress *selection;
+    MnuMantraNodeState *states;
+    MantraPrerequisiteRecord *record;
+    s32 cellWidth;
+    s32 cellHeight;
+    s8 i;
+    u32 flags;
+    u32 color;
+
+    scene = (MnuMantraGridEntry *)(u32)cell->value;
+    if (scene == NULL) {
+        return;
+    }
+    selection = mnuGetSelectedNodeValue();
+    states = grid->userData;
+    sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
+    record = &mnuMantraPrerequisiteRecords[scene->sceneId];
+    memset(prerequisiteFlags, 0, sizeof(prerequisiteFlags));
+    if (record->kind == 0) {
+        cellWidth = grid->cellWidth;
+        cellHeight = grid->cellHeight;
+        for (i = 0; i < 4 && record->ids[i] != 0; i++) {
+            if (states[record->ids[i]].state != 0) {
+                prerequisiteFlags[i] = mnuGetMantraPrerequisiteFlags(i, scene, states, selection);
+            }
+        }
+        for (i = 0; i < 4; i++) {
+            if (prerequisiteFlags[i] & 0x100) {
+                color = 0x50505080;
+                if (prerequisiteFlags[i] & 2) {
+                    color = 0x80808080;
+                }
+                mnuDrawMantraPrerequisiteLink(x, y, z, cellWidth, cellHeight, color, i, scene, states, surface);
+            }
+        }
+    }
+    switch (scene->backgroundColorIndex) {
+    case 1:
+        uiDrawUniformColorRect((x - 2) << 4, (y - 2) << 3, 0, 0x120, 0xA0, 0x10707020, surface);
+        break;
+    case 2:
+        uiDrawUniformColorRect((x - 2) << 4, (y - 2) << 3, 0, 0x120, 0xA0, 0x60401020, surface);
+        break;
+    case 3:
+        uiDrawUniformColorRect((x - 2) << 4, (y - 2) << 3, 0, 0x120, 0xA0, 0x10601020, surface);
+        break;
+    case 4:
+        uiDrawUniformColorRect((x - 2) << 4, (y - 2) << 3, 0, 0x120, 0xA0, 0x70701020, surface);
+        break;
+    case 5:
+        uiDrawUniformColorRect((x - 2) << 4, (y - 2) << 3, 0, 0x120, 0xA0, 0x70107020, surface);
+        break;
+    case 6:
+        uiDrawUniformColorRect((x - 2) << 4, (y - 2) << 3, 0, 0x120, 0xA0, 0x10107020, surface);
+        break;
+    case 7:
+        uiDrawUniformColorRect((x - 2) << 4, (y - 2) << 3, 0, 0x120, 0xA0, 0x70707020, surface);
+        break;
+    }
+    flags = mnuGetMantraDisplayFlags(scene, selection);
+    if (flags & 1) {
+        uiDrawUniformColorRect((x - 4) << 4, (y - 4) << 3, 0, 0x1C0, 0xE0, 0x60501050, surface);
+    }
+    if (flags & 2) {
+        frFontMeasureAndQueueGlyph(x + 4, y, z, 0x808020F0, (const u8 *)D_003BC458, surface);
+        frFontMeasureAndQueueGlyph(x, y, z, 0x808020F0, (const u8 *)D_003BC488, surface);
+    } else if (flags & 4) {
+        frFontMeasureAndQueueGlyph(x, y, z, 0x108080F0, (const u8 *)D_003BC488, surface);
+    } else if (flags & 8) {
+        frFontMeasureAndQueueGlyph(x + 4, y, z, 0x404040F0, (const u8 *)D_003BC488, surface);
+    } else if (flags & 0x20) {
+        frFontMeasureAndQueueGlyph(x, y, z, 0x40404080, (const u8 *)D_003BC490, surface);
+    } else {
+        frFontMeasureAndQueueGlyph(x, y, z, 0x40404080, (const u8 *)D_003BC498, surface);
+    }
+}
+
+void mnuDrawSpriteAtScaledPlacement(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
+                   s32 placementIndex, s32 context, f32 scaleX, f32 scaleY);
+
+void mnuDrawMantraEntryStatusIcon(s32 x, s32 y, s32 z, s32 alpha, u32 flags,
+                   f32 scaleX, f32 scaleY, s32 context) {
+    if (flags & 2) {
+        mnuDrawSpriteAtScaledPlacement(x, y, z, alpha, 0x20, 0x33, context, scaleX, scaleY);
+        return;
+    }
+    if (flags & 4) {
+        mnuDrawSpriteAtScaledPlacement(x, y, z, alpha, 0x20, 0x34, context, scaleX, scaleY);
+        return;
+    }
+    if (flags & 8) {
+        mnuDrawSpriteAtScaledPlacement(x, y, z, alpha, 0x20, 0x35, context, scaleX, scaleY);
+    }
+}
+
+
+void mnuSetMantraGridFeedbackMode(MnuGridFeedbackState *state, u32 mode) {
+    state->mode = mode;
+    state->frame = 0;
+}
+/* Step the notification frame (wraps at 31); mode 1 plays the cue once at frame 0.
+ * Its unused implicit-int result preserves the call's non-sibling epilogue. */
+mnuAdvanceMantraGridFeedback(MnuGridFeedbackState *voice) {
+    s32 notify;
+
+    notify = 0;
+    switch (voice->mode) {
+    case 0:
+        voice->frame = voice->frame + 1;
+        if (voice->frame >= 0x1F) {
+            voice->frame = 0;
+        }
+        break;
+    case 1:
+        notify = voice->frame == 0;
+        voice->frame = voice->frame + 1;
+        if (voice->frame >= 0x1F) {
+            voice->frame = 0;
+            voice->mode = 0;
+        }
+        break;
+    }
+    if (notify == 1) {
+        p2sdPlaySE(0x15, 0x7F, 0x3F);
+    }
+}
+
+void mnuDrawPlacedSpriteWithFlags(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
+                   s32 placementIndex, s32 context);
+void mnuDrawRotatedPlacedSprite(s32 x, s32 y, s32 z, s32 alpha, s32 flags,
+                   s32 placementIndex, s32 context, f32 rotation);
+
+void mnuDrawMantraGridFeedback(s32 x, s32 y, s32 z, s32 alpha, MnuGridFeedbackState *state,
+                   s32 context) {
+    f32 progress;
+
+    /* Both modes interpolate in radians and draw the ring pieces in degrees. */
+    switch (state->mode) {
+    case 0: {
+        f32 rotation;
+        f32 degrees;
+        progress = (f32)state->frame / 30.0f;
+        rotation = 6.2831853f;
+        degrees = 57.29578f;
+        mnuDrawPlacedSpriteWithFlags(x, y, z, alpha, 0x20, 0x43, context);
+        rotation = progress * rotation;
+        mnuDrawRotatedPlacedSprite(x, y, z, alpha, 0x20, 0x42, context, rotation * degrees);
+        rotation += 3.14159265f;
+        mnuDrawRotatedPlacedSprite(x, y, z, alpha, 0x20, 0x42, context, rotation * degrees);
+        return;
+    }
+    case 1: {
+        f32 originalAlpha;
+        f32 fade;
+        f32 secondary;
+        f32 degrees;
+        s32 count;
+        progress = (f32)state->frame / 30.0f;
+        progress = 1.0f - progress;
+        originalAlpha = (f32)alpha;
+        mnuDrawPlacedSpriteWithFlags(x, y, z, (s32)(originalAlpha * progress), 0x20, 0x41, context);
+        count = state->frame;
+        if (count < 10) {
+            progress = (f32)count / 10.0f;
+            fade = 1.0f;
+        } else {
+            progress = 1.0f;
+            fade = (f32)(30 - count) / 20.0f;
+        }
+        secondary = 0.0f;
+        if (count >= 7) {
+            if (count >= 11) {
+                secondary = (f32)(30 - count) / 19.0f;
+            } else {
+                secondary = (f32)(count - 6) * 0.25f;
+            }
+        }
+        alpha = (s32)(originalAlpha * fade);
+        degrees = 57.29578f;
+        mnuDrawRotatedPlacedSprite(x, y, z, alpha, 0x20, 0x3F, context, progress * -1.5707963f * degrees);
+        mnuDrawRotatedPlacedSprite(x, y, z, alpha, 0x20, 0x40, context, progress * 1.5707963f * degrees);
+        mnuDrawRotatedPlacedSprite(x, y, z, (s32)(originalAlpha * secondary), 0x20, 0x40, context,
+                      1.5707963f * 57.29578f);
+        progress = (f32)state->frame / 30.0f;
+        mnuDrawPlacedSpriteWithFlags(x, y, z, (s32)(originalAlpha * progress), 0x20, 0x43, context);
+        break;
+    }
+    }
+}
+
+
+
+
+
+static inline s16 mnuRandomPulseDuration(void *state) {
+    return dds3GetRandFloatA(state) * 120.0f + 30.0f;
+}
+
+void mnuUpdateMantraGridEntryPulse(MnuMantraGridEntry *entry) {
+    MnuMantraGridPulse *pulse = &entry->pulse;
+    s32 timer = pulse->timer + 1;
+    f32 random;
+
+    pulse->timer = timer;
+    if ((s16)timer < pulse->duration) {
+        return;
+    }
+    pulse->timer = 0;
+    random = dds3GetRandFloatA(0);
+    switch (pulse->mode) {
+    case 1:
+        if (random < 0.3f) {
+            pulse->mode = 2;
+            pulse->duration = 50;
+            return;
+        }
+        if (random < 0.5f) {
+            pulse->mode = 5;
+            pulse->duration = 60;
+            return;
+        }
+        pulse->duration = mnuRandomPulseDuration(0);
+        return;
+    case 2:
+        pulse->mode = 3;
+        pulse->duration = mnuRandomPulseDuration(0);
+        return;
+    case 3:
+        if (dds3GetRandFloatA(0) < 0.1f) {
+            pulse->mode = 4;
+            pulse->duration = 50;
+            return;
+        }
+        pulse->duration = mnuRandomPulseDuration(0);
+        return;
+    case 0:
+    case 4:
+    case 5:
+        pulse->mode = 1;
+        pulse->duration = mnuRandomPulseDuration(0);
+        return;
+    default:
+        return;
+    }
+}
+
+
+void mnuDrawMantraGridEntryPulse(s32 x, s32 y, s32 z, s32 alpha, MnuMantraGridEntry *entry,
+                   s32 context) {
+    MnuMantraGridPulse *pulse = &entry->pulse;
+    u32 mode = pulse->mode;
+    f32 progress;
+
+    if (mode >= 6) {
+        return;
+    }
+
+    /* The first two ring pieces interpolate in radians, then draw in degrees. */
+    switch (mode) {
+    case 0:
+    case 1:
+        mnuDrawPlacedSpriteWithFlags(x, y, z, alpha, 0x20, 0x44, context);
+        mnuDrawPlacedSpriteWithFlags(x, y, z, alpha, 0x20, 0x45, context);
+        mnuDrawPlacedSpriteWithFlags(x, y, z, alpha, 0x20, 0x46, context);
+        return;
+
+    case 2: {
+        progress = (f32)(s16)pulse->timer / (f32)pulse->duration;
+
+        mnuDrawRotatedPlacedSprite(x, y, z, alpha, 0x20, 0x44, context,
+                      progress * -1.0210175f * 57.29578f);
+        mnuDrawRotatedPlacedSprite(x, y, z, alpha, 0x20, 0x45, context,
+                      progress * 0.31415924f * 57.29578f);
+        mnuDrawPlacedSpriteWithFlags(x, y, z, alpha, 0x20, 0x46, context);
+        return;
+    }
+
+    case 3:
+        mnuDrawRotatedPlacedSprite(x, y, z, alpha, 0x20, 0x44, context,
+                      -1.0210175f * 57.29578f);
+        mnuDrawRotatedPlacedSprite(x, y, z, alpha, 0x20, 0x45, context,
+                      0.31415924f * 57.29578f);
+        mnuDrawPlacedSpriteWithFlags(x, y, z, alpha, 0x20, 0x46, context);
+        return;
+
+    case 4: {
+        progress = (f32)(s16)pulse->timer / (f32)pulse->duration;
+        progress = 1.0f - progress;
+
+        mnuDrawRotatedPlacedSprite(x, y, z, alpha, 0x20, 0x44, context,
+                      progress * -1.0210175f * 57.29578f);
+        mnuDrawRotatedPlacedSprite(x, y, z, alpha, 0x20, 0x45, context,
+                      progress * 0.31415924f * 57.29578f);
+        mnuDrawPlacedSpriteWithFlags(x, y, z, alpha, 0x20, 0x46, context);
+        return;
+    }
+
+    case 5: {
+        s16 timer = (s16)pulse->timer;
+
+        if (timer < 50) {
+            progress = (f32)timer / 50.0f;
+        } else {
+            progress = (f32)(60 - timer) / 10.0f;
+        }
+        mnuDrawRotatedPlacedSprite(x, y, z, alpha, 0x20, 0x44, context,
+                      progress * -1.0210175f * 57.29578f);
+        mnuDrawRotatedPlacedSprite(x, y, z, alpha, 0x20, 0x45, context,
+                      progress * 0.31415924f * 57.29578f);
+        mnuDrawPlacedSpriteWithFlags(x, y, z, alpha, 0x20, 0x46, context);
+        break;
+    }
+    }
+}
+
+extern TaskWork *mnuSceneResourceContext;
+
+
+
+
+
+extern u32 mnuGetMantraDisplayFlags(MnuMantraGridEntry *scene, MnuProfileProgress *target);
+extern void mnuUpdateMantraGridEntryPulse(MnuMantraGridEntry *entry);
+
+void mnuUpdateMantraGridEntry(MnuProfileProgress *target, SdfGrid *grid, SdfGridCell *entry) {
+    MenuSceneWork *scene;
+    MnuMantraGridEntry *displayEntry;
+    u32 flags;
+
+    scene = (MenuSceneWork *)sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
+    displayEntry = (MnuMantraGridEntry *)(u32)entry->value;
+    displayEntry->frame += 1;
+    if ((f32)displayEntry->frame > 60.0f) {
+        displayEntry->frame = 0;
+    }
+    flags = mnuGetMantraDisplayFlags(displayEntry, target);
+    if ((flags & MNU_MANTRA_DISPLAY_FLAG_PROFILE_MATCH) != 0) {
+        mnuAdvanceMantraGridFeedback(&scene->gridFeedback);
+        return;
+    }
+    if ((flags & MNU_MANTRA_DISPLAY_FLAG_AT_CAP) != 0) {
+        mnuUpdateMantraGridEntryPulse(displayEntry);
+    }
+}
+
+
+
+#include "mnu_mantra_sprite_draw.h"
+#include "sdk_ps2.h"
+#include "mnu_variant_sprite_placement.h"
+#include "mnu.h"
+#include "snd_sequence_volume_pan.h"
+#include "sdf_trig.h"
+#include "eff_random.h"
+#include "sdf_task_work.h"
+#include "sdf_resource.h"
+#include "dat_state.h"
+#include "mnu_scene.h"
+#include "mnu_profile_progress.h"
+#include "mnu_mantra_grid.h"
+#include "mnu_sprite_resource.h"
+#include "mnu_sprite_placement.h"
+#include "sdf_grid.h"
+#include "mnu_scene_work.h"
+#include "sdf_chip.h"
+
+
+
+extern void mnuDrawPlacedSpriteFromTable(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 context);
+
+
+extern MnuVariantSpritePlacement mnuMantraVariantSpritePlacements[];
+extern TaskWork *mnuSceneResourceContext;
+extern u32 mnuGetMantraDisplayFlags(MnuMantraGridEntry *, MnuProfileProgress *);
+extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
+extern void mnuDrawScaledScenePlacementSprite(s32, s32, s32, s32, s32, s32, f32, f32, s32);
+extern void mnuDrawMantraEntryStatusIcon(s32, s32, s32, s32, u32, f32, f32, s32);
+
+extern const u8 D_003BC4A0[];
+extern void mnuDrawPlacedSpriteWithFlags(s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawScaledVariantSprite(s32, s32, s32, s32, s32, s32, f32, f32, s32);
+extern void mnuDrawMantraGridEntryPulse(s32, s32, s32, s32, MnuMantraGridEntry *, s32);
+
+void mnuDrawMantraGridEntry(s32 x, s32 y, s32 depth, s32 alpha,
+                          MnuProfileProgress *profileOwner, SdfGrid *grid,
+                          SdfGridCell *entry, s32 context) {
+    u8 mappedIds[6];
+    MnuMantraGridEntry *scene;
+    MenuSceneWork *display;
+    s32 drawX;
+    s32 drawY;
+    s32 i;
+    s32 atCap;
+    u32 flags;
+    f32 pulse;
+    f32 progress;
+
+    memcpy(mappedIds, D_003BC4A0, sizeof(mappedIds));
+    display = (MenuSceneWork *)sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
+    scene = (MnuMantraGridEntry *)entry->value;
+    pulse = (sdfSin(((f32)scene->frame / 60.0f) * 6.2831853f -
+                       1.5707963f) + 1.0f) * 0.5f;
+    progress = (f32)(scene->frame - 20) / 20.0f;
+    if (progress > 1.0f) {
+        progress = 1.0f;
+    }
+    if (progress < 0.0f) {
+        progress = 0.0f;
+    }
+    progress = sdfSin(progress * 3.1415926f) * 0.3f;
+    drawX = x + mnuMantraVariantSpritePlacements[scene->sceneId][2];
+    drawY = y + mnuMantraVariantSpritePlacements[scene->sceneId][3];
+    flags = mnuGetMantraDisplayFlags(scene, profileOwner);
+    if (display->boundsFlags & MENU_SCENE_REQUIREMENT_GROUP_0_MET) {
+        mnuDrawScaledVariantSprite(x, y, depth, alpha, scene->sceneId, 0x20,
+                                  1.0f, 1.0f, context);
+    } else {
+        for (i = 0; i < 6; i++) {
+            if (scene->sceneId == mappedIds[i]) {
+                mnuDrawScaledVariantSprite(x, y, depth, alpha, i + 0x59, 0x20,
+                                          1.0f, 1.0f, context);
+                break;
+            }
+        }
+        if (i == 6) {
+            mnuDrawScaledVariantSprite(x, y, depth, alpha, scene->sceneId, 0x20,
+                                      1.0f, 1.0f, context);
+        }
+    }
+    pulse = pulse * 0.5f + 0.4f;
+    if (flags & MNU_MANTRA_DISPLAY_FLAG_PROFILE_MATCH) {
+        atCap = flags & MNU_MANTRA_DISPLAY_FLAG_AT_CAP;
+        if (atCap) {
+            f32 fade = (f32)alpha;
+            mnuDrawPlacedSpriteWithFlags(drawX, drawY, depth, (s32)(fade * 0.5f),
+                                        0x20, 0x3C, context);
+            mnuDrawPlacedSpriteWithFlags(drawX, drawY, depth, (s32)(fade * 0.3f),
+                                        0x20, 0x3C, context);
+        } else {
+            f32 fade = (f32)alpha;
+            mnuDrawPlacedSpriteWithFlags(drawX, drawY, depth, (s32)(fade * pulse),
+                                        0x20, 0x3C, context);
+            mnuDrawPlacedSpriteWithFlags(drawX, drawY, depth, (s32)(fade * progress),
+                                        0x20, 0x3C, context);
+        }
+    } else {
+        atCap = flags & MNU_MANTRA_DISPLAY_FLAG_AT_CAP;
+        if (atCap) {
+            mnuDrawPlacedSpriteWithFlags(drawX, drawY, depth, alpha,
+                                        0x20, 0x33, context);
+        } else if (flags & (MNU_MANTRA_DISPLAY_FLAG_ENTRY_STATE_1 |
+                            MNU_MANTRA_DISPLAY_FLAG_ENTRY_STATE_2)) {
+            f32 fade = (f32)alpha;
+            mnuDrawPlacedSpriteWithFlags(drawX, drawY, depth, (s32)(fade * pulse),
+                                        0x20, 0x34, context);
+            mnuDrawPlacedSpriteWithFlags(drawX, drawY, depth, (s32)(fade * progress),
+                                        0x20, 0x34, context);
+        }
+    }
+    if (atCap) {
+        mnuDrawMantraGridEntryPulse(drawX, drawY, depth, alpha, scene, context);
+    }
+}
+
+INCLUDE_SDATA(const s32, "game/code_0024F0D0", D_003BC440);
+
+INCLUDE_SDATA(const s32, "game/code_0024F0D0", D_003BC448);
+
+INCLUDE_SDATA(const s32, "game/code_0024F0D0", D_003BC450);
+
+INCLUDE_SDATA(const s32, "game/code_0024F0D0", D_003BC458);
+
+INCLUDE_SDATA(const s32, "game/code_0024F0D0", D_003BC460);
+
+INCLUDE_SDATA(const s32, "game/code_0024F0D0", D_003BC468);
+
+INCLUDE_SDATA(const s32, "game/code_0024F0D0", D_003BC470);
+
+INCLUDE_SDATA(const s32, "game/code_0024F0D0", D_003BC478);
+
+INCLUDE_SDATA(const s32, "game/code_0024F0D0", D_003BC480);
+
+INCLUDE_SDATA(const s32, "game/code_0024F0D0", D_003BC488);
+
+INCLUDE_SDATA(const s32, "game/code_0024F0D0", D_003BC490);
+
+INCLUDE_SDATA(const s32, "game/code_0024F0D0", D_003BC498);
+
+INCLUDE_SDATA(const s32, "game/code_0024F0D0", D_003BC4A0);
+
+void mnuDrawScaledMantraGridEntry(s32 x, s32 y, s32 depth, s32 alpha,
+                   MnuProfileProgress *profileOwner, SdfGrid *grid,
+                   f32 scaleX, f32 scaleY, SdfGridCell *entry,
+                   s32 context) {
+    u8 mappedIds[6] = { 5, 15, 45, 52, 63, 68 };
+    MnuMantraGridEntry *scene;
+    s32 drawX;
+    s32 drawY;
+    s32 i;
+    f32 pulse;
+
+    {
+        u32 flags;
+        MenuSceneWork *display;
+
+        display = (MenuSceneWork *)(u32)sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
+        scene = (MnuMantraGridEntry *)(u32)entry->value;
+        pulse = 0.0f;
+        scene->frame++;
+        if ((f32)scene->frame > 60.0f) {
+            scene->frame = 0;
+        }
+        pulse = sdfSin(pulse);
+        drawX = x + mnuMantraVariantSpritePlacements[scene->sceneId][2];
+        drawY = y + mnuMantraVariantSpritePlacements[scene->sceneId][3];
+        flags = mnuGetMantraDisplayFlags(scene, profileOwner);
+
+        if (flags & MNU_MANTRA_DISPLAY_FLAG_PROFILE_MATCH) {
+            uiDrawUniformColorRect(drawX << 4, drawY << 3, 0, 0x300, 0x180,
+                                   (s32)((f32)((alpha * 5) << 4) * 0.0078125f) |
+                                       0x60501000,
+                                   context);
+        }
+        {
+            s32 displayFlags = (u8)display->boundsFlags;
+
+            if (displayFlags & MENU_SCENE_REQUIREMENT_GROUP_0_MET) {
+                mnuDrawScaledScenePlacementSprite(x, y, depth, alpha, scene->sceneId, 0x20,
+                              scaleX, scaleY, context);
+            } else {
+                for (i = 0; i < 6; i++) {
+                    if (scene->sceneId == mappedIds[i]) {
+                        mnuDrawScaledScenePlacementSprite(x, y, depth, alpha, i + 0x59, 0x20,
+                                      scaleX, scaleY, context);
+                        break;
+                    }
+                }
+                if (i == 6) {
+                    mnuDrawScaledScenePlacementSprite(x, y, depth, alpha, scene->sceneId, 0x20,
+                                  scaleX, scaleY, context);
+                }
+            }
+        }
+        mnuDrawMantraEntryStatusIcon(drawX, drawY, depth,
+                      (s32)((f32)alpha * (pulse * 0.4f + 0.2f)),
+                      flags, scaleX, scaleY, context);
+    }
+}
+
+extern u32 prfGetCapValue(u16);
+extern u32 ptyGetProfileRecordValue(struct datUnitWork_t *, u16);
+extern u32 mnuGetMantraPrerequisiteFlags(s32, MnuMantraGridEntry *, MnuMantraNodeState *, MnuProfileProgress *);
+extern const s8 D_003AF9B8[];
+
+/* Fresh native reconstruction; not compiled or claimed matching.
+ * Retail 00259B40..0025A680, 0xB40 bytes, frame 0x120.
+ * Preserve the native partial clear: 21 bytes are cleared and populated,
+ * while the final eight-entry draw loop reads active[14] through active[21].
+ * The unexplained final-byte lifetime is retained, not zero-filled or diagnosed
+ * as a retail bug. See SOURCE_REVIEW.md for the exact stack-write audit. */
+void mnuDrawMantraGridEntryIndicators(s32 x, s32 y, s32 depth, s32 alpha,
+                                    MnuProfileProgress *profileOwner, SdfGrid *grid,
+                                    f32 scaleX, f32 scaleY, SdfGridCell *cell,
+                                    s32 context) {
+    u32 prerequisiteFlags[4];
+    s32 prerequisiteIds[4];
+    s8 firstCapGroup[3] = {24, 29, 34};
+    struct MantraSecondaryMarkerCaps {
+        s8 ids[2];
+    } secondCapGroup = {{39, 44}};
+    struct MantraSpecialSceneMarkerCaps {
+        s8 ids[2];
+    } specialCapGroup = {{52, 63}};
+    s8 active[22];
+    s8 profileIds[22];
+    MnuMantraGridEntry *scene = (MnuMantraGridEntry *)(u32)cell->value;
+    MantraPrerequisiteRecord *record;
+    MnuMantraNodeState *states;
+    s8 i;
+    u32 cap;
+    u32 sceneCap;
+    u32 packedFlags;
+
+    if (scene->sceneId == 45) {
+        for (i = 0; i < 3; i++) {
+            cap = prfGetCapValue((u16)firstCapGroup[i]);
+            if (cap == ptyGetProfileRecordValue(profileOwner->partyRecord,
+                                               (u16)firstCapGroup[i])) {
+                mnuDrawScaledVariantSpriteByIndex(x, y, depth, alpha, scene->sceneId, 0x1C, 0x20, scaleX, scaleY, context);
+                break;
+            }
+        }
+        for (i = 0; i < 2; i++) {
+            cap = prfGetCapValue((u16)secondCapGroup.ids[i]);
+            if (cap == ptyGetProfileRecordValue(profileOwner->partyRecord,
+                                               (u16)secondCapGroup.ids[i])) {
+                mnuDrawScaledVariantSpriteByIndex(x, y, depth, alpha, scene->sceneId, 0x1D, 0x20, scaleX, scaleY, context);
+                break;
+            }
+        }
+    }
+    if (scene->sceneId == 72) {
+        for (i = 0; i < 2; i++) {
+            cap = prfGetCapValue((u16)specialCapGroup.ids[i]);
+            if (cap == ptyGetProfileRecordValue(profileOwner->partyRecord,
+                                               (u16)specialCapGroup.ids[i])) {
+                mnuDrawScaledVariantSpriteByIndex(x, y, depth, alpha, scene->sceneId, 0x1C, 0x20, scaleX, scaleY, context);
+                break;
+            }
+        }
+    }
+
+    sceneCap = prfGetCapValue(scene->sceneId);
+    if (sceneCap != ptyGetProfileRecordValue(profileOwner->partyRecord, scene->sceneId)) {
+        return;
+    }
+    memset(prerequisiteIds, 0, sizeof(prerequisiteIds));
+    record = &mnuMantraPrerequisiteRecords[scene->sceneId];
+    states = (MnuMantraNodeState *)(u32)grid->userData;
+    if (record->kind != 0) {
+        return;
+    }
+    packedFlags = 0;
+    i = 0;
+    if (record->ids[i] != 0) {
+        do {
+            if (states[record->ids[i]].state != 0) {
+                prerequisiteFlags[i] = mnuGetMantraPrerequisiteFlags(i, scene, states, profileOwner);
+                prerequisiteIds[i] = record->ids[i];
+                if (prerequisiteFlags[i] & 4) {
+                    packedFlags |= 1 << (i * 8);
+                }
+                if (prerequisiteFlags[i] & 2) {
+                    packedFlags |= 2 << (i * 8);
+                }
+                if (prerequisiteFlags[i] & 0x10) {
+                    packedFlags |= 4 << (i * 8);
+                }
+            }
+            i++;
+            if (i >= 4) {
+                break;
+            }
+        } while (record->ids[i] != 0);
+    }
+
+    if (mnuMantraVariantSpritePlacements[scene->sceneId][5] & 0x100) {
+        mnuDrawScaledVariantSpriteByIndex(x, y, depth, alpha, scene->sceneId, 0x1D, 0x20, scaleX, scaleY, context);
+    }
+    if (mnuMantraVariantSpritePlacements[scene->sceneId][5] & 0x10) {
+        mnuDrawScaledVariantSpriteByIndex(x, y, depth, alpha, scene->sceneId, 0x1C, 0x20, scaleX, scaleY, context);
+    }
+    if (mnuMantraVariantSpritePlacements[scene->sceneId][5] & 1) {
+        if (prerequisiteIds[0] != 0 && (packedFlags & 4)) {
+            mnuDrawScaledVariantSpriteByIndex(x, y, depth, alpha, prerequisiteIds[0], 0x1C, 0x20, scaleX, scaleY, context);
+        }
+        if (prerequisiteIds[1] != 0 && (packedFlags & 0x400)) {
+            mnuDrawScaledVariantSpriteByIndex(x, y, depth, alpha, prerequisiteIds[1], 0x1C, 0x20, scaleX, scaleY, context);
+        }
+    }
+    if (mnuMantraVariantSpritePlacements[scene->sceneId][5] & 2) {
+        if (prerequisiteIds[0] != 0 && (packedFlags & 4)) {
+            mnuDrawScaledVariantSpriteByIndex(x, y, depth, alpha, prerequisiteIds[0], 0x1D, 0x20, scaleX, scaleY, context);
+        }
+        if (prerequisiteIds[1] != 0 && (packedFlags & 0x400)) {
+            mnuDrawScaledVariantSpriteByIndex(x, y, depth, alpha, prerequisiteIds[1], 0x1D, 0x20, scaleX, scaleY, context);
+        }
+    }
+
+    if (scene->sceneId == 67) {
+        mnuDrawVariantSpriteBySelector(x, y, depth, alpha, scene->sceneId, 0, 0x20, scaleX, scaleY, context);
+        mnuDrawVariantSpriteBySelector(x, y, depth, alpha, scene->sceneId, 1, 0x20, scaleX, scaleY, context);
+    } else if (scene->sceneId != 76 && scene->sceneId != 77) {
+        if ((packedFlags & 0xFF00) == 0) {
+            mnuDrawVariantSpriteBySelector(x, y, depth, alpha, scene->sceneId, 0, 0x20, scaleX, scaleY, context);
+            if ((packedFlags & 5) == 4) {
+                mnuDrawVariantSpriteAtCoordinatePlacement(x, y, depth, alpha,
+                    scene->sceneId, prerequisiteIds[0], 0, 0x20, scaleX, scaleY, context);
+            } else if (prerequisiteIds[0] == 72 || prerequisiteIds[0] == 19 ||
+                       prerequisiteIds[0] == 56 || prerequisiteIds[0] == 75 ||
+                       prerequisiteIds[0] == 67 || prerequisiteIds[0] == 45 ||
+                       prerequisiteIds[0] == 46) {
+                mnuDrawVariantSpriteAtCoordinatePlacement(x, y, depth, alpha,
+                    scene->sceneId, prerequisiteIds[0], 0, 0x20, scaleX, scaleY, context);
+            }
+        } else if ((packedFlags & 0xFF) == 0) {
+            mnuDrawVariantSpriteBySelector(x, y, depth, alpha, scene->sceneId, 1, 0x20, scaleX, scaleY, context);
+            if ((packedFlags & 0x500) == 0x400) {
+                mnuDrawVariantSpriteAtCoordinatePlacement(x, y, depth, alpha,
+                    scene->sceneId, prerequisiteIds[1], 1, 0x20, scaleX, scaleY, context);
+            }
+        } else {
+            mnuDrawVariantSpriteBySelector(x, y, depth, alpha, scene->sceneId, 0, 0x20, scaleX, scaleY, context);
+            if ((packedFlags & 5) == 4) {
+                mnuDrawVariantSpriteAtCoordinatePlacement(x, y, depth, alpha,
+                    scene->sceneId, prerequisiteIds[0], 0, 0x20, scaleX, scaleY, context);
+            }
+            mnuDrawVariantSpriteBySelector(x, y, depth, alpha, scene->sceneId, 1, 0x20, scaleX, scaleY, context);
+            if ((packedFlags & 0x500) == 0x400) {
+                mnuDrawVariantSpriteAtCoordinatePlacement(x, y, depth, alpha,
+                    scene->sceneId, prerequisiteIds[1], 1, 0x20, scaleX, scaleY, context);
+            }
+        }
+    }
+
+    /* This shared literal is owned by code_00258258, not this translation unit. */
+    memcpy(profileIds, D_003AF9B8, sizeof(profileIds));
+    memset(active, 0, 21);
+    for (i = 0; i < 21; i++) {
+        if (scene->sceneId == profileIds[i]) {
+            active[i] = 1;
+        }
+    }
+    for (i = 0; i < 4; i++) {
+        if (active[i] != 0) {
+            mnuDrawScaledSpriteAtCoordinatePlacement(x, y, depth, alpha, i + 0x2C, 0x20, scaleX, scaleY, context);
+            mnuDrawScaledFixedSpritePlacement(x, y, depth, alpha, i * 2, 0x20, scaleX, scaleY, context);
+            mnuDrawScaledFixedSpritePlacement(x, y, depth, alpha, i * 2 + 1, 0x20, scaleX, scaleY, context);
+        }
+    }
+    for (i = 0; i < 5; i++) {
+        if (active[i * 2 + 4] != 0) {
+            mnuDrawScaledSpriteAtCoordinatePlacement(x, y, depth, alpha, i * 2 + 0x30, 0x20, scaleX, scaleY, context);
+            mnuDrawScaledFixedSpritePlacement(x, y, depth, alpha, i * 3 + 8, 0x20, scaleX, scaleY, context);
+        }
+        if (active[i * 2 + 5] != 0) {
+            mnuDrawScaledSpriteAtCoordinatePlacement(x, y, depth, alpha, i * 2 + 0x31, 0x20, scaleX, scaleY, context);
+            mnuDrawScaledFixedSpritePlacement(x, y, depth, alpha, i * 3 + 10, 0x20, scaleX, scaleY, context);
+        }
+        if (active[i * 2 + 4] != 0 || active[i * 2 + 5] != 0) {
+            mnuDrawScaledFixedSpritePlacement(x, y, depth, alpha, i * 3 + 9, 0x20, scaleX, scaleY, context);
+        }
+    }
+    for (i = 0; i < 8; i++) {
+        if (active[i + 14] != 0) {
+            mnuDrawScaledFixedSpritePlacement(x, y, depth, alpha, i + 0x17, 0x20, scaleX, scaleY, context);
+        }
+    }
+}
+
+INCLUDE_RODATA(const s32, "game/code_0024F0D0", D_003AF9B8);
+

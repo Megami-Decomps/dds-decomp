@@ -1,3 +1,4 @@
+#include "mnu_mantra_sprite_draw.h"
 #include "sdk_ps2.h"
 #include "mnu_variant_sprite_placement.h"
 #include "mnu.h"
@@ -24,159 +25,9 @@ extern void mnuDrawPlacedSpriteFromTable(s32 x, s32 y, s32 z, s32 alpha, s32 pla
 extern MnuVariantSpritePlacement mnuMantraVariantSpritePlacements[];
 extern TaskWork *mnuSceneResourceContext;
 extern u32 mnuGetMantraDisplayFlags(MnuMantraGridEntry *, MnuProfileProgress *);
-extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
-extern void mnuDrawScaledScenePlacementSprite(s32, s32, s32, s32, s32, s32, f32, f32, s32);
-extern void mnuDrawMantraEntryStatusIcon(s32, s32, s32, s32, u32, f32, f32, s32);
+extern void uiDrawUniformColorRect(u32, u32, u32, u32, u32, u32, u32);
 
-extern const u8 D_003BC4A0[];
-extern void mnuDrawPlacedSpriteWithFlags(s32, s32, s32, s32, s32, s32, s32);
 extern void mnuDrawScaledVariantSprite(s32, s32, s32, s32, s32, s32, f32, f32, s32);
-extern void mnuDrawMantraGridEntryPulse(s32, s32, s32, s32, MnuMantraGridEntry *, s32);
-
-void mnuDrawMantraGridEntry(s32 x, s32 y, s32 depth, s32 alpha,
-                          MnuProfileProgress *profileOwner, SdfGrid *grid,
-                          SdfGridCell *entry, s32 context) {
-    u8 mappedIds[6];
-    MnuMantraGridEntry *scene;
-    MenuSceneWork *display;
-    s32 drawX;
-    s32 drawY;
-    s32 i;
-    s32 atCap;
-    u32 flags;
-    f32 pulse;
-    f32 progress;
-
-    memcpy(mappedIds, D_003BC4A0, sizeof(mappedIds));
-    display = (MenuSceneWork *)sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
-    scene = (MnuMantraGridEntry *)entry->value;
-    pulse = (sdfSin(((f32)scene->frame / 60.0f) * 6.2831853f -
-                       1.5707963f) + 1.0f) * 0.5f;
-    progress = (f32)(scene->frame - 20) / 20.0f;
-    if (progress > 1.0f) {
-        progress = 1.0f;
-    }
-    if (progress < 0.0f) {
-        progress = 0.0f;
-    }
-    progress = sdfSin(progress * 3.1415926f) * 0.3f;
-    drawX = x + mnuMantraVariantSpritePlacements[scene->sceneId][2];
-    drawY = y + mnuMantraVariantSpritePlacements[scene->sceneId][3];
-    flags = mnuGetMantraDisplayFlags(scene, profileOwner);
-    if (display->boundsFlags & MENU_SCENE_REQUIREMENT_GROUP_0_MET) {
-        mnuDrawScaledVariantSprite(x, y, depth, alpha, scene->sceneId, 0x20,
-                                  1.0f, 1.0f, context);
-    } else {
-        for (i = 0; i < 6; i++) {
-            if (scene->sceneId == mappedIds[i]) {
-                mnuDrawScaledVariantSprite(x, y, depth, alpha, i + 0x59, 0x20,
-                                          1.0f, 1.0f, context);
-                break;
-            }
-        }
-        if (i == 6) {
-            mnuDrawScaledVariantSprite(x, y, depth, alpha, scene->sceneId, 0x20,
-                                      1.0f, 1.0f, context);
-        }
-    }
-    pulse = pulse * 0.5f + 0.4f;
-    if (flags & MNU_MANTRA_DISPLAY_FLAG_PROFILE_MATCH) {
-        atCap = flags & MNU_MANTRA_DISPLAY_FLAG_AT_CAP;
-        if (atCap) {
-            f32 fade = (f32)alpha;
-            mnuDrawPlacedSpriteWithFlags(drawX, drawY, depth, (s32)(fade * 0.5f),
-                                        0x20, 0x3C, context);
-            mnuDrawPlacedSpriteWithFlags(drawX, drawY, depth, (s32)(fade * 0.3f),
-                                        0x20, 0x3C, context);
-        } else {
-            f32 fade = (f32)alpha;
-            mnuDrawPlacedSpriteWithFlags(drawX, drawY, depth, (s32)(fade * pulse),
-                                        0x20, 0x3C, context);
-            mnuDrawPlacedSpriteWithFlags(drawX, drawY, depth, (s32)(fade * progress),
-                                        0x20, 0x3C, context);
-        }
-    } else {
-        atCap = flags & MNU_MANTRA_DISPLAY_FLAG_AT_CAP;
-        if (atCap) {
-            mnuDrawPlacedSpriteWithFlags(drawX, drawY, depth, alpha,
-                                        0x20, 0x33, context);
-        } else if (flags & (MNU_MANTRA_DISPLAY_FLAG_ENTRY_STATE_1 |
-                            MNU_MANTRA_DISPLAY_FLAG_ENTRY_STATE_2)) {
-            f32 fade = (f32)alpha;
-            mnuDrawPlacedSpriteWithFlags(drawX, drawY, depth, (s32)(fade * pulse),
-                                        0x20, 0x34, context);
-            mnuDrawPlacedSpriteWithFlags(drawX, drawY, depth, (s32)(fade * progress),
-                                        0x20, 0x34, context);
-        }
-    }
-    if (atCap) {
-        mnuDrawMantraGridEntryPulse(drawX, drawY, depth, alpha, scene, context);
-    }
-}
-
-INCLUDE_SDATA(const s32, "game/code_00259498", D_003BC4A0);
-
-void mnuDrawScaledMantraGridEntry(s32 x, s32 y, s32 depth, s32 alpha,
-                   MnuProfileProgress *profileOwner, SdfGrid *grid,
-                   f32 scaleX, f32 scaleY, SdfGridCell *entry,
-                   s32 context) {
-    u8 mappedIds[6] = { 5, 15, 45, 52, 63, 68 };
-    MnuMantraGridEntry *scene;
-    s32 drawX;
-    s32 drawY;
-    s32 i;
-    f32 pulse;
-
-    {
-        u32 flags;
-        MenuSceneWork *display;
-
-        display = (MenuSceneWork *)(u32)sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
-        scene = (MnuMantraGridEntry *)(u32)entry->value;
-        pulse = 0.0f;
-        scene->frame++;
-        if ((f32)scene->frame > 60.0f) {
-            scene->frame = 0;
-        }
-        pulse = sdfSin(pulse);
-        drawX = x + mnuMantraVariantSpritePlacements[scene->sceneId][2];
-        drawY = y + mnuMantraVariantSpritePlacements[scene->sceneId][3];
-        flags = mnuGetMantraDisplayFlags(scene, profileOwner);
-
-        if (flags & MNU_MANTRA_DISPLAY_FLAG_PROFILE_MATCH) {
-            uiDrawUniformColorRect(drawX << 4, drawY << 3, 0, 0x300, 0x180,
-                                   (s32)((f32)((alpha * 5) << 4) * 0.0078125f) |
-                                       0x60501000,
-                                   context);
-        }
-        {
-            s32 displayFlags = (u8)display->boundsFlags;
-
-            if (displayFlags & MENU_SCENE_REQUIREMENT_GROUP_0_MET) {
-                mnuDrawScaledScenePlacementSprite(x, y, depth, alpha, scene->sceneId, 0x20,
-                              scaleX, scaleY, context);
-            } else {
-                for (i = 0; i < 6; i++) {
-                    if (scene->sceneId == mappedIds[i]) {
-                        mnuDrawScaledScenePlacementSprite(x, y, depth, alpha, i + 0x59, 0x20,
-                                      scaleX, scaleY, context);
-                        break;
-                    }
-                }
-                if (i == 6) {
-                    mnuDrawScaledScenePlacementSprite(x, y, depth, alpha, scene->sceneId, 0x20,
-                                  scaleX, scaleY, context);
-                }
-            }
-        }
-        mnuDrawMantraEntryStatusIcon(drawX, drawY, depth,
-                      (s32)((f32)alpha * (pulse * 0.4f + 0.2f)),
-                      flags, scaleX, scaleY, context);
-    }
-}
-
-INCLUDE_ASM(const s32, "game/code_00259498", mnuDrawMantraGridEntryIndicators);
-
 
 extern char D_003BC458[];
 extern char D_003BC488[];
@@ -552,14 +403,9 @@ SpriteSpawnNode *mnuCreateSpriteSpawnNode(MnuSpriteResourceGroup *group, SpriteS
     return node;
 }
 
-INCLUDE_RODATA(const s32, "game/code_00259498", D_003AF9F0);
+INCLUDE_RODATA(const s32, "game/code_0025A680", D_003AF9F0);
 
-INCLUDE_SDATA(const s32, "game/code_00259498", D_003BC4B0);
+INCLUDE_SDATA(const s32, "game/code_0025A680", D_003BC4C8);
 
-INCLUDE_SDATA(const s32, "game/code_00259498", D_003BC4B8);
+INCLUDE_SDATA(const s32, "game/code_0025A680", mnuSceneResourceContext);
 
-INCLUDE_SDATA(const s32, "game/code_00259498", D_003BC4C0);
-
-INCLUDE_SDATA(const s32, "game/code_00259498", D_003BC4C8);
-
-INCLUDE_SDATA(const s32, "game/code_00259498", mnuSceneResourceContext);

@@ -1,11 +1,9 @@
 # Per-unit cc1 flags: <dir>/<unit>  <flags>  # evidence (default is -O2)
 game/code_001FC7D8  -fno-optimize-sibling-calls  # 16 void wrappers 0x1FEE30-0x1FF010 end in jal+epilogue where -O2 sibcalls; sibcalls resume at 0x1FF030; start is the proven TU boundary 0x1FC7D8 (find_tus)
-game/code_00254B30  -fno-optimize-sibling-calls  # 30 tail calls in 43 functions, all jal+epilogue, no j to a function; neighbours sibcall
 game/code_002C97E8  -fno-optimize-sibling-calls  # 13 tail calls in 84 functions, all jal+epilogue, no j to a function; neighbours sibcall
 game/code_0025BC38  -fno-optimize-sibling-calls  # 16 tail calls in 36 functions, all jal+epilogue, no j to a function; neighbours sibcall
 game/code_0026BD80  -fno-optimize-sibling-calls  # 14 tail calls in 31 functions, all jal+epilogue, no j to a function; neighbours sibcall
 game/code_00228B38  -fno-optimize-sibling-calls  # 9 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
-game/code_00257200  -fno-optimize-sibling-calls  # 6 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
 game/code_0025DF68  -fno-optimize-sibling-calls  # 12 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
 game/code_0026DC50  -fno-optimize-sibling-calls  # 3 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py); flag_probe: 2 parked candidates match only with it
 game/code_002818B8  -fno-optimize-sibling-calls  # 5 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
@@ -14,7 +12,7 @@ game/code_002C2620  -fno-optimize-sibling-calls  # 8 jal+epilogue tail calls, no
 game/code_002C3868  -fno-optimize-sibling-calls  # 5 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py); flag_probe: 2 parked candidates match only with it
 game/code_0026E160  -fno-optimize-sibling-calls  # 4 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py); flag_probe: parked func_0026E160,func_0026E5A0 match only with it
 game/code_002CF530  -fno-optimize-sibling-calls  # 4 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py); flag_probe: parked func_002CF570,func_002CF5C0,func_002CF618 match only with it
-game/code_00259498  -fno-optimize-sibling-calls  # 4 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py); flag_probe: parked func_0025B7B0 match only with it
+game/code_0025A680  -fno-optimize-sibling-calls  # Retains the original code_00259498 suffix policy; mnuReleaseOptionalDrawAllocation (0x25B7B0) matches only without sibling calls
 game/code_0026AF30  -fno-optimize-sibling-calls  # mnuMovieShutdownA jal+nop tail between sibcall functions mnuCreateTitleCameraWorldEntry (0x26AEC8) and func_0026B050 (ends in j dds3StartProcess); natural types match only with the option
 game/code_0026B160  -fno-optimize-sibling-calls  # func_0026B1C0/mnuOpenTitleMenuForMode jal+epilogue tails between sibcall functions func_0026B050 and mnuRestartRuntimeAfterViewer; -O1 refuted (func_0026B160 3/24, func_0026B1C0 4/12)
 game/code_0020F8E0  -fno-optimize-sibling-calls  # 9 functions 0x20F8E0-0x20FC48, 5 jal+epilogue tails, no sibcall; bounded by sibcall functions btlReleaseBossData and btlUpdateEventPlayback; -O1 refuted (2 of 9 match); btlReleaseScriptResourceA/B match with natural s32 only with the option
