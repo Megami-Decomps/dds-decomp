@@ -2258,10 +2258,10 @@ u32 btlHasRegisteredAphNamePanelTask(void) {
 
 typedef struct MsgQueueTaskData {
     s32 task;
-    s32 id;
-    s32 unk08;
-    s32 counter;
-    s32 value;
+    s32 windowIndex;
+    s32 entryIndex;
+    s32 elapsedFrames;
+    s32 durationFrames;
     s16 fade;
 } MsgQueueTaskData;
 
@@ -2275,7 +2275,7 @@ extern s32 btlDrawTimedDialogTask(dds3ProcessID_t *);
 
 extern void btlReleaseDialogTaskData(dds3ProcessID_t *);
 
-s32 btlReplaceDialogTasksAndQueueMessage(s32 window, s32 entryIndex) {
+s32 btlReplaceDialogTasksAndQueueMessage(s32 windowIndex, s32 entryIndex) {
     s32 context = (s32)(u32)btlGetRuntime();
     s32 task = btlGetTrackedTaskHandle(0);
     MsgQueueTaskData *data;
@@ -2293,9 +2293,9 @@ s32 btlReplaceDialogTasksAndQueueMessage(s32 window, s32 entryIndex) {
     if (btlIsNamedBattleTaskRegistered() != 0) {
         dds3KillProcess((dds3ProcessID_t *)btlGetTrackedTaskHandle(10), 0);
     }
-    data->id = window;
-    data->unk08 = entryIndex;
-    data->value = 0x2D;
+    data->windowIndex = windowIndex;
+    data->entryIndex = entryIndex;
+    data->durationFrames = 0x2D;
     task = (s32)dds3StartProcess(D_003BB3A8, 0x2B0E, 1, 1, btlDrawTimedDialogTask, btlReleaseDialogTaskData, (u32)data);
     dds3LinkProcess((dds3ProcessID_t *)*(u32 *)(context + 0x29C), (dds3ProcessID_t *)task);
     data->task = task;
@@ -4549,12 +4549,12 @@ s32 btlDrawTimedDialogTask(dds3ProcessID_t *task) {
         return 0;
     }
     data = (MsgQueueTaskData *)dds3GetProcessData(task);
-    if (data->counter++ < data->value) {
+    if (data->elapsedFrames++ < data->durationFrames) {
         expired = 0;
     } else {
         expired = 1;
     }
-    width = itfMesMngGetWidth(data->id, data->unk08, 0);
+    width = itfMesMngGetWidth(data->windowIndex, data->entryIndex, 0);
     data->fade = 0x80;
     for (i = 0; i < 4; i++) {
         colors.values[i] = btlSetSlotLowByteClamped(btlResourceBlock->resC, 0x15, i, data->fade);
@@ -4572,11 +4572,11 @@ s32 btlDrawTimedDialogTask(dds3ProcessID_t *task) {
     if (expired) {
         return -1;
     }
-    itfMesMngSetMesPosition(data->id, (0x100 - (width >> 5)) << 4, 0x220);
+    itfMesMngSetMesPosition(data->windowIndex, (0x100 - (width >> 5)) << 4, 0x220);
     eglSetOt(0x53);
     evtSubmitPrimaryGsTest(1, 1, 0x80, 3, 0, 0, 1, 1);
     evtSubmitPrimaryAlphaBlendMode(0);
-    itfMesStartEntry(data->id, data->unk08, 0);
+    itfMesStartEntry(data->windowIndex, data->entryIndex, 0);
     return 0;
 }
 
