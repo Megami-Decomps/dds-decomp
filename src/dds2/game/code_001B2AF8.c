@@ -2941,6 +2941,12 @@ extern u32 btlHasRegisteredAphNamePanelTask(void);
 
 extern void btlSetTrackedTaskHandle(s32, s32);
 
+enum {
+    BTL_GUIDE_PANEL_STATE_FADE_IN,
+    BTL_GUIDE_PANEL_STATE_VISIBLE,
+    BTL_GUIDE_PANEL_STATE_FADE_OUT
+};
+
 s32 btlCreateGuidePanelTask(s32 windowIndex, s32 entryIndex) {
     BtlState *context = (BtlState *)btlGetRuntime();
     BtlGuidePanelWork *data;
@@ -2959,7 +2965,7 @@ s32 btlCreateGuidePanelTask(s32 windowIndex, s32 entryIndex) {
         dds3KillProcess((dds3ProcessID_t *)btlGetTrackedTaskHandle(10), 0);
     }
     data = sdfAllocAndClearQuadwords(sizeof(*data));
-    data->state = 0;
+    data->state = BTL_GUIDE_PANEL_STATE_FADE_IN;
     data->unk1C = 0x18;
     data->y = 0x60;
     data->windowIndex = windowIndex;
@@ -2978,7 +2984,7 @@ void btlRequestGuidePanelClose(void) {
     temp_v0 = dds3SearchProcessName(D_004367E0);
     if (temp_v0 != 0) {
         puVar1 = (u8 *)dds3GetProcessData(temp_v0);
-        *puVar1 = 2;
+        *puVar1 = BTL_GUIDE_PANEL_STATE_FADE_OUT;
     }
 }
 
@@ -4267,16 +4273,16 @@ s32 btlUpdateGuidePanelTask(dds3ProcessID_t *task) {
     u32 alpha;
 
     switch (work->state) {
-    case 0:
+    case BTL_GUIDE_PANEL_STATE_FADE_IN:
         work->fadeLevel += 12;
         work->fadeLevel = work->fadeLevel <= 0 ? 0 : work->fadeLevel > 0x80 ? 0x80 : work->fadeLevel;
         if (work->fadeLevel >= 0x80) {
-            work->state = 1;
+            work->state = BTL_GUIDE_PANEL_STATE_VISIBLE;
         }
         break;
-    case 1:
+    case BTL_GUIDE_PANEL_STATE_VISIBLE:
         break;
-    case 2:
+    case BTL_GUIDE_PANEL_STATE_FADE_OUT:
     default:
         work->fadeLevel -= 12;
         work->fadeLevel = work->fadeLevel <= 0 ? 0 : work->fadeLevel > 0x80 ? 0x80 : work->fadeLevel;
@@ -4286,10 +4292,10 @@ s32 btlUpdateGuidePanelTask(dds3ProcessID_t *task) {
         break;
     }
     switch (work->state) {
-    case 0:
-    case 1:
-    case 2:
-        if (work->state == 1) {
+    case BTL_GUIDE_PANEL_STATE_FADE_IN:
+    case BTL_GUIDE_PANEL_STATE_VISIBLE:
+    case BTL_GUIDE_PANEL_STATE_FADE_OUT:
+        if (work->state == BTL_GUIDE_PANEL_STATE_VISIBLE) {
             width = itfMesMngGetWidth(work->windowIndex, work->entryIndex, 0);
             itfMesMngSetMesPosition(work->windowIndex, (256 - (width >> 5)) << 4, (work->y + 0x10) << 3);
             itfMesStartEntry(work->windowIndex, work->entryIndex, 0);
