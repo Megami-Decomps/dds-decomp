@@ -124,7 +124,7 @@ struct sdfDrawTag_t;
 extern void effAppendBlurRenderState(struct sdfDrawTag_t *list, s32 blendControl, struct sdfTexHandle_t *resource);
 extern void effAppendBlurRectanglePackets(struct sdfDrawTag_t *list,
                                           const dds3Effect_Blur_t *quad, u8 fixedPoint);
-extern void effDrawBlurListWithFramePacket(void *list);
+extern void effDrawBlurListWithFramePacket(struct sdfDrawTag_t *list);
 extern f64 fabs(f64 value);
 
 void effBlurStepScatterSlotsAndDraw(EffBlurScatterWork *work)
@@ -209,7 +209,6 @@ void dds3EffectRipBlurPartInit(EffBlurScaleWork *work, EffBlurScaleSlot *slot) {
     quad->position[0] = work->params.position[0];
     quad->position[1] = work->params.position[1];
 }
-
 
 
 

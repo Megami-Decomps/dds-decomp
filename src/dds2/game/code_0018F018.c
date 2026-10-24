@@ -70,7 +70,7 @@ extern void effBlurBuildSamplingQuad(const dds3Effect_Blur_t *source, EffBlurDra
 
 extern void effAppendBlurRenderState(struct sdfDrawTag_t *, s32, sdfTexHandle_t *);
 extern void effAppendBlurRectanglePackets(struct sdfDrawTag_t *, const dds3Effect_Blur_t *, u8);
-extern void effDrawBlurListWithFramePacket(void *);
+extern void effDrawBlurListWithFramePacket(struct sdfDrawTag_t *);
 extern void effBlurSecondUpdateSlotRect(EffBlurScaleWork *, EffBlurScaleSlot *);
 
 

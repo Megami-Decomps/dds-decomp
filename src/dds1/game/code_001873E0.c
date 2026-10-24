@@ -65,7 +65,7 @@ extern s32 kwlnFadeIsBackgroundOverlayActive(void);
 extern u64 *effPkt2DAllocF4(u32 flags);
 
 extern void effAppendBlurRenderState(void *list, s32 blendControl, sdfTexHandle_t *resource);
-extern void effDrawBlurListWithFramePacket(void *);
+extern void effDrawBlurListWithFramePacket(struct sdfDrawTag_t *);
 extern void effBlurSecondUpdateSlotRect(EffBlurScaleWork *, EffBlurScaleSlot *);
 
 void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work) {

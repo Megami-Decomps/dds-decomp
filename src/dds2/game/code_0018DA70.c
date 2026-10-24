@@ -389,7 +389,7 @@ void effAppendBlurRectanglePackets(struct sdfDrawTag_t *list, const BlurSource *
 
 
 /* Queue a 0x40-byte textured packet for the current frame buffer onto `list`, then let the filter ops draw it. */
-void effDrawBlurListWithFramePacket(void *list) {
+void effDrawBlurListWithFramePacket(struct sdfDrawTag_t *list) {
     SdfDmaReferenceChainPacket *packet = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
 
     sdfBuildFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, packet, 1);
