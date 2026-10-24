@@ -1963,7 +1963,7 @@ s32 btlCreateAnalysisPanelTask(BtlUnit *unit, s32 duration) {
         dds3KillProcess((dds3ProcessID_t *)btlGetTrackedTaskHandle(0), 0);
     }
     data = sdfAllocAndClearQuadwords(sizeof(*data));
-    data->state = 0;
+    data->transitionState = BTL_ANALYSIS_PANEL_TRANSITION_ENTERING;
     data->page = 0;
     data->x = -20;
     data->y = 133;
@@ -2007,7 +2007,7 @@ u32 btlRequestAnalysisPanelClose(void) {
     task = dds3SearchProcessName(btlAnalyzPanelTaskNameRef);
     if (task != 0) {
         work = (BtlAnalysisPanelWork *)dds3GetProcessData(task);
-        work->state = 2;
+        work->transitionState = BTL_ANALYSIS_PANEL_TRANSITION_CLOSING;
     }
     return 1;
 }
@@ -2615,30 +2615,30 @@ s32 btlUpdateAndDrawAnalysisPanel(dds3ProcessID_t *task) {
     work->frame++;
     work->frame = work->frame > 0 ?
         (work->frame < 0x1001 ? work->frame : 0x1000) : 0;
-    if (work->frame >= work->duration && work->duration != 0) work->state = 2;
+    if (work->frame >= work->duration && work->duration != 0) work->transitionState = BTL_ANALYSIS_PANEL_TRANSITION_CLOSING;
 
-    switch (work->state) {
-    case 0:
+    switch (work->transitionState) {
+    case BTL_ANALYSIS_PANEL_TRANSITION_ENTERING:
         btlUpdateAnalysisPanelWindowGeometry(&battle->cameraCommand, work);
         btlDrawAnalysisPanelSilhouette(&battle->cameraCommand, work);
-        if (work->page == 7) work->state = 1;
+        if (work->page == 7) work->transitionState = BTL_ANALYSIS_PANEL_TRANSITION_ACTIVE;
         break;
-    case 1:
+    case BTL_ANALYSIS_PANEL_TRANSITION_ACTIVE:
         btlUpdateAnalysisPanelWindowGeometry(&battle->cameraCommand, work);
         btlDrawAnalysisPanelSilhouette(&battle->cameraCommand, work);
         work->alpha += 32;
         work->alpha = work->alpha > 0 ?
             (work->alpha < 129 ? work->alpha : 128) : 0;
         break;
-    case 2:
+    case BTL_ANALYSIS_PANEL_TRANSITION_CLOSING:
         work->alpha -= 32;
         work->alpha = work->alpha > 0 ?
             (work->alpha < 129 ? work->alpha : 128) : 0;
         if (work->alpha <= 0) return -1;
         break;
     }
-    if (work->state < 3) {
-        if (work->state > 0) {
+    if (work->transitionState <= BTL_ANALYSIS_PANEL_TRANSITION_CLOSING) {
+        if (work->transitionState > BTL_ANALYSIS_PANEL_TRANSITION_ENTERING) {
             for (row = 0; row < 7; row++) {
                 s32 xOffset = offsets[row];
                 switch (row) {

@@ -4,10 +4,16 @@
 #include "common.h"
 #include "btl.h"
 
+enum {
+    BTL_ANALYSIS_PANEL_TRANSITION_ENTERING = 0,
+    BTL_ANALYSIS_PANEL_TRANSITION_ACTIVE = 1,
+    BTL_ANALYSIS_PANEL_TRANSITION_CLOSING = 2,
+};
+
 /* The battle analysis panel's work. */
 #ifdef VERSION_DDS1
 typedef struct BtlAnalysisPanelWork {
-    s8 state;
+    s8 transitionState;
     u8 pad01[3];
     BtlUnit *unit;
     s32 duration;
@@ -29,7 +35,7 @@ typedef struct BtlAnalysisPanelWork {
 } BtlAnalysisPanelWork;
 #else
 typedef struct BtlAnalysisPanelWork {
-    s8 state;
+    s8 transitionState;
     u8 pad01[3];
     BtlUnit *unit;
     s32 duration;

@@ -16,6 +16,7 @@
 #include "btl_ai_table.h"
 #include "btl_indexed_ui_resource_api.h"
 #include "btl.h"
+#include "btl_analysis_panel_work.h"
 #include "btl_analysis_panel_wait_args.h"
 #include "btl_model_record.h"
 #include "sdf_chunk.h"
@@ -1127,7 +1128,7 @@ s32 btlWaitEffectTask(BtlAnalysisPanelWaitArgs *task) {
         btlSetCommandPanelFadeMode(0, 8);
     }
     if (task->elapsedTicks >= 0x11) {
-        if (btlGetRegisteredTaskValueOrDefault() == 1) {
+        if (btlGetRegisteredTaskValueOrDefault() == BTL_ANALYSIS_PANEL_TRANSITION_ACTIVE) {
             if (dds3PadButtonState[0x21] < 0 || dds3PadButtonState[0x23] < 0) {
                 btlSetCommandPanelFadeMode(1, 8);
                 btlRequestAnalysisPanelClose();
