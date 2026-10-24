@@ -15,6 +15,9 @@
 enum {
     PAC_COMMAND_PAYLOAD = 1,
     PAC_COMMAND_ALLOCATION_LIST = 2,
+    PAC_COMMAND_MODEL = 6,
+    PAC_COMMAND_MOTION = 8,
+    PAC_COMMAND_TEXTURE_LIST = 9,
     PAC_COMMAND_END = 0xFF,
     PAC_ENCODING_RAW = 0,
     PAC_ENCODING_COMPRESSED = 1,
@@ -118,13 +121,13 @@ s32 sdfPacStdCallback(PacState *state, s32 status, SdfPacStreamPacketHeader *pac
         case PAC_COMMAND_ALLOCATION_LIST:
             sdfPacTmxDecoderInit(state, packet);
             return 0;
-        case 6:
+        case PAC_COMMAND_MODEL:
             sdfPacModelDecoderInit(state, packet);
             return 0;
-        case 8:
+        case PAC_COMMAND_MOTION:
             sdfPacMotionDecoderInit(state, packet);
             return 0;
-        case 9:
+        case PAC_COMMAND_TEXTURE_LIST:
             sdfPacTexListDecoderInit(state, packet);
             return 0;
         case PAC_COMMAND_END:
