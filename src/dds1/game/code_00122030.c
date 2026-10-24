@@ -2071,7 +2071,7 @@ s32 fldProcSequence(dds3ProcessID_t *task) {
     if (dds3AdminiGetNextSequence() != -1) return 0;
     if (fileMenuTaskExists() != 0) return 0;
     fldPollAreaResourceLoad();
-    if (controller->stage == 0) {
+    if (controller->phase == 0) {
         if (fldLoadNextGetStatus() == 1) return 0;
         if (fldGlobalBase.transitionMode == 0 && mnuPollTitleStreamStateLocked() != 0) {
             mnuMarkTitleStreamResetPending();
@@ -2087,7 +2087,7 @@ s32 fldProcSequence(dds3ProcessID_t *task) {
         }
     }
     if (fldEncountTestFlag(0x40) == 0) fldUpdateSmoothedCameraPose();
-    switch (controller->stage) {
+    switch (controller->phase) {
     case 0:
         D_003BABE8 = 0;
         fldGlobalBase.sceneBgmSuppressed = 1;
@@ -2140,7 +2140,7 @@ s32 fldProcSequence(dds3ProcessID_t *task) {
         fldEncountClearFlag(0x40);
         fldDispatchPendingSceneResource();
         fldUpdateCameraFollow();
-        controller->stage++;
+        controller->phase++;
         break;
     case 1:
         if (fldStepSceneBgmArchive() != 0) {
@@ -2154,15 +2154,15 @@ s32 fldProcSequence(dds3ProcessID_t *task) {
                     fldPlayFieldBgm();
                 }
             }
-            controller->stage++;
+            controller->phase++;
         }
         break;
     case 2:
-        controller->stage++;
+        controller->phase++;
         break;
     case 3:
         if (fldGetArchiveLoadPending() != 0) return 0;
-        controller->stage++;
+        controller->phase++;
         if (fldGlobalBase.unk17C == 0 && fldGlobalBase.skipFade == 0 &&
             fldGlobalBase.titleFade == 0 && dds3FadeCheck() == 0) {
             dds3FadeIn2(8);
@@ -2200,7 +2200,7 @@ s32 fldProcSequence(dds3ProcessID_t *task) {
             fldUpdateTravelAndEncounters();
         }
         if (fldAutoMapSeqTestFlag(2) == 1) {
-            controller->stage++;
+            controller->phase++;
             break;
         }
         fldUpdateCameraFrame();
@@ -2216,7 +2216,7 @@ s32 fldProcSequence(dds3ProcessID_t *task) {
     case 7:
         fldFreeNextFile();
         fldLoadNextFile_SetId_BtlRet(fldGlobalBase.area, fldGlobalBase.floor + 1);
-        controller->stage = 0;
+        controller->phase = 0;
         fldGlobalBase.transitionCount++;
         if (fldGlobalBase.pendingSceneRequest == 0) D_003BABE8 = 1;
         else fldGlobalBase.pendingSceneRequest = 0;
@@ -2249,7 +2249,7 @@ s32 fldProcSequence(dds3ProcessID_t *task) {
         fldUpdateSelectedValueTransition();
         fldSkyCalcFilter();
     }
-    if (controller->stage >= 4) {
+    if (controller->phase >= 4) {
         func_001415F8();
         if (fldRunDanteGunFlag[0] == 0) {
             fldCheckSceneReady();
@@ -2287,11 +2287,11 @@ s32 fldProcDraw(dds3ProcessID_t *task) {
         if (D_0032E590[0] == 1) {
             fldDbgPrint2D(0x40, 0xC0, "NowLoading...");
         }
-        if (!lifecycle->stage) {
+        if (!lifecycle->phase) {
             return 0;
         }
     } else {
-        if (!lifecycle->stage) {
+        if (!lifecycle->phase) {
             return 0;
         }
     }
@@ -2313,7 +2313,7 @@ s32 fldProcDraw(dds3ProcessID_t *task) {
     if (fldGlobalBase.transitionMode != 0) {
         fldTickWeatherEffectNodes();
     }
-    if (lifecycle->stage >= 2 && D_0032E598[0] != 0 &&
+    if (lifecycle->phase >= 2 && D_0032E598[0] != 0 &&
         fldGetEncounterRuntimeResult() == 0) {
     flags = fldGetLocationCoordinateValue(fldGlobalBase.area, fldGlobalBase.floor + 1);
     if (flags & 0x40) {
@@ -2364,7 +2364,7 @@ void fldProcTrigSequence(fldSceneParam_t *record, u32 mode) {
     FieldPlayerSceneWork *scene = &fldSceneParam;
     FldSequenceController *controller = &fldAutoMapSeqFlags;
 
-    controller->stage = 0;
+    controller->phase = 0;
     controller->flags = 0;
     scene->primaryState = mode;
     if (mode == 0) {
