@@ -221,7 +221,7 @@ extern u64 btlStartSubtaskWithInput(u64 prerequisiteHandle);
 extern void btlStepFocusAngle(void);
 extern s32 btlSwapRandomBossSelection(void);
 extern void btlSyncEffectActorToUnit(BtlUnit *unit, u8 *task);
-extern void btlTrackSpecialEnemyCommandRestrictionByTurn(u8 *unit, u8 *command);
+extern void btlTrackSpecialEnemyCommandRestrictionByTurn(BtlUnit *unit, BtlOperandEntry *command);
 extern void btlTriggerSpecialUnitAction(void);
 extern void btlTriggerSpecialUnitActionAndResetPose(s32 unit);
 extern s32 btlTryScheduleMarkedUnitTask(BtlUnit *unit);

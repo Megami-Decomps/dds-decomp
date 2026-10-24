@@ -1130,36 +1130,26 @@ s32 btlSelectDisabledCommand(BtlUnit *battler) {
     return (battler->partyRecord.flags & 0x2000) ? 15 : -1;
 }
 
-/* Command condition words and the restriction flags tested by this boss mode. */
-typedef struct BtlCommandStatus {
-    s32 first;
-    s32 second;
-    s32 third;
-    u8 pad0C[0x1A];
-    u16 restrictionFlags; /* 0x26 */
-} BtlCommandStatus;
-
-void btlTrackSpecialEnemyCommandRestrictionByTurn(u8 *unit, u8 *command) {
+void btlTrackSpecialEnemyCommandRestrictionByTurn(BtlUnit *unit, BtlOperandEntry *command) {
     u8 *battle;
     u8 *effect;
     s32 species;
-    if ((((BtlUnit *)unit)->status.flags & 0x400) == 0) {
+    if ((unit->status.flags & 0x400) == 0) {
         return;
     }
     battle = (u8 *)btlGetRuntime();
-    species = ((BtlUnit *)unit)->partyRecord.unitId;
+    species = unit->partyRecord.unitId;
     effect = (u8 *)((BtlState *)battle)->effect;
     if (species < 0x105) {
-        if (species >= 0x102 && (((BtlCommandStatus *)command)->restrictionFlags & 0x10)) {
-            ((BtlUnit *)unit)->partyRecord.flags |= 0x2000;
+        if (species >= 0x102 && (command->flags & 0x10)) {
+            unit->partyRecord.flags |= 0x2000;
             *(s32 *)effect = ((BtlState *)battle)->turnCount;
         }
     }
-    if (species == 0x102 && (((BtlCommandStatus *)command)->restrictionFlags & 0x100)) {
-        if (((BtlCommandStatus *)command)->first < 0 || ((BtlCommandStatus *)command)->second < 0 ||
-            ((BtlCommandStatus *)command)->third != 0) {
+    if (species == 0x102 && (command->flags & 0x100)) {
+        if (command->hpDelta < 0 || command->mpDelta < 0 || command->addedStatus != 0) {
             if (*(s32 *)effect != ((BtlState *)battle)->turnCount) {
-                ((BtlUnit *)unit)->partyRecord.flags &= ~0x2000;
+                unit->partyRecord.flags &= ~0x2000;
             }
         }
     }
