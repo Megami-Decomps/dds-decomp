@@ -10619,15 +10619,15 @@ void effApplyBattleCameraToObject(work)
 }
 
 u32 effCreateBattleCameraJob(u8 *request) {
-    void *output = ((EffFileJobRequest *)request)->output;
+    u8 *outputBuffer = ((EffFileJobRequest *)request)->outputBuffer;
     u32 job;
 
-    if (output != NULL) {
+    if (outputBuffer != NULL) {
         if (((EffFileJobRequest *)request)->fileKind == 6) {
-            memcpy(output, D_003DE148, 0x3C);
-            output = ((EffFileJobRequest *)request)->output;
+            memcpy(outputBuffer, D_003DE148, 0x3C);
+            outputBuffer = ((EffFileJobRequest *)request)->outputBuffer;
         }
-        fileJobSetPrimaryData(effQueuedFileHandle, output, ((EffFileJobRequest *)request)->size, ((EffFileJobRequest *)request)->transferMode);
+        fileJobSetPrimaryData(effQueuedFileHandle, outputBuffer, ((EffFileJobRequest *)request)->size, ((EffFileJobRequest *)request)->transferMode);
     }
     job = (u32)fileJobCreateFromJob(effQueuedFileHandle);
     effApplyBattleCameraToObject(job);
@@ -10640,11 +10640,11 @@ FileJobPayload *effLoadFileJobPayload(EffFileJobRequest *request, u32 existingJo
         void *source;
         job = fileJobCreateFromCommandState((const char *)existingJob);
         source = fileResolvePrimaryBuffer(job);
-        memcpy(request->output, source, request->size);
+        memcpy(request->outputBuffer, source, request->size);
     } else {
         job = fileCreateJob(request->fileKind);
-        if (request->output != NULL) {
-            fileJobSetPrimaryData(job, request->output, request->size, request->transferMode);
+        if (request->outputBuffer != NULL) {
+            fileJobSetPrimaryData(job, request->outputBuffer, request->size, request->transferMode);
         }
         if (request->secondaryCommandPath != 0) {
             fileJobCopyCommandIntoSecondaryData(job, request->secondaryCommandPath, request->resourceMode);
@@ -11156,7 +11156,7 @@ u32 effLoadSelectedFileJob(void) {
     request = (EffFileJobRequest *)effFindAssetData(entry);
     if (request->fileKind != 6) {
         fileData = (u8 *)fileResolvePrimaryBuffer(effQueuedFileHandle);
-        memcpy(request->output, fileData, request->size);
+        memcpy(request->outputBuffer, fileData, request->size);
     } else {
         FileJobPayload *payload;
         u32 transferMode;
@@ -11171,14 +11171,14 @@ u32 effLoadSelectedFileJob(void) {
             void *output = sdfMemLock(request->allocation);
             payload = effQueuedFileHandle;
             /* Publish the retained pointer through its object representation. */
-            memcpy(&request->output, &output, sizeof(request->output));
+            memcpy(&request->outputBuffer, &output, sizeof(request->outputBuffer));
         }
         payloadSize = payload->primary.size;
         transferMode = payload->option;
         request->transferMode = transferMode;
         request->size = payloadSize;
         fileData = (u8 *)fileResolvePrimaryBuffer(payload);
-        memcpy(request->output, fileData,
+        memcpy(request->outputBuffer, fileData,
                effQueuedFileHandle->primary.size);
         memcpy(D_003DE148, fileData, 0x3C);
     }
@@ -11282,7 +11282,7 @@ u32 effCloneSelectedFileJob(void) {
 
     if (resource->fileKind != 6) {
         fileData = fileResolvePrimaryBuffer(effQueuedFileHandle);
-        memcpy(resource->output, fileData, resource->size);
+        memcpy(resource->outputBuffer, fileData, resource->size);
     } else {
         if (resource->allocation != 0) {
             sdfMemFreeDirect(resource->allocation);
@@ -11295,14 +11295,14 @@ u32 effCloneSelectedFileJob(void) {
             s32 option;
             u32 primarySize;
             /* Publish the retained pointer through its object representation. */
-            memcpy(&resource->output, &buffer, sizeof(resource->output));
+            memcpy(&resource->outputBuffer, &buffer, sizeof(resource->outputBuffer));
             primarySize = payload->primary.size;
             option = payload->option;
             resource->transferMode = option;
             resource->size = primarySize;
             fileData = fileResolvePrimaryBuffer(payload);
         }
-        memcpy(resource->output, fileData,
+        memcpy(resource->outputBuffer, fileData,
                effQueuedFileHandle->primary.size);
         memcpy(D_003DE148, fileData, 0x3C);
     }
