@@ -2410,7 +2410,7 @@ u32 evtCommand_MODEL_LIGHT_OFF(void) {
     return 1;
 }
 
-u8 evtCommand_MODEL_LIGHT_WAIT(void) {
+u32 evtCommand_MODEL_LIGHT_WAIT(void) {
     s32 worldObjectKey;
     evtUnitHandle_t *unit;
     u8 active;
