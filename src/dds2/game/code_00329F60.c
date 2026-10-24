@@ -181,7 +181,7 @@ extern volatile s32 dds3GsSema;
 extern volatile u8 D_00438A1D;
 extern volatile u8 sdfDrawFrameFlag;
 extern u16 D_00438A1E;
-extern SdfHandlerNode *sdfAddHandler(s32, s32, SdfHandlerCallback, s32, s32);
+extern SdfHandlerNode *sdfAddHandler(SdfHandlerKind, s32, SdfHandlerCallback, s32, s32);
 extern void sdfGrMakeFrameSet(sdfGrFrameSet_t *);
 extern void sdfGrGsReset(void);
 extern void sdfGrDrawFrame(void);
@@ -191,7 +191,7 @@ void sdfDrawThread(void) {
     u32 startTicks;
 
     sdfDispThreadFlag = 0;
-    sdfAddHandler(1, 1, sdfDrawThIntHandler, -1, 0);
+    sdfAddHandler(SDF_HANDLER_KIND_DMA, 1, sdfDrawThIntHandler, -1, 0);
     EnableDmac(1);
     for (;;) {
         CancelWakeupThread(GetThreadId());
