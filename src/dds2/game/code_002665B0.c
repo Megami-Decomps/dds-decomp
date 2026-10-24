@@ -69,7 +69,7 @@ typedef struct MenuSlotState {
     u32 initFlags; /* 0x04: entry initialization bits */
     MenuPopupState transitionWork; /* 0x08 */
     s32 dispatchStatus; /* 0x54 */
-    u32 dispatchValue; /* 0x58 */
+    char *popupTable; /* 0x58: table restored after panel dispatch */
     EvtResourcePair messageResources; /* 0x5C */
     EffectSlotSet *resourceBank[4]; /* 0x64: loaded effect-slot owners */
     EffectSlotSet *alternateBatch; /* 0x74 */
@@ -1183,7 +1183,7 @@ s32 mnuOpenTerminalPopupForAction(s32 action, s32 context) {
     switch (action) {
     case 3:
         if (*(s32 *)(*(s32 *)(context + 0x7C) + 0x20) == 0) {
-            *(u8 **)(context + 0x58) = mnuTerminalPopupEntries;
+            *(char **)(context + 0x58) = mnuTerminalPopupEntries;
             mnuSetPopupEntry((s32 *)(context + 0x54), mnuTerminalPopupEntries + 0xC4);
             *(s32 *)(context + 0x90) = 1;
             **(u32 **)(context + 0x54) |= 0x20000;
@@ -1192,7 +1192,7 @@ s32 mnuOpenTerminalPopupForAction(s32 action, s32 context) {
         break;
     case 2:
         if (*(s32 *)(*(s32 *)(context + 0x80) + 0x20) == 0) {
-            *(u8 **)(context + 0x58) = mnuTerminalPopupEntries;
+            *(char **)(context + 0x58) = mnuTerminalPopupEntries;
             mnuSetPopupEntry((s32 *)(context + 0x54), mnuTerminalPopupEntries + 0xC4);
             *(s32 *)(context + 0x90) = 2;
             **(u32 **)(context + 0x54) |= 0x20000;
@@ -2487,7 +2487,7 @@ s32 evtBContinueDispatchOrRestoreTable(dds3ProcessID_t *request) {
         return result;
     }
     if (*dispatch == 0 && fclChkMessage() == 0) {
-        mnuSetPopupEntry(dispatch, (void *)state->dispatchValue);
+        mnuSetPopupEntry(dispatch, state->popupTable);
     }
     return 0;
 }
