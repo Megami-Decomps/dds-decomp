@@ -920,11 +920,11 @@ void effUpdateFadeBlendA(EffKindWork *work) {
     effDrawBlurRectangle(out);
 }
 
-u32 effCreateFadeBlendWorkFromOutput(void *work) {
-    return (u32)dds3EffectPartialMultiBlurCreate((dds3Effect_PartialMultiBlurParam_t *)((u8 *)work + 0xc0));
+void *effCreateFadeBlendWorkFromOutput(void *work) {
+    return dds3EffectPartialMultiBlurCreate((dds3Effect_PartialMultiBlurParam_t *)((u8 *)work + 0xc0));
 }
 
-void effReleaseFadeBlendWork(u32 resourceHandle) {
+void effReleaseFadeBlendWork(void *resourceHandle) {
     dds3EffectPartialMultiBlurDelete((EffBlurTemplate *)resourceHandle);
 }
 
