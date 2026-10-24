@@ -4331,7 +4331,7 @@ INCLUDE_RODATA(const s32, "game/code_001442D0", fldTitleTaskName);
 void fldStartTitle(s32 field, s32 mode, s32 option) {
     char path[32];
     s32 resourceAddress;
-    s32 handle;
+    struct sdfMemHandle_t *allocation;
 
     D_00436350 = 0;
     D_00436354 = 0;
@@ -4346,14 +4346,14 @@ void fldStartTitle(s32 field, s32 mode, s32 option) {
     } else {
         sprintf(path, "/fld/f/pnl/df%03d.tmx", field);
     }
-    handle = sdfDevLoadFileEx(path, &resourceAddress, 0);
+    allocation = sdfDevLoadFileEx(path, &resourceAddress, 0);
     D_00436368 = sdfTexSet((SdfTextureFileHeader *)(resourceAddress));
-    sdfMemFreeDirect((struct sdfMemHandle_t *)(u32)(handle));
+    sdfMemFreeDirect(allocation);
     if (field == 0xC) {
         sprintf(path, "/fld/f/pnl/df_b.tmx");
-        handle = sdfDevLoadFileEx(path, &resourceAddress, 0);
+        allocation = sdfDevLoadFileEx(path, &resourceAddress, 0);
         D_0043636C = sdfTexSet((SdfTextureFileHeader *)(resourceAddress));
-        sdfMemFreeDirect((struct sdfMemHandle_t *)(u32)(handle));
+        sdfMemFreeDirect(allocation);
     }
     if (fldTitleIsActive() == 0) {
         dds3StartProcess(fldTitleTaskName, 0x2B0A, 0, 1, fldTitleTaskUpdate, fldReleaseTitleTextures, 0);
@@ -4481,7 +4481,7 @@ INCLUDE_RODATA(const s32, "game/code_001442D0", D_00413C80);
 void fldStartMiniTitleForUnlock(s32 id) {
     char path[0x20];
     s32 data;
-    s32 handle;
+    struct sdfMemHandle_t *allocation;
 
     switch (id) {
     case 4:
@@ -4596,9 +4596,9 @@ void fldStartMiniTitleForUnlock(s32 id) {
     D_00436370 = 0;
     D_00436374 = 0;
     sprintf(path, "/fld/f/pnl/ds_%03d.tmx", id);
-    handle = sdfDevLoadFileEx(path, &data, 0);
+    allocation = sdfDevLoadFileEx(path, &data, 0);
     D_0043637C = sdfTexSet((SdfTextureFileHeader *)(data));
-    sdfMemFreeDirect((struct sdfMemHandle_t *)(u32)(handle));
+    sdfMemFreeDirect(allocation);
     if (fldTitleIsActive() == 0) {
         dds3StartProcess(D_00413C80, 0x2B0A, 0, 1, fldTitleMini, fldReleaseTitleMiniTexture, 0);
     }
@@ -4613,17 +4613,17 @@ void fldSetSnowActive(void) {
 
 void fldLoadWeatherEffects(void) {
     s32 data;
-    s32 handle;
+    struct sdfMemHandle_t *allocation;
 
-    handle = sdfDevLoadFileEx("/fld/f/bin/d2_hunt1.tmx", &data, 0);
+    allocation = sdfDevLoadFileEx("/fld/f/bin/d2_hunt1.tmx", &data, 0);
     D_004363AC = sdfTexSet((SdfTextureFileHeader *)(data));
-    sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)handle);
-    handle = sdfDevLoadFileEx("/fld/f/bin/d2_hunt2.tmx", &data, 0);
+    sdfMemFreeDelayedDirect(allocation);
+    allocation = sdfDevLoadFileEx("/fld/f/bin/d2_hunt2.tmx", &data, 0);
     D_004363B0 = sdfTexSet((SdfTextureFileHeader *)(data));
-    sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)handle);
-    handle = sdfDevLoadFileEx("/fld/f/bin/d2_hunt3.tmx", &data, 0);
+    sdfMemFreeDelayedDirect(allocation);
+    allocation = sdfDevLoadFileEx("/fld/f/bin/d2_hunt3.tmx", &data, 0);
     D_004363B4 = sdfTexSet((SdfTextureFileHeader *)(data));
-    sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)handle);
+    sdfMemFreeDelayedDirect(allocation);
     D_00436380 = sdfDevLoadFileEx("/fld/f/bin/FH_DAM_2.EPL", &D_00436384, 0);
     fldDamEffectNode = effCreateNodeFromParameter(D_00436384);
     fldDamEffectPositioned = 0;

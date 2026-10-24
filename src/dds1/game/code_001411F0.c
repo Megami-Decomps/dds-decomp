@@ -3961,7 +3961,7 @@ extern char D_003A0810[]; /* "/fld/f/pnl/df%03d.tmx" */
 void fldStartTitle(s32 field, s32 mode, s32 option) {
     char path[32];
     s32 resourceAddress;
-    s32 handle;
+    struct sdfMemHandle_t *allocation;
 
     D_003BAFA8 = mode;
     D_003BAFAC = option;
@@ -3970,9 +3970,9 @@ void fldStartTitle(s32 field, s32 mode, s32 option) {
     D_003BAFA0 = 0;
     D_003BAFB0 = 0;
     sprintf(path, D_003A0810, field);
-    handle = (s32)sdfDevLoadFileEx(path, (u32 *)&resourceAddress, 0);
+    allocation = sdfDevLoadFileEx(path, (u32 *)&resourceAddress, 0);
     D_003BAFB4 = sdfTexSet((SdfTextureFileHeader *)(resourceAddress));
-    sdfMemFreeDirect((struct sdfMemHandle_t *)(u32)(handle));
+    sdfMemFreeDirect(allocation);
     if (fldTitleIsActive() == 0) {
         dds3StartProcess(fldTitleTaskName, 0x2B0A, 0, 1, fldTitle, fldReleaseTitleTextureReference, 0);
     }
@@ -4171,7 +4171,7 @@ INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0828);
 void fldStartMiniTitleForUnlock(s32 id) {
     char path[0x20];
     s32 data;
-    s32 handle;
+    struct sdfMemHandle_t *allocation;
 
     switch (id) {
     case 22:
@@ -4256,9 +4256,9 @@ void fldStartMiniTitleForUnlock(s32 id) {
     D_003BAFB8 = 0;
     D_003BAFBC = 0;
     sprintf(path, "/fld/f/pnl/ds%03d.tmx", id);
-    handle = (s32)sdfDevLoadFileEx(path, (u32 *)&data, 0);
+    allocation = sdfDevLoadFileEx(path, (u32 *)&data, 0);
     D_003BAFC4 = sdfTexSet((SdfTextureFileHeader *)(data));
-    sdfMemFreeDirect((struct sdfMemHandle_t *)(u32)(handle));
+    sdfMemFreeDirect(allocation);
     if (fldTitleIsActive() == 0) {
         dds3StartProcess(D_003A0828, 0x2B0A, 0, 1, fldTitleMini, fldReleaseTitleMiniTexture, 0);
     }
@@ -4274,12 +4274,12 @@ void fldSetSnowActive(void) {
 
 
 void fldLoadWeatherEffects(void) {
-    s32 handle;
+    struct sdfMemHandle_t *allocation;
     s32 resourceAddress;
 
-    handle = (s32)sdfDevLoadFileEx(s_fieldWeatherLimitPath, (u32 *)&resourceAddress, 0);
+    allocation = sdfDevLoadFileEx(s_fieldWeatherLimitPath, (u32 *)&resourceAddress, 0);
     fldWeatherLimitTexture = sdfTexSet((SdfTextureFileHeader *)(resourceAddress));
-    sdfMemFreeDelayedDirect((struct sdfMemHandle_t *)handle);
+    sdfMemFreeDelayedDirect(allocation);
     fldDamEffectResource = sdfDevLoadFileEx("/fld/f/bin/FH_DAM_2.EPL", &fldDamEffectData, 0);
     fldDamEffectNode = effCreateNodeFromParameter(fldDamEffectData);
     fldDamEffectPositioned = 0;
