@@ -1411,13 +1411,13 @@ s32 btlAnyEnemyHasFullActionSet(void) {
 /* Scan active group-0x200 actors for a queued action whose table entry has
  * nonzero byte 8 and class byte 9 equal to 2. */
 s32 btlHasEligibleQueuedSpecialAction(void) {
-    u8 *actor;
+    ActionStateLink *actor;
     BtlUnit *unit;
     DatCommandRecord *actionEntry;
     s16 actionId;
     s32 i;
-    for (actor = (u8 *)((BattleWork *)btlGetRuntime())->actionActors; actor != 0; actor = (u8 *)((ActionStateLink *)actor)->next) {
-        unit = ((ActionStateLink *)actor)->unit;
+    for (actor = ((BattleWork *)btlGetRuntime())->actionActors; actor != 0; actor = actor->next) {
+        unit = actor->unit;
         if (unit == 0) {
             continue;
         }
@@ -1425,7 +1425,7 @@ s32 btlHasEligibleQueuedSpecialAction(void) {
             continue;
         }
         for (i = 0; i < 8; i++) {
-            actionId = ((ActionStateLink *)actor)->actions[i].actionId;
+            actionId = actor->actions[i].actionId;
             if (actionId == 0) {
                 continue;
             }
