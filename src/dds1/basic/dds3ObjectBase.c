@@ -7,6 +7,7 @@
 #include "sdf_dev_slot_api.h"
 #include "evt_gradient_rect.h"
 #include "sdf_motion.h"
+#include "sdf_motion_next_result.h"
 #include "sdf_chip.h"
 #include "dds3_path.h"
 #include "dds3_slot1_handler_api.h"

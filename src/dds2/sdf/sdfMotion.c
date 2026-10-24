@@ -9,6 +9,7 @@
 #include "sdf_draw.h"
 #include "sdf_motion_bindings.h"
 #include "sdf_motion.h"
+#include "sdf_motion_next_result.h"
 #include "sdf_motion_node_api.h"
 #include "sdf_vu_matrix.h"
 #include "eff_quaternion_nlerp.h"
@@ -214,12 +215,12 @@ void sdfMotionSeek(sdfMotionCtrlr_t *motion, f32 frame) {
 }
 
 /* Apply the current motion state and report completion (1) or a loop wrap (2). */
-s32 sdfMotionNext(sdfMotionCtrlr_t *motion) {
-    s32 result;
+SdfMotionNextResult sdfMotionNext(sdfMotionCtrlr_t *motion) {
+    SdfMotionNextResult result;
     f32 frame;
     f32 frameCount;
 
-    result = 0;
+    result = SDF_MOTION_NEXT_NO_EVENT;
     switch (motion->state) {
     case SDF_MOTION_STATE_UNINITIALIZED:
     case 2:
@@ -237,12 +238,12 @@ s32 sdfMotionNext(sdfMotionCtrlr_t *motion) {
             if (frameCount <= frame) {
                 sdfMotionSeek(motion, frameCount);
                 motion->state = SDF_MOTION_STATE_TERMINAL;
-                result = 1;
+                result = SDF_MOTION_NEXT_TERMINAL;
                 break;
             }
         } else if (frameCount <= frame) {
             motion->blendDurationFrames = 0.0f;
-            result = 2;
+            result = SDF_MOTION_NEXT_LOOPED;
             motion->blendStartFrame = 0.0f;
             do {
                 frame -= frameCount;

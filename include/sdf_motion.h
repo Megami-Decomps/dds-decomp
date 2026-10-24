@@ -21,7 +21,6 @@ void sdfMotionCtrlrFree(struct sdfMotionCtrlr_t *motion);
 void sdfMotionChangeBlend(struct sdfMotionCtrlr_t *motion, s32 motionIndex, s32 loopEnabled,
                          f32 blendLeadFrames, f32 blendDurationFrames);
 void sdfMotionSeek(struct sdfMotionCtrlr_t *motion, f32 frame);
-s32 sdfMotionNext(struct sdfMotionCtrlr_t *motion);
 void sdfMotionPause(struct sdfMotionCtrlr_t *motion);
 void sdfMotionPauseOff(struct sdfMotionCtrlr_t *motion);
 

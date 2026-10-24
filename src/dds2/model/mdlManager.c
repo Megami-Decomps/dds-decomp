@@ -11,6 +11,7 @@
 #include "mdl_motion_end_status.h"
 #include "mdl_part_tag_record.h"
 #include "sdf_motion.h"
+#include "sdf_motion_next_result.h"
 #include "sdf_texture_draw_packet.h"
 #include "fr_font.h"
 #include "sdf_packet_list.h"

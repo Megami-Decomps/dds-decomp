@@ -21,6 +21,7 @@
 #include "sdf_asset_state.h"
 #include "sdf_asset_create.h"
 #include "sdf_motion.h"
+#include "sdf_motion_next_result.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
