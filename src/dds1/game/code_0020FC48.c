@@ -340,7 +340,7 @@ s32 btlIsEventSequenceTaskReady(void) {
         btlBossDebugPrintf(D_003A67A0);
         return 0;
     }
-    if (evtGetEventPackStat(battle->eventTaskId) == 2) {
+    if (evtGetEventPackStat(battle->eventTaskId) == EVT_PACK_LOAD_COMPLETE) {
         return 1;
     }
     btlBossDebugPrintf(D_003A67B8);

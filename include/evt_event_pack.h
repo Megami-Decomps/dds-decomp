@@ -45,10 +45,15 @@ typedef struct EvtPackHeader {
 } EvtPackHeader;
 
 typedef s32 EvtPackLoadPhase;
+/* Phase values plus the absent-process result returned by evtGetEventPackStat. */
+typedef s32 EvtPackLoadStatus;
 enum {
     EVT_PACK_LOAD_NOT_STARTED = 0,
     EVT_PACK_LOAD_REQUEST_PENDING = 1,
     EVT_PACK_LOAD_COMPLETE = 2
+};
+enum {
+    EVT_PACK_LOAD_NOT_FOUND = -1
 };
 
 /* The camp constructor allocates/clears 0x48 bytes and publishes this state to
@@ -94,7 +99,7 @@ typedef char EvtPackLoadState_effect75_at_0x44[
 
 /* These numeric task IDs resolve to the camp-owned event-pack state. */
 EvtPackLoadState *evtGetPackProcessData(u32 taskId);
-s32 evtGetEventPackStat(u32 taskId);
+EvtPackLoadStatus evtGetEventPackStat(u32 taskId);
 
 /* Entry payload layouts vary by resource kind and remain opaque here. */
 void *evtGetResorceData(u32 taskId, s32 key);

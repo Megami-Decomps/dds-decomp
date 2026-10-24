@@ -34,8 +34,7 @@ enum {
     EVT_PAIRED_REQUEST_SIZE = 8,
     EVT_FIELD_SEQUENCE_REQUEST_SIZE = 0xA0,
     EVT_WORLD_OBJECT_KIND_FIRST = 4,
-    EVT_WORLD_OBJECT_KIND_LIMIT = 10,
-    EVT_CAMP_TASK_READY_VALUE = 2
+    EVT_WORLD_OBJECT_KIND_LIMIT = 10
 };
 
 /* Script VM helpers (see script/scrCommonCommand.c for the convention). */
@@ -998,7 +997,7 @@ s32 evtCommand_LOAD_BE(void) {
         dds3LinkProcess(commandWork->task, evtLoadEventPack(taskId));
         return 0;
     }
-    if (evtGetEventPackStat(taskId) == EVT_CAMP_TASK_READY_VALUE) {
+    if (evtGetEventPackStat(taskId) == EVT_PACK_LOAD_COMPLETE) {
         message = D_00421ED8;
         evtPrintDeveloperConsoleMessage(message, taskId);
         sdfPrintf(message, taskId);
@@ -1031,7 +1030,7 @@ s32 evtCommand_CHK_BE(void) {
     s32 taskId = scrGetIntPara(0);
     s32 isReady;
 
-    if (scrGetScriptHandle() != 0 && evtSearchEventPack(taskId) != 0 && evtGetEventPackStat(taskId) == EVT_CAMP_TASK_READY_VALUE) {
+    if (scrGetScriptHandle() != 0 && evtSearchEventPack(taskId) != 0 && evtGetEventPackStat(taskId) == EVT_PACK_LOAD_COMPLETE) {
         evtPrintDeveloperConsoleMessage(D_00421ED8, taskId);
         isReady = 1;
     } else {

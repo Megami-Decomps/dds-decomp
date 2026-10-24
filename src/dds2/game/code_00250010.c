@@ -5733,11 +5733,11 @@ dds3ProcessID_t *evtSearchEventPack(u32 taskId) {
     return dds3SearchProcessName((const char *)taskName);
 }
 
-/* Return this event task's loaded state, or -1 when it does not exist. */
-s32 evtGetEventPackStat(u32 taskId) {
+/* Return its load phase, or EVT_PACK_LOAD_NOT_FOUND when the task is absent. */
+EvtPackLoadStatus evtGetEventPackStat(u32 taskId) {
     dds3ProcessID_t *task = evtSearchEventPack(taskId);
     if (task == 0) {
-        return -1;
+        return EVT_PACK_LOAD_NOT_FOUND;
     }
     return ((EvtPackLoadState *)dds3GetProcessData(task))->loadPhase;
 }

@@ -483,7 +483,7 @@ s32 btlIsEventSequenceTaskReady(void) {
         btlBossDebugPrintf("btl:SMG load wait\n");
         return 0;
     }
-    if (evtGetEventPackStat(battle->eventTaskId) == 2) {
+    if (evtGetEventPackStat(battle->eventTaskId) == EVT_PACK_LOAD_COMPLETE) {
         return 1;
     }
     btlBossDebugPrintf("btl:BE load wait\n");
