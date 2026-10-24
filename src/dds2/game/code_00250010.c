@@ -5726,7 +5726,7 @@ void evtMakeEventPackName(s32 taskId, char *buffer) {
     sprintf(buffer, D_004377D0, taskId);
 }
 
-dds3ProcessID_t *evtSearchEventPack(u32 taskId) {
+dds3ProcessID_t *evtSearchEventPack(s32 taskId) {
     char taskName[32];
 
     evtMakeEventPackName(taskId, taskName);
