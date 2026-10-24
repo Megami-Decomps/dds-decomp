@@ -2543,7 +2543,7 @@ extern s32 evtAdvanceSlotFlags(void);
 extern void datAddCurrencyClamped(s32);
 extern s32 mnuCampFindListedItemIndex(s32);
 extern void mnuDrawCommandPhaseTransition(s32);
-extern void mnuDrawCampCommandTransition(s32);
+extern s32 mnuDrawCampCommandTransition(MenuTerminalContext *);
 
 
 extern s32 mnuShopProgressSlotRows[];
@@ -2868,7 +2868,7 @@ s32 mnuShopPollBuyCommandSelection(dds3ProcessID_t *task) {
 s32 evtStageDispatchStart(dds3ProcessID_t *callbackContext) {
     s32 stateAddress = dds3GetProcessData(callbackContext);
     mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
-    mnuDrawCampCommandTransition(stateAddress);
+    mnuDrawCampCommandTransition((MenuTerminalContext *)stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
@@ -2985,7 +2985,7 @@ s32 mnuShopPollFilteredCommandSelection(dds3ProcessID_t *task) {
 s32 evtStageDispatchStartB(dds3ProcessID_t *callbackContext) {
     s32 stateAddress = dds3GetProcessData(callbackContext);
     mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
-    mnuDrawCampCommandTransition(stateAddress);
+    mnuDrawCampCommandTransition((MenuTerminalContext *)stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
@@ -3105,7 +3105,7 @@ s32 mnuShopPollRangeFilteredCommandSelection(dds3ProcessID_t *callbackContext) {
 s32 evtStageDispatchStartC(dds3ProcessID_t *callbackContext) {
     s32 stateAddress = dds3GetProcessData(callbackContext);
     mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
-    mnuDrawCampCommandTransition(stateAddress);
+    mnuDrawCampCommandTransition((MenuTerminalContext *)stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
@@ -3209,7 +3209,7 @@ s32 mnuShopPollSaleCommandSelection(dds3ProcessID_t *task) {
 s32 mnuRunCampCommandPrimaryTransition(dds3ProcessID_t *callbackContext) {
     s32 stateAddress = dds3GetProcessData(callbackContext);
     mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
-    mnuDrawCampCommandTransition(stateAddress);
+    mnuDrawCampCommandTransition((MenuTerminalContext *)stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
@@ -3693,7 +3693,7 @@ s32 evtDispatchSceneReadyFollowup(dds3ProcessID_t *callbackContext) {
     s32 stateAddress = dds3GetProcessData(callbackContext);
     mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
     if (((MenuTerminalContext *)stateAddress)->sceneReady == 1) {
-        mnuDrawCampCommandTransition(stateAddress);
+        mnuDrawCampCommandTransition((MenuTerminalContext *)stateAddress);
     } else {
         mnuDrawCommandClosePhase((MenuTerminalContext *)stateAddress);
     }
@@ -3945,7 +3945,7 @@ s32 evtAdvancePendingRewards(dds3ProcessID_t *callbackContext) {
 s32 evtDrawPendingRewardTransition(dds3ProcessID_t *callbackContext) {
     s32 stateAddress = dds3GetProcessData(callbackContext);
     mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
-    mnuDrawCampCommandTransition(stateAddress);
+    mnuDrawCampCommandTransition((MenuTerminalContext *)stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
@@ -4002,7 +4002,7 @@ s32 evtOpenSlotAdvancePopupWhenIdle(dds3ProcessID_t *callbackContext) {
 s32 evtDrawSlotAdvanceTransition(dds3ProcessID_t *callbackContext) {
     s32 stateAddress = dds3GetProcessData(callbackContext);
     mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
-    mnuDrawCampCommandTransition(stateAddress);
+    mnuDrawCampCommandTransition((MenuTerminalContext *)stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
@@ -4070,7 +4070,7 @@ s32 evtTriggerProgressGateThenOpenPopup(dds3ProcessID_t *callbackContext) {
 s32 evtDrawProgressGateTransition(dds3ProcessID_t *callbackContext) {
     s32 stateAddress = dds3GetProcessData(callbackContext);
     mnuDrawShopPanelDecorations((MenuTerminalContext *)stateAddress);
-    mnuDrawCampCommandTransition(stateAddress);
+    mnuDrawCampCommandTransition((MenuTerminalContext *)stateAddress);
     return evtMenuSetHandler((void *)stateAddress, EVT_DISPATCH_OPERATION_PRIMARY, (void *)callbackContext);
 }
 
