@@ -3755,8 +3755,8 @@ s32 evtViewCmdSetPosition(s32 unused0, s32 unused1, EvtRuntime *viewer) {
     return 0;
 }
 
-u32 evtViewCmdCancelSelection(u32 unused0, u32 unused1, u32 viewerAddr) {
-    evtViewerPopHistory((EvtRuntime *)viewerAddr);
+u32 evtViewCmdCancelSelection(u32 unused0, u32 unused1, EvtRuntime *viewer) {
+    evtViewerPopHistory(viewer);
     return 0;
 }
 s32 evtViewCmdResolveSlot(s32 operation, void *argument, EvtRuntime *viewer) {
