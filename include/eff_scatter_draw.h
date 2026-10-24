@@ -33,6 +33,6 @@ typedef char PcpScatterDrawAllocationOffsetCheck[
     ((u32)&((dds3WhirlwindPolyList_tag *)0)->allocation == 0x78) ? 1 : -1];
 
 void dds3WhirlwindPolyListDelete(dds3WhirlwindPolyList_tag *object);
-void dds3WhirlwindPolyListSetRotateMatrix(dds3WhirlwindPolyList_tag *draw, const void *sourceMatrix);
+void dds3WhirlwindPolyListSetRotateMatrix(dds3WhirlwindPolyList_tag *draw, const f32 sourceMatrix[16]);
 
 #endif

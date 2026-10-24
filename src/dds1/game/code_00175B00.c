@@ -215,8 +215,8 @@ u32 dds3WhirlwindPolyListGetABGR(dds3WhirlwindPolyList_tag *object, s32 particle
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
-void dds3WhirlwindPolyListSetRotateMatrix(dds3WhirlwindPolyList_tag *object, const void *src) {
-    VU0_LOAD_MATRIX(src);
+void dds3WhirlwindPolyListSetRotateMatrix(dds3WhirlwindPolyList_tag *object, const f32 sourceMatrix[16]) {
+    VU0_LOAD_MATRIX(sourceMatrix);
     VU0_STORE_MATRIX(object->matrix);
 }
 

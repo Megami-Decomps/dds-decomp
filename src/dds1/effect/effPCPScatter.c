@@ -1413,7 +1413,7 @@ void effPCPWhirlwindPolyDraw(PcpScatterInstanceA *work) {
     }
     draw->scale = work->scale;
     SDF_VU0_COPYVECTOR(draw->origin, work->params.origin);
-    dds3WhirlwindPolyListSetRotateMatrix(draw, work);
+    dds3WhirlwindPolyListSetRotateMatrix(draw, work->matrix);
     dds3WhirlwindPolyListDraw(draw);
 }
 
@@ -1706,7 +1706,7 @@ void effPCPWhirlwind2PolyDraw(PcpScatterInstanceB *work) {
     }
     draw->scale = work->scale;
     SDF_VU0_COPYVECTOR(draw->origin, work->params.origin);
-    dds3WhirlwindPolyListSetRotateMatrix(draw, work);
+    dds3WhirlwindPolyListSetRotateMatrix(draw, work->matrix);
     dds3WhirlwindPolyListDraw(draw);
 }
 
@@ -2002,7 +2002,7 @@ void effPCPWhirlwind3PolyDraw(PcpScatterInstanceC *work) {
     }
     draw->scale = work->scale;
     SDF_VU0_COPYVECTOR(draw->origin, work->params.origin);
-    dds3WhirlwindPolyListSetRotateMatrix(draw, work);
+    dds3WhirlwindPolyListSetRotateMatrix(draw, work->matrix);
     dds3WhirlwindPolyListDraw(draw);
 }
 
@@ -2243,6 +2243,6 @@ void effPCPWwSpherePolyDraw(PcpScatterPlainInstance *work) {
     }
     draw->scale = work->scale;
     SDF_VU0_COPYVECTOR(draw->origin, work->params.origin);
-    dds3WhirlwindPolyListSetRotateMatrix(draw, work);
+    dds3WhirlwindPolyListSetRotateMatrix(draw, work->matrix);
     dds3WhirlwindPolyListDraw(draw);
 }
