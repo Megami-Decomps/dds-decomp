@@ -40,21 +40,21 @@ extern s32 btlIsLowHpActionReady(BtlUnit *unit, s32 input);
 extern u32 btlRandomState;
 
 extern s32 func_00202668(BtlTask *, s32);
-extern s32 btlSelectLowestNonzeroHpTarget(s32, s32);
-extern void btlSelectLowestHealthRateTarget(s32, s32);
-extern void btlSelectLowestHealthElementBlockTarget(s32, s32);
-extern s32 btlSelectLowestRankTarget(s32, s32);
-extern void btlSelectHighestCurrentMpTarget(s32, s32);
-extern s32 btlSelectTargetsPassingCheck(s32, s32);
-extern void btlSelectTargetsByActionMask(s32, s32);
-extern void btlSelectTargetsWithoutActionMask(s32, s32);
-extern void btlSelectTargetsByMode(s32, s32);
-extern void btlPickUnlinkedPartyTarget(u32, u32);
-extern void btlPickLinkedPartyTarget(u32, u32);
-extern void btlAppendSelfAfterTargetScan(s32);
-extern s32 btlSelectTargetsExcludingActorUnit(s32);
-extern void btlAppendEffectActorToCommandIndices(s32, s32);
-extern void btlSelectTargetsBlockingElement(s32, s32);
+extern s32 btlSelectLowestNonzeroHpTarget(BtlTask *, s32);
+extern void btlSelectLowestHealthRateTarget(BtlTask *, s32);
+extern void btlSelectLowestHealthElementBlockTarget(BtlTask *, s32);
+extern s32 btlSelectLowestRankTarget(BtlTask *, s32);
+extern void btlSelectHighestCurrentMpTarget(BtlTask *, s32);
+extern s32 btlSelectTargetsPassingCheck(BtlTask *, s32);
+extern void btlSelectTargetsByActionMask(BtlTask *, s32);
+extern void btlSelectTargetsWithoutActionMask(BtlTask *, s32);
+extern void btlSelectTargetsByMode(BtlTask *, s32);
+extern void btlPickUnlinkedPartyTarget(BtlTask *, u32);
+extern void btlPickLinkedPartyTarget(BtlTask *, u32);
+extern void btlAppendSelfAfterTargetScan(BtlTask *);
+extern s32 btlSelectTargetsExcludingActorUnit(BtlTask *);
+extern void btlAppendEffectActorToCommandIndices(BtlTask *, s32);
+extern void btlSelectTargetsBlockingElement(BtlTask *, s32);
 
 extern s32 (*btlPackedEffectHandlers[])(s32, u32);
 extern s32 btlWaitEffectTask();
@@ -1287,82 +1287,82 @@ void btlShiftActorStateHistory(BtlTask *task, s8 flag) {
 }
 
 /* Choose command-record-driven targets; retain the native zero mode argument. */
-void btlChooseCommandActionTargets(s32 context) {
-    func_00202668((BtlTask *)context, 0);
+void btlChooseCommandActionTargets(BtlTask *context) {
+    func_00202668(context, 0);
 }
 
 /* Delegate minimum nonzero-current-HP selection for this command, with mode zero. */
-void btlPickCommandLowestHpTarget(s32 context) {
+void btlPickCommandLowestHpTarget(BtlTask *context) {
     btlSelectLowestNonzeroHpTarget(context, 0);
 }
 
 /* Delegate minimum HP-percentage selection without changing native fallback modes. */
-void btlPickCommandLowestHpRatioTarget(s32 context) {
+void btlPickCommandLowestHpRatioTarget(BtlTask *context) {
     btlSelectLowestHealthRateTarget(context, 0);
 }
 
 /* Pick a lowest-HP element-block candidate for the command's actor and action. */
-void btlPickCommandLowestHpBlockTarget(s32 actor, s32 action) {
+void btlPickCommandLowestHpBlockTarget(BtlTask *actor, s32 action) {
     btlSelectLowestHealthElementBlockTarget(actor, action);
 }
 
 /* Forward command selection with its native zero second argument. */
-void btlPickCommandLowestLevelTarget(s32 context) {
+void btlPickCommandLowestLevelTarget(BtlTask *context) {
     btlSelectLowestRankTarget(context, 0);
 }
 
 /* Select the highest-current-MP candidate through the native mode-zero entry. */
-void btlPickCommandHighestMpTarget(s32 context) {
+void btlPickCommandHighestMpTarget(BtlTask *context) {
     btlSelectHighestCurrentMpTarget(context, 0);
 }
 
 /* Select by group element checks; action is the query input, not a status mask. */
-void btlPickCommandElementCheckedTarget(s32 commandContext, s32 action) {
+void btlPickCommandElementCheckedTarget(BtlTask *commandContext, s32 action) {
     btlSelectTargetsPassingCheck(commandContext, action);
 }
 
 /* Select by status-mask presence. */
-void btlPickCommandTargetWithStatusMask(s32 actor, s32 mask) {
+void btlPickCommandTargetWithStatusMask(BtlTask *actor, s32 mask) {
     btlSelectTargetsByActionMask(actor, mask);
 }
 
 /* Select by status-mask absence. */
-void btlPickCommandTargetWithoutStatusMask(s32 actor, s32 mask) {
+void btlPickCommandTargetWithoutStatusMask(BtlTask *actor, s32 mask) {
     btlSelectTargetsWithoutActionMask(actor, mask);
 }
 
 /* Forward mode selection. */
-void btlSelectCommandTargetsByMode(s32 actor, s32 mode) {
+void btlSelectCommandTargetsByMode(BtlTask *actor, s32 mode) {
     btlSelectTargetsByMode(actor, mode);
 }
 
 /* Current-command adapter for the unlinked-party selector. */
-void btlPickUnlinkedCommandTarget(u32 task, u32 input) {
+void btlPickUnlinkedCommandTarget(BtlTask *task, u32 input) {
     btlPickUnlinkedPartyTarget(task, input);
 }
 
 /* Current-command adapter for the linked-party selector. */
-void btlPickLinkedCommandTarget(u32 task, u32 input) {
+void btlPickLinkedCommandTarget(BtlTask *task, u32 input) {
     btlPickLinkedPartyTarget(task, input);
 }
 
 /* Append the command's own actor after the native scan. */
-void btlAppendActorToCommandTargets(s32 actor, s32 unused) {
+void btlAppendActorToCommandTargets(BtlTask *actor, s32 unused) {
     btlAppendSelfAfterTargetScan(actor);
 }
 
 /* Default selection excludes the actor, with native self fallback; unused stays unused. */
-void btlPickCommandTargetExcludingActor(s32 context, s32 unused) {
+void btlPickCommandTargetExcludingActor(BtlTask *context, s32 unused) {
     btlSelectTargetsExcludingActorUnit(context);
 }
 
 /* Append the global effect actor, distinct from this command's own actor. */
-void btlAddEffectActorTargetToCommand(s32 context) {
+void btlAddEffectActorTargetToCommand(BtlTask *context) {
     btlAppendEffectActorToCommandIndices(context, 0);
 }
 
 /* Select element-block candidates. */
-void btlPickCommandElementBlockTarget(s32 actor, s32 mask) {
+void btlPickCommandElementBlockTarget(BtlTask *actor, s32 mask) {
     btlSelectTargetsBlockingElement(actor, mask);
 }
 

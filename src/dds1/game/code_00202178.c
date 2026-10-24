@@ -265,12 +265,12 @@ BtlUnit *btlSelectFlaggedIndexListEntry(BtlIndexList *list, u16 *flags, u16 coun
     return btlGetIndexListEntry(list, i);
 }
 
-BtlIndexList *btlBuildActorIndexListAndCount(s32 actor, u32 *matchingCount, u32 *listCount) {
+BtlIndexList *btlBuildActorIndexListAndCount(BtlTask *actor, u32 *matchingCount, u32 *listCount) {
     s32 result;
     BtlIndexList *list;
 
     list = btlAllocateIndexList(0xd);
-    result = btlSelectCommandTargetPolicy((BtlTask *)actor, list, 0);
+    result = btlSelectCommandTargetPolicy(actor, list, 0);
     *matchingCount = result;
     result = btlGetIndexListCount(list);
     *listCount = result;
@@ -286,7 +286,7 @@ INCLUDE_RODATA(const s32, "game/code_00202178", D_003A5BD0);
 INCLUDE_ASM(const s32, "game/code_00202178", func_00202668);
 
 /* Select the lowest nonzero current HP, preferring earlier entries on a tie. */
-s32 btlSelectLowestNonzeroHpTarget(s32 actor, s32 action) {
+s32 btlSelectLowestNonzeroHpTarget(BtlTask *actor, s32 action) {
     u32 matching;
     u32 count;
     BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &matching, &count);
@@ -310,11 +310,11 @@ s32 btlSelectLowestNonzeroHpTarget(s32 actor, s32 action) {
                 i++;
             } while (i < count);
         }
-        btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, btlGetIndexListEntry(list, bestIndex));
+        btlAppendIndexListEntry(actor->indexWork.indices, btlGetIndexListEntry(list, bestIndex));
         break;
     case 1:
     case 2:
-        btlCopyIndexList(((BtlTask *)actor)->indexWork.indices, list);
+        btlCopyIndexList(actor->indexWork.indices, list);
         break;
     }
     btlFreeIndexList(list);
@@ -323,7 +323,7 @@ s32 btlSelectLowestNonzeroHpTarget(s32 actor, s32 action) {
 
 /* Picks the target with the lowest nonzero health value among units that block the
  * element query; when none qualifies, every listed unit is a candidate. */
-s32 btlSelectLowestHealthElementBlockTarget(s32 actor, s32 action) {
+s32 btlSelectLowestHealthElementBlockTarget(BtlTask *actor, s32 action) {
     u32 matching;
     u32 count;
     u16 flags[12];
@@ -351,25 +351,25 @@ s32 btlSelectLowestHealthElementBlockTarget(s32 actor, s32 action) {
             }
         }
         if (found != 0) {
-            btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, btlGetIndexListEntry(list, bestIndex));
+            btlAppendIndexListEntry(actor->indexWork.indices, btlGetIndexListEntry(list, bestIndex));
         } else {
             u32 n = count;
             for (i = 0; i < n; i++) {
                 flags[i] = 1;
             }
-            btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, btlSelectFlaggedIndexListEntry(list, flags, count));
+            btlAppendIndexListEntry(actor->indexWork.indices, btlSelectFlaggedIndexListEntry(list, flags, count));
         }
         break;
     case 1:
     case 2:
-        btlCopyIndexList(((BtlTask *)actor)->indexWork.indices, list);
+        btlCopyIndexList(actor->indexWork.indices, list);
         break;
     }
     btlFreeIndexList(list);
     return 1;
 }
 
-s32 btlSelectLowestHealthRateTarget(s32 actor) {
+s32 btlSelectLowestHealthRateTarget(BtlTask *actor) {
     u32 matching;
     u32 count;
     u16 flags[12];
@@ -399,18 +399,18 @@ s32 btlSelectLowestHealthRateTarget(s32 actor) {
         } else {
             result = btlSelectFlaggedIndexListEntry(list, flags, count);
         }
-        btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, result);
+        btlAppendIndexListEntry(actor->indexWork.indices, result);
         break;
     case 1:
     case 2:
-        btlCopyIndexList(((BtlTask *)actor)->indexWork.indices, list);
+        btlCopyIndexList(actor->indexWork.indices, list);
         break;
     }
     btlFreeIndexList(list);
     return 1;
 }
 
-s32 btlSelectTargetsByActionMask(s32 actor, s32 mask) {
+s32 btlSelectTargetsByActionMask(BtlTask *actor, s32 mask) {
     u32 matching;
     u32 count;
     u16 flags[12];
@@ -425,18 +425,18 @@ s32 btlSelectTargetsByActionMask(s32 actor, s32 mask) {
                 flags[i] = 1;
             }
         }
-        btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, btlSelectFlaggedIndexListEntry(list, flags, count));
+        btlAppendIndexListEntry(actor->indexWork.indices, btlSelectFlaggedIndexListEntry(list, flags, count));
         break;
     case 1:
     case 2:
-        btlCopyIndexList(((BtlTask *)actor)->indexWork.indices, list);
+        btlCopyIndexList(actor->indexWork.indices, list);
         break;
     }
     btlFreeIndexList(list);
     return 1;
 }
 
-s32 btlSelectTargetsWithoutActionMask(s32 actor, s32 mask) {
+s32 btlSelectTargetsWithoutActionMask(BtlTask *actor, s32 mask) {
     u32 matching;
     u32 count;
     u16 flags[12];
@@ -451,18 +451,18 @@ s32 btlSelectTargetsWithoutActionMask(s32 actor, s32 mask) {
                 flags[i] = 1;
             }
         }
-        btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, btlSelectFlaggedIndexListEntry(list, flags, count));
+        btlAppendIndexListEntry(actor->indexWork.indices, btlSelectFlaggedIndexListEntry(list, flags, count));
         break;
     case 1:
     case 2:
-        btlCopyIndexList(((BtlTask *)actor)->indexWork.indices, list);
+        btlCopyIndexList(actor->indexWork.indices, list);
         break;
     }
     btlFreeIndexList(list);
     return 1;
 }
 
-s32 btlSelectTargetsByMode(s32 actor, s32 mode) {
+s32 btlSelectTargetsByMode(BtlTask *actor, s32 mode) {
     u32 matching;
     u32 count;
     u16 flags[12];
@@ -477,11 +477,11 @@ s32 btlSelectTargetsByMode(s32 actor, s32 mode) {
                 flags[i] = 1;
             }
         }
-        btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, btlSelectFlaggedIndexListEntry(list, flags, count));
+        btlAppendIndexListEntry(actor->indexWork.indices, btlSelectFlaggedIndexListEntry(list, flags, count));
         break;
     case 1:
     case 2:
-        btlCopyIndexList(((BtlTask *)actor)->indexWork.indices, list);
+        btlCopyIndexList(actor->indexWork.indices, list);
         break;
     }
     btlFreeIndexList(list);
@@ -489,7 +489,7 @@ s32 btlSelectTargetsByMode(s32 actor, s32 mode) {
 }
 
 /* Combines three AI predicate target rows before choosing an index-list entry. */
-s32 btlSelectEnemyAiConditionalTargets(s32 actor) {
+s32 btlSelectEnemyAiConditionalTargets(BtlTask *actor) {
     u16 flags[3][12];
     s32 kinds[3];
     s32 values[3]; /* Decoded payloads are retained but not consumed by this selector. */
@@ -548,7 +548,7 @@ s32 btlSelectEnemyAiConditionalTargets(s32 actor) {
                     case 24:
                         for (j = 0; j < count; j++) {
                             if (((BtlUnit *)btlGetIndexListEntry(list, j))->identity ==
-                                ((BtlTask *)actor)->unit->identity) {
+                                actor->unit->identity) {
                                 flags[i][j] = 1;
                             }
                         }
@@ -588,12 +588,12 @@ s32 btlSelectEnemyAiConditionalTargets(s32 actor) {
                 flags[0][i] |= flags[2][i];
             }
         }
-        btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices,
+        btlAppendIndexListEntry(actor->indexWork.indices,
                                btlSelectFlaggedIndexListEntry(list, flags[0], count));
         break;
     case 1:
     case 2:
-        btlCopyIndexList(((BtlTask *)actor)->indexWork.indices, list);
+        btlCopyIndexList(actor->indexWork.indices, list);
         break;
     }
     btlFreeIndexList(list);
@@ -607,7 +607,7 @@ typedef struct BtlIndexQuery {
 } BtlIndexQuery;
 
 /* AI operation 10 ignores its operand; the direct wrapper passes zero. */
-s32 btlSelectLowestRankTarget(s32 task, s32 unusedOperand) {
+s32 btlSelectLowestRankTarget(BtlTask *task, s32 unusedOperand) {
     u16 picked[12];
     BtlIndexQuery query;
     BtlIndexList *list;
@@ -630,12 +630,12 @@ s32 btlSelectLowestRankTarget(s32 task, s32 unusedOperand) {
                 bestIndex = i;
             }
         }
-        btlAppendIndexListEntry(((BtlTask *)task)->indexWork.indices, btlSelectFlaggedIndexListEntry(list, picked, query.count));
+        btlAppendIndexListEntry(task->indexWork.indices, btlSelectFlaggedIndexListEntry(list, picked, query.count));
         break;
     }
     case 1:
     case 2:
-        btlCopyIndexList(((BtlTask *)task)->indexWork.indices, list);
+        btlCopyIndexList(task->indexWork.indices, list);
         break;
     }
     btlFreeIndexList(list);
@@ -643,7 +643,7 @@ s32 btlSelectLowestRankTarget(s32 task, s32 unusedOperand) {
 }
 
 /* Select the highest current MP, preferring later entries on a tie. */
-s32 btlSelectHighestCurrentMpTarget(s32 actor, s32 unused) {
+s32 btlSelectHighestCurrentMpTarget(BtlTask *actor, s32 unused) {
     u32 matching;
     u32 count;
     BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &matching, &count);
@@ -665,18 +665,18 @@ s32 btlSelectHighestCurrentMpTarget(s32 actor, s32 unused) {
             }
             i++;
         } while (i < count);
-        btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, btlGetIndexListEntry(list, bestIndex));
+        btlAppendIndexListEntry(actor->indexWork.indices, btlGetIndexListEntry(list, bestIndex));
         break;
     case 1:
     case 2:
-        btlCopyIndexList(((BtlTask *)actor)->indexWork.indices, list);
+        btlCopyIndexList(actor->indexWork.indices, list);
         break;
     }
     btlFreeIndexList(list);
     return 1;
 }
 
-s32 btlSelectTargetsExcludingActorUnit(s32 actor) {
+s32 btlSelectTargetsExcludingActorUnit(BtlTask *actor) {
     BtlIndexList *list = btlAllocateIndexList(13);
     u32 mode;
     u32 count;
@@ -684,17 +684,17 @@ s32 btlSelectTargetsExcludingActorUnit(s32 actor) {
     u32 i;
     s32 pickedCount;
 
-    switch (((BtlTask *)actor)->unit->partyRecord.unitId) {
+    switch (actor->unit->partyRecord.unitId) {
     case 3:
     case 5:
     case 6:
-        mode = (((BtlTask *)actor)->unit->status.flags & 0x1000) ? 0 : 2;
+        mode = (actor->unit->status.flags & 0x1000) ? 0 : 2;
         break;
     default:
         mode = 0;
         break;
     }
-    btlBuildEligibleTargetIndexList((BtlTask *)actor, list, 1, 2, 0);
+    btlBuildEligibleTargetIndexList(actor, list, 1, 2, 0);
     count = btlGetIndexListCount(list);
     if (count == 0) {
         mode = 0;
@@ -704,39 +704,39 @@ s32 btlSelectTargetsExcludingActorUnit(s32 actor) {
         pickedCount = 0;
         memset(picked, 0, sizeof(picked));
         for (i = 0; i < count; i++) {
-            if (((BtlUnit *)btlGetIndexListEntry(list, i))->identity != ((BtlTask *)actor)->unit->identity) {
+            if (((BtlUnit *)btlGetIndexListEntry(list, i))->identity != actor->unit->identity) {
                 picked[pickedCount] = 1;
                 pickedCount++;
             }
         }
         if (pickedCount == 0) {
-            btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, ((BtlTask *)actor)->unit);
+            btlAppendIndexListEntry(actor->indexWork.indices, actor->unit);
             btlFreeIndexList(list);
             return 1;
         }
-        btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, btlSelectFlaggedIndexListEntry(list, picked, count));
+        btlAppendIndexListEntry(actor->indexWork.indices, btlSelectFlaggedIndexListEntry(list, picked, count));
         btlFreeIndexList(list);
         return 1;
     case 1:
     case 2:
-        btlCopyIndexList(((BtlTask *)actor)->indexWork.indices, list);
+        btlCopyIndexList(actor->indexWork.indices, list);
         break;
     }
     return 1;
 }
 
-s32 btlSelectTargetsByTargetType(s32 actor) {
+s32 btlSelectTargetsByTargetType(BtlTask *actor) {
     BtlIndexList *list = btlAllocateIndexList(13);
-    u8 targetType = datCommandRecords[((BtlTask *)actor)->indexWork.skillId].targetType;
+    u8 targetType = datCommandRecords[actor->indexWork.skillId].targetType;
     u32 count;
     u16 selectionFlags[12];
     u32 i;
     s32 candidateCount;
     s32 result;
 
-    btlBuildEligibleTargetIndexList((BtlTask *)actor, list, 2, 0, 0);
+    btlBuildEligibleTargetIndexList(actor, list, 2, 0, 0);
     if (targetType != 0) {
-        btlCopyIndexList(((BtlTask *)actor)->indexWork.indices, list);
+        btlCopyIndexList(actor->indexWork.indices, list);
         btlFreeIndexList(list);
         result = 1;
     } else {
@@ -750,49 +750,49 @@ s32 btlSelectTargetsByTargetType(s32 actor) {
             }
         }
         if (candidateCount == 0) {
-            btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, ((BtlTask *)actor)->unit);
+            btlAppendIndexListEntry(actor->indexWork.indices, actor->unit);
             btlFreeIndexList(list);
             return 1;
         }
-        btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, btlSelectFlaggedIndexListEntry(list, selectionFlags, count));
+        btlAppendIndexListEntry(actor->indexWork.indices, btlSelectFlaggedIndexListEntry(list, selectionFlags, count));
         btlFreeIndexList(list);
         result = 1;
     }
     return result;
 }
 
-s32 btlAppendSelfAfterTargetScan(s32 actor) {
+s32 btlAppendSelfAfterTargetScan(BtlTask *actor) {
     BtlIndexList *list = btlAllocateIndexList(13);
-    btlBuildEligibleTargetIndexList((BtlTask *)actor, list, 1, 1, 0);
+    btlBuildEligibleTargetIndexList(actor, list, 1, 1, 0);
     btlGetIndexListCount(list);
-    btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, ((BtlTask *)actor)->unit);
+    btlAppendIndexListEntry(actor->indexWork.indices, actor->unit);
     btlFreeIndexList(list);
     return 1;
 }
 
-void btlSelectLinkedTargets(s32 actor, s32 input, s8 invert);
+void btlSelectLinkedTargets(BtlTask *actor, s32 input, s8 invert);
 
 /* Default scan picks a party-group candidate without status 0x1000; mode shortcuts stay native. */
-u32 btlPickUnlinkedPartyTarget(u32 task, u32 input) {
+u32 btlPickUnlinkedPartyTarget(BtlTask *task, u32 input) {
     btlSelectLinkedTargets(task, input, 1);
     return 1;
 }
 
 /* Default scan picks a party-group candidate with status 0x1000; mode shortcuts stay native. */
-u32 btlPickLinkedPartyTarget(u32 task, u32 input) {
+u32 btlPickLinkedPartyTarget(BtlTask *task, u32 input) {
     btlSelectLinkedTargets(task, input, 0);
     return 1;
 }
 
-u32 btlAppendEffectActorToCommandIndices(s32 task) {
+u32 btlAppendEffectActorToCommandIndices(BtlTask *task) {
     BtlUnit *actor;
 
     actor = btlGetEffectActor();
-    btlAppendIndexListEntry(((BtlTask *)task)->indexWork.indices, actor);
+    btlAppendIndexListEntry(task->indexWork.indices, actor);
     return 1;
 }
 
-s32 btlSelectTargetsBlockingElement(s32 actor, s32 mask) {
+s32 btlSelectTargetsBlockingElement(BtlTask *actor, s32 mask) {
     u32 matching;
     u32 count;
     u16 flags[12];
@@ -807,11 +807,11 @@ s32 btlSelectTargetsBlockingElement(s32 actor, s32 mask) {
                 flags[i] = 1;
             }
         }
-        btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, btlSelectFlaggedIndexListEntry(list, flags, count));
+        btlAppendIndexListEntry(actor->indexWork.indices, btlSelectFlaggedIndexListEntry(list, flags, count));
         break;
     case 1:
     case 2:
-        btlCopyIndexList(((BtlTask *)actor)->indexWork.indices, list);
+        btlCopyIndexList(actor->indexWork.indices, list);
         break;
     }
     btlFreeIndexList(list);
@@ -823,7 +823,7 @@ u32 btlAiActionOperation22NoOp(void) {
     return 1;
 }
 
-s32 btlSelectTargetsPassingCheck(s32 actor, s32 action) {
+s32 btlSelectTargetsPassingCheck(BtlTask *actor, s32 action) {
     u32 matching;
     u32 count;
     u16 flags[12];
@@ -846,18 +846,18 @@ s32 btlSelectTargetsPassingCheck(s32 actor, s32 action) {
                 }
             }
         }
-        btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, btlSelectFlaggedIndexListEntry(list, flags, count));
+        btlAppendIndexListEntry(actor->indexWork.indices, btlSelectFlaggedIndexListEntry(list, flags, count));
         break;
     case 1:
     case 2:
-        btlCopyIndexList(((BtlTask *)actor)->indexWork.indices, list);
+        btlCopyIndexList(actor->indexWork.indices, list);
         break;
     }
     btlFreeIndexList(list);
     return 1;
 }
 
-void btlSelectLinkedTargets(s32 actor, s32 input, s8 invert) {
+void btlSelectLinkedTargets(BtlTask *actor, s32 input, s8 invert) {
     u32 matching;
     u32 count;
     u16 flags[12];
@@ -880,11 +880,11 @@ void btlSelectLinkedTargets(s32 actor, s32 input, s8 invert) {
                 }
             }
         }
-        btlAppendIndexListEntry(((BtlTask *)actor)->indexWork.indices, btlSelectFlaggedIndexListEntry(list, flags, count));
+        btlAppendIndexListEntry(actor->indexWork.indices, btlSelectFlaggedIndexListEntry(list, flags, count));
         break;
     case 1:
     case 2:
-        btlCopyIndexList(((BtlTask *)actor)->indexWork.indices, list);
+        btlCopyIndexList(actor->indexWork.indices, list);
         break;
     }
     btlFreeIndexList(list);
