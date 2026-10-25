@@ -2660,7 +2660,7 @@ void btlReloadLinkedUnitAndQueueEffects(BtlTask *task) {
     unit->modelId = 0;
     unit->modelResourceKind = 0;
     species = (unit->status.flags & 0x1000) ? unit->displaySpecies : unitId;
-    ((BtlTask *)btlFindUnitByActor((s32)unit))->flags |= 0x100;
+    btlFindUnitByActor(unit)->flags |= 0x100;
     unit->baseColor = 0x80808080;
     unit->overlayColor = 0x80808080;
     if (!(unit->partyRecord.status & 0x1000)) {
