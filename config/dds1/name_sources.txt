@@ -551,7 +551,7 @@
 0x001110D8	AreaBasicDrawprocuder	inferred	SMT3HD name via SLUS_209.11 0x0010F8E8, reloc-identical; was ddsDispatchFirstWorldIndexAreas
 0x00111108	CB_ReleaseObjectBasic	inferred	SMT3HD name via SLUS_209.11 0x0010F918, reloc-identical; was dds3ExchangeAreaSlot
 0x00111130	CB_BasicDrawProcuder	inferred	SMT3HD name via SLUS_209.11 0x0010F940, byte-identical; was dds3InvokeAreaCallback
-0x00111160	dds3AreaBasicTypeHasItems	inferred	SMT3HD name via SLUS_209.11 0x0010F970, byte-identical; was dds3SelectOwnerWorldIndexSlot
+0x00111160	dds3SelectOwnerWorldIndexSlot	inferred	Selects owner world-index slot 0 or 1 from the node kind; callers use the result as a slot index.
 0x00111188	dds3AddAreaBasic	inferred	SMT3HD name via SLUS_209.11 0x0010F998, reloc-identical; was evtSpawnActionObj2
 0x001111C8	dds3AreaBasicRegistItem	inferred	SMT3HD name via SLUS_209.11 0x0010F9D8, reloc-identical; was dds3EnsureWorldNodeInSlot
 0x00111258	dds3AreaBasicGetItemArray	inferred	SMT3HD name via SLUS_209.11 0x0010FA68, reloc-identical; was dds3RemoveObjectFromOwnerWorldIndex

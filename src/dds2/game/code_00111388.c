@@ -4,7 +4,7 @@
 #include "dds3_path.h"
 #include "evt_action_object.h"
 
-s32 dds3AreaBasicTypeHasItems(u32 nodeKind) {
+s32 dds3SelectOwnerWorldIndexSlot(u32 nodeKind) {
     s32 result = 0;
 
     if (nodeKind >= 4) {
@@ -24,7 +24,8 @@ dds3Basic_t *dds3AddAreaBasic(s32 key, const char *objectName) {
 }
 
 void dds3AreaBasicRegistItem(dds3Basic_t *ownerObject, dds3Basic_t *node) {
-    WorldIndexNode *slot = dds3AreaBasicGetWorldIndexNode(ownerObject, dds3AreaBasicTypeHasItems(node->kindTag >> 24));
+    WorldIndexNode *slot =
+        dds3AreaBasicGetWorldIndexNode(ownerObject, dds3SelectOwnerWorldIndexSlot(node->kindTag >> 24));
 
     dds3SetFirstBasicArray((dds3BasicArrayHandle_t *)slot);
     if (dds3SetSearchNextBasicArray((dds3BasicArrayHandle_t *)slot, node) != 1) {
