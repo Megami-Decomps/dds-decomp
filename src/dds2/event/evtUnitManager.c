@@ -15,6 +15,7 @@ struct EffNodeDescriptor;
 #include "evt_unit_path_advance_api.h"
 #include "evt_unit_wait_api.h"
 #include "evt_unit_facing_result_api.h"
+#include "evt_unit_light_animation_status.h"
 #include "evt_unit_vector_slot.h"
 #include "evt_unit_motion_slot_flags.h"
 #include "evt_unit_transition_flags.h"
@@ -739,8 +740,9 @@ void evtSetUnitColorA(evtUnitHandle_t *unit, s32 duration, u32 color) {
     }
 }
 
-u8 evtUnitLightAnimeStat(evtUnitHandle_t *unit) {
-    return (unit->flags & 0x7800) != 0;
+EvtUnitLightAnimationStatus evtUnitLightAnimeStat(evtUnitHandle_t *unit) {
+    return (unit->flags & 0x7800) != 0 ? EVT_UNIT_LIGHT_ANIMATION_ACTIVE
+                                      : EVT_UNIT_LIGHT_ANIMATION_INACTIVE;
 }
 
 void evtUnitLightOn(evtUnitHandle_t *unit) {
@@ -1197,8 +1199,6 @@ extern u8 D_00421B70[];
 extern s32 evtLoadUnit(s32 slotKind, s32 resource);
 
 extern void evtUnitLightOff(evtUnitHandle_t *unit, s32 duration);
-
-extern u8 evtUnitLightAnimeStat(evtUnitHandle_t *unit);
 
 extern void evtEndUnitValueTransition(evtUnitHandle_t *unit, s32 duration);
 
@@ -2488,12 +2488,12 @@ u32 evtCommand_MODEL_LIGHT_OFF(void) {
 u32 evtCommand_MODEL_LIGHT_WAIT(void) {
     s32 worldObjectKey;
     evtUnitHandle_t *unit;
-    u8 active;
+    EvtUnitLightAnimationStatus active;
 
     worldObjectKey = scrGetIntPara(0);
     unit = evtGetUnitHandle(worldObjectKey);
     active = evtUnitLightAnimeStat(unit);
-    return active == 0;
+    return active == EVT_UNIT_LIGHT_ANIMATION_INACTIVE;
 }
 
 u32 evtCommand_MODEL_LIGHT_RGB(void) {
