@@ -51,18 +51,20 @@ s32 btlReleaseScriptResource(void) {
 
 extern char btlPrimaryScriptResourceName[];
 
-s32 btlCanStartPrimaryScriptTask(void) {
+BtlPrimaryScriptTaskAvailability btlCanStartPrimaryScriptTask(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     if (battle->eventTaskId == -1) {
-        return 0;
+        return BTL_PRIMARY_SCRIPT_TASK_CANNOT_START;
     }
     if (battle->scriptFlags & 1) {
-        return 0;
+        return BTL_PRIMARY_SCRIPT_TASK_CANNOT_START;
     }
     if (battle->scriptHandle == 0) {
-        return 0;
+        return BTL_PRIMARY_SCRIPT_TASK_CANNOT_START;
     }
-    return btlFindScriptResource(btlPrimaryScriptResourceName) != -1;
+    return btlFindScriptResource(btlPrimaryScriptResourceName) != -1
+        ? BTL_PRIMARY_SCRIPT_TASK_CAN_START
+        : BTL_PRIMARY_SCRIPT_TASK_CANNOT_START;
 }
 
 
