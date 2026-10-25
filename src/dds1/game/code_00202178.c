@@ -2984,7 +2984,7 @@ void btlFadeAndTintNamedChunkTree(sdfModelNode_t *node, s32 color)
 
 extern s32 sdfModelGetNodeIndexByName(sdfModelRootNode_t *, const char *);
 
-s32 btlDispatchNamedChunkNode(void *query) {
+s32 btlDispatchNamedChunkNode(const char *name) {
     u8 *effect = (u8 *)((BtlState *)btlGetRuntime())->effect;
     u8 *unit = *(u8 **)effect;
     dds3ModelHandle_t *model;
@@ -2999,7 +2999,7 @@ s32 btlDispatchNamedChunkNode(void *query) {
     }
     model = ((BtlUnit *)unit)->ext->owner;
     descriptor = model->inner;
-    index = sdfModelGetNodeIndexByName(descriptor, query);
+    index = sdfModelGetNodeIndexByName(descriptor, name);
     if (index == -1) {
         return 1;
     }
@@ -3271,7 +3271,7 @@ u64 btlStartSubtaskWithInput(u64 prerequisiteHandle) {
     return task->handle;
 }
 
-extern s32 btlDispatchNamedChunkNode(void *);
+extern s32 btlDispatchNamedChunkNode(const char *);
 
 extern s8 D_003BB880[];
 
@@ -3290,13 +3290,13 @@ void btlUpdateReadyUnits(void) {
                 if (unit->status.flags & 0x80) {
                     switch (unit->species) {
                     case 0x10A:
-                        ready = btlDispatchNamedChunkNode(D_003BB880);
+                        ready = btlDispatchNamedChunkNode((const char *)D_003BB880);
                         break;
                     case 0x12E:
-                        ready = btlDispatchNamedChunkNode(D_003BB888);
+                        ready = btlDispatchNamedChunkNode((const char *)D_003BB888);
                         break;
                     case 0x12F:
-                        ready = btlDispatchNamedChunkNode(D_003BB890);
+                        ready = btlDispatchNamedChunkNode((const char *)D_003BB890);
                         break;
                     default:
                         ready = 1;
