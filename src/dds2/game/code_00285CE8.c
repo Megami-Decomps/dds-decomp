@@ -29,7 +29,7 @@ typedef struct MtrCell {
     s16 remainingFrames;
     s16 durationFrames;
     s8 direction;
-    s8 state;
+    s8 propagationMode;
     u8 remainingDepth;
     u8 unk0B;
 } MtrCell;
@@ -66,7 +66,7 @@ typedef char MtrGrid_cellWidth_offset_must_be_0x1C[
 typedef char MtrGrid_cellHeight_offset_must_be_0x1E[
     ((u32)&((MtrGrid *)0)->cellHeight == 0x1E) ? 1 : -1];
 
-extern void mtrSpawnGridPropagationCells(MtrGrid *grid, MtrCell *source, s8 mode);
+extern void mtrSpawnGridPropagationCells(MtrGrid *grid, MtrCell *source, s8 propagationMode);
 extern void mtrAdvanceGridCellPropagation(MtrGrid *grid);
 
 void mtrUpdateGridPropagation(MtrGrid *grid) {
@@ -86,7 +86,7 @@ void mtrDrawGridPropagationCells(s32 x, s32 y, s32 z, s32 alpha, MtrGrid *grid, 
     s32 i;
 
     for (i = 0; i < grid->count; i++, cell++) {
-        if (cell->state != 0) {
+        if (cell->propagationMode != 0) {
             f32 fade = sdfSin((f32)cell->remainingFrames / (f32)cell->durationFrames * 3.141592503f);
             grid->draw(x + cell->x, y + cell->y, z, (s32)((f32)alpha * fade), grid, flags, context);
         }
@@ -96,7 +96,7 @@ void mtrDrawGridPropagationCells(s32 x, s32 y, s32 z, s32 alpha, MtrGrid *grid, 
 typedef struct MtrDirections { u8 offsets[6][2]; } MtrDirections;
 extern const MtrDirections D_00425DD8;
 
-MtrCell *mtrCreateGridPropagationCell(MtrGrid *grid, MtrCell *source, s8 mode) {
+MtrCell *mtrCreateGridPropagationCell(MtrGrid *grid, MtrCell *source, s8 directionDelta) {
     MtrDirections directionTable = D_00425DD8;
     MtrCell *cell = NULL;
     s32 count;
@@ -104,7 +104,7 @@ MtrCell *mtrCreateGridPropagationCell(MtrGrid *grid, MtrCell *source, s8 mode) {
 
     count = grid->count;
     for (i = 0; i < count; i++) {
-        if (grid->cells[i].state == 0) {
+        if (grid->cells[i].propagationMode == 0) {
             cell = &grid->cells[i];
             break;
         }
@@ -114,7 +114,7 @@ MtrCell *mtrCreateGridPropagationCell(MtrGrid *grid, MtrCell *source, s8 mode) {
     }
     {
         if (source != NULL) {
-            s8 direction = source->direction + mode;
+            s8 direction = source->direction + directionDelta;
             s32 countdown;
 
             if (direction < 0) {
@@ -149,7 +149,7 @@ MtrCell *mtrCreateGridPropagationCell(MtrGrid *grid, MtrCell *source, s8 mode) {
     return cell;
 }
 
-extern MtrCell *mtrCreateGridPropagationCell(MtrGrid *, MtrCell *, s8);
+extern MtrCell *mtrCreateGridPropagationCell(MtrGrid *, MtrCell *, s8 directionDelta);
 
 void mtrSpawnGridPropagationCells(MtrGrid *grid, MtrCell *source, s8 mode) {
     MtrCell *cell;
@@ -160,7 +160,7 @@ void mtrSpawnGridPropagationCells(MtrGrid *grid, MtrCell *source, s8 mode) {
     case 1:
         cell = mtrCreateGridPropagationCell(grid, NULL, 0);
         if (cell != NULL) {
-            cell->state = 4;
+            cell->propagationMode = 4;
         }
         break;
     case 2:
@@ -170,12 +170,12 @@ void mtrSpawnGridPropagationCells(MtrGrid *grid, MtrCell *source, s8 mode) {
             if (cell == NULL) {
                 return;
             }
-            cell->state = mode;
+            cell->propagationMode = mode;
         }
         if (random < 0.9f) {
             cell = mtrCreateGridPropagationCell(grid, source, 1);
             if (cell != NULL) {
-                cell->state = 3;
+                cell->propagationMode = 3;
             }
         }
         break;
@@ -183,7 +183,7 @@ void mtrSpawnGridPropagationCells(MtrGrid *grid, MtrCell *source, s8 mode) {
         if (dds3GetRandFloatA(0) < 0.8f) {
             cell = mtrCreateGridPropagationCell(grid, source, 0);
             if (cell != NULL) {
-                cell->state = mode;
+                cell->propagationMode = mode;
             }
         }
         break;
@@ -193,7 +193,7 @@ void mtrSpawnGridPropagationCells(MtrGrid *grid, MtrCell *source, s8 mode) {
             if (cell == NULL) {
                 break;
             }
-            cell->state = 2;
+            cell->propagationMode = 2;
         }
         break;
     }
@@ -208,13 +208,13 @@ void mtrAdvanceGridCellPropagation(MtrGrid *grid) {
     s32 i;
 
     for (i = 0; i < grid->count; i++, cell++) {
-        if (cell->state != 0) {
+        if (cell->propagationMode != 0) {
             cell->remainingFrames--;
             if (cell->remainingFrames == cell->durationFrames - 5 && cell->remainingDepth != 0) {
-                mtrSpawnGridPropagationCells(grid, cell, cell->state);
+                mtrSpawnGridPropagationCells(grid, cell, cell->propagationMode);
             }
             if (cell->remainingFrames == 0) {
-                cell->state = 0;
+                cell->propagationMode = 0;
             }
         }
     }
