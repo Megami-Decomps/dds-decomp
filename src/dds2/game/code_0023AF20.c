@@ -9,6 +9,7 @@
 #include "evt_world.h"
 #include "evt_unit.h"
 #include "evt_unit_move_end_api.h"
+#include "evt_unit_path_advance_api.h"
 #include "pcp_vu0.h"
 #include "dds3_world_counter.h"
 #include "sdf_vu_matrix.h"
@@ -161,7 +162,7 @@ EvtUnitMoveEndResult evtCheckMoveEnd(evtUnitHandle_t *unit) {
 }
 
 
-s32 evtGetNextMovePos(evtUnitHandle_t *unit) {
+EvtUnitPathAdvanceResult evtGetNextMovePos(evtUnitHandle_t *unit) {
     f32 t;
 
     if (unit->motionState != EVT_UNIT_MOTION_STATE_SOURCE) {
@@ -192,7 +193,7 @@ s32 evtGetNextMovePos(evtUnitHandle_t *unit) {
         dds3PathBasicControlSetRatio(&unit->pathControl->counter, t);
         dds3PathBasicControlGetPos(unit->pathControl);
         VU0_STORE_VF($vf10, unit->targetVector);
-        return 1;
+        return EVT_UNIT_PATH_ADVANCED;
     }
-    return 0;
+    return EVT_UNIT_PATH_NOT_ADVANCED;
 }

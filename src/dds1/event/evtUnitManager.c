@@ -12,6 +12,7 @@ struct EffNodeDescriptor;
 #include "dds3_path.h"
 #include "evt_unit.h"
 #include "evt_unit_move_end_api.h"
+#include "evt_unit_path_advance_api.h"
 #include "evt_unit_vector_slot.h"
 #include "evt_unit_motion_slot_flags.h"
 #include "evt_unit_transition_flags.h"
@@ -1301,7 +1302,6 @@ s32 evtStartUnitModeWithValue(evtUnitHandle_t *work, s32 (*callback)(evtUnitHand
 
 extern void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *);
 extern s32 evtUnitRotationQuat(evtUnitHandle_t *, f32 *, f32);
-extern s32 evtGetNextMovePos(evtUnitHandle_t *);
 extern s32 evtUnitMoveType0(evtUnitHandle_t *);
 extern s32 evtUnitMoveTypePathTrace(evtUnitHandle_t *);
 extern void evtRefreshUnitEndpointWork(evtUnitHandle_t *);
@@ -1365,7 +1365,8 @@ s32 evtUpdateUnitMotion(dds3PoseSet_t *unused, dds3Basic_t *object) {
         }
         break;
     case EVT_UNIT_MOTION_STATE_SOURCE:
-        if (evtCheckMoveEnd(unit) != EVT_UNIT_MOVE_END_REACHED || evtGetNextMovePos(unit) != 0) {
+        if (evtCheckMoveEnd(unit) != EVT_UNIT_MOVE_END_REACHED ||
+            evtGetNextMovePos(unit) != EVT_UNIT_PATH_NOT_ADVANCED) {
             if (unit->motionSetupId != model->current.h.motionIndex) {
                 if (unit->flags & 1) {
                     mdlSmoothLoopMotion(model, 0, unit->motionSetupId, (f32)unit->motionSetupStartFrame, (f32)unit->motionSetupEndFrame);
