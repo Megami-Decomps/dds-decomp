@@ -341,8 +341,11 @@ void fldEveHit_End(void) {
     }
 }
 
+#include "fld_event_display_resource_api.h"
+
 /* Append a file resource for an event task and return its index. */
-s32 fldEveHit_AddEveData(FldFileResource *resource, dds3Basic_t *unusedObject) {
+FldEventDisplayResourceIndex fldEveHit_AddEveData(
+    FldFileResource *resource, dds3Basic_t *unusedObject) {
     s32 index = D_004361B8;
     fldDisplayValues[index] = resource;
     D_004361B8 = index + 1;

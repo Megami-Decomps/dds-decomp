@@ -3369,3 +3369,6 @@ INCLUDE_SDATA(const s32, "game/code_00138C30", D_003BAE68);
 INCLUDE_SDATA(const s32, "game/code_00138C30", fldPickedActorTemplateKind);
 
 INCLUDE_SDATA(const s32, "game/code_00138C30", addressprocess_id);
+
+/* Keep the shared declaration after this unit; moving it changes a matched routine. */
+#include "fld_event_display_resource_api.h"

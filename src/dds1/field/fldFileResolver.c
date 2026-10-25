@@ -846,7 +846,7 @@ extern dds3Basic_t *dds3AddEventBasic(s32 key, const char *resourcePath, const c
 
 extern dds3Basic_t *dds3AddPathBasic(s32 key, Dds3PathCurveTable *work, const char *name);
 
-extern u32 fldEveHit_AddEveData(FldFileResource *, dds3Basic_t *);
+#include "fld_event_display_resource_api.h"
 
 extern s32 fldRegisterRoomObject(FldFileResource *, dds3Basic_t *);
 
