@@ -463,7 +463,7 @@ ScrOpcodeHandlerResult CodeFunc_IF(scrProcessWork_s *scr)
 
 /* Run instructions until one stops the context: returns 2 when a handler returns 0 (finished),
  * 1 when a handler returns 2 (yield for one tick). */
-s32 scrTraceCode(scrProcessWork_s *scr) {
+ScrTraceResult scrTraceCode(scrProcessWork_s *scr) {
     ScrOpcodeHandlerResult handlerResult;
 
     while (1) {

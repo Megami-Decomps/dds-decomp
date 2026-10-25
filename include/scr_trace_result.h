@@ -3,6 +3,9 @@
 
 #include "common.h"
 
+/* Outer result returned by a trace pass, distinct from opcode-handler results. */
+typedef s32 ScrTraceResult;
+
 typedef u32 ScrOpcodeHandlerResult;
 
 #define SCR_TRACE_RESULT_YIELDED 1

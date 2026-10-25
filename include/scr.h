@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "kwln.h"
+#include "scr_trace_result.h"
 
 struct sdfMemHandle_t;
 struct BfFlw0Header;
@@ -102,7 +103,7 @@ void scrSetUserData(dds3ProcessID_t *task, void *actor);
 void scrScriptShutdown(dds3ProcessID_t *task);
 void scrRunScript(scrProcessWork_s *context);
 s32 scrScriptProcess(dds3ProcessID_t *task);
-s32 scrTraceCode(scrProcessWork_s *context);
+ScrTraceResult scrTraceCode(scrProcessWork_s *context);
 void scrProcDestroyTask(scrProcessWork_s *process);
 scrProcessWork_s *bfContextCreate(struct BfFlw0Header *header, ScrSection *sections, ScrLabel *procedures,
                         ScrLabel *labels, ScrInstr *instructions, struct ItfMesSub *auxiliaryData,
