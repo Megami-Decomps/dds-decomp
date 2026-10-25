@@ -196,7 +196,7 @@ typedef struct FileManWork {
     struct FileRequest *tail;            /* 0x0C */
     struct FileTransferJob *done;        /* 0x10: completed callbacks, linked through completionNext */
     struct FilePacRequest *pacCallbackHead; /* 0x14: queued PAC completion callbacks */
-    struct FileRequest *closingJobs;     /* 0x18: finished jobs whose device state is still open */
+    struct FileTransferJob *closingJobs; /* 0x18: finished jobs whose device state is still open */
     u8 *buffer;               /* 0x1C: retained base of the four device-read slots */
     FileManSlot slots[4];     /* 0x20 */
 } FileManWork;

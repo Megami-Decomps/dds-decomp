@@ -25,9 +25,9 @@ extern s32 sdfFileCmdFileSize(sdfFileCmdHandle_t *);
 
 extern void pacRead(FileTransferJob *);
 
-extern void fileLinkCloseWait(FileManWork *work, FileRequest *job);
+extern void fileLinkCloseWait(FileManWork *work, FileTransferJob *job);
 
-extern void fileUnlinkCloseWait(FileManWork *work, FileRequest *job);
+extern void fileUnlinkCloseWait(FileManWork *work, FileTransferJob *job);
 
 extern sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path,
                         s32 (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, FileTransferJob *), void *callbackContext);
@@ -83,7 +83,7 @@ s32 pacLoadCallback(sdfFileCmdHandle_t *deviceRequest, s32 event, s32 unused, s3
         }
         work->activeSlots++;
         if (job->state == FILE_JOB_CLOSING) {
-            fileLinkCloseWait(work, (FileRequest *)job);
+            fileLinkCloseWait(work, job);
             SignalSema(work->sema);
             sdfFileCmdClose(deviceRequest);
         } else {
@@ -96,7 +96,7 @@ s32 pacLoadCallback(sdfFileCmdHandle_t *deviceRequest, s32 event, s32 unused, s3
         break;
     case SDF_DEV_EVENT_CLOSED:
         WaitSema(work->sema);
-        fileUnlinkCloseWait(work, (FileRequest *)job);
+        fileUnlinkCloseWait(work, job);
         SignalSema(work->sema);
         sdfFileCmdFree(deviceRequest);
         job->deviceRequest = NULL;
@@ -172,7 +172,7 @@ s32 fileLoadCallback(sdfFileCmdHandle_t *deviceRequest, s32 event, s32 unused, s
             job->transferAddress += byteCount;
         }
         if (job->state == FILE_JOB_CLOSING) {
-            fileLinkCloseWait(work, (FileRequest *)job);
+            fileLinkCloseWait(work, job);
             SignalSema(work->sema);
             sdfFileCmdClose(deviceRequest);
             saved = D_003BC7D8;
@@ -189,7 +189,7 @@ s32 fileLoadCallback(sdfFileCmdHandle_t *deviceRequest, s32 event, s32 unused, s
         job->deviceRequest = NULL;
         job->state = FILE_JOB_CLOSED;
         WaitSema(work->sema);
-        fileUnlinkCloseWait(work, (FileRequest *)job);
+        fileUnlinkCloseWait(work, job);
         if (job->completionCallback != NULL) {
             FileTransferJob **link = &work->done;
             FileTransferJob *next;
@@ -243,7 +243,7 @@ s32 fileSaveCallback(sdfFileCmdHandle_t *deviceRequest, s32 event, s32 unused, s
             job->state = FILE_JOB_READY;
         }
         if (job->state == FILE_JOB_CLOSING) {
-            fileLinkCloseWait(work, (FileRequest *)job);
+            fileLinkCloseWait(work, job);
             SignalSema(work->sema);
             sdfFileCmdClose(deviceRequest);
             saved = D_003BC7D8;
@@ -260,7 +260,7 @@ s32 fileSaveCallback(sdfFileCmdHandle_t *deviceRequest, s32 event, s32 unused, s
         job->deviceRequest = NULL;
         job->state = FILE_JOB_CLOSED;
         WaitSema(work->sema);
-        fileUnlinkCloseWait(work, (FileRequest *)job);
+        fileUnlinkCloseWait(work, job);
         if (job->completionCallback != NULL) {
             FileTransferJob **link = &work->done;
             FileTransferJob *next;

@@ -107,16 +107,16 @@ void fileUnlinkQueue(FileRequest *node) {
 
 /* Add a finished job to the jobs whose device state is still open, without
  * locking or allocation. */
-void fileLinkCloseWait(FileManWork *work, FileRequest *job) {
+void fileLinkCloseWait(FileManWork *work, FileTransferJob *job) {
     job->next = work->closingJobs;
     work->closingJobs = job;
 }
 
 /* Remove a closed job without locking or freeing. The job must be in the
  * list: unlike fileUnlinkQueue, this walk has no end-of-list guard. */
-void fileUnlinkCloseWait(FileManWork *work, FileRequest *job) {
-    FileRequest **incomingLink = &work->closingJobs;
-    FileRequest *currentJob;
+void fileUnlinkCloseWait(FileManWork *work, FileTransferJob *job) {
+    FileTransferJob **incomingLink = &work->closingJobs;
+    FileTransferJob *currentJob;
 
     while ((currentJob = *incomingLink) != job) {
         incomingLink = &currentJob->next;
