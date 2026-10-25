@@ -123,7 +123,7 @@ extern char D_003B3BA0[]; /* "/tool/effect/hlp/" */
 
 
 
-extern f32 effComputeProjectedOffsetAngle(u8 *, void *);
+extern f32 effComputeProjectedOffsetAngle(const void *position, const void *offset);
 
 extern f32 dds3BillboardGetDirectionScale(u8 *, void *);
 

@@ -337,7 +337,7 @@ extern u8 effZeroVector[];
 
 extern void effSetCurveEmitterEndPosition(FileSlotTable *record, const f32 *value);
 
-extern f32 effComputeProjectedOffsetAngle(void *, void *);
+extern f32 effComputeProjectedOffsetAngle(const void *position, const void *offset);
 
 extern f32 dds3BillboardGetDirectionScale(void *, void *);
 
