@@ -1,6 +1,10 @@
 #ifndef SCR_TRACE_RESULT_H
 #define SCR_TRACE_RESULT_H
 
+#include "common.h"
+
+typedef u32 ScrOpcodeHandlerResult;
+
 #define SCR_TRACE_RESULT_YIELDED 1
 #define SCR_TRACE_RESULT_FINISHED 2
 
