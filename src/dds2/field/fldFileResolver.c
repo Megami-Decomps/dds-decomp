@@ -4413,7 +4413,7 @@ s32 fldUpdateFieldTransition(void) {
     return 0;
 }
 
-extern s32 ptyAnyUnitFlagMatch(u32 statusMask, s32 flagMode);
+extern s32 ptyAnyLivingUnitHasStatus(u32 statusMask, s32 frontlineOnly);
 extern void fldPlayMenuSound(s32 soundId);
 extern s32 fldPlaceAreaDamageEffect(f32 x, f32 y, f32 z);
 
@@ -4422,7 +4422,7 @@ s32 fldUpdateAreaDamageReaction(void) {
     dds3ModelHandle_t *model;
 
     if (work->unk190 > 0) {
-        if (work->terrainAttritionKind == FLD_TERRAIN_ATTRITION_NONE && ptyAnyUnitFlagMatch(0x80, 1) != 0) {
+        if (work->terrainAttritionKind == FLD_TERRAIN_ATTRITION_NONE && ptyAnyLivingUnitHasStatus(0x80, 1) != 0) {
             fldPlayMenuSound(0x22);
             dds3FadeIn(0x80, 0x20, 0x20, 6);
             dds3PadVibrationSet(0, 1, 6);

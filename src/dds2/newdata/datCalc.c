@@ -769,14 +769,14 @@ void ptyRecoverAllUnits(void) {
     }
 }
 
-/* Test occupied entries with nonzero HP; mode 1 additionally requires a frontline member. */
-s32 ptyAnyUnitFlagMatch(u32 statusMask, s32 flagMode) {
+/* Check occupied, nonzero-HP roster members; optionally restrict matches to frontline. */
+s32 ptyAnyLivingUnitHasStatus(u32 statusMask, s32 frontlineOnly) {
     s32 slotIndex = 0;
     datUnitWork_t *entry = DDS3_GBWK->party;
     do {
         if (entry->flags & DAT_PARTY_FLAG_OCCUPIED) {
             if (entry->hp != 0) {
-                if (flagMode != 1 || (entry->flags & DAT_PARTY_FLAG_FRONTLINE)) {
+                if (frontlineOnly != 1 || (entry->flags & DAT_PARTY_FLAG_FRONTLINE)) {
                     if (entry->status & statusMask) {
                         return 1;
                     }

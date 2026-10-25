@@ -3617,7 +3617,7 @@ extern s32 D_0032E4C8[];
 
 extern f32 fldBannerColorPhase;
 
-extern s32 ptyAnyUnitFlagMatch(s32 statusMask, s32 flagMode);
+extern s32 ptyAnyLivingUnitHasStatus(s32 statusMask, s32 frontlineOnly);
 
 
 extern void DrwSprite2DC(s32, s32, s32, s32, s32, s32, s32, s32, u32, u32, u32, u32, sdfTexHandle_t *);
@@ -3631,7 +3631,7 @@ void fldDrawAnimatedFieldBanner(s32 alpha, s32 x, s32 y) {
         rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
         DrwSprite2D(x + 0x123, y, 0x7D, 0x34, 1, 0x31, 0x7D, 0x34, 0x80808080, D_003BAF30);
         DrwSprite2D(x + 0x1A0, y, 0x62, 0x34, 0x7D, 0x31, 1, 0x34, 0x80808080, D_003BAF30);
-        if (ptyAnyUnitFlagMatch(0x5D0, 0) != 0) {
+        if (ptyAnyLivingUnitHasStatus(0x5D0, 0) != 0) {
             color = 0x808080;
             DrwSprite2D(x + 0x17F, y + 0x28, 0x73, 0x1A, 1, 0x66, 0x73, 0x1A, 0x80808080, D_003BAF30);
             if (fldBannerColorPhase < 45.0f) {

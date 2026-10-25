@@ -794,7 +794,7 @@
 0x00119B08	ptyApplyEventPenalty	inferred	Applies mode-selected HP loss and packed status penalties across the active party while keeping living members at one or more HP.
 0x00119CF0	ptyApplyFieldHpAttrition	inferred	Applies mode-selected frontline HP attrition during field processing and preserves a minimum of one HP for living party members.
 0x00119E00	ptyRecoverAllUnits	inferred	legacy Party_RecoverAllActiveUnits: restores HP/MP of every present active party row
-0x00119E88	ptyAnyUnitFlagMatch	inferred	returns 1 if any active roster entry (optionally with flag 2) has a halfword at +0xE matching the mask [names_M36_SmallSweep5.tsv]
+0x00119E88	ptyAnyLivingUnitHasStatus	inferred	returns 1 if any occupied roster entry with nonzero HP has status bits matching the mask; optionally restrict to frontline entries [names_M36_SmallSweep5.tsv]
 0x00119EF8	datAddExp	inferred	SMT3HD name via SLUS_209.11 0x002452B8, byte-identical; was evtAdvanceCounterValue
 0x00119F08	ptyApplySkillRecovery	inferred	R_Names31 B92
 0x0011A038	evtUpdateFlaggedStats	inferred	evt event state and dispatch in game/code_00119900.c
