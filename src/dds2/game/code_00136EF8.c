@@ -269,7 +269,7 @@ void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation
     s32 pass;
     s32 remaining;
     f32 (*sourceVertices)[4];
-    void *stopData;
+    struct FldStopEntry *stopData;
     s32 trianglesRemaining;
     FldCollisionFace *face;
     f32 *planeX;

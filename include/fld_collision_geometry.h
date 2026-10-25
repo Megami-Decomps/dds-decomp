@@ -3,6 +3,8 @@
 
 #include "fld.h"
 
+struct FldStopEntry;
+
 /* Six-word runtime view used by both file-loaded and generated geometry. */
 typedef struct FldCollisionDescriptor {
     s32 vertexCount;
@@ -10,7 +12,7 @@ typedef struct FldCollisionDescriptor {
     s32 triangleCount;
     f32 (*vertices)[4];
     FldCollisionFace *faces;
-    void *stopData;
+    struct FldStopEntry *stopData;
 } FldCollisionDescriptor;
 
 /* Temporary axis-aligned walls own their vertex/face arrays inline. */
