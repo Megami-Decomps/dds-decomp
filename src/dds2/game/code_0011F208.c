@@ -699,7 +699,7 @@ s32 fldTestDrawUpdate(dds3ProcessID_t *task) {
     fldDrawCameraColorScrollingGradient();
     fldSkyDrawFilter();
     if (fldRunDanteGunFlag[9] != 0) {
-        if (fldGetSceneReadyFlag() == 0) {
+        if (fldGetSceneReadyFlag() == FLD_SCENE_NOT_READY) {
             rsetOtOfs(0x53);
         } else {
             rsetOtOfs(0x5E);

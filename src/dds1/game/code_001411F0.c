@@ -1938,7 +1938,7 @@ void func_00145B18(void) {
     D_003D40A0[3] = sdfTexSet(cam->mapResources[3].resourceData);
     D_003BAED4 = 0;
     D_003BAEB4 = cam->floor;
-    AutoMapSeq = 1;
+    AutoMapSeq = FLD_SCENE_READY;
     D_003BAEB8 = cam->flagStage;
     D_003BAED0 = cam->flagStage;
     fldAllIconDel(cam->floor, &entry[0], &entry[1]);
@@ -1993,7 +1993,7 @@ void fldReleaseTitleSlots(void) {
     while (sdfDelayedResrcCheck() != 0) {
         sdfDrawSync();
     }
-    AutoMapSeq = 0;
+    AutoMapSeq = FLD_SCENE_NOT_READY;
     frSetFontDrawOT(0x54);
 }
 
@@ -2028,7 +2028,7 @@ void fldReleaseMenuSlots(void) {
     while (sdfDelayedResrcCheck() != 0) {
         sdfDrawSync();
     }
-    AutoMapSeq = 0;
+    AutoMapSeq = FLD_SCENE_NOT_READY;
 }
 
 extern void fldAutoMapSeqClearFlag(s32);
@@ -2055,7 +2055,7 @@ void fldEnterSceneCamera(void) {
     sdfDrawSync();
     sdfDrawSync();
     fldReleaseTitleSlots();
-    AutoMapSeq = 0;
+    AutoMapSeq = FLD_SCENE_NOT_READY;
     fldAutoMapSeqClearFlag(1);
     fldPreparePlayerSceneCameraTarget();
     evtSetSolarOverlayFullyVisible();
@@ -2160,7 +2160,7 @@ void fldReleaseMenuSlotsAfterWait(void) {
     fldReleaseMenuSlots();
 }
 
-u32 fldGetSceneReadyFlag(void) {
+FldSceneReadyState fldGetSceneReadyFlag(void) {
     return AutoMapSeq;
 }
 
@@ -2174,7 +2174,7 @@ void fldUpdateAutomapInput(void) {
     f32 minX, maxZ, maxX, minZ;
     s32 closeRequested = 0;
 
-    if (fldGetSceneReadyFlag() == 0) {
+    if (fldGetSceneReadyFlag() == FLD_SCENE_NOT_READY) {
         return;
     }
     if (D_0032E5C4[0] != 0) {
@@ -2567,13 +2567,13 @@ void fldCheckSceneReady(void) {
     if (D_0032E3C0[0] >= 200) {
         return;
     }
-    if (AutoMapSeq == 1) {
+    if (AutoMapSeq == FLD_SCENE_READY) {
         fldUpdateAutomapInput();
     }
 }
 
 void fldDrawAutomapWhenReady(void) {
-    if (AutoMapSeq == 1) {
+    if (AutoMapSeq == FLD_SCENE_READY) {
         fldDrawFieldBackdropFrame();
         fldDrawAutomapScene();
     }

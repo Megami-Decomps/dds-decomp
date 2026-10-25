@@ -2271,7 +2271,7 @@ void func_00149A00(void) {
     D_0044F7F0[6] = sdfTexSet(cam->mapResources[4].resourceData);
     D_00436268 = 0;
     D_00436248 = cam->floor;
-    AutoMapSeq = 1;
+    AutoMapSeq = FLD_SCENE_READY;
     D_0043624C = cam->flagStage;
     D_00436264 = cam->flagStage;
     fldAllIconDel(cam->floor, &entry[0], &entry[1]);
@@ -2331,7 +2331,7 @@ void fldReleaseResourceSlots(void) {
     while (sdfDelayedResrcCheck() != 0) {
         sdfDrawSync();
     }
-    AutoMapSeq = 0;
+    AutoMapSeq = FLD_SCENE_NOT_READY;
     frSetFontDrawOT(0x54);
 }
 
@@ -2370,7 +2370,7 @@ void fldReleaseSceneDevSlotsAndTextures(void) {
     while (sdfDelayedResrcCheck() != 0) {
         sdfDrawSync();
     }
-    AutoMapSeq = 0;
+    AutoMapSeq = FLD_SCENE_NOT_READY;
 }
 
 extern void fldAllIconDel(s32 index, f32 *x, f32 *z);
@@ -2421,7 +2421,7 @@ void fldEnterSceneCamera(void) {
     sdfDrawSync();
     sdfDrawSync();
     fldReleaseResourceSlots();
-    AutoMapSeq = 0;
+    AutoMapSeq = FLD_SCENE_NOT_READY;
     fldAutoMapSeqClearFlag(1);
     fldPreparePlayerSceneCameraTarget();
     evtSetSolarOverlayFullyVisible();
@@ -2522,7 +2522,7 @@ void fldReleaseMenuSlotsAfterWait(void) {
     fldReleaseSceneDevSlotsAndTextures();
 }
 
-u32 fldGetSceneReadyFlag(void) {
+FldSceneReadyState fldGetSceneReadyFlag(void) {
     return AutoMapSeq;
 }
 
@@ -2536,7 +2536,7 @@ void fldUpdateAutomapInput(void) {
     f32 minX, maxZ, maxX, minZ;
     s32 closeRequested = 0;
 
-    if (fldGetSceneReadyFlag() == 0) {
+    if (fldGetSceneReadyFlag() == FLD_SCENE_NOT_READY) {
         return;
     }
     if (D_003899E0[0] != 0) {
@@ -2936,13 +2936,13 @@ void fldCheckSceneReady(void) {
     if (D_00389780[0] >= 200) {
         return;
     }
-    if (AutoMapSeq == 1) {
+    if (AutoMapSeq == FLD_SCENE_READY) {
         fldUpdateAutomapInput();
     }
 }
 
 void fldDrawAutomapWhenReady(void) {
-    if (AutoMapSeq == 1) {
+    if (AutoMapSeq == FLD_SCENE_READY) {
         fldDrawScrollingLayerOverlay();
         fldDrawAutomapScene();
     }

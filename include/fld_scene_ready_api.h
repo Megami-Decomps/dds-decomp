@@ -3,7 +3,13 @@
 
 #include "common.h"
 
-u32 fldGetSceneReadyFlag(void);
+typedef u32 FldSceneReadyState;
+enum {
+    FLD_SCENE_NOT_READY = 0,
+    FLD_SCENE_READY = 1
+};
+
+FldSceneReadyState fldGetSceneReadyFlag(void);
 u32 fldLoadNextGetStatus(void);
 u8 fldLoadNextGetStatus2(void);
 u32 fldPollAreaResourceLoad(void);

@@ -4964,7 +4964,7 @@ s32 fldUpdateCameraFrame(void) {
     if (fldRunDanteGunFlag[0] != 0) {
         return 0;
     }
-    if (fldGetSceneReadyFlag() != 0) {
+    if (fldGetSceneReadyFlag() != FLD_SCENE_NOT_READY) {
         return 0;
     }
     if (fldEncountTestFlag(0x40) == 0) {
@@ -5349,7 +5349,7 @@ void fldSkyDrawFilter(void) {
     s32 oldR2, oldG2, oldB2, oldA2;
     s32 oldR3, oldG3, oldB3, oldA3;
 
-    if (current == 0 || fldGetSceneReadyFlag() != 0) {
+    if (current == 0 || fldGetSceneReadyFlag() != FLD_SCENE_NOT_READY) {
         return;
     }
     currentWeight = D_00436120;

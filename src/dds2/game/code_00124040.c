@@ -2046,7 +2046,7 @@ s32 fldUpdateCampMenuTransition(void) {
     if (control == 0) {
         return control;
     }
-    if (fldAutoMapSeqTestFlag(1) == 1 || fldHasPendingSceneFlags() != 0 || fldGetSceneReadyFlag() != 0) {
+    if (fldAutoMapSeqTestFlag(1) == 1 || fldHasPendingSceneFlags() != 0 || fldGetSceneReadyFlag() != FLD_SCENE_NOT_READY) {
         return 0;
     }
     scene = &fldGlobalBase;
@@ -2070,7 +2070,7 @@ u8 fldProcAmChk(void) {
     if (D_00435F80 > 0) {
         return 2;
     }
-    return fldGetSceneReadyFlag() != 0;
+    return fldGetSceneReadyFlag() != FLD_SCENE_NOT_READY;
 }
 
 /* Gate next-floor input on camp/readiness flags, then start the native scene
@@ -2390,7 +2390,7 @@ s32 fldUpdateFieldSceneTask(dds3ProcessID_t *task) {
             fldCheckSceneReady();
             fldGetSceneReadyFlag();
         }
-        if (fldGetSceneReadyFlag() == 0 && fldProcCampChk() == 0 &&
+        if (fldGetSceneReadyFlag() == FLD_SCENE_NOT_READY && fldProcCampChk() == 0 &&
             fldHasKiretaLabelProcess() == 0 && fldProcKiretaChk() == 0 &&
             fldProcHirakenaiChk() == 0) {
             fldFlushQueuedEffectPositions();
@@ -2439,7 +2439,7 @@ s32 fldProcDraw(dds3ProcessID_t *task) {
     if (fldProcCampChk() == 1) {
         return 0;
     }
-    if (fldGetSceneReadyFlag() == 0 && fldProcCampChk() == 0 &&
+    if (fldGetSceneReadyFlag() == FLD_SCENE_NOT_READY && fldProcCampChk() == 0 &&
         fldIsEventPhaseAtLeastTwo() == 0) {
         func_0014DEA8();
     }
