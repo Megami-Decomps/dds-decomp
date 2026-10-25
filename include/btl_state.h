@@ -258,9 +258,9 @@ typedef struct BtlState {
     u16 encounterParamA; /* 0x288: scene record +0x1C, else the test-menu default */
     u16 encounterParamB; /* 0x28A: scene record +0x1E, else the test-menu default */
     u8 pad28C[4];
-    struct sdfMemHandle_t *fieldF1ResourceId; /* 0x290: retained field archive allocation. */
-    struct sdfMemHandle_t *fieldF2ResourceId; /* 0x294 */
-    struct sdfMemHandle_t *fieldTBResourceId; /* 0x298 */
+    struct sdfMemHandle_t *fieldF1ResourceHandle; /* 0x290: retained field archive allocation. */
+    struct sdfMemHandle_t *fieldF2ResourceHandle; /* 0x294 */
+    struct sdfMemHandle_t *fieldTBResourceHandle; /* 0x298 */
     struct dds3ProcessID_t *scriptOwner; /* 0x29C: parent task; script tasks use its priority minus one */
     struct dds3ProcessID_t *scriptTask; /* 0x2A0: active battle script task. */
     struct dds3ProcessID_t *boundTask; /* 0x2A4: AI actor-slot binding script. */
@@ -370,9 +370,9 @@ typedef char BtlSceneLightDds1Offset4[((unsigned int)&((BtlState *)0)->lightColo
 typedef char BtlSceneLightDds1Offset5[((unsigned int)&((BtlState *)0)->ambientColor == 0x60) ? 1 : -1];
 typedef char BtlSceneLightDds1Offset6[((unsigned int)&((BtlState *)0)->sceneLightNode == 0x204) ? 1 : -1];
 typedef char BtlStateTotalApOffset[((unsigned int)&((BtlState *)0)->totalAp == 0x2D0) ? 1 : -1];
-typedef char BtlFieldF1Offset[((unsigned int)&((BtlState *)0)->fieldF1ResourceId == 0x290) ? 1 : -1];
-typedef char BtlFieldF2Offset[((unsigned int)&((BtlState *)0)->fieldF2ResourceId == 0x294) ? 1 : -1];
-typedef char BtlFieldTBOffset[((unsigned int)&((BtlState *)0)->fieldTBResourceId == 0x298) ? 1 : -1];
+typedef char BtlFieldF1Offset[((unsigned int)&((BtlState *)0)->fieldF1ResourceHandle == 0x290) ? 1 : -1];
+typedef char BtlFieldF2Offset[((unsigned int)&((BtlState *)0)->fieldF2ResourceHandle == 0x294) ? 1 : -1];
+typedef char BtlFieldTBOffset[((unsigned int)&((BtlState *)0)->fieldTBResourceHandle == 0x298) ? 1 : -1];
 typedef char BtlFrontFloorResourceOffset[
     ((unsigned int)&((BtlState *)0)->frontFloorResource == 0x57C) ? 1 : -1];
 typedef char BtlSideFloorResourceOffset[
@@ -504,9 +504,9 @@ typedef struct BtlState {
     s32 loadStep;
     u8 specialEncounterBlocked; /* 0x2B4: scene setup latch blocks special encounter rolls. */
     u8 pad2B5[3];
-    struct sdfMemHandle_t *fieldF1ResourceId; /* 0x2B8: retained field archive allocation. */
-    struct sdfMemHandle_t *fieldF2ResourceId; /* 0x2BC */
-    struct sdfMemHandle_t *fieldTBResourceId; /* 0x2C0 */
+    struct sdfMemHandle_t *fieldF1ResourceHandle; /* 0x2B8: retained field archive allocation. */
+    struct sdfMemHandle_t *fieldF2ResourceHandle; /* 0x2BC */
+    struct sdfMemHandle_t *fieldTBResourceHandle; /* 0x2C0 */
     struct dds3ProcessID_t *scriptOwner; /* 0x2C4: parent task; script tasks use its priority minus one */
     struct dds3ProcessID_t *scriptTask; /* 0x2C8: active battle script task. */
     struct dds3ProcessID_t *boundTask; /* 0x2CC: AI actor-slot binding script. */
@@ -675,12 +675,12 @@ typedef char BtlSceneLightOffset4[((unsigned int)&((BtlState *)0)->lightColor ==
 typedef char BtlSceneLightOffset5[((unsigned int)&((BtlState *)0)->ambientColor == 0x60) ? 1 : -1];
 typedef char BtlLinkageDelayHookOffset[((unsigned int)&((BtlState *)0)->linkageStartDelayHook == 0x65C) ? 1 : -1];
 typedef char BtlLinkageNextHookOffset[((unsigned int)&((BtlState *)0)->cameraPoseBlendHook == 0x660) ? 1 : -1];
-typedef char BtlFieldF1Offset[((unsigned int)&((BtlState *)0)->fieldF1ResourceId == 0x2B8) ? 1 : -1];
-typedef char BtlFieldF2Offset[((unsigned int)&((BtlState *)0)->fieldF2ResourceId == 0x2BC) ? 1 : -1];
-typedef char BtlFieldTBOffset[((unsigned int)&((BtlState *)0)->fieldTBResourceId == 0x2C0) ? 1 : -1];
-typedef char BtlFieldResourceIdsSpanCheck[
+typedef char BtlFieldF1Offset[((unsigned int)&((BtlState *)0)->fieldF1ResourceHandle == 0x2B8) ? 1 : -1];
+typedef char BtlFieldF2Offset[((unsigned int)&((BtlState *)0)->fieldF2ResourceHandle == 0x2BC) ? 1 : -1];
+typedef char BtlFieldTBOffset[((unsigned int)&((BtlState *)0)->fieldTBResourceHandle == 0x2C0) ? 1 : -1];
+typedef char BtlFieldResourceHandlesSpanCheck[
     (((unsigned int)&((BtlState *)0)->scriptOwner -
-      (unsigned int)&((BtlState *)0)->fieldF1ResourceId) == 0xC) ? 1 : -1];
+      (unsigned int)&((BtlState *)0)->fieldF1ResourceHandle) == 0xC) ? 1 : -1];
 typedef char BtlSpawnCountOffsetCheck[
     ((unsigned int)&((BtlState *)0)->spawnCount == 0x27E) ? 1 : -1];
 typedef char BtlSceneLightNodeOffsetCheck[
