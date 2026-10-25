@@ -701,7 +701,7 @@ u32 brsTaskAllowUpdate(void) {
     return 1;
 }
 
-s32 brsTaskPollDone(void) {
+BrsTaskPollResult brsTaskPollDone(void) {
     return brsTaskConsumeDone();
 }
 
@@ -1041,18 +1041,18 @@ u32 mnuStaffDestroyTasks(void) {
     return 0;
 }
 
-s32 brsTaskConsumeDone(void) {
+BrsTaskPollResult brsTaskConsumeDone(void) {
     s32 state = brsTaskState;
     if (state == BRS_TASK_STATE_ACTIVE) {
-        return 1;
+        return BRS_TASK_POLL_RESULT_ACTIVE;
     }
     if (state < BRS_TASK_STATE_COMPLETE) {
-        return 0;
+        return BRS_TASK_POLL_RESULT_INACTIVE;
     }
     if (state == BRS_TASK_STATE_COMPLETE) {
         brsTaskState = BRS_TASK_STATE_IDLE;
     }
-    return 0;
+    return BRS_TASK_POLL_RESULT_INACTIVE;
 }
 
 u32 brsTaskTryDestroy(void) {

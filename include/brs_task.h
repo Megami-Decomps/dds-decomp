@@ -1,10 +1,9 @@
 #ifndef BRS_TASK_H
 #define BRS_TASK_H
 
-#include "common.h"
+#include "brs_task_poll_result.h"
 
-/* Return 1 only while the task state is 1. State 2 is consumed and cleared;
- * other states return 0 without changing the state. */
-s32 brsTaskConsumeDone(void);
+/* COMPLETE is consumed into IDLE; only an ACTIVE lifecycle returns ACTIVE. */
+BrsTaskPollResult brsTaskConsumeDone(void);
 
 #endif /* BRS_TASK_H */

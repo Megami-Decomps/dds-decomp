@@ -1419,7 +1419,7 @@ u32 fldStepAreaLoad(BattleSceneWork *work) {
     step = work->loadStep;
     if (step < 3) {
         if (step > 0) {
-            if (brsTaskPollDone() == 0) {
+            if (brsTaskPollDone() == BRS_TASK_POLL_RESULT_INACTIVE) {
                 return 0xB;
             }
         }

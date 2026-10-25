@@ -1296,10 +1296,10 @@ u32 ExitResult2(void) {
 }
 
 u8 CheckResult2(void) {
-    s32 taskResult;
+    BrsTaskPollResult taskResult;
 
     taskResult = brsTaskConsumeDone();
-    return taskResult == 0;
+    return taskResult == BRS_TASK_POLL_RESULT_INACTIVE;
 }
 
 void CallConfig(void) {
@@ -1484,10 +1484,10 @@ u32 evtDestroyStaffTasksAlternate(void) {
 }
 
 u8 evtWaitStaffTaskDoneAlternate(void) {
-    s32 taskResult;
+    BrsTaskPollResult taskResult;
 
     taskResult = brsTaskConsumeDone();
-    return taskResult == 0;
+    return taskResult == BRS_TASK_POLL_RESULT_INACTIVE;
 }
 
 /* Admin mode 23 entry intentionally performs no work. */
