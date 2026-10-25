@@ -2692,8 +2692,8 @@ void effPcpUpdateOrbitingAimNode(EffPCPSpanWork *work) {
     work->frame++;
 }
 
-void effPCPBreathSetPosition(void *work, void *src) {
-    SDF_VU0_COPYVECTOR(((EffPCPSpanWork *)work)->params.anchor, src);
+void effPCPBreathSetPosition(EffPCPSpanWork *work, const f32 sourcePosition[4]) {
+    SDF_VU0_COPYVECTOR(work->params.anchor, sourcePosition);
 }
 
 void effPCPBreathSetColor(EffPCPSpanWork *work, u32 val) {

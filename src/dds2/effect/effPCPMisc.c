@@ -168,7 +168,7 @@ extern void effPCPHama01PartInit(EffPCPTwinWork *work, s32 slotIndex);
 
 EffPCPTripleWork *effPCPAgiraoFireCreate(EffPCPTripleParams *params, EffNodeDescriptor **descriptors);
 
-extern void effPCPBreathSetPosition(void *dst, void *src);
+extern void effPCPBreathSetPosition(EffPCPSpanWork *work, const f32 sourcePosition[4]);
 
 
 
@@ -2737,8 +2737,8 @@ void effPcpUpdateOrbitingAimNode(EffPCPSpanWork *work) {
     work->frame++;
 }
 
-void effPCPBreathSetPosition(void *work, void *src) {
-    SDF_VU0_COPYVECTOR(((EffPCPSpanWork *)work)->params.anchor, src);
+void effPCPBreathSetPosition(EffPCPSpanWork *work, const f32 sourcePosition[4]) {
+    SDF_VU0_COPYVECTOR(work->params.anchor, sourcePosition);
 }
 
 void effPCPBreathSetColor(EffPCPSpanWork *work, u32 value) {
