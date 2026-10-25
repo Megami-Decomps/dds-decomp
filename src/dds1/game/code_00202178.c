@@ -2984,7 +2984,7 @@ void btlFadeAndTintNamedChunkTree(sdfModelNode_t *node, s32 color)
 
 extern s32 sdfModelGetNodeIndexByName(sdfModelRootNode_t *, const char *);
 
-s32 btlDispatchNamedChunkNode(const char *name) {
+s8 btlDispatchNamedChunkNode(const char *name) {
     u8 *effect = (u8 *)((BtlState *)btlGetRuntime())->effect;
     u8 *unit = *(u8 **)effect;
     dds3ModelHandle_t *model;
@@ -3271,7 +3271,7 @@ u64 btlStartSubtaskWithInput(u64 prerequisiteHandle) {
     return task->handle;
 }
 
-extern s32 btlDispatchNamedChunkNode(const char *);
+extern s8 btlDispatchNamedChunkNode(const char *);
 
 extern s8 D_003BB880[];
 
