@@ -2907,23 +2907,22 @@ void btlFinalizeLinkedActionAndAdvanceHistory(void) {
 
 extern void btlAdvanceHistoryCounter(BtlTask *task);
 
-void btlUnitTurnEndCommit(s32 task) {
-    void (*hook)(s32) = *(void (**)(s32))((u8 *)btlGetRuntime() + 0x600);
-    BtlTask *command = (BtlTask *)task;
-    BtlUnit *owner = command->unit;
+void btlUnitTurnEndCommit(BtlTask *task) {
+    void (*hook)(BtlTask *) = *(void (**)(BtlTask *))((u8 *)btlGetRuntime() + 0x600);
+    BtlUnit *owner = task->unit;
 
     if (hook != 0) {
         hook(task);
     }
-    btlAdvanceHistoryCounter(command);
-    btlResetIndexWork(&command->indexWork);
+    btlAdvanceHistoryCounter(task);
+    btlResetIndexWork(&task->indexWork);
     owner->pendingAbilityId = -1;
-    command->options &= ~1;
-    command->completedTurns += 1;
+    task->options &= ~1;
+    task->completedTurns += 1;
     owner->status.flags &= ~0x4000;
-    fldUpdateSceneGroupTask(task);
-    if (command->unit->status.flags & 0x20) {
-        btlUnitTurnEndStateSelect((u8 *)task);
+    fldUpdateSceneGroupTask((s32)task);
+    if (task->unit->status.flags & 0x20) {
+        btlUnitTurnEndStateSelect(task);
     } else {
         btlDispatchStateHandler(task, 2);
     }
@@ -2935,9 +2934,8 @@ extern void btlAccumulateEnemyDefeatRewards(BtlUnit *);
 extern BtlRuntimeTask *btlCreateSelectedEffectUpdateTask(BtlUnit *);
 
 
-void btlStartActorDefeatTransition(s32 command) {
+void btlStartActorDefeatTransition(BtlTask *commandTask) {
     BtlActorWork *work = (BtlActorWork *)btlGetRuntime();
-    BtlTask *commandTask = (BtlTask *)command;
     BtlUnit *actor = commandTask->unit;
     datUnitWork_t *profile = &actor->partyRecord;
     BtlRuntimeTask *soundTask;
