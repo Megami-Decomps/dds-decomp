@@ -4986,14 +4986,14 @@ BtlRuntimeTask *btlCreateUnitFaceBodyTask(BtlUnit *actor, BtlUnit *target) {
     return task;
 }
 
-u32 btlFlagDefeatCandidateTask(u32 *taskArgs) {
-    btlFlagUnitDefeatCandidate((BtlUnit *)*taskArgs);
+u32 btlFlagDefeatCandidateTask(BtlUnit **taskArgs) {
+    btlFlagUnitDefeatCandidate(*taskArgs);
     return 1;
 }
 
 BtlRuntimeTask *btlCreateDefeatCandidateTask(BtlUnit *unit) {
     BtlRuntimeTask *task = btlAllocTask(4);
-    BtlRuntimeTaskArgs *args;
+    BtlUnit **args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->callback = btlFlagDefeatCandidateTask;
@@ -5001,18 +5001,18 @@ BtlRuntimeTask *btlCreateDefeatCandidateTask(BtlUnit *unit) {
     task->ownerId = unit->owner;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
-    args->actor = unit;
+    *args = unit;
     return task;
 }
 
-u32 btlClearDefeatCandidateTask(u32 *taskArgs) {
+u32 btlClearDefeatCandidateTask(BtlUnit **taskArgs) {
     btlClearUnitDefeatCandidate(*taskArgs);
     return 1;
 }
 
 BtlRuntimeTask *btlCreateDefeatCandidateClearTask(BtlUnit *unit) {
     BtlRuntimeTask *task = btlAllocTask(4);
-    BtlRuntimeTaskArgs *args;
+    BtlUnit **args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->callback = btlClearDefeatCandidateTask;
@@ -5020,7 +5020,7 @@ BtlRuntimeTask *btlCreateDefeatCandidateClearTask(BtlUnit *unit) {
     task->ownerId = unit->owner;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
-    args->actor = unit;
+    *args = unit;
     return task;
 }
 
