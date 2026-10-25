@@ -37,7 +37,7 @@ enum {
     SDF_POOL_PUSH_FREE = 1
 };
 
-extern DevRequest *sdfTexListNew(u32 count);
+extern DevRequest *sdfTexListNew(s32 count);
 
 /* Read the entry count word, size the list for it and arm the skip handler. */
 void sdfPacTexListDecoder0(PacState *state) {

@@ -104,7 +104,7 @@ extern SdfHandlerNode *D_003BDA9C;
 extern SdfHandlerNode *D_003BDAA0;
 extern void sdfIpuRemoveHandler(SdfHandlerNode *target);
 
-extern DevRequest *sdfTexListNew(u32 capacity);
+extern DevRequest *sdfTexListNew(s32 capacity);
 
 
 extern sdfIpuDecodeCb_t *sdfIpuQueueHead;

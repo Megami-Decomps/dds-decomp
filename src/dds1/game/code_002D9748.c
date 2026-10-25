@@ -386,7 +386,7 @@ void sdfSetForcedAssetTextureMode(u32 mode) {
 }
 
 /* Create a four-byte-item buffer with growth in groups of four slots. */
-DevRequest *sdfTexListNew(u32 capacity) {
+DevRequest *sdfTexListNew(s32 capacity) {
     return sdfDevCreateBufferedRequest(capacity, SDF_RESOURCE_LIST_ITEM_BYTES, SDF_RESOURCE_LIST_GROWTH);
 }
 
