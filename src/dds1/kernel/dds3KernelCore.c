@@ -9,12 +9,11 @@
 #include "kwln_task_state.h"
 #include "kwln_task_lifecycle.h"
 #include "kwln_task_queue_mutation.h"
+#include "kwln_task_runner.h"
 
 extern void StartProcess(dds3ProcessID_t* task);
 
 extern void StartingProcess(void);
-
-extern s32 RunProcess(dds3ProcessID_t* task);
 
 extern void RunningProcess(void);
 
@@ -95,13 +94,13 @@ void StartingProcess(void)
     }
 }
 
-s32 RunProcess(dds3ProcessID_t *task) {
+KwlnTaskCursorAction RunProcess(dds3ProcessID_t *task) {
     s32 port;
     s32 inputIndex;
     s32 nextUpdate;
 
     if (task->flags & KWLN_TASK_SKIP_UPDATE) {
-        return 1;
+        return KWLN_TASK_CURSOR_ACTION_ADVANCE;
     }
     runprocess = task;
 
@@ -139,12 +138,12 @@ s32 RunProcess(dds3ProcessID_t *task) {
         if (nextUpdate == -1 && (task->flags & KWLN_TASK_STATE_MASK) == KWLN_TASK_ACTIVE) {
             EndProcess(task);
             runprocess = 0;
-            return 0;
+            return KWLN_TASK_CURSOR_ACTION_RELOAD;
         }
     }
     task->runUpdateCount++;
     runprocess = 0;
-    return 1;
+    return KWLN_TASK_CURSOR_ACTION_ADVANCE;
 }
 
 void RunningProcess(void)
@@ -165,7 +164,7 @@ void RunningProcess(void)
                 if (active->priority <= delayed->priority) {
                     current = active;
                     previous = current->listPrev;
-                    if (RunProcess(current) != 0) {
+                    if (RunProcess(current) != KWLN_TASK_CURSOR_ACTION_RELOAD) {
                         active = current->listNext;
                     } else {
                         active = previous != 0 ? previous->listNext : runninglistf;
@@ -173,7 +172,7 @@ void RunningProcess(void)
                 } else {
                     current = delayed;
                     previous = current->listPrev;
-                    if (RunProcess(current) != 0) {
+                    if (RunProcess(current) != KWLN_TASK_CURSOR_ACTION_RELOAD) {
                         delayed = current->listNext;
                     } else {
                         delayed = previous != 0 ? previous->listNext : endinglistf;
@@ -184,7 +183,7 @@ void RunningProcess(void)
                 do {
                     current = active;
                     drainPrevious = current->listPrev;
-                    if (RunProcess(current) != 0) {
+                    if (RunProcess(current) != KWLN_TASK_CURSOR_ACTION_RELOAD) {
                         active = current->listNext;
                     } else {
                         active = drainPrevious != 0 ? drainPrevious->listNext : runninglistf;
@@ -198,7 +197,7 @@ void RunningProcess(void)
                 do {
                     current = delayed;
                     drainPrevious = current->listPrev;
-                    if (RunProcess(current) != 0) {
+                    if (RunProcess(current) != KWLN_TASK_CURSOR_ACTION_RELOAD) {
                         delayed = current->listNext;
                     } else {
                         delayed = drainPrevious != 0 ? drainPrevious->listNext : endinglistf;
