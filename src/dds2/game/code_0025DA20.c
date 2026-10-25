@@ -168,7 +168,7 @@ extern u8 mnuCampListedItemSolarWeightsView[];
 
 
 
-extern s32 mnuIsHighRangeItemId(s32);
+extern u8 mnuIsHighRangeItemId(s32);
 extern u8 mnuIsBulletItemId(s32);
 extern u8 mnuIsSolarPricedItemId(s32);
 
@@ -3865,7 +3865,7 @@ extern u8 mnuCampGetWideRewardKind(s32, s32);
 extern u8 mnuCampGetCompactRewardKind(s32, s32);
 extern s32 mnuCampResolveOwnedItemVariant(s32, s32);
 extern s32 mnuCampGetCompactEntryId(s32, s32);
-extern s32 mnuIsHighRangeItemId(s32);
+extern u8 mnuIsHighRangeItemId(s32);
 extern MenuPopupEntry mnuShopSlotAdvancePopupEntry[];
 extern char D_00437848[];
 extern char D_00437850[];

@@ -2607,7 +2607,7 @@ u8 mnuIsSolarPricedItemId(s32 id) {
     return id < 0x6D;
 }
 
-s32 mnuIsHighRangeItemId(s32 id) {
+u8 mnuIsHighRangeItemId(s32 id) {
     if (id < 0xC0) {
         return 0;
     }
