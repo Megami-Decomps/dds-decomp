@@ -124,7 +124,7 @@ extern f32 D_00433724;
 extern f32 *D_0037F770[];
 extern u32 btlGetActorCommandClass(BattleSceneObject *, s8);
 extern BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(const void *, u32);
-extern s32 btlCountTasksForOwner(s64);
+extern s32 btlCountTasksForOwner(u64);
 
 extern SceneInitializer D_003B6938[];
 

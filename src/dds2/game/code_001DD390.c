@@ -139,7 +139,7 @@ extern u32 dds3DrawFlag;
 
 extern u8 *datActionAnimationRecords;
 
-extern s32 btlCountTasksForOwner(s64);
+extern s32 btlCountTasksForOwner(u64);
 
 extern void btlRunTask(BtlRuntimeTask *);
 
@@ -2044,7 +2044,7 @@ s32 btlCountRegisteredTasks(void) {
 }
 
 /* Count registrations with this full-width owner key. */
-s32 btlCountTasksForOwner(s64 owner) {
+s32 btlCountTasksForOwner(u64 owner) {
     s32 count = 0;
     BtlRuntimeTask *task;
     for (task = ((BtlState *)btlGetRuntime())->taskHead; task != 0; task = task->next) {

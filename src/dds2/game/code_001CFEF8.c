@@ -105,7 +105,7 @@ extern f32 *D_0037F770[];
 
 extern BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(const void *sourceParams, u32 value);
 
-extern s32 btlCountTasksForOwner(s64);
+extern s32 btlCountTasksForOwner(u64);
 
 extern SceneInitializer D_003B6938[];
 
@@ -241,7 +241,7 @@ u64 fldMarkGridTiles(BtlState *scene) {
 s32 fldSceneStateStartTileEffect(BtlState *scene) {
     BattleEffectParams params;
     f32 *origin;
-    if (btlCountTasksForOwner(0x8000000000000001LL) == 0) {
+    if (btlCountTasksForOwner(0x8000000000000001ULL) == 0) {
         btlResetTitleStreamOnBattleFlag();
         btlInitializeWorldCamera();
         btlSpawnBattleWorldAction();
@@ -409,7 +409,7 @@ void btlInitializeBattleUnits(BtlState *scene) {
 }
 
 s32 fldSceneStateRestoreDisplay(BtlState *scene) {
-    if (btlCountTasksForOwner(0x8000000000000002LL) == 0) {
+    if (btlCountTasksForOwner(0x8000000000000002ULL) == 0) {
         btlArrangeOpponentFormationSlots();
         if (!(scene->battleFlags & 0x4000)) {
             btlRepositionPartyAroundBattleCenter();
@@ -672,12 +672,12 @@ s32 btlInitializeSceneAfterTasksAndBuffersReady(BtlState *scene) {
     u32 i;
 
     if (scene->commandRestrictFlags & 0x100000) {
-        if (btlCountTasksForOwner(0x8000000000000004LL) == 0) {
+        if (btlCountTasksForOwner(0x8000000000000004ULL) == 0) {
             btlMarkRuntimeUpdatePending();
             scene->commandRestrictFlags &= ~0x100000;
         }
     }
-    if (btlCountTasksForOwner(0x8000000000000003LL) == 0 &&
+    if (btlCountTasksForOwner(0x8000000000000003ULL) == 0 &&
         btlAreWorkBuffersReady() != 0 &&
         btlIsFadeOutCompleteOrIdle() != 0) {
         fldInitializeSceneGroups();

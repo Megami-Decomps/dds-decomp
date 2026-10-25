@@ -2347,7 +2347,7 @@ extern void btlSetUnitPosition(BtlUnit *, const f32 *);
 extern void btlApplyUnitEffectScale(BtlUnit *);
 extern void btlApplyUnitModelScaledValue(BtlUnit *);
 extern void btlSeekUnitModelFrameZero(BtlUnit *);
-extern s32 btlCountTasksForOwner(s64);
+extern s32 btlCountTasksForOwner(u64);
 extern void btlDebugDrawText(s32, s32, s32, const char *);
 /* Keep the diagnostic scale as a float in the existing four-argument ABI. */
 extern void btlDebugDrawScaledPositionGuide(f32 *, u32, s32, f32);

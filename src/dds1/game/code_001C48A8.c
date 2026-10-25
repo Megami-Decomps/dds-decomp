@@ -138,7 +138,7 @@ typedef char BattleSceneWorkTotalApOffsetCheck[
     ((u32)&((BattleSceneWork *)0)->totalAp == 0x2D0) ? 1 : -1];
 typedef char BattleSceneWorkSizeCheck[(sizeof(BattleSceneWork) == 0x5FC) ? 1 : -1];
 
-extern s32 btlCountTasksForOwner(s64);
+extern s32 btlCountTasksForOwner(u64);
 extern u64 btlStartTask(BtlRuntimeTask *);
 extern BtlRuntimeTask *fldCreateSceneTileTask(s32 stage, s32 variant);
 extern void btlDispatchStateHandler(void *, s32);

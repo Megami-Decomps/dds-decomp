@@ -97,7 +97,7 @@ extern s32 btlHasSingleLinkedResource(BtlLinkedCommand *);
 
 extern void btlResetCameraMotion(BtlLinkedCommand *);
 
-extern s32 btlCountTasksForOwner(s64);
+extern s32 btlCountTasksForOwner(u64);
 
 extern s32 btlUpdateUnitPositionInterpolationTask(BtlPosLerpTaskArgs *);
 
@@ -239,9 +239,9 @@ extern void btlResetUnitLinks(BtlUnit *);
 
 extern void btlReleaseUnitResources(BtlUnit *);
 
-extern s32 btlCountTasksForOwner(s64);
+extern s32 btlCountTasksForOwner(u64);
 
-extern s32 btlCountTasksForOwner(s64);
+extern s32 btlCountTasksForOwner(u64);
 
 extern BtlRuntimeTask *btlCreateSelectedEffectUpdateTask(BtlUnit *);
 
@@ -1935,11 +1935,11 @@ s32 btlCountRegisteredTasks(void) {
 }
 
 /* Count registrations with this full-width owner key. */
-s32 btlCountTasksForOwner(s64 owner) {
+s32 btlCountTasksForOwner(u64 owner) {
     BtlRuntimeTask *task = ((BtlActorWork *)btlGetRuntime())->taskHead;
     s32 count = 0;
     while (task != 0) {
-        s64 taskOwner = task->ownerId;
+        u64 taskOwner = task->ownerId;
         task = task->next;
         if (taskOwner == owner) {
             count++;

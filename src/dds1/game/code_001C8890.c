@@ -99,7 +99,7 @@ extern u64 btlStartTask(BtlRuntimeTask *);
 
 extern void btlDispatchStateHandler(void *, s32);
 
-extern s32 btlCountTasksForOwner(s64);
+extern s32 btlCountTasksForOwner(u64);
 
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
 
