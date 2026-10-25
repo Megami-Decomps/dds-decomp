@@ -2,6 +2,7 @@
 #include "common.h"
 #include "mc_poll.h"
 #include "mc_path_api.h"
+#include "mc_file_api.h"
 
 #define MC_CARD_SLOT 0
 #define MC_SYNC_POLL_MODE 1
@@ -9,13 +10,6 @@
 #define MC_SDK_COMMAND_SUCCESS 0
 #define MC_SDK_SPECIAL_ERROR (-4)
 #define MC_SDK_EXTENDED_ERROR_LIMIT (-10)
-
-/* The SDK's queued requests on an open file: its descriptor, and for a
- * transfer the EE buffer and its size. */
-s32 sceMcClose(s32 fileDescriptor);
-s32 sceMcRead(s32 fileDescriptor, void *buffer, s32 size);
-s32 sceMcWrite(s32 fileDescriptor, const void *data, s32 size);
-
 
 /* Return 1 only for completed status zero, -1 for other completed statuses.
  * Every SDK poll return other than 1 maps to 0, including SDK-level failures. */
