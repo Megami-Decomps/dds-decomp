@@ -5,6 +5,16 @@
 
 struct dds3ProcessID_t;
 
+typedef s32 FldTitleBannerResult;
+
+enum {
+    FLD_TITLE_BANNER_UNRESOLVED = 0,
+    FLD_TITLE_BANNER_RESOLVED = 1,
+    FLD_TITLE_BANNER_NO_PENDING = -1,
+};
+
+FldTitleBannerResult fldResolvePendingTitleBanner(void);
+
 /* Task initializer used by the field title-banner panel in both games. */
 s32 fldInputPanelProcess1(struct dds3ProcessID_t *task);
 

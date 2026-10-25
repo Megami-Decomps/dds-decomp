@@ -185,13 +185,11 @@ extern void evtSetSolarOverlayFullyVisible(void);
 void fldNpcHojiRefresh(void);
 
 extern s32 fldEveHitResID_Find(struct dds3ProcessID_t *task);
-extern s32 fldResolvePendingTitleBanner(void);
-
 s32 fldCmdQueryActorEntrySceneStatus(void) {
     dds3Basic_t *world = dds3GetActiveScene();
     dds3Basic_t *unit = dds3GetActiveUnitSceneBasic(world);
     dds3Basic_t *entry;
-    s32 result;
+    FldTitleBannerResult result;
 
     if (unit == 0) {
         scrSetIntReturnValue(0);
@@ -210,10 +208,10 @@ s32 fldCmdQueryActorEntrySceneStatus(void) {
     fldInputPanelSetDraw(1);
     result = fldResolvePendingTitleBanner();
     switch (result) {
-    case 1:
+    case FLD_TITLE_BANNER_RESOLVED:
         scrSetIntReturnValue(1);
         return 1;
-    case -1:
+    case FLD_TITLE_BANNER_NO_PENDING:
         scrSetIntReturnValue(-1);
         return 1;
     }
@@ -225,7 +223,7 @@ s32 fldCmdQueryAlternateActorEntrySceneStatus(void) {
     dds3Basic_t *world = dds3GetActiveScene();
     dds3Basic_t *unit = dds3GetActiveUnitSceneBasic(world);
     dds3Basic_t *entry;
-    s32 result;
+    FldTitleBannerResult result;
 
     if (unit == 0) {
         scrSetIntReturnValue(0);
@@ -244,10 +242,10 @@ s32 fldCmdQueryAlternateActorEntrySceneStatus(void) {
     fldInputPanelSetDraw(1);
     result = fldResolvePendingTitleBanner();
     switch (result) {
-    case 1:
+    case FLD_TITLE_BANNER_RESOLVED:
         scrSetIntReturnValue(1);
         return 1;
-    case -1:
+    case FLD_TITLE_BANNER_NO_PENDING:
         scrSetIntReturnValue(-1);
         return 1;
     }
@@ -256,16 +254,16 @@ s32 fldCmdQueryAlternateActorEntrySceneStatus(void) {
 }
 
 s32 fldCommand_ACT_WIN_DSP3(void) {
-    s32 result;
+    FldTitleBannerResult result;
 
     fldInputPanelSetMessage(scrGetIntPara(0));
     fldInputPanelSetDraw(1);
     result = fldResolvePendingTitleBanner();
-    if (result == -1) {
+    if (result == FLD_TITLE_BANNER_NO_PENDING) {
         scrSetIntReturnValue(-1);
         return 1;
     }
-    if (result == 1) {
+    if (result == FLD_TITLE_BANNER_RESOLVED) {
         scrSetIntReturnValue(1);
         return 1;
     }

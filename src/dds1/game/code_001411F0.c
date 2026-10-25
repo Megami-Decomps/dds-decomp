@@ -296,38 +296,38 @@ extern u8 fldProcHirakenaiChk(void);
 extern s32 fldIsEventPhaseAtLeastTwo(void);
 extern void fldApplyCameraFacingPoint(void);
 
-s32 fldResolvePendingTitleBanner(void) {
+FldTitleBannerResult fldResolvePendingTitleBanner(void) {
     FldTitleBannerMenu *menu;
     FldAreaWork *area;
 
     if (fldProcCampChk() != 0) {
-        return 0;
+        return FLD_TITLE_BANNER_UNRESOLVED;
     }
     if (fldProcAmChk() != 0) {
-        return 0;
+        return FLD_TITLE_BANNER_UNRESOLVED;
     }
     if (fldRunDanteGunFlag[0] != 0) {
-        return 0;
+        return FLD_TITLE_BANNER_UNRESOLVED;
     }
     if (fileMenuTaskExists() != 0) {
-        return 0;
+        return FLD_TITLE_BANNER_UNRESOLVED;
     }
     if (fldHasKiretaLabelProcess() != 0) {
-        return 0;
+        return FLD_TITLE_BANNER_UNRESOLVED;
     }
     if (fldProcKiretaChk() != 0) {
-        return 0;
+        return FLD_TITLE_BANNER_UNRESOLVED;
     }
     if (fldProcHirakenaiChk() != 0) {
-        return 0;
+        return FLD_TITLE_BANNER_UNRESOLVED;
     }
     if (fldIsEventPhaseAtLeastTwo() != 0) {
-        return 0;
+        return FLD_TITLE_BANNER_UNRESOLVED;
     }
 
     menu = (FldTitleBannerMenu *)dds3GetProcessData(inputpanel_id);
     if (menu->pending == 0) {
-        return -1;
+        return FLD_TITLE_BANNER_NO_PENDING;
     }
 
     if (fldGlobalBase.titleFade != 0 || gFldInf_WpExit == 1 || (s8)dds3PadButtonState[1][0][1] < 0) {
@@ -340,9 +340,9 @@ s32 fldResolvePendingTitleBanner(void) {
             dds3FadeIn2(8);
             area->titleFade = 0;
         }
-        return 1;
+        return FLD_TITLE_BANNER_RESOLVED;
     }
-    return 0;
+    return FLD_TITLE_BANNER_UNRESOLVED;
 }
 
 extern s32 fldTitleIsActive(void);
