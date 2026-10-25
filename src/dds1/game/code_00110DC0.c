@@ -1,34 +1,36 @@
 #include "common.h"
 #include "sdf_chip.h"
 #include "dds3obj.h"
+#include "dds3_scene_membership.h"
 #include "dds3_area_callback.h"
 #include "evt_world.h"
 
 
 s32 CB_ReleaseObjectBasic(dds3Basic_t *areaObject);
 
-const s32 dds3SceneBasicExistBasicFromType(dds3Basic_t *object, s32 slotIndex, const dds3Basic_t *targetNode) {
+Dds3SceneMembershipResult dds3SceneBasicExistBasicFromType(
+    dds3Basic_t *object, s32 slotIndex, const dds3Basic_t *targetNode) {
     dds3Basic_t *node;
 
     if (object == NULL || targetNode == 0) {
-        return 0;
+        return DDS3_SCENE_MEMBERSHIP_ABSENT;
     }
     node = ((EvtWorldTable *)object->data)->slots[slotIndex].head;
     while (node != NULL) {
         if (node == targetNode) {
-            return 1;
+            return DDS3_SCENE_MEMBERSHIP_PRESENT;
         }
         node = node->next;
     }
-    return 0;
+    return DDS3_SCENE_MEMBERSHIP_ABSENT;
 }
 
-const s32 dds3SceneBasicExistBasic(dds3Basic_t *object, dds3Basic_t *targetNode) {
+Dds3SceneMembershipResult dds3SceneBasicExistBasic(dds3Basic_t *object, dds3Basic_t *targetNode) {
     EvtWorldSlot *slots;
     s32 i;
 
     if (object == NULL || targetNode == 0) {
-        return 0;
+        return DDS3_SCENE_MEMBERSHIP_ABSENT;
     }
     slots = ((EvtWorldTable *)object->data)->slots;
     for (i = 0; i < 0x12; i++) {
@@ -39,12 +41,12 @@ const s32 dds3SceneBasicExistBasic(dds3Basic_t *object, dds3Basic_t *targetNode)
         }
         do {
             if (node == targetNode) {
-                return 1;
+                return DDS3_SCENE_MEMBERSHIP_PRESENT;
             }
             node = node->next;
         } while (node != 0);
     }
-    return 0;
+    return DDS3_SCENE_MEMBERSHIP_ABSENT;
 }
 
 void dds3SetMapNo(dds3Basic_t *worldNode, u32 areaRoomKey) {

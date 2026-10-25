@@ -118,7 +118,7 @@ u32 DispObjectBaseData(dds3Basic_t *worldNode, s32 x, s32 y, void *list) {
 
 
 #include "dds3_world_primary.h"
-extern s32 dds3SceneBasicExistBasic(dds3Basic_t *object, dds3Basic_t *node);
+#include "dds3_scene_membership.h"
 #include "sdf_packet_alloc.h"
 extern SdfPoolNode D_00325708;
 extern s8 D_00324543[];
@@ -135,7 +135,7 @@ s32 dds3DebugBasic(dds3ProcessID_t *task) {
         return -1;
     }
     node = (dds3Basic_t *)dds3GetProcessData(task);
-    if (dds3SceneBasicExistBasic(dds3GetActiveScene(), node) == 0) {
+    if (dds3SceneBasicExistBasic(dds3GetActiveScene(), node) == DDS3_SCENE_MEMBERSHIP_ABSENT) {
         return (s32)evtSceneDispProcess;
     }
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);

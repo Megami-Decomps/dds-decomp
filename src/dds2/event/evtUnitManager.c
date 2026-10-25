@@ -81,7 +81,7 @@ f32 GetSplineLength(dds3PathBasicControl_t *path) {
 
 extern f32 sdfFaceDivSoften, sdfFaceDivBias;
 #include "dds3_world_primary.h"
-extern s32 dds3SceneBasicExistBasicFromType(dds3Basic_t *object, s32 slotIndex, const dds3Basic_t *value);
+#include "dds3_scene_membership.h"
 extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *model, s32 mapRecordId);
 extern void dds3RotationArc(void);
 
@@ -169,16 +169,16 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
     if (flags & EVT_UNIT_FLAG_TARGET_TRANSITION) {
         if (unit->currentTransitionTarget == 0) {
             unit->flags = flags & ~EVT_UNIT_FLAG_TARGET_TRANSITION;
-        } else if (!dds3SceneBasicExistBasicFromType(dds3GetActiveScene(), 9,
-                                                 unit->currentTransitionTarget)) {
+        } else if (dds3SceneBasicExistBasicFromType(dds3GetActiveScene(), 9,
+                                                   unit->currentTransitionTarget) == DDS3_SCENE_MEMBERSHIP_ABSENT) {
             unit->currentTransitionTarget = 0;
             unit->previousTransitionTarget = 0;
             unit->flags &= ~EVT_UNIT_FLAG_TARGET_TRANSITION;
         }
     }
     if (unit->previousTransitionTarget &&
-        !dds3SceneBasicExistBasicFromType(dds3GetActiveScene(), 9,
-                                       unit->previousTransitionTarget)) {
+        dds3SceneBasicExistBasicFromType(dds3GetActiveScene(), 9,
+                                         unit->previousTransitionTarget) == DDS3_SCENE_MEMBERSHIP_ABSENT) {
         unit->previousTransitionTarget = 0;
     }
     transition = 0.0f;

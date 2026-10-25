@@ -9,6 +9,7 @@
 #include "eff_dependency.h"
 #include "pcp_vu0.h"
 #include "dds3obj.h"
+#include "dds3_scene_membership.h"
 #include "eff_object_dispatch_api.h"
 #include "eff.h"
 #include "eff_magatuhi_api.h"
@@ -73,7 +74,6 @@ void dds3EffectObjectBasicDestructor(dds3Basic_t *obj) {
 }
 
 #include "dds3_world_primary.h"
-extern s32 dds3SceneBasicExistBasicFromType(dds3Basic_t *object, s32 slotIndex, const dds3Basic_t *value);
 extern void dds3OffPoseSetFlag(dds3PoseSet_t *node, u32 flags);
 extern void dds3EffectObjectBasicGetObjectIndex(dds3Basic_t *obj);
 extern void Normalize(void);
