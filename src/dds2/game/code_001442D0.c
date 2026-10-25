@@ -1179,7 +1179,7 @@ void fldLoadSceneRecordTable(void) {
     fldAutoMapData = header->count;
 }
 
-void fldSetSceneRecordChunk(u8 *chunk, struct sdfMemHandle_t *resourceHandle) {
+void fldAdoptSceneRecordChunk(u8 *chunk, struct sdfMemHandle_t *resourceHandle) {
     if (D_00389780[0] < 0xC8) {
         FldTransferChunk *transferStart = (FldTransferChunk *)(chunk + 8);
 

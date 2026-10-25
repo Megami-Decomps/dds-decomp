@@ -1227,7 +1227,7 @@
 0x00145548	fldGetCurrentBgmHandle	inferred	DDS1 001422B8 twin; returns current track handle used in BGM methods [names_R_FuncNames2.tsv]
 0x00145550	fldCacheMapLabelLengths	inferred	DDS1 001422C0 twin; measures scene names/coordinates across map label tables [names_R_FuncNames2.tsv]
 0x00145698	fldLoadSceneRecordTable	inferred	Builds the current area scene-record path, loads and relocates the packed resource, then stores its row pointer and count. Called by fldInitSceneMapLabels. [provider body and caller, 2026-10-13]
-0x00145730	fldSetSceneRecordChunk	inferred	DDS1 001425F8 twin; relocates scene record chunk and caches count plus rows [names_R_FuncNames2.tsv]
+0x00145730	fldAdoptSceneRecordChunk	inferred	Adopts the packed scene-record allocation, relocates its pointers, and publishes row/count views; the paired release frees that allocation.
 0x00145790	fldInitSceneMapLabels	inferred	DDS1 00142658 twin; initializes scene map label lengths and associated data [names_R_FuncNames2.tsv]
 0x001457E0	fldReleaseSceneRecordChunk	inferred	DDS1 001426A8 twin; frees stored transfer resource and clears record pointers [names_R_FuncNames2.tsv]
 0x00145818	fldResetSceneResourceTables	inferred	resets the scene-record state and clears the title-specific scene model/slot tables during field display initialization; counterpart 0x001426E0 (DDS1)

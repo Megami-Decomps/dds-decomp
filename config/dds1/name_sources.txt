@@ -1312,7 +1312,7 @@
 0x001422B8	fldGetCurrentBgmHandle	inferred	returns current track handle used in BGM methods [names_R_FuncNames2.tsv]
 0x001422C0	fldCacheMapLabelLengths	inferred	measures scene names/coordinates across map label tables [names_R_FuncNames2.tsv]
 0x00142408	fldLoadSceneRecordTable	inferred	Inferred from the current C implementation in game/code_001411F0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
-0x001425F8	fldSetSceneRecordChunk	inferred	relocates scene record chunk and caches count plus rows [names_R_FuncNames2.tsv]
+0x001425F8	fldAdoptSceneRecordChunk	inferred	Adopts the packed scene-record allocation, relocates its pointers, and publishes row/count views; the paired release frees that allocation.
 0x00142658	fldInitSceneMapLabels	inferred	initializes scene map label lengths and associated data [names_R_FuncNames2.tsv]
 0x001426A8	fldReleaseSceneRecordChunk	inferred	frees stored transfer resource and clears record pointers [names_R_FuncNames2.tsv]
 0x001426E0	fldResetSceneResourceTables	inferred	resets the scene-record state and clears the title-specific scene model/slot tables during field display initialization; counterpart 0x00145818 (DDS2)
