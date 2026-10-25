@@ -118,7 +118,7 @@ extern MantraFlagResource *evtAllocateMantraSelectionWork(datUnitWork_t *, s32);
 extern void evtReleaseMantraSelectionWork(MantraFlagResource *);
 extern s32 mnuGetActiveMantraModelFlagState(void);
 extern void mnuValidateProfileEntry(MantraFlagResource *, datUnitWork_t *);
-extern s32 *ptyGetProfileRecordPointer(datUnitWork_t *, u16);
+extern DatProfileRecord *ptyGetProfileRecordPointer(datUnitWork_t *, u16);
 extern void ptyApplyProfile(datUnitWork_t *, u16);
 extern void scrSetEntryLowFlags(datUnitWork_t *, u16, u16);
 
@@ -168,7 +168,7 @@ void mtrRecomputeMantraFlagsForPartyUnit(datUnitWork_t *record) {
                 }
             }
             if ((node->selector.packed & 0x10F) == 0x102 && ((*src >> 8) & 1)) {
-                *ptyGetProfileRecordPointer(record, node->id) = ptyGetProfileRecordCap(node->id);
+                ptyGetProfileRecordPointer(record, node->id)->value = ptyGetProfileRecordCap(node->id);
                 ptyApplyProfile(record, node->id);
             }
             if (oldFlags != *cur) {

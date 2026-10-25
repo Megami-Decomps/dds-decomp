@@ -10,7 +10,7 @@ extern void mtrRecomputeMantraFlagsForPartyUnit(datUnitWork_t *);
 extern void mtrMantraBitResetUnit(datUnitWork_t *);
 extern MantraFlagResource *evtAllocateMantraSelectionWork(datUnitWork_t *, s32);
 extern void evtReleaseMantraSelectionWork(MantraFlagResource *);
-extern s32 *ptyGetProfileRecordPointer(datUnitWork_t *, u16);
+extern DatProfileRecord *ptyGetProfileRecordPointer(datUnitWork_t *, u16);
 extern void ptyApplyProfile(datUnitWork_t *, u16);
 extern void scrSetEntryLowFlags(datUnitWork_t *, u16, u16);
 
@@ -31,7 +31,7 @@ void mtrMantraSetBit(datUnitWork_t *record) {
         for (i = 0; i < 176; i++, node++) {
             scrSetEntryLowFlags(record, i, work->flags[i]);
             if ((node->selector.packed & 0x10F) == 0x102 && ((work->flags[i] >> 8) & 1)) {
-                *ptyGetProfileRecordPointer(record, node->id) = ptyGetProfileRecordCap(node->id);
+                ptyGetProfileRecordPointer(record, node->id)->value = ptyGetProfileRecordCap(node->id);
                 ptyApplyProfile(record, node->id);
             }
         }
