@@ -63,6 +63,7 @@
 #include "eff_create_node_from_parameter.h"
 #include "eff_node_descriptor.h"
 #include "kwln.h"
+#include "kwln_task_runner.h"
 #include "kwln_task_create.h"
 #include "kwln_task_lifecycle.h"
 #include "file_request_api.h"
@@ -219,7 +220,7 @@ extern void p2sdStopSe(u32 soundId);
 
 
 
-extern s32 fldFieldTaskUpdate(dds3ProcessID_t *task);
+extern KwlnTaskUpdateResult fldFieldTaskUpdate(dds3ProcessID_t *task);
 
 extern s32 D_0032E3C0[];
 
@@ -355,28 +356,28 @@ extern void func_00147188(s32);
 
 extern s32 gFldElvFloorNow;
 
-s32 fldFieldTaskUpdate(dds3ProcessID_t *task) {
+KwlnTaskUpdateResult fldFieldTaskUpdate(dds3ProcessID_t *task) {
     if (fldProcCampChk() != FLD_CAMP_CHECK_STATE_ENCOUNTER_FLAG_SET) {
-        return 0;
+        return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
     }
     if (fldProcAmChk() != 0) {
-        return 0;
+        return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
     }
     if (fileMenuTaskExists() != 0) {
-        return 0;
+        return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
     }
     if (fldTitleIsActive() != 0) {
-        return 0;
+        return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
     }
     if (gFldElvFloorNow != -999) {
         fldDrawAnimatedFieldBanner(0x80, 0, 0);
     } else {
         func_00147188(0);
     }
-    return 0;
+    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
-s32 fldAddressProcess1(dds3ProcessID_t *task) {
+KwlnTaskUpdateResult fldAddressProcess1(dds3ProcessID_t *task) {
     s32 *work;
 
     work = sdfChipAllocDirect(0x10);
@@ -385,7 +386,7 @@ s32 fldAddressProcess1(dds3ProcessID_t *task) {
     work[2] = 0;
     work[3] = 0;
     dds3SetProcessData(task, (u32)work);
-    return (s32)(u32)fldFieldTaskUpdate;
+    return (KwlnTaskUpdateResult)(u32)fldFieldTaskUpdate;
 }
 
 void fldAddressShutdown(dds3ProcessID_t *task) {
