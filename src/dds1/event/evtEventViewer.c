@@ -99,7 +99,7 @@ dds3Basic_t *dds3GetActiveScene(void);
 f32 dds3CameraObjectBasicGetFovy(dds3Basic_t *camera);
 void dds3SetScreenFovy(f32 fieldOfView);
 void movieStop(void);
-s32 mnuCheckMovieDecoderStatus(void);
+s32 mnuIsMoviePlaybackFinished(void);
 
 /* Handles retained by the viewer and by its owning task context. */
 
@@ -2273,7 +2273,7 @@ s32 evtViewerUpdateTimedAction(EvtRuntime *viewer) {
             viewer->timedStart = 0;
             viewer->timedEnd = 0;
         } else if (viewer->timedEnd == -1) {
-            mnuCheckMovieDecoderStatus();
+            mnuIsMoviePlaybackFinished();
         } else if (viewer->curFrame >= viewer->timedEnd) {
             movieStop();
             viewer->timedActive = 0;

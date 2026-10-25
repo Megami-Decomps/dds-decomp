@@ -1233,7 +1233,7 @@ s32 mnuUpdateStaffRoll(dds3ProcessID_t *task) {
 
 extern MnuStaffImageRecord mnuStaffRollImageRecords[19];
 extern s32 D_00437AB4;
-extern s32 mnuCheckMovieDecoderStatus(void);
+extern s32 mnuIsMoviePlaybackFinished(void);
 
 INCLUDE_RODATA(const s32, "game/code_002A5260", D_00429938);
 
@@ -1247,7 +1247,7 @@ void mnuAdvanceStaffImageSequence(void) {
 
     switch (D_00437AB8) {
     case 1:
-        if (mnuCheckMovieDecoderStatus() != 0) {
+        if (mnuIsMoviePlaybackFinished() != 0) {
             mnuMovieWork->fadeFrame = 0;
             D_00437AB8 = 2;
         } else {
@@ -1304,7 +1304,7 @@ void mnuAdvanceStaffImageSequence(void) {
         }
         for (i = 18; i >= D_00437AB4; i--) {
             if (mnuMovieWork->frame >= mnuStaffRollImageRecords[i].startFrame) {
-                if (mnuCheckMovieDecoderStatus() != 0 || D_00437AB4 == 0) {
+                if (mnuIsMoviePlaybackFinished() != 0 || D_00437AB4 == 0) {
                     sdfSetGridScaledDrawBounds(mnuStaffRollImageRecords[D_00437AB4].x,
                         mnuStaffRollImageRecords[D_00437AB4].y,
                         mnuStaffRollImageRecords[D_00437AB4].width,
@@ -1879,7 +1879,7 @@ void movieStop(void) {
     PlayingNo = 0;
 }
 
-s32 mnuCheckMovieDecoderStatus(void) {
+s32 mnuIsMoviePlaybackFinished(void) {
     return sdfMovieIsFinished(&mnuMovieDrawContext);
 }
 

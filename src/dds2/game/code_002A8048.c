@@ -48,7 +48,7 @@ void mnuRequestIndexedMovieResource(s32 index);
 
 void movieStop(void);
 
-s32 mnuCheckMovieDecoderStatus(void);
+s32 mnuIsMoviePlaybackFinished(void);
 
 s32 movieMan_Process(void) {
     sdfAdvanceStreamPlayback(0x3c / dds3VblanksPerFrame);
@@ -99,7 +99,7 @@ s32 mnuUpdateMovieDrawShutdownCountdown(void) {
         }
         mnuMovieShutdownCounter = mnuMovieShutdownCounter + 1;
     }
-    scrSetIntReturnValue(mnuCheckMovieDecoderStatus() == 0);
+    scrSetIntReturnValue(mnuIsMoviePlaybackFinished() == 0);
     return 1;
 }
 
@@ -183,7 +183,7 @@ void movieDebugDrawInfo(void) {
 
 void MovieViewerDrawFrameInfo(void) {
     sdfDrawTag_t *list;
-    if (mnuCheckMovieDecoderStatus() == 0) {
+    if (mnuIsMoviePlaybackFinished() == 0) {
         list = mnuMovieList.packets;
         sdfDrawTagLink(list, (u32)dds3PrimFrameRect(0x8810, 0x85E8, 0xFF0080, 0x720, 0x90, 0x30000000, 0x60404040));
         sdfDrawTagLink(list, (u32)sdfDevPrintf(0x8840, 0x8600, 0xFF0080, 0, "%04d/%04d", mnuMovieDrawContext.soundNode.playbackFrameIndex, (s32)mnuMovieDrawContext.soundNode.cycleLength));
@@ -214,7 +214,7 @@ s32 mnuMovieViewer(void) {
     }
 
     if (mnuMovieList.playing != 0) {
-        if (mnuCheckMovieDecoderStatus() != 0) {
+        if (mnuIsMoviePlaybackFinished() != 0) {
             mnuMovieList.playing = 0;
         } else {
             s32 previousButtons = D_00438FF0;

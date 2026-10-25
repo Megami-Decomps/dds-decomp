@@ -905,7 +905,7 @@ extern void mnuDrawMovieMenuSpriteSlot1F(s32);
 extern void mnuDrawMovieMenuSpriteSlot20(u32);
 extern void mnuDrawMovieMenuSpriteSlot21(u32);
 extern u8 mnuGetMoviePlaybackMode(void);
-extern s32 mnuCheckMovieDecoderStatus(void);
+extern s32 mnuIsMoviePlaybackFinished(void);
 extern void mnuClearGlobalMenuStateFields(void);
 extern s32 mnuPollMovieMenuInputAndTimeout(void);
 extern void mnuUpdateTitlePageByMode(void);
@@ -1122,7 +1122,7 @@ s32 mnuUpdateTitleMenuTask(dds3ProcessID_t *task) {
             sdfSoundSetChannelCount(0x2D);
             titleWork->movieOpened = 1;
         }
-        if (mnuCheckMovieDecoderStatus() != 0) {
+        if (mnuIsMoviePlaybackFinished() != 0) {
             titleWork->state = 18;
             titleWork->cursor = 0x2D;
         }
@@ -1160,7 +1160,7 @@ s32 mnuUpdateTitleMenuTask(dds3ProcessID_t *task) {
             titleWork->cursor = 0;
             mnuStopTitleMovieDraw();
         }
-        if (mnuCheckMovieDecoderStatus() != 0) {
+        if (mnuIsMoviePlaybackFinished() != 0) {
             titleWork->state = 23;
             titleWork->cursor = 0;
             mnuStopTitleMovieDraw();

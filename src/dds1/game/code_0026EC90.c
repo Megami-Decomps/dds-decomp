@@ -54,7 +54,7 @@ typedef char StaffImageCornersSizeCheck[(sizeof(StaffImageCorners) == 12) ? 1 : 
 extern StaffImageCorners mnuStaffRollImageFadeControlPoints[];
 extern MnuStaffImageRecord mnuStaffRollImageRecords[];
 extern s32 D_003BC614;
-extern s32 mnuCheckMovieDecoderStatus(void);
+extern s32 mnuIsMoviePlaybackFinished(void);
 extern u8 mnuGetMoviePlaybackMode(void);
 extern void mnuDrawScaledMovieRollSprite(s32 x, s32 y, s32 z, s32 alpha,
                                          EffectSlotSet *set, f32 scaleX, f32 scaleY,
@@ -93,7 +93,7 @@ void mnuDrawAnimatedMovieRollEntry(MnuMovieRollEntry *entry, EffectSlotSet *set,
         ey = entry->y;
         center = 128.0f;
         sdfSin((f32)entry->timer / (f32)entry->duration * 3.141592503f);
-        if ((u32)(D_003BC618 - 1) < 3U && (mnuCheckMovieDecoderStatus() != 0 || mnuGetMoviePlaybackMode() != 0)) {
+        if ((u32)(D_003BC618 - 1) < 3U && (mnuIsMoviePlaybackFinished() != 0 || mnuGetMoviePlaybackMode() != 0)) {
             dy = y1 - (ey + center);
             dx = x1 - (ex + center);
             dist = dx * dx;
@@ -326,7 +326,7 @@ s32 mnuUpdateStaffRoll(dds3ProcessID_t *task) {
     return 0;
 }
 
-extern s32 mnuCheckMovieDecoderStatus(void);
+extern s32 mnuIsMoviePlaybackFinished(void);
 extern void movieStop(void);
 extern void dds3PlayMovieByIndex(s32 index);
 
@@ -343,7 +343,7 @@ void mnuAdvanceStaffImageSequence(void) {
     mnuMovieWork->imageAlpha = 0;
     switch (D_003BC618) {
     case 1:
-        if (mnuCheckMovieDecoderStatus() != 0) {
+        if (mnuIsMoviePlaybackFinished() != 0) {
             mnuMovieWork->fadeInTicks = 0;
             D_003BC618 = 2;
             mnuMovieWork->imageAlpha = 128;
@@ -399,7 +399,7 @@ void mnuAdvanceStaffImageSequence(void) {
         }
         for (i = 14; i >= D_003BC614; i--) {
             if (mnuMovieWork->scrollTicks >= mnuStaffRollImageRecords[i].startFrame) {
-                if (mnuCheckMovieDecoderStatus() == 0 && D_003BC614 != 0) {
+                if (mnuIsMoviePlaybackFinished() == 0 && D_003BC614 != 0) {
                     return;
                 }
                 sdfSetGridScaledDrawBounds(mnuStaffRollImageRecords[D_003BC614].x, mnuStaffRollImageRecords[D_003BC614].y,
@@ -539,7 +539,7 @@ void movieStop(void) {
 
 extern s32 sdfMovieIsFinished(movieStream_t *job);
 
-s32 mnuCheckMovieDecoderStatus(void) {
+s32 mnuIsMoviePlaybackFinished(void) {
     return sdfMovieIsFinished(&mnuMovieDrawContext);
 }
 

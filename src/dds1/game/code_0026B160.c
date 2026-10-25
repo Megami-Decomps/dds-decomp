@@ -53,7 +53,7 @@ extern void mnuDrawMovieMenuSpriteSlot18(s32 volume);
 extern s32 mnuIsAnyMenuInputPressed(void);
 extern void dds3PlayMovieByIndex(s32 index);
 extern u8 mnuGetMoviePlaybackMode(void);
-extern s32 mnuCheckMovieDecoderStatus(void);
+extern s32 mnuIsMoviePlaybackFinished(void);
 extern void sdfSoundSetChannelCount(u32 channelCount);
 extern void mnuRequestDefaultMovieResource(void);
 extern void mnuDrawMovieMenuSpriteLayers(s32 context);
@@ -262,7 +262,7 @@ s32 mnuUpdateMovieMenuTask(dds3ProcessID_t *task) {
             sdfSoundSetChannelCount(0x2D);
             mnuMovieMenuState->movieSkipped = 1;
         }
-        if (mnuCheckMovieDecoderStatus() != 0) {
+        if (mnuIsMoviePlaybackFinished() != 0) {
             mnuMovieMenuState->state = 0x11;
             mnuMovieMenuState->cursor = 0x16;
         }
@@ -301,7 +301,7 @@ s32 mnuUpdateMovieMenuTask(dds3ProcessID_t *task) {
             mnuMovieMenuState->cursor = 0;
             movieStop();
         }
-        if (mnuCheckMovieDecoderStatus() != 0) {
+        if (mnuIsMoviePlaybackFinished() != 0) {
             mnuDrawMovieMenuBackgroundQuad(0x80);
             mnuDrawMovieMenuSpriteLayers(0x3E);
             mnuMovieMenuState->state = 0x16;

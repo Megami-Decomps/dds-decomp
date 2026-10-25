@@ -6311,7 +6311,7 @@
 0x0026FFA0	mnuStartMovieDrawTaskForResource	inferred	Starts the movie draw task when none exists, using supplied resource. [names_reviewed8.tsv]
 0x0026FFF8	dds3PlayMovieByIndex	inferred	SMT3HD name via SLUS_209.11 0x0022B768, reloc-identical; was mnuRequestIndexedMovieResource
 0x00270030	movieStop	inferred	SMT3HD name via SLUS_209.11 0x0022B7A0, reloc-identical; was mnuStopMovieDrawTask
-0x00270068	mnuCheckMovieDecoderStatus	inferred	confidence=medium; matched-C; src/dds1/game/code_0026EC90.c:197:func_00270068; Checks the PAC decoder status associated with the retained movie draw context.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
+0x00270068	mnuIsMoviePlaybackFinished	inferred	provider directly returns whether the retained movie stream has drained and no completed output buffers remain
 0x00270088	mnuGetMoviePlaybackMode	inferred	Returns the state byte at offset +0x34 of the movie draw context; callers use state 2 as a completed/ready condition and any nonzero state as an active transition. [code-quality cleanup, 2026-10-13]
 0x00270098	movieMan_Process	inferred	SMT3HD name via SLUS_209.11 0x0022B808, reloc-identical; was mnuSetFrameDivisor
 0x002700D0	dds3StartMovieManager	inferred	SMT3HD name via SLUS_209.11 0x0022B840, reloc-identical; was mnuCreateMovieManagerTask

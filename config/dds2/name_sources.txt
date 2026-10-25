@@ -6543,7 +6543,7 @@
 0x002A7E60	mnuRequestMoviePlayback	inferred	Fam_Mid2
 0x002A7F98	dds3PlayMovieByIndex	inferred	SMT3HD name via SLUS_209.11 0x0022B768, shared-hash-in-run; was mnuStartMoviePlaybackByResourceIndex
 0x002A7FD0	movieStop	inferred	SMT3HD name via SLUS_209.11 0x0022B7A0, reloc-identical; was mnuStopMovieDrawTask
-0x002A8008	mnuCheckMovieDecoderStatus	inferred	confidence=medium; matched-C; src/dds2/game/code_002A5260.c:1054:func_002A8008; Checks the PAC decoder status associated with the retained movie draw context.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
+0x002A8008	mnuIsMoviePlaybackFinished	inferred	provider directly returns whether the retained movie stream has drained and no completed output buffers remain
 0x002A8028	mnuGetMoviePlaybackMode	inferred	Returns the raw movie playback mode byte. Title-menu transitions wait for nonzero; movie draw/menu and event-viewer timing gate specifically on value 2. Other mode values are left unspecified. [provider and caller dataflow, 2026-10-13]
 0x002A8038	mnuIsMovieDrawContextActive	inferred	Returns mnuMovieDrawContext.active, which mnuCanDrawMovie checks after the draw-state value reaches 2. [LiteH b31]
 0x002A8048	movieMan_Process	inferred	SMT3HD name via SLUS_209.11 0x0022B808, reloc-identical; was mnuSetFrameDivisor
