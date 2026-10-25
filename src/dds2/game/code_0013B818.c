@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "fld_area_work.h"
+#include "fld_deferred_transition.h"
 #include "common.h"
 #include "sdf_vu0.h"
 #include "fld_stop_entry.h"
@@ -1986,7 +1987,7 @@ void fldInitializeActorLinkedSequence(s32 mode, s32 index, fldSceneParam_t *sequ
     }
 }
 
-s32 fldStartDeferredActorTransition(s32 command, u32 parameter) {
+FldDeferredCommandDisposition fldStartDeferredActorTransition(s32 command, u32 parameter) {
     fldSceneParam_t record;
     s32 warp;
     union {
@@ -2017,7 +2018,7 @@ s32 fldStartDeferredActorTransition(s32 command, u32 parameter) {
                 fldSetDeferredFieldCommand(entry->warpEntry2, warp);
             }
             dds3AdminiCallSequence(6, &warp, 4, 0);
-            return 1;
+            return FLD_DEFERRED_COMMAND_PRESERVE_PENDING;
         }
         if (entry->variantMode != 0) {
             continue;
@@ -2044,7 +2045,7 @@ s32 fldStartDeferredActorTransition(s32 command, u32 parameter) {
             fldBgmFadeOut();
             stagePayload.value = fldGlobalBase.area;
             dds3AdminiCallSequence(0x1C, stagePayload.bytes, sizeof(stagePayload.bytes), 0);
-            return 0;
+            return FLD_DEFERRED_COMMAND_CLEAR_PENDING;
         }
         if (entry->variant == 0) {
             stagePayload.value = command;
@@ -2065,9 +2066,9 @@ s32 fldStartDeferredActorTransition(s32 command, u32 parameter) {
         fldSetSceneParam4(&record, stagePayload.value, room, entry->warpName, entry->sequenceCode, entry->linkKind, entry->linkName);
         record.mode = 6;
         dds3AdminiCallSequence(5, &record, 0xA0, 0);
-        return 0;
+        return FLD_DEFERRED_COMMAND_CLEAR_PENDING;
     }
-    return 0;
+    return FLD_DEFERRED_COMMAND_CLEAR_PENDING;
 }
 
 extern s32 fldRequestAreaResource(s32 area, s32 room);

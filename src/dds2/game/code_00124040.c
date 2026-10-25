@@ -2,6 +2,7 @@
 #include "scr.h"
 #include "mdl_motion_api.h"
 #include "fld_area_work.h"
+#include "fld_deferred_transition.h"
 #include "fld_runtime_reset_api.h"
 #include "fld_area_encounter_table.h"
 #include "sdf_packet_list.h"
@@ -2579,8 +2580,6 @@ void fldSetDeferredFieldCommand(u32 command, u32 parameter) {
 
 extern u32 dds3AdminiGetPrevHistoryFlag(void);
 
-extern s32 fldStartDeferredActorTransition(s32, u32);
-
 void fldProcNextJump(void) {
     if (fldNext_fld == 0) {
         return;
@@ -2591,7 +2590,7 @@ void fldProcNextJump(void) {
     if (dds3AdminiGetNextSequence() < 0 && (dds3AdminiGetPrevHistoryFlag() & 1) != 0) {
         return;
     }
-    if (fldStartDeferredActorTransition(fldNext_fld, fldDeferredCommandParameter) == 0) {
+    if (fldStartDeferredActorTransition(fldNext_fld, fldDeferredCommandParameter) == FLD_DEFERRED_COMMAND_CLEAR_PENDING) {
         fldNext_fld = 0;
     }
 }
