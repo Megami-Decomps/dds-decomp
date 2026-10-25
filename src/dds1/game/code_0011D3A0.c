@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "fld_area_work.h"
+#include "fld_integer_editor_api.h"
 #include "fld_runtime_reset_api.h"
 #include "fld_npc_motion.h"
 #include "sdf_packet_list.h"
@@ -37,12 +38,6 @@ extern s32 fldDoor_ElvTakasaToFloor(s32 index);
 
 /* Signed selectors read signed storage; all writes retain the selected width. */
 enum {
-    FIELD_EDIT_UNSIGNED_BYTE = 1,
-    FIELD_EDIT_UNSIGNED_HALFWORD = 2,
-    FIELD_EDIT_UNSIGNED_WORD = 4,
-    FIELD_EDIT_SIGNED_BYTE = -1,
-    FIELD_EDIT_SIGNED_HALFWORD = -2,
-    FIELD_EDIT_SIGNED_WORD = -4,
     FIELD_EDIT_WRAP_INPUT = 0x80,
     FIELD_EDIT_CLAMP_INPUT = 2,
     FIELD_EDIT_COLOR_COARSE_STEP = 10
@@ -307,25 +302,26 @@ void dds3DebugFloatEdit(f32 *value, f32 min, f32 max, f32 step, f32 bigStep) {
 
 /* Read the selected signed/unsigned integer, apply pad stepping, then truncate
  * back to its original width. Unsupported storage selectors leave it untouched. */
-void fldStepIntByPad(void *valueAddress, s32 storageType, s64 min, s64 max, s64 step, s64 bigStep, s8 *padState) {
+void fldStepIntByPad(void *valueAddress, FldIntegerStorageType storageType, s64 min, s64 max, s64 step,
+                     s64 bigStep, s8 *padState) {
     s64 adjustedValue;
     switch (storageType) {
-    case FIELD_EDIT_UNSIGNED_BYTE:
+    case FLD_INTEGER_STORAGE_UNSIGNED_BYTE:
         adjustedValue = *(u8 *)valueAddress;
         break;
-    case FIELD_EDIT_UNSIGNED_HALFWORD:
+    case FLD_INTEGER_STORAGE_UNSIGNED_HALFWORD:
         adjustedValue = *(u16 *)valueAddress;
         break;
-    case FIELD_EDIT_UNSIGNED_WORD:
+    case FLD_INTEGER_STORAGE_UNSIGNED_WORD:
         adjustedValue = *(u32 *)valueAddress;
         break;
-    case FIELD_EDIT_SIGNED_BYTE:
+    case FLD_INTEGER_STORAGE_SIGNED_BYTE:
         adjustedValue = *(s8 *)valueAddress;
         break;
-    case FIELD_EDIT_SIGNED_HALFWORD:
+    case FLD_INTEGER_STORAGE_SIGNED_HALFWORD:
         adjustedValue = *(s16 *)valueAddress;
         break;
-    case FIELD_EDIT_SIGNED_WORD:
+    case FLD_INTEGER_STORAGE_SIGNED_WORD:
         adjustedValue = *(s32 *)valueAddress;
         break;
     default:
@@ -375,22 +371,23 @@ void fldStepIntByPad(void *valueAddress, s32 storageType, s64 min, s64 max, s64 
         return;
     }
     switch (storageType) {
-    case FIELD_EDIT_SIGNED_BYTE:
-    case FIELD_EDIT_UNSIGNED_BYTE:
+    case FLD_INTEGER_STORAGE_SIGNED_BYTE:
+    case FLD_INTEGER_STORAGE_UNSIGNED_BYTE:
         *(u8 *)valueAddress = adjustedValue;
         break;
-    case FIELD_EDIT_SIGNED_HALFWORD:
-    case FIELD_EDIT_UNSIGNED_HALFWORD:
+    case FLD_INTEGER_STORAGE_SIGNED_HALFWORD:
+    case FLD_INTEGER_STORAGE_UNSIGNED_HALFWORD:
         *(u16 *)valueAddress = adjustedValue;
         break;
-    case FIELD_EDIT_SIGNED_WORD:
-    case FIELD_EDIT_UNSIGNED_WORD:
+    case FLD_INTEGER_STORAGE_SIGNED_WORD:
+    case FLD_INTEGER_STORAGE_UNSIGNED_WORD:
         *(u32 *)valueAddress = adjustedValue;
         break;
     }
 }
 
-void dds3DebugIntEdit(void *valueAddress, s32 storageType, s64 min, s64 max, s64 step, s64 bigStep) {
+void dds3DebugIntEdit(void *valueAddress, FldIntegerStorageType storageType, s64 min, s64 max, s64 step,
+                      s64 bigStep) {
     fldStepIntByPad(valueAddress, storageType, min, max, step, bigStep, (s8 *)D_00324530);
 }
 

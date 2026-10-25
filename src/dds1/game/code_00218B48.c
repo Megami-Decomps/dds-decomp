@@ -30,6 +30,7 @@
 #include "mdl_resource_entries.h"
 #include "mdl_track_poly_record.h"
 #include "mdl_mark_params.h"
+#include "fld_integer_editor_api.h"
 #include "mdl_resource_table.h"
 #include "mdl_grouped_parts_api.h"
 #include "mdl_flag_api.h"
@@ -245,11 +246,9 @@ extern void kwlnDebugGraphSetEnabled(s8 mode);
 
 extern s32 fldStepColorChannelByPad(u32 *color, s32 channel, s8 *pad);
 
-extern void dds3DebugIntEdit(void *ptr, s32 type, s64 min, s64 max, s64 step, s64 bigStep);
 
 extern s8 dds3PadButtonState[64];
 
-extern void fldStepIntByPad(void *ptr, s32 type, s64 min, s64 max, s64 small, s64 big, s8 *pad);
 
 
 
@@ -725,25 +724,25 @@ void mdlPibEditTrackInfo(EffMarkParams *params, s16 *fieldCursor) {
     } else {
         switch (selectedField) {
         case 0:
-            fldStepIntByPad(&params->mark0, 4, 0, 99999, 0, 1, dds3PadButtonState);
+            fldStepIntByPad(&params->mark0, FLD_INTEGER_STORAGE_UNSIGNED_WORD, 0, 99999, 0, 1, dds3PadButtonState);
             break;
         case 1:
-            fldStepIntByPad(&params->mark1, 4, 0, 99999, 0, 1, dds3PadButtonState);
+            fldStepIntByPad(&params->mark1, FLD_INTEGER_STORAGE_UNSIGNED_WORD, 0, 99999, 0, 1, dds3PadButtonState);
             break;
         case 2:
-            fldStepIntByPad(&params->start, 2, 0, 9999, 0, 1, dds3PadButtonState);
+            fldStepIntByPad(&params->start, FLD_INTEGER_STORAGE_UNSIGNED_HALFWORD, 0, 9999, 0, 1, dds3PadButtonState);
             break;
         case 3:
-            fldStepIntByPad(&params->end, 2, 0, 9999, 0, 1, dds3PadButtonState);
+            fldStepIntByPad(&params->end, FLD_INTEGER_STORAGE_UNSIGNED_HALFWORD, 0, 9999, 0, 1, dds3PadButtonState);
             break;
         case 4:
-            fldStepIntByPad(&params->interval, 2, 1, 10, 0, 1, dds3PadButtonState);
+            fldStepIntByPad(&params->interval, FLD_INTEGER_STORAGE_UNSIGNED_HALFWORD, 1, 10, 0, 1, dds3PadButtonState);
             break;
         case 5:
-            fldStepIntByPad(&params->face, 1, 1, 10, 0, 1, dds3PadButtonState);
+            fldStepIntByPad(&params->face, FLD_INTEGER_STORAGE_UNSIGNED_BYTE, 1, 10, 0, 1, dds3PadButtonState);
             break;
         case 6:
-            fldStepIntByPad(&params->blend, 1, 0, 4, 0, 1, dds3PadButtonState);
+            fldStepIntByPad(&params->blend, FLD_INTEGER_STORAGE_UNSIGNED_BYTE, 0, 4, 0, 1, dds3PadButtonState);
             break;
         default:
             colorChannel = (u8 *)params->colors + selectedField - MDL_MARK_COLOR_FIRST_FIELD;
@@ -2344,21 +2343,21 @@ void mdlUpdateViewerSettingsInput(void) {
         if (dds3PadBitTable[1] < 0 || dds3PadBitTable[3] < 0) {
             mdlViewerState.settingsPage = 0;
         } else {
-            dds3DebugIntEdit(&mdlViewerState.captureScale, 2, 1, 8, 1, 1);
+            dds3DebugIntEdit(&mdlViewerState.captureScale, FLD_INTEGER_STORAGE_UNSIGNED_HALFWORD, 1, 8, 1, 1);
         }
         break;
     case 3:
         if (dds3PadBitTable[1] < 0 || dds3PadBitTable[3] < 0) {
             mdlViewerState.settingsPage = 0;
         } else {
-            dds3DebugIntEdit(&mdlViewerState.captureDivX, 2, 1, 8, 1, 1);
+            dds3DebugIntEdit(&mdlViewerState.captureDivX, FLD_INTEGER_STORAGE_UNSIGNED_HALFWORD, 1, 8, 1, 1);
         }
         break;
     case 4:
         if (dds3PadBitTable[1] < 0 || dds3PadBitTable[3] < 0) {
             mdlViewerState.settingsPage = 0;
         } else {
-            dds3DebugIntEdit(&mdlViewerState.captureDivY, 2, 1, 8, 1, 1);
+            dds3DebugIntEdit(&mdlViewerState.captureDivY, FLD_INTEGER_STORAGE_UNSIGNED_HALFWORD, 1, 8, 1, 1);
         }
         break;
     }
