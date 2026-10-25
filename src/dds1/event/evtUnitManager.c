@@ -2625,7 +2625,7 @@ u32 evtCommand_EFFBED_BE(void) {
     f32 scale[4];
     s32 taskId;
     s32 key;
-    void *resource;
+    struct SoundMixer *resource;
     dds3Basic_t *object;
 
     memset(position, 0, sizeof(position));
@@ -2639,7 +2639,7 @@ u32 evtCommand_EFFBED_BE(void) {
         scrSetIntReturnValue(0);
         return 1;
     }
-    object = (dds3Basic_t *)dds3AddBEDEffectObjectBasic2(resource, position, scale);
+    object = dds3AddBEDEffectObjectBasic2(resource, position, scale);
     if (object == NULL) {
         scrSetIntReturnValue(0);
     } else {

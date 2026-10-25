@@ -2688,21 +2688,21 @@ u32 evtCommand_EFFBED_BE(void) {
     u8 scale[16];
     s32 taskId;
     s32 key;
-    struct EffNodeDescriptor *descriptor;
+    struct SoundMixer *resource;
     dds3Basic_t *object;
 
     memset(position, 0, sizeof(position));
     memset(scale, 0, sizeof(scale));
     taskId = scrGetIntPara(0);
     key = scrGetIntPara(1);
-    descriptor = evtGetResorceData(taskId, key);
-    if (descriptor == NULL) {
+    resource = evtGetResorceData(taskId, key);
+    if (resource == NULL) {
         key = scrGetIntPara(1);
         evtPrintDeveloperConsoleMessage(D_00421AD8, key);
         scrSetIntReturnValue(0);
         return 1;
     }
-    object = (dds3Basic_t *)dds3AddBEDEffectObjectBasic2(descriptor, position, scale);
+    object = dds3AddBEDEffectObjectBasic2(resource, position, scale);
     if (object == NULL) {
         scrSetIntReturnValue(0);
     } else {
