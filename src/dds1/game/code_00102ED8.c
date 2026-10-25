@@ -18,6 +18,7 @@
 #include "kwln.h"
 #include "kwln_named_slot.h"
 #include "kwln_task_create.h"
+#include "kwln_task_runner.h"
 #include "kwln_fade.h"
 #include "kwln_fade_timing.h"
 #include "sdf.h"
@@ -121,7 +122,7 @@ extern SdfPoolNode D_00325708;
 extern void sdfPadSetAct(s32 padIndex, s32 smallMotor, s32 largeMotor);
 
 extern char dds3AdminTaskName[];
-extern s32 dds3AdminPollModeCompletion(dds3ProcessID_t *task);
+extern KwlnTaskUpdateResult dds3AdminPollModeCompletion(dds3ProcessID_t *task);
 extern void dds3AdminiNeoShutdown(dds3ProcessID_t *task);
 
 void dds3InitAdmini(void) {
