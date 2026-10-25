@@ -2531,16 +2531,15 @@ u32 evtExitSelectionMenuAndSendSoundCommand(dds3ProcessID_t *task) {
 
 
 s32 evtBRebuildTerminalMenuAndResetDispatch(dds3ProcessID_t *task) {
-    s32 state = dds3GetProcessData(task);
-    MenuSlotState *host = (MenuSlotState *)state;
+    MenuSlotState *host = (MenuSlotState *)dds3GetProcessData(task);
     mnuReleaseWorkResources(host);
     mnuTerminalBuildMenus(host);
-    mnuConfigureTerminalSlotEffects(1, (MenuSlotState *)state);
-    mnuTerminalSelectSlot(1, 0, state);
-    mnuSetTerminalPanelMotionMode(1, (MenuSlotState *)state);
-    evtRememberDispatchCallback(mnuDrawTerminalSelectionListAndStep, (MenuSlotState *)state);
-    ((MenuSlotState *)state)->stage = 1;
-    ((MenuSlotState *)state)->exitState = 0;
+    mnuConfigureTerminalSlotEffects(1, host);
+    mnuTerminalSelectSlot(1, 0, host);
+    mnuSetTerminalPanelMotionMode(1, host);
+    evtRememberDispatchCallback(mnuDrawTerminalSelectionListAndStep, host);
+    host->stage = 1;
+    host->exitState = 0;
     dds3FadeIn(0, 0, 0, 15);
     return 1;
 }
