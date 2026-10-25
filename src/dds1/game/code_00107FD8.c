@@ -1178,13 +1178,13 @@ void evtStartAreaFromSelection(u32 selection, u32 area) {
 }
 
 u32 ExitField(void) {
-    s32 operationResult;
+    FldResourceWaitResult operationResult;
     s32 status;
 
     fldCleanupFieldScene();
     operationResult = fldIsFieldResourceWaitFinished();
     status = -1;
-    if (operationResult != 0) {
+    if (operationResult != FLD_RESOURCE_WAIT_PENDING) {
         status = 0;
     }
     return status;

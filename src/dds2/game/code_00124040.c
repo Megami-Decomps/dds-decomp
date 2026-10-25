@@ -2544,14 +2544,14 @@ void fldReleaseCampSceneTasks(void) {
     fldReleaseMenuSlotsAfterWait();
 }
 
-u8 fldIsFieldResourceWaitFinished(void) {
+FldResourceWaitResult fldIsFieldResourceWaitFinished(void) {
     if (D_00389790[0] == 0 && fldLoadNextGetStatus2() != 0) {
         fldPollAreaResourceLoad();
-        if (fldLoadNextGetStatus() == 1) return 0;
+        if (fldLoadNextGetStatus() == 1) return FLD_RESOURCE_WAIT_PENDING;
         fldFreeNextFile();
-        return 0;
+        return FLD_RESOURCE_WAIT_PENDING;
     }
-    return sdfDelayedResrcCheck() == 0;
+    return sdfDelayedResrcCheck() == 0 ? FLD_RESOURCE_WAIT_FINISHED : FLD_RESOURCE_WAIT_PENDING;
 }
 
 extern void fldSelectActorFromSceneIndexTables(s32 mode, s32 index);
