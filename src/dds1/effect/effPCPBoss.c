@@ -474,7 +474,7 @@ void effBossTrailSetColor(effPCPCrack_t *work, s32 value) {
 }
 
 /* Copy the beam vector and create its model and auxiliary parameter works. */
-EffPCPBossWork *effPCPBossBaelCreate(void *vector, void *paramA, void *paramB) {
+EffPCPBossWork *effPCPBossBaelCreate(const f32 vector[4], void *paramA, void *paramB) {
     EffPCPBossWork *work;
 
     work = sdfChipAllocDirect(sizeof(EffPCPBossWork));
@@ -521,7 +521,7 @@ void effPCPBossBaelDelete(EffPCPBossWork *work) {
 /* Per-frame update: basis from the muzzle position (or identity) fed to both parameter works. */
 void effBossBeamUpdate(EffPCPBossWork *work) {
     u128 matrix[4];
-    void *direction;
+    f32 *direction;
 
     if (effBTLFieldColorUsesActorSelectors() != 0) {
         if (work->frame == 0) {
@@ -529,7 +529,7 @@ void effBossBeamUpdate(EffPCPBossWork *work) {
             SDF_VU0_STOREVECTOR(work->position);
         }
         direction = work->parameterVector;
-        LookAtMatrix(work->position, (const f32 *)direction, effBossLookAtReferenceAxis);
+        LookAtMatrix(work->position, direction, effBossLookAtReferenceAxis);
         ReverseMatrix();
         SDF_VU0_RESET_ROW3();
         VU0_STORE_MATRIX(matrix);
