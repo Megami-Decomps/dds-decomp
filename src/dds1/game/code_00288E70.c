@@ -135,7 +135,7 @@ s32 fileLoadCallback(sdfFileCmdHandle_t *deviceRequest, s32 event, s32 unused, s
         job->transferBytes = byteCount;
         job->totalBytes = byteCount;
         if (job->allocationMode == 0) {
-            allocationHandle = sdfMemAlloc2Direct(byteCount);
+            allocationHandle = sdfMemTryAllocDirect(byteCount);
             job->allocationHandle = allocationHandle;
             if (allocationHandle == NULL) {
                 job->retryCount = 10;
@@ -299,7 +299,7 @@ void fileExecQueue(void) {
             job->deviceRequest = sdfFileCmdReadOpen(job->name, fileLoadCallback, job);
             break;
         case FILE_JOB_ALLOCATION_RETRY:
-            job->allocationHandle = sdfMemAlloc2Direct(job->totalBytes);
+            job->allocationHandle = sdfMemTryAllocDirect(job->totalBytes);
             if (job->allocationHandle == NULL) {
                 sdfPrintf("alloc retry for %s\n",
                                             job->deviceRequest->resolvedPath);

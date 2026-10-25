@@ -33,7 +33,7 @@ typedef char SdfChipHeapStats_size_must_be_0x30[
 
 struct sdfMemHandle_t *sdfMemAllocDirect(s32 requestedBytes);
 struct sdfMemHandle_t *sdfMemAllocFromTailDirect(s32 requestedBytes);
-struct sdfMemHandle_t *sdfMemAlloc2Direct(s32 requestedBytes);
+struct sdfMemHandle_t *sdfMemTryAllocDirect(s32 requestedBytes);
 struct sdfMemHandle_t *sdfMemGetHandleByPtr(const void *address);
 void sdfMemGetInfo(SdfGeneralHeapStats *stats);
 void sdfChipGetInfo(SdfChipHeapStats *stats);

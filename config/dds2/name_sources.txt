@@ -8700,7 +8700,7 @@
 0x003292A0	sdfMemGetPtr	inferred	SMT3HD name via SLUS_209.11 0x002A9030, shared-hash-in-run; was sdfMemoryGetBlockAddress
 0x003292A8	sdfMemAllocDirect	inferred	confidence=high; matched-C; src/dds2/sdf/sdfMemory.c:52:func_003292A8; Performs first-fit general-heap allocation with one-hundred-twenty-eight-byte rounding and block splitting; invokes the exhaustion hook at the end marker.; source=names_pending_main.tsv:126 [names_qp11.tsv]
 0x003293C8	sdfMemAllocFromTailDirect	inferred	SMT3HD name via SLUS_209.11 0x002A9158, reloc-identical; was sdfAllocGeneralBlockHigh
-0x003294F8	sdfMemAlloc2Direct	inferred	SMT3HD name via SLUS_209.11 0x002A9288, reloc-identical; was sdfTryAllocGeneralBlock
+0x003294F8	sdfMemTryAllocDirect	inferred	First-fit general-heap allocation returns NULL at the end marker without invoking the out-of-memory hook.
 0x00329600	sdfMemReallocRecord	inferred	SMT3HD name via SLUS_209.11 0x002A9390, reloc-identical; was sdfResizeResourceAllocation
 0x003297B0	sdfMemFreeMerge	inferred	SMT3HD name via SLUS_209.11 0x002A9540, byte-identical; was sdfSkipNextListNode
 0x003297C8	sdfMemFreeDirect	inferred	confidence=high; matched-C; src/dds2/game/code_00329600.c:37:func_003297C8; Releases an allocation under the interrupt lock: coalesces adjacent unused blocks or marks the released block unused and clears its reference count; restores interrupts only when previously enabled.; source=fresh-R_Names31-today [names_qp11.tsv]

@@ -132,7 +132,7 @@ sdfMemHandle_t *sdfMemAllocFromTailDirect(s32 requestedBytes) {
 
 /* Low-end first-fit without the out-of-memory hook; return NULL at the end marker.
  * Rounding and split layout are the same as the normal low-end allocator. */
-sdfMemHandle_t *sdfMemAlloc2Direct(s32 requestedBytes) {
+sdfMemHandle_t *sdfMemTryAllocDirect(s32 requestedBytes) {
     SdfMemHeap *heap = &sdfMemCB;
     s32 alignedBytes = (requestedBytes + SDF_HEAP_ALIGNMENT_MASK) & ~SDF_HEAP_ALIGNMENT_MASK;
     s32 interruptsWereEnabled;
