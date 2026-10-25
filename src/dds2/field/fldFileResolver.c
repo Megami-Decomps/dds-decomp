@@ -1308,7 +1308,7 @@ s32 fldLoadNextGetStatus3(s32 area, s32 room) {
     return fldGlobalBase.resourceFlag != FLD_AREA_RESOURCE_REQUEST_IDLE;
 }
 
-struct sdfMemHandle_t *fldLoadCachedRoomResourceIfLocationMatches(const SdfTextureOffsetListHeader **destination, s32 area, s32 room) {
+struct sdfMemHandle_t *fldCopyCachedRoomResourceIfLocationMatches(const SdfTextureOffsetListHeader **destination, s32 area, s32 room) {
     FldAreaWork *state = &fldGlobalBase;
 
     if (state->resourceArea == area) {
@@ -1323,7 +1323,7 @@ struct sdfMemHandle_t *fldLoadCachedRoomResourceIfLocationMatches(const SdfTextu
     return NULL;
 }
 
-struct sdfMemHandle_t *fldLoadCachedRoomF1ResourceIfLocationMatches(u8 **destination, s32 area, s32 room) {
+struct sdfMemHandle_t *fldCopyCachedRoomF1ResourceIfLocationMatches(u8 **destination, s32 area, s32 room) {
     FldAreaWork *state = &fldGlobalBase;
 
     if (state->resourceArea == area) {
@@ -1338,7 +1338,7 @@ struct sdfMemHandle_t *fldLoadCachedRoomF1ResourceIfLocationMatches(u8 **destina
     return NULL;
 }
 
-struct sdfMemHandle_t *fldLoadCachedRoomF2ResourceIfLocationMatches(u8 **destination, s32 area, s32 room) {
+struct sdfMemHandle_t *fldCopyCachedRoomF2ResourceIfLocationMatches(u8 **destination, s32 area, s32 room) {
     FldAreaWork *state = &fldGlobalBase;
 
     if (state->resourceArea == area) {
@@ -1353,7 +1353,7 @@ struct sdfMemHandle_t *fldLoadCachedRoomF2ResourceIfLocationMatches(u8 **destina
     return NULL;
 }
 
-struct sdfMemHandle_t *fldLoadCachedRoomKF2ResourceIfLocationMatches(u8 **destination, s32 area, s32 room) {
+struct sdfMemHandle_t *fldCopyCachedRoomKF2ResourceIfLocationMatches(u8 **destination, s32 area, s32 room) {
     FldAreaWork *state = &fldGlobalBase;
 
     if (state->resourceArea == area) {
@@ -1617,7 +1617,7 @@ struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) {
         }
     }
     if (isField == 0) {
-        fldCachedRoomResourceAllocation = fldLoadCachedRoomResourceIfLocationMatches(&roomOffsets, area, room);
+        fldCachedRoomResourceAllocation = fldCopyCachedRoomResourceIfLocationMatches(&roomOffsets, area, room);
         if (fldCachedRoomResourceAllocation == NULL) {
             sprintf(path, D_00436028, resourceName);
             fldRoomSoundResources = sndLoadNamedOffsetResourceList(path);
@@ -1629,7 +1629,7 @@ struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) {
     }
     if (isField == 0) {
         sprintf(path, D_00436030, resourceName);
-        fldCachedRoomF2ResourceAllocation = fldLoadCachedRoomF2ResourceIfLocationMatches(&roomData, area, room);
+        fldCachedRoomF2ResourceAllocation = fldCopyCachedRoomF2ResourceIfLocationMatches(&roomData, area, room);
         if (fldCachedRoomF2ResourceAllocation == NULL) {
             fldCachedRoomF2ResourceAllocation = sdfDevLoadFileEx(path, (u32 *)&roomData, 0);
         }
@@ -1642,7 +1642,7 @@ struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) {
     if (fldGetLocationCoordinateValue(area, room) & 0x10) {
         fldMakeFilePath(directory, area, 1);
         sprintf(path, D_00413128, directory, area, room);
-        fldCachedRoomKF2ResourceAllocation = fldLoadCachedRoomKF2ResourceIfLocationMatches(&roomData, area, room);
+        fldCachedRoomKF2ResourceAllocation = fldCopyCachedRoomKF2ResourceIfLocationMatches(&roomData, area, room);
         if (fldCachedRoomKF2ResourceAllocation == NULL) {
             fldCachedRoomKF2ResourceAllocation = sdfDevLoadFileEx(path, (u32 *)&roomData, 0);
         }
@@ -1654,7 +1654,7 @@ struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) {
     }
     if (isField == 0) {
         sprintf(path, D_00436038, resourceName);
-        fldCachedRoomF1ResourceAllocation = fldLoadCachedRoomF1ResourceIfLocationMatches(&roomData, area, room);
+        fldCachedRoomF1ResourceAllocation = fldCopyCachedRoomF1ResourceIfLocationMatches(&roomData, area, room);
         if (fldCachedRoomF1ResourceAllocation == NULL) {
             fldCachedRoomF1ResourceAllocation = sdfDevLoadFileEx(path, (u32 *)&roomData, 0);
         }

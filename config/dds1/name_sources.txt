@@ -1046,10 +1046,10 @@
 0x00127B88	fldLoadNextGetStatus	inferred	SMT3HD name via SLUS_209.11 0x001275D0, shared-hash-in-run; was fldGetResourceReadyFlag
 0x00127B98	fldLoadNextGetStatus2	inferred	SMT3HD name via SLUS_209.11 0x001275E0, reloc-identical; was fldIsAreaResourceReady
 0x00127BD8	fldLoadNextGetStatus3	inferred	SMT3HD name via SLUS_209.11 0x00127620, unique-masked-hash; was fldIsAreaFloorResourceReady
-0x00127C40	fldLoadCachedRoomResourceIfLocationMatches	inferred	Copies a cached resource only when current area and room match the request. [names_reviewed17.tsv]
-0x00127CB8	fldLoadCachedRoomF1ResourceIfLocationMatches	inferred	D1 fldLoadAreaRoomResources calls this helper for the "%s.f1" cache path and retains its returned sdfMemHandle_t descriptor; DDS2 twin 0x0012A270 is called for the matching "%s.f1" path.
-0x00127D30	fldLoadCachedRoomF2ResourceIfLocationMatches	inferred	D1 fldLoadAreaRoomResources calls this helper for the "%s.f2" cache path and retains its returned sdfMemHandle_t descriptor; DDS2 twin 0x0012A2E8 is called for the matching "%s.f2" path.
-0x00127DA8	fldLoadCachedRoomKF2ResourceIfLocationMatches	inferred	D1 fldLoadAreaRoomResources calls this helper for the "%sk%03d_%03d.f2" cache path and retains its returned sdfMemHandle_t descriptor; DDS2 twin 0x0012A360 is called for the same literal path.
+0x00127C40	fldCopyCachedRoomResourceIfLocationMatches	inferred	Copies a cached resource only when current area and room match the request. [names_reviewed17.tsv]
+0x00127CB8	fldCopyCachedRoomF1ResourceIfLocationMatches	inferred	D1 helper allocates and copies cached F1 bytes into a relocatable buffer; fldLoadAreaRoomResources retains the returned handle, and scene teardown frees it. Paired DDS2 helper at 0x0012A270 has the same ownership behavior.
+0x00127D30	fldCopyCachedRoomF2ResourceIfLocationMatches	inferred	D1 helper allocates and copies cached F2 bytes into a relocatable buffer; fldLoadAreaRoomResources retains the returned handle, and scene teardown frees it. Paired DDS2 helper at 0x0012A2E8 has the same ownership behavior.
+0x00127DA8	fldCopyCachedRoomKF2ResourceIfLocationMatches	inferred	D1 helper allocates and copies cached KF2 bytes into a relocatable buffer; fldLoadAreaRoomResources retains the returned handle, and scene teardown frees it. Paired DDS2 helper at 0x0012A360 has the same ownership behavior.
 0x00127E20	fldFormatAreaResourceName	inferred	Builds the packed area resource file name (f%03d_000/00a-00d.LB); twin of D2 0x0012A3D8 [names_M53_Field.tsv]
 0x00127FD0	fldCheckNextFile	inferred	SMT3HD name via SLUS_209.11 0x001279B8, reloc-identical; was fldHasAreaResourceNameChanged
 0x00128000	fldLoadFieldPack	inferred	SMT3HD name via SLUS_209.11 0x001279E8, unique-masked-hash; was fldLoadAreaPackedResources
@@ -9952,11 +9952,11 @@
 0x003BAC54	fldCachedRoomF1ResourceAllocation	inferred	Native field loader stores the F1 cached-resource helper result here; field-resource teardown queues and clears it.
 0x003BAC58	fldCachedRoomF2ResourceAllocation	inferred	Native field loader stores the F2 cached-resource helper result here; field-resource teardown queues and clears it.
 0x003BAC5C	fldCachedRoomKF2ResourceAllocation	inferred	Native field loader stores the KF2 cached-resource helper result here; field-resource teardown queues and clears it.
-0x003BAC60	fldCachedRoomResourceData	inferred	confidence=high; src/dds1/game/code_00126A30.c:fldLoadCachedRoomResourceIfLocationMatches; Source address copied when the cached room location matches. [names_qp9.tsv]
+0x003BAC60	fldCachedRoomResourceData	inferred	confidence=high; src/dds1/game/code_00126A30.c:fldCopyCachedRoomResourceIfLocationMatches; Source address copied when the cached room location matches. [names_qp9.tsv]
 0x003BAC64	fldCachedRoomF1ResourceData	inferred	Native helper copies from this word for the literal .f1 channel; source producer is not established.
 0x003BAC68	fldCachedRoomF2ResourceData	inferred	Native helper copies from this word for the literal .f2 channel; source producer is not established.
 0x003BAC6C	fldCachedRoomKF2ResourceData	inferred	Native helper copies from this word for the literal k-prefixed .f2 channel; source producer is not established.
-0x003BAC70	fldCachedRoomResourceSize	inferred	confidence=high; src/dds1/game/code_00126A30.c:fldLoadCachedRoomResourceIfLocationMatches; Byte count passed to allocation and copying of the cached room resource. [names_qp9.tsv]
+0x003BAC70	fldCachedRoomResourceSize	inferred	confidence=high; src/dds1/game/code_00126A30.c:fldCopyCachedRoomResourceIfLocationMatches; Byte count passed to allocation and copying of the cached room resource. [names_qp9.tsv]
 0x003BAC74	fldCachedRoomF1ResourceSize	inferred	Native helper uses this word as allocation size and memcpy length for the literal .f1 channel.
 0x003BAC78	fldCachedRoomF2ResourceSize	inferred	Native helper uses this word as allocation size and memcpy length for the literal .f2 channel.
 0x003BAC7C	fldCachedRoomKF2ResourceSize	inferred	Native helper uses this word as allocation size and memcpy length for the literal k-prefixed .f2 channel.
