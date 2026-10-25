@@ -3265,7 +3265,7 @@ void fileRestoreSlotFlagsToState(void) {
 
 extern s32 fileTestSlotFlagsBit(s32 kind, u32 *flags);
 
-s32 fileToggleSlotFlagsBit(u32 kind, u32 *flags) {
+u8 fileToggleSlotFlagsBit(u32 kind, u32 *flags) {
     switch (kind) {
     case 0:
         *flags ^= 2;
