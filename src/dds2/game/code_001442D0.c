@@ -489,7 +489,7 @@ extern s32 fileMenuTaskExists(void);
 extern u8 fldHasKiretaLabelProcess(void);
 extern u8 fldProcKiretaChk(void);
 extern u8 fldProcHirakenaiChk(void);
-extern s32 fldIsEventPhaseAtLeastTwo(void);
+extern u8 fldIsEventPhaseAtLeastTwo(void);
 extern dds3ProcessID_t *inputpanel_id;
 extern void fldUpdateCameraHeadingFromXY(void);
 extern u32 fldRunDanteGunFlag[];
@@ -5521,7 +5521,7 @@ void fldFinishDeferredExit(void) {
     }
 }
 
-s32 fldIsEventPhaseAtLeastTwo(void) {
+u8 fldIsEventPhaseAtLeastTwo(void) {
     if (fldSparkControlState.state.phase < 2) {
         return 0;
     }

@@ -2268,7 +2268,7 @@ s32 fldProcSequence(dds3ProcessID_t *task) {
 
 #include "fld_encounter_runtime_api.h"
 extern void fldDbgPrint2D(s32, s32, const char *);
-extern s32 fldIsEventPhaseAtLeastTwo(void);
+extern u8 fldIsEventPhaseAtLeastTwo(void);
 extern void func_00149B68(void);
 extern void fldDrawAutomapWhenReady(void);
 extern void fldElvDrawFloorNum(void);

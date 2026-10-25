@@ -3251,7 +3251,7 @@ extern s32 fileMenuTaskExists(void);
 
 extern u8 fldHasKiretaLabelProcess(void), fldProcKiretaChk(void), fldProcHirakenaiChk(void);
 
-extern s32 fldIsEventPhaseAtLeastTwo(void);
+extern u8 fldIsEventPhaseAtLeastTwo(void);
 
 extern s32 frFontMeasureTextAdvance(const u8 *text, u8 fontIndex, u8 mode);
 

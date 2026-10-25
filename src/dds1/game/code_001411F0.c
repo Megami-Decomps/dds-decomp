@@ -293,7 +293,7 @@ extern s32 fileMenuTaskExists(void);
 extern u8 fldHasKiretaLabelProcess(void);
 extern u8 fldProcKiretaChk(void);
 extern u8 fldProcHirakenaiChk(void);
-extern s32 fldIsEventPhaseAtLeastTwo(void);
+extern u8 fldIsEventPhaseAtLeastTwo(void);
 extern void fldApplyCameraFacingPoint(void);
 
 FldTitleBannerResult fldResolvePendingTitleBanner(void) {
@@ -5129,7 +5129,7 @@ void fldFinishDeferredExit(void) {
     }
 }
 
-s32 fldIsEventPhaseAtLeastTwo(void) {
+u8 fldIsEventPhaseAtLeastTwo(void) {
     if (D_003D62A8[0] < 2) {
         return 0;
     }

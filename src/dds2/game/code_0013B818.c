@@ -161,7 +161,7 @@ extern s32 fldProcKiretaChk(void);
 
 extern s32 fldProcHirakenaiChk(void);
 
-extern s32 fldIsEventPhaseAtLeastTwo(void);
+extern u8 fldIsEventPhaseAtLeastTwo(void);
 
 extern void fldKanjiDraw(s32 x, s32 y, u32 colors, const u8 *text);
 
