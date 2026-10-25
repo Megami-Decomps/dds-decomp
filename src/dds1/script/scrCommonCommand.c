@@ -43,6 +43,13 @@ extern char D_0039F570[];
 
 extern s32 scrGetIntPara(s32 parameterIndex);
 
+typedef dds3ProcessID_t *ScrProcessHandle;
+
+static inline ScrProcessHandle scrGetProcessHandlePara(s32 parameterIndex)
+{
+    return (ScrProcessHandle)(u32)scrGetIntPara(parameterIndex);
+}
+
 s32 scrCommand_RND(void)
 {
     scrSetIntReturnValue(dds3GetRandIntA(0, scrGetIntPara(0)) + 1);
@@ -237,8 +244,8 @@ s32 bfWaitCbCreateTask(void)
 
 s32 scrCommand_SCR_KILL(void)
 {
-    dds3ProcessID_t *task;
-    task = (dds3ProcessID_t *)scrGetIntPara(0);
+    ScrProcessHandle task;
+    task = scrGetProcessHandlePara(0);
     if (dds3ExistProcess(task) == 0)
     {
         return 1;
@@ -249,12 +256,12 @@ s32 scrCommand_SCR_KILL(void)
 
 s32 scrCommand_SCR_WAIT(void)
 {
-    return dds3ExistProcess((dds3ProcessID_t *)scrGetIntPara(0)) == 0;
+    return dds3ExistProcess(scrGetProcessHandlePara(0)) == 0;
 }
 
 s32 scrCommand_SCR_STAT(void)
 {
-    if (dds3ExistProcess((dds3ProcessID_t *)scrGetIntPara(0)) != 0)
+    if (dds3ExistProcess(scrGetProcessHandlePara(0)) != 0)
     {
         scrSetIntReturnValue(1);
     }
@@ -268,8 +275,8 @@ s32 scrCommand_SCR_STAT(void)
 /* Persona 4 scrCommand_SCR_TIME @ 00299660 (src/Script/scrCommonCommand.c), recompiled unchanged */
 u32 scrCommand_SCR_TIME()
 {
-    dds3ProcessID_t* task;
-    task = (dds3ProcessID_t*)scrGetIntPara(0);
+    ScrProcessHandle task;
+    task = scrGetProcessHandlePara(0);
     if (!dds3ExistProcess(task))
     {
         scrSetIntReturnValue(0);
