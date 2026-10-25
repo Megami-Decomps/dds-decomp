@@ -10,6 +10,7 @@
 #include "fld_marker_packet.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "fld_placement_batch_mode.h"
 #include "dds3_object_flags.h"
 #include "sdf_vu0.h"
 #include "fld_stop_entry.h"
@@ -582,7 +583,8 @@ extern void fldCreatePlayerObject(void);
 
 extern const char *fldSelectCurrentActorOnNextFloor(void);
 
-extern void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatches, u32 batchCount, s32 isAppended);
+extern void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatches, u32 batchCount,
+                                                FldPlacementBatchMode mode);
 
 extern s32 D_003BAE68;
 
@@ -883,7 +885,7 @@ static inline void fldCopySpawnTransform(f32 *position, f32 *rotation, const f32
     }
 }
 
-void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCount, s32 isAppended) {
+void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCount, FldPlacementBatchMode mode) {
     f32 position[4];
     f32 rotation[4];
     const f32 *transform;
@@ -900,7 +902,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
     s32 room;
     u32 id;
 
-    if (isAppended == 0) {
+    if (mode == FLD_PLACEMENT_BATCH_MODE_INITIAL) {
         D_003BD7B8 = NULL;
         D_003BD7BC = 0;
     }
@@ -916,7 +918,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
         case FLD_SPAWN_BATCH_KIND_BILLBOARD_EFFECT:
             break;
         case FLD_SPAWN_BATCH_KIND_COLLISION:
-            if (isAppended != 0) {
+            if (mode != FLD_PLACEMENT_BATCH_MODE_INITIAL) {
                 break;
             }
             D_003BD7B8 = spawnResource;
@@ -936,7 +938,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
             break;
         case FLD_SPAWN_BATCH_KIND_EVENT:
             for (resourceIndex = 0; resourceIndex < entryCount; resourceIndex++, spawnResource++) {
-                if (isAppended != 0) {
+                if (mode != FLD_PLACEMENT_BATCH_MODE_INITIAL) {
                     spawnResource->id |= 0x800000;
                 } else {
                     fldRoomEventPlacementCount++;
@@ -948,7 +950,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
             break;
         case FLD_SPAWN_BATCH_KIND_PATH:
             for (resourceIndex = 0; resourceIndex < entryCount; resourceIndex++, spawnResource++) {
-                if (isAppended != 0) {
+                if (mode != FLD_PLACEMENT_BATCH_MODE_INITIAL) {
                     spawnResource->id |= 0x800000;
                 }
                 dds3AddPathBasic(spawnResource->id, spawnResource->data, spawnResource->name);
@@ -956,7 +958,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
             break;
         case FLD_SPAWN_BATCH_KIND_PLACEMENT_DATA:
             for (resourceIndex = 0; resourceIndex < entryCount; resourceIndex++, spawnResource++) {
-                if (isAppended != 0) {
+                if (mode != FLD_PLACEMENT_BATCH_MODE_INITIAL) {
                     spawnResource->id |= 0x800000;
                 }
                 transform = spawnResource->transform;
@@ -967,13 +969,13 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
                     switch (point->kind) {
                     case 1:
                         func_00148FF0(0, point->id, rotation, position[0], position[1], position[2]);
-                        if (isAppended == 0) {
+                        if (mode == FLD_PLACEMENT_BATCH_MODE_INITIAL) {
                             fldRoomEventPlacementCount++;
                         }
                         break;
                     case 2:
                         func_00148FF0(1, point->id, rotation, position[0], position[1], position[2]);
-                        if (isAppended == 0) {
+                        if (mode == FLD_PLACEMENT_BATCH_MODE_INITIAL) {
                             fldRoomEventPlacementCount++;
                         }
                         break;
@@ -996,7 +998,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
                     parameters = ((FldPlacementData *)spawnResource->data)->payload.words;
                     id = parameters[0];
                     room = fldCommand_GetHojiID(spawnResource->name);
-                    if (isAppended != 0) {
+                    if (mode != FLD_PLACEMENT_BATCH_MODE_INITIAL) {
                         FldPlacementData *placement = spawnResource->data;
                         func_001480D0(id, rotation, position[0], position[1], position[2],
                                       room, spawnResource->name, placement->event + fldRoomEventPlacementCount);
@@ -1009,7 +1011,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
                 case FLD_PLACEMENT_KIND_WORD_ARRAY_PLACEMENT:
                     parameters = ((FldPlacementData *)spawnResource->data)->payload.words;
                     func_001486D0(parameters[0], rotation, position[0], position[1], position[2]);
-                    if (isAppended == 0) {
+                    if (mode == FLD_PLACEMENT_BATCH_MODE_INITIAL) {
                         fldRoomEventPlacementCount++;
                     }
                     break;
@@ -1023,7 +1025,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
             break;
         case FLD_SPAWN_BATCH_KIND_CAMERA:
             for (resourceIndex = 0; resourceIndex < entryCount; resourceIndex++, spawnResource++) {
-                if (isAppended != 0) {
+                if (mode != FLD_PLACEMENT_BATCH_MODE_INITIAL) {
                     spawnResource->id |= 0x800000;
                 }
                 fldCopySpawnTransform(position, rotation, spawnResource->transform);
@@ -1279,12 +1281,14 @@ void fldProcessFieldRequest(FldSceneRequest *request) {
     fldSpawnActionObjects(request->spawnList, request->spawnCount);
     areaId = fldGlobalBase.area;
     if (areaId != 1 && areaId < 200) fldCreatePlayerObject();
-    fldSpawnPlacementObjectsFromBatches(request->spawnBatches, request->spawnBatchCount, 0);
+    fldSpawnPlacementObjectsFromBatches(request->spawnBatches, request->spawnBatchCount,
+                                        FLD_PLACEMENT_BATCH_MODE_INITIAL);
     fldGlobalBase.fallbackResourceTaskName = request->record->fallbackResourceName;
 }
 
 void fldProcessFieldRequestAlternate(FldSceneRequest *request) {
-    fldSpawnPlacementObjectsFromBatches(request->spawnBatches, request->spawnBatchCount, 1);
+    fldSpawnPlacementObjectsFromBatches(request->spawnBatches, request->spawnBatchCount,
+                                        FLD_PLACEMENT_BATCH_MODE_APPEND);
 }
 
 u8 *fldGetInfoHeader(FldTransferChunk *chunk) {
