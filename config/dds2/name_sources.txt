@@ -692,7 +692,7 @@
 0x001172B8	dds3PathBasicControlGetRot	inferred	SMT3HD name via SLUS_209.11 0x00116528, reloc-identical; was dds3InterpolatePathQuaternionVU
 0x00117340	dds3PathBasicControlNextStep	inferred	SMT3HD name via SLUS_209.11 0x001165B0, reloc-identical; was dds3InterpolatePathOutput
 0x001176A0	dds3PathBasicControlGetFovy	inferred	SMT3HD name via SLUS_209.11 0x00116910, reloc-identical; was sdfSampleActiveLinearCurve
-0x00117728	dds3PathBasicControlIsFinished	inferred	SMT3HD name via SLUS_209.11 0x00116998, byte-identical; was sdfStepWrappingFloatCounter
+0x00117728	dds3PathBasicControlStep	inferred	Paired counter-step providers advance time; zero means non-looping endpoint; prior SMT3HD name suggested a predicate
 0x001177D0	dds3PathBasicControlAlterMode	inferred	SMT3HD name via SLUS_209.11 0x00116A40, shared-hash-in-run; was sdfSetFloatCounterDirection
 0x001177D8	dds3PathBasicControlGetMode	inferred	SMT3HD name via SLUS_209.11 0x00116A48, shared-hash-in-run; was sdfGetFloatCounterDirection
 0x001177E0	dds3PathBasicControlSetRatio	inferred	SMT3HD name via SLUS_209.11 0x00116A50, byte-identical; was evtScaleValueByMultiplier

@@ -18,7 +18,12 @@ typedef char SdfFloatCounter_duration_at_0x08[
 typedef char SdfFloatCounter_time_at_0x0C[
     ((u32)&((SdfFloatCounter *)0)->time == 0x0C) ? 1 : -1];
 
-s32 dds3PathBasicControlIsFinished(SdfFloatCounter *counter);
+#define SDF_FLOAT_COUNTER_STEP_FINISHED 0
+#define SDF_FLOAT_COUNTER_STEP_CONTINUES 1
+
+/* Advance one counter step unless frozen. FINISHED means a non-looping
+ * counter was already at its endpoint; a frozen counter still CONTINUES. */
+s32 dds3PathBasicControlStep(SdfFloatCounter *counter);
 void dds3PathBasicControlAlterMode(SdfFloatCounter *counter, u32 direction);
 u32 dds3PathBasicControlGetMode(const SdfFloatCounter *counter);
 f32 dds3PathBasicControlGetRatio(const SdfFloatCounter *counter);

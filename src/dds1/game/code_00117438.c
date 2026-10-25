@@ -79,12 +79,12 @@ f32 dds3PathBasicControlGetFovy(dds3PathBasicControl_t *user) {
 #define SDF_FLOAT_COUNTER_FROZEN_FLAG 0x00000008
 #define SDF_FLOAT_COUNTER_WRAP_FLAG 0x00000020
 
-/* Step the counter by one; returns 0 when it ran out and does not wrap. */
-s32 dds3PathBasicControlIsFinished(SdfFloatCounter *counter) {
-    s32 result = 1;
+/* Step the counter by one; return zero when a non-looping endpoint is reached. */
+s32 dds3PathBasicControlStep(SdfFloatCounter *counter) {
+    s32 result = SDF_FLOAT_COUNTER_STEP_CONTINUES;
 
     if (counter->flags & SDF_FLOAT_COUNTER_FROZEN_FLAG) {
-        return 1;
+        return SDF_FLOAT_COUNTER_STEP_CONTINUES;
     }
     if (counter->direction == 0) {
         if (counter->duration > counter->time) {
@@ -92,7 +92,7 @@ s32 dds3PathBasicControlIsFinished(SdfFloatCounter *counter) {
         } else if (counter->flags & SDF_FLOAT_COUNTER_WRAP_FLAG) {
             counter->time = 0.0f;
         } else {
-            result = 0;
+            result = SDF_FLOAT_COUNTER_STEP_FINISHED;
         }
     } else if (counter->direction == 1) {
         if (counter->time > 0.0f) {
@@ -100,7 +100,7 @@ s32 dds3PathBasicControlIsFinished(SdfFloatCounter *counter) {
         } else if (counter->flags & SDF_FLOAT_COUNTER_WRAP_FLAG) {
             counter->time = counter->duration;
         } else {
-            result = 0;
+            result = SDF_FLOAT_COUNTER_STEP_FINISHED;
         }
     }
     return result;

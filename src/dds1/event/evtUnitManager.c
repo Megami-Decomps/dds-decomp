@@ -1074,7 +1074,7 @@ s32 evtUnitPrepareVerticalMoveSteps(evtUnitHandle_t *unit) {
 s32 evtUnitMoveTypePathTrace(evtUnitHandle_t *unit) {
     f32 v[4];
 
-    dds3PathBasicControlIsFinished(&unit->pathControl->counter);
+    dds3PathBasicControlStep(&unit->pathControl->counter);
     dds3PathBasicControlGetPos(unit->pathControl);
     VU0_STORE_VF($vf10, v);
     dds3SetPosPoseSet(unit->effObj, (u128 *)v);

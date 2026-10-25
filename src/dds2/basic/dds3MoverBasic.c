@@ -55,7 +55,7 @@ s32 MoverBasicMainprocuder(dds3Basic_t *moverNode)
             }
         }
         /* Advance even when no applicable channel was enabled for this target. */
-        dds3PathBasicControlIsFinished(&slotResource->path->counter);
+        dds3PathBasicControlStep(&slotResource->path->counter);
     } else {
         updateCallback = slotResource->update;
         /* This unidentified word is cleared even when no callback exists. */
