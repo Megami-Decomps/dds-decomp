@@ -6,6 +6,7 @@
 #include "eff_random_mod.h"
 #include "fpu.h"
 #include "kwln.h"
+#include "kwln_process_registration.h"
 #include "pcp_vu0.h"
 #include "scr.h"
 #include "scr_command_timer_api.h"
@@ -246,7 +247,7 @@ s32 scrCommand_SCR_KILL(void)
 {
     ScrProcessHandle task;
     task = scrGetProcessHandlePara(0);
-    if (dds3ExistProcess(task) == 0)
+    if (dds3ExistProcess(task) == KWLN_PROCESS_NOT_REGISTERED)
     {
         return 1;
     }
@@ -256,12 +257,12 @@ s32 scrCommand_SCR_KILL(void)
 
 s32 scrCommand_SCR_WAIT(void)
 {
-    return dds3ExistProcess(scrGetProcessHandlePara(0)) == 0;
+    return dds3ExistProcess(scrGetProcessHandlePara(0)) == KWLN_PROCESS_NOT_REGISTERED;
 }
 
 s32 scrCommand_SCR_STAT(void)
 {
-    if (dds3ExistProcess(scrGetProcessHandlePara(0)) != 0)
+    if (dds3ExistProcess(scrGetProcessHandlePara(0)) != KWLN_PROCESS_NOT_REGISTERED)
     {
         scrSetIntReturnValue(1);
     }
@@ -277,7 +278,7 @@ u32 scrCommand_SCR_TIME()
 {
     ScrProcessHandle task;
     task = scrGetProcessHandlePara(0);
-    if (!dds3ExistProcess(task))
+    if (dds3ExistProcess(task) == KWLN_PROCESS_NOT_REGISTERED)
     {
         scrSetIntReturnValue(0);
     }
