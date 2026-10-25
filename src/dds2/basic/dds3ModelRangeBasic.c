@@ -5,15 +5,14 @@
 #include "dds3_model_range.h"
 
 
-/* Queue the backing allocation, if present, then free the range-data block.
- * A non-NULL resourceData must match a used general-heap block.
- * The owning object's rangeData member is not cleared by this release. */
-void dds3ModelBasicFreeModel(Dds3ModelRangeObjectView *modelRangeObject) {
+/* The kind-11 destroy hook queues its optional resource allocation before
+ * freeing its data block. dds3DeleteBasic frees the object after this returns. */
+void dds3ModelBasicFreeModel(dds3Basic_t *object) {
     Dds3ModelRangeDataView *rangeData;
     const void *resourceData;
     sdfMemHandle_t *allocation;
 
-    rangeData = modelRangeObject->rangeData;
+    rangeData = object->data;
     resourceData = rangeData->resourceData;
     if (resourceData != NULL) {
         allocation = sdfMemGetHandleByPtr(resourceData);
