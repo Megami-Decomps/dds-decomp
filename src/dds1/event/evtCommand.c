@@ -821,7 +821,7 @@ extern void dds3MoverBasicMakePath(dds3Basic_t *object);
 extern char D_003AC8E8[], D_003AC8F8[], D_003AC908[];
 
 s32 evtCommand_OBJ_PATH_MOVE(void) {
-    void *unit;
+    dds3Basic_t *unit;
     dds3Basic_t *target;
     dds3ObjectBaseControlWorkData_t *data;
     dds3Basic_t *slotNode;
@@ -880,7 +880,7 @@ s32 evtCommand_OBJ_PATH_MOVE(void) {
 extern char D_003AC928[]; /* "re attach...!\n" */
 
 s32 evtCommandReattachObjectPath(void) {
-    void *unit;
+    dds3Basic_t *unit;
     dds3Basic_t *target;
     dds3ObjectBaseControlWorkData_t *data;
     dds3Basic_t *slotNode;
