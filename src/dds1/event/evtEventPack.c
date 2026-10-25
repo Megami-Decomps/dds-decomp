@@ -17,7 +17,7 @@
 
 #include "sdf.h"
 s32 evtCheckScriptDone(dds3ProcessID_t *task);
-void evtWaitEventPackLoad(dds3ProcessID_t *task);
+void evtDestroyEventPackTask(dds3ProcessID_t *task);
 
 #include "dds3_world_primary.h"
 extern sdfMotionCtrlr_t *mdlGetMotionCtrlr(dds3ModelHandle_t *ctx, s32 searchId);
@@ -283,7 +283,7 @@ extern void Eve_RippleBlurSetDefTex(void);
 extern void Eve_PartialMultiFilterSetDefTex(void);
 /* Release the event task's owned handles, then free its state.
  * File I/O is waited on even when the user-value handle is zero. */
-void evtWaitEventPackLoad(dds3ProcessID_t *task) {
+void evtDestroyEventPackTask(dds3ProcessID_t *task) {
     EvtPackLoadState *packState = (EvtPackLoadState *)dds3GetProcessData(task);
 
     fileSyncAll();

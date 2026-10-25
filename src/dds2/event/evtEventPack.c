@@ -282,7 +282,7 @@ extern void Eve_RippleBlurSetDefTex(void);
 extern void Eve_PartialMultiFilterSetDefTex(void);
 /* Release the event task's owned handles, then free its state.
  * File I/O is waited on even when the user-value handle is zero. */
-void evtWaitEventPackLoad(dds3ProcessID_t *task) {
+void evtDestroyEventPackTask(dds3ProcessID_t *task) {
     EvtPackLoadState *packState = (EvtPackLoadState *)(u32)dds3GetProcessData(task);
 
     fileSyncAll();

@@ -5510,7 +5510,7 @@
 0x00242340	evtLoadEventScript	inferred	SMT3HD name via SLUS_209.11 0x001FA9B0, reloc-identical; was evtBeginEventPackScriptLoad
 0x002423C8	evtCheckEventScriptLoaded	inferred	SMT3HD name via SLUS_209.11 0x001FAA38, reloc-identical; was evtCompleteEventPackScriptLoad
 0x002424B0	evtCheckScriptDone	inferred	SMT3HD name via SLUS_209.11 0x001FAB20, reloc-identical; was evtTickPackLoad
-0x00242510	evtWaitEventPackLoad	inferred	SMT3HD name via SLUS_209.11 0x001FAB80, reloc-identical; was evtReleaseEventPackResources
+0x00242510	evtDestroyEventPackTask	inferred	registered as the event-pack task destroy callback; releases owned handles and task state
 0x00242608	evtLoadEventPack	inferred	SMT3HD name via SLUS_209.11 0x001FAC78, reloc-identical; was mnuCampCreateTask
 0x00242698	evtKillEventPack	inferred	SMT3HD name via SLUS_209.11 0x001FAD08, reloc-identical; was mnuCampDestroyTaskById
 0x002426D0	mnuCampDestroyAllTasks	inferred	Byte-identical dds2 twin 0x0025DAE8; DDS1 has the same unprefixed symbol; game/code_0025DA20 uses mnu for the already-described campDestroyAllTasks behavior. [names_conflicts.tsv]
