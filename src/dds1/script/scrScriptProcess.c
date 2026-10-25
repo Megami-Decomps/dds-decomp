@@ -156,7 +156,7 @@ s32 scrStartProcessProcedure(scrProcessWork_s *process, ScrProcedureIndex proced
 
         for (cursor = SCR_STACK_RET; cursor >= 0; cursor--) {
             *stackType++ = 0;
-            stackValue++->i = 0;
+            stackValue++->bits = 0;
         }
     }
     process->procedureIndex = procedureIndex;

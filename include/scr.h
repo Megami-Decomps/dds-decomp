@@ -12,11 +12,20 @@ struct ItfMesSub;
 typedef s32 ScrProcedureIndex;
 #define SCR_PROCEDURE_INDEX_NOT_FOUND ((ScrProcedureIndex)-1)
 
-/* One 4-byte script operand slot; DDS1/2 script/scrTraceCode.c via scrProcessWork_s. */
+typedef s32 ScrProgramCounter;
+typedef s32 ScrGlobalIntegerIndex;
+typedef s32 ScrGlobalFloatIndex;
+
+/* One 4-byte script operand slot; the type tag determines whether a word is
+ * a scalar, a global-register index, a return address, or a borrowed string. */
 typedef union ScrStackValue {
-    s32 i;
-    f32 f;
-    const char *s;       /* borrowed read-only pointer into source FLW0 string section */
+    u32 bits; /* raw slot copy, preserving the separately stored type tag */
+    s32 integer;
+    f32 floating;
+    ScrGlobalIntegerIndex globalIntegerIndex;
+    ScrGlobalFloatIndex globalFloatIndex;
+    ScrProgramCounter returnAddress;
+    const char *string; /* borrowed read-only pointer into source FLW0 string section */
 } ScrStackValue;
 
 typedef s8 ScrStackValueType;
@@ -34,7 +43,7 @@ typedef union ScrInstr {
 /* Named script label/procedure and address (0x20); DDS1/2 script/scrTraceCode.c. */
 typedef struct ScrLabel {
     char name[24];
-    s32 addr;              /* 0x18 */
+    ScrProgramCounter addr; /* 0x18 */
     s32 unk1C;
 } ScrLabel;
 
@@ -62,7 +71,7 @@ typedef char ScrSection_size_must_be_0x10[
  * The interpreter, scheduler attachment and named-process list share this owner. */
 typedef struct scrProcessWork_s {
     char name[24];
-    s32 pc;
+    ScrProgramCounter pc;
     s32 sp;
     ScrStackValueType stackTypes[28];
     ScrStackValue stackValues[28];
@@ -112,7 +121,7 @@ scrProcessWork_s *scrCreateTaskWithDefaultOption(struct BfFlw0Header *header);
 void PushInt(scrProcessWork_s *script, s32 value);
 void PushFloat(scrProcessWork_s *script, f32 value);
 void PushStr(scrProcessWork_s *script, const char *value);
-void PushRet(scrProcessWork_s *script, s32 value);
+void PushRet(scrProcessWork_s *script, ScrProgramCounter returnAddress);
 s32 PopInt(scrProcessWork_s *script);
 f32 PopFloat(scrProcessWork_s *script);
 dds3ProcessID_t *scrRunScriptEx(u32 priority, struct BfFlw0Header *header,

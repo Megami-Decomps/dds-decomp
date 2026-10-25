@@ -1932,7 +1932,7 @@ scrProcessWork_s *bfContextCreate(BfFlw0Header *header, ScrSection *sections, Sc
                         const char *strings, ScrProcedureIndex procedureIndex) {
     scrProcessWork_s *process;
     s32 i;
-    s8 *types;
+    ScrStackValueType *types;
     ScrStackValue *values;
 
     if (header == NULL || sections == NULL || procedures == NULL ||
@@ -1952,9 +1952,9 @@ scrProcessWork_s *bfContextCreate(BfFlw0Header *header, ScrSection *sections, Sc
     process->sp = 0;
     values = process->stackValues;
     types = process->stackTypes;
-    for (i = 27; i >= 0; i--) {
+    for (i = SCR_STACK_RET; i >= 0; i--) {
         *types++ = 0;
-        values++->i = 0;
+        values++->bits = 0;
     }
     process->sections = sections;
     process->labels = labels;

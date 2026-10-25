@@ -47,25 +47,25 @@ s32 scrScriptProcess(dds3ProcessID_t *task) {
 
 void PushInt(scrProcessWork_s *script, s32 integerValue) {
     script->stackTypes[script->sp] = SCR_STACK_TYPE_INTEGER;
-    script->stackValues[script->sp].i = integerValue;
+    script->stackValues[script->sp].integer = integerValue;
     script->sp = script->sp + 1;
 }
 
 void PushFloat(scrProcessWork_s *script, f32 floatValue) {
     script->stackTypes[script->sp] = SCR_STACK_TYPE_FLOAT;
-    script->stackValues[script->sp].f = floatValue;
+    script->stackValues[script->sp].floating = floatValue;
     script->sp = script->sp + 1;
 }
 
 void PushStr(scrProcessWork_s *script, const char *string) {
     script->stackTypes[script->sp] = SCR_STACK_TYPE_STRING;
-    script->stackValues[script->sp].s = string;
+    script->stackValues[script->sp].string = string;
     script->sp = script->sp + 1;
 }
 
-void PushRet(scrProcessWork_s *script, s32 programCounter) {
+void PushRet(scrProcessWork_s *script, ScrProgramCounter returnAddress) {
     script->stackTypes[script->sp] = SCR_STACK_TYPE_RETURN_ADDRESS;
-    script->stackValues[script->sp].i = programCounter;
+    script->stackValues[script->sp].returnAddress = returnAddress;
     script->sp = script->sp + 1;
 }
 
@@ -76,14 +76,15 @@ s32 PopInt(scrProcessWork_s *script) {
     script->sp = stackIndex - 1;
     switch (script->stackTypes[stackIndex - 1]) {
     case SCR_STACK_TYPE_INTEGER:
+        return script->stackValues[script->sp].integer;
     case SCR_STACK_TYPE_RETURN_ADDRESS:
-        return script->stackValues[script->sp].i;
+        return script->stackValues[script->sp].returnAddress;
     case SCR_STACK_TYPE_FLOAT:
-        return script->stackValues[script->sp].f;
+        return script->stackValues[script->sp].floating;
     case SCR_STACK_TYPE_INTEGER_REFERENCE:
-        return DDS3_GBWK->script.ints[script->stackValues[script->sp].i];
+        return DDS3_GBWK->script.ints[script->stackValues[script->sp].globalIntegerIndex];
     case SCR_STACK_TYPE_FLOAT_REFERENCE:
-        return DDS3_GBWK->script.floats[script->stackValues[script->sp].i];
+        return DDS3_GBWK->script.floats[script->stackValues[script->sp].globalFloatIndex];
     }
     return 0;
 }
@@ -94,15 +95,15 @@ f32 PopFloat(scrProcessWork_s *script) {
     script->sp = stackIndex - 1;
     switch (script->stackTypes[stackIndex - 1]) {
     case SCR_STACK_TYPE_INTEGER:
-        return (f32)script->stackValues[script->sp].i;
+        return (f32)script->stackValues[script->sp].integer;
     case SCR_STACK_TYPE_RETURN_ADDRESS:
         return 0.0f;
     case SCR_STACK_TYPE_FLOAT:
-        return script->stackValues[script->sp].f;
+        return script->stackValues[script->sp].floating;
     case SCR_STACK_TYPE_INTEGER_REFERENCE:
-        return (f32)DDS3_GBWK->script.ints[script->stackValues[script->sp].i];
+        return (f32)DDS3_GBWK->script.ints[script->stackValues[script->sp].globalIntegerIndex];
     case SCR_STACK_TYPE_FLOAT_REFERENCE:
-        return DDS3_GBWK->script.floats[script->stackValues[script->sp].i];
+        return DDS3_GBWK->script.floats[script->stackValues[script->sp].globalFloatIndex];
     }
     return 0.0f;
 }
