@@ -9221,7 +9221,7 @@ extern const u8 *D_003BAA74;
 extern const u8 *D_003BAA88;
 extern void btlAdvanceTargetPanelAnimation(SceneAiWork *work, s32 mode);
 extern void func_001BFDE0(BtlUnit *unit, SceneAiWork *work, u32 index);
-extern u32 btlIsUnitInfoFlagOneEligible(BtlUnit *unit);
+extern s32 btlIsUnitInfoFlagOneEligible(BtlUnit *unit);
 extern void btlDrawCenteredPanelSegments(s32 width);
 
 /* Draw selected actor names and advance the battle scene's actor panels. */

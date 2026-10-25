@@ -2550,7 +2550,7 @@ void btlClearUnitDefeatCandidate(BtlUnit *object) {
     }
 }
 
-u32 btlIsUnitInfoFlagOneEligible(BtlUnit *unit) {
+s32 btlIsUnitInfoFlagOneEligible(BtlUnit *unit) {
     u32 flags = unit->status.flags;
     u8 modelFlags;
 
