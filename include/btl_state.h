@@ -290,8 +290,8 @@ typedef struct BtlState {
     u8 pad4B0[4];
     struct RefObj *buttonTextureHandle; /* 0x4B4: retained button-icon texture reference. */
     struct SoundResourceNode *resources[0x31]; /* 0x4B8: SYSEFF resource slots, indexed like DDS2's */
-    void *frontFloorResource; /* 0x57C: retained front floor texture resource. */
-    void *sideFloorResource; /* 0x580: retained side floor texture resource. */
+    void *frontFloorResource; /* 0x57C: locked payload address; delayed free resolves its allocation. */
+    void *sideFloorResource; /* 0x580: locked payload address; delayed free resolves its allocation. */
     u8 pad584[8];
     struct SdfFlagListWork *soundTransitionTask; /* 0x58C */
     u8 pad590[4];
@@ -542,8 +542,8 @@ typedef struct BtlState {
     u32 unk4E4; /* First word returned by the indexed scene-value API. */
     struct RefObj *buttonTextureHandle; /* 0x4E8: retained button-icon texture reference. */
     struct SoundResourceNode *resources[0x31]; /* 0x4EC: SYSEFF resource slots */
-    void *primaryBuffer;
-    void *secondaryBuffer;
+    void *primaryBuffer; /* Locked front-floor payload address; delayed free resolves its allocation. */
+    void *secondaryBuffer; /* Locked side-floor payload address; delayed free resolves its allocation. */
     u8 fadeEnabled;
     u8 pad5B9[3];
     u32 fadeColor;
