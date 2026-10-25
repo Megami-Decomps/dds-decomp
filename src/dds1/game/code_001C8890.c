@@ -3076,12 +3076,12 @@ void btlCommandTaskReleaseActor(s32 task) {
 void btlFlagLinkedActorActionInProgress(BtlTask *unit) {
     unit->unit->status.flags |= 0x4000;
 }
-void btlRunHookAndAdvanceUnitState(s32 object) {
-    void (*callback)(s32) = *(void (**)(s32))((u8 *)btlGetRuntime() + 0x660);
+void btlRunHookAndAdvanceUnitState(BtlTask *task) {
+    void (*callback)(BtlTask *) = *(void (**)(BtlTask *))((u8 *)btlGetRuntime() + 0x660);
     if (callback != 0) {
-        callback(object);
+        callback(task);
     }
-    btlDispatchStateHandler(object, 0x1A);
+    btlDispatchStateHandler(task, 0x1A);
 }
 
 /* Empty entry callback for the retail DEBUG action state. */
