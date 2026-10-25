@@ -3801,7 +3801,7 @@ void fldCamUpdateFollow(void) {
     node->ops->update(node);
     D_003BAD24++;
     if (D_003BAD28 < D_003BAD24) {
-        fldGlobalBase.mode = 0;
+        fldGlobalBase.mode = FLD_CAMERA_MODE_PLAYER_FOLLOW;
     }
 }
 
@@ -3957,7 +3957,7 @@ void fldUpdateCameraProximity(void) {
             fldClearCameraObjectHighlightFlag();
         } else {
             fldSetCameraObjectTransitionFlag();
-            if (fldGlobalBase.mode == 1 || fldGlobalBase.mode == 3) {
+            if (fldGlobalBase.mode == FLD_CAMERA_MODE_OBJECT_FOCUS || fldGlobalBase.mode == FLD_CAMERA_MODE_ALTERNATE_FOCUS) {
                 fldClearCameraObjectHighlightFlag();
             } else if (fldGlobalBase.dist < 100.0f) {
                 fldSetCameraObjectHighlightFlag();
@@ -3983,16 +3983,16 @@ s32 fldUpdateCameraFollow(void) {
         cam = &fldGlobalBase;
         dds3CameraObjectBasicSetFovy(*world, fldCameraFollowRows[cam->rowIdx].fov * 3.14f / 180.0f);
         switch (cam->mode) {
-        case 0:
+        case FLD_CAMERA_MODE_PLAYER_FOLLOW:
             fldUpdateCameraFollowPlayer();
             if (cam->dist < 50.0f) {
                 fldUpdateCameraFollowPlayer();
             }
             break;
-        case 1:
+        case FLD_CAMERA_MODE_OBJECT_FOCUS:
             fldUpdateCameraFollowLinkedObject();
             break;
-        case 4:
+        case FLD_CAMERA_MODE_FOLLOW_UPDATE:
             fldCamUpdateFollow();
             break;
         }
@@ -4181,7 +4181,7 @@ void fldDispatchCameraModelFrameEvents(s32 motion, s32 selector) {
         }
     }
 
-    if (fldGlobalBase.mode == 1) {
+    if (fldGlobalBase.mode == FLD_CAMERA_MODE_OBJECT_FOCUS) {
         dx = fldCamTarget[0] - fldLookAtNearPoint[0];
         dy = fldCamTarget[1] - fldLookAtNearPoint[1];
         dz = fldCamTarget[2] - fldLookAtNearPoint[2];
@@ -4751,7 +4751,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
         }
     }
     if (dds3PadButtonState[1][0][3] != 0 || (dds3PadButtonState[1][0][8] != 0 && dds3PadButtonState[1][0][10] != 0)) {
-        if (fldGlobalBase.mode != 1 && fldGlobalBase.mode != 3) {
+        if (fldGlobalBase.mode != FLD_CAMERA_MODE_OBJECT_FOCUS && fldGlobalBase.mode != FLD_CAMERA_MODE_ALTERNATE_FOCUS) {
             snapInput = 1;
         }
     }
@@ -4916,7 +4916,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
     FromRotation(fldGlobalBase.angle * 3.14f / 180.0f);
     SDF_VU0_STOREVECTOR_NOMEM(quaternion);
     dds3SetRotPoseSet((dds3Basic_t *)fldPlayerObject, (u128 *)quaternion);
-    if (fldGlobalBase.mode != 3 && fldGlobalBase.mode != 1) {
+    if (fldGlobalBase.mode != FLD_CAMERA_MODE_ALTERNATE_FOCUS && fldGlobalBase.mode != FLD_CAMERA_MODE_OBJECT_FOCUS) {
         if (D_003BAD2C != 0) {
             difference = fldAngleDifference(fldGlobalBase.negatedAngle, fldGlobalBase.cameraTargetAngle);
             step = 30.0f;
@@ -5022,7 +5022,7 @@ camera_input_done:
     } else {
         fldDisableCameraObjectFlag();
         fldSetCameraObjectTransitionFlag();
-        if (fldGlobalBase.mode == 1 || fldGlobalBase.mode == 3) {
+        if (fldGlobalBase.mode == FLD_CAMERA_MODE_OBJECT_FOCUS || fldGlobalBase.mode == FLD_CAMERA_MODE_ALTERNATE_FOCUS) {
             fldClearCameraObjectHighlightFlag();
         } else if (fldGlobalBase.dist < 100.0f) {
             fldSetCameraObjectHighlightFlag();
@@ -5057,7 +5057,7 @@ s32 fldUpdateCameraFrame(void) {
         return 0;
     }
     if (fldEncountTestFlag(0x40) == 0) {
-        if (fldGlobalBase.mode == 1 || fldGlobalBase.mode == 3) {
+        if (fldGlobalBase.mode == FLD_CAMERA_MODE_OBJECT_FOCUS || fldGlobalBase.mode == FLD_CAMERA_MODE_ALTERNATE_FOCUS) {
             fldClearCameraObjectHighlightFlag();
         }
         fldApplyPlayerVerticalStep();

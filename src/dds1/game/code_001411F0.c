@@ -477,7 +477,7 @@ void func_001415F8(void) {
     tick = D_003BAE94 + 1;
     nearby = 0;
     D_003BAE94 = tick;
-    if (fldGlobalBase.mode == 0) {
+    if (fldGlobalBase.mode == FLD_CAMERA_MODE_PLAYER_FOLLOW) {
         listenerX = fldCamTarget[0] - fldLookAtNearPoint[0];
         extraRadius = 500.0f;
         listenerY = fldLookAtNearPoint[1];
@@ -509,7 +509,7 @@ void func_001415F8(void) {
         }
     }
     if (nearby != 0 && (tick & 1)) {
-        if (fldGlobalBase.mode == 0) {
+        if (fldGlobalBase.mode == FLD_CAMERA_MODE_PLAYER_FOLLOW) {
             p2sdSetStandPos(listenerX, listenerY, listenerZ,
                 fldLookAtNearPoint[0], fldLookAtNearPoint[1], fldLookAtNearPoint[2]);
         } else {

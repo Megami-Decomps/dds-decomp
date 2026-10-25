@@ -346,7 +346,7 @@ s32 fldCmdFocusCameraOnObject(void) {
         return 1;
     }
     work = &fldGlobalBase;
-    work->mode = 1;
+    work->mode = FLD_CAMERA_MODE_OBJECT_FOCUS;
     work->focusPos[0] = obj->inner->position[0];
     work->focusPos[1] = obj->inner->position[1];
     work->focusPos[2] = obj->inner->position[2];
@@ -371,7 +371,7 @@ s32 fldUpdateLookAtSegment(void) {
     FldPoint near;
     FldPoint far;
 
-    cam->mode = 0;
+    cam->mode = FLD_CAMERA_MODE_PLAYER_FOLLOW;
     cam->negatedAngle = -cam->angle;
     near.x = cam->x - sdfSin((cam->angle + 180.0f) * 3.14f / 180.0f);
     near.y = cam->y - 200.0f - 10.0f + 60.0f;
@@ -482,7 +482,7 @@ s32 fldCommand_SET_NPC_CAMERA(void) {
     char *name;
 
     name = scrGetStrPara(0);
-    fldGlobalBase.mode = 5;
+    fldGlobalBase.mode = FLD_CAMERA_MODE_NPC_REQUEST;
     strcpy(fldGlobalBase.requestedSceneName, name);
     return 1;
 }

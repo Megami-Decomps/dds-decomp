@@ -31,6 +31,16 @@ enum FldEntryDialogDisposition {
     FLD_ENTRY_DIALOG_REQUEST = 1
 };
 
+typedef s32 FldCameraMode;
+
+enum FldCameraMode {
+    FLD_CAMERA_MODE_PLAYER_FOLLOW = 0,
+    FLD_CAMERA_MODE_OBJECT_FOCUS = 1,
+    FLD_CAMERA_MODE_ALTERNATE_FOCUS = 3,
+    FLD_CAMERA_MODE_FOLLOW_UPDATE = 4,
+    FLD_CAMERA_MODE_NPC_REQUEST = 5
+};
+
 /* Field loaders retain the allocation owner and its texture-file data. */
 typedef struct FldResourceBlock {
     struct sdfMemHandle_t *allocation;
@@ -61,7 +71,7 @@ typedef struct FldAreaWork {
     f32 focusPos[3];
     u8 pad3C[4];
     char requestedSceneName[0x10];
-    s32 mode;                    /* 0x50: includes the focus modes */
+    FldCameraMode mode;          /* 0x50: camera follow/focus state */
     s32 unk54;
     s32 rowIdx;
     f32 cameraSupportHeightOffset;

@@ -947,20 +947,20 @@ void fldRebuildFieldScene(void) {
                     4, (const u8 *)sceneWork->cameraName);
                 if (node != NULL) {
                     camera = node->inner;
-                    fldGlobalBase.mode = 1;
+                    fldGlobalBase.mode = FLD_CAMERA_MODE_OBJECT_FOCUS;
                     fldGlobalBase.focusPos[0] = camera->position[0];
                     fldGlobalBase.focusPos[1] = camera->position[1];
                     fldGlobalBase.focusPos[2] = camera->position[2];
                     fldUpdateCameraViewFromPlayer();
                 } else {
-                    fldGlobalBase.mode = 0;
+                    fldGlobalBase.mode = FLD_CAMERA_MODE_PLAYER_FOLLOW;
                     fldUpdateFieldCameraViewState();
                 }
             } else {
                 if (cameraLinkMode == 2) {
-                    fldGlobalBase.mode = 3;
+                    fldGlobalBase.mode = FLD_CAMERA_MODE_ALTERNATE_FOCUS;
                 } else {
-                    fldGlobalBase.mode = 0;
+                    fldGlobalBase.mode = FLD_CAMERA_MODE_PLAYER_FOLLOW;
                 }
                 if (sceneWork->secondaryState == 3) {
                     func_0012CED0();
