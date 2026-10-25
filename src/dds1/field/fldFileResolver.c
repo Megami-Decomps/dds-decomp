@@ -1166,7 +1166,7 @@ void fldCreateResourceScriptObjects(void) {
     }
 }
 
-extern s32 fldTestMapSlotValueFlag(s32 mapId, u32 slotIndex, s32 bit);
+extern u8 fldTestMapSlotValueFlag(s32 mapId, u32 slotIndex, s32 bit);
 
 extern s32 fldTestRoomModeFlag(s32 mapId, u32 slotIndex, s32 bit);
 
@@ -2012,7 +2012,7 @@ void fldMakeFilePath(char *path, s32 field, s32 unused) {
 
 void fldDbgPrint2D(s32 x, s32 y, const char *format);
 
-extern s32 fldTestRoomSceneFlag(s32 mapId, u32 slotIndex, s32 bit);
+extern u8 fldTestRoomSceneFlag(s32 mapId, u32 slotIndex, s32 bit);
 
 extern char D_003BACB0[];
 
@@ -7322,9 +7322,9 @@ s32 HitPositionInside2(f32 *out, s32 mode, s32 count, f32 margin, const f32 *pos
 
 extern f32 fldResolvedPosition[3];
 
-extern s32 fldTestRoomSceneFlag(s32 mapId, u32 slotIndex, s32 bit);
+extern u8 fldTestRoomSceneFlag(s32 mapId, u32 slotIndex, s32 bit);
 
-extern s32 fldTestMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit);
+extern u8 fldTestMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit);
 
 void fldHitChkUnitElvOnly(const f32 *input) {
     f32 position[4];

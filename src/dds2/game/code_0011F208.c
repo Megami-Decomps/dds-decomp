@@ -1925,7 +1925,7 @@ void fldSetRoomSceneFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
     }
 }
 
-s32 fldTestRoomSceneFlag(s32 mapId, u32 slotIndex, s32 bit) {
+u8 fldTestRoomSceneFlag(s32 mapId, u32 slotIndex, s32 bit) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
         u32 flags = DDS3_GBWK->maps[mapIndex].slots[slotIndex].roomSceneFlags;
@@ -1945,7 +1945,7 @@ void fldSetMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
     }
 }
 
-s32 fldTestMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit) {
+u8 fldTestMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
         u32 flags = DDS3_GBWK->maps[mapIndex].slots[slotIndex].mapTargetFlags;
@@ -1965,7 +1965,7 @@ void fldSetAlternateMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled
     }
 }
 
-s32 fldTestAlternateMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit) {
+u8 fldTestAlternateMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
         u32 flags = DDS3_GBWK->maps[mapIndex].slots[slotIndex].alternateMapTargetFlags;
@@ -2003,7 +2003,7 @@ void fldSetMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) 
     }
 }
 
-s32 fldTestMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit) {
+u8 fldTestMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
         u32 flags = DDS3_GBWK->maps[mapIndex].slots[slotIndex].auxiliaryFlags;
@@ -2023,7 +2023,7 @@ void fldSetMapSlotValueFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
     }
 }
 
-s32 fldTestMapSlotValueFlag(s32 mapId, u32 slotIndex, s32 bit) {
+u8 fldTestMapSlotValueFlag(s32 mapId, u32 slotIndex, s32 bit) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
         u32 flags = DDS3_GBWK->maps[mapIndex].slots[slotIndex].valueFlags;

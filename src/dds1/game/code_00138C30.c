@@ -488,7 +488,7 @@ extern u32 D_003BADDC;
 
 extern s32 fldCameraColorFade;
 
-extern s32 fldTestMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit);
+extern u8 fldTestMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit);
 
 void fldApplyPendingCameraHeading(void);
 

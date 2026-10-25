@@ -251,7 +251,7 @@ extern FldActorEntry fldDoorTable[256];
 /* Initialized by fldInitializeActorMotionSlots. */
 extern FldActorRow fldActorSlots[];
 
-extern s32 fldTestMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit);
+extern u8 fldTestMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit);
 
 extern void dds3MatterObjectBasicSetAlpMode(dds3Basic_t *object, u32 value);
 

@@ -1041,7 +1041,7 @@ void fldCreateResourceScriptObjects(void) {
 #include "dds3_path.h"
 #include "fld_resource_resolver.h"
 
-extern s32 fldTestMapSlotValueFlag(s32 mapId, u32 slotIndex, s32 bit);
+extern u8 fldTestMapSlotValueFlag(s32 mapId, u32 slotIndex, s32 bit);
 extern s32 fldTestRoomModeFlag(s32 mapId, u32 slotIndex, s32 bit);
 extern s32 fldCommand_SEARCH_ID(const char *);
 extern void dds3ObjectBaseCreateMover(dds3Basic_t *);
@@ -1854,7 +1854,7 @@ void fldMakeFilePath(char *buffer, s32 area, s32 unused) {
 }
 
 void fldDbgPrint2D(s32 x, s32 y, const char *format);
-extern s32 fldTestRoomSceneFlag(s32 mapId, u32 slotIndex, s32 bit);
+extern u8 fldTestRoomSceneFlag(s32 mapId, u32 slotIndex, s32 bit);
 extern char D_00436040[];
 extern char D_00436048[];
 extern char D_00436050[];
