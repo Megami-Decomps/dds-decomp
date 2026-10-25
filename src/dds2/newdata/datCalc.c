@@ -318,7 +318,7 @@ s32 datGetEffectiveAffinity(datUnitWork_t *unit, DatAffinitySelector selector) {
     return calculatedValue;
 }
 
-u32 datGetAisyoValue(datUnitWork_t *unit, DatAffinitySelector selector) {
+u16 datGetAisyoValue(datUnitWork_t *unit, DatAffinitySelector selector) {
     return (u16)datGetEffectiveAffinity(unit, selector);
 }
 
@@ -1792,7 +1792,7 @@ s32 evtPushSecondRosterMaximumHp(void) {
     return 1;
 }
 
-extern u32 datGetAisyoValue(datUnitWork_t *, DatAffinitySelector);
+extern u16 datGetAisyoValue(datUnitWork_t *, DatAffinitySelector);
 /* Push the first entry's selected stat; selectors -1, 16 and 17 use the default. */
 s32 evtPushFirstRosterSelectedStat(void) {
     DatAffinitySelector selector = datCommandSelectors[evtWorkScriptContext.commandIndex].stat;
