@@ -19,9 +19,14 @@ enum {
     SDF_MOVIE_STATE_STOP_REQUESTED = 7
 };
 
-s32 movieGetStreamSize(struct sdfFileCmdHandle_t *deviceState, s32 operation,
-                                    void *data, s32 bytesRead, struct movieStream_t *movie);
-s32 movieReadChunk(struct sdfFileCmdHandle_t *deviceState, s32 operation,
-                                 const void *readBuffer, s32 bytesRead, struct movieStream_t *movie);
+/* Completion event passed by the device layer to movie callbacks. */
+typedef s32 SdfMovieDeviceEvent;
+
+s32 movieGetStreamSize(
+    struct sdfFileCmdHandle_t *deviceState, SdfMovieDeviceEvent deviceEvent,
+    void *data, s32 bytesRead, struct movieStream_t *movie);
+s32 movieReadChunk(
+    struct sdfFileCmdHandle_t *deviceState, SdfMovieDeviceEvent deviceEvent,
+    const void *readBuffer, s32 bytesRead, struct movieStream_t *movie);
 
 #endif /* SDF_MOVIE_STATE_H */

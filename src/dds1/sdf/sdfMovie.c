@@ -49,7 +49,9 @@ void movieReadNextChunk(movieStream_t *movie) {
 }
 
 /* Consume device completions and stop requests for the linear stream; always return 0. */
-s32 movieGetStreamSize(sdfFileCmdHandle_t *deviceState, s32 operation, void *data, s32 bytesRead, movieStream_t *movie) {
+s32 movieGetStreamSize(
+    sdfFileCmdHandle_t *deviceState, SdfMovieDeviceEvent deviceEvent,
+    void *data, s32 bytesRead, movieStream_t *movie) {
     MovLinearStream *stream;
     s32 restoreInterrupts;
 
@@ -66,20 +68,20 @@ s32 movieGetStreamSize(sdfFileCmdHandle_t *deviceState, s32 operation, void *dat
 
     switch (movie->state) {
     case SDF_MOVIE_STATE_INITIAL:
-        if (operation == SDF_DEV_EVENT_OPENED) {
+        if (deviceEvent == SDF_DEV_EVENT_OPENED) {
             movie->state = SDF_MOVIE_STATE_CONTROL_REQUEST;
             sdfFileCmdFileSize(deviceState);
         }
         break;
     case SDF_MOVIE_STATE_CONTROL_REQUEST:
-        if (operation == SDF_DEV_EVENT_SIZE_REPLY) {
+        if (deviceEvent == SDF_DEV_EVENT_SIZE_REPLY) {
             movie->totalBytes = bytesRead;
             movie->remainingBytes = bytesRead;
             movieReadNextChunk(movie);
         }
         break;
     case SDF_MOVIE_STATE_DATA_READ:
-        if (operation == SDF_DEV_EVENT_READ_REPLY) {
+        if (deviceEvent == SDF_DEV_EVENT_READ_REPLY) {
             restoreInterrupts = DIntr();
             stream->bufferedBytes += bytesRead;
             movie->remainingBytes -= bytesRead;
@@ -95,7 +97,7 @@ s32 movieGetStreamSize(sdfFileCmdHandle_t *deviceState, s32 operation, void *dat
         }
         break;
     case SDF_MOVIE_STATE_STOP_REQUESTED:
-        if (operation == SDF_DEV_EVENT_CLOSED) {
+        if (deviceEvent == SDF_DEV_EVENT_CLOSED) {
             movie->deviceState = NULL;
             movie->state = SDF_MOVIE_STATE_DEVICE_RELEASE_CALLBACK;
             sdfFileCmdFree(deviceState);
@@ -125,7 +127,9 @@ void movieReadHeaderChunk(movieStream_t *movie) {
 }
 
 /* Process movie-PAC header, block-mask and payload completions; always return 0. */
-s32 movieReadChunk(sdfFileCmdHandle_t *deviceState, s32 operation, const void *readBuffer, s32 bytesRead, movieStream_t *movie) {
+s32 movieReadChunk(
+    sdfFileCmdHandle_t *deviceState, SdfMovieDeviceEvent deviceEvent,
+    const void *readBuffer, s32 bytesRead, movieStream_t *movie) {
     MovPacStream *stream;
 
     movie->deviceState = deviceState;
@@ -141,13 +145,13 @@ s32 movieReadChunk(sdfFileCmdHandle_t *deviceState, s32 operation, const void *r
 
     switch (movie->state) {
     case SDF_MOVIE_STATE_INITIAL:
-        if (operation == SDF_DEV_EVENT_OPENED) {
+        if (deviceEvent == SDF_DEV_EVENT_OPENED) {
             movie->state = SDF_MOVIE_STATE_CONTROL_REQUEST;
             sdfFileCmdFileSize(deviceState);
         }
         break;
     case SDF_MOVIE_STATE_CONTROL_REQUEST:
-        if (operation == SDF_DEV_EVENT_SIZE_REPLY) {
+        if (deviceEvent == SDF_DEV_EVENT_SIZE_REPLY) {
             movie->totalBytes = bytesRead;
             movie->remainingBytes = bytesRead;
             movie->state = SDF_MOVIE_STATE_PAC_HEADER_READ;
@@ -155,7 +159,7 @@ s32 movieReadChunk(sdfFileCmdHandle_t *deviceState, s32 operation, const void *r
         }
         break;
     case SDF_MOVIE_STATE_PAC_HEADER_READ:
-        if (operation == SDF_DEV_EVENT_READ_REPLY) {
+        if (deviceEvent == SDF_DEV_EVENT_READ_REPLY) {
             s32 payloadBytes = stream->packetBytes - 0x40;
             stream->payloadAllocation = sdfMemAllocDirect(payloadBytes);
             stream->blockMask = (u8 *)sdfMemLock(stream->payloadAllocation);
@@ -165,12 +169,12 @@ s32 movieReadChunk(sdfFileCmdHandle_t *deviceState, s32 operation, const void *r
         }
         break;
     case SDF_MOVIE_STATE_PAC_MASK_READ:
-        if (operation == SDF_DEV_EVENT_READ_REPLY) {
+        if (deviceEvent == SDF_DEV_EVENT_READ_REPLY) {
             movieReadHeaderChunk(movie);
         }
         break;
     case SDF_MOVIE_STATE_DATA_READ: {
-        if (operation == SDF_DEV_EVENT_READ_REPLY) {
+        if (deviceEvent == SDF_DEV_EVENT_READ_REPLY) {
             const u8 *source = readBuffer;
             s32 blockBytes = stream->blockBytes;
             s32 blocksRemaining = bytesRead / blockBytes;
@@ -232,7 +236,7 @@ s32 movieReadChunk(sdfFileCmdHandle_t *deviceState, s32 operation, const void *r
         break;
     }
     case SDF_MOVIE_STATE_STOP_REQUESTED:
-        if (operation == SDF_DEV_EVENT_CLOSED) {
+        if (deviceEvent == SDF_DEV_EVENT_CLOSED) {
             movie->deviceState = NULL;
             movie->state = SDF_MOVIE_STATE_DEVICE_RELEASE_CALLBACK;
             sdfFileCmdFree(deviceState);
