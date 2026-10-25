@@ -1340,7 +1340,7 @@ s32 mnuUpdateMantraSceneTaskState(s32 key, MenuSceneWork *work) {
             work->phaseFrame++;
         }
         mnuUpdateMantraSelectionPositions(work, 0);
-        if (fclChkMessage() == 0) {
+        if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             work->scenePhase = MNU_MANTRA_PHASE_START_PENDING_MESSAGE;
             evtFinishMessageWindowAndNotify();
         }
@@ -1383,7 +1383,7 @@ s32 mnuUpdateMantraSceneTaskState(s32 key, MenuSceneWork *work) {
         }
         break;
     case MNU_MANTRA_PHASE_WAIT_ENTRY_MESSAGE:
-        if (fclChkMessage() == 0) {
+        if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             if (work->entryMessageInProgress == 0) {
                 fclDestroyMessage();
                 fclInitMessage(metadata->entryMessageWindowResource);
@@ -2078,7 +2078,7 @@ s32 mnuUpdateMantraSceneState(void) {
         scene->state = MENU_SCENE_STATE_WAITING_FOR_MESSAGE_WINDOW;
         break;
     case MENU_SCENE_STATE_WAITING_FOR_MESSAGE_WINDOW:
-        if (fclChkMessage() == 0) {
+        if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             if (evtGetCapturedWindowPanelValue() != 0) {
                 scene->state = MENU_SCENE_STATE_WAITING_FOR_MESSAGE_COMPLETION;
                 scene->pendingProfileId = 0;
@@ -2116,7 +2116,7 @@ s32 mnuUpdateMantraSceneState(void) {
         scene->state = MENU_SCENE_STATE_WAITING_FOR_MESSAGE_COMPLETION;
         break;
     case MENU_SCENE_STATE_WAITING_FOR_MESSAGE_COMPLETION:
-        if (scene->stageFinished != 0 && fclChkMessage() == 0) {
+        if (scene->stageFinished != 0 && fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             evtFinishMessageWindowAndNotify();
             sdfSetTaskItemMode(mnuSceneResourceContext, 1,
                                SDF_TASK_ITEM_MODE_PENDING_ACTIVATION);
@@ -2160,7 +2160,7 @@ s32 mnuUpdateMantraSceneDisplay(void) {
     if (evtStageTestUpdate(kwlnSceneSurfaceSets[9]) >= 2) {
         sceneMetadata->stageFinished = 1;
     }
-    if (fclChkMessage() != 0) {
+    if (fclChkMessage() != EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
         if (sceneMetadata->messageShadeFrames < MNU_SCENE_SHADE_FRAME_LIMIT) {
             sceneMetadata->messageShadeFrames++;
         }

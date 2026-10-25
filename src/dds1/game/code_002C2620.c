@@ -679,7 +679,7 @@ void fldDisplayLocalMapCounterMessage(void) {
 s32 pipeMessDraw(void) {
     s32 result = 0;
 
-    if (fclChkMessage() != 0) {
+    if (fclChkMessage() != EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
         dspRequestMessageWindowModeOne();
     } else {
         evtFinishMessageWindowAndNotify();

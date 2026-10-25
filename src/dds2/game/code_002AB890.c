@@ -731,7 +731,7 @@ s32 mnuHandleStaffInventoryListInput(dds3ProcessID_t *callback) {
     if (result != 0) {
         return result;
     }
-    if (fclChkMessage() != 0) {
+    if (fclChkMessage() != EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
         return 0;
     }
     mnuSetStateValue(&context->gradientFade.active, 0);

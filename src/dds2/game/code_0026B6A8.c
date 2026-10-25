@@ -102,7 +102,7 @@ s32 dspUpdateFlagEvent(dds3ProcessID_t *request) {
         return result;
     }
     if (*panel == 0) {
-        if (fclChkMessage() == 0) {
+        if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             if (dspStartFlagEvent(context) == 0) {
                 mnuSetPopupEntryFlagged(panel, mnuTerminalPopupEntries);
             }

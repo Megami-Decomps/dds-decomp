@@ -140,7 +140,7 @@ s32 brsAdvanceRewardPanelAfterMessage(dds3ProcessID_t *request) {
         return result;
     }
     if (panel->transition.state == 0) {
-        if (fclChkMessage() == 0) {
+        if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             if (panel->rewardMode != 0) {
                 mnuStartRewardDialogAndMotion(panel);
                 mnuTitleApplySequenceState(panel);

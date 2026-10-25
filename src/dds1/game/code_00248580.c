@@ -1048,7 +1048,7 @@ s32 evtIsFadeCompleteAndMessageWindowIdle(void) {
     if (fadeActive != 0) {
         return 0;
     }
-    return fclChkMessage() == 0;
+    return fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL;
 }
 
 extern MenuPopupEntry mnuTerminalPopupEntries[];
@@ -2082,7 +2082,7 @@ s32 evtOpenTerminalFollowupPopupWhenIdle(dds3ProcessID_t *request) {
         return result;
     }
     if (*panel == 0) {
-        if (fclChkMessage() == 0) {
+        if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             if (fldClassifyRemainingFrames(state) == 0) {
                 mnuSetPopupEntry(panel, mnuTerminalFollowupFadePopupEntry);
             }
@@ -2096,7 +2096,7 @@ s32 evtOpenTerminalFollowupPopupWhenIdle(dds3ProcessID_t *request) {
 s32 mnuBeginTerminalExitTransition(dds3ProcessID_t *item) {
     s32 state = dds3GetProcessData(item);
 
-    if (fclChkMessage() == 0 && ((MenuTerminalWork *)state)->exitPending == 0) {
+    if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL && ((MenuTerminalWork *)state)->exitPending == 0) {
         mnuConfigureTerminalSlotEffects(2, (MenuTerminalWork *)state);
         mnuTerminalSelectSlot(2, -1, (MenuTerminalWork *)state);
         mnuAnimateTerminalSelection(2, (MenuTerminalWork *)state);
@@ -2264,7 +2264,7 @@ s32 evtBChooseSelectionCompletionPopup(dds3ProcessID_t *input) {
     if (result == 0) {
         if (*state == 0) {
             result = fclChkMessage();
-            if (result == 0) {
+            if (result == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
                 if (evtGetCapturedWindowPanelValue() == 0) {
                     mnuResetProgressModeFromOwner((u8 *)context);
                     mnuSetPopupEntryFlagged(state, mnuTerminalReturnToMenuPopupEntry);
@@ -2323,7 +2323,7 @@ s32 evtBContinueDispatchOrRestoreTable(dds3ProcessID_t *input) {
     dispatchState = &((MenuTerminalWork *)context)->popupState;
     dispatchResult = menuRunPanel((void *)context, 0, input);
     if (dispatchResult == 0) {
-        if ((*dispatchState == 0) && (dispatchResult = fclChkMessage(), dispatchResult == 0)) {
+        if ((*dispatchState == 0) && (dispatchResult = fclChkMessage(), dispatchResult == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL)) {
             mnuSetPopupEntry(dispatchState, ((MenuTerminalWork *)context)->popupTable);
         }
         dispatchResult = 0;

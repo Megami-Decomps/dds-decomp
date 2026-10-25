@@ -517,7 +517,7 @@ s32 mnuUpdatePartySlotAssignmentPopup(dds3ProcessID_t *callback) {
     if (state != 0) {
         return state;
     }
-    if (fclChkMessage() != 0) {
+    if (fclChkMessage() != EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
         return 0;
     }
     if (evtGetCapturedWindowPanelValue() == 0) {
@@ -586,7 +586,7 @@ s32 mnuPartySlotConfirmClearUpdate(dds3ProcessID_t *callback) {
     if (state != 0) {
         return state;
     }
-    if (fclChkMessage() != 0) {
+    if (fclChkMessage() != EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
         return 0;
     }
     if (evtGetCapturedWindowPanelValue() == 0) {

@@ -1094,7 +1094,7 @@ void mnuReleaseTerminalWorkAndResumeField(dds3ProcessID_t *task) {
 s32 mnuUpdateTerminalMessageWindowIndicator(dds3ProcessID_t *task) {
     MenuGradientFade *context = &((MenuSlotState *)dds3GetProcessData(task))->gradientFade;
     mnuDrawAndStepGradientFade(context, 0x53);
-    if (fclChkMessage() != 0) {
+    if (fclChkMessage() != EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
         mnuSetStateValue(&context->active, 1);
     } else {
         mnuSetStateValue(&context->active, 0);
@@ -1179,7 +1179,7 @@ s32 evtIsFadeCompleteAndMessageWindowIdle(void) {
     if (fadeActive != 0) {
         return 0;
     }
-    return fclChkMessage() == 0;
+    return fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL;
 }
 
 extern MenuPopupEntry mnuTerminalPopupEntries[];
@@ -2271,7 +2271,7 @@ s32 evtOpenTerminalFollowupPopupWhenIdle(dds3ProcessID_t *request) {
         return result;
     }
     if (*panel == 0) {
-        if (fclChkMessage() == 0) {
+        if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             if (fldClassifyRemainingFrames(state) == 0) {
                 mnuSetPopupEntry(panel, mnuTerminalFollowupFadePopupEntry);
             }
@@ -2284,7 +2284,7 @@ s32 mnuBeginTerminalExitTransition(dds3ProcessID_t *request) {
     s32 state = dds3GetProcessData(request);
     MenuSlotState *dispatchState = (MenuSlotState *)state;
 
-    if (fclChkMessage() == 0 && dispatchState->exitState == 0) {
+    if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL && dispatchState->exitState == 0) {
         mnuConfigureTerminalSlotEffects(2, (MenuSlotState *)state);
         mnuTerminalSelectSlot(2, -1, (MenuSlotState *)state);
         mnuSetTerminalPanelMotionMode(2, (MenuSlotState *)state);
@@ -2429,7 +2429,7 @@ s32 evtOpenTerminalOwnerStatePopup(dds3ProcessID_t *request) {
 
     if (result == 0) {
         /* Choose the follow-up only after menu and message-window work is idle. */
-        if (*dispatch == 0 && fclChkMessage() == 0) {
+        if (*dispatch == 0 && fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             if (evtGetCapturedWindowPanelValue() == 0) {
                 mnuResetProgressModeFromOwner((u8 *)state);
                 mnuSetPopupEntryFlagged(dispatch, mnuTerminalReturnToMenuPopupEntry);
@@ -2489,7 +2489,7 @@ s32 evtBContinueDispatchOrRestoreTable(dds3ProcessID_t *request) {
     if (result != 0) {
         return result;
     }
-    if (*dispatch == 0 && fclChkMessage() == 0) {
+    if (*dispatch == 0 && fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
         mnuSetPopupEntry(dispatch, state->popupTable);
     }
     return 0;

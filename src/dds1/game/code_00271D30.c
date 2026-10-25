@@ -182,7 +182,7 @@ s32 mnuStaffCampCancelCheck(dds3ProcessID_t *task) {
         return 0;
     }
     result = 0;
-    if (fclChkMessage() == 0) {
+    if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
         if (mappedButtons & MNU_CAMP_CANCEL_MASK) {
             if (evtStageTestPollModelRequest() != 1) {
                 if (checkConfigState() == 0) {

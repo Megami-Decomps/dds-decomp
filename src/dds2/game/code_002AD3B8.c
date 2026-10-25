@@ -563,7 +563,7 @@ s32 mnuUpdateStaffPartySelectionState(dds3ProcessID_t *task) {
         return state;
     }
     menu->thirdListEnabled = 0;
-    if (fclChkMessage() != 0) {
+    if (fclChkMessage() != EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
         return 0;
     }
     mnuSetStateValue(&context->gradientFade.active, 0);
@@ -832,7 +832,7 @@ s32 mnuHandleStaffSelectionPageInput(dds3ProcessID_t *task) {
     }
 
     menu->thirdListEnabled = 0;
-    if (fclChkMessage() != 0) {
+    if (fclChkMessage() != EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
         return 0;
     }
     mnuSetStateValue(&context->gradientFade.active, 0);
@@ -1192,7 +1192,7 @@ s32 mnuHandleStaffOwnedCatalogInput(dds3ProcessID_t *task) {
         return result;
     }
     menu->thirdListEnabled = 0;
-    if (fclChkMessage() != 0) {
+    if (fclChkMessage() != EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
         return 0;
     }
     mnuSetStateValue(&context->gradientFade.active, 0);

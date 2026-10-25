@@ -182,7 +182,7 @@ s32 dspUpdateFlagEvent(dds3ProcessID_t *request) {
         return result;
     }
     if (*popupSlot == 0) {
-        if (fclChkMessage() == 0) {
+        if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             if (dspStartFlagEvent(work) == 0) {
                 mnuSetPopupEntryFlagged(popupSlot, mnuTerminalPopupEntries);
             }
@@ -595,14 +595,14 @@ s32 fclDestroyMessage(void) {
     return 1;
 }
 
-/* A closed window reports zero; the state gate hides only control state two. */
-s32 fclChkMessage(void) {
+/* Return the visible signed control-state byte, or the query's no-active result. */
+EvtMessageWindowControlResult fclChkMessage(void) {
     if (gMsgID < 0) {
-        return 0;
+        return EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL;
     }
     if (gMsgInvFlag != 0) {
         if ((s8)gMsgFlag == DSP_WINDOW_CONTROL_GATED) {
-            return 0;
+            return EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL;
         }
     }
     return (s8)gMsgFlag;

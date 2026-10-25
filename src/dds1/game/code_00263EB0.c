@@ -64,7 +64,7 @@ s32 mnuHandleStatPointAssignment(dds3ProcessID_t *task) {
     if (result != 0) {
         return result;
     }
-    if (work->transition.state != 0 || fclChkMessage() != 0) {
+    if (work->transition.state != 0 || fclChkMessage() != EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
         return 0;
     }
 
@@ -176,7 +176,7 @@ s32 mnuCommitAssignedStatPoints(dds3ProcessID_t *task) {
     if (result != 0) {
         return result;
     }
-    if (work->transition.state == 0 && fclChkMessage() == 0) {
+    if (work->transition.state == 0 && fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
         s8 capturedValue = evtGetCapturedWindowPanelValue();
         s32 *stats = work->statGains;
 
@@ -251,7 +251,7 @@ s32 mnuRunPanelWithIdleFallback(dds3ProcessID_t *request) {
     if (result != 0) {
         return result;
     }
-    if (*panelState == 0 && fclChkMessage() == 0) {
+    if (*panelState == 0 && fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
         mnuSetPopupEntryFlagged(panelState, brsRewardMessagePopupEntry);
     }
     return 0;
@@ -377,7 +377,7 @@ s32 brsAdvanceRewardPanelAfterMessage(dds3ProcessID_t *request) {
         return result;
     }
     if (panel->transition.state == 0) {
-        if (fclChkMessage() == 0) {
+        if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             if (panel->rewardMode != 0) {
                 mnuStartRewardDialogAndMotion(panel);
                 kwlnItemUpdateDisplay(panel);

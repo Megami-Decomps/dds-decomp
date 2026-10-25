@@ -735,7 +735,7 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
         }
         break;
     case 3:
-        if (fclChkMessage() == 0) {
+        if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             work->sourceNextState = 1;
             work->drawBits.sourceKind = 18;
             work->sourceWaitFrames = 30;
@@ -978,7 +978,7 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
         }
         break;
     case 16:
-        if (fclChkMessage() == 0) {
+        if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             work->drawBits.sourceKind = 17;
             evtFinishMessageWindowAndNotify();
             evtPrintDeveloperConsoleMessage(D_00426FF8);

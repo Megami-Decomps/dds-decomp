@@ -122,7 +122,7 @@ s32 mnuStaffImageExitA(dds3ProcessID_t *task) {
     s32 item;
 
     dspRequestMessageWindowModeOne();
-    if (fclChkMessage() == 0) {
+    if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
         item = menu->pendingItem;
         if (item != 0) {
             menu->pendingItem = 0;
@@ -480,7 +480,7 @@ s32 mnuUpdateStaffPartySelectionState(dds3ProcessID_t *task) {
         return state;
     }
     menu->inputState = 0;
-    if (fclChkMessage() != 0) {
+    if (fclChkMessage() != EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
         return 0;
     }
     mnuSetStateValue(&context->transitionFade.active, 0);

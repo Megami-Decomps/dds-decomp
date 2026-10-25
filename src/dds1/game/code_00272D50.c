@@ -449,7 +449,7 @@ s32 mnuHandleStaffInventoryListInput(dds3ProcessID_t *task) {
     if (result != 0) {
         return result;
     }
-    if (fclChkMessage() == 0) {
+    if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
         mnuSetStateValue(&context->gradient.active, 0);
         if (input & 1) {
             list = resources->windows[0]->list;

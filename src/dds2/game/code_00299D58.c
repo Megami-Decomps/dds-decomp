@@ -278,7 +278,7 @@ s32 mnuDispatchProfileSelectionScene(dds3ProcessID_t *task) {
     result = mnuDispatchPopupTransition(&scene->transition.data, dispatchStatus, 0, task);
     if (result == 0) {
         if (*dispatchStatus == 0 &&
-            (result = fclChkMessage(), result == 0)) {
+            (result = fclChkMessage(), result == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL)) {
             if (scene->selectedRow < scene->secondaryRewards.count ||
                 scene->pendingSkillCount > 0 ||
                 scene->selectionApplied != 0) {
@@ -442,7 +442,7 @@ s32 brsProcessNextPrimaryReward(dds3ProcessID_t *task) {
     datUnitWork_t *item;
 
     evtStageTestUpdateCamera();
-    if (fclChkMessage() != 0) {
+    if (fclChkMessage() != EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
         return 0;
     }
     dispatchStatus = &scene->transition.state;

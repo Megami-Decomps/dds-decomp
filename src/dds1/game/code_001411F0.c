@@ -4800,7 +4800,7 @@ void fldUpdateSparkMessageSequence(void) {
     switch (fldSparkControlState.state.dialogPhase) {
     case FLD_SPARK_DIALOG_PHASE_UNAVAILABLE_MESSAGE:
         dspRequestMessageWindowModeOne();
-        if (fclChkMessage() == 0) {
+        if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             evtFinishMessageWindowAndNotify();
             fclDestroyMessage();
             fldSparkControlState.state.dialogPhase = FLD_SPARK_DIALOG_PHASE_CANCELLED;
@@ -4810,7 +4810,7 @@ void fldUpdateSparkMessageSequence(void) {
         break;
     case FLD_SPARK_DIALOG_PHASE_ENTRY_PROMPT:
         dspRequestMessageWindowModeOne();
-        if (fclChkMessage() == 0) {
+        if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             choice = evtGetCapturedWindowPanelValue();
             if (choice == 0) {
                 evtFinishMessageWindowAndNotify();
@@ -4837,7 +4837,7 @@ void fldUpdateSparkMessageSequence(void) {
         break;
     case FLD_SPARK_DIALOG_PHASE_CONFIRM_PROMPT:
         dspRequestMessageWindowModeOne();
-        if (fclChkMessage() == 0) {
+        if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             evtFinishMessageWindowAndNotify();
             fclDestroyMessage();
             fldSparkControlState.state.dialogPhase = FLD_SPARK_DIALOG_PHASE_ENTRY_PROMPT;
@@ -5026,7 +5026,7 @@ void fldUpdateSparkEncounterScene(void) {
         return;
     } else if (phase == 3) {
         dspRequestMessageWindowModeOne();
-        if (fclChkMessage() != 0) {
+        if (fclChkMessage() != EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             return;
         }
         evtFinishMessageWindowAndNotify();
@@ -5120,7 +5120,7 @@ void fldStartDeferredFieldExit(void) {
 void fldFinishDeferredExit(void) {
     if (fldGlobalBase.deferredExit == 2) {
         dspRequestMessageWindowModeOne();
-        if (!fclChkMessage()) {
+        if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             evtFinishMessageWindowAndNotify();
             fclDestroyMessage();
             fldPreparePlayerSceneCameraTarget();

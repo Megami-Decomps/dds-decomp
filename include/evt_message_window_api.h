@@ -9,10 +9,19 @@ s32 fclInitMessage(struct ItfMesSub *definition);
 
 u32 evtFinishMessageWindowAndNotify(void);
 
-/* Returns the signed control-state byte as s32. Returns 0 when no window is
- * open, or when a nonzero state gate hides control state 2. This is a state
- * value, not a boolean; other stored values pass through. */
-s32 fclChkMessage(void);
+typedef s32 EvtMessageWindowControlResult;
+
+#define EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL 0
+#define EVT_MESSAGE_WINDOW_CONTROL_RESULT_ACTIVE 1
+#define EVT_MESSAGE_WINDOW_CONTROL_RESULT_GATED 2
+#define EVT_MESSAGE_WINDOW_CONTROL_RESULT_CLEANUP 3
+
+/* Return the signed control-state byte as a query result, not a boolean or a
+ * stored phase. NO_ACTIVE_CONTROL (0) covers a missing window and control state
+ * two hidden by the gate; stored zero also passes through. Visible stored states
+ * one, two and three report ACTIVE, GATED and CLEANUP. Other stored values pass
+ * through unchanged. */
+EvtMessageWindowControlResult fclChkMessage(void);
 
 s32 evtSetBoundedDisplayValue(s32 displayValueIndex, s32 displayValue);
 /* Store the opaque value and snapshot the panel field when a window is open.

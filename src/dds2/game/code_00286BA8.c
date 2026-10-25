@@ -571,7 +571,7 @@ s32 mtrMantraEquipUpdate(void) {
         break;
 
     case MTR_MANTRA_EQUIP_STATE_WAIT_CONFIRMATION_RESULT:
-        if (fclChkMessage() != 0) {
+        if (fclChkMessage() != EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             break;
         }
         if (evtGetCapturedWindowPanelValue() != 0) {
@@ -630,7 +630,7 @@ s32 mtrMantraEquipUpdate(void) {
         break;
 
     case MTR_MANTRA_EQUIP_STATE_WAIT_COMPLETION_AND_RESTORE_MENU:
-        if (work->flags.fadeProgress == 0 || fclChkMessage() != 0) {
+        if (work->flags.fadeProgress == 0 || fclChkMessage() != EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             break;
         }
         evtFinishMessageWindowAndNotify();
@@ -877,7 +877,7 @@ s32 mtrUnitSelectUpdateState(MnuStatusResource *resourceWork) {
         selection->state = MTR_UNIT_SELECTION_STATE_WAIT_MESSAGE;
         break;
     case MTR_UNIT_SELECTION_STATE_WAIT_MESSAGE:
-        if (fclChkMessage() == 0) {
+        if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             selection->state = MTR_UNIT_SELECTION_STATE_RESTORE_INPUT;
         }
         break;

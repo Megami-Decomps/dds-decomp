@@ -123,7 +123,7 @@ s32 mnuTickShopMessageSequence(dds3ProcessID_t *task) {
                     break;
 
                 case 2:
-                    if (fclChkMessage() == 0) {
+                    if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
                         evtFinishMessageWindowAndNotify();
                         state->options = mnuGetTerminalMessageOption();
                         state->phase = 3;
@@ -167,7 +167,7 @@ s32 mnuTickShopMessageSequence(dds3ProcessID_t *task) {
                 }
 
                 case 4:
-                    if (fclChkMessage() == 0) {
+                    if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
                         evtFinishMessageWindowAndNotify();
                         if (state->rewardCursor == -1) {
                             if (state->options == 2) {
@@ -200,7 +200,7 @@ s32 mnuTickShopMessageSequence(dds3ProcessID_t *task) {
                 case 7:
                 case 9:
                 case 11:
-                    if (fclChkMessage() == 0) {
+                    if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
                         evtFinishMessageWindowAndNotify();
                         state->phase = 1;
                     }
@@ -264,7 +264,7 @@ s32 mnuPollMessageWindowBeforeClosing(dds3ProcessID_t *callback) {
 
     if (state == 0) {
         if (*window == 0) {
-            if (fclChkMessage() == 0) {
+            if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
                 evtFinishMessageWindowAndNotify();
                 mnuSetPopupEntryFlagged(window, mnuShopReturnFadePopupEntry);
             }

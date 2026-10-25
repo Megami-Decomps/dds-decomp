@@ -1609,7 +1609,7 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_000 ...->MTR_MSL_TUTORIAL_000_WAIT\n");
         break;
     case 9:
-        if (fclChkMessage() == 0) {
+        if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             state->tutorialNextState = 10;
             state->tutorialWaitFrames = 0;
             state->flagBytes[0] = 37;
@@ -1643,7 +1643,7 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_001 ...->MTR_MSL_TUTORIAL_001_WAIT\n");
         break;
     case 13:
-        if (fclChkMessage() == 0) {
+        if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             state->tutorialNextState = 14;
             state->tutorialWaitFrames = 0;
             state->flagBytes[0] = 37;
@@ -1677,7 +1677,7 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_002 ...->MTR_MSL_TUTORIAL_003_WAIT\n");
         break;
     case 17:
-        if (fclChkMessage() == 0) {
+        if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             state->tutorialNextState = 18;
             state->tutorialWaitFrames = 0;
             state->flagBytes[0] = 37;
@@ -1703,7 +1703,7 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_003 ...->MTR_MSL_TUTORIAL_004_WAIT\n");
         break;
     case 20:
-        if (fclChkMessage() == 0) {
+        if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             state->tutorialNextState = 21;
             state->tutorialWaitFrames = 0;
             state->flagBytes[0] = 37;
@@ -1729,7 +1729,7 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_004 ...->MTR_MSL_TUTORIAL_004_WAIT\n");
         break;
     case 23:
-        if (fclChkMessage() == 0) {
+        if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             state->tutorialNextState = 24;
             state->tutorialWaitFrames = 0;
             state->flagBytes[0] = 37;
@@ -1755,7 +1755,7 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_005 ...->MTR_MSL_TUTORIAL_005_WAIT\n");
         break;
     case 26:
-        if (fclChkMessage() == 0) {
+        if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             state->tutorialNextState = 27;
             state->tutorialWaitFrames = 0;
             state->flagBytes[0] = 37;
@@ -1781,7 +1781,7 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_006 ...->MTR_MSL_TUTORIAL_006_WAIT\n");
         break;
     case 29:
-        if (fclChkMessage() == 0) {
+        if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             state->tutorialNextState = 30;
             state->tutorialWaitFrames = 0;
             state->flagBytes[0] = 37;
@@ -1807,7 +1807,7 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_007 ...->MTR_MSL_TUTORIAL_007_WAIT\n");
         break;
     case 32:
-        if (fclChkMessage() == 0) {
+        if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             state->tutorialNextState = 1;
             state->tutorialWaitFrames = 0;
             state->flagBytes[0] = 37;

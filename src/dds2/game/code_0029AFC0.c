@@ -74,7 +74,7 @@ s32 mnuHandleStatPointAssignment(dds3ProcessID_t *task) {
     if (result != 0) {
         return result;
     }
-    if (work->transition.state != 0 || fclChkMessage() != 0) {
+    if (work->transition.state != 0 || fclChkMessage() != EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
         return 0;
     }
     if (work->selectionInitialized == 0) {
@@ -181,7 +181,7 @@ s32 mnuCommitAssignedStatPoints(dds3ProcessID_t *task) {
     if (result != 0) {
         return result;
     }
-    if (work->transition.state == 0 && fclChkMessage() == 0) {
+    if (work->transition.state == 0 && fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
         s8 capturedValue = evtGetCapturedWindowPanelValue();
         s32 *stats = work->statGains;
 
@@ -253,7 +253,7 @@ s32 mnuRunPanelWithIdleFallback(dds3ProcessID_t *request) {
     evtStageTestUpdateCamera();
     result = mnuDispatchPopupTransition(&context->transition.data, panelState, 0, request);
     if (result == 0) {
-        if ((*panelState == 0) && (result = fclChkMessage(), result == 0)) {
+        if ((*panelState == 0) && (result = fclChkMessage(), result == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL)) {
             mnuSetPopupEntryFlagged(panelState, brsRewardMessagePopupEntry);
         }
         result = 0;

@@ -2107,7 +2107,7 @@ s32 evtIsFadeDispatchIdle(void) {
     if (fading != 0) {
         return 0;
     }
-    return fclChkMessage() == 0;
+    return fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL;
 }
 
 /* Install a dispatch state table and point the popup at the shared shop entry. */
@@ -2612,7 +2612,7 @@ s32 evtQueryStateProgress(dds3ProcessID_t *callbackContext) {
     s32 dispatchResult = menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_POLL, callbackContext);
 
     if (dispatchResult == 0) {
-        if ((((ShopScene *)stateAddress)->dispatchState == 0) && (fclChkMessage() == 0)) {
+        if ((((ShopScene *)stateAddress)->dispatchState == 0) && (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL)) {
             s32 progressTicks = ((ShopScene *)stateAddress)->progressTicks;
 
             if ((f32)progressTicks < 20.0f) {
@@ -2898,7 +2898,7 @@ s32 evtDispatchShopSelectionAction(dds3ProcessID_t *task) {
     if (result != 0) {
         return result;
     }
-    if (*dispatchSlot == 0 && fclChkMessage() == 0) {
+    if (*dispatchSlot == 0 && fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
         if (state->extraOption != 0) {
             selectedOperation = state->ownedWindows[0]->list->cursor->index + 1;
         } else {
@@ -3015,7 +3015,7 @@ s32 evtSetPopupEntryWhenMessageWindowIdle(dds3ProcessID_t *callbackContext) {
     dispatchSlot = &((ShopScene *)stateAddress)->dispatchState;
     result = menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_POLL, callbackContext);
     if (result == 0) {
-        if ((*dispatchSlot == 0) && (result = fclChkMessage(), result == 0)) {
+        if ((*dispatchSlot == 0) && (result = fclChkMessage(), result == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL)) {
             mnuSetPopupEntryFlagged(dispatchSlot, ((ShopScene *)stateAddress)->popupTable);
         }
         result = 0;
@@ -3132,7 +3132,7 @@ s32 mnuTickShopMessageSequence(dds3ProcessID_t *task) {
                     break;
 
                 case 2:
-                    if (fclChkMessage() == 0) {
+                    if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
                         evtFinishMessageWindowAndNotify();
                         state->pendingPriceStage = mnuCampGetShopPriceStage();
                         state->action = 3;
@@ -3175,7 +3175,7 @@ s32 mnuTickShopMessageSequence(dds3ProcessID_t *task) {
                 }
 
                 case 4:
-                    if (fclChkMessage() == 0) {
+                    if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
                         evtFinishMessageWindowAndNotify();
                         if (state->scanIndex == -1) {
                             if (state->pendingPriceStage == 2) {
@@ -3196,7 +3196,7 @@ s32 mnuTickShopMessageSequence(dds3ProcessID_t *task) {
                     break;
 
                 case 7:
-                    if (fclChkMessage() == 0) {
+                    if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
                         evtFinishMessageWindowAndNotify();
                         state->action = 1;
                     }

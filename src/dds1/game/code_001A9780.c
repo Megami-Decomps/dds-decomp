@@ -4934,7 +4934,7 @@ s32 btlUpdateLinkageNoticeTask(dds3ProcessID_t *task) {
             colors.values[1] = color;
             colors.values[2] = color;
             colors.values[3] = color;
-            if (fclChkMessage() == 1) {
+            if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_ACTIVE) {
                 dspRequestMessageWindowModeOne();
                 goto return_zero;
             }
@@ -5016,7 +5016,7 @@ s32 btlUpdateCommandNoticeTask(dds3ProcessID_t *task) {
             colors.values[1] = color;
             colors.values[2] = color;
             colors.values[3] = color;
-            if (fclChkMessage() != 1) {
+            if (fclChkMessage() != EVT_MESSAGE_WINDOW_CONTROL_RESULT_ACTIVE) {
                 work->phase++;
                 /* Retail jump: 0x001B5B14 `b` to the return-0 block 0x001B5B50 placed after the -1 arm.
                  * Plain return 0 puts that block next to the mode-one arm (7 of 122 words differ);

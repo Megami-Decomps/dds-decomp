@@ -1745,7 +1745,7 @@ void mnuTerminalReleaseContextAndResources(dds3ProcessID_t *task) {
 s32 mnuTerminalSyncMessageWindowControl(dds3ProcessID_t *task) {
     MenuGradientFade *state = &((MenuTerminalContext *)dds3GetProcessData(task))->gradientFade;
     mnuDrawAndStepGradientFade(state, 0x53);
-    if (fclChkMessage() != 0) {
+    if (fclChkMessage() != EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
         mnuSetStateValue(&state->active, 1);
     } else {
         mnuSetStateValue(&state->active, 0);
@@ -2605,7 +2605,7 @@ s32 evtIsFadeDispatchIdle(void) {
     if (fadeActive != 0) {
         return 0;
     }
-    return fclChkMessage() == 0;
+    return fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL;
 }
 
 /* Install a dispatch state table and point the popup at the shared terminal entry. */
@@ -3263,7 +3263,7 @@ s32 evtOpenProgressResultPopupWhenIdle(dds3ProcessID_t *callbackContext) {
     s32 *dispatchSlot = &((MenuTerminalContext *)stateAddress)->popupState;
     s32 dispatchResult = mnuDispatchPopupTransition(&((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, (void *)callbackContext);
     if (dispatchResult == 0) {
-        if (fclChkMessage() == 0) {
+        if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             mnuSetPopupEntryFlagged(dispatchSlot, mnuShopCommandPopupEntries);
         }
         return 0;
@@ -3328,7 +3328,7 @@ s32 mnuPollTerminalPanelTransition(dds3ProcessID_t *callbackContext) {
     s32 *dispatchSlot = &((MenuTerminalContext *)stateAddress)->popupState;
     s32 dispatchResult = mnuDispatchPopupTransition(&((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, (void *)callbackContext);
     if (dispatchResult == 0) {
-        if (fclChkMessage() == 0) {
+        if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             mnuSetPopupEntryFlagged(dispatchSlot, mnuShopCommandPopupEntries);
         }
         return 0;
@@ -3368,7 +3368,7 @@ s32 evtQueryStateProgress(dds3ProcessID_t *callbackContext) {
     s32 dispatchResult = mnuDispatchPopupTransition(&((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, (void *)callbackContext);
     if (dispatchResult == 0) {
         if (*dispatchSlot == 0) {
-            if (fclChkMessage() == 0) {
+            if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
                 s32 progressTicks = ((MenuTerminalContext *)stateAddress)->retryFrames;
                 if ((f32)progressTicks < 20.0f) {
                     ((MenuTerminalContext *)stateAddress)->retryFrames = progressTicks + 1;
@@ -3663,7 +3663,7 @@ s32 evtDispatchShopSelectionAction(dds3ProcessID_t *task) {
     if (result != 0) {
         return result;
     }
-    if (*dispatchSlot == 0 && fclChkMessage() == 0) {
+    if (*dispatchSlot == 0 && fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
         operation = state->ownedWindows[0]->list->cursor->camp.value + 1;
         if (evtGetCapturedWindowPanelValue() == 0) {
             evtApplyShopQuantityTransaction(task);
@@ -3745,7 +3745,7 @@ s32 evtSetPopupEntryWhenMessageWindowIdle(dds3ProcessID_t *callbackContext) {
     dispatchSlot = &((MenuTerminalContext *)stateAddress)->popupState;
     result = mnuDispatchPopupTransition(&((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, callbackContext);
     if (result == 0) {
-        if ((*dispatchSlot == 0) && (result = fclChkMessage(), result == 0)) {
+        if ((*dispatchSlot == 0) && (result = fclChkMessage(), result == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL)) {
             mnuSetPopupEntryFlagged(dispatchSlot, ((MenuTerminalContext *)stateAddress)->popupTable);
         }
         result = 0;
@@ -3884,7 +3884,7 @@ s32 evtAdvancePendingRewards(dds3ProcessID_t *callbackContext) {
                          EVT_DISPATCH_OPERATION_POLL, (void *)callbackContext);
     if (result == 0) {
         if (*dispatchSlot == 0 &&
-            (result = fclChkMessage()) == 0) {
+            (result = fclChkMessage()) == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             if (state->grantPendingReward != 0) {
                 if (state->rewardKind == 0) {
                     ptyAdjustItemQuantity(state->rewardValue, 1);
@@ -3990,7 +3990,7 @@ s32 evtOpenSlotAdvancePopupWhenIdle(dds3ProcessID_t *callbackContext) {
     s32 dispatchResult = mnuDispatchPopupTransition(&((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, (void *)callbackContext);
     if (dispatchResult == 0) {
         if (*dispatchSlot == 0) {
-            if (fclChkMessage() == 0) {
+            if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
                 mnuSetPopupEntryFlagged(dispatchSlot, mnuShopProgressGatePopupEntry);
             }
         }
@@ -4056,7 +4056,7 @@ s32 evtTriggerProgressGateThenOpenPopup(dds3ProcessID_t *callbackContext) {
     s32 dispatchResult = mnuDispatchPopupTransition(&((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot, EVT_DISPATCH_OPERATION_POLL, (void *)callbackContext);
     if (dispatchResult == 0) {
         if (*dispatchSlot == 0) {
-            if (fclChkMessage() == 0) {
+            if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
                 if (evtTriggerProgressFlagGate(stateAddress) == 0) {
                     mnuSetPopupEntryFlagged(dispatchSlot, mnuShopSelectedRewardPopupEntry);
                 }
@@ -4209,7 +4209,7 @@ s32 evtMenuPollWindow(dds3ProcessID_t *callback) {
     s32 state = mnuDispatchPopupTransition(&context->transitionWork, window, 0, (void *)callback);
     if (state == 0) {
         if (*window == 0) {
-            if (fclChkMessage() == 0) {
+            if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
                 mnuSetPopupEntryFlagged(window, mnuShopGrantedRewardPopupEntry);
             }
         }
@@ -4292,7 +4292,7 @@ s32 evtMenuUpdateProgressRewardPopup(dds3ProcessID_t *callback) {
     if (dispatch != 0) {
         return dispatch;
     }
-    if (*popup == 0 && fclChkMessage() == 0) {
+    if (*popup == 0 && fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
         s32 rewardState = context->rewardGranted;
         if (rewardState == 1) {
             if (evtIsLastSlot(slotIndex) == 0) {

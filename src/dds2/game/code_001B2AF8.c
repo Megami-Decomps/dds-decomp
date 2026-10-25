@@ -5836,7 +5836,7 @@ s32 btlUpdateLinkageNoticeTask(dds3ProcessID_t *task) {
             colors.values[1] = color;
             colors.values[2] = color;
             colors.values[3] = color;
-            if (fclChkMessage() == 1) {
+            if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_ACTIVE) {
                 dspRequestMessageWindowModeOne();
                 goto dialog_active;
             }
@@ -5921,7 +5921,7 @@ s32 btlUpdateCommandNoticeTask(dds3ProcessID_t *task) {
             colors.values[1] = color;
             colors.values[2] = color;
             colors.values[3] = color;
-            if (fclChkMessage() != 1) {
+            if (fclChkMessage() != EVT_MESSAGE_WINDOW_CONTROL_RESULT_ACTIVE) {
                 work->phase++;
                 goto return_zero;
             }
@@ -5952,7 +5952,7 @@ extern BtlRuntimeTask *btlCreateNotifyingCameraKeyframeTask(ActionStateLink *, f
 s32 btlUpdateMajinTutorialTask(dds3ProcessID_t *task) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlTutorialDialogWork *work = (BtlTutorialDialogWork *)dds3GetProcessData(task);
-    s32 windowState = fclChkMessage();
+    EvtMessageWindowControlResult windowState = fclChkMessage();
     BtlUnit *unit;
     s32 count;
     BtlUnit *eligible[3];
@@ -5961,7 +5961,7 @@ s32 btlUpdateMajinTutorialTask(dds3ProcessID_t *task) {
 
     switch (work->phase) {
     case 0:
-        if (windowState != 1) {
+        if (windowState != EVT_MESSAGE_WINDOW_CONTROL_RESULT_ACTIVE) {
             fclStartMessage(5);
             work->phase++;
         }
@@ -6001,7 +6001,7 @@ s32 btlUpdateMajinTutorialTask(dds3ProcessID_t *task) {
         work->phase++;
         break;
     case 2:
-        if (windowState != 1) {
+        if (windowState != EVT_MESSAGE_WINDOW_CONTROL_RESULT_ACTIVE) {
             fclStartMessage(6);
             work->phase++;
         }
@@ -6088,7 +6088,7 @@ s32 btlUpdateMajinTutorialTask(dds3ProcessID_t *task) {
         }
         break;
     case 4:
-        if (windowState != 1) {
+        if (windowState != EVT_MESSAGE_WINDOW_CONTROL_RESULT_ACTIVE) {
             fclStartMessage(7);
             work->phase++;
         }
@@ -6098,7 +6098,7 @@ s32 btlUpdateMajinTutorialTask(dds3ProcessID_t *task) {
         work->phase++;
         break;
     case 6:
-        if (windowState != 1) {
+        if (windowState != EVT_MESSAGE_WINDOW_CONTROL_RESULT_ACTIVE) {
             work->phase++;
         }
         break;
@@ -6113,7 +6113,7 @@ s32 btlUpdateMajinTutorialTask(dds3ProcessID_t *task) {
         btlSetCommandPanelFadeMode(1, 8);
         return -1;
     }
-    if (windowState == 1) {
+    if (windowState == EVT_MESSAGE_WINDOW_CONTROL_RESULT_ACTIVE) {
         dspRequestMessageWindowModeOne();
     }
     return 0;
