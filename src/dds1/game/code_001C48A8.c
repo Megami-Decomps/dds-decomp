@@ -1396,7 +1396,7 @@ u32 fldStepAreaLoad(BattleSceneWork *work) {
             switch (work->loadStep) {
             case 0:
                 work->flags &= ~0x10;
-                if (fldLoadNextFile_BtlRet() != 0) {
+                if (fldTryStartPendingBattleReturnAreaLoad() != 0) {
                     work->loadStep = 1;
                 } else {
                     work->loadStep = 2;

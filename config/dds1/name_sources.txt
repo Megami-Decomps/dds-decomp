@@ -1040,7 +1040,7 @@
 0x00127898	fldAddressResolver	inferred	SMT3HD name via SLUS_209.11 0x00127318, shared-hash-in-run; was fldRelocatePackedTransferChunk
 0x001278C0	fldRelocateTransferChunkWords	inferred	Relocates packed words at transfer chunk offset using chunk size. [names_R_FuncNames6.tsv]
 0x001278E8	fldLoadNextFile_SetId_BtlRet	inferred	SMT3HD name via SLUS_209.11 0x00127368, shared-hash-in-run; was fldSetPendingAreaAndFloor
-0x001278F8	fldLoadNextFile_BtlRet	inferred	SMT3HD name via SLUS_209.11 0x00127378, unique-masked-hash; was fldLoadAreaResource
+0x001278F8	fldTryStartPendingBattleReturnAreaLoad	inferred	Starts the staged battle-return area file load and reports whether a request was started.
 0x00127AC0	fldFreeNextFile	inferred	SMT3HD name via SLUS_209.11 0x00127510, unique-masked-hash; was fldFreeDisplayObjects
 0x00127B30	fldPollAreaResourceLoad	inferred	While area scene state is pending, tests the resource handle and clears the pending flag and related field byte when loading completes.
 0x00127B88	fldLoadNextGetStatus	inferred	SMT3HD name via SLUS_209.11 0x001275D0, shared-hash-in-run; was fldGetResourceReadyFlag

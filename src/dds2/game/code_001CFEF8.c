@@ -1433,7 +1433,7 @@ u32 fldStepAreaLoad(BtlState *work) {
             switch (work->loadStep) {
             case 0:
                 work->battleFlags &= ~0x10;
-                if (fldLoadNextFile_BtlRet() != 0) {
+                if (fldTryStartPendingBattleReturnAreaLoad() != 0) {
                     work->loadStep = 1;
                 } else {
                     work->loadStep = 2;

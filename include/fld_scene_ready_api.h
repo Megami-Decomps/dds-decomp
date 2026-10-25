@@ -7,6 +7,6 @@ u32 fldGetSceneReadyFlag(void);
 u32 fldLoadNextGetStatus(void);
 u8 fldLoadNextGetStatus2(void);
 u32 fldPollAreaResourceLoad(void);
-s32 fldLoadNextFile_BtlRet(void);
+u8 fldTryStartPendingBattleReturnAreaLoad(void);
 
 #endif

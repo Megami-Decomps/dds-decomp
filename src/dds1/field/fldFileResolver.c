@@ -1334,7 +1334,7 @@ void fldLoadNextFile_SetId_BtlRet(u32 area, u32 floor) {
 extern char D_0039FE38[]; 
 extern void fldFreeNextFile(void);
 
-s32 fldLoadNextFile_BtlRet(void) {
+u8 fldTryStartPendingBattleReturnAreaLoad(void) {
     char directory[64];
     char path[80];
     u32 area = fldPendingArea;
