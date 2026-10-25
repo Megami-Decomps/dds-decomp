@@ -5156,7 +5156,7 @@ void fldQueueCameraXYOverride(f32 targetX, f32 targetZ) {
 
     camera->facingPointX = targetX;
     camera->facingPointZ = targetZ;
-    camera->pointState = 1;
+    camera->facingPointState = FLD_CAMERA_TURN_REQUEST_PENDING;
 }
 
 void fldQueueCameraHeadingFromVector(f32 x, f32 unusedY, f32 z) {
@@ -5166,7 +5166,7 @@ void fldQueueCameraHeadingFromVector(f32 x, f32 unusedY, f32 z) {
     angle = sdfAtan2(x, z);
     camera = &fldGlobalBase;
     angle *= 180.0f / 3.14f;
-    camera->angleState = 1;
+    camera->headingState = FLD_CAMERA_TURN_REQUEST_PENDING;
     camera->overrideAngle = -angle;
 }
 
@@ -5174,27 +5174,27 @@ void fldUpdateCameraHeadingFromXY(void) {
     f32 dx;
     f32 dz;
 
-    if (fldGlobalBase.pointState != 0) {
+    if (fldGlobalBase.facingPointState != FLD_CAMERA_TURN_REQUEST_IDLE) {
         dx = fldGlobalBase.x - fldGlobalBase.facingPointX;
         dz = fldGlobalBase.z - fldGlobalBase.facingPointZ;
         if (dx < 0.0001f && dx > -0.0001f && dz < 0.0001f && dz > -0.0001f) {
             return;
         }
         fldGlobalBase.targetAngle = -(sdfAtan2(dx, dz) * (180.0f / 3.14f));
-        fldGlobalBase.pointState = 2;
+        fldGlobalBase.facingPointState = FLD_CAMERA_TURN_REQUEST_TURNING;
     }
 }
 
 void fldApplyPendingCameraHeading(void) {
     FldAreaWork *camera = &fldGlobalBase;
 
-    if (camera->angleState != 0) {
-        camera->angleState = 2;
+    if (camera->headingState != FLD_CAMERA_TURN_REQUEST_IDLE) {
+        camera->headingState = FLD_CAMERA_TURN_REQUEST_TURNING;
         camera->targetAngle = camera->overrideAngle;
     }
 }
 
-/* ASM turning: smooth angle toward targetAngle, clearing pointState/angleState on arrival. */
+/* ASM turning: smooth angle toward targetAngle, clearing both request states on arrival. */
 INCLUDE_ASM(const s32, "field/fldFileResolver", fldUpdateCameraHeadingTransition);
 
 extern SdfFlagListParams fldCameraColorParameters[];

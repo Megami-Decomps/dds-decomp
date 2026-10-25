@@ -14,6 +14,13 @@ typedef enum FldAreaResourceRequestState {
     FLD_AREA_RESOURCE_REQUEST_SATISFIED_FROM_CACHE = 2
 } FldAreaResourceRequestState;
 
+typedef u32 FldCameraTurnRequestState;
+enum FldCameraTurnRequestState {
+    FLD_CAMERA_TURN_REQUEST_IDLE = 0,
+    FLD_CAMERA_TURN_REQUEST_PENDING = 1,
+    FLD_CAMERA_TURN_REQUEST_TURNING = 2
+};
+
 typedef s32 FldAreaResourceReuseState;
 
 enum FldAreaResourceReuseState {
@@ -188,10 +195,10 @@ typedef struct FldAreaWork {
 #else
     s32 unk190;
 #endif
-    u32 pointState;
+    FldCameraTurnRequestState facingPointState;
     f32 facingPointX;
     f32 facingPointZ;
-    u32 angleState;
+    FldCameraTurnRequestState headingState;
     f32 overrideAngle;
 #ifdef VERSION_DDS1
     FldResourceBlock mapResources[4]; /* 0x19C: fldmix.LB nodes 10..13 */

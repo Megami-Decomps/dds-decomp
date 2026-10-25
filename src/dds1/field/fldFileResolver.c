@@ -5233,7 +5233,7 @@ void fldQueueCameraXYOverride(f32 targetX, f32 targetZ) {
 
     work->facingPointX = targetX;
     work->facingPointZ = targetZ;
-    work->pointState = 1;
+    work->facingPointState = FLD_CAMERA_TURN_REQUEST_PENDING;
 }
 
 void fldQueueCameraHeadingFromVector(f32 x, f32 unusedY, f32 z) {
@@ -5243,19 +5243,19 @@ void fldQueueCameraHeadingFromVector(f32 x, f32 unusedY, f32 z) {
     angle = sdfAtan2(x, z);
     work = &fldGlobalBase;
     angle *= 180.0f / 3.14f;
-    work->angleState = 1;
+    work->headingState = FLD_CAMERA_TURN_REQUEST_PENDING;
     work->overrideAngle = -angle;
 }
 
 void fldApplyCameraFacingPoint(void) {
     FldAreaWork *cameraWork = &fldGlobalBase;
 
-    if (cameraWork->pointState != 0) {
+    if (cameraWork->facingPointState != FLD_CAMERA_TURN_REQUEST_IDLE) {
         f32 deltaX = cameraWork->x - cameraWork->facingPointX;
         f32 deltaZ = cameraWork->z - cameraWork->facingPointZ;
         f32 angle;
 
-        cameraWork->pointState = 2;
+        cameraWork->facingPointState = FLD_CAMERA_TURN_REQUEST_TURNING;
         angle = sdfAtan2(deltaX, deltaZ);
         angle *= 180.0f / 3.14f;
         cameraWork->targetAngle = -angle;
@@ -5265,8 +5265,8 @@ void fldApplyCameraFacingPoint(void) {
 void fldApplyPendingCameraHeading(void) {
     FldAreaWork *cameraWork = &fldGlobalBase;
 
-    if (cameraWork->angleState != 0) {
-        cameraWork->angleState = 2;
+    if (cameraWork->headingState != FLD_CAMERA_TURN_REQUEST_IDLE) {
+        cameraWork->headingState = FLD_CAMERA_TURN_REQUEST_TURNING;
         cameraWork->targetAngle = cameraWork->overrideAngle;
     }
 }
@@ -5294,7 +5294,8 @@ void fldUpdateSmoothedCameraPose(void) {
         axis = D_003A00A8;
 
         if (fldPlayerObject != 0) {
-            if (fldGlobalBase.pointState == 2 || fldGlobalBase.angleState == 2) {
+            if (fldGlobalBase.facingPointState == FLD_CAMERA_TURN_REQUEST_TURNING ||
+                fldGlobalBase.headingState == FLD_CAMERA_TURN_REQUEST_TURNING) {
                 difference = fldAngleDifference(fldGlobalBase.angle, fldGlobalBase.targetAngle);
                 step = difference / 5.0f;
                 if (step < 0.0f) {
@@ -5305,8 +5306,8 @@ void fldUpdateSmoothedCameraPose(void) {
                 }
                 if ((0.0f <= difference && difference <= step) ||
                     (difference <= 0.0f && -step <= difference)) {
-                    fldGlobalBase.angleState = 0;
-                    fldGlobalBase.pointState = 0;
+                    fldGlobalBase.headingState = FLD_CAMERA_TURN_REQUEST_IDLE;
+                    fldGlobalBase.facingPointState = FLD_CAMERA_TURN_REQUEST_IDLE;
                     difference = fldGlobalBase.targetAngle;
                 } else if (difference < 0.0f) {
                     difference = fldGlobalBase.angle - step;
