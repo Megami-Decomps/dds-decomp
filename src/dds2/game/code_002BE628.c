@@ -224,7 +224,106 @@ void mnuSetPanelSlotValues(MenuPageWindow *menu, struct EffectSlotSet *resourceS
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", mnuInitializeQueuedCommandEffect);
+extern s32 D_0042B048[];
+extern s32 D_0042B098[];
+
+void mnuInitializeQueuedCommandEffect(MenuQueuedCommand *entry) {
+    enum {
+        ROW_BASE = (s32)&((MenuQueuedCommand *)0)->kind,
+        POSITION_STRIDE = sizeof(MenuCommandPosition),
+        MOTION_STRIDE = sizeof(MenuCommandMotion),
+        POSITION_X = (s32)&((MenuQueuedCommand *)0)->positions[0].x - ROW_BASE,
+        POSITION_Y = (s32)&((MenuQueuedCommand *)0)->positions[0].y - ROW_BASE,
+        MOTION_VALUE = (s32)&((MenuQueuedCommand *)0)->motion[0].value - ROW_BASE,
+        MOTION_DELAY = (s32)&((MenuQueuedCommand *)0)->motion[0].delay - ROW_BASE,
+        MOTION_PHASE = (s32)&((MenuQueuedCommand *)0)->motion[0].phase - ROW_BASE,
+        MOTION_SCALE = (s32)&((MenuQueuedCommand *)0)->motion[0].scale - ROW_BASE
+    };
+    u8 scales[3] = {32, 64, 96};
+    s32 largeAnchors[10][2];
+    s32 smallAnchors[7][2];
+    s32 index;
+    s32 anchorCount;
+
+    memcpy(largeAnchors, D_0042B048, sizeof(largeAnchors));
+    memcpy(smallAnchors, D_0042B098, sizeof(smallAnchors));
+    entry->keepActive = 1;
+    entry->highPhaseDecayStep = 48;
+    entry->lowPhaseDecayStep = 16;
+    entry->particleCount = 0;
+    if (entry->option == 0) {
+        anchorCount = 10;
+        for (index = 0; index < anchorCount * 2; index++) {
+            if (dds3GetRandA(0) & 7) {
+                u8 *rows = (u8 *)entry + ROW_BASE;
+                *(s32 *)(rows + (entry->particleCount * POSITION_STRIDE + POSITION_X)) = largeAnchors[index % anchorCount][0];
+                *(s32 *)(rows + (entry->particleCount * POSITION_STRIDE + POSITION_Y)) = largeAnchors[index % anchorCount][1];
+                *(s32 *)(rows + (entry->particleCount * MOTION_STRIDE + MOTION_VALUE)) = (dds3GetRandA(0) & 31) + 16;
+                *(s32 *)(rows + (entry->particleCount * MOTION_STRIDE + MOTION_DELAY)) = dds3GetRandA(0) & 15;
+                *(s32 *)(rows + (entry->particleCount * MOTION_STRIDE + MOTION_PHASE)) = 0;
+                *(s32 *)(rows + (entry->particleCount * MOTION_STRIDE + MOTION_SCALE)) = 128;
+                if (index >= 10) {
+                    if ((dds3GetRandA(0) & 1) == 0) {
+                        s32 variation = dds3GetRandA(0) & 31;
+                        s32 displacement = entry->particleCount * POSITION_STRIDE + POSITION_X;
+                        *(s32 *)(rows + displacement) += variation + 8;
+                    } else {
+                        s32 variation = dds3GetRandA(0) & 31;
+                        s32 displacement = entry->particleCount * POSITION_STRIDE + POSITION_X;
+                        *(s32 *)(rows + displacement) -= variation + 8;
+                    }
+                    if ((dds3GetRandA(0) & 1) == 0) {
+                        s32 variation = dds3GetRandA(0) & 31;
+                        s32 displacement = entry->particleCount * POSITION_STRIDE + POSITION_Y;
+                        *(s32 *)(rows + displacement) += variation + 8;
+                    } else {
+                        s32 variation = dds3GetRandA(0) & 31;
+                        s32 displacement = entry->particleCount * POSITION_STRIDE + POSITION_Y;
+                        *(s32 *)(rows + displacement) -= variation + 8;
+                    }
+                    *(s32 *)(rows + (entry->particleCount * MOTION_STRIDE + MOTION_SCALE)) = scales[dds3GetRandA(0) % 3];
+                }
+                entry->particleCount++;
+            }
+        }
+    } else {
+        anchorCount = 7;
+        for (index = 0; index < anchorCount * 2; index++) {
+            if (dds3GetRandA(0) & 7) {
+                u8 *rows = (u8 *)entry + ROW_BASE;
+                *(s32 *)(rows + (entry->particleCount * POSITION_STRIDE + POSITION_X)) = smallAnchors[index % anchorCount][0];
+                *(s32 *)(rows + (entry->particleCount * POSITION_STRIDE + POSITION_Y)) = smallAnchors[index % anchorCount][1];
+                *(s32 *)(rows + (entry->particleCount * MOTION_STRIDE + MOTION_VALUE)) = (dds3GetRandA(0) & 31) + 16;
+                *(s32 *)(rows + (entry->particleCount * MOTION_STRIDE + MOTION_DELAY)) = dds3GetRandA(0) & 15;
+                *(s32 *)(rows + (entry->particleCount * MOTION_STRIDE + MOTION_PHASE)) = 0;
+                *(s32 *)(rows + (entry->particleCount * MOTION_STRIDE + MOTION_SCALE)) = 128;
+                if (index >= 7) {
+                    if ((dds3GetRandA(0) & 1) == 0) {
+                        s32 variation = dds3GetRandA(0) & 31;
+                        s32 displacement = entry->particleCount * POSITION_STRIDE + POSITION_X;
+                        *(s32 *)(rows + displacement) += variation + 8;
+                    } else {
+                        s32 variation = dds3GetRandA(0) & 31;
+                        s32 displacement = entry->particleCount * POSITION_STRIDE + POSITION_X;
+                        *(s32 *)(rows + displacement) -= variation + 8;
+                    }
+                    if ((dds3GetRandA(0) & 1) == 0) {
+                        s32 variation = dds3GetRandA(0) & 31;
+                        s32 displacement = entry->particleCount * POSITION_STRIDE + POSITION_Y;
+                        *(s32 *)(rows + displacement) += variation + 8;
+                    } else {
+                        s32 variation = dds3GetRandA(0) & 31;
+                        s32 displacement = entry->particleCount * POSITION_STRIDE + POSITION_Y;
+                        *(s32 *)(rows + displacement) -= variation + 8;
+                    }
+                    *(s32 *)(rows + (entry->particleCount * MOTION_STRIDE + MOTION_SCALE)) = scales[dds3GetRandA(0) % 3];
+                }
+                entry->particleCount++;
+            }
+        }
+    }
+}
+
 
 /* Initialize both particle arrays for a queued menu command. */
 void mnuInitRandomLineEffect(MenuQueuedCommand *entry) {
@@ -279,7 +378,7 @@ void mnuInitializeQueuedMenuCommand(MenuQueuedCommand *entry) {
 
 /* Queue in the least-valued command bank; use bank zero if neither value
  * is below 0x200. Retail has no explicit return: its last call is a plain jal. */
-s32 mnuQueueListEntry(MenuPageWindow *menu, s32 window, u32 kind, s32 argument) {
+void mnuQueueListEntry(MenuPageWindow *menu, s32 window, u32 kind, s32 argument) {
     MenuPageSlot *panel = &menu->slots[window];
     s32 best = 0x200;
     s32 bestIndex = 0;
@@ -317,6 +416,12 @@ s32 mnuQueueListEntry(MenuPageWindow *menu, s32 window, u32 kind, s32 argument) 
         mnuInitializeQueuedMenuCommand(entry);
         break;
     }
+    /* Narrow tail-call exception (docs/CONTRIBUTING.md): native 0x002BEF78
+     * calls and returns through its epilogue, not a sibling jump. Reset the
+     * existing bank-scan counter after dispatch: RTL uid255 survives
+     * 01.sibling through 11.cfg, then disappears at 13.life. This is a
+     * trace-backed source form, not a claim to recover the original reset. */
+    i = 0;
 }
 
 void mnuClearSpriteRecord(MenuQueuedCommand *entry) {
@@ -3895,7 +4000,7 @@ s32 pacFileHandleFree_(void *request) {
     return pacFileHandleFree(request);
 }
 
-INCLUDE_SDATA(const s32, "game/code_002BE628", D_00437C58);
+
 
 INCLUDE_SDATA(const s32, "game/code_002BE628", D_00437C60);
 
