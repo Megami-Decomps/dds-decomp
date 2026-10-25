@@ -18,6 +18,7 @@
 #include "mnu_list.h"
 #include "mnu_staff.h"
 #include "brs_task.h"
+#include "brs_task_lifecycle_state.h"
 #include "brs_task_poll_done_api.h"
 #include "kwln_task_lifecycle.h"
 
@@ -57,7 +58,7 @@ extern s8 brsUpdateBlocked;
 
 extern s8 brsPendingRowsLatched;
 
-extern s8 brsTaskState;
+extern BrsTaskLifecycleState brsTaskState;
 
 extern void p2sdLoadSMGFile(s32);
 
@@ -1008,7 +1009,7 @@ void brsStaffTaskDestroy(dds3ProcessID_t *task) {
     effDestroyEffectList(context->resourceList);
     fclDestroyMessage();
     sdfMemFreeDirect(context->allocation);
-    brsTaskState = 2;
+    brsTaskState = BRS_TASK_STATE_COMPLETE;
 }
 
 extern BrsSkillPackageWork *brsCreateRewardTaskWork(void);
@@ -1024,14 +1025,14 @@ dds3ProcessID_t *mnuStaffCreateTasks(void) {
     dds3StartProcess(brsStaffInputTaskName, 0x405, 1, 0, brsMessageInputStep, 0, (u32)work);
     dds3StartProcess(mnuStaffPrimaryPanelTaskName, 0x2B15, 1, 0, mnuStaffRunPanel1, 0, (u32)work);
     secondaryPanelTaskHandle = dds3StartProcess(mnuStaffSecondaryPanelTaskName, 0x5211, 1, 0, mnuStaffRunPanel2, brsStaffTaskDestroy, (u32)work);
-    brsTaskState = 1;
+    brsTaskState = BRS_TASK_STATE_ACTIVE;
     return secondaryPanelTaskHandle;
 }
 
 u32 mnuStaffDestroyTasks(void) {
     s8 state = brsTaskState;
 
-    if (state == 1) {
+    if (state == BRS_TASK_STATE_ACTIVE) {
         dds3KillProcessName(brsStaffInputTaskName, 0);
         dds3KillProcessName(mnuStaffPrimaryPanelTaskName, 0);
         dds3KillProcessName(mnuStaffSecondaryPanelTaskName, 0);
@@ -1043,20 +1044,20 @@ u32 mnuStaffDestroyTasks(void) {
 
 s32 brsTaskConsumeDone(void) {
     s32 state = brsTaskState;
-    if (state == 1) {
+    if (state == BRS_TASK_STATE_ACTIVE) {
         return 1;
     }
-    if (state < 2) {
+    if (state < BRS_TASK_STATE_COMPLETE) {
         return 0;
     }
-    if (state == 2) {
-        brsTaskState = 0;
+    if (state == BRS_TASK_STATE_COMPLETE) {
+        brsTaskState = BRS_TASK_STATE_IDLE;
     }
     return 0;
 }
 
 u32 brsTaskTryDestroy(void) {
-    if (brsTaskState == 1) {
+    if (brsTaskState == BRS_TASK_STATE_ACTIVE) {
         mnuStaffDestroyTasks();
         return 1;
     }
