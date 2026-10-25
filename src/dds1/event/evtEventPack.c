@@ -39,7 +39,7 @@ s32 evtInitMotionSeProcess(s32 eventId, s32 resourceId) {
     const EvtPackEntry *entry;
     s32 packEntryIndex;
     s32 entrySize;
-    u8 *modelPayload;
+    const u8 *modelPayload;
     s32 viewerObjectKey;
 
     packState = evtGetPackProcessData(eventId);
