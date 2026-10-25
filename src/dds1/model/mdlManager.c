@@ -88,7 +88,7 @@ dds3ModelResrc_t *mdlSearchResrc(s32 group, s32 type) {
 }
 
 /* Return whether this group's separate ID list contains id. */
-s32 mdlCheckLoading(s32 groupIndex, s32 wantedId) {
+MdlGroupLoadPendingResult mdlCheckLoading(s32 groupIndex, s32 wantedId) {
     BattleGroupIdEntry *idCursor = mdlLoadingMajorList[groupIndex];
     while (idCursor != 0) {
         if (idCursor->id == wantedId) {
