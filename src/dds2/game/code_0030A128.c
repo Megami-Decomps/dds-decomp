@@ -1,4 +1,5 @@
 #include "sdk_ps2.h"
+#include "snd_packed_track_load_status.h"
 #include "dsp_entry_api.h"
 #include "dsp_channel.h"
 #include "evt_message_window_api.h"
@@ -466,7 +467,7 @@ extern char D_0042D2A8[];
 extern char D_0042D2B8[];
 extern void sdfInstallNonzeroSpriteSlots(SdfSlotSet *);
 extern void effRequestResourceByMode(const char *, const char *, s32, u32 *);
-extern s32 sndFindPackedTrackLoadStatus(s32);
+extern SndPackedTrackLoadStatus sndFindPackedTrackLoadStatus(s32);
 extern void p2sdLoadSMGFile(s32);
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 
@@ -515,7 +516,7 @@ s32 fldAdvanceLmapResourceLoad(LmapTaskState *task)
             load->archive = pacLoad(files[load->entry].name);
             break;
         case 4:
-            if (sndFindPackedTrackLoadStatus(files[load->entry].argument) == 0) {
+            if (sndFindPackedTrackLoadStatus(files[load->entry].argument) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
                 p2sdLoadSMGFile(files[load->entry].argument);
             } else {
                 /* Native 0x0030AD7C stores 4 before the common phase-3 store. */
@@ -549,7 +550,7 @@ s32 fldAdvanceLmapResourceLoad(LmapTaskState *task)
             }
             break;
         case 4:
-            if (sndFindPackedTrackLoadStatus(files[load->entry].argument) == 1) {
+            if (sndFindPackedTrackLoadStatus(files[load->entry].argument) == SND_PACKED_TRACK_LOAD_RESIDENT) {
                 load->phase = 4;
             }
             break;

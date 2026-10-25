@@ -1,4 +1,5 @@
 #include "sdk_ps2.h"
+#include "snd_packed_track_load_status.h"
 #include "btl_sound.h"
 #include "dds3obj.h"
 #include "eff_random.h"
@@ -386,7 +387,7 @@ typedef struct SoundSceneEntry {
     u8 pad26[2];
 } SoundSceneEntry;
 
-extern s32 sndFindPackedTrackLoadStatus(u32);
+extern SndPackedTrackLoadStatus sndFindPackedTrackLoadStatus(u32);
 
 
 extern s64 btlForceSceneLightingRestore(SceneLightRestoreArgs *);

@@ -1,4 +1,5 @@
 #include "sdk_ps2.h"
+#include "snd_packed_track_load_status.h"
 #include "common.h"
 #include "sdf_vu0.h"
 #include "snd_track_playback_api.h"
@@ -127,7 +128,7 @@ extern s32 evtIsMenuTableEntryEnabled(s32 *);
 
 extern void p2sdLoadSMGFile(s32 sound);
 
-extern s32 sndFindPackedTrackLoadStatus(s32 sound);
+extern SndPackedTrackLoadStatus sndFindPackedTrackLoadStatus(s32 sound);
 
 
 #include "sdf_debug_api.h"
@@ -5646,7 +5647,7 @@ s32 evtCheckEventBgmLoaded(s32 eventId) {
     if ((u32)(eventId - 0x258) >= 0x100) {
         return 1;
     }
-    return sndFindPackedTrackLoadStatus(evtGetSoundIndex(eventId, 0)) == 1;
+    return sndFindPackedTrackLoadStatus(evtGetSoundIndex(eventId, 0)) == SND_PACKED_TRACK_LOAD_RESIDENT;
 }
 
 s32 evtPlayEventBgm(s32 eventId, s32 fade) {

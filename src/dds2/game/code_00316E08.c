@@ -1,4 +1,5 @@
 #include "sdk_ps2.h"
+#include "snd_packed_track_load_status.h"
 #include "common.h"
 #include "sdf_vu0.h"
 #include "mnu_sprite_placement.h"
@@ -245,7 +246,7 @@ const char D_0042D6B8[] __attribute__((aligned(8))) = "%s ... OK!! \n";
 const char D_0042D6C8[] __attribute__((aligned(8))) = "FileHandle Free... OK!! \n";
 
 /* The native wrapper tail-forwards the request through its legacy ABI. */
-extern s32 sndFindPackedTrackLoadStatus(s32 sound);
+extern SndPackedTrackLoadStatus sndFindPackedTrackLoadStatus(s32 sound);
 extern void p2sdLoadSMGFile(s32 sound);
 extern void effRequestResourceByMode(const char *prefix, const char *name,
                                      s32 mode, u32 *outInstance);
@@ -296,9 +297,9 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
             }
             break;
         case 2: {
-            s32 status = sndFindPackedTrackLoadStatus(
+            SndPackedTrackLoadStatus status = sndFindPackedTrackLoadStatus(
                 D_0040A970[work->packageEntryIndex].value);
-            if (status == 0) {
+            if (status == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
                 p2sdLoadSMGFile(D_0040A970[work->packageEntryIndex].value);
             } else {
                 work->packageLoadState = MNU_SHOOTING_PACKAGE_LOAD_PROCESS_ENTRY;
@@ -353,7 +354,7 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
             }
             break;
         case 2:
-            if (sndFindPackedTrackLoadStatus(D_0040A970[work->packageEntryIndex].value) == 1) {
+            if (sndFindPackedTrackLoadStatus(D_0040A970[work->packageEntryIndex].value) == SND_PACKED_TRACK_LOAD_RESIDENT) {
                 work->packageLoadState = MNU_SHOOTING_PACKAGE_LOAD_PROCESS_ENTRY;
             }
             break;

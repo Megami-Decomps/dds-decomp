@@ -1,4 +1,5 @@
 #include "sdk_ps2.h"
+#include "snd_packed_track_load_status.h"
 #include "snd_ring.h"
 #include "common.h"
 #include "snd_track_playback_api.h"
@@ -333,7 +334,7 @@ void sndSetSpatialSequenceVolumePan(s32 trackId, f32 angle, f32 distance) {
     p2sdPlaySE(trackId, (s32)(volume * 127.0f), pan);
 }
 
-extern s32 sndFindPackedTrackLoadStatus(s32 packedTrack);
+extern SndPackedTrackLoadStatus sndFindPackedTrackLoadStatus(s32 packedTrack);
 
 extern s32 p2sdSmgHandle;
 
@@ -394,9 +395,8 @@ void p2sdSetStandPos(f32 firstPointX, f32 firstPointY, f32 firstPointZ,
     }
 }
 
-/* Returns 1 when the track id (high half of `packed`) is in the slot table, 2 when it is the
-   current track, else 0. */
-s32 sndFindPackedTrackLoadStatus(s32 packed) {
+/* Prefer a resident slot, then report the single bank request tracked as pending. */
+SndPackedTrackLoadStatus sndFindPackedTrackLoadStatus(s32 packed) {
     SndWork *work = &sdfSndMap;
     s32 id = packed >> 16;
     SndTrackSlot *slot;
@@ -406,11 +406,12 @@ s32 sndFindPackedTrackLoadStatus(s32 packed) {
     slot = work->slots;
     for (slotIndex = 0; slotIndex < 13; slotIndex++) {
         if (slot->id == id) {
-            return 1;
+            return SND_PACKED_TRACK_LOAD_RESIDENT;
         }
         slot++;
     }
-    return p2sdSmgHandle == id ? 2 : 0;
+    return p2sdSmgHandle == id ? SND_PACKED_TRACK_LOAD_PENDING
+                               : SND_PACKED_TRACK_LOAD_NOT_PRESENT;
 }
 
 extern s32 (*p2sdSmgBuf)(void);
@@ -419,26 +420,26 @@ extern s32 (*p2sdSmgBuf)(void);
 void p2sdLoadSMGFile(s32 packed) {
     char name[0x10];
     char path[0x100];
-    s32 status = sndFindPackedTrackLoadStatus(packed);
+    SndPackedTrackLoadStatus status = sndFindPackedTrackLoadStatus(packed);
     s32 id;
 
     switch (status) {
-    case 0:
+    case SND_PACKED_TRACK_LOAD_NOT_PRESENT:
         id = packed >> 16;
         sprintf(name, "MIDI%04X.SMG", id);
         mnuBuildSoundResourcePath(path, name);
         sdfSndSendSyncCmd(0xA0, 0, path, strlen(path) + 1);
         p2sdSmgHandle = id;
         break;
-    case 1:
+    case SND_PACKED_TRACK_LOAD_RESIDENT:
         break;
-    case 2:
+    case SND_PACKED_TRACK_LOAD_PENDING:
         do {
             sdfDelayThread(2);
             if (p2sdSmgBuf != NULL) {
                 p2sdSmgBuf();
             }
-        } while (sndFindPackedTrackLoadStatus(packed) != 1);
+        } while (sndFindPackedTrackLoadStatus(packed) != SND_PACKED_TRACK_LOAD_RESIDENT);
         break;
     }
 }
@@ -481,7 +482,7 @@ u32 sndSendChannelGroupCommand150(u8 channel) {
 
 void sndReleaseMidiTrack(s32 id) {
     u32 packet[4];
-    if (sndFindPackedTrackLoadStatus(id) != 0) {
+    if (sndFindPackedTrackLoadStatus(id) != SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
         packet[0] = id;
         sdfSndSendSyncCmd(0xB0, 0, packet, 0x10);
         id >>= 16;

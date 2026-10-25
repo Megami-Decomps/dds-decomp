@@ -1,4 +1,5 @@
 #include "sdk_ps2.h"
+#include "snd_packed_track_load_status.h"
 #include "btl_runtime_state.h"
 #include "sdf_gs_header.h"
 #include "pcp_vu0.h"
@@ -56,7 +57,7 @@ extern void dds3WorkClear(void);
 extern effBTLCutHandle_t * effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, struct BtlUnit *owner, s32 value);
 extern s32 scrGetIntPara(s32 parameterIndex);
 extern void p2sdLoadSMGFile(s32 packed);
-extern s32 sndFindPackedTrackLoadStatus(s32 packed);
+extern SndPackedTrackLoadStatus sndFindPackedTrackLoadStatus(s32 packed);
 
 #define BTL_COMMAND_RECORD_BYTES 0x38
 
@@ -322,7 +323,7 @@ void btlRequestSceneEventResources(void) {
     dds3LinkProcess(battleState->scriptOwner, eventTask);
     battleState->sequenceHandle =
         ((battleState->eventTaskId - BTL_EVENT_SEQUENCE_ID_BIAS) << 16) + BTL_EVENT_SEQUENCE_BASE;
-    if (sndFindPackedTrackLoadStatus(battleState->sequenceHandle) == 0) {
+    if (sndFindPackedTrackLoadStatus(battleState->sequenceHandle) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
         p2sdLoadSMGFile(battleState->sequenceHandle);
         btlBossDebugPrintf(D_003A6788, battleState->sequenceHandle);
     }
@@ -336,7 +337,7 @@ s32 btlIsEventSequenceTaskReady(void) {
     if (battle->eventTaskId == -1) {
         return 1;
     }
-    if (sndFindPackedTrackLoadStatus(battle->sequenceHandle) == 0) {
+    if (sndFindPackedTrackLoadStatus(battle->sequenceHandle) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
         btlBossDebugPrintf(D_003A67A0);
         return 0;
     }
@@ -551,7 +552,7 @@ extern char D_003A6848[];
 s32 btlCommandSetSequenceVolumePan(void) {
     BtlState *battleState = (BtlState *)btlGetRuntime();
     s32 sequenceOffset = scrGetIntPara(0);
-    if (sndFindPackedTrackLoadStatus(battleState->sequenceHandle) != 0) {
+    if (sndFindPackedTrackLoadStatus(battleState->sequenceHandle) != SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
         p2sdPlaySE(battleState->sequenceHandle + sequenceOffset, BTL_EVENT_SEQUENCE_VOLUME, BTL_EVENT_SEQUENCE_PAN);
         btlBossDebugPrintf(D_003A6848, battleState->sequenceHandle + sequenceOffset);
     }
