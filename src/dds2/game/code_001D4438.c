@@ -568,23 +568,22 @@ void btlActionSeqStateSelect(ActionStateLink *task) {
     }
 }
 
-void btlUnitTurnEndStateSelect(u8 *task) {
-    u8 *unit = (u8 *)((ActionStateLink *)task)->unit;
-    u32 flags = ((BtlUnit *)unit)->status.flags;
+void btlUnitTurnEndStateSelect(ActionStateLink *task) {
+    BtlUnit *unit = task->unit;
+    u32 flags = unit->status.flags;
     if (flags & 0x200) {
         if (flags & 0x1000) {
-            if ((((BtlUnit *)unit)->status.stateFlags & 0x40) && !(((BtlUnit *)unit)->partyRecord.status & 0x5800) &&
-                !(((ActionStateLink *)task)->pendingFlags & 0x100)) {
-                ((ActionStateLink *)task)->indexWork.stage = 4;
-                ((ActionStateLink *)task)->indexWork.parameter = effOffsetIfOwnerFlagClear(unit, 0xA4);
-                ((BtlUnit *)unit)->status.flags = (((BtlUnit *)unit)->status.flags & ~0x20) | 0x400000;
-                ((BtlUnit *)unit)->partyRecord.flags |= 0x4000;
-                ((BtlUnit *)unit)->status.stateFlags |= 0x2000;
+            if ((unit->status.stateFlags & 0x40) && !(unit->partyRecord.status & 0x5800) && !(task->pendingFlags & 0x100)) {
+                task->indexWork.stage = 4;
+                task->indexWork.parameter = effOffsetIfOwnerFlagClear(unit, 0xA4);
+                unit->status.flags = (unit->status.flags & ~0x20) | 0x400000;
+                unit->partyRecord.flags |= 0x4000;
+                unit->status.stateFlags |= 0x2000;
                 btlDispatchStateHandler(task, 0x10);
             } else {
                 btlDispatchStateHandler(task, 0x1E);
             }
-            ((BtlUnit *)unit)->status.stateFlags &= ~0x40;
+            unit->status.stateFlags &= ~0x40;
         } else {
             btlDispatchStateHandler(task, 0x1E);
         }
@@ -741,17 +740,17 @@ void btlEnterStandbyState(ActionStateLink *task) {
     task->pendingFlags = (task->pendingFlags | 0x10) & ~0x200;
 }
 
-void btlUnitStateSelectAfterAction(u8 *task) {
-    u8 *unit = (u8 *)((ActionStateLink *)task)->unit;
+void btlUnitStateSelectAfterAction(ActionStateLink *task) {
+    BtlUnit *unit = task->unit;
     u32 flags;
-    if (!(((BtlUnit *)unit)->status.flags & 0x20)) {
-        ((ActionStateLink *)task)->pendingFlags &= ~0x100;
+    if (!(unit->status.flags & 0x20)) {
+        task->pendingFlags &= ~0x100;
     }
-    if (((BtlUnit *)unit)->resourceNode != 0 && sndIsResourceNodeReferencedOrActive((s32)((BtlUnit *)unit)->resourceNode) == 0) {
-        sndFreeResourceNode(((BtlUnit *)unit)->resourceNode);
-        ((BtlUnit *)unit)->resourceNode = 0;
+    if (unit->resourceNode != 0 && sndIsResourceNodeReferencedOrActive(unit->resourceNode) == 0) {
+        sndFreeResourceNode(unit->resourceNode);
+        unit->resourceNode = 0;
     }
-    flags = ((BtlUnit *)unit)->status.flags;
+    flags = unit->status.flags;
     if (flags & 0x20000000) {
         btlDispatchStateHandler(task, 0x11);
     } else if (flags & 0x400000) {
@@ -760,7 +759,7 @@ void btlUnitStateSelectAfterAction(u8 *task) {
         btlDispatchStateHandler(task, 0x12);
     } else if (flags & 0x20) {
         btlUnitTurnEndStateSelect(task);
-    } else if (((BtlUnit *)unit)->status.stateFlags & 0x40000) {
+    } else if (unit->status.stateFlags & 0x40000) {
         btlDispatchStateHandler(task, 0x15);
     }
 }
@@ -3651,23 +3650,23 @@ void btlResumeStandbyWhenActorTasksFinish(ActionStateLink *unit) {
 void btlFinalizeLinkedActionAndAdvanceHistory(void) {
 }
 
-void btlUnitTurnEndCommit(ActionStateLink *unit) {
+void btlUnitTurnEndCommit(ActionStateLink *task) {
     void (*hook)(struct ActionStateLink *) = ((BtlState *)btlGetRuntime())->commandTurnEndHook;
-    BtlUnit *owner = unit->unit;
+    BtlUnit *owner = task->unit;
     if (hook != 0) {
-        hook(unit);
+        hook(task);
     }
-    btlAdvanceHistoryCounter(unit);
-    btlResetIndexWork(&unit->indexWork);
+    btlAdvanceHistoryCounter(task);
+    btlResetIndexWork(&task->indexWork);
     owner->pendingAbilityId = -1;
-    unit->flags &= ~1;
-    unit->completedTurns += 1;
+    task->flags &= ~1;
+    task->completedTurns += 1;
     owner->status.flags &= ~0x4000;
-    fldUpdateSceneGroupTask(unit);
-    if (unit->unit->status.flags & 0x20) {
-        btlUnitTurnEndStateSelect((u8 *)unit);
+    fldUpdateSceneGroupTask(task);
+    if (task->unit->status.flags & 0x20) {
+        btlUnitTurnEndStateSelect(task);
     } else {
-        btlDispatchStateHandler(unit, 2);
+        btlDispatchStateHandler(task, 2);
     }
 }
 
