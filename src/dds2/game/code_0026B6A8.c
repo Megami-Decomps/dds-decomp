@@ -95,15 +95,15 @@ u32 mnuTerminalPanelLeaveNoOp(void) {
 }
 
 s32 dspUpdateFlagEvent(dds3ProcessID_t *request) {
-    s32 state = dds3GetProcessData(request);
-    s32 *panel = (s32 *)(state + 0x54);
-    s32 result = mnuDispatchPopupTransition((MenuPopupState *)((u8 *)state + 8), panel, 0, (void *)request);
+    MenuSlotFlagEventView *context = (MenuSlotFlagEventView *)dds3GetProcessData(request);
+    s32 *panel = (s32 *)((u8 *)context + 0x54);
+    s32 result = mnuDispatchPopupTransition((MenuPopupState *)((u8 *)context + 8), panel, 0, (void *)request);
     if (result != 0) {
         return result;
     }
     if (*panel == 0) {
         if (fclChkMessage() == 0) {
-            if (dspStartFlagEvent((MenuSlotFlagEventView *)(u32)state) == 0) {
+            if (dspStartFlagEvent(context) == 0) {
                 mnuSetPopupEntryFlagged(panel, mnuTerminalPopupEntries);
             }
         }
