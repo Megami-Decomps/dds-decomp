@@ -22,6 +22,7 @@
 #include "sdf_resource.h"
 #include "sdf_model.h"
 #include "btl.h"
+#include "btl_command_block_reason.h"
 #include "btl_actor_work.h"
 #include "sdf_texture_offset_list.h"
 #include "btl_state.h"
@@ -58,7 +59,7 @@ extern BtlRuntimeTask * btlCreateCommandSoundTask(BtlTask *, s32 variant);
 extern BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
 extern void btlDispatchCommandViaHookOrDefault(u8 *command, BattleIndexWork *argument);
 extern u32 btlGetActiveUnitId(void);
-extern s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId);
+extern BtlCommandBlockReason btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId);
 extern s32 btlGetStatusActionEffectId(BtlTask *task);
 extern void btlInitUnitFxDefaults(BtlUnit *fx);
 extern void btlInitializeBattleDebugMenu(void);
@@ -619,7 +620,7 @@ void btlUpdateCommandSelectionState(BtlTask *task) {
 
 void btlCommandResultEffectSelect(u8 *task) {
     s32 sel;
-    s32 reason;
+    BtlCommandBlockReason reason;
     s32 state;
 
     *(u32 *)(task + 8) &= ~4;
@@ -638,12 +639,12 @@ void btlCommandResultEffectSelect(u8 *task) {
         }
         reason = btlGetCommandBlockReason(task, sel);
         switch (reason) {
-        case 2:
+        case BTL_COMMAND_BLOCK_NO_RESTRICTED_UNIT:
             btlStartTask(btlCreateEffObjB(*(BtlUnit **)(task + 0x18), 0x82));
             sndSetStationedSeVolume(0xD);
             btlDispatchStateHandler(task, 6);
             return;
-        case 6:
+        case BTL_COMMAND_BLOCK_EVENT_61_NOT_ACTIVE:
             btlStartTask(btlCreateEffObjB(*(BtlUnit **)(task + 0x18), 0xB0));
             sndSetStationedSeVolume(0xD);
             btlDispatchStateHandler(task, 6);
@@ -653,7 +654,7 @@ void btlCommandResultEffectSelect(u8 *task) {
             sndSetStationedSeVolume(0xD);
             btlDispatchStateHandler(task, 6);
             return;
-        case 9:
+        case BTL_COMMAND_BLOCK_EMPTY_OR_ALL_FLAGGED_TARGETS:
             btlStartTask(btlCreateEffObjB(*(BtlUnit **)(task + 0x18), 0xD0));
             sndSetStationedSeVolume(0xD);
             btlDispatchStateHandler(task, 6);

@@ -42,6 +42,7 @@
 #include "evt_task.h"
 #include "btl_task_args.h"
 #include "btl_command.h"
+#include "btl_command_block_reason.h"
 #include "btl_model_record.h"
 #include "btl_model_cache_entry.h"
 #include "sdf.h"
@@ -78,8 +79,6 @@ extern SndPackedTrackLoadStatus sndFindPackedTrackLoadStatus(s32 packed);
 #define BTL_COUNTER_ELIGIBILITY_MET 3
 
 #define BTL_COUNTER_ELIGIBILITY_NOT_MET 0
-
-#define BTL_BLOCK_EMPTY_OR_ALL_FLAGGED 9
 
 #define MNU_LIST_INPUT_FLAG 2
 
@@ -836,7 +835,7 @@ u16 btlDetermineCommandCounterEligibility(datUnitWork_t **entryList, s32 entryCo
 /* Query the command's block reason, freeing the temporary target list.
  * DDS1 additionally has the mode/flag gate returning 6. The final empty/all-
  * flagged-target reason is 9 here, versus 10 in DDS2. Zero means no block. */
-s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId) {
+BtlCommandBlockReason btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId) {
     BtlUnit *ownerUnit;
     DatCommandRecord *commandRecord;
     BtlIndexList *targetList;
@@ -844,17 +843,17 @@ s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId) {
     s32 flaggedTargetCount;
     s32 targetIndex;
     if (((BtlState *)btlGetRuntime())->runtimeFlags & BTL_STATE_FLAG_BYPASS_COMMAND_BLOCKS) {
-        return 0;
+        return BTL_COMMAND_BLOCK_NONE;
     }
     if (commandId <= 0) {
-        return 0;
+        return BTL_COMMAND_BLOCK_NONE;
     }
     if (datCommandSelectors[commandId].kind == 2) {
         ownerUnit = actionTask->unit;
         if (ownerUnit->status.flags & 0x200) {
             if (ownerUnit->partyRecord.unitId == 4) {
                 if (evtBitCheck(0x61) == 0) {
-                    return 6;
+                    return BTL_COMMAND_BLOCK_EVENT_61_NOT_ACTIVE;
                 }
             }
         }
@@ -863,7 +862,7 @@ s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId) {
     if ((commandRecord->attribute.bits & 0x400000FF) == 0x40000002) {
         if ((~commandRecord->restriction & 0x7FFF) == 0x4000) {
             if (btlHasRestrictedUnit() == 0) {
-                return 2;
+                return BTL_COMMAND_BLOCK_NO_RESTRICTED_UNIT;
             }
         }
     }
@@ -882,10 +881,10 @@ s32 btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId) {
     btlFreeIndexList(targetList);
     if (targetCount != 0) {
         if (targetCount != flaggedTargetCount) {
-            return 0;
+            return BTL_COMMAND_BLOCK_NONE;
         }
     }
-    return BTL_BLOCK_EMPTY_OR_ALL_FLAGGED;
+    return BTL_COMMAND_BLOCK_EMPTY_OR_ALL_FLAGGED_TARGETS;
 }
 
 s32 btlGetCommandTargetEligibility(BtlIndexList *indexList, s32 commandId) {

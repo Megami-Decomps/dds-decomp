@@ -39,6 +39,7 @@
 #include "btl_sound_release_task.h"
 #include "btl_task_args.h"
 #include "btl_command.h"
+#include "btl_command_block_reason.h"
 #include "pcp_vu0.h"
 #include "sdf_vu_transform_api.h"
 #include "sdf_vu_matrix.h"
@@ -91,8 +92,6 @@ typedef char BtlStateModelCacheViewSizeCheck[
 #define BTL_COUNTER_ELIGIBILITY_MET 3
 
 #define BTL_COUNTER_ELIGIBILITY_NOT_MET 0
-
-#define BTL_BLOCK_EMPTY_OR_ALL_FLAGGED 0xA
 
 #define MNU_LIST_INPUT_FLAG 2
 
@@ -1058,23 +1057,23 @@ u16 btlDetermineCommandCounterEligibility(datUnitWork_t **entryList, s32 entryCo
 /* Query the command's block reason, freeing the temporary target list.
  * DDS2 omits DDS1's mode/flag gate. Its final empty/all-flagged-target reason
  * is 10, versus 9 in DDS1. Zero means no block. */
-s32 btlGetCommandBlockReason(ActionStateLink *actionTask, s32 commandId) {
+BtlCommandBlockReason btlGetCommandBlockReason(ActionStateLink *actionTask, s32 commandId) {
     DatCommandRecord *commandRecord;
     BtlIndexList *targetList;
     s32 targetCount;
     s32 flaggedTargetCount;
     s32 targetIndex;
     if (((BtlState *)btlGetRuntime())->runtimeFlags & BTL_STATE_FLAG_BYPASS_COMMAND_BLOCKS) {
-        return 0;
+        return BTL_COMMAND_BLOCK_NONE;
     }
     if (commandId <= 0) {
-        return 0;
+        return BTL_COMMAND_BLOCK_NONE;
     }
     commandRecord = (DatCommandRecord *)(commandId * BTL_COMMAND_RECORD_BYTES + (s32)datCommandRecords);
     if ((commandRecord->attribute.bits & 0x400000FF) == 0x40000002) {
         if ((~commandRecord->restriction & 0x7FFF) == 0x4000) {
             if (btlHasRestrictedUnit() == 0) {
-                return 2;
+                return BTL_COMMAND_BLOCK_NO_RESTRICTED_UNIT;
             }
         }
     }
@@ -1092,10 +1091,10 @@ s32 btlGetCommandBlockReason(ActionStateLink *actionTask, s32 commandId) {
     btlFreeIndexList(targetList);
     if (targetCount != 0) {
         if (targetCount != flaggedTargetCount) {
-            return 0;
+            return BTL_COMMAND_BLOCK_NONE;
         }
     }
-    return BTL_BLOCK_EMPTY_OR_ALL_FLAGGED;
+    return BTL_COMMAND_BLOCK_EMPTY_OR_ALL_FLAGGED_TARGETS;
 }
 
 extern s32 btlGetEntryFlagsUnlessDisabled(datUnitWork_t *);

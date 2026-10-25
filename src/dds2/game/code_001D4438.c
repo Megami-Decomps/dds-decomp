@@ -31,6 +31,7 @@
 #include "dat_state.h"
 #include "btl_scene_fade.h"
 #include "btl_command.h"
+#include "btl_command_block_reason.h"
 #include "btl_camera_pose_api.h"
 #include "btl_action.h"
 #include "btl_effect_table.h"
@@ -56,7 +57,7 @@
 /* Declared before first use (were implicit int). */
 extern s32 btlCanSpawnAnotherEnemy(BtlUnit *requester);
 extern u32 btlGetActiveUnitId(void);
-extern s32 btlGetCommandBlockReason(ActionStateLink *actionTask, s32 commandId);
+extern BtlCommandBlockReason btlGetCommandBlockReason(ActionStateLink *actionTask, s32 commandId);
 extern s32 btlGetLoggedIndexedCommandItem(s32 index);
 extern void btlInitializeBattleDebugMenu(void);
 extern s32 btlTestActorStatusPredicate(BtlUnit *unit);
@@ -1060,7 +1061,7 @@ void btlCommandResultEffectSelect(u8 *task) {
             selection = ((ActionStateLink *)task)->indexWork.skillId;
         }
         switch (btlGetCommandBlockReason(task, selection)) {
-        case 2:
+        case BTL_COMMAND_BLOCK_NO_RESTRICTED_UNIT:
             btlStartTask(btlCreateEffObjB(((ActionStateLink *)task)->unit, 0x82));
             sndSetStationedSeVolume(0xD);
             btlDispatchStateHandler(task, 6);
@@ -1075,7 +1076,7 @@ void btlCommandResultEffectSelect(u8 *task) {
             sndSetStationedSeVolume(0xD);
             btlDispatchStateHandler(task, 6);
             return;
-        case 10:
+        case BTL_COMMAND_BLOCK_EMPTY_OR_ALL_FLAGGED_TARGETS:
             btlStartTask(btlCreateEffObjB(((ActionStateLink *)task)->unit, 0xD0));
             sndSetStationedSeVolume(0xD);
             btlDispatchStateHandler(task, 6);
