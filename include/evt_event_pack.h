@@ -101,7 +101,8 @@ typedef char EvtPackLoadState_effect75_at_0x44[
 EvtPackLoadState *evtGetPackProcessData(u32 taskId);
 EvtPackLoadStatus evtGetEventPackStat(u32 taskId);
 
-/* Return a borrowed address into a complete pack; resource kinds stay opaque. */
-void *evtGetEventPackResourceAddress(u32 taskId, s32 key);
+/* Find an entry by secondaryResourceId in a complete pack and return its
+ * borrowed payload address; resource kinds stay opaque. */
+void *evtGetEventPackResourceAddress(u32 taskId, s32 secondaryResourceId);
 
 #endif /* EVT_EVENT_PACK_H */

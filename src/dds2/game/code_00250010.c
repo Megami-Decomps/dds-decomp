@@ -5750,7 +5750,7 @@ EvtPackLoadState *evtGetPackProcessData(u32 taskId) {
 }
 
 
-void *evtGetEventPackResourceAddress(u32 id, s32 key) {
+void *evtGetEventPackResourceAddress(u32 id, s32 secondaryResourceId) {
     dds3ProcessID_t *task;
     EvtPackLoadState *data;
     s32 i;
@@ -5764,7 +5764,7 @@ void *evtGetEventPackResourceAddress(u32 id, s32 key) {
         return 0;
     }
     for (i = 0; i < data->header->entryCount; i++) {
-        if (data->entries[i].secondaryResourceId == key) {
+        if (data->entries[i].secondaryResourceId == secondaryResourceId) {
             return data->data + data->entries[i].dataOffset;
         }
     }
