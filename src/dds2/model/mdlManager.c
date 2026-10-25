@@ -32,6 +32,7 @@
 #include "sdf_pac_packet.h"
 #include "sdf_packet_builders.h"
 #include "mdl.h"
+#include "mdl_group_resource_ownership_api.h"
 #include "mdl_load_request_api.h"
 #include "btl_grouped_entity_api.h"
 #include "sdf_model.h"
@@ -159,7 +160,8 @@ void mdlRegist(s32 groupIndex, s32 entityType, MdlRegistrationMode registrationM
         groupNode->slots[slotIndex].motionTable = NULL;
         groupNode->slots[slotIndex].resourceHandle = 0;
     }
-    groupNode->ownsResources = registrationMode & MDL_REGISTRATION_OWNS_GROUP_RESOURCES;
+    mdlSetGroupResourceOwnership(
+        groupNode, registrationMode & MDL_REGISTRATION_OWNS_GROUP_RESOURCES);
     groupNode->resourceHandle = 0;
     groupNode->partInfo = NULL;
     groupNode->partList = NULL;
@@ -172,7 +174,7 @@ void mdlRegist(s32 groupIndex, s32 entityType, MdlRegistrationMode registrationM
 void mdlUnRegistResrc(dds3ModelResrc_t *groupNode) {
     dds3ModelResrc_t *previousNode;
     dds3ModelResrc_t *nextNode;
-    u8 ownsResources;
+    MdlGroupResourceOwnership ownsResources;
     s32 slotIndex;
     if (groupNode == NULL) {
         return;
@@ -187,14 +189,14 @@ void mdlUnRegistResrc(dds3ModelResrc_t *groupNode) {
     if (nextNode != NULL) {
         nextNode->prev = previousNode;
     }
-    ownsResources = groupNode->ownsResources;
-    groupNode->ownsResources = 0;
+    ownsResources = mdlGetGroupResourceOwnership(groupNode);
+    mdlSetGroupResourceOwnership(groupNode, MDL_GROUP_RESOURCES_BORROWED);
     if (groupNode->modelContext != NULL) {
         do {
             mdlFree(groupNode->modelContext);
         } while (groupNode->modelContext != NULL);
     }
-    if (ownsResources != 0) {
+    if (ownsResources != MDL_GROUP_RESOURCES_BORROWED) {
         sdfTexListFree(groupNode->resourceList, SDF_TEX_LIST_RELEASE_REFERENCES);
         sdfMemFreeDelayedDirect(groupNode->requestAllocation);
         for (slotIndex = 0; slotIndex != BTL_GROUP_RESOURCE_SLOT_COUNT; slotIndex++) {
@@ -290,7 +292,7 @@ void mdlUnRegistResrcMotion(dds3ModelResrc_t *owner, s32 searchId) {
         for (ctx = owner->modelContext; ctx != NULL; ctx = ctx->next) {
             mdlFreeMotion(ctx, searchId);
         }
-        if (owner->ownsResources != 0) {
+        if (mdlGetGroupResourceOwnership(owner) != MDL_GROUP_RESOURCES_BORROWED) {
             if (owner->slots[searchId].resourceHandle != 0) {
                 sdfMemFreeDirect(owner->slots[searchId].resourceHandle);
             }
@@ -541,7 +543,7 @@ void mdlUnlinkResrc(dds3ModelHandle_t *ctx) {
             group->modelContext = nextContext;
         } else {
             group->modelContext = NULL;
-            if (group->ownsResources != 0) {
+            if (mdlGetGroupResourceOwnership(group) != MDL_GROUP_RESOURCES_BORROWED) {
                 mdlUnRegistResrc(group);
             }
         }
