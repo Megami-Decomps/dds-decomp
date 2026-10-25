@@ -243,7 +243,7 @@ extern sdfTexHandle_t *D_0043636C;
 
 extern struct sdfMemHandle_t *fldIndexedResourceHandle;
 
-extern u32 fldIndexedResourceData;
+extern EffNodeDescriptor *fldIndexedResourceData;
 
 extern EffNode *fldIndexedResourceEffect;
 
@@ -3120,8 +3120,8 @@ void fldLoadResourceByIndex(s32 index) {
     s32 ids[2];
 
     memcpy(ids, D_00436330, sizeof(ids));
-    fldIndexedResourceHandle = sdfDevLoadFileEx((const char *)(u32)ids[index], &fldIndexedResourceData, 0);
-    fldIndexedResourceEffect = dds3EffectLoad((EffNodeDescriptor *)fldIndexedResourceData);
+    fldIndexedResourceHandle = sdfDevLoadFileEx((const char *)(u32)ids[index], (u32 *)&fldIndexedResourceData, 0);
+    fldIndexedResourceEffect = dds3EffectLoad(fldIndexedResourceData);
 }
 
 void fldReleaseIndexedResourceEffect(void) {
@@ -3130,7 +3130,7 @@ void fldReleaseIndexedResourceEffect(void) {
         fldIndexedResourceEffect = 0;
         sdfMemFreeDelayedDirect(fldIndexedResourceHandle);
         fldIndexedResourceHandle = NULL;
-        fldIndexedResourceData = 0;
+        fldIndexedResourceData = NULL;
     }
 }
 

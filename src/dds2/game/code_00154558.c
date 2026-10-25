@@ -122,9 +122,6 @@ extern struct sdfTexHandle_t *D_0043636C;
 
 extern struct sdfMemHandle_t *fldIndexedResourceHandle;
 
-extern u32 fldIndexedResourceData;
-
-
 extern u32 D_0043623C;
 
 extern u32 fldSeLastBgm;
