@@ -195,7 +195,7 @@ void mdlUnRegistResrc(dds3ModelResrc_t *groupNode) {
         } while (groupNode->modelContext != NULL);
     }
     if (ownsResources != 0) {
-        sdfTexListFree(groupNode->resourceList, 1);
+        sdfTexListFree(groupNode->resourceList, SDF_TEX_LIST_RELEASE_REFERENCES);
         sdfMemFreeDelayedDirect(groupNode->requestAllocation);
         for (slotIndex = 0; slotIndex != BTL_GROUP_RESOURCE_SLOT_COUNT; slotIndex++) {
             if (groupNode->slots[slotIndex].resourceHandle != 0) {
@@ -709,7 +709,7 @@ void mdlFree(dds3ModelHandle_t *ctx) {
     while (inner->motionList != NULL) {
         sdfMotionCtrlrFree(inner->motionList);
     }
-    sdfTexListFree(inner->assetData, 1);
+    sdfTexListFree(inner->assetData, SDF_TEX_LIST_RELEASE_REFERENCES);
     for (resourceNode = ctx->resourceItems; resourceNode != NULL; resourceNode = nextResource) {
         nextResource = resourceNode->next;
         mdlFreeEffect(resourceNode);

@@ -1779,7 +1779,7 @@ void fldReleaseFieldResources(void) {
         fldReleaseTextureSlots();
         fldReleaseIndexedResourceEffect();
     }
-    sdfTexListFree(fldRoomSoundResources, 1);
+    sdfTexListFree(fldRoomSoundResources, SDF_TEX_LIST_RELEASE_REFERENCES);
     fldRoomSoundResources = 0;
     for (i = 0; i < 4; i++) {
         if (D_00444930[i] != NULL) {

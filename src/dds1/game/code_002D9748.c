@@ -391,13 +391,13 @@ DevRequest *sdfTexListNew(u32 capacity) {
 }
 
 /* Optionally release item references before destroying the buffered list; null lists are ignored. */
-void sdfTexListFree(DevRequest *list, s32 releaseItems) {
+void sdfTexListFree(DevRequest *list, SdfTexListItemReferencePolicy itemReferencePolicy) {
     s32 itemIndex;
     s32 itemCount;
     if (list == NULL) {
         return;
     }
-    if (releaseItems != 0) {
+    if (itemReferencePolicy != SDF_TEX_LIST_KEEP_REFERENCES) {
         itemCount = list->usedCount;
         for (itemIndex = 0; itemIndex < itemCount; itemIndex++) {
             sdfTexReleaseReferenceViaHandler(((sdfTexHandle_t **)list->buffer)[itemIndex]);

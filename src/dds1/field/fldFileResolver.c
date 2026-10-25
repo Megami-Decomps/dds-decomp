@@ -1937,7 +1937,7 @@ void fldReleaseFieldResources(void) {
         mnuReleaseResourceEntries();
         fldReleaseTextureSlots();
     }
-    sdfTexListFree(fldRoomSoundResources, 1);
+    sdfTexListFree(fldRoomSoundResources, SDF_TEX_LIST_RELEASE_REFERENCES);
     fldRoomSoundResources = 0;
     for (i = 0; i < 4; i++) {
         if (D_003C91E0[i] != NULL) {
