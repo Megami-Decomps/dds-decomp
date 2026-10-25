@@ -121,7 +121,7 @@ void fclInitPanelPos(u32 firstWord, u32 secondWord, u32 thirdWord, s16 firstHalf
 /* Destroy a nonzero, registered task. The declared return value is not set. */
 s32 fclScriptForcedEnd(dds3ProcessID_t *task) {
     if (task != 0) {
-        if (dds3GetProcessStat(task) != 0) {
+        if (dds3GetProcessStat(task) != KWLN_TASK_DETACHED) {
             dds3KillProcess(task, 0);
         }
     }

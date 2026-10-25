@@ -1195,7 +1195,7 @@ void itfReleaseFontTestTaskResources(dds3ProcessID_t *task) {
 
 /* Draw first, then report all bits set only for a task awaiting destruction. */
 s32 itfDrawBackgroundAndGetTaskReadyMask(dds3ProcessID_t *task) {
-    s32 taskState;
+    KwlnTaskState taskState;
     u32 readyMask;
 
     itfDrawBackgroundSprite();
