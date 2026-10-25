@@ -5,6 +5,7 @@
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "common.h"
+#include "btl_command_target_policy.h"
 #include "dds3_object_flags.h"
 #include "sdf_vu0.h"
 #include "btl_aim_horizontal_direction_clamped_api.h"
@@ -1871,8 +1872,6 @@ extern s32 fileTestSavedSlotFlags(u32);
 
 
 extern s32 btlGetCommandUseError(BtlUnit *, s32);
-
-extern u32 btlSelectCommandTargetPolicy(ActionStateLink *, BtlIndexList *, s32);
 
 extern BtlCommandTargetEligibilityResult btlGetCommandTargetEligibility(BtlIndexList *, s32);
 

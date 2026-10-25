@@ -3,6 +3,7 @@
 #include "btl_runtime_state.h"
 #include "eff_random.h"
 #include "common.h"
+#include "btl_command_target_policy.h"
 #include "sdf_delayed_resource_check_api.h"
 #include "sdf_vu0.h"
 #include "btl_actor_status_table_api.h"
@@ -160,8 +161,6 @@ extern s32 btlCountTasksByKind(u16);
 
 
 extern void btlBossDebugPrintf(const char *format, ...);
-
-extern u32 btlSelectCommandTargetPolicy(ActionStateLink *, BtlIndexList *, s32);
 
 extern s32 btlActorEntryIsExpired(BtlUnit *, s32);
 

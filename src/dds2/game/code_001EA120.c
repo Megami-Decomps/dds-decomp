@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_command_target_policy.h"
 #include "sdf_vu0.h"
 #include "btl_actor_status_table_api.h"
 #include "sdf_vu_rotation_axes.h"
@@ -88,10 +89,6 @@ extern void btlAdvanceCursorForUnmarkedUnit(BtlLinkedCommand *, BtlCamState *);
 extern DatEnemyRecord *datEnemyRecords;
 
 extern DatEnemyRecord *datEnemyRecords;
-
-extern u32 btlSelectCommandTargetPolicy(ActionStateLink *, BtlIndexList *, s32);
-
-
 
 extern void btlUnitGetBodyPosVU(BtlUnit *);
 

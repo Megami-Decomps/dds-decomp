@@ -5,6 +5,7 @@
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "common.h"
+#include "btl_command_target_policy.h"
 #include "btl_command_target_eligibility.h"
 #include "dds3_object_flags.h"
 #include "sdf_vu0.h"
@@ -79,8 +80,6 @@ enum { BTL_SELECTED_UNIT_EFFECT_SOUND_SLOT = 0x26 };
 extern s32 fileTestSavedSlotFlags(u32);
 
 extern s32 btlGetCommandFailureReason(BtlUnit *, s32);
-
-extern u32 btlSelectCommandTargetPolicy(BtlTask *, BtlIndexList *, s32);
 
 extern BtlUnit *btlSelectUnitAtExtremeX(BtlUnit *, BtlIndexList *);
 

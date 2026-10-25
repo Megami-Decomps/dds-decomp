@@ -1,6 +1,7 @@
 #include "btl_motion_transform.h"
 #include "btl_camera_pose_api.h"
 #include "common.h"
+#include "btl_command_target_policy.h"
 #include "sdf_vu0.h"
 #include "btl_actor_status_table_api.h"
 #include "eff_random_mod.h"
@@ -48,9 +49,6 @@ enum {
     BTL_UNIT_STATUS_FLAG_ENEMY = 0x400,
     BTL_UNIT_STATUS_SIDE_MASK = 0x600
 };
-
-extern u32 btlSelectCommandTargetPolicy(BtlTask *, BtlIndexList *, s32);
-
 
 extern s32 btlHasSingleLinkedResource(BtlLinkedCommand *);
 

@@ -9,6 +9,7 @@
 #include "btl_registered_panel_work.h"
 #include "btl_command_layout_work.h"
 #include "common.h"
+#include "btl_command_target_policy.h"
 #include "sdf_vu0.h"
 #include "btl_set_actor_effect_parameter_api.h"
 #include "dsp_message_window_api.h"
@@ -9353,8 +9354,6 @@ s32 btlUpdateTargetSelectionTask(dds3ProcessID_t *handle) {
 }
 
 extern s32 btlBuildEligibleTargetIndexList(BtlTask *source, BtlIndexList *list, s32, s32, s32);
-
-extern u32 btlSelectCommandTargetPolicy(BtlTask *source, BtlIndexList *list, s32);
 
 extern s32 btlStepTargetGridSelection(s32, SceneAiWork *);
 

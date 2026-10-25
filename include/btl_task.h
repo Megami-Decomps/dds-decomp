@@ -25,7 +25,7 @@ s32 btlFindListIndex(BtlIndexList *list, BtlUnit *entry);
 /* The battle AI task's 0xA4-byte user-data allocation in both games. */
 typedef struct SceneAiWork {
     s32 state;              /* 0x00 */
-    u32 result;             /* 0x04 */
+    u32 result;             /* 0x04: raw command target policy/category. */
     s32 entry;              /* 0x08 */
     BtlIndexList *eligibleTargets; /* 0x0C: candidates available to target selection. */
     BtlIndexList *selectedTargets; /* 0x10: targets committed by the selection policy. */

@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_command_target_policy.h"
 #include "sdf_vu0.h"
 #include "btl_actor_status_table_api.h"
 #include "sdf_vu_rotation_axes.h"
@@ -107,7 +108,6 @@ extern BtlUnit *btlGetSelectedOrCurrentActor(void);
 extern s32 btlRollAiBucket(void);
 
 extern u32 btlNextScaledRandom(u32);
-extern u32 btlSelectCommandTargetPolicy(ActionStateLink *, BtlIndexList *, s32);
 
 extern s32 func_002152D8(ActionStateLink *, s32);
 

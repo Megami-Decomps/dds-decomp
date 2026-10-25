@@ -3,6 +3,7 @@
 #include "fld_next_scene_request_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_command_target_policy.h"
 #include "btl_indexed_ui_resource_api.h"
 #include "btl_actor_status_table_api.h"
 #include "btl_actor_entry_code_api.h"
@@ -1976,7 +1977,7 @@ INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415158);
 
 INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415178);
 
-u32 btlSelectCommandTargetPolicy(ActionStateLink *task, BtlIndexList *destination, s32 unused) {
+BtlCommandTargetPolicy btlSelectCommandTargetPolicy(ActionStateLink *task, BtlIndexList *destination, s32 unused) {
     s32 category = 3;
     BtlState *battle = (BtlState *)btlGetRuntime();
     s32 mode = 0;

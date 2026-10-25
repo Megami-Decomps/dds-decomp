@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "btl_command_target_policy.h"
 #include "btl_actor_status_table_api.h"
 #include "btl_actor_entry_code_defaults.h"
 #include "btl_special_ability.h"
@@ -629,7 +630,7 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1788);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A17A8);
 
-u32 btlSelectCommandTargetPolicy(BtlTask *task, BtlIndexList *destination, s32 unused) {
+BtlCommandTargetPolicy btlSelectCommandTargetPolicy(BtlTask *task, BtlIndexList *destination, s32 unused) {
     s32 category = 3;
     BtlState *battle = (BtlState *)btlGetRuntime();
     s32 mode = 0;

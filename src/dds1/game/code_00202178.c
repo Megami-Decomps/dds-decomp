@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_command_target_policy.h"
 #include "sdf_vu0.h"
 #include "btl_actor_status_table_api.h"
 #include "sdf_vu_rotation_axes.h"
@@ -42,7 +43,6 @@ extern void btlUnitFaceTarget(BtlUnit *, BtlUnit *);
 
 extern BtlUnit *btlGetEffectActor(void);
 
-extern u32 btlSelectCommandTargetPolicy(BtlTask *, BtlIndexList *, s32);
 
 extern BtlAiScratchWork *btlActionScratchWork;
 

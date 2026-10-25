@@ -4,6 +4,7 @@
 #include "sdf_gs_header.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "btl_command_target_policy.h"
 #include "sdf_delayed_resource_check_api.h"
 #include "sdf_vu0.h"
 #include "btl_actor_status_table_api.h"
@@ -131,8 +132,6 @@ extern s32 btlCountTasksByKind(u32);
 extern s32 btlGetSlotRateKind(BtlUnit *, s32);
 
 extern void btlApplyScaledUnitEffectParameter(BtlUnit *, s32, s32, f32);
-
-extern u32 btlSelectCommandTargetPolicy(BtlTask *, BtlIndexList *, s32);
 
 extern void btlBossDebugPrintf(const char *format, ...);
 

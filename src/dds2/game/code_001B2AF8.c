@@ -13,6 +13,7 @@
 #include "dsp_entry_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_command_target_policy.h"
 #include "sdf_vu0.h"
 #include "btl_indexed_ui_resource_api.h"
 #include "btl_set_actor_effect_parameter_api.h"
@@ -10776,8 +10777,6 @@ s32 btlUpdateTargetSelectionTask(dds3ProcessID_t *handle) {
 
 
 extern s32 btlBuildUnitIndexList(ActionStateLink *source, BtlIndexList *list, s32, s32, s32);
-
-extern u32 btlSelectCommandTargetPolicy(ActionStateLink *source, BtlIndexList *list, s32);
 
 extern s32 btlFindCommandStatusMatchInTargetList(ActionStateLink *actionTask, BtlIndexList *targets);
 
