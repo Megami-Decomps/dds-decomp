@@ -96,7 +96,7 @@ typedef struct MenuSlotState {
     u8 padF0[0x5C];
     s32 stage;      /* 0x14C */
     s32 panelHoldFrames; /* 0x150 */
-    s32 bgmHandle;  /* 0x154: encoded bank/track handle */
+    u32 bgmHandle;  /* 0x154: encoded bank/track handle */
     DspScrollingStripState panels[2]; /* 0x158 */
     MenuCampEffect campEffect; /* 0x280 */
     MenuGradientFade gradientFade; /* 0x3E8 */
