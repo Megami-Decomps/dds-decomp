@@ -136,8 +136,8 @@ s32 evtCheckMoveEnd(evtUnitHandle_t *unit) {
     f32 value;
 
     switch (unit->motionSubmode) {
-    case 0:
-    case 1:
+    case EVT_UNIT_MOTION_SUBMODE_TARGET_XZ:
+    case EVT_UNIT_MOTION_SUBMODE_TARGET_XZ_WITH_VERTICAL_STEP:
     case 2:
         evtVu0SubVectorXZAxis(unit->targetVector, unit->effObj->inner->position);
         SDF_VU0_GETLENGTH(value);
@@ -145,7 +145,7 @@ s32 evtCheckMoveEnd(evtUnitHandle_t *unit) {
             return 1;
         }
         break;
-    case 3:
+    case EVT_UNIT_MOTION_SUBMODE_PATH_ENDPOINT:
         value = dds3PathBasicControlGetRatio(&unit->pathControl->counter);
         if (unit->flags & EVT_UNIT_FLAG_PATH_REVERSE) {
             if (value == 0.0f) {

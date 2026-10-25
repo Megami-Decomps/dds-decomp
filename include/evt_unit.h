@@ -26,6 +26,11 @@ typedef enum EvtUnitTransitionSourceKind {
     EVT_UNIT_TRANSITION_SOURCE_PATH_CURVE = 2
 } EvtUnitTransitionSourceKind;
 
+/* Observed evtUnitHandle_t.motionSubmode values; storage remains a halfword. */
+#define EVT_UNIT_MOTION_SUBMODE_TARGET_XZ 0
+#define EVT_UNIT_MOTION_SUBMODE_TARGET_XZ_WITH_VERTICAL_STEP 1
+#define EVT_UNIT_MOTION_SUBMODE_PATH_ENDPOINT 3
+
 enum EvtUnitReferenceAngleCacheFlags {
     EVT_UNIT_REFERENCE_ANGLE_CACHE_VALID = 1
 };

@@ -1299,11 +1299,11 @@ void evtSetUnitMove3(evtUnitHandle_t *work, s32 pathObjectKey, s32 frames, s32 v
     }
     switch (pathFollowMode) {
     case 0:
-        work->motionSubmode = 0;
+        work->motionSubmode = EVT_UNIT_MOTION_SUBMODE_TARGET_XZ;
         work->flags &= ~2;
         break;
     case 1:
-        work->motionSubmode = 3;
+        work->motionSubmode = EVT_UNIT_MOTION_SUBMODE_PATH_ENDPOINT;
         work->flags |= 2;
         break;
     }
@@ -1428,10 +1428,10 @@ s32 evtUpdateUnitMotion(dds3PoseSet_t *unused, dds3Basic_t *object) {
                 }
             }
             switch (unit->motionSubmode) {
-            case 0:
-            case 1:
+            case EVT_UNIT_MOTION_SUBMODE_TARGET_XZ:
+            case EVT_UNIT_MOTION_SUBMODE_TARGET_XZ_WITH_VERTICAL_STEP:
                 moving = evtUnitMoveType0(unit);
-                if (unit->motionSubmode == 1) {
+                if (unit->motionSubmode == EVT_UNIT_MOTION_SUBMODE_TARGET_XZ_WITH_VERTICAL_STEP) {
                     delta[0] = 0.0f;
                     delta[1] = unit->speedY;
                     delta[2] = 0.0f;
@@ -1441,7 +1441,7 @@ s32 evtUpdateUnitMotion(dds3PoseSet_t *unused, dds3Basic_t *object) {
                 break;
             case 2:
                 break;
-            case 3:
+            case EVT_UNIT_MOTION_SUBMODE_PATH_ENDPOINT:
                 moving = evtUnitMoveTypePathTrace(unit);
                 break;
             default:
@@ -2178,7 +2178,7 @@ u32 evtOpStartUnitTransitionTowardWorldObject(void) {
         s32 valueB6 = scrGetIntPara(4);
         evtSetUnitMove2(unit, motionSubmode, worldObjectKey, -1, frames, valueB6, 0, 0);
     }
-    if (scrGetIntPara(2) == 1) {
+    if (scrGetIntPara(2) == EVT_UNIT_MOTION_SUBMODE_TARGET_XZ_WITH_VERTICAL_STEP) {
         evtUnitPrepareVerticalMoveSteps(unit);
     }
     return 1;
