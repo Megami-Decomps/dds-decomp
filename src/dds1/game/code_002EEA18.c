@@ -66,19 +66,6 @@ void sdfPacTexListDecoderInit(PacState *state,
     state->onInput = sdfPacTexListDecoder0;
 }
 
-enum {
-    SDF_DECODE_READ_COMMAND = 1,
-    SDF_DECODE_READ_COUNT_LOW = 2,
-    SDF_DECODE_READ_COUNT_HIGH = 3,
-    SDF_DECODE_DISPATCH = 4,
-    SDF_DECODE_COPY_LITERAL = 5,
-    SDF_DECODE_FILL_BYTE = 6,
-    SDF_DECODE_COPY_SHORT_BACKREF = 7,
-    SDF_DECODE_READ_BACKREF_LOW = 8,
-    SDF_DECODE_READ_BACKREF_HIGH = 9,
-    SDF_DECODE_EXPAND_BYTES = 10
-};
-
 /* PAC command high bits choose the decoder operation; low five bits encode length.
  * Values at or above 0xE0 are reserved except for the 0xFF end marker. */
 enum {
@@ -107,7 +94,7 @@ s32 sdfDecomp(SdfPacDecoder *decoder, const u8 *input, s32 inputBytes) {
     u8 *shortBackrefSource;
     u32 sourceAddress;
 
-    if (decoder->state == 0) {
+    if (decoder->state == SDF_DECODE_COMPLETE) {
         return 1;
     }
 
@@ -130,7 +117,7 @@ s32 sdfDecomp(SdfPacDecoder *decoder, const u8 *input, s32 inputBytes) {
                             decoder->output = output;
                             decoder->input = input;
                             decoder->remainingInputBytes = inputBytes;
-                            decoder->state = 0;
+                            decoder->state = SDF_DECODE_COMPLETE;
                             return 1;
                         }
                     } else {
@@ -260,7 +247,7 @@ s32 sdfDecomp(SdfPacDecoder *decoder, const u8 *input, s32 inputBytes) {
 
 void sdfDecompInit(SdfPacDecoder *decoder, u8 *output) {
     decoder->output = output;
-    decoder->state = 1;
+    decoder->state = SDF_DECODE_READ_COMMAND;
 }
 
 /* vu0 routine: clip homogeneous line pairs and build a coloured GS packet. */

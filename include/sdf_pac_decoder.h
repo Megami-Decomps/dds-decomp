@@ -3,11 +3,26 @@
 
 #include "common.h"
 
+/* The stream phase is stored as a byte; zero marks the end marker. */
+enum SdfPacDecoderState {
+    SDF_DECODE_COMPLETE = 0,
+    SDF_DECODE_READ_COMMAND = 1,
+    SDF_DECODE_READ_COUNT_LOW = 2,
+    SDF_DECODE_READ_COUNT_HIGH = 3,
+    SDF_DECODE_DISPATCH = 4,
+    SDF_DECODE_COPY_LITERAL = 5,
+    SDF_DECODE_FILL_BYTE = 6,
+    SDF_DECODE_COPY_SHORT_BACKREF = 7,
+    SDF_DECODE_READ_BACKREF_LOW = 8,
+    SDF_DECODE_READ_BACKREF_HIGH = 9,
+    SDF_DECODE_EXPAND_BYTES = 10,
+};
+
 /* Incremental decoder access view shared by both providers. The backing
  * decoder block is allocated as 0x20 bytes; only this 0x14-byte prefix is
  * described here, and its trailing allocation bytes remain unknown. */
 typedef struct SdfPacDecoder {
-    u8 state;             /* 0x00 */
+    u8 state;             /* 0x00: SdfPacDecoderState */
     u8 command;           /* 0x01 */
     u16 pendingBytes;     /* 0x02 */
     u8 *output;           /* 0x04 */
