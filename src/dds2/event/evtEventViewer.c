@@ -587,8 +587,10 @@ dds3Basic_t *evtEventViewerCreateOriginEffect(struct SoundMixer *resource, u32 e
 }
 
 void DelBED(EvtRuntimeChild *node) {
-    if (node->payload != NULL) {
-        dds3DeleteSceneBasicData(node->payload);
+    dds3Basic_t *effectObject = node->payload;
+
+    if (effectObject != NULL) {
+        dds3DeleteSceneBasicData(effectObject);
     }
     node->payload = NULL;
 }

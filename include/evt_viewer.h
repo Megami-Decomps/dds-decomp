@@ -43,7 +43,7 @@ typedef struct EvtRuntimeChild {
         };
     };
     u8 pad28[4];
-    void *payload; /* Track-kind-specific allocation or borrowed data. */
+    void *payload; /* Type 0x12 owns a dds3Basic_t; other kinds hold buffers or borrowed data. */
     struct EvtRuntimeChild *next;
     struct EvtRuntimeChild *prev;
 } EvtRuntimeChild;
