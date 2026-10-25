@@ -195,7 +195,7 @@ extern u8 btlScriptGroupSlotByte1View[];
 extern u16 btlScriptGroupSlotAuxValueView[];
 
 
-extern void ptyAdjustItemQuantity(u32, u32);
+extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 
 extern s32 btlDrawCapturedScreenTileOverlay(u32, u32);
 
