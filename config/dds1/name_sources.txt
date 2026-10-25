@@ -3326,6 +3326,7 @@
 0x001A1BA0	btlSyncPlayerWork	inferred	string "btl:player work set[%p]": copies entry slice (flags, hp/mp clamped to max, status) from actor into its work slot
 0x001A1CB8	btlFindPartyEntryIndexForActor	inferred	Maps an actor index to its corresponding party entry index. [names_reviewed14.tsv]
 0x001A1CD0	btlOnPartyRosterChange	inferred	confidence=high; Retail no-op invoked after party actor insertion/removal/roster swap before party in/out/change debug text; DDS2 0x001AABD8 twin. Identifiers/comments only. [Namer1 batch47]
+0x001A1CD8	btlFindActiveActorByPartyIndex	inferred	Returns the active party actor whose partyIndex matches the requested party slot. DDS2 twin 0x001AABE0.
 0x001A1D48	btlInsertPartyActorByPriority	inferred	confidence=high; matched-C; Inserts complete party record before active actors with greater lookupId/priority, shifts records/indices and copies unit stats; native party-in debug message corroborates. DDS2 twin0x001AAC50. Namer1 batch21.
 0x001A2258	btlRemovePartyActorAndShiftEntries	inferred	Inferred from the current C implementation in game/code_001A1960.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x001A2608	btlSynchronizePartyActorRecords	inferred	confidence=high; matched-C; Swaps full party records at actor/target slots and refreshes stats/active flags without changing actor index; aligns existing DDS2 name at 0x001AB510. Namer1 batch 19.

@@ -1501,7 +1501,7 @@ s32 btlFindPartyEntryIndexForActor(BtlUnit *object) {
 void btlOnPartyRosterChange(void) {
 }
 
-BtlUnit *btlFindActiveActorByKind(s32 kind) {
+BtlUnit *btlFindActiveActorByPartyIndex(s32 partyIndex) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *unit;
     u32 flags;
@@ -1509,7 +1509,7 @@ BtlUnit *btlFindActiveActorByKind(s32 kind) {
         flags = unit->status.flags;
         if (flags & 1) {
             if (flags & 0x200) {
-                if (kind == unit->partyIndex) {
+                if (partyIndex == unit->partyIndex) {
                     return unit;
                 }
             }
@@ -1531,7 +1531,7 @@ void btlInsertPartyActorByPriority(BtlUnit *unit, u8 sourceIndex, u8 priority) {
             if ((u16)(DDS3_GBWK->party[insertion].flags & 1) == 0) {
                 break;
             }
-            if (priority < btlFindActiveActorByKind(insertion)->lookupId) {
+            if (priority < btlFindActiveActorByPartyIndex(insertion)->lookupId) {
                 break;
             }
             insertion++;
@@ -1545,14 +1545,14 @@ void btlInsertPartyActorByPriority(BtlUnit *unit, u8 sourceIndex, u8 priority) {
     for (i = sourceIndex; i < 4; i++) {
         memcpy(&DDS3_GBWK->party[i], &DDS3_GBWK->party[i + 1], sizeof(saved));
         if (DDS3_GBWK->party[i + 1].flags & 2) {
-            btlFindActiveActorByKind(i + 1)->partyIndex = i;
+            btlFindActiveActorByPartyIndex(i + 1)->partyIndex = i;
         }
     }
 
     for (i = 4; i > insertion; i--) {
         memcpy(&DDS3_GBWK->party[i], &DDS3_GBWK->party[i - 1], sizeof(saved));
         if (DDS3_GBWK->party[i - 1].flags & 2) {
-            btlFindActiveActorByKind(i - 1)->partyIndex = i;
+            btlFindActiveActorByPartyIndex(i - 1)->partyIndex = i;
         }
     }
 
@@ -1578,7 +1578,7 @@ void btlMoveActorOutOfActiveParty(BtlUnit *unit) {
         do {
             memcpy(&DDS3_GBWK->party[index], &DDS3_GBWK->party[index + 1], sizeof(saved));
             if (DDS3_GBWK->party[index + 1].flags & 2) {
-                btlFindActiveActorByKind(index + 1)->partyIndex = index;
+                btlFindActiveActorByPartyIndex(index + 1)->partyIndex = index;
             }
             index++;
             if (index >= 4) {

@@ -3241,7 +3241,7 @@
 0x001AAA80	btlGetIndexedPartyEntryRecord	inferred	Returns a battle party entry record selected by index. [names_reviewed14.tsv]
 0x001AABC0	btlFindPartyEntryIndexForActor	inferred	Maps an actor index to its corresponding party entry index. [names_reviewed14.tsv]
 0x001AABD8	btlOnPartyRosterChange	inferred	confidence=high; Retail no-op invoked after party actor insertion/removal/roster swap before party in/out/change debug text; DDS1 0x001A1CD0 twin. Identifiers/comments only. [Namer1 batch47]
-0x001AABE0	btlFindActiveActorByKind	inferred	Scans linked actor records and returns the active flagged actor matching the requested kind byte.
+0x001AABE0	btlFindActiveActorByPartyIndex	inferred	Returns the active party actor whose partyIndex matches the requested party slot. DDS1 twin 0x001A1CD8.
 0x001AAC50	btlInsertPartyActorByPriority	inferred	confidence=high; matched-C; Inserts complete party record before active actors with greater lookupId/priority, shifts records/indices and copies unit stats; native party-in debug message corroborates. DDS1 twin0x001A1D48. Namer1 batch21.
 0x001AB160	btlMoveActorOutOfActiveParty	inferred	Inferred from the current C implementation in game/code_001A5BB8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x001AB510	btlSynchronizePartyActorRecords	inferred	Inferred from the current C implementation in game/code_001A5BB8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).

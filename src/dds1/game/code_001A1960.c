@@ -187,14 +187,14 @@ s32 btlFindPartyEntryIndexForActor(BtlUnit *unit) {
 void btlOnPartyRosterChange(void) {
 }
 
-BtlUnit *btlFindActiveActorByKind(s32 index) {
+BtlUnit *btlFindActiveActorByPartyIndex(s32 partyIndex) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *node = battle->units;
     for (; node != 0; node = node->next) {
         u32 flags = node->status.flags;
         if ((flags & 1) != 0) {
             if ((flags & 0x200) != 0) {
-                if (index == node->partyIndex) {
+                if (partyIndex == node->partyIndex) {
                     return node;
                 }
             }
@@ -216,7 +216,7 @@ void btlInsertPartyActorByPriority(BtlUnit *unit, u8 sourceIndex, u8 priority) {
             if ((u16)(DDS3_GBWK->party[insertion].flags & 1) == 0) {
                 break;
             }
-            if (priority < btlFindActiveActorByKind(insertion)->lookupId) {
+            if (priority < btlFindActiveActorByPartyIndex(insertion)->lookupId) {
                 break;
             }
             insertion++;
@@ -229,13 +229,13 @@ void btlInsertPartyActorByPriority(BtlUnit *unit, u8 sourceIndex, u8 priority) {
     for (i = sourceIndex; i < 4; i++) {
         memcpy(&DDS3_GBWK->party[i], &DDS3_GBWK->party[i + 1], sizeof(saved));
         if (DDS3_GBWK->party[i + 1].flags & 2) {
-            btlFindActiveActorByKind(i + 1)->partyIndex = i;
+            btlFindActiveActorByPartyIndex(i + 1)->partyIndex = i;
         }
     }
     for (i = 4; i > insertion; i--) {
         memcpy(&DDS3_GBWK->party[i], &DDS3_GBWK->party[i - 1], sizeof(saved));
         if (DDS3_GBWK->party[i - 1].flags & 2) {
-            btlFindActiveActorByKind(i - 1)->partyIndex = i;
+            btlFindActiveActorByPartyIndex(i - 1)->partyIndex = i;
         }
     }
     memcpy(&DDS3_GBWK->party[i], &saved, sizeof(saved));
@@ -261,7 +261,7 @@ void btlRemovePartyActorAndShiftEntries(BtlUnit *unit) {
         do {
             memcpy(&DDS3_GBWK->party[index], &DDS3_GBWK->party[index + 1], sizeof(saved));
             if (DDS3_GBWK->party[index + 1].flags & 2) {
-                btlFindActiveActorByKind(index + 1)->partyIndex = index;
+                btlFindActiveActorByPartyIndex(index + 1)->partyIndex = index;
             }
             index++;
             if (index >= 4) {
