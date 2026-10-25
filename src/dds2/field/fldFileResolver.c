@@ -693,7 +693,7 @@ extern void btlClearRuntimeState(void);
 
 extern void fldUpdateCameraModelMotion(s32 currentMotionIndex, s32 requestedMotionIndex, f32 blendFrames);
 
-extern s32 fldGetLocationCoordinateFlags(s32 area, s32 locationIndex);
+extern s16 fldGetLocationCoordinateFlags(s32 area, s32 locationIndex);
 
 extern FldCamRow fldCameraFollowRows[];
 

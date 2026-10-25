@@ -1353,7 +1353,7 @@ u8 fldTryStartPendingBattleReturnAreaLoad(void) {
     return 0;
 }
 
-extern s32 fldGetLocationCoordinateFlags(s32 area, s32 locationIndex);
+extern s16 fldGetLocationCoordinateFlags(s32 area, s32 locationIndex);
 
 extern void sdfFileCmdThreadSetLoPrio(void);
 
@@ -5170,7 +5170,7 @@ s32 fldUpdateCameraObjectPose(void) {
     return 0;
 }
 
-extern s32 fldGetLocationCoordinateFlags(s32 area, s32 locationIndex);
+extern s16 fldGetLocationCoordinateFlags(s32 area, s32 locationIndex);
 
 extern void fldUpdateCameraModelMotion(s32 currentMotionIndex, s32 requestedMotionIndex, f32 blendFrames);
 

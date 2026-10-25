@@ -2080,7 +2080,7 @@ s16 *fldFindLocationCoordinateRecord(s32 area, s32 locationIndex) {
 }
 
 /* Read the matching location record's signed flags; zero on miss. */
-s32 fldGetLocationCoordinateFlags(s32 area, s32 locationIndex) {
+s16 fldGetLocationCoordinateFlags(s32 area, s32 locationIndex) {
     u8 *records = (u8 *)D_0032C9B0;
     u8 *yColumn = records + 2;
     u8 *valueColumn = records + 6;

@@ -393,7 +393,7 @@ extern char D_00435ED8[];
 
 /* Search location records 1..639; a miss returns the reserved first record, * not NULL, so callers can read the fallback record's fields. */ s16 *fldFindLocationCoordinateRecord(s32 area, s32 locationIndex);
 
-/* Read the matching location record's signed flags; zero on miss. */ s32 fldGetLocationCoordinateFlags(s32 area, s32 locationIndex);
+/* Read the matching location record's signed flags; zero on miss. */ s16 fldGetLocationCoordinateFlags(s32 area, s32 locationIndex);
 
 void InitOoyTest(void);
 
