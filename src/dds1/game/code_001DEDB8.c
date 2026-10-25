@@ -86,22 +86,21 @@ void btlUpdateSingleActionCameraNoOp(void) {
 }
 
 /* Run the timed camera setup hook; return its result, or zero when unset. */
-s32 btlRunTimedCameraSetupHook(s32 actor) {
+s32 btlRunTimedCameraSetupHook(BtlLinkedCommand *action) {
     s32 context = (s32)(u32)btlGetRuntime();
-    s32 (*callback)(s32) = *(void **)(context + 0x618);
+    s32 (*callback)(BtlLinkedCommand *) = *(void **)(context + 0x618);
     if (callback != 0) {
-        return callback(actor);
+        return callback(action);
     }
     return 0;
 }
 
 /* Run the timed camera finish hook; return its result, or zero when unset. */
-s32 btlRunTimedCameraFinishHook(s32 actor) {
+s32 btlRunTimedCameraFinishHook(BtlLinkedCommand *action) {
     s32 context = (s32)(u32)btlGetRuntime();
-    s32 (*callback)(s32) = *(void **)(context + 0x620);
+    s32 (*callback)(BtlLinkedCommand *) = *(void **)(context + 0x620);
     if (callback != 0) {
-        return callback(actor);
+        return callback(action);
     }
     return 0;
 }
-

@@ -379,8 +379,8 @@ extern void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *, BtlCamState *, Bt
 
 extern void btlSetupCameraAimDualUnit(BtlLinkedCommand *, BtlCamState *, s32, f32, f32);
 
-extern s32 btlRunTimedCameraSetupHook(s32 actor);
-extern s32 btlRunTimedCameraFinishHook(s32 actor);
+extern s32 btlRunTimedCameraSetupHook(BtlLinkedCommand *action);
+extern s32 btlRunTimedCameraFinishHook(BtlLinkedCommand *action);
 
 extern f32 fabsf(f32);
 extern f32 btlUnitGetBottomY(BtlUnit *);
@@ -5548,7 +5548,7 @@ void btlApplyTimedCameraInstruction(BtlLinkedCommand *action, BtlCamState *pose,
             if (instruction->startFrame <= (f32)CURSOR->frame &&
                 (f32)CURSOR->frame < instruction->startFrame + instruction->duration) {
                 /* Native integer-address hook transports this command address unchanged. */
-                if (btlRunTimedCameraSetupHook((s32)action) != 0) {
+                if (btlRunTimedCameraSetupHook(action) != 0) {
                     CURSOR->busy = 1;
                 }
             }
@@ -5563,7 +5563,7 @@ void btlApplyTimedCameraInstruction(BtlLinkedCommand *action, BtlCamState *pose,
             if (instruction->startFrame <= (f32)CURSOR->frame &&
                 (f32)CURSOR->frame < instruction->startFrame + instruction->duration) {
                 /* Native integer-address hook transports this command address unchanged. */
-                if (btlRunTimedCameraFinishHook((s32)action) != 0) {
+                if (btlRunTimedCameraFinishHook(action) != 0) {
                     CURSOR->busy = 1;
                 }
             }
