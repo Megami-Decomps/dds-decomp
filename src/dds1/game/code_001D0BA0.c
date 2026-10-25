@@ -4567,7 +4567,7 @@ u32 btlStiffenDamageShakeStep(BtlDamageShakeArgs *task) {
         if (node < 0x1D) {
             BtlActorStatusRecord *resource = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(task->unit->resourceKind,
                                                  task->unit->species);
-            if (resource->motions[node].kind == 2) {
+            if (resource->motions[node].endBehavior == BTL_MOTION_END_OUT) {
                 btlRefreshUnitEffectMotionAndEntry(task->unit);
                 btlBossDebugPrintf(D_003A3CA0);
             }

@@ -3,11 +3,18 @@
 
 #include "common.h"
 
+typedef s16 BtlMotionEndBehavior;
+
+#define BTL_MOTION_END_NORMAL 0
+#define BTL_MOTION_END_PAUSE 1
+#define BTL_MOTION_END_OUT 2
+#define BTL_MOTION_END_STOP 3
+
 /* One motion row in the side-indexed model parameter bank. */
 typedef struct BtlActorMotionSlot {
     s16 moveKind;            /* 0x00: UV_MV mode */
     u16 frameCount;
-    s16 kind;                /* 0x04: UV_END mode */
+    BtlMotionEndBehavior endBehavior; /* 0x04: UV_END mode */
     s16 alphaStartFrame;
     f32 alphaFrameScale;
     f32 muzzleGuideScale; /* 0x0C: scales the muzzle-position debug guide. */
@@ -33,6 +40,8 @@ typedef struct BtlActorStatusRecord {
 } BtlActorStatusRecord;
 
 typedef char BtlActorMotionSlotSizeCheck[sizeof(BtlActorMotionSlot) == 0x14 ? 1 : -1];
+typedef char BtlActorMotionSlot_endBehavior_offset_must_be_0x04[
+    ((u32)&((BtlActorMotionSlot *)0)->endBehavior == 0x04) ? 1 : -1];
 typedef char BtlActorMotionSlot_muzzleGuideScale_offset_must_be_0x0C[
     ((u32)&((BtlActorMotionSlot *)0)->muzzleGuideScale == 0x0C) ? 1 : -1];
 typedef char BtlActorStatusRecord_positionGuideScale_offset_check[

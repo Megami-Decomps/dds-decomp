@@ -2669,7 +2669,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
             btlApplyUnitEffectScale(unit);
             if (motion < mdlGetNumOfCut(unit->ext->owner, 0)) {
                 btlApplyScaledUnitEffectParameter(unit, motion, btlGetSlotRateKind(unit, motion), 1.0f);
-                if (btlDebugEditorMotionSlot.kind == 2) {
+                if (btlDebugEditorMotionSlot.endBehavior == BTL_MOTION_END_OUT) {
                     btlSeekUnitModelFrameZero(unit);
                 }
             }
@@ -2779,11 +2779,11 @@ void btlWriteActorModelTableFile(void) {
         case 2: cursor += sprintf(cursor, D_003BBAE0, "UV_MV_DASH"); break;
         }
         cursor += sprintf(cursor, D_003BBAE8, motion->frameCount);
-        switch (motion->kind) {
-        case 0: cursor += sprintf(cursor, "{%s,%2d},", "UV_END_NORM ", motion->alphaStartFrame); break;
-        case 1: cursor += sprintf(cursor, "{%s,%2d},", "UV_END_PAUSE", motion->alphaStartFrame); break;
-        case 2: cursor += sprintf(cursor, "{%s,%2d},", "UV_END_OUT  ", motion->alphaStartFrame); break;
-        case 3: cursor += sprintf(cursor, "{%s,%2d},", "UV_END_STOP ", motion->alphaStartFrame); break;
+        switch (motion->endBehavior) {
+        case BTL_MOTION_END_NORMAL: cursor += sprintf(cursor, "{%s,%2d},", "UV_END_NORM ", motion->alphaStartFrame); break;
+        case BTL_MOTION_END_PAUSE: cursor += sprintf(cursor, "{%s,%2d},", "UV_END_PAUSE", motion->alphaStartFrame); break;
+        case BTL_MOTION_END_OUT: cursor += sprintf(cursor, "{%s,%2d},", "UV_END_OUT  ", motion->alphaStartFrame); break;
+        case BTL_MOTION_END_STOP: cursor += sprintf(cursor, "{%s,%2d},", "UV_END_STOP ", motion->alphaStartFrame); break;
         }
         rowCursor += sizeof(BtlActorMotionSlot);
         cursor += sprintf(cursor, D_003BBAF0, (double)motion->alphaFrameScale);
