@@ -3361,13 +3361,15 @@ s32 fldEncProc(dds3ProcessID_t *task) {
     return 0;
 }
 
+#define FLD_ENCOUNTER_MODE_BYPASS_BATTLE_RUNTIME 3
+
 extern void p2sdPlaySE(s32 sequence, s32 volume, s32 pan);
 
 void fldRequestEncounterWithFade(s32 encounterMode, s32 recordIndex) {
     if ((recordIndex < 0x400) && ((datBattleSceneRecords[recordIndex].flags & 0x8000) != 0))
     {
         kwlnFadeBackgroundStartOut(0);
-        fldSetEncounterMode(3);
+        fldSetEncounterMode(FLD_ENCOUNTER_MODE_BYPASS_BATTLE_RUNTIME);
         return;
     }
     p2sdPlaySE(0xf, 0x7f, 0x3f);
