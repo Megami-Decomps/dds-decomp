@@ -6788,7 +6788,7 @@ void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation
                     if (record->normal[1] <= 0.0f) continue;
                 }
                 if (absY <= absX && absZ <= absX) {
-                    record->mode = 0;
+                    record->mode = FLD_COLLISION_AXIS_X;
                     runningMinimum = vertices[0][1];
                     minimum[0] = runningMinimum;
                     minimum[1] = vertices[0][2];
@@ -6946,7 +6946,7 @@ void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation
                     }
                 }
                 else if (absX <= absY && absZ <= absY) {
-                    record->mode = 1;
+                    record->mode = FLD_COLLISION_AXIS_Y;
                     runningMinimum = vertices[0][0];
                     minimum[0] = runningMinimum;
                     minimum[1] = vertices[0][2];
@@ -7104,7 +7104,7 @@ void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation
                     }
                 }
                 else {
-                    record->mode = 2;
+                    record->mode = FLD_COLLISION_AXIS_Z;
                     runningMinimum = vertices[0][0];
                     minimum[0] = runningMinimum;
                     minimum[1] = vertices[0][1];
@@ -7276,7 +7276,7 @@ void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation
     D_003BADF8++;
 }
 
-s32 HitPositionInside2(f32 *out, s32 mode, s32 count, f32 margin, const f32 *pos,
+s32 HitPositionInside2(f32 *out, FldCollisionAxis axis, s32 count, f32 margin, const f32 *pos,
                         const FldValueRecord *zone) {
     f32 probe[3];
     f32 planar[2];
@@ -7286,13 +7286,13 @@ s32 HitPositionInside2(f32 *out, s32 mode, s32 count, f32 margin, const f32 *pos
     s32 inside = 0;
     s32 planeIndex;
 
-    if (mode == 0) {
+    if (axis == FLD_COLLISION_AXIS_X) {
         probe[0] = 0.0f;
         probe[1] = pos[1];
         probe[2] = pos[2];
         planar[0] = pos[1];
         planar[1] = pos[2];
-    } else if (mode == 1) {
+    } else if (axis == FLD_COLLISION_AXIS_Y) {
         probe[0] = pos[0];
         probe[1] = 0.0f;
         probe[2] = pos[2];
@@ -7318,7 +7318,7 @@ s32 HitPositionInside2(f32 *out, s32 mode, s32 count, f32 margin, const f32 *pos
             return -1;
         }
         if (dist < 0.0f) {
-            if (mode == 1) {
+            if (axis == FLD_COLLISION_AXIS_Y) {
                 best = dist + 45.0f;
             } else {
                 best = slack;
@@ -7510,7 +7510,7 @@ void fldHitChkUnitDamage(f32 *position) {
     f32 planeDistance;
     f32 classifiedMargin;
     FldAreaWork *areaState;
-    s32 selectedAxis;
+    FldCollisionAxis selectedAxis;
     s32 pass;
     s32 recordIndex;
 
@@ -7537,7 +7537,7 @@ void fldHitChkUnitDamage(f32 *position) {
 
     axisDistance[0] = ffabsf(point[0] - reference[0]);
     axisDistance[2] = ffabsf(point[2] - reference[2]);
-    selectedAxis = axisDistance[2] < axisDistance[0] ? 0 : 2;
+    selectedAxis = axisDistance[2] < axisDistance[0] ? FLD_COLLISION_AXIS_X : FLD_COLLISION_AXIS_Z;
 
     fldHitChkUnitElvOnly(position);
 
@@ -7549,7 +7549,7 @@ void fldHitChkUnitDamage(f32 *position) {
             do {
                 dds3Basic_t *node;
 
-                margin = fldMatterTable[recordIndex].mode == 1 ? 45.0f : 60.0f;
+                margin = fldMatterTable[recordIndex].mode == FLD_COLLISION_AXIS_Y ? 45.0f : 60.0f;
                 if (pass == 0) {
                     if (fldMatterTable[recordIndex].mode == selectedAxis) {
                         continue;
@@ -7624,7 +7624,7 @@ void func_00137EA0(void) {
 /* Project away the selected axis and reject points outside expanded bounds.
  * Return the last negative plane's margin-adjusted distance, not a minimum;
  * no negative plane leaves margin unchanged. Reject results below 0.001. */
-f32 HitPositionInside3(s32 axisMode, s32 planeCount, f32 margin, const f32 *position,
+f32 HitPositionInside3(FldCollisionAxis axis, s32 planeCount, f32 margin, const f32 *position,
                        const FldValueRecord *zone) {
     f32 projectedPosition[3];
     f32 planarPosition[2];
@@ -7633,13 +7633,13 @@ f32 HitPositionInside3(s32 axisMode, s32 planeCount, f32 margin, const f32 *posi
     f32 marginDistance;
     s32 planeIndex;
 
-    if (axisMode == 0) {
+    if (axis == FLD_COLLISION_AXIS_X) {
         projectedPosition[0] = 0.0f;
         projectedPosition[1] = position[1];
         projectedPosition[2] = position[2];
         planarPosition[0] = position[1];
         planarPosition[1] = position[2];
-    } else if (axisMode == 1) {
+    } else if (axis == FLD_COLLISION_AXIS_Y) {
         projectedPosition[0] = position[0];
         projectedPosition[1] = 0.0f;
         projectedPosition[2] = position[2];
@@ -7700,7 +7700,7 @@ s32 fldHitChkCamera(const f32 start[3], const f32 end[3], f32 hitPoint[3]) {
     target[1] = end[1];
     target[2] = end[2];
     for (index = 0; index < fldValueRecordCount; index++) {
-        if (fldMatterTable[index].mode == 1) {
+        if (fldMatterTable[index].mode == FLD_COLLISION_AXIS_Y) {
             if (!(fldMatterTable[index].face->attributes & 0x100)) {
                 continue;
             }
@@ -7814,7 +7814,7 @@ s32 fldHitChkEnemy(const f32 start[3], const f32 end[3], f32 hitPoint[3]) {
     target[1] = end[1];
     target[2] = end[2];
     for (index = 0; index < fldValueRecordCount; index++) {
-        if (fldMatterTable[index].mode == 1) {
+        if (fldMatterTable[index].mode == FLD_COLLISION_AXIS_Y) {
             if (!(fldMatterTable[index].face->attributes & 0x100)) {
                 continue;
             }

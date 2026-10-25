@@ -5,6 +5,14 @@
 
 struct FldStopEntry;
 
+typedef s32 FldCollisionAxis;
+
+enum FldCollisionAxis {
+    FLD_COLLISION_AXIS_X = 0,
+    FLD_COLLISION_AXIS_Y = 1,
+    FLD_COLLISION_AXIS_Z = 2
+};
+
 /* Six-word runtime view used by both file-loaded and generated geometry. */
 typedef struct FldCollisionDescriptor {
     s32 vertexCount;
