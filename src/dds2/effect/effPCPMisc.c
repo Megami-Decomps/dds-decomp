@@ -1513,7 +1513,7 @@ void effPCPMZiodin02SetColor(EffPCPThunderGroup *work, u32 value) {
 /* All four thunder fade variants allocate this 0x20-byte record.
    Their constructors, color setters, frame updates and release share it. */
 typedef struct EffPCPFadeWork {
-    u8 pad00[0x10];
+    f32 position[4];
     f32 unk10; /* Settable input; not read by the observed fade updates. */
     u32 color;
     u32 frame;
@@ -1549,8 +1549,6 @@ void *effPCPShockWave01Copy(void) {
     return work;
 }
 
-extern void effPCPThunderSpherePolySetPosition(void *destination, void *source);
-
 /* Scales the target over the first 22 frames, fades the colour out from frame 45. */
 void effPCPShockWave01Draw(EffPCPFadeWork *work) {
     EffThunderParameterHead *parameterHead;
@@ -1573,7 +1571,7 @@ void effPCPShockWave01Draw(EffPCPFadeWork *work) {
         fadedColor = work->color;
     }
     effPCPThunderSpherePolySetColor(work->handle, fadedColor);
-    effPCPThunderSpherePolySetPosition((void *)work->handle, work);
+    effPCPThunderSpherePolySetPosition(work->handle->head.vector.origin, work->position);
     effPCPThunderSpherePolyDraw(work->handle);
     work->frame++;
 }
@@ -1740,7 +1738,7 @@ void effPCPHouden01Draw(EffPCPFadeWork *work) {
     } else {
         effPCPThunderSpherePolySetColor(work->handle, work->color);
     }
-    effPCPThunderSpherePolySetPosition((void *)work->handle, work);
+    effPCPThunderSpherePolySetPosition(work->handle->head.vector.origin, work->position);
     effPCPThunderSpherePolyDraw(work->handle);
     work->frame++;
 }
@@ -2531,7 +2529,7 @@ void effPCPMegidora01Draw(EffPCPFadeWork *work) {
         fadedColor = work->color;
     }
     effPCPThunderSpherePolySetColor(work->handle, fadedColor);
-    effPCPThunderSpherePolySetPosition((void *)work->handle, work);
+    effPCPThunderSpherePolySetPosition(work->handle->head.vector.origin, work->position);
     effPCPThunderSpherePolyDraw(work->handle);
     work->frame++;
 }
@@ -2605,7 +2603,7 @@ void effPCPMegidoraon01Draw(EffPCPFadeWork *work) {
         fadedColor = work->color;
     }
     effPCPThunderSpherePolySetColor(work->handle, fadedColor);
-    effPCPThunderSpherePolySetPosition((void *)work->handle, work);
+    effPCPThunderSpherePolySetPosition(work->handle->head.vector.origin, work->position);
     effPCPThunderSpherePolyDraw(work->handle);
     work->frame++;
 }
@@ -3960,7 +3958,7 @@ void effPCPThunderSphereExpDraw(EffPCPGrowWork *work) {
     }
     color = work->color;
     effPCPThunderSpherePolySetColor(work->handle, effColorBlend(color & 0xFFFFFF, color, opacity));
-    effPCPThunderSpherePolySetPosition(work->handle, work->position);
+    effPCPThunderSpherePolySetPosition(work->handle->head.vector.origin, work->position);
     effPCPThunderSpherePolySetScale(work->scale * scale, work->handle);
     effPCPThunderSpherePolyDraw(work->handle);
     work->frame = (s32)((u32)work->frame + 1);

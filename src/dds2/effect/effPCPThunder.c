@@ -7,6 +7,7 @@
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "eff_pcp_event_place.h"
+#include "eff_pcp_vector_copy_api.h"
 #include "sdf_quaternion.h"
 #include "sdf_asset_state.h"
 #include "sdf_asset_create.h"
@@ -76,8 +77,8 @@ void effPCPThunderSpherePolyDelete(EffThunderVectorWork *work) {
 }
 
 /* vu0 routine: copy the entire quadword, including its fourth component. */
-void effPCPThunderSpherePolySetPosition(void *destination, void *source) {
-    SDF_VU0_COPYVECTOR(destination, source);
+void effPCPThunderSpherePolySetPosition(f32 destinationPosition[4], const f32 sourcePosition[4]) {
+    SDF_VU0_COPYVECTOR(destinationPosition, sourcePosition);
 }
 
 /* Set the packed modulation color applied to every vector cell. */

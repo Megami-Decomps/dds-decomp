@@ -23,6 +23,7 @@ void effPCPMZiodin02SetPosition(f32 destinationPosition[4], const f32 sourcePosi
 void effPCPShockWave01SetPosition(f32 destinationPosition[4], const f32 sourcePosition[4]);
 void effPCPShockWave02SetPosition(f32 destinationPosition[4], const f32 sourcePosition[4]);
 void effPCPHouden01SetPosition(f32 destinationPosition[4], const f32 sourcePosition[4]);
+void effPCPThunderSpherePolySetPosition(f32 destinationPosition[4], const f32 sourcePosition[4]);
 void effPCPMultiBlurExpSetPosition(void *dst, const f32 sourcePosition[4]);
 void effPCPMultiFilterExpSetPosition(void *dst, const f32 sourcePosition[4]);
 void effPCPMultiBlurExp2SetPosition(void *dst, const f32 sourcePosition[4]);
