@@ -19,7 +19,7 @@
 #include "btl.h"
 #include "scr_integer_return_value_api.h"
 /* Declared before first use (were implicit int). */
-extern s32 ptyRemoveUnitWithFlags(s32 param0, s32 param1);
+extern PtyRemoveUnitResult ptyRemoveUnitWithFlags(s32 param0, s32 param1);
 
 #define DAT_EXTERNAL_SKILL_TABLE 0x20
 #define DAT_INLINE_SKILL_COUNT 0x18
@@ -1345,7 +1345,7 @@ PtyAddUnitResult ptyAddUnit(s32 unitId) {
     return ptyAddUnitWithFlags(unitId, 0);
 }
 
-s32 ptyRemoveUnitWithFlags(s32 unitId, s32 flags) {
+PtyRemoveUnitResult ptyRemoveUnitWithFlags(s32 unitId, s32 flags) {
     s32 partyIndex;
     s32 i;
     s32 completeSlotCount;
@@ -1355,7 +1355,7 @@ s32 ptyRemoveUnitWithFlags(s32 unitId, s32 flags) {
 
     partyIndex = dds3FindEntryIndex(unitId);
     if (partyIndex < 0) {
-        return 0;
+        return PTY_REMOVE_UNIT_RESULT_NOT_FOUND;
     }
 
     itemId = DDS3_GBWK->party[partyIndex].itemId;
@@ -1403,10 +1403,10 @@ s32 ptyRemoveUnitWithFlags(s32 unitId, s32 flags) {
             return result;
         }
     }
-    return 1;
+    return PTY_REMOVE_UNIT_RESULT_REMOVED;
 }
 
-s32 ptyRemoveUnit(s32 unitId) {
+PtyRemoveUnitResult ptyRemoveUnit(s32 unitId) {
     return ptyRemoveUnitWithFlags(unitId, 0);
 }
 

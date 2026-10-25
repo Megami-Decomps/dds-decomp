@@ -13,7 +13,15 @@ enum {
 
 /* Return the assigned party slot, or a PTY_ADD_UNIT_RESULT_* error. */
 PtyAddUnitResult ptyAddUnit(s32 unitId);
-s32 ptyRemoveUnit(s32 unitId);
+
+typedef s32 PtyRemoveUnitResult;
+enum {
+    PTY_REMOVE_UNIT_RESULT_NOT_FOUND = 0,
+    PTY_REMOVE_UNIT_RESULT_REMOVED = 1,
+};
+
+/* Return whether a matching roster record was removed. */
+PtyRemoveUnitResult ptyRemoveUnit(s32 unitId);
 s32 ptyMatchAffinityPermutation(const struct datUnitWork_t *const *actors, s32 affinity);
 
 #endif

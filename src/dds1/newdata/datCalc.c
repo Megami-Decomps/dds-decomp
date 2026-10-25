@@ -1005,7 +1005,7 @@ extern s32 D_0032ACA8[128];
 extern void evtBitOff(s32);
 extern s32 ptyRebalanceFrontline(s32);
 
-s32 ptyRemoveUnit(s32 unitId) {
+PtyRemoveUnitResult ptyRemoveUnit(s32 unitId) {
     s32 partyIndex = dds3FindEntryIndex(unitId);
     s32 i;
     s32 completeSlotCount;
@@ -1013,7 +1013,7 @@ s32 ptyRemoveUnit(s32 unitId) {
     datUnitWork_t *entry;
 
     if (partyIndex < 0) {
-        return 0;
+        return PTY_REMOVE_UNIT_RESULT_NOT_FOUND;
     }
 
     memcpy(&DDS3_GBWK->templates[unitId], &DDS3_GBWK->party[partyIndex], sizeof(datUnitWork_t));
@@ -1039,10 +1039,10 @@ s32 ptyRemoveUnit(s32 unitId) {
         entry++;
     }
     if (completeSlotCount != 0) {
-        return 1;
+        return PTY_REMOVE_UNIT_RESULT_REMOVED;
     }
     ptyRebalanceFrontline(1);
-    return 1;
+    return PTY_REMOVE_UNIT_RESULT_REMOVED;
 }
 
 u32 ptyReturnZero(void) {

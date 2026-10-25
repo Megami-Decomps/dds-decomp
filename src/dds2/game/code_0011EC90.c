@@ -11,7 +11,7 @@ extern s32 mtrHasEnoughOwnedMantras(void);
 
 extern PtyAddUnitResult ptyAddUnitWithFlags(s32 unitId, s32 initFlags);
 
-extern s32 ptyRemoveUnitWithFlags(s32 param0, s32 param1);
+extern PtyRemoveUnitResult ptyRemoveUnitWithFlags(s32 param0, s32 param1);
 
 extern s32 scrGetIntPara(s32 idx);
 
@@ -28,7 +28,7 @@ extern void scrSetSecondaryScriptFlag(datUnitWork_t *work, u16 index);
 s32 ptyScriptRemoveUnitAndReturnResult(void) {
     s32 unitId = scrGetIntPara(0);
 
-    scrSetIntReturnValue(ptyRemoveUnit(unitId) == 1);
+    scrSetIntReturnValue(ptyRemoveUnit(unitId) == PTY_REMOVE_UNIT_RESULT_REMOVED);
     return 1;
 }
 
@@ -45,7 +45,8 @@ s32 ptyScriptRemoveUnitWithFlagsAndReturnResult(void) {
     s32 firstOperand = scrGetIntPara(0);
     s32 secondOperand = scrGetIntPara(1);
 
-    scrSetIntReturnValue(ptyRemoveUnitWithFlags(firstOperand, secondOperand) == 1);
+    scrSetIntReturnValue(
+        ptyRemoveUnitWithFlags(firstOperand, secondOperand) == PTY_REMOVE_UNIT_RESULT_REMOVED);
     return 1;
 }
 
