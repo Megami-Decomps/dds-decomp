@@ -13,6 +13,7 @@
 #include "sdf_tex_lifetime.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "sdf_delayed_resource_check_api.h"
 #include "sdf_vu0.h"
 #include "sdf_timer.h"
 #include "sdf_packet_list.h"
@@ -437,7 +438,7 @@ u8 sdfDelayedResrcCheckFunc(void) {
     return 0;
 }
 
-s32 sdfDelayedResrcCheck(void) {
+SdfDelayedResourceCheckResult sdfDelayedResrcCheck(void) {
     s32 interruptState;
     u8 hasPendingWork;
 

@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_delayed_resource_check_api.h"
 #include "sdf_vu0.h"
 #include "sdf_dma_tag.h"
 #include "evt_window_shade_packet.h"
@@ -147,8 +148,6 @@ extern void mnuDrawCampScaledTexture(sdfTexHandle_t *texture, CampDisplayDefault
 
 
 void UnlinkFrameInfo(EvtRuntimeGroup *entry, EvtRuntimeChild *node);
-s32 sdfDelayedResrcCheck();
-
 EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer);
 void Eve_PartialMultiBlurSetDefTex(void);
 void Eve_DistortionBlurSetDefTex(void);
@@ -4075,7 +4074,6 @@ s32 evtViewerStartUpdate(dds3ProcessID_t *task) {
 
 extern f32 sdfViewShakeVector[];
 extern void movieStop();
-extern s32 sdfDelayedResrcCheck();
 extern void evtFreeStage();
 extern void dds3FreeRenderTexture();
 extern void fldReleaseCameraColorEffect();

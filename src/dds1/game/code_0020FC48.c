@@ -4,6 +4,7 @@
 #include "sdf_gs_header.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "sdf_delayed_resource_check_api.h"
 #include "sdf_vu0.h"
 #include "btl_actor_status_table_api.h"
 #include "btl_actor_entry_code_api.h"
@@ -1808,9 +1809,6 @@ extern void fldSkyDrawFilter(void);
 
 
 extern u32 dds3DrawFlag;
-
-extern s32 sdfDelayedResrcCheck(void);
-
 extern s32 btlUpdateFadeOut(void);
 
 void btlResetRuntimeState(void);

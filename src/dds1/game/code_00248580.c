@@ -11,6 +11,7 @@
 #include "eff_resource_list.h"
 #include "eff.h"
 #include "common.h"
+#include "sdf_delayed_resource_check_api.h"
 #include "mnu_text_entry.h"
 #include "dds3_world_selection.h"
 #include "snd_sequence_volume_pan.h"
@@ -1810,8 +1811,6 @@ u32 evtBeginSelectionExitFade(dds3ProcessID_t *task) {
     dds3FadeIn(0, 0, 0, 15);
     return 1;
 }
-
-extern s32 sdfDelayedResrcCheck(void);
 extern s32 fileMenuTaskExists(void);
 extern void fileEnterMcPackScene(s32 mode);
 extern void slSetTmnlID(s32 x, s32 y);

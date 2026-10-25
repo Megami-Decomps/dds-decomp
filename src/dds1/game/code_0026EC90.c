@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_delayed_resource_check_api.h"
 #include "mnu_title_stream.h"
 #include "fr_font_measure.h"
 #include "eff_resource_slots.h"
@@ -32,9 +33,6 @@ extern dds3ProcessID_t *PlayingNo;
 extern u16 dds3VblanksPerFrame;
 
 extern MnuStaffMovieWork *mnuMovieWork;
-
-extern s32 sdfDelayedResrcCheck(void);
-
 extern char D_003B1A78[]; /* "mnuMovieDraw" */
 
 extern s32 D_003BC618;

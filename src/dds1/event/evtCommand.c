@@ -3,6 +3,7 @@
 #include "fld.h"
 #include "dds3_admin_control_api.h"
 #include "common.h"
+#include "sdf_delayed_resource_check_api.h"
 #include "sdf_vu0.h"
 #include "scr_integer_return_value_api.h"
 #include "kwln_task_add_child.h"
@@ -90,9 +91,6 @@ void fldBgmFadeOut(void);
 void fldSetSceneParam2(fldSceneParam_t *record, s32 stage, s32 kind, const char *name);
 
 void fldSetSceneParam3(fldSceneParam_t *record, s32 stage, s32 kind, const char *name);
-
-s32 sdfDelayedResrcCheck(void);
-
 void evtFreeStage(void);
 
 s32 evtPathLinkAndMake(dds3Basic_t *target, dds3Basic_t *path);

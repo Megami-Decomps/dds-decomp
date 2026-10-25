@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_delayed_resource_check_api.h"
 #include "sdf_vu0.h"
 #include "sdf_dma_tag.h"
 #include "evt_window_shade_packet.h"
@@ -66,7 +67,6 @@ extern s32 mnuGetSelectedTableValue(EvtRuntime *runtime);
 
 
 void UnlinkFrameInfo(EvtRuntimeGroup *entry, EvtRuntimeChild *node);
-s32 sdfDelayedResrcCheck();
 void Eve_PartialMultiBlurSetDefTex(void);
 void Eve_DistortionBlurSetDefTex(void);
 void Eve_RippleBlurSetDefTex(void);
@@ -4389,7 +4389,6 @@ u8 evtViewerSkipsCampSceneIdRelease(PolyMovieWork *task) {
 }
 
 extern f32 sdfViewShakeVector[];
-extern s32 sdfDelayedResrcCheck();
 extern void evtFreeStage();
 extern void dds3FreeRenderTexture();
 extern void fldReleaseCameraColorEffect();

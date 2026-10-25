@@ -18,6 +18,7 @@
 #include "evt_unit.h"
 #include "evt_unit_color_transition.h"
 #include "common.h"
+#include "sdf_delayed_resource_check_api.h"
 #include "fld_archive_load_state.h"
 #include "dds3_object_flags.h"
 #include "sdf_vu0.h"
@@ -79,7 +80,6 @@ extern f32 fabsf(f32);
 extern u8 fldTitleIsActive(void);
 extern void p2sdSendStopCmd(u32 controlWord);
 extern void p2sdStopAllBgm(void);
-extern s32 sdfDelayedResrcCheck(void);
 extern void func_00148A98(void);
 extern void dds3WorkClear(void);
 extern void fldAddCameraModelEntry(s32 motionIndex);

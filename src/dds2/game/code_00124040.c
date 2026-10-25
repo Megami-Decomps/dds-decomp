@@ -8,6 +8,7 @@
 #include "fld_area_encounter_table.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "sdf_delayed_resource_check_api.h"
 #include "dds3_object_flags.h"
 #include "sdf_vu0.h"
 #include "sdf_trig.h"
@@ -266,9 +267,6 @@ extern u32 D_00389790[];
 
 
 extern void fldFreeNextFile(void);
-
-extern s32 sdfDelayedResrcCheck(void);
-
 struct dds3Basic_t;
 
 

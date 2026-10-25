@@ -3,6 +3,7 @@
 #include "fld.h"
 #include "scr_integer_return_value_api.h"
 #include "common.h"
+#include "sdf_delayed_resource_check_api.h"
 #include "sdf_vu0.h"
 #include "dds3_admin_control_api.h"
 #include "kwln_task_add_child.h"
@@ -84,9 +85,6 @@ s32 evtRegistBEField(s32 eventId, s32 resourceId);
 void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 
 void evtFreeAllUnit(void);
-
-s32 sdfDelayedResrcCheck(void);
-
 void evtFreeStage(void);
 
 extern u32 dds3DrawFlag;

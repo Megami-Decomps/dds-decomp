@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "mnu_movie.h"
 #include "common.h"
+#include "sdf_delayed_resource_check_api.h"
 #include "mnu_sprite_placement.h"
 #include "snd_track_callback.h"
 #include "mnu_title_stream.h"
@@ -105,9 +106,6 @@ extern StaffTaskState *mnuMovieWork;
 extern MnuStaffTextRow D_003E3970[273];
 extern u32 D_00437AB8;
 extern void mnuDrawScrollingStaffBackdrop(StaffSparkleState *);
-
-extern s32 sdfDelayedResrcCheck(void);
-
 extern char D_00429938[]; /* "staffImageProc" */
 
 extern char D_00429968[]; /* "staffProc" */

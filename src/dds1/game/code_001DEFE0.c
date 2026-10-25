@@ -9,6 +9,7 @@
 #include "btl_pair_camera_preset.h"
 #include "btl_camera_parameter_record.h"
 #include "common.h"
+#include "sdf_delayed_resource_check_api.h"
 #include "btl_camera_quaternion_pair.h"
 #include "btl_aim_horizontal_direction_clamped_api.h"
 #include "btl_set_actor_effect_parameter_api.h"
@@ -168,9 +169,6 @@ extern BtlRuntimeTask *btlCreateMoveOtherUnitsTask(BtlUnit *, u32);
 extern SoundResourceNode *sndAllocResourceNode(void);
 
 extern u32 dds3DrawFlag;
-
-extern s32 sdfDelayedResrcCheck(void);
-
 extern u32 D_003BB694;
 
 extern u32 btlTintTransitionHoldCount;

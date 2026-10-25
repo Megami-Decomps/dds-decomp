@@ -1,4 +1,5 @@
 #include "sdk_ps2.h"
+#include "sdf_delayed_resource_check_api.h"
 #include "dsp_entry_api.h"
 #include "dsp_channel.h"
 #include "dsp_active_api.h"
@@ -2013,8 +2014,6 @@ s32 evtBeginSelectionExitFade(dds3ProcessID_t *task) {
     dds3FadeIn(0, 0, 0, 15);
     return 1;
 }
-
-extern s32 sdfDelayedResrcCheck(void);
 extern s32 fileMenuTaskExists(void);
 extern void fileStartMemoryCardMenuForMode(s32 mode);
 extern void slSetTmnlID(s32 x, s32 y);

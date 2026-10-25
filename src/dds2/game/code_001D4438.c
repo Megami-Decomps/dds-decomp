@@ -376,7 +376,6 @@ extern BtlRuntimeTask *btlDeferredTaskTail;
 
 extern BtlRuntimeTask *btlDeferredTaskHead;
 
-extern s32 sdfDelayedResrcCheck(void);
 
 extern u32 dds3DrawFlag;
 

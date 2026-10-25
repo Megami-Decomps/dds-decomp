@@ -8,6 +8,7 @@
 #include "btl_pair_camera_preset.h"
 #include "btl_camera_parameter_record.h"
 #include "common.h"
+#include "sdf_delayed_resource_check_api.h"
 #include "btl_camera_quaternion_pair.h"
 #include "btl_camera_snapshots.h"
 #include "sdf_vu0.h"
@@ -164,9 +165,6 @@ extern struct dds3Basic_t *dds3AddLightObjectBasic(s32);
 extern f32 btlGetUnitCameraClearance(BtlUnit *, u8, f32, f32);
 
 extern f32 btlCombineCameraSpheresVU(f32 *, f32, f32, f32 *);
-
-extern s32 sdfDelayedResrcCheck(void);
-
 extern u32 dds3DrawFlag;
 
 

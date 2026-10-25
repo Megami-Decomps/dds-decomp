@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "scr.h"
 #include "common.h"
+#include "sdf_delayed_resource_check_api.h"
 #include "sdf_float_counter.h"
 #include "fld_area_path.h"
 #include "dds3_path.h"
@@ -89,8 +90,6 @@ s32 evtLoadArea(s32 area, s32 room)
 extern void dds3SceneBasicMakeScene_FromMemory(dds3Basic_t *object, u32 area, u32 room,
                                                        u8 *resource0Data, u8 *resource1Data,
                                                        const SdfTextureOffsetListHeader *textureOffsets, u32 flags);
-extern s32 sdfDelayedResrcCheck(void);
-
 s32 evtLoadArea_FromMemory(s32 area, s32 room, u8 *resource0Data, u8 *resource1Data,
                                      const SdfTextureOffsetListHeader *textureOffsets, s32 flags)
 {

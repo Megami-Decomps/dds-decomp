@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "scr.h"
 #include "common.h"
+#include "sdf_delayed_resource_check_api.h"
 #include "sdf_float_counter.h"
 #include "fld_area_path.h"
 #include "dds3_path.h"
@@ -91,9 +92,6 @@ s32 evtLoadArea(s32 area, s32 room)
     dds3SetAmbient((u128 *)D_00367ED0);
     return 1;
 }
-
-extern s32 sdfDelayedResrcCheck(void);
-
 /* Build a field world object from the supplied resource parameters. */
 s32 evtLoadArea_FromMemory(s32 area, s32 room, u8 *resource0Data, u8 *resource1Data,
                                      const SdfTextureOffsetListHeader *textureOffsets, s32 flags)

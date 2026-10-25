@@ -3,6 +3,7 @@
 #include "btl_runtime_state.h"
 #include "eff_random.h"
 #include "common.h"
+#include "sdf_delayed_resource_check_api.h"
 #include "sdf_vu0.h"
 #include "btl_actor_status_table_api.h"
 #include "btl_actor_entry_code_api.h"
@@ -1929,10 +1930,6 @@ extern char D_0041B9A0[];
 extern char D_0041B9B8[];
 
 extern void fldSkyDrawFilter(void);
-
-
-extern s32 sdfDelayedResrcCheck(void);
-
 s32 btlUpdateRuntimeFadeState(void) {
     s8 mode;
 

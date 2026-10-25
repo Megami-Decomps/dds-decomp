@@ -15,6 +15,7 @@
 #include "file_pac.h"
 #include "evt_world.h"
 #include "common.h"
+#include "sdf_delayed_resource_check_api.h"
 #include "fld_archive_load_state.h"
 #include "dds3_object_flags.h"
 #include "sdf_vu0.h"
@@ -1977,8 +1978,6 @@ void func_00145B18(void) {
     kwlnDrawVector.depthFar = 20000.0f;
     kwlnDrawVector.fogColor = 0x108010;
 }
-extern s32 sdfDelayedResrcCheck(void);
-
 extern void frSetFontDrawOT(u32);
 
 void fldReleaseTitleSlots(void) {

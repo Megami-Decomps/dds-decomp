@@ -13,6 +13,7 @@
 #include "kwln_fade.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "sdf_delayed_resource_check_api.h"
 #include "dds3_object_flags.h"
 #include "sdf_vu0.h"
 #include "eff_inner_float_api.h"
@@ -140,9 +141,6 @@ extern void fldLoadNextFile_SetId_BtlRet(u32, u32);
 
 
 extern void fldFreeNextFile(void);
-
-extern s32 sdfDelayedResrcCheck(void);
-
 extern s8 dds3AdminiGetNextSequence(void);
 
 extern u32 dds3AdminiGetPrevHistoryFlag(void);
