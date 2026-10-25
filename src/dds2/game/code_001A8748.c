@@ -16,6 +16,7 @@
 #include "btl_special_ability.h"
 #include "dat_unit_has_skill_api.h"
 #include "btl_command_affinity_api.h"
+#include "btl_active_units_ready_api.h"
 #include "btl_enc_bg_entry.h"
 #include "btl_animation_mode_entry.h"
 #include "btl_effect_position.h"
@@ -2708,7 +2709,7 @@ void btlAccumulateEnemyDefeatRewards(BtlUnit *enemy) {
 }
 
 /* Readiness requires each active actor to have cleared transient action flags. */
-s32 btlAllActiveUnitsReady(void) {
+BtlActiveUnitsReadiness btlAllActiveUnitsReady(void) {
     BtlUnit *unit;
     u32 flags;
     for (unit = ((BattleController *)btlGetRuntime())->actors; unit != 0; unit = unit->next) {
@@ -2716,17 +2717,17 @@ s32 btlAllActiveUnitsReady(void) {
         if (flags & 1) {
             if (flags & 0x400) {
                 if (flags & 0xC0) {
-                    return 0;
+                    return BTL_ACTIVE_UNITS_NOT_READY;
                 }
                 if (flags & 0x20) {
                     if (!(unit->status.stateFlags & 1)) {
-                        return 0;
+                        return BTL_ACTIVE_UNITS_NOT_READY;
                     }
                 }
             }
         }
     }
-    return 1;
+    return BTL_ACTIVE_UNITS_READY;
 }
 
 /* Return the battle-parameter scale for the selected encounter's clamped adjustment. */

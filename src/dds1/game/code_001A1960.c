@@ -26,6 +26,7 @@
 #include "btl.h"
 #include "btl_actor_entry_code_api.h"
 #include "btl_command_affinity_api.h"
+#include "btl_active_units_ready_api.h"
 #include "btl_state.h"
 #include "eff.h"
 #include "btl_action.h"
@@ -1232,24 +1233,24 @@ void btlAccumulateEnemyDefeatRewards(BtlUnit *enemy) {
     btlBossDebugPrintf(D_003A1848, enemy);
 }
 
-s32 btlAllActiveUnitsReady(void) {
+BtlActiveUnitsReadiness btlAllActiveUnitsReady(void) {
     BtlUnit *actor = ((BtlState *)btlGetRuntime())->units;
     for (; actor != NULL; actor = actor->next) {
         u32 flags = actor->status.flags;
         if ((flags & 1) != 0) {
             if ((flags & 0x400) != 0) {
                 if ((flags & 0xC0) != 0) {
-                    return 0;
+                    return BTL_ACTIVE_UNITS_NOT_READY;
                 }
                 if ((flags & 0x20) != 0) {
                     if ((actor->status.stateFlags & 1) == 0) {
-                        return 0;
+                        return BTL_ACTIVE_UNITS_NOT_READY;
                     }
                 }
             }
         }
     }
-    return 1;
+    return BTL_ACTIVE_UNITS_READY;
 }
 
 /* Return the battle-parameter scale for the selected encounter's clamped adjustment. */

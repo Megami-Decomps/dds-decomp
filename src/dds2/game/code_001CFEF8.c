@@ -4,6 +4,7 @@
 #include "btl_boss_data_api.h"
 #include "btl_event_asset_api.h"
 #include "btl_event_sequence_api.h"
+#include "btl_active_units_ready_api.h"
 #include "fld_scene_ready_api.h"
 #include "kwln_background_fade_api.h"
 #include "brs_primary_panel_update_api.h"
@@ -1225,7 +1226,6 @@ const char D_004171E0[] __attribute__((aligned(8))) = "btl:end [BTL_END_ESCAPE]\
 const char D_00417200[] __attribute__((aligned(8))) = "btl:end [BTL_END_SERIAL]\n";
 const char D_00417220[] __attribute__((aligned(8))) = "btl:end [BTL_END_COMPULSORY]\n";
 extern s8 dds3PadButtonState[];
-extern s32 btlAllActiveUnitsReady(void);
 extern s32 btlCountRegisteredTasks(void);
 extern s32 btlReleaseScriptResourceB(void);
 extern s32 mnuPollTitleStreamStateLocked(void);
@@ -1266,7 +1266,7 @@ s32 btlUpdateBattleEnd(BtlState *scene) {
         btlBossDebugPrintf(D_00417140);
         return 0;
     }
-    if (!btlAllActiveUnitsReady()) {
+    if (btlAllActiveUnitsReady() == BTL_ACTIVE_UNITS_NOT_READY) {
         btlBossDebugPrintf(D_00417160);
         return 0;
     }
