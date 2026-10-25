@@ -723,7 +723,7 @@ extern void dds3CameraObjectBasicGetTgtCam(dds3Basic_t *camera, f32 *worldEyeOut
 
 extern f32 sdfAtan2(f32 y, f32 x);
 
-extern struct FileRequest *pFldNextFileDataF2;
+extern FilePacRequest *pFldNextFileDataF2;
 
 extern u8 D_003BACE0[];
 
@@ -1346,7 +1346,7 @@ u8 fldTryStartPendingBattleReturnAreaLoad(void) {
         fldGlobalBase.resourceFloor = floor;
         fldMakeFilePath(directory, area, 1);
         sprintf(path, D_0039FE38, directory, area, floor);
-        pFldNextFileDataF2 = pacLoad(path);
+        pFldNextFileDataF2 = (FilePacRequest *)pacLoad(path);
         fldGlobalBase.resourceFlag = FLD_AREA_RESOURCE_REQUEST_LOAD_PENDING;
         return 1;
     }
@@ -1386,14 +1386,14 @@ s32 fldRequestAreaResource(s32 area, s32 room) {
     D_003BA734 = 1;
     fldMakeFilePath(directory, area, 1);
     sprintf(path, D_0039FE38, directory, area, room);
-    pFldNextFileDataF2 = pacLoad(path);
+    pFldNextFileDataF2 = (FilePacRequest *)pacLoad(path);
     fldGlobalBase.resourceFlag = FLD_AREA_RESOURCE_REQUEST_LOAD_PENDING;
     return 1;
 }
 
 void fldFreeNextFile(void) {
     if (pFldNextFileDataF2 != 0) {
-        PacWork *work = ((FilePacRequest *)pFldNextFileDataF2)->packet.queueHead;
+        PacWork *work = pFldNextFileDataF2->packet.queueHead;
 
         if (work != NULL) {
             do {
@@ -1416,7 +1416,7 @@ u32 fldPollAreaResourceLoad(void) {
 
     if (resourceState != FLD_AREA_RESOURCE_REQUEST_IDLE) {
         if (resourceState == FLD_AREA_RESOURCE_REQUEST_LOAD_PENDING) {
-            if (pacCheckEnd(pFldNextFileDataF2) != 0) {
+            if (pacCheckEnd((struct FileRequest *)pFldNextFileDataF2) != 0) {
                 fldGlobalBase.resourceFlag = FLD_AREA_RESOURCE_REQUEST_IDLE;
                 D_003BA734 = 0;
             }
@@ -1431,7 +1431,7 @@ u32 fldLoadNextGetStatus(void) {
 
 u8 fldLoadNextGetStatus2(void) {
     if (pFldNextFileDataF2 != 0) {
-        if (pacCheckEnd(pFldNextFileDataF2) != 0) {
+        if (pacCheckEnd((struct FileRequest *)pFldNextFileDataF2) != 0) {
             return 1;
         }
     }
@@ -1442,7 +1442,7 @@ u8 fldCanReuseAreaResourceRequest(s32 area, s32 room) {
     if (fldGlobalBase.resourceArea != area || fldGlobalBase.resourceFloor != room) {
         return 0;
     }
-    if (pFldNextFileDataF2 != 0 && pacCheckEnd(pFldNextFileDataF2) != 0) {
+    if (pFldNextFileDataF2 != 0 && pacCheckEnd((struct FileRequest *)pFldNextFileDataF2) != 0) {
         return 1;
     }
     return fldGlobalBase.resourceFlag != FLD_AREA_RESOURCE_REQUEST_IDLE;
@@ -1656,7 +1656,7 @@ extern FldTransferChunk *fldRoomKF2Chunk;
 
 extern u8 *fldRoomKF2Data;
 
-extern struct FileRequest *D_003BAC38;
+extern FilePacRequest *D_003BAC38;
 
 extern struct sdfMemHandle_t *D_003BAC4C;
 
@@ -1716,7 +1716,7 @@ struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) {
     const SdfTextureOffsetListHeader *roomOffsets;
     u8 *roomData;
     FldTransferChunk *chunk;
-    struct FileRequest *request;
+    FilePacRequest *request;
     FieldPlayerSceneWork *sceneWork = &fldSceneParam;
     s32 area;
     s32 room;
@@ -1769,13 +1769,13 @@ struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) {
         } else {
             fldMakeFilePath(directory, area, 1);
             sprintf(path, D_0039FE38, directory, area, room);
-            request = pacLoad(path);
+            request = (FilePacRequest *)pacLoad(path);
             D_003BAC38 = request;
-            pacSync(request);
+            pacSync((struct FileRequest *)request);
         }
         index = 0;
         fldRoomSoundResources = NULL;
-        work = ((FilePacRequest *)D_003BAC38)->packet.queueHead;
+        work = D_003BAC38->packet.queueHead;
         fldCachedRoomResourceAllocation = NULL;
         for (; work != NULL; work = work->next) {
             switch (index) {
@@ -1890,7 +1890,7 @@ extern FldTransferChunk *fldRoomKF2Chunk;
 
 extern u8 *fldRoomKF2Data;
 
-extern struct FileRequest *D_003BAC38;
+extern FilePacRequest *D_003BAC38;
 
 extern struct sdfMemHandle_t *D_003BAC4C;
 
@@ -1985,7 +1985,7 @@ void fldReleaseFieldResources(void) {
         fldGlobalBase.cachedArea = fldGlobalBase.area;
     }
     if (D_003BAC38 != 0) {
-        work = ((FilePacRequest *)D_003BAC38)->packet.queueHead;
+        work = D_003BAC38->packet.queueHead;
         i = 0;
         if (work != 0) {
             do {

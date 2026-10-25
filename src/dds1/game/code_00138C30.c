@@ -255,7 +255,7 @@ extern f32 D_003BAD20;
 
 extern char fldEncounterTaskName[];
 
-extern struct FileRequest *pFldNextFileDataF2;
+extern struct FilePacRequest *pFldNextFileDataF2;
 
 extern u8 D_003BACE0[];
 
@@ -358,7 +358,7 @@ extern FldTransferChunk *fldRoomKF2Chunk;
 
 extern u32 fldRoomKF2Data;
 
-extern struct FileRequest *D_003BAC38;
+extern struct FilePacRequest *D_003BAC38;
 
 extern struct sdfMemHandle_t *D_003BAC4C;
 
@@ -394,7 +394,7 @@ extern FldTransferChunk *fldRoomKF2Chunk;
 
 extern u32 fldRoomKF2Data;
 
-extern struct FileRequest *D_003BAC38;
+extern struct FilePacRequest *D_003BAC38;
 
 extern struct sdfMemHandle_t *D_003BAC4C;
 
