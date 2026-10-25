@@ -23,7 +23,7 @@ typedef struct FldObjectSlot {
     f32 y;
     f32 z;
     f32 yaw;                 /* 0x1C: placement yaw, in degrees */
-    s32 effectVariant;       /* 0x20 */
+    s32 activationKind;      /* 0x20: copied from FldActivationEntry.kind. */
     struct EffNode *effectNode; /* 0x24: effect deleted when the slot table resets/releases. */
     s32 effectKindIndex;     /* 0x28: row of DDS1's D_0034C8F0 */
     u8 pad2C[4];
@@ -33,6 +33,8 @@ typedef char FldObjectSlot_activationState_offset_must_be_0x08[
     ((u32)&((FldObjectSlot *)0)->activationState == 0x08) ? 1 : -1];
 typedef char FldObjectSlot_activationRequested_offset_must_be_0x0C[
     ((u32)&((FldObjectSlot *)0)->activationRequested == 0x0C) ? 1 : -1];
+typedef char FldObjectSlot_activationKind_offset_must_be_0x20[
+    ((u32)&((FldObjectSlot *)0)->activationKind == 0x20) ? 1 : -1];
 typedef char FldObjectSlot_unitObject_offset_must_be_0x00[
     ((u32)&((FldObjectSlot *)0)->unitObject == 0x00) ? 1 : -1];
 typedef char FldObjectSlot_effectNode_offset_must_be_0x24[

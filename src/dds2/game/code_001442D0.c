@@ -3739,7 +3739,7 @@ void func_0014C9B0(u32 id, f32 *rotation, f32 x, f32 y, f32 z) {
         dds3GetRotPoseSet(object);
         heading = EulerAngleAxisY();
         fldTakaraSlotTable[fldTakaraCount].yaw = heading * 180.0f / 3.14f;
-        fldTakaraSlotTable[fldTakaraCount].effectVariant = D_003A8EB0[id].kind;
+        fldTakaraSlotTable[fldTakaraCount].activationKind = D_003A8EB0[id].kind;
         fldTakaraSlotTable[fldTakaraCount].effectKindIndex = id;
         fldTakaraCount++;
         fldAddItemBoxObject(x, y, z, 20.0f, 100.0f, -1);
@@ -3816,7 +3816,7 @@ void fldUpdateObjectSlotActivation(void) {
                 resource = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle(fldTakaraSlotTable[i].unitObject);
                 mdlSingleMotion(resource, 0, 1);
                 fldTakaraSlotTable[i].activationState = fldTakaraSlotTable[i].activationRequested;
-                switch (fldTakaraSlotTable[i].effectVariant) {
+                switch (fldTakaraSlotTable[i].activationKind) {
                 case 0:
                 case 3:
                     if (D_004362E8 != 0) {
