@@ -1095,7 +1095,7 @@ extern s8 D_003BC58C;
 
 extern char D_00377318[];
 
-extern char D_00377338[];
+extern s32 D_00377338[];
 
 extern s32 D_00370D10[];
 
@@ -1105,7 +1105,7 @@ extern s16 D_003BD8B0;
 
 extern s32 D_003BC5AC;
 
-extern void sndInitializeIopSoundSystem(char *, s32, char *, s32);
+extern void sndInitializeIopSoundSystem(char *, s32, s32 *, s32);
 
 extern void p2sdLoadSMGFile(s32);
 
