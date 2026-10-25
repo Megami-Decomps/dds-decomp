@@ -307,8 +307,8 @@ void mnuCreatePartySelectionWindow(CampMenuContext *context) {
     party->primaryWindow = window;
 }
 
-void mnuDestroyPartySelectionWindow(s32 context) {
-    mnuDestroyWindowContainer((u32)((PartyMenuData *)((CampMenuContext *)context)->menu)->primaryWindow);
+void mnuDestroyPartySelectionWindow(CampMenuContext *context) {
+    mnuDestroyWindowContainer((u32)((PartyMenuData *)context->menu)->primaryWindow);
 }
 
 /* Snapshot five party entries; at most three active slots are displayed. */
@@ -437,10 +437,10 @@ void mnuClearPartySelectionAndActivateSlots(CampMenuContext *context) {
 }
 
 /* Release panel textures before reinitializing slots and updating handle state. */
-void mnuRefreshPartyPanelSlots(s32 context) {
-    mnuReleasePartyPanelTextures(&((CampMenuContext *)context)->partyWindow);
-    mnuInitPartyPanelSlots(&((CampMenuContext *)context)->partyPanel);
-    mnuUpdateHandleStates(&((CampMenuContext *)context)->partyWindow);
+void mnuRefreshPartyPanelSlots(CampMenuContext *context) {
+    mnuReleasePartyPanelTextures(&context->partyWindow);
+    mnuInitPartyPanelSlots(&context->partyPanel);
+    mnuUpdateHandleStates(&context->partyWindow);
 }
 
 extern void mnuLoadPanelSectionResources(MenuPageSlot *, EffectSlotSet *, u32,
@@ -480,11 +480,11 @@ s32 mnuInitializePartySelectionState(dds3ProcessID_t *task) {
 }
 
 s32 mnuShopReleaseResources(dds3ProcessID_t *task) {
-    s32 context = dds3GetProcessData(task);
-    PartyMenuData *menu = (PartyMenuData *)((CampMenuContext *)context)->menu;
+    CampMenuContext *context = (CampMenuContext *)dds3GetProcessData(task);
+    PartyMenuData *menu = (PartyMenuData *)context->menu;
     mnuRefreshPartyPanelSlots(context);
     mnuDestroyPartySelectionWindow(context);
-    mnuNoOpPartySelectionCleanup(context);
+    mnuNoOpPartySelectionCleanup((s32)context);
     sdfMemFreeDirect(menu->allocation);
     return 1;
 }
@@ -652,8 +652,7 @@ void mnuUpdateStaffFade(s32 opening, PartyMenuData *menuWork) {
     }
 }
 
-void mnuDrawPartySelectionPreview(s32 contextAddress) {
-    CampMenuContext *context = (CampMenuContext *)contextAddress;
+void mnuDrawPartySelectionPreview(CampMenuContext *context) {
     PartyMenuData *menu = (PartyMenuData *)context->menu;
     struct MenuList *list;
     struct MenuListNode *node;
@@ -714,8 +713,8 @@ void mnuDrawPartySelectionPreview(s32 contextAddress) {
 }
 
 s32 mnuDrawPartySelectionPanelAndStep(dds3ProcessID_t *callback) {
-    s32 context = dds3GetProcessData(callback);
-    PartyMenuData *menu = (PartyMenuData *)((CampMenuContext *)context)->menu;
+    CampMenuContext *context = (CampMenuContext *)dds3GetProcessData(callback);
+    PartyMenuData *menu = (PartyMenuData *)context->menu;
 
     mnuDrawCampScreenDefault(callback);
     mnuCreateStaffImageSprite(0x13);
