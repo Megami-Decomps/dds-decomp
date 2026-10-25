@@ -28,7 +28,7 @@
 #include "dat_command.h"
 #include "kwln_task_lifecycle.h"
 /* Declared before first use (were implicit int). */
-extern s32 btlTestSelectedItemCategoryMask(BtlUnit *unit, s32 actorIndex);
+extern u8 btlTestSelectedItemCategoryMask(BtlUnit *unit, s32 actorIndex);
 extern s32 fldCountSceneSlots(void);
 extern u32 sdfQueryChannelBits(s32 channel, datUnitWork_t *sourceRecord, datUnitWork_t *item);
 /* Original-style implicit int, kept: matched code depends on it: btlRollAiBucket. */
@@ -512,7 +512,7 @@ s32 btlGetActionRecordLookupValue(s32 actionRecordIndex) {
     return D_00358510[lookupTableIndex * 3];
 }
 
-s32 btlTestSelectedItemCategoryMask(BtlUnit *unit, s32 actorIndex) {
+u8 btlTestSelectedItemCategoryMask(BtlUnit *unit, s32 actorIndex) {
     s32 selectedEntryIndex = unit->selectedEntryIndex;
     u16 maskTableIndex;
     if (selectedEntryIndex == -1) {

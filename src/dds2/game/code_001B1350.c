@@ -32,7 +32,7 @@
 #include "kwln_task_lifecycle.h"
 #include "btl_target_result.h"
 /* Declared before first use (were implicit int). */
-extern s32 btlTestSelectedItemCategoryMask(BtlUnit *unit, s32 actorIndex);
+extern u8 btlTestSelectedItemCategoryMask(BtlUnit *unit, s32 actorIndex);
 extern u32 sdfQueryChannelBits(s32 channel, datUnitWork_t *sourceRecord, datUnitWork_t *item);
 extern u32 sdfQueryChannelValue(s32 channel, datUnitWork_t *sourceRecord, datUnitWork_t *item);
 
@@ -649,7 +649,7 @@ s32 btlGetActionRecordLookupValue(s32 actionRecordIndex) {
     return D_003B4F70[lookupTableIndex * 3];
 }
 
-s32 btlTestSelectedItemCategoryMask(BtlUnit *unit, s32 actorIndex) {
+u8 btlTestSelectedItemCategoryMask(BtlUnit *unit, s32 actorIndex) {
     s32 selectedEntryIndex = unit->selectedEntryIndex;
     u16 maskTableIndex;
     if (selectedEntryIndex == -1) {

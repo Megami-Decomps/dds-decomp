@@ -99,7 +99,7 @@ extern BtlUnit *btlSelectFlaggedIndexListEntry(BtlIndexList *, u16 *, u16);
 
 extern s32 btlReadCurrentUnitHp(datUnitWork_t *);
 
-extern s32 btlTestSelectedItemCategoryMask(BtlUnit *, s32);
+extern u8 btlTestSelectedItemCategoryMask(BtlUnit *, s32);
 
 extern s32 btlReadCurrentUnitMp(datUnitWork_t *);
 
@@ -119,7 +119,7 @@ s32 btlElementToBitIndex(s32 mask, s32 elementIndex);
 
 /* Return whether the native unit-status query intersects any requested action-mask bit. */ s32 btlUnitHasAnyStatusInMask(BtlUnit *unit, s32 actionMask);
 
-extern s32 btlTestSelectedItemCategoryMask(BtlUnit *, s32);
+extern u8 btlTestSelectedItemCategoryMask(BtlUnit *, s32);
 
 extern s32 btlHasMappedSpecialAbilityForSlot(BtlUnit *, u32);
 

@@ -720,7 +720,7 @@ s32 btlUnitMatchesEntryCodeCondition(BtlUnit *unit, s32 conditionIndex, s8 inver
     return 0;
 }
 
-extern s32 btlTestSelectedItemCategoryMask(BtlUnit *, s32);
+extern u8 btlTestSelectedItemCategoryMask(BtlUnit *, s32);
 
 extern const s32 btlRequiredActionCategories[10];
 
