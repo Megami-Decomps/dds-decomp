@@ -47,14 +47,14 @@ typedef char FldActionSpawn_key_offset_check[
 typedef struct FldLoadRequest {
     u32 spawnBatchCount;
     FldSpawnBatch *spawnBatches;
-    FldFileResolverRecord *record;
+    const FldFileResolverRecord *record;
 } FldLoadRequest;
 
 /* Counted placement-batch input consumed by both field request paths. */
 typedef struct FldSceneRequest {
     u32 spawnBatchCount;
     FldSpawnBatch *spawnBatches;
-    FldSceneResourceRecord *record;
+    const FldSceneResourceRecord *record;
     u32 spawnCount;
     struct FldActionSpawn *spawnList;
 } FldSceneRequest;
