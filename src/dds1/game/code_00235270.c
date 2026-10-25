@@ -5702,11 +5702,11 @@ extern EvtModelScaleEntry *D_003BAA20;
 
 /* Spawn from a keyed task resource with two zeroed constructor vectors.
  * A nonnegative index applies the selected model-table scale relative to the base. */
-void *evtSpawnResourceObject(s32 taskId, s32 key, s32 index) {
+dds3Basic_t *evtSpawnResourceObject(s32 taskId, s32 key, s32 index) {
     u8 vecA[16];
     u8 vecB[16];
     void *found;
-    void *obj;
+    dds3Basic_t *obj;
     EvtEffectInner *inner;
 
     memset(vecA, 0, 0x10);

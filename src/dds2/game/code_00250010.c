@@ -5795,7 +5795,7 @@ extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(struct SoundMixer *resource, co
 
 /* Spawn from a keyed task resource with two zeroed constructor vectors.
  * A nonnegative index applies the selected model-table scale relative to the base. */
-void *evtSpawnResourceObject(s32 taskId, s32 key, s32 index) {
+dds3Basic_t *evtSpawnResourceObject(s32 taskId, s32 key, s32 index) {
     u8 vecA[16];
     u8 vecB[16];
     void *found;
