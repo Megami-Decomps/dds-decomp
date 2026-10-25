@@ -441,7 +441,7 @@ extern void btlBindUnitModel(u8 *, u32, u32);
 
 extern char D_00417B30[];
 
-extern s32 btlCheckModelAssetByMode(u8 *, u32, u32);
+extern u8 btlCheckModelAssetByMode(u8 *, u32, u32);
 
 extern void btlSetEffectCameraKeys(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 

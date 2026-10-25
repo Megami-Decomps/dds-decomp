@@ -2505,7 +2505,7 @@ void btlReleaseModelAssetByMode(u32 unused, u32 effect, u32 model) {
     }
 }
 
-s32 btlCheckModelAssetByMode(u8 *object, u32 effect, u32 model) {
+u8 btlCheckModelAssetByMode(u8 *object, u32 effect, u32 model) {
     if (evtBitCheck(0xC0F) != 0) {
         if (btlEnsureModelAndSoundReady(effect, model, 0) != 0) {
             return 1;
@@ -3780,7 +3780,7 @@ void btlRequestModelOrReuse(BtlRuntimeTaskArgs *arguments) {
 
 extern char D_003A3C08[];
 
-extern s32 btlCheckModelAssetByMode(u8 *, u32, u32);
+extern u8 btlCheckModelAssetByMode(u8 *, u32, u32);
 
 u32 btlPollModelLoadCompletion(BtlRuntimeTaskArgs *arguments) {
     BtlUnit *object = arguments->actor;
