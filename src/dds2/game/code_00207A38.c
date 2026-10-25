@@ -1101,7 +1101,7 @@ void btlUpdateUnitActors(void) {
         btlFlagUnitDefeatCandidate(unit);
         btlSetUnitPosition(unit, unit->position);
         btlSetUnitRotation(unit, unit->rotation);
-        if ((btlIsActorModeAcceptedByBattleHook((s32)unit) == 0 && unit->effectState != 0) ||
+        if ((btlIsActorModeAcceptedByBattleHook(unit) == 0 && unit->effectState != 0) ||
             (unit->updateFlags & 2) != 0) {
             btlRefreshUnitMotionSelection(unit);
             unit->motionStartFrame = 0;
