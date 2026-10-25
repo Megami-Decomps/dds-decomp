@@ -8536,15 +8536,15 @@ u32 sndGetResourceStatus(SoundResourceNode *sound) {
     return 0;
 }
 
-s32 sndLookupResourceType(s32 sound, s32 index) {
-    s32 (*lookup)(s32, s32) = *(s32 (**)(s32, s32))((u8 *)btlGetRuntime() + 0x644);
+s32 sndLookupResourceType(BtlUnit *actor, s32 resourceIndex) {
+    s32 (*lookup)(BtlUnit *, s32) = *(s32 (**)(BtlUnit *, s32))((u8 *)btlGetRuntime() + 0x644);
     if (lookup != 0) {
-        s32 value = lookup(sound, index);
+        s32 value = lookup(actor, resourceIndex);
         if (value != -1) {
             return value;
         }
     }
-    return ((BtlActionTableEntry *)datActionAnimationRecords)[index].resourceType;
+    return ((BtlActionTableEntry *)datActionAnimationRecords)[resourceIndex].resourceType;
 }
 
 void btlSetCommandEffectLinkFlags(BtlTask *task, BattleIndexWork *work) {
@@ -10051,8 +10051,8 @@ void sndFormatResourceNameFromUnitMode(const BtlUnit *unit, char *output) {
     sprintf(output, "MDD_%03X.ADB", unit->partyRecord.unitId);
 }
 
-s32 sndMapResourceType(s32 sound, s32 index) {
-    s32 type = sndLookupResourceType(sound, index);
+s32 sndMapResourceType(BtlUnit *actor, s32 resourceIndex) {
+    s32 type = sndLookupResourceType(actor, resourceIndex);
     if (type < 0x1A && type != 0) {
         if (type >= 0xB) {
             return type + *(s32 *)((u8 *)btlGetRuntime() + 0x1E4) - 6;

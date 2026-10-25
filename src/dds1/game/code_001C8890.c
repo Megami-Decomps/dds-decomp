@@ -1425,10 +1425,10 @@ s32 btlGetActionDefaultOrOverride(s32 skillIndex);
 extern BtlRuntimeTask *btlCreateLinkageFormationTask(BtlTask *, BtlUnit *,
         BtlUnit *, u32, u32);
 extern BtlRuntimeTask *btlCreateCommandSoundWithArguments(BtlTask *, BtlUnit *, BtlUnit *, u32, u32);
-s32 sndLookupResourceType(s32 actor, s32 resourceIndex);
+s32 sndLookupResourceType(BtlUnit *actor, s32 resourceIndex);
 BtlRuntimeTask *sndCreateActorEffectTask(SoundResourceNode *source,
         BtlUnit *owner, u32 duration);
-s32 sndMapResourceType(s32 category, s32 id);
+s32 sndMapResourceType(BtlUnit *actor, s32 resourceIndex);
 extern BtlRuntimeTask *btlCreateCategoryStatDamageTask(BtlUnit *, s32, s32);
 extern BtlRuntimeTask *btlCreateFlaggedCommandItemConsumeTask(BtlUnit *, s32);
 s32 btlFormatActionEventFilename(s32 skillIndex, char *output);
@@ -1533,11 +1533,11 @@ void btlScheduleLinkageActionTasks(BtlTask *action) {
             task->startCondition.kind = 4;
             task->startCondition.value.handle = soundHandle;
             btlStartTask(task);
-            resourceIndex = sndLookupResourceType((s32)actors[groupIndex], skill);
+            resourceIndex = sndLookupResourceType(actors[groupIndex], skill);
             if (resourceIndex != 0) {
                 btlStartTask(sndCreateActorEffectTask(state->resources[resourceIndex], actors[groupIndex], maxFrames + 6));
                 if (groupIndex == 0) {
-                    s32 sound = sndMapResourceType((s32)actors[0], skill);
+                    s32 sound = sndMapResourceType(actors[0], skill);
                     if (sound != -1) btlStartTask(sndCreateStationedSeTask(sound));
                 }
             }
