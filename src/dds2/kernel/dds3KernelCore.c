@@ -91,7 +91,7 @@ extern dds3ProcessID_t *runprocess;
 KwlnTaskCursorAction RunProcess(dds3ProcessID_t *task) {
     s32 port;
     s32 inputIndex;
-    s32 nextUpdate;
+    KwlnTaskUpdateResult nextUpdate;
 
     if (task->flags & KWLN_TASK_SKIP_UPDATE) {
         return KWLN_TASK_CURSOR_ACTION_ADVANCE;
@@ -124,12 +124,13 @@ KwlnTaskCursorAction RunProcess(dds3ProcessID_t *task) {
         }
     }
 
-    if (task->update != NULL && task->update != (TaskUpdate)-1) {
+    if (task->update != NULL && task->update != (TaskUpdate)KWLN_TASK_UPDATE_FINISH_CALLBACK) {
         nextUpdate = task->update(task);
-        if (nextUpdate != 0) {
+        if (nextUpdate != KWLN_TASK_UPDATE_RETAIN_CALLBACK) {
             task->update = (TaskUpdate)nextUpdate;
         }
-        if (nextUpdate == -1 && (task->flags & KWLN_TASK_STATE_MASK) == KWLN_TASK_ACTIVE) {
+        if (nextUpdate == KWLN_TASK_UPDATE_FINISH_CALLBACK &&
+            (task->flags & KWLN_TASK_STATE_MASK) == KWLN_TASK_ACTIVE) {
             EndProcess(task);
             runprocess = 0;
             return KWLN_TASK_CURSOR_ACTION_RELOAD;
