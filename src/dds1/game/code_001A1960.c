@@ -694,9 +694,9 @@ u32 btlSelectCommandTargetPolicy(BtlTask *task, BtlIndexList *destination, s32 u
     return category;
 }
 
-extern s32 btlFindEligibleTargetForMultiActorCommand(BtlTask *actionTask, BtlIndexList *targets);
+extern s32 btlFindCommandStatusMatchInTargetList(BtlTask *actionTask, BtlIndexList *targets);
 
-s32 btlFindEligibleTargetForMultiActorCommand(BtlTask *actionTask, BtlIndexList *targets) {
+s32 btlFindCommandStatusMatchInTargetList(BtlTask *actionTask, BtlIndexList *targets) {
     BtlTask *action = actionTask;
     u32 count;
     u32 i;
