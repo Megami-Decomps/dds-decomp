@@ -97,7 +97,7 @@ sdfTexHandle_t *dds3BillboardGetGeneralTex(s32 index) {
     return hGeneralBillboard[index]->child->texture;
 }
 
-void effCopyVector(void *destination, const void *source) {
+void effCopyVector(f32 destination[4], const f32 source[4]) {
     SDF_VU0_COPYVECTOR(destination, source);
 }
 

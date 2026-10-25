@@ -129,8 +129,8 @@ EffTrackPolyWork *effTrackPolyCreateWork(EffTrackPolyParams *src);
 void effTrackPolyRelease(EffTrackPolyWork *work);
 void effTrackPolyUpdate(EffTrackPolyWork *work);
 
-/* Copy one 16-byte vector from read-only source storage to destination storage. */
-void effCopyVector(void *destination, const void *source);
+/* Copy one four-float vector from read-only source storage to destination. */
+void effCopyVector(f32 destination[4], const f32 source[4]);
 void effCopyVectorToNodeInstance(struct EffNode *node, const void *vector);
 void effApplyNodeTransformMatrix(struct EffNode *node, const void *matrix);
 
