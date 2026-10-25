@@ -98,6 +98,7 @@
 #include "fld_object_slot_api.h"
 #include "fld_placement_data.h"
 #include "fld_resource_name.h"
+#include "fld_file_resource_link_view.h"
 #include "eff_object.h"
 #include "dds3_path.h"
 #include "fld_label_cache_api.h"
@@ -1087,7 +1088,7 @@ void fldCreateResourceScriptObjects(void) {
     FldFileResource *bindingResource;
     FldFileNameEntry *nameEntry;
     FldScriptResource *scriptResource;
-    FldResourceName *linkedResourceName;
+    const FldResourceName *linkedResourceName;
     s32 resourceIndex;
     s32 bindingIndex;
     u32 nameIndex;
@@ -1161,7 +1162,7 @@ void fldCreateResourceScriptObjects(void) {
             }
         }
         /* Retail fetches the link descriptor even when the object is NULL. */
-        linkedResourceName = (FldResourceName *)resource->word14;
+        linkedResourceName = ((const FldFileResourceLinkView *)resource)->linkedResourceName;
         if (scriptObject != NULL) {
             dds3ObjectBaseSetControlBasic(scriptObject, dds3SceneBasicSearchNameAndType(secondaryWorld, 2, linkedResourceName->name));
             dds3ObjectBaseRegistArea(scriptObject);
