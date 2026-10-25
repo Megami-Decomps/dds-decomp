@@ -930,13 +930,13 @@ extern void btlClearAllUnitDefeatCandidates(void);
 extern void btlFlagUnitDefeatCandidate(BtlUnit *);
 extern void btlFlagMatchingUnitsDefeatCandidate(s32);
 
-void btlFaceLinkedTargetAndFlagDirection(u8 *command, u8 *unused) {
+void btlFaceLinkedTargetAndFlagDirection(BtlLinkedCommand *command, void *unused) {
     BtlUnit *user;
     BtlUnit *target;
     f32 userPos[4];
     f32 targetPos[4];
-    user = btlGetTargetUnitForLink((BtlLinkedCommand *)command);
-    target = (BtlUnit *)btlGetIndexListEntry(((BtlLinkedCommand *)command)->targetList, 0);
+    user = btlGetTargetUnitForLink(command);
+    target = (BtlUnit *)btlGetIndexListEntry(command->targetList, 0);
     if (!(user->status.flags & target->status.flags & 0x600)) {
         btlClearAllUnitDefeatCandidates();
         btlFlagUnitDefeatCandidate(user);
@@ -952,9 +952,9 @@ void btlFaceLinkedTargetAndFlagDirection(u8 *command, u8 *unused) {
     SDF_VU0_STOREVECTOR(targetPos);
     btlUnitFaceTarget(target, user);
     if (userPos[0] < targetPos[0]) {
-        ((BtlLinkedCommand *)command)->flags |= 0x200;
+        command->flags |= 0x200;
     } else {
-        ((BtlLinkedCommand *)command)->flags &= ~0x200;
+        command->flags &= ~0x200;
     }
 }
 
@@ -5010,7 +5010,7 @@ s32 btlUpdateLinkedDefeatCamera(BtlLinkedCommand *command, BtlCamState *camera, 
     return result;
 }
 
-s32 btlTryStartTargetFacingActionEffect(u8 *unit) {
+s32 btlTryStartTargetFacingActionEffect(BtlLinkedCommand *unit) {
     u8 *entry = (u8 *)((BtlEventEntry *)unit)->task;
     u32 flags = ((BtlTask *)entry)->unit->status.flags;
     u8 *other;

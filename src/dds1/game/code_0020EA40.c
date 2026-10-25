@@ -225,7 +225,7 @@ extern void btlTrackSpecialEnemyCommandRestrictionByTurn(BtlUnit *unit, BtlOpera
 extern void btlTriggerSpecialUnitAction(void);
 extern void btlTriggerSpecialUnitActionAndResetPose(s32 unit);
 extern s32 btlTryScheduleMarkedUnitTask(BtlUnit *unit);
-extern s32 btlTryStartTargetFacingActionEffect(u8 *unit);
+extern s32 btlTryStartTargetFacingActionEffect(BtlLinkedCommand *unit);
 extern s32 btlUnitStartAimAtTarget(BtlLinkedCommand *command);
 extern void btlUpdateReadyUnits(void);
 extern s32 btlUpdateSpecialTargetCamera(BtlLinkedCommand *command);
