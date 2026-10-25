@@ -38,7 +38,6 @@ extern MenuProfilePanel *mnuCreateProfilePanel(datUnitWork_t *selectionState);
 extern void mnuCacheProfilePanelGridPositions(MenuProfilePanel *, u32, u32, u32, u32);
 extern void mnuFreeProfilePanelWork(MenuProfilePanel *);
 extern void mnuDrawAndAdvanceProfilePanel(s32, s32, s32, MenuProfilePanel *, s32);
-extern s32 mnuGetSelectionFromFlags(datUnitWork_t *);
 extern void mnuConfigurePartyPanelPage(MenuPageWindow *, s32, s32, s32);
 
 extern s32 mnuLookupRangeEntry(u16);
@@ -660,7 +659,7 @@ void mnuDrawPartySelectionPreview(CampMenuContext *context) {
     EffectSlotSet **sets;
     EffectSlotSet *marker;
     s32 selectionKey;
-    s32 statusIndex;
+    MnuPartyStatusIconIndex statusIndex;
     s32 found = 0;
 
     node = menu->primaryWindow->list->cursor;
@@ -687,7 +686,7 @@ void mnuDrawPartySelectionPreview(CampMenuContext *context) {
     }
 
     record = (datUnitWork_t *)&menu->original[selectionKey];
-    statusIndex = mnuGetSelectionFromFlags(record);
+    statusIndex = mnuGetPartyStatusIconIndex(record);
     if (statusIndex >= 0) {
         marker = context->selectionResources[statusIndex];
     } else {

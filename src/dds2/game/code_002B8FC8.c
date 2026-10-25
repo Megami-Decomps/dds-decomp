@@ -180,7 +180,6 @@ extern u8 *datSkillMessages;
 
 extern void mnuDrawCampIconBackdropByKind();
 
-extern s32 mnuGetSelectionFromFlags(datUnitWork_t *);
 
 
 extern void mnuDrawCampGridAndLabelDefault();
@@ -2170,7 +2169,7 @@ void mnuRebuildPartySlotResources(MenuPageWindow *menu, s32 partySlotIndex, s32 
     MenuPageSlot *slot = &menu->slots[partySlotIndex];
     datUnitWork_t *actor = &DDS3_GBWK->party[menu->records->slots[partySlotIndex].index];
     s32 resourceIndex;
-    s32 statusIndex;
+    MnuPartyStatusIconIndex statusIndex;
 
     slot->kind = kind;
     slot->flags = 0;
@@ -2228,7 +2227,7 @@ void mnuRebuildPartySlotResources(MenuPageWindow *menu, s32 partySlotIndex, s32 
         slot->frame[4] = 0;
         slot->frame[5] = 0;
     }
-    statusIndex = mnuGetSelectionFromFlags(actor);
+    statusIndex = mnuGetPartyStatusIconIndex(actor);
     if (statusIndex >= 0) {
         slot->frame[7] = effCreateResourceSlotSet((EffectSlotSet *)menu->handlesC[statusIndex], 0, 1);
     } else {
@@ -2445,13 +2444,13 @@ void mnuRefreshPageHandles(MenuPageWindow *window) {
 
 void mnuSelectPage(MenuPageWindow *window, s32 selected) {
     u32 i;
-    s32 selection;
+    MnuPartyStatusIconIndex selection;
 
     for (i = 0; i < 5; i++) {
         effReleaseTextureHandlesAndResetSlots(window->handlesC[i]);
     }
 
-    selection = mnuGetSelectionFromFlags(&DDS3_GBWK->party[
+    selection = mnuGetPartyStatusIconIndex(&DDS3_GBWK->party[
         window->records->slots[selected].index]);
     for (i = 0; i < 5; i++) {
         if (i == selection) {

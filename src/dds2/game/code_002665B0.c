@@ -333,7 +333,6 @@ void mnuReleaseResourceGroupTextureHandles(u32 address) {
 }
 extern u32 mnuGetPanelRatioColor(s32, s32, s32);
 extern void mnuDrawAndAdvanceRatioPanel(s32, s32, s32, u32, s32, s32, MenuPageBar *, u32);
-extern s32 mnuGetSelectionFromFlags(datUnitWork_t *);
 extern MenuTextEntry D_003A41A8[];
 extern MenuTextEntry D_003A47E8[];
 
@@ -424,7 +423,7 @@ void mnuDrawTerminalRecoveryListEntry(s32 unused, s32 rowY, s32 depth, MenuList 
     _FRQ *glyph;
     MenuTerminalPercentPanelPair *panels;
     s32 fade;
-    s32 status;
+    MnuPartyStatusIconIndex status;
 
     effDrawTextureSlotWithBlendedCornerColors(0, rowY, depth, scale, 0, host->resourceBank[0], 0x1B, priority);
     if (list->cursor == node) {
@@ -454,7 +453,7 @@ void mnuDrawTerminalRecoveryListEntry(s32 unused, s32 rowY, s32 depth, MenuList 
         mnuDrawAndAdvanceRatioPanel(0x1050, rowY + 0xD0, depth, 0, -1, -1,
             &panels->panels[1], priority);
     }
-    status = mnuGetSelectionFromFlags(record);
+    status = mnuGetPartyStatusIconIndex(record);
     if (status >= 0) {
         effDrawTextureSlotWithBlendedCornerColors(0x14D0, rowY - 0x68, depth, scale, 0, host->resourceBank[0],
             statusCodes[status], priority);

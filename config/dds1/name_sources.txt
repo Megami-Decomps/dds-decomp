@@ -6780,6 +6780,7 @@
 0x00286AD8	sndPlayPartyItemSe	inferred	searches 3 six-byte rows of D_0037CE00 for id, plays sound e[1]+10 or e[2]+0x17 via func_0024DA58
 0x00286B48	btlItemApplyPermanentBonus	inferred	wrong or missing short module prefix [names_audit.tsv]
 0x00286D20	btlItemApplyDirectEffect	inferred	wrong or missing short module prefix [names_audit.tsv]
+0x00286E50	mnuGetPartyStatusIconIndex	inferred	Selects the party-status icon resource index by native flag priority, or -1 when none match.
 0x00286EA0	mnuGetMatchingPartyEntryMask	inferred	mnu menu, title, shop, or movie UI in game/code_00282850.c
 0x00286EF8	mnuClassifyQuarterHalfPercent	inferred	Computes percentage, returns separate categories below 25 and 50. [names_reviewed5.tsv]
 0x00286F48	mnuIsStaffMenuInputBlocked	inferred	Returns the global guard checked before staff-menu input; DDS2 twin 0x002C6480.

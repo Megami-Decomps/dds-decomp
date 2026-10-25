@@ -7068,7 +7068,7 @@
 0x002C5700	mnuHasOwnedUnblockedItem	inferred	Scans stored item quantities and reports whether an owned item is not blocked. [names_reviewed15.tsv]
 0x002C5758	sndPlayPartyItemSe	inferred	Finds item ID in sound-effect lookup table and starts mapped display cue. [names_reviewed5.tsv]
 0x002C59B0	ptyChooseFirstAvailableRosterId	inferred	Tests roster presence in priority order and returns the first present roster ID. [names_reviewed15.tsv]
-0x002C5C28	mnuGetSelectionFromFlags	inferred	Maps flags at entry offset 0xE to selection 0..4 by priority, returning -1 if none match.
+0x002C5C28	mnuGetPartyStatusIconIndex	inferred	Selects the party-status icon resource index by native flag priority, or -1 when none match.
 0x002C5CD0	mnuClassifyQuarterHalfPercent	inferred	Computes percentage, returns separate categories below 25 and 50. [names_reviewed5.tsv]
 0x002C5D20	mnuPickBestPartyEntry	inferred	two passes over the 5 party entries (unflagged then flagged bit 2); picks the highest weight where table[tableIndex]==0
 0x002C5DE0	mnuFindPartyEntryBySelection	inferred	matches entry+0xE against a local {mask,id} table {0x400,0xD4},{0x100,0xCF},{0x80,0xA9},{0x40,0xCE},{0x10,0xA8}; returns the entry and writes the id

@@ -38,6 +38,11 @@ void mnuDrawStaffGridLabelsForKind(s32 kind, struct EffectSlotSet *resources);
 void mnuCreateStaffImageSprite(s32 imageIndex);
 
 struct datUnitWork_t;
+/* Index of the highest-priority active party-status icon, or none. */
+typedef s32 MnuPartyStatusIconIndex;
+#define MNU_PARTY_STATUS_ICON_INDEX_NONE (-1)
+MnuPartyStatusIconIndex mnuGetPartyStatusIconIndex(const struct datUnitWork_t *entry);
+
 /* Field-use skills operate on the selected party records and their page. */
 s32 ptySkillApplyFieldUseEffect(MenuPageWindow *page, u16 ability,
                                struct datUnitWork_t *target,

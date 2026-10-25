@@ -209,7 +209,6 @@ void mnuCreateNumberSprite(s32 x, s32 y, s32 layer, s32 blendWeight, s32 number,
 
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, s32, s32, void *, s32, s32);
 
-extern s32 mnuGetSelectionFromFlags(datUnitWork_t *partyRecord);
 extern u32 mnuGetPanelRatioColor(s32 useDefault, s32 amount, s32 divisor);
 
 void mnuDrawTerminalRecoveryListEntry(s32 unused, s32 rowY, s32 depth, struct MenuList *list, struct MenuListNode *node, s32 priority) {
@@ -224,7 +223,7 @@ void mnuDrawTerminalRecoveryListEntry(s32 unused, s32 rowY, s32 depth, struct Me
     struct _FRQ *glyph;
     MenuEffectPair *panels;
     s32 fade;
-    s32 status;
+    MnuPartyStatusIconIndex status;
 
     effDrawSpriteWithCornerFade(0, rowY, depth, scale, 0, host->resourceSets[0], 0x1B, priority);
     if (list->cursor == node) {
@@ -253,7 +252,7 @@ void mnuDrawTerminalRecoveryListEntry(s32 unused, s32 rowY, s32 depth, struct Me
         panels[1].opacity = fade;
         mnuDrawAndAdvanceRatioPanel(0x1000, rowY + 0xF8, depth, 0, -1, -1, &panels[1], priority);
     }
-    status = mnuGetSelectionFromFlags(record);
+    status = mnuGetPartyStatusIconIndex(record);
     if (status >= 0) {
         effDrawSpriteWithCornerFade(0x14D0, rowY - 0x60, depth, scale, 0, host->resourceSets[0],
             statusCodes[status], priority);

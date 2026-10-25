@@ -1766,7 +1766,6 @@ void mnuRegisterResourceHandles(MenuPageWindow *destination, struct EffectSlotSe
     }
 }
 
-extern s32 mnuGetSelectionFromFlags(datUnitWork_t *);
 
 /* Rebuild one party row's icon and frame resources from its current selectors. */
 void mnuRebuildPartySlotResources(MenuPageWindow *window, s32 partySlotIndex, s32 kind) {
@@ -1774,7 +1773,7 @@ void mnuRebuildPartySlotResources(MenuPageWindow *window, s32 partySlotIndex, s3
     PartyPanelEntry *entry = &window->records->slots[partySlotIndex];
     datUnitWork_t *actor = &DDS3_GBWK->party[entry->index];
     s32 resourceIndex;
-    s32 selection;
+    MnuPartyStatusIconIndex selection;
 
     slot->kind = kind;
     slot->flags = 0;
@@ -1846,7 +1845,7 @@ void mnuRebuildPartySlotResources(MenuPageWindow *window, s32 partySlotIndex, s3
         slot->frame[3] = NULL;
     }
 
-    selection = mnuGetSelectionFromFlags(actor);
+    selection = mnuGetPartyStatusIconIndex(actor);
     if (selection >= 0) {
         slot->frame[5] = effCreateResourceSlotSet(window->handlesC[selection], 0, 1);
     } else {
@@ -2067,13 +2066,13 @@ void mnuReleasePageTexturesAndSelectedResources(MenuPageWindow *window) {
 
 void mnuSelectPage(MenuPageWindow *window, s32 selected) {
     u32 i;
-    s32 selection;
+    MnuPartyStatusIconIndex selection;
 
     for (i = 0; i < 5; i++) {
         effReleaseTextureHandlesAndResetSlots(window->handlesC[i]);
     }
 
-    selection = mnuGetSelectionFromFlags(&DDS3_GBWK->party[
+    selection = mnuGetPartyStatusIconIndex(&DDS3_GBWK->party[
         window->records->slots[selected].index]);
     for (i = 0; i < 5; i++) {
         if (i == selection) {

@@ -33,7 +33,6 @@
 extern void evtStageTestInit(s32 mode);
 extern void evtStageTestStop(void);
 extern s32 itfGridLookupValueOrDefault(EffectSlotSet *resource, s32 resourceIndex);
-extern s32 mnuGetSelectionFromFlags(datUnitWork_t *actorEntry);
 extern void mnuResetWorkFloats(void);
 extern void mnuSetStateValue(u32 *out, u32 value);
 extern void mnuSwitchCampVisualCategory(s32 nextCategory, MenuStaffContext *menu);
@@ -1100,7 +1099,7 @@ void mnuDrawPartySelectionPreview(MenuContext *context) {
     datUnitWork_t *record;
     EffectSlotSet *marker;
     s32 selectionKey;
-    s32 statusIndex;
+    MnuPartyStatusIconIndex statusIndex;
     s32 found = 0;
     u32 i;
 
@@ -1128,7 +1127,7 @@ void mnuDrawPartySelectionPreview(MenuContext *context) {
     }
 
     record = &menu->original[selectionKey];
-    statusIndex = mnuGetSelectionFromFlags(record);
+    statusIndex = mnuGetPartyStatusIconIndex(record);
     if (statusIndex >= 0) {
         marker = (EffectSlotSet *)context->selectionResources[statusIndex];
     } else {

@@ -3008,15 +3008,15 @@ accepted:
     return 1;
 }
 
-/* Return the first matching status index in native priority order, or -1. */
-s32 mnuGetSelectionFromFlags(datUnitWork_t *actorEntry) {
+/* Return the first matching status-icon index in native priority order, or none. */
+MnuPartyStatusIconIndex mnuGetPartyStatusIconIndex(const datUnitWork_t *actorEntry) {
     u16 statusFlags = actorEntry->status;
     if (statusFlags & 0x400) return 0;
     if (statusFlags & 0x100) return 1;
     if (statusFlags & 0x80) return 2;
     if (statusFlags & 0x40) return 3;
     if (statusFlags & 0x10) return 4;
-    return -1;
+    return MNU_PARTY_STATUS_ICON_INDEX_NONE;
 }
 
 /* Return one bit for the first occupied matching table ID, or zero when absent. */
