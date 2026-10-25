@@ -217,6 +217,17 @@ typedef struct BattleScriptTaskData {
     u32 frames;
 } BattleScriptTaskData;
 
+typedef struct BattleActionTaskData {
+    ActionStateLink *action;
+    u32 group;
+    u32 frames;
+} BattleActionTaskData;
+
+typedef char BattleScriptTaskData_size_must_be_0x0C[
+    (sizeof(BattleScriptTaskData) == 0x0C) ? 1 : -1];
+typedef char BattleActionTaskData_size_must_be_0x0C[
+    (sizeof(BattleActionTaskData) == 0x0C) ? 1 : -1];
+
 
 extern char D_0041B7E0[];
 
@@ -833,15 +844,15 @@ BtlRuntimeTask *btlCreateScriptResourceTask(BtlUnit *object, u32 group) {
     return task;
 }
 
-/* Start the event on frame zero, bind its actor, and return 1 on completion. */
-s32 btlUpdateScriptResourceTask(BattleScriptTaskData *record) {
+/* Start the event on frame zero, bind the action state as user data, and finish. */
+s32 btlUpdateScriptResourceTask(BattleActionTaskData *record) {
     if (record->frames == 0) {
         BtlState *battle = (BtlState *)btlGetRuntime();
         dds3ProcessID_t *object;
         btlStartSkillEventTask(record->group);
         object = battle->scriptTask;
         if (object != NULL) {
-            scrSetUserData(object, (void *)record->object);
+            scrSetUserData(object, record->action);
         }
     }
     if (btlReleaseScriptResource()) {
@@ -851,17 +862,17 @@ s32 btlUpdateScriptResourceTask(BattleScriptTaskData *record) {
     return 0;
 }
 
-/* Queue object/group event processing with zero elapsed frames; return the task. */
-BtlRuntimeTask *btlCreateActionTask(void *object, s32 group) {
+/* Queue action/group event processing with zero elapsed frames; return the task. */
+BtlRuntimeTask *btlCreateActionTask(ActionStateLink *action, s32 group) {
     BtlRuntimeTask *task = btlAllocTask(12);
-    BattleScriptTaskData *data;
+    BattleActionTaskData *data;
 
     task->startCondition.kind = 1;
     task->taskId = 0x69;
     task->callback = btlUpdateScriptResourceTask;
     task->endCondition.kind = 0;
     data = btlGetTaskArguments(task);
-    data->object = object;
+    data->action = action;
     data->group = group;
     data->frames = 0;
     return task;
