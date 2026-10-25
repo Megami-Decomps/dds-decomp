@@ -140,7 +140,7 @@ void sdfMotionChangeBlend(sdfMotionCtrlr_t *motion, s32 motionIndex, SdfMotionLo
                          f32 blendDurationFrames) {
     s32 i;
     const MotionEntry *entry;
-    u8 *bindingData;
+    const u8 *bindingData;
     SdfMotionBindingHead *binding;
 
     motion->motionIndex = motionIndex;
@@ -167,11 +167,11 @@ void sdfMotionChangeBlend(sdfMotionCtrlr_t *motion, s32 motionIndex, SdfMotionLo
     }
 
     motion->frameCount = entry->frameCount;
-    bindingData = (u8 *)entry->bindingData;
+    bindingData = (const u8 *)entry->bindingData;
     for (i = 0; i < motion->request->usedCount; i++) {
         binding = ((SdfMotionBindingHead **)motion->request->buffer)[i];
-        binding->dispatch->bindKeyTrack(binding, (SdfMotionKeyTrack *)bindingData);
-        bindingData += ((SdfMotionKeyTrack *)bindingData)->nextTrackOffsetBytes;
+        binding->dispatch->bindKeyTrack(binding, (const SdfMotionKeyTrack *)bindingData);
+        bindingData += ((const SdfMotionKeyTrack *)bindingData)->nextTrackOffsetBytes;
     }
 }
 
@@ -279,17 +279,17 @@ void sdfMotCLBK_Destroy(void *storage) {
     sdfChipFreeDirect(storage);
 }
 
-void sdfMotCLBK_SetCut(SdfMotionKeyBinding *binding, SdfMotionKeyTrack *track) {
+void sdfMotCLBK_SetCut(SdfMotionKeyBinding *binding, const SdfMotionKeyTrack *track) {
     binding->track = track;
 }
 
 /* Find the key interval containing frame and return its interpolation weight. */
 void sdfMotGetKey(SdfMotionKeyBinding *binding,
                               SdfMotionKeyInterval *out, f32 frame) {
-    SdfMotionKeyTrack *track;
-    u16 *keyFrames;
-    u8 *keyData;
-    u8 *firstKeyData;
+    const SdfMotionKeyTrack *track;
+    const u16 *keyFrames;
+    const u8 *keyData;
+    const u8 *firstKeyData;
     s32 frameNumber;
     s32 firstKeyIndex;
     s32 lastKeyIndex;

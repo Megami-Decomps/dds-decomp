@@ -9,7 +9,7 @@ struct SdfMotionKeyTrack;
 /* sdfMotionCtrlr_t callbacks release storage, bind keys, sample, capture and blend. */
 typedef struct SdfMotionBindingDispatch {
     void (*releaseStorage)(void *binding);
-    void (*bindKeyTrack)(void *binding, struct SdfMotionKeyTrack *track);
+    void (*bindKeyTrack)(void *binding, const struct SdfMotionKeyTrack *track);
     void (*sample)(void *binding, f32 frame);
     void (*capturePrevious)(void *binding);
     void (*blend)(void *binding, f32 frame, f32 weight);
@@ -37,19 +37,19 @@ typedef struct SdfMotionKeyTrack {
     u32 nextTrackOffsetBytes;
     u16 keyCount;
     u16 keyStride;
-    u16 keyFrames[1];
+    const u16 keyFrames[1];
 } SdfMotionKeyTrack;
 
 typedef struct SdfMotionKeyBinding {
     SdfMotionBindingDispatch *dispatch;
     sdfMotionCtrlr_t *motion;
-    SdfMotionKeyTrack *track;
+    const SdfMotionKeyTrack *track;
 } SdfMotionKeyBinding;
 
 void sdfMotGetKey(SdfMotionKeyBinding *binding,
                               SdfMotionKeyInterval *interval, f32 frame);
 
-void sdfMotCLBK_SetCut(SdfMotionKeyBinding *binding, SdfMotionKeyTrack *track);
+void sdfMotCLBK_SetCut(SdfMotionKeyBinding *binding, const SdfMotionKeyTrack *track);
 
 /* Indexed asset bindings share the key prefix and retain the selected asset. */
 typedef struct SdfMotionIndexedBinding {
