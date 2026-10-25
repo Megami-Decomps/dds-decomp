@@ -79,7 +79,7 @@ extern void p2sdSyncSound(void);
 
 /* Handle an occupied sound-command channel before dispatching a named sound. */
 s32 fldCommandSendNamedSound(void) {
-    s32 commandName;
+    const char *commandName;
     commandName = scrGetStrPara(0);
     if (p2sdGetPcmState() != 0) {
         p2sdSyncSound();
@@ -157,4 +157,3 @@ void fldCreateFieldEffectTask(void) {
 }
 
 INCLUDE_SDATA(const s32, "game/code_0014F4C8", D_003BB008);
-

@@ -551,15 +551,14 @@ dds3Basic_t *dds3AddBEDEffectObjectBasic2(struct SoundMixer *resource, const u12
     return AddBEDEffect(resource, position, scale);
 }
 
-/* Resolve the resource identifier, create from it, then release the temporary resource.
-   The legacy constructor call and its argument types are deliberately unchanged. */
-dds3Basic_t *dds3AddBEDEffectObjectBasic(void *resource, const u128 *firstVector, void *secondVector) {
+/* Resolve the path to a resource identifier, then create the effect from it. */
+dds3Basic_t *dds3AddBEDEffectObjectBasic(const char *resourcePath, const u128 *firstVector, void *secondVector) {
     u32 resolvedId;
     struct sdfMemHandle_t *resourceHandle;
     dds3Basic_t *created;
 
     resolvedId = 0;
-    resourceHandle = sdfDevLoadFileEx(resource, &resolvedId, 0);
+    resourceHandle = sdfDevLoadFileEx(resourcePath, &resolvedId, 0);
     created = AddBEDEffect(resolvedId, firstVector, secondVector);
     sdfMemFreeDirect(resourceHandle);
     return created;
@@ -693,13 +692,13 @@ dds3Basic_t *dds3AddMG12EffectObjectBasic2(s32 kind, struct EffNodeDescriptor *d
 }
 
 /* Resolve a named resource for the kind/value constructor, then release that resource. */
-dds3Basic_t *dds3AddMG12EffectObjectBasic(s32 kind, void *resource) {
+dds3Basic_t *dds3AddMG12EffectObjectBasic(s32 kind, const char *resourcePath) {
     u32 resolvedId;
     struct sdfMemHandle_t *resourceHandle;
     dds3Basic_t *created;
 
     resolvedId = 0;
-    resourceHandle = sdfDevLoadFileEx(resource, &resolvedId, 0);
+    resourceHandle = sdfDevLoadFileEx(resourcePath, &resolvedId, 0);
     created = AddMG12Effect(kind, resolvedId);
     sdfMemFreeDirect(resourceHandle);
     return created;

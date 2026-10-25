@@ -1930,7 +1930,7 @@ INCLUDE_RODATA(const s32, "game/code_00107FD8", D_0039E238);
 
 scrProcessWork_s *bfContextCreate(BfFlw0Header *header, ScrSection *sections, ScrLabel *procedures,
                         ScrLabel *labels, ScrInstr *instructions, struct ItfMesSub *auxiliaryData,
-                        char *strings, ScrProcedureIndex procedureIndex) {
+                        const char *strings, ScrProcedureIndex procedureIndex) {
     scrProcessWork_s *process;
     s32 i;
     s8 *types;
@@ -2007,7 +2007,7 @@ scrProcessWork_s *fldFlowParse(BfFlw0Header *header, ScrProcedureIndex procedure
     ScrLabel *labels = NULL;
     ScrInstr *instructions = NULL;
     struct ItfMesSub *auxiliaryData = NULL;
-    char *strings = NULL;
+    const char *strings = NULL;
     s32 i;
 
     sections = header->sections;
@@ -2031,7 +2031,7 @@ scrProcessWork_s *fldFlowParse(BfFlw0Header *header, ScrProcedureIndex procedure
                 }
                 break;
             case BF_FLW0_SECTION_STRINGS:
-                strings = (char *)header + sections[i].offset;
+                strings = (const char *)header + sections[i].offset;
                 break;
             default:
                 return 0;

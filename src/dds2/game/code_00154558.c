@@ -650,7 +650,7 @@ s32 fldCommand_CAM_SEL_PHOKAN(void) {
 
 
 s32 fldCommand_SET_NPC_CAMERA(void) {
-    char *name;
+    const char *name;
 
     name = scrGetStrPara(0);
     fldGlobalBase.mode = FLD_CAMERA_MODE_NPC_REQUEST;
@@ -773,7 +773,7 @@ s32 fldCommand_FLD_MODEL_ON(void) {
     s32 world;
     s32 stage;
     s32 mode;
-    char *name;
+    const char *name;
     s32 room;
     WorldIndexNode *list;
     dds3Basic_t *node;
@@ -832,7 +832,7 @@ s32 fldCmdApplyNumericRoomModeGroupZero(void) {
     s32 stage;
     s32 mode;
     char buffer[32];
-    char *name;
+    const char *name;
     s32 room;
     WorldIndexNode *list;
     dds3Basic_t *node;
@@ -888,7 +888,7 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
     s32 world;
     s32 stage;
     s32 mode;
-    char *name;
+    const char *name;
     s32 room;
     WorldIndexNode *list;
     dds3Basic_t *node;
@@ -946,7 +946,7 @@ s32 fldCmdApplyNumericRoomModeGroupOne(void) {
     s32 stage;
     s32 mode;
     char buffer[32];
-    char *name;
+    const char *name;
     s32 room;
     WorldIndexNode *list;
     dds3Basic_t *node;
@@ -999,7 +999,7 @@ s32 fldCmdApplyNumericRoomModeGroupOne(void) {
 s32 fldCommand_FLD_ANIME_ON(void) {
     s32 world;
     s32 stage;
-    char *name;
+    const char *name;
     s32 i;
     s32 searchId;
     void *obj;
@@ -1091,7 +1091,7 @@ s32 fldApplyRoomObjectModeZero(s32 world, s32 stage, char *roomName, s32 mode) {
 s32 fldCommand_FLD_ANIME_OFF(void) {
     s32 world;
     s32 stage;
-    char *name;
+    const char *name;
     s32 i;
     s32 searchId;
     void *obj;
@@ -1177,7 +1177,7 @@ s32 fldApplyRoomObjectModeOne(s32 world, s32 stage, char *roomName, s32 mode) {
 s32 fldCommand_FLD_ATARI_ON(void) {
     s32 world;
     s32 stage;
-    char *name;
+    const char *name;
     s32 i;
 
     world = scrGetIntPara(0);
@@ -1202,7 +1202,7 @@ s32 fldCommand_FLD_ATARI_ON(void) {
 s32 fldCmdSetSceneBitsBarrierRoom(void) {
     s32 world;
     s32 stage;
-    char *name;
+    const char *name;
     s32 i;
 
     world = scrGetIntPara(0);
@@ -1327,7 +1327,7 @@ extern void fldSetMapSlotAuxiliaryFlag(s32 area, u32 slotIndex, s32 bit, s32 ena
 s32 fldOpClearRoomStateFlags(void) {
     s32 world;
     s32 stage;
-    char *name;
+    const char *name;
     s32 i;
 
     world = scrGetIntPara(0);
@@ -1357,7 +1357,7 @@ s32 fldOpClearRoomStateFlags(void) {
 s32 fldOpSetRoomStateFlags(void) {
     s32 world;
     s32 stage;
-    char *name;
+    const char *name;
     s32 i;
 
     world = scrGetIntPara(0);
@@ -1734,7 +1734,7 @@ s32 fldCmdInitializeHuntSparkUnit(void) {
 
 /* Persona 4 func_001eb2a0 @ 001EB2A0 (src/promoted/code1_001e.c), recompiled unchanged */
 s32 fldCommandFindEffectByName(void) {
-    char *param = scrGetStrPara(0);
+    const char *param = scrGetStrPara(0);
 
     scrSetIntReturnValue(fldFindEffectByName(param));
     return 1;
@@ -1795,7 +1795,7 @@ extern void p2sdSyncSound(void);
 
 /* Handle an occupied sound-command channel before dispatching a named sound. */
 s32 fldCommandSendNamedSound(void) {
-    s32 commandName;
+    const char *commandName;
     commandName = scrGetStrPara(0);
     if (p2sdGetPcmState() != 0) {
         p2sdSyncSound();

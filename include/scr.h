@@ -15,7 +15,7 @@ typedef s32 ScrProcedureIndex;
 typedef union ScrStackValue {
     s32 i;
     f32 f;
-    char *s;
+    const char *s;       /* borrowed read-only pointer into source FLW0 string section */
 } ScrStackValue;
 
 typedef s8 ScrStackValueType;
@@ -71,7 +71,7 @@ typedef struct scrProcessWork_s {
     ScrLabel *labels;
     ScrInstr *instructions;
     struct ItfMesSub *auxiliaryData;
-    char *strings;
+    const char *strings;          /* borrowed read-only view; lifetime follows source owner/caller */
     ScrProcedureIndex procedureIndex;
     s32 resourceIndex;
     u32 timer;
@@ -106,17 +106,17 @@ s32 scrTraceCode(scrProcessWork_s *context);
 void scrProcDestroyTask(scrProcessWork_s *process);
 scrProcessWork_s *bfContextCreate(struct BfFlw0Header *header, ScrSection *sections, ScrLabel *procedures,
                         ScrLabel *labels, ScrInstr *instructions, struct ItfMesSub *auxiliaryData,
-                        char *strings, ScrProcedureIndex procedureIndex);
+                        const char *strings, ScrProcedureIndex procedureIndex);
 scrProcessWork_s *scrCreateTaskWithDefaultOption(struct BfFlw0Header *header);
 void PushInt(scrProcessWork_s *script, s32 value);
 void PushFloat(scrProcessWork_s *script, f32 value);
-void PushStr(scrProcessWork_s *script, char *value);
+void PushStr(scrProcessWork_s *script, const char *value);
 void PushRet(scrProcessWork_s *script, s32 value);
 s32 PopInt(scrProcessWork_s *script);
 f32 PopFloat(scrProcessWork_s *script);
 dds3ProcessID_t *scrRunScriptEx(u32 priority, struct BfFlw0Header *header,
     ScrSection *sections, ScrLabel *procedures, ScrLabel *labels,
-    ScrInstr *instructions, struct ItfMesSub *auxiliaryData, char *strings, ScrProcedureIndex procedureIndex);
+    ScrInstr *instructions, struct ItfMesSub *auxiliaryData, const char *strings, ScrProcedureIndex procedureIndex);
 
 
 /* Command callback plus operand count (0x8); DDS1 script/scrTraceCode.c. */

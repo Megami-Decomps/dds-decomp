@@ -1188,11 +1188,11 @@ extern dds3Basic_t *effObjSpawnLoadedResourceEffect(const char *resourceName, vo
 
 extern u8 D_00421A90[];
 
-extern dds3Basic_t *dds3AddBEDEffectObjectBasic(void *resource, void *firstVector, void *secondVector);
+extern dds3Basic_t *dds3AddBEDEffectObjectBasic(const char *resourcePath, void *firstVector, void *secondVector);
 
 extern u8 D_00421B20[];
 
-extern dds3Basic_t *dds3AddMG12EffectObjectBasic(s32 kind, void *resource);
+extern dds3Basic_t *dds3AddMG12EffectObjectBasic(s32 kind, const char *resourcePath);
 
 extern u8 D_00421B70[];
 
@@ -2635,13 +2635,13 @@ u32 evtCommand_EFFECT_BE(void) {
 u32 evtCommand_EFFECT_LOAD(void) {
     u8 buf1[16];
     u8 buf2[16];
-    char *resourceName;
+    const char *resourceName;
     dds3Basic_t *unit;
 
     memset(buf1, 0, 0x10);
     memset(buf2, 0, 0x10);
     resourceName = scrGetStrPara(0);
-    unit = effObjSpawnLoadedResourceEffect((const char *)resourceName, buf1, buf2);
+    unit = effObjSpawnLoadedResourceEffect(resourceName, buf1, buf2);
     if (unit == NULL) {
         printf(D_00421A90, 1);
         printf(D_00421AC0, scrGetStrPara(0));
@@ -2656,7 +2656,7 @@ u32 evtCommand_EFFECT_LOAD(void) {
 u32 evtCommand_EFFBED_LOAD(void) {
     f32 buf1[4];
     f32 buf2[4];
-    char *param0;
+    const char *param0;
     dds3Basic_t *unit;
 
     memset(buf1, 0, 0x10);
@@ -2771,7 +2771,7 @@ u32 evtCommand_EFFBED_START_EVO(void) {
 }
 
 u32 evtCommand_EFFMG1_LOAD(void) {
-    char *param0;
+    const char *param0;
     dds3Basic_t *unit;
 
     param0 = scrGetStrPara(0);
@@ -2819,7 +2819,7 @@ u32 evtCommand_EFFMG1_BE(void) {
 }
 
 u32 evtCommand_EFFMG2_LOAD(void) {
-    char *param0;
+    const char *param0;
     dds3Basic_t *unit;
 
     param0 = scrGetStrPara(0);

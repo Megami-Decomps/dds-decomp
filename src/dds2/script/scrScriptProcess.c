@@ -80,14 +80,14 @@ scrProcessWork_s *scrCreateTaskWithDefaultOption(BfFlw0Header *header) {
 
 dds3ProcessID_t *scrRunScriptEx(u32 priority, BfFlw0Header *header,
     ScrSection *procedureSection, ScrLabel *procedures, ScrLabel *labels,
-    ScrInstr *instructions, struct ItfMesSub *auxiliaryData, char *strings, ScrProcedureIndex procedureIndex)
+    ScrInstr *instructions, struct ItfMesSub *auxiliaryData, const char *strings, ScrProcedureIndex procedureIndex)
 {
     return scrStartScriptProcess(priority, bfContextCreate(header, procedureSection, procedures, labels, instructions, auxiliaryData, strings, procedureIndex));
 }
 
 scrProcessWork_s *scrCreateProcessAtFirstProcedure(BfFlw0Header *header, ScrSection *procedureSection,
     ScrLabel *procedures, ScrLabel *labels, ScrInstr *instructions,
-    struct ItfMesSub *auxiliaryData, char *strings)
+    struct ItfMesSub *auxiliaryData, const char *strings)
 {
     return bfContextCreate(header, procedureSection, procedures, labels, instructions, auxiliaryData, strings, 0);
 }

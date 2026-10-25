@@ -57,7 +57,7 @@ void PushFloat(scrProcessWork_s *script, f32 floatValue) {
     script->sp = script->sp + 1;
 }
 
-void PushStr(scrProcessWork_s *script, char *string) {
+void PushStr(scrProcessWork_s *script, const char *string) {
     script->stackTypes[script->sp] = SCR_STACK_TYPE_STRING;
     script->stackValues[script->sp].s = string;
     script->sp = script->sp + 1;

@@ -478,7 +478,7 @@ s32 fldCommand_CAM_SEL_PHOKAN(void) {
 
 
 s32 fldCommand_SET_NPC_CAMERA(void) {
-    char *name;
+    const char *name;
 
     name = scrGetStrPara(0);
     fldGlobalBase.mode = FLD_CAMERA_MODE_NPC_REQUEST;
@@ -614,7 +614,7 @@ s32 fldCommand_FLD_MODEL_ON(void) {
     s32 world;
     s32 stage;
     s32 mode;
-    char *name;
+    const char *name;
     s32 room;
     WorldIndexNode *list;
     dds3Basic_t *node;
@@ -667,7 +667,7 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
     s32 world;
     s32 stage;
     s32 mode;
-    char *name;
+    const char *name;
     s32 room;
     WorldIndexNode *list;
     dds3Basic_t *node;
@@ -725,7 +725,7 @@ extern void fldSetRoomObjectModeFlag(s32 area, s32 slotIndex, s32 bit, s32 enabl
 s32 fldCommand_FLD_ANIME_ON(void) {
     s32 world;
     s32 stage;
-    char *name;
+    const char *name;
     void *object;
     s32 id;
     s32 i;
@@ -772,7 +772,7 @@ s32 fldCommand_FLD_ANIME_ON(void) {
 s32 fldCommand_FLD_ANIME_OFF(void) {
     s32 world;
     s32 stage;
-    char *name;
+    const char *name;
     void *object;
     s32 id;
     s32 i;
@@ -820,7 +820,7 @@ extern void fldSetRoomSceneFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 s32 fldCommand_FLD_ATARI_ON(void) {
     s32 world;
     s32 stage;
-    char *name;
+    const char *name;
     s32 i;
 
     world = scrGetIntPara(0);
@@ -847,7 +847,7 @@ extern char *D_003BAE48;
 s32 fldCmdSetSceneBitsBarrierRoom(void) {
     s32 world;
     s32 stage;
-    char *name;
+    const char *name;
     s32 i;
 
     world = scrGetIntPara(0);
@@ -982,7 +982,7 @@ extern void fldSetMapSlotAuxiliaryFlag(s32 area, u32 slotIndex, s32 bit, s32 ena
 s32 fldOpClearRoomStateFlags(void) {
     s32 world;
     s32 stage;
-    char *name;
+    const char *name;
     s32 i;
 
     world = scrGetIntPara(0);
@@ -1012,7 +1012,7 @@ s32 fldOpClearRoomStateFlags(void) {
 s32 fldOpSetRoomStateFlags(void) {
     s32 world;
     s32 stage;
-    char *name;
+    const char *name;
     s32 i;
 
     world = scrGetIntPara(0);

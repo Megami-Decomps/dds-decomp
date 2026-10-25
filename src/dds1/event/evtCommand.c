@@ -499,7 +499,7 @@ s32 evtCommand_CALL_FIELD(void)
 {
     s32 stage;
     s32 kind;
-    char *sequenceName;
+    const char *sequenceName;
     fldSceneParam_t requestBuffer;
 
     fldBgmFadeOut();
@@ -516,7 +516,7 @@ s32 evtCommand_CALL_FIELD(void)
 s32 evtCommand_CALL_FIELD2(void)
 {
     s32 kind;
-    char *sequenceName;
+    const char *sequenceName;
     fldSceneParam_t requestBuffer;
 
     kind = scrGetIntPara(0);
@@ -541,7 +541,7 @@ s32 evtCommandSubmitScalarAdminRequest(void)
 s32 evtCommand_CALL_FIELD3(void)
 {
     s32 kind;
-    char *sequenceName;
+    const char *sequenceName;
     fldSceneParam_t requestBuffer;
 
     kind = scrGetIntPara(0);

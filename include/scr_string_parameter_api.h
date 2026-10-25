@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-/* Returns the string for a STRING-tagged current script parameter, or NULL. */
-char *scrGetStrPara(s32 idx);
+/* Returns a borrowed read-only string for a STRING-tagged parameter, or NULL. */
+const char *scrGetStrPara(s32 idx);
 
 #endif /* DDS_SCR_STRING_PARAMETER_API_H */

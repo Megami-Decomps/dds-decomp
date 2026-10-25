@@ -1278,7 +1278,7 @@ u32 sndOpSendTitleAudioCommand(void) {
 }
 
 s32 mnuInitializeTitleEffects(void) {
-    s32 commandName;
+    const char *commandName;
     commandName = scrGetStrPara(0);
     if (p2sdGetPcmState() != 0) {
         p2sdSyncSound();

@@ -549,7 +549,7 @@ f32 scrGetFloatPara(s32 parameterIndex)
 }
 
 /* Return a string parameter only when its VM stack tag is STRING. */
-char *scrGetStrPara(s32 parameterIndex)
+const char *scrGetStrPara(s32 parameterIndex)
 {
     scrProcessWork_s *scr = nowpwork;
     s32 stackIndex = scr->sp - parameterIndex - 1;

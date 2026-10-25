@@ -209,7 +209,7 @@ s32 fldCmdInitializeHuntSparkUnit(void) {
 
 /* Persona 4 func_001eb2a0 @ 001EB2A0 (src/promoted/code1_001e.c), recompiled unchanged */
 s32 fldCommandFindEffectByName(void) {
-    char *effectName = scrGetStrPara(0);
+    const char *effectName = scrGetStrPara(0);
 
     scrSetIntReturnValue(fldFindEffectByName(effectName));
     return 1;
