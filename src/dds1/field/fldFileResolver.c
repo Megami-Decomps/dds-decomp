@@ -167,10 +167,10 @@ dds3Basic_t *fldGetMatter_From_ModelRangeID(u32 resourceId) {
                     }
                 }
             } else {
-                dds3Basic_t *resolvedObject = fldFindMatterIndex(resource->id);
+                dds3Basic_t *resolvedObject = fldFindWorldNodeForRecordId(resource->id);
                 if (resolvedObject == NULL) {
                     resolvedObject = fldMakeDmyMatter();
-                    fldFindMatterIndexFrom(resource->id, resolvedObject);
+                    fldBindWorldNodeToRecordId(resource->id, resolvedObject);
                 }
                 return resolvedObject;
             }
@@ -1151,7 +1151,7 @@ void fldCreateResourceScriptObjects(void) {
                 nameIndex = 0;
                 for (; nameIndex < bindingResource->names->count; nameIndex++, nameEntry++) {
                     if (strcmp(resource->name, nameEntry->name) == 0) {
-                        fldFindMatterIndexFrom(bindingResource->id, scriptObject);
+                        fldBindWorldNodeToRecordId(bindingResource->id, scriptObject);
                         break;
                     }
                 }
@@ -6620,13 +6620,13 @@ void fldMakeEveHitPlanes(const f32 *vertices, f32 *normalX, f32 *normalY, f32 *n
 }
 
 /* Return the first matching record's world node; NULL also denotes a missing ID. */
-dds3Basic_t *fldFindMatterIndex(s32 id) {
+dds3Basic_t *fldFindWorldNodeForRecordId(s32 recordId) {
     s32 index = 0;
 
     if (fldValueRecordCount > 0) {
         FldValueRecord *record = fldMatterTable;
         do {
-            if (record->id == id) {
+            if (record->id == recordId) {
                 return record->worldNode;
             }
             index++;
@@ -6637,11 +6637,11 @@ dds3Basic_t *fldFindMatterIndex(s32 id) {
 }
 
 /* Update every matching ID, including duplicates; leave other records intact. */
-void fldFindMatterIndexFrom(s32 id, dds3Basic_t *worldNode) {
+void fldBindWorldNodeToRecordId(s32 recordId, dds3Basic_t *worldNode) {
     s32 index;
 
     for (index = 0; index < fldValueRecordCount; index++) {
-        if (fldMatterTable[index].id == id) {
+        if (fldMatterTable[index].id == recordId) {
             fldMatterTable[index].worldNode = worldNode;
         }
     }

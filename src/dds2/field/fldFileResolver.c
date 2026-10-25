@@ -101,10 +101,10 @@ dds3Basic_t *fldGetMatter_From_ModelRangeID(u32 resourceId) {
                     }
                 }
             } else {
-                dds3Basic_t *resolvedObject = fldFindMatterIndex(resource->id);
+                dds3Basic_t *resolvedObject = fldFindWorldNodeForRecordId(resource->id);
                 if (resolvedObject == NULL) {
                     resolvedObject = fldMakeDmyMatter();
-                    fldFindMatterIndexFrom(resource->id, resolvedObject);
+                    fldBindWorldNodeToRecordId(resource->id, resolvedObject);
                 }
                 return resolvedObject;
             }
@@ -1022,7 +1022,7 @@ void fldCreateResourceScriptObjects(void) {
                 nameIndex = 0;
                 for (; nameIndex < bindingResource->names->count; nameIndex++, nameEntry++) {
                     if (strcmp(resource->name, nameEntry->name) == 0) {
-                        fldFindMatterIndexFrom(bindingResource->id, scriptObject);
+                        fldBindWorldNodeToRecordId(bindingResource->id, scriptObject);
                         break;
                     }
                 }

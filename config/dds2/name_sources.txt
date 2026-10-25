@@ -1122,8 +1122,8 @@
 0x00137C08	fldVecDot	inferred	SMT3HD name via SLUS_209.11 0x00137B40, byte-identical; was fldDotVector
 0x00137C38	MATH_VectorLength	inferred	SMT3HD name via SLUS_209.11 0x00137B70, shared-hash-in-run; was fldCalculateVectorLength
 0x00137C68	fldMakeEveHitPlanes	inferred	SMT3HD name via SLUS_209.11 0x00137BA0, reloc-identical; was fldCalcTrianglePlane
-0x00137E00	fldFindMatterIndex	inferred	SMT3HD name via SLUS_209.11 0x00137D38, reloc-identical; was fldHitGetMatter
-0x00137E48	fldFindMatterIndexFrom	inferred	SMT3HD name via SLUS_209.11 0x00137D80, reloc-identical; was fldHitLinkMatter
+0x00137E00	fldFindWorldNodeForRecordId	inferred	Semantic rename: returns the cached worldNode from the first FldValueRecord matching its ID; prior retail aliases were fldFindMatterIndex / fldHitGetMatter
+0x00137E48	fldBindWorldNodeToRecordId	inferred	Semantic rename: assigns the worldNode to every FldValueRecord matching its ID; prior retail aliases were fldFindMatterIndexFrom / fldHitLinkMatter
 0x00137E90	fldClrCollision	inferred	Byte-identical DDS1 counterpart: Clears cached world-node pointers, resets related field state, then frees the record buffers.
 0x00137F10	fldMakePlane	inferred	SMT3HD name via SLUS_209.11 0x00137E38, reloc-identical; was fldAddCollisionPoly
 0x00139400	HitPositionInside2	inferred	SMT3HD name via SLUS_209.11 0x00139328, reloc-identical; was fldClassifyPositionInZoneWithMargin
@@ -10614,7 +10614,7 @@
 0x00436174	fldCameraColorLayerScroll	inferred	The vertical scroll of the camera colour layer being drawn (its fldCameraColorLayerScrolls entry), read for each tile's position and fade. DDS1 twin 0x003BADE4.
 0x00436178	fldItemBoxObjBuf	inferred	SMT3HD data name via SLUS_209.11 0x0054ED94, 20 agreeing references; was fldItemBoxObjBuf
 0x00436180	fldMatterTable	inferred	SMT3HD data name via SLUS_209.11 0x0054ED9C, 6 agreeing references; was fldMatterTable
-0x00436184	fldValueRecordCount	inferred	high confidence; src/dds2/game/code_00136EF8.c fldFindMatterIndex(): if (D_00436184 > 0) { Instruction-aligned data counterpart of DDS1 D_003BADF4 in the matched fldFindMatterIndex() twin. Number of ID/world-node records limiting the field record search. [names_reviewed26.tsv]
+0x00436184	fldValueRecordCount	inferred	high confidence; src/dds2/game/code_00136EF8.c fldFindWorldNodeForRecordId(): if (D_00436184 > 0) { Instruction-aligned data counterpart of DDS1 D_003BADF4 in the matched fldFindWorldNodeForRecordId() twin. Number of ID/world-node records limiting the field record search. [names_reviewed26.tsv]
 0x0043618C	fldAuxRecordResource	inferred	medium confidence; src/dds2/game/code_00136EF8.c fldAllocPlaneTable(): D_0043618C = (u32)storage; Instruction-aligned data counterpart of DDS1 D_003BADFC in the matched fldAllocPlaneTable() twin. Retained allocation handle backing the second, smaller record-storage buffer. [names_reviewed26.tsv]
 0x00436190	fldValueRecordResource	inferred	high confidence; src/dds2/game/code_00136EF8.c fldAllocPlaneTable(): D_00436190 = (u32)storage; Instruction-aligned data counterpart of DDS1 D_003BAE00 in the matched fldAllocPlaneTable() twin. Retained allocation handle backing the large ID/world-node record-storage buffer. [names_reviewed26.tsv]
 0x00436194	fldActorTaskRoom	inferred	The room whose actor-entry task fldUpdateRoomTriggers started (-1 none); its task ends when the player leaves. DDS1 twin 0x003BAE04.

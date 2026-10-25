@@ -5,9 +5,10 @@
 
 struct dds3Basic_t;
 
-/* Read or update the cached world object associated with a resource record ID. */
-struct dds3Basic_t *fldFindMatterIndex(s32 id);
-void fldFindMatterIndexFrom(s32 id, struct dds3Basic_t *worldNode);
+/* Return the first matching record's cached node, or NULL if no binding is found. */
+struct dds3Basic_t *fldFindWorldNodeForRecordId(s32 recordId);
+/* Bind the node to every collision record with this ID. */
+void fldBindWorldNodeToRecordId(s32 recordId, struct dds3Basic_t *worldNode);
 
 /* Resolves a named world object or lazily creates/caches a dummy matter object. */
 struct dds3Basic_t *fldGetMatter_From_ModelRangeID(u32 resourceId);

@@ -211,13 +211,13 @@ void fldMakeEveHitPlanes(const f32 *vertices, f32 *normalX, f32 *normalY, f32 *n
 }
 
 /* Return the first matching record's world node; NULL also denotes a missing ID. */
-struct dds3Basic_t *fldFindMatterIndex(s32 id) {
+struct dds3Basic_t *fldFindWorldNodeForRecordId(s32 recordId) {
     s32 index = 0;
 
     if (fldValueRecordCount > 0) {
         FldValueRecord *record = fldMatterTable;
         do {
-            if (record->id == id) {
+            if (record->id == recordId) {
                 return record->worldNode;
             }
             index++;
@@ -228,11 +228,11 @@ struct dds3Basic_t *fldFindMatterIndex(s32 id) {
 }
 
 /* Update every matching ID, including duplicates; leave other records intact. */
-void fldFindMatterIndexFrom(s32 id, struct dds3Basic_t *worldNode) {
+void fldBindWorldNodeToRecordId(s32 recordId, struct dds3Basic_t *worldNode) {
     s32 index;
 
     for (index = 0; index < fldValueRecordCount; index++) {
-        if (fldMatterTable[index].id == id) {
+        if (fldMatterTable[index].id == recordId) {
             fldMatterTable[index].worldNode = worldNode;
         }
     }
