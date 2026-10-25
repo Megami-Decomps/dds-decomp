@@ -220,7 +220,7 @@ void dds3DeleteBasic(dds3Basic_t *node) {
     }
 }
 
-s32 dds3InitPoseSet(dds3Basic_t *node) {
+u8 dds3InitPoseSet(dds3Basic_t *node) {
     dds3PoseSet_t *inner;
 
     if (node == NULL) {
@@ -377,4 +377,3 @@ INCLUDE_SDATA(const s32, "game/code_0010F118", D_00435D70);
 INCLUDE_SDATA(const s32, "game/code_0010F118", D_00435D78);
 
 INCLUDE_SDATA(const s32, "game/code_0010F118", D_00435D80);
-

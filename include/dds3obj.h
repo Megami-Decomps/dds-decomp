@@ -54,7 +54,7 @@ dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *world, s32 slotIndex, 
 dds3Basic_t *dds3SceneBasicSearchName(dds3Basic_t *world, const char *name);
 dds3Basic_t *dds3AddSceneBasicData(s32 kind);
 /* Allocate and initialize the inner transform object for a world node. */
-s32 dds3InitPoseSet(dds3Basic_t *node);
+u8 dds3InitPoseSet(dds3Basic_t *node);
 void dds3DeleteSceneBasicData(dds3Basic_t *node);
 /* Load the named area resource and attach it to the object's world table. */
 void dds3SceneBasicMakeScene(dds3Basic_t *object, const char *resourcePath);
