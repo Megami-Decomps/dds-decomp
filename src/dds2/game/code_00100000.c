@@ -4,6 +4,7 @@
 #include "sdf_timer.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
+#include "kwln_process_main_result.h"
 
 extern void kwlnUpdatePadInputState(void);
 
@@ -181,7 +182,7 @@ extern void sdfPadBuildButtonStates(void);
 extern void sdfFileCmdThreadSetLoPrio(void);
 extern void sdfFileCmdThreadSetHiPrio(void);
 
-extern s32 dds3ProcessMain(void);
+extern KwlnProcessMainResult dds3ProcessMain(void);
 
 void kwlnRunMainLoop(void) {
     u32 startTick;
@@ -198,7 +199,7 @@ void kwlnRunMainLoop(void) {
         if (D_00435B8C == 0) {
             startTick = sdfGetRunTimeCountBase();
             kwlnUpdatePadInputState();
-            if (dds3ProcessMain() == 0) {
+            if (dds3ProcessMain() == KWLN_PROCESS_MAIN_STOP) {
                 break;
             }
             D_00435B80++;

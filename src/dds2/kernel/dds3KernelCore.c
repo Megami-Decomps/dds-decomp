@@ -12,6 +12,7 @@
 #include "kwln_task_lifecycle.h"
 #include "kwln_task_queue_mutation.h"
 #include "kwln_task_runner.h"
+#include "kwln_process_main_result.h"
 
 
 
@@ -447,12 +448,12 @@ void dds3PrintProcessTree(void)
     }
 }
 
-s32 dds3ProcessMain(void)
+KwlnProcessMainResult dds3ProcessMain(void)
 {
     StartingProcess();
     RunningProcess();
     dds3EndingProcess();
-    return 1;
+    return KWLN_PROCESS_MAIN_CONTINUE;
 }
 
 dds3ProcessID_t *dds3StartProcess(const char *name, u32 priority, s32 startDelay, s32 destroyDelay,
