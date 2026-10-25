@@ -790,25 +790,25 @@ void fldSetSceneParamLoad(fldSceneParam_t *record, s32 stage, s32 kind, const ch
 
 /* Converts the field work's primary and secondary state words into a
  * compact scene status, giving the primary state precedence. */
-u32 fldGetRestoreMode(void) {
+FldSceneStatus fldGetRestoreMode(void) {
     FieldPlayerSceneWork *sceneWork = &fldSceneParam;
 
     if (sceneWork->primaryState == 1) {
-        return 1;
+        return FLD_SCENE_STATUS_BATTLE;
     }
     if (sceneWork->secondaryState == 3) {
-        return 3;
+        return FLD_SCENE_STATUS_ANA;
     }
     if (sceneWork->secondaryState == 4) {
-        return 4;
+        return FLD_SCENE_STATUS_SISETU;
     }
     if (sceneWork->secondaryState == 5) {
-        return 5;
+        return FLD_SCENE_STATUS_MINI_TITLE_UNLOCK;
     }
     if (sceneWork->secondaryState == 6) {
-        return 2;
+        return FLD_SCENE_STATUS_EVENT;
     }
-    return sceneWork->primaryState != 0 ? 2 : 0;
+    return sceneWork->primaryState != 0 ? FLD_SCENE_STATUS_EVENT : FLD_SCENE_STATUS_DEFAULT;
 }
 
 extern FieldAreaEncounterTable *D_003BAA38;
@@ -913,12 +913,12 @@ void fldRebuildFieldScene(void) {
                     fldGlobalBase.defaultEncounterId = encounter;
                 }
             }
-            if (fldGlobalBase.area < 39 && fldGetRestoreMode() != 4 && reuseAreaResources == 0) {
-                if (fldGetRestoreMode() == 5) {
+            if (fldGlobalBase.area < 39 && fldGetRestoreMode() != FLD_SCENE_STATUS_SISETU && reuseAreaResources == 0) {
+                if (fldGetRestoreMode() == FLD_SCENE_STATUS_MINI_TITLE_UNLOCK) {
                     if (fldGlobalBase.cachedArea != fldGlobalBase.area) {
                         fldStartMiniTitleForUnlock(fldGlobalBase.area);
                     }
-                } else if (fldGetRestoreMode() != 2) {
+                } else if (fldGetRestoreMode() != FLD_SCENE_STATUS_EVENT) {
                     if (!((fldGlobalBase.cachedArea == 32 &&
                            (fldGlobalBase.area == 36 || fldGlobalBase.area == 37)) ||
                           (fldGlobalBase.cachedArea == 36 &&
@@ -2146,7 +2146,8 @@ s32 fldProcSequence(dds3ProcessID_t *task) {
         if (fldStepSceneBgmArchive() != 0) {
             fldGlobalBase.sceneBgmSuppressed = 0;
             if (fldGlobalBase.specialEventActive == 0) {
-                if (fldGetRestoreMode() == 1 || fldGetRestoreMode() == 4 || fldGetRestoreMode() == 6) {
+                /* Raw sequence mode 6 maps to EVENT, so this legacy status check is unreachable. */
+                if (fldGetRestoreMode() == FLD_SCENE_STATUS_BATTLE || fldGetRestoreMode() == FLD_SCENE_STATUS_SISETU || fldGetRestoreMode() == 6) {
                     fldStartSceneBgmAlternate();
                 } else if (scene->sequenceMode == 0) {
                     fldStartSceneBgm();

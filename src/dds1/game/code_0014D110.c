@@ -1066,7 +1066,7 @@ s32 fldCmdSetSceneBitsValue(void) {
 }
 
 s32 fldCommand_FLD_CHK_BTL(void) {
-    if (fldGetRestoreMode() == 1) {
+    if (fldGetRestoreMode() == FLD_SCENE_STATUS_BATTLE) {
         scrSetIntReturnValue(1);
         return 1;
     }
@@ -1075,7 +1075,7 @@ s32 fldCommand_FLD_CHK_BTL(void) {
 }
 
 s32 fldCommand_FLD_CHK_ANA(void) {
-    if (fldGetRestoreMode() == 3) {
+    if (fldGetRestoreMode() == FLD_SCENE_STATUS_ANA) {
         scrSetIntReturnValue(1);
         return 1;
     }
@@ -1084,7 +1084,7 @@ s32 fldCommand_FLD_CHK_ANA(void) {
 }
 
 s32 fldCommand_FLD_CHK_SISETU(void) {
-    if (fldGetRestoreMode() == 4) {
+    if (fldGetRestoreMode() == FLD_SCENE_STATUS_SISETU) {
         scrSetIntReturnValue(1);
         return 1;
     }
@@ -1093,7 +1093,7 @@ s32 fldCommand_FLD_CHK_SISETU(void) {
 }
 
 s32 fldCommand_FLD_CHK_EVE(void) {
-    if (fldGetRestoreMode() == 2) {
+    if (fldGetRestoreMode() == FLD_SCENE_STATUS_EVENT) {
         scrSetIntReturnValue(1);
         return 1;
     }
