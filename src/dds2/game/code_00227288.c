@@ -1501,7 +1501,7 @@ extern void btlMarkActiveBossUnitExtensionFlags(BtlUnit *unit);
 extern void btlMarkSpecialActionUnit(BtlUnit *actor);
 extern void btlMarkUnitActionAndStatusForMode(BtlUnit *unit);
 extern s32 btlMaskValueWhenSubtaskInactive(BtlUnit *actor);
-extern s32 btlMotionOffsetForActor(s32 actor, s32 base);
+extern s32 btlMotionOffsetForActor(BtlUnit *actor, s32 base);
 extern u32 btlOffsetSpecialActionValue(BtlUnit *unit, u32 base);
 extern s32 btlOffsetSpecialEnemyForCommand(BtlLinkedCommand *command);
 extern s32 btlOverrideActionResultForEnemyMode(s32 battler, s32 action, s32 defaultValue);

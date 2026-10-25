@@ -3097,15 +3097,15 @@ s32 btlResolveBoundActionCode(s32 battler, s32 action) {
     return action;
 }
 
-s32 btlMotionOffsetForActor(s32 actor, s32 base) {
-    u32 flags = ((BtlUnit *)actor)->status.flags;
+s32 btlMotionOffsetForActor(BtlUnit *actor, s32 base) {
+    u32 flags = actor->status.flags;
     if ((flags & 1) == 0) {
         return base;
     }
     if ((flags & 0x400) == 0) {
         return base;
     }
-    switch (((BtlUnit *)actor)->partyRecord.unitId) {
+    switch (actor->partyRecord.unitId) {
     case 0x110:
         return base;
     case 0x111:
