@@ -846,13 +846,13 @@ void btlResetCommandIndexWork(BtlTask *task) {
     task->unit->pendingAbilityId = -1;
 }
 
-void btlCommandStartSoundTasks(u8 *task) {
+void btlCommandStartSoundTasks(BtlTask *task) {
     BtlUnit *unit;
     s64 ownerId;
     s32 effect;
-    u8 *object;
+    BtlRuntimeTask *object;
     if (sndHasActiveActor() == 0 && btlCountTasksByKind(0x45) == 0) {
-        unit = *(BtlUnit **)(task + 0x18);
+        unit = task->unit;
         ownerId = btlAdvanceRuntimeSequenceCounter();
         btlStartTask(btlCreateCommandSoundUpdateTask());
         btlStartTask(btlCreateSecondaryCommandSoundTask());
@@ -862,7 +862,7 @@ void btlCommandStartSoundTasks(u8 *task) {
             btlStartTask(btlCreateCommandSoundTask(task, 3));
         }
         if ((unit->partyRecord.status & 0x7FFF) == 0x20) {
-            if ((u32)((BtlTask *)task)->unit->status.flags & 0x200) {
+            if ((u32)task->unit->status.flags & 0x200) {
                 btlSelectAndRunModeAiAction(task, 2);
             } else {
                 btlSelectAndRunModeAiAction(task, 3);
@@ -871,11 +871,11 @@ void btlCommandStartSoundTasks(u8 *task) {
         }
         effect = btlGetStatusActionEffectId(task);
         if (effect > 0) {
-            object = (u8 *)btlCreateEffObjB(unit, effect);
-            *(s64 *)(object + 0x40) = ownerId;
+            object = btlCreateEffObjB(unit, effect);
+            object->ownerId = ownerId;
             btlStartTask(object);
         }
-        *(u32 *)(task + 8) |= 0x200;
+        task->flags |= 0x200;
     }
 }
 

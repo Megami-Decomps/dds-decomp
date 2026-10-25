@@ -1296,23 +1296,23 @@ void btlResetCommandIndexWork(ActionStateLink *task) {
     task->unit->pendingAbilityId = 0xffffffff;
 }
 
-void btlCommandStartSoundTasks(u8 *task) {
-    u8 *unit;
+void btlCommandStartSoundTasks(ActionStateLink *task) {
+    BtlUnit *unit;
     s64 ownerId;
     s32 effect;
     BtlRuntimeTask *object;
     if (sndHasActiveActor() == 0 && btlCountTasksByKind(0x49) == 0) {
-        unit = (u8 *)((ActionStateLink *)task)->unit;
+        unit = task->unit;
         ownerId = btlAdvanceRuntimeSequenceCounter();
         btlStartTask(btlCreateCommandSoundUpdateTask());
         btlStartTask(btlCreateSecondaryCommandSoundTask());
-        if (((BtlUnit *)unit)->status.flags & 0x200) {
-            btlStartTask(btlCreateCommandSoundTask((ActionStateLink *)task, 9));
+        if (unit->status.flags & 0x200) {
+            btlStartTask(btlCreateCommandSoundTask(task, 9));
         } else {
-            btlStartTask(btlCreateCommandSoundTask((ActionStateLink *)task, 3));
+            btlStartTask(btlCreateCommandSoundTask(task, 3));
         }
-        if ((((BtlUnit *)unit)->partyRecord.status & 0x7FFF) == 0x20) {
-            if (((ActionStateLink *)task)->unit->status.flags & 0x200) {
+        if ((unit->partyRecord.status & 0x7FFF) == 0x20) {
+            if (task->unit->status.flags & 0x200) {
                 btlSelectAndRunModeAiAction(task, 2);
             } else {
                 btlSelectAndRunModeAiAction(task, 3);
@@ -1321,11 +1321,11 @@ void btlCommandStartSoundTasks(u8 *task) {
         }
         effect = btlGetStatusActionEffectId(task);
         if (effect > 0) {
-            object = btlCreateEffObjB((BtlUnit *)unit, effect);
+            object = btlCreateEffObjB(unit, effect);
             object->ownerId = ownerId;
             btlStartTask(object);
         }
-        ((ActionStateLink *)task)->pendingFlags |= 0x200;
+        task->pendingFlags |= 0x200;
     }
 }
 
