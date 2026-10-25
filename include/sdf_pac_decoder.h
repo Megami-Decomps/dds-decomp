@@ -18,6 +18,14 @@ enum SdfPacDecoderState {
     SDF_DECODE_EXPAND_BYTES = 10,
 };
 
+/* sdfDecomp reports whether the stream end marker was consumed, independently
+ * of how many bytes from the current input span were consumed. */
+typedef s32 SdfPacDecoderResult;
+enum SdfPacDecoderResultValue {
+    SDF_PAC_DECODE_INCOMPLETE = 0,
+    SDF_PAC_DECODE_COMPLETE = 1
+};
+
 /* Incremental decoder access view shared by both providers. The backing
  * decoder block is allocated as 0x20 bytes; only this 0x14-byte prefix is
  * described here, and its trailing allocation bytes remain unknown. */
@@ -32,7 +40,7 @@ typedef struct SdfPacDecoder {
     u8 pad11[3];          /* 0x11: opaque */
 } SdfPacDecoder;
 
-s32 sdfDecomp(SdfPacDecoder *decoder, const u8 *input, s32 inputBytes);
+SdfPacDecoderResult sdfDecomp(SdfPacDecoder *decoder, const u8 *input, s32 inputBytes);
 void sdfDecompInit(SdfPacDecoder *decoder, u8 *output);
 
 typedef char SdfPacDecoder_size_must_be_0x14[

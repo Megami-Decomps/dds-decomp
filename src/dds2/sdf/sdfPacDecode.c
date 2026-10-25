@@ -200,9 +200,9 @@ void sdfPacMemDecoderFunc(PacState *state) {
 /* Feed compressed input to the active decoder until it finishes. */
 void sdfPacMemDecompDecoderFunc(PacState *state) {
     s32 inputBytes = state->inputAvailable;
-    s32 finished = sdfDecomp((SdfPacDecoder *)state->decoder, state->inputCursor, inputBytes);
+    SdfPacDecoderResult result = sdfDecomp((SdfPacDecoder *)state->decoder, state->inputCursor, inputBytes);
     sdfPacUseSrc(state, inputBytes - ((SdfPacDecoder *)state->decoder)->remainingInputBytes);
-    if (finished == 0) {
+    if (result == SDF_PAC_DECODE_INCOMPLETE) {
         return;
     }
     sdfChipFreeDirect(state->decoder);
@@ -339,9 +339,9 @@ void sdfPacTmxDecoderFunc(PacState *state) {
 void sdfPacTmxDecompDecoderFunc(PacState *state) {
     /* This handler offers pendingBytes, unlike the packet-level decoder. */
     s32 inputBytes = state->pendingBytes;
-    s32 finished = sdfDecomp((SdfPacDecoder *)state->decoder, state->inputCursor, inputBytes);
+    SdfPacDecoderResult result = sdfDecomp((SdfPacDecoder *)state->decoder, state->inputCursor, inputBytes);
     sdfPacUseSrc(state, inputBytes - ((SdfPacDecoder *)state->decoder)->remainingInputBytes);
-    if (finished == 0) {
+    if (result == SDF_PAC_DECODE_INCOMPLETE) {
         return;
     }
     {

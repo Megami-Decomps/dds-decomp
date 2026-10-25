@@ -109,7 +109,7 @@ extern const u8 *D_0047BC80[16];
 
 /* Incrementally decode the PAC byte stream, preserving partial commands when
  * the caller's input chunk ends. */
-s32 sdfDecomp(SdfPacDecoder *decoder, const u8 *input, s32 inputBytes) {
+SdfPacDecoderResult sdfDecomp(SdfPacDecoder *decoder, const u8 *input, s32 inputBytes) {
     s32 count;
     s32 offset;
     u8 *output;
@@ -140,7 +140,7 @@ s32 sdfDecomp(SdfPacDecoder *decoder, const u8 *input, s32 inputBytes) {
                             decoder->input = input;
                             decoder->remainingInputBytes = inputBytes;
                             decoder->state = SDF_DECODE_COMPLETE;
-                            return 1;
+                            return SDF_PAC_DECODE_COMPLETE;
                         }
                     } else {
                         decoder->command = command & SDF_DECODE_COMMAND_CLASS_MASK;
@@ -264,7 +264,7 @@ s32 sdfDecomp(SdfPacDecoder *decoder, const u8 *input, s32 inputBytes) {
     decoder->input = input;
     decoder->remainingInputBytes = inputBytes;
     decoder->output = output;
-    return 0;
+    return SDF_PAC_DECODE_INCOMPLETE;
 }
 
 void sdfDecompInit(SdfPacDecoder *decoder, u8 *output) {
