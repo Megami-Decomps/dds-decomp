@@ -4778,12 +4778,12 @@ void fldClearObjectEntryHandles(void) {
     s32 i = 0x10;
 
     do {
-        s32 objectHandle = entry->objectHandle;
+        dds3Basic_t *objectHandle = entry->objectHandle;
 
         i--;
-        if (objectHandle != 0) {
-            dds3DeleteUnitObjectBasic((dds3Basic_t *)objectHandle);
-            entry->objectHandle = 0;
+        if (objectHandle != NULL) {
+            dds3DeleteUnitObjectBasic(objectHandle);
+            entry->objectHandle = NULL;
         }
         entry++;
     } while (i >= 0);
@@ -4851,9 +4851,9 @@ s32 fldAttachSparkSlotToWorldObject(s32 index, s32 reserved) {
     fldSparkControlState.cursor = (slot + 1) % 16;
     if (fldSparkSlots[index].hasVectors == 1) {
         SDF_VU0_COPYVECTOR(&position, fldSparkSlots[index].position);
-        dds3SetPosPoseSet((dds3Basic_t *)fldSparkObjectEntries[slot].objectHandle, (u128 *)fldSparkSlots[index].position);
-        dds3SetRotPoseSet((dds3Basic_t *)fldSparkObjectEntries[slot].objectHandle, (u128 *)fldSparkSlots[index].rotation);
-        model = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle((dds3Basic_t *)(u32)fldSparkObjectEntries[slot].objectHandle);
+        dds3SetPosPoseSet(fldSparkObjectEntries[slot].objectHandle, (u128 *)fldSparkSlots[index].position);
+        dds3SetRotPoseSet(fldSparkObjectEntries[slot].objectHandle, (u128 *)fldSparkSlots[index].rotation);
+        model = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle(fldSparkObjectEntries[slot].objectHandle);
         model->flags &= ~MDL_SKIP_TRANSFORMS;
         fldSparkSlots[index].objectSlot = slot;
         fldSparkObjectEntries[slot].sparkSlotIndex = index;
@@ -4864,7 +4864,7 @@ s32 fldAttachSparkSlotToWorldObject(s32 index, s32 reserved) {
 
 void fldFreeSparkSlot(s32 index) {
     SdfMathVector4 vec;
-    s32 obj;
+    dds3Basic_t *obj;
     s32 *flags;
     s16 slot;
 
@@ -4872,9 +4872,9 @@ void fldFreeSparkSlot(s32 index) {
     if (fldSparkSlots[index].hasVectors == 1 && fldSparkSlots[index].active != 0 && fldSparkSlots[index].objectSlot != -1) {
         vec.x = fldSparkSlots[index].position[0];
         vec.z = fldSparkSlots[index].position[2];
-        dds3SetPosPoseSet((dds3Basic_t *)fldSparkObjectEntries[fldSparkSlots[index].objectSlot].objectHandle, (u128 *)&vec);
+        dds3SetPosPoseSet(fldSparkObjectEntries[fldSparkSlots[index].objectSlot].objectHandle, (u128 *)&vec);
         obj = fldSparkObjectEntries[fldSparkSlots[index].objectSlot].objectHandle;
-        flags = (s32 *)dds3ObjectBaseGetModelHandle((dds3Basic_t *)(u32)obj);
+        flags = (s32 *)dds3ObjectBaseGetModelHandle(obj);
         *flags |= 1;
         dds3ObjectBaseOffFlag(obj, 0x400);
         slot = fldSparkSlots[index].objectSlot;
