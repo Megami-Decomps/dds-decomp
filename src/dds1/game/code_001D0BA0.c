@@ -5612,9 +5612,9 @@ u32 btlInitializeMotionTransformFromTaskArguments(BtlCameraTransformTaskArgs *ar
     return 1;
 }
 
-u8 *btlCreateFloatTask28(BtlTask *actor, f32 x, f32 y, f32 z, f32 directionX,
-                         f32 directionY, f32 directionZ, f32 directionW,
-                         f32 fovDegrees) {
+BtlRuntimeTask *btlCreateFloatTask28(BtlTask *actor, f32 x, f32 y, f32 z,
+                                     f32 directionX, f32 directionY, f32 directionZ,
+                                     f32 directionW, f32 fovDegrees) {
     BtlRuntimeTask *task = btlAllocTask(0x24);
     u8 *taskBytes = (u8 *)task;
     BtlCameraTransformTaskArgs *args;
@@ -5636,7 +5636,7 @@ u8 *btlCreateFloatTask28(BtlTask *actor, f32 x, f32 y, f32 z, f32 directionX,
     args->direction[2] = directionZ;
     args->direction[3] = directionW;
     args->fovDegrees = fovDegrees;
-    return (u8 *)task;
+    return task;
 }
 
 extern void btlSetEffectCameraKeys(u8 *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);

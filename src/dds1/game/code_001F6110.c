@@ -2534,9 +2534,9 @@ u32 btlScriptFlagEnemyDefeatCandidates(void) {
     return 1;
 }
 
-extern u8 *btlCreateFloatTask28(BtlTask *actor, f32 x, f32 y, f32 z,
-                                f32 directionX, f32 directionY, f32 directionZ,
-                                f32 directionW, f32 fovDegrees);
+extern struct BtlRuntimeTask *btlCreateFloatTask28(BtlTask *actor, f32 x, f32 y, f32 z,
+                                                   f32 directionX, f32 directionY, f32 directionZ,
+                                                   f32 directionW, f32 fovDegrees);
 extern struct BtlRuntimeTask *btlScheduleContextReset(void);
 
 extern u64 btlStartTask(struct BtlRuntimeTask *taskObject);
