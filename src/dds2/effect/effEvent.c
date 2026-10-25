@@ -1154,7 +1154,7 @@ void effEveBEDCutSetScale(effEveBEDCutHandle_t *work, f32 scale) {
     effBTLCutSetScale(work->effect, scale);
 }
 
-void effEveBEDCutSetUnitHandle(effEveBEDCutHandle_t *work, void *actor) {
+void effEveBEDCutSetUnitHandle(effEveBEDCutHandle_t *work, struct evtUnitHandle_t *actor) {
     work->actor = actor;
 }
 
