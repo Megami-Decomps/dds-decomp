@@ -28,7 +28,7 @@ void dds3DeleteWorld(void) {
 /* Set the primary world node without releasing it; no world is a no-op. */
 void dds3SetActiveScene(dds3Basic_t *primaryWorldNode) {
     if (dds3TheWorld != NULL) {
-        ((WorldInfo *)dds3TheWorld->data)->primaryObject = primaryWorldNode;
+        ((WorldInfo *)dds3TheWorld->data)->activeScene = primaryWorldNode;
     }
 }
 
@@ -40,13 +40,13 @@ dds3Basic_t *dds3GetActiveScene(void) {
     if (world == NULL) {
         return NULL;
     }
-    return ((WorldInfo *)world->data)->primaryObject;
+    return ((WorldInfo *)world->data)->activeScene;
 }
 
 /* Set the secondary world node without releasing it; no world is a no-op. */
 void dds3SetControlScene(dds3Basic_t *secondaryWorldNode) {
     if (dds3TheWorld != NULL) {
-        ((WorldInfo *)dds3TheWorld->data)->secondaryObject = secondaryWorldNode;
+        ((WorldInfo *)dds3TheWorld->data)->controlScene = secondaryWorldNode;
     }
 }
 
@@ -58,7 +58,7 @@ dds3Basic_t *dds3GetControlScene(void) {
     if (world == NULL) {
         return NULL;
     }
-    return ((WorldInfo *)world->data)->secondaryObject;
+    return ((WorldInfo *)world->data)->controlScene;
 }
 
 /* Create a kind-1 world node and append it at the tail.
@@ -104,11 +104,11 @@ void dds3DeleteScene(dds3Basic_t *worldNode) {
     if (worldInfo->lastNode == worldNode) {
         worldInfo->lastNode = worldNode->previous;
     }
-    if (worldInfo->primaryObject == worldNode) {
-        worldInfo->primaryObject = NULL;
+    if (worldInfo->activeScene == worldNode) {
+        worldInfo->activeScene = NULL;
     }
-    if (worldInfo->secondaryObject == worldNode) {
-        worldInfo->secondaryObject = NULL;
+    if (worldInfo->controlScene == worldNode) {
+        worldInfo->controlScene = NULL;
     }
     dds3DeleteBasic(worldNode);
 }

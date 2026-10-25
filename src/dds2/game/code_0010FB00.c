@@ -126,8 +126,8 @@ s32 worldconstructor(dds3Basic_t *object) {
     object->data = entry;
     entry->firstNode = NULL;
     entry->lastNode = NULL;
-    entry->primaryObject = NULL;
-    entry->secondaryObject = NULL;
+    entry->activeScene = NULL;
+    entry->controlScene = NULL;
     entry->entryAllocation = NULL;
     entry->entries = NULL;
     entry->entryCapacity = 0;
@@ -162,7 +162,7 @@ u32 worldmainprocuder(dds3Basic_t *obj) {
     WorldInfo *entry = obj->data;
     dds3Basic_t *callbackTarget;
 
-    callbackTarget = (dds3Basic_t *)entry->primaryObject;
+    callbackTarget = (dds3Basic_t *)entry->activeScene;
     if (callbackTarget != NULL) {
         dds3CallBasicMainProc(callbackTarget);
     }
@@ -173,7 +173,7 @@ u32 worlddrawprocuder(dds3Basic_t *obj) {
     WorldInfo *entry = obj->data;
     dds3Basic_t *callbackTarget;
 
-    callbackTarget = (dds3Basic_t *)entry->primaryObject;
+    callbackTarget = (dds3Basic_t *)entry->activeScene;
     if (callbackTarget != NULL) {
         dds3CallBasicDrawProc(callbackTarget);
     }
