@@ -2,6 +2,7 @@
 #include "sdf_chip.h"
 
 #include "dds3obj.h"
+#include "dds3_basic_array_search.h"
 #include "dds3_world_selection.h"
 #include "dds3_world_lifecycle.h"
 
@@ -275,18 +276,18 @@ void dds3DeleteAllBasicArray(dds3BasicArrayHandle_t *object) {
 
 /* Reset the cursor and remove this node's matching address once, or all matches
  * when processAllMatches is nonzero. Return whether any match was processed. */
-s32 dds3SearchDeleteBasicArray(dds3BasicArrayHandle_t *indexNode, dds3Basic_t *targetNode, s32 processAllMatches) {
-    s32 processedMatch;
+Dds3BasicArrayMatchResult dds3SearchDeleteBasicArray(dds3BasicArrayHandle_t *indexNode, dds3Basic_t *targetNode, s32 processAllMatches) {
+    Dds3BasicArrayMatchResult processedMatch;
 
-    processedMatch = 0;
+    processedMatch = DDS3_BASIC_ARRAY_NO_MATCH;
     if (dds3GetBasicArrayCount(indexNode) != 0) {
         dds3SetFirstBasicArray(indexNode);
         do {
-            if (dds3SetSearchNextBasicArray(indexNode, targetNode) != 1) {
+            if (dds3SetSearchNextBasicArray(indexNode, targetNode) != DDS3_BASIC_ARRAY_MATCH_FOUND) {
                 break;
             }
             dds3DeleteBasicArray(indexNode);
-            processedMatch = 1;
+            processedMatch = DDS3_BASIC_ARRAY_MATCH_FOUND;
         } while (processAllMatches != 0);
     }
     return processedMatch;
@@ -295,17 +296,17 @@ s32 dds3SearchDeleteBasicArray(dds3BasicArrayHandle_t *indexNode, dds3Basic_t *t
 /* Search from the current cursor without resetting it; leave it on a match.
  * A NULL payload terminates before comparison, even if later entries remain,
  * so a NULL target never matches. Return 1 for a match, otherwise 0. */
-s32 dds3SetSearchNextBasicArray(dds3BasicArrayHandle_t *indexNode, const dds3Basic_t *targetNode) {
+Dds3BasicArrayMatchResult dds3SetSearchNextBasicArray(dds3BasicArrayHandle_t *indexNode, const dds3Basic_t *targetNode) {
     u32 candidateWord;
 
     do {
         candidateWord = dds3GetBasicArray(indexNode);
         if (candidateWord == 0) {
-            return 0;
+            return DDS3_BASIC_ARRAY_NO_MATCH;
         }
         if ((u32)targetNode == candidateWord) {
-            return 1;
+            return DDS3_BASIC_ARRAY_MATCH_FOUND;
         }
     } while (dds3SetNextBasicArray(indexNode) != 0);
-    return 0;
+    return DDS3_BASIC_ARRAY_NO_MATCH;
 }
