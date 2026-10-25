@@ -399,7 +399,7 @@ void datAddCurrencyClamped(s32 delta) {
 
 /* Compare the signed balance against the requested amount; no debit or
  * validation is performed, so negative requests keep their original semantics. */
-s32 datHasEnoughCurrency(s32 requiredAmount) {
+u8 datHasEnoughCurrency(s32 requiredAmount) {
     if (DDS3_GBWK->header.currency < requiredAmount) {
         return 0;
     }

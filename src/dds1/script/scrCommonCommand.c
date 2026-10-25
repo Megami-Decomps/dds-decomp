@@ -958,7 +958,7 @@ s32 scrCommandAddPartyCurrency(void)
     return 1;
 }
 
-extern s32 datHasEnoughCurrency(s32 requiredAmount);
+extern u8 datHasEnoughCurrency(s32 requiredAmount);
 
 /* Persona 4 scrCommand_SCR_EXISTS @ 00299600 (src/Script/scrCommonCommand.c), recompiled unchanged */
 u32 scrCommand_SCR_EXISTS()
