@@ -1768,7 +1768,7 @@ extern void dspRequestMessageWindowModeOne(void);
 
 extern void mnuQueueTerminalCurrencyLabel(s32, s32);
 
-extern void mnuSelectFirstListNode(s32);
+extern void mnuSelectFirstListNode(MenuList *);
 
 
 
@@ -2058,7 +2058,7 @@ u32 evtInitializeSelectionListWhenReady(dds3ProcessID_t *task) {
     MenuSlotState *context = (MenuSlotState *)dds3GetProcessData(task);
 
     if (context->menuActive == 0) {
-        mnuSelectFirstListNode((s32)context->secondaryList);
+        mnuSelectFirstListNode(context->secondaryList);
         mnuConfigureTerminalSlotEffects(3, (s32)context);
         evtRememberDispatchCallback(mnuDrawTerminalSecondaryListAndStep, (s32)context);
         mnuConfigureTerminalModeEffects(3, (s32)context);
@@ -2139,8 +2139,8 @@ s32 evtBSetupDispatchSyncC(dds3ProcessID_t *request) {
 u32 evtEnterThresholdSelectionList(dds3ProcessID_t *task) {
     MenuSlotState *context = (MenuSlotState *)dds3GetProcessData(task);
 
-    mnuRefreshThresholdNodeFlags((s32)context->progressList);
-    mnuSelectFirstListNode((s32)context->progressList);
+    mnuRefreshThresholdNodeFlags(context->progressList);
+    mnuSelectFirstListNode(context->progressList);
     mnuTerminalSelectSlot(3, 2, (s32)context);
     mnuApplyGridPanelHostSetting(3, (MenuSlotState *)context);
     mnuSetTerminalPanelMotionMode(4, (s32)context);
@@ -2401,7 +2401,7 @@ u32 evtPrepareSelectedMenuEntry(dds3ProcessID_t *task) {
     s32 *selectionIndex = &owner->cursor->camp.value;
 
     if (owner->count == 1) {
-        mnuSelectFirstListNode((s32)owner);
+        mnuSelectFirstListNode(owner);
     }
     evtCopyEntryStringToActiveWindow(0, D_003A41A8[*selectionIndex].encodedText);
     dspSetActive(1);
