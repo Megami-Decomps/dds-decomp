@@ -8,6 +8,7 @@
 #include "eff_resource_records.h"
 #include "eff_resource_list.h"
 #include "common.h"
+#include "dds3_admin_control_api.h"
 #include "staff_grid_label_row.h"
 #include "kwln_task_add_child.h"
 #include "ui_color.h"
@@ -57,7 +58,7 @@ extern s32 mnuDrawCampFieldSkillPage(dds3ProcessID_t *task);
 
 extern s32 mnuFinishStaffConfigPopup(dds3ProcessID_t *task);
 
-extern s32 dds3AdminiGetPrevSequence(void);
+
 
 extern struct EffectList *mnuAllocateValueRecord(u32);
 

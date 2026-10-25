@@ -6,6 +6,7 @@
 #include "eff_resource_records.h"
 #include "eff_resource_list.h"
 #include "common.h"
+#include "dds3_admin_control_api.h"
 #include "staff_grid_label_row.h"
 #include "kwln_task_add_child.h"
 #include "fr_font.h"
@@ -85,7 +86,7 @@ void mnuReleaseStaffSpriteAndResourceHandles(StaffMenuWork *menu) {
 }
 
 
-extern s8 dds3AdminiGetPrevSequence(void);
+
 
 extern EffectList *mnuAllocateValueRecord(u32);
 

@@ -56,7 +56,7 @@ extern void frDelFontStyle(s32 slotId);
 #define ITF_TRIANGLE_STRIP_PRIMITIVE_BITS 0x4C
 #define ITF_LINE_STRIP_PRIMITIVE_BITS 0x14A
 #define ITF_LINES_PRIMITIVE_BITS 0x49
-extern s8 dds3AdminiGetActiveSequence(void);
+
 #include "sdf_debug_api.h"
 
 extern dds3ProcessID_t *itfFontTestScriptTask;

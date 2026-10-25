@@ -101,7 +101,7 @@ void frFontEnsureSlotLoaded(s32 id, const char *path);
 
 
 
-extern s32 dds3AdminiGetActiveSequence(void);
+
 
 #include "sdf_debug_api.h"
 
