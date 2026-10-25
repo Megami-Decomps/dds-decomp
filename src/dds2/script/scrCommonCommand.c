@@ -9,6 +9,7 @@
 #include "kwln_process_registration.h"
 #include "pcp_vu0.h"
 #include "scr.h"
+#include "scr_command_result.h"
 #include "scr_command_timer_api.h"
 #include "scr_string_parameter_api.h"
 #include "scr_arg_read.h"
@@ -64,7 +65,7 @@ static inline ScrProcessHandle scrGetProcessHandlePara(s32 parameterIndex)
 s32 scrCommand_RND(void)
 {
     scrSetIntReturnValue(dds3GetRandIntA(0, scrGetIntPara(0)) + 1);
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 s32 scrCommand_SYNC(void)
@@ -75,13 +76,13 @@ s32 scrCommand_SYNC(void)
 /* DDS2 twin of DDS1 func_0010D7C0: BF wait step-ticks-at-least callback. */
 s32 scrCommand_WAIT(void) {
     if (scrGetIntPara(0) <= 0) {
-        return 1;
+        return SCR_COMMAND_RESULT_COMPLETE;
     }
     /* VM timer limits use signed words; retail +0x30 is slt, not sltu. */
     if ((s32)scrGetCommandTimer() < scrGetIntPara(0)) {
-        return 0;
+        return SCR_COMMAND_RESULT_PENDING;
     }
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void evtPrintDeveloperConsoleMessage(const char *format, ...);
@@ -89,13 +90,13 @@ extern void evtPrintDeveloperConsoleMessage(const char *format, ...);
 s32 scrCommandPrintInteger(void)
 {
     evtPrintDeveloperConsoleMessage(D_00412648, scrGetIntPara(0));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 s32 scrCommandPrintString(void)
 {
     evtPrintDeveloperConsoleMessage(D_00412658, scrGetStrPara(0));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 s32 bfWaitCbScreenFadeA(void)
@@ -114,11 +115,11 @@ s32 bfWaitCbScreenFadeA(void)
             dds3FadeIn(0xFF, 0xFF, 0xFF, scrGetIntPara(1));
             break;
         default:
-            return 1;
+            return SCR_COMMAND_RESULT_COMPLETE;
         }
-        return 0;
+        return SCR_COMMAND_RESULT_PENDING;
     }
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 s32 bfWaitCbScreenFadeB(void)
@@ -137,11 +138,11 @@ s32 bfWaitCbScreenFadeB(void)
             dds3FadeOut(0xFF, 0xFF, 0xFF, scrGetIntPara(1));
             break;
         default:
-            return 1;
+            return SCR_COMMAND_RESULT_COMPLETE;
         }
-        return 0;
+        return SCR_COMMAND_RESULT_PENDING;
     }
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 s32 scrCommandFadeBackgroundOut(void)
@@ -149,9 +150,9 @@ s32 scrCommandFadeBackgroundOut(void)
     if (scrGetCommandTimer() == 0)
     {
         kwlnFadeBackgroundStartOut(scrGetIntPara(0));
-        return 0;
+        return SCR_COMMAND_RESULT_PENDING;
     }
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void kwlnFadeBackgroundStartIn(s32 duration);
@@ -161,9 +162,9 @@ s32 scrCommandFadeBackgroundIn(void)
     if (scrGetCommandTimer() == 0)
     {
         kwlnFadeBackgroundStartIn(scrGetIntPara(0));
-        return 0;
+        return SCR_COMMAND_RESULT_PENDING;
     }
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern s32 scrGetLabelCodeAddress(s32 labelIndex);
@@ -176,27 +177,27 @@ s32 scrCommand_SEL_JMP(void)
     argumentIndex = scrGetIntPara(0);
     if (argumentIndex < 0)
     {
-        return 1;
+        return SCR_COMMAND_RESULT_COMPLETE;
     }
     labelIndex = scrGetIntPara(argumentIndex + 1);
     if (labelIndex < 0)
     {
-        return 1;
+        return SCR_COMMAND_RESULT_COMPLETE;
     }
     scrSetCodePointer(scrGetLabelCodeAddress(labelIndex));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 s32 scrCommand_PAD_TRIG(void)
 {
     scrSetIntReturnValue(dds3PadBitTable[scrGetIntPara(0)] < 0);
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 s32 scrCommand_PAD_PRESS(void)
 {
     scrSetIntReturnValue(dds3PadBitTable[scrGetIntPara(0)] & 1);
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void dds3PadVibrationSet(u32 motor, u8 level, s32 duration);
@@ -208,7 +209,7 @@ s32 scrCommand_PAD_ACT(void)
     motor = scrGetIntPara(0);
     motorLevel = scrGetIntPara(1);
     dds3PadVibrationSet(motor, motorLevel & 0xFF, scrGetIntPara(2));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern char D_00412668[];
@@ -222,10 +223,10 @@ s32 scrCommand_SET_FOVY(void)
     if (fovy <= 5.0f || fovy >= 180.0f)
     {
         evtPrintDeveloperConsoleMessage(D_00412668, fovy);
-        return 1;
+        return SCR_COMMAND_RESULT_COMPLETE;
     }
     dds3SetScreenFovy(fovy);
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 
@@ -238,21 +239,21 @@ s32 bfWaitCbCreateTask(void)
     ctx = scrGetScriptHandle();
     if (ctx == NULL)
     {
-        return 1;
+        return SCR_COMMAND_RESULT_COMPLETE;
     }
     if (ctx->task == NULL)
     {
-        return 1;
+        return SCR_COMMAND_RESULT_COMPLETE;
     }
     if (procedureIndex < 0 || procedureIndex >= ctx->sections->count)
     {
-        return 1;
+        return SCR_COMMAND_RESULT_COMPLETE;
     }
     scrSetIntReturnValue((s32)scrRunScriptEx(
         ctx->task->priority + scrGetIntPara(1), ctx->scriptHeader,
         ctx->sections, ctx->procedures, ctx->labels,
         ctx->instructions, ctx->auxiliaryData, ctx->strings, procedureIndex));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 s32 scrCommand_SCR_KILL(void)
@@ -261,10 +262,10 @@ s32 scrCommand_SCR_KILL(void)
     task = scrGetProcessHandlePara(0);
     if (dds3ExistProcess(task) == KWLN_PROCESS_NOT_REGISTERED)
     {
-        return 1;
+        return SCR_COMMAND_RESULT_COMPLETE;
     }
     dds3KillProcess(task, 1);
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 s32 scrCommand_SCR_WAIT(void)
@@ -282,7 +283,7 @@ s32 scrCommand_SCR_STAT(void)
     {
         scrSetIntReturnValue(0);
     }
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 /* Persona 4 scrCommand_SCR_TIME @ 00299660 (src/Script/scrCommonCommand.c), recompiled unchanged */
@@ -298,7 +299,7 @@ u32 scrCommand_SCR_TIME()
     {
         scrSetIntReturnValue(dds3GetProcessRunTime(task));
     }
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void dds3SetQuake(s32 fadeMode, s32 frames);
@@ -310,7 +311,7 @@ s32 scrCommand_QUAKE_ON(void)
     fadeMode = scrGetIntPara(0);
     durationFrames = scrGetIntPara(1);
     dds3SetQuake(fadeMode, durationFrames);
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void dds3StopQuake(void);
@@ -318,7 +319,7 @@ extern void dds3StopQuake(void);
 s32 scrCommand_QUAKE_OFF(void)
 {
     dds3StopQuake();
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 s32 scrCommand_SCENE_LIGHT_RGB(void)
@@ -336,7 +337,7 @@ s32 scrCommand_SCENE_LIGHT_RGB(void)
     SDF_VU0_VECTOR_W_SET_ZERO();
     SDF_VU0_STOREVECTOR_MEMOPS(v);
     dds3SetLightColor(scrGetIntPara(0), 0, &v.x);
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_00412648);
@@ -359,10 +360,10 @@ s32 scrCommand_SCENE_LIGHT_DIR(void) {
         ffabsf(direction.y) <= 0.01f &&
         ffabsf(direction.z) <= 0.01f) {
         evtPrintDeveloperConsoleMessage(scrSceneLightDirectionZeroWarning);
-        return 1;
+        return SCR_COMMAND_RESULT_COMPLETE;
     }
     dds3SetLightDir(scrGetIntPara(0), 0, &direction.x);
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 s32 scrCommand_SCENE_AMBIENT(void)
@@ -380,7 +381,7 @@ s32 scrCommand_SCENE_AMBIENT(void)
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_STOREVECTOR_MEMOPS(v);
     dds3SetAmbientColor(scrGetIntPara(0), &v.x);
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 s32 scrCommand_SCENE_FOG_RGB(void)
@@ -391,7 +392,7 @@ s32 scrCommand_SCENE_FOG_RGB(void)
     v.z = scrGetFloatPara(3);
     v.w = 0;
     dds3SetFogColor(scrGetIntPara(0), &v.x);
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 s32 scrCommand_SCENE_FOG_PARA(void)
@@ -408,7 +409,7 @@ s32 scrCommand_SCENE_FOG_PARA(void)
     z = (f32)(u32)scrGetIntPara(2);
     w = (f32)(u32)scrGetIntPara(4);
     dds3SetFogPara(blendFrames, x, y, z, w);
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 s32 scrCommand_SOFTEN_BIAS(void)
@@ -416,7 +417,7 @@ s32 scrCommand_SOFTEN_BIAS(void)
     s32 frames;
     frames = scrGetIntPara(0);
     dds3SetSoftenBias(frames, scrGetFloatPara(1), scrGetFloatPara(2));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void dds3SetBlur(s32 duration, s32 alpha, s32 scale);
@@ -428,7 +429,7 @@ s32 scrCommand_BLUR(void)
     duration = scrGetIntPara(0);
     alpha = scrGetIntPara(1);
     dds3SetBlur(duration, alpha, scrGetIntPara(2));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 s32 scrCommand_MUL_BLUR_PARA(void) {
@@ -451,7 +452,7 @@ s32 scrCommand_MUL_BLUR_PARA(void) {
     rotation = scrGetFloatPara(0);
     scale = scrGetFloatPara(1);
     dds3SetMultiBlurPara(rotation, scale, gsAlphaControl);
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void dds3SetMultiBlurRGBA(u32 rgba);
@@ -468,7 +469,7 @@ s32 scrCommand_MUL_BLUR_RGBA(void)
     byte2 = scrGetIntPara(2);
     byte1 = scrGetIntPara(1);
     dds3SetMultiBlurRGBA(((byte0 & 0xFF) | (byte3 << 24)) | (((byte2 & 0xFF) << 16) | ((byte1 & 0xFF) << 8)));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void dds3SetMultiBlurArea(u32 extent, u32 centerX, u32 centerY);
@@ -482,7 +483,7 @@ s32 scrCommand_MUL_BLUR_AREA(void)
     centerX = scrGetIntPara(1);
     centerY = scrGetIntPara(2);
     dds3SetMultiBlurArea(extent, centerX, centerY);
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void dds3MultiBlurSwap(s32 duration);
@@ -490,7 +491,7 @@ extern void dds3MultiBlurSwap(s32 duration);
 s32 scrCommand_MUL_BLUR_SWAP(void)
 {
     dds3MultiBlurSwap(scrGetIntPara(0));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void dds3MultiBlurOn(s32 duration);
@@ -498,7 +499,7 @@ extern void dds3MultiBlurOn(s32 duration);
 s32 scrCommand_MUL_BLUR_ON(void)
 {
     dds3MultiBlurOn(scrGetIntPara(0));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void dds3MultiBlurOff(s32 duration);
@@ -506,7 +507,7 @@ extern void dds3MultiBlurOff(s32 duration);
 s32 scrCommand_MUL_BLUR_OFF(void)
 {
     dds3MultiBlurOff(scrGetIntPara(0));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 s32 scrCommand_DIST_BLUR_PARA(void)
@@ -543,7 +544,7 @@ s32 scrCommand_DIST_BLUR_PARA(void)
     dds3SetDistBlurPara(filterCount, size, delaySpread, angleStep,
                            uvDisplacementAngleDegrees, uvDisplacementAmplitude,
                            gsAlphaControl);
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void dds3SetDistBlurRGBA(u32 rgba);
@@ -560,7 +561,7 @@ s32 scrCommand_DIST_BLUR_RGBA(void)
     byte2 = scrGetIntPara(2);
     byte1 = scrGetIntPara(1);
     dds3SetDistBlurRGBA(((byte0 & 0xFF) | (byte3 << 24)) | (((byte2 & 0xFF) << 16) | ((byte1 & 0xFF) << 8)));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void dds3SetDistBlurArea(u32 positionSpread, u32 x, u32 y);
@@ -572,7 +573,7 @@ s32 scrCommand_DIST_BLUR_AREA(void)
     positionSpread = scrGetIntPara(0);
     x = scrGetIntPara(1);
     dds3SetDistBlurArea(positionSpread, x, scrGetIntPara(2));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void dds3DistBlurSwap(s32 duration);
@@ -580,7 +581,7 @@ extern void dds3DistBlurSwap(s32 duration);
 s32 scrCommand_DIST_BLUR_SWAP(void)
 {
     dds3DistBlurSwap(scrGetIntPara(0));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void dds3DistBlurOn(s32 duration);
@@ -588,7 +589,7 @@ extern void dds3DistBlurOn(s32 duration);
 s32 scrCommand_DIST_BLUR_ON(void)
 {
     dds3DistBlurOn(scrGetIntPara(0));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void dds3DistBlurOff(s32 duration);
@@ -596,7 +597,7 @@ extern void dds3DistBlurOff(s32 duration);
 s32 scrCommand_DIST_BLUR_OFF(void)
 {
     dds3DistBlurOff(scrGetIntPara(0));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 s32 scrCommand_RIP_BLUR_PARA(void)
@@ -632,7 +633,7 @@ s32 scrCommand_RIP_BLUR_PARA(void)
     angleStep = scrGetFloatPara(5);
     dds3SetRipBlurPara(count, phaseStep, spacing, uvDisplacementAngleDegrees,
                           uvDisplacementAmplitude, angleStep, gsAlphaControl);
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void dds3SetRipBlurRGBA(u32 rgba);
@@ -649,7 +650,7 @@ s32 scrCommand_RIP_BLUR_RGBA(void)
     byte2 = scrGetIntPara(2);
     byte1 = scrGetIntPara(1);
     dds3SetRipBlurRGBA(((byte0 & 0xFF) | (byte3 << 24)) | (((byte2 & 0xFF) << 16) | ((byte1 & 0xFF) << 8)));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void dds3SetRipBlurArea(u32 size, u32 x, u32 y);
@@ -661,7 +662,7 @@ s32 scrCommand_RIP_BLUR_AREA(void)
     size = scrGetIntPara(0);
     x = scrGetIntPara(1);
     dds3SetRipBlurArea(size, x, scrGetIntPara(2));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void dds3RipBlurSwap(s32 duration);
@@ -669,7 +670,7 @@ extern void dds3RipBlurSwap(s32 duration);
 s32 scrCommand_RIP_BLUR_SWAP(void)
 {
     dds3RipBlurSwap(scrGetIntPara(0));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void dds3RipBlurOn(s32 duration);
@@ -677,7 +678,7 @@ extern void dds3RipBlurOn(s32 duration);
 s32 scrCommand_RIP_BLUR_ON(void)
 {
     dds3RipBlurOn(scrGetIntPara(0));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void dds3RipBlurOff(s32 duration);
@@ -685,7 +686,7 @@ extern void dds3RipBlurOff(s32 duration);
 s32 scrCommand_RIP_BLUR_OFF(void)
 {
     dds3RipBlurOff(scrGetIntPara(0));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 s32 scrCommand_BLUR2_PARA(void)
@@ -715,7 +716,7 @@ s32 scrCommand_BLUR2_PARA(void)
     rotation = scrGetFloatPara(0);
     scale = scrGetFloatPara(1);
     dds3SetBlur2Para(rotation, scale, gsAlphaControl);
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 
@@ -733,7 +734,7 @@ s32 scrCommand_BLUR2_RGBA(void)
     byte2 = scrGetIntPara(2);
     byte1 = scrGetIntPara(1);
     dds3SetBlur2RGBA(((byte0 & 0xFF) | (byte3 << 24)) | (((byte2 & 0xFF) << 16) | ((byte1 & 0xFF) << 8)));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void dds3SetBlur2Area(u32 centerX, u32 centerY);
@@ -743,7 +744,7 @@ s32 scrCommand_BLUR2_AREA(void)
     s32 centerX;
     centerX = scrGetIntPara(0);
     dds3SetBlur2Area(centerX, scrGetIntPara(1));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void dds3Blur2Swap(s32 duration);
@@ -751,7 +752,7 @@ extern void dds3Blur2Swap(s32 duration);
 s32 scrCommand_BLUR2_SWAP(void)
 {
     dds3Blur2Swap(scrGetIntPara(0));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void dds3Blur2On(s32 duration);
@@ -759,7 +760,7 @@ extern void dds3Blur2On(s32 duration);
 s32 scrCommand_BLUR2_ON(void)
 {
     dds3Blur2On(scrGetIntPara(0));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void dds3Blur2Off(s32 duration);
@@ -767,7 +768,7 @@ extern void dds3Blur2Off(s32 duration);
 s32 scrCommand_BLUR2_OFF(void)
 {
     dds3Blur2Off(scrGetIntPara(0));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 s32 scrCommand_FILTER2_PARA(void)
@@ -795,7 +796,7 @@ s32 scrCommand_FILTER2_PARA(void)
         break;
     }
     dds3SetFilter2Para(gsAlphaControl);
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void dds3SetFilter2RGBA(u32 rgba);
@@ -812,7 +813,7 @@ s32 scrCommand_FILTER2_RGBA(void)
     byte2 = scrGetIntPara(2);
     byte1 = scrGetIntPara(1);
     dds3SetFilter2RGBA(((byte0 & 0xFF) | (byte3 << 24)) | (((byte2 & 0xFF) << 16) | ((byte1 & 0xFF) << 8)));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void dds3Filter2Swap(s32 duration);
@@ -820,7 +821,7 @@ extern void dds3Filter2Swap(s32 duration);
 s32 scrCommand_FILTER2_SWAP(void)
 {
     dds3Filter2Swap(scrGetIntPara(0));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void dds3Filter2On(s32 duration);
@@ -828,7 +829,7 @@ extern void dds3Filter2On(s32 duration);
 s32 scrCommand_FILTER2_ON(void)
 {
     dds3Filter2On(scrGetIntPara(0));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void dds3Filter2Off(s32 duration);
@@ -836,7 +837,7 @@ extern void dds3Filter2Off(s32 duration);
 s32 scrCommand_FILTER2_OFF(void)
 {
     dds3Filter2Off(scrGetIntPara(0));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 s32 scrCommand_MFILTER_PARA(void)
@@ -864,7 +865,7 @@ s32 scrCommand_MFILTER_PARA(void)
         break;
     }
     dds3SetMFilterPara(gsAlphaControl);
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void dds3SetMFilterRGBA(u32 rgba);
@@ -881,7 +882,7 @@ s32 scrCommand_MFILTER_RGBA(void)
     byte2 = scrGetIntPara(2);
     byte1 = scrGetIntPara(1);
     dds3SetMFilterRGBA(((byte0 & 0xFF) | (byte3 << 24)) | (((byte2 & 0xFF) << 16) | ((byte1 & 0xFF) << 8)));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void dds3SetMFilterArea(u32 extent, u32 centerX, u32 centerY);
@@ -893,7 +894,7 @@ s32 scrCommand_MFILTER_AREA(void)
     extent = scrGetIntPara(0);
     centerX = scrGetIntPara(1);
     dds3SetMFilterArea(extent, centerX, scrGetIntPara(2));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void dds3MFilterSwap(s32 duration);
@@ -901,7 +902,7 @@ extern void dds3MFilterSwap(s32 duration);
 s32 scrCommand_MFILTER_SWAP(void)
 {
     dds3MFilterSwap(scrGetIntPara(0));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void dds3MFilterOn(s32 duration);
@@ -909,7 +910,7 @@ extern void dds3MFilterOn(s32 duration);
 s32 scrCommand_MFILTER_ON(void)
 {
     dds3MFilterOn(scrGetIntPara(0));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void dds3MFilterOff(s32 duration);
@@ -917,7 +918,7 @@ extern void dds3MFilterOff(s32 duration);
 s32 scrCommand_MFILTER_OFF(void)
 {
     dds3MFilterOff(scrGetIntPara(0));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 s32 scrCommandResetDrawEffects(void)
@@ -928,7 +929,7 @@ s32 scrCommandResetDrawEffects(void)
     dds3DistBlurOff(0);
     dds3RipBlurOff(0);
     effDisableFramebufferQuad();
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void fldSetFadeTarget(s32 area, s32 targetMode, s32 duration);
@@ -944,19 +945,19 @@ s32 scrCommandResetFieldEffects(void)
     fldSkySetAlpha(0x80);
     fldSkySetAlphaOfs(0);
     fldSetFadeTarget(0, 1, 0);
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 s32 scrCommandClearProcessControlFlag(void)
 {
     DDS3_GBWK->script.ints[SCR_PROCESS_CONTROL_FLAG_REGISTER] = 0;
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 s32 scrCommandSetProcessControlFlag(void)
 {
     DDS3_GBWK->script.ints[SCR_PROCESS_CONTROL_FLAG_REGISTER] = 1;
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 s32 scrCommandIsProcessControlFlagClear(void)
@@ -971,7 +972,7 @@ s32 scrCommandAdjustItemQuantity(void)
     s32 itemId;
     itemId = scrGetIntPara(0);
     ptyAdjustItemQuantity(itemId, scrGetIntPara(1));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern void datAddCurrencyClamped(s32 delta);
@@ -979,7 +980,7 @@ extern void datAddCurrencyClamped(s32 delta);
 s32 scrCommandAddPartyCurrency(void)
 {
     datAddCurrencyClamped(scrGetIntPara(0));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 extern u8 datHasEnoughCurrency(s32 requiredAmount);
@@ -997,7 +998,7 @@ u32 scrCommand_SCR_EXISTS()
     {
         scrSetIntReturnValue(0);
     }
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_004126D0);

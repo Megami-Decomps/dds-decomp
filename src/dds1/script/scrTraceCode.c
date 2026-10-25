@@ -1,6 +1,7 @@
 #include "dat_state.h"
 #include "common.h"
 #include "scr.h"
+#include "scr_command_result.h"
 #include "scr_binary_operator.h"
 #include "scr_trace_result.h"
 #include "scr_string_parameter_api.h"
@@ -113,9 +114,11 @@ ScrOpcodeHandlerResult CodeFunc_Comm(scrProcessWork_s *scr)
 {
     s32 commandPc = scr->pc;
     s32 commandIndex = scr->instructions[commandPc].parts.sOperand;
+    ScrCommandResult commandResult;
 
     nowpwork = scr;
-    if (D_0039E288[commandIndex].func() == 0) {
+    commandResult = D_0039E288[commandIndex].func();
+    if (commandResult == SCR_COMMAND_RESULT_PENDING) {
         return SCR_OPCODE_HANDLER_RESULT_YIELDED;
     }
     scr->sp -= D_0039E288[commandIndex].paramCount;
