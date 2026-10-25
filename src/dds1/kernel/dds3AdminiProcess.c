@@ -188,13 +188,13 @@ s32 dds3AdminiEndCheck(dds3ProcessID_t *task) {
 s32 dds3AdminPollModeCompletion(dds3ProcessID_t *task) {
     AdminWork *work = (AdminWork *)dds3GetProcessData(task);
     u32 flags = work->flags;
-    s32 (*cleanup)(void);
+    Dds3AdminModeCleanupResult (*cleanup)(void);
     s32 previousHistoryIndex;
 
     if ((flags & 2) == 0) {
         if (work->activeMode >= 0) {
             cleanup = ddsAdminModeCallbacks[work->activeMode].cleanup;
-            if (cleanup != NULL && cleanup() != 0) {
+            if (cleanup != NULL && cleanup() != DDS3_ADMIN_MODE_CLEANUP_CONTINUE) {
                 work->flags |= 2;
             }
             work->value++;
