@@ -283,10 +283,11 @@ void ChangeProcessFlagChild(s32 setFlags, dds3ProcessID_t* task, u32 flags)
     }
 }
 
-void ChangeProcessFlag(s32 setFlags, dds3ProcessID_t *task, u32 flags, s32 scope)
+void ChangeProcessFlag(s32 setFlags, dds3ProcessID_t *task, u32 flags, KwlnTaskFlagScope scopeArg)
 {
     dds3ProcessID_t *node = NULL;
     s32 state;
+    s32 scope = (s32)scopeArg; /* Keep the selector in its original signed domain. */
 
     switch (scope) {
     case KWLN_TASK_FLAG_SCOPE_TARGET:

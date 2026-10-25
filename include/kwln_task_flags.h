@@ -18,8 +18,8 @@ typedef enum KwlnTaskFlagScope {
 } KwlnTaskFlagScope;
 
 /* Subtree includes the target; queued scopes visit all three scheduler queues. */
-void ChangeProcessFlag(s32 setFlags, dds3ProcessID_t *task, u32 flags, s32 scope);
-void dds3SetProcessFlag(dds3ProcessID_t *object, u32 mask, s32 scope);
-void dds3ResetProcessFlag(dds3ProcessID_t *object, u32 mask, s32 scope);
+void ChangeProcessFlag(s32 setFlags, dds3ProcessID_t *task, u32 flags, KwlnTaskFlagScope scope);
+void dds3SetProcessFlag(dds3ProcessID_t *object, u32 mask, KwlnTaskFlagScope scope);
+void dds3ResetProcessFlag(dds3ProcessID_t *object, u32 mask, KwlnTaskFlagScope scope);
 
 #endif /* KWLN_TASK_FLAGS_H */
