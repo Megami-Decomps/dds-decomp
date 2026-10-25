@@ -57,7 +57,6 @@
 
 #define BTL_GROUP_RESOURCE_SLOT_COUNT 8
 
-#define BTL_GROUP_OWNS_RESOURCES_FLAG 1
 extern u32 mdlManagerWork;
 
 extern dds3ModelResrc_t *mdlResrcMajorList[];
@@ -131,7 +130,7 @@ void mdlUnRegLoading(s32 groupIndex, s32 wantedId) {
 }
 
 /* Replace the group/type node; only flags bit 0 selects resource ownership. */
-void mdlRegist(s32 groupIndex, s32 entityType, s32 ownershipFlags, DevRequest *resourceList, struct sdfModelDef_t *itemList, struct sdfMemHandle_t *requestAllocation) {
+void mdlRegist(s32 groupIndex, s32 entityType, MdlRegistrationMode registrationMode, DevRequest *resourceList, struct sdfModelDef_t *itemList, struct sdfMemHandle_t *requestAllocation) {
     dds3ModelResrc_t *groupNode;
     dds3ModelResrc_t *previousHead;
     s32 slotIndex;
@@ -155,7 +154,7 @@ void mdlRegist(s32 groupIndex, s32 entityType, s32 ownershipFlags, DevRequest *r
         groupNode->slots[slotIndex].motionTable = NULL;
         groupNode->slots[slotIndex].resourceHandle = 0;
     }
-    groupNode->ownsResources = ownershipFlags & BTL_GROUP_OWNS_RESOURCES_FLAG;
+    groupNode->ownsResources = registrationMode & MDL_REGISTRATION_OWNS_GROUP_RESOURCES;
     groupNode->resourceHandle = 0;
     groupNode->partInfo = NULL;
     groupNode->partList = NULL;
@@ -332,7 +331,7 @@ void mdlUnRegistMotion(s32 group, s32 id, s32 searchId) {
     mdlUnRegistResrcMotion(entity, searchId);
 }
 
-void mdlRegistMotion(s32 group, s32 id, u32 mode, s32 motionIndex, s32 searchId, s32 slotIndex, MotionTable *data, struct sdfMemHandle_t *resourceHandle) {
+void mdlRegistMotion(s32 group, s32 id, MdlRegistrationMode registrationMode, s32 motionIndex, s32 searchId, s32 slotIndex, MotionTable *data, struct sdfMemHandle_t *resourceHandle) {
     dds3ModelResrc_t *owner = mdlSearchResrc(group, id);
     BattleGroupSlot *slot;
 
@@ -343,21 +342,21 @@ void mdlRegistMotion(s32 group, s32 id, u32 mode, s32 motionIndex, s32 searchId,
     slot->motionTable = data;
     slot->resourceHandle = resourceHandle;
     slot->flags = 0;
-    if (mode & MDL_MOTION_REGISTRATION_CREATE_ON_MODEL_LOAD) {
+    if (registrationMode & MDL_MOTION_REGISTRATION_CREATE_ON_MODEL_LOAD) {
         slot->flags = MDL_MOTION_SLOT_CREATE_ON_MODEL_LOAD;
     }
-    if (mode & 0x200) {
+    if (registrationMode & 0x200) {
         slot->flags |= 2;
     }
 }
 
 
-void mdlRegistModelSet(s32 group, s32 id, s32 mode, MdlLoadPayload *setup) {
+void mdlRegistModelSet(s32 group, s32 id, MdlRegistrationMode registrationMode, MdlLoadPayload *setup) {
     dds3ModelResrc_t *entity;
 
-    mdlRegist(group, id, mode, setup->resourceList, setup->itemList, setup->requestAllocation);
+    mdlRegist(group, id, registrationMode, setup->resourceList, setup->itemList, setup->requestAllocation);
     if (setup->motionTable != NULL) {
-        mdlRegistMotion(group, id, mode, 0, 0, 0, setup->motionTable, setup->motionResource);
+        mdlRegistMotion(group, id, registrationMode, 0, 0, 0, setup->motionTable, setup->motionResource);
     }
     if (setup->partInfo != NULL) {
         entity = mdlSearchResrc(group, id);
@@ -426,7 +425,7 @@ char *mdlSetFileName(char *dst, const char *src) {
 
 extern char D_003BBB68[];
 extern void sdfCreateSemaphoreFromOptions(u32 callbackArg);
-extern s32 mdlFileLoad(s32 group, s32 id, s32 jobArg,
+extern s32 mdlFileLoad(s32 group, s32 id, MdlRegistrationMode registrationMode,
                                      const char *requestPath,
                                      void (*onComplete)(u32), u32 callbackArg);
 
@@ -465,11 +464,13 @@ s32 mdlPrepare(s32 group, s32 id, s32 blocking) {
     SignalSema(mdlManagerWork);
     if (packedBundle != 0) {
         mdlSetFileName(requestPath, paths->path);
-        mdlFileLoad(group, id, 0x101, requestPath,
+        mdlFileLoad(group, id, MDL_REGISTRATION_OWNS_GROUP_RESOURCES |
+                              MDL_MOTION_REGISTRATION_CREATE_ON_MODEL_LOAD, requestPath,
                                   sdfCreateSemaphoreFromOptions, 0);
     } else {
         request = sdfAllocAndClearQuadwords(sizeof(*request));
-        request->options = 0x101;
+        request->options = MDL_REGISTRATION_OWNS_GROUP_RESOURCES |
+                           MDL_MOTION_REGISTRATION_CREATE_ON_MODEL_LOAD;
         request->group = group;
         request->id = id;
         if (paths->motionPath != NULL) {
@@ -1221,7 +1222,7 @@ s32 mdlIsPartInfoPacket(PacWork *packetWork) {
 
 
 
-extern PacWork *mdlPackSetOld(PacWork *work, s32 group, s32 id, s32 mode);
+extern PacWork *mdlPackSetOld(PacWork *work, s32 group, s32 id, MdlRegistrationMode registrationMode);
 struct EffNodeDescriptor;
 extern u16 mdlPibGetEffectCount(MdlRecord *record);
 extern DevRequest *mdlEffectResrcListNew(u32 count);
@@ -1231,7 +1232,7 @@ extern void mdlCreateEffectResrc_D3P(DevRequest *list, struct EffNodeDescriptor 
 
 /* Generic transports preserve the queue/payload alias relationship; see
  * docs/idioms.md, "Pointer transport aliasing: queued model packets". */
-PacWork *mdlPackSetOld(PacWork *work, s32 group, s32 id, s32 mode) {
+PacWork *mdlPackSetOld(PacWork *work, s32 group, s32 id, MdlRegistrationMode registrationMode) {
     MdlLoadPayload setup;
     DevRequest *parts;
     s32 count;
@@ -1279,7 +1280,7 @@ PacWork *mdlPackSetOld(PacWork *work, s32 group, s32 id, s32 mode) {
         }
         work = sdfPacFreeResrc(work);
     }
-    mdlRegistModelSet(group, id, mode, &setup);
+    mdlRegistModelSet(group, id, registrationMode, &setup);
     return work;
 }
 
@@ -1288,7 +1289,7 @@ extern u32 mdlPibGetVersion(MdlRecord *record);
 extern void mdlCreateEffectResrc_IPU(DevRequest *list, u8 *sourceAddress, struct sdfMemHandle_t *allocation, s32 size);
 
 /* Apply the group's counted parts and entity slots; return the next packet. */
-PacWork *mdlPackSet(PacWork *packetWork, s32 group, s32 id, s32 mode) {
+PacWork *mdlPackSet(PacWork *packetWork, s32 group, s32 id, MdlRegistrationMode registrationMode) {
     MdlLoadPayload groupSetup;
     MdlPartTagRecord partTagRecord;
     SdfPacModelPacketHeader *packetHeader;
@@ -1302,12 +1303,12 @@ PacWork *mdlPackSet(PacWork *packetWork, s32 group, s32 id, s32 mode) {
     s32 payloadValue;
 
     if (mdlIsPartInfoPacket(packetWork) == 0) {
-        return mdlPackSetOld(packetWork, group, id, mode);
+        return mdlPackSetOld(packetWork, group, id, registrationMode);
     }
     record = (MdlRecord *)packetWork->dataCursor;
     payloadValue = mdlPibGetVersion(record);
     if (payloadValue <= 0) {
-        return mdlPackSetOld(packetWork, group, id, mode);
+        return mdlPackSetOld(packetWork, group, id, registrationMode);
     }
 
     memset(&groupSetup, 0, sizeof(groupSetup));
@@ -1360,12 +1361,12 @@ PacWork *mdlPackSet(PacWork *packetWork, s32 group, s32 id, s32 mode) {
     groupSetup.requestAllocation = PAC_WORK_ALLOCATION(packetWork);
     groupSetup.itemList = (struct sdfModelDef_t *)packetWork->dataCursor;
     packetWork = sdfPacFreeResrc(packetWork);
-    mdlRegistModelSet(group, id, mode, &groupSetup);
+    mdlRegistModelSet(group, id, registrationMode, &groupSetup);
 
     slotCount = mdlPibGetMotionCount(record);
     while (slotCount > 0) {
         slotRecord = (MdlRecord *)(packetWork->dataCursor - (u32)&((MdlRecord *)0)->tail);
-        mdlRegistMotion(group, id, mode, (s16)slotRecord->parameter.word,
+        mdlRegistMotion(group, id, registrationMode, (s16)slotRecord->parameter.word,
                                       slotRecord->payload.stream.selectorA,
                                       slotRecord->payload.stream.selectorB,
                                       (MotionTable *)packetWork->dataCursor,
@@ -1389,7 +1390,8 @@ void mdlFileCbFree(MdlDoneJob *ownerBlock) {
  * this function leaves cleanup to the request path. */
 void mdlFileLoadCallback(FilePacRequest *requestOwner, MdlDoneJob *completionJob) {
     completionJob->owner = requestOwner;
-    mdlPackSet(requestOwner->packet.queueHead, completionJob->group, completionJob->id, completionJob->arg);
+    mdlPackSet(requestOwner->packet.queueHead, completionJob->group, completionJob->id,
+               completionJob->arg);
     WaitSema(mdlManagerWork);
     mdlUnRegLoading(completionJob->group, completionJob->id);
     SignalSema(mdlManagerWork);
@@ -1405,13 +1407,13 @@ extern void mdlFileLoadCallback(FilePacRequest *, MdlDoneJob *);
  * Without onComplete, run the existing no-callback completion path and clean up
  * here; otherwise the completion callback path owns cleanup. Always return zero.
  * Preserve the generic callback and user-data word parameters. */
-s32 mdlFileLoad(s32 group, s32 id, s32 jobArg, const char *requestPath, void (*onComplete)(u32), u32 callbackArg) {
+s32 mdlFileLoad(s32 group, s32 id, MdlRegistrationMode registrationMode, const char *requestPath, void (*onComplete)(u32), u32 callbackArg) {
     MdlDoneJob *completionJob = sdfAllocAndClearQuadwords(sizeof(MdlDoneJob));
     FilePacRequest *requestSlot;
 
     completionJob->group = group;
     completionJob->id = id;
-    completionJob->arg = jobArg;
+    completionJob->arg = registrationMode;
     completionJob->doneArg = callbackArg;
     completionJob->done = onComplete;
     requestSlot = (FilePacRequest *)pacLoadEx(requestPath, 0, 0,

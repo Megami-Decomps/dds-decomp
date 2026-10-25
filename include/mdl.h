@@ -97,7 +97,6 @@ typedef struct dds3ModelEffectCtrlr_t {
     } payload;
 } dds3ModelEffectCtrlr_t;
 
-#define MDL_MOTION_REGISTRATION_CREATE_ON_MODEL_LOAD 0x100
 #define MDL_MOTION_SLOT_CREATE_ON_MODEL_LOAD 1
 
 typedef struct BattleGroupSlot {
