@@ -1681,7 +1681,7 @@ struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) {
     return fldCachedRoomF1ResourceAllocation;
 }
 
-extern u32 fldLoadAreaRoomResourcesFromRequest(u32 area, u32 room,
+extern struct sdfMemHandle_t *fldLoadAreaRoomResourcesFromRequest(u32 area, u32 room,
                         u8 *resource0Data, u8 *resource1Data,
                         const SdfTextureOffsetListHeader *textureOffsets, u32 flags);
 
