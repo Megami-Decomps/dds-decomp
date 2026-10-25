@@ -16,6 +16,7 @@
 #include "sdf_resource_list_release_api.h"
 #include "kwln_background_fade_api.h"
 #include "fld_scene_ready_api.h"
+#include "fld_area_resource_request_reuse_api.h"
 #include "fld_scene_record_api.h"
 #include "fld_light_set.h"
 #include "fld_sky_buffer.h"
@@ -1438,14 +1439,16 @@ u8 fldLoadNextGetStatus2(void) {
     return D_0032E428[0] != 0;
 }
 
-u8 fldCanReuseAreaResourceRequest(s32 area, s32 room) {
+FldAreaResourceRequestReuseResult fldCanReuseAreaResourceRequest(s32 area, s32 room) {
     if (fldGlobalBase.resourceArea != area || fldGlobalBase.resourceFloor != room) {
-        return 0;
+        return FLD_AREA_RESOURCE_REQUEST_NOT_REUSABLE;
     }
     if (pFldNextFileDataF2 != 0 && pacCheckEnd((struct FileRequest *)pFldNextFileDataF2) != 0) {
-        return 1;
+        return FLD_AREA_RESOURCE_REQUEST_REUSABLE;
     }
-    return fldGlobalBase.resourceFlag != FLD_AREA_RESOURCE_REQUEST_IDLE;
+    return fldGlobalBase.resourceFlag != FLD_AREA_RESOURCE_REQUEST_IDLE
+               ? FLD_AREA_RESOURCE_REQUEST_REUSABLE
+               : FLD_AREA_RESOURCE_REQUEST_NOT_REUSABLE;
 }
 
 extern const u8 *fldCachedRoomResourceData, *fldCachedRoomF1ResourceData, *fldCachedRoomF2ResourceData,
@@ -1761,7 +1764,7 @@ struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) {
         isField = 1;
     }
     if (isField != 0) {
-        if (fldCanReuseAreaResourceRequest(area, room) != 0) {
+        if (fldCanReuseAreaResourceRequest(area, room) != FLD_AREA_RESOURCE_REQUEST_NOT_REUSABLE) {
             request = pFldNextFileDataF2;
             pFldNextFileDataF2 = NULL;
             D_003BAC38 = request;
