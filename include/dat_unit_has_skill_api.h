@@ -5,6 +5,6 @@
 
 struct datUnitWork_t;
 
-s32 datUnitHasSkill(const struct datUnitWork_t *unit, s32 skillId);
+u8 datUnitHasSkill(const struct datUnitWork_t *unit, s32 skillId);
 
 #endif /* DAT_UNIT_HAS_SKILL_API_H */
