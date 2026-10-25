@@ -115,7 +115,7 @@ extern s32 fldCanUseTargetGuideInCurrentScene(s32, s32);
 
 extern void fldResetSecondaryArchiveLoadPhase(void);
 
-extern s32 fldStepSecondaryArchiveLoad(void);
+extern FldArchiveLoadResult fldStepSecondaryArchiveLoad(void);
 
 extern s32 fldReportCampVolumeError(void);
 

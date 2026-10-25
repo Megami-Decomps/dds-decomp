@@ -1090,7 +1090,7 @@ void fldResetSecondaryArchiveLoadPhase(void) {
     D_0043623C = 0;
 }
 
-s32 fldStepSecondaryArchiveLoad(void) {
+FldArchiveLoadResult fldStepSecondaryArchiveLoad(void) {
     switch (D_0043623C) {
     case 0:
         if (sndFindPackedTrackLoadStatus(0x690000) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
@@ -1107,9 +1107,9 @@ s32 fldStepSecondaryArchiveLoad(void) {
         break;
     default:
         D_0043623C = -1;
-        return 1;
+        return FLD_ARCHIVE_LOAD_COMPLETE;
     }
-    return 0;
+    return FLD_ARCHIVE_LOAD_PENDING;
 }
 
 u32 fldGetCurrentBgmHandle(void) {
