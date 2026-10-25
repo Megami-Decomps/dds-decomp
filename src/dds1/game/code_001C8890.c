@@ -2930,7 +2930,7 @@ void btlUnitTurnEndCommit(s32 task) {
     }
 }
 
-extern void btlAccumulateEnemyDefeatRewards(s32);
+extern void btlAccumulateEnemyDefeatRewards(BtlUnit *);
 
 
 extern BtlRuntimeTask *btlCreateSelectedEffectUpdateTask(BtlUnit *);
@@ -2968,7 +2968,7 @@ void btlStartActorDefeatTransition(s32 command) {
             btlRefreshUnitMotionSelection(actor);
         }
     } else if (actor->status.flags & 0x400) {
-        btlAccumulateEnemyDefeatRewards((s32)actor);
+        btlAccumulateEnemyDefeatRewards(actor);
         if (actor->status.flags & 0x8000000) {
             object = btlCreateSelectedEffectUpdateTask(actor);
             object->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
