@@ -71,12 +71,12 @@ extern s32 D_00360348[];
 extern s32 D_0035FFE0[];
 extern s32 D_003BB6B8;
 extern s32 D_003BD854;
-extern void btlPickCommandElementCheckedTarget(s32 commandContext, s32 action);
-extern void btlPickCommandTargetExcludingActor(s32, s32);
-extern void btlPickCommandLowestHpBlockTarget(s32, s32);
-extern void btlSelectCommandTargetsByMode(s32, s32);
-extern void btlPickCommandTargetWithoutStatusMask(s32, s32);
-extern void btlPickCommandElementBlockTarget(s32, s32);
+extern void btlPickCommandElementCheckedTarget(BtlTask *context, s32 action);
+extern void btlPickCommandTargetExcludingActor(BtlTask *context, s32);
+extern void btlPickCommandLowestHpBlockTarget(BtlTask *context, s32);
+extern void btlSelectCommandTargetsByMode(BtlTask *context, s32);
+extern void btlPickCommandTargetWithoutStatusMask(BtlTask *context, s32);
+extern void btlPickCommandElementBlockTarget(BtlTask *context, s32);
 extern void btlRunWeightedAiAction(BtlTask *, s32);
 
 extern s8 btlHistoryCounter;
@@ -178,7 +178,7 @@ extern s32 scrGetIntPara(s32);
 
 extern u32 btlButtonIconTexture;
 extern s32 btlDispatchPackedActionWithScratch(s32 context, s32 actor, u32 mask);
-extern void btlPickCommandTargetWithStatusMask(s32, s32);
+extern void btlPickCommandTargetWithStatusMask(BtlTask *context, s32);
 extern struct BtlRuntimeTask *btlAllocTask(s32);
 extern void btlCommandRecenterParty(void);
 
@@ -1566,7 +1566,7 @@ u32 btlScriptSetBattleWorkParameter(void) {
     return 1;
 }
 
-extern void btlChooseCommandActionTargets(s32 context);
+extern void btlChooseCommandActionTargets(BtlTask *context);
 
 /* Select targets for the current command's action; return VM success. */
 u32 btlScriptChooseActionTargets(void) {
@@ -1576,13 +1576,13 @@ u32 btlScriptChooseActionTargets(void) {
 
 /* Parameter 0 supplies the group element-check input; return VM success. */
 u32 btlScriptPickElementCheckedTarget(void) {
-    void *context = scrGetData();
+    BtlTask *context = scrGetData();
     s32 value = scrGetIntPara(0);
-    btlPickCommandElementCheckedTarget((s32)(u32)context, value);
+    btlPickCommandElementCheckedTarget(context, value);
     return 1;
 }
 
-extern void btlPickCommandLowestHpTarget(s32 context);
+extern void btlPickCommandLowestHpTarget(BtlTask *context);
 
 /* Select the current command's minimum nonzero-HP candidate; return VM success. */
 u32 btlScriptPickLowestHpTarget(void) {
@@ -1590,7 +1590,7 @@ u32 btlScriptPickLowestHpTarget(void) {
     return 1;
 }
 
-extern void btlPickCommandLowestHpRatioTarget(s32 context);
+extern void btlPickCommandLowestHpRatioTarget(BtlTask *context);
 
 /* Select the current command's minimum HP-percentage candidate; return VM success. */
 u32 btlScriptPickLowestHpRatioTarget(void) {
@@ -1600,13 +1600,13 @@ u32 btlScriptPickLowestHpRatioTarget(void) {
 
 /* Parameter 0 feeds lowest-HP element-block selection; return VM success. */
 u32 btlScriptPickLowestHpBlockTarget(void) {
-    void *context = scrGetData();
+    BtlTask *context = scrGetData();
     s32 value = scrGetIntPara(0);
-    btlPickCommandLowestHpBlockTarget((s32)(u32)context, value);
+    btlPickCommandLowestHpBlockTarget(context, value);
     return 1;
 }
 
-extern void btlPickCommandHighestMpTarget(s32 context);
+extern void btlPickCommandHighestMpTarget(BtlTask *context);
 
 /* Pick the current command's highest-MP target and return VM completion. */
 u32 btlScriptPickHighestMpTarget(void) {
@@ -1614,7 +1614,7 @@ u32 btlScriptPickHighestMpTarget(void) {
     return 1;
 }
 
-extern void btlPickCommandLowestLevelTarget(s32 context);
+extern void btlPickCommandLowestLevelTarget(BtlTask *context);
 
 /* Run the current command's minimum-value target selector; return VM success. */
 u32 btlScriptPickLowestLevelTarget(void) {
@@ -1624,25 +1624,25 @@ u32 btlScriptPickLowestLevelTarget(void) {
 
 /* Parameter 0 is a status-presence mask for command target selection; return VM success. */
 u32 btlScriptPickTargetWithStatusMask(void) {
-    void *context = scrGetData();
+    BtlTask *context = scrGetData();
     s32 value = scrGetIntPara(0);
-    btlPickCommandTargetWithStatusMask((s32)(u32)context, value);
+    btlPickCommandTargetWithStatusMask(context, value);
     return 1;
 }
 
 /* Parameter 0 is a status-absence mask for command target selection; return VM success. */
 u32 btlScriptPickTargetWithoutStatusMask(void) {
-    void *context = scrGetData();
+    BtlTask *context = scrGetData();
     s32 value = scrGetIntPara(0);
-    btlPickCommandTargetWithoutStatusMask((s32)(u32)context, value);
+    btlPickCommandTargetWithoutStatusMask(context, value);
     return 1;
 }
 
 /* Apply script parameter 0 as the command target-selection mode; return VM success. */
 u32 btlScriptCmdSelectTargetsByMode(void) {
-    void *context = scrGetData();
+    BtlTask *context = scrGetData();
     s32 value = scrGetIntPara(0);
-    btlSelectCommandTargetsByMode((s32)(u32)context, value);
+    btlSelectCommandTargetsByMode(context, value);
     return 1;
 }
 
@@ -1652,7 +1652,7 @@ u32 btlScriptChooseActionTargetsDuplicate(void) {
     return 1;
 }
 
-extern void btlPickUnlinkedCommandTarget(u32 task, u32 input);
+extern void btlPickUnlinkedCommandTarget(BtlTask *context, u32 input);
 
 /* Run the current script command's unlinked-party target selection; return script success. */
 u32 btlScriptPickUnlinkedPartyTarget(void) {
@@ -1660,7 +1660,7 @@ u32 btlScriptPickUnlinkedPartyTarget(void) {
     return 1;
 }
 
-extern void btlPickLinkedCommandTarget(u32 task, u32 input);
+extern void btlPickLinkedCommandTarget(BtlTask *context, u32 input);
 
 /* Run the current script command's linked-party target selection; return script success. */
 u32 btlScriptPickLinkedPartyTarget(void) {
@@ -1668,7 +1668,7 @@ u32 btlScriptPickLinkedPartyTarget(void) {
     return 1;
 }
 
-extern void btlAppendActorToCommandTargets(s32 context, s32 input);
+extern void btlAppendActorToCommandTargets(BtlTask *context, s32 input);
 
 /* Append this command's own actor after target scan; return VM success. */
 u32 btlScriptAppendActorToTargets(void) {
@@ -1676,7 +1676,7 @@ u32 btlScriptAppendActorToTargets(void) {
     return 1;
 }
 
-extern void btlAddEffectActorTargetToCommand(s32 context);
+extern void btlAddEffectActorTargetToCommand(BtlTask *context);
 
 /* Append the global effect actor to this command's targets; return VM success. */
 u32 btlScriptAddEffectActorTarget(void) {
@@ -1686,9 +1686,9 @@ u32 btlScriptAddEffectActorTarget(void) {
 
 /* Parameter 0 feeds element-block target selection; return VM success. */
 u32 btlScriptPickElementBlockTarget(void) {
-    void *context = scrGetData();
+    BtlTask *context = scrGetData();
     s32 value = scrGetIntPara(0);
-    btlPickCommandElementBlockTarget((s32)(u32)context, value);
+    btlPickCommandElementBlockTarget(context, value);
     return 1;
 }
 

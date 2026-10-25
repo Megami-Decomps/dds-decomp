@@ -138,16 +138,16 @@ extern s32 D_00436AF0;
 extern s32 D_00438F6C;
 
 
-extern void btlPickCommandElementCheckedTarget(s32 commandContext, s32 action);
-extern void btlPickCommandTargetExcludingActor(s32, s32);
+extern void btlPickCommandElementCheckedTarget(ActionStateLink *context, s32 action);
+extern void btlPickCommandTargetExcludingActor(ActionStateLink *context, s32);
 
-extern void btlPickCommandLowestHpBlockTarget(s32, s32);
+extern void btlPickCommandLowestHpBlockTarget(ActionStateLink *context, s32);
 
-extern void btlPickCommandTargetWithoutStatusMask(s32, s32);
+extern void btlPickCommandTargetWithoutStatusMask(ActionStateLink *context, s32);
 
-extern void btlFilterCommandTargetsByUnitId(s32, s32);
+extern void btlFilterCommandTargetsByUnitId(ActionStateLink *context, s32);
 
-extern void btlPickCommandElementBlockTarget(s32, s32);
+extern void btlPickCommandElementBlockTarget(ActionStateLink *context, s32);
 
 extern s8 btlHistoryCounter;
 
@@ -187,7 +187,7 @@ extern u32 btlGetEffectValue(void);
 
 extern u32 btlGetSubtaskTargetMode(void);
 
-extern void btlPickCommandTargetWithStatusMask(s32, s32);
+extern void btlPickCommandTargetWithStatusMask(ActionStateLink *context, s32);
 
 extern s32 btlDispatchPackedActionWithScratch(s32 context, s32 actor, s32 mask);
 
@@ -204,9 +204,9 @@ extern f32 btlMeasureUnitIndexListBounds(BtlIndexList *list, f32 *maxTop, f32 *m
 
 extern void btlChoosePartyDerivedShadowSkill(ActionStateLink *actor);
 
-extern void btlCmdAppendCurrentUnitIdToCommandIndices(s32);
+extern void btlCmdAppendCurrentUnitIdToCommandIndices(ActionStateLink *context);
 
-extern void btlSelectCommandTargetsByMode(s32, s32);
+extern void btlSelectCommandTargetsByMode(ActionStateLink *context, s32);
 
 extern void btlSetSpecialBattleEffectActorByte(u8);
 
@@ -1684,7 +1684,7 @@ u32 btlScriptSetBattleWorkParameter(void) {
     return 1;
 }
 
-extern void btlChooseCommandActionTargets(s32 context);
+extern void btlChooseCommandActionTargets(ActionStateLink *context);
 
 /* Select targets for the current command's action; return VM success. */
 u32 btlScriptChooseActionTargets(void) {
@@ -1694,13 +1694,13 @@ u32 btlScriptChooseActionTargets(void) {
 
 /* Parameter 0 supplies the group element-check input; return VM success. */
 u32 btlScriptPickElementCheckedTarget(void) {
-    void *context = scrGetData();
+    ActionStateLink *context = scrGetData();
     s32 value = scrGetIntPara(0);
-    btlPickCommandElementCheckedTarget((s32)(u32)context, value);
+    btlPickCommandElementCheckedTarget(context, value);
     return 1;
 }
 
-extern void btlPickCommandLowestHpTarget(s32 context);
+extern void btlPickCommandLowestHpTarget(ActionStateLink *context);
 
 /* Select the current command's minimum nonzero-HP candidate; return VM success. */
 u32 btlScriptPickLowestHpTarget(void) {
@@ -1708,7 +1708,7 @@ u32 btlScriptPickLowestHpTarget(void) {
     return 1;
 }
 
-extern void btlPickCommandLowestHpRatioTarget(s32 context);
+extern void btlPickCommandLowestHpRatioTarget(ActionStateLink *context);
 
 /* Select the current command's minimum HP-percentage candidate; return VM success. */
 u32 btlScriptPickLowestHpRatioTarget(void) {
@@ -1718,13 +1718,13 @@ u32 btlScriptPickLowestHpRatioTarget(void) {
 
 /* Parameter 0 feeds lowest-HP element-block selection; return VM success. */
 u32 btlScriptPickLowestHpBlockTarget(void) {
-    void *context = scrGetData();
+    ActionStateLink *context = scrGetData();
     s32 value = scrGetIntPara(0);
-    btlPickCommandLowestHpBlockTarget((s32)(u32)context, value);
+    btlPickCommandLowestHpBlockTarget(context, value);
     return 1;
 }
 
-extern void btlPickCommandHighestMpTarget(s32 context);
+extern void btlPickCommandHighestMpTarget(ActionStateLink *context);
 
 /* Pick the current command's highest-MP target and return VM completion. */
 u32 btlScriptPickHighestMpTarget(void) {
@@ -1732,7 +1732,7 @@ u32 btlScriptPickHighestMpTarget(void) {
     return 1;
 }
 
-extern void btlPickCommandLowestLevelTarget(s32 context);
+extern void btlPickCommandLowestLevelTarget(ActionStateLink *context);
 
 /* Run the current command's minimum-value target selector; return VM success. */
 u32 btlScriptPickLowestLevelTarget(void) {
@@ -1742,25 +1742,25 @@ u32 btlScriptPickLowestLevelTarget(void) {
 
 /* Parameter 0 is a status-presence mask for command target selection; return VM success. */
 u32 btlScriptPickTargetWithStatusMask(void) {
-    void *context = scrGetData();
+    ActionStateLink *context = scrGetData();
     s32 value = scrGetIntPara(0);
-    btlPickCommandTargetWithStatusMask((s32)(u32)context, value);
+    btlPickCommandTargetWithStatusMask(context, value);
     return 1;
 }
 
 /* Parameter 0 is a status-absence mask for command target selection; return VM success. */
 u32 btlScriptPickTargetWithoutStatusMask(void) {
-    void *context = scrGetData();
+    ActionStateLink *context = scrGetData();
     s32 value = scrGetIntPara(0);
-    btlPickCommandTargetWithoutStatusMask((s32)(u32)context, value);
+    btlPickCommandTargetWithoutStatusMask(context, value);
     return 1;
 }
 
 /* Apply script parameter 0 as the target unit-ID filter; return VM success. */
 u32 btlScriptFilterTargetsByUnitId(void) {
-    void *context = scrGetData();
+    ActionStateLink *context = scrGetData();
     s32 value = scrGetIntPara(0);
-    btlFilterCommandTargetsByUnitId((s32)(u32)context, value);
+    btlFilterCommandTargetsByUnitId(context, value);
     return 1;
 }
 
@@ -1770,7 +1770,7 @@ u32 btlScriptChooseActionTargetsDuplicate(void) {
     return 1;
 }
 
-extern void btlPickUnlinkedCommandTarget(u32 task, u32 input);
+extern void btlPickUnlinkedCommandTarget(ActionStateLink *context, u32 input);
 
 /* Run unlinked-party selection; the old F/G attribution was reversed in DDS2. */
 u32 btlScriptPickUnlinkedPartyTarget(void) {
@@ -1778,7 +1778,7 @@ u32 btlScriptPickUnlinkedPartyTarget(void) {
     return 1;
 }
 
-extern void btlPickLinkedCommandTarget(u32 task, u32 input);
+extern void btlPickLinkedCommandTarget(ActionStateLink *context, u32 input);
 
 /* Run linked-party selection; the old F/G attribution was reversed in DDS2. */
 u32 btlScriptPickLinkedPartyTarget(void) {
@@ -1786,7 +1786,7 @@ u32 btlScriptPickLinkedPartyTarget(void) {
     return 1;
 }
 
-extern void btlAppendActorToCommandTargets(s32 context, s32 input);
+extern void btlAppendActorToCommandTargets(ActionStateLink *context, s32 input);
 
 /* Append this command's own actor after target scan; return VM success. */
 u32 btlScriptAppendActorToTargets(void) {
@@ -1796,12 +1796,12 @@ u32 btlScriptAppendActorToTargets(void) {
 
 /* Apply script parameter 0 as the command target-selection mode; return VM success. */
 s32 btlScriptCmdSelectTargetsByMode(void) {
-    void *context = scrGetData();
-    btlSelectCommandTargetsByMode((s32)(u32)context, scrGetIntPara(0));
+    ActionStateLink *context = scrGetData();
+    btlSelectCommandTargetsByMode(context, scrGetIntPara(0));
     return 1;
 }
 
-extern void btlAddEffectActorTargetToCommand(s32 context);
+extern void btlAddEffectActorTargetToCommand(ActionStateLink *context);
 
 /* Append the global effect actor to this command's targets; return VM success. */
 u32 btlScriptAddEffectActorTarget(void) {
@@ -1817,9 +1817,9 @@ s32 btlScriptAppendSelectedOrCurrentTarget(void) {
 
 /* Parameter 0 feeds element-block target selection; return VM success. */
 u32 btlScriptPickElementBlockTarget(void) {
-    void *context = scrGetData();
+    ActionStateLink *context = scrGetData();
     s32 value = scrGetIntPara(0);
-    btlPickCommandElementBlockTarget((s32)(u32)context, value);
+    btlPickCommandElementBlockTarget(context, value);
     return 1;
 }
 
