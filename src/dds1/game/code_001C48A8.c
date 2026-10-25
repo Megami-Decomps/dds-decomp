@@ -78,7 +78,7 @@ typedef struct BattleSceneWork {
     s32 currentScene;          /* 0x208 */
     s32 queuedScene;           /* 0x20C */
     s32 frame;                 /* 0x210 */
-    s32 sceneState;            /* 0x214 */
+    s32 sceneEndFrame;         /* 0x214: battle end-phase frame threshold. */
     u8 pad218[4];
     s32 scriptState;           /* 0x21C */
     s32 scriptArg;             /* 0x220 */
@@ -995,7 +995,7 @@ void btlFinalizeBattleRewards(BtlState *scene) {
             scene->eventReady = 6;
         }
     }
-    scene->sceneState = 30;
+    scene->sceneEndFrame = 30;
     scene->endFlags &= ~7;
     scene->endDelay = 0;
     switch (scene->eventReady) {
@@ -1033,7 +1033,7 @@ void btlFinalizeBattleRewards(BtlState *scene) {
                     task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                     task->startCondition.value.handle = sound->handle;
                     btlStartTask(task);
-                    scene->sceneState = 120;
+                    scene->sceneEndFrame = 120;
                 }
             }
         }
@@ -1060,18 +1060,18 @@ void btlFinalizeBattleRewards(BtlState *scene) {
             task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
             task->startCondition.value.handle = clear->handle;
             btlStartTask(task);
-            scene->sceneState = 280;
+            scene->sceneEndFrame = 280;
         } else {
             task = btlCreateCommandSoundTask(0, 3);
             task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
             task->startCondition.value.handle = clear->handle;
             btlStartTask(task);
-            scene->sceneState = 90;
+            scene->sceneEndFrame = 90;
         }
         task = (BtlRuntimeTask *)sndCreateCustomTask(-1, 24);
         task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         task->startCondition.value.handle = clear->handle;
-        task->startDelay = scene->sceneState - 48;
+        task->startDelay = scene->sceneEndFrame - 48;
         btlStartTask(task);
         break;
     }
@@ -1080,7 +1080,7 @@ void btlFinalizeBattleRewards(BtlState *scene) {
         task = (BtlRuntimeTask *)sndCreateCustomTask(-1, 20);
         task->startDelay = 30;
         btlStartTask(task);
-        scene->sceneState = 50;
+        scene->sceneEndFrame = 50;
         break;
     case 6:
         if (scene->scriptState != 0xF000003) {
@@ -1091,7 +1091,7 @@ void btlFinalizeBattleRewards(BtlState *scene) {
             task = (BtlRuntimeTask *)sndCreateCustomTask(0, 30);
             task->startDelay = 80;
             btlStartTask(task);
-            scene->sceneState = 110;
+            scene->sceneEndFrame = 110;
         }
         break;
     }
@@ -1207,7 +1207,7 @@ s32 btlUpdateBattleEnd(BtlState *scene) {
     u32 flags;
 
     if (scene->eventReady == BTL_TERMINAL_OUTCOME_WIN && !(scene->endFlags & 1) &&
-        scene->scriptState != 0xF000003 && scene->scenePhaseFrame + 30 >= scene->sceneState) {
+        scene->scriptState != 0xF000003 && scene->scenePhaseFrame + 30 >= scene->sceneEndFrame) {
         btlAdvanceTitleState();
         sndLoadAndPlayStationedSe(0x1C);
         scene->endFlags |= 1;
@@ -1242,7 +1242,7 @@ s32 btlUpdateBattleEnd(BtlState *scene) {
         }
     }
     if (!((scene->scriptState != 0xF000003 || scene->scriptState != state) &&
-          scene->scenePhaseFrame < scene->sceneState &&
+          scene->scenePhaseFrame < scene->sceneEndFrame &&
           (scene->eventReady != BTL_TERMINAL_OUTCOME_WIN || scene->scenePhaseFrame < 37 ||
            ((s8)dds3PadButtonState[0x21] >= 0 && (s8)dds3PadButtonState[0x23] >= 0))) &&
         scene->endDelay == 0) {
@@ -1506,7 +1506,7 @@ void btlSetScene(s32 sceneId) {
 
     scene->currentScene = sceneId;
     scene->frame = 0;
-    scene->sceneState = 0;
+    scene->sceneEndFrame = 0;
     D_00359A88[sceneId].initialize((s32)scene);
 }
 

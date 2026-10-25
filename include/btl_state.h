@@ -214,7 +214,7 @@ typedef struct BtlState {
     s32 currentScene; /* 0x208 */
     s32 queuedScene; /* 0x20C */
     s32 scenePhaseFrame; /* 0x210: scene-phase counter, distinct from the +0x1F0 model-update clock. */
-    s32 sceneState; /* 0x214: scheduled end-phase frame. */
+    s32 sceneEndFrame; /* 0x214: frame threshold scheduled by the battle end phase. */
     s16 endDelay; /* 0x218: signed battle-end countdown. */
     u16 endFlags; /* 0x21A: jingle, script-release and stream-reset latches. */
     s32 scriptState; /* 0x21C */
@@ -455,7 +455,7 @@ typedef struct BtlState {
     s32 currentScene; /* 0x22C */
     s32 queuedScene;
     s32 frame;
-    s32 sceneState;
+    s32 sceneEndFrame; /* Frame threshold scheduled by the battle end phase. */
     s16 endDelay; /* 0x23C: signed battle-end countdown. */
     u16 endFlags; /* 0x23E: same end-phase latches as DDS1. */
     s32 scriptState; /* 0x240 */
