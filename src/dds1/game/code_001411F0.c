@@ -2957,25 +2957,25 @@ void fldParseMixLb(void) {
             allocation = PAC_WORK_ALLOCATION(node);
             fldGlobalBase.mapResources[0].allocation = allocation;
             fldGlobalBase.mapResources[0].resourceData =
-                (struct SdfTextureFileHeader *)sdfMemGetPtr(allocation);
+                (const struct SdfTextureFileHeader *)sdfMemGetPtr(allocation);
             break;
         case 11:
             allocation = PAC_WORK_ALLOCATION(node);
             fldGlobalBase.mapResources[1].allocation = allocation;
             fldGlobalBase.mapResources[1].resourceData =
-                (struct SdfTextureFileHeader *)sdfMemGetPtr(allocation);
+                (const struct SdfTextureFileHeader *)sdfMemGetPtr(allocation);
             break;
         case 12:
             allocation = PAC_WORK_ALLOCATION(node);
             fldGlobalBase.mapResources[2].allocation = allocation;
             fldGlobalBase.mapResources[2].resourceData =
-                (struct SdfTextureFileHeader *)sdfMemGetPtr(allocation);
+                (const struct SdfTextureFileHeader *)sdfMemGetPtr(allocation);
             break;
         case 13:
             allocation = PAC_WORK_ALLOCATION(node);
             fldGlobalBase.mapResources[3].allocation = allocation;
             fldGlobalBase.mapResources[3].resourceData =
-                (struct SdfTextureFileHeader *)sdfMemGetPtr(allocation);
+                (const struct SdfTextureFileHeader *)sdfMemGetPtr(allocation);
             break;
         }
     }

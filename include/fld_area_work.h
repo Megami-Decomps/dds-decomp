@@ -61,15 +61,15 @@ enum FldCameraMode {
     FLD_CAMERA_MODE_NPC_REQUEST = 5
 };
 
-/* Field loaders retain the allocation owner and its texture-file data. */
+/* Each resourceData pointer is a read-only view into its retained allocation. */
 typedef struct FldResourceBlock {
     struct sdfMemHandle_t *allocation;
-    struct SdfTextureFileHeader *resourceData;
+    const struct SdfTextureFileHeader *resourceData;
 } FldResourceBlock;
 
 typedef struct FldTextureResource {
     struct sdfMemHandle_t *allocation;
-    struct SdfTextureFileHeader *resourceData;
+    const struct SdfTextureFileHeader *resourceData;
     struct sdfTexHandle_t *texture;
 } FldTextureResource;
 
