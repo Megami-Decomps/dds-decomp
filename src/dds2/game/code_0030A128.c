@@ -21,6 +21,7 @@
 #include "itf_grid_text.h"
 #include "sdf_grid_seek_api.h"
 #include "fld_lmap_task.h"
+#include "fld_lmap_task_presence.h"
 #include "sdf_sif_command.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
@@ -372,7 +373,9 @@ void fldStopLmapTask(void) {
 }
 
 u8 fldLmapTaskExists(void) {
-    return dds3SearchProcessName(fldLocalMapTaskName) != NULL;
+    return dds3SearchProcessName(fldLocalMapTaskName) != NULL
+               ? FLD_LOCAL_MAP_TASK_PRESENT
+               : FLD_LOCAL_MAP_TASK_ABSENT;
 }
 
 void fldLocalMapDebugPrintfNoop(const char *fmt, ...) {

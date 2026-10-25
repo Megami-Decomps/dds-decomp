@@ -9,6 +9,7 @@
 #include "sdf_vu0.h"
 #include "kwln_background_fade_api.h"
 #include "mnu_camp_state_ack_api.h"
+#include "fld_lmap_task_presence.h"
 #include "dds3_admin_control_api.h"
 #include "sdf_heap_overlay_block.h"
 #include "kwln_draw_buffer.h"
@@ -1568,10 +1569,10 @@ u32 evtDestroyLmapTask(void) {
 }
 
 u8 evtWaitLmapTaskGone(void) {
-    u8 taskExists;
+    u8 taskPresence;
 
-    taskExists = fldLmapTaskExists();
-    return taskExists == 0;
+    taskPresence = fldLmapTaskExists();
+    return taskPresence == FLD_LOCAL_MAP_TASK_ABSENT;
 }
 
 /* Start the shooting-game task: the callee allocates MnuShootingWork and starts "stgProcess". */

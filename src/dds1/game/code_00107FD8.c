@@ -16,6 +16,7 @@
 #include "sdf_vu0.h"
 #include "kwln_background_fade_api.h"
 #include "mnu_camp_state_ack_api.h"
+#include "fld_lmap_task_presence.h"
 #include "sdf_heap_overlay_block.h"
 #include "kwln_draw_buffer.h"
 #include "kwln_frame_draw_buffer.h"
@@ -1574,10 +1575,10 @@ u32 evtDestroyLmapTask(void) {
 }
 
 u8 evtWaitLmapTaskGone(void) {
-    s32 taskExists;
+    s32 taskPresence;
 
-    taskExists = fldLmapTaskExists();
-    return taskExists == 0;
+    taskPresence = fldLmapTaskExists();
+    return taskPresence == FLD_LOCAL_MAP_TASK_ABSENT;
 }
 
 u32 evtEnsureFontResourceChain(void) {

@@ -20,6 +20,7 @@
 #include "mdl_flag_api.h"
 #include "kwln_fade.h"
 #include "sdf_counter_display.h"
+#include "fld_lmap_task_presence.h"
 
 extern void fldShutdownLmapResources(void);
 
@@ -370,7 +371,9 @@ void fldStopLmapTask(void) {
 }
 
 s32 fldLmapTaskExists(void) {
-    return dds3SearchProcessName(fldLocalMapTaskName) != NULL;
+    return dds3SearchProcessName(fldLocalMapTaskName) != NULL
+               ? FLD_LOCAL_MAP_TASK_PRESENT
+               : FLD_LOCAL_MAP_TASK_ABSENT;
 }
 
 void fldLocalMapDebugPrintfNoop(const char *fmt, ...) {
