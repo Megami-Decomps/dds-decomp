@@ -16,6 +16,7 @@
 #include "btl_ai_table.h"
 #include "btl_indexed_ui_resource_api.h"
 #include "btl.h"
+#include "btl_model_state_ownership.h"
 #include "btl_analysis_panel_work.h"
 #include "btl_analysis_panel_wait_args.h"
 #include "btl_model_record.h"
@@ -87,7 +88,7 @@ void btlDrawUnitStatusShadowDisc(BtlUnit *unit) {
         if ((unit->status.flags & 2) == 0) {
             return;
         }
-        if (unit->modelBorrowed != 0) {
+        if (unit->modelBorrowed != BTL_MODEL_STATE_OWNED) {
             return;
         }
         model = unit->ext->owner;

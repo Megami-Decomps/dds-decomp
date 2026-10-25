@@ -37,6 +37,7 @@
 #include "sdf_model.h"
 #include "sdf_dev_slot_api.h"
 #include "btl.h"
+#include "btl_model_state_ownership.h"
 #include "btl_deferred_unit_status_args.h"
 #include "btl_position_effect_task_args.h"
 #include "btl_position_lerp_task_args.h"
@@ -2328,7 +2329,7 @@ void btlInheritActorModelState(BtlUnit *dst, BtlUnit *src) {
     dst->transparencyModel = src->transparencyModel;
     dst->effectObject = src->effectObject;
     dst->ext = src->ext;
-    dst->modelBorrowed = 1;
+    dst->modelBorrowed = BTL_MODEL_STATE_BORROWED;
     dst->status.flags |= 2;
 }
 
@@ -2365,7 +2366,7 @@ void btlBindActorModel(BtlUnit *unit, u32 kind, u32 id) {
 
     unit->resourceKind = kind;
     unit->species = id;
-    unit->modelBorrowed = 0;
+    unit->modelBorrowed = BTL_MODEL_STATE_OWNED;
     btlInitializeEffectVectorsFromSourceRecords(unit, kind, id);
     if (battle->findReusableUnit) {
         reused = battle->findReusableUnit(kind, id);
@@ -2451,7 +2452,7 @@ void btlReleaseActorModelResources(BtlUnit *object) {
     u32 state;
     u32 flags;
 
-    if (object->modelBorrowed == 0) {
+    if (object->modelBorrowed == BTL_MODEL_STATE_OWNED) {
         sound = object->soundSlotOwner;
         if (sound != 0) {
             sndReleaseSlotOwner(sound);
@@ -3285,7 +3286,7 @@ void btlCreateUnitTransparency(BtlUnit *unit) {
     if (unit->transparencyModel != 0) {
         return;
     }
-    if (unit->modelBorrowed != 0) {
+    if (unit->modelBorrowed != BTL_MODEL_STATE_OWNED) {
         return;
     }
     shape = unit->ext->owner->sub;
@@ -3305,7 +3306,7 @@ void btlUpdateUnitTransparency(BtlUnit *unit) {
     u32 alpha;
 
     if (flags & 2) {
-        if (unit->modelBorrowed == 0) {
+        if (unit->modelBorrowed == BTL_MODEL_STATE_OWNED) {
             color = unit->overlayColor;
             info = unit->ext->owner;
             alpha = color >> 24;
@@ -3351,7 +3352,7 @@ void btlDrawUnitMirrorTransparency(BtlUnit *unit) {
     if ((unit->status.flags & 2) == 0) {
         return;
     }
-    if (unit->modelBorrowed != 0) {
+    if (unit->modelBorrowed != BTL_MODEL_STATE_OWNED) {
         return;
     }
     unit->mirror->transparencyBuffer = sdfGrAllocPacketBuff(0x70000);
@@ -3890,9 +3891,9 @@ u32 btlUpdateModelChangeTask(BtlModelChangeArgs *args) {
             unit->mirror = btlCreateUnit();
             unit->mirror->status.flags |= 0x40000;
             btlInheritActorModelState(unit->mirror, unit);
-            if (unit->modelBorrowed == 0) {
-                unit->mirror->modelBorrowed = 0;
-                unit->modelBorrowed = 1;
+            if (unit->modelBorrowed == BTL_MODEL_STATE_OWNED) {
+                unit->mirror->modelBorrowed = BTL_MODEL_STATE_OWNED;
+                unit->modelBorrowed = BTL_MODEL_STATE_BORROWED;
             }
             btlSetUnitPosition(unit->mirror, unit->currentPosition);
             btlSetUnitRotation(unit->mirror, unit->orientation);

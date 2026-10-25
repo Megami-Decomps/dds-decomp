@@ -14,6 +14,7 @@
 #include "btl_task_state.h"
 #include "btl_task_condition.h"
 #include "btl.h"
+#include "btl_model_state_ownership.h"
 #include "btl_analysis_panel_work.h"
 #include "btl_analysis_panel_wait_args.h"
 #include "btl_command.h"
@@ -177,7 +178,7 @@ void btlDrawActorGroundDisc(BtlUnit *unit) {
     if (!(unit->status.flags & 2)) {
         return;
     }
-    if (unit->modelBorrowed != 0) {
+    if (unit->modelBorrowed != BTL_MODEL_STATE_OWNED) {
         return;
     }
 
