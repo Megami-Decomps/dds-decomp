@@ -5,18 +5,18 @@
 #include "dat_state.h"
 
 
-void scrSetUserData(dds3ProcessID_t *task, void *actor) {
+void scrSetUserData(dds3ProcessID_t *task, void *userData) {
     scrProcessWork_s *context;
 
     context = (scrProcessWork_s *)dds3GetProcessData(task);
-    context->actor = actor;
+    context->userData = userData;
 }
 
 void *scrGetUserData(dds3ProcessID_t *task) {
     scrProcessWork_s *context;
 
     context = (scrProcessWork_s *)dds3GetProcessData(task);
-    return context->actor;
+    return context->userData;
 }
 
 void scrScriptShutdown(dds3ProcessID_t *task) {

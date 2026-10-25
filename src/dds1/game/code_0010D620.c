@@ -43,7 +43,7 @@ scrProcessWork_s *scrGetScriptHandle(void) {
 }
 
 void *scrGetData(void) {
-    return nowpwork->actor;
+    return nowpwork->userData;
 }
 
 s32 scrCommand_KEY(void) {

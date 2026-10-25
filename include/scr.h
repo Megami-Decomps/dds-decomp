@@ -82,7 +82,7 @@ typedef struct scrProcessWork_s {
     dds3ProcessID_t *task;       /* 0xE4: scheduler object returned by dds3StartProcess */
     struct scrProcessWork_s *previous; /* 0xE8: named-process list links */
     struct scrProcessWork_s *next;     /* 0xEC */
-    void *actor;          /* 0xF0: caller-owned command work */
+    void *userData;       /* 0xF0: opaque caller-owned script context, never freed here */
 } scrProcessWork_s;
 
 typedef char ScrData_size_must_be_0xF4[
