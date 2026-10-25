@@ -5734,7 +5734,7 @@ dds3ProcessID_t *evtSearchEventPack(s32 taskId) {
 }
 
 /* Return its load phase, or EVT_PACK_LOAD_NOT_FOUND when the task is absent. */
-EvtPackLoadStatus evtGetEventPackStat(u32 taskId) {
+EvtPackLoadStatus evtGetEventPackStat(s32 taskId) {
     dds3ProcessID_t *task = evtSearchEventPack(taskId);
     if (task == 0) {
         return EVT_PACK_LOAD_NOT_FOUND;
@@ -5742,7 +5742,7 @@ EvtPackLoadStatus evtGetEventPackStat(u32 taskId) {
     return ((EvtPackLoadState *)dds3GetProcessData(task))->loadPhase;
 }
 
-EvtPackLoadState *evtGetPackProcessData(u32 taskId) {
+EvtPackLoadState *evtGetPackProcessData(s32 taskId) {
     dds3ProcessID_t *task = evtSearchEventPack(taskId);
     if (task != 0) {
         return (EvtPackLoadState *)dds3GetProcessData(task);
@@ -5751,12 +5751,12 @@ EvtPackLoadState *evtGetPackProcessData(u32 taskId) {
 }
 
 
-void *evtGetEventPackResourceAddress(u32 id, s32 secondaryResourceId) {
+void *evtGetEventPackResourceAddress(s32 taskId, s32 secondaryResourceId) {
     dds3ProcessID_t *task;
     EvtPackLoadState *data;
     s32 i;
 
-    task = evtSearchEventPack(id);
+    task = evtSearchEventPack(taskId);
     if (task == 0) {
         return 0;
     }

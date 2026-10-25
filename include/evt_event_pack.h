@@ -98,11 +98,11 @@ typedef char EvtPackLoadState_effect75_at_0x44[
     ((u32)&((EvtPackLoadState *)0)->effect75 == 0x44) ? 1 : -1];
 
 /* These numeric task IDs resolve to the camp-owned event-pack state. */
-EvtPackLoadState *evtGetPackProcessData(u32 taskId);
-EvtPackLoadStatus evtGetEventPackStat(u32 taskId);
+EvtPackLoadState *evtGetPackProcessData(s32 taskId);
+EvtPackLoadStatus evtGetEventPackStat(s32 taskId);
 
 /* Find an entry by secondaryResourceId in a complete pack and return its
  * borrowed payload address; resource kinds stay opaque. */
-void *evtGetEventPackResourceAddress(u32 taskId, s32 secondaryResourceId);
+void *evtGetEventPackResourceAddress(s32 taskId, s32 secondaryResourceId);
 
 #endif /* EVT_EVENT_PACK_H */
