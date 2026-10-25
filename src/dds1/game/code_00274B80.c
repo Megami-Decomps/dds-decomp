@@ -1571,7 +1571,7 @@ void ptySkillMenuRefreshEntries(CampMenuContext *context) {
     }
 }
 
-s32 mnuBuildSkillCodeBitset(void) {
+u32 *mnuBuildSkillCodeBitset(void) {
     s32 id = 0;
     u32 *bits = (u32 *)sdfChipAllocDirect(0x50);
     PrfSkillListBuffer info;
@@ -1589,7 +1589,7 @@ s32 mnuBuildSkillCodeBitset(void) {
             }
         }
     }
-    return (s32)bits;
+    return bits;
 }
 
 
@@ -1615,7 +1615,7 @@ void ptySkillMenuInitPages(CampMenuContext *context) {
 
     if (menu->active == 0) {
         owner = &DDS3_GBWK->party[context->partyWindow.lists[0]->cursor->index];
-        skillBits = (u32 *)mnuBuildSkillCodeBitset();
+        skillBits = mnuBuildSkillCodeBitset();
         menu->panel = mnuCreatePanelState(4, 0x2B0);
         mnuSetPanelFirstGridSlot(menu->panel, 0, 0, context->gridSlotResource, 8);
         mnuSetPanelThirdGridSlot(menu->panel, 0x5E0, 0x150, (struct EffectSlotSet *)context->variant, 0xA);
