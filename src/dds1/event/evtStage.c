@@ -195,22 +195,22 @@ void evtPathDir(dds3Basic_t *worldNode, u32 direction) {
 }
 
 /* Attach object to the node referenced by owner's owned handle. */
-s32 evtPathLinkAndMake(dds3Basic_t *object, dds3Basic_t *owner) {
+EvtPathLinkResult evtPathLinkAndMake(dds3Basic_t *object, dds3Basic_t *owner) {
     dds3ObjectBaseControlWorkData_t *ref;
     dds3Basic_t *slotNode;
 
     if (object == NULL) {
-        return 0;
+        return EVT_PATH_LINK_FAILED;
     }
     ref = dds3GetBaseControlWorkData(owner);
     if (ref == NULL) {
-        return 0;
+        return EVT_PATH_LINK_FAILED;
     }
     slotNode = ref->slots[1];
     if (slotNode == NULL) {
-        return 0;
+        return EVT_PATH_LINK_FAILED;
     }
     dds3MoverBasicSetPath(slotNode, object);
     dds3MoverBasicMakePath(slotNode);
-    return 1;
+    return EVT_PATH_LINK_SUCCEEDED;
 }

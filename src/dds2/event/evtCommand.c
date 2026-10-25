@@ -136,7 +136,7 @@ void fldSetMapSlotValueFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled);
 
 void evtPathDir(dds3Basic_t *worldNode, u32 direction);
 
-s32 evtPathLinkAndMake(dds3Basic_t *target, dds3Basic_t *path);
+EvtPathLinkResult evtPathLinkAndMake(dds3Basic_t *target, dds3Basic_t *path);
 
 extern char D_00421FB0[]; /* "LIGHT_PATH_MOVE error!\n" */
 
@@ -667,7 +667,7 @@ s32 evtCommand_CAM_PATH_MOVE(void) {
         printf("CAM_PATH_MOVE error!\n");
         return 1;
     }
-    if (evtPathLinkAndMake(path, owner) == 0) {
+    if (evtPathLinkAndMake(path, owner) == EVT_PATH_LINK_FAILED) {
         printf("CAM_PATH_MOVE error!\n");
         return 1;
     }
@@ -1281,7 +1281,7 @@ s32 evtCommand_PATH_LOOP_OFF(void)
 s32 evtCommand_LIGHT_PATH_MOVE(void) {
     dds3Basic_t *pathOwner = evtSearchBasic(9, scrGetIntPara(0));
 
-    if (evtPathLinkAndMake(evtSearchBasic(0x10, scrGetIntPara(1)), pathOwner) != 0) {
+    if (evtPathLinkAndMake(evtSearchBasic(0x10, scrGetIntPara(1)), pathOwner) != EVT_PATH_LINK_FAILED) {
         return 1;
     }
     printf(D_00421FB0);

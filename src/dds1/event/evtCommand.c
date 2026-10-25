@@ -104,7 +104,7 @@ void fldSetSceneParam2(fldSceneParam_t *record, s32 stage, s32 kind, const char 
 void fldSetSceneParam3(fldSceneParam_t *record, s32 stage, s32 kind, const char *name);
 void evtFreeStage(void);
 
-s32 evtPathLinkAndMake(dds3Basic_t *target, dds3Basic_t *path);
+EvtPathLinkResult evtPathLinkAndMake(dds3Basic_t *target, dds3Basic_t *path);
 
 void evtPathRate(dds3Basic_t *unit, f32 value);
 
@@ -698,7 +698,7 @@ s32 evtCommand_CAM_PATH_MOVE(void) {
         printf("CAM_PATH_MOVE error!\n");
         return 1;
     }
-    if (evtPathLinkAndMake(path, owner) == 0) {
+    if (evtPathLinkAndMake(path, owner) == EVT_PATH_LINK_FAILED) {
         printf("CAM_PATH_MOVE error!\n");
         return 1;
     }
@@ -1297,7 +1297,7 @@ s32 evtCommand_PATH_LOOP_OFF(void)
 s32 evtCommand_LIGHT_PATH_MOVE(void) {
     void *pathOwner = evtSearchBasic(9, scrGetIntPara(0));
 
-    if (evtPathLinkAndMake(evtSearchBasic(0x10, scrGetIntPara(1)), pathOwner) != 0) {
+    if (evtPathLinkAndMake(evtSearchBasic(0x10, scrGetIntPara(1)), pathOwner) != EVT_PATH_LINK_FAILED) {
         return 1;
     }
     printf(D_003ACA40);

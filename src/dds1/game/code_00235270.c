@@ -4623,7 +4623,7 @@ extern s32 evtEventViewerAddName(const char *name, EvtRuntime *runtime);
 extern void mdlPackDecode(s32 packageId, s32 partId, s32 flags, const u8 *data, s32 length);
 extern s32 mdlSpawnCameraSlotViewerObject(s32 packageId, s32 partId);
 extern evtUnitHandle_t *evtGetUnitHandle(s32 key);
-extern s32 evtPathLinkAndMake(dds3Basic_t *object, dds3Basic_t *owner);
+extern EvtPathLinkResult evtPathLinkAndMake(dds3Basic_t *object, dds3Basic_t *owner);
 extern EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, EvtRuntime *runtime);
 extern s32 evtLoadEventBgm(s32 eventId);
 extern EvtEventBgmReadiness evtCheckEventBgmLoaded(s32 eventId);

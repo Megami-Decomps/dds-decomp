@@ -11,6 +11,13 @@ typedef enum EvtPathStatus {
     EVT_PATH_STATUS_IN_PROGRESS = 1
 } EvtPathStatus;
 
+typedef s32 EvtPathLinkResult;
+
+enum EvtPathLinkResult {
+    EVT_PATH_LINK_FAILED = 0,
+    EVT_PATH_LINK_SUCCEEDED = 1
+};
+
 /* Native 0x0A-byte frame editor row: count followed by eight signed column kinds. */
 typedef struct EvtFrameTableEntry {
     s16 columns;

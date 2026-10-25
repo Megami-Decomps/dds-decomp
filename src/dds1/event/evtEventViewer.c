@@ -532,7 +532,7 @@ dds3Basic_t *evtEventViewerGetNameObject(s32 index, EvtRuntime *viewer)
 
 extern s32 dds3EffectObjectBasicLinkObjectIndex(dds3Basic_t *, dds3Basic_t *, s32);
 extern s32 dds3EffectObjectBasicLinkObject(dds3Basic_t *, dds3Basic_t *);
-extern s32 evtPathLinkAndMake(dds3Basic_t *object, dds3Basic_t *owner);
+extern EvtPathLinkResult evtPathLinkAndMake(dds3Basic_t *object, dds3Basic_t *owner);
 
 /* Billboard entries and polygon movies use distinct owner attachment paths. */
 void evtViewerBindNamedOwner(dds3Basic_t *effectObject, s32 ownerNameIndex, s32 billboardEntry, u32 startFrame, EvtRuntime *viewer) {
