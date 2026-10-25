@@ -600,7 +600,7 @@ typedef struct BattleTaskData {
     s32 frames;
 } BattleTaskData;
 
-extern BattleTask *btlAllocTask(s32);
+extern BtlRuntimeTask *btlAllocTask(s32);
 
 extern s32 btlRunSceneActorEventTask(BattleTaskData *);
 
@@ -632,7 +632,7 @@ s32 btlRunSceneActorEventTask(BattleTaskData *data) {
 
 /* Queue a battler/action task with zero elapsed frames; return the task. */
 BtlRuntimeTask *btlCreateActionTask(BtlUnit *battler, s32 action) {
-    BattleTask *task = btlAllocTask(12);
+    BattleTask *task = (BattleTask *)btlAllocTask(12);
     BattleTaskData *data;
 
     task->enabled = 1;

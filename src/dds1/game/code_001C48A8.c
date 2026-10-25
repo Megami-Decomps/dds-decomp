@@ -2144,7 +2144,7 @@ u32 fldDispatchSceneGroupRequestWhenAllowed(BtlSceneCounterArgs *request) {
     return 1;
 }
 
-extern void * btlAllocTask(s32 size);
+extern BtlRuntimeTask *btlAllocTask(s32 size);
 
 /* Allocate a counter request, link the source task's actor owner, and store amount/mode. */
 u8 *fldCreateSceneGroupAction(u8 *actorTask, u32 counterAmount, s32 counterMode) {

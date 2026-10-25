@@ -593,7 +593,7 @@ typedef struct BtlObjLink {
     s32 elapsedTicks; /* 0x08: elapsed callback updates */
 } BtlObjLink;
 
-extern void *btlAllocTask(s32);
+extern BtlRuntimeTask *btlAllocTask(s32);
 /* Create the selected numbered-display task with its frame count starting at zero. */
 BtlRuntimeTask *btlCreateLinkedEffectTask(BtlUnit *owner, s32 value, u8 kind) {
     BtlRuntimeTask *task = btlAllocTask(0x34);

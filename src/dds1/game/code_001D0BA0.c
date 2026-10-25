@@ -1274,7 +1274,7 @@ s32 btlApplyActorParameterDelta(BtlOperandTaskArgs *arguments) {
     return 1;
 }
 
-extern void *btlAllocTask(s32);
+extern BtlRuntimeTask *btlAllocTask(s32);
 
 BtlRuntimeTask *btlCreateActorParameterDeltaTask(BtlUnit *owner, BtlOperandEntry *spec) {
     BtlRuntimeTask *task = btlAllocTask(0x2C);
@@ -1343,26 +1343,27 @@ u32 btlApplyDeferredUnitStatus(BtlDeferredUnitStatusArgs *arguments) {
     return 1;
 }
 
-extern void *btlAllocTask(s32);
+extern BtlRuntimeTask *btlAllocTask(s32);
 
 extern u32 btlApplyDeferredUnitStatus(BtlDeferredUnitStatusArgs *);
 
 BtlRuntimeTask *btlCreateDeferredUnitStatusTask(BtlUnit *owner, u32 value) {
-    u8 *task = btlAllocTask(8);
+    BtlRuntimeTask *task = btlAllocTask(8);
+    u8 *taskBytes = (u8 *)task;
     s64 data;
     BtlDeferredUnitStatusArgs *arguments;
 
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    *(u16 *)(task + 0x20) = 0x47;
-    *(void **)(task + 0x4C) = btlApplyDeferredUnitStatus;
+    taskBytes[0x10] = BTL_TASK_CONDITION_NEVER;
+    taskBytes[0] = BTL_TASK_CONDITION_ALWAYS;
+    *(u16 *)((u8 *)task + 0x20) = 0x47;
+    *(void **)((u8 *)task + 0x4C) = btlApplyDeferredUnitStatus;
     data = owner->identity;
-    *(s64 *)(task + 0x40) = data;
-    *(u32 *)(task + 0x48) = 0;
+    *(s64 *)((u8 *)task + 0x40) = data;
+    *(u32 *)((u8 *)task + 0x48) = 0;
     arguments = btlGetTaskArguments(task);
     arguments->unit = owner;
     arguments->minimumValue = value;
-    return (BtlRuntimeTask *)task;
+    return task;
 }
 
 u32 btlApplyCategoryStatDamage(BtlCategoryStatDamageArgs *args) {
@@ -1394,20 +1395,21 @@ u32 btlApplyCategoryStatDamage(BtlCategoryStatDamageArgs *args) {
 extern u32 btlApplyCategoryStatDamage(BtlCategoryStatDamageArgs *);
 
 BtlRuntimeTask *btlCreateCategoryStatDamageTask(BtlUnit *owner, s32 category, s32 amount) {
-    u8 *task = btlAllocTask(12);
+    BtlRuntimeTask *task = btlAllocTask(12);
+    u8 *taskBytes = (u8 *)task;
     BtlCategoryStatDamageArgs *arguments;
 
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
-    *(void **)(task + 0x4C) = btlApplyCategoryStatDamage;
-    *(u16 *)(task + 0x20) = 0x48;
-    *(s64 *)(task + 0x40) = *(s64 *)((u8 *)owner + 0x108);
-    *(u32 *)(task + 0x48) = 0;
+    taskBytes[0] = BTL_TASK_CONDITION_ALWAYS;
+    taskBytes[0x10] = BTL_TASK_CONDITION_NEVER;
+    *(void **)((u8 *)task + 0x4C) = btlApplyCategoryStatDamage;
+    *(u16 *)((u8 *)task + 0x20) = 0x48;
+    *(s64 *)((u8 *)task + 0x40) = *(s64 *)((u8 *)owner + 0x108);
+    *(u32 *)((u8 *)task + 0x48) = 0;
     arguments = btlGetTaskArguments(task);
     arguments->unit = owner;
     arguments->category = category;
     arguments->amount = amount;
-    return (BtlRuntimeTask *)task;
+    return task;
 }
 
 /* Apply the operand's masked entry changes; complete immediately. */
@@ -1556,19 +1558,20 @@ u32 btlAwardHuntExperience(BtlHuntExpArgs *args) {
 extern u32 btlAwardHuntExperience(BtlHuntExpArgs *);
 
 BtlRuntimeTask *btlCreateActorSoundOptionTask(BtlUnit *actor, s32 option) {
-    u8 *task = btlAllocTask(8);
+    BtlRuntimeTask *task = btlAllocTask(8);
+    u8 *taskBytes = (u8 *)task;
     BtlHuntExpArgs *data;
 
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    *(u16 *)(task + 0x20) = 0x4C;
-    *(void **)(task + 0x4C) = btlAwardHuntExperience;
-    *(u64 *)(task + 0x40) = actor->identity;
-    *(s32 *)(task + 0x48) = 0;
+    taskBytes[0x10] = BTL_TASK_CONDITION_NEVER;
+    taskBytes[0] = BTL_TASK_CONDITION_ALWAYS;
+    *(u16 *)((u8 *)task + 0x20) = 0x4C;
+    *(void **)((u8 *)task + 0x4C) = btlAwardHuntExperience;
+    *(u64 *)((u8 *)task + 0x40) = actor->identity;
+    *(s32 *)((u8 *)task + 0x48) = 0;
     data = btlGetTaskArguments(task);
     data->actor = actor;
     data->amount = (u32)option;
-    return (BtlRuntimeTask *)task;
+    return task;
 }
 
 extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
@@ -1589,19 +1592,20 @@ u32 btlConsumeFlaggedCommandItem(BtlCommandItemWork *work) {
 
 /* Queue an actor/item argument pair for conditional inventory consumption. */
 BtlRuntimeTask *btlCreateFlaggedCommandItemConsumeTask(BtlUnit *actor, s32 itemId) {
-    u8 *task = btlAllocTask(8);
+    BtlRuntimeTask *task = btlAllocTask(8);
+    u8 *taskBytes = (u8 *)task;
     BtlCommandItemWork *data;
 
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    *(u16 *)(task + 0x20) = 0x4D;
-    *(void **)(task + 0x4C) = btlConsumeFlaggedCommandItem;
-    *(u64 *)(task + 0x40) = actor->identity;
-    *(s32 *)(task + 0x48) = 0;
+    taskBytes[0x10] = BTL_TASK_CONDITION_NEVER;
+    taskBytes[0] = BTL_TASK_CONDITION_ALWAYS;
+    *(u16 *)((u8 *)task + 0x20) = 0x4D;
+    *(void **)((u8 *)task + 0x4C) = btlConsumeFlaggedCommandItem;
+    *(u64 *)((u8 *)task + 0x40) = actor->identity;
+    *(s32 *)((u8 *)task + 0x48) = 0;
     data = (BtlCommandItemWork *)btlGetTaskArguments(task);
     data->actor = actor;
     data->itemId = itemId;
-    return (BtlRuntimeTask *)task;
+    return task;
 }
 
 /* Add one to the argument's 16-bit item ID quantity, then complete the task. */
@@ -1612,20 +1616,21 @@ u32 btlIncrementCommandItemQuantity(BtlRuntimeTaskArgs *taskArgs) {
 
 /* Queue an owner-bound task that increments this item's inventory quantity. */
 BtlRuntimeTask *btlCreateItemQuantityIncrementTask(BtlUnit *actor, u16 itemId) {
-    u8 *task = btlAllocTask(8);
+    BtlRuntimeTask *task = btlAllocTask(8);
+    u8 *taskBytes = (u8 *)task;
     u8 *actorBytes = (u8 *)actor;
     BtlRuntimeTaskArgs *data;
 
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    *(u16 *)(task + 0x20) = 0x4E;
-    *(void **)(task + 0x4C) = btlIncrementCommandItemQuantity;
-    *(u64 *)(task + 0x40) = *(u64 *)(actorBytes + 0x108);
-    *(s32 *)(task + 0x48) = 0;
+    taskBytes[0x10] = BTL_TASK_CONDITION_NEVER;
+    taskBytes[0] = BTL_TASK_CONDITION_ALWAYS;
+    *(u16 *)((u8 *)task + 0x20) = 0x4E;
+    *(void **)((u8 *)task + 0x4C) = btlIncrementCommandItemQuantity;
+    *(u64 *)((u8 *)task + 0x40) = *(u64 *)(actorBytes + 0x108);
+    *(s32 *)((u8 *)task + 0x48) = 0;
     data = btlGetTaskArguments(task);
     data->actor = actor;
     data->optionId = itemId;
-    return (BtlRuntimeTask *)task;
+    return task;
 }
 
 u32 btlAddEpFromPacket(BtlRewardPacket *packet) {
@@ -1645,19 +1650,20 @@ u32 btlAddEpFromPacket(BtlRewardPacket *packet) {
 extern u32 btlAddEpFromPacket(BtlRewardPacket *);
 
 BtlRuntimeTask *btlScheduleEpPacketTask(BtlUnit *actor, s32 amount) {
-    u8 *task = btlAllocTask(8);
+    BtlRuntimeTask *task = btlAllocTask(8);
+    u8 *taskBytes = (u8 *)task;
     BtlRewardPacket *arguments;
 
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    *(u16 *)(task + 0x20) = 0x4F;
-    *(void **)(task + 0x4C) = btlAddEpFromPacket;
-    *(u64 *)(task + 0x40) = actor->identity;
-    *(u32 *)(task + 0x48) = 0;
+    taskBytes[0x10] = BTL_TASK_CONDITION_NEVER;
+    taskBytes[0] = BTL_TASK_CONDITION_ALWAYS;
+    *(u16 *)((u8 *)task + 0x20) = 0x4F;
+    *(void **)((u8 *)task + 0x4C) = btlAddEpFromPacket;
+    *(u64 *)((u8 *)task + 0x40) = actor->identity;
+    *(u32 *)((u8 *)task + 0x48) = 0;
     arguments = btlGetTaskArguments(task);
     arguments->actor = actor;
     arguments->amount = amount;
-    return (BtlRuntimeTask *)task;
+    return task;
 }
 
 u32 btlAddMoneyFromPacket(BtlRewardPacket *packet) {
@@ -1677,21 +1683,22 @@ u32 btlAddMoneyFromPacket(BtlRewardPacket *packet) {
 extern u32 btlAddMoneyFromPacket(BtlRewardPacket *);
 
 BtlRuntimeTask *btlScheduleMoneyPacketTask(BtlUnit *actor, s32 amount) {
-    u8 *task = btlAllocTask(8);
+    BtlRuntimeTask *task = btlAllocTask(8);
+    u8 *taskBytes = (u8 *)task;
     s64 data;
     BtlRewardPacket *arguments;
 
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    *(u16 *)(task + 0x20) = 0x50;
-    *(void **)(task + 0x4C) = btlAddMoneyFromPacket;
+    taskBytes[0x10] = BTL_TASK_CONDITION_NEVER;
+    taskBytes[0] = BTL_TASK_CONDITION_ALWAYS;
+    *(u16 *)((u8 *)task + 0x20) = 0x50;
+    *(void **)((u8 *)task + 0x4C) = btlAddMoneyFromPacket;
     data = actor->identity;
-    *(s64 *)(task + 0x40) = data;
-    *(u32 *)(task + 0x48) = 0;
+    *(s64 *)((u8 *)task + 0x40) = data;
+    *(u32 *)((u8 *)task + 0x48) = 0;
     arguments = btlGetTaskArguments(task);
     arguments->actor = actor;
     arguments->amount = amount;
-    return (BtlRuntimeTask *)task;
+    return task;
 }
 
 u32 btlRefreshEligibleActors(void) {
@@ -1727,13 +1734,14 @@ u32 btlRefreshEligibleActors(void) {
 }
 
 BtlRuntimeTask *btlCreateRefreshEligibleActorsTask(void) {
-    u8 *task = btlAllocTask(0);
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    *(void **)(task + 0x4C) = btlRefreshEligibleActors;
-    *(u16 *)(task + 0x20) = 0x51;
-    *(u32 *)(task + 0x48) = 0;
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
-    return (BtlRuntimeTask *)task;
+    BtlRuntimeTask *task = btlAllocTask(0);
+    u8 *taskBytes = (u8 *)task;
+    taskBytes[0] = BTL_TASK_CONDITION_ALWAYS;
+    *(void **)((u8 *)task + 0x4C) = btlRefreshEligibleActors;
+    *(u16 *)((u8 *)task + 0x20) = 0x51;
+    *(u32 *)((u8 *)task + 0x48) = 0;
+    taskBytes[0x10] = BTL_TASK_CONDITION_NEVER;
+    return task;
 }
 
 extern char D_003A3A40[];
@@ -2041,7 +2049,7 @@ s32 btlEvalTaskCondition(BtlTaskCondition *condition, s32 currentCount) {
 }
 
 /* Append a cleared task; positive size exposes argument bytes after the header. */
-void *btlAllocTask(s32 size) {
+BtlRuntimeTask *btlAllocTask(s32 size) {
     BtlRuntimeTask *task = sdfAllocAndClearQuadwords(size + 0x70);
     BtlActorWork *context;
     BtlRuntimeTask *tail;
@@ -3505,22 +3513,23 @@ u32 btlApplyIndexedUnitEffectTask(BtlRuntimeTaskArgs *taskArgs) {
 }
 
 BtlRuntimeTask *btlAllocateIndexedUnitEffectTask(BtlUnit *owner, s32 index, s32 value, f32 scale) {
-    u8 *task = btlAllocTask(16);
+    BtlRuntimeTask *task = btlAllocTask(16);
+    u8 *taskBytes = (u8 *)task;
     u8 *ownerBytes = (u8 *)owner;
     BtlRuntimeTaskArgs *arguments;
 
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
-    *(u16 *)(task + 0x20) = 9;
-    *(void **)(task + 0x4C) = btlApplyIndexedUnitEffectTask;
-    *(u64 *)(task + 0x40) = *(u64 *)(ownerBytes + 0x108);
-    *(u32 *)(task + 0x48) = 0;
+    taskBytes[0] = BTL_TASK_CONDITION_ALWAYS;
+    taskBytes[0x10] = BTL_TASK_CONDITION_NEVER;
+    *(u16 *)((u8 *)task + 0x20) = 9;
+    *(void **)((u8 *)task + 0x4C) = btlApplyIndexedUnitEffectTask;
+    *(u64 *)((u8 *)task + 0x40) = *(u64 *)(ownerBytes + 0x108);
+    *(u32 *)((u8 *)task + 0x48) = 0;
     arguments = btlGetTaskArguments(task);
     arguments->actor = owner;
     arguments->option = index;
     arguments->effectParameterOption = value;
     arguments->scale2 = scale;
-    return (BtlRuntimeTask *)task;
+    return task;
 }
 
 u32 btlApplyScaledUnitModelTask(BtlUnit **taskArgs) {
@@ -3529,16 +3538,17 @@ u32 btlApplyScaledUnitModelTask(BtlUnit **taskArgs) {
 }
 
 BtlRuntimeTask *btlCreateScaledUnitModelTask(BtlUnit *owner) {
-    u8 *task = btlAllocTask(4);
+    BtlRuntimeTask *task = btlAllocTask(4);
+    u8 *taskBytes = (u8 *)task;
     u8 *ownerBytes = (u8 *)owner;
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
-    *(void **)(task + 0x4C) = btlApplyScaledUnitModelTask;
-    *(u16 *)(task + 0x20) = 10;
-    *(s64 *)(task + 0x40) = *(s64 *)(ownerBytes + 0x108);
-    *(u32 *)(task + 0x48) = 0;
+    taskBytes[0] = BTL_TASK_CONDITION_ALWAYS;
+    taskBytes[0x10] = BTL_TASK_CONDITION_NEVER;
+    *(void **)((u8 *)task + 0x4C) = btlApplyScaledUnitModelTask;
+    *(u16 *)((u8 *)task + 0x20) = 10;
+    *(s64 *)((u8 *)task + 0x40) = *(s64 *)(ownerBytes + 0x108);
+    *(u32 *)((u8 *)task + 0x48) = 0;
     *(BtlUnit **)btlGetTaskArguments(task) = owner;
-    return (BtlRuntimeTask *)task;
+    return task;
 }
 
 u32 btlPollThresholdTask(BtlThresholdTaskArgs *arguments) {
@@ -3552,20 +3562,21 @@ u32 btlPollThresholdTask(BtlThresholdTaskArgs *arguments) {
 }
 
 BtlRuntimeTask *btlScheduleThresholdTask(BtlUnit *actor, s32 option) {
-    u8 *task = btlAllocTask(8);
+    BtlRuntimeTask *task = btlAllocTask(8);
+    u8 *taskBytes = (u8 *)task;
     u8 *actorBytes = (u8 *)actor;
     BtlThresholdTaskArgs *arguments;
 
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    *(u16 *)(task + 0x20) = 0xB;
-    *(void **)(task + 0x4C) = btlPollThresholdTask;
-    *(s64 *)(task + 0x40) = *(s64 *)(actorBytes + 0x108);
-    *(u32 *)(task + 0x48) = 0;
+    taskBytes[0x10] = BTL_TASK_CONDITION_NEVER;
+    taskBytes[0] = BTL_TASK_CONDITION_ALWAYS;
+    *(u16 *)((u8 *)task + 0x20) = 0xB;
+    *(void **)((u8 *)task + 0x4C) = btlPollThresholdTask;
+    *(s64 *)((u8 *)task + 0x40) = *(s64 *)(actorBytes + 0x108);
+    *(u32 *)((u8 *)task + 0x48) = 0;
     arguments = btlGetTaskArguments(task);
     arguments->unit = actor;
     arguments->frameThreshold = option;
-    return (BtlRuntimeTask *)task;
+    return task;
 }
 
 
@@ -3819,17 +3830,18 @@ u32 btlReleaseUnitModelTask(BtlUnit **taskArgs) {
 
 BtlRuntimeTask *btlScheduleRefreshTask(BtlUnit *owner) {
     u8 *ownerBytes = (u8 *)owner;
-    u8 *task = btlAllocTask(4);
+    BtlRuntimeTask *task = btlAllocTask(4);
+    u8 *taskBytes = (u8 *)task;
     BtlUnit **arguments;
 
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
-    *(void **)(task + 0x4C) = btlReleaseUnitModelTask;
-    *(u16 *)(task + 0x20) = 0x19;
-    *(s64 *)(task + 0x40) = *(s64 *)(ownerBytes + 0x108);
+    taskBytes[0] = BTL_TASK_CONDITION_ALWAYS;
+    taskBytes[0x10] = BTL_TASK_CONDITION_NEVER;
+    *(void **)((u8 *)task + 0x4C) = btlReleaseUnitModelTask;
+    *(u16 *)((u8 *)task + 0x20) = 0x19;
+    *(s64 *)((u8 *)task + 0x40) = *(s64 *)(ownerBytes + 0x108);
     arguments = btlGetTaskArguments(task);
     *arguments = owner;
-    return (BtlRuntimeTask *)task;
+    return task;
 }
 
 /* Task-start callbacks do not return a status to the scheduler. */
@@ -3998,15 +4010,16 @@ u32 btlUpdateModelChangeTask(BtlModelChangeArgs *args) {
 extern u32 btlUpdateModelChangeTask(BtlModelChangeArgs *);
 
 BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 resourceKind, s32 resourceId, s32 delay, s32 duration, u8 transitionMode) {
-    u8 *task = btlAllocTask(0x1C);
+    BtlRuntimeTask *task = btlAllocTask(0x1C);
+    u8 *taskBytes = (u8 *)task;
     BtlModelChangeArgs *args;
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
-    *(u16 *)(task + 0x20) = 0x1A;
-    *(u16 *)(task + 0x24) &= ~BTL_TASK_FLAG_REGISTERED;
-    *(u64 *)(task + 0x40) = *(u64 *)((u8 *)unit + 0x108);
-    *(void **)(task + 0x48) = btlBeginModelChange;
-    *(void **)(task + 0x4C) = btlUpdateModelChangeTask;
+    taskBytes[0] = BTL_TASK_CONDITION_ALWAYS;
+    taskBytes[0x10] = BTL_TASK_CONDITION_NEVER;
+    *(u16 *)((u8 *)task + 0x20) = 0x1A;
+    *(u16 *)((u8 *)task + 0x24) &= ~BTL_TASK_FLAG_REGISTERED;
+    *(u64 *)((u8 *)task + 0x40) = *(u64 *)((u8 *)unit + 0x108);
+    *(void **)((u8 *)task + 0x48) = btlBeginModelChange;
+    *(void **)((u8 *)task + 0x4C) = btlUpdateModelChangeTask;
     args = btlGetTaskArguments(task);
     args->unit = unit;
     args->resourceKind = resourceKind;
@@ -4016,7 +4029,7 @@ BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 resourceKind, s32 re
     args->transitionMode = transitionMode;
     args->phase = BTL_MODEL_CHANGE_WAITING_FOR_ASSET;
     args->elapsed = 0;
-    return (BtlRuntimeTask *)task;
+    return task;
 }
 
 void btlApplyLinkedUnitStatusWhenActorActive(BtlUnitLightAndAmbientTaskArgs *taskArgs) {
@@ -4034,20 +4047,21 @@ u32 btlApplyUnitFxWhenLoaded(BtlUnitLightAndAmbientTaskArgs *taskArgs) {
 }
 
 u8 *btlCreateUnitTask0F(BtlUnit *unit, s32 firstColor, s32 secondColor, s32 duration) {
-    u8 *task = btlAllocTask(16);
+    BtlRuntimeTask *task = btlAllocTask(16);
+    u8 *taskBytes = (u8 *)task;
     BtlUnitLightAndAmbientTaskArgs *args;
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    *(u16 *)(task + 0x20) = 0xF;
-    *(u64 *)(task + 0x40) = unit->identity;
-    *(void **)(task + 0x48) = btlApplyLinkedUnitStatusWhenActorActive;
-    *(void **)(task + 0x4C) = btlApplyUnitFxWhenLoaded;
+    taskBytes[0x10] = BTL_TASK_CONDITION_NEVER;
+    taskBytes[0] = BTL_TASK_CONDITION_ALWAYS;
+    *(u16 *)((u8 *)task + 0x20) = 0xF;
+    *(u64 *)((u8 *)task + 0x40) = unit->identity;
+    *(void **)((u8 *)task + 0x48) = btlApplyLinkedUnitStatusWhenActorActive;
+    *(void **)((u8 *)task + 0x4C) = btlApplyUnitFxWhenLoaded;
     args = btlGetTaskArguments(task);
     args->unit = unit;
     args->firstColor = firstColor;
     args->secondColor = secondColor;
     args->duration = duration;
-    return task;
+    return (u8 *)task;
 }
 
 typedef struct BtlUnitLightDirectionTaskArgs {
@@ -4130,22 +4144,23 @@ extern u32 btlUnitFadeInTask(BtlUnitColorFadeArgs *);
 
 BtlRuntimeTask *btlCreateUnitFadeInTask(BtlUnit *owner, u32 value, u32 variant) {
     u8 *ownerBytes = (u8 *)owner;
-    u8 *task = btlAllocTask(20);
+    BtlRuntimeTask *task = btlAllocTask(20);
+    u8 *taskBytes = (u8 *)task;
     BtlUnitColorFadeArgs *arguments;
 
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
-    *(void **)(task + 0x4C) = btlUnitFadeInTask;
-    *(u16 *)(task + 0x20) = 0x11;
-    *(u64 *)(task + 0x40) = *(u64 *)(ownerBytes + 0x108);
-    *(u32 *)(task + 0x48) = 0;
+    taskBytes[0] = BTL_TASK_CONDITION_ALWAYS;
+    taskBytes[0x10] = BTL_TASK_CONDITION_NEVER;
+    *(void **)((u8 *)task + 0x4C) = btlUnitFadeInTask;
+    *(u16 *)((u8 *)task + 0x20) = 0x11;
+    *(u64 *)((u8 *)task + 0x40) = *(u64 *)(ownerBytes + 0x108);
+    *(u32 *)((u8 *)task + 0x48) = 0;
     arguments = btlGetTaskArguments(task);
     arguments->unit = owner;
     arguments->color = 0x80808080;
     arguments->fadeIn = value;
     arguments->fadeOut = variant;
     arguments->count = 0;
-    return (BtlRuntimeTask *)task;
+    return task;
 }
 
 u32 btlUnitFadeOutTask(BtlUnitColorFadeArgs *args) {
@@ -4177,21 +4192,22 @@ u32 btlUnitFadeOutTask(BtlUnitColorFadeArgs *args) {
 extern u32 btlUnitFadeOutTask(BtlUnitColorFadeArgs *);
 
 BtlRuntimeTask *btlCreateUnitFadeOutTask(BtlUnit *owner, u32 value, u32 variant) {
-    u8 *task = btlAllocTask(16);
+    BtlRuntimeTask *task = btlAllocTask(16);
+    u8 *taskBytes = (u8 *)task;
     BtlUnitColorFadeArgs *arguments;
 
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
-    *(void **)(task + 0x4C) = btlUnitFadeOutTask;
-    *(u16 *)(task + 0x20) = 0x12;
-    *(u64 *)(task + 0x40) = *(u64 *)((u8 *)owner + 0x108);
-    *(u32 *)(task + 0x48) = 0;
+    taskBytes[0] = BTL_TASK_CONDITION_ALWAYS;
+    taskBytes[0x10] = BTL_TASK_CONDITION_NEVER;
+    *(void **)((u8 *)task + 0x4C) = btlUnitFadeOutTask;
+    *(u16 *)((u8 *)task + 0x20) = 0x12;
+    *(u64 *)((u8 *)task + 0x40) = *(u64 *)((u8 *)owner + 0x108);
+    *(u32 *)((u8 *)task + 0x48) = 0;
     arguments = btlGetTaskArguments(task);
     arguments->unit = owner;
     arguments->fadeIn = value;
     arguments->fadeOut = variant;
     arguments->count = 0;
-    return (BtlRuntimeTask *)task;
+    return task;
 }
 
 u32 btlStepUnitDefeatFadeIn(BtlUnitFadeTaskArgs *taskArgs) {
@@ -4266,20 +4282,21 @@ u32 btlStepUnitDefeatFadeOut(BtlUnitFadeTaskArgs *taskArgs) {
 /* Create the owner-bound defeat fade-out task with a zero elapsed count. */
 BtlRuntimeTask *btlCreateUnitDefeatFadeOutTask(BtlUnit *unit, s32 durationOrMode) {
     u8 *unitBytes = (u8 *)unit;
-    u8 *task = btlAllocTask(12);
+    BtlRuntimeTask *task = btlAllocTask(12);
+    u8 *taskBytes = (u8 *)task;
     BtlUnitFadeTaskArgs *arguments;
 
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    *(u16 *)(task + 0x20) = 0x14;
-    *(void **)(task + 0x4C) = btlStepUnitDefeatFadeOut;
-    *(u64 *)(task + 0x40) = *(u64 *)(unitBytes + 0x108);
-    *(u32 *)(task + 0x48) = 0;
+    taskBytes[0x10] = BTL_TASK_CONDITION_NEVER;
+    taskBytes[0] = BTL_TASK_CONDITION_ALWAYS;
+    *(u16 *)((u8 *)task + 0x20) = 0x14;
+    *(void **)((u8 *)task + 0x4C) = btlStepUnitDefeatFadeOut;
+    *(u64 *)((u8 *)task + 0x40) = *(u64 *)(unitBytes + 0x108);
+    *(u32 *)((u8 *)task + 0x48) = 0;
     arguments = (BtlUnitFadeTaskArgs *)btlGetTaskArguments(task);
     arguments->unit = unit;
     arguments->durationOrMode = durationOrMode;
     arguments->elapsed = 0;
-    return (BtlRuntimeTask *)task;
+    return task;
 }
 
 /* Arguments hold unit, mode and elapsed ticks; return one after the exit fade. */
@@ -4406,23 +4423,24 @@ void btlFinishSelectedUnitEffect(BtlSelectedUnitEffectTaskArgs *arguments) {
 }
 
 BtlRuntimeTask *btlCreateSelectedEffectUpdateTask(BtlUnit *unit) {
-    u8 *task = btlAllocTask(20);
+    BtlRuntimeTask *task = btlAllocTask(20);
+    u8 *taskBytes = (u8 *)task;
     BtlSelectedUnitEffectTaskArgs *arguments;
 
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
-    *(u16 *)(task + 0x20) = 0x16;
-    *(u16 *)(task + 0x24) |= BTL_TASK_FLAG_DEFERRED;
-    *(u64 *)(task + 0x40) = unit->identity;
-    *(void **)(task + 0x4C) = btlUpdateSelectedUnitEffect;
-    *(void **)(task + 0x50) = btlFinishSelectedUnitEffect;
-    *(u32 *)(task + 0x48) = 0;
+    taskBytes[0] = BTL_TASK_CONDITION_ALWAYS;
+    taskBytes[0x10] = BTL_TASK_CONDITION_NEVER;
+    *(u16 *)((u8 *)task + 0x20) = 0x16;
+    *(u16 *)((u8 *)task + 0x24) |= BTL_TASK_FLAG_DEFERRED;
+    *(u64 *)((u8 *)task + 0x40) = unit->identity;
+    *(void **)((u8 *)task + 0x4C) = btlUpdateSelectedUnitEffect;
+    *(void **)((u8 *)task + 0x50) = btlFinishSelectedUnitEffect;
+    *(u32 *)((u8 *)task + 0x48) = 0;
     arguments = btlGetTaskArguments(task);
     arguments->unit = unit;
     arguments->effect = 0;
     arguments->counter = 0;
     arguments->duration = 0;
-    return (BtlRuntimeTask *)task;
+    return task;
 }
 
 extern void btlUpdateUnitActors(void);
@@ -4450,14 +4468,15 @@ u32 btlUpdateCommandSoundTaskSecondary(void) {
 }
 
 BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void) {
-    u8 *task = btlAllocTask(0);
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    *(u16 *)(task + 0x20) = 0x1C;
-    *(u16 *)(task + 0x24) |= BTL_TASK_FLAG_DEFERRED;
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
-    *(u32 *)(task + 0x48) = 0;
-    *(void **)(task + 0x4C) = btlUpdateCommandSoundTaskSecondary;
-    return (BtlRuntimeTask *)task;
+    BtlRuntimeTask *task = btlAllocTask(0);
+    u8 *taskBytes = (u8 *)task;
+    taskBytes[0] = BTL_TASK_CONDITION_ALWAYS;
+    *(u16 *)((u8 *)task + 0x20) = 0x1C;
+    *(u16 *)((u8 *)task + 0x24) |= BTL_TASK_FLAG_DEFERRED;
+    taskBytes[0x10] = BTL_TASK_CONDITION_NEVER;
+    *(u32 *)((u8 *)task + 0x48) = 0;
+    *(void **)((u8 *)task + 0x4C) = btlUpdateCommandSoundTaskSecondary;
+    return task;
 }
 
 /* Complete the empty task on its first process call; no sound operation is performed. */
@@ -4727,16 +4746,17 @@ u32 btlRefreshUnitFxVectorTask(BtlUnit **taskArgs) {
 }
 
 BtlRuntimeTask *btlCreateUnitFxVectorRefreshTask(BtlUnit *owner) {
-    u8 *task = btlAllocTask(4);
+    BtlRuntimeTask *task = btlAllocTask(4);
+    u8 *taskBytes = (u8 *)task;
     u8 *ownerBytes = (u8 *)owner;
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
-    *(void **)(task + 0x4C) = btlRefreshUnitFxVectorTask;
-    *(u16 *)(task + 0x20) = 0x22;
-    *(s64 *)(task + 0x40) = *(s64 *)(ownerBytes + 0x108);
-    *(u32 *)(task + 0x48) = 0;
+    taskBytes[0] = BTL_TASK_CONDITION_ALWAYS;
+    taskBytes[0x10] = BTL_TASK_CONDITION_NEVER;
+    *(void **)((u8 *)task + 0x4C) = btlRefreshUnitFxVectorTask;
+    *(u16 *)((u8 *)task + 0x20) = 0x22;
+    *(s64 *)((u8 *)task + 0x40) = *(s64 *)(ownerBytes + 0x108);
+    *(u32 *)((u8 *)task + 0x48) = 0;
     *(BtlUnit **)btlGetTaskArguments(task) = owner;
-    return (BtlRuntimeTask *)task;
+    return task;
 }
 
 INCLUDE_RODATA(const s32, "game/code_001D0BA0", D_003A3CA0);
@@ -4783,21 +4803,22 @@ extern void btlStartGunFinishLoad(GunLoadArgs *);
 extern u32 btlPollGunLoad(GunLoadArgs *);
 
 BtlRuntimeTask *btlCreateGunLoadPollTask(BtlUnit *owner) {
-    u8 *task = btlAllocTask(8);
+    BtlRuntimeTask *task = btlAllocTask(8);
+    u8 *taskBytes = (u8 *)task;
     u8 *ownerBytes = (u8 *)owner;
     GunLoadArgs *arguments;
 
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
-    *(u16 *)(task + 0x20) = 0x23;
-    *(u16 *)(task + 0x24) &= ~BTL_TASK_FLAG_REGISTERED;
-    *(u64 *)(task + 0x40) = *(u64 *)(ownerBytes + 0x108);
-    *(void **)(task + 0x48) = btlStartGunFinishLoad;
-    *(void **)(task + 0x4C) = btlPollGunLoad;
+    taskBytes[0] = BTL_TASK_CONDITION_ALWAYS;
+    taskBytes[0x10] = BTL_TASK_CONDITION_NEVER;
+    *(u16 *)((u8 *)task + 0x20) = 0x23;
+    *(u16 *)((u8 *)task + 0x24) &= ~BTL_TASK_FLAG_REGISTERED;
+    *(u64 *)((u8 *)task + 0x40) = *(u64 *)(ownerBytes + 0x108);
+    *(void **)((u8 *)task + 0x48) = btlStartGunFinishLoad;
+    *(void **)((u8 *)task + 0x4C) = btlPollGunLoad;
     arguments = btlGetTaskArguments(task);
     arguments->unit = owner;
     arguments->request = NULL;
-    return (BtlRuntimeTask *)task;
+    return task;
 }
 
 u32 btlUpdateUnitEffectsTask(void) {
@@ -4832,14 +4853,15 @@ s32 btlCreateActorTransparency(BtlActorTransparencyArgs *arguments) {
 }
 
 BtlRuntimeTask *btlCreateActorTransparencyTask(BtlUnit *actor) {
-    u8 *task = btlAllocTask(4);
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    *(u16 *)(task + 0x20) = 0x25;
-    *(void **)(task + 0x4C) = btlCreateActorTransparency;
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
-    *(u32 *)(task + 0x48) = 0;
+    BtlRuntimeTask *task = btlAllocTask(4);
+    u8 *taskBytes = (u8 *)task;
+    taskBytes[0] = BTL_TASK_CONDITION_ALWAYS;
+    *(u16 *)((u8 *)task + 0x20) = 0x25;
+    *(void **)((u8 *)task + 0x4C) = btlCreateActorTransparency;
+    taskBytes[0x10] = BTL_TASK_CONDITION_NEVER;
+    *(u32 *)((u8 *)task + 0x48) = 0;
     ((BtlActorTransparencyArgs *)btlGetTaskArguments(task))->unit = actor;
-    return task;
+    return (u8 *)task;
 }
 
 /* Advance the queued model-motion blend in two stages; return one when done. */
@@ -5593,16 +5615,17 @@ u32 btlInitializeMotionTransformFromTaskArguments(BtlCameraTransformTaskArgs *ar
 u8 *btlCreateFloatTask28(BtlTask *actor, f32 x, f32 y, f32 z, f32 directionX,
                          f32 directionY, f32 directionZ, f32 directionW,
                          f32 fovDegrees) {
-    u8 *task = btlAllocTask(0x24);
+    BtlRuntimeTask *task = btlAllocTask(0x24);
+    u8 *taskBytes = (u8 *)task;
     BtlCameraTransformTaskArgs *args;
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    *(u16 *)(task + 0x20) = 0x28;
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
+    taskBytes[0] = BTL_TASK_CONDITION_ALWAYS;
+    *(u16 *)((u8 *)task + 0x20) = 0x28;
+    taskBytes[0x10] = BTL_TASK_CONDITION_NEVER;
     if (actor != NULL && actor->unit != NULL) {
-        *(u64 *)(task + 0x40) = actor->unit->identity;
+        *(u64 *)((u8 *)task + 0x40) = actor->unit->identity;
     }
-    *(void **)(task + 0x4C) = btlInitializeMotionTransformFromTaskArguments;
-    *(u32 *)(task + 0x48) = 0;
+    *(void **)((u8 *)task + 0x4C) = btlInitializeMotionTransformFromTaskArguments;
+    *(u32 *)((u8 *)task + 0x48) = 0;
     args = btlGetTaskArguments(task);
     args->actor = actor;
     args->position[0] = x;
@@ -5613,7 +5636,7 @@ u8 *btlCreateFloatTask28(BtlTask *actor, f32 x, f32 y, f32 z, f32 directionX,
     args->direction[2] = directionZ;
     args->direction[3] = directionW;
     args->fovDegrees = fovDegrees;
-    return task;
+    return (u8 *)task;
 }
 
 extern void btlSetEffectCameraKeys(u8 *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
@@ -5633,16 +5656,17 @@ s32 btlApplyEffectCameraKeyframes(BtlCameraKeyframesTaskArgs *args) {
 }
 
 BtlRuntimeTask *btlCreateFloatTask29(BtlTask *actor, f32 a1, f32 a2, f32 a3, f32 a4, f32 a5, f32 a6, f32 a7, f32 a8, f32 a9, f32 a10, f32 a11, f32 a12, f32 a13, f32 a14, f32 a15, f32 a16) {
-    u8 *task = btlAllocTask(0x44);
+    BtlRuntimeTask *task = btlAllocTask(0x44);
+    u8 *taskBytes = (u8 *)task;
     BtlCameraKeyframesTaskArgs *args;
-    task[0] = BTL_TASK_CONDITION_ALWAYS;
-    *(u16 *)(task + 0x20) = 0x29;
-    task[0x10] = BTL_TASK_CONDITION_NEVER;
+    taskBytes[0] = BTL_TASK_CONDITION_ALWAYS;
+    *(u16 *)((u8 *)task + 0x20) = 0x29;
+    taskBytes[0x10] = BTL_TASK_CONDITION_NEVER;
     if (actor != 0 && *(u8 **)((u8 *)actor + 0x18) != 0) {
-        *(u64 *)(task + 0x40) = *(u64 *)(*(u8 **)((u8 *)actor + 0x18) + 0x108);
+        *(u64 *)((u8 *)task + 0x40) = *(u64 *)(*(u8 **)((u8 *)actor + 0x18) + 0x108);
     }
-    *(void **)(task + 0x4C) = btlApplyEffectCameraKeyframes;
-    *(u32 *)(task + 0x48) = 0;
+    *(void **)((u8 *)task + 0x4C) = btlApplyEffectCameraKeyframes;
+    *(u32 *)((u8 *)task + 0x48) = 0;
     args = btlGetTaskArguments(task);
     args->actor = (BtlTask *)actor;
     args->frontPosition[0] = a1;
@@ -5661,7 +5685,7 @@ BtlRuntimeTask *btlCreateFloatTask29(BtlTask *actor, f32 a1, f32 a2, f32 a3, f32
     args->backDirection[3] = a14;
     args->scale = a15;
     args->motionParameter = a16;
-    return (BtlRuntimeTask *)task;
+    return task;
 }
 
 u32 btlRunCameraMotionResetTask(void) {

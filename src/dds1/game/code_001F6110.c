@@ -179,7 +179,7 @@ extern s32 scrGetIntPara(s32);
 extern u32 btlButtonIconTexture;
 extern s32 btlDispatchPackedActionWithScratch(s32 context, s32 actor, u32 mask);
 extern void btlPickCommandTargetWithStatusMask(s32, s32);
-extern u8 *btlAllocTask(s32);
+extern struct BtlRuntimeTask *btlAllocTask(s32);
 extern void btlCommandRecenterParty(void);
 
 typedef struct BtlControlObject {
