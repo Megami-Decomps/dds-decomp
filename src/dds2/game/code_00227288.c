@@ -22,6 +22,7 @@
 #include "sdf_resource.h"
 #include "mdl_flag_api.h"
 #include "btl_scene_initializer.h"
+#include "pty_frontline_promotion_api.h"
 
 extern void btlInterpolateVectorStep(BtlCamState *camera);
 
@@ -1268,8 +1269,6 @@ s32 btlConsumeReadyEventScriptResource(void) {
     }
     return result;
 }
-
-extern s32 ptyRebalanceFrontline(s32 rosterIndex);
 
 /* Promote Sera when present but not frontline, with fewer than four occupied
  * entries and fewer than three frontline entries. */

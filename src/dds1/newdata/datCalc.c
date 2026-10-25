@@ -11,6 +11,7 @@
 #include "evt_randomize_entry_api.h"
 #include "mdl_flag_api.h"
 #include "pty_roster_api.h"
+#include "pty_frontline_promotion_api.h"
 #include "dat_unit_has_skill_api.h"
 #include "pty_item_quantity_update_view.h"
 #include "eff_random_mod.h"
@@ -826,7 +827,7 @@ datUnitWork_t *dds3FindEntry(s32 rosterIndex) {
 
 
 /* Promote the selected roster entry into the current frontline boundary. */
-s32 ptyRebalanceFrontline(s32 unitId) {
+PtyFrontlinePromotionResult ptyRebalanceFrontline(s32 unitId) {
     DatGameState *scanState;
     datUnitWork_t savedEntry;
     const s32 selectedIndex = dds3FindEntryIndex(unitId);
@@ -834,13 +835,13 @@ s32 ptyRebalanceFrontline(s32 unitId) {
     s32 scanIndex;
 
     if (selectedIndex < 0) {
-        return 0;
+        return PTY_FRONTLINE_PROMOTION_NOT_PERFORMED;
     }
 
     {
         datUnitWork_t *const selectedEntry = &DDS3_GBWK->party[selectedIndex];
         if ((selectedEntry->flags & DAT_PARTY_FLAG_FRONTLINE) != 0) {
-            return 0;
+            return PTY_FRONTLINE_PROMOTION_NOT_PERFORMED;
         }
     }
 
@@ -870,7 +871,7 @@ s32 ptyRebalanceFrontline(s32 unitId) {
            &DDS3_GBWK->party[frontlineCount], sizeof(savedEntry));
     memcpy(&DDS3_GBWK->party[frontlineCount], &savedEntry,
            sizeof(savedEntry));
-    return 1;
+    return PTY_FRONTLINE_PROMOTION_PERFORMED;
 }
 
 u8 ptyIsRosterEntryPresent(s32 rosterIndex) {
@@ -1003,8 +1004,6 @@ PtyAddUnitResult ptyAddUnit(s32 unitId) {
 
 extern s32 D_0032ACA8[128];
 extern void evtBitOff(s32);
-extern s32 ptyRebalanceFrontline(s32);
-
 PtyRemoveUnitResult ptyRemoveUnit(s32 unitId) {
     s32 partyIndex = dds3FindEntryIndex(unitId);
     s32 i;

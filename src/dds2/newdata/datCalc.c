@@ -13,6 +13,7 @@
 #include "evt_randomize_entry_api.h"
 #include "mdl_flag_api.h"
 #include "pty_roster_api.h"
+#include "pty_frontline_promotion_api.h"
 #include "dat_unit_has_skill_api.h"
 #include "pty_item_quantity_update_view.h"
 #include "eff_random_mod.h"
@@ -502,8 +503,6 @@ extern s32 D_00386288[];
 
 extern u32 mnuSetPartyEntryCurrentId(datUnitWork_t *, u32);
 
-extern s32 ptyRebalanceFrontline(s32 unitId);
-
 extern void scrRemoveAvailableSkillFlagAndSlot(datUnitWork_t *, u16);
 
 
@@ -937,7 +936,7 @@ datUnitWork_t *dds3FindEntry(s32 rosterIndex) {
     return 0;
 }
 
-s32 ptyRebalanceFrontline(s32 unitId) {
+PtyFrontlinePromotionResult ptyRebalanceFrontline(s32 unitId) {
     DatGameState *scanState;
     datUnitWork_t savedEntry;
     s32 selectedIndex;
@@ -946,13 +945,13 @@ s32 ptyRebalanceFrontline(s32 unitId) {
 
     selectedIndex = dds3FindEntryIndex(unitId);
     if (selectedIndex < 0) {
-        return 0;
+        return PTY_FRONTLINE_PROMOTION_NOT_PERFORMED;
     }
 
     {
         datUnitWork_t *const selectedEntry = &DDS3_GBWK->party[selectedIndex];
         if ((selectedEntry->flags & DAT_PARTY_FLAG_FRONTLINE) != 0) {
-            return 0;
+            return PTY_FRONTLINE_PROMOTION_NOT_PERFORMED;
         }
     }
 
@@ -980,7 +979,7 @@ s32 ptyRebalanceFrontline(s32 unitId) {
     memcpy(&savedEntry, &DDS3_GBWK->party[selectedIndex], sizeof(savedEntry));
     memcpy(&DDS3_GBWK->party[selectedIndex], &DDS3_GBWK->party[frontlineCount], sizeof(savedEntry));
     memcpy(&DDS3_GBWK->party[frontlineCount], &savedEntry, sizeof(savedEntry));
-    return 1;
+    return PTY_FRONTLINE_PROMOTION_PERFORMED;
 }
 
 u8 ptyIsRosterEntryPresent(s32 rosterIndex) {
@@ -1350,7 +1349,7 @@ PtyRemoveUnitResult ptyRemoveUnitWithFlags(s32 unitId, s32 flags) {
     s32 i;
     s32 completeSlotCount;
     s32 *modelFlags;
-    s32 result;
+    PtyFrontlinePromotionResult result;
     u16 itemId;
 
     partyIndex = dds3FindEntryIndex(unitId);
@@ -1391,15 +1390,15 @@ PtyRemoveUnitResult ptyRemoveUnitWithFlags(s32 unitId, s32 flags) {
      * this form shows no noce conversion, hooked==unhooked verify OK). */
     if (completeSlotCount == 0) {
         result = ptyRebalanceFrontline(1);
-        if (result == 1) {
+        if (result == PTY_FRONTLINE_PROMOTION_PERFORMED) {
             return result;
         }
         result = ptyRebalanceFrontline(2);
-        if (result == 1) {
+        if (result == PTY_FRONTLINE_PROMOTION_PERFORMED) {
             return result;
         }
         result = ptyRebalanceFrontline(5);
-        if (result == 1) {
+        if (result == PTY_FRONTLINE_PROMOTION_PERFORMED) {
             return result;
         }
     }
