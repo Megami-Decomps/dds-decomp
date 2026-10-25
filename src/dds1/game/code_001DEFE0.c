@@ -8333,7 +8333,7 @@ u32 btlApplySceneLightingTransition(SceneLightTransitionArgs *args) {
 
 extern u32 btlApplySceneLightingTransition(SceneLightTransitionArgs *);
 
-BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(u8 *source, u32 value) {
+BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(const void *sourceParams, u32 value) {
     BtlRuntimeTask *task = btlAllocTask(0x34);
     u8 *taskBytes = (u8 *)task;
     u8 *arguments;
@@ -8346,8 +8346,8 @@ BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(u8 *source, u32 value) {
     *(u32 *)((u8 *)task + 0x48) = 0;
     arguments = btlGetTaskArguments(task);
     *(u32 *)(arguments + 0x30) = value;
-    if (source != 0) {
-        memcpy(arguments, source, 0x30);
+    if (sourceParams != 0) {
+        memcpy(arguments, sourceParams, 0x30);
     } else {
         memcpy(arguments, ((u8 *)btlGetRuntime() + 0x10), 0x30);
     }

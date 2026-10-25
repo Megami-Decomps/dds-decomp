@@ -103,7 +103,7 @@ typedef struct BattleEffectParams {
 
 extern f32 *D_0037F770[];
 
-extern BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(u8 *source, u32 value);
+extern BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(const void *sourceParams, u32 value);
 
 extern s32 btlCountTasksForOwner(s64);
 
@@ -257,7 +257,7 @@ s32 fldSceneStateStartTileEffect(BtlState *scene) {
             params.position[0] = origin[4];
             params.position[1] = origin[5];
             params.position[2] = origin[6];
-            btlStartTask(btlCreateEffectTaskWithSourceParams((u8 *)&params, 0));
+            btlStartTask(btlCreateEffectTaskWithSourceParams(&params, 0));
         }
         return 4;
     }

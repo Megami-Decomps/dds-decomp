@@ -123,7 +123,7 @@ extern BattleSelectionWork *btlLinkedSelectionTaskBuffer;
 extern f32 D_00433724;
 extern f32 *D_0037F770[];
 extern u32 btlGetActorCommandClass(BattleSceneObject *, s8);
-extern BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(u8 *, u32);
+extern BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(const void *, u32);
 extern s32 btlCountTasksForOwner(s64);
 
 extern SceneInitializer D_003B6938[];
@@ -1919,7 +1919,7 @@ extern const char D_00417360[];
 
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 void btlBuildActionLightParameters(s32 skillIndex, BtlSceneLightParams *light);
-BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(u8 *source, u32 value);
+BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(const void *sourceParams, u32 value);
 s32 btlGetActionDefaultOrOverride(s32 skillIndex);
 BtlRuntimeTask *sndCreateAcquireTask(s32 value, s32 option);
 BtlRuntimeTask *btlCreateLinkageFormationTask(ActionStateLink *link,
@@ -2073,7 +2073,7 @@ void btlScheduleLinkageActionTasks(ActionStateLink *action) {
     btlStartTask(btlCreateCommandSoundUpdateTask());
     btlStartTask(btlCreateSecondaryCommandSoundTask());
     btlBuildActionLightParameters(skill, &light);
-    btlStartTask(btlCreateEffectTaskWithSourceParams((u8 *)&light, 12));
+    btlStartTask(btlCreateEffectTaskWithSourceParams(&light, 12));
     btlStartTask(sndCreateAcquireTask(btlGetActionDefaultOrOverride(skill), 12));
     if ((unit->status.flags & 0x400) != 0) {
         btlStartTask(btlCreateEffObjB(unit, 0xC9));

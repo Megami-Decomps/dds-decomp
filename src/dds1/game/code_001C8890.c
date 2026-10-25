@@ -1420,7 +1420,7 @@ extern BtlRuntimeTask *sndCreateTimedUnitEffectTask(
     SoundResourceNode *, BtlUnit *, u16, s32, u32);
 
 void btlBuildActionLightParameters(s32 skillIndex, BtlSceneLightParams *light);
-extern BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(u8 *, u32);
+extern BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(const void *, u32);
 s32 btlGetActionDefaultOrOverride(s32 skillIndex);
 extern BtlRuntimeTask *btlCreateLinkageFormationTask(BtlTask *, BtlUnit *,
         BtlUnit *, u32, u32);
@@ -1504,7 +1504,7 @@ void btlScheduleLinkageActionTasks(BtlTask *action) {
     btlStartTask(btlCreateCommandSoundUpdateTask());
     btlStartTask(btlCreateSecondaryCommandSoundTask());
     btlBuildActionLightParameters(skill, &light);
-    btlStartTask(btlCreateEffectTaskWithSourceParams((u8 *)&light, 12));
+    btlStartTask(btlCreateEffectTaskWithSourceParams(&light, 12));
     btlStartTask(sndCreateAcquireTask(btlGetActionDefaultOrOverride(skill), 12));
     if ((unit->status.flags & 0x400) != 0) {
         btlStartTask(btlCreateEffObjB(unit, 0xC9));
