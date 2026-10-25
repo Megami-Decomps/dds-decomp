@@ -1560,7 +1560,7 @@ void fldFormatAreaResourceName(char *out) {
     sprintf(out, "%sf%03d_000.LB", directory, area);
 }
 
-u8 fldCheckNextFile(void) {
+u8 fldHasAreaResourceNameChanged(void) {
     char buf[32];
 
     fldFormatAreaResourceName(buf);
@@ -1700,7 +1700,7 @@ extern void fldDrwZAlloc(void);
 
 extern void fldCreateResourceScriptObjects(void);
 
-extern u8 fldCheckNextFile(void);
+extern u8 fldHasAreaResourceNameChanged(void);
 
 extern void fldLoadFieldPack(void);
 
@@ -1750,7 +1750,7 @@ struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) {
     if (fldGlobalBase.reuseAreaResources == 0) {
         fldInitializeMenuResources();
         fldLoadFieldPack();
-    } else if (fldCheckNextFile() != 0 || (u32)(fldGlobalBase.area - 0x1B) < 2) {
+    } else if (fldHasAreaResourceNameChanged() != 0 || (u32)(fldGlobalBase.area - 0x1B) < 2) {
         fldReleaseTitleSlots();
         fldReleaseSceneRecordChunk();
         fldFreePac0();

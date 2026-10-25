@@ -1051,7 +1051,7 @@
 0x00127D30	fldCopyCachedRoomF2ResourceIfLocationMatches	inferred	D1 helper allocates and copies cached F2 bytes into a relocatable buffer; fldLoadAreaRoomResources retains the returned handle, and scene teardown frees it. Paired DDS2 helper at 0x0012A2E8 has the same ownership behavior.
 0x00127DA8	fldCopyCachedRoomKF2ResourceIfLocationMatches	inferred	D1 helper allocates and copies cached KF2 bytes into a relocatable buffer; fldLoadAreaRoomResources retains the returned handle, and scene teardown frees it. Paired DDS2 helper at 0x0012A360 has the same ownership behavior.
 0x00127E20	fldFormatAreaResourceName	inferred	Builds the packed area resource file name (f%03d_000/00a-00d.LB); twin of D2 0x0012A3D8 [names_M53_Field.tsv]
-0x00127FD0	fldCheckNextFile	inferred	SMT3HD name via SLUS_209.11 0x001279B8, reloc-identical; was fldHasAreaResourceNameChanged
+0x00127FD0	fldHasAreaResourceNameChanged	inferred	behavior name from the requested-vs-cached area-resource path comparison; retail symbol fldCheckNextFile at SMT3HD SLUS_209.11 0x001279B8 is reloc-identical
 0x00128000	fldLoadFieldPack	inferred	SMT3HD name via SLUS_209.11 0x001279E8, unique-masked-hash; was fldLoadAreaPackedResources
 0x00128188	fldFreePac0	inferred	SMT3HD name via SLUS_209.11 0x00127B70, reloc-identical; was fldReleaseAreaResourceCache
 0x001281E0	fldLoadAreaRoomResources	inferred	confidence=high; matched-C; Loads and relocates area/room resource chunks, including cached F1/F2 resources; DDS2 twin 0x0012A6F0. LiteG field naming batch.
