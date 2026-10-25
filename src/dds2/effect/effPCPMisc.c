@@ -259,8 +259,8 @@ void effPCPSparkleSphereDraw(EffPCPRingWork *work) {
     }
 }
 
-void effPCPSparkleSphereSetPosition(void *dst, const f32 sourcePosition[4]) {
-    SDF_VU0_COPYVECTOR(dst, sourcePosition);
+void effPCPSparkleSphereSetPosition(f32 destinationPosition[4], const f32 sourcePosition[4]) {
+    SDF_VU0_COPYVECTOR(destinationPosition, sourcePosition);
 }
 
 void effPCPSparkleSphereSetColor(EffPCPRingWork *work, u32 value) {
@@ -389,8 +389,8 @@ void effPCPHama01Draw(EffPCPTwinWork *work) {
     work->frame++;
 }
 
-void effPCPHama01SetPosition(void *dst, const f32 sourcePosition[4]) {
-    SDF_VU0_COPYVECTOR(dst, sourcePosition);
+void effPCPHama01SetPosition(f32 destinationPosition[4], const f32 sourcePosition[4]) {
+    SDF_VU0_COPYVECTOR(destinationPosition, sourcePosition);
 }
 
 void effPCPHama01SetScale(EffPCPTwinWork *work, f32 val) {
@@ -502,8 +502,8 @@ void effPCPHama02Draw(EffPCPStaggered *work) {
     }
 }
 
-void effPCPHama02SetPosition(void *dst, const f32 sourcePosition[4]) {
-    SDF_VU0_COPYVECTOR(dst, sourcePosition);
+void effPCPHama02SetPosition(f32 destinationPosition[4], const f32 sourcePosition[4]) {
+    SDF_VU0_COPYVECTOR(destinationPosition, sourcePosition);
 }
 
 void effPCPHama02SetScale(EffPCPStaggered *work, f32 val) {
@@ -628,8 +628,8 @@ void effPCPHamaonDraw(EffPCPCrossWork *work) {
     }
 }
 
-void effPCPHamaonSetPosition(void *dst, const f32 sourcePosition[4]) {
-    SDF_VU0_COPYVECTOR(dst, sourcePosition);
+void effPCPHamaonSetPosition(f32 destinationPosition[4], const f32 sourcePosition[4]) {
+    SDF_VU0_COPYVECTOR(destinationPosition, sourcePosition);
 }
 
 void effPCPHamaonSetScale(EffPCPCrossWork *work, f32 val) {
@@ -731,8 +731,8 @@ void effPCPMHanma01Draw(EffPCPDelayedPairs *work) {
     }
 }
 
-void effPCPMHanma01SetPosition(void *dst, const f32 sourcePosition[4]) {
-    SDF_VU0_COPYVECTOR(dst, sourcePosition);
+void effPCPMHanma01SetPosition(f32 destinationPosition[4], const f32 sourcePosition[4]) {
+    SDF_VU0_COPYVECTOR(destinationPosition, sourcePosition);
 }
 
 void effPCPMHanma01SetScale(EffPCPDelayedPairs *work, f32 val) {
@@ -924,8 +924,8 @@ void effPCPHwave01Draw(EffPCPSpawnOnceWork *work) {
     dds3EffectPartDraw(work->secondaryHandle);
 }
 
-void effPCPHwave01SetPosition(void *dst, const f32 sourcePosition[4]) {
-    SDF_VU0_COPYVECTOR(dst, sourcePosition);
+void effPCPHwave01SetPosition(f32 destinationPosition[4], const f32 sourcePosition[4]) {
+    SDF_VU0_COPYVECTOR(destinationPosition, sourcePosition);
 }
 
 void effPCPHwave01SetColor(EffPCPSpawnOnceWork *work, u32 value) {
@@ -1069,8 +1069,8 @@ void effPCPZiodin01Draw(EffPCPThunderGroup *work) {
     effPcpShiftThunderHandles(work, 12);
 }
 
-void effPCPZiodin01SetPosition(void *dst, const f32 sourcePosition[4]) {
-    SDF_VU0_COPYVECTOR(dst, sourcePosition);
+void effPCPZiodin01SetPosition(f32 destinationPosition[4], const f32 sourcePosition[4]) {
+    SDF_VU0_COPYVECTOR(destinationPosition, sourcePosition);
 }
 
 void effPCPZiodin01SetScale(EffPCPThunderGroup *work, f32 val) {
@@ -1166,8 +1166,8 @@ void effPCPZiodin02Draw(EffPCPThunderGroup *work) {
     effPcpShiftThunderHandles(work, 12);
 }
 
-void effPCPZiodin02SetPosition(void *dst, const f32 sourcePosition[4]) {
-    SDF_VU0_COPYVECTOR(dst, sourcePosition);
+void effPCPZiodin02SetPosition(f32 destinationPosition[4], const f32 sourcePosition[4]) {
+    SDF_VU0_COPYVECTOR(destinationPosition, sourcePosition);
 }
 
 void effPCPZiodin02SetScale(EffPCPThunderGroup *work, f32 val) {
@@ -1261,8 +1261,8 @@ void effPCPZiodin03Draw(EffPCPThunderGroup *work) {
     effPcpShiftThunderHandles(work, 30);
 }
 
-void effPCPZiodin03SetPosition(void *dst, const f32 sourcePosition[4]) {
-    SDF_VU0_COPYVECTOR(dst, sourcePosition);
+void effPCPZiodin03SetPosition(f32 destinationPosition[4], const f32 sourcePosition[4]) {
+    SDF_VU0_COPYVECTOR(destinationPosition, sourcePosition);
 }
 
 void effPCPZiodin03SetScale(EffPCPThunderGroup *work, f32 val) {
@@ -1357,8 +1357,8 @@ void effPCPZiodin04Draw(EffPCPThunderGroup *work) {
     effPcpShiftThunderHandles(work, 12);
 }
 
-void effPCPZiodin04SetPosition(void *dst, const f32 sourcePosition[4]) {
-    SDF_VU0_COPYVECTOR(dst, sourcePosition);
+void effPCPZiodin04SetPosition(f32 destinationPosition[4], const f32 sourcePosition[4]) {
+    SDF_VU0_COPYVECTOR(destinationPosition, sourcePosition);
 }
 
 void effPCPZiodin04SetScale(EffPCPThunderGroup *work, f32 val) {
@@ -1425,8 +1425,8 @@ void effPCPMZiodin01Draw(EffPCPThunderGroup *work) {
     effPcpShiftThunderHandles(work, 12);
 }
 
-void effPCPMZiodin01SetPosition(void *dst, const f32 sourcePosition[4]) {
-    SDF_VU0_COPYVECTOR(dst, sourcePosition);
+void effPCPMZiodin01SetPosition(f32 destinationPosition[4], const f32 sourcePosition[4]) {
+    SDF_VU0_COPYVECTOR(destinationPosition, sourcePosition);
 }
 
 void effPCPMZiodin01SetScale(EffPCPThunderGroup *work, f32 val) {
@@ -1498,8 +1498,8 @@ void effPCPMZiodin02Draw(EffPCPThunderGroup *work) {
     effPcpShiftThunderHandles(work, 8);
 }
 
-void effPCPMZiodin02SetPosition(void *dst, const f32 sourcePosition[4]) {
-    SDF_VU0_COPYVECTOR(dst, sourcePosition);
+void effPCPMZiodin02SetPosition(f32 destinationPosition[4], const f32 sourcePosition[4]) {
+    SDF_VU0_COPYVECTOR(destinationPosition, sourcePosition);
 }
 
 void effPCPMZiodin02SetScale(EffPCPThunderGroup *work, f32 val) {
@@ -1578,8 +1578,8 @@ void effPCPShockWave01Draw(EffPCPFadeWork *work) {
     work->frame++;
 }
 
-void effPCPShockWave01SetPosition(void *dst, const f32 sourcePosition[4]) {
-    SDF_VU0_COPYVECTOR(dst, sourcePosition);
+void effPCPShockWave01SetPosition(f32 destinationPosition[4], const f32 sourcePosition[4]) {
+    SDF_VU0_COPYVECTOR(destinationPosition, sourcePosition);
 }
 
 /* Retain this fade variant's float input; its observed updater does not read it. */
@@ -1673,8 +1673,8 @@ void effPCPShockWave02Draw(EffPCPThunderGroup *work) {
     effPcpShiftThunderHandles(work, 30);
 }
 
-void effPCPShockWave02SetPosition(void *dst, const f32 sourcePosition[4]) {
-    SDF_VU0_COPYVECTOR(dst, sourcePosition);
+void effPCPShockWave02SetPosition(f32 destinationPosition[4], const f32 sourcePosition[4]) {
+    SDF_VU0_COPYVECTOR(destinationPosition, sourcePosition);
 }
 
 void effPCPShockWave02SetScale(EffPCPThunderGroup *work, f32 val) {
@@ -1745,8 +1745,8 @@ void effPCPHouden01Draw(EffPCPFadeWork *work) {
     work->frame++;
 }
 
-void effPCPHouden01SetPosition(void *dst, const f32 sourcePosition[4]) {
-    SDF_VU0_COPYVECTOR(dst, sourcePosition);
+void effPCPHouden01SetPosition(f32 destinationPosition[4], const f32 sourcePosition[4]) {
+    SDF_VU0_COPYVECTOR(destinationPosition, sourcePosition);
 }
 
 /* Retain this fade variant's float input; its observed updater does not read it. */

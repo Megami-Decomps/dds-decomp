@@ -5,24 +5,24 @@
 
 struct EffPCPChargeWork;
 
-/* Shared effect PCP callback contract: paired DDS1/DDS2 providers receive
- * destination work/storage first and the source parameter vector second. */
-void effPCPSparkleSphereSetPosition(void *dst, const f32 sourcePosition[4]);
-void effPCPHama01SetPosition(void *dst, const f32 sourcePosition[4]);
-void effPCPHama02SetPosition(void *dst, const f32 sourcePosition[4]);
-void effPCPHamaonSetPosition(void *dst, const f32 sourcePosition[4]);
-void effPCPMHanma01SetPosition(void *dst, const f32 sourcePosition[4]);
+/* Shared effect PCP callback contract: paired DDS1/DDS2 providers receive a
+ * four-float destination vector first and the source parameter vector second. */
+void effPCPSparkleSphereSetPosition(f32 destinationPosition[4], const f32 sourcePosition[4]);
+void effPCPHama01SetPosition(f32 destinationPosition[4], const f32 sourcePosition[4]);
+void effPCPHama02SetPosition(f32 destinationPosition[4], const f32 sourcePosition[4]);
+void effPCPHamaonSetPosition(f32 destinationPosition[4], const f32 sourcePosition[4]);
+void effPCPMHanma01SetPosition(f32 destinationPosition[4], const f32 sourcePosition[4]);
 void effPCPMudoSetPosition(struct EffPCPChargeWork *work, const f32 sourcePosition[4]);
-void effPCPHwave01SetPosition(void *dst, const f32 sourcePosition[4]);
-void effPCPZiodin01SetPosition(void *dst, const f32 sourcePosition[4]);
-void effPCPZiodin02SetPosition(void *dst, const f32 sourcePosition[4]);
-void effPCPZiodin03SetPosition(void *dst, const f32 sourcePosition[4]);
-void effPCPZiodin04SetPosition(void *dst, const f32 sourcePosition[4]);
-void effPCPMZiodin01SetPosition(void *dst, const f32 sourcePosition[4]);
-void effPCPMZiodin02SetPosition(void *dst, const f32 sourcePosition[4]);
-void effPCPShockWave01SetPosition(void *dst, const f32 sourcePosition[4]);
-void effPCPShockWave02SetPosition(void *dst, const f32 sourcePosition[4]);
-void effPCPHouden01SetPosition(void *dst, const f32 sourcePosition[4]);
+void effPCPHwave01SetPosition(f32 destinationPosition[4], const f32 sourcePosition[4]);
+void effPCPZiodin01SetPosition(f32 destinationPosition[4], const f32 sourcePosition[4]);
+void effPCPZiodin02SetPosition(f32 destinationPosition[4], const f32 sourcePosition[4]);
+void effPCPZiodin03SetPosition(f32 destinationPosition[4], const f32 sourcePosition[4]);
+void effPCPZiodin04SetPosition(f32 destinationPosition[4], const f32 sourcePosition[4]);
+void effPCPMZiodin01SetPosition(f32 destinationPosition[4], const f32 sourcePosition[4]);
+void effPCPMZiodin02SetPosition(f32 destinationPosition[4], const f32 sourcePosition[4]);
+void effPCPShockWave01SetPosition(f32 destinationPosition[4], const f32 sourcePosition[4]);
+void effPCPShockWave02SetPosition(f32 destinationPosition[4], const f32 sourcePosition[4]);
+void effPCPHouden01SetPosition(f32 destinationPosition[4], const f32 sourcePosition[4]);
 void effPCPMultiBlurExpSetPosition(void *dst, const f32 sourcePosition[4]);
 void effPCPMultiFilterExpSetPosition(void *dst, const f32 sourcePosition[4]);
 void effPCPMultiBlurExp2SetPosition(void *dst, const f32 sourcePosition[4]);
