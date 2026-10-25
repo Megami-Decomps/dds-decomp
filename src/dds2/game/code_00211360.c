@@ -120,7 +120,7 @@ extern u8 sdfHddValid;
 
 extern s32 btlAnyUnitHasActionInSlots(s32 mask, s32 action);
 
-extern s32 btlCanSpawnAnotherEnemy(s32);
+extern s32 btlCanSpawnAnotherEnemy(BtlUnit *requester);
 
 extern s32 btlActionMatchesStatMask(s32, s16, s8);
 
