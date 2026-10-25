@@ -9,6 +9,7 @@
 #include "dat_state.h"
 #include "dat_party_growth.h"
 #include "mnu_result.h"
+#include "brs_result_counter_completion_api.h"
 #include "prf_profile_cap.h"
 
 extern u32 brsBuildProfileSkillList(datUnitWork_t *, PrfSkillList *);
@@ -515,7 +516,6 @@ extern void brsDrawLevelProgressIndicator(s32, s32, s32, BrsSkillPackageWork *, 
 extern void brsUpdateProfileProgressIndicator(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
 extern void brsDrawProfileProgressIndicator(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
 extern void brsDrawProgressRowUnitInfo(s32, s32, s32, BrsSkillPackageWork *, BrsProgressRow *, s32, s32);
-extern s32 brsPollResultCounterCompletion(void);
 extern void p2sdStopSe(u32 sound);
 
 void mnuDrawUnitProgressRows(s32 x, s32 y, s32 z, s32 alpha, BrsActiveProgressList *list, s32 context) {
@@ -568,11 +568,11 @@ void mnuDrawUnitProgressRows(s32 x, s32 y, s32 z, s32 alpha, BrsActiveProgressLi
             y += 0x1A0;
         }
     }
-    if (brsPollResultCounterCompletion() != 0 && work != NULL && work->resultPhase == 1) {
+    if (brsPollResultCounterCompletion() != BRS_RESULT_COUNTER_COMPLETION_PENDING &&
+        work != NULL && work->resultPhase == 1) {
         work->resultPhase = 2;
         p2sdStopSe(20);
     }
 }
 
 INCLUDE_RODATA(const s32, "game/code_0029CC90", D_00428550);
-

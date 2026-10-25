@@ -9,6 +9,7 @@
 #include "mnu_reset_selection_widths_api.h"
 #include "mnu.h"
 #include "mnu_result.h"
+#include "brs_result_counter_completion_api.h"
 #include "brs_ui_update_allowed_api.h"
 #include "dsp_name.h"
 #include "mdl_flag_api.h"
@@ -51,7 +52,6 @@ extern MenuPopupEntry brsPrimaryRewardPopupEntry[];
 
 extern void brsNoOpMessageInputCallback(void *);
 extern void mnuClearTitleState(BrsSkillPackageWork *);
-extern s32 brsPollResultCounterCompletion(void);
 extern u8 D_0037F530[];
 extern u8 D_003D643C[];
 
@@ -73,7 +73,7 @@ s32 brsMessageInputStep(dds3ProcessID_t *input) {
     }
     if (*transitionState == 0) {
         brsNoOpMessageInputCallback(context);
-        if (brsPollResultCounterCompletion() != 0 &&
+        if (brsPollResultCounterCompletion() != BRS_RESULT_COUNTER_COMPLETION_PENDING &&
             ((buttons & 1) != 0 || (D_0037F530[3] & 2) != 0)) {
             mnuClearTitleState(context);
             mnuSetPopupEntry(transitionState, (MenuPopupEntry *)D_003D643C);

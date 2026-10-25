@@ -2,13 +2,13 @@
 #include "kwln.h"
 #include "mnu.h"
 #include "mnu_result.h"
+#include "brs_result_counter_completion_api.h"
 #include "brs_ui_update_allowed_api.h"
 
 
 extern void mnuRefreshPanelLayer(BrsSkillPackageWork *);
 
 extern void brsNoOpMessageInputCallback(void *);
-extern s32 brsPollResultCounterCompletion(void);
 extern void mnuClearTitleState(BrsSkillPackageWork *);
 extern u8 D_00324530[];
 extern u8 D_0036D3EC[];
@@ -31,7 +31,7 @@ s32 brsMessageInputStep(dds3ProcessID_t *input) {
     }
     if (*transitionState == 0) {
         brsNoOpMessageInputCallback(context);
-        if (brsPollResultCounterCompletion() != 0 &&
+        if (brsPollResultCounterCompletion() != BRS_RESULT_COUNTER_COMPLETION_PENDING &&
             ((buttons & 1) != 0 || (D_00324530[3] & 2) != 0)) {
             mnuClearTitleState(context);
             mnuSetPopupEntry(transitionState, (MenuPopupEntry *)D_0036D3EC);

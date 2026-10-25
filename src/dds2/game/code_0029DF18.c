@@ -10,6 +10,7 @@
 #include "ui_color.h"
 #include "mnu_result.h"
 #include "brs_result_counter.h"
+#include "brs_result_counter_completion_api.h"
 #include "sdf.h"
 #include "snd_track_playback_api.h"
 #include "snd_work.h"
@@ -1077,13 +1078,13 @@ void brsDrawProfileProgressDetails(s32 x, s32 y, s32 depth, BrsSkillPackageWork 
 
 /* Complete after six successful polls of five counter pairs.
  * Early returns deliberately leave the accumulated settled count unchanged. */
-s32 brsPollResultCounterCompletion(void) {
+BrsResultCounterCompletionResult brsPollResultCounterCompletion(void) {
     dds3ProcessID_t *resultTask = dds3SearchProcessName(D_00428550);
     BrsResultWork *resultWork;
     s32 counterIndex;
 
     if (resultTask == NULL) {
-        return 0;
+        return BRS_RESULT_COUNTER_COMPLETION_PENDING;
     }
     resultWork = (BrsResultWork *)dds3GetProcessData(resultTask);
     for (counterIndex = 0; counterIndex < BRS_RESULT_COUNTER_PAIR_COUNT; counterIndex++) {
@@ -1091,15 +1092,15 @@ s32 brsPollResultCounterCompletion(void) {
             if (resultWork->levelCounters[counterIndex].remaining != 0 ||
                 resultWork->levelCounters[counterIndex].progressIconState[0] != 0 ||
                 resultWork->levelCounters[counterIndex].completionIconState[0] != 0) {
-                return 0;
+                return BRS_RESULT_COUNTER_COMPLETION_PENDING;
             }
         } else if (resultWork->levelCounters[counterIndex].remaining != 0) {
-            return 0;
+            return BRS_RESULT_COUNTER_COMPLETION_PENDING;
         }
         if (resultWork->profileCounters[counterIndex].phase >= 2) {
             if (resultWork->profileCounters[counterIndex].phase == 2) {
                 if (resultWork->profileCounters[counterIndex].remaining != 0) {
-                    return 0;
+                    return BRS_RESULT_COUNTER_COMPLETION_PENDING;
                 }
             }
         }
@@ -1108,9 +1109,9 @@ s32 brsPollResultCounterCompletion(void) {
     resultWork->settledFrames = resultWork->settledFrames <= 0 ? 0 :
         resultWork->settledFrames >= BRS_RESULT_SETTLED_POLL_CLAMP ? BRS_RESULT_SETTLED_POLL_LIMIT : resultWork->settledFrames;
     if (resultWork->settledFrames < BRS_RESULT_SETTLED_POLL_LIMIT) {
-        return 0;
+        return BRS_RESULT_COUNTER_COMPLETION_PENDING;
     }
-    return 1;
+    return BRS_RESULT_COUNTER_COMPLETION_COMPLETE;
 }
 
 void nbPlaySe(u32 sequenceId) {
