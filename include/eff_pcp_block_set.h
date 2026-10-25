@@ -2,6 +2,7 @@
 #define EFF_PCP_BLOCK_SET_H
 
 #include "eff_param.h"
+#include "eff_matrix4.h"
 
 struct sdfMemHandle_t;
 
@@ -119,7 +120,7 @@ EffPCPBlockSetWork *effPCPAgiFireballSpCopy(EffPCPBlockSetWork *source);
 EffPCPBlockSetWork *effPCPAgiFireballSp2Copy(EffPCPBlockSetWork *source);
 void effPCPAgiFireballDelete(EffPCPBlockSetWork *work);
 void effPCPAgiFireballSetPosition(EffPCPBlockSetWork *work, const f32 sourcePosition[4]);
-void effPCPAgiFireballSetRotateMatrix(EffPCPBlockSetWork *work, const void *source);
+void effPCPAgiFireballSetRotateMatrix(EffPCPBlockSetWork *work, const Matrix4 *source);
 void effPCPAgiFireballSetColor(EffPCPBlockSetWork *work, u32 color);
 
 #endif /* EFF_PCP_BLOCK_SET_H */

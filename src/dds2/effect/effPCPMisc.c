@@ -3196,7 +3196,7 @@ void effPCPAgiFireballSetColor(EffPCPBlockSetWork *work, u32 value) {
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
-void effPCPAgiFireballSetRotateMatrix(EffPCPBlockSetWork *work, const void *src) {
+void effPCPAgiFireballSetRotateMatrix(EffPCPBlockSetWork *work, const Matrix4 *src) {
     VU0_COPY_MATRIX(work->matrix, src);
 }
 
@@ -3368,7 +3368,7 @@ void effPCPAgiFireball2SetColor(EffPCPRotateWork *work, u32 val) {
     }
 }
 
-void effPCPAgiFireball2SetRotateMatrix(EffPCPRotateWork *work, const void *src) {
+void effPCPAgiFireball2SetRotateMatrix(EffPCPRotateWork *work, const Matrix4 *src) {
     u32 i;
     EffPCPBlockSetWork **blockSets;
 
