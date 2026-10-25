@@ -190,11 +190,11 @@ u32 mnuClearTerminalPanelSelection(dds3ProcessID_t *task) {
 }
 
 struct MenuSlotState;
-extern void mnuReleaseWorkResources(u8 *work);
+extern void mnuReleaseWorkResources(struct MenuSlotState *host);
 extern void mnuTerminalBuildMenus(struct MenuSlotState *host);
 
 s32 mnuRebuildTerminalMenuResources(dds3ProcessID_t *task) {
-    s32 *state = (s32 *)dds3GetProcessData(task);
+    struct MenuSlotState *state = (struct MenuSlotState *)dds3GetProcessData(task);
 
     mnuReleaseWorkResources(state);
     mnuTerminalBuildMenus(state);

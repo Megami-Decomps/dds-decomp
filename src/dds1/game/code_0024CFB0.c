@@ -290,12 +290,12 @@ u32 mnuClearTerminalPanelSelection(dds3ProcessID_t *task) {
 }
 
 struct MenuTerminalWork;
-extern void mnuReleaseWorkResources(u8 *work);
+extern void mnuReleaseWorkResources(struct MenuTerminalWork *work);
 extern void mnuTerminalBuildMenus(struct MenuTerminalWork *host);
 
 /* Release the current task's menu resources before rebuilding its terminal menus. */
 s32 mnuRebuildTerminalMenuResources(dds3ProcessID_t *task) {
-    s32 *work = (s32 *)dds3GetProcessData(task);
+    struct MenuTerminalWork *work = (struct MenuTerminalWork *)dds3GetProcessData(task);
 
     mnuReleaseWorkResources(work);
     mnuTerminalBuildMenus(work);

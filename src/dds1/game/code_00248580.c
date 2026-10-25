@@ -601,8 +601,7 @@ extern void mnuReleaseStaffImageHandles(struct EffectSlotSet **);
 
 /* Release command/progress lists, child percentage panels and staff image handles.
  * Release the owned command-list array before the remaining resources. */
-void mnuReleaseWorkResources(u8 *work) {
-    MenuTerminalWork *host = (MenuTerminalWork *)work;
+void mnuReleaseWorkResources(MenuTerminalWork *host) {
     s32 i;
 
     for (i = 0; i < sizeof(host->commandLists) / sizeof(host->commandLists[0]); i++) {
@@ -944,7 +943,7 @@ void mnuReleaseTerminalWorkAndResumeField(dds3ProcessID_t *task) {
     MenuTerminalWork *work = (MenuTerminalWork *)dds3GetProcessData(task);
 
     if (work != NULL) {
-        mnuReleaseWorkResources((u8 *)work);
+        mnuReleaseWorkResources(work);
         mnuReleaseResourceHandles(work);
         mnuDestroyAllMenuSlotEffectBatches((s32)work);
         mnuDrainPanelTransitions(&work->transitionWork, task);

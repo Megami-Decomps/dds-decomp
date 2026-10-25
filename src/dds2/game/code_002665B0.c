@@ -757,8 +757,7 @@ void mnuTerminalBuildMenus(MenuSlotState *host) {
 
 /* Release command/progress lists, child percentage panels and camp texture handles.
  * Release the owned command-list array before the remaining resources. */
-void mnuReleaseWorkResources(u8 *work) {
-    MenuSlotState *host = (MenuSlotState *)work;
+void mnuReleaseWorkResources(MenuSlotState *host) {
     s32 i;
 
     for (i = 0; i < sizeof(host->commandLists) / sizeof(host->commandLists[0]); i++) {
@@ -1073,7 +1072,7 @@ void mnuReleaseTerminalWorkAndResumeField(dds3ProcessID_t *task) {
     MenuSlotState *work = (MenuSlotState *)dds3GetProcessData(task);
 
     if (work != NULL) {
-        mnuReleaseWorkResources((u8 *)work);
+        mnuReleaseWorkResources(work);
         mnuReleaseTerminalSceneResources(work);
         mnuDestroyAllMenuSlotEffectBatches((s32)work);
         mnuDrainPanelTransitions(&work->transitionWork, task);
@@ -2533,8 +2532,9 @@ u32 evtExitSelectionMenuAndSendSoundCommand(dds3ProcessID_t *task) {
 
 s32 evtBRebuildTerminalMenuAndResetDispatch(dds3ProcessID_t *task) {
     s32 state = dds3GetProcessData(task);
-    mnuReleaseWorkResources(state);
-    mnuTerminalBuildMenus(state);
+    MenuSlotState *host = (MenuSlotState *)state;
+    mnuReleaseWorkResources(host);
+    mnuTerminalBuildMenus(host);
     mnuConfigureTerminalSlotEffects(1, (MenuSlotState *)state);
     mnuTerminalSelectSlot(1, 0, state);
     mnuSetTerminalPanelMotionMode(1, (MenuSlotState *)state);
