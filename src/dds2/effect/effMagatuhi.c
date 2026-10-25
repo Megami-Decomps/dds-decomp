@@ -32,13 +32,6 @@
 #define EFF_MAGATUHI_REPLAY_DRIFT 4
 #define EFF_MAGATUHI_HISTORY_MINIMUM 8
 
-/* Internal callback view whose third word carries the effect work pointer. */
-typedef struct {
-    s32 type;
-    u8 pad04[4];
-    EffWork *effect;
-} EffMagatuhiCallback;
-
 extern u32 effMagaCylinderCalcColor(u32 colorA, u32 colorB);
 
 /* Parameter head of the first family: particles of 0x30 bytes precede the work. */
@@ -775,8 +768,8 @@ void effMagaP4SetPoint(EffNode *node, const EffMagatuhiRowsSrc *src) {
 
 /* Seed every fourth slot with interpolated samples between two curve positions.
  * Keep the asymmetric duration/age subtraction and unchecked span divisor. */
-void effMagaP4Randomize(EffMagatuhiCallback *callback) {
-    EffMagatuhiWideSecond *work = dds3MagatuhiGetHandle(callback->effect);
+void effMagaP4Randomize(EffNode *callback) {
+    EffMagatuhiWideSecond *work = dds3MagatuhiGetHandle((EffWork *)callback->instance);
     EffMagatuhiValueWork *valueWork = work->managedResource->valueWork;
     u32 historyFrames = work->head.duration;
     s32 lifetimeFrames = work->head.lifetimeFrames;
@@ -1009,7 +1002,7 @@ void effMagaCylinderSetRotateMatrix(EffMagatuhiRingWork *work, const f32 matrix[
 
 
 /* Replay the first slot of each three-slot group from a random age. */
-void effMagaCylinderRandomize(EffMagatuhiCallback *callback) {
+void effMagaCylinderRandomize(EffNode *callback) {
     u32 k;
     EffMagatuhiRingWork *work;
     EffMagatuhiValueWork *valueWork;
@@ -1029,8 +1022,8 @@ void effMagaCylinderRandomize(EffMagatuhiCallback *callback) {
     f32 radiusStep;
 
     if (callback->type == EFF_MAGATUHI_CALLBACK_TYPE) {
-        if (dds3MagatuhiGetType(callback->effect) == EFF_MAGATUHI_REPLAY_RING) {
-            work = dds3MagatuhiGetHandle(callback->effect);
+        if (dds3MagatuhiGetType((EffWork *)callback->instance) == EFF_MAGATUHI_REPLAY_RING) {
+            work = dds3MagatuhiGetHandle((EffWork *)callback->instance);
             count = work->head.particleCount;
             valueWork = work->managedResource->valueWork;
             maxSteps = work->head.maxSteps;
@@ -1216,7 +1209,7 @@ void effMagaSpiralSetRotateMatrix(EffMagatuhiOrbitWork *work, const f32 matrix[1
 
 
 /* Advance the orbiting-particle family: each group of three slots is replayed from a random delay, one orbit step at a time, into the value table. */
-void effMagaSpiralRandomize(EffMagatuhiCallback *callback) {
+void effMagaSpiralRandomize(EffNode *callback) {
     u32 k;
     EffMagatuhiOrbitWork *work;
     EffMagatuhiValueWork *valueWork;
@@ -1237,8 +1230,8 @@ void effMagaSpiralRandomize(EffMagatuhiCallback *callback) {
     f32 radiusStep;
 
     if (callback->type == EFF_MAGATUHI_CALLBACK_TYPE) {
-        if (dds3MagatuhiGetType(callback->effect) == EFF_MAGATUHI_REPLAY_ORBIT) {
-            work = dds3MagatuhiGetHandle(callback->effect);
+        if (dds3MagatuhiGetType((EffWork *)callback->instance) == EFF_MAGATUHI_REPLAY_ORBIT) {
+            work = dds3MagatuhiGetHandle((EffWork *)callback->instance);
             count = work->head.particleCount;
             valueWork = work->managedResource->valueWork;
             maxSteps = work->head.maxSteps;
@@ -1457,7 +1450,7 @@ void effMagaSmokeSetRotateMatrix(EffMagatuhiDriftWork *work, const f32 matrix[16
 
 
 /* Replay the first slot of each three-slot drift group from a random age. */
-void effMagaSmokeRandomize(EffMagatuhiCallback *callback) {
+void effMagaSmokeRandomize(EffNode *callback) {
     u32 k;
     EffMagatuhiDriftWork *work;
     EffMagatuhiValueWork *valueWork;
@@ -1478,8 +1471,8 @@ void effMagaSmokeRandomize(EffMagatuhiCallback *callback) {
     f32 scaleStep;
 
     if (callback->type == EFF_MAGATUHI_CALLBACK_TYPE) {
-        if (dds3MagatuhiGetType(callback->effect) == EFF_MAGATUHI_REPLAY_DRIFT) {
-            work = dds3MagatuhiGetHandle(callback->effect);
+        if (dds3MagatuhiGetType((EffWork *)callback->instance) == EFF_MAGATUHI_REPLAY_DRIFT) {
+            work = dds3MagatuhiGetHandle((EffWork *)callback->instance);
             count = work->head.particleCount;
             valueWork = work->managedResource->valueWork;
             maxSteps = work->head.maxSteps;
@@ -1533,9 +1526,9 @@ void effMagaSmokeRandomize(EffMagatuhiCallback *callback) {
 }
 
 /* Dispatch replay side effects; retain the native s32 definition's fall-through. */
-s32 effMagaRandomize(EffMagatuhiCallback *work) {
+s32 effMagaRandomize(EffNode *work) {
     if (work->type == EFF_MAGATUHI_CALLBACK_TYPE) {
-        switch (dds3MagatuhiGetType(work->effect)) {
+        switch (dds3MagatuhiGetType((EffWork *)work->instance)) {
         case EFF_MAGATUHI_REPLAY_NONE:
             break;
         case EFF_MAGATUHI_REPLAY_BEZIER:

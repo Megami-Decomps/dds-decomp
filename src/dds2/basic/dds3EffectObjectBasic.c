@@ -744,8 +744,8 @@ s32 GetESPR(dds3Basic_t *obj) {
     return (s32)parameters->scale[0];
 }
 
-extern void effMagaP4Randomize(void *bill);
-extern void effMagaRandomize(void *bill);
+extern void effMagaP4Randomize(struct EffNode *node);
+extern void effMagaRandomize(struct EffNode *node);
 
 /* Dispatch bound-bill setup or four-row history initialization; two-row state does nothing.
    The legacy s32 result is unspecified and every caller discards it. */
