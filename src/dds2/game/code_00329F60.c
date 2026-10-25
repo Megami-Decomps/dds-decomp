@@ -984,11 +984,12 @@ void sdfTexSetWrapMode(sdfTexHandle_t *texture, SdfTextureClampMode mode) {
 }
 
 /* Borrow pixels or copy them to the selected heap; return the source cursor after the transfer bytes. */
-u8 *sdfTexTransData(u32 destination, s32 width, s32 height, u32 format, u8 *pixels, s32 borrowPixels) {
+u8 *sdfTexTransData(u32 destination, s32 width, s32 height, u32 format, u8 *pixels,
+                    SdfTextureUploadOwnership borrowPixels) {
     SdfImageUploadRequest request;
     s32 imageBytes = sdfImageDataSize(format, width, height) * 16;
 
-    if (borrowPixels == 0) {
+    if (borrowPixels == SDF_TEXTURE_UPLOAD_COPY) {
         if (imageBytes > SDF_UPLOAD_CHIP_MAX_BYTES) {
             request.allocation = sdfMemAllocDirect(imageBytes);
             request.pixels = (void *)sdfMemLock(request.allocation);
@@ -1014,7 +1015,8 @@ u8 *sdfTexTransData(u32 destination, s32 width, s32 height, u32 format, u8 *pixe
 }
 
 /* Upload the CLUT as 16x16 for 8-bit indexed formats, otherwise 8x2; forward pixel ownership. */
-u8 *sdfTexTransCLUT(sdfTexHandle_t *texture, u32 destination, u8 *pixels, s32 borrowPixels) {
+u8 *sdfTexTransCLUT(sdfTexHandle_t *texture, u32 destination, u8 *pixels,
+                    SdfTextureUploadOwnership borrowPixels) {
     s32 paletteWidth;
     s32 paletteHeight;
 
@@ -1030,7 +1032,8 @@ u8 *sdfTexTransCLUT(sdfTexHandle_t *texture, u32 destination, u8 *pixels, s32 bo
 
 void sdfTexClutToGs(sdfTexHandle_t *tex) {
     if (tex->secondaryResource != NULL) {
-        sdfTexTransCLUT(tex, sdfTexGetCLUTAddr(tex), tex->paletteData, 0);
+        sdfTexTransCLUT(tex, sdfTexGetCLUTAddr(tex), tex->paletteData,
+                        SDF_TEXTURE_UPLOAD_COPY);
     }
 }
 

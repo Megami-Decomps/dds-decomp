@@ -225,12 +225,14 @@ void effUploadModelTextures(EffModelOwner *owner) {
         }
         pixels = header + (header[1] & 0xF0) + 0x40;
         if (sdfTexGetCLUTCount(tex) != 0) {
-            pixels = sdfTexTransCLUT(tex, sdfTexGetCLUTAddr(tex), pixels, 1);
+            pixels = sdfTexTransCLUT(tex, sdfTexGetCLUTAddr(tex), pixels,
+                                     SDF_TEXTURE_UPLOAD_BORROW);
         }
         width = tex->width;
         height = tex->height;
         format = tex->pixelFormat;
-        sdfTexTransData(sdfTexGetPixelAddr(tex), width, height, format, pixels, 1);
+        sdfTexTransData(sdfTexGetPixelAddr(tex), width, height, format, pixels,
+                        SDF_TEXTURE_UPLOAD_BORROW);
     } while (i < 2);
 }
 

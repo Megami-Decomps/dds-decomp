@@ -226,7 +226,8 @@ void sdfTexRebuildPacket(sdfTexHandle_t *texture) {
     }
 }
 
-sdfTexHandle_t *sdfTexCreateFromFileHeader(const SdfTextureFileHeader *header, s32 borrowPixels) {
+sdfTexHandle_t *sdfTexCreateFromFileHeader(const SdfTextureFileHeader *header,
+                                           SdfTextureUploadOwnership borrowPixels) {
     sdfTexHandle_t *texture;
     u8 *pixels;
     s32 format;
@@ -278,12 +279,12 @@ sdfTexHandle_t *sdfTexCreateFromFileHeader(const SdfTextureFileHeader *header, s
 
 /* Build the texture and packet using queue-owned copies of the input pixels. */
 sdfTexHandle_t *sdfTexSet(const SdfTextureFileHeader *header) {
-    return sdfTexCreateFromFileHeader(header, 0);
+    return sdfTexCreateFromFileHeader(header, SDF_TEXTURE_UPLOAD_COPY);
 }
 
 /* Build the texture and packet while borrowing input pixels through transfer. */
 sdfTexHandle_t *sdfTexSetDirect(const SdfTextureFileHeader *header) {
-    return sdfTexCreateFromFileHeader(header, 1);
+    return sdfTexCreateFromFileHeader(header, SDF_TEXTURE_UPLOAD_BORROW);
 }
 
 /* Build weighted-RGB intensity bytes from retained palette color data. */
