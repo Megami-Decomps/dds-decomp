@@ -4017,12 +4017,12 @@ s32 btlDispatchEligibleBossEvent(BtlLinkedCommand *entry) {
     return 1;
 }
 
-s32 btlCheckAttachedMember(u8 *entry) {
-    u8 *unit = (u8 *)((BtlEventEntry *)entry)->task;
-    if (unit == 0) {
+s32 btlCheckAttachedMember(BtlLinkedCommand *command) {
+    BtlTask *task = command->task;
+    if (task == NULL) {
         return 1;
     }
-    if ((((BtlTask *)unit)->unit->status.flags & 0x400) == 0) {
+    if ((task->unit->status.flags & 0x400) == 0) {
         return 1;
     }
     {

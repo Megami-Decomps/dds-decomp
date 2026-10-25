@@ -142,7 +142,7 @@ extern s32 btlAllowsSpeciesCondition(BtlUnit *unit, BtlUnit *other, s32 conditio
 extern s32 btlApplyActionDefeatCamera(BtlLinkedCommand *command);
 extern void btlArmEventResourceTrigger(void);
 extern s32 btlCheckActiveEffectForSpecialTarget(BtlUnit *actor, BtlUnit *target, s32 command, s32 bits);
-extern s32 btlCheckAttachedMember(u8 *entry);
+extern s32 btlCheckAttachedMember(BtlLinkedCommand *command);
 extern s32 btlCheckBossOptionAllowed(u8 *unit);
 extern s32 btlCheckEnemyUnitReadiness(void);
 extern s32 btlCheckLinkedActionEffectTarget(BtlUnit *actor, BtlUnit *target, s32 command);
