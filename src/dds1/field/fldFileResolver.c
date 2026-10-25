@@ -273,7 +273,7 @@ void fldMakeResouceBasicFL1(FldSpawnBatch *batch, u32 batchCount) {
     u32 resourceCount;
     u32 resourceIndex;
     FldFileResource *resource;
-    void *spawnedObject;
+    dds3Basic_t *spawnedObject;
     u32 pathIndex;
 
     memset(loaded, 0, cacheCount);
@@ -396,7 +396,7 @@ void fldMakeResouceBasicFL1(FldSpawnBatch *batch, u32 batchCount) {
                 dds3GetRadiusPoseSet(spawnedObject, ((WorldTransformSetup *)resource->data)->transform.rotation[1]);
                 dds3SetLightObjectResoruce(spawnedObject, resource->data);
                 if ((u32)fldGlobalBase.area - 200U < 300U) {
-                    ((EffLightData *)((dds3Basic_t *)spawnedObject)->data)->flags |= 8;
+                    ((EffLightData *)spawnedObject->data)->flags |= 8;
                     dds3SetUnitObjectId(spawnedObject, "BTL_DEF_LIGHT");
                 }
             }
