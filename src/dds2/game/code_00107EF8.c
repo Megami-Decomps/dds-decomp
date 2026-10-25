@@ -1975,7 +1975,7 @@ INCLUDE_RODATA(const s32, "game/code_00107EF8", D_004113B8);
 
 scrProcessWork_s *bfContextCreate(BfFlw0Header *header, ScrSection *sections, ScrLabel *procedures,
                         ScrLabel *labels, ScrInstr *instructions, struct ItfMesSub *auxiliaryData,
-                        char *strings, s32 procedureIndex) {
+                        char *strings, ScrProcedureIndex procedureIndex) {
     scrProcessWork_s *process;
     s32 i;
     s8 *types;
@@ -2045,7 +2045,7 @@ scrProcessWork_s *bfContextCreate(BfFlw0Header *header, ScrSection *sections, Sc
 
 /* Resolve supported FLW0 sections relative to the header; reject bad magic/unknown kinds.
    Zero-count auxiliary sections are ignored, and absent sections remain null. */
-scrProcessWork_s *fldFlowParse(BfFlw0Header *header, s32 procedureIndex) {
+scrProcessWork_s *fldFlowParse(BfFlw0Header *header, ScrProcedureIndex procedureIndex) {
     ScrSection *sections;
     ScrLabel *procedures = NULL;
     ScrLabel *labels = NULL;

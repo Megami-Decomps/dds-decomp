@@ -1275,11 +1275,11 @@ s32 evtClearRandomStatusFlags(void) {
     return clearedAny;
 }
 
-extern s32 scrStartProcessProcedure(scrProcessWork_s *context, s32 procedureIndex);
+extern s32 scrStartProcessProcedure(scrProcessWork_s *context, ScrProcedureIndex procedureIndex);
 
 /* Step the script with these context values; clear the written flag, not the stored result. */
-s32 evtRunContext(s32 script, s32 firstArgument, s32 secondArgument, s32 commandIndex, u16 options) {
-    scrStartProcessProcedure(evtWorkScriptTask, script);
+s32 evtRunContext(ScrProcedureIndex procedureIndex, s32 firstArgument, s32 secondArgument, s32 commandIndex, u16 options) {
+    scrStartProcessProcedure(evtWorkScriptTask, procedureIndex);
     evtWorkScriptContext.commandIndex = commandIndex;
     evtWorkScriptContext.firstArgument = firstArgument;
     evtWorkScriptContext.secondArgument = secondArgument;

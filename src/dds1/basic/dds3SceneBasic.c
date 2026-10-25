@@ -85,7 +85,7 @@ void dds3SceneBasicReleaseScriptFile(dds3Basic_t *worldNode) {
 dds3ProcessID_t *evtStartSceneResourceTask(dds3Basic_t *worldNode, const char *taskName) {
     EvtWorldTable *worldData = (EvtWorldTable *)worldNode->data;
     struct BfFlw0Header *sceneScript = worldData->sceneScript;
-    s32 scriptIndex;
+    ScrProcedureIndex scriptIndex;
 
     if (sceneScript == NULL) {
         return 0;

@@ -15,7 +15,7 @@
 
 
 
-scrProcessWork_s *fldFlowParse(BfFlw0Header *header, s32 procedureIndex);
+scrProcessWork_s *fldFlowParse(BfFlw0Header *header, ScrProcedureIndex procedureIndex);
 
 
 /* Load a script resource, create its VM process and retain its resource handle. */
@@ -80,7 +80,7 @@ scrProcessWork_s *scrCreateTaskWithDefaultOption(BfFlw0Header *header) {
 
 dds3ProcessID_t *scrRunScriptEx(u32 priority, BfFlw0Header *header,
     ScrSection *procedureSection, ScrLabel *procedures, ScrLabel *labels,
-    ScrInstr *instructions, struct ItfMesSub *auxiliaryData, char *strings, s32 procedureIndex)
+    ScrInstr *instructions, struct ItfMesSub *auxiliaryData, char *strings, ScrProcedureIndex procedureIndex)
 {
     return scrStartScriptProcess(priority, bfContextCreate(header, procedureSection, procedures, labels, instructions, auxiliaryData, strings, procedureIndex));
 }
@@ -144,7 +144,7 @@ void scrDestroyAllNamedProcesses(void)
 }
 
 /* Start a procedure on a script process: copy its name, set pc, clear the stack and timers. */
-s32 scrStartProcessProcedure(scrProcessWork_s *process, s32 procedureIndex)
+s32 scrStartProcessProcedure(scrProcessWork_s *process, ScrProcedureIndex procedureIndex)
 {
     s32 cursor;
 
@@ -184,14 +184,14 @@ scrProcessWork_s *scrSearchScriptName(const char *name) {
 }
 
 /* Index of the named procedure in the FLW0 procedure section, or -1. */
-s32 scrSearchProcedureName(const BfFlw0Header *header, const char *procedureName) {
+ScrProcedureIndex scrSearchProcedureName(const BfFlw0Header *header, const char *procedureName) {
     const ScrLabel *procedures = NULL;
     const ScrSection *sections;
     s32 sectionIndex;
-    s32 procedureIndex;
+    ScrProcedureIndex procedureIndex;
 
     if (header == NULL) {
-        return -1;
+        return SCR_PROCEDURE_INDEX_NOT_FOUND;
     }
     sections = header->sections;
     for (sectionIndex = 0; sectionIndex < header->sectionCount; sectionIndex++) {
@@ -201,14 +201,14 @@ s32 scrSearchProcedureName(const BfFlw0Header *header, const char *procedureName
         }
     }
     if (procedures == NULL) {
-        return -1;
+        return SCR_PROCEDURE_INDEX_NOT_FOUND;
     }
     for (procedureIndex = 0; procedureIndex < sections[sectionIndex].count; procedureIndex++) {
         if (strcmp(procedures[procedureIndex].name, procedureName) == 0) {
             return procedureIndex;
         }
     }
-    return -1;
+    return SCR_PROCEDURE_INDEX_NOT_FOUND;
 }
 
 INCLUDE_RODATA(const s32, "script/scrScriptProcess", D_00411408);

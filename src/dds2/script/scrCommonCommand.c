@@ -223,7 +223,7 @@ s32 scrCommand_SET_FOVY(void)
 
 s32 bfWaitCbCreateTask(void)
 {
-    s32 procedureIndex;
+    ScrProcedureIndex procedureIndex;
     scrProcessWork_s *ctx;
 
     procedureIndex = scrGetIntPara(0);

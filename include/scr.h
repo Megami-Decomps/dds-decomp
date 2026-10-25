@@ -8,6 +8,9 @@ struct sdfMemHandle_t;
 struct BfFlw0Header;
 struct ItfMesSub;
 
+typedef s32 ScrProcedureIndex;
+#define SCR_PROCEDURE_INDEX_NOT_FOUND ((ScrProcedureIndex)-1)
+
 /* One 4-byte script operand slot; DDS1/2 script/scrTraceCode.c via scrProcessWork_s. */
 typedef union ScrStackValue {
     s32 i;
@@ -69,7 +72,7 @@ typedef struct scrProcessWork_s {
     ScrInstr *instructions;
     struct ItfMesSub *auxiliaryData;
     char *strings;
-    s32 procedureIndex;
+    ScrProcedureIndex procedureIndex;
     s32 resourceIndex;
     u32 timer;
     u32 cmdTimer;
@@ -103,7 +106,7 @@ s32 scrTraceCode(scrProcessWork_s *context);
 void scrProcDestroyTask(scrProcessWork_s *process);
 scrProcessWork_s *bfContextCreate(struct BfFlw0Header *header, ScrSection *sections, ScrLabel *procedures,
                         ScrLabel *labels, ScrInstr *instructions, struct ItfMesSub *auxiliaryData,
-                        char *strings, s32 procedureIndex);
+                        char *strings, ScrProcedureIndex procedureIndex);
 scrProcessWork_s *scrCreateTaskWithDefaultOption(struct BfFlw0Header *header);
 void PushInt(scrProcessWork_s *script, s32 value);
 void PushFloat(scrProcessWork_s *script, f32 value);
@@ -113,7 +116,7 @@ s32 PopInt(scrProcessWork_s *script);
 f32 PopFloat(scrProcessWork_s *script);
 dds3ProcessID_t *scrRunScriptEx(u32 priority, struct BfFlw0Header *header,
     ScrSection *sections, ScrLabel *procedures, ScrLabel *labels,
-    ScrInstr *instructions, struct ItfMesSub *auxiliaryData, char *strings, s32 procedureIndex);
+    ScrInstr *instructions, struct ItfMesSub *auxiliaryData, char *strings, ScrProcedureIndex procedureIndex);
 
 
 /* Command callback plus operand count (0x8); DDS1 script/scrTraceCode.c. */
