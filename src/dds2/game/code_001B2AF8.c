@@ -2941,12 +2941,6 @@ extern u32 btlHasRegisteredAphNamePanelTask(void);
 
 extern void btlSetTrackedTaskHandle(s32, s32);
 
-enum {
-    BTL_GUIDE_PANEL_STATE_FADE_IN,
-    BTL_GUIDE_PANEL_STATE_VISIBLE,
-    BTL_GUIDE_PANEL_STATE_FADE_OUT
-};
-
 s32 btlCreateGuidePanelTask(s32 windowIndex, s32 entryIndex) {
     BtlState *context = (BtlState *)btlGetRuntime();
     BtlGuidePanelWork *data;
@@ -2978,13 +2972,13 @@ s32 btlCreateGuidePanelTask(s32 windowIndex, s32 entryIndex) {
 }
 
 void btlRequestGuidePanelClose(void) {
-    u8 *puVar1;
+    BtlGuidePanelWork *work;
     dds3ProcessID_t *temp_v0;
 
     temp_v0 = dds3SearchProcessName(D_004367E0);
     if (temp_v0 != 0) {
-        puVar1 = (u8 *)dds3GetProcessData(temp_v0);
-        *puVar1 = BTL_GUIDE_PANEL_STATE_FADE_OUT;
+        work = (BtlGuidePanelWork *)dds3GetProcessData(temp_v0);
+        work->state = BTL_GUIDE_PANEL_STATE_FADE_OUT;
     }
 }
 

@@ -3,8 +3,16 @@
 
 #include "common.h"
 
+typedef s8 BtlGuidePanelState;
+
+enum BtlGuidePanelStateValue {
+    BTL_GUIDE_PANEL_STATE_FADE_IN = 0,
+    BTL_GUIDE_PANEL_STATE_VISIBLE = 1,
+    BTL_GUIDE_PANEL_STATE_FADE_OUT = 2,
+};
+
 typedef struct BtlGuidePanelWork {
-    s8 state;
+    BtlGuidePanelState state;
     u8 pad01[7];
     s16 fadeLevel;
     u8 pad0A[2];
