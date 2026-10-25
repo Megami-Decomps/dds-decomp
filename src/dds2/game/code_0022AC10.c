@@ -198,7 +198,7 @@ extern u16 btlScriptGroupSlotAuxValueView[];
 
 extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 
-extern s32 btlDrawCapturedScreenTileOverlay(u32, u32);
+extern BtlRuntimeFadeStepResult btlDrawCapturedScreenTileOverlay(u32, u32);
 
 extern BtlRuntimeTask *btlAllocTask(s32);
 
@@ -1583,13 +1583,14 @@ typedef struct BtlTileAlphaPacket {
 typedef char BtlTileAlphaPacketSize[(sizeof(BtlTileAlphaPacket) == 0x30) ? 1 : -1];
 
 /* vu0 routine: draw/advance captured-screen tiles; return nonzero when their pass completes. */
-s32 btlDrawCapturedScreenTileOverlay(u32 backgroundColor, u32 color) {
+BtlRuntimeFadeStepResult btlDrawCapturedScreenTileOverlay(
+    u32 backgroundColor, u32 color) {
     f32 positions[6][4] __attribute__((aligned(16)));
     f32 normals[6][4] __attribute__((aligned(16)));
     f32 coordinates[6][2];
     f32 axis[4] __attribute__((aligned(16)));
     f32 center[4] __attribute__((aligned(16)));
-    s32 complete = 1;
+    BtlRuntimeFadeStepResult complete = BTL_RUNTIME_FADE_STEP_COMPLETE;
     sdfDrawTag_t *list;
     sdfDrawTag_t *tiles;
     sdfPrimTransPacket_t *packet;
@@ -1740,7 +1741,7 @@ s32 btlDrawCapturedScreenTileOverlay(u32 backgroundColor, u32 color) {
                             if (btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].age >= 11) {
                                 btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].alpha -= 32;
                             }
-                            complete = 0;
+                            complete = BTL_RUNTIME_FADE_STEP_IN_PROGRESS;
                         }
                         age = btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].age;
                         alpha = btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].alpha;
@@ -1754,7 +1755,7 @@ s32 btlDrawCapturedScreenTileOverlay(u32 backgroundColor, u32 color) {
                 size = 240.0f;
                 alpha = 0x80;
                 depth = 1000.0f;
-                complete = 0;
+                complete = BTL_RUNTIME_FADE_STEP_IN_PROGRESS;
 draw_tile:
                 if (alpha) {
                     BtlTileAlphaPacket *alphaPacket = (BtlTileAlphaPacket *)sdfGrAllocPacketBuff(sizeof(BtlTileAlphaPacket));
@@ -1832,21 +1833,22 @@ void btlInitFadeColors(void) {
     }
 }
 
-s32 btlUpdateFadeIn(void) {
+BtlRuntimeFadeStepResult btlUpdateFadeIn(void) {
     btlDrawCapturedScreenTileOverlay(btlRuntimeState.color14, btlRuntimeState.color10);
     if ((btlRuntimeState.color14 & 0xFF000000) != 0) {
         btlRuntimeState.color14 -= 0x08000000;
-        return 0;
+        return BTL_RUNTIME_FADE_STEP_IN_PROGRESS;
     }
-    return 1;
+    return BTL_RUNTIME_FADE_STEP_COMPLETE;
 }
 
 /* Native empty transition hook after fade-in completes and fade-out is pending. */
 void btlFadeInCompleteNoOp(void) {
 }
 
-s32 btlFadeSharedOverlayAlpha(void) {
-    s32 result = btlDrawCapturedScreenTileOverlay(btlRuntimeState.color14, btlRuntimeState.color10);
+BtlRuntimeFadeStepResult btlFadeSharedOverlayAlpha(void) {
+    BtlRuntimeFadeStepResult result =
+        btlDrawCapturedScreenTileOverlay(btlRuntimeState.color14, btlRuntimeState.color10);
     if ((btlRuntimeState.color10 & 0xFF000000) > 0x08000000) {
         btlRuntimeState.color10 -= 0x08000000;
     } else {

@@ -1652,7 +1652,7 @@ extern SdfPoolNode D_00325708;
 
 extern void btlDrawCapturedScreenTileOverlay(sdfDrawTag_t *, u32, u32, u32, u32, s32);
 
-s32 btlUpdateFadeIn(void) {
+BtlRuntimeFadeStepResult btlUpdateFadeIn(void) {
     sdfDrawTag_t *packets = dds3FontReqAllocDrawTag();
     if ((btlRuntimeState.color18 & 0xFF000000) != 0x80000000) {
         btlRuntimeState.color18 += 0x10000000;
@@ -1662,13 +1662,13 @@ s32 btlUpdateFadeIn(void) {
     if ((btlRuntimeState.color14 & 0xFF000000) > 0x08000000) {
         btlRuntimeState.color14 -= 0x08000000;
         btlRuntimeState.color1C -= 0x08000000;
-        return 0;
+        return BTL_RUNTIME_FADE_STEP_IN_PROGRESS;
     }
     if (btlRuntimeState.color1C & 0xFF000000) {
         btlRuntimeState.color1C -= 0x02000000;
-        return 0;
+        return BTL_RUNTIME_FADE_STEP_IN_PROGRESS;
     }
-    return 1;
+    return BTL_RUNTIME_FADE_STEP_COMPLETE;
 }
 
 /* Native empty transition hook after fade-in completes and fade-out is pending. */
@@ -1678,9 +1678,9 @@ void btlFadeInCompleteNoOp(void) {
 extern u8 D_00360F68[21][21];
 extern u8 D_00361128[21][21];
 
-s32 btlUpdateFadeOut(void) {
+BtlRuntimeFadeStepResult btlUpdateFadeOut(void) {
     u8 (*order)[21];
-    s32 finished;
+    BtlRuntimeFadeStepResult finished;
     s32 pass;
     s32 changed;
     s32 x, y, row, column;
@@ -1694,7 +1694,7 @@ s32 btlUpdateFadeOut(void) {
     } else {
         order = D_00361128;
     }
-    finished = 1;
+    finished = BTL_RUNTIME_FADE_STEP_COMPLETE;
     pass = 0;
     changed = 0;
     for (; pass < 2; pass++) {
@@ -1707,7 +1707,7 @@ s32 btlUpdateFadeOut(void) {
                     cell = &btlRuntimeState.ownedData[y * btlRuntimeState.gridWidth + x];
                     if (*cell != 0) {
                         *cell += 0xC0;
-                        finished = 0;
+                        finished = BTL_RUNTIME_FADE_STEP_IN_PROGRESS;
                         changed++;
                     }
                 }
@@ -1808,7 +1808,7 @@ extern void fldSkyDrawFilter(void);
 
 
 extern u32 dds3DrawFlag;
-extern s32 btlUpdateFadeOut(void);
+extern BtlRuntimeFadeStepResult btlUpdateFadeOut(void);
 
 void btlResetRuntimeState(void);
 

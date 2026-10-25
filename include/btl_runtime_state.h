@@ -13,6 +13,13 @@ typedef enum BtlRuntimeFadeStateValue {
     BTL_RUNTIME_FADE_CLEANUP = 4,
 } BtlRuntimeFadeStateValue;
 
+/* Fade work is pending at zero and the current step is complete at one. */
+typedef s32 BtlRuntimeFadeStepResult;
+enum {
+    BTL_RUNTIME_FADE_STEP_IN_PROGRESS = 0,
+    BTL_RUNTIME_FADE_STEP_COMPLETE = 1,
+};
+
 /* The battle's runtime state, as the overlay effects read it. */
 #ifdef VERSION_DDS1
 typedef struct BattleRuntimeState {
