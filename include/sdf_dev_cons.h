@@ -26,7 +26,7 @@ typedef struct sdfDevConsDrawCB_t {
     u8 *writeCursor; /* 0x00: next glyph-data write */
     u8 *packetStart; /* 0x04: beginning of the DMA range */
     u8 *currentTag; /* 0x08: reserved, not-yet-finalized GIF tag */
-    u32 *dmaChannel; /* 0x0C: DMA channel registers; CHCR is the first word. */
+    vu32 *dmaChannel; /* 0x0C: DMA channel registers; CHCR is the first word. */
     u8 *bufferAddresses[2]; /* 0x10: start of each alternating packet buffer */
     s32 bufferBytes; /* 0x18: byte capacity of each buffer */
     u16 activeBufferIndex; /* 0x1C */

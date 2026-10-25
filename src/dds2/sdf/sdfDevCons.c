@@ -157,17 +157,17 @@ void sdfDevConsTagClose(sdfDevConsDrawCB_t *buffers) {
  */
 void sdfDevConsDrawFlush(sdfDevConsDrawCB_t *packetBuffers) {
     s32 packetBytes;
-    u32 *channelRegisters;
+    vu32 *channelRegisters;
     u32 nextBufferIndex;
 
     sdfDevConsTagClose(packetBuffers);
     packetBytes = packetBuffers->currentTag - packetBuffers->packetStart;
     if ((packetBytes >> SDF_DEVCONS_NONEMPTY_SHIFT) != 0) {
         channelRegisters = packetBuffers->dmaChannel;
-        sceDmaSync(channelRegisters, 0, 0);
+        sceDmaSync((void *)channelRegisters, 0, 0);
         HW_WRITE(channelRegisters, HW_READ(channelRegisters) | SDF_DMA_CHCR_TTE); /* CHCR bit 6: tag-transfer enable */
         EE_SYNC();
-        sceDmaSendN(channelRegisters, (void *)((u32)packetBuffers->packetStart & SDF_DMA_ADDRESS_MASK), packetBytes >> SDF_DMA_QWORD_SHIFT);
+        sceDmaSendN((void *)channelRegisters, (void *)((u32)packetBuffers->packetStart & SDF_DMA_ADDRESS_MASK), packetBytes >> SDF_DMA_QWORD_SHIFT);
         nextBufferIndex = packetBuffers->activeBufferIndex ^ 1;
         packetBuffers->activeBufferIndex = nextBufferIndex;
         packetBuffers->currentTag = (u8 *)packetBuffers->bufferAddresses[nextBufferIndex];
