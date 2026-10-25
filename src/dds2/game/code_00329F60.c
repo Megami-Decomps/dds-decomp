@@ -45,7 +45,7 @@ enum {
 
 
 
-s32 sdfGsMemCheckMerge(sdfGsMemSlice_t *block);
+s32 sdfGsMemAbsorbFreePredecessor(sdfGsMemSlice_t *block);
 extern u8 sdfGrCaptureBuff;
 
 extern u8 *sdfGrCaptureReq;
@@ -491,8 +491,8 @@ sdfGsMemSlice_t *sdfGsMemAllocRect(s32 width, s32 height, s32 format, s32 alloca
     return textureBlock;
 }
 
-/* Merge the previous free range into block; return one only when a record was recycled. */
-s32 sdfGsMemCheckMerge(sdfGsMemSlice_t *block) {
+/* Absorb the previous free range into block; return one when its record is released. */
+s32 sdfGsMemAbsorbFreePredecessor(sdfGsMemSlice_t *block) {
     sdfGsMemSlice_t *previousBlock = block->prev;
 
     if (previousBlock != NULL) {
@@ -539,10 +539,10 @@ void sdfGsMemFree(sdfGsMemSlice_t *textureBlock) {
     }
     restoreInterrupts = DIntr();
     textureBlock->allocationMode = 0;
-    sdfGsMemCheckMerge(textureBlock);
+    sdfGsMemAbsorbFreePredecessor(textureBlock);
     nextBlock = textureBlock->next;
     if (nextBlock != NULL && nextBlock->allocationMode == 0) {
-        sdfGsMemCheckMerge(nextBlock);
+        sdfGsMemAbsorbFreePredecessor(nextBlock);
     }
     if (restoreInterrupts != 0) {
         EIntr();

@@ -8735,7 +8735,7 @@
 0x0032A688	sdfGsMemAllocFromHead	inferred	SMT3HD name via SLUS_209.11 0x002AA438, reloc-identical; was sdfTexAllocHeadLow
 0x0032A7A8	sdfGsMemAllocFromTail	inferred	SMT3HD name via SLUS_209.11 0x002AA558, reloc-identical; was sdfTexAllocHeadHigh
 0x0032A8C8	sdfGsMemAllocRect	inferred	SMT3HD name via SLUS_209.11 0x002AA678, reloc-identical; was sdfTexAllocateHeadForDimensions
-0x0032A968	sdfGsMemCheckMerge	inferred	SMT3HD name via SLUS_209.11 0x002AA718, reloc-identical; was sdfCoalesceUnusedTextureBlocks
+0x0032A968	sdfGsMemAbsorbFreePredecessor	inferred	code_002D10B0.c and code_00329F60.c absorb the immediately preceding free range into the supplied range and release its record; prior names: sdfGsMemCheckMerge and sdfCoalesceUnusedTextureBlocks
 0x0032A9D8	sdfGsMemCheckLinkConsistence	inferred	SMT3HD name via SLUS_209.11 0x002AA788, reloc-identical; was sdfWalkTextureListEndpoints
 0x0032AA40	sdfGsMemFree	inferred	SMT3HD name via SLUS_209.11 0x002AA7F0, reloc-identical; was sdfUpdateTextureHeadsWithInterruptsMasked
 0x0032AAB8	sdfGsMemFreeDelayed	inferred	SMT3HD name via SLUS_209.11 0x002AA868, shared-hash-in-run; was sdfTexQueuePendingWork
