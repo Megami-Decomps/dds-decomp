@@ -1767,7 +1767,7 @@ s32 evtSelectFineStatGrade(void) {
 }
 
 
-s32 evtTestSolarPhaseOrModelFlag(u32 condition) {
+u8 evtTestSolarPhaseOrModelFlag(u32 condition) {
     u32 conditionType = condition >> 16;
     switch (conditionType) {
     case 0:

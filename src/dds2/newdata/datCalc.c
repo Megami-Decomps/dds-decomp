@@ -2276,7 +2276,7 @@ s32 evtPushRosterOrGlobalCounterValue(void) {
     return 1;
 }
 
-s32 evtTestSolarPhaseOrModelFlag(u32 condition) {
+u8 evtTestSolarPhaseOrModelFlag(u32 condition) {
     u32 conditionType = condition >> 16;
     switch (conditionType) {
     case 0:
