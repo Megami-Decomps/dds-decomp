@@ -346,7 +346,7 @@ FldTitleBannerResult fldResolvePendingTitleBanner(void) {
     return FLD_TITLE_BANNER_UNRESOLVED;
 }
 
-extern s32 fldTitleIsActive(void);
+extern u8 fldTitleIsActive(void);
 
 extern void fldDrawAnimatedFieldBanner(s32, s32, s32);
 
@@ -3827,7 +3827,7 @@ void fldSetTitleDrawMode(u32 value) {
     D_003BAFB0 = value;
 }
 
-s32 fldTitleIsActive(void) {
+u8 fldTitleIsActive(void) {
     return dds3SearchProcessName(fldTitleTaskName) != 0;
 }
 

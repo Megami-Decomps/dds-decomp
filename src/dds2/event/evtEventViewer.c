@@ -731,7 +731,7 @@ extern void p2sdBgmVolUp(void);
 extern void p2sdStopAllBgm(void);
 extern void dds3PadVibrationSet(u32 motor, u8 level, s32 duration);
 extern void dds3PlayMovieByIndex(s32 value);
-extern s32 fldTitleIsActive(void);
+extern u8 fldTitleIsActive(void);
 extern void fldSetTitleDrawMode(u32 enabled);
 extern void nbPanelAnalyzeStart(void);
 extern void kwlnFadeBackgroundStartIn(s32 duration);
@@ -2324,7 +2324,7 @@ extern void mnuReleaseCampSceneRegisteredIds(EvtRuntime *viewer);
 extern s32 mnuQueryTitleSoundBusy(void);
 extern void mnuStopTitleVoicePlayback(void);
 extern void sdfSoundSetChannelCount(u32 channels);
-extern s32 fldTitleIsActive(void);
+extern u8 fldTitleIsActive(void);
 extern void fldSetTitleDrawMode(u32 active);
 void evtViewerCleanupMessageWindow(EvtRuntime *viewer);
 

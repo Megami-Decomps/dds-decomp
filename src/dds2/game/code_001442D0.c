@@ -76,7 +76,7 @@
 #include "sdf_packet_alloc.h"
 
 extern f32 fabsf(f32);
-extern s32 fldTitleIsActive(void);
+extern u8 fldTitleIsActive(void);
 extern void p2sdSendStopCmd(u32 controlWord);
 extern void p2sdStopAllBgm(void);
 extern s32 sdfDelayedResrcCheck(void);
@@ -4199,7 +4199,7 @@ void fldSetTitleDrawMode(u32 value) {
     D_00436364 = value;
 }
 
-s32 fldTitleIsActive(void) {
+u8 fldTitleIsActive(void) {
     return dds3SearchProcessName(fldTitleTaskName) != 0;
 }
 
