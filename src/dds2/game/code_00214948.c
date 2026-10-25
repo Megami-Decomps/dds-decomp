@@ -211,7 +211,7 @@ extern void btlSetUnitPosition(BtlUnit *, const f32 *);
 
 extern s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *, s32);
 
-extern s32 btlIsActiveActor();
+extern s32 btlIsUnitInActorList();
 
 extern void btlRefreshUnitMotionSelection(BtlUnit *);
 
@@ -1749,7 +1749,7 @@ void btlStartPrevUnitScriptAction(ActionStateLink *handle) {
     if (ctrl->prevUnit == 0) {
         return;
     }
-    if (btlIsActiveActor(ctrl->prevUnit) == 0) {
+    if (btlIsUnitInActorList(ctrl->prevUnit) == 0) {
         return;
     }
     if ((handle->pendingFlags & 8) == 0) {
@@ -2362,7 +2362,7 @@ void btlQueueGateComponentScriptAndSound(ActionStateLink *record) {
     if (ctrl->prevUnit == 0) {
         return;
     }
-    if (btlIsActiveActor(ctrl->prevUnit) == 0) {
+    if (btlIsUnitInActorList(ctrl->prevUnit) == 0) {
         return;
     }
     if (!(record->pendingFlags & 8)) {
@@ -2462,7 +2462,7 @@ s32 btlGetSubtaskActorMotionClass(void) {
     if (slot[2] == 0) {
         return 0x64;
     }
-    if (btlIsActiveActor(slot[2]) == 0) {
+    if (btlIsUnitInActorList(slot[2]) == 0) {
         return 0x64;
     }
     switch (((BtlUnit *)slot[2])->partyRecord.unitId) {

@@ -3882,7 +3882,7 @@
 0x001DA780	btlUpdateActorModelColorAndLinks	inferred	U3
 0x001DABE0	btlRemoveActorsWithFlags	inferred	btl battle control and actor operations in game/code_0019DB88.c
 0x001DAC40	btlFindActorForOwner	inferred	btl battle control and actor operations in game/code_0019DB88.c
-0x001DACA0	btlIsActiveActor	inferred	btl battle control and actor operations in game/code_0019DB88.c
+0x001DACA0	btlIsUnitInActorList	inferred	provider walks BtlState.units and compares unit pointers
 0x001DADC8	btlAllocateIndexList	inferred	btl battle control and actor operations in game/code_0019DB88.c
 0x001DAE08	btlFreeIndexList	inferred	DDS2 001E8018 twin; frees index-list allocation [names_R_FuncNames2.tsv]
 0x001DAE20	btlAppendIndexListEntry	inferred	DDS2 001E8030 twin; appends entry at count and increments count [names_R_FuncNames2.tsv]

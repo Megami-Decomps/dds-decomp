@@ -1253,7 +1253,7 @@ void btlEnterAutoActionState(void) {
 }
 
 extern void btlDispatchCommandViaHookOrDefault(u8 *command, BattleIndexWork *argument);
-extern s32 btlIsActiveActor(BtlUnit *actor);
+extern s32 btlIsUnitInActorList(BtlUnit *actor);
 
 extern s32 btlSetEligibleActorPanelTransitionState(void);
 
@@ -1278,7 +1278,7 @@ s32 btlCommandStateSelectC(ActionStateLink *task) {
                 }
             }
         }
-        if (ready == 1 && (btlIsActiveActor(actor) == 0 || (btlUnitStatusPair(actor) & 0xE1) != 1)) {
+        if (ready == 1 && (btlIsUnitInActorList(actor) == 0 || (btlUnitStatusPair(actor) & 0xE1) != 1)) {
             btlDispatchStateHandler(task, 0x1B);
         } else if (!(task->flags & 8)) {
             btlDispatchStateHandler(task, 0xC);
