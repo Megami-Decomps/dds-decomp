@@ -4420,9 +4420,9 @@ void evtViewerRelease(viewer)
     evtFreeStage();
     while (sdfDelayedResrcCheck() != 0) {
     }
-    if (viewer->pendingResource != 0) {
-        sdfMemFreeDelayedDirect(viewer->pendingResource);
-        viewer->pendingResource = 0;
+    if (viewer->pendingFrameBufferAllocation != 0) {
+        sdfMemFreeDelayedDirect(viewer->pendingFrameBufferAllocation);
+        viewer->pendingFrameBufferAllocation = 0;
         viewer->pendingFrameBuffer = NULL;
     }
     while (sdfDelayedResrcCheck() != 0) {

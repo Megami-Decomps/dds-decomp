@@ -999,9 +999,9 @@ void mnuShopCreateDescriptorSurface(EvtRuntime *scene) {
     sdfPreDrawTag_t *context;
     sdfMemHandle_t *allocation;
 
-    if (scene->pendingResource == 0) {
+    if (scene->pendingFrameBufferAllocation == 0) {
         allocation = sdfMemAllocFromTailDirect(0x70000);
-        scene->pendingResource = allocation;
+        scene->pendingFrameBufferAllocation = allocation;
         scene->pendingFrameBuffer = sdfMemLock(allocation);
     }
     memset(scene->pendingFrameBuffer, 0x40, 0x70000);

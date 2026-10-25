@@ -214,8 +214,8 @@ typedef struct EvtRuntime {
     u8 shadowAlpha;
     u8 pad2422[2];
     f32 shadowY;
-    void *pendingFrameBuffer;
-    sdfMemHandle_t *pendingResource;
+    u8 *pendingFrameBuffer; /* Locked byte view used as the descriptor frame image. */
+    sdfMemHandle_t *pendingFrameBufferAllocation; /* Owner released after queued draws finish. */
     s32 menuState;
     s32 shopFlag;
     u32 auxResource;
@@ -268,6 +268,10 @@ typedef char EvtRuntime_voiceFrame_at24A8[((u32)&((EvtRuntime *)0)->voiceFrame =
 typedef char EvtRuntime_camera_at23CC[((u32)&((EvtRuntime *)0)->cameraColorActive == 0x23CC) ? 1 : -1];
 typedef char EvtRuntime_color_at2408[((u32)&((EvtRuntime *)0)->colorSelection == 0x2408) ? 1 : -1];
 typedef char EvtRuntime_color_at240C[((u32)&((EvtRuntime *)0)->colorEditorActive == 0x240C) ? 1 : -1];
+typedef char EvtRuntime_pendingFrameBuffer_at2428[
+    ((u32)&((EvtRuntime *)0)->pendingFrameBuffer == 0x2428) ? 1 : -1];
+typedef char EvtRuntime_pendingFrameBufferAllocation_at242C[
+    ((u32)&((EvtRuntime *)0)->pendingFrameBufferAllocation == 0x242C) ? 1 : -1];
 
 EvtRuntimeChild *evtEventViewerGetPendingNode(EvtRuntime *viewer);
 void evtEventViewerReleaseQueuedNode(EvtRuntime *viewer, EvtRuntimeGroup *entry, EvtRuntimeChild *node);

@@ -5586,9 +5586,9 @@ s32 evtReloadEventViewer(s32 mode, EvtRuntime *runtime) {
     }
     while (sdfDelayedResrcCheck() != 0) {
     }
-    if (runtime->pendingResource != 0) {
-        sdfMemFreeDelayedDirect(runtime->pendingResource);
-        runtime->pendingResource = 0;
+    if (runtime->pendingFrameBufferAllocation != 0) {
+        sdfMemFreeDelayedDirect(runtime->pendingFrameBufferAllocation);
+        runtime->pendingFrameBufferAllocation = 0;
         runtime->pendingFrameBuffer = NULL;
     }
     while (sdfDelayedResrcCheck() != 0) {
