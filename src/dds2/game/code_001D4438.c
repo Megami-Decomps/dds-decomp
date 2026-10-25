@@ -492,7 +492,7 @@ extern char D_00418C58[];
 extern s32 sndHasActiveFileLoad(void);
 
 
-extern void p2sdSetPcmBuffer(u32, s32);
+extern void p2sdSetPcmBuffer(const void *, s32);
 
 
 

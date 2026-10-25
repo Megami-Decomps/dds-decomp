@@ -9936,7 +9936,7 @@ extern char D_003A5110[];
 
 extern char D_003A5138[];
 
-extern void p2sdSetPcmBuffer(u32, s32);
+extern void p2sdSetPcmBuffer(const void *, s32);
 
 s32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *request) {
     ActiveSoundNode *node = request->node;
@@ -9947,7 +9947,7 @@ s32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *request) {
     if ((node->flags & SOUND_FILE_STATE_SOURCE_REQUEST_RESOLVED) == 0) {
         if (pacFileCheckEnd(request->request)) {
             s32 size;
-            u32 data;
+            const void *data;
             btlBossDebugPrintf(D_003A50F0, request->filename);
             request->resourceAllocation = fileGetMemHandle(request->request);
             size = (s32)fileGetLoadSize(request->request);
@@ -10490,7 +10490,7 @@ void btlPollMotionSoundResources(void) {
                     SoundSlotWork *work = &owner->work;
                     struct sdfMemHandle_t *block = work->resourceHandles[owner->work.pendingSlot];
                     s32 size = sdfMemGetSize(block);
-                    u32 address = sdfMemGetPtr(work->resourceHandles[owner->work.pendingSlot]);
+                    const void *address = sdfMemGetPtr(work->resourceHandles[owner->work.pendingSlot]);
 
                     p2sdSetPcmBuffer(address, size);
                     owner->flags = (owner->flags & ~SOUND_SLOT_TRACK_LOAD_REQUESTED) | SOUND_SLOT_TRACK_LOADING;

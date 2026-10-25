@@ -443,15 +443,15 @@ u32 sndSendFilenameCommand(char *filename) {
 }
 
 extern SndFileRequestState D_0047B310;
-void p2sdSetPcmBuffer(u32 data, s32 size) {
+void p2sdSetPcmBuffer(const void *data, s32 size) {
     u32 *packet;
 
     D_0047B310.size = size;
     D_0047B310.pending = 1;
-    D_0047B310.data = data;
+    D_0047B310.data = (u32)data;
     if (data != 0 && size > 0) {
         packet = &D_004391D0;
-        *packet = data;
+        *packet = (u32)data;
         sdfSndSendSyncCmd(0x1B0, 0, packet, 4);
     }
     p2sdSmgHandle = -1;
