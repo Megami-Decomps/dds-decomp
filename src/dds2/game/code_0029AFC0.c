@@ -35,8 +35,8 @@ extern void mnuRefreshPartyUnitVitalsPanels(datUnitWork_t *, BrsSkillPackageWork
 extern char D_004379B0[];
 extern char D_004379B8[];
 
-/* All five signed-byte plus table-word totals must meet the minimum. */
-s32 mnuCheckTableSums(const datUnitWork_t *unit, const BrsSkillPackageWork *skillPackage) {
+/* All five projected base stats must meet the cap. */
+s32 mnuAreAllProjectedBaseStatsAtCap(const datUnitWork_t *unit, const BrsSkillPackageWork *skillPackage) {
     const s32 *statGains = skillPackage->statGains;
     const s8 *baseStats = unit->baseStats;
     s32 statIndex = 0;
@@ -82,7 +82,7 @@ s32 mnuHandleStatPointAssignment(dds3ProcessID_t *task) {
         work->selectionInitialized = 1;
     }
     if (work->assignedStatPoints == work->availableStatPoints ||
-        mnuCheckTableSums(entry, work) != 0) {
+        mnuAreAllProjectedBaseStatsAtCap(entry, work) != 0) {
         fclStartMessage(0x17);
         evtSetMessageWindowOptionWhenOpen(0);
         evtStoreValueAndCaptureWindowPanelValue(0xA3);

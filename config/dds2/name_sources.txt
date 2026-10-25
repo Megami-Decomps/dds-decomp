@@ -6338,6 +6338,7 @@
 0x0029AF40	mnuStatPointPanelLeaveNoOp	inferred	confidence=high; Native MenuPopupEntry.leave slot0x003D647C. Stat-point allocation popup starts mnuHandleStatPointAssignment; constant-one leave has no side effects. DDS1 twin0x00263E30 has the same role at0x0036D42C. Existing signature, constant-one return and order retained. [Namer1 readability b79; native popup registry and installer paths]
 0x0029AF48	mnuClearItemSelectionSlots	inferred	Byte-identical dds1 twin 0x00263E38; Clears the active slot and five adjacent item-selection slot words. [names_conflicts.tsv]
 0x0029AF80	mnuRefreshPartyUnitVitalsPanels	inferred	Recomputes maximum unit vitals before refreshing selected party panels. [names_reviewed10.tsv]
+0x0029AFC0	mnuAreAllProjectedBaseStatsAtCap	inferred	Returns true when all five signed base-stat bytes plus their pending gains meet the 99-point cap; twin 0x00263EB0.
 0x0029B008	mnuHandleStatPointAssignment	inferred	L13; handles stat-point input and updates the preview. DDS1 twin 0x00263EF8. [LiteH reward/stat batch]
 0x0029B320	mnuDrawItemPanelDuringRequest	inferred	Draws the item panel backdrop and forwards the active request. [names_reviewed10.tsv]
 0x0029B378	mnuAdvanceItemPanelAfterRequest	inferred	Completes the display transition and runs the item-panel request in mode 2; DDS1 twin 0x00264238. [LiteH menu naming batch 9]
