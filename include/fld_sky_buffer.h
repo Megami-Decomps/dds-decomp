@@ -13,6 +13,6 @@ typedef union FldSkyBuffer {
 typedef char FldSkyBufferSizeCheck[sizeof(FldSkyBuffer) == 0xE000 ? 1 : -1];
 
 extern FldSkyBuffer *fldSkyLightSetBuffer;
-void fldUploadSkyBuffer(FldSkyBuffer *source);
+void fldUploadSkyBuffer(const FldSkyBuffer *source);
 
 #endif

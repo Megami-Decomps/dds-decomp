@@ -1436,7 +1436,7 @@ void fldLoadFieldPack(void) {
                     PAC_WORK_ALLOCATION(work));
                 break;
             case FLD_PACKED_RESOURCE_SKY_BUFFER:
-                fldUploadSkyBuffer((FldSkyBuffer *)work->dataCursor);
+                fldUploadSkyBuffer((const FldSkyBuffer *)work->dataCursor);
                 sdfMemFreeDelayedDirect(
                     PAC_WORK_ALLOCATION(work));
                 break;
@@ -5274,7 +5274,7 @@ void fldReleaseSkyResources(void) {
     fldCameraColorEnabled = 0;
 }
 
-void fldUploadSkyBuffer(FldSkyBuffer *src) {
+void fldUploadSkyBuffer(const FldSkyBuffer *src) {
     gFilterAlpha = 0x80;
     *fldSkyLightSetBuffer = *src;
     fldReleaseSkyResources();
