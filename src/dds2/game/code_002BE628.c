@@ -1952,12 +1952,12 @@ void mnuApplyPanelTransitionAction(s32 action, MenuPopupEntry *entry, MenuPopupS
 }
 
 /* Pop saved entries with their leave callbacks until the state count reaches zero. */
-void mnuDrainPanelTransitions(MenuPopupState *state, u32 callbackArgument) {
+void mnuDrainPanelTransitions(MenuPopupState *state, struct dds3ProcessID_t *task) {
     s32 entryCount;
 
     entryCount = state->count;
     while (entryCount != 0) {
-        mnuApplyPanelTransitionAction(1, NULL, state, callbackArgument);
+        mnuApplyPanelTransitionAction(1, NULL, state, (u32)task);
         entryCount = state->count;
     }
 }
