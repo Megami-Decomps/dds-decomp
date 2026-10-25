@@ -6182,7 +6182,7 @@ void effAdvanceRadialClassResourceFrames(EffClassWork *work) {
 extern void effCopyClassResourcePosition(void *, void *);
 extern void effCopyClassResourceOrientation(void *, void *);
 extern void effSetClassResourceMatrixComponent(EffClassWork *, f32);
-extern void effSetClassResourceColor(s32, u32);
+extern void effSetClassResourceColor(EffClassWork *, u32);
 extern void effDrawClassResourceWork(EffClassWork *);
 
 /* vu0 routine: packed color blend and SDK vector copies. */
@@ -6226,7 +6226,7 @@ void effUpdateRadialClassInstances(EffClassWork *work) {
         effCopyClassResourcePosition(*entries, position);
         effCopyClassResourceOrientation(*entries, orientation);
         effSetClassResourceMatrixComponent(*entries, scale);
-        effSetClassResourceColor((s32)*entries, color);
+        effSetClassResourceColor(*entries, color);
         effDrawClassResourceWork((EffClassWork *)*entries);
     }
 }
@@ -6880,8 +6880,8 @@ void effCopyClassResourceOrientation(void *dst, void *src) {
     SDF_VU0_COPYVECTOR(((EffClassWork *)dst)->vectors.orientation, src);
 }
 
-void effSetClassResourceColor(s32 work, u32 color) {
-    ((EffClassWork *)work)->color = color;
+void effSetClassResourceColor(EffClassWork *work, u32 color) {
+    work->color = color;
 }
 
 void effSetClassResourceMatrixComponent(EffClassWork *work, float value) {
