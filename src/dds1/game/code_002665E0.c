@@ -35,11 +35,58 @@ void brsUpdateResultBackgroundFade(s32 x, s32 y, s32 z, BrsSkillPackageWork *wor
         }
     }
 }
-INCLUDE_RODATA(const s32, "game/code_002665E0", D_003AFBB0);
 
-INCLUDE_RODATA(const s32, "game/code_002665E0", D_003AFBC0);
 
-INCLUDE_ASM(const s32, "game/code_002665E0", brsDrawProgressRowEntries);
+extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);
+
+/* Initialized triplet tables have their actual inferred row counts.  Separate
+ * aggregate alias sets let EE GCC schedule these independent template copies
+ * in the retail order; see docs/idioms.md, inferred array bounds.
+ * Each selected row supplies x/y/slot values before the draw call.  The shared
+ * table cursor borrows whole rows, rather than flattening inner arrays. */
+void brsDrawProgressRowEntries(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
+                              BrsProgressRow *row, s32 context, s32 rowIndex) {
+    u32 color[4] = {0x80808080, 0x80808080, 0x80808080, 0x80808080};
+    s32 frontline[][3] = {{5, 5, 1}, {38, 35, 0}};
+    s32 reserve[][3] = {{26, 20, 4}, {53, 35, 36}};
+    s32 shared[][3] = {
+        {197, 27, 6}, {256, 27, 3}, {391, 27, 7}, {155, 36, 18}, {297, 36, 18}
+    };
+    datUnitWork_t *unit = row->unit;
+    u32 packed = work->fadeAnimation[rowIndex].backgroundOpacity | 0x80808000;
+    s32 (*placement)[3];
+    s32 px, py, slot;
+    s32 i;
+
+    color[0] = packed;
+    color[1] = packed;
+    color[2] = packed;
+    color[3] = packed;
+    if (work->teardownResource == NULL) {
+        return;
+    }
+    for (i = 0; i < 2; i++) {
+        if (unit->flags & DAT_PARTY_FLAG_FRONTLINE) {
+            px = frontline[i][0];
+            py = frontline[i][1];
+            slot = frontline[i][2];
+        } else {
+            px = reserve[i][0];
+            py = reserve[i][1];
+            slot = reserve[i][2];
+        }
+        effDrawSpriteWithCornerColors(x + (px << 4), y + (py << 3), z,
+                                     color, 0, work->teardownResource, slot, context);
+    }
+    placement = shared;
+    for (i = 0; i < 5; i++, placement++) {
+        px = (*placement)[0];
+        py = (*placement)[1];
+        slot = (*placement)[2];
+        effDrawSpriteWithCornerColors(x + (px << 4), y + (py << 3), z,
+                                     color, 0, work->teardownResource, slot, context);
+    }
+}
 
 INCLUDE_ASM(const s32, "game/code_002665E0", brsDrawProgressRowUnitInfo);
 
@@ -539,7 +586,6 @@ void brsUpdateProfileProgressIndicator(s32 screenX, s32 screenY, s32 depth, BrsS
 
 extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);
 
-INCLUDE_RODATA(const s32, "game/code_002665E0", D_003AFBF0);
 
 INCLUDE_RODATA(const s32, "game/code_002665E0", D_003AFC30);
 
