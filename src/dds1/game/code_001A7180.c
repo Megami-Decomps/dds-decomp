@@ -719,8 +719,9 @@ s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, BtlUnit **first
 }
 
 extern BtlTask *fldGetSceneGroupEntry(s32 entryIndex);
+#include "btl_command_affinity_api.h"
 
-s32 btlHasRequiredCommandAffinityPartners(BtlUnit *unit, s32 command) {
+BtlCommandAffinityPartnerAvailability btlHasRequiredCommandAffinityPartners(BtlUnit *unit, s32 command) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     s32 result;
     u32 availableSlots;
@@ -732,14 +733,14 @@ s32 btlHasRequiredCommandAffinityPartners(BtlUnit *unit, s32 command) {
     u32 flags;
 
     if (datCommandSelectors[command].kind != 1) {
-        return 0;
+        return BTL_COMMAND_AFFINITY_PARTNERS_UNAVAILABLE;
     }
     if ((u32)(command - DAT_AFFINITY_FIRST_COMMAND) >= 0x55) {
-        return 0;
+        return BTL_COMMAND_AFFINITY_PARTNERS_UNAVAILABLE;
     }
     availableSlots = fldCountSceneSlots();
     if (availableSlots < (u32)btlGetLinkageSlotCost(command)) {
-        return 0;
+        return BTL_COMMAND_AFFINITY_PARTNERS_UNAVAILABLE;
     }
     requiredCount = 0;
     requirement = datAffinityRecords[command - DAT_AFFINITY_FIRST_COMMAND].requirements;
@@ -749,7 +750,7 @@ s32 btlHasRequiredCommandAffinityPartners(BtlUnit *unit, s32 command) {
         }
     }
     if (requiredCount < 2) {
-        return 0;
+        return BTL_COMMAND_AFFINITY_PARTNERS_UNAVAILABLE;
     }
     if (!(datAffinityRecords[command - DAT_AFFINITY_FIRST_COMMAND].flags & 2) &&
         !(datBattleSceneRecords[battle->battleMode].flags & 1)) {
@@ -762,7 +763,7 @@ s32 btlHasRequiredCommandAffinityPartners(BtlUnit *unit, s32 command) {
 
                 entry = fldGetSceneGroupEntry(i++);
                 if (entry == NULL) {
-                    return 0;
+                    return BTL_COMMAND_AFFINITY_PARTNERS_UNAVAILABLE;
                 }
                 partner = entry->unit;
                 loopFlags = partner->status.flags;
@@ -770,19 +771,19 @@ s32 btlHasRequiredCommandAffinityPartners(BtlUnit *unit, s32 command) {
                     u32 inactiveFlags = loopFlags & 0xE0;
                     loopFlags &= 0x400;
                     if (!loopFlags) {
-                        return 0;
+                        return BTL_COMMAND_AFFINITY_PARTNERS_UNAVAILABLE;
                     }
                     if (inactiveFlags) {
-                        return 0;
+                        return BTL_COMMAND_AFFINITY_PARTNERS_UNAVAILABLE;
                     }
                 }
                 result = partner->partyRecord.status & 0x2A0E;
                 if (result) {
-                    result = 0;
+                    result = BTL_COMMAND_AFFINITY_PARTNERS_UNAVAILABLE;
                     break;
                 }
                 if (i >= requiredCount) {
-                    result = 1;
+                    result = BTL_COMMAND_AFFINITY_PARTNERS_AVAILABLE;
                     break;
                 }
             } while (1);
@@ -795,24 +796,24 @@ s32 btlHasRequiredCommandAffinityPartners(BtlUnit *unit, s32 command) {
                 (btlUnitStatusPair(entry->unit) & 0x4E0) != 0x400) {
                 entry = fldGetSceneGroupEntry(1);
                 if (entry == NULL) {
-                    return 0;
+                    return BTL_COMMAND_AFFINITY_PARTNERS_UNAVAILABLE;
                 }
                 partner = entry->unit;
                 flags = partner->status.flags;
                 if ((flags & 0x400) == 0) {
-                    return 0;
+                    return BTL_COMMAND_AFFINITY_PARTNERS_UNAVAILABLE;
                 }
                 if (flags & 0xE0) {
-                    return 0;
+                    return BTL_COMMAND_AFFINITY_PARTNERS_UNAVAILABLE;
                 }
                 if (partner->partyRecord.status & 0x2A0E) {
-                    return 0;
+                    return BTL_COMMAND_AFFINITY_PARTNERS_UNAVAILABLE;
                 }
             }
         } else {
-            return 0;
+            return BTL_COMMAND_AFFINITY_PARTNERS_UNAVAILABLE;
         }
-        result = 1;
+        result = BTL_COMMAND_AFFINITY_PARTNERS_AVAILABLE;
     }
     return result;
 }

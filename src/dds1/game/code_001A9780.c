@@ -7944,7 +7944,9 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
             return 1;
         case 4:
             if ((object->owner->unit->status.flags & 0x400) != 0) {
-                if (btlHasRequiredCommandAffinityPartners(object->owner->unit, D_00359160.entries[entry].skill) == 0) {
+                if (btlHasRequiredCommandAffinityPartners(
+                        object->owner->unit, D_00359160.entries[entry].skill) ==
+                    BTL_COMMAND_AFFINITY_PARTNERS_UNAVAILABLE) {
                     break;
                 }
                 if (btlResolveCommandAffinityPartners(object->owner->unit, D_00359160.entries[entry].skill, &partners) == 0) {

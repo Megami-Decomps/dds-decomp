@@ -3,7 +3,13 @@
 
 #include "btl_command_partner_output.h"
 
-s32 btlHasRequiredCommandAffinityPartners(BtlUnit *unit, s32 command);
+typedef s32 BtlCommandAffinityPartnerAvailability;
+enum {
+    BTL_COMMAND_AFFINITY_PARTNERS_UNAVAILABLE = 0,
+    BTL_COMMAND_AFFINITY_PARTNERS_AVAILABLE = 1,
+};
+
+BtlCommandAffinityPartnerAvailability btlHasRequiredCommandAffinityPartners(BtlUnit *unit, s32 command);
 s32 btlResolveCommandAffinityPartners(BtlUnit *unit, s32 command,
                                      BtlCommandPartnerOutput *output);
 

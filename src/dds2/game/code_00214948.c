@@ -296,7 +296,7 @@ s32 btlActionMatchesUnit(BtlUnit *unit, s32 action) {
 s32 btlGroup400UnitHasAction(BtlUnit *unit, s32 action) {
     btlGetRuntime();
     if ((btlUnitStatusPair(unit) & 0x421) == 0x401) {
-        if (btlHasRequiredCommandAffinityPartners(unit, action) != 0) {
+        if (btlHasRequiredCommandAffinityPartners(unit, action) != BTL_COMMAND_AFFINITY_PARTNERS_UNAVAILABLE) {
             return 1;
         }
     }
