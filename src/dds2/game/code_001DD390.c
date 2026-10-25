@@ -164,7 +164,7 @@ extern char D_00417AF0[];
 
 extern char D_00417B10[];
 
-extern void btlBindUnitModel(u8 *, u32, u32);
+extern void btlBindUnitModel(BtlUnit *, u32, u32);
 
 extern char D_00417B30[];
 
@@ -2441,8 +2441,7 @@ extern void btlSetUnitRotation(BtlUnit *unit, const f32 rotation[4]);
 
 extern void btlInheritActorModelState(BtlUnit *unit, BtlUnit *reused);
 
-void btlBindUnitModel(u8 *unitAddress, u32 kind, u32 index) {
-    BtlUnit *unit = (BtlUnit *)unitAddress;
+void btlBindUnitModel(BtlUnit *unit, u32 kind, u32 index) {
     BtlUnit *reused = NULL;
     BtlState *battle = (BtlState *)btlGetRuntime();
     dds3ModelHandle_t *model;
@@ -3851,45 +3850,45 @@ BtlRuntimeTask *btlCreateUnitRotationInterpolationTask(BtlUnit *unit, const f32 
 }
 
 void btlRequestModelOrReuse(BtlRuntimeTaskArgs *arguments) {
-    u8 *object = (u8 *)arguments->actor;
+    BtlUnit *unit = arguments->actor;
     u32 effect = arguments->option;
     u32 model = arguments->unk_08;
-    if ((((BtlUnit *)object)->status.flags & 2) != 0) {
+    if ((unit->status.flags & 2) != 0) {
         return;
     }
     if (btlHasMatchingModel(effect, model)) {
-        btlBindUnitModel(object, effect, model);
+        btlBindUnitModel(unit, effect, model);
         if (arguments->mode == 0) {
-            btlClearUnitDefeatCandidate(object);
-            evtSetUnitColorA(((BtlUnit *)object)->ext, 0, 0);
-            ((BtlUnit *)object)->overlayColor = ((BtlUnit *)object)->baseColor & 0xFFFFFF;
+            btlClearUnitDefeatCandidate(unit);
+            evtSetUnitColorA(unit->ext, 0, 0);
+            unit->overlayColor = unit->baseColor & 0xFFFFFF;
         }
         btlBossDebugPrintf(D_00417AF0, effect, model);
     } else {
-        btlRequestModelAssetByMode(object, effect, model);
-        ((BtlUnit *)object)->gunResourceFlags |= 1;
+        btlRequestModelAssetByMode((u32)unit, effect, model);
+        unit->gunResourceFlags |= 1;
         btlBossDebugPrintf(D_00417B10, effect, model);
     }
 }
 
 u32 btlPollModelLoadCompletion(BtlRuntimeTaskArgs *arguments) {
-    u8 *object = (u8 *)arguments->actor;
+    BtlUnit *unit = arguments->actor;
     u32 effect = arguments->option;
     u32 model = arguments->unk_08;
-    if ((((BtlUnit *)object)->status.flags & 2) == 0) {
-        if (!btlCheckModelAssetByMode(object, effect, model)) {
+    if ((unit->status.flags & 2) == 0) {
+        if (!btlCheckModelAssetByMode((u8 *)unit, effect, model)) {
             return 0;
         }
-        btlBindUnitModel(object, effect, model);
-        btlReleaseModelAssetByMode(object, effect, model);
-        btlBossDebugPrintf(D_00417B30, effect, model, object);
+        btlBindUnitModel(unit, effect, model);
+        btlReleaseModelAssetByMode((u32)unit, effect, model);
+        btlBossDebugPrintf(D_00417B30, effect, model, unit);
     }
     if (arguments->mode == 0) {
-        btlClearUnitDefeatCandidate(object);
-        evtSetUnitColorA(((BtlUnit *)object)->ext, 0, 0);
-        ((BtlUnit *)object)->overlayColor = ((BtlUnit *)object)->baseColor & 0xFFFFFF;
+        btlClearUnitDefeatCandidate(unit);
+        evtSetUnitColorA(unit->ext, 0, 0);
+        unit->overlayColor = unit->baseColor & 0xFFFFFF;
     }
-    ((BtlUnit *)object)->gunResourceFlags = (((BtlUnit *)object)->gunResourceFlags & ~1) | 2;
+    unit->gunResourceFlags = (unit->gunResourceFlags & ~1) | 2;
     return 1;
 }
 
@@ -3999,7 +3998,7 @@ u32 btlUpdateModelChangeTask(BtlModelChangeArgs *args) {
         btlReleaseActorModelResources(unit);
         btlRefreshUnitMaximumHpAndClampCurrentHp(&unit->partyRecord);
         btlRefreshUnitMaximumMpAndClampCurrentMp(&unit->partyRecord);
-        btlBindUnitModel((u8 *)unit, resourceKind, resourceId);
+        btlBindUnitModel(unit, resourceKind, resourceId);
         btlReleaseModelAssetByMode((u32)unit, resourceKind, resourceId);
         if (args->duration == 0) {
             dds3DrawFlag |= 0x2000000;
