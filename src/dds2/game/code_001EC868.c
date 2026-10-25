@@ -53,6 +53,7 @@
 #include "file_pac.h"
 #include "btl_floor_load_task_args.h"
 #include "btl_sound.h"
+#include "btl_referenced_battle_effect_task.h"
 #include "btl_sound_release_task.h"
 #include "actor_effect_task.h"
 #include "eff_field_color.h"
@@ -8048,50 +8049,51 @@ void sndReleaseEffectReferences(SoundEffectReferenceArgs *args) {
 extern s32 btlUpdateReferencedBattleEffect(SoundEffectReferenceArgs *);
 
 /* Create a deferred effect task whose start/finish callbacks balance resource and actor references. */
-BtlRuntimeTask *btlCreateReferencedBattleEffectTask(SoundResourceNode *effect, BtlUnit *source,
-                                                 BtlUnit *actor, u16 variant) {
+BtlRuntimeTask *btlCreateReferencedBattleEffectTask(SoundResourceNode *borrowedEffect,
+                                                     BtlUnit *sourceOwner,
+                                                     BtlUnit *targetOwner, u16 option) {
     s32 sourceSelector = 0;
     s32 targetSelector;
     BtlRuntimeTask *task = btlAllocTask(sizeof(SoundEffectReferenceArgs));
     SoundEffectReferenceArgs *args;
     BtlState *work;
-    ActorEffectOwner sourceOwner;
-    sourceOwner.unit = source;
+    ActorEffectOwner sourceOwnerRef;
+    sourceOwnerRef.unit = sourceOwner;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x2E;
     task->flags |= BTL_TASK_FLAG_DEFERRED;
-    task->ownerId = actor->owner;
+    task->ownerId = targetOwner->owner;
     task->onStart = sndAddEffectReferences;
     task->callback = btlUpdateReferencedBattleEffect;
     task->onFinish = sndReleaseEffectReferences;
     work = (BtlState *)btlGetRuntime();
     if (work->sourceEffectSelectorOverride != 0) {
-        sourceSelector = work->sourceEffectSelectorOverride(actor);
+        sourceSelector = work->sourceEffectSelectorOverride(targetOwner);
     }
     if (sourceSelector == 0) {
-        sourceSelector = sourceOwner.selectorKey;
+        sourceSelector = sourceOwnerRef.selectorKey;
     }
     targetSelector = 0;
     if (work->targetEffectSelectorOverride != 0) {
-        targetSelector = work->targetEffectSelectorOverride(actor);
+        targetSelector = work->targetEffectSelectorOverride(targetOwner);
     }
     if (targetSelector == 0) {
-        targetSelector = sourceOwner.selectorKey;
+        targetSelector = sourceOwnerRef.selectorKey;
     }
     if (work->selectSoundEffectTarget != 0) {
-        BtlUnit *overrideActor = work->selectSoundEffectTarget(actor);
+        BtlUnit *overrideActor = work->selectSoundEffectTarget(targetOwner);
         if (overrideActor != 0) {
-            actor = overrideActor;
+            targetOwner = overrideActor;
         }
     }
     args = btlGetTaskArguments(task);
-    args->source = effect;
-    args->sourceOwner.unit = source;
+    args->source = borrowedEffect;
+    args->sourceOwner.unit = sourceOwner;
     args->sourceSelector = sourceSelector;
     args->targetSelector = targetSelector;
-    args->option = variant;
-    args->targetOwner.unit = actor;
+    args->option = option;
+    args->targetOwner.unit = targetOwner;
     args->effect = 0;
     args->duration = 0;
     return task;

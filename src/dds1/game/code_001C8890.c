@@ -31,6 +31,7 @@
 #include "btl_model_record.h"
 #include "btl_task_args.h"
 #include "btl_sound.h"
+#include "btl_referenced_battle_effect_task.h"
 #include "btl_sound_node_api.h"
 #include "btl_sound_release_task.h"
 #include "eff_field_color.h"
@@ -929,7 +930,6 @@ extern BtlRuntimeTask *btlCreateTargetedCommandSoundTask(BtlTask *, s32, u32);
 extern BtlRuntimeTask *btlAllocateApproachTargetTask(BtlUnit *, BtlUnit *, f32);
 extern s32 btlIsBattleRecordEligible(BtlUnit *, BtlUnit *, s32, s32);
 extern SoundResourceNode *sndCreateResourceNode(SoundMixer *sourceMixer);
-extern BtlRuntimeTask *btlCreateReferencedBattleEffectTask(SoundResourceNode *, BtlUnit *, BtlUnit *, u16);
 extern const char D_003A3658[];
 extern const char D_003A3670[];
 extern s32 btlGetActionAnimationDelay(BtlUnit *, s32);

@@ -56,6 +56,7 @@
 #include "file_pac.h"
 #include "btl_floor_load_task_args.h"
 #include "btl_sound.h"
+#include "btl_referenced_battle_effect_task.h"
 #include "btl_sound_release_task.h"
 #include "actor_effect_task.h"
 #include "eff_field_color.h"
@@ -8797,7 +8798,9 @@ void sndReleaseEffectReferences(SoundEffectReferenceArgs *args) {
 }
 
 /* Create a deferred effect task whose start/finish callbacks balance resource and actor references. */
-BtlRuntimeTask *btlCreateReferencedBattleEffectTask(SoundResourceNode *effect, BtlUnit *source, BtlUnit *owner, u16 variant) {
+BtlRuntimeTask *btlCreateReferencedBattleEffectTask(SoundResourceNode *borrowedEffect,
+                                                     BtlUnit *sourceOwner,
+                                                     BtlUnit *targetOwner, u16 option) {
     BtlRuntimeTask *task = btlAllocTask(sizeof(SoundEffectReferenceArgs));
     SoundEffectReferenceArgs *arguments;
 
@@ -8805,17 +8808,17 @@ BtlRuntimeTask *btlCreateReferencedBattleEffectTask(SoundResourceNode *effect, B
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x2B;
     task->flags |= BTL_TASK_FLAG_DEFERRED;
-    task->ownerId = owner->identity;
+    task->ownerId = targetOwner->identity;
     task->onStart = sndAddEffectReferences;
     task->callback = btlUpdateReferencedBattleEffect;
     task->onFinish = sndReleaseEffectReferences;
     arguments = btlGetTaskArguments(task);
-    arguments->source = effect;
-    arguments->sourceOwner.unit = source;
+    arguments->source = borrowedEffect;
+    arguments->sourceOwner.unit = sourceOwner;
     arguments->sourceSelector = arguments->sourceOwner.selectorKey;
     arguments->targetSelector = arguments->sourceOwner.selectorKey;
-    arguments->targetOwner.unit = owner;
-    arguments->option = variant;
+    arguments->targetOwner.unit = targetOwner;
+    arguments->option = option;
     arguments->effect = 0;
     arguments->duration = 0;
     return task;

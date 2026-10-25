@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "snd_packed_track_load_status.h"
 #include "btl_sound.h"
+#include "btl_referenced_battle_effect_task.h"
 #include "dds3obj.h"
 #include "eff_random.h"
 #include "btl_motion_transform.h"
@@ -1402,8 +1403,6 @@ extern BtlRuntimeTask *btlCreateEffectTask3E(BtlUnit *owner, u16 messageId);
 extern BtlRuntimeTask *btlCreateFadeStateResetTask(void);
 extern BtlRuntimeTask *btlCreateImmediateCompletionTask(void);
 extern BtlRuntimeTask *btlCreateLinkedEffectTask(BtlUnit *owner, s32 value, u8 kind);
-extern BtlRuntimeTask *btlCreateReferencedBattleEffectTask(SoundResourceNode *effect, BtlUnit *source,
-                                                 BtlUnit *actor, u16 variant);
 extern BtlRuntimeTask *btlCreateRefreshEligibleActorsTask(void);
 extern BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
 extern BtlRuntimeTask *btlCreateTargetedCommandSoundTask(ActionStateLink *, s32 mode, u32 command);

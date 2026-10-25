@@ -2,6 +2,7 @@
 #include "sdf_debug_api.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_referenced_battle_effect_task.h"
 #include "btl_actor_category_flag_api.h"
 #include "sdf_vu0.h"
 #include "sdf_vu_rotation_axes.h"
@@ -339,7 +340,6 @@ void btlInitializeBossUnitScaleTransition(BtlUnit *unit) {
 
 extern s8 btlGetActorIndexedSignedValue(BtlUnit *, s32);
 extern s32 btlMapCommandToSkill(u32);
-extern BtlRuntimeTask *btlCreateReferencedBattleEffectTask(struct SoundResourceNode *, BtlUnit *, BtlUnit *, u16);
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 
 void btlStartPairedActorCommandEffect(BtlTask *task, s32 unusedCommand, BtlUnit *supplied,
