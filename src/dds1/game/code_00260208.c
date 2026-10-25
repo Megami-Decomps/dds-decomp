@@ -1011,7 +1011,7 @@ u32 brsTaskTryDestroy(void) {
     return 0;
 }
 
-s32 brsIsPrimaryPanelUpdateReady(void) {
+BrsPrimaryPanelReadyState brsIsPrimaryPanelUpdateReady(void) {
     dds3ProcessID_t *task = dds3SearchProcessName(mnuStaffPrimaryPanelTaskName);
     BrsSkillPackageWork *work;
 

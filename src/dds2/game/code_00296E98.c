@@ -1064,13 +1064,13 @@ u32 brsTaskTryDestroy(void) {
     return 0;
 }
 
-s32 brsIsPrimaryPanelUpdateReady(void) {
+BrsPrimaryPanelReadyState brsIsPrimaryPanelUpdateReady(void) {
     dds3ProcessID_t *task;
     BrsSkillPackageWork *work;
 
     task = dds3SearchProcessName(mnuStaffPrimaryPanelTaskName);
     if (task == 0) {
-        return task;
+        return 0;
     }
     work = (BrsSkillPackageWork *)dds3GetProcessData(task);
     if (256 - work->fadeProgress <= 0 && brsTaskIsUiUpdateAllowed(work) != 0) {
