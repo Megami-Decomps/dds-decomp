@@ -38,7 +38,7 @@ extern s32 scrGetIntPara(s32);
 extern void fldDispatchSceneAction(u32 action);
 
 
-extern s32 fldFindEveRngIndex(struct dds3ProcessID_t *task);
+extern s32 fldFindRoomIdByTask(struct dds3ProcessID_t *task);
 
 extern u32 fldDamEffectResource;
 
@@ -1105,7 +1105,7 @@ s32 fldCommand_FLD_CHK_EVE(void) {
 extern FldActivationEntry D_0034C8F0[];
 
 s32 fldCmdPushSceneParam(void) {
-    s32 room = fldFindEveRngIndex(scrGetScriptHandle()->task);
+    s32 room = fldFindRoomIdByTask(scrGetScriptHandle()->task);
 
     switch (scrGetIntPara(0)) {
     case 0:
@@ -1135,13 +1135,13 @@ u32 fldCommand_FLD_SET_TAKARA_OPEN(void) {
     s32 room;
 
     script = scrGetScriptHandle();
-    room = fldFindEveRngIndex(script->task);
+    room = fldFindRoomIdByTask(script->task);
     fldActivateFlaggedObject(room);
     return 1;
 }
 
 u32 fldCommand_FLD_CHK_TAKARA_OPEN(void) {
-    if (fldTestObjectActivationFlag(fldFindEveRngIndex(scrGetScriptHandle()->task)) != 0) {
+    if (fldTestObjectActivationFlag(fldFindRoomIdByTask(scrGetScriptHandle()->task)) != 0) {
         scrSetIntReturnValue(1);
     } else {
         scrSetIntReturnValue(0);

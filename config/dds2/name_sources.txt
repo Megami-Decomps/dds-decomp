@@ -1150,7 +1150,7 @@
 0x0013DDC0	fldUpdateRoomTriggers	inferred	Per-frame test of the player against every registered room trigger (sphere, plane, box): starts and ends the room event sets, label tasks and actor tasks they arm, moving the camera to them; skipped while fldEveHitState. DDS1 twin func_0013B1D8 (0x0013B1D8).
 0x0013E9B8	fldPurgeEveRngProcesses	inferred	SMT3HD name via SLUS_209.11 0x0013F718, reloc-identical; was fldClearInactiveTaskSlots
 0x0013EA18	fldEveHitResID_Find	inferred	SMT3HD name via SLUS_209.11 0x0013F778, reloc-identical; was fldFindTaskRecordId
-0x0013EA78	fldFindEveRngIndex	inferred	SMT3HD name via SLUS_209.11 0x0013F7D8, unique-masked-hash; was fldFindRoomByTask
+0x0013EA78	fldFindRoomIdByTask	inferred	Returns the stored roomId for a task match, or -1 on miss; SMT3HD equivalent fldFindEveRngIndex at SLUS_209.11 0x0013F7D8 is unique-masked-hash. Prior local name: fldFindRoomByTask. twin=0x0013BE90.
 0x0013EAD0	fldEveHitResName_Find	inferred	SMT3HD name via SLUS_209.11 0x0013F830, reloc-identical; was fldGetTaskRecordValue
 0x0013EB30	fldSpawnRoomTrigger	inferred	confidence=high; paired with DDS1 0x0013BF48. Spawns the room's type-D action object and child trigger, registers the display value, then records the supplied room ID with room mode 2 and no selected entry. [matched owner code; caller and room-record writes]
 0x0013ED20	fldSpawnNpcTrigger	inferred	Registers an NPC's talk trigger: the next fldActionRows row as a sphere of the given radius at the NPC, its program_hit action object, its room slot (fldRegisterRoomObject) in mode 1 with the NPC's map-flag gate and room-effect entry index; returns the slot. DDS1 twin func_0013C138 (0x0013C138).
@@ -9947,7 +9947,7 @@
 0x0038BBF0	fldResolvedPosition	inferred	The field position the collision last resolved (x, y, z, then 1): fldRefreshAreaStateFromPosition and fldHitChkUnitElv/ElvOnly/Damage start from it and store their result in it. DDS1 twin 0x00330750.
 0x0038BC10	fldHitProgramName	inferred	"program_hit": the action object every room trigger's child resource spawns (dds3AddPointBasic). DDS1 twin 0x00330770.
 0x0038BC50	fldRoomResources	inferred	The 64 room slots' trigger resources (FldFileResource *[64]: name, transform, FldTaskInfo with its shape), stored by fldRegisterRoomObject; slot index = fldEveHitTable index. DDS1 twin 0x003307B0.
-0x0038BD50	fldRoomTaskHandles	inferred	The 64 room slots' running script tasks (u32[64]), stored when a trigger starts its task, cleared when it ends; searched by fldEveHitResID_Find and fldFindEveRngIndex. DDS1 twin 0x003308B0.
+0x0038BD50	fldRoomTaskHandles	inferred	The 64 room slots' running script tasks (u32[64]), stored when a trigger starts its task, cleared when it ends; searched by fldEveHitResID_Find and fldFindRoomIdByTask. DDS1 twin 0x003308B0.
 0x0038BE50	fldActionRows	inferred	Room trigger rows (FldActionRow, 0x90 each: shape, task info, transform, child and display resources) the trigger spawners fill in order of fldActionRowCount; its extent to the next object is 64 rows and 0x40 bytes. DDS1 twin 0x003309B0.
 0x003931A0	fldActorWaypointRows	inferred	confidence=high; src/dds2/game/code_00136EF8.c:D_003931A0; type=FldS16Row[]; refs=fldDoor_GetElvTbl,fldDoorLoad; Loaded from the field WAP file, copied as a table and queried for the selected actor waypoint row. [names_qp9.tsv]
 0x003932A0	fldDoorTable	inferred	SMT3HD data name via SLUS_209.11 0x003030F0, 2 agreeing references; was fldDoorTable

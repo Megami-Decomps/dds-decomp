@@ -147,7 +147,7 @@ extern s32 D_00436360;
 
 extern struct sdfTexHandle_t *D_0043637C;
 
-extern s32 fldFindEveRngIndex(dds3ProcessID_t *task);
+extern s32 fldFindRoomIdByTask(dds3ProcessID_t *task);
 
 extern s32 fldElvCheckEnd(void);
 
@@ -1451,7 +1451,7 @@ INCLUDE_RODATA(const s32, "game/code_00154558", D_00414090);
 s32 fldCmdPushSceneParam(void) {
     s32 room;
 
-    room = fldFindEveRngIndex(scrGetScriptHandle()->task);
+    room = fldFindRoomIdByTask(scrGetScriptHandle()->task);
     switch (scrGetIntPara(0)) {
     case 0:
         scrSetIntReturnValue(D_003A8EB0[room].kind);
@@ -1479,7 +1479,7 @@ u32 fldCommand_FLD_SET_TAKARA_OPEN(void) {
     s32 room;
 
     script = scrGetScriptHandle();
-    room = fldFindEveRngIndex(script->task);
+    room = fldFindRoomIdByTask(script->task);
     fldActivateFlaggedObject(room);
     return 1;
 }
@@ -1487,7 +1487,7 @@ u32 fldCommand_FLD_SET_TAKARA_OPEN(void) {
 extern u8 fldTestObjectActivationFlag(u32 flagIndex);
 
 u32 fldCommand_FLD_CHK_TAKARA_OPEN(void) {
-    if (fldTestObjectActivationFlag(fldFindEveRngIndex(scrGetScriptHandle()->task)) != 0) {
+    if (fldTestObjectActivationFlag(fldFindRoomIdByTask(scrGetScriptHandle()->task)) != 0) {
         scrSetIntReturnValue(1);
     } else {
         scrSetIntReturnValue(0);
