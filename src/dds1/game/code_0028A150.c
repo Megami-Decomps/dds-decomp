@@ -362,9 +362,9 @@ extern void sdfVuMatrixToQuaternion(const f32 matrix[4][4]);
 
 
 
-extern void mnuRecordSetVector(void *record, const void *src);
+extern void mnuRecordSetVector(FileSlotTable *record, const void *src);
 
-extern void fileSetRecordSecondVector(void *record, const void *src);
+extern void fileSetRecordSecondVector(FileSlotTable *record, const void *src);
 
 extern void dds3AdminiCallSequence(s32 kind, const void *data, u32 size, s32 flags);
 
@@ -5566,8 +5566,8 @@ void fileAcquireLoadObjectRecord(LoadObj *obj) {
 #include "eff_anim.h"
 
 extern void dds3BillboardDraw(struct billHandle_t *);
-extern void fileReadRecordSecondVector(void *, u128 *);
-extern void fileReadVectorPtr20(void *, u128 *);
+extern void fileReadRecordSecondVector(FileSlotTable *, u128 *);
+extern void fileReadVectorPtr20(FileSlotTable *, u128 *);
 extern void effSubmitGeneratedTexturePacket(SdfPoolNode *, EffGeneratedTextureDescriptor *);
 
 void fileDrawLoadObjectSlots(s32 object) {
@@ -7409,20 +7409,20 @@ void fileAcquireRecord(FileSlotTable *record) {
     record->references++;
 }
 
-void fileReadVectorPtr20(void *record, u128 *out) {
-    SDF_VU0_COPYVECTOR(out, ((FileSlotTable *)record)->data0);
+void fileReadVectorPtr20(FileSlotTable *record, u128 *out) {
+    SDF_VU0_COPYVECTOR(out, record->data0);
 }
 
-void mnuRecordSetVector(void *record, const void *src) {
-    SDF_VU0_COPYVECTOR(((FileSlotTable *)record)->data0, src);
+void mnuRecordSetVector(FileSlotTable *record, const void *src) {
+    SDF_VU0_COPYVECTOR(record->data0, src);
 }
 
-void fileReadRecordSecondVector(void *record, u128 *out) {
-    SDF_VU0_COPYVECTOR(out, (u128 *)((FileSlotTable *)record)->data0 + 1);
+void fileReadRecordSecondVector(FileSlotTable *record, u128 *out) {
+    SDF_VU0_COPYVECTOR(out, (u128 *)record->data0 + 1);
 }
 
-void fileSetRecordSecondVector(void *record, const void *src) {
-    SDF_VU0_COPYVECTOR((u128 *)((FileSlotTable *)record)->data0 + 1, src);
+void fileSetRecordSecondVector(FileSlotTable *record, const void *src) {
+    SDF_VU0_COPYVECTOR((u128 *)record->data0 + 1, src);
 }
 
 INCLUDE_SDATA(const s32, "game/code_0028A150", effModelUpdateControlFlags);

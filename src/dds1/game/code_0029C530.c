@@ -89,11 +89,11 @@ extern void btlInitTintTransitionDefault(u16 soundId);
 extern void btlInitTintTransitionResource(u32 resource, u16 soundId);
 extern void evtDestroySelectionState(void);
 extern s32 evtSelStateCreate(s32 countLimit, s16 frames, s32 firstValue, s32 secondValue);
-extern void fileReadRecordSecondVector(void *record, u128 *out);
-extern void fileReadVectorPtr20(void *record, u128 *out);
-extern void fileSetRecordSecondVector(void *record, const void *src);
+extern void fileReadRecordSecondVector(FileSlotTable *record, u128 *out);
+extern void fileReadVectorPtr20(FileSlotTable *record, u128 *out);
+extern void fileSetRecordSecondVector(FileSlotTable *record, const void *src);
 extern void kwlnPadResetMotorLevelsAndOutput(void);
-extern void mnuRecordSetVector(void *record, const void *src);
+extern void mnuRecordSetVector(FileSlotTable *record, const void *src);
 
 
 
