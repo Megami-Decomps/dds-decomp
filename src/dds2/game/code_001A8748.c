@@ -162,7 +162,7 @@ extern u16 mnuGetPartyEntryCurrentId(datUnitWork_t *);
 
 extern s32 btlDoesEnabledStatusMatchCurrentId(datUnitWork_t *, u32);
 
-extern s32 evtCheckValueThreshold(s32 itemId, s32 minimumQuantity);
+extern u8 evtCheckValueThreshold(s32 itemId, s32 minimumQuantity);
 
 
 extern s32 TestMsgMngD_Process(dds3ProcessID_t *task);

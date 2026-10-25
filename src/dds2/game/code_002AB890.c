@@ -37,7 +37,7 @@ extern s32 mnuIsBulletItemId(s32);
 extern s32 mnuIsHighRangeItemId(s32);
 extern s32 mnuIsSolarPricedItemId(s32);
 extern s32 mtrMantraFindIndex(s32);
-extern s32 evtCheckValueThreshold(s32 itemId, s32 minimum);
+extern u8 evtCheckValueThreshold(s32 itemId, s32 minimum);
 extern void mnuDrawCampGridResourceSlot(s32, s32, s32, struct MenuList *,
                                         struct MenuListNode *, s32);
 

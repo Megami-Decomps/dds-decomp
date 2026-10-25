@@ -559,7 +559,7 @@ void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta) {
 
 /* Flag-range items test their model flag and ignore minimumQuantity.
  * Other items require at least the requested byte quantity. */
-s32 evtCheckValueThreshold(s32 itemId, s32 minimumQuantity) {
+u8 evtCheckValueThreshold(s32 itemId, s32 minimumQuantity) {
     if ((u32)(itemId - PTY_ITEM_FLAG_FIRST) < PTY_ITEM_FLAG_COUNT) {
         return evtBitCheck(itemId + PTY_ITEM_MODEL_FLAG_BASE) != 0;
     }
