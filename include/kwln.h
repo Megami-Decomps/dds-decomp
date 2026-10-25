@@ -29,7 +29,7 @@ struct dds3ProcessID_t {
     u32 flags;               /* 0x1C */
     u32 priority;            /* 0x20: ascending task queue priority. */
     u32 unk24;
-    u32 timer;               /* 0x28 */
+    u32 runUpdateCount;      /* 0x28 */
     s16 startDelayTicks;     /* 0x2C: signed; positive values count down, zero activates, negatives remain queued. */
     s16 destroyDelayTicks;   /* 0x2E: signed; positive values count down, zero destroys, negatives stay pending. */
     TaskUpdate update;       /* 0x30 */

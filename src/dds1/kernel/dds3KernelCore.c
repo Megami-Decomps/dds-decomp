@@ -74,7 +74,7 @@ void StartProcess(dds3ProcessID_t* task)
     task->flags = (task->flags & ~KWLN_TASK_STATE_MASK) | KWLN_TASK_ACTIVE;
     AddProcessList(task);
     task->unk24 = 0;
-    task->timer = 0;
+    task->runUpdateCount = 0;
 }
 
 void StartingProcess(void)
@@ -142,7 +142,7 @@ s32 RunProcess(dds3ProcessID_t *task) {
             return 0;
         }
     }
-    task->timer++;
+    task->runUpdateCount++;
     runprocess = 0;
     return 1;
 }
@@ -477,7 +477,7 @@ dds3ProcessID_t *dds3StartProcess(const char *name, u32 priority, s32 startDelay
     task->userValue = userValue;
     task->name[0x17] = 0;
     task->unk24 = 0;
-    task->timer = 0;
+    task->runUpdateCount = 0;
     task->listNext = NULL;
     task->listPrev = NULL;
     task->parent = NULL;
@@ -682,7 +682,7 @@ u32 dds3GetProcessStartTime(dds3ProcessID_t* task)
 /* Persona 4 dds3GetProcessRunTime @ 00452540 (src/Kernel/sdkTask.c), recompiled unchanged */
 u32 dds3GetProcessRunTime(dds3ProcessID_t* task)
 {
-    return task->timer;
+    return task->runUpdateCount;
 }
 
 void dds3SetProcessData(dds3ProcessID_t* task, u32 userValue)
