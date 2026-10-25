@@ -116,7 +116,7 @@ typedef struct FldAreaWork {
     u8 padF8[4];
     f32 frameTravelDistance;     /* 0xFC: current player displacement length. */
     FldEntryDialogDisposition pendingEntryDialogDisposition;
-    s16 transitionMode;          /* 0x104 */
+    s16 specialEventActive;      /* 0x104: spark/Devilize field event latch */
     u16 collectedCount;          /* 0x106: spark pickups. */
     s32 score;                   /* 0x108: pickups add 50. */
     f32 unk10C;                  /* 0x10C: cleared when a spark run starts. */
@@ -205,7 +205,8 @@ typedef char FldAreaWork_defaultEncounterId_offset_check[(FLD_AREA_OFFSET(defaul
 typedef char FldAreaWork_resourceFlag_offset_check[(FLD_AREA_OFFSET(resourceFlag) == 0x78) ? 1 : -1];
 typedef char FldAreaWork_cameraTargetGraceTicks_offset_check[
     (FLD_AREA_OFFSET(cameraTargetGraceTicks) == 0xE8) ? 1 : -1];
-typedef char FldAreaWork_transitionMode_offset_check[(FLD_AREA_OFFSET(transitionMode) == 0x104) ? 1 : -1];
+typedef char FldAreaWork_specialEventActive_offset_check[
+    (FLD_AREA_OFFSET(specialEventActive) == 0x104) ? 1 : -1];
 typedef char FldAreaWork_pendingSceneRequest_offset_check[(FLD_AREA_OFFSET(pendingSceneRequest) == 0x110) ? 1 : -1];
 typedef char FldAreaWork_flagStage_offset_check[(FLD_AREA_OFFSET(flagStage) == 0xC0) ? 1 : -1];
 typedef char FldAreaWork_playerModelAlternate_offset_check[(FLD_AREA_OFFSET(playerModelAlternate) == 0x118) ? 1 : -1];

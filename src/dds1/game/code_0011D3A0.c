@@ -1695,7 +1695,7 @@ void fldResetFieldRuntimeState(FldRuntimeResetMode mode) {
     area->unkB4 = 0;
     area->cameraTilt = 0.0f;
     area->pendingEntryDialogDisposition = FLD_ENTRY_DIALOG_NONE;
-    area->transitionMode = 0;
+    area->specialEventActive = 0;
     area->collectedCount = 0;
     area->score = 0;
     memset(&area->unk10C, 0, sizeof(area->unk10C));

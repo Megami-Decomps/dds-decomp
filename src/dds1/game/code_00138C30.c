@@ -1541,7 +1541,7 @@ const char *fldPickActorTemplateByName(const char *name) {
         entry = &fldGetActorRows()[i];
         flag = entry->requiredFlag;
         if ((flag == 0 || evtBitCheck(flag) != 0)
-            && (fldGlobalBase.transitionMode == 0 || !(fldGetActorControlFlags(entry) & 4))
+            && (fldGlobalBase.specialEventActive == 0 || !(fldGetActorControlFlags(entry) & 4))
             && entry->floor == fldGlobalBase.floor + 1
             && strcmp(name, entry->name) == 0) {
             switch (entry->kind) {
@@ -1599,7 +1599,7 @@ const char *fldFindActorEntryByName(const char *name) {
         entry = &fldGetActorRows()[i];
         flag = entry->requiredFlag;
         if ((flag == 0 || evtBitCheck(flag) != 0)
-            && (fldGlobalBase.transitionMode == 0 || !(fldGetActorControlFlags(entry) & 4))
+            && (fldGlobalBase.specialEventActive == 0 || !(fldGetActorControlFlags(entry) & 4))
             && entry->floor == fldGlobalBase.floor + 1
             && strcmp(name, entry->name) == 0) {
             fldSelectedActorEntryIndex = i;

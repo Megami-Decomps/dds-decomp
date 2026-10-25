@@ -1209,7 +1209,7 @@ const char *fldPickActorTemplateByName(const char *name) {
             && strcmp(name, entry->name) == 0) {
             switch (entry->kind) {
             case 1:
-                if (fldGlobalBase.transitionMode != 0 && (entry->flags31 & 4)) {
+                if (fldGlobalBase.specialEventActive != 0 && (entry->flags31 & 4)) {
                     fldPickedActorTemplateKind = 0xB;
                     return D_00391F84;
                 }
@@ -1273,7 +1273,7 @@ const char *fldFindActorEntryByName(const char *name) {
             fldSelectedActorEntryIndex = i;
             switch (entry->kind) {
             case 1:
-                if (fldGlobalBase.transitionMode != 0 && (entry->flags31 & 4)) {
+                if (fldGlobalBase.specialEventActive != 0 && (entry->flags31 & 4)) {
                     fldPickedActorTemplateKind = 0xB;
                     return D_00391F84;
                 }

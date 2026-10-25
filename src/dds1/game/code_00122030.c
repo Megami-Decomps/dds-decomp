@@ -1663,7 +1663,7 @@ s32 fldUpdateTravelAndEncounters(void) {
         fldGlobalBase.frameTravelDistance = 0.0f;
         return 0;
     }
-    if (fldGlobalBase.transitionMode != 0) return 0;
+    if (fldGlobalBase.specialEventActive != 0) return 0;
     evtAdvanceSolarClockAndExpireControls(distance);
     phase = evtGetAgeOfMoon16();
     if (fldGlobalBase.consumedFlags & 15) {
@@ -1707,7 +1707,7 @@ s32 fldUpdateTravelAndEncounters(void) {
         fldGlobalBase.attritionDistance = 450.0f;
     }
     if (fldLoadNextGetStatus() == 1) return 0;
-    if (!fldGlobalBase.transitionMode && !fldRunDanteGunFlag[0x44 / 4]) return 0;
+    if (!fldGlobalBase.specialEventActive && !fldRunDanteGunFlag[0x44 / 4]) return 0;
     if (!fldEncountTestFlag(0x10)) return 0;
     fldGlobalBase.encounterMode = 0;
     encounter = fldGlobalBase.encounterOverrideId;
@@ -2073,7 +2073,7 @@ s32 fldProcSequence(dds3ProcessID_t *task) {
     fldPollAreaResourceLoad();
     if (controller->phase == 0) {
         if (fldLoadNextGetStatus() == 1) return 0;
-        if (fldGlobalBase.transitionMode == 0 && mnuPollTitleStreamStateLocked() != 0) {
+        if (fldGlobalBase.specialEventActive == 0 && mnuPollTitleStreamStateLocked() != 0) {
             mnuMarkTitleStreamResetPending();
             mnuResetTitleStreamLocked();
             return 0;
@@ -2098,7 +2098,7 @@ s32 fldProcSequence(dds3ProcessID_t *task) {
         fldRebuildFieldScene();
         dds3SetActiveScene(dds3GetControlScene());
         fldInitInputPanel();
-        if (fldGlobalBase.transitionMode == 0) evtSetSolarOverlayFullyVisible();
+        if (fldGlobalBase.specialEventActive == 0) evtSetSolarOverlayFullyVisible();
         fldInitAddressProcess();
         if (fldGlobalBase.area >= 200) {
             fldRunDanteGunFlag[11] = 0;
@@ -2145,7 +2145,7 @@ s32 fldProcSequence(dds3ProcessID_t *task) {
     case 1:
         if (fldStepSceneBgmArchive() != 0) {
             fldGlobalBase.sceneBgmSuppressed = 0;
-            if (fldGlobalBase.transitionMode == 0) {
+            if (fldGlobalBase.specialEventActive == 0) {
                 if (fldGetRestoreMode() == 1 || fldGetRestoreMode() == 4 || fldGetRestoreMode() == 6) {
                     fldStartSceneBgmAlternate();
                 } else if (scene->sequenceMode == 0) {
@@ -2184,7 +2184,7 @@ s32 fldProcSequence(dds3ProcessID_t *task) {
             break;
         }
         fldFinishDeferredExit();
-        if (fldGlobalBase.transitionMode != 0) {
+        if (fldGlobalBase.specialEventActive != 0) {
             fldUpdateSparkEncounterScene();
             fldMarkStageExplorationCellsAroundPosition(fldGlobalBase.floor, fldGlobalBase.flagStage,
                          fldGlobalBase.x, fldGlobalBase.z, 50.0f);
@@ -2310,7 +2310,7 @@ s32 fldProcDraw(dds3ProcessID_t *task) {
     }
     fldDrawAutomapWhenReady();
     fldElvDrawFloorNum();
-    if (fldGlobalBase.transitionMode != 0) {
+    if (fldGlobalBase.specialEventActive != 0) {
         fldTickWeatherEffectNodes();
     }
     if (lifecycle->phase >= 2 && D_0032E598[0] != 0 &&
