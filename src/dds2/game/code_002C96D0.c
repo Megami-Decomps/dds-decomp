@@ -6590,21 +6590,21 @@ void fileSampleKeyTracks(FileSlot *out, FileKeyBlock *block, s32 frame, f32 *tar
     VU0_MOVE_VF(vf31, vf23);
 }
 
-void fileInvalidateSlotGroup(FileSlotTable *table, u32 slotAddr) {
+void fileInvalidateSlotGroup(FileSlotTable *table, FileSlot *slot) {
     FileKeyBlock *grid = (FileKeyBlock *)table->data0;
     s32 rows = grid->rows;
     s32 columns = grid->columns;
     s32 n = columns * rows;
     u32 index;
-    FileSlot *slot;
+    FileSlot *groupSlot;
     s32 i;
 
     if (n != 0) {
-        index = (slotAddr - (u32)table->slots) >> 5;
-        slot = table->slots + (table->instances + index * n);
+        index = ((u32)slot - (u32)table->slots) >> 5;
+        groupSlot = table->slots + (table->instances + index * n);
         for (i = 0; i < n; i++) {
-            slot->state = 0xFFFFFFFF;
-            slot++;
+            groupSlot->state = 0xFFFFFFFF;
+            groupSlot++;
         }
     }
 }
@@ -6872,7 +6872,7 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
             do {
                 if (slot->state >= length) {
                     slot->state = duration != 0 ? -2 : -1;
-                    fileInvalidateSlotGroup(record, (u32)slot);
+                    fileInvalidateSlotGroup(record, slot);
                 }
                 frame = slot->state;
                 if (frame != -2) {
@@ -7108,7 +7108,7 @@ void effUpdateRadialEmitterSlots(FileSlotTable *record) {
             do {
                 if (slot->state >= length) {
                     slot->state = duration != 0 ? -2 : -1;
-                    fileInvalidateSlotGroup(record, (u32)slot);
+                    fileInvalidateSlotGroup(record, slot);
                 }
                 frame = slot->state;
                 if (frame != -2) {
@@ -7327,7 +7327,7 @@ void effUpdateCircularEmitterSlots(FileSlotTable *record) {
             do {
                 if (slot->state >= length) {
                     slot->state = duration != 0 ? -2 : -1;
-                    fileInvalidateSlotGroup(record, (u32)slot);
+                    fileInvalidateSlotGroup(record, slot);
                 }
                 frame = slot->state;
                 if (frame != -2) {
@@ -7571,7 +7571,7 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
             do {
                 if (slot->state >= length) {
                     slot->state = duration != 0 ? -2 : -1;
-                    fileInvalidateSlotGroup(record, (u32)slot);
+                    fileInvalidateSlotGroup(record, slot);
                 }
                 frame = slot->state;
                 if (frame != -2) {
@@ -7784,7 +7784,7 @@ void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
             do {
                 if (slot->state >= length) {
                     slot->state = duration != 0 ? -2 : -1;
-                    fileInvalidateSlotGroup(record, (u32)slot);
+                    fileInvalidateSlotGroup(record, slot);
                 }
                 frame = slot->state;
                 if (frame != -2) {
@@ -7998,7 +7998,7 @@ void effUpdateSectorEmitterSlots(FileSlotTable *record) {
             do {
                 if (slot->state >= length) {
                     slot->state = duration != 0 ? -2 : -1;
-                    fileInvalidateSlotGroup(record, (u32)slot);
+                    fileInvalidateSlotGroup(record, slot);
                 }
                 frame = slot->state;
                 if (frame != -2) {
@@ -8282,7 +8282,7 @@ void effUpdateCurveEmitterSlots(FileSlotTable *record) {
             do {
                 if (slot->state >= length) {
                     slot->state = duration != 0 ? -2 : -1;
-                    fileInvalidateSlotGroup(record, (u32)slot);
+                    fileInvalidateSlotGroup(record, slot);
                 }
                 frame = slot->state;
                 if (frame != -2) {
