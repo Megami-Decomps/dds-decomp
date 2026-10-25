@@ -334,7 +334,7 @@ s32 datFlagToElementIndex(s32 elementFlag) {
 }
 
 /* Test the truncated current-HP percentage; maximum HP must be nonzero. */
-s32 datCheckDying(datUnitWork_t *unit) {
+u8 datCheckDying(datUnitWork_t *unit) {
     return unit->hp * DAT_PERCENT_SCALE / unit->maxHp < DAT_QUARTER_PERCENT;
 }
 
