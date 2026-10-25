@@ -10,13 +10,13 @@
 #include "btl_command_layout_work.h"
 #include "common.h"
 #include "btl_command_target_policy.h"
+#include "btl_named_task_pair_status_api.h"
 #include "sdf_vu0.h"
 #include "btl_set_actor_effect_parameter_api.h"
 #include "dsp_message_window_api.h"
 #include "fr_font_context.h"
 /* Declared before first use (were implicit int). */
 extern void btlClearNodeFlags(void);
-extern s32 btlGetNamedTaskPairStatusOrUnavailable(void);
 extern u32 btlNextScaledRandom(u32 limit);
 extern u16 btlRefreshUnitMaximumHpAndClampCurrentHp(struct datUnitWork_t *entryAddress);
 extern u16 btlRefreshUnitMaximumMpAndClampCurrentMp(struct datUnitWork_t *entryAddress);
@@ -4003,7 +4003,7 @@ const s32 D_003A2978[4] = {0x21, 0x22, 0x2C, 0x2D};
 
 s32 btlUpdatePhaseGatedTaskUntilTimeout(dds3ProcessID_t *task) {
     BattlePhasePanelWork *state = (BattlePhasePanelWork *)dds3GetProcessData(task);
-    s32 phase = btlGetNamedTaskPairStatusOrUnavailable();
+    BtlNamedTaskPairStatus phase = btlGetNamedTaskPairStatusOrUnavailable();
     if ((u8)(phase - 1) < 2) {
         return 0;
     }
@@ -7484,21 +7484,21 @@ s32 btlDrawGouraudTexturedPanelQuad(s32 x0, s32 y0, s32 x1, s32 y1,
     return 1;
 }
 
-s32 btlGetNamedTaskPairStatusOrUnavailable(void) {
+BtlNamedTaskPairStatus btlGetNamedTaskPairStatusOrUnavailable(void) {
     dds3ProcessID_t *first;
     dds3ProcessID_t *second;
     if (btlTrackedTaskHandles != 0) {
         first = dds3SearchProcessName(btlCommandPanelTaskNameRef);
         second = dds3SearchProcessName(D_003BB3B0);
         if (first == 0 && second == 0) {
-            return -128;
+            return BTL_NAMED_TASK_PAIR_STATUS_UNAVAILABLE;
         }
         if (btlTrackedTaskHandles->status.bytes.blocked == 0) {
             return btlTrackedTaskHandles->status.bytes.state;
         }
         return 0;
     }
-    return -128;
+    return BTL_NAMED_TASK_PAIR_STATUS_UNAVAILABLE;
 }
 
 void btlSetCommandPanelFadeMode(s8 mode, s32 duration) {
@@ -7524,7 +7524,7 @@ void btlSetCommandPanelFadeMode(s8 mode, s32 duration) {
             BattleTrackedTaskWork *tracked = btlTrackedTaskHandles;
             step = 0x80 / duration;
             tracked->threshold = duration;
-            tracked->status.bytes.state = 1;
+            tracked->status.bytes.state = BTL_NAMED_TASK_PAIR_STATUS_CLOSE_IN_PROGRESS;
             tracked->counter = 0;
             tracked->status.bytes.fadeStep = step;
         }
@@ -7546,7 +7546,7 @@ void btlSetCommandPanelFadeMode(s8 mode, s32 duration) {
             BattleTrackedTaskWork *tracked = btlTrackedTaskHandles;
             step = 0x80 / duration;
             tracked->threshold = duration;
-            tracked->status.bytes.state = 3;
+            tracked->status.bytes.state = BTL_NAMED_TASK_PAIR_STATUS_OPEN_IN_PROGRESS;
             tracked->counter = 0;
             tracked->status.bytes.fadeStep = step;
         }
@@ -7564,13 +7564,13 @@ s32 btlUpdateCommandUiTransition(void) {
         task = dds3SearchProcessName(btlCommandPanelTaskNameRef);
         flow = btlTrackedTaskHandles;
         switch (flow->status.bytes.state) {
-        case 1:
+        case BTL_NAMED_TASK_PAIR_STATUS_CLOSE_IN_PROGRESS:
             flow->counter++;
             if (flow->counter >= flow->threshold) {
-                flow->status.bytes.state = 2;
+                flow->status.bytes.state = BTL_NAMED_TASK_PAIR_STATUS_CLOSE_COMPLETE;
             }
             break;
-        case 3:
+        case BTL_NAMED_TASK_PAIR_STATUS_OPEN_IN_PROGRESS:
             counter = flow->counter + 1;
             flow->counter = counter;
             if (counter < flow->threshold) {
@@ -9538,7 +9538,7 @@ void btlUpdateActorSlotOrderAnimation(void) {
     BtlActorSlotLimits right = D_003A30A8;
     BtlActorSlotLimits left = D_003A30D8;
     s32 *limits;
-    s32 status;
+    BtlNamedTaskPairStatus status;
     s32 side;
     s32 count;
     s32 i;
@@ -9548,7 +9548,7 @@ void btlUpdateActorSlotOrderAnimation(void) {
     if (D_003BD83C->enabled[side] == 0) {
         return;
     }
-    if (status != 0 && status != 3) {
+    if (status != 0 && status != BTL_NAMED_TASK_PAIR_STATUS_OPEN_IN_PROGRESS) {
         return;
     }
     count = D_003BD83C->currentIndex;
@@ -9929,16 +9929,14 @@ void fldSetSceneSlotRange(s32 index) {
     D_003BD83C->currentIndex = index;
 }
 
-extern s32 btlGetNamedTaskPairStatusOrUnavailable(void);
-
 /* Step the current bank's slot fades when the task pair permits; slots share a timer. */
 void btlUpdateBankedSlotFadeSequence(void) {
     s32 bank = D_003BD83C->bank;
     s32 last = D_003BD83C->lastIndex;
-    s32 status = btlGetNamedTaskPairStatusOrUnavailable();
+    BtlNamedTaskPairStatus status = btlGetNamedTaskPairStatusOrUnavailable();
     s32 i;
     if (D_003BD83C->enabled[bank] == 0) return;
-    if (status != 0 && status != 3) return;
+    if (status != 0 && status != BTL_NAMED_TASK_PAIR_STATUS_OPEN_IN_PROGRESS) return;
     for (i = 0; i <= last; i++) {
         switch (D_003BD83C->phase[i][bank]) {
         case 1:

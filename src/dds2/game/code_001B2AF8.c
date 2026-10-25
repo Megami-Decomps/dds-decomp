@@ -14,6 +14,7 @@
 #include "sdf_packet_list.h"
 #include "common.h"
 #include "btl_command_target_policy.h"
+#include "btl_named_task_pair_status_api.h"
 #include "sdf_vu0.h"
 #include "btl_indexed_ui_resource_api.h"
 #include "btl_set_actor_effect_parameter_api.h"
@@ -4885,8 +4886,6 @@ const s32 D_004164A8[4] = {0x21, 0x22, 0x2C, 0x2D};
 
 
 
-extern s32 btlGetNamedTaskPairStatusOrUnavailable();
-
 extern void btlUpdatePhasePanelAnimation();
 
 extern void btlDrawPhaseChangePanelStrips();
@@ -8612,7 +8611,7 @@ s32 btlDrawGouraudTexturedPanelQuad(s32 x0, s32 y0, s32 x1, s32 y1,
 
 extern const char *btlCommandPanelTaskNameRef;
 
-s32 btlGetNamedTaskPairStatusOrUnavailable(void) {
+BtlNamedTaskPairStatus btlGetNamedTaskPairStatusOrUnavailable(void) {
     void *first;
     void *second;
 
@@ -8620,14 +8619,14 @@ s32 btlGetNamedTaskPairStatusOrUnavailable(void) {
         first = dds3SearchProcessName(btlCommandPanelTaskNameRef);
         second = dds3SearchProcessName(D_004367CC);
         if (first == 0 && second == 0) {
-            return -128;
+            return BTL_NAMED_TASK_PAIR_STATUS_UNAVAILABLE;
         }
         if (btlTrackedTaskHandles->status.flags & 0x100) {
             return 0;
         }
         return btlTrackedTaskHandles->status.bytes.state;
     }
-    return -128;
+    return BTL_NAMED_TASK_PAIR_STATUS_UNAVAILABLE;
 }
 
 extern const char *D_004367DC;
@@ -8658,7 +8657,7 @@ void btlSetCommandPanelFadeMode(s8 mode, s32 duration) {
             BattleTrackedTaskWork *tracked = btlTrackedTaskHandles;
             step = 0x80 / duration;
             tracked->threshold = duration;
-            tracked->status.bytes.state = 1;
+            tracked->status.bytes.state = BTL_NAMED_TASK_PAIR_STATUS_CLOSE_IN_PROGRESS;
             tracked->counter = 0;
             tracked->status.bytes.fadeStep = step;
         }
@@ -8680,7 +8679,7 @@ void btlSetCommandPanelFadeMode(s8 mode, s32 duration) {
             BattleTrackedTaskWork *tracked = btlTrackedTaskHandles;
             step = 0x80 / duration;
             tracked->threshold = duration;
-            tracked->status.bytes.state = 3;
+            tracked->status.bytes.state = BTL_NAMED_TASK_PAIR_STATUS_OPEN_IN_PROGRESS;
             tracked->counter = 0;
             tracked->status.bytes.fadeStep = step;
         }
@@ -8700,13 +8699,13 @@ s32 btlUpdateCommandUiTransition(void) {
         task = dds3SearchProcessName(btlCommandPanelTaskNameRef);
         flow = btlTrackedTaskHandles;
         switch (flow->status.bytes.state) {
-        case 1:
+        case BTL_NAMED_TASK_PAIR_STATUS_CLOSE_IN_PROGRESS:
             flow->counter++;
             if (flow->counter >= flow->threshold) {
-                flow->status.bytes.state = 2;
+                flow->status.bytes.state = BTL_NAMED_TASK_PAIR_STATUS_CLOSE_COMPLETE;
             }
             break;
-        case 3:
+        case BTL_NAMED_TASK_PAIR_STATUS_OPEN_IN_PROGRESS:
             counter = flow->counter + 1;
             flow->counter = counter;
             if (counter < flow->threshold) {
@@ -10924,7 +10923,7 @@ void btlUpdateActorSlotOrderAnimation(void) {
     BtlActorSlotLimits right = D_00416D58;
     BtlActorSlotLimits left = D_00416D88;
     s32 *limits;
-    s32 status;
+    BtlNamedTaskPairStatus status;
     s32 side;
     s32 count;
     s32 i;
@@ -10934,7 +10933,7 @@ void btlUpdateActorSlotOrderAnimation(void) {
     if (D_00438F54->enabled[side] == 0) {
         return;
     }
-    if (status != 0 && status != 3) {
+    if (status != 0 && status != BTL_NAMED_TASK_PAIR_STATUS_OPEN_IN_PROGRESS) {
         return;
     }
     count = D_00438F54->currentIndex;
@@ -11331,16 +11330,14 @@ void fldSetSceneSlotRange(s32 index) {
     D_00438F54->currentIndex = index;
 }
 
-extern s32 btlGetNamedTaskPairStatusOrUnavailable(void);
-
 /* Step the current bank's slot fades when the task pair permits; slots share a timer. */
 void btlUpdateBankedSlotFadeSequence(void) {
     s32 bank = D_00438F54->bank;
     s32 last = D_00438F54->lastIndex;
-    s32 status = btlGetNamedTaskPairStatusOrUnavailable();
+    BtlNamedTaskPairStatus status = btlGetNamedTaskPairStatusOrUnavailable();
     s32 i;
     if (D_00438F54->enabled[bank] == 0) return;
-    if (status != 0 && status != 3) return;
+    if (status != 0 && status != BTL_NAMED_TASK_PAIR_STATUS_OPEN_IN_PROGRESS) return;
     for (i = 0; i <= last; i++) {
         switch (D_00438F54->phase[i][bank]) {
         case 1:
