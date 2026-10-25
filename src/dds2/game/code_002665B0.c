@@ -919,7 +919,7 @@ s32 mnuDrawLoadedProgressPanels(datUnitWork_t *resource, MenuProgressHost *host,
 
 
 extern void p2sdPlayBGMFade(s32);
-extern void p2sdStopBGM(s32);
+extern void p2sdStopBGM(u32);
 
 /* Mode one optionally starts the BGM and releases the group; other modes use the
  * counterpart sound action and texture release. Only enable == 1 sends sound calls.

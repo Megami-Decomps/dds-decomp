@@ -253,7 +253,7 @@ extern s32 fileOnAllWritten(void);
 
 extern void dds3SoftResetOff(void);
 extern s8 dds3PadButtonState[];
-extern void p2sdStopBGM(s32 command);
+extern void p2sdStopBGM(u32 command);
 extern s32 slExitWait(FileMenuContinuationCallback callback);
 
 extern s32 mcHandleDetectionResult(void);

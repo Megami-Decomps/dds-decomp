@@ -2063,7 +2063,7 @@ extern void mnuSetValueListTransition(struct MenuList *, u32);
 extern s32 mnuDrawShopPanelTransition(ShopScene *);
 extern void mnuDrawShopRowTextAndValue();
 extern void evtClearActiveFlag(s32);
-extern void p2sdStopBGM(s32);
+extern void p2sdStopBGM(u32);
 
 extern s32 mnuDrawShopCommandPanel(ShopScene *context);
 

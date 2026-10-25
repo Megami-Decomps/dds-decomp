@@ -1276,7 +1276,7 @@ extern void p2sdPlayBGMFade(s32);
 
 extern void p2sdBgmVolDown(void);
 
-extern void p2sdStopBGM(s32);
+extern void p2sdStopBGM(u32);
 
 extern void p2sdBgmVolUp(void);
 

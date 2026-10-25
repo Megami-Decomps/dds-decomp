@@ -323,7 +323,7 @@ extern FldClear18 fldSe3DTable[];
 
 
 
-extern void p2sdStopBGM(s32 trackHandle);
+extern void p2sdStopBGM(u32 trackHandle);
 
 extern s32 fldCurrentBgmId[];
 
