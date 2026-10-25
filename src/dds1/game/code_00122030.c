@@ -2001,8 +2001,6 @@ extern void fldStartSceneBgmAlternate(void);
 
 extern void fldPlayFieldBgm(void);
 
-extern s32 fldStepSceneBgmArchive(void);
-
 extern s32 fldUpdateCameraFollow(void);
 
 extern s32 fldUpdateCameraFrame(void);
@@ -2143,7 +2141,7 @@ s32 fldProcSequence(dds3ProcessID_t *task) {
         controller->phase++;
         break;
     case 1:
-        if (fldStepSceneBgmArchive() != 0) {
+        if (fldStepSceneBgmArchive() != FLD_ARCHIVE_LOAD_PENDING) {
             fldGlobalBase.sceneBgmSuppressed = 0;
             if (fldGlobalBase.specialEventActive == 0) {
                 /* Raw sequence mode 6 maps to EVENT, so this legacy status check is unreachable. */

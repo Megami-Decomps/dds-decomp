@@ -1010,7 +1010,7 @@ void fldPrepareSceneBgmArchive(void) {
     fldBgmReloadStep = 0;
 }
 
-s32 fldStepSceneBgmArchive(void) {
+FldArchiveLoadResult fldStepSceneBgmArchive(void) {
     switch (fldBgmReloadStep) {
     case 0:
         if (sndFindPackedTrackLoadStatus(MidiNo) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
@@ -1027,9 +1027,9 @@ s32 fldStepSceneBgmArchive(void) {
         break;
     default:
         fldBgmReloadStep = -1;
-        return 1;
+        return FLD_ARCHIVE_LOAD_COMPLETE;
     }
-    return 0;
+    return FLD_ARCHIVE_LOAD_PENDING;
 }
 
 FldArchivePendingState fldGetArchiveLoadPending(void) {
