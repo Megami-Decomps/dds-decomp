@@ -594,7 +594,7 @@ void fldSetSceneParam2(fldSceneParam_t *record, s32 stage, s32 kind, const char 
 void fldMainLoadStart(void) {
     fldSceneParam_t record;
 
-    if (fileGetSelectionPendingFlag() == 1) {
+    if (fileGetSelectionPendingFlag() == FILE_SELECTION_FLOW_PENDING) {
         return;
     }
     if (DDS3_GBWK->header.transition != 0) {

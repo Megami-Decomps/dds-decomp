@@ -204,7 +204,7 @@ extern u32 D_00437CF4;
 
 extern u32 D_00437CF8;
 
-extern u32 fileSelectionPending;
+extern FileSelectionFlowState fileSelectionPending;
 
 extern u32 D_00437D04;
 
@@ -1095,7 +1095,7 @@ s32 fileRequestDefaultMode(void) {
 
 s32 mcdEnterSelectedFileFlow(void) {
     s32 mode = 2;
-    fileSelectionPending = 1;
+    fileSelectionPending = FILE_SELECTION_FLOW_PENDING;
     if (mcdOriginalTitleFileMode != 0) {
         return (s32)fileMenuWorkStart;
     }
@@ -2611,7 +2611,7 @@ void fileResetMenuFlowState(void) {
     D_00437D04 = 0;
     fileWaitTicksRemaining = 0;
     D_00437D18 = 0xffffffff;
-    fileSelectionPending = 0;
+    fileSelectionPending = FILE_SELECTION_FLOW_IDLE;
     D_00437D3C = 0;
     D_00437D40 = 0;
     D_00437CF8 = 0;
@@ -2852,7 +2852,7 @@ s32 fileMenuTaskExists(void) {
     return dds3SearchProcessName("FileMentCalc") != NULL;
 }
 
-u32 fileGetSelectionPendingFlag(void) {
+FileSelectionFlowState fileGetSelectionPendingFlag(void) {
     return fileSelectionPending;
 }
 

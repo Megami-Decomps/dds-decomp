@@ -745,7 +745,7 @@ void fldMainLoadStart(void) {
     fldSceneParam_t record;
     u32 mode;
 
-    if (fileGetSelectionPendingFlag() == 1) {
+    if (fileGetSelectionPendingFlag() == FILE_SELECTION_FLOW_PENDING) {
         return;
     }
     if (DDS3_GBWK->header.transition != 0) {

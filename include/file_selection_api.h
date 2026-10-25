@@ -5,8 +5,14 @@
 
 typedef s32 (*FileSelectionCallback)(void);
 
-/* Returns the pending selected-file-flow flag. */
-u32 fileGetSelectionPendingFlag(void);
+/* The selected-file flow is idle until entering it sets the handoff pending. */
+typedef u32 FileSelectionFlowState;
+enum {
+    FILE_SELECTION_FLOW_IDLE = 0,
+    FILE_SELECTION_FLOW_PENDING = 1
+};
+
+FileSelectionFlowState fileGetSelectionPendingFlag(void);
 
 s32 slQueryYesNo(FileSelectionCallback start, FileSelectionCallback finish, s32 mode);
 
