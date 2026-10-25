@@ -1885,12 +1885,12 @@ void btlPrepareSavedCommandTargets(BtlTask *task, BattleIndexWork *work) {
 void btlFindSoundTaskByWorkValue(s32 kind, s32 press) {
 }
 
-/* Return the oldest matching handle, or zero; unstarted tasks may have handle 0. */
-s32 btlFindTaskByHandle(s64 handle) {
+/* Return the oldest task matching this handle; unstarted tasks may have handle 0. */
+BtlRuntimeTask *btlFindTaskByHandle(u64 handle) {
     BtlRuntimeTask *task = ((BtlActorWork *)btlGetRuntime())->taskHead;
     while (task != 0) {
-        if ((s64)task->handle == handle) {
-            return (s32)task;
+        if (task->handle == handle) {
+            return task;
         }
         task = task->next;
     }
@@ -1898,11 +1898,11 @@ s32 btlFindTaskByHandle(s64 handle) {
 }
 
 /* Return the oldest task with this owner, or zero. */
-s32 btlFindTaskByOwner(s64 owner) {
+BtlRuntimeTask *btlFindTaskByOwner(u64 owner) {
     BtlRuntimeTask *task = ((BtlActorWork *)btlGetRuntime())->taskHead;
     while (task != 0) {
-        if ((s64)task->ownerId == owner) {
-            return (s32)task;
+        if (task->ownerId == owner) {
+            return task;
         }
         task = task->next;
     }
@@ -2007,7 +2007,7 @@ s32 btlEvalTaskCondition(BtlTaskCondition *condition, s32 currentCount) {
         }
         break;
     case BTL_TASK_CONDITION_HANDLE_RUNNING_OR_ABSENT:
-        task = (BtlRuntimeTask *)btlFindTaskByHandle(condition->value.handle);
+        task = btlFindTaskByHandle(condition->value.handle);
         if (task != 0) {
             if (task->state == BTL_TASK_PHASE_RUNNING) {
                 result = 1;
@@ -2027,7 +2027,7 @@ s32 btlEvalTaskCondition(BtlTaskCondition *condition, s32 currentCount) {
         }
         break;
     case BTL_TASK_CONDITION_OWNER_RUNNING_OR_ABSENT:
-        task = (BtlRuntimeTask *)btlFindTaskByOwner(condition->value.owner);
+        task = btlFindTaskByOwner(condition->value.owner);
         if (task != 0) {
             if (task->state == BTL_TASK_PHASE_RUNNING) {
                 result = 1;

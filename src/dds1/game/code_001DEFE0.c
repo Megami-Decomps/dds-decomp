@@ -334,7 +334,7 @@ void btlClearUnitDefeatCandidate(BtlUnit *object);
 
 void btlCopyUnitRotationQuaternion(BtlUnit *unit, f32 dst[4]);
 
-/* Return the oldest matching handle, or zero; unstarted tasks may have handle 0. */ s32 btlFindTaskByHandle(s64 handle);
+/* Return the oldest task matching this handle; unstarted tasks may have handle 0. */ BtlRuntimeTask *btlFindTaskByHandle(u64 handle);
 
 void btlFlagLinkedGroupDefeatCandidatesTask(BtlLinkedCommand *command);
 
