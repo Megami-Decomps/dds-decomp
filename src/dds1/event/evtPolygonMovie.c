@@ -877,9 +877,9 @@ PolyMovieWork *evtGetPolygonMovieWorkData2(s32 eventId, s32 sceneId, s32 mode) {
     char path1[0x40];
     char path2[0x40];
     char path3[0x40];
-    PmdHeader *address1;
-    PmdHeader *address2;
-    PmdHeader *address3;
+    PmdResourceAddress address1;
+    PmdResourceAddress address2;
+    PmdResourceAddress address3;
     sdfMemHandle_t *handle1;
     sdfMemHandle_t *handle2;
     sdfMemHandle_t *handle3;
@@ -887,25 +887,25 @@ PolyMovieWork *evtGetPolygonMovieWorkData2(s32 eventId, s32 sceneId, s32 mode) {
 
     evtFormatPolygonMoviePaths(eventId, sceneId, path1, path2, path3);
     printf(evtMovieBeforePrimaryLoadMessage);
-    handle1 = sdfDevLoadFileEx(path1, (u32 *)&address1, 0);
-    if (address1 == 0) {
+    handle1 = sdfDevLoadFileEx(path1, &address1.word, 0);
+    if (address1.header == NULL) {
         return NULL;
     }
     printf(evtMoviePrimaryLoadedMessage);
     if (mode == 0) {
-        handle2 = sdfDevLoadFileEx(path2, (u32 *)&address2, 0);
+        handle2 = sdfDevLoadFileEx(path2, &address2.word, 0);
     } else {
-        handle2 = evtAllocMovieWork(&address2);
+        handle2 = evtAllocMovieWork(&address2.header);
     }
     if (mode == 0 && sdfFileCheckExist(path3) == 1) {
-        handle3 = sdfDevLoadFileEx(path3, (u32 *)&address3, 0);
+        handle3 = sdfDevLoadFileEx(path3, &address3.word, 0);
         printf(evtMovieTertiaryLoadedMessage);
     } else {
-        handle3 = evtPolygonMovieSynthesizePmd3Header(&address3);
+        handle3 = evtPolygonMovieSynthesizePmd3Header(&address3.header);
     }
     printf(evtMovieResourcesReadyMessage);
     work = InitPolygonMovieWorkData();
-    evtPolygonMovieInitWork(work, address1, address2, address3);
+    evtPolygonMovieInitWork(work, address1.header, address2.header, address3.header);
     if (work == NULL) {
         return NULL;
     }

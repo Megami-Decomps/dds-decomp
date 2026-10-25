@@ -40,6 +40,15 @@ typedef struct PmdHeader {
     PmdEntry entries[1]; /* 0x20 */
 } PmdHeader;
 
+/* sdfDevLoadFileEx writes the 32-bit payload address, not its allocation handle. */
+typedef union PmdResourceAddress {
+    u32 word;
+    PmdHeader *header;
+} PmdResourceAddress;
+
+typedef char PmdResourceAddress_size_must_be_0x4[
+    (sizeof(PmdResourceAddress) == 0x4) ? 1 : -1];
+
 /* Three retained resources share request/handle/address slots. */
 #define EVT_POLY_MOVIE_MAIN_LOAD_PENDING 0x02
 #define EVT_POLY_MOVIE_SECONDARY_LOAD_PENDING 0x04
