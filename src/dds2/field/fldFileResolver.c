@@ -1681,7 +1681,7 @@ struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) {
         dds3SceneBasicLoadScriptFile_FromMem(dds3GetControlScene(), D_00435FDC);
     }
     fldInitializeActorMotionSlots();
-    fldGlobalBase.reuseAreaResources = 0;
+    fldGlobalBase.reuseAreaResources = FLD_AREA_RESOURCE_REUSE_DISABLED;
     if (fldGlobalBase.specialEventActive != 0) {
         fldUpdateSparkSlots();
     }

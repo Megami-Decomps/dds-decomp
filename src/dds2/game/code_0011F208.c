@@ -1673,7 +1673,7 @@ void fldResetFieldRuntimeState(FldRuntimeResetMode mode) {
     area->floor = 0;
     area->unk18 = 0;
     area->cachedArea = 0;
-    area->reuseAreaResources = 0;
+    area->reuseAreaResources = FLD_AREA_RESOURCE_REUSE_DISABLED;
     area->consumedFlags = 0;
     area->mode = 0;
     area->unk54 = 0;

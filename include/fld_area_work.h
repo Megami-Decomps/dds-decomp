@@ -14,6 +14,13 @@ typedef enum FldAreaResourceRequestState {
     FLD_AREA_RESOURCE_REQUEST_SATISFIED_FROM_CACHE = 2
 } FldAreaResourceRequestState;
 
+typedef s32 FldAreaResourceReuseState;
+
+enum FldAreaResourceReuseState {
+    FLD_AREA_RESOURCE_REUSE_DISABLED = 0,
+    FLD_AREA_RESOURCE_REUSE_ENABLED = 1
+};
+
 typedef s32 FldTerrainAttritionKind;
 
 enum FldTerrainAttritionKind {
@@ -67,7 +74,7 @@ typedef struct FldAreaWork {
     s32 floor;                   /* Zero-based; room lookups use floor + 1. */
     s32 unk18;
     s32 cachedArea;
-    s32 reuseAreaResources;    /* 0x20: preserves same-area resources across transitions */
+    FldAreaResourceReuseState reuseAreaResources; /* 0x20: preserves same-area resources across transitions */
     s32 titleFade;
     s32 sequenceCode;            /* 0x28: retained scene/sequence index */
     s32 unk2C;

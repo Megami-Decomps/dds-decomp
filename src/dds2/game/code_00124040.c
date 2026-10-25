@@ -805,7 +805,7 @@ void fldResetPlayerSceneTransformState(void) {
 void fldSetSceneParam2(fldSceneParam_t *record, s32 stage, s32 kind, const char *name) {
     if (dds3SearchProcessName(D_00412D50) != NULL) {
         if (fldGlobalBase.area == stage) {
-            fldGlobalBase.reuseAreaResources = 1;
+            fldGlobalBase.reuseAreaResources = FLD_AREA_RESOURCE_REUSE_ENABLED;
         } else {
             dds3WorkClear();
         }
@@ -833,7 +833,7 @@ void fldSetSceneParam2(fldSceneParam_t *record, s32 stage, s32 kind, const char 
 void fldSetSceneParam3(fldSceneParam_t *record, s32 stage, s32 kind, const char *name) {
     if (dds3SearchProcessName(D_00412D50) != NULL) {
         if (fldGlobalBase.area == stage) {
-            fldGlobalBase.reuseAreaResources = 1;
+            fldGlobalBase.reuseAreaResources = FLD_AREA_RESOURCE_REUSE_ENABLED;
         } else {
             dds3WorkClear();
         }
@@ -860,7 +860,7 @@ void fldSetSceneParam4(fldSceneParam_t *record, s32 stage, s32 kind, const char 
                    s32 code, s32 link, const char *subname) {
     if (dds3SearchProcessName(D_00412D50) != NULL) {
         if (fldGlobalBase.area == stage) {
-            fldGlobalBase.reuseAreaResources = 1;
+            fldGlobalBase.reuseAreaResources = FLD_AREA_RESOURCE_REUSE_ENABLED;
         } else {
             dds3WorkClear();
         }
@@ -887,7 +887,7 @@ void fldSetSceneParam5(fldSceneParam_t *record, s32 stage, s32 kind, const char 
                     s32 code, const char *subname) {
     if (dds3SearchProcessName(D_00412D50) != NULL) {
         if (fldGlobalBase.area == stage) {
-            fldGlobalBase.reuseAreaResources = 1;
+            fldGlobalBase.reuseAreaResources = FLD_AREA_RESOURCE_REUSE_ENABLED;
         } else {
             dds3WorkClear();
         }
@@ -975,7 +975,7 @@ void fldRebuildFieldScene(void) {
     dds3Basic_t *node;
     FieldAreaEncounterTable *encounters;
     FieldAreaEncounterRow *room;
-    s32 reuseAreaResources;
+    FldAreaResourceReuseState reuseAreaResources;
     s32 areaIndex;
     s32 i;
     s32 selection;
