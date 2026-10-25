@@ -949,7 +949,6 @@ extern s32 brsBuildProfileCapList(BrsRewardBatch *);
 extern void brsBuildActiveUnitProgressRows(BrsActiveProgressList *);
 
 extern s32 btlCaptureRewardSummary(BrsRewardSummary *rewards);
-extern s32 evtSetMessageWindowPageValue(s32 pageValue);
 
 INCLUDE_RODATA(const s32, "game/code_00296E98", D_00428358);
 

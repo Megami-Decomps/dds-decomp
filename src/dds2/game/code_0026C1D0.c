@@ -233,12 +233,12 @@ s32 fclInitMessage(struct ItfMesSub *definition) {
 }
 
 /* Apply page mode zero and the caller's opaque page value to an open window. */
-s32 evtSetMessageWindowPageValue(s32 pageValue) {
+EvtMessageWindowPageValueResult evtSetMessageWindowPageValue(s32 pageValue) {
     if (gMsgID < 0) {
-        return 0;
+        return EVT_MESSAGE_WINDOW_PAGE_VALUE_NO_WINDOW;
     }
     itfMesMngChangeWindowType(gMsgID, 0, pageValue);
-    return 1;
+    return EVT_MESSAGE_WINDOW_PAGE_VALUE_UPDATED;
 }
 
 

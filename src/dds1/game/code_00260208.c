@@ -890,7 +890,6 @@ void brsTaskLatchPendingRows(BrsSkillPackageWork *work) {
 }
 
 extern struct EffectList *mnuAllocateValueRecord(u32);
-extern void evtSetMessageWindowPageValue(s32);
 extern void btlSnapshotResultRewards(BrsRewardSummary *);
 extern s32 brsBuildRewardRows(BrsRewardBatch *, BrsRewardSummary *);
 extern s32 brsBuildLevelUpList(BrsRewardBatch *);
