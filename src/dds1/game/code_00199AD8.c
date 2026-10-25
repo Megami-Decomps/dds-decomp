@@ -445,7 +445,7 @@ void itfDrawFramedPanelWithTextureStrips(itfpanel_t *panel, sdfDrawTag_t *comman
     rect.y0 = panel->top + 0x48;
     rect.x1 = panel->left + 0xB40;
     rect.y1 = panel->bottom;
-    itfMiscDrawSpritePrim((DrawVertex *)&rect, (DrawColorRec *)&D_00357D08, (DrawColorRec *)color, panel->renderValue, payload->texture, 0, command);
+    itfMiscDrawSpritePrim((DrawVertex *)&rect, (DrawColorRec *)&D_00357D08, (DrawColorRec *)color, panel->renderValue, payload->borrowedTexture, 0, command);
     if (panel->scrollSpan > 0 && panel->screenY != panel->top) {
         alpha = 0x80 - ((panel->screenY - panel->top) << 7) / panel->scrollSpan;
     } else {
@@ -456,31 +456,31 @@ void itfDrawFramedPanelWithTextureStrips(itfpanel_t *panel, sdfDrawTag_t *comman
     rect.y0 = panel->top;
     rect.x1 = panel->right + 0x140;
     rect.y1 = panel->bottom - 0x48;
-    itfMiscDrawSpritePrim((DrawVertex *)&rect, (DrawColorRec *)&D_00357D18, (DrawColorRec *)&D_00357C98[12], panel->renderValue, payload->texture, 0, command);
+    itfMiscDrawSpritePrim((DrawVertex *)&rect, (DrawColorRec *)&D_00357D18, (DrawColorRec *)&D_00357C98[12], panel->renderValue, payload->borrowedTexture, 0, command);
     D_00357C98[11] = panel->alpha * 70 / 128;
     rect.x0 = panel->left - 0x140;
     rect.y0 = panel->top - 0xB8;
     rect.x1 = panel->left + 0x1A40;
     rect.y1 = panel->top + 8;
-    itfMiscDrawSpritePrim((DrawVertex *)&rect, (DrawColorRec *)&D_00357D18 - 1, (DrawColorRec *)&D_00357C98[8], panel->renderValue, payload->texture, 0, command);
+    itfMiscDrawSpritePrim((DrawVertex *)&rect, (DrawColorRec *)&D_00357D18 - 1, (DrawColorRec *)&D_00357C98[8], panel->renderValue, payload->borrowedTexture, 0, command);
     rect.x0 = panel->left + 0x8B0;
     rect.y0 = panel->top - 0x10;
     rect.x1 = panel->left + 0xFC0;
     rect.y1 = panel->top;
-    itfMiscDrawSpritePrim((DrawVertex *)&rect, (DrawColorRec *)&D_00357D18 - 3, (DrawColorRec *)color, panel->renderValue, payload->texture, 0, command);
+    itfMiscDrawSpritePrim((DrawVertex *)&rect, (DrawColorRec *)&D_00357D18 - 3, (DrawColorRec *)color, panel->renderValue, payload->borrowedTexture, 0, command);
     x = rect.x1;
     rect.x0 = x;
     rect.x1 = x + 0x1040;
-    itfMiscDrawSpritePrim((DrawVertex *)&rect, (DrawColorRec *)&D_00357D18 - 2, (DrawColorRec *)color, panel->renderValue, payload->texture, 0, command);
+    itfMiscDrawSpritePrim((DrawVertex *)&rect, (DrawColorRec *)&D_00357D18 - 2, (DrawColorRec *)color, panel->renderValue, payload->borrowedTexture, 0, command);
     rect.x0 = panel->left + 0x1020;
     rect.y0 = panel->bottom - 0x10;
     rect.x1 = panel->left + 0x1730;
     rect.y1 = panel->bottom;
-    itfMiscDrawSpritePrim((DrawVertex *)&rect, (DrawColorRec *)&D_00357D18 - 4, (DrawColorRec *)color, panel->renderValue, payload->texture, 0, command);
+    itfMiscDrawSpritePrim((DrawVertex *)&rect, (DrawColorRec *)&D_00357D18 - 4, (DrawColorRec *)color, panel->renderValue, payload->borrowedTexture, 0, command);
     x = rect.x0;
     rect.x1 = x;
     rect.x0 = x - 0x1220;
-    itfMiscDrawSpritePrim((DrawVertex *)&rect, (DrawColorRec *)&D_00357D18 - 2, (DrawColorRec *)color, panel->renderValue, payload->texture, 0, command);
+    itfMiscDrawSpritePrim((DrawVertex *)&rect, (DrawColorRec *)&D_00357D18 - 2, (DrawColorRec *)color, panel->renderValue, payload->borrowedTexture, 0, command);
 }
 /*END itfDrawFramedPanelWithTextureStrips*/
 
@@ -502,7 +502,7 @@ void DrawSpkWin2(itfpanel_t *panel, sdfDrawTag_t *command) {
     rect[1].x = leftInset;
     rect[1].y = panel->bottom;
     itfMiscDrawSpritePrim((DrawVertex *)rect, (DrawColorRec *)&D_00357D28, (DrawColorRec *)color, panel->renderValue,
-                                  payload->texture, 0, command);
+                                  payload->borrowedTexture, 0, command);
 
     rect[0].x = leftInset;
     rect[0].y = panel->top;
@@ -553,19 +553,19 @@ void DrawFacility(itfpanel_t *panel, sdfDrawTag_t *command) {
         rect[1].x = panel->right;
         rect[1].y = topEnd;
         itfMiscDrawSpritePrim((DrawVertex *)rect, (DrawColorRec *)&D_00357A78, (DrawColorRec *)color, panel->renderValue,
-                                      payload->texture, 0, command);
+                                      payload->borrowedTexture, 0, command);
         rect[0].y = topEnd;
         rect[1].y = bottomStart;
         itfMiscDrawSpritePrim((DrawVertex *)rect, (DrawColorRec *)&D_00357A88, (DrawColorRec *)color, panel->renderValue,
-                                      payload->texture, 0, command);
+                                      payload->borrowedTexture, 0, command);
         rect[0].y = bottomStart;
         rect[1].y = panel->bottom;
         itfMiscDrawSpritePrim((DrawVertex *)rect, (DrawColorRec *)&D_00357A98, (DrawColorRec *)color, panel->renderValue,
-                                      payload->texture, 0, command);
+                                      payload->borrowedTexture, 0, command);
     } else {
         itfMiscDrawSpritePrim((DrawVertex *)&panel->left, (DrawColorRec *)&D_00357AA8,
                                       (DrawColorRec *)&panel->red, panel->renderValue,
-                                      payload->texture, 0, command);
+                                      payload->borrowedTexture, 0, command);
     }
 }
 

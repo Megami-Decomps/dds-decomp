@@ -1475,7 +1475,7 @@ void itfMiscDrawTexPoly(DrawVertex *vertices, f32 *uvs, DrawColorRec *colors, u3
  * Unwritten padding words in the native packet remain untouched. */
 void itfMiscDrawSpritePrim(DrawVertex *vertices, DrawColorRec *uv,
                             DrawColorRec *colors, s32 tail,
-                            sdfTexHandle_t *texture, s32 flag,
+                            const sdfTexHandle_t *borrowedTexture, s32 flag,
                             sdfDrawTag_t *command) {
     SdfDrawPacket *packet;
     u64 *dst;
@@ -1496,7 +1496,8 @@ void itfMiscDrawSpritePrim(DrawVertex *vertices, DrawColorRec *uv,
     dst[6] = (u64)uv->components[2] | ((u64)uv->components[3] << 32);
     dst[8] = (u64)(u32)x1 | ((u64)y1 << 32);
     dst[9] = (u64)(u32)tail;
-    sdf2DLinkTexPacket(command, texture, flag);
+    /* The legacy packet API is mutable-typed; this path only reads GS words. */
+    sdf2DLinkTexPacket(command, (sdfTexHandle_t *)borrowedTexture, flag);
     sdfDrawTagLink(command, (u32)packet);
 }
 
@@ -1714,7 +1715,7 @@ void itfCampStartProcess(void) {
 
 extern s32 D_003B44B0[];
 
-itfpanel_t *itfCreateUiSpriteByKind(s32 kind, sdfTexHandle_t *texture) {
+itfpanel_t *itfCreateUiSpriteByKind(s32 kind, const sdfTexHandle_t *borrowedTexture) {
     sdfMemHandle_t *allocation = sdfMemAllocDirect(sizeof(itfpanel_t));
     itfpanel_t *work = (itfpanel_t *)sdfMemLock(allocation);
 
@@ -1723,19 +1724,19 @@ itfpanel_t *itfCreateUiSpriteByKind(s32 kind, sdfTexHandle_t *texture) {
     allocation = sdfMemAllocDirect(D_003B44B0[kind]);
     work->payloadAllocation = allocation;
     work->payload = (u32 *)sdfMemLock(allocation);
-    if (texture != NULL) {
+    if (borrowedTexture != NULL) {
         switch (kind) {
         case 6:
-            *work->payload = (u32)texture;
+            *work->payload = (u32)borrowedTexture;
             break;
         case 7:
-            ((UiSpriteTexturePayload *)work->payload)->texture = texture;
+            ((UiSpriteTexturePayload *)work->payload)->borrowedTexture = borrowedTexture;
             break;
         case 8:
-            ((UiSpriteBandPayload *)work->payload)->texture = texture;
+            ((UiSpriteBandPayload *)work->payload)->borrowedTexture = borrowedTexture;
             break;
         case 9:
-            *work->payload = (u32)texture;
+            *work->payload = (u32)borrowedTexture;
             break;
         }
     }
