@@ -2355,7 +2355,7 @@ u8 btlSelectConditionalEncounterGroup(s32 encounterIndex) {
  * all three flag masks 1/2/4. No eligible entries returns zero.
  * count and remaining serve both loops; word holds enemy IDs, then entry flags.
  * partyLevel is accumulated first and divided in place before comparison. */
-s32 btlCheckScenePartyLevelThreshold(u32 sceneIndex) {
+u8 btlCheckScenePartyLevelThreshold(u32 sceneIndex) {
     s32 result = 0;
     s32 enemyTotal;
     u16 *levelCursor;
@@ -2448,7 +2448,7 @@ s32 btlGetConditionalEncounterInterval(s32 encounterIndex) {
 
 extern s32 btlSelectedConditionalEncounterIndex;
 extern s32 btlSelectedConditionalEncounterResult;
-extern s32 btlCheckScenePartyLevelThreshold(u32 scene);
+extern u8 btlCheckScenePartyLevelThreshold(u32 scene);
 extern void dds3WorkClear(void);
 
 s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex) {
