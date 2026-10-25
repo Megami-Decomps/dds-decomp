@@ -2737,19 +2737,19 @@ INCLUDE_RODATA(const s32, "event/evtUnitManager", D_003AC5B0);
 u32 evtCommand_EFFMG1_BE(void) {
     s32 taskId;
     s32 key;
-    void *resource;
+    struct EffNodeDescriptor *descriptor;
     dds3Basic_t *object;
 
     taskId = scrGetIntPara(0);
     key = scrGetIntPara(1);
-    resource = evtGetEventPackResourceAddress(taskId, key);
-    if (resource == NULL) {
+    descriptor = evtGetEventPackResourceAddress(taskId, key);
+    if (descriptor == NULL) {
         key = scrGetIntPara(1);
         evtPrintDeveloperConsoleMessage("EFFMG1_BE not fount RID = %d\n", key);
         scrSetIntReturnValue(0);
         return 1;
     }
-    object = dds3AddMG12EffectObjectBasic2(1, (struct EffNodeDescriptor *)resource);
+    object = dds3AddMG12EffectObjectBasic2(1, descriptor);
     if (object == NULL) {
         scrSetIntReturnValue(0);
     } else {
@@ -2781,19 +2781,19 @@ INCLUDE_RODATA(const s32, "event/evtUnitManager", D_003AC600);
 u32 evtCommand_EFFMG2_BE(void) {
     s32 taskId;
     s32 key;
-    void *resource;
+    struct EffNodeDescriptor *descriptor;
     dds3Basic_t *object;
 
     taskId = scrGetIntPara(0);
     key = scrGetIntPara(1);
-    resource = evtGetEventPackResourceAddress(taskId, key);
-    if (resource == NULL) {
+    descriptor = evtGetEventPackResourceAddress(taskId, key);
+    if (descriptor == NULL) {
         key = scrGetIntPara(1);
         evtPrintDeveloperConsoleMessage("EFFMG2_BE not fount RID = %d\n", key);
         scrSetIntReturnValue(0);
         return 1;
     }
-    object = dds3AddMG12EffectObjectBasic2(2, (struct EffNodeDescriptor *)resource);
+    object = dds3AddMG12EffectObjectBasic2(2, descriptor);
     if (object == NULL) {
         scrSetIntReturnValue(0);
     } else {
