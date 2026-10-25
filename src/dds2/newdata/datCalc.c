@@ -789,8 +789,8 @@ u8 ptyAnyLivingUnitHasStatus(u32 statusMask, s32 frontlineOnly) {
     return 0;
 }
 
-void datAddExp(s32 counterAddress, s32 increment) {
-    *(s32 *)(counterAddress + 0x10) = *(s32 *)(counterAddress + 0x10) + increment;
+void datAddExp(datUnitWork_t *unit, s32 increment) {
+    unit->totalExp += increment;
 }
 
 /* Apply the owned skill's positive HP/MP recovery rate; unsupported skills do nothing. */
