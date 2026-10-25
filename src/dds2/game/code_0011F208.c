@@ -9,6 +9,7 @@
 #include "common.h"
 #include "sdf_vu0.h"
 #include "fld_scene_ready_api.h"
+#include "fld_camp_check_state_api.h"
 #include "fld_encounter_runtime_api.h"
 #include "fld_activation_entry.h"
 #include "fld_camera_follow_row.h"
@@ -80,7 +81,6 @@ extern s32 fldStepColorChannelByPad(u32 *, s32, s8 *);
 
 extern s32 fldTestDrawUpdate(dds3ProcessID_t *task);
 
-extern u8 fldProcCampChk(void);
 
 extern void rsetTest(s32, s32, s32, s32, s32, s32, s32, s32);
 
@@ -690,7 +690,7 @@ s32 fldTestDrawUpdate(dds3ProcessID_t *task) {
     if (fldGetEncounterRuntimeResult() != 0) {
         return 0;
     }
-    if (fldProcCampChk() == 1) {
+    if (fldProcCampChk() == FLD_CAMP_CHECK_STATE_MENU_ACTIVE) {
         return 0;
     }
     rsetOtOfs(0x53);

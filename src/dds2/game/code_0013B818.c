@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "fld_area_work.h"
+#include "fld_camp_check_state_api.h"
 #include "fld_deferred_transition.h"
 #include "common.h"
 #include "sdf_vu0.h"
@@ -149,7 +150,6 @@ extern s32 D_00399F60[];
 
 extern u8 D_00399EA0[][16];
 
-extern s32 fldProcCampChk(void);
 
 extern s32 fldProcAmChk(void);
 
@@ -3049,7 +3049,7 @@ s32 fldUpdateTitleBannerTask(dds3ProcessID_t *task) {
     if (D_00389780[0] >= 200) {
         return 0;
     }
-    if (fldProcCampChk() != 0) {
+    if (fldProcCampChk() != FLD_CAMP_CHECK_STATE_ENCOUNTER_FLAG_SET) {
         return 0;
     }
     if (fldProcAmChk() != 0) {

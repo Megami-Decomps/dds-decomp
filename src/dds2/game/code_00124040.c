@@ -15,6 +15,7 @@
 #include "fld_scene_status_api.h"
 #include "fld_scene_ready_api.h"
 #include "fld_scene_command_state_api.h"
+#include "fld_camp_check_state_api.h"
 #include "fld_encounter_runtime_api.h"
 #include "sdf_message.h"
 #include "eff_random.h"
@@ -273,8 +274,6 @@ struct dds3Basic_t;
 extern f32 fldCalcAngleBetween(f32 fromX, f32 fromZ, f32 toX, f32 toZ);
 
 extern u8 D_0037F530[];
-
-extern u8 fldProcCampChk(void);
 
 extern u32 fldRunDanteGunFlag[];
 
@@ -1972,14 +1971,16 @@ u8 fldProcHirakenaiChk(void) {
     return scrSearchScriptName(D_00412F40) != 0;
 }
 
-u8 fldProcCampChk(void) {
+FldCampCheckState fldProcCampChk(void) {
     if (D_00435F7C > 0) {
-        return 2;
+        return FLD_CAMP_CHECK_STATE_HANDOFF_DELAY;
     }
     if (mnuAcknowledgeCampState() != 0) {
-        return 1;
+        return FLD_CAMP_CHECK_STATE_MENU_ACTIVE;
     }
-    return fldEncountTestFlag(0x20) != 0 ? 0 : 3;
+    return fldEncountTestFlag(0x20) != 0
+        ? FLD_CAMP_CHECK_STATE_ENCOUNTER_FLAG_SET
+        : FLD_CAMP_CHECK_STATE_IDLE;
 }
 
 
@@ -2021,7 +2022,7 @@ s32 fldUpdateCampMenuTransition(void) {
         }
         return 0;
     }
-    if (fldEncountTestFlag(0x20) == 0 && fldProcCampChk() == 3) {
+    if (fldEncountTestFlag(0x20) == 0 && fldProcCampChk() == FLD_CAMP_CHECK_STATE_IDLE) {
         fldAutoMapSeqClearFlag(1);
         fldPreparePlayerSceneCameraTarget();
         evtSetSolarOverlayFullyVisible();
@@ -2078,7 +2079,7 @@ s32 fldUpdateNextFloorTransition(void) {
     s32 transitionInput = 0;
     FldAreaWork *scene;
 
-    if (fldProcCampChk() != 0) {
+    if (fldProcCampChk() != FLD_CAMP_CHECK_STATE_ENCOUNTER_FLAG_SET) {
         return 0;
     }
     if (fldRunDanteGunFlag[0x58 / 4] & fldEncountTestFlag(0x40)) {
@@ -2193,8 +2194,8 @@ s32 fldUpdateFieldSceneTask(dds3ProcessID_t *task) {
         }
     }
     mode = fldProcCampChk();
-    if (mode < 3) {
-        if (mode > 0) {
+    if (mode < FLD_CAMP_CHECK_STATE_IDLE) {
+        if (mode > FLD_CAMP_CHECK_STATE_ENCOUNTER_FLAG_SET) {
             fldUpdateCampMenuTransition();
             if (controller->phase == 4 && D_003898AC[0] != 0 && fldRunDanteGunFlag[0x5C / 4] != 0) {
                 fldReportCampVolumeError();
@@ -2378,7 +2379,7 @@ s32 fldUpdateFieldSceneTask(dds3ProcessID_t *task) {
     default:
         break;
     }
-    if (fldProcCampChk() != 1) {
+    if (fldProcCampChk() != FLD_CAMP_CHECK_STATE_MENU_ACTIVE) {
         fldUpdateSceneCommandSpeed();
         fldUpdateSelectedValueTransition();
         fldSkyCalcFilter();
@@ -2389,14 +2390,14 @@ s32 fldUpdateFieldSceneTask(dds3ProcessID_t *task) {
             fldCheckSceneReady();
             fldGetSceneReadyFlag();
         }
-        if (fldGetSceneReadyFlag() == FLD_SCENE_NOT_READY && fldProcCampChk() == 0 &&
+        if (fldGetSceneReadyFlag() == FLD_SCENE_NOT_READY && fldProcCampChk() == FLD_CAMP_CHECK_STATE_ENCOUNTER_FLAG_SET &&
             fldHasKiretaLabelProcess() == 0 && fldProcKiretaChk() == 0 &&
             fldProcHirakenaiChk() == 0) {
             fldFlushQueuedEffectPositions();
             fldUpdateObjectSlotActivation();
         }
     }
-    if (fldProcCampChk() != 1) fldUpdateCameraFollow();
+    if (fldProcCampChk() != FLD_CAMP_CHECK_STATE_MENU_ACTIVE) fldUpdateCameraFollow();
     return 0;
 }
 
@@ -2435,10 +2436,10 @@ s32 fldProcDraw(dds3ProcessID_t *task) {
     if (fileMenuTaskExists() != 0) {
         return 0;
     }
-    if (fldProcCampChk() == 1) {
+    if (fldProcCampChk() == FLD_CAMP_CHECK_STATE_MENU_ACTIVE) {
         return 0;
     }
-    if (fldGetSceneReadyFlag() == FLD_SCENE_NOT_READY && fldProcCampChk() == 0 &&
+    if (fldGetSceneReadyFlag() == FLD_SCENE_NOT_READY && fldProcCampChk() == FLD_CAMP_CHECK_STATE_ENCOUNTER_FLAG_SET &&
         fldIsEventPhaseAtLeastTwo() == 0) {
         func_0014DEA8();
     }

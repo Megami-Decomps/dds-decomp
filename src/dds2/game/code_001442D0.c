@@ -25,6 +25,7 @@
 #include "sdf_vu_matrix.h"
 #include "sdf_texture_draw_packet.h"
 #include "fld_scene_ready_api.h"
+#include "fld_camp_check_state_api.h"
 #include "fld_clear_menu_entries_api.h"
 #include "fld_play_pending_sounds_api.h"
 #include "fld_scene_record_api.h"
@@ -487,7 +488,6 @@ extern s32 fldAttachSparkSlotToWorldObject(s32, s32);
 
 
 
-extern u8 fldProcCampChk(void);
 extern u8 fldProcAmChk(void);
 extern s32 fileMenuTaskExists(void);
 extern u8 fldHasKiretaLabelProcess(void);
@@ -509,7 +509,7 @@ FldTitleBannerResult fldResolvePendingTitleBanner(void) {
     FldTitleBannerMenu *menu;
     FldAreaWork *area;
 
-    if (fldProcCampChk() != 0) {
+    if (fldProcCampChk() != FLD_CAMP_CHECK_STATE_ENCOUNTER_FLAG_SET) {
         return FLD_TITLE_BANNER_UNRESOLVED;
     }
     if (fldProcAmChk() != 0) {
@@ -561,7 +561,7 @@ extern void fldDrawAnimatedFieldBanner(s32 alpha, s32 x, s32 y);
 void func_0014B0F8(); /* no prototype: called here with arguments */
 
 s32 fldFieldTaskUpdate(dds3ProcessID_t *task) {
-    if (fldProcCampChk() != 0) {
+    if (fldProcCampChk() != FLD_CAMP_CHECK_STATE_ENCOUNTER_FLAG_SET) {
         return 0;
     }
     if (fldProcAmChk() != 0) {
@@ -4108,7 +4108,7 @@ void fldFlushQueuedEffectPositions(void) {
         if (fldAutoMapSeqTestFlag(1) != 0) {
             return;
         }
-        if (fldProcCampChk() != 0) {
+        if (fldProcCampChk() != FLD_CAMP_CHECK_STATE_ENCOUNTER_FLAG_SET) {
             return;
         }
         if (fldProcAmChk() != 0) {
@@ -4384,7 +4384,7 @@ s32 fldTitleMini(dds3ProcessID_t *task) {
     s32 slide;
     s32 nextFrame;
 
-    if (fldProcCampChk() == 1) {
+    if (fldProcCampChk() == FLD_CAMP_CHECK_STATE_MENU_ACTIVE) {
         return 0;
     }
     rsetOtOfs(0x53);
@@ -6554,7 +6554,7 @@ extern s32 D_00451D3C[];
 
 s32 fldReportCampVolumeError(void) {
     if (D_00451D3C[0] != 1) {
-        if (fldProcCampChk() != 0) {
+        if (fldProcCampChk() != FLD_CAMP_CHECK_STATE_ENCOUNTER_FLAG_SET) {
             printf(D_00413F78);
         }
     }

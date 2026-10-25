@@ -20,6 +20,7 @@
 #include "sdf_vu0.h"
 #include "snd_track_playback_api.h"
 #include "fld_scene_ready_api.h"
+#include "fld_camp_check_state_api.h"
 #include "fld_clear_menu_entries_api.h"
 #include "fld_play_pending_sounds_api.h"
 #include "fld_scene_record_api.h"
@@ -288,7 +289,6 @@ extern void DrwSprite2D(s32, s32, s32, s32, s32, s32, s32, s32, s32, sdfTexHandl
 extern dds3ProcessID_t *inputpanel_id;
 extern u32 fldRunDanteGunFlag[];
 extern s32 gFldInf_WpExit;
-extern u8 fldProcCampChk(void);
 extern u8 fldProcAmChk(void);
 extern s32 fileMenuTaskExists(void);
 extern u8 fldHasKiretaLabelProcess(void);
@@ -301,7 +301,7 @@ FldTitleBannerResult fldResolvePendingTitleBanner(void) {
     FldTitleBannerMenu *menu;
     FldAreaWork *area;
 
-    if (fldProcCampChk() != 0) {
+    if (fldProcCampChk() != FLD_CAMP_CHECK_STATE_ENCOUNTER_FLAG_SET) {
         return FLD_TITLE_BANNER_UNRESOLVED;
     }
     if (fldProcAmChk() != 0) {
@@ -355,7 +355,7 @@ extern void func_00147188(s32);
 extern s32 gFldElvFloorNow;
 
 s32 fldFieldTaskUpdate(dds3ProcessID_t *task) {
-    if (fldProcCampChk() != 0) {
+    if (fldProcCampChk() != FLD_CAMP_CHECK_STATE_ENCOUNTER_FLAG_SET) {
         return 0;
     }
     if (fldProcAmChk() != 0) {
@@ -3738,7 +3738,7 @@ void fldFlushQueuedEffectPositions(void) {
         if (fldAutoMapSeqTestFlag(1) != 0) {
             return;
         }
-        if (fldProcCampChk() != 0) {
+        if (fldProcCampChk() != FLD_CAMP_CHECK_STATE_ENCOUNTER_FLAG_SET) {
             return;
         }
         if (fldProcAmChk() != 0) {
@@ -4002,7 +4002,7 @@ s32 fldTitleMini(dds3ProcessID_t *task) {
     s32 nextFrame;
     u32 highlightRgb;
 
-    if (fldProcCampChk() == 1) {
+    if (fldProcCampChk() == FLD_CAMP_CHECK_STATE_MENU_ACTIVE) {
         return 0;
     }
     rsetOtOfs(0x53);

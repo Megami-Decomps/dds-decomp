@@ -14,6 +14,7 @@
 #include "sdf_resource_list_release_api.h"
 #include "kwln_background_fade_api.h"
 #include "fld_scene_ready_api.h"
+#include "fld_camp_check_state_api.h"
 #include "fld_scene_record_api.h"
 #include "fld_light_set.h"
 #include "fld_sky_buffer.h"
@@ -3246,7 +3247,7 @@ s32 fldStepActorMotionByKey(u32 key, f32 *x, f32 *y, f32 *z) {
 void func_00140F68(void) {
 }
 
-extern u8 fldProcCampChk(void), fldProcAmChk(void);
+extern u8 fldProcAmChk(void);
 extern s32 fileMenuTaskExists(void);
 
 extern u8 fldHasKiretaLabelProcess(void), fldProcKiretaChk(void), fldProcHirakenaiChk(void);
@@ -3267,7 +3268,7 @@ s32 fldUpdateTitleBannerTask(dds3ProcessID_t *task) {
     s32 width;
     s32 x;
 
-    if (fldProcCampChk() != 0) {
+    if (fldProcCampChk() != FLD_CAMP_CHECK_STATE_ENCOUNTER_FLAG_SET) {
         return 0;
     }
     if (fldProcAmChk() != 0) {
