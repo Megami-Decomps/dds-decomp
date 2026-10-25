@@ -1,6 +1,16 @@
 #ifndef BTL_TERMINAL_OUTCOME_H
 #define BTL_TERMINAL_OUTCOME_H
 
+#include "common.h"
+
+typedef s32 BtlTerminalOutcomeReadiness;
+enum {
+    BTL_TERMINAL_OUTCOME_NOT_READY = 0,
+    BTL_TERMINAL_OUTCOME_READY = 1,
+};
+
+BtlTerminalOutcomeReadiness btlResolveBattleTerminalOutcome(void);
+
 /* Known outcomes published by btlResolveBattleTerminalOutcome. Other
  * override and scene-specific codes may also be stored in eventReady. */
 enum BtlTerminalOutcome {

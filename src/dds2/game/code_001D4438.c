@@ -2,6 +2,7 @@
 #include "snd_packed_track_load_status.h"
 #include "btl_sound.h"
 #include "btl_actor_resource_cleanup_api.h"
+#include "btl_terminal_outcome.h"
 #include "btl_referenced_battle_effect_task.h"
 #include "dds3obj.h"
 #include "eff_random.h"
@@ -250,9 +251,6 @@ extern void datAddHp();
 
 #include "brs_task_poll_done_api.h"
 #include "btl_target_selection_state_api.h"
-
-extern s32 btlResolveBattleTerminalOutcome(void);
-
 
 extern s32 mnuGetSoundBufferStateLocked(void);
 extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);

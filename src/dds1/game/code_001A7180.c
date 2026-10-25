@@ -414,7 +414,7 @@ s32 btlIsUnitStatusFlagClear(BtlUnit *object) {
 
 /* Terminal policies publish and return; see docs/idioms.md,
  * "Outcome classifiers: late publication sharing". */
-s32 btlResolveBattleTerminalOutcome(void) {
+BtlTerminalOutcomeReadiness btlResolveBattleTerminalOutcome(void) {
     BtlState *state;
     BtlUnit *unit;
     s32 partyCount = 0;
@@ -428,7 +428,7 @@ s32 btlResolveBattleTerminalOutcome(void) {
         s32 result = state->battleOutcomeOverride();
         if (result != -1) {
             state->eventReady = result;
-            return 1;
+            return BTL_TERMINAL_OUTCOME_READY;
         }
     }
     for (unit = state->units; unit != NULL; unit = unit->next) {
@@ -450,21 +450,21 @@ s32 btlResolveBattleTerminalOutcome(void) {
         if (defeatedCount != 0) {
             btlBossDebugPrintf("btl:lose[%d,%d,%d]\n", partyCount, enemyCount, stoneCount);
             state->eventReady = BTL_TERMINAL_OUTCOME_LOSS;
-            return 1;
+            return BTL_TERMINAL_OUTCOME_READY;
         } else {
             state->eventReady = BTL_TERMINAL_OUTCOME_ESCAPE;
-            return 1;
+            return BTL_TERMINAL_OUTCOME_READY;
         }
     }
     if (state->battleFlags & 0x2000) {
         btlBossDebugPrintf("btl:esc[%d,%d,%d]\n", partyCount, enemyCount, stoneCount);
         state->eventReady = BTL_TERMINAL_OUTCOME_ESCAPE;
-        return 1;
+        return BTL_TERMINAL_OUTCOME_READY;
     }
     if (partyCount == stoneCount) {
         btlBossDebugPrintf("btl:stone[%d,%d,%d]\n", partyCount, enemyCount, stoneCount);
         state->eventReady = BTL_TERMINAL_OUTCOME_ALL_STONE;
-        return 1;
+        return BTL_TERMINAL_OUTCOME_READY;
     }
     if (enemyCount == 0) {
         btlBossDebugPrintf("btl:win[%d,%d,%d]\n", partyCount, enemyCount, stoneCount);
@@ -473,9 +473,9 @@ s32 btlResolveBattleTerminalOutcome(void) {
         } else {
             state->eventReady = BTL_TERMINAL_OUTCOME_WIN;
         }
-        return 1;
+        return BTL_TERMINAL_OUTCOME_READY;
     }
-    return 0;
+    return BTL_TERMINAL_OUTCOME_NOT_READY;
 }
 
 extern s32 D_00358514[];

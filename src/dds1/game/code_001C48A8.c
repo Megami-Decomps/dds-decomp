@@ -2061,8 +2061,6 @@ BtlTask *fldGetSceneGroupEntry(s32 entryIndex) {
     return fldGetSceneGroupResource(((BattleSceneWork *)scene)->slots[0].group)[entryIndex];
 }
 
-extern s32 btlResolveBattleTerminalOutcome(void);
-
 /* Advance one scene group task after both scene gates have opened. */
 void fldAdvanceSceneGroupScheduler(void) {
     BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
@@ -2076,7 +2074,7 @@ void fldAdvanceSceneGroupScheduler(void) {
             if ((scene->flags & 0x400) != 0) {
                 return;
             }
-            if (btlResolveBattleTerminalOutcome() != 0) {
+            if (btlResolveBattleTerminalOutcome() != BTL_TERMINAL_OUTCOME_NOT_READY) {
                 scene->flags |= 0x800;
                 return;
             }
