@@ -2879,7 +2879,7 @@ void ooyTestLine3D(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32
     D_0032F500[0] = first;
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
-    record = (s32)effDebugDrawWireModel(D_0032F4E0, D_0032F500, 2, 0x80);
+    record = (s32)effDebugDrawWireModel((const f32 (*)[4])D_0032F4E0, D_0032F500, 2, 0x80);
     sdfDrawTagLink(list, record);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
     descriptor->append(descriptor, list);
