@@ -6,12 +6,16 @@
 struct FldSpecialPoint;
 
 /* Type-10 placement tag values select both spawn behavior and payload view. */
-#define FLD_PLACEMENT_KIND_POINT 0
-#define FLD_PLACEMENT_KIND_REGISTERED_POINT 1
-#define FLD_PLACEMENT_KIND_EVENT_PLACEMENT 2
-#define FLD_PLACEMENT_KIND_WORD_ARRAY_PLACEMENT 3
-#define FLD_PLACEMENT_KIND_PENDING_SOUND 7
-#define FLD_PLACEMENT_KIND_SPECIAL_POINT 8
+typedef u32 FldPlacementKind;
+
+enum FldPlacementKind {
+    FLD_PLACEMENT_KIND_POINT = 0,
+    FLD_PLACEMENT_KIND_REGISTERED_POINT = 1,
+    FLD_PLACEMENT_KIND_EVENT_PLACEMENT = 2,
+    FLD_PLACEMENT_KIND_WORD_ARRAY_PLACEMENT = 3,
+    FLD_PLACEMENT_KIND_PENDING_SOUND = 7,
+    FLD_PLACEMENT_KIND_SPECIAL_POINT = 8
+};
 
 /* The kind word at +0 selects the pointed-to view of this relocated payload.
  * Kind 8 points to a two-word special point. Kinds 2 and 3 are consumed as
@@ -36,7 +40,7 @@ typedef struct FldSpecialPoint {
 
 /* Type-10 placement records contain a four-word serialized header. */
 typedef struct FldPlacementData {
-    u32 kind;            /* 0x00 */
+    FldPlacementKind kind; /* 0x00 */
     s32 event;            /* 0x04 */
     u8 opaque08[4];
     FldPlacementPayloadRef payload; /* 0x0C */
