@@ -8559,20 +8559,24 @@ void fileAcquireRecord(FileSlotTable *record) {
     record->references++;
 }
 
-void fileReadVectorPtr20(u8 *obj, void *dst) {
-    SDF_VU0_COPYVECTOR(dst, *(u8 **)(obj + 0x20));
+void fileReadVectorPtr20(u8 *recordBytes, void *dst) {
+    FileSlotTable *record = (FileSlotTable *)recordBytes;
+    SDF_VU0_COPYVECTOR(dst, record->data0);
 }
 
-void mnuRecordSetVector(void *record, const void *src) {
-    SDF_VU0_COPYVECTOR(*(u8 **)((u8 *)record + 0x20), src);
+void mnuRecordSetVector(void *recordBytes, const void *src) {
+    FileSlotTable *record = (FileSlotTable *)recordBytes;
+    SDF_VU0_COPYVECTOR(record->data0, src);
 }
 
-void fileReadRecordSecondVector(u8 *obj, void *dst) {
-    SDF_VU0_COPYVECTOR(dst, *(u8 **)(obj + 0x20) + 0x10);
+void fileReadRecordSecondVector(u8 *recordBytes, void *dst) {
+    FileSlotTable *record = (FileSlotTable *)recordBytes;
+    SDF_VU0_COPYVECTOR(dst, record->data0 + 0x10);
 }
 
-void fileSetRecordSecondVector(void *record, const void *src) {
-    SDF_VU0_COPYVECTOR(*(u8 **)((u8 *)record + 0x20) + 0x10, src);
+void fileSetRecordSecondVector(void *recordBytes, const void *src) {
+    FileSlotTable *record = (FileSlotTable *)recordBytes;
+    SDF_VU0_COPYVECTOR(record->data0 + 0x10, src);
 }
 
 INCLUDE_SDATA(const s32, "game/code_002C96D0", effModelUpdateControlFlags);
