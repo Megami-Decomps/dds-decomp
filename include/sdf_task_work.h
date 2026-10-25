@@ -79,6 +79,13 @@ typedef struct TaskWork {
     struct SdfListNode *currentNode;/* 0x10: next entry visited by the active pass. */
 } TaskWork;
 
+/* A pass step visits its current node or resets the cursor when the pass ends. */
+typedef s32 SdfTaskWorkStepResult;
+enum {
+    SDF_TASK_WORK_STEP_RESULT_PASS_COMPLETE = 0,
+    SDF_TASK_WORK_STEP_RESULT_NODE_VISITED = 1
+};
+
 typedef char TaskWork_layout_must_match_native_owner[
     (sizeof(TaskWork) == 0x14 &&
      (u32)&((TaskWork *)0)->allocation == 0x00 &&
@@ -96,6 +103,8 @@ void sdfDestroyTaskWorkerTasks(TaskWork *);
 void sdfAttachTaskItem(TaskWork *, SdfTaskItemDesc *);
 void sdfRemoveTaskItem(TaskWork *, s32);
 SdfTaskEntry *sdfFindTaskItemValueByKey(TaskWork *, s32);
+SdfTaskWorkStepResult sdfTaskWorkStepEntry(TaskWork *work);
+SdfTaskWorkStepResult sdfTaskWorkStep(TaskWork *work);
 
 #define SDF_TASK_VALUE_USER_DATA_KEY (-1)
 

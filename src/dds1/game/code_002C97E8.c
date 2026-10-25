@@ -882,15 +882,15 @@ void sdfCallbackWorkOnRemove(s32 key, SdfTaskEntry *work) {
 
 
 /* Visit one entry: initialize, remove if pending, otherwise update.
- * An update result of -1 queues removal for its next visit. Returns 0 at pass end. */
-s32 sdfTaskWorkStepEntry(TaskWork *work) {
+ * An update result of -1 queues removal for its next visit. Returns PASS_COMPLETE at pass end. */
+SdfTaskWorkStepResult sdfTaskWorkStepEntry(TaskWork *work) {
     SdfListNode *node = work->currentNode;
     SdfTaskEntry *taskEntry;
     u32 flags;
 
     if (node == NULL) {
         work->currentNode = work->list->head;
-        return 0;
+        return SDF_TASK_WORK_STEP_RESULT_PASS_COMPLETE;
     }
     taskEntry = (SdfTaskEntry *)node->value;
     flags = taskEntry->flags;
@@ -907,7 +907,7 @@ s32 sdfTaskWorkStepEntry(TaskWork *work) {
         }
         if (flags & SDF_TASK_ENTRY_REMOVE_PENDING) {
             sdfRemoveTaskItem(work, taskEntry->key);
-            return 1;
+            return SDF_TASK_WORK_STEP_RESULT_NODE_VISITED;
         }
         if (flags & SDF_TASK_ENTRY_UPDATE_ENABLED) {
             if (taskEntry->update(taskEntry->key, taskEntry->initResult) == -1) {
@@ -918,18 +918,18 @@ s32 sdfTaskWorkStepEntry(TaskWork *work) {
     case SDF_TASK_ENTRY_SUSPENDED:
         break;
     }
-    return 1;
+    return SDF_TASK_WORK_STEP_RESULT_NODE_VISITED;
 }
 
-/* Run one entry's callback phase; return 0 after resetting the cursor at pass end. */
-s32 sdfTaskWorkStep(TaskWork *work) {
+/* Run one entry's callback phase; return PASS_COMPLETE after resetting the cursor. */
+SdfTaskWorkStepResult sdfTaskWorkStep(TaskWork *work) {
     SdfListNode *node = work->currentNode;
     SdfTaskEntry *entry;
     u32 flags;
 
     if (node == NULL) {
         work->currentNode = work->list->head;
-        return 0;
+        return SDF_TASK_WORK_STEP_RESULT_PASS_COMPLETE;
     }
     entry = (SdfTaskEntry *)node->value;
     flags = entry->flags;
@@ -946,7 +946,7 @@ s32 sdfTaskWorkStep(TaskWork *work) {
         /* Pending-mode activation belongs to the update pass in DDS1. */
         break;
     }
-    return 1;
+    return SDF_TASK_WORK_STEP_RESULT_NODE_VISITED;
 }
 
 s32 sdfTaskWorkRunAllEntries(dds3ProcessID_t *task) {
@@ -955,7 +955,7 @@ s32 sdfTaskWorkRunAllEntries(dds3ProcessID_t *task) {
     if (work->currentNode == NULL) {
         return -1;
     }
-    while (sdfTaskWorkStepEntry(work) == 1) {
+    while (sdfTaskWorkStepEntry(work) == SDF_TASK_WORK_STEP_RESULT_NODE_VISITED) {
     }
     return 0;
 }
@@ -966,7 +966,7 @@ s32 sdfTaskWorkRunAll(dds3ProcessID_t *task) {
     if (work->currentNode == NULL) {
         return -1;
     }
-    while (sdfTaskWorkStep(work) == 1) {
+    while (sdfTaskWorkStep(work) == SDF_TASK_WORK_STEP_RESULT_NODE_VISITED) {
     }
     return 0;
 }
