@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "fld_area_work.h"
+#include "fld_camera_move_tracking.h"
 #include "fld_title_banner_menu.h"
 #include "common.h"
 #include "fld_scene_status_api.h"
@@ -23,8 +24,6 @@ extern void fldApplyCurrentTaskScene(const char *name);
 #include "fld_activation_entry.h"
 
 
-
-extern s32 fldElvCheckEnd(void);
 
 extern s32 fldDoor_GetElvTbl(s32);
 
@@ -1241,9 +1240,9 @@ u32 fldCommand_FLD_ELV_FLOOREND(void) {
 }
 
 u32 fldCommand_FLD_ELV_ENDCHK(void) {
-    s32 result;
+    FldCameraTrackingResult result;
 
-    result = fldElvCheckEnd();
+    result = fldEvaluateCameraMoveTracking();
     scrSetIntReturnValue(result);
     return 1;
 }

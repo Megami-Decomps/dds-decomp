@@ -915,7 +915,7 @@
 0x0011E6C0	fldDrawPercentValue	inferred	formats signed percentage values with glyphs 10, 11 and 12; calls fldKanjiDraw
 0x0011E810	fldElvSetFloor	inferred	SMT3HD name via SLUS_209.11 0x00118F30, reloc-identical; was fldConfigureCameraMoveTracking
 0x0011E960	fldResetCameraMoveTracking	inferred	Clears camera tracking sentinel values and calls fldClearCameraMoveMode. [names_reviewed5.tsv]
-0x0011E998	fldElvCheckEnd	inferred	SMT3HD name via SLUS_209.11 0x001190B8, reloc-identical; was fldEvaluateCameraMoveTracking
+0x0011E998	fldEvaluateCameraMoveTracking	inferred	Reports camera-tracking mode pending (2), starts the requested camera move and returns 1 when the target floor is reached, or returns 0 when no action is due. SMT3HD equivalent fldElvCheckEnd at SLUS_209.11 0x001190B8 is reloc-identical. [paired provider behavior and script-result use]
 0x0011EA10	fldElvDrawFloorNum	inferred	SMT3HD name via SLUS_209.11 0x00119130, unique-masked-hash; was fldUpdateCameraMoveTracking
 0x0011EBC8	drawSceneBasicList	inferred	SMT3HD name via SLUS_209.11 0x001192E8, reloc-identical; was fldSubmitVisibleWorldBackground
 0x0011ECC8	fldDrawEffectObjectShadow	inferred	Builds shadow triangles from the effect model silhouette, extrudes boundary edges along the selected ground/view direction, and submits projected shadow geometry. Called by dds3UpdateEffectObjectFollowParameters only when the shadow/update flags and transition owner permit it; paired DDS2 implementation at 0x00120B88.

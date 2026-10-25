@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "fld_integer_editor_api.h"
 #include "fld_area_work.h"
+#include "fld_camera_move_tracking.h"
 #include "fld_runtime_reset_api.h"
 #include "fld_npc_motion.h"
 #include "fld_label_rows.h"
@@ -820,11 +821,10 @@ void fldResetCameraMoveTracking(void) {
     fldClearCameraMoveMode();
 }
 
-/* Report the pending camera move mode, kicking the field camera when the
- * stored start and end indices agree. */
-s32 fldElvCheckEnd(void) {
+/* Report camera-tracking state and start a move when its target is reached. */
+FldCameraTrackingResult fldEvaluateCameraMoveTracking(void) {
     if (fldElvState == 1) {
-        return 2;
+        return FLD_CAMERA_TRACKING_MODE_PENDING;
     }
     if (fldElvFloorTarget != FIELD_CAMERA_TRACKING_UNSET && gFldElvFloorNow == fldElvFloorTo) {
         if (fldElvFloorFrom < gFldElvFloorNow) {
@@ -832,9 +832,9 @@ s32 fldElvCheckEnd(void) {
         } else {
             fldSetElvCameraScene(-2);
         }
-        return 1;
+        return FLD_CAMERA_TRACKING_MOVE_STARTED;
     }
-    return 0;
+    return FLD_CAMERA_TRACKING_NO_ACTION;
 }
 
 INCLUDE_RODATA(const s32, "game/code_0011F208", D_00412B90);

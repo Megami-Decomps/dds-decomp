@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "fld_area_work.h"
+#include "fld_camera_move_tracking.h"
 #include "fld_title_banner_menu.h"
 #include "fld_activation_entry.h"
 #include "fld_scene_record.h"
@@ -148,9 +149,6 @@ extern s32 D_00436360;
 extern struct sdfTexHandle_t *D_0043637C;
 
 extern s32 fldFindRoomIdByTask(dds3ProcessID_t *task);
-
-extern s32 fldElvCheckEnd(void);
-
 
 extern s32 fldQuerySelectedActorMotionState(s32 value);
 
@@ -1589,7 +1587,7 @@ u32 fldCommand_FLD_ELV_FLOOREND(void) {
 }
 
 s32 fldCommand_FLD_ELV_ENDCHK(void) {
-    scrSetIntReturnValue(fldElvCheckEnd());
+    scrSetIntReturnValue(fldEvaluateCameraMoveTracking());
     return 1;
 }
 
