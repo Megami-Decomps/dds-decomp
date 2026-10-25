@@ -15,6 +15,7 @@
 #include "itf.h"
 #include "fpu.h"
 #include "itf_grid_text.h"
+#include "sdf_grid_seek_api.h"
 #include "sdf.h"
 #include "mnu.h"
 #include "itf_draw_grid.h"
@@ -1599,13 +1600,13 @@ GridTextListItem *itfFindGridNodeByKey(u32 key, GridTextWidget *widget) {
     return item;
 }
 
-s32 sdfGridSeekSelectedNodeByIndex(s32 itemsToAdvance, GridTextWidget *widget) {
+SdfGridSeekResult sdfGridSeekSelectedNodeByIndex(s32 itemsToAdvance, GridTextWidget *widget) {
     s16 count = widget->itemCount;
     u16 width;
     GridTextListItem *first;
 
     if (itemsToAdvance >= count) {
-        return 0;
+        return SDF_GRID_SEEK_RESULT_ITEMS_EXHAUSTED;
     }
     first = widget->head;
     widget->cursorRow = 0;
@@ -1624,13 +1625,13 @@ s32 sdfGridSeekSelectedNodeByIndex(s32 itemsToAdvance, GridTextWidget *widget) {
             widget->selected = current->next;
         } while (--itemsToAdvance != 0);
     }
-    return 1;
+    return SDF_GRID_SEEK_RESULT_SEEK_APPLIED;
 }
 
-s32 sdfGridSeekFirstNode(GridTextWidget *widget) {
+SdfGridSeekResult sdfGridSeekFirstNode(GridTextWidget *widget) {
     return sdfGridSeekSelectedNodeByIndex(0, widget);
 }
 
-s32 sdfGridSeekLastNode(GridTextWidget *widget) {
+SdfGridSeekResult sdfGridSeekLastNode(GridTextWidget *widget) {
     return sdfGridSeekSelectedNodeByIndex(widget->itemCount - 1, widget);
 }

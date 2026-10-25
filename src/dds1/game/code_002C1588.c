@@ -11,6 +11,7 @@
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
 #include "itf_grid_text.h"
+#include "sdf_grid_seek_api.h"
 #include "itf_draw_grid.h"
 #include "sdf.h"
 #include "sdf_draw.h"
@@ -20,8 +21,6 @@
 extern GridTextListItem *itfFindGridNodeByKey(u32, GridTextWidget *);
 
 extern GridTextListItem *itfRemoveSelectedGridTextItem(GridTextWidget *);
-
-extern s32 sdfGridSeekSelectedNodeByIndex(s32, GridTextWidget *);
 
 void uiDrawUniformColorRect(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32 surfaceIndex);
 
@@ -613,13 +612,13 @@ GridTextListItem *itfFindGridNodeByKey(u32 key, GridTextWidget *widget) {
     return item;
 }
 
-s32 sdfGridSeekSelectedNodeByIndex(s32 itemsToAdvance, GridTextWidget *widget) {
+SdfGridSeekResult sdfGridSeekSelectedNodeByIndex(s32 itemsToAdvance, GridTextWidget *widget) {
     s16 count = widget->itemCount;
     u16 width;
     GridTextListItem *first;
 
     if (itemsToAdvance >= count) {
-        return 0;
+        return SDF_GRID_SEEK_RESULT_ITEMS_EXHAUSTED;
     }
     first = widget->head;
     widget->cursorRow = 0;
@@ -638,16 +637,15 @@ s32 sdfGridSeekSelectedNodeByIndex(s32 itemsToAdvance, GridTextWidget *widget) {
             widget->selected = current->next;
         } while (--itemsToAdvance != 0);
     }
-    return 1;
+    return SDF_GRID_SEEK_RESULT_SEEK_APPLIED;
 }
 
-s32 sdfGridSeekFirstNode(GridTextWidget *widget) {
+SdfGridSeekResult sdfGridSeekFirstNode(GridTextWidget *widget) {
     return sdfGridSeekSelectedNodeByIndex(0, widget);
 }
 
-s32 sdfGridSeekLastNode(GridTextWidget *widget) {
+SdfGridSeekResult sdfGridSeekLastNode(GridTextWidget *widget) {
     return sdfGridSeekSelectedNodeByIndex(widget->itemCount - 1, widget);
 }
 
 INCLUDE_RODATA(const s32, "game/code_002C1588", fldLocalMapTaskName);
-

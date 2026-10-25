@@ -14,6 +14,7 @@
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "itf_grid_text.h"
+#include "sdf_grid_seek_api.h"
 #include "sdf_sif_command.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
@@ -96,8 +97,6 @@ extern u32 D_003BD258;
 typedef GridTextListItem LmapNode;
 typedef GridTextWidget LmapList;
 
-extern s32 sdfGridSeekFirstNode(GridTextWidget *);
-extern s32 sdfGridSeekLastNode(GridTextWidget *);
 extern LmapNode *fldLmapAdvanceWindowStart(LmapList *);
 extern u32 itfGetGridListLinkFlags(LmapList *);
 extern void uiDrawUniformRgbRange(s32 *, s32 *, s32, u32, s32);
@@ -733,4 +732,3 @@ INCLUDE_SDATA(const s32, "game/code_002C2620", D_003BD258);
 INCLUDE_SDATA(const s32, "game/code_002C2620", D_003BD25C);
 
 INCLUDE_SDATA(const s32, "game/code_002C2620", D_003BD260);
-

@@ -19,6 +19,7 @@
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "itf_grid_text.h"
+#include "sdf_grid_seek_api.h"
 #include "fld_lmap_task.h"
 #include "sdf_sif_command.h"
 #include "kwln_task_lifecycle.h"
@@ -55,8 +56,6 @@ extern void fldShutdownLmapResources(void);
 typedef GridTextListItem LmapNode;
 typedef GridTextWidget LmapList;
 
-extern s32 sdfGridSeekFirstNode(GridTextWidget *);
-extern s32 sdfGridSeekLastNode(GridTextWidget *);
 extern LmapNode *fldLmapAdvanceWindowStart(LmapList *);
 extern u32 itfGetGridListLinkFlags(LmapList *);
 extern void uiDrawUniformRgbRange(s32 *, s32 *, s32, u32, s32);
