@@ -17,7 +17,7 @@
 #include "sdf_chunk.h"
 
 extern void effPCPCrackDraw(effPCPCrack_t *work);
-extern void effPCPCrackSetPosition(void *dst, void *src);
+extern void effPCPCrackSetPosition(f32 *dst, const f32 *src);
 extern PairedEffectResources *effPCPBossMETATOBeamCreate(PairedEffectParams *src);
 extern EffThunderGroup *effPCP_ThunderPolyListCreate(EffThunderGroupParams *src);
 
@@ -464,9 +464,9 @@ void effPCPCrackDraw(effPCPCrack_t *work) {
 }
 
 
-void effPCPCrackSetPosition(void *dst, void *src)
+void effPCPCrackSetPosition(f32 *dst, const f32 *src)
 {
-    SDF_VU0_COPYVECTOR(dst, src);
+    PCP_COPY_VECTOR_F32(dst, src);
 }
 
 void effBossTrailSetColor(effPCPCrack_t *work, s32 value) {
