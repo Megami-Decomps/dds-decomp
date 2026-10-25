@@ -462,8 +462,12 @@ void sdfModelEvalNode(sdfModelNode_t *drawNode, const f32 (*parentMatrix)[4], s3
 
 /* Scale the root transform and propagate it into the first draw node. */
 void sdfModelEvalTm2(sdfModelRootNode_t *model, s32 frame) {
-    u128 rootMatrix[4];
-    void *transform = model->matrix;
+    /* Keep the VU-aligned store view and read-only row-matrix view together. */
+    union {
+        u128 quadwords[4];
+        const f32 rows[4][4];
+    } rootMatrix;
+    f32 (*transform)[4] = model->matrix;
     f32 *scale;
     DevRequest *list;
 
@@ -471,9 +475,10 @@ void sdfModelEvalTm2(sdfModelRootNode_t *model, s32 frame) {
     scale = model->scaleVector;
     SDF_VU0_LOADVECTOR_BARRIER(scale);
     SDF_VU0_SCALE_XYZ_REV();
-    VU0_STORE_MATRIX_M(rootMatrix[0], rootMatrix[1], rootMatrix[2], rootMatrix[3]);
+    VU0_STORE_MATRIX_M(rootMatrix.quadwords[0], rootMatrix.quadwords[1], rootMatrix.quadwords[2],
+                       rootMatrix.quadwords[3]);
     list = model->list;
-    sdfModelEvalNode(((sdfModelNode_t **)list->buffer)[0], (const f32 (*)[4])rootMatrix, frame);
+    sdfModelEvalNode(((sdfModelNode_t **)list->buffer)[0], rootMatrix.rows, frame);
 }
 
 /* Update the model with the engine's current signed frame index. */
