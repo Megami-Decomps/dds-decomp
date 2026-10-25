@@ -235,7 +235,7 @@ typedef struct BtlUnit {
     f32 effectScale; /* 0x104: retained motion-selection rate. */
     u64 owner;      /* 0x108: compared against the battle command's unit ID */
     BtlUnitStatus status; /* 0x110: complete low/high status record. */
-    s32 gunResourceFlags;
+    u32 gunResourceFlags; /* 0x118: model/gun request and readiness bits. */
     u8 lookupId;
     u8 pad11D[3];
     datUnitWork_t partyRecord; /* 0x120: complete copied roster record (0x1C4). */
