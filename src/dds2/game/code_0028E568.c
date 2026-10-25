@@ -603,9 +603,94 @@ void mnuUpdateSelectedMantraLimitLineState(MnuStatusResource *object) {
     mnuSetMantraBackgroundSelection(menu->menu.selectionController, flags);
 }
 
-INCLUDE_RODATA(const s32, "game/code_0028E568", D_004274B0);
+extern s32 prfIsMantraCategoryEnabled(u32 categoryIndex);
+extern s32 evtTestMantraNodePartyRequirements(u16, s32);
+extern s32 prfReqEvaluateRules(u32, u32, datUnitWork_t *, u32, u32 *);
+extern s32 prfReqCheckWithFallback(datUnitWork_t *, u16);
 
-INCLUDE_ASM(const s32, "game/code_0028E568", mnuScanMantraSourceCandidates);
+s32 mnuScanMantraSourceCandidates(MnuStatusResource *object) {
+    s8 memberOffsets[9] = { 0, 0, 1, 5, 2, 3, 4, 5, 1 };
+    MenuMantraRecord *record;
+    struct MenuListNode *node;
+    datUnitWork_t *selectedParty;
+    datUnitWork_t **selectedPartySlot;
+    datUnitWork_t *party;
+    s32 changed = 0;
+    s32 rank;
+    s32 modelRank;
+    s32 remaining;
+
+    selectedPartySlot = &object->list->cursor->partyRecord;
+    selectedParty = *selectedPartySlot;
+    record = object->menu.records;
+    if (!record->fields.announced) {
+        for (rank = 0; prfIsMantraCategoryEnabled(rank); rank++) {}
+        rank--;
+        modelRank = mnuGetActiveMantraModelFlagState();
+        if (modelRank < rank) changed = 1;
+        evtPrintDeveloperConsoleMessage("DrawRank!!!!!!!!!!!!!!!!!!![%d][%d]\n", modelRank, rank);
+        if (rank < modelRank) rank = modelRank;
+        object->menu.drawBits.drawRank = rank;
+        if (record->fields.kind < rank) {
+            record->fields.kind = rank;
+            record->fields.queued = 1;
+            if ((record->flags & 0xF00) == 0x100) {
+                record->eventFlag = 0x920;
+                object->menu.drawBits.drawRank = 1;
+            } else if ((record->flags & 0xF00) == 0x200) {
+                record->eventFlag = 0x921;
+                object->menu.drawBits.drawRank = 2;
+            } else if ((record->flags & 0xF00) == 0x300) {
+                record->eventFlag = 0x922;
+                record->fields.announced = 1;
+                object->menu.drawBits.drawRank = 3;
+            }
+        }
+    } else {
+        object->menu.drawBits.drawRank = 3;
+        object->menu.drawBits.showOverlay = 1;
+    }
+    record++;
+    for (remaining = 110; remaining >= 0; remaining--, record++) {
+        if (record->mantraId != 0 && !record->fields.announced) {
+            switch (record->fields.kind) {
+            case 2:
+                if (!evtBitCheck(record->eventFlag)) {
+                    if (evtTestMantraNodePartyRequirements(record->mantraId, 0)) {
+                        record->fields.queued = 1;
+                        changed = 1;
+                        evtPrintDeveloperConsoleMessage("Event Mantra Hiding[%d]!!!!!!!!!!\n", record->mantraId);
+                    }
+                }
+                break;
+            case 3:
+                if (!evtBitCheck(record->eventFlag)) {
+                    for (node = object->list->first; node != NULL; node = node->next) {
+                        party = node->partyRecord;
+                        if (record->element == memberOffsets[party->unitId]) break;
+                    }
+                    if (node != NULL && prfReqEvaluateRules(0, 4, party, record->mantraId, NULL)) {
+                        record->fields.queued = 1;
+                        changed = 1;
+                        record->targetId = party->unitId;
+                        evtPrintDeveloperConsoleMessage("Event Mantra High Rank[%d]!!!!!!!!!!\n", record->mantraId);
+                    }
+                }
+                break;
+            case 4:
+                if (!evtBitCheck(record->eventFlag)) {
+                    if (prfReqCheckWithFallback(selectedParty, record->mantraId)) {
+                        record->fields.queued = 1;
+                        changed = 1;
+                        evtPrintDeveloperConsoleMessage("Event Mantra Rare[%d]!!!!!!!!!!\n", record->mantraId);
+                    }
+                }
+                break;
+            }
+        }
+    }
+    return changed;
+}
 
 u32 func_0028FD08(void) {
     return 0;
