@@ -899,7 +899,7 @@ s32 mnuHandleTitleMenuEvent(s32 event) {
 
 /* Actual cross-unit contracts used by the title-menu callback. */
 extern void dds3FadeClear(void);
-extern s32 mnuIsAnyMenuInputPressed(void);
+extern u8 mnuIsAnyMenuInputPressed(void);
 extern u8 mnuHasSpriteHandle(void);
 extern void mnuDrawMovieMenuSpriteSlot1F(s32);
 extern void mnuDrawMovieMenuSpriteSlot20(u32);

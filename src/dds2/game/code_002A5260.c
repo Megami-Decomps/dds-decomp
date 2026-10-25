@@ -141,7 +141,7 @@ extern void mnuCallInitWide(s32, s32, s32, s32, s32);
 
 extern void sdfMovieDrawFrame(movieStream_t *, SdfPoolNode *);
 extern void mnuSubmitMovieDrawPacket(movieStream_t *, SdfPoolNode *);
-extern s32 mnuIsAnyMenuInputPressed(void);
+extern u8 mnuIsAnyMenuInputPressed(void);
 extern void mnuDrawSprite(s32 x, s32 y, s32 depth, s32 alpha, s32 drawMode, s32 spriteIndex,
                           s32 drawContext);
 

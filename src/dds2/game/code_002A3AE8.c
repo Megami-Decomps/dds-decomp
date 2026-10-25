@@ -102,7 +102,7 @@ void mnuSelectMenuListCursorByAdvance(s32 advanceCount) {
 
 extern s8 dds3PadButtonState[];
 
-s32 mnuIsAnyMenuInputPressed(void) {
+u8 mnuIsAnyMenuInputPressed(void) {
     if (dds3PadButtonState[0x21] < 0 || dds3PadButtonState[0x23] < 0 ||
         dds3PadButtonState[0x22] < 0 || dds3PadButtonState[0x20] < 0 ||
         dds3PadButtonState[0x2a] < 0 || dds3PadButtonState[0x2b] < 0 ||

@@ -50,7 +50,7 @@ extern void p2sdPlayBGMFade(s32 trackId);
 extern void mnuDrawMovieMenuSpriteSlot16(s32 volume);
 extern void mnuDrawMovieMenuSpriteSlot17(s32 volume);
 extern void mnuDrawMovieMenuSpriteSlot18(s32 volume);
-extern s32 mnuIsAnyMenuInputPressed(void);
+extern u8 mnuIsAnyMenuInputPressed(void);
 extern void dds3PlayMovieByIndex(s32 index);
 extern u8 mnuGetMoviePlaybackMode(void);
 extern s32 mnuIsMoviePlaybackFinished(void);
