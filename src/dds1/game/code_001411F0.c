@@ -3683,7 +3683,7 @@ void fldDrawInputCursor(s32 x, s32 y) {
 }
 
 extern s32 fldGetSparkDialogPhase(void);
-extern s16 *fldFindLocationCoordinateRecord(s32 area, s32 locationIndex);
+extern const s16 *fldFindLocationCoordinateRecord(s32 area, s32 locationIndex);
 extern void fldSubmitGsGradientQuad(s32, s32, s32, s32, u32, u32, u32, u32,
     u32, u32, u32, u32, u32, u32, u32, u32, u32, u32, u32, u32);
 

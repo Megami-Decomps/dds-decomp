@@ -2092,7 +2092,7 @@ s32 fldFindMapCoordinateIndex(s32 mapId, s32 floorIndex) {
 
 /* Search location records 1..639; a miss returns the reserved first record,
  * not NULL, so callers can read the fallback record's fields. */
-s16 *fldFindLocationCoordinateRecord(s32 area, s32 locationIndex) {
+const s16 *fldFindLocationCoordinateRecord(s32 area, s32 locationIndex) {
     u8 *records = (u8 *)D_00387D70;
     u8 *yColumn = records + 2;
     s32 index = 1;
