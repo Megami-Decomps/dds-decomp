@@ -9,6 +9,7 @@
 #include "eff_dependency.h"
 #include "pcp_vu0.h"
 #include "dds3obj.h"
+#include "dds3_object_resource_state.h"
 #include "dds3_scene_membership.h"
 #include "eff_object_dispatch_api.h"
 #include "eff.h"
@@ -304,7 +305,7 @@ dds3Basic_t *AddP2AEffect(bill, vec, extra)
     data->entryId = 0;
     data->ownerKind = 0;
     handle = dds3EffectObjectBasicGetControlWorkData(obj);
-    handle->resourceState = 2;
+    handle->resourceState = DDS3_OBJECT_RESOURCE_EFFECT_DEPENDENCY;
     id = dds3GetFirstWorldObjectNodeOfKind2();
     if (id != NULL) {
         handle->slots[5] = id;
@@ -371,7 +372,7 @@ dds3Basic_t *AddTMXEffect(bill, firstVector, secondVectorAddress)
     data->entryId = 0;
     data->ownerKind = 0;
     objectHandle = dds3EffectObjectBasicGetControlWorkData(obj);
-    objectHandle->resourceState = 2;
+    objectHandle->resourceState = DDS3_OBJECT_RESOURCE_EFFECT_DEPENDENCY;
     worldNode = dds3GetFirstWorldObjectNodeOfKind2();
     if (worldNode != NULL) {
         objectHandle->slots[5] = worldNode;
@@ -434,7 +435,7 @@ dds3Basic_t *effObjCreateWithBoundBill(bill, firstVector, secondVector)
     data->entryId = 0;
     data->ownerKind = 0;
     objectHandle = dds3EffectObjectBasicGetControlWorkData(obj);
-    objectHandle->resourceState = 2;
+    objectHandle->resourceState = DDS3_OBJECT_RESOURCE_EFFECT_DEPENDENCY;
     worldNode = dds3GetFirstWorldObjectNodeOfKind2();
     if (worldNode != NULL) {
         objectHandle->slots[5] = worldNode;
@@ -488,7 +489,7 @@ dds3Basic_t *effObjCreateBillboardInWorld(bill, firstVector, secondVector)
     data->entryId = 0;
     data->ownerKind = 0;
     objectHandle = dds3EffectObjectBasicGetControlWorkData(obj);
-    objectHandle->resourceState = 2;
+    objectHandle->resourceState = DDS3_OBJECT_RESOURCE_EFFECT_DEPENDENCY;
     worldNode = dds3GetFirstWorldObjectNodeOfKind2();
     if (worldNode != NULL) {
         objectHandle->slots[5] = worldNode;
@@ -538,7 +539,7 @@ dds3Basic_t *AddBEDEffect(source, firstVector, secondVector)
     data->vector = sdfChipAllocDirect(sizeof(parameters));
     memcpy(data->vector, &parameters, sizeof(parameters));
     objectHandle = dds3EffectObjectBasicGetControlWorkData(obj);
-    objectHandle->resourceState = 2;
+    objectHandle->resourceState = DDS3_OBJECT_RESOURCE_EFFECT_DEPENDENCY;
     worldNode = dds3GetFirstWorldObjectNodeOfKind2();
     if (worldNode != NULL) {
         objectHandle->slots[5] = worldNode;
@@ -611,7 +612,7 @@ dds3Basic_t *AddESPEffect(const char *name, const u128 *firstVector, void *secon
     data->ownerKind = 0;
     obj->value = name;
     objectHandle = dds3EffectObjectBasicGetControlWorkData(obj);
-    objectHandle->resourceState = 2;
+    objectHandle->resourceState = DDS3_OBJECT_RESOURCE_EFFECT_DEPENDENCY;
     worldNode = dds3GetFirstWorldObjectNodeOfKind2();
     if (worldNode != NULL) {
         objectHandle->slots[5] = worldNode;
@@ -678,7 +679,7 @@ dds3Basic_t *AddMG12Effect(kind, descriptor)
         break;
     }
     objectHandle = dds3EffectObjectBasicGetControlWorkData(obj);
-    objectHandle->resourceState = 2;
+    objectHandle->resourceState = DDS3_OBJECT_RESOURCE_EFFECT_DEPENDENCY;
     worldNode = dds3GetFirstWorldObjectNodeOfKind2();
     if (worldNode != NULL) {
         objectHandle->slots[5] = worldNode;
@@ -859,7 +860,7 @@ void dds3EffectObjectBasicGetObjectIndex(dds3Basic_t *obj) {
         owner = data->owner;
         if (((u8 *)&owner->kindTag)[3] == EFF_OBJ_OWNER_BILL_KIND) {
             objectBase = ((EffectObjectData *)owner->data)->modelHolder;
-            if (objectBase->resourceState != 0) {
+            if (objectBase->resourceState != DDS3_OBJECT_RESOURCE_MODEL_CONTEXT) {
                 return;
             }
             model = objectBase->resourceHandle;

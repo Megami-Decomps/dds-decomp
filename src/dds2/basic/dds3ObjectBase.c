@@ -13,6 +13,7 @@
 #include "dds3_slot1_handler_api.h"
 
 #include "dds3obj.h"
+#include "dds3_object_resource_state.h"
 #include "dds3_object_mode.h"
 #include "eff_object.h"
 #include "dds3Admin.h"
@@ -158,11 +159,13 @@ void *dds3ObjectBaseGetModelHandle(dds3Basic_t *object) {
 void dds3ObjectBaseFreeModelHandle(dds3Basic_t *object) {
     dds3ObjectBaseControlWorkData_t *base;
     EffectObjectData *data;
+    Dds3ObjectResourceState resourceState;
 
     base = dds3GetBaseControlWorkData(object);
     if (base->resourceHandle != 0) {
-        if (base->resourceState != DDS3_OBJECT_RESOURCE_DEV_MOTION) {
-            if (base->resourceState == DDS3_OBJECT_RESOURCE_MODEL_CONTEXT) {
+        resourceState = base->resourceState;
+        if (resourceState != DDS3_OBJECT_RESOURCE_DEV_MOTION) {
+            if (resourceState == DDS3_OBJECT_RESOURCE_MODEL_CONTEXT) {
                 mdlFree((dds3ModelHandle_t *)base->resourceHandle);
                 data = object->data;
                 if (data->transitionWork != NULL) {
@@ -424,6 +427,7 @@ extern void sdfModelEvalTm(sdfModelRootNode_t *);
 
 void effObjApplyTransformParameters(struct SdfPoolNode **surfaces, dds3Basic_t *object) {
     dds3ObjectBaseControlWorkData_t *base;
+    Dds3ObjectResourceState resourceState;
     struct SdfDmaTagHeader *lighting;
     sdfModelRootNode_t *model;
     s32 roomObjectIndex;
@@ -436,8 +440,9 @@ void effObjApplyTransformParameters(struct SdfPoolNode **surfaces, dds3Basic_t *
         return;
     }
 
-    if (base->resourceState != DDS3_OBJECT_RESOURCE_DEV_MOTION) {
-        if (base->resourceState != DDS3_OBJECT_RESOURCE_MODEL_CONTEXT) {
+    resourceState = base->resourceState;
+    if (resourceState != DDS3_OBJECT_RESOURCE_DEV_MOTION) {
+        if (resourceState != DDS3_OBJECT_RESOURCE_MODEL_CONTEXT) {
             return;
         }
         if (dds3ObjectBaseCheckFlag(object, 0x800)) {
