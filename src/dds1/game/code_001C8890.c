@@ -750,8 +750,8 @@ void btlInitializeActorCommandState(BtlTask *task) {
 }
 
 /* Allow the AI updater to bind this acting unit's script slot once again. */
-void btlEnterAiActionState(s32 task) {
-    *(u32 *)(task + 8) = *(u32 *)(task + 8) & 0xffffff7f;
+void btlEnterAiActionState(BtlTask *task) {
+    task->flags = task->flags & 0xffffff7f;
 }
 
 /* Bind the acting unit's AI slot once, then wait for its script task. */
@@ -2064,9 +2064,8 @@ s32 btlCommandGunChangeStart(BtlTask *task) {
 }
 
 /* Mark the acting unit in progress on entry to the retail DEVIL state. */
-void btlEnterDevilActionState(s32 task) {
-    ((BtlTask *)task)->unit->status.flags = (u32)((BtlTask *)task)->unit->status.flags | 0x4000
-    ;
+void btlEnterDevilActionState(BtlTask *task) {
+    task->unit->status.flags |= 0x4000;
 }
 
 /* Slot-0x10 model-change command: the same flow as btlCommandGunChangeStart, swapping to the unit's
@@ -2181,9 +2180,8 @@ void btlScheduleDevilStateModelChange(BtlTask *task) {
 }
 
 /* Mark the acting unit in progress on entry to the retail BAT state. */
-void btlEnterBatActionState(s32 task) {
-    ((BtlTask *)task)->unit->status.flags = (u32)((BtlTask *)task)->unit->status.flags | 0x4000
-    ;
+void btlEnterBatActionState(BtlTask *task) {
+    task->unit->status.flags |= 0x4000;
 }
 
 
