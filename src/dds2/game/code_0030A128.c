@@ -372,7 +372,7 @@ void fldStopLmapTask(void) {
     dds3KillProcessName(fldLocalMapTaskName, 1);
 }
 
-s32 fldLmapTaskExists(void) {
+u8 fldLmapTaskExists(void) {
     return dds3SearchProcessName(fldLocalMapTaskName) != NULL;
 }
 

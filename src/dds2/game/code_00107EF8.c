@@ -119,7 +119,7 @@ extern s32 mnuCampConsumePanelTaskCompletion(void);
 
 extern s32 fldPollSceneState(void);
 
-extern s32 fldLmapTaskExists(void);
+extern u8 fldLmapTaskExists(void);
 
 extern sdfDevConsCB_tag *evtConsoleFontResourceChain;
 
@@ -1569,7 +1569,7 @@ u32 evtDestroyLmapTask(void) {
 }
 
 u8 evtWaitLmapTaskGone(void) {
-    s32 taskExists;
+    u8 taskExists;
 
     taskExists = fldLmapTaskExists();
     return taskExists == 0;
