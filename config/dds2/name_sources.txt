@@ -4870,7 +4870,7 @@
 0x00232F28	mdlGetNumOfCut	inferred	SMT3HD name via SLUS_209.11 0x001DDBA8, reloc-identical; was mdlGetNodeRefHalf
 0x00232F58	mdlSetClutColor	inferred	SMT3HD name via SLUS_209.11 0x001DDBD8, shared-hash-in-run; was mdlReleaseInnerResourceHandle
 0x00232F78	mdlGetFilebase	inferred	SMT3HD name via SLUS_209.11 0x001DDBF8, reloc-identical; was mdlCopyResourceBasename
-0x00233098	mdlPackCheck	inferred	SMT3HD name via SLUS_209.11 0x001DDD18, byte-identical; was mdlIsInnerSentinel
+0x00233098	mdlIsPartInfoPacket	inferred	SMT3HD name via SLUS_209.11 0x001DDD18, byte-identical; was mdlIsInnerSentinel
 0x002330C8	mdlPackSetOld	inferred	SMT3HD name via SLUS_209.11 0x001DDD48, reloc-identical; was mdlApplyQueuedGroupPackets
 0x00233280	mdlPackSet	inferred	SMT3HD name via SLUS_209.11 0x001DDF00, reloc-identical; was mdlApplyGroupedPartPackets
 0x002334F0	mdlFileCbFree	inferred	SMT3HD name via SLUS_209.11 0x001DE170, shared-hash-in-run; was mdlDestroyLoadRequestOwner
