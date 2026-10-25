@@ -64,8 +64,8 @@ typedef struct EvtPackLoadState {
     struct FileRequest *pendingRequest; /* 0x08: queued event-script request, then cleanup */
     struct sdfMemHandle_t *resourceAllocation; /* 0x0C: retained descriptor */
     u8 *data;                     /* 0x10 */
-    EvtPackHeader *header;        /* 0x14 */
-    EvtPackEntry *entries;        /* 0x18 */
+    const EvtPackHeader *header;  /* 0x14: borrowed read-only pack header. */
+    const EvtPackEntry *entries;  /* 0x18: borrowed read-only pack records. */
     u8 *entryPoint;               /* 0x1C */
     u8 pad20[4];
     struct sdfMemHandle_t *sceneAllocation1; /* 0x24: descriptor released at teardown. */

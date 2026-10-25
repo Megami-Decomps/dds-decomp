@@ -36,7 +36,7 @@ extern s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource);
 /* Decode one retained unit payload and return its new viewer-object key. */
 s32 evtInitMotionSeProcess(s32 eventId, s32 resourceId) {
     EvtPackLoadState *packState;
-    EvtPackEntry *entry;
+    const EvtPackEntry *entry;
     s32 packEntryIndex;
     s32 entrySize;
     u8 *modelPayload;
@@ -82,7 +82,7 @@ s32 evtInitMotionSeProcess(s32 eventId, s32 resourceId) {
 /* Start a field BE from the task's resource table when all four payloads exist. */
 s32 evtRegistBEField(s32 eventId, s32 resourceId) {
     EvtPackLoadState *packState;
-    EvtPackEntry *entry;
+    const EvtPackEntry *entry;
     s32 entryCount;
     s32 remainingEntryCount;
     const EvtAreaRoomIds *areaRoomIds;
@@ -233,7 +233,7 @@ extern char D_003BC378[];
  * Clearing the request handle and marking completion occur on separate calls;
  * no entry-point record leaves the existing entryPoint value untouched. */
 void evtCheckEventScriptLoaded(EvtPackLoadState *state) {
-    EvtPackHeader *header;
+    const EvtPackHeader *header;
     s32 entryPointIndex;
 
     if (state->pendingRequest != NULL) {
@@ -241,7 +241,7 @@ void evtCheckEventScriptLoaded(EvtPackLoadState *state) {
             state->resourceAllocation = fileGetMemHandle(state->pendingRequest);
             fileRequestFreeIfComplete(state->pendingRequest);
             state->pendingRequest = NULL;
-            header = (EvtPackHeader *)sdfMemLock(state->resourceAllocation);
+            header = (const EvtPackHeader *)sdfMemLock(state->resourceAllocation);
             state->data = (u8 *)header;
             state->header = header;
             state->entries = header->entries;
