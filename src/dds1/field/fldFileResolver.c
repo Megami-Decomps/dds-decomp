@@ -1353,7 +1353,7 @@ u8 fldTryStartPendingBattleReturnAreaLoad(void) {
     return 0;
 }
 
-extern s32 fldGetLocationCoordinateValue(s32 area, s32 locationIndex);
+extern s32 fldGetLocationCoordinateFlags(s32 area, s32 locationIndex);
 
 extern void sdfFileCmdThreadSetLoPrio(void);
 
@@ -1377,7 +1377,7 @@ s32 fldRequestAreaResource(s32 area, s32 room) {
     fldFreeNextFile();
     fldGlobalBase.resourceArea = area;
     fldGlobalBase.resourceFloor = room;
-    if (fldGetLocationCoordinateValue(area, room) & 0x10) {
+    if (fldGetLocationCoordinateFlags(area, room) & 0x10) {
         D_003BAC80 = 1;
     } else {
         D_003BAC80 = 0;
@@ -1829,7 +1829,7 @@ struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) {
         fldAddressResolver(roomData, chunk);
         fldProcessFieldRequest((FldSceneRequest *)fldGetInfoHeader(chunk));
     }
-    if (fldGetLocationCoordinateValue(area, room) & 0x10) {
+    if (fldGetLocationCoordinateFlags(area, room) & 0x10) {
         fldMakeFilePath(directory, area, 1);
         sprintf(path, D_0039FF18, directory, area, room);
         fldCachedRoomKF2ResourceAllocation = fldCopyCachedRoomKF2ResourceIfLocationMatches(&roomData, area, room);
@@ -3937,7 +3937,7 @@ void fldUpdateCameraProximity(void) {
 
     memset(vec, 0, sizeof(vec));
     vec[3] = 1.0f;
-    if (fldGetLocationCoordinateValue(fldGlobalBase.area, fldGlobalBase.floor + 1) & 0x40) {
+    if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) & 0x40) {
         if (fldEncountTestFlag(0x40) == 0) {
             return;
         }
@@ -4669,7 +4669,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
         return 0;
     }
 
-    if (fldGetLocationCoordinateValue(fldGlobalBase.area, fldGlobalBase.floor + 1) & 0x100) {
+    if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) & 0x100) {
         if (D_003BA870[0][0][1] < 0x40) {
             if (fileTestSavedSlotFlags(3) != 0) {
                 fldGlobalBase.cameraTilt -= 10.0f;
@@ -4795,7 +4795,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
             fldGlobalBase.y = position[1] + 10.0f;
         }
     }
-    if (fldGetLocationCoordinateValue(fldGlobalBase.area, fldGlobalBase.floor + 1) & 0x40) {
+    if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) & 0x40) {
         motion = 18;
     } else {
         motion = 2;
@@ -4810,7 +4810,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
         } else {
             D_003BAD50 = heading;
         }
-        if (fldGetLocationCoordinateValue(fldGlobalBase.area, fldGlobalBase.floor + 1) & 0x40) {
+        if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) & 0x40) {
             motion = 17;
         } else {
             motion = 1;
@@ -5170,13 +5170,13 @@ s32 fldUpdateCameraObjectPose(void) {
     return 0;
 }
 
-extern s32 fldGetLocationCoordinateValue(s32 area, s32 locationIndex);
+extern s32 fldGetLocationCoordinateFlags(s32 area, s32 locationIndex);
 
 extern void fldUpdateCameraModelMotion(s32 currentMotionIndex, s32 requestedMotionIndex, f32 blendFrames);
 
 void fldSetCameraNodeModeWithTen(void) {
     s16 node = fldPlayerModelContext->current.h.motionIndex;
-    if (fldGetLocationCoordinateValue(fldGlobalBase.area, fldGlobalBase.floor + 1) & 0x40) {
+    if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) & 0x40) {
         fldUpdateCameraModelMotion(node, 0x12, 10.0f);
         return;
     }
@@ -5185,7 +5185,7 @@ void fldSetCameraNodeModeWithTen(void) {
 
 void fldSetCameraNodeModeWithZero(void) {
     s16 node = fldPlayerModelContext->current.h.motionIndex;
-    if (fldGetLocationCoordinateValue(fldGlobalBase.area, fldGlobalBase.floor + 1) & 0x40) {
+    if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) & 0x40) {
         fldUpdateCameraModelMotion(node, 0x12, 0.0f);
         return;
     }

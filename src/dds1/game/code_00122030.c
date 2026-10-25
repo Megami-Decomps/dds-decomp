@@ -225,7 +225,7 @@ extern u32 fldRunDanteGunFlag[];
 
 /* Search location records 1..639; a miss returns the reserved first record, * not NULL, so callers can read the fallback record's fields. */ s16 *fldFindLocationCoordinateRecord(s32 area, s32 locationIndex);
 
-/* Read the matching location record's fourth signed halfword; zero on miss. */ s32 fldGetLocationCoordinateValue(s32 area, s32 locationIndex);
+/* Read the matching location record's fourth signed halfword; zero on miss. */ s32 fldGetLocationCoordinateFlags(s32 area, s32 locationIndex);
 
 void fldLoadFieldTables(void);
 
@@ -971,7 +971,7 @@ void fldRebuildFieldScene(void) {
         }
         fldGlobalBase.verticalStepDirection = 0;
         if (!evtBitCheck(0x413)) {
-            if (fldGetLocationCoordinateValue(fldGlobalBase.area, fldGlobalBase.floor + 1) & 8) {
+            if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) & 8) {
                 fldActivateCameraColorSetting(1);
             } else {
                 fldActivateCameraColorSetting(0);
@@ -980,11 +980,11 @@ void fldRebuildFieldScene(void) {
             fldActivateCameraColorSetting(0);
         }
         if (!evtBitCheck(0x413)) {
-            if (fldGetLocationCoordinateValue(fldGlobalBase.area, fldGlobalBase.floor + 1) & 8) {
+            if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) & 8) {
                 mnuInitializeResourceEntries();
             }
         }
-        if (fldGetLocationCoordinateValue(fldGlobalBase.area, fldGlobalBase.floor + 1) & 0x40) {
+        if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) & 0x40) {
             fldLoadFieldEffectTextureSlots();
         }
     }
@@ -1003,7 +1003,7 @@ void fldUnloadPlayerModel(void);
 void fldLoadPlayerModel(void) {
     s32 model;
 
-    if (fldGetLocationCoordinateValue(fldGlobalBase.area, fldGlobalBase.floor + 1) & 0x20) {
+    if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) & 0x20) {
         model = 2;
     } else {
         model = fldGlobalBase.playerModelAlternate != 0;
@@ -1672,7 +1672,7 @@ s32 fldUpdateTravelAndEncounters(void) {
         fldUpdateSmoothedCameraPose();
         return 0;
     }
-    if (!(fldGetLocationCoordinateValue(fldGlobalBase.area, fldGlobalBase.floor + 1) & 0x40) &&
+    if (!(fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) & 0x40) &&
         previousPhase != phase) {
         evtUpdateFlaggedStats();
         if (phase == 0 && evtClearRandomStatusFlags()) {
@@ -2106,7 +2106,7 @@ s32 fldProcSequence(dds3ProcessID_t *task) {
             fldApplySkyLightSet(0, 0);
             fldSkySetTableAnime(fldRunDanteGunFlag[12]);
         }
-        coordinateFlags = fldGetLocationCoordinateValue(fldGlobalBase.area, fldGlobalBase.floor + 1);
+        coordinateFlags = fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1);
         if (coordinateFlags & 0x40) {
             blur.count = 15;
             blur.delaySpread = 15;
@@ -2315,7 +2315,7 @@ s32 fldProcDraw(dds3ProcessID_t *task) {
     }
     if (lifecycle->phase >= 2 && D_0032E598[0] != 0 &&
         fldGetEncounterRuntimeResult() == 0) {
-    flags = fldGetLocationCoordinateValue(fldGlobalBase.area, fldGlobalBase.floor + 1);
+    flags = fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1);
     if (flags & 0x40) {
         effBlurStepScatterSlotsAndDraw(D_003BABE4);
         return 0;
