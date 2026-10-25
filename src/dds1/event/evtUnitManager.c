@@ -69,7 +69,6 @@ extern f32 sdfFaceDivSoften, sdfFaceDivBias;
 extern s32 dds3SceneBasicExistBasicFromType(dds3Basic_t *object, s32 slotIndex, const dds3Basic_t *value);
 extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *model, s32 mapRecordId);
 extern void dds3RotationArc(void);
-extern s32 evtFindUnitSlotAuxCoordinates(evtUnitHandle_t *unit, f32 *outX, f32 *outY);
 
 
 /* Advance the model, light-colour and directional transitions for one event unit. */
@@ -1606,24 +1605,25 @@ void evtApplyMatchingUnitSlotEndpoints(evtUnitHandle_t *unit) {
 }
 
 /* Find auxiliary coordinates for the unit-bound slot, else the shared fallback. */
-s32 evtFindUnitSlotAuxCoordinates(evtUnitHandle_t *unit, f32 *outX, f32 *outY) {
+EvtUnitVectorSlotAuxCoordinatesResult evtFindUnitSlotAuxCoordinates(
+    evtUnitHandle_t *unit, f32 *outX, f32 *outY) {
     s32 i;
 
     for (i = 0; i < 7; i++) {
         if (D_003D7BD8[i].state == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND && D_003D7BD8[i].unitHandle == unit) {
             *outX = D_003D7BD8[i].auxX;
             *outY = D_003D7BD8[i].auxY;
-            return 1;
+            return EVT_UNIT_VECTOR_SLOT_AUX_COORDINATES_FOUND;
         }
     }
     for (i = 0; i < 7; i++) {
         if (D_003D7BD8[i].state == EVT_UNIT_VECTOR_SLOT_SHARED_FALLBACK) {
             *outX = D_003D7BD8[i].auxX;
             *outY = D_003D7BD8[i].auxY;
-            return 1;
+            return EVT_UNIT_VECTOR_SLOT_AUX_COORDINATES_FOUND;
         }
     }
-    return 0;
+    return EVT_UNIT_VECTOR_SLOT_AUX_COORDINATES_NOT_FOUND;
 }
 
 dds3Basic_t *evtSearchBasic(s32 objectKind, s32 worldObjectKey) {

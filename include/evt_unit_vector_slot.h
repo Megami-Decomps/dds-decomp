@@ -11,6 +11,12 @@ typedef enum EvtUnitVectorSlotState {
     EVT_UNIT_VECTOR_SLOT_UNIT_BOUND = 3
 } EvtUnitVectorSlotState;
 
+typedef s32 EvtUnitVectorSlotAuxCoordinatesResult;
+enum {
+    EVT_UNIT_VECTOR_SLOT_AUX_COORDINATES_NOT_FOUND = 0,
+    EVT_UNIT_VECTOR_SLOT_AUX_COORDINATES_FOUND = 1
+};
+
 /* Native 0x40-byte slot: three vec4 followed by two auxiliary coordinates.
  * The static pool contains seven slots in DDS1 and ten in DDS2. */
 typedef struct EvtUnitVectorSlot {
@@ -28,5 +34,10 @@ typedef char EvtUnitVectorSlot_unitHandle_offset_check[
 void evtSetSlotVectors(s32 slotIndex, EvtUnitVectorSlotState slotState,
                        struct evtUnitHandle_t *unitHandle, const f32 *firstEndpoint,
                        const f32 *secondEndpoint, const f32 *color);
+
+/* Copy auxiliary coordinates from the unit-bound slot or shared fallback.
+ * Outputs are written only when a slot is found. */
+EvtUnitVectorSlotAuxCoordinatesResult evtFindUnitSlotAuxCoordinates(
+    struct evtUnitHandle_t *unit, f32 *outX, f32 *outY);
 
 #endif /* EVT_UNIT_VECTOR_SLOT_H */
