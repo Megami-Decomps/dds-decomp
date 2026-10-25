@@ -17,7 +17,7 @@
 #include "sdf_texture_offset_list.h"
 
 #include "dds3_world_primary.h"
-extern sdfMotionCtrlr_t *mdlGetMotionCtrlr(dds3ModelHandle_t *ctx, s32 searchId);
+extern sdfMotionCtrlr_t *mdlGetMotionCtrlr(const dds3ModelHandle_t *ctx, s32 searchId);
 extern s32 evtPlaySe(s32 id, s32 fade);
 
 extern s32 evtLoadArea_FromMemory(s32 area, s32 room, u8 *resource0Data, u8 *resource1Data,

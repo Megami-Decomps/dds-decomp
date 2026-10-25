@@ -1842,7 +1842,7 @@ void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer) {
     }
 }
 
-extern sdfMotionCtrlr_t *mdlGetMotionCtrlr(dds3ModelHandle_t *ctx, s32 id);
+extern sdfMotionCtrlr_t *mdlGetMotionCtrlr(const dds3ModelHandle_t *ctx, s32 id);
 extern EvtRuntimeChild *evtViewerFindLatestMatchingMotionKey(EvtRuntimeGroup *group, s32 frame, s32 channel);
 
 /* Synchronize four motion channels, retaining their last applied timeline key. */

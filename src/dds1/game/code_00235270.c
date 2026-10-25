@@ -1949,7 +1949,7 @@ typedef union EvtMotionValue {
     EvtMotionBits bits;
 } EvtMotionValue;
 
-extern sdfMotionCtrlr_t *mdlGetMotionCtrlr(dds3ModelHandle_t *model, s32 index);
+extern sdfMotionCtrlr_t *mdlGetMotionCtrlr(const dds3ModelHandle_t *model, s32 index);
 
 extern char D_003BC2A8[];
 extern char D_003BBFF0[];

@@ -15,7 +15,7 @@ extern f32 aViewTarget[4];
 
 extern f32 sdfViewTargetVector[4];
 
-extern sdfMotionCtrlr_t *mdlGetMotionCtrlr(dds3ModelHandle_t *model, s32 id);
+extern sdfMotionCtrlr_t *mdlGetMotionCtrlr(const dds3ModelHandle_t *model, s32 id);
 
 /* Replace only the high byte of the model's broadcast word. */
 void mnuSetNodeModelBroadcastByte(MnuModelNode *node, u8 highByte) {
