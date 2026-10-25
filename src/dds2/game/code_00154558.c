@@ -1324,7 +1324,7 @@ s32 fldCommand_FLD_MAP_OFF(void) {
     return 1;
 }
 
-extern void fldSetMapSlotAuxiliaryFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
+extern void fldSetMapSlotAuxiliaryFlag(s32 area, u32 slotIndex, s32 bit, s32 enabled);
 
 s32 fldOpClearRoomStateFlags(void) {
     s32 world;
