@@ -355,7 +355,7 @@ s32 btlAddBaseStats(s32 *src, datUnitWork_t *seq) {
 
 extern PartyStatGrowthBank D_003D6518[];
 
-void ptyAccumulateStatGains(s32 *gains, s32 levelDelta, datUnitWork_t *unit) {
+void ptyAccumulateStatGains(s32 *gains, s32 levelDelta, const datUnitWork_t *unit) {
     s32 eligible[DAT_BASE_STAT_COUNT];
     s32 eligibleCount;
     s32 overflow;

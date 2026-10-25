@@ -262,7 +262,7 @@ void brsUpdateStatSelectionExtent(BrsSkillPackageWork *scene) {
 
 extern void evtStageTestUpdateCamera(void);
 extern s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *);
-extern void ptyAccumulateStatGains(s32 *, s32, datUnitWork_t *);
+extern void ptyAccumulateStatGains(s32 *, s32, const datUnitWork_t *);
 extern s32 mnuAdvanceTitleEntryAnimation(datUnitWork_t *);
 extern void mnuStaffCopyPanelBlock(datUnitWork_t *, BrsSkillPackageWork *);
 extern void mnuRefreshSelectedUnitPanels(datUnitWork_t *, BrsSkillPackageWork *);

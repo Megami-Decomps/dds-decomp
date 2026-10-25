@@ -914,7 +914,7 @@ s32 ptyGetAverageLevel(void) {
     return (levelSum + activeCount - 1) / activeCount;
 }
 
-extern void ptyAccumulateStatGains(s32 *gains, s32 levelDelta, datUnitWork_t *unit);
+extern void ptyAccumulateStatGains(s32 *gains, s32 levelDelta, const datUnitWork_t *unit);
 extern u32 ptyComputeTotalExp(datUnitWork_t *, s32);
 extern void ptyRecomputeMaxHpMp(datUnitWork_t *);
 extern void ptyRebuildProfileSkills(s32, datUnitWork_t *);
