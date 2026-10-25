@@ -564,7 +564,7 @@ extern s32 btlCalculateEnemyExperienceReward(BtlUnit *, BtlUnit *);
 
 extern s32 btlGetEnemyMoney(BtlUnit *, BtlUnit *);
 
-extern u8 btlGetActorDisplayByteWithDefault(s32 object, s32 index);
+extern u8 btlGetActorDisplayByteWithDefault(BtlUnit *object, s32 index);
 
 extern s32 btlRollPassiveAbilityAction(BtlUnit *);
 
@@ -1078,7 +1078,7 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
             runtime->defeatedLevelCount++;
             recipient->status.stateFlags |= 0x400;
         }
-        work->groups[targetIndex].interval = btlGetActorDisplayByteWithDefault((s32)source, command);
+        work->groups[targetIndex].interval = btlGetActorDisplayByteWithDefault(source, command);
         work->groups[targetIndex].count = hitCount;
         if (element < 2 &&
             kind == 1 && !group->inactive && !group->reflected && !group->targetSpecialHit &&
