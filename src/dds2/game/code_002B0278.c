@@ -1647,7 +1647,7 @@ void mnuIdleVoiceTimer(StaffMenuRuntime *object) {
     u32 count;
     if (object->motionSelection == -1) {
         if (evtStageTestAdvanceResourceWork() != 1) {
-            if (evtStageTestHasPendingMotion() == 0) {
+            if (evtStageTestHasPendingMotion() == EVT_STAGE_MOTION_QUEUE_SETTLED) {
                 object->idleFrames += 1;
             }
             if (object->idleFrames >= 0x12d) {

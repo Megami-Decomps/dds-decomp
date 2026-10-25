@@ -1252,8 +1252,6 @@ s32 mnuDrawAndStepStaffPartyScene(dds3ProcessID_t *task) {
     return menuRunPanel((void *)context, 1, (void *)task);
 }
 
-extern s32 evtStageTestHasPendingMotion();
-
 #define MENU_IDLE_VOICE_TICKS 0x12D
 
 /* Pick another idle voice after MENU_IDLE_VOICE_TICKS eligible ticks. */
@@ -1261,7 +1259,7 @@ void mnuIdleVoiceTimer(StaffMenuRuntime *menu) {
     u32 voiceCount;
 
     if (menu->motionSelection == -1 && evtStageTestPollModelRequest() != 1) {
-        if (evtStageTestHasPendingMotion() == 0) {
+        if (evtStageTestHasPendingMotion() == EVT_STAGE_MOTION_QUEUE_SETTLED) {
             menu->idleFrames = menu->idleFrames + 1;
         }
         if (menu->idleFrames >= MENU_IDLE_VOICE_TICKS) {

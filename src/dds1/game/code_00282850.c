@@ -2830,13 +2830,13 @@ void evtStageTestForceDefaultMotion(void) {
 }
 
 /* Idle and fallback-started states are settled; every other state is reported as pending. */
-s32 evtStageTestHasPendingMotion(void) {
+EvtStageMotionQueueStatus evtStageTestHasPendingMotion(void) {
     StageTestMotionState motionState = evtStageTestState.queue.slot[0].state;
 
     if ((motionState == EVT_STAGE_MOTION_IDLE) || (motionState == EVT_STAGE_MOTION_FALLBACK_STARTED)) {
-        return 0;
+        return EVT_STAGE_MOTION_QUEUE_SETTLED;
     }
-    return 1;
+    return EVT_STAGE_MOTION_QUEUE_PENDING;
 }
 
 /* Start a queued motion, then the entry's fallback unless suppressed.

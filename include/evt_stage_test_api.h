@@ -4,7 +4,14 @@
 #include "common.h"
 
 s32 evtStageTestCountFlags(s32 columnKind);
-s32 evtStageTestHasPendingMotion(void);
+
+typedef s32 EvtStageMotionQueueStatus;
+enum {
+    EVT_STAGE_MOTION_QUEUE_SETTLED = 0,
+    EVT_STAGE_MOTION_QUEUE_PENDING = 1
+};
+
+EvtStageMotionQueueStatus evtStageTestHasPendingMotion(void);
 
 typedef enum EvtStageMotionKind {
     EVT_STAGE_MOTION_PRIMARY_COLUMN = 0,
