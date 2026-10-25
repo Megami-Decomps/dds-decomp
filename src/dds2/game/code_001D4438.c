@@ -1384,7 +1384,7 @@ extern u64 btlAdvanceRuntimeSequenceCounter(void);
 extern BtlRuntimeTask *btlAllocateApproachTargetTask(BtlUnit *unit, BtlUnit *target, f32 scale);
 extern BtlRuntimeTask *btlAllocateIndexedUnitEffectTask(BtlUnit *unit, s32 index, s32 value, f32 scale);
 extern void btlBossDebugPrintf(const char *format, ...);
-extern s32 btlCanUseActorCommandForModelEntry(s32 object, s32 other, s32 offset, s32 index);
+extern s32 btlCanUseActorCommandForModelEntry(BtlUnit *unit, BtlUnit *target, s32 commandSlot, s32 skillId);
 extern BtlRuntimeTask *btlCreateActorParameterDeltaTask(BtlUnit *unit, BtlOperandEntry *block);
 extern BtlRuntimeTask *btlCreateActorSoundOptionTask(BtlUnit *actor, s32 option);
 extern BtlRuntimeTask *btlCreateApplyToActiveActorsTask(u32 value);
@@ -1508,7 +1508,7 @@ void btlScheduleAttackActionTasks(ActionStateLink *action) {
     btlStartTask(task);
     if (targetCount == 1) {
         indexedTarget = (BtlUnit *)btlGetIndexListEntry(indices, 0);
-        if (btlCanUseActorCommandForModelEntry((s32)action->unit, (s32)indexedTarget,
+        if (btlCanUseActorCommandForModelEntry(action->unit, indexedTarget,
                 action->indexWork.slot, action->indexWork.skillId) != 0) {
             if ((action->unit->status.flags & indexedTarget->status.flags & 0x600) == 0 ||
                     (indexedTarget->status.flags & 0x200) != 0) {

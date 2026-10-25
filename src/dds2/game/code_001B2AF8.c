@@ -1637,21 +1637,21 @@ s32 btlTestSideCountCommandEligibility(ActionStateLink *action) {
     return 1;
 }
 
-s32 btlCanUseActorCommandForModelEntry(s32 object, s32 other, s32 offset, s32 index) {
+s32 btlCanUseActorCommandForModelEntry(BtlUnit *unit, BtlUnit *target, s32 commandSlot, s32 skillId) {
     s32 (*predicate)(s32, s32, s32);
     u8 *table;
     predicate = *(s32 (**)(s32, s32, s32))((u8 *)btlGetRuntime() + 0x6cc);
-    if (predicate != 0 && !predicate(object, other, index)) {
+    if (predicate != 0 && !predicate((s32)unit, (s32)target, skillId)) {
         return 0;
     }
-    if (index == 0x91) {
+    if (skillId == 0x91) {
         return 0;
     }
-    table = btlGetSideIndexedActorStatusTable(*(s32 *)(object + 0xc4), *(s32 *)(object + 0xc8));
-    if (*(s16 *)(table + offset * 20 + 0x2c) != 2) {
+    table = btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->resourceIndex);
+    if (*(s16 *)(table + commandSlot * 20 + 0x2c) != 2) {
         return 0;
     }
-    if (index != 0 && datCommandRecords[index].targetType != 0) {
+    if (skillId != 0 && datCommandRecords[skillId].targetType != 0) {
         return 0;
     }
     return 1;
