@@ -12,6 +12,7 @@
 #include "evt_world.h"
 #include "evt_picture.h"
 #include "evt_event_pack.h"
+#include "evt_event_bgm_readiness.h"
 #include "evt_solar.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
@@ -45,7 +46,7 @@ void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 extern char D_00422030[];
 extern char D_00421FE8[];
 s32 evtLoadEventBgm(s32 id);
-s32 evtCheckEventBgmLoaded(s32 id);
+EvtEventBgmReadiness evtCheckEventBgmLoaded(s32 id);
 
 extern dds3Basic_t *evtSearchBasic(s32 objectKind, s32 worldObjectKey);
 extern EvtPathStatus evtCheckPathStat(dds3Basic_t *object);
@@ -207,7 +208,7 @@ u32 evtCommand_LOAD_SOUND_E(void) {
         evtLoadEventBgm(scrGetIntPara(0));
     } else {
         eventId = scrGetIntPara(0);
-        if (evtCheckEventBgmLoaded(eventId) != 0) {
+        if (evtCheckEventBgmLoaded(eventId) != EVT_EVENT_BGM_NOT_READY) {
             return 1;
         }
     }

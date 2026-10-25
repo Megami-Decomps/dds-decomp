@@ -13,6 +13,7 @@
 #include "evt_world.h"
 #include "evt_picture.h"
 #include "evt_event_pack.h"
+#include "evt_event_bgm_readiness.h"
 #include "evt_solar.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
@@ -27,7 +28,7 @@ extern void rsetTest(s32 bit0, s32 bit1, s32 bit4, s32 bit12,
                                s32 bit14, s32 bit15, s32 unused, s32 bit17);
 extern u32 dds3DrawFlag;
 s32 evtLoadEventBgm(s32 id);
-s32 evtCheckEventBgmLoaded(s32 id);
+EvtEventBgmReadiness evtCheckEventBgmLoaded(s32 id);
 
 
 extern char D_003BBDC8[];
@@ -202,7 +203,7 @@ u32 evtCommand_LOAD_SOUND_E(void) {
         evtLoadEventBgm(scrGetIntPara(0));
     } else {
         eventId = scrGetIntPara(0);
-        if (evtCheckEventBgmLoaded(eventId) != 0) {
+        if (evtCheckEventBgmLoaded(eventId) != EVT_EVENT_BGM_NOT_READY) {
             return 1;
         }
     }

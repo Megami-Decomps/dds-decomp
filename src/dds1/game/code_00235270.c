@@ -18,6 +18,7 @@
 
 #include "evt_world.h"
 #include "evt_picture.h"
+#include "evt_event_bgm_readiness.h"
 #include "eff_object.h"
 #include "eff_event.h"
 #include "pcp_vu0.h"
@@ -4623,7 +4624,7 @@ extern evtUnitHandle_t *evtGetUnitHandle(s32 key);
 extern s32 evtPathLinkAndMake(dds3Basic_t *object, dds3Basic_t *owner);
 extern EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, EvtRuntime *runtime);
 extern s32 evtLoadEventBgm(s32 eventId);
-extern s32 evtCheckEventBgmLoaded(s32 eventId);
+extern EvtEventBgmReadiness evtCheckEventBgmLoaded(s32 eventId);
 extern s32 fldTitleIsActive(void);
 extern void fldStartTitle(s32 field, s32 mode, s32 option);
 extern void kwlnFadeBackgroundStartIn(s32 frames);
@@ -5446,7 +5447,8 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
     }
     if (soundRowsPresent == 1) {
         evtLoadEventBgm(((EvtViewerPackageRecord *)work->mainEntry2Data)->packageId);
-        while (evtCheckEventBgmLoaded(((EvtViewerPackageRecord *)work->mainEntry2Data)->packageId) == 0) {
+        while (evtCheckEventBgmLoaded(((EvtViewerPackageRecord *)work->mainEntry2Data)->packageId) ==
+               EVT_EVENT_BGM_NOT_READY) {
         }
         printf("smg file load :eventViewer\n");
     }
@@ -5554,11 +5556,13 @@ s32 evtLoadEventBgm(s32 eventId) {
     return packedTrackId;
 }
 
-s32 evtCheckEventBgmLoaded(s32 eventId) {
+EvtEventBgmReadiness evtCheckEventBgmLoaded(s32 eventId) {
     if ((u32)(eventId - 0x258) >= 0x100) {
-        return 1;
+        return EVT_EVENT_BGM_READY;
     }
-    return sndFindPackedTrackLoadStatus(evtGetSoundIndex(eventId, 0)) == SND_PACKED_TRACK_LOAD_RESIDENT;
+    return sndFindPackedTrackLoadStatus(evtGetSoundIndex(eventId, 0)) == SND_PACKED_TRACK_LOAD_RESIDENT
+        ? EVT_EVENT_BGM_READY
+        : EVT_EVENT_BGM_NOT_READY;
 }
 
 s32 evtPlayEventBgm(s32 eventId, s32 fade) {
