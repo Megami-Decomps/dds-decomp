@@ -17,6 +17,12 @@
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
 
+/* Preserve process handles in the script VM's signed integer result slot. */
+static inline s32 evtProcessHandleToVmInteger(dds3ProcessID_t *handle)
+{
+    return (s32)(u32)handle;
+}
+
 extern void fldSetFadeTarget(s32 area, s32 targetMode, s32 duration);
 extern void evtSetSkyAlpha(s32 duration, s32 target);
 
@@ -89,7 +95,7 @@ u32 evtCommand_TEX_BE(void) {
     }
     task = evtStartPictureProcess(0x2AFE, entry);
     dds3LinkProcess(work->task, task);
-    scrSetIntReturnValue((s32)task);
+    scrSetIntReturnValue(evtProcessHandleToVmInteger(task));
     return 1;
 }
 
@@ -107,7 +113,7 @@ u32 evtCommand_TEX_LOAD(void) {
     }
     childTask = evtStartPictureProcess2(0x2afe, scrGetStrPara(0));
     dds3LinkProcess(work->task, childTask);
-    scrSetIntReturnValue((s32)childTask);
+    scrSetIntReturnValue(evtProcessHandleToVmInteger(childTask));
     return 1;
 }
 
