@@ -23,6 +23,7 @@
 #include "fld_scene_ready_api.h"
 #include "fld_scene_command_state_api.h"
 #include "fld_camp_check_state_api.h"
+#include "mnu_camp_state_ack_api.h"
 #include "fld_next_scene_request_api.h"
 #include "sdf_message.h"
 #include "mnu_title_stream.h"
@@ -167,8 +168,6 @@ struct dds3Basic_t;
 extern u8 D_003BAB3C;
 
 extern u8 D_0032C9A0[];
-
-extern u32 mnuAcknowledgeCampState(void);
 
 void fldLightMaClear(void);
 
@@ -1774,7 +1773,7 @@ FldCampCheckState fldProcCampChk(void) {
     if (D_003BABEC > 0) {
         return FLD_CAMP_CHECK_STATE_HANDOFF_DELAY;
     }
-    if (mnuAcknowledgeCampState() != 0) {
+    if (mnuAcknowledgeCampState() != MNU_CAMP_STATE_ACK_NOT_ACTIVE) {
         return FLD_CAMP_CHECK_STATE_MENU_ACTIVE;
     }
     return fldEncountTestFlag(0x20) != 0

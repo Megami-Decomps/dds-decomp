@@ -12,6 +12,7 @@
 #include "fr_font.h"
 #include "itf_draw_grid.h"
 #include "mnu_staff.h"
+#include "mnu_camp_state_ack_api.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
 #include "kwln_fade.h"
@@ -229,18 +230,18 @@ void mnuDestroyCampTasks(void) {
 
 /* Report active camp; acknowledge cleanup only for the exact cleaned-up state.
  * Other non-active states return 0 without being rewritten. */
-s32 mnuAcknowledgeCampState(void) {
+MnuCampStateAcknowledgementResult mnuAcknowledgeCampState(void) {
     s8 campState = campExitState;
     if (campState == MNU_CAMP_STATE_ACTIVE) {
-        return 1;
+        return MNU_CAMP_STATE_ACK_ACTIVE;
     }
     if (campState < MNU_CAMP_STATE_CLEANED_UP) {
-        return 0;
+        return MNU_CAMP_STATE_ACK_NOT_ACTIVE;
     }
     if (campState == MNU_CAMP_STATE_CLEANED_UP) {
         campExitState = MNU_CAMP_STATE_IDLE;
     }
-    return 0;
+    return MNU_CAMP_STATE_ACK_NOT_ACTIVE;
 }
 
 /* Return 1 exactly when the kernel reports no active fade. */
@@ -350,4 +351,3 @@ void mnuDrawCampScreenDefault(dds3ProcessID_t *task) {
 INCLUDE_RODATA(const s32, "game/code_00271D30", D_003B2100);
 
 INCLUDE_SDATA(const s32, "game/code_00271D30", D_003BC6C0);
-

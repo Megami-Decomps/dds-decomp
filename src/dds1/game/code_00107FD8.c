@@ -15,6 +15,7 @@
 #include "common.h"
 #include "sdf_vu0.h"
 #include "kwln_background_fade_api.h"
+#include "mnu_camp_state_ack_api.h"
 #include "sdf_heap_overlay_block.h"
 #include "kwln_draw_buffer.h"
 #include "kwln_frame_draw_buffer.h"
@@ -108,8 +109,6 @@ extern s32 mnuPollTaskState(void);
 extern u32 D_003BA958;
 
 extern s32 checkConfigState(void);
-
-extern s32 mnuAcknowledgeCampState(void);
 
 extern u32 D_003BA730;
 
@@ -1251,10 +1250,10 @@ u32 evtDestroyCampTasks(void) {
 }
 
 u8 evtWaitCampStateAcknowledged(void) {
-    s32 campState;
+    MnuCampStateAcknowledgementResult campState;
 
     campState = mnuAcknowledgeCampState();
-    return campState == 0;
+    return campState == MNU_CAMP_STATE_ACK_NOT_ACTIVE;
 }
 
 /* Admin mode 8 entry intentionally performs no work. */
@@ -1428,10 +1427,10 @@ u32 evtExitCampTaskGroup(void) {
 }
 
 u8 mnuCheckCampStateAndAcknowledge(void) {
-    s32 campState;
+    MnuCampStateAcknowledgementResult campState;
 
     campState = mnuAcknowledgeCampState();
-    return campState == 0;
+    return campState == MNU_CAMP_STATE_ACK_NOT_ACTIVE;
 }
 
 s32 evtCreateSkyAndCampTasks(u32 unused, u32 campMode) {

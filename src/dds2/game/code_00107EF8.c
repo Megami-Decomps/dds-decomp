@@ -8,6 +8,7 @@
 #include "common.h"
 #include "sdf_vu0.h"
 #include "kwln_background_fade_api.h"
+#include "mnu_camp_state_ack_api.h"
 #include "dds3_admin_control_api.h"
 #include "sdf_heap_overlay_block.h"
 #include "kwln_draw_buffer.h"
@@ -110,8 +111,6 @@ extern s32 fileMenuTaskExists(void);
 extern void fileStartMemoryCardMenuForMode(s32 mode);
 
 extern u32 D_00435BB0;
-
-extern s32 mnuAcknowledgeCampState(void);
 
 extern s32 checkConfigState(void);
 
@@ -1245,10 +1244,10 @@ u32 evtDestroyCampTasks(void) {
 }
 
 u8 evtWaitCampStateAcknowledged(void) {
-    s32 state;
+    MnuCampStateAcknowledgementResult state;
 
     state = mnuAcknowledgeCampState();
-    return state == 0;
+    return state == MNU_CAMP_STATE_ACK_NOT_ACTIVE;
 }
 
 /* Admin mode 8 entry intentionally performs no work. */
@@ -1421,10 +1420,10 @@ u32 evtExitCampTaskGroup(void) {
 }
 
 u8 mnuCheckCampStateAndAcknowledge(void) {
-    s32 state;
+    MnuCampStateAcknowledgementResult state;
 
     state = mnuAcknowledgeCampState();
-    return state == 0;
+    return state == MNU_CAMP_STATE_ACK_NOT_ACTIVE;
 }
 
 void evtCreateSkyAndCampTasks(u32 unused, u32 campMode) {

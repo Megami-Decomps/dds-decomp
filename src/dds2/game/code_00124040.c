@@ -17,6 +17,7 @@
 #include "fld_scene_ready_api.h"
 #include "fld_scene_command_state_api.h"
 #include "fld_camp_check_state_api.h"
+#include "mnu_camp_state_ack_api.h"
 #include "fld_next_scene_request_api.h"
 #include "fld_encounter_runtime_api.h"
 #include "sdf_message.h"
@@ -227,8 +228,6 @@ extern char D_00412F58[];
 extern char D_00412F40[];
 
 extern s32 D_00435F7C;
-
-extern u32 mnuAcknowledgeCampState(void);
 
 u8 fldEncountTestFlag(u32 mask);
 
@@ -1972,7 +1971,7 @@ FldCampCheckState fldProcCampChk(void) {
     if (D_00435F7C > 0) {
         return FLD_CAMP_CHECK_STATE_HANDOFF_DELAY;
     }
-    if (mnuAcknowledgeCampState() != 0) {
+    if (mnuAcknowledgeCampState() != MNU_CAMP_STATE_ACK_NOT_ACTIVE) {
         return FLD_CAMP_CHECK_STATE_MENU_ACTIVE;
     }
     return fldEncountTestFlag(0x20) != 0

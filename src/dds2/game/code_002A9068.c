@@ -22,6 +22,7 @@
 #include "mnu_shop.h"
 #include "mnu_list.h"
 #include "mnu_staff.h"
+#include "mnu_camp_state_ack_api.h"
 #include "mnu_scroll_panel.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
@@ -942,18 +943,18 @@ void mnuDestroyCampTasks(void) {
 
 /* Report active camp; acknowledge cleanup only for the exact cleaned-up state.
  * Other non-active states return 0 without being rewritten. */
-s32 mnuAcknowledgeCampState(void) {
+MnuCampStateAcknowledgementResult mnuAcknowledgeCampState(void) {
     s8 campState = campExitState;
     if (campState == MNU_CAMP_STATE_ACTIVE) {
-        return 1;
+        return MNU_CAMP_STATE_ACK_ACTIVE;
     }
     if (campState < MNU_CAMP_STATE_CLEANED_UP) {
-        return 0;
+        return MNU_CAMP_STATE_ACK_NOT_ACTIVE;
     }
     if (campState == MNU_CAMP_STATE_CLEANED_UP) {
         campExitState = MNU_CAMP_STATE_IDLE;
     }
-    return 0;
+    return MNU_CAMP_STATE_ACK_NOT_ACTIVE;
 }
 
 /* Return 1 exactly when the kernel reports no active fade. */
