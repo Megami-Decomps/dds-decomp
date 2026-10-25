@@ -1713,7 +1713,7 @@ void fldResetFieldRuntimeState(FldRuntimeResetMode mode) {
     area->targetX = 0.0f;
     area->targetY = 0.0f;
     area->targetZ = 0.0f;
-    area->positionPending = 0;
+    area->positionPending = FLD_POSITION_UPDATE_NONE;
     area->positionMode = 0;
     area->unk17C = 0;
     area->verticalStepDirection = 0;

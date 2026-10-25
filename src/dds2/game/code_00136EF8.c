@@ -1020,7 +1020,7 @@ void fldHitChkUnitElv(f32 *position) {
 
     memset(movement, 0, sizeof(movement));
     movement[3] = 1.0f;
-    fldGlobalBase.positionPending = 0;
+    fldGlobalBase.positionPending = FLD_POSITION_UPDATE_NONE;
     if (fldGlobalBase.primaryMovingMatterIndex == -1) {
         fldHitChkUnitElvOnly(position);
     }
@@ -1061,7 +1061,7 @@ void fldHitChkUnitElv(f32 *position) {
             previous[0] = fldResolvedPosition[0];
             previous[1] = fldResolvedPosition[1];
             previous[2] = fldResolvedPosition[2];
-            fldGlobalBase.positionPending = 1;
+            fldGlobalBase.positionPending = FLD_POSITION_UPDATE_PENDING;
             fldGlobalBase.targetX = newPosition[0];
             fldGlobalBase.targetY = newPosition[1];
             fldGlobalBase.targetZ = newPosition[2];

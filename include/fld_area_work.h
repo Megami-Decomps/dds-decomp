@@ -31,6 +31,9 @@ enum FldEntryDialogDisposition {
     FLD_ENTRY_DIALOG_REQUEST = 1
 };
 
+#define FLD_POSITION_UPDATE_NONE 0
+#define FLD_POSITION_UPDATE_PENDING 1
+
 typedef s32 FldCameraMode;
 
 enum FldCameraMode {
@@ -84,7 +87,7 @@ typedef struct FldAreaWork {
     FldAreaResourceRequestState resourceFlag; /* 0x78: local-map request state. */
     s32 resourceArea;
     s32 resourceFloor;
-    s32 positionPending;
+    s32 positionPending; /* 0x84: corrected pose awaits application. */
     s32 selectedRoomIndex;
     s32 unk8C;
     s32 primaryMovingMatterIndex;   /* 0x90: -1 when no moving matter record is selected. */
@@ -203,6 +206,8 @@ typedef char FldTextureResource_resourceData_offset_check[
 typedef char FldAreaWork_area_offset_check[(FLD_AREA_OFFSET(area) == 0x10) ? 1 : -1];
 typedef char FldAreaWork_defaultEncounterId_offset_check[(FLD_AREA_OFFSET(defaultEncounterId) == 0xDC) ? 1 : -1];
 typedef char FldAreaWork_resourceFlag_offset_check[(FLD_AREA_OFFSET(resourceFlag) == 0x78) ? 1 : -1];
+typedef char FldAreaWork_positionPending_offset_check[
+    (FLD_AREA_OFFSET(positionPending) == 0x84) ? 1 : -1];
 typedef char FldAreaWork_cameraTargetGraceTicks_offset_check[
     (FLD_AREA_OFFSET(cameraTargetGraceTicks) == 0xE8) ? 1 : -1];
 typedef char FldAreaWork_specialEventActive_offset_check[

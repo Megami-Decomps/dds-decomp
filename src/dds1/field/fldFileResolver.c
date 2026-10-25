@@ -4292,7 +4292,7 @@ void fldUpdateCameraTarget(void) {
         cur[1] = st->y;
         cur[2] = st->z;
         fldHitChkUnitElv(cur);
-        if (st->positionPending != 0) {
+        if (st->positionPending != FLD_POSITION_UPDATE_NONE) {
             st->x = st->targetX;
             st->y = st->targetY;
             st->z = st->targetZ;
@@ -4300,7 +4300,7 @@ void fldUpdateCameraTarget(void) {
             vec.f[1] = st->targetY;
             vec.f[2] = st->targetZ;
             dds3SetPosPoseSet(fldPlayerObject, &vec.q);
-            st->positionPending = 0;
+            st->positionPending = FLD_POSITION_UPDATE_NONE;
             dds3GetPosPoseSet(fldPlayerObject);
             SDF_VU0_STOREVECTOR(&vec);
 ;
@@ -4397,7 +4397,7 @@ void fldUpdateModeOneCameraPose(void) {
         current[1] = fldGlobalBase.y;
         current[2] = fldGlobalBase.z;
         fldRefreshAreaStateFromPosition(current);
-        if (fldGlobalBase.positionPending != 0) {
+        if (fldGlobalBase.positionPending != FLD_POSITION_UPDATE_NONE) {
             fldGlobalBase.x = fldGlobalBase.targetX;
             fldGlobalBase.y = fldGlobalBase.targetY + 44.0f;
             fldGlobalBase.z = fldGlobalBase.targetZ;
@@ -4405,7 +4405,7 @@ void fldUpdateModeOneCameraPose(void) {
             position[1] = fldGlobalBase.y;
             position[2] = fldGlobalBase.z;
             dds3SetPosPoseSet((dds3Basic_t *)fldPlayerObject, (u128 *)position);
-            fldGlobalBase.positionPending = 0;
+            fldGlobalBase.positionPending = FLD_POSITION_UPDATE_NONE;
         }
         dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
         SDF_VU0_STOREVECTOR_NOMEM(position);
@@ -4862,7 +4862,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
             current[1] = fldGlobalBase.y;
             current[2] = fldGlobalBase.z;
             fldRefreshAreaStateFromPosition(current);
-            if (fldGlobalBase.positionPending != 0) {
+            if (fldGlobalBase.positionPending != FLD_POSITION_UPDATE_NONE) {
                 fldGlobalBase.x = fldGlobalBase.targetX;
                 fldGlobalBase.y = fldGlobalBase.targetY + 44.0f;
                 fldGlobalBase.z = fldGlobalBase.targetZ;
@@ -4870,7 +4870,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
                 position[1] = fldGlobalBase.y;
                 position[2] = fldGlobalBase.z;
                 dds3SetPosPoseSet((dds3Basic_t *)fldPlayerObject, (u128 *)position);
-                fldGlobalBase.positionPending = 0;
+                fldGlobalBase.positionPending = FLD_POSITION_UPDATE_NONE;
             }
         }
         dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
@@ -5152,7 +5152,7 @@ s32 fldUpdateCameraObjectPose(void) {
     current[1] = fldGlobalBase.y;
     current[2] = fldGlobalBase.z;
     fldRefreshAreaStateFromPosition(current);
-    if (fldGlobalBase.positionPending != 0) {
+    if (fldGlobalBase.positionPending != FLD_POSITION_UPDATE_NONE) {
         fldGlobalBase.x = fldGlobalBase.targetX;
         fldGlobalBase.y = fldGlobalBase.targetY + 44.0f;
         fldGlobalBase.z = fldGlobalBase.targetZ;
@@ -5160,7 +5160,7 @@ s32 fldUpdateCameraObjectPose(void) {
         position[1] = fldGlobalBase.y;
         position[2] = fldGlobalBase.z;
         dds3SetPosPoseSet(fldPlayerObject, (u128 *)position);
-        fldGlobalBase.positionPending = 0;
+        fldGlobalBase.positionPending = FLD_POSITION_UPDATE_NONE;
     }
     dds3GetPosPoseSet(fldPlayerObject);
     SDF_VU0_STOREVECTOR_NOMEM(position);
@@ -7427,7 +7427,7 @@ void fldHitChkUnitElv(f32 *position) {
 
     memset(movement, 0, sizeof(movement));
     movement[3] = 1.0f;
-    fldGlobalBase.positionPending = 0;
+    fldGlobalBase.positionPending = FLD_POSITION_UPDATE_NONE;
     if (fldGlobalBase.primaryMovingMatterIndex == -1) {
         fldHitChkUnitElvOnly(position);
     }
@@ -7468,7 +7468,7 @@ void fldHitChkUnitElv(f32 *position) {
             previous[0] = fldResolvedPosition[0];
             previous[1] = fldResolvedPosition[1];
             previous[2] = fldResolvedPosition[2];
-            fldGlobalBase.positionPending = 1;
+            fldGlobalBase.positionPending = FLD_POSITION_UPDATE_PENDING;
             fldGlobalBase.targetX = newPosition[0];
             fldGlobalBase.targetY = newPosition[1];
             fldGlobalBase.targetZ = newPosition[2];

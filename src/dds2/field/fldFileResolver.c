@@ -4155,7 +4155,7 @@ void fldUpdateCameraTarget(void) {
         cur[1] = st->y;
         cur[2] = st->z;
         fldHitChkUnitElv(cur);
-        if (st->positionPending != 0) {
+        if (st->positionPending != FLD_POSITION_UPDATE_NONE) {
             st->x = st->targetX;
             st->y = st->targetY;
             st->z = st->targetZ;
@@ -4163,7 +4163,7 @@ void fldUpdateCameraTarget(void) {
             vec.f[1] = st->targetY;
             vec.f[2] = st->targetZ;
             dds3SetPosPoseSet(fldPlayerObject, (u128 *)vec.f);
-            st->positionPending = 0;
+            st->positionPending = FLD_POSITION_UPDATE_NONE;
             dds3GetPosPoseSet(fldPlayerObject);
             SDF_VU0_STOREVECTOR(&vec);
             dst = (u128 *)fldPlayerObject->inner->smoothedPosition;
@@ -4256,7 +4256,7 @@ void fldUpdateModeOneCameraPose(void) {
         current[1] = fldGlobalBase.y;
         current[2] = fldGlobalBase.z;
         fldRefreshAreaStateFromPosition(current);
-        if (fldGlobalBase.positionPending != 0) {
+        if (fldGlobalBase.positionPending != FLD_POSITION_UPDATE_NONE) {
             fldGlobalBase.x = fldGlobalBase.targetX;
             fldGlobalBase.y = fldGlobalBase.targetY + 44.0f;
             fldGlobalBase.z = fldGlobalBase.targetZ;
@@ -4264,7 +4264,7 @@ void fldUpdateModeOneCameraPose(void) {
             position[1] = fldGlobalBase.y;
             position[2] = fldGlobalBase.z;
             dds3SetPosPoseSet(fldPlayerObject, (u128 *)position);
-            fldGlobalBase.positionPending = 0;
+            fldGlobalBase.positionPending = FLD_POSITION_UPDATE_NONE;
         }
         dds3GetPosPoseSet(fldPlayerObject);
         SDF_VU0_STOREVECTOR_NOMEM(position);
@@ -4744,7 +4744,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
             current[1] = fldGlobalBase.y;
             current[2] = fldGlobalBase.z;
             fldRefreshAreaStateFromPosition(current);
-            if (fldGlobalBase.positionPending != 0) {
+            if (fldGlobalBase.positionPending != FLD_POSITION_UPDATE_NONE) {
                 fldGlobalBase.x = fldGlobalBase.targetX;
                 fldGlobalBase.y = fldGlobalBase.targetY + 44.0f;
                 fldGlobalBase.z = fldGlobalBase.targetZ;
@@ -4752,7 +4752,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
                 position[1] = fldGlobalBase.y;
                 position[2] = fldGlobalBase.z;
                 dds3SetPosPoseSet(fldPlayerObject, (u128 *)position);
-                fldGlobalBase.positionPending = 0;
+                fldGlobalBase.positionPending = FLD_POSITION_UPDATE_NONE;
             }
         }
         dds3GetPosPoseSet(fldPlayerObject);
@@ -5080,7 +5080,7 @@ s32 fldSynchronizePlayerPositionAndAreaState(void) {
     current[1] = fldGlobalBase.y;
     current[2] = fldGlobalBase.z;
     fldRefreshAreaStateFromPosition(current);
-    if (fldGlobalBase.positionPending != 0) {
+    if (fldGlobalBase.positionPending != FLD_POSITION_UPDATE_NONE) {
         fldGlobalBase.x = fldGlobalBase.targetX;
         fldGlobalBase.y = fldGlobalBase.targetY + 44.0f;
         fldGlobalBase.z = fldGlobalBase.targetZ;
@@ -5088,7 +5088,7 @@ s32 fldSynchronizePlayerPositionAndAreaState(void) {
         position[1] = fldGlobalBase.y;
         position[2] = fldGlobalBase.z;
         dds3SetPosPoseSet(fldPlayerObject, (u128 *)position);
-        fldGlobalBase.positionPending = 0;
+        fldGlobalBase.positionPending = FLD_POSITION_UPDATE_NONE;
     }
     dds3GetPosPoseSet(fldPlayerObject);
     SDF_VU0_STOREVECTOR_NOMEM(position);
