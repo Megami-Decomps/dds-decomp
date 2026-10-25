@@ -824,7 +824,7 @@ s32 DrawMsgMng_Process(dds3ProcessID_t *task) {
     for (node = itfMesMngManager.pool.activeHead; node != NULL; node = node->next) {
         itfUpdateSoundSelectorPanel(node->state);
     }
-    itfMesMngManager.unk8++;
+    itfMesMngManager.drawTickCount++;
     return 0;
 }
 

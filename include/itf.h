@@ -359,7 +359,7 @@ typedef struct ItfMesPool {
 typedef struct ItfMesGlobals {
     u32 activeWindowCount;
     sdfTexHandle_t *windowTexture;
-    u32 unk8;
+    u32 drawTickCount;
     u16 flags;
     u16 unkE;
     ItfMesPool pool;

@@ -950,7 +950,7 @@ void itfMesMngInitializeManager(void) {
     mesflow_tag *poolNode;
 
     itfMesMngManager.activeWindowCount = 0;
-    itfMesMngManager.unk8 = 0;
+    itfMesMngManager.drawTickCount = 0;
     itfMesMngManager.flags = 0;
     itfMesMngManager.windowTexture = itfMiscLoadTexture("/itf/MESWIN.TMX");
     itfMiscLinkInitialize(&itfMesMngManager.pool, itfMesMngManager.nodes, ITF_MES_WINDOW_CAPACITY, ITF_MES_POOL_NODE_BYTES);
