@@ -1261,7 +1261,7 @@ extern void fldToggleWorldNodeState(s64 enabled);
 
 extern void dds3MatterObjectBasicSetAlpMode(dds3Basic_t *object, u32 value);
 
-s32 fldHitChkCamera(f32 *start, f32 *end, f32 *hitPoint) {
+s32 fldHitChkCamera(const f32 start[3], const f32 end[3], f32 hitPoint[3]) {
     f32 origin[4];
     f32 target[4];
     f32 delta[4];
@@ -1380,7 +1380,7 @@ s32 fldHitChkCamera(f32 *start, f32 *end, f32 *hitPoint) {
     return found;
 }
 
-s32 fldHitChkEnemy(f32 *start, f32 *end, f32 *hitPoint) {
+s32 fldHitChkEnemy(const f32 start[3], const f32 end[3], f32 hitPoint[3]) {
     f32 origin[4];
     f32 target[4];
     f32 delta[4];

@@ -3655,7 +3655,7 @@ void fldProbeCameraSupportSurface(void) {
 
 extern f32 EulerAngleAxisY(void);
 
-extern s32 fldHitChkCamera(f32 *, f32 *, f32 *);
+extern s32 fldHitChkCamera(const f32 start[3], const f32 end[3], f32 hitPoint[3]);
 
 extern f32 D_003BAD10, D_003BAD14, D_003BAD18;
 
@@ -7662,7 +7662,7 @@ f32 HitPositionInside3(s32 axisMode, s32 planeCount, f32 margin, const f32 *posi
     return clearance;
 }
 
-s32 fldHitChkCamera(f32 *start, f32 *end, f32 *hitPoint) {
+s32 fldHitChkCamera(const f32 start[3], const f32 end[3], f32 hitPoint[3]) {
     f32 origin[4];
     f32 target[4];
     f32 delta[4];
@@ -7781,7 +7781,7 @@ s32 fldHitChkCamera(f32 *start, f32 *end, f32 *hitPoint) {
     return found;
 }
 
-s32 fldHitChkEnemy(f32 *start, f32 *end, f32 *hitPoint) {
+s32 fldHitChkEnemy(const f32 start[3], const f32 end[3], f32 hitPoint[3]) {
     f32 origin[4];
     f32 target[4];
     f32 delta[4];

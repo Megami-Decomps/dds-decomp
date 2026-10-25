@@ -3466,7 +3466,7 @@ void fldProbeCameraSupportSurface(void) {
 }
 
 extern f32 EulerAngleAxisY(void);
-extern s32 fldHitChkCamera(f32 *, f32 *, f32 *);
+extern s32 fldHitChkCamera(const f32 start[3], const f32 end[3], f32 hitPoint[3]);
 extern f32 D_004360A0, D_004360A4, D_004360A8;
 typedef union FldLookAtVector {
     u128 q;
