@@ -36,6 +36,7 @@
 #include "mdl_flag_api.h"
 /* Declared before first use (were implicit int). */
 extern s32 btlGetSlotValueAdjustedForSpecialAbility(BtlUnit *battler, s32 slot);
+extern s32 btlHasMarkedEntry14(BtlLinkedCommand *command);
 extern s32 btlHasActiveSubtask(void);
 extern s32 ptyRebalanceFrontline(s32 rosterIndex);
 
@@ -2594,8 +2595,6 @@ s32 btlSetupHariActionCameraPair(BtlLinkedCommand *command, s32 unusedGroup200, 
     return 1;
 }
 
-extern s32 btlHasMarkedEntry14();
-
 extern void btlClearRuntimeFlag2000(void);
 
 
@@ -2603,7 +2602,7 @@ s32 btlAdvanceTimedActionState(BtlLinkedCommand *command) {
     if (command->actionCode != 0x10c) {
         return 0;
     }
-    if (btlHasMarkedEntry14((s32)command, 0x10c) != 0) {
+    if (btlHasMarkedEntry14(command) != 0) {
         if (command->motionProgress >= 0x12) {
             btlClearRuntimeFlag2000();
             btlBuildBattleUnitFramingCameraPose(command, &command->camera, 0.0f);
@@ -4155,7 +4154,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
         switch (command->actionCode) {
         case 0x10D: {
             BtlUnit *attackTarget;
-            if (btlHasMarkedEntry14((s32)command)) {
+            if (btlHasMarkedEntry14(command)) {
                 btlBossDebugPrintf("VURI_AB:ATTACK-HANSYA ++++\n");
                 btlBuildLinkedCommandCameraPair(command, &command->frontCamera, &command->backCamera,
                     0.8f, -0.5f, 0.075f, 0, 0);
@@ -4269,7 +4268,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
         }
         case 0x10E:
             btlFlagAllUnitDefeatCandidatesTask();
-            if (btlHasMarkedEntry14((s32)command)) {
+            if (btlHasMarkedEntry14(command)) {
                 btlBossDebugPrintf("VURI_A:NAGIBA-HANSYA ++++\n");
                 btlSetCameraPresetForBossUnitMode(command);
                 return 1;
@@ -4307,7 +4306,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
             }
             return 1;
         default:
-            if (sub->enemyCommand != 0 && !btlHasMarkedEntry14((s32)command)) {
+            if (sub->enemyCommand != 0 && !btlHasMarkedEntry14(command)) {
                 target = btlGetTargetUnitForLink(command);
                 if (target != NULL && (target->status.flags & 0x400)) {
                     switch (target->partyRecord.unitId) {
@@ -4360,7 +4359,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
                     return 1;
                 }
                 btlFlagAllUnitDefeatCandidatesTask();
-                if (btlHasMarkedEntry14((s32)command)) {
+                if (btlHasMarkedEntry14(command)) {
                     btlBossDebugPrintf("VURI_AB:HANSYA ++++\n");
                     btlSetCameraPresetForBossUnitMode(command);
                     return 1;
@@ -5832,7 +5831,7 @@ s32 btlQueryLinkedGroupResponse(ActionStateLink *link) {
 
 u32 btlInitializeMarkedActionTimer(BtlLinkedCommand *unit) {
     if (unit->actionCode == 0x6b) {
-        if (btlHasMarkedEntry14((u32)unit)) {
+        if (btlHasMarkedEntry14(unit)) {
             unit->motionProgress = 0;
         } else {
             unit->motionProgress = -1;
@@ -5882,7 +5881,7 @@ u32 btlTickDelayedMarkedAction(BtlLinkedCommand *unit) {
     if (unit->actionCode != 0x6c) {
         return 0;
     }
-    if (btlHasMarkedEntry14((u32)unit) && unit->motionProgress == 0x25) {
+    if (btlHasMarkedEntry14(unit) && unit->motionProgress == 0x25) {
         btlClearRuntimeFlag2000();
         btlBuildBattleUnitFramingCameraPose(unit, &unit->camera, 0.0f);
     }
@@ -6964,7 +6963,7 @@ s32 btlAdvanceBrahmanTimedActionCamera(BtlLinkedCommand *unit) {
         triggerFrame = 0x3E;
         break;
     }
-    if (btlHasMarkedEntry14((s32)unit) && triggerFrame >= 0) {
+    if (btlHasMarkedEntry14(unit) && triggerFrame >= 0) {
         if (unit->motionProgress >= triggerFrame) {
             btlClearRuntimeFlag2000();
         }
@@ -8336,7 +8335,7 @@ u32 btlUpdateSpiralEdgeMarkedCamera(BtlLinkedCommand *unit) {
     if (unit->actionCode != 0x187) {
         return 0;
     }
-    if (btlHasMarkedEntry14((u32)unit)) {
+    if (btlHasMarkedEntry14(unit)) {
         if (unit->motionProgress >= 0x34) {
             btlClearRuntimeFlag2000();
             btlInitMotionTransformFromComponents((BtlCamState *)unit, 517.3f, -476.0f, -947.2f, 0.177f,

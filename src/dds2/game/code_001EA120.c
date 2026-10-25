@@ -138,8 +138,8 @@ s32 btlMatchFirstLinkedActorFlags(BtlLinkedCommand *action) {
 }
 
 /* Return whether a live linked group has its byte at 0x14 marked. */
-s32 btlHasMarkedEntry14(s32 actor) {
-    ActionStateLink *linked = ((BtlLinkedCommand *)actor)->link;
+s32 btlHasMarkedEntry14(BtlLinkedCommand *command) {
+    ActionStateLink *linked = command->link;
     u32 count;
     BtlOperandGroup *entry;
     u32 i;
@@ -175,7 +175,7 @@ s32 btlCanUseLinkedActor(BtlLinkedCommand *actor) {
     if (linked == 0) {
         return 1;
     }
-    if (btlHasMarkedEntry14((s32)actor)) {
+    if (btlHasMarkedEntry14(actor)) {
         return 0;
     }
     if (linked->unit->partyRecord.status & 0x480) {
