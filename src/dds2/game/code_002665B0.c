@@ -988,8 +988,8 @@ void mnuTerminalCreateEffects(MenuSlotState *state) {
 }
 
 /* Destroy every retained effect batch; the slots and terminal allocation are not cleared. */
-void mnuDestroyAllMenuSlotEffectBatches(s32 object) {
-    struct EffMappedResource **batch = ((MenuSlotState *)object)->effect;
+void mnuDestroyAllMenuSlotEffectBatches(MenuSlotState *state) {
+    struct EffMappedResource **batch = state->effect;
     u32 i;
 
     for (i = 0; i < MNU_EFFECT_BATCH_COUNT; i++) {
@@ -1074,7 +1074,7 @@ void mnuReleaseTerminalWorkAndResumeField(dds3ProcessID_t *task) {
     if (work != NULL) {
         mnuReleaseWorkResources(work);
         mnuReleaseTerminalSceneResources(work);
-        mnuDestroyAllMenuSlotEffectBatches((s32)work);
+        mnuDestroyAllMenuSlotEffectBatches(work);
         mnuDrainPanelTransitions(&work->transitionWork, task);
         fclDestroyMessage();
         evtReleaseResourcePairHandle(&work->messageResources);
