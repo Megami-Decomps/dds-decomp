@@ -6,6 +6,7 @@
 #include "common.h"
 #include "sdf_vu0.h"
 #include "btl_actor_status_table_api.h"
+#include "btl_actor_entry_code_api.h"
 #include "btl_event_asset_api.h"
 #include "btl_skill_max_api.h"
 #include "kwln_background_fade_api.h"
@@ -137,8 +138,6 @@ extern s8 D_003D7588[];
 
 
 extern BattleRuntimeState btlRuntimeState;
-
-extern s32 btlMatchActorEntryCode(BtlUnit *, s32);
 
 extern s32 btlGetEntryFlagsUnlessDisabled(datUnitWork_t *);
 
@@ -709,7 +708,7 @@ s32 btlListHasMatchingFlag(datUnitWork_t **entryList, s32 entryCount, u32 reques
     return 0;
 }
 
-/* Every entry must classify as 1 or 2 with a corresponding allowed mask bit.
+/* Every entry must match the max/min code with a corresponding allowed mask bit.
  * Other classifications fail the all-entry check; an empty list passes. */
 s32 btlIndexListMatchesEntryCodes(BtlIndexList *indexList, s32 entryCode, u32 allowedCodeBits) {
     u32 matchedCount = 0;
@@ -718,12 +717,12 @@ s32 btlIndexListMatchesEntryCodes(BtlIndexList *indexList, s32 entryCode, u32 al
 
     for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
         switch (btlMatchActorEntryCode(btlGetIndexListEntry(indexList, entryIndex), entryCode)) {
-        case 1:
+        case BTL_ACTOR_ENTRY_CODE_MATCH_MAX_CODE:
             if (allowedCodeBits & 0x2555) {
                 matchedCount++;
             }
             break;
-        case 2:
+        case BTL_ACTOR_ENTRY_CODE_MATCH_MIN_CODE:
             if (allowedCodeBits & 0x2AA) {
                 matchedCount++;
             }
@@ -735,8 +734,6 @@ s32 btlIndexListMatchesEntryCodes(BtlIndexList *indexList, s32 entryCode, u32 al
 
 /* Reject expired positive or negative codes according to the command's rule.
  * A returned code value of zero is not rejected; other expiry rules pass. */
-#include "btl_actor_entry_code_api.h"
-
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6738);
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6758);

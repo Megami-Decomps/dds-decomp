@@ -24,6 +24,7 @@
 #include "sdf.h"
 #include "btl_indexed_ui_resource_api.h"
 #include "btl.h"
+#include "btl_actor_entry_code_api.h"
 #include "btl_command_partner_output.h"
 #include "btl_state.h"
 #include "eff.h"
@@ -1385,19 +1386,19 @@ s32 btlActorEntryIsExpired(BtlUnit *unit, s32 index) {
     return unit->entrySlots[index].countdown < 1;
 }
 
-s32 btlMatchActorEntryCode(BtlUnit *unit, s32 index) {
+BtlActorEntryCodeMatch btlMatchActorEntryCode(BtlUnit *unit, s32 index) {
     s16 value = unit->entrySlots[index].code;
     if (btlActorEntryCodeDefaults[index].maxCode != 0) {
         if (btlActorEntryCodeDefaults[index].maxCode == value) {
-            return 1;
+            return BTL_ACTOR_ENTRY_CODE_MATCH_MAX_CODE;
         }
     }
     if (btlActorEntryCodeDefaults[index].minCode != 0) {
         if (btlActorEntryCodeDefaults[index].minCode == value) {
-            return 2;
+            return BTL_ACTOR_ENTRY_CODE_MATCH_MIN_CODE;
         }
     }
-    return 0;
+    return BTL_ACTOR_ENTRY_CODE_MATCH_NONE;
 }
 
 /* Clamp a signed entry-code delta and refresh timing only when the result is nonzero. */

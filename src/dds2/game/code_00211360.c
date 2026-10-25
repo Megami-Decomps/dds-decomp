@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_actor_entry_code_api.h"
 #include "btl_skill_max_api.h"
 #include "eff_random.h"
 #include "btl_ai_slot.h"
@@ -69,8 +70,6 @@ extern s32 btlIsSelectedActorStatusAndRecordClear(BtlUnit *);
 
 extern s32 btlUnitMatchesEntryCodeCondition(BtlUnit *, s32, s8);
 
-extern s32 btlMatchActorEntryCode(BtlUnit *, s32);
-
 extern u8 btlHasAvailableOption(BtlUnit *);
 
 extern s32 btlGetCommandUseError(BtlUnit *, s32);
@@ -80,8 +79,6 @@ extern s8 btlHistoryCounter;
 extern void btlSyncEligibleActorPanelHpMp(ActionStateLink *);
 
 extern s32 btlActorEntryIsExpired(BtlUnit *, s32);
-
-#include "btl_actor_entry_code_api.h"
 
 extern s32 btlEntryCodeConditionIndices[];
 
@@ -761,46 +758,46 @@ s32 btlMatchesActorEntryCodeCondition(BtlUnit *actor, s32 conditionIndex) {
 /* Test an entry-code endpoint; kinds 11/12 scan even/odd conditions. */
 s32 btlUnitMatchesEntryCodeCondition(BtlUnit *unit, s32 conditionIndex, s8 inverse) {
     s32 index;
-    s16 result;
+    BtlActorEntryCodeMatch result;
 
     if (conditionIndex == 11) {
         for (index = 0; index < BTL_ENTRY_CODE_SCAN_COUNT; index += 2) {
-            result = btlMatchActorEntryCode(unit, btlEntryCodeConditionIndices[index]);
+            result = (s16)btlMatchActorEntryCode(unit, btlEntryCodeConditionIndices[index]);
             if (inverse == 0) {
-                if (result == 1) {
+                if (result == BTL_ACTOR_ENTRY_CODE_MATCH_MAX_CODE) {
                     return 1;
                 }
-            } else if (result == 2) {
+            } else if (result == BTL_ACTOR_ENTRY_CODE_MATCH_MIN_CODE) {
                 return 1;
             }
         }
     } else if (conditionIndex == 12) {
         for (index = 1; index < BTL_ENTRY_CODE_SCAN_COUNT; index += 2) {
-            result = btlMatchActorEntryCode(unit, btlEntryCodeConditionIndices[index]);
+            result = (s16)btlMatchActorEntryCode(unit, btlEntryCodeConditionIndices[index]);
             if (inverse == 0) {
-                if (result == 2) {
+                if (result == BTL_ACTOR_ENTRY_CODE_MATCH_MIN_CODE) {
                     return 1;
                 }
-            } else if (result == 1) {
+            } else if (result == BTL_ACTOR_ENTRY_CODE_MATCH_MAX_CODE) {
                 return 1;
             }
         }
     } else {
-        result = btlMatchActorEntryCode(unit, btlEntryCodeConditionIndices[conditionIndex]);
+        result = (s16)btlMatchActorEntryCode(unit, btlEntryCodeConditionIndices[conditionIndex]);
         if ((conditionIndex & 1) == 0 || conditionIndex == 13) {
             if (inverse == 0) {
-                if (result == 1) {
+                if (result == BTL_ACTOR_ENTRY_CODE_MATCH_MAX_CODE) {
                     return 1;
                 }
-            } else if (result == 2) {
+            } else if (result == BTL_ACTOR_ENTRY_CODE_MATCH_MIN_CODE) {
                 return 1;
             }
         } else {
             if (inverse == 0) {
-                if (result == 2) {
+                if (result == BTL_ACTOR_ENTRY_CODE_MATCH_MIN_CODE) {
                     return 1;
                 }
-            } else if (result == 1) {
+            } else if (result == BTL_ACTOR_ENTRY_CODE_MATCH_MAX_CODE) {
                 return 1;
             }
         }

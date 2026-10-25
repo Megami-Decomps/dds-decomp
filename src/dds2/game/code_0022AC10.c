@@ -5,6 +5,7 @@
 #include "common.h"
 #include "sdf_vu0.h"
 #include "btl_actor_status_table_api.h"
+#include "btl_actor_entry_code_api.h"
 #include "scr_integer_return_value_api.h"
 #include "btl_script_resource_api.h"
 #include "btl_event_asset_api.h"
@@ -160,9 +161,7 @@ extern void btlBossDebugPrintf(const char *format, ...);
 
 extern u32 btlSelectCommandTargetPolicy(ActionStateLink *, BtlIndexList *, s32);
 
-extern s32 btlMatchActorEntryCode(BtlUnit *, s32);
 extern s32 btlActorEntryIsExpired(BtlUnit *, s32);
-#include "btl_actor_entry_code_api.h"
 
 extern s8 D_00453068[];
 
@@ -941,7 +940,7 @@ s32 btlListHasMatchingFlag(datUnitWork_t **entryList, s32 entryCount, u32 reques
     return 0;
 }
 
-/* Every entry must classify as 1 or 2 with a corresponding allowed mask bit.
+/* Every entry must match the max/min code with a corresponding allowed mask bit.
  * Other classifications fail the all-entry check; an empty list passes. */
 s32 btlIndexListMatchesEntryCodes(BtlIndexList *indexList, s32 entryCode, u32 allowedCodeBits) {
     u32 matchedCount = 0;
@@ -950,12 +949,12 @@ s32 btlIndexListMatchesEntryCodes(BtlIndexList *indexList, s32 entryCode, u32 al
 
     for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
         switch (btlMatchActorEntryCode(btlGetIndexListEntry(indexList, entryIndex), entryCode)) {
-        case 1:
+        case BTL_ACTOR_ENTRY_CODE_MATCH_MAX_CODE:
             if (allowedCodeBits & 0x2555) {
                 matchedCount++;
             }
             break;
-        case 2:
+        case BTL_ACTOR_ENTRY_CODE_MATCH_MIN_CODE:
             if (allowedCodeBits & 0x2AA) {
                 matchedCount++;
             }
