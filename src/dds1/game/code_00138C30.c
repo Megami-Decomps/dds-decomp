@@ -87,6 +87,7 @@
 #include "mdl.h"
 #include "scr.h"
 #include "kwln.h"
+#include "kwln_process_registration.h"
 #include "kwln_task_create.h"
 #include "dat_state.h"
 #include "dds3_world_primary.h"
@@ -896,7 +897,7 @@ s32 fldEveHit_ScriptEnd(char *flag, u32 slot) {
 u32 fldEveHit_ScriptEnd2(u32 slot) {
     dds3ProcessID_t **task = &fldRoomTaskHandles[slot];
 
-    if (dds3ExistProcess(*task) != 0) {
+    if (dds3ExistProcess(*task) != KWLN_PROCESS_NOT_REGISTERED) {
         dds3KillProcess(*task, 0);
     }
     *task = NULL;
@@ -943,7 +944,7 @@ void fldPurgeEveRngProcesses(void) {
     if (count > 0) {
         dds3ProcessID_t **taskSlot = fldRoomTaskHandles;
         do {
-            if (dds3ExistProcess(*taskSlot) == 0) {
+            if (dds3ExistProcess(*taskSlot) == KWLN_PROCESS_NOT_REGISTERED) {
                 *taskSlot = NULL;
             }
             slotIndex++;
