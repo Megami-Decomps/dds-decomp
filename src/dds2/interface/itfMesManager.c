@@ -84,7 +84,7 @@ void itfMesMngSetMesPosition(s32 window, s32 x, s32 y);
 
 s32 itfMesMngSetSelectDefKey(s32 window, s32 id, s32 value);
 
-void itfMesMngRequestMessageRelease(s32 window, s32 releasePrimaryBlock);
+void itfMesMngRequestMessageRelease(s32 window, ItfMesMessageReleaseMode releaseMode);
 
 void itfMesMngRequestSelectRelease(s32 window);
 
@@ -206,7 +206,7 @@ void itfMesMngMsgWndCls(s32 window) {
     if (previousFlags & ITF_MES_UPPER_STATUS_PAIR_MASK) {
         mes->flags = mes->flags | ITF_MES_UPPER_STATUS_PAIR_MASK;
     }
-    itfMesMngRequestMessageRelease(window, 1);
+    itfMesMngRequestMessageRelease(window, ITF_MES_RELEASE_ENTRY_AND_PRIMARY_TEXT);
     itfMesMngRequestSelectRelease(window);
     mes->flags &= ITF_MES_CLEAR_SCRIPT_PANEL_BIT;
 }
@@ -472,7 +472,7 @@ s32 itfMesSelectTableItemText(s32 window, s32 entryIndex, s32 itemIndex) {
 
 /* Release/reset selected-entry glyphs and their status; optionally do the same
  * for primary text. Negative window is a no-op; no other slot validation. */
-void itfMesMngRequestMessageRelease(s32 window, s32 releasePrimaryBlock) {
+void itfMesMngRequestMessageRelease(s32 window, ItfMesMessageReleaseMode releaseMode) {
     instanceMes_tag *mes;
     ItfMesEntryBlock *entryBlock;
     ItfMesBlk14 *primaryTextBlock;
@@ -490,7 +490,7 @@ void itfMesMngRequestMessageRelease(s32 window, s32 releasePrimaryBlock) {
     InitializeMessage(entryBlock, 0);
     mes->flags &= ~ITF_MES_ENTRY_STATE_MASK;
     mes->flags &= ITF_MES_ENTRY_STATE_HIGH_CLEAR_MASK;
-    if (releasePrimaryBlock == 0) {
+    if (releaseMode == ITF_MES_RELEASE_ENTRY_ONLY) {
         return;
     }
     if (primaryTextBlock->glyphChain != NULL) {
@@ -1126,7 +1126,7 @@ void DestructFlow(s32 window) {
     ItfMesWindowRec *windowRecord = &D_00452960[window];
     instanceMes_tag *mes = windowRecord->state;
     if (mes != NULL) {
-        itfMesMngRequestMessageRelease(window, 1);
+        itfMesMngRequestMessageRelease(window, ITF_MES_RELEASE_ENTRY_AND_PRIMARY_TEXT);
         itfMesMngRequestSelectRelease(window);
         btlReleaseEffectResourceHandles(mes);
         ReleaseAllVariable(&mes->textSlots);
@@ -2785,7 +2785,7 @@ s32 itfMesScriptStartEntryAndWait(void) {
                 itfMesMngClearBitStat(window, 0x800000);
                 itfMesMngClearBitStat(window, 0x100000);
                 itfMesMngSetPhase(window, 0);
-                itfMesMngRequestMessageRelease(window, 0);
+                itfMesMngRequestMessageRelease(window, ITF_MES_RELEASE_ENTRY_ONLY);
                 scrSetIntReturnValue(D_00438F2C);
                 return 1;
             }
