@@ -9,6 +9,7 @@
  * branches (bnezl vs bnez, bne vs bnel).
  */
 #include "fld_area_work.h"
+#include "fld_next_scene_request_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
 #include "btl_actor_status_table_api.h"
@@ -108,8 +109,6 @@ extern u8 *D_00435E00;
 extern const u8 *btlPartyUnitGunTypeNames[];
 
 extern EncBgRow *D_00435E14;
-
-extern s32 fldConsumeNextSceneRequest(s32 *outCode, s32 *outParameter);
 
 typedef char BtlStateTotalApDds2OffsetCheck[
     ((u32)&((BtlState *)0)->totalAp == 0x2F8) ? 1 : -1];

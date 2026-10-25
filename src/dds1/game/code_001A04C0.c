@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "eff_random.h"
 #include "common.h"
+#include "fld_next_scene_request_api.h"
 #include "btl_boss_data_api.h"
 #include "btl_event_asset_api.h"
 #include "btl_skill_max_api.h"
@@ -729,13 +730,11 @@ u32 btlSnapshotResultRewards(BrsRewardSummary *rewards) {
 
 extern EncBgRow *D_003BAA44;
 
-extern s32 fldConsumeNextSceneRequest(s32 *outCode, s32 *outParameter);
-
 s32 btlResolveQueuedSceneRequestParameters(s32 *outCode, s32 *outParameter) {
     s32 buffer[2];
     s16 i;
 
-    if (fldConsumeNextSceneRequest(&buffer[0], &buffer[1]) == 0) {
+    if (fldConsumeNextSceneRequest(&buffer[0], &buffer[1]) == FLD_NEXT_SCENE_REQUEST_NO_REQUEST) {
         return 0;
     }
     for (i = 0; i < 0x10; i++) {

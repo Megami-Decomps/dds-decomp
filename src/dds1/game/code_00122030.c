@@ -22,6 +22,7 @@
 #include "fld_scene_ready_api.h"
 #include "fld_scene_command_state_api.h"
 #include "fld_camp_check_state_api.h"
+#include "fld_next_scene_request_api.h"
 #include "sdf_message.h"
 #include "mnu_title_stream.h"
 #include "eff_random.h"
@@ -2481,17 +2482,16 @@ void fldRunPendingSceneAction(void) {
     }
 }
 
-/* Consume the pending pair of field-script values. -1 in both slots means
- * no request; the first value is returned with its 200-entry base offset. */
-s32 fldConsumeNextSceneRequest(s32 *outCode, s32 *outParameter) {
+/* Consume the pending pair; write outputs only when a request is consumed. */
+FldNextSceneRequestResult fldConsumeNextSceneRequest(s32 *outCode, s32 *outParameter) {
     if (fldGlobalBase.nextArea == -1 && fldGlobalBase.nextFloor == -1) {
-        return 0;
+        return FLD_NEXT_SCENE_REQUEST_NO_REQUEST;
     }
     *outCode = fldGlobalBase.nextArea + 0xC8;
     *outParameter = fldGlobalBase.nextFloor;
     fldGlobalBase.nextArea = -1;
     fldGlobalBase.nextFloor = -1;
-    return 1;
+    return FLD_NEXT_SCENE_REQUEST_CONSUMED;
 }
 
 /* Validate the packet where its native initialization is reconstructed. */

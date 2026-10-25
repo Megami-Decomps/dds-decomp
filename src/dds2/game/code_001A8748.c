@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "fld_area_work.h"
+#include "fld_next_scene_request_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
 #include "btl_indexed_ui_resource_api.h"
@@ -105,8 +106,6 @@ extern u8 *D_00435E00;
 extern const u8 *btlPartyUnitGunTypeNames[];
 
 extern EncBgRow *D_00435E14;
-
-extern s32 fldConsumeNextSceneRequest(s32 *outCode, s32 *outParameter);
 
 typedef struct BattleController {
     u8 pad_000[0x214];
@@ -1290,7 +1289,7 @@ s32 btlResolveQueuedSceneRequestParameters(s32 *outCode, s32 *outParameter) {
     s32 buffer[2];
     s16 i;
 
-    if (fldConsumeNextSceneRequest(&buffer[0], &buffer[1]) == 0) {
+    if (fldConsumeNextSceneRequest(&buffer[0], &buffer[1]) == FLD_NEXT_SCENE_REQUEST_NO_REQUEST) {
         return 0;
     }
     for (i = 0; i < 0x10; i++) {
