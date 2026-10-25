@@ -299,37 +299,47 @@ s32 mnuGetMantraNeighborIndexForDirection(MnuStatusResource *resource, s8 direct
 }
 
 
-s32 mnuClassifyMantraNeighborStatus(MnuStatusResource *resource, MantraNodePos *node, s8 neighborIndex) {
+typedef s32 MnuMantraNeighborStatus;
+
+enum {
+    MNU_MANTRA_NEIGHBOR_STATUS_INVALID = -1,
+    MNU_MANTRA_NEIGHBOR_STATUS_DIRECT = 0,
+    MNU_MANTRA_NEIGHBOR_STATUS_MISSING = 1,
+    MNU_MANTRA_NEIGHBOR_STATUS_TRY_OPPOSITE = 2,
+    MNU_MANTRA_NEIGHBOR_STATUS_JUMP_TWO = 3
+};
+
+MnuMantraNeighborStatus mnuClassifyMantraNeighborStatus(MnuStatusResource *resource, MantraNodePos *node, s8 neighborIndex) {
     u16 selectedUnitIndex;
     MantraNodePos *neighbor;
     u16 neighborFlags;
-    s32 result;
+    MnuMantraNeighborStatus status;
 
     if (node == NULL || neighborIndex == -1) {
-        return -1;
+        return MNU_MANTRA_NEIGHBOR_STATUS_INVALID;
     }
     selectedUnitIndex = mnuGetSelectedMantraUnitIndex((MnuStatusResource *)resource);
     neighbor = node->neighbors[neighborIndex];
-    result = 0;
+    status = MNU_MANTRA_NEIGHBOR_STATUS_DIRECT;
     if (neighbor == NULL) {
-        result = 1;
+        status = MNU_MANTRA_NEIGHBOR_STATUS_MISSING;
     } else {
         neighborFlags = resource->menu.slots[selectedUnitIndex]->flags[neighbor->selector.fields.index];
         if ((neighborFlags & 15) == 3) {
-            result = 2;
+            status = MNU_MANTRA_NEIGHBOR_STATUS_TRY_OPPOSITE;
         } else if ((neighbor->selector.packed & 0x100) != 0 && ((neighborFlags >> 8) & 8) != 0) {
             switch (neighborIndex) {
-                case 1:
-                case 4:
-                    result = 3;
-                    break;
-                default:
-                    result = 2;
-                    break;
+            case 1:
+            case 4:
+                status = MNU_MANTRA_NEIGHBOR_STATUS_JUMP_TWO;
+                break;
+            default:
+                status = MNU_MANTRA_NEIGHBOR_STATUS_TRY_OPPOSITE;
+                break;
             }
         }
     }
-    return result;
+    return status;
 }
 
 extern s32 mnuGetMantraNeighborIndexForDirection(MnuStatusResource *, s8);
@@ -358,15 +368,15 @@ s32 mnuNavigateMantraSelector(MnuStatusResource *resource, s8 directionFlags) {
         for (;;) {
             neighborStatus = mnuClassifyMantraNeighborStatus(resource, selectedNode, neighborIndex);
             switch (neighborStatus) {
-                case -1:
+                case MNU_MANTRA_NEIGHBOR_STATUS_INVALID:
                     return 0;
-                case 0:
+                case MNU_MANTRA_NEIGHBOR_STATUS_DIRECT:
                     work->defaultSelector = selectedNode->neighbors[neighborIndex];
                     if (work->navigationState == 0) {
                         work->navigationState = 4;
                     }
                     return 1;
-                case 1:
+                case MNU_MANTRA_NEIGHBOR_STATUS_MISSING:
                     if ((directionFlags & 0xa) != 0 || attempts == 2) {
                         for (i = 0; i < 50; i++) {
                             if (mnuMantraAlternateNeighborRows[i].id == selectedNode->selector.fields.index) {
@@ -389,7 +399,7 @@ s32 mnuNavigateMantraSelector(MnuStatusResource *resource, s8 directionFlags) {
                         return 0;
                     }
                     /* Try the opposite direction when this neighbor is unavailable. */
-                case 2:
+                case MNU_MANTRA_NEIGHBOR_STATUS_TRY_OPPOSITE:
                     if (neighborIndex == 1 || neighborIndex == 4) {
                         return 0;
                     }
@@ -416,7 +426,7 @@ s32 mnuNavigateMantraSelector(MnuStatusResource *resource, s8 directionFlags) {
                         return 0;
                     }
                     break;
-                case 3:
+                case MNU_MANTRA_NEIGHBOR_STATUS_JUMP_TWO:
                     work->defaultSelector = selectedNode->neighbors[neighborIndex]->neighbors[neighborIndex];
                     if (work->navigationState == 0) {
                         work->navigationState = 4;
