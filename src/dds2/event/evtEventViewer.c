@@ -593,7 +593,7 @@ void DelBED(EvtRuntimeChild *node) {
 
 extern f32 dds3CameraObjectBasicGetFovy(dds3Basic_t *camera);
 extern void dds3SetScreenFovy(f32 fieldOfView);
-extern s32 evtViewerHasUpdateFlag(EvtRuntime *);
+extern u8 evtViewerHasUpdateFlag(EvtRuntime *);
 
 typedef struct CampDisplayDefaults CampDisplayDefaults;
 extern void mnuBlendCampDisplayFields(EvtRuntimeChild *from, EvtRuntimeChild *to, CampDisplayDefaults *display, f32 ratio);
@@ -954,7 +954,7 @@ extern void dds3SetScreenFovy(f32 fieldOfView);
 
 
 
-extern s32 evtViewerHasUpdateFlag(EvtRuntime *);
+extern u8 evtViewerHasUpdateFlag(EvtRuntime *);
 extern void evtEventViewerApplyEffectToggles(EvtRuntime *viewer);
 extern void evtViewerApplySelectedEntry(EvtRuntime *viewer);
 extern u8 D_004372C0[3];
@@ -2361,7 +2361,7 @@ void evtEventViewerStartEndCountdown(EvtRuntime *viewer) {
     evtViewerCleanupMessageWindow(viewer);
 }
 
-s32 evtViewerHasUpdateFlag(EvtRuntime *viewer) {
+u8 evtViewerHasUpdateFlag(EvtRuntime *viewer) {
     s32 flags = viewer->flags;
     return (flags & 0x10) > 0;
 }

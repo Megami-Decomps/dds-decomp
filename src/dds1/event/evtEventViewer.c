@@ -63,7 +63,7 @@ extern s32 mnuGetSelectedTableValue(EvtRuntime *runtime);
 struct EvtRuntime;
 
 extern char evtViewerTaskName[]; /* "EventViewer" */
-s32 evtViewerHasUpdateFlag(struct EvtRuntime *viewer);
+u8 evtViewerHasUpdateFlag(struct EvtRuntime *viewer);
 s32 evtViewerUpdateFrame(dds3ProcessID_t *task);
 void fldInitializeCameraColorResource(void);
 dds3ProcessID_t *evtInitFrameVar(void);
@@ -2159,7 +2159,7 @@ void evtEventViewerStartEndCountdown(EvtRuntime *viewer) {
 }
 
 /* Test the viewer's update flag. */
-s32 evtViewerHasUpdateFlag(EvtRuntime *viewer) {
+u8 evtViewerHasUpdateFlag(EvtRuntime *viewer) {
     return ((s32)viewer->flags & 0x10) > 0;
 }
 
