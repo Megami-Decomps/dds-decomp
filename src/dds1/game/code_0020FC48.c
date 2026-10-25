@@ -43,6 +43,7 @@
 #include "btl_task_args.h"
 #include "btl_command.h"
 #include "btl_command_block_reason.h"
+#include "btl_command_target_eligibility.h"
 #include "btl_model_record.h"
 #include "btl_model_cache_entry.h"
 #include "sdf.h"
@@ -887,7 +888,7 @@ BtlCommandBlockReason btlGetCommandBlockReason(BtlTask *actionTask, s32 commandI
     return BTL_COMMAND_BLOCK_EMPTY_OR_ALL_FLAGGED_TARGETS;
 }
 
-s32 btlGetCommandTargetEligibility(BtlIndexList *indexList, s32 commandId) {
+BtlCommandTargetEligibilityResult btlGetCommandTargetEligibility(BtlIndexList *indexList, s32 commandId) {
     datUnitWork_t *entryList[26];
     BtlState *battle = (BtlState *)btlGetRuntime();
     s32 count;
@@ -897,14 +898,14 @@ s32 btlGetCommandTargetEligibility(BtlIndexList *indexList, s32 commandId) {
     s32 code;
 
     if (battle->runtimeFlags & 0x40) {
-        return 0;
+        return BTL_COMMAND_TARGET_ELIGIBILITY_RESULT_NONE;
     }
     if (commandId <= 0) {
-        return 0;
+        return BTL_COMMAND_TARGET_ELIGIBILITY_RESULT_NONE;
     }
     count = btlGetIndexListCount(indexList);
     if (count == 0) {
-        return 0;
+        return BTL_COMMAND_TARGET_ELIGIBILITY_RESULT_NONE;
     }
     for (i = 0; i < count; i++) {
         entryList[i] = &((BtlUnit *)btlGetIndexListEntry(indexList, i))->partyRecord;
@@ -914,17 +915,17 @@ s32 btlGetCommandTargetEligibility(BtlIndexList *indexList, s32 commandId) {
         for (i = 0; i < count; i++) {
             flags = btlGetEntryFlagsUnlessDisabled(&((BtlUnit *)btlGetIndexListEntry(indexList, i))->partyRecord);
             if (flags & 0x40) {
-                return 5;
+                return BTL_COMMAND_TARGET_ELIGIBILITY_RESULT_ENTRY_FLAG_40;
             }
         }
     }
     if (datCommandRecords[commandId].unk30 == 1) {
         if (battle->commandRestrictFlags & 0x10) {
-            return 8;
+            return BTL_COMMAND_TARGET_ELIGIBILITY_RESULT_COMMAND_RESTRICTED;
         }
         for (i = 0; i < count; i++) {
             if (btlGetEntryFlagsUnlessDisabled(&((BtlUnit *)btlGetIndexListEntry(indexList, i))->partyRecord) & 0x800) {
-                return 8;
+                return BTL_COMMAND_TARGET_ELIGIBILITY_RESULT_COMMAND_RESTRICTED;
             }
         }
     }
@@ -934,7 +935,7 @@ s32 btlGetCommandTargetEligibility(BtlIndexList *indexList, s32 commandId) {
         if (code >= 0) {
             if (btlIndexListMatchesEntryCodes(indexList, code,
                     datCommandRecords[commandId].requirementBits)) {
-                return 3;
+                return BTL_COMMAND_TARGET_ELIGIBILITY_RESULT_REQUIREMENTS_MET;
             }
         }
     }

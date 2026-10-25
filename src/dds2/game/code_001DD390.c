@@ -36,6 +36,7 @@
 #include "sdf_texture_offset_list.h"
 #include "btl_model_record.h"
 #include "btl_command.h"
+#include "btl_command_target_eligibility.h"
 #include "btl_state.h"
 #include "btl_task_args.h"
 #include "btl_deferred_unit_status_args.h"
@@ -1872,7 +1873,7 @@ extern s32 btlGetCommandUseError(BtlUnit *, s32);
 
 extern u32 btlSelectCommandTargetPolicy(ActionStateLink *, BtlIndexList *, s32);
 
-extern s32 btlGetCommandTargetEligibility(BtlIndexList *, s32);
+extern BtlCommandTargetEligibilityResult btlGetCommandTargetEligibility(BtlIndexList *, s32);
 
 extern BtlUnit *btlSelectUnitAtExtremeX(BtlUnit *, BtlIndexList *);
 
@@ -1887,7 +1888,7 @@ void btlPrepareSavedCommandTargets(ActionStateLink *task, BattleIndexWork *work)
     u32 i;
     u32 sides;
     BtlUnit *target;
-    s32 reason;
+    BtlCommandTargetEligibilityResult reason;
 
     if (fileTestSavedSlotFlags(2)) {
         if ((s16)unit->partyRecord.savedCommandPhase == 10) {
@@ -1935,9 +1936,9 @@ void btlPrepareSavedCommandTargets(ActionStateLink *task, BattleIndexWork *work)
         kind = btlSelectCommandTargetPolicy(task, list, 0);
         reason = btlGetCommandTargetEligibility(list, work->skillId);
         switch (reason) {
-        case 5:
-        case 7:
-        case 9:
+        case BTL_COMMAND_TARGET_ELIGIBILITY_RESULT_ENTRY_FLAG_40:
+        case BTL_COMMAND_TARGET_ELIGIBILITY_RESULT_ENTRY_FLAG_8000:
+        case BTL_COMMAND_TARGET_ELIGIBILITY_RESULT_COMMAND_RESTRICTED:
             work->skillId = 0;
             work->phase = 1;
             unit->partyRecord.actionSlot = work->skillId;

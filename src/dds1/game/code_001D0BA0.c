@@ -5,6 +5,7 @@
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "common.h"
+#include "btl_command_target_eligibility.h"
 #include "dds3_object_flags.h"
 #include "sdf_vu0.h"
 #include "btl_aim_horizontal_direction_clamped_api.h"
@@ -223,7 +224,7 @@ extern s32 btlCountTasksByKind(u16 kind);
 
 BtlRuntimeTask *btlCreateActorParameterDeltaTask(BtlUnit *owner, BtlOperandEntry *spec);
 
-extern s32 btlGetCommandTargetEligibility(BtlIndexList *indices, s32 selection);
+extern BtlCommandTargetEligibilityResult btlGetCommandTargetEligibility(BtlIndexList *indices, s32 selection);
 
 void btlResolveActionTargetResults(BtlTask *task, BattleIndexWork *work);
 
@@ -1779,7 +1780,7 @@ void btlPrepareSavedCommandTargets(BtlTask *task, BattleIndexWork *work) {
     u32 i;
     u32 sides;
     BtlUnit *target;
-    s32 reason;
+    BtlCommandTargetEligibilityResult reason;
 
     if (fileTestSavedSlotFlags(2)) {
         if ((s16)unit->partyRecord.savedCommandPhase == 10) {
@@ -1826,7 +1827,8 @@ void btlPrepareSavedCommandTargets(BtlTask *task, BattleIndexWork *work) {
         list = btlAllocateIndexList(13);
         kind = btlSelectCommandTargetPolicy(task, list, 0);
         reason = btlGetCommandTargetEligibility(list, work->skillId);
-        if (reason == 5 || reason == 8) {
+        if (reason == BTL_COMMAND_TARGET_ELIGIBILITY_RESULT_ENTRY_FLAG_40 ||
+            reason == BTL_COMMAND_TARGET_ELIGIBILITY_RESULT_COMMAND_RESTRICTED) {
             work->skillId = 0;
             work->phase = 1;
             unit->partyRecord.actionSlot = work->skillId;

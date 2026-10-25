@@ -32,6 +32,7 @@
 #include "btl_scene_fade.h"
 #include "btl_command.h"
 #include "btl_command_block_reason.h"
+#include "btl_command_target_eligibility.h"
 #include "btl_camera_pose_api.h"
 #include "btl_action.h"
 #include "btl_effect_table.h"
@@ -1089,7 +1090,7 @@ void btlCommandResultEffectSelect(u8 *task) {
 
 extern s32 btlGetTargetSelectionState(void);
 extern BtlIndexList *btlGetSelectedTargetList(void);
-extern s32 btlGetCommandTargetEligibility(BtlIndexList *, s32);
+extern BtlCommandTargetEligibilityResult btlGetCommandTargetEligibility(BtlIndexList *, s32);
 extern void btlRequestTargetSelectionClose(void);
 extern s32 btlSetTaskPhase2(void);
 
@@ -1099,7 +1100,7 @@ void btlInitializeActorCommandState(ActionStateLink *task) {
     s32 state;
     BtlIndexList *selected;
     s32 selection;
-    s32 reason;
+    BtlCommandTargetEligibilityResult reason;
 
     if (work->battleFlags & 0x20) {
         return;
@@ -1129,19 +1130,20 @@ void btlInitializeActorCommandState(ActionStateLink *task) {
             }
             reason = btlGetCommandTargetEligibility(selected, selection);
             switch (reason) {
-            case 3:
+            case BTL_COMMAND_TARGET_ELIGIBILITY_RESULT_REQUIREMENTS_MET:
             case 4:
                 btlStartTask(btlCreateEffObjB(task->unit, 0x6A));
                 sndSetStationedSeVolume(0xD);
                 btlSetTaskPhase2();
                 return;
-            case 5:
-            case 7:
-                btlStartTask(btlCreateEffObjB(task->unit, reason == 5 ? 0xA6 : 0xE2));
+            case BTL_COMMAND_TARGET_ELIGIBILITY_RESULT_ENTRY_FLAG_40:
+            case BTL_COMMAND_TARGET_ELIGIBILITY_RESULT_ENTRY_FLAG_8000:
+                btlStartTask(btlCreateEffObjB(task->unit,
+                    reason == BTL_COMMAND_TARGET_ELIGIBILITY_RESULT_ENTRY_FLAG_40 ? 0xA6 : 0xE2));
                 sndSetStationedSeVolume(0xD);
                 btlSetTaskPhase2();
                 return;
-            case 9:
+            case BTL_COMMAND_TARGET_ELIGIBILITY_RESULT_COMMAND_RESTRICTED:
                 btlStartTask(btlCreateEffObjB(task->unit, 0xCC));
                 sndSetStationedSeVolume(0xD);
                 btlSetTaskPhase2();

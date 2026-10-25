@@ -23,6 +23,7 @@
 #include "sdf_model.h"
 #include "btl.h"
 #include "btl_command_block_reason.h"
+#include "btl_command_target_eligibility.h"
 #include "btl_actor_work.h"
 #include "sdf_texture_offset_list.h"
 #include "btl_state.h"
@@ -669,7 +670,7 @@ extern s32 btlGetTargetSelectionState(void);
 
 extern BtlIndexList *btlGetSelectedTargetList(void);
 
-extern s32 btlGetCommandTargetEligibility(BtlIndexList *indices, s32 selection);
+extern BtlCommandTargetEligibilityResult btlGetCommandTargetEligibility(BtlIndexList *indices, s32 selection);
 
 extern void btlRequestTargetSelectionClose(void);
 
@@ -680,7 +681,7 @@ void btlInitializeActorCommandState(BtlTask *task) {
     s32 state;
     BtlIndexList *selected;
     s32 selection;
-    s32 reason;
+    BtlCommandTargetEligibilityResult reason;
 
     if (work->battleFlags & 0x20) {
         return;
@@ -710,18 +711,18 @@ void btlInitializeActorCommandState(BtlTask *task) {
             }
             reason = btlGetCommandTargetEligibility(selected, selection);
             switch (reason) {
-            case 3:
+            case BTL_COMMAND_TARGET_ELIGIBILITY_RESULT_REQUIREMENTS_MET:
             case 4:
                 btlStartTask(btlCreateEffObjB(task->unit, 0x6A));
                 sndSetStationedSeVolume(0xD);
                 btlSetTaskPhase2();
                 return;
-            case 5:
+            case BTL_COMMAND_TARGET_ELIGIBILITY_RESULT_ENTRY_FLAG_40:
                 btlStartTask(btlCreateEffObjB(task->unit, 0xA6));
                 sndSetStationedSeVolume(0xD);
                 btlSetTaskPhase2();
                 return;
-            case 8:
+            case BTL_COMMAND_TARGET_ELIGIBILITY_RESULT_COMMAND_RESTRICTED:
                 btlStartTask(btlCreateEffObjB(task->unit, 0xCC));
                 sndSetStationedSeVolume(0xD);
                 btlSetTaskPhase2();
