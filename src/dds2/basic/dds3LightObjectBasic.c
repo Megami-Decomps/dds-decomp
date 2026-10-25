@@ -52,7 +52,7 @@ s32 lightmainprocedure(dds3Basic_t *lightObject) {
             unpackedA[0] = data->packedColorA;
             EE_MMI_RGBA_UNPACK(unpackedA, 1.0f / 128.0f);
             VU0_SCALE_VF(vf10, 1.0f - factor);
-            SDF_VU0_LOADVECTOR_B(data->ambientColor);
+            SDF_VU0_LOADVECTOR_B(data->sourceVectors.named.color);
             VU0_SCALE_VF(vf11, factor);
             SDF_VU0_ADDVECTOR();
             SDF_VU0_COPYVECTOR_A_TO_C();
@@ -65,7 +65,7 @@ s32 lightmainprocedure(dds3Basic_t *lightObject) {
             unpackedB[0] = secondaryWord;
             EE_MMI_RGBA_UNPACK(unpackedB, 1.0f / 128.0f);
             VU0_SCALE_VF(vf10, 1.0f - factor);
-            SDF_VU0_LOADVECTOR_B(data->secondaryColor);
+            SDF_VU0_LOADVECTOR_B(data->ambientColor);
             VU0_SCALE_VF(vf11, factor);
             SDF_VU0_ADDVECTOR();
             SDF_VU0_COPYVECTOR_A_TO_B();
@@ -73,13 +73,13 @@ s32 lightmainprocedure(dds3Basic_t *lightObject) {
             data->packedColorB = packedB[0];
             SDF_VU0_COPYVECTOR_C_TO_A();
         } else {
-            SDF_VU0_LOADVECTOR(data->ambientColor);
-            SDF_VU0_LOADVECTOR_B(data->secondaryColor);
+            SDF_VU0_LOADVECTOR(data->sourceVectors.named.color);
+            SDF_VU0_LOADVECTOR_B(data->ambientColor);
         }
         SDF_VU0_STOREVECTOR(D_0037F770[0]);
         SDF_VU0_STOREVECTOR_B(kwlnDefaultColorVector);
     }
-    sources[0] = (f32 (*)[4])data;
-    sdf3DMakeLightParallelPacket(data->buffer, sources, data->secondaryColor);
+    sources[0] = data->sourceVectors.vectors;
+    sdf3DMakeLightParallelPacket(data->buffer, sources, data->ambientColor);
     return 1;
 }
