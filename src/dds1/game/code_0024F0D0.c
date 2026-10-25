@@ -1457,7 +1457,242 @@ s32 mnuUpdateMantraSceneTaskState(s32 key, MenuSceneWork *work) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_0024F0D0", mnuDrawMantraSceneFrame);
+/* Draw the mantra scene layers for the current task phase. */
+s32 mnuDrawMantraSceneFrame(s32 key, MenuSceneWork *work) {
+    extern void mnuDrawPlacedSpriteFromTable(s32, s32, s32, s32, s32, s32);
+    extern void mnuDrawMantraSparkScene(MenuSceneMetadata *, s32, s32);
+    extern void mnuDrawMantraSceneBackground(MenuSceneMetadata *, s32, s32);
+    extern void mnuDrawMantraPulseFrame(s32, s32, s32, s32, MenuSceneWork *, s32);
+    extern void itfDspDrawMarksA(s32, s32);
+    extern void itfDspDrawMarksB(s32, s32);
+    extern void mnuDrawAnimatedCurrencyCounter(s32, s32, s32, s32, MenuSceneMetadata *, s32);
+    extern void mnuDrawMantraGridPulseEntry(s32, s32, s32, MenuSceneWork *, s32, s32);
+    extern s32 itfAdvanceDisplayList(MnuSceneListHead *, s32, s32);
+    extern void itfDspDrawPartyRecordWithLevel(s32, s32, s32, datUnitWork_t *, s32, s32);
+    extern void mnuDrawMantraNavigationPulses(MenuSceneWork *, s32, s32);
+    extern void mnuDrawMantraPulseStripAndKind(MenuSceneWork *, s32, s32);
+    extern void mnuDrawSelectedMantraEntry(MenuSceneWork *, s32, s32);
+    extern void mnuChooseDisplaySpriteKindFromEntryFlags(MenuSceneWork *, s32, s32);
+    extern void dspRequestMessageWindowModeOne(void);
+    MenuSceneMetadata *metadata;
+    MnuSceneListHead *pendingDisplayList;
+    f32 weight = 0.0f;
+    f32 entryWeight;
+    f32 stripWeight;
+    s32 alpha;
+    s32 entryAlpha;
+
+    eglSetOt(0x53);
+    evtSubmitPrimaryAlphaBlendMode(0);
+    evtSubmitPrimaryGsTest(1, 2, 128, 3, 0, 0, 1, 1);
+    mnuGetSelectedNodeValue();
+    metadata = (MenuSceneMetadata *)sdfGetTaskValueByKey(mnuSceneResourceContext, -1);
+    dspRequestMessageWindowModeOne();
+    switch (work->scenePhase) {
+    case 0:
+        mnuDrawMantraSparkScene(metadata, 128, 0x52);
+        break;
+    case 1:
+        if (work->phaseFrame < 7) entryWeight = 0.0f;
+        else entryWeight = (work->phaseFrame - 7) / 3.0f;
+        weight = work->phaseFrame / 5.0f;
+        if (weight > 1.0f) weight = 1.0f;
+        mnuDrawMantraSparkScene(metadata, 128, 0x52);
+        mnuDrawMantraSceneBackground(metadata, (s32)(weight * 128.0f), 0x52);
+        if (work->phaseFrame < 5) weight = 0.0f;
+        else weight = (work->phaseFrame - 5) / 5.0f;
+        mnuDrawPlacedSpriteFromTable(0, 0, 0, 128, 0x5a, 0x52);
+        entryAlpha = (s32)(entryWeight * 128.0f);
+        mnuDrawMantraPulseFrame(0, 0, 1, entryAlpha, work, 0x52);
+        itfDspDrawMarksA(128, 0x53);
+        mnuDrawMantraScenePlacementSprite(0, 0, 1, 128, 0x53);
+        itfDspDrawMarksB((s32)(weight * 128.0f), 0x53);
+        mnuDrawAnimatedCurrencyCounter(0, 0, 0, (s32)(weight * 128.0f), metadata, 0x53);
+        mnuDrawMantraGridPulseEntry((s32)((1.0f - weight) * 64.0f), 0, 0, work, entryAlpha, 0x53);
+        if (itfAdvanceDisplayList(&work->sceneTransitionList, (s32)(weight * 128.0f), 0x53)) {
+            itfDspDrawPartyRecordWithLevel(0, 0, 0, mnuGetSelectedNodeValue()->partyRecord, (s32)(weight * 128.0f), 0x53);
+        }
+        mnuDrawMantraNavigationPulses(work, (s32)(weight * 128.0f), 0x53);
+        break;
+    case 2:
+        weight = work->phaseFrame / 10.0f;
+        weight = 1.0f - weight;
+        /* Copied-case trace exception, not recovered original source: this
+         * phase-1 entry channel is unused during the outgoing fade. Qualified
+         * cc1 traces delete its values in 13.life, but keep its integer test
+         * through combine/allocation until 21.flow2. This retains retail's
+         * 002520D8 lw / 002520EC mtc1 and the separate unit-constant CSE regions.
+         * See docs/matching/mantra-scene-frame.md. */
+        if (work->phaseFrame < 7) entryWeight = 0.0f;
+        else entryWeight = (work->phaseFrame - 7) / 3.0f;
+        mnuDrawMantraSparkScene(metadata, 128, 0x52);
+        alpha = (s32)(weight * 128.0f);
+        mnuDrawMantraSceneBackground(metadata, alpha, 0x52);
+        mnuDrawPlacedSpriteFromTable(0, 0, 0, 128, 0x5a, 0x52);
+        mnuDrawMantraPulseFrame(0, 0, 1, alpha, work, 0x52);
+        itfDspDrawMarksA(128, 0x53);
+        mnuDrawMantraScenePlacementSprite(0, 0, 1, 128, 0x53);
+        itfDspDrawMarksB(alpha, 0x53);
+        mnuDrawAnimatedCurrencyCounter(0, 0, 0, alpha, metadata, 0x53);
+        mnuDrawMantraGridPulseEntry((s32)((1.0f - weight) * 64.0f), 0, 0, work, alpha, 0x53);
+        if (itfAdvanceDisplayList(&work->sceneTransitionList, alpha, 0x53)) {
+            itfDspDrawPartyRecordWithLevel(0, 0, 0, mnuGetSelectedNodeValue()->partyRecord, alpha, 0x53);
+        }
+        mnuDrawMantraNavigationPulses(work, alpha, 0x53);
+        break;
+    case 4:
+        weight = work->phaseFrame / 10.0f;
+        mnuDrawMantraSparkScene(metadata, 128, 0x52);
+        weight = 1.0f - weight;
+        alpha = (s32)(weight * 128.0f);
+        mnuDrawMantraSceneBackground(metadata, alpha, 0x52);
+        mnuDrawMantraPulseFrame(0, 0, 1, alpha, work, 0x52);
+        itfDspDrawMarksA(alpha, 0x53);
+        mnuDrawMantraScenePlacementSprite(0, 0, 1, alpha, 0x53);
+        itfDspDrawMarksB(alpha, 0x53);
+        mnuDrawAnimatedCurrencyCounter(0, (s32)((1.0f - weight) * -27.0f), 0, 128, metadata, 0x53);
+        mnuDrawMantraPulseStripAndKind(work, alpha, 0x53);
+        if (itfAdvanceDisplayList(&work->sceneTransitionList, alpha, 0x53)) {
+            itfDspDrawPartyRecordWithLevel(0, 0, 0, mnuGetSelectedNodeValue()->partyRecord, alpha, 0x53);
+        }
+        mnuDrawMantraNavigationPulses(work, alpha, 0x53);
+        break;
+    case 9:
+        weight = work->phaseFrame / 10.0f;
+        mnuDrawMantraSparkScene(metadata, 128, 0x52);
+        mnuDrawMantraSceneBackground(metadata, 128, 0x52);
+        alpha = (s32)(weight * 128.0f);
+        mnuDrawMantraPulseFrame(0, 0, 1, alpha, work, 0x52);
+        itfDspDrawMarksA(alpha, 0x53);
+        mnuDrawMantraScenePlacementSprite(0, 0, 1, alpha, 0x53);
+        itfDspDrawMarksB(alpha, 0x53);
+        mnuDrawAnimatedCurrencyCounter(0, (s32)((1.0f - weight) * -27.0f), 0, 128, metadata, 0x53);
+        mnuDrawMantraPulseStripAndKind(work, alpha, 0x53);
+        if (itfAdvanceDisplayList(&work->sceneTransitionList, alpha, 0x53)) {
+            itfDspDrawPartyRecordWithLevel(0, 0, 0, mnuGetSelectedNodeValue()->partyRecord, alpha, 0x53);
+        }
+        mnuDrawMantraNavigationPulses(work, alpha, 0x53);
+        break;
+    case 5:
+        weight = work->phaseFrame / 10.0f;
+        weight = 1.0f - weight;
+        mnuDrawMantraSparkScene(metadata, 128, 0x52);
+        alpha = (s32)(weight * 128.0f);
+        mnuDrawMantraSceneBackground(metadata, alpha, 0x52);
+        mnuDrawMantraPulseFrame(0, 0, 1, alpha, work, 0x52);
+        mnuDrawPlacedSpriteFromTable(0, 0, 0, alpha, 0x3a, 0x53);
+        mnuDrawPlacedSpriteFromTable(0, 0, 0, alpha, 0x38, 0x53);
+        mnuDrawPlacedSpriteFromTable(0, 0, 0, alpha, 0x39, 0x53);
+        mnuDrawMantraScenePlacementSprite(0, 0, 0, 128, 0x53);
+        mnuDrawPlacedSpriteFromTable(0, 0, 0, 128, 0xf, 0x53);
+        mnuDrawPlacedSpriteFromTable(0, 0, 0, alpha, 0x10, 0x53);
+        mnuDrawPlacedSpriteFromTable(0, 0, 0, alpha, 0x12, 0x53);
+        mnuDrawAnimatedCurrencyCounter(0, 0, 0, alpha, metadata, 0x53);
+        mnuDrawPlacedSpriteFromTable(0, 0, 0, alpha, 0x4, 0x53);
+        mnuDrawPlacedSpriteFromTable(0, 0, 0, alpha, 0x5, 0x53);
+        mnuDrawPlacedSpriteFromTable(0, 0, 0, alpha, 0xa, 0x53);
+        mnuDrawPlacedSpriteFromTable(0, 0, 0, alpha, 0xb, 0x53);
+        mnuDrawPlacedSpriteFromTable(0, 0, 0, alpha, 0xc, 0x53);
+        mnuDrawPlacedSpriteFromTable(0, 0, 0, 128, 0xd, 0x53);
+        mnuDrawSelectedMantraEntry(work, alpha, 0x53);
+        mnuChooseDisplaySpriteKindFromEntryFlags(work, 128, 0x53);
+        if (itfAdvanceDisplayList(&work->sceneTransitionList, alpha, 0x53)) {
+            itfDspDrawPartyRecordWithLevel(0, 0, 0, mnuGetSelectedNodeValue()->partyRecord, alpha, 0x53);
+        }
+        mnuDrawMantraNavigationPulses(work, alpha, 0x53);
+        break;
+    case 13:
+        weight = work->phaseFrame / 10.0f;
+        mnuDrawMantraSparkScene(metadata, 128, 0x52);
+        alpha = (s32)(weight * 128.0f);
+        mnuDrawMantraSceneBackground(metadata, alpha, 0x52);
+        mnuDrawMantraPulseFrame(0, 0, 0, alpha, work, 0x52);
+        mnuDrawPlacedSpriteFromTable(0, 0, 0, alpha, 0x3a, 0x53);
+        mnuDrawPlacedSpriteFromTable(0, 0, 0, alpha, 0x38, 0x53);
+        mnuDrawPlacedSpriteFromTable(0, 0, 0, alpha, 0x39, 0x53);
+        mnuDrawMantraScenePlacementSprite(0, 0, 0, 128, 0x53);
+        mnuDrawPlacedSpriteFromTable(0, 0, 0, 128, 0xf, 0x53);
+        mnuDrawPlacedSpriteFromTable(0, 0, 0, alpha, 0x10, 0x53);
+        mnuDrawPlacedSpriteFromTable(0, 0, 0, alpha, 0x12, 0x53);
+        mnuDrawAnimatedCurrencyCounter(0, 0, 0, alpha, metadata, 0x53);
+        mnuDrawPlacedSpriteFromTable(0, 0, 0, alpha, 0x4, 0x53);
+        mnuDrawPlacedSpriteFromTable(0, 0, 0, alpha, 0x5, 0x53);
+        mnuDrawPlacedSpriteFromTable(0, 0, 0, alpha, 0xa, 0x53);
+        mnuDrawPlacedSpriteFromTable(0, 0, 0, alpha, 0xb, 0x53);
+        mnuDrawPlacedSpriteFromTable(0, 0, 0, alpha, 0xc, 0x53);
+        mnuDrawPlacedSpriteFromTable(0, 0, 0, 128, 0xd, 0x53);
+        mnuDrawSelectedMantraEntry(work, alpha, 0x53);
+        mnuChooseDisplaySpriteKindFromEntryFlags(work, 128, 0x53);
+        if (itfAdvanceDisplayList(&work->sceneTransitionList, alpha, 0x53)) {
+            itfDspDrawPartyRecordWithLevel(0, 0, 0, mnuGetSelectedNodeValue()->partyRecord, alpha, 0x53);
+        }
+        mnuDrawMantraNavigationPulses(work, alpha, 0x53);
+        break;
+    case 12:
+        weight = work->phaseFrame / 10.0f;
+        weight = 1.0f - weight;
+        mnuDrawMantraSparkScene(metadata, 128, 0x52);
+        mnuDrawMantraSceneBackground(metadata, 128, 0x52);
+        alpha = (s32)(weight * 128.0f);
+        mnuDrawMantraPulseFrame(0, 0, 1, alpha, work, 0x52);
+        itfDspDrawMarksA(alpha, 0x53);
+        mnuDrawMantraScenePlacementSprite(0, 0, 1, alpha, 0x53);
+        itfDspDrawMarksB(alpha, 0x53);
+        mnuDrawAnimatedCurrencyCounter(0, 0, 0, alpha, metadata, 0x53);
+        stripWeight = weight * 32.0f;
+        alpha = (s32)stripWeight;
+        mnuDrawMantraPulseStripAndKind(work, alpha, 0x53);
+        /* Acquire the next list stage after drawing the strip. The live
+         * address definition also preserves the native shared call tail. */
+        pendingDisplayList = &work->sceneTransitionList;
+        goto advance_pending_display;
+    case 10:
+    case 11:
+        weight = work->phaseFrame / 10.0f;
+        weight = 1.0f - weight;
+        mnuDrawMantraSparkScene(metadata, 128, 0x52);
+        mnuDrawMantraSceneBackground(metadata, 128, 0x52);
+        mnuDrawMantraPulseFrame(0, 0, 1, 128, work, 0x52);
+        itfDspDrawMarksA(128, 0x53);
+        mnuDrawMantraScenePlacementSprite(0, 0, 1, 128, 0x53);
+        itfDspDrawMarksB(128, 0x53);
+        mnuDrawAnimatedCurrencyCounter(0, 0, 0, 128, metadata, 0x53);
+        stripWeight = weight * 96.0f + 32.0f;
+        alpha = (s32)stripWeight;
+        mnuDrawMantraPulseStripAndKind(work, alpha, 0x53);
+        pendingDisplayList = &work->sceneTransitionList;
+    advance_pending_display:
+        if (itfAdvanceDisplayList(pendingDisplayList, alpha, 0x53)) {
+            itfDspDrawPartyRecordWithLevel(0, 0, 0, mnuGetSelectedNodeValue()->partyRecord, alpha, 0x53);
+        }
+        mnuDrawMantraNavigationPulses(work, 128, 0x53);
+        break;
+    case 3:
+    case 6:
+        if (work->transitionBlendCounter > 0) weight = work->transitionBlendCounter / 10.0f;
+        else if (work->transitionBlendCounter < 0) weight = -work->transitionBlendCounter / 10.0f;
+        weight = 1.0f - sdfSin(weight * 3.1415926f);
+        mnuDrawMantraSparkScene(metadata, 128, 0x52);
+        mnuDrawMantraSceneBackground(metadata, 128, 0x52);
+        mnuDrawMantraPulseFrame(0, 0, 1, (s32)(weight * 128.0f), work, 0x52);
+        itfDspDrawMarksA(128, 0x53);
+        mnuDrawMantraScenePlacementSprite(0, 0, 1, 128, 0x53);
+        itfDspDrawMarksB(128, 0x53);
+        mnuDrawAnimatedCurrencyCounter(0, 0, 0, 128, metadata, 0x53);
+        mnuDrawMantraPulseStripAndKind(work, 128, 0x53);
+        if (itfAdvanceDisplayList(&work->sceneTransitionList, 128, 0x53)) {
+            itfDspDrawPartyRecordWithLevel(0, 0, 0, mnuGetSelectedNodeValue()->partyRecord, 128, 0x53);
+        }
+        mnuDrawMantraNavigationPulses(work, 128, 0x53);
+        break;
+    case 7:
+    case 8:
+        break;
+    default:
+        return 0;
+    }
+    return 0;
+}
 
 extern u8 D_0036B410[17][15];
 s32 mnuSelectMantraGridLeftCell(SdfGrid *grid, s32 x, s32 y, u32 from) {
