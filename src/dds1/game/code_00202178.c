@@ -2,6 +2,7 @@
 #include "btl_motion_transform.h"
 #include "common.h"
 #include "btl_command_target_policy.h"
+#include "btl_actor_category_flag_api.h"
 #include "sdf_vu0.h"
 #include "btl_actor_status_table_api.h"
 #include "sdf_vu_rotation_axes.h"
@@ -5199,8 +5200,6 @@ u8 btlSelectHariharaActionCamera(BtlLinkedCommand *command, s8 a, s8 b) {
     return 1;
 }
 
-extern u32 btlCanUseActorCategoryFlag4(BtlLinkedCommand *);
-extern u32 btlCanUseActorCategoryFlag2(BtlLinkedCommand *);
 extern void btlFlagUnitDefeatCandidate(BtlUnit *);
 extern void btlFaceActionParticipantsTowardLinkedTarget(BtlLinkedCommand *);
 extern void btlBuildRandomTargetCameraStates(BtlLinkedCommand *, BtlCamState *, BtlCamState *);

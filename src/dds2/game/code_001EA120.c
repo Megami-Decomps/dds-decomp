@@ -1,6 +1,7 @@
 #include "btl_motion_transform.h"
 #include "common.h"
 #include "btl_command_target_policy.h"
+#include "btl_actor_category_flag_api.h"
 #include "sdf_vu0.h"
 #include "btl_actor_status_table_api.h"
 #include "sdf_vu_rotation_axes.h"
@@ -318,7 +319,7 @@ s32 btlIsActorCategoryTypeTwo(BtlLinkedCommand *action) {
 
 extern s32 btlIsActorCategoryMarked(BtlLinkedCommand *);
 
-s32 btlCanUseActorCategoryFlag2(BtlLinkedCommand *actor) {
+BtlActorCategoryFlagUseResult btlCanUseActorCategoryFlag2(BtlLinkedCommand *actor) {
     s32 category;
 
     if (btlIsActorCategoryMarked(actor)) {
@@ -343,7 +344,7 @@ s32 btlHasSingleLinkedResource(BtlLinkedCommand *actor) {
     return btlGetIndexListCount(actor->targetList) == 1;
 }
 
-s32 btlCanUseActorCategoryFlag4(BtlLinkedCommand *actor) {
+BtlActorCategoryFlagUseResult btlCanUseActorCategoryFlag4(BtlLinkedCommand *actor) {
     s32 category = actor->actionCode;
 
     if (category == 0) {

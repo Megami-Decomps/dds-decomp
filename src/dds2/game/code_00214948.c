@@ -1,6 +1,7 @@
 #include "btl_motion_transform.h"
 #include "common.h"
 #include "btl_command_target_policy.h"
+#include "btl_actor_category_flag_api.h"
 #include "sdf_vu0.h"
 #include "btl_actor_status_table_api.h"
 #include "sdf_vu_rotation_axes.h"
@@ -3908,8 +3909,6 @@ extern void btlBuildFilteredGroupCameraPair(BtlLinkedCommand *, BtlCamState *, B
 extern void btlBuildActorPairFramingCameraPose(BtlLinkedCommand *, BtlCamState *, u8);
 extern void btlBuildTargetGroupFramingCameraPose(BtlLinkedCommand *, BtlCamState *);
 extern void btlBuildRandomizedActionCameraPosePair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
-extern s32 btlCanUseActorCategoryFlag2(BtlLinkedCommand *);
-extern s32 btlCanUseActorCategoryFlag4(BtlLinkedCommand *);
 extern s32 btlHasSingleLinkedResource(BtlLinkedCommand *);
 extern void btlApplyCombinedActorFlags(BtlLinkedCommand *);
 extern EffRandState effSharedRandomState[];
@@ -6651,8 +6650,6 @@ s32 btlLiftTowardLinkedTarget(BtlLinkedCommand *object) {
     }
     return 0;
 }
-
-extern s32 btlCanUseActorCategoryFlag4(BtlLinkedCommand *);
 
 extern void btlSetupCameraPoseAimUnit(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 

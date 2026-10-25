@@ -2,6 +2,7 @@
 #include "sdf_debug_api.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_actor_category_flag_api.h"
 #include "sdf_vu0.h"
 #include "sdf_vu_rotation_axes.h"
 #include "btl_effect_position.h"
@@ -826,9 +827,7 @@ u8 btlSelectSpecialActionCameraPose(BtlLinkedCommand *command, s8 a, s8 b) {
     return 1;
 }
 
-extern u32 btlCanUseActorCategoryFlag4(BtlLinkedCommand *);
 extern s32 btlCanUseLinkedActor(BtlLinkedCommand *);
-extern u32 btlCanUseActorCategoryFlag2(BtlLinkedCommand *);
 extern void btlClearAllUnitDefeatCandidatesTask(void);
 extern void btlApplyCombinedActorFlags(BtlLinkedCommand *);
 extern void btlBuildRandomTargetCameraStates(u8 *, u8 *, u8 *);
