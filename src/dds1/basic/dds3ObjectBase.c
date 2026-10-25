@@ -116,8 +116,8 @@ dds3Basic_t *dds3ObjectBaseSetControlBasic(dds3Basic_t *object, dds3Basic_t *slo
 }
 
 /* Replace one caller-selected slot and return its previous pointer; no release. */
-void *dds3ObjectBaseSetControlBasicType(dds3Basic_t *object, void *slotData, s32 slotIndex) {
-    void *previousData;
+dds3Basic_t *dds3ObjectBaseSetControlBasicType(dds3Basic_t *object, dds3Basic_t *slotData, s32 slotIndex) {
+    dds3Basic_t *previousData;
 
     previousData = dds3ObjectBaseGetControlBasic(object, slotIndex);
     dds3GetBaseControlWorkData(object)->slots[slotIndex] = slotData;
