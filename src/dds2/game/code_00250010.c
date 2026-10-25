@@ -5750,7 +5750,7 @@ EvtPackLoadState *evtGetPackProcessData(u32 taskId) {
 }
 
 
-void *evtGetResorceData(u32 id, s32 key) {
+void *evtGetEventPackResourceAddress(u32 id, s32 key) {
     dds3ProcessID_t *task;
     EvtPackLoadState *data;
     s32 i;
@@ -5774,7 +5774,7 @@ void *evtGetResorceData(u32 id, s32 key) {
 extern void Eve_DistortionBlurSetTex(sdfTexHandle_t *);
 void evtRefreshTaskEffectTexture(s32 taskId, s32 key) {
     EvtPackLoadState *data = evtGetPackProcessData(taskId);
-    void *address = evtGetResorceData(taskId, key);
+    void *address = evtGetEventPackResourceAddress(taskId, key);
     sdfTexHandle_t *texture;
     if (address != 0) {
         if (data->effect72 != 0) {
@@ -5804,7 +5804,7 @@ dds3Basic_t *evtSpawnResourceObject(s32 taskId, s32 key, s32 index) {
 
     memset(vecA, 0, 0x10);
     memset(vecB, 0, 0x10);
-    found = evtGetResorceData(taskId, key);
+    found = evtGetEventPackResourceAddress(taskId, key);
     if (found != 0) {
         obj = dds3AddBEDEffectObjectBasic2(found, vecA, vecB);
         if (obj != 0) {

@@ -393,7 +393,7 @@ void btlBindEventEffectResources(void) {
         s32 slotIndex;
         void *resourceValue;
 
-        resourceValue = evtGetResorceData(battleState->eventTaskId, resourceKey);
+        resourceValue = evtGetEventPackResourceAddress(battleState->eventTaskId, resourceKey);
         slotIndex = resourceIndex + BTL_EVENT_SOUND_SLOT_FIRST;
         if (resourceValue == 0) {
             btlBossDebugPrintf(D_003A67E8, slotIndex, resourceKey);
@@ -444,7 +444,7 @@ s32 btlCommandSelectEventAction(void) {
         return 1;
     }
     battleState = (BtlState *)btlGetRuntime();
-    actionResource = evtGetResorceData(battleState->eventTaskId, actionKey);
+    actionResource = evtGetEventPackResourceAddress(battleState->eventTaskId, actionKey);
     if (actionResource == 0) {
         return 1;
     }
@@ -613,7 +613,7 @@ s32 btlRunSceneActorEventTask(BattleTaskData *data) {
         if ((data->battler->status.flags & 2) == 0) {
             return 1;
         }
-        resource = evtGetResorceData(battle->eventTaskId, data->action);
+        resource = evtGetEventPackResourceAddress(battle->eventTaskId, data->action);
         if (resource == 0) {
             return 1;
         }

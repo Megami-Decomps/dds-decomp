@@ -81,7 +81,7 @@ u32 evtCommand_TEX_BE(void) {
         return 1;
     }
     id = scrGetIntPara(0);
-    entry = evtGetResorceData(id, scrGetIntPara(1));
+    entry = evtGetEventPackResourceAddress(id, scrGetIntPara(1));
     if (entry == 0) {
         evtPrintDeveloperConsoleMessage(D_00422030, scrGetIntPara(1));
         return 1;

@@ -5439,7 +5439,7 @@
 0x0025CF70	evtSearchEventPack	inferred	SMT3HD name via SLUS_209.11 0x001FA1C8, reloc-identical; was evtFindTaskById
 0x0025CF98	evtGetEventPackStat	inferred	SMT3HD name via SLUS_209.11 0x001FA1F0, reloc-identical; was evtGetEventPackLoadedState
 0x0025CFD0	evtGetPackProcessData	inferred	SMT3HD name via SLUS_209.11 0x001FA228, reloc-identical; was evtGetEventPackLoadState
-0x0025D008	evtGetResorceData	inferred	SMT3HD name via SLUS_209.11 0x001FA260, reloc-identical; was evtFindTaskResourceEntryByKey
+0x0025D008	evtGetEventPackResourceAddress	inferred	Returns a borrowed address into a complete event pack entry selected by secondary resource ID; consumers interpret it according to the resource kind. SMT3HD name via SLUS_209.11 0x001FA260, reloc-identical; was evtFindTaskResourceEntryByKey.
 0x0025D0B8	evtRefreshTaskEffectTexture	inferred	DDS1 twin: replaces the event task's retained effect texture when the keyed resource is present, updates channel 72, and stores the replacement at task-data +0x38.
 0x0025D140	evtSpawnResourceObject	inferred	DDS1 twin 0x00241D28 [names_M95_Event.tsv]
 0x0025D230	evtInitMotionSeProcess	inferred	SMT3HD name via SLUS_209.11 0x001FA488, reloc-identical; was evtCreateModelFromPackResource

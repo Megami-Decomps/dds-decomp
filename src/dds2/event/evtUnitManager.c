@@ -2614,7 +2614,7 @@ u32 evtCommand_EFFECT_BE(void) {
     memset(secondVector, 0, sizeof(secondVector));
     taskId = scrGetIntPara(0);
     key = scrGetIntPara(1);
-    descriptor = evtGetResorceData(taskId, key);
+    descriptor = evtGetEventPackResourceAddress(taskId, key);
     if (descriptor == NULL) {
         key = scrGetIntPara(1);
         evtPrintDeveloperConsoleMessage(D_00421A58, key);
@@ -2695,7 +2695,7 @@ u32 evtCommand_EFFBED_BE(void) {
     memset(scale, 0, sizeof(scale));
     taskId = scrGetIntPara(0);
     key = scrGetIntPara(1);
-    resource = evtGetResorceData(taskId, key);
+    resource = evtGetEventPackResourceAddress(taskId, key);
     if (resource == NULL) {
         key = scrGetIntPara(1);
         evtPrintDeveloperConsoleMessage(D_00421AD8, key);
@@ -2801,7 +2801,7 @@ u32 evtCommand_EFFMG1_BE(void) {
 
     taskId = scrGetIntPara(0);
     key = scrGetIntPara(1);
-    descriptor = evtGetResorceData(taskId, key);
+    descriptor = evtGetEventPackResourceAddress(taskId, key);
     if (descriptor == NULL) {
         key = scrGetIntPara(1);
         evtPrintDeveloperConsoleMessage(D_00421B50, key);
@@ -2847,7 +2847,7 @@ u32 evtCommand_EFFMG2_BE(void) {
 
     taskId = scrGetIntPara(0);
     key = scrGetIntPara(1);
-    descriptor = evtGetResorceData(taskId, key);
+    descriptor = evtGetEventPackResourceAddress(taskId, key);
     if (descriptor == NULL) {
         key = scrGetIntPara(1);
         evtPrintDeveloperConsoleMessage(D_00421BA0, key);

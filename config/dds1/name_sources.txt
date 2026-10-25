@@ -5499,7 +5499,7 @@
 0x00241B58	evtSearchEventPack	inferred	SMT3HD name via SLUS_209.11 0x001FA1C8, reloc-identical; was evtFindTaskById
 0x00241B80	evtGetEventPackStat	inferred	SMT3HD name via SLUS_209.11 0x001FA1F0, reloc-identical; was evtGetEventPackLoadedState
 0x00241BB8	evtGetPackProcessData	inferred	SMT3HD name via SLUS_209.11 0x001FA228, reloc-identical; was evtGetEventPackLoadState
-0x00241BF0	evtGetResorceData	inferred	SMT3HD name via SLUS_209.11 0x001FA260, reloc-identical; was evtFindTaskResourceEntryByKey
+0x00241BF0	evtGetEventPackResourceAddress	inferred	Returns a borrowed address into a complete event pack entry selected by secondary resource ID; consumers interpret it according to the resource kind. SMT3HD name via SLUS_209.11 0x001FA260, reloc-identical; was evtFindTaskResourceEntryByKey.
 0x00241CA0	evtRefreshTaskEffectTexture	inferred	Releases the task's previous effect texture, resolves the keyed resource, updates effect channel 72, and retains the replacement at task-data +0x38. The former name described rebuilding that field via 0x00241BF0/0x002D3288 and freeing its old handle.
 0x00241D28	evtSpawnResourceObject	inferred	looks up the task resource, creates an effect object (flags 1) and scales it by slot scale ratio D_003BAA20[index]/D_003BAA10 [names_M95_Event.tsv]
 0x00241E18	evtInitMotionSeProcess	inferred	SMT3HD name via SLUS_209.11 0x001FA488, reloc-identical; was evtCreateModelFromPackResource
