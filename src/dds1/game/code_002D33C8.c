@@ -100,7 +100,7 @@ extern s32 sdfPacketBuffers[2];
 extern s32 sdfGrPacketBuffPtr;
 extern s32 sdfGrPacketBuffLimit;
 
-extern s32 sdfDelayedResrcCheckFunc(void);
+extern u8 sdfDelayedResrcCheckFunc(void);
 
 extern s32 sdfDelayedResrcSemaId;
 extern SdfPendingRequest sdfTexDelayedResrcCB;
@@ -416,7 +416,7 @@ void sdfDelayedResrcProc(void) {
 }
 
 /* Return one for an active rotation, a queued chain, or either delayed slot. */
-s32 sdfDelayedResrcCheckFunc(void) {
+u8 sdfDelayedResrcCheckFunc(void) {
     u32 slotIndex;
     SdfPendingNode **slotCursor;
     if (sdfDelayedResrcFlag != 0) {
@@ -439,14 +439,14 @@ s32 sdfDelayedResrcCheckFunc(void) {
 
 s32 sdfDelayedResrcCheck(void) {
     s32 interruptState;
-    s32 pendingWork;
+    u8 hasPendingWork;
 
     interruptState = DIntr();
-    pendingWork = sdfDelayedResrcCheckFunc();
+    hasPendingWork = sdfDelayedResrcCheckFunc();
     if (interruptState != 0) {
         EIntr();
     }
-    return pendingWork;
+    return hasPendingWork;
 }
 
 extern struct sdfMemHandle_t *sdfGrPacketBuffHandle;

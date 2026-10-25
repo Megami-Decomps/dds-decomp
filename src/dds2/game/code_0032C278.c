@@ -91,7 +91,7 @@ extern vu8 sdfFrameId;
 #define SDF_GIF_TWO_AD_LOOPS_EOP 0x8002
 
 extern s32 sdfDelayedResrcSemaId;
-extern s32 sdfDelayedResrcCheckFunc(void);
+extern u8 sdfDelayedResrcCheckFunc(void);
 
 
 extern s32 sdfGrPacketBuffSize;
@@ -443,7 +443,7 @@ void sdfDelayedResrcProc(void) {
 }
 
 /* Test all three pending-work sources: flag, chain, and two slots. */
-s32 sdfDelayedResrcCheckFunc(void) {
+u8 sdfDelayedResrcCheckFunc(void) {
     u32 slotIndex;
     SdfPendingNode **slotCursor;
     if (sdfDelayedResrcFlag != 0) {
@@ -467,14 +467,14 @@ s32 sdfDelayedResrcCheckFunc(void) {
 /* Preserve interrupt state while querying pending work. */
 s32 sdfDelayedResrcCheck(void) {
     s32 interruptState;
-    s32 pendingWork;
+    u8 hasPendingWork;
 
     interruptState = DIntr();
-    pendingWork = sdfDelayedResrcCheckFunc();
+    hasPendingWork = sdfDelayedResrcCheckFunc();
     if (interruptState != 0) {
         EIntr();
     }
-    return pendingWork;
+    return hasPendingWork;
 }
 
 /* Replace both packet buffers with one allocation, rounding each half to 128 bytes. */
