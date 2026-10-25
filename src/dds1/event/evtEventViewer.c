@@ -835,7 +835,7 @@ extern void kwlnFadeBackgroundStartIn(s32);
 extern u16 D_003BBE78;
 extern char D_003ACFE8[];
 extern void mnuUnpackNibbleFields(EvtRuntimeChild *key, s32 *lowBitsOut, s32 *highBitsOut);
-extern s32 evtViewerTestIndexedCondition(u32 condition);
+extern u8 evtViewerTestIndexedCondition(u32 condition);
 extern s32 mnuQueryTitleSoundBusy(void);
 extern void mnuStopTitleVoicePlayback(void);
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
@@ -2306,7 +2306,7 @@ void evtViewerAdvanceGlyphTick(EvtRuntime *viewer) {
 void evtViewerFlag8ClearFrameHookNoOp(EvtRuntime *viewer) {
 }
 
-s32 evtViewerTestIndexedCondition(u32 condition);
+u8 evtViewerTestIndexedCondition(u32 condition);
 
 /* Returns the latest eligible kind-5 motion key at/before frame for channel,
  * or NULL. Its condition must pass; equal-frame ties retain the first key. */
@@ -2670,7 +2670,7 @@ void evtViewerUpdateWindowShadeFade(EvtRuntime *viewer) {
     }
 }
 
-s32 evtViewerTestIndexedCondition(u32 encodedCondition) {
+u8 evtViewerTestIndexedCondition(u32 encodedCondition) {
     u32 conditionIndex;
     u32 expectedValue;
 

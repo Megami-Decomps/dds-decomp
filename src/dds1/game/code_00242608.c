@@ -587,7 +587,7 @@ void mnuBlendCampDisplayFields(EvtRuntimeChild *from, EvtRuntimeChild *to,
     display->variant = from->p08.sb[1];
 }
 
-extern s32 evtViewerTestIndexedCondition(u32);
+extern u8 evtViewerTestIndexedCondition(u32);
 
 void mnuFindCampKeyTrackNeighbors(EvtRuntimeGroup *track, s32 frame, EvtRuntimeChild **lowerKey, EvtRuntimeChild **upperKey) {
     s32 frameOffset;

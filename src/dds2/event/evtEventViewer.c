@@ -718,7 +718,7 @@ void evtViewerApplySelectedEntry(EvtRuntime *viewer) {
 }
 
 extern u16 D_004372B0;
-extern s32 evtViewerTestIndexedCondition(u32 encodedCondition);
+extern u8 evtViewerTestIndexedCondition(u32 encodedCondition);
 extern void mnuUnpackNibbleFields(EvtRuntimeChild *key, s32 *lowBitsOut, s32 *highBitsOut);
 extern s32 evtPlaySe(s32 id, s32 fade);
 extern s32 evtPlayEventBgm(s32 id, s32 fade);
@@ -963,7 +963,7 @@ extern void dds3FadeSet(s32 red, s32 green, s32 blue, s32 alpha);
 
 /* Effect-channel assignments driven by the viewer's timeline tracks. */
 
-extern s32 evtViewerTestIndexedCondition(u32 encodedCondition);
+extern u8 evtViewerTestIndexedCondition(u32 encodedCondition);
 extern void Eve_PartialMultiBlurSetDefTex(void);
 extern void Eve_DistortionBlurSetDefTex(void);
 extern void Eve_PartialMultiFilterSetDefTex(void);
@@ -1000,7 +1000,7 @@ extern u32 dds3DrawFlag;
 void fldInitializeCameraColorResource(void);
 
 extern void evtEventViewerPollMovieResources(PolyMovieWork *assets);
-extern s32 evtViewerSkipsTitleStreamWait(PolyMovieWork *ctx);
+extern u8 evtViewerSkipsTitleStreamWait(PolyMovieWork *ctx);
 
 struct EvtRuntime;
 
@@ -1782,7 +1782,7 @@ extern void evtViewerCountFlaggedUpdates(EvtRuntime *viewer);
 extern void evtEventViewerApplyEffectChannels(s32 frame, EvtRuntime *viewer);
 extern s32 evtViewerUpdateTimedAction(EvtRuntime *viewer);
 extern void evtViewerUpdateShopFlagTrack(EvtRuntime *viewer);
-extern s32 evtViewerTestIndexedCondition(u32 encodedCondition);
+extern u8 evtViewerTestIndexedCondition(u32 encodedCondition);
 extern void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key, s32 currentFrame,
                                            s32, EvtRuntime *viewer);
 extern void evtEventViewerFadeEffectSlot(EvtRuntimeGroup *group, EvtRuntimeChild *key, s32 time,
@@ -2873,7 +2873,7 @@ void evtViewerUpdateWindowShadeFade(EvtRuntime *viewer) {
     }
 }
 
-s32 evtViewerTestIndexedCondition(u32 encodedCondition) {
+u8 evtViewerTestIndexedCondition(u32 encodedCondition) {
     u32 conditionIndex;
     u32 expectedValue;
 
@@ -4321,7 +4321,7 @@ s32 evtViewerInitializeUpdateSequence(dds3ProcessID_t *task) {
     return (s32)(u32)evtViewerScheduleFrameVariableTask;
 }
 
-s32 evtViewerSkipsTitleStreamWait(PolyMovieWork *ctx) {
+u8 evtViewerSkipsTitleStreamWait(PolyMovieWork *ctx) {
     s32 id = ctx->eventId;
 
     if (id == 0x28B || id == 0x28E) {
