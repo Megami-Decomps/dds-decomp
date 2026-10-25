@@ -192,15 +192,15 @@ void btlActionSeqStateSelect(BtlTask *task) {
     }
 }
 
-void btlUnitTurnEndStateSelect(u8 *task) {
-    BtlUnit *unit = *(BtlUnit **)(task + 0x18);
+void btlUnitTurnEndStateSelect(BtlTask *task) {
+    BtlUnit *unit = task->unit;
     u32 flags = (u32)unit->status.flags;
     if (flags & 0x200) {
         if (flags & 0x1000) {
             if ((unit->status.stateFlags & 0x40) && !(unit->partyRecord.status & 0x7C0E) &&
-                !(*(u32 *)(task + 8) & 0x100)) {
-                *(u16 *)(task + 0x50) = 4;
-                *(s32 *)(task + 0x54) = effOffsetIfOwnerFlagClear(unit, 0xA4);
+                !(task->flags & 0x100)) {
+                task->indexWork.stage = 4;
+                task->indexWork.parameter = effOffsetIfOwnerFlagClear(unit, 0xA4);
                 unit->status.flags = ((u32)unit->status.flags & ~0x20) | 0x400000;
                 unit->partyRecord.flags |= 0x4000;
                 unit->status.stateFlags |= 0x2000;
