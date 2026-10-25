@@ -738,51 +738,51 @@ s32 evtCommand_CAM_CREATE(void) {
 
 s32 evtCommand_CAM_CLS(void)
 {
-    s32 effectUnitId;
-    void *effectUnit;
+    s32 cameraObjectId;
+    dds3Basic_t *cameraObject;
 
-    effectUnitId = scrGetIntPara(0);
-    effectUnit = evtSearchBasic(4, effectUnitId);
-    if (effectUnit == NULL) {
+    cameraObjectId = scrGetIntPara(0);
+    cameraObject = evtSearchBasic(4, cameraObjectId);
+    if (cameraObject == NULL) {
         return 1;
     }
-    dds3DeleteSceneBasicData(effectUnit);
+    dds3DeleteSceneBasicData(cameraObject);
     return 1;
 }
 
 s32 evtCommand_CAM_POS_XYZ(void) {
-    void *effectUnit;
+    dds3Basic_t *cameraObject;
     f32 position[4];
 
     memset(position, 0, sizeof(position));
     if (scrGetIntPara(0) < 0) {
-        effectUnit = fldGetPlayerSceneState();
+        cameraObject = fldGetPlayerSceneState();
     } else {
-        effectUnit = evtSearchBasic(4, scrGetIntPara(0));
+        cameraObject = evtSearchBasic(4, scrGetIntPara(0));
     }
-    if (effectUnit == NULL) {
+    if (cameraObject == NULL) {
         return 1;
     }
     position[0] = scrGetFloatPara(1);
     position[1] = scrGetFloatPara(2);
     position[2] = scrGetFloatPara(3);
-    dds3SetPosPoseSet(effectUnit, (u128 *)position);
+    dds3SetPosPoseSet(cameraObject, (u128 *)position);
     return 1;
 }
 
 /* Convert the three degree inputs before composing and storing a quaternion. */
 s32 evtCommand_CAM_ROT_XYZ(void) {
-    void *effectUnit;
+    dds3Basic_t *cameraObject;
     f32 quaternion[4];
     f32 degreesToRadians;
     f32 pitch;
 
     if (scrGetIntPara(0) < 0) {
-        effectUnit = fldGetPlayerSceneState();
+        cameraObject = fldGetPlayerSceneState();
     } else {
-        effectUnit = evtSearchBasic(4, scrGetIntPara(0));
+        cameraObject = evtSearchBasic(4, scrGetIntPara(0));
     }
-    if (effectUnit == NULL) {
+    if (cameraObject == NULL) {
         return 1;
     }
     degreesToRadians = 0.017453293f;
@@ -792,27 +792,27 @@ s32 evtCommand_CAM_ROT_XYZ(void) {
     sdfConvertEulerAnglesToQuaternionVU(0.0f, 0.0f, scrGetFloatPara(3) * degreesToRadians);
     effMiscQuatMultiplyVU();
     SDF_VU0_STOREVECTOR(quaternion);
-    dds3SetRotPoseSet(effectUnit, (u128 *)quaternion);
+    dds3SetRotPoseSet(cameraObject, (u128 *)quaternion);
     return 1;
 }
 
 s32 evtCommand_CAM_ROT_Q(void) {
-    void *effectUnit;
+    dds3Basic_t *cameraObject;
     f32 quaternion[4];
 
     if (scrGetIntPara(0) < 0) {
-        effectUnit = fldGetPlayerSceneState();
+        cameraObject = fldGetPlayerSceneState();
     } else {
-        effectUnit = evtSearchBasic(4, scrGetIntPara(0));
+        cameraObject = evtSearchBasic(4, scrGetIntPara(0));
     }
-    if (effectUnit == NULL) {
+    if (cameraObject == NULL) {
         return 1;
     }
     quaternion[0] = scrGetFloatPara(1);
     quaternion[1] = scrGetFloatPara(2);
     quaternion[2] = scrGetFloatPara(3);
     quaternion[3] = scrGetFloatPara(4);
-    dds3SetRotPoseSet(effectUnit, (u128 *)quaternion);
+    dds3SetRotPoseSet(cameraObject, (u128 *)quaternion);
     return 1;
 }
 
