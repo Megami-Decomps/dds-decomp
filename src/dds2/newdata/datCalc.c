@@ -1264,7 +1264,7 @@ extern s32 D_00386048[][4];
 /* Add a roster member to the first free party slot: initialise it from its saved template or by
  * roster kind, refill HP/MP, set its model flags and apply skill-boosted maxima. Returns the
  * slot, -1 if the member is already present or -2 if the party is full. */
-s32 ptyAddUnitWithFlags(s32 unitId, s32 initFlags) {
+PtyAddUnitResult ptyAddUnitWithFlags(s32 unitId, s32 initFlags) {
     datUnitWork_t *entry;
     datUnitWork_t *party;
     s32 slotIndex;
@@ -1273,7 +1273,7 @@ s32 ptyAddUnitWithFlags(s32 unitId, s32 initFlags) {
     s32 *modelFlags;
 
     if (dds3FindEntryIndex(unitId) >= 0) {
-        return -1;
+        return PTY_ADD_UNIT_RESULT_ALREADY_PRESENT;
     }
 
     for (slotIndex = 0; slotIndex < PTY_ACTIVE_ROSTER_COUNT; slotIndex++) {
@@ -1283,7 +1283,7 @@ s32 ptyAddUnitWithFlags(s32 unitId, s32 initFlags) {
         }
     }
     if (slotIndex == PTY_ACTIVE_ROSTER_COUNT) {
-        return -2;
+        return PTY_ADD_UNIT_RESULT_PARTY_FULL;
     }
 
     memset(entry, 0, sizeof(*entry));
@@ -1341,7 +1341,7 @@ s32 ptyAddUnitWithFlags(s32 unitId, s32 initFlags) {
     return slotIndex;
 }
 
-s32 ptyAddUnit(s32 unitId) {
+PtyAddUnitResult ptyAddUnit(s32 unitId) {
     return ptyAddUnitWithFlags(unitId, 0);
 }
 

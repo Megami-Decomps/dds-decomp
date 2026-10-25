@@ -9,7 +9,7 @@
 
 extern s32 mtrHasEnoughOwnedMantras(void);
 
-extern s32 ptyAddUnitWithFlags(s32 unitId, s32 initFlags);
+extern PtyAddUnitResult ptyAddUnitWithFlags(s32 unitId, s32 initFlags);
 
 extern s32 ptyRemoveUnitWithFlags(s32 param0, s32 param1);
 

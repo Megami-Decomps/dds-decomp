@@ -921,7 +921,7 @@ extern void evtCopyRosterTableValue(datUnitWork_t *);
 extern s32 D_0032ACA8[128];
 
 /* Restore or initialise the first free roster slot and publish its model flags. */
-s32 ptyAddUnit(s32 unitId) {
+PtyAddUnitResult ptyAddUnit(s32 unitId) {
     s32 gains[DAT_BASE_STAT_COUNT];
     datUnitWork_t *entry;
     s32 slotIndex;
@@ -931,7 +931,7 @@ s32 ptyAddUnit(s32 unitId) {
     s32 *modelFlags;
 
     if (dds3FindEntryIndex(unitId) >= 0) {
-        return -1;
+        return PTY_ADD_UNIT_RESULT_ALREADY_PRESENT;
     }
     for (slotIndex = 0; slotIndex < 5; slotIndex++) {
         entry = &DDS3_GBWK->party[slotIndex];
@@ -940,7 +940,7 @@ s32 ptyAddUnit(s32 unitId) {
         }
     }
     if (slotIndex == 5) {
-        return -2;
+        return PTY_ADD_UNIT_RESULT_PARTY_FULL;
     }
 
     memset(entry, 0, sizeof(*entry));
