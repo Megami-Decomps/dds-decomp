@@ -6554,7 +6554,7 @@ f32 effSampleScalarCurve(const EffScalarCurve *curve, s32 frame, s32 duration) {
 
 
 /* vu0 routine: samples the colour, scale and heading tracks at frame; in mode 2 the heading is the screen-space direction from out->pos to target (0 when they coincide) */
-void fileSampleKeyTracks(FileSlot *out, FileKeyBlock *block, s32 frame, f32 *target)
+void fileSampleKeyTracks(FileSlot *out, const FileKeyBlock *block, s32 frame, const f32 *target)
 {
     f32 delta[4];
 
