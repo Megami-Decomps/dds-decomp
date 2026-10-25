@@ -1,6 +1,7 @@
 #include "dat_state.h"
 #include "common.h"
 #include "scr.h"
+#include "scr_binary_operator.h"
 #include "scr_trace_result.h"
 #include "scr_string_parameter_api.h"
 #include "scr_arg_read.h"
@@ -168,7 +169,7 @@ extern f32 CodeFunc_2Operation_rf;
 extern s32 CodeFunc_2Operation_t1;
 extern s32 CodeFunc_2Operation_t2;
 
-void CodeFunc_2Operation(scrProcessWork_s *scr, s32 operatorCode)
+void CodeFunc_2Operation(scrProcessWork_s *scr, ScrBinaryOperator operatorCode)
 {
     CodeFunc_2Operation_t1 = scr->stackTypes[scr->sp - 1];
     CodeFunc_2Operation_t2 = scr->stackTypes[scr->sp - 2];
@@ -179,68 +180,68 @@ void CodeFunc_2Operation(scrProcessWork_s *scr, s32 operatorCode)
         CodeFunc_2Operation_i1 = PopInt(scr);
         CodeFunc_2Operation_i2 = PopInt(scr);
         switch (operatorCode) {
-        case 0:
+        case SCR_BINARY_OPERATOR_ADD:
             CodeFunc_2Operation_ri = CodeFunc_2Operation_i1 + CodeFunc_2Operation_i2;
             break;
-        case 1:
+        case SCR_BINARY_OPERATOR_SUBTRACT:
             CodeFunc_2Operation_ri = CodeFunc_2Operation_i1 - CodeFunc_2Operation_i2;
             break;
-        case 2:
+        case SCR_BINARY_OPERATOR_MULTIPLY:
             CodeFunc_2Operation_ri = CodeFunc_2Operation_i1 * CodeFunc_2Operation_i2;
             break;
-        case 3:
+        case SCR_BINARY_OPERATOR_DIVIDE:
             CodeFunc_2Operation_ri = CodeFunc_2Operation_i1 / CodeFunc_2Operation_i2;
             break;
-        case 4:
+        case SCR_BINARY_OPERATOR_LOGICAL_OR:
             if (CodeFunc_2Operation_i1 != 0 || CodeFunc_2Operation_i2 != 0) {
                 CodeFunc_2Operation_ri = 1;
             } else {
                 CodeFunc_2Operation_ri = 0;
             }
             break;
-        case 5:
+        case SCR_BINARY_OPERATOR_LOGICAL_AND:
             if (CodeFunc_2Operation_i1 != 0 && CodeFunc_2Operation_i2 != 0) {
                 CodeFunc_2Operation_ri = 1;
             } else {
                 CodeFunc_2Operation_ri = 0;
             }
             break;
-        case 6:
+        case SCR_BINARY_OPERATOR_EQUAL:
             if (CodeFunc_2Operation_i1 == CodeFunc_2Operation_i2) {
                 CodeFunc_2Operation_ri = 1;
             } else {
                 CodeFunc_2Operation_ri = 0;
             }
             break;
-        case 7:
+        case SCR_BINARY_OPERATOR_NOT_EQUAL:
             if (CodeFunc_2Operation_i1 != CodeFunc_2Operation_i2) {
                 CodeFunc_2Operation_ri = 1;
             } else {
                 CodeFunc_2Operation_ri = 0;
             }
             break;
-        case 8:
+        case SCR_BINARY_OPERATOR_LESS_THAN:
             if (CodeFunc_2Operation_i1 < CodeFunc_2Operation_i2) {
                 CodeFunc_2Operation_ri = 1;
             } else {
                 CodeFunc_2Operation_ri = 0;
             }
             break;
-        case 9:
+        case SCR_BINARY_OPERATOR_GREATER_THAN:
             if (CodeFunc_2Operation_i1 > CodeFunc_2Operation_i2) {
                 CodeFunc_2Operation_ri = 1;
             } else {
                 CodeFunc_2Operation_ri = 0;
             }
             break;
-        case 10:
+        case SCR_BINARY_OPERATOR_LESS_OR_EQUAL:
             if (CodeFunc_2Operation_i1 <= CodeFunc_2Operation_i2) {
                 CodeFunc_2Operation_ri = 1;
             } else {
                 CodeFunc_2Operation_ri = 0;
             }
             break;
-        case 11:
+        case SCR_BINARY_OPERATOR_GREATER_OR_EQUAL:
             if (CodeFunc_2Operation_i1 >= CodeFunc_2Operation_i2) {
                 CodeFunc_2Operation_ri = 1;
             } else {
@@ -253,19 +254,19 @@ void CodeFunc_2Operation(scrProcessWork_s *scr, s32 operatorCode)
         CodeFunc_2Operation_f1 = PopFloat(scr);
         CodeFunc_2Operation_f2 = PopFloat(scr);
         switch (operatorCode) {
-        case 0:
+        case SCR_BINARY_OPERATOR_ADD:
             CodeFunc_2Operation_rf = CodeFunc_2Operation_f1 + CodeFunc_2Operation_f2;
             break;
-        case 1:
+        case SCR_BINARY_OPERATOR_SUBTRACT:
             CodeFunc_2Operation_rf = CodeFunc_2Operation_f1 - CodeFunc_2Operation_f2;
             break;
-        case 2:
+        case SCR_BINARY_OPERATOR_MULTIPLY:
             CodeFunc_2Operation_rf = CodeFunc_2Operation_f1 * CodeFunc_2Operation_f2;
             break;
-        case 3:
+        case SCR_BINARY_OPERATOR_DIVIDE:
             CodeFunc_2Operation_rf = CodeFunc_2Operation_f1 / CodeFunc_2Operation_f2;
             break;
-        case 4:
+        case SCR_BINARY_OPERATOR_LOGICAL_OR:
             if (CodeFunc_2Operation_f1 != 0.0 || CodeFunc_2Operation_f2 != 0.0) {
                 CodeFunc_2Operation_ri = 1;
             } else {
@@ -273,7 +274,7 @@ void CodeFunc_2Operation(scrProcessWork_s *scr, s32 operatorCode)
             }
             PushInt(scr, CodeFunc_2Operation_ri);
             return;
-        case 5:
+        case SCR_BINARY_OPERATOR_LOGICAL_AND:
             if (CodeFunc_2Operation_f1 != 0.0 && CodeFunc_2Operation_f2 != 0.0) {
                 CodeFunc_2Operation_ri = 1;
             } else {
@@ -281,7 +282,7 @@ void CodeFunc_2Operation(scrProcessWork_s *scr, s32 operatorCode)
             }
             PushInt(scr, CodeFunc_2Operation_ri);
             return;
-        case 6:
+        case SCR_BINARY_OPERATOR_EQUAL:
             if (CodeFunc_2Operation_f1 == CodeFunc_2Operation_f2) {
                 CodeFunc_2Operation_ri = 1;
             } else {
@@ -289,7 +290,7 @@ void CodeFunc_2Operation(scrProcessWork_s *scr, s32 operatorCode)
             }
             PushInt(scr, CodeFunc_2Operation_ri);
             return;
-        case 7:
+        case SCR_BINARY_OPERATOR_NOT_EQUAL:
             if (CodeFunc_2Operation_f1 != CodeFunc_2Operation_f2) {
                 CodeFunc_2Operation_ri = 1;
             } else {
@@ -297,7 +298,7 @@ void CodeFunc_2Operation(scrProcessWork_s *scr, s32 operatorCode)
             }
             PushInt(scr, CodeFunc_2Operation_ri);
             return;
-        case 8:
+        case SCR_BINARY_OPERATOR_LESS_THAN:
             if (CodeFunc_2Operation_f1 < CodeFunc_2Operation_f2) {
                 CodeFunc_2Operation_ri = 1;
             } else {
@@ -305,7 +306,7 @@ void CodeFunc_2Operation(scrProcessWork_s *scr, s32 operatorCode)
             }
             PushInt(scr, CodeFunc_2Operation_ri);
             return;
-        case 9:
+        case SCR_BINARY_OPERATOR_GREATER_THAN:
             if (CodeFunc_2Operation_f1 > CodeFunc_2Operation_f2) {
                 CodeFunc_2Operation_ri = 1;
             } else {
@@ -313,7 +314,7 @@ void CodeFunc_2Operation(scrProcessWork_s *scr, s32 operatorCode)
             }
             PushInt(scr, CodeFunc_2Operation_ri);
             return;
-        case 10:
+        case SCR_BINARY_OPERATOR_LESS_OR_EQUAL:
             if (CodeFunc_2Operation_f1 <= CodeFunc_2Operation_f2) {
                 CodeFunc_2Operation_ri = 1;
             } else {
@@ -321,7 +322,7 @@ void CodeFunc_2Operation(scrProcessWork_s *scr, s32 operatorCode)
             }
             PushInt(scr, CodeFunc_2Operation_ri);
             return;
-        case 11:
+        case SCR_BINARY_OPERATOR_GREATER_OR_EQUAL:
             if (CodeFunc_2Operation_f1 >= CodeFunc_2Operation_f2) {
                 CodeFunc_2Operation_ri = 1;
             } else {
@@ -336,28 +337,28 @@ void CodeFunc_2Operation(scrProcessWork_s *scr, s32 operatorCode)
 
 ScrOpcodeHandlerResult CodeFunc_Add(scrProcessWork_s *scr)
 {
-    CodeFunc_2Operation(scr, 0);
+    CodeFunc_2Operation(scr, SCR_BINARY_OPERATOR_ADD);
     scr->pc++;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 ScrOpcodeHandlerResult CodeFunc_Sub(scrProcessWork_s *scr)
 {
-    CodeFunc_2Operation(scr, 1);
+    CodeFunc_2Operation(scr, SCR_BINARY_OPERATOR_SUBTRACT);
     scr->pc++;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 ScrOpcodeHandlerResult CodeFunc_Mul(scrProcessWork_s *scr)
 {
-    CodeFunc_2Operation(scr, 2);
+    CodeFunc_2Operation(scr, SCR_BINARY_OPERATOR_MULTIPLY);
     scr->pc++;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 ScrOpcodeHandlerResult CodeFunc_Div(scrProcessWork_s *scr)
 {
-    CodeFunc_2Operation(scr, 3);
+    CodeFunc_2Operation(scr, SCR_BINARY_OPERATOR_DIVIDE);
     scr->pc++;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
@@ -404,56 +405,56 @@ ScrOpcodeHandlerResult CodeFunc_Not(scrProcessWork_s *scr) {
 
 ScrOpcodeHandlerResult CodeFunc_Or(scrProcessWork_s *scr)
 {
-    CodeFunc_2Operation(scr, 4);
+    CodeFunc_2Operation(scr, SCR_BINARY_OPERATOR_LOGICAL_OR);
     scr->pc++;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 ScrOpcodeHandlerResult CodeFunc_And(scrProcessWork_s *scr)
 {
-    CodeFunc_2Operation(scr, 5);
+    CodeFunc_2Operation(scr, SCR_BINARY_OPERATOR_LOGICAL_AND);
     scr->pc++;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 ScrOpcodeHandlerResult CodeFunc_EQ(scrProcessWork_s *scr)
 {
-    CodeFunc_2Operation(scr, 6);
+    CodeFunc_2Operation(scr, SCR_BINARY_OPERATOR_EQUAL);
     scr->pc++;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 ScrOpcodeHandlerResult CodeFunc_NEQ(scrProcessWork_s *scr)
 {
-    CodeFunc_2Operation(scr, 7);
+    CodeFunc_2Operation(scr, SCR_BINARY_OPERATOR_NOT_EQUAL);
     scr->pc++;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 ScrOpcodeHandlerResult CodeFunc_S(scrProcessWork_s *scr)
 {
-    CodeFunc_2Operation(scr, 8);
+    CodeFunc_2Operation(scr, SCR_BINARY_OPERATOR_LESS_THAN);
     scr->pc++;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 ScrOpcodeHandlerResult CodeFunc_L(scrProcessWork_s *scr)
 {
-    CodeFunc_2Operation(scr, 9);
+    CodeFunc_2Operation(scr, SCR_BINARY_OPERATOR_GREATER_THAN);
     scr->pc++;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 ScrOpcodeHandlerResult CodeFunc_SE(scrProcessWork_s *scr)
 {
-    CodeFunc_2Operation(scr, 10);
+    CodeFunc_2Operation(scr, SCR_BINARY_OPERATOR_LESS_OR_EQUAL);
     scr->pc++;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 ScrOpcodeHandlerResult CodeFunc_LE(scrProcessWork_s *scr)
 {
-    CodeFunc_2Operation(scr, 11);
+    CodeFunc_2Operation(scr, SCR_BINARY_OPERATOR_GREATER_OR_EQUAL);
     scr->pc++;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
