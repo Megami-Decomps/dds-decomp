@@ -341,11 +341,11 @@ void mnuWriteTitleStreamStatusLocked(TitleAudioStreamStatusSnapshot *statusValue
  * frames using its frame-byte divisor, then release the loaded resource. */
 
 void mnuLoadTitleStreamFrameData(char *filePath, TitleAudioStreamState *streamState) {
-    void *fileData;
+    u32 resolvedAddress;
     s32 frameCount;
-    struct sdfMemHandle_t *resourceHandle = sdfDevLoadFileEx(filePath, (u32 *)&fileData, 0);
+    struct sdfMemHandle_t *resourceHandle = sdfDevLoadFileEx(filePath, &resolvedAddress, 0);
     s32 fileBytes = sdfMemGetSize(resourceHandle);
-    memcpy(streamState->compressedData, fileData, fileBytes);
+    memcpy(streamState->compressedData, (void *)resolvedAddress, fileBytes);
     frameCount = fileBytes / streamState->frameBytes;
     streamState->frameIndex = 0;
     streamState->frameCount = frameCount;
