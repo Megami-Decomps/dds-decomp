@@ -1177,7 +1177,7 @@ ItfMesEntry *GetTypeHeader2(ItfMesSub *sub) {
 }
 
 /* Return the entry's item-address table or branch sentinel 1; index unchecked. */
-u32 *itfMesGetWindowEntryItems(s32 window, s32 entryIndex) {
+ItfMesEntryItemsResult itfMesGetWindowEntryItems(s32 window, s32 entryIndex) {
     return GetTypeHeader(pinst[window].mes, entryIndex)->itemList;
 }
 
@@ -1291,7 +1291,7 @@ void CommitVarTable(u8 **table) {
 u8 *GetSpeakerName(instanceMes_tag *mes) {
     u32 *items;
 
-    items = GetTypeHeader2(mes->sub)->itemList;
+    items = (u32 *)GetTypeHeader2(mes->sub)->itemList;
     return (u8 *)items[mes->blk14.selectedIndex];
 }
 

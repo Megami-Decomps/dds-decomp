@@ -2,6 +2,7 @@
 #define ITF_MES_RESOURCE_H
 
 #include "common.h"
+#include "itf_mes_entry_items_result.h"
 
 /* Message tables contain relocated encoded-text addresses. */
 typedef struct ItfMesTable {
@@ -12,8 +13,8 @@ typedef struct ItfMesTable {
 } ItfMesTable;
 
 typedef struct ItfMesEntry {
-    /* Relocated item-address table; address 1 marks a branch entry. */
-    u32 *itemList;
+    /* Relocated table address, or NONE / BRANCH sentinel. */
+    ItfMesEntryItemsResult itemList;
     ItfMesTable *table;
 } ItfMesEntry;
 typedef char ItfMesEntry_size_must_be_0x8[

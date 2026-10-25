@@ -2,11 +2,12 @@
 #define ITF_MES_WINDOW_H
 
 #include "common.h"
+#include "itf_mes_entry_items_result.h"
 
 u32 itfMesMngGetStat(s32 window);
 s16 itfMesMngGetSelect(s32 window);
-/* Return an entry's relocated item-address table; address 1 marks a branch. */
-u32 *itfMesGetWindowEntryItems(s32 window, s32 entryIndex);
+/* Return the entry's item-list address, NONE, or the BRANCH sentinel. */
+ItfMesEntryItemsResult itfMesGetWindowEntryItems(s32 window, s32 entryIndex);
 u32 itfMesGetEntryCount(s32 window);
 /* Return the replacement text stored in a window slot. */
 u8 *itfMesMngGetVar(s32 window, s32 slotIndex);

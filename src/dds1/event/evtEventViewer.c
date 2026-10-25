@@ -939,7 +939,7 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
         if (key->frame != currentFrame) {
             break;
         }
-        if (itfMesGetWindowEntryItems(viewer->windowContext->messageManagerHandle, nibbles[0]) == NULL) {
+        if (itfMesGetWindowEntryItems(viewer->windowContext->messageManagerHandle, nibbles[0]) == ITF_MES_ENTRY_ITEMS_NONE) {
             if (!evtViewerTestIndexedCondition(key->p08.sh[1])) {
                 break;
             }
@@ -2098,7 +2098,7 @@ void evtViewerActivateWindowForGlyphEntry(s32 timelinePosition, EvtRuntime *view
                     }
                     mnuUnpackNibbleFields(glyph, &entryIndex, &entryMode);
                     if (itfMesGetWindowEntryItems(
-                            viewer->windowContext->messageManagerHandle, entryIndex) != (u32 *)1) {
+                            viewer->windowContext->messageManagerHandle, entryIndex) != ITF_MES_ENTRY_ITEMS_BRANCH) {
                         continue;
                     }
                     evtViewerMarkWindowActive(viewer);

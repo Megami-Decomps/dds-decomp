@@ -628,7 +628,7 @@ s32 campAnyPackedFlagSet(EvtRuntime *scene) {
         if (node->type == 4) {
             for (child = node->children; child != NULL; child = child->next) {
                 mnuUnpackNibbleFields(child, &low, &high);
-                if (itfMesGetWindowEntryItems(scene->windowContext->messageManagerHandle, low) == (u32 *)1) {
+                if (itfMesGetWindowEntryItems(scene->windowContext->messageManagerHandle, low) == ITF_MES_ENTRY_ITEMS_BRANCH) {
                     return 1;
                 }
             }
