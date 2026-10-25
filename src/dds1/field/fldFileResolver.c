@@ -5450,7 +5450,7 @@ void fldLoadSkyResource(s32 area) {
         sdfFileClose(command);
         if (area >= 2 && area < 100 && fldRainTextureResource == 0) {
             fldRainTextureResource = sdfDevLoadFileEx(D_003A0100, &fldRainTextureData, 0);
-            fldRainTextureReference = sdfTexSet((SdfTextureFileHeader *)(fldRainTextureData));
+            fldRainTextureReference = sdfTexSet((const SdfTextureFileHeader *)(fldRainTextureData));
         }
     }
 }
@@ -5477,7 +5477,7 @@ void fldUploadSkyBuffer(const FldSkyBuffer *src) {
     fldReleaseSkyResources();
     if (D_0032E3C0[0] >= 2 && D_0032E3C0[0] < 100 && fldRainTextureResource == 0) {
         fldRainTextureResource = sdfDevLoadFileEx(D_003A0100, &fldRainTextureData, 0);
-        fldRainTextureReference = sdfTexSet((SdfTextureFileHeader *)(fldRainTextureData));
+        fldRainTextureReference = sdfTexSet((const SdfTextureFileHeader *)(fldRainTextureData));
     }
 }
 
@@ -6506,7 +6506,7 @@ extern u32 fldRainTextureData;
 
 void fldInitializeCameraColorResource(void) {
     fldRainTextureResource = sdfDevLoadFileEx(D_003A0100, &fldRainTextureData, 0);
-    fldRainTextureReference = sdfTexSet((SdfTextureFileHeader *)(fldRainTextureData));
+    fldRainTextureReference = sdfTexSet((const SdfTextureFileHeader *)(fldRainTextureData));
     fldCameraColorEffect = effCreateSelectionFlagListFromWork(fldCameraColorParameters);
     if (fldRainTextureResource != 0) {
         sdfMemFreeDelayedDirect(fldRainTextureResource);

@@ -5270,7 +5270,7 @@ void fldLoadSkyResource(s32 area) {
         sdfFileClose(command);
         if (area >= 2 && area < 100 && fldRainTextureResource == NULL) {
             fldRainTextureResource = sdfDevLoadFileEx(D_00413350, &fldRainTextureData, 0);
-            fldRainTextureReference = sdfTexSet((SdfTextureFileHeader *)(fldRainTextureData));
+            fldRainTextureReference = sdfTexSet((const SdfTextureFileHeader *)(fldRainTextureData));
         }
     }
 }
@@ -5297,7 +5297,7 @@ void fldUploadSkyBuffer(const FldSkyBuffer *src) {
     fldReleaseSkyResources();
     if (D_00389780[0] >= 2 && D_00389780[0] < 100 && fldRainTextureResource == NULL) {
         fldRainTextureResource = sdfDevLoadFileEx(D_00413350, &fldRainTextureData, 0);
-        fldRainTextureReference = sdfTexSet((SdfTextureFileHeader *)(fldRainTextureData));
+        fldRainTextureReference = sdfTexSet((const SdfTextureFileHeader *)(fldRainTextureData));
     }
 }
 
