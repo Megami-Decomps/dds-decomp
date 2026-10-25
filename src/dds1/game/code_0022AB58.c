@@ -1,4 +1,5 @@
 #include "sdk_ps2.h"
+#include "scr.h"
 #include "common.h"
 #include "mdl_flag_api.h"
 #include "kwln.h"
@@ -37,7 +38,7 @@ void *evtGetDebugProcess(void) {
 
 extern s32 sdfFileCheckExist(const char *);
 
-extern dds3ProcessID_t *scrStartScriptByName(u32, const char *, s32);
+extern dds3ProcessID_t *scrStartScriptByName(u32, const char *, ScrProcedureIndex);
 
 extern SdfPoolNode D_00325708;
 

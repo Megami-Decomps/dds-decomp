@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr.h"
 #include "sdf_resource.h"
 #include "dds3obj.h"
 #include "evt_world_object_api.h"
@@ -9,7 +10,7 @@
 
 struct sdfMemHandle_t;
 
-extern dds3ProcessID_t *scrStartScript2(s32 priority, BfFlw0Header *script, s32 option);
+extern dds3ProcessID_t *scrStartScript2(s32 priority, BfFlw0Header *script, ScrProcedureIndex procedureIndex);
 
 extern void fldReleaseFieldResources(void);
 

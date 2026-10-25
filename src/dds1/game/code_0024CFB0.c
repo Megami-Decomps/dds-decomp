@@ -1,4 +1,5 @@
 #include "dsp_entry_api.h"
+#include "scr.h"
 #include "bf_flw0_header.h"
 #include "dsp_message_window_api.h"
 #include "dsp_channel.h"
@@ -400,7 +401,7 @@ s32 fclScriptForcedEnd(dds3ProcessID_t *task) {
     }
 }
 
-extern dds3ProcessID_t *scrStartScript2(s32 priority, BfFlw0Header *script, s32 option);
+extern dds3ProcessID_t *scrStartScript2(s32 priority, BfFlw0Header *script, ScrProcedureIndex procedureIndex);
 
 /* Replace an optional task slot, clear active flag zero, and return the new task.
  * Creation is still attempted if no slot is supplied. */

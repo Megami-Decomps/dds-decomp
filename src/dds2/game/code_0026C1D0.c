@@ -1,4 +1,5 @@
 #include "sdk_ps2.h"
+#include "scr.h"
 #include "bf_flw0_header.h"
 #include "dsp_entry_api.h"
 #include "dsp_message_window_api.h"
@@ -125,7 +126,7 @@ s32 fclScriptForcedEnd(dds3ProcessID_t *task) {
     }
 }
 
-extern dds3ProcessID_t *scrStartScript2(s32 priority, BfFlw0Header *script, s32 option);
+extern dds3ProcessID_t *scrStartScript2(s32 priority, BfFlw0Header *script, ScrProcedureIndex procedureIndex);
 
 void evtClearActiveFlag(s32 flagIndex);
 

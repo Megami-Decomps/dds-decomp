@@ -1,4 +1,5 @@
 #include "sdk_ps2.h"
+#include "scr.h"
 #include "common.h"
 #include "itf_bit_range.h"
 #include "dds3_admin_control_api.h"
@@ -1050,7 +1051,7 @@ void itfDrawBackgroundSprite(void) {
     }
 }
 
-extern dds3ProcessID_t *scrStartScriptByName(u32, const char *, s32);
+extern dds3ProcessID_t *scrStartScriptByName(u32, const char *, ScrProcedureIndex);
 extern s32 itfDrawBackgroundAndGetTaskReadyMask(dds3ProcessID_t *task);
 extern void itfReleaseFontTestTaskResources(dds3ProcessID_t *task);
 

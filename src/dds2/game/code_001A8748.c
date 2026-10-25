@@ -203,7 +203,7 @@ extern s32 TestMsgMngC_Process(dds3ProcessID_t *task);
 
 extern u8 D_003B4A28[];
 
-extern dds3ProcessID_t *scrStartScript2(s32 priority, BfFlw0Header *script, s32 option);
+extern dds3ProcessID_t *scrStartScript2(s32 priority, BfFlw0Header *script, ScrProcedureIndex procedureIndex);
 
 void TestMsgReloadTexture(void);
 

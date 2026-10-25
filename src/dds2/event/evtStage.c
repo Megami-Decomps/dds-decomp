@@ -1,4 +1,5 @@
 #include "sdk_ps2.h"
+#include "scr.h"
 #include "common.h"
 #include "sdf_float_counter.h"
 #include "fld_area_path.h"
@@ -116,7 +117,7 @@ s32 evtLoadArea_FromMemory(s32 area, s32 room, u8 *resource0Data, u8 *resource1D
 }
 
 extern char evtScriptResourcePathBuffer[];
-extern dds3ProcessID_t *scrStartScriptByName(u32 priority, const char *path, s32 option);
+extern dds3ProcessID_t *scrStartScriptByName(u32 priority, const char *path, ScrProcedureIndex procedureIndex);
 #include "sdf_debug_api.h"
 
 /* DDS2 twin of DDS1 func_00220110: start the event BF script by id. */

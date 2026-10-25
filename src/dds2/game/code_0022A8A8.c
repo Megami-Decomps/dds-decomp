@@ -16,7 +16,7 @@ extern void btlStartSkillEventTask(u32);
 
 extern char btlPrimaryScriptResourceName[];
 
-extern dds3ProcessID_t *scrStartScript2(s32 priority, BfFlw0Header *script, s32 option);
+extern dds3ProcessID_t *scrStartScript2(s32 priority, BfFlw0Header *script, ScrProcedureIndex procedureIndex);
 
 extern char btlSecondaryScriptResourceName[];
 

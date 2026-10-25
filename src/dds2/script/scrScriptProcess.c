@@ -19,7 +19,7 @@ scrProcessWork_s *fldFlowParse(BfFlw0Header *header, ScrProcedureIndex procedure
 
 
 /* Load a script resource, create its VM process and retain its resource handle. */
-scrProcessWork_s *scrLoadScriptFile(const char *path, s32 option)
+scrProcessWork_s *scrLoadScriptFile(const char *path, ScrProcedureIndex procedureIndex)
 {
     u32 resourceInfo[4];
     sdfMemHandle_t *handle;
@@ -31,7 +31,7 @@ scrProcessWork_s *scrLoadScriptFile(const char *path, s32 option)
     {
         return 0;
     }
-    process = fldFlowParse((BfFlw0Header *)resourceAddress, option);
+    process = fldFlowParse((BfFlw0Header *)resourceAddress, procedureIndex);
     if (process != NULL)
     {
         process->scriptHandle = handle;
@@ -60,18 +60,18 @@ void dds3GlobalWorkClearFlags(void)
     }
 }
 
-dds3ProcessID_t *scrStartScriptByName(u32 priority, const char *path, s32 option)
+dds3ProcessID_t *scrStartScriptByName(u32 priority, const char *path, ScrProcedureIndex procedureIndex)
 {
-    return scrStartScriptProcess(priority, scrLoadScriptFile(path, option));
+    return scrStartScriptProcess(priority, scrLoadScriptFile(path, procedureIndex));
 }
 
 scrProcessWork_s *scrCreateProcessWithDefaultOption(const char *path) {
     return scrLoadScriptFile(path, 0);
 }
 
-dds3ProcessID_t *scrStartScript2(s32 priority, BfFlw0Header *script, s32 option)
+dds3ProcessID_t *scrStartScript2(s32 priority, BfFlw0Header *script, ScrProcedureIndex procedureIndex)
 {
-    return scrStartScriptProcess(priority, fldFlowParse(script, option));
+    return scrStartScriptProcess(priority, fldFlowParse(script, procedureIndex));
 }
 
 scrProcessWork_s *scrCreateTaskWithDefaultOption(BfFlw0Header *header) {
