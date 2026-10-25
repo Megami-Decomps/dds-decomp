@@ -180,7 +180,7 @@ typedef struct MenuSpriteArguments {
 
 extern void mnuClearListFlagsOneAndTwo(u32 *);
 extern s32 mnuInitializeStaffPartyScene(dds3ProcessID_t *);
-extern void mnuClearWindowListSelectionFlags(s32);
+extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern MenuPopupEntry mnuSkillMenuFieldUsePopupEntry[];
@@ -510,7 +510,7 @@ s32 mnuHandlePartySelectionInput(s32 callback) {
     }
     if (*popup == 0) {
         if ((inputFlags & 0x300000) == 0) {
-            mnuClearWindowListSelectionFlags((s32)window);
+            mnuClearWindowListSelectionFlags(window);
         }
         if (inputFlags & 0x10) {
             mnuRetreatWindowListSelection(window);
@@ -2011,7 +2011,7 @@ void ptySkillMenuHandleSelection(dds3ProcessID_t *callback) {
     }
     if (window != 0) {
         if (!(inputFlags & MNU_STAFF_INPUT_NAV_STATE_MASK)) {
-            mnuClearWindowListSelectionFlags((s32)window);
+            mnuClearWindowListSelectionFlags(window);
         }
         if (inputFlags & MNU_STAFF_INPUT_PREVIOUS) {
             mnuRetreatWindowListSelection(window);
@@ -2068,7 +2068,7 @@ void ptySkillMenuHandleSlotReorder(dds3ProcessID_t *callback) {
     mnuHighlightSelectedListNode(callback);
     if (window != 0) {
         if (!(inputFlags & MNU_STAFF_INPUT_NAV_STATE_MASK)) {
-            mnuClearWindowListSelectionFlags((s32)window);
+            mnuClearWindowListSelectionFlags(window);
         }
         if (inputFlags & MNU_STAFF_INPUT_PREVIOUS) {
             mnuRetreatWindowListSelection(window);

@@ -559,7 +559,7 @@ s32 mnuDestroyWindowOwnerResourceSet(dds3ProcessID_t *task) {
     return 1;
 }
 
-extern void mnuClearWindowListSelectionFlags(s32);
+extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern MenuPopupEntry mnuCampItemUseListPopupEntry[];
@@ -622,7 +622,7 @@ s32 mnuHandleStaffPopupSelection(dds3ProcessID_t *callback) {
         window = context->activeWindow;
         if (window != NULL) {
             if ((input & 0x300000) == 0) {
-                mnuClearWindowListSelectionFlags((s32)window);
+                mnuClearWindowListSelectionFlags(window);
             }
             if (input & 0x10) {
                 mnuRetreatWindowListSelection(window);
@@ -769,7 +769,7 @@ s32 mnuHandleStaffInventoryListInput(dds3ProcessID_t *callback) {
     window = resources->windows[0];
     if (window != NULL) {
         if ((input & 0x300000) == 0) {
-            mnuClearWindowListSelectionFlags((s32)window);
+            mnuClearWindowListSelectionFlags(window);
         }
         if (input & 0x10) {
             mnuRetreatWindowListSelection(window);

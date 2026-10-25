@@ -2404,7 +2404,7 @@ void mnuCampMenuHandleInput(dds3ProcessID_t *callback) {
     }
     if (window != 0) {
         if (!(inputFlags & MNU_STAFF_INPUT_NAV_STATE_MASK)) {
-            mnuClearWindowListSelectionFlags((s32)window);
+            mnuClearWindowListSelectionFlags(window);
         }
         if (inputFlags & MNU_STAFF_INPUT_PREVIOUS) {
             mnuRetreatWindowListSelection(window);
@@ -2463,7 +2463,7 @@ void ptySkillMenuHandleSelection(dds3ProcessID_t *callback) {
     }
     if (window != 0) {
         if (!(inputFlags & MNU_STAFF_INPUT_NAV_STATE_MASK)) {
-            mnuClearWindowListSelectionFlags((s32)window);
+            mnuClearWindowListSelectionFlags(window);
         }
         if (inputFlags & MNU_STAFF_INPUT_PREVIOUS) {
             mnuRetreatWindowListSelection(window);
@@ -2517,7 +2517,7 @@ void ptySkillMenuHandleSlotReorder(dds3ProcessID_t *callback) {
     mnuHighlightSelectedListNode(callback);
     if (window != 0) {
         if (!(inputFlags & MNU_STAFF_INPUT_NAV_STATE_MASK)) {
-            mnuClearWindowListSelectionFlags((s32)window);
+            mnuClearWindowListSelectionFlags(window);
         }
         if (inputFlags & MNU_STAFF_INPUT_PREVIOUS) {
             mnuRetreatWindowListSelection(window);
@@ -2827,7 +2827,7 @@ s32 ptySkillMenuBrowseCandidatePages(dds3ProcessID_t *callback) {
     windowSlot = windows + ((MenuList *)menu[3])->cursor->index;
     window = (MenuWindowContainer *)*windowSlot;
     if (!(input & 0x300000)) {
-        mnuClearWindowListSelectionFlags((s32)window);
+        mnuClearWindowListSelectionFlags(window);
     }
     if (input & 0x10) {
         mnuRetreatWindowListSelection(window);

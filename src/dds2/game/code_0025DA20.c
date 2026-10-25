@@ -2252,7 +2252,8 @@ s32 mnuCampAdvanceCounter(s32 delta, MenuTerminalContext *scene) {
 extern u8 *D_00435E5C;
 extern u8 mnuShopSourceEntryTypeView[];
 extern void mnuSelectFirstListNode();
-extern void mnuClearWindowListSelectionFlags();
+extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *);
+
 extern s32 mnuDrawCampItemListRow();
 extern s32 mnuCampGetSourceItemPrice(s32, s32, s32);
 
@@ -2593,7 +2594,6 @@ extern MenuPopupEntry mnuShopReturnFadePopupEntry[];
 extern void mnuStorePendingMenuCommandValue(struct MenuList *, u32);
 
 extern void mnuSetSelectionListTransition(struct MenuList *, u32);
-extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *);
 
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern MenuPopupEntry mnuShopQuantityPopupEntry[];
