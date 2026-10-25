@@ -4508,8 +4508,14 @@ extern void mnuTitleStreamUpdateAndLogBgm(void);
 extern void dds3PadVibrationSet(u32 motor, u8 level, s32 duration);
 extern void fldEncountSetFlag(u32 mask);
 
+typedef s32 FldMovementGateResult;
+enum {
+    FLD_MOVEMENT_GATE_PROCEED = 0,
+    FLD_MOVEMENT_GATE_HELD = -1
+};
+
 /* Advance the field transition while the camera model's motion drives completion. */
-s32 fldUpdateFieldTransition(void) {
+FldMovementGateResult fldUpdateFieldTransition(void) {
     FldAreaWork *work = &fldGlobalBase;
     dds3ModelHandle_t *model;
     s16 node;
@@ -4541,20 +4547,20 @@ s32 fldUpdateFieldTransition(void) {
                 mnuResetTitleStreamLocked();
                 fldGlobalBase.unk17C = 0;
                 fldEncountSetFlag(0x40);
-                return 0;
+                return FLD_MOVEMENT_GATE_PROCEED;
             }
         }
 
         fldDispatchCameraModelFrameEvents(node, 7);
-        return -1;
+        return FLD_MOVEMENT_GATE_HELD;
     }
 
-    return 0;
+    return FLD_MOVEMENT_GATE_PROCEED;
 }
 
 extern u8 ptyAnyLivingUnitHasStatus(u32 statusMask, s32 frontlineOnly);
 
-s32 fldUpdateAreaDamageReaction(void) {
+FldMovementGateResult fldUpdateAreaDamageReaction(void) {
     FldAreaWork *work = &fldGlobalBase;
     dds3ModelHandle_t *model;
 
@@ -4565,7 +4571,7 @@ s32 fldUpdateAreaDamageReaction(void) {
             dds3PadVibrationSet(1, 0x96, 6);
             work->unk184 = 0;
             fldEncountSetFlag(0x40);
-            return -1;
+            return FLD_MOVEMENT_GATE_HELD;
         }
 
         model = fldPlayerModelContext;
@@ -4581,10 +4587,10 @@ s32 fldUpdateAreaDamageReaction(void) {
             fldGlobalBase.unk184 = 0;
             fldEncountSetFlag(0x40);
         } else {
-            return -1;
+            return FLD_MOVEMENT_GATE_HELD;
         }
     }
-    return 0;
+    return FLD_MOVEMENT_GATE_PROCEED;
 }
 
 extern s8 dds3PadButtonState[2][2][16];
@@ -4655,10 +4661,10 @@ s32 fldUpdateFieldPlayerMovement(void) {
     if (D_003BAD30 > 0) {
         D_003BAD30--;
     }
-    if (fldUpdateFieldTransition() == -1) {
+    if (fldUpdateFieldTransition() == FLD_MOVEMENT_GATE_HELD) {
         return 0;
     }
-    if (fldUpdateAreaDamageReaction() == -1) {
+    if (fldUpdateAreaDamageReaction() == FLD_MOVEMENT_GATE_HELD) {
         return 0;
     }
     if (fldEncountTestFlag(0x40) == 0) {
