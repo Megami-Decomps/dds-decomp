@@ -790,8 +790,8 @@ void effPCPCrack2Draw(effPCPCrack_t *work) {
     effPCPCrackDraw(work);
 }
 
-void effBossSetPositionCallback(void *work, void *position) {
-    effPCPCrackSetPosition(work, position);
+void effBossSetPositionCallback(f32 *destination, const f32 position[4]) {
+    effPCPCrackSetPosition(destination, position);
 }
 
 void effBossApplyGroupTint(effPCPCrack_t *work, s32 value) {
