@@ -2932,7 +2932,7 @@ void btlWriteActorModelTableFile(void) {
         sprintf(path, "%smodel/table.txt", sdfFileGetHostRoot());
         fd = sceOpen(path, 0x602);
     }
-    sceWrite(fd, (s32)buffer, cursor - buffer);
+    sceWrite(fd, buffer, cursor - buffer);
     sceClose(fd);
     sceSync(D_00436F58, 0);
     sdfFreeAuto(buffer);
