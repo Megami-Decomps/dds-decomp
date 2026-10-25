@@ -253,7 +253,7 @@ BtlTask *btlFindUnitByActor(BtlUnit *target);
 
 extern void scrSetGlobalSeenBit(u32 flagId);
 
-void btlDispatchCommandViaHookOrDefault(u8 *command, BattleIndexWork *argument) {
+void btlDispatchCommandViaHookOrDefault(BtlTask *command, BattleIndexWork *argument) {
     s32 (*handler)(s32, s32) = *(s32 (**)(s32, s32))((u8 *)btlGetRuntime() + 0x604);
 
     if (handler != 0) {
@@ -277,14 +277,14 @@ void btlDispatchCommandViaHookOrDefault(u8 *command, BattleIndexWork *argument) 
         if (datCommandSelectors[argument->skillId].kind != 1) {
             btlDispatchStateHandler(command, 0xE);
         } else {
-            if ((u32)((BtlTask *)command)->unit->status.flags & 0x200) {
+            if ((u32)command->unit->status.flags & 0x200) {
                 scrSetGlobalSeenBit((u16)argument->skillId);
             }
             btlDispatchStateHandler(command, 0xF);
         }
         break;
     case 5:
-        if ((u32)((BtlTask *)command)->unit->status.flags & 0x1000) {
+        if ((u32)command->unit->status.flags & 0x1000) {
             btlDispatchStateHandler(command, 0x10);
         } else {
             btlDispatchStateHandler(command, 0x11);
@@ -296,7 +296,7 @@ void btlDispatchCommandViaHookOrDefault(u8 *command, BattleIndexWork *argument) 
         btlDispatchStateHandler(command, 0x13);
         break;
     case 9:
-        if ((u32)((BtlTask *)command)->indexWork.linkedUnit->status.flags & 1) {
+        if ((u32)command->indexWork.linkedUnit->status.flags & 1) {
             btlDispatchStateHandler(command, 0x16);
         } else {
             btlDispatchStateHandler(command, 0x15);
@@ -306,7 +306,7 @@ void btlDispatchCommandViaHookOrDefault(u8 *command, BattleIndexWork *argument) 
         btlDispatchStateHandler(command, 0x15);
         break;
     case 6: {
-        u32 flags = (u32)((BtlTask *)command)->unit->status.flags;
+        u32 flags = (u32)command->unit->status.flags;
         if (flags & 0x200) {
             btlDispatchStateHandler(command, 0x17);
         } else if (flags & 0x400) {

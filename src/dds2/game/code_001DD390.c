@@ -251,7 +251,7 @@ extern s32 btlGetLoggedIndexedCommandItem(s32);
 extern void scrSetGlobalBitFlag(u32);
 
 /* A hook result of -1 leaves dispatch to the command-kind handler. */
-void btlDispatchCommandViaHookOrDefault(u8 *command, BattleIndexWork *argument) {
+void btlDispatchCommandViaHookOrDefault(ActionStateLink *command, BattleIndexWork *argument) {
     s32 (*handler)(s32, s32) = ((BtlState *)btlGetRuntime())->commandHook;
 
     if (handler != 0) {
@@ -275,14 +275,14 @@ void btlDispatchCommandViaHookOrDefault(u8 *command, BattleIndexWork *argument) 
         if (datCommandSelectors[argument->skillId].kind != 1) {
             btlDispatchStateHandler(command, 0xE);
         } else {
-            if ((u32)((ActionStateLink *)command)->unit->status.flags & 0x200) {
+            if ((u32)command->unit->status.flags & 0x200) {
                 scrSetGlobalBitFlag((u16)argument->skillId);
             }
             btlDispatchStateHandler(command, 0xF);
         }
         break;
     case 5: {
-        u32 flags = (u32)((ActionStateLink *)command)->unit->status.flags;
+        u32 flags = (u32)command->unit->status.flags;
         if (flags & 0x200) {
             if (flags & 0x1000) {
                 btlDispatchStateHandler(command, 0x10);
@@ -301,7 +301,7 @@ void btlDispatchCommandViaHookOrDefault(u8 *command, BattleIndexWork *argument) 
         btlDispatchStateHandler(command, 0x14);
         break;
     case 9:
-        if ((u32)((ActionStateLink *)command)->indexWork.linkedUnit->status.flags & 1) {
+        if ((u32)command->indexWork.linkedUnit->status.flags & 1) {
             btlDispatchStateHandler(command, 0x17);
         } else {
             btlDispatchStateHandler(command, 0x16);
@@ -311,7 +311,7 @@ void btlDispatchCommandViaHookOrDefault(u8 *command, BattleIndexWork *argument) 
         btlDispatchStateHandler(command, 0x16);
         break;
     case 6: {
-        u32 flags = (u32)((ActionStateLink *)command)->unit->status.flags;
+        u32 flags = (u32)command->unit->status.flags;
         if (flags & 0x200) {
             btlDispatchStateHandler(command, 0x18);
         } else if (flags & 0x400) {
