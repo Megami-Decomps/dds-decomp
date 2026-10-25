@@ -356,7 +356,7 @@ void mnuInitializeCampPanelVisualDefaults(f32 *a, f32 *b, f32 *c, f32 *d, f32 *e
     *e = 0.0f;
 }
 
-extern void evtHokanSceneLight(s32 enable, f32 t, f32 *first, f32 *second, f32 *out);
+extern void evtHokanSceneLight(s32 enable, f32 t, const f32 *first, const f32 *second, f32 *out);
 extern f32 evtHokanFloat(s32 enable, f32 t, f32 first, f32 second);
 void mnuFindCampKeyTrackNeighbors(EvtRuntimeGroup *track, s32 frame, EvtRuntimeChild **selected, EvtRuntimeChild **future);
 

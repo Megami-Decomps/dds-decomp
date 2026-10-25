@@ -650,12 +650,12 @@ extern dds3Effect_PartialMultiFilterParam_t kwlnTexturedSquareFrameParameters;
 
 /* The blend helpers replace the parameters, which are the leading fields the
  * staged block shares with their own parameter block. */
-extern void evtHokanBlur2(s32 enable, f32 t, dds3Effect_Blur_t *from, dds3Effect_Blur_t *to, dds3Effect_Blur_t *out);
-extern void evtHokanMultBlur(s32 enable, f32 t, dds3Effect_PartialMultiBlurParam_t *from, dds3Effect_PartialMultiBlurParam_t *to, dds3Effect_PartialMultiBlurParam_t *out);
-extern void evtHokanMultFilter(s32 enable, f32 t, dds3Effect_PartialMultiFilterParam_t *from, dds3Effect_PartialMultiFilterParam_t *to, dds3Effect_PartialMultiFilterParam_t *out);
-extern void evtHokanDistBlur(s32 enable, f32 t, dds3Effect_DistortionBlurParam_t *from, dds3Effect_DistortionBlurParam_t *to, dds3Effect_DistortionBlurParam_t *out);
-extern void evtHokanRipBlur(s32 enable, f32 t, dds3Effect_RippleBlurParam_t *from, dds3Effect_RippleBlurParam_t *to, dds3Effect_RippleBlurParam_t *out);
-extern void evtHokanFilter(s32 enable, f32 t, dds3Effect_Filter_t *from, dds3Effect_Filter_t *to, dds3Effect_Filter_t *out);
+extern void evtHokanBlur2(s32 enable, f32 t, const dds3Effect_Blur_t *from, const dds3Effect_Blur_t *to, dds3Effect_Blur_t *out);
+extern void evtHokanMultBlur(s32 enable, f32 t, const dds3Effect_PartialMultiBlurParam_t *from, const dds3Effect_PartialMultiBlurParam_t *to, dds3Effect_PartialMultiBlurParam_t *out);
+extern void evtHokanMultFilter(s32 enable, f32 t, const dds3Effect_PartialMultiFilterParam_t *from, const dds3Effect_PartialMultiFilterParam_t *to, dds3Effect_PartialMultiFilterParam_t *out);
+extern void evtHokanDistBlur(s32 enable, f32 t, const dds3Effect_DistortionBlurParam_t *from, const dds3Effect_DistortionBlurParam_t *to, dds3Effect_DistortionBlurParam_t *out);
+extern void evtHokanRipBlur(s32 enable, f32 t, const dds3Effect_RippleBlurParam_t *from, const dds3Effect_RippleBlurParam_t *to, dds3Effect_RippleBlurParam_t *out);
+extern void evtHokanFilter(s32 enable, f32 t, const dds3Effect_Filter_t *from, const dds3Effect_Filter_t *to, dds3Effect_Filter_t *out);
 
 /* Advance every running kernel-draw fade and transition by one frame. Each arm
  * keeps its control bit set while its timer runs: it reinterpolates its

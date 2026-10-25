@@ -122,7 +122,7 @@ u32 evtHokanColor(s32 enable, f32 t, u32 a, u32 b)
 }
 
 /* vu0 routine: blend three rows of vectors a and b by t into out (missing input = default rows) */
-void evtHokanSceneLight(s32 enable, f32 t, f32 *a, f32 *b, f32 *out)
+void evtHokanSceneLight(s32 enable, f32 t, const f32 *a, const f32 *b, f32 *out)
 {
     if (enable == 0) {
         t = 0.0f;
@@ -183,7 +183,7 @@ static inline void evtSetBlendVecW(f32 w)
 
 /* vu0 routine: blend a vector and an RGBA8888 colour by t (missing input =
  * default vector/colour) */
-void evtHokanSceneFog(s32 enable, f32 t, EvtBlendVecColor *a, EvtBlendVecColor *b, EvtBlendVecColor *out)
+void evtHokanSceneFog(s32 enable, f32 t, const EvtBlendVecColor *a, const EvtBlendVecColor *b, EvtBlendVecColor *out)
 {
 
     if (enable == 0) {
@@ -236,7 +236,7 @@ void evtHokanSceneFog(s32 enable, f32 t, EvtBlendVecColor *a, EvtBlendVecColor *
     out->color = eePackRGBAWord(128.0f);
 }
 
-void evtHokanBlur2(s32 enable, f32 t, dds3Effect_Blur_t *a, dds3Effect_Blur_t *b, dds3Effect_Blur_t *out)
+void evtHokanBlur2(s32 enable, f32 t, const dds3Effect_Blur_t *a, const dds3Effect_Blur_t *b, dds3Effect_Blur_t *out)
 {
     s32 positionOrCornerIndex;
     s32 coordinateIndex;
@@ -264,7 +264,7 @@ void evtHokanBlur2(s32 enable, f32 t, dds3Effect_Blur_t *a, dds3Effect_Blur_t *b
     }
 }
 
-void evtHokanMultBlur(s32 enable, f32 t, dds3Effect_PartialMultiBlurParam_t *a, dds3Effect_PartialMultiBlurParam_t *b, dds3Effect_PartialMultiBlurParam_t *out)
+void evtHokanMultBlur(s32 enable, f32 t, const dds3Effect_PartialMultiBlurParam_t *a, const dds3Effect_PartialMultiBlurParam_t *b, dds3Effect_PartialMultiBlurParam_t *out)
 {
     s32 positionOrCornerIndex;
     s32 coordinateIndex;
@@ -293,7 +293,7 @@ void evtHokanMultBlur(s32 enable, f32 t, dds3Effect_PartialMultiBlurParam_t *a, 
     }
 }
 
-void evtHokanFilter(s32 enable, f32 t, dds3Effect_Filter_t *a, dds3Effect_Filter_t *b, dds3Effect_Filter_t *out)
+void evtHokanFilter(s32 enable, f32 t, const dds3Effect_Filter_t *a, const dds3Effect_Filter_t *b, dds3Effect_Filter_t *out)
 {
     s32 cornerIndex;
     s32 coordinateIndex;
@@ -316,7 +316,7 @@ void evtHokanFilter(s32 enable, f32 t, dds3Effect_Filter_t *a, dds3Effect_Filter
     out->blendControl = a->blendControl;
 }
 
-void evtHokanMultFilter(s32 enable, f32 t, dds3Effect_PartialMultiFilterParam_t *a, dds3Effect_PartialMultiFilterParam_t *b, dds3Effect_PartialMultiFilterParam_t *out)
+void evtHokanMultFilter(s32 enable, f32 t, const dds3Effect_PartialMultiFilterParam_t *a, const dds3Effect_PartialMultiFilterParam_t *b, dds3Effect_PartialMultiFilterParam_t *out)
 {
     s32 centerCoordinateIndex;
 
@@ -338,7 +338,7 @@ void evtHokanMultFilter(s32 enable, f32 t, dds3Effect_PartialMultiFilterParam_t 
     out->draw.blendControl = a->draw.blendControl;
 }
 
-void evtHokanDistBlur(s32 enable, f32 t, dds3Effect_DistortionBlurParam_t *a, dds3Effect_DistortionBlurParam_t *b, dds3Effect_DistortionBlurParam_t *out)
+void evtHokanDistBlur(s32 enable, f32 t, const dds3Effect_DistortionBlurParam_t *a, const dds3Effect_DistortionBlurParam_t *b, dds3Effect_DistortionBlurParam_t *out)
 {
     s32 positionAxisIndex;
 
@@ -365,7 +365,7 @@ void evtHokanDistBlur(s32 enable, f32 t, dds3Effect_DistortionBlurParam_t *a, dd
     out->size = evtHokanUInt(enable, t, a->size, b->size);
 }
 
-void evtHokanRipBlur(s32 enable, f32 t, dds3Effect_RippleBlurParam_t *a, dds3Effect_RippleBlurParam_t *b, dds3Effect_RippleBlurParam_t *out)
+void evtHokanRipBlur(s32 enable, f32 t, const dds3Effect_RippleBlurParam_t *a, const dds3Effect_RippleBlurParam_t *b, dds3Effect_RippleBlurParam_t *out)
 {
     s32 positionAxisIndex;
 
@@ -392,7 +392,7 @@ void evtHokanRipBlur(s32 enable, f32 t, dds3Effect_RippleBlurParam_t *a, dds3Eff
     out->size = evtHokanUInt(enable, t, a->size, b->size);
 }
 
-void evtBlendParamsG(s32 enable, f32 t, dds3Effect_Blur_t *a, dds3Effect_Blur_t *b, dds3Effect_Blur_t *out)
+void evtBlendParamsG(s32 enable, f32 t, const dds3Effect_Blur_t *a, const dds3Effect_Blur_t *b, dds3Effect_Blur_t *out)
 {
     s32 positionOrCornerIndex;
     s32 coordinateIndex;
