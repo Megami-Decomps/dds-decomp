@@ -100,7 +100,60 @@ void brsDrawProgressRowEntries(s32 x, s32 y, s32 z, BrsSkillPackageWork *work, B
 }
 
 /* Shared gray palette retained for the still-ASM unit-info renderer. */
-INCLUDE_ASM(const s32, "game/code_0029DF18", brsDrawProgressRowUnitInfo);
+#include "fr_font.h"
+#include "fr_font_draw_glyph.h"
+extern struct _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct _FRQ *);
+
+/* Both placement tables use the same coordinate-row type.  Their initialized
+ * array bounds are inferred from the real rows, giving distinct aggregate copy
+ * alias sets without inventing different level/icon element types. */
+typedef struct BrsRowPosition {
+    s16 x;
+    s16 y;
+} BrsRowPosition;
+
+void brsDrawProgressRowUnitInfo(s32 x, s32 y, s32 depth, BrsSkillPackageWork *work,
+                               BrsProgressRow *row, s32 context, s32 rowIndex) {
+    char text[16];
+    BrsRowPosition levelPosition[] = {{88, 20}, {105, 13}};
+    BrsRowPosition iconPosition[] = {{72, 33}, {82, 27}};
+    s8 iconFrames[] = {8, 14, 10, 11, 9, 12, 13, 15};
+    u32 colors[4] = {0x80808080, 0x80808080, 0x80808080, 0x80808080};
+    datUnitWork_t *unit = row->unit;
+    u32 color = work->fadeAnimation[rowIndex].backgroundOpacity | 0x80808000;
+    s32 placement;
+    s32 px;
+    s32 py;
+    struct _FRQ *glyph;
+
+    colors[0] = color;
+    colors[1] = color;
+    colors[2] = color;
+    colors[3] = color;
+    if (work->teardownResource == NULL) {
+        return;
+    }
+    if (unit->flags & DAT_PARTY_FLAG_FRONTLINE) {
+        placement = 0;
+    } else {
+        placement = 1;
+    }
+    if (unit->hp == 0 || (unit->status & 0x4000)) {
+        color = work->fadeAnimation[rowIndex].portraitOpacity | 0x4F4E4E00;
+    }
+    px = levelPosition[placement].x;
+    py = levelPosition[placement].y;
+    sprintf(text, "%2d", work->levelAnimation[rowIndex].level);
+    glyph = itfCreateFont2TextGlyph(x + (px << 4), y + (py << 3), 0xFF0000, color, text, 0);
+    frFontDrawGlyphChain(glyph, 1, context);
+    frDestroyFontRequestAfter(glyph);
+    px = iconPosition[placement].x;
+    py = iconPosition[placement].y;
+    if (work->teardownResource != NULL) {
+        effDrawSpriteWithCornerColors(x + (px << 4), y + (py << 3), depth, colors, 0,
+                                     work->teardownResource, iconFrames[unit->unitId - 1], context);
+    }
+}
 
 /* Fade a result row's portrait in; the row is ready once the opacity reaches 0x60. */
 void brsUpdateResultPortraitFade(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
@@ -128,7 +181,6 @@ extern void btlDrawIconAtSize(SdfPoolNode *, s32, s32, s32, s32, s32, s32, s32, 
  * Direct indexed animation members preserve separate position/opacity epochs.
  * Resolve the coordinates before dimensions: sched2's equal-priority frontline
  * Y setup must precede the width spill; the fallback spill has higher priority. */
-INCLUDE_RODATA(const s32, "game/code_0029DF18", D_00428590);
 
 void brsDrawProgressRowOverlays(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
                    BrsProgressRow *progressRow, s32 surfaceIndex, s32 rowIndex) {
@@ -1356,3 +1408,25 @@ s32 mnuCopySoundStreamOnStatusChange(const void *source, u32 words) {
     return 1;
 }
 
+
+INCLUDE_SDATA(const s32, "game/code_0029DF18", D_004379F0);
+
+INCLUDE_SDATA(const s32, "game/code_0029DF18", mnuTitleSoundTask);
+
+INCLUDE_SDATA(const s32, "game/code_0029DF18", D_004379FC);
+
+INCLUDE_SDATA(const s32, "game/code_0029DF18", D_00437A00);
+
+INCLUDE_SDATA(const s32, "game/code_0029DF18", D_00437A08);
+
+INCLUDE_SDATA(const s32, "game/code_0029DF18", D_00437A10);
+
+INCLUDE_SDATA(const s32, "game/code_0029DF18", D_00437A18);
+
+INCLUDE_SDATA(const s32, "game/code_0029DF18", D_00437A1C);
+
+INCLUDE_SDATA(const s32, "game/code_0029DF18", D_00437A20);
+
+INCLUDE_SDATA(const s32, "game/code_0029DF18", D_00437A28);
+
+INCLUDE_SDATA(const s32, "game/code_0029DF18", D_00437A2C);

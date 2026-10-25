@@ -629,6 +629,8 @@ segments:
       - [0x3389B0, .sdata, game/code_00299D58]
       - [0x3389B8, .sdata, game/code_0029AFC0]
       - [0x3389C0, .sdata, game/code_0029BC58]
+      - [0x3389D0, .sdata, game/code_0029DF18]  # result row templates through title audio state
+      - [0x338A30, .sdata, game/code_002A1820]  # next title-stream state owner
       - [0x338AE8, .sdata, game/code_002A8048]  # first used by func_002A80C0
       - [0x338B78, .sdata, game/code_002A9068]
       - [0x338B88, .sdata, game/code_002AAEA0]

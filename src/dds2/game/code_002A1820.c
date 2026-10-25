@@ -1323,3 +1323,63 @@ void mnuRestartRuntimeAfterViewer(s32 unused) {
     sdfDestroyRuntimeTask();
     sdfCreateRuntimeTask();
 }
+
+INCLUDE_SDATA(const s32, "game/code_002A1820", D_00437A30);
+
+INCLUDE_SDATA(const s32, "game/code_002A1820", D_00437A34);
+
+INCLUDE_SDATA(const s32, "game/code_002A1820", D_00437A38);
+
+INCLUDE_SDATA(const s32, "game/code_002A1820", D_00437A3C);
+
+INCLUDE_SDATA(const s32, "game/code_002A1820", titleWork);
+
+INCLUDE_SDATA(const s32, "game/code_002A1820", D_00437A48);
+
+INCLUDE_SDATA(const s32, "game/code_002A1820", D_00437A50);
+
+INCLUDE_SDATA(const s32, "game/code_002A1820", D_00437A58);
+
+INCLUDE_SDATA(const s32, "game/code_002A1820", D_00437A60);
+
+INCLUDE_SDATA(const s32, "game/code_002A1820", D_00437A68);
+
+INCLUDE_SDATA(const s32, "game/code_002A1820", D_00437A70);
+
+INCLUDE_SDATA(const s32, "game/code_002A1820", D_00437A78);
+
+INCLUDE_SDATA(const s32, "game/code_002A1820", D_00437A80);
+
+INCLUDE_SDATA(const s32, "game/code_002A1820", D_00437A88);
+
+INCLUDE_SDATA(const s32, "game/code_002A1820", D_00437A90);
+
+INCLUDE_SDATA(const s32, "game/code_002A1820", D_00437A98);
+
+INCLUDE_SDATA(const s32, "game/code_002A1820", D_00437AA0);
+
+INCLUDE_SDATA(const s32, "game/code_002A1820", D_00437AA8);
+
+INCLUDE_SDATA(const s32, "game/code_002A1820", mnuMovieWork);
+
+INCLUDE_SDATA(const s32, "game/code_002A1820", D_00437AB4);
+
+INCLUDE_SDATA(const s32, "game/code_002A1820", D_00437AB8);
+
+INCLUDE_SDATA(const s32, "game/code_002A1820", D_00437AC0);
+
+INCLUDE_SDATA(const s32, "game/code_002A1820", D_00437AC8);
+
+INCLUDE_SDATA(const s32, "game/code_002A1820", PlayingNo);
+
+INCLUDE_SDATA(const s32, "game/code_002A1820", D_00437AD0);
+
+INCLUDE_SDATA(const s32, "game/code_002A1820", D_00437AD4);
+
+INCLUDE_SDATA(const s32, "game/code_002A1820", D_00437AD8);
+
+INCLUDE_SDATA(const s32, "game/code_002A1820", D_00437ADC);
+
+INCLUDE_SDATA(const s32, "game/code_002A1820", D_00437AE0);
+
+INCLUDE_SDATA(const s32, "game/code_002A1820", D_00437AE4);
