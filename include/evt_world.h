@@ -67,6 +67,7 @@ typedef char EvtLoadedRecord_size_must_be_0x0C[(sizeof(EvtLoadedRecord) == 0x0C)
  * DDS1 and DDS2 use the same observed layout. Node payloads depend on the slot. */
 enum {
     EVT_WORLD_SLOT_MOVIE = 3, /* viewer movie-time lists: byte offset 0x28 */
+    EVT_WORLD_SLOT_CAMERA = 4, /* linked cameras; active nodes supply the view transform */
     EVT_WORLD_SLOT_UNIT = 5   /* unit/group/lip-sync lists: byte offset 0x40 */
 };
 

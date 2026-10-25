@@ -2945,7 +2945,7 @@ void evtStageTestDrawCameraTransformDebug(void) {
         if (camera->next != NULL) {
             camera = camera->next;
         } else {
-            camera = ((EvtWorldTable *)world->data)->slots[4].head;
+            camera = ((EvtWorldTable *)world->data)->slots[EVT_WORLD_SLOT_CAMERA].head;
         }
         dds3SetActiveCameraSceneBasic((dds3Basic_t *)dds3GetActiveScene(), camera);
         dds3SetScreenFovy(dds3CameraObjectBasicGetFovy(camera));
@@ -2953,7 +2953,7 @@ void evtStageTestDrawCameraTransformDebug(void) {
         if (camera->previous != NULL) {
             camera = camera->previous;
         } else {
-            camera = ((EvtWorldTable *)world->data)->slots[4].tail;
+            camera = ((EvtWorldTable *)world->data)->slots[EVT_WORLD_SLOT_CAMERA].tail;
         }
         dds3SetActiveCameraSceneBasic((dds3Basic_t *)dds3GetActiveScene(), camera);
         dds3SetScreenFovy(dds3CameraObjectBasicGetFovy(camera));
