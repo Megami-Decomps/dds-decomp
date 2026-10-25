@@ -103,8 +103,8 @@ extern void (*btlAiActionHandlers[])(BtlTask *, u32, s32);
 extern AiSpecies D_00360640[];
 extern s32 btlSelectConditionalAiRoute(BtlUnit *, s32, s32 *, s32);
 extern s32 btlRollAiBucket(void);
-extern s32 btlHasAdjacentActorRecordStatus(s32);
-extern u32 btlIsActorHighStateFlagClear(s32);
+extern s32 btlHasAdjacentActorRecordStatus(BtlUnit *);
+extern u32 btlIsActorHighStateFlagClear(BtlUnit *);
 extern s32 btlRunAiAction(BtlTask *, s32, u32);
 extern s32 btlSyncEligibleActorPanelHpMp(BtlTask *);
 void btlSelectAndRunModeAiAction(BtlTask *task, u32 mode) {
@@ -158,7 +158,7 @@ void btlSelectAndRunModeAiAction(BtlTask *task, u32 mode) {
     index = btlPickWeightedAiSlot(unit, species, row);
     actionId = datEnemyAiRecords[species].slot[row * 5 + index].actionId;
     if (mode == 3 && actionId == 0x8008) {
-        if (!btlHasAdjacentActorRecordStatus((s32)unit) || !btlIsActorHighStateFlagClear((s32)unit)) {
+        if (!btlHasAdjacentActorRecordStatus(unit) || !btlIsActorHighStateFlagClear(unit)) {
             memcpy(slots, &datEnemyAiRecords[species].slot[row * 5], sizeof(slots));
             bucket = btlRollAiBucket();
             count = 0;

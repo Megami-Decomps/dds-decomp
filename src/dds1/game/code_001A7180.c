@@ -817,8 +817,8 @@ s32 btlHasRequiredCommandAffinityPartners(BtlUnit *unit, s32 command) {
     return result;
 }
 
-s32 btlHasAdjacentActorRecordStatus(s32 object) {
-    u8 *itemIds = datEnemyRecords[((BtlUnit *)object)->partyRecord.unitId].additionalDropItemIds;
+s32 btlHasAdjacentActorRecordStatus(BtlUnit *object) {
+    u8 *itemIds = datEnemyRecords[object->partyRecord.unitId].additionalDropItemIds;
     u32 i;
     for (i = 0; i < 2; i++) {
         if (*itemIds++ != 0) {
@@ -829,8 +829,8 @@ s32 btlHasAdjacentActorRecordStatus(s32 object) {
 }
 
 /* Return 1 when bit 26 is clear, preserving the original signed word shift. */
-u32 btlIsActorHighStateFlagClear(s32 actor) {
-    return (((s32)((BtlUnit *)actor)->status.flags >> 0x1a) ^ 1U) & 1;
+u32 btlIsActorHighStateFlagClear(BtlUnit *actor) {
+    return (((s32)actor->status.flags >> 0x1a) ^ 1U) & 1;
 }
 
 /* Return 1 when the scene can still accept another active enemy: below the active cap and the cumulative spawn limit. */
