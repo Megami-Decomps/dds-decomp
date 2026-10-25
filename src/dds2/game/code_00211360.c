@@ -714,12 +714,12 @@ s32 btlHasGroup200UnitMode(s32 unused, s32 unitMode) {
 }
 
 /* Find an eligible enemy-side unit of the requested mode with a different native owner ID. */
-s32 btlHasOtherGroup400UnitMode(s32 excludedUnit, s32 unitMode) {
+s32 btlHasOtherGroup400UnitMode(BtlUnit *excludedUnit, s32 unitMode) {
     BtlUnit *unitCursor = ((BattleWork *)btlGetRuntime())->actorList;
     for (; unitCursor != 0; unitCursor = unitCursor->next) {
         if ((btlUnitStatusPair(unitCursor) & BTL_ENEMY_QUERY_MASK) == BTL_ENEMY_ACTIVE_FLAGS &&
             unitCursor->partyRecord.unitId == unitMode &&
-            unitCursor->owner != ((BtlUnit *)excludedUnit)->owner) {
+            unitCursor->owner != excludedUnit->owner) {
             return 1;
         }
     }
