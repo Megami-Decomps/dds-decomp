@@ -613,7 +613,7 @@ extern s32 btlCompareSkippedAndActiveTargetCounts(BtlIndexList *, struct BtlTarg
 
 extern s32 btlGetSlotValueAdjustedForSpecialAbility(BtlUnit *, s32);
 
-extern s32 btlAdjustPointsForCombatFlags(s32, u32, u32, u32, s32);
+extern s32 btlAdjustPointsForCombatFlags(BtlUnit *source, u32 flags, u32 otherFlags, u32 value, s32 index);
 
 extern s32 btlGetCommandResultKindFromFlags(u32, u32, s32);
 
@@ -1235,7 +1235,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
             points *= btlGetSlotValueAdjustedForSpecialAbility(action->unit, command);
         }
         if (!work->costValidationFailed) {
-            work->adjustedValue = btlAdjustPointsForCombatFlags((s32)source, combinedKinds, combinedPress, (u32)points, command);
+            work->adjustedValue = btlAdjustPointsForCombatFlags(source, combinedKinds, combinedPress, (u32)points, command);
             work->resultKind = btlGetCommandResultKindFromFlags(combinedKinds, combinedPress, command);
         } else {
             if (overrideMiss) {

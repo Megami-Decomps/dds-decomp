@@ -630,7 +630,7 @@ f32 btlGetActionRecordPercentAsFraction(s32 unused0, s32 unused1, s32 commandInd
     return (f32)datCommandRecords[commandIndex].effectPercent / 100.0f;
 }
 
-s32 btlAdjustPointsForCombatFlags(s32 unused, u32 flags, u32 otherFlags, u32 value, s32 index) {
+s32 btlAdjustPointsForCombatFlags(BtlUnit *source, u32 flags, u32 otherFlags, u32 value, s32 index) {
     DatCommandRecord *entry;
     u16 code;
     if (flags & 0x20000) {

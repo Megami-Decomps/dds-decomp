@@ -3237,7 +3237,7 @@ extern BtlActionAnimationRecord *datActionAnimationRecords;
 
 extern s32 btlGetSlotValueAdjustedForSpecialAbility(BtlUnit *, s32);
 
-extern s32 btlAdjustPointsForCombatFlags(BtlUnit *, s32, s32, s32, s32);
+extern s32 btlAdjustPointsForCombatFlags(BtlUnit *source, u32 flags, u32 otherFlags, u32 value, s32 index);
 
 extern s8 btlGetCommandResultKindFromFlags(s32, s32, s32);
 
