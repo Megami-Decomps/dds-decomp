@@ -29,7 +29,7 @@
 extern u32 effModelUpdateControlFlags;
 extern u8 btlIsRuntimeAllocated(void);
 
-extern s32 btlIsCurrentActorFullyMarked(void);
+extern u8 btlIsCurrentActorFullyMarked(void);
 
 extern dds3ModelHandle_t *effLoadViewerModelWithVUState(void *, u32);
 

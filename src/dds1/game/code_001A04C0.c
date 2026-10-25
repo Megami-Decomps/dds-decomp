@@ -655,7 +655,7 @@ u8 btlIsRuntimeAllocated(void) {
     return btlRuntime != NULL;
 }
 
-s32 btlIsCurrentActorFullyMarked(void) {
+u8 btlIsCurrentActorFullyMarked(void) {
     if (btlIsRuntimeAllocated() == 0) {
         return 0;
     }
