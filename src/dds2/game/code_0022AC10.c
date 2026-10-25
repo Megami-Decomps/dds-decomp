@@ -9,6 +9,7 @@
 #include "scr_integer_return_value_api.h"
 #include "btl_script_resource_api.h"
 #include "btl_event_asset_api.h"
+#include "btl_event_sequence_api.h"
 #include "kwln_background_fade_api.h"
 #include "btl_skill_max_api.h"
 #include "kwln_task_add_child.h"
@@ -476,10 +477,10 @@ INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041B6F8);
 
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041B710);
 
-s32 btlIsEventSequenceTaskReady(void) {
+BtlEventSequenceTaskAvailability btlIsEventSequenceTaskReady(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     if (battle->eventTaskId == -1) {
-        return 1;
+        return BTL_EVENT_SEQUENCE_TASK_READY;
     }
     if (battle->eventFlags & 4) {
         if (sndFindPackedTrackLoadStatus(battle->sequenceHandle) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
@@ -487,18 +488,18 @@ s32 btlIsEventSequenceTaskReady(void) {
             battle->eventFlags &= ~4;
             btlBossDebugPrintf("btl:event SMG load[%X]\n", battle->sequenceHandle);
         }
-        return 0;
+        return BTL_EVENT_SEQUENCE_TASK_NOT_READY;
     }
     if (sndFindPackedTrackLoadStatus(battle->sequenceHandle) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
         p2sdLoadSMGFile(battle->sequenceHandle);
         btlBossDebugPrintf("btl:SMG load wait\n");
-        return 0;
+        return BTL_EVENT_SEQUENCE_TASK_NOT_READY;
     }
     if (evtGetEventPackStat(battle->eventTaskId) == EVT_PACK_LOAD_COMPLETE) {
-        return 1;
+        return BTL_EVENT_SEQUENCE_TASK_READY;
     }
     btlBossDebugPrintf("btl:BE load wait\n");
-    return 0;
+    return BTL_EVENT_SEQUENCE_TASK_NOT_READY;
 }
 
 /* Release both optional voice resources once and reset the action state.

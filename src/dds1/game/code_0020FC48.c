@@ -8,6 +8,7 @@
 #include "btl_actor_status_table_api.h"
 #include "btl_actor_entry_code_api.h"
 #include "btl_event_asset_api.h"
+#include "btl_event_sequence_api.h"
 #include "btl_skill_max_api.h"
 #include "kwln_background_fade_api.h"
 #include "kwln_task_add_child.h"
@@ -331,20 +332,20 @@ void btlRequestSceneEventResources(void) {
 
 extern char D_003A67A0[], D_003A67B8[];
 
-s32 btlIsEventSequenceTaskReady(void) {
+BtlEventSequenceTaskAvailability btlIsEventSequenceTaskReady(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     if (battle->eventTaskId == -1) {
-        return 1;
+        return BTL_EVENT_SEQUENCE_TASK_READY;
     }
     if (sndFindPackedTrackLoadStatus(battle->sequenceHandle) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
         btlBossDebugPrintf(D_003A67A0);
-        return 0;
+        return BTL_EVENT_SEQUENCE_TASK_NOT_READY;
     }
     if (evtGetEventPackStat(battle->eventTaskId) == EVT_PACK_LOAD_COMPLETE) {
-        return 1;
+        return BTL_EVENT_SEQUENCE_TASK_READY;
     }
     btlBossDebugPrintf(D_003A67B8);
-    return 0;
+    return BTL_EVENT_SEQUENCE_TASK_NOT_READY;
 }
 
 extern char D_003A67D0[];

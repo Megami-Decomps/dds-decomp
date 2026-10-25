@@ -3,6 +3,7 @@
 #include "btl_script_resource_api.h"
 #include "btl_boss_data_api.h"
 #include "btl_event_asset_api.h"
+#include "btl_event_sequence_api.h"
 #include "fld_scene_ready_api.h"
 #include "kwln_background_fade_api.h"
 #include "brs_primary_panel_update_api.h"
@@ -192,14 +193,13 @@ void fldBattleSceneEnterInit(u8 *scene) {
     VU0_STORE_VF($vf0, scene);
 }
 
-extern s32 btlIsEventSequenceTaskReady(void);
 extern s32 btlIsFadeInPhaseOrIdle(void);
 extern void btlBindEventEffectResources(void);
 extern void sndLoadBattleBank(void);
 
 s32 btlLoadBankWhenTasksIdle(void) {
     if (sndIsStreamStatusTwoOrThree() != 0 &&
-        btlIsEventSequenceTaskReady() != 0 &&
+        btlIsEventSequenceTaskReady() != BTL_EVENT_SEQUENCE_TASK_NOT_READY &&
         btlIsFadeInPhaseOrIdle() != 0) {
         sndLoadBattleBank();
         btlBindEventEffectResources();
