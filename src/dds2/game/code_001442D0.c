@@ -7219,7 +7219,7 @@ INCLUDE_SDATA(const s32, "game/code_001442D0", fldTakaraCount);
 
 INCLUDE_SDATA(struct sdfMemHandle_t * const, "game/code_001442D0", fldIndexedResourceHandle);
 
-INCLUDE_SDATA(const s32, "game/code_001442D0", fldIndexedResourceData);
+INCLUDE_SDATA(EffNodeDescriptor *, "game/code_001442D0", fldIndexedResourceData);
 
 INCLUDE_SDATA(EffNode *, "game/code_001442D0", fldIndexedResourceEffect);
 
