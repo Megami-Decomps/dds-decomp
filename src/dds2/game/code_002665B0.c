@@ -998,7 +998,7 @@ void mnuDestroyAllMenuSlotEffectBatches(s32 object) {
     }
 }
 
-extern s32 fldGetCurrentBgmHandle(void);
+extern u32 fldGetCurrentBgmHandle(void);
 extern void p2sdLoadSMGFile(u32);
 
 /* Select the native default/current BGM handle and make only its bank bits resident.
