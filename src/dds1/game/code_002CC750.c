@@ -966,7 +966,7 @@ s32 ptyAreReqProfilesInParty(PrfDds1RequirementSlot *operand) {
 }
 
 /* Compare the unit's level word with the prerequisite's byte threshold. */
-u32 prfReqCheckUnitLevel(datUnitWork_t *unit, PrfDds1RequirementSlot *operand) {
+u8 prfReqCheckUnitLevel(datUnitWork_t *unit, PrfDds1RequirementSlot *operand) {
     if (unit->level < operand->levelThreshold) {
         return 0;
     }
@@ -974,7 +974,7 @@ u32 prfReqCheckUnitLevel(datUnitWork_t *unit, PrfDds1RequirementSlot *operand) {
 }
 
 /* Test the global currency counter against a prerequisite threshold. */
-u32 prfReqCheckGlobalCounter(PrfDds1RequirementSlot *operand) {
+u8 prfReqCheckGlobalCounter(PrfDds1RequirementSlot *operand) {
     if (DDS3_GBWK->header.currency < (u32)operand->minimum) {
         return 0;
     }
