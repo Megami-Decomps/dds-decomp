@@ -574,9 +574,9 @@ void btlStartCommandSoundAndEffectTasks(u8 *battleTask) {
 extern void btlOpenBattleCommandPanel(BtlTask *task);
 
 /* Enter COMMAND by clearing its one-shot audio flag and opening the command panel. */
-void btlEnterCommandSelectionState(u32 task) {
+void btlEnterCommandSelectionState(BtlTask *task) {
     btlGetRuntime();
-    *(u32 *)((s32)task + 8) = *(u32 *)((s32)task + 8) & 0xfffffffb;
+    task->flags = task->flags & 0xfffffffb;
     btlOpenBattleCommandPanel(task);
 }
 
