@@ -5726,7 +5726,7 @@ void fileDrawLoadObjectSlots(s32 object) {
                         }
                         effSampleAnimSet(animation, directFrame, &sample);
                         if (previousSegment != sample.segment) {
-                            params.texture = (struct sdfTexHandle_t *)effAssignSampledSegmentReference(animation, textureSink, &sample);
+                            params.texture = effAssignSampledSegmentReference(animation, textureSink, &sample);
                             previousSegment = sample.segment;
                         }
                         scale = slot->scale;
@@ -5767,7 +5767,7 @@ void fileDrawLoadObjectSlots(s32 object) {
                         }
                         effSampleAnimSet(animation, transformedFrame, &sample);
                         if (previousSegment != sample.segment) {
-                            params.texture = (struct sdfTexHandle_t *)effAssignSampledSegmentReference(animation, textureSink, &sample);
+                            params.texture = effAssignSampledSegmentReference(animation, textureSink, &sample);
                             previousSegment = sample.segment;
                         }
                         scale = slot->scale;

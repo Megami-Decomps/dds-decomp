@@ -13,7 +13,8 @@ typedef struct EffAnimSample {
 void effSampleAnimSet(const EffExpandedList *set, u32 frame, EffAnimSample *out);
 struct sdfTexHandle_t;
 struct SdfPoolNode;
-struct sdfTexHandle_t *effAssignSampledSegmentReference(EffExpandedList *set, struct SdfPoolNode *target,
+struct sdfTexHandle_t *effAssignSampledSegmentReference(const EffExpandedList *set,
+                                                       struct SdfPoolNode *target,
                                                        const EffAnimSample *sample);
 
 #endif /* EFF_ANIM_H */

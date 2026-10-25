@@ -976,7 +976,7 @@ void effSampleAnimSet(const EffExpandedList *set, u32 frame, EffAnimSample *out)
     out->angle = 0.0f;
 }
 
-sdfTexHandle_t *effAssignSampledSegmentReference(EffExpandedList *set, SdfPoolNode *target,
+sdfTexHandle_t *effAssignSampledSegmentReference(const EffExpandedList *set, SdfPoolNode *target,
                                                  const EffAnimSample *sample) {
     return sdfGetOrCreateTextureForReference(target, set->handles[sample->segment]);
 }
