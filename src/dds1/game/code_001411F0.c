@@ -832,7 +832,7 @@ s32 fldStepSceneBgmArchive(void) {
     return 0;
 }
 
-u32 fldGetArchiveLoadPending(void) {
+FldArchivePendingState fldGetArchiveLoadPending(void) {
     return fldArchiveLoadPending;
 }
 
@@ -841,11 +841,11 @@ u8 fldPollArchiveLoad(s32 archiveId) {
     SndPackedTrackLoadStatus result = sndFindPackedTrackLoadStatus(name);
     if (result == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
         p2sdLoadSMGFile(name);
-        fldArchiveLoadPending = 1;
+        fldArchiveLoadPending = FLD_ARCHIVE_PENDING_ACTIVE;
         return 0;
     }
     if (result == SND_PACKED_TRACK_LOAD_RESIDENT) {
-        fldArchiveLoadPending = 0;
+        fldArchiveLoadPending = FLD_ARCHIVE_PENDING_NONE;
         return 1;
     }
     return 0;

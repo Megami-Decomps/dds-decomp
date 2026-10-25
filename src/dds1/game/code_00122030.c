@@ -2,6 +2,7 @@
 #include "scr.h"
 #include "mdl_motion_api.h"
 #include "fld_area_work.h"
+#include "fld_archive_load_state.h"
 #include "fld_runtime_reset_api.h"
 #include "fld_area_encounter_table.h"
 #include "sdf_packet_list.h"
@@ -1981,7 +1982,7 @@ extern void fldFinishDeferredExit(void);
 
 extern void fldFlushQueuedEffectPositions(void);
 
-extern u32 fldGetArchiveLoadPending(void);
+extern FldArchivePendingState fldGetArchiveLoadPending(void);
 
 extern void fldLoadSceneModelsAndCamera(void);
 
