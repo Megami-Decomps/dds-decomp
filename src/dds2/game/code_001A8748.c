@@ -53,6 +53,7 @@
 #include "scr.h"
 #include "bf_flw0_header.h"
 #include "dat_state.h"
+#include "dat_affinity_selector.h"
 #include "btl_resolve_unit_value_api.h"
 #include "btl_select_transform_parameters_api.h"
 #include "mnu_result.h"
@@ -1813,7 +1814,7 @@ s32 btlGetUnitElementAffinity(BtlUnit *battler, s32 element) {
     return btlResolveUnitValueWithOverride(&battler->partyRecord, element);
 }
 
-extern s32 datGetEffectiveAffinity(datUnitWork_t *, s32);
+extern s32 datGetEffectiveAffinity(datUnitWork_t *, DatAffinitySelector);
 
 s32 btlResolveUnitValueWithOverride(datUnitWork_t *record, s32 element) {
     s32 (*hook)(datUnitWork_t *, s32) =

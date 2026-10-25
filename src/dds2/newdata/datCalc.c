@@ -6,6 +6,7 @@
 #include "pty_roster_value_record.h"
 #include "sdf.h"
 #include "dat_state.h"
+#include "dat_affinity_selector.h"
 #include "pty_skill_nibble_state.h"
 #include "dat_world_field_flags.h"
 #include "btl_affinity_row.h"
@@ -239,13 +240,13 @@ extern const BtlAffinityRow *datAffinityTablePrimary;
 extern const BtlAffinityRow *datAffinityTableAlternate;
 extern const BtlAffinityRow *datExternalAffinityTable;
 
-s32 datGetEffectiveAffinity(datUnitWork_t *unit, s32 element) {
+s32 datGetEffectiveAffinity(datUnitWork_t *unit, DatAffinitySelector selector) {
     s32 calculatedValue;
     u16 unitId;
     u32 low;
 
-    switch (element) {
-    case -1:
+    switch (selector) {
+    case DAT_AFFINITY_SELECTOR_UNMAPPED:
         return 0;
     case 16:
     case 17:
@@ -256,9 +257,9 @@ s32 datGetEffectiveAffinity(datUnitWork_t *unit, s32 element) {
     unitId = unit->unitId;
     if (!(unit->flags & DAT_EXTERNAL_SKILL_TABLE)) {
         if (unit->flags & 0x1000) {
-            calculatedValue = ((const s32 *)datAffinityTablePrimary)[unitId * 19 + element];
+            calculatedValue = ((const s32 *)datAffinityTablePrimary)[unitId * 19 + selector];
         } else {
-            calculatedValue = ((const s32 *)datAffinityTableAlternate)[unitId * 19 + element];
+            calculatedValue = ((const s32 *)datAffinityTableAlternate)[unitId * 19 + selector];
         }
         if (evtBitCheck(0x80E) && calculatedValue < 0) {
             calculatedValue = (calculatedValue & DAT_CALC_HIGH_MASK) |
@@ -266,29 +267,29 @@ s32 datGetEffectiveAffinity(datUnitWork_t *unit, s32 element) {
         }
     } else {
         if (unit->affinityTableIndex != 0) {
-            calculatedValue = ((const s32 *)datExternalAffinityTable)[unit->affinityTableIndex * 19 + element];
+            calculatedValue = ((const s32 *)datExternalAffinityTable)[unit->affinityTableIndex * 19 + selector];
         } else {
-            calculatedValue = ((const s32 *)datExternalAffinityTable)[unitId * 19 + element];
+            calculatedValue = ((const s32 *)datExternalAffinityTable)[unitId * 19 + selector];
         }
     }
 
-    if (element == 15) {
+    if (selector == 15) {
         calculatedValue = datRaiseCalculatedValueFloor(unit, calculatedValue);
     }
     if (unit->flags & 0x2000) {
-        calculatedValue = ((const s32 *)datExternalAffinityTable)[383 * 19 + element];
+        calculatedValue = ((const s32 *)datExternalAffinityTable)[383 * 19 + selector];
     }
     if ((unit->status & DAT_STATUS_VALUE_MASK) == 0x800) {
-        calculatedValue = ((const s32 *)datExternalAffinityTable)[382 * 19 + element];
+        calculatedValue = ((const s32 *)datExternalAffinityTable)[382 * 19 + selector];
     }
     if ((unit->status & DAT_STATUS_VALUE_MASK) == 0x1000) {
-        calculatedValue = ((const s32 *)datExternalAffinityTable)[381 * 19 + element];
+        calculatedValue = ((const s32 *)datExternalAffinityTable)[381 * 19 + selector];
     }
 
     low = calculatedValue & 0xFFFF;
     if ((unit->status & DAT_STATUS_VALUE_MASK) == 4) {
-        if (element < 2) {
-            if (element >= 0) {
+        if (selector < 2) {
+            if (selector >= 0) {
                 if (low < 100) {
                     calculatedValue = (calculatedValue & DAT_CALC_HIGH_MASK) | 100;
                     low = calculatedValue & 0xFFFF;
@@ -297,12 +298,12 @@ s32 datGetEffectiveAffinity(datUnitWork_t *unit, s32 element) {
         }
     }
     if ((unit->status & DAT_STATUS_VALUE_MASK) == 0x400) {
-        if (element == 9 && low < 300) {
+        if (selector == 9 && low < 300) {
             calculatedValue = (calculatedValue & DAT_CALC_HIGH_MASK) | 300;
             low = calculatedValue & 0xFFFF;
         }
     }
-    if ((unit->status & DAT_STATUS_VALUE_MASK) == 0x10 && element == 12 && low < 200) {
+    if ((unit->status & DAT_STATUS_VALUE_MASK) == 0x10 && selector == 12 && low < 200) {
         calculatedValue = (calculatedValue & DAT_CALC_HIGH_MASK) | 200;
         low = calculatedValue & 0xFFFF;
     }
@@ -317,67 +318,67 @@ s32 datGetEffectiveAffinity(datUnitWork_t *unit, s32 element) {
     return calculatedValue;
 }
 
-u32 datGetAisyoValue(datUnitWork_t *unit, s32 element) {
-    return (u16)datGetEffectiveAffinity(unit, element);
+u32 datGetAisyoValue(datUnitWork_t *unit, DatAffinitySelector selector) {
+    return (u16)datGetEffectiveAffinity(unit, selector);
 }
 
-u32 datGetAisyoFlag(datUnitWork_t *unit, s32 element) {
-    return datGetEffectiveAffinity(unit, element) & DAT_CALC_HIGH_MASK;
+u32 datGetAisyoFlag(datUnitWork_t *unit, DatAffinitySelector selector) {
+    return datGetEffectiveAffinity(unit, selector) & DAT_CALC_HIGH_MASK;
 }
 
-/* Map one exact flag to a stat index. Flag one and unknown/combined flags
- * return -1; shared destination indices are intentional. */
-s32 datFlagToElementIndex(s32 elementFlag) {
-    s32 statIndex = -1;
+/* Map one exact channel flag to an affinity-table column. Flag one and
+ * unknown/combined flags have no column; several flags share a destination. */
+DatAffinitySelector datFlagToElementIndex(s32 channelFlag) {
+    DatAffinitySelector selector = DAT_AFFINITY_SELECTOR_UNMAPPED;
 
-    switch (elementFlag) {
+    switch (channelFlag) {
     case 1:
-        statIndex = -1;
+        selector = DAT_AFFINITY_SELECTOR_UNMAPPED;
         break;
     case 2:
-        statIndex = 4;
+        selector = 4;
         break;
     case 4:
-        statIndex = 3;
+        selector = 3;
         break;
     case 8:
-        statIndex = 14;
+        selector = 14;
         break;
     case 0x10:
-        statIndex = 12;
+        selector = 12;
         break;
     case 0x20:
-        statIndex = 13;
+        selector = 13;
         break;
     case 0x40:
-        statIndex = 7;
+        selector = 7;
         break;
     case 0x80:
-        statIndex = 11;
+        selector = 11;
         break;
     case 0x100:
-        statIndex = 14;
+        selector = 14;
         break;
     case 0x200:
-        statIndex = 10;
+        selector = 10;
         break;
     case 0x400:
-        statIndex = 9;
+        selector = 9;
         break;
     case 0x800:
-        statIndex = 9;
+        selector = 9;
         break;
     case 0x1000:
-        statIndex = 7;
+        selector = 7;
         break;
     case 0x2000:
-        statIndex = 7;
+        selector = 7;
         break;
     case 0x4000:
-        statIndex = 9;
+        selector = 9;
         break;
     }
-    return statIndex;
+    return selector;
 }
 
 /* Test the truncated current-HP percentage; maximum HP must be nonzero. */
@@ -1791,14 +1792,14 @@ s32 evtPushSecondRosterMaximumHp(void) {
     return 1;
 }
 
-extern u32 datGetAisyoValue(datUnitWork_t *, s32);
+extern u32 datGetAisyoValue(datUnitWork_t *, DatAffinitySelector);
 /* Push the first entry's selected stat; selectors -1, 16 and 17 use the default. */
 s32 evtPushFirstRosterSelectedStat(void) {
-    s8 statIndex = datCommandSelectors[evtWorkScriptContext.commandIndex].stat;
+    DatAffinitySelector selector = datCommandSelectors[evtWorkScriptContext.commandIndex].stat;
     s32 statValue;
 
-    switch (statIndex) {
-    case -1:
+    switch (selector) {
+    case DAT_AFFINITY_SELECTOR_UNMAPPED:
     case 16:
     case 17:
         statValue = EVT_DEFAULT_STAT_VALUE;
@@ -1806,10 +1807,10 @@ s32 evtPushFirstRosterSelectedStat(void) {
     default:
         if (btlIsRuntimeAllocated()) {
             statValue = (u16)btlResolveUnitValueWithOverride(
-                (datUnitWork_t *)evtWorkScriptContext.firstArgument, statIndex);
+                (datUnitWork_t *)evtWorkScriptContext.firstArgument, selector);
         } else {
             statValue = datGetAisyoValue(
-                (datUnitWork_t *)evtWorkScriptContext.firstArgument, statIndex);
+                (datUnitWork_t *)evtWorkScriptContext.firstArgument, selector);
         }
         break;
     }
@@ -1819,11 +1820,11 @@ s32 evtPushFirstRosterSelectedStat(void) {
 
 /* Push the second entry's selected stat; selectors -1, 16 and 17 use the default. */
 s32 evtPushSecondRosterSelectedStat(void) {
-    s8 statIndex = datCommandSelectors[evtWorkScriptContext.commandIndex].stat;
+    DatAffinitySelector selector = datCommandSelectors[evtWorkScriptContext.commandIndex].stat;
     s32 statValue;
 
-    switch (statIndex) {
-    case -1:
+    switch (selector) {
+    case DAT_AFFINITY_SELECTOR_UNMAPPED:
     case 16:
     case 17:
         statValue = EVT_DEFAULT_STAT_VALUE;
@@ -1831,10 +1832,10 @@ s32 evtPushSecondRosterSelectedStat(void) {
     default:
         if (btlIsRuntimeAllocated()) {
             statValue = (u16)btlResolveUnitValueWithOverride(
-                (datUnitWork_t *)evtWorkScriptContext.secondArgument, statIndex);
+                (datUnitWork_t *)evtWorkScriptContext.secondArgument, selector);
         } else {
             statValue = datGetAisyoValue(
-                (datUnitWork_t *)evtWorkScriptContext.secondArgument, statIndex);
+                (datUnitWork_t *)evtWorkScriptContext.secondArgument, selector);
         }
         break;
     }
@@ -1848,7 +1849,7 @@ s32 evtPushFirstRosterOptionStat(void) {
     s32 statValue = EVT_DEFAULT_STAT_VALUE;
 
     switch (statIndex) {
-    case -1:
+    case DAT_AFFINITY_SELECTOR_UNMAPPED:
     case 16:
     case 17:
         break;
@@ -1872,7 +1873,7 @@ s32 evtPushSecondRosterOptionStat(void) {
     s32 statValue = EVT_DEFAULT_STAT_VALUE;
 
     switch (statIndex) {
-    case -1:
+    case DAT_AFFINITY_SELECTOR_UNMAPPED:
     case 16:
     case 17:
         break;
