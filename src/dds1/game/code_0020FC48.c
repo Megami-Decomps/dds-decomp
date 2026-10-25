@@ -37,6 +37,7 @@
 #include "btl_state.h"
 #include "btl_scene_initializer.h"
 #include "btl_action.h"
+#include "btl_task_condition.h"
 #include "btl_sound.h"
 #include "btl_sound_release_task.h"
 #include "evt_unit.h"
@@ -560,42 +561,6 @@ s32 btlCommandSetSequenceVolumePan(void) {
     return 1;
 }
 
-struct BattleScriptTaskData;
-struct BattleTaskData;
-
-/* 0x70-byte queued-task header, distinct from the unit's 0x170-byte BtlTask.
- * The callback union preserves each consumer's actual function prototype. */
-typedef struct BattleTask {
-    u8 enabled;
-    u8 pad01[0xF];
-    u8 status;
-    u8 pad11[0xF];
-    u16 taskId;
-    u16 state;
-    u16 flags;
-    u8 pad26[2];
-    s32 startDelay;
-    s32 endDelay;
-    u32 unk30;
-    u32 unk34;
-    u64 sequence;
-    u64 owner;
-    void (*onStart)(u32);
-    union {
-        void (*update)(void);
-        s32 (*run)(void *);
-        u32 (*processScript)(struct BattleScriptTaskData *);
-        s32 (*runSceneActorEvent)(struct BattleTaskData *);
-    } callback;
-    void (*onFinish)(u32 *);
-    void *args;
-    struct BattleTask *next;
-    struct BattleTask *nextActive;
-    struct BattleTask *deferNext;
-    struct BattleTask *deferPrev;
-    u8 pad68[8];
-} BattleTask;
-
 typedef struct BattleTaskData {
     BtlUnit *battler;
     s32 action;
@@ -634,13 +599,13 @@ s32 btlRunSceneActorEventTask(BattleTaskData *data) {
 
 /* Queue a battler/action task with zero elapsed frames; return the task. */
 BtlRuntimeTask *btlCreateActionTask(BtlUnit *battler, s32 action) {
-    BattleTask *task = (BattleTask *)btlAllocTask(12);
+    BtlRuntimeTask *task = btlAllocTask(12);
     BattleTaskData *data;
 
-    task->enabled = 1;
+    task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x62;
-    task->callback.runSceneActorEvent = btlRunSceneActorEventTask;
-    task->status = 0;
+    task->callback = btlRunSceneActorEventTask;
+    task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     data = btlGetTaskArguments(task);
     data->battler = battler;
     data->action = action;
