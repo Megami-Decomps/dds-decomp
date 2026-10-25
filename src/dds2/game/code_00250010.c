@@ -11,6 +11,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_resource.h"
 #include "evt_viewer.h"
+#include "evt_menu_table_entry_availability.h"
 #include "evt_reload_viewer_api.h"
 #include "evt_viewer_rows.h"
 #include "evt_float_panel_row.h"
@@ -125,7 +126,6 @@ extern s32 dds3SelectMenu(s32 padSet, s32 secondaryCount, s32 primaryCount, s32 
                                   s32 primaryVisible, s32 *secondaryScroll, s32 *primaryScroll,
                                   s32 *secondaryCursor, s32 *primaryCursor);
 extern s32 evtDrawFrameListColumnHeadings(sdfDrawTag_t *list, s32 x, s32 y, EvtRuntime *ctx);
-extern s32 evtIsMenuTableEntryEnabled(s32 *);
 
 extern void p2sdLoadSMGFile(s32 sound);
 
@@ -1485,7 +1485,7 @@ s32 evtUpdateFrameListDialog(s32 x, s32 y, EvtRuntime *ctx) {
     if (group->childCount + 1 < shown) {
         shown = group->childCount + 1;
     }
-    if (evtIsMenuTableEntryEnabled(&group->type) == 1) {
+    if (evtIsMenuTableEntryEnabled(&group->type) == EVT_MENU_TABLE_ENTRY_ENABLED) {
         if (dds3PadButtonState.decTen < 0) {
             if (ctx->frameCursor + ctx->frameFirst == 0) {
                 return -4;
@@ -1884,8 +1884,8 @@ s32 evtUpdateComparisonValueDialog(s32 x, s32 y, EvtRuntime *ctx) {
     return dds3PadButtonState.cancel >= 0 ? 0 : -1;
 }
 
-s32 evtIsMenuTableEntryEnabled(s32 *index) {
-    return D_003C9730[*index].columnCount != 0;
+EvtMenuTableEntryAvailability evtIsMenuTableEntryEnabled(s32 *index) {
+    return D_003C9730[*index].columnCount != EVT_MENU_TABLE_ENTRY_DISABLED;
 }
 
 /* Return the table value selected by this group's type and editor column. */
