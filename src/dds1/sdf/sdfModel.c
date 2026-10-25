@@ -135,7 +135,7 @@ s32 sdfModelGetDrawPacketSize(const u32 *list, s32 *outCount, s32 *outQuadwords)
     return bytes != 0 ? bytes + 0x20 : 0;
 }
 
-SdfDmaTagHeader *sdfModelSetNormalDrawPacket(sdfModelNode_t *node, SdfIndexedCommandView *command,
+SdfDmaTagHeader *sdfModelSetNormalDrawPacket(sdfModelNode_t *node, const SdfIndexedCommandView *command,
                                                     SdfDmaTagHeader *packet, s32 frame) {
     u32 packed = command->assetIndexAndCount;
     u16 assetIndex = packed >> 16;
@@ -223,7 +223,7 @@ void sdfModelLinkDrawPacket(sdfModelNode_t *node, const u32 *commandList,
         command = (SdfMeasureCommandPrefix *)*cursor++;
         switch (command->kind) {
         case 1:
-            packet = sdfModelSetNormalDrawPacket(node, (SdfIndexedCommandView *)command, packet, listIndex);
+            packet = sdfModelSetNormalDrawPacket(node, (const SdfIndexedCommandView *)command, packet, listIndex);
             break;
         case 2:
             packet = sdfModelSetOneSkinDrawPacket(node, command, packet, listIndex);
