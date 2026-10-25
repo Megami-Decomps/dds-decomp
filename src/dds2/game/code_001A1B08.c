@@ -4,6 +4,7 @@
 #include "sdf_packet_list.h"
 #include "itf.h"
 #include "itf_mes_window.h"
+#include "itf_mes_entry_start_api.h"
 #include "sdf.h"
 #include "itf_panel_draw.h"
 #include "itf_text_vector.h"
@@ -58,7 +59,6 @@ extern u32 D_003B4760[];
 #include "sdf_packet_alloc.h"
 extern void *sdf2DMakeStdPacket(void *packet, s32 packetBytes);
 extern s32 scrGetIntPara(s32);
-extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
 extern u8 D_003B45E8[], D_003B4600[], D_003B4618[];
 extern u8 D_003B4630[], D_003B4648[], D_003B4660[];
 extern u8 D_004365A8[8], D_004365B0[8];
@@ -633,7 +633,7 @@ s32 itfMesMngMessage(void) {
     entryState = &record->sub24;
     status = entryState->status;
     if (status == 0) {
-        if (itfMesStartEntry(window, entryIndex, 0) == 0) {
+        if (itfMesStartEntry(window, entryIndex, 0) == ITF_MES_ENTRY_START_EMPTY_TABLE) {
             return 1;
         }
     } else if (status < 0) {

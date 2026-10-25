@@ -9,6 +9,7 @@
 #include "btl_registered_panel_work.h"
 #include "btl_command_layout_work.h"
 #include "common.h"
+#include "itf_mes_entry_start_api.h"
 #include "btl_command_target_policy.h"
 #include "btl_named_task_pair_status_api.h"
 #include "sdf_vu0.h"
@@ -23,7 +24,6 @@ extern u16 btlRefreshUnitMaximumMpAndClampCurrentMp(struct datUnitWork_t *entryA
 extern void evtCopyEntryStringToActiveWindow(s32 slotIndex, const char *sourceText);
 extern s32 fldGetSceneObjectState(void);
 extern void itfMesMngRequestMessageRelease(s32 window, s32 releasePrimaryBlock);
-extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
 /* Original-style implicit int, kept: matched code depends on it: btlCountEligibleLinkedActors. */
 
 extern void itfSetTextDrawLimit(s32 limit);

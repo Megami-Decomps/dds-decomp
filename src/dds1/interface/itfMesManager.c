@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "itf_mes_entry_start_api.h"
 #include "itf.h"
 #include "sdf_packet_list.h"
 #include "sdf_resource.h"
@@ -372,7 +373,7 @@ void itfMesBuildEntryGlyph(instanceMes_tag *mes);
 
 /* Install an entry's table into the window, rebuild its text glyphs and the
  * selected-item caption, then mark the entry block active. */
-s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex) {
+ItfMesEntryStartResult itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex) {
     instanceMes_tag *mes = pinst[window].mes;
     ItfMesEntryBlock *entryBlock = &mes->entryBlock;
     ItfMesTable *table = GetTypeHeader(mes, entryIndex)->table;
@@ -384,7 +385,7 @@ s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex) {
     entryBlock->table = table;
     entryBlock->tableCount = table->count;
     if (table->count == 0) {
-        return 0;
+        return ITF_MES_ENTRY_START_EMPTY_TABLE;
     }
     CommitVarTable(mes->textSlots.addresses);
     if (mes->temporaryFontEntry != 0) {
@@ -430,7 +431,7 @@ s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex) {
     }
     entryBlock->textState = 1;
     mes->flags |= 0x1000000;
-    return 1;
+    return ITF_MES_ENTRY_START_STARTED;
 }
 
 extern s32 itfInitTextDrawArgs(u8 *encodedText, _FRQ *sub);

@@ -16,6 +16,7 @@
 #include "mdl_world_object_source_vector_api.h"
 #include "sdf_motion_loop.h"
 #include "itf_mes_window.h"
+#include "itf_mes_entry_start_api.h"
 #include "sdf_resource.h"
 #include "evt_viewer.h"
 #include "evt_reload_viewer_api.h"
@@ -58,7 +59,6 @@ extern void effEventSetScatterBlurParameters(dds3Effect_DistortionBlurParam_t *p
 extern void effSetLoadDescA(const dds3Effect_Blur_t *parameters);
 extern void effSetLoadDescD(const dds3Effect_Blur_t *parameters);
 extern u8 fldTitleIsActive(void);
-extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
 extern void mnuCampSetPrimaryOption(EvtRuntime *scene, u32 option);
 extern void mnuCampSetSecondaryOption(EvtRuntime *scene, u32 option);
 extern s32 mnuGetSelectedTableValue(EvtRuntime *runtime);

@@ -4,6 +4,7 @@
 #include "sdf_packet_list.h"
 #include "itf.h"
 #include "itf_mes_window.h"
+#include "itf_mes_entry_start_api.h"
 #include "sdf.h"
 #include "itf_panel_draw.h"
 #include "itf_text_vector.h"
@@ -54,7 +55,6 @@ extern u8 D_003BB1E0[8];
 extern TextVector itfPanelGradientColorTemplate[];
 extern TextVector itfPanelGradientColorPair[];
 extern s32 scrGetIntPara(s32);
-extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
 extern u8 D_00357BF0[], D_00357C08[], D_00357C20[];
 extern u8 D_00357C38[], D_00357C50[], D_00357C68[];
 extern u8 D_003BB1A8[8], D_003BB1B0[8];
@@ -611,7 +611,7 @@ s32 itfMesMngMessage(void) {
     entryState = &record->sub24;
     status = entryState->status;
     if (status == 0) {
-        if (itfMesStartEntry(window, entryIndex, 0) == 0) {
+        if (itfMesStartEntry(window, entryIndex, 0) == ITF_MES_ENTRY_START_EMPTY_TABLE) {
             return 1;
         }
     } else if (status < 0) {

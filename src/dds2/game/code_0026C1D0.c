@@ -12,6 +12,7 @@
 #include "mnu_list.h"
 #include "kwln_task_state.h"
 #include "itf_mes_window.h"
+#include "itf_mes_entry_start_api.h"
 #include "evt_world.h"
 #include "sdf_resource.h"
 #include "dat_state.h"
@@ -240,7 +241,6 @@ s32 evtSetMessageWindowPageValue(s32 pageValue) {
     return 1;
 }
 
-extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
 
 extern void itfMesMngSetSelPhase(s32 windowIndex, s32 status);
 

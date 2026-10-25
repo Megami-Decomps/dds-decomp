@@ -21,6 +21,7 @@
 #include "mdl_world_object_source_vector_api.h"
 #include "sdf_motion_loop.h"
 #include "itf_mes_window.h"
+#include "itf_mes_entry_start_api.h"
 #include "sdf_resource.h"
 #include "kwln.h"
 #include "kwln_fade.h"
@@ -738,7 +739,6 @@ extern void nbPanelAnalyzeStart(void);
 extern void kwlnFadeBackgroundStartIn(s32 duration);
 extern s32 mnuQueryTitleSoundBusy(void);
 extern s32 itfMesSelectTableItemText(s32 window, s32 entry, s32 unused);
-extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
 extern void itfMesBuildOptionList(s32 window, s32 entry);
 extern void mnuStopTitleVoicePlayback(void);
 extern void evtPrintDeveloperConsoleMessage(const char *format, ...);

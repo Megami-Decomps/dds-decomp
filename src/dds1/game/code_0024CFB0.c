@@ -9,6 +9,7 @@
 #include "evt_world_object_api.h"
 #include "kwln_task_state.h"
 #include "itf_mes_window.h"
+#include "itf_mes_entry_start_api.h"
 #include "mnu.h"
 #include "mnu_list.h"
 #include "mnu_terminal_work.h"
@@ -94,7 +95,6 @@ extern void mnuDrawTerminalEffectIfAvailable(s32 state);
 extern void evtCopyEntryStringToActiveWindow(s32 slotIndex, const char *sourceText);
 extern void itfMesMngSetPhase(s32 windowIndex, s32 status);
 extern void itfMesMngSetSelPhase(s32 windowIndex, s32 status);
-extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
 extern MenuPopupEntry mnuTerminalPopupEntries[];
 extern void itfMesMngRelease(s32 window);
 extern u8 *D_003BAA70;

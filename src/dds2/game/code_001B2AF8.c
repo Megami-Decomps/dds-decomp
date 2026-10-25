@@ -13,6 +13,7 @@
 #include "dsp_entry_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "itf_mes_entry_start_api.h"
 #include "btl_command_target_policy.h"
 #include "btl_named_task_pair_status_api.h"
 #include "sdf_vu0.h"
@@ -70,7 +71,6 @@ extern s32 btlApplyCommandAbilityMultiplier(datUnitWork_t *battler, s32 command)
 extern s32 btlCountEligibleLinkedActors(BtlState *battle);
 extern u32 btlNextScaledRandom(u32 limit);
 extern void btlResetBattleHistoryCounters(void);
-extern s32 itfMesStartEntry(s32 window, s32 entryIndex, s32 itemIndex);
 /* Original-style implicit int, kept: matched code depends on it: btlBuildActorLinkageSkillList. */
 /* itfSetTextDrawLimit is void in the font TU; preserve C89 call scope here.
  * An early void declaration recolors btlDrawItemCommandRows' loop carriers:
