@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "snd_packed_track_load_status.h"
 #include "btl_sound.h"
+#include "btl_actor_resource_cleanup_api.h"
 #include "btl_referenced_battle_effect_task.h"
 #include "dds3obj.h"
 #include "eff_random.h"
@@ -647,32 +648,32 @@ s32 btlPollBattleResourceCleanup(BtlUnit *self) {
     return btlCountTasksByKind(0x2E) == 0;
 }
 
-s32 btlPollActorResourceCleanup(BtlUnit *actor) {
+BtlActorResourceCleanupResult btlPollActorResourceCleanup(BtlUnit *actor) {
     if (actor->resourceNode != 0) {
         if (sndIsResourceNodeReferencedOrActive(actor->resourceNode) != 0) {
-            return 0;
+            return BTL_ACTOR_RESOURCE_CLEANUP_PENDING;
         }
         sndFreeResourceNode(actor->resourceNode);
         actor->resourceNode = 0;
     }
     if (actor->listNode != 0) {
         if (sndHasResourceFlagsOneOrEight(actor->listNode) != 0) {
-            return 0;
+            return BTL_ACTOR_RESOURCE_CLEANUP_PENDING;
         }
         sndFreeListNode(actor->listNode);
         actor->listNode = 0;
     }
     if (actor->effectLink.referenceCount != 0) {
-        return 0;
+        return BTL_ACTOR_RESOURCE_CLEANUP_PENDING;
     }
     if (btlIsUnitInActiveList(actor) != 0) {
         btlResetActiveUnitList();
-        return 0;
+        return BTL_ACTOR_RESOURCE_CLEANUP_PENDING;
     }
     if (btlCountTasksForOwner(actor->owner) != 0) {
-        return 0;
+        return BTL_ACTOR_RESOURCE_CLEANUP_PENDING;
     }
-    return btlCountTasksByKind(0x2E) == 0;
+    return btlCountTasksByKind(0x2E) == 0 ? BTL_ACTOR_RESOURCE_CLEANUP_COMPLETE : BTL_ACTOR_RESOURCE_CLEANUP_PENDING;
 }
 
 /* Empty entry callback for the retail NON action state. */
@@ -3017,7 +3018,7 @@ void btlCommandTaskReturnUpdate(ActionStateLink *task) {
     if ((unit->status.flags & 0x40) == 0) {
         return;
     }
-    if (btlPollActorResourceCleanup(task->unit) != 0) {
+    if (btlPollActorResourceCleanup(task->unit) != BTL_ACTOR_RESOURCE_CLEANUP_PENDING) {
         if (unit->status.flags & 0x200) {
             btlClearPartyRecordStatusBits(&unit->partyRecord, 8);
             btlMoveActorOutOfActiveParty(unit);
@@ -3352,7 +3353,7 @@ void btlReloadLinkedUnitAndQueueEffects(ActionStateLink *task) {
     if (!(unit->status.flags & 0x40)) {
         return;
     }
-    if (btlPollActorResourceCleanup(unit) == 0) {
+    if (btlPollActorResourceCleanup(unit) == BTL_ACTOR_RESOURCE_CLEANUP_PENDING) {
         return;
     }
     unit->status.flags &= ~0xC0;
@@ -3755,7 +3756,7 @@ void btlRemoveEligibleActorSceneTask(ActionStateLink *task) {
     s32 hookResult;
     s32 entryFlags;
     if (unit->status.flags & 0x200) {
-        if (btlPollActorResourceCleanup(unit) == 0) {
+        if (btlPollActorResourceCleanup(unit) == BTL_ACTOR_RESOURCE_CLEANUP_PENDING) {
             return;
         }
         btlResetIndexWork(&task->indexWork);
@@ -3796,7 +3797,7 @@ void btlEnterDeadActionState(void) {
 
 void btlCommandTaskReleaseActor(ActionStateLink *task) {
     if ((task->pendingFlags & 8) != 0) {
-        if (btlPollActorResourceCleanup(task->unit) == 0) {
+        if (btlPollActorResourceCleanup(task->unit) == BTL_ACTOR_RESOURCE_CLEANUP_PENDING) {
             return;
         }
         if (task->unit != 0) {
