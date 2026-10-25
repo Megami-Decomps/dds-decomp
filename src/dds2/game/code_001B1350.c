@@ -30,7 +30,6 @@
 #include "sdf_sif_command.h"
 #include "mdl_resource_table.h"
 #include "kwln_task_lifecycle.h"
-#include "btl_target_result.h"
 /* Declared before first use (were implicit int). */
 extern u8 btlTestSelectedItemCategoryMask(BtlUnit *unit, s32 actorIndex);
 extern u32 sdfQueryChannelBits(s32 channel, datUnitWork_t *sourceRecord, datUnitWork_t *item);
@@ -677,7 +676,7 @@ s32 btlGetSelectedCommandEffectTint(BtlUnit *unit) {
     return D_003B4F74[commandEffectId * 3];
 }
 
-s32 btlCompareSkippedAndActiveTargetCounts(BtlIndexList *targets, BtlTargetResult *results) {
+s32 btlCompareSkippedAndActiveTargetCounts(BtlIndexList *targets, BtlOperandGroup *groups) {
     s32 i = 0;
     u32 sides = 0;
     BtlState *controller = (BtlState *)btlGetRuntime();
@@ -689,8 +688,8 @@ s32 btlCompareSkippedAndActiveTargetCounts(BtlIndexList *targets, BtlTargetResul
         sides |= ((BtlUnit *)btlGetIndexListEntry(targets, i))->status.flags & 0x600;
     }
     skipped = 0;
-    for (i = 0; i < count; i++, results++) {
-        if (results->skipped != 0) {
+    for (i = 0; i < count; i++, groups++) {
+        if (groups->inactive != 0) {
             skipped++;
         }
     }

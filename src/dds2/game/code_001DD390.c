@@ -611,7 +611,7 @@ extern s32 btlActorEntryIsExpired(BtlUnit *, s32);
 
 extern void btlClearActorEntrySlot(BtlUnit *, s32);
 
-extern s32 btlCompareSkippedAndActiveTargetCounts(BtlIndexList *, struct BtlTargetResult *);
+extern s32 btlCompareSkippedAndActiveTargetCounts(BtlIndexList *, BtlOperandGroup *);
 
 extern s32 btlGetSlotValueAdjustedForSpecialAbility(BtlUnit *, s32);
 
@@ -1215,7 +1215,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
             btlClearActorEntrySlot(action->unit, 6);
         }
     }
-    if (btlCompareSkippedAndActiveTargetCounts(work->indices, (struct BtlTargetResult *)work->groups)) {
+    if (btlCompareSkippedAndActiveTargetCounts(work->indices, work->groups)) {
         work->allTargetSideActorsSkipped = 1;
     }
     work->slot = btlClassifyActionOperand(action->unit, work);
