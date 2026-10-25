@@ -1053,8 +1053,8 @@ void evtSelStateDestroy(void) {
     }
 }
 
-s32 CallDebug(void) {
-    return dds3StartProcess(D_0039E1F0, 0x2AF9, 0, 0, (s32)kwlnTaskNoopCallback, 0, 0);
+dds3ProcessID_t *CallDebug(void) {
+    return dds3StartProcess(D_0039E1F0, 0x2AF9, 0, 0, kwlnTaskNoopCallback, 0, 0);
 }
 
 u32 ExitDebug(void) {
