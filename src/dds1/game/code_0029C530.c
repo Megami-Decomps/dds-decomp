@@ -9272,6 +9272,15 @@ void effGetWorldVector(u32 which) {
     }
 }
 
+#define EFF_COLLECT_ACTORS_VARIANT_SELECTOR 0
+#define EFF_COLLECT_ACTORS_ORIGINAL_SELECTOR 1
+#define EFF_COLLECT_ACTORS_VARIANT_SELECTOR_ALIAS 2
+#define EFF_COLLECT_ACTORS_ORIGINAL_GROUP 3
+#define EFF_COLLECT_ACTORS_VARIANT_GROUP 4
+#define EFF_COLLECT_ACTORS_EITHER_GROUP 5
+#define EFF_COLLECT_ACTORS_OVERRIDE_SELECTOR 6
+#define EFF_COLLECT_ACTORS_FINAL_SELECTOR 7
+
 s32 effCollectModelEffectActors(BtlUnit **out, u32 kind) {
     s32 count = 0;
     u32 mask = 0;
@@ -9280,37 +9289,37 @@ s32 effCollectModelEffectActors(BtlUnit **out, u32 kind) {
     BtlUnit *other = (BtlUnit *)effBTLFieldColorGetVariantSelector();
 
     switch (kind) {
-    case 1:
+    case EFF_COLLECT_ACTORS_ORIGINAL_SELECTOR:
         if ((actor->status.flags & 2) && actor->ext != 0) {
             out[0] = actor;
             count = 1;
         }
         break;
-    case 4:
+    case EFF_COLLECT_ACTORS_VARIANT_GROUP:
         mask = other->status.flags & 0x600;
         break;
-    case 3:
+    case EFF_COLLECT_ACTORS_ORIGINAL_GROUP:
         mask = actor->status.flags & 0x600;
         break;
-    case 5:
+    case EFF_COLLECT_ACTORS_EITHER_GROUP:
         mask = 0x600;
         break;
-    case 6:
+    case EFF_COLLECT_ACTORS_OVERRIDE_SELECTOR:
         other = (BtlUnit *)effBTLFieldColorGetOverrideSelector();
         if ((other->status.flags & 2) && other->ext != 0) {
             out[0] = other;
             count = 1;
         }
         break;
-    case 7:
+    case EFF_COLLECT_ACTORS_FINAL_SELECTOR:
         other = (BtlUnit *)effBTLFieldColorGetFinalSelector();
         if ((other->status.flags & 2) && other->ext != 0) {
             out[0] = other;
             count = 1;
         }
         break;
-    case 0:
-    case 2:
+    case EFF_COLLECT_ACTORS_VARIANT_SELECTOR:
+    case EFF_COLLECT_ACTORS_VARIANT_SELECTOR_ALIAS:
         if ((other->status.flags & 2) && other->ext != 0) {
             out[0] = other;
             count = 1;
@@ -9336,6 +9345,15 @@ s32 effCollectModelEffectActors(BtlUnit **out, u32 kind) {
     }
     return count;
 }
+
+#undef EFF_COLLECT_ACTORS_VARIANT_SELECTOR
+#undef EFF_COLLECT_ACTORS_ORIGINAL_SELECTOR
+#undef EFF_COLLECT_ACTORS_VARIANT_SELECTOR_ALIAS
+#undef EFF_COLLECT_ACTORS_ORIGINAL_GROUP
+#undef EFF_COLLECT_ACTORS_VARIANT_GROUP
+#undef EFF_COLLECT_ACTORS_EITHER_GROUP
+#undef EFF_COLLECT_ACTORS_OVERRIDE_SELECTOR
+#undef EFF_COLLECT_ACTORS_FINAL_SELECTOR
 
 extern void evtUnitLightOff(evtUnitHandle_t *, s32);
 
