@@ -863,7 +863,7 @@ void fldResetArchiveLoadPhase(void) {
     fldFixedArchiveLoadPhase = FLD_ARCHIVE_LOAD_PHASE_CHECK;
 }
 
-s32 fldStepArchiveLoad(void) {
+FldArchiveLoadResult fldStepArchiveLoad(void) {
     switch (fldFixedArchiveLoadPhase) {
     case FLD_ARCHIVE_LOAD_PHASE_CHECK:
         if (sndFindPackedTrackLoadStatus(0x670000) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
