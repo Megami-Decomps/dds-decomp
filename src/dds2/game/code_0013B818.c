@@ -1140,18 +1140,19 @@ s32 fldDispatchInteractionAction(s32 messageId, s32 slot) {
 
 extern s32 D_004361C8;
 
-s32 fldGetActorSlotAttribute(s32 actorId, s32 attribute) {
+s32 fldGetActorSlotAttribute(s32 actorId, FldInfMessageAttribute attribute) {
     s32 index = actorId - 10;
+    s32 attributeIndex = (s32)attribute;
     s32 value = 0;
 
-    switch (attribute) {
-    case 0:
+    switch (attributeIndex) {
+    case FLD_INF_MESSAGE_ATTRIBUTE_KIND:
         value = D_0038E2D0.sets[D_004361C8].messages[index].kind;
         break;
-    case 1:
+    case FLD_INF_MESSAGE_ATTRIBUTE_MESSAGE:
         value = D_0038E2D0.sets[D_004361C8].messages[index].message;
         break;
-    case 2:
+    case FLD_INF_MESSAGE_ATTRIBUTE_VIEWED:
         if (D_0038E2D0.sets[D_004361C8].messages[index].view & 0x80) {
             value = 1;
         }

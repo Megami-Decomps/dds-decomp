@@ -4,6 +4,7 @@
 #include "fld_activation_entry.h"
 #include "fld_scene_record.h"
 #include "common.h"
+#include "fld_inf.h"
 #include "fld_scene_status_api.h"
 #include "evt_solar.h"
 #include "eff_random_mod.h"
@@ -155,7 +156,7 @@ extern s32 fldQuerySelectedActorMotionState(s32 value);
 
 extern s32 fldDispatchInteractionAction(s32 param0, s32 param1);
 
-extern s32 fldGetActorSlotAttribute(s32 actorId, s32 attribute);
+extern s32 fldGetActorSlotAttribute(s32 actorId, FldInfMessageAttribute attribute);
 
 extern void fldInfToWAP(void);
 

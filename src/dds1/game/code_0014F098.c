@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fld_inf.h"
 #include "scr.h"
 #include "scr_string_parameter_api.h"
 
@@ -17,7 +18,7 @@ extern s32 fldResolveEventSelectorTarget(s32 index);
 
 extern s32 fldDispatchInteractionAction(s32 param0, s32 param1);
 
-extern s32 fldGetActorSlotAttribute(s32 actorId, s32 attribute);
+extern s32 fldGetActorSlotAttribute(s32 actorId, FldInfMessageAttribute attribute);
 
 extern void fldInfToWAP(void);
 

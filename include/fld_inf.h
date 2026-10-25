@@ -40,6 +40,13 @@ typedef struct FldInfFlagSelector {
     u8 onTarget;
 } FldInfFlagSelector;
 
+typedef enum FldInfMessageAttribute {
+    FLD_INF_MESSAGE_ATTRIBUTE_KIND = 0,
+    FLD_INF_MESSAGE_ATTRIBUTE_MESSAGE = 1,
+    FLD_INF_MESSAGE_ATTRIBUTE_VIEWED = 2,
+} FldInfMessageAttribute;
+typedef char FldInfMessageAttribute_size[(sizeof(FldInfMessageAttribute) == sizeof(s32)) ? 1 : -1];
+
 typedef struct FldInfMessageRow {
     s16 kind;
     s16 message;
