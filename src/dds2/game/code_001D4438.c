@@ -1044,47 +1044,47 @@ void btlUpdateCommandSelectionState(ActionStateLink *task) {
     }
 }
 
-void btlCommandResultEffectSelect(u8 *task) {
+void btlCommandResultEffectSelect(ActionStateLink *task) {
     s32 selection;
 
-    ((ActionStateLink *)task)->pendingFlags &= ~4;
-    switch (((ActionStateLink *)task)->indexWork.phase) {
+    task->pendingFlags &= ~4;
+    switch (task->indexWork.phase) {
     case 1:
     case 2:
     case 3:
     case 4:
     case 7:
     case 8:
-        if (((ActionStateLink *)task)->indexWork.phase == 4) {
-            selection = btlGetLoggedIndexedCommandItem(((ActionStateLink *)task)->indexWork.reference);
+        if (task->indexWork.phase == 4) {
+            selection = btlGetLoggedIndexedCommandItem(task->indexWork.reference);
         } else {
-            selection = ((ActionStateLink *)task)->indexWork.skillId;
+            selection = task->indexWork.skillId;
         }
         switch (btlGetCommandBlockReason(task, selection)) {
         case BTL_COMMAND_BLOCK_NO_RESTRICTED_UNIT:
-            btlStartTask(btlCreateEffObjB(((ActionStateLink *)task)->unit, 0x82));
+            btlStartTask(btlCreateEffObjB(task->unit, 0x82));
             sndSetStationedSeVolume(0xD);
             btlDispatchStateHandler(task, 6);
             return;
         case 6:
-            btlStartTask(btlCreateEffObjB(((ActionStateLink *)task)->unit, 0xB0));
+            btlStartTask(btlCreateEffObjB(task->unit, 0xB0));
             sndSetStationedSeVolume(0xD);
             btlDispatchStateHandler(task, 6);
             return;
         case 8:
-            btlStartTask(btlCreateEffObjB(((ActionStateLink *)task)->unit, 0xB2));
+            btlStartTask(btlCreateEffObjB(task->unit, 0xB2));
             sndSetStationedSeVolume(0xD);
             btlDispatchStateHandler(task, 6);
             return;
         case BTL_COMMAND_BLOCK_EMPTY_OR_ALL_FLAGGED_TARGETS:
-            btlStartTask(btlCreateEffObjB(((ActionStateLink *)task)->unit, 0xD0));
+            btlStartTask(btlCreateEffObjB(task->unit, 0xD0));
             sndSetStationedSeVolume(0xD);
             btlDispatchStateHandler(task, 6);
             return;
         }
         break;
     }
-    btlCreateTargetSelectionTask((ActionStateLink *)task);
+    btlCreateTargetSelectionTask(task);
 }
 
 extern BtlIndexList *btlGetSelectedTargetList(void);

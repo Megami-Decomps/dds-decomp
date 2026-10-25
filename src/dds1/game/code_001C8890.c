@@ -622,13 +622,13 @@ void btlUpdateCommandSelectionState(BtlTask *task) {
     }
 }
 
-void btlCommandResultEffectSelect(u8 *task) {
+void btlCommandResultEffectSelect(BtlTask *task) {
     s32 sel;
     BtlCommandBlockReason reason;
     s32 state;
 
-    *(u32 *)(task + 8) &= ~4;
-    state = *(s32 *)(task + 0x20);
+    task->flags &= ~4;
+    state = task->indexWork.phase;
     switch (state) {
     case 1:
     case 2:
@@ -637,36 +637,36 @@ void btlCommandResultEffectSelect(u8 *task) {
     case 7:
     case 8:
         if (state == 4) {
-            sel = btlGetLoggedIndexedCommandItem(*(s32 *)(task + 0x28));
+            sel = btlGetLoggedIndexedCommandItem(task->indexWork.reference);
         } else {
-            sel = *(s32 *)(task + 0x24);
+            sel = task->indexWork.skillId;
         }
         reason = btlGetCommandBlockReason(task, sel);
         switch (reason) {
         case BTL_COMMAND_BLOCK_NO_RESTRICTED_UNIT:
-            btlStartTask(btlCreateEffObjB(*(BtlUnit **)(task + 0x18), 0x82));
+            btlStartTask(btlCreateEffObjB(task->unit, 0x82));
             sndSetStationedSeVolume(0xD);
             btlDispatchStateHandler(task, 6);
             return;
         case BTL_COMMAND_BLOCK_EVENT_61_NOT_ACTIVE:
-            btlStartTask(btlCreateEffObjB(*(BtlUnit **)(task + 0x18), 0xB0));
+            btlStartTask(btlCreateEffObjB(task->unit, 0xB0));
             sndSetStationedSeVolume(0xD);
             btlDispatchStateHandler(task, 6);
             return;
         case 7:
-            btlStartTask(btlCreateEffObjB(*(BtlUnit **)(task + 0x18), 0xB2));
+            btlStartTask(btlCreateEffObjB(task->unit, 0xB2));
             sndSetStationedSeVolume(0xD);
             btlDispatchStateHandler(task, 6);
             return;
         case BTL_COMMAND_BLOCK_EMPTY_OR_ALL_FLAGGED_TARGETS:
-            btlStartTask(btlCreateEffObjB(*(BtlUnit **)(task + 0x18), 0xD0));
+            btlStartTask(btlCreateEffObjB(task->unit, 0xD0));
             sndSetStationedSeVolume(0xD);
             btlDispatchStateHandler(task, 6);
             return;
         }
         break;
     }
-    btlCreateTargetSelectionTask((BtlTask *)task);
+    btlCreateTargetSelectionTask(task);
 }
 
 extern BtlIndexList *btlGetSelectedTargetList(void);
