@@ -37,6 +37,7 @@
 #include "btl_action.h"
 #include "btl_model_record.h"
 #include "btl_model_cache_entry.h"
+#include "btl_model_pack_readiness.h"
 #include "btl_sound.h"
 #include "btl_sound_release_task.h"
 #include "btl_task_args.h"
@@ -1295,17 +1296,17 @@ void btlFormatModelResourcePath(s32 isDevil, s32 modelId, char *pathOut) {
 
 /* Finalized entries bypass requests. Otherwise retain both native model
  * queries and the signed-byte readiness result. */
-s8 btlIsModelPackEntryReady(BattleModelEntry *cacheEntry) {
+BtlModelPackReadiness btlIsModelPackEntryReady(BattleModelEntry *cacheEntry) {
     FilePacRequestCompletionResult requestReady;
     if (cacheEntry->finalized != BTL_MODEL_ENTRY_UNFINALIZED) {
-        return 1;
+        return BTL_MODEL_PACK_READY;
     }
     if (mdlPrepare(cacheEntry->kind, cacheEntry->id, 0) == 0 ||
         mdlPrepare(cacheEntry->kind, cacheEntry->id, 0) == -1) {
-        return 0;
+        return BTL_MODEL_PACK_NOT_READY;
     }
     if (cacheEntry->packRequest == 0) {
-        return 1;
+        return BTL_MODEL_PACK_READY;
     }
     requestReady = pacCheckEnd((struct FileRequest *)cacheEntry->packRequest);
     return requestReady;
@@ -1420,12 +1421,12 @@ s32 btlGetEntryState(s32 modelKind, s32 modelId) {
 }
 
 /* Query readiness for the matching kind/id cache entry. */
-s32 btlIsModelEntryReady(s32 kind, s32 id) {
+BtlModelPackReadiness btlIsModelEntryReady(s32 kind, s32 id) {
     BattleModelEntry *entry = btlFindModelEntry(kind, id);
     if (entry != 0) {
         return btlIsModelPackEntryReady(entry);
     }
-    return 0;
+    return BTL_MODEL_PACK_NOT_READY;
 }
 
 extern void btlFinalizeModelPackEntry(s32, s32);
@@ -1440,7 +1441,7 @@ s32 btlEnsureModelAndSoundReady(s32 kind, s32 id, s32 unused) {
     }
     entry = btlFindModelEntry(kind, id);
     if (entry != 0) {
-        if (btlIsModelPackEntryReady(entry) != 0) {
+        if (btlIsModelPackEntryReady(entry) != BTL_MODEL_PACK_NOT_READY) {
             if (entry->finalized == BTL_MODEL_ENTRY_UNFINALIZED) {
                 btlFinalizeModelPackEntry(kind, id);
             }
