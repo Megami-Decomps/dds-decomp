@@ -8,6 +8,7 @@
 #include "scr_command_timer_api.h"
 #include "scr_string_parameter_api.h"
 #include "kwln.h"
+#include "kwln_process_registration.h"
 #include "kwln_task_create.h"
 #include "evt_world.h"
 #include "evt_picture.h"
@@ -119,11 +120,11 @@ u32 evtCommand_TEX_LOAD(void) {
 
 u32 evtCommand_TEX_ON(void) {
     dds3ProcessID_t *task;
-    s32 registered;
+    KwlnProcessRegistrationResult registered;
 
     task = (dds3ProcessID_t *)scrGetIntPara(0);
     registered = dds3ExistProcess(task);
-    if (registered != 0) {
+    if (registered != KWLN_PROCESS_NOT_REGISTERED) {
         evtPictureDrawOn(task);
     }
     return 1;
@@ -131,11 +132,11 @@ u32 evtCommand_TEX_ON(void) {
 
 u32 evtCommand_TEX_OFF(void) {
     dds3ProcessID_t *task;
-    s32 registered;
+    KwlnProcessRegistrationResult registered;
 
     task = (dds3ProcessID_t *)scrGetIntPara(0);
     registered = dds3ExistProcess(task);
-    if (registered != 0) {
+    if (registered != KWLN_PROCESS_NOT_REGISTERED) {
         evtPictureDrawOff(task);
     }
     return 1;
@@ -145,11 +146,11 @@ extern void evtKillPictureProcess(dds3ProcessID_t *task);
 
 u32 evtCommand_TEX_CLS(void) {
     dds3ProcessID_t *task;
-    s32 registered;
+    KwlnProcessRegistrationResult registered;
 
     task = (dds3ProcessID_t *)scrGetIntPara(0);
     registered = dds3ExistProcess(task);
-    if (registered != 0) {
+    if (registered != KWLN_PROCESS_NOT_REGISTERED) {
         evtKillPictureProcess(task);
     }
     return 1;

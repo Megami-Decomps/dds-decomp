@@ -2,6 +2,7 @@
 #include "kwln_task_add_child.h"
 #include "sdf_chip.h"
 #include "kwln.h"
+#include "kwln_process_registration.h"
 #include "kwln_task_queue_query.h"
 #include "kwln_task_priority_query.h"
 #include "kwln_task_create.h"
@@ -666,12 +667,12 @@ s32 dds3ExistProcess(dds3ProcessID_t* target)
         {
             if (node == target)
             {
-                return 1;
+                return KWLN_PROCESS_REGISTERED;
             }
             node = node->listNext;
         }
     }
-    return 0;
+    return KWLN_PROCESS_NOT_REGISTERED;
 }
 
 u32 dds3GetProcessStartTime(dds3ProcessID_t* task)
