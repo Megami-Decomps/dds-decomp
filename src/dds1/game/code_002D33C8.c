@@ -324,21 +324,21 @@ void sdfDelayedResrcInitCB(SdfPendingRequest *request, SdfPendingCallback callba
 void sdfDelayedResrcEntry(SdfPendingRequest *owner, void *entry) {
     SdfPendingNode *pendingNode;
     SdfPendingBuffer *entryBuffer;
-    s32 freeEntries;
+    SdfPendingBufferFreeEntryCount freeEntries;
 
     if (entry != NULL) {
         WaitSema(sdfDelayedResrcSemaId);
         pendingNode = owner->pending;
         if (pendingNode == NULL) {
             pendingNode = (SdfPendingNode *)sdfChipAllocDirect(sizeof(SdfPendingNode));
-            pendingNode->remaining = 0;
+            pendingNode->freeEntryCount = 0;
             pendingNode->next = sdfDelayedResrcLink;
             pendingNode->buffer = NULL;
             pendingNode->owner = owner;
             owner->pending = pendingNode;
             sdfDelayedResrcLink = pendingNode;
         }
-        freeEntries = pendingNode->remaining;
+        freeEntries = pendingNode->freeEntryCount;
         entryBuffer = pendingNode->buffer;
         if (freeEntries == 0) {
             SdfPendingBuffer *newBuffer = (SdfPendingBuffer *)sdfChipAllocDirect(sizeof(SdfPendingBuffer));
@@ -348,7 +348,7 @@ void sdfDelayedResrcEntry(SdfPendingRequest *owner, void *entry) {
             freeEntries = SDF_PENDING_BUFFER_CAPACITY;
         }
         entryBuffer->entry[SDF_PENDING_BUFFER_CAPACITY - freeEntries] = entry;
-        pendingNode->remaining = freeEntries - 1;
+        pendingNode->freeEntryCount = freeEntries - 1;
         SignalSema(sdfDelayedResrcSemaId);
     }
 }
@@ -377,7 +377,7 @@ void sdfDelayedResrcRelease(SdfPendingNode *pendingNode) {
 
     if (pendingNode != NULL) {
         do {
-            entryCount = SDF_PENDING_BUFFER_CAPACITY - pendingNode->remaining;
+            entryCount = SDF_PENDING_BUFFER_CAPACITY - pendingNode->freeEntryCount;
             entryHandler = pendingNode->owner->handler;
             entryBuffer = pendingNode->buffer;
             if (entryBuffer != NULL) {

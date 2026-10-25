@@ -13,13 +13,15 @@ typedef struct SdfPendingBuffer {
     void *entry[SDF_PENDING_BUFFER_CAPACITY];
 } SdfPendingBuffer;
 
+typedef s32 SdfPendingBufferFreeEntryCount;
+
 /* One pending callback owner's node: global-chain link, owner, data chunk,
- * and remaining free entry slots. */
+ * and the number of unused slots in the current head chunk. */
 struct SdfPendingNode {
     SdfPendingNode *next;       /* 0x00 */
     SdfPendingRequest *owner;   /* 0x04 */
     SdfPendingBuffer *buffer;   /* 0x08 */
-    s32 remaining;              /* 0x0C */
+    SdfPendingBufferFreeEntryCount freeEntryCount; /* 0x0C */
 };
 
 typedef char SdfPendingNode_size_must_be_0x10[(sizeof(SdfPendingNode) == 0x10) ? 1 : -1];
