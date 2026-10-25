@@ -183,7 +183,7 @@ extern SceneKindTable *btlCommandSelectionHighlightWork;
 extern void btlGatherActorCommandsByKind();
 extern void fldCollectAvailableRosterEntries(s32, s16 *);
 
-extern void btlDrawLinkageSkillOptions(s32);
+extern void btlDrawLinkageSkillOptions(BattleSceneObject *);
 extern void btlDrawItemCommandRows(s32);
 extern void btlDrawStockCommandPanelRows(s32);
 extern void btlDrawRetreatCommandLabel(s32);

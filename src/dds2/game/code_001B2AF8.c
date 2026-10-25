@@ -9348,7 +9348,7 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
 
 extern void btlDrawActorCommandRows(BattleSceneObject *, u16, u16, u16);
 
-extern void btlDrawLinkageSkillOptions(s32);
+extern void btlDrawLinkageSkillOptions(BattleSceneObject *);
 
 extern void btlDrawItemCommandRows(BattleSceneObject *);
 
@@ -9362,7 +9362,7 @@ void btlDrawCommandClassRows(s32 sceneContext) {
         btlDrawActorCommandRows((BattleSceneObject *)sceneContext, 0, 2, 3);
         return;
     case 4:
-        btlDrawLinkageSkillOptions(sceneContext);
+        btlDrawLinkageSkillOptions((BattleSceneObject *)sceneContext);
         return;
     case 2:
         btlDrawItemCommandRows((BattleSceneObject *)sceneContext);
@@ -9767,8 +9767,7 @@ static inline void btlSetCornerColors(BattlePanelColors *colors, u32 color) {
 
 extern s32 btlGetCombinedPartyCommandPower(datUnitWork_t *base, BtlUnit *first, BtlUnit *second, BtlUnit *third, s32 command);
 
-void btlDrawLinkageSkillOptions(s32 sceneContext) {
-    BattleSceneObject *object = (BattleSceneObject *)sceneContext;
+void btlDrawLinkageSkillOptions(BattleSceneObject *object) {
     char text[16];
     BattlePanelColors colors = D_00416A10;
     u16 count;
