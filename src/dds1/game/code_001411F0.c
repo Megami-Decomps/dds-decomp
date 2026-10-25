@@ -4634,7 +4634,7 @@ void fldUpdateSparkSequence(void) {
 
 extern FldSparkController fldSparkControlState;
 
-s32 fldIsNearSpark(f32 x, f32 y, f32 z) {
+u8 fldIsNearSpark(f32 x, f32 y, f32 z) {
     s32 i;
 
     for (i = 0; i < 64 && i < fldSparkControlState.state.entryCount; i++) {
