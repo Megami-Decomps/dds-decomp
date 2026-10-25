@@ -40,6 +40,7 @@
 #include "mdl.h"
 #include "evt_polygon_movie.h"
 #include "evt_viewer_group_record.h"
+#include "evt_sky_alpha_animation_status.h"
 #include "kwln_task_lifecycle.h"
 #include "file_request_api.h"
 
@@ -1065,7 +1066,6 @@ extern s16 dds3ScreenBlurAlpha;
 extern s16 dds3ScreenBlurScale;
 extern void evtSetBokasi(u32 enabled);
 extern void evtSetSkyAlpha(s32 duration, s32 state);
-extern u16 evtCheckSkyAlphaAnime(void);
 extern void fldSetFadeTarget(s32 id, s32 mode, s32 duration);
 extern u32 fldSkyGetAlpha(void);
 extern void dds3FadeClear(void);
@@ -1133,7 +1133,7 @@ void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *group, EvtRuntimeChild *
                 fldSetFadeTarget(previous->p0C.i, previous->p08.sh[0], previous->duration);
                 evtSetSkyAlpha(previous->duration, previous->p08.sh[1]);
                 viewer->cachedType12FadeAreaId = previous->p0C.i;
-            } else if (evtCheckSkyAlphaAnime() == 0) {
+            } else if (evtCheckSkyAlphaAnime() == EVT_SKY_ALPHA_ANIMATION_INACTIVE) {
                 if (fldSkyGetAlpha() != previous->p08.sh[1]) {
                     return evtSetSkyAlpha(previous->duration, previous->p08.sh[1]);
                 }

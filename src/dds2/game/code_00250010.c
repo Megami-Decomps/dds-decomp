@@ -22,6 +22,7 @@
 #include "evt_world.h"
 #include "evt_picture.h"
 #include "evt_event_bgm_readiness.h"
+#include "evt_sky_alpha_animation_status.h"
 #include "eff_object.h"
 #include "eff_event.h"
 #include "pcp_vu0.h"
@@ -47,7 +48,7 @@ extern void evtViewerPushCommandHistory(s32 actionMode, s32 first, s32 second, E
 
 extern u32 fldbokasi;
 
-extern u16 skyanime;
+extern EvtSkyAlphaAnimationStatus skyanime;
 
 extern void fldSkySetAlphaOfs(u32 alpha);
 
@@ -169,27 +170,27 @@ void evtSetSkyAlpha(s32 duration, s32 target) {
     if (current != target) {
         if (duration == 0) {
             fldSkySetAlphaOfs(target);
-            skyanime = 0;
+            skyanime = EVT_SKY_ALPHA_ANIMATION_INACTIVE;
         } else {
             skyamax = duration;
             skyatarget = current;
             skyabase_par = target;
-            skyanime = 1;
+            skyanime = EVT_SKY_ALPHA_ANIMATION_ACTIVE;
             skyanow = 0;
         }
     }
 }
 
-u16 evtCheckSkyAlphaAnime(void) {
+EvtSkyAlphaAnimationStatus evtCheckSkyAlphaAnime(void) {
     return skyanime;
 }
 
 void evtUpdateSkyAlpha(void) {
-    if (skyanime != 0) {
+    if (skyanime != EVT_SKY_ALPHA_ANIMATION_INACTIVE) {
         skyanow += 1;
         fldSkySetAlphaOfs(skyatarget + (s32)((f32)(skyabase_par - skyatarget) * ((f32)skyanow / (f32)skyamax)));
         if (skyanow >= skyamax) {
-            skyanime = 0;
+            skyanime = EVT_SKY_ALPHA_ANIMATION_INACTIVE;
         }
     }
 }
@@ -205,7 +206,7 @@ s32 evtSkyProcess1(dds3ProcessID_t *task) {
 }
 
 void evtSkyShutdown(dds3ProcessID_t *task) {
-    skyanime = 0;
+    skyanime = EVT_SKY_ALPHA_ANIMATION_INACTIVE;
     fldbokasi = 0;
 }
 
