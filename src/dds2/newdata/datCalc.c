@@ -475,7 +475,7 @@ extern s32 scrGetIntPara(s32 idx);
 extern s32 datGetStatWithStatusOverride(datUnitWork_t *unit, s32 statIndex);
 
 
-extern u8 *datRosterDetails;
+extern EventRosterStat *datRosterDetails;
 
 
 
@@ -1913,7 +1913,7 @@ s32 evtPushSelectedStatOrRosterLowValue(void) {
     s32 commandIndex = evtWorkScriptContext.commandIndex;
     if (datCommandSelectors[commandIndex].kind == EVT_ROSTER_DETAIL_KIND) {
         u16 rosterIndex = ((datUnitWork_t *)evtWorkScriptContext.firstArgument)->unitId;
-        statValue = ((EventRosterStat *)datRosterDetails)[rosterIndex].alternateA;
+        statValue = datRosterDetails[rosterIndex].alternateA;
     } else {
         statValue = datCommandRecords[commandIndex].stat11;
     }
@@ -1928,7 +1928,7 @@ s32 evtPushSelectedScaledStat(void) {
     statValue = datCommandRecords[commandIndex].attribute.parts.hitChance;
     if (datCommandSelectors[commandIndex].kind == EVT_ROSTER_DETAIL_KIND) {
         u16 rosterIndex = ((datUnitWork_t *)evtWorkScriptContext.firstArgument)->unitId;
-        statValue = (s32)((f32)statValue * ((EventRosterStat *)datRosterDetails)[rosterIndex].multiplier);
+        statValue = (s32)((f32)statValue * datRosterDetails[rosterIndex].multiplier);
     }
     scrSetIntReturnValue(statValue);
     return 1;
@@ -1986,7 +1986,7 @@ s32 evtPushSelectedTotalOrRosterHighValue(void) {
     s32 commandIndex = evtWorkScriptContext.commandIndex;
     if (datCommandSelectors[commandIndex].kind == EVT_ROSTER_DETAIL_KIND) {
         u16 rosterIndex = ((datUnitWork_t *)evtWorkScriptContext.firstArgument)->unitId;
-        statValue = ((EventRosterStat *)datRosterDetails)[rosterIndex].alternateB;
+        statValue = datRosterDetails[rosterIndex].alternateB;
     } else {
         statValue = datCommandRecords[commandIndex].criticalPercent;
     }
@@ -2204,7 +2204,7 @@ s32 evtRollFlagDependentResultCode(void) {
 
 s32 evtPushRosterBaseValue(void) {
     u16 unitId = ((datUnitWork_t *)evtWorkScriptContext.firstArgument)->unitId;
-    scrSetIntReturnValue(((EventRosterStat *)datRosterDetails)[unitId].base);
+    scrSetIntReturnValue(datRosterDetails[unitId].base);
     return 1;
 }
 

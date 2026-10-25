@@ -921,7 +921,7 @@ void btlEnterAttackActionState(void) {
 }
 
 /* ATTACK command scheduling; descriptive names inferred from retail consumers. */
-extern u8 *datRosterDetails;
+extern EventRosterStat *datRosterDetails;
 extern f32 btlGetActorEffectScale(BtlTask *);
 extern BtlRuntimeTask *btlCreateTargetedCommandSoundTask(BtlTask *, s32, u32);
 extern BtlRuntimeTask *btlAllocateApproachTargetTask(BtlUnit *, BtlUnit *, f32);
@@ -1075,8 +1075,8 @@ void btlScheduleAttackActionTasks(BtlTask *action) {
         if (((btlUnitStatusPair(action->unit) & 0x1200) == 0x1200 && action->indexWork.slot == 3) ||
                 (action->unit->status.flags & 0x400) != 0) {
             if ((action->unit->status.flags & 0x200) != 0) {
-                repeatCount = ((EventRosterStat *)datRosterDetails)[action->unit->partyRecord.unitId].attackCount;
-                spacing = ((EventRosterStat *)datRosterDetails)[action->unit->partyRecord.unitId].attackSpacing;
+                repeatCount = datRosterDetails[action->unit->partyRecord.unitId].attackCount;
+                spacing = datRosterDetails[action->unit->partyRecord.unitId].attackSpacing;
             } else {
                 repeatCount = datEnemyRecords[action->unit->species].tickCount;
                 spacing = datEnemyRecords[action->unit->species].attackSpacing;

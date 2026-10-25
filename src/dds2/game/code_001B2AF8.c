@@ -186,7 +186,7 @@ void btlClearActorEntrySlot(BtlUnit *unit, s32 index);
 
 extern s32 fldCountSceneSlots(void);
 
-extern u8 *datRosterDetails;
+extern EventRosterStat *datRosterDetails;
 
 extern s32 btlHasEnemyRecordDefeatExemptionFlag(BtlUnit *);
 
@@ -1404,8 +1404,8 @@ void btlBuildCombinedActorUnit(BtlUnit *dst, BtlUnit *first, BtlUnit *second, Bt
     dst->partyRecord.status |= src->partyRecord.status & 0x10;
     if (((btlUnitStatusPair(src) & 0x1200) == 0x200) && (src->partyRecord.menuValue != 0))
     {
-      currentScore = ((EventRosterStat *)datRosterDetails)[dst->partyRecord.unitId].base;
-      incomingScore = ((EventRosterStat *)datRosterDetails)[src->partyRecord.unitId].base;
+      currentScore = datRosterDetails[dst->partyRecord.unitId].base;
+      incomingScore = datRosterDetails[src->partyRecord.unitId].base;
       if (currentScore < incomingScore)
       {
         dst->partyRecord.unitId = src->partyRecord.unitId;

@@ -408,7 +408,7 @@ extern u8 ptyAffinityPermutationOrders[];
 extern s32 ptyUnitMatchesAffinityRequirement(const datUnitWork_t *unit, s32 affinity, u8 requirementIndex);
 
 
-extern u8 *datRosterDetails;
+extern EventRosterStat *datRosterDetails;
 extern DatEnemyRecord *datEnemyRecords;
 extern s32 btlConditionalEncounterCachedInterval;
 extern datUnitWork_t *D_003BAA04;
@@ -1455,7 +1455,7 @@ s32 evtPushSelectedStatOrRosterLowValue(void) {
     s32 commandIndex = scriptContext->commandIndex;
     s32 statValue;
     if (datCommandSelectors[commandIndex].kind == EVT_ROSTER_DETAIL_KIND) {
-        statValue = ((EventRosterStat *)datRosterDetails)[((datUnitWork_t *)scriptContext->firstArgument)->unitId].alternateA;
+        statValue = datRosterDetails[((datUnitWork_t *)scriptContext->firstArgument)->unitId].alternateA;
     } else {
         statValue = datCommandRecords[commandIndex].stat11;
     }
@@ -1469,7 +1469,7 @@ s32 evtPushSelectedScaledStat(void) {
     s32 commandIndex = scriptContext->commandIndex;
     s32 statValue = datCommandRecords[commandIndex].attribute.parts.hitChance;
     if (datCommandSelectors[commandIndex].kind == EVT_ROSTER_DETAIL_KIND) {
-        f32 rosterScale = ((EventRosterStat *)datRosterDetails)[((datUnitWork_t *)scriptContext->firstArgument)->unitId].multiplier;
+        f32 rosterScale = datRosterDetails[((datUnitWork_t *)scriptContext->firstArgument)->unitId].multiplier;
         statValue = (s32)((f32)statValue * rosterScale);
     }
     scrSetIntReturnValue(statValue);
@@ -1528,7 +1528,7 @@ s32 evtPushSelectedTotalOrRosterHighValue(void) {
     s32 commandIndex = scriptContext->commandIndex;
     s32 statValue;
     if (datCommandSelectors[commandIndex].kind == EVT_ROSTER_DETAIL_KIND) {
-        statValue = ((EventRosterStat *)datRosterDetails)[((datUnitWork_t *)scriptContext->firstArgument)->unitId].alternateB;
+        statValue = datRosterDetails[((datUnitWork_t *)scriptContext->firstArgument)->unitId].alternateB;
     } else {
         statValue = datCommandRecords[commandIndex].criticalPercent;
     }
@@ -1726,7 +1726,7 @@ s32 evtScriptSelectRandomValue(void) {
 }
 
 s32 evtPushRosterBaseValue(void) {
-    return (s32)scrSetIntReturnValue(((EventRosterStat *)datRosterDetails)[((datUnitWork_t *)evtWorkScriptContext.firstArgument)->unitId].base);
+    return (s32)scrSetIntReturnValue(datRosterDetails[((datUnitWork_t *)evtWorkScriptContext.firstArgument)->unitId].base);
 }
 
 /* Push the finer HP-percentage table value; only exactly 100 percent uses index zero. */

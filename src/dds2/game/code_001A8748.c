@@ -1967,7 +1967,7 @@ s32 btlBuildUnitIndexList(ActionStateLink *action, BtlIndexList *targets,
 
 extern s32 btlBuildUnitIndexList(ActionStateLink *, BtlIndexList *, s32, s32, s32);
 
-extern u8 *datRosterDetails;
+extern EventRosterStat *datRosterDetails;
 INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415130);
 
 INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415158);
@@ -1997,10 +1997,10 @@ u32 btlSelectCommandTargetPolicy(ActionStateLink *task, BtlIndexList *destinatio
             mask = 0;
         } else {
             value = actor->partyRecord.unitId;
-            category = ((EventRosterStat *)datRosterDetails)[value].targetType;
-            mode = ((EventRosterStat *)datRosterDetails)[value].options;
-            flags = ((EventRosterStat *)datRosterDetails)[value].targetFlags;
-            mask = ((EventRosterStat *)datRosterDetails)[value].restriction;
+            category = datRosterDetails[value].targetType;
+            mode = datRosterDetails[value].options;
+            flags = datRosterDetails[value].targetFlags;
+            mask = datRosterDetails[value].restriction;
         }
         break;
     }

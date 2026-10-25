@@ -3341,7 +3341,7 @@ s32 btlCerberAllowsNonPartyActor(BtlUnit *unit, s32 command) {
     return (unit->status.flags & 0x200) < 1;
 }
 
-extern u8 *datRosterDetails;
+extern EventRosterStat *datRosterDetails;
 
 extern char D_003A5D78[];
 
@@ -3360,8 +3360,7 @@ s32 btlCerberGetCommandHitCount(BtlUnit *unit, s32 command) {
     eligible = 0;
     if (datCommandSelectors[command].kind == 5) {
         u32 unitId = unit->partyRecord.unitId;
-        const u8 *detail = (const u8 *)datRosterDetails;
-        if (detail[unitId * 0x14 + 0x0B] == 1) {
+        if (datRosterDetails[unitId].pad0B == 1) {
             eligible = 1;
         }
     } else {

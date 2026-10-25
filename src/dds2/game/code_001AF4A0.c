@@ -192,7 +192,7 @@ f32 btlGetActorEntryMultiplier(BtlUnit *unit, u32 index, s8 includeCharge);
 f32 btlGetElementAbilityMultiplier(BtlUnit *unit, s32 attr);
 f32 btlGetLowHpAbilityMultiplier(BtlUnit *unit);
 f32 btlGetClampedBattleTableValue(BtlUnit *source);
-extern u8 *datRosterDetails;
+extern EventRosterStat *datRosterDetails;
 extern s32 evtRunContext(s32, s32, s32, s32, u16);
 
 
@@ -758,8 +758,8 @@ u8 btlSelectCommandHitCount(BtlUnit *unit, s32 command) {
         return 1;
     }
     if (datCommandSelectors[command].kind == 5 && (unit->status.flags & 0x200)) {
-        minimum = ((EventRosterStat *)datRosterDetails)[unit->partyRecord.unitId].rangeMin;
-        maximum = ((EventRosterStat *)datRosterDetails)[unit->partyRecord.unitId].rangeMax;
+        minimum = datRosterDetails[unit->partyRecord.unitId].rangeMin;
+        maximum = datRosterDetails[unit->partyRecord.unitId].rangeMax;
     } else {
         minimum = datCommandRecords[command].rangeMin;
         maximum = datCommandRecords[command].rangeMax;
@@ -922,7 +922,7 @@ s32 btlShouldDistributeRandomTargetHits(BtlUnit *unit, s32 command) {
         }
     }
     if ((unit->status.flags & 0x200) && datCommandSelectors[command].kind == 5) {
-        if (((EventRosterStat *)datRosterDetails)[unit->partyRecord.unitId].pad0B == 1) {
+        if (datRosterDetails[unit->partyRecord.unitId].pad0B == 1) {
             return 1;
         }
     } else if (datCommandRecords[command].distributeRandomTargetHits == 1) {

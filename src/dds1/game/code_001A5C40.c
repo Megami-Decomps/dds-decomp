@@ -92,7 +92,7 @@ extern u8 *D_003BAA20;
 
 extern u8 *D_003BAA30;
 
-extern u8 *datRosterDetails;
+extern EventRosterStat *datRosterDetails;
 
 extern s32 fldCountSceneSlots(void);
 
@@ -460,8 +460,8 @@ u8 btlSelectCommandHitCount(BtlUnit *unit, s32 command) {
     }
     if (datCommandSelectors[command].kind == 5 &&
         (unit->status.flags & 0x200) != 0) {
-        minimum = ((EventRosterStat *)datRosterDetails)[unit->partyRecord.unitId].rangeMin;
-        maximum = ((EventRosterStat *)datRosterDetails)[unit->partyRecord.unitId].rangeMax;
+        minimum = datRosterDetails[unit->partyRecord.unitId].rangeMin;
+        maximum = datRosterDetails[unit->partyRecord.unitId].rangeMax;
     } else {
         minimum = datCommandRecords[command].rangeMin;
         maximum = datCommandRecords[command].rangeMax;
@@ -629,7 +629,7 @@ s32 btlShouldDistributeRandomTargetHits(BtlUnit *unit, s32 command) {
         }
     }
     if ((unit->status.flags & 0x200) && datCommandSelectors[command].kind == 5) {
-        if (((EventRosterStat *)datRosterDetails)[unit->partyRecord.unitId].pad0B == 1) {
+        if (datRosterDetails[unit->partyRecord.unitId].pad0B == 1) {
             return 1;
         }
     } else if (datCommandRecords[command].distributeRandomTargetHits == 1) {

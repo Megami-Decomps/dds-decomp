@@ -28,6 +28,7 @@
 #include "btl_task_condition.h"
 #include "btl_deferred_unit_status_args.h"
 #include "dat_command.h"
+#include "dat_state.h"
 #include "btl_scene_fade.h"
 #include "btl_command.h"
 #include "btl_camera_pose_api.h"
@@ -1375,7 +1376,7 @@ void btlEnterAttackActionState(void) {
 }
 
 /* ATTACK command scheduling; descriptive names inferred from retail consumers. */
-extern u8 *datRosterDetails;
+extern EventRosterStat *datRosterDetails;
 extern DatEnemyRecord *datEnemyRecords;
 struct SoundMixer;
 extern const char D_00417348[];
@@ -1548,8 +1549,8 @@ void btlScheduleAttackActionTasks(ActionStateLink *action) {
         if (((btlUnitStatusPair(action->unit) & 0x1200) == 0x1200 && action->indexWork.slot == 3) ||
                 (action->unit->status.flags & 0x400) != 0) {
             if ((action->unit->status.flags & 0x200) != 0) {
-                repeatCount = ((EventRosterStat *)datRosterDetails)[action->unit->partyRecord.unitId].attackCount;
-                spacing = ((EventRosterStat *)datRosterDetails)[action->unit->partyRecord.unitId].attackSpacing;
+                repeatCount = datRosterDetails[action->unit->partyRecord.unitId].attackCount;
+                spacing = datRosterDetails[action->unit->partyRecord.unitId].attackSpacing;
             } else {
                 repeatCount = datEnemyRecords[action->unit->resourceIndex].tickCount;
                 spacing = datEnemyRecords[action->unit->resourceIndex].attackSpacing;

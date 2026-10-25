@@ -70,7 +70,7 @@ extern u8 *D_003BAA20;
 
 extern u8 *D_003BAA30;
 
-extern u8 *datRosterDetails;
+extern EventRosterStat *datRosterDetails;
 
 extern s32 fldCountSceneSlots(void);
 
@@ -650,10 +650,10 @@ u32 btlSelectCommandTargetPolicy(BtlTask *task, BtlIndexList *destination, s32 u
             mask = 0;
         } else {
             value = actor->partyRecord.unitId;
-            category = ((EventRosterStat *)datRosterDetails)[value].targetType;
-            mode = ((EventRosterStat *)datRosterDetails)[value].options;
-            flags = ((EventRosterStat *)datRosterDetails)[value].targetFlags;
-            mask = ((EventRosterStat *)datRosterDetails)[value].restriction;
+            category = datRosterDetails[value].targetType;
+            mode = datRosterDetails[value].options;
+            flags = datRosterDetails[value].targetFlags;
+            mask = datRosterDetails[value].restriction;
         }
         break;
     }
