@@ -205,12 +205,12 @@ extern s32 fileBeginLabeledSlotWrite(void);
 
 extern s32 fileBuildMainBlobAfterDelete(void);
 
-extern s32 fileSaveFileDescriptor;
+extern McFileDescriptor fileSaveFileDescriptor;
 
 extern struct sdfMemHandle_t *fileSaveReadBufferResource;
 
 
-extern void sdfMcFuncClose(s32);
+extern void sdfMcFuncClose(McFileDescriptor fileDescriptor);
 
 extern s32 fileStoreSlotHeader(void);
 
@@ -864,7 +864,7 @@ s32 slHeadLoad(void) {
     return (s32)fileReadSlotPreviewBegin;
 }
 
-extern void sdfMcFuncRead(s32, void *, s32);
+extern void sdfMcFuncRead(McFileDescriptor fileDescriptor, void *buffer, s32 size);
 extern s32 slHeadLoadProc_readFile(void);
 s32 fileReadSlotPreviewBegin(void) {
     McPollResult status = sdfMcFuncOpen1(&fileSaveFileDescriptor);
@@ -2048,7 +2048,7 @@ s32 slSaveWriteFile(const char *fileName, u32 *dataAddressSlot, u32 *dataSizeSlo
     return (s32)slSaveProc_openFile;
 }
 
-extern void sdfMcFuncWrite(s32 request, const void *data, u32 size);
+extern void sdfMcFuncWrite(McFileDescriptor fileDescriptor, const void *data, u32 size);
 extern s32 slSaveProc_waitDataReady(void);
 
 s32 slSaveProc_openFile(void) {

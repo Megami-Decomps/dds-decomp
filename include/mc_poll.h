@@ -12,12 +12,15 @@ typedef enum McPollResult {
     MC_POLL_SPECIAL_ERROR = -2
 } McPollResult;
 
+/* sceMcOpen's nonnegative completion result is used as a file descriptor. */
+typedef s32 McFileDescriptor;
+
 McPollResult sdfMcFuncFormat1(void);
 McPollResult sdfMcFuncChdir1(void);
 McPollResult sdfMcFuncMkdir1(void);
 McPollResult sdfMcFuncGetDir1(s32 *resultOut);
 McPollResult sdfMcFuncDelete1(void);
-McPollResult sdfMcFuncOpen1(s32 *resultOut);
+McPollResult sdfMcFuncOpen1(McFileDescriptor *fileDescriptorOut);
 McPollResult sdfMcFuncClose1(void);
 McPollResult sdfMcFuncRead1(void);
 McPollResult sdfMcFuncWrite1(void);

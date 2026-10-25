@@ -325,9 +325,9 @@ extern void fileDrawCursorPulse(s32, s32, s32);
 extern s32 D_00437D78;
 
 extern s32 fileReadSlotPreviewBegin(void);
-extern void sdfMcFuncRead(s32, void *, s32);
 extern s32 slLoadProc_readFile(void);
-extern s32 fileSaveFileDescriptor;
+extern McFileDescriptor fileSaveFileDescriptor;
+extern void sdfMcFuncRead(McFileDescriptor fileDescriptor, void *buffer, s32 size);
 extern struct sdfMemHandle_t *fileSaveReadBufferResource;
 extern s32 slHeadLoadProc_readFile(void);
 
@@ -942,7 +942,7 @@ s32 fileReadSlotPreviewBegin(void) {
     return fileBeginSlotMetadataRefresh();
 }
 
-extern void sdfMcFuncClose(u32);
+extern void sdfMcFuncClose(McFileDescriptor fileDescriptor);
 extern s32 fileStoreSlotHeader(void);
 
 s32 slHeadLoadProc_readFile(void) {
@@ -1913,7 +1913,7 @@ s32 slSaveWriteFile(const char *fileName, u32 *dataAddressSlot, u32 *dataSizeSlo
     return (s32)slSaveProc_openFile;
 }
 
-extern void sdfMcFuncWrite(s32 request, const void *data, u32 size);
+extern void sdfMcFuncWrite(McFileDescriptor fileDescriptor, const void *data, u32 size);
 extern s32 slSaveProc_writeFile(void);
 extern s32 slSaveProc_waitDataReady(void);
 

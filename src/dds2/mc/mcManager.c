@@ -133,16 +133,16 @@ void sdfMcFuncOpen(u32 port, const char *path, s32 openFlags) {
     sceMcOpen(port, MC_CARD_SLOT, path, openFlags);
 }
 
-/* Accept any completed nonnegative status, writing resultOut only then.
- * Preserve the -4/-2 translation and all other poll/result distinctions. */
-McPollResult sdfMcFuncOpen1(s32 *commandResultOut) {
+/* Accept any completed nonnegative open result as a file descriptor and write
+ * it to fileDescriptorOut only then. Preserve all poll/error translations. */
+McPollResult sdfMcFuncOpen1(McFileDescriptor *fileDescriptorOut) {
     s32 commandId;
     s32 commandResult;
     s32 pollResult = sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult);
 
     if (pollResult == MC_SYNC_COMPLETE) {
         if (commandResult >= MC_SDK_COMMAND_SUCCESS) {
-            *commandResultOut = commandResult;
+            *fileDescriptorOut = commandResult;
             return pollResult;
         }
         if (commandResult == MC_SDK_SPECIAL_ERROR) {
@@ -154,7 +154,7 @@ McPollResult sdfMcFuncOpen1(s32 *commandResultOut) {
 }
 
 /* Queue the SDK's close of an open file; do not poll it. */
-void sdfMcFuncClose(s32 fileDescriptor) {
+void sdfMcFuncClose(McFileDescriptor fileDescriptor) {
     sceMcClose(fileDescriptor);
 }
 
@@ -174,7 +174,7 @@ McPollResult sdfMcFuncClose1(void) {
 }
 
 /* Queue the SDK's read of an open file into an EE buffer; do not poll it. */
-void sdfMcFuncRead(s32 fileDescriptor, void *buffer, s32 size) {
+void sdfMcFuncRead(McFileDescriptor fileDescriptor, void *buffer, s32 size) {
     sceMcRead(fileDescriptor, buffer, size);
 }
 
@@ -199,7 +199,7 @@ McPollResult sdfMcFuncRead1(void) {
 
 /* Queue the SDK's write of an EE buffer to an open file; this entry does
  * not report completion. */
-void sdfMcFuncWrite(s32 fileDescriptor, const void *data, u32 dataSize) {
+void sdfMcFuncWrite(McFileDescriptor fileDescriptor, const void *data, u32 dataSize) {
     sceMcWrite(fileDescriptor, data, (s32)dataSize);
 }
 
