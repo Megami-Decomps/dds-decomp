@@ -72,7 +72,6 @@ extern void btlDispatchStateHandler(void *obj, s32 kind);
 
 extern u64 itfCreateFont2TextGlyph(s32, s32, u64, u64, u64, u64);
 
-extern s32 btlGetTrackedTaskHandle(s32);
 extern s32 btlIsNamedBattleTaskRegistered(void);
 extern s32 btlHasRegisteredGuidePanelTask(void);
 extern s32 btlHasRegisteredSkillNamePanelTask(void);
