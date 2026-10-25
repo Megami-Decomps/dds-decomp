@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "kwln.h"
+#include "kwln_task_runner.h"
 #include "evt_world.h"
 
 enum {
@@ -16,7 +17,7 @@ void evtPictureDrawOff(dds3ProcessID_t *task);
 EvtPictureWork *evtAllocateContext(void);
 void LoadTexture(EvtPictureWork *context, const char *path);
 void evtSubmitPictureDrawPacket(struct sdfTexHandle_t *texture);
-s32 evtUpdatePictureWhenFlagged(dds3ProcessID_t *task);
+KwlnTaskUpdateResult evtUpdatePictureWhenFlagged(dds3ProcessID_t *task);
 void evtPictureShutdown(dds3ProcessID_t *task);
 dds3ProcessID_t *evtStartPictureProcess2(s32 taskId, const char *path);
 dds3ProcessID_t *evtStartPictureProcess(s32 taskId, struct sdfTexHandle_t *texture);

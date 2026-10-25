@@ -22,8 +22,8 @@ void evtSubmitPictureDrawPacket(struct sdfTexHandle_t *texture) {
     D_003805A8.append(&D_003805A8, packet);
 }
 
-/* Run the picture's own update step while its active flag is set. */
-s32 evtUpdatePictureWhenFlagged(dds3ProcessID_t *task) {
+/* This recurring task keeps its callback installed while drawing or idle. */
+KwlnTaskUpdateResult evtUpdatePictureWhenFlagged(dds3ProcessID_t *task) {
     EvtPictureWork *picture;
 
     picture = (EvtPictureWork *)dds3GetProcessData(task);
@@ -31,9 +31,9 @@ s32 evtUpdatePictureWhenFlagged(dds3ProcessID_t *task) {
         if (picture->texture != 0) {
             evtSubmitPictureDrawPacket(picture->texture);
         }
-        return 0;
+        return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
     }
-    return 0;
+    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 /* Drop the picture's texture, then free the task data. */
