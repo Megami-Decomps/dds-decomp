@@ -7324,7 +7324,7 @@ extern s32 fldTestRoomSceneFlag(s32 mapId, u32 slotIndex, s32 bit);
 
 extern s32 fldTestMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit);
 
-void fldHitChkUnitElvOnly(f32 *input) {
+void fldHitChkUnitElvOnly(const f32 *input) {
     f32 position[4];
     f32 previous[4];
     f32 savedPosition[4];
