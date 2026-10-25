@@ -1533,7 +1533,10 @@ struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) {
     char path[0x80];
     char directory[0x40];
     const SdfTextureOffsetListHeader *roomOffsets;
-    u8 *roomData;
+    union {
+        u8 *data;
+        u32 resolvedAddress;
+    } roomData;
     FldTransferChunk *chunk;
     FilePacRequest *request;
     FieldPlayerSceneWork *sceneWork = &fldSceneParam;
@@ -1605,20 +1608,20 @@ struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) {
                 break;
             case 1:
                 fldCachedRoomF2ResourceAllocation = NULL;
-                roomData = work->dataCursor;
-                chunk = (FldTransferChunk *)((u8 *)roomData + 8);
-                fldRoomF2Data = roomData;
+                roomData.data = work->dataCursor;
+                chunk = (FldTransferChunk *)((u8 *)roomData.data + 8);
+                fldRoomF2Data = roomData.data;
                 fldRoomF2Chunk = chunk;
-                fldAddressResolver(roomData, chunk);
+                fldAddressResolver(roomData.data, chunk);
                 fldProcessFieldRequest((FldSceneRequest *)fldGetInfoHeader(chunk));
                 break;
             case 2:
                 fldCachedRoomF1ResourceAllocation = NULL;
-                roomData = work->dataCursor;
-                chunk = (FldTransferChunk *)((u8 *)roomData + 8);
-                fldRoomF1Data = roomData;
+                roomData.data = work->dataCursor;
+                chunk = (FldTransferChunk *)((u8 *)roomData.data + 8);
+                fldRoomF1Data = roomData.data;
                 fldRoomF1Chunk = chunk;
-                fldAddressResolver(roomData, chunk);
+                fldAddressResolver(roomData.data, chunk);
                 fldLoadSceneRequestFiles((FldLoadRequest *)fldGetInfoHeader(chunk));
                 break;
             }
@@ -1638,39 +1641,39 @@ struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) {
     }
     if (isField == 0) {
         sprintf(path, D_00436030, resourceName);
-        fldCachedRoomF2ResourceAllocation = fldCopyCachedRoomF2ResourceIfLocationMatches(&roomData, area, room);
+        fldCachedRoomF2ResourceAllocation = fldCopyCachedRoomF2ResourceIfLocationMatches(&roomData.data, area, room);
         if (fldCachedRoomF2ResourceAllocation == NULL) {
-            fldCachedRoomF2ResourceAllocation = sdfDevLoadFileEx(path, (u32 *)&roomData, 0);
+            fldCachedRoomF2ResourceAllocation = sdfDevLoadFileEx(path, &roomData.resolvedAddress, 0);
         }
-        chunk = (FldTransferChunk *)(roomData + 8);
-        fldRoomF2Data = roomData;
+        chunk = (FldTransferChunk *)(roomData.data + 8);
+        fldRoomF2Data = roomData.data;
         fldRoomF2Chunk = chunk;
-        fldAddressResolver(roomData, chunk);
+        fldAddressResolver(roomData.data, chunk);
         fldProcessFieldRequest((FldSceneRequest *)fldGetInfoHeader(chunk));
     }
     if (fldGetLocationCoordinateFlags(area, room) & 0x10) {
         fldMakeFilePath(directory, area, 1);
         sprintf(path, D_00413128, directory, area, room);
-        fldCachedRoomKF2ResourceAllocation = fldCopyCachedRoomKF2ResourceIfLocationMatches(&roomData, area, room);
+        fldCachedRoomKF2ResourceAllocation = fldCopyCachedRoomKF2ResourceIfLocationMatches(&roomData.data, area, room);
         if (fldCachedRoomKF2ResourceAllocation == NULL) {
-            fldCachedRoomKF2ResourceAllocation = sdfDevLoadFileEx(path, (u32 *)&roomData, 0);
+            fldCachedRoomKF2ResourceAllocation = sdfDevLoadFileEx(path, &roomData.resolvedAddress, 0);
         }
-        chunk = (FldTransferChunk *)(roomData + 8);
-        fldRoomKF2Data = roomData;
+        chunk = (FldTransferChunk *)(roomData.data + 8);
+        fldRoomKF2Data = roomData.data;
         fldRoomKF2Chunk = chunk;
-        fldAddressResolver(roomData, chunk);
+        fldAddressResolver(roomData.data, chunk);
         fldProcessFieldRequestAlternate((FldSceneRequest *)fldGetInfoHeader(chunk));
     }
     if (isField == 0) {
         sprintf(path, D_00436038, resourceName);
-        fldCachedRoomF1ResourceAllocation = fldCopyCachedRoomF1ResourceIfLocationMatches(&roomData, area, room);
+        fldCachedRoomF1ResourceAllocation = fldCopyCachedRoomF1ResourceIfLocationMatches(&roomData.data, area, room);
         if (fldCachedRoomF1ResourceAllocation == NULL) {
-            fldCachedRoomF1ResourceAllocation = sdfDevLoadFileEx(path, (u32 *)&roomData, 0);
+            fldCachedRoomF1ResourceAllocation = sdfDevLoadFileEx(path, &roomData.resolvedAddress, 0);
         }
-        chunk = (FldTransferChunk *)(roomData + 8);
-        fldRoomF1Data = roomData;
+        chunk = (FldTransferChunk *)(roomData.data + 8);
+        fldRoomF1Data = roomData.data;
         fldRoomF1Chunk = chunk;
-        fldAddressResolver(roomData, chunk);
+        fldAddressResolver(roomData.data, chunk);
         fldLoadSceneRequestFiles((FldLoadRequest *)fldGetInfoHeader(chunk));
     }
     fldCreateResourceScriptObjects();
