@@ -3231,14 +3231,14 @@ s32 btlReplaceDialogTasksAndQueueMessage(s32 windowIndex, s32 entryIndex) {
 s32 btlGetTrackedTaskHandle(s32 slotIndex) {
     s32 *handle;
 
-    handle = &btlTrackedTaskHandles->handles[slotIndex];
+    handle = &btlTrackedTaskHandles->taskSlots.rawSlots[slotIndex];
     return *handle;
 }
 
 void btlSetTrackedTaskHandle(s32 slotIndex, s32 taskHandle) {
     s32 *handle;
 
-    handle = &btlTrackedTaskHandles->handles[slotIndex];
+    handle = &btlTrackedTaskHandles->taskSlots.rawSlots[slotIndex];
     *handle = taskHandle;
 }
 

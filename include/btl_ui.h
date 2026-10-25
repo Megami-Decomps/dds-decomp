@@ -4,6 +4,7 @@
 #include "common.h"
 
 struct BtlTask;
+struct dds3ProcessID_t;
 struct sdfMemHandle_t;
 struct ActionStateLink;
 struct BattleIndexWork;
@@ -95,12 +96,29 @@ typedef char BattleCmdPanel_size_must_be_0xCC[(sizeof(BattleCmdPanel) == 0xCC) ?
 typedef char BattleCmdPanel_slotsA_at_0x14[((u32)&((BattleCmdPanel *)0)->slotsA == 0x14) ? 1 : -1];
 typedef char BattleCmdPanel_slotsB_at_0x64[((u32)&((BattleCmdPanel *)0)->slotsB == 0x64) ? 1 : -1];
 
-/* Native 0x58-byte command UI work in both games. The first 0x38 bytes
- * are fourteen 32-bit task handles; they are not the whole allocation.
- * DDS1 accesses the status bytes separately, while DDS2 also masks the
- * enclosing word. The fade step shares that word's high halfword. */
+/* Native 0x58-byte command UI work in both games. The first 0x38 bytes hold
+ * twelve scheduler-task pointers and two resource-presence flags. Keep the
+ * raw word view for indexed accessors; the typed view documents each slot. */
 typedef struct BattleTrackedTaskWork {
-    s32 handles[14];
+    union {
+        s32 rawSlots[14];
+        struct {
+            struct dds3ProcessID_t *aphNamePanelTask; /* +0x00 */
+            struct dds3ProcessID_t *skillNamePanelTask; /* +0x04 */
+            s32 selectionBufferActive; /* +0x08 */
+            struct dds3ProcessID_t *actorPanelTask; /* +0x0C */
+            s32 commandHintWindowActive; /* +0x10 */
+            struct dds3ProcessID_t *selectionTrailTask; /* +0x14 */
+            struct dds3ProcessID_t *phaseChangePanelTask; /* +0x18 */
+            struct dds3ProcessID_t *registeredActorPanelChildTask; /* +0x1C */
+            struct dds3ProcessID_t *reserveActorPanelTask; /* +0x20 */
+            struct dds3ProcessID_t *guidePanelTask; /* +0x24 */
+            struct dds3ProcessID_t *mahenPanelTask; /* +0x28 */
+            struct dds3ProcessID_t *analysisPanelTask; /* +0x2C */
+            struct dds3ProcessID_t *linkageNoticeTask; /* +0x30 */
+            struct dds3ProcessID_t *tutorialCommandNoticeTask; /* +0x34 */
+        } typed;
+    } taskSlots; /* +0x00 */
     u32 presentationState; /* +0x38: linked actor-slot panel transition. */
     union {
         u32 flags;
@@ -119,6 +137,15 @@ typedef struct BattleTrackedTaskWork {
     s8 phaseGate; /* +0x54: nonzero skips two phase-gated panel updates. */
     u8 pad55[3];
 } BattleTrackedTaskWork;
+
+typedef char BattleTrackedTaskWorkSizeCheck[
+    (sizeof(BattleTrackedTaskWork) == 0x58) ? 1 : -1];
+typedef char BattleTrackedTaskSlotsSizeCheck[
+    (sizeof(((BattleTrackedTaskWork *)0)->taskSlots) == 0x38) ? 1 : -1];
+typedef char BattleTrackedSelectionBufferActiveOffsetCheck[
+    ((u32)&((BattleTrackedTaskWork *)0)->taskSlots.typed.selectionBufferActive == 0x08) ? 1 : -1];
+typedef char BattleTrackedCommandHintWindowActiveOffsetCheck[
+    ((u32)&((BattleTrackedTaskWork *)0)->taskSlots.typed.commandHintWindowActive == 0x10) ? 1 : -1];
 
 /* The linked selection task allocates 0x30 bytes: a one-based selected row,
  * four signed fade levels, four screen positions and a backdrop fade.
