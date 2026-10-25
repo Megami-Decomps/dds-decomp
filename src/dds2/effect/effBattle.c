@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_special_entry_object_class.h"
 #include "sdf_vu0.h"
 #include "sdf_chip.h"
 #include "btl_sound.h"
@@ -140,7 +141,7 @@ u32 effBTLCutGetAllPartColor(u32 elapsed, u32 duration)
 #include "evt_unit.h"
 #include "eff_battle_color_keyframe.h"
 extern f32 D_004144A0[4]; extern f32 D_004144B0[4]; extern f32 D_004144C0[4];
-extern s32 btlClassifySpecialEntryObject(BtlUnit *entry);
+extern BtlSpecialEntryObjectClass btlClassifySpecialEntryObject(BtlUnit *entry);
 extern void effMiscQuatMultiplyVU(void); extern void effMiscQuaternionToMatrixVU(void);
 extern void sdfComposeVuMatrixFromRegisters(void);
 extern void effBTLPartGetPositionPtr(BtlUnit *owner, EffectVectorRequest *request, u128 *out);
@@ -266,7 +267,7 @@ void effBattleUpdate(effBTLCutHandle_t *work) {
             }
             if (entry->kind != 0) {
                 u16 eligibilityFlags = unit->effectLink.flags;
-                s32 special = btlClassifySpecialEntryObject(unit);
+                BtlSpecialEntryObjectClass special = btlClassifySpecialEntryObject(unit);
                 u16 step = 0xFFFF;
                 if (entry->kind == 3) {
                     if ((eligibilityFlags & 2) == 0) {
@@ -285,7 +286,9 @@ void effBattleUpdate(effBTLCutHandle_t *work) {
                     if (entry->kind == 4 && (u16)(special + step) < 2) {
                         continue;
                     }
-                    if (entry->kind == 5 && (special == 0 || special == 2)) {
+                    if (entry->kind == 5 &&
+                        (special == BTL_SPECIAL_ENTRY_CLASS_NONE ||
+                         special == BTL_SPECIAL_ENTRY_CLASS_UNIT_ID_CASE)) {
                         continue;
                     }
                 }

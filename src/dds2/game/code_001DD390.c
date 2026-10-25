@@ -32,6 +32,7 @@
 #include "sdf_model.h"
 #include "sdf_dev_slot_api.h"
 #include "btl.h"
+#include "btl_special_entry_object_class.h"
 #include "btl_position_effect_task_args.h"
 #include "btl_position_lerp_task_args.h"
 #include "sdf_texture_offset_list.h"
@@ -3273,18 +3274,19 @@ void btlUnitFaceTargetScaled(BtlUnit *unit, BtlUnit *target, f32 scale) {
 
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_004179E0);
 
-s32 btlClassifySpecialEntryObject(BtlUnit *entry) {
+BtlSpecialEntryObjectClass btlClassifySpecialEntryObject(BtlUnit *entry) {
     if (!(entry->status.flags & 0x400)) {
-        return 0;
+        return BTL_SPECIAL_ENTRY_CLASS_NONE;
     }
     switch (entry->partyRecord.unitId) {
     case 0x109: case 0x10A: case 0x110: case 0x111: case 0x112:
     case 0x119: case 0x11D: case 0x11E: case 0x11F: case 0x120:
     case 0x121: case 0x127: case 0x12E: case 0x12F: case 0x131:
     case 0x132: case 0x133: case 0x134: case 0x135: case 0x136:
-        return 2;
+        return BTL_SPECIAL_ENTRY_CLASS_UNIT_ID_CASE;
     default:
-        return (btlGetEntryFlagsUnlessDisabled(&entry->partyRecord) >> 14) & 1;
+        return (btlGetEntryFlagsUnlessDisabled(&entry->partyRecord) >> 14) &
+               BTL_SPECIAL_ENTRY_CLASS_RECORD_FLAG;
     }
 }
 
