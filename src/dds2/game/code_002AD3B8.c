@@ -227,23 +227,23 @@ u32 mnuStaffValueSelectionLeaveNoOp(void) {
 }
 
 s32 mnuPollStaffValueSelectionConfirmation(dds3ProcessID_t *task) {
-    s32 context = dds3GetProcessData(task);
-    MenuStaffChoices *menu = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
-    s32 *popup = (s32 *)(context + 0x54);
+    MenuStaffContext *context = (MenuStaffContext *)dds3GetProcessData(task);
+    MenuStaffChoices *menu = context->menu;
+    s32 *popup = &context->popupState;
     u32 buttons = mnuMapPadMaskToFlags(3);
     s32 state;
 
-    state = mnuDispatchPopupTransition(&((MenuStaffContext *)context)->transitionWork, popup, 0, (void *)task);
+    state = mnuDispatchPopupTransition(&context->transitionWork, popup, 0, (void *)task);
     if (state != 0) {
         return state;
     }
-    mnuStepPartyPanelListFromInput(4, &((MenuStaffContext *)context)->partyWindow);
+    mnuStepPartyPanelListFromInput(4, &context->partyWindow);
     if (buttons & MNU_STAFF_INPUT_CONFIRM) {
-        menu->currentSelection = ((MenuStaffContext *)context)->partyWindow.lists[0]->cursor->index;
+        menu->currentSelection = context->partyWindow.lists[0]->cursor->index;
         mnuSetPopupEntryFlagged(popup, mnuCampRingCustomizationPopupEntry);
     }
     if (buttons & MNU_STAFF_INPUT_CANCEL) {
-        mnuClearActionFlags(0, &((MenuStaffContext *)context)->partyWindow);
+        mnuClearActionFlags(0, &context->partyWindow);
         mnuSetPopupEntryFlagged(popup, mnuCampItemCategoryPopupEntry);
     }
     mnuPlayInputSound(0, buttons, 0);

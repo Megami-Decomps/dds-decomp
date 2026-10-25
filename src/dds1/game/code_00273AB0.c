@@ -148,21 +148,21 @@ u32 mnuStaffValueSelectionLeaveNoOp(void) {
 
 /* Once the popup is idle, confirmation captures the page-selection cursor index. */
 s32 mnuPollStaffValueSelectionConfirmation(dds3ProcessID_t *task) {
-    s32 context = dds3GetProcessData(task);
-    StaffImageChoices *menu = ((StaffImageContext *)context)->menu;
-    s32 *popup = (s32 *)(context + 0x54);
+    StaffImageContext *context = (StaffImageContext *)dds3GetProcessData(task);
+    StaffImageChoices *menu = context->menu;
+    s32 *popup = &context->popupState;
     u32 buttons = mnuMapPadMaskToFlags(3);
     s32 state;
     MenuPageWindow *window;
 
-    state = menuRunPanel((void *)context, 0, (void *)task);
+    state = menuRunPanel(context, 0, (void *)task);
     if (state != 0) {
         return state;
     }
-    window = &((StaffImageContext *)context)->pageWindow;
+    window = &context->pageWindow;
     mnuStepPartyPanelListFromInput(4, window);
     if (buttons & MNU_STAFF_INPUT_CONFIRM) {
-        menu->currentSelection = ((StaffImageContext *)context)->pageWindow.lists[0]->cursor->index;
+        menu->currentSelection = context->pageWindow.lists[0]->cursor->index;
         mnuSetPopupEntryFlagged(popup, mnuCampAmmoEquipmentPopupEntry);
     }
     if (buttons & MNU_STAFF_INPUT_CANCEL) {
