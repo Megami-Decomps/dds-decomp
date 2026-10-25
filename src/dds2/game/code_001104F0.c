@@ -141,7 +141,7 @@ u32 dds3CreateWorldObjectData(dds3Basic_t *object) {
         data->slots = NULL;
         data->cameraObject = 0;
         data->playerObject = 0;
-        data->indexedHandle = 0;
+        data->fieldResourceHandle = NULL;
         data->sceneResourceHandle = 0;
         data->sceneScript = NULL;
         data->resource = sdfMemAllocDirect(0xD8);
@@ -373,7 +373,7 @@ void dds3SceneBasicMakeScene(dds3Basic_t *object, const char *resourcePath) {
 
     data = ((EvtWorldTable *)object->data);
     handle = fldLoadAreaRoomResources(resourcePath);
-    data->indexedHandle = (u32)handle;
+    data->fieldResourceHandle = handle;
 }
 
 void dds3SceneBasicMakeScene_FromMemory(dds3Basic_t *object, u32 area, u32 room,
@@ -385,5 +385,5 @@ void dds3SceneBasicMakeScene_FromMemory(dds3Basic_t *object, u32 area, u32 room,
     data = ((EvtWorldTable *)object->data);
     handle = fldLoadAreaRoomResourcesFromRequest(area, room, resource0Data, resource1Data,
                                                  textureOffsets, flags);
-    data->indexedHandle = (u32)handle;
+    data->fieldResourceHandle = handle;
 }

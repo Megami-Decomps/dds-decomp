@@ -14,14 +14,14 @@ extern dds3ProcessID_t *scrStartScript2(s32 priority, BfFlw0Header *script, ScrP
 
 extern void fldReleaseFieldResources(void);
 
-/* Release field resources before clearing the scene object's state word.
+/* Release field resources before clearing their retained handle.
  * The scene resource handle/address are released separately. */
 void dds3SceneBasicFreeScene(dds3Basic_t *worldNode) {
     EvtWorldTable *worldData;
 
     worldData = (EvtWorldTable *)worldNode->data;
     fldReleaseFieldResources();
-    worldData->indexedHandle = 0;
+    worldData->fieldResourceHandle = NULL;
 }
 
 s32 evtLoadSceneResourceFrom(dds3Basic_t *worldNode, const char *resourceName) {
