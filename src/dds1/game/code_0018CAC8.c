@@ -614,9 +614,9 @@ u32 dds3EffectFileListWindowGetState(EffResourceDescriptor *work) {
     return work->result;
 }
 
-/* Format the prefix/name records through the native template and return the name record's first word.
+/* Format the selected filename and return its resource category.
    Buffer capacity and record pointers remain unchecked. */
-u32 dds3EffectFileListWindowGetFilename(EffResourceDescriptor *message, char *destination) {
+EffResourceKind dds3EffectFileListWindowGetFilename(EffResourceDescriptor *message, char *destination) {
     sprintf(destination, D_003BB060, message->resourceList->directoryPath, message->selectedEntry->name);
     return message->selectedEntry->kind;
 }

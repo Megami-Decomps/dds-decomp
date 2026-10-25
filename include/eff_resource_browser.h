@@ -60,7 +60,8 @@ void dds3EffectFileListWindowDelete(EffResourceDescriptor *work);
 void dds3EffectFileListWindowSetPos(EffResourceDescriptor *work, s32 x, s32 y);
 u32 effGetWorkParam(EffResourceDescriptor *work);
 u32 dds3EffectFileListWindowGetState(EffResourceDescriptor *work);
-u32 dds3EffectFileListWindowGetFilename(EffResourceDescriptor *work, char *destination);
+/* Write the selected filename and return that entry's resource category. */
+EffResourceKind dds3EffectFileListWindowGetFilename(EffResourceDescriptor *work, char *destination);
 void dds3EffectFileListWindowSetOt(EffResourceDescriptor *work, u32 delay);
 void dds3EffectFileListWindowSetPadWait(EffResourceDescriptor *work, u32 surface);
 void dds3EffectFileListWindowSetWindowColor(EffResourceDescriptor *work, u32 borderColor, u32 fillColor);
