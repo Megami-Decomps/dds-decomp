@@ -577,7 +577,7 @@ void mnuDrawSelectionLabel(u16 id);
 /* Collect up to max pointers to occupied, frontline party slots. */
 void mnuCollectFrontlinePartySlots(const datUnitWork_t **out, s32 max);
 
-s32 mnuHasAvailableSlotResource(s32 id);
+s32 mnuHasStandardPartnerRequirements(s32 id);
 
 
 

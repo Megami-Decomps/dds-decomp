@@ -3012,7 +3012,7 @@ void mnuCollectFrontlinePartySlots(const datUnitWork_t **out, s32 max) {
     }
 }
 
-s32 mnuHasAvailableSlotResource(s32 id) {
+s32 mnuHasStandardPartnerRequirements(s32 id) {
     s32 i;
     id -= DAT_AFFINITY_FIRST_COMMAND;
     if ((datAffinityRecords[id].flags & 2) != 0) {
@@ -3063,7 +3063,7 @@ void ptySkillMenuBuildLinkageSkills(dds3ProcessID_t *task) {
         ordinal = context->skillSlots;
         do {
             if (btlAccessRecordedLinkageSkillFlag((u16)skill, 2) != 0 &&
-                mnuHasAvailableSlotResource(skill) != 0) {
+                mnuHasStandardPartnerRequirements(skill) != 0) {
                 node = mnuAppendWindowListNode(windows[0], datSkillNames[skill]);
                 {
                     u32 sortRank = *ordinal;
@@ -3080,7 +3080,7 @@ void ptySkillMenuBuildLinkageSkills(dds3ProcessID_t *task) {
                         node->flags48 |= 1;
                     }
                 }
-            } else if (mnuHasAvailableSlotResource(skill) != 0) {
+            } else if (mnuHasStandardPartnerRequirements(skill) != 0) {
                 node = mnuAppendWindowListNode(windows[0], D_00437C00);
                 node->sortKeyPrimary = 0xFFFF;
                 node->sortKeySecondary = -1;

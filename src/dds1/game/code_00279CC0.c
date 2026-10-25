@@ -339,7 +339,7 @@ void mnuCollectFrontlinePartySlots(const datUnitWork_t **out, s32 max) {
     }
 }
 
-s32 mnuHasAvailableSlotResource(s32 id) {
+s32 mnuHasStandardPartnerRequirements(s32 id) {
     s32 i;
     id -= DAT_AFFINITY_FIRST_COMMAND;
     if ((datAffinityRecords[id].flags & 2) != 0) {
@@ -362,8 +362,8 @@ extern void mnuSortItems(MenuList *, s32, s32);
 extern void mnuSetWindowFadeScale(MenuWindowContainer *, u32);
 
 /* Build the linkage-skill window: every recorded linkage skill with an
- * available slot resource, flagged when the frontline party cannot form it,
- * plus blank rows for unrecorded skills that have a resource. */
+ * standard partner requirements, flagged when the frontline party cannot form it,
+ * plus blank rows for unrecorded skills with standard partner requirements. */
 void ptySkillMenuBuildLinkageSkills(dds3ProcessID_t *task) {
     /* Both retail versions place the frontline array at stack +0x10, after
      * the window workspace; only its first window is populated here. */
@@ -399,7 +399,7 @@ void ptySkillMenuBuildLinkageSkills(dds3ProcessID_t *task) {
     if (skill < last) {
         MenuWindowContainer **blankWindow = windows;
         do {
-            if (btlAccessRecordedLinkageSkillFlag(skill & 0xFFFF, 2) != 0 && mnuHasAvailableSlotResource(skill) != 0) {
+            if (btlAccessRecordedLinkageSkillFlag(skill & 0xFFFF, 2) != 0 && mnuHasStandardPartnerRequirements(skill) != 0) {
                 node = mnuAppendWindowListNode(windows[0], D_003BAA8C + skill * 17);
                 node->sortKeyPrimary = skill;
                 {
@@ -411,7 +411,7 @@ void ptySkillMenuBuildLinkageSkills(dds3ProcessID_t *task) {
                         node->flags48 |= 1;
                     }
                 }
-            } else if (mnuHasAvailableSlotResource(skill) != 0) {
+            } else if (mnuHasStandardPartnerRequirements(skill) != 0) {
                 node = mnuAppendWindowListNode(*blankWindow, D_003BC708);
                 node->sortKeyPrimary = 0xFFFF;
             }
