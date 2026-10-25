@@ -148,7 +148,7 @@ extern s32 D_00436360;
 
 extern struct sdfTexHandle_t *D_0043637C;
 
-extern s32 fldFindRoomIdByTask(dds3ProcessID_t *task);
+extern s16 fldFindRoomIdByTask(dds3ProcessID_t *task);
 
 extern s32 fldQuerySelectedActorMotionState(s32 value);
 

@@ -37,7 +37,7 @@ extern s32 scrGetIntPara(s32);
 extern void fldDispatchSceneAction(u32 action);
 
 
-extern s32 fldFindRoomIdByTask(struct dds3ProcessID_t *task);
+extern s16 fldFindRoomIdByTask(struct dds3ProcessID_t *task);
 
 extern u32 fldDamEffectResource;
 
