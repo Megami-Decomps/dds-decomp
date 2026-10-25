@@ -2553,7 +2553,7 @@ computed with `tools/ee_gcc_allocations.py`. Natural source shapes that flip it:
     `void`. Correcting only that initializer result fixes the DDS1 **52/90-word**
     residual. Reusing the existing `EvtWindowContext` asset prefix gives
     **47 match, 0 differ** and **50 match, 0 differ** for the two current units.
-    `fileHandleFree` also has its genuine `s32` declaration, but an
+    `fileRequestFreeIfComplete` also has its genuine `s32` declaration, but an
     independent control with that call still declared `void` remains exact:
     the initializer return is the decisive change.
     A currently matching `void` C definition is not conclusive negative evidence.
@@ -5736,7 +5736,7 @@ instead of integer-address formals and one-input forwarding.
 `fileManager.c` supplies three distinct, finite interfaces:
 `pacFileCheckEnd(FileRequest *)`,
 `fileGetMemHandle(FileWork *)` returning `u32`, and
-`fileHandleFree(FileCleanup *)` returning `s32`.
+`fileRequestFreeIfComplete(FileCleanup *)` returning `s32`.
 The battle units `001C8890`/`001DD390` now declare these opaque provider
 tags before first use, instead of relying on implicit declarations or
 `s32 (s32)` prototypes.

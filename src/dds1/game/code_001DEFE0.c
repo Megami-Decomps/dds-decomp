@@ -8247,7 +8247,7 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
             if (pacFileCheckEnd(args->frontRequest) != 0) {
                 work->frontFloorResource =
                     (void *)sdfMemLock(fileGetMemHandle(args->frontRequest));
-                fileHandleFree(args->frontRequest);
+                fileRequestFreeIfComplete(args->frontRequest);
                 args->frontRequest = 0;
                 btlBossDebugPrintf(D_003A4BF8);
             } else {
@@ -8258,7 +8258,7 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
             if (pacFileCheckEnd(args->sideRequest) != 0) {
                 work->sideFloorResource =
                     (void *)sdfMemLock(fileGetMemHandle(args->sideRequest));
-                fileHandleFree(args->sideRequest);
+                fileRequestFreeIfComplete(args->sideRequest);
                 args->sideRequest = 0;
                 btlBossDebugPrintf(D_003A4C10);
             } else {
@@ -8987,7 +8987,7 @@ s32 sndPollEffectLoad(EffectLoadArgs *args) {
     effect->resourceHandle =
         sndMixerClone((SoundMixer *)sdfMemLock(resource));
     sdfMemFreeDirect(resource);
-    fileHandleFree(args->request);
+    fileRequestFreeIfComplete(args->request);
     effect->flags = (effect->flags & ~1) | 2;
     return 0;
 }
@@ -9965,7 +9965,7 @@ s32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *request) {
     } else if (sndFindPackedTrackLoadStatus(node->packedTrackPosition) != 0) {
         btlBossDebugPrintf(D_003A5138, (u16)(node->packedTrackPosition >> 16));
         sdfMemFreeDirect(request->resourceAllocation);
-        fileHandleFree(request->request);
+        fileRequestFreeIfComplete(request->request);
         node->flags = (node->flags & ~SOUND_FILE_STATE_SPU_LOAD_PENDING) |
                       SOUND_FILE_STATE_COMPLETE;
         return 1;
@@ -10228,7 +10228,7 @@ void sndReleaseSlotOwner(SoundSlotOwner *node) {
         struct FileRequest **requests = node->work.fileRequests;
         for (; i < 0x1D; i++, requests++, resources++) {
             if (*requests != 0) {
-                fileHandleFree(*requests);
+                fileRequestFreeIfComplete(*requests);
             }
             if (*resources != 0) {
                 sdfMemFreeDirect(*resources);
@@ -10443,7 +10443,7 @@ void btlPollMotionSoundResources(void) {
                         struct FileRequest *completedRequest = owner->work.fileRequests[slot];
 
                         owner->work.resourceHandles[slot] = resource;
-                        fileHandleFree(completedRequest);
+                        fileRequestFreeIfComplete(completedRequest);
                         owner->work.fileRequests[slot] = 0;
                     } else {
                         requestsPending = 1;
@@ -10569,7 +10569,7 @@ s32 sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
         resource = fileGetMemHandle(args->request);
         data = sdfMemLock(resource);
         size = (s32)fileGetLoadSize(args->request);
-        fileHandleFree(args->request);
+        fileRequestFreeIfComplete(args->request);
         mnuInstallTitleSoundBufferFromData(data, size, D_00377650[args->entryIndex].format);
         sdfMemFreeDirect(resource);
         btlBossDebugPrintf(D_003A5358);
@@ -10642,7 +10642,7 @@ u32 sndUpdateEarringDeadPlayback(BtlDeadLoadArgs *args) {
                 fileGetMemHandle(args->request);
             data = sdfMemLock(args->resourceAllocation);
             size = (s32)fileGetLoadSize(args->request);
-            fileHandleFree(args->request);
+            fileRequestFreeIfComplete(args->request);
             mnuInstallTitleSoundBufferFromData(data, size,
                                                MNU_TITLE_SOUND_FORMAT_MEDIUM_FRAME);
             mnuPrintTitleDebugBanner();

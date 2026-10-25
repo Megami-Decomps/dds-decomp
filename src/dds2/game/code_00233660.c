@@ -2995,7 +2995,7 @@ void mdlLoadViewerPresentationConfig(void) {
     resourceHandle = fileGetMemHandle(fileRequest);
     fileData = (char *)fileGetLoadPtr(fileRequest);
     fileSize = (s32)fileGetLoadSize(fileRequest);
-    fileHandleFree(fileRequest);
+    fileRequestFreeIfComplete(fileRequest);
     lineOffset = 0;
     while (lineOffset < fileSize) {
         nextLineOffset = lineOffset;
@@ -3054,7 +3054,7 @@ void mdlSaveViewerPresentationConfig(void) {
                         kwlnDrawVector.depthFar, kwlnDrawVector.fogColor);
     request = fileSave(D_003C88A8, buffer, size);
     fileSync(request);
-    fileHandleFree((struct FileRequest *)request);
+    fileRequestFreeIfComplete((struct FileRequest *)request);
 }
 
 typedef struct MdlTaskDef {

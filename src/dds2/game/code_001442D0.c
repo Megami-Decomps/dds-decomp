@@ -5258,7 +5258,7 @@ void fldUpdateDevilizeEventSequence(void) {
             node = dds3AddBEDEffectObjectBasic2((struct SoundMixer *)D_004363A8, position, rotation);
             fldSparkControlState.object = node;
             dds3EffectObjectBasicStatOff(node, 1);
-            fileHandleFree(D_004363A0);
+            fileRequestFreeIfComplete(D_004363A0);
             fldAddCameraModelEntry(0xD);
             D_003899E0[0] = 1;
             fldResetArchiveLoadPhase();

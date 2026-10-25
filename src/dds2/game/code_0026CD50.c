@@ -93,7 +93,7 @@ void mtrLoadMantraNodePositions(void) {
     mnuLoadMantraNodePositionTable(fileGetLoadPtr(request));
     mnuRebuildMantraCategoryAvailability();
     sdfMemFreeDirect(fileGetMemHandle(request));
-    fileHandleFree(request);
+    fileRequestFreeIfComplete(request);
 }
 
 void mnuReleaseMantraNodePositionTable(void);

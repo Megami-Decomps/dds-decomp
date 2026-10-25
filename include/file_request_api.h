@@ -12,7 +12,8 @@ struct sdfMemHandle_t *fileGetMemHandle(const struct FileRequest *request);
 /* Return the address of the loaded resource payload as a byte pointer. */
 u8 *fileGetLoadPtr(const struct FileRequest *request);
 u32 fileGetLoadSize(const struct FileRequest *request);
-s32 fileHandleFree(struct FileRequest *request);
+/* Free a completed request wrapper; return one while it remains pending. */
+s32 fileRequestFreeIfComplete(struct FileRequest *request);
 
 #ifdef VERSION_DDS1
 struct FileRequest *pacLoadEx(const char *requestName, u32 flags, u32 dispatchValue,

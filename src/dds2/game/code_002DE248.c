@@ -16119,7 +16119,7 @@ void effCompleteTransientResourceJob(struct FileRequest *job, u32 *outInstance) 
     instance = effCreateResourceSlotSetFromAllocation(allocation, EFF_RESOURCE_TRANSIENT);
     *outInstance = (u32)instance;
     sdfMemFreeDirect(allocation);
-    fileHandleFree(job);
+    fileRequestFreeIfComplete(job);
 }
 
 /* Publish the instance without releasing its source allocation, then clean up the file job. */
@@ -16130,7 +16130,7 @@ void effCompleteRetainedResourceJob(struct FileRequest *job, u32 *outInstance) {
     allocation = fileGetMemHandle(job);
     instance = effCreateResourceSlotSetFromAllocation(allocation, EFF_RESOURCE_KEEP_ALLOCATION);
     *outInstance = (u32)instance;
-    fileHandleFree(job);
+    fileRequestFreeIfComplete(job);
 }
 
 /* Clear the output first; only mode one selects the retained-allocation completion path. */
@@ -16170,7 +16170,7 @@ void effCompleteMappedResourceJob(struct FileRequest *job,
     mappedResource = effCreateMappedResource((const u8 *)sourceAddress);
     *outMappedResource = mappedResource;
     sdfMemFreeDirect(allocation);
-    fileHandleFree(job);
+    fileRequestFreeIfComplete(job);
 }
 
 /* Initialize the output to zero and schedule mapped-record completion. */

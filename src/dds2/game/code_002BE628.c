@@ -3871,7 +3871,7 @@ void btlCreateStageTestTask(void) {
     dds3StartProcess(D_0042B610, 0x2B0C, 1, 1, evtBattleStageTestScreen, evtDestroyBattleStageTestWorldNode, 0);
 }
 
-/* A PAC file request's cleanup (fileHandleFree delegates it): once the
+/* A PAC file request's cleanup (fileRequestFreeIfComplete delegates it): once the
  * request is complete, release its device state, packet queue nodes, name and
  * the request itself, returning zero; return one while it is pending. Retain
  * the K&R definition. */

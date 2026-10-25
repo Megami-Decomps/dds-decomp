@@ -23,7 +23,7 @@ extern s32 pacFileHandleFree(struct FilePacRequest *);
 /* PAC requests delegate cleanup. Other kinds remain pending until state six,
  * then release any device state, duplicated name and entry, returning zero.
  * A pending non-PAC request returns one; request is required. */
-s32 fileHandleFree(struct FileRequest *request) {
+s32 fileRequestFreeIfComplete(struct FileRequest *request) {
     if (request->kind == FILE_REQUEST_KIND_PAC) {
         return pacFileHandleFree((struct FilePacRequest *)request);
     }

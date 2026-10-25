@@ -4861,7 +4861,7 @@ void fldUpdateSparkMessageSequence(void) {
             node = dds3AddBEDEffectObjectBasic2((struct SoundMixer *)D_003BAFF0, position, rotation);
             fldSparkControlState.object = node;
             dds3EffectObjectBasicStatOff(node, 1);
-            fileHandleFree(D_003BAFE8);
+            fileRequestFreeIfComplete(D_003BAFE8);
             fldAddCameraModelEntry(0xD);
             D_0032E5C4[0] = 1;
             fldResetArchiveLoadPhase();
@@ -5048,7 +5048,7 @@ void fldUpdateSparkEncounterScene(void) {
         node = dds3AddBEDEffectObjectBasic2((struct SoundMixer *)D_003BAFF0, firstVector, secondVector);
         fldSparkControlState.object = node;
         dds3EffectObjectBasicStatOff(node, 1);
-        fileHandleFree(D_003BAFE8);
+        fileRequestFreeIfComplete(D_003BAFE8);
         fldSetCameraModelMotionRequest(5, 0);
         dds3EffectObjectBasicStatOn(fldSparkControlState.object, 1);
         dds3StartBEDEffectObjectBasic(fldSparkControlState.object, 0);

@@ -4496,7 +4496,7 @@ void evtEventViewerPollMovieResources(PolyMovieWork *assets) {
         }
         assets->mainResource.handle = fileGetMemHandle((struct FileRequest *)assets->mainResource.request);
         assets->mainResource.address = (PmdHeader *)sdfMemLock(assets->mainResource.handle);
-        fileHandleFree(assets->mainResource.request);
+        fileRequestFreeIfComplete(assets->mainResource.request);
         assets->mainResource.request = 0;
         assets->flags &= ~EVT_POLY_MOVIE_MAIN_LOAD_PENDING;
     } else if (assets->flags & EVT_POLY_MOVIE_SECONDARY_LOAD_PENDING) {
@@ -4508,7 +4508,7 @@ void evtEventViewerPollMovieResources(PolyMovieWork *assets) {
         }
         assets->secondaryResource.handle = fileGetMemHandle((struct FileRequest *)assets->secondaryResource.request);
         assets->secondaryResource.address = (PmdHeader *)sdfMemLock(assets->secondaryResource.handle);
-        fileHandleFree(assets->secondaryResource.request);
+        fileRequestFreeIfComplete(assets->secondaryResource.request);
         assets->secondaryResource.request = 0;
         assets->flags &= ~EVT_POLY_MOVIE_SECONDARY_LOAD_PENDING;
     } else if (assets->flags & EVT_POLY_MOVIE_TERTIARY_LOAD_PENDING) {
@@ -4520,7 +4520,7 @@ void evtEventViewerPollMovieResources(PolyMovieWork *assets) {
         }
         assets->tertiaryResource.handle = fileGetMemHandle((struct FileRequest *)assets->tertiaryResource.request);
         assets->tertiaryResource.address = (PmdHeader *)sdfMemLock(assets->tertiaryResource.handle);
-        fileHandleFree(assets->tertiaryResource.request);
+        fileRequestFreeIfComplete(assets->tertiaryResource.request);
         assets->tertiaryResource.request = 0;
         assets->flags &= ~EVT_POLY_MOVIE_TERTIARY_LOAD_PENDING;
     } else if (assets->mainResource.address != NULL && assets->secondaryResource.address != NULL) {

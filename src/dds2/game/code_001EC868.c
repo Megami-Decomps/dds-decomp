@@ -7508,7 +7508,7 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
         if (args->frontRequest != 0) {
             if (pacFileCheckEnd(args->frontRequest) != 0) {
                 work->primaryBuffer = (void *)sdfMemLock(fileGetMemHandle(args->frontRequest));
-                fileHandleFree(args->frontRequest);
+                fileRequestFreeIfComplete(args->frontRequest);
                 args->frontRequest = 0;
                 btlBossDebugPrintf("btl:floor load end 0\n");
             } else {
@@ -7518,7 +7518,7 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
         if (args->sideRequest != 0) {
             if (pacFileCheckEnd(args->sideRequest) != 0) {
                 work->secondaryBuffer = (void *)sdfMemLock(fileGetMemHandle(args->sideRequest));
-                fileHandleFree(args->sideRequest);
+                fileRequestFreeIfComplete(args->sideRequest);
                 args->sideRequest = 0;
                 btlBossDebugPrintf("btl:floor load end 1\n");
             } else {
@@ -8258,7 +8258,7 @@ s32 sndPollEffectLoad(EffectLoadArgs *args) {
     resource = fileGetMemHandle(args->request);
     effect->resourceHandle = sndMixerClone((SoundMixer *)sdfMemLock(resource));
     sdfMemFreeDirect(resource);
-    fileHandleFree(args->request);
+    fileRequestFreeIfComplete(args->request);
     effect->flags = (effect->flags & ~1) | 2;
     return 0;
 }
@@ -9197,7 +9197,7 @@ s32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *request) {
     } else if (sndFindPackedTrackLoadStatus(node->packedTrackPosition) != 0) {
         btlBossDebugPrintf("btl:sound SPU load end[%X]\n", (u16)(node->packedTrackPosition >> 16));
         sdfMemFreeDirect(request->resourceAllocation);
-        fileHandleFree(request->request);
+        fileRequestFreeIfComplete(request->request);
         node->flags = (node->flags & ~SOUND_FILE_STATE_SPU_LOAD_PENDING) |
                       SOUND_FILE_STATE_COMPLETE;
         return 1;
@@ -9444,7 +9444,7 @@ void sndReleaseSlotOwner(SoundSlotOwner *owner) {
     if (--owner->work.refCount == 0) {
         for (i = 0; i < 0x1D; i++) {
             if (owner->work.fileRequests[i] != 0) {
-                fileHandleFree(owner->work.fileRequests[i]);
+                fileRequestFreeIfComplete(owner->work.fileRequests[i]);
             }
             if (owner->work.resourceHandles[i] != 0) {
                 sdfMemFreeDirect(owner->work.resourceHandles[i]);
@@ -9654,7 +9654,7 @@ void btlUpdateMotionSoundLoading(void) {
                         struct FileRequest *completedRequest = owner->work.fileRequests[slot];
 
                         owner->work.resourceHandles[slot] = resource;
-                        fileHandleFree(completedRequest);
+                        fileRequestFreeIfComplete(completedRequest);
                         owner->work.fileRequests[slot] = 0;
                     } else {
                         requestsPending = 1;

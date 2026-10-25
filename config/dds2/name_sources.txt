@@ -7120,7 +7120,7 @@
 0x002C7C18	evtBattleStageTestStopTask	inferred	Destroys stage test hierarchy by name and disables debug graph. [names_reviewed5.tsv]
 0x002C7C88	pacFileHandleFree	inferred	SMT3HD name via SLUS_209.11 0x00296648, reloc-identical; was btlDestroyStageTask
 0x002C7CE8	pacFileHandleFree_	inferred	SMT3HD name via SLUS_209.11 0x002966A8, shared-hash-in-run; was btlStageTaskCleanupCallback
-0x002C7D00	fileHandleFree	inferred	SMT3HD name via SLUS_209.11 0x002966C0, reloc-identical; was filePollEntryCleanup
+0x002C7D00	fileRequestFreeIfComplete	inferred	Frees a completed request wrapper, returns one while an ordinary request is pending, and delegates PAC cleanup; does not free the loaded resource allocation. SMT3HD name via SLUS_209.11 0x002966C0, reloc-identical; was filePollEntryCleanup.
 0x002C7D78	fileLinkQueue	inferred	SMT3HD name via SLUS_209.11 0x00296738, reloc-identical; was fileManQueueNamedRequest
 0x002C7E28	fileUnlinkQueue	inferred	SMT3HD name via SLUS_209.11 0x002967E8, reloc-identical; was fileManCancelRequest
 0x002C7EE8	fileLinkCloseWait	inferred	SMT3HD name via SLUS_209.11 0x002968A8, byte-identical; was filePrependNode

@@ -391,7 +391,7 @@ void TbLoadCallback(struct FileRequest *resource, MdlLoadRequest *destination) {
     resourceList = sdfTexSetTB(loadedData);
     destination->payload.resourceList = resourceList;
     sdfMemFreeDirect(fileGetMemHandle(resource));
-    fileHandleFree(resource);
+    fileRequestFreeIfComplete(resource);
 }
 
 
@@ -401,7 +401,7 @@ void MbLoadCallback(struct FileRequest *resource, MdlLoadRequest *request) {
     request->payload.requestAllocation = fileGetMemHandle(resource);
     request->payload.itemList = (struct sdfModelDef_t *)sdfRelocatePackedResourcePayload(
         (SdfPackedRelocationHeader *)fileGetLoadPtr(resource));
-    fileHandleFree(resource);
+    fileRequestFreeIfComplete(resource);
     if (request->awaitingMotionLoad == 0) {
         TbMbAbLoadEnd(request);
     }
@@ -413,7 +413,7 @@ void AbLoadCallback(struct FileRequest *resource, MdlLoadRequest *request) {
     request->payload.motionResource = fileGetMemHandle(resource);
     request->payload.motionTable = (struct MotionTable *)sdfRelocatePackedResourceWordsFromHeader(
         (SdfPackedRelocationHeader *)fileGetLoadPtr(resource));
-    fileHandleFree(resource);
+    fileRequestFreeIfComplete(resource);
     TbMbAbLoadEnd(request);
 }
 

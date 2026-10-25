@@ -4793,7 +4793,7 @@ u32 btlPollGunLoad(GunLoadArgs *loadArgs) {
     }
     btlBossDebugPrintf("btl:gun & finish load end[%p]\n", loadArgs->request);
     unit->gunResource = (void *)sdfMemLock(fileGetMemHandle(loadArgs->request));
-    fileHandleFree(loadArgs->request);
+    fileRequestFreeIfComplete(loadArgs->request);
     unit->gunResourceFlags = (unit->gunResourceFlags & ~4) | 8;
     return 1;
 }

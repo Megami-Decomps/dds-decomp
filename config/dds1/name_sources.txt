@@ -6823,7 +6823,7 @@
 0x002886E0	btlCreateStageTestTask	inferred	btl battle control and actor operations in game/code_00282850.c
 0x00288728	pacFileHandleFree	inferred	SMT3HD name via SLUS_209.11 0x00296648, reloc-identical; was btlDestroyStageTask
 0x00288788	pacFileHandleFree_	inferred	SMT3HD name via SLUS_209.11 0x002966A8, shared-hash-in-run; was btlStageTaskCleanupCallback
-0x002887A0	fileHandleFree	inferred	SMT3HD name via SLUS_209.11 0x002966C0, reloc-identical; was filePollEntryCleanup
+0x002887A0	fileRequestFreeIfComplete	inferred	Frees a completed request wrapper, returns one while an ordinary request is pending, and delegates PAC cleanup; does not free the loaded resource allocation. SMT3HD name via SLUS_209.11 0x002966C0, reloc-identical; was filePollEntryCleanup.
 0x00288818	fileLinkQueue	inferred	SMT3HD name via SLUS_209.11 0x00296738, reloc-identical; was fileManQueueNamedRequest
 0x002888C8	fileUnlinkQueue	inferred	SMT3HD name via SLUS_209.11 0x002967E8, reloc-identical; was fileManCancelRequest
 0x00288988	fileLinkCloseWait	inferred	SMT3HD name via SLUS_209.11 0x002968A8, byte-identical; was filePrependNode
