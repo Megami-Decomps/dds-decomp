@@ -123,15 +123,15 @@ void dds3FontReqListCount(void) {
     }
 }
 
-void dds3FontReqDestroy(void *owner) {
-    Dds3FontNode *node = owner;
+void dds3FontReqDestroy(Dds3IntrusiveNode *owner) {
+    Dds3FontNode *node = (Dds3FontNode *)owner;
 
     frDestroyFontRequestAfter(node->glyph);
     sdfChipFreeDirect(node);
 }
 
-void dds3FontReqDrawFont(void *owner) {
-    Dds3FontNode *node = owner;
+void dds3FontReqDrawFont(Dds3IntrusiveNode *owner) {
+    Dds3FontNode *node = (Dds3FontNode *)owner;
 
     frFontDrawGlyphInDefaultMode(node->glyph);
 }
@@ -157,8 +157,8 @@ void dds3FontReqSetColorNo(Dds3FontNode *node, u8 value) {
     frSetFontColorNo(node->glyph, value);
 }
 
-void dds3FontReqFree(void *memory) {
-    sdfChipFreeDirect(memory);
+void dds3FontReqFree(Dds3IntrusiveNode *owner) {
+    sdfChipFreeDirect(owner);
 }
 
 Dds3IntrusiveNodeCallbacks dds3FontNodeVTable __attribute__((section(".sdata"))) = {

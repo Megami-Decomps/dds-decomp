@@ -8,9 +8,9 @@
 extern SdfPoolNode D_003255A8;
 
 /* Emit one filled rectangle into a fresh packet list. */
-void dds3FontReqDrawBoxLine(void *rectangleData)
+void dds3FontReqDrawBoxLine(Dds3IntrusiveNode *owner)
 {
-    Dds3L2dRectangle *rect = rectangleData;
+    Dds3L2dRectangle *rect = (Dds3L2dRectangle *)owner;
     sdfDrawTag_t *list;
 
     list = (sdfDrawTag_t *)sdfPrimAllocDrawTag(0);
@@ -37,4 +37,3 @@ Dds3L2dRectangle *dds3FontReqAddBox(s32 left, s32 top, s32 depth, s32 width, s32
 }
 
 INCLUDE_SDATA(const s32, "misc/l2d", D_003BAAD8);
-

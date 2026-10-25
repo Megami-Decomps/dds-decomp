@@ -24,8 +24,8 @@ typedef struct Dds3IntrusiveNodeList {
 
 /* Callback tables are shared by owners with different payloads. */
 struct Dds3IntrusiveNodeCallbacks {
-    void (*destroy)(void *owner);
-    void (*update)(void *owner);
+    void (*destroy)(Dds3IntrusiveNode *owner);
+    void (*update)(Dds3IntrusiveNode *owner);
 };
 
 /* The font-owned node's payload is specifically a retained glyph pointer. */
@@ -62,9 +62,9 @@ void dds3FontReqListCount(void);
 
 Dds3FontNode *dds3CreateFontNode(s32 x, s32 y, const char *text);
 void dds3FontReqSetColorNo(Dds3FontNode *node, u8 value);
-void dds3FontReqDestroy(void *owner);
-void dds3FontReqDrawFont(void *owner);
-void dds3FontReqFree(void *owner);
+void dds3FontReqDestroy(Dds3IntrusiveNode *owner);
+void dds3FontReqDrawFont(Dds3IntrusiveNode *owner);
+void dds3FontReqFree(Dds3IntrusiveNode *owner);
 
 typedef char Dds3IntrusiveNodeSizeCheck[sizeof(Dds3IntrusiveNode) == 0x10 ? 1 : -1];
 typedef char Dds3IntrusiveNodeListSizeCheck[sizeof(Dds3IntrusiveNodeList) == 0x08 ? 1 : -1];
