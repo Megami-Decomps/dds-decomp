@@ -1045,7 +1045,7 @@ void fldCreateResourceScriptObjects(void) {
 #include "fld_resource_resolver.h"
 
 extern u8 fldTestMapSlotValueFlag(s32 mapId, u32 slotIndex, s32 bit);
-extern s32 fldTestRoomModeFlag(s32 mapId, u32 slotIndex, s32 bit);
+extern u8 fldTestRoomModeFlag(s32 mapId, u32 slotIndex, s32 bit);
 extern s32 fldCommand_SEARCH_ID(const char *);
 extern void dds3ObjectBaseCreateMover(dds3Basic_t *);
 extern void dds3MoverBasicMakePath(dds3Basic_t *object);
@@ -1913,7 +1913,7 @@ void fldHojiDebugView(void) {
     }
 }
 
-extern s32 fldTestRoomObjectModeFlag(s32 mapId, u32 slotIndex, s32 bit);
+extern u8 fldTestRoomObjectModeFlag(s32 mapId, u32 slotIndex, s32 bit);
 
 /* Same debug grid as fldHojiDebugView for the room mode (VIS) and room object
  * mode (ANM) flags. */

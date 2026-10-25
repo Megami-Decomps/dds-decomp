@@ -1171,7 +1171,7 @@ void fldCreateResourceScriptObjects(void) {
 
 extern u8 fldTestMapSlotValueFlag(s32 mapId, u32 slotIndex, s32 bit);
 
-extern s32 fldTestRoomModeFlag(s32 mapId, u32 slotIndex, s32 bit);
+extern u8 fldTestRoomModeFlag(s32 mapId, u32 slotIndex, s32 bit);
 
 extern s32 fldCommand_SEARCH_ID(const char *);
 
@@ -2075,7 +2075,7 @@ void fldHojiDebugView(void) {
     }
 }
 
-extern s32 fldTestRoomObjectModeFlag(s32 mapId, u32 slotIndex, s32 bit);
+extern u8 fldTestRoomObjectModeFlag(s32 mapId, u32 slotIndex, s32 bit);
 
 extern char D_003BACB0[];
 

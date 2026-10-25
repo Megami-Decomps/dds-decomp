@@ -1885,7 +1885,7 @@ void fldSetRoomModeFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
     }
 }
 
-s32 fldTestRoomModeFlag(s32 mapId, u32 slotIndex, s32 bit) {
+u8 fldTestRoomModeFlag(s32 mapId, u32 slotIndex, s32 bit) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
         u32 flags = DDS3_GBWK->maps[mapIndex].slots[slotIndex].roomModeFlags;
@@ -1905,7 +1905,7 @@ void fldSetRoomObjectModeFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
     }
 }
 
-s32 fldTestRoomObjectModeFlag(s32 mapId, u32 slotIndex, s32 bit) {
+u8 fldTestRoomObjectModeFlag(s32 mapId, u32 slotIndex, s32 bit) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
         u32 flags = DDS3_GBWK->maps[mapIndex].slots[slotIndex].roomObjectModeFlags;

@@ -406,7 +406,7 @@ void dds3DrawObjectWithGradientOverlay(dds3Basic_t *object) {
 }
 
 #include "fld_area_work.h"
-extern s32 fldTestRoomObjectModeFlag(s32, u32, s32);
+extern u8 fldTestRoomObjectModeFlag(s32, u32, s32);
 extern void mdlBlendEntryPitchYawAndUpdate(dds3ModelHandle_t *, struct SdfPoolNode **, s32, f32, f32);
 extern void sdfModelEvalTm(sdfModelRootNode_t *);
 
