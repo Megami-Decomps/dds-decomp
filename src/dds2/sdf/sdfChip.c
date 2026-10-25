@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_chip.h"
+#include "sdf_chip_range_api.h"
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "sdf_pending.h"
@@ -75,12 +76,14 @@ void sdfChipFreeDelayedDirect(void *memory) {
     sdfDelayedResrcEntry(&dds3CleanupList, memory);
 }
 
-s32 sdfChipIsInRange(s32 address) {
+s32 sdfChipIsInRange(const void *address) {
+    /* Keep the original signed EE address comparison after accepting a pointer. */
+    s32 addressWord = (s32)address;
     s32 withinRange;
 
     withinRange = 0;
-    if (address >= (s32)sdfChipPageTop) {
-        withinRange = address < (s32)sdfChipPageEnd;
+    if (addressWord >= (s32)sdfChipPageTop) {
+        withinRange = addressWord < (s32)sdfChipPageEnd;
     }
     return withinRange;
 }

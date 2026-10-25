@@ -10,6 +10,7 @@
 
 #include "sdf_resource.h"
 #include "sdf_chip.h"
+#include "sdf_chip_range_api.h"
 
 #include "sdf.h"
 #include "sdf_semaphore_api.h"
@@ -760,7 +761,7 @@ void sdfImageSetChainReleaseMem(void *address) {
 
     if (address != NULL) {
         entry = sdfAllocAndClearQuadwords(sizeof(SdfTexReleaseEntry));
-        if (sdfChipIsInRange((s32)address) != 0) {
+        if (sdfChipIsInRange(address) != 0) {
             entry->chipMemory = address;
             entry->releaseMode = SDF_TEX_RELEASE_CHIP_ADDRESS;
         } else {

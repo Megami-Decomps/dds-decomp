@@ -2,6 +2,7 @@
 #include "common.h"
 #include "sdf_resource.h"
 #include "sdf_chip.h"
+#include "sdf_chip_range_api.h"
 #include "sdf_handler_node.h"
 
 extern void sdfMemFreePtrDirect(const void *);
@@ -24,7 +25,7 @@ void *sdfAllocAuto(s32 size) {
 
 void sdfFreeAuto(void *allocation) {
     if (allocation != NULL) {
-        if (sdfChipIsInRange((s32)allocation)) {
+        if (sdfChipIsInRange(allocation)) {
             sdfChipFreeDirect(allocation);
             return;
         }
@@ -35,7 +36,7 @@ void sdfFreeAuto(void *allocation) {
 
 void sdfFreeAutoDelayed(void *allocation) {
     if (allocation != NULL) {
-        if (sdfChipIsInRange((s32)allocation)) {
+        if (sdfChipIsInRange(allocation)) {
             sdfChipFreeDelayedDirect(allocation);
             return;
         }
@@ -48,7 +49,7 @@ void sdfFreeMemorySlotFromEitherHeap(void **slot) {
     void *allocation = *slot;
     if (allocation != NULL) {
         *slot = NULL;
-        if (sdfChipIsInRange((s32)allocation)) {
+        if (sdfChipIsInRange(allocation)) {
             sdfChipFreeDirect(allocation);
             return;
         }
