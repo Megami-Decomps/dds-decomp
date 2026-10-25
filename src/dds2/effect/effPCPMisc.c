@@ -2888,7 +2888,7 @@ EffPCPBlockSetWork *effPCPAgiFireballCreate(const EffPCPBlockSetParams *params, 
     work->params = *params;
     work->frame = 0;
     work->color = 0x80808080;
-    work->mode = 0;
+    work->mode = EFF_PCP_BLOCK_SET_MODE_DEFAULT;
     EE_MMI_UNIT_MATRIX(work->matrix);
     work->headHandle = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_VIEWER_CONTEXT, blocks[0]);
     work->handleA[0] = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, blocks[1]);
@@ -2984,7 +2984,7 @@ EffPCPBlockSetWork *effPCPAgiFireballCopy(EffPCPBlockSetWork *src) {
     work->params = src->params;
     work->frame = 0;
     work->color = 0x80808080;
-    work->mode = 0;
+    work->mode = EFF_PCP_BLOCK_SET_MODE_DEFAULT;
     EE_MMI_UNIT_MATRIX(work->matrix);
     effPCPAgiFireballCopySub(work, src);
     work->source = NULL;
@@ -3067,7 +3067,7 @@ void effPcpBlockSetUpdate(EffPCPBlockSetWork *work) {
     color = work->color;
     color = effColorBlend(color & 0xFFFFFF, color, fade);
     model = effParamWorkGetData(work->headHandle);
-    if (work->mode == 0) {
+    if (work->mode == EFF_PCP_BLOCK_SET_MODE_DEFAULT) {
         dds3EffectPartSetPosition(work->headHandle, work->params.position);
         if (effBTLFieldColorUsesActorSelectors()) {
             btlUnitGetMuzzlePosVU((void *)effBTLFieldColorGetOriginalSelector());
@@ -3091,7 +3091,8 @@ void effPcpBlockSetUpdate(EffPCPBlockSetWork *work) {
     if (frame < count && frame > 0) {
         for (i = 0; i < 5; i++) {
             if (i == 4) {
-                if (work->mode == 1 || work->mode == 2) {
+                if (work->mode == EFF_PCP_BLOCK_SET_MODE_SP ||
+                    work->mode == EFF_PCP_BLOCK_SET_MODE_SP2) {
                     dds3EffectPartSetRotateMatrix(work->handleA[i], matrix);
                 }
                 dds3EffectPartSetPosition(work->handleA[i], work->previousPosition);
@@ -3205,7 +3206,7 @@ EffPCPBlockSetWork *effPCPAgiFireballSpCreatePCF(void *parameterTable) {
     EffPCPBlockSetWork *work;
 
     work = effPCPAgiFireballCreatePCF(parameterTable);
-    work->mode = 1;
+    work->mode = EFF_PCP_BLOCK_SET_MODE_SP;
     return work;
 }
 
@@ -3216,7 +3217,7 @@ EffPCPBlockSetWork *effPCPAgiFireballSpCopy(EffPCPBlockSetWork *src) {
     memset(work, 0, 0x10C);
     work->params = src->params;
     work->color = 0x80808080;
-    work->mode = 1;
+    work->mode = EFF_PCP_BLOCK_SET_MODE_SP;
     work->frame = 0;
     EE_MMI_UNIT_MATRIX(work->matrix);
     work->source = src;
@@ -3228,7 +3229,7 @@ EffPCPBlockSetWork *effPCPAgiFireballSp2CreatePCF(void *parameterTable) {
     EffPCPBlockSetWork *work;
 
     work = effPCPAgiFireballCreatePCF(parameterTable);
-    work->mode = 2;
+    work->mode = EFF_PCP_BLOCK_SET_MODE_SP2;
     return work;
 }
 
@@ -3239,7 +3240,7 @@ EffPCPBlockSetWork *effPCPAgiFireballSp2Copy(EffPCPBlockSetWork *src) {
     memset(work, 0, 0x10C);
     work->params = src->params;
     work->color = 0x80808080;
-    work->mode = 2;
+    work->mode = EFF_PCP_BLOCK_SET_MODE_SP2;
     work->frame = 0;
     EE_MMI_UNIT_MATRIX(work->matrix);
     work->source = src;
@@ -3312,7 +3313,7 @@ EffPCPRotateWork *effPCPAgiFireball2Copy(EffPCPRotateWork *src) {
         sub = work->blockSets[i];
         sub->frame = 0;
         sub->color = 0x80808080;
-        sub->mode = 0;
+        sub->mode = EFF_PCP_BLOCK_SET_MODE_DEFAULT;
         EE_MMI_UNIT_MATRIX(sub->matrix);
         sub->source = src->blockSets[i];
     }

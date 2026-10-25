@@ -34,6 +34,15 @@ typedef union EffPCPBlockSetInputs {
     void *blocks[15];
 } EffPCPBlockSetInputs;
 
+/* The updater separates the default set from the two SP variants. */
+typedef u32 EffPCPBlockSetMode;
+
+enum {
+    EFF_PCP_BLOCK_SET_MODE_DEFAULT = 0,
+    EFF_PCP_BLOCK_SET_MODE_SP = 1,
+    EFF_PCP_BLOCK_SET_MODE_SP2 = 2
+};
+
 /* Shared retained work owner used by construction, cloning, drawing and release.
    A non-NULL source borrows its resources; NULL owns the listed handles. */
 typedef struct EffPCPBlockSetWork {
@@ -44,7 +53,7 @@ typedef struct EffPCPBlockSetWork {
     u32 frame;
     u32 count;
     u32 color;
-    u32 mode;
+    EffPCPBlockSetMode mode;
     effPartHandle_t *headHandle;
     effPartHandle_t *handleA[5];
     effPartHandle_t **list[3];
