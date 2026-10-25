@@ -60,6 +60,7 @@
 #include "btl.h"
 #include "btl_tracked_task_slot_api.h"
 #include "btl_command.h"
+#include "btl_command_vital_cost.h"
 #include "fr_font.h"
 #include "mdl_flag_api.h"
 /* Declared before first use (were implicit int). */
@@ -9843,8 +9844,6 @@ void btlDrawLinkageSkillOptions(BattleSceneObject *object) {
 
 extern s32 btlGetPartnerCommandUseError(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
 
-extern s32 btlCheckCommandVitalCost(BtlUnit *, s32);
-
 /* Check helper for a pair of scene objects: the caller's own result wins,
  * then the first object's, then the second's. */
 s32 btlCheckScenePairResult(BtlUnit *self, BattleRosterPair *args) {
@@ -9855,7 +9854,7 @@ s32 btlCheckScenePairResult(BtlUnit *self, BattleRosterPair *args) {
     if (args->first != 0) {
         resultA = btlGetPartnerCommandUseError(args->first, args->first, self, args->second, args->skill);
         if (resultA == 6 && base == 0) {
-            if (btlCheckCommandVitalCost(args->first, args->skill) == 0) {
+            if (btlCheckCommandVitalCost(args->first, args->skill) == BTL_COMMAND_VITAL_COST_OK) {
                 resultA = 0;
             }
         }
@@ -9863,7 +9862,7 @@ s32 btlCheckScenePairResult(BtlUnit *self, BattleRosterPair *args) {
     if (args->second != 0) {
         resultB = btlGetPartnerCommandUseError(args->second, args->second, self, args->first, args->skill);
         if (resultB == 6 && base == 0) {
-            if (btlCheckCommandVitalCost(args->second, args->skill) == 0) {
+            if (btlCheckCommandVitalCost(args->second, args->skill) == BTL_COMMAND_VITAL_COST_OK) {
                 resultB = 0;
             }
         }

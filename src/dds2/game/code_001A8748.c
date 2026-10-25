@@ -15,6 +15,7 @@
 #include "btl_raise_party_record_status_value.h"
 #include "kwln_task_add_child.h"
 #include "btl_special_ability.h"
+#include "btl_command_vital_cost.h"
 #include "dat_unit_has_skill_api.h"
 #include "btl_command_affinity_api.h"
 #include "btl_active_units_ready_api.h"
@@ -1673,23 +1674,23 @@ s32 btlGetSlotValueAdjustedForSpecialAbility(BtlUnit *battler, s32 slot) {
     return value;
 }
 
-s32 btlCheckCommandVitalCost(BtlUnit *unit, s32 command) {
-    s32 result = 0;
+BtlCommandVitalCostResult btlCheckCommandVitalCost(BtlUnit *unit, s32 command) {
+    BtlCommandVitalCostResult result = BTL_COMMAND_VITAL_COST_OK;
     u32 cost = btlApplyCommandAbilityMultiplier(&unit->partyRecord, command);
 
     switch (datCommandRecords[command].costMode) {
     case DAT_COMMAND_COST_MODE_HP:
         if ((datCommandRecords[command].flags & 8) == 0) {
             if (unit->partyRecord.hp <= cost) {
-                result = 1;
+                result = BTL_COMMAND_VITAL_COST_INSUFFICIENT_HP;
             }
         } else if (unit->partyRecord.hp < cost) {
-            result = 1;
+            result = BTL_COMMAND_VITAL_COST_INSUFFICIENT_HP;
         }
         break;
     case DAT_COMMAND_COST_MODE_MP:
         if (unit->partyRecord.mp < cost) {
-            result = 2;
+            result = BTL_COMMAND_VITAL_COST_INSUFFICIENT_MP;
         }
         break;
     }
