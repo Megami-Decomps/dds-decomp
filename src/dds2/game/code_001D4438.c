@@ -3632,9 +3632,9 @@ void btlSchedulePressStateSceneAction(u8 *unit) {
 void btlEnterPacketActionState(void) {
 }
 
-void btlAdvanceStateWhenLinkedTasksFinish(ActionStateLink *unit) {
-    if (btlCountTasksForOwner(unit->unit->owner) == 0) {
-        btlDispatchStateHandler(unit, 0x1D);
+void btlAdvanceStateWhenLinkedTasksFinish(ActionStateLink *task) {
+    if (btlCountTasksForOwner(task->unit->owner) == 0) {
+        btlDispatchStateHandler(task, 0x1D);
     }
 }
 
@@ -3642,11 +3642,11 @@ void btlAdvanceLinkedUnitWhenOwnerIdle(void) {
 }
 
 /* Clear the actor's in-progress bit and return to STANDBY when its tasks finish. */
-void btlResumeStandbyWhenActorTasksFinish(ActionStateLink *unit) {
-    BtlUnit *owner = unit->unit;
+void btlResumeStandbyWhenActorTasksFinish(ActionStateLink *task) {
+    BtlUnit *owner = task->unit;
     if (btlCountTasksForOwner(owner->owner) == 0) {
         owner->status.flags &= ~0x4000;
-        btlDispatchStateHandler(unit, 2);
+        btlDispatchStateHandler(task, 2);
     }
 }
 
