@@ -1020,26 +1020,24 @@ extern MenuPopupEntry mnuTerminalPreparationPopupEntry[];
 
 /* Seed the task's popup slot before running panel mode zero with the supplied request. */
 s32 mnuPrepareTerminalPopupAndDispatch(dds3ProcessID_t *task) {
-    s32 context = dds3GetProcessData(task);
-    MenuTerminalWork *work = (MenuTerminalWork *)context;
-    s32 *state = &work->popupState;
+    MenuTerminalWork *work = (MenuTerminalWork *)dds3GetProcessData(task);
 
-    mnuSetPopupEntry(state, mnuTerminalPreparationPopupEntry);
-    return menuRunPanel((void *)context, 0, (void *)task);
+    mnuSetPopupEntry(&work->popupState, mnuTerminalPreparationPopupEntry);
+    return menuRunPanel(work, 0, (void *)task);
 }
 
 /* Dispatch current task work through panel mode one; distinct callback role unknown. */
 s32 evtRunTerminalPanel(dds3ProcessID_t *task) {
-    s32 context = dds3GetProcessData(task);
+    MenuTerminalWork *work = (MenuTerminalWork *)dds3GetProcessData(task);
 
-    return menuRunPanel((void *)context, 1, (void *)task);
+    return menuRunPanel(work, 1, (void *)task);
 }
 
 /* Dispatch current task work through panel mode two; distinct callback role unknown. */
 s32 evtRunTerminalPanelSync(dds3ProcessID_t *task) {
-    s32 context = dds3GetProcessData(task);
+    MenuTerminalWork *work = (MenuTerminalWork *)dds3GetProcessData(task);
 
-    return menuRunPanel((void *)context, 2, (void *)task);
+    return menuRunPanel(work, 2, (void *)task);
 }
 
 /* Require the fade to be inactive before testing message-window control for idle. */

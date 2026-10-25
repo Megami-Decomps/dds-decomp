@@ -68,7 +68,7 @@ typedef struct MenuSlotState {
     struct sdfMemHandle_t *heapHandle;
     u32 initFlags; /* 0x04: entry initialization bits */
     MenuPopupState transitionWork; /* 0x08 */
-    s32 dispatchStatus; /* 0x54 */
+    s32 popupState; /* 0x54: current popup dispatch state */
     MenuPopupEntry *popupTable; /* 0x58: table restored after panel dispatch */
     EvtResourcePair messageResources; /* 0x5C */
     EffectSlotSet *resourceBank[4]; /* 0x64: loaded effect-slot owners */
@@ -1151,20 +1151,24 @@ s32 fldPollSceneState(void) {
 
 /* Seed the task's popup slot before dispatching mode zero with the supplied request. */
 s32 mnuPrepareTerminalPopupAndDispatch(dds3ProcessID_t *request) {
-    s32 context = dds3GetProcessData(request);
+    MenuSlotState *scene = (MenuSlotState *)dds3GetProcessData(request);
 
-    mnuSetPopupEntry((s32 *)(context + 0x54), mnuTerminalPreparationPopupEntry);
-    return menuSetHandler((void *)context, 0, (void *)request);
+    mnuSetPopupEntry(&scene->popupState, mnuTerminalPreparationPopupEntry);
+    return menuSetHandler(scene, 0, (void *)request);
 }
 
 /* Dispatch current task work through panel mode one; distinct callback role unknown. */
 s32 evtRunTerminalPanel(dds3ProcessID_t *request) {
-    return menuSetHandler((void *)dds3GetProcessData(request), 1, (void *)request);
+    MenuSlotState *scene = (MenuSlotState *)dds3GetProcessData(request);
+
+    return menuSetHandler(scene, 1, (void *)request);
 }
 
 /* Dispatch current task work through panel mode two; distinct callback role unknown. */
 s32 evtRunTerminalPanelSync(dds3ProcessID_t *request) {
-    return menuSetHandler((void *)dds3GetProcessData(request), 2, (void *)request);
+    MenuSlotState *scene = (MenuSlotState *)dds3GetProcessData(request);
+
+    return menuSetHandler(scene, 2, (void *)request);
 }
 
 /* Require the fade to be inactive before testing message-window control for idle. */
@@ -1901,7 +1905,7 @@ extern MenuPopupEntry mnuTerminalEntryMessagePopupEntry[];
 s32 evtBHandleSelectionPanelInput(dds3ProcessID_t *input) {
     MenuSlotState *context = (MenuSlotState *)dds3GetProcessData(input);
     u32 buttons = mnuMapPadMaskToFlags(0x33);
-    s32 *state = &context->dispatchStatus;
+    s32 *state = &context->popupState;
     s32 kind = context->commandLists[0]->cursor->index;
     s32 frames;
     s32 action;
@@ -2018,7 +2022,7 @@ extern void slSetTmnlID(s32 x, s32 y);
 /* Poll the file task after the dispatch/fade barrier, then restore the menu popup. */
 s32 mnuOpenFileMenuFromTerminal(dds3ProcessID_t *request) {
     MenuSlotState *state = (MenuSlotState *)dds3GetProcessData(request);
-    s32 *dispatch = &state->dispatchStatus;
+    s32 *dispatch = &state->popupState;
     s32 result = mnuDispatchPopupTransition(&state->transitionWork, dispatch, 0, request);
 
     if (result != 0) {
@@ -2033,7 +2037,7 @@ s32 mnuOpenFileMenuFromTerminal(dds3ProcessID_t *request) {
         fileStartMemoryCardMenuForMode(0);
         state->fileTaskActive = 1;
     }
-    if (state->dispatchStatus == 0 && fileMenuTaskExists() == 0 &&
+    if (state->popupState == 0 && fileMenuTaskExists() == 0 &&
         sdfDelayedResrcCheck() == 0) {
         state->fileTaskActive = 0;
         mnuSetPopupEntryFlagged(dispatch, mnuTerminalPopupEntries);
@@ -2090,7 +2094,7 @@ u32 evtFinishPendingSelectionTransition(dds3ProcessID_t *task) {
 s32 mnuUpdateTerminalSelectionInput(dds3ProcessID_t *request) {
     MenuSlotState *context = (MenuSlotState *)dds3GetProcessData(request);
     u32 buttons = mnuMapPadMaskToFlags(0x33);
-    s32 *dispatch = &context->dispatchStatus;
+    s32 *dispatch = &context->popupState;
     s32 result = mnuDispatchPopupTransition(&context->transitionWork, dispatch, 0, request);
 
     if (result != 0 || context->secondaryList->scale < 0x100) {
@@ -2163,7 +2167,7 @@ u32 evtBEnterStateA(dds3ProcessID_t *task) {
 s32 mnuHandleTerminalRecoverySelection(dds3ProcessID_t *task) {
     MenuSlotState *host = (MenuSlotState *)dds3GetProcessData(task);
     u32 buttons = mnuMapPadMaskToFlags(0x33);
-    s32 *dispatch = &host->dispatchStatus;
+    s32 *dispatch = &host->popupState;
     s32 result = mnuDispatchPopupTransition(&host->transitionWork, dispatch, 0, task);
     MenuListNode *node;
     MenuThresholdEntry *entry;
@@ -2262,7 +2266,7 @@ u32 evtSelectFinalVisualNode(dds3ProcessID_t *task) {
 
 s32 evtOpenTerminalFollowupPopupWhenIdle(dds3ProcessID_t *request) {
     MenuSlotState *state = (MenuSlotState *)dds3GetProcessData(request);
-    s32 *panel = &state->dispatchStatus;
+    s32 *panel = &state->popupState;
     s32 result = mnuDispatchPopupTransition(&state->transitionWork, panel, 0, request);
     if (result != 0) {
         return result;
@@ -2350,7 +2354,7 @@ extern MenuPopupEntry mnuTerminalPopupEntries[];
  * keep the request outstanding until that barrier has drained. */
 s32 evtPollDispatchAfterFade(dds3ProcessID_t *request) {
     MenuSlotState *state = (MenuSlotState *)dds3GetProcessData(request);
-    s32 *dispatch = &state->dispatchStatus;
+    s32 *dispatch = &state->popupState;
     s32 result = mnuDispatchPopupTransition(&state->transitionWork, dispatch, 0, request);
     if (result == 0) {
         if (dds3FadeCheck() == 0) {
@@ -2421,7 +2425,7 @@ extern MenuPopupEntry mnuTerminalReturnToMenuPopupEntry[];
 
 s32 evtOpenTerminalOwnerStatePopup(dds3ProcessID_t *request) {
     MenuSlotState *state = (MenuSlotState *)dds3GetProcessData(request);
-    s32 *dispatch = &state->dispatchStatus;
+    s32 *dispatch = &state->popupState;
     s32 result = mnuDispatchPopupTransition(&state->transitionWork, dispatch, 0, (void *)request);
 
     if (result == 0) {
@@ -2481,7 +2485,7 @@ s32 evtBContinueDispatchOrRestoreTable(dds3ProcessID_t *request) {
     s32 *dispatch;
 
     state = (MenuSlotState *)dds3GetProcessData(request);
-    dispatch = &state->dispatchStatus;
+    dispatch = &state->popupState;
     result = mnuDispatchPopupTransition(&state->transitionWork, dispatch, 0, request);
     if (result != 0) {
         return result;
@@ -2546,7 +2550,7 @@ s32 evtBRebuildTerminalMenuAndResetDispatch(dds3ProcessID_t *task) {
 /* Selection chain startup: fade in once the field frames are drained, then open the popup when the fade finishes. */
 s32 evtBStartSelectionChainAfterFade(dds3ProcessID_t *request) {
     MenuSlotState *state = (MenuSlotState *)dds3GetProcessData(request);
-    s32 *dispatch = &state->dispatchStatus;
+    s32 *dispatch = &state->popupState;
     s32 result = mnuDispatchPopupTransition(&state->transitionWork, dispatch, 0, request);
 
     if (result == 0) {
@@ -2628,7 +2632,7 @@ extern MenuPopupEntry mnuTerminalPanelPopupEntry[];
 /* Wait for the mode's load/fade barrier before binding the terminal exit popup. */
 s32 evtWaitForTerminalExitPopup(dds3ProcessID_t *request) {
     MenuSlotState *state = (MenuSlotState *)dds3GetProcessData(request);
-    s32 *dispatch = &state->dispatchStatus;
+    s32 *dispatch = &state->popupState;
     s32 ready = 0;
     s32 result = mnuDispatchPopupTransition(&state->transitionWork, dispatch, 0, request);
 
@@ -2643,7 +2647,7 @@ s32 evtWaitForTerminalExitPopup(dds3ProcessID_t *request) {
             }
         }
     }
-    if (state->dispatchStatus == 0) {
+    if (state->popupState == 0) {
         if (state->reduced == 0) {
             ready = dds3SearchProcessName(D_00425008) == NULL;
             if (evtIsActiveFlagSet(0) != 0) {
