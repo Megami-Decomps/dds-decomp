@@ -701,6 +701,13 @@ void dds3Billboard_P2ASetAnim(BillData *animationData, s32 entryIndex, BillOut *
 
 #include "sdf_debug_api.h"
 
+enum {
+    BILL_ANIMATION_ENTRY_MODE_MTEX = 0x00000040,
+    BILL_ANIMATION_ENTRY_MODE_AMTEX = 0x00000080,
+    BILL_ANIMATION_ENTRY_MODE_TWO_ENTRY_MASK = 0x000000C0,
+    BILL_ANIMATION_ENTRY_MODE_P2A_POLYGON_LOG = 0x00000100
+};
+
 /* Select an animation and initialize the plural records' signed start delays. */
 void dds3Billboard_P2ASetNumber(billHandle_t *obj, s32 animationEntryIndex) {
     BillData *data = obj->animationData;
@@ -723,7 +730,7 @@ void dds3Billboard_P2ASetNumber(billHandle_t *obj, s32 animationEntryIndex) {
             dds3Billboard_P2ASetAnim(data, records[i].entryIndex, obj->resolvedEntries + i);
             (obj->resolvedEntries)[i].frameIndex = -records[i].delay;
         }
-    } else if (entry->entryModeFlags & 0xC0) {
+    } else if (entry->entryModeFlags & BILL_ANIMATION_ENTRY_MODE_TWO_ENTRY_MASK) {
         printf("billAnim..(A)MTEX SET\n");
         obj->modeFlags = entry->entryModeFlags;
         obj->animationEntryIndex = animationEntryIndex;
@@ -736,7 +743,7 @@ void dds3Billboard_P2ASetNumber(billHandle_t *obj, s32 animationEntryIndex) {
         obj->animationEntryIndex = animationEntryIndex;
         dds3Billboard_P2ASetAnim(data, animationEntryIndex, obj->resolvedEntries);
     }
-    if (entry->entryModeFlags & 0x100) {
+    if (entry->entryModeFlags & BILL_ANIMATION_ENTRY_MODE_P2A_POLYGON_LOG) {
         printf("billAnim..P2A POLYGON\n");
     }
     obj->animationActive = 1;
@@ -775,10 +782,10 @@ BillData *billCreateAnimationDataFromResource(void *resourceData) {
             data->entryCount = entry->frameCount;
             printf("billAnim no[%d][%d]...PLURAL\n", resourceIndex, data->entryCount);
         } else {
-            if (entry->entryModeFlags & 0x40) {
+            if (entry->entryModeFlags & BILL_ANIMATION_ENTRY_MODE_MTEX) {
                 data->entryCount = 2;
                 printf("billAnim no[%d][%d]...MTEX\n", resourceIndex, 2);
-            } else if (entry->entryModeFlags & 0x80) {
+            } else if (entry->entryModeFlags & BILL_ANIMATION_ENTRY_MODE_AMTEX) {
                 data->entryCount = 2;
                 printf("billAnim no[%d][%d]...AMTEX\n", resourceIndex, 2);
             }
