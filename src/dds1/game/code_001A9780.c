@@ -7949,7 +7949,8 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
                     BTL_COMMAND_AFFINITY_PARTNERS_UNAVAILABLE) {
                     break;
                 }
-                if (btlResolveCommandAffinityPartners(object->owner->unit, D_00359160.entries[entry].skill, &partners) == 0) {
+                if (btlResolveCommandAffinityPartners(object->owner->unit, D_00359160.entries[entry].skill, &partners) ==
+                    BTL_COMMAND_AFFINITY_PARTNERS_UNRESOLVED) {
                     break;
                 }
                 object->owner->indexWork.companionA = partners.firstPartner;

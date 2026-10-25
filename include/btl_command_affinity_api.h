@@ -9,8 +9,14 @@ enum {
     BTL_COMMAND_AFFINITY_PARTNERS_AVAILABLE = 1,
 };
 
+typedef s32 BtlCommandAffinityPartnerResolution;
+enum {
+    BTL_COMMAND_AFFINITY_PARTNERS_UNRESOLVED = 0,
+    BTL_COMMAND_AFFINITY_PARTNERS_RESOLVED = 1,
+};
+
 BtlCommandAffinityPartnerAvailability btlHasRequiredCommandAffinityPartners(BtlUnit *unit, s32 command);
-s32 btlResolveCommandAffinityPartners(BtlUnit *unit, s32 command,
-                                     BtlCommandPartnerOutput *output);
+BtlCommandAffinityPartnerResolution btlResolveCommandAffinityPartners(
+    BtlUnit *unit, s32 command, BtlCommandPartnerOutput *output);
 
 #endif

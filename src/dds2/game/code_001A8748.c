@@ -15,7 +15,7 @@
 #include "kwln_task_add_child.h"
 #include "btl_special_ability.h"
 #include "dat_unit_has_skill_api.h"
-#include "btl_command_partner_output.h"
+#include "btl_command_affinity_api.h"
 #include "btl_enc_bg_entry.h"
 #include "btl_animation_mode_entry.h"
 #include "btl_effect_position.h"
@@ -2323,18 +2323,19 @@ s32 btlBuildActorLinkageSkillList(BtlUnit *actor, BattleRosterTable *table) {
 extern ActionStateLink *fldGetSceneGroupEntry(s32 entryIndex);
 extern s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, BtlUnit **first, BtlUnit **second);
 
-s32 btlResolveCommandAffinityPartners(BtlUnit *unit, s32 command, BtlCommandPartnerOutput *output) {
+BtlCommandAffinityPartnerResolution btlResolveCommandAffinityPartners(
+    BtlUnit *unit, s32 command, BtlCommandPartnerOutput *output) {
     BtlState *controller = (BtlState *)btlGetRuntime();
     s32 *requirementCursor;
     u32 requiredCount;
     u32 i;
-    s32 result;
+    BtlCommandAffinityPartnerResolution result;
 
     if (datCommandSelectors[command].kind != 1) {
-        return 0;
+        return BTL_COMMAND_AFFINITY_PARTNERS_UNRESOLVED;
     }
     if ((u32)(command - DAT_AFFINITY_FIRST_COMMAND) >= 0x75) {
-        return 0;
+        return BTL_COMMAND_AFFINITY_PARTNERS_UNRESOLVED;
     }
     requiredCount = 0;
     requirementCursor = datAffinityRecords[command - DAT_AFFINITY_FIRST_COMMAND].requirements;
@@ -2344,7 +2345,7 @@ s32 btlResolveCommandAffinityPartners(BtlUnit *unit, s32 command, BtlCommandPart
         }
     }
     if (requiredCount == 0) {
-        return 0;
+        return BTL_COMMAND_AFFINITY_PARTNERS_UNRESOLVED;
     }
     if ((datAffinityRecords[command - DAT_AFFINITY_FIRST_COMMAND].flags & 2) == 0 &&
         (datBattleSceneRecords[controller->battleMode].flags & 1) == 0) {
@@ -2360,17 +2361,17 @@ s32 btlResolveCommandAffinityPartners(BtlUnit *unit, s32 command, BtlCommandPart
                 BtlUnit *partner;
 
                 if (entry == NULL) {
-                    return 0;
+                    return BTL_COMMAND_AFFINITY_PARTNERS_UNRESOLVED;
                 }
                 partner = entry->unit;
                 if ((partner->status.flags & 0x400) == 0) {
-                    return 0;
+                    return BTL_COMMAND_AFFINITY_PARTNERS_UNRESOLVED;
                 }
                 if ((partner->status.flags & 0xE0) != 0) {
-                    return 0;
+                    return BTL_COMMAND_AFFINITY_PARTNERS_UNRESOLVED;
                 }
                 if ((partner->partyRecord.status & 0x2A0E) != 0) {
-                    return 0;
+                    return BTL_COMMAND_AFFINITY_PARTNERS_UNRESOLVED;
                 }
                 switch (i) {
                 case 1:
@@ -2381,7 +2382,7 @@ s32 btlResolveCommandAffinityPartners(BtlUnit *unit, s32 command, BtlCommandPart
                     break;
                 }
             }
-            return 1;
+            return BTL_COMMAND_AFFINITY_PARTNERS_RESOLVED;
         }
         if (requiredCount == 2) {
             ActionStateLink *entry = fldGetSceneGroupEntry(2);
@@ -2394,25 +2395,25 @@ s32 btlResolveCommandAffinityPartners(BtlUnit *unit, s32 command, BtlCommandPart
 
                 entry = fldGetSceneGroupEntry(1);
                 if (entry == NULL) {
-                    return 0;
+                    return BTL_COMMAND_AFFINITY_PARTNERS_UNRESOLVED;
                 }
                 partner = entry->unit;
                 if ((partner->status.flags & 0x400) == 0) {
-                    return 0;
+                    return BTL_COMMAND_AFFINITY_PARTNERS_UNRESOLVED;
                 }
                 if ((partner->status.flags & 0xE0) != 0) {
-                    return 0;
+                    return BTL_COMMAND_AFFINITY_PARTNERS_UNRESOLVED;
                 }
                 if ((partner->partyRecord.status & 0x2A0E) == 0) {
                     output->firstPartner = partner;
                 } else {
-                    return 0;
+                    return BTL_COMMAND_AFFINITY_PARTNERS_UNRESOLVED;
                 }
             }
         } else {
-            return 0;
+            return BTL_COMMAND_AFFINITY_PARTNERS_UNRESOLVED;
         }
-        result = 1;
+        result = BTL_COMMAND_AFFINITY_PARTNERS_RESOLVED;
     }
     return result;
 }

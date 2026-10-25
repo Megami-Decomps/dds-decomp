@@ -1509,7 +1509,8 @@ u32 btlScriptSelectActionEntry(void) {
     commandId = scrGetIntPara(0);
     if (datCommandSelectors[commandId].kind == 1) {
         if (btlHasRequiredCommandAffinityPartners(context->unit, commandId) != BTL_COMMAND_AFFINITY_PARTNERS_UNAVAILABLE &&
-            btlResolveCommandAffinityPartners(context->unit, commandId, &probe) != 0) {
+            btlResolveCommandAffinityPartners(context->unit, commandId, &probe) !=
+                BTL_COMMAND_AFFINITY_PARTNERS_UNRESOLVED) {
             context->actionProbeFirst = probe.firstPartner;
             context->commandMode = 3;
             context->commandValue = probe.commandId;
