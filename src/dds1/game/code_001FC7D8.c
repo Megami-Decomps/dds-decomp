@@ -94,18 +94,18 @@ void btlDrawUnitStatusShadowDisc(BtlUnit *unit) {
         alpha = ((u8 *)&unit->overlayColor)[3];
         status = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->species);
         switch (status->shadowKind) {
-        case 0:
+        case BTL_ACTOR_SHADOW_NONE:
             return;
-        case 1:
+        case BTL_ACTOR_SHADOW_SMALL:
             radius = 50.0f;
             break;
-        case 2:
+        case BTL_ACTOR_SHADOW_MEDIUM:
             radius = 100.0f;
             break;
-        case 3:
+        case BTL_ACTOR_SHADOW_LARGE:
             radius = 200.0f;
             break;
-        case 4:
+        case BTL_ACTOR_SHADOW_EXTRA_LARGE:
             radius = 300.0f;
             break;
         default:

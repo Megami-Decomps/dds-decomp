@@ -2761,11 +2761,11 @@ void btlWriteActorModelTableFile(void) {
     cursor += sprintf(cursor, "%s: %.2f\n", btlDebugModelTableLabels[8], (double)btlDebugEditorActorStatus.positionGuideScale);
     cursor += sprintf(cursor, D_003BBAC0, btlDebugModelTableLabels[9]);
     switch (btlDebugEditorActorStatus.shadowKind) {
-    case 0: cursor += sprintf(cursor, D_003BBAB8, "UV_SHADOW_NON"); break;
-    case 1: cursor += sprintf(cursor, D_003BBAB8, "UV_SHADOW_S"); break;
-    case 2: cursor += sprintf(cursor, D_003BBAB8, "UV_SHADOW_M"); break;
-    case 3: cursor += sprintf(cursor, D_003BBAB8, "UV_SHADOW_L"); break;
-    case 4: cursor += sprintf(cursor, D_003BBAB8, "UV_SHADOW_LL"); break;
+    case BTL_ACTOR_SHADOW_NONE: cursor += sprintf(cursor, D_003BBAB8, "UV_SHADOW_NON"); break;
+    case BTL_ACTOR_SHADOW_SMALL: cursor += sprintf(cursor, D_003BBAB8, "UV_SHADOW_S"); break;
+    case BTL_ACTOR_SHADOW_MEDIUM: cursor += sprintf(cursor, D_003BBAB8, "UV_SHADOW_M"); break;
+    case BTL_ACTOR_SHADOW_LARGE: cursor += sprintf(cursor, D_003BBAB8, "UV_SHADOW_L"); break;
+    case BTL_ACTOR_SHADOW_EXTRA_LARGE: cursor += sprintf(cursor, D_003BBAB8, "UV_SHADOW_LL"); break;
     }
     cursor += sprintf(cursor, D_003BBAC8, btlDebugModelTableLabels[10], btlDebugEditorActorStatus.model);
     cursor += sprintf(cursor, D_003BBAD0, btlDebugModelTableLabels[11]);
