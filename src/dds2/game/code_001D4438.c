@@ -1173,8 +1173,8 @@ void btlInitializeActorCommandState(ActionStateLink *task) {
 }
 
 /* Allow the AI updater to bind this acting unit's script slot once again. */
-void btlEnterAiActionState(s32 task) {
-    ((ActionStateLink *)task)->pendingFlags = ((ActionStateLink *)task)->pendingFlags & 0xffffff7f;
+void btlEnterAiActionState(ActionStateLink *task) {
+    task->pendingFlags = task->pendingFlags & 0xffffff7f;
 }
 
 extern AiSpecies *datEnemyAiRecords;
