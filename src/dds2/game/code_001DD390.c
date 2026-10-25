@@ -65,6 +65,7 @@
 #include "fpu.h"
 #include "dat_state.h"
 #include "dat_command.h"
+#include "btl_command_id.h"
 #include "mdl_flag_api.h"
 #include "dds3_world_counter.h"
 #include "sdf_vu_matrix.h"
@@ -349,7 +350,7 @@ s32 btlIsSupportedCommandKind(const s32 *phase) {
 extern s32 btlSelectRandomAutoAttackSkill(BtlUnit *unit);
 extern s32 btlGetActorBedAssetIdFromIndex(s32 itemIndex);
 
-s32 btlResolveActionOperand(BtlUnit *unit, BattleIndexWork *work) {
+BtlCommandId btlResolveActionOperand(BtlUnit *unit, BattleIndexWork *work) {
     s32 value;
     switch (work->phase) {
     case 1:
@@ -372,7 +373,7 @@ s32 btlResolveActionOperand(BtlUnit *unit, BattleIndexWork *work) {
     case 8:
         return work->skillId;
     default:
-        return -1;
+        return BTL_COMMAND_ID_INVALID;
     }
 }
 
@@ -633,7 +634,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
     s32 huntHpRecovery;
     s32 huntMpRecovery;
     s32 cumulativeHp;
-    s32 command;
+    BtlCommandId command;
     u32 costError;
     s32 helperResult;
     s32 counterCommand;
@@ -674,7 +675,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
     runtime = (BtlState *)btlGetRuntime();
     action->flags &= ~2;
     command = btlResolveActionOperand(action->unit, work);
-    if (command == -1) {
+    if (command == BTL_COMMAND_ID_INVALID) {
         return;
     }
     reflectedHp = 0;

@@ -65,6 +65,7 @@
 #include "sdf.h"
 #include "file.h"
 #include "dat_command.h"
+#include "btl_command_id.h"
 #include "file_request_api.h"
 #include "dat_affinity.h"
 #include "mdl_flag_api.h"
@@ -344,7 +345,7 @@ s32 btlIsSupportedCommandKind(const s32 *phase) {
     }
 }
 
-s32 btlResolveActionOperand(BtlUnit *unit, BattleIndexWork *work) {
+BtlCommandId btlResolveActionOperand(BtlUnit *unit, BattleIndexWork *work) {
     switch (work->phase) {
     case 1:
         if ((btlUnitStatusPair(unit) & 0x1200) == 0x200) {
@@ -362,7 +363,7 @@ s32 btlResolveActionOperand(BtlUnit *unit, BattleIndexWork *work) {
     case 8:
         return work->skillId;
     default:
-        return -1;
+        return BTL_COMMAND_ID_INVALID;
     }
 }
 
@@ -594,7 +595,7 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
     s32 huntHpRecovery;
     s32 huntMpRecovery;
     s32 cumulativeHp;
-    s32 command;
+    BtlCommandId command;
     u32 costError;
     s32 helperResult;
     s32 counterCommand;
@@ -634,7 +635,7 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
     runtime = (BtlState *)btlGetRuntime();
     action->options &= ~2;
     command = btlResolveActionOperand(action->unit, work);
-    if (command == -1) {
+    if (command == BTL_COMMAND_ID_INVALID) {
         return;
     }
     reflectedHp = 0;
