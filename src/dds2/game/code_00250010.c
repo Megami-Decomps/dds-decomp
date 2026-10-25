@@ -5566,7 +5566,7 @@ extern void movieStop(void);
 extern s32 sdfDelayedResrcCheck(void);
 extern void dds3FreeRenderTexture(void);
 extern u32 dds3DrawFlag;
-extern void evtFormatPolygonMoviePaths(u16 eventId, u16 sceneId, char *path0, char *path1, char *path2);
+extern s32 evtFormatPolygonMoviePaths(s32 eventId, s32 sceneId, char *path0, char *path1, char *path2);
 extern s32 sdfFileCheckExist(const char *path);
 extern void evtFreeStage(void);
 
