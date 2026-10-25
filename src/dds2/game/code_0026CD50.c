@@ -160,7 +160,7 @@ void mnuLoadMantraPanelPositionTable(const u8 *resourceData) {
 
 /* Release the retained panel-position handle and clear the global table address. */
 void mnuReleaseMantraPanelPositionTable(void) {
-    sdfMemFreeDirect((struct sdfMemHandle_t *)(u32)mnuMantraPanelPositionTable->handle);
+    sdfMemFreeDirect(mnuMantraPanelPositionTable->handle);
     mnuMantraPanelPositionTable = 0;
 }
 
