@@ -1295,7 +1295,7 @@ s32 evtCommand_PATH_LOOP_OFF(void)
 }
 
 s32 evtCommand_LIGHT_PATH_MOVE(void) {
-    void *pathOwner = evtSearchBasic(9, scrGetIntPara(0));
+    dds3Basic_t *pathOwner = evtSearchBasic(9, scrGetIntPara(0));
 
     if (evtPathLinkAndMake(evtSearchBasic(0x10, scrGetIntPara(1)), pathOwner) != EVT_PATH_LINK_FAILED) {
         return 1;
