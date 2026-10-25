@@ -2593,14 +2593,14 @@ s32 ptyGetAffinityFlagsWithoutOverride(s32 affinityId, s32 index) {
     return value;
 }
 
-s32 mnuIsBulletItemId(s32 id) {
+u8 mnuIsBulletItemId(s32 id) {
     if (id < 0xA0) {
         return 0;
     }
     return id < 0xC0;
 }
 
-s32 mnuIsSolarPricedItemId(s32 id) {
+u8 mnuIsSolarPricedItemId(s32 id) {
     if (id < 0x60) {
         return 0;
     }

@@ -169,8 +169,8 @@ extern u8 mnuCampListedItemSolarWeightsView[];
 
 
 extern s32 mnuIsHighRangeItemId(s32);
-extern s32 mnuIsBulletItemId(s32);
-extern s32 mnuIsSolarPricedItemId(s32);
+extern u8 mnuIsBulletItemId(s32);
+extern u8 mnuIsSolarPricedItemId(s32);
 
 extern u8 mnuCampWideRewardEntries[];
 
@@ -2566,7 +2566,7 @@ extern const EvtFlagGate D_003CE400[];
 extern s32 mnuTickExtendedCommandPhase(MenuTerminalContext *);
 
 
-extern s32 mnuIsSolarPricedItemId();
+extern u8 mnuIsSolarPricedItemId(s32);
 extern MenuPopupEntry mnuShopProgressGatePopupEntry[];
 extern u16 D_003CE3F8[];
 extern void mnuDrawSpriteMenuFadeOut();

@@ -33,9 +33,9 @@ void mnuDrawStaffItemListEntry(s32 x, s32 y, s32 z, s32 list, s32 node, s32 draw
 }
 
 extern char (*D_00435E5C)[25];
-extern s32 mnuIsBulletItemId(s32);
+extern u8 mnuIsBulletItemId(s32);
 extern s32 mnuIsHighRangeItemId(s32);
-extern s32 mnuIsSolarPricedItemId(s32);
+extern u8 mnuIsSolarPricedItemId(s32);
 extern s32 mtrMantraFindIndex(s32);
 extern u8 evtCheckValueThreshold(s32 itemId, s32 minimum);
 extern void mnuDrawCampGridResourceSlot(s32, s32, s32, struct MenuList *,
