@@ -5687,7 +5687,7 @@ s32 btlIsLinkageTutorialEligible(void) {
 extern s32 btlBuildActorLinkageSkillList(BtlUnit *actor, BattleRosterTable *table);
 
 /* Clear working notice flags, then test for an unmarked eligible LINKAGE skill. */
-u8 btlHasUnmarkedLinkageSkill(s32 unit) {
+u8 btlHasUnmarkedLinkageSkill(BtlUnit *unit) {
     s32 count;
     s32 i;
 
@@ -5714,7 +5714,7 @@ s32 btlGetTaskState6(void) {
         return 0;
     }
     scene = (BattleSceneObject *)dds3GetProcessData(task);
-    count = btlHasUnmarkedLinkageSkill((s32)scene->owner->unit);
+    count = btlHasUnmarkedLinkageSkill(scene->owner->unit);
     return count;
 }
 
@@ -9121,7 +9121,7 @@ void fldCollectAvailableRosterEntries(s32 unused, s16 *count) {
 BattleRosterTable *btlGetActorLinkageSkillList(BattleSceneObject *object, u16 *outCount) {
     s32 cachedCount = D_004367C0;
     if (cachedCount == 0) {
-        cachedCount = btlBuildActorLinkageSkillList((s32)object->owner->unit, &D_003B5D10);
+        cachedCount = btlBuildActorLinkageSkillList(object->owner->unit, &D_003B5D10);
         D_004367C0 = cachedCount;
     }
     *outCount = cachedCount;
