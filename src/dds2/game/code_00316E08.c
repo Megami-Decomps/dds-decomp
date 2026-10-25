@@ -19,6 +19,7 @@
 #include "mdl.h"
 #include "itf.h"
 #include "mnu_shooting.h"
+#include "mnu_shooting_round_phase_api.h"
 #include "kwln_task_lifecycle.h"
 #include "file_pac.h"
 #include "file_request_api.h"
@@ -979,7 +980,6 @@ extern MenuRuntimeList *mnuGetRuntimeAnimationList(void);
 extern s32 mnuDispatchRuntimeWorkOverlaps(MenuRuntimeList *, MnuShootingWork *);
 extern void CalcCamera(void);
 extern void mnuTickScoreProgressState(MnuShootingWork *);
-extern s32 mnuAdvanceShootingRoundPhase(MnuShootingWork *);
 extern void mnuResetCurrentAndPeakScoresToPending(MnuShootingWork *);
 extern void mnuClearRuntimeRecordStorage(MenuRuntimeList *);
 void mnuRequestTimedEntryEffectStop(void);
@@ -1075,9 +1075,9 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
     CalcCamera();
     mnuTickScoreProgressState(work);
     switch (mnuAdvanceShootingRoundPhase(work)) {
-    case 0:
+    case MNU_SHOOTING_ROUND_RESULT_NO_ACTION:
         break;
-    case 3:
+    case MNU_SHOOTING_ROUND_RESULT_SESSION_RESET:
         work->frameDisplayValue = 2;
         work->savedPlayerMode = 0;
         work->flags |= 4;
@@ -1088,12 +1088,12 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
         itfSetFadeGaugeDisplayValue(&work->gauge, 0);
         work->round = 0;
         return 1;
-    case 2:
+    case MNU_SHOOTING_ROUND_RESULT_SESSION_STOP:
         work->state = -1;
         work->round = 0;
         work->flags |= 4;
         return 1;
-    case 1:
+    case MNU_SHOOTING_ROUND_RESULT_ROUND_COMPLETE:
         mode = D_0040ABF8.flagsBits.mode;
         work->progress = 0;
         work->completed = 0;

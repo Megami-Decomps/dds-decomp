@@ -2,6 +2,7 @@
 #include "mnu_work.h"
 #include "dat_state.h"
 #include "mnu_shooting.h"
+#include "mnu_shooting_round_phase_api.h"
 #include "mdl_flag_api.h"
 #include "kwln_fade.h"
 
@@ -144,7 +145,7 @@ void mnuTickScoreProgressState(MnuShootingWork *work) {
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
 extern s8 dds3PadButtonState[];
 
-s32 mnuAdvanceShootingRoundPhase(MnuShootingWork *work) {
+MnuShootingRoundPhaseResult mnuAdvanceShootingRoundPhase(MnuShootingWork *work) {
     switch (work->phase) {
     case 0:
         work->phaseTicks = 0;
@@ -187,7 +188,7 @@ s32 mnuAdvanceShootingRoundPhase(MnuShootingWork *work) {
         work->state = 0;
         work->phase = 0;
         work->round++;
-        return 1;
+        return MNU_SHOOTING_ROUND_RESULT_ROUND_COMPLETE;
     case 8:
         work->phaseTicks = 0;
         work->phase = 9;
@@ -233,14 +234,14 @@ s32 mnuAdvanceShootingRoundPhase(MnuShootingWork *work) {
             case 0:
                 work->phase = 0;
                 work->state = 0;
-                return 3;
+                return MNU_SHOOTING_ROUND_RESULT_SESSION_RESET;
             case 1:
                 work->phase = 0;
                 work->state = 0;
-                return 2;
+                return MNU_SHOOTING_ROUND_RESULT_SESSION_STOP;
             }
         }
         break;
     }
-    return 0;
+    return MNU_SHOOTING_ROUND_RESULT_NO_ACTION;
 }
