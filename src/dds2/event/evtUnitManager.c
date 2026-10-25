@@ -11,6 +11,7 @@ struct EffNodeDescriptor;
 #include "sdf_chip.h"
 #include "dds3_path.h"
 #include "evt_unit.h"
+#include "evt_unit_move_end_api.h"
 #include "evt_unit_vector_slot.h"
 #include "evt_unit_motion_slot_flags.h"
 #include "evt_unit_transition_flags.h"
@@ -1038,7 +1039,6 @@ s32 evtUnitMoveType0(evtUnitHandle_t *unit) {
 }
 
 
-extern s32 evtCheckMoveEnd(evtUnitHandle_t *unit);
 #include "sdf_debug_api.h"
 
 /* Run a copy of the unit until evtCheckMoveEnd reports done, and derive its per-step Y speed. */
@@ -1060,7 +1060,7 @@ s32 evtUnitPrepareVerticalMoveSteps(evtUnitHandle_t *unit) {
         savedB[vectorComponentIndex] = unit->effObj->inner->rotation[vectorComponentIndex];
     }
     copy = *unit;
-    while (evtCheckMoveEnd(&copy) == 0) {
+    while (evtCheckMoveEnd(&copy) == EVT_UNIT_MOVE_END_NOT_REACHED) {
         simulatedStepCount++;
         evtUnitMoveType0(&copy);
     }
@@ -1353,7 +1353,6 @@ s32 evtStartUnitModeWithValue(evtUnitHandle_t *eventUnit, s32 (*callback)(evtUni
 
 extern void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *);
 extern s32 evtUnitRotationQuat(evtUnitHandle_t *, f32 *, f32);
-extern s32 evtCheckMoveEnd(evtUnitHandle_t *);
 extern s32 evtGetNextMovePos(evtUnitHandle_t *);
 extern s32 evtUnitMoveType0(evtUnitHandle_t *);
 extern s32 evtUnitMoveTypePathTrace(evtUnitHandle_t *);
@@ -1418,7 +1417,7 @@ s32 evtUpdateUnitMotion(dds3PoseSet_t *unused, dds3Basic_t *object) {
         }
         break;
     case EVT_UNIT_MOTION_STATE_SOURCE:
-        if (evtCheckMoveEnd(unit) != 1 || evtGetNextMovePos(unit) != 0) {
+        if (evtCheckMoveEnd(unit) != EVT_UNIT_MOVE_END_REACHED || evtGetNextMovePos(unit) != 0) {
             if (unit->motionSetupId != model->current.h.motionIndex) {
                 if (unit->flags & 1) {
                     mdlSmoothLoopMotion(model, 0, unit->motionSetupId, (f32)unit->motionSetupStartFrame, (f32)unit->motionSetupEndFrame);

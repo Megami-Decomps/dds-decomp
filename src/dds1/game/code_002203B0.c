@@ -8,6 +8,7 @@
 #include "dds3_path.h"
 #include "evt_world.h"
 #include "evt_unit.h"
+#include "evt_unit_move_end_api.h"
 #include "pcp_vu0.h"
 #include "dds3_world_counter.h"
 #include "sdf_vu_matrix.h"
@@ -132,7 +133,7 @@ void evtGetUnitDirVector(evtUnitHandle_t *unit) {
 }
 
 /* vu0 routine: test target range or the selected path endpoint. */
-s32 evtCheckMoveEnd(evtUnitHandle_t *unit) {
+EvtUnitMoveEndResult evtCheckMoveEnd(evtUnitHandle_t *unit) {
     f32 value;
 
     switch (unit->motionSubmode) {
@@ -142,21 +143,21 @@ s32 evtCheckMoveEnd(evtUnitHandle_t *unit) {
         evtVu0SubVectorXZAxis(unit->targetVector, unit->effObj->inner->position);
         SDF_VU0_GETLENGTH(value);
         if (value <= 20.0f) {
-            return 1;
+            return EVT_UNIT_MOVE_END_REACHED;
         }
         break;
     case EVT_UNIT_MOTION_SUBMODE_PATH_ENDPOINT:
         value = dds3PathBasicControlGetRatio(&unit->pathControl->counter);
         if (unit->flags & EVT_UNIT_FLAG_PATH_REVERSE) {
             if (value == 0.0f) {
-                return 1;
+                return EVT_UNIT_MOVE_END_REACHED;
             }
         } else if (value == 1.0f) {
-            return 1;
+            return EVT_UNIT_MOVE_END_REACHED;
         }
         break;
     }
-    return 0;
+    return EVT_UNIT_MOVE_END_NOT_REACHED;
 }
 
 
