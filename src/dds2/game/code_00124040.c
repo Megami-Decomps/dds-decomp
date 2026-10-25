@@ -2324,7 +2324,7 @@ s32 fldUpdateFieldSceneTask(dds3ProcessID_t *task) {
             if (fldRunDanteGunFlag[0] == 0) fldUpdateNextFloorTransition();
         }
         if (fldGetSparkDialogPhase() != 0) fldUpdateDevilizeEventSequence();
-        if (fldGlobalBase.pendingSceneRequest == 1) fldAdvanceToNextScene();
+        if (fldGlobalBase.pendingSceneRequest == FLD_SCENE_ADVANCE_REQUEST_PENDING) fldAdvanceToNextScene();
         if (fldIsTargetWithinInteractionRange() != 0 && fldGlobalBase.targetGuideActive == 1) {
             fldNoopWithMode(1);
             fldUpdateTravelAndEncounters();
@@ -2351,8 +2351,8 @@ s32 fldUpdateFieldSceneTask(dds3ProcessID_t *task) {
         fldLoadNextFile_SetId_BtlRet(fldGlobalBase.area, fldGlobalBase.floor + 1);
         controller->phase = 0;
         fldGlobalBase.transitionCount++;
-        if (fldGlobalBase.pendingSceneRequest == 0) D_00435F78 = 1;
-        else fldGlobalBase.pendingSceneRequest = 0;
+        if (fldGlobalBase.pendingSceneRequest == FLD_SCENE_ADVANCE_REQUEST_NONE) D_00435F78 = 1;
+        else fldGlobalBase.pendingSceneRequest = FLD_SCENE_ADVANCE_REQUEST_NONE;
         dds3AdminiCallSequence(14, &D_00435F98, sizeof(D_00435F98), 1);
         return -1;
     case 6:

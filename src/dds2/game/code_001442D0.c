@@ -5419,7 +5419,7 @@ void fldUpdateSparkEncounterScene(void) {
         }
         if (fldSparkControlState.state.terminated != 0) {
             mnuMarkTitleStreamResetPending();
-            fldGlobalBase.pendingSceneRequest = 1;
+            fldGlobalBase.pendingSceneRequest = FLD_SCENE_ADVANCE_REQUEST_PENDING;
             fldResetPlayerSceneObjectState();
             fldSparkControlState.state.phase = 7;
             evtBitOn(0x802);

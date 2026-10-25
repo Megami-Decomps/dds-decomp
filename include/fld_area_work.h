@@ -41,6 +41,9 @@ enum FldEntryDialogDisposition {
 #define FLD_POSITION_UPDATE_NONE 0
 #define FLD_POSITION_UPDATE_PENDING 1
 
+#define FLD_SCENE_ADVANCE_REQUEST_NONE 0
+#define FLD_SCENE_ADVANCE_REQUEST_PENDING 1
+
 typedef s32 FldCameraMode;
 
 enum FldCameraMode {
@@ -130,7 +133,7 @@ typedef struct FldAreaWork {
     u16 collectedCount;          /* 0x106: spark pickups. */
     s32 score;                   /* 0x108: pickups add 50. */
     f32 unk10C;                  /* 0x10C: cleared when a spark run starts. */
-    u32 pendingSceneRequest;
+    u32 pendingSceneRequest; /* one-shot request to advance to the next scene */
     s32 deferredExit;
     s32 playerModelAlternate;    /* 0x118: toggles the player_a/player_b model selection. */
     FldTerrainAttritionKind terrainAttritionKind; /* 0x11C: collision-zone category for HP attrition. */
