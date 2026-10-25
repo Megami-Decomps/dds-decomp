@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "snd_packed_track_load_status.h"
+#include "snd_queued_command_dispatch_api.h"
 #include "snd_ring.h"
 #include "common.h"
 #include "snd_track_playback_api.h"
@@ -42,8 +43,6 @@ extern u32 D_00438B90;
 extern vu16 sdfSndCmdIndex;
 extern vu16 sdfSndCmdTailIndex;
 extern s32 sdfSndCmdBuf;
-extern s32 sndTryDispatchQueuedCommand(void);
-
 u32 sdfSndSendCmd(u32 command, u32 channel, const void *packet, s32 payloadBytes) {
     s32 nextWriteIndex;
     s32 wakeAttemptsRemaining;
@@ -75,7 +74,7 @@ u32 sdfSndSendCmd(u32 command, u32 channel, const void *packet, s32 payloadBytes
                      (transferQuadwords << SND_COMMAND_LENGTH_SHIFT);
     sdfSndCmdTailIndex = nextWriteIndex;
     if (sdfSndBurstReqMode != 0) {
-        while (sndTryDispatchQueuedCommand() != 0) {
+        while (sndTryDispatchQueuedCommand() != SND_QUEUED_COMMAND_DISPATCH_RESULT_SENT) {
         }
     } else {
         WakeupThread(sdfSndCmdBuf);

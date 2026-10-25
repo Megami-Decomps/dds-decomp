@@ -1,4 +1,5 @@
 #include "sdk_ps2.h"
+#include "snd_queued_command_dispatch_api.h"
 #include "snd_ring.h"
 #include "common.h"
 #include "eff_random.h"
@@ -97,21 +98,20 @@ extern SndRingPacket sndCommandRing[32];
 extern vu16 sdfSndCmdIndex;
 extern vu16 sdfSndCmdTailIndex;
 
-/* Attempt one queued SIF packet: 0 means sent, 1 means empty or rejected. */
-s32 sndTryDispatchQueuedCommand(void) {
+SndQueuedCommandDispatchResult sndTryDispatchQueuedCommand(void) {
     s32 readIndex = (s16)sdfSndCmdIndex;
     SndRingPacket *packet;
 
     if (readIndex == (s16)sdfSndCmdTailIndex) {
-        return 1;
+        return SND_QUEUED_COMMAND_DISPATCH_RESULT_NOT_SENT;
     }
     packet = &sndCommandRing[readIndex];
     if (sceSifSendCmd(0, packet, (packet->command >> 24) & 0xf0, 0, 0, 0) == 0) {
-        return 1;
+        return SND_QUEUED_COMMAND_DISPATCH_RESULT_NOT_SENT;
     }
     readIndex = (readIndex + 1) & 31;
     sdfSndCmdIndex = readIndex;
-    return 0;
+    return SND_QUEUED_COMMAND_DISPATCH_RESULT_SENT;
 }
 
 
@@ -120,7 +120,7 @@ void sdfSndCmdIFThread(void) {
         do {
             SleepThread();
         } while (sdfSndBurstReqMode != 0);
-        while (sndTryDispatchQueuedCommand() == 0) {
+        while (sndTryDispatchQueuedCommand() == SND_QUEUED_COMMAND_DISPATCH_RESULT_SENT) {
         }
     }
 }
