@@ -1913,11 +1913,11 @@ BtlRuntimeTask *btlFindTaskByOwner(u64 owner) {
 }
 
 /* Return the oldest registered task of this kind, or zero. */
-s32 btlFindTaskByKind(u16 kind) {
+BtlRuntimeTask *btlFindTaskByKind(u16 kind) {
     BtlRuntimeTask *task = ((BtlActorWork *)btlGetRuntime())->taskHead;
     while (task != 0) {
         if (task->taskId == kind) {
-            return (s32)task;
+            return task;
         }
         task = task->next;
     }
