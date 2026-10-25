@@ -38,6 +38,7 @@
 #include "sdf_packet_builders.h"
 #include "ee_mmi.h"
 #include "mdl.h"
+#include "mdl_load_request_api.h"
 #include "btl_grouped_entity_api.h"
 #include "sdf_model.h"
 #include "sdf_model_copy.h"
@@ -375,7 +376,8 @@ dds3ModelResrc_t *mdlWaitLoadEnd(s32 group, s32 id) {
 
 
 void TbMbAbLoadEnd(MdlLoadRequest *request) {
-    mdlRegistModelSet(request->group, request->id, request->options, &request->payload);
+    mdlRegistModelSet(request->group, request->id,
+                      mdlLoadRequestGetRegistrationMode(request), &request->payload);
     WaitSema(mdlManagerWork);
     mdlUnRegLoading(request->group, request->id);
     SignalSema(mdlManagerWork);
@@ -469,8 +471,9 @@ s32 mdlPrepare(s32 group, s32 id, s32 blocking) {
                                   sdfCreateSemaphoreFromOptions, 0);
     } else {
         request = sdfAllocAndClearQuadwords(sizeof(*request));
-        request->options = MDL_REGISTRATION_OWNS_GROUP_RESOURCES |
-                           MDL_MOTION_REGISTRATION_CREATE_ON_MODEL_LOAD;
+        mdlLoadRequestSetRegistrationMode(
+            request, MDL_REGISTRATION_OWNS_GROUP_RESOURCES |
+                         MDL_MOTION_REGISTRATION_CREATE_ON_MODEL_LOAD);
         request->group = group;
         request->id = id;
         if (paths->motionPath != NULL) {

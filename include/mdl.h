@@ -146,7 +146,7 @@ typedef struct MdlLoadRequest {
     u8 itemsRequested;
     u8 awaitingMotionLoad;
     u8 pad7;
-    u32 options;
+    u32 options; /* MdlRegistrationMode consumed when this request completes. */
     MdlLoadPayload payload;
 } MdlLoadRequest;
 
