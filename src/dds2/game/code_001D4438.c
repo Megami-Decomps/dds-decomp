@@ -3846,12 +3846,12 @@ void btlEnterTestActionState(void) {
     btlInitializeBattleDebugMenu();
 }
 
-void btlAdvanceUnitWhenActionGateClears(u32 unit) {
+void btlAdvanceUnitWhenActionGateClears(ActionStateLink *action) {
     s32 status;
 
     status = btlUpdateBattleModelDebugEditor();
     if (status == 0) {
-        btlDispatchStateHandler(unit, 6);
+        btlDispatchStateHandler(action, 6);
         return;
     }
 }

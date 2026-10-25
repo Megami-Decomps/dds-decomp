@@ -3097,12 +3097,12 @@ void btlEnterTestActionState(void) {
     btlInitializeBattleDebugMenu();
 }
 
-void btlAdvanceUnitWhenActionGateClears(u32 unit) {
+void btlAdvanceUnitWhenActionGateClears(BtlTask *action) {
     s32 temp_v0;
 
     temp_v0 = btlUpdateBattleModelDebugEditor();
     if (temp_v0 == 0) {
-        btlDispatchStateHandler(unit, 6);
+        btlDispatchStateHandler(action, 6);
         return;
     }
 }
