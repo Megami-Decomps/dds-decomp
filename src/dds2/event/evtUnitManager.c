@@ -14,6 +14,7 @@ struct EffNodeDescriptor;
 #include "evt_unit_move_end_api.h"
 #include "evt_unit_path_advance_api.h"
 #include "evt_unit_wait_api.h"
+#include "evt_unit_facing_result_api.h"
 #include "evt_unit_vector_slot.h"
 #include "evt_unit_motion_slot_flags.h"
 #include "evt_unit_transition_flags.h"
@@ -37,7 +38,6 @@ extern f32 *D_0037F770[];
 extern u8 kwlnDefaultColorVector[];
 
 extern void evtGetUnitDirVector(evtUnitHandle_t *unit);
-s32 evtRotateUnitTowardTarget(evtUnitHandle_t *unit, f32 *dir, f32 angle);
 
 typedef struct PcpScatterWork4 PcpScatterWork4;
 
@@ -950,7 +950,7 @@ extern const s32 D_004215F0[];
 extern void evtVu0SubVectorXZAxis(f32 *a, f32 *b);
 extern void FromRotation(f32 angle);
 
-s32 evtRotateUnitTowardTarget(evtUnitHandle_t *unit, f32 *dir, f32 scale) {
+EvtUnitFacingTargetResult evtRotateUnitTowardTarget(evtUnitHandle_t *unit, f32 *dir, f32 scale) {
     /* SDK stores end local CSE before the axis and quaternion addresses
      * are rebuilt. One angle carries the cosine through acos and clamping. */
     f32 a[4];
@@ -959,7 +959,7 @@ s32 evtRotateUnitTowardTarget(evtUnitHandle_t *unit, f32 *dir, f32 scale) {
     f32 out[4];
     f32 dot1;
     f32 rotationAngle;
-    s32 result = 1;
+    EvtUnitFacingTargetResult result = EVT_UNIT_ALREADY_FACING_TARGET;
 
     memcpy(a, D_004215E0, sizeof(a));
     memcpy(b, D_004215F0, sizeof(b));
@@ -996,13 +996,13 @@ s32 evtRotateUnitTowardTarget(evtUnitHandle_t *unit, f32 *dir, f32 scale) {
     FromRotation(rotationAngle);
     SDF_VU0_STOREVECTOR_NOMEM(q);
     dds3AddRotPoseSet(unit->effObj, (u128 *)q);
-    return 0;
+    return EVT_UNIT_ROTATION_STEP_APPLIED;
 }
 
 
 
 /* Flat, negated direction of the rotation in quat, offset by the effect object's point, aimed with evtRotateUnitTowardTarget. */
-s32 evtUnitRotationQuat(evtUnitHandle_t *unit, f32 *quat, f32 angle) {
+EvtUnitFacingTargetResult evtUnitRotationQuat(evtUnitHandle_t *unit, f32 *quat, f32 angle) {
     f32 v[4];
 
     SDF_VU0_LOADVECTOR(quat);
@@ -1353,7 +1353,6 @@ s32 evtStartUnitModeWithValue(evtUnitHandle_t *eventUnit, s32 (*callback)(evtUni
 }
 
 extern void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *);
-extern s32 evtUnitRotationQuat(evtUnitHandle_t *, f32 *, f32);
 extern s32 evtUnitMoveType0(evtUnitHandle_t *);
 extern s32 evtUnitMoveTypePathTrace(evtUnitHandle_t *);
 extern void evtRefreshUnitEndpointWork(evtUnitHandle_t *);
@@ -1411,7 +1410,8 @@ s32 evtUpdateUnitMotion(dds3PoseSet_t *unused, dds3Basic_t *object) {
             wobble = 0;
         }
         if (unit->motionState == EVT_UNIT_MOTION_STATE_VECTOR) {
-            if (evtUnitRotationQuat(unit, unit->targetVector, (f32)unit->motionParameter / 100.0f) != 0) {
+            if (evtUnitRotationQuat(unit, unit->targetVector, (f32)unit->motionParameter / 100.0f) !=
+                EVT_UNIT_ROTATION_STEP_APPLIED) {
                 unit->motionState = EVT_UNIT_MOTION_STATE_IDLE;
             }
         }
