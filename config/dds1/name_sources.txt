@@ -4038,6 +4038,7 @@
 0x001EF158	btlInitLinkedUnitActionCursor	inferred	Sets linked unit on scene, resets cursor, marks linked unit candidate and starts cursor. [names_reviewed5.tsv]
 0x001EF390	btlInitCursorAndApplyAction	inferred	Clears cursor, initializes action pose, renders first frame and sets cursor mode. [names_reviewed5.tsv]
 0x001EF420	btlAdvanceWorldCounterAndSpawnActionObject	inferred	Increments world counter, spawns an action object and retains its handle. [names_reviewed16.tsv]
+0x001EF460	btlAreFrontAndSideFloorResourcesReady	inferred	Requires both retained front- and side-floor resource outputs before scene initialization proceeds; paired floor-load requests populate these resources. DDS2 twin 0x00200038. [paired loader and caller dataflow, 2026-10-25]
 0x001EF4F8	btlWaitForPendingWorkAndReleaseBuffers	inferred	Twin of dds2 0x002000D0; Waits for SDF pending work and releases battle work buffers. [names_R_FuncNames3.tsv]
 0x001EF560	btlFreeFieldBlocks	inferred	frees battle field buffers F1/F2 (strings "btl:free field F1/F2")
 0x001EF618	btlInitializeSceneLightingAndTint	inferred	Applies field lighting, initializes tint and copies initial light vectors. [names_reviewed9.tsv]

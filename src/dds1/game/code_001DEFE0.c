@@ -55,6 +55,7 @@
 #include "btl_field_load_task_args.h"
 #include "file_pac.h"
 #include "btl_floor_load_task_args.h"
+#include "btl_floor_resource_readiness_api.h"
 #include "btl_sound.h"
 #include "btl_referenced_battle_effect_task.h"
 #include "btl_sound_release_task.h"
@@ -214,9 +215,6 @@ extern void btlAdvanceWorldCounterAndSpawnActionObject(void);
 
 
 extern s32 btlRepositionPartyAroundBattleCenter(void);
-
-
-extern s32 btlAreWorkBuffersReady(void);
 
 
 s32 btlGetEntryFlagsUnlessDisabled(datUnitWork_t *entry);
@@ -7741,14 +7739,14 @@ void btlAdvanceWorldCounterAndSpawnActionObject(void) {
     D_003BB694 = 0;
 }
 
-s32 btlAreWorkBuffersReady(void) {
+BtlFloorResourceReadiness btlAreFrontAndSideFloorResourcesReady(void) {
     BtlState *work = (BtlState *)btlGetRuntime();
     if (work->frontFloorResource != 0) {
         if (work->sideFloorResource != 0) {
-            return 1;
+            return BTL_FLOOR_RESOURCES_READY;
         }
     }
-    return 0;
+    return BTL_FLOOR_RESOURCES_NOT_READY;
 }
 
 void btlReleaseWorkBuffers(void) {

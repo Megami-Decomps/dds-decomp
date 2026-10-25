@@ -3976,7 +3976,7 @@
 0x001FFDD0	btlInitTargetCursorAndFacing	inferred	U1
 0x001FFF68	btlInitCursorAndApplyAction	inferred	Clears cursor, initializes action pose, renders first frame and sets cursor mode. [names_reviewed5.tsv]
 0x001FFFF8	btlSpawnBattleWorldAction	inferred	advances world counter then stores spawned action id in battle work [names_R_FuncNames2.tsv]
-0x00200038	btlAreWorkBuffersReady	inferred	Returns true only when both battle work buffer handles are present.
+0x00200038	btlAreFrontAndSideFloorResourcesReady	inferred	Requires both floor-load outputs: the front request is retained in primaryBuffer and the side request in secondaryBuffer before scene initialization proceeds. [paired loader and caller dataflow, 2026-10-25]
 0x00200078	btlReleaseWorkBuffers	inferred	DDS1 has the same unprefixed symbol; game/code_001DACF8 uses btl for the already-described releaseBattleWorkBuffers behavior.
 0x002000D0	btlWaitForPendingWorkAndReleaseBuffers	inferred	Waits for SDF pending work and releases battle work buffers. [names_R_FuncNames3.tsv]
 0x002001F0	btlInitializeSceneLightingAndTint	inferred	Applies field lighting, initializes tint and copies initial light vectors. [names_reviewed9.tsv]

@@ -16,6 +16,7 @@
 #include "btl_task_condition.h"
 #include "btl.h"
 #include "btl_state.h"
+#include "btl_floor_resource_readiness_api.h"
 #include "btl_terminal_outcome.h"
 #include "btl_task_args.h"
 #include "btl_action.h"
@@ -640,7 +641,6 @@ u64 btlQueueSceneActorModelEntry(s32 sceneAddress) {
 
 extern s32 btlIsFadeOutCompleteOrIdle(void);
 
-extern s32 btlAreWorkBuffersReady(void);
 
 void fldInitializeSceneGroups(void);
 extern s32 btlResetSceneSlotFades(void);
@@ -652,7 +652,7 @@ s32 btlInitializeSceneAfterTasksAndBuffersReady(BtlState *scene) {
     u32 i;
 
     if (btlCountTasksForOwner(0x8000000000000003ULL) == 0 &&
-        btlAreWorkBuffersReady() != 0 &&
+        btlAreFrontAndSideFloorResourcesReady() != BTL_FLOOR_RESOURCES_NOT_READY &&
         btlIsFadeOutCompleteOrIdle() != 0) {
         fldInitializeSceneGroups();
         btlResetSceneSlotFades();

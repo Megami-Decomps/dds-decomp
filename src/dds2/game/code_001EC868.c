@@ -52,6 +52,7 @@
 #include "btl_field_load_task_args.h"
 #include "file_pac.h"
 #include "btl_floor_load_task_args.h"
+#include "btl_floor_resource_readiness_api.h"
 #include "btl_sound.h"
 #include "btl_referenced_battle_effect_task.h"
 #include "btl_sound_release_task.h"
@@ -7069,14 +7070,14 @@ void btlSpawnBattleWorldAction(void) {
     D_00436AD4 = 0;
 }
 
-s32 btlAreWorkBuffersReady(void) {
+BtlFloorResourceReadiness btlAreFrontAndSideFloorResourcesReady(void) {
     BtlState *work = (BtlState *)btlGetRuntime();
     if (work->primaryBuffer != 0) {
         if (work->secondaryBuffer != 0) {
-            return 1;
+            return BTL_FLOOR_RESOURCES_READY;
         }
     }
-    return 0;
+    return BTL_FLOOR_RESOURCES_NOT_READY;
 }
 
 void btlReleaseWorkBuffers(void) {
