@@ -770,7 +770,7 @@ void ptyRecoverAllUnits(void) {
 }
 
 /* Check occupied, nonzero-HP roster members; optionally restrict matches to frontline. */
-s32 ptyAnyLivingUnitHasStatus(u32 statusMask, s32 frontlineOnly) {
+u8 ptyAnyLivingUnitHasStatus(u32 statusMask, s32 frontlineOnly) {
     s32 slotIndex = 0;
     datUnitWork_t *entry = DDS3_GBWK->party;
     do {

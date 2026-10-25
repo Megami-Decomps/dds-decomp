@@ -4413,7 +4413,7 @@ s32 fldUpdateFieldTransition(void) {
     return 0;
 }
 
-extern s32 ptyAnyLivingUnitHasStatus(u32 statusMask, s32 frontlineOnly);
+extern u8 ptyAnyLivingUnitHasStatus(u32 statusMask, s32 frontlineOnly);
 extern void fldPlayMenuSound(s32 soundId);
 extern s32 fldPlaceAreaDamageEffect(f32 x, f32 y, f32 z);
 

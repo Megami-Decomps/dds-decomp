@@ -4552,7 +4552,7 @@ s32 fldUpdateFieldTransition(void) {
     return 0;
 }
 
-extern s32 ptyAnyLivingUnitHasStatus(u32 statusMask, s32 frontlineOnly);
+extern u8 ptyAnyLivingUnitHasStatus(u32 statusMask, s32 frontlineOnly);
 
 s32 fldUpdateAreaDamageReaction(void) {
     FldAreaWork *work = &fldGlobalBase;

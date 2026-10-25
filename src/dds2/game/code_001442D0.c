@@ -3992,7 +3992,7 @@ s32 fldPlaceAreaDamageEffect(f32 x, f32 y, f32 z) {
 extern void rsetOtOfs(u32);
 extern void rsetAlpha(s32);
 extern void rsetTest(s32, s32, s32, s32, s32, s32, s32, s32);
-extern s32 ptyAnyLivingUnitHasStatus(u32 statusMask, s32 frontlineOnly);
+extern u8 ptyAnyLivingUnitHasStatus(u32 statusMask, s32 frontlineOnly);
 extern void DrwSprite2DC(s32, s32, s32, s32, s32, s32, s32, s32, u32,
                           u32, u32, u32, sdfTexHandle_t *);
 extern f32 D_0043634C;
