@@ -963,9 +963,9 @@ extern s32 datHasEnoughCurrency(s32 requiredAmount);
 /* Persona 4 scrCommand_SCR_EXISTS @ 00299600 (src/Script/scrCommonCommand.c), recompiled unchanged */
 u32 scrCommand_SCR_EXISTS()
 {
-    dds3ProcessID_t* task;
-    task = (dds3ProcessID_t*)scrGetIntPara(0);
-    if (datHasEnoughCurrency(task))
+    s32 requiredAmount;
+    requiredAmount = scrGetIntPara(0);
+    if (datHasEnoughCurrency(requiredAmount))
     {
         scrSetIntReturnValue(1);
     }
