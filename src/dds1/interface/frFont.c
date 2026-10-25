@@ -367,7 +367,7 @@ extern FntNode *fmRentFontMem(void);
 
 /* Retain one atlas item and submit its pixel upload with the requested ownership
  * mode. Coordinates are converted from sixteenths; pool exhaustion is unchecked. */
-GsFont_t *frTranslateUserData(s32 width, s32 height, u8 *pixels, s8 ownsPixels) {
+GsFont_t *frTranslateUserData(s32 width, s32 height, u8 *pixels, FrFontPixelOwnership pixelOwnership) {
     s32 imagePosition[2];
     SdfImageUploadRequest uploadRequest;
     FntNode *atlasNode;
@@ -380,7 +380,7 @@ GsFont_t *frTranslateUserData(s32 width, s32 height, u8 *pixels, s8 ownsPixels) 
     imagePosition[1] = atlasNode->uv.v0 >> FR_FONT_ATLAS_POSITION_SHIFT;
     cachedItem->refs = 1;
     cachedItem->list = atlasNode;
-    if (ownsPixels == 0) {
+    if (pixelOwnership == FR_FONT_PIXELS_BORROWED) {
         uploadRequest.allocationMode = SDF_UPLOAD_BORROWED;
     } else {
         uploadRequest.allocationMode = SDF_UPLOAD_CHIP_HEAP;
@@ -423,7 +423,7 @@ GsFont_t *frTranslateFont2GS(_TEXT *glyph, s32 itemIndex) {
         return cachedItem;
     }
     clonedResource = frDecodeFontImage(glyph->renderValueOrSetupOrShade.setupBytes.fontIndex, itemIndex);
-    cachedItem = frTranslateUserData(frFontGetSlotCellWidth(glyph->renderValueOrSetupOrShade.setupBytes.fontIndex), frFontGetSlotCellHeight(glyph->renderValueOrSetupOrShade.setupBytes.fontIndex), clonedResource, 1);
+    cachedItem = frTranslateUserData(frFontGetSlotCellWidth(glyph->renderValueOrSetupOrShade.setupBytes.fontIndex), frFontGetSlotCellHeight(glyph->renderValueOrSetupOrShade.setupBytes.fontIndex), clonedResource, FR_FONT_PIXELS_TRANSFERRED_TO_UPLOAD);
     cachedItem->id = itemIndex;
     entry->slots[itemIndex] = cachedItem;
     frFontWork.cachedItemCount++;
