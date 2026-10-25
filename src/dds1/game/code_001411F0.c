@@ -835,7 +835,7 @@ u32 fldGetArchiveLoadPending(void) {
     return fldArchiveLoadPending;
 }
 
-s32 fldPollArchiveLoad(s32 archiveId) {
+u8 fldPollArchiveLoad(s32 archiveId) {
     s32 name = 0x30000000 + (archiveId << 16);
     s32 result = sndFindPackedTrackLoadStatus(name);
     if (result == 0) {
