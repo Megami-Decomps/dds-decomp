@@ -13,6 +13,7 @@ struct EffNodeDescriptor;
 #include "evt_unit.h"
 #include "evt_unit_move_end_api.h"
 #include "evt_unit_path_advance_api.h"
+#include "evt_unit_wait_api.h"
 #include "evt_unit_vector_slot.h"
 #include "evt_unit_motion_slot_flags.h"
 #include "evt_unit_transition_flags.h"
@@ -847,17 +848,17 @@ void evtSetWaitHokanFrame(evtUnitHandle_t *unit, s32 firstParameter, s32 secondP
     unit->motionBlendDurationFrames = secondParameter;
 }
 
-s32 evtCheckUnitWait(evtUnitHandle_t *unit) {
+EvtUnitWaitResult evtCheckUnitWait(evtUnitHandle_t *unit) {
     EvtUnitMotionState state = evtGetUnitStat(unit);
 
     if (state == EVT_UNIT_MOTION_STATE_IDLE) {
-        return 1;
+        return EVT_UNIT_WAIT_COMPLETE;
     }
     if (state == EVT_UNIT_MOTION_STATE_MOTION && unit->motionTicks > 0 &&
         unit->owner->first->state == SDF_MOTION_STATE_TERMINAL) {
-        return 1;
+        return EVT_UNIT_WAIT_COMPLETE;
     }
-    return 0;
+    return EVT_UNIT_WAIT_IN_PROGRESS;
 }
 
 void evtSetUnitKutiMotion(evtUnitHandle_t *unit, s32 firstSlot, s32 secondSlot) {
@@ -1138,7 +1139,6 @@ extern s32 scrGetIntPara(s32 idx);
 extern s32 evtLoadUnit(s32 slotKind, s32 resource);
 
 
-extern s32 evtCheckUnitWait(evtUnitHandle_t *unit);
 #include "dds3_world_secondary.h"
 extern void evtSetUnitMove1(evtUnitHandle_t *work, s32 motionSubmode, const f32 vector[4], s32 unused, s32 frames, s32 valueB6, s32 (*callback)(evtUnitHandle_t *, s32), s32 unusedLast);
 
@@ -2062,7 +2062,7 @@ u32 evtCommand_MODEL_WAIT(void) {
     if (unit == NULL) {
         return ret;
     }
-    return evtCheckUnitWait(unit) != 0;
+    return evtCheckUnitWait(unit) != EVT_UNIT_WAIT_IN_PROGRESS;
 }
 
 u32 evtCommand_MODEL_EXWAIT(void) {
