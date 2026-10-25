@@ -8140,7 +8140,7 @@
 0x002CFF68	sdfAllocAndClearQuadwords	inferred	Allocates requested bytes and zeroes rounded-up quadwords. [names_reviewed6.tsv]
 0x002CFF98	sdfChipFreeDirect	inferred	Retires block from slot, updates owner links or free list with interrupts preserved. [names_reviewed6.tsv]
 0x002D00B8	sdfChipFreeDelayedDirect	inferred	SMT3HD name via SLUS_209.11 0x002A8CF8, shared-hash-in-run; was sdfQueuePendingChipRelease
-0x002D00D8	sdfChipCheck	inferred	SMT3HD name via SLUS_209.11 0x002A8D18, reloc-identical; was sdfChipIsInRange
+0x002D00D8	sdfChipIsInRange	inferred	Tests whether an address lies in [sdfChipPageTop, sdfChipPageEnd); SMT3HD equivalent sdfChipCheck at SLUS_209.11 0x002A8D18 is reloc-identical.
 0x002D00F8	sdfChipInit	inferred	SMT3HD name via SLUS_209.11 0x002A8D38, reloc-identical; was sdfInitChipHeap
 0x002D01F0	sdfChipGetInfo	inferred	SMT3HD name via SLUS_209.11 0x002A8E30, reloc-identical; was sdfGetChipHeapStats
 0x002D02C0	sdfMemInit	inferred	SMT3HD name via SLUS_209.11 0x002A8F00, reloc-identical; was sdfInitGeneralHeap

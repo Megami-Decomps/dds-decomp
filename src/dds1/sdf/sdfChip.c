@@ -72,7 +72,7 @@ void sdfChipFreeDelayedDirect(void *memory) {
     sdfDelayedResrcEntry(&dds3CleanupList, memory);
 }
 
-s32 sdfChipCheck(s32 address) {
+s32 sdfChipIsInRange(s32 address) {
     s32 inRange;
 
     inRange = 0;
