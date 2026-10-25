@@ -1261,7 +1261,7 @@ void sdfPrimSetBitBltPacket(SdfImageTransferPacket *packet, u32 destinationBuffe
 }
 
 /* Allocate and append the image-transfer packet; use the packet arena when allocator is null. */
-void sdfPrimLinkBitBltPacket(s32 packetList, u32 destinationBufferAddress, s32 destinationBufferWidth,
+void sdfPrimLinkBitBltPacket(sdfDrawTag_t *packetList, u32 destinationBufferAddress, s32 destinationBufferWidth,
                              s64 destinationFormat, s64 destinationX, s64 destinationY,
                              u32 sourceBufferAddress, s32 sourceBufferWidth, s32 sourceFormat,
                              s32 sourceX, s32 sourceY, s32 transferWidth, s32 transferHeight,
