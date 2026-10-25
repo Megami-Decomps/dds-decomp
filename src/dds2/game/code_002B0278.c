@@ -1386,7 +1386,6 @@ void mnuConfigurePartyPanelPage(MenuPageWindow *window, s32 mode, u32 staffImage
 
 
 
-extern void evtStageTestSelectEntry(s32, s32, s32);
 extern void mnuConfigurePartyPanelPage(MenuPageWindow *, s32, u32, s32);
 
 s32 mnuCreatePanels(dds3ProcessID_t *callback) {

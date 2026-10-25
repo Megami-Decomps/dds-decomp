@@ -2546,15 +2546,16 @@ void evtStageTestClearPendingFlag(void) {
     evtStageTestState.queue.flags &= ~EVT_STAGE_QUEUE_PENDING;
 }
 
-/* Return zero for an already-loaded matching model ID; otherwise schedule a selection.
+/* Return UNCHANGED for the active model; otherwise stage a selection.
  * An in-progress request uses the pending slot rather than replacing the active slot. */
-s32 evtStageTestSelectEntry(s32 encodedIndex, s32 initialMotionIndex, s32 assetOption) {
+EvtStageTestSelectionResult evtStageTestSelectEntry(
+    s32 encodedIndex, s32 initialMotionIndex, s32 assetOption) {
     s32 entryIndex = encodedIndex & EVT_STAGE_ENTRY_INDEX_MASK;
     s32 slotIndex;
     StageTestSlot *selectionSlot;
 
     if (evtStageTestState.model != 0 && evtStageTestState.queue.slot[0].modelId == (s32)evtStageTestState.entries[entryIndex].modelId) {
-        return 0;
+        return EVT_STAGE_TEST_SELECTION_UNCHANGED;
     }
     btlStopStage();
     slotIndex = 0;
@@ -2572,7 +2573,7 @@ s32 evtStageTestSelectEntry(s32 encodedIndex, s32 initialMotionIndex, s32 assetO
     selectionSlot->assetOption = assetOption;
     selectionSlot->initialMotionIndex = initialMotionIndex;
     selectionSlot->state = EVT_STAGE_MOTION_IDLE;
-    return 1;
+    return EVT_STAGE_TEST_SELECTION_SCHEDULED;
 }
 
 /* Select an entry using its own stored motion byte; retain the native all-bits-set literal type. */

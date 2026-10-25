@@ -39,7 +39,6 @@ extern void mnuCacheProfilePanelGridPositions(MenuProfilePanel *, u32, u32, u32,
 extern void mnuFreeProfilePanelWork(MenuProfilePanel *);
 extern void mnuDrawAndAdvanceProfilePanel(s32, s32, s32, MenuProfilePanel *, s32);
 extern s32 mnuGetSelectionFromFlags(datUnitWork_t *);
-extern s32 evtStageTestSelectEntry(s32, s32, s32);
 extern void mnuConfigurePartyPanelPage(MenuPageWindow *, s32, s32, s32);
 
 extern s32 mnuLookupRangeEntry(u16);

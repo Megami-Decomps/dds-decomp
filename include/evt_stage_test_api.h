@@ -5,6 +5,14 @@
 
 s32 evtStageTestCountFlags(s32 columnKind);
 
+typedef s32 EvtStageTestSelectionResult;
+
+#define EVT_STAGE_TEST_SELECTION_UNCHANGED 0
+#define EVT_STAGE_TEST_SELECTION_SCHEDULED 1
+
+EvtStageTestSelectionResult evtStageTestSelectEntry(
+    s32 encodedIndex, s32 initialMotionIndex, s32 assetOption);
+
 typedef s32 EvtStageMotionQueueStatus;
 enum {
     EVT_STAGE_MOTION_QUEUE_SETTLED = 0,

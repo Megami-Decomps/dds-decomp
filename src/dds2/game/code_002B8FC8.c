@@ -414,7 +414,6 @@ s32 mnuStepStaffCampPageControl(s32 callback);
 
 
 extern MenuProfilePanel *mnuCreateProfilePanel(datUnitWork_t *selectionState);
-extern void evtStageTestSelectEntry(s32, s32, s32);
 extern void mnuConfigurePartyPanelPage(s32, s32, s32, s32);
 
 s32 mnuCreatePanels(s32 callback);
