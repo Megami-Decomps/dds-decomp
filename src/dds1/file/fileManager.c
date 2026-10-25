@@ -2,6 +2,7 @@
 #include "sdf_chip.h"
 #include "file.h"
 #include "sdf_pac_state.h"
+#include "file_request_cleanup_api.h"
 #include "file_pac_completion_api.h"
 #include "sdf_dev_state.h"
 #include "file_manager_api.h"
@@ -21,9 +22,8 @@ extern s32 pacFileHandleFree(struct FilePacRequest *);
 #define FILE_READ_SLOT_SHIFT 16
 
 /* PAC requests delegate cleanup. Other kinds remain pending until state six,
- * then release any device state, duplicated name and entry, returning zero.
- * A pending non-PAC request returns one; request is required. */
-s32 fileRequestFreeIfComplete(struct FileRequest *request) {
+ * then release any device state, duplicated name and entry. The request is required. */
+FileRequestCleanupResult fileRequestFreeIfComplete(struct FileRequest *request) {
     if (request->kind == FILE_REQUEST_KIND_PAC) {
         return pacFileHandleFree((struct FilePacRequest *)request);
     }
@@ -33,9 +33,9 @@ s32 fileRequestFreeIfComplete(struct FileRequest *request) {
         }
         sdfChipFreeDirect(request->name);
         sdfChipFreeDirect(request);
-        return 0;
+        return FILE_REQUEST_CLEANUP_FREED;
     }
-    return 1;
+    return FILE_REQUEST_CLEANUP_PENDING;
 }
 
 extern char *sdfStrdupChip(const char *text);
