@@ -594,7 +594,7 @@ void fldResetZoneRecordsAndActorSlots(void) {
         fldEveHitTable[roomIndex].unk130 = 0;
         fldEveHitTable[roomIndex].roomId = -1;
         fldEveHitTable[roomIndex].mapSlot = -1;
-        fldEveHitTable[roomIndex].mode = 0;
+        fldEveHitTable[roomIndex].mode = FLD_ROOM_INTERACTION_NONE;
         fldEveHitTable[roomIndex].entryIndex = -1;
         fldEveHitTable[roomIndex].savePointValue = -1;
         fldEveHitTable[roomIndex].axisMode = 0;
@@ -1037,7 +1037,7 @@ void fldSpawnRoomTrigger(s32 roomId, f32 x, f32 y, f32 z, f32 radius) {
                                  fldHitProgramName);
     taskIndex = fldRegisterRoomObject(&fldActionRows[index].childResource, object);
     fldEveHitTable[taskIndex].roomId = roomId;
-    fldEveHitTable[taskIndex].mode = 2;
+    fldEveHitTable[taskIndex].mode = FLD_ROOM_INTERACTION_ITEM_BOX;
     fldActionRowCount++;
     fldEveHitTable[taskIndex].entryIndex = -1;
 }
@@ -1092,10 +1092,10 @@ void fldSpawnRoomTriggerVariant(s32 kind, s32 roomValue,
                                  fldHitProgramName);
     taskIndex = fldRegisterRoomObject(&fldActionRows[index].childResource, object);
     if (kind == 0) {
-        fldEveHitTable[taskIndex].mode = 3;
+        fldEveHitTable[taskIndex].mode = FLD_ROOM_INTERACTION_SAVE_POINT;
         fldEveHitTable[taskIndex].savePointValue = roomValue;
     } else {
-        fldEveHitTable[taskIndex].mode = 4;
+        fldEveHitTable[taskIndex].mode = FLD_ROOM_INTERACTION_HEAL_POINT;
     }
     fldActionRowCount++;
     fldEveHitTable[taskIndex].entryIndex = -1;
@@ -1112,7 +1112,7 @@ s32 fldCheckEntryActive(s32 entry) {
         return 0;
     }
     slot = D_003C9510 + entryIdx * 0xA0;
-    if (slot[3] == 1 && slot[4] == entry) {
+    if (slot[3] == FLD_ROOM_INTERACTION_NPC && slot[4] == entry) {
         return 1;
     }
     return 0;

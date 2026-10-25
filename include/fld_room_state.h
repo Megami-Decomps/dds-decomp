@@ -13,6 +13,16 @@ enum {
     FIELD_ACTOR_SLOT_COUNT = 256
 };
 
+/* Interaction modes stored in FldRoomState.mode; the field remains s16. */
+typedef s16 FldRoomInteractionMode;
+enum FldRoomInteractionModeValue {
+    FLD_ROOM_INTERACTION_NONE = 0,
+    FLD_ROOM_INTERACTION_NPC = 1,
+    FLD_ROOM_INTERACTION_ITEM_BOX = 2,
+    FLD_ROOM_INTERACTION_SAVE_POINT = 3,
+    FLD_ROOM_INTERACTION_HEAL_POINT = 4
+};
+
 /* Shared room geometry/runtime record. DDS1 and DDS2 use the same 0x140-byte
  * layout; unclassified state words and the intervening gap retain their raw
  * widths and positions. */
@@ -32,7 +42,7 @@ typedef struct FldRoomState {
     s16 unk130;
     s16 roomId;       /* 0x132: returned by fldFindRoomIdByTask */
     s16 mapSlot;      /* 0x134: above 0, the map slot whose flag hides the trigger */
-    s16 mode;         /* 0x136: 1 NPC, 2 item box, 3 save point, 4 heal point; 0 otherwise */
+    FldRoomInteractionMode mode; /* 0x136: selects the room's interaction behavior. */
     s16 entryIndex; /* 0x138: active entry index when mode is 1. */
     s16 axisMode;
     s32 crossingDirection; /* 0x13C: a plane trigger's last crossing inside the room (1, -1; 0 none);

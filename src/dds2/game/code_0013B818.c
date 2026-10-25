@@ -296,7 +296,7 @@ void fldResetZoneRecordsAndActorSlots(void) {
         fldEveHitTable[roomIndex].unk130 = 0;
         fldEveHitTable[roomIndex].roomId = -1;
         fldEveHitTable[roomIndex].mapSlot = -1;
-        fldEveHitTable[roomIndex].mode = 0;
+        fldEveHitTable[roomIndex].mode = FLD_ROOM_INTERACTION_NONE;
         fldEveHitTable[roomIndex].entryIndex = -1;
         fldEveHitTable[roomIndex].savePointValue = -1;
         fldEveHitTable[roomIndex].axisMode = 0;
@@ -740,7 +740,7 @@ void fldSpawnRoomTrigger(s32 roomId, f32 x, f32 y, f32 z, f32 triggerRadius) {
     child = dds3AddPointBasic(fldActionRows[index].childResource.id, (EvtWorldSourceTransformPrefix *)fldActionRows[index].childResource.transform, fldHitProgramName);
     roomIndex = fldRegisterRoomObject(&fldActionRows[index].childResource, child);
     fldEveHitTable[roomIndex].roomId = roomId;
-    fldEveHitTable[roomIndex].mode = 2;
+    fldEveHitTable[roomIndex].mode = FLD_ROOM_INTERACTION_ITEM_BOX;
     fldEveHitTable[roomIndex].entryIndex = -1;
     fldActionRowCount++;
 }
@@ -795,10 +795,10 @@ void fldSpawnRoomTriggerVariant(s32 kind, s32 roomValue,
                                  fldHitProgramName);
     taskIndex = fldRegisterRoomObject(&fldActionRows[index].childResource, object);
     if (kind == 0) {
-        fldEveHitTable[taskIndex].mode = 3;
+        fldEveHitTable[taskIndex].mode = FLD_ROOM_INTERACTION_SAVE_POINT;
         fldEveHitTable[taskIndex].savePointValue = roomValue;
     } else {
-        fldEveHitTable[taskIndex].mode = 4;
+        fldEveHitTable[taskIndex].mode = FLD_ROOM_INTERACTION_HEAL_POINT;
     }
     fldActionRowCount++;
     fldEveHitTable[taskIndex].entryIndex = -1;
@@ -816,7 +816,8 @@ s32 fldCheckEntryActive(s32 entry) {
     if (index == -1) {
         return 0;
     }
-    if (fldEveHitTable[index].mode == 1 && fldEveHitTable[index].entryIndex == entry) {
+    if (fldEveHitTable[index].mode == FLD_ROOM_INTERACTION_NPC &&
+        fldEveHitTable[index].entryIndex == entry) {
         return 1;
     }
     return 0;
