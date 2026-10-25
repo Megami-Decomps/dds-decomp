@@ -109,49 +109,49 @@ EffNode *dds3EffectCreate(u16 type, u16 arg, s32 param) {
     node->type = type;
     node->unkC = 1.03f;
     node->arg = arg;
-    node->instance = EffMajorTable[type].create(arg, param);
+    node->instanceWord = EffMajorTable[type].create(arg, param);
     return node;
 }
 
 void dds3EffectDelete(EffNode *node) {
-    EffMajorTable[node->type].destroy(node->instance);
+    EffMajorTable[node->type].destroy(node->instanceWord);
     sdfChipFreeDirect(node);
 }
 
 void dds3EffectDraw(EffNode *node) {
-    EffMajorTable[node->type].update(node->instance);
+    EffMajorTable[node->type].update(node->instanceWord);
 }
 
 void dds3EffectReset(EffNode *node) {
-    EffMajorTable[node->type].restart(node->instance);
+    EffMajorTable[node->type].restart(node->instanceWord);
 }
 
 void dds3EffectSetScale(EffNode *node, f32 factor) {
-    EffMajorTable[node->type].applyScale(node->instance, factor);
+    EffMajorTable[node->type].applyScale(node->instanceWord, factor);
 }
 
 s32 effInvokeNodeConditionOrAcceptDefault(EffNode *node) {
     if (EffMajorTable[node->type].queryCondition == NULL) {
         return 1;
     }
-    return EffMajorTable[node->type].queryCondition(node->instance);
+    return EffMajorTable[node->type].queryCondition(node->instanceWord);
 }
 
 void effCopyVectorToNodeInstance(EffNode *node, const void *vector) {
-    EffMajorTable[node->type].setVector(node->instance, vector);
+    EffMajorTable[node->type].setVector(node->instanceWord, vector);
 }
 
 void effApplyNodeTransformMatrix(EffNode *node, const void *matrix) {
-    EffMajorTable[node->type].setMatrix(node->instance, matrix);
+    EffMajorTable[node->type].setMatrix(node->instanceWord, matrix);
 }
 
 void effSetNodeParameterValue(EffNode *node, u32 parameterWord) {
-    EffMajorTable[node->type].setParameterWord(node->instance, parameterWord);
+    EffMajorTable[node->type].setParameterWord(node->instanceWord, parameterWord);
 }
 
 void effDispatchOptionalNodeFlag(EffNode *node, u8 flag) {
     if (EffMajorTable[node->type].dispatchOptionalFlag != NULL) {
-        EffMajorTable[node->type].dispatchOptionalFlag(node->instance, flag);
+        EffMajorTable[node->type].dispatchOptionalFlag(node->instanceWord, flag);
     }
 }
 
@@ -159,7 +159,7 @@ s32 effInvokeOptionalNodeInstanceCallback(EffNode *node) {
     if (EffMajorTable[node->type].queryOptional == NULL) {
         return 1;
     }
-    return EffMajorTable[node->type].queryOptional(node->instance);
+    return EffMajorTable[node->type].queryOptional(node->instanceWord);
 }
 
 #include "sdf_debug_api.h"
@@ -178,11 +178,11 @@ EffNode *dds3EffectLoad(EffNodeDescriptor *descriptor) {
         switch (node->type) {
         case 0:
         case 1:
-            instance = (EffLegacyNodeInstanceView *)node->instance;
+            instance = (EffLegacyNodeInstanceView *)node->instanceWord;
             EE_MMI_UNIT_MATRIX(&instance->matrixAtB0);
             break;
         case 2:
-            instance = (EffLegacyNodeInstanceView *)node->instance;
+            instance = (EffLegacyNodeInstanceView *)node->instanceWord;
             EE_MMI_UNIT_MATRIX(&instance->matrixAt20);
             break;
         }

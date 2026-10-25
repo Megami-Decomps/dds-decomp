@@ -14,11 +14,11 @@
 #include "sdf.h"
 EffNode *dds3EffectCopy(const EffNode *source) {
     EffNode *copy = (EffNode *)sdfChipAllocDirect(0x10);
-    u32 argument = (u32)source->instance;
+    EffNodeInstanceWord instanceWord = source->instanceWord;
 
     copy->type = source->type;
     copy->arg = source->arg;
-    copy->instance = EffMajorTable[source->type].cloneInstanceWord(argument);
+    copy->instanceWord = EffMajorTable[source->type].cloneInstanceWord(instanceWord);
     return copy;
 }
 

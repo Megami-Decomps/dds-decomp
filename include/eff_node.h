@@ -4,30 +4,34 @@
 #include "common.h"
 
 /* Live effect node allocated in a 0x10-byte size-class block. */
+typedef u32 EffNodeInstanceWord;
+
 typedef struct EffNode {
     u32 type;       /* 0x00: type-operation row */
     s32 arg;        /* 0x04 */
-    s32 instance;   /* 0x08: type-specific instance word */
+    EffNodeInstanceWord instanceWord; /* 0x08: type-specific instance pointer word */
     f32 unkC;       /* 0x0C */
 } EffNode;
 
 typedef char EffNode_size_must_be_0x10[(sizeof(EffNode) == 0x10) ? 1 : -1];
+typedef char EffNode_instanceWord_offset_must_be_0x08[
+    ((u32)&((EffNode *)0)->instanceWord == 0x08) ? 1 : -1];
 
 /* One 0x30-byte row of the type-indexed manager/callback table. Instance
  * values remain words because the concrete effect type owns their formats. */
 typedef struct EffTypeOps {
-    s32 (*create)(s32 arg, s32 parameter);                  /* 0x00 */
-    void (*update)(s32 instanceWord);                        /* 0x04 */
-    void (*destroy)(s32 instanceWord);                       /* 0x08 */
-    void (*restart)(s32 instanceWord);                       /* 0x0C */
-    s32 (*queryCondition)(s32 instanceWord);                 /* 0x10 */
-    void (*setVector)(s32 instanceWord, const void *vector); /* 0x14 */
-    void (*setMatrix)(s32 instanceWord, const void *matrix); /* 0x18 */
-    void (*setParameterWord)(s32 instanceWord, u32 value);   /* 0x1C */
-    void (*dispatchOptionalFlag)(s32 instanceWord, u8 flag); /* 0x20 */
-    s32 (*queryOptional)(s32 instanceWord);                  /* 0x24 */
-    u32 (*cloneInstanceWord)(u32 instanceWord);              /* 0x28 */
-    void (*applyScale)(s32 instanceWord, f32 factor);        /* 0x2C */
+    EffNodeInstanceWord (*create)(s32 arg, s32 parameter);   /* 0x00 */
+    void (*update)(EffNodeInstanceWord instanceWord);         /* 0x04 */
+    void (*destroy)(EffNodeInstanceWord instanceWord);        /* 0x08 */
+    void (*restart)(EffNodeInstanceWord instanceWord);        /* 0x0C */
+    s32 (*queryCondition)(EffNodeInstanceWord instanceWord);  /* 0x10 */
+    void (*setVector)(EffNodeInstanceWord instanceWord, const void *vector); /* 0x14 */
+    void (*setMatrix)(EffNodeInstanceWord instanceWord, const void *matrix); /* 0x18 */
+    void (*setParameterWord)(EffNodeInstanceWord instanceWord, u32 value);   /* 0x1C */
+    void (*dispatchOptionalFlag)(EffNodeInstanceWord instanceWord, u8 flag); /* 0x20 */
+    s32 (*queryOptional)(EffNodeInstanceWord instanceWord);   /* 0x24 */
+    EffNodeInstanceWord (*cloneInstanceWord)(EffNodeInstanceWord instanceWord); /* 0x28 */
+    void (*applyScale)(EffNodeInstanceWord instanceWord, f32 factor); /* 0x2C */
 } EffTypeOps;
 
 typedef char EffTypeOps_size_must_be_0x30[(sizeof(EffTypeOps) == 0x30) ? 1 : -1];

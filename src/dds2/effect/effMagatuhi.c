@@ -566,7 +566,7 @@ void effMagaSmokeConvDraw(EffMagatuhiWideFirst *work) {
 
 /* Update the first family's scattered float parameters without touching gaps. */
 void effMagaSCSetArea(EffNode *node, const EffMagatuhiFloatParams *src) {
-    EffMagatuhiWideFirst *dst = dds3MagatuhiGetHandle((EffWork *)node->instance);
+    EffMagatuhiWideFirst *dst = dds3MagatuhiGetHandle((EffWork *)node->instanceWord);
 
     dst->head.origin.x = src->origin.x;
     dst->head.origin.y = src->origin.y;
@@ -755,7 +755,7 @@ void effMagaPoint4Draw(EffMagatuhiWideSecond *work) {
 
 /* Replace control-point xyz and jitter amplitudes without changing point w. */
 void effMagaP4SetPoint(EffNode *node, const EffMagatuhiRowsSrc *src) {
-    EffMagatuhiWideSecond *dst = dds3MagatuhiGetHandle((EffWork *)node->instance);
+    EffMagatuhiWideSecond *dst = dds3MagatuhiGetHandle((EffWork *)node->instanceWord);
     u32 controlPointIndex;
 
     for (controlPointIndex = 0; controlPointIndex < EFF_MAGATUHI_CONTROL_POINT_COUNT; controlPointIndex++) {
@@ -769,7 +769,7 @@ void effMagaP4SetPoint(EffNode *node, const EffMagatuhiRowsSrc *src) {
 /* Seed every fourth slot with interpolated samples between two curve positions.
  * Keep the asymmetric duration/age subtraction and unchecked span divisor. */
 void effMagaP4Randomize(EffNode *callback) {
-    EffMagatuhiWideSecond *work = dds3MagatuhiGetHandle((EffWork *)callback->instance);
+    EffMagatuhiWideSecond *work = dds3MagatuhiGetHandle((EffWork *)callback->instanceWord);
     EffMagatuhiValueWork *valueWork = work->managedResource->valueWork;
     u32 historyFrames = work->head.duration;
     s32 lifetimeFrames = work->head.lifetimeFrames;
@@ -1022,8 +1022,8 @@ void effMagaCylinderRandomize(EffNode *callback) {
     f32 radiusStep;
 
     if (callback->type == EFF_MAGATUHI_CALLBACK_TYPE) {
-        if (dds3MagatuhiGetType((EffWork *)callback->instance) == EFF_MAGATUHI_REPLAY_RING) {
-            work = dds3MagatuhiGetHandle((EffWork *)callback->instance);
+        if (dds3MagatuhiGetType((EffWork *)callback->instanceWord) == EFF_MAGATUHI_REPLAY_RING) {
+            work = dds3MagatuhiGetHandle((EffWork *)callback->instanceWord);
             count = work->head.particleCount;
             valueWork = work->managedResource->valueWork;
             maxSteps = work->head.maxSteps;
@@ -1230,8 +1230,8 @@ void effMagaSpiralRandomize(EffNode *callback) {
     f32 radiusStep;
 
     if (callback->type == EFF_MAGATUHI_CALLBACK_TYPE) {
-        if (dds3MagatuhiGetType((EffWork *)callback->instance) == EFF_MAGATUHI_REPLAY_ORBIT) {
-            work = dds3MagatuhiGetHandle((EffWork *)callback->instance);
+        if (dds3MagatuhiGetType((EffWork *)callback->instanceWord) == EFF_MAGATUHI_REPLAY_ORBIT) {
+            work = dds3MagatuhiGetHandle((EffWork *)callback->instanceWord);
             count = work->head.particleCount;
             valueWork = work->managedResource->valueWork;
             maxSteps = work->head.maxSteps;
@@ -1471,8 +1471,8 @@ void effMagaSmokeRandomize(EffNode *callback) {
     f32 scaleStep;
 
     if (callback->type == EFF_MAGATUHI_CALLBACK_TYPE) {
-        if (dds3MagatuhiGetType((EffWork *)callback->instance) == EFF_MAGATUHI_REPLAY_DRIFT) {
-            work = dds3MagatuhiGetHandle((EffWork *)callback->instance);
+        if (dds3MagatuhiGetType((EffWork *)callback->instanceWord) == EFF_MAGATUHI_REPLAY_DRIFT) {
+            work = dds3MagatuhiGetHandle((EffWork *)callback->instanceWord);
             count = work->head.particleCount;
             valueWork = work->managedResource->valueWork;
             maxSteps = work->head.maxSteps;
@@ -1528,7 +1528,7 @@ void effMagaSmokeRandomize(EffNode *callback) {
 /* Dispatch replay side effects; retain the native s32 definition's fall-through. */
 s32 effMagaRandomize(EffNode *work) {
     if (work->type == EFF_MAGATUHI_CALLBACK_TYPE) {
-        switch (dds3MagatuhiGetType((EffWork *)work->instance)) {
+        switch (dds3MagatuhiGetType((EffWork *)work->instanceWord)) {
         case EFF_MAGATUHI_REPLAY_NONE:
             break;
         case EFF_MAGATUHI_REPLAY_BEZIER:
