@@ -570,7 +570,7 @@ u8 evtCheckValueThreshold(s32 itemId, s32 minimumQuantity) {
 }
 
 /* Flag-range items have one slot; every quantity range caps at 99. */
-s32 ptyIsInventoryItemAtCapacity(s32 itemId) {
+u8 ptyIsInventoryItemAtCapacity(s32 itemId) {
     s32 quantity = DDS3_GBWK->inventory.counts[itemId];
 
     if (itemId >= 0xA0) {
