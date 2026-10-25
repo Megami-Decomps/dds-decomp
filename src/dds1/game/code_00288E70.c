@@ -363,13 +363,13 @@ extern void fileUnlinkQueue(FileRequest *request);
 /* Deliver callbacks queued after PAC input completes. */
 s32 fileManager(void) {
     FileManWork *work = &fileQueueHead;
-    u32 activeSlots;
+    u32 pendingReadReplies;
     FilePacRequest **link;
     FilePacRequest *request;
 
     fileExecCallback();
-    activeSlots = work->activeSlots;
-    while (activeSlots != 0) {
+    pendingReadReplies = work->activeSlots;
+    while (pendingReadReplies != 0) {
         u32 slot = work->currentSlot;
         const u8 *input = work->buffer + (slot << 16);
         FileTransferJob *job = (FileTransferJob *)work->slots[slot].request;
@@ -400,7 +400,7 @@ s32 fileManager(void) {
             work->freeSlots++;
             work->activeSlots--;
             SignalSema(work->sema);
-            activeSlots = work->activeSlots;
+            pendingReadReplies = work->activeSlots;
         }
     }
     fileExecQueue();

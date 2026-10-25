@@ -190,7 +190,7 @@ typedef struct FileManWork {
     s32 sema;                 /* 0x00 */
     u8 currentSlot;           /* 0x04 */
     u8 nextSlot;              /* 0x05 */
-    u8 activeSlots;           /* 0x06 */
+    u8 activeSlots;           /* 0x06: READ_REPLY events awaiting manager processing */
     u8 freeSlots;             /* 0x07 */
     struct FileRequest *head;            /* 0x08: queued requests, linked through next */
     struct FileRequest *tail;            /* 0x0C */
