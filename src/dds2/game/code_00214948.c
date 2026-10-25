@@ -3206,7 +3206,7 @@ extern void btlInitializePartyRecordFromEnemy(datUnitWork_t *, s32);
  * sequence ID without launching a task; a nonzero prerequisite waits until
  * that task handle is gone.
  */
-s64 btlEnsureHeroUnitTask(u64 prerequisiteHandle) {
+u64 btlEnsureHeroUnitTask(u64 prerequisiteHandle) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit **slot = &battle->effect->guard.unit;
     BtlRuntimeTask *task;

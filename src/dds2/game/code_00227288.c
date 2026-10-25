@@ -1463,7 +1463,7 @@ extern s32 btlClearUnitRestrictionFlag(void);
 extern u64 btlCreateLinkedActorTransformTasks(u64 prerequisiteHandle);
 extern void btlDestroyActionActor(void);
 extern s32 btlDispatchActionByResourceFlags(BtlLinkedCommand *unit);
-extern s64 btlEnsureHeroUnitTask(u64 prerequisiteHandle);
+extern u64 btlEnsureHeroUnitTask(u64 prerequisiteHandle);
 extern s32 btlFilterActionByUnitFlags(BtlUnit *unit, s32 action);
 extern s32 btlFilterRestrictedCommand(BtlUnit *battler, s32 command);
 extern BtlUnit *btlFindUnitByMode(BtlUnit *unusedActor);
