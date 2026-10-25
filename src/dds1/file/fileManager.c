@@ -2,7 +2,7 @@
 #include "sdf_chip.h"
 #include "file.h"
 #include "sdf_pac_state.h"
-#include "file_request_api.h"
+#include "file_pac_completion_api.h"
 #include "sdf_dev_state.h"
 #include "file_manager_api.h"
 #include "file_request.h"
@@ -207,8 +207,8 @@ s32 pacFileCheckEnd(const FileRequest *request) {
 }
 
 /* Require PAC decode completion and state six. */
-s32 pacCheckEnd(const FileRequest *request) {
-    s32 result = 0;
+FilePacRequestCompletionResult pacCheckEnd(const FileRequest *request) {
+    FilePacRequestCompletionResult result = FILE_PAC_REQUEST_COMPLETION_INCOMPLETE;
     if (request->pacDecodeComplete != 0) {
         result = request->state == FILE_REQUEST_STATE_COMPLETE;
     }

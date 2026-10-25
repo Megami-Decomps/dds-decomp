@@ -55,7 +55,7 @@
 #include "mdl.h"
 #include "mdl_asset_request.h"
 #include "dat_command.h"
-#include "file_request_api.h"
+#include "file_pac_completion_api.h"
 #include "mdl_flag_api.h"
 /* Declared before first use (were implicit int). */
 extern s32 btlActorEntryIsExpired(BtlUnit *unit, s32 index);
@@ -1083,7 +1083,7 @@ void btlFormatModelResourcePath(s32 isDevil, s32 modelId, char *pathOut) {
 /* Finalized entries bypass requests. Otherwise retain both native model
  * queries and the signed-byte readiness result. */
 s8 btlIsModelPackEntryReady(BattleModelEntry *cacheEntry) {
-    s32 requestReady;
+    FilePacRequestCompletionResult requestReady;
     if (cacheEntry->finalized != BTL_MODEL_ENTRY_UNFINALIZED) {
         return 1;
     }

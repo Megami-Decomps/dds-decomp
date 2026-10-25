@@ -59,7 +59,7 @@
 #include "dat_state.h"
 #include "dat_world_field_flags.h"
 #include "dat_command.h"
-#include "file_request_api.h"
+#include "file_pac_completion_api.h"
 #include "eff_packet_params.h"
 #include "sdf_packet_append.h"
 #include "sdf_asset_state.h"
@@ -1295,7 +1295,7 @@ void btlFormatModelResourcePath(s32 isDevil, s32 modelId, char *pathOut) {
 /* Finalized entries bypass requests. Otherwise retain both native model
  * queries and the signed-byte readiness result. */
 s8 btlIsModelPackEntryReady(BattleModelEntry *cacheEntry) {
-    s32 requestReady;
+    FilePacRequestCompletionResult requestReady;
     if (cacheEntry->finalized != BTL_MODEL_ENTRY_UNFINALIZED) {
         return 1;
     }
