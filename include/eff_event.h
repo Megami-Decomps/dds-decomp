@@ -30,12 +30,17 @@ typedef char EffEventInit_orientation_at_0x10[((u32)&((EffEventInit *)0)->orient
 typedef char EffEventInit_range_at_0x20[((u32)&((EffEventInit *)0)->range == 0x20) ? 1 : -1];
 typedef char EffEventInit_color_at_0x2C[((u32)&((EffEventInit *)0)->color == 0x2C) ? 1 : -1];
 
+/* Identifies who releases the event handle shared by light-effect clones. */
+typedef u8 EffSimpleBEDHandleOwnership;
+#define EFF_SIMPLE_BED_HANDLE_BORROWED 0
+#define EFF_SIMPLE_BED_HANDLE_OWNED 1
+
 /* Per-title light-effect holder allocated by its create and clone paths. */
 typedef struct effSimpleBED_t {
     struct SoundMixer *handle;
     effEveBEDCutHandle_t *owner;
     EffEventInit init;
-    u8 active;
+    EffSimpleBEDHandleOwnership handleOwnership;
     u8 opaque39[3];
 } effSimpleBED_t;
 
@@ -47,8 +52,8 @@ typedef char EffEventLight_owner_offset_must_be_0x04[
     ((u32)&((effSimpleBED_t *)0)->owner == 0x04) ? 1 : -1];
 typedef char EffEventLight_init_offset_must_be_0x08[
     ((u32)&((effSimpleBED_t *)0)->init == 0x08) ? 1 : -1];
-typedef char EffEventLight_active_offset_must_be_0x38[
-    ((u32)&((effSimpleBED_t *)0)->active == 0x38) ? 1 : -1];
+typedef char EffEventLight_handleOwnership_offset_must_be_0x38[
+    ((u32)&((effSimpleBED_t *)0)->handleOwnership == 0x38) ? 1 : -1];
 typedef char EffEventLight_opaque39_offset_must_be_0x39[
     ((u32)&((effSimpleBED_t *)0)->opaque39 == 0x39) ? 1 : -1];
 

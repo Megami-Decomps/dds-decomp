@@ -1254,14 +1254,14 @@ effSimpleBED_t *effSimpleBEDCreate(SoundMixer *mixer, f32 param) {
     work->init.position[3] = 0;
     work->handle = effEveBEDCreate(mixer);
     work->owner = effEveBEDCutCreate(work->handle, 0, &work->init);
-    work->active = 1;
+    work->handleOwnership = EFF_SIMPLE_BED_HANDLE_OWNED;
     return work;
 }
 
 /* Release the effect, invoke shared teardown only when flagged, then free the holder. */
 void effSimpleBEDDelete(effSimpleBED_t *work) {
     effEveBEDCutDelete(work->owner);
-    if (work->active != 0) {
+    if (work->handleOwnership != EFF_SIMPLE_BED_HANDLE_BORROWED) {
         effEveBEDDelete(work->handle);
     }
     sdfChipFreeDirect(work);
@@ -1275,7 +1275,7 @@ effSimpleBED_t *effSimpleBEDCopy(effSimpleBED_t *src) {
     work->owner = effEveBEDCutCreate(src->handle, 0, block);
     work->handle = src->handle;
     memcpy(&work->init, block, sizeof(work->init));
-    work->active = 0;
+    work->handleOwnership = EFF_SIMPLE_BED_HANDLE_BORROWED;
     return work;
 }
 
