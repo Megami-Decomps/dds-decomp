@@ -9349,7 +9349,7 @@ void btlUpdateFadeColor(void) {
             node->fadeCountdown = node->fadeCountdown - 1;
         }
     }
-    if ((u32)(btlGetActiveUnitId() - 9) < 2 || context->unk2A4 != 0 || context->unk208 == 8) {
+    if ((u32)(btlGetActiveUnitId() - 9) < 2 || context->boundTask != 0 || context->currentScene == 8) {
         context->fadeEnabled = 0;
     } else {
         context->fadeEnabled = 1;

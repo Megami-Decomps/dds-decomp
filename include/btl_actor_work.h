@@ -9,10 +9,11 @@
  * resource-node lists, and packed battle tint share this owner; intervening
  * words without a proved role remain opaque. */
 struct BtlRuntimeTask;
+struct dds3ProcessID_t;
 
 typedef struct BtlActorWork {
     u8 pad_00[0x208];
-    s32 unk208;
+    s32 currentScene; /* 0x208: matches the battle runtime's selected scene. */
     u8 pad20C[0x1C];
     BtlUnit *actorList; /* 0x228 */
     struct BtlRuntimeTask *taskTail; /* Newest registration; reverse traversal. */
@@ -24,7 +25,7 @@ typedef struct BtlActorWork {
     u32 motionSeLoadFrame; /* 0x264: shared with BtlState; -1 disables frame counting. */
     u32 skillSeLoadFrame; /* 0x268: -1 disables the skill-SE frame gate. */
     u8 pad26C[0x38];
-    s32 unk2A4;
+    struct dds3ProcessID_t *boundTask; /* 0x2A4: actor-slot AI script task. */
     u8 pad2A8[0x210];
     struct SoundResourceNode *soundResourceSlots[BTL_SOUND_ENTRY_COUNT]; /* 0x4B8 */
     u8 pad57C[8];
@@ -37,6 +38,10 @@ typedef struct BtlActorWork {
 } BtlActorWork;
 
 typedef char BtlActorWorkExtent[(sizeof(BtlActorWork) == 0x5EC) ? 1 : -1];
+typedef char BtlActorWorkCurrentSceneOffset[
+    ((unsigned int)&((BtlActorWork *)0)->currentScene == 0x208) ? 1 : -1];
+typedef char BtlActorWorkBoundTaskOffset[
+    ((unsigned int)&((BtlActorWork *)0)->boundTask == 0x2A4) ? 1 : -1];
 typedef char BtlActorWorkActorListOffset[((unsigned int)&((BtlActorWork *)0)->actorList == 0x228) ? 1 : -1];
 typedef char BtlActorWorkTaskTailOffset[((unsigned int)&((BtlActorWork *)0)->taskTail == 0x22C) ? 1 : -1];
 typedef char BtlActorWorkTaskHeadOffset[((unsigned int)&((BtlActorWork *)0)->taskHead == 0x230) ? 1 : -1];
