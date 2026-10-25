@@ -944,7 +944,7 @@
 0x00121A58	fldGetStageBitmapBitCoordinates	inferred	confidence=high; matched-C; src/dds1/game/code_0011D3A0.c:1089; Converts scene-relative offsets into bitmap byte, row and bit coordinates, returning whether they are in bounds. twin=0x00123A58 (DDS2). LiteG batch 4.
 0x00121B88	fldMarkStageExplorationCellsAroundPosition	inferred	Marks the valid 3-by-3 neighborhood around a stage position in the field exploration bitset; paired helper is 0x00123B88.
 0x00121DE0	fldMarkStageExplorationBitmapRegion	inferred	Sets the requested rectangular run of stage-exploration bitmap cells; the field-script wrapper forwards five bounds/size parameters and the exploration-record path supplies the same region operation. Paired DDS1/DDS2 providers use title-specific bitmap bases. [Binary Ninja HLIL, script wrapper and record callers, 2026-10-14]
-0x00121ED8	fldTestStageExplorationCell	inferred	Inferred from the current C implementation in game/code_0011D3A0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00121ED8	fldIsStageExplorationCellMarked	inferred	Tests whether a world X/Z position maps to a marked stage-exploration cell; paired DDS2 provider uses title-specific bitmap indexing.
 0x00122030	fldAngleDifference	inferred	adds 360 to negative angles, reduces both mod 360 and returns the shortest signed difference b-a in degrees
 0x00122100	fldSnapAngleToCompassPoint	inferred	Wraps angle and chooses nearest of sixteen compass angles. [names_qp9.tsv]
 0x00122498	fldPlayerCalc360_8	inferred	SMT3HD name via SLUS_209.11 0x0012FE08, reloc-identical; was fldSnapAngleToCompassOctant

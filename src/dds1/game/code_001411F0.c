@@ -1214,7 +1214,7 @@ extern void eglSetOt(u32);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 extern void eglLinkPoly4(f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,u32,u32,u32,u32);
-extern s32 fldTestStageExplorationCell(s32 floor, f32 x, f32 z);
+extern s32 fldIsStageExplorationCellMarked(s32 floor, f32 x, f32 z);
 extern s32 fldGetFloorFlag(s32 area, s32 floor, s32 bit);
 extern void fldSubmitPrimaryFramePacket(void), fldSubmitAlternateFramePacket(void);
 extern void fldAllIconDel(s32 index, f32 *x, f32 *z);
@@ -1314,7 +1314,7 @@ void fldDrawAutomapScene(void) {
                  i++, sceneX += step) {
                 if (sceneX < (f32)D_003BAEBC - 11400.0f) continue;
                 if (sceneX > (f32)D_003BAEBC + 11400.0f) break;
-                if (fldTestStageExplorationCell(D_003BAEF0, sceneX, sceneZ)) {
+                if (fldIsStageExplorationCellMarked(D_003BAEF0, sceneX, sceneZ)) {
                     if (run == 0) { left = sceneX - 50.0f; top = sceneZ + 50.0f; }
                     bottom = sceneZ - step - 50.0f;
                     right = sceneX + step + 50.0f;
@@ -1429,7 +1429,7 @@ void fldDrawAutomapScene(void) {
                 if ((f32)D_003BAEBC + 11400.0f < sceneX) {
                     break;
                 }
-                if (fldTestStageExplorationCell(D_003BAEF0, sceneX, sceneZ) != 0) {
+                if (fldIsStageExplorationCellMarked(D_003BAEF0, sceneX, sceneZ) != 0) {
                     if (run == 0) {
                         left = sceneX - 50.0f;
                         top = sceneZ + 50.0f;
@@ -1502,7 +1502,7 @@ void fldDrawAutomapScene(void) {
                             switch (icon->kind) {
                             case 1:
                                 if (D_003BAEAC != 0 ||
-                                    fldTestStageExplorationCell(D_003BAEF0,
+                                    fldIsStageExplorationCellMarked(D_003BAEF0,
                                         icon->position->x + sceneX + offsetX,
                                         icon->position->z + sceneZ + offsetZ) != 0) {
                                     spriteIndex = 8;
@@ -1511,7 +1511,7 @@ void fldDrawAutomapScene(void) {
                                 break;
                             case 2:
                                 if (D_003BAEAC != 0 ||
-                                    fldTestStageExplorationCell(D_003BAEF0,
+                                    fldIsStageExplorationCellMarked(D_003BAEF0,
                                         icon->position->x + sceneX + offsetX,
                                         icon->position->z + sceneZ + offsetZ) != 0) {
                                     spriteIndex = 9;
@@ -1520,7 +1520,7 @@ void fldDrawAutomapScene(void) {
                                 break;
                             case 3:
                                 if (D_003BAEAC != 0 ||
-                                    fldTestStageExplorationCell(D_003BAEF0,
+                                    fldIsStageExplorationCellMarked(D_003BAEF0,
                                         icon->position->x + sceneX + offsetX,
                                         icon->position->z + sceneZ + offsetZ) != 0) {
                                     spriteIndex = 10;
@@ -1529,7 +1529,7 @@ void fldDrawAutomapScene(void) {
                                 break;
                             case 4:
                                 if (D_003BAEAC != 0 ||
-                                    fldTestStageExplorationCell(D_003BAEF0,
+                                    fldIsStageExplorationCellMarked(D_003BAEF0,
                                         icon->position->x + sceneX + offsetX,
                                         icon->position->z + sceneZ + offsetZ) != 0) {
                                     spriteIndex = 5;
@@ -1538,7 +1538,7 @@ void fldDrawAutomapScene(void) {
                                 break;
                             case 5:
                                 if (D_003BAEAC != 0 ||
-                                    fldTestStageExplorationCell(D_003BAEF0,
+                                    fldIsStageExplorationCellMarked(D_003BAEF0,
                                         icon->position->x + sceneX + offsetX,
                                         icon->position->z + sceneZ + offsetZ) != 0) {
                                     spriteIndex = 2;
@@ -1547,7 +1547,7 @@ void fldDrawAutomapScene(void) {
                                 break;
                             case 6:
                                 if (D_003BAEAC != 0 ||
-                                    fldTestStageExplorationCell(D_003BAEF0,
+                                    fldIsStageExplorationCellMarked(D_003BAEF0,
                                         icon->position->x + sceneX + offsetX,
                                         icon->position->z + sceneZ + offsetZ) != 0) {
                                     spriteIndex = 4;
@@ -1556,7 +1556,7 @@ void fldDrawAutomapScene(void) {
                                 break;
                             case 7:
                                 if (D_003BAEAC != 0 ||
-                                    fldTestStageExplorationCell(D_003BAEF0,
+                                    fldIsStageExplorationCellMarked(D_003BAEF0,
                                         icon->position->x + sceneX + offsetX,
                                         icon->position->z + sceneZ + offsetZ) != 0) {
                                     spriteIndex = 6;
@@ -1565,7 +1565,7 @@ void fldDrawAutomapScene(void) {
                                 break;
                             case 8:
                                 if (D_003BAEAC != 0 ||
-                                    fldTestStageExplorationCell(D_003BAEF0,
+                                    fldIsStageExplorationCellMarked(D_003BAEF0,
                                         icon->position->x + sceneX + offsetX,
                                         icon->position->z + sceneZ + offsetZ) != 0) {
                                     spriteIndex = 7;
@@ -1578,7 +1578,7 @@ void fldDrawAutomapScene(void) {
                                 break;
                             case 10:
                                 if (D_003BAEAC != 0 ||
-                                    fldTestStageExplorationCell(D_003BAEF0,
+                                    fldIsStageExplorationCellMarked(D_003BAEF0,
                                         icon->position->x + sceneX + offsetX,
                                         icon->position->z + sceneZ + offsetZ) != 0) {
                                     spriteIndex = 12;
@@ -1592,7 +1592,7 @@ void fldDrawAutomapScene(void) {
                                 break;
                             case 12:
                                 if (D_003BAEAC != 0 ||
-                                    fldTestStageExplorationCell(D_003BAEF0,
+                                    fldIsStageExplorationCellMarked(D_003BAEF0,
                                         icon->position->x + sceneX + offsetX,
                                         icon->position->z + sceneZ + offsetZ) != 0) {
                                     spriteIndex = 13;
@@ -1601,7 +1601,7 @@ void fldDrawAutomapScene(void) {
                                 break;
                             case 13:
                                 if (D_003BAEAC != 0 ||
-                                    fldTestStageExplorationCell(D_003BAEF0,
+                                    fldIsStageExplorationCellMarked(D_003BAEF0,
                                         icon->position->x + sceneX + offsetX,
                                         icon->position->z + sceneZ + offsetZ) != 0) {
                                     spriteIndex = 14;
