@@ -8576,9 +8576,9 @@ SoundResourceNode *sndAllocResourceNode(void) {
     return node;
 }
 
-SoundResourceNode *sndCreateResourceNode(SoundMixer *soundId) {
+SoundResourceNode *sndCreateResourceNode(SoundMixer *sourceMixer) {
     SoundResourceNode *node = (SoundResourceNode *)sndAllocResourceNode();
-    node->resourceHandle = sndMixerClone(soundId);
+    node->resourceHandle = sndMixerClone(sourceMixer);
     node->flags |= 2;
     return node;
 }

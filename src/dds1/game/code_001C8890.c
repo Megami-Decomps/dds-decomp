@@ -926,7 +926,7 @@ extern f32 btlGetActorEffectScale(BtlTask *);
 extern BtlRuntimeTask *btlCreateTargetedCommandSoundTask(BtlTask *, s32, u32);
 extern BtlRuntimeTask *btlAllocateApproachTargetTask(BtlUnit *, BtlUnit *, f32);
 extern s32 btlIsBattleRecordEligible(BtlUnit *, BtlUnit *, s32, s32);
-extern SoundResourceNode *sndCreateResourceNode(SoundMixer *);
+extern SoundResourceNode *sndCreateResourceNode(SoundMixer *sourceMixer);
 extern BtlRuntimeTask *btlCreateReferencedBattleEffectTask(SoundResourceNode *, BtlUnit *, BtlUnit *, u16);
 extern const char D_003A3658[];
 extern const char D_003A3670[];

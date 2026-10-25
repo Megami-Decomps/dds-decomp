@@ -1419,7 +1419,7 @@ extern BtlRuntimeTask *btlCreateClearActorEntrySelectionTask(BtlUnit *unit);
 extern s32 btlGetUnitMotionDurationFrames(BtlUnit *unit, s32 motionIndex);
 extern BtlRuntimeTask *btlCreateActorPositionEffectTask(BtlUnit *unit);
 extern BtlRuntimeTask *sndCreateClearStateTask(void);
-extern SoundResourceNode *sndCreateResourceNode(struct SoundMixer *soundId);
+extern SoundResourceNode *sndCreateResourceNode(struct SoundMixer *sourceMixer);
 extern BtlRuntimeTask *sndCreateSetStateTask(void);
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32 value);
 extern BtlRuntimeTask *sndCreateTimedUnitEffectTask(SoundResourceNode *effect, BtlUnit *actor, u16 frames,
