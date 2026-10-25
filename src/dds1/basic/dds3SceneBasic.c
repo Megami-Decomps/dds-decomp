@@ -27,7 +27,7 @@ void dds3SceneBasicFreeScene(dds3Basic_t *worldNode) {
 s32 evtLoadSceneResourceFrom(dds3Basic_t *worldNode, const char *resourceName) {
     EvtWorldTable *worldData;
     struct sdfMemHandle_t *resourceHandle;
-    u32 resolvedAddress;
+    struct BfFlw0Header *resolvedScript;
 
     worldData = (EvtWorldTable *)worldNode->data;
     if (resourceName == NULL) {
@@ -36,12 +36,12 @@ s32 evtLoadSceneResourceFrom(dds3Basic_t *worldNode, const char *resourceName) {
     if (worldData->sceneResourceHandle != 0) {
         dds3SceneBasicReleaseScriptFile(worldNode);
     }
-    resourceHandle = sdfDevLoadFileEx(resourceName, &resolvedAddress, 0);
-    if (resolvedAddress == 0) {
+    resourceHandle = sdfDevLoadFileEx(resourceName, (u32 *)&resolvedScript, 0);
+    if (resolvedScript == NULL) {
         return 0;
     }
     worldData->sceneResourceHandle = resourceHandle;
-    worldData->sceneScript = (struct BfFlw0Header *)resolvedAddress;
+    worldData->sceneScript = resolvedScript;
     return 1;
 }
 
