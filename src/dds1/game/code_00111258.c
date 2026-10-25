@@ -24,7 +24,7 @@ WorldIndexNode *dds3AreaBasicGetWorldIndexNode(dds3Basic_t *worldIndexOwner, s32
 }
 #include "dds3_world_secondary.h"
 /* Copy the slot's world-object words (optionally filtered) into a fresh index node. */
-WorldIndexNode *dds3AreaBasicArrangeGetItemArray(dds3Basic_t *worldIndexOwner, s32 slotIndex, s32 (*filter)(u32)) {
+WorldIndexNode *dds3AreaBasicArrangeGetItemArray(dds3Basic_t *worldIndexOwner, s32 slotIndex, s32 (*filter)(dds3Basic_t *)) {
     WorldIndexNode *slot = dds3AreaBasicGetWorldIndexNode(worldIndexOwner, slotIndex);
     WorldIndexNode *result;
     u32 word;
@@ -36,7 +36,7 @@ WorldIndexNode *dds3AreaBasicArrangeGetItemArray(dds3Basic_t *worldIndexOwner, s
     dds3SetFirstBasicArray((dds3BasicArrayHandle_t *)slot);
     do {
         word = dds3GetBasicArray((dds3BasicArrayHandle_t *)slot);
-        if (filter == NULL || filter(word) != 0) {
+        if (filter == NULL || filter((dds3Basic_t *)(u32)word) != 0) {
             dds3AddBasicArray((dds3BasicArrayHandle_t *)result, 1);
             dds3SetBasicArray((dds3BasicArrayHandle_t *)result, word);
         }
