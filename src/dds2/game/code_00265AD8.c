@@ -16,12 +16,6 @@
 
 extern void dspRequestMessageWindowModeOne(void);
 
-typedef struct EventCallbackContext {
-    u8 pad00[0xC];
-    MenuPopupState transitionWork; /* +0x0C: native saved-entry transition state */
-    s32 dispatch; /* +0x58: state passed to the callback dispatcher */
-} EventCallbackContext;
-
 extern MnuSceneFlagEntry mnuSceneFlagEventEntries[MNU_SCENE_FLAG_ENTRY_COUNT];
 extern MnuPartyFlagEntry mnuPartyFlagEventEntries[MNU_PARTY_FLAG_ENTRY_COUNT];
 
@@ -244,9 +238,10 @@ s32 evtAdvancePopupWithOptionalPreparation(dds3ProcessID_t *callback) {
 }
 /* Route the supplied callback through dispatch mode 2 after menu setup. */
 s32 evtSetupDispatchSyncI(dds3ProcessID_t *callback) {
-    s32 eventContext = dds3GetProcessData(callback);
+    MenuTerminalContext *context = (MenuTerminalContext *)dds3GetProcessData(callback);
+
     dspRequestMessageWindowModeOne();
-    return evtMenuSetHandler((void *)eventContext, 2, (void *)callback);
+    return evtMenuSetHandler(context, 2, (void *)callback);
 }
 
 u32 evtStartTerminalMenuMessage(void) {
@@ -263,9 +258,9 @@ u32 mnuTerminalMenuMessageLeaveNoOp(void) {
 extern MenuPopupEntry mnuShopReturnFadePopupEntry[];
 
 s32 mnuPollMessageWindowBeforeClosing(dds3ProcessID_t *callback) {
-    s32 context = dds3GetProcessData(callback);
-    s32 *window = (s32 *)(context + 0x58);
-    s32 state = mnuDispatchPopupTransition(&((EventCallbackContext *)context)->transitionWork, window, 0, (void *)callback);
+    MenuTerminalContext *context = (MenuTerminalContext *)dds3GetProcessData(callback);
+    s32 *window = &context->popupState;
+    s32 state = mnuDispatchPopupTransition(&context->transitionWork, window, 0, (void *)callback);
 
     if (state == 0) {
         if (*window == 0) {
@@ -280,16 +275,17 @@ s32 mnuPollMessageWindowBeforeClosing(dds3ProcessID_t *callback) {
 }
 
 s32 mnuDrawShopPanelAfterMessageClose(dds3ProcessID_t *callback) {
-    s32 context = dds3GetProcessData(callback);
+    MenuTerminalContext *context = (MenuTerminalContext *)dds3GetProcessData(callback);
 
-    mnuDrawShopPanelDecorations((MenuTerminalContext *)context);
-    return evtMenuSetHandler((void *)context, 1, (void *)callback);
+    mnuDrawShopPanelDecorations(context);
+    return evtMenuSetHandler(context, 1, (void *)callback);
 }
 
 s32 evtAdvanceTerminalMenuMessage(dds3ProcessID_t *callback) {
-    s32 eventContext = dds3GetProcessData(callback);
+    MenuTerminalContext *context = (MenuTerminalContext *)dds3GetProcessData(callback);
+
     dspRequestMessageWindowModeOne();
-    return evtMenuSetHandler((void *)eventContext, 2, (void *)callback);
+    return evtMenuSetHandler(context, 2, (void *)callback);
 }
 
 extern void evtClearActiveFlag(s32 flagIndex);
@@ -310,9 +306,9 @@ u32 evtStartFadeOut(void) {
 }
 
 s32 mnuWaitForFadeBeforePopup(dds3ProcessID_t *callback) {
-    s32 context = dds3GetProcessData(callback);
-    s32 *window = (s32 *)(context + 0x58);
-    s32 state = mnuDispatchPopupTransition(&((EventCallbackContext *)context)->transitionWork, window, 0, (void *)callback);
+    MenuTerminalContext *context = (MenuTerminalContext *)dds3GetProcessData(callback);
+    s32 *window = &context->popupState;
+    s32 state = mnuDispatchPopupTransition(&context->transitionWork, window, 0, (void *)callback);
     if (state == 0) {
         if (*window == 0) {
             if (dds3FadeCheck() == 0) {
@@ -325,16 +321,16 @@ s32 mnuWaitForFadeBeforePopup(dds3ProcessID_t *callback) {
 }
 
 s32 mnuDrawShopPanelAfterFade(dds3ProcessID_t *callback) {
-    s32 context = dds3GetProcessData(callback);
+    MenuTerminalContext *context = (MenuTerminalContext *)dds3GetProcessData(callback);
 
-    mnuDrawShopPanelDecorations((MenuTerminalContext *)context);
-    return evtMenuSetHandler((void *)context, 1, (void *)callback);
+    mnuDrawShopPanelDecorations(context);
+    return evtMenuSetHandler(context, 1, (void *)callback);
 }
 
 s32 evtDispatchSync(dds3ProcessID_t *callback) {
-    s32 context = dds3GetProcessData(callback);
+    MenuTerminalContext *context = (MenuTerminalContext *)dds3GetProcessData(callback);
 
-    return evtMenuSetHandler((void *)context, 2, (void *)callback);
+    return evtMenuSetHandler(context, 2, (void *)callback);
 }
 
 /* Registered popup enter hook: no side effects; returns one. */
@@ -458,4 +454,3 @@ const CampEffectRows mnuCampEffectInitialRows __attribute__((aligned(8))) = {
 };
 const char mnuCampBackgroundMotionPath[] __attribute__((aligned(8))) = "/camp/mot/bg.mot";
 const char mnuTerminalSpriteDirectory[] __attribute__((aligned(8))) = "/facility/spr/terminal/";
-
