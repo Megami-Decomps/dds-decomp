@@ -32,34 +32,14 @@
 #define EFF_MAGATUHI_REPLAY_DRIFT 4
 #define EFF_MAGATUHI_HISTORY_MINIMUM 8
 
-
-/* Callback input prefix; type 3 contains an effect-dispatch object at +8. */
+/* Internal callback view whose third word carries the effect work pointer. */
 typedef struct {
     s32 type;
     u8 pad04[4];
     EffWork *effect;
 } EffMagatuhiCallback;
+
 extern u32 effMagaCylinderCalcColor(u32 colorA, u32 colorB);
-
-/* XYZ is consumed as a position vector; preserve the untouched fourth word. */
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-    u8 opaqueFourthWord[4];
-} EffMagatuhiPosition;
-
-typedef char EffMagatuhiPositionSizeCheck[(sizeof(EffMagatuhiPosition) == 0x10) ? 1 : -1];
-
-/* Four control points and their jitter scales; copy xyz but preserve each w. */
-typedef struct {
-    f32 controlPoints[EFF_MAGATUHI_CONTROL_POINT_COUNT][EFF_MAGATUHI_VECTOR_WORD_COUNT];
-    f32 jitterScales[EFF_MAGATUHI_CONTROL_POINT_COUNT];
-} EffMagatuhiRowsSrc;
-
-
-
-
 
 /* Parameter head of the first family: particles of 0x30 bytes precede the work. */
 typedef struct {
@@ -133,18 +113,6 @@ typedef struct {
     EffMagatuhiOwner *managedResource; /* 0x188 */
     sdfMemHandle_t *allocationHandle; /* 0x18C backing allocation, not the work address */
 } EffMagatuhiWideSecond;
-
-/* Float source block read by effMagaSCSetArea. */
-typedef struct {
-    EffMagatuhiPosition origin;
-    EffMagatuhiPosition target;
-    f32 initialRadius, captureDistance;
-} EffMagatuhiFloatParams; /* 0x28 */
-
-typedef char EffMagatuhiFloatParamsSizeCheck[(sizeof(EffMagatuhiFloatParams) == 0x28) ? 1 : -1];
-typedef char EffMagatuhiFloatParamsTargetOffsetCheck[
-    ((u32)&((EffMagatuhiFloatParams *)0)->target == 0x10) ? 1 : -1];
-
 
 /* Release the allocation retained by the render/history owner. */
 void effMagaCylinderFreeParts(EffMagatuhiValueWork *work) {
@@ -604,8 +572,8 @@ void effMagaSmokeConvDraw(EffMagatuhiWideFirst *work) {
 }
 
 /* Update the first family's scattered float parameters without touching gaps. */
-void effMagaSCSetArea(EffMagatuhiCallback *work, EffMagatuhiFloatParams *src) {
-    EffMagatuhiWideFirst *dst = dds3MagatuhiGetHandle(work->effect);
+void effMagaSCSetArea(EffNode *node, const EffMagatuhiFloatParams *src) {
+    EffMagatuhiWideFirst *dst = dds3MagatuhiGetHandle((EffWork *)node->instance);
 
     dst->head.origin.x = src->origin.x;
     dst->head.origin.y = src->origin.y;
@@ -793,8 +761,8 @@ void effMagaPoint4Draw(EffMagatuhiWideSecond *work) {
 }
 
 /* Replace control-point xyz and jitter amplitudes without changing point w. */
-void effMagaP4SetPoint(EffMagatuhiCallback *work, EffMagatuhiRowsSrc *src) {
-    EffMagatuhiWideSecond *dst = dds3MagatuhiGetHandle(work->effect);
+void effMagaP4SetPoint(EffNode *node, const EffMagatuhiRowsSrc *src) {
+    EffMagatuhiWideSecond *dst = dds3MagatuhiGetHandle((EffWork *)node->instance);
     u32 controlPointIndex;
 
     for (controlPointIndex = 0; controlPointIndex < EFF_MAGATUHI_CONTROL_POINT_COUNT; controlPointIndex++) {

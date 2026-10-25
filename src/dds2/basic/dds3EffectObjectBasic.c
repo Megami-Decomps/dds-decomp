@@ -11,6 +11,7 @@
 #include "dds3obj.h"
 #include "eff_object_dispatch_api.h"
 #include "eff.h"
+#include "eff_magatuhi_api.h"
 #include "eff_node.h"
 #include "eff_create_node_from_parameter.h"
 #include "eff_node_descriptor.h"
@@ -45,8 +46,6 @@ extern s32 sdfModelGetMarkPosMatrix(sdfModelRootNode_t *model, s32 id);
 
 
 extern void dds3SetRadiusPoseSet(dds3PoseSet_t *node);
-extern void effMagaSCSetArea(void *work, const void *src);
-extern void effMagaP4SetPoint(void *work, const void *src);
 
 
 
@@ -790,7 +789,7 @@ s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *obj, dds3Basic_t *first, dds3Basic_t
             SDF_VU0_STOREVECTOR(parameterRows + 4);
             parameterRows[9] = GetESPR(second);
         }
-        effMagaSCSetArea(data->handle, parameterRows);
+        effMagaSCSetArea(data->handle, (const EffMagatuhiFloatParams *)parameterRows);
         return 1;
     case EFF_DEPENDENCY_STATE_MAGATUHI_FOUR_ROWS:
         parameterRows = data->vector;
@@ -810,7 +809,7 @@ s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *obj, dds3Basic_t *first, dds3Basic_t
             SDF_VU0_STOREVECTOR(parameterRows + 12);
             parameterRows[19] = GetESPR(fourth);
         }
-        effMagaP4SetPoint(data->handle, parameterRows);
+        effMagaP4SetPoint(data->handle, (const EffMagatuhiRowsSrc *)parameterRows);
         return 1;
     }
     return 0;
