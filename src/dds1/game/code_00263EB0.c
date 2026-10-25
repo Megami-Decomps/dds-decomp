@@ -138,10 +138,10 @@ s32 mnuDrawItemPanelDuringRequest(dds3ProcessID_t *task) {
 }
 
 s32 mnuAdvanceItemPanelAfterRequest(dds3ProcessID_t *input) {
-    s32 context = dds3GetProcessData(input);
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(input);
 
     dspRequestMessageWindowModeOne();
-    return menuRunPanel((void *)context, 2, (void *)input);
+    return menuRunPanel(context, 2, (void *)input);
 }
 
 u32 mnuBeginPanelEntryAndCaptureSoundMode(dds3ProcessID_t *task) {
@@ -206,10 +206,10 @@ s32 mnuDrawItemPanelAfterStatAssignment(dds3ProcessID_t *request) {
 }
 
 s32 mnuAdvanceStatAssignmentPanel(dds3ProcessID_t *input) {
-    s32 context = dds3GetProcessData(input);
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(input);
 
     dspRequestMessageWindowModeOne();
-    return menuRunPanel((void *)context, 2, (void *)input);
+    return menuRunPanel(context, 2, (void *)input);
 }
 
 u32 mnuShowProgressLevelChangePopup(dds3ProcessID_t *task) {
@@ -266,10 +266,10 @@ s32 mnuRunItemPanelWithInactiveBackdrop(dds3ProcessID_t *request) {
 }
 
 s32 mnuAdvanceInactiveItemPanel(dds3ProcessID_t *input) {
-    s32 context = dds3GetProcessData(input);
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(input);
 
     dspRequestMessageWindowModeOne();
-    return menuRunPanel((void *)context, 2, (void *)input);
+    return menuRunPanel(context, 2, (void *)input);
 }
 
 

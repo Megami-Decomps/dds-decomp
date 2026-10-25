@@ -143,10 +143,10 @@ s32 mnuDrawItemPanelDuringRequest(dds3ProcessID_t *task) {
 }
 
 s32 mnuAdvanceItemPanelAfterRequest(dds3ProcessID_t *request) {
-    s32 context = dds3GetProcessData(request);
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(request);
 
     dspRequestMessageWindowModeOne();
-    return menuSetHandler((void *)context, 2, (void *)request);
+    return menuSetHandler(context, 2, (void *)request);
 }
 
 u32 mnuResetGroupSelectionAndStartMessage(dds3ProcessID_t *task) {
@@ -211,10 +211,10 @@ s32 mnuDrawItemPanelAfterStatAssignment(dds3ProcessID_t *request) {
 }
 
 s32 mnuAdvanceStatAssignmentPanel(dds3ProcessID_t *request) {
-    s32 context = dds3GetProcessData(request);
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(request);
 
     dspRequestMessageWindowModeOne();
-    return menuSetHandler((void *)context, 2, (void *)request);
+    return menuSetHandler(context, 2, (void *)request);
 }
 
 s32 mnuShowProgressLevelChangePopup(dds3ProcessID_t *task) {
@@ -270,10 +270,10 @@ s32 mnuRunItemPanelWithInactiveBackdrop(dds3ProcessID_t *request) {
 }
 
 s32 mnuAdvanceInactiveItemPanel(dds3ProcessID_t *request) {
-    s32 context = dds3GetProcessData(request);
+    BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(request);
 
     dspRequestMessageWindowModeOne();
-    return menuSetHandler((void *)context, 2, (void *)request);
+    return menuSetHandler(context, 2, (void *)request);
 }
 
 extern u16 mnuExtraLevelWeightedItemPairsView[][17];
