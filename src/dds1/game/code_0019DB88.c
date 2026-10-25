@@ -1,6 +1,7 @@
 #include "common.h"
 #include "itf_debug_panel_work.h"
 #include "itf.h"
+#include "itf_option_bit_index_api.h"
 #include "snd_sequence_volume_pan.h"
 #include "snd_pad.h"
 #include "itf_mes_window.h"
@@ -35,7 +36,7 @@ extern ItfMesGlobals itfMesMngManager;
 
 extern void itfMesShiftPanelVertically(instanceMes_tag *panel, s32 dy);
 extern void ChangeFontColorAll(_FRQ *node, u8 flagValue);
-extern s32 GetMaskedIndex(s32 clearBitsToSkip, u32 mask);
+extern ItfMesOptionBitIndex itfMesFindOptionBitIndex(ItfMesVisibleOptionOrdinal optionOrdinal, u32 optionMask);
 extern s32 SelectItem(instanceMes_tag *);
 extern void itfUpdateSoundSelectionTransition(instanceMes_tag *);
 
@@ -446,7 +447,7 @@ void itfUpdateSoundSelectionTransition(instanceMes_tag *panel) {
             if ((flags & 0xC00) == 0x800) {
                 panel->flags |= 0xC00;
             }
-            selection->selectedIndex = GetMaskedIndex(selection->selectedIndex, selection->panelValue);
+            selection->selectedIndex = itfMesFindOptionBitIndex(selection->selectedIndex, selection->panelValue);
             selection->optionCount = 0;
             ForceSetCurCtr(&panel->fade, BTL_FADE_PHASE_ALPHA_FALLING, 0x7F, 0);
             panel->flags = (panel->flags & ~0x38) | 0x28;

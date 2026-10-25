@@ -4,6 +4,7 @@
 #include "itf_mes_entry_start_api.h"
 #include "scr_integer_return_value_api.h"
 #include "itf.h"
+#include "itf_option_bit_index_api.h"
 #include "snd_pad.h"
 #include "sdf_packet_list.h"
 #include "sdf_resource.h"
@@ -135,7 +136,7 @@ void OpenCheckSpeakerWindow(instanceMes_tag *panel);
 #define ITF_MES_COLOR_BYTE_CLEAR_MASK 0xffffff00
 #define ITF_MES_DEFAULT_COLOR_VALUE 0x80
 #define ITF_MES_TEXT_SLOT_COUNT 0x20
-#define ITF_MES_MASK_BIT_COUNT 0x20
+#define ITF_MES_MASK_BIT_COUNT ITF_MES_OPTION_BIT_INDEX_NOT_FOUND
 #define ITF_MES_STRING_COPY_ROUND_BIAS 4
 #define ITF_MES_BINARY_COPY_ROUND_BIAS 5
 #define ITF_MES_COPY_ALIGN_MASK 3
@@ -1512,18 +1513,18 @@ s32 GetMessageWidth(_FRQ *glyph) {
     return maxAdvance << ITF_MES_TEXT_X_SHIFT;
 }
 
-/* Return the bit index of the zero-based clear-bit ordinal, or 32 if absent.
- * Keep the predecrement; the ordinal itself is not validated. */
-s32 GetMaskedIndex(s32 clearBitsToSkip, u32 mask) {
+/* Resolve the zero-based visible-option ordinal to its clear bit, or 32 if
+ * absent. Keep the predecrement; the ordinal itself is not validated. */
+ItfMesOptionBitIndex itfMesFindOptionBitIndex(ItfMesVisibleOptionOrdinal optionOrdinal, u32 optionMask) {
     s32 bitIndex = 0;
     while (bitIndex < ITF_MES_MASK_BIT_COUNT) {
-        if ((mask & 1) == 0) {
-            if (--clearBitsToSkip < 0) {
+        if ((optionMask & 1) == 0) {
+            if (--optionOrdinal < 0) {
                 break;
             }
         }
         bitIndex++;
-        mask >>= 1;
+        optionMask >>= 1;
     }
     return bitIndex;
 }
@@ -1929,7 +1930,7 @@ void itfMesAdvanceEntryText(instanceMes_tag *mes) {
 
 extern void ChangeFontColorAll(_FRQ *glyph, u8 flagValue);
 
-extern s32 GetMaskedIndex(s32 clearBitsToSkip, u32 mask);
+extern ItfMesOptionBitIndex itfMesFindOptionBitIndex(ItfMesVisibleOptionOrdinal optionOrdinal, u32 optionMask);
 
 extern s32 SelectItem(instanceMes_tag *panel);
 
@@ -1975,7 +1976,7 @@ void itfUpdateSoundSelectionTransition(instanceMes_tag *panel) {
             if ((flags & 0xC00) == 0x800) {
                 panel->flags |= 0xC00;
             }
-            selection->selectedIndex = GetMaskedIndex(selection->selectedIndex, selection->panelValue);
+            selection->selectedIndex = itfMesFindOptionBitIndex(selection->selectedIndex, selection->panelValue);
             selection->optionCount = 0;
             ForceSetCurCtr(&panel->fade, BTL_FADE_PHASE_ALPHA_FALLING, 0x7F, 0);
             panel->flags = (panel->flags & ~0x38) | 0x28;

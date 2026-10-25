@@ -3148,7 +3148,7 @@
 0x001A5A28	ChangeFontColorAll	inferred	SMT3HD name via SLUS_209.11 0x001CF8B8, shared-hash-in-run; was itfMesSetChildChainFlags
 0x001A5A80	ChangeFontAlpha	inferred	SMT3HD name via SLUS_209.11 0x001CF910, shared-hash-in-run; was itfMesRecolorNodeChildren
 0x001A5AD0	GetMessageWidth	inferred	SMT3HD name via SLUS_209.11 0x001CF960, byte-identical; was itfMesMaxGroupedExtent
-0x001A5B20	GetMaskedIndex	inferred	SMT3HD name via SLUS_209.11 0x001CF9B0, byte-identical; was itfMesNthClearBit
+0x001A5B20	itfMesFindOptionBitIndex	inferred	Maps a zero-based visible-option ordinal to its clear mask bit; returns 32 when absent; previously named itfMesNthClearBit before the SMT3HD import.
 0x001A5B70	itfMesEnableUnflaggedNodeContexts	inferred	Enables font context mode on nodes whose first child's flag byte is clear. [names_reviewed6.tsv]
 0x001A5BB8	frFontEnableNodeContextModes	inferred	Enables font context mode on every node in a chain. [names_reviewed8.tsv]
 0x001A5BF8	itfMesInitializePanelPlacementSprite	inferred	Allocates and positions the panel sprite and enables its placement state. [names_reviewed11.tsv]
