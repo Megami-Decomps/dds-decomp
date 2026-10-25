@@ -2092,8 +2092,8 @@ INCLUDE_RODATA(const s32, "game/code_001DD390", D_004178A8);
 
 INCLUDE_RODATA(const s32, "game/code_001DD390", D_004178B8);
 
-s32 btlEvalTaskCondition(BtlTaskCondition *condition, s32 currentCount) {
-    s32 result = 0;
+u8 btlEvalTaskCondition(BtlTaskCondition *condition, s32 currentCount) {
+    u8 result = 0;
     BtlRuntimeTask *task;
     switch (condition->kind) {
     case BTL_TASK_CONDITION_NEVER:
