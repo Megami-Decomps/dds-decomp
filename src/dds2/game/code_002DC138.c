@@ -33,7 +33,7 @@ extern u8 btlIsCurrentActorFullyMarked(void);
 
 extern dds3ModelHandle_t *effLoadViewerModelWithVUState(void *, u32);
 
-extern void mdlPackDecode(s32, u16, s32, void *, u32);
+extern void mdlPackDecode(s32, s32, s32, const u8 *, s32);
 
 extern u16 D_00437E2C;
 

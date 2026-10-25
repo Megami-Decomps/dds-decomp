@@ -254,7 +254,7 @@ extern u32 D_00435F40;
 
 extern u32 D_00435F3C;
 
-extern void mdlPackDecode(s32, s32, s32, s32, s32);
+extern void mdlPackDecode(s32, s32, s32, const u8 *, s32);
 
 void fldLoadPlayerModel(void);
 
@@ -1262,7 +1262,7 @@ void fldTogglePlayerModel(void) {
     buffer = (void *)sdfMemGetPtr(D_00435F38);
     memcpy(buffer, source, D_00435F40);
     D_00435F3C = (u32)buffer;
-    mdlPackDecode(2, 0, 0x101, (s32)buffer, D_00435F40);
+    mdlPackDecode(2, 0, 0x101, buffer, D_00435F40);
     sdfMemFreeDelayedDirect(D_00435F38);
     D_00435F38 = 0;
     dds3RebuildObjectModelContext(fldPlayerObject, 2, fldSceneParam.sequenceWord3C);
@@ -1292,7 +1292,7 @@ void fldPrepareResourceBuffer(void) {
     buffer = (void *)sdfMemGetPtr(D_00435F38);
     memcpy(buffer, source, D_00435F40);
     D_00435F3C = (u32)buffer;
-    mdlPackDecode(2, 0, 0x101, (s32)buffer, D_00435F40);
+    mdlPackDecode(2, 0, 0x101, buffer, D_00435F40);
     sdfMemFreeDelayedDirect(D_00435F38);
     D_00435F38 = 0;
 }

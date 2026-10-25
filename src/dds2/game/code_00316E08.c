@@ -80,7 +80,7 @@ extern s16 dds3VblanksPerFrame;
 extern s32 (*D_0040ABF0[])(u8 *work);
 extern s32 (*D_0040ABE0[])(u8 *work);
 
-extern void mdlPackDecode(s32 source, s32 destination, s32 flags, s32 packageId, s32 variant);
+extern void mdlPackDecode(s32 source, s32 destination, s32 flags, const u8 *packageData, s32 packageSize);
 
 
 
@@ -535,12 +535,12 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
 }
 
 
-/* Read the inline packet header, then forward its request through the legacy ABI. */
+/* Read the inline packet header, then pass its borrowed package bytes to the decoder. */
 void mdlLoadViewerPackageFromWork(PacWork *entry) {
     u32 commandWord;
 
     memcpy(&commandWord, entry->packet, sizeof(commandWord));
-    mdlPackDecode(5, commandWord >> 16, 0x101, (s32)entry->dataCursor,
+    mdlPackDecode(5, commandWord >> 16, 0x101, entry->dataCursor,
                          ((const SdfPacStreamPacketHeader *)entry->packet)->decodedSize);
 }
 

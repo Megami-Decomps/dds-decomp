@@ -27,7 +27,7 @@ extern u32 dds3DrawFlag;
 
 extern s32 evtMotionSeWork;
 #include "sdf_debug_api.h"
-extern void mdlPackDecode(s32, s32, s32, s32, s32);
+extern void mdlPackDecode(s32, s32, s32, const u8 *, s32);
 extern s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource);
 
 /* Keep the complete diagnostic records, including their native trailing zeros. */
@@ -40,7 +40,7 @@ s32 evtInitMotionSeProcess(s32 eventId, s32 resourceId) {
     const EvtPackEntry *entry;
     s32 packEntryIndex;
     s32 entrySize;
-    u8 *modelPayload;
+    const u8 *modelPayload;
     s32 viewerObjectKey;
 
     packState = evtGetPackProcessData(eventId);
@@ -59,10 +59,10 @@ s32 evtInitMotionSeProcess(s32 eventId, s32 resourceId) {
                     case 0x2AC:
                     case 0x2AE:
                     case 0x2B0:
-                        mdlPackDecode(3, evtMotionSeWork, 0x101, (s32)modelPayload, entrySize);
+                        mdlPackDecode(3, evtMotionSeWork, 0x101, modelPayload, entrySize);
                         break;
                     default:
-                        mdlPackDecode(3, evtMotionSeWork, 0x103, (s32)modelPayload, entrySize);
+                        mdlPackDecode(3, evtMotionSeWork, 0x103, modelPayload, entrySize);
                         break;
                     }
                     viewerObjectKey = mdlSpawnCameraSlotViewerObject(3, evtMotionSeWork);

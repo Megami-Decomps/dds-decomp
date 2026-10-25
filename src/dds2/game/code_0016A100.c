@@ -316,7 +316,7 @@ void dds3EffectPartModelInit(dds3ModelHandle_t *work) {
 }
 
 extern u16 D_00436434;
-extern void mdlPackDecode(s32 resourceGroup, u16 resourceId, s32 flags, void *packageData, u32 packageSize);
+extern void mdlPackDecode(s32 resourceGroup, s32 resourceId, s32 flags, const u8 *packageData, s32 packageSize);
 
 /* Create and initialize a viewer-package context in the fixed effect group.
  * DDS2 skips occupied halfword ids before loading; DDS1 does not scan them. */
@@ -326,7 +326,8 @@ void *effParamCreateViewerWork(s32 *package) {
     while (mdlSearchResrc(EFF_VIEWER_RESOURCE_GROUP, D_00436434) != 0) {
         D_00436434++;
     }
-    mdlPackDecode(EFF_VIEWER_RESOURCE_GROUP, D_00436434, EFF_VIEWER_LOAD_FLAGS, package + 4, package[0]);
+    mdlPackDecode(EFF_VIEWER_RESOURCE_GROUP, D_00436434, EFF_VIEWER_LOAD_FLAGS,
+                  (const u8 *)(package + 4), package[0]);
     work = mdlLoad(EFF_VIEWER_RESOURCE_GROUP, D_00436434);
     dds3EffectPartModelInit(work);
     D_00436434++;
