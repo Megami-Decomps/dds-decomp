@@ -194,7 +194,6 @@ extern s32 evtStageTestPollModelRequest(void);
 extern u8 *D_003BAA7C;
 extern _FRQ *itfDrawUnderscoreTextSegment(s32, s32, s32, u32, const u8 *, s32);
 extern u8 *D_003BAA70;
-extern void mnuDestroyWindowContainer(u32);
 
 extern MenuPopupEntry mnuCampPartySelectionReturnPopupEntry[];
 extern struct MenuPanelState *mnuCreatePanelState(s32 width, s32 height);
@@ -306,7 +305,7 @@ void mnuCreatePartySelectionWindow(CampMenuContext *context) {
 }
 
 void mnuDestroyPartySelectionWindow(CampMenuContext *context) {
-    mnuDestroyWindowContainer((u32)((PartyMenuData *)context->menu)->primaryWindow);
+    mnuDestroyWindowContainer(((PartyMenuData *)context->menu)->primaryWindow);
 }
 
 /* Snapshot five party entries; at most three active slots are displayed. */
@@ -1396,7 +1395,7 @@ typedef struct SkillMenuRuntime {
     s32 active;
     struct MenuList *categoryList;
     MenuWindowContainer *skillWindows[4];
-    void *panel;
+    struct MenuPanelState *panel;
     MenuWindowContainer *selectedWindow;
     s32 activeMark;
     s32 motionSelection;
@@ -1404,7 +1403,15 @@ typedef struct SkillMenuRuntime {
     u32 selectedIndex;
 } SkillMenuRuntime;
 
-typedef char SkillMenuRuntimeSizeCheck[(sizeof(SkillMenuRuntime) == 0x38) ? 1 : -1];
+typedef char SkillMenuRuntimeLayoutCheck[
+    (sizeof(SkillMenuRuntime) == 0x38 &&
+     (u32)&((SkillMenuRuntime *)0)->active == 0x08 &&
+     (u32)&((SkillMenuRuntime *)0)->categoryList == 0x0C &&
+     (u32)&((SkillMenuRuntime *)0)->skillWindows == 0x10 &&
+     (u32)&((SkillMenuRuntime *)0)->panel == 0x20 &&
+     (u32)&((SkillMenuRuntime *)0)->selectedWindow == 0x24)
+        ? 1
+        : -1];
 
 typedef struct MenuListDefaults {
     s32 indices[3];
@@ -1690,21 +1697,17 @@ void ptySkillMenuInitPages(CampMenuContext *context) {
     }
 }
 
-struct MenuPanelState;
-extern void mnuDestroyPanelState(struct MenuPanelState *panel);
-
 void mnuDestroySkillMenuWindows(s32 context) {
-    u32 *menu = (u32 *)((CampMenuContext *)context)->menu;
-    if (menu[2] != 0) {
+    SkillMenuRuntime *menu = (SkillMenuRuntime *)((CampMenuContext *)context)->menu;
+    if (menu->active != 0) {
         u32 i = 0;
-        u32 *resource = menu + 4;
-        mnuDestroyPanelState(menu[8]);
-        mnuDestroyListState((struct MenuList *)menu[3]);
+        mnuDestroyPanelState(menu->panel);
+        mnuDestroyListState(menu->categoryList);
         do {
-            mnuDestroyWindowContainer(*resource++);
+            mnuDestroyWindowContainer(menu->skillWindows[i]);
             i++;
         } while (i < 4);
-        menu[2] = 0;
+        menu->active = 0;
     }
 }
 

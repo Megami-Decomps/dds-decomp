@@ -14,6 +14,10 @@ s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor);
 #define MNU_STAFF_NODE_UNAVAILABLE 1
 
 struct EffectList;
+struct MenuWindowContainer;
+/* Destroy the window's owned list, optional sprite resources, and window. */
+void mnuDestroyWindowContainer(struct MenuWindowContainer *window);
+
 void mnuAppendCampSpriteRequests(struct EffectList *resourceList,
                                  StaffSlots *resourceSlots);
 #ifdef VERSION_DDS2
@@ -66,7 +70,6 @@ s32 mnuIsStaffWindowReadyForItem(s32 itemId,
 #endif
 
 #ifdef VERSION_DDS2
-struct MenuPanelState;
 /* Initialize the camp menu after its task-owned effect handles are ready. */
 s32 mnuInitializeCampMenuWhenResourcesReady(struct dds3ProcessID_t *task);
 void mnuRefreshWindowSlots(MenuPageWindow *page, s32 preserveResourceHandles);
@@ -98,8 +101,6 @@ s32 mnuTryUseBestPartyHealingSkill(PartyPanel *party, MenuPageWindow *page,
 MenuWindowContainer *mnuCreateStaffResourceListWindow(
     void *const *entries, s32 entryCount, s32 width, s32 rowHeight,
     u8 *work, const s32 *requiredFlags);
-void mnuDestroyWindowContainer(MenuWindowContainer *window);
-void mnuDestroyPanelState(struct MenuPanelState *panel);
 s32 mnuConsumeEntryCost(s32 commandId, struct datUnitWork_t *entry);
 #endif
 

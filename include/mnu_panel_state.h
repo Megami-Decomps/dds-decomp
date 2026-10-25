@@ -7,6 +7,9 @@ struct MenuPanelState;
 struct EffectSlotSet;
 struct EffMappedResource;
 
+/* Release the panel's retained resources and free the panel owner. */
+void mnuDestroyPanelState(struct MenuPanelState *panel);
+
 /* Store the selected panel state in a title-specific allocated panel owner. */
 void mnuSetPanelState(struct MenuPanelState *panel, u32 state);
 #ifndef VERSION_DDS2
