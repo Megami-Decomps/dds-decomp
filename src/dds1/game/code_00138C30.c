@@ -1944,11 +1944,11 @@ void fldApplyCurrentTaskScene(const char *name) {
                 fldGlobalBase.commandEnabled = 0;
             }
             if (entry->flags31 & 2) {
-                fldGlobalBase.pendingEntryDialogRequest = 1;
+                fldGlobalBase.pendingEntryDialogDisposition = FLD_ENTRY_DIALOG_REQUEST;
             } else if (entry->flags31 & 4) {
-                fldGlobalBase.pendingEntryDialogRequest = -1;
+                fldGlobalBase.pendingEntryDialogDisposition = FLD_ENTRY_DIALOG_SUPPRESS;
             } else {
-                fldGlobalBase.pendingEntryDialogRequest = 0;
+                fldGlobalBase.pendingEntryDialogDisposition = FLD_ENTRY_DIALOG_NONE;
             }
             if (entry->kind == 3 || entry->kind == 4) {
                 fldGlobalBase.unk17C = 15;
@@ -2128,9 +2128,9 @@ void fldDispatchSceneAction(u32 action) {
                 if (commandFlag) fldGlobalBase.commandEnabled = 1;
                 else fldGlobalBase.commandEnabled = 0;
             }
-            if (flags & 2) fldGlobalBase.pendingEntryDialogRequest = 1;
-            else if (flags & 4) fldGlobalBase.pendingEntryDialogRequest = -1;
-            else fldGlobalBase.pendingEntryDialogRequest = 0;
+            if (flags & 2) fldGlobalBase.pendingEntryDialogDisposition = FLD_ENTRY_DIALOG_REQUEST;
+            else if (flags & 4) fldGlobalBase.pendingEntryDialogDisposition = FLD_ENTRY_DIALOG_SUPPRESS;
+            else fldGlobalBase.pendingEntryDialogDisposition = FLD_ENTRY_DIALOG_NONE;
             if ((u32)((u8)entry->kind - 3) < 2U) {
                 fldGlobalBase.unk17C = 15;
                 if (entry->linkKind == 1) {

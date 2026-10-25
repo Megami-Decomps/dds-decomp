@@ -23,6 +23,14 @@ enum FldTerrainAttritionKind {
     FLD_TERRAIN_ATTRITION_SOUND_CLASS_20 = 3
 };
 
+typedef s32 FldEntryDialogDisposition;
+
+enum FldEntryDialogDisposition {
+    FLD_ENTRY_DIALOG_SUPPRESS = -1,
+    FLD_ENTRY_DIALOG_NONE = 0,
+    FLD_ENTRY_DIALOG_REQUEST = 1
+};
+
 /* Field loaders retain the allocation owner and its texture-file data. */
 typedef struct FldResourceBlock {
     struct sdfMemHandle_t *allocation;
@@ -97,7 +105,7 @@ typedef struct FldAreaWork {
     s32 nextFloor;
     u8 padF8[4];
     f32 frameTravelDistance;     /* 0xFC: current player displacement length. */
-    s32 pendingEntryDialogRequest;
+    FldEntryDialogDisposition pendingEntryDialogDisposition;
     s16 transitionMode;          /* 0x104 */
     u16 collectedCount;          /* 0x106: spark pickups. */
     s32 score;                   /* 0x108: pickups add 50. */

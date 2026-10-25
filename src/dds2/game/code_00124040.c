@@ -2135,10 +2135,10 @@ s32 fldDispatchPendingSceneResource(void) {
     FieldPlayerSceneWork *sceneWork = &fldSceneParam;
     u32 overrideFlags;
 
-    if (fldGlobalBase.pendingEntryDialogRequest == 1) {
+    if (fldGlobalBase.pendingEntryDialogDisposition == FLD_ENTRY_DIALOG_REQUEST) {
         func_00150800();
     }
-    fldGlobalBase.pendingEntryDialogRequest = 0;
+    fldGlobalBase.pendingEntryDialogDisposition = FLD_ENTRY_DIALOG_NONE;
     if ((D_00435F24 & 2) && *(s8 *)D_00387D60 != 0) {
         evtStartSceneResourceTask(dds3GetControlScene(), D_00387D60);
         overrideFlags = D_00435F24;

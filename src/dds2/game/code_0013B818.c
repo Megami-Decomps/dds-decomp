@@ -1608,11 +1608,11 @@ void fldApplyCurrentTaskScene(const char *name) {
                 D_00435F28 = i + 1;
             }
             if (entry->flags31 & 2) {
-                fldGlobalBase.pendingEntryDialogRequest = 1;
+                fldGlobalBase.pendingEntryDialogDisposition = FLD_ENTRY_DIALOG_REQUEST;
             } else if (entry->flags31 & 4) {
-                fldGlobalBase.pendingEntryDialogRequest = -1;
+                fldGlobalBase.pendingEntryDialogDisposition = FLD_ENTRY_DIALOG_SUPPRESS;
             } else {
-                fldGlobalBase.pendingEntryDialogRequest = 0;
+                fldGlobalBase.pendingEntryDialogDisposition = FLD_ENTRY_DIALOG_NONE;
             }
             if (entry->kind == 3 || entry->kind == 4) {
                 fldGlobalBase.unk188 = 15;
@@ -1775,9 +1775,9 @@ void fldDispatchSceneAction(s32 action) {
                 strcpy((char *)D_00387D60, entry->taskName);
                 D_00435F28 = index + 1;
             }
-            if (entry->flags31 & 2) fldGlobalBase.pendingEntryDialogRequest = 1;
-            else if (entry->flags31 & 4) fldGlobalBase.pendingEntryDialogRequest = -1;
-            else fldGlobalBase.pendingEntryDialogRequest = 0;
+            if (entry->flags31 & 2) fldGlobalBase.pendingEntryDialogDisposition = FLD_ENTRY_DIALOG_REQUEST;
+            else if (entry->flags31 & 4) fldGlobalBase.pendingEntryDialogDisposition = FLD_ENTRY_DIALOG_SUPPRESS;
+            else fldGlobalBase.pendingEntryDialogDisposition = FLD_ENTRY_DIALOG_NONE;
             if ((u32)((u8)entry->kind - 3) < 2U) {
                 fldGlobalBase.unk188 = 15;
                 if (entry->linkKind == 1) {
@@ -2377,11 +2377,11 @@ void fldDispatchSceneRoomSelection(s32 index) {
                 D_00435F28 = i + 1;
             }
             if (entry->flags31 & 2U) {
-                fldGlobalBase.pendingEntryDialogRequest = 1;
+                fldGlobalBase.pendingEntryDialogDisposition = FLD_ENTRY_DIALOG_REQUEST;
             } else if (entry->flags31 & 4U) {
-                fldGlobalBase.pendingEntryDialogRequest = -1;
+                fldGlobalBase.pendingEntryDialogDisposition = FLD_ENTRY_DIALOG_SUPPRESS;
             } else {
-                fldGlobalBase.pendingEntryDialogRequest = 0;
+                fldGlobalBase.pendingEntryDialogDisposition = FLD_ENTRY_DIALOG_NONE;
             }
             fldSetFloorFlag(area, floor, D_003931A4[D_004361DC * 16 + sourceRoom + 8]);
             fldSetSceneParam4(&sequence, area, floor, entry->warpName, entry->sequenceCode, entry->linkKind, entry->linkName);
