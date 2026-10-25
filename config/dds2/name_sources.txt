@@ -993,7 +993,7 @@
 0x0012A0E8	fldPollAreaResourceLoad	inferred	Clears the area loading and busy flags after the pending file resource becomes ready.
 0x0012A140	fldLoadNextGetStatus	inferred	SMT3HD name via SLUS_209.11 0x001275D0, shared-hash-in-run; was fldGetResourceReadyFlag
 0x0012A150	fldLoadNextGetStatus2	inferred	SMT3HD name via SLUS_209.11 0x001275E0, reloc-identical; was fldIsAreaResourceReady
-0x0012A190	fldLoadNextGetStatus3	inferred	SMT3HD name via SLUS_209.11 0x00127620, unique-masked-hash; was fldIsAreaFloorResourceReady
+0x0012A190	fldCanReuseAreaResourceRequest	inferred	Checks whether matching area and room resource state can be reused by the loader.
 0x0012A1F8	fldCopyCachedRoomResourceIfLocationMatches	inferred	Copies a cached resource only when current area and room match the request. [names_reviewed17.tsv]
 0x0012A270	fldCopyCachedRoomF1ResourceIfLocationMatches	inferred	DDS2 helper allocates and copies cached F1 bytes into a relocatable buffer; fldLoadAreaRoomResources retains the returned handle, and scene teardown frees it. Paired D1 helper at 0x00127CB8 has the same ownership behavior.
 0x0012A2E8	fldCopyCachedRoomF2ResourceIfLocationMatches	inferred	DDS2 helper allocates and copies cached F2 bytes into a relocatable buffer; fldLoadAreaRoomResources retains the returned handle, and scene teardown frees it. Paired D1 helper at 0x00127D30 has the same ownership behavior.

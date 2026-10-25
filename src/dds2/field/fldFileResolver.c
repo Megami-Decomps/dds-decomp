@@ -1298,7 +1298,7 @@ u8 fldLoadNextGetStatus2(void) {
     return D_003897E8[0] != 0;
 }
 
-s32 fldLoadNextGetStatus3(s32 area, s32 room) {
+u8 fldCanReuseAreaResourceRequest(s32 area, s32 room) {
     if (fldGlobalBase.resourceArea != area || fldGlobalBase.resourceFloor != room) {
         return 0;
     }
@@ -1571,7 +1571,7 @@ struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) {
         isField = 1;
     }
     if (isField != 0) {
-        if (fldLoadNextGetStatus3(area, room) != 0) {
+        if (fldCanReuseAreaResourceRequest(area, room) != 0) {
             request = pFldNextFileDataF2;
             pFldNextFileDataF2 = NULL;
             D_00435FC8 = request;
