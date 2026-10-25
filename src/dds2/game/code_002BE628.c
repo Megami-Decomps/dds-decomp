@@ -48,6 +48,7 @@
 #include "kwln_task_lifecycle.h"
 #include "btl.h"
 #include "dds3_world_primary.h"
+#include "fld_scene_command_state_api.h"
 #include "itf_draw_grid.h"
 #include "prf_profile_cap.h"
 /* Declared before first use (were implicit int). */
@@ -57,7 +58,6 @@ extern s32 datAddMp(datUnitWork_t *unit, s32 delta);
 extern void evtCopyEntryStringToActiveWindow(s32 slotIndex, const char *sourceText);
 extern void evtFreeStage(void);
 extern void fldActivatePendingSceneCommand(void);
-extern s32 fldGetSceneCommandState(void);
 extern s32 itfGridLookupValueOrDefault(EffectSlotSet *resource, s32 resourceIndex);
 extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *resource, s32 resourceIndex, s32 x, s32 y, s32 width, s32 height);
 extern void kwlnDebugGraphSetEnabled(s8 enabled);
@@ -2987,10 +2987,10 @@ s32 func_002C5A28(MenuPageWindow *page, u16 ability, struct datUnitWork_t *targe
         goto accepted;
     case 0x3E:
         switch (fldGetSceneCommandState()) {
-        case -1:
+        case FLD_SCENE_COMMAND_STATE_UNAVAILABLE:
             sndPlayPartyItemSe(ability, 2);
             return 2;
-        case 1:
+        case FLD_SCENE_COMMAND_STATE_PENDING:
             sndPlayPartyItemSe(ability, 1);
             return 2;
         default:

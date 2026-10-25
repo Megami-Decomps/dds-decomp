@@ -14,6 +14,7 @@
 #include "sdf_vu_matrix.h"
 #include "fld_scene_status_api.h"
 #include "fld_scene_ready_api.h"
+#include "fld_scene_command_state_api.h"
 #include "fld_encounter_runtime_api.h"
 #include "sdf_message.h"
 #include "eff_random.h"
@@ -1420,8 +1421,6 @@ extern void fldResetCameraModelHandles(void);
 
 extern void fldActivatePendingSceneCommand(void);
 
-extern s32 fldGetSceneCommandState(void);
-
 /* The scene reset ignores the command word supplied by this caller. */
 extern void fldClearCameraObjectActiveFlag();
 
@@ -1532,7 +1531,7 @@ void fldSpawnPlayerUnits(f32 *input) {
             fldApplySceneLightSet(0, 0);
             fldApplySkyLightSet(fldRunDanteGunFlag[0x2C / 4], 0);
             fldSkySetTableAnime(fldRunDanteGunFlag[0x30 / 4]);
-            if (fldGetSceneCommandState() == 1) {
+            if (fldGetSceneCommandState() == FLD_SCENE_COMMAND_STATE_PENDING) {
                 if (fldGlobalBase.commandEnabled != 0) {
                     fldActivatePendingSceneCommand();
                 } else {
@@ -1624,14 +1623,14 @@ void fldActivatePendingSceneCommand(void) {
     }
 }
 
-s32 fldGetSceneCommandState(void) {
+FldSceneCommandState fldGetSceneCommandState(void) {
     if ((DDS3_GBWK->world.fieldFlags & DAT_WORLD_FIELD_LIGHT_COMMAND_PENDING) != 0) {
-        return 1;
+        return FLD_SCENE_COMMAND_STATE_PENDING;
     }
     if (D_0038989C[0] != 0) {
-        return 0;
+        return FLD_SCENE_COMMAND_STATE_AVAILABLE;
     }
-    return -1;
+    return FLD_SCENE_COMMAND_STATE_UNAVAILABLE;
 }
 
 /* Latch the scene command while enabled and flagged; stop it when either gate

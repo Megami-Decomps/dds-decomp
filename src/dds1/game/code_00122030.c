@@ -20,6 +20,7 @@
 #include "sdf_vu_matrix.h"
 #include "fld_scene_status_api.h"
 #include "fld_scene_ready_api.h"
+#include "fld_scene_command_state_api.h"
 #include "sdf_message.h"
 #include "mnu_title_stream.h"
 #include "eff_random.h"
@@ -1278,8 +1279,6 @@ extern void fldResetCameraModelHandles(void);
 
 
 
-s32 fldGetSceneCommandState(void);
-
 void fldEnterSceneCommand(void);
 
 extern void fldSkySetTblLightMaDZ(s32);
@@ -1341,7 +1340,7 @@ void fldPreparePlayerAndCameraScene(u128 *transform) {
         fldApplySceneLightSet(0, 0);
         fldApplySkyLightSet(fldRunDanteGunFlag[11], 0);
         fldSkySetTableAnime(fldRunDanteGunFlag[12]);
-        if (fldGetSceneCommandState() == 1) {
+        if (fldGetSceneCommandState() == FLD_SCENE_COMMAND_STATE_PENDING) {
             if (fldGlobalBase.commandEnabled != 0) {
                 fldEnterSceneCommand();
             } else {
@@ -1451,14 +1450,14 @@ void fldEnterSceneCommand(void) {
     fldApplySceneLightSet((s16)code, 0);
 }
 
-s32 fldGetSceneCommandState(void) {
+FldSceneCommandState fldGetSceneCommandState(void) {
     if ((DDS3_GBWK->world.fieldFlags & DAT_WORLD_FIELD_LIGHT_COMMAND_PENDING) != 0) {
-        return 1;
+        return FLD_SCENE_COMMAND_STATE_PENDING;
     }
     if (D_0032E4DC[0] != 0) {
-        return 0;
+        return FLD_SCENE_COMMAND_STATE_AVAILABLE;
     }
-    return -1;
+    return FLD_SCENE_COMMAND_STATE_UNAVAILABLE;
 }
 
 /* Latch the area/floor command while enabled and flagged; stop it when either
