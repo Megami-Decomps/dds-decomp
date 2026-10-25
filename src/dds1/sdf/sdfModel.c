@@ -497,11 +497,12 @@ void sdfStoreMessageWordsAndNotifyConsumer(struct SdfPoolNode **surfaces, struct
     sdfModelSetOtCallbacks((SdfPool *)pool);
 }
 
-/* Nonzero when the bounds box lies entirely outside one clip plane: each
- * plane's bit must be set in all four 6-bit clip-flag groups. */
-s32 sdfModelCheckBounds(const f32 *bounds) {
+typedef u8 SdfClipPlaneMask;
+
+/* Return clip-plane bits shared by every corner of the bounds box. */
+SdfClipPlaneMask sdfModelCheckBounds(const f32 *bounds) {
     s32 flags;
-    s32 result;
+    SdfClipPlaneMask result;
 
     VU0_CLIP_TEST_BOX_CORNERS(flags, bounds);
     result = flags & 0x3F;
