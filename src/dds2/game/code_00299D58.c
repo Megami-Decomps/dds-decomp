@@ -1,4 +1,5 @@
 #include "sdk_ps2.h"
+#include "fld_spark_reward_profile.h"
 #include "snd_command_packet.h"
 #include "evt_message_window_api.h"
 #include "dsp_active_api.h"
@@ -40,7 +41,7 @@ typedef struct FieldResourceRecord {
 } FieldResourceRecord;
 
 extern FieldResourceRecord *D_00435E18;
-extern s32 fldGetSparkRewardProfileIndex(void);
+extern FldSparkRewardProfileIndex fldGetSparkRewardProfileIndex(void);
 extern s16 fldGetSparkPickupCount(void);
 extern void brsSelectNextUnit(BrsSkillPackageWork *, s32);
 extern s32 brsStartPartyPanelResourcesOnce(BrsSkillPackageWork *);
@@ -243,14 +244,14 @@ s32 mnuRequestContextClearSceneDsp(BrsSkillPackageWork *state)
 
 /* Request the weighted-profile message bucket only once. */
 s32 mnuRequestWeightedProfileMessage(BrsSkillPackageWork *scene) {
-    s32 profileIndex;
+    FldSparkRewardProfileIndex profileIndex;
     u32 value;
     s32 rank;
     FieldResourceRecord *record;
 
     if (scene->thresholdMessageShown == 0) {
         profileIndex = fldGetSparkRewardProfileIndex();
-        if (profileIndex == -1) {
+        if (profileIndex == FLD_SPARK_REWARD_PROFILE_INDEX_NONE) {
             return 0;
         }
         value = scene->rewards.mitama * D_00435E18[profileIndex].mitamaThresholdMultiplier;

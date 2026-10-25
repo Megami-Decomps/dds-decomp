@@ -1,4 +1,5 @@
 #include "sdk_ps2.h"
+#include "fld_spark_reward_profile.h"
 #include "common.h"
 #include "eff_random.h"
 #include "ui_color.h"
@@ -133,12 +134,12 @@ typedef struct BrsProfileApRecord {
 } BrsProfileApRecord;
 
 extern BrsProfileApRecord *D_00435E18;
-extern s32 fldGetSparkRewardProfileIndex(void);
+extern FldSparkRewardProfileIndex fldGetSparkRewardProfileIndex(void);
 extern s16 fldGetSparkPickupCount(void);
 
 s32 brsCalcApGain(datUnitWork_t *unit, s32 baseApTotal, s32 perUnitBonus) {
     s32 gain;
-    s32 profileIndex;
+    FldSparkRewardProfileIndex profileIndex;
 
     if (unit->status & BRS_AP_BLOCKED_FLAG) {
         return 0;

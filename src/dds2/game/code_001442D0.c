@@ -1,4 +1,5 @@
 #include "sdk_ps2.h"
+#include "fld_spark_reward_profile.h"
 #include "snd_packed_track_load_status.h"
 #include "fld_item_box_object_api.h"
 #include "fld_projected_sprite.h"
@@ -456,12 +457,12 @@ extern SdfMathVector4 D_00413DE8;
 
 struct FieldResourceRecord;
 
-/* DDS2 retains the DDS1 controller's roles, with its inserted +8 word and
- * the serialized-sequence/pickup bookkeeping that grows it to 0x4C. */
+/* DDS2 stores the selected reward row in its inserted +8 word; sequence and
+ * pickup bookkeeping grow the controller to 0x4C. */
 typedef struct FldSparkController {
     void *object;
     struct FieldResourceRecord *entry;
-    s32 unk8;
+    FldSparkRewardProfileIndex rewardProfileIndex;
     FldSparkControllerState state;
     s32 cursor;
     s32 pickupDelay;
@@ -471,6 +472,8 @@ typedef struct FldSparkController {
 typedef char FldSparkControllerSizeCheck[(sizeof(FldSparkController) == 0x4C) ? 1 : -1];
 typedef char FldSparkControllerStateOffsetCheck[
     ((u32)&((FldSparkController *)0)->state == 0x0C) ? 1 : -1];
+typedef char FldSparkControllerRewardProfileIndexOffsetCheck[
+    ((u32)&((FldSparkController *)0)->rewardProfileIndex == 0x08) ? 1 : -1];
 
 extern FldSparkController fldSparkControlState;
 
@@ -4718,9 +4721,9 @@ typedef char FieldResourceRecord_encounterSelection_offset_must_be_0x06[
 
 extern FieldResourceRecord *D_00435E18;
 
-s32 fldFindResourceRecordIndex(s32 category, s32 id) {
+FldSparkRewardProfileIndex fldFindResourceRecordIndex(s32 category, s32 id) {
     FieldResourceRecord *record = D_00435E18;
-    s32 index;
+    FldSparkRewardProfileIndex index;
     for (index = 0; index < 8; index++, record++) {
         if (record->category == category && record->id == id) {
             return index;
@@ -5084,7 +5087,7 @@ void func_00150800(void) {
     FieldResourceRecord *record;
     s32 duration;
     s32 entryCount;
-    s32 recordIndex;
+    FldSparkRewardProfileIndex recordIndex;
     FldSparkController *control;
 
     if (D_003899E0[0] != 0) {
@@ -5131,7 +5134,7 @@ void func_00150800(void) {
     control->state.entryCount = entryCount;
     do {
     control->scheduledSounds = 0;
-    control->unk8 = recordIndex;
+    control->rewardProfileIndex = recordIndex;
     fldGlobalBase.unk10C = 0.0f;
     fldGlobalBase.score = 0;
     } while (0);
@@ -5464,7 +5467,7 @@ void fldUpdateSparkEncounterScene(void) {
 
 
 void fldRunDanteClear(void) {
-    fldSparkControlState.unk8 = -1;
+    fldSparkControlState.rewardProfileIndex = FLD_SPARK_REWARD_PROFILE_INDEX_NONE;
 }
 
 
@@ -5538,8 +5541,8 @@ s32 fldGetSparkEncounterSelection(void) {
     return fldSparkControlState.entry->encounterSelection;
 }
 
-s32 fldGetSparkRewardProfileIndex(void) {
-    return fldSparkControlState.unk8;
+FldSparkRewardProfileIndex fldGetSparkRewardProfileIndex(void) {
+    return fldSparkControlState.rewardProfileIndex;
 }
 
 
