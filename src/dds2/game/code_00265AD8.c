@@ -380,7 +380,7 @@ struct sdfMemHandle_t *mnuCreateFlagEntries(void) {
 }
 
 void mnuApplyCampResourceFlagEntries(struct sdfMemHandle_t *handle) {
-    MnuFlagSnapshotEntry *entries = (MnuFlagSnapshotEntry *)sdfMemLock(handle);
+    const MnuFlagSnapshotEntry *entries = (const MnuFlagSnapshotEntry *)sdfMemLock(handle);
     u32 i;
 
     for (i = 0; i < MNU_SCENE_FLAG_ENTRY_COUNT; i++) {

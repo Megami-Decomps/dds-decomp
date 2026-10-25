@@ -24,7 +24,8 @@ typedef char MnuFlagSnapshotEntry_allocation_extent[
     (sizeof(MnuFlagSnapshotEntry) * (MNU_SCENE_FLAG_ENTRY_COUNT + MNU_PARTY_FLAG_ENTRY_COUNT) ==
      MNU_FLAG_SNAPSHOT_BYTES) ? 1 : -1];
 
-/* The snapshot handle owns the allocation; its retained data holds flag pairs. */
+/* The snapshot handle owns the allocation; its retained data holds flag pairs.
+ * Apply reads the retained entries but leaves the allocation with its caller. */
 struct sdfMemHandle_t *mnuCreateFlagEntries(void);
 #ifdef VERSION_DDS1
 void mnuApplyFlagEntries(struct sdfMemHandle_t *snapshot);

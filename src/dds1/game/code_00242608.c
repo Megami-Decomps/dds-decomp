@@ -3342,7 +3342,7 @@ struct sdfMemHandle_t *mnuCreateFlagEntries(void) {
 
 /* Restore only those flags that were enabled in the saved snapshot. */
 void mnuApplyFlagEntries(struct sdfMemHandle_t *snapshotHandle) {
-    MnuFlagSnapshotEntry *snapshot = (MnuFlagSnapshotEntry *)sdfMemLock(snapshotHandle);
+    const MnuFlagSnapshotEntry *snapshot = (const MnuFlagSnapshotEntry *)sdfMemLock(snapshotHandle);
     u32 pairIndex;
 
     /* Scene pairs restore only their second flag; party pairs restore both. */
