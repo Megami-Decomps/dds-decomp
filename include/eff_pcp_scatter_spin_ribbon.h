@@ -5,6 +5,8 @@
 #include "eff_param.h"
 #include "sdf_resource.h"
 
+struct SdfTextureFileHeader;
+
 /* Serialized parameters copied into each spin-scatter work owner. */
 typedef struct PcpScatterSpinParams {
     f32 origin[4];
@@ -134,8 +136,10 @@ typedef char PcpScatterRibbonWork_duplicateAllocation_offset_must_be_0x68[
 
 /* Constructors copy these serialized parameter heads into runtime work. */
 PcpScatterSpinWork *effPCPHamaCardSphereCreate(
-    const PcpScatterSpinParams *params, u32 resource, void *particleParams);
+    const PcpScatterSpinParams *params, const struct SdfTextureFileHeader *textureHeader,
+    void *particleParams);
 PcpScatterRibbonWork *effPCPHamaCardScatterCreate(
-    const PcpScatterRibbonParams *params, u32 resource, void *particleParams);
+    const PcpScatterRibbonParams *params, const struct SdfTextureFileHeader *textureHeader,
+    void *particleParams);
 
 #endif

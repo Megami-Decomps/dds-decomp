@@ -21,7 +21,8 @@
  * instance, not to the drawable used by the resource helpers below. */
 extern PcpScatterRes *dds3ScatterPolyListTexResourceCopy(PcpScatterRes *);
 
-extern PcpScatterRes *dds3ScatterPolyListTexResourceCreate(u32 resId);
+extern PcpScatterRes *dds3ScatterPolyListTexResourceCreate(
+    const struct SdfTextureFileHeader *textureHeader);
 extern void dds3ScatterPolyListTexResourceDelete(PcpScatterRes *);
 
 /* Copy the flat effect's source vector; the renderer reads the embedded copy. */
@@ -185,7 +186,8 @@ void dds3WhirlwindPolyListDraw(dds3WhirlwindPolyList_tag *object) {
 }
 
 /* Give this object its own reference to a newly created scatter resource. */
-void dds3WhirlwindPolyListSetTex(dds3WhirlwindPolyList_tag *object, u32 resource) {
+void dds3WhirlwindPolyListSetTex(
+    dds3WhirlwindPolyList_tag *object, const struct SdfTextureFileHeader *resource) {
     PcpScatterRes *shared;
 
     shared = dds3ScatterPolyListTexResourceCreate(resource);

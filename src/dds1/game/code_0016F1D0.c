@@ -18,6 +18,8 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
+struct SdfTextureFileHeader;
+
 #define EFF_RING_PARAM_BYTES 0x58
 #define EFF_RING_HEADER_BYTES 0x80
 #define EFF_RING_VERTEX_BYTES 16
@@ -768,10 +770,11 @@ void dds3FlashPolyListHSetScale(dds3FlashPolyList_t *work, f32 scale) {
 
 
 extern PcpScatterPool *dds3ScatterPolyListCreate(s32 groups);
-extern void dds3ScatterPolyListSetTex(PcpScatterPool *work, u32 resource);
+extern void dds3ScatterPolyListSetTex(
+    PcpScatterPool *work, const struct SdfTextureFileHeader *resource);
 PcpScatterRadialWork *effPCPHamaCardSpiralCreate(params, resource, particleParams)
     const PcpScatterRadialParams *params;
-    u32 resource;
+    const struct SdfTextureFileHeader *resource;
     void *particleParams;
 {
     PcpScatterRadialWork *work;

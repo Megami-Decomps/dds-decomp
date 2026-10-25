@@ -68,7 +68,7 @@ extern PcpScatterRes *dds3ScatterPolyListTexResourceCopy(PcpScatterRes *res);
 extern void dds3ScatterPolyListCopyTex(PcpScatterPool *work, PcpScatterPool *src);
 
 extern PcpScatterPool *dds3ScatterPolyListCreate(s32 groups);
-extern void dds3ScatterPolyListSetTex(PcpScatterPool *work, u32 resId);
+extern void dds3ScatterPolyListSetTex(PcpScatterPool *work, const SdfTextureFileHeader *textureHeader);
 extern EffRandState effDefaultRandomState[];
 extern f32 *dds3WhirlwindPolyListGetVertex(dds3WhirlwindPolyList_tag *object, s32 index);
 extern f32 *dds3WhirlwindPolyListGetUV(dds3WhirlwindPolyList_tag *object, s32 index);
@@ -77,7 +77,7 @@ extern void SetRotateMatrixXYZ(const RwV3d *rot);
 extern void dds3ScatterPolyListDelete(PcpScatterPool *work);
 
 extern PcpScatterRadialWork *effPCPHamaCardSpiralCreate(
-    const PcpScatterRadialParams *params, u32 resource, void *particleParams);
+    const PcpScatterRadialParams *params, const SdfTextureFileHeader *resource, void *particleParams);
 
 
 
@@ -91,7 +91,7 @@ extern void dds3WhirlwindPolyListCopyTex(dds3WhirlwindPolyList_tag *object, dds3
 
 
 
-extern PcpScatterRes *dds3ScatterPolyListTexResourceCreate(u32 resId);
+extern PcpScatterRes *dds3ScatterPolyListTexResourceCreate(const SdfTextureFileHeader *textureHeader);
 
 /* Create radial work from the parameter, texture-resource and child-work blocks. */
 PcpScatterRadialWork *effPCPHamaCardSpiralCreatePCF(const EffParamTable *parameterTable)
@@ -101,7 +101,7 @@ PcpScatterRadialWork *effPCPHamaCardSpiralCreatePCF(const EffParamTable *paramet
     params = dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_PARAM_BLOCK);
     return effPCPHamaCardSpiralCreate(
         params,
-        (u32)dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK),
+        dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_RESOURCE_BLOCK),
         dds3EffectPCPDataGetData(parameterTable, EFF_SCATTER_CHILD_BLOCK));
 }
 
@@ -375,7 +375,7 @@ void effPCPHamaCardSpiralSetScale(f32 scale, PcpScatterRadialWork *work)
  * Group normalization occurs only when child parameters and duplication are enabled. */
 PcpScatterSpinWork *effPCPHamaCardSphereCreate(params, resource, particleParams)
     const PcpScatterSpinParams *params;
-    u32 resource;
+    const SdfTextureFileHeader *resource;
     void *particleParams;
 {
     PcpScatterSpinWork *work;
@@ -706,7 +706,7 @@ void effPCPHamaCardSphereSetScale(f32 scale, PcpScatterSpinWork *work)
  * As with spin work, the zero group-size clamp is conditional on child creation. */
 PcpScatterRibbonWork *effPCPHamaCardScatterCreate(params, resource, particleParams)
     const PcpScatterRibbonParams *params;
-    u32 resource;
+    const SdfTextureFileHeader *resource;
     void *particleParams;
 {
     PcpScatterRibbonWork *work;
@@ -1114,11 +1114,11 @@ void dds3ScatterPolyListDraw(PcpScatterPool *pool) {
 }
 
 /* Acquire a new texture owner and store it in the pool. */
-void dds3ScatterPolyListSetTex(PcpScatterPool *work, u32 resId)
+void dds3ScatterPolyListSetTex(PcpScatterPool *work, const SdfTextureFileHeader *textureHeader)
 {
     PcpScatterRes *res;
 
-    res = dds3ScatterPolyListTexResourceCreate(resId);
+    res = dds3ScatterPolyListTexResourceCreate(textureHeader);
     work->sharedResource = res;
 }
 
@@ -1144,12 +1144,12 @@ u32 *dds3ScatterPolyListGetVC(PcpScatterPool *work, s32 index)
 }
 
 /* Return a texture owner with one reference and its acquired texture handle. */
-PcpScatterRes *dds3ScatterPolyListTexResourceCreate(u32 resId)
+PcpScatterRes *dds3ScatterPolyListTexResourceCreate(const SdfTextureFileHeader *textureHeader)
 {
     PcpScatterRes *res;
 
     res = sdfChipAllocDirect(sizeof(PcpScatterRes));
-    res->textureHandle = sdfTexSet((SdfTextureFileHeader *)(resId));
+    res->textureHandle = sdfTexSet(textureHeader);
     res->refCount = 1;
     return res;
 }
@@ -1173,14 +1173,14 @@ PcpScatterRes *dds3ScatterPolyListTexResourceCopy(PcpScatterRes *res)
 /* The allocator stores 2 * segmentsPerParticle + 2 vectors for each particle. */
 extern dds3WhirlwindPolyList_tag *dds3WhirlwindPolyListCreate(
     u32 particleCount, u32 segmentsPerParticle);
-extern void dds3WhirlwindPolyListSetTex(dds3WhirlwindPolyList_tag *object, u32 resource);
+extern void dds3WhirlwindPolyListSetTex(dds3WhirlwindPolyList_tag *object, const SdfTextureFileHeader *resource);
 
 
 /* Return ring work with trailing particles and randomized negative initial ages.
  * The delay clamp changes only the local modulus, not the copied parameter head. */
 PcpScatterInstanceA *effPCPWhirlwindPolyCreate(src, resource)
     PcpScatterParamsA *src;
-    u32 resource;
+    const SdfTextureFileHeader *resource;
 {
     sdfMemHandle_t *allocation = sdfMemAllocDirect(src->particleCount * sizeof(PcpScatterParticle) + sizeof(PcpScatterInstanceA));
     PcpScatterInstanceA *inst = (PcpScatterInstanceA *)sdfMemLock(allocation);
@@ -1450,7 +1450,7 @@ void effPCPWhirlwindPolySetRotateMatrix(PcpScatterInstanceA *work, void *source)
  * Normalize the copied delay range too, because loop restarts read that stored value. */
 PcpScatterInstanceB *effPCPWhirlwind2PolyCreate(src, resource)
     PcpScatterParamsB *src;
-    u32 resource;
+    const SdfTextureFileHeader *resource;
 {
     sdfMemHandle_t *allocation = sdfMemAllocDirect(src->particleCount * sizeof(PcpScatterParticle) + sizeof(PcpScatterInstanceB));
     PcpScatterInstanceB *inst = (PcpScatterInstanceB *)sdfMemLock(allocation);
@@ -1740,7 +1740,7 @@ void effPCPWhirlwind2PolySetRotateMatrix(PcpScatterInstanceB *work, void *source
 /* Return two-color ring work with an instance clock and normalized stored delay range. */
 PcpScatterInstanceC *effPCPWhirlwind3PolyCreate(src, resource)
     PcpScatterParamsC *src;
-    u32 resource;
+    const SdfTextureFileHeader *resource;
 {
     sdfMemHandle_t *allocation = sdfMemAllocDirect(src->particleCount * sizeof(PcpScatterParticle) + sizeof(PcpScatterInstanceC));
     PcpScatterInstanceC *inst = (PcpScatterInstanceC *)sdfMemLock(allocation);
@@ -2038,7 +2038,7 @@ void effPCPWhirlwind3PolySetRotateMatrix(PcpScatterInstanceC *work, void *source
  * Like the first ring variant, only the local delay modulus is normalized. */
 PcpScatterPlainInstance *effPCPWwSpherePolyCreate(src, resource)
     PcpScatterPlainParams *src;
-    u32 resource;
+    const SdfTextureFileHeader *resource;
 {
     sdfMemHandle_t *allocation = sdfMemAllocDirect(src->particleCount * sizeof(PcpScatterPlainParticle) + sizeof(PcpScatterPlainInstance));
     PcpScatterPlainInstance *inst = (PcpScatterPlainInstance *)sdfMemLock(allocation);

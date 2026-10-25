@@ -5,6 +5,8 @@
 #include "eff_scatter_draw.h"
 #include "sdf_resource.h"
 
+struct SdfTextureFileHeader;
+
 /* Shared particle record used by B/C and the related copied-parameter ring. */
 typedef struct PcpScatterParticle {
     f32 orientationAngle;
@@ -261,12 +263,12 @@ typedef char PcpScatterPlainInstance_allocationHandle_offset_must_be_0x138[
 
 /* Constructors copy one serialized parameter variant into its runtime owner. */
 PcpScatterInstanceA *effPCPWhirlwindPolyCreate(
-    PcpScatterParamsA *params, u32 resource);
+    PcpScatterParamsA *params, const struct SdfTextureFileHeader *textureHeader);
 PcpScatterInstanceB *effPCPWhirlwind2PolyCreate(
-    PcpScatterParamsB *params, u32 resource);
+    PcpScatterParamsB *params, const struct SdfTextureFileHeader *textureHeader);
 PcpScatterInstanceC *effPCPWhirlwind3PolyCreate(
-    PcpScatterParamsC *params, u32 resource);
+    PcpScatterParamsC *params, const struct SdfTextureFileHeader *textureHeader);
 PcpScatterPlainInstance *effPCPWwSpherePolyCreate(
-    PcpScatterPlainParams *params, u32 resource);
+    PcpScatterPlainParams *params, const struct SdfTextureFileHeader *textureHeader);
 
 #endif
