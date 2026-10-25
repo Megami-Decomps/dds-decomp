@@ -187,7 +187,7 @@ typedef struct FrFontCtx {
     s8 firstOption;
     s8 secondOption;
     u8 contextEncodedByte;
-    u8 *encodedText;
+    const u8 *encodedText; /* Borrowed source bytes; parsing advances the offset, not this data. */
     _FRQ *glyphChain;
     s32 encodedTextOffset;
     s8 pendingCreate;
@@ -320,16 +320,17 @@ void GetLastMessagePara(_FRQ *glyph, ItfMesEntryBlock *entryBlock);
 void itfMesEnableUnflaggedNodeContexts(_FRQ *glyph);
 
 void itfPnlRelease(itfpanel_t *sprite);
-_FRQ *MessageRequest(s32 x, s32 y, u8 *encodedText, _FRQ *sub);
+/* Decode from borrowed encoded bytes; request helpers do not mutate or retain the source. */
+_FRQ *MessageRequest(s32 x, s32 y, const u8 *encodedText, _FRQ *sub);
 _FRQ *MessageRequestEx(s32 x, s32 y, s32 channel0, s32 channel1,
-    s32 channel2, s32 channel3, u8 *encodedText, _FRQ *sub);
+    s32 channel2, s32 channel3, const u8 *encodedText, _FRQ *sub);
 _FRQ *MessageRequestEx2(s32 x, s32 y, s32 depth, s32 channel0,
-    s32 channel1, s32 channel2, s32 channel3, u8 *encodedText, _FRQ *sub);
+    s32 channel1, s32 channel2, s32 channel3, const u8 *encodedText, _FRQ *sub);
 _FRQ *itfDrawColor(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1,
-    s32 channel2, s32 channel3, u8 *encodedText, _FRQ *unusedSub);
+    s32 channel2, s32 channel3, const u8 *encodedText, _FRQ *unusedSub);
 _FRQ *itfDrawPlainEncodedTextWithByteColors(s32 x, s32 y, s32 depth,
     s32 channel0, s32 channel1, s32 channel2, s32 channel3,
-    u8 *encodedText, _FRQ *unusedSub);
+    const u8 *encodedText, _FRQ *unusedSub);
 s32 frFontDrawGlyphInDefaultMode(_FRQ *glyph);
 s32 frFontDrawGlyphWithSharedFlags(_FRQ *glyph, s8 mode);
 

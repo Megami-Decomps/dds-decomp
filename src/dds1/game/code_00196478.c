@@ -99,7 +99,7 @@ extern s32 itfScanEncodedTextControls(FrFontCtx *args);
 /* Subtract one modulo 256 from the first byte, then advance over the whole pair. */
 u32 itfReadEncodedTextLead(FrFontCtx *args) {
     s32 *position = &args->encodedTextOffset;
-    u8 *byte = args->encodedText + *position;
+    const u8 *byte = args->encodedText + *position;
     u32 value = *byte;
 
     *position += 2;
@@ -109,7 +109,7 @@ u32 itfReadEncodedTextLead(FrFontCtx *args) {
 /* Decode a little-endian pair; encoded high byte 0xFF is the zero escape.
  * Neither reader checks the input length. */
 u32 itfReadEncodedCode(FrFontCtx *args) {
-    u8 *bytes = args->encodedText;
+    const u8 *bytes = args->encodedText;
     u32 first;
     u32 second;
 
@@ -131,7 +131,7 @@ extern u8 *datItemMessages;
 
 s32 itfProcessEncodedTextControl(s32 code, FrFontCtx *stream) {
     s32 *position = &stream->encodedTextOffset;
-    u8 *bytes = stream->encodedText;
+    const u8 *bytes = stream->encodedText;
     s32 payloadWords = code & 0xF;
     s32 payloadPosition = *position;
 
@@ -250,7 +250,7 @@ extern _FRQ * frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOpti
 _FRQ *itfBuildGlyphChainFromEncodedStream(FrFontCtx *stream) {
     u8 encodedText[3];
     s32 value;
-    u8 *bytes = stream->encodedText;
+    const u8 *bytes = stream->encodedText;
 
     if ((bytes[0] & 0xF0) != 0xF0 && bytes[1] == 8) {
         stream->encodedTextOffset += 4;
@@ -310,17 +310,17 @@ _FRQ *itfBuildGlyphChainFromEncodedStream(FrFontCtx *stream) {
     return stream->glyphChain;
 }
 
-_FRQ *MessageRequest(s32 x, s32 y, u8 *encodedText, _FRQ *sub) {
+_FRQ *MessageRequest(s32 x, s32 y, const u8 *encodedText, _FRQ *sub) {
     return MessageRequestEx2(x, y, 0, 0, 0, 0, 0x80, encodedText, sub);
 }
 
-_FRQ *MessageRequestEx(s32 x, s32 y, s32 channel0, s32 channel1, s32 channel2, s32 channel3, u8 *encodedText, _FRQ *sub) {
+_FRQ *MessageRequestEx(s32 x, s32 y, s32 channel0, s32 channel1, s32 channel2, s32 channel3, const u8 *encodedText, _FRQ *sub) {
     return MessageRequestEx2(x, y, 0, channel0 & 0xFF, channel1 & 0xFF, channel2 & 0xFF, channel3 & 0xFF, encodedText, sub);
 }
 
 extern _FRQ *itfBuildGlyphChainFromEncodedStream(FrFontCtx *);
 
-_FRQ *MessageRequestEx2(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, u8 *encodedText, _FRQ *sub) {
+_FRQ *MessageRequestEx2(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, const u8 *encodedText, _FRQ *sub) {
     FrFontCtx args;
 
     args.x = x;
@@ -339,7 +339,7 @@ _FRQ *MessageRequestEx2(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32
 }
 
 _FRQ *itfDrawColor(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1,
-                   s32 channel2, s32 channel3, u8 *encodedText, _FRQ *unusedSub) {
+                   s32 channel2, s32 channel3, const u8 *encodedText, _FRQ *unusedSub) {
     return MessageRequestEx2(x, y, depth, channel0 & 0xff, channel1 & 0xff,
                   channel2 & 0xff, channel3 & 0xff, encodedText, 0);
 }
@@ -367,7 +367,7 @@ INCLUDE_ASM(const s32, "game/code_00196478", frDumpFontTexture);
 
 s32 itfSkipEncodedTextOpcode(s32 code, FrFontCtx *stream) {
     s32 *position = &stream->encodedTextOffset;
-    u8 *bytes = stream->encodedText;
+    const u8 *bytes = stream->encodedText;
     s32 payloadWords = code & 0xF;
     s32 payloadPosition = *position;
 
@@ -430,7 +430,7 @@ s32 itfSkipEncodedTextOpcode(s32 code, FrFontCtx *stream) {
 s32 itfScanEncodedTextControls(FrFontCtx *stream) {
     u8 encodedText[3];
     s32 value;
-    u8 *bytes = stream->encodedText;
+    const u8 *bytes = stream->encodedText;
 
     if ((bytes[0] & 0xF0) != 0xF0 && bytes[1] == 8) {
         stream->encodedTextOffset += 4;
@@ -473,7 +473,7 @@ s32 itfScanEncodedTextControls(FrFontCtx *stream) {
     return 0;
 }
 
-s32 itfInitTextDrawArgs(u8 *encodedText, _FRQ *sub) {
+s32 itfInitTextDrawArgs(const u8 *encodedText, _FRQ *sub) {
     FrFontCtx args;
 
     args.x = 0;
@@ -753,12 +753,12 @@ void itfAttachGlyph12x16(u32 x, u32 y, s32 depth, u32 colors,
     frFontLinkGlyph(parent, glyph, 0);
 }
 
-extern u8 *MessageNumSearch(s32 textId, FrFontTextBank *bank, s32 mode);
+extern const u8 *MessageNumSearch(s32 textId, const FrFontTextBank *bank, s32 mode);
 extern s32 frFontMeasureGlyphStripWidth(s32 line, _FRQ *text);
 extern void frFontMoveChainTo(s32 x, s32 y, _FRQ *text);
 
 _FRQ *itfDrawBankTextWithLayoutFlags(s32 x, s32 y, s32 depth, u16 textId, FrFontTextBank *bank, s32 flags) {
-    u8 *text = MessageNumSearch(textId, bank, 0);
+    const u8 *text = MessageNumSearch(textId, bank, 0);
     u32 mode;
     _FRQ *handle;
 

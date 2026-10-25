@@ -112,7 +112,7 @@ extern u16 D_003B2F58[];
 /* Subtract one modulo 256 from the first byte, then advance over the whole pair. */
 u32 itfReadEncodedTextLead(FrFontCtx *stream) {
     s32 *position = &stream->encodedTextOffset;
-    u8 *byte = stream->encodedText + *position;
+    const u8 *byte = stream->encodedText + *position;
     u32 value = *byte;
 
     *position += 2;
@@ -149,7 +149,7 @@ extern void p2sdPlaySE(s32, s32, s32);
 
 s32 itfProcessEncodedTextControl(s32 code, FrFontCtx *stream) {
     s32 *position = &stream->encodedTextOffset;
-    u8 *bytes = stream->encodedText;
+    const u8 *bytes = stream->encodedText;
     s32 payloadWords = code & 0xF;
     s32 payloadPosition = *position;
 
@@ -269,7 +269,7 @@ extern s8 frFontEncodedTextGlyphSpacing;
 _FRQ *itfBuildGlyphChainFromEncodedStream(FrFontCtx *stream) {
     u8 encodedText[3];
     s32 value;
-    u8 *bytes = stream->encodedText;
+    const u8 *bytes = stream->encodedText;
 
     if ((bytes[0] & 0xF0) != 0xF0 && bytes[1] == 8) {
         stream->encodedTextOffset += 4;
@@ -329,15 +329,15 @@ _FRQ *itfBuildGlyphChainFromEncodedStream(FrFontCtx *stream) {
     return stream->glyphChain;
 }
 
-_FRQ *MessageRequest(s32 x, s32 y, u8 *encodedText, _FRQ *sub) {
+_FRQ *MessageRequest(s32 x, s32 y, const u8 *encodedText, _FRQ *sub) {
     return MessageRequestEx2(x, y, 0, 0, 0, 0, 0x80, encodedText, sub);
 }
 
-_FRQ *MessageRequestEx(s32 x, s32 y, s32 channel0, s32 channel1, s32 channel2, s32 channel3, u8 *encodedText, _FRQ *sub) {
+_FRQ *MessageRequestEx(s32 x, s32 y, s32 channel0, s32 channel1, s32 channel2, s32 channel3, const u8 *encodedText, _FRQ *sub) {
     return MessageRequestEx2(x, y, 0, channel0 & 0xFF, channel1 & 0xFF, channel2 & 0xFF, channel3 & 0xFF, encodedText, sub);
 }
 
-_FRQ *MessageRequestEx2(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, u8 *encodedText, _FRQ *sub) {
+_FRQ *MessageRequestEx2(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, const u8 *encodedText, _FRQ *sub) {
     FrFontCtx args;
     args.x = x;
     args.y = y;
@@ -356,7 +356,7 @@ _FRQ *MessageRequestEx2(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32
 extern s8 frFontEncodedTextGlyphSpacing;
 
 
-_FRQ *itfDrawPlainEncodedTextWithByteColors(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, u8 *encodedText, _FRQ *unusedSub) {
+_FRQ *itfDrawPlainEncodedTextWithByteColors(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, const u8 *encodedText, _FRQ *unusedSub) {
     s8 saved = frFontEncodedTextGlyphSpacing;
     _FRQ *result;
     frFontEncodedTextGlyphSpacing = 0;
@@ -389,7 +389,7 @@ INCLUDE_ASM(const s32, "game/code_0019E138", frDumpFontTexture);
 /* Skip one encoded-text control without executing it; returns 1 for the stop codes and 2 for the voice trigger. */
 s32 itfSkipEncodedTextOpcode(s32 code, FrFontCtx *stream) {
     s32 *position = &stream->encodedTextOffset;
-    u8 *bytes = stream->encodedText;
+    const u8 *bytes = stream->encodedText;
     s32 payloadWords = code & 0xF;
     s32 payloadPosition = *position;
 
@@ -455,7 +455,7 @@ s32 itfSkipEncodedTextOpcode(s32 code, FrFontCtx *stream) {
 s32 itfScanEncodedTextControls(FrFontCtx *stream) {
     u8 encodedText[3];
     s32 value;
-    u8 *bytes = stream->encodedText;
+    const u8 *bytes = stream->encodedText;
 
     if ((bytes[0] & 0xF0) != 0xF0 && bytes[1] == 8) {
         stream->encodedTextOffset += 4;
@@ -498,7 +498,7 @@ s32 itfScanEncodedTextControls(FrFontCtx *stream) {
     return 0;
 }
 
-s32 itfInitTextDrawArgs(u8 *encodedText, _FRQ *sub) {
+s32 itfInitTextDrawArgs(const u8 *encodedText, _FRQ *sub) {
     FrFontCtx args;
     args.x = 0;
     args.y = 0;
@@ -762,7 +762,7 @@ void itfAttachGlyph12x16(u32 x, u32 y, s32 depth, u32 colors,
 }
 
 /* Count 0xFx0F separators in the packed text stream. */
-s32 itfCountTextSeparators(char *text) {
+s32 itfCountTextSeparators(const char *text) {
     s32 separatorCount = 0;
 
     while (*text != 0) {
@@ -778,7 +778,7 @@ s32 itfCountTextSeparators(char *text) {
 }
 
 /* Copy one plain-text segment; other two-byte control codes pass through. */
-void itfCopyTextSegment(char *src, char *dst, s32 segmentIndex) {
+void itfCopyTextSegment(const char *src, char *dst, s32 segmentIndex) {
     s32 currentSegment = 0;
 
     while (*src != 0) {
@@ -804,7 +804,7 @@ void itfCopyTextSegment(char *src, char *dst, s32 segmentIndex) {
 extern u16 D_00436582;
 extern s32 D_00436584;
 extern s32 D_00436588;
-extern u8 *MessageNumSearch(s32 textId, FrFontTextBank *bank, s32 mode);
+extern const u8 *MessageNumSearch(s32 textId, const FrFontTextBank *bank, s32 mode);
 extern s32 frFontCountGlyphBands(_FRQ *text);
 extern void frFontMoveChainTo(s32 x, s32 y, _FRQ *text);
 
@@ -812,7 +812,7 @@ extern void frFontMoveChainTo(s32 x, s32 y, _FRQ *text);
  * Return NULL for absent text; optionally center the resulting glyph chain. */
 _FRQ *itfDrawBankTextWithSegmentCounter(s32 x, s32 y, s32 depth, u16 textId, FrFontTextBank *bank, s32 flags) {
     char buffer[0x80];
-    u8 *text;
+    const u8 *text;
     u32 mode;
     _FRQ *handle;
     s32 separators;
@@ -838,14 +838,14 @@ _FRQ *itfDrawBankTextWithSegmentCounter(s32 x, s32 y, s32 depth, u16 textId, FrF
         frEnableMode(0x20);
         break;
     }
-    separators = itfCountTextSeparators((char *)text);
+    separators = itfCountTextSeparators((const char *)text);
     if (++D_00436588 == 30) {
         D_00436588 = 0;
         if (++D_00436584 > separators) {
             D_00436584 = 0;
         }
     }
-    itfCopyTextSegment((char *)text, buffer, D_00436584);
+    itfCopyTextSegment((const char *)text, buffer, D_00436584);
     /* The original draw uses the full stream rather than the copied segment. */
     handle = itfDrawPlainEncodedTextWithByteColors(x, y, depth, 1, 0, 0, 0x80, text, 0);
     if (flags & 0x10000) {
@@ -876,7 +876,7 @@ _FRQ *itfDrawBankTextWithSegmentCounter(s32 x, s32 y, s32 depth, u16 textId, FrF
 
 
 _FRQ *itfDrawBankTextWithLayoutFlags(s32 x, s32 y, s32 depth, u16 textId, FrFontTextBank *bank, s32 flags) {
-    u8 *text = MessageNumSearch(textId, bank, 0);
+    const u8 *text = MessageNumSearch(textId, bank, 0);
     u32 mode;
     _FRQ *handle;
 

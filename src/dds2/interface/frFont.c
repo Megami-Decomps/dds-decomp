@@ -1213,10 +1213,9 @@ void frFontMoveChainTo(s32 targetX, s32 targetY, _FRQ *glyphChain) {
 
 INCLUDE_ASM(const s32, "interface/frFont", frFontCenterGlyphChainAt);
 
-/* Read the packed table count, then skip the table and its trailing metadata
- * word to reach the encoded text. The native parser copies that metadata even
- * though this lookup does not use its value. */
-u8 *MessageNumSearch(s32 textId, FrFontTextBank *bank, s32 mode) {
+/* Return a borrowed read-only bank view. Read the packed table count, skip the
+ * table and trailing metadata word; the parser copies that metadata too. */
+const u8 *MessageNumSearch(s32 textId, const FrFontTextBank *bank, s32 mode) {
     u32 offset;
     u32 tableCount;
     u32 textMetadata;
@@ -1226,12 +1225,12 @@ u8 *MessageNumSearch(s32 textId, FrFontTextBank *bank, s32 mode) {
     }
     offset = bank->entries[textId].offset + 0x38;
     tableCount = 0;
-    memcpy(&tableCount, (u8 *)bank + offset, 2);
+    memcpy(&tableCount, (const u8 *)bank + offset, 2);
     offset += 4;
     offset += tableCount * 4;
-    memcpy(&textMetadata, (u8 *)bank + offset, sizeof(textMetadata));
+    memcpy(&textMetadata, (const u8 *)bank + offset, sizeof(textMetadata));
     offset += sizeof(textMetadata);
-    return (u8 *)bank + offset;
+    return (const u8 *)bank + offset;
 }
 
 

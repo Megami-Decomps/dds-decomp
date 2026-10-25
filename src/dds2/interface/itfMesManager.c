@@ -452,7 +452,7 @@ ItfMesEntryStartResult itfMesStartEntry(s32 window, s32 entryIndex, s32 itemInde
     return ITF_MES_ENTRY_START_STARTED;
 }
 
-extern s32 itfInitTextDrawArgs(u8 *encodedText, _FRQ *sub);
+extern s32 itfInitTextDrawArgs(const u8 *encodedText, _FRQ *sub);
 
 /* Cache the selected table and narrowed item index, then initialize its text.
  * Empty tables return 0; nonempty tables return the text initializer's result. */
