@@ -51,6 +51,7 @@
 #include "dat_affinity.h"
 #include "btl_ai_table.h"
 #include "btl_ui.h"
+#include "btl_target_selection_state_api.h"
 /* Declared before first use (were implicit int). */
 extern s32 btlCanSpawnAnotherEnemy(BtlUnit *requester);
 extern BtlRuntimeTask *btlScheduleRefreshTask(BtlUnit *owner);
@@ -666,8 +667,6 @@ void btlCommandResultEffectSelect(u8 *task) {
     btlCreateTargetSelectionTask((BtlTask *)task);
 }
 
-extern s32 btlGetTargetSelectionState(void);
-
 extern BtlIndexList *btlGetSelectedTargetList(void);
 
 extern BtlCommandTargetEligibilityResult btlGetCommandTargetEligibility(BtlIndexList *indices, s32 selection);
@@ -678,7 +677,7 @@ extern s32 btlSetTaskPhase2(void);
 
 void btlInitializeActorCommandState(BtlTask *task) {
     BtlState *work = (BtlState *)btlGetRuntime();
-    s32 state;
+    BtlTargetSelectionState state;
     BtlIndexList *selected;
     s32 selection;
     BtlCommandTargetEligibilityResult reason;
@@ -687,7 +686,8 @@ void btlInitializeActorCommandState(BtlTask *task) {
         return;
     }
     state = btlGetTargetSelectionState();
-    if ((task->flags & 4) == 0 && state != 3 && sndHasActiveActor() == 0) {
+    if ((task->flags & 4) == 0 && state != BTL_TARGET_SELECTION_STATE_COMMITTED &&
+        sndHasActiveActor() == 0) {
         if (btlGetActiveUnitId() != 9) {
             btlStartTask(btlCreateCommandSoundUpdateTask());
             btlStartTask(btlCreateSecondaryCommandSoundTask());
@@ -695,7 +695,7 @@ void btlInitializeActorCommandState(BtlTask *task) {
         btlStartTask(btlCreateCommandSoundTask(task, 0xA));
         task->flags |= 4;
     }
-    if (state == 3) {
+    if (state == BTL_TARGET_SELECTION_STATE_COMMITTED) {
         selected = btlGetSelectedTargetList();
         switch (task->indexWork.phase) {
         case 1:
@@ -741,7 +741,7 @@ void btlInitializeActorCommandState(BtlTask *task) {
         } else {
             btlDispatchStateHandler(task, 0xC);
         }
-    } else if (state == 4) {
+    } else if (state == BTL_TARGET_SELECTION_STATE_CANCELLED) {
         btlRequestTargetSelectionClose();
         btlDispatchStateHandler(task, 6);
     } else if (work->battleFlags & 0x8000) {

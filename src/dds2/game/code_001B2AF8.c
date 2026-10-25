@@ -8581,6 +8581,7 @@ void btlDrawActorVitalGauge(BtlUnit *unit, s32 current, s32 displayed, s32 maxim
 
 extern SdfPoolNode D_003805A8;
 #include "sdf_packet_alloc.h"
+#include "btl_target_selection_state_api.h"
 /* Draw a textured command-panel quad with independently colored corners. */
 s32 btlDrawGouraudTexturedPanelQuad(s32 x0, s32 y0, s32 x1, s32 y1,
                   s32 x2, s32 y2, s32 x3, s32 y3,
@@ -9950,7 +9951,8 @@ s32 btlUpdateBattleSceneCommands(dds3ProcessID_t *task) {
             panel = (BattleActorPanelWork *)dds3GetProcessData(dds3SearchProcessName(D_004367CC));
             BTL_COMMAND_PARTY_RECORD_INDEX(object->commandData) = panel->partyRecordIndex;
             object->state = 3;
-            ((SceneAiWork *)dds3GetProcessData(dds3SearchProcessName(D_004367B8)))->state = 3;
+            ((SceneAiWork *)dds3GetProcessData(dds3SearchProcessName(D_004367B8)))->state =
+                BTL_TARGET_SELECTION_STATE_COMMITTED;
             slot = object->commandData->linkedUnit->lookupId;
             panel->activeEntries[slot].presentation.unkF0 = 0;
             panel->activeEntries[slot].presentation.pendingSceneState = 5;
@@ -10514,7 +10516,7 @@ void btlUpdateTargetSelectionInput(BtlState *scene, SceneAiWork *state, s32 mode
         task = (dds3ProcessID_t *)dds3SearchProcessName(btlCommandPanelTaskNameRef);
         object = (BattleSceneObject *)dds3GetProcessData((s32)task);
         if (object->state == 8) {
-            state->state = 5;
+            state->state = BTL_TARGET_SELECTION_STATE_COMMAND_PANEL_HANDOFF;
             object->state = 9;
             object->commandData->linkedUnit =
                 (BtlUnit *)btlGetIndexListEntry(state->eligibleTargets, state->entry);
@@ -10523,7 +10525,7 @@ void btlUpdateTargetSelectionInput(BtlState *scene, SceneAiWork *state, s32 mode
             return;
         }
 
-        state->state = 3;
+        state->state = BTL_TARGET_SELECTION_STATE_COMMITTED;
         if (btlGetActorCommandClass(object, btlCommandPanelWork->classIndex) != 0) {
             return;
         }
@@ -10532,7 +10534,7 @@ void btlUpdateTargetSelectionInput(BtlState *scene, SceneAiWork *state, s32 mode
     }
 
     if (dds3PadButtonState.primaryCancel < 0) {
-        state->state = 4;
+        state->state = BTL_TARGET_SELECTION_STATE_CANCELLED;
         sndSetStationedSeVolume(10);
         if (fldGetSceneObjectState() == 8) {
             return;
@@ -10663,7 +10665,8 @@ void btlUpdateAndDrawTargetActorPanels(SceneAiWork *work) {
     dds3ProcessID_t *panelTask = NULL;
 
     count = btlGetIndexListCount(work->selectedTargets);
-    if (count == 1 && btlHasRegisteredAphNamePanelTask() == 0 && work->state != 4) {
+    if (count == 1 && btlHasRegisteredAphNamePanelTask() == 0 &&
+        work->state != BTL_TARGET_SELECTION_STATE_CANCELLED) {
         unit = btlGetIndexListEntry(work->selectedTargets, 0);
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x200) {
@@ -10697,7 +10700,7 @@ void btlUpdateAndDrawTargetActorPanels(SceneAiWork *work) {
         }
     }
     scene = fldGetSceneObjectState();
-    if (work->state != 3 && scene != 8) {
+    if (work->state != BTL_TARGET_SELECTION_STATE_COMMITTED && scene != 8) {
         unit = btlGetIndexListEntry(work->selectedTargets, 0);
         if (unit->status.flags & 0x200) {
             panelTask = dds3SearchProcessName(D_004367CC);
@@ -10713,7 +10716,8 @@ void btlUpdateAndDrawTargetActorPanels(SceneAiWork *work) {
         if (btlIsUnitInfoFlagOneEligible(unit) == 0) {
             func_001CB7A8(unit, work, i);
         }
-        if ((u32)(work->state - 3) >= 2 && scene != 8 && scene != 9 &&
+        if ((u32)(work->state - BTL_TARGET_SELECTION_STATE_COMMITTED) >= 2 &&
+            scene != 8 && scene != 9 &&
             (unit->status.flags & 0x200) && panelTask != NULL) {
             btlSetActorSecondaryPresentation(unit, 0, 1);
         }
@@ -10746,10 +10750,10 @@ s32 btlUpdateTargetSelectionTask(dds3ProcessID_t *handle) {
     }
     state = (SceneAiWork *)dds3GetProcessData(handle);
     switch (state->state) {
-    case 1:
-        state->state = 2;
+    case BTL_TARGET_SELECTION_STATE_INITIALIZING:
+        state->state = BTL_TARGET_SELECTION_STATE_ACTIVE;
         break;
-    case 2:
+    case BTL_TARGET_SELECTION_STATE_ACTIVE:
         mode = 1;
         if (work->battleMode == 0x312) {
             mode = btlGetEffectActive() == 1 ? 5 : 1;
@@ -10757,11 +10761,11 @@ s32 btlUpdateTargetSelectionTask(dds3ProcessID_t *handle) {
         btlUpdateTargetSelectionInput(work, state, mode);
         btlUpdateAndDrawTargetActorPanels(state);
         break;
-    case 3:
-    case 4:
-    case 5:
+    case BTL_TARGET_SELECTION_STATE_COMMITTED:
+    case BTL_TARGET_SELECTION_STATE_CANCELLED:
+    case BTL_TARGET_SELECTION_STATE_COMMAND_PANEL_HANDOFF:
         break;
-    case 6:
+    case BTL_TARGET_SELECTION_STATE_CLOSE_REQUESTED:
         return -1;
     }
     return 0;
@@ -10818,7 +10822,7 @@ SceneAiWork *btlCreateTargetSelectionWork(ActionStateLink *source) {
         break;
     }
     work->source = (ActionStateLink *)source;
-    work->state = 1;
+    work->state = BTL_TARGET_SELECTION_STATE_INITIALIZING;
     return work;
 }
 
@@ -10841,7 +10845,7 @@ SceneAiWork *btlGetTargetSelectionWork(void) {
     return (SceneAiWork *)dds3GetProcessData(task);
 }
 
-s32 btlGetTargetSelectionState(void) {
+BtlTargetSelectionState btlGetTargetSelectionState(void) {
     return btlGetTargetSelectionWork()->state;
 }
 
@@ -10877,7 +10881,7 @@ void btlRequestTargetSelectionClose(void) {
 
     state = btlGetTargetSelectionWork();
     if (state != 0) {
-        state->state = 6;
+        state->state = BTL_TARGET_SELECTION_STATE_CLOSE_REQUESTED;
     }
 }
 

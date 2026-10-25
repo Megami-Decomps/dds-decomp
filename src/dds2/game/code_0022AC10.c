@@ -258,6 +258,7 @@ extern char D_0041B7D0[];
 extern void btlDebugDrawTwoColorRectangle(s32, s32, s32, s32, u32, u32);
 
 #include "sdf_packet_alloc.h"
+#include "btl_target_selection_state_api.h"
 
 extern void *sdfDevPrintf(s32, s32, s32, s32, const char *, ...);
 
@@ -2412,7 +2413,6 @@ typedef struct BtlDebugValueMenu {
 typedef char BtlDebugValueEntryStride[(sizeof(BtlDebugValueEntry) == 0x18) ? 1 : -1];
 
 extern BtlIndexList *btlGetSelectedTargetList(void);
-extern s32 btlGetTargetSelectionState(void);
 extern void btlCreateTargetSelectionTask(ActionStateLink *sourceTask);
 extern void btlRequestTargetSelectionClose(void);
 extern void btlCopyUnitCurrentPosition(BtlUnit *unit, f32 *destination);
@@ -2475,7 +2475,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
     u32 health;
     u32 mana;
     s32 currentFrame;
-    s32 sceneState;
+    BtlTargetSelectionState sceneState;
     u32 motion;
     f32 savedScale;
     u32 selectedAddress;
@@ -2490,11 +2490,11 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         break;
     case 1:
         sceneState = btlGetTargetSelectionState();
-        if (sceneState == 3) {
+        if (sceneState == BTL_TARGET_SELECTION_STATE_COMMITTED) {
             battle->debug.selectedUnit = btlGetIndexListEntry(btlGetSelectedTargetList(), 0);
             btlRequestTargetSelectionClose();
             battle->debug.phase = 2;
-        } else if (sceneState == 4) {
+        } else if (sceneState == BTL_TARGET_SELECTION_STATE_CANCELLED) {
             btlRequestTargetSelectionClose();
             battle->debug.phase = 10;
         } else {

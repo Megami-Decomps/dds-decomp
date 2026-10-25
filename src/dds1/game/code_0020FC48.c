@@ -2168,6 +2168,7 @@ s32 mnuListMoveCursor(BtlDebugMenuCursor *menuList) {
 }
 
 #include "fr_font_draw_glyph.h"
+#include "btl_target_selection_state_api.h"
 
 /* Queue text at pixel coordinates, using the font's native X/Y scaling. */
 s32 mnuQueueColoredGlyphAtPosition(s32 x, s32 y, s32 text) {
@@ -2325,7 +2326,6 @@ extern BtlActorStatusRecord btlDebugEditorActorStatus;
 extern BtlActorMotionSlot btlDebugEditorMotionSlot;
 extern u8 btlDebugEditorStatusSelection;
 extern s32 btlDebugEditorSelectedEntryIndex;
-extern s32 btlGetTargetSelectionState(void);
 extern BtlIndexList *btlGetSelectedTargetList(void);
 extern void btlRequestTargetSelectionClose(void);
 extern void btlCreateTargetSelectionTask(BtlTask *sourceTask);
@@ -2372,12 +2372,12 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         btlCreateTargetSelectionTask(0);
         break;
     case 1: {
-        s32 scene = btlGetTargetSelectionState();
-        if (scene == 3) {
+        BtlTargetSelectionState scene = btlGetTargetSelectionState();
+        if (scene == BTL_TARGET_SELECTION_STATE_COMMITTED) {
             state->debug.selectedUnit = btlGetIndexListEntry(btlGetSelectedTargetList(), 0);
             btlRequestTargetSelectionClose();
             state->debug.phase = 2;
-        } else if (scene == 4) {
+        } else if (scene == BTL_TARGET_SELECTION_STATE_CANCELLED) {
             btlRequestTargetSelectionClose();
             state->debug.phase = 10;
         } else {

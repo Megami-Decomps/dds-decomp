@@ -247,6 +247,7 @@ extern s32 mnuIsTitleEntryAvailable(datUnitWork_t *);
 extern void datAddHp();
 
 #include "brs_task_poll_done_api.h"
+#include "btl_target_selection_state_api.h"
 
 extern s32 btlResolveBattleTerminalOutcome(void);
 
@@ -1086,7 +1087,6 @@ void btlCommandResultEffectSelect(u8 *task) {
     btlCreateTargetSelectionTask((ActionStateLink *)task);
 }
 
-extern s32 btlGetTargetSelectionState(void);
 extern BtlIndexList *btlGetSelectedTargetList(void);
 extern BtlCommandTargetEligibilityResult btlGetCommandTargetEligibility(BtlIndexList *, s32);
 extern void btlRequestTargetSelectionClose(void);
@@ -1095,7 +1095,7 @@ extern s32 btlSetTaskPhase2(void);
 /* Validate/copy the selected target list and initialize the actor's chosen command. */
 void btlInitializeActorCommandState(ActionStateLink *task) {
     BtlState *work = (BtlState *)btlGetRuntime();
-    s32 state;
+    BtlTargetSelectionState state;
     BtlIndexList *selected;
     s32 selection;
     BtlCommandTargetEligibilityResult reason;
@@ -1104,7 +1104,9 @@ void btlInitializeActorCommandState(ActionStateLink *task) {
         return;
     }
     state = btlGetTargetSelectionState();
-    if ((task->pendingFlags & 4) == 0 && state != 3 && sndHasActiveActor() == 0) {
+    if ((task->pendingFlags & 4) == 0 &&
+        state != BTL_TARGET_SELECTION_STATE_COMMITTED &&
+        sndHasActiveActor() == 0) {
         if (btlGetActiveUnitId() != 9) {
             btlStartTask(btlCreateCommandSoundUpdateTask());
             btlStartTask(btlCreateSecondaryCommandSoundTask());
@@ -1112,7 +1114,7 @@ void btlInitializeActorCommandState(ActionStateLink *task) {
         btlStartTask(btlCreateCommandSoundTask(task, 0xA));
         task->pendingFlags |= 4;
     }
-    if (state == 3) {
+    if (state == BTL_TARGET_SELECTION_STATE_COMMITTED) {
         selected = btlGetSelectedTargetList();
         switch (task->indexWork.phase) {
         case 1:
@@ -1160,7 +1162,7 @@ void btlInitializeActorCommandState(ActionStateLink *task) {
         } else {
             btlDispatchStateHandler(task, 0xC);
         }
-    } else if (state == 4) {
+    } else if (state == BTL_TARGET_SELECTION_STATE_CANCELLED) {
         btlRequestTargetSelectionClose();
         btlDispatchStateHandler(task, 6);
     } else if (work->battleFlags & 0x8000) {
