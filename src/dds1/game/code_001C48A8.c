@@ -1482,9 +1482,9 @@ s32 btlFinishScenePartyRecovery(BtlState *scene) {
     return 0;
 }
 
-void fldMarkSceneRefresh(s32 scene) {
-    btlResetDebugEncounterSelection(scene);
-    ((BattleSceneWork *)scene)->refreshFlags |= 4;
+void fldMarkSceneRefresh(BattleSceneWork *scene) {
+    btlResetDebugEncounterSelection((s32)scene);
+    scene->refreshFlags |= 4;
 }
 
 extern s32 btlUpdateDebugEncounterSelector(void);
