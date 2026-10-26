@@ -558,7 +558,7 @@ s32 dds3GetProcessStat(dds3ProcessID_t* task)
 {
     u32 state;
 
-    if (dds3ExistProcess(task) == 0) {
+    if (dds3ExistProcess(task) == KWLN_PROCESS_NOT_REGISTERED) {
         return KWLN_TASK_DETACHED;
     }
     state = task->flags & KWLN_TASK_STATE_MASK;

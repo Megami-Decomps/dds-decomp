@@ -18,6 +18,7 @@
 #include "snd_slot.h"
 #include "active_sound_node.h"
 #include "kwln.h"
+#include "kwln_process_registration.h"
 #include "btl_task_state.h"
 #include "btl_task_condition.h"
 #include "sdf_resource.h"
@@ -794,7 +795,7 @@ s32 btlAiTaskUpdate(BtlTask *task) {
                     } else {
                         btlDispatchStateHandler(task, 0xC);
                     }
-                } else if (dds3ExistProcess(scene->boundTask) == 0) {
+                } else if (dds3ExistProcess(scene->boundTask) == KWLN_PROCESS_NOT_REGISTERED) {
                     if (task->indexWork.phase == -1) {
                         btlBossDebugPrintf("btl:AI script return NULL[%p]\n", task);
                         btlDebugPrintf("AI script return NULL\n");

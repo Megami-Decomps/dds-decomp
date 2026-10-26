@@ -7,6 +7,7 @@
 #include "btl_command.h"
 #include "ee_mmi.h"
 #include "kwln.h"
+#include "kwln_process_registration.h"
 #include "scr.h"
 #include "bf_flw0_header.h"
 
@@ -42,7 +43,7 @@ s32 btlReleaseScriptResource(void) {
     if (battle->eventTaskId == -1) {
         return 1;
     }
-    if (dds3ExistProcess(battle->scriptTask) == 0) {
+    if (dds3ExistProcess(battle->scriptTask) == KWLN_PROCESS_NOT_REGISTERED) {
         battle->scriptTask = 0;
         return 1;
     }

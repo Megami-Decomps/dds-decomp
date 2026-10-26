@@ -16,6 +16,7 @@
 #include "sdf_texture_draw_packet.h"
 #include "sdf_tex_packet.h"
 #include "kwln.h"
+#include "kwln_process_registration.h"
 #include "kwln_named_slot.h"
 #include "kwln_task_create.h"
 #include "kwln_task_runner.h"
@@ -288,7 +289,7 @@ s32 fclEncycFreeEntries(const char *name) {
     }
     if (D_0043D410[slotIndex].kind > 0) {
         if (D_0043D410[slotIndex].kind < 3) {
-            if (dds3ExistProcess(D_0043D410[slotIndex].task) == 1) {
+            if (dds3ExistProcess(D_0043D410[slotIndex].task) == KWLN_PROCESS_REGISTERED) {
                 dds3KillProcess(D_0043D410[D_00435C2C].task, 1);
             }
         }

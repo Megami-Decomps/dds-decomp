@@ -30,6 +30,7 @@
 #include "btl_scene_lighting_task_args.h"
 #include "sdf_chip.h"
 #include "kwln.h"
+#include "kwln_process_registration.h"
 #include "kwln_task_create.h"
 #include "btl_task_condition.h"
 #include "btl_deferred_unit_status_args.h"
@@ -1215,7 +1216,7 @@ s32 btlAiTaskUpdate(ActionStateLink *task) {
                     } else {
                         btlDispatchStateHandler(task, 0xC);
                     }
-                } else if (dds3ExistProcess(scene->boundTask) == 0) {
+                } else if (dds3ExistProcess(scene->boundTask) == KWLN_PROCESS_NOT_REGISTERED) {
                     if (task->indexWork.phase == -1) {
                         btlBossDebugPrintf("btl:AI script return NULL[%p]\n", task);
                         btlDebugPrintf("AI script return NULL\n");
