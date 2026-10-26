@@ -471,7 +471,7 @@ s32 btlGetUnitElementAffinity(BtlUnit *battler, s32 element) {
     return btlResolveUnitValueWithOverride(&battler->partyRecord, element);
 }
 
-extern s32 datGetEffectiveAffinity(datUnitWork_t *, DatAffinitySelector);
+extern s32 datGetEffectiveAffinity(const datUnitWork_t *, DatAffinitySelector);
 
 s32 btlResolveUnitValueWithOverride(datUnitWork_t *record, s32 value) {
     s32 (*handler)(datUnitWork_t *, s32) = ((BtlState *)btlGetRuntime())->unitValueOverrideHook;

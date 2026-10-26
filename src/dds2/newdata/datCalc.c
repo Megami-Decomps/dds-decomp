@@ -209,7 +209,7 @@ u8 datUnitHasSkill(const datUnitWork_t *unit, s32 skillId) {
 /* Unless a skip-status bit is set, adjust only the low 16 bits by exact masked
  * status: 8/0x100 floor at 200, 2 at 150, 1 at 300, and 4 forces one.
  * High bits are retained; combined or unlisted statuses leave the value alone. */
-s32 datRaiseCalculatedValueFloor(datUnitWork_t *unit, s32 packedValue) {
+s32 datRaiseCalculatedValueFloor(const datUnitWork_t *unit, s32 packedValue) {
     if ((packedValue & DAT_CALC_SKIP_STATUS_MASK) == 0) {
         switch (unit->status & DAT_STATUS_VALUE_MASK) {
         case 8:
@@ -240,7 +240,7 @@ extern const BtlAffinityRow *datAffinityTablePrimary;
 extern const BtlAffinityRow *datAffinityTableAlternate;
 extern const BtlAffinityRow *datExternalAffinityTable;
 
-s32 datGetEffectiveAffinity(datUnitWork_t *unit, DatAffinitySelector selector) {
+s32 datGetEffectiveAffinity(const datUnitWork_t *unit, DatAffinitySelector selector) {
     s32 calculatedValue;
     u16 unitId;
     u32 low;
@@ -318,11 +318,11 @@ s32 datGetEffectiveAffinity(datUnitWork_t *unit, DatAffinitySelector selector) {
     return calculatedValue;
 }
 
-u16 datGetAisyoValue(datUnitWork_t *unit, DatAffinitySelector selector) {
+u16 datGetAisyoValue(const datUnitWork_t *unit, DatAffinitySelector selector) {
     return (u16)datGetEffectiveAffinity(unit, selector);
 }
 
-u32 datGetAisyoFlag(datUnitWork_t *unit, DatAffinitySelector selector) {
+u32 datGetAisyoFlag(const datUnitWork_t *unit, DatAffinitySelector selector) {
     return datGetEffectiveAffinity(unit, selector) & DAT_CALC_HIGH_MASK;
 }
 
@@ -1794,7 +1794,7 @@ s32 evtPushSecondRosterMaximumHp(void) {
     return 1;
 }
 
-extern u16 datGetAisyoValue(datUnitWork_t *, DatAffinitySelector);
+extern u16 datGetAisyoValue(const datUnitWork_t *, DatAffinitySelector);
 /* Push the first entry's selected stat; selectors -1, 16 and 17 use the default. */
 s32 evtPushFirstRosterSelectedStat(void) {
     DatAffinitySelector selector = datCommandSelectors[evtWorkScriptContext.commandIndex].stat;

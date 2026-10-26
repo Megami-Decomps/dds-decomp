@@ -738,7 +738,7 @@ s32 sdfCalculateCommandVitalDelta(s32 channel, datUnitWork_t *sourceRecord, datU
     return damage > 0 ? -damage : healing;
 }
 
-extern s32 datGetEffectiveAffinity(datUnitWork_t *, DatAffinitySelector);
+extern s32 datGetEffectiveAffinity(const datUnitWork_t *, DatAffinitySelector);
 extern char D_00412B08[]; /* "btl:bad ratio = %d%%[%d][%X]\n" */
 
 /* Rolls whether the action hits: returns the surviving channel mask, or 0 on a miss. */
