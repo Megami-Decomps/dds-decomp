@@ -330,7 +330,9 @@ void mdlRegistMotion(s32 group, s32 id, MdlRegistrationMode registrationMode, s3
 }
 
 
-void mdlRegistModelSet(s32 group, s32 id, MdlRegistrationMode registrationMode, MdlLoadPayload *setup) {
+/* Register a model set from the assembled load payload; this descriptor is read-only input. */
+void mdlRegistModelSet(s32 group, s32 id, MdlRegistrationMode registrationMode,
+                       const MdlLoadPayload *setup) {
     dds3ModelResrc_t *entity;
 
     mdlRegist(group, id, registrationMode, setup->resourceList, setup->itemList, setup->requestAllocation);
