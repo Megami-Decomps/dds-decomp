@@ -445,25 +445,25 @@ void effObjApplyTransformParameters(struct SdfPoolNode **surfaces, dds3Basic_t *
         }
         lighting = (struct SdfDmaTagHeader *)((EffectObjectData *)object->data)->transitionWork->value;
         if (lighting != NULL) {
-            ((dds3ModelHandle_t *)base->resourceHandle)->inner->lighting = lighting;
+            dds3ObjectBaseBorrowModelContext(base)->inner->lighting = lighting;
         } else {
-            ((dds3ModelHandle_t *)base->resourceHandle)->inner->lighting = NULL;
+            dds3ObjectBaseBorrowModelContext(base)->inner->lighting = NULL;
         }
         if (dds3ObjectBaseCheckFlag(object, 0x2000)) {
-            mdlBlendEntryPitchYawAndUpdate((dds3ModelHandle_t *)base->resourceHandle, surfaces, base->currentSlot,
+            mdlBlendEntryPitchYawAndUpdate(dds3ObjectBaseBorrowModelContext(base), surfaces, base->currentSlot,
                                            ((EffectObjectData *)object->data)->angle,
                                            ((EffectObjectData *)object->data)->word34);
             return;
         }
         if (dds3ObjectBaseCheckFlag(object, 0x10000)) {
-            model = ((dds3ModelHandle_t *)base->resourceHandle)->inner;
+            model = dds3ObjectBaseBorrowModelContext(base)->inner;
             model->flags |= 0x40;
-            mdlLink((dds3ModelHandle_t *)base->resourceHandle, kwlnSceneSurfaceSets[9]);
+            mdlLink(dds3ObjectBaseBorrowModelContext(base), kwlnSceneSurfaceSets[9]);
             model->flags &= ~0x40;
             dds3ObjectBaseOffFlag(object, 0x10000);
             return;
         }
-        mdlLink((dds3ModelHandle_t *)base->resourceHandle, surfaces);
+        mdlLink(dds3ObjectBaseBorrowModelContext(base), surfaces);
         return;
     }
 
@@ -505,7 +505,7 @@ void effObjApplyTransformParameters(struct SdfPoolNode **surfaces, dds3Basic_t *
                     base->motion->frameStep = base->weight;
                     sdfMotionNext(base->motion);
                 }
-                sdfModelEvalTm((sdfModelRootNode_t *)base->resourceHandle);
+                sdfModelEvalTm(dds3ObjectBaseBorrowDeviceMotionRoot(base));
             } else {
                 switch (base->mode) {
                 case 0:
@@ -538,7 +538,7 @@ void effObjApplyTransformParameters(struct SdfPoolNode **surfaces, dds3Basic_t *
                     base->motion->frameStep = base->weight;
                     sdfMotionNext(base->motion);
                 }
-                sdfModelEvalTm((sdfModelRootNode_t *)base->resourceHandle);
+                sdfModelEvalTm(dds3ObjectBaseBorrowDeviceMotionRoot(base));
             }
         } else {
             switch (base->mode) {
@@ -577,12 +577,12 @@ void effObjApplyTransformParameters(struct SdfPoolNode **surfaces, dds3Basic_t *
                 base->motion->frameStep = base->weight;
                 sdfMotionNext(base->motion);
             }
-            sdfModelEvalTm((sdfModelRootNode_t *)base->resourceHandle);
+            sdfModelEvalTm(dds3ObjectBaseBorrowDeviceMotionRoot(base));
         }
     }
-    ((sdfModelRootNode_t *)base->resourceHandle)->color = object->color;
+    dds3ObjectBaseBorrowDeviceMotionRoot(base)->color = object->color;
     sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, surfaces,
-                           (sdfModelRootNode_t *)base->resourceHandle);
+                           dds3ObjectBaseBorrowDeviceMotionRoot(base));
 }
 
 /* Create and attach kind-3 slot data only when the data slot is empty.
