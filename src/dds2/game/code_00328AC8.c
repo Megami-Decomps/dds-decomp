@@ -4,6 +4,7 @@
 #include "sdf_chip.h"
 #include "ee_mmi.h"
 #include "sdf.h"
+#include "sdf_chip_page_link_view.h"
 #include "sdf_semaphore_api.h"
 #include "sdf_thread.h"
 #include "sdf_thread_sleep.h"
@@ -93,7 +94,7 @@ void sdfChipAllocNextPage(sdfChipCB_tag *sizeClass) {
 
     nextPage = sizeClass->availablePages;
     if (nextPage != NULL) {
-        sizeClass->availablePages = nextPage->next;
+        sizeClass->availablePages = SDF_CHIP_PAGE_LINK_VIEW(nextPage)->nextInSizeClassAvailableList;
     }
     sizeClass->currentPage = nextPage;
 }
@@ -130,7 +131,7 @@ SdfChipCell *sdfChipAllocPageGrow(sdfChipCB_tag *sizeClass, SdfChipPage *page) {
 SdfChipCell *sdfChipAllocNewPage(sdfChipCB_tag *sizeClass) {
     SdfChipPage *page = sdfChipPageFreeLink;
 
-    sdfChipPageFreeLink = page->next;
+    sdfChipPageFreeLink = SDF_CHIP_PAGE_LINK_VIEW(page)->nextInFreePagePool;
     page->usedCells = 0;
     page->allocate = sdfChipAllocPageGrow;
     sizeClass->currentPage = page;

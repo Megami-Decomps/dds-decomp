@@ -4,6 +4,7 @@
 #include "sdf_resource.h"
 #include "sdf_general_heap_api.h"
 #include "sdf.h"
+#include "sdf_chip_page_link_view.h"
 #include "sdf_pending.h"
 
 #define SDF_CHIP_BLOCK_SHIFT 12
@@ -51,10 +52,10 @@ void sdfChipInit(u32 heapSize) {
         record->base = page;
         page += SDF_CHIP_BLOCK_BYTES;
         record->sizeClass = NULL;
-        record->next = next;
+        SDF_CHIP_PAGE_LINK_VIEW(record)->nextInFreePagePool = next;
         record = next;
     } while (pageCount != 0);
-    next[-1].next = NULL;
+    SDF_CHIP_PAGE_LINK_VIEW(&next[-1])->nextInFreePagePool = NULL;
 
     sizeClass = sdfChipCB.classes;
     unitSize = 0x10;

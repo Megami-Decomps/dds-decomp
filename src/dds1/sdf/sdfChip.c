@@ -4,6 +4,7 @@
 #include "sdf_chip_range_api.h"
 #include "sdf_resource.h"
 #include "sdf.h"
+#include "sdf_chip_page_link_view.h"
 #include "sdf_pending.h"
 #include "sdf_memory_api.h"
 
@@ -49,16 +50,16 @@ void sdfChipFreeDirect(void *memory) {
             sdfChipAllocNextPage(sizeClass);
         } else {
             while (*link != page) {
-                link = &(*link)->next;
+                link = &SDF_CHIP_PAGE_LINK_VIEW(*link)->nextInSizeClassAvailableList;
             }
-            *link = page->next;
+            *link = SDF_CHIP_PAGE_LINK_VIEW(page)->nextInSizeClassAvailableList;
         }
         page->sizeClass = NULL;
-        page->next = sdfChipPageFreeLink;
+        SDF_CHIP_PAGE_LINK_VIEW(page)->nextInFreePagePool = sdfChipPageFreeLink;
         sdfChipPageFreeLink = page;
     } else {
         if (count == sizeClass->cellCount) {
-            page->next = sizeClass->availablePages;
+            SDF_CHIP_PAGE_LINK_VIEW(page)->nextInSizeClassAvailableList = sizeClass->availablePages;
             sizeClass->availablePages = page;
         }
         cell->nextFree = page->freeCells;
