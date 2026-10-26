@@ -14102,6 +14102,12 @@ setup helpers and invoked by completion/cancel paths, with the existing
 minus-one sentinel. Preserve the `slExitWaitProc` quirk: it tests this word's
 sentinel but invokes the separate `fileWaitContinuation`.
 
+`fileMenuStateHandler` uses a separate transition result: zero retains the
+current handler, minus one exits the menu task, and any other word is the next
+handler's code address. `slCalc` passes its task pointer through the
+unprototyped handler slot. Keep this 32-bit result distinct from the
+`fileMenuContinuation` callback and its sentinel.
+
 The completed `fileSaveIconRequest` publishes `fileSaveIconResourceHandle`,
 `fileSaveIconData` and `fileSaveIconDataSize` through the three request getters.
 The `base.ico` request supplies the data/size output addresses; teardown waits

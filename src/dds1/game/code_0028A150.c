@@ -2,6 +2,7 @@
 #define SDK_SKIP_memset
 #include "sdk_ps2.h"
 #include "common.h"
+#include "file_menu_state_result.h"
 #include "file_config_list_node.h"
 #include "sdf_vu0.h"
 #include "file_job_type.h"
@@ -143,7 +144,7 @@ extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 fileReadSlotPreviewBegin(void);
 extern s32 fileAdvanceSlotScan(void);
 
-extern s32 (*fileMenuStateHandler)();
+extern FileMenuStateHandler fileMenuStateHandler;
 extern s32 D_003BC814;
 
 extern s32 fileDrawMenuFrame(s32);
@@ -2600,19 +2601,19 @@ s32 fileDrawSlotListAndPreview(s32 work) {
 
 
 s32 slCalc(dds3ProcessID_t *task) {
-    s32 next;
+    FileMenuStateResult next;
     struct FileRequest *job;
-    s32 (*cur)();
+    FileMenuStateHandler cur;
     D_003BC814++;
     fileDrawMenuFrame((s32)task);
-    next = fileMenuStateHandler(task);
-    if (next == -1) {
-        return next;
+    next.encodedValue = fileMenuStateHandler(task);
+    if (next.encodedValue == FILE_MENU_STATE_EXIT) {
+        return next.encodedValue;
     }
     job = fileSaveIconRequest;
     cur = fileMenuStateHandler;
-    if (next != 0) {
-        cur = (s32 (*)())next;
+    if (next.encodedValue != FILE_MENU_STATE_RETAIN) {
+        cur = next.nextHandler;
     }
     fileMenuStateHandler = cur;
     if (job != 0 && pacFileCheckEnd(job) != 0) {
