@@ -25,6 +25,7 @@
 #include "fr_font.h"
 #include "fr_font_context.h"
 #include "mc_poll.h"
+#include "mc_write_api.h"
 #include "mc_path_api.h"
 #include "bill_object_api.h"
 #include "eff_resource_slots.h"
@@ -2051,7 +2052,6 @@ s32 slSaveWriteFile(const char *fileName, const u32 *dataAddressSlot, const u32 
     return (s32)slSaveProc_openFile;
 }
 
-extern void sdfMcFuncWrite(McFileDescriptor fileDescriptor, const void *data, u32 size);
 extern s32 slSaveProc_waitDataReady(void);
 
 s32 slSaveProc_openFile(void) {

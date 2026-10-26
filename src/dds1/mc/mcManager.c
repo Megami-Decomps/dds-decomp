@@ -3,6 +3,7 @@
 #include "mc_poll.h"
 #include "mc_path_api.h"
 #include "mc_file_api.h"
+#include "mc_write_api.h"
 
 #define MC_CARD_SLOT 0
 #define MC_SYNC_POLL_MODE 1
@@ -194,8 +195,8 @@ McPollResult sdfMcFuncRead1(void) {
 
 /* Queue the SDK's write of an EE buffer to an open file; this entry does
  * not report completion. */
-void sdfMcFuncWrite(McFileDescriptor fileDescriptor, const void *data, u32 dataSize) {
-    sceMcWrite(fileDescriptor, data, (s32)dataSize);
+void sdfMcFuncWrite(McFileDescriptor fileDescriptor, const void *data, s32 byteCount) {
+    sceMcWrite(fileDescriptor, data, byteCount);
 }
 
 /* Poll once: any completed nonnegative write status returns 1; -4 becomes
