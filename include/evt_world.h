@@ -94,7 +94,7 @@ typedef struct EvtWorldTable {
     EvtWorldSlot *slots; /* 0x08; valid index range is a caller contract */
     dds3Basic_t *cameraObject; /* 0x0C: retained camera world node */
     dds3Basic_t *playerObject; /* 0x10 */
-    struct sdfMemHandle_t *fieldResourceHandle; /* 0x14: returned by the area/room resource loaders. */
+    const struct sdfMemHandle_t *fieldResourceHandle; /* 0x14: borrowed alias; fldReleaseFieldResources owns its release. */
     struct sdfMemHandle_t *sceneResourceHandle; /* 0x18: retained allocation descriptor; released at teardown. */
     struct BfFlw0Header *sceneScript; /* 0x1C: resolved FLW0 header used for script lookup. */
     s32 drawEnabled; /* 0x20: controls drawing of kind 2 */

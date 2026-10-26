@@ -14,7 +14,7 @@ extern dds3ProcessID_t *scrStartScript2(s32 priority, const BfFlw0Header *script
 
 extern void fldReleaseFieldResources(void);
 
-/* Release field resources before clearing their retained handle.
+/* Release globally owned field resources before clearing their borrowed alias.
  * The scene resource handle/address are released separately. */
 void dds3SceneBasicFreeScene(dds3Basic_t *worldNode) {
     EvtWorldTable *worldData;
