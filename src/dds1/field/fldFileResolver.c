@@ -519,7 +519,7 @@ static inline f32 fldNormalizeProbeVector(void) {
     return length;
 }
 
-extern void fldSpawnActionObjects(FldActionSpawn *, u32);
+extern void fldSpawnActionObjects(const FldActionSpawn *, u32);
 
 extern s32 D_0032E400[];
 
@@ -1050,7 +1050,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
     }
 }
 
-void fldSpawnActionObjects(FldActionSpawn *spawnList, u32 spawnCount) {
+void fldSpawnActionObjects(const FldActionSpawn *spawnList, u32 spawnCount) {
     u32 spawnIndex;
 
     dds3GetControlScene();
@@ -1255,7 +1255,7 @@ void fldMakeObjectBasic3(void) {
 
 void fldSetFileResolverIdx(u32 state);
 
-void fldLoadSceneRequestFiles(FldLoadRequest *request) {
+void fldLoadSceneRequestFiles(const FldLoadRequest *request) {
     char directory[32];
     char path[64];
     s32 resourceSlotIndex;
@@ -1282,7 +1282,7 @@ void fldLoadSceneRequestFiles(FldLoadRequest *request) {
 }
 
 /* Handle a field request, creating the player only in non-special scene states. */
-void fldProcessFieldRequest(FldSceneRequest *request) {
+void fldProcessFieldRequest(const FldSceneRequest *request) {
     s32 areaId;
     fldSpawnActionObjects(request->spawnList, request->spawnCount);
     areaId = fldGlobalBase.area;
@@ -1292,7 +1292,7 @@ void fldProcessFieldRequest(FldSceneRequest *request) {
     fldGlobalBase.fallbackResourceTaskName = request->record->fallbackResourceName;
 }
 
-void fldProcessFieldRequestAlternate(FldSceneRequest *request) {
+void fldProcessFieldRequestAlternate(const FldSceneRequest *request) {
     fldSpawnPlacementObjectsFromBatches(request->spawnBatches, request->spawnBatchCount,
                                         FLD_PLACEMENT_BATCH_MODE_APPEND);
 }
