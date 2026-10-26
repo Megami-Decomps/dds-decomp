@@ -7,6 +7,7 @@
 #include "fpu.h"
 #include "kwln.h"
 #include "kwln_process_registration.h"
+#include "scr_process_handle_api.h"
 #include "pcp_vu0.h"
 #include "scr.h"
 #include "scr_instruction_stream_api.h"
@@ -56,11 +57,9 @@ extern char D_004126B0[];
 
 extern s32 scrGetIntPara(s32 parameterIndex);
 
-typedef dds3ProcessID_t *ScrProcessHandle;
-
 static inline ScrProcessHandle scrGetProcessHandlePara(s32 parameterIndex)
 {
-    return (ScrProcessHandle)(u32)scrGetIntPara(parameterIndex);
+    return scrVmIntegerToProcessHandle(scrGetIntPara(parameterIndex));
 }
 
 ScrCommandResult scrCommand_RND(void)
@@ -250,10 +249,10 @@ ScrCommandResult bfWaitCbCreateTask(void)
     {
         return SCR_COMMAND_RESULT_COMPLETE;
     }
-    scrSetIntReturnValue((s32)scrRunScriptEx(
+    scrSetIntReturnValue(scrProcessHandleToVmInteger(scrRunScriptEx(
         ctx->task->priority + scrGetIntPara(1), ctx->scriptHeader,
         ctx->sections, ctx->procedures, ctx->labels,
-        ctx->instructions, ctx->auxiliaryData, ctx->strings, procedureIndex));
+        ctx->instructions, ctx->auxiliaryData, ctx->strings, procedureIndex)));
     return SCR_COMMAND_RESULT_COMPLETE;
 }
 
