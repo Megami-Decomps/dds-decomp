@@ -850,7 +850,7 @@ void sdfImageSetInit(void) {
     sdfImageSetClearCb(obj);
 }
 
-sdfTexPacket_t *sdfTexGetPacket(const sdfTexHandle_t *texture) {
+const sdfTexPacket_t *sdfTexGetPacket(const sdfTexHandle_t *texture) {
     return texture->primaryBuffer;
 }
 
@@ -867,7 +867,7 @@ s32 sdfTexGetPacketLength(const sdfTexHandle_t *texture) {
 
 extern void sdfTexMakeGIFPacketCtx2(sdfTexHandle_t *texture);
 
-sdfTexPacket_t *sdfTexGetPacketCtx2(sdfTexHandle_t *texture) {
+const sdfTexPacket_t *sdfTexGetPacketCtx2(sdfTexHandle_t *texture) {
     sdfTexPacket_t *buffer;
 
     buffer = texture->secondaryBuffer;

@@ -1608,7 +1608,7 @@ void effEVECombParSmokeDraw(EffEventBillSet *work) {
     u32 color;
     f32 acceleration, swayPhaseStep, swayAmplitudeStep;
     struct DmaPacketHeader *texturePacket;
-    sdfTexPacket_t *textureBuffer;
+    const sdfTexPacket_t *textureBuffer;
     s32 textureBytes;
     u8 *geometryPacket;
     sdfDrawTag_t *stateList;

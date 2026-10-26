@@ -828,7 +828,7 @@ void sdfImageSetInit(void) {
     sdfImageSetClearCb(obj);
 }
 
-sdfTexPacket_t *sdfTexGetPacket(const sdfTexHandle_t *texture) {
+const sdfTexPacket_t *sdfTexGetPacket(const sdfTexHandle_t *texture) {
     return texture->primaryBuffer;
 }
 
@@ -843,7 +843,7 @@ s32 sdfTexGetPacketLength(const sdfTexHandle_t *texture) {
     return ((buffer->gifTagWord & SDF_GIF_LOOP_COUNT_MASK) + 1) << SDF_QWORD_BYTE_SHIFT;
 }
 
-sdfTexPacket_t *sdfTexGetPacketCtx2(sdfTexHandle_t *texture) {
+const sdfTexPacket_t *sdfTexGetPacketCtx2(sdfTexHandle_t *texture) {
     sdfTexPacket_t *buf;
 
     buf = texture->secondaryBuffer;

@@ -125,7 +125,7 @@ static inline u32 packMagatuhiTrailColor(void) {
     EE_MMI_RGBA_PACK_UNIT(rgba[0], 128.0f);
     return rgba[0];
 }
-extern sdfTexPacket_t * sdfTexGetPacket(const sdfTexHandle_t *texture);
+extern const sdfTexPacket_t * sdfTexGetPacket(const sdfTexHandle_t *texture);
 extern s32 sdfGrAllocPacketBuff(s32 size);
 extern s32 sdfTexGetPacketLength(const sdfTexHandle_t *texture);
 extern void sdfDrawTagLink(sdfDrawTag_t *list, u32 packet);
