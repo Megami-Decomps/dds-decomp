@@ -40,6 +40,7 @@
 #include "fld.h"
 #include "fld_encounter_runtime_api.h"
 #include "fld_scene_request.h"
+#include "fld_room_resource_api.h"
 #include "fld_spawn_event.h"
 #include "dds3obj.h"
 #include "dds3_world_value.h"
@@ -734,7 +735,6 @@ extern dds3Basic_t *dds3AddEventBasic(s32 key, const char *resourcePath, const c
 extern dds3Basic_t *dds3AddPathBasic(s32 key, Dds3PathCurveTable *work, const char *name);
 #include "fld_event_display_resource_api.h"
 
-extern s32 fldRegisterRoomObject(FldFileResource *, dds3Basic_t *);
 extern void func_0014D380(s32 mode, u32 pointId, f32 *rotation,
                             f32 x, f32 y, f32 z);
 extern void func_0014C2B8(u32, f32 *, f32, f32, f32, s32, const char *, s32);

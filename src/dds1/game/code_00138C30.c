@@ -101,6 +101,7 @@
 #include "fld_label_cache_api.h"
 #include "fld_sprite_vertex.h"
 #include "fld_room_state.h"
+#include "fld_room_resource_api.h"
 #include "fld_trigger_shape.h"
 #include "fld_action_row.h"
 #include "fld_actor_row.h"
@@ -323,8 +324,6 @@ extern s32 fldRoomEventPlacementCount;
 extern dds3Basic_t *dds3AddEventBasic(s32 key, const char *resourcePath, const char *name);
 
 extern u32 fldEveHit_AddEveData(FldFileResource *, dds3Basic_t *);
-
-extern s32 fldRegisterRoomObject(FldFileResource *, dds3Basic_t *);
 
 extern struct DevRequest *fldRoomSoundResources;
 
@@ -656,7 +655,7 @@ u32 fldEveHit_AddEveData(FldFileResource *resource, dds3Basic_t *object) {
     return index;
 }
 
-INCLUDE_ASM(const s32, "game/code_00138C30", fldRegisterRoomObject);
+INCLUDE_ASM(const FldRoomRecordIndex, "game/code_00138C30", fldRegisterRoomObject);
 
 /* vu0 routine: actor-facing probe for the world kind-0x11 position payload. */
 s32 fldTestRoomProbeFacingAndRange(dds3Basic_t *actor, dds3Basic_t *entry) {
@@ -1005,16 +1004,17 @@ void fldSpawnRoomTrigger(s32 roomId, f32 x, f32 y, f32 z, f32 radius) {
     FldActionTransform *transform;
     s32 worldKey = dds3AllocObjectId();
     dds3Basic_t *object;
-    s32 taskIndex;
+    u32 displayResourceIndex;
+    FldRoomRecordIndex roomRecordIndex;
 
     object = dds3AddEventBasic(worldKey, D_00330780, D_00330760);
     fldActionRows[index].displayResource.id = worldKey;
-    taskIndex = fldEveHit_AddEveData(
+    displayResourceIndex = fldEveHit_AddEveData(
         &fldActionRows[index].displayResource, object);
     fldActionRows[index].prefix.task.shape.radius = radius;
     fldActionRows[index].prefix.task.shape.kind = 0;
     fldActionRows[index].prefix.task.info.unk0 = 1;
-    fldActionRows[index].prefix.task.info.slot = taskIndex;
+    fldActionRows[index].prefix.task.info.slot = displayResourceIndex;
     fldActionRows[index].prefix.task.info.unk08 = 1;
     fldActionRows[index].prefix.task.info.shape = (FldTriggerShape *)&fldActionRows[index].prefix.task.shape;
     fldActionRows[index].childResource.data = &fldActionRows[index].prefix.task.info;
@@ -1037,11 +1037,11 @@ void fldSpawnRoomTrigger(s32 roomId, f32 x, f32 y, f32 z, f32 radius) {
     object = dds3AddPointBasic(fldActionRows[index].childResource.id,
                                  (EvtWorldSourceTransformPrefix *)fldActionRows[index].childResource.transform,
                                  fldHitProgramName);
-    taskIndex = fldRegisterRoomObject(&fldActionRows[index].childResource, object);
-    fldEveHitTable[taskIndex].roomId = roomId;
-    fldEveHitTable[taskIndex].mode = FLD_ROOM_INTERACTION_ITEM_BOX;
+    roomRecordIndex = fldRegisterRoomObject(&fldActionRows[index].childResource, object);
+    fldEveHitTable[roomRecordIndex].roomId = roomId;
+    fldEveHitTable[roomRecordIndex].mode = FLD_ROOM_INTERACTION_ITEM_BOX;
     fldActionRowCount++;
-    fldEveHitTable[taskIndex].entryIndex = -1;
+    fldEveHitTable[roomRecordIndex].entryIndex = -1;
 }
 
 INCLUDE_ASM(const s32, "game/code_00138C30", fldSpawnNpcTrigger);
@@ -1056,7 +1056,8 @@ void fldSpawnRoomTriggerVariant(s32 kind, s32 roomValue,
     FldActionTransform *transform;
     s32 worldKey = dds3AllocObjectId();
     dds3Basic_t *object;
-    s32 taskIndex;
+    u32 displayResourceIndex;
+    FldRoomRecordIndex roomRecordIndex;
 
     if (kind == 0) {
         object = dds3AddEventBasic(worldKey, D_003307A0, D_00330760);
@@ -1064,12 +1065,12 @@ void fldSpawnRoomTriggerVariant(s32 kind, s32 roomValue,
         object = dds3AddEventBasic(worldKey, D_00330790, D_00330760);
     }
     fldActionRows[index].displayResource.id = worldKey;
-    taskIndex = fldEveHit_AddEveData(
+    displayResourceIndex = fldEveHit_AddEveData(
         &fldActionRows[index].displayResource, object);
     fldActionRows[index].prefix.task.shape.radius = radius;
     fldActionRows[index].prefix.task.shape.kind = 0;
     fldActionRows[index].prefix.task.info.unk0 = 1;
-    fldActionRows[index].prefix.task.info.slot = taskIndex;
+    fldActionRows[index].prefix.task.info.slot = displayResourceIndex;
     fldActionRows[index].prefix.task.info.unk08 = 1;
     fldActionRows[index].prefix.task.info.shape = (FldTriggerShape *)&fldActionRows[index].prefix.task.shape;
     fldActionRows[index].childResource.data = &fldActionRows[index].prefix.task.info;
@@ -1092,15 +1093,15 @@ void fldSpawnRoomTriggerVariant(s32 kind, s32 roomValue,
     object = dds3AddPointBasic(fldActionRows[index].childResource.id,
                                  (EvtWorldSourceTransformPrefix *)fldActionRows[index].childResource.transform,
                                  fldHitProgramName);
-    taskIndex = fldRegisterRoomObject(&fldActionRows[index].childResource, object);
+    roomRecordIndex = fldRegisterRoomObject(&fldActionRows[index].childResource, object);
     if (kind == 0) {
-        fldEveHitTable[taskIndex].mode = FLD_ROOM_INTERACTION_SAVE_POINT;
-        fldEveHitTable[taskIndex].savePointValue = roomValue;
+        fldEveHitTable[roomRecordIndex].mode = FLD_ROOM_INTERACTION_SAVE_POINT;
+        fldEveHitTable[roomRecordIndex].savePointValue = roomValue;
     } else {
-        fldEveHitTable[taskIndex].mode = FLD_ROOM_INTERACTION_HEAL_POINT;
+        fldEveHitTable[roomRecordIndex].mode = FLD_ROOM_INTERACTION_HEAL_POINT;
     }
     fldActionRowCount++;
-    fldEveHitTable[taskIndex].entryIndex = -1;
+    fldEveHitTable[roomRecordIndex].entryIndex = -1;
 }
 
 s32 fldCheckEntryActive(s32 entry) {

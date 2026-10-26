@@ -46,6 +46,7 @@
 #include "fld_encounter_runtime_api.h"
 #include "fld_collision_geometry.h"
 #include "fld_scene_request.h"
+#include "fld_room_resource_api.h"
 #include "fld_spawn_event.h"
 #include "sdf_resource.h"
 #include "dds3obj.h"
@@ -850,8 +851,6 @@ extern dds3Basic_t *dds3AddEventBasic(s32 key, const char *resourcePath, const c
 extern dds3Basic_t *dds3AddPathBasic(s32 key, Dds3PathCurveTable *work, const char *name);
 
 #include "fld_event_display_resource_api.h"
-
-extern s32 fldRegisterRoomObject(FldFileResource *, dds3Basic_t *);
 
 extern void func_00148FF0(s32, u32, f32 *, f32, f32, f32);
 

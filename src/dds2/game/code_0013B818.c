@@ -35,6 +35,7 @@
 #include "dds3_world_secondary.h"
 #include "fld_trigger_shape.h"
 #include "fld_room_state.h"
+#include "fld_room_resource_api.h"
 #include "fld_action_row.h"
 #include "fld_actor_row.h"
 #include "eff_object.h"
@@ -47,7 +48,6 @@
 /* Declared before first use (were implicit int). */
 extern void dds3AdminiCallSequence(s32 requestedMode, const void *requestData, u32 dataBytes, s32 markHistory);
 extern void fldMarkStageExplorationBitmapRegion(s32, s32, s32, s32, s32, s32);
-extern s32 fldRegisterRoomObject(FldFileResource *, dds3Basic_t *);
 /* itfSetTextDrawLimit is void in the font TU; preserve C89 call scope here.
  * An early void declaration moves fldUpdateTitleBannerTask's position update
  * at +0x11C/+0x124/+0x12C from retail $3 to $2. */
@@ -354,7 +354,7 @@ FldEventDisplayResourceIndex fldEveHit_AddEveData(
     return index;
 }
 
-INCLUDE_ASM(const s32, "game/code_0013B818", fldRegisterRoomObject);
+INCLUDE_ASM(const FldRoomRecordIndex, "game/code_0013B818", fldRegisterRoomObject);
 
 /* vu0 routine: actor-facing probe for the world kind-0x11 position payload. */
 s32 fldTestRoomProbeFacingAndRange(dds3Basic_t *actor, dds3Basic_t *entry) {
@@ -718,19 +718,20 @@ void fldSpawnRoomTrigger(s32 roomId, f32 x, f32 y, f32 z, f32 triggerRadius) {
     dds3Basic_t *object;
     dds3Basic_t *child;
     s32 index;
-    s32 roomIndex;
+    FldRoomRecordIndex roomIndex;
     u32 counter;
-    s32 slot;
+    FldEventDisplayResourceIndex displayResourceIndex;
 
     index = fldActionRowCount;
     counter = dds3AllocObjectId();
     object = dds3AddEventBasic(counter, D_0038BC20, D_0038BC00);
     fldActionRows[index].displayResource.id = counter;
-    slot = fldEveHit_AddEveData(&fldActionRows[index].displayResource, object);
+    displayResourceIndex = fldEveHit_AddEveData(
+        &fldActionRows[index].displayResource, object);
     fldActionRows[index].prefix.task.shape.radius = triggerRadius;
     fldActionRows[index].prefix.shape.kind = 0;
     fldActionRows[index].prefix.task.info.unk0 = 1;
-    fldActionRows[index].prefix.task.info.slot = slot;
+    fldActionRows[index].prefix.task.info.slot = displayResourceIndex;
     fldActionRows[index].prefix.task.info.unk08 = 1;
     fldActionRows[index].prefix.task.info.shape = &fldActionRows[index].prefix.shape;
     transform = &fldActionRows[index].transform.fields;
@@ -759,7 +760,8 @@ void fldSpawnRoomTriggerVariant(s32 kind, s32 roomValue,
     FldActionTransform *transform;
     s32 worldKey = dds3AllocObjectId();
     dds3Basic_t *object;
-    s32 taskIndex;
+    FldEventDisplayResourceIndex displayResourceIndex;
+    FldRoomRecordIndex roomRecordIndex;
 
     if (kind == 0) {
         object = dds3AddEventBasic(worldKey, D_0038BC40, D_0038BC00);
@@ -767,12 +769,12 @@ void fldSpawnRoomTriggerVariant(s32 kind, s32 roomValue,
         object = dds3AddEventBasic(worldKey, D_0038BC30, D_0038BC00);
     }
     fldActionRows[index].displayResource.id = worldKey;
-    taskIndex = fldEveHit_AddEveData(
+    displayResourceIndex = fldEveHit_AddEveData(
         &fldActionRows[index].displayResource, object);
     fldActionRows[index].prefix.task.shape.radius = radius;
     fldActionRows[index].prefix.task.shape.kind = 0;
     fldActionRows[index].prefix.task.info.unk0 = 1;
-    fldActionRows[index].prefix.task.info.slot = taskIndex;
+    fldActionRows[index].prefix.task.info.slot = displayResourceIndex;
     fldActionRows[index].prefix.task.info.unk08 = 1;
     fldActionRows[index].prefix.task.info.shape = (FldTriggerShape *)&fldActionRows[index].prefix.task.shape;
     fldActionRows[index].childResource.data = &fldActionRows[index].prefix.task.info;
@@ -795,15 +797,15 @@ void fldSpawnRoomTriggerVariant(s32 kind, s32 roomValue,
     object = dds3AddPointBasic(fldActionRows[index].childResource.id,
                                  (EvtWorldSourceTransformPrefix *)fldActionRows[index].childResource.transform,
                                  fldHitProgramName);
-    taskIndex = fldRegisterRoomObject(&fldActionRows[index].childResource, object);
+    roomRecordIndex = fldRegisterRoomObject(&fldActionRows[index].childResource, object);
     if (kind == 0) {
-        fldEveHitTable[taskIndex].mode = FLD_ROOM_INTERACTION_SAVE_POINT;
-        fldEveHitTable[taskIndex].savePointValue = roomValue;
+        fldEveHitTable[roomRecordIndex].mode = FLD_ROOM_INTERACTION_SAVE_POINT;
+        fldEveHitTable[roomRecordIndex].savePointValue = roomValue;
     } else {
-        fldEveHitTable[taskIndex].mode = FLD_ROOM_INTERACTION_HEAL_POINT;
+        fldEveHitTable[roomRecordIndex].mode = FLD_ROOM_INTERACTION_HEAL_POINT;
     }
     fldActionRowCount++;
-    fldEveHitTable[taskIndex].entryIndex = -1;
+    fldEveHitTable[roomRecordIndex].entryIndex = -1;
 }
 
 extern s32 D_004361C0;
