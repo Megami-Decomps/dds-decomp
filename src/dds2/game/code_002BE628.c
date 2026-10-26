@@ -36,6 +36,7 @@
 #include "sdf_sif_command.h"
 #include "pcp_vu0.h"
 #include "mnu.h"
+#include "mnu_entry_cost_api.h"
 #include "mnu_popup_eligibility.h"
 #include "mnu_panel_item.h"
 #include "mnu_shop.h"
@@ -2490,28 +2491,30 @@ s32 mnuGetRangeEntryFlatValue(s32 id) {
 }
 
 /* Compare the stored raw HP/MP cost; equality is affordable and other kinds pass. */
-s32 mnuCanAffordEntryCost(u16 commandId, datUnitWork_t *actorEntry) {
+MnuEntryCostAffordability mnuCanAffordEntryCost(
+    u16 commandId, const datUnitWork_t *actorEntry) {
     u16 cost = datCommandRecords[commandId].costPercentage;
     s32 costKind = mnuGetRangeEntryKind(commandId);
 
     switch (costKind) {
     case DAT_COMMAND_COST_MODE_HP:
         if (actorEntry->hp < cost) {
-            return 0;
+            return MNU_ENTRY_COST_UNAFFORDABLE;
         }
         break;
     case DAT_COMMAND_COST_MODE_MP:
         if (actorEntry->mp < cost) {
-            return 0;
+            return MNU_ENTRY_COST_UNAFFORDABLE;
         }
         break;
     }
-    return 1;
+    return MNU_ENTRY_COST_AFFORDABLE;
 }
 
 /* Return -1 for insufficient raw cost, else 0 for flagged IDs below the boundary, or 1. */
 s32 mnuGetEntryUseStatus(datUnitWork_t *actorEntry, u16 commandId) {
-    if (mnuCanAffordEntryCost(commandId, actorEntry) == 0) return -1;
+    if (mnuCanAffordEntryCost(commandId, actorEntry) ==
+        MNU_ENTRY_COST_UNAFFORDABLE) return -1;
     if ((((DatCommandRecord *)((s32)datCommandRecords + commandId * MNU_COMMAND_RECORD_BYTES))->menuFlags & 1) == 0) return 1;
     if (commandId < MNU_COMMAND_USE_STATUS_BOUNDARY) return 0;
     return 1;
