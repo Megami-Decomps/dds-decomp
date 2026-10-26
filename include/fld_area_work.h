@@ -21,6 +21,12 @@ enum FldCameraTurnRequestState {
     FLD_CAMERA_TURN_REQUEST_TURNING = 2
 };
 
+typedef s32 FldModeOneCameraState;
+enum FldModeOneCameraStateValue {
+    FLD_MODE_ONE_CAMERA_INACTIVE = 0,
+    FLD_MODE_ONE_CAMERA_ACTIVE = 1
+};
+
 typedef s32 FldAreaResourceReuseState;
 
 enum FldAreaResourceReuseState {
@@ -193,7 +199,7 @@ typedef struct FldAreaWork {
     f32 cameraSupportHeightDelta;
     f32 modeOneCameraHeadingTarget;
 #endif
-    s32 positionMode;
+    FldModeOneCameraState modeOneCameraState; /* Special door-transition camera pose is active. */
 #ifdef VERSION_DDS1
     FldMovementGateState fieldTransitionMovementGate; /* 0x17C */
 #else
@@ -254,6 +260,8 @@ typedef char FldAreaWork_areaDamageReactionMovementGate_offset_check[
     (FLD_AREA_OFFSET(areaDamageReactionMovementGate) == 0x184) ? 1 : -1];
 typedef char FldAreaWork_x_offset_check[(FLD_AREA_OFFSET(x) == 0x140) ? 1 : -1];
 typedef char FldAreaWork_previousCameraModelFrame_offset_check[(FLD_AREA_OFFSET(previousCameraModelFrame) == 0x16C) ? 1 : -1];
+typedef char FldAreaWork_modeOneCameraState_offset_check[
+    (FLD_AREA_OFFSET(modeOneCameraState) == 0x178) ? 1 : -1];
 typedef char FldAreaWork_mapResources_offset_check[(FLD_AREA_OFFSET(mapResources) == 0x19C) ? 1 : -1];
 #else
 typedef char FldAreaWork_size_check[(sizeof(FldAreaWork) == 0x218) ? 1 : -1];
@@ -263,6 +271,8 @@ typedef char FldAreaWork_areaDamageReactionMovementGate_offset_check[
     (FLD_AREA_OFFSET(areaDamageReactionMovementGate) == 0x190) ? 1 : -1];
 typedef char FldAreaWork_x_offset_check[(FLD_AREA_OFFSET(x) == 0x14C) ? 1 : -1];
 typedef char FldAreaWork_previousCameraModelFrame_offset_check[(FLD_AREA_OFFSET(previousCameraModelFrame) == 0x178) ? 1 : -1];
+typedef char FldAreaWork_modeOneCameraState_offset_check[
+    (FLD_AREA_OFFSET(modeOneCameraState) == 0x184) ? 1 : -1];
 typedef char FldAreaWork_mapResources_offset_check[(FLD_AREA_OFFSET(mapResources) == 0x1A8) ? 1 : -1];
 typedef char FldAreaWork_fieldTextures_offset_check[(FLD_AREA_OFFSET(fieldTextures) == 0x1E8) ? 1 : -1];
 #endif

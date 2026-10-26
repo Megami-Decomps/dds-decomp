@@ -1719,7 +1719,7 @@ void fldApplyActorEntryTrigger(s32 checkTaskRecord) {
             s32 motion = entry->motion;
 
             fldGlobalBase.modeOneCameraHeadingTarget = fldActorSlots[index].firstValues[0];
-            fldGlobalBase.positionMode = 1;
+            fldGlobalBase.modeOneCameraState = FLD_MODE_ONE_CAMERA_ACTIVE;
             if (motion == 1) {
                 dds3FadeOut(0xC0, 0xC0, 0xC0, 0xF);
                 return;

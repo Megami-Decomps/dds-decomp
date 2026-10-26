@@ -1715,7 +1715,7 @@ void fldResetFieldRuntimeState(FldRuntimeResetMode mode) {
     area->targetY = 0.0f;
     area->targetZ = 0.0f;
     area->positionPending = FLD_POSITION_UPDATE_NONE;
-    area->positionMode = 0;
+    area->modeOneCameraState = FLD_MODE_ONE_CAMERA_INACTIVE;
     area->fieldTransitionMovementGate = 0;
     area->verticalStepDirection = 0;
     area->angle = 0.0f;

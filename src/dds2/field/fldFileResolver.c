@@ -4164,7 +4164,8 @@ void fldUpdateCameraTarget(void) {
     FldAreaWork *st;
     u128 *dst;
 
-    if (fldPlayerObject != 0 && (st = &fldGlobalBase, st->positionMode != 1) && D_00435F30 != 0) {
+    if (fldPlayerObject != 0 &&
+        (st = &fldGlobalBase, st->modeOneCameraState != FLD_MODE_ONE_CAMERA_ACTIVE) && D_00435F30 != 0) {
         cur[0] = st->x;
         cur[1] = st->y;
         cur[2] = st->z;
@@ -4206,7 +4207,7 @@ void fldUpdateModeOneCameraPose(void) {
     s32 motion;
 
     axis = D_00413280;
-    if (fldGlobalBase.positionMode != 1) {
+    if (fldGlobalBase.modeOneCameraState != FLD_MODE_ONE_CAMERA_ACTIVE) {
         return;
     }
     dds3GetPosPoseSet(fldPlayerObject);
@@ -5086,7 +5087,7 @@ s32 fldSynchronizePlayerPositionAndAreaState(void) {
     f32 current[3];
     dds3PoseSet_t *inner;
 
-    fldGlobalBase.positionMode = 0;
+    fldGlobalBase.modeOneCameraState = FLD_MODE_ONE_CAMERA_INACTIVE;
     if (D_00435F30 == 0) return 0;
     dds3GetPosPoseSet(fldPlayerObject);
     SDF_VU0_STOREVECTOR_NOMEM(position);
