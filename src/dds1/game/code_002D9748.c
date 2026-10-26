@@ -974,11 +974,11 @@ void sdfMatListCopyStat(DevRequest *destination, DevRequest *source) {
     }
 }
 
-extern s32 (*D_003981A8[])(u32, u32, s32);
+extern SdfMotionBindingFactory D_003981A8[];
 
 /* The high halfword selects the handler, which receives the complete command word unchanged. */
 struct SdfMotionBindingHead *sdfMotionNodeNew(sdfMotionCtrlr_t *motion, u32 commandWord, s32 targetIndex) {
-    return (struct SdfMotionBindingHead *)D_003981A8[commandWord >> 16]((u32)motion, commandWord, targetIndex);
+    return D_003981A8[commandWord >> 16](motion, commandWord, targetIndex);
 }
 
 INCLUDE_SDATA(const s32, "game/code_002D9748", sdfMatAllocCount);

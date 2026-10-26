@@ -10,10 +10,11 @@
 #include "pcp_vu0.h"
 #include "sdf_vu_transform_api.h"
 #include "sdf_motion_bindings.h"
+#include "sdf_motion_node_api.h"
 
 extern SdfMotionBindingDispatch D_0040B480;
 
-extern s32 (*sdfMotionCommandHandlers[])(void *object, s32 command, s32 targetIndex);
+extern SdfMotionBindingFactory sdfMotionCommandHandlers[];
 
 extern SdfMotionBindingDispatch sdfMotMorphTable;
 
@@ -24,8 +25,8 @@ extern SdfMotionBindingDispatch sdfMotMorphTable;
 void sdfMotCLBK_matMultiUvw2InitBlend(void) {
 }
 
-s32 sdfMotGenMorphNode(void *object, s32 command, s32 targetIndex) {
-    return sdfMotionCommandHandlers[(u16)command](object, command, targetIndex);
+SdfMotionBindingHead *sdfMotGenMorphNode(sdfMotionCtrlr_t *motion, u32 command, s32 targetIndex) {
+    return sdfMotionCommandHandlers[(u16)command](motion, command, targetIndex);
 }
 
 /* Bind the selected pair of model slot indices and weights. */
@@ -36,12 +37,12 @@ void sdfMotGenMorphInit(SdfMotionSlotPairBinding *destination,
     destination->current = &((SdfSlotEntry *)motion->owner->slotPairs->buffer)[entryIndex];
 }
 
-SdfMotionSlotPairBinding *sdfMotGenMorph(sdfMotionCtrlr_t *motion,
-                                                           s32 unused, s32 entryIndex) {
+SdfMotionBindingHead *sdfMotGenMorph(sdfMotionCtrlr_t *motion,
+                                      u32 unused, s32 entryIndex) {
     SdfMotionSlotPairBinding *entry = sdfChipAllocDirect(sizeof(SdfMotionSlotPairBinding));
 
     sdfMotGenMorphInit(entry, motion, &sdfMotMorphTable, entryIndex);
-    return entry;
+    return (SdfMotionBindingHead *)entry;
 }
 
 /* Sample the supplied frame and interpolate, retaining separate keys when IDs differ. */
