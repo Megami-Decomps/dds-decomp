@@ -233,7 +233,7 @@ void evtUnitLightOn(evtUnitHandle_t *unit);
 evtUnitHandle_t *evtGetUnitHandle2(dds3Basic_t *unit);
 void evtSetWaitMotion(evtUnitHandle_t *unit, s32 value);
 
-s32 evtCheckScriptDone(dds3ProcessID_t *task);
+KwlnTaskUpdateResult evtTickPackLoad(dds3ProcessID_t *task);
 void evtDestroyEventPackTask(dds3ProcessID_t *task);
 
 #endif /* EVT_UNIT_H */

@@ -257,7 +257,7 @@ void evtCheckEventScriptLoaded(EvtPackLoadState *state) {
     }
 }
 
-KwlnTaskUpdateResult evtCheckScriptDone(dds3ProcessID_t *task) {
+KwlnTaskUpdateResult evtTickPackLoad(dds3ProcessID_t *task) {
     EvtPackLoadState *packState = (EvtPackLoadState *)dds3GetProcessData(task);
 
     switch (packState->loadPhase) {

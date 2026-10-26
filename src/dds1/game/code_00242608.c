@@ -121,7 +121,7 @@ dds3ProcessID_t *evtLoadEventPack(s32 taskId) {
         memset(taskData, 0, CAMP_TASK_DATA_BYTES);
         taskData->eventId = taskId;
         taskData->loadPhase = EVT_PACK_LOAD_NOT_STARTED;
-        task = dds3StartProcess(taskName, CAMP_TASK_PRIORITY, 1, 1, evtCheckScriptDone, evtDestroyEventPackTask, (u32)taskData);
+        task = dds3StartProcess(taskName, CAMP_TASK_PRIORITY, 1, 1, evtTickPackLoad, evtDestroyEventPackTask, (u32)taskData);
     }
     return task;
 }
