@@ -14,6 +14,7 @@
 #include "itf_resource_segments.h"
 #include "kwln.h"
 #include "kwln_draw_buffer.h"
+#include "kwln_task_runner.h"
 #include "btl.h"
 #include "mnu_title_sound.h"
 /* Declared before first use (were implicit int). */
@@ -920,13 +921,12 @@ s32 frFontDrawGlyphChain(_FRQ *glyph, s8 mode, u32 renderFlags) {
     return result;
 }
 
-/* Release queue slot 1 when the draw-buffer index's low byte is zero, otherwise
- * slot 0; return 0. This is buffer selection, not a current-font selection. */
-s32 frFlipPacketBuf(dds3ProcessID_t *task) {
+/* Release the selected frame queue and retain this scheduler callback. */
+KwlnTaskUpdateResult frFlipPacketBuf(dds3ProcessID_t *task) {
     s32 queueIndex = (dds3GetFrameID() & FR_FONT_BYTE_MASK) == 0;
 
     frFontWork.glyphSlots[queueIndex] = frFontReleaseGlyphChain(frFontWork.glyphSlots[queueIndex]);
-    return 0;
+    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 /* Link chains with the renderer's relative-positioning option enabled. */

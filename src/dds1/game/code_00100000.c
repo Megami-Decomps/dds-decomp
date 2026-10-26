@@ -4,6 +4,7 @@
 #include "sdf_timer.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
+#include "kwln_task_runner.h"
 #include "kwln_process_main_result.h"
 
 extern void kwlnUpdatePadInputState(void);
@@ -65,7 +66,7 @@ extern s32 kwlnBuildFrameScenePackets(dds3ProcessID_t *task);
 extern s32 kwlnRenderFrame(dds3ProcessID_t *task);
 extern s32 dds3BasicMainProcess(dds3ProcessID_t *task);
 extern s32 dds3BasicDrawProcess(dds3ProcessID_t *task);
-extern s32 frFlipPacketBuf(dds3ProcessID_t *task);
+extern KwlnTaskUpdateResult frFlipPacketBuf(dds3ProcessID_t *task);
 extern void frDestroyFontTable(dds3ProcessID_t *task);
 extern s32 dds3DebugDevDumpProcess(dds3ProcessID_t *task);
 
