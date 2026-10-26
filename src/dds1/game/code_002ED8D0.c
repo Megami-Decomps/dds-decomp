@@ -5,6 +5,7 @@
 #include "sdf.h"
 #include "sdf_semaphore_api.h"
 #include "file_pac.h"
+#include "sdf_pac_callback.h"
 #include "sdf_movie_stream.h"
 #include "sdf_movie_state.h"
 #include "sdf_dev_state.h"
@@ -18,8 +19,6 @@ enum {
     PAC_CALLBACK_FINISHED = 1,
     PAC_CALLBACK_ALIGN = 2,
     PAC_CALLBACK_DROP_TAIL = 4,
-    PAC_CALLBACK_EVENT_PACKET_HEADER = 0,
-    PAC_CALLBACK_EVENT_PACKET_COMPLETE = 1,
     PAC_PHASE_FINISHED = -1,
     PAC_INITIAL_PACKET_COUNTER = -1,
     PAC_STATE_USE_PACKET_MEMORY = 1,
@@ -225,7 +224,7 @@ void sdfPacAdvanceCallbackBoundary(PacState *state) {
     payloadBytes = packetBytes - headerBytes;
     state->pendingBytes = payloadBytes;
     packetCallback = state->packetCallback;
-    callbackResult = packetCallback(state, PAC_CALLBACK_EVENT_PACKET_HEADER, inputHeader, payloadBytes);
+    callbackResult = packetCallback(state, SDF_PAC_CALLBACK_EVENT_PACKET_HEADER, inputHeader, payloadBytes);
     if (callbackResult == PAC_CALLBACK_FINISHED) {
         sdfPacMarkPhaseFinished(&state->phase);
         return;
@@ -247,7 +246,7 @@ void sdfDecodePacNodeAndAdvanceTail(PacState *state) {
     PacWork *scanPacket;
     PacWork *nextPacket;
 
-    callbackResult = state->packetCallback(state, PAC_CALLBACK_EVENT_PACKET_COMPLETE, state->queueTail->packet);
+    callbackResult = state->packetCallback(state, SDF_PAC_CALLBACK_EVENT_PACKET_COMPLETE, state->queueTail->packet);
     if (callbackResult == PAC_CALLBACK_FINISHED) {
         sdfPacMarkPhaseFinished(&state->phase);
         return;
