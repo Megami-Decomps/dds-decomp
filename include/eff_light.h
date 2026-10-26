@@ -39,7 +39,7 @@ typedef struct EffLightData {
     u32 packedColorB;
     u16 blendFrames;
     u16 unk72;
-    dds3ObjectBaseControlWorkData_t *resourceState;
+    dds3ObjectBaseControlWorkData_t *baseControlWorkData; /* Owned block released by lightdestructor. */
     struct SdfLightingPacketStorage *buffer;
 } EffLightData;
 
@@ -49,6 +49,7 @@ typedef char EffLightData_sourceVectors_at_0x00[
 typedef char EffLightData_ambientColor_at_0x40[
     ((u32)&((EffLightData *)0)->ambientColor == 0x40) ? 1 : -1];
 typedef char EffLightData_flags_at_0x64[((u32)&((EffLightData *)0)->flags == 0x64) ? 1 : -1];
-typedef char EffLightData_resource_at_0x74[((u32)&((EffLightData *)0)->resourceState == 0x74) ? 1 : -1];
+typedef char EffLightData_baseControlWorkData_at_0x74[
+    ((u32)&((EffLightData *)0)->baseControlWorkData == 0x74) ? 1 : -1];
 
 #endif

@@ -18,7 +18,7 @@ void lightdestructor(dds3Basic_t *light) {
 
     data = light->data;
     sdfChipFreeDirect(data->buffer);
-    dds3ObjectBaseFreeControlWorkData(data->resourceState);
+    dds3ObjectBaseFreeControlWorkData(data->baseControlWorkData);
     sdfChipFreeDirect(light->data);
     light->data = NULL;
     dds3FreePoseSet(light);

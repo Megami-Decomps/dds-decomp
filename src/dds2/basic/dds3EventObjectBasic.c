@@ -17,7 +17,7 @@ void EventObjectBasicDestructor(dds3Basic_t *eventObject) {
 
     dds3FreePoseSet(eventObject);
     eventData = eventObject->data;
-    dds3ObjectBaseFreeControlWorkData(eventData->resourceState);
+    dds3ObjectBaseFreeControlWorkData(eventData->baseControlWorkData);
     sdfChipFreeDirect(eventData);
 }
 

@@ -2573,7 +2573,7 @@ void evtEventViewerApplyPlaybackMode(s32 playbackMode, u32 frame, EvtRuntime *vi
     }
     object = table->slots[6].head;
     while (object != NULL) {
-        motion = ((EffectTransformData *)object->data)->resourceState->motion;
+        motion = ((EffectTransformData *)object->data)->baseControlWorkData->motion;
         if (motion != NULL) {
             if (playbackMode == EVT_VIEWER_PLAYBACK_PAUSED) {
                 sdfMotionSeek(motion, (f32)frame);

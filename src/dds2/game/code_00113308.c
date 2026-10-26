@@ -478,7 +478,7 @@ attach_transition:
 dds3ObjectBaseControlWorkData_t *dds3MatterObjectBasicGetControlWorkData(const dds3Basic_t *object) {
     const EffectTransformData *data = object->data;
 
-    return data->resourceState;
+    return data->baseControlWorkData;
 }
 
 
@@ -554,7 +554,7 @@ s32 dds3MatterObjectBasicConstructor(dds3Basic_t *object) {
     object->data = work;
     memset(work, 0, sizeof(EffectTransformData));
     data = object->data;
-    data->resourceState = dds3CreateSlotResourceState(object);
+    data->baseControlWorkData = dds3CreateSlotResourceState(object);
     data->roomNumber = 0;
     data->opacityMode = EFFECT_OPACITY_MODE_INITIAL;
     data->activeId = -1;
@@ -575,7 +575,7 @@ void dds3MatterObjectBasicDestructor(dds3Basic_t *object) {
 
     dds3FreePoseSet(object);
     data = object->data;
-    dds3ObjectBaseFreeControlWorkData(data->resourceState);
+    dds3ObjectBaseFreeControlWorkData(data->baseControlWorkData);
     sdfChipFreeDirect(data);
 }
 

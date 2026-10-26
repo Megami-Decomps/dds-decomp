@@ -24,7 +24,7 @@ u32 lightdrawprocedure(void) {
 }
 
 dds3ObjectBaseControlWorkData_t *dds3LightObjectBasicGetControlWorkData(dds3Basic_t *object) {
-    return ((EffLightData *)object->data)->resourceState;
+    return ((EffLightData *)object->data)->baseControlWorkData;
 }
 
 

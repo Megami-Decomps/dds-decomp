@@ -28,7 +28,7 @@ typedef char EffectObjectData_tail_at_0x3C[((u32)&((EffectObjectData *)0)->limit
 
 /* Kind-6 world nodes allocate this complete transform payload at 0x30 bytes. */
 typedef struct EffectTransformData {
-    dds3ObjectBaseControlWorkData_t *resourceState;
+    dds3ObjectBaseControlWorkData_t *baseControlWorkData; /* Owned by the transform node. */
     u32 roomNumber;
     u32 opacityMode;
     s32 activeId;

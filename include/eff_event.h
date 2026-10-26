@@ -3,10 +3,10 @@
 
 #include "dds3obj.h"
 
-/* Kind-8 constructors allocate this complete 0x10-byte resource payload.
- * Only the owned resource pointer is initialized or consumed here. */
+/* Kind-8 constructors allocate this complete 0x10-byte payload and own the
+ * base-control block stored in its first word. */
 typedef struct DdsSlotResourceBlock {
-    dds3ObjectBaseControlWorkData_t *resourceState;
+    dds3ObjectBaseControlWorkData_t *baseControlWorkData;
     u8 pad04[0xC];
 } DdsSlotResourceBlock;
 

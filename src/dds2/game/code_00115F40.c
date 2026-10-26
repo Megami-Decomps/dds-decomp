@@ -183,6 +183,6 @@ u32 EventObjectBasicConstructor(dds3Basic_t *object) {
     resource = (DdsSlotResourceBlock *)sdfChipAllocDirect(0x10);
     object->data = resource;
     handle = dds3CreateSlotResourceState(object);
-    resource->resourceState = handle;
+    resource->baseControlWorkData = handle;
     return 1;
 }
