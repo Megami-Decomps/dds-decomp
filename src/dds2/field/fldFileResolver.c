@@ -46,6 +46,7 @@
 #include "fld_encounter_runtime_api.h"
 #include "fld_scene_request.h"
 #include "fld_room_resource_api.h"
+#include "fld_area_room_resource_load_api.h"
 #include "fld_spawn_event.h"
 #include "dds3obj.h"
 #include "dds3_world_value.h"
@@ -1534,7 +1535,7 @@ extern void fldClrCollision(void);
 extern void fldResetZoneRecordsAndActorSlots(void);
 extern void fldSe_Init(void);
 
-struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) {
+const struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) {
     char path[0x80];
     char directory[0x40];
     const SdfTextureOffsetListHeader *roomOffsets;

@@ -2,6 +2,7 @@
 #include "dds3_basic_lifecycle.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
+#include "fld_area_room_resource_load_api.h"
 #include "dds3obj.h"
 #include "evt_world_object_api.h"
 #include "evt_world.h"
@@ -11,11 +12,6 @@ struct WorldIndexNode;
 
 extern struct sdfMemHandle_t *fldLoadAreaRoomResourcesFromRequest(u32, u32, u8 *, u8 *,
                         const SdfTextureOffsetListHeader *, u32);
-
-extern struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *);
-
-
-
 
 extern dds3Basic_t *dds3TheWorld;
 
@@ -370,11 +366,11 @@ struct WorldIndexNode *dds3SceneBasicGetList(dds3Basic_t *object, s32 kind) {
 
 void dds3SceneBasicMakeScene(dds3Basic_t *object, const char *resourcePath) {
     EvtWorldTable *data;
-    struct sdfMemHandle_t *handle;
+    const struct sdfMemHandle_t *resourceHandle;
 
     data = ((EvtWorldTable *)object->data);
-    handle = fldLoadAreaRoomResources(resourcePath);
-    data->fieldResourceHandle = handle;
+    resourceHandle = fldLoadAreaRoomResources(resourcePath);
+    data->fieldResourceHandle = resourceHandle;
 }
 
 void dds3SceneBasicMakeScene_FromMemory(dds3Basic_t *object, u32 area, u32 room,

@@ -52,6 +52,7 @@
 #include "fld_collision_geometry.h"
 #include "fld_scene_request.h"
 #include "fld_room_resource_api.h"
+#include "fld_area_room_resource_load_api.h"
 #include "fld_spawn_event.h"
 #include "sdf_resource.h"
 #include "dds3obj.h"
@@ -1720,7 +1721,7 @@ extern void fldAddressResolver(u8 *buffer, FldTransferChunk *chunk);
 
 const char D_0039FF18[] = "%sk%03d_%03d.f2";
 
-struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) {
+const struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) {
     char path[0x80];
     char directory[0x40];
     const SdfTextureOffsetListHeader *roomOffsets;
