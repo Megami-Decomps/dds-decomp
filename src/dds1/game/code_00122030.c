@@ -42,6 +42,7 @@
 #include "fld.h"
 #include "evt_world.h"
 #include "evt_solar.h"
+#include "evt_random_status_clear_api.h"
 #include "evt_world_source_transform.h"
 #include "dds3obj.h"
 #include "dds3_world_value.h"
@@ -1615,7 +1616,6 @@ extern void fldUpdateSmoothedCameraPose(void);
 extern u8 fldAutoMapSeqTestFlag(u32);
 extern void evtAdvanceSolarClockAndExpireControls(f32 travelDistance);
 extern void evtUpdateFlaggedStats(void);
-extern s32 evtClearRandomStatusFlags(void);
 extern u8 ptyAnyLivingUnitHasStatus(u32 statusMask, s32 frontlineOnly);
 extern void ptyApplyFieldHpAttrition(s32 attritionMode);
 extern s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex);
@@ -1673,7 +1673,7 @@ s32 fldUpdateTravelAndEncounters(void) {
     if (!(fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) & 0x40) &&
         previousPhase != phase) {
         evtUpdateFlaggedStats();
-        if (phase == 0 && evtClearRandomStatusFlags()) {
+        if (phase == 0 && evtClearRandomStatusFlags() != EVT_RANDOM_STATUS_CLEAR_NO_FLAGS) {
             fldGlobalBase.sceneMode = 4;
             fldGlobalBase.sceneState = 5;
             fldResetPlayerSceneObjectState();

@@ -3,6 +3,7 @@
 #include "bf_flw0_header.h"
 #include "evt_script_context.h"
 #include "evt_solar.h"
+#include "evt_random_status_clear_api.h"
 #include "pty_roster_value_record.h"
 #include "sdf.h"
 #include "dat_state.h"
@@ -1670,13 +1671,13 @@ void evtRandomizeEntryValue(datUnitWork_t *entry) {
 
 /* Clear a subset of per-unit status flags on occupied qualifying entries,
  * gated by the event RNG; report whether any flags were cleared. */
-s32 evtClearRandomStatusFlags(void) {
-    s32 clearedAny = 0;
+EvtRandomStatusClearResult evtClearRandomStatusFlags(void) {
+    EvtRandomStatusClearResult clearedAny = EVT_RANDOM_STATUS_CLEAR_NO_FLAGS;
     s32 remaining;
     datUnitWork_t *entry;
     s32 roll = (s32)dds3GetRandIntA(0, 100);
     if (roll >= 51) {
-        return 0;
+        return EVT_RANDOM_STATUS_CLEAR_NO_FLAGS;
     }
     remaining = 4;
     entry = DDS3_GBWK->party;
@@ -1685,7 +1686,7 @@ s32 evtClearRandomStatusFlags(void) {
             u16 statusFlags = entry->status;
             if ((statusFlags & 0x5D0) != 0) {
                 entry->status = statusFlags & ~0x5D0;
-                clearedAny = 1;
+                clearedAny = EVT_RANDOM_STATUS_CLEAR_FLAGS_CLEARED;
             }
         }
         remaining--;
