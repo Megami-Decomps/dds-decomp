@@ -16,6 +16,7 @@
 #include "btl_resolve_unit_value_api.h"
 #include "evt_randomize_entry_api.h"
 #include "mdl_flag_api.h"
+#include "pty_active_roster_index_api.h"
 #include "pty_roster_api.h"
 #include "pty_template_init_flags.h"
 #include "pty_frontline_promotion_api.h"
@@ -600,8 +601,8 @@ u8 evtGetFlaggedRosterValue(datUnitWork_t *entry) {
     return *((u8 *)&datEnemyRecords[entry->unitId] + 4);
 }
 
-s32 dds3FindEntryIndex(s32 unitId) {
-    s32 slotIndex = 0;
+PtyActiveRosterIndex dds3FindEntryIndex(s32 unitId) {
+    PtyActiveRosterIndex slotIndex = 0;
     datUnitWork_t *entry = DDS3_GBWK->party;
     do {
         if (entry->flags & DAT_PARTY_FLAG_OCCUPIED) {
@@ -612,7 +613,7 @@ s32 dds3FindEntryIndex(s32 unitId) {
         slotIndex++;
         entry++;
     } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
-    return -1;
+    return PTY_ACTIVE_ROSTER_INDEX_NOT_FOUND;
 }
 
 /* Read a signed stat byte in the first active roster record. */
@@ -942,12 +943,12 @@ datUnitWork_t *dds3FindEntry(s32 unitId) {
 PtyFrontlinePromotionResult ptyRebalanceFrontline(s32 unitId) {
     DatGameState *scanState;
     datUnitWork_t savedEntry;
-    s32 selectedIndex;
+    PtyActiveRosterIndex selectedIndex;
     s32 scanIndex;
     s32 frontlineCount;
 
     selectedIndex = dds3FindEntryIndex(unitId);
-    if (selectedIndex < 0) {
+    if (PTY_ACTIVE_ROSTER_INDEX_IS_NOT_FOUND(selectedIndex)) {
         return PTY_FRONTLINE_PROMOTION_NOT_PERFORMED;
     }
 
@@ -1274,7 +1275,7 @@ PtyAddUnitResult ptyAddUnitWithFlags(s32 unitId, PtyTemplateInitFlags initFlags)
     s32 modelFlagIndex;
     s32 *modelFlags;
 
-    if (dds3FindEntryIndex(unitId) >= 0) {
+    if (PTY_ACTIVE_ROSTER_INDEX_IS_FOUND(dds3FindEntryIndex(unitId))) {
         return PTY_ADD_UNIT_RESULT_ALREADY_PRESENT;
     }
 
@@ -1348,7 +1349,7 @@ PtyAddUnitResult ptyAddUnit(s32 unitId) {
 }
 
 PtyRemoveUnitResult ptyRemoveUnitWithFlags(s32 unitId, s32 flags) {
-    s32 partyIndex;
+    PtyActiveRosterIndex partyIndex;
     s32 i;
     s32 completeSlotCount;
     s32 *modelFlags;
@@ -1356,7 +1357,7 @@ PtyRemoveUnitResult ptyRemoveUnitWithFlags(s32 unitId, s32 flags) {
     u16 itemId;
 
     partyIndex = dds3FindEntryIndex(unitId);
-    if (partyIndex < 0) {
+    if (PTY_ACTIVE_ROSTER_INDEX_IS_NOT_FOUND(partyIndex)) {
         return PTY_REMOVE_UNIT_RESULT_NOT_FOUND;
     }
 
@@ -1653,10 +1654,10 @@ void ptySaveActivePartyTemplates(void) {
             memcpy(&DDS3_GBWK->templates[entry->unitId], entry, sizeof(*entry));
         }
     }
-    if (dds3FindEntryIndex(3) < 0) {
+    if (PTY_ACTIVE_ROSTER_INDEX_IS_NOT_FOUND(dds3FindEntryIndex(3))) {
         memset(&DDS3_GBWK->templates[3], 0, sizeof(datUnitWork_t));
     }
-    if (dds3FindEntryIndex(7) < 0) {
+    if (PTY_ACTIVE_ROSTER_INDEX_IS_NOT_FOUND(dds3FindEntryIndex(7))) {
         memset(&DDS3_GBWK->templates[7], 0, sizeof(datUnitWork_t));
     }
 }

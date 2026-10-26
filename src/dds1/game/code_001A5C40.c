@@ -8,6 +8,7 @@
  * `bnez s1` slot instead of filling it unannulled.
  */
 #include "common.h"
+#include "pty_active_roster_index_api.h"
 #include "sdf_vu0.h"
 #include "btl_actor_status_table_api.h"
 #include "btl_special_ability.h"
@@ -96,8 +97,6 @@ extern s32 fldCountSceneSlots(void);
 
 
 extern char D_003A1A40[];
-
-extern s32 dds3FindEntryIndex(s32 unitId);
 
 extern datUnitWork_t *btlGetIndexedPartyEntryRecord(s32);
 

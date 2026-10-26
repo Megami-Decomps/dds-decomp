@@ -6,6 +6,7 @@
 #include "fr_font.h"
 #include "dds3_owned_node.h"
 #include "pty_roster_api.h"
+#include "pty_active_roster_index_api.h"
 #include "pty_template_init_flags.h"
 
 extern s32 mtrHasEnoughOwnedMantras(void);
@@ -15,8 +16,6 @@ extern PtyAddUnitResult ptyAddUnitWithFlags(s32 unitId, PtyTemplateInitFlags ini
 extern PtyRemoveUnitResult ptyRemoveUnitWithFlags(s32 param0, s32 param1);
 
 extern s32 scrGetIntPara(s32 idx);
-
-extern s32 dds3FindEntryIndex(s32 unitId);
 
 extern s32 scrSetFlag(datUnitWork_t *work, u16 index);
 
@@ -59,10 +58,10 @@ s32 scrCmdHasEnoughOwnedMantras(void) {
 s32 scrCmdSetEntryFlagsInBothStores(void) {
     s32 unitId = scrGetIntPara(0);
     u16 flagId = scrGetIntPara(1);
-    s32 index = dds3FindEntryIndex(unitId);
+    PtyActiveRosterIndex index = dds3FindEntryIndex(unitId);
     s32 result = 0;
 
-    if (index >= 0) {
+    if (PTY_ACTIVE_ROSTER_INDEX_IS_FOUND(index)) {
         datUnitWork_t *entry = &DDS3_GBWK->party[index];
 
         scrSetFlag(entry, flagId);

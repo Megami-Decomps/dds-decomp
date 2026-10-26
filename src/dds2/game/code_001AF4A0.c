@@ -12,6 +12,7 @@
 #include "fld_next_scene_request_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "pty_active_roster_index_api.h"
 #include "dat_assigned_item_id.h"
 #include "btl_actor_status_table_api.h"
 #include "itf_debug_panel_work.h"
@@ -78,7 +79,6 @@ typedef union UiQuadColor {
     s32 channels[4];
 } UiQuadColor;
 
-extern s32 dds3FindEntryIndex(s32 unitId);
 
 extern datUnitWork_t *btlGetIndexedPartyEntryRecord(s32);
 

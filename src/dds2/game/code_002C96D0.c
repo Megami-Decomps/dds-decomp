@@ -3,6 +3,7 @@
 #include "sdk_ps2.h"
 #include "eff_surface_node.h"
 #include "common.h"
+#include "pty_active_roster_index_api.h"
 #include "file_menu_state_result.h"
 #include "file_config_list_node.h"
 #include "file_config_option_api.h"
@@ -3578,12 +3579,11 @@ typedef struct FileMultiFlagBonus {
 
 extern FileMultiFlagBonus ptyUnit7StatBonusFlagGroups[6];
 extern s8 (*D_00435E3C)[6];
-extern s32 dds3FindEntryIndex(s32 unitId);
 extern char D_0042B950[];
 
 /* Apply each unlocked story bonus once to the active party record. */
 s32 ptyApplyUnlockedUnitStatBonusesOnce(s32 unitId) {
-    s32 partyIndex;
+    PtyActiveRosterIndex partyIndex;
     datUnitWork_t *party;
     s32 changed;
     u32 row;
@@ -3592,7 +3592,7 @@ s32 ptyApplyUnlockedUnitStatBonusesOnce(s32 unitId) {
     s8 *bonus;
 
     partyIndex = dds3FindEntryIndex(unitId);
-    if (partyIndex < 0) {
+    if (PTY_ACTIVE_ROSTER_INDEX_IS_NOT_FOUND(partyIndex)) {
         return 0;
     }
     party = &DDS3_GBWK->party[partyIndex];

@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "pty_active_roster_index_api.h"
 #include "btl_command_use_error.h"
 #include "btl_command_target_policy.h"
 #include "btl_actor_status_table_api.h"
@@ -80,8 +81,6 @@ extern s32 fldCountSceneSlots(void);
 
 extern char D_003A1A40[];
 
-extern s32 dds3FindEntryIndex(s32 unitId);
-
 extern datUnitWork_t *btlGetIndexedPartyEntryRecord(s32);
 
 extern EffRandState effSharedRandomState[];
@@ -143,7 +142,7 @@ datUnitWork_t *btlGetActorEntryData(BtlUnit *actor) {
 }
 
 datUnitWork_t *btlGetCurrentPartyEntryRecord(s32 unitId) {
-    s32 index;
+    PtyActiveRosterIndex index;
 
     index = dds3FindEntryIndex(unitId);
     return &DDS3_GBWK->party[index];
@@ -182,7 +181,7 @@ void btlSyncPlayerWork(BtlUnit *actor) {
     btlBossDebugPrintf("btl:player work set[%p]\n", actor);
 }
 
-s32 btlFindPartyEntryIndexForActor(BtlUnit *unit) {
+PtyActiveRosterIndex btlFindPartyEntryIndexForActor(BtlUnit *unit) {
     return dds3FindEntryIndex(unit->partyRecord.unitId);
 }
 
