@@ -2,6 +2,7 @@
 #include "common.h"
 #include "itf_mes_entry_start_api.h"
 #include "itf.h"
+#include "itf_message_manager_task.h"
 #include "itf_option_bit_index_api.h"
 #include "sdf_packet_list.h"
 #include "sdf_resource.h"
@@ -77,12 +78,6 @@ _FRQ *GetLastLinkFontHandle(_FRQ *glyph);
 void CommitVarTable(u8 **table);
 
 s32 GetMessageWidth(_FRQ *glyph);
-
-extern s32 CalcMsgMng_Process(dds3ProcessID_t *task);
-
-extern void DrawMsgMng_Shutdown(dds3ProcessID_t *task);
-
-extern s32 DrawMsgMng_Process(dds3ProcessID_t *task);
 
 void SetVar(instanceMes_tag *mes, s32 slotIndex, const char *source, s32 byteCount);
 

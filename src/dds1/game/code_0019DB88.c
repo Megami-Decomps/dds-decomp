@@ -1,6 +1,7 @@
 #include "common.h"
 #include "itf_debug_panel_work.h"
 #include "itf.h"
+#include "itf_message_manager_task.h"
 #include "itf_option_bit_index_api.h"
 #include "snd_sequence_volume_pan.h"
 #include "snd_pad.h"
@@ -804,29 +805,29 @@ void itfDrawSoundSelectorFadeLayers(instanceMes_tag *panel) {
 }
 
 
-s32 CalcMsgMng_Process(dds3ProcessID_t *task) {
+KwlnTaskUpdateResult CalcMsgMng_Process(dds3ProcessID_t *task) {
     mesflow_tag *node = itfMesMngManager.pool.activeHead;
     while (node != 0) {
         itfUpdateBattleDisplayAndFadeIndicator(node->state);
         node = node->next;
     }
-    return 0;
+    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 extern void DestructFlow(s32 window);
 extern u32 dds3NullDrawProc(void);
 
-s32 DrawMsgMng_Process(dds3ProcessID_t *task) {
+KwlnTaskUpdateResult DrawMsgMng_Process(dds3ProcessID_t *task) {
     mesflow_tag *node;
 
     if (dds3NullDrawProc() != 0) {
-        return 0;
+        return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
     }
     for (node = itfMesMngManager.pool.activeHead; node != NULL; node = node->next) {
         itfUpdateSoundSelectorPanel(node->state);
     }
     itfMesMngManager.drawTickCount++;
-    return 0;
+    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 void DrawMsgMng_Shutdown(dds3ProcessID_t *task) {
