@@ -130,7 +130,7 @@ void scrDestroyAllNamedProcesses(void)
     }
     while (1) {
         nextProcessNode = processNode->next;
-        if (scrIsCurrentWorkTask(processNode) == 0) {
+        if (scrIsCurrentWorkTask(processNode) == SCR_WORK_TASK_NOT_CURRENT) {
             if (processNode->task != NULL) {
                 dds3KillProcess(processNode->task, 0);
             } else {

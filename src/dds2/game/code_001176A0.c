@@ -410,8 +410,8 @@ void sdfFirePendingCallback(void) {
     scrDestroyWorkTask();
 }
 
-u8 scrIsCurrentWorkTask(struct scrProcessWork_s *expected) {
-    struct scrProcessWork_s *current;
+ScrCurrentWorkTaskResult scrIsCurrentWorkTask(const struct scrProcessWork_s *expected) {
+    const struct scrProcessWork_s *current;
 
     current = scrGetWorkTaskHandle();
     return current == expected;
