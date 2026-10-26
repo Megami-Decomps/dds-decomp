@@ -3,9 +3,12 @@
 
 #include "mnu_callback_list.h"
 
+/* Packed offsets use the segment index in bits 16-31 and byte offset in 0-15. */
+typedef u32 DdsPackedOffset;
+
 /* Owner of packed segments and the two named-reference lists. */
 typedef struct DdsPackedObject {
-    u32 maxPackedOffset;
+    DdsPackedOffset maxPackedOffset;
     MnuCallbackList *segments;
     MnuCallbackList *namedReferences;
     MnuCallbackList *pendingReferences;

@@ -35,8 +35,8 @@ extern void mnuCallbackNodeNoOp(u32, u32);
 #define DDS_NAMED_RECORD_NAME_BYTES 0x40
 
 typedef struct DdsNamedRecord {
-    char *name;       /* 0x00: writable 0x40-byte name buffer */
-    u32 value;        /* 0x04: packed offset or resolved address */
+    char *name;                 /* 0x00: writable 0x40-byte name buffer */
+    DdsPackedOffset packedOffset; /* 0x04: data target or pending pointer-slot offset */
 } DdsNamedRecord;
 
 typedef struct DdsNamedNode {
@@ -101,7 +101,7 @@ void dds3ReleasePackedValueBuffer(u32 node) {
 DdsNamedRecord *dds3AllocateNamedReference(void) {
     DdsNamedRecord *record = malloc(sizeof(DdsNamedRecord));
     record->name = malloc(DDS_NAMED_RECORD_NAME_BYTES);
-    record->value = 0;
+    record->packedOffset = 0;
     memset(record->name, 0, sizeof(record->name));
     return record;
 }
@@ -210,14 +210,14 @@ void dds3RegisterNamedPackedOffset(DdsPackedObject *object, const char *name) {
     record = dds3AllocateNamedReference();
     sprintf(record->name, D_00438960, name);
     dds3AppendIndexedListNode(object->namedReferences, 0, (u32)record);
-    record->value = object->maxPackedOffset;
+    record->packedOffset = object->maxPackedOffset;
 }
 
 void dds3RecordNamedReference(u32 context, const char *name) {
     DdsNamedRecord *record = dds3AllocateNamedReference();
     strncpy(record->name, name, DDS_NAMED_RECORD_NAME_BYTES);
     dds3AppendIndexedListNode(((DdsPackedObject *)context)->pendingReferences, 0, (u32)record);
-    record->value = ((DdsPackedObject *)context)->maxPackedOffset;
+    record->packedOffset = ((DdsPackedObject *)context)->maxPackedOffset;
     dds3WritePackedValue(context, -1, 4);
 }
 
@@ -236,7 +236,7 @@ DdsNamedRecord *dds3FindNamedRecord(MnuCallbackList *list, const char *name) {
 }
 
 /* Split a packed segment:offset reference and resolve it to a live address. */
-u32 dds3ResolvePackedOffset(DdsPackedObject *object, u32 packedOffset) {
+u8 *dds3ResolvePackedOffset(DdsPackedObject *object, DdsPackedOffset packedOffset) {
     u32 segmentIndex = packedOffset >> 16;
     u32 offset = packedOffset - (segmentIndex << 16);
     SdfListNode *segment;
@@ -246,7 +246,7 @@ u32 dds3ResolvePackedOffset(DdsPackedObject *object, u32 packedOffset) {
     }
     segment = mnuFindResourceNodeById(object->segments, segmentIndex);
     block = (DdsAllocBlock *)segment->value;
-    return (u32)block->buffer + offset;
+    return block->buffer + offset;
 }
 
 /* Replace recorded pointer slots with their matching named addresses. */
@@ -256,13 +256,13 @@ s32 dds3ApplyNamedRelocations(DdsPackedObject *packedObject) {
         do {
             DdsNamedRecord *record = node->record;
             DdsNamedRecord *found = dds3FindNamedRecord(packedObject->namedReferences, record->name);
-            u32 address;
-            u32 replacement;
+            u8 *address;
+            DdsPackedOffset replacement;
             if (found == NULL) {
                 return 0;
             }
-            address = (u32)dds3ResolvePackedOffset(packedObject, record->value);
-            replacement = found->value;
+            address = dds3ResolvePackedOffset(packedObject, record->packedOffset);
+            replacement = found->packedOffset;
             node = node->next;
             *(u32 *)address = replacement;
         } while (node != NULL);
@@ -278,7 +278,8 @@ DdsPackedObject *dds3WritePendingNamedReferenceValues(DdsPackedObject *object) {
     }
     destination = dds3CreatePackedObject();
     do {
-        dds3WritePackedValue((u32)destination, ((DdsNamedRecord *)node->record)->value, 4);
+        dds3WritePackedValue((u32)destination,
+                             ((DdsNamedRecord *)node->record)->packedOffset, 4);
         node = node->next;
     } while (node != NULL);
     return destination;
