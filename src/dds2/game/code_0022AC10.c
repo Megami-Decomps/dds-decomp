@@ -2045,7 +2045,7 @@ void btlResetRuntimeState(void) {
     btlReleaseOwnedData();
 }
 
-s32 btlGetRuntimeResult(void) {
+s8 btlGetRuntimeResult(void) {
     return D_00453068[0];
 }
 

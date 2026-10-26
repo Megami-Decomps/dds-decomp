@@ -747,7 +747,7 @@ extern f32 D_00330670[];
 
 extern s32 fldUpdateTitleBannerTask(dds3ProcessID_t *task);
 
-extern s32 btlGetRuntimeResult(void);
+extern s8 btlGetRuntimeResult(void);
 
 extern s32 fldValueRecordCount;
 

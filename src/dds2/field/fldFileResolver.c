@@ -610,7 +610,7 @@ extern s32 fldEncounterRuntimeState;
 
 extern u32 D_0043608C;
 
-extern s32 btlGetRuntimeResult(void);
+extern s8 btlGetRuntimeResult(void);
 
 extern s32 fldEncProc(dds3ProcessID_t *task);
 
