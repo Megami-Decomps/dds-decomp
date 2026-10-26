@@ -244,8 +244,8 @@ effPartHandle_t *dds3EffectPartCopy(effPartHandle_t *source) {
 
 /* Optional compact-work operations, indexed by effect kind. */
 void dds3EffectPartSetPosition(effPartHandle_t *work, void *source) {
-    if (dds3EffectFuncTable[work->kind].callback0 != NULL) {
-        dds3EffectFuncTable[work->kind].callback0(work->payload, source);
+    if (dds3EffectFuncTable[work->kind].setPosition != NULL) {
+        dds3EffectFuncTable[work->kind].setPosition(work->payload, source);
     }
 }
 
@@ -256,26 +256,26 @@ void dds3EffectPartSetScale(effPartHandle_t *work, f32 scale) {
 }
 
 void dds3EffectPartSetRotateMatrix(effPartHandle_t *work, void *matrix) {
-    if (dds3EffectFuncTable[work->kind].callback2 != NULL) {
-        dds3EffectFuncTable[work->kind].callback2(work->payload, matrix);
+    if (dds3EffectFuncTable[work->kind].setRotationMatrix != NULL) {
+        dds3EffectFuncTable[work->kind].setRotationMatrix(work->payload, matrix);
     }
 }
 
 void dds3EffectPartSetColor(effPartHandle_t *work, u32 value) {
-    if (dds3EffectFuncTable[work->kind].callback3 != NULL) {
-        dds3EffectFuncTable[work->kind].callback3(work->payload, value);
+    if (dds3EffectFuncTable[work->kind].setColor != NULL) {
+        dds3EffectFuncTable[work->kind].setColor(work->payload, value);
     }
 }
 
 void dds3EffectPartSetDirection(effPartHandle_t *work, void *matrix) {
-    if (dds3EffectFuncTable[work->kind].callback4 != NULL) {
-        dds3EffectFuncTable[work->kind].callback4(work->payload, matrix);
+    if (dds3EffectFuncTable[work->kind].setDirection != NULL) {
+        dds3EffectFuncTable[work->kind].setDirection(work->payload, matrix);
     }
 }
 
 void dds3EffectPartSetArea(effPartHandle_t *work, f32 sizeInput) {
-    if (dds3EffectFuncTable[work->kind].callback5 != NULL) {
-        dds3EffectFuncTable[work->kind].callback5(work->payload, sizeInput);
+    if (dds3EffectFuncTable[work->kind].setArea != NULL) {
+        dds3EffectFuncTable[work->kind].setArea(work->payload, sizeInput);
     }
 }
 
@@ -431,8 +431,8 @@ EffParamWorkEx *dds3EffectPCPCopy(EffParamWorkEx *source) {
 /* Optional extended-work dispatches; preserve the native column order,
  * including the reversed fourth/fifth column addresses. */
 void dds3EffectPCPSetPosition(EffParamWorkEx *work, void *source) {
-    if (EffectPCPFuncTable[work->kind].callback0 != NULL) {
-        EffectPCPFuncTable[work->kind].callback0(work->payload, source);
+    if (EffectPCPFuncTable[work->kind].setPosition != NULL) {
+        EffectPCPFuncTable[work->kind].setPosition(work->payload, source);
     }
 }
 
@@ -443,26 +443,26 @@ void dds3EffectPCPSetScale(EffParamWorkEx *work, f32 scale) {
 }
 
 void dds3EffectPCPSetRotateMatrix(EffParamWorkEx *work, void *matrix) {
-    if (EffectPCPFuncTable[work->kind].callback2 != NULL) {
-        EffectPCPFuncTable[work->kind].callback2(work->payload, matrix);
+    if (EffectPCPFuncTable[work->kind].setRotationMatrix != NULL) {
+        EffectPCPFuncTable[work->kind].setRotationMatrix(work->payload, matrix);
     }
 }
 
 void dds3EffectPCPSetDirection(EffParamWorkEx *work, void *matrix) {
-    if (EffectPCPFuncTable[work->kind].callback4 != NULL) {
-        EffectPCPFuncTable[work->kind].callback4(work->payload, matrix);
+    if (EffectPCPFuncTable[work->kind].setDirection != NULL) {
+        EffectPCPFuncTable[work->kind].setDirection(work->payload, matrix);
     }
 }
 
 void dds3EffectPCPSetColor(EffParamWorkEx *work, u32 value) {
-    if (EffectPCPFuncTable[work->kind].callback3 != NULL) {
-        EffectPCPFuncTable[work->kind].callback3(work->payload, value);
+    if (EffectPCPFuncTable[work->kind].setColor != NULL) {
+        EffectPCPFuncTable[work->kind].setColor(work->payload, value);
     }
 }
 
 void dds3EffectPCPSetArea(EffParamWorkEx *work, f32 sizeInput) {
-    if (EffectPCPFuncTable[work->kind].callback5 != NULL) {
-        EffectPCPFuncTable[work->kind].callback5(work->payload, sizeInput);
+    if (EffectPCPFuncTable[work->kind].setArea != NULL) {
+        EffectPCPFuncTable[work->kind].setArea(work->payload, sizeInput);
     }
 }
 
