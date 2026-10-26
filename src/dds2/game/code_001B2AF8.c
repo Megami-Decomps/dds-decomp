@@ -1640,9 +1640,27 @@ s32 btlTestSideCountCommandEligibility(ActionStateLink *action) {
     return 1;
 }
 
+/* Command-effect nodes occupy the 0x14-byte rows after the actor-resource header. */
+typedef struct BtlCommandActorEffectNode {
+    s16 triggerKind;
+    u8 unknown02[0x12];
+} BtlCommandActorEffectNode;
+
+typedef struct BtlCommandActorEffectTable {
+    u8 header[0x2C];
+    BtlCommandActorEffectNode nodes[29];
+} BtlCommandActorEffectTable;
+
+typedef char BtlCommandActorEffectNode_size_must_be_0x14[
+    (sizeof(BtlCommandActorEffectNode) == 0x14) ? 1 : -1];
+typedef char BtlCommandActorEffectTable_nodes_offset_must_be_0x2C[
+    ((u32)&((BtlCommandActorEffectTable *)0)->nodes == 0x2C) ? 1 : -1];
+typedef char BtlCommandActorEffectTable_size_must_be_0x270[
+    (sizeof(BtlCommandActorEffectTable) == 0x270) ? 1 : -1];
+
 s32 btlCanUseActorCommandForModelEntry(BtlUnit *unit, BtlUnit *target, s32 commandSlot, s32 skillId) {
     s32 (*predicate)(s32, s32, s32);
-    u8 *table;
+    BtlCommandActorEffectTable *table;
     predicate = *(s32 (**)(s32, s32, s32))((u8 *)btlGetRuntime() + 0x6cc);
     if (predicate != 0 && !predicate((s32)unit, (s32)target, skillId)) {
         return 0;
@@ -1650,8 +1668,9 @@ s32 btlCanUseActorCommandForModelEntry(BtlUnit *unit, BtlUnit *target, s32 comma
     if (skillId == 0x91) {
         return 0;
     }
-    table = btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->resourceIndex);
-    if (*(s16 *)(table + commandSlot * 20 + 0x2c) != 2) {
+    table = (BtlCommandActorEffectTable *)btlGetSideIndexedActorStatusTable(
+        unit->resourceKind, unit->resourceIndex);
+    if (table->nodes[commandSlot].triggerKind != 2) {
         return 0;
     }
     if (skillId != 0 && datCommandRecords[skillId].targetType != 0) {
