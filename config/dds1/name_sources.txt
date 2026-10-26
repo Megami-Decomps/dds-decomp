@@ -8054,7 +8054,7 @@
 0x002CD8E8	scrTestGlobalSeenBit	inferred	legacy SkillIdRange1AB_1FF_TestGlobalSeenBit: tests save-global seen bit at g_GameState1+0x2E9D0
 0x002CD940	scrSetSecondaryScriptFlag	inferred	Sets bit two of the selected four-bit script flag slot.
 0x002CD998	scrClearSecondaryScriptFlag	inferred	Clears bit two of the selected four-bit script flag slot.
-0x002CD9F8	scrClearFlags	inferred	scr script flags and VM helpers in game/code_002CC750.c
+0x002CD9F8	scrClearAllSecondaryScriptFlags	inferred	Iterates over all skill IDs and clears only each skill's secondary script flag.
 0x002CDA48	scrGetSecondaryScriptFlag	inferred	Returns the bit-two mask for the selected script flag slot.
 0x002CDA98	ptyGetSkillNibbleState	inferred	legacy PartyUnitSkillNibble_GetState01: nibble state 2/1/0 from skill-slot nibble bits
 0x002CDB00	ptyHasSkill	inferred	legacy PartyUnit_HasSkillInSkillSlots: scans PartyUnitData.skill_ids_22[24] for skill_id

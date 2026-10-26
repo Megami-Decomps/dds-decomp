@@ -256,7 +256,7 @@ extern void ptyRecomputeMaxHpMp(datUnitWork_t *);
 extern s32 prfBuildRawSkillList(u16, PrfSkillList *);
 extern s32 scrSetFlag(datUnitWork_t *, u16);
 extern void scrSetSecondaryScriptFlag(datUnitWork_t *, u16);
-extern void scrClearFlags(datUnitWork_t *);
+extern void scrClearAllSecondaryScriptFlags(datUnitWork_t *);
 
 /* Rebuild skill flags from the preset (no current profile) or from the current profile. */
 void ptyRebuildProfileSkills(s32 useCurrentProfile, datUnitWork_t *unit) {
@@ -281,7 +281,7 @@ void ptyRebuildProfileSkills(s32 useCurrentProfile, datUnitWork_t *unit) {
             memset(&skillList, 0, sizeof(PrfSkillList));
             prfBuildRawSkillList(profile, &skillList);
             if (skillList.count != 0) {
-                scrClearFlags(unit);
+                scrClearAllSecondaryScriptFlags(unit);
                 for (skillIndex = 0; skillIndex < skillList.count; skillIndex++) {
                     skillId = skillList.skills[skillIndex];
                     scrSetFlag(unit, skillId);
@@ -627,7 +627,7 @@ void scrClearSecondaryScriptFlag(datUnitWork_t *work, u16 flagId) {
 }
 
 /* Clear secondary bits over the fixed ID range, preserving other nibble bits. */
-void scrClearFlags(datUnitWork_t *work) {
+void scrClearAllSecondaryScriptFlags(datUnitWork_t *work) {
     s32 flagId;
     for (flagId = 0; flagId < SCR_SECONDARY_FLAG_COUNT; flagId++) {
         scrClearSecondaryScriptFlag(work, flagId);

@@ -411,7 +411,7 @@ counted:
 }
 
 
-extern void scrClearFlags(datUnitWork_t *);
+extern void scrClearAllSecondaryScriptFlags(datUnitWork_t *);
 extern s32 scrSetFlag(datUnitWork_t *, u16);
 extern void scrSetSecondaryScriptFlag(datUnitWork_t *, u16);
 
@@ -430,7 +430,7 @@ u32 ptyBuildProfileCapSkillList(datUnitWork_t *unit, PrfSkillList *output) {
                 prfBuildSkillListState0(unit, profile, &skills);
                 count = skills.count;
                 if (count != 0) {
-                    scrClearFlags(unit);
+                    scrClearAllSecondaryScriptFlags(unit);
                     for (i = 0; i < skills.count; i++) {
                         u16 skill = skills.skills[i];
                         scrSetFlag(unit, skill);

@@ -1185,7 +1185,7 @@ void dds3ForEachEntry(void) {
 }
 
 extern u16 ptyRosterDefaultSkillIds[16][4];
-extern void scrClearFlags(datUnitWork_t *unit);
+extern void scrClearAllSecondaryScriptFlags(datUnitWork_t *unit);
 extern s32 scrSetFlag(datUnitWork_t *unit, u16 skill);
 extern void scrSetSecondaryScriptFlag(datUnitWork_t *unit, u16 skill);
 
@@ -1202,7 +1202,7 @@ void ptyMergeStockSkills(datUnitWork_t *unit) {
         }
         unit->profileId = stock->profileId;
     }
-    scrClearFlags(unit);
+    scrClearAllSecondaryScriptFlags(unit);
     for (i = 0; i < 4; i++) {
         u32 value = ptyRosterDefaultSkillIds[unitId][i];
         skill = value;
