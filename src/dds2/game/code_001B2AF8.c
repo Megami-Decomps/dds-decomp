@@ -1960,7 +1960,7 @@ void func_001B5A20(BattleSceneObject *object) {
 
     if (changed != 0) {
         s32 kind = btlGetActorCommandClass(object, btlCommandPanelWork->classIndex);
-        u16 entry = object->selections[kind].entry;
+        u16 entry = object->selections[kind].selectedOption;
 
         if (kind == 4) {
             btlSetActionActorPanelPresentation(object->owner, 1, 0);
@@ -5002,41 +5002,41 @@ void btlInitializeCommandOptionState(BattleSceneObject *object) {
     switch ((s16)object->owner->unit->partyRecord.savedCommandPhase) {
     case 0:
     case 1:
-        object->selections[0].entry = 0;
-        object->selections[0].cursor = 0;
+        object->selections[0].selectedOption = 0;
+        object->selections[0].firstVisibleOption = 0;
         break;
     case 2:
-        object->selections[0].entry = object->owner->unit->partyRecord.savedCommandSelectionEntry;
+        object->selections[0].selectedOption = object->owner->unit->partyRecord.savedCommandSelectionEntry;
         btlGatherActorCommandsByKind((s32)object, &count, 0, 2, 3);
-        if (count - 1 < object->selections[0].entry) {
-            object->selections[0].entry = 0;
-            object->selections[0].cursor = 0;
-        } else if (object->selections[0].entry >= 3) {
-            object->selections[0].cursor = object->selections[0].entry - 2;
+        if (count - 1 < object->selections[0].selectedOption) {
+            object->selections[0].selectedOption = 0;
+            object->selections[0].firstVisibleOption = 0;
+        } else if (object->selections[0].selectedOption >= 3) {
+            object->selections[0].firstVisibleOption = object->selections[0].selectedOption - 2;
         }
         break;
     case 3:
-        object->selections[4].entry = object->owner->unit->partyRecord.savedCommandSelectionEntry;
+        object->selections[4].selectedOption = object->owner->unit->partyRecord.savedCommandSelectionEntry;
         btlGetActorLinkageSkillList(object, (u16 *)&count);
-        if (count - 1 < object->selections[4].entry) {
-            object->selections[4].entry = 0;
-            object->selections[4].cursor = 0;
-        } else if (count == object->selections[4].entry) {
-            if (object->selections[4].entry >= 3) {
-                object->selections[4].cursor = object->selections[4].entry - 3;
+        if (count - 1 < object->selections[4].selectedOption) {
+            object->selections[4].selectedOption = 0;
+            object->selections[4].firstVisibleOption = 0;
+        } else if (count == object->selections[4].selectedOption) {
+            if (object->selections[4].selectedOption >= 3) {
+                object->selections[4].firstVisibleOption = object->selections[4].selectedOption - 3;
             }
-        } else if (object->selections[4].entry >= 3) {
-            object->selections[4].cursor = object->selections[4].entry - 2;
+        } else if (object->selections[4].selectedOption >= 3) {
+            object->selections[4].firstVisibleOption = object->selections[4].selectedOption - 2;
         }
         break;
     case 10:
-        object->selections[0].entry = object->owner->unit->partyRecord.savedCommandSelectionEntry;
+        object->selections[0].selectedOption = object->owner->unit->partyRecord.savedCommandSelectionEntry;
         btlGatherActorCommandsByKind((s32)object, &count, 0, 2, 3);
-        object->selections[0].entry = (u16)count;
+        object->selections[0].selectedOption = (u16)count;
         if ((u16)count >= 3) {
-            object->selections[0].cursor = (u16)count - 3;
+            object->selections[0].firstVisibleOption = (u16)count - 3;
         } else {
-            object->selections[0].cursor = 0;
+            object->selections[0].firstVisibleOption = 0;
         }
         break;
     }
@@ -5078,8 +5078,8 @@ void btlUpdateAndDrawCommandSelectionHighlight(BattleSceneObject *object, s32 ki
     case 9:
         btlCommandSelectionHighlightWork->alpha += 16;
         btlCommandSelectionHighlightWork->alpha = btlCommandSelectionHighlightWork->alpha <= 0 ? 0 : btlCommandSelectionHighlightWork->alpha <= 128 ? btlCommandSelectionHighlightWork->alpha : 128;
-        entry = object->selections[kind].entry;
-        cursor = object->selections[kind].cursor;
+        entry = object->selections[kind].selectedOption;
+        cursor = object->selections[kind].firstVisibleOption;
         row = entry - cursor;
         btlCommandSelectionHighlightWork->phase = 0;
         btlCommandSelectionHighlightWork->entry = entry;
@@ -5094,8 +5094,8 @@ void btlUpdateAndDrawCommandSelectionHighlight(BattleSceneObject *object, s32 ki
     case 3:
         btlCommandSelectionHighlightWork->phase = (btlCommandSelectionHighlightWork->phase + 16) % 360;
         btlCommandSelectionHighlightWork->alpha = (s32)((sdfSin((f32)((btlCommandSelectionHighlightWork->phase + 90) % 360) / 180.0f * 3.14159f) + 1.0f) * 0.5f * 64.0f + 64.0f);
-        entry = object->selections[kind].entry;
-        cursor = object->selections[kind].cursor;
+        entry = object->selections[kind].selectedOption;
+        cursor = object->selections[kind].firstVisibleOption;
         row = entry - cursor;
         state = object->state;
         if (state == 2 && (optionCount = fldUpdateSceneKindCounter((s32)object, btlCommandPanelWork->classIndex, 1)) >= 2) {
@@ -5129,16 +5129,16 @@ void btlUpdateAndDrawCommandSelectionHighlight(BattleSceneObject *object, s32 ki
     case 11:
         btlCommandSelectionHighlightWork->alpha -= btlTrackedTaskHandles->status.bytes.fadeStep;
         btlCommandSelectionHighlightWork->alpha = btlCommandSelectionHighlightWork->alpha <= 0 ? 0 : btlCommandSelectionHighlightWork->alpha <= 128 ? btlCommandSelectionHighlightWork->alpha : 128;
-        entry = object->selections[kind].entry;
-        cursor = object->selections[kind].cursor;
+        entry = object->selections[kind].selectedOption;
+        cursor = object->selections[kind].firstVisibleOption;
         row = entry - cursor;
         break;
     case 6:
     case 8:
         btlCommandSelectionHighlightWork->alpha -= 32;
         btlCommandSelectionHighlightWork->alpha = btlCommandSelectionHighlightWork->alpha <= 0 ? 0 : btlCommandSelectionHighlightWork->alpha <= 128 ? btlCommandSelectionHighlightWork->alpha : 128;
-        entry = object->selections[kind].entry;
-        cursor = object->selections[kind].cursor;
+        entry = object->selections[kind].selectedOption;
+        cursor = object->selections[kind].firstVisibleOption;
         row = entry - cursor;
         break;
     }
@@ -5581,8 +5581,8 @@ s32 func_001BFB58(dds3ProcessID_t *task) {
     kind = btlGetActorCommandClass(object, btlCommandPanelWork->classIndex);
     optionCount = (s16)fldUpdateSceneKindCounter((s32)object,
                                          btlCommandPanelWork->classIndex, 1);
-    row = object->selections[kind].entry;
-    cursor = object->selections[kind].cursor;
+    row = object->selections[kind].selectedOption;
+    cursor = object->selections[kind].firstVisibleOption;
 
     switch (kind) {
     case 0:
@@ -9153,8 +9153,8 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     u16 count = fldUpdateSceneKindCounter((s32)object, btlCommandPanelWork->classIndex, 1);
     s32 kind = btlGetActorCommandClass(object, btlCommandPanelWork->classIndex);
-    s16 entry = object->selections[kind].entry;
-    s16 cursor = object->selections[kind].cursor;
+    s16 entry = object->selections[kind].selectedOption;
+    s16 cursor = object->selections[kind].firstVisibleOption;
     BtlCommandPartnerOutput partners;
     u16 *commands;
     u16 *picked;
@@ -9309,8 +9309,8 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
                 cursor = 0;
             }
             btlCommandPanelWork->classIndex = 0;
-            object->selections[0].entry = 0;
-            object->selections[0].cursor = 0;
+            object->selections[0].selectedOption = 0;
+            object->selections[0].firstVisibleOption = 0;
             sndSetStationedSeVolume(10);
         }
     } else if ((dds3PadButtonState.prev & 2) != 0) {
@@ -9356,8 +9356,8 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
         sndSetStationedSeVolume(8);
         return 1;
     }
-    object->selections[kind].entry = entry;
-    object->selections[kind].cursor = cursor;
+    object->selections[kind].selectedOption = entry;
+    object->selections[kind].firstVisibleOption = cursor;
     return 0;
 }
 
@@ -9424,16 +9424,16 @@ void btlDrawActorCommandRows(BattleSceneObject *ctx, u16 kind, u16 page, u16 col
     top = 0;
     switch (kind) {
     case 0:
-        top = ctx->selections[0].cursor;
-        highlight = ctx->selections[0].entry;
+        top = ctx->selections[0].firstVisibleOption;
+        highlight = ctx->selections[0].selectedOption;
         break;
     case 2:
-        top = ctx->selections[5].cursor;
-        highlight = ctx->selections[5].entry;
+        top = ctx->selections[5].firstVisibleOption;
+        highlight = ctx->selections[5].selectedOption;
         break;
     case 3:
-        top = ctx->selections[7].cursor;
-        highlight = ctx->selections[7].entry;
+        top = ctx->selections[7].firstVisibleOption;
+        highlight = ctx->selections[7].selectedOption;
         break;
     }
     if (top == 0) {
@@ -9550,8 +9550,8 @@ void btlDrawItemCommandRows(BattleSceneObject *object) {
 
     shown = fldUpdateSceneKindCounter((s32)object, btlCommandPanelWork->classIndex, 0);
     total = fldUpdateSceneKindCounter((s32)object, btlCommandPanelWork->classIndex, 1);
-    index = object->selections[2].cursor;
-    selected = object->selections[2].entry;
+    index = object->selections[2].firstVisibleOption;
+    selected = object->selections[2].selectedOption;
     for (;;) {
         if (row >= shown || index >= total) {
             break;
@@ -9805,8 +9805,8 @@ void btlDrawLinkageSkillOptions(BattleSceneObject *object) {
     y = 0x14C;
     rowCount = fldUpdateSceneKindCounter((s32)object, btlCommandPanelWork->classIndex, 0);
     total = fldUpdateSceneKindCounter((s32)object, btlCommandPanelWork->classIndex, 1);
-    row = object->selections[4].cursor;
-    selected = object->selections[4].entry;
+    row = object->selections[4].firstVisibleOption;
+    selected = object->selections[4].selectedOption;
     list = btlGetActorLinkageSkillList(object, &count);
 
     for (; i < rowCount && row < total; i++, row++) {

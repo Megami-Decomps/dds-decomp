@@ -9,9 +9,14 @@ struct sdfMemHandle_t;
 struct ActionStateLink;
 struct BattleIndexWork;
 
+/* Each command class keeps the selected option separate from the start of its
+ * visible option window. The first index also doubles as the scroll offset. */
+typedef u16 BattleSceneOptionIndex;
+typedef u16 BattleSceneOptionWindowStart;
+
 typedef struct BattleSceneSelection {
-    u16 cursor;
-    u16 entry;
+    BattleSceneOptionWindowStart firstVisibleOption;
+    BattleSceneOptionIndex selectedOption;
 } BattleSceneSelection;
 
 /* Both fldInitializeSceneObject constructors clear one 0x30-byte allocation.
