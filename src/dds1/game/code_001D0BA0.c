@@ -8,6 +8,7 @@
 #include "file_config_option_api.h"
 #include "btl_command_use_error.h"
 #include "btl_action_reaction_motion.h"
+#include "btl_action_press_result.h"
 #include "btl_action_state_selection.h"
 #include "btl_command_target_policy.h"
 #include "btl_command_target_eligibility.h"
@@ -396,7 +397,9 @@ u32 btlClassifyActionOperand(BtlUnit *actor, BattleIndexWork *work) {
     }
 }
 
-BtlActionReactionMotionIndex btlClassifyActionResult(BtlUnit *actor, u32 actionKind, s32 press, u32 elementMask, s32 hitCount, u8 groupInactive, s32 commandIndex) {
+BtlActionReactionMotionIndex btlClassifyActionResult(
+    BtlUnit *actor, u32 actionKind, BtlActionPressResult press,
+    u32 elementMask, s32 hitCount, u8 groupInactive, s32 commandIndex) {
     BtlActionReactionMotionIndex motionIndex;
 
     btlGetEntryFlagsUnlessDisabled(&actor->partyRecord);
@@ -417,7 +420,8 @@ BtlActionReactionMotionIndex btlClassifyActionResult(BtlUnit *actor, u32 actionK
     }
     if (elementMask & 0xE0001) {
         motionIndex = BTL_ACTION_REACTION_MOTION_NONE;
-    } else if ((actor->status.flags & 0x200) != 0 && press == 2 && hitCount == 1 && groupInactive == 0) {
+    } else if ((actor->status.flags & 0x200) != 0 &&
+               press == BTL_ACTION_PRESS_RESULT_CRITICAL && hitCount == 1 && groupInactive == 0) {
         motionIndex = 0x12;
     } else {
         motionIndex = 1;
@@ -525,11 +529,9 @@ extern s32 btlResolveCommandHitResult(BtlUnit *, BtlUnit *, s32);
 
 extern u8 btlSelectCommandHitCount(BtlUnit *, s32);
 
-extern s32 btlDetermineActionPressResult(BtlUnit *, BtlUnit *, s32);
+extern s32 btlGetCommandAddedStatus(BtlUnit *, BtlUnit *, s32, BtlActionPressResult, s32);
 
-extern s32 btlGetCommandAddedStatus(BtlUnit *, BtlUnit *, s32, s32, s32);
-
-extern s32 btlQueryUnitChannelFlags(BtlUnit *, BtlUnit *, s32, s32, s32);
+extern s32 btlQueryUnitChannelFlags(BtlUnit *, BtlUnit *, s32, BtlActionPressResult, s32);
 
 extern s32 btlSelectActorAction(BtlUnit *actor);
 
@@ -544,20 +546,22 @@ extern s32 btlCalculateAbilityRecoveryAmount(BtlUnit *actor, BtlUnit *target);
 extern u32 btlGetHuntPenaltyFlags(BtlUnit *unit, BtlUnit *enemy);
 
 /* The damage/restore result is signed; keep this cross-unit declaration aligned with its provider. */
-extern s32 btlCalculateHpAttackOrRestoreAmount(BtlUnit *, BtlUnit *, s32, u32, s32, s32, u32);
+extern s32 btlCalculateHpAttackOrRestoreAmount(
+    BtlUnit *, BtlUnit *, s32, u32, BtlActionPressResult, s32, u32);
 
-extern s32 btlCalculateMpAttackOrRestoreAmount(BtlUnit *, BtlUnit *, s32, u32, s32, s32, u32);
+extern s32 btlCalculateMpAttackOrRestoreAmount(
+    BtlUnit *, BtlUnit *, s32, u32, BtlActionPressResult, s32, u32);
 
 extern f32 btlGetActionCategoryMultiplier(BtlUnit *, s32, s32);
 
 extern f32 btlGetActionCategoryGateAsFloat(s32, s32, s32);
 
 /* Native resolver hook passes kind and press; both are unused by this title's no-op. */
-extern void btlFindSoundTaskByWorkValue(s32 kind, s32 press);
+extern void btlFindSoundTaskByWorkValue(s32 kind, BtlActionPressResult press);
 
 extern s32 btlRollAllFearChance(s32, BtlUnit *, u32, s32, u8);
 
-extern s32 btlRollFearChance(s32, BtlUnit *, u32, u32);
+extern s32 btlRollFearChance(s32, BtlUnit *, u32, BtlActionPressResult);
 
 extern s32 btlRollStoneDeathChance(BtlUnit *, s32);
 
@@ -610,11 +614,11 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
     u32 removedStatus;
     u32 deferredStatus;
     u32 operandFlags;
-    s32 press;
+    BtlActionPressResult press;
     s32 emptyHits;
     s32 fearCount;
     u32 combinedKinds;
-    u32 combinedPress;
+    BtlActionPressResult combinedPress;
     u32 element;
     u32 elementMask;
     s32 entryChangeMask;
@@ -719,7 +723,7 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
         btlBossDebugPrintf("btl:precede=%d\n", work->precedence);
     }
     combinedKinds = 0;
-    combinedPress = 0;
+    combinedPress = BTL_ACTION_PRESS_RESULT_NONE;
     fearPending = 0;
     allFear = 0;
     overrideMiss = 0;
@@ -832,7 +836,7 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
             }
             absorbed = 1;
         }
-        press = 1;
+        press = BTL_ACTION_PRESS_RESULT_NORMAL;
         if (!group->reflected) {
             switch (kind) {
             case 2:
@@ -840,13 +844,13 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
             case 0x10000:
             case 0x20000:
             case 0x40000:
-                press = 1;
+                press = BTL_ACTION_PRESS_RESULT_NORMAL;
                 break;
             default:
                 press = btlDetermineActionPressResult(source, recipient, command);
                 if (action->options & 1) {
-                    s32 adjustedPress = 2;
-                    if (press == 4) {
+                    BtlActionPressResult adjustedPress = BTL_ACTION_PRESS_RESULT_CRITICAL;
+                    if (press == BTL_ACTION_PRESS_RESULT_WEAKNESS) {
                         adjustedPress = press;
                     }
                     press = adjustedPress;
@@ -1002,7 +1006,7 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
                 cumulativeHp < 0 && kind == 1 && !group->inactive && !group->reflected &&
                 !group->targetSpecialHit && !absorbed && addedStatus == 0 &&
                 !(datEnemyRecords[recipient->partyRecord.unitId].flags & 0x440)) {
-                if (btlRollFearChance((s32)source, recipient, 1, (u32)press)) {
+                if (btlRollFearChance((s32)source, recipient, 1, press)) {
                     group->entries[hitIndex].addedStatus = 1;
                     addedStatus = 1;
                     fearPending = 1;
@@ -1039,7 +1043,7 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
             }
         }
         if (emptyHits == hitCount) {
-            press = 1;
+            press = BTL_ACTION_PRESS_RESULT_NORMAL;
             btlBossDebugPrintf("btl:press miss\n");
         }
         combinedKinds |= kind;
@@ -1097,7 +1101,7 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
                 btlBossDebugPrintf("btl:counter[%p][%X]\n", target, counter);
             }
         }
-        if (press == 2) {
+        if (press == BTL_ACTION_PRESS_RESULT_CRITICAL) {
             action->options |= 2;
         }
         group->reactionCode = btlClassifyActionResult(recipient, kind, press, elementMask,
@@ -1886,7 +1890,7 @@ void btlPrepareSavedCommandTargets(BtlTask *task, BattleIndexWork *work) {
 }
 
 /* Resolver hook receives kind and press; both are unused by this title's no-op. */
-void btlFindSoundTaskByWorkValue(s32 kind, s32 press) {
+void btlFindSoundTaskByWorkValue(s32 kind, BtlActionPressResult press) {
 }
 
 /* Return the oldest task matching this handle; unstarted tasks may have handle 0. */

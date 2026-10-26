@@ -6,6 +6,7 @@
 #include "pty_active_roster_index_api.h"
 #include "dat_assigned_item_id.h"
 #include "btl_command_use_error.h"
+#include "btl_action_press_result.h"
 #include "btl_command_target_policy.h"
 #include "btl_indexed_ui_resource_api.h"
 #include "btl_actor_status_table_api.h"
@@ -3478,7 +3479,7 @@ extern s32 evtRunContext(s32, s32, s32, s32, u16);
 
 INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415340);
 
-s32 btlDetermineActionPressResult(BtlUnit *attacker, BtlUnit *defender, u32 command) {
+BtlActionPressResult btlDetermineActionPressResult(BtlUnit *attacker, BtlUnit *defender, u32 command) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     s32 element;
     s32 mask;
@@ -3494,15 +3495,15 @@ s32 btlDetermineActionPressResult(BtlUnit *attacker, BtlUnit *defender, u32 comm
     element = btlGetActorIndexedSignedValue(attacker, command);
     mask = btlEncodeActorIndexAsSelectionMask(element);
     if (mask & 0xE0001) {
-        return 1;
+        return BTL_ACTION_PRESS_RESULT_NORMAL;
     }
     damage = btlGetAdjustedSlotAffinity(defender, command, element);
     if (!(mask & 4) && damage < 0) {
-        return 4;
+        return BTL_ACTION_PRESS_RESULT_WEAKNESS;
     }
     if (!(mask & 0x10006)) {
         if (!(mask & 0x100) || datCommandRecords[command].effectType != 0) {
-            return 1;
+            return BTL_ACTION_PRESS_RESULT_NORMAL;
         }
     }
     critical = 0;
@@ -3548,7 +3549,7 @@ s32 btlDetermineActionPressResult(BtlUnit *attacker, BtlUnit *defender, u32 comm
     }
     if (datCommandRecords[command].effectType == 0) {
         if (battle->runtimeFlags & 0x1000) {
-            return 2;
+            return BTL_ACTION_PRESS_RESULT_CRITICAL;
         }
         if (critical == 0) {
             critical = evtRunContext(4, (s32)&attacker->partyRecord, (s32)&defender->partyRecord, command, 0);
@@ -3568,13 +3569,13 @@ s32 btlDetermineActionPressResult(BtlUnit *attacker, BtlUnit *defender, u32 comm
         }
         btlBossDebugPrintf("btl:critical=%d%%[raito=%.3f,fix=%d,auto=%d]\n", critical, scale, fixed, automatic);
         if (btlRollAiBucket() < fixed) {
-            return 2;
+            return BTL_ACTION_PRESS_RESULT_CRITICAL;
         }
         if (btlRollAiBucket() < automatic) {
             if (automaticAbility != -1) {
                 attacker->pendingAbilityId = automaticAbility;
             }
-            return 2;
+            return BTL_ACTION_PRESS_RESULT_CRITICAL;
         }
         if (btlRollAiBucket() < critical) {
             if (criticalAbility != -1) {
@@ -3584,7 +3585,7 @@ s32 btlDetermineActionPressResult(BtlUnit *attacker, BtlUnit *defender, u32 comm
         }
     }
     if ((mask & 4) && damage < 0) {
-        return 4;
+            return BTL_ACTION_PRESS_RESULT_WEAKNESS;
     }
-    return 1;
+    return BTL_ACTION_PRESS_RESULT_NORMAL;
 }

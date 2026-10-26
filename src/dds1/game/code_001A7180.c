@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_action_press_result.h"
 #include "btl_command_use_error.h"
 #include "btl_special_ability.h"
 #include "eff_random_mod.h"
@@ -123,7 +124,9 @@ s32 btlFlagToElementIndex(s32 flag);
 extern u32 sdfQueryChannelValue(s32, datUnitWork_t *, datUnitWork_t *);
 #include "sdf_debug_api.h"
 
-s32 btlGetCommandAddedStatus(BtlUnit *attacker, BtlUnit *defender, s32 command, s32 variant, s32 mode) {
+s32 btlGetCommandAddedStatus(
+    BtlUnit *attacker, BtlUnit *defender, s32 command,
+    BtlActionPressResult pressResult, s32 mode) {
     datUnitWork_t *record;
     s32 value;
     s32 guard;
@@ -143,7 +146,7 @@ s32 btlGetCommandAddedStatus(BtlUnit *attacker, BtlUnit *defender, s32 command, 
     if ((value & 0x8000) && !(defender->status.flags & 0x1000)) {
         value &= ~0x8000;
     }
-    if (value == 0 && variant == 2) {
+    if (value == 0 && pressResult == BTL_ACTION_PRESS_RESULT_CRITICAL) {
         if (btlCheckSpecialAbility(record, 0x20A)) {
             return 0x20;
         }
@@ -171,13 +174,15 @@ s32 btlGetCommandAddedStatus(BtlUnit *attacker, BtlUnit *defender, s32 command, 
     return value;
 }
 
-s32 btlQueryUnitChannelFlags(BtlUnit *source, BtlUnit *recipient, s32 command, s32 press, s32 kind) {
+s32 btlQueryUnitChannelFlags(
+    BtlUnit *source, BtlUnit *recipient, s32 command,
+    BtlActionPressResult pressResult, s32 kind) {
     s32 flags;
     if (kind != 1) {
         return 0;
     }
     flags = sdfQueryChannelBits(command, &source->partyRecord, &recipient->partyRecord);
-    if ((recipient->partyRecord.status & 8) != 0 && press == 2) {
+    if ((recipient->partyRecord.status & 8) != 0 && pressResult == BTL_ACTION_PRESS_RESULT_CRITICAL) {
         flags |= 8;
     }
     return flags;

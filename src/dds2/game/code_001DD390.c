@@ -8,6 +8,7 @@
 #include "file_config_option_api.h"
 #include "btl_command_use_error.h"
 #include "btl_action_reaction_motion.h"
+#include "btl_action_press_result.h"
 #include "btl_command_target_policy.h"
 #include "dds3_object_flags.h"
 #include "sdf_vu0.h"
@@ -404,7 +405,9 @@ u32 btlClassifyActionOperand(BtlUnit *unit, BattleIndexWork *work) {
     }
 }
 
-BtlActionReactionMotionIndex btlClassifyActionResult(BtlUnit *actor, u32 actionKind, s32 press, u32 elementMask, s32 hitCount, u8 groupInactive, s32 commandIndex) {
+BtlActionReactionMotionIndex btlClassifyActionResult(
+    BtlUnit *actor, u32 actionKind, BtlActionPressResult press,
+    u32 elementMask, s32 hitCount, u8 groupInactive, s32 commandIndex) {
     BtlActionReactionMotionIndex motionIndex;
 
     btlGetEntryFlagsUnlessDisabled(&actor->partyRecord);
@@ -430,7 +433,8 @@ BtlActionReactionMotionIndex btlClassifyActionResult(BtlUnit *actor, u32 actionK
     }
     if (elementMask & 0xE0001) {
         motionIndex = BTL_ACTION_REACTION_MOTION_NONE;
-    } else if ((actor->status.flags & 0x200) != 0 && press == 2 && hitCount == 1 && groupInactive == 0) {
+    } else if ((actor->status.flags & 0x200) != 0 &&
+               press == BTL_ACTION_PRESS_RESULT_CRITICAL && hitCount == 1 && groupInactive == 0) {
         motionIndex = 0x12;
     } else {
         motionIndex = 1;
@@ -552,11 +556,9 @@ extern s32 btlResolveCommandHitResult(BtlUnit *, BtlUnit *, s32);
 
 extern u8 btlSelectCommandHitCount(BtlUnit *, s32);
 
-extern s32 btlDetermineActionPressResult(BtlUnit *, BtlUnit *, u32);
+extern u32 btlGetCommandAddedStatus(BtlUnit *, BtlUnit *, u32, BtlActionPressResult, s32);
 
-extern u32 btlGetCommandAddedStatus(BtlUnit *, BtlUnit *, u32, s32, s32);
-
-extern s32 btlQueryUnitChannelFlags(BtlUnit *, BtlUnit *, s32, s32, s32);
+extern s32 btlQueryUnitChannelFlags(BtlUnit *, BtlUnit *, s32, BtlActionPressResult, s32);
 
 extern s32 btlSelectActorAction(BtlUnit *actor);
 
@@ -570,19 +572,21 @@ extern s32 btlCalculateAbilityRecoveryAmount(BtlUnit *, BtlUnit *);
 
 extern u32 btlGetHuntPenaltyFlags(BtlUnit *unit, BtlUnit *enemy);
 
-extern s32 btlCalculateHpActionAmount(BtlUnit *, BtlUnit *, s32, s32, s32, s32, u32);
+extern s32 btlCalculateHpActionAmount(
+    BtlUnit *, BtlUnit *, s32, u32, BtlActionPressResult, s32, u32);
 
-extern s32 btlCalculateMpActionAmount(BtlUnit *, BtlUnit *, s32, s32, s32, s32, u32);
+extern s32 btlCalculateMpActionAmount(
+    BtlUnit *, BtlUnit *, s32, u32, BtlActionPressResult, s32, u32);
 
 extern f32 btlGetActionCategoryMultiplier(BtlUnit *, s32, s32);
 
 extern f32 btlGetActionCategoryGateAsFloat(s32, s32, s32);
 
-extern void btlFindSoundTaskByWorkValue(u32, s32);
+extern void btlFindSoundTaskByWorkValue(u32, BtlActionPressResult);
 
 extern s32 btlRollAllFearChance(s32, BtlUnit *, u32, s32, u8);
 
-extern s32 btlRollFearChance(s32, BtlUnit *, s32, s32);
+extern s32 btlRollFearChance(s32, BtlUnit *, s32, BtlActionPressResult);
 
 extern s32 btlRollPetrifiedDeathChance(BtlUnit *, s32);
 
@@ -641,11 +645,11 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
     u32 removedStatus;
     u32 deferredStatus;
     u32 operandFlags;
-    s32 press;
+    BtlActionPressResult press;
     s32 emptyHits;
     s32 fearCount;
     u32 combinedKinds;
-    u32 combinedPress;
+    BtlActionPressResult combinedPress;
     u32 element;
     u32 elementMask;
     s32 entryChangeMask;
@@ -751,7 +755,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
         btlBossDebugPrintf("btl:precede=%d\n", work->precedence);
     }
     combinedKinds = 0;
-    combinedPress = 0;
+    combinedPress = BTL_ACTION_PRESS_RESULT_NONE;
     fearPending = 0;
     allFear = 0;
     overrideMiss = 0;
@@ -880,7 +884,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
             }
             absorbed = 1;
         }
-        press = 1;
+        press = BTL_ACTION_PRESS_RESULT_NORMAL;
         if (!group->reflected) {
             switch (kind) {
             case 2:
@@ -888,16 +892,16 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
             case 0x10000:
             case 0x20000:
             case 0x40000:
-                press = 1;
+                press = BTL_ACTION_PRESS_RESULT_NORMAL;
                 break;
             default:
                 press = btlDetermineActionPressResult(source, recipient, command);
                 if (action->flags & 1) {
-                    if (press != 4) {
-                        press = 2;
+                    if (press != BTL_ACTION_PRESS_RESULT_WEAKNESS) {
+                        press = BTL_ACTION_PRESS_RESULT_CRITICAL;
                     }
                 }
-                if (press == 4) {
+                if (press == BTL_ACTION_PRESS_RESULT_WEAKNESS) {
                     recipient->status.stateFlags |= 0x800000;
                 }
                 break;
@@ -1102,7 +1106,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
             }
         }
         if (emptyHits == hitCount) {
-            press = 1;
+            press = BTL_ACTION_PRESS_RESULT_NORMAL;
             btlBossDebugPrintf("btl:press miss\n");
         }
         if ((kind & 0x10002) && btlDoesEnabledStatusMatchCurrentId(&recipient->partyRecord, 0xDC)) {
@@ -1173,7 +1177,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
                 btlBossDebugPrintf("btl:counter[%p][%X]\n", target, counter);
             }
         }
-        if (press == 2) {
+        if (press == BTL_ACTION_PRESS_RESULT_CRITICAL) {
             action->flags |= 2;
         }
         group->reactionCode = btlClassifyActionResult(recipient, kind, press, elementMask,
@@ -1984,7 +1988,7 @@ void btlPrepareSavedCommandTargets(ActionStateLink *task, BattleIndexWork *work)
 }
 
 /* The resolver supplies its result kind and press value to this no-op hook. */
-void btlFindSoundTaskByWorkValue(u32 kind, s32 press) {
+void btlFindSoundTaskByWorkValue(u32 kind, BtlActionPressResult press) {
 }
 
 /* Return the oldest matching handle, or zero; unstarted tasks may have handle 0. */

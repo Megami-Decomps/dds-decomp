@@ -8,6 +8,7 @@
  * `bnez s1` slot instead of filling it unannulled.
  */
 #include "common.h"
+#include "btl_action_press_result.h"
 #include "pty_active_roster_index_api.h"
 #include "sdf_vu0.h"
 #include "btl_actor_status_table_api.h"
@@ -109,7 +110,7 @@ extern s32 evtRunContext(s32 script, s32 firstArgument, s32 secondArgument, s32 
 /* Clear the supplied party-record status mask. */
 
 s32 btlCalculateHpAttackOrRestoreAmount(BtlUnit *attacker, BtlUnit *recipient, s32 command,
-                   u32 maxHits, s32 press, s32 attackMode, u32 calculationFlags) {
+                   u32 maxHits, BtlActionPressResult press, s32 attackMode, u32 calculationFlags) {
     f32 attack;
     f32 defense = 1.0f;
     f32 status;
@@ -171,7 +172,7 @@ s32 btlCalculateHpAttackOrRestoreAmount(BtlUnit *attacker, BtlUnit *recipient, s
     } else {
         automatic = 1.0f;
     }
-    if (press == 2 && btlCheckSpecialAbility(&attacker->partyRecord, 0x209)) {
+    if (press == BTL_ACTION_PRESS_RESULT_CRITICAL && btlCheckSpecialAbility(&attacker->partyRecord, 0x209)) {
         defense *= datAbilityParameters[0x209 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
     }
     if (attackMode == 1 && attribute != -1 &&
@@ -186,7 +187,7 @@ s32 btlCalculateHpAttackOrRestoreAmount(BtlUnit *attacker, BtlUnit *recipient, s
     result = sdfCalculateCommandVitalDelta(command, &attacker->partyRecord, &recipient->partyRecord, maxHits, 1);
     base = result;
     result = (s32)((f32)result * attack * defense * status * automatic);
-    if (!(recipient->status.flags & 0x10) && press == 2 && result != 0) {
+    if (!(recipient->status.flags & 0x10) && press == BTL_ACTION_PRESS_RESULT_CRITICAL && result != 0) {
         result = (s32)((f32)result * (f32)evtRunContext(6, (s32)&attacker->partyRecord, 0, 0, 0) / 100.0f);
     }
     if ((recipient->status.flags & 0x10) && attackMode == 1) {
@@ -216,7 +217,7 @@ s32 btlCalculateHpAttackOrRestoreAmount(BtlUnit *attacker, BtlUnit *recipient, s
 }
 
 s32 btlCalculateMpAttackOrRestoreAmount(BtlUnit *attacker, BtlUnit *recipient, s32 command,
-                   u32 maxHits, s32 press, s32 attackMode, u32 calculationFlags) {
+                   u32 maxHits, BtlActionPressResult press, s32 attackMode, u32 calculationFlags) {
     f32 attack;
     f32 defense = 1.0f;
     f32 status;
@@ -277,7 +278,7 @@ s32 btlCalculateMpAttackOrRestoreAmount(BtlUnit *attacker, BtlUnit *recipient, s
     } else {
         automatic = 1.0f;
     }
-    if (press == 2 && btlCheckSpecialAbility(&attacker->partyRecord, 0x209)) {
+    if (press == BTL_ACTION_PRESS_RESULT_CRITICAL && btlCheckSpecialAbility(&attacker->partyRecord, 0x209)) {
         defense *= datAbilityParameters[0x209 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
     }
     btlBossDebugPrintf("btl:mp[atk=%.2f,def=%.2f,bat=%.2f,auto=%.2f]\n",
@@ -285,7 +286,7 @@ s32 btlCalculateMpAttackOrRestoreAmount(BtlUnit *attacker, BtlUnit *recipient, s
     result = sdfCalculateCommandVitalDelta(command, &attacker->partyRecord, &recipient->partyRecord, maxHits, 2);
     base = result;
     result = (s32)((f32)result * attack * defense * status * automatic);
-    if (press == 2 && result != 0) {
+    if (press == BTL_ACTION_PRESS_RESULT_CRITICAL && result != 0) {
         result = (s32)((f32)result * (f32)evtRunContext(6, (s32)&attacker->partyRecord, 0, 0, 0) / 100.0f);
     }
     if ((recipient->status.flags & 0x10) && attackMode == 1) {
@@ -373,16 +374,16 @@ s32 btlComputeStatusPenaltyFifth(BtlUnit *object) {
 
 extern s32 btlRollAiBucket(void);
 
-s32 btlRollFearChance(s32 unused, BtlUnit *unit, u32 flags, u32 options) {
+s32 btlRollFearChance(s32 unused, BtlUnit *unit, u32 flags, BtlActionPressResult pressFlags) {
     s32 ratio;
     if ((((BtlState *)btlGetRuntime())->runtimeFlags & 0x80) != 0) return 0;
     if ((unit->status.stateFlags & 8) != 0) return 0;
     if ((flags & 1) == 0) return 0;
     if ((unit->partyRecord.status & 1) != 0) return 0;
     ratio = 0;
-    if (options & 2) {
+    if (pressFlags & BTL_ACTION_PRESS_RESULT_CRITICAL) {
         ratio = 30;
-    } else if (options & 4) {
+    } else if (pressFlags & BTL_ACTION_PRESS_RESULT_WEAKNESS) {
         ratio = 40;
     }
     btlBossDebugPrintf("btl:fear ratio[%d]\n", ratio);

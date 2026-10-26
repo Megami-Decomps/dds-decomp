@@ -12,6 +12,7 @@
 #include "fld_next_scene_request_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_action_press_result.h"
 #include "pty_active_roster_index_api.h"
 #include "dat_assigned_item_id.h"
 #include "btl_actor_status_table_api.h"
@@ -201,7 +202,7 @@ s32 btlGetEntryFlagsUnlessDisabled(datUnitWork_t *record);
 s32 btlGetAbilityAttributeMultiplierPercent(BtlUnit *actor, s32 attr);
 extern s32 sdfCalculateCommandVitalDelta(s32, datUnitWork_t *, datUnitWork_t *, u32, u8);
 s32 btlCalculateHpActionAmount(BtlUnit *source, BtlUnit *target, s32 command,
-                               u32 maxHits, s32 actionKind, s32 side,
+                               u32 maxHits, BtlActionPressResult press, s32 side,
                                u32 calculationFlags) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     SdfBattleParameters *parameters;
@@ -289,7 +290,7 @@ s32 btlCalculateHpActionAmount(BtlUnit *source, BtlUnit *target, s32 command,
             }
         }
     }
-    if (actionKind == 2 && btlCheckSpecialAbility(&source->partyRecord, 0x229)) {
+    if (press == BTL_ACTION_PRESS_RESULT_CRITICAL && btlCheckSpecialAbility(&source->partyRecord, 0x229)) {
         defense *= datAbilityParameters[0x229 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
     }
     if (side == 1 && attribute != -1 &&
@@ -388,7 +389,7 @@ s32 btlCalculateHpActionAmount(BtlUnit *source, BtlUnit *target, s32 command,
                                            &target->partyRecord, maxHits, 1);
     base = amount;
     amount = (s32)((f32)base * attack * defense * status * automatic * solar);
-    if (!(target->status.flags & 0x10) && actionKind == 2 && amount != 0) {
+    if (!(target->status.flags & 0x10) && press == BTL_ACTION_PRESS_RESULT_CRITICAL && amount != 0) {
         amount = (s32)((f32)amount *
                        (f32)evtRunContext(6, (s32)&source->partyRecord, 0, 0, 0) /
                        100.0f);
@@ -430,7 +431,7 @@ s32 btlCalculateHpActionAmount(BtlUnit *source, BtlUnit *target, s32 command,
 }
 
 s32 btlCalculateMpActionAmount(BtlUnit *source, BtlUnit *target, s32 command,
-                               u32 maxHits, s32 actionKind, s32 side,
+                               u32 maxHits, BtlActionPressResult press, s32 side,
                                u32 calculationFlags) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     SdfBattleParameters *parameters;
@@ -512,7 +513,7 @@ s32 btlCalculateMpActionAmount(BtlUnit *source, BtlUnit *target, s32 command,
         break;
     }
 
-    if (actionKind == 2 && btlCheckSpecialAbility(&source->partyRecord, 0x229)) {
+    if (press == BTL_ACTION_PRESS_RESULT_CRITICAL && btlCheckSpecialAbility(&source->partyRecord, 0x229)) {
         defense *= datAbilityParameters[0x229 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
     }
     if (datCommandRecords[command].unk30 == 0x13 &&
@@ -570,7 +571,7 @@ s32 btlCalculateMpActionAmount(BtlUnit *source, BtlUnit *target, s32 command,
                                            &target->partyRecord, maxHits, 2);
     base = amount;
     amount = (s32)((f32)base * attack * defense * status * automatic * solar);
-    if (actionKind == 2 && amount != 0) {
+    if (press == BTL_ACTION_PRESS_RESULT_CRITICAL && amount != 0) {
         amount = (s32)((f32)amount *
                        (f32)evtRunContext(6, (s32)&source->partyRecord, 0, 0, 0) /
                        100.0f);
@@ -666,7 +667,7 @@ extern char D_00415440[]; /* "btl:fear ratio[%d]\n" */
 
 extern s32 btlRollAiBucket(void);
 
-s32 btlRollFearChance(s32 unused, BtlUnit *unit, s32 flagsA, s32 flagsB) {
+s32 btlRollFearChance(s32 unused, BtlUnit *unit, s32 flagsA, BtlActionPressResult pressFlags) {
     s32 threshold;
     if (((BtlState *)btlGetRuntime())->runtimeFlags & 0x80) {
         return 0;
@@ -681,8 +682,8 @@ s32 btlRollFearChance(s32 unused, BtlUnit *unit, s32 flagsA, s32 flagsB) {
         return 0;
     }
     threshold = 0x1E;
-    if (!(flagsB & 2)) {
-        threshold = !(flagsB & 4) ? 0 : 0x28;
+    if (!(pressFlags & BTL_ACTION_PRESS_RESULT_CRITICAL)) {
+        threshold = !(pressFlags & BTL_ACTION_PRESS_RESULT_WEAKNESS) ? 0 : 0x28;
     }
     btlBossDebugPrintf(D_00415440, threshold);
     return btlRollAiBucket() < threshold;

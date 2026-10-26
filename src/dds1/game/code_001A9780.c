@@ -9,6 +9,7 @@
 #include "btl_registered_panel_work.h"
 #include "btl_command_layout_work.h"
 #include "common.h"
+#include "btl_action_press_result.h"
 #include "file_config_option_api.h"
 #include "btl_command_use_error.h"
 #include "itf_mes_entry_start_api.h"
@@ -626,7 +627,8 @@ void btlBuildCombinedActorUnit(BtlUnit *dst, BtlUnit *first, BtlUnit *second, Bt
 extern const BattleStartVoiceRow btlStartVoiceRows[];
 extern s32 btlRollAiBucket(void);
 extern s32 btlReadCurrentUnitHp(datUnitWork_t *);
-extern s32 btlCalculateHpAttackOrRestoreAmount(BtlUnit *, BtlUnit *, s32, u32, s32, s32, u32);
+extern s32 btlCalculateHpAttackOrRestoreAmount(
+    BtlUnit *, BtlUnit *, s32, u32, BtlActionPressResult, s32, u32);
 
 extern char D_003A1DD8[]; /* "btl:start voice off[ESC_OFF]\n" */
 extern char D_003A1DF8[]; /* "btl:start voice off[SERIAL]\n" */
@@ -683,7 +685,8 @@ s8 btlChooseStartVoice(void) {
     for (unit = state->units; unit != NULL; unit = unit->next) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x400) {
-                damage = btlCalculateHpAttackOrRestoreAmount(unit, chosen, 0, 1, 1, 1, 0);
+                damage = btlCalculateHpAttackOrRestoreAmount(
+                    unit, chosen, 0, 1, BTL_ACTION_PRESS_RESULT_NORMAL, 1, 0);
                 if (category == 2) {
                     if (hp + hp * 10 / 100 < damage) {
                         category = 0;

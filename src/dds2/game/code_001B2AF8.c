@@ -13,6 +13,7 @@
 #include "dsp_entry_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_action_press_result.h"
 #include "btl_camera_mode_index.h"
 #include "file_config_option_api.h"
 #include "btl_command_use_error.h"
@@ -1457,7 +1458,8 @@ extern const BattleStartVoiceRow btlStartVoiceRows[16];
 extern s8 btlMajinStartVoiceIds[16];
 extern char D_004158F8[], D_00415920[];
 extern s32 btlReadCurrentUnitHp(datUnitWork_t *);
-extern s32 btlCalculateHpActionAmount(BtlUnit *, BtlUnit *, s32, s32, s32, s32, u32);
+extern s32 btlCalculateHpActionAmount(
+    BtlUnit *, BtlUnit *, s32, u32, BtlActionPressResult, s32, u32);
 
 extern char D_00415878[]; /* "btl:start voice off[ESC_OFF]\n" */
 extern char D_00415898[]; /* "btl:start voice off[SERIAL]\n" */
@@ -1531,7 +1533,8 @@ s8 btlChooseStartVoice(void) {
     for (unit = state->units; unit != NULL; unit = unit->next) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x400) {
-                damage = btlCalculateHpActionAmount(unit, chosen, 0, 1, 1, 1, 0);
+                damage = btlCalculateHpActionAmount(
+                    unit, chosen, 0, 1, BTL_ACTION_PRESS_RESULT_NORMAL, 1, 0);
                 /* Keep the first decisive category; later damage calls still run.
                  * The high threshold wins even when unsigned arithmetic wraps. */
                 if (category == 2) {

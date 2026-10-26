@@ -1,6 +1,7 @@
 #include "fld_area_work.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_action_press_result.h"
 #include "btl_special_ability.h"
 #include "evt_solar.h"
 #include "btl_item_drop.h"
@@ -86,8 +87,9 @@ s32 btlFlagToElementIndex(s32 flag);
 
 s32 btlGetAbilityAttributeMultiplierPercent(BtlUnit *actor, s32 attr);
 
-u32 btlGetCommandAddedStatus(BtlUnit *attacker, BtlUnit *defender, u32 command,
-                  s32 reaction, s32 mode) {
+u32 btlGetCommandAddedStatus(
+    BtlUnit *attacker, BtlUnit *defender, u32 command,
+    BtlActionPressResult pressResult, s32 mode) {
     u32 guardMask;
     s32 guardAbility;
     u32 result;
@@ -125,7 +127,7 @@ u32 btlGetCommandAddedStatus(BtlUnit *attacker, BtlUnit *defender, u32 command,
         break;
     }
 
-    if (guardMask != 0 && result == 0 && reaction == 2) {
+    if (guardMask != 0 && result == 0 && pressResult == BTL_ACTION_PRESS_RESULT_CRITICAL) {
         result = guardMask;
         if (btlGetUnitElementAffinity(defender, btlFlagToElementIndex(guardMask)) & 0x170000) {
             result = 0;
@@ -163,13 +165,15 @@ u32 btlGetCommandAddedStatus(BtlUnit *attacker, BtlUnit *defender, u32 command,
     return result;
 }
 
-s32 btlQueryUnitChannelFlags(BtlUnit *source, BtlUnit *recipient, s32 command, s32 press, s32 kind) {
+s32 btlQueryUnitChannelFlags(
+    BtlUnit *source, BtlUnit *recipient, s32 command,
+    BtlActionPressResult pressResult, s32 kind) {
     s32 flags;
     if (kind != 1) {
         return 0;
     }
     flags = sdfQueryChannelBits(command, &source->partyRecord, &recipient->partyRecord);
-    if ((recipient->partyRecord.status & 8) != 0 && press == 2) {
+    if ((recipient->partyRecord.status & 8) != 0 && pressResult == BTL_ACTION_PRESS_RESULT_CRITICAL) {
         flags |= 8;
     }
     return flags;

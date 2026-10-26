@@ -2,6 +2,7 @@
 #include "common.h"
 #include "pty_active_roster_index_api.h"
 #include "btl_command_use_error.h"
+#include "btl_action_press_result.h"
 #include "btl_command_target_policy.h"
 #include "btl_actor_status_table_api.h"
 #include "btl_actor_entry_code_defaults.h"
@@ -1891,7 +1892,7 @@ void btlRestorePartySlotSnapshots(void) {
 extern u32 btlGetAdjustedSlotAffinity(BtlUnit *, s32, s32);
 extern s32 evtRunContext(s32, s32, s32, s32, u16);
 
-s32 btlDetermineActionPressResult(BtlUnit *attacker, BtlUnit *target, u32 command) {
+BtlActionPressResult btlDetermineActionPressResult(BtlUnit *attacker, BtlUnit *target, u32 command) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     s32 attribute;
     u32 mask;
@@ -1906,13 +1907,13 @@ s32 btlDetermineActionPressResult(BtlUnit *attacker, BtlUnit *target, u32 comman
     attribute = btlGetActorIndexedSignedValue(attacker, command);
     mask = btlEncodeActorIndexAsSelectionMask(attribute);
     if (mask & 0xE0001) {
-        return 1;
+        return BTL_ACTION_PRESS_RESULT_NORMAL;
     }
     if (btlGetAdjustedSlotAffinity(target, command, attribute) & 0x80000000u) {
-        return 4;
+        return BTL_ACTION_PRESS_RESULT_WEAKNESS;
     }
     if (!(mask & 0x10006)) {
-        return 1;
+        return BTL_ACTION_PRESS_RESULT_NORMAL;
     }
     chance = 0;
     fixedChance = 0;
@@ -1952,7 +1953,7 @@ s32 btlDetermineActionPressResult(BtlUnit *attacker, BtlUnit *target, u32 comman
     }
     if (datCommandRecords[command].effectType == 0) {
         if (battle->runtimeFlags & 0x1000) {
-            return 2;
+            return BTL_ACTION_PRESS_RESULT_CRITICAL;
         }
         if (chance == 0) {
             chance = evtRunContext(4, (s32)&attacker->partyRecord, (s32)record, command, 0);
@@ -1964,20 +1965,20 @@ s32 btlDetermineActionPressResult(BtlUnit *attacker, BtlUnit *target, u32 comman
         btlBossDebugPrintf("btl:critical=%d%%[raito=%.3f,fix=%d,auto=%d]\n", chance, multiplier, fixedChance,
                            autoChance);
         if ((s32)btlRollAiBucket() < fixedChance) {
-            return 2;
+            return BTL_ACTION_PRESS_RESULT_CRITICAL;
         }
         if ((s32)btlRollAiBucket() < autoChance) {
             if (autoReason != -1) {
                 attacker->pendingAbilityId = autoReason;
             }
-            return 2;
+            return BTL_ACTION_PRESS_RESULT_CRITICAL;
         }
         if ((s32)btlRollAiBucket() < chance) {
             if (ratioReason != -1) {
                 attacker->pendingAbilityId = ratioReason;
             }
-            return 2;
+            return BTL_ACTION_PRESS_RESULT_CRITICAL;
         }
     }
-    return 1;
+    return BTL_ACTION_PRESS_RESULT_NORMAL;
 }
