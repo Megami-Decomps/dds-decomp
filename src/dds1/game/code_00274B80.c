@@ -1428,7 +1428,8 @@ extern const u8 D_003BC708[];
 extern void ptySkillMenuDrawEquippedSkillEntry();
 extern s32 mnuGetEntryUseStatus(datUnitWork_t *, u16);
 
-s32 ptySkillMenuBuildEquippedSlots(s32 selectionMode, dds3ProcessID_t *task) {
+s32 ptySkillMenuBuildEquippedSlots(
+    PtySkillUnavailableMarking markUnavailableSkills, dds3ProcessID_t *task) {
     CampMenuContext *context = (CampMenuContext *)dds3GetProcessData(task);
     SkillMenuRuntime *child = (SkillMenuRuntime *)context->menu;
     MenuWindowContainer *window;
@@ -1473,7 +1474,8 @@ s32 ptySkillMenuBuildEquippedSlots(s32 selectionMode, dds3ProcessID_t *task) {
             node = mnuAppendWindowListNode(window, D_003BAA8C[skill].encodedText);
             node->sortKeySecondary = i;
             node->sortKeyPrimary = skill;
-            if (selectionMode != 0 && mnuGetEntryUseStatus(entry, skill) != 0) {
+            if (markUnavailableSkills != PTY_SKILL_UNAVAILABLE_MARKING_DISABLED &&
+                mnuGetEntryUseStatus(entry, skill) != 0) {
                 node->flags48 |= 1;
             }
         } else {
@@ -1512,13 +1514,14 @@ void mnuSeekFirstAvailableStaffListNode(dds3ProcessID_t *task) {
     }
 }
 
-MenuWindowContainer *ptySkillMenuRebuildAfterMutation(s32 actor, dds3ProcessID_t *contextArg) {
+MenuWindowContainer *ptySkillMenuRebuildAfterMutation(
+    PtySkillUnavailableMarking markUnavailableSkills, dds3ProcessID_t *contextArg) {
     StaffMenuWork *menu = (StaffMenuWork *)((CampMenuContext *)dds3GetProcessData(contextArg))->menu;
     s32 selected = ((MenuWindowContainer *)menu->selectedList)->list->cursor->index;
     MenuWindowContainer *window;
 
     mnuDestroySelectedPartyWindow(contextArg);
-    ptySkillMenuBuildEquippedSlots(actor, contextArg);
+    ptySkillMenuBuildEquippedSlots(markUnavailableSkills, contextArg);
     mnuSeekListNode(selected, ((MenuWindowContainer *)menu->selectedList)->list);
     window = (MenuWindowContainer *)menu->selectedList;
     *(s32 *)((u8 *)window + 0x44) = 0x200;
@@ -1786,7 +1789,8 @@ s32 ptySkillMenuShellUpdate(dds3ProcessID_t *callback) {
                     mnuDestroySelectedPartyWindow(callback);
                 }
                 if (runtime->selectedWindow == NULL) {
-                    ptySkillMenuBuildEquippedSlots(1, callback);
+                    ptySkillMenuBuildEquippedSlots(
+                        PTY_SKILL_UNAVAILABLE_MARKING_ENABLED, callback);
                     mnuSeekFirstAvailableStaffListNode(callback);
                 }
                 mnuSetPopupEntry(popup, mnuSkillMenuPagePopupEntry);
@@ -1997,7 +2001,8 @@ void ptySkillMenuHandleSelection(dds3ProcessID_t *callback) {
                 inputFlags = MNU_STAFF_INPUT_REJECTED;
             }
         }
-        window = ptySkillMenuRebuildAfterMutation(0, callback);
+        window = ptySkillMenuRebuildAfterMutation(
+            PTY_SKILL_UNAVAILABLE_MARKING_DISABLED, callback);
         mnuInitPartyPanelSlots(&context->partyPanel);
         mnuUpdatePartyPanelPercentDisplays((s32)&context->partyWindow);
         mnuSetPopupEntryFlagged(&context->popupState, mnuSkillMenuDetailPopupEntry);
@@ -2051,7 +2056,8 @@ void ptySkillMenuHandleSlotReorder(dds3ProcessID_t *callback) {
         } else if (selectedSlot != menuWork->selectionId) {
             mnuSwapPartySkillSlots(partyEntry, menuWork->selectionId, selectedSlot);
             mnuClearSelectedListNodeId(callback);
-            window = ptySkillMenuRebuildAfterMutation(0, callback);
+            window = ptySkillMenuRebuildAfterMutation(
+                PTY_SKILL_UNAVAILABLE_MARKING_DISABLED, callback);
         } else {
             inputFlags = MNU_STAFF_INPUT_REJECTED;
         }

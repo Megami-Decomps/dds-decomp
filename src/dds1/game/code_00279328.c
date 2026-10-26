@@ -266,7 +266,7 @@ s32 ptySkillMenuOpenPartyPage(dds3ProcessID_t *menu) {
 
     mnuSelectPage(panel, ((SkillMenuContext *)ctx)->selection->cursor->index);
     panel->flags |= 0x400;
-    ptySkillMenuBuildEquippedSlots(0, menu);
+    ptySkillMenuBuildEquippedSlots(PTY_SKILL_UNAVAILABLE_MARKING_DISABLED, menu);
     ptySkillMenuInitPages(ctx);
     return 1;
 }
