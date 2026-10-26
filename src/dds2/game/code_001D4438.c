@@ -41,6 +41,7 @@
 #include "btl_effect_table.h"
 #include "btl_unit_tasks.h"
 #include "btl_state.h"
+#include "btl_action_state_selection.h"
 #include "btl_action_state_handler.h"
 #include "btl_ui.h"
 #include "pcp_vu0.h"
@@ -532,8 +533,8 @@ extern void btlClearSceneTaskActiveFlag(ActionStateLink *task);
 void btlActionSeqStateSelect(ActionStateLink *task) {
     BtlState *work = (BtlState *)btlGetRuntime();
     BtlUnit *unit = task->unit;
-    s32 (*hook)(ActionStateLink *);
-    s32 next;
+    BtlActionStateSelectionHook hook;
+    BtlActionStateSelectionResult next;
     u32 flags;
     task->pendingFlags &= ~0x20;
     if (task->actionNumber == 0) {
@@ -544,7 +545,7 @@ void btlActionSeqStateSelect(ActionStateLink *task) {
     hook = work->actionStateSelectionHook;
     if (hook != 0) {
         next = hook(task);
-        if (next != -1) {
+        if (next != BTL_ACTION_STATE_SELECTION_USE_DEFAULT) {
             btlDispatchStateHandler(task, next);
             return;
         }

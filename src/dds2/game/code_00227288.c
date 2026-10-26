@@ -10,6 +10,7 @@
 #include "btl_effect_position.h"
 #include "btl_task_condition.h"
 #include "btl_state.h"
+#include "btl_action_state_selection.h"
 #include "btl_command.h"
 #include "btl_action.h"
 #include "btl_find_actor_for_owner_api.h"
@@ -521,13 +522,13 @@ void func_002279F0(void) {
     }
 }
 
-s32 btlGetEffectTaskActorMatchCode(ActionStateLink *task) {
+BtlActionStateSelectionResult btlGetEffectTaskActorMatchCode(ActionStateLink *task) {
     BattleEffectPayload *effect;
     if ((task->pendingFlags & 8) == 0) {
-        return -1;
+        return BTL_ACTION_STATE_SELECTION_USE_DEFAULT;
     }
     effect = ((BtlState *)btlGetRuntime())->effect;
-    return effect->linked.actor == task->unit ? 12 : -1;
+    return effect->linked.actor == task->unit ? 12 : BTL_ACTION_STATE_SELECTION_USE_DEFAULT;
 }
 
 s32 btlEffectTaskStartFinale(ActionStateLink *task) {
@@ -1308,7 +1309,7 @@ void btlPromoteSeraForSmallParty(void) {
     }
 }
 
-s32 btlClearEffectNodeRuntimeFlagForActiveUnits(void) {
+BtlActionStateSelectionResult btlClearEffectNodeRuntimeFlagForActiveUnits(ActionStateLink *unusedTask) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     while (unit != 0) {
         if (unit->status.flags & 1) {
@@ -1316,7 +1317,7 @@ s32 btlClearEffectNodeRuntimeFlagForActiveUnits(void) {
         }
         unit = unit->next;
     }
-    return -1;
+    return BTL_ACTION_STATE_SELECTION_USE_DEFAULT;
 }
 
 void btlMarkBattleUnitEntryForActiveKind(BtlUnit *unit) {
@@ -1451,7 +1452,7 @@ extern s32 btlApplySingleTargetCameraOffset(BtlLinkedCommand *unit);
 extern void btlApplySpecialActionRenderGroup(BtlUnit *unit, u32 group, f32 opacity);
 extern void btlCancelCurrentSubtask(void);
 extern void btlCenterMarkedFormationAroundLead(void);
-extern s32 btlCheckActionRecordUnit(ActionStateLink *record);
+extern BtlActionStateSelectionResult btlCheckActionRecordUnit(ActionStateLink *record);
 extern s32 btlCheckActionUnitResourceEligibility(BtlUnit *unit, s32 type);
 extern s32 btlCheckActiveEffectForSpecialTarget(BtlUnit *actor, BtlUnit *target, s32 command, s32 bits);
 extern void btlClaimCommandSlot(BtlUnit *unit, BtlOperandEntry *entry);

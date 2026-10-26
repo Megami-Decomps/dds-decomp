@@ -4,6 +4,7 @@
 #include "btl_boss_data_api.h"
 #include "mdl_flag_api.h"
 #include "btl_state.h"
+#include "btl_action_state_selection.h"
 #include "btl_command.h"
 #include "btl_action.h"
 #include "dat_state.h"
@@ -172,7 +173,7 @@ extern s32 btlFindSubsequentTurnScript(void);
 extern void btlFormatBattleEffectResourceName(BtlTask *actor, s32 action, char *pathBuffer);
 extern s32 btlFrameMarkedTargetDefeatCamera(BtlLinkedCommand *command);
 extern s32 btlGetAdjustedUnitDisplaySpecies(BtlUnit *unit);
-extern s32 btlGetEffectTaskActorMatchCode(BtlTask *task);
+extern BtlActionStateSelectionResult btlGetEffectTaskActorMatchCode(BtlTask *task);
 extern s32 btlGetEnabledEnemyActionResponse(BtlUnit *unit, s32 action);
 extern BtlUnit *btlGetReadyUnitForSpecies(s32 mode, u32 species);
 extern s32 btlGetSoleTargetKind(void);

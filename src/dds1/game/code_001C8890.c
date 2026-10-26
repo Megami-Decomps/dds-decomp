@@ -28,6 +28,7 @@
 #include "sdf_texture_offset_list.h"
 #include "btl_state.h"
 #include "btl_action_state_handler.h"
+#include "btl_action_state_selection.h"
 #include "btl_model_record.h"
 #include "btl_task_args.h"
 #include "btl_sound.h"
@@ -158,10 +159,10 @@ void btlCreateTargetSelectionTask(BtlTask *sourceTask);
 void btlClearPartyRecordStatusBits(datUnitWork_t *record, s32 mask);
 
 void btlActionSeqStateSelect(BtlTask *task) {
-    u8 *work = (u8 *)btlGetRuntime();
+    BtlState *work = (BtlState *)btlGetRuntime();
     BtlUnit *unit = task->unit;
-    s32 (*hook)(u8 *);
-    s32 next;
+    BtlActionStateSelectionHook hook;
+    BtlActionStateSelectionResult next;
     u32 flags;
     task->flags &= ~0x20;
     if (task->actionNumber == 0) {
@@ -169,10 +170,10 @@ void btlActionSeqStateSelect(BtlTask *task) {
         btlBossDebugPrintf("btl:actnum 0 [%p]\n", task);
         return;
     }
-    hook = *(s32 (**)(u8 *))(work + 0x5FC);
-    if (hook != 0) {
-        next = hook((u8 *)task);
-        if (next != -1) {
+    hook = *(BtlActionStateSelectionHook *)((u8 *)work + 0x5FC);
+    if (hook != NULL) {
+        next = hook(task);
+        if (next != BTL_ACTION_STATE_SELECTION_USE_DEFAULT) {
             btlDispatchStateHandler(task, next);
             return;
         }
@@ -182,13 +183,13 @@ void btlActionSeqStateSelect(BtlTask *task) {
     } else {
         flags = (u32)unit->status.flags;
         if (flags & 0x200) {
-            if (*(u32 *)(work + 0x1F4) & 0x8000) {
+            if (work->battleFlags & 0x8000) {
                 btlDispatchStateHandler(task, 9);
             } else {
                 btlDispatchStateHandler(task, 6);
             }
         } else if (flags & 0x400) {
-            if (!(*(u32 *)(work + 0x1FC) & 1)) {
+            if (!(work->runtimeFlags & 1)) {
                 btlDispatchStateHandler(task, 8);
             } else {
                 btlDispatchStateHandler(task, 6);

@@ -16,6 +16,7 @@
 #include "btl_task_condition.h"
 #include "eff_transform.h"
 #include "btl_state.h"
+#include "btl_action_state_selection.h"
 #include "btl_affinity_row.h"
 #include "btl_command.h"
 #include "btl_command_affinity_api.h"
@@ -2224,13 +2225,13 @@ void func_00206608(void) {
     }
 }
 
-s32 btlGetEffectTaskActorMatchCode(BtlTask *task) {
+BtlActionStateSelectionResult btlGetEffectTaskActorMatchCode(BtlTask *task) {
     BtlEffectHeader *effect;
     if ((task->flags & 8) == 0) {
-        return -1;
+        return BTL_ACTION_STATE_SELECTION_USE_DEFAULT;
     }
     effect = ((BtlState *)btlGetRuntime())->effect;
-    return effect->owner == (u32)task->unit ? 12 : -1;
+    return effect->owner == (u32)task->unit ? 12 : BTL_ACTION_STATE_SELECTION_USE_DEFAULT;
 }
 
 extern BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);
