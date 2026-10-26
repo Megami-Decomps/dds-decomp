@@ -3,7 +3,7 @@
 
 struct SoundMixer;
 
-/* Clone a mixer owner or release all of its active voices. */
+/* Create an owned mixer clone, then destroy it with its active effect state. */
 struct SoundMixer *effEveBEDCreate(struct SoundMixer *source);
 void effEveBEDDelete(struct SoundMixer *mixer);
 

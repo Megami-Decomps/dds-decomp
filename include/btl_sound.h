@@ -321,7 +321,8 @@ typedef char Atrac3LoadTaskArgs_entryIndex_offset_must_be_8[
 
 SoundMixer *sndMixerClone(SoundMixer *source);
 s32 effBTLGetDrawEndFrame(SoundMixer *mixer, u16 kind);
-void sndReleaseAllVoices(SoundMixer *mixer);
+/* Destroy an owned mixer clone, including its voices, parts, and allocation. */
+void sndMixerDestroy(SoundMixer *mixer);
 void sndCreateSystemEffect(SoundResourceNode *effect);
 void sndDeleteSystemEffect(SoundResourceNode *effect);
 s32 sndSetEffectNodeParameter(SoundResourceNode *effect, u16 option);

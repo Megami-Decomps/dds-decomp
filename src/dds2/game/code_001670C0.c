@@ -558,7 +558,7 @@ SoundMixer *sndMixerClone(SoundMixer *src) {
     return mixer;
 }
 
-void sndReleaseAllVoices(SoundMixer *mixer) {
+void sndMixerDestroy(SoundMixer *mixer) {
     effBTLCutHandle_t *voice = mixer->voiceList;
     effBTLCutHandle_t *next;
 

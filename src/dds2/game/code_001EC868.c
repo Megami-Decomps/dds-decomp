@@ -7960,7 +7960,7 @@ void sndDeleteSystemEffect(SoundResourceNode *effect) {
     if ((effect->flags & SOUND_RESOURCE_NODE_FLAG_SYSTEM_EFFECT) && effect->resourceHandle &&
         !effect->referenceCount) {
         btlBossDebugPrintf("btl:system effect delete[%p]\n", effect->resourceHandle);
-        sndReleaseAllVoices(effect->resourceHandle);
+        sndMixerDestroy(effect->resourceHandle);
         effect->resourceHandle = 0;
     }
 }
@@ -8242,7 +8242,7 @@ void sndBeginEffectLoad(EffectLoadArgs *args) {
     SoundResourceNode *effect = args->effect;
     if (effect->flags & SOUND_RESOURCE_NODE_FLAG_AVAILABLE) {
         if (effect->resourceHandle != 0) {
-            sndReleaseAllVoices(effect->resourceHandle);
+            sndMixerDestroy(effect->resourceHandle);
             effect->resourceHandle = 0;
         }
         effect->flags &= ~SOUND_RESOURCE_NODE_FLAG_AVAILABLE;
@@ -8594,7 +8594,7 @@ SoundResourceNode *sndCreateResourceNode(SoundMixer *sourceMixer) {
 /* Release owned voices, unlink the resource node, and free its allocation. */
 void sndFreeResourceNode(SoundResourceNode *node) {
     if (node->resourceHandle != 0) {
-        sndReleaseAllVoices(node->resourceHandle);
+        sndMixerDestroy(node->resourceHandle);
     }
     if (node->next != 0) {
         node->next->previous = node->previous;

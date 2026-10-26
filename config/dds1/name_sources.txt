@@ -1808,7 +1808,7 @@
 0x001602F8	dds3UpdateCrossfade	inferred	confidence=high; matched-C; Corrects prior textured-quad name: captures first frame, draws held texture with decreasing alpha, ends when current frame reaches duration. Both native start/end debug strings explicitly name dds3Crossfade. DDS2 twin0x00167EE8. Namer1 batch21.
 0x00160690	dds3EndCrossfade	inferred	confidence=high; matched-C; Clears/releases held texture and active state; native rodata says dds3CrossfadeEnd. DDS2 twin0x00168280. Namer1 batch21.
 0x001606C0	sndMixerClone	inferred	Copies source mixer state into a new mixer and initializes it. [names_qp9.tsv]
-0x00160800	sndReleaseAllVoices	inferred	quiet3 twin unification
+0x00160800	sndMixerDestroy	inferred	Destroys an owned clone: deletes linked voices, releases both banks' parameter work, and frees the retained mixer allocation; DDS2 twin.
 0x00160858	effBTLGetMotionChangeFrame	inferred	SMT3HD name via SLUS_209.11 0x0016AB70, shared-hash-in-run; was sndGetMixerBankCallbackFrame
 0x00160888	effBTLGetCutEndFrame	inferred	SMT3HD name via SLUS_209.11 0x0016ABA0, byte-identical; was sndGetMixerBankTriggerFrame
 0x001608B8	effBTLGetDrawEndFrame	inferred	SMT3HD name via SLUS_209.11 0x0016ABD0, byte-identical; was sndReadSelectedMixerBankValue

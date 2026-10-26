@@ -4423,7 +4423,7 @@ void btlFinishSelectedUnitEffect(BtlSelectedUnitEffectTaskArgs *arguments) {
         effBTLCutDelete(voice);
     }
     if (arguments->mixer != 0) {
-        sndReleaseAllVoices(arguments->mixer);
+        sndMixerDestroy(arguments->mixer);
     }
     btlClearUnitDefeatCandidate(arguments->unit);
     arguments->unit->status.flags |= 0x40;

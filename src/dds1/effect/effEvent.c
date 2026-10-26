@@ -1142,7 +1142,7 @@ SoundMixer *effEveBEDCreate(SoundMixer *source) {
 }
 
 void effEveBEDDelete(SoundMixer *mixer) {
-    sndReleaseAllVoices(mixer);
+    sndMixerDestroy(mixer);
 }
 
 

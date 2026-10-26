@@ -1094,7 +1094,7 @@ SoundMixer *effEveBEDCreate(SoundMixer *source) {
 }
 
 void effEveBEDDelete(SoundMixer *mixer) {
-    sndReleaseAllVoices(mixer);
+    sndMixerDestroy(mixer);
 }
 /* Compact event owner: the allocator reserves exactly 0x38 bytes. */
 struct effEveBEDCutHandle_t {

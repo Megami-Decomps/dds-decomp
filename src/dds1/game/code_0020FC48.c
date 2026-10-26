@@ -194,7 +194,7 @@ void btlUpdateEventPlayback(void) {
             battle->eventData = NULL;
         }
         if (battle->eventRequest != NULL) {
-            sndReleaseAllVoices(battle->eventRequest);
+            sndMixerDestroy(battle->eventRequest);
             battle->eventRequest = NULL;
         }
         battle->eventAction = -1;
@@ -206,7 +206,7 @@ void btlUpdateEventPlayback(void) {
             battle->eventData = NULL;
         }
         if (battle->eventRequest != NULL) {
-            sndReleaseAllVoices(battle->eventRequest);
+            sndMixerDestroy(battle->eventRequest);
         }
         battle->eventRequest = sndMixerClone(battle->eventResult);
         battle->eventActive = 2;
@@ -365,7 +365,7 @@ void btlReleaseEventData(void) {
     }
     resource = battleState->eventRequest;
     if (resource != 0) {
-        sndReleaseAllVoices(resource);
+        sndMixerDestroy(resource);
         battleState->eventRequest = 0;
     }
     battleState->eventActive = 0;
