@@ -798,9 +798,10 @@ u32 func_00315318(void) {
     return 0;
 }
 
-s32 ptyCheckLevelAtLeastProfileParam7b6(datUnitWork_t *work, u16 scriptId) {
-    s32 current = work->level;
-    if (current < (s32)prfGetRequiredProfileLevel(scriptId)) return 0;
+/* Test whether a unit meets the profile's configured level requirement. */
+u8 ptyMeetsProfileLevelRequirement(const datUnitWork_t *unit, u16 profileId) {
+    s32 unitLevel = unit->level;
+    if (unitLevel < (s32)prfGetRequiredProfileLevel(profileId)) return 0;
     return 1;
 }
 

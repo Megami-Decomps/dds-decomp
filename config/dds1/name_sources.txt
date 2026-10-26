@@ -8070,7 +8070,7 @@
 0x002CDDB0	prfGetIndexedProfileByte	inferred	confidence=high; Canonical DDS2 interface at00315248, used by matching profile-adjusted-stat and script-operand paths. DDS1 retail stub always returns0; retain its u16/s32/u32 interface and zero body, without implying a data read. [PurA readability b7; corresponding callers and canonical DDS2 body]
 0x002CDDB8	scrCallIfOperandReady	inferred	calls ptyGetCurrentProfileId twice then forwards selected index to prfGetIndexedProfileByte; the DDS1 retail callee is an always-zero stub
 0x002CDE20	prfGetSkillAtIndex	inferred	legacy ProfileId_GetSkillAtIndex: profile skill id at index 0..7
-0x002CDE68	ptyCheckLevelAtLeastProfileParam7b6	inferred	legacy PartyUnit_CheckLevelAtLeastProfileParam7b6: unit level >= profile param word 0x7B6
+0x002CDE68	ptyMeetsProfileLevelRequirement	inferred	Compares unit level with the profile parameter row's requiredLevel and returns 1 when met; was ptyCheckLevelAtLeastProfileParam7b6.
 0x002CDEB8	ptyIsCurrentProfileId	inferred	legacy PartyUnit_IsCurrentProfileId: unit.current_profile_id_55 == profile_id
 0x002CDED0	prfBuildRawSkillList	inferred	legacy ProfileId_BuildRawSkillList: builds up to 8 nonzero raw skill ids for a profile id
 0x002CDFE8	prfBuildSkillList	inferred	legacy ProfileId_BuildSkillListForUnit: builds the effective skill list for a unit's current profile
