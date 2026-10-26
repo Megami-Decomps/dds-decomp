@@ -15,6 +15,7 @@
 #include "sdf_vu_matrix.h"
 #include "fld_scene_status_api.h"
 #include "fld_scene_ready_api.h"
+#include "fld_movement_hold_state_api.h"
 #include "fld_scene_command_state_api.h"
 #include "fld_camp_check_state_api.h"
 #include "mnu_camp_state_ack_api.h"
@@ -1987,8 +1988,6 @@ extern void func_00149A00(void);
 
 extern void fldUpdateCameraHeadingTransition(void);
 
-extern u8 fldHasPendingSceneFlags(void);
-
 extern void fldSetCameraNodeModeWithTen(void);
 
 extern void fldMarkStageExplorationCellsAroundPosition(s32, s32, f32, f32, f32);
@@ -2042,7 +2041,8 @@ s32 fldUpdateCampMenuTransition(void) {
     if (control == 0) {
         return control;
     }
-    if (fldAutoMapSeqTestFlag(1) == 1 || fldHasPendingSceneFlags() != 0 || fldGetSceneReadyFlag() != FLD_SCENE_NOT_READY) {
+    if (fldAutoMapSeqTestFlag(1) == 1 || fldGetMovementHoldState() != FLD_MOVEMENT_HOLD_CLEAR ||
+        fldGetSceneReadyFlag() != FLD_SCENE_NOT_READY) {
         return 0;
     }
     scene = &fldGlobalBase;
@@ -2110,7 +2110,7 @@ s32 fldUpdateNextFloorTransition(void) {
         }
         fldMarkStageExplorationCellsAroundPosition(scene->floor, scene->flagStage, scene->x, scene->z, 50.0f);
         if (scene->sceneMode == 0) {
-            if (fldHasPendingSceneFlags() != 0) {
+            if (fldGetMovementHoldState() != FLD_MOVEMENT_HOLD_CLEAR) {
                 return 0;
             }
             if (fldEncountTestFlag(0x40) != 0 && transitionInput != 0 && fldRunDanteGunFlag[0x48 / 4] == 0) {

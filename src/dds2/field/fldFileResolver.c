@@ -14,6 +14,7 @@
 #include "sdf_vu0.h"
 #include "sdf_resource_list_release_api.h"
 #include "kwln_background_fade_api.h"
+#include "fld_movement_hold_state_api.h"
 #include "fld_scene_ready_api.h"
 #include "fld_area_resource_request_reuse_api.h"
 #include "fld_scene_record_api.h"
@@ -5006,15 +5007,15 @@ s32 fldUpdateCameraFrame(void) {
     return 0;
 }
 
-u8 fldHasPendingSceneFlags(void) {
+FldMovementHoldState fldGetMovementHoldState(void) {
     if (fldGlobalBase.fieldTransitionMovementGate == 0) {
         if (fldGlobalBase.areaDamageReactionMovementGate == 0) {
             if (fldGlobalBase.verticalStepDirection == 0) {
-                return 0;
+                return FLD_MOVEMENT_HOLD_CLEAR;
             }
         }
     }
-    return 1;
+    return FLD_MOVEMENT_HOLD_ACTIVE;
 }
 
 void fldSetCameraNodeModeWithZero(void);

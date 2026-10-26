@@ -1141,7 +1141,7 @@
 0x0012FE30	fldUpdateAreaDamageReaction	inferred	confidence=high; matched-C; Updates the area-damage camera, fade, and haptic reaction; DDS2 twin 0x00132408. LiteG field naming batch.
 0x0012FF48	fldUpdateFieldPlayerMovement	inferred	Per-frame player movement processor: gates updates on field transitions/damage/control, maps directional input into target heading and position, advances motion, and refreshes field coordinates. The active camera-frame routine dispatches it only under scene-control flag 0x40. Paired DDS2 provider is 0x00132540.
 0x00131098	fldUpdateCameraFrame	inferred	Per-frame field camera update dispatch; applies pending vertical field steps through fldApplyPlayerVerticalStep on the non-movement path and updates camera/player movement on the scene-control path; DDS2 twin at 0x00133840.
-0x001311A0	fldHasPendingSceneFlags	inferred	Returns true if any of three adjacent field scene-state words is nonzero. [names_reviewed5.tsv]
+0x001311A0	fldGetMovementHoldState	inferred	Returns whether either movement-hold gate or the signed vertical-step direction is active; paired automap callers wait for the clear state. [provider and caller review, 2026-10-26]
 0x001311D8	fldEnableCameraObjectFlag	inferred	Sets bit 1 on camera object then resets camera node setting. [names_R_FuncNames6.tsv]
 0x001311F8	fldDisableCameraObjectFlag	inferred	Clears bit 1 on camera object. [names_R_FuncNames6.tsv]
 0x00131218	fldClearCameraObjectHighlightFlag	inferred	Clears the camera object's 0x800 flag and resets its paired status field. [names_reviewed5.tsv]
