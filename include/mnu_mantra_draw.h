@@ -24,6 +24,14 @@ typedef enum MnuMantraDrawState {
     MNU_MANTRA_DRAW_STATE_DEACTIVATE = 6
 } MnuMantraDrawState;
 
+struct MantraDrawPool;
+struct MantraDrawItem;
+
+typedef void *(*MantraDrawItemCreateCallback)(struct MantraDrawPool *pool, u32 createArg);
+typedef void (*MantraDrawItemReleaseCallback)(struct MantraDrawItem *item);
+typedef s32 (*MantraDrawItemUpdateCallback)(struct MantraDrawPool *pool, struct MantraDrawItem *item);
+typedef s32 (*MantraDrawItemDrawCallback)(struct MantraDrawPool *pool, struct MantraDrawItem *item);
+
 /* One draw process: construction supplies data, update requests completion,
  * draw runs each active frame, and release receives the item record. */
 typedef struct MantraDrawItem {
@@ -39,10 +47,10 @@ typedef struct MantraDrawItem {
             u32 unkHigh : 12;
         } bits;
     };
-    u32 (*create)();
-    void (*release)(struct MantraDrawItem *);
-    s32 (*update)();
-    void (*draw)();
+    MantraDrawItemCreateCallback create;
+    MantraDrawItemReleaseCallback release;
+    MantraDrawItemUpdateCallback update;
+    MantraDrawItemDrawCallback draw;
     s16 startDelay;    /* 0x18: delay before construction */
     s16 endDelay;      /* 0x1A: delay before release */
     u32 createArg;     /* 0x1C: constructor argument */
