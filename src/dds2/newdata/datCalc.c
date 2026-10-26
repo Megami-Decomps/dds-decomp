@@ -448,7 +448,8 @@ enum {
 };
 
 extern u8 ptyAffinityPermutationOrders[];
-extern s32 ptyUnitMatchesAffinityRequirement(const datUnitWork_t *unit, s32 affinity, u8 requirementIndex);
+extern PtyAffinityMatchResult
+ptyUnitMatchesAffinityRequirement(const datUnitWork_t *unit, s32 affinity, u8 requirementIndex);
 
 
 
@@ -1421,41 +1422,41 @@ u32 ptyReturnOne(void) {
 extern DatSkillList *D_00435E28;
 
 /* Test whether a party record satisfies one participant requirement of an affinity. */
-s32 ptyUnitMatchesAffinityRequirement(const datUnitWork_t *unit, s32 affinity, u8 requirementIndex) {
+PtyAffinityMatchResult ptyUnitMatchesAffinityRequirement(const datUnitWork_t *unit, s32 affinity, u8 requirementIndex) {
     DatAffinityRecord *record;
     s32 requirement;
     s32 requirementValue;
     u32 i;
 
     if (unit == NULL) {
-        return 0;
+        return PTY_AFFINITY_MATCH_NOT_FOUND;
     }
     record = &datAffinityRecords[affinity - DAT_AFFINITY_FIRST_COMMAND];
     if (record->flags & 2) {
-        return 0;
+        return PTY_AFFINITY_MATCH_NOT_FOUND;
     }
     requirement = record->requirements[requirementIndex];
     if (requirement == -1) {
-        return 0;
+        return PTY_AFFINITY_MATCH_NOT_FOUND;
     }
     switch (requirement & 0xF0000000) {
     case 0:
         if (requirement == 0 || datUnitHasSkill(unit, requirement) != 0) {
-            return 1;
+            return PTY_AFFINITY_MATCH_FOUND;
         }
         break;
     case 0x10000000:
         requirementValue = requirement & 0x0FFFFFFF;
         for (i = 0; i < 24; i++) {
             if (unit->effectData[i] != 0 && (1 << datCommandSelectors[unit->effectData[i]].stat) == requirementValue) {
-                return 1;
+                return PTY_AFFINITY_MATCH_FOUND;
             }
         }
         break;
     case 0x20000000:
         requirementValue = requirement & 0x0FFFFFFF;
         if (requirementValue == 0 || requirementValue == (1 << unit->unitId)) {
-            return 1;
+            return PTY_AFFINITY_MATCH_FOUND;
         }
         break;
     case 0x40000000:
@@ -1464,16 +1465,16 @@ s32 ptyUnitMatchesAffinityRequirement(const datUnitWork_t *unit, s32 affinity, u
             s16 skill = D_00435E28[requirementValue].skills[i];
 
             if (skill >= 0 && datUnitHasSkill(unit, skill)) {
-                return 1;
+                return PTY_AFFINITY_MATCH_FOUND;
             }
         }
         break;
     }
-    return 0;
+    return PTY_AFFINITY_MATCH_NOT_FOUND;
 }
 
 /* Try the six stored orders; success requires exactly the non-sentinel requirement count. */
-s32 ptyMatchAffinityPermutation(const datUnitWork_t *const *actors, s32 affinity) {
+PtyAffinityMatchResult ptyMatchAffinityPermutation(const datUnitWork_t *const *actors, s32 affinity) {
     s32 *requirementCursor = datAffinityRecords[affinity - DAT_AFFINITY_FIRST_COMMAND].requirements;
     u32 i;
     s32 requiredCount = 0;
@@ -1493,15 +1494,16 @@ s32 ptyMatchAffinityPermutation(const datUnitWork_t *const *actors, s32 affinity
         matchedCount = 0;
         for (i = 0, orderCursor = ptyAffinityPermutationOrders + orderOffset, actorCursor = actors; i < 3; i++, orderCursor++) {
             actor = *actorCursor++;
-            if (actor != 0 && ptyUnitMatchesAffinityRequirement(actor, affinity, *orderCursor) != 0) {
+            if (actor != 0 &&
+                ptyUnitMatchesAffinityRequirement(actor, affinity, *orderCursor) != PTY_AFFINITY_MATCH_NOT_FOUND) {
                 matchedCount++;
             }
         }
         if (requiredCount == matchedCount) {
-            return 1;
+            return PTY_AFFINITY_MATCH_FOUND;
         }
     }
-    return 0;
+    return PTY_AFFINITY_MATCH_NOT_FOUND;
 }
 
 void evtCopyRosterTableValue(datUnitWork_t *entry) {

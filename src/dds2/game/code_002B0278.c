@@ -3070,10 +3070,9 @@ void ptySkillMenuBuildLinkageSkills(dds3ProcessID_t *task) {
                 }
                 {
                     s32 unavailable = ptyMatchAffinityPermutation(frontline, skill);
-                    /* The permutation matcher returns only 0 or 1. A consumed
-                     * local keeps the inverted result as XOR, rather than a
-                     * comparison against a rematerialized loop constant. */
-                    unavailable ^= 1;
+                    /* The typed match result is inverted as XOR rather than
+                     * a comparison to preserve the emitted predicate. */
+                    unavailable ^= PTY_AFFINITY_MATCH_FOUND;
                     if (unavailable != 0) {
                         node->flags48 |= 1;
                     }

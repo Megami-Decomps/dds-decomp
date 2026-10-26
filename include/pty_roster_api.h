@@ -22,6 +22,15 @@ enum {
 
 /* Return whether a matching roster record was removed. */
 PtyRemoveUnitResult ptyRemoveUnit(s32 unitId);
-s32 ptyMatchAffinityPermutation(const struct datUnitWork_t *const *actors, s32 affinity);
+
+typedef u8 PtyAffinityMatchResult;
+enum {
+    PTY_AFFINITY_MATCH_NOT_FOUND = 0,
+    PTY_AFFINITY_MATCH_FOUND = 1,
+};
+
+/* Report whether any actor ordering satisfies the affinity requirements. */
+PtyAffinityMatchResult ptyMatchAffinityPermutation(
+    const struct datUnitWork_t *const *actors, s32 affinity);
 
 #endif

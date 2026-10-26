@@ -345,7 +345,7 @@ s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, BtlUnit **first
                     continue;
                 }
                 statRecords[2] = &partner->partyRecord;
-                if (ptyMatchAffinityPermutation(statRecords, command) == 0) {
+                if (ptyMatchAffinityPermutation(statRecords, command) == PTY_AFFINITY_MATCH_NOT_FOUND) {
                     continue;
                 }
                 if (first != NULL) {
@@ -358,7 +358,7 @@ s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, BtlUnit **first
             }
         } else {
             statRecords[2] = 0;
-            if (ptyMatchAffinityPermutation(statRecords, command) != 0) {
+            if (ptyMatchAffinityPermutation(statRecords, command) != PTY_AFFINITY_MATCH_NOT_FOUND) {
                 if (first != NULL) {
                     *first = candidate;
                 }
