@@ -229,7 +229,7 @@ typedef struct BrsSkillPackageWork {
     u32 selectionInitialized;
     s32 iconFade;
     u32 commitComplete;
-    u32 crossedSteps;
+    u32 unlockedSkillSlotCount;
     s32 rewardMode;
     s32 rewardIndex;
 #ifdef VERSION_DDS2

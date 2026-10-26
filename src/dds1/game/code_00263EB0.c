@@ -217,10 +217,11 @@ u32 mnuShowProgressLevelChangePopup(dds3ProcessID_t *task) {
     BrsSkillPackageWork *work = (BrsSkillPackageWork *)dds3GetProcessData(task);
     BrsRewardRow *state = work->selectedRewardRow;
     datUnitWork_t *entry = state->unit;
-    u32 step = brsGetLevelStepCrossedBy(entry->level - state->values.amount, state->values.amount);
+    u32 unlockedSkillSlotCount = brsGetLevelStepCrossedBy(
+        entry->level - state->values.amount, state->values.amount);
 
-    work->crossedSteps = step;
-    if (step != 0) {
+    work->unlockedSkillSlotCount = unlockedSkillSlotCount;
+    if (unlockedSkillSlotCount != PTY_SKILL_SLOT_COUNT_NONE) {
         sprintf(text, D_003BC558, D_003BAA70 + entry->unitId * 17);
         evtCopyEntryStringToActiveWindow(0, text);
         sprintf(text, D_003BC550, brsGetLevelStepForValue(entry->level));

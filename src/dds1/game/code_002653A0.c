@@ -16,12 +16,12 @@
 extern u32 ptyBuildProfileCapSkillList(datUnitWork_t *, PrfSkillList *);
 
 
-typedef struct LevelStep {
-    u8 threshold;
-    u8 value;
-} LevelStep;
+typedef struct PtySkillSlotThreshold {
+    u8 level;
+    PtySkillSlotCount slotCount;
+} PtySkillSlotThreshold;
 
-extern LevelStep brsLevelStepThresholds[];
+extern const PtySkillSlotThreshold brsSkillSlotCountThresholds[];
 
 extern s32 ptyCalcLevelUps(datUnitWork_t *);
 extern u32 ptyComputeTotalExp(datUnitWork_t *, s32);
@@ -69,21 +69,22 @@ void brsDecaySharedAnimCounter(BrsSkillPackageWork *animationState) {
     brsStepAnimDecay(animationState);
 }
 
-u8 brsGetLevelStepForValue(s32 level) {
+PtySkillSlotCount brsGetLevelStepForValue(s32 level) {
     s32 i;
 
     for (i = 2; i >= 0; i--) {
-        if (level >= brsLevelStepThresholds[i].threshold) {
-            return brsLevelStepThresholds[i].value;
+        if (level >= brsSkillSlotCountThresholds[i].level) {
+            return brsSkillSlotCountThresholds[i].slotCount;
         }
     }
-    return brsLevelStepThresholds[0].value;
+    return brsSkillSlotCountThresholds[0].slotCount;
 }
 
-u8 brsGetLevelStepCrossedBy(s32 startingLevel, s32 levelGain) {
-    u8 *table = (u8 *)brsLevelStepThresholds;
+PtySkillSlotCount brsGetLevelStepCrossedBy(s32 startingLevel,
+                                                          s32 levelGain) {
+    const u8 *table = (const u8 *)brsSkillSlotCountThresholds;
     s32 i = 2;
-    u8 *limit = table + 4;
+    const u8 *limit = table + 4;
     s32 nextPosition = startingLevel + levelGain;
     do {
         if (startingLevel < *limit && nextPosition >= *limit) {
@@ -91,7 +92,7 @@ u8 brsGetLevelStepCrossedBy(s32 startingLevel, s32 levelGain) {
         }
         limit -= 2;
     } while (--i >= 0);
-    return 0;
+    return PTY_SKILL_SLOT_COUNT_NONE;
 }
 
 u32 func_00265590(void) {

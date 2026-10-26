@@ -71,24 +71,25 @@ void brsDecaySharedAnimCounter(BrsSkillPackageWork *work) {
     brsStepAnimDecay(work);
 }
 
-extern u8 brsLevelStepThresholds[];
+extern const u8 brsSkillSlotCountThresholds[];
 
-/* Read the value paired with the highest of three thresholds not above input. */
-u8 brsGetLevelStepForValue(s32 level) {
+/* Return the slot capacity paired with the highest threshold not above level. */
+PtySkillSlotCount brsGetLevelStepForValue(s32 level) {
     s32 i;
 
     for (i = 2; i >= 0; i--) {
-        if (level >= brsLevelStepThresholds[i * 2]) {
-            return brsLevelStepThresholds[i * 2 + 1];
+        if (level >= brsSkillSlotCountThresholds[i * 2]) {
+            return brsSkillSlotCountThresholds[i * 2 + 1];
         }
     }
-    return brsLevelStepThresholds[1];
+    return brsSkillSlotCountThresholds[1];
 }
 
-u8 brsGetLevelStepCrossedBy(s32 startingLevel, s32 levelGain) {
-    u8 *table = brsLevelStepThresholds;
+PtySkillSlotCount brsGetLevelStepCrossedBy(s32 startingLevel,
+                                                          s32 levelGain) {
+    const u8 *table = brsSkillSlotCountThresholds;
     s32 i = 2;
-    u8 *limit = table + 4;
+    const u8 *limit = table + 4;
     s32 nextPosition = startingLevel + levelGain;
     do {
         if (startingLevel < *limit && nextPosition >= *limit) {
@@ -96,7 +97,7 @@ u8 brsGetLevelStepCrossedBy(s32 startingLevel, s32 levelGain) {
         }
         limit -= 2;
     } while (--i >= 0);
-    return 0;
+    return PTY_SKILL_SLOT_COUNT_NONE;
 }
 
 u32 func_0029CE80(void) {

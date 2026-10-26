@@ -583,7 +583,7 @@ extern const u8 *D_003BAA8C;
 void mnuDrawPartyInfoSprites(s32 x, s32 y, s32 depth, datUnitWork_t *entry,
                              MenuSpriteState *spriteState, s32 surface) {
     u32 opacity;
-    s32 step;
+    s32 skillSlotCount;
     s32 rowCount;
     s32 frameId;
     s32 horizontal;
@@ -593,7 +593,7 @@ void mnuDrawPartyInfoSprites(s32 x, s32 y, s32 depth, datUnitWork_t *entry,
     struct _FRQ *glyph;
 
     opacity = spriteState->initialValue;
-    step = brsGetLevelStepForValue(entry->level);
+    skillSlotCount = brsGetLevelStepForValue(entry->level);
     {
         s32 frameIds[3] = {0x34, 0x33, 0x21};
         s32 origin[2] = {0xED0, 0x9C8};
@@ -602,12 +602,12 @@ void mnuDrawPartyInfoSprites(s32 x, s32 y, s32 depth, datUnitWork_t *entry,
             {{0xF70, 0x9F0}, {0x17E0, 0x9F0}},
             {{0xF70, 0xA18}, {0x17E0, 0xA18}}
         };
-        switch (step) {
-        case 4:
+        switch (skillSlotCount) {
+        case PTY_SKILL_SLOT_COUNT_INITIAL:
             rowCount = 2;
             frameId = frameIds[0];
             break;
-        case 6:
+        case PTY_SKILL_SLOT_COUNT_AFTER_FIRST_UNLOCK:
             rowCount = 3;
             frameId = frameIds[1];
             break;

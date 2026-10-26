@@ -226,8 +226,9 @@ s32 mnuShowProgressLevelChangePopup(dds3ProcessID_t *task) {
     context = (BrsSkillPackageWork *)dds3GetProcessData(task);
     item = context->selectedRewardRow->unit;
     gain = context->selectedRewardRow->values.amount;
-    context->crossedSteps = brsGetLevelStepCrossedBy(item->level - gain, gain);
-    if (context->crossedSteps != 0) {
+    context->unlockedSkillSlotCount =
+        brsGetLevelStepCrossedBy(item->level - gain, gain);
+    if (context->unlockedSkillSlotCount != PTY_SKILL_SLOT_COUNT_NONE) {
         sprintf(text, D_004379B8, datUnitNames + item->unitId * 17);
         evtCopyEntryStringToActiveWindow(0, text);
         sprintf(text, D_004379B0, brsGetLevelStepForValue(item->level));
