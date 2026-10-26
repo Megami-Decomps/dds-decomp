@@ -49,6 +49,7 @@
 #include "fld_spawn_event.h"
 #include "sdf_resource.h"
 #include "dds3obj.h"
+#include "evt_world_object_api.h"
 #include "dds3_world_value.h"
 #include "sdf_texture_file.h"
 #include "sdf_texture_primary_buffer_api.h"
@@ -1694,8 +1695,6 @@ extern void fldMakeObjectBasic3(void);
 extern void fldInitializeActorMotionSlots(void);
 
 extern DevRequest *sndLoadNamedOffsetResourceList(const char *name);
-
-extern s32 dds3SceneBasicLoadScriptFile_FromMem(dds3Basic_t *worldNode, struct sdfMemHandle_t *resourceHandle);
 
 extern char D_003BAC98[];
 
