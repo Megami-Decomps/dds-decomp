@@ -5285,7 +5285,7 @@ extern void mdlPropagateObjectFlag(void);
 extern void mdlSetListedObjectFlag(void);
 
 void btlSetCameraCommandMode(u32 kind, BtlTask *link, BtlUnit *valueA,
-                             BtlUnit *valueB, s32 category) {
+                             BtlUnit *valueB, BtlActionCode actionCode) {
     BtlState *scene = (BtlState *)btlGetRuntime();
     BtlCameraModeDefinition *definition;
     u32 previousKind = scene->cameraCommand.status;
@@ -5301,7 +5301,7 @@ void btlSetCameraCommandMode(u32 kind, BtlTask *link, BtlUnit *valueA,
     scene->cameraCommand.linkedA = valueA;
     scene->cameraCommand.linkedB = valueB;
     scene->cameraCommand.actionKind = previousKind;
-    scene->cameraCommand.actionCode = category;
+    scene->cameraCommand.actionCode = actionCode;
     scene->cameraCommand.task = link;
     scene->cameraCommand.selectedUnit = NULL;
     scene->cameraCommand.status = kind;
@@ -5565,7 +5565,7 @@ s32 btlAdjustCameraDirectionForPlane(BtlCamState *state, f32 height) {
 }
 
 u32 btlExecuteCommandSoundTask(BtlCommandSoundTaskArgs *arguments) {
-    btlSetCameraCommandMode(arguments->mode, arguments->actor, arguments->unitA, arguments->unitB, arguments->category);
+    btlSetCameraCommandMode(arguments->mode, arguments->actor, arguments->unitA, arguments->unitB, arguments->actionCode);
     return 1;
 }
 
@@ -5585,21 +5585,21 @@ BtlRuntimeTask *btlCreateCommandSoundTask(BtlTask *actor, s32 variant) {
     arguments->mode = variant;
     arguments->unitA = NULL;
     arguments->unitB = NULL;
-    arguments->category = 0;
+    arguments->actionCode = 0;
     return task;
 }
 
-BtlRuntimeTask *btlCreateTargetedCommandSoundTask(BtlTask *actor, s32 variant, u32 target) {
+BtlRuntimeTask *btlCreateTargetedCommandSoundTask(BtlTask *actor, s32 variant, BtlActionCode actionCode) {
     BtlRuntimeTask *task = btlCreateCommandSoundTask(actor, variant);
     BtlCommandSoundTaskArgs *arguments = btlGetTaskArguments(task);
-    arguments->category = target;
+    arguments->actionCode = actionCode;
     return task;
 }
 
-BtlRuntimeTask *btlCreateCommandSoundWithArguments(BtlTask *actor, BtlUnit *unitA, BtlUnit *unitB, u32 mode, u32 category) {
+BtlRuntimeTask *btlCreateCommandSoundWithArguments(BtlTask *actor, BtlUnit *unitA, BtlUnit *unitB, u32 mode, BtlActionCode actionCode) {
     BtlRuntimeTask *task = btlCreateCommandSoundTask(actor, mode);
     BtlCommandSoundTaskArgs *arguments = btlGetTaskArguments(task);
-    arguments->category = category;
+    arguments->actionCode = actionCode;
     arguments->unitA = unitA;
     arguments->unitB = unitB;
     return task;

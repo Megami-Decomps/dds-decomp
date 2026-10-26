@@ -936,7 +936,7 @@ void btlEnterAttackActionState(void) {
 /* ATTACK command scheduling; descriptive names inferred from retail consumers. */
 extern EventRosterStat *datRosterDetails;
 extern f32 btlGetActorEffectScale(BtlTask *);
-extern BtlRuntimeTask *btlCreateTargetedCommandSoundTask(BtlTask *, s32, u32);
+extern BtlRuntimeTask *btlCreateTargetedCommandSoundTask(BtlTask *, s32, BtlActionCode actionCode);
 extern BtlRuntimeTask *btlAllocateApproachTargetTask(BtlUnit *, BtlUnit *, f32);
 extern s32 btlIsBattleRecordEligible(BtlUnit *, BtlUnit *, s32, s32);
 extern SoundResourceNode *sndCreateResourceNode(SoundMixer *sourceMixer);
@@ -1436,7 +1436,7 @@ extern BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(const void *, u32);
 s32 btlGetActionDefaultOrOverride(s32 skillIndex);
 extern BtlRuntimeTask *btlCreateLinkageFormationTask(BtlTask *, BtlUnit *,
         BtlUnit *, u32, u32);
-extern BtlRuntimeTask *btlCreateCommandSoundWithArguments(BtlTask *, BtlUnit *, BtlUnit *, u32, u32);
+extern BtlRuntimeTask *btlCreateCommandSoundWithArguments(BtlTask *, BtlUnit *, BtlUnit *, u32, BtlActionCode actionCode);
 s32 sndLookupResourceType(BtlUnit *actor, s32 resourceIndex);
 BtlRuntimeTask *sndCreateActorEffectTask(SoundResourceNode *source,
         BtlUnit *owner, u32 duration);

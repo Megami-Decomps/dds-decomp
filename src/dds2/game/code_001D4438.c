@@ -255,6 +255,7 @@ extern void datAddHp();
 
 #include "brs_task_poll_done_api.h"
 #include "btl_target_selection_state_api.h"
+#include "btl_action_code.h"
 
 extern s32 mnuGetSoundBufferStateLocked(void);
 extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
@@ -1408,7 +1409,7 @@ extern BtlRuntimeTask *btlCreateImmediateCompletionTask(void);
 extern BtlRuntimeTask *btlCreateLinkedEffectTask(BtlUnit *owner, s32 value, u8 kind);
 extern BtlRuntimeTask *btlCreateRefreshEligibleActorsTask(void);
 extern BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
-extern BtlRuntimeTask *btlCreateTargetedCommandSoundTask(ActionStateLink *, s32 mode, u32 command);
+extern BtlRuntimeTask *btlCreateTargetedCommandSoundTask(ActionStateLink *, s32 mode, BtlActionCode actionCode);
 extern BtlRuntimeTask *btlCreateUpdateUnitEffectsTask(void);
 extern BtlRuntimeTask *btlCreateWaitUnitListIdleTask(u32 value);
 extern f32 btlGetActorStateScale(ActionStateLink *task);
@@ -1930,7 +1931,7 @@ s32 btlGetActionDefaultOrOverride(s32 skillIndex);
 BtlRuntimeTask *sndCreateAcquireTask(s32 value, s32 option);
 BtlRuntimeTask *btlCreateLinkageFormationTask(ActionStateLink *link,
         BtlUnit *firstActor, BtlUnit *secondActor, u32 skillId, u32 flags);
-BtlRuntimeTask *btlCreateCommandSoundWithArguments(ActionStateLink *, BtlUnit *, BtlUnit *, s32, s32);
+BtlRuntimeTask *btlCreateCommandSoundWithArguments(ActionStateLink *, BtlUnit *, BtlUnit *, s32, BtlActionCode actionCode);
 s32 sndLookupResourceType(BtlUnit *actor, s32 resourceIndex);
 BtlRuntimeTask *sndCreateActorEffectTask(SoundResourceNode *source,
         BtlUnit *owner, u32 duration);

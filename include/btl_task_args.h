@@ -1,6 +1,7 @@
 #ifndef BTL_TASK_ARGS_H
 #define BTL_TASK_ARGS_H
 
+#include "btl_action_code.h"
 #include "common.h"
 
 struct BtlUnit;
@@ -84,14 +85,14 @@ typedef struct BtlCommandSoundTaskArgs {
     struct BtlUnit *unitA; /* 0x04: optional first linked camera unit. */
     struct BtlUnit *unitB; /* 0x08: optional second linked camera unit. */
     u32 mode; /* 0x0C: camera-command mode. */
-    s32 category; /* 0x10: targeted command category. */
+    BtlActionCode actionCode; /* 0x10: action-table selector forwarded to cameraCommand.actionCode. */
 } BtlCommandSoundTaskArgs;
 typedef char BtlCommandSoundTaskArgsSizeCheck[
     sizeof(BtlCommandSoundTaskArgs) == 0x14 ? 1 : -1];
 typedef char BtlCommandSoundTaskArgsModeOffsetCheck[
     (u32)&((BtlCommandSoundTaskArgs *)0)->mode == 0x0C ? 1 : -1];
-typedef char BtlCommandSoundTaskArgsCategoryOffsetCheck[
-    (u32)&((BtlCommandSoundTaskArgs *)0)->category == 0x10 ? 1 : -1];
+typedef char BtlCommandSoundTaskArgsActionCodeOffsetCheck[
+    (u32)&((BtlCommandSoundTaskArgs *)0)->actionCode == 0x10 ? 1 : -1];
 
 /* The linked-number task allocates the full 0x34-byte variant; the counter
  * task uses the common prefix and its 0x2C-byte counter variant. */
