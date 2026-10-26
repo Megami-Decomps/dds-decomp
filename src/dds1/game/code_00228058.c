@@ -49,12 +49,12 @@ extern void fldSetFadeTarget(s32 area, s32 targetMode, s32 duration);
 extern void evtSetSkyAlpha(s32 duration, s32 target);
 
 s32 scrGetIntPara(s32 idx);
-extern struct dds3Basic_t *evtSearchBasic(s32 objectKind, s32 worldObjectKey);
+extern struct dds3Basic_t *evtSearchBasic(s32 worldKind, s32 worldObjectKey);
 extern EvtPathStatus evtCheckPathStat(struct dds3Basic_t *object);
 
 s32 evtCommand_LIGHT_PATH_WAIT(void) {
     EvtPathStatus status = evtCheckPathStat(
-        evtSearchBasic(9, scrGetIntPara(0)));
+        evtSearchBasic(EFF_WORLD_KIND_LIGHT, scrGetIntPara(0)));
 
     switch (status) {
     case EVT_PATH_STATUS_AT_ENDPOINT:

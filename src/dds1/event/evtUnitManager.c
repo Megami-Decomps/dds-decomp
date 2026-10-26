@@ -1624,11 +1624,11 @@ EvtUnitVectorSlotAuxCoordinatesResult evtFindUnitSlotAuxCoordinates(
     return EVT_UNIT_VECTOR_SLOT_AUX_COORDINATES_NOT_FOUND;
 }
 
-dds3Basic_t *evtSearchBasic(s32 objectKind, s32 worldObjectKey) {
+dds3Basic_t *evtSearchBasic(s32 worldKind, s32 worldObjectKey) {
     dds3Basic_t *world;
 
     world = dds3GetActiveScene();
-    return dds3SearchSceneBasic(world, worldObjectKey, objectKind);
+    return dds3SearchSceneBasic(world, worldObjectKey, worldKind);
 }
 
 u32 evtCommand_MODEL_PLAYER(void) {

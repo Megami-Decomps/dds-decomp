@@ -1086,7 +1086,7 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
                 }
                 length = 200.0f;
             } else {
-                target = dds3SearchSceneBasic(dds3GetActiveScene(), data->activeId, 9);
+                target = dds3SearchSceneBasic(dds3GetActiveScene(), data->activeId, EFF_WORLD_KIND_LIGHT);
                 transition = dds3GetUnitHandleObjectBasic(object);
                 if (sdfModelGetMarkPos(transition->owner->inner, 0)) {
                     SDF_VU0_STOREVECTOR_NOMEM(anchorPosition);

@@ -30,13 +30,11 @@
 #include "evt_solar.h"
 #include "dds3_world_counter.h"
 
-/* Fixed dispatch payload sizes and the native six-kind world-object scan. */
+/* Fixed dispatch payload sizes used by admin-sequence requests. */
 enum {
     EVT_SCALAR_REQUEST_SIZE = 4,
     EVT_PAIRED_REQUEST_SIZE = 8,
-    EVT_FIELD_SEQUENCE_REQUEST_SIZE = 0xA0,
-    EVT_WORLD_OBJECT_KIND_FIRST = 4,
-    EVT_WORLD_OBJECT_KIND_LIMIT = 10
+    EVT_FIELD_SEQUENCE_REQUEST_SIZE = 0xA0
 };
 
 /* Preserve process handles in the script VM's signed integer result slot. */
@@ -52,8 +50,9 @@ static inline dds3ProcessID_t *evtProcessHandleFromVmInteger(s32 value)
 
 /* Script VM helpers (see script/scrCommonCommand.c for the convention). */
 s32 scrGetIntPara(s32 idx);
-
-dds3Basic_t *evtSearchBasic(s32 objectKind, s32 worldObjectKey);
+/* Selects both the world-node tag and its per-kind scene slot. */
+typedef s32 EffWorldKind;
+dds3Basic_t *evtSearchBasic(EffWorldKind worldKind, s32 worldObjectKey);
 
 s32 dds3EffectObjectBasicLinkObject(dds3Basic_t *obj, dds3Basic_t *owner);
 s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *obj, dds3Basic_t *first,
@@ -149,14 +148,14 @@ s32 evtCommand_EFFMG1_POS(void) {
     dds3Basic_t *sourcePoint0;
     dds3Basic_t *sourcePoint1;
 
-    primaryEffect = evtSearchBasic(7, scrGetIntPara(0));
+    primaryEffect = evtSearchBasic(EFF_WORLD_KIND_EFFECT_OBJECT, scrGetIntPara(0));
     if (primaryEffect == NULL) {
         evtPrintDeveloperConsoleMessage("EFFMG1_POS mg1 ID error!\n");
         return 1;
     }
 
-    sourcePoint0 = evtSearchBasic(7, scrGetIntPara(1));
-    sourcePoint1 = evtSearchBasic(7, scrGetIntPara(2));
+    sourcePoint0 = evtSearchBasic(EFF_WORLD_KIND_EFFECT_OBJECT, scrGetIntPara(1));
+    sourcePoint1 = evtSearchBasic(EFF_WORLD_KIND_EFFECT_OBJECT, scrGetIntPara(2));
     if (sourcePoint0 == NULL || sourcePoint1 == NULL) {
         evtPrintDeveloperConsoleMessage("EFFMG1_POS point ID not found!\n");
         return 1;
@@ -176,16 +175,16 @@ s32 evtCommand_EFFMG2_POS(void) {
     dds3Basic_t *sourcePoint2;
     dds3Basic_t *sourcePoint3;
 
-    primaryEffect = evtSearchBasic(7, scrGetIntPara(0));
+    primaryEffect = evtSearchBasic(EFF_WORLD_KIND_EFFECT_OBJECT, scrGetIntPara(0));
     if (primaryEffect == NULL) {
         evtPrintDeveloperConsoleMessage("EFFMG2_POS mg2 ID error!\n");
         return 1;
     }
 
-    sourcePoint0 = evtSearchBasic(7, scrGetIntPara(1));
-    sourcePoint1 = evtSearchBasic(7, scrGetIntPara(2));
-    sourcePoint2 = evtSearchBasic(7, scrGetIntPara(3));
-    sourcePoint3 = evtSearchBasic(7, scrGetIntPara(4));
+    sourcePoint0 = evtSearchBasic(EFF_WORLD_KIND_EFFECT_OBJECT, scrGetIntPara(1));
+    sourcePoint1 = evtSearchBasic(EFF_WORLD_KIND_EFFECT_OBJECT, scrGetIntPara(2));
+    sourcePoint2 = evtSearchBasic(EFF_WORLD_KIND_EFFECT_OBJECT, scrGetIntPara(3));
+    sourcePoint3 = evtSearchBasic(EFF_WORLD_KIND_EFFECT_OBJECT, scrGetIntPara(4));
 
     if (sourcePoint0 == NULL || sourcePoint1 == NULL || sourcePoint2 == NULL || sourcePoint3 == NULL) {
         evtPrintDeveloperConsoleMessage("EFFMG2_POS point ID not found!\n");
@@ -204,7 +203,7 @@ s32 evtCommand_EFFECT_ON(void)
     dds3Basic_t *effectObject;
 
     effectId = scrGetIntPara(0);
-    effectObject = evtSearchBasic(7, effectId);
+    effectObject = evtSearchBasic(EFF_WORLD_KIND_EFFECT_OBJECT, effectId);
     if (effectObject != NULL) {
         evtEffectLoopControl(effectObject, 1);
         dds3EffectObjectBasicStatOn(effectObject, 1);
@@ -212,21 +211,21 @@ s32 evtCommand_EFFECT_ON(void)
     return 1;
 }
 
-/* Bind the selected effect path to the first owner found in kinds 4..9.
+/* Bind the selected effect path to the first owner found from camera through light.
  * Missing paths or owners complete the command without binding anything. */
 s32 evtCommand_EFFECT_LINK(void) {
-    dds3Basic_t *effectPath = evtSearchBasic(7, scrGetIntPara(0));
+    dds3Basic_t *effectPath = evtSearchBasic(EFF_WORLD_KIND_EFFECT_OBJECT, scrGetIntPara(0));
     dds3Basic_t *owner;
-    s32 objectKind;
+    EffWorldKind worldKind;
 
     if (effectPath == NULL) {
         return 1;
     }
-    objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
+    worldKind = EFF_WORLD_KIND_CAMERA;
     do {
-        owner = evtSearchBasic(objectKind, scrGetIntPara(1));
-        objectKind++;
-    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && owner == NULL);
+        owner = evtSearchBasic(worldKind, scrGetIntPara(1));
+        worldKind++;
+    } while (worldKind < EFF_WORLD_KIND_SCRIPT_OBJECT && owner == NULL);
     if (owner == NULL) {
         return 1;
     }
@@ -236,18 +235,18 @@ s32 evtCommand_EFFECT_LINK(void) {
 
 /* Search the same owner kinds, then bind with the VM's third entry argument. */
 s32 evtCommand_EFFECT_LINK2(void) {
-    dds3Basic_t *effectPath = evtSearchBasic(7, scrGetIntPara(0));
+    dds3Basic_t *effectPath = evtSearchBasic(EFF_WORLD_KIND_EFFECT_OBJECT, scrGetIntPara(0));
     dds3Basic_t *owner;
-    s32 objectKind;
+    EffWorldKind worldKind;
 
     if (effectPath == NULL) {
         return 1;
     }
-    objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
+    worldKind = EFF_WORLD_KIND_CAMERA;
     do {
-        owner = evtSearchBasic(objectKind, scrGetIntPara(1));
-        objectKind++;
-    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && owner == NULL);
+        owner = evtSearchBasic(worldKind, scrGetIntPara(1));
+        worldKind++;
+    } while (worldKind < EFF_WORLD_KIND_SCRIPT_OBJECT && owner == NULL);
     if (owner == NULL) {
         return 1;
     }
@@ -261,7 +260,7 @@ s32 evtCommand_EFFECT_UNLINK(void)
     dds3Basic_t *effectObject;
 
     effectId = scrGetIntPara(0);
-    effectObject = evtSearchBasic(7, effectId);
+    effectObject = evtSearchBasic(EFF_WORLD_KIND_EFFECT_OBJECT, effectId);
     if (effectObject == NULL) {
         return 1;
     }
@@ -275,7 +274,7 @@ s32 evtCommand_EFFECT_OFF(void)
     dds3Basic_t *effectObject;
 
     effectId = scrGetIntPara(0);
-    effectObject = evtSearchBasic(7, effectId);
+    effectObject = evtSearchBasic(EFF_WORLD_KIND_EFFECT_OBJECT, effectId);
     if (effectObject != NULL) {
         evtEffectLoopControl(effectObject, 0);
     }
@@ -286,12 +285,12 @@ s32 evtCommand_EFFECT_PATH_MOVE(void) {
     dds3Basic_t *effect;
     dds3Basic_t *path;
 
-    effect = evtSearchBasic(7, scrGetIntPara(0));
+    effect = evtSearchBasic(EFF_WORLD_KIND_EFFECT_OBJECT, scrGetIntPara(0));
     if (effect == NULL) {
         evtPrintDeveloperConsoleMessage("EFFECT_PATH_MOVE not found eff!\n");
         return 1;
     }
-    path = evtSearchBasic(0x10, scrGetIntPara(1));
+    path = evtSearchBasic(EFF_WORLD_KIND_ACTION_10, scrGetIntPara(1));
     if (path == NULL) {
         evtPrintDeveloperConsoleMessage("EFFECT_PATH_MOVE not found path!\n", effect);
         return 1;
@@ -304,7 +303,7 @@ extern EvtPathStatus evtCheckPathStat(dds3Basic_t *object);
 
 ScrCommandResult evtCommand_EFFECT_PATH_WAIT(void) {
     s32 effectId = scrGetIntPara(0);
-    dds3Basic_t *effectObject = evtSearchBasic(7, effectId);
+    dds3Basic_t *effectObject = evtSearchBasic(EFF_WORLD_KIND_EFFECT_OBJECT, effectId);
     EvtPathStatus scaleStatus;
 
     if (effectObject == NULL) {
@@ -622,7 +621,7 @@ s32 evtCommandAddEffectUnitToWorld(void) {
     if (scrGetIntPara(0) < 0) {
         cameraOwner = fldGetPlayerSceneState();
     } else {
-        cameraOwner = evtSearchBasic(4, scrGetIntPara(0));
+        cameraOwner = evtSearchBasic(EFF_WORLD_KIND_CAMERA, scrGetIntPara(0));
     }
     if (cameraOwner == NULL) {
         return 1;
@@ -638,7 +637,7 @@ s32 evtCommand_CAM_SEL_FOVY(void) {
     if (scrGetIntPara(0) < 0) {
         cameraOwner = fldGetPlayerSceneState();
     } else {
-        cameraOwner = evtSearchBasic(4, scrGetIntPara(0));
+        cameraOwner = evtSearchBasic(EFF_WORLD_KIND_CAMERA, scrGetIntPara(0));
         cameraData = cameraOwner->data;
         cameraData->fovUpdatePending |= 1;
     }
@@ -657,13 +656,13 @@ s32 evtCommand_CAM_PATH_MOVE(void) {
     if (scrGetIntPara(0) < 0) {
         owner = fldGetPlayerSceneState();
     } else {
-        owner = evtSearchBasic(4, scrGetIntPara(0));
+        owner = evtSearchBasic(EFF_WORLD_KIND_CAMERA, scrGetIntPara(0));
     }
     if (owner == NULL) {
         printf("CAM_PATH_MOVE error!\n");
         return 1;
     }
-    path = evtSearchBasic(0x10, scrGetIntPara(1));
+    path = evtSearchBasic(EFF_WORLD_KIND_ACTION_10, scrGetIntPara(1));
     if (path == NULL) {
         printf("CAM_PATH_MOVE error!\n");
         return 1;
@@ -683,7 +682,7 @@ ScrCommandResult evtCommand_CAM_PATH_WAIT(void) {
     if (scrGetIntPara(0) < 0) {
         cameraOwner = fldGetPlayerSceneState();
     } else {
-        cameraOwner = evtSearchBasic(4, scrGetIntPara(0));
+        cameraOwner = evtSearchBasic(EFF_WORLD_KIND_CAMERA, scrGetIntPara(0));
     }
     if (cameraOwner == NULL) {
         return 1;
@@ -724,7 +723,7 @@ s32 evtCommand_CAM_CLS(void)
     dds3Basic_t *cameraObject;
 
     cameraObjectId = scrGetIntPara(0);
-    cameraObject = evtSearchBasic(4, cameraObjectId);
+    cameraObject = evtSearchBasic(EFF_WORLD_KIND_CAMERA, cameraObjectId);
     if (cameraObject == NULL) {
         return 1;
     }
@@ -740,7 +739,7 @@ s32 evtCommand_CAM_POS_XYZ(void) {
     if (scrGetIntPara(0) < 0) {
         cameraObject = fldGetPlayerSceneState();
     } else {
-        cameraObject = evtSearchBasic(4, scrGetIntPara(0));
+        cameraObject = evtSearchBasic(EFF_WORLD_KIND_CAMERA, scrGetIntPara(0));
     }
     if (cameraObject == NULL) {
         return 1;
@@ -762,7 +761,7 @@ s32 evtCommand_CAM_ROT_XYZ(void) {
     if (scrGetIntPara(0) < 0) {
         cameraObject = fldGetPlayerSceneState();
     } else {
-        cameraObject = evtSearchBasic(4, scrGetIntPara(0));
+        cameraObject = evtSearchBasic(EFF_WORLD_KIND_CAMERA, scrGetIntPara(0));
     }
     if (cameraObject == NULL) {
         return 1;
@@ -785,7 +784,7 @@ s32 evtCommand_CAM_ROT_Q(void) {
     if (scrGetIntPara(0) < 0) {
         cameraObject = fldGetPlayerSceneState();
     } else {
-        cameraObject = evtSearchBasic(4, scrGetIntPara(0));
+        cameraObject = evtSearchBasic(EFF_WORLD_KIND_CAMERA, scrGetIntPara(0));
     }
     if (cameraObject == NULL) {
         return 1;
@@ -811,7 +810,7 @@ s32 evtCommand_OBJ_PATH_MOVE(void) {
     Dds3SlotResource *resource;
     s32 roomNumber;
 
-    unit = evtSearchBasic(6, scrGetIntPara(0));
+    unit = evtSearchBasic(EFF_WORLD_KIND_EFFECT_TRANSFORM, scrGetIntPara(0));
     if (unit == NULL) {
         unit = fldGetMatter_From_ModelRangeID(scrGetIntPara(0));
         if (unit == NULL) {
@@ -821,7 +820,7 @@ s32 evtCommand_OBJ_PATH_MOVE(void) {
             return 1;
         }
     }
-    target = evtSearchBasic(0x10, scrGetIntPara(1));
+    target = evtSearchBasic(EFF_WORLD_KIND_ACTION_10, scrGetIntPara(1));
     if (target == NULL)
         return 1;
     objectData = dds3MatterObjectBasicGetControlWorkData(unit);
@@ -871,7 +870,7 @@ s32 evtCommandReattachObjectPath(void) {
     s32 targetId;
     s32 mode;
 
-    unit = evtSearchBasic(6, scrGetIntPara(0));
+    unit = evtSearchBasic(EFF_WORLD_KIND_EFFECT_TRANSFORM, scrGetIntPara(0));
     if (unit == NULL) {
         unit = fldGetMatter_From_ModelRangeID(scrGetIntPara(0));
         if (unit == NULL) {
@@ -882,7 +881,7 @@ s32 evtCommandReattachObjectPath(void) {
             return 1;
         }
     }
-    target = evtSearchBasic(0x10, scrGetIntPara(1));
+    target = evtSearchBasic(EFF_WORLD_KIND_ACTION_10, scrGetIntPara(1));
     if (target == NULL) {
         return 1;
     }
@@ -928,7 +927,7 @@ INCLUDE_RODATA(const s32, "event/evtCommand", D_00421E98);
 
 ScrCommandResult evtCommand_OBJ_PATH_WAIT(void) {
     s32 objectId = scrGetIntPara(0);
-    dds3Basic_t *worldObject = evtSearchBasic(6, objectId);
+    dds3Basic_t *worldObject = evtSearchBasic(EFF_WORLD_KIND_EFFECT_TRANSFORM, objectId);
     EvtPathStatus scaleStatus;
 
     if (worldObject == NULL) {
@@ -1134,12 +1133,12 @@ s32 evtCommand_PMV_RUN(void) {
 /* Look up a world unit across the six kinds before trying the fallback slot. */
 s32 evtCommand_PATH_STOP(void) {
     dds3Basic_t *slotObject;
-    s32 objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
+    EffWorldKind worldKind = EFF_WORLD_KIND_CAMERA;
 
     do {
-        slotObject = evtSearchBasic(objectKind, scrGetIntPara(0));
-        objectKind++;
-    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && slotObject == 0);
+        slotObject = evtSearchBasic(worldKind, scrGetIntPara(0));
+        worldKind++;
+    } while (worldKind < EFF_WORLD_KIND_SCRIPT_OBJECT && slotObject == 0);
     if (slotObject == 0) {
         slotObject = fldGetMatter_From_ModelRangeID(scrGetIntPara(0));
         if (slotObject == 0) {
@@ -1153,12 +1152,12 @@ s32 evtCommand_PATH_STOP(void) {
 /* Resume the first matching path controller, using the same fallback search. */
 s32 evtCommand_PATH_START(void) {
     dds3Basic_t *slotObject;
-    s32 objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
+    EffWorldKind worldKind = EFF_WORLD_KIND_CAMERA;
 
     do {
-        slotObject = evtSearchBasic(objectKind, scrGetIntPara(0));
-        objectKind++;
-    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && slotObject == 0);
+        slotObject = evtSearchBasic(worldKind, scrGetIntPara(0));
+        worldKind++;
+    } while (worldKind < EFF_WORLD_KIND_SCRIPT_OBJECT && slotObject == 0);
     if (slotObject == 0) {
         slotObject = fldGetMatter_From_ModelRangeID(scrGetIntPara(0));
         if (slotObject == 0) {
@@ -1175,12 +1174,12 @@ s32 evtCommand_PATH_RATE(void) {
     dds3Basic_t *worldNode;
     s32 roomNumber;
     const char *roomName;
-    s32 objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
+    EffWorldKind worldKind = EFF_WORLD_KIND_CAMERA;
 
     do {
-        worldNode = evtSearchBasic(objectKind, scrGetIntPara(0));
-        objectKind++;
-    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && worldNode == NULL);
+        worldNode = evtSearchBasic(worldKind, scrGetIntPara(0));
+        worldKind++;
+    } while (worldKind < EFF_WORLD_KIND_SCRIPT_OBJECT && worldNode == NULL);
     if (worldNode == NULL) {
         worldNode = fldGetMatter_From_ModelRangeID(scrGetIntPara(0));
         if (worldNode == NULL) {
@@ -1209,12 +1208,12 @@ s32 evtCommand_PATH_DIR(void) {
     dds3Basic_t *worldNode;
     s32 roomNumber;
     const char *roomName;
-    s32 objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
+    EffWorldKind worldKind = EFF_WORLD_KIND_CAMERA;
 
     do {
-        worldNode = evtSearchBasic(objectKind, scrGetIntPara(0));
-        objectKind++;
-    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && worldNode == NULL);
+        worldNode = evtSearchBasic(worldKind, scrGetIntPara(0));
+        worldKind++;
+    } while (worldKind < EFF_WORLD_KIND_SCRIPT_OBJECT && worldNode == NULL);
     if (worldNode == NULL) {
         worldNode = fldGetMatter_From_ModelRangeID(scrGetIntPara(0));
         if (worldNode == NULL) {
@@ -1240,14 +1239,14 @@ s32 evtCommand_PATH_DIR(void) {
 /* Enable the scaled-value flag on the first unit found, including the fallback. */
 s32 evtCommand_PATH_LOOP_ON(void)
 {
-    s32 objectKind;
+    EffWorldKind worldKind;
     dds3Basic_t *slotObject;
 
-    objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
+    worldKind = EFF_WORLD_KIND_CAMERA;
     do {
-        slotObject = evtSearchBasic(objectKind, scrGetIntPara(0));
-        objectKind++;
-    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && slotObject == NULL);
+        slotObject = evtSearchBasic(worldKind, scrGetIntPara(0));
+        worldKind++;
+    } while (worldKind < EFF_WORLD_KIND_SCRIPT_OBJECT && slotObject == NULL);
     if (slotObject == NULL) {
         slotObject = fldGetMatter_From_ModelRangeID(scrGetIntPara(0));
         if (slotObject == NULL) {
@@ -1261,14 +1260,14 @@ s32 evtCommand_PATH_LOOP_ON(void)
 /* Disable the scaled-value flag using the same six-kind and fallback search. */
 s32 evtCommand_PATH_LOOP_OFF(void)
 {
-    s32 objectKind;
+    EffWorldKind worldKind;
     dds3Basic_t *slotObject;
 
-    objectKind = EVT_WORLD_OBJECT_KIND_FIRST;
+    worldKind = EFF_WORLD_KIND_CAMERA;
     do {
-        slotObject = evtSearchBasic(objectKind, scrGetIntPara(0));
-        objectKind++;
-    } while (objectKind < EVT_WORLD_OBJECT_KIND_LIMIT && slotObject == NULL);
+        slotObject = evtSearchBasic(worldKind, scrGetIntPara(0));
+        worldKind++;
+    } while (worldKind < EFF_WORLD_KIND_SCRIPT_OBJECT && slotObject == NULL);
     if (slotObject == NULL) {
         slotObject = fldGetMatter_From_ModelRangeID(scrGetIntPara(0));
         if (slotObject == NULL) {
@@ -1280,9 +1279,9 @@ s32 evtCommand_PATH_LOOP_OFF(void)
 }
 
 s32 evtCommand_LIGHT_PATH_MOVE(void) {
-    dds3Basic_t *pathOwner = evtSearchBasic(9, scrGetIntPara(0));
+    dds3Basic_t *pathOwner = evtSearchBasic(EFF_WORLD_KIND_LIGHT, scrGetIntPara(0));
 
-    if (evtPathLinkAndMake(evtSearchBasic(0x10, scrGetIntPara(1)), pathOwner) != EVT_PATH_LINK_FAILED) {
+    if (evtPathLinkAndMake(evtSearchBasic(EFF_WORLD_KIND_ACTION_10, scrGetIntPara(1)), pathOwner) != EVT_PATH_LINK_FAILED) {
         return 1;
     }
     printf(D_00421FB0);

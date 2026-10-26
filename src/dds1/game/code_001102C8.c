@@ -253,20 +253,20 @@ void dds3VisibleSceneBasic(dds3Basic_t *object, s8 enabled) {
 extern dds3Basic_t *dds3AllocBasic(u32 kind);
 
 /* Create a member in the current secondary world's list for this kind. */
-dds3Basic_t *dds3AddSceneBasicData(s32 kind) {
+dds3Basic_t *dds3AddSceneBasicData(s32 worldKind) {
     dds3Basic_t *world;
     dds3Basic_t *node;
     EvtWorldSlot *list;
 
-    if ((u32)(kind - 2) >= 16) {
+    if ((u32)(worldKind - 2) >= 16) {
         return NULL;
     }
     world = dds3GetControlScene();
     if (world == NULL) {
         return NULL;
     }
-    list = &((EvtWorldTable *)world->data)->slots[kind];
-    node = dds3AllocBasic(kind);
+    list = &((EvtWorldTable *)world->data)->slots[worldKind];
+    node = dds3AllocBasic(worldKind);
     if (node == NULL) {
         return NULL;
     }
@@ -332,14 +332,14 @@ dds3Basic_t *dds3GetActiveUnitSceneBasic(dds3Basic_t *object) {
     return ((EvtWorldTable *)object->data)->playerObject;
 }
 
-/* Find the node with `key` in list `kind` of the object, or NULL. */
-dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *object, u32 key, s32 kind) {
+/* Find the node with `key` in the selected world-kind slot, or NULL. */
+dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *object, u32 key, s32 worldKind) {
     dds3Basic_t *node;
 
-    if (((EvtWorldTable *)object->data)->slots[kind].count == 0) {
+    if (((EvtWorldTable *)object->data)->slots[worldKind].count == 0) {
         return NULL;
     }
-    node = ((EvtWorldTable *)object->data)->slots[kind].head;
+    node = ((EvtWorldTable *)object->data)->slots[worldKind].head;
     do {
         if (key == node->key) {
             return node;
