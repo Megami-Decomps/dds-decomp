@@ -1668,7 +1668,7 @@ s32 btlFindReadyScriptResource(void) {
     if (battle->eventTaskId == -1 || battle->scriptHandle == 0) {
         return -1;
     }
-    if ((battle->battleFlags & 0x800) == 0 || battle->eventReady != 6) {
+    if ((battle->battleFlags & 0x800) == 0 || battle->terminalOutcome != 6) {
         return -1;
     }
     /* Retail calls and returns here instead of sibcalling: GCC does not sibcall

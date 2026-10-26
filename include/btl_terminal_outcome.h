@@ -12,7 +12,7 @@ enum {
 BtlTerminalOutcomeReadiness btlResolveBattleTerminalOutcome(void);
 
 /* Known outcomes published by btlResolveBattleTerminalOutcome. Other
- * override and scene-specific codes may also be stored in eventReady. */
+ * override and scene-specific codes may also be stored in terminalOutcome. */
 enum BtlTerminalOutcome {
     BTL_TERMINAL_OUTCOME_NONE = 0,
     BTL_TERMINAL_OUTCOME_WIN = 1,

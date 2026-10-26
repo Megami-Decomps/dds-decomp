@@ -654,7 +654,7 @@ s8 btlChooseStartVoice(void) {
         btlBossDebugPrintf(D_003A1DD8);
         return -1;
     }
-    if ((state->battleFlags & 0x4000) || state->eventReady == 5) {
+    if ((state->battleFlags & 0x4000) || state->terminalOutcome == 5) {
         btlBossDebugPrintf(D_003A1DF8);
         return -1;
     }

@@ -107,7 +107,7 @@ s32 btlHasScriptResource(void) {
     if (battle->scriptHandle == 0) {
         return 0;
     }
-    if ((battle->battleFlags & 0x800) == 0 || battle->eventReady != 1) {
+    if ((battle->battleFlags & 0x800) == 0 || battle->terminalOutcome != 1) {
         return 0;
     }
     return btlFindScriptResource(btlSecondaryScriptResourceName) != -1;

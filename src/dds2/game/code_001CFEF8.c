@@ -684,7 +684,7 @@ s32 btlInitializeSceneAfterTasksAndBuffersReady(BtlState *scene) {
         btlIsFadeOutCompleteOrIdle() != 0) {
         fldInitializeSceneGroups();
         btlResetSceneSlotFades();
-        scene->eventReady = BTL_TERMINAL_OUTCOME_NONE;
+        scene->terminalOutcome = BTL_TERMINAL_OUTCOME_NONE;
         btlSelectSerialEncounter();
         if (datBattleSceneRecords[scene->battleMode].itemDropId != 0) {
             for (i = 0; i < datBattleSceneRecords[scene->battleMode].itemDropCount; i++) {
@@ -1009,22 +1009,22 @@ void btlFinalizeBattleRewards(BtlState *scene) {
     u32 i;
 
     btlPushSavedPartyUnitStates();
-    if (scene->eventReady != BTL_TERMINAL_OUTCOME_SERIAL) {
+    if (scene->terminalOutcome != BTL_TERMINAL_OUTCOME_SERIAL) {
         btlSetCommandPanelFadeMode(0, 8);
         btlSetTaskPhase5();
         btlSetEligibleActorPanelTransitionState();
         btlDestroyTaskC();
         btlDestroyTaskD();
     }
-    if (scene->eventReady == BTL_TERMINAL_OUTCOME_WIN) {
+    if (scene->terminalOutcome == BTL_TERMINAL_OUTCOME_WIN) {
         if (datBattleSceneRecords[scene->battleMode].flags & 0x4000) {
-            scene->eventReady = 6;
+            scene->terminalOutcome = 6;
         }
     }
     scene->sceneEndFrame = 30;
     scene->endFlags &= ~7;
     scene->endDelay = 0;
-    switch (scene->eventReady) {
+    switch (scene->terminalOutcome) {
     case BTL_TERMINAL_OUTCOME_WIN: {
         BtlRuntimeTask *sound;
         if (scene->scriptState != 0xF000003) {
@@ -1081,7 +1081,7 @@ void btlFinalizeBattleRewards(BtlState *scene) {
         task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
         task->startCondition.value.handle = clear->handle;
         btlStartTask(task);
-        if (scene->eventReady == BTL_TERMINAL_OUTCOME_LOSS) {
+        if (scene->terminalOutcome == BTL_TERMINAL_OUTCOME_LOSS) {
             task = btlCreateCommandSoundTask(0, 0xD);
             task->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
             task->startCondition.value.handle = clear->handle;
@@ -1126,7 +1126,7 @@ void btlFinalizeBattleRewards(BtlState *scene) {
         }
         break;
     }
-    if (scene->eventReady != BTL_TERMINAL_OUTCOME_SERIAL) {
+    if (scene->terminalOutcome != BTL_TERMINAL_OUTCOME_SERIAL) {
         for (unit = scene->units; unit != NULL; unit = unit->next) {
             u32 flags = unit->status.flags;
             if (!(flags & 1)) {
@@ -1209,7 +1209,7 @@ void btlFinalizeBattleRewards(BtlState *scene) {
     scene->moneyTotal += scene->moneyEarned;
     btlBossDebugPrintf("btl:moneyTotal = %d\n", scene->moneyTotal);
     scene->moneyEarned = 0;
-    if (scene->eventReady == BTL_TERMINAL_OUTCOME_WIN) {
+    if (scene->terminalOutcome == BTL_TERMINAL_OUTCOME_WIN) {
         brsTaskStart();
     }
 }
@@ -1249,12 +1249,12 @@ s32 btlUpdateBattleEnd(BtlState *scene) {
     s32 event;
     u32 flags;
 
-    if (scene->eventReady == BTL_TERMINAL_OUTCOME_WIN && !(scene->endFlags & 1) &&
+    if (scene->terminalOutcome == BTL_TERMINAL_OUTCOME_WIN && !(scene->endFlags & 1) &&
         scene->scriptState != 0xF000003 && scene->frame + 30 >= scene->sceneEndFrame) {
         btlAdvanceTitleState();
         sndLoadAndPlayStationedSe(0x1C);
         scene->endFlags |= 1;
-    } else if (scene->eventReady == BTL_TERMINAL_OUTCOME_LOSS && !(scene->endFlags & 4) && scene->frame >= 75) {
+    } else if (scene->terminalOutcome == BTL_TERMINAL_OUTCOME_LOSS && !(scene->endFlags & 4) && scene->frame >= 75) {
         if (scene->frame == 75) {
             if (mnuPollTitleStreamStateLocked()) mnuResetTitleStreamLocked();
             mnuQueueTitleSoundStreamEntry(0x15);
@@ -1275,7 +1275,7 @@ s32 btlUpdateBattleEnd(BtlState *scene) {
         btlBossDebugPrintf(D_00417188);
         return 0;
     }
-    if (scene->eventReady == BTL_TERMINAL_OUTCOME_WIN && brsTaskIsUpdateBlocked()) return 0;
+    if (scene->terminalOutcome == BTL_TERMINAL_OUTCOME_WIN && brsTaskIsUpdateBlocked()) return 0;
 
     if (scene->scriptState == 0xF000003) {
         state = scene->scriptState;
@@ -1286,10 +1286,10 @@ s32 btlUpdateBattleEnd(BtlState *scene) {
     }
     if (!((scene->scriptState != 0xF000003 || scene->scriptState != state) &&
           scene->frame < scene->sceneEndFrame &&
-          (scene->eventReady != BTL_TERMINAL_OUTCOME_WIN || scene->frame < 37 ||
+          (scene->terminalOutcome != BTL_TERMINAL_OUTCOME_WIN || scene->frame < 37 ||
            ((s8)dds3PadButtonState[0x21] >= 0 && (s8)dds3PadButtonState[0x23] >= 0))) &&
         scene->endDelay == 0) {
-        switch (scene->eventReady) {
+        switch (scene->terminalOutcome) {
         case BTL_TERMINAL_OUTCOME_NONE:
             break;
         case BTL_TERMINAL_OUTCOME_WIN:
@@ -1317,8 +1317,8 @@ s32 btlUpdateBattleEnd(BtlState *scene) {
         default:
             break;
         }
-        if (scene->eventReady != BTL_TERMINAL_OUTCOME_SERIAL) btlAdvanceTitleState();
-        if (scene->eventReady == BTL_TERMINAL_OUTCOME_WIN) {
+        if (scene->terminalOutcome != BTL_TERMINAL_OUTCOME_SERIAL) btlAdvanceTitleState();
+        if (scene->terminalOutcome == BTL_TERMINAL_OUTCOME_WIN) {
             if (!(scene->endFlags & 1)) {
                 sndQueueNoPayloadCommand210();
                 p2sdStopAllBgm();
@@ -1329,10 +1329,10 @@ s32 btlUpdateBattleEnd(BtlState *scene) {
             sndQueueNoPayloadCommand210();
             p2sdStopAllBgm();
         }
-        if (scene->eventReady == BTL_TERMINAL_OUTCOME_SERIAL) {
+        if (scene->terminalOutcome == BTL_TERMINAL_OUTCOME_SERIAL) {
             task = scene->tasks;
             scene->preemptiveOutcome = 0;
-            scene->eventReady = BTL_TERMINAL_OUTCOME_NONE;
+            scene->terminalOutcome = BTL_TERMINAL_OUTCOME_NONE;
             scene->spawnCount = 0;
             scene->turnCount = 0;
             scene->defeatedLevelCount = 0;
@@ -1360,7 +1360,7 @@ s32 btlUpdateBattleEnd(BtlState *scene) {
             scene->phase++;
             return 4;
         }
-        event = scene->eventReady;
+        event = scene->terminalOutcome;
         return event != 1 ? 11 : 10;
     }
     if (scene->endDelay > 0) scene->endDelay--;
@@ -1391,7 +1391,7 @@ void btlApplyPartyEntryWeightedDelta(BtlState *scene) {
         btlClearPartyRecordStatusBits(&DDS3_GBWK->party[i], -0x45D1);
         if (!(scene->commandRestrictFlags & 0x40)) {
             if (DDS3_GBWK->party[i].flags & 2) {
-                if (scene->eventReady == BTL_TERMINAL_OUTCOME_WIN) {
+                if (scene->terminalOutcome == BTL_TERMINAL_OUTCOME_WIN) {
                     if (DDS3_GBWK->party[i].huntExp != 0 ||
                         scene->totalAp != 0) {
                         if (!(DDS3_GBWK->party[i].status & 0x40)) {

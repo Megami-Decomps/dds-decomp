@@ -239,7 +239,7 @@ typedef struct BtlState {
     u8 pad24E[2];
     s32 turnCount; /* 0x250 */
     s32 escapeAttemptCount; /* 0x254: incremented before each escape chance test. */
-    u8 eventReady; /* 0x258 */
+    u8 terminalOutcome; /* 0x258: selected result code; overrides may add values. */
     u8 pad259;
     u16 spawnCount; /* 0x25A: enemies spawned, compared with maxEnemySpawns. */
     u16 phase; /* 0x25C */
@@ -303,7 +303,7 @@ typedef struct BtlState {
     s32 (*preserveMotionRange)(BtlUnit *, s32); /* 0x5A8: keep the stored motion start/end. */
     void (*actorParameterDeltaCallback)(BtlUnit *, s32 *); /* 0x5AC */
     u8 pad5B0[4];
-    s32 (*battleOutcomeOverride)(void); /* 0x5B4: -1 falls through to the unit scan; any other value is stored in eventReady (func_001A8188). */
+    s32 (*battleOutcomeOverride)(void); /* 0x5B4: -1 falls through to the unit scan; other results become terminalOutcome (func_001A8188). */
     void (*postPlacementCallback)(void); /* 0x5B8: runs after actor positions and rotations. */
     s32 (*effectParameterCallback)(BtlUnit *, s32); /* 0x5BC: actor record-index override, DDS1 001D645C. */
     u8 pad5C0[4];
@@ -482,7 +482,7 @@ typedef struct BtlState {
     u8 pad272[2];
     s32 turnCount; /* 0x274 */
     s32 escapeAttemptCount; /* 0x278: same escape-attempt counter as DDS1. */
-    u8 eventReady; /* 0x27C */
+    u8 terminalOutcome; /* 0x27C: selected result code; overrides may add values. */
     u8 pad27D;
     u16 spawnCount; /* 0x27E: enemies spawned so far, compared with maxEnemySpawns. */
     u16 phase; /* 0x280 */

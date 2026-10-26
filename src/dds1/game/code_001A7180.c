@@ -423,11 +423,11 @@ BtlTerminalOutcomeReadiness btlResolveBattleTerminalOutcome(void) {
     s32 defeatedCount = 0;
 
     state = btlGetRuntime();
-    state->eventReady = BTL_TERMINAL_OUTCOME_NONE;
+    state->terminalOutcome = BTL_TERMINAL_OUTCOME_NONE;
     if (state->battleOutcomeOverride != NULL) {
         s32 result = state->battleOutcomeOverride();
         if (result != -1) {
-            state->eventReady = result;
+            state->terminalOutcome = result;
             return BTL_TERMINAL_OUTCOME_READY;
         }
     }
@@ -449,29 +449,29 @@ BtlTerminalOutcomeReadiness btlResolveBattleTerminalOutcome(void) {
     if (partyCount == 0) {
         if (defeatedCount != 0) {
             btlBossDebugPrintf("btl:lose[%d,%d,%d]\n", partyCount, enemyCount, stoneCount);
-            state->eventReady = BTL_TERMINAL_OUTCOME_LOSS;
+            state->terminalOutcome = BTL_TERMINAL_OUTCOME_LOSS;
             return BTL_TERMINAL_OUTCOME_READY;
         } else {
-            state->eventReady = BTL_TERMINAL_OUTCOME_ESCAPE;
+            state->terminalOutcome = BTL_TERMINAL_OUTCOME_ESCAPE;
             return BTL_TERMINAL_OUTCOME_READY;
         }
     }
     if (state->battleFlags & 0x2000) {
         btlBossDebugPrintf("btl:esc[%d,%d,%d]\n", partyCount, enemyCount, stoneCount);
-        state->eventReady = BTL_TERMINAL_OUTCOME_ESCAPE;
+        state->terminalOutcome = BTL_TERMINAL_OUTCOME_ESCAPE;
         return BTL_TERMINAL_OUTCOME_READY;
     }
     if (partyCount == stoneCount) {
         btlBossDebugPrintf("btl:stone[%d,%d,%d]\n", partyCount, enemyCount, stoneCount);
-        state->eventReady = BTL_TERMINAL_OUTCOME_ALL_STONE;
+        state->terminalOutcome = BTL_TERMINAL_OUTCOME_ALL_STONE;
         return BTL_TERMINAL_OUTCOME_READY;
     }
     if (enemyCount == 0) {
         btlBossDebugPrintf("btl:win[%d,%d,%d]\n", partyCount, enemyCount, stoneCount);
         if (state->nextBattleMode != 0) {
-            state->eventReady = BTL_TERMINAL_OUTCOME_SERIAL;
+            state->terminalOutcome = BTL_TERMINAL_OUTCOME_SERIAL;
         } else {
-            state->eventReady = BTL_TERMINAL_OUTCOME_WIN;
+            state->terminalOutcome = BTL_TERMINAL_OUTCOME_WIN;
         }
         return BTL_TERMINAL_OUTCOME_READY;
     }
