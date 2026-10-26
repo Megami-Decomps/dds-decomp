@@ -11,6 +11,7 @@
 #include "dds3_path.h"
 #include "kwln_task_add_child.h"
 #include "mnu_title_stream.h"
+#include "mnu_title_sound.h"
 #include "mnu_camp_font_api.h"
 #include "kwln_draw_buffer.h"
 #include "mdl_motion_api.h"
@@ -839,7 +840,6 @@ extern u16 D_003BBE78;
 extern char D_003ACFE8[];
 extern void mnuUnpackNibbleFields(EvtRuntimeChild *key, s32 *lowBitsOut, s32 *highBitsOut);
 extern u8 evtViewerTestIndexedCondition(u32 condition);
-extern s32 mnuQueryTitleSoundBusy(void);
 extern void mnuStopTitleVoicePlayback(void);
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 extern void fldSetTitleDrawMode(u32);
@@ -944,7 +944,7 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
             if (!evtViewerTestIndexedCondition(key->p08.sh[1])) {
                 break;
             }
-            if (mnuQueryTitleSoundBusy()) {
+            if (mnuQueryTitleSoundBusy() != MNU_TITLE_SOUND_IDLE) {
                 selectedText = itfMesSelectTableItemText(viewer->windowContext->messageManagerHandle, nibbles[0], 0);
                 if (selectedText == 1) {
                     evtPrintDeveloperConsoleMessage(D_003ACFE8, nibbles[0]);
@@ -2149,7 +2149,7 @@ void evtEventViewerStartEndCountdown(EvtRuntime *viewer) {
         viewer->updateCount = 0;
     }
     mnuReleaseCampSceneRegisteredIds(viewer);
-    if (mnuQueryTitleSoundBusy() == 1) {
+    if (mnuQueryTitleSoundBusy() == MNU_TITLE_SOUND_BUSY) {
         mnuStopTitleVoicePlayback();
     } else if (viewer->timedActive == 1) {
         sdfSoundSetChannelCount(10);
@@ -3959,7 +3959,7 @@ s32 evtViewerUpdateFrame(dds3ProcessID_t *task) {
         }
     }
     if (viewer->voicePending == 1 && evtViewerHasUpdateFlag(viewer) == 0 &&
-        mnuQueryTitleSoundBusy() == 0) {
+        mnuQueryTitleSoundBusy() == MNU_TITLE_SOUND_IDLE) {
         itfMesStartEntry(viewer->windowContext->messageManagerHandle,
             viewer->voiceMessage, 0);
         viewer->voicePending = 0;

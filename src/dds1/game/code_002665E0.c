@@ -8,6 +8,7 @@
 #include "sdf_trig.h"
 #include "dds3_world_value.h"
 #include "mnu_sound_resource_path_api.h"
+#include "mnu_title_sound.h"
 #include "mnu_voice_resource_path_api.h"
 #include "ui_color.h"
 #include "mnu_result.h"
@@ -1239,7 +1240,7 @@ void mnuStopTitleVoicePlayback(void) {
     p2sdSyncSound();
 }
 
-s32 mnuQueryTitleSoundBusy(void) {
+MnuTitleSoundBusyState mnuQueryTitleSoundBusy(void) {
     return p2sdGetPcmState();
 }
 

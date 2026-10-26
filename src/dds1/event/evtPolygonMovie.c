@@ -20,6 +20,7 @@
 #include "itf_mes_resource.h"
 #include "sdf_float_counter.h"
 #include "evt_blend_vec_color.h"
+#include "mnu_title_sound.h"
 
 /* Polygon-movie event parameter blocks blended by the functions below.
  * Each field is named for how the blend functions use it:
@@ -54,7 +55,6 @@ extern dds3Effect_Blur_t D_003686A0;
 extern s32 itfMesMngInitialize(ItfMesSub *messageSub);
 extern void itfMesMngRelease(s32 handle);
 extern void fileSyncAll(void);
-extern s32 mnuQueryTitleSoundBusy(void);
 extern void mnuStopTitleVoicePlayback(void);
 #include "sdf_debug_api.h"
 
@@ -795,7 +795,7 @@ void evtPolygonMovieFreeWork(PolyMovieWork *work)
         if (work->tertiaryResource.handle != 0) {
             sdfMemFreeDirect(work->tertiaryResource.handle);
         }
-        if (mnuQueryTitleSoundBusy() == 1) {
+        if (mnuQueryTitleSoundBusy() == MNU_TITLE_SOUND_BUSY) {
             mnuStopTitleVoicePlayback();
         }
         printf("sound stop all. \n");

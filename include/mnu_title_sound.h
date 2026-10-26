@@ -3,6 +3,15 @@
 
 #include "common.h"
 
+/* The PCM voice owner stores idle as 0 and active playback as 1. */
+typedef s32 MnuTitleSoundBusyState;
+enum {
+    MNU_TITLE_SOUND_IDLE = 0,
+    MNU_TITLE_SOUND_BUSY = 1
+};
+
+MnuTitleSoundBusyState mnuQueryTitleSoundBusy(void);
+
 /* Decoder format selectors used by the title sound buffer installer. */
 typedef s32 MnuTitleSoundFormat;
 enum {

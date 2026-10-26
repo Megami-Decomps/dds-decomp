@@ -16,10 +16,10 @@
 #include "kwln.h"
 #include "kwln_draw_buffer.h"
 #include "btl.h"
+#include "mnu_title_sound.h"
 /* Declared before first use (were implicit int). */
 extern void evtLipsStopFunction(void);
 extern void frDelFontStyle(s32 slotId);
-extern s32 mnuQueryTitleSoundBusy(void);
 /* fmRetFontMem is void in the game font TU; preserve C89 call scope here.
  * An early void declaration moves the cache-count update at +0x5C/+0x60/+0x64
  * from retail $3 to $2 in frFlushGsFontTable. */
@@ -734,7 +734,7 @@ s32 frFontAdvanceChildFadeAndGetJitter(_FRQ *parent, _TEXT *glyph, u8 threshold,
                     previousParent->remainingWaitFrames--;
                     canAdvanceFade = 0;
                 }
-            } else if (mnuQueryTitleSoundBusy() != 0) {
+            } else if (mnuQueryTitleSoundBusy() != MNU_TITLE_SOUND_IDLE) {
                 canAdvanceFade = 0;
             }
             break;
@@ -744,7 +744,7 @@ s32 frFontAdvanceChildFadeAndGetJitter(_FRQ *parent, _TEXT *glyph, u8 threshold,
     if (parent->pendingLipsStopCode == ITF_GLYPH_CONTROL_STOP_LIPS && parent->lastChild->parentDimensionsOrRenderWord.fadeByte.value == FR_FONT_FADE_COMPLETE) {
         if (parent->skipLipsStopWait == 0 && parent->remainingWaitFrames > 0) {
             if (parent->remainingWaitFrames == ITF_GLYPH_WAIT_FOR_SOUND_SENTINEL) {
-                if (mnuQueryTitleSoundBusy() != 0) {
+                if (mnuQueryTitleSoundBusy() != MNU_TITLE_SOUND_IDLE) {
                     canStopLips = 0;
                 }
             } else {
@@ -802,7 +802,7 @@ s32 frFontDrawGlyphChain(_FRQ *glyph, s8 mode, u32 renderFlags) {
     s32 enabled = 1;
     s32 result = 0;
     s32 totalGlyphCount = 0;
-    s32 titleSoundBusy;
+    MnuTitleSoundBusyState titleSoundBusy;
     const FrFontAtlas *atlas;
 
     if (glyph != NULL) {
@@ -868,7 +868,7 @@ s32 frFontDrawGlyphChain(_FRQ *glyph, s8 mode, u32 renderFlags) {
                             }
                         } else {
                             titleSoundBusy = mnuQueryTitleSoundBusy();
-                            if (titleSoundBusy != 0) {
+                            if (titleSoundBusy != MNU_TITLE_SOUND_IDLE) {
                                 ready = 0;
                             }
                         }
