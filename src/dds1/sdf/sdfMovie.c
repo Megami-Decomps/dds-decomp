@@ -248,7 +248,7 @@ s32 movieReadChunk(
 }
 
 /* Sound/IPU source operations: report available bytes/EOF, copy data, or resume reads. */
-s32 movieCopyChunk(sdfIpuDecodeCb_t *unused, movieStream_t *movie, s32 operation, void *dataBuffer, s32 byteCount) {
+SdfStreamReadResult movieCopyChunk(sdfIpuDecodeCb_t *unused, movieStream_t *movie, SdfStreamReadOperation operation, void *dataBuffer, s32 byteCount) {
     MovLinearStream *stream = movie->stream.linear;
 
     switch (operation) {
@@ -298,7 +298,7 @@ s32 movieCopyChunk(sdfIpuDecodeCb_t *unused, movieStream_t *movie, s32 operation
 }
 
 /* Sound/IPU source operations for the movie-PAC ring; retain the native copy helper. */
-s32 movieParseHeader(sdfIpuDecodeCb_t *unused, movieStream_t *movie, s32 operation, void *dataBuffer, s32 byteCount) {
+SdfStreamReadResult movieParseHeader(sdfIpuDecodeCb_t *unused, movieStream_t *movie, SdfStreamReadOperation operation, void *dataBuffer, s32 byteCount) {
     void movieMemcpy(void *destination, const void *source, u32 byteCount) {
         memcpy(destination, source, byteCount);
     }

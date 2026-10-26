@@ -1511,7 +1511,7 @@ void sdfIpuFree(sdfIpuDecodeCb_t *node) {
 void sdfIpuHandleDmaEnd(sdfIpuDecodeCb_t *feed) {
     s32 writeSlot;
     s32 filledSlots;
-    s32 availableBytes;
+    SdfStreamReadResult availableBytes;
     u32 destinationAddress;
     s32 endOfStream;
 
