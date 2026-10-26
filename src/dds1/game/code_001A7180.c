@@ -16,6 +16,7 @@
 #include "btl_ui.h"
 #include "sdf.h"
 #include "btl.h"
+#include "btl_actor_selection_clear_api.h"
 #include "btl_state.h"
 #include "btl_terminal_outcome.h"
 #include "btl_boss_debug_api.h"
@@ -619,7 +620,7 @@ s32 btlRollEscapeChance(BtlUnit *actor) {
 
 extern AiSpecies *datEnemyAiRecords;
 
-s32 btlIsSelectedActorStatusAndRecordClear(BtlUnit *unit) {
+u8 btlIsSelectedActorStatusAndRecordClear(BtlUnit *unit) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     if (datBattleSceneRecords[battle->battleMode].voice != 0) {
         return 0;

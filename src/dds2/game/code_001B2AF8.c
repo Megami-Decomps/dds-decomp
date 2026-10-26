@@ -61,6 +61,7 @@
 #include "sdf_packet_builders.h"
 #include "sdf_texture_draw_packet.h"
 #include "btl.h"
+#include "btl_actor_selection_clear_api.h"
 #include "btl_tracked_task_slot_api.h"
 #include "btl_command.h"
 #include "btl_command_vital_cost.h"
@@ -273,7 +274,7 @@ s32 btlTryEscapeWithPhaseAdjustment(BtlUnit *actor) {
     return btlRollAiBucket() < chance;
 }
 
-s32 btlIsSelectedActorStatusAndRecordClear(BtlUnit *unit) {
+u8 btlIsSelectedActorStatusAndRecordClear(BtlUnit *unit) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     if (datBattleSceneRecords[battle->battleMode].voice != 0) {
         return 0;

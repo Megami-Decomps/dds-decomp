@@ -1,5 +1,6 @@
 #include "common.h"
 #include "btl_actor_entry_code_api.h"
+#include "btl_actor_selection_clear_api.h"
 #include "btl_skill_max_api.h"
 #include "eff_random.h"
 #include "btl_ai_slot.h"
@@ -66,8 +67,6 @@ extern s32 btlRollAiBucket(void);
 extern u32 btlNextScaledRandom(u32);
 
 extern u32 btlPreviousAiCandidateBucket;
-extern s32 btlIsSelectedActorStatusAndRecordClear(BtlUnit *);
-
 extern s32 btlUnitMatchesEntryCodeCondition(BtlUnit *, s32, s8);
 
 extern u8 btlHasAvailableOption(BtlUnit *);

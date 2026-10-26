@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "common.h"
 #include "btl_actor_entry_code_api.h"
+#include "btl_actor_selection_clear_api.h"
 #include "btl_skill_max_api.h"
 #include "btl_ai_slot.h"
 #include "sdf_chip.h"
@@ -62,8 +63,6 @@ extern u8 btlHasAvailableOption(BtlUnit *actor);
 extern s32 btlMatchesActorEntryCodeCondition(BtlUnit *actor, s32 conditionIndex);
 
 extern s32 btlUnitMatchesEntryCodeCondition(BtlUnit *, s32, s8);
-
-extern s32 btlIsSelectedActorStatusAndRecordClear(BtlUnit *unit);
 
 extern s8 btlHistoryCounter;
 
