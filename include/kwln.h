@@ -20,7 +20,10 @@ typedef char KwlnDrawVectorParams_size[(sizeof(KwlnDrawVectorParams) == 0x14) ? 
 
 /* Scheduler task links, callbacks and hierarchy (0x50); DDS1/2 kernel/dds3KernelCore.c and game task units. */
 typedef struct dds3ProcessID_t dds3ProcessID_t;
-typedef s32 (*TaskUpdate)(dds3ProcessID_t *task);
+/* Callback result: 0 retains the callback, -1 finishes the task, and
+ * other words select a replacement callback. */
+typedef s32 KwlnTaskUpdateResult;
+typedef KwlnTaskUpdateResult (*KwlnTaskUpdateCallback)(dds3ProcessID_t *task);
 typedef void (*TaskDestroy)(dds3ProcessID_t *task);
 
 struct dds3ProcessID_t {
@@ -32,7 +35,7 @@ struct dds3ProcessID_t {
     u32 runUpdateCount;      /* 0x28 */
     s16 startDelayTicks;     /* 0x2C: signed; positive values count down, zero activates, negatives remain queued. */
     s16 destroyDelayTicks;   /* 0x2E: signed; positive values count down, zero destroys, negatives stay pending. */
-    TaskUpdate update;       /* 0x30 */
+    KwlnTaskUpdateCallback update; /* 0x30 */
     TaskDestroy destroy;     /* 0x34 */
     u32 userValue;           /* 0x38: caller-supplied value exposed by accessors. */
     dds3ProcessID_t *listNext;      /* 0x3C */

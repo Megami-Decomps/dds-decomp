@@ -125,10 +125,10 @@ KwlnTaskCursorAction RunProcess(dds3ProcessID_t *task) {
         }
     }
 
-    if (task->update != NULL && task->update != (TaskUpdate)KWLN_TASK_UPDATE_FINISH_CALLBACK) {
+    if (task->update != NULL && task->update != (KwlnTaskUpdateCallback)KWLN_TASK_UPDATE_FINISH_CALLBACK) {
         nextUpdate = task->update(task);
         if (nextUpdate != KWLN_TASK_UPDATE_RETAIN_CALLBACK) {
-            task->update = (TaskUpdate)nextUpdate;
+            task->update = (KwlnTaskUpdateCallback)nextUpdate;
         }
         if (nextUpdate == KWLN_TASK_UPDATE_FINISH_CALLBACK &&
             (task->flags & KWLN_TASK_STATE_MASK) == KWLN_TASK_ACTIVE) {
@@ -457,7 +457,7 @@ KwlnProcessMainResult dds3ProcessMain(void)
 }
 
 dds3ProcessID_t *dds3StartProcess(const char *name, u32 priority, s32 startDelay, s32 destroyDelay,
-                         TaskUpdate update, TaskDestroy destroy, u32 userValue) {
+                         KwlnTaskUpdateCallback update, TaskDestroy destroy, u32 userValue) {
     dds3ProcessID_t *task = sdfChipAllocDirect(sizeof(dds3ProcessID_t));
     s32 taskNameByteIndex = 0;
 

@@ -2762,7 +2762,7 @@ void mdlViewerTaskDestroy(void) {
 
 typedef struct MdlViewerTaskDef {
     const char *name;
-    TaskUpdate update;
+    KwlnTaskUpdateCallback update;
     s32 data;
 } MdlViewerTaskDef;
 

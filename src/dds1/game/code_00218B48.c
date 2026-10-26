@@ -188,7 +188,7 @@ extern s8 D_003D7A60[];
 
 typedef struct MdlViewerTaskDef {
     const char *name;
-    TaskUpdate update;
+    KwlnTaskUpdateCallback update;
     s32 data;
 } MdlViewerTaskDef;
 

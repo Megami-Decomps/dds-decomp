@@ -9,7 +9,7 @@ typedef struct KwlnNamedSlot {
     s32 kind;               /* 0x00 */
     char name[32];          /* 0x04 */
     dds3ProcessID_t *task;         /* 0x24: task passed to scheduler APIs. */
-    TaskUpdate update;      /* 0x28 */
+    KwlnTaskUpdateCallback update; /* 0x28 */
     TaskDestroy destroy;    /* 0x2C */
     void (*setState)(s32);  /* 0x30: state callback. */
     s32 enabled;            /* 0x34 */
