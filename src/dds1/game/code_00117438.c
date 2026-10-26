@@ -30,7 +30,7 @@
 #include "mdl_flag_api.h"
 
 extern void scrDestroyWorkTask(void);
-extern void dds3WorkInit(BfFlw0Header *header);
+extern void dds3WorkInit(const BfFlw0Header *header);
 
 extern BfFlw0Header *D_003BAAAC;
 

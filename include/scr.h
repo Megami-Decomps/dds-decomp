@@ -119,7 +119,7 @@ void scrRunScript(scrProcessWork_s *context);
 s32 scrScriptProcess(dds3ProcessID_t *task);
 ScrTraceResult scrTraceCode(scrProcessWork_s *context);
 void scrProcDestroyTask(scrProcessWork_s *process);
-scrProcessWork_s *scrCreateTaskWithDefaultOption(struct BfFlw0Header *header);
+scrProcessWork_s *scrCreateTaskWithDefaultOption(const struct BfFlw0Header *header);
 void PushInt(scrProcessWork_s *script, s32 value);
 void PushFloat(scrProcessWork_s *script, f32 value);
 void PushStr(scrProcessWork_s *script, const char *value);

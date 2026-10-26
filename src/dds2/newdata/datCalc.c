@@ -1755,7 +1755,7 @@ s32 evtRunContext(ScrProcedureIndex procedureIndex, s32 firstArgument, s32 secon
 }
 
 /* Create the script task and clear its separate 24-byte context. */
-void dds3WorkInit(BfFlw0Header *header) {
+void dds3WorkInit(const BfFlw0Header *header) {
     evtWorkScriptTask = scrCreateTaskWithDefaultOption(header);
     memset(&evtWorkScriptContext, 0, sizeof(evtWorkScriptContext));
 }

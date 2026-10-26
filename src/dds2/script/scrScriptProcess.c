@@ -75,7 +75,7 @@ dds3ProcessID_t *scrStartScript2(s32 priority, BfFlw0Header *script, ScrProcedur
     return scrStartScriptProcess(priority, fldFlowParse(script, procedureIndex));
 }
 
-scrProcessWork_s *scrCreateTaskWithDefaultOption(BfFlw0Header *header) {
+scrProcessWork_s *scrCreateTaskWithDefaultOption(const BfFlw0Header *header) {
     return fldFlowParse(header, 0);
 }
 

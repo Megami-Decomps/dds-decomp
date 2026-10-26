@@ -33,7 +33,7 @@
 extern BfFlw0Header *D_00435E80;
 
 
-extern void dds3WorkInit(BfFlw0Header *header);
+extern void dds3WorkInit(const BfFlw0Header *header);
 extern s32 sdfDispatchPrimaryUnitScript(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode);
 extern char sdfRuntimeTaskName[]; /* "GBWK" */
 extern void sdfRuntimeTaskTeardownHook(void);
