@@ -2,6 +2,7 @@
 #include "scr_integer_return_value_api.h"
 #include "scr_command_timer_api.h"
 #include "scr.h"
+#include "scr_current_process_user_data_api.h"
 #include "mdl_flag_api.h"
 
 
@@ -42,7 +43,7 @@ scrProcessWork_s *scrGetScriptHandle(void) {
     return nowpwork;
 }
 
-void *scrGetData(void) {
+void *scrGetCurrentProcessUserData(void) {
     return nowpwork->userData;
 }
 

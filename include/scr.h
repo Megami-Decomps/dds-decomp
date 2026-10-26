@@ -111,7 +111,6 @@ extern scrProcessWork_s *scrHandleLast;
 
 scrProcessWork_s *scrGetScriptHandle(void);
 scrProcessWork_s *scrSearchScriptName(const char *name);
-void *scrGetData(void);
 void *scrGetUserData(dds3ProcessID_t *task);
 void scrSetUserData(dds3ProcessID_t *task, void *actor);
 void scrScriptShutdown(dds3ProcessID_t *task);

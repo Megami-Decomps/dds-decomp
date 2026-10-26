@@ -358,7 +358,7 @@
 0x0010D898	scrGetScriptTimer	inferred	SMT3HD name via SLUS_209.11 0x0010B810, shared-hash-in-run; was scrGetTimer
 0x0010D8B8	scrGetMessageHandle	inferred	SMT3HD name via SLUS_209.11 0x0010B830, shared-hash-in-run; was scrGetWindow
 0x0010D8C8	scrGetScriptHandle	inferred	SMT3HD name via SLUS_209.11 0x0010B840, shared-hash-in-run; was scrGetCurrentContext
-0x0010D8D0	scrGetData	inferred	SMT3HD name via SLUS_209.11 0x0010B848, shared-hash-in-run; was scrGetCurrentCommandWork
+0x0010D8D0	scrGetCurrentProcessUserData	inferred	Semantic name from returning nowpwork->userData; shared-hash SMT3HD name via SLUS_209.11 0x0010B848 was scrGetData, previously scrGetCurrentCommandWork
 0x0010D8E0	scrCommand_KEY	inferred	SMT3HD name via SLUS_209.11 0x0010B858, reloc-identical; was scrHasNegativeMarkerDuringCommandTimer
 0x0010D910	scrCommand_BIT_CHK	inferred	SMT3HD name via SLUS_209.11 0x0010B888, shared-hash-in-run; was scrOpcodeTestModelFlag
 0x0010D940	scrCommand_BIT_ON	inferred	SMT3HD name via SLUS_209.11 0x0010B8B8, shared-hash-in-run; was scrOpcodeSetModelFlag

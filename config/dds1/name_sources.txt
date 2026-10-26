@@ -383,7 +383,7 @@
 0x0010D680	scrGetCommandTimer	inferred	Returns script state's command timer at offset 0xD4.
 0x0010D690	scrGetMessageHandle	inferred	SMT3HD name via SLUS_209.11 0x0010B830, shared-hash-in-run; was scrGetWindow
 0x0010D6A0	scrGetScriptHandle	inferred	SMT3HD name via SLUS_209.11 0x0010B840, shared-hash-in-run; was scrGetCurrentContext
-0x0010D6A8	scrGetData	inferred	SMT3HD name via SLUS_209.11 0x0010B848, shared-hash-in-run; was scrGetCurrentCommandWork
+0x0010D6A8	scrGetCurrentProcessUserData	inferred	Semantic name from returning nowpwork->userData; shared-hash SMT3HD name via SLUS_209.11 0x0010B848 was scrGetData, previously scrGetCurrentCommandWork
 0x0010D6B8	scrCommand_KEY	inferred	SMT3HD name via SLUS_209.11 0x0010B858, reloc-identical; was scrHasNegativeMarkerDuringCommandTimer
 0x0010D6E8	scrCommand_BIT_CHK	inferred	SMT3HD name via SLUS_209.11 0x0010B888, shared-hash-in-run; was scrOpcodeTestModelFlag
 0x0010D718	scrCommand_BIT_ON	inferred	SMT3HD name via SLUS_209.11 0x0010B8B8, shared-hash-in-run; was scrOpcodeSetModelFlag
