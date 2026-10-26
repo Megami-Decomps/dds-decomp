@@ -287,14 +287,14 @@ Dds3BasicArrayMatchResult dds3SearchDeleteBasicArray(dds3BasicArrayHandle_t *ind
  * A NULL payload terminates before comparison, even if later entries remain,
  * so a NULL target never matches. Return 1 for a match, otherwise 0. */
 Dds3BasicArrayMatchResult dds3SetSearchNextBasicArray(dds3BasicArrayHandle_t *indexNode, const dds3Basic_t *targetNode) {
-    u32 candidateWord;
+    dds3Basic_t *candidate;
 
     do {
-        candidateWord = dds3GetBasicArray(indexNode);
-        if (candidateWord == 0) {
+        candidate = dds3GetBasicArray(indexNode);
+        if (candidate == NULL) {
             return DDS3_BASIC_ARRAY_NO_MATCH;
         }
-        if ((u32)targetNode == candidateWord) {
+        if (targetNode == candidate) {
             return DDS3_BASIC_ARRAY_MATCH_FOUND;
         }
     } while (dds3SetNextBasicArray(indexNode) != 0);

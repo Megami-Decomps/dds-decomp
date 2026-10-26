@@ -862,7 +862,7 @@ void drawSceneBasicList(void) {
     if (objectChain != 0) {
         if (dds3SetFirstBasicArray((dds3BasicArrayHandle_t *)objectChain) != 0) {
             do {
-                worldObject = (dds3Basic_t *)dds3GetBasicArray((dds3BasicArrayHandle_t *)objectChain);
+                worldObject = dds3GetBasicArray((dds3BasicArrayHandle_t *)objectChain);
                 if (dds3ObjectBaseCheckFlag(worldObject, FIELD_BACKGROUND_REQUIRED_OBJECT_FLAG) != 0) {
                     if (dds3ObjectBaseCheckFlag(worldObject, FIELD_BACKGROUND_EXCLUDED_OBJECT_FLAG) == 0) {
                         hasEligibleBackground = 1;

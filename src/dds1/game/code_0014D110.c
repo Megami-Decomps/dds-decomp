@@ -642,7 +642,7 @@ s32 fldCommand_FLD_MODEL_ON(void) {
         if (dds3GetBasicArrayCount((dds3BasicArrayHandle_t *)list) != 0) {
             dds3SetFirstBasicArray((dds3BasicArrayHandle_t *)list);
             do {
-                node = (dds3Basic_t *)(u32)dds3GetBasicArray((dds3BasicArrayHandle_t *)list);
+                node = dds3GetBasicArray((dds3BasicArrayHandle_t *)list);
                 if (((EffectTransformData *)node->data)->roomNumber == (u32)room) {
                     switch (mode) {
                     case 0:
@@ -698,7 +698,7 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
         if (dds3GetBasicArrayCount((dds3BasicArrayHandle_t *)list) != 0) {
             dds3SetFirstBasicArray((dds3BasicArrayHandle_t *)list);
             do {
-                node = (dds3Basic_t *)(u32)dds3GetBasicArray((dds3BasicArrayHandle_t *)list);
+                node = dds3GetBasicArray((dds3BasicArrayHandle_t *)list);
                 if (((EffectTransformData *)node->data)->roomNumber == (u32)room) {
                     switch (mode) {
                     case 0:

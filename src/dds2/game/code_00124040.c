@@ -699,7 +699,7 @@ void fldToggleWorldNodeState(s64 clearMode) {
     }
     dds3SetFirstBasicArray((dds3BasicArrayHandle_t *)valueChain);
     do {
-        worldObject = (dds3Basic_t *)dds3GetBasicArray((dds3BasicArrayHandle_t *)valueChain);
+        worldObject = dds3GetBasicArray((dds3BasicArrayHandle_t *)valueChain);
         status = dds3MatterObjectBasicGetAlpMode(worldObject);
         if (status == 4) {
             if (clearMode == 0) {

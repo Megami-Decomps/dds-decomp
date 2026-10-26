@@ -31,6 +31,6 @@ void dds3AreaBasicRegistItem(dds3Basic_t *ownerObject, dds3Basic_t *node) {
     dds3SetFirstBasicArray((dds3BasicArrayHandle_t *)slot);
     if (dds3SetSearchNextBasicArray((dds3BasicArrayHandle_t *)slot, node) != DDS3_BASIC_ARRAY_MATCH_FOUND) {
         dds3AddBasicArray((dds3BasicArrayHandle_t *)slot, 1);
-        dds3SetBasicArray((dds3BasicArrayHandle_t *)slot, (u32)node);
+        dds3SetBasicArray((dds3BasicArrayHandle_t *)slot, node);
     }
 }

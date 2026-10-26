@@ -74,25 +74,25 @@ u16 dds3GetBasicArrayCount(const dds3BasicArrayHandle_t *object) {
     return value;
 }
 
-u32 dds3SetBasicArray(dds3BasicArrayHandle_t *object, u32 wordValue) {
+u32 dds3SetBasicArray(dds3BasicArrayHandle_t *object, void *value) {
     if (object->entryCount == 0) {
         return 0;
     }
     if (object->cursorIndex < 0) {
         return 0;
     }
-    ((WorldInfo *)dds3TheWorld->data)->entries[object->cursorIndex].value = wordValue;
+    ((WorldInfo *)dds3TheWorld->data)->entries[object->cursorIndex].value = (s32)(u32)value;
     return 1;
 }
 
-u32 dds3GetBasicArray(const dds3BasicArrayHandle_t *object) {
+void *dds3GetBasicArray(const dds3BasicArrayHandle_t *object) {
     if (object->entryCount == 0) {
         return 0;
     }
     if (object->cursorIndex < 0) {
         return 0;
     }
-    return ((WorldInfo *)dds3TheWorld->data)->entries[object->cursorIndex].value;
+    return (void *)(u32)((WorldInfo *)dds3TheWorld->data)->entries[object->cursorIndex].value;
 }
 
 /* Signed comparison via complement-and-shift: zero counts as nonnegative. */
@@ -120,7 +120,7 @@ s32 dds3ForEachBasicArray(dds3BasicArrayHandle_t *object, s32 (*callback)(dds3Ba
         return 1;
     }
     for (more = dds3SetFirstBasicArray(object); more != 0; more = dds3SetNextBasicArray(object)) {
-        if (callback((dds3Basic_t *)dds3GetBasicArray(object)) == 0) {
+        if (callback(dds3GetBasicArray(object)) == 0) {
             return 0;
         }
     }
@@ -361,7 +361,7 @@ struct WorldIndexNode *dds3SceneBasicGetList(dds3Basic_t *object, s32 kind) {
     node = data->slots[kind].head;
     do {
         dds3AddBasicArray((dds3BasicArrayHandle_t *)indexObject, 1);
-        dds3SetBasicArray((dds3BasicArrayHandle_t *)indexObject, (u32)node);
+        dds3SetBasicArray((dds3BasicArrayHandle_t *)indexObject, node);
         node = node->next;
     } while (node != NULL);
     return indexObject;
