@@ -711,7 +711,7 @@ void mnuUnpackNibbleFields(EvtRuntimeChild *key, s32 *lowBitsOut, s32 *highBitsO
 }
 
 /* Return the scene's matching name index, or -1 when the track list has no match. */
-s32 mnuCampFindMatchingEntryIndex(PolyMovieWork *lookup, EvtRuntime *scene, s32 nameIndex) {
+EvtViewerNameIndex mnuCampFindMatchingEntryIndex(PolyMovieWork *lookup, EvtRuntime *scene, s32 nameIndex) {
     EvtRuntimeGroup *track = scene->groups;
     while (track != NULL) {
         if (strcmp(scene->entryName[track->entryHeader],
@@ -720,7 +720,7 @@ s32 mnuCampFindMatchingEntryIndex(PolyMovieWork *lookup, EvtRuntime *scene, s32 
         }
         track = track->next;
     }
-    return -1;
+    return EVT_VIEWER_NAME_INDEX_NOT_FOUND;
 }
 
 /* Return the first track with this fixed-width name, or NULL when absent. */

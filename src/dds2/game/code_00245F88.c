@@ -99,7 +99,7 @@ void SortFrameInfo(EvtRuntimeGroup *list) {
     }
 }
 
-extern s32 evtEventViewerAddName(const char *, EvtRuntime *);
+extern EvtViewerNameIndex evtEventViewerAddName(const char *, EvtRuntime *);
 extern void mnuSampleCampPanelVisualTrack(EvtRuntime *runtime, EvtRuntimeGroup *group, s32 frame,
                                           f32 (*outVectors)[4], f32 *outValueA, f32 *outValueB);
 extern void mnuSampleCampDisplayTrack(EvtRuntime *viewer, EvtRuntimeGroup *track, s32 value,

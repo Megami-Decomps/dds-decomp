@@ -339,7 +339,7 @@ EvtRuntimeGroup *evtEventViewerCreateEntry(s32 entryType, EvtRuntime *viewer)
     }
     memset(entry, 0, 0x84);
     entry->type = entryType;
-    entry->entryHeader = -1;
+    entry->entryHeader = EVT_VIEWER_NAME_INDEX_NOT_FOUND;
     entry->argument0C = -1;
     evtEventViewerInsertEntry(entry, viewer);
     return entry;
@@ -484,10 +484,10 @@ void evtEventViewerReleaseGroups(EvtRuntime *viewer)
 }
 
 /* Search the fixed-width (0x20-byte) event-name records. */
-s32 evtEventViewerFindNameIndex(const char *name, EvtRuntime *viewer)
+EvtViewerNameIndex evtEventViewerFindNameIndex(const char *name, EvtRuntime *viewer)
 {
     const char *nameEntry;
-    s32 nameIndex;
+    EvtViewerNameIndex nameIndex;
 
     nameIndex = 0;
     if (0 < viewer->entryTotal) {
@@ -500,14 +500,14 @@ s32 evtEventViewerFindNameIndex(const char *name, EvtRuntime *viewer)
             nameEntry = nameEntry + 0x20;
         } while (nameIndex < viewer->entryTotal);
     }
-    return -1;
+    return EVT_VIEWER_NAME_INDEX_NOT_FOUND;
 }
 
 /* Return the index of a name in the table, appending it when missing. */
-s32 evtEventViewerAddName(const char *name, EvtRuntime *viewer)
+EvtViewerNameIndex evtEventViewerAddName(const char *name, EvtRuntime *viewer)
 {
-    s32 existingNameIndex;
-    s32 newNameIndex;
+    EvtViewerNameIndex existingNameIndex;
+    EvtViewerNameIndex newNameIndex;
 
     existingNameIndex = evtEventViewerFindNameIndex(name, viewer);
     if (existingNameIndex >= 0) {
@@ -521,7 +521,7 @@ s32 evtEventViewerAddName(const char *name, EvtRuntime *viewer)
 
 
 /* Look up a named kind-7 effect object by index. */
-dds3Basic_t *evtEventViewerGetNameObject(s32 index, EvtRuntime *viewer)
+dds3Basic_t *evtEventViewerGetNameObject(EvtViewerNameIndex index, EvtRuntime *viewer)
 {
     if (index < 0) {
         return NULL;
@@ -537,7 +537,7 @@ extern s32 dds3EffectObjectBasicLinkObject(dds3Basic_t *, dds3Basic_t *);
 extern EvtPathLinkResult evtPathLinkAndMake(dds3Basic_t *object, dds3Basic_t *owner);
 
 /* Billboard entries and polygon movies use distinct owner attachment paths. */
-void evtViewerBindNamedOwner(dds3Basic_t *effectObject, s32 ownerNameIndex, s32 billboardEntry, u32 startFrame, EvtRuntime *viewer) {
+void evtViewerBindNamedOwner(dds3Basic_t *effectObject, EvtViewerNameIndex ownerNameIndex, s32 billboardEntry, u32 startFrame, EvtRuntime *viewer) {
     dds3Basic_t *owner;
     dds3Basic_t *movieObject;
     s32 currentFrame;
@@ -673,7 +673,7 @@ void evtEventViewerFreeSlot(s32 index, EvtRuntime *viewer)
 }
 
 /* Create an event-viewer effect at the origin and attach its active event node. */
-dds3Basic_t *evtEventViewerCreateOriginEffect(struct SoundMixer *resource, u32 entryId, s32 ownerNameIndex, s32 billboardEntry, u32 startFrame,
+dds3Basic_t *evtEventViewerCreateOriginEffect(struct SoundMixer *resource, u32 entryId, EvtViewerNameIndex ownerNameIndex, s32 billboardEntry, u32 startFrame,
                     EvtRuntime *viewer) {
     f32 position[4];
     f32 scale[4];
@@ -818,9 +818,9 @@ void evtViewerApplySelectedEntry(EvtRuntime *viewer) {
 }
 
 extern s32 evtViewerCreateObjectInFreeSlot(s32, EvtRuntimeGroup *, EvtRuntimeChild *, EvtRuntime *);
-extern dds3Basic_t *evtEventViewerGetNameObject(s32, EvtRuntime *);
+extern dds3Basic_t *evtEventViewerGetNameObject(EvtViewerNameIndex, EvtRuntime *);
 extern s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *, dds3Basic_t *, dds3Basic_t *, dds3Basic_t *, dds3Basic_t *);
-extern dds3Basic_t *evtEventViewerCreateOriginEffect(struct SoundMixer *, u32, s32, s32, u32, EvtRuntime *);
+extern dds3Basic_t *evtEventViewerCreateOriginEffect(struct SoundMixer *, u32, EvtViewerNameIndex, s32, u32, EvtRuntime *);
 extern s32 evtPlaySe(s32 id, s32 fade);
 extern void mnuShopRegisterSceneObject(EvtRuntime *, s32);
 extern s32 evtPlayEventBgm(s32 id, s32 fade);
@@ -3695,7 +3695,7 @@ s32 evtEventViewerCommitGroupSelection(s32 unused0, s32 unused1, EvtRuntime *vie
     s32 selection;
     s32 targetGroupIndex;
     s32 groupIndex;
-    s32 nameIndex;
+    EvtViewerNameIndex nameIndex;
 
     selection = viewer->groupFirst + viewer->groupCursor;
     if (selection == 0) {

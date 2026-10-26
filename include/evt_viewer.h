@@ -1,6 +1,7 @@
 #ifndef EVT_VIEWER_H
 #define EVT_VIEWER_H
 #include "common.h"
+#include "evt_viewer_name_index.h"
 #include "evt_blend_vec_color.h"
 #include "evt_world.h"
 #include "evt_polygon_movie.h"
@@ -77,7 +78,7 @@ typedef struct EvtRuntimeGroup {
         struct { u8 metadataFlag; u8 pad05[3]; };
         s32 setterId;
     };
-    s32 entryHeader; /* Signed runtime name-table index. */
+    EvtViewerNameIndex entryHeader; /* 0x08: signed runtime name-table index. */
     s32 argument0C;
     dds3Basic_t *info;
     union {
@@ -259,6 +260,8 @@ typedef char EvtGroupMetadata_option_offset[
     ((u32)&((EvtGroupMetadata *)0)->option == 0x06) ? 1 : -1];
 typedef char EvtRuntimeGroup_metadata_offset[((u32)&((EvtRuntimeGroup *)0)->metadata == 0x18) ? 1 : -1];
 typedef char EvtRuntimeGroup_size[(sizeof(EvtRuntimeGroup) == 0x84) ? 1 : -1];
+typedef char EvtRuntimeGroup_entryHeader_at_0x08[
+    ((u32)&((EvtRuntimeGroup *)0)->entryHeader == 0x08) ? 1 : -1];
 #ifdef VERSION_DDS1
 typedef char EvtRuntime_size[(sizeof(EvtRuntime) == 0x2490) ? 1 : -1];
 #else

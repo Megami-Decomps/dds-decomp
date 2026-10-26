@@ -4619,7 +4619,7 @@ typedef char EvtViewerResourceRecord_size[(sizeof(EvtViewerResourceRecord) == 0x
 extern s32 evtLoadArea_FromMemory(s32 area, s32 room, u8 *resource0Data, u8 *resource1Data,
                                             const SdfTextureOffsetListHeader *textureOffsets, s32 flags);
 extern EvtRuntimeGroup *evtEventViewerCreateEntry(s32 kind, EvtRuntime *runtime);
-extern s32 evtEventViewerAddName(const char *name, EvtRuntime *runtime);
+extern EvtViewerNameIndex evtEventViewerAddName(const char *name, EvtRuntime *runtime);
 extern void mdlPackDecode(s32 packageId, s32 partId, s32 flags, const u8 *data, s32 length);
 extern s32 mdlSpawnCameraSlotViewerObject(s32 packageId, s32 partId);
 extern evtUnitHandle_t *evtGetUnitHandle(s32 key);
@@ -4641,9 +4641,9 @@ typedef struct { u8 bytes[0x40]; } EvtRowPayload40;
 
 extern EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *, s32, EvtRuntime *);
 extern EvtRuntimeGroup *evtEventViewerCreateEntry(s32, EvtRuntime *);
-extern s32 evtEventViewerAddName(const char *, EvtRuntime *);
+extern EvtViewerNameIndex evtEventViewerAddName(const char *, EvtRuntime *);
 extern void dds3CameraObjectBasicSetFovy(dds3Basic_t *, f32);
-extern s32 mnuCampFindMatchingEntryIndex(PolyMovieWork *, EvtRuntime *, s32);
+extern EvtViewerNameIndex mnuCampFindMatchingEntryIndex(PolyMovieWork *, EvtRuntime *, s32);
 
 
 
@@ -4729,7 +4729,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
         }
     }
     for (row = 0; row < (s32)work->mainEntry7Count; row++) {
-        s32 entryNameIndex;
+        EvtViewerNameIndex entryNameIndex;
         EvtViewerResourceRecord *resources;
         u8 *resourceBase;
         switch (((EvtViewerResourceRecord *)work->mainEntry7Data)[row].kind) {
@@ -4751,7 +4751,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
     if ((s32)work->mainEntry22Count > 0) {
         s32 textureCount;
         do {
-            s32 entryNameIndex;
+            EvtViewerNameIndex entryNameIndex;
             EvtViewerResourceRecord *resources;
             u8 *resourceBase;
             sdfTexHandle_t *texture;
@@ -4884,7 +4884,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
                     key->p08.f = ((const EvtCameraFovRowPayload *)evtGetRowPayloadAddress(work, row))->cameraFieldOfView;
                     key->p0C.h[0] = ((const EvtCameraFovRowPayload *)evtGetRowPayloadAddress(work, row))->opaque04;
                     {
-                        s32 serializedNameIndex;
+                        EvtViewerNameIndex serializedNameIndex;
                         dds3Basic_t *camera;
                         nameIndex = evtGetRowVariant(work, row);
                         serializedNameIndex = evtEventViewerAddName(
@@ -5108,8 +5108,8 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
                 *(EvtRowPayload2C *)(work->subEntry16Data + ordinal * 0x2C);
             key->p10.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x8);
             if (*(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) != 0 && *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) != 1) {
-                s32 matchedNameIndex = mnuCampFindMatchingEntryIndex(work, runtime, *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) - 2);
-                if (matchedNameIndex != -1) {
+                EvtViewerNameIndex matchedNameIndex = mnuCampFindMatchingEntryIndex(work, runtime, *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) - 2);
+                if (matchedNameIndex != EVT_VIEWER_NAME_INDEX_NOT_FOUND) {
                     key->p10.h[0] = matchedNameIndex + 2;
                 } else {
                     key->p10.h[0] = 0;
@@ -5132,8 +5132,8 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
                 *(EvtRowPayload2C *)(work->subEntry17Data + ordinal * 0x2C);
             key->p10.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x8);
             if (*(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) != 0 && *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) != 1) {
-                s32 matchedNameIndex = mnuCampFindMatchingEntryIndex(work, runtime, *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) - 2);
-                if (matchedNameIndex != -1) {
+                EvtViewerNameIndex matchedNameIndex = mnuCampFindMatchingEntryIndex(work, runtime, *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) - 2);
+                if (matchedNameIndex != EVT_VIEWER_NAME_INDEX_NOT_FOUND) {
                     key->p10.h[0] = matchedNameIndex + 2;
                 } else {
                     key->p10.h[0] = 0;
@@ -5156,8 +5156,8 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
                 *(EvtRowPayload2C *)(work->subEntry20Data + ordinal * 0x2C);
             key->p10.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x8);
             if (*(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) != 0 && *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) != 1) {
-                s32 matchedNameIndex = mnuCampFindMatchingEntryIndex(work, runtime, *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) - 2);
-                if (matchedNameIndex != -1) {
+                EvtViewerNameIndex matchedNameIndex = mnuCampFindMatchingEntryIndex(work, runtime, *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) - 2);
+                if (matchedNameIndex != EVT_VIEWER_NAME_INDEX_NOT_FOUND) {
                     key->p10.h[0] = matchedNameIndex + 2;
                 } else {
                     key->p10.h[0] = 0;
@@ -5211,8 +5211,8 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
                 *(EvtRowPayload24 *)(work->subEntry19Data + ordinal * 0x24);
             key->p10.h[0] = *(const u16 *)(evtGetRowPayloadAddress(work, row) + 0x8);
             if (*(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) != 0 && *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) != 1) {
-                s32 matchedNameIndex = mnuCampFindMatchingEntryIndex(work, runtime, *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) - 2);
-                if (matchedNameIndex != -1) {
+                EvtViewerNameIndex matchedNameIndex = mnuCampFindMatchingEntryIndex(work, runtime, *(const s16 *)(evtGetRowPayloadAddress(work, row) + 0x8) - 2);
+                if (matchedNameIndex != EVT_VIEWER_NAME_INDEX_NOT_FOUND) {
                     key->p10.h[0] = matchedNameIndex + 2;
                 } else {
                     key->p10.h[0] = 0;
