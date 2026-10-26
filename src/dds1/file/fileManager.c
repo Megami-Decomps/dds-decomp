@@ -4,6 +4,7 @@
 #include "sdf_pac_state.h"
 #include "file_request_cleanup_api.h"
 #include "file_pac_completion_api.h"
+#include "file_request_end_check_api.h"
 #include "sdf_dev_state.h"
 #include "file_manager_api.h"
 #include "file_request.h"
@@ -195,17 +196,19 @@ u32 fileGetLoadRemain(FileRequest *request) {
 
 /* PAC requests additionally require a decoded end marker; other kinds only
  * require a closed device request. */
-s32 pacFileCheckEnd(const FileRequest *request) {
-    s32 result;
+FileRequestEndCheckResult pacFileCheckEnd(const FileRequest *request) {
+    FileRequestEndCheckResult result;
 
     if (request->kind == FILE_REQUEST_KIND_PAC) {
-        result = 0;
+        result = FILE_REQUEST_END_CHECK_PENDING;
         if (request->pacDecodeComplete != 0) {
-            result = request->state == FILE_REQUEST_LIFECYCLE_CLOSED;
+            result = request->state == FILE_REQUEST_LIFECYCLE_CLOSED
+                ? FILE_REQUEST_END_CHECK_REACHED : FILE_REQUEST_END_CHECK_PENDING;
         }
         return result;
     }
-    return request->state == FILE_REQUEST_LIFECYCLE_CLOSED;
+    return request->state == FILE_REQUEST_LIFECYCLE_CLOSED
+        ? FILE_REQUEST_END_CHECK_REACHED : FILE_REQUEST_END_CHECK_PENDING;
 }
 
 /* Require PAC decode completion and a closed device request. */
@@ -219,10 +222,10 @@ FilePacRequestCompletionResult pacCheckEnd(const FileRequest *request) {
 
 extern void sdfFileCmdThreadSetHiPrio(void);
 
-/* Pump the device scheduler and file manager while the kind-specific readiness
- * predicate is zero. No timeout or NULL-request guard is introduced. */
+/* Pump the device scheduler and file manager while the request-specific end
+ * condition is pending. No timeout or NULL-request guard is introduced. */
 void fileSync(FileRequest *request) {
-    while (pacFileCheckEnd(request) == 0) {
+    while (pacFileCheckEnd(request) == FILE_REQUEST_END_CHECK_PENDING) {
         sdfFileCmdThreadSetHiPrio();
         fileManager();
     }
