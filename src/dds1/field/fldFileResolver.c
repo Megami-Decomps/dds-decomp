@@ -1297,7 +1297,7 @@ void fldProcessFieldRequestAlternate(FldSceneRequest *request) {
                                         FLD_PLACEMENT_BATCH_MODE_APPEND);
 }
 
-u8 *fldGetInfoHeader(FldTransferChunk *chunk) {
+u8 *fldGetInfoHeader(const FldTransferChunk *chunk) {
     return (u8 *)chunk + sizeof(*chunk);
 }
 
@@ -1329,11 +1329,11 @@ void sdfAddressResolverReset(u32 *table, u32 base, const u8 *data, s32 size) {
 }
 
 /* Relocate the words described by this packed-resource transfer chunk. */
-void fldAddressResolver(u8 *buffer, FldTransferChunk *chunk) {
+void fldAddressResolver(u8 *buffer, const FldTransferChunk *chunk) {
     sdfAddressResolver((s32 *)buffer, (u32)buffer, buffer + chunk->offset, chunk->size);
 }
 
-void fldRelocateTransferChunkWords(u8 *buffer, FldTransferChunk *chunk) {
+void fldRelocateTransferChunkWords(u8 *buffer, const FldTransferChunk *chunk) {
     sdfAddressResolverReset((u32 *)buffer, (u32)buffer, buffer + chunk->offset, chunk->size);
 }
 
@@ -1716,8 +1716,6 @@ extern u8 fldHasAreaResourceNameChanged(void);
 extern void fldLoadFieldPack(void);
 
 extern void fldFreePac0(void);
-
-extern void fldAddressResolver(u8 *buffer, FldTransferChunk *chunk);
 
 const char D_0039FF18[] = "%sk%03d_%03d.f2";
 

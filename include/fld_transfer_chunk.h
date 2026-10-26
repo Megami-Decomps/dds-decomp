@@ -12,7 +12,10 @@ typedef struct FldTransferChunk {
 
 typedef char FldTransferChunkSizeCheck[(sizeof(FldTransferChunk) == 0x0C) ? 1 : -1];
 
-/* Return the byte payload immediately following the 0x0C-byte descriptor. */
-u8 *fldGetInfoHeader(FldTransferChunk *chunk);
+/* Return the mutable byte payload immediately following a borrowed descriptor. */
+u8 *fldGetInfoHeader(const FldTransferChunk *chunk);
+
+/* Relocate resource words in buffer using this read-only transfer descriptor. */
+void fldAddressResolver(u8 *buffer, const FldTransferChunk *chunk);
 
 #endif
