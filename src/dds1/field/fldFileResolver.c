@@ -295,7 +295,8 @@ void fldMakeResouceBasicFL1(FldSpawnBatch *batch, u32 batchCount) {
         case FLD_SPAWN_BATCH_KIND_BILLBOARD_EFFECT:
             for (resourceIndex = 0; resourceIndex < resourceCount; resourceIndex++, resource++) {
                 BillConfig *config;
-                u32 *resourcePathSuffixAddresses;
+                /* The resolver stores these borrowed string addresses as 32-bit words. */
+                const char * const *resourcePathSuffixes;
                 u32 cacheByteOffset;
                 if (resource->transform != NULL) {
                     position[0] = resource->transform[0];
@@ -320,12 +321,12 @@ void fldMakeResouceBasicFL1(FldSpawnBatch *batch, u32 batchCount) {
                 switch (config->kind) {
                 case 0:
                 case 3:
-                    resourcePathSuffixAddresses = D_003C91D0;
+                    resourcePathSuffixes = (const char * const *)D_003C91D0;
                     cacheByteOffset = config->resourceIndex * sizeof(*cached);
                     if (loaded[config->resourceIndex] == 0) {
                         fldMakeFilePath(directory, fldGlobalBase.area, fldGlobalBase.floor);
                         sprintf(path, D_003BAC40, directory,
-                                     (const char *)resourcePathSuffixAddresses[((BillConfig *)resource->data)->resourceIndex]);
+                                     resourcePathSuffixes[((BillConfig *)resource->data)->resourceIndex]);
                         spawnedObject = effObjCreateResourceKindZero(path, position, (s32)rotation);
                         dds3EffectObjectBasicStatOn(spawnedObject, 1);
                         dds3EffectObjectBasicSetFldEx(spawnedObject, resource->data);
@@ -338,12 +339,12 @@ void fldMakeResouceBasicFL1(FldSpawnBatch *batch, u32 batchCount) {
                     }
                     break;
                 case 1:
-                    resourcePathSuffixAddresses = D_003C91D0;
+                    resourcePathSuffixes = (const char * const *)D_003C91D0;
                     cacheByteOffset = config->resourceIndex * sizeof(*cached);
                     if (loaded[config->resourceIndex] == 0) {
                         fldMakeFilePath(directory, fldGlobalBase.area, fldGlobalBase.floor);
                         sprintf(path, D_003BAC40, directory,
-                                     (const char *)resourcePathSuffixAddresses[((BillConfig *)resource->data)->resourceIndex]);
+                                     resourcePathSuffixes[((BillConfig *)resource->data)->resourceIndex]);
                         spawnedObject = dds3AddP2AEffectObjectBasic(path, position, (s32)rotation);
                         dds3EffectObjectBasicStatOn(spawnedObject, 1);
                         loaded[((BillConfig *)resource->data)->resourceIndex] = 1;
