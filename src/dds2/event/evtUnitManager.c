@@ -1090,6 +1090,8 @@ s32 evtUnitPrepareVerticalMoveSteps(evtUnitHandle_t *unit) {
     return simulatedStepCount;
 }
 
+#define EVT_UNIT_FLAG_USE_PATH_ROTATION 0x10
+
 EvtUnitMotionStepResult evtUnitMoveTypePathTrace(evtUnitHandle_t *unit) {
     f32 v[4];
 
@@ -1097,7 +1099,7 @@ EvtUnitMotionStepResult evtUnitMoveTypePathTrace(evtUnitHandle_t *unit) {
     dds3PathBasicControlGetPos(unit->pathControl);
     VU0_STORE_VF($vf10, v);
     dds3SetPosPoseSet(unit->effObj, (u128 *)v);
-    if (unit->flags & 0x10) {
+    if (unit->flags & EVT_UNIT_FLAG_USE_PATH_ROTATION) {
         dds3PathBasicControlGetRot(unit->pathControl);
         SDF_VU0_COPYVECTOR_A_TO_B();
         sdfConvertEulerAnglesToQuaternionVU(0.0f, 3.14159265f, 0.0f);
@@ -1319,15 +1321,15 @@ void evtSetUnitMove3(evtUnitHandle_t *work, s32 pathObjectKey, s32 frames, s32 v
     switch (sideMode) {
     case 0:
         work->flags &= ~8;
-        work->flags &= ~0x10;
+        work->flags &= ~EVT_UNIT_FLAG_USE_PATH_ROTATION;
         break;
     case 1:
         work->flags |= 8;
-        work->flags &= ~0x10;
+        work->flags &= ~EVT_UNIT_FLAG_USE_PATH_ROTATION;
         break;
     case 2:
         work->flags &= ~8;
-        work->flags |= 0x10;
+        work->flags |= EVT_UNIT_FLAG_USE_PATH_ROTATION;
         break;
     }
     work->motionState = EVT_UNIT_MOTION_STATE_SOURCE;
