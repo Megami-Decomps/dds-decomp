@@ -237,9 +237,9 @@ extern dds3Basic_t *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *,
 
 extern dds3Basic_t *dds3AddESPEffectObjectBasic(const char *, void *, void *, f32);
 
-extern void dds3EffectObjectBasicStatOn(dds3Basic_t *, s32);
+extern void dds3EffectObjectBasicStatOn(dds3Basic_t *, u32);
 
-extern void dds3EffectObjectBasicStatOff(dds3Basic_t *, s32);
+extern void dds3EffectObjectBasicStatOff(dds3Basic_t *, u32);
 
 extern void dds3EffectObjectBasicSetFldEx(dds3Basic_t *, BillConfig *);
 

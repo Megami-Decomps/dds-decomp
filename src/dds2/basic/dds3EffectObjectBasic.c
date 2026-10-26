@@ -820,7 +820,7 @@ void dds3EffectObjectBasicStatOn(dds3Basic_t *obj, u32 flags) {
     ((EffectDependencyState *)obj->data)->flags = ((EffectDependencyState *)obj->data)->flags | flags;
 }
 
-/* Clear the requested flag bits; retain the unsigned mask parameter used by DDS2. */
+/* Clear the requested flag bits from the unsigned effect-state mask. */
 void dds3EffectObjectBasicStatOff(dds3Basic_t *obj, u32 flags) {
     ((EffectDependencyState *)obj->data)->flags = ((EffectDependencyState *)obj->data)->flags & ~flags;
 }

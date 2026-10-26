@@ -25,7 +25,7 @@ void dds3EffectObjectBasicUnlinkObject(dds3Basic_t *owner) {
 }
 
 struct billHandle_t;
-extern void dds3EffectObjectBasicStatOn(dds3Basic_t *object, s32 flags);
+extern void dds3EffectObjectBasicStatOn(dds3Basic_t *object, u32 flags);
 extern void dds3BillboardSetAnimNumber(struct billHandle_t *billboard, u32 entry);
 
 /* Complete 0x30-byte FLD1 type-11 effect descriptor. The field resolver

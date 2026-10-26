@@ -806,12 +806,12 @@ s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *obj, dds3Basic_t *first, dds3Basic_t
 }
 
 /* OR the requested flag bits into slot data; no object/data validation is performed. */
-void dds3EffectObjectBasicStatOn(dds3Basic_t *obj, s32 flags) {
+void dds3EffectObjectBasicStatOn(dds3Basic_t *obj, u32 flags) {
     ((EffectDependencyState *)obj->data)->flags |= flags;
 }
 
-/* Clear the requested flag bits; retain the signed mask parameter used by DDS1. */
-void dds3EffectObjectBasicStatOff(dds3Basic_t *obj, s32 flags) {
+/* Clear the requested flag bits from the unsigned effect-state mask. */
+void dds3EffectObjectBasicStatOff(dds3Basic_t *obj, u32 flags) {
     ((EffectDependencyState *)obj->data)->flags &= ~flags;
 }
 
