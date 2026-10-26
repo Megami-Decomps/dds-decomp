@@ -12,6 +12,7 @@
 #include "mnu_voice_resource_path_api.h"
 #include "ui_color.h"
 #include "mnu_result.h"
+#include "brs_progress_animation_kind.h"
 #include "brs_result_counter.h"
 #include "brs_result_counter_completion_api.h"
 #include "dds3_world_counter.h"
@@ -182,7 +183,6 @@ void brsDrawProgressRowOverlays(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
 
 extern void nbPlaySe(u32 sequenceId);
 extern u32 ptyComputeTotalExp(datUnitWork_t *unit, s32 levelDelta);
-extern s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *, BrsProgressRow *, s32, s8);
 
 void brsUpdateLevelProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
                    BrsProgressRow *progressRow, s32 context, s32 rowIndex) {
@@ -212,7 +212,8 @@ void brsUpdateLevelProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork *w
     case 4:
         if (level < 99 && progressRow->unit->hp != 0 && (progressRow->unit->status & 0x4000) == 0) {
             if (work->levelAnimation[rowIndex].state != 3) {
-                work->levelAnimation[rowIndex].applied = brsCalcProgressAnimationStep(work, progressRow, rowIndex, 0);
+                work->levelAnimation[rowIndex].applied = brsCalcProgressAnimationStep(
+                    work, progressRow, rowIndex, BRS_PROGRESS_ANIMATION_LEVEL_EXPERIENCE);
                 currentExp = work->levelAnimation[rowIndex].currentProgress + work->levelAnimation[rowIndex].applied;
                 work->levelAnimation[rowIndex].currentProgress = currentExp;
                 if (currentExp >= (s32)ptyComputeTotalExp(progressRow->unit, nextLevel - progressRow->unit->level) && work->levelAnimation[rowIndex].state == 2) {
@@ -654,7 +655,8 @@ extern u32 ptyComputeTotalExp(datUnitWork_t *unit, s32 levelDelta);
 extern s32 ptyGetCurrentProfileId(const datUnitWork_t *);
 extern u32 prfGetCapValue(u16);
 
-s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *work, BrsProgressRow *progressRow, s32 rowIndex, s8 progressKind) {
+s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *work, BrsProgressRow *progressRow,
+                                 s32 rowIndex, BrsProgressAnimationKind progressKind) {
     s32 result = 0;
     s32 levelDelta = work->levelAnimation[rowIndex].level - progressRow->unit->level;
     s32 nextLevelExp = ptyComputeTotalExp(progressRow->unit, levelDelta + 1);
@@ -665,7 +667,7 @@ s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *work, BrsProgressRow *prog
     if (range == 0) {
         range = ptyComputeTotalExp(progressRow->unit, levelDelta + 1);
     }
-    if (progressKind == 0) {
+    if (progressKind == BRS_PROGRESS_ANIMATION_LEVEL_EXPERIENCE) {
         if (work->levelAnimation[rowIndex].remaining > 0) {
             if (work->levelAnimation[rowIndex].skipRamp == 0) {
                 work->levelAnimation[rowIndex].frames++;
@@ -849,7 +851,6 @@ typedef struct BrsResultWork {
 extern DatProfileRecord *ptyGetCurrentProfileRecord(datUnitWork_t *);
 extern s32 ptyGetCurrentProfileId(const datUnitWork_t *);
 extern u32 prfGetCapValue(u16);
-extern s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *, BrsProgressRow *, s32, s8);
 extern void nbPlaySe(u32 sequenceId);
 
 
@@ -891,7 +892,8 @@ void brsUpdateProfileProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork 
         if (work->profileAnimation[rowIndex].state == 2) {
             if (cap != 0) {
                 if (currentProgress < cap) {
-                    increment = brsCalcProgressAnimationStep(work, row, rowIndex, 1);
+                    increment = brsCalcProgressAnimationStep(
+                        work, row, rowIndex, BRS_PROGRESS_ANIMATION_PROFILE_POINTS);
                     work->profileAnimation[rowIndex].applied = increment;
                     work->profileAnimation[rowIndex].currentProgress += increment;
                     if (work->profileAnimation[rowIndex].currentProgress >= cap) {
