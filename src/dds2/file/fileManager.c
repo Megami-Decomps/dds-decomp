@@ -4,6 +4,7 @@
 #include "file_pac.h"
 #include "sdf_pac_state.h"
 #include "file_request_cleanup_api.h"
+#include "file_pac_cleanup_api.h"
 #include "file_pac_completion_api.h"
 #include "file_request_end_check_api.h"
 #include "sdf_dev_state.h"
@@ -15,7 +16,6 @@
 
 FileManWork fileQueueHead __attribute__((section(".bss")));
 
-extern s32 pacFileHandleFree(struct FilePacRequest *);
 #include "sdf_debug_api.h"
 #define FILE_READ_SLOT_COUNT 4
 #define FILE_LAST_READ_SLOT 3

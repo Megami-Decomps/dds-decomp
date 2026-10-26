@@ -19,6 +19,7 @@
 #include "ui_color.h"
 #include "btl_stage_task_cleanup.h"
 #include "file_pac.h"
+#include "file_pac_cleanup_api.h"
 #include "sdf_motion.h"
 #include "sdf_chip.h"
 #include "fr_font.h"
@@ -3979,11 +3980,9 @@ void btlCreateStageTestTask(void) {
     dds3StartProcess(D_0042B610, 0x2B0C, 1, 1, evtBattleStageTestScreen, evtDestroyBattleStageTestWorldNode, 0);
 }
 
-/* A PAC file request's cleanup (fileRequestFreeIfComplete delegates it): once the
- * request is complete, release its device state, packet queue nodes, name and
- * the request itself, returning zero; return one while it is pending. Retain
- * the K&R definition. */
-s32 pacFileHandleFree(request)
+/* Release the device state, packet nodes, copied name, and wrapper only after
+ * the device lifecycle closes; otherwise retain the pending request. */
+FileRequestCleanupResult pacFileHandleFree(request)
     FilePacRequest *request;
 {
     if (request->state == FILE_REQUEST_STATE_COMPLETE) {
@@ -3994,9 +3993,9 @@ s32 pacFileHandleFree(request)
         sdfPacFree(&request->packet);
         sdfChipFreeDirect(request->name);
         sdfChipFreeDirect((void *)request);
-        return 0;
+        return FILE_REQUEST_CLEANUP_FREED;
     }
-    return 1;
+    return FILE_REQUEST_CLEANUP_PENDING;
 }
 
 s32 pacFileHandleFree_(void *request) {
