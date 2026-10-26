@@ -32,6 +32,7 @@
 #include "kwln_task_create.h"
 #include "pcp_vu0.h"
 #include "mnu.h"
+#include "mnu_popup_eligibility.h"
 #include "mnu_panel_state.h"
 #include "mnu_panel_state_prefix.h"
 #include "mnu_staff.h"
@@ -1395,7 +1396,7 @@ s32 mnuDispatchPopupTransition(MenuPopupState *work, s32 *entrySlot, s32 mode,
     case 0:
         entry->flags = flags | 0x100000;
         if (entry->canEnter != NULL) {
-            accepted = entry->canEnter(callback) != 0;
+            accepted = ((MenuPopupCanEnterCallback)entry->canEnter)(callback) != 0;
         }
         if (accepted || ((*slot)->flags & 1)) {
             if (!((*slot)->flags & 0x10000)) {
