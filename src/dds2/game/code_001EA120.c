@@ -1044,7 +1044,7 @@ void btlAdvanceActorStageAndPose(BtlLinkedCommand *action) {
         return;
     }
     work = (BtlState *)btlGetRuntime();
-    if (work->unk66C != 0 && work->unk66C((BtlUnit *)action) != 0) {
+    if (work->actionStageAdvanceHook != 0 && work->actionStageAdvanceHook(action) != 0) {
         return;
     }
     category = btlMapActorCategory(action);

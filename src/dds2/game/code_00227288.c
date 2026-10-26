@@ -1766,7 +1766,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->unk64C, 0x0, btlTriggerLinkedActionMotion);
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlStartLinkedActionMotionPrimary);
         BTL_INSTALL_CALLBACK(battle->handleActorCategoryCamera, 0x0, btlSetupHariActionCameraPair);
-        BTL_INSTALL_CALLBACK(battle->unk66C, 0x0, btlAdvanceTimedActionState);
+        BTL_INSTALL_CALLBACK(battle->actionStageAdvanceHook, 0x0, btlAdvanceTimedActionState);
         BTL_INSTALL_CALLBACK(battle->statusMotionOverride, 0x0, btlGetSpecialEnemyActionStatus);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlRemapCommandKind);
         BTL_INSTALL_CALLBACK(battle->preserveMotionRange, 0x0, btlIsGateCoreAction19Request);
@@ -1914,7 +1914,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
     case 0x327: {
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlInitializeMarkedActionTimer);
         BTL_INSTALL_CALLBACK(battle->actionCameraStepHook, 0x0, btlStartMarkedActionRuntimeUpdate);
-        BTL_INSTALL_CALLBACK(battle->unk66C, 0x0, btlTickAction6B);
+        BTL_INSTALL_CALLBACK(battle->actionStageAdvanceHook, 0x0, btlTickAction6B);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlRemapListedUnitAction);
         BTL_INSTALL_CALLBACK(battle->actorSceneExceptionPredicate, 0x0, btlIsSceneUnitModeListed);
         break;
@@ -1922,7 +1922,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
     case 0x317:
     case 0x326: {
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlResetDelayedActionTimer);
-        BTL_INSTALL_CALLBACK(battle->unk66C, 0x0, btlTickDelayedMarkedAction);
+        BTL_INSTALL_CALLBACK(battle->actionStageAdvanceHook, 0x0, btlTickDelayedMarkedAction);
         BTL_INSTALL_CALLBACK(battle->chooseMotion, 0x0, btlRemapListedUnitAction);
         BTL_INSTALL_CALLBACK(battle->actorSceneExceptionPredicate, 0x0, btlIsSceneUnitModeListed);
         break;
@@ -1961,7 +1961,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlSelectActionTransitionCamera);
         BTL_INSTALL_CALLBACK(battle->actionCameraStepHook, 0x0, btlSetSpecialLinkedActionCamera);
         BTL_INSTALL_CALLBACK(battle->handleActorCategoryCamera, 0x0, btlSelectBrahmaActorCategoryCamera);
-        BTL_INSTALL_CALLBACK(battle->unk66C, 0x0, btlAdvanceBrahmanTimedActionCamera);
+        BTL_INSTALL_CALLBACK(battle->actionStageAdvanceHook, 0x0, btlAdvanceBrahmanTimedActionCamera);
         BTL_INSTALL_CALLBACK(battle->actionCameraSetupHook, 0x0, btlSelectActionCameraByTableFlags);
         BTL_INSTALL_CALLBACK(battle->timedCameraFinishHook, 0x0, btlFinishBrahmanCameraByTableFlags);
         BTL_INSTALL_CALLBACK(battle->actionEffectOverride, 0x0, btlGetMarkedActionMotionCode);
@@ -2045,7 +2045,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->commandTurnEndHook, 0x0, btlMode311TurnEndCallback);
         BTL_INSTALL_CALLBACK(battle->afterUnitUpdate, 0x0, btlResetUnitPlacement);
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlResetSpiralEdgeMotionProgress);
-        BTL_INSTALL_CALLBACK(battle->unk66C, 0x0, btlUpdateSpiralEdgeMarkedCamera);
+        BTL_INSTALL_CALLBACK(battle->actionStageAdvanceHook, 0x0, btlUpdateSpiralEdgeMarkedCamera);
         allocation = sdfAllocAuto(0x4);
         battle->effect = allocation;
         memset(allocation, 0, 0x4);
@@ -2082,7 +2082,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlSetLinkedPairActionCamera);
         BTL_INSTALL_CALLBACK(battle->actionCameraStepHook, 0x0, btlUnitStartAimAtTarget);
         BTL_INSTALL_CALLBACK(battle->handleActorCategoryCamera, 0x0, btlIsSpecialActionKind);
-        BTL_INSTALL_CALLBACK(battle->unk66C, 0x0, btlAdvanceMarkedLinkedActionCamera);
+        BTL_INSTALL_CALLBACK(battle->actionStageAdvanceHook, 0x0, btlAdvanceMarkedLinkedActionCamera);
         allocation = sdfAllocAuto(0x18);
         battle->effect = allocation;
         memset(allocation, 0, 0x18);

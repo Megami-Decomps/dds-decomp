@@ -590,7 +590,7 @@ typedef struct BtlState {
     s32 (*cameraPoseBlendHook)(BtlLinkedCommand *, s32, s32); /* 0x660: same target-side pose override as DDS1 +0x628. */
     s32 (*actionCameraStepHook)(struct BtlLinkedCommand *); /* 0x664: nonzero handles the camera step. */
     s32 (*handleActorCategoryCamera)(struct BtlLinkedCommand *, s32, s32); /* 0x668: same category camera override. */
-    s32 (*unk66C)(BtlUnit *);
+    s32 (*actionStageAdvanceHook)(BtlLinkedCommand *); /* Nonzero handles action-stage and pose advancement. */
     s32 (*unk670)(struct BtlLinkedCommand *);
     /* Legacy installers copy callback representations into these byte slots. */
     union {
