@@ -19,6 +19,13 @@ FldSceneReadyState fldGetSceneReadyFlag(void);
 FldNextFileLoadState fldGetNextFileLoadState(void);
 u8 fldLoadNextGetStatus2(void);
 u32 fldPollAreaResourceLoad(void);
-u8 fldTryStartPendingBattleReturnAreaLoad(void);
+
+typedef u8 FldBattleReturnAreaLoadResult;
+enum {
+    FLD_BATTLE_RETURN_AREA_LOAD_NOT_REQUESTED = 0,
+    FLD_BATTLE_RETURN_AREA_LOAD_STARTED = 1
+};
+
+FldBattleReturnAreaLoadResult fldTryStartPendingBattleReturnAreaLoad(void);
 
 #endif

@@ -1206,7 +1206,7 @@ void fldLoadNextFile_SetId_BtlRet(u32 area, u32 floor) {
     fldPendingFloor = floor;
 }
 
-u8 fldTryStartPendingBattleReturnAreaLoad(void) {
+FldBattleReturnAreaLoadResult fldTryStartPendingBattleReturnAreaLoad(void) {
     char directory[64];
     char path[80];
     u32 area = fldPendingArea;
@@ -1220,9 +1220,9 @@ u8 fldTryStartPendingBattleReturnAreaLoad(void) {
         sprintf(path, D_004130D8, directory, area, floor);
         pFldNextFileDataF2 = (FilePacRequest *)pacLoad(path);
         fldGlobalBase.resourceFlag = FLD_AREA_RESOURCE_REQUEST_LOAD_PENDING;
-        return 1;
+        return FLD_BATTLE_RETURN_AREA_LOAD_STARTED;
     }
-    return 0;
+    return FLD_BATTLE_RETURN_AREA_LOAD_NOT_REQUESTED;
 }
 
 extern void sdfFileCmdThreadSetLoPrio(void);
