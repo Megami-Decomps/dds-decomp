@@ -998,13 +998,13 @@ void mdlSetMotionSpeedEx(dds3ModelHandle_t *ctx, s32 searchId, f32 frameStep) {
 
 /* vu0 routine: load the primary vector into vf10, not a C return value. */
 void mdlGetPosition(dds3ModelHandle_t *ctx) {
-    void *primaryVector = ctx->inner->matrix[3];
+    const f32 *primaryVector = ctx->inner->matrix[3];
     SDF_VU0_LOADVECTOR_BARRIER(primaryVector);
 }
 
 /* vu0 routine: force vf10.w to one and store it as the primary vector. */
 void mdlSetPosition(dds3ModelHandle_t *ctx) {
-    void *primaryVector;
+    f32 *primaryVector;
     SDF_VU0_VECTOR_W_SET_ONE();
     primaryVector = ctx->inner->matrix[3];
     SDF_VU0_STOREVECTOR(primaryVector);
@@ -1012,7 +1012,7 @@ void mdlSetPosition(dds3ModelHandle_t *ctx) {
 
 /* vu0 routine: load the stored rotation quaternion into vf10. */
 void mdlGetRotate(dds3ModelHandle_t *ctx) {
-    void *rotationQuaternion = ctx->inner->rotationQuaternion;
+    const f32 *rotationQuaternion = ctx->inner->rotationQuaternion;
     SDF_VU0_LOADVECTOR_BARRIER(rotationQuaternion);
 }
 
@@ -1020,10 +1020,10 @@ void mdlGetRotate(dds3ModelHandle_t *ctx) {
 /* vu0 routine: consume vf10 as a quaternion, preserve it in the model,
  * then store the resulting basis rows from vf28-vf30. No C argument supplies vf10. */
 void mdlSetRotate(dds3ModelHandle_t *ctx) {
-    void *rotationQuaternion;
-    void *basisRow0;
-    void *basisRow1;
-    void *basisRow2;
+    f32 *rotationQuaternion;
+    f32 *basisRow0;
+    f32 *basisRow1;
+    f32 *basisRow2;
 
     rotationQuaternion = ctx->inner->rotationQuaternion;
     SDF_VU0_STOREVECTOR(rotationQuaternion);
@@ -1038,13 +1038,13 @@ void mdlSetRotate(dds3ModelHandle_t *ctx) {
 
 /* vu0 routine: load the tertiary vector into vf10; projection uses its row scale. */
 void mdlGetScale(dds3ModelHandle_t *ctx) {
-    void *tertiaryVector = ctx->inner->scaleVector;
+    const f32 *tertiaryVector = ctx->inner->scaleVector;
     SDF_VU0_LOADVECTOR_BARRIER(tertiaryVector);
 }
 
 /* vu0 routine: store all vf10 components as the tertiary vector, without forcing w. */
 void mdlSetScale(dds3ModelHandle_t *ctx) {
-    void *tertiaryVector = ctx->inner->scaleVector;
+    f32 *tertiaryVector = ctx->inner->scaleVector;
     SDF_VU0_STOREVECTOR(tertiaryVector);
 }
 
