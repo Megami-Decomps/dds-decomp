@@ -802,8 +802,8 @@ u32 evtGetIndexedEventRecordId(s32 tableIndex) {
 }
 
 /* Read the entry's level, capped at the script-visible maximum. */
-u16 datGetLevelForDraw(s32 entryAddress) {
-    s32 level = ((datUnitWork_t *)entryAddress)->level;
+u16 datGetLevelForDraw(const datUnitWork_t *entry) {
+    s32 level = entry->level;
 
     return level < PTY_LEVEL_LIMIT ? level : PTY_MAX_LEVEL;
 }
