@@ -10147,8 +10147,8 @@ void effUpdateEffectSlotTransitions(EffActiveResource *work) {
     index = 0;
     btlGetRuntime();
     elapsed = (s32)work->frame;
-    slotColor = (u8 *)work->payload + 0x18;
-    slotData = (u32 *)((u8 *)work->payload + 0x10);
+    slotColor = work->payload + 0x18;
+    slotData = (u32 *)(work->payload + 0x10);
     do {
         duration = slotData[-4];
         if (duration < *slotData) {

@@ -19,7 +19,7 @@ typedef struct EffActiveResource {
     } kind;
     void *resource;
     u8 pad_34[4];
-    void *payload;
+    u8 *payload;
     u8 pad_3C[4];
 } EffActiveResource;
 
