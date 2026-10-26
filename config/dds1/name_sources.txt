@@ -8231,7 +8231,7 @@
 0x002D2A58	sdfTexAllocClutBuff	inferred	SMT3HD name via SLUS_209.11 0x002AB688, reloc-identical; was sdfTexAllocatePaletteData
 0x002D2A98	sdfTexCopyClutData	inferred	SMT3HD name via SLUS_209.11 0x002AB6C8, reloc-identical; was sdfTexCopyImageData
 0x002D2AB8	sdfTexAlloc	inferred	SMT3HD name via SLUS_209.11 0x002AB6E8, reloc-identical; was sdfTexCreateWithAllocatedResources
-0x002D2C30	sdfTexRelease	inferred	Releases texture allocations, unlinks the texture, and frees its reference and record.
+0x002D2C30	sdfTexDestroy	inferred	Unlinks the texture and frees its GPU resources, buffers, reference, and record without changing its reference count.
 0x002D2CB8	sdfTexReleaseReference	inferred	Decrements the texture reference count and releases its texture when it reaches zero.
 0x002D2D00	sdfTexReleaseReferenceViaHandler	inferred	Decrements the texture refcount and passes the final reference to func_002D3C30.
 0x002D2D48	sdfTexSetPacket	inferred	SMT3HD name via SLUS_209.11 0x002AB910, byte-identical; was sdfBuildTextureStatePacket

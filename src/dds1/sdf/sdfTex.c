@@ -117,8 +117,8 @@ sdfTexHandle_t *sdfTexAlloc(s32 width, s32 height, u32 format,
         primary, paletteFormat, paletteCount, secondary);
 }
 
-/* Release both GPU resources and unlink the texture from the active list. */
-void sdfTexRelease(sdfTexHandle_t *texture) {
+/* Destroy both GPU resources and unlink the texture from the active list. */
+void sdfTexDestroy(sdfTexHandle_t *texture) {
     sdfTexHandle_t *next;
     sdfTexHandle_t *prev;
 
@@ -155,7 +155,7 @@ void sdfTexReleaseReference(sdfTexHandle_t *texture) {
         ref->refCount = remainingReferenceCount;
         if (remainingReferenceCount == 0) {
             texture->resourceKey = 0;
-            sdfTexRelease(texture);
+            sdfTexDestroy(texture);
         }
     }
 }

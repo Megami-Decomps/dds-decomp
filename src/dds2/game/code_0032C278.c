@@ -214,7 +214,7 @@ sdfTexHandle_t *sdfTexSearch(s32 resourceKey) {
 extern SdfPendingRequest sdfTexDelayedResrcCB;
 
 void sdfTexInit(void) {
-    sdfDelayedResrcInitCB(&sdfTexDelayedResrcCB, sdfTexRelease);
+    sdfDelayedResrcInitCB(&sdfTexDelayedResrcCB, sdfTexDestroy);
 }
 
 /* Transfer setup, deferred image metadata, and its linked primitive-reset tail. */
