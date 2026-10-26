@@ -11,6 +11,7 @@ struct EffNodeDescriptor;
 #include "sdf_chip.h"
 #include "dds3_path.h"
 #include "evt_unit.h"
+#include "evt_unit_motion_callback_result.h"
 #include "evt_unit_motion_step_result.h"
 #include "evt_unit_move_end_api.h"
 #include "evt_unit_path_advance_api.h"
@@ -1149,7 +1150,7 @@ extern BtlActorStatusRecord *D_00435DF0;
 extern void mnuInitializeCampPanelVisualDefaults(f32 *firstVector, f32 *secondVector, f32 *thirdVector, f32 *scalarA, f32 *scalarB);
 #include "dds3_world_secondary.h"
 
-extern void evtSetUnitMove1(evtUnitHandle_t *work, s32 motionSubmode, const f32 vector[4], s32 unused, s32 frames, s32 valueB6, s32 (*callback)(evtUnitHandle_t *, s32), s32 unusedLast);
+extern void evtSetUnitMove1(evtUnitHandle_t *work, s32 motionSubmode, const f32 vector[4], s32 unused, s32 frames, s32 valueB6, EvtUnitMotionCallback callback, s32 unusedLast);
 
 
 
@@ -1248,7 +1249,7 @@ void evtSetUnitRot2(evtUnitHandle_t *work, s32 worldObjectKey, s32 frames) {
 }
 
 /* Configure a mode-one vector transition, without retaining a world source. */
-void evtSetUnitMove1(evtUnitHandle_t *work, s32 motionSubmode, const f32 vector[4], s32 unused, s32 frames, s32 valueB6, s32 (*callback)(evtUnitHandle_t *, s32), s32 unusedLast) {
+void evtSetUnitMove1(evtUnitHandle_t *work, s32 motionSubmode, const f32 vector[4], s32 unused, s32 frames, s32 valueB6, EvtUnitMotionCallback callback, s32 unusedLast) {
     f32 *destination = work->targetVector;
 
     work->motionSubmode = motionSubmode;
@@ -1263,7 +1264,7 @@ void evtSetUnitMove1(evtUnitHandle_t *work, s32 motionSubmode, const f32 vector[
 }
 
 /* Configure the same transition from a secondary-world object's vector. */
-void evtSetUnitMove2(evtUnitHandle_t *work, s32 motionSubmode, s32 worldObjectKey, s32 unused, s32 frames, s32 valueB6, s32 (*callback)(evtUnitHandle_t *, s32), s32 unusedLast) {
+void evtSetUnitMove2(evtUnitHandle_t *work, s32 motionSubmode, s32 worldObjectKey, s32 unused, s32 frames, s32 valueB6, EvtUnitMotionCallback callback, s32 unusedLast) {
     dds3Basic_t *worldUnit;
     EvtWorldSourceTransformPrefix *source;
 
@@ -1341,7 +1342,7 @@ void evtSetUnitMove3(evtUnitHandle_t *work, s32 pathObjectKey, s32 frames, s32 v
     work->motionTicks = 0;
 }
 
-s32 evtStartUnitModeWithValue(evtUnitHandle_t *eventUnit, s32 (*callback)(evtUnitHandle_t *, s32)) {
+s32 evtStartUnitModeWithValue(evtUnitHandle_t *eventUnit, EvtUnitMotionCallback callback) {
     s32 result = 0;
 
     if (callback != 0) {
@@ -1449,7 +1450,7 @@ EvtUnitMotionStepResult evtUpdateUnitMotion(dds3PoseSet_t *unused, dds3Basic_t *
                 break;
             }
             if (unit->motionCallback != NULL) {
-                if (unit->motionCallback(unit, 0) == 1) {
+                if (unit->motionCallback(unit, 0) == EVT_UNIT_MOTION_CALLBACK_COMPLETE) {
                     unit->motionState = EVT_UNIT_MOTION_STATE_IDLE;
                 }
             }
@@ -1484,7 +1485,7 @@ EvtUnitMotionStepResult evtUpdateUnitMotion(dds3PoseSet_t *unused, dds3Basic_t *
         break;
     case EVT_UNIT_MOTION_STATE_VALUE:
         if (unit->motionCallback != NULL) {
-            if (unit->motionCallback(unit, 0) == 1) {
+            if (unit->motionCallback(unit, 0) == EVT_UNIT_MOTION_CALLBACK_COMPLETE) {
                 unit->motionState = EVT_UNIT_MOTION_STATE_IDLE;
             }
         } else {
