@@ -37,7 +37,7 @@ typedef struct PmdHeader {
     s32 count;    /* 0x10 */
     s32 kind;     /* 0x14 */
     u8 pad2[8];
-    PmdEntry entries[1]; /* 0x20 */
+    const PmdEntry entries[1]; /* 0x20: serialized records are read-only. */
 } PmdHeader;
 
 /* sdfDevLoadFileEx writes the 32-bit payload address, not its allocation handle. */
@@ -65,7 +65,7 @@ typedef struct PolyMovieWork {
     u32 flags;         /* 0x00 */
     PolyMovieResourceSlot mainResource; /* 0x04 */
     PmdHeader *data;   /* 0x10 */
-    PmdEntry *entries; /* 0x14 */
+    const PmdEntry *entries; /* 0x14: borrowed directory records. */
     u8 *mainEntry1Data;   /* 0x18 */
     u32 mainEntry1Value; /* 0x1C: value from the main type-1 entry. */
     u8 *mainEntry2Data;   /* 0x20 */
@@ -86,14 +86,14 @@ typedef struct PolyMovieWork {
     PolyMovieResourceSlot secondaryResource; /* 0x5C */
     PolyMovieResourceSlot tertiaryResource; /* 0x68 */
     PmdHeader *sub;    /* 0x74 */
-    PmdEntry *subEntries; /* 0x78 */
+    const PmdEntry *subEntries; /* 0x78: borrowed directory records. */
     u8 *subEntry1Data;    /* 0x7C */
     u32 subEntry1Value; /* 0x80: value from the secondary type-1 entry. */
     u8 *subEntry0Data;    /* 0x84 */
     const struct EvtCompactRow *subEntry4Kind4Data; /* 0x88 */
     const struct EvtExtendedRow *subEntry4OtherData; /* 0x8C */
     PmdHeader *sub2;   /* 0x90 */
-    PmdEntry *sub2Entries; /* 0x94 */
+    const PmdEntry *sub2Entries; /* 0x94: borrowed directory records. */
     const struct EvtExtendedRow *secondEntry4Data; /* 0x98 */
     u32 extendedEntry4Count; /* 0x9C: rows in the extended type-4 table */
     u32 subEntry4Count; /* 0xA0 */
