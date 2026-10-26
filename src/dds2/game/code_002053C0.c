@@ -786,7 +786,7 @@ void btlOrientFrontAndBackUnitsTowardTargets(ActionStateLink *link, BtlUnit *a, 
     btlUnitFaceTarget(back, front);
 }
 
-extern s32 btlGetBossSceneStateWhenActive(void);
+extern s8 btlGetBossSceneStateWhenActive(void);
 
 /* vu0 routine: measure the center actor's displacement from its sole target. */
 void btlAlignTripleFormationWithTarget(ActionStateLink *link, BtlUnit *first, BtlUnit *second) {

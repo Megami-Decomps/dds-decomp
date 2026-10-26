@@ -16,7 +16,7 @@ typedef struct BattleSub {
         s32 targetMode;
         BtlUnit *targetActor;
     };
-    s8 b8;
+    s8 specialActorFormationEnabled; /* Mode 0x30B: gates the special actor arrangement. */
     u8 pad09;
     s8 alternateFormation;
     u8 pad0B;

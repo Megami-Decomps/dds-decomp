@@ -2896,7 +2896,7 @@ void btlUpdateSpecialActorFormation(void) {
             }
         }
     }
-    if (sub->b8 != 0) {
+    if (sub->specialActorFormationEnabled != 0) {
         if (core != NULL) {
             btlInitializeEffectVectorsFromSourceRecords(core, 1, core->partyRecord.unitId);
             core->bodyOffset[2] += 1050.0f;
@@ -4550,7 +4550,7 @@ s32 btlPlayStationedSoundForActiveBossAction(BtlUnit *unit) {
     }
 }
 
-s32 btlGetBossSceneStateWhenActive(void) {
+s8 btlGetBossSceneStateWhenActive(void) {
     BattleWork *work = (BattleWork *)btlGetRuntime();
     if (work->mode != 0x30B) {
         return 0;
@@ -4558,7 +4558,7 @@ s32 btlGetBossSceneStateWhenActive(void) {
     if (work->sub == 0) {
         return 0;
     }
-    return work->sub->b8;
+    return work->sub->specialActorFormationEnabled;
 }
 
 void btlResetBossRatioScale(void) {
