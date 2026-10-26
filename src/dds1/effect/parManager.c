@@ -523,7 +523,6 @@ void dds3Particle_BlurClearItem(dds3Particle_BlurBuff_t *table, s32 slotIndex) {
 
 extern f32 parLook[];
 extern f32 parTrack_w[];
-extern void dds3TrackPolyColorSet(void *entryOwner, s32 index, u32 color);
 
 /* Rebuild one slot's two-vertex strip cells from its point history: each cell is
    the offset point +/- the cross product of the segment direction with the view axis,

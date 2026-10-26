@@ -15,7 +15,6 @@
 
 extern u32 effBTLFieldColorUsesActorSelectors(void);
 extern u32 effBTLFieldColorGetOriginalSelector(void);
-extern void dds3TrackPolyColorSet(void *entryOwner, s32 index, u32 value);
 
 extern f32 aViewTarget[4];
 extern f32 sdfViewTargetVector[4];

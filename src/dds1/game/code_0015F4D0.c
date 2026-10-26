@@ -16,6 +16,7 @@
 #include "sdf_vu_matrix.h"
 #include "ee_mmi.h"
 #include "eff.h"
+#include "par_cell_api.h"
 #include "eff_dispatch_state.h"
 #include "eff_offset_triangle.h"
 
@@ -159,8 +160,8 @@ void dds3PolygonTriangleSet(EffOffsetTriangleView *work, const f32 *position) {
     work->count = count + 3;
 }
 
-void dds3TrackPolyColorSet(void *entryOwner, s32 index, u32 value) {
-    ((EffectDispatchState *)entryOwner)->entries[index].value = value;
+void dds3TrackPolyColorSet(ParSystem *system, s32 cellIndex, u32 color) {
+    system->cells[cellIndex].color = color;
 }
 
 BlurPacketQuad *effPkt2DGetPrimPtr(SdfDrawPacket *packet) {

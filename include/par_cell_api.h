@@ -11,6 +11,7 @@ void dds3TrackPolyDelete(struct ParSystem *system);
 void dds3TrackPolyListInit(struct ParSystem *system, s32 cellIndex);
 void dds3TrackPolyDraw(struct ParSystem *system);
 void dds3TrackPolySetMode(struct ParSystem *system, u16 value);
+void dds3TrackPolyColorSet(struct ParSystem *system, s32 cellIndex, u32 color);
 void dds3TrackPolyLinkOt(void);
 void dds3TrackPolyVC3Set_Acute(struct ParSystem *system, u32 centerWord,
                                u32 middleWord, u32 edgeWord);
