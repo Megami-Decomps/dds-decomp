@@ -119,14 +119,14 @@ extern KwlnDrawVectorParams kwlnDrawVector;
 #define KWLN_DRAW_OVERLAY_TRANSITION_BIT 0x800
 #define KWLN_DRAW_CLEAR_OVERLAY_TRANSITION 0xfffff7ff
 
-/* Copy one complete vector into the default draw color state. */
-void dds3SetAmbient(u128 *source) {
+/* Copy one complete vector into the default draw color state; retain no source pointer. */
+void dds3SetAmbient(const u128 *source) {
     SDF_VU0_COPYVECTOR(&kwlnDefaultColorVector, source);
 }
 
 
-/* Copy the five-word draw vector parameter body, without interpreting its words. */
-void dds3SetFog(KwlnDrawVectorParams *source) {
+/* Copy the five-word draw vector parameter body without interpreting or retaining it. */
+void dds3SetFog(const KwlnDrawVectorParams *source) {
     memcpy(&kwlnDrawVector, source, KWLN_DRAW_VECTOR_PARAM_BYTES);
 }
 

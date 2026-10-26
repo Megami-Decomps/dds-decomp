@@ -30,8 +30,8 @@ extern void dds3SceneBasicMakeScene_FromMemory(dds3Basic_t *object, u32 area, u3
 extern void evtSetTestCamera(void);
 extern void dds3SetScreenFovy(f32 fieldOfView);
 extern void dds3SetLight(f32 (*lightSource)[4], s32 index);
-extern void dds3SetFog(KwlnDrawVectorParams *source);
-extern void dds3SetAmbient(u128 *source);
+extern void dds3SetFog(const KwlnDrawVectorParams *source);
+extern void dds3SetAmbient(const u128 *source);
 extern const char evtStageResourcePathFormat[0x10];
 extern f32 D_00367DF0[];
 extern KwlnDrawVectorParams D_00367EB0[];
@@ -89,7 +89,7 @@ s32 evtLoadArea(s32 area, s32 room)
     dds3SetLight((f32 (*)[4])(D_00367DF0 + 0x10), 1);
     dds3SetLight((f32 (*)[4])(D_00367DF0 + 0x20), 2);
     dds3SetFog(D_00367EB0);
-    dds3SetAmbient((u128 *)D_00367ED0);
+    dds3SetAmbient((const u128 *)D_00367ED0);
     return 1;
 }
 /* Build a field world object from the supplied resource parameters. */
@@ -112,7 +112,7 @@ s32 evtLoadArea_FromMemory(s32 area, s32 room, u8 *resource0Data, u8 *resource1D
     dds3SetLight((f32 (*)[4])(D_00367DF0 + 0x10), 1);
     dds3SetLight((f32 (*)[4])(D_00367DF0 + 0x20), 2);
     dds3SetFog(D_00367EB0);
-    dds3SetAmbient((u128 *)D_00367ED0);
+    dds3SetAmbient((const u128 *)D_00367ED0);
     while (sdfDelayedResrcCheck() != 0) {
     }
     return 1;
