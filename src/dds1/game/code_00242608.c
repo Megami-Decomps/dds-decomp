@@ -1188,26 +1188,26 @@ void mnuReleaseShopSceneSpriteResources(ShopScene *scene) {
 }
 
 
-s32 mnuShopHasPendingFlag(ShopScene *unused) {
+MnuShopPendingSelection mnuShopHasPendingSelection(ShopScene *unused) {
     u8 *flags = DDS3_GBWK->inventory.counts;
     DatItemSkillRecord *entry = datItemSkillRecords;
-    s32 found = 0;
+    MnuShopPendingSelection hasPendingSelection = MNU_SHOP_NO_PENDING_SELECTION;
     s32 i;
 
     for (i = 0; i < 0xC0; flags++, i++) {
         if ((u32)(i - 0xA0) >= 0x20 && *flags != 0) {
             if ((entry->flags & 3) != 0) {
-                found = 1;
+                hasPendingSelection = MNU_SHOP_HAS_PENDING_SELECTION;
                 break;
             }
             if ((u32)(i - 0x60) < 0x20) {
-                found = 1;
+                hasPendingSelection = MNU_SHOP_HAS_PENDING_SELECTION;
                 break;
             }
         }
         entry++;
     }
-    return found;
+    return hasPendingSelection;
 }
 
 
@@ -2130,7 +2130,7 @@ extern void mnuShopInitializeOptionList(ShopScene *);
 s32 evtInitializeActiveMenuState(dds3ProcessID_t *task) {
     s32 stateAddress = dds3GetProcessData(task);
     MnuShopListContext *windowData;
-    s32 pendingSelection;
+    MnuShopPendingSelection pendingSelection;
 
     evtClearActiveFlag(0);
     evtSetBoundedDisplayValue(0, 2);
@@ -2139,7 +2139,7 @@ s32 evtInitializeActiveMenuState(dds3ProcessID_t *task) {
         mnuShopInitializeOptionList((ShopScene *)stateAddress);
     }
     windowData = ((ShopScene *)stateAddress)->ownedWindows[0]->list->context;
-    pendingSelection = mnuShopHasPendingFlag((ShopScene *)stateAddress);
+    pendingSelection = mnuShopHasPendingSelection((ShopScene *)stateAddress);
     ((ShopScene *)stateAddress)->previousValue = DDS3_GBWK->header.currency;
     windowData->pendingSelection = pendingSelection;
     ((ShopScene *)stateAddress)->pendingSelection = pendingSelection;

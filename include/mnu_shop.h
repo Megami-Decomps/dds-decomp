@@ -201,7 +201,14 @@ typedef struct ShopScene {
     s8 atLimit;
 } ShopScene;
 
-s32 mnuShopHasPendingFlag(ShopScene *unused);
+typedef enum MnuShopPendingSelection {
+    MNU_SHOP_NO_PENDING_SELECTION = 0,
+    MNU_SHOP_HAS_PENDING_SELECTION = 1
+} MnuShopPendingSelection;
+
+/* Scans global inventory; the scene is unused. The result drives both
+ * pendingSelection fields in the shop and its list context. */
+MnuShopPendingSelection mnuShopHasPendingSelection(ShopScene *unused);
 
 typedef char MnuShopListContext_size_must_be_0x10[(sizeof(MnuShopListContext) == 0x10) ? 1 : -1];
 
