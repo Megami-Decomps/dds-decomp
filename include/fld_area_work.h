@@ -40,6 +40,13 @@ enum FldTerrainAttritionKind {
 /* Positive values hold player movement until the corresponding gate clears. */
 typedef s32 FldMovementGateState;
 
+typedef s32 FldDeferredExitState;
+enum FldDeferredExitState {
+    FLD_DEFERRED_EXIT_IDLE = 0,
+    FLD_DEFERRED_EXIT_REQUESTED = 1,
+    FLD_DEFERRED_EXIT_MESSAGE_ACTIVE = 2
+};
+
 typedef s32 FldEntryDialogDisposition;
 
 enum FldEntryDialogDisposition {
@@ -144,7 +151,7 @@ typedef struct FldAreaWork {
     s32 score;                   /* 0x108: pickups add 50. */
     f32 unk10C;                  /* 0x10C: cleared when a spark run starts. */
     u32 pendingSceneRequest; /* one-shot request to advance to the next scene */
-    s32 deferredExit;
+    FldDeferredExitState deferredExit; /* 0x114: idle, requested, or waiting for the exit message to finish. */
     s32 playerModelAlternate;    /* 0x118: toggles the player_a/player_b model selection. */
     FldTerrainAttritionKind terrainAttritionKind; /* 0x11C: collision-zone category for HP attrition. */
     f32 attritionDistance;      /* 0x120: movement toward the next HP attrition tick. */
@@ -233,6 +240,7 @@ typedef char FldAreaWork_cameraTargetGraceTicks_offset_check[
 typedef char FldAreaWork_specialEventActive_offset_check[
     (FLD_AREA_OFFSET(specialEventActive) == 0x104) ? 1 : -1];
 typedef char FldAreaWork_pendingSceneRequest_offset_check[(FLD_AREA_OFFSET(pendingSceneRequest) == 0x110) ? 1 : -1];
+typedef char FldAreaWork_deferredExit_offset_check[(FLD_AREA_OFFSET(deferredExit) == 0x114) ? 1 : -1];
 typedef char FldAreaWork_flagStage_offset_check[(FLD_AREA_OFFSET(flagStage) == 0xC0) ? 1 : -1];
 typedef char FldAreaWork_playerModelAlternate_offset_check[(FLD_AREA_OFFSET(playerModelAlternate) == 0x118) ? 1 : -1];
 typedef char FldAreaWork_terrainAttritionKind_offset_check[(FLD_AREA_OFFSET(terrainAttritionKind) == 0x11C) ? 1 : -1];

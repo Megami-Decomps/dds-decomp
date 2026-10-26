@@ -1720,7 +1720,7 @@ void fldResetFieldRuntimeState(FldRuntimeResetMode mode) {
     area->score = 0;
     memset(&area->unk10C, 0, sizeof(area->unk10C));
     area->pendingSceneRequest = FLD_SCENE_ADVANCE_REQUEST_NONE;
-    area->deferredExit = 0;
+    area->deferredExit = FLD_DEFERRED_EXIT_IDLE;
     area->nextFloor = area->nextArea = -1;
     area->commandEnabled = 0;
     area->sceneBgmSuppressed = 0;

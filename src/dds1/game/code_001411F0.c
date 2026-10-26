@@ -195,7 +195,6 @@ extern void sdfMemFreeDelayedDirect(struct sdfMemHandle_t *);
 
 extern s32 D_0032E5C4[];
 
-extern s32 D_0032E4C4[];
 
 extern u8 D_0034D8F0[];
 
@@ -3695,7 +3694,7 @@ void fldDrawLocationPanel(void) {
         return;
     }
     work = &fldGlobalBase;
-    if (work->playerModelAlternate == 1 || work->deferredExit != 0) {
+    if (work->playerModelAlternate == 1 || work->deferredExit != FLD_DEFERRED_EXIT_IDLE) {
         return;
     }
     if (fldFindLocationCoordinateRecord(work->area, work->floor + 1)[2] <= 0) {
@@ -5102,7 +5101,7 @@ void fldResetEventSceneState(void) {
     fldClearObjectEntryHandles();
     fldReleaseWeatherEffects();
     fldPreparePlayerSceneCameraTarget();
-    fldGlobalBase.deferredExit = 1;
+    fldGlobalBase.deferredExit = FLD_DEFERRED_EXIT_REQUESTED;
     fldGlobalBase.specialEventActive = 0;
     D_003D62A8[0] = 0;
     fldGlobalBase.unk138 = 1;
@@ -5113,19 +5112,19 @@ void fldStartDeferredFieldExit(void) {
     fclInitMessage((struct ItfMesSub *)D_0034D8F0);
     fclStartMessage(5);
     fldResetPlayerSceneObjectState();
-    D_0032E4C4[0] = 2;
+    fldGlobalBase.deferredExit = FLD_DEFERRED_EXIT_MESSAGE_ACTIVE;
 }
 
-/* Completes deferred exit state 2 only after the message window stops being
- * controlled, then closes its display channel and restores the camera target. */
+/* Completes the message-active deferred exit after message control ends, then
+ * closes its display channel and restores the camera target. */
 void fldFinishDeferredExit(void) {
-    if (fldGlobalBase.deferredExit == 2) {
+    if (fldGlobalBase.deferredExit == FLD_DEFERRED_EXIT_MESSAGE_ACTIVE) {
         dspRequestMessageWindowModeOne();
         if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             evtFinishMessageWindowAndNotify();
             fclDestroyMessage();
             fldPreparePlayerSceneCameraTarget();
-            fldGlobalBase.deferredExit = 0;
+            fldGlobalBase.deferredExit = FLD_DEFERRED_EXIT_IDLE;
         }
     }
 }

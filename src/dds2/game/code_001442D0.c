@@ -363,7 +363,6 @@ extern void dds3DeleteUnitObjectBasic(dds3Basic_t *node);
 
 extern FldSparkObjectEntry fldSparkObjectEntries[];
 
-extern s32 D_00389884[];
 
 extern u8 D_003A9EB0[];
 
@@ -574,7 +573,7 @@ KwlnTaskUpdateResult fldFieldTaskUpdate(dds3ProcessID_t *task) {
     if (fldTitleIsActive() != 0) {
         return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
     }
-    if (D_00389884[0] == 1) {
+    if (fldGlobalBase.deferredExit == FLD_DEFERRED_EXIT_REQUESTED) {
         return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
     }
     if (gFldElvFloorNow != -0x3e7) {
@@ -4003,7 +4002,8 @@ extern f32 D_0043634C;
 void fldDrawAnimatedFieldBanner(s32 alpha, s32 x, s32 y) {
     u32 color;
 
-    if (fldGlobalBase.playerModelAlternate != 1 && fldGlobalBase.deferredExit != 1) {
+    if (fldGlobalBase.playerModelAlternate != 1 &&
+        fldGlobalBase.deferredExit != FLD_DEFERRED_EXIT_REQUESTED) {
         rsetOtOfs(0x53);
         rsetAlpha(0);
         rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
@@ -4058,7 +4058,8 @@ void fldDrawLocationPanel(void) {
     if (fldGetSparkDialogPhase() != 0) {
         return;
     }
-    if (fldGlobalBase.playerModelAlternate == 1 || fldGlobalBase.deferredExit != 0) {
+    if (fldGlobalBase.playerModelAlternate == 1 ||
+        fldGlobalBase.deferredExit != FLD_DEFERRED_EXIT_IDLE) {
         return;
     }
     if (fldFindLocationCoordinateRecord(fldGlobalBase.area, fldGlobalBase.floor + 1)[2] <= 0) {
@@ -5482,7 +5483,7 @@ void fldResetEventSceneState(void) {
     fldClearObjectEntryHandles();
     fldReleaseWeatherEffects();
     fldPreparePlayerSceneCameraTarget();
-    fldGlobalBase.deferredExit = 1;
+    fldGlobalBase.deferredExit = FLD_DEFERRED_EXIT_REQUESTED;
     fldGlobalBase.specialEventActive = 0;
     fldSparkControlState.state.phase = 0;
     fldGlobalBase.unk138 = 1;
@@ -5498,7 +5499,7 @@ void fldResetAfterEvent(void) {
     fldClearObjectEntryHandles();
     fldReleaseWeatherEffects();
     fldStartSceneBgmAlternate();
-    fldGlobalBase.deferredExit = 0;
+    fldGlobalBase.deferredExit = FLD_DEFERRED_EXIT_IDLE;
     fldGlobalBase.specialEventActive = 0;
     fldSparkControlState.state.phase = 0;
     fldGlobalBase.unk138 = 1;
@@ -5509,19 +5510,19 @@ void fldStartDeferredFieldExit(void) {
     fclInitMessage(D_003A9EB0);
     fclStartMessage(4);
     fldResetPlayerSceneObjectState();
-    D_00389884[0] = 2;
+    fldGlobalBase.deferredExit = FLD_DEFERRED_EXIT_MESSAGE_ACTIVE;
 }
 
-/* Completes deferred exit state 2 only after the message window stops being
- * controlled, then closes its display channel and restores the camera target. */
+/* Completes the message-active deferred exit after message control ends, then
+ * closes its display channel and restores the camera target. */
 void fldFinishDeferredExit(void) {
-    if (fldGlobalBase.deferredExit == 2) {
+    if (fldGlobalBase.deferredExit == FLD_DEFERRED_EXIT_MESSAGE_ACTIVE) {
         dspRequestMessageWindowModeOne();
         if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             evtFinishMessageWindowAndNotify();
             fclDestroyMessage();
             fldPreparePlayerSceneCameraTarget();
-            fldGlobalBase.deferredExit = 0;
+            fldGlobalBase.deferredExit = FLD_DEFERRED_EXIT_IDLE;
         }
     }
 }

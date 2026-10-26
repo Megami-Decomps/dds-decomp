@@ -2172,7 +2172,7 @@ s32 fldProcSequence(dds3ProcessID_t *task) {
         fldEncountSetFlag(0x10);
         fldEncountSetFlag(0x20);
         fldSetSnowActive();
-        if (fldGlobalBase.deferredExit == 1) fldStartDeferredFieldExit();
+        if (fldGlobalBase.deferredExit == FLD_DEFERRED_EXIT_REQUESTED) fldStartDeferredFieldExit();
         break;
     case 4:
         D_003BAD58 = 1;

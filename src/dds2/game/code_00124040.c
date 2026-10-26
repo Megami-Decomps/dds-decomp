@@ -2300,7 +2300,7 @@ s32 fldUpdateFieldSceneTask(dds3ProcessID_t *task) {
         fldEncountSetFlag(0x10);
         fldEncountSetFlag(0x20);
         fldSetSnowActive();
-        if (fldGlobalBase.deferredExit == 1) fldStartDeferredFieldExit();
+        if (fldGlobalBase.deferredExit == FLD_DEFERRED_EXIT_REQUESTED) fldStartDeferredFieldExit();
         break;
     case 4:
         if (fldGlobalBase.targetGuideEnabled != 0 && fldRunDanteGunFlag[0x5C / 4] != 0) fldUpdateTargetGuideController();
