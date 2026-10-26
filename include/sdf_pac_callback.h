@@ -4,6 +4,17 @@
 #include "common.h"
 #include "sdf_pac_packet.h"
 
+/* The decoder honors FINISHED at either callback event, ALIGN for packet
+ * headers, and DROP_TAIL at packet completion; other values continue. */
+typedef s32 SdfPacPacketCallbackResult;
+enum SdfPacPacketCallbackResultValue {
+    SDF_PAC_CALLBACK_CONTINUE = 0,
+    SDF_PAC_CALLBACK_FINISHED = 1,
+    SDF_PAC_CALLBACK_ALIGN = 2,
+    SDF_PAC_CALLBACK_UNHANDLED_COMMAND = 3,
+    SDF_PAC_CALLBACK_DROP_TAIL = 4
+};
+
 /* Header events pass a fourth payload-byte-count argument; completion events
  * use only the three shared callback arguments. */
 typedef s32 SdfPacPacketCallbackEvent;
@@ -13,7 +24,8 @@ enum SdfPacPacketCallbackEventValue {
 };
 
 struct PacState;
-s32 sdfPacStdCallback(struct PacState *state, SdfPacPacketCallbackEvent event,
-                      SdfPacStreamPacketHeader *packet);
+SdfPacPacketCallbackResult sdfPacStdCallback(
+    struct PacState *state, SdfPacPacketCallbackEvent event,
+    SdfPacStreamPacketHeader *packet);
 
 #endif /* SDF_PAC_CALLBACK_H */

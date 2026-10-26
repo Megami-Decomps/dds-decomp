@@ -113,31 +113,31 @@ PacWork *sdfPacFreeResrc(PacWork *work) {
 }
 
 /* Dispatch recognized PAC commands; one marks end-of-stream. */
-s32 sdfPacStdCallback(PacState *state, SdfPacPacketCallbackEvent event, SdfPacStreamPacketHeader *packet) {
+SdfPacPacketCallbackResult sdfPacStdCallback(PacState *state, SdfPacPacketCallbackEvent event, SdfPacStreamPacketHeader *packet) {
     if (event == SDF_PAC_CALLBACK_EVENT_PACKET_HEADER) {
         switch (packet->command) {
         case PAC_COMMAND_PAYLOAD:
             sdfPacMemDecoderInit(state, packet);
-            return 0;
+            return SDF_PAC_CALLBACK_CONTINUE;
         case PAC_COMMAND_ALLOCATION_LIST:
             sdfPacTmxDecoderInit(state, packet);
-            return 0;
+            return SDF_PAC_CALLBACK_CONTINUE;
         case PAC_COMMAND_MODEL:
             sdfPacModelDecoderInit(state, packet);
-            return 0;
+            return SDF_PAC_CALLBACK_CONTINUE;
         case PAC_COMMAND_MOTION:
             sdfPacMotionDecoderInit(state, packet);
-            return 0;
+            return SDF_PAC_CALLBACK_CONTINUE;
         case PAC_COMMAND_TEXTURE_LIST:
             sdfPacTexListDecoderInit(state, packet);
-            return 0;
+            return SDF_PAC_CALLBACK_CONTINUE;
         case PAC_COMMAND_END:
-            return 1;
+            return SDF_PAC_CALLBACK_FINISHED;
         default:
-            return 3;
+            return SDF_PAC_CALLBACK_UNHANDLED_COMMAND;
         }
     }
-    return 0;
+    return SDF_PAC_CALLBACK_CONTINUE;
 }
 /* Return the second header's payload when its extension-length nibble is nonzero. */
 u8 *sdfPacGetResrcFileName(SdfPacStreamPacketHeader *header) {

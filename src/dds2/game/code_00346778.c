@@ -16,9 +16,6 @@ enum {
     PAC_EXTENSION_BYTES_MASK = 0xF0,
     PAC_ALIGNMENT_BYTES = 0x40,
     PAC_ALIGNMENT_MASK = 0x3F,
-    PAC_CALLBACK_FINISHED = 1,
-    PAC_CALLBACK_ALIGN = 2,
-    PAC_CALLBACK_DROP_TAIL = 4,
     PAC_PHASE_FINISHED = -1,
     PAC_INITIAL_PACKET_COUNTER = -1,
     PAC_STATE_USE_PACKET_MEMORY = 1,
@@ -205,8 +202,8 @@ void sdfPacAdvanceCallbackBoundary(PacState *state) {
     u32 packetBytes;
     u32 headerBytes;
     u32 payloadBytes;
-    s32 (*packetCallback)();
-    s32 callbackResult;
+    SdfPacPacketCallbackResult (*packetCallback)();
+    SdfPacPacketCallbackResult callbackResult;
 
     alignmentOffset = state->consumedBytes & PAC_ALIGNMENT_MASK;
     if (alignmentOffset != 0) {
@@ -225,11 +222,11 @@ void sdfPacAdvanceCallbackBoundary(PacState *state) {
     state->pendingBytes = payloadBytes;
     packetCallback = state->packetCallback;
     callbackResult = packetCallback(state, SDF_PAC_CALLBACK_EVENT_PACKET_HEADER, inputHeader, payloadBytes);
-    if (callbackResult == PAC_CALLBACK_FINISHED) {
+    if (callbackResult == SDF_PAC_CALLBACK_FINISHED) {
         sdfPacMarkPhaseFinished(&state->phase);
         return;
     }
-    if (callbackResult == PAC_CALLBACK_ALIGN) {
+    if (callbackResult == SDF_PAC_CALLBACK_ALIGN) {
         state->phase = 1;
         state->pendingBytes = (state->pendingBytes + PAC_ALIGNMENT_MASK) & ~PAC_ALIGNMENT_MASK;
     } else {
@@ -239,19 +236,19 @@ void sdfPacAdvanceCallbackBoundary(PacState *state) {
 
 
 
-/* Notify completion with the tail's header: result 1 finishes; result 4 releases the tail. */
+/* Notify completion: FINISHED stops decoding; DROP_TAIL releases the queue tail. */
 void sdfDecodePacNodeAndAdvanceTail(PacState *state) {
-    s32 callbackResult;
+    SdfPacPacketCallbackResult callbackResult;
     PacWork *tailPacket;
     PacWork *scanPacket;
     PacWork *nextPacket;
 
     callbackResult = state->packetCallback(state, SDF_PAC_CALLBACK_EVENT_PACKET_COMPLETE, state->queueTail->packet);
-    if (callbackResult == PAC_CALLBACK_FINISHED) {
+    if (callbackResult == SDF_PAC_CALLBACK_FINISHED) {
         sdfPacMarkPhaseFinished(&state->phase);
         return;
     }
-    if (callbackResult == PAC_CALLBACK_DROP_TAIL) {
+    if (callbackResult == SDF_PAC_CALLBACK_DROP_TAIL) {
         tailPacket = state->queueTail;
         scanPacket = state->queueHead;
         if (scanPacket == tailPacket) {
