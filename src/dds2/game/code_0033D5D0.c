@@ -1523,7 +1523,7 @@ extern char D_00438B30[]; /* host0: */
 extern char D_00438B38[]; /* pfs0: */
 
 /* Allocate a worker-specific device path; an unsupported worker returns NULL. */
-char *sdfFileCmdMakeRealFileName(char *path, s32 worker) {
+char *sdfFileCmdMakeRealFileName(const char *path, s32 worker) {
     s32 length = strlen(path);
     char *result;
     s32 index;
@@ -1619,7 +1619,7 @@ s32 sdfFileCmdAnalyzeFileName(const char *path, char **resolvedPath) {
         worker = D_00438B1E;
         name = path;
     }
-    *resolvedPath = sdfFileCmdMakeRealFileName((char *)name, worker);
+    *resolvedPath = sdfFileCmdMakeRealFileName(name, worker);
     return worker;
 }
 
