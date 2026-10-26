@@ -35,6 +35,7 @@
 #include "snd_slot.h"
 #include "kwln.h"
 #include "btl_task_state.h"
+#include "btl_task_poll_result.h"
 #include "btl_task_condition.h"
 #include "sdf_resource.h"
 #include "sdf_model.h"
@@ -2161,7 +2162,7 @@ void btlRunTask(BtlRuntimeTask *task) {
     case BTL_TASK_PHASE_RUNNING:
         if (btlEvalTaskCondition(&task->endCondition, task->runCount) != 0) {
             task->state = BTL_TASK_PHASE_END_DELAY;
-        } else if (task->callback(task->args) != 0) {
+        } else if ((BtlTaskPollResult)task->callback(task->args) != BTL_TASK_POLL_CONTINUE) {
             task->state = BTL_TASK_PHASE_END_DELAY;
         } else {
             task->runCount = task->runCount + 1;
