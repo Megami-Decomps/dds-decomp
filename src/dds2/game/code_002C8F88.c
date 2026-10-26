@@ -47,7 +47,7 @@ s32 fileReqPoll(void) {
         switch (entry->cardType) {
         case 0:
             entry->slotMetadataDirty = result;
-            entry->status = 0;
+            entry->status = FILE_REQ_STATUS_NO_CARD;
             entry->selectedSlot = 0;
             break;
         case 2:
@@ -58,15 +58,15 @@ s32 fileReqPoll(void) {
                     fileReqInit(fileActiveCardDetectionRequestIndex);
                     return 0;
                 }
-                entry->status = 2;
+                entry->status = FILE_REQ_STATUS_UNFORMATTED;
                 entry->slotMetadataDirty = result;
                 entry->selectedSlot = 0;
             } else {
-                entry->status = result;
+                entry->status = FILE_REQ_STATUS_READY;
             }
             break;
         default:
-            entry->status = 3;
+            entry->status = FILE_REQ_STATUS_UNSUPPORTED_CARD;
             entry->slotMetadataDirty = 1;
             entry->selectedSlot = 0;
             break;
@@ -76,7 +76,7 @@ s32 fileReqPoll(void) {
     return 0;
 }
 
-u8 fileReqGetStatus(s32 request) {
+FileReqStatus fileReqGetStatus(s32 request) {
     return fileRequestEntries[request].status;
 }
 

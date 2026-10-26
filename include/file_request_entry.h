@@ -3,6 +3,15 @@
 
 #include "common.h"
 
+/* Results produced by fileReqPoll after the memory-card info query completes. */
+typedef u8 FileReqStatus;
+enum FileReqStatusValue {
+    FILE_REQ_STATUS_NO_CARD = 0,
+    FILE_REQ_STATUS_READY = 1,
+    FILE_REQ_STATUS_UNFORMATTED = 2,
+    FILE_REQ_STATUS_UNSUPPORTED_CARD = 3
+};
+
 /* Request-indexed memory-card state, one 0x64-byte entry per request. */
 typedef struct FileReqEntry {
     u32 unk0;      /* 0x00 */
@@ -10,7 +19,7 @@ typedef struct FileReqEntry {
     u32 sizeKiB;   /* 0x08: fileReqGetSize converts this to bytes */
     u32 formatted; /* 0x0C: zero means unformatted. */
     u8 requestRetryCount; /* 0x10: reset on begin; retries request-mode 2 up to five times. */
-    u8 status;     /* 0x11: inspected by memory-card request polling */
+    FileReqStatus status; /* 0x11: completed card-detection result */
     u8 slotMetadataDirty; /* 0x12 */
     s8 selectedSlot; /* 0x13 */
     u32 slotFlags[20]; /* 0x14: includes the twenty per-request slot words */
@@ -30,7 +39,7 @@ extern u32 fileRequestSlotFlags[];
 
 void fileReqBegin(s32 request);
 s32 fileReqPoll(void);
-u8 fileReqGetStatus(s32 request);
+FileReqStatus fileReqGetStatus(s32 request);
 s32 fileReqGetSize(s32 request);
 u8 fileReqIsSlotMetadataDirty(s32 request);
 void fileReqClearSlotMetadataDirty(s32 request);

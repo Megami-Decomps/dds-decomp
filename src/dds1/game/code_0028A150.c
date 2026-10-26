@@ -1097,7 +1097,7 @@ s32 slBootProc1st(void) {
 }
 
 s32 fileSlotStatusPoll(void) {
-    s32 status;
+    FileReqStatus status;
 
     if (fileReqPoll() == 0) {
         return 0;
@@ -1109,9 +1109,9 @@ s32 fileSlotStatusPoll(void) {
     }
     status = fileReqGetStatus(fileMemoryCardRequestIndex);
     switch (status) {
-    case 0:
+    case FILE_REQ_STATUS_NO_CARD:
         return fileBeginSlotMetadataRefresh();
-    case 2:
+    case FILE_REQ_STATUS_UNFORMATTED:
         if (D_003BC848 == 0) {
             fileClearAllSlotFlags();
             slSetInfo(0);
@@ -1124,7 +1124,7 @@ s32 fileSlotStatusPoll(void) {
         D_003BC858 = 0;
         fileReqBegin(fileMemoryCardRequestIndex);
         return (s32)filePollSlotDetectionAndBranch;
-    case 3:
+    case FILE_REQ_STATUS_UNSUPPORTED_CARD:
         fileClearAllSlotFlags();
         slSetInfo(0);
         D_003BC854 = 2;
@@ -1133,7 +1133,7 @@ s32 fileSlotStatusPoll(void) {
         return (s32)filePollSlotDetectionAndBranch;
     default:
         return 0;
-    case 1:
+    case FILE_REQ_STATUS_READY:
         return mcResetSlotMetadata();
     }
 }
@@ -1169,12 +1169,12 @@ s32 fileSlotSelectPoll(void) {
         return 0;
     }
     switch (fileReqGetStatus(fileMemoryCardRequestIndex)) {
-    case 0:
-    case 3:
+    case FILE_REQ_STATUS_NO_CARD:
+    case FILE_REQ_STATUS_UNSUPPORTED_CARD:
         return slBootError();
-    case 2:
+    case FILE_REQ_STATUS_UNFORMATTED:
         return fileRequestDefaultMode();
-    case 1:
+    case FILE_REQ_STATUS_READY:
         if (slSizeChk() != 0) {
             return fileRequestDefaultMode();
         }
@@ -1196,12 +1196,12 @@ s32 fileSlotSelectPollClear(void) {
         return 0;
     }
     switch (fileReqGetStatus(fileMemoryCardRequestIndex)) {
-    case 0:
-    case 3:
+    case FILE_REQ_STATUS_NO_CARD:
+    case FILE_REQ_STATUS_UNSUPPORTED_CARD:
         return slBootError();
-    case 2:
+    case FILE_REQ_STATUS_UNFORMATTED:
         return fileRequestDefaultMode();
-    case 1:
+    case FILE_REQ_STATUS_READY:
         if (slSizeChk() != 0) {
             return fileRequestDefaultMode();
         }
@@ -1214,7 +1214,7 @@ s32 fileSlotSelectPollClear(void) {
 extern s8 dds3PadButtonState[];
 
 s32 filePollSlotDetectionAndBranch(void) {
-    s32 reqStatus;
+    FileReqStatus reqStatus;
 
     D_003BC810 = 0;
     if (D_003BC858 == 0) {
@@ -1238,7 +1238,7 @@ s32 filePollSlotDetectionAndBranch(void) {
         }
         reqStatus = fileReqGetStatus(fileMemoryCardRequestIndex);
         switch (reqStatus) {
-        case 1:
+        case FILE_REQ_STATUS_READY:
             if (D_003BC854 == 1) {
                 fileClearAllSlotFlags();
                 slSetInfo(1);
@@ -1248,7 +1248,7 @@ s32 filePollSlotDetectionAndBranch(void) {
             }
             fileReqBegin(fileMemoryCardRequestIndex);
             break;
-        case 0:
+        case FILE_REQ_STATUS_NO_CARD:
             fileClearAllSlotFlags();
             if (D_003BC854 != 1) {
                 D_003BC854 = 1;
@@ -1256,7 +1256,7 @@ s32 filePollSlotDetectionAndBranch(void) {
             }
             fileReqBegin(fileMemoryCardRequestIndex);
             break;
-        case 2:
+        case FILE_REQ_STATUS_UNFORMATTED:
             if (D_003BC848 == 0) {
                 fileClearAllSlotFlags();
                 D_003BC854 = 0;
@@ -1270,7 +1270,7 @@ s32 filePollSlotDetectionAndBranch(void) {
             }
             fileReqBegin(fileMemoryCardRequestIndex);
             break;
-        case 3:
+        case FILE_REQ_STATUS_UNSUPPORTED_CARD:
             if (D_003BC854 != 2) {
                 fileClearAllSlotFlags();
                 D_003BC854 = 2;
@@ -1296,7 +1296,7 @@ s32 slErrorWaitToFileMc(void) {
             D_003BC854 = 0;
             return fileScanSlotStates();
         }
-        if (fileReqGetStatus(fileMemoryCardRequestIndex) != 1) {
+        if (fileReqGetStatus(fileMemoryCardRequestIndex) != FILE_REQ_STATUS_READY) {
             D_003BC854 = 0;
             D_003BC810 = 0;
             return fileResetSelection();
@@ -1358,7 +1358,7 @@ s32 fileBeginDetectionRequest(FileMenuContinuationCallback callback) {
 }
 
 s32 filePollSlotRequestAndResumeFlow(void) {
-    s32 fileStatus;
+    FileReqStatus fileStatus;
 
     if (D_003BC858 == 0) {
         if (fileIsLoadedAndConditionTrue(dds3PadButtonState[0x21] < 0) ||
@@ -1379,7 +1379,7 @@ s32 filePollSlotRequestAndResumeFlow(void) {
         }
         fileStatus = fileReqGetStatus(fileMemoryCardRequestIndex);
         switch (fileStatus) {
-        case 1:
+        case FILE_REQ_STATUS_READY:
             if (D_003BC854 == 1) {
                 fileClearAllSlotFlags();
                 slSetInfo(1);
@@ -1389,9 +1389,9 @@ s32 filePollSlotRequestAndResumeFlow(void) {
             }
             fileReqBegin(fileMemoryCardRequestIndex);
             break;
-        case 0:
+        case FILE_REQ_STATUS_NO_CARD:
             return fileBeginSlotMetadataRefresh();
-        case 2:
+        case FILE_REQ_STATUS_UNFORMATTED:
             if (D_003BC848 == 0) {
                 fileClearAllSlotFlags();
                 slSetInfo(0);
@@ -1407,7 +1407,7 @@ s32 filePollSlotRequestAndResumeFlow(void) {
             }
             fileReqBegin(fileMemoryCardRequestIndex);
             break;
-        case 3:
+        case FILE_REQ_STATUS_UNSUPPORTED_CARD:
             if (D_003BC854 != 2) {
                 fileClearAllSlotFlags();
                 slSetInfo(0);
@@ -2238,6 +2238,7 @@ s32 fileSlotBrowserUpdate(void) {
     s32 offset;
     s32 selection;
     s32 action;
+    FileReqStatus requestStatus;
     u32 flags;
 
     if (D_003BC82C == 0) {
@@ -2295,9 +2296,9 @@ s32 fileSlotBrowserUpdate(void) {
     }
 
     if (fileReqPoll() != 0) {
-        flags = fileReqGetStatus(fileMemoryCardRequestIndex);
+        requestStatus = fileReqGetStatus(fileMemoryCardRequestIndex);
         action = D_003BC82C;
-        if (flags == 0) {
+        if (requestStatus == FILE_REQ_STATUS_NO_CARD) {
             return fileBeginSlotMetadataRefresh();
         }
 
@@ -2898,7 +2899,7 @@ s32 fileUpdatePromptDialog(void) {
         }
         requestStatus = fileReqGetStatus(fileMemoryCardRequestIndex);
         switch (requestStatus) {
-        case 1:
+        case FILE_REQ_STATUS_READY:
             decision = (s32)D_003BC838;
             if (decision == 1) {
                 /* Retail 0x0028F7A4 beq: shared yes tail (.L0028FAB8). */
@@ -2918,7 +2919,7 @@ s32 fileUpdatePromptDialog(void) {
             }
             /* Retail 0x0028F7C4 bne: shared begin tail (.L0028FAA8). */
             goto begin;
-        case 2:
+        case FILE_REQ_STATUS_UNFORMATTED:
             /* Retail 0x0028F790 beq: shared yes tail (.L0028FAB8). */
             goto yes;
         }
@@ -2976,8 +2977,8 @@ s32 fileUpdatePromptDialog(void) {
     }
     status = fileReqGetStatus(fileMemoryCardRequestIndex);
     switch (status) {
-    case 1:
-    case 2:
+    case FILE_REQ_STATUS_READY:
+    case FILE_REQ_STATUS_UNFORMATTED:
         decision = (s32)D_003BC838;
         if (decision == 1) {
             /* Retail 0x0028FA78 beq: shared yes tail (.L0028FAB8). */
