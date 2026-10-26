@@ -16629,18 +16629,18 @@ void effResolveAndReleaseSelectedResource(EffectSlotSet *owner, s32 mapping) {
 void effReleaseSlotTextureReferencesAndResetWork(EffectSlotSet *owner, s32 preserveWork) {
     u32 i = 0;
     u32 count = owner->textureCount;
-    u32 *resources;
+    sdfTexHandle_t **resources;
 
     if (count != 0) {
-        resources = (u32 *)owner->textureReferences;
+        resources = owner->textureReferences;
         do {
-            if (resources[i] != 0) {
-                u32 *current;
-                sdfTexReleaseReference((sdfTexHandle_t *)resources[i]);
-                current = (u32 *)owner->textureReferences;
+            if (resources[i] != NULL) {
+                sdfTexHandle_t **current;
+                sdfTexReleaseReference(resources[i]);
+                current = owner->textureReferences;
                 count = owner->textureCount;
                 resources = current;
-                current[i] = 0;
+                current[i] = NULL;
             }
             i++;
         } while (i < count);
