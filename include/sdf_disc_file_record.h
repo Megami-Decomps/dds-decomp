@@ -14,8 +14,18 @@ typedef struct SdfDiscFileRecord {
 typedef char SdfDiscFileRecordSizeCheck[
     sizeof(SdfDiscFileRecord) == 0x0C ? 1 : -1];
 
-/* Both lookup entry points return the shared 0x0C-byte record. */
-SdfDiscFileRecord *sdfCdImageSearchFile(u32 pathAddress, u8 *sectorOut, u32 flagAddress);
-SdfDiscFileRecord *sdfDevFindDiscFileRecordByCdromPath(u32 pathAddress, u8 *sectorOut, u32 flagAddress);
+/* File reads distinguish an address in the preloaded image from a CD stream. */
+typedef u8 SdfDiscReadMode;
+enum {
+    SDF_DISC_READ_MODE_INDEXED_IMAGE = 0,
+    SDF_DISC_READ_MODE_CDROM_STREAM = 1
+};
+
+/* Both lookups return the shared 0x0C-byte record. On success they write the
+ * 32-bit read location (image address or CD sector); readModeOut is optional. */
+SdfDiscFileRecord *sdfCdImageSearchFile(
+    const char *path, u32 *readLocationOut, SdfDiscReadMode *readModeOut);
+SdfDiscFileRecord *sdfDevFindDiscFileRecordByCdromPath(
+    const char *path, u32 *readLocationOut, SdfDiscReadMode *readModeOut);
 
 #endif

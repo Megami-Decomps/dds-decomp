@@ -392,7 +392,7 @@ void sdfDevWaitForDisc(void) {
     SignalSema(sdfCdImageFd);
 }
 
-extern u8 sdfDiscReadMode;
+extern SdfDiscReadMode sdfDiscReadMode;
 
 extern s32 sdfDiscReadPosition;
 
@@ -404,7 +404,7 @@ void sdfCdStStart(s32 request) {
     s32 ready;
 
     options[0] = 0;
-    if (sdfDiscReadMode == 1) {
+    if (sdfDiscReadMode == SDF_DISC_READ_MODE_CDROM_STREAM) {
         options[1] = 0;
     } else {
         options[1] = 1;
@@ -439,7 +439,7 @@ void sdfDevSeekDiscWithRequestGate(s32 request) {
     s32 ready;
 
     options[0] = 0;
-    if (sdfDiscReadMode == 1) {
+    if (sdfDiscReadMode == SDF_DISC_READ_MODE_CDROM_STREAM) {
         options[1] = 0;
     } else {
         options[1] = 1;
@@ -495,18 +495,18 @@ extern SdfDiscFileRecord D_00476940;
 /* Look up a "cdrom" path through the CD file system: convert it to an ISO
  * name ("\\" separators, upper case, ";1" version), retry the search until
  * the disc answers, and record the file's size in the shared record. */
-SdfDiscFileRecord *sdfDevFindDiscFileRecordByCdromPath(u32 pathAddress, u8 *sectorOut, u32 flagAddress) {
+SdfDiscFileRecord *sdfDevFindDiscFileRecordByCdromPath(
+    const char *path, u32 *readLocationOut, SdfDiscReadMode *readModeOut) {
     u32 file[9];
-    char path[256];
+    char normalizedPath[256];
     char *name;
     char *cursor;
-    char *flag = (char *)flagAddress;
     s32 character;
     s32 status;
     s32 fd;
 
-    strcpy(path, (char *)pathAddress);
-    name = strchr(path, ':') + 1;
+    strcpy(normalizedPath, path);
+    name = strchr(normalizedPath, ':') + 1;
     cursor = name;
     character = *cursor;
     while (character != 0) {
@@ -526,7 +526,7 @@ SdfDiscFileRecord *sdfDevFindDiscFileRecordByCdromPath(u32 pathAddress, u8 *sect
     for (;;) {
         WaitSema(sdfCdImageFd);
         if (sceCdSearchFile(file, (s32)name) != 0) {
-            fd = sceOpen(path, 1);
+            fd = sceOpen(normalizedPath, 1);
             if (fd < 0) {
                 SignalSema(sdfCdImageFd);
                 continue;
@@ -544,9 +544,9 @@ SdfDiscFileRecord *sdfDevFindDiscFileRecordByCdromPath(u32 pathAddress, u8 *sect
             sdfDelayThread(100);
         }
     }
-    *(u32 *)sectorOut = file[0];
-    if (flag != NULL) {
-        *flag = 1;
+    *readLocationOut = file[0];
+    if (readModeOut != 0) {
+        *readModeOut = SDF_DISC_READ_MODE_CDROM_STREAM;
     }
     return &D_00476940;
 }
@@ -559,12 +559,11 @@ extern char D_0042E258[]; /* filename too long : %s */
 /* Walk a '/'-separated path through the preloaded disc index: each directory
  * holds its children sorted by name, with a negative size whose magnitude is
  * the child count, so every segment is a binary search. */
-SdfDiscFileRecord *sdfCdImageSearchFile(u32 pathAddress, u8 *sectorOut, u32 flagAddress) {
+SdfDiscFileRecord *sdfCdImageSearchFile(
+    const char *path, u32 *readLocationOut, SdfDiscReadMode *readModeOut) {
     char name[32];
-    char *path = (char *)pathAddress;
-    char *flag = (char *)flagAddress;
-    char *segment;
-    char *cursor;
+    const char *segment;
+    const char *cursor;
     SdfDiscFileRecord *entries;
     SdfDiscFileRecord *node;
     u32 base;
@@ -576,7 +575,7 @@ SdfDiscFileRecord *sdfCdImageSearchFile(u32 pathAddress, u8 *sectorOut, u32 flag
     s32 order;
 
     if (memcmp(path, D_00438AD0, 5) == 0) {
-        return sdfDevFindDiscFileRecordByCdromPath(pathAddress, sectorOut, flagAddress);
+        return sdfDevFindDiscFileRecordByCdromPath(path, readLocationOut, readModeOut);
     }
     base = D_004391A4;
     node = (SdfDiscFileRecord *)base;
@@ -617,9 +616,9 @@ SdfDiscFileRecord *sdfCdImageSearchFile(u32 pathAddress, u8 *sectorOut, u32 flag
         }
         segment = cursor;
     } while (*cursor != 0);
-    *(u32 *)sectorOut = D_004391A0 + node->dataOffset;
-    if (flag != NULL) {
-        *flag = 0;
+    *readLocationOut = D_004391A0 + node->dataOffset;
+    if (readModeOut != 0) {
+        *readModeOut = SDF_DISC_READ_MODE_INDEXED_IMAGE;
     }
     return node;
 }
@@ -636,19 +635,19 @@ extern void sdfCdImageClose(void);
 
 s32 sdfDevOpenDiscFileAndGetSize(const char *name) {
     s32 result;
-    s32 request[4];
+    u32 readLocation[4];
     SdfDiscFileRecord *file;
 
-    file = sdfCdImageSearchFile((u32)name, (u8 *)request, (u32)&sdfDiscReadMode);
+    file = sdfCdImageSearchFile(name, readLocation, &sdfDiscReadMode);
     result = -1;
     if (file != 0) {
         D_004391AC = file->sizeOrNegativeChildCount;
         sdfCdImageCurrFile = file;
         sdfCdImageCurrActive = 0;
         if (name[1] == 0x76 || name[1] == 0x56) {
-            sdfDevSeekDiscWithRequestGate(request[0]);
+            sdfDevSeekDiscWithRequestGate(readLocation[0]);
         } else {
-            sdfCdStStart(request[0]);
+            sdfCdStStart(readLocation[0]);
         }
         result = file->sizeOrNegativeChildCount;
     }
@@ -731,21 +730,19 @@ void sdfCdImageClose(void) {
     }
 }
 
-u32 sdfCdImageCheckExist(index)
-    u32 index;
-{
+u32 sdfCdImageCheckExist(const char *path) {
     SdfDiscFileRecord *record;
-    u8 buffer[16];
+    u32 readLocation[4];
 
-    record = sdfCdImageSearchFile(index, buffer, 0);
+    record = sdfCdImageSearchFile(path, readLocation, 0);
     return record != 0;
 }
 
-s32 sdfCdImageGetFileSize(u32 index) {
-    u8 buffer[16];
+s32 sdfCdImageGetFileSize(const char *path) {
+    u32 readLocation[4];
     SdfDiscFileRecord *record;
 
-    record = sdfCdImageSearchFile(index, buffer, 0);
+    record = sdfCdImageSearchFile(path, readLocation, 0);
     if (record != 0) {
         return record->sizeOrNegativeChildCount;
     }
@@ -942,7 +939,7 @@ s32 sdfFileCheckExist(const char *path) {
     s32 fd;
 
     if (*resolved == '/') {
-        return sdfCdImageCheckExist((u32)resolved);
+        return sdfCdImageCheckExist(resolved);
     }
 
     fd = sceOpen(resolved, 1);
