@@ -8117,15 +8117,14 @@ void sndStartEffectTask(ActorEffectTaskArgs *args) {
     args->effect = 0;
     sndCreateSystemEffect(args->source);
     source = args->source;
-    unit = args->owner.unit;
+    unit = args->owner;
     source->referenceCount++;
     unit->effectLink.referenceCount++;
 }
 
 s32 btlUpdateActorSystemEffect(ActorEffectTaskArgs *args) {
     BtlState *battle = (BtlState *)btlGetRuntime();
-    ActorEffectOwner owner = args->owner;
-    BtlUnit *unit = owner.unit;
+    BtlUnit *unit = args->owner;
 
     if ((battle->battleFlags & 0x40000) == 0) {
         return 1;
@@ -8142,7 +8141,7 @@ s32 btlUpdateActorSystemEffect(ActorEffectTaskArgs *args) {
     } else {
         args->effect->color = 0x80808080;
     }
-    effBTLFieldColorSetSelectors(owner.selectorKey, owner.selectorKey, 0, 0);
+    effBTLFieldColorSetSelectors((s32)unit, (u32)unit, 0, 0);
     if (unit->status.flags & 4) {
         args->effect->flags |= 8;
     } else {
@@ -8163,7 +8162,7 @@ void sndFinishActorEffectTask(ActorEffectTaskArgs *args) {
         effBTLCutDelete(args->effect);
     }
     source = args->source;
-    unit = args->owner.unit;
+    unit = args->owner;
     source->referenceCount--;
     unit->effectLink.referenceCount--;
     sndDeleteSystemEffect(source);
@@ -8183,7 +8182,7 @@ BtlRuntimeTask *sndCreateActorEffectTask(SoundResourceNode *source, BtlUnit *own
     task->onFinish = sndFinishActorEffectTask;
     args = btlGetTaskArguments(task);
     args->source = source;
-    args->owner.unit = owner;
+    args->owner = owner;
     args->duration = duration;
     args->effect = 0;
     args->counter = 0;

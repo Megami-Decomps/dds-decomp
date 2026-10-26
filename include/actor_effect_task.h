@@ -5,9 +5,9 @@
 #include "common.h"
 
 typedef struct ActorEffectTaskArgs {
-    SoundResourceNode *source;
-    effBTLCutHandle_t *effect;
-    ActorEffectOwner owner;
+    SoundResourceNode *source; /* Held through the task's system-effect reference. */
+    effBTLCutHandle_t *effect; /* Created and released by this task. */
+    struct BtlUnit *owner; /* Borrowed actor, pinned by its effect-link reference. */
     u32 duration;
     s32 counter;
 } ActorEffectTaskArgs;
