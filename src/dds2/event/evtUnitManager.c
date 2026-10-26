@@ -1210,7 +1210,6 @@ extern void dds3StartBEDEffectObjectBasic(dds3Basic_t *effectObject, u32 entryId
 
 extern char D_00421AF8[];
 
-extern s32 evtInitMotionSeProcess(s32 eventId, s32 resourceId);
 extern ItfMesWindowIndex scrGetMessageHandle(void);
 
 
@@ -1727,7 +1726,7 @@ u32 evtCommand_MODEL_DSP(void) {
 u32 evtCommand_MODEL_BE(void) {
     s32 eventId;
     s32 resourceId;
-    s32 modelKey;
+    EvtMotionSeModelKey modelKey;
     dds3ProcessID_t *motionSeTask;
 
     if (scrGetScriptHandle() == 0) {

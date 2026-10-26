@@ -36,13 +36,13 @@ const char D_00424830[0x20] __attribute__((aligned(8))) = "unit decode rid:%d, s
 const char D_00424850[0x20] __attribute__((aligned(8))) = "BE regist unit %d < %d >\n";
 
 /* Decode one retained unit payload and return its new viewer-object key. */
-s32 evtInitMotionSeProcess(s32 eventId, s32 resourceId) {
+EvtMotionSeModelKey evtInitMotionSeProcess(s32 eventId, s32 resourceId) {
     EvtPackLoadState *packState;
     const EvtPackEntry *entry;
     s32 packEntryIndex;
     s32 entrySize;
     const u8 *modelPayload;
-    s32 viewerObjectKey;
+    EvtMotionSeModelKey viewerObjectKey;
 
     packState = evtGetPackProcessData(eventId);
     packEntryIndex = 0;
@@ -78,7 +78,7 @@ s32 evtInitMotionSeProcess(s32 eventId, s32 resourceId) {
             entry++;
         } while (++packEntryIndex < packState->header->entryCount);
     }
-    return -1;
+    return EVT_MOTION_SE_MODEL_KEY_NOT_FOUND;
 }
 
 /* Start a field BE from the task's resource table when all four payloads exist. */
@@ -191,7 +191,7 @@ const char evtMotionSeTaskNameFormat[0x10] __attribute__((aligned(8))) = "mse_%d
 
 
 /* Allocate a three-word task parameter block and format its "mse_..." name. */
-dds3ProcessID_t *evtLoadModelSe(s32 modelKey, s32 eventTaskId, s32 resourceId) {
+dds3ProcessID_t *evtLoadModelSe(EvtMotionSeModelKey modelKey, s32 eventTaskId, s32 resourceId) {
     char taskName[0x20];
     EvtMotionSeTaskParams *params;
 

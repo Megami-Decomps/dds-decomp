@@ -1147,7 +1147,6 @@ extern void evtSetUnitMove1(evtUnitHandle_t *work, s32 motionSubmode, const f32 
 extern void evtResetObjectPendingValue(dds3Basic_t *object);
 extern void evtArmEffectObjectPendingValue(dds3Basic_t *object, s32 value);
 extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
-extern s32 evtInitMotionSeProcess(s32 eventId, s32 resourceId);
 extern void evtSetUnitMotion(evtUnitHandle_t *unit, s32 motionId, s32 startFrame, s32 endFrame, s32 mode);
 extern u8 D_003AC480[];
 
@@ -1666,7 +1665,7 @@ u32 evtCommand_MODEL_DSP(void) {
 u32 evtCommand_MODEL_BE(void) {
     s32 eventId;
     s32 resourceId;
-    s32 modelKey;
+    EvtMotionSeModelKey modelKey;
     dds3ProcessID_t *motionSeTask;
 
     if (scrGetScriptHandle() == 0) {
