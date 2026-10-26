@@ -2543,7 +2543,7 @@ void fldReleaseCampSceneTasks(void) {
 }
 
 FldResourceWaitResult fldIsFieldResourceWaitFinished(void) {
-    if (D_00389790[0] == 0 && fldLoadNextGetStatus2() != 0) {
+    if (D_00389790[0] == 0 && fldIsAreaResourceReady() != FLD_AREA_RESOURCE_NOT_READY) {
         fldPollAreaResourceLoad();
         if (fldGetNextFileLoadState() == FLD_NEXT_FILE_LOAD_PENDING) return FLD_RESOURCE_WAIT_PENDING;
         fldFreeNextFile();

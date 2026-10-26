@@ -1301,10 +1301,10 @@ FldNextFileLoadState fldGetNextFileLoadState(void) {
     return D_003897E8[0];
 }
 
-u8 fldLoadNextGetStatus2(void) {
+FldAreaResourceReadyState fldIsAreaResourceReady(void) {
     if (pFldNextFileDataF2 != 0) {
         if (pacCheckEnd((struct FileRequest *)pFldNextFileDataF2) != 0) {
-            return 1;
+            return FLD_AREA_RESOURCE_READY;
         }
     }
     return D_003897E8[0] != 0;
