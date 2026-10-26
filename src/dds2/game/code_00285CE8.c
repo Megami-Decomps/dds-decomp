@@ -352,7 +352,7 @@ extern u16 scrGetEntryLowFlags(datUnitWork_t *, u16);
 extern u32 scrGetSelectedScriptEntryId(datUnitWork_t *);
 extern u32 ptyGetProfileRecordCap(u16);
 extern s32 mnuGetActiveMantraModelFlagState(void);
-extern u32 ptyGetProfileRecordValue(datUnitWork_t *work, u16 scriptId);
+extern u32 ptyGetProfileRecordValue(const datUnitWork_t *work, u16 scriptId);
 
 void mtrSynchronizeMantraFlagsAcrossParty(void) {
     datUnitWork_t first;

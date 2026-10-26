@@ -755,7 +755,7 @@ void mnuLoadMantraPanelFlagsFromScript(MnuStatusResource *object) {
 
 extern u32 scrGetSelectedScriptEntryId(datUnitWork_t *);
 extern u32 ptyGetProfileRecordCap(u16 scriptId);
-extern u32 ptyGetProfileRecordValue(datUnitWork_t *work, u16 scriptId);
+extern u32 ptyGetProfileRecordValue(const datUnitWork_t *work, u16 scriptId);
 
 s32 mnuValidateProfileEntry(MantraFlagResource *slot, datUnitWork_t *partyRecord) {
     u16 target = scrGetSelectedScriptEntryId(partyRecord) & 0xFFFF;

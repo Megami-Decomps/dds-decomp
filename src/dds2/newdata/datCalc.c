@@ -1189,7 +1189,7 @@ extern s32 ptyTestSecondaryProfileFlag(datUnitWork_t *, u16);
 extern void ptySetSecondaryProfileFlag(datUnitWork_t *, u16);
 extern s32 ptyTestPrimaryProfileFlag(datUnitWork_t *, u16);
 extern void ptyApplyProfile(datUnitWork_t *, u16);
-extern u32 ptyGetProfileRecordValue(datUnitWork_t *, u16);
+extern u32 ptyGetProfileRecordValue(const datUnitWork_t *, u16);
 extern void ptySetProfileRecordValue(datUnitWork_t *, u16, u32);
 extern void mtrSynchronizeMantraFlagsAcrossParty(void);
 extern s32 scrSetFlag(datUnitWork_t *, u16);

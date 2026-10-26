@@ -10,7 +10,7 @@ extern void mtrRecomputeMantraFlagsForPartyUnit(datUnitWork_t *);
 extern void mtrMantraBitResetUnit(datUnitWork_t *);
 extern MantraFlagResource *evtAllocateMantraSelectionWork(datUnitWork_t *, s32);
 extern void evtReleaseMantraSelectionWork(MantraFlagResource *);
-extern DatProfileRecord *ptyGetProfileRecordPointer(datUnitWork_t *, u16);
+extern DatProfileRecord *ptyGetProfileRecordPointer(const datUnitWork_t *, u16);
 extern void ptyApplyProfile(datUnitWork_t *, u16);
 extern void scrSetEntryLowFlags(datUnitWork_t *, u16, u16);
 

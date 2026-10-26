@@ -174,7 +174,7 @@ enum MnuMantraScenePhase {
 
 extern s8 scrGetSelectedOperandIndex(struct datUnitWork_t *);
 
-extern u32 ptyGetProfileRecordValue(struct datUnitWork_t *, u16);
+extern u32 ptyGetProfileRecordValue(const struct datUnitWork_t *, u16);
 
 extern u32 prfGetCapValue(u16);
 
@@ -1151,7 +1151,7 @@ s32 mnuFreeTaskData(u32 unused, u32 taskData) {
 
 extern s32 prfCheckRequirementRules(s32, ScrVmOperand *, u16);
 extern void sdfGridGetCursorCoordinates(SdfGrid *, u32 *, u32 *);
-extern u32 ptyGetProfileRecordValue(datUnitWork_t *, u16);
+extern u32 ptyGetProfileRecordValue(const datUnitWork_t *, u16);
 extern const s32 D_003AF810[8];
 extern const u16 D_003AF830[8];
 
@@ -1811,7 +1811,7 @@ extern u8 prfGetProfileParameterByte5(u16);
 extern s32 prfBuildRawSkillList(u16, PrfSkillList *);
 extern s32 ptyTestSecondaryProfileFlag(datUnitWork_t *, u16);
 extern s32 prfCheckRequirementRules(s32, ScrVmOperand *, u16);
-extern u32 ptyGetProfileRecordValue(datUnitWork_t *, u16);
+extern u32 ptyGetProfileRecordValue(const datUnitWork_t *, u16);
 
 /* Build the 0x58-byte list entry for one profile, or NULL when it is not available (profile 0x4E is still
  * listed once flag 0x908 is set). The entry's state is 1 when requirement 1 passes or the profile flag is set,
@@ -3151,7 +3151,7 @@ void itfDspDrawMarksB(s32 scale, s32 context) {
 }
 
 extern u32 prfGetCapValue(u16);
-extern u32 ptyGetProfileRecordValue(struct datUnitWork_t *, u16);
+extern u32 ptyGetProfileRecordValue(const struct datUnitWork_t *, u16);
 extern MnuProfileRequirementFlags mnuGetProfileRequirementFlags(u16);
 
 u32 mnuGetMantraDisplayFlags(MnuMantraGridEntry *entry, MnuProfileProgress *target) {
@@ -3763,7 +3763,7 @@ INCLUDE_ASM(const s32, "game/code_0024F0D0", mnuDrawMantraCursorTrail);
 #include "mnu_scene_work.h"
 #include "sdf_grid.h"
 
-extern u32 ptyGetProfileRecordValue(struct datUnitWork_t *, u16);
+extern u32 ptyGetProfileRecordValue(const struct datUnitWork_t *, u16);
 
 
 extern u32 D_003E274C[];
@@ -4420,7 +4420,7 @@ void mnuDrawScaledMantraGridEntry(s32 x, s32 y, s32 depth, s32 alpha,
 }
 
 extern u32 prfGetCapValue(u16);
-extern u32 ptyGetProfileRecordValue(struct datUnitWork_t *, u16);
+extern u32 ptyGetProfileRecordValue(const struct datUnitWork_t *, u16);
 extern u32 mnuGetMantraPrerequisiteFlags(s32, MnuMantraGridEntry *, MnuMantraNodeState *, MnuProfileProgress *);
 extern const s8 D_003AF9B8[];
 

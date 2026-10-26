@@ -38,7 +38,7 @@ extern datUnitWork_t *mnuGetNodeValueByIndex(MnuStatusResource *, s32);
 
 extern s32 ptyAnyActivePartyMemberAtProfileCap(u16, u16);
 
-extern u32 ptyGetProfileRecordValue(datUnitWork_t *, u16);
+extern u32 ptyGetProfileRecordValue(const datUnitWork_t *, u16);
 
 
 struct MantraPanelPool;

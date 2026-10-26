@@ -83,7 +83,7 @@ extern u32 D_003BD2C8;
 
 extern u32 prfIsRequirementExcluded(u16);
 
-extern DatProfileRecord *ptyGetProfileRecord(datUnitWork_t *, u16);
+extern DatProfileRecord *ptyGetProfileRecord(const datUnitWork_t *, u16);
 
 
 extern FrFontTextBank frFontColoredGlyphResource;
@@ -529,13 +529,13 @@ s8 scrGetSelectedOperandIndex(datUnitWork_t *op) {
     return op->profileId;
 }
 
-/* Address an unchecked profile record within the unit's record bank. */
-DatProfileRecord *ptyGetProfileRecord(datUnitWork_t *unit, u16 profileId) {
+/* The party record supplies only the bank index; the returned profile record is writable. */
+DatProfileRecord *ptyGetProfileRecord(const datUnitWork_t *unit, u16 profileId) {
     return &DDS3_GBWK->profileRecords[unit->unitId][profileId];
 }
 
-u32 ptyGetProfileRecordValue(datUnitWork_t *unit, u16 profileId) {
-    DatProfileRecord *record;
+u32 ptyGetProfileRecordValue(const datUnitWork_t *unit, u16 profileId) {
+    const DatProfileRecord *record;
 
     record = ptyGetProfileRecord(unit, profileId);
     return record->value;

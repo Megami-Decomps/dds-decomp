@@ -200,7 +200,7 @@ extern u32 scrGetSelectedScriptEntryId(datUnitWork_t *);
 extern s32 ptyTestSecondaryProfileFlag(datUnitWork_t *, u16);
 
 
-extern u32 ptyGetProfileRecordValue(datUnitWork_t *, u16);
+extern u32 ptyGetProfileRecordValue(const datUnitWork_t *, u16);
 
 extern s32 prfReqEvaluateRules(u32, u32, datUnitWork_t *, u16, u32 *);
 
@@ -309,7 +309,7 @@ void mnuUpdateMantraRecordFlags(MantraFlagResource *work, datUnitWork_t *unit, s
 
 
 /* The shared value provider owns a datUnitWork_t, not an integer address. */
-extern u32 ptyGetProfileRecordValue(datUnitWork_t *work, u16 scriptId);
+extern u32 ptyGetProfileRecordValue(const datUnitWork_t *work, u16 scriptId);
 
 /* 1 when some active party member other than unit `skipId` has `scriptId` at its profile record cap. */
 s32 ptyAnyActivePartyMemberAtProfileCap(u16 scriptId, u16 skipId) {

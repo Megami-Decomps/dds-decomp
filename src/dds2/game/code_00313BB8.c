@@ -80,7 +80,7 @@ extern void memset(void *dst, s32 value, s32 size);
 extern DspMantraName *D_00435E50;
 
 
-extern DatProfileRecord *ptyGetProfileRecordPointer(datUnitWork_t *, u16);
+extern DatProfileRecord *ptyGetProfileRecordPointer(const datUnitWork_t *, u16);
 
 extern PrfFallbackItemRequirement D_00404A90[];
 
@@ -551,13 +551,13 @@ u32 scrGetSelectedScriptEntryId(datUnitWork_t *work) {
     return work->profileId;
 }
 
-/* Address an unchecked profile record within the unit's record bank. */
-DatProfileRecord *ptyGetProfileRecordPointer(datUnitWork_t *unit, u16 profileId) {
+/* The party record supplies only the bank index; the returned profile record is writable. */
+DatProfileRecord *ptyGetProfileRecordPointer(const datUnitWork_t *unit, u16 profileId) {
     return &DDS3_GBWK->profileBanks[unit->unitId].records[profileId];
 }
 
-u32 ptyGetProfileRecordValue(datUnitWork_t *work, u16 scriptId) {
-    DatProfileRecord *record;
+u32 ptyGetProfileRecordValue(const datUnitWork_t *work, u16 scriptId) {
+    const DatProfileRecord *record;
 
     record = ptyGetProfileRecordPointer(work, scriptId);
     return record->value;
