@@ -336,7 +336,7 @@ void ChangeProcessFlag(s32 setFlags, dds3ProcessID_t *task, u32 flags, KwlnTaskF
     }
 }
 
-s32 dds3GetProcessCount(u32 state)
+s32 dds3GetProcessCount(KwlnTaskState state)
 {
     switch (state & KWLN_TASK_STATE_MASK) {
     case KWLN_TASK_DELAYED_START:
@@ -350,7 +350,7 @@ s32 dds3GetProcessCount(u32 state)
     }
 }
 
-dds3ProcessID_t *dds3SearchProcessNumber(u32 taskState, s32 taskIndex)
+dds3ProcessID_t *dds3SearchProcessNumber(KwlnTaskState taskState, s32 taskIndex)
 {
     dds3ProcessID_t *task = startinglistf;
     s32 listPosition;
