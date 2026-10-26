@@ -576,7 +576,7 @@ void brsStepAnimDecay(BrsSkillPackageWork *work) {
 }
 
 
-u32 mnuGetTitleState(BrsSkillPackageWork *skillPackage) {
+s32 mnuGetTitleState(BrsSkillPackageWork *skillPackage) {
     return skillPackage->fadeProgress;
 }
 
