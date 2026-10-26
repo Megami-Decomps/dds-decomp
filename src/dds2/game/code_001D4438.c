@@ -603,20 +603,18 @@ extern s32 sndHasResourceFlagsOneOrEight(ActiveSoundNode *resource);
 extern s32 sndIsResourceNodeReferencedOrActive(SoundResourceNode *effect);
 extern u32 sndGetResourceStatus(SoundResourceNode *sound);
 
-/* Returns nonzero when the scene is idle: frees every actor's unreferenced
- * resource node, then the caller's list node, and requires no waiting actor
- * or scene task of the listed kinds. */
-s32 btlPollBattleResourceCleanup(BtlUnit *self) {
+/* Frees inactive resources; PENDING means a resource or task still blocks scene progress. */
+BtlBattleResourceCleanupResult btlPollBattleResourceCleanup(BtlUnit *self) {
     BtlState *scene = (BtlState *)btlGetRuntime();
     BtlUnit *actor;
     for (actor = scene->units; actor != 0; actor = actor->next) {
         if (actor->resourceNode != 0) {
             if (sndIsResourceNodeReferencedOrActive(actor->resourceNode) != 0) {
                 if (actor == self) {
-                    return 0;
+                    return BTL_BATTLE_RESOURCE_CLEANUP_PENDING;
                 }
                 sndGetResourceStatus(actor->resourceNode);
-                return 0;
+                return BTL_BATTLE_RESOURCE_CLEANUP_PENDING;
             }
             sndFreeResourceNode(actor->resourceNode);
             actor->resourceNode = 0;
@@ -624,7 +622,7 @@ s32 btlPollBattleResourceCleanup(BtlUnit *self) {
     }
     if (self->listNode != 0) {
         if (sndHasResourceFlagsOneOrEight(self->listNode) != 0) {
-            return 0;
+            return BTL_BATTLE_RESOURCE_CLEANUP_PENDING;
         }
         sndFreeListNode(self->listNode);
         self->listNode = 0;
@@ -633,19 +631,21 @@ s32 btlPollBattleResourceCleanup(BtlUnit *self) {
         if (actor->status.flags & 0x200) {
             if (actor->status.flags & 2) {
                 if ((actor->gunResourceFlags & 8) == 0) {
-                    return 0;
+                    return BTL_BATTLE_RESOURCE_CLEANUP_PENDING;
                 }
             }
         }
     }
-    if (btlCountTasksByKind(0x23) != 0) return 0;
-    if (btlCountTasksByKind(0x40) != 0) return 0;
-    if (btlCountTasksByKind(0x41) != 0) return 0;
-    if (btlCountTasksByKind(0x3F) != 0) return 0;
-    if (btlCountTasksByKind(0x36) != 0) return 0;
-    if (btlCountTasksByKind(0x37) != 0) return 0;
-    if (btlCountTasksByKind(0x24) != 0) return 0;
-    return btlCountTasksByKind(0x2E) == 0;
+    if (btlCountTasksByKind(0x23) != 0) return BTL_BATTLE_RESOURCE_CLEANUP_PENDING;
+    if (btlCountTasksByKind(0x40) != 0) return BTL_BATTLE_RESOURCE_CLEANUP_PENDING;
+    if (btlCountTasksByKind(0x41) != 0) return BTL_BATTLE_RESOURCE_CLEANUP_PENDING;
+    if (btlCountTasksByKind(0x3F) != 0) return BTL_BATTLE_RESOURCE_CLEANUP_PENDING;
+    if (btlCountTasksByKind(0x36) != 0) return BTL_BATTLE_RESOURCE_CLEANUP_PENDING;
+    if (btlCountTasksByKind(0x37) != 0) return BTL_BATTLE_RESOURCE_CLEANUP_PENDING;
+    if (btlCountTasksByKind(0x24) != 0) return BTL_BATTLE_RESOURCE_CLEANUP_PENDING;
+    return btlCountTasksByKind(0x2E) == 0
+        ? BTL_BATTLE_RESOURCE_CLEANUP_COMPLETE
+        : BTL_BATTLE_RESOURCE_CLEANUP_PENDING;
 }
 
 BtlActorResourceCleanupResult btlPollActorResourceCleanup(BtlUnit *actor) {
@@ -790,7 +790,8 @@ void btlActionSeqCheckDispatch(ActionStateLink *task) {
                 return;
             }
         }
-        if (!(flags & 0x8000) || btlPollBattleResourceCleanup(unit) != 0) {
+        if (!(flags & 0x8000) ||
+            btlPollBattleResourceCleanup(unit) != BTL_BATTLE_RESOURCE_CLEANUP_PENDING) {
             if (btlBothSidesActive(unit) == 0) {
                 btlDispatchStateHandler(task, 0x1D);
                 return;
@@ -1193,7 +1194,7 @@ s32 btlAiTaskUpdate(ActionStateLink *task) {
     u16 index;
     if (!(scene->battleFlags & 0x20)) {
         if (sndHasActiveActor() == 0) {
-            if (btlPollBattleResourceCleanup(task->unit) != 0) {
+            if (btlPollBattleResourceCleanup(task->unit) != BTL_BATTLE_RESOURCE_CLEANUP_PENDING) {
                 if (!(task->pendingFlags & 0x80)) {
                     index = task->unit->partyRecord.unitId;
                     scene->boundTask = 0;
@@ -1362,7 +1363,7 @@ void btlProcessEligibleCommandTaskEffects(ActionStateLink *task) {
     u8 *work = (u8 *)btlGetRuntime();
     BtlUnit *owner = task->unit;
     void (*hook)(u8 *);
-    if (btlPollBattleResourceCleanup(owner) != 0) {
+    if (btlPollBattleResourceCleanup(owner) != BTL_BATTLE_RESOURCE_CLEANUP_PENDING) {
         if (task->indexWork.stage == 2) {
             btlStartTask(btlCreateEffObjB(owner, task->indexWork.parameter));
         }
