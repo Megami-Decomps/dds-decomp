@@ -110,9 +110,8 @@ s8 dds3AdminiGetPrevSequence(void)
     return work->signedHistory[(work->historyIndex + 7) & 7];
 }
 
-/* Read the corresponding unsigned sample from the previous ring slot;
- * its callers read the zero-extended sample as a word. */
-u32 dds3AdminiGetPrevHistoryFlag(void)
+/* Read the flags associated with the previous mode-history slot. */
+Dds3AdminHistoryFlags dds3AdminiGetPrevHistoryFlag(void)
 {
     AdminWork* work;
 
@@ -138,7 +137,7 @@ KwlnTaskUpdateResult dds3AdminActivateRequestedMode(dds3ProcessID_t *task) {
         work->flags &= ~2;
         work->value = 0;
         if (flags & 4) {
-            work->unsignedHistory[work->historyIndex] |= 1;
+            work->unsignedHistory[work->historyIndex] |= DDS3_ADMIN_HISTORY_FLAG_RESTORE_PREVIOUS_MODE;
             work->flags &= ~4;
         }
         if (work->flags & 0x10000) {
@@ -204,7 +203,8 @@ KwlnTaskUpdateResult dds3AdminPollModeCompletion(dds3ProcessID_t *task) {
     }
     if ((flags & 2) && work->activeMode >= 0) {
         previousHistoryIndex = (work->historyIndex + 7) & 7;
-        if (work->signedHistory[previousHistoryIndex] >= 0 && (work->unsignedHistory[previousHistoryIndex] & 1)) {
+        if (work->signedHistory[previousHistoryIndex] >= 0 &&
+            (work->unsignedHistory[previousHistoryIndex] & DDS3_ADMIN_HISTORY_FLAG_RESTORE_PREVIOUS_MODE)) {
             void *requestData = work->ownedRequestData;
 
             work->flags |= 0x10001;

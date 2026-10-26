@@ -10,6 +10,7 @@
 #include "kwln.h"
 #include "kwln_task_runner.h"
 #include "kwln_task_priority_query.h"
+#include "dds3_admin_control_api.h"
 #include "kwln_task_create.h"
 #include "kwln_fade.h"
 #include "pcp_vu0.h"
@@ -147,8 +148,6 @@ extern void fldLoadNextFile_SetId_BtlRet(u32, u32);
 
 extern void fldFreeNextFile(void);
 extern s8 dds3AdminiGetNextSequence(void);
-
-extern u32 dds3AdminiGetPrevHistoryFlag(void);
 
 extern void func_0013F100(s32, u32);
 
@@ -2460,7 +2459,8 @@ void fldSetDeferredFieldCommand(u32 command, u32 parameter) {
 void fldProcNextJump(void) {
     if (fldNext_fld == 0) return;
     if (dds3AdminiGetNextSequence() > 0) return;
-    if (dds3AdminiGetNextSequence() < 0 && (dds3AdminiGetPrevHistoryFlag() & 1) != 0) return;
+    if (dds3AdminiGetNextSequence() < 0 &&
+        (dds3AdminiGetPrevHistoryFlag() & DDS3_ADMIN_HISTORY_FLAG_RESTORE_PREVIOUS_MODE) != 0) return;
     func_0013F100(fldNext_fld, fldDeferredCommandParameter);
     fldNext_fld = 0;
 }

@@ -45,6 +45,7 @@
 #include "dds3_world_value.h"
 #include "dds3_world_selection.h"
 #include "kwln.h"
+#include "dds3_admin_control_api.h"
 #include "kwln_task_runner.h"
 #include "kwln_task_priority_query.h"
 #include "kwln_task_create.h"
@@ -2578,8 +2579,6 @@ void fldSetDeferredFieldCommand(u32 command, u32 parameter) {
     fldDeferredCommandParameter = parameter;
 }
 
-extern u32 dds3AdminiGetPrevHistoryFlag(void);
-
 void fldProcNextJump(void) {
     if (fldNext_fld == 0) {
         return;
@@ -2587,7 +2586,8 @@ void fldProcNextJump(void) {
     if (dds3AdminiGetNextSequence() > 0) {
         return;
     }
-    if (dds3AdminiGetNextSequence() < 0 && (dds3AdminiGetPrevHistoryFlag() & 1) != 0) {
+    if (dds3AdminiGetNextSequence() < 0 &&
+        (dds3AdminiGetPrevHistoryFlag() & DDS3_ADMIN_HISTORY_FLAG_RESTORE_PREVIOUS_MODE) != 0) {
         return;
     }
     if (fldStartDeferredActorTransition(fldNext_fld, fldDeferredCommandParameter) == FLD_DEFERRED_COMMAND_CLEAR_PENDING) {
