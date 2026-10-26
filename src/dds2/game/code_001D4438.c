@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "snd_packed_track_load_status.h"
 #include "btl_sound.h"
+#include "btl_sound_resource_use_result.h"
 #include "btl_actor_resource_cleanup_api.h"
 #include "btl_terminal_outcome.h"
 #include "btl_enemy_spawn_capacity_api.h"
@@ -69,7 +70,7 @@ extern void btlInitializeBattleDebugMenu(void);
 extern s32 btlTestActorStatusPredicate(BtlUnit *unit);
 extern s32 btlTryEscapeWithPhaseAdjustment(BtlUnit *actor);
 extern void sndSetStationedSeVolume(u32 sequence);
-/* Original-style implicit int, kept: matched code depends on it: sndGetResourceStatus, sndHasResourceFlagsOneOrEight, sndIsResourceNodeReferencedOrActive. */
+/* Original-style implicit int, kept: matched code depends on it: sndGetResourceStatus, sndHasResourceFlagsOneOrEight. */
 
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 extern void btlDispatchStateHandler(void *obj, s32 kind);
@@ -600,7 +601,6 @@ extern void btlResetActiveUnitList(void);
 extern s32 btlCountTasksByKind(u16);
 
 extern s32 sndHasResourceFlagsOneOrEight(ActiveSoundNode *resource);
-extern s32 sndIsResourceNodeReferencedOrActive(SoundResourceNode *effect);
 extern u32 sndGetResourceStatus(SoundResourceNode *sound);
 
 /* Frees inactive resources; PENDING means a resource or task still blocks scene progress. */
@@ -609,7 +609,7 @@ BtlBattleResourceCleanupResult btlPollBattleResourceCleanup(BtlUnit *self) {
     BtlUnit *actor;
     for (actor = scene->units; actor != 0; actor = actor->next) {
         if (actor->resourceNode != 0) {
-            if (sndIsResourceNodeReferencedOrActive(actor->resourceNode) != 0) {
+            if (sndIsResourceNodeReferencedOrActive(actor->resourceNode) != BTL_SOUND_RESOURCE_NOT_IN_USE) {
                 if (actor == self) {
                     return BTL_BATTLE_RESOURCE_CLEANUP_PENDING;
                 }
@@ -650,7 +650,7 @@ BtlBattleResourceCleanupResult btlPollBattleResourceCleanup(BtlUnit *self) {
 
 BtlActorResourceCleanupResult btlPollActorResourceCleanup(BtlUnit *actor) {
     if (actor->resourceNode != 0) {
-        if (sndIsResourceNodeReferencedOrActive(actor->resourceNode) != 0) {
+        if (sndIsResourceNodeReferencedOrActive(actor->resourceNode) != BTL_SOUND_RESOURCE_NOT_IN_USE) {
             return BTL_ACTOR_RESOURCE_CLEANUP_PENDING;
         }
         sndFreeResourceNode(actor->resourceNode);
@@ -708,7 +708,7 @@ void btlReleaseIdleUnitSoundAndAdvanceTask(ActionStateLink *task) {
     resource = unit->resourceNode;
     task->pendingFlags &= ~0x100;
     if (resource != 0) {
-        if (sndIsResourceNodeReferencedOrActive(resource) == 0) {
+        if (sndIsResourceNodeReferencedOrActive(resource) == BTL_SOUND_RESOURCE_NOT_IN_USE) {
             sndFreeResourceNode(unit->resourceNode);
             unit->resourceNode = 0;
         }
@@ -749,7 +749,7 @@ void btlUnitStateSelectAfterAction(ActionStateLink *task) {
     if (!(unit->status.flags & 0x20)) {
         task->pendingFlags &= ~0x100;
     }
-    if (unit->resourceNode != 0 && sndIsResourceNodeReferencedOrActive(unit->resourceNode) == 0) {
+    if (unit->resourceNode != 0 && sndIsResourceNodeReferencedOrActive(unit->resourceNode) == BTL_SOUND_RESOURCE_NOT_IN_USE) {
         sndFreeResourceNode(unit->resourceNode);
         unit->resourceNode = 0;
     }

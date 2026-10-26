@@ -33,6 +33,7 @@
 #include "btl_model_record.h"
 #include "btl_task_args.h"
 #include "btl_sound.h"
+#include "btl_sound_resource_use_result.h"
 #include "btl_referenced_battle_effect_task.h"
 #include "btl_actor_resource_cleanup_api.h"
 #include "btl_enemy_spawn_capacity_api.h"
@@ -233,7 +234,7 @@ BtlBattleResourceCleanupResult btlPollBattleResourceCleanup(BtlUnit *self) {
 
     for (actor = scene->actorList; actor != 0; actor = actor->next) {
         if (actor->resourceNode != 0) {
-            if (sndIsResourceNodeReferencedOrActive(actor->resourceNode) != 0) {
+            if (sndIsResourceNodeReferencedOrActive(actor->resourceNode) != BTL_SOUND_RESOURCE_NOT_IN_USE) {
                 if (actor == self) {
                     return BTL_BATTLE_RESOURCE_CLEANUP_PENDING;
                 }
@@ -274,7 +275,7 @@ BtlBattleResourceCleanupResult btlPollBattleResourceCleanup(BtlUnit *self) {
 
 BtlActorResourceCleanupResult btlPollActorResourceCleanup(BtlUnit *actor) {
     if (actor->resourceNode != 0) {
-        if (sndIsResourceNodeReferencedOrActive(actor->resourceNode) != 0) {
+        if (sndIsResourceNodeReferencedOrActive(actor->resourceNode) != BTL_SOUND_RESOURCE_NOT_IN_USE) {
             return BTL_ACTOR_RESOURCE_CLEANUP_PENDING;
         }
         sndFreeResourceNode(actor->resourceNode);
@@ -321,7 +322,7 @@ void btlReleaseIdleUnitSoundAndAdvanceTask(BtlTask *task) {
 
     task->flags &= ~0x100;
     if (resource != 0) {
-        if (sndIsResourceNodeReferencedOrActive(resource) == 0) {
+        if (sndIsResourceNodeReferencedOrActive(resource) == BTL_SOUND_RESOURCE_NOT_IN_USE) {
             sndFreeResourceNode(unit->resourceNode);
             unit->resourceNode = 0;
         }
@@ -355,7 +356,7 @@ void btlTaskUpdateFlags(BtlTask *task) {
     if (!(unit->status.flags & 0x20)) {
         task->flags &= ~0x100;
     }
-    if (unit->resourceNode != 0 && sndIsResourceNodeReferencedOrActive(unit->resourceNode) == 0) {
+    if (unit->resourceNode != 0 && sndIsResourceNodeReferencedOrActive(unit->resourceNode) == BTL_SOUND_RESOURCE_NOT_IN_USE) {
         sndFreeResourceNode(unit->resourceNode);
         unit->resourceNode = 0;
     }

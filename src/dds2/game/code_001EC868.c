@@ -54,6 +54,7 @@
 #include "btl_floor_load_task_args.h"
 #include "btl_floor_resource_readiness_api.h"
 #include "btl_sound.h"
+#include "btl_sound_resource_use_result.h"
 #include "btl_referenced_battle_effect_task.h"
 #include "btl_sound_release_task.h"
 #include "actor_effect_task.h"
@@ -8541,17 +8542,17 @@ s32 sndGetEffectNodeParameter(SoundResourceNode *effect, u16 option) {
     return effBTLGetMotionChangeFrame(effect->resourceHandle, option);
 }
 
-s32 sndIsResourceNodeReferencedOrActive(SoundResourceNode *effect) {
+BtlSoundResourceUseResult sndIsResourceNodeReferencedOrActive(SoundResourceNode *effect) {
     if (effect->referenceCount != 0) {
-        return 1;
+        return BTL_SOUND_RESOURCE_IN_USE;
     }
-    return effect->activeCount != 0;
+    return effect->activeCount != 0 ? BTL_SOUND_RESOURCE_IN_USE : BTL_SOUND_RESOURCE_NOT_IN_USE;
 }
 
 s32 sndHasActiveActor(void) {
     BtlUnit *unit;
     for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->next) {
-        if (unit->resourceNode != 0 && sndIsResourceNodeReferencedOrActive(unit->resourceNode) != 0) {
+        if (unit->resourceNode != 0 && sndIsResourceNodeReferencedOrActive(unit->resourceNode) != BTL_SOUND_RESOURCE_NOT_IN_USE) {
             return 1;
         }
     }

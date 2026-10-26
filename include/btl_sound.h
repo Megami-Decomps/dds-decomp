@@ -291,7 +291,6 @@ void sndCreateSystemEffect(SoundResourceNode *effect);
 void sndDeleteSystemEffect(SoundResourceNode *effect);
 s32 sndSetEffectNodeParameter(SoundResourceNode *effect, u16 option);
 s32 sndGetEffectNodeParameter(SoundResourceNode *effect, u16 option);
-s32 sndIsResourceNodeReferencedOrActive(SoundResourceNode *effect);
 void btlExtendTaskFrameLimit(SoundResourceNode *effect, s32 frames);
 u32 sndGetResourceStatus(SoundResourceNode *effect);
 s32 sndHasResourceFlagsOneOrEight(struct ActiveSoundNode *node);
