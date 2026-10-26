@@ -1555,7 +1555,7 @@ extern FieldVec4 D_00412F20;
 
 extern char D_00435F58[];
 
-extern void dds3CameraObjectBasicGetCameraTM(struct dds3Basic_t *camera, u128 *worldEye);
+extern void dds3CameraObjectBasicSetWorldEye(struct dds3Basic_t *camera, const u128 *worldEye);
 
 
 /* Create the secondary camera at target origin with the stored eye/up vectors. */
@@ -1571,7 +1571,7 @@ void fldCreateSecondaryWorldCamera(void) {
     cameraObject = dds3AddCameraObjectBasicTypeLookAt(dds3AllocObjectId(), (u128 *)&targetPosition, (u128 *)&worldEye, (u128 *)&localUp);
     *cameraObjectSlot = cameraObject;
     dds3SetUnitObjectId(cameraObject, D_00435F58);
-    dds3CameraObjectBasicGetCameraTM(*cameraObjectSlot, (u128 *)&worldEye);
+    dds3CameraObjectBasicSetWorldEye(*cameraObjectSlot, (u128 *)&worldEye);
     dds3GetRadiusPoseSet(*cameraObjectSlot, 2.0f);
     dds3ReplaceActiveCameraSceneBasic(dds3GetControlScene(), *cameraObjectSlot);
 }

@@ -3637,7 +3637,7 @@ void fldCamUpdateFollow(void) {
 
 INCLUDE_ASM(const s32, "field/fldFileResolver", func_0012FA58);
 
-extern void dds3CameraObjectBasicGetCameraTM(dds3Basic_t *camera, u128 *worldEye);
+extern void dds3CameraObjectBasicSetWorldEye(dds3Basic_t *camera, const u128 *worldEye);
 extern f32 GetSphericalPosMove(f32 fromX, f32 fromZ, f32 toX, f32 toZ);
 extern f32 EulerAngleAxisY(void);
 extern void dds3GetTMPoseSet(dds3Basic_t *object);
@@ -3656,7 +3656,7 @@ void fldUpdateCameraViewFromPlayer(void) {
     nearPoint[2] = fldLookAtNearPoint[2] + (fldGlobalBase.z - fldLookAtNearPoint[2]);
     fldGlobalBase.angle = angle;
     fldGlobalBase.targetAngle = angle;
-    dds3CameraObjectBasicGetCameraTM(*world, (u128 *)nearPoint);
+    dds3CameraObjectBasicSetWorldEye(*world, (u128 *)nearPoint);
     dds3GetTMPoseSet(fldPlayerObject);
     farPoint[3] = 1.0f;
     farPoint[0] = fldGlobalBase.focusPos[0];

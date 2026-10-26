@@ -174,7 +174,7 @@ void dds3LoadObjectMatrixPointerIntoVu(dds3Basic_t *camera) {
 }
 
 /* Copy the supplied vector to the camera's world-space eye position. */
-void dds3CameraObjectBasicGetCameraTM(dds3Basic_t *camera, u128 *worldEye) {
+void dds3CameraObjectBasicSetWorldEye(dds3Basic_t *camera, const u128 *worldEye) {
     SDF_VU0_COPYVECTOR(&((CameraData *)camera->data)->worldEye, worldEye);
 }
 

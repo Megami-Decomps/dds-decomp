@@ -576,7 +576,7 @@
 0x00112F28	dds3AddCameraObjectBasicTypeLookAt	inferred	SMT3HD name via SLUS_209.11 0x00112718, reloc-identical; was dds3CreateConfiguredCameraObject
 0x00112FC0	dds3AddCameraObjectBasic	inferred	SMT3HD name via SLUS_209.11 0x001127B0, reloc-identical; was dds3CreateCameraObjectWithVectors
 0x00113080	dds3DeleteCameraObjectBasic	inferred	SMT3HD name via SLUS_209.11 0x00112870, shared-hash-in-run; was dds3ReleaseCameraWorldNode
-0x001130B8	dds3CameraObjectBasicGetCameraTM	inferred	SMT3HD name via SLUS_209.11 0x001128A8, byte-identical; was dds3SetCameraVector
+0x001130B8	dds3CameraObjectBasicSetWorldEye	inferred	Copies the supplied vector into CameraData.worldEye; direct callers use it to seed or update the camera eye. Replaces the imported GetCameraTM name, which contradicted the copy direction.
 0x001130D0	dds3CameraObjectBasicGetTargetPos	inferred	SMT3HD name via SLUS_209.11 0x001128C0, shared-hash-in-run; was dds3LoadCameraVectorVU
 0x001130E8	dds3CameraObjectBasicSetFovy	inferred	SMT3HD name via SLUS_209.11 0x001128D8, byte-identical; was dds3SetCameraFieldOfView
 0x00113100	dds3CameraObjectBasicGetFovy	inferred	SMT3HD name via SLUS_209.11 0x00112900, shared-hash-in-run; was dds3GetCameraFieldOfView
