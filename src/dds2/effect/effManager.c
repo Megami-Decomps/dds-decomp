@@ -196,13 +196,16 @@ EffNode *effCreateNodeFromParameter(u32 parameter) {
 }
 
 struct EffNode *dds3EffectFileLoad(const char *resource) {
-    u32 resolvedId;
+    union {
+        u32 addressWord;
+        EffNodeDescriptor *descriptor;
+    } loadedResource;
     struct sdfMemHandle_t *resourceHandle;
     struct EffNode *node;
 
     printf("d3p file read...[%s]\n", resource);
-    resourceHandle = sdfDevLoadFileEx(resource, &resolvedId, 0);
-    node = dds3EffectLoad((EffNodeDescriptor *)resolvedId);
+    resourceHandle = sdfDevLoadFileEx(resource, &loadedResource.addressWord, 0);
+    node = dds3EffectLoad(loadedResource.descriptor);
     sdfMemFreeDirect(resourceHandle);
     return node;
 }
