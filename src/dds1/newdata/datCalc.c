@@ -144,7 +144,8 @@ extern u32 prfGetIndexedProfileByte(u16 profileId, s32 statIndex);
 
 /* Add the signed per-unit stat byte to its profile adjustment and clamp
  * the existing signed result to 1..99. Stat index is not checked here. */
-DatCalculatedStatValue datGetClampedProfileAdjustedStat(datUnitWork_t *unit, s32 statIndex) {
+DatCalculatedStatValue datGetClampedProfileAdjustedStat(
+    datUnitWork_t *unit, DatBaseStatIndex statIndex) {
     s32 adjustedStat = unit->baseStats[statIndex] +
                 prfGetIndexedProfileByte(ptyGetCurrentProfileId(unit), statIndex);
 
@@ -157,7 +158,8 @@ DatCalculatedStatValue datGetClampedProfileAdjustedStat(datUnitWork_t *unit, s32
 
 /* Only an exact masked status of 0x1000 forces one; combinations of low
  * status bits do not take this path. Otherwise use the profile-adjusted stat. */
-DatCalculatedStatValue datGetStatWithStatusOverride(datUnitWork_t *unit, s32 statIndex) {
+DatCalculatedStatValue datGetStatWithStatusOverride(
+    datUnitWork_t *unit, DatBaseStatIndex statIndex) {
     if ((unit->status & DAT_STATUS_VALUE_MASK) == DAT_STATUS_STAT_OVERRIDE) {
         return 1;
     }
