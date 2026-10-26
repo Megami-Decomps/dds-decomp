@@ -14,8 +14,8 @@ s16 itfMesMngGetSelect(ItfMesWindowIndex window);
 /* Return the entry's item-list address, NONE, or the BRANCH sentinel. */
 ItfMesEntryItemsResult itfMesGetWindowEntryItems(ItfMesWindowIndex window, s32 entryIndex);
 u32 itfMesGetEntryCount(ItfMesWindowIndex window);
-/* Return the replacement text stored in a window slot. */
-u8 *itfMesMngGetVar(ItfMesWindowIndex window, s32 slotIndex);
+/* Borrow window-owned replacement text; valid until slot replacement or window release. */
+const u8 *itfMesMngGetVar(ItfMesWindowIndex window, s32 slotIndex);
 /* Replace only the high 16 bits, retaining the window's low status bits. */
 void itfMesMngSetStat(ItfMesWindowIndex window, u32 highFlags);
 /* Set or clear only bits from the high-half mask. */

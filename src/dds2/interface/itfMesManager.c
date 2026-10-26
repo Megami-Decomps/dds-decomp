@@ -723,7 +723,7 @@ s16 itfMesMngGetMesCurrentPage(ItfMesWindowIndex window) {
 }
 
 /* Return the replacement text stored in a window slot. */
-u8 *itfMesMngGetVar(ItfMesWindowIndex window, s32 slotIndex) {
+const u8 *itfMesMngGetVar(ItfMesWindowIndex window, s32 slotIndex) {
     return pinst[window].mes->textSlots.addresses[slotIndex];
 }
 
