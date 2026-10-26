@@ -9,6 +9,7 @@
 #include "btl_command_use_error.h"
 #include "btl_action_reaction_motion.h"
 #include "btl_action_press_result.h"
+#include "btl_hunt_mp_recovery_api.h"
 #include "btl_action_state_selection.h"
 #include "btl_command_target_policy.h"
 #include "btl_command_target_eligibility.h"
@@ -541,8 +542,6 @@ extern s32 btlCalculateHuntEpReward(BtlUnit *acquirer, BtlUnit *enemy);
 extern u32 btlGetHuntHpRecoveryAmount(BtlUnit *actor, BtlUnit *target);
 
 /* Native caller supplies actor,target; concrete provider consumes only actor. */
-extern s32 btlCalculateAbilityRecoveryAmount(BtlUnit *actor, BtlUnit *target);
-
 extern u32 btlGetHuntPenaltyFlags(BtlUnit *unit, BtlUnit *enemy);
 
 /* The damage/restore result is signed; keep this cross-unit declaration aligned with its provider. */
@@ -598,7 +597,7 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
     BtlOperandGroup *group;
     s32 hpDelta;
     s32 huntHpRecovery;
-    s32 huntMpRecovery;
+    BtlHuntMpRecoveryAmount huntMpRecovery;
     s32 cumulativeHp;
     BtlCommandId command;
     u32 costError;
@@ -896,7 +895,7 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
                 if (!huntRecovered) {
                     huntRecovered = 1;
                     huntHpRecovery = btlGetHuntHpRecoveryAmount(action->unit, target);
-                    huntMpRecovery = btlCalculateAbilityRecoveryAmount(action->unit, target);
+                    huntMpRecovery = btlGetHuntMpRecoveryAmount(action->unit, target);
                 }
                 switch (btlGetHuntPenaltyFlags(action->unit, target)) {
                 case 16: deferredStatus = 0x40; break;
@@ -1066,7 +1065,7 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
                 if (!huntRecovered) {
                     huntRecovered = 1;
                     group->entries[hitCount - 1].hpRecovery += btlGetHuntHpRecoveryAmount(action->unit, target);
-                    group->entries[hitCount - 1].mpRecovery += btlCalculateAbilityRecoveryAmount(action->unit, target);
+                    group->entries[hitCount - 1].mpRecovery += btlGetHuntMpRecoveryAmount(action->unit, target);
                 }
                 switch (btlGetHuntPenaltyFlags(action->unit, target)) {
                 case 16: group->entries[hitCount - 1].deferredStatus |= 0x40; break;

@@ -2,6 +2,7 @@
 #include "sdf_packet_list.h"
 #include "common.h"
 #include "btl_action_press_result.h"
+#include "btl_hunt_mp_recovery_api.h"
 #include "btl_special_ability.h"
 #include "evt_solar.h"
 #include "btl_item_drop.h"
@@ -468,12 +469,12 @@ u32 btlGetHuntHpRecoveryAmount(BtlUnit *actor, BtlUnit *target) {
     return 0;
 }
 
-s32 btlCalculateAbilityRecoveryAmount(BtlUnit *unit, BtlUnit *target) {
+BtlHuntMpRecoveryAmount btlGetHuntMpRecoveryAmount(BtlUnit *actor, BtlUnit *target) {
     s32 recovery = 0;
-    if (btlCheckSpecialAbility(&unit->partyRecord, 0x26E) != 0) {
-        recovery = (s32)(unit->partyRecord.maxMp * datAbilityParameters[0x26E - BTL_ABILITY_PARAMETER_FIRST_SKILL].value);
-    } else if (btlCheckSpecialAbility(&unit->partyRecord, 0x249) != 0) {
-        recovery = (s32)(unit->partyRecord.maxMp * datAbilityParameters[0x249 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value);
+    if (btlCheckSpecialAbility(&actor->partyRecord, 0x26E) != 0) {
+        recovery = (s32)(actor->partyRecord.maxMp * datAbilityParameters[0x26E - BTL_ABILITY_PARAMETER_FIRST_SKILL].value);
+    } else if (btlCheckSpecialAbility(&actor->partyRecord, 0x249) != 0) {
+        recovery = (s32)(actor->partyRecord.maxMp * datAbilityParameters[0x249 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value);
     }
     btlBossDebugPrintf("btl:hunt mp rec[%d]\n", recovery);
     return recovery;

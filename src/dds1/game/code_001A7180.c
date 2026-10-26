@@ -22,6 +22,7 @@
 #include "btl_state.h"
 #include "btl_terminal_outcome.h"
 #include "btl_enemy_spawn_capacity_api.h"
+#include "btl_hunt_mp_recovery_api.h"
 #include "btl_boss_debug_api.h"
 #include "eff.h"
 #include "btl_action.h"
@@ -340,7 +341,7 @@ u32 btlGetHuntHpRecoveryAmount(BtlUnit *actor, BtlUnit *target) {
 
 
 /* Target is part of the hunt-recovery interface; this implementation uses only actor. */
-s32 btlCalculateAbilityRecoveryAmount(BtlUnit *actor, BtlUnit *target) {
+BtlHuntMpRecoveryAmount btlGetHuntMpRecoveryAmount(BtlUnit *actor, BtlUnit *target) {
     s32 recovery = 0;
     if (btlCheckSpecialAbility(&actor->partyRecord, 0x24E)) {
         recovery = (s32)(actor->partyRecord.maxMp * datAbilityParameters[0x24E - BTL_ABILITY_PARAMETER_FIRST_SKILL].value);

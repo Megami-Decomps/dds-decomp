@@ -9,6 +9,7 @@
 #include "btl_command_use_error.h"
 #include "btl_action_reaction_motion.h"
 #include "btl_action_press_result.h"
+#include "btl_hunt_mp_recovery_api.h"
 #include "btl_command_target_policy.h"
 #include "dds3_object_flags.h"
 #include "sdf_vu0.h"
@@ -568,8 +569,6 @@ extern s32 btlCalculateHuntEpReward(BtlUnit *acquirer, BtlUnit *enemy);
 
 extern u32 btlGetHuntHpRecoveryAmount(BtlUnit *, BtlUnit *);
 
-extern s32 btlCalculateAbilityRecoveryAmount(BtlUnit *, BtlUnit *);
-
 extern u32 btlGetHuntPenaltyFlags(BtlUnit *unit, BtlUnit *enemy);
 
 extern s32 btlCalculateHpActionAmount(
@@ -629,7 +628,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
     BtlOperandGroup *group;
     s32 hpDelta;
     s32 huntHpRecovery;
-    s32 huntMpRecovery;
+    BtlHuntMpRecoveryAmount huntMpRecovery;
     s32 cumulativeHp;
     BtlCommandId command;
     u32 costError;
@@ -953,7 +952,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
                 if (!huntRecovered) {
                     huntRecovered = 1;
                     huntHpRecovery = btlGetHuntHpRecoveryAmount(action->unit, target);
-                    huntMpRecovery = btlCalculateAbilityRecoveryAmount(action->unit, target);
+                    huntMpRecovery = btlGetHuntMpRecoveryAmount(action->unit, target);
                 }
                 switch (btlGetHuntPenaltyFlags(action->unit, target)) {
                 case 16: deferredStatus = 0x40; break;
@@ -1132,7 +1131,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
                 if (!huntRecovered) {
                     huntRecovered = 1;
                     group->entries[hitCount - 1].hpRecovery += btlGetHuntHpRecoveryAmount(action->unit, target);
-                    group->entries[hitCount - 1].mpRecovery += btlCalculateAbilityRecoveryAmount(action->unit, target);
+                    group->entries[hitCount - 1].mpRecovery += btlGetHuntMpRecoveryAmount(action->unit, target);
                 }
                 switch (btlGetHuntPenaltyFlags(action->unit, target)) {
                 case 16: group->entries[hitCount - 1].deferredStatus |= 0x40; break;
