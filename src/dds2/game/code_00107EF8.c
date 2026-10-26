@@ -1974,8 +1974,9 @@ INCLUDE_RODATA(const s32, "game/code_00107EF8", D_004113A0);
 
 INCLUDE_RODATA(const s32, "game/code_00107EF8", D_004113B8);
 
-scrProcessWork_s *bfContextCreate(BfFlw0Header *header, ScrSection *sections, ScrLabel *procedures,
-                        ScrLabel *labels, const ScrInstr *instructions, struct ItfMesSub *auxiliaryData,
+scrProcessWork_s *bfContextCreate(const BfFlw0Header *header, const ScrSection *sections,
+                        const ScrLabel *procedures, const ScrLabel *labels,
+                        const ScrInstr *instructions, struct ItfMesSub *auxiliaryData,
                         const char *strings, ScrProcedureIndex procedureIndex) {
     scrProcessWork_s *process;
     s32 i;
@@ -2005,7 +2006,7 @@ scrProcessWork_s *bfContextCreate(BfFlw0Header *header, ScrSection *sections, Sc
     }
     process->sections = sections;
     process->labels = labels;
-    process->instructions = (ScrInstr *)instructions;
+    process->instructions = instructions;
     process->strings = strings;
     process->procedureIndex = procedureIndex;
     process->messageWindowIndex = ITF_MES_WINDOW_INDEX_INVALID;
@@ -2046,10 +2047,10 @@ scrProcessWork_s *bfContextCreate(BfFlw0Header *header, ScrSection *sections, Sc
 
 /* Resolve supported FLW0 sections relative to the header; reject bad magic/unknown kinds.
    Zero-count auxiliary sections are ignored, and absent sections remain null. */
-scrProcessWork_s *fldFlowParse(BfFlw0Header *header, ScrProcedureIndex procedureIndex) {
-    ScrSection *sections;
-    ScrLabel *procedures = NULL;
-    ScrLabel *labels = NULL;
+scrProcessWork_s *fldFlowParse(const BfFlw0Header *header, ScrProcedureIndex procedureIndex) {
+    const ScrSection *sections;
+    const ScrLabel *procedures = NULL;
+    const ScrLabel *labels = NULL;
     const u8 *instructionSection = NULL;
     struct ItfMesSub *auxiliaryData = NULL;
     const char *strings = NULL;
@@ -2062,17 +2063,17 @@ scrProcessWork_s *fldFlowParse(BfFlw0Header *header, ScrProcedureIndex procedure
     for (i = 0; i < header->sectionCount; i++) {
         switch (sections[i].type) {
             case BF_FLW0_SECTION_PROCEDURES:
-                procedures = (ScrLabel *)((u8 *)header + sections[i].offset);
+                procedures = (const ScrLabel *)((const u8 *)header + sections[i].offset);
                 break;
             case BF_FLW0_SECTION_LABELS:
-                labels = (ScrLabel *)((u8 *)header + sections[i].offset);
+                labels = (const ScrLabel *)((const u8 *)header + sections[i].offset);
                 break;
             case BF_FLW0_SECTION_INSTRUCTIONS:
                 instructionSection = (const u8 *)header + sections[i].offset;
                 break;
             case BF_FLW0_SECTION_AUXILIARY:
                 if (sections[i].count != 0) {
-                    auxiliaryData = (u8 *)header + sections[i].offset;
+                    auxiliaryData = (struct ItfMesSub *)((u8 *)header + sections[i].offset);
                 }
                 break;
             case BF_FLW0_SECTION_STRINGS:

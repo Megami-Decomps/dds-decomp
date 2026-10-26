@@ -12,7 +12,7 @@
 #include "sdf.h"
 #include "kwln_task_lifecycle.h"
 
-scrProcessWork_s *fldFlowParse(BfFlw0Header *header, ScrProcedureIndex procedureIndex);
+scrProcessWork_s *fldFlowParse(const BfFlw0Header *header, ScrProcedureIndex procedureIndex);
 /* Load a script resource, create its VM process and retain its resource handle. */
 scrProcessWork_s *scrLoadScriptFile(const char *path, ScrProcedureIndex procedureIndex)
 {
@@ -26,7 +26,7 @@ scrProcessWork_s *scrLoadScriptFile(const char *path, ScrProcedureIndex procedur
     {
         return 0;
     }
-    process = fldFlowParse((BfFlw0Header *)resourceAddress, procedureIndex);
+    process = fldFlowParse((const BfFlw0Header *)resourceAddress, procedureIndex);
     if (process != NULL)
     {
         process->scriptHandle = handle;
@@ -75,8 +75,8 @@ scrProcessWork_s *scrCreateTaskWithDefaultOption(BfFlw0Header *header)
     return fldFlowParse(header, 0);
 }
 
-dds3ProcessID_t *scrRunScriptEx(u32 priority, BfFlw0Header *header,
-    ScrSection *procedureSection, ScrLabel *procedures, ScrLabel *labels,
+dds3ProcessID_t *scrRunScriptEx(u32 priority, const BfFlw0Header *header,
+    const ScrSection *procedureSection, const ScrLabel *procedures, const ScrLabel *labels,
     const ScrInstr *instructions, struct ItfMesSub *auxiliaryData, const char *strings, ScrProcedureIndex procedureIndex)
 {
     return scrStartScriptProcess(priority, bfContextCreate(header, procedureSection, procedures, labels, instructions, auxiliaryData, strings, procedureIndex));

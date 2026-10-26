@@ -3,13 +3,15 @@
 
 #include "scr.h"
 
-/* The caller lends immutable decoded instruction data for the process lifetime. */
-scrProcessWork_s *bfContextCreate(struct BfFlw0Header *header, ScrSection *sections,
-    ScrLabel *procedures, ScrLabel *labels, const ScrInstr *instructions,
+/* The VM borrows its source tables and reads them without modifying them.
+ * Message auxiliary data stays mutable because window initialization relocates it. */
+scrProcessWork_s *bfContextCreate(const struct BfFlw0Header *header,
+    const ScrSection *sections, const ScrLabel *procedures, const ScrLabel *labels,
+    const ScrInstr *instructions,
     struct ItfMesSub *auxiliaryData, const char *strings, ScrProcedureIndex procedureIndex);
 
-dds3ProcessID_t *scrRunScriptEx(u32 priority, struct BfFlw0Header *header,
-    ScrSection *sections, ScrLabel *procedures, ScrLabel *labels,
+dds3ProcessID_t *scrRunScriptEx(u32 priority, const struct BfFlw0Header *header,
+    const ScrSection *sections, const ScrLabel *procedures, const ScrLabel *labels,
     const ScrInstr *instructions, struct ItfMesSub *auxiliaryData,
     const char *strings, ScrProcedureIndex procedureIndex);
 

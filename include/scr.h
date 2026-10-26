@@ -77,12 +77,13 @@ typedef struct scrProcessWork_s {
     s32 sp;
     ScrStackValueType stackTypes[28];
     ScrStackValue stackValues[28];
-    struct BfFlw0Header *scriptHeader;
-    ScrSection *sections;
-    ScrLabel *procedures;
-    ScrLabel *labels;
-    ScrInstr *instructions;
-    struct ItfMesSub *auxiliaryData;
+    /* Borrowed FLW0 source views; the VM reads them but does not edit them. */
+    const struct BfFlw0Header *scriptHeader;
+    const ScrSection *sections;
+    const ScrLabel *procedures;
+    const ScrLabel *labels;
+    const ScrInstr *instructions;
+    struct ItfMesSub *auxiliaryData; /* mutable: message initialization relocates it */
     const char *strings;          /* borrowed read-only view; lifetime follows source owner/caller */
     ScrProcedureIndex procedureIndex;
     ItfMesWindowIndex messageWindowIndex;
