@@ -1124,9 +1124,9 @@ effEveBEDCutHandle_t *effEveBEDCutCreate(SoundMixer *owner, u16 kind, const void
 
 extern s32 D_00436530;
 
-extern u32 D_00436534;
+extern billHandle_t *D_00436534;
 
-extern u32 D_00436538;
+extern billHandle_t *D_00436538;
 
 
 
@@ -1407,8 +1407,8 @@ EffEventBillSet *effEVECombParSmokeCreate(EffEventBillParams *src) {
     }
     D_00436530 = D_00436530 + 1;
     if (D_00436530 == 1) {
-        D_00436534 = (u32)billCreateFromResource(0, "/efftool/bill/dbball01.tmx");
-        D_00436538 = (u32)billCreateFromResource(0, "/efftool/bill/dbball02.tmx");
+        D_00436534 = billCreateFromResource(0, "/efftool/bill/dbball01.tmx");
+        D_00436538 = billCreateFromResource(0, "/efftool/bill/dbball02.tmx");
     }
     particleCount = work->head.particleCount;
     for (particleIndex = 0; particleIndex < particleCount; particleIndex++) {
@@ -1423,8 +1423,8 @@ EffEventBillSet *effEVECombParSmokeCreate(EffEventBillParams *src) {
 void effEVECombParSmokeDelete(EffEventBillSet *work) {
     D_00436530 = D_00436530 - 1;
     if (D_00436530 == 0) {
-        dds3BillboardDelete((billHandle_t *)D_00436534);
-        dds3BillboardDelete((billHandle_t *)D_00436538);
+        dds3BillboardDelete(D_00436534);
+        dds3BillboardDelete(D_00436538);
     }
     sdfMemFreeDirect(work->allocationHandle);
 }
@@ -1512,8 +1512,8 @@ void effEventUpdateBillboardParticles(EffEventBillSet *work) {
     swayPhaseStep = work->head.swayPhaseStep;
     swayAmplitudeStep = work->head.swayAmplitudeStep;
     SDF_VU0_COPYVECTOR(origin, work->head.position);
-    dds3BillboardSetMode((billHandle_t *)D_00436534, work->head.drawMode);
-    dds3BillboardSetMode((billHandle_t *)D_00436538, 3);
+    dds3BillboardSetMode(D_00436534, work->head.drawMode);
+    dds3BillboardSetMode(D_00436538, 3);
     for (index = 0; index < particleCount; index++, particle++) {
         s32 age = particle->age;
         if (age == 0) {
@@ -1562,16 +1562,16 @@ void effEventUpdateBillboardParticles(EffEventBillSet *work) {
             SDF_VU0_LOADVECTOR_B(origin);
             SDF_VU0_ADDVECTOR();
             SDF_VU0_STOREVECTOR(position);
-            effCopyVector(((billHandle_t *)D_00436534)->position, position);
-            dds3BillboardSetScale((billHandle_t *)D_00436534, scaleX, scaleY);
-            dds3BillboardSetRGBA((billHandle_t *)D_00436534, drawColor);
-            dds3BillboardSetRotate((billHandle_t *)D_00436534, particle->rotation);
-            dds3BillboardDraw((billHandle_t *)D_00436534);
-            effCopyVector(((billHandle_t *)D_00436538)->position, position);
-            dds3BillboardSetScale((billHandle_t *)D_00436538, scaleX, scaleY);
-            dds3BillboardSetRGBA((billHandle_t *)D_00436538, drawColor);
-            dds3BillboardSetRotate((billHandle_t *)D_00436538, particle->rotation);
-            dds3BillboardDraw((billHandle_t *)D_00436538);
+            effCopyVector(D_00436534->position, position);
+            dds3BillboardSetScale(D_00436534, scaleX, scaleY);
+            dds3BillboardSetRGBA(D_00436534, drawColor);
+            dds3BillboardSetRotate(D_00436534, particle->rotation);
+            dds3BillboardDraw(D_00436534);
+            effCopyVector(D_00436538->position, position);
+            dds3BillboardSetScale(D_00436538, scaleX, scaleY);
+            dds3BillboardSetRGBA(D_00436538, drawColor);
+            dds3BillboardSetRotate(D_00436538, particle->rotation);
+            dds3BillboardDraw(D_00436538);
             particle->scalePhaseX += particle->scalePhaseStepX;
             particle->scalePhaseY += particle->scalePhaseStepY;
             particle->rotation += particle->angularSpeed;
@@ -1620,13 +1620,13 @@ void effEVECombParSmokeDraw(EffEventBillSet *work) {
     sdfDrawTagInit(primaryList);
     secondaryList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(secondaryList);
-    primaryTexture = dds3BillboardGetTex((billHandle_t *)D_00436534);
+    primaryTexture = dds3BillboardGetTex(D_00436534);
     texturePacket = (struct DmaPacketHeader *)sdfGrAllocPacketBuff(0x20);
     textureBuffer = sdfTexGetPacket(primaryTexture);
     textureBytes = sdfTexGetPacketLength(primaryTexture);
     sdf3DMakeDirectRefPacket(texturePacket, (u32)textureBuffer, textureBytes);
     sdfAppendReferencePacket(primaryList, (u32)texturePacket);
-    secondaryTexture = dds3BillboardGetTex((billHandle_t *)D_00436538);
+    secondaryTexture = dds3BillboardGetTex(D_00436538);
     texturePacket = (struct DmaPacketHeader *)sdfGrAllocPacketBuff(0x20);
     textureBuffer = sdfTexGetPacket(secondaryTexture);
     textureBytes = sdfTexGetPacketLength(secondaryTexture);
