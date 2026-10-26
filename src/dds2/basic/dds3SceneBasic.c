@@ -24,8 +24,10 @@ void dds3SceneBasicFreeScene(dds3Basic_t *worldNode) {
     worldData->fieldResourceHandle = NULL;
 }
 
-/* Load another scene's named resource and give the scene object ownership. */
-s32 evtLoadSceneResourceFrom(dds3Basic_t *worldNode, const char *resourceName) {
+/* NULL preserves the current resource; a non-NULL replacement releases it
+ * before loading, so failure leaves no scene script attached. */
+Dds3SceneScriptAttachResult evtLoadSceneResourceFrom(
+    dds3Basic_t *worldNode, const char *resourceName) {
     EvtWorldTable *worldData;
     struct sdfMemHandle_t *resourceHandle;
     u32 resolvedAddress;
@@ -33,7 +35,7 @@ s32 evtLoadSceneResourceFrom(dds3Basic_t *worldNode, const char *resourceName) {
 
     worldData = (EvtWorldTable *)worldNode->data;
     if (resourceName == NULL) {
-        return 0;
+        return DDS3_SCENE_SCRIPT_ATTACH_FAILED;
     }
     if (worldData->sceneResourceHandle != 0) {
         dds3SceneBasicReleaseScriptFile(worldNode);
@@ -41,11 +43,11 @@ s32 evtLoadSceneResourceFrom(dds3Basic_t *worldNode, const char *resourceName) {
     resourceHandle = sdfDevLoadFileEx(resourceName, &resolvedAddress, 0);
     resourceAddress = (void *)resolvedAddress;
     if (resourceAddress == NULL) {
-        return 0;
+        return DDS3_SCENE_SCRIPT_ATTACH_FAILED;
     }
     worldData->sceneResourceHandle = resourceHandle;
     worldData->sceneScript = (const struct BfFlw0Header *)resourceAddress;
-    return 1;
+    return DDS3_SCENE_SCRIPT_ATTACH_SUCCEEDED;
 }
 
 /* Attach a memory-backed script. NULL input preserves the current resource. A

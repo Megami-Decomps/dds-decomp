@@ -23,6 +23,12 @@ enum Dds3SceneScriptAttachResult {
 Dds3SceneScriptAttachResult dds3SceneBasicLoadScriptFile_FromMem(
     struct dds3Basic_t *worldNode, struct sdfMemHandle_t *resourceHandle);
 
+/* Load a named scene script. NULL leaves the current resource untouched. A
+ * non-NULL name releases it before loading, so FAILED leaves it cleared;
+ * SUCCEEDED stores the loaded handle and address on worldNode. */
+Dds3SceneScriptAttachResult evtLoadSceneResourceFrom(
+    struct dds3Basic_t *worldNode, const char *resourceName);
+
 /* Release the node's scene allocation and clear its handle and address. */
 void dds3SceneBasicReleaseScriptFile(struct dds3Basic_t *worldNode);
 

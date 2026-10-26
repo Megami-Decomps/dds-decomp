@@ -24,25 +24,28 @@ void dds3SceneBasicFreeScene(dds3Basic_t *worldNode) {
     worldData->fieldResourceHandle = NULL;
 }
 
-s32 evtLoadSceneResourceFrom(dds3Basic_t *worldNode, const char *resourceName) {
+/* NULL preserves the current resource; a non-NULL replacement releases it
+ * before loading, so failure leaves no scene script attached. */
+Dds3SceneScriptAttachResult evtLoadSceneResourceFrom(
+    dds3Basic_t *worldNode, const char *resourceName) {
     EvtWorldTable *worldData;
     struct sdfMemHandle_t *resourceHandle;
     u32 resolvedAddress;
 
     worldData = (EvtWorldTable *)worldNode->data;
     if (resourceName == NULL) {
-        return 0;
+        return DDS3_SCENE_SCRIPT_ATTACH_FAILED;
     }
     if (worldData->sceneResourceHandle != 0) {
         dds3SceneBasicReleaseScriptFile(worldNode);
     }
     resourceHandle = sdfDevLoadFileEx(resourceName, &resolvedAddress, 0);
     if (resolvedAddress == 0) {
-        return 0;
+        return DDS3_SCENE_SCRIPT_ATTACH_FAILED;
     }
     worldData->sceneResourceHandle = resourceHandle;
     worldData->sceneScript = (const struct BfFlw0Header *)resolvedAddress;
-    return 1;
+    return DDS3_SCENE_SCRIPT_ATTACH_SUCCEEDED;
 }
 
 /* Retain an allocation handle and attach its resolved address; return
