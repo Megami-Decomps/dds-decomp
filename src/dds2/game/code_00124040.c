@@ -1843,10 +1843,10 @@ s32 fldUpdateTravelAndEncounters(void) {
         if (fldGlobalBase.attritionDistance > interval) {
             if (fldGlobalBase.terrainAttritionKind != FLD_TERRAIN_ATTRITION_NONE) {
                 if (fldGlobalBase.terrainAttritionKind != FLD_TERRAIN_ATTRITION_SOUND_CLASS_20 && (DDS3_GBWK->world.fieldFlags & DAT_WORLD_FIELD_TRANSITION_WORK)) {
-                    fldGlobalBase.unk190 = 0;
+                    fldGlobalBase.areaDamageReactionMovementGate = 0;
                     fldGlobalBase.attritionDistance = 0.0f;
                 } else {
-                    fldGlobalBase.unk190 = 60;
+                    fldGlobalBase.areaDamageReactionMovementGate = 60;
                     fldGlobalBase.attritionDistance = 0.0f;
                     if (fldGlobalBase.terrainAttritionKind == FLD_TERRAIN_ATTRITION_SOUND_CLASS_20) ptyApplyFieldHpAttrition(3);
                     else if (fldGlobalBase.terrainAttritionKind == FLD_TERRAIN_ATTRITION_SOUND_CLASS_30) ptyApplyFieldHpAttrition(4);
@@ -1854,7 +1854,7 @@ s32 fldUpdateTravelAndEncounters(void) {
                 }
             } else {
                 fldGlobalBase.attritionDistance = 0.0f;
-                fldGlobalBase.unk190 = 60;
+                fldGlobalBase.areaDamageReactionMovementGate = 60;
                 ptyApplyFieldHpAttrition(1);
             }
         }
@@ -2289,7 +2289,7 @@ s32 fldUpdateFieldSceneTask(dds3ProcessID_t *task) {
     case 3:
         if (fldGetArchiveLoadPending() != 0) return 0;
         controller->phase++;
-        if (fldGlobalBase.unk188 == 0 && fldGlobalBase.skipFade == 0 &&
+        if (fldGlobalBase.fieldTransitionMovementGate == 0 && fldGlobalBase.skipFade == 0 &&
             fldGlobalBase.titleFade == 0 && dds3FadeCheck() == 0) {
             dds3FadeIn2(8);
         }

@@ -4531,7 +4531,7 @@ FldMovementGateResult fldUpdateFieldTransition(void) {
     dds3ModelHandle_t *model;
     s16 node;
 
-    if (work->unk17C > 0) {
+    if (work->fieldTransitionMovementGate > 0) {
         model = fldPlayerModelContext;
         node = model->current.h.motionIndex;
         if (node != 7) {
@@ -4556,7 +4556,7 @@ FldMovementGateResult fldUpdateFieldTransition(void) {
             if (completionMotion->state == SDF_MOTION_STATE_TERMINAL) {
                 mnuMarkTitleStreamResetPending();
                 mnuResetTitleStreamLocked();
-                fldGlobalBase.unk17C = 0;
+                fldGlobalBase.fieldTransitionMovementGate = 0;
                 fldEncountSetFlag(0x40);
                 return FLD_MOVEMENT_GATE_PROCEED;
             }
@@ -4575,12 +4575,12 @@ FldMovementGateResult fldUpdateAreaDamageReaction(void) {
     FldAreaWork *work = &fldGlobalBase;
     dds3ModelHandle_t *model;
 
-    if (work->unk184 > 0) {
+    if (work->areaDamageReactionMovementGate > 0) {
         if (work->terrainAttritionKind == FLD_TERRAIN_ATTRITION_NONE && ptyAnyLivingUnitHasStatus(0x80, 1) != 0) {
             dds3FadeIn(0x80, 0x20, 0x20, 6);
             dds3PadVibrationSet(0, 1, 6);
             dds3PadVibrationSet(1, 0x96, 6);
-            work->unk184 = 0;
+            work->areaDamageReactionMovementGate = 0;
             fldEncountSetFlag(0x40);
             return FLD_MOVEMENT_GATE_HELD;
         }
@@ -4595,7 +4595,7 @@ FldMovementGateResult fldUpdateAreaDamageReaction(void) {
         }
 
         if (model->first->state == SDF_MOTION_STATE_TERMINAL) {
-            fldGlobalBase.unk184 = 0;
+            fldGlobalBase.areaDamageReactionMovementGate = 0;
             fldEncountSetFlag(0x40);
         } else {
             return FLD_MOVEMENT_GATE_HELD;
@@ -5099,8 +5099,8 @@ s32 fldUpdateCameraFrame(void) {
 }
 
 u8 fldHasPendingSceneFlags(void) {
-    if (fldGlobalBase.unk17C == 0) {
-        if (fldGlobalBase.unk184 == 0) {
+    if (fldGlobalBase.fieldTransitionMovementGate == 0) {
+        if (fldGlobalBase.areaDamageReactionMovementGate == 0) {
             if (fldGlobalBase.verticalStepDirection == 0) {
                 return 0;
             }

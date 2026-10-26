@@ -1687,16 +1687,16 @@ s32 fldUpdateTravelAndEncounters(void) {
         if (fldGlobalBase.attritionDistance > interval) {
             if (fldGlobalBase.terrainAttritionKind != FLD_TERRAIN_ATTRITION_NONE) {
                 if (DDS3_GBWK->world.fieldFlags & DAT_WORLD_FIELD_TRANSITION_WORK) {
-                    fldGlobalBase.unk184 = 0;
+                    fldGlobalBase.areaDamageReactionMovementGate = 0;
                     fldGlobalBase.attritionDistance = 0.0f;
                 } else {
-                    fldGlobalBase.unk184 = 60;
+                    fldGlobalBase.areaDamageReactionMovementGate = 60;
                     fldGlobalBase.attritionDistance = 0.0f;
                     ptyApplyFieldHpAttrition(2);
                 }
             } else {
                 fldGlobalBase.attritionDistance = 0.0f;
-                fldGlobalBase.unk184 = 60;
+                fldGlobalBase.areaDamageReactionMovementGate = 60;
                 ptyApplyFieldHpAttrition(1);
             }
         }
@@ -2161,7 +2161,7 @@ s32 fldProcSequence(dds3ProcessID_t *task) {
     case 3:
         if (fldGetArchiveLoadPending() != 0) return 0;
         controller->phase++;
-        if (fldGlobalBase.unk17C == 0 && fldGlobalBase.skipFade == 0 &&
+        if (fldGlobalBase.fieldTransitionMovementGate == 0 && fldGlobalBase.skipFade == 0 &&
             fldGlobalBase.titleFade == 0 && dds3FadeCheck() == 0) {
             dds3FadeIn2(8);
         }

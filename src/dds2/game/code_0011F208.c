@@ -1737,9 +1737,9 @@ void fldResetFieldRuntimeState(FldRuntimeResetMode mode) {
     area->previousY = 0.0f;
     area->positionPending = FLD_POSITION_UPDATE_NONE;
     area->positionMode = 0;
-    area->unk188 = 0;
+    area->fieldTransitionMovementGate = 0;
     area->verticalStepDirection = 0;
-    area->unk190 = 0;
+    area->areaDamageReactionMovementGate = 0;
     area->previousZ = 0.0f;
     area->targetX = 0.0f;
     area->targetY = 0.0f;
@@ -1835,7 +1835,7 @@ void fldInitializeAreaWork(void) {
     area->overlayCounter = 0;
     area->unkD8 = -1;
     area->terrainAttritionKind = FLD_TERRAIN_ATTRITION_NONE;
-    area->unk190 = 0;
+    area->areaDamageReactionMovementGate = 0;
     area->cameraTiltActive = 0;
     area->targetGuideEnabled = 0;
     area->targetGuideActive = 0;

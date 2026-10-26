@@ -37,6 +37,9 @@ enum FldTerrainAttritionKind {
     FLD_TERRAIN_ATTRITION_SOUND_CLASS_20 = 3
 };
 
+/* Positive values hold player movement until the corresponding gate clears. */
+typedef s32 FldMovementGateState;
+
 typedef s32 FldEntryDialogDisposition;
 
 enum FldEntryDialogDisposition {
@@ -185,15 +188,15 @@ typedef struct FldAreaWork {
 #endif
     s32 positionMode;
 #ifdef VERSION_DDS1
-    s32 unk17C;
+    FldMovementGateState fieldTransitionMovementGate; /* 0x17C */
 #else
-    s32 unk188;
+    FldMovementGateState fieldTransitionMovementGate; /* 0x188 */
 #endif
     s32 verticalStepDirection;
 #ifdef VERSION_DDS1
-    s32 unk184;
+    FldMovementGateState areaDamageReactionMovementGate; /* 0x184 */
 #else
-    s32 unk190;
+    FldMovementGateState areaDamageReactionMovementGate; /* 0x190 */
 #endif
     FldCameraTurnRequestState facingPointState;
     f32 facingPointX;
@@ -237,11 +240,19 @@ typedef char FldAreaWork_colorEffectSuppressed_offset_check[(FLD_AREA_OFFSET(col
 typedef char FldAreaWork_sceneBgmSuppressed_offset_check[(FLD_AREA_OFFSET(sceneBgmSuppressed) == 0x130) ? 1 : -1];
 #ifdef VERSION_DDS1
 typedef char FldAreaWork_size_check[(sizeof(FldAreaWork) == 0x1BC) ? 1 : -1];
+typedef char FldAreaWork_fieldTransitionMovementGate_offset_check[
+    (FLD_AREA_OFFSET(fieldTransitionMovementGate) == 0x17C) ? 1 : -1];
+typedef char FldAreaWork_areaDamageReactionMovementGate_offset_check[
+    (FLD_AREA_OFFSET(areaDamageReactionMovementGate) == 0x184) ? 1 : -1];
 typedef char FldAreaWork_x_offset_check[(FLD_AREA_OFFSET(x) == 0x140) ? 1 : -1];
 typedef char FldAreaWork_previousCameraModelFrame_offset_check[(FLD_AREA_OFFSET(previousCameraModelFrame) == 0x16C) ? 1 : -1];
 typedef char FldAreaWork_mapResources_offset_check[(FLD_AREA_OFFSET(mapResources) == 0x19C) ? 1 : -1];
 #else
 typedef char FldAreaWork_size_check[(sizeof(FldAreaWork) == 0x218) ? 1 : -1];
+typedef char FldAreaWork_fieldTransitionMovementGate_offset_check[
+    (FLD_AREA_OFFSET(fieldTransitionMovementGate) == 0x188) ? 1 : -1];
+typedef char FldAreaWork_areaDamageReactionMovementGate_offset_check[
+    (FLD_AREA_OFFSET(areaDamageReactionMovementGate) == 0x190) ? 1 : -1];
 typedef char FldAreaWork_x_offset_check[(FLD_AREA_OFFSET(x) == 0x14C) ? 1 : -1];
 typedef char FldAreaWork_previousCameraModelFrame_offset_check[(FLD_AREA_OFFSET(previousCameraModelFrame) == 0x178) ? 1 : -1];
 typedef char FldAreaWork_mapResources_offset_check[(FLD_AREA_OFFSET(mapResources) == 0x1A8) ? 1 : -1];

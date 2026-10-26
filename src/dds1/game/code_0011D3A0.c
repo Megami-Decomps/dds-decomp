@@ -1716,14 +1716,14 @@ void fldResetFieldRuntimeState(FldRuntimeResetMode mode) {
     area->targetZ = 0.0f;
     area->positionPending = FLD_POSITION_UPDATE_NONE;
     area->positionMode = 0;
-    area->unk17C = 0;
+    area->fieldTransitionMovementGate = 0;
     area->verticalStepDirection = 0;
     area->angle = 0.0f;
     area->previousCameraModelFrame = 0.0f;
     area->cameraSupportHeightDelta = 0.0f;
     area->modeOneCameraHeadingTarget = 0.0f;
     area->targetAngle = 180.0f;
-    area->unk184 = 0;
+    area->areaDamageReactionMovementGate = 0;
     fldRunDanteGunFlag[0] = 0;
     fldRunDanteGunFlag[1] = 0;
     fldRunDanteGunFlag[2] = 0;
@@ -1804,7 +1804,7 @@ void fldInitializeAreaWork(void) {
     area->overlayCounter = 0;
     area->unkD8 = -1;
     area->terrainAttritionKind = FLD_TERRAIN_ATTRITION_NONE;
-    area->unk184 = 0;
+    area->areaDamageReactionMovementGate = 0;
     area->cameraTiltActive = 0;
     area->nextArea = -1;
     area->skipFade = 0;
