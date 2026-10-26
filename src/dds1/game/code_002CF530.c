@@ -4,8 +4,7 @@
 #include "sdf_chip.h"
 #include "sdf_chip_range_api.h"
 #include "sdf_handler_node.h"
-
-extern void sdfMemFreePtrDirect(const void *);
+#include "sdf_mem_free_pointer_api.h"
 
 extern void (*sdfTickCallback)(void);
 

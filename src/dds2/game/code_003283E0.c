@@ -19,7 +19,7 @@ void *sdfAllocAuto(s32 size) {
     return sdfChipAllocDirect(size);
 }
 
-extern void sdfMemFreePtrDirect(const void *);
+#include "sdf_mem_free_pointer_api.h"
 
 void sdfFreeAuto(void *allocation) {
     if (allocation != NULL) {
