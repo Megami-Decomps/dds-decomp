@@ -27,20 +27,18 @@ void fldFreeInputPanel(void) {
     }
 }
 
-FldTitleBannerMenu *fldInputPanelSetDraw(s32 isPending) {
+void fldInputPanelSetDraw(s32 isPending) {
     FldTitleBannerMenu *menu;
 
     menu = (FldTitleBannerMenu *)dds3GetProcessData(inputpanel_id);
     menu->pending = isPending;
-    return menu;
 }
 
-FldTitleBannerMenu *fldInputPanelSetMessage(s32 choice) {
+void fldInputPanelSetMessage(s32 choice) {
     FldTitleBannerMenu *menu;
 
     menu = (FldTitleBannerMenu *)dds3GetProcessData(inputpanel_id);
     menu->choice = choice;
-    return menu;
 }
 
 INCLUDE_SDATA(const s32, "field/fldPanel", inputpanel_id);

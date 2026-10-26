@@ -29,7 +29,7 @@ typedef struct FldTitleBannerMenu {
 typedef char FldTitleBannerMenu_size_must_be_8[
     (sizeof(FldTitleBannerMenu) == 8) ? 1 : -1];
 
-FldTitleBannerMenu *fldInputPanelSetDraw(s32 isPending);
-FldTitleBannerMenu *fldInputPanelSetMessage(s32 choice);
+void fldInputPanelSetDraw(s32 isPending);
+void fldInputPanelSetMessage(s32 choice);
 
 #endif /* FLD_TITLE_BANNER_MENU_H */
