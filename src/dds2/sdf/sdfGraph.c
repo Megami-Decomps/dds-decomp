@@ -3,6 +3,7 @@
 #include "sdf.h"
 #include "ee_mmi.h"
 #include "sdf_graph_display.h"
+#include "sdf_graph_buffer_state.h"
 
 extern s32 sdfDrawThreadId;
 
@@ -54,7 +55,7 @@ void sdfGrMakeFrameSet(sdfGrFrameSet_t *graph) {
 extern SdfDisplayEnvView sdfDisplayEnvironment;
 
 /* Select the indexed image buffer for display; the index and pointer are unchecked. */
-void sdfGrSetDisp(s32 bufferIndex) {
+void sdfGrSetDisp(SdfGraphBufferIndex bufferIndex) {
     sdfGsMemSlice_t *displayBuffer = D_0040B290.buffers[bufferIndex];
 
     /* Initialize the environment through its uncached main-RAM alias. */

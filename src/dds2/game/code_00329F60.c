@@ -13,6 +13,7 @@
 #include "sdf_chip_range_api.h"
 
 #include "sdf.h"
+#include "sdf_graph_buffer_state.h"
 #include "sdf_semaphore_api.h"
 #include "sdf_texture_primary_buffer_api.h"
 #include "sdf_texture_submit.h"
@@ -34,7 +35,6 @@ enum {
     SDF_PSMZ16S = 0x3A
 };
 
-#define SDF_NO_BUSY_BUFFER -1
 #define SDF_GIF_LOOP_COUNT_MASK 0x7FFF
 #define SDF_QWORD_BYTE_SHIFT 4
 #define SDF_TEX_FILTER_MASK 0x1E0
@@ -71,9 +71,9 @@ extern sdfGsMemSlice_t *sdfGsMemAllocFromHead(s32 size, s32 allocationMode);
 extern sdfGsMemSlice_t *sdfGsMemAllocFromTail(s32 size, s32 allocationMode);
 
 extern SdfTextureQueue sdfImageSetCb;
-extern s8 sdfDispFrameId[2];
+extern SdfGraphBufferState sdfDispFrameId[2];
 
-extern volatile s8 sdfGrDrawBusy;
+extern volatile SdfGraphBufferState sdfGrDrawBusy;
 
 extern vu8 sdfFrameId;
 
@@ -119,7 +119,7 @@ void sdfGrCapture(void) {
         pixels = (u8 *)sdfMemLock(allocation);
         sceGsSetDefStoreImage(
             (sceGsStoreImage *)(((u32)&sdfGsCaptureStoreImage & 0x0FFFFFFF) | 0x20000000),
-            D_0040B290.buffers[1]->word >> 6,
+            D_0040B290.buffers[SDF_GRAPH_BUFFER_1]->word >> 6,
             width / 64, format, 0, 0, width, height);
         sceGsExecStoreImage(&sdfGsCaptureStoreImage, pixels);
         sceGsSyncPath(0, 0);
@@ -133,7 +133,7 @@ void sdfGrCapture(void) {
         } while (--rows != 0);
         sceGsSetDefStoreImage(
             (sceGsStoreImage *)(((u32)&sdfGsCaptureStoreImage & 0x0FFFFFFF) | 0x20000000),
-            D_0040B290.buffers[0]->word >> 6,
+            D_0040B290.buffers[SDF_GRAPH_BUFFER_0]->word >> 6,
             width / 64, format, 0, 0, width, height);
         sceGsExecStoreImage(&sdfGsCaptureStoreImage, pixels);
         sceGsSyncPath(0, 0);
@@ -155,25 +155,25 @@ void sdfGrCapture(void) {
 
 /* Switch both references off the finished double-buffer slot before
  * publishing the slot currently in use. */
-void sdfDeliverDrawStart(s32 oldBuffer, s32 nextBuffer) {
+void sdfDeliverDrawStart(SdfGraphBufferIndex oldBuffer, SdfGraphBufferIndex nextBuffer) {
     if (sdfDispFrameId[0] == oldBuffer) {
-        sdfDispFrameId[0] = oldBuffer ^ 1;
+        sdfDispFrameId[0] = oldBuffer ^ SDF_GRAPH_BUFFER_1;
     }
     if (sdfDispFrameId[1] == oldBuffer) {
-        sdfDispFrameId[1] = oldBuffer ^ 1;
+        sdfDispFrameId[1] = oldBuffer ^ SDF_GRAPH_BUFFER_1;
     }
     sdfGrDrawBusy = nextBuffer;
 }
 
 /* Update one slot or both slots, then clear the busy-buffer status. */
-void sdfDeliverDrawEnd(s32 updateSingleSlot, s32 bufferIndex, s32 slotIndex) {
+void sdfDeliverDrawEnd(s32 updateSingleSlot, SdfGraphBufferIndex bufferIndex, s32 slotIndex) {
     if (updateSingleSlot == 0) {
         sdfDispFrameId[0] = bufferIndex;
         sdfDispFrameId[1] = bufferIndex;
     } else {
         sdfDispFrameId[slotIndex] = bufferIndex;
     }
-    sdfGrDrawBusy = SDF_NO_BUSY_BUFFER;
+    sdfGrDrawBusy = SDF_GRAPH_BUFFER_NONE;
 }
 
 extern s8 reqMakeFrameBuff;
@@ -242,7 +242,7 @@ extern void sdfGrSetDisp(s32);
 /* Service device requests, select the GS field's buffer, and age packet slots.
  * Capture state 1 wakes its worker; state 2 precedes the semaphore wait. */
 void sdfServiceGraphicsBuffers(void) {
-    s8 bufferIndex;
+    SdfGraphBufferState bufferIndex;
     s32 invertedField;
 
     for (;;) {
@@ -288,8 +288,8 @@ void sdfGrInit(s32 packetBufferBytes) {
     sdfGrSetFrameSetMode(graph, 1, 1);
     sdfGrMakeFrameSet(graph);
     D_004389D9 = 0;
-    sdfDispFrameId[0] = sdfDispFrameId[1] = -1;
-    sdfGrDrawBusy = -1;
+    sdfDispFrameId[0] = sdfDispFrameId[1] = SDF_GRAPH_BUFFER_NONE;
+    sdfGrDrawBusy = SDF_GRAPH_BUFFER_NONE;
     reqGsReset = 1;
     sdfGrMakePacketBuff(packetBufferBytes);
     sdfGrInitDraw();
