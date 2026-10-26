@@ -336,7 +336,7 @@ INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC700);
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC728);
 
-s32 evtCommand_EFFECT_PATH_WAIT(void) {
+ScrCommandResult evtCommand_EFFECT_PATH_WAIT(void) {
     s32 effectId = scrGetIntPara(0);
     dds3Basic_t *effectObject = evtSearchBasic(7, effectId);
     EvtPathStatus scaleStatus;
@@ -429,7 +429,7 @@ s32 evtCommand_CALL_EVENT(void)
     return 1;
 }
 
-u32 evtCommandSignalAdminAtTimerZero(void)
+ScrCommandResult evtCommandSignalAdminAtTimerZero(void)
 {
     if (scrGetCommandTimer() == 0) {
         dds3AdminiExitSequence();
@@ -706,7 +706,7 @@ s32 evtCommand_CAM_PATH_MOVE(void) {
     return 1;
 }
 
-s32 evtCommand_CAM_PATH_WAIT(void) {
+ScrCommandResult evtCommand_CAM_PATH_WAIT(void) {
     dds3Basic_t *cameraOwner;
     EvtPathStatus scaleStatus;
 
@@ -954,7 +954,7 @@ INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC908);
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_003AC928);
 
-s32 evtCommand_OBJ_PATH_WAIT(void) {
+ScrCommandResult evtCommand_OBJ_PATH_WAIT(void) {
     dds3Basic_t *worldObject = evtSearchBasic(6, scrGetIntPara(0));
     EvtPathStatus scaleStatus;
 
@@ -1012,7 +1012,7 @@ u32 evtCommand_CHG_MOON(void)
 
 /* Create a missing camp task, then wait for its ready value.
  * No VM context completes immediately; a pending task returns zero. */
-s32 evtCommand_LOAD_BE(void) {
+ScrCommandResult evtCommand_LOAD_BE(void) {
     s32 taskId = scrGetIntPara(0);
     scrProcessWork_s *commandWork = scrGetScriptHandle();
     char *message;
