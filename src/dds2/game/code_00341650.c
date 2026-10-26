@@ -139,7 +139,7 @@ void sndLoadIopSoundModules(void) {
     SdfIopFileRpc(module, 0, NULL, NULL);
 }
 
-void sndInitializeChannelAndTrackState(s32 unused, s32 header) {
+void sndInitializeChannelAndTrackState(char *unused, s32 header) {
     SndChannel *channel;
     s32 i;
 
@@ -197,7 +197,7 @@ void sndAllocateAlignedIopBuffers(const s32 *bufferSizes, s32 bufferCount) {
     } while (bufferIndex != bufferCount);
 }
 
-void sndInitializeIopSoundSystem(s32 unused, s32 header, const s32 *bufferSizes, s32 bufferCount) {
+void sndInitializeIopSoundSystem(char *unused, s32 header, const s32 *bufferSizes, s32 bufferCount) {
     sdfSndBurstReqMode = 1;
     sndLoadIopSoundModules();
     sceSifInitIopHeap();
