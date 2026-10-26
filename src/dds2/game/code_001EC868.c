@@ -7794,16 +7794,21 @@ u32 sndGetResourceStatus(SoundResourceNode *sound) {
     return 0;
 }
 
-s32 sndLookupResourceType(BtlUnit *actor, s32 resourceIndex) {
-    s32 (*hook)(BtlUnit *, s32) = ((BtlState *)btlGetRuntime())->unk684;
-    s32 type;
-    if (hook != 0) {
-        type = hook(actor, resourceIndex);
-        if (type != -1) {
-            return type;
+/* -1 leaves action resource selection to BtlActionAnimationRecord.resourceType. */
+typedef s32 BtlActionResourceTypeOverrideResult;
+typedef BtlActionResourceTypeOverrideResult (*BtlActionResourceTypeOverride)(BtlUnit *actor,
+                                                                             s32 actionRecordIndex);
+enum { BTL_ACTION_RESOURCE_TYPE_USE_RECORD = -1 };
+
+s32 sndLookupResourceType(BtlUnit *actor, s32 actionRecordIndex) {
+    BtlActionResourceTypeOverride resourceTypeOverride = ((BtlState *)btlGetRuntime())->unk684;
+    if (resourceTypeOverride != 0) {
+        BtlActionResourceTypeOverrideResult overrideResult = resourceTypeOverride(actor, actionRecordIndex);
+        if (overrideResult != BTL_ACTION_RESOURCE_TYPE_USE_RECORD) {
+            return overrideResult;
         }
     }
-    return ((BtlActionTableEntry *)datActionAnimationRecords)[resourceIndex].resourceType;
+    return ((BtlActionTableEntry *)datActionAnimationRecords)[actionRecordIndex].resourceType;
 }
 
 void btlSetCommandEffectLinkFlags(ActionStateLink *task, BattleIndexWork *work) {
