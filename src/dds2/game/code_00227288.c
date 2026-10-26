@@ -311,7 +311,7 @@ s32 btlRemapEffectActiveCombatantAction(BtlUnit *unit, s32 code) {
     return code;
 }
 
-BtlUnit *btlFindFlaggedSpecialSpeciesUnit(s32 category, s32 species) {
+BtlUnit *btlFindFlaggedSpecialSpeciesUnit(u32 category, u32 species) {
     BtlUnit *unit;
     if (category != 1) {
         return 0;
@@ -1479,7 +1479,7 @@ extern s32 btlGetHealthyAllyActionStatus(BtlUnit *unit);
 extern u32 btlGetMarkedActionMotionCode(u32 unit, u32 action);
 extern u32 btlGetMarkedUnitActionResponse(BtlUnit *unit, BtlUnit *actor, u32 action);
 extern s32 btlGetMarkedUnitActionStatus(BtlUnit *unit);
-extern BtlUnit *btlGetReadyUnitForSpecies(s32 mode, u32 species);
+extern BtlUnit *btlGetReadyUnitForSpecies(u32 mode, u32 species);
 extern u32 btlGetSelectedActorAction(void);
 extern u32 btlGetSelectionEmptyValue(void);
 extern s32 btlGetSpecialEnemyActionStatus(BtlUnit *unit);

@@ -3180,7 +3180,7 @@ void btlRefreshVritraPresentationAfterUnitUpdate(void) {
     btlResetSpecialActionActorPresentation();
 }
 
-BtlUnit *btlGetReadyUnitForSpecies(s32 mode, u32 species) {
+BtlUnit *btlGetReadyUnitForSpecies(u32 mode, u32 species) {
     BtlUnit *unit;
 
     if (mode != 1) {

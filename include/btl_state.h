@@ -561,7 +561,7 @@ typedef struct BtlState {
     void (*postPlacementCallback)(void); /* 0x5EC: runs after actor positions and rotations. */
     s32 (*effectParameterCallback)(BtlUnit *, s32); /* 0x5F0: same override, DDS2 001E3264. */
     void (*initializeUnitEntry)(BtlUnit *); /* 0x5F4: scene-entry unit flag/status setup. */
-    BtlUnit *(*findModelActor)(s32, s32); /* 0x5F8 */
+    BtlUnit *(*findModelActor)(u32, u32); /* 0x5F8 */
     u64 (*beginBattleEntryTasks)(s32); /* 0x5FC: supplies the model-load dependency. */
     s32 (*selectEntryModelVariant)(BtlUnit *); /* 0x600 */
     u8 pad604[4];

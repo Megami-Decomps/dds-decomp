@@ -2020,7 +2020,7 @@ s32 btlAdjustDamageKind(BtlUnit *unit, s32 damageKind) {
     return damageKind;
 }
 
-BtlUnit *btlFindFlaggedSpecialSpeciesUnit(s32 category, s32 species) {
+BtlUnit *btlFindFlaggedSpecialSpeciesUnit(u32 category, u32 species) {
     BtlUnit *unit;
     if (category != 1) {
         return 0;
@@ -3195,7 +3195,7 @@ void btlMarkSpecialUnit(u8 *unit) {
     ((BtlUnit *)unit)->status.stateFlags |= 0x200;
 }
 
-BtlUnit *btlGetReadyUnitForSpecies(s32 mode, u32 species) {
+BtlUnit *btlGetReadyUnitForSpecies(u32 mode, u32 species) {
     BtlUnit *unit;
     if (mode != 1) {
         return NULL;
