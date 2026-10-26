@@ -406,7 +406,7 @@ s32 fileManager(void) {
     fileExecQueue();
     link = &work->pacCallbackHead;
     while ((request = *link) != NULL) {
-        if (request->state == FILE_JOB_CLOSED) {
+        if (((FileTransferJob *)request)->state == FILE_JOB_CLOSED) {
             *link = request->callbackNext;
             ((void (*)(FilePacRequest *, void *))request->completionCallback)(request, request->completionArg);
         } else {
