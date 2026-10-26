@@ -8,6 +8,7 @@
 #include "sdf_packet_list.h"
 #include "ee_mmi.h"
 #include "kwln.h"
+#include "kwln_task_runner.h"
 #include "kwln_task_priority_query.h"
 #include "kwln_task_create.h"
 #include "kwln_fade.h"
@@ -2058,29 +2059,29 @@ INCLUDE_RODATA(const s32, "game/code_00122030", D_0039FCB0);
 
 INCLUDE_RODATA(const s32, "game/code_00122030", D_0039FCC8);
 
-s32 fldProcSequence(dds3ProcessID_t *task) {
+KwlnTaskUpdateResult fldProcSequence(dds3ProcessID_t *task) {
     dds3Effect_DistortionBlurParam_t blur;
     FieldPlayerSceneWork *scene = &fldSceneParam;
     FldSequenceController *controller = &fldAutoMapSeqFlags;
     s32 mode;
     s32 coordinateFlags;
 
-    if (dds3AdminiGetNextSequence() != -1) return 0;
-    if (fileMenuTaskExists() != 0) return 0;
+    if (dds3AdminiGetNextSequence() != -1) return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+    if (fileMenuTaskExists() != 0) return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
     fldPollAreaResourceLoad();
     if (controller->phase == 0) {
-        if (fldGetNextFileLoadState() == FLD_NEXT_FILE_LOAD_PENDING) return 0;
+        if (fldGetNextFileLoadState() == FLD_NEXT_FILE_LOAD_PENDING) return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
         if (fldGlobalBase.specialEventActive == 0 && mnuPollTitleStreamStateLocked() != 0) {
             mnuMarkTitleStreamResetPending();
             mnuResetTitleStreamLocked();
-            return 0;
+            return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
         }
     }
     mode = fldProcCampChk();
     if (mode < FLD_CAMP_CHECK_STATE_IDLE) {
         if (mode > FLD_CAMP_CHECK_STATE_ENCOUNTER_FLAG_SET) {
             fldUpdateCampMenuTransition();
-            return 0;
+            return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
         }
     }
     if (fldEncountTestFlag(0x40) == 0) fldUpdateSmoothedCameraPose();
@@ -2159,7 +2160,7 @@ s32 fldProcSequence(dds3ProcessID_t *task) {
         controller->phase++;
         break;
     case 3:
-        if (fldGetArchiveLoadPending() != 0) return 0;
+        if (fldGetArchiveLoadPending() != 0) return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
         controller->phase++;
         if (fldGlobalBase.fieldTransitionMovementGate == 0 && fldGlobalBase.skipFade == 0 &&
             fldGlobalBase.titleFade == 0 && dds3FadeCheck() == 0) {
@@ -2176,7 +2177,7 @@ s32 fldProcSequence(dds3ProcessID_t *task) {
         break;
     case 4:
         D_003BAD58 = 1;
-        if (fldEncountTestFlag(0x40) != 0 && fldEveHit_ChkEveHitAfter() != 0) return 0;
+        if (fldEncountTestFlag(0x40) != 0 && fldEveHit_ChkEveHitAfter() != 0) return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
         if (fldEncountTestFlag(0x40) != 0 && fldGlobalBase.titleFade != 0) {
             fldUpdateRoomTriggers(fldPlayerObject);
             break;
@@ -2219,7 +2220,7 @@ s32 fldProcSequence(dds3ProcessID_t *task) {
         if (fldGlobalBase.pendingSceneRequest == FLD_SCENE_ADVANCE_REQUEST_NONE) D_003BABE8 = 1;
         else fldGlobalBase.pendingSceneRequest = FLD_SCENE_ADVANCE_REQUEST_NONE;
         dds3AdminiCallSequence(14, &D_003BAC08, sizeof(D_003BAC08), 1);
-        return -1;
+        return KWLN_TASK_UPDATE_FINISH_CALLBACK;
     case 6:
     default:
         break;
@@ -2261,7 +2262,7 @@ s32 fldProcSequence(dds3ProcessID_t *task) {
         }
     }
     if (fldProcCampChk() != FLD_CAMP_CHECK_STATE_MENU_ACTIVE) fldUpdateCameraFollow();
-    return 0;
+    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 #include "fld_encounter_runtime_api.h"
@@ -2274,33 +2275,33 @@ extern void fldTickWeatherEffectNodes(void);
 extern s32 D_0032E590[];
 extern s32 D_0032E598[];
 extern s32 D_003BABFC;
-s32 fldProcDraw(dds3ProcessID_t *task) {
+KwlnTaskUpdateResult fldProcDraw(dds3ProcessID_t *task) {
     s32 flags;
     FldSequenceController *lifecycle = &fldAutoMapSeqFlags;
 
     if (dds3AdminiGetNextSequence() != -1) {
-        return 0;
+        return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
     }
     if (fldGetNextFileLoadState() == FLD_NEXT_FILE_LOAD_PENDING) {
         if (D_0032E590[0] == 1) {
             fldDbgPrint2D(0x40, 0xC0, "NowLoading...");
         }
         if (!lifecycle->phase) {
-            return 0;
+            return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
         }
     } else {
         if (!lifecycle->phase) {
-            return 0;
+            return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
         }
     }
     if (fldGetEncounterRuntimeResult() != 0) {
-        return 0;
+        return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
     }
     if (fileMenuTaskExists() != 0) {
-        return 0;
+        return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
     }
     if (fldProcCampChk() == FLD_CAMP_CHECK_STATE_MENU_ACTIVE) {
-        return 0;
+        return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
     }
     if (fldGetSceneReadyFlag() == FLD_SCENE_NOT_READY && fldProcCampChk() == FLD_CAMP_CHECK_STATE_ENCOUNTER_FLAG_SET &&
         fldIsEventPhaseAtLeastTwo() == 0) {
@@ -2316,13 +2317,13 @@ s32 fldProcDraw(dds3ProcessID_t *task) {
     flags = fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1);
     if (flags & 0x40) {
         effBlurStepScatterSlotsAndDraw(D_003BABE4);
-        return 0;
+        return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
     }
     if (flags & 0x80) {
         effBlurStepScatterSlotsAndDraw(D_003BABE4);
     }
     }
-    return 0;
+    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 /* Lifecycle flags and the separate scene-control flags have independent
@@ -2355,7 +2356,7 @@ u8 fldEncountTestFlag(u32 mask) {
 
 extern s32 D_003BABF4;
 extern char D_0039FD30[], D_0039FD40[];
-extern s32 fldProcDraw(dds3ProcessID_t *task);
+extern KwlnTaskUpdateResult fldProcDraw(dds3ProcessID_t *task);
 
 /* Start the field scene tasks; a zero mode copies the caller's sequence record into the scene work. */
 void fldProcTrigSequence(fldSceneParam_t *record, u32 mode) {
