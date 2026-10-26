@@ -743,13 +743,13 @@ extern u32 ptyComputeTotalExp(datUnitWork_t *unit, s32 levelDelta);
 /* Cap stored EXP at the EXP required for level 99. */
 void ptyClampExp(datUnitWork_t *unit) {
     datUnitWork_t snapshot;
-    u32 exp;
+    u32 level99Experience;
 
     memcpy(&snapshot, unit, sizeof(snapshot));
     snapshot.level = 0x63;
-    exp = ptyComputeTotalExp(&snapshot, 0);
-    if (exp < unit->totalExp) {
-        unit->totalExp = exp;
+    level99Experience = ptyComputeTotalExp(&snapshot, 0);
+    if (level99Experience < unit->totalExp) {
+        unit->totalExp = level99Experience;
     }
 }
 

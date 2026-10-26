@@ -674,7 +674,7 @@ void gstApplyBundleMacca(BrsRewardSummary *batch) {
     datAddCurrencyClamped(batch->macca);
 }
 
-extern s32 ptyComputeTotalExp(datUnitWork_t *unit, s32 levelDelta);
+extern u32 ptyComputeTotalExp(datUnitWork_t *unit, s32 levelDelta);
 
 extern DatProfileRecord *ptyGetCurrentProfileRecord(datUnitWork_t *unit);
 extern u32 ptyAddProfilePoints(datUnitWork_t *unit, s32 increment);
@@ -684,13 +684,13 @@ extern void brsSetSkillProgressAnimations(BrsSkillPackageWork *, s32, s32, u32, 
 /* Cap stored EXP at the EXP required for level 99. */
 void ptyClampExp(datUnitWork_t *unit) {
     datUnitWork_t snapshot;
-    s32 exp;
+    u32 level99Experience;
 
     memcpy(&snapshot, unit, sizeof(snapshot));
     snapshot.level = 0x63;
-    exp = ptyComputeTotalExp(&snapshot, 0);
-    if (exp < unit->totalExp) {
-        unit->totalExp = exp;
+    level99Experience = ptyComputeTotalExp(&snapshot, 0);
+    if (level99Experience < unit->totalExp) {
+        unit->totalExp = level99Experience;
     }
 }
 
