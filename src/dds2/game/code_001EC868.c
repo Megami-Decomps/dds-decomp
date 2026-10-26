@@ -772,7 +772,7 @@ void btlPrepareRandomizedActionCameraPose(BtlLinkedCommand *action, BtlCamState 
 void btlAimEffectPoseAtUnit(u8 *fx) {
     BtlUnit *unit = ((BtlLinkedCommand *)fx)->link->unit;
     if (unit->status.flags & 2) {
-        if (btlSetActorEffectParameter(unit, 1) == 0) {
+        if (btlSetActorEffectParameter(unit, 1) == BTL_ACTOR_EFFECT_POSITION_UNAVAILABLE) {
             btlUnitGetMuzzlePosVU(unit);
         }
         SDF_VU0_STOREVECTOR_NOMEM(&((BtlLinkedCommand *)fx)->backCamera);
@@ -3331,7 +3331,7 @@ void btlStepUnitHeightFramedCamera(BtlLinkedCommand *action) {
     endFrame = btlGetUnitModelFrameCount(unit) + 30;
     saved = &action->backCamera;
     if (action->state < endFrame) {
-        if (btlSetActorEffectParameter(unit, 1) == 0) {
+        if (btlSetActorEffectParameter(unit, 1) == BTL_ACTOR_EFFECT_POSITION_UNAVAILABLE) {
             btlUnitGetMuzzlePosVU(unit);
         }
         SDF_VU0_STOREVECTOR_NOMEM(from->position);

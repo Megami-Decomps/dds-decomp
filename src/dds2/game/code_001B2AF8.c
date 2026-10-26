@@ -10422,7 +10422,7 @@ void func_001CB7A8(BtlUnit *unit, SceneAiWork *work, u32 index) {
     s32 n;
 
     btlGetRuntime();
-    if (btlSetActorEffectParameter(unit, 0) == 0) {
+    if (btlSetActorEffectParameter(unit, 0) == BTL_ACTOR_EFFECT_POSITION_UNAVAILABLE) {
         btlUnitGetMuzzlePosVU(unit);
     } else if ((unit->status.flags & 0x8000000) != 0) {
         btlUnitGetMuzzlePosVU(unit);

@@ -3081,10 +3081,10 @@ extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *, s32);
 
 extern void btlRefreshUnitFxVectors(BtlUnit *);
 
-s8 btlSetActorEffectParameter(BtlUnit *unit, s32 mode) {
+BtlActorEffectPositionResult btlSetActorEffectParameter(BtlUnit *unit, s32 mode) {
     s32 (*hook)(BtlUnit *, s32);
     if (!(unit->status.flags & 2)) {
-        return 0;
+        return BTL_ACTOR_EFFECT_POSITION_UNAVAILABLE;
     }
     hook = ((BtlState *)btlGetRuntime())->effectParameterCallback;
     if (hook != 0) {
@@ -3095,7 +3095,7 @@ s8 btlSetActorEffectParameter(BtlUnit *unit, s32 mode) {
 }
 
 void effBTLModelGetMarkPosition2(BtlUnit *unit, s32 mode) {
-    if (btlSetActorEffectParameter(unit, mode) == 0) {
+    if (btlSetActorEffectParameter(unit, mode) == BTL_ACTOR_EFFECT_POSITION_UNAVAILABLE) {
         btlUnitGetMuzzlePosVU(unit);
     }
 }

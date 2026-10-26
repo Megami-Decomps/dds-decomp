@@ -672,7 +672,7 @@ void btlPrepareRandomizedActionCameraPose(BtlLinkedCommand *action, BtlCamState 
 void btlAimEffectPoseAtUnit(BtlLinkedCommand *actor) {
     BtlUnit *object = actor->task->unit;
     if ((object->status.flags & 2) != 0) {
-        if (btlSetActorEffectParameter(object, 1) == 0) {
+        if (btlSetActorEffectParameter(object, 1) == BTL_ACTOR_EFFECT_POSITION_UNAVAILABLE) {
             btlUnitGetMuzzlePosVU(object);
         }
         VU0_STORE_VF_UNCLOBBERED(vf10, actor->backCamera.position);
@@ -3118,7 +3118,7 @@ void btlStepUnitHeightFramedCamera(BtlLinkedCommand *action) {
     endFrame = btlGetUnitModelFrameCount(unit) + 30;
     saved = &action->backCamera;
     if (action->state < endFrame) {
-        if (btlSetActorEffectParameter(unit, 1) == 0) {
+        if (btlSetActorEffectParameter(unit, 1) == BTL_ACTOR_EFFECT_POSITION_UNAVAILABLE) {
             btlUnitGetMuzzlePosVU(unit);
         }
         VU0_STORE_VF_UNCLOBBERED(vf10, from->position);
