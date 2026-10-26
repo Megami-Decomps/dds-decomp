@@ -10,7 +10,7 @@
 #include "sdf_trig.h"
 #include "mnu.h"
 #include "mnu_movie.h"
-#include "sdf.h"
+#include "sdf_movie_api.h"
 #include "mnu_movie_resource.h"
 #include "itf.h"
 #include "kwln_task_lifecycle.h"
@@ -513,7 +513,7 @@ s32 movieDrawProc(dds3ProcessID_t *task) {
     return 0;
 }
 
-void mnuStartMovieDrawTaskForResource(const char *fileName, SdfMovieDescriptor *descriptor) {
+void mnuStartMovieDrawTaskForResource(const char *fileName, const SdfMovieDescriptor *descriptor) {
     if (PlayingNo == 0) {
         movieOpenStream(&mnuMovieDrawContext, descriptor, fileName);
         PlayingNo = dds3StartProcess(D_003B1A78, 0x2afb, 1, 1, movieDrawProc, 0, 0);

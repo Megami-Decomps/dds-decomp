@@ -45,7 +45,7 @@ extern SdfPoolNode D_00380708;
 extern char D_0042A428[];
 
 extern KwlnTaskUpdateResult mnuMovieViewer(dds3ProcessID_t *task);
-extern void mnuStartMovieDrawTaskForResource(const char *, SdfMovieDescriptor *);
+extern void mnuStartMovieDrawTaskForResource(const char *, const SdfMovieDescriptor *);
 void mnuRequestIndexedMovieResource(s32 index);
 
 void movieStop(void);

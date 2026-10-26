@@ -14,7 +14,7 @@
 #include "sdf_resource.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
-#include "sdf.h"
+#include "sdf_movie_api.h"
 #include "mnu.h"
 #include "eff.h"
 #include "mnu_list.h"
@@ -1699,7 +1699,7 @@ s32 movieDrawProc(dds3ProcessID_t *task) {
 
 extern char D_0042A338[]; /* "mnuMovieDraw" */
 
-void mnuStartMovieDrawTaskForResource(const char *fileName, SdfMovieDescriptor *descriptor) {
+void mnuStartMovieDrawTaskForResource(const char *fileName, const SdfMovieDescriptor *descriptor) {
     if (PlayingNo == 0) {
         movieOpenStream(&mnuMovieDrawContext, descriptor, fileName);
         PlayingNo = dds3StartProcess(D_0042A338, 0x2afb, 1, 1, movieDrawProc, 0, 0);

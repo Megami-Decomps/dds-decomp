@@ -334,7 +334,6 @@ typedef char MovObj_size_must_be_0xB0[
 typedef char MovObj_stream_offset_must_be_0x1C[
     ((u32)&((movieStream_t *)0)->stream == 0x1C) ? 1 : -1];
 
-void movieOpenStream(movieStream_t *, SdfMovieDescriptor *, const char *);
 void movieCloseStream(movieStream_t *);
 
 /* Graph target: two color buffers followed by the auxiliary/depth buffer (0x14). */

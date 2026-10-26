@@ -2,7 +2,7 @@
 #include "common.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
-#include "sdf.h"
+#include "sdf_movie_api.h"
 #include "sdf_semaphore_api.h"
 #include "file_pac.h"
 #include "sdf_pac_callback.h"
@@ -39,7 +39,7 @@ extern u8 D_00438D28[];
 
 
 /* Initialize an inline sound/IPU node and the selected linear or movie-PAC stream. */
-void movieOpenStream(movieStream_t *owner, SdfMovieDescriptor *descriptor, const char *name) {
+void movieOpenStream(movieStream_t *owner, const SdfMovieDescriptor *descriptor, const char *name) {
     const SdfMovieDescriptor *borrowedDescriptor = descriptor;
     SoundFormat soundFormat;
     struct sdfMemHandle_t *allocation;

@@ -211,7 +211,7 @@ extern SdfMovieDescriptor mnuMovieViewerDrawDescriptor;
 extern u16 D_003BD3A0[4];
 extern u16 D_003BD8E4;
 extern SdfPoolNode D_003255A8;
-extern void mnuStartMovieDrawTaskForResource(const char *fileName, SdfMovieDescriptor *descriptor);
+extern void mnuStartMovieDrawTaskForResource(const char *fileName, const SdfMovieDescriptor *descriptor);
 
 KwlnTaskUpdateResult mnuMovieViewer(dds3ProcessID_t *task) {
     MnuMovieListNode *node;
