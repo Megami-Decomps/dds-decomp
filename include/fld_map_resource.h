@@ -10,7 +10,7 @@ struct SdfTextureFileHeader;
 typedef struct MapResource {
     struct sdfTexHandle_t *texture;            /* 0x00: retained texture returned by sdfTexSet */
     struct sdfMemHandle_t *allocation;    /* 0x04: named-resource allocation queued for release */
-    struct SdfTextureFileHeader *resourceData; /* 0x08: loaded texture-file data consumed by the texture loader */
+    const struct SdfTextureFileHeader *resourceData; /* 0x08: borrowed input to sdfTexSet */
     u32 unknown0C;                     /* 0x0C: untouched by the paired loader/release providers */
 } MapResource;
 
