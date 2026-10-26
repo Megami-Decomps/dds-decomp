@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_basic_lifecycle.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "dds3obj.h"
@@ -129,7 +130,7 @@ s32 dds3ForEachBasicArray(dds3BasicArrayHandle_t *object, s32 (*callback)(dds3Ba
 
 
 /* Allocate the object's data and 18 empty per-kind lists; return success. */
-u32 dds3CreateWorldObjectData(dds3Basic_t *object) {
+Dds3BasicCreateResult dds3CreateWorldObjectData(dds3Basic_t *object) {
     EvtWorldTable *data = sdfChipAllocDirect(sizeof(*data));
     EvtWorldSlot *lists;
     s32 listIndex;

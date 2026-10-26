@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_basic_lifecycle.h"
 #include "dds3_object_flags.h"
 #include "dds3obj.h"
 #include "sdf_chip.h"
@@ -37,7 +38,7 @@ void dds3ObjectBaseSetControlBasicSvs(dds3Basic_t *object, u32 value) {
 }
 
 
-s32 dds3CreateCameraData(dds3Basic_t *object) {
+Dds3BasicCreateResult dds3CreateCameraData(dds3Basic_t *object) {
     CameraData *inner;
     dds3ObjectBaseControlWorkData_t *objectBase;
 

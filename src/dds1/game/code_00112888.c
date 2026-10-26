@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_basic_lifecycle.h"
 #include "dds3_object_flags.h"
 #include "sdf_chip.h"
 #include "eff_object.h"
@@ -36,7 +37,7 @@ void dds3ObjectBaseSetControlBasicSvs(dds3Basic_t *object, u32 value) {
 
 
 /* Allocate the inner state and associate it with its world-object handle. */
-s32 dds3CreateCameraData(dds3Basic_t *object) {
+Dds3BasicCreateResult dds3CreateCameraData(dds3Basic_t *object) {
     CameraData *inner;
     dds3ObjectBaseControlWorkData_t *objectBase;
 

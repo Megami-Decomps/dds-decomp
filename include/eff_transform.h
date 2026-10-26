@@ -54,7 +54,7 @@ typedef struct dds3PoseSet_t {
 /* D_003299C0 selects six-word tables; D_00329A20 is kind 1.
  * The last two words in every populated retail table are zero. */
 typedef struct EffWorldOps {
-    s32 (*create)(dds3Basic_t *);
+    s32 (*create)(dds3Basic_t *); /* dds3AllocBasic accepts exactly 1. */
     void (*destroy)(dds3Basic_t *);
     s32 (*update)(dds3Basic_t *);
     s32 (*draw)(dds3Basic_t *);
