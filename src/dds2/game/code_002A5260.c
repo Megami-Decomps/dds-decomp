@@ -42,7 +42,7 @@ typedef struct MenuTitleState {
     s32 sequenceTimer; /* 0x1C */
     u8 pad20[4];
     struct MenuList *selectionList; /* 0x24 */
-    s32 phase;         /* 0x28 */
+    MnuMovieMenuPhase phase; /* 0x28: shared title-movie menu phase. */
     u8 pad2C[0xD4];
     MnuSlideBarPair movieWork; /* 0x100 */
     u32 movieDrawActive; /* 0x10C */
@@ -259,7 +259,7 @@ extern void p2sdPlayBGMFade(s32 trackId);
 void mnuResetTitleMovieMenuStateAndStartTrack(void) {
     MenuTitleState *state = titleWork;
 
-    state->phase = 0;
+    state->phase = MNU_MOVIE_PHASE_OPENING_ANIMATION;
     state->selectedPage = 0;
     state->sequenceTimer = 0;
     sndApplyTrackOperation(p2sdPlayBGMFade, 0x310000);
@@ -268,7 +268,7 @@ void mnuResetTitleMovieMenuStateAndStartTrack(void) {
 void mnuClearGlobalMenuStateFields(void) {
     MenuTitleState *state = (MenuTitleState *)titleWork;
 
-    state->phase = 0;
+    state->phase = MNU_MOVIE_PHASE_OPENING_ANIMATION;
     state->selectedPage = 0;
     state->sequenceTimer = 0;
 }
@@ -276,20 +276,20 @@ void mnuClearGlobalMenuStateFields(void) {
 void dds3TitleClearFade(void) {
     MenuTitleState *state = (MenuTitleState *)titleWork;
 
-    state->phase = 0;
+    state->phase = MNU_MOVIE_PHASE_OPENING_ANIMATION;
     state->selectedPage = 0;
 }
 
 s32 mnuPollMovieMenuInputAndTimeout(void) {
     MenuTitleState *state = (MenuTitleState *)titleWork;
     switch (state->phase) {
-    case 0:
+    case MNU_MOVIE_PHASE_OPENING_ANIMATION:
         if (mnuIsAnyMenuInputPressed() == 0) {
             MenuTitleState *opening = (MenuTitleState *)titleWork;
             if (opening->selectedPage < 30) {
                 opening->selectedPage++;
             } else {
-                opening->phase = 1;
+                opening->phase = MNU_MOVIE_PHASE_FADE_IN;
                 opening->selectedPage = 0;
             }
             mnuSetMovieWorkFlag(&titleWork->movieWork, 0, 1);
@@ -298,7 +298,7 @@ s32 mnuPollMovieMenuInputAndTimeout(void) {
         p2sdPlaySE(8, 127, 63);
         mnuSetMovieWorkFlag(&titleWork->movieWork, 0, 0);
         return 1;
-    case 1:
+    case MNU_MOVIE_PHASE_FADE_IN:
         if (state->selectedPage < 90) {
             state->selectedPage++;
         } else {
@@ -316,7 +316,7 @@ s32 mnuPollMovieMenuInputAndTimeout(void) {
             return -1;
         }
         break;
-    case 2:
+    case MNU_MOVIE_PHASE_SELECTION:
         if (state->selectedPage < 0) {
             state->selectedPage++;
         } else {
@@ -331,13 +331,13 @@ void mnuUpdateTitlePageByMode(void) {
     MenuTitleState *title = titleWork;
 
     switch (title->phase) {
-    case 0:
+    case MNU_MOVIE_PHASE_OPENING_ANIMATION:
         mnuDrawTitleMenuFadeOverlay(0, title->selectedPage);
         return;
-    case 1:
+    case MNU_MOVIE_PHASE_FADE_IN:
         mnuDrawTitleMenuFadeOverlay(1, title->selectedPage);
         break;
-    case 2:
+    case MNU_MOVIE_PHASE_SELECTION:
         break;
     }
 }
@@ -487,20 +487,20 @@ s32 mnuUpdateMovieMenuInputState(void) {
 
 void mnuDrawTitleSceneForPhase(void) {
     switch (((MenuTitleState *)titleWork)->phase) {
-    case 1:
+    case MNU_MOVIE_PHASE_FADE_IN:
         mnuDrawTitleMenuFadeOverlay(2, ((MenuTitleState *)titleWork)->selectedPage);
         mnuDrawMovieChoiceTransition(0, ((MenuTitleState *)titleWork)->selectedPage);
         mnuSetMovieWorkFlag(&titleWork->movieWork, 1, 1);
         return;
-    case 0:
+    case MNU_MOVIE_PHASE_OPENING_ANIMATION:
         mnuDrawMovieChoiceTransition(1, ((MenuTitleState *)titleWork)->selectedPage);
         mnuSetMovieWorkFlag(&titleWork->movieWork, 1, 1);
         return;
-    case 2:
+    case MNU_MOVIE_PHASE_SELECTION:
         mnuCallInitWide(0, 0, 0, (s32)((MenuTitleState *)titleWork)->selectionList, 0x53);
         return;
-    case 3:
-    case 4:
+    case MNU_MOVIE_PHASE_CONFIRM_EXIT:
+    case MNU_MOVIE_PHASE_CANCEL_EXIT:
         mnuDrawMovieChoiceTransition(2, ((MenuTitleState *)titleWork)->selectedPage);
         mnuSetMovieWorkFlag(&titleWork->movieWork, 1, 0);
         break;

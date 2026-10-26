@@ -10,12 +10,15 @@
 #include "mnu_shop.h"
 #endif
 
-/* Title-movie menu transition phases shared by DDS1 and DDS2. */
-#define MNU_MOVIE_PHASE_OPENING_ANIMATION 0
-#define MNU_MOVIE_PHASE_FADE_IN 1
-#define MNU_MOVIE_PHASE_SELECTION 2
-#define MNU_MOVIE_PHASE_CONFIRM_EXIT 3
-#define MNU_MOVIE_PHASE_CANCEL_EXIT 4
+/* The shared title-movie phase uses a signed word in both menu-state layouts. */
+typedef s32 MnuMovieMenuPhase;
+typedef enum MnuMovieMenuPhaseValue {
+    MNU_MOVIE_PHASE_OPENING_ANIMATION = 0,
+    MNU_MOVIE_PHASE_FADE_IN = 1,
+    MNU_MOVIE_PHASE_SELECTION = 2,
+    MNU_MOVIE_PHASE_CONFIRM_EXIT = 3,
+    MNU_MOVIE_PHASE_CANCEL_EXIT = 4
+} MnuMovieMenuPhaseValue;
 
 /* Results returned by the title-movie menu input and update handlers. */
 #define MNU_MOVIE_INPUT_MOVED -1
@@ -906,7 +909,7 @@ typedef struct MovieMenuState {
     s32 backdropMode;    /* 0x28 */
     struct MenuList *selectionList; /* 0x2C: created by the movie selection-list builder */
     struct MnuSpriteResourceGroup *resources; /* 0x30 */
-    s32 transitionMode; /* 0x34: backdrop/choice transition. */
+    MnuMovieMenuPhase transitionMode; /* 0x34: backdrop/choice transition. */
     s32 slideOffset;     /* 0x38 */
     s8 movieSkipped;     /* 0x3C: set when the opening movie is skipped */
     u8 pad3D[3];
