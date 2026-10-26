@@ -3,6 +3,7 @@
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "dds3obj.h"
+#include "dds3_world_scene_node_view.h"
 #include "dds3_world_value.h"
 #include "pcp_vu0.h"
 #include "fpu.h"
@@ -162,7 +163,7 @@ u32 worldmainprocuder(dds3Basic_t *obj) {
     WorldInfo *entry = obj->data;
     dds3Basic_t *callbackTarget;
 
-    callbackTarget = (dds3Basic_t *)entry->activeScene;
+    callbackTarget = ((WorldInfoSceneNodeView *)entry)->activeScene;
     if (callbackTarget != NULL) {
         dds3CallBasicMainProc(callbackTarget);
     }
@@ -173,7 +174,7 @@ u32 worlddrawprocuder(dds3Basic_t *obj) {
     WorldInfo *entry = obj->data;
     dds3Basic_t *callbackTarget;
 
-    callbackTarget = (dds3Basic_t *)entry->activeScene;
+    callbackTarget = ((WorldInfoSceneNodeView *)entry)->activeScene;
     if (callbackTarget != NULL) {
         dds3CallBasicDrawProc(callbackTarget);
     }

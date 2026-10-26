@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_chip.h"
 #include "dds3obj.h"
+#include "dds3_world_scene_node_view.h"
 #include "dds3_basic_array_search.h"
 #include "dds3_world_selection.h"
 #include "dds3_world_lifecycle.h"
@@ -29,7 +30,7 @@ void dds3DeleteWorld(void) {
 /* Set the primary world node without releasing it; no world is a no-op. */
 void dds3SetActiveScene(dds3Basic_t *primaryWorldNode) {
     if (dds3TheWorld != NULL) {
-        ((WorldInfo *)dds3TheWorld->data)->activeScene = primaryWorldNode;
+        ((WorldInfoSceneNodeView *)dds3TheWorld->data)->activeScene = primaryWorldNode;
     }
 }
 
@@ -41,13 +42,13 @@ dds3Basic_t *dds3GetActiveScene(void) {
     if (world == NULL) {
         return NULL;
     }
-    return ((WorldInfo *)world->data)->activeScene;
+    return ((WorldInfoSceneNodeView *)world->data)->activeScene;
 }
 
 /* Set the secondary world node without releasing it; no world is a no-op. */
 void dds3SetControlScene(dds3Basic_t *secondaryWorldNode) {
     if (dds3TheWorld != NULL) {
-        ((WorldInfo *)dds3TheWorld->data)->controlScene = secondaryWorldNode;
+        ((WorldInfoSceneNodeView *)dds3TheWorld->data)->controlScene = secondaryWorldNode;
     }
 }
 
@@ -59,7 +60,7 @@ dds3Basic_t *dds3GetControlScene(void) {
     if (world == NULL) {
         return NULL;
     }
-    return ((WorldInfo *)world->data)->controlScene;
+    return ((WorldInfoSceneNodeView *)world->data)->controlScene;
 }
 
 /* Create a kind-1 world node and append it at the tail.
@@ -91,6 +92,7 @@ dds3Basic_t *dds3AddScene(void) {
  * NULL node or missing active world leaves the node untouched. */
 void dds3DeleteScene(dds3Basic_t *worldNode) {
     WorldInfo *worldInfo;
+    WorldInfoSceneNodeView *sceneNodeView;
 
     if (worldNode == NULL) {
         return;
@@ -99,17 +101,18 @@ void dds3DeleteScene(dds3Basic_t *worldNode) {
         return;
     }
     worldInfo = (WorldInfo *)dds3TheWorld->data;
+    sceneNodeView = (WorldInfoSceneNodeView *)worldInfo;
     if (worldInfo->firstNode == worldNode) {
         worldInfo->firstNode = worldNode->next;
     }
     if (worldInfo->lastNode == worldNode) {
         worldInfo->lastNode = worldNode->previous;
     }
-    if (worldInfo->activeScene == worldNode) {
-        worldInfo->activeScene = NULL;
+    if (sceneNodeView->activeScene == worldNode) {
+        sceneNodeView->activeScene = NULL;
     }
-    if (worldInfo->controlScene == worldNode) {
-        worldInfo->controlScene = NULL;
+    if (sceneNodeView->controlScene == worldNode) {
+        sceneNodeView->controlScene = NULL;
     }
     dds3DeleteBasic(worldNode);
 }
