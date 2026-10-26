@@ -11,6 +11,7 @@ struct EffNodeDescriptor;
 #include "sdf_chip.h"
 #include "dds3_path.h"
 #include "evt_unit.h"
+#include "evt_unit_motion_step_result.h"
 #include "evt_unit_move_end_api.h"
 #include "evt_unit_path_advance_api.h"
 #include "evt_unit_wait_api.h"
@@ -1019,7 +1020,7 @@ EvtUnitFacingTargetResult evtUnitRotationQuat(evtUnitHandle_t *unit, f32 *quat, 
     return evtRotateUnitTowardTarget(unit, v, angle);
 }
 
-s32 evtUnitMoveType0(evtUnitHandle_t *unit) {
+EvtUnitMotionStepResult evtUnitMoveType0(evtUnitHandle_t *unit) {
     f32 v[4];
     f32 scale;
     dds3Basic_t *obj;
@@ -1039,7 +1040,7 @@ s32 evtUnitMoveType0(evtUnitHandle_t *unit) {
     VU0_SCALAR_OP(scale, "vmulx.xyzw vf10, vf10, vf2x");
     SDF_VU0_STOREVECTOR(v);
     dds3GetPosPoseSetMCR(obj, (u128 *)v);
-    return 1;
+    return EVT_UNIT_MOTION_STEP_APPLIED;
 }
 
 
@@ -1088,7 +1089,7 @@ s32 evtUnitPrepareVerticalMoveSteps(evtUnitHandle_t *unit) {
     return simulatedStepCount;
 }
 
-s32 evtUnitMoveTypePathTrace(evtUnitHandle_t *unit) {
+EvtUnitMotionStepResult evtUnitMoveTypePathTrace(evtUnitHandle_t *unit) {
     f32 v[4];
 
     dds3PathBasicControlStep(&unit->pathControl->counter);
@@ -1103,7 +1104,7 @@ s32 evtUnitMoveTypePathTrace(evtUnitHandle_t *unit) {
         VU0_STORE_VF($vf10, v);
         dds3SetRotPoseSet(unit->effObj, (u128 *)v);
     }
-    return 1;
+    return EVT_UNIT_MOTION_STEP_APPLIED;
 }
 
 void evtCopyUnitTargetVector(evtUnitHandle_t *work, const f32 src[4]) {
@@ -1353,12 +1354,12 @@ s32 evtStartUnitModeWithValue(evtUnitHandle_t *eventUnit, s32 (*callback)(evtUni
 }
 
 extern void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *);
-extern s32 evtUnitMoveType0(evtUnitHandle_t *);
-extern s32 evtUnitMoveTypePathTrace(evtUnitHandle_t *);
+extern EvtUnitMotionStepResult evtUnitMoveType0(evtUnitHandle_t *);
+extern EvtUnitMotionStepResult evtUnitMoveTypePathTrace(evtUnitHandle_t *);
 extern void evtRefreshUnitEndpointWork(evtUnitHandle_t *);
-s32 evtUpdateUnitMotion(dds3PoseSet_t *unused, dds3Basic_t *object) {
+EvtUnitMotionStepResult evtUpdateUnitMotion(dds3PoseSet_t *unused, dds3Basic_t *object) {
     f32 delta[4];
-    s32 moving = 0;
+    EvtUnitMotionStepResult moving = EVT_UNIT_MOTION_STEP_NOT_APPLIED;
     s32 wobble = 0;
     EffectObjectData *data = object->data;
     evtUnitHandle_t *unit = data->transitionWork;
@@ -1367,7 +1368,7 @@ s32 evtUpdateUnitMotion(dds3PoseSet_t *unused, dds3Basic_t *object) {
     u8 enabled;
 
     if (unit == NULL) {
-        return 0;
+        return EVT_UNIT_MOTION_STEP_NOT_APPLIED;
     }
     model = unit->owner;
     evtAdvanceUnitVisualTransitions(unit);
@@ -1491,7 +1492,7 @@ s32 evtUpdateUnitMotion(dds3PoseSet_t *unused, dds3Basic_t *object) {
         }
         break;
     default:
-        return 0;
+        return EVT_UNIT_MOTION_STEP_NOT_APPLIED;
     }
     if (unit->flags & 0x400000) {
         wobble = 1;

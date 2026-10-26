@@ -14,6 +14,7 @@
 #include "eff_object.h"
 #include "evt_world_source_transform.h"
 #include "evt_unit.h"
+#include "evt_unit_motion_step_result.h"
 #include "eff.h"
 #include "eff_node.h"
 #include "eff_event.h"
@@ -246,7 +247,7 @@ extern EffVec4 D_004128A0;
 extern EffVec4 D_004128B0;
 extern u8 dds3CheckPoseSetFlag(dds3PoseSet_t *node, u32 flags);
 extern void dds3BackupPoseSet(dds3PoseSet_t *transform);
-extern s32 evtUpdateUnitMotion(dds3PoseSet_t *, dds3Basic_t *);
+extern EvtUnitMotionStepResult evtUpdateUnitMotion(dds3PoseSet_t *, dds3Basic_t *);
 
 extern void dds3OffPoseSetFlag(dds3PoseSet_t *node, u32 flags);
 extern void Normalize(void);
@@ -269,7 +270,7 @@ s32 effUpdateFollowModelTransform(dds3Basic_t *obj) {
     flag = 0;
     if (data->transitionWork != 0) {
         dds3BackupPoseSet(&node);
-        if (evtUpdateUnitMotion(&node, obj) != 0) {
+        if (evtUpdateUnitMotion(&node, obj) != EVT_UNIT_MOTION_STEP_NOT_APPLIED) {
             dds3GetSclPoseSetMCR(obj, (u128 *)node.scale);
             dds3AddRotPoseSet(obj, (u128 *)node.rotation);
             dds3GetPosPoseSetMCR(obj, (u128 *)node.position);
