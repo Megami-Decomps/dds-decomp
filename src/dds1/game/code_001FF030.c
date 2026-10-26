@@ -18,8 +18,6 @@
 #include "dat_state.h"
 #include "dat_command.h"
 
-#define BTL_AI_SLOT_COUNT 5
-
 extern BtlAiScratchWork *btlActionScratchWork;
 
 extern AiSpecies *datEnemyAiRecords;
@@ -39,6 +37,6 @@ void btlRunWeightedAiAction(BtlTask *task, s32 rowIndex) {
     btlActionScratchWork = sdfAllocAndClearQuadwords(sizeof(BtlAiScratchWork));
     speciesId = task->unit->partyRecord.unitId;
     slotIndex = btlPickWeightedAiSlot(task->unit, speciesId, rowIndex);
-    btlRunAiAction(task, datEnemyAiRecords[speciesId].slot[rowIndex * BTL_AI_SLOT_COUNT + slotIndex].actionId, datEnemyAiRecords[speciesId].slot[rowIndex * BTL_AI_SLOT_COUNT + slotIndex].packedAction);
+    btlRunAiAction(task, datEnemyAiRecords[speciesId].slot[rowIndex][slotIndex].actionId, datEnemyAiRecords[speciesId].slot[rowIndex][slotIndex].packedAction);
     sdfChipFreeDirect(btlActionScratchWork);
 }

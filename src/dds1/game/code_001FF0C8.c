@@ -24,8 +24,6 @@
 #include "dat_state.h"
 #include "dat_command.h"
 
-#define BTL_AI_SLOT_COUNT 5
-
 #define BTL_AI_WEIGHT_MASK 0xFFFF
 
 #define BTL_HEALTH_RATE_SCALE 100
@@ -155,10 +153,10 @@ void btlSelectAndRunModeAiAction(BtlTask *task, u32 mode) {
     work->speciesId = unit->partyRecord.unitId;
     btlSelectConditionalAiRoute(unit, species, &row, variant);
     index = btlPickWeightedAiSlot(unit, species, row);
-    actionId = datEnemyAiRecords[species].slot[row * 5 + index].actionId;
+    actionId = datEnemyAiRecords[species].slot[row][index].actionId;
     if (mode == 3 && actionId == 0x8008) {
         if (!btlHasAdjacentActorRecordStatus(unit) || !btlIsActorHighStateFlagClear(unit)) {
-            memcpy(slots, &datEnemyAiRecords[species].slot[row * 5], sizeof(slots));
+            memcpy(slots, datEnemyAiRecords[species].slot[row], sizeof(slots));
             bucket = btlRollAiBucket();
             count = 0;
             for (i = 0; i < BTL_AI_SLOT_COUNT; i++) {
@@ -182,10 +180,10 @@ void btlSelectAndRunModeAiAction(BtlTask *task, u32 mode) {
                     }
                 }
             }
-            actionId = datEnemyAiRecords[species].slot[row * 5 + index].actionId;
+            actionId = datEnemyAiRecords[species].slot[row][index].actionId;
         }
     }
-    btlRunAiAction(task, actionId, datEnemyAiRecords[species].slot[row * 5 + index].packedAction);
+    btlRunAiAction(task, actionId, datEnemyAiRecords[species].slot[row][index].packedAction);
     if (mode == 2) {
         btlSyncEligibleActorPanelHpMp(task);
     }
@@ -393,7 +391,7 @@ u32 btlPickWeightedAiSlot(BtlUnit *unusedUnit, s32 speciesId, s32 rowIndex) {
     weightRoll = btlRollAiBucket();
     cumulativeWeight = 0;
     for (slotIndex = 0; slotIndex < BTL_AI_SLOT_COUNT; slotIndex++) {
-        u32 weight = datEnemyAiRecords[speciesId].slot[rowIndex * BTL_AI_SLOT_COUNT + slotIndex].weight;
+        u32 weight = datEnemyAiRecords[speciesId].slot[rowIndex][slotIndex].weight;
 
         cumulativeWeight = (cumulativeWeight + weight) & BTL_AI_WEIGHT_MASK;
         if (cumulativeWeight >= weightRoll && weight != 0) {

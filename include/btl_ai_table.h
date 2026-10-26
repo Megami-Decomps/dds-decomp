@@ -3,6 +3,11 @@
 
 #include "common.h"
 
+enum {
+    BTL_AI_SLOT_ROW_COUNT = 5,
+    BTL_AI_SLOT_COUNT = 5,
+};
+
 /* Weighted action entry in an enemy species' AI table. */
 typedef struct AiSlot {
     u8 weight; /* 0x00: used by the weighted-slot selector. */
@@ -34,7 +39,7 @@ typedef struct AiSpecies {
     u8 opaque01;
     u16 sceneSlot; /* 0x02: optional actor slot bound by the scene task. */
     AiDecisionRow decisions[3]; /* 0x04 */
-    AiSlot slot[25]; /* 0x40: five rows of five weighted actions. */
+    AiSlot slot[BTL_AI_SLOT_ROW_COUNT][BTL_AI_SLOT_COUNT]; /* 0x40: five rows of five weighted actions. */
     u8 unknown108[0x54]; /* 0x108 */
 } AiSpecies;
 

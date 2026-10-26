@@ -30,8 +30,6 @@
 /* Original-style implicit int, kept: matched code depends on it: btlAiCounterReachedLimit. */
 
 
-#define BTL_AI_SLOT_COUNT 5
-
 #define BTL_AI_WEIGHT_MASK 0xFFFF
 
 #define BTL_HEALTH_RATE_SCALE 100
@@ -190,8 +188,8 @@ void btlSelectAndRunModeAiAction(ActionStateLink *task, u32 mode) {
     work->speciesId = unit->partyRecord.unitId;
     btlSelectConditionalAiRoute(unit, species, &row, variant);
     index = btlPickWeightedAiSlot(unit, species, row);
-    btlExecuteAiTableAction(task, datEnemyAiRecords[species].slot[row * 5 + index].actionId,
-                  datEnemyAiRecords[species].slot[row * 5 + index].packedAction);
+    btlExecuteAiTableAction(task, datEnemyAiRecords[species].slot[row][index].actionId,
+                  datEnemyAiRecords[species].slot[row][index].packedAction);
     if (mode == 2) {
         btlSyncEligibleActorPanelHpMp(task);
     }
@@ -444,7 +442,7 @@ u32 btlPickWeightedAiSlot(BtlUnit *unusedUnit, s32 speciesId, s32 rowIndex) {
     weightRoll = btlRollAiBucket();
     cumulativeWeight = 0;
     for (slotIndex = 0; slotIndex < BTL_AI_SLOT_COUNT; slotIndex++) {
-        u32 weight = datEnemyAiRecords[speciesId].slot[rowIndex * BTL_AI_SLOT_COUNT + slotIndex].weight;
+        u32 weight = datEnemyAiRecords[speciesId].slot[rowIndex][slotIndex].weight;
 
         cumulativeWeight = (cumulativeWeight + weight) & BTL_AI_WEIGHT_MASK;
         if (cumulativeWeight >= weightRoll && weight != 0) {
