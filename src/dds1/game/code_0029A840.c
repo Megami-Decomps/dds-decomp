@@ -207,7 +207,7 @@ void effUploadModelTextures(EffModelOwner *owner) {
     do {
         sdfTexHandle_t *tex = table->entries[i++];
         u8 *header;
-        u8 *pixels;
+        const u8 *pixels;
         s16 width;
         s16 height;
         u8 format;

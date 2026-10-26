@@ -229,7 +229,7 @@ void sdfTexRebuildPacket(sdfTexHandle_t *texture) {
 sdfTexHandle_t *sdfTexCreateFromFileHeader(const SdfTextureFileHeader *header,
                                            SdfTextureUploadOwnership borrowPixels) {
     sdfTexHandle_t *texture;
-    u8 *pixels;
+    const u8 *pixels;
     s32 format;
     s32 width;
     s32 height;
@@ -254,7 +254,7 @@ sdfTexHandle_t *sdfTexCreateFromFileHeader(const SdfTextureFileHeader *header,
     texture->clampMode = header->clampMode;
     texture->resourceKey = header->resourceKey;
     texture->battleTextureSlot = header->battleTextureSlot;
-    pixels = (u8 *)header + (header->payloadOffsetFlags & SDF_TEXTURE_PAYLOAD_EXTRA_OFFSET_MASK) + sizeof(*header);
+    pixels = (const u8 *)header + (header->payloadOffsetFlags & SDF_TEXTURE_PAYLOAD_EXTRA_OFFSET_MASK) + sizeof(*header);
     if (sdfTexGetCLUTCount(texture) != 0) {
         sdfTexAllocClutBuff(texture);
         sdfTexCopyClutData(texture, pixels);
