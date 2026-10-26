@@ -25,6 +25,7 @@
 #include "sdf_texture_registry.h"
 #include "sdf_projection.h"
 #include "mdl.h"
+#include "mdl_part_info_api.h"
 #include "mdl_part_entry.h"
 #include "mdl_resource_entries.h"
 #include "mdl_track_poly_record.h"
@@ -677,7 +678,7 @@ s32 mdlPibCheckItemType(MdlRecord *record, s32 kind) {
     return record->kind == kind;
 }
 
-u16 mdlPibGetEffectCount(MdlRecord *record) {
+u16 mdlPibGetPartCount(const MdlRecord *record) {
     return record->parameter.part.partIndex;
 }
 

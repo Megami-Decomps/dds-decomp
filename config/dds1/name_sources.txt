@@ -4879,7 +4879,7 @@
 0x00219368	mdlPibGetNextChunkItem	inferred	SMT3HD name via SLUS_209.11 0x001DEB00, byte-identical; was mdlGetNextRecord
 0x00219388	mdlPibGetChunkItemCount	inferred	SMT3HD name via SLUS_209.11 0x001DEB20, reloc-identical; was mdlCountRecords
 0x002193D8	mdlPibCheckItemType	inferred	SMT3HD name via SLUS_209.11 0x001DEB70, byte-identical; was mdlRecordHasKind
-0x002193E8	mdlPibGetEffectCount	inferred	SMT3HD name via SLUS_209.11 0x001DEB80, shared-hash-in-run; was mdlGetRecordPartIndex
+0x002193E8	mdlPibGetPartCount	inferred	Counts the attached part list, including billboard, effect, and object entries
 0x002193F0	mdlPibGetMotionCount	inferred	SMT3HD name via SLUS_209.11 0x001DEB88, shared-hash-in-run; was mdlGetRecordSlotCount
 0x002193F8	mdlPibDrawEffectInfo	inferred	SMT3HD name via SLUS_209.11 0x001DEB90, unique-masked-hash; was mdlAppendViewerRecordSummary
 0x00219590	mdlPibDrawTrackInfo	inferred	SMT3HD name via SLUS_209.11 0x001DED28, reloc-identical; was mdlDrawMarkParamsPanel

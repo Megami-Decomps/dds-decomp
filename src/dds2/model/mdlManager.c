@@ -32,6 +32,7 @@
 #include "sdf_pac_packet.h"
 #include "sdf_packet_builders.h"
 #include "mdl.h"
+#include "mdl_part_info_api.h"
 #include "mdl_group_resource_ownership_api.h"
 #include "mdl_load_request_api.h"
 #include "btl_grouped_entity_api.h"
@@ -1261,7 +1262,6 @@ s32 mdlIsPartInfoPacket(PacWork *packetWork) {
 
 extern PacWork *mdlPackSetOld(PacWork *work, s32 group, s32 id, MdlRegistrationMode registrationMode);
 struct EffNodeDescriptor;
-extern u16 mdlPibGetEffectCount(MdlRecord *record);
 extern DevRequest *mdlEffectResrcListNew(u32 count);
 extern void mdlCreateEffectResrc_P2A(DevRequest *list, void *descriptor);
 extern void mdlCreateEffectResrc_D3P(DevRequest *list, struct EffNodeDescriptor *descriptor);
@@ -1283,7 +1283,7 @@ PacWork *mdlPackSetOld(PacWork *work, s32 group, s32 id, MdlRegistrationMode reg
             case 0x30424950:
                 setup.partInfo = work->dataCursor;
                 setup.resourceHandle = PAC_WORK_ALLOCATION(work);
-                count = mdlPibGetEffectCount((MdlRecord *)work->dataCursor);
+                count = mdlPibGetPartCount((MdlRecord *)work->dataCursor);
                 if (count > 0) {
                     parts = mdlEffectResrcListNew(count);
                     setup.partList = parts;
@@ -1352,7 +1352,7 @@ PacWork *mdlPackSet(PacWork *packetWork, s32 group, s32 id, MdlRegistrationMode 
     groupSetup.partInfo = record;
     groupSetup.resourceHandle = PAC_WORK_ALLOCATION(packetWork);
     packetWork = sdfPacFreeResrc(packetWork);
-    partCount = mdlPibGetEffectCount(record);
+    partCount = mdlPibGetPartCount(record);
     remainingParts = partCount;
     if (partCount > 0) {
         partList = mdlEffectResrcListNew(partCount);
