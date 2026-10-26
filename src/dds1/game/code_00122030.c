@@ -1344,13 +1344,13 @@ void fldPreparePlayerAndCameraScene(u128 *transform) {
             if (fldGlobalBase.commandEnabled != 0) {
                 fldEnterSceneCommand();
             } else {
-                fldGlobalBase.sceneCommand = 0;
+                fldGlobalBase.sceneLightSetOverrideIndex = 0;
                 fldApplySceneLightSet(0, 0);
                 fldApplySkyLightSet(fldRunDanteGunFlag[11], 0);
                 fldSkySetTableAnime(fldRunDanteGunFlag[12]);
             }
         } else if (fldGlobalBase.commandEnabled == 0) {
-            fldGlobalBase.sceneCommand = 0;
+            fldGlobalBase.sceneLightSetOverrideIndex = 0;
         }
         fldSkySetTblLightMaDZ(fldGlobalBase.commandEnabled);
     }
@@ -1444,7 +1444,7 @@ void fldEnterSceneCommand(void) {
         fldPlayFieldSeVolumePan(0x29);
     }
     code = fldLightMaIdxCalc();
-    fldGlobalBase.sceneCommand = code;
+    fldGlobalBase.sceneLightSetOverrideIndex = code;
     DDS3_GBWK->world.fieldFlags |= DAT_WORLD_FIELD_LIGHT_COMMAND_PENDING;
     fldGlobalBase.consumedFlags &= ~1;
     fldApplySceneLightSet((s16)code, 0);
@@ -1467,18 +1467,18 @@ void fldUpdateSceneCommand(void) {
     s32 code;
 
     if (state->commandEnabled == 0) {
-        if (state->sceneCommand != 0) {
-            state->sceneCommand = 0;
+        if (state->sceneLightSetOverrideIndex != 0) {
+            state->sceneLightSetOverrideIndex = 0;
             fldApplySceneLightSet(0, 0);
         }
     } else if ((DDS3_GBWK->world.fieldFlags & DAT_WORLD_FIELD_LIGHT_COMMAND_PENDING) != 0) {
-        if (state->sceneCommand == 0) {
+        if (state->sceneLightSetOverrideIndex == 0) {
             code = fldLightMaIdxCalc();
-            state->sceneCommand = code;
+            state->sceneLightSetOverrideIndex = code;
             fldApplySceneLightSet((s16)code, 0x14);
         }
-    } else if (state->sceneCommand != 0) {
-        state->sceneCommand = 0;
+    } else if (state->sceneLightSetOverrideIndex != 0) {
+        state->sceneLightSetOverrideIndex = 0;
         fldApplySceneLightSet(0, 0x14);
         fldPlayFieldSeVolumePan(0x2A);
     }

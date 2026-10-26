@@ -170,7 +170,9 @@ typedef struct FldAreaWork {
 #else
     u8 pad124[4];
 #endif
-    s16 sceneCommand;
+    /* Zero means no scene-light override; nonzero selects a light-set index.
+     * Command-active state is tracked separately. */
+    s16 sceneLightSetOverrideIndex; /* 0x128 */
     s16 colorEffectSuppressed;
     s32 commandEnabled;
     s32 sceneBgmSuppressed;

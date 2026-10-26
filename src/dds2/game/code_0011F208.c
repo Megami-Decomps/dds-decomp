@@ -1702,7 +1702,7 @@ void fldResetFieldRuntimeState(FldRuntimeResetMode mode) {
     area->movementSoundActive = 0;
     area->terrainAttritionKind = FLD_TERRAIN_ATTRITION_NONE;
     area->attritionDistance = 100.0f;
-    area->sceneCommand = 0;
+    area->sceneLightSetOverrideIndex = 0;
     area->colorEffectSuppressed = 0;
     area->defaultEncounterId = 0;
     area->encounterOverrideId = 0;

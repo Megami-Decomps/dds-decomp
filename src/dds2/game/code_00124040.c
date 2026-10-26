@@ -1535,14 +1535,14 @@ void fldSpawnPlayerUnits(f32 *input) {
                     fldActivatePendingSceneCommand();
                 } else {
                     evtBitOff(0x818);
-                    fldGlobalBase.sceneCommand = 0;
+                    fldGlobalBase.sceneLightSetOverrideIndex = 0;
                     fldApplySceneLightSet(0, 0);
                     fldApplySkyLightSet(fldRunDanteGunFlag[0x2C / 4], 0);
                     fldSkySetTableAnime(fldRunDanteGunFlag[0x30 / 4]);
                 }
             } else if (fldGlobalBase.commandEnabled == 0) {
                 evtBitOff(0x818);
-                fldGlobalBase.sceneCommand = 0;
+                fldGlobalBase.sceneLightSetOverrideIndex = 0;
             }
             fldClearCameraObjectActiveFlag(fldGlobalBase.commandEnabled);
         }
@@ -1615,7 +1615,7 @@ void fldActivatePendingSceneCommand(void) {
         }
         evtBitOn(0x818);
         value = fldGetDefaultSceneCommandValue();
-        fldGlobalBase.sceneCommand = value;
+        fldGlobalBase.sceneLightSetOverrideIndex = value;
         DDS3_GBWK->world.fieldFlags |= DAT_WORLD_FIELD_LIGHT_COMMAND_PENDING;
         fldGlobalBase.consumedFlags &= ~1;
         fldApplySceneLightSet((s16)value, 0);
@@ -1638,18 +1638,18 @@ void fldUpdateSceneCommandSpeed(void) {
     FldAreaWork *scene = &fldGlobalBase;
     s32 value;
     if (scene->commandEnabled == 0) {
-        if (scene->sceneCommand != 0) {
-            scene->sceneCommand = 0;
+        if (scene->sceneLightSetOverrideIndex != 0) {
+            scene->sceneLightSetOverrideIndex = 0;
             fldApplySceneLightSet(0, 0);
         }
     } else if ((DDS3_GBWK->world.fieldFlags & DAT_WORLD_FIELD_LIGHT_COMMAND_PENDING) != 0) {
-        if (scene->sceneCommand == 0) {
+        if (scene->sceneLightSetOverrideIndex == 0) {
             value = fldGetDefaultSceneCommandValue();
-            scene->sceneCommand = value;
+            scene->sceneLightSetOverrideIndex = value;
             fldApplySceneLightSet((s16)value, 0x14);
         }
-    } else if (scene->sceneCommand != 0) {
-        scene->sceneCommand = 0;
+    } else if (scene->sceneLightSetOverrideIndex != 0) {
+        scene->sceneLightSetOverrideIndex = 0;
         fldApplySceneLightSet(0, 0x14);
         fldPlayMenuSound(0x2A);
         evtBitOff(0x818);

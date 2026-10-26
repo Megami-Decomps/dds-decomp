@@ -5892,7 +5892,7 @@ void fldApplySkyLightSet(u32 skyLightSetIndex, s32 durationMode) {
         D_003BAD98 = skyLightSetIndex;
         D_003BADC8 = skyLightSetIndex;
         D_003BADA8 = 0;
-        if (state->sceneCommand == 0) {
+        if (state->sceneLightSetOverrideIndex == 0) {
             light = &fldSkyLightSetBuffer->lightSets[skyLightSetIndex];
             area = light->fadeArea;
             fldRunDanteGunFlag[13] = area;
@@ -6039,7 +6039,7 @@ void fldTransitionSkyLightSet(s32 lightSetIndex, s32 mode) {
             D_003BADD4 = D_003BADA4;
             D_003BADA8 = 1;
             D_003BAD98 = lightSetIndex;
-            if (fldGlobalBase.sceneCommand == 0) {
+            if (fldGlobalBase.sceneLightSetOverrideIndex == 0) {
                 light = &fldSkyLightSetBuffer->lightSets[lightSetIndex];
                 fldRunDanteGunFlag[11] = lightSetIndex;
                 area = light->fadeArea;

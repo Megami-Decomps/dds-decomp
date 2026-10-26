@@ -1870,7 +1870,7 @@ void fldDrawAutomapScene(void) {
 
     /* DDS2's location-flag overlay also runs during the floor fade. */
     if (D_00436288 == fldGlobalBase.flagStage && fldGlobalBase.commandEnabled != 0
-        && fldGlobalBase.sceneCommand == 0) {
+        && fldGlobalBase.sceneLightSetOverrideIndex == 0) {
         s32 maskX;
         s32 maskY;
         s32 spriteX;

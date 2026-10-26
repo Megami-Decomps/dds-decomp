@@ -1680,7 +1680,7 @@ void fldResetFieldRuntimeState(FldRuntimeResetMode mode) {
     area->dist = 0.0f;
     memset(area->pad124, 0, sizeof(area->pad124));
     area->terrainAttritionKind = FLD_TERRAIN_ATTRITION_NONE;
-    area->sceneCommand = 0;
+    area->sceneLightSetOverrideIndex = 0;
     area->colorEffectSuppressed = 0;
     area->defaultEncounterId = 0;
     area->encounterOverrideId = 0;
