@@ -8,7 +8,7 @@
 #include "sdf_dev_event.h"
 #include "sdf_dev_state.h"
 
-s32 sdfFileCmdFileSize(sdfFileCmdHandle_t *state);
+s32 sdfFileCmdRequestFileSize(sdfFileCmdHandle_t *state);
 extern s32 movieStreamSema;
 
 /* Queue up to 0x4000 bytes into the linear ring; state 5 means insufficient room. */
@@ -70,7 +70,7 @@ s32 movieGetStreamSize(
     case SDF_MOVIE_STATE_INITIAL:
         if (deviceEvent == SDF_DEV_EVENT_OPENED) {
             movie->state = SDF_MOVIE_STATE_CONTROL_REQUEST;
-            sdfFileCmdFileSize(deviceState);
+            sdfFileCmdRequestFileSize(deviceState);
         }
         break;
     case SDF_MOVIE_STATE_CONTROL_REQUEST:
@@ -147,7 +147,7 @@ s32 movieReadChunk(
     case SDF_MOVIE_STATE_INITIAL:
         if (deviceEvent == SDF_DEV_EVENT_OPENED) {
             movie->state = SDF_MOVIE_STATE_CONTROL_REQUEST;
-            sdfFileCmdFileSize(deviceState);
+            sdfFileCmdRequestFileSize(deviceState);
         }
         break;
     case SDF_MOVIE_STATE_CONTROL_REQUEST:

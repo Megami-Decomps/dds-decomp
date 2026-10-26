@@ -8756,7 +8756,7 @@
 0x002E6BA8	sdfFileCmdReadOpen	inferred	resolves resource, creates mode-one sdfFileCmdHandle_t and submits it
 0x002E6C10	sdfFileCmdWriteOpen	inferred	resolves resource and creates a mode-two sdfFileCmdHandle_t with default option
 0x002E6C90	sdfFileCmdSeek	inferred	Sets operation three and signals the selected device worker semaphore when the state is active.
-0x002E6CF0	sdfFileCmdFileSize	inferred	Queues the control opcode on an active worker state. [names_reviewed8.tsv]
+0x002E6CF0	sdfFileCmdRequestFileSize	inferred	Queues the file-size control opcode on an active worker state. [names_reviewed8.tsv]
 0x002E6D48	sdfFileCmdRead	inferred	dev request operation 5 with data+extra
 0x002E6DA8	sdfFileCmdWrite	inferred	dev request operation 6 with data+extra
 0x002E6E08	sdfFileCmdClearError	inferred	Byte-identical dds2 twin 0x0033FCB0; Changes a device state from 9 to 7 and clears its previous result; other device operations require state 7. [names_conflicts.tsv]

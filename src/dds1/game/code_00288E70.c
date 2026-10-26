@@ -22,7 +22,7 @@ extern s32 D_003BC7D8;
 extern s32 (*p2sdSmgBuf)(void);
 s32 fileManagerProc(dds3ProcessID_t *task);
 
-extern s32 sdfFileCmdFileSize(sdfFileCmdHandle_t *);
+extern s32 sdfFileCmdRequestFileSize(sdfFileCmdHandle_t *);
 
 extern void pacRead(FileTransferJob *);
 
@@ -47,7 +47,7 @@ s32 pacLoadCallback(sdfFileCmdHandle_t *deviceRequest, s32 event, s32 unused, s3
     case SDF_DEV_EVENT_OPENED:
         job->deviceRequest = deviceRequest;
         job->state = FILE_REQUEST_LIFECYCLE_OPENED;
-        sdfFileCmdFileSize(deviceRequest);
+        sdfFileCmdRequestFileSize(deviceRequest);
         break;
     case SDF_DEV_EVENT_SIZE_REPLY:
         job->transferBytes = byteCount;
@@ -118,7 +118,7 @@ s32 fileLoadCallback(sdfFileCmdHandle_t *deviceRequest, s32 event, s32 unused, s
     case SDF_DEV_EVENT_OPENED:
         job->deviceRequest = deviceRequest;
         job->state = FILE_REQUEST_LIFECYCLE_OPENED;
-        sdfFileCmdFileSize(deviceRequest);
+        sdfFileCmdRequestFileSize(deviceRequest);
         break;
     case SDF_DEV_EVENT_SIZE_REPLY: {
         struct sdfMemHandle_t *allocationHandle;

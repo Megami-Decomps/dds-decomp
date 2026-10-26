@@ -22,7 +22,7 @@
 #include "btl.h"
 /* Declared before first use (were implicit int). */
 extern void sceCdInit(s32);
-extern s32 sdfFileCmdFileSize(sdfFileCmdHandle_t *state);
+extern s32 sdfFileCmdRequestFileSize(sdfFileCmdHandle_t *state);
 /* Original-style implicit int, kept: matched code depends on it: sdfFileCmdSeek. */
 
 #define SDF_DEV_WORKER_COUNT 4
@@ -974,7 +974,7 @@ void sdfFileRead(sdfFileCmdHandle_t *state, void *buffer, s32 byteCount) {
 }
 
 u32 sdfFileLength(sdfFileCmdHandle_t *state) {
-    sdfFileCmdFileSize(state);
+    sdfFileCmdRequestFileSize(state);
     WaitSema(sdfFileSemaId);
     return sdfFileLengthWork;
 }
@@ -1679,8 +1679,8 @@ s32 sdfFileCmdSeek(sdfFileCmdHandle_t *state, s32 seekOffset, s32 seekOrigin) {
     return 0;
 }
 
-/* Query file size without changing the file position; return -1 unless active. */
-s32 sdfFileCmdFileSize(sdfFileCmdHandle_t *state) {
+/* Queue a size query for an active request; return 0, or -1 if inactive. */
+s32 sdfFileCmdRequestFileSize(sdfFileCmdHandle_t *state) {
     if (state->state != SDF_DEV_STATE_ACTIVE) {
         return -1;
     }
