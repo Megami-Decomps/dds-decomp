@@ -62,7 +62,7 @@ typedef s32 (*FileMenuContinuationCallback)(void);
 extern void effLoadFlashTextures(void);
 extern void effLoadScalyTexture(void);
 extern void effLoadWindTexture(void);
-extern s32 slSaveWriteFile(const char *fileName, u32 *dataAddressSlot, u32 *dataSizeSlot, FileMenuContinuationCallback continuation, struct FileRequest **pendingRequestStatus);
+extern s32 slSaveWriteFile(const char *fileName, const u32 *dataAddressSlot, const u32 *dataSizeSlot, FileMenuContinuationCallback continuation, struct FileRequest * const *pendingRequestStatus);
 extern void dds3SoftResetOn(void);
 extern s32 slSaveData_chdir(void);
 extern void frEnableMode(s32 mask);
@@ -1815,7 +1815,7 @@ s32 fileBeginLabeledSlotWrite(void) {
     return slSaveWriteFile(D_0042B6B8, &D_00437D90, &D_00437D94, fileWriteIconSysComplete, 0);
 }
 
-extern s32 slSaveWriteFile(const char *fileName, u32 *dataAddressSlot, u32 *dataSizeSlot, FileMenuContinuationCallback continuation, struct FileRequest **pendingRequestStatus);
+extern s32 slSaveWriteFile(const char *fileName, const u32 *dataAddressSlot, const u32 *dataSizeSlot, FileMenuContinuationCallback continuation, struct FileRequest * const *pendingRequestStatus);
 extern s32 fileBeginLabeledSlotWrite(void);
 
 INCLUDE_RODATA(const s32, "game/code_002C96D0", D_0042B698);
@@ -1899,13 +1899,15 @@ s32 slSaveData_deleteIconSys(void) {
     return (s32)fileBuildMainBlobAfterDelete;
 }
 
-extern u32 *fileWriteDataAddressSlot;
-extern u32 *fileWriteDataSizeSlot;
+extern const u32 *fileWriteDataAddressSlot;
+extern const u32 *fileWriteDataSizeSlot;
 extern FileMenuContinuationCallback fileWriteContinuation;
-extern struct FileRequest **fileWritePendingRequestSlot;
+extern struct FileRequest * const *fileWritePendingRequestSlot;
 extern s32 slSaveProc_openFile(void);
 
-s32 slSaveWriteFile(const char *fileName, u32 *dataAddressSlot, u32 *dataSizeSlot, FileMenuContinuationCallback continuation, struct FileRequest **pendingRequestStatus) {
+/* Later save callbacks read these borrowed slots without changing them; callers
+ * keep the slots alive until the asynchronous save completes. */
+s32 slSaveWriteFile(const char *fileName, const u32 *dataAddressSlot, const u32 *dataSizeSlot, FileMenuContinuationCallback continuation, struct FileRequest * const *pendingRequestStatus) {
     fileWriteDataAddressSlot = dataAddressSlot;
     fileWriteDataSizeSlot = dataSizeSlot;
     fileWriteContinuation = continuation;
