@@ -19,6 +19,14 @@
 #include "sdf_model_command_views.h"
 #include "sdf_packet_alloc.h"
 #include "sdf_packet_list.h"
+
+/* SdfCommandNode payload forms: owned packet bytes or borrowed commands. */
+enum {
+    SDF_COMMAND_NODE_KIND_PACKET_DATA = 1,
+    SDF_COMMAND_NODE_KIND_SHAPED_COMMANDS = 2,
+    SDF_COMMAND_NODE_KIND_CORE_COMMANDS = 3,
+};
+
 /* Declared before first use (were implicit int). */
 extern void sdfMatListUpdatePacket(DevRequest *list, s32 entryIndex);
 extern void sdfResourceListApplyEntryChanges(DevRequest *list, s32 entryIndex);
@@ -211,7 +219,7 @@ void sdfModelLinkDrawPacket(sdfModelNode_t *node, const u32 *commandList,
                          (u32)&((sdfModelNode_t *)0)->lists);
         next = *head;
         packet = (SdfDmaTagHeader *)(listNode + 1);
-        listNode->kind = 1;
+        listNode->kind = SDF_COMMAND_NODE_KIND_PACKET_DATA;
         listNode->packetSelector = packetSelector;
         listNode->payload = packet;
         listNode->quadwordCount = (bytes + 0xF) >> 4;
@@ -230,21 +238,21 @@ void sdfModelLinkDrawPacket(sdfModelNode_t *node, const u32 *commandList,
             break;
         case 3:
             listNode = sdfModelNewPacketHeader(node, packetSelector, listIndex);
-            listNode->kind = 2;
+            listNode->kind = SDF_COMMAND_NODE_KIND_SHAPED_COMMANDS;
             listNode->payload = command;
             break;
         case 4:
         case 6:
         case 8:
             listNode = sdfModelNewPacketHeader(node, packetSelector, listIndex);
-            listNode->kind = 3;
+            listNode->kind = SDF_COMMAND_NODE_KIND_CORE_COMMANDS;
             listNode->payload = command;
             break;
         case 5:
         case 7:
             sdfCoreDrawScanOneSkinNodes(node->root, (SdfObjectRefCommand *)command);
             listNode = sdfModelNewPacketHeader(node, packetSelector, listIndex);
-            listNode->kind = 3;
+            listNode->kind = SDF_COMMAND_NODE_KIND_CORE_COMMANDS;
             listNode->payload = command;
             break;
         }
@@ -654,7 +662,7 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, sdfModelRootNode_t
             }
 
             switch (entry->kind) {
-            case 1: {
+            case SDF_COMMAND_NODE_KIND_PACKET_DATA: {
                 if (!skipCommands) {
                     u8 *referencePacket = (u8 *)sdfGrAllocPacketBuff(0x20);
                     *(u16 *)referencePacket = 0;
@@ -665,12 +673,12 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, sdfModelRootNode_t
                 }
                 break;
             }
-            case 2:
+            case SDF_COMMAND_NODE_KIND_SHAPED_COMMANDS:
                 if (!skipCommands) {
                     sdfModelLinkShapedDrawPacket(node, entry->payload, packets, frame);
                 }
                 break;
-            case 3: {
+            case SDF_COMMAND_NODE_KIND_CORE_COMMANDS: {
                 u32 packet;
                 sdfCoreDrawSetLight(lighting);
                 sdfCoreDrawSetFog(secondaryLighting);
