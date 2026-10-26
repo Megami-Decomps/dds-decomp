@@ -125,15 +125,16 @@ void fileUnlinkCloseWait(FileManWork *work, FileTransferJob *job) {
     *incomingLink = job->next;
 }
 
-/* Clear a PAC request, initialize its embedded dispatch packet and optionally
- * apply extra packet setup for any nonzero flags. Queue its copied name and
- * completion context as kind one, returning the allocated work. No failure guard. */
-struct FilePacRequest *fileCreatePacLoadWork(const char *requestName, s32 flags, void *dispatchValue, s32 onComplete, s32 userData) {
+/* Clear a PAC request, select its custom or standard packet callback, and
+ * optionally apply extra packet setup for any nonzero flags. Queue its copied
+ * name and completion context as kind one, returning the allocated work. No
+ * failure guard. */
+struct FilePacRequest *fileCreatePacLoadWork(const char *requestName, s32 flags, void *packetCallbackAddress, s32 onComplete, s32 userData) {
     FilePacRequest *request;
 
     printf("pac load %s\n", requestName);
     request = sdfAllocAndClearQuadwords(sizeof(FilePacRequest));
-    sdfPacInit(&request->packet, dispatchValue);
+    sdfPacInit(&request->packet, packetCallbackAddress);
     if (flags != 0) {
         sdfPacSetFromTail(&request->packet);
     }
