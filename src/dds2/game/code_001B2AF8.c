@@ -9531,7 +9531,80 @@ void btlDrawActorCommandRows(BattleSceneObject *ctx, u16 kind, u16 page, u16 col
     }
 }
 
-INCLUDE_ASM(const s32, "game/code_001B2AF8", btlDrawStockCommandPanelRows);
+extern char D_00436860[], D_00436868[], D_004165E0[], D_00416600[];
+
+void btlDrawStockCommandPanelRows(s32 sceneContext) {
+    char *revertedNames[] = { D_00436860, D_00436868, D_004165E0 };
+    char *normalNames[] = { D_00416600, D_00436868, D_004165E0 };
+    BattleSceneObject *object = (BattleSceneObject *)sceneContext;
+    s16 index;
+    s32 selected;
+    s32 total;
+    s32 shown;
+    char **names;
+    s32 row = 0;
+
+    btlGetRuntime();
+    index = (s16)object->selections[3].firstVisibleOption;
+    selected = (s16)object->selections[3].selectedOption;
+    shown = fldUpdateSceneKindCounter(sceneContext, btlCommandPanelWork->classIndex, 0);
+    total = fldUpdateSceneKindCounter(sceneContext, btlCommandPanelWork->classIndex, 1);
+    names = normalNames;
+    if (btlUnitStatusPair(object->owner->unit) & 0x1400) names = revertedNames;
+    for (;;) {
+        u32 color;
+        s32 x, y;
+        struct _FRQ *glyph;
+        BattleSelectionWork *selection;
+
+        if (row >= shown || index >= total) break;
+        switch (row) {
+        case 0:
+            if (object->owner->unit->partyRecord.flags & 0x10) {
+                color = 0x504F6140;
+                break;
+            }
+            if (evtBitCheck(0x820)) {
+                color = 0x504F6140;
+                break;
+            }
+            if (object->owner->unit->partyRecord.unitId == 9) {
+                color = 0x504F6140;
+                break;
+            }
+            if (btlReadUnitStatusMask(&object->owner->unit->partyRecord) & 0x1000) {
+                color = 0x504F6140;
+                break;
+            }
+            color = selected == index ? 0x89FEFF80 : 0xA09DC380;
+            break;
+        case 1: {
+            s16 count = 0;
+            s32 i;
+            for (i = 0; i < DDS3_GBWK->partyCount; i++) {
+                if (DDS3_GBWK->party[i].flags & 2) count++;
+            }
+            count = DDS3_GBWK->partyCount - count;
+            color = count != 0 ? (selected == index ? 0x89FEFF80 : 0xA09DC380) : 0x504F6140;
+            break;
+        }
+        case 2:
+        default:
+            color = btlIsSceneActorCountWithinLimit(object->owner->unit, 1) == 0 ? (selected == index ? 0x89FEFF80 : 0xA09DC380) : 0x504F6140;
+            break;
+        }
+        selection = btlLinkedSelectionTaskBuffer;
+        x = selection->positions[row][0] + 15;
+        y = selection->positions[row][1] + 3;
+        color = (color & ~0xff) | (u32)selection->rowFade[row];
+        row++;
+        itfSetTextDrawLimit(0x13);
+        glyph = itfCreateConvertedTextGlyph(x << 4, y << 3, 0xff0010, color, (u8 *)names[index], 0);
+        btlSubmitSharedTextGlyph(glyph);
+        itfSetTextDrawLimit(-1);
+        index++;
+    }
+}
 
 typedef struct ItemRowColors {
     u32 values[4];
@@ -9919,8 +9992,6 @@ static inline void btlUpdateSceneCommandSelection(BattleSceneObject *object) {
     btlDrawCommandClassRows((s32)object);
     btlUpdateAndDrawCommandSelectionHighlight(object, btlGetActorCommandClass(object, btlCommandPanelWork->classIndex));
 }
-
-INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004169F0);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416A00);
 
