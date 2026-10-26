@@ -37,7 +37,7 @@ const char D_00424850[0x20] __attribute__((aligned(8))) = "BE regist unit %d < %
 
 /* Decode one retained unit payload and return its new viewer-object key. */
 EvtMotionSeModelKey evtInitMotionSeProcess(s32 eventId, s32 resourceId) {
-    EvtPackLoadState *packState;
+    const EvtPackLoadState *packState;
     const EvtPackEntry *entry;
     s32 packEntryIndex;
     s32 entrySize;
@@ -83,7 +83,7 @@ EvtMotionSeModelKey evtInitMotionSeProcess(s32 eventId, s32 resourceId) {
 
 /* Start a field BE from the task's resource table when all four payloads exist. */
 s32 evtRegistBEField(s32 eventId, s32 resourceId) {
-    EvtPackLoadState *packState;
+    const EvtPackLoadState *packState;
     const EvtPackEntry *entry;
     s32 entryCount;
     s32 remainingEntryCount;
@@ -134,7 +134,7 @@ s32 evtRegistBEField(s32 eventId, s32 resourceId) {
 KwlnTaskUpdateResult evtMotionSeProcess1(dds3ProcessID_t *task) {
     EvtMotionSeTaskParams *motionSeParams;
     dds3Basic_t *motionNode;
-    EvtPackLoadState *packState;
+    const EvtPackLoadState *packState;
     evtUnitHandle_t *unit;
     u16 motionId;
     s32 motionFrame;

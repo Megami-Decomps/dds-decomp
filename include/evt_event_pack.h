@@ -97,7 +97,7 @@ typedef char EvtPackLoadState_effect76_at_0x40[
 typedef char EvtPackLoadState_effect75_at_0x44[
     ((u32)&((EvtPackLoadState *)0)->effect75 == 0x44) ? 1 : -1];
 
-/* These numeric task IDs resolve to the camp-owned event-pack state. */
+/* Borrow the camp-owned state; it remains valid only while its task exists. */
 EvtPackLoadState *evtGetPackProcessData(s32 taskId);
 EvtPackLoadStatus evtGetEventPackStat(s32 taskId);
 
