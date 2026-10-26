@@ -491,42 +491,42 @@ dds3ProcessID_t *dds3StartProcess(const char *name, u32 priority, s32 startDelay
     return task;
 }
 
-s32 dds3KillProcessName(const char* name, s32 delayTicks)
+KwlnTaskKillRequestResult dds3KillProcessName(const char* name, s32 delayTicks)
 {
     dds3ProcessID_t* task;
 
     task = dds3SearchProcessName(name);
     if (task == 0) {
-        return 0;
+        return KWLN_TASK_KILL_REQUEST_REJECTED;
     }
     return dds3KillProcess(task, delayTicks);
 }
 
-/* Destroy a live task: running tasks queue the request, while a task already
- * being destroyed finalizes at once when the new delay is zero. */
-s32 dds3KillProcess(dds3ProcessID_t* task, s32 delayTicks)
+/* Queued and active tasks move to destruction pending; a pending task
+ * finalizes immediately when its delay is reset to zero. */
+KwlnTaskKillRequestResult dds3KillProcess(dds3ProcessID_t* task, s32 delayTicks)
 {
     if (task == 0 || task == (dds3ProcessID_t*)-1) {
-        return 0;
+        return KWLN_TASK_KILL_REQUEST_REJECTED;
     }
     switch (task->flags & KWLN_TASK_STATE_MASK) {
     case KWLN_TASK_DELAYED_START:
     case KWLN_TASK_ACTIVE:
         task->destroyDelayTicks = delayTicks;
         EndProcess(task);
-        return 1;
+        return KWLN_TASK_KILL_REQUEST_ACCEPTED;
     case KWLN_TASK_DESTROY_PENDING:
         task->destroyDelayTicks = delayTicks;
         if (task->destroyDelayTicks == 0) {
             kwlnTaskFinalizeDestroy(task);
-            return 1;
+            return KWLN_TASK_KILL_REQUEST_ACCEPTED;
         }
         break;
     case KWLN_TASK_DETACHED:
     default:
-        return 0;
+        return KWLN_TASK_KILL_REQUEST_REJECTED;
     }
-    return 1;
+    return KWLN_TASK_KILL_REQUEST_ACCEPTED;
 }
 
 void dds3EndProcess(dds3ProcessID_t* task)
