@@ -39,6 +39,7 @@
 #include "sdf_model.h"
 #include "sdf_dev_slot_api.h"
 #include "btl.h"
+#include "btl_skill_name_index.h"
 #include "btl_model_state_ownership.h"
 #include "btl_deferred_unit_status_args.h"
 #include "btl_position_effect_task_args.h"
@@ -5028,7 +5029,7 @@ void btlUpdateActorModelColorAndLinks(void) {
 
 void btlResetUnitLinks(BtlUnit *actor) {
     actor->selectedEntryIndex = -1;
-    actor->pendingAbilityId = -1;
+    actor->pendingAbilityId = BTL_SKILL_NAME_INDEX_NONE;
     actor->status.flags = 0;
     actor->status.stateFlags = 0;
     actor->gunResourceFlags = 0;

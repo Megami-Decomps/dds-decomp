@@ -23,6 +23,7 @@
 #include "sdf_resource.h"
 #include "sdf_model.h"
 #include "btl.h"
+#include "btl_skill_name_index.h"
 #include "btl_command_block_reason.h"
 #include "btl_command_target_eligibility.h"
 #include "btl_actor_work.h"
@@ -421,7 +422,7 @@ extern BtlRuntimeTask *btlCreateEffObjA(BtlUnit *, s32);
 
 extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
 
-extern BtlRuntimeTask *btlCreateEffObjD(BtlUnit *, s32);
+extern BtlRuntimeTask *btlCreateEffObjD(BtlUnit *, BtlSkillNameIndex);
 
 /* Try to clear the unit's condition: 2 and 4 always clear, 1 needs battle mode 2, and the
  * others roll a script-supplied chance (capped at 70, scaled by ability 0x232). */
@@ -850,7 +851,7 @@ void btlChooseActorStateFromFirstLinkedUnit(u8 *actor) {
 void btlResetCommandIndexWork(BtlTask *task) {
     btlSetEligibleActorPanelTransitionState();
     btlResetIndexWork(&task->indexWork);
-    task->unit->pendingAbilityId = -1;
+    task->unit->pendingAbilityId = BTL_SKILL_NAME_INDEX_NONE;
 }
 
 void btlCommandStartSoundTasks(BtlTask *task) {
@@ -1038,7 +1039,7 @@ void btlScheduleAttackActionTasks(BtlTask *action) {
     task->startCondition.kind = 4;
     task->startCondition.value.handle = moveHandle;
     btlStartTask(task);
-    if (action->unit->pendingAbilityId == -1)
+    if (action->unit->pendingAbilityId == BTL_SKILL_NAME_INDEX_NONE)
         task = btlCreateEffObjD(action->unit, action->indexWork.skillId);
     else
         task = btlCreateEffObjD(action->unit, action->unit->pendingAbilityId);
@@ -2925,7 +2926,7 @@ void btlUnitTurnEndCommit(BtlTask *task) {
     }
     btlAdvanceHistoryCounter(task);
     btlResetIndexWork(&task->indexWork);
-    owner->pendingAbilityId = -1;
+    owner->pendingAbilityId = BTL_SKILL_NAME_INDEX_NONE;
     task->options &= ~1;
     task->completedTurns += 1;
     owner->status.flags &= ~0x4000;
@@ -3026,7 +3027,7 @@ void btlRemoveEligibleActorSceneTask(BtlTask *task) {
             return;
         }
         btlResetIndexWork(&task->indexWork);
-        actor->pendingAbilityId = -1;
+        actor->pendingAbilityId = BTL_SKILL_NAME_INDEX_NONE;
         btlClearAllActorEntrySlots(actor);
         fldUpdateSceneGroupTask(task);
         btlRemoveTaskFromSceneGroup(task);

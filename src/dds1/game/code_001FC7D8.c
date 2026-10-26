@@ -16,6 +16,7 @@
 #include "btl_ai_table.h"
 #include "btl_indexed_ui_resource_api.h"
 #include "btl.h"
+#include "btl_skill_name_index.h"
 #include "btl_model_state_ownership.h"
 #include "btl_analysis_panel_work.h"
 #include "btl_analysis_panel_wait_args.h"
@@ -812,7 +813,7 @@ s32 btlPollActorOrEntryLabelTask(BtlObjLink *link) {
 
 extern s32 btlPollActorOrEntryLabelTask();
 
-BtlRuntimeTask *btlCreateEffObjD(BtlUnit *owner, s32 resourceIndex) {
+BtlRuntimeTask *btlCreateEffObjD(BtlUnit *owner, BtlSkillNameIndex skillNameIndex) {
     BtlRuntimeTask *task = btlAllocTask(0xC);
     BtlObjLink *link;
 
@@ -824,7 +825,7 @@ BtlRuntimeTask *btlCreateEffObjD(BtlUnit *owner, s32 resourceIndex) {
     task->callback = btlPollActorOrEntryLabelTask;
     link = btlGetTaskArguments(task);
     link->owner = owner;
-    link->arg = resourceIndex;
+    link->arg = skillNameIndex;
     link->elapsedTicks = 0;
     return task;
 }

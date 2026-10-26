@@ -10,6 +10,7 @@
 #include "eff_random.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_skill_name_index.h"
 #include "btl_action_reaction_motion.h"
 #include "dds3_object_flags.h"
 #include "sdf_vu0.h"
@@ -1296,7 +1297,7 @@ s32 btlCommandStateSelectC(ActionStateLink *task) {
 void btlResetCommandIndexWork(ActionStateLink *task) {
     btlSetEligibleActorPanelTransitionState();
     btlResetIndexWork(&task->indexWork);
-    task->unit->pendingAbilityId = 0xffffffff;
+    task->unit->pendingAbilityId = BTL_SKILL_NAME_INDEX_NONE;
 }
 
 void btlCommandStartSoundTasks(ActionStateLink *task) {
@@ -1399,7 +1400,7 @@ extern BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);
 extern BtlRuntimeTask *btlCreateDeferredActorStatsTask(BtlUnit *unit, BtlOperandEntry *block);
 extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *owner, s32 messageId);
 extern BtlRuntimeTask *btlCreateEffObjC(BtlUnit *owner, s32 messageId);
-extern BtlRuntimeTask *btlCreateEffObjD(BtlUnit *owner, s32 resourceIndex);
+extern BtlRuntimeTask *btlCreateEffObjD(BtlUnit *owner, BtlSkillNameIndex skillNameIndex);
 extern BtlRuntimeTask *btlCreateEffectCounterTask(BtlUnit *owner, s32 kind);
 extern BtlRuntimeTask *btlCreateEffectTask3E(BtlUnit *owner, u16 messageId);
 extern BtlRuntimeTask *btlCreateFadeStateResetTask(void);
@@ -1503,7 +1504,7 @@ void btlScheduleAttackActionTasks(ActionStateLink *action) {
     task->startCondition.kind = 4;
     task->startCondition.value.handle = moveHandle;
     btlStartTask(task);
-    if (action->unit->pendingAbilityId == -1)
+    if (action->unit->pendingAbilityId == BTL_SKILL_NAME_INDEX_NONE)
         task = btlCreateEffObjD(action->unit, action->indexWork.skillId);
     else
         task = btlCreateEffObjD(action->unit, action->unit->pendingAbilityId);
@@ -1911,7 +1912,7 @@ extern BtlRuntimeTask *btlCreateFadeStateResetTask(void);
 extern BtlRuntimeTask *btlCreateEffectCounterTask(BtlUnit *, s32);
 extern BtlRuntimeTask *btlCreateEffectTask3E(BtlUnit *, u16);
 extern BtlRuntimeTask *btlCreateEffObjC(BtlUnit *, s32);
-extern BtlRuntimeTask *btlCreateEffObjD(BtlUnit *, s32);
+extern BtlRuntimeTask *btlCreateEffObjD(BtlUnit *, BtlSkillNameIndex);
 extern BtlRuntimeTask *sndCreateTimedUnitEffectTask(
     SoundResourceNode *, BtlUnit *, u16, s32, u32);
 extern BtlRuntimeTask *sndCreateSetStateTask(void);
@@ -2519,7 +2520,7 @@ extern BtlRuntimeTask *btlCreateGunLoadPollTask(BtlUnit *unit);
 extern BtlRuntimeTask *sndCreateEffectSourceTask(SoundResourceNode *resource, BtlUnit *unit,
                                                   u64 waitForTaskHandle);
 extern BtlRuntimeTask *btlCreateEffObjA(BtlUnit *unit, s32 effect);
-extern BtlRuntimeTask *btlCreateEffObjD(BtlUnit *unit, s32 ability);
+extern BtlRuntimeTask *btlCreateEffObjD(BtlUnit *unit, BtlSkillNameIndex skillNameIndex);
 
 /* State-handler table entry (0x3B6A9C); the table holds s32 handlers (btlCommandStateSelectB) and this one
  * returns without a value, as retail's missing sibling calls show.
@@ -3662,7 +3663,7 @@ void btlUnitTurnEndCommit(ActionStateLink *task) {
     }
     btlAdvanceHistoryCounter(task);
     btlResetIndexWork(&task->indexWork);
-    owner->pendingAbilityId = -1;
+    owner->pendingAbilityId = BTL_SKILL_NAME_INDEX_NONE;
     task->flags &= ~1;
     task->completedTurns += 1;
     owner->status.flags &= ~0x4000;
@@ -3761,7 +3762,7 @@ void btlRemoveEligibleActorSceneTask(ActionStateLink *task) {
             return;
         }
         btlResetIndexWork(&task->indexWork);
-        unit->pendingAbilityId = -1;
+        unit->pendingAbilityId = BTL_SKILL_NAME_INDEX_NONE;
         btlClearAllActorEntrySlots(unit);
         fldUpdateSceneGroupTask(task);
         btlRemoveTaskFromSceneGroup(task);
