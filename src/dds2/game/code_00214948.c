@@ -2230,15 +2230,15 @@ void btlRefreshAbaddonPresentationAfterUnitUpdate(void) {
 
 s32 btlHasActiveSubtask(void) {
     BattleWork *work = (BattleWork *)btlGetRuntime();
-    BattleSub *sub;
+    BtlSelectCtrl *ctrl;
     if (work->mode != 0x306) {
         return 0;
     }
-    sub = work->sub;
-    if (sub == 0) {
+    ctrl = (BtlSelectCtrl *)work->sub;
+    if (ctrl == 0) {
         return 0;
     }
-    return sub->task != 0;
+    return ctrl->unit != 0;
 }
 
 u32 btlGetSubtaskTargetMode(void) {
@@ -2254,7 +2254,8 @@ u32 btlGetSubtaskTargetMode(void) {
 
 BtlUnit *btlGetSelectedOrCurrentActor(void) {
     BattleWork *work = (BattleWork *)btlGetRuntime();
-    BtlUnit *selected = (BtlUnit *)work->sub->task;
+    BtlSelectCtrl *ctrl = (BtlSelectCtrl *)work->sub;
+    BtlUnit *selected = ctrl->unit;
     BtlUnit *unit;
 
     if (selected != 0) {
