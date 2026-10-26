@@ -10,6 +10,7 @@
 #include "evt_world_object_api.h"
 #include "sdf_packet_list.h"
 #include "kwln.h"
+#include "kwln_task_runner.h"
 #include "kwln_task_create.h"
 #include "sdf_resource.h"
 #include "sdf.h"
@@ -47,7 +48,7 @@ extern void evtDisableMoonDraw(void);
 extern void evtFreeStage(void);
 extern sdfMemHandle_t *D_003BD254;
 extern s32 fldLocalMapTrackSlotFromMode(s32 mode);
-extern s32 fldLmapTaskUpdate(dds3ProcessID_t *task);
+extern KwlnTaskUpdateResult fldLmapTaskUpdate(dds3ProcessID_t *task);
 extern s32 D_003BD23C;
 extern s32 D_003BD96C;
 extern void fldInitializeLmapState(void);
@@ -326,7 +327,7 @@ void fldLmapSubmitScaledSpritePacket(s32 x, s32 y, s32 z, s32 width, s32 height,
     drawSurface->append(drawSurface, packetList);
 }
 
-s32 fldLmapTaskUpdate(dds3ProcessID_t *task) {
+KwlnTaskUpdateResult fldLmapTaskUpdate(dds3ProcessID_t *task) {
     s32 state = D_003BD96C;
     s32 result;
 
