@@ -1450,7 +1450,46 @@ void dds3StopQuake(void) {
     D_00435CE8 = 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00102DC8", dds3InitZClearDrawTag);
+/* Fill each frame state's z-clear packet for both draw buffers. */
+void dds3InitZClearDrawTag(void) {
+    s32 state;
+    s32 buffer;
+    u64 topLeft;
+    u64 bottomRight;
+
+    for (state = 0; state < 3; state++) {
+        for (buffer = 0; buffer < 2; buffer++) {
+            dds3ZClearDrawTag[state][buffer].dma.quadwordCount = 10;
+            dds3ZClearDrawTag[state][buffer].dma.reservedByte = 0;
+            dds3ZClearDrawTag[state][buffer].dma.control = 0x70;
+            dds3ZClearDrawTag[state][buffer].dma.address = 0;
+            dds3ZClearDrawTag[state][buffer].dma.firstVifCode = 0;
+            dds3ZClearDrawTag[state][buffer].dma.secondVifCode = 0x5000000A;
+            dds3ZClearDrawTag[state][buffer].testGifTag = 0x1000000000000001;
+            dds3ZClearDrawTag[state][buffer].testGifRegisters = 0xE;
+            dds3ZClearDrawTag[state][buffer].clearTest.registerId = 0x47;
+            dds3ZClearDrawTag[state][buffer].clearTest.value = 0x32001;
+            dds3ZClearDrawTag[state][buffer].clearGifTag = 0x1003400000000004;
+            dds3ZClearDrawTag[state][buffer].clearGifRegisters = 0xE;
+            topLeft = 0x79007000;
+            dds3ZClearDrawTag[state][buffer].topLeftColor.registerId = 1;
+            dds3ZClearDrawTag[state][buffer].topLeftColor.value = 0x3F80000000000000;
+            dds3ZClearDrawTag[state][buffer].topLeftPosition.registerId = 5;
+            dds3ZClearDrawTag[state][buffer].topLeftPosition.value = topLeft;
+            bottomRight = 0x87009000;
+            dds3ZClearDrawTag[state][buffer].bottomRightColor.registerId = 1;
+            dds3ZClearDrawTag[state][buffer].bottomRightColor.value = 0x3F80000000000000;
+            dds3ZClearDrawTag[state][buffer].bottomRightPosition.registerId = 5;
+            dds3ZClearDrawTag[state][buffer].bottomRightPosition.value = bottomRight;
+            dds3ZClearDrawTag[state][buffer].blendGifTag = 0x1000000000008002;
+            dds3ZClearDrawTag[state][buffer].blendGifRegisters = 0xE;
+            dds3ZClearDrawTag[state][buffer].blend.test.registerId = 0x47;
+            dds3ZClearDrawTag[state][buffer].blend.test.value = 0x5101B;
+            dds3ZClearDrawTag[state][buffer].blend.alpha.registerId = 0x42;
+            dds3ZClearDrawTag[state][buffer].blend.alpha.value = 0x44;
+        }
+    }
+}
 
 /* Append the selected state's packet for the current draw buffer to a new list. */
 sdfDrawTag_t *dds3LinkZClearDrawTag(s32 stateIndex) {
