@@ -40,6 +40,7 @@ extern u8 D_003BD638[];
 
 /* Initialize an inline sound/IPU node and the selected linear or movie-PAC stream. */
 void movieOpenStream(movieStream_t *owner, SdfMovieDescriptor *descriptor, const char *name) {
+    const SdfMovieDescriptor *borrowedDescriptor = descriptor;
     SoundFormat soundFormat;
     struct sdfMemHandle_t *allocation;
     MovPacStream *pacWork;
@@ -56,15 +57,15 @@ void movieOpenStream(movieStream_t *owner, SdfMovieDescriptor *descriptor, const
     }
     owner->isPac = isPac;
     owner->remainingBytes = 0x7FFFFFFF;
-    owner->drawX = descriptor->drawX;
-    owner->drawZ = descriptor->drawZ;
-    owner->drawY = descriptor->drawY;
-    owner->drawWidth = descriptor->drawWidth;
-    owner->drawHeight = descriptor->drawHeight;
-    soundFormat.hasAudio = descriptor->hasAudio;
-    soundFormat.stereo = descriptor->stereo;
+    owner->drawX = borrowedDescriptor->drawX;
+    owner->drawZ = borrowedDescriptor->drawZ;
+    owner->drawY = borrowedDescriptor->drawY;
+    owner->drawWidth = borrowedDescriptor->drawWidth;
+    owner->drawHeight = borrowedDescriptor->drawHeight;
+    soundFormat.hasAudio = borrowedDescriptor->hasAudio;
+    soundFormat.stereo = borrowedDescriptor->stereo;
     soundFormat.loopMode = 0;
-    soundFormat.playbackCadenceStep = descriptor->playbackCadenceStep;
+    soundFormat.playbackCadenceStep = borrowedDescriptor->playbackCadenceStep;
 
     if (!isPac) {
         stream = sdfAllocAndClearQuadwords(sizeof(MovLinearStream));
@@ -81,7 +82,7 @@ void movieOpenStream(movieStream_t *owner, SdfMovieDescriptor *descriptor, const
         owner->deviceState = sdfFileCmdReadOpen(name,
                                                         (void *)movieGetStreamSize, owner);
         sdfSoundInitFormattedAndAppendNode(&owner->soundNode, &soundFormat,
-                                            movieCopyChunk, owner, descriptor->source);
+                                            movieCopyChunk, owner, borrowedDescriptor->source);
         return;
     }
 
@@ -107,7 +108,7 @@ void movieOpenStream(movieStream_t *owner, SdfMovieDescriptor *descriptor, const
     owner->pacEnabled = 1;
     owner->packetLimit = 0x7F;
     sdfSoundInitFormattedAndAppendNode(&owner->soundNode, &soundFormat,
-                                        movieParseHeader, owner, descriptor->source);
+                                        movieParseHeader, owner, borrowedDescriptor->source);
 }
 
 /* This no-op also serves as a void(u32) completion callback and ignores its word. */
