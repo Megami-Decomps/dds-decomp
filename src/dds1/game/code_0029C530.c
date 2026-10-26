@@ -5070,8 +5070,8 @@ EffSurfaceGridNode *effCreateSurfaceGridNode(u32 count, u32 columns) {
     node->allocation = base;
     node->tail = (u32 *)data;
     node->field_14 = 0;
-    node->handle = sdfMatNew();
-    sdfMatSetConstant(node->handle, 1.0f);
+    node->material = sdfMatNew();
+    sdfMatSetConstant(node->material, 1.0f);
     memset(&D_003DCA40, 0, sizeof(EffPacketParams));
     D_003DCA40.primitive = 0x4000;
     D_003DCA40.parameters = (u32 *)D_0037EB90;
@@ -5138,7 +5138,7 @@ void effFillSurfaceGridColorGradient(EffSurfaceGridNode *node, u32 *colors) {
 }
 
 void effReleaseSurfaceGridBuffers(EffSurfaceGridNode *node) {
-    sdfMatFreeDelayed(node->handle);
+    sdfMatFreeDelayed(node->material);
     sdfMemFreeDirect(node->allocation);
 }
 

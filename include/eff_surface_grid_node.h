@@ -15,7 +15,7 @@ typedef struct EffSurfaceGridNode {
     u32 type;       // 0x20
     u128 *buffer;     // 0x24
     u32 *tail;       // 0x28
-    sdfMat_t *handle; // 0x2C
+    sdfMat_t *material; // 0x2C: owned material descriptor
     u128 *queueA;     // 0x30
     u32 *queueB;     // 0x34
     struct sdfMemHandle_t *allocation; // 0x38
@@ -33,7 +33,7 @@ typedef struct EffSurfaceGridNode {
     u32 type;           // 0x30
     u128 *buffer;         // 0x34
     u32 *tail;           // 0x38
-    sdfMat_t *handle;     // 0x3C
+    sdfMat_t *material;   // 0x3C: owned material descriptor
     u128 *queueA;         // 0x40
     u32 *queueB;          // 0x44
     struct sdfMemHandle_t *allocation; // 0x48
