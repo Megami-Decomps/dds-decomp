@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr_command_result.h"
 #include "scr_integer_return_value_api.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
@@ -99,7 +100,7 @@ extern void dds3SetFilter2Para(u32);
 
 extern void dds3Filter2On(s32);
 
-extern s32 scrCommandIsProcessControlFlagClear(void);
+extern ScrCommandResult scrCommandIsProcessControlFlagClear(void);
 
 extern s32 itfPanelReleaseHold(void);
 

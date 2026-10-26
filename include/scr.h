@@ -4,6 +4,7 @@
 #include "common.h"
 #include "kwln.h"
 #include "scr_trace_result.h"
+#include "scr_command_result.h"
 
 struct sdfMemHandle_t;
 struct BfFlw0Header;
@@ -131,7 +132,7 @@ dds3ProcessID_t *scrRunScriptEx(u32 priority, struct BfFlw0Header *header,
 
 /* Command callback plus operand count (0x8); DDS1 script/scrTraceCode.c. */
 typedef struct ScrCommand {
-    u32 (*func)(void);
+    ScrCommandResult (*func)(void);
     s32 paramCount;
 } ScrCommand;
 

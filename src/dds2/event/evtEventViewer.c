@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "scr_command_result.h"
 #include "sdf_delayed_resource_check_api.h"
 #include "sdf_vu0.h"
 #include "sdf_dma_tag.h"
@@ -2320,7 +2321,7 @@ void evtViewerCountFlaggedUpdates(EvtRuntime *viewer) {
 }
 
 extern u32 mnuShouldBlockViewerEndCountdown(void);
-extern s32 scrCommandIsProcessControlFlagClear(void);
+extern ScrCommandResult scrCommandIsProcessControlFlagClear(void);
 extern u32 mnuCampGetSecondaryOption(EvtRuntime *scene);
 extern void mnuReleaseCampSceneRegisteredIds(EvtRuntime *viewer);
 extern s32 mnuQueryTitleSoundBusy(void);

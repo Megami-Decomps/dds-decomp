@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr_command_result.h"
 #include "scr_integer_return_value_api.h"
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
@@ -77,7 +78,7 @@ u32 mnuScriptStopMovieAndResetDraw(void) {
 }
 
 extern s8 D_0037F530[];
-extern s32 scrCommandIsProcessControlFlagClear(void);
+extern ScrCommandResult scrCommandIsProcessControlFlagClear(void);
 extern void dds3SetFilter2Para(u32);
 extern void dds3SetFilter2RGBA(u32);
 extern void dds3Filter2On(s32);
