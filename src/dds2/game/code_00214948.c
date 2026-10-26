@@ -2576,7 +2576,7 @@ s32 btlStartLinkedActionMotionPrimary(BtlLinkedCommand *command) {
         return 0;
     case 0x17E:
         btlPrepareRandomizedActionCameraPose(command, &command->frontCamera, &command->backCamera);
-        command->stepKind = 4;
+        command->stepKind = BTL_LINKED_CAMERA_STEP_AIM_EFFECT_POSE;
         return 1;
     }
     return 0;
@@ -3796,7 +3796,7 @@ s32 btlSelectVritraActionCamera(BtlLinkedCommand *command, s8 side, s8 targetSid
             btlBossDebugPrintf("VURI:I-G ++++\n");
             btlPrepareRandomizedActionCameraPose(command, &command->frontCamera, &command->backCamera);
             btlFlagAllUnitDefeatCandidatesTask();
-            command->stepKind = 4;
+            command->stepKind = BTL_LINKED_CAMERA_STEP_AIM_EFFECT_POSE;
             return 1;
         case 0x197:
             btlFlagAllUnitDefeatCandidatesTask();
@@ -3833,7 +3833,7 @@ s32 btlSelectVritraActionCamera(BtlLinkedCommand *command, s8 side, s8 targetSid
                 btlBossDebugPrintf("VURI:I-2 ++++\n");
                 btlPrepareRandomizedActionCameraPose(command, &command->frontCamera, &command->backCamera);
                 btlFlagAllUnitDefeatCandidatesTask();
-                command->stepKind = 4;
+                command->stepKind = BTL_LINKED_CAMERA_STEP_AIM_EFFECT_POSE;
                 return 1;
             }
             break;
@@ -3846,7 +3846,7 @@ s32 btlSelectVritraActionCamera(BtlLinkedCommand *command, s8 side, s8 targetSid
             btlBossDebugPrintf("VURI_A:N_A ++++\n");
             btlPrepareRandomizedActionCameraPose(command, &command->frontCamera, &command->backCamera);
             btlFlagAllUnitDefeatCandidatesTask();
-            command->stepKind = 4;
+            command->stepKind = BTL_LINKED_CAMERA_STEP_AIM_EFFECT_POSE;
             return 1;
         }
         btlFlagAllUnitDefeatCandidatesTask();
@@ -3878,7 +3878,7 @@ s32 btlSelectVritraActionCamera(BtlLinkedCommand *command, s8 side, s8 targetSid
             btlBossDebugPrintf("VURI_A:N_B ++++\n");
             btlPrepareRandomizedActionCameraPose(command, &command->frontCamera, &command->backCamera);
             btlFlagAllUnitDefeatCandidatesTask();
-            command->stepKind = 4;
+            command->stepKind = BTL_LINKED_CAMERA_STEP_AIM_EFFECT_POSE;
             return 1;
         }
         btlFlagAllUnitDefeatCandidatesTask();
@@ -6739,7 +6739,7 @@ INCLUDE_RODATA(const s32, "game/code_00214948", D_0041ADA8);
 s32 btlSetSpecialLinkedActionCamera(BtlLinkedCommand *command) {
     if (btlIsActorCategoryMarked(command) == 0) {
         if (command->link->unit->status.flags & 0x200) {
-            if (command->stepKind == 14) {
+            if (command->stepKind == BTL_LINKED_CAMERA_STEP_SPECIAL_PARTY_APPROACH) {
                 btlBuildAngledApproachCameraPose(command, &command->camera, -1.4f, 0.67f, 25.0f);
                 command->camera.distance += 1250.0f;
                 return 1;
@@ -7209,7 +7209,7 @@ s32 btlSelectLinkedActionCameraPose(BtlLinkedCommand *command, s8 modeA, s8 mode
         if (btlHasLinkedEffectNodeTrigger(command)) {
             btlFaceLinkedTargetAndFlagDirection(command, command);
             command->flags |= 0x800;
-            command->stepKind = 0xE;
+            command->stepKind = BTL_LINKED_CAMERA_STEP_SPECIAL_PARTY_APPROACH;
             return 1;
         }
         cameraKind = datActionAnimationRecords[command->actionCode].cameraKind;
@@ -7246,7 +7246,7 @@ s32 btlSelectLinkedActionCameraPose(BtlLinkedCommand *command, s8 modeA, s8 mode
         return 0;
     }
     btlPrepareRandomizedActionCameraPose(command, &command->frontCamera, &command->backCamera);
-    command->stepKind = 4;
+    command->stepKind = BTL_LINKED_CAMERA_STEP_AIM_EFFECT_POSE;
     return 1;
 }
 
@@ -7254,7 +7254,7 @@ s32 btlSelectLinkedActionCameraPose(BtlLinkedCommand *command, s8 modeA, s8 mode
 s32 btlUpdatePartyApproachCameraStep(BtlLinkedCommand *command) {
     if (btlIsActorCategoryMarked(command) == 0) {
         if ((command->link->unit->status.flags & 0x200) != 0) {
-            if (command->stepKind == 0xE) {
+            if (command->stepKind == BTL_LINKED_CAMERA_STEP_SPECIAL_PARTY_APPROACH) {
                 btlBuildAngledApproachCameraPose(command, (BtlCamState *)command, -0.8f, 0.225f, 35.0f);
                 command->camera.distance += 500.0f;
                 btlAdjustCameraDirectionForDefaultPlane((BtlCamState *)command);
@@ -7860,7 +7860,7 @@ s32 btlSelectSatanLinkedActionCamera(BtlLinkedCommand *command, s8 modeA, s8 mod
         break;
     case 2:
         btlPrepareRandomizedActionCameraPose(command, &command->frontCamera, &command->backCamera);
-        command->stepKind = 4;
+        command->stepKind = BTL_LINKED_CAMERA_STEP_AIM_EFFECT_POSE;
         break;
     }
     return 1;
@@ -7874,7 +7874,7 @@ extern void btlSetRuntimeFlag2000(void);
 s32 btlUpdateSatanApproachCameraStep(BtlLinkedCommand *unit) {
     if (btlIsActorCategoryMarked(unit) == 0) {
         if (unit->link->unit->status.flags & 0x200) {
-            if (unit->stepKind == 14) {
+            if (unit->stepKind == BTL_LINKED_CAMERA_STEP_SPECIAL_PARTY_APPROACH) {
                 btlBuildAngledApproachCameraPose((BtlLinkedCommand *)unit, (BtlCamState *)unit, -0.8f, 0.225f, 35.0f);
                 unit->camera.distance += 500.0f;
                 btlAdjustCameraDirectionForDefaultPlane((BtlCamState *)unit);

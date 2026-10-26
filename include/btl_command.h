@@ -26,6 +26,24 @@ typedef struct BtlScalarRange {
     f32 value;       /* 0x10: accumulated progress */
 } BtlScalarRange;
 
+/* The linked command reuses this 16-bit selector for camera setup and step
+ * dispatch. Cursor and camera-preset update IDs differ by title. */
+#define BTL_LINKED_CAMERA_STEP_NONE 0
+#define BTL_LINKED_CAMERA_STEP_INITIAL_POSE_SELECTION 1
+#define BTL_LINKED_CAMERA_STEP_SIDE_SELECTED_ACTOR_BLEND 2
+#define BTL_LINKED_CAMERA_STEP_AIMED_ACTION_POSE 3
+#define BTL_LINKED_CAMERA_STEP_AIM_EFFECT_POSE 4
+#define BTL_LINKED_CAMERA_STEP_ACTION_END_PULLBACK 5
+#define BTL_LINKED_CAMERA_STEP_MODE_6_APPROACH_POSE 7
+#define BTL_LINKED_CAMERA_STEP_MODE_7_APPROACH_POSE 8
+#define BTL_LINKED_CAMERA_STEP_APPROACH_POSE 9
+#define BTL_LINKED_CAMERA_STEP_TARGET_CAMERA_UPDATE 10
+#define BTL_LINKED_CAMERA_STEP_ADVANCE_UNMARKED_CURSOR 11
+#define BTL_LINKED_CAMERA_STEP_ADVANCE_TARGET_CURSOR_DDS1 12
+#define BTL_LINKED_CAMERA_STEP_ADVANCE_ACTOR_CAMERA_PRESET_DDS2 12
+#define BTL_LINKED_CAMERA_STEP_ADVANCE_TARGET_CURSOR_DDS2 13
+#define BTL_LINKED_CAMERA_STEP_SPECIAL_PARTY_APPROACH 14
+
 /* Linked motion command shared by actor selection, action cameras and aim.
  * It is not a BtlUnit or its owner. All three camera offsets are common to
  * both games; DDS2 inserts 0x20 bytes before the control fields. */
@@ -44,7 +62,7 @@ typedef struct BtlLinkedCommand {
     BtlUnit *selectedUnit;    /* 0x100: actor selected for camera setup. */
     u32 status;              /* 0x104: command status used by callback dispatch. */
     s32 actionKind;          /* 0x108: previous camera action kind. */
-    u16 stepKind;             /* 0x10C: camera initialization stores 9, 10 or 11. */
+    u16 stepKind;             /* 0x10C: camera setup and cursor step selector. */
     u8 pad10E[2];
     s32 state;               /* 0x110: aim waits for 0x1E, then resets this */
     s32 actionCode;          /* 0x114 */
@@ -87,7 +105,7 @@ typedef struct BtlLinkedCommand {
     BtlUnit *focus;          /* 0x120 */
     u32 status;              /* 0x124 */
     s32 actionKind;          /* 0x128 */
-    u16 stepKind;            /* 0x12C: action-camera dispatch kind */
+    u16 stepKind;            /* 0x12C: camera setup and step selector. */
     u8 pad12E[2];
     s32 state;               /* 0x130 */
     u32 actionCode;          /* 0x134: unsigned; the VURI camera range test is sltiu */

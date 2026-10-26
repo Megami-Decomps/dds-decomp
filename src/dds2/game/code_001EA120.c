@@ -573,7 +573,7 @@ void btlInitializeLinkedCommandCursor(BtlLinkedCommand *action) {
     ActionStateLink *link;
     u32 flags;
 
-    action->stepKind = 0;
+    action->stepKind = BTL_LINKED_CAMERA_STEP_NONE;
     link = action->link;
     if (hook != NULL && hook((BtlUnit *)action) != 0) {
         return;
@@ -581,14 +581,14 @@ void btlInitializeLinkedCommandCursor(BtlLinkedCommand *action) {
     flags = link->unit->status.flags;
     if (flags & BTL_UNIT_STATUS_FLAG_ALLY) {
         if (!(flags & 0x1000) && !(link->unit->partyRecord.flags & 0x10)) {
-            action->stepKind = 0xB;
+            action->stepKind = BTL_LINKED_CAMERA_STEP_ADVANCE_UNMARKED_CURSOR;
             btlInitializeCameraCursorForActorId(action, &action->camera);
         } else if (btlHasSingleLinkedResource(action) != 0) {
             if ((link->unit->partyRecord.flags & 0x10) && link->indexWork.slot == 0x17) {
-                action->stepKind = 0xC;
+                action->stepKind = BTL_LINKED_CAMERA_STEP_ADVANCE_ACTOR_CAMERA_PRESET_DDS2;
                 btlInitializeActorCameraPreset(action);
             } else {
-                action->stepKind = 9;
+                action->stepKind = BTL_LINKED_CAMERA_STEP_APPROACH_POSE;
                 btlFlagUserAndTargetDefeat(action, action);
             }
         } else {
@@ -599,7 +599,7 @@ void btlInitializeLinkedCommandCursor(BtlLinkedCommand *action) {
             btlFrameCommandTargetGroups(action);
         } else if (btlHasSingleLinkedResource(action) != 0) {
             btlPositionActorIndexUnits(action);
-            action->stepKind = 0xA;
+            action->stepKind = BTL_LINKED_CAMERA_STEP_TARGET_CAMERA_UPDATE;
             btlSetupActionCameraPair(action);
         } else {
             btlPrepareUnitPoseWithTiltRotation(action, &action->frontCamera, &action->backCamera);
@@ -617,16 +617,16 @@ void btlDispatchActionCursorStepByKind(BtlLinkedCommand *action) {
         return;
     }
     switch (action->stepKind) {
-    case 9:
+    case BTL_LINKED_CAMERA_STEP_APPROACH_POSE:
         btlBuildApproachCamera(action, &action->camera);
         break;
-    case 0xA:
+    case BTL_LINKED_CAMERA_STEP_TARGET_CAMERA_UPDATE:
         btlUpdateActionTargetCameraPose(action);
         break;
-    case 0xB:
+    case BTL_LINKED_CAMERA_STEP_ADVANCE_UNMARKED_CURSOR:
         btlAdvanceCursorForUnmarkedUnit(action, &action->camera);
         break;
-    case 0xC:
+    case BTL_LINKED_CAMERA_STEP_ADVANCE_ACTOR_CAMERA_PRESET_DDS2:
         btlAdvanceActorCameraPreset(action);
         break;
     }
@@ -655,7 +655,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
     u32 i;
     u32 count;
 
-    action->stepKind = 0;
+    action->stepKind = BTL_LINKED_CAMERA_STEP_NONE;
     link = action->link;
     if (btlUsesSpecialLinkedCameraPath(action) != 0) {
         btlStartLinkedActionPoseBlendIfEligible(action);
@@ -704,15 +704,15 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
             } else if (btlHasLinkedEffectNodeTrigger(action) != 0) {
                 switch (((BtlActionTableEntry *)datActionAnimationRecords)[action->actionCode].kind) {
                 case 6:
-                    action->stepKind = 7;
+                    action->stepKind = BTL_LINKED_CAMERA_STEP_MODE_6_APPROACH_POSE;
                     btlPrepareCameraMode6Participants(action, &action->camera);
                     break;
                 case 7:
-                    action->stepKind = 8;
+                    action->stepKind = BTL_LINKED_CAMERA_STEP_MODE_7_APPROACH_POSE;
                     btlPrepareCameraMode7Participants(action, &action->camera);
                     break;
                 default:
-                    action->stepKind = 9;
+                    action->stepKind = BTL_LINKED_CAMERA_STEP_APPROACH_POSE;
                     btlFlagUserAndTargetDefeat(action, action);
                     break;
                 }
@@ -720,26 +720,28 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
             } else {
                 if (btlCanUseActorCategoryFlag2(action) != 0 || btlCanUseActorCategoryFlag4(action) != 0 ||
                     btlIsLinkedFireOfSinaiCommand(action) != 0 || btlMapActorCategory(action) != 0) {
-                    action->stepKind = 1;
+                    action->stepKind = BTL_LINKED_CAMERA_STEP_INITIAL_POSE_SELECTION;
                 } else if (btlIsEntryHeightWithinLimit() == 0 && btlHasSingleLinkedResource(action) == 0) {
-                    action->stepKind = 1;
+                    action->stepKind = BTL_LINKED_CAMERA_STEP_INITIAL_POSE_SELECTION;
                 } else {
-                    action->stepKind = (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) ? 1 : 2;
+                    action->stepKind = (dds3GetRandA((EffRandState *)effSharedRandomState) & 1)
+                        ? BTL_LINKED_CAMERA_STEP_INITIAL_POSE_SELECTION
+                        : BTL_LINKED_CAMERA_STEP_SIDE_SELECTED_ACTOR_BLEND;
                 }
                 switch (action->stepKind) {
-                case 1:
+                case BTL_LINKED_CAMERA_STEP_INITIAL_POSE_SELECTION:
                     switch (((BtlActionTableEntry *)datActionAnimationRecords)[action->actionCode].kind) {
                     case 6:
                     case 7:
                         btlSetupCameraPoseAimUnit(action, &action->frontCamera, &action->backCamera);
-                        action->stepKind = 3;
+                        action->stepKind = BTL_LINKED_CAMERA_STEP_AIMED_ACTION_POSE;
                         break;
                     default:
                         btlPrepareHeightScaledActionCameraPose(action, &action->frontCamera, &action->backCamera);
                         break;
                     }
                     break;
-                case 2:
+                case BTL_LINKED_CAMERA_STEP_SIDE_SELECTED_ACTOR_BLEND:
                     btlBuildSideSelectedActorCameraBlend(action, &action->frontCamera, &action->backCamera);
                     break;
                 }
@@ -750,7 +752,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
                 action->flags |= 0x800;
             } else if (btlHasSingleLinkedResource(action) != 0 && btlHasLinkedEffectNodeTrigger(action) != 0) {
                 btlPositionActorIndexUnits(action);
-                action->stepKind = 5;
+                action->stepKind = BTL_LINKED_CAMERA_STEP_ACTION_END_PULLBACK;
                 btlBuildDistanceClampedActionCameraBlend(action, &action->frontCamera, &action->backCamera);
             } else if (btlCanUseActorCategoryFlag4(action) != 0 && (hasFlag200 != 1 || hasFlag400 == hasFlag200)) {
                 btlBuildRandomizedActionCameraPosePair(action, &action->frontCamera, &action->backCamera);
@@ -763,19 +765,21 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
             } else {
                 if (btlHasActorCategoryFlag100(action) == 0 && btlCanUseActorCategoryFlag2(action) == 0 &&
                     btlCanUseActorCategoryFlag4(action) == 0 && (hasFlag200 == 1 || hasFlag400 != 1)) {
-                    action->stepKind = (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) ? 4 : 5;
+                    action->stepKind = (dds3GetRandA((EffRandState *)effSharedRandomState) & 1)
+                        ? BTL_LINKED_CAMERA_STEP_AIM_EFFECT_POSE
+                        : BTL_LINKED_CAMERA_STEP_ACTION_END_PULLBACK;
                 } else {
-                    action->stepKind = 4;
+                    action->stepKind = BTL_LINKED_CAMERA_STEP_AIM_EFFECT_POSE;
                 }
                 if (btlHasActorCategoryFlag100(action) != 0 &&
                     (link->unit->partyRecord.unitId != 0x128 || link->indexWork.slot != 0xE)) {
                     btlFaceActionParticipantsTowardLinkedTarget(action);
                 }
                 switch (action->stepKind) {
-                case 4:
+                case BTL_LINKED_CAMERA_STEP_AIM_EFFECT_POSE:
                     btlPrepareRandomizedActionCameraPose(action, &action->frontCamera, &action->backCamera);
                     break;
-                case 5:
+                case BTL_LINKED_CAMERA_STEP_ACTION_END_PULLBACK:
                     btlBuildDistanceClampedActionCameraBlend(action, &action->frontCamera, &action->backCamera);
                     action->motionProgress = 1;
                     break;
@@ -810,22 +814,22 @@ void btlDispatchActionCameraStep(BtlLinkedCommand *action) {
         return;
     }
     switch (action->stepKind) {
-    case 2:
+    case BTL_LINKED_CAMERA_STEP_SIDE_SELECTED_ACTOR_BLEND:
         btlRefreshActionPoseBlendSnapshot(action, &action->camera);
         break;
-    case 9:
+    case BTL_LINKED_CAMERA_STEP_APPROACH_POSE:
         btlBuildApproachCamera(action, &action->camera);
         break;
-    case 4:
+    case BTL_LINKED_CAMERA_STEP_AIM_EFFECT_POSE:
         btlAimEffectPoseAtUnit((u8 *)action, (u8 *)&action->camera);
         break;
-    case 5:
+    case BTL_LINKED_CAMERA_STEP_ACTION_END_PULLBACK:
         btlBeginActionEndCameraPullback(action, &action->camera);
         break;
-    case 7:
+    case BTL_LINKED_CAMERA_STEP_MODE_6_APPROACH_POSE:
         btlUpdateApproachCameraPose(action, &action->camera);
         break;
-    case 8:
+    case BTL_LINKED_CAMERA_STEP_MODE_7_APPROACH_POSE:
         btlBuildHeightClampedApproachCamera(action, &action->camera);
         break;
     }
@@ -874,7 +878,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
     }
     state = (BtlState *)btlGetRuntime();
     task = action->link;
-    action->stepKind = 0;
+    action->stepKind = BTL_LINKED_CAMERA_STEP_NONE;
     if (btlMapActorCategory(action) != 0) {
         action->stageCount = 0;
     }
@@ -903,7 +907,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
             if (hasFlag200 != 1 && hasFlag400 == 1) {
                 if (btlIsActorCategoryMarked(action)) {
                     btlInitCommandCursorForFirstActor(action, &action->camera);
-                    action->stepKind = 13;
+                    action->stepKind = BTL_LINKED_CAMERA_STEP_ADVANCE_TARGET_CURSOR_DDS2;
                 } else if (btlCanUseActorCategoryFlag4(action)) {
                     btlBuildRandomizedActionCameraPosePair(action, &action->frontCamera, &action->backCamera);
                 } else {
@@ -1070,7 +1074,7 @@ void btlAdvanceActorStageAndPose(BtlLinkedCommand *action) {
         btlAdjustCameraDirectionForDefaultPlane(out);
         return;
     }
-    if (action->stepKind == 0xD) {
+    if (action->stepKind == BTL_LINKED_CAMERA_STEP_ADVANCE_TARGET_CURSOR_DDS2) {
         btlAdvanceTargetCursorAnimation(action, &action->camera);
     }
 }
