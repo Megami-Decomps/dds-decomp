@@ -39,15 +39,28 @@ extern s8 D_0043643D;
 #define EFF_COLOR_UNPACK_SCALE_BITS 0x3C000000
 #define EFF_SLOT_BYTES 0x38
 #define EFF_SLOT_HEADER_BYTES 0xC
-extern EffCreateHandler D_003B2060[];
 
-extern EffHandler D_003B2064[];
+/* This translation unit's effect callbacks occupy one 0x18-byte row per type. */
+typedef void *(*EffTypeCreateCallback)(void *parameters);
+typedef void (*EffTypePayloadCallback)(void *payload);
+typedef struct EffTypeDispatch {
+    EffTypeCreateCallback create;
+    EffTypePayloadCallback draw;
+    EffTypePayloadCallback release;
+    EffTypePayloadCallback setPosition;
+    EffTypePayloadCallback setRGBA;
+    EffTypePayloadCallback setRotateMatrix;
+} EffTypeDispatch;
+typedef char EffTypeDispatch_size_must_be_0x18[
+    sizeof(EffTypeDispatch) == 0x18 ? 1 : -1];
+typedef char EffTypeDispatch_callback_offsets[
+    ((u32)&((EffTypeDispatch *)0)->draw == 0x04 &&
+     (u32)&((EffTypeDispatch *)0)->release == 0x08 &&
+     (u32)&((EffTypeDispatch *)0)->setPosition == 0x0C &&
+     (u32)&((EffTypeDispatch *)0)->setRGBA == 0x10 &&
+     (u32)&((EffTypeDispatch *)0)->setRotateMatrix == 0x14) ? 1 : -1];
 
-extern EffHandler D_003B206C[];
-
-extern EffHandler D_003B2074[];
-
-extern EffHandler D_003B2070[];
+extern EffTypeDispatch D_003B2060[];
 
 extern u8 sdfHddValid;
 
@@ -59,9 +72,6 @@ extern char D_00436448[];
 
 
 extern char D_00436450[];
-
-extern EffHandler D_003B2068[];
-
 
 extern char *D_003B20D8[];
 
@@ -78,7 +88,7 @@ extern u8 aViewDown[];
 /* Allocate the dispatch owner before calling the selected payload constructor. */
 EffWork *dds3MagatuhiParCreate(s32 type, void *params) {
     EffWork *work = sdfChipAllocDirect(sizeof(*work));
-    void *payload = D_003B2060[type].handler(params);
+    void *payload = D_003B2060[type].create(params);
 
     work->type = type;
     work->payload = payload;
@@ -87,12 +97,12 @@ EffWork *dds3MagatuhiParCreate(s32 type, void *params) {
 
 /* Invoke the primary type callback with the payload; no NULL or type bounds check. */
 void dds3MagatuhiParDraw(EffWork *work) {
-    D_003B2064[work->type].handler(work->payload);
+    D_003B2060[work->type].draw(work->payload);
 }
 
 /* Invoke the release callback, then free the outer work; no callback NULL check. */
 void dds3MagatuhiParDelete(EffWork *work) {
-    D_003B2068[work->type].handler(work->payload);
+    D_003B2060[work->type].release(work->payload);
     sdfChipFreeDirect(work);
 }
 
@@ -117,7 +127,7 @@ u32 dds3MagatuhiParIsActive(void) {
 
 /* Node set-vector slot: invoke optional subtype callback A; preserve the one-formal surface. */
 void dds3MagatuhiParSetPosition(EffWork *work) {
-    void (*handler)(void *) = D_003B206C[work->type].handler;
+    EffTypePayloadCallback handler = D_003B2060[work->type].setPosition;
 
     if (handler != NULL) {
         handler(work->payload);
@@ -126,7 +136,7 @@ void dds3MagatuhiParSetPosition(EffWork *work) {
 
 /* Node set-matrix slot: invoke optional subtype callback B; preserve the one-formal surface. */
 void dds3MagatuhiParSetRotateMatrix(EffWork *work) {
-    void (*handler)(void *) = D_003B2074[work->type].handler;
+    EffTypePayloadCallback handler = D_003B2060[work->type].setRotateMatrix;
 
     if (handler != NULL) {
         handler(work->payload);
@@ -135,7 +145,7 @@ void dds3MagatuhiParSetRotateMatrix(EffWork *work) {
 
 /* Node parameter-word slot: invoke optional subtype callback C; preserve the one-formal surface. */
 void dds3MagatuhiParSetRGBA(EffWork *work) {
-    void (*handler)(void *) = D_003B2070[work->type].handler;
+    EffTypePayloadCallback handler = D_003B2060[work->type].setRGBA;
 
     if (handler != NULL) {
         handler(work->payload);
