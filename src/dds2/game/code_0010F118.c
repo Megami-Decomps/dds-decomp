@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_basic_lifecycle.h"
 #include "sdf_vu0.h"
 #include "eff_inner_float_api.h"
 #include "sdf_sif_command.h"
@@ -163,6 +164,7 @@ void dds3DeleteBasic(dds3Basic_t *node);
 dds3Basic_t *dds3AllocBasic(u32 kind) {
     dds3Basic_t *node;
     EffWorldOps *ops;
+    Dds3BasicCreateResult createResult;
 
     if (kind >= EFF_WORLD_KIND_COUNT) {
         return NULL;
@@ -187,7 +189,8 @@ dds3Basic_t *dds3AllocBasic(u32 kind) {
     node->word2C = 0;
     node->owner = NULL;
     if (ops != NULL && ops->create != NULL) {
-        if (ops->create(node) != 1) {
+        createResult = ops->create(node);
+        if (createResult != DDS3_BASIC_CREATE_ACCEPTED) {
             dds3DeleteBasic(node);
             return NULL;
         }
