@@ -23,6 +23,7 @@
 #include "evt_world.h"
 #include "evt_event_pack.h"
 #include "scr.h"
+#include "scr_command_result.h"
 #include "scr_command_timer_api.h"
 #include "scr_string_parameter_api.h"
 #include "scr_arg_read.h"
@@ -313,13 +314,13 @@ s32 evtCommand_EFFECT_PATH_WAIT(void) {
     scaleStatus = evtCheckPathStat(effectObject);
     switch (scaleStatus) {
     case EVT_PATH_STATUS_AT_ENDPOINT:
-        return 1;
+        return SCR_COMMAND_RESULT_COMPLETE;
     case EVT_PATH_STATUS_IN_PROGRESS:
-        return 0;
+        return SCR_COMMAND_RESULT_PENDING;
     case EVT_PATH_STATUS_INVALID:
-        return 1;
+        return SCR_COMMAND_RESULT_COMPLETE;
     default:
-        return 0;
+        return SCR_COMMAND_RESULT_PENDING;
     }
 }
 
@@ -402,7 +403,7 @@ u32 evtCommandSignalAdminAtTimerZero(void) {
     if (timer == 0) {
         dds3AdminiExitSequence();
     }
-    return 0;
+    return SCR_COMMAND_RESULT_PENDING;
 }
 
 /* Queue an event request after preparing BGM/encounter state, then stop scripts.
@@ -690,13 +691,13 @@ s32 evtCommand_CAM_PATH_WAIT(void) {
     scaleStatus = evtCheckPathStat(cameraOwner);
     switch (scaleStatus) {
     case EVT_PATH_STATUS_AT_ENDPOINT:
-        return 1;
+        return SCR_COMMAND_RESULT_COMPLETE;
     case EVT_PATH_STATUS_IN_PROGRESS:
-        return 0;
+        return SCR_COMMAND_RESULT_PENDING;
     case EVT_PATH_STATUS_INVALID:
-        return 1;
+        return SCR_COMMAND_RESULT_COMPLETE;
     default:
-        return 0;
+        return SCR_COMMAND_RESULT_PENDING;
     }
 }
 
@@ -943,13 +944,13 @@ s32 evtCommand_OBJ_PATH_WAIT(void) {
     scaleStatus = evtCheckPathStat(worldObject);
     switch (scaleStatus) {
     case EVT_PATH_STATUS_AT_ENDPOINT:
-        return 1;
+        return SCR_COMMAND_RESULT_COMPLETE;
     case EVT_PATH_STATUS_IN_PROGRESS:
-        return 0;
+        return SCR_COMMAND_RESULT_PENDING;
     case EVT_PATH_STATUS_INVALID:
-        return 1;
+        return SCR_COMMAND_RESULT_COMPLETE;
     default:
-        return 0;
+        return SCR_COMMAND_RESULT_PENDING;
     }
 }
 
@@ -997,22 +998,22 @@ s32 evtCommand_LOAD_BE(void) {
     char *message;
 
     if (commandWork == NULL) {
-        return 1;
+        return SCR_COMMAND_RESULT_COMPLETE;
     }
     if (evtSearchEventPack(taskId) == 0) {
         message = "load BE (%d)..\n";
         evtPrintDeveloperConsoleMessage(message, taskId);
         sdfPrintf(message, taskId);
         dds3LinkProcess(commandWork->task, evtLoadEventPack(taskId));
-        return 0;
+        return SCR_COMMAND_RESULT_PENDING;
     }
     if (evtGetEventPackStat(taskId) == EVT_PACK_LOAD_COMPLETE) {
         message = D_00421ED8;
         evtPrintDeveloperConsoleMessage(message, taskId);
         sdfPrintf(message, taskId);
-        return 1;
+        return SCR_COMMAND_RESULT_COMPLETE;
     }
-    return 0;
+    return SCR_COMMAND_RESULT_PENDING;
 }
 
 /* Start the camp task only if no task with this ID exists yet.
