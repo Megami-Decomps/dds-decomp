@@ -5682,9 +5682,9 @@ void fldSetPlayerAndPeerLighting(s32 duration, f32 redA, f32 greenA, f32 blueA,
 
 
 extern void dds3SetFogColor(s32, f32 *);
-extern void dds3SetLightColor(s32 blendFrames, s32 lightIndex, f32 *color);
+extern void dds3SetLightColor(s32 blendFrames, s32 lightIndex, const f32 *color);
 extern void dds3SetAmbientColor(s32, f32 *);
-extern void dds3SetLightDir(s32 blendFrames, s32 lightIndex, f32 *direction);
+extern void dds3SetLightDir(s32 blendFrames, s32 lightIndex, const f32 *direction);
 extern void dds3SetFogPara(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
 extern void fldSetFilterAnime(u32);
 extern u32 D_00436138, D_0043613C;

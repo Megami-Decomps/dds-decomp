@@ -28,9 +28,9 @@ s32 dds3SetRipBlurPara(s32 count, f32 phaseStep, f32 spacing,
 void dds3SetSoftenBias(s32 frames, f32 firstTarget, f32 secondTarget);
 void dds3SetFogColor(s32 blendFrames, f32 *color);
 void dds3SetMultiBlurPara(f32 rotation, f32 scale, u32 gsAlphaControl);
-void dds3SetLightColor(s32 blendFrames, s32 lightIndex, f32 *color);
+void dds3SetLightColor(s32 blendFrames, s32 lightIndex, const f32 *color);
 void dds3SetAmbientColor(s32 blendFrames, f32 *color);
-void dds3SetLightDir(s32 blendFrames, s32 lightIndex, f32 *direction);
+void dds3SetLightDir(s32 blendFrames, s32 lightIndex, const f32 *direction);
 void dds3SetBlur2Para(f32 rotation, f32 scale, u32 gsAlphaControl);
 void dds3SetFilter2Para(u32 gsAlphaControl);
 void dds3SetMFilterPara(u32 gsAlphaControl);

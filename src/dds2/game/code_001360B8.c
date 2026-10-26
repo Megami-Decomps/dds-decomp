@@ -26,11 +26,11 @@ extern FldLightSet *D_004360F0;
 
 extern void dds3SetFogColor(s32, f32 *);
 
-extern void dds3SetLightColor(s32 blendFrames, s32 lightIndex, f32 *color);
+extern void dds3SetLightColor(s32 blendFrames, s32 lightIndex, const f32 *color);
 
 extern void dds3SetAmbientColor(s32, f32 *);
 
-extern void dds3SetLightDir(s32 blendFrames, s32 lightIndex, f32 *direction);
+extern void dds3SetLightDir(s32 blendFrames, s32 lightIndex, const f32 *direction);
 
 extern void dds3SetFogPara(s32, f32, f32, f32, f32);
 

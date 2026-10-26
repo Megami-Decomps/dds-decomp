@@ -270,7 +270,7 @@ extern u32 D_0043E320[4];
 extern u32 D_0043E330[4];
 
 /* Set an existing light slot's RGB target immediately or save packed blend endpoints. */
-void dds3SetLightColor(s32 blendFrames, s32 lightIndex, f32 *color) {
+void dds3SetLightColor(s32 blendFrames, s32 lightIndex, const f32 *color) {
     u32 startColorWords[4];
     u32 targetColorWords[4];
     u32 packedStartColor;
@@ -309,7 +309,7 @@ extern f32 D_0043E340[][4];
 extern f32 D_0043E370[][4];
 extern void dds3RotationArc(void);
 
-void dds3SetLightDir(s32 blendFrames, s32 lightIndex, f32 *direction) {
+void dds3SetLightDir(s32 blendFrames, s32 lightIndex, const f32 *direction) {
     u32 blendFlag;
 
     if (D_0037F770[lightIndex] != NULL) {

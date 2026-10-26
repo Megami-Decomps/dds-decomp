@@ -596,8 +596,8 @@ typedef struct ShootingVector {
 extern const ShootingVector D_0042D7A0;
 extern struct dds3Basic_t *dds3AddScene(void);
 extern void AddCamera(void);
-extern void dds3SetLightColor(s32 blendFrames, s32 lightIndex, f32 *color);
-extern void dds3SetLightDir(s32 blendFrames, s32 lightIndex, f32 *direction);
+extern void dds3SetLightColor(s32 blendFrames, s32 lightIndex, const f32 *color);
+extern void dds3SetLightDir(s32 blendFrames, s32 lightIndex, const f32 *direction);
 extern void dds3SetAmbientColor(s32, f32 *);
 extern void dds3SetFogPara(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
 extern void dds3InitSoundSlotPool(void);

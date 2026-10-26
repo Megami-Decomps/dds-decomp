@@ -2423,8 +2423,8 @@ extern void dds3PrimDebugTextBox(void *, s32, s32, s32, f32 *);
 extern void mnuShopSavePrimaryTransform(EvtRuntime *);
 extern void mnuShopSaveFullTransform(EvtRuntime *);
 extern void mnuShopRestoreTransform(EvtRuntime *);
-extern void dds3SetLightColor(s32, s32, f32 *);
-extern void dds3SetLightDir(s32, s32, f32 *);
+extern void dds3SetLightColor(s32, s32, const f32 *);
+extern void dds3SetLightDir(s32, s32, const f32 *);
 extern void dds3SetAmbientColor(s32, f32 *);
 extern void evtSetSlotVectors(s32, EvtUnitVectorSlotState, evtUnitHandle_t *, const f32 *, const f32 *, const f32 *);
 

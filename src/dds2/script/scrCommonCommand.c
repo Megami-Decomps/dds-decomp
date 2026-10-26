@@ -34,7 +34,7 @@ extern char D_00412658[];
 extern s8 dds3PadBitTable[];
 
 
-void dds3SetLightColor(s32 blendFrames, s32 lightIndex, f32 *color);
+void dds3SetLightColor(s32 blendFrames, s32 lightIndex, const f32 *color);
 
 void dds3SetAmbientColor(s32 blendFrames, f32 *color);
 
@@ -347,7 +347,7 @@ INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_00412658);
 INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_00412668);
 
 const char scrSceneLightDirectionZeroWarning[] = "WARNING: SCENE_LIGHT_DIR length zero\n";
-extern void dds3SetLightDir(s32 blendFrames, s32 lightIndex, f32 *direction);
+extern void dds3SetLightDir(s32 blendFrames, s32 lightIndex, const f32 *direction);
 
 ScrCommandResult scrCommand_SCENE_LIGHT_DIR(void) {
     ScrVecW direction;
