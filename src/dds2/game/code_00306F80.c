@@ -15,6 +15,7 @@
 #include "itf.h"
 #include "fpu.h"
 #include "itf_grid_text.h"
+#include "itf_grid_text_color_api.h"
 #include "sdf_grid_seek_api.h"
 #include "sdf.h"
 #include "mnu.h"
@@ -1443,7 +1444,8 @@ void itfReverseSelectedGridScroll(GridTextWidget *owner, u32 steps) {
     }
 }
 
-s32 itfGetGridChildLayoutMode(GridTextWidget *widget, GridTextListItem *target) {
+ItfGridTextColorTableIndex itfGetGridTextColorTableIndex(const GridTextWidget *widget,
+                                                          const GridTextListItem *target) {
     u32 flags = widget->flags;
 
     if (flags & 2) {
@@ -1508,9 +1510,6 @@ void itfFormatGridValueEntryText(GridTextWidget *widget, GridTextListItem *entry
     }
 }
 
-extern void fldLmapSubmitPositionedCommandPacket(s32 x, s32 y, s32 z, s32 drawMode,
-                                                 const char *command, s32 surfaceIndex);
-
 /* Draw visible local-map rows and invoke the selected row callback once. */
 void itfDrawGridTextRows(s32 offsetX, s32 offsetY, s32 z, GridTextWidget *widget,
                    s32 surfaceIndex) {
@@ -1529,11 +1528,12 @@ void itfDrawGridTextRows(s32 offsetX, s32 offsetY, s32 z, GridTextWidget *widget
         if (offsetY < rowEnd) {
             if ((u16)widget->rows != 0) {
                 do {
-                    s32 layout = itfGetGridChildLayoutMode(widget, item);
-                    s32 drawMode = 0;
+                    ItfGridTextColorTableIndex rowColorTableIndex =
+                        itfGetGridTextColorTableIndex(widget, item);
+                    ItfGridTextColorTableIndex packetColorTableIndex = 0;
 
                     if (invokeSelected != 0) {
-                        drawMode = layout;
+                        packetColorTableIndex = rowColorTableIndex;
                     }
                     if (!(widget->flags & GRID_TEXT_HIDE_ROWS)) {
                         if (item == widget->selected && (widget->flags & GRID_TEXT_HIGHLIGHT_SELECTION)) {
@@ -1568,7 +1568,7 @@ void itfDrawGridTextRows(s32 offsetX, s32 offsetY, s32 z, GridTextWidget *widget
                         }
                         itfFormatGridValueEntryText(widget, item, text);
                         fldLmapSubmitPositionedCommandPacket(offsetX, offsetY, z,
-                                                             drawMode, text,
+                                                             packetColorTableIndex, text,
                                                              surfaceIndex);
                     }
                     if (item->select != NULL && item == widget->selected &&

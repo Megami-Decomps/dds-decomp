@@ -15,6 +15,7 @@
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "itf_grid_text.h"
+#include "itf_grid_text_color_api.h"
 #include "sdf_grid_seek_api.h"
 #include "sdf_sif_command.h"
 #include "kwln_task_lifecycle.h"
@@ -304,13 +305,15 @@ extern SdfPoolNode sdfGrOtTable[];
 #include "sdf_bordered_rectangle_packet.h"
 
 /* Build one positioned SIF command and submit it on the requested draw surface. */
-void fldLmapSubmitPositionedCommandPacket(s32 x, s32 y, s32 z, s32 drawMode, const char *command, s32 surfaceIndex) {
+void fldLmapSubmitPositionedCommandPacket(s32 x, s32 y, s32 z,
+                                          ItfGridTextColorTableIndex colorTableIndex,
+                                          const char *command, s32 surfaceIndex) {
     sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     SdfPoolNode *drawSurface;
     SifCommand packetHeader;
 
     sdfDrawTagInit(packetList);
-    sdfPktInit(&packetHeader, x + 0x7000, y + 0x7900, z, drawMode);
+    sdfPktInit(&packetHeader, x + 0x7000, y + 0x7900, z, colorTableIndex);
     sdfDrawTagLink(packetList, (u32)sdfDevPrintfEx(&packetHeader, command));
     drawSurface = &sdfGrOtTable[surfaceIndex];
     drawSurface->append(drawSurface, packetList);

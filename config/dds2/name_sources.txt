@@ -8078,7 +8078,7 @@
 0x00309A90	itfAdvanceSelectedGridScroll	inferred	Scrolls the selected grid node forward when enabled. [names_reviewed8.tsv]
 0x00309AD8	itfReverseGridScrollPosition	inferred	Subtracts one or more steps from the selected scroll position and wraps below its minimum.
 0x00309B48	itfReverseSelectedGridScroll	inferred	Scrolls the selected grid node backward when enabled. [names_reviewed8.tsv]
-0x00309B90	itfGetGridChildLayoutMode	inferred	Computes grid child layout mode from widget flags and child identity. [names_reviewed8.tsv]
+0x00309B90	itfGetGridTextColorTableIndex	inferred	Computes the sdfDevConsColorTable index used by the local-map row text packet.
 0x00309C00	itfFormatGridValueEntryText	inferred	confidence=high; src/dds2/game/code_00306F80.c:func_00309C00; Formats labeled decimal/hex/float entries or a custom formatter and optionally prefixes a decimal/hex row index. [names_qp9.tsv]
 0x00309DF8	itfDrawGridTextRows	inferred	Paired DDS1 visible-row renderer, including selection highlights and callback; called by the local-map list renderer.
 0x0030A048	itfFindGridNodeByKey	inferred	Searches the grid's linked nodes for the requested halfword key.

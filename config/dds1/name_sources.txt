@@ -7808,7 +7808,7 @@
 0x002C1D78	itfSetGridNumericItemDescriptor	inferred	Copies a numeric descriptor into the item, initializes its value and derives the formatted column width from mode and maximum.
 0x002C1F88	itfAdvanceSelectedGridScroll	inferred	Scrolls the selected grid node forward when enabled. [names_reviewed8.tsv]
 0x002C2040	itfReverseSelectedGridScroll	inferred	Scrolls the selected grid node backward when enabled. [names_reviewed8.tsv]
-0x002C2088	itfGetGridChildLayoutMode	inferred	Computes grid child layout mode from widget flags and child identity. [names_reviewed8.tsv]
+0x002C2088	itfGetGridTextColorTableIndex	inferred	Computes the sdfDevConsColorTable index used by the local-map row text packet.
 0x002C20F8	itfFormatGridValueEntryText	inferred	confidence=high; src/dds1/game/code_002BF790.c:func_002C20F8; Formats labeled decimal/hex/float entries or a custom formatter and optionally prefixes a decimal/hex row index. [names_qp9.tsv]
 0x002C22F0	itfDrawGridTextRows	inferred	Draws visible grid text rows, selection highlights and the selected-item callback; used by the local-map list renderer.
 0x002C2568	sdfGridSeekSelectedNodeByIndex	inferred	Traverses a grid node list to the selected index and tracks skipped nodes. [names_reviewed10.tsv]
