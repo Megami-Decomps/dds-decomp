@@ -52,10 +52,10 @@ extern char D_00425118[];
 extern char mnuMantraNumberFormat[]; /* "%d" */
 extern char D_004378B0[]; /* "---" */
 extern s32 mnuGetMantraSourceValue(u16);
-extern u32 frFontDrawTextVariantAAndMeasure(s32, s32, s32, u32, u8, char *, s32, s32);
-extern u32 frFontDrawTextVariantBAndMeasure(s32, s32, s32, u32, u8, char *, s32, s32);
-extern u32 frFontDrawStyledGlyphChainAndMeasure(s32, s32, s32, u32, u8, const u8 *, s32, s32);
-extern u32 frFontQueueTintedGlyphChainAndMeasure(s32, s32, s32, u32, u8, u16, FrFontTextBank *, s32, s32, s32);
+extern s32 frFontDrawTextVariantAAndMeasure(s32, s32, s32, u32, u8, char *, s32, s32);
+extern s32 frFontDrawTextVariantBAndMeasure(s32, s32, s32, u32, u8, char *, s32, s32);
+extern s32 frFontDrawStyledGlyphChainAndMeasure(s32, s32, s32, u32, u8, const u8 *, s32, s32);
+extern s32 frFontQueueTintedGlyphChainAndMeasure(s32, s32, s32, u32, u8, u16, FrFontTextBank *, s32, s32, s32);
 /* GS TEST packets carry a full-width register value; kind selects the surface. */
 extern void sdfSubmitGsTestOneRegisterPacket(u64, u32);
 extern void uiDrawActiveSurfaceRegion(s32);

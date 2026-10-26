@@ -1022,7 +1022,7 @@ s32 mtrDrawSelectionFadeAndScale(s32 x, s32 y, s32 depth, s32 alpha,
 }
 
 extern const s8 D_004262B0[];
-extern u32 frFontQueueTextAndOptionallyMeasure(s32, s32, u32, u32, s8, const u8 *, s32, s32);
+extern s32 frFontQueueTextAndOptionallyMeasure(s32, s32, u32, u32, s8, const u8 *, s32, s32);
 
 /* Draw the selected mantra's two sprites, refresh the profile panel opacity and queue the mantra name. */
 s32 mtrDrawSelectedMantraEntry(s32 x, s32 y, s32 z, s32 alpha, MnuStatusResource *resource, s32 drawContext) {

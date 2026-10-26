@@ -61,7 +61,7 @@ u32 frFontGetGlyphCellHeight(u8);
 extern u8 D_00436570;
 _FRQ *frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, _FRQ *head);
 _TEXT *frFontCreateGlyphFromCode(u16 glyphId, s32 fontIndexArg, u8 firstOption, u8 secondOption);
-u32 frGetStrWidth(_FRQ *parentGlyph);
+s32 frGetStrWidth(_FRQ *parentGlyph);
 
 _FRQ *frCombineFontRequest(_FRQ *previous, _FRQ *next);
 
@@ -980,8 +980,8 @@ s32 frStrLen(s8 *text) {
 }
 
 /* Sum one parent's child advances and signed spacing after every child, even
- * the last. Require a non-NULL parent; preserve the existing unsigned result. */
-u32 frGetStrWidth(_FRQ *parentGlyph) {
+ * the last. Require a non-NULL parent; return the signed total. */
+s32 frGetStrWidth(_FRQ *parentGlyph) {
     _TEXT *childGlyph = parentGlyph->firstChild;
     s32 totalAdvance = 0;
 
@@ -997,9 +997,9 @@ u32 frGetStrWidth(_FRQ *parentGlyph) {
     return totalAdvance;
 }
 
-/* Sum all child advances/spacing from the chain origin. This is neither a line
- * count nor a maximum line width; require a non-NULL glyphChain. */
-u32 frGetStrWidth2(_FRQ *glyphChain) {
+/* Sum all child advances and signed spacing from the chain origin. This is
+ * neither a line count nor a maximum line width; require a non-NULL glyphChain. */
+s32 frGetStrWidth2(_FRQ *glyphChain) {
     _FRQ *parentGlyph;
     _TEXT *childGlyph;
     s32 totalAdvance = 0;

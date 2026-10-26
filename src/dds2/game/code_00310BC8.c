@@ -340,17 +340,17 @@ void sdfFontRegisterShort(s32 x, s32 y, u32 colors, const u8 *text) {
     frDestroyFontRequestAfter(handle);
 }
 
-u32 frFontMeasureAndQueueGlyph(s32 x, s32 y, s32 depth, u32 colors, const u8 *text, s32 option) {
+s32 frFontMeasureAndQueueGlyph(s32 x, s32 y, s32 depth, u32 colors, const u8 *text, s32 option) {
     _FRQ *handle = itfCreateConvertedTextGlyph(x << 4, y << 3, depth, colors, text, 0);
-    u32 result = frGetStrWidth(handle);
+    s32 result = frGetStrWidth(handle);
     frFontDrawGlyphChain(handle, 1, option);
     frDestroyFontRequestAfter(handle);
     return result;
 }
 
-u32 frFontQueueTextAndOptionallyMeasure(s32 x, s32 y, u32 depth, u32 colors, s8 type, const u8 *encodedText, s32 flag, s32 option) {
+s32 frFontQueueTextAndOptionallyMeasure(s32 x, s32 y, u32 depth, u32 colors, s8 type, const u8 *encodedText, s32 flag, s32 option) {
     _FRQ *handle = frFontBuildGlyphChain((const char *)encodedText, 0, type, 0, 0);
-    u32 result = 0;
+    s32 result = 0;
     frSetFontColor(handle, colors);
     frSetDrawPosition(handle, x << 4, y << 3);
     frSetPriority(handle, depth);
@@ -365,9 +365,9 @@ u32 frFontQueueTextAndOptionallyMeasure(s32 x, s32 y, u32 depth, u32 colors, s8 
     return result;
 }
 
-u32 frFontDrawStyledGlyphChainAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, const u8 *text, s32 flag, s32 option) {
+s32 frFontDrawStyledGlyphChainAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, const u8 *text, s32 flag, s32 option) {
     _FRQ *handle = itfCreateConvertedTextGlyph(x << 4, y << 3, z, w, text, 0);
-    u32 result = 0;
+    s32 result = 0;
     frSetFontColorNo(handle, flags);
     if (flag & 0x100) {
         frSetFontSpace(handle, flag & 0xFF);
@@ -380,9 +380,9 @@ u32 frFontDrawStyledGlyphChainAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, c
     return result;
 }
 
-u32 frFontDrawTextVariantAAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, char *text, s32 flag, s32 option) {
+s32 frFontDrawTextVariantAAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, char *text, s32 flag, s32 option) {
     _FRQ *handle = itfCreateTightFont3TextGlyph(x << 4, y << 3, z, w, text, 0);
-    u32 result = 0;
+    s32 result = 0;
     frSetFontColorNo(handle, flags);
     if (flag & 0x100) {
         frSetFontSpace(handle, flag & 0xFF);
@@ -395,9 +395,9 @@ u32 frFontDrawTextVariantAAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, char 
     return result;
 }
 
-u32 frFontDrawTextVariantBAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, char *text, s32 flag, s32 option) {
+s32 frFontDrawTextVariantBAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, char *text, s32 flag, s32 option) {
     _FRQ *handle = itfCreateFont2TextGlyph(x << 4, y << 3, z, w, text, 0);
-    u32 result = 0;
+    s32 result = 0;
     frSetFontColorNo(handle, flags);
     if (flag & 0x100) {
         frSetFontSpace(handle, flag & 0xFF);
@@ -410,9 +410,9 @@ u32 frFontDrawTextVariantBAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, char 
     return result;
 }
 
-u32 frFontQueueTintedGlyphChainAndMeasure(s32 x, s32 y, s32 depth, u32 colors, u8 opacity, u16 textId, FrFontTextBank *bank, s32 layoutFlags, s32 flag, s32 option) {
+s32 frFontQueueTintedGlyphChainAndMeasure(s32 x, s32 y, s32 depth, u32 colors, u8 opacity, u16 textId, FrFontTextBank *bank, s32 layoutFlags, s32 flag, s32 option) {
     _FRQ *handle = itfDrawBankTextWithLayoutFlags(x << 4, y << 3, depth, textId, bank, layoutFlags);
-    u32 result = 0;
+    s32 result = 0;
     frSetFontColorNo(handle, opacity);
     frSetFontColor(handle, colors);
     if (flag & 0x100) {
