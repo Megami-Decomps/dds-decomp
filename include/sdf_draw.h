@@ -235,7 +235,7 @@ typedef struct SdfMotionCommand {
             u16 family;
         } binding;
     };
-    u32 targetIndex;
+    s32 targetIndex;
 } SdfMotionCommand;
 
 typedef char SdfMotionCommand_size_must_be_8[
