@@ -22,6 +22,7 @@
 #include "pty_frontline_promotion_api.h"
 #include "dat_unit_has_skill_api.h"
 #include "pty_item_quantity_update_view.h"
+#include "pty_record_slot_value_api.h"
 #include "eff_random_mod.h"
 #include "btl.h"
 #include "scr_integer_return_value_api.h"
@@ -166,8 +167,6 @@ DatCalculatedStatValue datGetClampedProfileAdjustedStat(
     if (adjustedStat >= DAT_PROFILE_STAT_LIMIT) adjustedStat = DAT_PROFILE_STAT_MAX;
     return adjustedStat;
 }
-extern s32 ptyGetCombinedRecordAndSlotValue(s32 id, s32 slot);
-
 /* Only an exact masked status of 0x1000 forces one. Otherwise add the
  * record/slot adjustment to the profile stat, then clamp to 0..99 (DDS2 only). */
 DatCalculatedStatValue datGetStatWithStatusOverride(
@@ -1696,12 +1695,12 @@ EvtRandomStatusClearResult evtClearRandomStatusFlags(void) {
     return clearedAny;
 }
 
-s32 ptyGetCombinedRecordAndSlotValue(s32 itemId, s32 statIndex) {
+s32 ptyGetCombinedRecordAndSlotValue(s32 itemId, DatBaseStatIndex baseStatIndex) {
     s32 itemStatIndex = itemId - 0xC0;
     if (itemStatIndex <= 0) {
         return 0;
     }
-    return D_00435E3C[itemStatIndex][statIndex] + DDS3_GBWK->itemStatBonuses[itemStatIndex][statIndex];
+    return D_00435E3C[itemStatIndex][baseStatIndex] + DDS3_GBWK->itemStatBonuses[itemStatIndex][baseStatIndex];
 }
 
 void ptyAddClampedEntryValue(datUnitWork_t *entry, s32 statIndex, s32 amount) {

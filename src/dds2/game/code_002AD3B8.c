@@ -14,6 +14,7 @@
 #include "mnu_shop.h"
 #include "dat_state.h"
 #include "dat_assigned_item_id.h"
+#include "pty_record_slot_value_api.h"
 #include "dat_command.h"
 #include "mdl_flag_api.h"
 
@@ -904,7 +905,6 @@ s32 mnuHandleStaffSelectionPageInput(dds3ProcessID_t *task) {
     return 0;
 }
 
-extern s32 ptyGetCombinedRecordAndSlotValue(s32 id, s32 slot);
 extern char D_00437BC0[];
 
 typedef struct MenuStaffGridCell {

@@ -8,6 +8,7 @@
 #include "fpu.h"
 #include "common.h"
 #include "dat_assigned_item_id.h"
+#include "pty_record_slot_value_api.h"
 #include "sdf_vu0.h"
 #include "pty_bullet_item_count_api.h"
 #include "sdf_vu_matrix.h"
@@ -118,8 +119,6 @@ extern void mnuInitializeQueuedCommandEffect(MenuQueuedCommand *entry);
 extern void mnuInitRandomLineEffect(MenuQueuedCommand *entry);
 
 extern s32 mnuLookupRangeEntry(u16);
-
-extern s32 ptyGetCombinedRecordAndSlotValue(s32 id, s32 slot);
 
 extern void ptyRecomputeMaxHpMp(datUnitWork_t *);
 

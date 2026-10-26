@@ -7,6 +7,7 @@
 #include "mnu_list.h"
 #include "mnu_shop.h"
 #include "dat_command.h"
+#include "pty_record_slot_value_api.h"
 #include "brs_icon_record.h"
 /* Declared before first use (were implicit int). */
 extern void mnuDrawAndAdvanceScrollingStrips(s32 x, s32 y, s32 z, s32 opacity, DspScrollingStripState *state, s32 surfaceIndex);
@@ -187,7 +188,6 @@ void mnuDrawWindowBorderAndScrollBar(s32 x, s32 y, s32 unused, MenuTerminalConte
 
 extern u32 evtGetIndexedEventRecordId(s32);
 extern s32 ptyCountBulletItem(s32);
-extern s32 ptyGetCombinedRecordAndSlotValue(s32 id, s32 slot);
 extern u32 itfCreateTightFont3TextGlyph(s32, s32, s32, u32, char *, s32);
 extern char D_00437968[];
 
