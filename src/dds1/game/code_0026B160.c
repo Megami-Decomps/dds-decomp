@@ -2,6 +2,7 @@
 #include "kwln_fade.h"
 #include "sdf_resource.h"
 #include "kwln_task_lifecycle.h"
+#include "kwln_task_runner.h"
 #include "mnu.h"
 #include "mnu_sprite_resource.h"
 
@@ -79,7 +80,7 @@ extern void fldPrepareDeferredSceneTransition(void);
 extern void mnuDrawMovieMenuSpriteSlot1A(s32 alpha);
 extern void dds3FadeClear(void);
 
-s32 mnuUpdateMovieMenuTask(dds3ProcessID_t *task) {
+KwlnTaskUpdateResult mnuUpdateMovieMenuTask(dds3ProcessID_t *task) {
     s32 alpha;
     s32 menuAction;
     s32 selectedItem;
@@ -497,7 +498,7 @@ s32 mnuUpdateMovieMenuTask(dds3ProcessID_t *task) {
         mnuDrawMovieMenuBackgroundQuad(0x80);
         break;
     }
-    return 0;
+    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 extern dds3ProcessID_t *mnuCreateTitleMenuTask(s32 mode);

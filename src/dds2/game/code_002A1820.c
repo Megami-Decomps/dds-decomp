@@ -11,6 +11,7 @@
 #include "sdf.h"
 #include "sdf_semaphore_api.h"
 #include "kwln.h"
+#include "kwln_task_runner.h"
 #include "kwln_task_create.h"
 #include "kwln_fade.h"
 #include "mnu_title_effect.h"
@@ -726,7 +727,7 @@ void mnuLoadTitleMenuAssets(void) {
 extern void mnuStopTitleMovieDraw(void);
 extern void mnuRecreateMenuSelectionList(void);
 extern void mnuSelectMenuListCursorByAdvance(s32);
-extern s32 mnuUpdateTitleMenuTask(dds3ProcessID_t *);
+extern KwlnTaskUpdateResult mnuUpdateTitleMenuTask(dds3ProcessID_t *);
 extern u32 D_00435CBC;
 
 dds3ProcessID_t *mnuCreateTitleMenuTask(s32 mode) {
@@ -933,7 +934,7 @@ extern s32 fileLoadStateChanged(void);
 extern void fileCacheSlotFlagsFromState(void);
 extern void fileRestoreSlotFlagsToState(void);
 
-s32 mnuUpdateTitleMenuTask(dds3ProcessID_t *task) {
+KwlnTaskUpdateResult mnuUpdateTitleMenuTask(dds3ProcessID_t *task) {
     s32 volume;
     s32 menuAction;
     s32 selectedItem;
@@ -1294,7 +1295,7 @@ s32 mnuUpdateTitleMenuTask(dds3ProcessID_t *task) {
     mnuAdvanceSlideBarValue(&titleWork->barB, 0x52);
     mnuAdvanceSlideBar(&titleWork->paired, 0x53);
     mnuDrawAndAdvanceMovieMenuBar(&titleWork->bar, 0x53);
-    return 0;
+    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 u32 mnuOpenTitleMenuForMode(s32 mode) {
