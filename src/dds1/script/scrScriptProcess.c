@@ -44,7 +44,7 @@ dds3ProcessID_t *scrStartScriptProcess(u32 priority, scrProcessWork_s *process)
     return task;
 }
 
-void dds3GlobalWorkClearFlags(void)
+void scrClearProcessGlobals(void)
 {
     s32 globalClearCountdown;
     /* Countdown with a forward index; gcc keeps a single pointer (see asm). */

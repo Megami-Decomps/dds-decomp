@@ -289,7 +289,7 @@
 0x0010BC40	fldFlowParse	inferred	SMT3HD name via SLUS_209.11 0x00109B48, reloc-identical; was bfParseFLW0
 0x0010BD50	scrLoadScriptFile	inferred	SMT3HD name via SLUS_209.11 0x00109C58, reloc-identical; was scrOpenProcessFromResource
 0x0010BDB0	scrStartScriptProcess	inferred	SMT3HD name via SLUS_209.11 0x00109CB8, reloc-identical; was scrProcCreateTask
-0x0010BE08	dds3GlobalWorkClearFlags	inferred	SMT3HD name via SLUS_209.11 0x00109D10, reloc-identical; was scrClearProcessGlobals
+0x0010BE08	scrClearProcessGlobals	inferred	SMT3HD name via SLUS_209.11 0x00109D10, reloc-identical; clears 256 integer and float script globals; was dds3GlobalWorkClearFlags
 0x0010BE40	scrStartScriptByName	inferred	SMT3HD name via SLUS_209.11 0x00109D48, shared-hash-in-run; was scrCreateProcessTaskFromResource
 0x0010BE90	scrStartScript2	inferred	SMT3HD name via SLUS_209.11 0x00109D98, shared-hash-in-run; was scrCreateTaskForProcessId
 0x0010BEE0	scrRunScriptEx	inferred	SMT3HD name via SLUS_209.11 0x00109DE8, reloc-identical; was scrCreateTaskFromContextParameters
