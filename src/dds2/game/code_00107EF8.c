@@ -36,6 +36,7 @@
 #include "sdf_general_heap_api.h"
 #include "sdf_sif_command.h"
 #include "scr.h"
+#include "scr_instruction_stream_api.h"
 #include "bf_flw0_header.h"
 #include "kwln_task_lifecycle.h"
 #include "brs_task.h"
@@ -1974,7 +1975,7 @@ INCLUDE_RODATA(const s32, "game/code_00107EF8", D_004113A0);
 INCLUDE_RODATA(const s32, "game/code_00107EF8", D_004113B8);
 
 scrProcessWork_s *bfContextCreate(BfFlw0Header *header, ScrSection *sections, ScrLabel *procedures,
-                        ScrLabel *labels, ScrInstr *instructions, struct ItfMesSub *auxiliaryData,
+                        ScrLabel *labels, const ScrInstr *instructions, struct ItfMesSub *auxiliaryData,
                         const char *strings, ScrProcedureIndex procedureIndex) {
     scrProcessWork_s *process;
     s32 i;
@@ -2004,7 +2005,7 @@ scrProcessWork_s *bfContextCreate(BfFlw0Header *header, ScrSection *sections, Sc
     }
     process->sections = sections;
     process->labels = labels;
-    process->instructions = instructions;
+    process->instructions = (ScrInstr *)instructions;
     process->strings = strings;
     process->procedureIndex = procedureIndex;
     process->resourceIndex = -1;
@@ -2049,7 +2050,7 @@ scrProcessWork_s *fldFlowParse(BfFlw0Header *header, ScrProcedureIndex procedure
     ScrSection *sections;
     ScrLabel *procedures = NULL;
     ScrLabel *labels = NULL;
-    ScrInstr *instructions = NULL;
+    const u8 *instructionSection = NULL;
     struct ItfMesSub *auxiliaryData = NULL;
     const char *strings = NULL;
     s32 i;
@@ -2067,7 +2068,7 @@ scrProcessWork_s *fldFlowParse(BfFlw0Header *header, ScrProcedureIndex procedure
                 labels = (ScrLabel *)((u8 *)header + sections[i].offset);
                 break;
             case BF_FLW0_SECTION_INSTRUCTIONS:
-                instructions = (ScrInstr *)((u8 *)header + sections[i].offset);
+                instructionSection = (const u8 *)header + sections[i].offset;
                 break;
             case BF_FLW0_SECTION_AUXILIARY:
                 if (sections[i].count != 0) {
@@ -2081,7 +2082,8 @@ scrProcessWork_s *fldFlowParse(BfFlw0Header *header, ScrProcedureIndex procedure
                 return 0;
         }
     }
-    return bfContextCreate(header, sections, procedures, labels, instructions,
+    return bfContextCreate(header, sections, procedures, labels,
+                           (const ScrInstr *)instructionSection,
                            auxiliaryData, strings, procedureIndex);
 }
 

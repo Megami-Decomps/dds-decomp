@@ -9,6 +9,7 @@
 #include "kwln_process_registration.h"
 #include "pcp_vu0.h"
 #include "scr.h"
+#include "scr_instruction_stream_api.h"
 #include "scr_command_result.h"
 #include "scr_command_timer_api.h"
 #include "scr_string_parameter_api.h"

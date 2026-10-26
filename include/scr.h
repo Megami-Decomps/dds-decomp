@@ -115,9 +115,6 @@ void scrRunScript(scrProcessWork_s *context);
 s32 scrScriptProcess(dds3ProcessID_t *task);
 ScrTraceResult scrTraceCode(scrProcessWork_s *context);
 void scrProcDestroyTask(scrProcessWork_s *process);
-scrProcessWork_s *bfContextCreate(struct BfFlw0Header *header, ScrSection *sections, ScrLabel *procedures,
-                        ScrLabel *labels, ScrInstr *instructions, struct ItfMesSub *auxiliaryData,
-                        const char *strings, ScrProcedureIndex procedureIndex);
 scrProcessWork_s *scrCreateTaskWithDefaultOption(struct BfFlw0Header *header);
 void PushInt(scrProcessWork_s *script, s32 value);
 void PushFloat(scrProcessWork_s *script, f32 value);
@@ -125,11 +122,6 @@ void PushStr(scrProcessWork_s *script, const char *value);
 void PushRet(scrProcessWork_s *script, ScrProgramCounter returnAddress);
 s32 PopInt(scrProcessWork_s *script);
 f32 PopFloat(scrProcessWork_s *script);
-dds3ProcessID_t *scrRunScriptEx(u32 priority, struct BfFlw0Header *header,
-    ScrSection *sections, ScrLabel *procedures, ScrLabel *labels,
-    ScrInstr *instructions, struct ItfMesSub *auxiliaryData, const char *strings, ScrProcedureIndex procedureIndex);
-
-
 /* Command callback plus operand count (0x8); DDS1 script/scrTraceCode.c. */
 typedef struct ScrCommand {
     ScrCommandResult (*func)(void);

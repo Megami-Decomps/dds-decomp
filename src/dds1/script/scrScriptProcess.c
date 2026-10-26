@@ -6,6 +6,7 @@
 #include "kwln_task_create.h"
 #include "sdf_resource.h"
 #include "scr.h"
+#include "scr_instruction_stream_api.h"
 #include "scr_work_task_api.h"
 #include "bf_flw0_header.h"
 #include "sdf.h"
@@ -76,13 +77,13 @@ scrProcessWork_s *scrCreateTaskWithDefaultOption(BfFlw0Header *header)
 
 dds3ProcessID_t *scrRunScriptEx(u32 priority, BfFlw0Header *header,
     ScrSection *procedureSection, ScrLabel *procedures, ScrLabel *labels,
-    ScrInstr *instructions, struct ItfMesSub *auxiliaryData, const char *strings, ScrProcedureIndex procedureIndex)
+    const ScrInstr *instructions, struct ItfMesSub *auxiliaryData, const char *strings, ScrProcedureIndex procedureIndex)
 {
     return scrStartScriptProcess(priority, bfContextCreate(header, procedureSection, procedures, labels, instructions, auxiliaryData, strings, procedureIndex));
 }
 
 scrProcessWork_s *scrCreateProcessAtFirstProcedure(BfFlw0Header *header, ScrSection *procedureSection,
-    ScrLabel *procedures, ScrLabel *labels, ScrInstr *instructions,
+    ScrLabel *procedures, ScrLabel *labels, const ScrInstr *instructions,
     struct ItfMesSub *auxiliaryData, const char *strings)
 {
     return bfContextCreate(header, procedureSection, procedures, labels, instructions, auxiliaryData, strings, 0);
