@@ -13,8 +13,7 @@
 
 enum {
     EFF_BATTLE_COPY_TRIGGER_FRAME = 0,
-    EFF_BATTLE_MINIMUM_RAMP_END_FRAME = 1,
-    EFF_BATTLE_PARAMETER_WORK_CAPACITY = 0x3C
+    EFF_BATTLE_MINIMUM_RAMP_END_FRAME = 1
 };
 
 
@@ -32,7 +31,7 @@ extern f32 D_00352860[4];
 void effBTLCutDelete(effBTLCutHandle_t *owner) {
     s32 workIndex;
 
-    for (workIndex = 0; workIndex < EFF_BATTLE_PARAMETER_WORK_CAPACITY; workIndex++) {
+    for (workIndex = 0; workIndex < EFF_BATTLE_PARAMETER_ENTRY_CAPACITY; workIndex++) {
         if (owner->parameterWorks[workIndex] != 0) {
             dds3EffectPartDelete(owner->parameterWorks[workIndex]);
         }
@@ -449,21 +448,23 @@ void effBTLPartCreate(SoundMixer *destination, SoundMixer *source) {
             s32 remainingEntries = entryCountForBank;
 
             do {
-                if (entry->paramKind != 0xFFFE) {
-                    if (entry->paramKind == 0xFFFF) {
-                        u32 index = entry->value.sourceOffset;
-                        u32 sourceBank = index / 0x3C;
-                        u32 sourceEntryIndex = index % 0x3C;
-                        EffBattleEntry *sourceEntry = &destination->banks[sourceBank].list.entries[sourceEntryIndex];
-                        effPartHandle_t *duplicatedWork = dds3EffectPartCopy(sourceEntry->value.work);
-                        u16 sourceKind = sourceEntry->paramKind;
+                if (entry->parameterKind != EFF_BATTLE_PARAMETER_KIND_NO_WORK) {
+                    if (entry->parameterKind == EFF_BATTLE_PARAMETER_KIND_COPY_SOURCE_ENTRY) {
+                        u32 copySourceIndex = entry->value.copySourceIndex;
+                        u32 sourceBankIndex = copySourceIndex / EFF_BATTLE_PARAMETER_ENTRY_CAPACITY;
+                        u32 sourceEntryIndex = copySourceIndex % EFF_BATTLE_PARAMETER_ENTRY_CAPACITY;
+                        EffBattleEntry *copySourceEntry =
+                            &destination->banks[sourceBankIndex].list.entries[sourceEntryIndex];
+                        effPartHandle_t *duplicatedWork = dds3EffectPartCopy(copySourceEntry->value.work);
+                        EffBattleParameterKind sourceKind = copySourceEntry->parameterKind;
 
                         entry->value.work = duplicatedWork;
-                        entry->paramKind = sourceKind;
+                        entry->parameterKind = sourceKind;
                     } else {
-                        entry->value.work = dds3EffectPartCreate(entry->paramKind, sourceBytes + entry->value.sourceOffset);
+                        entry->value.work = dds3EffectPartCreate(
+                            entry->parameterKind, sourceBytes + entry->value.mixerOffset);
                     }
-                    if (entry->paramKind == EFF_PARAM_WORK_KIND_EFFECT_NODE) {
+                    if (entry->parameterKind == EFF_PARAM_WORK_KIND_EFFECT_NODE) {
                         entry->zeroKindCount++;
                     }
                 }
@@ -486,7 +487,7 @@ void effBTLPartDelete(SoundMixer *mixer) {
             s32 remaining = entryCount;
 
             do {
-                if (entry->paramKind != 0xFFFE) {
+                if (entry->parameterKind != EFF_BATTLE_PARAMETER_KIND_NO_WORK) {
                     dds3EffectPartDelete(entry->value.work);
                 }
                 entry++;
@@ -497,4 +498,3 @@ void effBTLPartDelete(SoundMixer *mixer) {
 }
 
 INCLUDE_SDATA(const s32, "effect/effBattle", effFieldColorFlags);
-

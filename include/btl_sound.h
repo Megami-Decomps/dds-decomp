@@ -8,6 +8,10 @@
 
 enum { BTL_SOUND_ENTRY_COUNT = 0x31 };
 
+/* Each effect bank addresses this many parameter rows when flattening a
+ * bank/entry pair into the copy-source index stored in an entry. */
+enum { EFF_BATTLE_PARAMETER_ENTRY_CAPACITY = 0x3C };
+
 /* One SYSEFF archive slot. The loader tests enabled, stores the archive payload
  * pointer from node+0x0C, and retains node+0x08 without interpreting it. */
 typedef struct BattleSoundArchiveEntry {
@@ -30,13 +34,22 @@ typedef char BattleSoundArchiveTable_extent_must_be_0x24C[
 typedef struct effBTLCutHandle_t effBTLCutHandle_t;
 typedef void (*BattleEffectCallback)(effBTLCutHandle_t *effect);
 
+/* Serialized parameter selector: an effect-work kind or one of the row states
+ * below. Keep the wire/storage width at 16 bits. */
+typedef u16 EffBattleParameterKind;
+enum {
+    EFF_BATTLE_PARAMETER_KIND_NO_WORK = 0xFFFE,
+    EFF_BATTLE_PARAMETER_KIND_COPY_SOURCE_ENTRY = 0xFFFF
+};
+
 typedef union EffBattleParameterValue {
-    u32 sourceOffset;
+    u32 mixerOffset; /* Effect-work payload offset from the source mixer. */
+    u32 copySourceIndex; /* Bank * EFF_BATTLE_PARAMETER_ENTRY_CAPACITY + entry. */
     struct effPartHandle_t *work;
 } EffBattleParameterValue;
 
 typedef struct EffBattleEntry {
-    u16 paramKind;                 /* 0x00 */
+    EffBattleParameterKind parameterKind; /* 0x00: work kind or row-state sentinel. */
     u8 pad02[2];
     EffBattleParameterValue value; /* 0x04 */
     EffectVectorRequest aimParams;        /* 0x08 */
@@ -128,7 +141,7 @@ struct effBTLCutHandle_t {
     u8 pad1E[2];
     s32 unk20;
     struct EffBattleEntryList *list; /* 0x24 */
-    struct effPartHandle_t *parameterWorks[0x3C]; /* 0x28 */
+    struct effPartHandle_t *parameterWorks[EFF_BATTLE_PARAMETER_ENTRY_CAPACITY]; /* 0x28 */
     BattleEffectCallback sourceFrameCallback; /* 0x118 */
     BattleEffectCallback triggerFrameCallback; /* 0x11C */
     u32 unk120;

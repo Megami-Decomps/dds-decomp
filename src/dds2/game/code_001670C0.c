@@ -654,7 +654,7 @@ effBTLCutHandle_t *effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, struct
     if (entryCount != 0) {
         remaining = entryCount;
         do {
-            if (entry->paramKind != 0xFFFE) {
+            if (entry->parameterKind != EFF_BATTLE_PARAMETER_KIND_NO_WORK) {
                 *workSlot = dds3EffectPartCopy(entry->value.work);
                 if (callbackEnabled != 0 && owner != NULL &&
                     (entry->aimParams.kind == 0 || entry->aimParams.kind == 4)) {
