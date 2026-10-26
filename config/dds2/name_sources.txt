@@ -6622,7 +6622,7 @@
 0x002AB8C0	mnuDrawStaffItemListEntry	inferred	Forwards a staff-item list row to the camp-grid renderer with mode 0x200; registered by mnuBuildStaffItemWindows. DDS1 twin 0x00272BC0. [LiteH menu naming batch 21]
 0x002AB8F0	mnuBuildStaffItemWindows	inferred	Inferred from the current C implementation in game/code_002AB890.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x002ABCD0	mnuDestroyResourceOwnerWindowContainers	inferred	Destroys both window containers held in a menu resource set. [names_reviewed17.tsv]
-0x002ABD08	mnuIsStaffWindowReadyForItem	inferred	L69; sources=names_pending_main.tsv [names_qp10.tsv]
+0x002ABD08	mnuHasStaffWindowEntriesForItem	inferred	renamed from inferred mnuIsStaffWindowReadyForItem; removes an unavailable item, then reports whether any staff-window entries remain (previous provenance: L69; sources=names_pending_main.tsv [names_qp10.tsv]).
 0x002ABD60	mnuCreateStaffBulletItemWindow	inferred	Matched DDS2 staff bullet-item window constructor; DDS1 counterpart mnuCreateStaffBulletItemWindow; creates and populates the bullet-item inventory window using DDS2 layout and item bounds.
 0x002ABEB0	mnuDestroyStaffBulletItemWindow	inferred	Destroys the window stored at staff item-list slot 2. LiteH-2 menu naming batch 2.
 0x002ABED8	mnuRefreshStaffBulletItemList	inferred	Rebuilds/reorders the staff bullet-item window after inventory/equipment changes; DDS1 twin 0x00273220. [LiteH menu naming batch 14]

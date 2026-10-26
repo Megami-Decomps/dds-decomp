@@ -6375,7 +6375,7 @@
 0x00272BC0	mnuDrawStaffItemListEntry	inferred	Draws a staff-item list row, displaying its owned quantity when present or both staff-item slots otherwise; registered in the regular and bullet-item windows. DDS2 counterpart 0x002AB8C0 forwards to the camp-grid renderer with mode 0x200. [LiteH menu naming batch 21]
 0x00272D50	mnuCreateStaffItemWindow	inferred	Inferred from the current C implementation in game/code_00272D50.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00273020	mnuReleaseStaffPrimaryWindows	inferred	Releases the first two window handles in staff display resources.
-0x00273050	mnuIsStaffWindowReadyForItem	inferred	Checks the selected item record before testing the staff window remaining count. [names_reviewed16.tsv]
+0x00273050	mnuHasStaffWindowEntriesForItem	inferred	renamed from inferred mnuIsStaffWindowReadyForItem; removes an unavailable item, then reports whether any staff-window entries remain (previous name review: names_reviewed16.tsv).
 0x002730A0	mnuCreateStaffBulletItemWindow	inferred	Fam_Mid3
 0x00273200	mnuReleaseStaffExtraWindow	inferred	Releases the third window handle in staff display resources.
 0x00273220	mnuRefreshStaffBulletItemList	inferred	Rebuilds/reorders the staff bullet-item window after inventory/equipment changes; DDS2 twin 0x002ABED8. [LiteH menu naming batch 14]

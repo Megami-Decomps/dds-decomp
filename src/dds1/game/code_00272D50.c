@@ -150,9 +150,10 @@ void mnuReleaseStaffPrimaryWindows(StaffDisplayContext *context) {
 
 extern void mnuRemoveWindowListCursorNode(MenuWindowContainer *);
 
-/* Refresh the bullet-item window if inventory is empty; return whether the
- * window still has entries. */
-s32 mnuIsStaffWindowReadyForItem(s32 itemId, StaffDisplayContext *context) {
+/* Remove the item when its inventory reaches zero; report whether any window
+ * entries remain. */
+MnuStaffWindowEntryPresence mnuHasStaffWindowEntriesForItem(
+    s32 itemId, StaffDisplayContext *context) {
     StaffWindowResources *resources = context->resources;
 
     if (DDS3_GBWK->inventory.counts[itemId & 0xFFFF] == 0) {

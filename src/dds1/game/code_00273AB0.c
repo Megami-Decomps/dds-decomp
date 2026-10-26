@@ -126,8 +126,9 @@ s32 mnuStaffImageExitA(dds3ProcessID_t *task) {
         item = menu->pendingItem;
         if (item != 0) {
             menu->pendingItem = 0;
-            if (mnuIsStaffWindowReadyForItem((u16)item,
-                                             (struct StaffDisplayContext *)context) == 0) {
+            if (mnuHasStaffWindowEntriesForItem((u16)item,
+                                                (struct StaffDisplayContext *)context) ==
+                MNU_STAFF_WINDOW_ENTRIES_ABSENT) {
                 mnuSetPopupEntry(&context->popupState, mnuCampItemCategoryPopupEntry);
             }
         }
@@ -287,8 +288,9 @@ s32 mnuHandleStaffItemUseInput(dds3ProcessID_t *task) {
     if (buttons & MNU_STAFF_INPUT_CONFIRM) {
         buttons = mnuUseStaffItem(itemId, (struct StaffDisplayContext *)staff) == 0 ? 0x8000 : 0;
         menu->primaryObject->list->cursor->sortKeyPrimary = DDS3_GBWK->inventory.counts[itemId];
-        if (mnuIsStaffWindowReadyForItem((u16)itemId,
-                                         (struct StaffDisplayContext *)staff) == 0) {
+        if (mnuHasStaffWindowEntriesForItem((u16)itemId,
+                                            (struct StaffDisplayContext *)staff) ==
+            MNU_STAFF_WINDOW_ENTRIES_ABSENT) {
             mnuSetPopupEntryFlagged(&staff->popupState, mnuCampItemCategoryPopupEntry);
             mnuClearListFlags(0, &staff->pageWindow);
         } else {

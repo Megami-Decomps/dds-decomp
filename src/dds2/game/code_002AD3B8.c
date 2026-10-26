@@ -378,7 +378,8 @@ s32 mnuStaffUseSelectedItemTask(dds3ProcessID_t *task) {
     if (buttons & MNU_STAFF_INPUT_CONFIRM) {
         buttons = mnuUseStaffItem(item, context) ? 0 : 0x8000;
         menu->windows[0]->list->cursor->sortKeyPrimary = DDS3_GBWK->inventory.counts[item];
-        if (mnuIsStaffWindowReadyForItem(item & 0xFFFF, context) == 0) {
+        if (mnuHasStaffWindowEntriesForItem(item & 0xFFFF, context) ==
+            MNU_STAFF_WINDOW_ENTRIES_ABSENT) {
             mnuSetPopupEntryFlagged(popup, mnuCampItemCategoryPopupEntry);
             mnuClearActionFlags(0, party);
             mnuBeginWindowFadeTransition(0, &context->fade);

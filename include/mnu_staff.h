@@ -13,6 +13,13 @@ s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor);
 /* Staff-list nodes with unavailable entries carry this lifecycle flag. */
 #define MNU_STAFF_NODE_UNAVAILABLE 1
 
+/* Updating the selected item reports whether any staff-window entries remain. */
+typedef s32 MnuStaffWindowEntryPresence;
+enum {
+    MNU_STAFF_WINDOW_ENTRIES_ABSENT = 0,
+    MNU_STAFF_WINDOW_ENTRIES_PRESENT = 1
+};
+
 struct EffectList;
 struct MenuWindowContainer;
 /* Destroy the window's owned list, optional sprite resources, and window. */
@@ -65,8 +72,8 @@ u32 mnuHasSelectedListNodeId(struct dds3ProcessID_t *callback);
 void mnuClearListFlags(s32 which, MenuPageWindow *page);
 struct StaffDisplayContext;
 s32 mnuUseStaffItem(s32 itemId, struct StaffDisplayContext *context);
-s32 mnuIsStaffWindowReadyForItem(s32 itemId,
-                                 struct StaffDisplayContext *context);
+MnuStaffWindowEntryPresence mnuHasStaffWindowEntriesForItem(
+    s32 itemId, struct StaffDisplayContext *context);
 #endif
 
 #ifdef VERSION_DDS2
@@ -83,7 +90,8 @@ void mnuUpdateAndDrawWindowTransition(s32 x, s32 y, s32 depth,
 void mnuClearActionFlags(s32 kind, MenuPageWindow *page);
 s32 mnuUseStaffItem(s32 itemId, MenuStaffContext *context);
 void mnuApplyResourceSelection(s32 itemId, MenuStaffContext *context);
-s32 mnuIsStaffWindowReadyForItem(s32 itemId, MenuStaffContext *context);
+MnuStaffWindowEntryPresence mnuHasStaffWindowEntriesForItem(
+    s32 itemId, MenuStaffContext *context);
 s32 mnuGetAbilityTargetCategory(u16 commandId);
 s32 mnuGetMatchingPartyEntryMask(struct datUnitWork_t *entry);
 s32 mnuFindMatchingPartyEntryIndex(struct datUnitWork_t *entry);

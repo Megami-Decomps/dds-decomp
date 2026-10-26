@@ -140,7 +140,10 @@ void mnuDestroyResourceOwnerWindowContainers(MenuStaffContext *object) {
 
 extern void mnuRemoveWindowListCursorNode(MenuWindowContainer *);
 
-s32 mnuIsStaffWindowReadyForItem(s32 itemId, MenuStaffContext *owner) {
+/* Remove the item when its inventory reaches zero; report whether any window
+ * entries remain. */
+MnuStaffWindowEntryPresence mnuHasStaffWindowEntriesForItem(
+    s32 itemId, MenuStaffContext *owner) {
     MenuStaffChoices *resources = (MenuStaffChoices *)owner->menu;
 
     if (DDS3_GBWK->inventory.counts[itemId & 0xFFFF] == 0) {
@@ -758,7 +761,8 @@ s32 mnuHandleStaffInventoryListInput(dds3ProcessID_t *callback) {
             mnuSetPopupEntryFlagged(popup, mnuCampItemCategoryPopupEntry);
         }
     } else {
-        if (mnuIsStaffWindowReadyForItem(resources->secondListState & 0xFFFF, context) == 0) {
+        if (mnuHasStaffWindowEntriesForItem(resources->secondListState & 0xFFFF, context) ==
+            MNU_STAFF_WINDOW_ENTRIES_ABSENT) {
             mnuSetPopupEntryFlagged(popup, mnuCampItemCategoryPopupEntry);
             mnuClearActionFlags(0, &context->partyWindow);
             mnuBeginWindowFadeTransition(0, &context->fade);
