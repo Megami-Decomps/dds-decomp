@@ -7,6 +7,7 @@
 #include "file_pac_cleanup_api.h"
 #include "file_pac_completion_api.h"
 #include "file_request_end_check_api.h"
+#include "file_request_allocation_mode.h"
 #include "sdf_dev_state.h"
 #include "file_manager_api.h"
 #include "file_request.h"
@@ -154,28 +155,28 @@ void pacLoadUseTail(const char *requestName) {
     fileCreatePacLoadWork(requestName, 1, 0, 0, 0);
 }
 
-/* Clear kind-zero request work and narrow callbackMode into byte three.
+/* Clear kind-zero request work and narrow allocationMode into byte three.
  * callbackAddress is the queue callback; userData is its context, not another
  * callback. Keep the raw byte store and existing provider parameter types. */
-struct FileRequest *fileLoadEx(const char *requestName, s32 callbackMode, s32 callbackAddress, s32 userData) {
+struct FileRequest *fileLoadEx(const char *requestName, s32 allocationMode, s32 callbackAddress, s32 userData) {
     FileRequest *request;
 
     printf("file load %s\n", requestName);
     request = sdfAllocAndClearQuadwords(FILE_REQUEST_HEADER_BYTES);
-    request->allocationMode = callbackMode;
+    request->allocationMode = allocationMode;
     fileLinkQueue(request, FILE_REQUEST_KIND_CALLBACK, requestName,
                              (void *)callbackAddress, (void *)userData);
     return request;
 }
 
-/* Queue a callback-kind request with mode zero and no callback/context. */
+/* Queue a callback-kind request with retryable direct allocation and no callback/context. */
 struct FileRequest *fileLoad(const char *requestName) {
-    return fileLoadEx(requestName, 0, 0, 0);
+    return fileLoadEx(requestName, FILE_REQUEST_ALLOCATION_MODE_DIRECT, 0, 0);
 }
 
-/* Queue a callback-kind request with mode one and no callback/context. */
+/* Queue a callback-kind request with tail allocation and no callback/context. */
 struct FileRequest *fileLoadUseTail(const char *requestName) {
-    return fileLoadEx(requestName, 1, 0, 0);
+    return fileLoadEx(requestName, FILE_REQUEST_ALLOCATION_MODE_FROM_TAIL, 0, 0);
 }
 
 /* Return the stored allocation descriptor without changing ownership; work is required. */

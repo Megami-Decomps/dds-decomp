@@ -19,12 +19,12 @@ s32 fileRequestFreeIfComplete(struct FileRequest *request);
 #ifdef VERSION_DDS1
 struct FileRequest *pacLoadEx(const char *requestName, u32 flags, void *packetCallbackAddress,
                                                 u32 onComplete, u32 userData);
-struct FileRequest *fileLoadEx(const char *requestName, u32 callbackMode,
+struct FileRequest *fileLoadEx(const char *requestName, u32 allocationMode,
                                               u32 callbackAddress, u32 userData);
 #else
 struct FilePacRequest *fileCreatePacLoadWork(const char *requestName, s32 flags, void *dispatchValue,
                                              s32 onComplete, s32 userData);
-struct FileRequest *fileLoadEx(const char *requestName, s32 callbackMode,
+struct FileRequest *fileLoadEx(const char *requestName, s32 allocationMode,
                                               s32 callbackAddress, s32 userData);
 #endif
 

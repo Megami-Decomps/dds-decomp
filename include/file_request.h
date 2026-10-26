@@ -33,7 +33,7 @@ enum {
     u8 kind;                              /* 0x00 */                         \
     u8 state;                             /* 0x01 */                         \
     u8 retryCount;                        /* 0x02 */                         \
-    u8 allocationMode;                    /* 0x03: a callback request's mode */ \
+    u8 allocationMode;                    /* 0x03: direct-with-retries or tail allocation mode */ \
     Link *next;                           /* 0x04 */                         \
     char *name;                           /* 0x08: the duplicated request name */ \
     struct sdfFileCmdHandle_t *deviceRequest; /* 0x0C: owned file-device handle */ \
