@@ -165,11 +165,11 @@ extern s32 sceCdGetDiskType(void);
 
 extern u16 sdfFileCmdDefaultCreateMode;
 
-extern s32 sdfFileCmdAnalyzeFileName(const char *path, char **outResolvedPath);
+extern SdfFileWorkerIndex sdfFileCmdAnalyzeFileName(const char *path, char **outResolvedPath);
 
 extern void sdfFileCmdAllocHandle(sdfFileCmdHandle_t *state);
 
-extern sdfFileCmdHandle_t *sdfFileCmdNewHandle(char *resolvedPath, s32 workerIndex, s32 operation,
+extern sdfFileCmdHandle_t *sdfFileCmdNewHandle(char *resolvedPath, SdfFileWorkerIndex workerIndex, s32 operation,
                                 void (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32), void *callbackContext);
 
 extern u8 sdfDev9LoadFlag;
@@ -1522,7 +1522,7 @@ extern char D_003BD440[]; /* host0: */
 extern char D_003BD448[]; /* pfs0: */
 
 /* Allocate a worker-specific device path; an unsupported worker returns NULL. */
-char *sdfFileCmdMakeRealFileName(const char *path, s32 worker) {
+char *sdfFileCmdMakeRealFileName(const char *path, SdfFileWorkerIndex worker) {
     s32 length = strlen(path);
     char *result;
     s32 index;
@@ -1582,8 +1582,8 @@ extern char D_003BD450[]; /* /movie/ */
 extern char D_003BD458[]; /* cdimg: */
 
 /* Split the device prefix off a path and report the worker that serves it. */
-s32 sdfFileCmdAnalyzeFileName(const char *path, char **resolvedPath) {
-    s32 worker;
+SdfFileWorkerIndex sdfFileCmdAnalyzeFileName(const char *path, char **resolvedPath) {
+    SdfFileWorkerIndex worker;
     s32 prefixLength;
     const char *suffix;
     const char *name;
@@ -1623,7 +1623,7 @@ s32 sdfFileCmdAnalyzeFileName(const char *path, char **resolvedPath) {
 }
 
 /* Allocate a request state and retain the callback's opaque context pointer. */
-sdfFileCmdHandle_t *sdfFileCmdNewHandle(char *resolvedPath, s32 workerIndex, s32 operation,
+sdfFileCmdHandle_t *sdfFileCmdNewHandle(char *resolvedPath, SdfFileWorkerIndex workerIndex, s32 operation,
                         void (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32), void *callbackContext) {
     sdfFileCmdHandle_t *state = (sdfFileCmdHandle_t *)sdfAllocAndClearQuadwords(sizeof(sdfFileCmdHandle_t));
     state->resolvedPath = resolvedPath;
@@ -1640,7 +1640,7 @@ sdfFileCmdHandle_t *sdfFileCmdNewHandle(char *resolvedPath, s32 workerIndex, s32
 sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path, void (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32),
                         void *callbackContext) {
     char *resolvedPath;
-    s32 workerIndex = sdfFileCmdAnalyzeFileName(path, &resolvedPath);
+    SdfFileWorkerIndex workerIndex = sdfFileCmdAnalyzeFileName(path, &resolvedPath);
     sdfFileCmdHandle_t *state;
 
     if (workerIndex < 0) {
@@ -1655,7 +1655,7 @@ sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path, void (*callback)(sdfFil
 sdfFileCmdHandle_t *sdfFileCmdWriteOpen(const char *path, void (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32),
                         void *callbackContext, s32 options) {
     char *resolvedPath;
-    s32 workerIndex = sdfFileCmdAnalyzeFileName(path, &resolvedPath);
+    SdfFileWorkerIndex workerIndex = sdfFileCmdAnalyzeFileName(path, &resolvedPath);
     sdfFileCmdHandle_t *state;
 
     if (workerIndex < 0) {
@@ -1750,7 +1750,7 @@ s32 sdfFileCmdFree(sdfFileCmdHandle_t *state) {
 sdfFileCmdHandle_t *sdfFileCmdReadFile(const char *path, void *buffer, s32 byteCount,
                         void (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32), void *callbackContext) {
     char *resolvedPath;
-    s32 workerIndex = sdfFileCmdAnalyzeFileName(path, &resolvedPath);
+    SdfFileWorkerIndex workerIndex = sdfFileCmdAnalyzeFileName(path, &resolvedPath);
     sdfFileCmdHandle_t *state;
 
     if (workerIndex < 0) {
@@ -1769,7 +1769,7 @@ sdfFileCmdHandle_t *sdfFileCmdWriteFile(const char *path, void *buffer, s32 byte
                         void (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32),
                         void *callbackContext, s32 options) {
     char *resolvedPath;
-    s32 workerIndex = sdfFileCmdAnalyzeFileName(path, &resolvedPath);
+    SdfFileWorkerIndex workerIndex = sdfFileCmdAnalyzeFileName(path, &resolvedPath);
     sdfFileCmdHandle_t *state;
 
     if (workerIndex < 0) {

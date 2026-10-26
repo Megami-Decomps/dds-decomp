@@ -5,6 +5,9 @@
 
 struct sdfFileCmdHandle_t;
 
+/* Path resolution returns worker slots 0..3 or -1 for an unsupported path. */
+typedef s32 SdfFileWorkerIndex;
+
 /* Shared queue/thread slot from the device-worker table. */
 typedef struct DevWorkerEntry {
     s32 threadId;
