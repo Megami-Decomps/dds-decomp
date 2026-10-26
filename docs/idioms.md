@@ -12386,10 +12386,11 @@ evidence recorded in provenance.
 
 `sdfPackCountedPayloadLists` packs two callback lists into one owner-tracked
 `DdsNestedGroup`. Each list region contains its counted-payload headers
-followed by the copied `count * 8` byte payloads; copied data pointers are
-rebased into that allocation. The existing allocator tracks ownership.
-List counts, size arithmetic, empty-list behavior, copy order and types are
-unchanged; no callback invocation or menu-specific payload meaning is assumed.
+followed by the copied opaque eight-byte items. `DdsCountedPayload.count`
+counts those items, and `data` is a read-only view rebased into the allocation.
+The existing allocator tracks ownership. List counts, byte layout, empty-list
+behavior and copy order are unchanged; no callback invocation or menu-specific
+payload meaning is assumed.
 
 ## Native registry no-ops and retained forwarding surfaces
 

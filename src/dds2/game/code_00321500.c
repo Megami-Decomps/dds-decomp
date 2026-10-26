@@ -428,18 +428,18 @@ s32 dds3MeasureMenuRecord(const DdsNestedGroup *group) {
     return byteSize + dds3MeasureRecordBlock(group->second, group->secondCount);
 }
 
-/* Each entry has an eight-byte header followed by its eight-byte subentries. */
+/* Each descriptor contains a count of opaque eight-byte subentries. */
 s32 dds3MeasureRecordBlock(const DdsCountedPayload *records, s32 count) {
     s32 subentryCount;
     s32 byteSize;
 
-    byteSize = count << 3;
+    byteSize = count * sizeof(*records);
     if (0 < count) {
         do {
             subentryCount = records->count;
             records++;
             count = count - 1;
-            byteSize = byteSize + subentryCount * 8;
+            byteSize = byteSize + subentryCount * sizeof(*records->data);
         } while (count != 0);
     }
     return byteSize;

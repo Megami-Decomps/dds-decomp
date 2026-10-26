@@ -3,9 +3,14 @@
 
 #include "common.h"
 
+/* The nested data blocks are copied as opaque eight-byte items. */
+typedef struct DdsCountedPayloadItem {
+    u8 bytes[8];
+} DdsCountedPayloadItem;
+
 typedef struct DdsCountedPayload {
     u32 count;
-    void *data;
+    const DdsCountedPayloadItem *data; /* count opaque eight-byte items */
 } DdsCountedPayload;
 
 typedef struct DdsNestedGroup {
@@ -26,7 +31,8 @@ typedef struct DdsNestedHeader {
 } DdsNestedHeader;
 
 typedef char DdsNestedResourceLayoutAssert[
-    (sizeof(DdsCountedPayload) == 8 &&
+    (sizeof(DdsCountedPayloadItem) == 8 &&
+     sizeof(DdsCountedPayload) == 8 &&
      (unsigned long)&((DdsCountedPayload *)0)->count == 0 &&
      (unsigned long)&((DdsCountedPayload *)0)->data == 4 &&
      sizeof(DdsNestedGroup) == 0x10 &&

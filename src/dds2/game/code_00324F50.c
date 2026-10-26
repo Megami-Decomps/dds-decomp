@@ -86,18 +86,18 @@ DdsNestedHeader *sdfCloneNestedResourceRecord(MnuCallbackListPair *owner, MnuCal
         entries = group->first;
         cursor += group->firstCount * sizeof(*entries);
         for (j = 0; j < group->firstCount; j++, entries++) {
-            memcpy(cursor, entries->data, entries->count * 8);
-            entries->data = cursor;
-            cursor += entries->count * 8;
+            memcpy(cursor, entries->data, entries->count * sizeof(*entries->data));
+            entries->data = (const DdsCountedPayloadItem *)cursor;
+            cursor += entries->count * sizeof(*entries->data);
         }
         memcpy(cursor, group->second, group->secondCount * sizeof(*entries));
         group->second = (DdsCountedPayload *)cursor;
         entries = group->second;
         cursor += group->secondCount * sizeof(*entries);
         for (j = 0; j < group->secondCount; j++, entries++) {
-            memcpy(cursor, entries->data, entries->count * 8);
-            entries->data = cursor;
-            cursor += entries->count * 8;
+            memcpy(cursor, entries->data, entries->count * sizeof(*entries->data));
+            entries->data = (const DdsCountedPayloadItem *)cursor;
+            cursor += entries->count * sizeof(*entries->data);
         }
     }
     return buffer;
@@ -127,18 +127,18 @@ MnuCallbackListPair *func_003251C0(const DdsNestedHeader *header) {
         cursor += group->firstCount * sizeof(*entry);
         entry = copy->first;
         for (j = 0; j < copy->firstCount; j++, entry++) {
-            memcpy(cursor, entry->data, entry->count * 8);
-            entry->data = cursor;
-            cursor += entry->count * 8;
+            memcpy(cursor, entry->data, entry->count * sizeof(*entry->data));
+            entry->data = (const DdsCountedPayloadItem *)cursor;
+            cursor += entry->count * sizeof(*entry->data);
         }
         memcpy(cursor, group->second, group->secondCount * sizeof(*entry));
         copy->second = (DdsCountedPayload *)cursor;
         cursor += group->secondCount * sizeof(*entry);
         entry = copy->second;
         for (j = 0; j < group->secondCount; j++, entry++) {
-            memcpy(cursor, entry->data, entry->count * 8);
-            entry->data = cursor;
-            cursor += entry->count * 8;
+            memcpy(cursor, entry->data, entry->count * sizeof(*entry->data));
+            entry->data = (const DdsCountedPayloadItem *)cursor;
+            cursor += entry->count * sizeof(*entry->data);
         }
     }
     return owner;
@@ -159,14 +159,14 @@ DdsNestedGroup *sdfPackCountedPayloadLists(MnuCallbackListPair *owner, MnuCallba
     node = (*firstList)->head;
     while (node != NULL) {
         source = node->value;
-        firstBytes += source->count * 8 + sizeof(*source);
+        firstBytes += source->count * sizeof(*source->data) + sizeof(*source);
         node = node->next;
     }
     secondBytes = 0;
     node = (*secondList)->head;
     while (node != NULL) {
         source = node->value;
-        secondBytes += source->count * 8 + sizeof(*source);
+        secondBytes += source->count * sizeof(*source->data) + sizeof(*source);
         node = node->next;
     }
     totalBytes = firstBytes + secondBytes + sizeof(*group);
@@ -190,9 +190,9 @@ DdsNestedGroup *sdfPackCountedPayloadLists(MnuCallbackListPair *owner, MnuCallba
     node = (*firstList)->head;
     while (node != NULL) {
         source = node->value;
-        memcpy(payload, source->data, source->count * 8);
-        destination->data = payload;
-        payload += source->count * 8;
+        memcpy(payload, source->data, source->count * sizeof(*source->data));
+        destination->data = (const DdsCountedPayloadItem *)payload;
+        payload += source->count * sizeof(*source->data);
         destination++;
         node = node->next;
     }
@@ -210,9 +210,9 @@ DdsNestedGroup *sdfPackCountedPayloadLists(MnuCallbackListPair *owner, MnuCallba
     node = (*secondList)->head;
     while (node != NULL) {
         source = node->value;
-        memcpy(payload, source->data, source->count * 8);
-        destination->data = payload;
-        payload += source->count * 8;
+        memcpy(payload, source->data, source->count * sizeof(*source->data));
+        destination->data = (const DdsCountedPayloadItem *)payload;
+        payload += source->count * sizeof(*source->data);
         destination++;
         node = node->next;
     }
@@ -344,9 +344,9 @@ MnuCallbackListPair *sdfCloneOwnedSpriteRecordList(const SdfSpriteListRecord *so
             entry = group->first;
             entryCopy = groupCopy->first;
             for (j = 0; j < group->firstCount; j++, entry++, entryCopy++) {
-                memcpy(cursor, entry->data, entry->count * 8);
-                entryCopy->data = cursor;
-                cursor += entry->count * 8;
+                memcpy(cursor, entry->data, entry->count * sizeof(*entry->data));
+                entryCopy->data = (const DdsCountedPayloadItem *)cursor;
+                cursor += entry->count * sizeof(*entry->data);
             }
             memcpy(cursor, group->second, group->secondCount * sizeof(*entry));
             groupCopy->second = (DdsCountedPayload *)cursor;
@@ -354,9 +354,9 @@ MnuCallbackListPair *sdfCloneOwnedSpriteRecordList(const SdfSpriteListRecord *so
             entry = group->second;
             entryCopy = groupCopy->second;
             for (j = 0; j < group->secondCount; j++, entry++, entryCopy++) {
-                memcpy(cursor, entry->data, entry->count * 8);
-                entryCopy->data = cursor;
-                cursor += entry->count * 8;
+                memcpy(cursor, entry->data, entry->count * sizeof(*entry->data));
+                entryCopy->data = (const DdsCountedPayloadItem *)cursor;
+                cursor += entry->count * sizeof(*entry->data);
             }
         }
         count--;
@@ -453,7 +453,7 @@ SdfRelocatedResource *sdfCloneRelocatedResourceGroups(MnuCallbackListPair *owner
     result->firstCount = (*source)->count;
     for (node = (*groups)->head; node != NULL; node = node->next) {
         payload = (DdsCountedPayload *)node->value;
-        size += payload->count * 8 + sizeof(*payload);
+        size += payload->count * sizeof(*payload->data) + sizeof(*payload);
     }
     result->groups = sdfAllocateOwnedResourceBuffer(owner, size);
     memset(result->groups, 0, size);
@@ -468,10 +468,10 @@ SdfRelocatedResource *sdfCloneRelocatedResourceGroups(MnuCallbackListPair *owner
     record = result->groups;
     for (node = (*groups)->head; node != NULL; node = node->next) {
         payload = (DdsCountedPayload *)node->value;
-        memcpy(cursor, payload->data, payload->count * 8);
-        record->data = cursor;
+        memcpy(cursor, payload->data, payload->count * sizeof(*payload->data));
+        record->data = (const DdsCountedPayloadItem *)cursor;
         record++;
-        cursor += payload->count * 8;
+        cursor += payload->count * sizeof(*payload->data);
     }
     return result;
 }

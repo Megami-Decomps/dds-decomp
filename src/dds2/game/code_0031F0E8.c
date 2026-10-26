@@ -452,7 +452,8 @@ DdsPackedObject *dds3PackNestedResourceRecords(MnuCallbackList **source) {
                     memset(name, 0, sizeof(name));
                     sprintf(name, D_00438978, entry->data);
                     dds3RegisterNamedPackedOffset(object, name);
-                    dds3AppendPackedBytes(object, entry->data, entry->count * 8);
+                    dds3AppendPackedBytes(object, entry->data,
+                                          entry->count * sizeof(*entry->data));
                 }
                 entry = group->second;
                 memset(name, 0, sizeof(name));
@@ -468,7 +469,8 @@ DdsPackedObject *dds3PackNestedResourceRecords(MnuCallbackList **source) {
                     memset(name, 0, sizeof(name));
                     sprintf(name, D_00438978, entry->data);
                     dds3RegisterNamedPackedOffset(object, name);
-                    dds3AppendPackedBytes(object, entry->data, entry->count * 8);
+                    dds3AppendPackedBytes(object, entry->data,
+                                          entry->count * sizeof(*entry->data));
                 }
             }
         }
