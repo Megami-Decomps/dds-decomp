@@ -991,7 +991,7 @@
 0x00129F58	fldRequestAreaResource	inferred	Starts loading area/room resource file
 0x0012A078	fldFreeNextFile	inferred	SMT3HD name via SLUS_209.11 0x00127510, unique-masked-hash; was fldFreeDisplayObjects
 0x0012A0E8	fldPollAreaResourceLoad	inferred	Clears the area loading and busy flags after the pending file resource becomes ready.
-0x0012A140	fldLoadNextGetStatus	inferred	SMT3HD name via SLUS_209.11 0x001275D0, shared-hash-in-run; was fldGetResourceReadyFlag
+0x0012A140	fldGetNextFileLoadState	inferred	The paired pollers clear this state when the file request completes; scene and battle waiters treat 1 as pending and 0 as finished. Previous SMT3HD pairing: fldGetResourceReadyFlag.
 0x0012A150	fldLoadNextGetStatus2	inferred	SMT3HD name via SLUS_209.11 0x001275E0, reloc-identical; was fldIsAreaResourceReady
 0x0012A190	fldCanReuseAreaResourceRequest	inferred	Checks whether matching area and room resource state can be reused by the loader.
 0x0012A1F8	fldCopyCachedRoomResourceIfLocationMatches	inferred	Copies a cached resource only when current area and room match the request. [names_reviewed17.tsv]

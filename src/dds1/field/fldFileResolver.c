@@ -1432,7 +1432,7 @@ u32 fldPollAreaResourceLoad(void) {
     return 0;
 }
 
-u32 fldLoadNextGetStatus(void) {
+FldNextFileLoadState fldGetNextFileLoadState(void) {
     return D_0032E428[0];
 }
 

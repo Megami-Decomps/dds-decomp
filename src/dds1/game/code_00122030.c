@@ -1704,7 +1704,7 @@ s32 fldUpdateTravelAndEncounters(void) {
     } else {
         fldGlobalBase.attritionDistance = 450.0f;
     }
-    if (fldLoadNextGetStatus() == 1) return 0;
+    if (fldGetNextFileLoadState() == FLD_NEXT_FILE_LOAD_PENDING) return 0;
     if (!fldGlobalBase.specialEventActive && !fldRunDanteGunFlag[0x44 / 4]) return 0;
     if (!fldEncountTestFlag(0x10)) return 0;
     fldGlobalBase.encounterMode = 0;
@@ -2069,7 +2069,7 @@ s32 fldProcSequence(dds3ProcessID_t *task) {
     if (fileMenuTaskExists() != 0) return 0;
     fldPollAreaResourceLoad();
     if (controller->phase == 0) {
-        if (fldLoadNextGetStatus() == 1) return 0;
+        if (fldGetNextFileLoadState() == FLD_NEXT_FILE_LOAD_PENDING) return 0;
         if (fldGlobalBase.specialEventActive == 0 && mnuPollTitleStreamStateLocked() != 0) {
             mnuMarkTitleStreamResetPending();
             mnuResetTitleStreamLocked();
@@ -2281,7 +2281,7 @@ s32 fldProcDraw(dds3ProcessID_t *task) {
     if (dds3AdminiGetNextSequence() != -1) {
         return 0;
     }
-    if (fldLoadNextGetStatus() == 1) {
+    if (fldGetNextFileLoadState() == FLD_NEXT_FILE_LOAD_PENDING) {
         if (D_0032E590[0] == 1) {
             fldDbgPrint2D(0x40, 0xC0, "NowLoading...");
         }
@@ -2425,7 +2425,7 @@ void fldReleaseCampSceneTasks(void) {
 FldResourceWaitResult fldIsFieldResourceWaitFinished(void) {
     if (D_0032E3D0[0] == 0 && fldLoadNextGetStatus2() != 0) {
         fldPollAreaResourceLoad();
-        if (fldLoadNextGetStatus() == 1) return FLD_RESOURCE_WAIT_PENDING;
+        if (fldGetNextFileLoadState() == FLD_NEXT_FILE_LOAD_PENDING) return FLD_RESOURCE_WAIT_PENDING;
         fldFreeNextFile();
         return FLD_RESOURCE_WAIT_PENDING;
     }

@@ -9,8 +9,14 @@ enum {
     FLD_SCENE_READY = 1
 };
 
+typedef u32 FldNextFileLoadState;
+enum {
+    FLD_NEXT_FILE_LOAD_FINISHED = 0,
+    FLD_NEXT_FILE_LOAD_PENDING = 1
+};
+
 FldSceneReadyState fldGetSceneReadyFlag(void);
-u32 fldLoadNextGetStatus(void);
+FldNextFileLoadState fldGetNextFileLoadState(void);
 u8 fldLoadNextGetStatus2(void);
 u32 fldPollAreaResourceLoad(void);
 u8 fldTryStartPendingBattleReturnAreaLoad(void);

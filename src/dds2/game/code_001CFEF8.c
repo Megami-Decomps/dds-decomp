@@ -1443,7 +1443,7 @@ u32 fldStepAreaLoad(BtlState *work) {
                 break;
             case 1:
                 fldPollAreaResourceLoad();
-                if (fldLoadNextGetStatus() == 0) {
+                if (fldGetNextFileLoadState() == FLD_NEXT_FILE_LOAD_FINISHED) {
                     work->loadStep = 2;
                     btlBossDebugPrintf("btl:field loding end\n");
                 }
