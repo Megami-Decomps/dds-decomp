@@ -32,7 +32,7 @@ void fileReqBegin(s32 request) {
 
 /* Keep the zero-status tail distinct and the ready path after retry work;
  * see docs/idioms.md, "Trace-justified switch tails: fileReqPoll". */
-s32 fileReqPoll(void) {
+FileReqPollResult fileReqPoll(void) {
     FileReqEntry *entry = &fileRequestEntries[fileActiveCardDetectionRequestIndex];
     s32 info[2];
     s32 result = sceMcSync(1, info, &info[1]);
@@ -56,7 +56,7 @@ s32 fileReqPoll(void) {
                 if (retries < 5) {
                     entry->requestRetryCount = retries + 1;
                     fileReqInit(fileActiveCardDetectionRequestIndex);
-                    return 0;
+                    return FILE_REQ_POLL_PENDING;
                 }
                 entry->status = FILE_REQ_STATUS_UNFORMATTED;
                 entry->slotMetadataDirty = result;
@@ -71,9 +71,9 @@ s32 fileReqPoll(void) {
             entry->selectedSlot = 0;
             break;
         }
-        return 1;
+        return FILE_REQ_POLL_COMPLETE;
     }
-    return 0;
+    return FILE_REQ_POLL_PENDING;
 }
 
 FileReqStatus fileReqGetStatus(s32 request) {

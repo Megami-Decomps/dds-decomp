@@ -1184,7 +1184,7 @@ s32 slBootProc1st(void) {
 s32 fileSlotStatusPoll(void) {
     FileReqStatus status;
 
-    if (fileReqPoll() == 0) {
+    if (fileReqPoll() == FILE_REQ_POLL_PENDING) {
         return 0;
     }
     if (fileSlotSelectionPollCount > 0) {
@@ -1249,9 +1249,9 @@ extern s32 slSizeChk(void);
 extern s32 slBootRetry(void);
 
 s32 fileSlotSelectPoll(void) {
-    s32 result = fileReqPoll();
+    FileReqPollResult result = fileReqPoll();
 
-    if (result == 0) {
+    if (result == FILE_REQ_POLL_PENDING) {
         return result;
     }
     if ((s32)fileSlotSelectionPollCount > 0) {
@@ -1280,7 +1280,7 @@ extern s32 fileRequestDefaultMode(void);
 extern s32 slSizeChk(void);
 
 s32 fileSlotSelectPollClear(void) {
-    if (fileReqPoll() == 0) {
+    if (fileReqPoll() == FILE_REQ_POLL_PENDING) {
         return 0;
     }
     if ((s32)fileSlotSelectionPollCount > 0) {
@@ -1315,7 +1315,7 @@ s32 filePollSlotDetectionAndBranch(void) {
             D_00437D40 = 1;
         }
     }
-    if (fileReqPoll() != 0) {
+    if (fileReqPoll() != FILE_REQ_POLL_PENDING) {
         if (D_00437D40 == 1) {
             D_00437D3C = 0;
             D_00437CF8 = 0;
@@ -1382,7 +1382,7 @@ s32 slErrorWaitToFileMc(void) {
             D_00437D40 = 1;
         }
     }
-    if (fileReqPoll() != 0) {
+    if (fileReqPoll() != FILE_REQ_POLL_PENDING) {
         if (D_00437D40 == 1) {
             D_00437D3C = 0;
             return fileScanSlotStates();
@@ -1459,7 +1459,7 @@ s32 filePollSlotRequestAndResumeFlow(void) {
             D_00437D40 = 1;
         }
     }
-    if (fileReqPoll() != 0) {
+    if (fileReqPoll() != FILE_REQ_POLL_PENDING) {
         if (D_00437D40 == 1) {
             slSetInfo(0);
             D_00437D3C = 0;
@@ -2187,7 +2187,7 @@ s32 fileSlotBrowserUpdate(void) {
             D_00437D14 = 2;
         }
     }
-    if (fileReqPoll() != 0) {
+    if (fileReqPoll() != FILE_REQ_POLL_PENDING) {
         requestStatus = fileReqGetStatus(fileMemoryCardRequestIndex);
         action = D_00437D14;
         if (requestStatus == FILE_REQ_STATUS_NO_CARD) {
@@ -2901,7 +2901,7 @@ s32 fileUpdatePromptDialog(void) {
     if (D_00437D1C - 5 < 2) {
         s32 requestStatus;
         filePollPromptChoice();
-        if (fileReqPoll() == 0) {
+        if (fileReqPoll() == FILE_REQ_POLL_PENDING) {
             goto idle;
         }
         requestStatus = fileReqGetStatus(fileMemoryCardRequestIndex);
@@ -2979,7 +2979,7 @@ s32 fileUpdatePromptDialog(void) {
         goto idle;
     }
     filePollPromptChoice();
-    if (fileReqPoll() == 0) {
+    if (fileReqPoll() == FILE_REQ_POLL_PENDING) {
         goto idle;
     }
     status = fileReqGetStatus(fileMemoryCardRequestIndex);
