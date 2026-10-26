@@ -7,6 +7,7 @@
 #include "sdf_dev_state.h"
 #include "file_manager_api.h"
 #include "file_request.h"
+#include "file_request_lifecycle.h"
 #include "file_request_kind.h"
 #include "file_transfer_job.h"
 
@@ -21,13 +22,13 @@ extern s32 pacFileHandleFree(struct FilePacRequest *);
 #define FILE_READ_SLOT_BYTES 0x10000
 #define FILE_READ_SLOT_SHIFT 16
 
-/* PAC requests delegate cleanup. Other kinds remain pending until state six,
- * then release any device state, duplicated name and entry. The request is required. */
+/* PAC requests delegate cleanup. Other kinds remain pending until the device
+ * request closes, then release its state, duplicated name and entry. */
 FileRequestCleanupResult fileRequestFreeIfComplete(struct FileRequest *request) {
     if (request->kind == FILE_REQUEST_KIND_PAC) {
         return pacFileHandleFree((struct FilePacRequest *)request);
     }
-    if (request->state == FILE_REQUEST_STATE_COMPLETE) {
+    if (request->state == FILE_REQUEST_LIFECYCLE_CLOSED) {
         if (request->deviceRequest != NULL) {
             sdfFileCmdFree(request->deviceRequest);
         }
@@ -192,25 +193,25 @@ u32 fileGetLoadRemain(FileRequest *request) {
 }
 
 /* PAC requests additionally require a decoded end marker; other kinds only
- * require state six. */
+ * require a closed device request. */
 s32 pacFileCheckEnd(const FileRequest *request) {
     s32 result;
 
     if (request->kind == FILE_REQUEST_KIND_PAC) {
         result = 0;
         if (request->pacDecodeComplete != 0) {
-            result = request->state == FILE_REQUEST_STATE_COMPLETE;
+            result = request->state == FILE_REQUEST_LIFECYCLE_CLOSED;
         }
         return result;
     }
-    return request->state == FILE_REQUEST_STATE_COMPLETE;
+    return request->state == FILE_REQUEST_LIFECYCLE_CLOSED;
 }
 
-/* Require PAC decode completion and state six. */
+/* Require PAC decode completion and a closed device request. */
 FilePacRequestCompletionResult pacCheckEnd(const FileRequest *request) {
     FilePacRequestCompletionResult result = FILE_PAC_REQUEST_COMPLETION_INCOMPLETE;
     if (request->pacDecodeComplete != 0) {
-        result = request->state == FILE_REQUEST_STATE_COMPLETE;
+        result = request->state == FILE_REQUEST_LIFECYCLE_CLOSED;
     }
     return result;
 }
@@ -275,11 +276,11 @@ void pacRead(FileTransferJob *job) {
         SignalSema(work->sema);
         return;
     }
-    if (job->state != FILE_JOB_READY) {
+    if (job->state != FILE_REQUEST_LIFECYCLE_READY) {
         SignalSema(work->sema);
         return;
     }
-    job->state = FILE_JOB_TRANSFERRING;
+    job->state = FILE_REQUEST_LIFECYCLE_TRANSFERRING;
     slotIndex = work->nextSlot;
     if (slotIndex == FILE_LAST_READ_SLOT) {
         work->nextSlot = 0;

@@ -4,6 +4,7 @@
 #include "kwln_task_create.h"
 #include "sdf_resource.h"
 #include "file.h"
+#include "file_request_lifecycle.h"
 #include "file_slot_flags.h"
 #include "file_request_entry.h"
 #include "file_request_kind.h"
@@ -38,16 +39,6 @@ extern sdfFileCmdHandle_t *sdfFileCmdWriteOpen(const char *path,
 
 extern s32 sdfPrintf(const char *fmt, ...);
 
-/* Remaining FileTransferJob states; READY and TRANSFERRING live in file.h. */
-enum {
-    FILE_JOB_QUEUED = 0,
-    FILE_JOB_OPENING = 1,
-    FILE_JOB_OPENED = 2,
-    FILE_JOB_CLOSING = 5,
-    FILE_JOB_CLOSED = 6,
-    FILE_JOB_ALLOCATION_RETRY = 7
-};
-
 s32 pacLoadCallback(sdfFileCmdHandle_t *deviceRequest, s32 event, s32 unused, s32 byteCount, FileTransferJob *job) {
     FileManWork *work = &fileQueueHead;
     s32 saved;
@@ -55,34 +46,34 @@ s32 pacLoadCallback(sdfFileCmdHandle_t *deviceRequest, s32 event, s32 unused, s3
     switch (event) {
     case SDF_DEV_EVENT_OPENED:
         job->deviceRequest = deviceRequest;
-        job->state = FILE_JOB_OPENED;
+        job->state = FILE_REQUEST_LIFECYCLE_OPENED;
         sdfFileCmdFileSize(deviceRequest);
         break;
     case SDF_DEV_EVENT_SIZE_REPLY:
         job->transferBytes = byteCount;
-        job->state = FILE_JOB_READY;
+        job->state = FILE_REQUEST_LIFECYCLE_READY;
         job->totalBytes = byteCount;
         pacRead(job);
         break;
     case SDF_DEV_EVENT_READ_REPLY:
         WaitSema(work->sema);
         if (job->pacDecodeComplete != 0) {
-            job->state = FILE_JOB_CLOSING;
+            job->state = FILE_REQUEST_LIFECYCLE_CLOSING;
         } else {
             work->slots[job->slot].value = byteCount;
             job->transferBytes -= byteCount;
             if (job->transferBytes == 0) {
-                job->state = FILE_JOB_CLOSING;
+                job->state = FILE_REQUEST_LIFECYCLE_CLOSING;
                 work->head = (struct FileRequest *)job->next;
                 if (job->next == NULL) {
                     work->tail = NULL;
                 }
             } else {
-                job->state = FILE_JOB_READY;
+                job->state = FILE_REQUEST_LIFECYCLE_READY;
             }
         }
         work->activeSlots++;
-        if (job->state == FILE_JOB_CLOSING) {
+        if (job->state == FILE_REQUEST_LIFECYCLE_CLOSING) {
             fileLinkCloseWait(work, job);
             SignalSema(work->sema);
             sdfFileCmdClose(deviceRequest);
@@ -100,7 +91,7 @@ s32 pacLoadCallback(sdfFileCmdHandle_t *deviceRequest, s32 event, s32 unused, s3
         SignalSema(work->sema);
         sdfFileCmdFree(deviceRequest);
         job->deviceRequest = NULL;
-        job->state = FILE_JOB_CLOSED;
+        job->state = FILE_REQUEST_LIFECYCLE_CLOSED;
         break;
     }
     return 0;
@@ -108,11 +99,11 @@ s32 pacLoadCallback(sdfFileCmdHandle_t *deviceRequest, s32 event, s32 unused, s3
 
 void fileRead(FileTransferJob *job) {
     WaitSema(fileQueueHead.sema);
-    if (job->state != FILE_JOB_READY) {
+    if (job->state != FILE_REQUEST_LIFECYCLE_READY) {
         SignalSema(fileQueueHead.sema);
         return;
     }
-    job->state = FILE_JOB_TRANSFERRING;
+    job->state = FILE_REQUEST_LIFECYCLE_TRANSFERRING;
     SignalSema(fileQueueHead.sema);
     sdfFileCmdRead(job->deviceRequest, job->transferAddress,
                     job->transferBytes <= FILE_IO_MAX_CHUNK_BYTES ? job->transferBytes : FILE_IO_MAX_CHUNK_BYTES);
@@ -126,7 +117,7 @@ s32 fileLoadCallback(sdfFileCmdHandle_t *deviceRequest, s32 event, s32 unused, s
     switch (event) {
     case SDF_DEV_EVENT_OPENED:
         job->deviceRequest = deviceRequest;
-        job->state = FILE_JOB_OPENED;
+        job->state = FILE_REQUEST_LIFECYCLE_OPENED;
         sdfFileCmdFileSize(deviceRequest);
         break;
     case SDF_DEV_EVENT_SIZE_REPLY: {
@@ -139,7 +130,7 @@ s32 fileLoadCallback(sdfFileCmdHandle_t *deviceRequest, s32 event, s32 unused, s
             job->allocationHandle = allocationHandle;
             if (allocationHandle == NULL) {
                 job->retryCount = 10;
-                job->state = FILE_JOB_ALLOCATION_RETRY;
+                job->state = FILE_REQUEST_LIFECYCLE_ALLOCATION_RETRY;
                 break;
             }
         } else {
@@ -151,7 +142,7 @@ s32 fileLoadCallback(sdfFileCmdHandle_t *deviceRequest, s32 event, s32 unused, s
 
             job->transferAddress = address;
             job->retainedAddress = address;
-            job->state = FILE_JOB_READY;
+            job->state = FILE_REQUEST_LIFECYCLE_READY;
         }
         fileRead(job);
         break;
@@ -160,7 +151,7 @@ s32 fileLoadCallback(sdfFileCmdHandle_t *deviceRequest, s32 event, s32 unused, s
         WaitSema(work->sema);
         job->transferBytes -= byteCount;
         if (job->transferBytes == 0) {
-            job->state = FILE_JOB_CLOSING;
+            job->state = FILE_REQUEST_LIFECYCLE_CLOSING;
             if (work->head == (struct FileRequest *)job) {
                 work->head = (struct FileRequest *)job->next;
                 if (job->next == NULL) {
@@ -168,10 +159,10 @@ s32 fileLoadCallback(sdfFileCmdHandle_t *deviceRequest, s32 event, s32 unused, s
                 }
             }
         } else {
-            job->state = FILE_JOB_READY;
+            job->state = FILE_REQUEST_LIFECYCLE_READY;
             job->transferAddress += byteCount;
         }
-        if (job->state == FILE_JOB_CLOSING) {
+        if (job->state == FILE_REQUEST_LIFECYCLE_CLOSING) {
             fileLinkCloseWait(work, job);
             SignalSema(work->sema);
             sdfFileCmdClose(deviceRequest);
@@ -187,7 +178,7 @@ s32 fileLoadCallback(sdfFileCmdHandle_t *deviceRequest, s32 event, s32 unused, s
     case SDF_DEV_EVENT_CLOSED:
         sdfFileCmdFree(deviceRequest);
         job->deviceRequest = NULL;
-        job->state = FILE_JOB_CLOSED;
+        job->state = FILE_REQUEST_LIFECYCLE_CLOSED;
         WaitSema(work->sema);
         fileUnlinkCloseWait(work, job);
         if (job->completionCallback != NULL) {
@@ -207,11 +198,11 @@ s32 fileLoadCallback(sdfFileCmdHandle_t *deviceRequest, s32 event, s32 unused, s
 
 void fileWrite(FileTransferJob *job) {
     WaitSema(fileQueueHead.sema);
-    if (job->state != FILE_JOB_READY) {
+    if (job->state != FILE_REQUEST_LIFECYCLE_READY) {
         SignalSema(fileQueueHead.sema);
         return;
     }
-    job->state = FILE_JOB_TRANSFERRING;
+    job->state = FILE_REQUEST_LIFECYCLE_TRANSFERRING;
     SignalSema(fileQueueHead.sema);
     sdfFileCmdWrite(job->deviceRequest, job->transferAddress,
                      job->transferBytes <= FILE_IO_MAX_CHUNK_BYTES ? job->transferBytes : FILE_IO_MAX_CHUNK_BYTES);
@@ -224,7 +215,7 @@ s32 fileSaveCallback(sdfFileCmdHandle_t *deviceRequest, s32 event, s32 unused, s
 
     switch (event) {
     case SDF_DEV_EVENT_OPENED:
-        job->state = FILE_JOB_READY;
+        job->state = FILE_REQUEST_LIFECYCLE_READY;
         fileWrite(job);
         break;
     case SDF_DEV_EVENT_WRITE_REPLY:
@@ -232,7 +223,7 @@ s32 fileSaveCallback(sdfFileCmdHandle_t *deviceRequest, s32 event, s32 unused, s
         job->transferAddress += byteCount;
         job->transferBytes -= byteCount;
         if (job->transferBytes == 0) {
-            job->state = FILE_JOB_CLOSING;
+            job->state = FILE_REQUEST_LIFECYCLE_CLOSING;
             if (work->head == (struct FileRequest *)job) {
                 work->head = (struct FileRequest *)job->next;
                 if (job->next == NULL) {
@@ -240,9 +231,9 @@ s32 fileSaveCallback(sdfFileCmdHandle_t *deviceRequest, s32 event, s32 unused, s
                 }
             }
         } else {
-            job->state = FILE_JOB_READY;
+            job->state = FILE_REQUEST_LIFECYCLE_READY;
         }
-        if (job->state == FILE_JOB_CLOSING) {
+        if (job->state == FILE_REQUEST_LIFECYCLE_CLOSING) {
             fileLinkCloseWait(work, job);
             SignalSema(work->sema);
             sdfFileCmdClose(deviceRequest);
@@ -258,7 +249,7 @@ s32 fileSaveCallback(sdfFileCmdHandle_t *deviceRequest, s32 event, s32 unused, s
     case SDF_DEV_EVENT_CLOSED:
         sdfFileCmdFree(deviceRequest);
         job->deviceRequest = NULL;
-        job->state = FILE_JOB_CLOSED;
+        job->state = FILE_REQUEST_LIFECYCLE_CLOSED;
         WaitSema(work->sema);
         fileUnlinkCloseWait(work, job);
         if (job->completionCallback != NULL) {
@@ -292,13 +283,13 @@ void fileExecQueue(void) {
     switch (job->kind) {
     case FILE_REQUEST_KIND_CALLBACK:
         switch (job->state) {
-        case FILE_JOB_QUEUED:
-            job->state = FILE_JOB_OPENING;
+        case FILE_REQUEST_LIFECYCLE_QUEUED:
+            job->state = FILE_REQUEST_LIFECYCLE_OPENING;
             locked = 0;
             SignalSema(work->sema);
             job->deviceRequest = sdfFileCmdReadOpen(job->name, fileLoadCallback, job);
             break;
-        case FILE_JOB_ALLOCATION_RETRY:
+        case FILE_REQUEST_LIFECYCLE_ALLOCATION_RETRY:
             job->allocationHandle = sdfMemTryAllocDirect(job->totalBytes);
             if (job->allocationHandle == NULL) {
                 sdfPrintf("alloc retry for %s\n",
@@ -309,7 +300,7 @@ void fileExecQueue(void) {
 
                 job->transferAddress = address;
                 job->retainedAddress = address;
-                job->state = FILE_JOB_READY;
+                job->state = FILE_REQUEST_LIFECYCLE_READY;
                 fileRead(job);
             }
             break;
@@ -317,13 +308,13 @@ void fileExecQueue(void) {
         break;
     case FILE_REQUEST_KIND_PAC:
         switch (job->state) {
-        case FILE_JOB_QUEUED:
-            job->state = FILE_JOB_OPENING;
+        case FILE_REQUEST_LIFECYCLE_QUEUED:
+            job->state = FILE_REQUEST_LIFECYCLE_OPENING;
             locked = 0;
             SignalSema(work->sema);
             job->deviceRequest = sdfFileCmdReadOpen(job->name, pacLoadCallback, job);
             break;
-        case FILE_JOB_READY:
+        case FILE_REQUEST_LIFECYCLE_READY:
             locked = 0;
             SignalSema(work->sema);
             pacRead(job);
@@ -331,8 +322,8 @@ void fileExecQueue(void) {
         }
         break;
     case FILE_REQUEST_KIND_VALUE_PAIR:
-        if (job->state == FILE_JOB_QUEUED) {
-            job->state = FILE_JOB_OPENING;
+        if (job->state == FILE_REQUEST_LIFECYCLE_QUEUED) {
+            job->state = FILE_REQUEST_LIFECYCLE_OPENING;
             locked = 0;
             SignalSema(work->sema);
             job->deviceRequest = sdfFileCmdWriteOpen(job->name, fileSaveCallback, job, 0x180);
@@ -406,7 +397,7 @@ s32 fileManager(void) {
     fileExecQueue();
     link = &work->pacCallbackHead;
     while ((request = *link) != NULL) {
-        if (((FileTransferJob *)request)->state == FILE_JOB_CLOSED) {
+        if (((FileTransferJob *)request)->state == FILE_REQUEST_LIFECYCLE_CLOSED) {
             *link = request->callbackNext;
             ((void (*)(FilePacRequest *, void *))request->completionCallback)(request, request->completionArg);
         } else {
