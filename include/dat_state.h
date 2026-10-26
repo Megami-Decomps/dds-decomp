@@ -144,7 +144,7 @@ typedef struct datUnitWork_t {
     u16 savedCommandPhase; /* +0x1AC: saved action phase restored with actionSlot. */
     u16 savedCommandSelectionEntry; /* +0x1AE: selected list entry restored with savedCommandPhase. */
     s16 actionSlot;
-    u16 itemId;
+    u16 assignedItemId; /* 0x1B2: item assigned to this roster record. */
     s32 randomizedValue;                  /* 0x1B4: initialized to 0x12 minus a four-way roll. */
     s32 huntExp; /* 0x1B8: hunt EP accumulated this battle */
     u8 pad1BC[8];
@@ -302,7 +302,8 @@ typedef char DatGameStateSizeCheck[sizeof(DatGameState) == 0x33600 ? 1 : -1];
 #ifdef VERSION_DDS2
 typedef char DatPartyRecordSizeCheck[sizeof(datUnitWork_t) == 0x1C4 ? 1 : -1];
 typedef char DatPartyRecordActionSlotOffsetCheck[((u32)&((datUnitWork_t *)0)->actionSlot == 0x1B0) ? 1 : -1];
-typedef char DatPartyRecordItemIdOffsetCheck[((u32)&((datUnitWork_t *)0)->itemId == 0x1B2) ? 1 : -1];
+typedef char DatPartyRecordAssignedItemIdOffsetCheck[
+    ((u32)&((datUnitWork_t *)0)->assignedItemId == 0x1B2) ? 1 : -1];
 typedef char DatGameStateSizeCheck[sizeof(DatGameState) == 0x1E840 ? 1 : -1];
 #endif
 

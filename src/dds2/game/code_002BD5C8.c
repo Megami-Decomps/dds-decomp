@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "dat_assigned_item_id.h"
 #include "ui_color.h"
 #include "fr_font.h"
 #include "fr_font_draw_glyph.h"
@@ -113,7 +114,7 @@ extern const u8 (*D_00435E5C)[25];
 extern char D_00437C38[];
 extern char D_00437C40[];
 extern u16 mnuGetPartyEntryMenuValue(datUnitWork_t *);
-extern u16 mnuGetPartyEntryCurrentId(datUnitWork_t *);
+extern DatAssignedItemId mnuGetPartyEntryCurrentId(datUnitWork_t *);
 extern u32 evtGetIndexedEventRecordId(s32);
 extern u32 itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, s32);
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);

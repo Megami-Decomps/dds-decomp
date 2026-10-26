@@ -7,6 +7,7 @@
 #include "eff_resource_records.h"
 #include "fpu.h"
 #include "common.h"
+#include "dat_assigned_item_id.h"
 #include "sdf_vu0.h"
 #include "pty_bullet_item_count_api.h"
 #include "sdf_vu_matrix.h"
@@ -1309,7 +1310,7 @@ void mnuDrawAndAdvancePanelGroup(s32 x, s32 y, s32 depth, datUnitWork_t *partyRe
         textMode = 0;
         switch (mode) {
         case 1:
-            itemBonus = ptyGetCombinedRecordAndSlotValue(partyRecord->itemId, index);
+            itemBonus = ptyGetCombinedRecordAndSlotValue(partyRecord->assignedItemId, index);
             currentValue = group->entries[index]->value18 + group->entries[index]->value24;
             proposedValue = group->entries[index]->value18 + itemBonus;
             if (currentValue >= 100) {
@@ -2752,21 +2753,21 @@ u16 mnuGetPartyEntryMenuValue(datUnitWork_t *entry) {
 void mnuMarkEntryBlocked(s32 itemId);
 
 u32 mnuSetPartyEntryCurrentId(datUnitWork_t *entry, u32 id) {
-    entry->itemId = id;
+    entry->assignedItemId = id;
     mnuMarkEntryBlocked(id);
     ptyRecomputeMaxHpMp(entry);
     return 1;
 }
 
-u16 mnuGetPartyEntryCurrentId(datUnitWork_t *entry) {
-    return entry->itemId;
+DatAssignedItemId mnuGetPartyEntryCurrentId(datUnitWork_t *entry) {
+    return entry->assignedItemId;
 }
 
 datUnitWork_t *mnuFindPartySlotByCurrentId(u32 id) {
     s32 index;
     datUnitWork_t *entry = DDS3_GBWK->party;
     for (index = 0; index < 5; index++, entry++) {
-        if ((entry->flags & 1) && id == entry->itemId) {
+        if ((entry->flags & 1) && id == entry->assignedItemId) {
             return entry;
         }
     }
@@ -2777,7 +2778,7 @@ datUnitWork_t *mnuFindReserveSlotByCurrentId(u32 id) {
     s32 index;
     datUnitWork_t *entry = DDS3_GBWK->templates;
     for (index = 0; index < 16; index++, entry++) {
-        if (entry->level != 0 && (entry->flags & 1) && id == entry->itemId) {
+        if (entry->level != 0 && (entry->flags & 1) && id == entry->assignedItemId) {
             return entry;
         }
     }

@@ -3,6 +3,7 @@
 #include "fld_next_scene_request_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "dat_assigned_item_id.h"
 #include "btl_command_use_error.h"
 #include "btl_command_target_policy.h"
 #include "btl_indexed_ui_resource_api.h"
@@ -163,7 +164,7 @@ extern f32 btlActiveGroupCountMultipliers[];
 
 
 
-extern u16 mnuGetPartyEntryCurrentId(datUnitWork_t *);
+extern DatAssignedItemId mnuGetPartyEntryCurrentId(datUnitWork_t *);
 
 extern s32 btlDoesEnabledStatusMatchCurrentId(datUnitWork_t *, u32);
 

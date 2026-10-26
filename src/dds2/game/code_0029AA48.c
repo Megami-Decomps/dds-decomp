@@ -90,7 +90,7 @@ void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *context, s32 copyOptions) {
                                  context->statGains[i]);
         }
     }
-    mnuApplyPackedGroupValues(context->panelHandle, unit->itemId);
+    mnuApplyPackedGroupValues(context->panelHandle, unit->assignedItemId);
     mnuDrawAndAdvancePanelGroup(0xEB0, 0x518, 0, unit, context->panelHandle, 0, 0x53);
     mnuDrawPartySkillListPanel(0, 0, 0, unit, context->spriteHandle, 0x53);
     mnuDrawRemainingSelectionExtent(context);

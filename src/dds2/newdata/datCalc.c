@@ -177,7 +177,7 @@ DatCalculatedStatValue datGetStatWithStatusOverride(
     }
     adjustedStat = datGetClampedProfileAdjustedStat(unit, statIndex);
     adjustedStat += ptyGetCombinedRecordAndSlotValue(
-        unit->itemId, statIndex);
+        unit->assignedItemId, statIndex);
     if (adjustedStat < 0) {
         adjustedStat = 0;
     }
@@ -906,7 +906,7 @@ void ptyInitRuntime(void) {
     DDS3_GBWK->partyCount = 3;
     for (i = 0; i < 5; i++) {
         DDS3_GBWK->party[i].menuValue = 0;
-        DDS3_GBWK->party[i].itemId = 0;
+        DDS3_GBWK->party[i].assignedItemId = 0;
     }
     DDS3_GBWK->header.currency = 0;
     for (i = 0; i < 256; i++) {
@@ -1103,8 +1103,8 @@ void ptyRestoreUnitFromSavedTemplate(datUnitWork_t *entry, s32 templateIndex, s3
         ptyRebuildProfileSkills(1, entry);
     }
     mtrRecomputeMantraFlagsForPartyUnit(entry);
-    if (entry->itemId != 0) {
-        DDS3_GBWK->inventory.counts[entry->itemId] = 1;
+    if (entry->assignedItemId != 0) {
+        DDS3_GBWK->inventory.counts[entry->assignedItemId] = 1;
     }
 }
 
@@ -1144,7 +1144,7 @@ void ptyInitRosterAndClearItem(datUnitWork_t *entry, s32 initFlags) {
     memcpy(&gameState->mantraBits[2], &gameState->mantraBits[1], sizeof(gameState->mantraBits[2]));
     memcpy(gameState->profileBanks[2].records, gameState->profileBanks[1].records, sizeof(gameState->profileBanks[2].records));
     mtrRefreshMantraStateForUnit2();
-    entry->itemId = 0;
+    entry->assignedItemId = 0;
 }
 
 /* Clone template 7 into roster 3 and inherit its mantra state. After optional
@@ -1183,8 +1183,8 @@ void ptyCloneTemplateSevenToRosterUnitThree(datUnitWork_t *entry, s32 initFlags)
     if (!(initFlags & 2)) {
         ptyRebuildProfileSkills(1, entry);
     }
-    if (entry->itemId != 0) {
-        DDS3_GBWK->inventory.counts[entry->itemId] = 1;
+    if (entry->assignedItemId != 0) {
+        DDS3_GBWK->inventory.counts[entry->assignedItemId] = 1;
     }
 }
 
@@ -1364,10 +1364,10 @@ PtyRemoveUnitResult ptyRemoveUnitWithFlags(s32 unitId, s32 flags) {
         return PTY_REMOVE_UNIT_RESULT_NOT_FOUND;
     }
 
-    itemId = DDS3_GBWK->party[partyIndex].itemId;
+    itemId = DDS3_GBWK->party[partyIndex].assignedItemId;
     if (flags == 0 && itemId != 0) {
         DDS3_GBWK->inventory.counts[itemId] = 1;
-        DDS3_GBWK->party[partyIndex].itemId = 0;
+        DDS3_GBWK->party[partyIndex].assignedItemId = 0;
     }
 
     memcpy(&DDS3_GBWK->templates[unitId], &DDS3_GBWK->party[partyIndex], sizeof(datUnitWork_t));
@@ -1637,8 +1637,8 @@ void ptyClearItemF8FromPartyAndInventory(void) {
         datUnitWork_t *entry = &DDS3_GBWK->party[slotIndex];
 
         if (entry->flags & DAT_PARTY_FLAG_OCCUPIED) {
-            if (entry->itemId == 0xF8) {
-                entry->itemId = 0;
+            if (entry->assignedItemId == 0xF8) {
+                entry->assignedItemId = 0;
             }
         }
     }

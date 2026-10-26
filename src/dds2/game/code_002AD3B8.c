@@ -13,6 +13,7 @@
 #include "mnu_list.h"
 #include "mnu_shop.h"
 #include "dat_state.h"
+#include "dat_assigned_item_id.h"
 #include "dat_command.h"
 #include "mdl_flag_api.h"
 
@@ -49,7 +50,7 @@ extern u32 evtGetIndexedEventRecordId(s32);
 extern u8 *D_00435E5C;
 extern u8 *datUnitNames;
 extern u16 mnuGetPartyEntryMenuValue(datUnitWork_t *);
-extern u16 mnuGetPartyEntryCurrentId(datUnitWork_t *);
+extern DatAssignedItemId mnuGetPartyEntryCurrentId(datUnitWork_t *);
 extern void evtCopyEntryStringToActiveWindow(s32, const char *);
 extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 extern void mnuRefreshStaffWindowDescription();
@@ -645,7 +646,7 @@ s32 mnuDrawStaffPartyValuePage(dds3ProcessID_t *task) {
 
     mnuDrawCampIconBackdropByKind(1, task);
     mnuCreateStaffImageSprite(8);
-    mnuApplyPackedGroupValues(((MenuStaffContext *)context)->panelHandle, partyEntry->itemId);
+    mnuApplyPackedGroupValues(((MenuStaffContext *)context)->panelHandle, partyEntry->assignedItemId);
     mnuDrawAndAdvancePanelGroup(0xEB0, 0x518, 0, partyEntry,
                                ((MenuStaffContext *)context)->panelHandle, 0, 0x53);
     mnuUpdateAndDrawWindowTransition(0x1E0, 0x350, 0, &((MenuStaffContext *)context)->fade, 0x53);
@@ -857,7 +858,7 @@ s32 mnuHandleStaffSelectionPageInput(dds3ProcessID_t *task) {
                     eligible = 1;
                     if (menu->windows[3]->list->cursor->index == 0) {
                         selectionId = 0;
-                        if (party->itemId == 0) {
+                        if (party->assignedItemId == 0) {
                             eligible = 0;
                         }
                     } else {

@@ -124,7 +124,7 @@ void ptyResetPartyRecordsAndProfiles(void) {
         partyIndex++;
         if (rec->flags & 1) {
             scrClearPackedScriptFlags(rec);
-            rec->itemId = 0;
+            rec->assignedItemId = 0;
         }
         i--;
     } while (i >= 0);

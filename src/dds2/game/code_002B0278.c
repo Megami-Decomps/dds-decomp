@@ -24,6 +24,7 @@
 #include "mnu_shop.h"
 #include "mnu_scroll_panel.h"
 #include "dat_state.h"
+#include "dat_assigned_item_id.h"
 #include "pty_skill_nibble_state.h"
 #include "pty_roster_api.h"
 #include "prf_skill_list_buffer.h"
@@ -47,7 +48,7 @@ struct StaffMenuRuntime;
 
 extern void evtCopyEntryStringToActiveWindow(s32, const char *);
 
-extern u16 mnuGetPartyEntryCurrentId(datUnitWork_t *);
+extern DatAssignedItemId mnuGetPartyEntryCurrentId(datUnitWork_t *);
 
 #define MNU_ENTRY_SPRITE_COUNT 4
 #define MNU_ENTRY_COLOR_COUNT 4
@@ -366,7 +367,7 @@ void mnuDrawStaffPartySelectionPanel(dds3ProcessID_t *task) {
 
     mnuDrawCampIconBackdropByKind(1, task);
     mnuCreateStaffImageSprite(12);
-    mnuApplyPackedGroupValues(context->panelGroup, unit->itemId);
+    mnuApplyPackedGroupValues(context->panelGroup, unit->assignedItemId);
     selection = choices->windows[4]->list->count == 0
                     ? 0 : choices->windows[4]->list->cursor->sortKeySecondary;
     if (selection != 0) {
@@ -1582,7 +1583,7 @@ void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, const char *text, s32
 }
 
 void mnuDrawPartySkillAndStatusPanel(datUnitWork_t *entry, MenuPageWindow *page, MenuPanelGroup *packedGroup, MenuSpriteState *spriteState, s32 unused, s32 spriteFlags) {
-    mnuApplyPackedGroupValues(packedGroup, entry->itemId);
+    mnuApplyPackedGroupValues(packedGroup, entry->assignedItemId);
     mnuDrawAndAdvancePanelGroup(0xeb0, 0x518, 0, entry, packedGroup, 0, spriteFlags);
     mnuDrawPartySkillListPanel(0, 0, 0, entry, spriteState, spriteFlags);
     mnuDrawTextSprite(0x2a0, 0xa50, 0, 0xa09dc380, datUnitNames + entry->unitId * 0x11 + 0x110, spriteFlags);
