@@ -10,6 +10,7 @@
 #include "fld_marker_packet.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "fld_camera_model_motion_request.h"
 #include "fld_placement_batch_mode.h"
 #include "sdf_vu0.h"
 #include "sdf_resource_list_release_api.h"
@@ -454,7 +455,7 @@ extern u32 D_00436088;
 
 extern s32 D_004360AC;
 
-extern s32 D_004360C4;
+extern FldCameraModelMotionRequest D_004360C4;
 
 extern s32 D_004360C8;
 
@@ -3866,7 +3867,7 @@ s32 fldSyncObjectFlagsB(void) {
 
 void fldResetCameraModelHandles(void) {
     D_004360C8 = 0;
-    D_004360C4 = 0xffffffff;
+    D_004360C4 = FLD_CAMERA_MODEL_MOTION_REQUEST_NONE;
     D_004360CC = 0;
     D_004360D0 = 0;
 }
@@ -3883,8 +3884,9 @@ void fldReleaseCameraModel(u32 enabled) {
     }
 }
 
-void fldSetCameraModelMotionRequest(u32 requestCode, u32 frameCountdown) {
-    D_004360C4 = requestCode;
+void fldSetCameraModelMotionRequest(FldCameraModelMotionRequest request,
+                                    u32 frameCountdown) {
+    D_004360C4 = request;
     D_004360C8 = frameCountdown;
 }
 
@@ -3925,7 +3927,7 @@ void fldUpdateCameraModelMotion(s32 currentMotionIndex, s32 requestedMotionIndex
         if (D_004360C4 == 1) {
             mdlSetMotionSpeedEx(fldPlayerModelContext, 1, 1.0f);
             mdlSmoothLoopMotion(fldPlayerModelContext, 1, requestedMotionIndex, blendFrames, blendFrames);
-            D_004360C4 = -1;
+            D_004360C4 = FLD_CAMERA_MODEL_MOTION_REQUEST_NONE;
             if (requestedMotionIndex == 2 && D_004360CC == 3) {
                 D_004360CC = requestedMotionIndex;
                 fldPlayerModelContext->first->frameStep = 1.0f;
@@ -3934,28 +3936,28 @@ void fldUpdateCameraModelMotion(s32 currentMotionIndex, s32 requestedMotionIndex
         } else if (D_004360C4 == 0x66) {
             mdlSetMotionSpeedEx(fldPlayerModelContext, 1, 1.0f);
             mdlSmoothSingleMotion(fldPlayerModelContext, 1, 2, 0.0f, blendFrames);
-            D_004360C4 = -1;
+            D_004360C4 = FLD_CAMERA_MODEL_MOTION_REQUEST_NONE;
             D_004360CC = 0x66;
             fldPlayerModelContext->first->frameStep = 1.0f;
             mdlSmoothLoopMotion(fldPlayerModelContext, 0, 2, blendFrames, blendFrames);
         } else if (D_004360C4 == 2) {
             mdlSetMotionSpeedEx(fldPlayerModelContext, 1, 1.0f);
             mdlSmoothSingleMotion(fldPlayerModelContext, 1, 2, 0.0f, blendFrames);
-            D_004360C4 = -1;
+            D_004360C4 = FLD_CAMERA_MODEL_MOTION_REQUEST_NONE;
             D_004360CC = 2;
             fldPlayerModelContext->first->frameStep = 1.0f;
             mdlSmoothLoopMotion(fldPlayerModelContext, 0, 2, blendFrames, blendFrames);
         } else if (D_004360C4 == 3) {
             mdlSetMotionSpeedEx(fldPlayerModelContext, 1, 1.0f);
             mdlSmoothSingleMotion(fldPlayerModelContext, 1, 3, 0.0f, blendFrames);
-            D_004360C4 = -1;
+            D_004360C4 = FLD_CAMERA_MODEL_MOTION_REQUEST_NONE;
             D_004360CC = 3;
             fldPlayerModelContext->first->frameStep = 1.0f;
             mdlSmoothLoopMotion(fldPlayerModelContext, 0, 3, blendFrames, blendFrames);
         } else if (D_004360C4 == 5) {
             mdlSetMotionSpeedEx(fldPlayerModelContext, 1, 1.0f);
             mdlSmoothSingleMotion(fldPlayerModelContext, 1, 5, 0.0f, blendFrames);
-            D_004360C4 = -1;
+            D_004360C4 = FLD_CAMERA_MODEL_MOTION_REQUEST_NONE;
             D_004360CC = 5;
             fldPlayerModelContext->first->frameStep = 1.0f;
             mdlSmoothLoopMotion(fldPlayerModelContext, 0, 5, blendFrames, blendFrames);
@@ -3963,11 +3965,11 @@ void fldUpdateCameraModelMotion(s32 currentMotionIndex, s32 requestedMotionIndex
             if (requestedMotionIndex == 1) {
                 mdlSetMotionSpeedEx(fldPlayerModelContext, 1, 2.0f);
                 mdlSingleMotion(fldPlayerModelContext, 1, 6);
-                D_004360C4 = -1;
+                D_004360C4 = FLD_CAMERA_MODEL_MOTION_REQUEST_NONE;
             } else {
                 mdlSetMotionSpeedEx(fldPlayerModelContext, 1, 2.0f);
                 mdlSingleMotion(fldPlayerModelContext, 1, 4);
-                D_004360C4 = -1;
+                D_004360C4 = FLD_CAMERA_MODEL_MOTION_REQUEST_NONE;
                 D_004360CC = 4;
                 fldPlayerModelContext->first->frameStep = 1.0f;
                 mdlSmoothLoopMotion(fldPlayerModelContext, 0, 4, blendFrames, blendFrames);

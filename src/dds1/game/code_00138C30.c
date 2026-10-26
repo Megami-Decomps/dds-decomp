@@ -10,6 +10,7 @@
 #include "fld_marker_packet.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "fld_camera_model_motion_request.h"
 #include "sdf_vu0.h"
 #include "fld_stop_entry.h"
 #include "sdf_resource_list_release_api.h"
@@ -200,7 +201,7 @@ extern dds3Basic_t *fldPlayerObject;
 
 extern u8 D_003BAB3C;
 
-extern u32 D_003BAD34;
+extern FldCameraModelMotionRequest D_003BAD34;
 
 extern u32 D_003BAD38;
 

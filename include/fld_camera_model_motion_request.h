@@ -1,0 +1,10 @@
+#ifndef FLD_CAMERA_MODEL_MOTION_REQUEST_H
+#define FLD_CAMERA_MODEL_MOTION_REQUEST_H
+
+#include "common.h"
+
+typedef u32 FldCameraModelMotionRequest;
+
+#define FLD_CAMERA_MODEL_MOTION_REQUEST_NONE 0xFFFFFFFFu
+
+#endif /* FLD_CAMERA_MODEL_MOTION_REQUEST_H */
