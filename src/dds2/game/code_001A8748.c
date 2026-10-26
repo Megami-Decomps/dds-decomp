@@ -2451,9 +2451,10 @@ s32 btlFlagToElementIndex(s32 flag) {
     return datFlagToElementIndex(flag);
 }
 
-s32 btlCheckSpecialAbility(datUnitWork_t *record, s32 ability) {
+BtlSpecialAbilityAvailability btlCheckSpecialAbility(
+    const datUnitWork_t *record, s32 ability) {
     if (datUnitHasSkill(record, ability) == 0) {
-        return 0;
+        return BTL_SPECIAL_ABILITY_UNAVAILABLE;
     }
     switch (ability) {
     case 0x227:
@@ -2461,7 +2462,7 @@ s32 btlCheckSpecialAbility(datUnitWork_t *record, s32 ability) {
     case 0x228:
         return evtGetMirroredSolarPhase() == 0;
     default:
-        return 1;
+        return BTL_SPECIAL_ABILITY_AVAILABLE;
     }
 }
 
