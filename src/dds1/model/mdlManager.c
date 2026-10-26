@@ -1080,10 +1080,10 @@ void mdlGetScreenOffset(dds3ModelHandle_t *ctx, const f32 point[4])
 #define MDL_PROJECTION_SCALE_OFFSET 0x40
 #define MDL_PROJECTION_BIAS_OFFSET 0x50
 
-/* vu0 routine: project pointCount four-float vectors using the stored tertiary
- * row scale. Matrix setup still runs for nonpositive counts. Output stores all
- * four components; perspective division is not guarded against zero w. */
-void mdlProjectPoints(dds3ModelHandle_t *ctx, f32 (*inputPoints)[4], f32 (*outputPoints)[4], s32 pointCount)
+/* vu0 routine: project pointCount borrowed input vectors using the stored
+ * tertiary row scale. Matrix setup still runs for nonpositive counts. Output
+ * stores all four components; perspective division is not guarded at zero w. */
+void mdlProjectPoints(dds3ModelHandle_t *ctx, const f32 (*inputPoints)[4], f32 (*outputPoints)[4], s32 pointCount)
 {
     s32 pointIndex;
 
