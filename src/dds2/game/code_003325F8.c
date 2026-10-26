@@ -491,11 +491,11 @@ void sdfMatListFree(DevRequest *list) {
     sdfItemArrayFree(list);
 }
 
-void sdfMatListFreeResrc(DevRequest *resource, s32 retained) {
+void sdfMatListFreeResrc(DevRequest *resource, SdfMatListReleaseMode releaseMode) {
     if (resource == NULL) {
         return;
     }
-    if (retained != 0) {
+    if (releaseMode != SDF_MAT_LIST_RELEASE_CONTAINER_ONLY) {
         sdfDelayedResrcEntry(&sdfMatDelayedResrcCB, resource);
     } else {
         sdfItemArrayFree(resource);

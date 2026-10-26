@@ -1784,7 +1784,7 @@ void sdfModelRootFree(sdfModelRootNode_t *slot, s32 recycle, s32 release) {
         return;
     }
     if (release != 0) {
-        sdfMatListFreeResrc(slot->resources, 1);
+        sdfMatListFreeResrc(slot->resources, SDF_MAT_LIST_DEFER_FULL_RELEASE);
     }
     if (slot->slotPairs != NULL) {
         sdfItemArrayFree(slot->slotPairs);
