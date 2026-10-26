@@ -174,11 +174,11 @@ extern sdfMemHandle_t *D_004366E0;
 
 extern u32 btlIsCurrentDarkZone(void);
 
-extern s32 itfMesMngInitialize(ItfMesSub *);
+extern ItfMesWindowIndex itfMesMngInitialize(ItfMesSub *);
 
 extern char D_004366F8[];
 
-extern void itfMesMngRelease(s32);
+extern void itfMesMngRelease(ItfMesWindowIndex window);
 
 extern s32 evtGetMirroredSolarPhase(void);
 

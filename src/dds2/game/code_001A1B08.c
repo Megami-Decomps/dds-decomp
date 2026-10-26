@@ -39,7 +39,7 @@ extern PanelHold itfHeldPanelCursor;
 extern PanelEntry pinst[];
 
 extern void itfMesMngRequestMessageRelease(s32 window, s32 releasePrimaryBlock);
-extern s32 scrGetMessageHandle(void);
+extern ItfMesWindowIndex scrGetMessageHandle(void);
 extern void itfMesBuildOptionList(s32 window, s32 entryIndex);
 extern void itfMesMngRequestSelectRelease(s32 window);
 extern void itfMiscSetRatioRGB(DrawColorRec *output, s32 scaleX, s32 scaleY, s32 scaleZ, s32 w, const TextVector *input, s32 count);
@@ -619,7 +619,7 @@ void DrawTestAlphaPrim(sdfDrawTag_t *list) {
 /* Poll/start an entry: one ends the command, zero keeps waiting.
    A negative signed status is consumed by clearing it; positive status keeps waiting. */
 s32 itfMesMngMessage(void) {
-    s32 window = scrGetMessageHandle();
+    ItfMesWindowIndex window = scrGetMessageHandle();
     PanelRec *record;
     PanelRecSub *entryState;
     s32 entryIndex;
@@ -662,7 +662,7 @@ void itfMesMngSetPhase(s32 windowIndex, s8 status) {
    Invalid windows still return the native command-complete value of one. */
 s32 itfPanelAcquireHold(void) {
     PanelHold *hold;
-    s32 window;
+    ItfMesWindowIndex window;
 
     window = scrGetMessageHandle();
     if (window < 0) {
@@ -756,7 +756,7 @@ s32 itfStepHeldPanelMessages(void) {
 
 
 s32 itfMesMngSelect(void) {
-    s32 window;
+    ItfMesWindowIndex window;
     s32 entry;
     PanelRec *record;
     PanelOptionBlock *options;
@@ -788,7 +788,7 @@ extern s32 D_00438F28;
 /* Configure the fade on timer zero, wait thirty ticks, then consume a negative option status.
    Keep both timer reads: setup tests a second read, while later comparisons use the cached one. */
 s32 itfCommandSelectOptionWithFade(void) {
-    s32 window;
+    ItfMesWindowIndex window;
     s32 elapsedTicks;
     s32 entryIndex;
     PanelRec *record;

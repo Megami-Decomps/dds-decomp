@@ -34,8 +34,8 @@ u32 scrGetCommandTimer(void) {
     return nowpwork->cmdTimer;
 }
 
-s32 scrGetMessageHandle(void) {
-    return nowpwork->resourceIndex;
+ItfMesWindowIndex scrGetMessageHandle(void) {
+    return nowpwork->messageWindowIndex;
 }
 
 scrProcessWork_s *scrGetScriptHandle(void) {

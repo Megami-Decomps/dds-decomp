@@ -1923,7 +1923,7 @@ void scrUnlinkHandle(scrProcessWork_s *node) {
 }
 
 
-extern s32 itfMesMngInitialize(ItfMesSub *data);
+extern ItfMesWindowIndex itfMesMngInitialize(ItfMesSub *data);
 
 INCLUDE_RODATA(const s32, "game/code_00107FD8", D_0039E220);
 
@@ -1963,7 +1963,7 @@ scrProcessWork_s *bfContextCreate(BfFlw0Header *header, ScrSection *sections, Sc
     process->instructions = (ScrInstr *)instructions;
     process->strings = strings;
     process->procedureIndex = procedureIndex;
-    process->resourceIndex = -1;
+    process->messageWindowIndex = ITF_MES_WINDOW_INDEX_INVALID;
     process->scriptHeader = header;
     process->procedures = procedures;
     process->auxiliaryData = auxiliaryData;
@@ -1992,7 +1992,7 @@ scrProcessWork_s *bfContextCreate(BfFlw0Header *header, ScrSection *sections, Sc
         process->localFloat = NULL;
     }
     if (auxiliaryData != NULL) {
-        process->resourceIndex = itfMesMngInitialize(auxiliaryData);
+        process->messageWindowIndex = itfMesMngInitialize(auxiliaryData);
     }
     scrLinkHandle(process);
     evtPrintDeveloperConsoleMessage("start <%s>\n", procedures[procedureIndex].name);

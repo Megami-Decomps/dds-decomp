@@ -987,7 +987,7 @@ extern s32 TestMsgMngD_Process(dds3ProcessID_t *task);
 void itfDebugMesMngInitialize(void) {
     D_003BA8EC = 0x80FFFFFF;
     TestMsgReloadTexture();
-    itfMesMngSetKutiCallback(((scrProcessWork_s *)dds3GetProcessData(scrStartScript2(0x3E8, (BfFlw0Header *)D_00358038, 0)))->resourceIndex, itfDebugPrintMark);
+    itfMesMngSetKutiCallback(((scrProcessWork_s *)dds3GetProcessData(scrStartScript2(0x3E8, (BfFlw0Header *)D_00358038, 0)))->messageWindowIndex, itfDebugPrintMark);
     dds3StartProcess(D_003A14F0, 0x3EF, 0, 0, TestMsgMngC_Process, 0, 0);
     dds3StartProcess(D_003A1500, 0x2AFE, 0, 0, TestMsgMngD_Process, 0, 0);
 }

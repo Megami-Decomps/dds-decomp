@@ -2,6 +2,7 @@
 #define EVT_POLYGON_MOVIE_H
 
 #include "common.h"
+#include "itf_mes_window_index.h"
 #include "sdf.h"
 #include "sdf_float_counter.h"
 
@@ -121,7 +122,7 @@ typedef struct PolyMovieWork {
     u32 subEntry21Count; /* 0xF8: rows in the sub type-21 group metadata table */
     u8 *subEntry25Data;   /* 0xFC */
     u32 subEntry25Count;       /* 0x100 */
-    s32 messageManagerHandle; /* 0x104: ItfMesMng handle for the main type-6 entry. */
+    ItfMesWindowIndex messageManagerHandle; /* 0x104: owned index for the main type-6 message window. */
     struct dds3ProcessID_t *task; /* 0x108: scheduler task created for this viewer */
     s32 eventId;       /* 0x10C */
     s32 sceneId;       /* 0x110 */

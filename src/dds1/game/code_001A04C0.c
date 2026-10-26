@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "eff_random.h"
 #include "common.h"
+#include "itf_mes_window_index.h"
 #include "fld_next_scene_request_api.h"
 #include "btl_boss_data_api.h"
 #include "btl_event_asset_api.h"
@@ -420,7 +421,7 @@ extern void sdfRandomize(s8 *, s32);
 
 extern u32 dds3GetKernelCount(void);
 
-extern s32 itfMesMngInitialize(ItfMesSub *);
+extern ItfMesWindowIndex itfMesMngInitialize(ItfMesSub *);
 
 extern void btlResetActorEntryState(void);
 
@@ -496,7 +497,7 @@ extern char D_003A15A8[];
 
 extern char D_003A15C8[];
 
-extern void itfMesMngRelease(s32);
+extern void itfMesMngRelease(ItfMesWindowIndex window);
 
 extern s32 btlCountRegisteredTasks(void);
 extern s32 sndHasOccupiedNodeSlots(void);
@@ -913,4 +914,3 @@ INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB388);
 INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB390);
 
 INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB398);
-

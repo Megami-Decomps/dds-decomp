@@ -2,6 +2,7 @@
 #define ITF_H
 
 #include "common.h"
+#include "itf_mes_window_index.h"
 #include "itf_mes_resource.h"
 #include "eff.h"
 #include "sdf.h"
@@ -349,7 +350,7 @@ s32 frFontDrawGlyphWithSharedFlags(_FRQ *glyph, s8 mode);
 typedef struct mesflow_tag {
     struct mesflow_tag *previous;
     struct mesflow_tag *next;
-    s32 index;
+    ItfMesWindowIndex index;
     instanceMes_tag *state;
     sdfMemHandle_t *resourceHandle;
 } mesflow_tag;

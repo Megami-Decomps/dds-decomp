@@ -215,7 +215,7 @@ void TestMsgReloadTexture(void);
 void itfDebugMesMngInitialize(void) {
     D_00435CBC = 0x80FFFFFF;
     TestMsgReloadTexture();
-    itfMesMngSetKutiCallback(((scrProcessWork_s *)dds3GetProcessData(scrStartScript2(0x3E8, (BfFlw0Header *)D_003B4A28, 0)))->resourceIndex, itfDebugPrintMark);
+    itfMesMngSetKutiCallback(((scrProcessWork_s *)dds3GetProcessData(scrStartScript2(0x3E8, (BfFlw0Header *)D_003B4A28, 0)))->messageWindowIndex, itfDebugPrintMark);
     dds3StartProcess("TestMsgMngC", 0x3EF, 0, 0, TestMsgMngC_Process, 0, 0);
     dds3StartProcess("TestMsgMngD", 0x2AFE, 0, 0, TestMsgMngD_Process, 0, 0);
 }
@@ -925,7 +925,7 @@ extern u32 btlIsCurrentDarkZone(void);
 
 extern void sdfRandomize(void *, u32);
 
-extern s32 itfMesMngInitialize(ItfMesSub *);
+extern ItfMesWindowIndex itfMesMngInitialize(ItfMesSub *);
 
 extern void btlResetActorEntryState(void);
 
@@ -1012,7 +1012,7 @@ void btlInitializeBattleRuntime(void) {
     }
 }
 
-extern void itfMesMngRelease(s32);
+extern void itfMesMngRelease(ItfMesWindowIndex window);
 
 extern char D_00414F48[];
 

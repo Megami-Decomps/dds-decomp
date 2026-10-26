@@ -219,7 +219,7 @@ void evtReleaseResourcePairHandle(EvtResourcePair *record) {
 
 struct ItfMesSub;
 
-extern s32 itfMesMngInitialize(struct ItfMesSub *);
+extern ItfMesWindowIndex itfMesMngInitialize(struct ItfMesSub *);
 
 /* Create the singleton message window only when its handle is negative.
  * The page setup remains unconditional after the allocation attempt. */
@@ -325,7 +325,7 @@ u32 evtFinishMessageWindowAndNotify(void) {
     return evtCleanupMessageWindow(1);
 }
 
-extern void itfMesMngRelease(s32);
+extern void itfMesMngRelease(ItfMesWindowIndex window);
 
 /* Destroy an existing singleton window and invalidate its handle and control gates. */
 s32 fclDestroyMessage(void) {

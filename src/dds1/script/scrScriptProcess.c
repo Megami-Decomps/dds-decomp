@@ -90,7 +90,7 @@ scrProcessWork_s *scrCreateProcessAtFirstProcedure(BfFlw0Header *header, ScrSect
 }
 
 extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
-extern void itfMesMngRelease(s32);
+extern void itfMesMngRelease(ItfMesWindowIndex window);
 extern void scrUnlinkHandle(scrProcessWork_s *process);
 
 /* Log the process name, release its VM buffers and resource, then unlink and free it. */
@@ -102,8 +102,8 @@ void scrProcDestroyTask(scrProcessWork_s *process) {
     if (process->localFloat != NULL) {
         sdfChipFreeDirect(process->localFloat);
     }
-    if (process->resourceIndex >= 0) {
-        itfMesMngRelease(process->resourceIndex);
+    if (process->messageWindowIndex >= 0) {
+        itfMesMngRelease(process->messageWindowIndex);
     }
     if (process->scriptHandle != 0) {
         sdfMemFreeDirect(process->scriptHandle);

@@ -5,6 +5,7 @@
 #include "kwln.h"
 #include "scr_trace_result.h"
 #include "scr_command_result.h"
+#include "itf_mes_window_index.h"
 
 struct sdfMemHandle_t;
 struct BfFlw0Header;
@@ -84,7 +85,7 @@ typedef struct scrProcessWork_s {
     struct ItfMesSub *auxiliaryData;
     const char *strings;          /* borrowed read-only view; lifetime follows source owner/caller */
     ScrProcedureIndex procedureIndex;
-    s32 resourceIndex;
+    ItfMesWindowIndex messageWindowIndex;
     u32 timer;
     u32 cmdTimer;
     struct sdfMemHandle_t *scriptHandle; /* 0xD8: allocation descriptor, not scriptHeader data */
@@ -100,6 +101,8 @@ typedef char ScrData_size_must_be_0xF4[
     (sizeof(scrProcessWork_s) == 0xF4) ? 1 : -1];
 typedef char ScrData_scriptHandle_at_0xD8[
     ((u32)&((scrProcessWork_s *)0)->scriptHandle == 0xD8) ? 1 : -1];
+typedef char ScrData_messageWindowIndex_at_0xCC[
+    ((u32)&((scrProcessWork_s *)0)->messageWindowIndex == 0xCC) ? 1 : -1];
 
 extern scrProcessWork_s *nowpwork;
 extern scrProcessWork_s *scrHandleFirst;

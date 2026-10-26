@@ -1211,7 +1211,7 @@ extern void dds3StartBEDEffectObjectBasic(dds3Basic_t *effectObject, u32 entryId
 extern char D_00421AF8[];
 
 extern s32 evtInitMotionSeProcess(s32 eventId, s32 resourceId);
-extern s32 scrGetMessageHandle(void);
+extern ItfMesWindowIndex scrGetMessageHandle(void);
 
 
 extern void evtSetUnitKutiMotion(evtUnitHandle_t *unit, s32 firstSlot, s32 secondSlot);
@@ -2085,7 +2085,7 @@ u32 evtCommand_KUTISET(void) {
         evtWindowMotionUnit = unit;
     }
     {
-        s32 window = scrGetMessageHandle();
+        ItfMesWindowIndex window = scrGetMessageHandle();
         if (window < 0) {
             return 1;
         }
@@ -2109,7 +2109,7 @@ u32 evtCommand_KUTI(void) {
         evtWindowMotionUnit = unit;
     }
     {
-        s32 window = scrGetMessageHandle();
+        ItfMesWindowIndex window = scrGetMessageHandle();
         if (window < 0) {
             return 1;
         }

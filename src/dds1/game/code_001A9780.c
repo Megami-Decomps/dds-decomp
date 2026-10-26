@@ -152,7 +152,7 @@ extern EffRandState effSharedRandomState[];
 
 extern void btlAllocatePanelTaskWork(void);
 
-extern void itfMesMngRelease(s32);
+extern void itfMesMngRelease(ItfMesWindowIndex window);
 
 extern s32 btlFindCommandStatusMatchInTargetList(BtlTask *actionTask, BtlIndexList *targets);
 
@@ -1858,7 +1858,7 @@ typedef struct ItfMesSub ItfMesSub;
 
 extern ItfMesSub D_0032A668;
 
-extern s32 itfMesMngInitialize(ItfMesSub *);
+extern ItfMesWindowIndex itfMesMngInitialize(ItfMesSub *);
 
 extern u32 btlIsNamedBattleTaskRegistered(void);
 

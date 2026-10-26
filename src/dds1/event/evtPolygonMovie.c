@@ -52,8 +52,8 @@ extern dds3Effect_PartialMultiFilterParam_t evtMovieDefaultResourceRect;
 extern dds3Effect_DistortionBlurParam_t evtMovieDefaultBlurScatter;
 extern dds3Effect_RippleBlurParam_t evtMovieDefaultBlurScale;
 extern dds3Effect_Blur_t D_003686A0;
-extern s32 itfMesMngInitialize(ItfMesSub *messageSub);
-extern void itfMesMngRelease(s32 handle);
+extern ItfMesWindowIndex itfMesMngInitialize(ItfMesSub *messageSub);
+extern void itfMesMngRelease(ItfMesWindowIndex window);
 extern void fileSyncAll(void);
 extern void mnuStopTitleVoicePlayback(void);
 #include "sdf_debug_api.h"
@@ -568,7 +568,7 @@ PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *mainHeade
         return NULL;
     }
     work->unk_114 = 0;
-    work->messageManagerHandle = -1;
+    work->messageManagerHandle = ITF_MES_WINDOW_INDEX_INVALID;
     work->buffer = sdfChipAllocDirect(0x1FC);
     for (arrayIndex = 0; arrayIndex < 0x7F; arrayIndex++) {
         work->buffer[arrayIndex] = 0;
@@ -620,7 +620,7 @@ PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *work, PmdHeader *mainHeade
         case 6:
             work->mainEntry6Data = (u8 *)mainHeader + work->entries[arrayIndex].offset;
             if (work->entries[arrayIndex].value == 0) {
-                work->messageManagerHandle = -1;
+                work->messageManagerHandle = ITF_MES_WINDOW_INDEX_INVALID;
             } else {
                 work->messageManagerHandle = itfMesMngInitialize((ItfMesSub *)work->mainEntry6Data);
             }
@@ -777,7 +777,7 @@ void evtPolygonMovieFreeWork(PolyMovieWork *work)
         }
         if (work->messageManagerHandle >= 0) {
             itfMesMngRelease(work->messageManagerHandle);
-            work->messageManagerHandle = -1;
+            work->messageManagerHandle = ITF_MES_WINDOW_INDEX_INVALID;
         }
         fileSyncAll();
         if (work->mainResource.request != 0) {

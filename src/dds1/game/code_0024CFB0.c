@@ -96,7 +96,7 @@ extern void evtCopyEntryStringToActiveWindow(s32 slotIndex, const char *sourceTe
 extern void itfMesMngSetPhase(s32 windowIndex, s32 status);
 extern void itfMesMngSetSelPhase(s32 windowIndex, s32 status);
 extern MenuPopupEntry mnuTerminalPopupEntries[];
-extern void itfMesMngRelease(s32 window);
+extern void itfMesMngRelease(ItfMesWindowIndex window);
 extern u8 *D_003BAA70;
 extern u8 *D_003BAA74;
 extern u8 *D_003BAA78;
@@ -482,7 +482,7 @@ void evtReleaseResourcePairHandle(EvtResourcePair *record) {
 }
 
 struct ItfMesSub;
-extern s32 itfMesMngInitialize(struct ItfMesSub *sub);
+extern ItfMesWindowIndex itfMesMngInitialize(struct ItfMesSub *sub);
 
 /* Create the singleton message window only when its handle is negative. */
 s32 fclInitMessage(struct ItfMesSub *sub) {
