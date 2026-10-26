@@ -9,6 +9,7 @@
 #include "sdf_chip.h"
 #include "sdf_model.h"
 #include "sdf_material_asset_list.h"
+#include "sdf_forced_asset_texture_mode.h"
 #include "pcp_vu0.h"
 #include "sdf_draw.h"
 #include "sdf_model_copy.h"
@@ -30,7 +31,6 @@ enum {
 /* Declared before first use (were implicit int). */
 extern void sdfMatListUpdatePacket(DevRequest *list, s32 entryIndex);
 extern void sdfResourceListApplyEntryChanges(DevRequest *list, s32 entryIndex);
-extern void sdfSetForcedAssetTextureMode(u32 mode);
 extern void sdfCoreDrawSetFog(const SdfLightingPacketStorage *sourcePacket);
 extern void sdfCoreDrawSetLight(const struct SdfDmaTagHeader *lightingPacket);
 
@@ -552,14 +552,14 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, sdfModelRootNode_t
     }
 
     frame = (s8)sdfFrameId;
-    if (model->flags & 0x20) {
-        sdfSetForcedAssetTextureMode(1);
+    if (model->flags & SDF_MODEL_FORCE_ASSET_TEXTURE_REFRESH_WITH_ZERO_STATE_WORD) {
+        sdfSetForcedAssetTextureMode(SDF_FORCED_ASSET_TEXTURE_MODE_REFRESH_WITH_ZERO_STATE_WORD);
         sdfMatListUpdatePacket(model->resources, frame);
-        sdfSetForcedAssetTextureMode(0);
-    } else if (model->flags & 0x40) {
-        sdfSetForcedAssetTextureMode(2);
+        sdfSetForcedAssetTextureMode(SDF_FORCED_ASSET_TEXTURE_MODE_NORMAL);
+    } else if (model->flags & SDF_MODEL_FORCE_ASSET_TEXTURE_REFRESH) {
+        sdfSetForcedAssetTextureMode(SDF_FORCED_ASSET_TEXTURE_MODE_REFRESH);
         sdfMatListUpdatePacket(model->resources, frame);
-        sdfSetForcedAssetTextureMode(0);
+        sdfSetForcedAssetTextureMode(SDF_FORCED_ASSET_TEXTURE_MODE_NORMAL);
     } else {
         sdfResourceListApplyEntryChanges(model->resources, frame);
     }

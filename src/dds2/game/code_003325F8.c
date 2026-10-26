@@ -9,6 +9,7 @@
 #include "sdf_asset_packets.h"
 #include "sdf_dma_tag.h"
 #include "sdf_model_scalars.h"
+#include "sdf_forced_asset_texture_mode.h"
 #include "sdf_unique_chunk_value_api.h"
 #include "sdf_packet_list.h"
 #include "sdf_chip.h"
@@ -27,7 +28,7 @@
 #include "sdf_motion_node_api.h"
 #include "sdf_material_asset_list.h"
 
-extern u32 sdfForcedAssetTextureMode;
+extern SdfForcedAssetTextureMode sdfForcedAssetTextureMode;
 
 
 #define SDF_CHUNK_NAMED_IDS 0x4D4E444E
@@ -51,7 +52,6 @@ extern u32 sdfForcedAssetTextureMode;
 #define SDF_ASSET_DRAW_ENTRY_BYTES 0xA0
 #define SDF_RESOURCE_LIST_ITEM_BYTES 4
 #define SDF_RESOURCE_LIST_GROWTH 4
-#define SDF_FORCED_TEXTURE_ZERO_STATE_MODE 1
 #define SDF_NODE_SOURCE_WORD_MASK 0x0FFFFFFF
 #define SDF_NODE_HEADER_BYTES 0x10
 
@@ -386,8 +386,8 @@ f32 sdfModelGetFaceDivBias(sdfModelRootNode_t *model) {
     return sdfFaceDivBias;
 }
 
-/* Set the native mode word; its consumers distinguish mode one from other values. */
-void sdfSetForcedAssetTextureMode(u32 mode) {
+/* Select material refresh behavior while assembling node resource packets. */
+void sdfSetForcedAssetTextureMode(SdfForcedAssetTextureMode mode) {
     sdfForcedAssetTextureMode = mode;
 }
 
@@ -770,13 +770,13 @@ SdfDmaTagHeader *sdfMatMakePacket(sdfMat_t *asset, SdfDmaTagHeader *tag, s32 fra
     return (SdfDmaTagHeader *)((u8 *)tag + SDF_NODE_HEADER_BYTES);
 }
 
-/* Copy primary words and optional GS texture state; only mode one zeros its state word. */
+/* Copy primary words and optional GS texture state; one refresh mode zeros the third state word. */
 void sdfAssetCopyTextureState(sdfMat_t *asset, SdfAssetEntry *entry) {
     sdfTexHandle_t *texture;
     entry->unk04 = asset->primaryStateWordFirst;
     entry->unk1C = asset->primaryStateFloat;
     entry->unk08 = asset->primaryStateWordSecond;
-    if (sdfForcedAssetTextureMode == SDF_FORCED_TEXTURE_ZERO_STATE_MODE) {
+    if (sdfForcedAssetTextureMode == SDF_FORCED_ASSET_TEXTURE_MODE_REFRESH_WITH_ZERO_STATE_WORD) {
         entry->primaryStateWordThird = 0;
     } else {
         entry->primaryStateWordThird = asset->primaryStateWordThird;
@@ -892,7 +892,7 @@ void sdfApplyAssetEntryChangesWithForcedTexture(sdfMat_t *asset, s32 entryIndex)
     SdfAssetEntry *drawEntry = asset->drawEntries[entryIndex];
     if ((dirtyFlags >> entryIndex) & SDF_ASSET_PRIMARY_STATE_BIT) {
         sdfAssetCopyTextureState(asset, drawEntry);
-    } else if (sdfForcedAssetTextureMode != 0) {
+    } else if (sdfForcedAssetTextureMode != SDF_FORCED_ASSET_TEXTURE_MODE_NORMAL) {
         sdfAssetCopyTextureState(asset, drawEntry);
     }
     if (dirtyFlags & (SDF_ASSET_PRIMARY_SCALARS_BIT << entryIndex)) {

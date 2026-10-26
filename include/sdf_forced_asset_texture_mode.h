@@ -1,0 +1,12 @@
+#ifndef SDF_FORCED_ASSET_TEXTURE_MODE_H
+#define SDF_FORCED_ASSET_TEXTURE_MODE_H
+
+typedef enum SdfForcedAssetTextureMode {
+    SDF_FORCED_ASSET_TEXTURE_MODE_NORMAL = 0,
+    SDF_FORCED_ASSET_TEXTURE_MODE_REFRESH_WITH_ZERO_STATE_WORD = 1,
+    SDF_FORCED_ASSET_TEXTURE_MODE_REFRESH = 2
+} SdfForcedAssetTextureMode;
+
+void sdfSetForcedAssetTextureMode(SdfForcedAssetTextureMode mode);
+
+#endif /* SDF_FORCED_ASSET_TEXTURE_MODE_H */

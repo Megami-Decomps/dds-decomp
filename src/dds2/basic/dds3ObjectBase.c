@@ -469,9 +469,9 @@ void effObjApplyTransformParameters(struct SdfPoolNode **surfaces, dds3Basic_t *
         }
         if (dds3ObjectBaseCheckFlag(object, 0x10000)) {
             model = dds3ObjectBaseBorrowModelContext(base)->inner;
-            model->flags |= 0x40;
+            model->flags |= SDF_MODEL_FORCE_ASSET_TEXTURE_REFRESH;
             mdlLink(dds3ObjectBaseBorrowModelContext(base), kwlnSceneSurfaceSets[9]);
-            model->flags &= ~0x40;
+            model->flags &= ~SDF_MODEL_FORCE_ASSET_TEXTURE_REFRESH;
             dds3ObjectBaseOffFlag(object, 0x10000);
             return;
         }
