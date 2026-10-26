@@ -18,6 +18,47 @@ typedef s32 ScrProgramCounter;
 typedef s32 ScrGlobalIntegerIndex;
 typedef s32 ScrGlobalFloatIndex;
 
+/* Script instruction handler table indices (35 entries in codefunc[]). */
+typedef s16 ScrOpcode;
+enum {
+    SCR_OPCODE_PUSH_INTEGER = 0,
+    SCR_OPCODE_PUSH_FLOAT = 1,
+    SCR_OPCODE_PUSH_GLOBAL_INTEGER = 2,
+    SCR_OPCODE_PUSH_GLOBAL_FLOAT = 3,
+    SCR_OPCODE_PUSH_RETURN_VALUE = 4,
+    SCR_OPCODE_POP_GLOBAL_INTEGER = 5,
+    SCR_OPCODE_POP_GLOBAL_FLOAT = 6,
+    SCR_OPCODE_PROCEDURE = 7,
+    SCR_OPCODE_COMMAND = 8,
+    SCR_OPCODE_END = 9,
+    SCR_OPCODE_JUMP_PROCEDURE = 10,
+    SCR_OPCODE_CALL_PROCEDURE = 11,
+    SCR_OPCODE_RUN = 12,
+    SCR_OPCODE_GOTO_LABEL = 13,
+    SCR_OPCODE_ADD = 14,
+    SCR_OPCODE_SUBTRACT = 15,
+    SCR_OPCODE_MULTIPLY = 16,
+    SCR_OPCODE_DIVIDE = 17,
+    SCR_OPCODE_NEGATE = 18,
+    SCR_OPCODE_NOT = 19,
+    SCR_OPCODE_LOGICAL_OR = 20,
+    SCR_OPCODE_LOGICAL_AND = 21,
+    SCR_OPCODE_EQUAL = 22,
+    SCR_OPCODE_NOT_EQUAL = 23,
+    SCR_OPCODE_LESS_THAN = 24,
+    SCR_OPCODE_GREATER_THAN = 25,
+    SCR_OPCODE_LESS_OR_EQUAL = 26,
+    SCR_OPCODE_GREATER_OR_EQUAL = 27,
+    SCR_OPCODE_IF = 28,
+    SCR_OPCODE_PUSH_SIGNED_SHORT = 29,
+    SCR_OPCODE_PUSH_LOCAL_INTEGER = 30,
+    SCR_OPCODE_PUSH_LOCAL_FLOAT = 31,
+    SCR_OPCODE_POP_LOCAL_INTEGER = 32,
+    SCR_OPCODE_POP_LOCAL_FLOAT = 33,
+    SCR_OPCODE_PUSH_STRING = 34,
+    SCR_OPCODE_COUNT = 35
+};
+
 /* One 4-byte script operand slot; the type tag determines whether a word is
  * a scalar, a global-register index, a return address, or a borrowed string. */
 typedef union ScrStackValue {
@@ -35,7 +76,7 @@ typedef s8 ScrStackValueType;
 /* Four-byte decoded VM instruction; DDS1/2 script/scrTraceCode.c via scrProcessWork_s. */
 typedef union ScrInstr {
     struct {
-        s16 opCode;
+        ScrOpcode opCode;
         s16 sOperand;
     } parts;
     s32 iOperand;
