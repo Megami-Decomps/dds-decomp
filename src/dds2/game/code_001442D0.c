@@ -4940,7 +4940,8 @@ void fldUpdateSparkSequence(void) {
             break;
         case 1:
             fldSparkSlots[i].tickCounter++;
-            if (fldSparkSlots[i].objectSlot != -1 && fldSparkControlState.state.mode == 1 &&
+            if (fldSparkSlots[i].objectSlot != -1 &&
+                fldSparkControlState.state.animationState == FLD_SPARK_ANIMATION_RUNNING &&
                 fldSparkControlState.state.pulse != 0 && (u32)(fldSparkControlState.state.modeCountdown - 10) < 6) {
                 SDF_VU0_COPYVECTOR(&position, fldSparkSlots[i].position);
                 dx = fldGlobalBase.x - position.x;
@@ -5144,7 +5145,7 @@ void func_00150800(void) {
     do {
     control->state.phase = 0;
     control->state.terminated = 0;
-    control->state.mode = 0;
+    control->state.animationState = FLD_SPARK_ANIMATION_READY;
     control->state.modeCountdown = 0;
     control->state.pendingMode = 0;
     control->state.pulse = 0;
@@ -5354,11 +5355,11 @@ void fldUpdateSparkEncounterScene(void) {
 
     phase = fldSparkControlState.state.phase;
     if (phase == 1) {
-        if (fldSparkControlState.state.mode == 0) {
+        if (fldSparkControlState.state.animationState == FLD_SPARK_ANIMATION_READY) {
             if ((s8)dds3PadButtonState[1][0][0] < 0) {
                 fldSetCameraModelMotionRequest(6, 20);
                 p2sdPlaySE(0x680012, 0x7F, 0x3F);
-                fldSparkControlState.state.mode = 1;
+                fldSparkControlState.state.animationState = FLD_SPARK_ANIMATION_RUNNING;
                 fldSparkControlState.state.pulse = 1;
                 fldSparkControlState.state.modeCountdown = 20;
                 fldSparkControlState.state.pendingMode = 0;
@@ -5371,16 +5372,16 @@ void fldUpdateSparkEncounterScene(void) {
                     s32 pendingMode;
                     fldSetCameraModelMotionRequest(1, 0);
                     pendingMode = fldSparkControlState.state.pendingMode;
-                    fldSparkControlState.state.mode = pendingMode;
+                    fldSparkControlState.state.animationState = pendingMode;
                     fldSparkControlState.state.modeCountdown = 0;
                     fldSparkControlState.state.pendingMode = 0;
                 }
-            } else if (fldSparkControlState.state.mode == 1 &&
+            } else if (fldSparkControlState.state.animationState == FLD_SPARK_ANIMATION_RUNNING &&
                        fldSparkControlState.state.pendingMode == 0 && value < 14 &&
                        (s8)dds3PadButtonState[1][0][0] < 0) {
                 fldSetCameraModelMotionRequest(6, 20);
                 p2sdPlaySE(0x680012, 0x7F, 0x3F);
-                fldSparkControlState.state.mode = 1;
+                fldSparkControlState.state.animationState = FLD_SPARK_ANIMATION_RUNNING;
                 fldSparkControlState.state.pulse = 1;
                 fldSparkControlState.state.modeCountdown = 20;
             }

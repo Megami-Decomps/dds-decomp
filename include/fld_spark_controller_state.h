@@ -3,6 +3,12 @@
 
 #include "common.h"
 
+typedef s32 FldSparkAnimationState;
+enum {
+    FLD_SPARK_ANIMATION_READY = 0,
+    FLD_SPARK_ANIMATION_RUNNING = 1
+};
+
 /* Values for the spark-event prompt, playback, and field-return state machine. */
 #define FLD_SPARK_DIALOG_PHASE_IDLE 0
 #define FLD_SPARK_DIALOG_PHASE_ENTRY_PROMPT 1
@@ -23,7 +29,7 @@ typedef struct FldSparkControllerState {
     s32 phase;
     s32 countdown;
     s32 terminated;
-    s32 mode;
+    FldSparkAnimationState animationState;
     s32 modeCountdown;
     s32 pendingMode;
     s32 frame;
@@ -36,6 +42,8 @@ typedef struct FldSparkControllerState {
 } FldSparkControllerState;
 
 typedef char FldSparkControllerStateSizeCheck[(sizeof(FldSparkControllerState) == 0x34) ? 1 : -1];
+typedef char FldSparkControllerStateAnimationStateOffsetCheck[
+    ((u32)&((FldSparkControllerState *)0)->animationState == 0x0C) ? 1 : -1];
 typedef char FldSparkControllerStateSequenceIndexOffsetCheck[
     ((u32)&((FldSparkControllerState *)0)->sequenceIndex == 0x2C) ? 1 : -1];
 typedef char FldSparkControllerStateSequenceRemainingOffsetCheck[
