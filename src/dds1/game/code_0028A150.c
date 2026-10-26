@@ -1447,13 +1447,13 @@ s32 slChooseData_getCardInfo2(void) {
 }
 
 s32 slChooseData_getCardInfo3(void) {
-    s32 value;
-    McPollResult status = sdfMcFuncGetDir1(&value);
+    McDirectoryEntryCount entryCount;
+    McPollResult status = sdfMcFuncGetDir1(&entryCount);
     if (status == MC_POLL_PENDING) {
         return 0;
     }
     if (status == MC_POLL_SUCCESS) {
-        if (value == 1) {
+        if (entryCount == 1) {
             fileReqSetSlotFlags(fileMemoryCardRequestIndex, fileSlotScanIndex,
                                 FILE_REQ_SLOT_CAN_READ_SAVE | FILE_REQ_SLOT_DELETE_BEFORE_WRITE);
         }
@@ -1544,13 +1544,13 @@ s32 slChooseData_getCardInfo2_B(void) {
 }
 
 s32 slChooseData_getCardInfo3_B(void) {
-    s32 value;
-    McPollResult status = sdfMcFuncGetDir1(&value);
+    McDirectoryEntryCount entryCount;
+    McPollResult status = sdfMcFuncGetDir1(&entryCount);
     if (status == MC_POLL_PENDING) {
         return 0;
     }
     if (status == MC_POLL_SUCCESS) {
-        if (value == 1) {
+        if (entryCount == 1) {
             fileReqSetSlotFlags(fileMemoryCardRequestIndex, fileSlotScanIndex,
                                 FILE_REQ_SLOT_CAN_READ_SAVE | FILE_REQ_SLOT_DELETE_BEFORE_WRITE);
         }

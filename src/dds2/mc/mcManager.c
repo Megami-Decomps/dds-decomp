@@ -79,17 +79,17 @@ void sdfMcFuncGetDir(u32 port, const char *path, sceMcTblGetDir *directoryEntrie
     sceMcGetDir(port, MC_CARD_SLOT, path, 0, entryLimit, directoryEntries);
 }
 
-/* Accept any completed nonnegative status and write it to resultOut, which
- * must be valid on success and stays untouched otherwise. Translate -4 to
- * -2, other negatives to -1; non-complete SDK polls map to 0. */
-McPollResult sdfMcFuncGetDir1(s32 *commandResultOut) {
+/* Accept any completed nonnegative entry count and write it to entryCountOut,
+ * which must be valid on success and stays untouched otherwise. Translate
+ * -4 to -2, other negatives to -1; non-complete SDK polls map to 0. */
+McPollResult sdfMcFuncGetDir1(McDirectoryEntryCount *entryCountOut) {
     s32 commandId;
     s32 commandResult;
     s32 pollResult = sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult);
 
     if (pollResult == MC_SYNC_COMPLETE) {
         if (commandResult >= MC_SDK_COMMAND_SUCCESS) {
-            *commandResultOut = commandResult;
+            *entryCountOut = commandResult;
             return pollResult;
         }
         if (commandResult == MC_SDK_SPECIAL_ERROR) {
