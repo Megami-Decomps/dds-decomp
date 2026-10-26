@@ -558,7 +558,7 @@ void itfMesBuildOptionList(s32 window, s32 entryIndex) {
     if (mes->panelMode == 3) {
         itfMesBuildOptionFrame(mes);
     }
-    optionBlock->selectionState = 1;
+    optionBlock->selectionState = ITF_SOUND_SELECTION_STATE_OPENING;
 }
 
 /* Release option glyphs, clear option selection/state and invalidate its rank.
@@ -571,7 +571,7 @@ void itfMesMngRequestSelectRelease(s32 window) {
         optionBlock->glyphChain = NULL;
     }
     optionBlock->panelValue = 0;
-    optionBlock->selectionState = 0;
+    optionBlock->selectionState = ITF_SOUND_SELECTION_STATE_INACTIVE;
     optionBlock->rowCount = 0;
     optionBlock->selectedIndex = -1;
     mes->flags &= ~ITF_MES_OPTION_STATE_MASK;
@@ -1660,7 +1660,7 @@ void itfInitializeCursorResetState(ItfMesBlk40 *cursor) {
     cursor->y = 0xC88;
     cursor->glyphChain = NULL;
     cursor->panelValue = 0;
-    cursor->selectionState = 0;
+    cursor->selectionState = ITF_SOUND_SELECTION_STATE_INACTIVE;
     cursor->selectedIndex = -1;
     cursor->savedIndex = -1;
     cursor->rowCount = 0;
@@ -1945,9 +1945,9 @@ void itfUpdateSoundSelectionTransition(instanceMes_tag *panel) {
     s32 entryY;
 
     switch (selection->selectionState) {
-    case 1:
+    case ITF_SOUND_SELECTION_STATE_OPENING:
         if (panel->panelMode == 3) {
-            selection->selectionState = 2;
+            selection->selectionState = ITF_SOUND_SELECTION_STATE_INTERACTIVE;
             panel->flags = (flags & ~0x38) | 0x18;
             break;
         }
@@ -1965,11 +1965,11 @@ void itfUpdateSoundSelectionTransition(instanceMes_tag *panel) {
             if (entry->glyphChain != NULL) {
                 ChangeFontColorAll(entry->glyphChain, 3);
             }
-            selection->selectionState = 2;
+            selection->selectionState = ITF_SOUND_SELECTION_STATE_INTERACTIVE;
             panel->flags = (panel->flags & ~0x38) | 0x18;
         }
         break;
-    case 2:
+    case ITF_SOUND_SELECTION_STATE_INTERACTIVE:
         if ((flags & 0x38) == 0x20 && SelectItem(panel) == 1) {
             selection->glyphChain = UnchainFontHandleUnit(selection->glyphChain,
                 selection->selectedIndex, selection->rowCount);
@@ -1981,24 +1981,24 @@ void itfUpdateSoundSelectionTransition(instanceMes_tag *panel) {
             ForceSetCurCtr(&panel->fade, BTL_FADE_PHASE_ALPHA_FALLING, 0x7F, 0);
             panel->flags = (panel->flags & ~0x38) | 0x28;
             selection->glyphColorIntensity = 0x80;
-            selection->selectionState = 3;
+            selection->selectionState = ITF_SOUND_SELECTION_STATE_SELECTION_FADE;
         }
         break;
-    case 3:
+    case ITF_SOUND_SELECTION_STATE_SELECTION_FADE:
         selection->glyphColorIntensity -= 16;
         if (selection->glyphColorIntensity <= 0) {
             selection->glyphColorIntensity = 0;
-            selection->selectionState = 4;
+            selection->selectionState = ITF_SOUND_SELECTION_STATE_RETURNING;
             InitializeCurCtr(&panel->fade, 0);
         }
         ChangeFontAlpha(selection->glyphChain, selection->glyphColorIntensity);
         return;
-    case 4:
+    case ITF_SOUND_SELECTION_STATE_RETURNING:
         if (entry->glyphChain != NULL && entry->y < 0xAF8) {
             itfMesShiftPanelVertically(panel, 64);
             return;
         }
-        selection->selectionState = -1;
+        selection->selectionState = ITF_SOUND_SELECTION_STATE_COMPLETE;
         break;
     }
 }

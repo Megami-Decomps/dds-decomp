@@ -248,12 +248,23 @@ typedef struct ItfMesOption {
     s16 value;
 } ItfMesOption;
 
+/* Sound-option chooser lifecycle; completion preserves the signed -1 sentinel. */
+typedef s16 ItfSoundSelectionState;
+enum {
+    ITF_SOUND_SELECTION_STATE_INACTIVE = 0,
+    ITF_SOUND_SELECTION_STATE_OPENING = 1,
+    ITF_SOUND_SELECTION_STATE_INTERACTIVE = 2,
+    ITF_SOUND_SELECTION_STATE_SELECTION_FADE = 3,
+    ITF_SOUND_SELECTION_STATE_RETURNING = 4,
+    ITF_SOUND_SELECTION_STATE_COMPLETE = -1
+};
+
 typedef struct ItfMesBlk40 {
     u32 x;
     u32 y;
     _FRQ *glyphChain;
     u32 panelValue;
-    s16 selectionState;
+    ItfSoundSelectionState selectionState;
     s16 selectedIndex;
     s16 savedIndex;
     s16 rowCount;

@@ -543,7 +543,7 @@ void itfMesBuildOptionList(s32 window, s32 entryIndex) {
     if (mes->panelMode == 3) {
         itfMesBuildOptionFrame(mes);
     }
-    optionBlock->selectionState = 1;
+    optionBlock->selectionState = ITF_SOUND_SELECTION_STATE_OPENING;
 }
 
 /* Release option glyphs, clear option selection/state and invalidate its rank.
@@ -557,7 +557,7 @@ void itfMesMngRequestSelectRelease(s32 window) {
         optionBlock->glyphChain = NULL;
     }
     optionBlock->panelValue = 0;
-    optionBlock->selectionState = 0;
+    optionBlock->selectionState = ITF_SOUND_SELECTION_STATE_INACTIVE;
     optionBlock->rowCount = 0;
     optionBlock->selectedIndex = -1;
     mes->flags &= ~ITF_MES_OPTION_STATE_MASK;
