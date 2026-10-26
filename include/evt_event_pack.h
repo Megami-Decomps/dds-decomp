@@ -44,17 +44,16 @@ typedef struct EvtPackHeader {
     EvtPackEntry entries[0];      /* 0x20 */
 } EvtPackHeader;
 
-typedef s32 EvtPackLoadPhase;
-/* Phase values plus the absent-process result returned by evtGetEventPackStat. */
-typedef s32 EvtPackLoadStatus;
-enum {
+typedef enum EvtPackLoadPhase {
+    EVT_PACK_LOAD_PHASE_INVALID = -1,
     EVT_PACK_LOAD_NOT_STARTED = 0,
     EVT_PACK_LOAD_REQUEST_PENDING = 1,
     EVT_PACK_LOAD_COMPLETE = 2
-};
-enum {
-    EVT_PACK_LOAD_NOT_FOUND = -1
-};
+} EvtPackLoadPhase;
+
+/* Phase values plus the absent-process result returned by evtGetEventPackStat. */
+typedef s32 EvtPackLoadStatus;
+enum { EVT_PACK_LOAD_NOT_FOUND = -1 };
 
 /* The camp constructor allocates/clears 0x48 bytes and publishes this state to
  * the event-pack load and release callbacks. */
@@ -82,6 +81,7 @@ typedef char EvtPackEntry_size_must_be_0x20[(sizeof(EvtPackEntry) == 0x20) ? 1 :
 typedef char EvtAreaRoomIds_size_must_be_0x08[(sizeof(EvtAreaRoomIds) == 0x08) ? 1 : -1];
 typedef char EvtPackHeader_size_must_be_0x20[(sizeof(EvtPackHeader) == 0x20) ? 1 : -1];
 typedef char EvtPackLoadState_size_must_be_0x48[(sizeof(EvtPackLoadState) == 0x48) ? 1 : -1];
+typedef char EvtPackLoadPhase_must_be_4_bytes[(sizeof(EvtPackLoadPhase) == 4) ? 1 : -1];
 typedef char EvtPackLoadState_loadPhase_at_0x04[
     ((u32)&((EvtPackLoadState *)0)->loadPhase == 0x04) ? 1 : -1];
 typedef char EvtPackLoadState_sceneAllocation1_at_0x24[
