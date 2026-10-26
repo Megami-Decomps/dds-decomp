@@ -360,6 +360,7 @@ void fldMakeResouceBasicFL1(FldSpawnBatch *batch, u32 batchCount) {
 
 #include "fld_area_work.h"
 #include "evt_world.h"
+#include "evt_world_object_api.h"
 #include "evt_world_source_transform.h"
 #include "common.h"
 #include "sdf_column_packet_api.h"
@@ -1509,7 +1510,6 @@ extern void fldUpdateSparkSlots(void);
 extern void fldMakeObjectBasic3(void);
 extern void fldInitializeActorMotionSlots(void);
 extern struct DevRequest *sndLoadNamedOffsetResourceList(const char *name);
-extern s32 dds3SceneBasicLoadScriptFile_FromMem(dds3Basic_t *worldNode, struct sdfMemHandle_t *resourceHandle);
 extern char D_00436028[];
 extern char D_00436030[];
 extern char D_00436038[];

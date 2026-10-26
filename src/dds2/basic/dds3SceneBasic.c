@@ -48,17 +48,18 @@ s32 evtLoadSceneResourceFrom(dds3Basic_t *worldNode, const char *resourceName) {
     return 1;
 }
 
-/* Retain an allocation handle and attach its resolved address; return 1 on
- * attachment, 0 otherwise. NULL preserves the current resource. A non-NULL
- * handle releases the old resource first, so failure does not restore it;
- * a NULL resolved address fails attachment without undoing the retain. */
-s32 dds3SceneBasicLoadScriptFile_FromMem(dds3Basic_t *worldNode, struct sdfMemHandle_t *resourceHandle) {
-    s32 notAttachedStatus = 0;
+/* Attach a memory-backed script. NULL input preserves the current resource. A
+ * non-NULL handle releases the old resource before locking; success transfers
+ * handle ownership to the scene, while lock failure leaves the new handle at
+ * the caller and does not restore the previous resource. */
+Dds3SceneScriptAttachResult dds3SceneBasicLoadScriptFile_FromMem(
+    dds3Basic_t *worldNode, struct sdfMemHandle_t *resourceHandle) {
+    Dds3SceneScriptAttachResult attachResult = DDS3_SCENE_SCRIPT_ATTACH_FAILED;
     void *resourceAddress;
     EvtWorldTable *worldData = (EvtWorldTable *)worldNode->data;
 
     if (resourceHandle == NULL) {
-        return notAttachedStatus;
+        return attachResult;
     }
     if (worldData->sceneResourceHandle != 0) {
         dds3SceneBasicReleaseScriptFile(worldNode);
@@ -67,9 +68,9 @@ s32 dds3SceneBasicLoadScriptFile_FromMem(dds3Basic_t *worldNode, struct sdfMemHa
     if (resourceAddress != 0) {
         worldData->sceneResourceHandle = resourceHandle;
         worldData->sceneScript = (struct BfFlw0Header *)resourceAddress;
-        return 1;
+        return DDS3_SCENE_SCRIPT_ATTACH_SUCCEEDED;
     }
-    return notAttachedStatus;
+    return attachResult;
 }
 
 /* Release a stored allocation handle when present, then always clear both
