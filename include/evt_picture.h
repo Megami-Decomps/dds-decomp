@@ -16,7 +16,7 @@ void evtPictureDrawOn(dds3ProcessID_t *task);
 void evtPictureDrawOff(dds3ProcessID_t *task);
 EvtPictureWork *evtAllocateContext(void);
 void LoadTexture(EvtPictureWork *context, const char *path);
-void evtSubmitPictureDrawPacket(struct sdfTexHandle_t *texture);
+void evtSubmitPictureDrawPacket(const struct sdfTexHandle_t *borrowedTexture);
 KwlnTaskUpdateResult evtUpdatePictureWhenFlagged(dds3ProcessID_t *task);
 void evtPictureShutdown(dds3ProcessID_t *task);
 dds3ProcessID_t *evtStartPictureProcess2(s32 taskId, const char *path);

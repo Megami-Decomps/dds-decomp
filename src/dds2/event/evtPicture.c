@@ -12,13 +12,13 @@ extern SdfPoolNode D_003805A8;
 #include "sdf_packet_alloc.h"
 extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *packet, s32 index, s32 flag);
 
-void evtSubmitPictureDrawPacket(struct sdfTexHandle_t *texture) {
+void evtSubmitPictureDrawPacket(const struct sdfTexHandle_t *borrowedTexture) {
     sdfDrawTag_t *packet;
 
     packet = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packet);
     itfMiscDrawAlphaPrim(packet, 0, 0);
-    itfMiscDrawSpritePrim((DrawVertex *)evtPictureQuadBounds, (DrawColorRec *)evtPictureQuadTexcoords, (DrawColorRec *)evtPictureQuadColor, 0xFFF, texture, 0, packet);
+    itfMiscDrawSpritePrim((DrawVertex *)evtPictureQuadBounds, (DrawColorRec *)evtPictureQuadTexcoords, (DrawColorRec *)evtPictureQuadColor, 0xFFF, borrowedTexture, 0, packet);
     D_003805A8.append(&D_003805A8, packet);
 }
 
