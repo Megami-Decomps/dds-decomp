@@ -2514,7 +2514,7 @@ void mnuResetWorkFloats(void) {
 }
 
 /* Remember the model asset request result for the stage viewer. */
-s32 evtStageTestRequestModelAsset(s32 resource, s32 modelId, s32 option) {
+MdlAssetRequestResult evtStageTestRequestModelAsset(s32 resource, s32 modelId, s32 option) {
     evtStageTestState.assetRequest = mdlPrepare(resource, modelId, option);
     return evtStageTestState.assetRequest;
 }

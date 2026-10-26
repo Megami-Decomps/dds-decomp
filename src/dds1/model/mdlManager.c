@@ -433,8 +433,8 @@ extern s32 mdlFileLoad(s32 group, s32 id, MdlRegistrationMode registrationMode,
                                      const char *requestPath,
                                      void (*onComplete)(u32), u32 callbackArg);
 
-/* Resolve or schedule a grouped model asset; -1 denotes an existing request. */
-s32 mdlPrepare(s32 group, s32 id, s32 blocking) {
+/* Return QUEUED, ALREADY_PENDING, or the ready group's address word. */
+MdlAssetRequestResult mdlPrepare(s32 group, s32 id, s32 blocking) {
     char requestPath[0x80];
     dds3ModelResrc_t *entity;
     MdlResourceSelection *selection;
@@ -447,14 +447,14 @@ s32 mdlPrepare(s32 group, s32 id, s32 blocking) {
     entity = mdlSearchResrc(group, id);
     if (entity != NULL) {
         SignalSema(mdlManagerWork);
-        return (s32)entity;
+        return (MdlAssetRequestResult)entity;
     }
     if (mdlCheckLoading(group, id) != MDL_GROUP_LOAD_NOT_PENDING) {
         SignalSema(mdlManagerWork);
         if (blocking != 0) {
-            return (s32)mdlWaitLoadEnd(group, id);
+            return (MdlAssetRequestResult)mdlWaitLoadEnd(group, id);
         }
-        return -1;
+        return MDL_ASSET_REQUEST_ALREADY_PENDING;
     }
     selection = (MdlResourceSelection *)D_00367900[group].entries;
     selection += id;
@@ -495,9 +495,9 @@ s32 mdlPrepare(s32 group, s32 id, s32 blocking) {
         }
     }
     if (blocking != 0) {
-        return (s32)mdlWaitLoadEnd(group, id);
+        return (MdlAssetRequestResult)mdlWaitLoadEnd(group, id);
     }
-    return 0;
+    return MDL_ASSET_REQUEST_QUEUED;
 }
 
 /* The blocking SDK request returns its group in a native status/address word. */

@@ -2,6 +2,7 @@
 #define EVT_STAGE_TEST_H
 
 #include "common.h"
+#include "mdl_asset_request.h"
 
 struct SoundHandleNode;
 
@@ -53,7 +54,7 @@ typedef struct StageTestQueue {
  * first model update has run before it starts queued effect/motion work. */
 typedef struct StageTestState {
     s32 mode;
-    s32 assetRequest;
+    MdlAssetRequestResult assetRequest; /* 0x04: status or ready group address. */
     struct dds3ModelHandle_t *model;
     s8 flag;
     u8 pad0D[3];

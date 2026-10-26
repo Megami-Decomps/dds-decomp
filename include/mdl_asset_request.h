@@ -3,8 +3,18 @@
 
 #include "common.h"
 
-/* Nonblocking requests return 0 when queued, -1 when already pending, or a
- * ready dds3ModelResrc_t address; the blocking model facade casts that address. */
-s32 mdlPrepare(s32 group, s32 id, s32 blocking);
+/* The API returns a group address in the same word used for its two non-ready
+ * outcomes, so retain the signed 32-bit representation at the ABI boundary. */
+typedef s32 MdlAssetRequestResult;
+
+enum {
+    MDL_ASSET_REQUEST_QUEUED = 0,
+    MDL_ASSET_REQUEST_ALREADY_PENDING = -1,
+};
+
+/* A nonblocking request returns QUEUED when it starts work and
+ * ALREADY_PENDING when work for the key already exists. Otherwise the result
+ * is the ready dds3ModelResrc_t address. */
+MdlAssetRequestResult mdlPrepare(s32 group, s32 id, s32 blocking);
 
 #endif /* MDL_ASSET_REQUEST_H */

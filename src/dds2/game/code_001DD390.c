@@ -2591,7 +2591,8 @@ u8 btlCheckModelAssetByMode(u8 *object, u32 effect, u32 model) {
             return 1;
         }
     } else {
-        if (mdlPrepare(effect, model, 0) != 0 && mdlPrepare(effect, model, 0) != -1) {
+        if (mdlPrepare(effect, model, 0) != MDL_ASSET_REQUEST_QUEUED &&
+            mdlPrepare(effect, model, 0) != MDL_ASSET_REQUEST_ALREADY_PENDING) {
             return 1;
         }
     }

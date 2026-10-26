@@ -1053,8 +1053,8 @@ BtlModelPackReadiness btlIsModelPackEntryReady(BattleModelEntry *cacheEntry) {
     if (cacheEntry->finalized != BTL_MODEL_ENTRY_UNFINALIZED) {
         return BTL_MODEL_PACK_READY;
     }
-    if (mdlPrepare(cacheEntry->kind, cacheEntry->id, 0) == 0 ||
-        mdlPrepare(cacheEntry->kind, cacheEntry->id, 0) == -1) {
+    if (mdlPrepare(cacheEntry->kind, cacheEntry->id, 0) == MDL_ASSET_REQUEST_QUEUED ||
+        mdlPrepare(cacheEntry->kind, cacheEntry->id, 0) == MDL_ASSET_REQUEST_ALREADY_PENDING) {
         return BTL_MODEL_PACK_NOT_READY;
     }
     if (cacheEntry->packRequest == 0) {
@@ -1185,7 +1185,8 @@ extern void btlFinalizeModelPackEntry(s32, s32);
 s32 btlEnsureModelAndSoundReady(s32 kind, s32 id, s32 unused) {
     BattleModelEntry *entry;
 
-    if (mdlPrepare(kind, id, 0) != 0 && mdlPrepare(kind, id, 0) != -1 &&
+    if (mdlPrepare(kind, id, 0) != MDL_ASSET_REQUEST_QUEUED &&
+        mdlPrepare(kind, id, 0) != MDL_ASSET_REQUEST_ALREADY_PENDING &&
         sndFindListNodeForChannel(kind, id) != 0) {
         return 1;
     }
