@@ -123,10 +123,9 @@ McPollResult sdfMcFuncDelete1(void) {
 }
 
 
-/* Start opening a path on slot zero. The last operand is numeric open flags,
- * not a data-buffer address (callers use 1 and 0x203). */
-void sdfMcFuncOpen(u32 port, const char *path, s32 openFlags) {
-    sceMcOpen(port, MC_CARD_SLOT, path, openFlags);
+/* Start opening a path on slot zero with the requested read/save mode. */
+void sdfMcFuncOpen(u32 port, const char *path, McOpenMode openMode) {
+    sceMcOpen(port, MC_CARD_SLOT, path, openMode);
 }
 
 /* Accept any completed nonnegative open result as a file descriptor and write

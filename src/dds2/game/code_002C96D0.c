@@ -927,7 +927,7 @@ s32 slHeadLoad(void) {
     path[len + 1] = 0x2F;
     memcpy(&path[len + 2], &path[1], len);
     path[len * 2 + 2] = 0;
-    sdfMcFuncOpen(ctx, path, 1);
+    sdfMcFuncOpen(ctx, path, MC_OPEN_MODE_READ_ONLY);
     return (s32)fileReadSlotPreviewBegin;
 }
 
@@ -1915,7 +1915,7 @@ s32 slSaveWriteFile(const char *fileName, const u32 *dataAddressSlot, const u32 
     fileWriteDataSizeSlot = dataSizeSlot;
     fileWriteContinuation = continuation;
     fileWritePendingRequestSlot = pendingRequestStatus;
-    sdfMcFuncOpen(fileMemoryCardRequestIndex, fileName, 0x203);
+    sdfMcFuncOpen(fileMemoryCardRequestIndex, fileName, MC_OPEN_MODE_READ_WRITE_CREATE);
     return (s32)slSaveProc_openFile;
 }
 
@@ -2040,7 +2040,7 @@ s32 slLoadData(void) {
     path[len + 1] = '/';
     memcpy(&path[len + 2], &path[1], len);
     path[len * 2 + 2] = 0;
-    sdfMcFuncOpen(ctx, path, 1);
+    sdfMcFuncOpen(ctx, path, MC_OPEN_MODE_READ_ONLY);
     return (s32)slLoadProc_openFile;
 }
 
