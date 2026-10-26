@@ -117,18 +117,6 @@ typedef char BtlUnitLightDirectionTaskArgs_unit_offset_check[
 
 extern s128 btlDefaultUnitBodyOffset;
 
-typedef struct BtlVectorTaskArgs {
-    u8 pad00[0x20];
-    f32 scale;
-    u32 state24;
-    u32 state28;
-    union {
-        u32 unit2C;
-        s8 mode2C;
-    };
-    u32 unit30;
-} BtlVectorTaskArgs;
-
 typedef struct BtlActiveSlot {
     u8 pad00[0x18];
     void *unit;         /* 0x18 */
@@ -3795,15 +3783,22 @@ BtlRuntimeTask *btlCreateUnitPositionLerpTowardTargetTask(BtlUnit *unit, const f
     return task;
 }
 
+/* Active fields occupy 0x34 task bytes: vectors are copied; unit is borrowed. */
 typedef struct BtlSlerpTaskArgs {
-    s128 from;
-    s128 to;
-    f32 rate;
-    f32 t;
-    s32 count;
-    s8 mode;
-    BtlUnit *unit;
+    s128 initialOrientation; /* 0x00: current orientation sampled when interpolation begins. */
+    s128 targetOrientation;  /* 0x10: copied from the factory input. */
+    f32 rate;                /* 0x20 */
+    f32 t;                   /* 0x24 */
+    s32 count;               /* 0x28 */
+    s8 mode;                 /* 0x2C */
+    BtlUnit *unit;           /* 0x30: borrowed actor updated by the task. */
 } BtlSlerpTaskArgs;
+typedef char BtlSlerpTaskArgsModeOffsetCheck[
+    (u32)&((BtlSlerpTaskArgs *)0)->mode == 0x2C ? 1 : -1];
+typedef char BtlSlerpTaskArgsUnitOffsetCheck[
+    (u32)&((BtlSlerpTaskArgs *)0)->unit == 0x30 ? 1 : -1];
+typedef char BtlSlerpTaskArgsPayloadExtentCheck[
+    ((u32)&((BtlSlerpTaskArgs *)0)->unit + sizeof(((BtlSlerpTaskArgs *)0)->unit) == 0x34) ? 1 : -1];
 
 s32 btlStepUnitRotationNlerp(BtlSlerpTaskArgs *args) {
     s128 quat;
@@ -3818,27 +3813,27 @@ s32 btlStepUnitRotationNlerp(BtlSlerpTaskArgs *args) {
         rate = args->rate;
         if (rate > 0.0f && rate < 1.0f) {
             if (args->count == 0) {
-                SDF_VU0_COPYVECTOR(&args->from, unit->orientation);
+                SDF_VU0_COPYVECTOR(&args->initialOrientation, unit->orientation);
             }
             args->t = t + (1.0f - t) * rate;
             if (args->t > 0.999f) {
                 args->t = 1.0f;
             }
-            SDF_VU0_LOADVECTOR(&args->from);
-            SDF_VU0_LOADVECTOR_B(&args->to);
+            SDF_VU0_LOADVECTOR(&args->initialOrientation);
+            SDF_VU0_LOADVECTOR_B(&args->targetOrientation);
             Lerp(args->t);
             SDF_VU0_STOREVECTOR(&quat);
             btlSetUnitRotation(unit, (const f32 *)&quat);
             return 0;
         }
     }
-    btlSetUnitRotation(unit, (const f32 *)&args->to);
+    btlSetUnitRotation(unit, (const f32 *)&args->targetOrientation);
     return 1;
 }
 
 BtlRuntimeTask *btlCreateUnitRotationInterpolationTask(BtlUnit *unit, const f32 targetOrientation[4], f32 interpolationRate, s8 mode) {
     BtlRuntimeTask *task = btlAllocTask(0x34);
-    u8 *args;
+    BtlSlerpTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0xD;
@@ -3846,13 +3841,13 @@ BtlRuntimeTask *btlCreateUnitRotationInterpolationTask(BtlUnit *unit, const f32 
     task->callback = btlStepUnitRotationNlerp;
     task->onStart = 0;
     args = btlGetTaskArguments(task);
-    ((BtlVectorTaskArgs *)args)->scale = interpolationRate;
-    ((BtlVectorTaskArgs *)args)->mode2C = mode;
-    ((BtlVectorTaskArgs *)args)->unit30 = (u32)unit;
-    ((BtlVectorTaskArgs *)args)->state24 = 0;
-    ((BtlVectorTaskArgs *)args)->state28 = 0;
-    SDF_VU0_COPYVECTOR(args, unit->orientation);
-    SDF_VU0_COPYVECTOR(args + 0x10, targetOrientation);
+    args->rate = interpolationRate;
+    args->mode = mode;
+    args->unit = unit;
+    args->t = 0.0f;
+    args->count = 0;
+    SDF_VU0_COPYVECTOR(&args->initialOrientation, unit->orientation);
+    SDF_VU0_COPYVECTOR(&args->targetOrientation, targetOrientation);
     return task;
 }
 
