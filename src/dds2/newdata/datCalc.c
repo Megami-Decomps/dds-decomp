@@ -6,6 +6,7 @@
 #include "pty_roster_value_record.h"
 #include "sdf.h"
 #include "dat_state.h"
+#include "dat_calculated_stat_value_api.h"
 #include "dat_affinity_selector.h"
 #include "pty_skill_nibble_state.h"
 #include "dat_world_field_flags.h"
@@ -149,8 +150,8 @@ extern u32 prfGetIndexedProfileByte(u16 id, s32 sub);
 
 
 /* Add the signed per-unit stat byte to its profile adjustment and clamp
- * the existing result to 1..127. Keep the profile callee's unsigned return type. */
-s32 datGetClampedProfileAdjustedStat(datUnitWork_t *unit, s32 statIndex) {
+ * the existing result to 1..99. Keep the profile callee's unsigned return type. */
+DatCalculatedStatValue datGetClampedProfileAdjustedStat(datUnitWork_t *unit, s32 statIndex) {
     s32 adjustedStat = unit->baseStats[statIndex] +
                 prfGetIndexedProfileByte(ptyGetCurrentProfileId(unit), statIndex);
 
@@ -164,7 +165,7 @@ extern s32 ptyGetCombinedRecordAndSlotValue(s32 id, s32 slot);
 
 /* Only an exact masked status of 0x1000 forces one. Otherwise add the
  * record/slot adjustment to the profile stat, then clamp to 0..99 (DDS2 only). */
-s32 datGetStatWithStatusOverride(datUnitWork_t *unit, s32 statIndex) {
+DatCalculatedStatValue datGetStatWithStatusOverride(datUnitWork_t *unit, s32 statIndex) {
     s32 adjustedStat;
 
     if ((unit->status & DAT_STATUS_VALUE_MASK) == DAT_STATUS_STAT_OVERRIDE) {
@@ -475,7 +476,6 @@ extern void ptyRefreshEntryFromSavedTemplate(datUnitWork_t *entry);
 
 extern s32 scrGetIntPara(s32 idx);
 
-extern s32 datGetStatWithStatusOverride(datUnitWork_t *unit, s32 statIndex);
 
 
 extern EventRosterStat *datRosterDetails;

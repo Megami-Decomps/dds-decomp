@@ -19,6 +19,7 @@
 #include "pcp_vu0.h"
 #include "btl_action.h"
 #include "dat_state.h"
+#include "dat_calculated_stat_value_api.h"
 #include "dat_affinity_selector.h"
 #include "dat_world_field_flags.h"
 #include "dat_unit_has_skill_api.h"
@@ -68,9 +69,6 @@ const char D_00412AB0[16] = "sys:[%s]\n";
 
 
 extern DatEnemyRecord *datEnemyRecords;
-
-
-extern s32 datGetStatWithStatusOverride(datUnitWork_t *, s32 statIndex);
 
 extern u32 sdfRollActionHit(s32 channel, datUnitWork_t *sourceRecord, datUnitWork_t *item);
 

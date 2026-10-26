@@ -53,6 +53,7 @@
 #include "scr.h"
 #include "bf_flw0_header.h"
 #include "dat_state.h"
+#include "dat_calculated_stat_value_api.h"
 #include "dat_affinity_selector.h"
 #include "btl_resolve_unit_value_api.h"
 #include "btl_select_transform_parameters_api.h"
@@ -1628,10 +1629,6 @@ s32 btlGetEntryFlagsUnlessDisabled(datUnitWork_t *record) {
     }
     return datEnemyRecords[record->unitId].flags;
 }
-
-extern s32 datGetClampedProfileAdjustedStat(datUnitWork_t *, s32);
-
-extern s32 datGetStatWithStatusOverride(datUnitWork_t *, s32);
 
 /* Native tail jump forwards the clamped profile-adjusted stat in v0;
  * retain the existing void C surface for matching. */

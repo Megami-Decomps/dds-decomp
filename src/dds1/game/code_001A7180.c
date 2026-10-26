@@ -26,6 +26,7 @@
 #include "btl_ai_table.h"
 #include "kwln.h"
 #include "dat_state.h"
+#include "dat_calculated_stat_value_api.h"
 #include "pty_roster_api.h"
 #include "dat_command.h"
 #include "kwln_task_lifecycle.h"
@@ -79,8 +80,6 @@ typedef struct BattleController {
     u8 pad_5B4[0xD4];
     u32 (*enemyLimitOverride)(BtlUnit *, DatBattleSceneRecord *, u32); /* 0x688 */
 } BattleController;
-
-extern s32 datGetStatWithStatusOverride(datUnitWork_t *, s32);
 
 extern s32 D_00358510[];
 

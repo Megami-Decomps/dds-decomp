@@ -37,6 +37,7 @@
 #include "btl_action.h"
 #include "kwln.h"
 #include "dat_state.h"
+#include "dat_calculated_stat_value_api.h"
 #include "btl_resolve_unit_value_api.h"
 #include "btl_select_transform_parameters_api.h"
 #include "dat_command.h"
@@ -66,10 +67,6 @@ extern u32 datComputeSkillBoostedMaxHp(datUnitWork_t *);
 extern u32 datComputeSkillBoostedMaxMp(datUnitWork_t *);
 
 extern void datResetBadStat(datUnitWork_t *record, s32 mask);
-
-extern s32 datGetClampedProfileAdjustedStat(datUnitWork_t *, s32);
-
-extern s32 datGetStatWithStatusOverride(datUnitWork_t *, s32);
 
 extern u8 btlSharedActorTransformParameters[];
 

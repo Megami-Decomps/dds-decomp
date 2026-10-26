@@ -5,6 +5,7 @@
 #include "evt_solar.h"
 #include "pty_roster_value_record.h"
 #include "dat_state.h"
+#include "dat_calculated_stat_value_api.h"
 #include "dat_affinity_selector.h"
 #include "dat_world_field_flags.h"
 #include "btl_affinity_row.h"
@@ -142,7 +143,7 @@ extern u32 prfGetIndexedProfileByte(u16 profileId, s32 statIndex);
 
 /* Add the signed per-unit stat byte to its profile adjustment and clamp
  * the existing signed result to 1..99. Stat index is not checked here. */
-s32 datGetClampedProfileAdjustedStat(datUnitWork_t *unit, s32 statIndex) {
+DatCalculatedStatValue datGetClampedProfileAdjustedStat(datUnitWork_t *unit, s32 statIndex) {
     s32 adjustedStat = unit->baseStats[statIndex] +
                 prfGetIndexedProfileByte(ptyGetCurrentProfileId(unit), statIndex);
 
@@ -155,7 +156,7 @@ s32 datGetClampedProfileAdjustedStat(datUnitWork_t *unit, s32 statIndex) {
 
 /* Only an exact masked status of 0x1000 forces one; combinations of low
  * status bits do not take this path. Otherwise use the profile-adjusted stat. */
-s32 datGetStatWithStatusOverride(datUnitWork_t *unit, s32 statIndex) {
+DatCalculatedStatValue datGetStatWithStatusOverride(datUnitWork_t *unit, s32 statIndex) {
     if ((unit->status & DAT_STATUS_VALUE_MASK) == DAT_STATUS_STAT_OVERRIDE) {
         return 1;
     }
@@ -429,7 +430,6 @@ extern struct scrProcessWork_s *scrSetFloatReturnValue(f32 value);
 extern datUnitWork_t *dds3FindEntry(s32 rosterIndex);
 extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 extern void ptyMergeStockSkills(datUnitWork_t *unit);
-extern s32 datGetStatWithStatusOverride(datUnitWork_t *, s32);
 extern u8 btlIsRuntimeAllocated(void);
 extern f32 btlGetEncounterAdjustmentScale(void);
 extern u32 btlGetEscapeAttemptCount(void);

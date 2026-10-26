@@ -8126,7 +8126,7 @@ u32 btlFlagBattleForSpecialAction(u32 unit, u32 actor, u32 action) {
     return 0;
 }
 
-extern s32 datGetStatWithStatusOverride(datUnitWork_t *, s32);
+#include "dat_calculated_stat_value_api.h"
 
 s32 btlSelectLowestStatTarget(ActionStateLink *actor) {
     BtlState *battle;

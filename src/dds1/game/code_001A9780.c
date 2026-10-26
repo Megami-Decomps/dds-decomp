@@ -70,6 +70,7 @@ extern void itfSetTextDrawLimit(s32 limit);
 #include "kwln.h"
 #include "kwln_task_create.h"
 #include "dat_state.h"
+#include "dat_calculated_stat_value_api.h"
 #include "dat_world_field_flags.h"
 #include "dat_command.h"
 #include "kwln_task_lifecycle.h"
@@ -95,8 +96,6 @@ extern ActorSlotOrder *D_003BD840[2];
 
 
 extern void btlSetCommandPanelFadeMode(s8, s32);
-
-extern s32 datGetStatWithStatusOverride(datUnitWork_t *, s32);
 
 extern SndPad dds3PadButtonState;
 

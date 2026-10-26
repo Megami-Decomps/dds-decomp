@@ -54,6 +54,7 @@
 #include "btl_ai_table.h"
 #include "scr.h"
 #include "dat_state.h"
+#include "dat_calculated_stat_value_api.h"
 #include "dat_world_field_flags.h"
 #include "pty_roster_api.h"
 #include "mnu_result.h"
@@ -178,8 +179,6 @@ extern s32 itfMesMngInitialize(ItfMesSub *);
 extern char D_004366F8[];
 
 extern void itfMesMngRelease(s32);
-
-extern s32 datGetStatWithStatusOverride(datUnitWork_t *, s32);
 
 extern s32 evtGetMirroredSolarPhase(void);
 
