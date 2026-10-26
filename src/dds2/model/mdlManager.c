@@ -1151,8 +1151,8 @@ void mdlMotionPauseOff(dds3ModelHandle_t *ctx) {
 }
 
 /* Return whether the searched node exists; do not expose the lookup result. */
-u8 mdlHasMotionEx(dds3ModelHandle_t *ctx, s32 searchId) {
-    sdfMotionCtrlr_t *lookupResult;
+MdlMotionPresence mdlHasMotionEx(const dds3ModelHandle_t *ctx, s32 searchId) {
+    const sdfMotionCtrlr_t *lookupResult;
 
     lookupResult = mdlGetMotionCtrlr(ctx, searchId);
     return lookupResult != NULL;

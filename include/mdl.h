@@ -226,8 +226,6 @@ void mdlSmoothSingleMotion(dds3ModelHandle_t *ctx, s32 searchId, s32 motionIndex
                        f32 blendDurationFrames);
 void mdlSmoothLoopMotion(dds3ModelHandle_t *ctx, s32 searchId, s32 motionIndex, f32 blendLeadFrames,
                           f32 blendDurationFrames);
-u8 mdlHasMotionEx(dds3ModelHandle_t *ctx, s32 searchId);
-
 /* The referenced halfword is promoted to a word-sized SDK result. */
 s32 mdlGetNumOfCut(const dds3ModelHandle_t *ctx, s32 searchId);
 

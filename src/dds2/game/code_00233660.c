@@ -1452,7 +1452,7 @@ void mdlAddViewEntryFlagged(void) {
     f32 width;
     f32 height;
 
-    if (mdlHasMotionEx(state->resources[0], state->selectedNodeId) == 0) {
+    if (mdlHasMotionEx(state->resources[0], state->selectedNodeId) == MDL_MOTION_ABSENT) {
         return;
     }
     height = (f32)state->entryHeight;
@@ -1469,7 +1469,7 @@ void mdlAddPlainViewerEntryForSelectedNode(void) {
     f32 width;
     f32 height;
 
-    if (mdlHasMotionEx(state->resources[0], state->selectedNodeId) == 0) {
+    if (mdlHasMotionEx(state->resources[0], state->selectedNodeId) == MDL_MOTION_ABSENT) {
         return;
     }
     height = (f32)state->entryHeight;

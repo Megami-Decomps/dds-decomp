@@ -1421,7 +1421,7 @@ void mdlAddViewEntryFlagged(void) {
     f32 high;
     f32 first;
 
-    if (mdlHasMotionEx(mdlViewerState.resources[0], mdlViewerState.selectedNodeId)) {
+    if (mdlHasMotionEx(mdlViewerState.resources[0], mdlViewerState.selectedNodeId) != MDL_MOTION_ABSENT) {
         low = mdlViewerState.entryHeight;
         high = mdlViewerState.entryWidth;
         first = high;
@@ -1438,7 +1438,7 @@ void mdlAddPlainViewerEntryForSelectedNode(void) {
     f32 high;
     f32 first;
 
-    if (mdlHasMotionEx(mdlViewerState.resources[0], mdlViewerState.selectedNodeId)) {
+    if (mdlHasMotionEx(mdlViewerState.resources[0], mdlViewerState.selectedNodeId) != MDL_MOTION_ABSENT) {
         low = mdlViewerState.entryHeight;
         high = mdlViewerState.entryWidth;
         first = high;
