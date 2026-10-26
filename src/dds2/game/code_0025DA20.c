@@ -1286,10 +1286,12 @@ void mnuInitializeShopStatusBatches(MenuTerminalContext *scene) {
     batchParameters[1] = 0;
 }
 
+#include "eff_mapped_resource_destroy_result.h"
+
 /* Destroy both batches and return the second destruction result. */
-s32 mnuShopReleaseSceneObjects(MenuTerminalContext *scene) {
+EffMappedResourceDestroyResult mnuShopReleaseSceneObjects(MenuTerminalContext *scene) {
     EffMappedResource **batchCursor = scene->objects;
-    s32 destroyResult;
+    EffMappedResourceDestroyResult destroyResult;
     u32 batchIndex;
     for (batchIndex = 0; batchIndex < CAMP_STATUS_BATCH_COUNT; batchIndex++) {
         destroyResult = effDestroyPackedBatch(*batchCursor++);

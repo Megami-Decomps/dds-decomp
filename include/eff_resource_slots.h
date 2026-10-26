@@ -3,6 +3,10 @@
 
 #include "common.h"
 
+#ifndef VERSION_DDS2
+#include "eff_mapped_resource_destroy_result.h"
+#endif
+
 struct EffectSlotSet;
 struct sdfMemHandle_t;
 struct EffMappedResource;
@@ -28,10 +32,11 @@ u32 effSetSlotResourceAndFlags(struct EffTimedState *target,
                                struct EffMappedRecord *resource, u32 flags);
 
 struct EffMappedResource *effCreateStatusBatch(u32 category);
+/* Frees record status buffers, backing storage and the batch header; returns 1. */
 #ifdef VERSION_DDS2
 s32 effDestroyPackedBatch(struct EffMappedResource *batch);
 #else
-s32 effDestroyPackedBatch(struct EffMappedResource *batch);
+EffMappedResourceDestroyResult effDestroyPackedBatch(struct EffMappedResource *batch);
 #endif
 /* Serialized source bytes are borrowed; async mapped-resource outputs hold typed pointers. */
 struct EffMappedResource *effCreateMappedResource(const u8 *source);

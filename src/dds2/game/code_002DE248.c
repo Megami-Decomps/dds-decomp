@@ -16439,8 +16439,10 @@ EffMappedResource *effCreateStatusBatch(u32 category) {
     return batch;
 }
 
+#include "eff_mapped_resource_destroy_result.h"
+
 /* Release each record's status storage, then the record allocation and batch header. */
-s32 effDestroyPackedBatch(EffMappedResource *batch) {
+EffMappedResourceDestroyResult effDestroyPackedBatch(EffMappedResource *batch) {
     s32 recordIndex;
 
     for (recordIndex = 0; recordIndex < batch->count; recordIndex++) {
@@ -16448,7 +16450,7 @@ s32 effDestroyPackedBatch(EffMappedResource *batch) {
     }
     sdfMemFreeDirect(batch->allocation);
     sdfChipFreeDirect(batch);
-    return 1;
+    return EFF_MAPPED_RESOURCE_DESTROYED;
 }
 
 

@@ -1161,9 +1161,9 @@ void mnuInitializeShopStatusBatches(ShopScene *scene) {
 }
 
 /* Destroy both batches and return the second destruction result. */
-s32 mnuShopReleaseSceneObjects(ShopScene *scene) {
+EffMappedResourceDestroyResult mnuShopReleaseSceneObjects(ShopScene *scene) {
     struct EffMappedResource **batchCursor = scene->batches;
-    s32 destroyResult;
+    EffMappedResourceDestroyResult destroyResult;
     u32 batchIndex;
     for (batchIndex = 0; batchIndex < CAMP_STATUS_BATCH_COUNT; batchIndex++) {
         destroyResult = effDestroyPackedBatch(*batchCursor++);

@@ -518,14 +518,14 @@ EffMappedResource *effCreateStatusBatch(u32 category) {
 
 
 /* Release each record's status storage, then the record allocation and batch header. */
-s32 effDestroyPackedBatch(EffMappedResource *batch) {
+EffMappedResourceDestroyResult effDestroyPackedBatch(EffMappedResource *batch) {
     s32 recordIndex;
     for (recordIndex = 0; recordIndex < batch->count; recordIndex++) {
         sdfChipFreeDirect(batch->records[recordIndex].status);
     }
     sdfMemFreeDirect(batch->allocation);
     sdfChipFreeDirect(batch);
-    return 1;
+    return EFF_MAPPED_RESOURCE_DESTROYED;
 }
 
 u32 effReleaseSlotWorkAllocation(EffectSlotSet *owner) {
