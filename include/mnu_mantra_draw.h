@@ -29,11 +29,16 @@ struct MantraDrawItem;
 
 typedef void *(*MantraDrawItemCreateCallback)(struct MantraDrawPool *pool, u32 createArg);
 typedef void (*MantraDrawItemReleaseCallback)(struct MantraDrawItem *item);
-typedef s32 (*MantraDrawItemUpdateCallback)(struct MantraDrawPool *pool, struct MantraDrawItem *item);
+typedef s32 MnuMantraDrawUpdateResult;
+enum {
+    MNU_MANTRA_DRAW_UPDATE_CONTINUE = 0,
+    MNU_MANTRA_DRAW_UPDATE_COMPLETE = 1
+};
+typedef MnuMantraDrawUpdateResult (*MantraDrawItemUpdateCallback)(struct MantraDrawPool *pool, struct MantraDrawItem *item);
 typedef s32 (*MantraDrawItemDrawCallback)(struct MantraDrawPool *pool, struct MantraDrawItem *item);
 
-/* One draw process: construction supplies data, update requests completion,
- * draw runs each active frame, and release receives the item record. */
+/* One draw process: update reports completion; the pool owns delayed release
+ * and deactivation, while draw runs each active frame. */
 typedef struct MantraDrawItem {
     u32 kind;
     union {
