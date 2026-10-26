@@ -8,6 +8,7 @@
 #include "kwln_task_create.h"
 #include "kwln_task_flags.h"
 #include "kwln_task_state.h"
+#include "kwln_task_state_query.h"
 #include "kwln_task_lifecycle.h"
 #include "kwln_task_queue_mutation.h"
 #include "kwln_task_runner.h"
@@ -554,7 +555,7 @@ void dds3SetShutdownTimer(dds3ProcessID_t* task, s32 delayTicks)
     }
 }
 
-s32 dds3GetProcessStat(dds3ProcessID_t* task)
+KwlnTaskState dds3GetProcessStat(dds3ProcessID_t* task)
 {
     u32 state;
 

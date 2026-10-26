@@ -8,6 +8,7 @@
 #include "evt_message_window_api.h"
 #include "evt_world_object_api.h"
 #include "kwln_task_state.h"
+#include "kwln_task_state_query.h"
 #include "itf_mes_window.h"
 #include "itf_mes_entry_start_api.h"
 #include "mnu.h"

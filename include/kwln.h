@@ -46,8 +46,6 @@ struct dds3ProcessID_t {
 };
 
 u32 dds3GetProcessRunTime(dds3ProcessID_t *task);
-/* Return the task's low scheduler state when registered, otherwise DETACHED. */
-s32 dds3GetProcessStat(dds3ProcessID_t *task);
 void dds3SetProcessData(dds3ProcessID_t *task, u32 userValue);
 u32 dds3GetProcessData(dds3ProcessID_t *task);
 dds3ProcessID_t *dds3SearchProcessName(const char *name);

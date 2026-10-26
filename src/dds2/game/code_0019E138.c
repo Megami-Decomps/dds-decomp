@@ -14,6 +14,7 @@
 #include "kwln.h"
 #include "kwln_task_create.h"
 #include "kwln_task_state.h"
+#include "kwln_task_state_query.h"
 #include "sdf_resource.h"
 #include "itf.h"
 #include "itf_panel_api.h"
