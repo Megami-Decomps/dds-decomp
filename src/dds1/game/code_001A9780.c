@@ -14,6 +14,7 @@
 #include "btl_named_task_pair_status_api.h"
 #include "sdf_vu0.h"
 #include "btl_set_actor_effect_parameter_api.h"
+#include "btl_projected_screen_point.h"
 #include "dsp_message_window_api.h"
 #include "fr_font_context.h"
 /* Declared before first use (were implicit int). */
@@ -8883,11 +8884,10 @@ void btlAdvanceTargetPanelAnimation(SceneAiWork *work, s32 mode) {
     }
 }
 
-extern s32 btlProjectForwardPositionToScreen(s32 *);
 extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 
 void func_001BFDE0(BtlUnit *unit, SceneAiWork *work, u32 index) {
-    s32 position[4];
+    BtlProjectedScreenPoint screenPoint;
     s32 origin[5];
     f32 muzzle[4];
     s32 panelRows[] = {0, 0, 25, 0, 0, 24, 7, 7, 27, 7, 7, 26};
@@ -8911,13 +8911,13 @@ void func_001BFDE0(BtlUnit *unit, SceneAiWork *work, u32 index) {
         muzzle[1] = -24.0f;
         SDF_VU0_LOADVECTOR(muzzle);
     }
-    if (btlProjectForwardPositionToScreen(position) == 0) {
+    if (btlProjectForwardPositionToScreen(&screenPoint) == BTL_PROJECTED_SCREEN_POINT_REJECTED) {
         return;
     }
     origin[3] = 0x35;
     origin[4] = 0x35;
-    origin[0] = position[0] - 0x1A;
-    origin[1] = position[1] - 0x1A;
+    origin[0] = screenPoint.x - 0x1A;
+    origin[1] = screenPoint.y - 0x1A;
     origin[2] = 0xFFFFFFF;
     if (work->animationPhase < 6) {
     if (work->animationPhase >= 0) {

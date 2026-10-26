@@ -8,6 +8,7 @@
 #include "btl_aim_horizontal_direction_clamped_api.h"
 #include "btl_boss_debug_api.h"
 #include "btl_vec3.h"
+#include "btl_projected_screen_point.h"
 #include "scr_integer_return_value_api.h"
 #include "btl_marked_command_requested_state_api.h"
 #include "btl_skill_max_api.h"
@@ -266,7 +267,7 @@ extern f32 sdfProjectionMatrix[];
 extern f32 D_0037F660[];
 
 /* vu0 routine: forward-cone projection from vf10 to integer screen XY */
-s32 btlProjectForwardPositionToScreen(s32 *out) {
+BtlProjectedScreenPointResult btlProjectForwardPositionToScreen(BtlProjectedScreenPoint *outPoint) {
     f32 distance;
     f32 facing;
     f32 *projection;
@@ -277,7 +278,7 @@ s32 btlProjectForwardPositionToScreen(s32 *out) {
     SDF_VU0_SUBVECTOR();
     SDF_VU0_GETLENGTH(distance);
     if (!(distance > 16.0)) {
-        return 0;
+        return BTL_PROJECTED_SCREEN_POINT_REJECTED;
     }
     SDF_VU0_NORMALIZE();
     SDF_VU0_COPYVECTOR_A_TO_B();
@@ -288,7 +289,7 @@ s32 btlProjectForwardPositionToScreen(s32 *out) {
     SDF_VU0_NORMALIZE();
     SDF_VU0_INNERPRODUCT(facing);
     if (facing <= 0.5f) {
-        return 0;
+        return BTL_PROJECTED_SCREEN_POINT_REJECTED;
     }
     SDF_VU0_COPYVECTOR_C_TO_A();
     VU0_MOVE_VF(vf28, vf24);
@@ -305,9 +306,9 @@ s32 btlProjectForwardPositionToScreen(s32 *out) {
     SDF_VU0_LOADVECTOR_B(D_0037F660);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(&position);
-    out[0] = (s32)position.f[0] - 0x700;
-    out[1] = (s32)position.f[1] * 2 - 0xF20;
-    return 1;
+    outPoint->x = (s32)position.f[0] - 0x700;
+    outPoint->y = (s32)position.f[1] * 2 - 0xF20;
+    return BTL_PROJECTED_SCREEN_POINT_WRITTEN;
 }
 
 /* vu0 routine: project the vf10 position into four screen-coordinate words with four fractional bits.
