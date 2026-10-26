@@ -684,15 +684,18 @@ dds3Basic_t *dds3AddMG12EffectObjectBasic2(s32 kind, struct EffNodeDescriptor *d
     return AddMG12Effect(kind, descriptor);
 }
 
-/* Resolve the named resource for the kind/value constructor, then release it. */
+/* Resolve the loader's address word as a descriptor before passing it onward. */
 dds3Basic_t *dds3AddMG12EffectObjectBasic(s32 kind, const char *resourcePath) {
-    u32 resolvedId;
+    union {
+        u32 address;
+        EffNodeDescriptor *descriptor;
+    } resource;
     struct sdfMemHandle_t *resourceHandle;
     dds3Basic_t *created;
 
-    resolvedId = 0;
-    resourceHandle = sdfDevLoadFileEx(resourcePath, &resolvedId, 0);
-    created = AddMG12Effect(kind, resolvedId);
+    resource.address = 0;
+    resourceHandle = sdfDevLoadFileEx(resourcePath, &resource.address, 0);
+    created = AddMG12Effect(kind, resource.descriptor);
     sdfMemFreeDirect(resourceHandle);
     return created;
 }
