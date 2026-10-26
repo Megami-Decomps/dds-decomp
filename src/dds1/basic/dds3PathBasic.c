@@ -63,12 +63,12 @@ void dds3PathBasicControlGetRot(dds3PathBasicControl_t *path) {
     }
 }
 
-/* vu0 routine: lerp the three key vectors of adjacent path entries into transformParams, or clear it. */
-void dds3PathBasicControlNextStep(dds3PathBasicControl_t *path, WorldTransformParams *transformParams) {
+/* Interpolate rotation, position, and scale at the current path time, or clear the output. */
+void dds3PathBasicControlGetTransform(const dds3PathBasicControl_t *path, WorldTransformParams *transformParams) {
     u32 segmentIndex;
     f32 interpolationWeight;
-    Dds3PathKeyframes *keyframes;
-    struct WorldTransformParams *entries;
+    const Dds3PathKeyframes *keyframes;
+    const WorldTransformParams *entries;
 
     if (path->counter.flags & DDS3_PATH_WORLD_TRANSFORM_CHANNEL) {
         keyframes = path->transformKeys;

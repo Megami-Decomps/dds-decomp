@@ -105,7 +105,7 @@ void dds3DeletePathControl(dds3PathBasicControl_t *path);
 dds3PathBasicControl_t *dds3MoverBasicGetPathControl(struct dds3Basic_t *object);
 void dds3PathBasicControlGetPos(dds3PathBasicControl_t *path);
 void dds3PathBasicControlGetRot(dds3PathBasicControl_t *path);
-void dds3PathBasicControlNextStep(dds3PathBasicControl_t *path, struct WorldTransformParams *out);
+void dds3PathBasicControlGetTransform(const dds3PathBasicControl_t *path, struct WorldTransformParams *out);
 f32 dds3PathBasicControlGetFovy(dds3PathBasicControl_t *path);
 f32 GetSplineLength(dds3PathBasicControl_t *path);
 

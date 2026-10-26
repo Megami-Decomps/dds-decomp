@@ -50,7 +50,7 @@ s32 MoverBasicMainprocuder(dds3Basic_t *moverNode)
         }
         if (slotResource->path->counter.flags & DDS3_PATH_WORLD_TRANSFORM_CHANNEL) {
             if ((targetObject->kindTag >> 24) == EFF_WORLD_KIND_LIGHT) {
-                dds3PathBasicControlNextStep(slotResource->path, &transformParams);
+                dds3PathBasicControlGetTransform(slotResource->path, &transformParams);
                 dds3SetLightObjectPathResoruce(targetObject, &transformParams);
             }
         }

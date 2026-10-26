@@ -726,7 +726,7 @@
 0x00116F08	dds3DeletePathControl	inferred	SMT3HD name via SLUS_209.11 0x001163E0, shared-hash-in-run; was dds3FreePathObject
 0x00116F38	dds3PathBasicControlGetPos	inferred	SMT3HD name via SLUS_209.11 0x00116410, reloc-identical; was dds3InterpolatePathVectorVU
 0x00117050	dds3PathBasicControlGetRot	inferred	SMT3HD name via SLUS_209.11 0x00116528, reloc-identical; was dds3InterpolatePathQuaternionVU
-0x001170D8	dds3PathBasicControlNextStep	inferred	SMT3HD name via SLUS_209.11 0x001165B0, reloc-identical; was dds3InterpolatePathOutput
+0x001170D8	dds3PathBasicControlGetTransform	inferred	Samples the current rotation, position, and scale without advancing path time; replaces SMT3HD-inferred dds3PathBasicControlNextStep (SLUS_209.11 0x001165B0, reloc-identical; formerly dds3InterpolatePathOutput)
 0x00117438	dds3PathBasicControlGetFovy	inferred	SMT3HD name via SLUS_209.11 0x00116910, reloc-identical; was sdfSampleActiveLinearCurve
 0x001174C0	dds3PathBasicControlStep	inferred	Paired counter-step providers advance time; zero means non-looping endpoint; prior SMT3HD name suggested a predicate
 0x00117568	dds3PathBasicControlAlterMode	inferred	SMT3HD name via SLUS_209.11 0x00116A40, shared-hash-in-run; was sdfSetFloatCounterDirection
