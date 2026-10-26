@@ -76,12 +76,6 @@ extern s32 sdfMovieDrawBottom;
 
 extern u32 sdfMovieDrawColor;
 
-typedef void *(*SdfSoundReadCallback)(s32);
-typedef union SdfSoundCommand {
-    u32 word;
-    SdfSoundReadCallback read;
-} SdfSoundCommand;
-
 extern SdfSoundCommand D_00438B84;
 
 extern s32 sdfPrintf(const char *fmt, ...);
@@ -166,12 +160,12 @@ void sdfSoundSetChannelCount(u32 channels) {
     sdfSndSendSyncCmd((channels - 1) | 0x1d0, 0, 0, 0);
 }
 
-u32 p2sdSetPcmCallback(u32 command) {
+SdfSoundReadCallback p2sdSetPcmCallback(SdfSoundReadCallback callback) {
     if (p2sdPcmBusy != 0) {
-        return 0;
+        return NULL;
     }
-    D_00438B84.word = command;
-    return command;
+    D_00438B84.read = callback;
+    return callback;
 }
 
 /* Send opcode 0x120 with the channel's group (bits 3-6) unless a command is
@@ -1936,7 +1930,7 @@ void sdfMovieDrawFrame(movieStream_t *movie, SdfPoolNode *pool) {
         movie->stream.pac->ringLength >= 0x1000) {
         movie->pad21 = 1;
         movieSemaId = movie;
-        p2sdSetPcmCallback((u32)movieWaitSema);
+        p2sdSetPcmCallback(movieWaitSema);
         p2sdPlayPcm(movie->packetLimit);
     }
 

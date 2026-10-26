@@ -1,6 +1,8 @@
 #ifndef SDF_SOUND_RPC_RECORDS_H
 #define SDF_SOUND_RPC_RECORDS_H
 
+#include "common.h"
+
 enum SdfSoundRpcCommand {
     SDF_SOUND_RPC_OPEN_VOICE_FILE = 0,
     SDF_SOUND_RPC_READ_VOICE_FILE = 1,
@@ -11,6 +13,20 @@ enum SdfSoundRpcCommand {
     SDF_SOUND_RPC_READ_PCM_CALLBACK_BUFFER = 7,
     SDF_SOUND_RPC_CLEAR_PCM_CALLBACK_BUSY = 8
 };
+
+/* EE callback used to fill a requested span for the PCM sound RPC. */
+typedef void *(*SdfSoundReadCallback)(s32 byteCount);
+
+typedef union SdfSoundCommand {
+    u32 word; /* Callback address returned to the IOP. */
+    SdfSoundReadCallback read;
+} SdfSoundCommand;
+
+typedef char SdfSoundCommand_size_must_be_4[
+    (sizeof(SdfSoundCommand) == 4) ? 1 : -1];
+
+/* Returns NULL while PCM is busy; otherwise installs and returns the callback. */
+SdfSoundReadCallback p2sdSetPcmCallback(SdfSoundReadCallback callback);
 
 typedef struct SdfSoundRpcRequest {
     u8 opaque00[8];

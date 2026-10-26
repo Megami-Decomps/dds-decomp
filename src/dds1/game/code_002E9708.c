@@ -86,12 +86,6 @@ extern char *D_00398968[];
 extern void sdfIpuExecQueue(s32 skipInterruptGuard);
 extern s32 sdfIpuDecode(sdfIpuDecodeCb_t *);
 
-typedef void *(*SdfSoundReadCallback)(s32);
-typedef union SdfSoundCommand {
-    u32 word;
-    SdfSoundReadCallback read;
-} SdfSoundCommand;
-
 extern SdfSoundCommand D_003BD494;
 
 
@@ -157,12 +151,12 @@ void sdfSoundSetChannelCount(u32 channelCount) {
     sdfSndSendSyncCmd((channelCount - 1) | 0x1d0, 0, 0, 0);
 }
 
-u32 p2sdSetPcmCallback(u32 command) {
+SdfSoundReadCallback p2sdSetPcmCallback(SdfSoundReadCallback callback) {
     if (p2sdPcmBusy != 0) {
-        return 0;
+        return NULL;
     }
-    D_003BD494.word = command;
-    return command;
+    D_003BD494.read = callback;
+    return callback;
 }
 
 /* Send opcode 0x120 with the channel's group (bits 3-6) unless a command is
@@ -1924,7 +1918,7 @@ void sdfMovieDrawFrame(movieStream_t *movie, SdfPoolNode *pool) {
         movie->stream.pac->ringLength >= 0x1000) {
         movie->pad21 = 1;
         movieSemaId = movie;
-        p2sdSetPcmCallback((u32)movieWaitSema);
+        p2sdSetPcmCallback(movieWaitSema);
         p2sdPlayPcm(movie->packetLimit);
     }
 
