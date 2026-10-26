@@ -110,7 +110,7 @@ extern void ptyRefreshEntryFromSavedTemplate(datUnitWork_t *);
 
 
 
-extern s32 ptyGetCurrentProfileId(datUnitWork_t *);
+extern s32 ptyGetCurrentProfileId(const datUnitWork_t *);
 
 extern DatProfileRecord *ptyGetCurrentProfileRecord(datUnitWork_t *);
 extern s32 scrSetFlag(datUnitWork_t *, u16);
@@ -568,7 +568,7 @@ DatProfileRecord *ptyGetCurrentProfileRecord(datUnitWork_t *unit) {
     return ptyGetProfileRecordPointer(unit, scrGetSelectedScriptEntryId(unit));
 }
 
-s32 ptyGetCurrentProfileId(datUnitWork_t *work) {
+s32 ptyGetCurrentProfileId(const datUnitWork_t *work) {
     return work->profileId;
 }
 

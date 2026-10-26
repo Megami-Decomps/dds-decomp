@@ -72,7 +72,7 @@ extern void mnuUpdateWindowPanelHandleStates(MenuPanelHandles *);
 
 extern void mnuDrawWindowSprites();
 
-extern s32 ptyGetCurrentProfileId(datUnitWork_t *);
+extern s32 ptyGetCurrentProfileId(const datUnitWork_t *);
 
 extern s32 prfResolveMantraNameOrFallback(u16, u8 **);
 

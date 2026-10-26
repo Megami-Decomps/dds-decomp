@@ -460,7 +460,7 @@ extern u32 ptyComputeTotalExp(datUnitWork_t *, s32);
 
 extern u32 ptyAddProfileRecordValueClamped(datUnitWork_t *, u32);
 
-extern s32 ptyGetCurrentProfileId(datUnitWork_t *);
+extern s32 ptyGetCurrentProfileId(const datUnitWork_t *);
 
 
 

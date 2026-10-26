@@ -651,7 +651,7 @@ void brsDrawProfileProgressIndicator(s32 x, s32 y, s32 z, BrsSkillPackageWork *w
 
 
 extern u32 ptyComputeTotalExp(datUnitWork_t *unit, s32 levelDelta);
-extern s32 ptyGetCurrentProfileId(datUnitWork_t *);
+extern s32 ptyGetCurrentProfileId(const datUnitWork_t *);
 extern u32 prfGetCapValue(u16);
 
 s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *work, BrsProgressRow *progressRow, s32 rowIndex, s8 progressKind) {
@@ -847,7 +847,7 @@ typedef struct BrsResultWork {
 } BrsResultWork;
 
 extern DatProfileRecord *ptyGetCurrentProfileRecord(datUnitWork_t *);
-extern s32 ptyGetCurrentProfileId(datUnitWork_t *);
+extern s32 ptyGetCurrentProfileId(const datUnitWork_t *);
 extern u32 prfGetCapValue(u16);
 extern s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *, BrsProgressRow *, s32, s8);
 extern void nbPlaySe(u32 sequenceId);

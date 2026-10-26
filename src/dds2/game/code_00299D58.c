@@ -170,7 +170,7 @@ u32 mnuProcessItemSelection(BrsSkillPackageWork *scene) {
 extern DspUnitName *datUnitNames;
 extern DspUnitName *datSkillNames;
 extern void evtCopyEntryStringToActiveWindow(s32, const char *);
-extern s32 ptyGetCurrentProfileId(datUnitWork_t *);
+extern s32 ptyGetCurrentProfileId(const datUnitWork_t *);
 extern u32 scrGetIndexedRecordAddress(u32, const u8 **);
 
 void prfCapPresentMessages(BrsSkillPackageWork *scene) {

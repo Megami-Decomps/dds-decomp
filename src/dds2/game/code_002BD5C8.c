@@ -249,7 +249,7 @@ void mnuDrawMenuTextById(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 su
     frDestroyFontRequestAfter(item);
 }
 
-extern s32 ptyGetCurrentProfileId(datUnitWork_t *);
+extern s32 ptyGetCurrentProfileId(const datUnitWork_t *);
 extern u32 scrGetIndexedRecordAddress(u32, const u8 **);
 
 void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 fade, s32 selectedCode, s32 unused,

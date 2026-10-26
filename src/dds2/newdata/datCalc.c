@@ -147,14 +147,14 @@ s32 datAddMp(datUnitWork_t *unit, s32 delta) {
     return currentMp;
 }
 
-extern s32 ptyGetCurrentProfileId(datUnitWork_t *unit);
+extern s32 ptyGetCurrentProfileId(const datUnitWork_t *unit);
 extern u32 prfGetIndexedProfileByte(u16 id, s32 sub);
 
 
 /* Add the signed per-unit stat byte to its profile adjustment and clamp
  * the existing result to 1..99. Keep the profile callee's unsigned return type. */
 DatCalculatedStatValue datGetClampedProfileAdjustedStat(
-    datUnitWork_t *unit, DatBaseStatIndex statIndex) {
+    const datUnitWork_t *unit, DatBaseStatIndex statIndex) {
     s32 adjustedStat = unit->baseStats[statIndex] +
                 prfGetIndexedProfileByte(ptyGetCurrentProfileId(unit), statIndex);
 
@@ -169,7 +169,7 @@ extern s32 ptyGetCombinedRecordAndSlotValue(s32 id, s32 slot);
 /* Only an exact masked status of 0x1000 forces one. Otherwise add the
  * record/slot adjustment to the profile stat, then clamp to 0..99 (DDS2 only). */
 DatCalculatedStatValue datGetStatWithStatusOverride(
-    datUnitWork_t *unit, DatBaseStatIndex statIndex) {
+    const datUnitWork_t *unit, DatBaseStatIndex statIndex) {
     s32 adjustedStat;
 
     if ((unit->status & DAT_STATUS_VALUE_MASK) == DAT_STATUS_STAT_OVERRIDE) {

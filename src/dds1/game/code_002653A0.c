@@ -453,7 +453,7 @@ void mnuTitleInitFourParameters(u32 *state, u32 first, u32 second, u32 third, u3
 }
 
 extern u32 ptyAddProfilePoints(datUnitWork_t *unit, s32 increment);
-extern s32 ptyGetCurrentProfileId(datUnitWork_t *);
+extern s32 ptyGetCurrentProfileId(const datUnitWork_t *);
 extern void mnuTitleInitFourParameters(u32 *, u32, u32, u32, u32);
 
 

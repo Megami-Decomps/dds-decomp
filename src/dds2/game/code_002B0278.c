@@ -235,7 +235,7 @@ typedef struct MenuPanelDrawLayout {
 
 extern const MenuPanelDrawLayout D_0042AD38;
 extern const u8 D_00437BF0[];
-extern s32 ptyGetCurrentProfileId(datUnitWork_t *);
+extern s32 ptyGetCurrentProfileId(const datUnitWork_t *);
 extern void cmpDrawTriG(const u32 *, const u32 *, u32, const u32 *, u32);
 extern void mnuDrawAndAdvanceRatioPanel(s32, s32, s32, u32, s32, s32, MenuPageBar *, u32);
 extern u32 scrGetIndexedRecordAddress(u32, const u8 **);

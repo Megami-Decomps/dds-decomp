@@ -10,8 +10,8 @@ struct datUnitWork_t;
 
 /* Profile results are 1..99; DDS2's slot-adjusted result can also be zero. */
 DatCalculatedStatValue datGetClampedProfileAdjustedStat(
-    struct datUnitWork_t *unit, DatBaseStatIndex statIndex);
+    const struct datUnitWork_t *unit, DatBaseStatIndex statIndex);
 DatCalculatedStatValue datGetStatWithStatusOverride(
-    struct datUnitWork_t *unit, DatBaseStatIndex statIndex);
+    const struct datUnitWork_t *unit, DatBaseStatIndex statIndex);
 
 #endif

@@ -105,7 +105,7 @@ extern _FRQ *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *
 extern s32 frFontDrawGlyphChain(_FRQ *, s8, u32);
 extern s32 ptyTestPrimaryProfileFlag(datUnitWork_t *, u16);
 DatProfileRecord *ptyGetCurrentProfileRecord(datUnitWork_t *);
-s32 ptyGetCurrentProfileId(datUnitWork_t *);
+s32 ptyGetCurrentProfileId(const datUnitWork_t *);
 
 
 extern void ptyRecomputeMaxVitals(datUnitWork_t *, const s32 *);
@@ -546,7 +546,7 @@ DatProfileRecord *ptyGetCurrentProfileRecord(datUnitWork_t *unit) {
     return ptyGetProfileRecord(unit, scrGetSelectedOperandIndex(unit) & SCR_FLAG_ID_MASK);
 }
 
-s32 ptyGetCurrentProfileId(datUnitWork_t *op) {
+s32 ptyGetCurrentProfileId(const datUnitWork_t *op) {
     return op->profileId;
 }
 
