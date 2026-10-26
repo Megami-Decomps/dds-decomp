@@ -17,7 +17,6 @@
 #include "btl_command.h"
 #include "btl_command_affinity_api.h"
 #include "btl_camera_pose_api.h"
-#include "btl_marked_command_requested_state_api.h"
 #include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_vu_matrix_multiply_api.h"
@@ -5276,6 +5275,7 @@ void btlApplyMarkedCommandStateMotion(void) {
 }
 
 /* This command mode allocates exactly three state bytes. */
+#include "btl_marked_command_state_api.h"
 
 void btlToggleMarkedTaskActionState(BtlUnit *unused, s32 *delta) {
     BtlState *battle = (BtlState *)btlGetRuntime();
@@ -5302,12 +5302,12 @@ void btlToggleMarkedTaskActionState(BtlUnit *unused, s32 *delta) {
             }
             if (actor != NULL) {
                 switch (state->current) {
-                case 0:
-                    state->requested = 1;
+                case BTL_MARKED_COMMAND_STATE_INACTIVE:
+                    state->requested = BTL_MARKED_COMMAND_STATE_ACTIVE;
                     actor->actionNumber = 4;
                     break;
-                case 1:
-                    state->requested = 0;
+                case BTL_MARKED_COMMAND_STATE_ACTIVE:
+                    state->requested = BTL_MARKED_COMMAND_STATE_INACTIVE;
                     actor->actionNumber = 2;
                     break;
                 }
@@ -5330,8 +5330,6 @@ u32 btlSetBattleActionFlag(u32 unused1, u32 unused2, u32 action) {
     return 0;
 }
 
-u32 btlGetMarkedCommandCurrentState(void);
-
 s32 btlRemapMarkedUnitCommand(BtlUnit *unit, s32 action) {
     u32 flags = unit->status.flags;
 
@@ -5342,17 +5340,17 @@ s32 btlRemapMarkedUnitCommand(BtlUnit *unit, s32 action) {
         return action;
     }
     if (action == 1) {
-        if (btlGetMarkedCommandCurrentState() == 1) {
+        if (btlGetMarkedCommandCurrentState() == BTL_MARKED_COMMAND_STATE_ACTIVE) {
             return 0x11;
         }
     }
     if (action == 0) {
-        if (btlGetMarkedCommandCurrentState() == 1) {
+        if (btlGetMarkedCommandCurrentState() == BTL_MARKED_COMMAND_STATE_ACTIVE) {
             return 0x10;
         }
     }
     if (action == 0xA) {
-        if (btlGetMarkedCommandCurrentState() == 1) {
+        if (btlGetMarkedCommandCurrentState() == BTL_MARKED_COMMAND_STATE_ACTIVE) {
             return 0x12;
         }
     }
@@ -5361,7 +5359,7 @@ s32 btlRemapMarkedUnitCommand(BtlUnit *unit, s32 action) {
     }
     if (action < 0x15) {
         if (action >= 0x13) {
-            return btlGetMarkedCommandCurrentState() != 0 ? 0x14 : 0x13;
+            return btlGetMarkedCommandCurrentState() != BTL_MARKED_COMMAND_STATE_INACTIVE ? 0x14 : 0x13;
         }
     }
     return action;
@@ -5413,7 +5411,7 @@ s32 btlGetHealthyAllyActionStatus(BtlUnit *unit) {
     if (unit->status.flags & 0x400) {
         if (unit->partyRecord.unitId == 0x11B) {
             if (battle->state[2] != 0) {
-                return btlGetMarkedCommandCurrentState() != 0 ? 8 : 7;
+                return btlGetMarkedCommandCurrentState() != BTL_MARKED_COMMAND_STATE_INACTIVE ? 8 : 7;
             }
         }
     }
@@ -5456,32 +5454,31 @@ s32 btlOffsetSpecialEnemyForCommand(BtlLinkedCommand *command) {
     return 0;
 }
 
-/* Mode 0x314's applied state is byte 1; absent state or another mode returns zero. */
-u32 btlGetMarkedCommandCurrentState(void) {
+/* Mode 0x314's applied state selects active alternate commands. */
+BtlMarkedCommandState btlGetMarkedCommandCurrentState(void) {
     BattleActionScene *battle = (BattleActionScene *)btlGetRuntime();
     BattleMarkedCommandState *data;
     if (battle->mode != 0x314) {
-        return 0;
+        return BTL_MARKED_COMMAND_STATE_INACTIVE;
     }
     data = (BattleMarkedCommandState *)battle->state;
     if (data != 0) {
         return data->current;
     }
-    return 0;
+    return BTL_MARKED_COMMAND_STATE_INACTIVE;
 }
 
-/* Mode 0x314's requested state is byte 0; absent state or another mode returns zero. */
-u32 btlGetMarkedCommandRequestedState(void) {
+BtlMarkedCommandState btlGetMarkedCommandRequestedState(void) {
     BattleActionScene *battle = (BattleActionScene *)btlGetRuntime();
     BattleMarkedCommandState *data;
     if (battle->mode != 0x314) {
-        return 0;
+        return BTL_MARKED_COMMAND_STATE_INACTIVE;
     }
     data = (BattleMarkedCommandState *)battle->state;
     if (data != 0) {
         return data->requested;
     }
-    return 0;
+    return BTL_MARKED_COMMAND_STATE_INACTIVE;
 }
 
 /* Native actor-name 9 is True Heat, not the ordinary Heat roster entry. */

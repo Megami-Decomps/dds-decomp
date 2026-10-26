@@ -10,7 +10,7 @@
 #include "btl_vec3.h"
 #include "btl_projected_screen_point.h"
 #include "scr_integer_return_value_api.h"
-#include "btl_marked_command_requested_state_api.h"
+#include "btl_marked_command_state_api.h"
 #include "btl_skill_max_api.h"
 #include "btl_blend_color_api.h"
 #include "btl_effect_active_api.h"
@@ -2732,7 +2732,7 @@ u32 btlScriptReturnEffectActive(void) {
 
 /* Report the requested byte of mode 0x314's marked-command state; return script success. */
 u32 btlScriptReturnMarkedCommandRequestedState(void) {
-    u32 result;
+    BtlMarkedCommandState result;
 
     result = btlGetMarkedCommandRequestedState();
     scrSetIntReturnValue(result);

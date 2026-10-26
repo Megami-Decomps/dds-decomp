@@ -74,8 +74,8 @@ typedef struct BtlSelectCtrl {
 } BtlSelectCtrl;
 
 typedef struct BattleMarkedCommandState {
-    u8 requested;
-    u8 current;
+    u8 requested; /* BtlMarkedCommandState; requested alternate-action mode. */
+    u8 current; /* BtlMarkedCommandState; applied alternate-action mode. */
     u8 actionFlag;
 } BattleMarkedCommandState;
 
