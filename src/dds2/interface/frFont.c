@@ -1123,7 +1123,7 @@ s32 frFontCountGlyphBands(_FRQ *glyph) {
     return 0;
 }
 
-u32 frFontMeasureLineWidth(s32 requestedLine, _FRQ *glyph) {
+s32 frFontMeasureLineWidth(s32 requestedLine, _FRQ *glyph) {
     _FRQ *node;
     s32 bottom;
     s32 currentY;
@@ -1155,7 +1155,7 @@ u32 frFontMeasureLineWidth(s32 requestedLine, _FRQ *glyph) {
             glyph = node;
         } while (glyph != NULL);
     }
-    return width << FR_FONT_POSITION_SHIFT;
+    return (s32)(width << FR_FONT_POSITION_SHIFT);
 }
 
 /* Write each visited position and stop at requestedIndex. Missing indices leave

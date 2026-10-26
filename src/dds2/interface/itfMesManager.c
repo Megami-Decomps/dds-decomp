@@ -430,7 +430,7 @@ ItfMesEntryStartResult itfMesStartEntry(s32 window, s32 entryIndex, s32 itemInde
                 captionBlock->glyphChain = MessageRequestEx(captionBlock->x, captionBlock->y, 0, 3, 0, ITF_MES_DEFAULT_COLOR_VALUE,
                     GetSpeakerName(mes), NULL);
             }
-            if ((s32)frFontMeasureLineWidth(0, captionBlock->glyphChain) >= 0x69) {
+            if (frFontMeasureLineWidth(0, captionBlock->glyphChain) >= 0x69) {
                 frSetDrawPosition(captionBlock->glyphChain, captionBlock->x, captionBlock->y);
             } else {
                 frFontCenterGlyphChainAt(0x5C0, captionBlock->y, captionBlock->glyphChain);
