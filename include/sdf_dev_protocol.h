@@ -15,8 +15,9 @@ enum SdfDevOperation {
     SDF_DEV_OPERATION_WRITE_BUFFER = 9
 };
 
-/* Worker lifecycle states; 0 and 1 remain unnamed. */
+/* State codes for a worker-owned request; new handles wait here until dispatch. */
 enum SdfDevState {
+    SDF_DEV_STATE_QUEUED = 0,
     SDF_DEV_STATE_OPENING = 2,
     SDF_DEV_STATE_SEEKING = 3,
     SDF_DEV_STATE_READING = 4,

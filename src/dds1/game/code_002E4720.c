@@ -1630,7 +1630,7 @@ sdfFileCmdHandle_t *sdfFileCmdNewHandle(char *resolvedPath, s32 workerIndex, s32
     state->resolvedPath = resolvedPath;
     state->workerIndex = workerIndex;
     state->operation = operation;
-    state->state = 0;
+    state->state = SDF_DEV_STATE_QUEUED;
     state->resourceId = SDF_DEV_INVALID_FILE_HANDLE;
     state->callback = callback;
     state->callbackContext = callbackContext;
