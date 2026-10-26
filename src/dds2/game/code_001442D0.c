@@ -278,7 +278,7 @@ extern s32 D_00436358;
 extern s32 D_00436360;
 
 
-extern s32 fldTitleTaskUpdate(dds3ProcessID_t *task);
+extern KwlnTaskUpdateResult fldTitleTaskUpdate(dds3ProcessID_t *task);
 
 extern sdfTexHandle_t *D_0043637C;
 
@@ -4210,7 +4210,7 @@ void nbPanelAnalyzeStart(void) {
 }
 
 /* Render the field title through delay, fade-in, hold and fade-out phases. */
-s32 fldTitleTaskUpdate(dds3ProcessID_t *task) {
+KwlnTaskUpdateResult fldTitleTaskUpdate(dds3ProcessID_t *task) {
     s32 alpha;
     u32 color;
     s32 nextFrame;
@@ -4231,7 +4231,7 @@ s32 fldTitleTaskUpdate(dds3ProcessID_t *task) {
             D_00436354 = 1;
             D_00436350 = 0;
         }
-        return 0;
+        return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
     case 1:
         if (D_00436350 >= 20) {
             alpha = (D_00436350 - 19) * 128 / 15;
@@ -4319,9 +4319,9 @@ s32 fldTitleTaskUpdate(dds3ProcessID_t *task) {
         }
         break;
     default:
-        return -1;
+        return KWLN_TASK_UPDATE_FINISH_CALLBACK;
     }
-    return 0;
+    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 void fldReleaseTitleTextures(dds3ProcessID_t *task) {
