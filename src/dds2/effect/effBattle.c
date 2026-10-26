@@ -184,7 +184,7 @@ void effBattleUpdate(effBTLCutHandle_t *work) {
     BtlUnit *finalOwner;
 
     list = work->list;
-    unit = (BtlUnit *)work->owner;
+    unit = work->owner;
 
     if ((flags & 8) != 0) {
         if ((flags & 2) != 0) {
