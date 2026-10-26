@@ -139,7 +139,7 @@ s32 evtMotionSeProcess1(dds3ProcessID_t *task) {
     s32 motionFrame;
     s32 entryIndex;
     s32 cueIndex;
-    EvtMotionSeCue *cues;
+    const EvtMotionSeCue *cues;
 
     motionSeParams = (EvtMotionSeTaskParams *)dds3GetProcessData(task);
     if (dds3GetActiveScene() == NULL) {
@@ -166,7 +166,7 @@ s32 evtMotionSeProcess1(dds3ProcessID_t *task) {
         if (packState->entries[entryIndex].kind == EVT_PACK_KIND_MOTION_CUES &&
             packState->entries[entryIndex].resourceId == motionSeParams->resourceId &&
             packState->entries[entryIndex].motionId == motionId) {
-            cues = (EvtMotionSeCue *)(packState->data + packState->entries[entryIndex].dataOffset);
+            cues = (const EvtMotionSeCue *)(packState->data + packState->entries[entryIndex].dataOffset);
             for (cueIndex = 0; cueIndex < packState->entries[entryIndex].cueCount; cueIndex++) {
                 if (cues[cueIndex].frame == motionFrame) {
                     evtPlaySe(motionSeParams->eventTaskId, cues[cueIndex].fade);
