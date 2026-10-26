@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "fld_area_work.h"
+#include "fld_actor_motion_step_result_api.h"
 #include "fld_camp_check_state_api.h"
 #include "fld_deferred_transition.h"
 #include "common.h"
@@ -2918,7 +2919,7 @@ void fldBeginNpcInteractionById(s32 id) {
 
 extern void dds3MatterObjectBasicSetAlpMode(dds3Basic_t *object, u32 value);
 
-s32 fldStepActorMotionByKey(u32 key, f32 *x, f32 *y, f32 *z) {
+FldActorMotionStepResult fldStepActorMotionByKey(u32 key, f32 *x, f32 *y, f32 *z) {
     f32 weights[50] = {
         0.5f, 1.4f, 1.0f, 0.5f, 1.0f, 0.6f, 1.2f, 0.8f, 1.2f, 0.8f,
         0.5f, 1.4f, 1.0f, 0.5f, 1.0f, 0.6f, 1.2f, 0.8f, 1.2f, 0.8f,
@@ -2931,7 +2932,7 @@ s32 fldStepActorMotionByKey(u32 key, f32 *x, f32 *y, f32 *z) {
     dds3Basic_t *node;
 
     if (D_00389780[0] >= 200) {
-        return 0;
+        return FLD_ACTOR_MOTION_STEP_NOT_APPLIED;
     }
     for (i = 0; i < FIELD_ACTOR_SLOT_COUNT; i++) {
         row = &fldActorSlots[i];
@@ -2954,7 +2955,7 @@ s32 fldStepActorMotionByKey(u32 key, f32 *x, f32 *y, f32 *z) {
             *x = row->firstValues[0];
             *y = row->firstValues[1];
             *z = row->firstValues[2];
-            return 1;
+            return FLD_ACTOR_MOTION_STEP_APPLIED;
         } else if (row->secondKey == key) {
             if (row->kind != 2) {
                 continue;
@@ -2974,7 +2975,7 @@ s32 fldStepActorMotionByKey(u32 key, f32 *x, f32 *y, f32 *z) {
             *x = row->secondValues[0];
             *y = row->secondValues[1];
             *z = row->secondValues[2];
-            return 1;
+            return FLD_ACTOR_MOTION_STEP_APPLIED;
         } else if (row->transitionKey == key) {
             if (row->kind != 2) {
                 continue;
@@ -2990,10 +2991,10 @@ s32 fldStepActorMotionByKey(u32 key, f32 *x, f32 *y, f32 *z) {
             *x = 0.0f;
             *y = 0.0f;
             *z = 0.0f;
-            return 1;
+            return FLD_ACTOR_MOTION_STEP_APPLIED;
         }
     }
-    return 0;
+    return FLD_ACTOR_MOTION_STEP_NOT_APPLIED;
 }
 
 void func_00143C90(void) {

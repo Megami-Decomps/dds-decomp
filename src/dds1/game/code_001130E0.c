@@ -21,6 +21,7 @@
 #include "btl_sound.h"
 #include "bill_object_api.h"
 #include "effect_value_object.h"
+#include "fld_actor_motion_step_result_api.h"
 
 extern void dds3ObjectBaseFreeModelHandle(dds3Basic_t *object);
 
@@ -571,8 +572,6 @@ void dds3MatterObjectBasicDestructor(dds3Basic_t *object) {
 }
 
 extern void dds3GetTMPoseSet(dds3Basic_t *object);
-extern s32 fldStepActorMotionByKey(u32 key, f32 *x, f32 *y, f32 *z);
-
 INCLUDE_RODATA(const s32, "game/code_001130E0", D_0039F720);
 
 INCLUDE_RODATA(const s32, "game/code_001130E0", D_0039F730);
@@ -680,7 +679,8 @@ s32 effUpdateTransformOpacityMode(dds3Basic_t *object) {
         SDF_VU0_STOREVECTOR(model->rotationQuaternion);
         dds3GetTMPoseSet(object);
         dds3GetPosPoseSet(object);
-        if (fldStepActorMotionByKey(object->key, &coordinates[0], &coordinates[1], &coordinates[2]) != 0) {
+        if (fldStepActorMotionByKey(object->key, &coordinates[0], &coordinates[1], &coordinates[2]) !=
+            FLD_ACTOR_MOTION_STEP_NOT_APPLIED) {
             f32 x = coordinates[0];
             f32 y = coordinates[1];
             inner = object->inner;

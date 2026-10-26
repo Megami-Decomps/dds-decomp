@@ -3,6 +3,7 @@
 #include "sdf_gs_header.h"
 #include "sdf_pac_reloc.h"
 #include "fld_script_resource.h"
+#include "fld_actor_motion_step_result_api.h"
 #include "sdf_packet_header.h"
 #include "eff.h"
 #include "fld_player_scene_state.h"
@@ -3167,7 +3168,7 @@ extern void dds3MatterObjectBasicSetAlpMode(dds3Basic_t *object, u32 value);
 
 /* Advance an actor slot's first/second interpolation (ease-weighted for 40-frame moves) or start its door
  * transition, returning the current values for the key. */
-s32 fldStepActorMotionByKey(u32 key, f32 *x, f32 *y, f32 *z) {
+FldActorMotionStepResult fldStepActorMotionByKey(u32 key, f32 *x, f32 *y, f32 *z) {
     f32 weights[50] = {
         0.5f, 1.4f, 1.0f, 0.5f, 1.0f, 0.6f, 1.2f, 0.8f, 1.2f, 0.8f,
         0.5f, 1.4f, 1.0f, 0.5f, 1.0f, 0.6f, 1.2f, 0.8f, 1.2f, 0.8f,
@@ -3180,7 +3181,7 @@ s32 fldStepActorMotionByKey(u32 key, f32 *x, f32 *y, f32 *z) {
     void *node;
 
     if (D_0032E3C0[0] >= 200) {
-        return 0;
+        return FLD_ACTOR_MOTION_STEP_NOT_APPLIED;
     }
     for (i = 0; i < FIELD_ACTOR_SLOT_COUNT; i++) {
         row = &fldActorSlots[i];
@@ -3203,7 +3204,7 @@ s32 fldStepActorMotionByKey(u32 key, f32 *x, f32 *y, f32 *z) {
             *x = row->firstValues[0];
             *y = row->firstValues[1];
             *z = row->firstValues[2];
-            return 1;
+            return FLD_ACTOR_MOTION_STEP_APPLIED;
         } else if (row->secondKey == key) {
             if (row->kind != 2) {
                 continue;
@@ -3223,7 +3224,7 @@ s32 fldStepActorMotionByKey(u32 key, f32 *x, f32 *y, f32 *z) {
             *x = row->secondValues[0];
             *y = row->secondValues[1];
             *z = row->secondValues[2];
-            return 1;
+            return FLD_ACTOR_MOTION_STEP_APPLIED;
         } else if (row->transitionKey == key) {
             if (row->kind != 2) {
                 continue;
@@ -3239,10 +3240,10 @@ s32 fldStepActorMotionByKey(u32 key, f32 *x, f32 *y, f32 *z) {
             *x = 0.0f;
             *y = 0.0f;
             *z = 0.0f;
-            return 1;
+            return FLD_ACTOR_MOTION_STEP_APPLIED;
         }
     }
-    return 0;
+    return FLD_ACTOR_MOTION_STEP_NOT_APPLIED;
 }
 
 void func_00140F68(void) {
