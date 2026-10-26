@@ -1866,8 +1866,6 @@ void btlUpdateAutoMusic(void) {
 
 
 
-extern BtlCommandTargetEligibilityResult btlGetCommandTargetEligibility(BtlIndexList *, s32);
-
 extern BtlUnit *btlSelectUnitAtExtremeX(BtlUnit *, BtlIndexList *);
 
 /* Restore and validate the saved command and its eligible target indices. */

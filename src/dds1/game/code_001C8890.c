@@ -680,8 +680,6 @@ void btlCommandResultEffectSelect(BtlTask *task) {
 
 extern BtlIndexList *btlGetSelectedTargetList(void);
 
-extern BtlCommandTargetEligibilityResult btlGetCommandTargetEligibility(BtlIndexList *indices, s32 selection);
-
 extern void btlRequestTargetSelectionClose(void);
 
 extern s32 btlSetTaskPhase2(void);
@@ -690,7 +688,7 @@ void btlInitializeActorCommandState(BtlTask *task) {
     BtlState *work = (BtlState *)btlGetRuntime();
     BtlTargetSelectionState state;
     BtlIndexList *selected;
-    s32 selection;
+    BtlCommandId commandId;
     BtlCommandTargetEligibilityResult reason;
 
     if (work->battleFlags & 0x20) {
@@ -716,11 +714,11 @@ void btlInitializeActorCommandState(BtlTask *task) {
         case 7:
         case 8:
             if (task->indexWork.phase == 4) {
-                selection = btlGetLoggedIndexedCommandItem(task->indexWork.reference);
+                commandId = btlGetLoggedIndexedCommandItem(task->indexWork.reference);
             } else {
-                selection = task->indexWork.skillId;
+                commandId = task->indexWork.skillId;
             }
-            reason = btlGetCommandTargetEligibility(selected, selection);
+            reason = btlGetCommandTargetEligibility(selected, commandId);
             switch (reason) {
             case BTL_COMMAND_TARGET_ELIGIBILITY_RESULT_REQUIREMENTS_MET:
             case 4:

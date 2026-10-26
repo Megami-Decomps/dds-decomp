@@ -1102,7 +1102,8 @@ extern s32 btlGetEntryFlagsUnlessDisabled(datUnitWork_t *);
 
 extern s32 btlLowestSetPairIndex(u32);
 
-BtlCommandTargetEligibilityResult btlGetCommandTargetEligibility(BtlIndexList *indexList, s32 commandId) {
+BtlCommandTargetEligibilityResult btlGetCommandTargetEligibility(
+    BtlIndexList *indexList, BtlCommandId commandId) {
     datUnitWork_t *entryList[26];
     BtlState *battle = (BtlState *)btlGetRuntime();
     s32 count;

@@ -232,8 +232,6 @@ extern s32 btlCountTasksByKind(u16 kind);
 
 BtlRuntimeTask *btlCreateActorParameterDeltaTask(BtlUnit *owner, BtlOperandEntry *spec);
 
-extern BtlCommandTargetEligibilityResult btlGetCommandTargetEligibility(BtlIndexList *indices, s32 selection);
-
 void btlResolveActionTargetResults(BtlTask *task, BattleIndexWork *work);
 
 extern BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 resourceKind, s32 resourceId, s32 delay, s32 duration, u8 transitionMode);

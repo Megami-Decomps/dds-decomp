@@ -1,7 +1,7 @@
 #ifndef BTL_COMMAND_TARGET_ELIGIBILITY_H
 #define BTL_COMMAND_TARGET_ELIGIBILITY_H
 
-#include "common.h"
+#include "btl_command_id.h"
 
 typedef s32 BtlCommandTargetEligibilityResult;
 
@@ -21,5 +21,11 @@ enum {
     BTL_COMMAND_TARGET_ELIGIBILITY_RESULT_COMMAND_RESTRICTED = 9,
 };
 #endif
+
+struct BtlIndexList;
+
+/* Check the selected targets against the command's target requirements. */
+BtlCommandTargetEligibilityResult btlGetCommandTargetEligibility(
+    struct BtlIndexList *indexList, BtlCommandId commandId);
 
 #endif /* BTL_COMMAND_TARGET_ELIGIBILITY_H */

@@ -852,7 +852,8 @@ BtlCommandBlockReason btlGetCommandBlockReason(BtlTask *actionTask, s32 commandI
     return BTL_COMMAND_BLOCK_EMPTY_OR_ALL_FLAGGED_TARGETS;
 }
 
-BtlCommandTargetEligibilityResult btlGetCommandTargetEligibility(BtlIndexList *indexList, s32 commandId) {
+BtlCommandTargetEligibilityResult btlGetCommandTargetEligibility(
+    BtlIndexList *indexList, BtlCommandId commandId) {
     datUnitWork_t *entryList[26];
     BtlState *battle = (BtlState *)btlGetRuntime();
     s32 count;
