@@ -552,15 +552,18 @@ dds3Basic_t *dds3AddBEDEffectObjectBasic2(struct SoundMixer *resource, const u12
     return AddBEDEffect(resource, position, scale);
 }
 
-/* Resolve the path to a resource identifier, then create the effect from it. */
+/* Load the named mixer, clone it into the effect, then release the file block. */
 dds3Basic_t *dds3AddBEDEffectObjectBasic(const char *resourcePath, const u128 *firstVector, void *secondVector) {
-    u32 resolvedId;
+    union {
+        u32 address;
+        struct SoundMixer *source;
+    } resource;
     struct sdfMemHandle_t *resourceHandle;
     dds3Basic_t *created;
 
-    resolvedId = 0;
-    resourceHandle = sdfDevLoadFileEx(resourcePath, &resolvedId, 0);
-    created = AddBEDEffect(resolvedId, firstVector, secondVector);
+    resource.address = 0;
+    resourceHandle = sdfDevLoadFileEx(resourcePath, &resource.address, 0);
+    created = AddBEDEffect(resource.source, firstVector, secondVector);
     sdfMemFreeDirect(resourceHandle);
     return created;
 }
