@@ -20,12 +20,12 @@ void itfPnlRelease(itfpanel_t *sprite) {
 }
 
 
-/* The layout table accepts context alone or context plus four corners. */
+/* Kind-indexed handlers rebuild payload geometry from the panel rectangle. */
 extern void (*itfPanelLayoutCallbacks[])();
 extern void (*CreateColorTable[])();
 
-/* Store rectangle corners and the caller's render value before notifying the
- * kind-specific handler with context only. No kind-range or context checks. */
+/* Store rectangle corners and render value before notifying the handler with
+ * the payload and all four corners. No kind-range or context checks. */
 void itfPnlSetPosition(itfpanel_t *panel, s32 left, s32 top, s32 right, s32 bottom, s32 renderValue) {
     panel->renderValue = renderValue;
     panel->left = left;
@@ -52,15 +52,15 @@ void itfPnlSetPositionOffset(itfpanel_t *panel, s32 leftDelta, s32 topDelta, s32
     }
 }
 
-/* Store the RGBA words in packet order, then notify with context.
- * The panel renderers consume these channels directly. */
+/* Store the RGBA words, then pass those same channels to the selected updater.
+ * The facility updater consumes only the payload. */
 void itfPnlSetColor(itfpanel_t *panel, s32 redValue, s32 greenValue, s32 blueValue, s32 alphaValue) {
     panel->red = redValue;
     panel->green = greenValue;
     panel->blue = blueValue;
     panel->alpha = alphaValue;
     if (CreateColorTable[panel->kind] != 0) {
-        CreateColorTable[panel->kind](panel->payload);
+        CreateColorTable[panel->kind](panel->payload, redValue, greenValue, blueValue, alphaValue);
     }
 }
 

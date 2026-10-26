@@ -14229,10 +14229,11 @@ channels. Native values agree between games: bounds `(0,0,8192,3584)`, UVs
 declarations and fixed-point values remain unchanged.
 
 `itfPanelLayoutCallbacks` is indexed after setting or advancing panel
-corners and render value; the advance path also forwards all four updated
-corners. `CreateColorTable` is the separate bank notified after RGBA
-stores. Retain the existing unprototyped callback declarations and differing
-argument lists, rather than inventing one new shared signature.
+corners and render value; both paths forward the payload and all four corners.
+`CreateColorTable` is a separate bank: entries 0–5 receive the payload and
+four RGBA values, while the Facility entry at index 8 consumes only the
+payload. Keep both declarations unprototyped because their entries do not share
+one callback signature.
 
 `evtStageResourcePathFormat` combines a field directory and area/room IDs.
 `evtFieldScriptTerminationFormat` reports the task immediately before the
