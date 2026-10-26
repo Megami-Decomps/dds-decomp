@@ -60,7 +60,6 @@
 #include "file_pac_completion_api.h"
 #include "mdl_flag_api.h"
 /* Declared before first use (were implicit int). */
-extern s32 btlActorEntryIsExpired(BtlUnit *unit, s32 index);
 extern void dds3WorkClear(void);
 extern s32 scrGetIntPara(s32 parameterIndex);
 extern void p2sdLoadSMGFile(s32 packed);

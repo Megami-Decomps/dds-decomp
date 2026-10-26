@@ -33,6 +33,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
 #include "btl_effect_position.h"
+#include "btl_actor_entry_code_api.h"
 #include "eff_offset_if_owner_flag_clear.h"
 #include "sdf_chip.h"
 #include "snd_slot.h"
@@ -577,8 +578,6 @@ extern s32 btlRollPassiveAbilityAction(BtlUnit *);
 extern void fldAppendSceneGroupHandle(BtlTask *);
 
 extern s16 btlGetCommandEffectId(BtlTask *, s32);
-
-extern s32 btlActorEntryIsExpired(BtlUnit *, s32);
 
 extern void btlClearActorEntrySlot(BtlUnit *, s32);
 

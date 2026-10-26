@@ -14,6 +14,8 @@ enum {
 };
 
 BtlActorEntryCodeMatch btlMatchActorEntryCode(struct BtlUnit *unit, s32 index);
+/* True only when the slot has a code and its countdown has elapsed. */
+u8 btlActorEntryIsExpired(const struct BtlUnit *unit, s32 index);
 s16 btlGetActorEntryCode(const struct BtlUnit *unit, s32 index);
 
 #endif

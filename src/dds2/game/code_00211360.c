@@ -75,8 +75,6 @@ extern s8 btlHistoryCounter;
 
 extern void btlSyncEligibleActorPanelHpMp(ActionStateLink *);
 
-extern s32 btlActorEntryIsExpired(BtlUnit *, s32);
-
 extern s32 btlEntryCodeConditionIndices[];
 
 

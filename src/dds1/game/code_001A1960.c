@@ -1381,7 +1381,7 @@ void btlClearAllActorEntrySlots(BtlUnit *unit) {
     } while (temp_v0 < 7);
 }
 
-s32 btlActorEntryIsExpired(BtlUnit *unit, s32 index) {
+u8 btlActorEntryIsExpired(const BtlUnit *unit, s32 index) {
     if (unit->entrySlots[index].code == 0) {
         return 0;
     }

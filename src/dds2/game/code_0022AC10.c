@@ -163,7 +163,6 @@ extern s32 btlCountTasksByKind(u16);
 
 extern void btlBossDebugPrintf(const char *format, ...);
 
-extern s32 btlActorEntryIsExpired(BtlUnit *, s32);
 
 extern s8 D_00453068[];
 
