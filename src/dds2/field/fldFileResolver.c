@@ -1710,7 +1710,7 @@ extern void fldReleaseResourceSlots(void);
 
 
 
-extern s32 fldTitleMiniIsActive(void);
+extern u8 fldTitleMiniIsActive(void);
 
 
 extern void fldReleaseMenuSlotsAfterWait(void);

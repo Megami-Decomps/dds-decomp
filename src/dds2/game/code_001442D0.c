@@ -4376,7 +4376,7 @@ void fldDestroyTitleTask(void) {
     }
 }
 
-s32 fldTitleMiniIsActive(void) {
+u8 fldTitleMiniIsActive(void) {
     return dds3SearchProcessName(D_00413C80) != 0;
 }
 

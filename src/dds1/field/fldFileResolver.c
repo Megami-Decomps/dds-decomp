@@ -790,7 +790,7 @@ extern void fldReleaseTitleSlots(void);
 
 extern void fldReleaseResourceHandles();
 
-extern s32 fldTitleMiniIsActive(void);
+extern u8 fldTitleMiniIsActive(void);
 
 extern void fldResetZoneRecordsAndActorSlots(void);
 
