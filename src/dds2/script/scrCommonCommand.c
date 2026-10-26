@@ -10,6 +10,7 @@
 #include "scr_process_handle_api.h"
 #include "pcp_vu0.h"
 #include "scr.h"
+#include "scr_program_counter_api.h"
 #include "scr_instruction_stream_api.h"
 #include "scr_command_result.h"
 #include "scr_command_timer_api.h"
@@ -167,13 +168,10 @@ ScrCommandResult scrCommandFadeBackgroundIn(void)
     return SCR_COMMAND_RESULT_COMPLETE;
 }
 
-extern s32 scrGetLabelCodeAddress(s32 labelIndex);
-extern void scrSetCodePointer(s32 address);
-
 ScrCommandResult scrCommand_SEL_JMP(void)
 {
     s32 argumentIndex;
-    s32 labelIndex;
+    ScrLabelIndex labelIndex;
     argumentIndex = scrGetIntPara(0);
     if (argumentIndex < 0)
     {

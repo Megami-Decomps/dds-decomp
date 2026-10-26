@@ -2,6 +2,7 @@
 #include "scr_integer_return_value_api.h"
 #include "scr_command_timer_api.h"
 #include "scr.h"
+#include "scr_program_counter_api.h"
 #include "scr_current_process_user_data_api.h"
 #include "mdl_flag_api.h"
 
@@ -11,20 +12,20 @@ extern s32 scrGetIntPara(s32 idx);
 extern s8 D_0040B7D9[];
 
 
-s32 scrGetProcedureCodeAddress(s32 procedureIndex) {
+ScrProgramCounter scrGetProcedureCodeAddress(ScrProcedureIndex procedureIndex) {
     return nowpwork->procedures[procedureIndex].addr;
 }
 
-s32 scrGetLabelCodeAddress(s32 labelIndex) {
+ScrProgramCounter scrGetLabelCodeAddress(ScrLabelIndex labelIndex) {
     return nowpwork->labels[labelIndex].addr;
 }
 
-s32 scrGetCodePointer(void) {
+ScrProgramCounter scrGetCodePointer(void) {
     return nowpwork->pc;
 }
 
-void scrSetCodePointer(s32 address) {
-    nowpwork->pc = address;
+void scrSetCodePointer(ScrProgramCounter programCounter) {
+    nowpwork->pc = programCounter;
 }
 
 u32 scrGetScriptTimer(void) {
