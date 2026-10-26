@@ -93,11 +93,11 @@ MdlGroupLoadPendingResult mdlCheckLoading(s32 groupIndex, s32 wantedId) {
     BattleGroupIdEntry *idCursor = mdlLoadingMajorList[groupIndex];
     while (idCursor != 0) {
         if (idCursor->id == wantedId) {
-            return 1;
+            return MDL_GROUP_LOAD_PENDING;
         }
         idCursor = idCursor->next;
     }
-    return 0;
+    return MDL_GROUP_LOAD_NOT_PENDING;
 }
 
 /* Prepend id to this group's ID list; duplicate IDs are allowed. */
@@ -370,7 +370,7 @@ void mdlRegistModelSet(s32 group, s32 id, MdlRegistrationMode registrationMode, 
 }
 
 dds3ModelResrc_t *mdlWaitLoadEnd(s32 group, s32 id) {
-    while (mdlCheckLoading(group, id)) {
+    while (mdlCheckLoading(group, id) != MDL_GROUP_LOAD_NOT_PENDING) {
         fileManager();
     }
     return mdlSearchResrc(group, id);
@@ -449,7 +449,7 @@ s32 mdlPrepare(s32 group, s32 id, s32 blocking) {
         SignalSema(mdlManagerWork);
         return (s32)entity;
     }
-    if (mdlCheckLoading(group, id)) {
+    if (mdlCheckLoading(group, id) != MDL_GROUP_LOAD_NOT_PENDING) {
         SignalSema(mdlManagerWork);
         if (blocking != 0) {
             return (s32)mdlWaitLoadEnd(group, id);
