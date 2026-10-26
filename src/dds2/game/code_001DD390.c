@@ -61,6 +61,7 @@
 #include "btl_unit_tasks.h"
 #include "dds3obj.h"
 #include "evt_unit.h"
+#include "evt_unit_motion_api.h"
 #include "evt_unit_color_transition.h"
 #include "eff_transform.h"
 #include "eff_object.h"
@@ -211,8 +212,6 @@ extern void btlApplyUnitMotionSelection(BtlUnit *, u32, s32, f32);
 extern s32 btlGetSlotRateKind(BtlUnit *, s32);
 
 extern BtlRuntimeTask *btlCreateStiffenDamageShakeTask(BtlUnit *, f32);
-
-extern void evtSetUnitMotion(evtUnitHandle_t *, s32, s32, s32, s32);
 
 extern void evtSetWaitHokanFrame(evtUnitHandle_t *, s32, s32);
 

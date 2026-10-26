@@ -63,6 +63,7 @@
 #include "fpu.h"
 #include "dat_state.h"
 #include "evt_unit.h"
+#include "evt_unit_motion_api.h"
 #include "evt_unit_color_transition.h"
 #include "mdl.h"
 #include "mdl_asset_request.h"
@@ -180,8 +181,6 @@ extern void btlApplyUnitMotionSelection(BtlUnit *, u32, s32, f32);
 extern void btlRefreshUnitMotionSelection(BtlUnit *unit);
 
 extern void btlRefreshUnitEffectMotionAndEntry(BtlUnit *unit);
-
-extern void evtSetUnitMotion(struct evtUnitHandle_t *, s32, s32, s32, s32);
 
 extern void evtSetWaitHokanFrame(struct evtUnitHandle_t *, s32, s32);
 

@@ -11,6 +11,7 @@ struct EffNodeDescriptor;
 #include "sdf_chip.h"
 #include "dds3_path.h"
 #include "evt_unit.h"
+#include "evt_unit_motion_api.h"
 #include "evt_unit_motion_callback_result.h"
 #include "evt_unit_motion_step_result.h"
 #include "evt_unit_move_end_api.h"
@@ -914,14 +915,8 @@ void evtConfigureUnitMotionSlot(evtUnitHandle_t *unit, s32 slot, s32 slotAValue,
 #define EVT_UNIT_FLAG_MOTION_START_PENDING 0x80
 #define EVT_UNIT_FLAG_MOTION_WOBBLE 0x40
 
-enum {
-    EVT_UNIT_MOTION_MODE_RESTART_PENDING_MOTION = 0,
-    EVT_UNIT_MOTION_MODE_LOOP = 1,
-    EVT_UNIT_MOTION_MODE_SINGLE = 2,
-    EVT_UNIT_MOTION_MODE_WOBBLE = 3,
-};
-
-void evtSetUnitMotion(evtUnitHandle_t *unit, s32 motionId, s32 startFrame, s32 endFrame, s32 mode) {
+void evtSetUnitMotion(evtUnitHandle_t *unit, s32 motionId, s32 startFrame, s32 endFrame,
+                      EvtUnitMotionMode mode) {
     unit->flags &= ~0x1;
     unit->flags &= ~0x20;
     unit->flags &= ~EVT_UNIT_FLAG_MOTION_WOBBLE;
@@ -1172,9 +1167,6 @@ extern evtUnitHandle_t *evtGetUnitHandle(s32 idx);
 
 
 
-
-
-extern void evtSetUnitMotion(evtUnitHandle_t *unit, s32 motionId, s32 startFrame, s32 endFrame, s32 mode);
 
 
 extern u8 D_00421AC0[];
@@ -1967,7 +1959,8 @@ u32 evtOpDeprecatedModelMotion(void) {
     if (unit == NULL) {
         return 1;
     }
-    evtSetUnitMotion(unit, scrGetIntPara(1), scrGetIntPara(2), scrGetIntPara(3), 0);
+    evtSetUnitMotion(unit, scrGetIntPara(1), scrGetIntPara(2), scrGetIntPara(3),
+                     EVT_UNIT_MOTION_MODE_RESTART_PENDING_MOTION);
     printf(D_00421810);
     return 1;
 }
@@ -1983,7 +1976,7 @@ u32 evtOpSetUnitParams5(void) {
         s32 motionId = scrGetIntPara(1);
         s32 startFrame = scrGetIntPara(2);
         s32 endFrame = scrGetIntPara(3);
-        s32 mode = scrGetIntPara(4);
+        EvtUnitMotionMode mode = scrGetIntPara(4);
         evtSetUnitMotion(unit, motionId, startFrame, endFrame, mode);
     }
     return 1;
@@ -2263,7 +2256,7 @@ u32 evtCommand_MODEL_MOVE_MOT(void) {
     if (unit == NULL) {
         return 1;
     }
-    evtSetUnitMotion(unit, scrGetIntPara(1), 5, 7, 1);
+    evtSetUnitMotion(unit, scrGetIntPara(1), 5, 7, EVT_UNIT_MOTION_MODE_LOOP);
     printf("\xA2\xA8\xC3\xED\xB0\xD5:MODEL_MOVE_MOT()\xA4\xB3\xA4\xCE\xA5\xB3\xA5\xDE\xA5\xF3\xA5\xC9"
                   "\xA4\xCF\xBA\xA3\xB8\xE5\xBB\xC8\xCD\xD1\xB6\xD8\xBB\xDF\xA4\xCB\xA4\xCA\xA4\xEA\xA4\xDE\xA4\xB9\xA1\xA3\n");
     return 1;
