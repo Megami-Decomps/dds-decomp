@@ -472,7 +472,7 @@ ScrCommandResult scrCommand_MUL_BLUR_RGBA(void)
     return SCR_COMMAND_RESULT_COMPLETE;
 }
 
-extern void dds3SetMultiBlurArea(u32 extent, u32 centerX, u32 centerY);
+extern void dds3SetMultiBlurArea(s32 extent, s32 centerX, s32 centerY);
 
 ScrCommandResult scrCommand_MUL_BLUR_AREA(void)
 {
@@ -564,7 +564,7 @@ ScrCommandResult scrCommand_DIST_BLUR_RGBA(void)
     return SCR_COMMAND_RESULT_COMPLETE;
 }
 
-extern void dds3SetDistBlurArea(u32 positionSpread, u32 x, u32 y);
+extern void dds3SetDistBlurArea(s32 positionSpread, s32 x, s32 y);
 
 ScrCommandResult scrCommand_DIST_BLUR_AREA(void)
 {
@@ -653,7 +653,7 @@ ScrCommandResult scrCommand_RIP_BLUR_RGBA(void)
     return SCR_COMMAND_RESULT_COMPLETE;
 }
 
-extern void dds3SetRipBlurArea(u32 size, u32 x, u32 y);
+extern void dds3SetRipBlurArea(s32 size, s32 x, s32 y);
 
 ScrCommandResult scrCommand_RIP_BLUR_AREA(void)
 {
@@ -737,7 +737,7 @@ ScrCommandResult scrCommand_BLUR2_RGBA(void)
     return SCR_COMMAND_RESULT_COMPLETE;
 }
 
-extern void dds3SetBlur2Area(u32 centerX, u32 centerY);
+extern void dds3SetBlur2Area(s32 centerX, s32 centerY);
 
 ScrCommandResult scrCommand_BLUR2_AREA(void)
 {
@@ -885,7 +885,7 @@ ScrCommandResult scrCommand_MFILTER_RGBA(void)
     return SCR_COMMAND_RESULT_COMPLETE;
 }
 
-extern void dds3SetMFilterArea(u32 extent, u32 centerX, u32 centerY);
+extern void dds3SetMFilterArea(s32 extent, s32 centerX, s32 centerY);
 
 ScrCommandResult scrCommand_MFILTER_AREA(void)
 {

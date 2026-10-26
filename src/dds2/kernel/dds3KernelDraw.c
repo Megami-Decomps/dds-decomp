@@ -220,7 +220,7 @@ void dds3SetMFilterRGBA(u32 rgba) {
 }
 
 /* Stage textured-square extent and center coordinates. */
-void dds3SetMFilterArea(u32 extent, u32 centerX, u32 centerY) {
+void dds3SetMFilterArea(s32 extent, s32 centerX, s32 centerY) {
     mfiltertarget.extent = extent;
     mfiltertarget.center[0] = centerX;
     mfiltertarget.center[1] = centerY;
@@ -322,7 +322,7 @@ void dds3SetBlur2RGBA(u32 rgba) {
 }
 
 /* Stage the rectangle blur's center coordinates. */
-void dds3SetBlur2Area(u32 centerX, u32 centerY) {
+void dds3SetBlur2Area(s32 centerX, s32 centerY) {
     blur2target.position[0] = centerX;
     blur2target.position[1] = centerY;
 }
@@ -394,7 +394,7 @@ void dds3SetMultiBlurRGBA(u32 rgba) {
 }
 
 /* Stage textured-blur extent and source center coordinates. */
-void dds3SetMultiBlurArea(u32 extent, u32 centerX, u32 centerY) {
+void dds3SetMultiBlurArea(s32 extent, s32 centerX, s32 centerY) {
     mulblurtarget.extent = extent;
     mulblurtarget.source.position[0] = centerX;
     mulblurtarget.source.position[1] = centerY;
@@ -491,7 +491,7 @@ void dds3SetDistBlurRGBA(u32 rgba) {
 }
 
 /* Stage filter-blur position spread and coordinates. */
-void dds3SetDistBlurArea(u32 positionSpread, u32 x, u32 y) {
+void dds3SetDistBlurArea(s32 positionSpread, s32 x, s32 y) {
     distblurtarget.positionSpread = positionSpread;
     distblurtarget.position[0] = x;
     distblurtarget.position[1] = y;
@@ -576,7 +576,7 @@ void dds3SetRipBlurRGBA(u32 rgba) {
 }
 
 /* Stage staggered-blur size and coordinates. */
-void dds3SetRipBlurArea(u32 size, u32 x, u32 y) {
+void dds3SetRipBlurArea(s32 size, s32 x, s32 y) {
     ripblurtarget.size = size;
     ripblurtarget.position[0] = x;
     ripblurtarget.position[1] = y;
