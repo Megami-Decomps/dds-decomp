@@ -109,9 +109,9 @@ WorldIndexNode *dds3ObjectBaseGetEventArray(dds3Basic_t *object);
 u32 dds3AddBasicArray(dds3BasicArrayHandle_t *object, s32 count);
 u16 dds3GetBasicArrayCount(const dds3BasicArrayHandle_t *object);
 s32 dds3SetSearchNextBasicArray(dds3BasicArrayHandle_t *indexNode, const dds3Basic_t *targetNode);
-/* Index-list entries borrow object pointers in the world's 32-bit value slots. */
-u32 dds3SetBasicArray(dds3BasicArrayHandle_t *object, void *value);
-void *dds3GetBasicArray(const dds3BasicArrayHandle_t *object);
+/* Index-list values borrow base world nodes; the list does not own them. */
+u32 dds3SetBasicArray(dds3BasicArrayHandle_t *object, dds3Basic_t *node);
+dds3Basic_t *dds3GetBasicArray(const dds3BasicArrayHandle_t *object);
 u32 dds3SetFirstBasicArray(dds3BasicArrayHandle_t *object);
 u32 dds3SetNextBasicArray(dds3BasicArrayHandle_t *object);
 /* Visit stored dds3Basic_t pointers in order. */

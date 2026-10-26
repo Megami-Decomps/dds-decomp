@@ -433,7 +433,7 @@ void dds3UnitObjectBasicEL_Link(dds3Basic_t *obj) {
     }
     if (dds3SetFirstBasicArray((dds3BasicArrayHandle_t *)list) != 0) {
         do {
-            other = dds3GetBasicArray((dds3BasicArrayHandle_t *)list);
+            other = (EffectValueObject *)dds3GetBasicArray((dds3BasicArrayHandle_t *)list);
             otherData = other->data;
             if (!(otherData->flags & 4) &&
                 dds3ComparePosPoseSet2(((f32 *)obj->inner), other->source) == 0 &&
@@ -451,7 +451,7 @@ void dds3UnitObjectBasicEL_Link(dds3Basic_t *obj) {
             goto destroy_list;
         }
         do {
-            other = dds3GetBasicArray((dds3BasicArrayHandle_t *)list);
+            other = (EffectValueObject *)dds3GetBasicArray((dds3BasicArrayHandle_t *)list);
             otherData = other->data;
             if (!(otherData->flags & 4) &&
                 dds3ComparePosPoseSet2(((f32 *)obj->inner), other->source) != 0) {

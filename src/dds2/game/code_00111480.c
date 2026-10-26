@@ -27,7 +27,7 @@ WorldIndexNode *dds3AreaBasicGetWorldIndexNode(dds3Basic_t *worldIndexOwner, s32
 WorldIndexNode *dds3AreaBasicArrangeGetItemArray(dds3Basic_t *worldIndexOwner, s32 slotIndex, s32 (*filter)(dds3Basic_t *)) {
     WorldIndexNode *slot = dds3AreaBasicGetWorldIndexNode(worldIndexOwner, slotIndex);
     WorldIndexNode *result;
-    void *value;
+    dds3Basic_t *value;
 
     if (dds3GetBasicArrayCount((dds3BasicArrayHandle_t *)slot) == 0) {
         return NULL;

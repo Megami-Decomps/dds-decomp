@@ -74,25 +74,25 @@ u16 dds3GetBasicArrayCount(const dds3BasicArrayHandle_t *object) {
     return value;
 }
 
-u32 dds3SetBasicArray(dds3BasicArrayHandle_t *object, void *value) {
+u32 dds3SetBasicArray(dds3BasicArrayHandle_t *object, dds3Basic_t *node) {
     if (object->entryCount == 0) {
         return 0;
     }
     if (object->cursorIndex < 0) {
         return 0;
     }
-    ((WorldInfo *)dds3TheWorld->data)->entries[object->cursorIndex].value = (s32)(u32)value;
+    ((WorldInfo *)dds3TheWorld->data)->entries[object->cursorIndex].value = (s32)(u32)node;
     return 1;
 }
 
-void *dds3GetBasicArray(const dds3BasicArrayHandle_t *object) {
+dds3Basic_t *dds3GetBasicArray(const dds3BasicArrayHandle_t *object) {
     if (object->entryCount == 0) {
         return 0;
     }
     if (object->cursorIndex < 0) {
         return 0;
     }
-    return (void *)(u32)((WorldInfo *)dds3TheWorld->data)->entries[object->cursorIndex].value;
+    return (dds3Basic_t *)(u32)((WorldInfo *)dds3TheWorld->data)->entries[object->cursorIndex].value;
 }
 
 /* Signed comparison via complement-and-shift: zero counts as nonnegative. */
