@@ -3117,7 +3117,7 @@ void fldUpdatePositionedTextureNodes(void) {
             SetRotateMatrixY(-angle);
             VU0_STORE_MATRIX_UNCLOBBERED(matrix);
             effApplyNodeTransformMatrix(fldEffectTextureNodes[i], matrix);
-            dds3EffectDraw(fldEffectTextureNodes[i]);
+            dds3EffectDispatchUpdate(fldEffectTextureNodes[i]);
         }
     }
 }
@@ -3153,7 +3153,7 @@ void fldUpdateIndexedResourceEffectPosition(void) {
         position[1] = state->y;
         position[2] = state->z;
         effCopyVectorToNodeInstance(fldIndexedResourceEffect, position);
-        dds3EffectDraw(fldIndexedResourceEffect);
+        dds3EffectDispatchUpdate(fldIndexedResourceEffect);
     }
 }
 
@@ -3213,7 +3213,7 @@ void fldUpdateMenuResourceEffects(void) {
     s32 i;
     for (i = 0; i < 4; i++) {
         if (mnuPositionedResourceNodes[i] != 0 && mnuPositionedResourceActive[i] != 0) {
-            dds3EffectDraw(mnuPositionedResourceNodes[i]);
+            dds3EffectDispatchUpdate(mnuPositionedResourceNodes[i]);
         }
     }
 }
@@ -4697,10 +4697,10 @@ void fldSetWeatherEffectPos(f32 x, f32 y, f32 z) {
 
 void fldUpdateWeatherEffectNodes(void) {
     if (fldDamEffectNode != 0 && fldDamEffectPositioned != 0) {
-        dds3EffectDraw(fldDamEffectNode);
+        dds3EffectDispatchUpdate(fldDamEffectNode);
     }
     if (fldYukEffectNode != 0 && fldYukEffectPositioned != 0) {
-        dds3EffectDraw(fldYukEffectNode);
+        dds3EffectDispatchUpdate(fldYukEffectNode);
     }
 }
 

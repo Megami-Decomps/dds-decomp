@@ -118,7 +118,7 @@ void dds3EffectDelete(EffNode *node) {
     sdfChipFreeDirect(node);
 }
 
-void dds3EffectDraw(EffNode *node) {
+void dds3EffectDispatchUpdate(EffNode *node) {
     EffMajorTable[node->type].update(node->instanceWord);
 }
 

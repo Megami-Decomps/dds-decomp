@@ -241,7 +241,7 @@ s32 dds3EffectObjectBasicDrawProcedure(dds3Basic_t *obj) {
     case 7:
     case 8:
         if (data->handle != NULL) {
-            dds3EffectDraw(data->handle);
+            dds3EffectDispatchUpdate(data->handle);
         }
         break;
     case 2:

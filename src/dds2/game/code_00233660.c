@@ -1148,7 +1148,7 @@ void mdlLinkEffect(dds3ModelHandle_t *owner, dds3ModelEffectCtrlr_t *anchorRecor
         mdlEffect_P2A_D3P_GetPos(model, anchorRecord, position);
         resourceInstance = anchorRecord->payload.part.instance;
         effCopyVectorToNodeInstance((EffNode *)resourceInstance, position);
-        dds3EffectDraw((EffNode *)resourceInstance);
+        dds3EffectDispatchUpdate((EffNode *)resourceInstance);
         break;
     case MDL_RESOURCE_TRACK_POLY:
         effTrackPolyUpdate(anchorRecord->payload.part.track);

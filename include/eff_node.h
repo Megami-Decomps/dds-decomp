@@ -46,7 +46,7 @@ extern EffTypeOps EffMajorTable[];
 
 EffNode *dds3EffectCreate(u16 type, u16 arg, s32 parameter);
 void dds3EffectDelete(EffNode *node);
-void dds3EffectDraw(EffNode *node);
+void dds3EffectDispatchUpdate(EffNode *node);
 void dds3EffectReset(EffNode *node);
 void dds3EffectSetScale(EffNode *node, f32 factor);
 EffNodeConditionResult effInvokeNodeConditionOrAcceptDefault(EffNode *node);

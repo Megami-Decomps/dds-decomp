@@ -2732,7 +2732,7 @@ void effPcpUpdateOrbitingAimNode(EffPCPSpanWork *work) {
             t = 1.0f;
         }
         effSetNodeParameterValue((struct EffNode *)node, effColorBlend(work->color & 0xFFFFFF, work->color, t));
-        dds3EffectDraw((struct EffNode *)node);
+        dds3EffectDispatchUpdate((struct EffNode *)node);
     }
     work->frame++;
 }
@@ -2855,7 +2855,7 @@ void effPCPAgiraoFireDraw(EffPCPTripleWork *work) {
                 if (frame >= (s32)((u32)work->head.handleDelay[handleIndex] + (u32)start)) {
                     effSetNodeParameterValue((struct EffNode *)work->handles[group * 7 + handleIndex], color);
                     effCopyVectorToNodeInstance((struct EffNode *)work->handles[group * 7 + handleIndex], position);
-                    dds3EffectDraw((struct EffNode *)work->handles[group * 7 + handleIndex]);
+                    dds3EffectDispatchUpdate((struct EffNode *)work->handles[group * 7 + handleIndex]);
                 }
             }
         }

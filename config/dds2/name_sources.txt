@@ -1434,7 +1434,7 @@
 0x001575C8	dds3EffectPCFGetState	inferred	SMT3HD name via SLUS_209.11 0x0015AAC8, shared-hash-in-run; was effParamNodeConditionAlwaysTrue
 0x001575D0	dds3EffectCreate	inferred	SMT3HD name via SLUS_209.11 0x0015AAD0, reloc-identical; was effCreateNode
 0x00157658	dds3EffectDelete	inferred	SMT3HD name via SLUS_209.11 0x0015AB58, reloc-identical; was effDestroyNode
-0x001576A0	dds3EffectDraw	inferred	SMT3HD name via SLUS_209.11 0x0015ABA0, shared-hash-in-run; was effUpdateNode
+0x001576A0	dds3EffectDispatchUpdate	inferred	Dispatches EffMajorTable[node->type].update for the live effect node; callers use it in per-frame updates. Replaces the shared-hash name dds3EffectDraw (older alias effUpdateNode).
 0x001576D8	dds3EffectReset	inferred	SMT3HD name via SLUS_209.11 0x0015ABD8, shared-hash-in-run; was effRestartNodeInstance
 0x00157710	dds3EffectSetScale	inferred	SMT3HD name via SLUS_209.11 0x0015AC10, shared-hash-in-run; was effApplyNodeScale
 0x00157748	effInvokeNodeConditionOrAcceptDefault	inferred	Accepts a missing optional effect-node condition callback or returns its result. [names_reviewed17.tsv]
