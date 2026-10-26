@@ -16677,6 +16677,10 @@ u32 effDestroyPayload(EffPayload *payload) {
     return 1;
 }
 
+/* A slot set either owns its texture-reference table or borrows its parent's. */
+#define EFF_SLOT_TEXTURE_REFERENCES_OWNED 0
+#define EFF_SLOT_TEXTURE_REFERENCES_BORROWED 1
+
 EffectSlotSet *effCreateResourceSlotSetFromAllocation(struct sdfMemHandle_t *resourceAllocation, u32 keepAllocation) {
     EffectSlotSet *set;
     u8 *resource;
@@ -16686,7 +16690,7 @@ EffectSlotSet *effCreateResourceSlotSetFromAllocation(struct sdfMemHandle_t *res
 
     set = (EffectSlotSet *)sdfChipAllocDirect(0x30);
     memset(set, 0, 0x30);
-    set->sharesTextureReferences = 0;
+    set->sharesTextureReferences = EFF_SLOT_TEXTURE_REFERENCES_OWNED;
     set->sourceAllocation = keepAllocation != 0 ? resourceAllocation : 0;
     resource = (u8 *)sdfMemLock(resourceAllocation);
     set->textureCount = ((EffPackedResourceHeader *)resource)->textureCount;
@@ -16716,7 +16720,7 @@ EffectSlotSet *effCreateResourceSlotSetFromAllocation(struct sdfMemHandle_t *res
 EffectSlotSet *effCreateResourceSlotSet(EffectSlotSet *source, u32 slot, u32 count) {
     EffectSlotSet *effect = (EffectSlotSet *)sdfChipAllocDirect(0x30);
     u32 index = 0;
-    effect->sharesTextureReferences = 1;
+    effect->sharesTextureReferences = EFF_SLOT_TEXTURE_REFERENCES_BORROWED;
     {
         u32 mode = source->textureCount;
         sdfTexHandle_t **textureReferences = source->textureReferences;
@@ -16744,7 +16748,7 @@ u32 effDestroyResourceSlotSet(EffectSlotSet *set) {
     if (set->sourceAllocation != 0) {
         sdfMemFreeDirect(set->sourceAllocation);
     }
-    if (set->sharesTextureReferences == 0) {
+    if (set->sharesTextureReferences == EFF_SLOT_TEXTURE_REFERENCES_OWNED) {
         effReleaseTextureHandlesAndResetSlots(set);
         sdfMemFreeDirect(set->textureAllocation);
     }
@@ -16753,6 +16757,9 @@ u32 effDestroyResourceSlotSet(EffectSlotSet *set) {
     sdfChipFreeDirect(set);
     return 1;
 }
+
+#undef EFF_SLOT_TEXTURE_REFERENCES_OWNED
+#undef EFF_SLOT_TEXTURE_REFERENCES_BORROWED
 
 u32 effSetSlotResourceAndFlags(EffTimedState *effect, EffMappedRecord *resource, u32 flags) {
     effect->flags = flags;
