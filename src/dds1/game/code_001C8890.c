@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_action_reaction_motion.h"
 #include "sdf_vu0.h"
 #include "btl_actor_status_table_api.h"
 #include "btl_special_ability.h"
@@ -1198,9 +1199,9 @@ void btlScheduleAttackActionTasks(BtlTask *action) {
             btlStartTask(groupTask);
         }
         for (operandIndex = 0, operandDelay = 0, effectFrameOffset = 0; operandIndex < operandCount; operandIndex++) {
-            s32 selection;
+            BtlActionReactionMotionIndex selection;
             if (btlActionEntryIsEmpty(action->indexWork.skillId, group, &group->entries[operandIndex]) != 0) {
-                selection = -1;
+                selection = BTL_ACTION_REACTION_MOTION_NONE;
                 categoryKind = 4;
                 extraKind = 1;
             } else {
@@ -1634,10 +1635,10 @@ void btlScheduleLinkageActionTasks(BtlTask *action) {
                 btlStartTask(groupTask);
             }
             for (operandIndex = 0, operandDelay = 0, effectFrameOffset = 0; operandIndex < operandCount; operandIndex++) {
-                s32 selection;
+                BtlActionReactionMotionIndex selection;
                 BtlRuntimeTask *operandTask;
                 if (btlActionEntryIsEmpty(skill, group, &group->entries[operandIndex]) != 0) {
-                    selection = -1;
+                    selection = BTL_ACTION_REACTION_MOTION_NONE;
                     categoryKind = 4;
                     extraKind = 1;
                 } else {

@@ -5,6 +5,7 @@
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "common.h"
+#include "btl_action_reaction_motion.h"
 #include "btl_command_target_policy.h"
 #include "btl_command_target_eligibility.h"
 #include "dds3_object_flags.h"
@@ -393,8 +394,8 @@ u32 btlClassifyActionOperand(BtlUnit *actor, BattleIndexWork *work) {
     }
 }
 
-s32 btlClassifyActionResult(BtlUnit *actor, u32 actionKind, s32 press, u32 elementMask, s32 hitCount, u8 groupInactive, s32 commandIndex) {
-    s32 resultCode;
+BtlActionReactionMotionIndex btlClassifyActionResult(BtlUnit *actor, u32 actionKind, s32 press, u32 elementMask, s32 hitCount, u8 groupInactive, s32 commandIndex) {
+    BtlActionReactionMotionIndex motionIndex;
 
     btlGetEntryFlagsUnlessDisabled(&actor->partyRecord);
     if (commandIndex >= 0) {
@@ -403,29 +404,29 @@ s32 btlClassifyActionResult(BtlUnit *actor, u32 actionKind, s32 press, u32 eleme
         case 2:
         case 9:
         case 10:
-            return -1;
+            return BTL_ACTION_REACTION_MOTION_NONE;
         }
     }
     if ((datCommandRecords[commandIndex].attribute.bits & 0x400000FF) == 0x40000002) {
-        return -1;
+        return BTL_ACTION_REACTION_MOTION_NONE;
     }
     if (actionKind & 0x50004) {
-        return -1;
+        return BTL_ACTION_REACTION_MOTION_NONE;
     }
     if (elementMask & 0xE0001) {
-        resultCode = -1;
+        motionIndex = BTL_ACTION_REACTION_MOTION_NONE;
     } else if ((actor->status.flags & 0x200) != 0 && press == 2 && hitCount == 1 && groupInactive == 0) {
-        resultCode = 0x12;
+        motionIndex = 0x12;
     } else {
-        resultCode = 1;
+        motionIndex = 1;
     }
     if (groupInactive != 0 && (btlUnitStatusPair(actor) & 0x4000000200) == 0x200) {
-        resultCode = 0xB;
+        motionIndex = 0xB;
     }
     if ((actionKind & 0x20001) == 0) {
-        resultCode = -1;
+        motionIndex = BTL_ACTION_REACTION_MOTION_NONE;
     }
-    return resultCode;
+    return motionIndex;
 }
 
 /* Test whether the operand is empty, subject to command-category and slot-kind exclusions. */

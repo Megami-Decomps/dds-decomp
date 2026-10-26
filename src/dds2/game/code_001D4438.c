@@ -8,6 +8,7 @@
 #include "eff_random.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_action_reaction_motion.h"
 #include "dds3_object_flags.h"
 #include "sdf_vu0.h"
 #include "btl_set_actor_effect_parameter_api.h"
@@ -1669,9 +1670,9 @@ void btlScheduleAttackActionTasks(ActionStateLink *action) {
             btlStartTask(groupTask);
         }
         for (operandIndex = 0, operandDelay = 0, effectFrameOffset = 0; operandIndex < operandCount; operandIndex++) {
-            s32 selection;
+            BtlActionReactionMotionIndex selection;
             if (btlActionEntryIsEmpty(action->indexWork.skillId, group, &group->entries[operandIndex]) != 0) {
-                selection = -1;
+                selection = BTL_ACTION_REACTION_MOTION_NONE;
                 categoryKind = group->kind == 4 ? 4 : 0;
                 extraKind = 1;
             } else {
@@ -2205,10 +2206,10 @@ void btlScheduleLinkageActionTasks(ActionStateLink *action) {
                 btlStartTask(groupTask);
             }
             for (operandIndex = 0, operandDelay = 0, effectFrameOffset = 0; operandIndex < operandCount; operandIndex++ ) {
-                s32 selection;
+                BtlActionReactionMotionIndex selection;
                 BtlRuntimeTask *operandTask;
                 if (btlActionEntryIsEmpty(skill, group, &group->entries[operandIndex]) != 0) {
-                    selection = -1;
+                    selection = BTL_ACTION_REACTION_MOTION_NONE;
                     if (datCommandRecords[skill].hpType == 8 || datCommandRecords[skill].hpType == 10 || datCommandRecords[skill].effectType == 2 || datCommandRecords[skill].unk30 == 4) categoryKind = 0;
                     else categoryKind = group->kind == 4 ? 4 : 0;
                     extraKind = 1;
