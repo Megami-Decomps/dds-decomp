@@ -6874,23 +6874,23 @@
 0x00289D00	fileReqGetSelectedSlot	inferred	Returns the signed selected save slot at request offset 0x13, used to format save directory names.
 0x00289D28	fileReqSetSelectedSlot	inferred	Stores the selected save slot byte at request offset 0x13.
 0x00289D50	sdfMcFuncFormat	inferred	SMT3HD name via SLUS_209.11 0x0029B380, shared-hash-in-run; was fileReqStartCardDetection
-0x00289D68	sdfMcFuncFormat1	inferred	SMT3HD name via SLUS_209.11 0x0029B398, reloc-identical; was mcPollStrictSuccess
+0x00289D68	sdfMcPollFormat	inferred	SMT3HD function via SLUS_209.11 0x0029B398, reloc-identical; was mcPollStrictSuccess; locally renamed from sdfMcFuncFormat1 because it performs one nonblocking sceMcSync poll
 0x00289DA8	sdfMcFuncChdir	inferred	SMT3HD name via SLUS_209.11 0x0029B3D8, reloc-identical; was mcChangeCurrentDirectory
-0x00289DC8	sdfMcFuncChdir1	inferred	SMT3HD name via SLUS_209.11 0x0029B3F8, shared-hash-in-run; was mcPollSyncResult
+0x00289DC8	sdfMcPollChdir	inferred	SMT3HD function via SLUS_209.11 0x0029B3F8, shared-hash-in-run; was mcPollSyncResult; locally renamed from sdfMcFuncChdir1 because it performs one nonblocking sceMcSync poll
 0x00289E18	sdfMcFuncMkdir	inferred	SMT3HD name via SLUS_209.11 0x0029B448, shared-hash-in-run; was mcMakeDirectory
-0x00289E38	sdfMcFuncMkdir1	inferred	SMT3HD name via SLUS_209.11 0x0029B468, reloc-identical; was mcPollWithExtendedErrors
+0x00289E38	sdfMcPollMkdir	inferred	SMT3HD function via SLUS_209.11 0x0029B468, reloc-identical; was mcPollWithExtendedErrors; locally renamed from sdfMcFuncMkdir1 because it performs one nonblocking sceMcSync poll
 0x00289E80	sdfMcFuncGetDir	inferred	SMT3HD name via SLUS_209.11 0x0029B4B0, reloc-identical; was mcReadDirectoryEntries
-0x00289EB0	sdfMcFuncGetDir1	inferred	SMT3HD name via SLUS_209.11 0x0029B4E0, shared-hash-in-run; was mcPollNonnegativeResult
+0x00289EB0	sdfMcPollGetDir	inferred	SMT3HD function via SLUS_209.11 0x0029B4E0, shared-hash-in-run; was mcPollNonnegativeResult; locally renamed from sdfMcFuncGetDir1 because it performs one nonblocking sceMcSync poll
 0x00289F10	sdfMcFuncDelete	inferred	SMT3HD name via SLUS_209.11 0x0029B540, shared-hash-in-run; was mcDeleteFilePath
-0x00289F30	sdfMcFuncDelete1	inferred	SMT3HD name via SLUS_209.11 0x0029B560, shared-hash-in-run; was mcPollNormalizedCommandStatus
+0x00289F30	sdfMcPollDelete	inferred	SMT3HD function via SLUS_209.11 0x0029B560, shared-hash-in-run; was mcPollNormalizedCommandStatus; locally renamed from sdfMcFuncDelete1 because it performs one nonblocking sceMcSync poll
 0x00289F80	sdfMcFuncOpen	inferred	SMT3HD name via SLUS_209.11 0x0029B5B0, reloc-identical; was mcOpenFilePath
-0x00289FA8	sdfMcFuncOpen1	inferred	SMT3HD name via SLUS_209.11 0x0029B5D8, shared-hash-in-run; was mcPollCommandStatusWithResult
+0x00289FA8	sdfMcPollOpen	inferred	SMT3HD function via SLUS_209.11 0x0029B5D8, shared-hash-in-run; was mcPollCommandStatusWithResult; locally renamed from sdfMcFuncOpen1 because it performs one nonblocking sceMcSync poll
 0x0028A008	sdfMcFuncClose	inferred	SMT3HD name via SLUS_209.11 0x0029B638, shared-hash-in-run; was mcCloseOpenFile
-0x0028A020	sdfMcFuncClose1	inferred	SMT3HD name via SLUS_209.11 0x0029B650, shared-hash-in-run; was mcPollZeroCommandResult
+0x0028A020	sdfMcPollClose	inferred	SMT3HD function via SLUS_209.11 0x0029B650, shared-hash-in-run; was mcPollZeroCommandResult; locally renamed from sdfMcFuncClose1 because it performs one nonblocking sceMcSync poll
 0x0028A070	sdfMcFuncRead	inferred	SMT3HD name via SLUS_209.11 0x0029B6A0, shared-hash-in-run; was mcReadOpenFile
-0x0028A088	sdfMcFuncRead1	inferred	SMT3HD name via SLUS_209.11 0x0029B6B8, shared-hash-in-run; was mcPollCompletionStatus
+0x0028A088	sdfMcPollRead	inferred	SMT3HD function via SLUS_209.11 0x0029B6B8, shared-hash-in-run; was mcPollCompletionStatus; locally renamed from sdfMcFuncRead1 because it performs one nonblocking sceMcSync poll
 0x0028A0E0	sdfMcFuncWrite	inferred	SMT3HD name via SLUS_209.11 0x0029B710, shared-hash-in-run; was mcBeginWrite
-0x0028A0F8	sdfMcFuncWrite1	inferred	SMT3HD name via SLUS_209.11 0x0029B728, shared-hash-in-run; was mcPollWriteCompletion
+0x0028A0F8	sdfMcPollWrite	inferred	SMT3HD function via SLUS_209.11 0x0029B728, shared-hash-in-run; was mcPollWriteCompletion; locally renamed from sdfMcFuncWrite1 because it performs one nonblocking sceMcSync poll
 0x0028A150	slKillLoadProcess	inferred	SMT3HD name via SLUS_209.11 0x0029B780, reloc-identical; was fileDestroyMenuTask
 0x0028A180	fileMenuTaskIsAlive	inferred	returns D_003BC7EC, the flag set while the file-menu task runs (cleared by slKillLoadProcess)
 0x0028A190	mcFormatSaveFilename	inferred	mc save/load memory-card workflow in game/code_0028A0E0.c

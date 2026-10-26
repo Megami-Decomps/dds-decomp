@@ -932,7 +932,7 @@ s32 slHeadLoad(void) {
 }
 
 s32 fileReadSlotPreviewBegin(void) {
-    McPollResult status = sdfMcFuncOpen1(&fileSaveFileDescriptor);
+    McPollResult status = sdfMcPollOpen(&fileSaveFileDescriptor);
 
     if (status == MC_POLL_PENDING) {
         return 0;
@@ -950,7 +950,7 @@ extern void sdfMcFuncClose(McFileDescriptor fileDescriptor);
 extern s32 fileStoreSlotHeader(void);
 
 s32 slHeadLoadProc_readFile(void) {
-    McPollResult r = sdfMcFuncRead1();
+    McPollResult r = sdfMcPollRead();
 
     if (r == MC_POLL_PENDING) {
         return 0;
@@ -967,7 +967,7 @@ s32 slHeadLoadProc_readFile(void) {
 extern FileSavePreviewRecord fileSavePreviewRecords[10];
 
 s32 fileStoreSlotHeader(void) {
-    McPollResult status = sdfMcFuncClose1();
+    McPollResult status = sdfMcPollClose();
 
     if (status == MC_POLL_PENDING) {
         return 0;
@@ -1523,7 +1523,7 @@ s32 fileBeginReadSlotIcon(void) {
 }
 
 s32 slChooseData_getCardInfo2(void) {
-    McPollResult t = sdfMcFuncChdir1();
+    McPollResult t = sdfMcPollChdir();
 
     if (t == MC_POLL_PENDING) {
         return 0;
@@ -1541,7 +1541,7 @@ s32 slChooseData_getCardInfo2(void) {
 
 s32 slChooseData_getCardInfo3(void) {
     McDirectoryEntryCount entryCount;
-    McPollResult status = sdfMcFuncGetDir1(&entryCount);
+    McPollResult status = sdfMcPollGetDir(&entryCount);
     if (status == MC_POLL_PENDING) {
         return 0;
     }
@@ -1633,7 +1633,7 @@ s32 fileBeginSaveSlotIconScan(void) {
 }
 
 s32 slChooseData_getCardInfo2_B(void) {
-    McPollResult t = sdfMcFuncChdir1();
+    McPollResult t = sdfMcPollChdir();
 
     if (t == MC_POLL_PENDING) {
         return 0;
@@ -1654,7 +1654,7 @@ s32 slChooseData_getCardInfo2_B(void) {
 
 s32 slChooseData_getCardInfo3_B(void) {
     McDirectoryEntryCount entryCount;
-    McPollResult status = sdfMcFuncGetDir1(&entryCount);
+    McPollResult status = sdfMcPollGetDir(&entryCount);
     if (status == MC_POLL_PENDING) {
         return 0;
     }
@@ -1743,7 +1743,7 @@ s32 slSaveData_chdir(void) {
 }
 
 s32 slSaveProc_Write_mkdir(void) {
-    McPollResult status = sdfMcFuncMkdir1();
+    McPollResult status = sdfMcPollMkdir();
     if (status == MC_POLL_PENDING) {
         return 0;
     }
@@ -1757,7 +1757,7 @@ s32 slSaveProc_Write_mkdir(void) {
 }
 
 s32 filePrepareMainBlobWrite(void) {
-    McPollResult t = sdfMcFuncChdir1();
+    McPollResult t = sdfMcPollChdir();
 
     if (t == MC_POLL_PENDING) {
         return 0;
@@ -1774,7 +1774,7 @@ s32 filePrepareMainBlobWrite(void) {
 }
 
 s32 fileBuildMainBlobAfterDelete(void) {
-    McPollResult t = sdfMcFuncDelete1();
+    McPollResult t = sdfMcPollDelete();
 
     if (t == MC_POLL_PENDING) {
         return 0;
@@ -1923,7 +1923,7 @@ extern s32 slSaveProc_writeFile(void);
 extern s32 slSaveProc_waitDataReady(void);
 
 s32 slSaveProc_openFile(void) {
-    McPollResult status = sdfMcFuncOpen1(&fileSaveFileDescriptor);
+    McPollResult status = sdfMcPollOpen(&fileSaveFileDescriptor);
 
     if (status == MC_POLL_PENDING) {
         return 0;
@@ -1947,7 +1947,7 @@ s32 slSaveProc_openFile(void) {
 extern s32 slSaveProc_closeFile(void);
 
 s32 slSaveProc_writeFile(void) {
-    McPollResult status = sdfMcFuncWrite1();
+    McPollResult status = sdfMcPollWrite();
 
     if (status == MC_POLL_PENDING) {
         return 0;
@@ -1966,7 +1966,7 @@ s32 slSaveProc_writeFile(void) {
 
 extern FileMenuContinuationCallback fileWriteContinuation;
 s32 slSaveProc_closeFile(void) {
-    McPollResult status = sdfMcFuncClose1();
+    McPollResult status = sdfMcPollClose();
 
     if (status == MC_POLL_PENDING) {
         return 0;
@@ -1991,7 +1991,7 @@ s32 slSaveProc_waitDataReady(void) {
 }
 
 s32 mcHandleDetectionResult(void) {
-    McPollResult status = sdfMcFuncFormat1();
+    McPollResult status = sdfMcPollFormat();
 
     if (status == MC_POLL_PENDING) {
         return 0;
@@ -2045,7 +2045,7 @@ s32 slLoadData(void) {
 }
 
 s32 slLoadProc_openFile(void) {
-    McPollResult status = sdfMcFuncOpen1(&fileSaveFileDescriptor);
+    McPollResult status = sdfMcPollOpen(&fileSaveFileDescriptor);
     u32 size;
 
     if (status == MC_POLL_PENDING) {
@@ -2065,7 +2065,7 @@ s32 slLoadProc_openFile(void) {
 
 extern s32 mcdHandleSaveSetupDone(void);
 s32 slLoadProc_readFile(void) {
-    McPollResult status = sdfMcFuncRead1();
+    McPollResult status = sdfMcPollRead();
 
     if (status == MC_POLL_PENDING) {
         return 0;
@@ -2085,7 +2085,7 @@ extern s8 D_00437CD5;
 void fileRestoreSlotFlagsToState(void);
 
 s32 mcdHandleSaveSetupDone(void) {
-    McPollResult status = sdfMcFuncClose1();
+    McPollResult status = sdfMcPollClose();
 
     if (status == MC_POLL_PENDING) {
         return 0;

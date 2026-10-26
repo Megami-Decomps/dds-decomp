@@ -18,14 +18,14 @@ typedef s32 McFileDescriptor;
 /* sceMcSync returns the entry count for a completed sceMcGetDir request. */
 typedef s32 McDirectoryEntryCount;
 
-McPollResult sdfMcFuncFormat1(void);
-McPollResult sdfMcFuncChdir1(void);
-McPollResult sdfMcFuncMkdir1(void);
-McPollResult sdfMcFuncGetDir1(McDirectoryEntryCount *entryCountOut);
-McPollResult sdfMcFuncDelete1(void);
-McPollResult sdfMcFuncOpen1(McFileDescriptor *fileDescriptorOut);
-McPollResult sdfMcFuncClose1(void);
-McPollResult sdfMcFuncRead1(void);
-McPollResult sdfMcFuncWrite1(void);
+McPollResult sdfMcPollFormat(void);
+McPollResult sdfMcPollChdir(void);
+McPollResult sdfMcPollMkdir(void);
+McPollResult sdfMcPollGetDir(McDirectoryEntryCount *entryCountOut);
+McPollResult sdfMcPollDelete(void);
+McPollResult sdfMcPollOpen(McFileDescriptor *fileDescriptorOut);
+McPollResult sdfMcPollClose(void);
+McPollResult sdfMcPollRead(void);
+McPollResult sdfMcPollWrite(void);
 
 #endif
