@@ -20,7 +20,6 @@
 #include "btl_model_record.h"
 #include "sdf_vu_rotation_axes.h"
 #include "btl_effect_active_api.h"
-#include "btl_task_state6_api.h"
 #include "btl_special_ability.h"
 #include "btl_effect_position.h"
 #include "eff_offset_if_owner_flag_clear.h"

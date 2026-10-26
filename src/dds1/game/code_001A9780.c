@@ -34,7 +34,7 @@ extern void itfSetTextDrawLimit(s32 limit);
 #include "dsp_channel.h"
 #include "mdl_flag_api.h"
 #include "btl_stat_effect_offsets.h"
-#include "btl_task_state6_api.h"
+#include "btl_command_panel_owner_linkage_skill_api.h"
 #include "btl_effect_active_api.h"
 #include "kwln_task_add_child.h"
 #include "btl_special_ability.h"
@@ -4803,17 +4803,18 @@ u8 btlHasUnmarkedLinkageSkill(BtlUnit *unit) {
 }
 
 /* The byte predicate result keeps retail's JAL + epilogue at 001B54AC. */
-s32 btlGetTaskState6(void) {
+BtlCommandPanelLinkageSkillAvailability
+btlCommandPanelOwnerHasUnmarkedLinkageSkill(void) {
     dds3ProcessID_t *task = dds3SearchProcessName(btlCommandPanelTaskNameRef);
     BattleSceneObject *scene;
-    s32 count;
+    BtlCommandPanelLinkageSkillAvailability availability;
 
     if (task == NULL) {
-        return 0;
+        return BTL_COMMAND_PANEL_LINKAGE_SKILL_UNAVAILABLE;
     }
     scene = (BattleSceneObject *)dds3GetProcessData(task);
-    count = btlHasUnmarkedLinkageSkill(scene->owner->unit);
-    return count;
+    availability = btlHasUnmarkedLinkageSkill(scene->owner->unit);
+    return availability;
 }
 
 
@@ -8713,7 +8714,8 @@ void btlOpenBattleCommandPanel(BtlTask *task) {
                 fclInitMessage(btlLinkageTutorialMessages);
                 fclStartMessage(2);
                 btlSetCommandPanelFadeMode(0, 8);
-            } else if (btlGetTaskState6() != 0) {
+            } else if (btlCommandPanelOwnerHasUnmarkedLinkageSkill() !=
+                       BTL_COMMAND_PANEL_LINKAGE_SKILL_UNAVAILABLE) {
                 scene->battleFlags &= ~0x100000;
                 handle = dds3StartProcess(D_003BB3D0, 0x2B0E, 1, 1,
                                        btlUpdateLinkageNoticeTask, btlFinishTrackedBattleTaskAndCloseWindow,
