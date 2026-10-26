@@ -13,6 +13,7 @@
 #include "dds3_slot1_handler_api.h"
 #include "dds3obj.h"
 #include "dds3_object_resource_state.h"
+#include "dds3_object_base_resource_view.h"
 #include "dds3_object_mode.h"
 #include "eff_object.h"
 #include "pcp_vu0.h"
@@ -137,7 +138,8 @@ WorldIndexNode *dds3ObjectBaseGetEventArray(dds3Basic_t *object) {
     return dds3GetBaseControlWorkData(object)->worldIndexNode;
 }
 
-/* Return the stored resource pointer; its type depends on resourceState. */
+/* Return a borrowed model-context or device-motion-root view; check
+ * resourceState before interpreting it. Owner release or rebuild invalidates it. */
 void *dds3ObjectBaseGetModelHandle(dds3Basic_t *object) {
     return dds3GetBaseControlWorkData(object)->resourceHandle;
 }
@@ -155,7 +157,7 @@ void dds3ObjectBaseFreeModelHandle(dds3Basic_t *object) {
         resourceState = base->resourceState;
         if (resourceState != DDS3_OBJECT_RESOURCE_DEV_MOTION) {
             if (resourceState == DDS3_OBJECT_RESOURCE_MODEL_CONTEXT) {
-                mdlFree((dds3ModelHandle_t *)base->resourceHandle);
+                mdlFree(dds3ObjectBaseBorrowModelContext(base));
                 data = object->data;
                 if (data->transitionWork != NULL) {
                     evtDeleteUnitHandle(data->transitionWork);
@@ -163,7 +165,7 @@ void dds3ObjectBaseFreeModelHandle(dds3Basic_t *object) {
                 }
             }
         } else {
-            sdfModelRootFree((sdfModelRootNode_t *)base->resourceHandle,
+            sdfModelRootFree(dds3ObjectBaseBorrowDeviceMotionRoot(base),
                              SDF_MODEL_ROOT_FREE_DEFERRED,
                              SDF_MODEL_MATERIAL_RESOURCES_RELEASE_DEFERRED);
             sdfMotionCtrlrFree(base->motion);
@@ -281,7 +283,7 @@ void dds3RebuildObjectModelContext(dds3Basic_t *object, s32 resourceGroup, s32 r
     SDF_VU0_LOADVECTOR(object->inner->position);
     SDF_VU0_VECTOR_W_SET_ONE();
     mdlSetPosition(model);
-    base->resourceHandle = model;
+    dds3ObjectBaseSetModelContext(base, model);
     object->inner->radius = model->objectRadius;
     base->resourceState = DDS3_OBJECT_RESOURCE_MODEL_CONTEXT;
     base->unk44 = 0;
@@ -311,7 +313,7 @@ void dds3ObjectBaseMakeMatter(dds3Basic_t *object) {
     sdfModelEvalTm2(model, 0);
     sdfModelEvalTm2(model, 1);
     base->resourceState = DDS3_OBJECT_RESOURCE_DEV_MOTION;
-    base->resourceHandle = model;
+    dds3ObjectBaseSetDeviceMotionRoot(base, model);
     base->motion = motion;
     base->weight = 1.0f;
     base->mode = 0;
@@ -397,7 +399,7 @@ void dds3DrawObjectWithGradientOverlay(dds3Basic_t *object) {
     evtSubmitPrimaryGsTest(1, 1, 0x80, 2, 0, 0, 1, 1);
     evtSubmitPrimaryFramePacket();
 
-    context = (dds3ModelHandle_t *)base->resourceHandle;
+    context = dds3ObjectBaseBorrowModelContext(base);
     inner = context->inner;
     inner->flags |= 0x20;
     mdlLink(context, kwlnSceneSurfaceSets[9]);

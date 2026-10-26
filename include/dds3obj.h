@@ -19,7 +19,8 @@ typedef struct dds3ObjectBaseControlWorkData_t {
     u32 flags;
     struct WorldIndexNode *worldIndexNode;
     u32 resourceState;
-    void *resourceHandle; /* dds3ModelHandle_t or sdfModelRootNode_t pointer according to resourceState. */
+    void *resourceHandle; /* Owner-held model context/device-motion root;
+                           * borrowed views expire on release or rebuild. */
     void *slots[8];
     void *extData;
     struct sdfModelRootNode_t *devSlot;

@@ -11,6 +11,7 @@
 #include "eff_object_dispatch_api.h"
 #include "pcp_vu0.h"
 #include "dds3obj.h"
+#include "dds3_object_base_resource_view.h"
 #include "dds3_object_resource_state.h"
 #include "dds3_scene_membership.h"
 #include "eff.h"
@@ -856,7 +857,7 @@ void dds3EffectObjectBasicGetObjectIndex(dds3Basic_t *obj) {
             if (objectBase->resourceState != DDS3_OBJECT_RESOURCE_MODEL_CONTEXT) {
                 return;
             }
-            model = objectBase->resourceHandle;
+            model = dds3ObjectBaseBorrowModelContext(objectBase);
             sdfModelGetMarkPosMatrix(model->inner, data->entryId);
         }
     }
