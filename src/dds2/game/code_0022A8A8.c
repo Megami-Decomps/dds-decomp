@@ -17,7 +17,7 @@ extern void btlStartSkillEventTask(u32);
 
 extern char btlPrimaryScriptResourceName[];
 
-extern dds3ProcessID_t *scrStartScript2(s32 priority, BfFlw0Header *script, ScrProcedureIndex procedureIndex);
+extern dds3ProcessID_t *scrStartScript2(s32 priority, const BfFlw0Header *script, ScrProcedureIndex procedureIndex);
 
 extern char btlSecondaryScriptResourceName[];
 
@@ -28,7 +28,7 @@ s32 btlFindScriptResource(char *name) {
         return -1;
     }
     sprintf(path, "e%03d_%s", battle->eventTaskId, name);
-    return scrSearchProcedureName((BfFlw0Header *)battle->scriptHandle, path);
+    return scrSearchProcedureName((const BfFlw0Header *)battle->scriptHandle, path);
 }
 
 /* Start the requested skill script as a child of the battle owner task.
@@ -40,7 +40,7 @@ void btlStartSkillEventTask(u32 skill) {
         return;
     }
     taskId = scrStartScript2((s32)battle->scriptOwner->priority - 1,
-                            (BfFlw0Header *)battle->scriptHandle, skill);
+                            (const BfFlw0Header *)battle->scriptHandle, skill);
     scrSetUserData(taskId, NULL);
     dds3LinkProcess(battle->scriptOwner, taskId);
     battle->scriptTask = taskId;
@@ -87,7 +87,7 @@ void btlStartPrimaryScriptTask(void) {
         return;
     }
     taskId = scrStartScript2((s32)battle->scriptOwner->priority - 1,
-                            (BfFlw0Header *)battle->scriptHandle, scriptId);
+                            (const BfFlw0Header *)battle->scriptHandle, scriptId);
     scrSetUserData(taskId, NULL);
     dds3LinkProcess(battle->scriptOwner, taskId);
     battle->scriptTask = taskId;
@@ -126,7 +126,7 @@ void btlStartSecondaryScriptTask(void) {
         return;
     }
     taskId = scrStartScript2((s32)battle->scriptOwner->priority - 1,
-                            (BfFlw0Header *)battle->scriptHandle, scriptId);
+                            (const BfFlw0Header *)battle->scriptHandle, scriptId);
     scrSetUserData(taskId, NULL);
     dds3LinkProcess(battle->scriptOwner, taskId);
     battle->scriptTask = taskId;

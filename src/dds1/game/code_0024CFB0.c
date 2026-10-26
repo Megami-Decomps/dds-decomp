@@ -401,7 +401,7 @@ s32 fclScriptForcedEnd(dds3ProcessID_t *task) {
     }
 }
 
-extern dds3ProcessID_t *scrStartScript2(s32 priority, BfFlw0Header *script, ScrProcedureIndex procedureIndex);
+extern dds3ProcessID_t *scrStartScript2(s32 priority, const BfFlw0Header *script, ScrProcedureIndex procedureIndex);
 
 /* Replace an optional task slot, clear active flag zero, and return the new task.
  * Creation is still attempted if no slot is supplied. */

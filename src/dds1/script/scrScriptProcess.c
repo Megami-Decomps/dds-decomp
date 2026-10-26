@@ -65,7 +65,7 @@ scrProcessWork_s *scrCreateProcessWithDefaultOption(const char *path)
     return scrLoadScriptFile(path, 0);
 }
 
-dds3ProcessID_t *scrStartScript2(s32 priority, BfFlw0Header *script, ScrProcedureIndex procedureIndex)
+dds3ProcessID_t *scrStartScript2(s32 priority, const BfFlw0Header *script, ScrProcedureIndex procedureIndex)
 {
     return scrStartScriptProcess(priority, fldFlowParse(script, procedureIndex));
 }
@@ -82,8 +82,8 @@ dds3ProcessID_t *scrRunScriptEx(u32 priority, const BfFlw0Header *header,
     return scrStartScriptProcess(priority, bfContextCreate(header, procedureSection, procedures, labels, instructions, auxiliaryData, strings, procedureIndex));
 }
 
-scrProcessWork_s *scrCreateProcessAtFirstProcedure(BfFlw0Header *header, ScrSection *procedureSection,
-    ScrLabel *procedures, ScrLabel *labels, const ScrInstr *instructions,
+scrProcessWork_s *scrCreateProcessAtFirstProcedure(const BfFlw0Header *header, const ScrSection *procedureSection,
+    const ScrLabel *procedures, const ScrLabel *labels, const ScrInstr *instructions,
     struct ItfMesSub *auxiliaryData, const char *strings)
 {
     return bfContextCreate(header, procedureSection, procedures, labels, instructions, auxiliaryData, strings, 0);

@@ -208,14 +208,14 @@ extern s32 TestMsgMngC_Process(dds3ProcessID_t *task);
 
 extern u8 D_003B4A28[];
 
-extern dds3ProcessID_t *scrStartScript2(s32 priority, BfFlw0Header *script, ScrProcedureIndex procedureIndex);
+extern dds3ProcessID_t *scrStartScript2(s32 priority, const BfFlw0Header *script, ScrProcedureIndex procedureIndex);
 
 void TestMsgReloadTexture(void);
 
 void itfDebugMesMngInitialize(void) {
     D_00435CBC = 0x80FFFFFF;
     TestMsgReloadTexture();
-    itfMesMngSetKutiCallback(((scrProcessWork_s *)dds3GetProcessData(scrStartScript2(0x3E8, (BfFlw0Header *)D_003B4A28, 0)))->messageWindowIndex, itfDebugPrintMark);
+    itfMesMngSetKutiCallback(((scrProcessWork_s *)dds3GetProcessData(scrStartScript2(0x3E8, (const BfFlw0Header *)D_003B4A28, 0)))->messageWindowIndex, itfDebugPrintMark);
     dds3StartProcess("TestMsgMngC", 0x3EF, 0, 0, TestMsgMngC_Process, 0, 0);
     dds3StartProcess("TestMsgMngD", 0x2AFE, 0, 0, TestMsgMngD_Process, 0, 0);
 }
