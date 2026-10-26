@@ -17,6 +17,7 @@
 #include "fld_scene_ready_api.h"
 #include "fld_area_resource_request_reuse_api.h"
 #include "fld_scene_record_api.h"
+#include "fld_scene_object_key_result.h"
 #include "fld_light_set.h"
 #include "fld_sky_buffer.h"
 #include "fld_sky_gradient_record.h"
@@ -1050,7 +1051,6 @@ void fldCreateResourceScriptObjects(void) {
 
 extern u8 fldTestMapSlotValueFlag(s32 mapId, u32 slotIndex, s32 bit);
 extern u8 fldTestRoomModeFlag(s32 mapId, u32 slotIndex, s32 bit);
-extern s32 fldCommand_SEARCH_ID(const char *);
 extern void dds3ObjectBaseCreateMover(dds3Basic_t *);
 extern void dds3MoverBasicMakePath(dds3Basic_t *object);
 extern void evtPathRate(dds3Basic_t *object, f32 multiplier);
@@ -1068,7 +1068,7 @@ void fldMakeObjectBasic3(void) {
 
     for (roomFlagIndex = 1; roomFlagIndex < 16; roomFlagIndex++) {
         if (fldTestMapSlotValueFlag(fldGlobalBase.area, fldGlobalBase.floor + 1, roomFlagIndex)) {
-            s32 modelKey, collisionKey;
+            FldSceneObjectKeyResult modelKey, collisionKey;
             dds3Basic_t *object;
             dds3Basic_t *path;
             dds3ObjectBaseControlWorkData_t *data;
@@ -1080,7 +1080,7 @@ void fldMakeObjectBasic3(void) {
             sprintf(pathName, D_004130C8, roomFlagIndex);
             modelKey = fldCommand_SEARCH_ID(modelName);
             collisionKey = fldCommand_SEARCH_ID(collisionName);
-            if (modelKey == -1) {
+            if (modelKey == FLD_SCENE_OBJECT_KEY_NOT_FOUND) {
                 object = fldGetMatter_From_ModelRangeID(collisionKey);
             } else {
                 object = dds3SearchSceneBasic(world, modelKey, 6);
@@ -1105,7 +1105,7 @@ void fldMakeObjectBasic3(void) {
             dds3MoverBasicUpdate(slot);
         }
         if (fldTestRoomModeFlag(fldGlobalBase.area, fldGlobalBase.floor + 1, roomFlagIndex)) {
-            s32 key;
+            FldSceneObjectKeyResult key;
             dds3Basic_t *object;
 
             sprintf(modelName, D_004130A8, roomFlagIndex);

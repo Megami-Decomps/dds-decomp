@@ -24,6 +24,7 @@ extern void fldApplyCurrentTaskScene(const char *name);
 #include "fld_player_scene_state.h"
 #include "scr.h"
 #include "scr_string_parameter_api.h"
+#include "fld_scene_object_key_result.h"
 
 /* The setter returns the context it set the value in (scrTraceCode.c). */
 extern scrProcessWork_s *scrSetIntReturnValue(s32 retVal);
@@ -712,13 +713,13 @@ u32 fldCmdFreeDisplayObjects(void) {
     return 1;
 }
 
-s32 fldCommand_SEARCH_ID(const char *name) {
+FldSceneObjectKeyResult fldCommand_SEARCH_ID(const char *name) {
     dds3Basic_t *entry = dds3SceneBasicSearchName(dds3GetControlScene(), name);
     if (entry != 0) {
         return entry->key;
     }
     printf("field SEARCH_ID NotFound:[%s]\n", name);
-    return -1;
+    return FLD_SCENE_OBJECT_KEY_NOT_FOUND;
 }
 
 s32 fldCommand_GetHojiID(const char *name) {
@@ -1001,7 +1002,7 @@ s32 fldCommand_FLD_ANIME_ON(void) {
     s32 stage;
     const char *name;
     s32 i;
-    s32 searchId;
+    FldSceneObjectKeyResult searchId;
     void *obj;
 
     world = scrGetIntPara(0);
@@ -1023,7 +1024,7 @@ s32 fldCommand_FLD_ANIME_ON(void) {
     if (world == fldGlobalBase.area) {
         if (stage == fldGlobalBase.floor + 1) {
             searchId = fldCommand_SEARCH_ID(name);
-            if (searchId != -1) {
+            if (searchId != FLD_SCENE_OBJECT_KEY_NOT_FOUND) {
                 obj = dds3SearchSceneBasic(dds3GetControlScene(), searchId, 6);
                 switch (scrGetIntPara(3)) {
                 case 0:
@@ -1047,7 +1048,7 @@ s32 fldCommand_FLD_ANIME_ON(void) {
 
 s32 fldApplyRoomObjectModeZero(s32 world, s32 stage, char *roomName, s32 mode) {
     s32 i;
-    s32 searchId;
+    FldSceneObjectKeyResult searchId;
     void *obj;
 
     if (world == 0) {
@@ -1066,7 +1067,7 @@ s32 fldApplyRoomObjectModeZero(s32 world, s32 stage, char *roomName, s32 mode) {
     if (world == fldGlobalBase.area) {
         if (stage == fldGlobalBase.floor + 1) {
             searchId = fldCommand_SEARCH_ID(roomName);
-            if (searchId != -1) {
+            if (searchId != FLD_SCENE_OBJECT_KEY_NOT_FOUND) {
                 obj = dds3SearchSceneBasic(dds3GetControlScene(), searchId, 6);
                 switch (mode) {
                 case 0:
@@ -1093,7 +1094,7 @@ s32 fldCommand_FLD_ANIME_OFF(void) {
     s32 stage;
     const char *name;
     s32 i;
-    s32 searchId;
+    FldSceneObjectKeyResult searchId;
     void *obj;
 
     world = scrGetIntPara(0);
@@ -1115,7 +1116,7 @@ s32 fldCommand_FLD_ANIME_OFF(void) {
     if (world == fldGlobalBase.area) {
         if (stage == fldGlobalBase.floor + 1) {
             searchId = fldCommand_SEARCH_ID(name);
-            if (searchId != -1) {
+            if (searchId != FLD_SCENE_OBJECT_KEY_NOT_FOUND) {
                 obj = dds3SearchSceneBasic(dds3GetControlScene(), searchId, 6);
                 switch (scrGetIntPara(3)) {
                 case 0:
@@ -1136,7 +1137,7 @@ s32 fldCommand_FLD_ANIME_OFF(void) {
 
 s32 fldApplyRoomObjectModeOne(s32 world, s32 stage, char *roomName, s32 mode) {
     s32 i;
-    s32 searchId;
+    FldSceneObjectKeyResult searchId;
     void *obj;
 
     if (world == 0) {
@@ -1155,7 +1156,7 @@ s32 fldApplyRoomObjectModeOne(s32 world, s32 stage, char *roomName, s32 mode) {
     if (world == fldGlobalBase.area) {
         if (stage == fldGlobalBase.floor + 1) {
             searchId = fldCommand_SEARCH_ID(roomName);
-            if (searchId != -1) {
+            if (searchId != FLD_SCENE_OBJECT_KEY_NOT_FOUND) {
                 obj = dds3SearchSceneBasic(dds3GetControlScene(), searchId, 6);
                 switch (mode) {
                 case 0:

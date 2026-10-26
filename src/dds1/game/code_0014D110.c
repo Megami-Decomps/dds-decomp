@@ -21,6 +21,7 @@ extern void fldApplyCurrentTaskScene(const char *name);
 #include "scr.h"
 #include "scr_string_parameter_api.h"
 #include "scr_integer_return_value_api.h"
+#include "fld_scene_object_key_result.h"
 #include "fld_activation_entry.h"
 
 
@@ -540,13 +541,13 @@ u32 fldCmdFreeDisplayObjects(void) {
     return 1;
 }
 
-s32 fldCommand_SEARCH_ID(const char *name) {
+FldSceneObjectKeyResult fldCommand_SEARCH_ID(const char *name) {
     dds3Basic_t *entry = dds3SceneBasicSearchName(dds3GetControlScene(), name);
     if (entry != 0) {
         return entry->key;
     }
     printf("field SEARCH_ID NotFound:[%s]\n", name);
-    return -1;
+    return FLD_SCENE_OBJECT_KEY_NOT_FOUND;
 }
 
 extern char fldRoomNameSentinel[];
@@ -727,7 +728,7 @@ s32 fldCommand_FLD_ANIME_ON(void) {
     s32 stage;
     const char *name;
     void *object;
-    s32 id;
+    FldSceneObjectKeyResult id;
     s32 i;
 
     world = scrGetIntPara(0);
@@ -748,7 +749,7 @@ s32 fldCommand_FLD_ANIME_ON(void) {
     }
     if (world == fldGlobalBase.area && stage == fldGlobalBase.floor + 1) {
         id = fldCommand_SEARCH_ID(name);
-        if (id != -1) {
+        if (id != FLD_SCENE_OBJECT_KEY_NOT_FOUND) {
             object = dds3SearchSceneBasic(dds3GetControlScene(), id, 6);
             switch (scrGetIntPara(3)) {
             case 0:
@@ -774,7 +775,7 @@ s32 fldCommand_FLD_ANIME_OFF(void) {
     s32 stage;
     const char *name;
     void *object;
-    s32 id;
+    FldSceneObjectKeyResult id;
     s32 i;
 
     world = scrGetIntPara(0);
@@ -795,7 +796,7 @@ s32 fldCommand_FLD_ANIME_OFF(void) {
     }
     if (world == fldGlobalBase.area && stage == fldGlobalBase.floor + 1) {
         id = fldCommand_SEARCH_ID(name);
-        if (id != -1) {
+        if (id != FLD_SCENE_OBJECT_KEY_NOT_FOUND) {
             object = dds3SearchSceneBasic(dds3GetControlScene(), id, 6);
             switch (scrGetIntPara(3)) {
             case 0:
