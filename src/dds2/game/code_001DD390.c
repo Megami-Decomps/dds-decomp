@@ -170,7 +170,7 @@ extern char D_00417B30[];
 
 extern u8 btlCheckModelAssetByMode(u8 *, u32, u32);
 
-extern void btlSetCameraCommandMode(u32, ActionStateLink *, BtlUnit *, BtlUnit *, BtlActionCode);
+extern void btlSetCameraCommandMode(BtlCameraModeIndex, ActionStateLink *, BtlUnit *, BtlUnit *, BtlActionCode);
 
 extern void btlSetEffectCameraKeys(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
@@ -5402,33 +5402,33 @@ extern BtlCameraModeDefinition btlCameraModeDefinitions[];
 extern void mdlPropagateObjectFlag(void);
 extern void mdlSetListedObjectFlag(void);
 
-void btlSetCameraCommandMode(u32 kind, ActionStateLink *link, BtlUnit *valueA,
+void btlSetCameraCommandMode(BtlCameraModeIndex cameraMode, ActionStateLink *link, BtlUnit *valueA,
                              BtlUnit *valueB, BtlActionCode actionCode) {
     BtlState *scene = (BtlState *)btlGetRuntime();
     BtlCameraModeDefinition *definition;
-    u32 previousKind = scene->cameraCommand.status;
+    BtlCameraModeIndex previousCameraMode = scene->cameraCommand.status;
     u32 flags;
     s32 accepted;
-    if (previousKind == kind && btlCameraModeDefinitions[kind].allowRepeat == 0) {
+    if (previousCameraMode == cameraMode && btlCameraModeDefinitions[cameraMode].allowRepeat == 0) {
         return;
     }
-    if (kind == 6 && (scene->cameraCommand.flags & 0x800)) {
+    if (cameraMode == 6 && (scene->cameraCommand.flags & 0x800)) {
         return;
     }
     flags = scene->cameraCommand.flags;
     scene->cameraCommand.linkedA = valueA;
     scene->cameraCommand.linkedB = valueB;
-    scene->cameraCommand.actionKind = previousKind;
+    scene->cameraCommand.actionKind = previousCameraMode;
     scene->cameraCommand.actionCode = actionCode;
     scene->cameraCommand.link = link;
     scene->cameraCommand.focus = NULL;
-    scene->cameraCommand.status = kind;
-    if (kind != 10 || !(flags & 0x1000)) {
+    scene->cameraCommand.status = cameraMode;
+    if (cameraMode != 10 || !(flags & 0x1000)) {
         scene->cameraCommand.state = 0;
         scene->cameraCommand.flags = 0;
     }
     scene->cameraCommand.camera.fov = 0.6981317f; /* 40 degrees. */
-    if (kind - 9 < 2) {
+    if (cameraMode - 9 < 2) {
         scene->cameraCommand.flags |= flags & 0x40000;
     }
     if (link != NULL && link->indexWork.indices != NULL) {
@@ -5436,7 +5436,7 @@ void btlSetCameraCommandMode(u32 kind, ActionStateLink *link, BtlUnit *valueA,
     } else {
         btlClearIndexList(scene->cameraCommand.targetList);
     }
-    definition = &btlCameraModeDefinitions[kind];
+    definition = &btlCameraModeDefinitions[cameraMode];
     if (definition->initialize != NULL) {
         accepted = 1;
         if (scene->cameraStateChangePredicate != NULL) {
@@ -5446,7 +5446,7 @@ void btlSetCameraCommandMode(u32 kind, ActionStateLink *link, BtlUnit *valueA,
             definition->initialize(&scene->cameraCommand);
         }
     }
-    switch (kind) {
+    switch (cameraMode) {
     case 6:
     case 8:
     case 11:
@@ -5684,14 +5684,14 @@ s32 btlAdjustCameraDirectionForPlane(BtlCamState *state, f32 height) {
     return changed;
 }
 
-u32 btlExecuteCommandSoundTask(BtlCommandSoundTaskArgs *taskArgs) {
-    btlSetCameraCommandMode(taskArgs->mode, taskArgs->actor, taskArgs->unitA, taskArgs->unitB, taskArgs->actionCode);
+u32 btlExecuteCommandSoundTask(BtlCameraModeTaskArgs *taskArgs) {
+    btlSetCameraCommandMode(taskArgs->cameraMode, taskArgs->actor, taskArgs->unitA, taskArgs->unitB, taskArgs->actionCode);
     return 1;
 }
 
-BtlRuntimeTask *btlCreateCommandSoundTask(ActionStateLink *actor, s32 mode) {
+BtlRuntimeTask *btlCreateCommandSoundTask(ActionStateLink *actor, BtlCameraModeIndex cameraMode) {
     BtlRuntimeTask *task = btlAllocTask(0x14);
-    BtlCommandSoundTaskArgs *args;
+    BtlCameraModeTaskArgs *args;
 
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
@@ -5703,24 +5703,24 @@ BtlRuntimeTask *btlCreateCommandSoundTask(ActionStateLink *actor, s32 mode) {
     task->onStart = 0;
     args = btlGetTaskArguments(task);
     args->actor = actor;
-    args->mode = mode;
+    args->cameraMode = cameraMode;
     args->unitA = NULL;
     args->unitB = NULL;
     args->actionCode = 0;
     return task;
 }
 
-BtlRuntimeTask *btlCreateTargetedCommandSoundTask(ActionStateLink *actor, s32 mode, BtlActionCode actionCode) {
-    BtlRuntimeTask *task = btlCreateCommandSoundTask(actor, mode);
-    BtlCommandSoundTaskArgs *args = btlGetTaskArguments(task);
+BtlRuntimeTask *btlCreateTargetedCommandSoundTask(ActionStateLink *actor, BtlCameraModeIndex cameraMode, BtlActionCode actionCode) {
+    BtlRuntimeTask *task = btlCreateCommandSoundTask(actor, cameraMode);
+    BtlCameraModeTaskArgs *args = btlGetTaskArguments(task);
 
     args->actionCode = actionCode;
     return task;
 }
 
-BtlRuntimeTask *btlCreateCommandSoundWithArguments(ActionStateLink *actor, BtlUnit *unitA, BtlUnit *unitB, s32 mode, BtlActionCode actionCode) {
-    BtlRuntimeTask *task = btlCreateCommandSoundTask(actor, mode);
-    BtlCommandSoundTaskArgs *args = btlGetTaskArguments(task);
+BtlRuntimeTask *btlCreateCommandSoundWithArguments(ActionStateLink *actor, BtlUnit *unitA, BtlUnit *unitB, BtlCameraModeIndex cameraMode, BtlActionCode actionCode) {
+    BtlRuntimeTask *task = btlCreateCommandSoundTask(actor, cameraMode);
+    BtlCameraModeTaskArgs *args = btlGetTaskArguments(task);
 
     args->actionCode = actionCode;
     args->unitA = unitA;
@@ -5850,7 +5850,7 @@ extern f32 btlCameraLocalUpVector[4], btlCameraOutputRotation[4];
  * the command rotation, then push the pose into the world camera. */
 void btlUpdateBattleCameraFrame(void) {
     BtlState *scene = (BtlState *)btlGetRuntime();
-    u32 kind;
+    BtlCameraModeIndex cameraMode;
     dds3Basic_t *camera;
     CameraData *data;
     u32 flags;
@@ -5860,17 +5860,17 @@ void btlUpdateBattleCameraFrame(void) {
     if (!(scene->battleFlags & 0x10)) {
         return;
     }
-    kind = scene->cameraCommand.status;
-    if (kind == 0) {
+    cameraMode = scene->cameraCommand.status;
+    if (cameraMode == 0) {
         return;
     }
-    if (btlCameraModeDefinitions[kind].update != NULL && !(scene->cameraCommand.flags & 0x400)) {
+    if (btlCameraModeDefinitions[cameraMode].update != NULL && !(scene->cameraCommand.flags & 0x400)) {
         result = 1;
         if (scene->cameraUpdatePredicate != NULL) {
             result = scene->cameraUpdatePredicate(&scene->cameraCommand);
         }
         if (result != 0) {
-            btlCameraModeDefinitions[kind].update(&scene->cameraCommand);
+            btlCameraModeDefinitions[cameraMode].update(&scene->cameraCommand);
         }
     }
     camera = dds3GetActiveCameraSceneBasic(dds3GetActiveScene());

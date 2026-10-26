@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_camera_mode_index.h"
 #include "sdf_vu0.h"
 #include "btl_boss_data_api.h"
 #include "btl_effect_active_api.h"
@@ -66,7 +67,7 @@ extern BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);
 
 extern BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
 
-extern BtlRuntimeTask *btlCreateCommandSoundTask(ActionStateLink *, s32);
+extern BtlRuntimeTask *btlCreateCommandSoundTask(ActionStateLink *, BtlCameraModeIndex cameraMode);
 
 extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
 

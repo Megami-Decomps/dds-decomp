@@ -10,6 +10,7 @@
 #include "eff_random.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_camera_mode_index.h"
 #include "btl_skill_name_index.h"
 #include "btl_action_reaction_motion.h"
 #include "dds3_object_flags.h"
@@ -816,7 +817,7 @@ extern s32 sndHasActiveActor(void);
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
 extern BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);
 extern BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
-extern BtlRuntimeTask *btlCreateCommandSoundTask(ActionStateLink *, s32);
+extern BtlRuntimeTask *btlCreateCommandSoundTask(ActionStateLink *, BtlCameraModeIndex cameraMode);
 extern void btlSelectAndRunModeAiAction();
 extern s32 btlGetStatusActionEffectId();
 
@@ -1409,7 +1410,7 @@ extern BtlRuntimeTask *btlCreateImmediateCompletionTask(void);
 extern BtlRuntimeTask *btlCreateLinkedEffectTask(BtlUnit *owner, s32 value, u8 kind);
 extern BtlRuntimeTask *btlCreateRefreshEligibleActorsTask(void);
 extern BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
-extern BtlRuntimeTask *btlCreateTargetedCommandSoundTask(ActionStateLink *, s32 mode, BtlActionCode actionCode);
+extern BtlRuntimeTask *btlCreateTargetedCommandSoundTask(ActionStateLink *, BtlCameraModeIndex cameraMode, BtlActionCode actionCode);
 extern BtlRuntimeTask *btlCreateUpdateUnitEffectsTask(void);
 extern BtlRuntimeTask *btlCreateWaitUnitListIdleTask(u32 value);
 extern f32 btlGetActorStateScale(ActionStateLink *task);
@@ -1931,7 +1932,7 @@ s32 btlGetActionDefaultOrOverride(s32 skillIndex);
 BtlRuntimeTask *sndCreateAcquireTask(s32 value, s32 option);
 BtlRuntimeTask *btlCreateLinkageFormationTask(ActionStateLink *link,
         BtlUnit *firstActor, BtlUnit *secondActor, u32 skillId, u32 flags);
-BtlRuntimeTask *btlCreateCommandSoundWithArguments(ActionStateLink *, BtlUnit *, BtlUnit *, s32, BtlActionCode actionCode);
+BtlRuntimeTask *btlCreateCommandSoundWithArguments(ActionStateLink *, BtlUnit *, BtlUnit *, BtlCameraModeIndex cameraMode, BtlActionCode actionCode);
 s32 sndLookupResourceType(BtlUnit *actor, s32 resourceIndex);
 BtlRuntimeTask *sndCreateActorEffectTask(SoundResourceNode *source,
         BtlUnit *owner, u32 duration);

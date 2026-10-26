@@ -7,6 +7,7 @@
 #include "btl_effect_position.h"
 #include "kwln_sprite.h"
 #include "common.h"
+#include "btl_camera_mode_index.h"
 #include "sdf_vu0.h"
 #include "btl_aim_horizontal_direction_clamped_api.h"
 #include "btl_boss_debug_api.h"
@@ -160,7 +161,7 @@ typedef union BtlVec4 {
 extern struct BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
 
 struct BtlRuntimeTask;
-extern struct BtlRuntimeTask *btlCreateCommandSoundTask(BtlTask *, s32 variant);
+extern struct BtlRuntimeTask *btlCreateCommandSoundTask(BtlTask *, BtlCameraModeIndex cameraMode);
 
 extern BattleTrackedTaskWork *btlTrackedTaskHandles;
 

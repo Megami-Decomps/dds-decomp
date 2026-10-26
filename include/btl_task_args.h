@@ -2,6 +2,7 @@
 #define BTL_TASK_ARGS_H
 
 #include "btl_action_code.h"
+#include "btl_camera_mode_index.h"
 #include "common.h"
 
 struct BtlUnit;
@@ -74,9 +75,9 @@ typedef char BtlCameraKeyframesTaskArgsScaleOffsetCheck[
 typedef char BtlCameraKeyframesTaskArgsMotionParameterOffsetCheck[
     (u32)&((BtlCameraKeyframesTaskArgs *)0)->motionParameter == 0x40 ? 1 : -1];
 
-/* Command-sound tasks allocate this 0x14-byte camera-mode packet (task 0x27 in
- * DDS1, 0x2A in DDS2); targeted variants add category or linked units. */
-typedef struct BtlCommandSoundTaskArgs {
+/* Command-sound task variants carry this 0x14-byte camera-mode request
+ * (task 0x27 in DDS1, 0x2A in DDS2); targeted variants add linked units. */
+typedef struct BtlCameraModeTaskArgs {
 #ifdef VERSION_DDS1
     struct BtlTask *actor; /* 0x00: task owner passed to camera command mode. */
 #else
@@ -84,15 +85,15 @@ typedef struct BtlCommandSoundTaskArgs {
 #endif
     struct BtlUnit *unitA; /* 0x04: optional first linked camera unit. */
     struct BtlUnit *unitB; /* 0x08: optional second linked camera unit. */
-    u32 mode; /* 0x0C: camera-command mode. */
+    BtlCameraModeIndex cameraMode; /* 0x0C: camera-mode definition index. */
     BtlActionCode actionCode; /* 0x10: action-table selector forwarded to cameraCommand.actionCode. */
-} BtlCommandSoundTaskArgs;
-typedef char BtlCommandSoundTaskArgsSizeCheck[
-    sizeof(BtlCommandSoundTaskArgs) == 0x14 ? 1 : -1];
-typedef char BtlCommandSoundTaskArgsModeOffsetCheck[
-    (u32)&((BtlCommandSoundTaskArgs *)0)->mode == 0x0C ? 1 : -1];
-typedef char BtlCommandSoundTaskArgsActionCodeOffsetCheck[
-    (u32)&((BtlCommandSoundTaskArgs *)0)->actionCode == 0x10 ? 1 : -1];
+} BtlCameraModeTaskArgs;
+typedef char BtlCameraModeTaskArgsSizeCheck[
+    sizeof(BtlCameraModeTaskArgs) == 0x14 ? 1 : -1];
+typedef char BtlCameraModeTaskArgsIndexOffsetCheck[
+    (u32)&((BtlCameraModeTaskArgs *)0)->cameraMode == 0x0C ? 1 : -1];
+typedef char BtlCameraModeTaskArgsActionCodeOffsetCheck[
+    (u32)&((BtlCameraModeTaskArgs *)0)->actionCode == 0x10 ? 1 : -1];
 
 /* The linked-number task allocates the full 0x34-byte variant; the counter
  * task uses the common prefix and its 0x2C-byte counter variant. */

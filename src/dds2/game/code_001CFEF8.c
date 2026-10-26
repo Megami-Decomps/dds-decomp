@@ -459,7 +459,7 @@ s32 fldSceneStateRestoreDisplay(BtlState *scene) {
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
 extern BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);
 extern BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
-extern BtlRuntimeTask *btlCreateCommandSoundTask(ActionStateLink *, s32);
+extern BtlRuntimeTask *btlCreateCommandSoundTask(ActionStateLink *, BtlCameraModeIndex cameraMode);
 extern BtlRuntimeTask *btlCreateActorTransparencyTask(BtlUnit *);
 extern BtlRuntimeTask *btlCreateUnitFadeInTask(BtlUnit *, u32, u32);
 extern BtlRuntimeTask *sndCreateActorEffectTask(struct SoundResourceNode *, BtlUnit *, u32);

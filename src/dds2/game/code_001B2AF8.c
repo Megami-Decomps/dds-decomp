@@ -13,6 +13,7 @@
 #include "dsp_entry_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_camera_mode_index.h"
 #include "file_config_option_api.h"
 #include "btl_command_use_error.h"
 #include "itf_mes_entry_start_api.h"
@@ -5962,7 +5963,7 @@ return_zero:
 
 extern ActionStateLink *fldGetActiveSceneGroupValue(void);
 extern void dspRequestMessageWindowModeOne(void);
-extern BtlRuntimeTask *btlCreateCommandSoundTask(ActionStateLink *, s32);
+extern BtlRuntimeTask *btlCreateCommandSoundTask(ActionStateLink *, BtlCameraModeIndex cameraMode);
 extern u64 btlStartTask(BtlRuntimeTask *);
 extern void btlCopyUnitCurrentPosition(BtlUnit *, f32 *);
 extern void btlCopyUnitRotationQuaternion(BtlUnit *, f32 dst[4]);

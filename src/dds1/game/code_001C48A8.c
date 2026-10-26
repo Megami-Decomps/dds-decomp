@@ -443,7 +443,7 @@ s32 fldSceneStateRestoreDisplay(u8 *scene) {
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
 extern struct BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);
 extern BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
-extern BtlRuntimeTask *btlCreateCommandSoundTask(BtlTask *, s32);
+extern BtlRuntimeTask *btlCreateCommandSoundTask(BtlTask *, BtlCameraModeIndex cameraMode);
 extern BtlRuntimeTask *btlCreateModelLoadPollTask(BtlUnit *, u32, u32, s8);
 extern BtlRuntimeTask *btlCreateActorTransparencyTask(BtlUnit *);
 extern BtlRuntimeTask *btlCreateUnitDefeatFadeInTask(BtlUnit *, s32);

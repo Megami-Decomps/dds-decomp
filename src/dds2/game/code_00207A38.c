@@ -4,6 +4,7 @@
 #include "btl_effect_position.h"
 #include "kwln_sprite.h"
 #include "common.h"
+#include "btl_camera_mode_index.h"
 #include "sdf_vu0.h"
 #include "btl_aim_horizontal_direction_clamped_api.h"
 #include "btl_boss_debug_api.h"
@@ -130,7 +131,7 @@ extern BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);
 
 extern BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
 
-extern BtlRuntimeTask *btlCreateCommandSoundTask(ActionStateLink *, s32 mode);
+extern BtlRuntimeTask *btlCreateCommandSoundTask(ActionStateLink *, BtlCameraModeIndex cameraMode);
 
 extern u32 D_00436B00;
 
