@@ -61,8 +61,11 @@ enum FldEntryDialogDisposition {
     FLD_ENTRY_DIALOG_REQUEST = 1
 };
 
-#define FLD_POSITION_UPDATE_NONE 0
-#define FLD_POSITION_UPDATE_PENDING 1
+typedef s32 FldPositionUpdateState;
+enum FldPositionUpdateStateValue {
+    FLD_POSITION_UPDATE_NONE = 0,
+    FLD_POSITION_UPDATE_PENDING = 1
+};
 
 #define FLD_SCENE_ADVANCE_REQUEST_NONE 0
 #define FLD_SCENE_ADVANCE_REQUEST_PENDING 1
@@ -120,7 +123,7 @@ typedef struct FldAreaWork {
     FldAreaResourceRequestState resourceFlag; /* 0x78: local-map request state. */
     s32 resourceArea;
     s32 resourceFloor;
-    s32 positionPending; /* 0x84: corrected pose awaits application. */
+    FldPositionUpdateState positionPending; /* 0x84: corrected pose awaits application. */
     s32 selectedRoomIndex;
     s32 unk8C;
     s32 primaryMovingMatterIndex;   /* 0x90: -1 when no moving matter record is selected. */
