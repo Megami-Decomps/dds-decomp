@@ -310,8 +310,8 @@ s32 sndHasResourceFlagsOneOrEight(struct ActiveSoundNode *node);
 struct BtlRuntimeTask *sndCreateStationedSeTask(u32 soundId);
 struct BtlRuntimeTask *sndCreateEffectSourceTask(SoundResourceNode *source, struct BtlUnit *owner,
                                                 u64 waitForTaskHandle);
-effBTLCutHandle_t *func_00160958(SoundMixer *mixer, u16 kind, void *owner, s32 value);
-effBTLCutHandle_t *func_00168548(SoundMixer *mixer, u16 kind, void *owner, s32 value);
+effBTLCutHandle_t *effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind,
+                                             struct BtlUnit *owner, s32 value);
 void effBTLCutListRelease(effBTLCutHandle_t *effect);
 void effBTLCutDelete(effBTLCutHandle_t *effect);
 u32 effBTLCutGetFrame(effBTLCutHandle_t *effect);

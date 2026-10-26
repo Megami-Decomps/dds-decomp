@@ -87,7 +87,6 @@ extern s32 btlBuildEligibleTargetIndexList(BtlTask *action, BtlIndexList *target
 extern s32 btlGetSelectedCommandEffectTint(BtlUnit *unit);
 extern s32 btlGetUnitMotionDurationFrames(BtlUnit *unit, s32 motionIndex);
 extern void effBTLFieldColorResetFlags(void);
-extern effBTLCutHandle_t * effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, struct BtlUnit *owner, s32 value);
 extern void effSweepFloorModelList(void);
 extern void effTickSlotVolumeFade(void);
 extern void evtFreeStage(void);

@@ -1106,8 +1106,6 @@ struct BtlUnit;
 
 extern void effBTLCutSetScale(effBTLCutHandle_t *effect, f32 scale);
 
-extern effBTLCutHandle_t * effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, struct BtlUnit *owner, s32 value);
-
 /* Allocate the compact record, copy its init prefix, then attach the new effect. */
 effEveBEDCutHandle_t *effEveBEDCutCreate(SoundMixer *owner, u16 kind, const void *params) {
     const EffEventInit *init = (const EffEventInit *)params;
