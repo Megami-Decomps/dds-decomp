@@ -148,6 +148,12 @@ void mnuDrawScaledVariantSpriteByIndex(s32 x, s32 y, s32 z, s32 alpha, s32 place
 
 #define MNU_REQUIREMENT_MIN_COUNT 2
 
+typedef u32 MnuProfileRequirementFlags;
+enum {
+    MNU_PROFILE_REQUIREMENT_FLAG_HAS_AT_LEAST_THREE_IDS = 1,
+    MNU_PROFILE_REQUIREMENT_FLAG_RULE_PAIR_SET = 2
+};
+
 enum MnuMantraScenePhase {
     MNU_MANTRA_PHASE_INITIALIZE = 0,
     MNU_MANTRA_PHASE_WAIT_INITIAL_SHADE = 1,
@@ -721,10 +727,9 @@ s32 mnuDrawMenuFadePhase(s32 unused, MenuFadeWork *work) {
     return 0;
 }
 
-/* Summarize two requirement slots: bit 0 marks a qualifying list of at least three IDs;
- * bit 1 reflects the conjunction of the two native record flags. */
-u32 mnuGetProfileRequirementFlags(u16 profileId) {
-    u32 resultFlags = 0;
+/* Summarize the profile's qualifying ID list and paired requirement flags. */
+MnuProfileRequirementFlags mnuGetProfileRequirementFlags(u16 profileId) {
+    MnuProfileRequirementFlags resultFlags = 0;
     u8 *profileRecord = (u8 *)prfReqGetEntryRecord(profileId);
     s32 requirementWordIndex = 0;
     u8 *slotStatusBase = profileRecord + 0xC;
@@ -745,7 +750,7 @@ u32 mnuGetProfileRequirementFlags(u16 profileId) {
                 } while (*requirementCursor != 0);
             }
             if (requirementCount >= MNU_REQUIREMENT_MIN_COUNT) {
-                resultFlags |= 1;
+                resultFlags |= MNU_PROFILE_REQUIREMENT_FLAG_HAS_AT_LEAST_THREE_IDS;
             }
         }
         remainingSlots--;
@@ -753,7 +758,7 @@ u32 mnuGetProfileRequirementFlags(u16 profileId) {
         slotOffset += 0x14;
     } while (remainingSlots >= 0);
     if ((*(u32 *)(profileRecord + 4) & 4) != 0 && (*(u32 *)(profileRecord + 0x18) & 4) != 0) {
-        resultFlags |= 2;
+        resultFlags |= MNU_PROFILE_REQUIREMENT_FLAG_RULE_PAIR_SET;
     }
     return resultFlags;
 }
@@ -763,7 +768,8 @@ u8 *mnuGetProfileRequirementIds(u16 profileId) {
     s32 slotIndex = 0;
     PrfDds1RequirementRecord *profileRecord;
 
-    if ((mnuGetProfileRequirementFlags(profileId) & 1) != 0) {
+    if ((mnuGetProfileRequirementFlags(profileId) &
+         MNU_PROFILE_REQUIREMENT_FLAG_HAS_AT_LEAST_THREE_IDS) != 0) {
         profileRecord = prfReqGetEntryRecord(profileId);
         while (profileRecord->slots[slotIndex].operation != 1) {
             slotIndex++;
@@ -3146,7 +3152,7 @@ void itfDspDrawMarksB(s32 scale, s32 context) {
 
 extern u32 prfGetCapValue(u16);
 extern u32 ptyGetProfileRecordValue(struct datUnitWork_t *, u16);
-extern u32 mnuGetProfileRequirementFlags(u16);
+extern MnuProfileRequirementFlags mnuGetProfileRequirementFlags(u16);
 
 u32 mnuGetMantraDisplayFlags(MnuMantraGridEntry *entry, MnuProfileProgress *target) {
     u32 flags = 0;
@@ -3163,7 +3169,8 @@ u32 mnuGetMantraDisplayFlags(MnuMantraGridEntry *entry, MnuProfileProgress *targ
         flags |= MNU_MANTRA_DISPLAY_FLAG_ENTRY_STATE_1;
     } else if (entry->state == MNU_MANTRA_GRID_ENTRY_FIRST_CHECK_OR_SPECIAL_PROFILE) {
         flags |= MNU_MANTRA_DISPLAY_FLAG_ENTRY_STATE_2;
-    } else if ((mnuGetProfileRequirementFlags(entry->sceneId) & 2) != 0) {
+    } else if ((mnuGetProfileRequirementFlags(entry->sceneId) &
+                MNU_PROFILE_REQUIREMENT_FLAG_RULE_PAIR_SET) != 0) {
         flags |= MNU_MANTRA_DISPLAY_FLAG_REQUIREMENT_PAIR_SET_FALLBACK;
     } else {
         flags |= MNU_MANTRA_DISPLAY_FLAG_REQUIREMENT_PAIR_CLEAR_FALLBACK;
