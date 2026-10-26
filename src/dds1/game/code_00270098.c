@@ -5,6 +5,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
 #include "kwln.h"
+#include "kwln_task_runner.h"
 #include "kwln_task_create.h"
 #include "sdf.h"
 #include "sdf_sif_command.h"
@@ -52,7 +53,7 @@ extern MnuMovieList mnuMovieList;
 extern u64 *dds3PrimFrameRect(s32, s32, s32, s32, s32, u32, u32);
 
 
-extern s32 mnuMovieViewer();
+extern KwlnTaskUpdateResult mnuMovieViewer(dds3ProcessID_t *task);
 
 extern char D_003B1A78[]; /* "mnuMovieDraw" */
 
@@ -68,14 +69,14 @@ u8 mnuGetMoviePlaybackMode(void);
 
 void movieStop(void);
 
-s32 movieMan_Process(void) {
+KwlnTaskUpdateResult movieMan_Process(dds3ProcessID_t *task) {
     sdfAdvanceStreamPlayback(0x3c / dds3VblanksPerFrame);
-    return 0;
+    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 void dds3StartMovieManager(void) {
     sdfIpuInit();
-    dds3StartProcess("movieMan", 0x385, 1, 0, (TaskUpdate)movieMan_Process, 0, 0);
+    dds3StartProcess("movieMan", 0x385, 1, 0, movieMan_Process, 0, 0);
 }
 
 u32 mnuScriptRequestMovieByIndex(void) {
@@ -212,7 +213,7 @@ extern u16 D_003BD8E4;
 extern SdfPoolNode D_003255A8;
 extern void mnuStartMovieDrawTaskForResource(const char *fileName, SdfMovieDescriptor *descriptor);
 
-s32 mnuMovieViewer(void) {
+KwlnTaskUpdateResult mnuMovieViewer(dds3ProcessID_t *task) {
     MnuMovieListNode *node;
     s32 nextTop;
 
@@ -272,13 +273,13 @@ s32 mnuMovieViewer(void) {
     MovieViewerDrawFrameInfo();
     D_003255A8.append(&D_003255A8, mnuMovieList.packets);
     D_003BD8E4 = D_003BD3A0[0];
-    return 0;
+    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 void InitMovieViewer(void) {
     mnuBuildMovieViewerList();
     mnuMovieList.task = dds3StartProcess(mnuMovieViewerTaskName, 0x2b02, 1, 0,
-                                       (TaskUpdate)mnuMovieViewer, 0, 0);
+                                       mnuMovieViewer, 0, 0);
 }
 
 void FinishMovieViewer(void) {
