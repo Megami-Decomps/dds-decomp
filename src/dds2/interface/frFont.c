@@ -634,8 +634,8 @@ void frSetFontSize(_FRQ *glyph, s32 cellAdvance, s32 cellHeight) {
     targetGlyph->advance = frGetStrWidth(targetGlyph);
 }
 
-/* Store the glyph position without scaling. */
-void frSetDrawPosition(_FRQ *glyph, u32 x, u32 y) {
+/* Store signed draw coordinates without scaling. */
+void frSetDrawPosition(_FRQ *glyph, s32 x, s32 y) {
     glyph->x = x;
     glyph->y = y;
 }

@@ -211,7 +211,7 @@ typedef struct FrFontTextBank {
 void frSetDrawSpeed(_FRQ *glyph, s32 inputValue);
 void frFontEnableContextMode(_FRQ *glyph);
 void frSetFontSpace(_FRQ *glyph, s32 spacing);
-void frSetDrawPosition(_FRQ *glyph, u32 x, u32 y);
+void frSetDrawPosition(_FRQ *glyph, s32 x, s32 y);
 void frSetPriority(_FRQ *glyph, u32 unshiftedValue);
 void frSetFontColor(_FRQ *parentGlyph, u32 colorWord);
 void frSetFontColorNo(_FRQ *glyph, u8 firstOption);
