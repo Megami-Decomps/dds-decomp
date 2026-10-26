@@ -16,6 +16,17 @@ typedef struct BtlSelectedUnitEffectTaskArgs {
     s32 counter;                 /* 0x10: elapsed update count */
 } BtlSelectedUnitEffectTaskArgs;
 
+/* btlRunTask keeps this callback registered on zero and enters its finish path
+ * on nonzero. This effect yields while its voice is updating. */
+typedef s32 BtlSelectedUnitEffectTaskResult;
+enum {
+    BTL_SELECTED_UNIT_EFFECT_TASK_CONTINUE = 0,
+    BTL_SELECTED_UNIT_EFFECT_TASK_COMPLETE = 1,
+};
+
+BtlSelectedUnitEffectTaskResult btlUpdateSelectedUnitEffect(
+    BtlSelectedUnitEffectTaskArgs *arguments);
+
 typedef char BtlSelectedUnitEffectTaskArgs_size_check[
     (sizeof(BtlSelectedUnitEffectTaskArgs) == 0x14) ? 1 : -1];
 typedef char BtlSelectedUnitEffectTaskArgs_unit_offset_check[

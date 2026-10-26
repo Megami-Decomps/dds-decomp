@@ -4441,12 +4441,11 @@ extern void effBattleUpdate(effBTLCutHandle_t *);
 
 extern effBTLCutHandle_t * effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, struct BtlUnit *owner, s32 value);
 
-/* Start from the selected-unit SYSEFF source, then update through its duration.
- * Return one for an ineligible unit or expiry, zero while updating. */
-s32 btlUpdateSelectedUnitEffect(BtlSelectedUnitEffectTaskArgs *args) {
+/* Start from the selected-unit SYSEFF source, then update through its duration. */
+BtlSelectedUnitEffectTaskResult btlUpdateSelectedUnitEffect(BtlSelectedUnitEffectTaskArgs *args) {
     BtlUnit *unit = args->unit;
     if (!(unit->status.flags & 2)) {
-        return 1;
+        return BTL_SELECTED_UNIT_EFFECT_TASK_COMPLETE;
     }
     {
         BtlState *battle = (BtlState *)btlGetRuntime();
@@ -4466,10 +4465,10 @@ s32 btlUpdateSelectedUnitEffect(BtlSelectedUnitEffectTaskArgs *args) {
         args->counter = args->counter + 1;
         if (args->counter >= args->duration) {
             unit->status.flags = (unit->status.flags & ~0x80) | 0x40;
-            return 1;
+            return BTL_SELECTED_UNIT_EFFECT_TASK_COMPLETE;
         }
         effBattleUpdate(args->effect);
-        return 0;
+        return BTL_SELECTED_UNIT_EFFECT_TASK_CONTINUE;
     }
 }
 
