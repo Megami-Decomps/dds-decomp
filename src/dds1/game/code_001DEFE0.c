@@ -8525,10 +8525,10 @@ u32 sndGetResourceStatus(SoundResourceNode *sound) {
         return 0;
     }
     flags = sound->flags;
-    if (flags & 1) {
+    if (flags & SOUND_RESOURCE_NODE_FLAG_LOAD_PENDING) {
         return 0xFFFFFFF;
     }
-    if (flags & 2) {
+    if (flags & SOUND_RESOURCE_NODE_FLAG_AVAILABLE) {
         return sound->fadeCountdown;
     }
     return 0;
@@ -8702,7 +8702,8 @@ INCLUDE_RODATA(const s32, "game/code_001DEFE0", D_003A4C10);
 
 void sndCreateSystemEffect(SoundResourceNode *effect) {
     SoundMixer *handle;
-    if (!(effect->flags & 8) || effect->resourceHandle || effect->referenceCount) {
+    if (!(effect->flags & SOUND_RESOURCE_NODE_FLAG_SYSTEM_EFFECT) ||
+        effect->resourceHandle || effect->referenceCount) {
         return;
     }
     handle = sndMixerClone(effect->sourceHandle);
@@ -8711,7 +8712,8 @@ void sndCreateSystemEffect(SoundResourceNode *effect) {
 }
 
 void sndDeleteSystemEffect(SoundResourceNode *effect) {
-    if ((effect->flags & 8) && effect->resourceHandle && !effect->referenceCount) {
+    if ((effect->flags & SOUND_RESOURCE_NODE_FLAG_SYSTEM_EFFECT) && effect->resourceHandle &&
+        !effect->referenceCount) {
         btlBossDebugPrintf("btl:system effect delete[%p]\n", effect->resourceHandle);
         sndReleaseAllVoices(effect->resourceHandle);
         effect->resourceHandle = 0;
@@ -8744,7 +8746,7 @@ s32 btlUpdateReferencedBattleEffect(SoundEffectReferenceArgs *args) {
         return 1;
     }
     owner = args->option == 2 ? args->targetOwner.unit : args->sourceOwner.unit;
-    if (args->source->flags & 2) {
+    if (args->source->flags & SOUND_RESOURCE_NODE_FLAG_AVAILABLE) {
         if (args->effect == NULL) {
             args->effect = effCreateBattleVoiceOwner(args->source->resourceHandle, args->option, owner, 0);
             args->duration = sndSetEffectNodeParameter(args->source, args->option);
@@ -8918,7 +8920,7 @@ s32 sndWaitEffectFramesAndApplyUnitParameter(TimedUnitEffectArgs *args) {
     SoundResourceNode *effect = args->source;
     s32 frames;
 
-    if ((effect->flags & 2) == 0) {
+    if ((effect->flags & SOUND_RESOURCE_NODE_FLAG_AVAILABLE) == 0) {
         return 0;
     }
     frames = sndGetEffectNodeParameter(effect, args->option);
@@ -8957,15 +8959,15 @@ BtlRuntimeTask *sndCreateTimedUnitEffectTask(SoundResourceNode *effect, BtlUnit 
 
 void sndBeginEffectLoad(EffectLoadArgs *args) {
     SoundResourceNode *effect = args->effect;
-    if (effect->flags & 2) {
+    if (effect->flags & SOUND_RESOURCE_NODE_FLAG_AVAILABLE) {
         if (effect->resourceHandle != 0) {
             sndReleaseAllVoices(effect->resourceHandle);
             effect->resourceHandle = 0;
         }
-        effect->flags &= ~2;
+        effect->flags &= ~SOUND_RESOURCE_NODE_FLAG_AVAILABLE;
     }
     args->request = fileLoad(args->name);
-    effect->flags |= 1;
+    effect->flags |= SOUND_RESOURCE_NODE_FLAG_LOAD_PENDING;
     btlBossDebugPrintf("btl:effect load start[%s]\n", args->name);
 }
 
@@ -8975,7 +8977,7 @@ s32 sndPollEffectLoad(EffectLoadArgs *args) {
     SoundResourceNode *effect = args->effect;
     struct sdfMemHandle_t *resource;
 
-    if (effect->flags & 2) {
+    if (effect->flags & SOUND_RESOURCE_NODE_FLAG_AVAILABLE) {
         return 1;
     }
     if (!pacFileCheckEnd(args->request)) {
@@ -8987,7 +8989,8 @@ s32 sndPollEffectLoad(EffectLoadArgs *args) {
         sndMixerClone((SoundMixer *)sdfMemLock(resource));
     sdfMemFreeDirect(resource);
     fileRequestFreeIfComplete(args->request);
-    effect->flags = (effect->flags & ~1) | 2;
+    effect->flags = (effect->flags & ~SOUND_RESOURCE_NODE_FLAG_LOAD_PENDING) |
+                    SOUND_RESOURCE_NODE_FLAG_AVAILABLE;
     return 0;
 }
 
@@ -9315,7 +9318,7 @@ SoundResourceNode *sndAllocResourceNode(void) {
 SoundResourceNode *sndCreateResourceNode(SoundMixer *sourceMixer) {
     SoundResourceNode *node = (SoundResourceNode *)sndAllocResourceNode();
     node->resourceHandle = sndMixerClone(sourceMixer);
-    node->flags |= 2;
+    node->flags |= SOUND_RESOURCE_NODE_FLAG_AVAILABLE;
     return node;
 }
 
@@ -9644,7 +9647,7 @@ void sndFreeBattleSoundEntries(void) {
 
 /* Register a borrowed archive source in its SYSEFF slot, without cloning it. */
 void btlCreateIndexedSoundResourceNode(s32 slotIndex, SoundMixer *source) {
-    u32 flags;
+    SoundResourceNodeFlags flags;
     s32 work;
     SoundResourceNode *node;
 
@@ -9653,7 +9656,8 @@ void btlCreateIndexedSoundResourceNode(s32 slotIndex, SoundMixer *source) {
     flags = node->flags;
     node->sourceHandle = source;
     ((BtlActorWork *)work)->soundResourceSlots[slotIndex] = node;
-    node->flags = flags | 10;
+    node->flags = flags | SOUND_RESOURCE_NODE_FLAG_AVAILABLE |
+                  SOUND_RESOURCE_NODE_FLAG_SYSTEM_EFFECT;
 }
 
 #include "btl_sound_handle_node.h"

@@ -136,8 +136,17 @@ struct effBTLCutHandle_t {
 };
 
 /* The allocated 0x20-byte resource is also the system-effect task owner. */
+typedef u32 SoundResourceNodeFlags;
+/* Pending loads become available after their mixer is installed; indexed
+ * system effects retain a borrowed source and clone its mixer on first use. */
+enum {
+    SOUND_RESOURCE_NODE_FLAG_LOAD_PENDING = 0x01,
+    SOUND_RESOURCE_NODE_FLAG_AVAILABLE = 0x02,
+    SOUND_RESOURCE_NODE_FLAG_SYSTEM_EFFECT = 0x08,
+};
+
 typedef struct SoundResourceNode {
-    u32 flags;
+    SoundResourceNodeFlags flags; /* Load pending, available, and lazy system-effect bits. */
     s32 referenceCount; /* 0x04: retained effect tasks, not a separate prefix object. */
     u32 activeCount; /* 0x08: timed effects still using this resource. */
     s32 fadeCountdown;
