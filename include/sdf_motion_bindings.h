@@ -46,7 +46,8 @@ typedef struct SdfMotionKeyBinding {
     const SdfMotionKeyTrack *track;
 } SdfMotionKeyBinding;
 
-void sdfMotGetKey(SdfMotionKeyBinding *binding,
+/* Read the binding's track; the interval's key pointers borrow track storage. */
+void sdfMotGetKey(const SdfMotionKeyBinding *binding,
                               SdfMotionKeyInterval *interval, f32 frame);
 
 void sdfMotCLBK_SetCut(SdfMotionKeyBinding *binding, const SdfMotionKeyTrack *track);
