@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "itf_mes_entry_items_result.h"
+#include "itf_option_bit_index_api.h"
 #include "itf_mes_window_index.h"
 
 struct ItfMesSub;
@@ -22,7 +23,7 @@ void itfMesMngSetStat(ItfMesWindowIndex window, u32 highFlags);
 void itfMesMngMarkBitStat(ItfMesWindowIndex window, u32 mask);
 void itfMesMngClearBitStat(ItfMesWindowIndex window, u32 mask);
 void itfMesMngSetMaskSelect(ItfMesWindowIndex window, u32 panelMask);
-void itfMesMngSetSelect(ItfMesWindowIndex window, s32 selectedBitIndex);
+void itfMesMngSetSelect(ItfMesWindowIndex window, ItfMesOptionBitIndex selectedBitIndex);
 void itfMesMngChangeWindowType(ItfMesWindowIndex window, s32 firstValue, s32 secondValue);
 void itfMesMngSetKutiCallback(ItfMesWindowIndex window, void (*callback)(void));
 void itfMesMngMsgWndCls(ItfMesWindowIndex window);

@@ -581,7 +581,7 @@ void itfMesMngSetMaskSelect(ItfMesWindowIndex window, u32 panelMask) {
 /* Cache the number of clear bits below selectedBitIndex only when that bit is
  * itself clear; a set bit produces zero. Negative indices also produce zero;
  * no upper bound is checked. */
-void itfMesMngSetSelect(ItfMesWindowIndex window, s32 selectedBitIndex) {
+void itfMesMngSetSelect(ItfMesWindowIndex window, ItfMesOptionBitIndex selectedBitIndex) {
     ItfMesBlk40 *optionBlock = &pinst[window].mes->blk40;
     u32 remainingMask = optionBlock->panelValue;
     s32 bitValue = remainingMask & 1;
