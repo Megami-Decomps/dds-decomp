@@ -98,18 +98,11 @@ typedef struct {
     effPartHandle_t *paramWork; /* 0xA8 */
 } effPCPCrack_t;
 
-/* Five packed RGBA values paired with the draw pool's five vertex positions.
-   Native update writes tinted colors here; these are not vertex indices. */
-typedef struct {
-    u32 color[5];
-} EffBossColorSlot;
-
 typedef char EffPCPBossWork_size_must_be_0x30[(sizeof(EffPCPBossWork) == 0x30) ? 1 : -1];
 typedef char EffBossHead_size_must_be_0x8C[(sizeof(EffBossHead) == 0x8C) ? 1 : -1];
 typedef char EffBossParams_size_must_be_0x94[(sizeof(EffBossParams) == 0x94) ? 1 : -1];
 typedef char EffBossCell_size_must_be_0x14[(sizeof(EffBossCell) == 0x14) ? 1 : -1];
 typedef char EffBossGroup_size_must_be_0x24[(sizeof(EffBossGroup) == 0x24) ? 1 : -1];
 typedef char EffBossWork_size_must_be_0xAC[(sizeof(effPCPCrack_t) == 0xAC) ? 1 : -1];
-typedef char EffBossColorSlot_size_must_be_0x14[(sizeof(EffBossColorSlot) == 0x14) ? 1 : -1];
 
 #endif /* EFF_PCP_BOSS_H */

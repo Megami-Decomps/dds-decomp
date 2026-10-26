@@ -9,6 +9,7 @@
 #include "eff.h"
 #include "eff_math.h"
 #include "eff_pcp_flash.h"
+#include "eff_flash_fan_color_slot.h"
 #include "pcp_vu0.h"
 
 /* Work records keep SDF allocation ownership separate from drawable records.
@@ -285,15 +286,13 @@ void effPCPFlashPolySphereSetScale(PcpFlashStreakWork *work, f32 value)
     work->renderScale = value;
 }
 
-extern void *dds3FlashPolyListGetVC(dds3FlashPolyList_t *pool, s32 index);
-
 void effPCPFlashPolySpherePartSetVC(PcpFlashStreakWork *work, s32 index, s32 color)
 {
-    PcpFlashQuadColorSlot *slot;
+    EffFlashFanColorSlot *slot;
     s32 rgb1;
     s32 rgb2;
 
-    slot = (PcpFlashQuadColorSlot *)dds3FlashPolyListGetVC(work->resourceHandle, index);
+    slot = dds3FlashPolyListGetVC(work->resourceHandle, index);
     rgb1 = work->centerColor & 0xFFFFFF;
     rgb2 = work->edgeColor & 0xFFFFFF;
     slot->color[0] = effMagaCylinderCalcColor(rgb2, color);
@@ -561,11 +560,11 @@ void effPCPFlashPolyRingSetScale(PcpFlashScalingOrbitWork *work, f32 value)
 
 void effPCPFlashPolyRingPartSetVC(PcpFlashScalingOrbitWork *work, s32 index, s32 color)
 {
-    PcpFlashQuadColorSlot *slot;
+    EffFlashFanColorSlot *slot;
     s32 rgb1;
     s32 rgb2;
 
-    slot = (PcpFlashQuadColorSlot *)dds3FlashPolyListGetVC(work->resourceHandle, index);
+    slot = dds3FlashPolyListGetVC(work->resourceHandle, index);
     rgb1 = work->centerColor & 0xFFFFFF;
     rgb2 = work->edgeColor & 0xFFFFFF;
     slot->color[0] = effMagaCylinderCalcColor(rgb2, color);
@@ -1067,11 +1066,11 @@ void effPCPFlashPolyRingExpSetScale(PcpFlashOrbitArcWork *work, f32 value)
 
 void effPCPFlashPolyRingExpPartSetVC(PcpFlashOrbitArcWork *work, s32 index, s32 color)
 {
-    PcpFlashQuadColorSlot *slot;
+    EffFlashFanColorSlot *slot;
     s32 rgb1;
     s32 rgb2;
 
-    slot = (PcpFlashQuadColorSlot *)dds3FlashPolyListGetVC(work->resourceHandle, index);
+    slot = dds3FlashPolyListGetVC(work->resourceHandle, index);
     rgb1 = work->centerColor & 0xFFFFFF;
     rgb2 = work->edgeColor & 0xFFFFFF;
     slot->color[0] = effMagaCylinderCalcColor(rgb2, color);
@@ -1321,11 +1320,11 @@ void effPCPFlashPolySphereExpSetScale(PcpFlashRotatingQuadWork *work, f32 value)
 
 void effPCPFlashPolySphereExpPartSetVC(PcpFlashRotatingQuadWork *work, s32 index, s32 color)
 {
-    PcpFlashQuadColorSlot *slot;
+    EffFlashFanColorSlot *slot;
     s32 rgb1;
     s32 rgb2;
 
-    slot = (PcpFlashQuadColorSlot *)dds3FlashPolyListGetVC(work->resourceHandle, index);
+    slot = dds3FlashPolyListGetVC(work->resourceHandle, index);
     rgb1 = work->centerColor & 0xFFFFFF;
     rgb2 = work->edgeColor & 0xFFFFFF;
     slot->color[0] = effMagaCylinderCalcColor(rgb2, color);
@@ -2041,11 +2040,11 @@ void effPCPFlashPolyRingExp2SetScale(PcpFlashFadingOrbitWork *work, f32 value)
 
 void effPCPFlashPolyRingExp2PartSetVC(PcpFlashFadingOrbitWork *work, s32 index, s32 color)
 {
-    PcpFlashQuadColorSlot *slot;
+    EffFlashFanColorSlot *slot;
     s32 rgb1;
     s32 rgb2;
 
-    slot = (PcpFlashQuadColorSlot *)dds3FlashPolyListGetVC(work->resourceHandle, index);
+    slot = dds3FlashPolyListGetVC(work->resourceHandle, index);
     rgb1 = work->centerColor & 0xFFFFFF;
     rgb2 = work->edgeColor & 0xFFFFFF;
     slot->color[0] = effMagaCylinderCalcColor(rgb2, color);

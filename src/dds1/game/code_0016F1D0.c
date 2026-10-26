@@ -15,6 +15,7 @@
 #include "eff_math.h"
 #include "eff_param.h"
 #include "eff_pcp_scatter_radial.h"
+#include "eff_flash_fan_color_slot.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 
@@ -467,8 +468,8 @@ f32 *dds3FlashPolyListGetVertex(dds3FlashPolyList_t *group, s32 groupIndex) {
 }
 
 /* Address the group's five packed color words. */
-void *dds3FlashPolyListGetVC(dds3FlashPolyList_t *group, s32 groupIndex) {
-    return group->auxRecordBase + groupIndex * EFF_FAN_COLOR_BYTES;
+EffFlashFanColorSlot *dds3FlashPolyListGetVC(dds3FlashPolyList_t *group, s32 groupIndex) {
+    return (EffFlashFanColorSlot *)(group->auxRecordBase + groupIndex * EFF_FAN_COLOR_BYTES);
 }
 
 /* Store the record pool's raw submission-control bits. */

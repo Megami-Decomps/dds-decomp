@@ -542,10 +542,6 @@ struct PcpFlashRotatingParticle {
 };
 
 
-typedef struct PcpFlashQuadColorSlot {
-    s32 color[5];
-} PcpFlashQuadColorSlot;
-
 /* The orbit-arc particles follow the same work header used by its draw and
    angle-update passes; this is an allocation container, not a second view. */
 typedef struct PcpFlashOrbitArcBlock {
@@ -638,7 +634,6 @@ typedef char PcpFlashOffsetRadialWorkDrawModeOffsetCheck[
     ((u32)&((PcpFlashOffsetRadialWork *)0)->drawMode) == 0x3C ? 1 : -1];
 
 typedef char PcpFlashColorSlotSizeCheck[sizeof(PcpFlashColorSlot) == 0x0C ? 1 : -1];
-typedef char PcpFlashQuadColorSlotSizeCheck[sizeof(PcpFlashQuadColorSlot) == 0x14 ? 1 : -1];
 typedef char PcpFlashRotatingParticleSizeCheck[sizeof(PcpFlashRotatingParticle) == 0x2C ? 1 : -1];
 typedef char PcpFlashOrbitParticleSizeCheck[sizeof(PcpFlashOrbitParticle) == 0x14 ? 1 : -1];
 typedef char PcpFlashAccumulatingParticleSizeCheck[sizeof(PcpFlashAccumulatingParticle) == 0x1C ? 1 : -1];

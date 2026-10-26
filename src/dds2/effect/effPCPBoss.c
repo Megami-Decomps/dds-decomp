@@ -9,6 +9,7 @@
 #include "eff.h"
 #include "eff_param.h"
 #include "eff_pcp_boss.h"
+#include "eff_flash_fan_color_slot.h"
 #include "pcp_vu0.h"
 #include "sdf_vu_transform_api.h"
 #include "ee_mmi.h"
@@ -27,7 +28,6 @@ extern f32 effBossLookAtReferenceAxis[4];
 
 extern dds3FlashPolyList_t *dds3FlashPolyListCreate(u32 cellCount);
 extern f32 *dds3FlashPolyListGetVertex(dds3FlashPolyList_t *pool, s32 index);
-extern void *dds3FlashPolyListGetVC(dds3FlashPolyList_t *pool, s32 index);
 extern void dds3FlashPolyListSetBlend(dds3FlashPolyList_t *pool, u32 bits);
 extern EffRandState effDefaultRandomState[];
 extern f32 D_004334C4;
@@ -92,7 +92,7 @@ void effPCPCrackInit(effPCPCrack_t *work)
             group->rotationAngle = 0.0f;
             for (cellIndex = 0; cellIndex < work->cellCount; cellIndex++) {
                 f32 *vertices = dds3FlashPolyListGetVertex(group->drawPool, cellIndex);
-                EffBossColorSlot *colors = dds3FlashPolyListGetVC(group->drawPool, cellIndex);
+                EffFlashFanColorSlot *colors = dds3FlashPolyListGetVC(group->drawPool, cellIndex);
 
                 colors->color[0] = 0;
                 colors->color[1] = 0;
@@ -351,7 +351,7 @@ void effPCPCrackDraw(effPCPCrack_t *work) {
                 dds3FlashPolyListSetABGR(group->drawPool, tint);
                 for (j = 0; j < count - 1; j++, cell++, historyStart += 3) {
                     positions = dds3FlashPolyListGetVertex(group->drawPool, j);
-                    colorWords = ((EffBossColorSlot *)dds3FlashPolyListGetVC(group->drawPool, j))->color;
+                    colorWords = dds3FlashPolyListGetVC(group->drawPool, j)->color;
                     age = cell->age;
                     if (age > colorStart) {
                         if (work->head.cellColorTransitionFrames > 0 && age < colorStart + colorFrames) {
