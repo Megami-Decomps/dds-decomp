@@ -4,6 +4,7 @@
 #include "fld_item_box_object_api.h"
 #include "fld_projected_sprite.h"
 #include "sdf_model_packet_callback.h"
+#include "sdf_model_release_api.h"
 #include "fld_label_rows.h"
 #include "dsp_channel.h"
 #include "evt_message_window_api.h"
@@ -2335,14 +2336,15 @@ void fldReleaseResourceSlots(void) {
     frSetFontDrawOT(0x54);
 }
 
-extern void sdfModelRootFree(sdfModelRootNode_t *slot, s32 recycle, s32 release);
 
 void fldReleaseSceneDevSlotsAndTextures(void) {
     s32 i;
 
     for (i = 0; i < fldAutoMapData; i++) {
         if (D_003A5470[i] != 0) {
-            sdfModelRootFree(D_003A5470[i], 1, 1);
+            sdfModelRootFree(D_003A5470[i],
+                             SDF_MODEL_ROOT_FREE_DEFERRED,
+                             SDF_MODEL_MATERIAL_RESOURCES_RELEASE_DEFERRED);
         }
     }
     for (i = 0; i < 96; i++) {

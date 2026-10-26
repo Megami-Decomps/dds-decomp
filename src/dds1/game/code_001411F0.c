@@ -3,6 +3,7 @@
 #include "fld_item_box_object_api.h"
 #include "fld_projected_sprite.h"
 #include "sdf_model_packet_callback.h"
+#include "sdf_model_release_api.h"
 #include "dsp_entry_api.h"
 #include "dsp_channel.h"
 #include "evt_message_window_api.h"
@@ -2000,14 +2001,15 @@ extern sdfModelRootNode_t *D_00348F30[];
 
 extern FldPoint D_003D40B0[];
 
-extern void sdfModelRootFree(sdfModelRootNode_t *slot, s32 recycle, s32 release);
 
 void fldReleaseMenuSlots(void) {
     s32 i;
 
     for (i = 0; i < fldAutoMapData; i++) {
         if (D_00348F30[i] != 0) {
-            sdfModelRootFree(D_00348F30[i], 1, 1);
+            sdfModelRootFree(D_00348F30[i],
+                             SDF_MODEL_ROOT_FREE_DEFERRED,
+                             SDF_MODEL_MATERIAL_RESOURCES_RELEASE_DEFERRED);
         }
     }
     for (i = 0; i < 64; i++) {

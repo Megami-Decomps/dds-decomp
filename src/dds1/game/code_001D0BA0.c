@@ -38,7 +38,7 @@
 #include "btl_task_condition.h"
 #include "sdf_resource.h"
 #include "sdf_model.h"
-#include "sdf_dev_slot_api.h"
+#include "sdf_model_release_api.h"
 #include "btl.h"
 #include "btl_skill_name_index.h"
 #include "btl_model_state_ownership.h"
@@ -2461,7 +2461,9 @@ void btlReleaseActorModelResources(BtlUnit *object) {
         }
         load = object->transparencyModel;
         if (load != 0) {
-            sdfModelRootFree(load, 1, 1);
+            sdfModelRootFree(load,
+                             SDF_MODEL_ROOT_FREE_DEFERRED,
+                             SDF_MODEL_MATERIAL_RESOURCES_RELEASE_DEFERRED);
             object->transparencyModel = 0;
             btlBossDebugPrintf(D_003A3AD0, object);
         }
@@ -3314,7 +3316,9 @@ void btlUpdateUnitTransparency(BtlUnit *unit) {
             alpha = color >> 24;
             if (!(flags & 0x20000)) {
                 if (unit->transparencyModel != 0) {
-                    sdfModelRootFree(unit->transparencyModel, 1, 1);
+                    sdfModelRootFree(unit->transparencyModel,
+                                     SDF_MODEL_ROOT_FREE_DEFERRED,
+                                     SDF_MODEL_MATERIAL_RESOURCES_RELEASE_DEFERRED);
                     unit->transparencyModel = 0;
                     if (unit->status.flags & 2) {
                         info->inner->lighting = (struct SdfDmaTagHeader *)unit->ext->endpointWork;

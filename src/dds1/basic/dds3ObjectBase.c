@@ -4,7 +4,7 @@
 #include "sdf_model_packet_callback.h"
 #include "dds3_object_flags.h"
 #include "sdf_model.h"
-#include "sdf_dev_slot_api.h"
+#include "sdf_model_release_api.h"
 #include "evt_gradient_rect.h"
 #include "sdf_motion.h"
 #include "sdf_motion_next_result.h"
@@ -63,7 +63,9 @@ void dds3ObjectBaseFreeControlWorkData(dds3ObjectBaseControlWorkData_t *base) {
     }
     dds3ObjectBaseFreeModelHandle(owner);
     if (base->devSlot != 0) {
-        sdfModelRootFree(base->devSlot, 1, 1);
+        sdfModelRootFree(base->devSlot,
+                         SDF_MODEL_ROOT_FREE_DEFERRED,
+                         SDF_MODEL_MATERIAL_RESOURCES_RELEASE_DEFERRED);
     }
     dds3FreeBasicArrayHandle(base->worldIndexNode);
     sdfChipFreeDirect(base);
@@ -161,7 +163,9 @@ void dds3ObjectBaseFreeModelHandle(dds3Basic_t *object) {
                 }
             }
         } else {
-            sdfModelRootFree((sdfModelRootNode_t *)base->resourceHandle, 1, 1);
+            sdfModelRootFree((sdfModelRootNode_t *)base->resourceHandle,
+                             SDF_MODEL_ROOT_FREE_DEFERRED,
+                             SDF_MODEL_MATERIAL_RESOURCES_RELEASE_DEFERRED);
             sdfMotionCtrlrFree(base->motion);
         }
         base->resourceHandle = 0;

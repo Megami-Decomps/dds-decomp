@@ -37,7 +37,7 @@
 #include "btl_grouped_entity_api.h"
 #include "sdf_model.h"
 #include "sdf_model_copy.h"
-#include "sdf_dev_slot_api.h"
+#include "sdf_model_release_api.h"
 #include "mdl_resource_entries.h"
 #include "mdl_asset_request.h"
 #include "mdl_resource_table.h"
@@ -596,7 +596,9 @@ void mdlFreeBlur(dds3ModelHandle_t *ctx) {
         while (nextSlot != NULL) {
             currentSlot = nextSlot;
             nextSlot = nextSlot->next;
-            sdfModelRootFree(currentSlot->model, 1, 1);
+            sdfModelRootFree(currentSlot->model,
+                             SDF_MODEL_ROOT_FREE_DEFERRED,
+                             SDF_MODEL_MATERIAL_RESOURCES_RELEASE_DEFERRED);
             sdfChipFreeDirect(currentSlot);
         }
         sdfChipFreeDirect(deviceList);
@@ -721,7 +723,9 @@ void mdlFree(dds3ModelHandle_t *ctx) {
         mdlFreeEffect(resourceNode);
     }
     mdlFreeBlur(ctx);
-    sdfModelRootFree(inner, 1, 1);
+    sdfModelRootFree(inner,
+                     SDF_MODEL_ROOT_FREE_DEFERRED,
+                     SDF_MODEL_MATERIAL_RESOURCES_RELEASE_DEFERRED);
     mdlUnlinkResrc(ctx);
     sdfChipFreeDirect(ctx);
 }
