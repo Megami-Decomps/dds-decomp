@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "btl_command_use_error.h"
 #include "btl_command_target_policy.h"
 #include "btl_actor_status_table_api.h"
 #include "btl_actor_entry_code_defaults.h"
@@ -345,33 +346,33 @@ s8 btlGetLinkageSlotCost(s32 command) {
     return datAffinityRecords[command - DAT_AFFINITY_FIRST_COMMAND].slotCost;
 }
 
-s32 btlGetCommandFailureReason(BtlUnit *unit, s32 command) {
-    s32 result = 0;
+BtlCommandUseError btlGetCommandFailureReason(BtlUnit *unit, s32 command) {
+    BtlCommandUseError result = BTL_COMMAND_USE_ERROR_NONE;
     u32 cost;
 
     if (command == 0) {
-        return 0;
+        return BTL_COMMAND_USE_ERROR_NONE;
     }
     if (datCommandRecords[command].effectType == 1 ||
         datCommandRecords[command].costMode == DAT_COMMAND_COST_MODE_MP) {
         if ((unit->partyRecord.status & 0x7FFF) == 0x10) {
-            return 3;
+            return BTL_COMMAND_USE_ERROR_ACTOR_STATE;
         }
     }
     if (datCommandSelectors[command].kind == 2 &&
         (unit->partyRecord.status & 0x7FFF) == 0x40) {
-        return 5;
+        return BTL_COMMAND_USE_ERROR_SELECTOR_STATE;
     }
     if (datCommandSelectors[command].kind == 1) {
         if ((unit->partyRecord.status & 0x7FFF) == 0x1000) {
-            return 4;
+            return BTL_COMMAND_USE_ERROR_LINKAGE_STATE;
         }
         if (fldCountSceneSlots() < (u32)btlGetLinkageSlotCost(command)) {
-            return 6;
+            return BTL_COMMAND_USE_ERROR_INSUFFICIENT_SCENE_SLOTS;
         }
     }
     if (datCommandRecords[command].flags & 4) {
-        return 0;
+        return BTL_COMMAND_USE_ERROR_NONE;
     }
 
     cost = btlApplyCommandAbilityMultiplier(&unit->partyRecord, command);
@@ -379,14 +380,14 @@ s32 btlGetCommandFailureReason(BtlUnit *unit, s32 command) {
     case DAT_COMMAND_COST_MODE_HP:
         if ((datCommandRecords[command].flags & 8) == 0) {
             if (cost >= unit->partyRecord.hp) {
-                result = 1;
+                result = BTL_COMMAND_USE_ERROR_INSUFFICIENT_HP;
             }
         } else if (unit->partyRecord.hp < cost) {
-            result = 1;
+            result = BTL_COMMAND_USE_ERROR_INSUFFICIENT_HP;
         }
         break;
     case DAT_COMMAND_COST_MODE_MP:
-        result = unit->partyRecord.mp < cost ? 2 : 0;
+        result = unit->partyRecord.mp < cost ? BTL_COMMAND_USE_ERROR_INSUFFICIENT_MP : BTL_COMMAND_USE_ERROR_NONE;
         break;
     }
     return result;
@@ -417,7 +418,7 @@ s32 btlGetCombinedPartyCommandPower(datUnitWork_t *base, BtlUnit *first, BtlUnit
     return btlApplyCommandAbilityMultiplier(&snapshot, command);
 }
 
-s32 btlGetLinkedPartyCommandFailureReason(BtlUnit *base, BtlUnit *first, BtlUnit *second,
+BtlCommandUseError btlGetLinkedPartyCommandFailureReason(BtlUnit *base, BtlUnit *first, BtlUnit *second,
                   BtlUnit *third, s32 command) {
     BtlUnit snapshot = *base;
     s32 totalMaxHp = 0;
@@ -425,30 +426,30 @@ s32 btlGetLinkedPartyCommandFailureReason(BtlUnit *base, BtlUnit *first, BtlUnit
 
     if (first != NULL) {
         if ((first->status.flags & 0x100) == 0) {
-            return 3;
+            return BTL_COMMAND_USE_ERROR_ACTOR_STATE;
         }
         if ((first->partyRecord.status & 0x2A0E) != 0) {
-            return 3;
+            return BTL_COMMAND_USE_ERROR_ACTOR_STATE;
         }
         totalMaxHp = first->partyRecord.maxHp;
         count = 1;
     }
     if (second != NULL) {
         if ((second->status.flags & 0x100) == 0) {
-            return 3;
+            return BTL_COMMAND_USE_ERROR_ACTOR_STATE;
         }
         if ((second->partyRecord.status & 0x2A0E) != 0) {
-            return 3;
+            return BTL_COMMAND_USE_ERROR_ACTOR_STATE;
         }
         count++;
         totalMaxHp += second->partyRecord.maxHp;
     }
     if (third != NULL) {
         if ((third->status.flags & 0x100) == 0) {
-            return 3;
+            return BTL_COMMAND_USE_ERROR_ACTOR_STATE;
         }
         if ((third->partyRecord.status & 0x2A0E) != 0) {
-            return 3;
+            return BTL_COMMAND_USE_ERROR_ACTOR_STATE;
         }
         count++;
         totalMaxHp += third->partyRecord.maxHp;

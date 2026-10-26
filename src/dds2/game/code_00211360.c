@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_command_use_error.h"
 #include "btl_actor_entry_code_api.h"
 #include "btl_actor_selection_clear_api.h"
 #include "btl_enemy_spawn_capacity_api.h"
@@ -71,8 +72,6 @@ extern u32 btlPreviousAiCandidateBucket;
 extern s32 btlUnitMatchesEntryCodeCondition(BtlUnit *, s32, s8);
 
 extern u8 btlHasAvailableOption(BtlUnit *);
-
-extern s32 btlGetCommandUseError(BtlUnit *, s32);
 
 extern s8 btlHistoryCounter;
 
@@ -1125,10 +1124,10 @@ s32 btlUnitHasFlag1000(const BtlUnit *unit) {
 }
 
 u8 btlIsCommandAvailable(BtlUnit *unit, s32 command) {
-    s32 result;
+    BtlCommandUseError result;
 
     result = btlGetCommandUseError(unit, command);
-    return result == 0;
+    return result == BTL_COMMAND_USE_ERROR_NONE;
 }
 
 /* Normalize the gate requiring status and entry flag 0x40 to be clear. */

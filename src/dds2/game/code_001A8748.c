@@ -3,6 +3,7 @@
 #include "fld_next_scene_request_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_command_use_error.h"
 #include "btl_command_target_policy.h"
 #include "btl_indexed_ui_resource_api.h"
 #include "btl_actor_status_table_api.h"
@@ -64,8 +65,6 @@
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
 #include "btl_target_result.h"
-
-extern s32 btlGetCommandUseError(BtlUnit *, s32);
 
 /* Named and indexed views of the same four signed 32-bit color channels. */
 typedef union UiQuadColor {
@@ -1698,39 +1697,39 @@ BtlCommandVitalCostResult btlCheckCommandVitalCost(BtlUnit *unit, s32 command) {
 
 extern s32 fldCountSceneSlots(void);
 
-s32 btlGetCommandUseError(BtlUnit *unit, s32 command) {
+BtlCommandUseError btlGetCommandUseError(BtlUnit *unit, s32 command) {
     u32 availableSlots;
 
     if (command == 0) {
-        return 0;
+        return BTL_COMMAND_USE_ERROR_NONE;
     }
     if ((unit->partyRecord.flags & 0x10) && (unit->status.flags & 0x200)) {
         if ((datCommandRecords[command].effectType != 0 &&
              datCommandRecords[command].effectType != 2) ||
             datCommandRecords[command].costMode >= 2) {
-            return 7;
+            return BTL_COMMAND_USE_ERROR_RESTRICTED_ACTOR_COMMAND;
         }
     }
     if ((datCommandRecords[command].effectType == 1 ||
          datCommandRecords[command].costMode == DAT_COMMAND_COST_MODE_MP) &&
         (unit->partyRecord.status & 0x7FFF) == 0x10) {
-        return 3;
+        return BTL_COMMAND_USE_ERROR_ACTOR_STATE;
     }
     if (datCommandSelectors[command].kind == 2 &&
         (unit->partyRecord.status & 0x7FFF) == 0x40) {
-        return 5;
+        return BTL_COMMAND_USE_ERROR_SELECTOR_STATE;
     }
     if (datCommandSelectors[command].kind == 1) {
         if ((unit->partyRecord.status & 0x7FFF) == 0x1000) {
-            return 4;
+            return BTL_COMMAND_USE_ERROR_LINKAGE_STATE;
         }
         availableSlots = fldCountSceneSlots();
         if (availableSlots < btlGetSlotValueAdjustedForSpecialAbility(unit, command)) {
-            return 6;
+            return BTL_COMMAND_USE_ERROR_INSUFFICIENT_SCENE_SLOTS;
         }
     }
     if (datCommandRecords[command].flags & 4) {
-        return 0;
+        return BTL_COMMAND_USE_ERROR_NONE;
     }
     return btlCheckCommandVitalCost(unit, command);
 }
@@ -1760,7 +1759,7 @@ s32 btlGetCombinedPartyCommandPower(datUnitWork_t *base, BtlUnit *first, BtlUnit
     return btlApplyCommandAbilityMultiplier(&snapshot, command);
 }
 
-s32 btlGetPartnerCommandUseError(BtlUnit *base, BtlUnit *first, BtlUnit *second,
+BtlCommandUseError btlGetPartnerCommandUseError(BtlUnit *base, BtlUnit *first, BtlUnit *second,
                   BtlUnit *third, s32 command) {
     BtlUnit snapshot = *base;
     s32 totalMaxHp = 0;
@@ -1768,30 +1767,30 @@ s32 btlGetPartnerCommandUseError(BtlUnit *base, BtlUnit *first, BtlUnit *second,
 
     if (first != NULL) {
         if ((first->status.flags & 0x100) == 0) {
-            return 3;
+            return BTL_COMMAND_USE_ERROR_ACTOR_STATE;
         }
         if ((first->partyRecord.status & 0x2A0E) != 0) {
-            return 3;
+            return BTL_COMMAND_USE_ERROR_ACTOR_STATE;
         }
         totalMaxHp = first->partyRecord.maxHp;
         count = 1;
     }
     if (second != NULL) {
         if ((second->status.flags & 0x100) == 0) {
-            return 3;
+            return BTL_COMMAND_USE_ERROR_ACTOR_STATE;
         }
         if ((second->partyRecord.status & 0x2A0E) != 0) {
-            return 3;
+            return BTL_COMMAND_USE_ERROR_ACTOR_STATE;
         }
         count++;
         totalMaxHp += second->partyRecord.maxHp;
     }
     if (third != NULL) {
         if ((third->status.flags & 0x100) == 0) {
-            return 3;
+            return BTL_COMMAND_USE_ERROR_ACTOR_STATE;
         }
         if ((third->partyRecord.status & 0x2A0E) != 0) {
-            return 3;
+            return BTL_COMMAND_USE_ERROR_ACTOR_STATE;
         }
         count++;
         totalMaxHp += third->partyRecord.maxHp;

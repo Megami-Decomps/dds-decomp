@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_command_use_error.h"
 #include "btl_special_ability.h"
 #include "eff_random_mod.h"
 #include "btl_item_drop.h"
@@ -103,8 +104,6 @@ s32 btlGetAbilityAttributeMultiplierPercent(BtlUnit *actor, s32 attr);
 f32 btlGetActorEntryMultiplier(BtlUnit *unit, u32 index, s8 includeCharge);
 
 s8 btlGetActorIndexedSignedValue(BtlUnit *unit, s32 index);
-
-s32 btlGetCommandFailureReason(BtlUnit *unit, s32 command);
 
 s32 btlGetEntryFlagsUnlessDisabled(datUnitWork_t *record);
 
@@ -894,7 +893,7 @@ s32 btlCollectAvailableOptionSkills(BtlUnit *actor, s32 *choices) {
                 continue;
             }
         }
-        if (btlGetCommandFailureReason(actor, id) != 0) {
+        if (btlGetCommandFailureReason(actor, id) != BTL_COMMAND_USE_ERROR_NONE) {
             continue;
         }
         if (choices != NULL) {

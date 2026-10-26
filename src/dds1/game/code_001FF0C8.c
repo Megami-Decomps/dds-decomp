@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "btl_command_use_error.h"
 #include "btl_actor_entry_code_api.h"
 #include "btl_actor_selection_clear_api.h"
 #include "btl_enemy_spawn_capacity_api.h"
@@ -56,8 +57,6 @@
 #define BTL_LOW_HP_ENEMY_COUNT_LIMIT 2
 
 extern s32 btlAreUnitStatusAndEntryFlagsClear(BtlUnit *actor);
-
-extern s32 btlGetCommandFailureReason(BtlUnit *, s32);
 
 extern u8 btlHasAvailableOption(BtlUnit *actor);
 
@@ -1027,10 +1026,10 @@ s32 btlUnitHasFlag1000(const BtlUnit *unit) {
 }
 
 u8 btlIsCommandAvailable(BtlUnit *unit, s32 command) {
-    s32 result;
+    BtlCommandUseError result;
 
     result = btlGetCommandFailureReason(unit, command);
-    return result == 0;
+    return result == BTL_COMMAND_USE_ERROR_NONE;
 }
 
 /* Normalize the gate requiring status and entry flag 0x40 to be clear. */

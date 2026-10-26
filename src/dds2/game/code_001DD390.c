@@ -5,6 +5,7 @@
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "common.h"
+#include "btl_command_use_error.h"
 #include "btl_action_reaction_motion.h"
 #include "btl_command_target_policy.h"
 #include "dds3_object_flags.h"
@@ -536,10 +537,6 @@ extern s8 btlGetActorIndexedSignedValue(BtlUnit *, s32);
 
 extern u32 btlEncodeActorIndexAsSelectionMask(u32);
 
-extern s32 btlGetCommandUseError(BtlUnit *, s32);
-
-extern s32 btlGetPartnerCommandUseError(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
-
 extern s32 btlApplyCommandAbilityMultiplier(datUnitWork_t *battler, s32 command);
 
 extern s32 btlGetCombinedPartyCommandPower(datUnitWork_t *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
@@ -703,7 +700,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
             costError = btlGetPartnerCommandUseError(source, action->unit, action->indexWork.companionA,
                                     action->indexWork.companionB, command);
         }
-        if (costError == 0) {
+        if (costError == BTL_COMMAND_USE_ERROR_NONE) {
             if (datCommandSelectors[command].kind != 1) {
                 work->stageValue = btlApplyCommandAbilityMultiplier(&source->partyRecord, command);
             } else {
@@ -717,17 +714,17 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
                               source->partyRecord.hp, source->partyRecord.mp);
             work->costValidationFailed = 1;
             switch (costError) {
-            case 1:
+            case BTL_COMMAND_USE_ERROR_INSUFFICIENT_HP:
                 work->stage = 3;
                 work->parameter = effOffsetIfOwnerFlagClear(source, 0x14);
                 action->unit->status.stateFlags |= 0x1000;
                 break;
-            case 2:
+            case BTL_COMMAND_USE_ERROR_INSUFFICIENT_MP:
                 work->stage = 3;
                 work->parameter = effOffsetIfOwnerFlagClear(source, 0x12);
                 action->unit->status.stateFlags |= 0x1000;
                 break;
-            case 3:
+            case BTL_COMMAND_USE_ERROR_ACTOR_STATE:
                 work->stage = 3;
                 work->parameter = effOffsetIfOwnerFlagClear(source, 0x80);
                 break;
@@ -1865,8 +1862,6 @@ void btlUpdateAutoMusic(void) {
 extern s32 fileTestSavedSlotFlags(u32);
 
 
-extern s32 btlGetCommandUseError(BtlUnit *, s32);
-
 extern BtlCommandTargetEligibilityResult btlGetCommandTargetEligibility(BtlIndexList *, s32);
 
 extern BtlUnit *btlSelectUnitAtExtremeX(BtlUnit *, BtlIndexList *);
@@ -1920,7 +1915,7 @@ void btlPrepareSavedCommandTargets(ActionStateLink *task, BattleIndexWork *work)
             work->skillId = 0;
             work->phase = 1;
         }
-        if (btlGetCommandUseError(unit, work->skillId)) {
+        if (btlGetCommandUseError(unit, work->skillId) != BTL_COMMAND_USE_ERROR_NONE) {
             work->skillId = 0;
             work->phase = 1;
         }

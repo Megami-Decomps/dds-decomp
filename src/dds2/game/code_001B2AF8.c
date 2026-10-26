@@ -13,6 +13,7 @@
 #include "dsp_entry_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_command_use_error.h"
 #include "itf_mes_entry_start_api.h"
 #include "btl_command_target_policy.h"
 #include "btl_named_task_pair_status_api.h"
@@ -84,8 +85,6 @@ extern void btlResetBattleHistoryCounters(void);
 extern void btlDrawActorPanelHighlights(BtlUnit *, BattleActorPanelWork *, s32, s8);
 
 extern f32 D_00415F80[4];
-
-extern s32 btlGetCommandUseError(BtlUnit *, s32);
 
 extern BtlCommandHintWork *D_004367F8;
 
@@ -550,7 +549,7 @@ s32 btlCollectAvailableOptionSkills(BtlUnit *actor, s32 *choices) {
                 continue;
             }
         }
-        if (btlGetCommandUseError(actor, value) != 0) {
+        if (btlGetCommandUseError(actor, value) != BTL_COMMAND_USE_ERROR_NONE) {
             continue;
         }
         if (choices != NULL) {
@@ -9143,7 +9142,7 @@ BattleRosterTable *btlGetActorLinkageSkillList(BattleSceneObject *object, u16 *o
 extern u16 btlReadUnitStatusMask(datUnitWork_t *);
 extern void btlCreateReserveActorPanelTask(void);
 extern s32 btlIsSupportedCommandKind(const s32 *phase);
-extern s32 btlCheckScenePairResult(BtlUnit *, BattleRosterPair *);
+extern BtlCommandUseError btlCheckScenePairResult(BtlUnit *, BattleRosterPair *);
 extern s16 D_004368BC;
 extern s16 D_004368BE;
 extern s16 D_004368C0;
@@ -9174,7 +9173,7 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
                     btlSetActorCommandSelection((s32)object, 10, entry, 0);
                 } else {
                     picked = &commands[entry - 1];
-                    if (btlGetCommandUseError(object->owner->unit, *picked) != 0) {
+                    if (btlGetCommandUseError(object->owner->unit, *picked) != BTL_COMMAND_USE_ERROR_NONE) {
                         sndSetStationedSeVolume(10);
                         break;
                     }
@@ -9212,7 +9211,7 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
                 sndSetStationedSeVolume(8);
                 return 1;
             }
-            if (btlCheckScenePairResult(object->owner->unit, &D_003B5D10.entries[entry]) != 0) {
+            if (btlCheckScenePairResult(object->owner->unit, &D_003B5D10.entries[entry]) != BTL_COMMAND_USE_ERROR_NONE) {
                 sndSetStationedSeVolume(10);
                 break;
             }
@@ -9393,8 +9392,6 @@ extern const char D_00436858[];
 extern const BattlePanelColors D_004169C0;
 extern char D_00436848[];
 extern char D_00436850[];
-extern s32 btlGetCommandUseError(BtlUnit *, s32);
-
 /* Keep the TU's pre-existing implicit itfSetTextDrawLimit calls: its void
  * prototype grows btlDrawItemCommandRows to492B vs480B native extent (OVER).
  * The existing matched caller corroborates this inherited context. */
@@ -9414,7 +9411,7 @@ void btlDrawActorCommandRows(BattleSceneObject *ctx, u16 kind, u16 page, u16 col
     u16 *list;
     u32 color;
     struct _FRQ *glyph;
-    s32 failure;
+    BtlCommandUseError failure;
     s32 cost;
     u32 iconColor;
 
@@ -9495,7 +9492,7 @@ void btlDrawActorCommandRows(BattleSceneObject *ctx, u16 kind, u16 page, u16 col
             return;
         }
         failure = btlGetCommandUseError(ctx->owner->unit, *list);
-        if (failure == 0) {
+        if (failure == BTL_COMMAND_USE_ERROR_NONE) {
             color = (highlight == top) ? 0x89FEFF80 : 0xA09DC380;
         } else {
             color = 0x504F6140;
@@ -9795,7 +9792,7 @@ void btlDrawLinkageSkillOptions(BattleSceneObject *object) {
     BattleRosterTable *list;
     s32 row;
     s32 j;
-    s32 blocked;
+    BtlCommandUseError blocked;
     s32 power;
     u32 textColor;
     u32 glyphColor;
@@ -9812,14 +9809,14 @@ void btlDrawLinkageSkillOptions(BattleSceneObject *object) {
 
     for (; i < rowCount && row < total; i++, row++) {
         blocked = btlCheckScenePairResult(object->owner->unit, &list->entries[row]);
-        if (blocked == 0) {
+        if (blocked == BTL_COMMAND_USE_ERROR_NONE) {
             glyphColor = selected == row ? 0x89FEFF80 : 0xA09DC380;
         } else {
             glyphColor = 0x504F6140;
         }
         textColor = (glyphColor & ~0xFF) | btlLinkedSelectionTaskBuffer->rowFade[i];
         glyphColor = textColor;
-        if (scrTestGlobalBitFlag(list->entries[row].skill) == 0 && blocked == 0 && selected != row) {
+        if (scrTestGlobalBitFlag(list->entries[row].skill) == 0 && blocked == BTL_COMMAND_USE_ERROR_NONE && selected != row) {
             glyphColor = btlLinkedSelectionTaskBuffer->rowFade[i] | 0xD1BA7100;
         }
         btlDrawIndexedBattleEntryGlyphs(0x1A, y, 0xFF0010, glyphColor, list->entries[row].skill);
@@ -9844,7 +9841,7 @@ void btlDrawLinkageSkillOptions(BattleSceneObject *object) {
             effDrawSpriteWithCornerColors(0x8F0 + j * 0x90, (y + 0xF) << 3, 0, colors.values, 0, btlResourceBlock->resA, 6, 0x53);
         }
 
-        if (blocked == 0) {
+        if (blocked == BTL_COMMAND_USE_ERROR_NONE) {
             btlSetCornerColors(&colors, btlLinkedSelectionTaskBuffer->rowFade[i] | 0x80808000);
         } else {
             color = textColor;
@@ -9865,35 +9862,33 @@ void btlDrawLinkageSkillOptions(BattleSceneObject *object) {
     }
 }
 
-extern s32 btlGetPartnerCommandUseError(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
-
 /* Check helper for a pair of scene objects: the caller's own result wins,
  * then the first object's, then the second's. */
-s32 btlCheckScenePairResult(BtlUnit *self, BattleRosterPair *args) {
-    s32 base;
-    s32 resultA = 0;
-    s32 resultB = 0;
+BtlCommandUseError btlCheckScenePairResult(BtlUnit *self, BattleRosterPair *args) {
+    BtlCommandUseError base;
+    BtlCommandUseError resultA = BTL_COMMAND_USE_ERROR_NONE;
+    BtlCommandUseError resultB = BTL_COMMAND_USE_ERROR_NONE;
     base = btlGetPartnerCommandUseError(self, self, args->first, args->second, args->skill);
     if (args->first != 0) {
         resultA = btlGetPartnerCommandUseError(args->first, args->first, self, args->second, args->skill);
-        if (resultA == 6 && base == 0) {
+        if (resultA == BTL_COMMAND_USE_ERROR_INSUFFICIENT_SCENE_SLOTS && base == BTL_COMMAND_USE_ERROR_NONE) {
             if (btlCheckCommandVitalCost(args->first, args->skill) == BTL_COMMAND_VITAL_COST_OK) {
-                resultA = 0;
+                resultA = BTL_COMMAND_USE_ERROR_NONE;
             }
         }
     }
     if (args->second != 0) {
         resultB = btlGetPartnerCommandUseError(args->second, args->second, self, args->first, args->skill);
-        if (resultB == 6 && base == 0) {
+        if (resultB == BTL_COMMAND_USE_ERROR_INSUFFICIENT_SCENE_SLOTS && base == BTL_COMMAND_USE_ERROR_NONE) {
             if (btlCheckCommandVitalCost(args->second, args->skill) == BTL_COMMAND_VITAL_COST_OK) {
-                resultB = 0;
+                resultB = BTL_COMMAND_USE_ERROR_NONE;
             }
         }
     }
-    if (base != 0) {
+    if (base != BTL_COMMAND_USE_ERROR_NONE) {
         return base;
     }
-    if (resultA != 0) {
+    if (resultA != BTL_COMMAND_USE_ERROR_NONE) {
         return resultA;
     }
     return resultB;
