@@ -28,6 +28,7 @@
 #include "kwln.h"
 #include "dat_state.h"
 #include "dat_calculated_stat_value_api.h"
+#include "btl_actor_attribute_api.h"
 #include "pty_roster_api.h"
 #include "dat_command.h"
 #include "kwln_task_lifecycle.h"
@@ -1085,7 +1086,7 @@ s32 btlAverageAllLevelsForMask(u32 actorMask) {
     return btlAverageMaskedActorStat(actorMask, 0);
 }
 
-s32 btlSumOrAverageActorAttribute(u32 mask, s32 attribute, s8 allowDisabled) {
+s32 btlSumOrAverageActorAttribute(u32 mask, DatBaseStatIndex baseStatIndex, s8 allowDisabled) {
     s32 sum = 0;
     s32 count = 0;
     BtlUnit *actor = ((BtlState *)btlGetRuntime())->units;
@@ -1094,7 +1095,7 @@ s32 btlSumOrAverageActorAttribute(u32 mask, s32 attribute, s8 allowDisabled) {
         if ((flags & 1) != 0) {
             if (allowDisabled == 0 || (flags & 0x20) == 0) {
                 if ((actor->partyRecord.flags & mask) != 0) {
-                    s32 value = datGetStatWithStatusOverride(&actor->partyRecord, attribute);
+                    s32 value = datGetStatWithStatusOverride(&actor->partyRecord, baseStatIndex);
                     count++;
                     sum += value;
                 }
@@ -1107,12 +1108,12 @@ s32 btlSumOrAverageActorAttribute(u32 mask, s32 attribute, s8 allowDisabled) {
     return sum;
 }
 
-void btlAverageFilteredActorAttribute(u32 partyRecordFlagsMask, u32 statIndex) {
-    btlSumOrAverageActorAttribute(partyRecordFlagsMask, statIndex, 1);
+void btlAverageFilteredActorAttribute(u32 partyRecordFlagsMask, DatBaseStatIndex baseStatIndex) {
+    btlSumOrAverageActorAttribute(partyRecordFlagsMask, baseStatIndex, 1);
 }
 
-s32 btlAverageActorAttribute(u32 partyRecordFlagsMask, s32 statIndex) {
-    return btlSumOrAverageActorAttribute(partyRecordFlagsMask, statIndex, 0);
+s32 btlAverageActorAttribute(u32 partyRecordFlagsMask, DatBaseStatIndex baseStatIndex) {
+    return btlSumOrAverageActorAttribute(partyRecordFlagsMask, baseStatIndex, 0);
 }
 
 extern void btlPreemptiveChanceHook();

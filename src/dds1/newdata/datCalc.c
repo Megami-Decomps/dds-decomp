@@ -7,6 +7,7 @@
 #include "pty_roster_value_record.h"
 #include "dat_state.h"
 #include "dat_calculated_stat_value_api.h"
+#include "btl_actor_attribute_api.h"
 #include "dat_affinity_selector.h"
 #include "dat_effective_affinity_api.h"
 #include "dat_world_field_flags.h"
@@ -1622,17 +1623,15 @@ s32 scrGetBattleAverageActorStatForGroup(void) {
     return 1;
 }
 
-extern s32 btlAverageActorAttribute(u32 partyRecordFlagsMask, s32 statIndex);
-
 /* Push the selected actor-group average for the requested attribute. */
 s32 evtPushAvailableChoiceRatio(void) {
     s32 battleAvailable = btlIsRuntimeAllocated();
     s32 averageValue;
     if (battleAvailable) {
         s32 groupChoice = scrGetIntPara(0);
-        s32 statIndex = scrGetIntPara(1);
+        DatBaseStatIndex baseStatIndex = scrGetIntPara(1);
         s32 selectedMask = groupChoice ? EVT_ALTERNATE_GROUP_MASK : EVT_DEFAULT_GROUP_MASK;
-        averageValue = btlAverageActorAttribute(selectedMask, statIndex);
+        averageValue = btlAverageActorAttribute(selectedMask, baseStatIndex);
     }
     else {
         averageValue = 0;

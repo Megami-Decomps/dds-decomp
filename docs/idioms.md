@@ -10015,12 +10015,15 @@ consistently with the script getters; see "Masked-average tail-call return types
 `btlAverageActorAttribute` at `0x001A95B0` and `0x001B3B10` was previously
 misnamed `__udivdi3`; these are game averaging wrappers, not libgcc helpers.
 Native code tail-jumps `btlSumOrAverageActorAttribute(mask, statIndex, 0)`;
-the real wrapper contract is `s32 (u32, s32)`. The VM command in
-`newdata/datCalc.c` calls that wrapper explicitly and stores an `s32` average.
-Do not express this call as `u64` division to manufacture a compiler libcall,
-or infer 64-bit width from a runtime-looking symbol name. The explicit call,
-truthful return and normal symbol/provenance rename match without changing
-native code or compiler flags.
+the ABI remains `s32 (u32, s32)`, with the second argument typed as the
+existing `DatBaseStatIndex` in C. The provider indexes `partyRecord.baseStats`
+and forwards the same axis to `datGetStatWithStatusOverride`; its filtered
+wrapper uses that same five-stat contract. The VM command in
+`newdata/datCalc.c` passes its requested axis to the wrapper and stores an
+`s32` average. Do not express this call as `u64` division to manufacture a
+compiler libcall, or infer 64-bit width from a runtime-looking symbol name. The
+explicit call, truthful return and normal symbol/provenance rename match
+without changing native code or compiler flags.
 
 ## Trace-justified skill-camera path selection
 

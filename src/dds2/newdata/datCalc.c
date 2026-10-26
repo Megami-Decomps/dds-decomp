@@ -23,6 +23,7 @@
 #include "dat_unit_has_skill_api.h"
 #include "pty_item_quantity_update_view.h"
 #include "pty_record_slot_value_api.h"
+#include "btl_actor_attribute_api.h"
 #include "eff_random_mod.h"
 #include "btl.h"
 #include "scr_integer_return_value_api.h"
@@ -2075,17 +2076,15 @@ s32 scrGetBattleAverageActorStatForGroup(void) {
     return 1;
 }
 
-extern s32 btlAverageActorAttribute(u32 partyRecordFlagsMask, s32 statIndex);
-
 /* Push the selected actor-group average for the requested attribute. */
 s32 evtPushAvailableChoiceRatio(void) {
     s32 battleAvailable = btlIsRuntimeAllocated();
     s32 averageValue;
     if (battleAvailable) {
         s32 groupChoice = scrGetIntPara(0);
-        s32 statIndex = scrGetIntPara(1);
+        DatBaseStatIndex baseStatIndex = scrGetIntPara(1);
         s32 selectedMask = groupChoice ? EVT_ALTERNATE_GROUP_MASK : EVT_DEFAULT_GROUP_MASK;
-        averageValue = btlAverageActorAttribute(selectedMask, statIndex);
+        averageValue = btlAverageActorAttribute(selectedMask, baseStatIndex);
     }
     else {
         averageValue = 0;
