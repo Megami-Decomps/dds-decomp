@@ -5,6 +5,7 @@
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "common.h"
+#include "dds3_camera_update_flags.h"
 #include "file_config_option_api.h"
 #include "btl_command_use_error.h"
 #include "btl_action_reaction_motion.h"
@@ -5937,7 +5938,7 @@ void btlUpdateBattleCameraFrame(void) {
     SDF_VU0_STOREVECTOR(position);
     dds3SetPosPoseSet(camera, (u128 *)position);
     dds3CameraObjectBasicSetFovy(camera, scene->cameraCommand.camera.fov);
-    data->fovUpdatePending |= 1;
+    data->fovUpdatePending |= DDS3_CAMERA_UPDATE_FOV_BIT;
     dds3SetRotPoseSet(camera, (u128 *)btlCameraOutputRotation);
     SDF_VU0_COPYVECTOR(&data->localUp, btlCameraLocalUpVector);
     scene->cameraCommand.state++;
@@ -5974,7 +5975,7 @@ void btlInitializeWorldCamera(void) {
         dds3SetRotPoseSet(camera, (u128 *)btlWorldCameraStartRotation);
         data = camera->data;
         dds3CameraObjectBasicSetFovy(camera, 0.6981317f);
-        data->fovUpdatePending |= 1;
+        data->fovUpdatePending |= DDS3_CAMERA_UPDATE_FOV_BIT;
     }
     camera = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), (u128 *)btlCreatedCameraTarget, (u128 *)btlCreatedCameraRotation);
     camera->value = (const char *)D_00436A98;

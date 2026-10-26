@@ -3,6 +3,7 @@
 #include "fld.h"
 #include "dds3_admin_control_api.h"
 #include "common.h"
+#include "dds3_camera_update_flags.h"
 #include "sdf_delayed_resource_check_api.h"
 #include "sdf_vu0.h"
 #include "scr_integer_return_value_api.h"
@@ -669,7 +670,7 @@ s32 evtCommand_CAM_SEL_FOVY(void) {
     } else {
         cameraOwner = evtSearchBasic(EFF_WORLD_KIND_CAMERA, scrGetIntPara(0));
         cameraData = cameraOwner->data;
-        cameraData->fovUpdatePending |= 1;
+        cameraData->fovUpdatePending |= DDS3_CAMERA_UPDATE_FOV_BIT;
     }
     if (cameraOwner == NULL) {
         return 1;

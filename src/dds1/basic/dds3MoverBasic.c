@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_camera_update_flags.h"
 #include "sdf_vu0.h"
 #include "dds3obj.h"
 #include "dds3_path.h"
@@ -8,8 +9,6 @@
 
 extern void dds3BackupPoseSet(dds3PoseSet_t *transform);
 
-
-#define DDS3_MOVER_FOV_UPDATE_BIT 1
 
 /* Apply enabled absolute path channels and step the path counter once, or apply
  * a callback-built relative transform when its return value is exactly 1.
@@ -45,7 +44,7 @@ s32 MoverBasicMainprocuder(dds3Basic_t *moverNode)
                 fieldOfView = dds3PathBasicControlGetFovy(slotResource->path);
                 cameraData = targetObject->data;
                 cameraData->fieldOfView = fieldOfView;
-                cameraData->fovUpdatePending |= DDS3_MOVER_FOV_UPDATE_BIT;
+                cameraData->fovUpdatePending |= DDS3_CAMERA_UPDATE_FOV_BIT;
             }
         }
         if (slotResource->path->counter.flags & DDS3_PATH_WORLD_TRANSFORM_CHANNEL) {

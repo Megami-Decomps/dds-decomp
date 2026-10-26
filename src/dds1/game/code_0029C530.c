@@ -31,6 +31,7 @@
 #include "eff_point_set_table.h"
 #include "eff_span_work.h"
 #include "common.h"
+#include "dds3_camera_update_flags.h"
 #include "sdf_vu0.h"
 #include "eff_emitter_type.h"
 #include "sdf_vu_rotation_axes.h"
@@ -9975,7 +9976,7 @@ s32 func_002B3698(EffActiveResource *owner) {
     VU0_SCALAR_OP(1.0f, "vmulx.xyzw vf10, vf10, vf2x");
     SDF_VU0_STOREVECTOR(&data->worldEye);
     dds3CameraObjectBasicSetFovy(camera, D_003BC9A8);
-    data->fovUpdatePending |= 1;
+    data->fovUpdatePending |= DDS3_CAMERA_UPDATE_FOV_BIT;
     dds3SetRotPoseSet(camera, &D_0037EEB0);
     return dds3PathBasicControlStep(&path->counter);
 }

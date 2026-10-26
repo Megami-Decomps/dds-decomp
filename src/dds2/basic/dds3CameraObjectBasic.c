@@ -1,4 +1,5 @@
 #include "common.h"
+#include "dds3_camera_update_flags.h"
 #include "sdf_vu0.h"
 #include "sdf_chip.h"
 #include "dds3obj.h"
@@ -49,9 +50,9 @@ s32 dds3UpdateCameraObject(dds3Basic_t *camera) {
         SDF_VU0_COPYVECTOR(sdfViewTargetVector, &inner->position);
         SDF_VU0_COPYVECTOR(aViewTarget, &data->worldEye);
         SDF_VU0_COPYVECTOR(aViewDown, &data->worldUp);
-        if (data->fovUpdatePending & 1) {
+        if (data->fovUpdatePending & DDS3_CAMERA_UPDATE_FOV_BIT) {
             dds3SetScreenFovy(data->fieldOfView);
-            data->fovUpdatePending &= ~1;
+            data->fovUpdatePending &= ~DDS3_CAMERA_UPDATE_FOV_BIT;
         }
     }
     return 1;
@@ -189,7 +190,7 @@ void dds3CameraObjectBasicGetTargetPos(dds3Basic_t *camera) {
 void dds3CameraObjectBasicSetFovy(dds3Basic_t *camera, f32 fieldOfView) {
     CameraData *state = camera->data;
     state->fieldOfView = fieldOfView;
-    state->fovUpdatePending |= 1;
+    state->fovUpdatePending |= DDS3_CAMERA_UPDATE_FOV_BIT;
 }
 
 /* Return the cached field of view in radians. */
