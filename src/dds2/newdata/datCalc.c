@@ -2352,9 +2352,13 @@ u8 btlSelectConditionalEncounterGroup(s32 encounterIndex) {
     return code == 8 ? 0 : code;
 }
 
+enum {
+    BTL_LEVEL_GATE_PARTY_FLAG_ELIGIBLE = 4
+};
+
 /* Compare truncated averages: enemy average + party average / 4 >= party average.
  * Requires a nonzero scene, a nonempty enemy list, and party entries carrying
- * all three flag masks 1/2/4. No eligible entries returns zero.
+ * occupied, level-gate-eligible and frontline flags. No eligible entries returns zero.
  * count and remaining serve both loops; word holds enemy IDs, then entry flags.
  * partyLevel is accumulated first and divided in place before comparison. */
 u8 btlCheckScenePartyLevelThreshold(u32 sceneIndex) {
@@ -2399,7 +2403,7 @@ u8 btlCheckScenePartyLevelThreshold(u32 sceneIndex) {
                 value = entry->flags;
                 entry++;
                 if (value & DAT_PARTY_FLAG_OCCUPIED) {
-                    if (value & 4) {
+                    if (value & BTL_LEVEL_GATE_PARTY_FLAG_ELIGIBLE) {
                         if (value & DAT_PARTY_FLAG_FRONTLINE) {
                             count++;
                             partyTotal += *levelCursor;
