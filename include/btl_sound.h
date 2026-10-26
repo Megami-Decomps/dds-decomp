@@ -263,12 +263,25 @@ typedef struct BtlDeadLoadArgs {
     struct sdfMemHandle_t *resourceAllocation; /* 0x08: retained until task finish. */
 } BtlDeadLoadArgs;
 
+/* The scheduler finishes this task on nonzero, then runs its allocation-release hook. */
+typedef s32 SndEarringPlaybackTaskResult;
+enum {
+    SND_EARRING_PLAYBACK_TASK_CONTINUE = 0,
+    SND_EARRING_PLAYBACK_TASK_FINISHED = 1,
+};
+
 typedef char BtlDeadLoadArgs_size_must_be_0x0C[
     (sizeof(BtlDeadLoadArgs) == 0x0C) ? 1 : -1];
 typedef char BtlDeadLoadArgs_request_offset_must_be_4[
     ((u32)&((BtlDeadLoadArgs *)0)->request == 4) ? 1 : -1];
 typedef char BtlDeadLoadArgs_resourceAllocation_offset_must_be_8[
     ((u32)&((BtlDeadLoadArgs *)0)->resourceAllocation == 8) ? 1 : -1];
+
+#ifdef VERSION_DDS1
+SndEarringPlaybackTaskResult sndUpdateEarringDeadPlayback(BtlDeadLoadArgs *args);
+#else
+SndEarringPlaybackTaskResult sndDeadAtracPlaybackTask(BtlDeadLoadArgs *args);
+#endif
 
 /* Fixed task payload for asynchronous ATRAC3 sample effects. */
 typedef struct Atrac3LoadTaskArgs {

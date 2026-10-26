@@ -10630,12 +10630,12 @@ extern char D_003A53B0[];
 
 extern char D_003A53D0[];
 
-u32 sndUpdateEarringDeadPlayback(BtlDeadLoadArgs *args) {
+SndEarringPlaybackTaskResult sndUpdateEarringDeadPlayback(BtlDeadLoadArgs *args) {
     const void *data;
     s32 size;
 
     if (args->request == 0) {
-        return 1;
+        return SND_EARRING_PLAYBACK_TASK_FINISHED;
     }
     if (args->resourceAllocation == 0) {
         if (pacFileCheckEnd(args->request) != 0) {
@@ -10650,13 +10650,13 @@ u32 sndUpdateEarringDeadPlayback(BtlDeadLoadArgs *args) {
             printf(D_003A5390);
             btlBossDebugPrintf(D_003A53B0);
         }
-        return 0;
+        return SND_EARRING_PLAYBACK_TASK_CONTINUE;
     }
     if (mnuGetSoundBufferStateLocked() == 0) {
         btlBossDebugPrintf(D_003A53D0);
-        return 1;
+        return SND_EARRING_PLAYBACK_TASK_FINISHED;
     }
-    return 0;
+    return SND_EARRING_PLAYBACK_TASK_CONTINUE;
 }
 
 void sndFinishEarringPlaybackTask(BtlDeadLoadArgs *args) {

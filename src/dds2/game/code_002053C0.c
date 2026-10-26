@@ -251,11 +251,11 @@ void sndStartDeadAtracLoad(BtlDeadLoadArgs *args) {
     work->earringPlaybackCount++;
 }
 
-s32 sndDeadAtracPlaybackTask(BtlDeadLoadArgs *args) {
+SndEarringPlaybackTaskResult sndDeadAtracPlaybackTask(BtlDeadLoadArgs *args) {
     const void *data;
     s32 size;
     if (args->request == 0) {
-        return 1;
+        return SND_EARRING_PLAYBACK_TASK_FINISHED;
     }
     if (args->resourceAllocation == 0) {
         if (pacFileCheckEnd(args->request) != 0) {
@@ -269,13 +269,13 @@ s32 sndDeadAtracPlaybackTask(BtlDeadLoadArgs *args) {
             mnuClearInactiveSoundBufferState();
             btlBossDebugPrintf("btl:ATRAC3 dead load end\n");
         }
-        return 0;
+        return SND_EARRING_PLAYBACK_TASK_CONTINUE;
     }
     if (mnuGetSoundBufferStateLocked() == 0) {
         btlBossDebugPrintf("btl:ATRAC3 dead play end\n");
-        return 1;
+        return SND_EARRING_PLAYBACK_TASK_FINISHED;
     }
-    return 0;
+    return SND_EARRING_PLAYBACK_TASK_CONTINUE;
 }
 
 void sndFinishEarringPlaybackTask(BtlDeadLoadArgs *taskArgs) {
