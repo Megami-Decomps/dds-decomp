@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_area_load_phase.h"
 #include "btl_rain_effect_api.h"
 #include "btl_script_resource_api.h"
 #include "btl_boss_data_api.h"
@@ -1404,7 +1405,7 @@ void btlApplyPartyEntryWeightedDelta(BtlState *scene) {
         }
         i++;
     } while (i < 5);
-    scene->loadStep = 0;
+    scene->loadStep = BTL_AREA_LOAD_PHASE_START;
 }
 
 
@@ -1420,7 +1421,7 @@ void btlApplyPartyEntryWeightedDelta(BtlState *scene) {
  * 0xB while a load is still pending. */
 u32 fldStepAreaLoad(BtlState *work) {
     ActionStateLink *node;
-    s32 step;
+    BtlAreaLoadPhase phase;
     if (brsIsPrimaryPanelUpdateReady() == 1) {
         work->commandRestrictFlags |= 0x20;
         if (work->tasks != 0) {
@@ -1431,31 +1432,31 @@ u32 fldStepAreaLoad(BtlState *work) {
             }
         } else {
             switch (work->loadStep) {
-            case 0:
+            case BTL_AREA_LOAD_PHASE_START:
                 work->battleFlags &= ~0x10;
                 if (fldTryStartPendingBattleReturnAreaLoad() != FLD_BATTLE_RETURN_AREA_LOAD_NOT_REQUESTED) {
-                    work->loadStep = 1;
+                    work->loadStep = BTL_AREA_LOAD_PHASE_POLLING;
                 } else {
-                    work->loadStep = 2;
+                    work->loadStep = BTL_AREA_LOAD_PHASE_COMPLETE;
                 }
                 btlReleaseEventAssets();
                 btlReleaseBossData();
                 break;
-            case 1:
+            case BTL_AREA_LOAD_PHASE_POLLING:
                 fldPollAreaResourceLoad();
                 if (fldGetNextFileLoadState() == FLD_NEXT_FILE_LOAD_FINISHED) {
-                    work->loadStep = 2;
+                    work->loadStep = BTL_AREA_LOAD_PHASE_COMPLETE;
                     btlBossDebugPrintf("btl:field loding end\n");
                 }
                 break;
-            case 2:
+            case BTL_AREA_LOAD_PHASE_COMPLETE:
                 break;
             }
         }
     }
-    step = work->loadStep;
-    if (step < 3) {
-        if (step > 0) {
+    phase = work->loadStep;
+    if (phase < BTL_AREA_LOAD_PHASE_COUNT) {
+        if (phase > BTL_AREA_LOAD_PHASE_START) {
             if (brsTaskPollDone() == BRS_TASK_POLL_RESULT_INACTIVE) {
                 return 0xB;
             }

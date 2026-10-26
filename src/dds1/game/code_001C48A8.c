@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_area_load_phase.h"
 #include "btl_rain_effect_api.h"
 #include "btl_script_resource_api.h"
 #include "btl_boss_data_api.h"
@@ -103,7 +104,7 @@ typedef struct BattleSceneWork {
     u8 pad280[8];
     s16 tileX;                 /* 0x288 */
     s16 tileY;                 /* 0x28A */
-    s32 loadStep;              /* 0x28C */
+    s32 loadStep;              /* 0x28C: battle-return area-load phase. */
     u8 pad290[0xC];
     s32 taskParent;
     u8 pad_2A0[0xC];
@@ -135,6 +136,8 @@ typedef char BattleSceneWorkStreamAdjustmentIndexOffsetCheck[
     ((u32)&((BattleSceneWork *)0)->streamAdjustmentIndex == 0x270) ? 1 : -1];
 typedef char BattleSceneWorkSceneIdOffsetCheck[
     ((u32)&((BattleSceneWork *)0)->sceneId == 0x27C) ? 1 : -1];
+typedef char BattleSceneWorkLoadStepOffsetCheck[
+    ((u32)&((BattleSceneWork *)0)->loadStep == 0x28C) ? 1 : -1];
 typedef char BattleSceneWorkOnUnitCreatedOffsetCheck[
     ((u32)&((BattleSceneWork *)0)->onUnitCreated == 0x5C0) ? 1 : -1];
 typedef char BattleSceneWorkTotalApOffsetCheck[
@@ -1367,7 +1370,7 @@ void btlApplyPartyEntryWeightedDelta(BattleSceneWork *scene) {
         }
         i++;
     } while (i < 5);
-    scene->loadStep = 0;
+    scene->loadStep = BTL_AREA_LOAD_PHASE_START;
 }
 
 
@@ -1382,7 +1385,7 @@ void btlApplyPartyEntryWeightedDelta(BattleSceneWork *scene) {
 /* Drive field loading or dispatch linked nodes to state 30; return 0xB while pending. */
 u32 fldStepAreaLoad(BattleSceneWork *work) {
     BtlTask *node;
-    s32 step;
+    BtlAreaLoadPhase phase;
 
     if (brsIsPrimaryPanelUpdateReady() == 1) {
         work->subFlags |= 0x20;
@@ -1394,31 +1397,31 @@ u32 fldStepAreaLoad(BattleSceneWork *work) {
             }
         } else {
             switch (work->loadStep) {
-            case 0:
+            case BTL_AREA_LOAD_PHASE_START:
                 work->flags &= ~0x10;
                 if (fldTryStartPendingBattleReturnAreaLoad() != FLD_BATTLE_RETURN_AREA_LOAD_NOT_REQUESTED) {
-                    work->loadStep = 1;
+                    work->loadStep = BTL_AREA_LOAD_PHASE_POLLING;
                 } else {
-                    work->loadStep = 2;
+                    work->loadStep = BTL_AREA_LOAD_PHASE_COMPLETE;
                 }
                 btlReleaseEventAssets();
                 btlReleaseBossData();
                 break;
-            case 1:
+            case BTL_AREA_LOAD_PHASE_POLLING:
                 fldPollAreaResourceLoad();
                 if (fldGetNextFileLoadState() == FLD_NEXT_FILE_LOAD_FINISHED) {
-                    work->loadStep = 2;
+                    work->loadStep = BTL_AREA_LOAD_PHASE_COMPLETE;
                     btlBossDebugPrintf("btl:field loding end\n");
                 }
                 break;
-            case 2:
+            case BTL_AREA_LOAD_PHASE_COMPLETE:
                 break;
             }
         }
     }
-    step = work->loadStep;
-    if (step < 3) {
-        if (step > 0) {
+    phase = work->loadStep;
+    if (phase < BTL_AREA_LOAD_PHASE_COUNT) {
+        if (phase > BTL_AREA_LOAD_PHASE_START) {
             if (brsTaskPollDone() == BRS_TASK_POLL_RESULT_INACTIVE) {
                 return 0xB;
             }
