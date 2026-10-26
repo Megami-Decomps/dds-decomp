@@ -41,7 +41,7 @@ s32 evtLoadSceneResourceFrom(dds3Basic_t *worldNode, const char *resourceName) {
         return 0;
     }
     worldData->sceneResourceHandle = resourceHandle;
-    worldData->sceneScript = (struct BfFlw0Header *)resolvedAddress;
+    worldData->sceneScript = (const struct BfFlw0Header *)resolvedAddress;
     return 1;
 }
 
@@ -65,7 +65,7 @@ Dds3SceneScriptAttachResult dds3SceneBasicLoadScriptFile_FromMem(
     resourceAddress = sdfMemLock(resourceHandle);
     if (resourceAddress != 0) {
         worldData->sceneResourceHandle = resourceHandle;
-        worldData->sceneScript = (struct BfFlw0Header *)resourceAddress;
+        worldData->sceneScript = (const struct BfFlw0Header *)resourceAddress;
         return DDS3_SCENE_SCRIPT_ATTACH_SUCCEEDED;
     }
     return notAttachedStatus;
@@ -87,7 +87,7 @@ void dds3SceneBasicReleaseScriptFile(dds3Basic_t *worldNode) {
    retail's beqz/b merge of the two exit paths has no plain-C shape. */
 dds3ProcessID_t *evtStartSceneResourceTask(dds3Basic_t *worldNode, const char *taskName) {
     EvtWorldTable *worldData = (EvtWorldTable *)worldNode->data;
-    struct BfFlw0Header *sceneScript = worldData->sceneScript;
+    const struct BfFlw0Header *sceneScript = worldData->sceneScript;
     ScrProcedureIndex scriptIndex;
 
     if (sceneScript == NULL) {

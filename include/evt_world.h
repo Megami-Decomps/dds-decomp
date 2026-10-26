@@ -96,7 +96,7 @@ typedef struct EvtWorldTable {
     dds3Basic_t *playerObject; /* 0x10 */
     const struct sdfMemHandle_t *fieldResourceHandle; /* 0x14: borrowed alias; fldReleaseFieldResources owns its release. */
     struct sdfMemHandle_t *sceneResourceHandle; /* 0x18: retained allocation descriptor; released at teardown. */
-    struct BfFlw0Header *sceneScript; /* 0x1C: resolved FLW0 header used for script lookup. */
+    const struct BfFlw0Header *sceneScript; /* 0x1C: borrowed resolved FLW0 view used for script lookup. */
     s32 drawEnabled; /* 0x20: controls drawing of kind 2 */
     u8 pad24[0x1C]; /* The SDK constructor allocates 0x40 bytes. */
 } EvtWorldTable;
