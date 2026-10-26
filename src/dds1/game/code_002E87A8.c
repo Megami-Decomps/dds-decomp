@@ -165,7 +165,7 @@ void sndInitializeChannelAndTrackState(s32 unused, s32 header) {
 }
 
 /* Allocate one aligned IOP block and distribute its address among active buffers. */
-void sndAllocateAlignedIopBuffers(s32 *bufferSizes, s32 bufferCount) {
+void sndAllocateAlignedIopBuffers(const s32 *bufferSizes, s32 bufferCount) {
     SndIopBuffer *buffer;
     s32 totalBytes;
     s32 alignedBytes;
@@ -197,7 +197,7 @@ void sndAllocateAlignedIopBuffers(s32 *bufferSizes, s32 bufferCount) {
     } while (bufferIndex != bufferCount);
 }
 
-void sndInitializeIopSoundSystem(s32 unused, s32 header, s32 *bufferSizes, s32 bufferCount) {
+void sndInitializeIopSoundSystem(s32 unused, s32 header, const s32 *bufferSizes, s32 bufferCount) {
     sdfSndBurstReqMode = 1;
     sndLoadIopSoundModules();
     sceSifInitIopHeap();

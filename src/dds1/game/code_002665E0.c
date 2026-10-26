@@ -1155,7 +1155,7 @@ extern s16 D_003BD8B0;
 
 extern s32 D_003BC5AC;
 
-extern void sndInitializeIopSoundSystem(char *, s32, s32 *, s32);
+extern void sndInitializeIopSoundSystem(char *, s32, const s32 *, s32);
 
 extern void p2sdLoadSMGFile(s32);
 
