@@ -2457,7 +2457,7 @@ void fldDoorLoad(s32 field) {
     }
 }
 
-void fldGetDoorEntry(FldWaypointBlock *src) {
+void fldGetDoorEntry(const FldWaypointBlock *src) {
     fldActorWaypointRows = *src;
 }
 

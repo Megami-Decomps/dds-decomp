@@ -1576,7 +1576,7 @@ u8 fldHasAreaResourceNameChanged(void) {
     return strcmp(D_003C9200, buf) != 0;
 }
 
-extern void fldGetDoorEntry(FldWaypointBlock *source);
+extern void fldGetDoorEntry(const FldWaypointBlock *source);
 
 extern void fldInfLoadFromMem(const FldInfTable *source);
 
@@ -1611,7 +1611,7 @@ void fldLoadFieldPack(void) {
                     PAC_WORK_ALLOCATION(work));
                 break;
             case FLD_PACKED_RESOURCE_ACTOR_WAYPOINT_TABLE:
-                fldGetDoorEntry((FldWaypointBlock *)work->dataCursor);
+                fldGetDoorEntry((const FldWaypointBlock *)work->dataCursor);
                 sdfMemFreeDelayedDirect(
                     PAC_WORK_ALLOCATION(work));
                 break;
