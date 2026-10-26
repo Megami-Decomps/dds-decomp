@@ -28,11 +28,11 @@ void fldFreeInputPanel(void) {
     }
 }
 
-void fldInputPanelSetDraw(s32 isPending) {
+void fldInputPanelSetDraw(FldTitleBannerDrawRequest request) {
     FldTitleBannerMenu *menu;
 
     menu = (FldTitleBannerMenu *)dds3GetProcessData(inputpanel_id);
-    menu->pending = isPending;
+    menu->drawRequestState = request;
 }
 
 void fldInputPanelSetMessage(s32 choice) {

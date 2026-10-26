@@ -329,7 +329,7 @@ FldTitleBannerResult fldResolvePendingTitleBanner(void) {
     }
 
     menu = (FldTitleBannerMenu *)dds3GetProcessData(inputpanel_id);
-    if (menu->pending == 0) {
+    if (menu->drawRequestState == FLD_TITLE_BANNER_DRAW_NOT_REQUESTED) {
         return FLD_TITLE_BANNER_NO_PENDING;
     }
 
@@ -337,7 +337,7 @@ FldTitleBannerResult fldResolvePendingTitleBanner(void) {
         if ((s8)dds3PadButtonState[1][0][1] < 0) {
             fldApplyCameraFacingPoint();
         }
-        menu->pending = 0;
+        menu->drawRequestState = FLD_TITLE_BANNER_DRAW_NOT_REQUESTED;
         area = &fldGlobalBase;
         if (area->titleFade != 0) {
             dds3FadeIn2(8);

@@ -205,7 +205,7 @@ s32 fldCmdQueryActorEntrySceneStatus(void) {
         return 1;
     }
     fldInputPanelSetMessage(scrGetIntPara(0));
-    fldInputPanelSetDraw(1);
+    fldInputPanelSetDraw(FLD_TITLE_BANNER_DRAW_REQUESTED);
     result = fldResolvePendingTitleBanner();
     switch (result) {
     case FLD_TITLE_BANNER_RESOLVED:
@@ -239,7 +239,7 @@ s32 fldCmdQueryAlternateActorEntrySceneStatus(void) {
         return 1;
     }
     fldInputPanelSetMessage(scrGetIntPara(0));
-    fldInputPanelSetDraw(1);
+    fldInputPanelSetDraw(FLD_TITLE_BANNER_DRAW_REQUESTED);
     result = fldResolvePendingTitleBanner();
     switch (result) {
     case FLD_TITLE_BANNER_RESOLVED:
@@ -257,7 +257,7 @@ s32 fldCommand_ACT_WIN_DSP3(void) {
     FldTitleBannerResult result;
 
     fldInputPanelSetMessage(scrGetIntPara(0));
-    fldInputPanelSetDraw(1);
+    fldInputPanelSetDraw(FLD_TITLE_BANNER_DRAW_REQUESTED);
     result = fldResolvePendingTitleBanner();
     if (result == FLD_TITLE_BANNER_NO_PENDING) {
         scrSetIntReturnValue(-1);

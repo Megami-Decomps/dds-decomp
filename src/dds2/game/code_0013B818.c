@@ -3079,14 +3079,14 @@ s32 fldUpdateTitleBannerTask(dds3ProcessID_t *task) {
         return 0;
     }
     menu = (FldTitleBannerMenu *)dds3GetProcessData(task);
-    if (menu->pending != 0) {
+    if (menu->drawRequestState != FLD_TITLE_BANNER_DRAW_NOT_REQUESTED) {
         fldDrawTitleBannerFrame(menu->position);
         fldDrawTitleBannerCursor(D_00399F60[menu->choice] - 9, 0x130);
         itfSetTextDrawLimit(0x13);
         fldKanjiDraw(D_00399F60[menu->choice] + 10, 0x98, 0xA09DC380, D_00399EA0[menu->choice]);
         itfSetTextDrawLimit(-1);
         menu->position = menu->position + 1;
-        menu->pending = 0;
+        menu->drawRequestState = FLD_TITLE_BANNER_DRAW_NOT_REQUESTED;
     } else {
         menu->position = 0;
     }
@@ -3097,7 +3097,7 @@ s32 fldInputPanelProcess1(dds3ProcessID_t *task) {
     FldTitleBannerMenu *menu = sdfChipAllocDirect(sizeof(FldTitleBannerMenu));
     menu->choice = 1;
     menu->position = 0;
-    menu->pending = 0;
+    menu->drawRequestState = FLD_TITLE_BANNER_DRAW_NOT_REQUESTED;
     menu->reserved = 0;
     dds3SetProcessData(task, (u32)menu);
     return (s32)fldUpdateTitleBannerTask;
