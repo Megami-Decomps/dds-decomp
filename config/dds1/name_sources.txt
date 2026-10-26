@@ -525,9 +525,9 @@
 0x00110860	dds3VisibleSceneBasic	inferred	SMT3HD name via SLUS_209.11 0x0010F020, byte-identical; was dds3SetWorldObjectDrawEnabled
 0x00110880	dds3AddSceneBasicData	inferred	SMT3HD name via SLUS_209.11 0x0010F040, reloc-identical; was dds3AppendWorldObjectNode
 0x00110928	dds3DeleteSceneBasicData	inferred	SMT3HD name via SLUS_209.11 0x0010F0E8, reloc-identical; was dds3RemoveWorldObjectNode
-0x001109B8	dds3SetActiveCameraSceneBasic	inferred	SMT3HD name via SLUS_209.11 0x0010F178, reloc-identical; was dds3SetWorldCameraObject
+0x001109B8	dds3ReplaceActiveCameraSceneBasic	inferred	Replaces selected camera and returns previous borrowed node; verified in both DDS title providers and callers
 0x001109F0	dds3GetActiveCameraSceneBasic	inferred	SMT3HD name via SLUS_209.11 0x0010F1B0, shared-hash-in-run; was dds3GetWorldCameraObject
-0x00110A00	dds3SetActiveUnitSceneBasic	inferred	SMT3HD name via SLUS_209.11 0x0010F1C0, reloc-identical; was dds3SetWorldPlayerObject
+0x00110A00	dds3ReplaceActiveUnitSceneBasic	inferred	Replaces selected player and returns previous borrowed node; verified in both DDS title providers and callers
 0x00110A38	dds3GetActiveUnitSceneBasic	inferred	SMT3HD name via SLUS_209.11 0x0010F1F8, shared-hash-in-run; was dds3GetWorldPlayerObject
 0x00110A48	dds3SearchSceneBasic	inferred	SMT3HD name via SLUS_209.11 0x0010F208, byte-identical; was dds3FindWorldObjectNodeByKey
 0x00110AB0	dds3SceneBasicGetList	inferred	SMT3HD name via SLUS_209.11 0x0010F270, reloc-identical; was dds3CopyWorldListToValueChain

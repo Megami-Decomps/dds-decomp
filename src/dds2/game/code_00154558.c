@@ -615,7 +615,7 @@ s32 fldCommand_CAM_SEL_PHOKAN(void) {
     f32 pos[4];
     f32 rot[4];
     dds3Basic_t *target;
-    dds3Basic_t *object;
+    dds3Basic_t *previousCamera;
     dds3Basic_t *world;
 
     if (scrGetIntPara(0) == -1) {
@@ -623,11 +623,11 @@ s32 fldCommand_CAM_SEL_PHOKAN(void) {
         if (target == NULL) {
             return 1;
         }
-        object = dds3SetActiveCameraSceneBasic(dds3GetActiveScene(), target);
-        if (object == NULL) {
+        previousCamera = dds3ReplaceActiveCameraSceneBasic(dds3GetActiveScene(), target);
+        if (previousCamera == NULL) {
             return 1;
         }
-        dds3CameraObjectBasicGetTgtCam(object, pos, rot);
+        dds3CameraObjectBasicGetTgtCam(previousCamera, pos, rot);
         fldUpdateCameraProjectionEndpoints();
         D_0038BAD0[0] = pos[0];
         D_0038BAD0[1] = pos[1];
@@ -644,7 +644,7 @@ s32 fldCommand_CAM_SEL_PHOKAN(void) {
         if (target == NULL) {
             return 1;
         }
-        dds3SetActiveCameraSceneBasic(dds3GetActiveScene(), target);
+        dds3ReplaceActiveCameraSceneBasic(dds3GetActiveScene(), target);
     }
     return 1;
 }

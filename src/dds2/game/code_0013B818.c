@@ -1087,11 +1087,11 @@ s32 fldDispatchInteractionAction(s32 messageId, s32 slot) {
             if (node != NULL) {
                 camera = dds3SearchSceneBasic(world, node->key, 4);
                 if (camera != NULL) {
-                    dds3SetActiveCameraSceneBasic(world, camera);
+                    dds3ReplaceActiveCameraSceneBasic(world, camera);
                 }
             }
         } else if (fldCamNowEveCamera() != 0) {
-            dds3SetActiveCameraSceneBasic(world, fldGetPlayerSceneState());
+            dds3ReplaceActiveCameraSceneBasic(world, fldGetPlayerSceneState());
             switch (D_003897C0[0]) {
             case 0:
             case 3:
@@ -1446,7 +1446,7 @@ void fldDoor_ExitCamera(const char *name) {
                 }
                 if (entry->variantMode == 0 && entry->linkKind == 3) {
                     camera = dds3SceneBasicSearchNameAndType(dds3GetActiveScene(), 4, entry->linkName);
-                    dds3SetActiveCameraSceneBasic(dds3GetActiveScene(), camera);
+                    dds3ReplaceActiveCameraSceneBasic(dds3GetActiveScene(), camera);
                     fldHideSceneModelsAndResetCamera();
                     return;
                 }

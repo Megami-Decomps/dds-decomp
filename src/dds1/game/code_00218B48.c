@@ -3777,7 +3777,7 @@ void evtSetTestCamera(void) {
     object = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), (u128 *)position, (u128 *)rotation);
     dds3GetRadiusPoseSet((dds3Basic_t *)object, 10.0f);
     dds3ObjectBaseCreateMover(object);
-    dds3SetActiveCameraSceneBasic(dds3GetControlScene(), (dds3Basic_t *)object);
+    dds3ReplaceActiveCameraSceneBasic(dds3GetControlScene(), (dds3Basic_t *)object);
     dds3ObjectBaseSetPadControl(object, 0);
 }
 

@@ -1075,7 +1075,7 @@ void fldRebuildFieldScene(void) {
             fldCreateChaseCameraObject();
             fldGlobalBase.targetGuideEnabled = 1;
         }
-        dds3SetActiveUnitSceneBasic(dds3GetControlScene(), fldPlayerObject);
+        dds3ReplaceActiveUnitSceneBasic(dds3GetControlScene(), fldPlayerObject);
         fldPreparePlayerSceneCameraTarget();
         fldCreateSecondaryWorldCamera();
         if (sceneWork->primaryState == 0) {
@@ -1254,7 +1254,7 @@ void fldTogglePlayerModel(void) {
     }
     fldPlayerObject = dds3AddUnitObjectBasic(dds3AllocObjectId(), &sceneWork->position, (u128 *)work);
     dds3SetUnitObjectId(fldPlayerObject, D_00412EC0);
-    dds3SetActiveUnitSceneBasic(dds3GetControlScene(), fldPlayerObject);
+    dds3ReplaceActiveUnitSceneBasic(dds3GetControlScene(), fldPlayerObject);
     fldLoadPlayerModel();
     D_00435F40 = D_00435F44;
     D_00435F38 = sdfMemAllocDirect(D_00435F44);
@@ -1397,7 +1397,7 @@ void fldCreatePlayerObject(void) {
     if (fldPlayerObject == 0) {
         fldPlayerObject = dds3AddUnitObjectBasic(dds3AllocObjectId(), (u128 *)position, (u128 *)rotation);
         dds3SetUnitObjectId(fldPlayerObject, D_00412EC0);
-        dds3SetActiveUnitSceneBasic(dds3GetControlScene(), fldPlayerObject);
+        dds3ReplaceActiveUnitSceneBasic(dds3GetControlScene(), fldPlayerObject);
         if (D_00435F30 != 0) {
             dds3ObjectBaseOffFlag(fldPlayerObject, 0x20);
         }
@@ -1455,7 +1455,7 @@ void fldSpawnPlayerUnits(f32 *input) {
             player = dds3AddUnitObjectBasic(dds3AllocObjectId(), (u128 *)input, (u128 *)work);
             fldPlayerObject = player;
             dds3SetUnitObjectId(player, D_00412EC0);
-            dds3SetActiveUnitSceneBasic(dds3GetControlScene(), fldPlayerObject);
+            dds3ReplaceActiveUnitSceneBasic(dds3GetControlScene(), fldPlayerObject);
             if (D_00435F30 != 0) {
                 dds3ObjectBaseOffFlag(fldPlayerObject, 0x20);
             }
@@ -1572,7 +1572,7 @@ void fldCreateSecondaryWorldCamera(void) {
     dds3SetUnitObjectId(cameraObject, D_00435F58);
     dds3CameraObjectBasicGetCameraTM(*cameraObjectSlot, (u128 *)&worldEye);
     dds3GetRadiusPoseSet(*cameraObjectSlot, 2.0f);
-    dds3SetActiveCameraSceneBasic(dds3GetControlScene(), *cameraObjectSlot);
+    dds3ReplaceActiveCameraSceneBasic(dds3GetControlScene(), *cameraObjectSlot);
 }
 
 s32 fldPlayerCameraTargetNoPathUpdate(dds3PoseSet_t *relativeTransform, dds3Basic_t *target) {

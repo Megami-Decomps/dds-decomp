@@ -6895,7 +6895,7 @@ void fldCreateGrippedUnitMarker(s32 gridX, s32 gridY, s32 slot) {
         object = dds3AddUnitObjectBasic(dds3AllocObjectId(), (u128 *)position,
                                         (u128 *)rotation);
         dds3SetUnitObjectId(object, "TUKAMI_UNIT");
-        dds3SetActiveUnitSceneBasic(dds3GetControlScene(), object);
+        dds3ReplaceActiveUnitSceneBasic(dds3GetControlScene(), object);
         dds3RebuildObjectModelContext(object, 2, 0x10);
         dds3GetRadiusPoseSet(object, 180.0f);
 
@@ -6987,7 +6987,7 @@ void fldCreateChaseCameraObject(void) {
     SDF_VU0_STOREVECTOR_NOMEM(rotation);
     D_00435F1C = dds3AddUnitObjectBasic(dds3AllocObjectId(), (u128 *)position, (u128 *)rotation);
     dds3SetUnitObjectId(D_00435F1C, "OIKAKE_UNIT");
-    dds3SetActiveUnitSceneBasic(dds3GetControlScene(), D_00435F1C);
+    dds3ReplaceActiveUnitSceneBasic(dds3GetControlScene(), D_00435F1C);
     dds3RebuildObjectModelContext(D_00435F1C, 1, 0x103);
     dds3GetRadiusPoseSet(D_00435F1C, 180.0f);
     dds3ObjectBaseOnFlag(D_00435F1C, 0x400);

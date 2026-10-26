@@ -696,5 +696,5 @@ void mnuCreateTitleCameraWorldEntry(void) {
     mnuTitleCameraObject = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), (u128 *)mnuTitleCameraPosition, (u128 *)mnuTitleCameraRotation);
     dds3SetUnitObjectId(mnuTitleCameraObject, "title_camera");
     dds3GetRadiusPoseSet(mnuTitleCameraObject, 2.0f);
-    dds3SetActiveCameraSceneBasic(dds3GetControlScene(), mnuTitleCameraObject);
+    dds3ReplaceActiveCameraSceneBasic(dds3GetControlScene(), mnuTitleCameraObject);
 }

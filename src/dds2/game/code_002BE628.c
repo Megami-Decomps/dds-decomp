@@ -3883,7 +3883,7 @@ void evtStageTestDrawCameraTransformDebug(void) {
         } else {
             camera = ((EvtWorldTable *)world->data)->slots[EVT_WORLD_SLOT_CAMERA].head;
         }
-        dds3SetActiveCameraSceneBasic((dds3Basic_t *)dds3GetActiveScene(), camera);
+        dds3ReplaceActiveCameraSceneBasic((dds3Basic_t *)dds3GetActiveScene(), camera);
         dds3SetScreenFovy(dds3CameraObjectBasicGetFovy(camera));
     } else if (dds3PadButtonState[0x22] < 0) {
         if (camera->previous != NULL) {
@@ -3891,7 +3891,7 @@ void evtStageTestDrawCameraTransformDebug(void) {
         } else {
             camera = ((EvtWorldTable *)world->data)->slots[EVT_WORLD_SLOT_CAMERA].tail;
         }
-        dds3SetActiveCameraSceneBasic((dds3Basic_t *)dds3GetActiveScene(), camera);
+        dds3ReplaceActiveCameraSceneBasic((dds3Basic_t *)dds3GetActiveScene(), camera);
         dds3SetScreenFovy(dds3CameraObjectBasicGetFovy(camera));
     }
     name = camera->value;

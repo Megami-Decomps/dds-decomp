@@ -302,7 +302,7 @@ void dds3DeleteSceneBasicData(dds3Basic_t *node) {
 }
 
 
-dds3Basic_t *dds3SetActiveCameraSceneBasic(dds3Basic_t *object, dds3Basic_t *cameraObject) {
+dds3Basic_t *dds3ReplaceActiveCameraSceneBasic(dds3Basic_t *object, dds3Basic_t *cameraObject) {
     EvtWorldTable *data;
     dds3Basic_t *previous;
 
@@ -317,7 +317,7 @@ dds3Basic_t *dds3GetActiveCameraSceneBasic(dds3Basic_t *object) {
 }
 
 
-dds3Basic_t *dds3SetActiveUnitSceneBasic(dds3Basic_t *object, dds3Basic_t *playerObject) {
+dds3Basic_t *dds3ReplaceActiveUnitSceneBasic(dds3Basic_t *object, dds3Basic_t *playerObject) {
     EvtWorldTable *data;
     dds3Basic_t *previous;
 

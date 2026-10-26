@@ -168,6 +168,6 @@ void AddCamera(void) {
     dds3CameraObjectBasicGetCameraTM(D_00438944, worldEye);
     dds3GetRadiusPoseSet(D_00438944, 2.0f);
     world = dds3GetControlScene();
-    dds3SetActiveCameraSceneBasic((struct dds3Basic_t *)world, D_00438944);
+    dds3ReplaceActiveCameraSceneBasic((struct dds3Basic_t *)world, D_00438944);
     dds3SetScreenFovy(0.6283184886f);
 }

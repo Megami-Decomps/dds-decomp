@@ -5983,7 +5983,7 @@ void btlInitializeWorldCamera(void) {
     dds3ObjectBaseCreateMover(camera);
     dds3ObjectBaseSetPadControl(camera, 0);
     dds3CameraObjectBasicSetFovy(camera, 0.6981317f);
-    dds3SetActiveCameraSceneBasic(dds3GetActiveScene(), camera);
+    dds3ReplaceActiveCameraSceneBasic(dds3GetActiveScene(), camera);
     battle->cameraObject = camera;
     battle->cameraCommand.targetList = btlAllocateIndexList(13);
     battle->battleFlags |= 0x10;
@@ -6127,7 +6127,7 @@ void btlRefreshWorldCameraHandle(void) {
                 } else {
                     handle = ((EvtWorldTable *)object->data)->slots[EFF_WORLD_KIND_CAMERA].head;
                 }
-                dds3SetActiveCameraSceneBasic(object, handle);
+                dds3ReplaceActiveCameraSceneBasic(object, handle);
                 dds3SetScreenFovy(dds3CameraObjectBasicGetFovy(handle));
             }
         }

@@ -61,9 +61,11 @@ void dds3SceneBasicMakeScene(dds3Basic_t *object, const char *resourcePath);
 /* Store the source object address used by a slot's later path replacement. */
 void dds3MoverBasicSetPath(dds3Basic_t *object, dds3Basic_t *sourceObject);
 dds3Basic_t *dds3GetActiveCameraSceneBasic(dds3Basic_t *world);
-dds3Basic_t *dds3SetActiveCameraSceneBasic(dds3Basic_t *world, dds3Basic_t *camera);
+/* For a valid world, replace its camera and return the previous borrowed node (NULL if unset). */
+dds3Basic_t *dds3ReplaceActiveCameraSceneBasic(dds3Basic_t *world, dds3Basic_t *camera);
 dds3Basic_t *dds3GetActiveUnitSceneBasic(dds3Basic_t *world);
-dds3Basic_t *dds3SetActiveUnitSceneBasic(dds3Basic_t *world, dds3Basic_t *player);
+/* For a valid world, replace its player and return the previous borrowed node (NULL if unset). */
+dds3Basic_t *dds3ReplaceActiveUnitSceneBasic(dds3Basic_t *world, dds3Basic_t *player);
 
 /* Inner transform vector helpers; fetch results are returned in VU vf10. */
 void dds3SetPosPoseSet(dds3Basic_t *object, u128 *vector);

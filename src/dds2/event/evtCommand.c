@@ -627,7 +627,7 @@ s32 evtCommandAddEffectUnitToWorld(void) {
     if (cameraOwner == NULL) {
         return 1;
     }
-    dds3SetActiveCameraSceneBasic(dds3GetActiveScene(), cameraOwner);
+    dds3ReplaceActiveCameraSceneBasic(dds3GetActiveScene(), cameraOwner);
     return 1;
 }
 
@@ -645,7 +645,7 @@ s32 evtCommand_CAM_SEL_FOVY(void) {
     if (cameraOwner == NULL) {
         return 1;
     }
-    dds3SetActiveCameraSceneBasic(dds3GetActiveScene(), cameraOwner);
+    dds3ReplaceActiveCameraSceneBasic(dds3GetActiveScene(), cameraOwner);
     return 1;
 }
 

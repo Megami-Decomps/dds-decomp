@@ -25,7 +25,7 @@ void fldCreateLocalMapCamera(void) {
     fldLocalMapCameraObject = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), (u128 *)&fldLocalMapFirstCameraVector, (u128 *)&fldLocalMapSecondCameraVector);
     dds3SetUnitObjectId(fldLocalMapCameraObject, "Lmap_Cam");
     dds3GetRadiusPoseSet(fldLocalMapCameraObject, 2.0f);
-    dds3SetActiveCameraSceneBasic(dds3GetControlScene(), fldLocalMapCameraObject);
+    dds3ReplaceActiveCameraSceneBasic(dds3GetControlScene(), fldLocalMapCameraObject);
 }
 
 INCLUDE_SDATA(const s32, "game/code_0030B7D0", fldLocalMapCameraObject);

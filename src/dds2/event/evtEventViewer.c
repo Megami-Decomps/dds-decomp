@@ -718,7 +718,7 @@ void evtViewerApplySelectedEntry(EvtRuntime *viewer) {
         selectedEntry = viewer->fallbackEntry;
     }
     if (selectedEntry != 0) {
-        dds3SetActiveCameraSceneBasic(dds3GetActiveScene(), selectedEntry);
+        dds3ReplaceActiveCameraSceneBasic(dds3GetActiveScene(), selectedEntry);
         dds3SetScreenFovy(dds3CameraObjectBasicGetFovy(selectedEntry));
     }
 }
