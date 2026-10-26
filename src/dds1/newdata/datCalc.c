@@ -428,7 +428,7 @@ extern EvtScriptContext evtWorkScriptContext;
 extern s32 scrGetIntPara(s32 idx);
 extern struct scrProcessWork_s *scrSetIntReturnValue(s32 retVal);
 extern struct scrProcessWork_s *scrSetFloatReturnValue(f32 value);
-extern datUnitWork_t *dds3FindEntry(s32 rosterIndex);
+extern datUnitWork_t *dds3FindEntry(s32 unitId);
 extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 extern void ptyMergeStockSkills(datUnitWork_t *unit);
 extern u8 btlIsRuntimeAllocated(void);
@@ -809,13 +809,13 @@ u16 datGetLevelForDraw(const datUnitWork_t *entry) {
     return level < PTY_LEVEL_LIMIT ? level : PTY_MAX_LEVEL;
 }
 
-/* Find the first occupied slot with this roster identifier, or return NULL. */
-datUnitWork_t *dds3FindEntry(s32 rosterIndex) {
+/* Find the first occupied party record for this unit ID, or return NULL. */
+datUnitWork_t *dds3FindEntry(s32 unitId) {
     datUnitWork_t *entry = DDS3_GBWK->party;
     s32 slotIndex = 0;
 
     do {
-        if (entry->unitId != rosterIndex) {
+        if (entry->unitId != unitId) {
             slotIndex++;
         } else {
             if (entry->flags & DAT_PARTY_FLAG_OCCUPIED) {
@@ -877,8 +877,8 @@ PtyFrontlinePromotionResult ptyRebalanceFrontline(s32 unitId) {
     return PTY_FRONTLINE_PROMOTION_PERFORMED;
 }
 
-u8 ptyIsRosterEntryPresent(s32 rosterIndex) {
-    return dds3FindEntry(rosterIndex) != 0;
+u8 ptyIsPartyUnitPresent(s32 unitId) {
+    return dds3FindEntry(unitId) != 0;
 }
 
 /* Return the highest occupied-slot level, or zero when no slot is occupied. */
@@ -2033,9 +2033,9 @@ void btlSurpriseChanceHook(s32 chance) {
 }
 
 s32 evtPushRequestedRosterPresence(void) {
-    s32 rosterIndex = scrGetIntPara(0);
+    s32 unitId = scrGetIntPara(0);
 
-    scrSetIntReturnValue(ptyIsRosterEntryPresent(rosterIndex) == 1);
+    scrSetIntReturnValue(ptyIsPartyUnitPresent(unitId) == 1);
     return 1;
 }
 

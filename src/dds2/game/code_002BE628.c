@@ -62,7 +62,7 @@ extern void fldActivatePendingSceneCommand(void);
 extern s32 itfGridLookupValueOrDefault(EffectSlotSet *resource, s32 resourceIndex);
 extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *resource, s32 resourceIndex, s32 x, s32 y, s32 width, s32 height);
 extern void kwlnDebugGraphSetEnabled(s8 enabled);
-extern u8 ptyIsRosterEntryPresent(s32 rosterIndex);
+extern u8 ptyIsPartyUnitPresent(s32 unitId);
 extern s32 sdfApplyCommandResults(s32 channel, datUnitWork_t *sourceRecord, datUnitWork_t *item);
 extern void sndDestroyFileQueueWrapper(struct SoundHandleNode *node);
 /* Original-style implicit int, kept: matched code depends on it: qsort, sndCreateSystemEffectHandle. */
@@ -2935,10 +2935,10 @@ s32 btlItemApplyPermanentBonus(u16 itemId, datUnitWork_t *unit) {
 }
 
 s32 ptyChooseFirstAvailableRosterId(void) {
-    if (ptyIsRosterEntryPresent(1)) return 1;
-    if (ptyIsRosterEntryPresent(2)) return 2;
-    if (ptyIsRosterEntryPresent(5)) return 5;
-    return ptyIsRosterEntryPresent(8) ? 8 : 1;
+    if (ptyIsPartyUnitPresent(1)) return 1;
+    if (ptyIsPartyUnitPresent(2)) return 2;
+    if (ptyIsPartyUnitPresent(5)) return 5;
+    return ptyIsPartyUnitPresent(8) ? 8 : 1;
 }
 
 extern s32 fldEsutoMaChk(void);

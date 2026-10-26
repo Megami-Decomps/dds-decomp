@@ -805,7 +805,7 @@
 0x0011A580	datGetLevelForDraw	inferred	SMT3HD name via SLUS_209.11 0x00245D18, byte-identical; was dds3Clamp99
 0x0011A598	dds3FindEntry	inferred	finds Entry1A4 with +4 == arg0 and flag set; returns pointer or NULL
 0x0011A5E8	ptyRebalanceFrontline	inferred	legacy Party_RebalanceFrontlineBitAfterRemoval: rebalances the frontline bit after a party removal
-0x0011A968	ptyIsRosterEntryPresent	inferred	Returns whether the specified roster entry exists. [names_reviewed10.tsv]
+0x0011A968	ptyIsPartyUnitPresent	inferred	Checks whether a party unit ID resolves to an occupied record; callers supply unit IDs, not roster slots.
 0x0011A988	dds3EntryMax	inferred	max of +0x14 over flag-set Entry1A4 entries (5 iters, stride 0x1A4)
 0x0011A9C8	ptyGetAverageLevel	inferred	legacy Party_GetActiveAverageLevelCeil: ceil of the average level across present active rows
 0x0011AA28	ptyAddUnit	inferred	legacy Party_AddUnitById: adds a unit to the active party from the stock row

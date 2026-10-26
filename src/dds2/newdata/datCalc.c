@@ -455,7 +455,7 @@ ptyUnitMatchesAffinityRequirement(const datUnitWork_t *unit, s32 affinity, u8 re
 
 
 
-extern datUnitWork_t *dds3FindEntry(s32 rosterIndex);
+extern datUnitWork_t *dds3FindEntry(s32 unitId);
 
 extern scrProcessWork_s *evtWorkScriptTask;
 
@@ -925,12 +925,12 @@ u16 datGetLevelForDraw(const datUnitWork_t *entry) {
     return level < PTY_LEVEL_LIMIT ? level : PTY_MAX_LEVEL;
 }
 
-/* Find the first occupied slot with this roster identifier, or return zero. */
-datUnitWork_t *dds3FindEntry(s32 rosterIndex) {
+/* Find the first occupied party record for this unit ID, or return zero. */
+datUnitWork_t *dds3FindEntry(s32 unitId) {
     s32 slotIndex = 0;
     datUnitWork_t *entry = DDS3_GBWK->party;
     do {
-        if (entry->unitId == rosterIndex && (entry->flags & DAT_PARTY_FLAG_OCCUPIED)) {
+        if (entry->unitId == unitId && (entry->flags & DAT_PARTY_FLAG_OCCUPIED)) {
             return entry;
         }
         slotIndex++;
@@ -985,10 +985,10 @@ PtyFrontlinePromotionResult ptyRebalanceFrontline(s32 unitId) {
     return PTY_FRONTLINE_PROMOTION_PERFORMED;
 }
 
-u8 ptyIsRosterEntryPresent(s32 rosterIndex) {
+u8 ptyIsPartyUnitPresent(s32 unitId) {
     datUnitWork_t *entry;
 
-    entry = dds3FindEntry(rosterIndex);
+    entry = dds3FindEntry(unitId);
     return entry != 0;
 }
 
@@ -2550,7 +2550,7 @@ s32 ptyScriptCheckOrRebalanceFrontline(void) {
     s32 unitId = scrGetIntPara(0);
     s32 result;
     if (scrGetIntPara(1) == 0) {
-        result = ptyIsRosterEntryPresent(unitId);
+        result = ptyIsPartyUnitPresent(unitId);
     } else {
         result = ptyRebalanceFrontline(unitId);
     }

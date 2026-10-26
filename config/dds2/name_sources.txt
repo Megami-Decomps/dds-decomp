@@ -755,7 +755,7 @@
 0x0011AE60	evtGetIndexedEventRecordId	inferred	Returns index field from selected EventIndexRecord. [names_reviewed7.tsv]
 0x0011AE78	datGetLevelForDraw	inferred	SMT3HD name via SLUS_209.11 0x00245D18, byte-identical; was dds3Clamp99
 0x0011AEE0	ptyRebalanceFrontline	inferred	DDS1 counterpart and complete party-record promotion/demotion/swap flow
-0x0011B260	ptyIsRosterEntryPresent	inferred	Returns whether the specified roster entry exists. [names_reviewed10.tsv]
+0x0011B260	ptyIsPartyUnitPresent	inferred	Checks whether a party unit ID resolves to an occupied record; callers supply unit IDs, not roster slots.
 0x0011B2C0	ptyGetRoundedAveragePartyLevel	inferred	Averages levels of occupied party entries, rounding fractional results up and returning zero if empty. [names_reviewed15.tsv]
 0x0011B328	ptyCloneTemplateAtPartyMaxLevel	inferred	U1
 0x0011B4B0	ptyRestoreUnitFromSavedTemplate	inferred	Consumes the saved roster template at the requested index, clears the saved slot, applies the requested level policy, refreshes derived state, and marks its assigned item owned; selected for existing saved templates by ptyAddUnitWithFlags.
