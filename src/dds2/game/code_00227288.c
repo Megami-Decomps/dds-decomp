@@ -531,16 +531,16 @@ BtlActionStateSelectionResult btlGetEffectTaskActorMatchCode(ActionStateLink *ta
     return effect->linked.actor == task->unit ? 12 : BTL_ACTION_STATE_SELECTION_USE_DEFAULT;
 }
 
-s32 btlEffectTaskStartFinale(ActionStateLink *task) {
+BtlActionStateSelectionResult btlEffectTaskStartFinale(ActionStateLink *task) {
     BattleEffectPayload *effect;
     BtlRuntimeTask *group;
 
     if ((task->pendingFlags & 8) == 0) {
-        return -1;
+        return BTL_ACTION_STATE_SELECTION_USE_DEFAULT;
     }
     effect = ((BtlState *)btlGetRuntime())->effect;
     if (effect->linked.actor != task->unit) {
-        return -1;
+        return BTL_ACTION_STATE_SELECTION_USE_DEFAULT;
     }
     btlStartTask(btlCreateCommandSoundUpdateTask());
     btlStartTask(btlCreateSecondaryCommandSoundTask());
@@ -1556,7 +1556,7 @@ extern void btlSpawnBrahmaActionEffectTasks(ActionStateLink *unit, u32 action, u
 extern s32 btlSpawnLinkedActionEffect(u8 *task);
 extern u32 btlStartAction19A(BtlLinkedCommand *unit);
 extern void btlStartActionRecordSoundTask(ActionStateLink *record, u64 prerequisiteHandle, s32 delayBase);
-extern s32 btlStartActionRecordTasks(ActionStateLink *record);
+extern BtlActionStateSelectionResult btlStartActionRecordTasks(ActionStateLink *record);
 extern s32 btlStartLinkedActionMotionPrimary(BtlLinkedCommand *command);
 extern u32 btlStartLinkedDefeatCandidateAction(BtlLinkedCommand *unit);
 extern u32 btlStartMarkedActionRuntimeUpdate(BtlLinkedCommand *unit);

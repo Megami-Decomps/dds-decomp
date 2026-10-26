@@ -2078,14 +2078,16 @@ extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
 
 extern BtlRuntimeTask *fldCreateSceneGroupAction(ActionStateLink *, u32, s32);
 
+#include "btl_action_state_selection.h"
+
 /* Start the selected action's task group; its scene action carries a 22-tick start delay. */
-s32 btlStartActionRecordTasks(ActionStateLink *record) {
+BtlActionStateSelectionResult btlStartActionRecordTasks(ActionStateLink *record) {
     BtlRuntimeTask *task;
     if (!(record->pendingFlags & 8)) {
-        return -1;
+        return BTL_ACTION_STATE_SELECTION_USE_DEFAULT;
     }
     if (((BtlSelectCtrl *)((BattleWork *)btlGetRuntime())->sub)->unit != record->unit) {
-        return -1;
+        return BTL_ACTION_STATE_SELECTION_USE_DEFAULT;
     }
     btlStartTask(btlCreateCommandSoundUpdateTask());
     btlStartTask(btlCreateSecondaryCommandSoundTask());

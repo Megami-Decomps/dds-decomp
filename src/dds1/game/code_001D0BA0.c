@@ -6,6 +6,7 @@
 #include "btl_select_transform_parameters_api.h"
 #include "common.h"
 #include "btl_action_reaction_motion.h"
+#include "btl_action_state_selection.h"
 #include "btl_command_target_policy.h"
 #include "btl_command_target_eligibility.h"
 #include "dds3_object_flags.h"
@@ -256,11 +257,12 @@ BtlTask *btlFindUnitByActor(BtlUnit *target);
 extern void scrSetGlobalSeenBit(u32 flagId);
 
 void btlDispatchCommandViaHookOrDefault(BtlTask *command, BattleIndexWork *argument) {
-    s32 (*handler)(s32, s32) = *(s32 (**)(s32, s32))((u8 *)btlGetRuntime() + 0x604);
+    BtlActionStateSelectionResult (*handler)(s32, s32) =
+        *(BtlActionStateSelectionResult (**)(s32, s32))((u8 *)btlGetRuntime() + 0x604);
 
     if (handler != 0) {
-        s32 result = handler((s32)command, (s32)argument);
-        if (result != -1) {
+        BtlActionStateSelectionResult result = handler((s32)command, (s32)argument);
+        if (result != BTL_ACTION_STATE_SELECTION_USE_DEFAULT) {
             btlDispatchStateHandler(command, result);
             return;
         }

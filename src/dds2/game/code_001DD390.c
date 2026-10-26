@@ -34,6 +34,7 @@
 #include "sdf_dev_slot_api.h"
 #include "btl.h"
 #include "btl_model_state_ownership.h"
+#include "btl_action_state_selection.h"
 #include "btl_special_entry_object_class.h"
 #include "btl_position_effect_task_args.h"
 #include "btl_position_lerp_task_args.h"
@@ -252,13 +253,14 @@ extern s32 btlGetLoggedIndexedCommandItem(s32);
 
 extern void scrSetGlobalBitFlag(u32);
 
-/* A hook result of -1 leaves dispatch to the command-kind handler. */
+/* The default sentinel leaves dispatch to the command-kind handler. */
 void btlDispatchCommandViaHookOrDefault(ActionStateLink *command, BattleIndexWork *argument) {
-    s32 (*handler)(s32, s32) = ((BtlState *)btlGetRuntime())->commandHook;
+    BtlActionStateSelectionResult (*handler)(s32, s32) =
+        ((BtlState *)btlGetRuntime())->commandHook;
 
     if (handler != 0) {
-        s32 result = handler((s32)command, (s32)argument);
-        if (result != -1) {
+        BtlActionStateSelectionResult result = handler((s32)command, (s32)argument);
+        if (result != BTL_ACTION_STATE_SELECTION_USE_DEFAULT) {
             btlDispatchStateHandler(command, result);
             return;
         }

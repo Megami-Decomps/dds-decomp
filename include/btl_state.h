@@ -578,7 +578,7 @@ typedef struct BtlState {
     s32 (*actionStateSelectionHook)(struct ActionStateLink *);
     u8 pad634[4];
     void (*commandTurnEndHook)(struct ActionStateLink *);
-    s32 (*commandHook)(s32, s32);
+    s32 (*commandHook)(s32, s32); /* handler index or -1 to use command-kind dispatch. */
     u8 (*cameraArrangementHook)(BtlLinkedCommand *, BtlCamState *, s32); /* 0x640: boolean mode-specific pose override. */
     s32 (*defeatCameraHook)(BtlLinkedCommand *, BtlCamState *, s32); /* 0x644: same linked-defeat camera override. */
     s32 (*unk648)(BtlUnit *);

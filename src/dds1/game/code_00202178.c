@@ -2245,16 +2245,16 @@ extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *, s32);
 extern u8 *fldCreateSceneGroupAction(BtlTask *, u32, s32);
 
 /* Start the selected actor's finale task group; its scene action carries a 22-tick start delay. */
-s32 btlEffectTaskStartFinale(BtlTask *task) {
+BtlActionStateSelectionResult btlEffectTaskStartFinale(BtlTask *task) {
     BattleEffectState *effect;
     BtlRuntimeTask *group;
 
     if ((task->flags & 8) == 0) {
-        return -1;
+        return BTL_ACTION_STATE_SELECTION_USE_DEFAULT;
     }
     effect = (BattleEffectState *)((BtlState *)btlGetRuntime())->effect;
     if (effect->header.owner != (u32)task->unit) {
-        return -1;
+        return BTL_ACTION_STATE_SELECTION_USE_DEFAULT;
     }
     btlStartTask(btlCreateCommandSoundUpdateTask());
     btlStartTask(btlCreateSecondaryCommandSoundTask());

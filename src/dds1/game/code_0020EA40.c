@@ -162,7 +162,7 @@ extern s32 btlDisableUnitsIfSpeciesFlagged(void);
 extern s32 btlSetupDefeatCameraFromAnimationFlags(BtlLinkedCommand *command);
 extern s32 btlDispatchEligibleBossEvent(BtlLinkedCommand *entry);
 extern void btlDispatchSpecialEnemyActionWhenPhaseAllows(BtlUnit *unit, s32 *action);
-extern s32 btlEffectTaskStartFinale(BtlTask *task);
+extern BtlActionStateSelectionResult btlEffectTaskStartFinale(BtlTask *task);
 extern u64 btlEnsureEffectUnitModelLoadTask(u64 prerequisiteHandle);
 extern s32 btlFadeOtherEnemyUnitsWhenSpecialModeActive(void);
 extern s32 btlFilterBossCommandBySelection(u8 *unit, s32 command);
