@@ -359,7 +359,7 @@ s32 mnuCompleteTitleStreamFileLoad(TitleAudioStreamState *destinationState) {
     if (ready != 0) {
         struct sdfMemHandle_t *resourceHandle = fileGetMemHandle(mnuTitleStreamFileRequest);
         void *fileData = fileGetLoadPtr(mnuTitleStreamFileRequest);
-        s32 fileBytes = (s32)fileGetLoadSize(mnuTitleStreamFileRequest);
+        s32 fileBytes = fileGetLoadSize(mnuTitleStreamFileRequest);
         struct sdfMemHandle_t *allocation;
 
         fileRequestFreeIfComplete(mnuTitleStreamFileRequest);

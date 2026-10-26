@@ -9951,7 +9951,7 @@ s32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *request) {
             const void *data;
             btlBossDebugPrintf(D_003A50F0, request->filename);
             request->resourceAllocation = fileGetMemHandle(request->request);
-            size = (s32)fileGetLoadSize(request->request);
+            size = fileGetLoadSize(request->request);
             data = sdfMemLock(request->resourceAllocation);
             if (sndFindPackedTrackLoadStatus(node->packedTrackPosition) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
                 p2sdSetPcmBuffer(data, size);
@@ -10556,7 +10556,7 @@ s32 sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
     char path[0x80];
     struct sdfMemHandle_t *resource;
     const void *data;
-    u32 size;
+    s32 size;
 
     if (args->state == 0) {
         sprintf(path, D_003A5328, D_00377650[args->entryIndex].fileName);
@@ -10568,7 +10568,7 @@ s32 sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
         }
         resource = fileGetMemHandle(args->request);
         data = sdfMemLock(resource);
-        size = (s32)fileGetLoadSize(args->request);
+        size = fileGetLoadSize(args->request);
         fileRequestFreeIfComplete(args->request);
         mnuInstallTitleSoundBufferFromData(data, size, D_00377650[args->entryIndex].format);
         sdfMemFreeDirect(resource);
@@ -10631,7 +10631,7 @@ extern char D_003A53D0[];
 
 u32 sndUpdateEarringDeadPlayback(BtlDeadLoadArgs *args) {
     const void *data;
-    u32 size;
+    s32 size;
 
     if (args->request == 0) {
         return 1;
@@ -10641,7 +10641,7 @@ u32 sndUpdateEarringDeadPlayback(BtlDeadLoadArgs *args) {
             args->resourceAllocation =
                 fileGetMemHandle(args->request);
             data = sdfMemLock(args->resourceAllocation);
-            size = (s32)fileGetLoadSize(args->request);
+            size = fileGetLoadSize(args->request);
             fileRequestFreeIfComplete(args->request);
             mnuInstallTitleSoundBufferFromData(data, size,
                                                MNU_TITLE_SOUND_FORMAT_MEDIUM_FRAME);

@@ -9186,7 +9186,7 @@ s32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *request) {
             const void *data;
             btlBossDebugPrintf("btl:sound file load end[%s]\n", request->filename);
             request->resourceAllocation = fileGetMemHandle(request->request);
-            size = (s32)fileGetLoadSize(request->request);
+            size = fileGetLoadSize(request->request);
             data = sdfMemLock(request->resourceAllocation);
             if (sndFindPackedTrackLoadStatus(node->packedTrackPosition) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
                 p2sdSetPcmBuffer(data, size);

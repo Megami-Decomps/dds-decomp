@@ -11,7 +11,8 @@ struct sdfMemHandle_t;
 struct sdfMemHandle_t *fileGetMemHandle(const struct FileRequest *request);
 /* Return the address of the loaded resource payload as a byte pointer. */
 u8 *fileGetLoadPtr(const struct FileRequest *request);
-u32 fileGetLoadSize(const struct FileRequest *request);
+/* Return the signed byte count recorded by the file transfer request. */
+s32 fileGetLoadSize(const struct FileRequest *request);
 /* Free a completed request wrapper; return one while it remains pending. */
 s32 fileRequestFreeIfComplete(struct FileRequest *request);
 

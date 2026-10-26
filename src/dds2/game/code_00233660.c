@@ -2993,7 +2993,7 @@ void mdlLoadViewerPresentationConfig(void) {
     fileSync(fileRequest);
     resourceHandle = fileGetMemHandle(fileRequest);
     fileData = (char *)fileGetLoadPtr(fileRequest);
-    fileSize = (s32)fileGetLoadSize(fileRequest);
+    fileSize = fileGetLoadSize(fileRequest);
     fileRequestFreeIfComplete(fileRequest);
     lineOffset = 0;
     while (lineOffset < fileSize) {

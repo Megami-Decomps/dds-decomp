@@ -198,7 +198,7 @@ s32 sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
         }
         resource = fileGetMemHandle(args->request);
         data = sdfMemLock(resource);
-        size = (s32)fileGetLoadSize(args->request);
+        size = fileGetLoadSize(args->request);
         fileRequestFreeIfComplete(args->request);
         mnuInstallTitleSoundBufferFromData(data, size, D_003E0F60[args->entryIndex].format);
         sdfMemFreeDirect(resource);
@@ -262,7 +262,7 @@ s32 sndDeadAtracPlaybackTask(BtlDeadLoadArgs *args) {
             args->resourceAllocation =
                 fileGetMemHandle(args->request);
             data = sdfMemLock(args->resourceAllocation);
-            size = (s32)fileGetLoadSize(args->request);
+            size = fileGetLoadSize(args->request);
             fileRequestFreeIfComplete(args->request);
             mnuInstallTitleSoundBufferFromData(data, size,
                                                MNU_TITLE_SOUND_FORMAT_MEDIUM_FRAME);

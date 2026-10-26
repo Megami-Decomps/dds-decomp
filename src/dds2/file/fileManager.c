@@ -185,8 +185,8 @@ u8 *fileGetLoadPtr(const struct FileRequest *request) {
     return request->retainedAddress;
 }
 
-/* Return the recorded resource size; work is required. */
-u32 fileGetLoadSize(const struct FileRequest *request) {
+/* Return the signed byte count recorded by the file transfer request. */
+s32 fileGetLoadSize(const struct FileRequest *request) {
     return request->totalBytes;
 }
 
