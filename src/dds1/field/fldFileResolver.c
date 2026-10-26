@@ -10,6 +10,7 @@
 #include "fld_marker_packet.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "file_config_option_api.h"
 #include "fld_camera_model_motion_request.h"
 #include "fld_placement_batch_mode.h"
 #include "dds3_object_flags.h"
@@ -4624,7 +4625,6 @@ extern s32 D_003BAD54;
 
 extern f32 D_0032F170[12];
 
-extern s32 fileTestSavedSlotFlags(u32);
 
 extern f32 fldSnapAngleToCompassPoint(f32);
 
@@ -4690,7 +4690,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
 
     if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) & 0x100) {
         if (D_003BA870[0][0][1] < 0x40) {
-            if (fileTestSavedSlotFlags(3) != 0) {
+            if (fileTestSavedSlotFlags(FILE_CONFIG_OPTION_REVERSE_FIELD_CAMERA) != 0) {
                 fldGlobalBase.cameraTilt -= 10.0f;
             } else {
                 fldGlobalBase.cameraTilt += 10.0f;
@@ -4698,7 +4698,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
             fldGlobalBase.cameraTiltActive = 1;
         }
         if (D_003BA870[0][0][1] > 0xC0) {
-            if (fileTestSavedSlotFlags(3) != 0) {
+            if (fileTestSavedSlotFlags(FILE_CONFIG_OPTION_REVERSE_FIELD_CAMERA) != 0) {
                 fldGlobalBase.cameraTilt += 10.0f;
             } else {
                 fldGlobalBase.cameraTilt -= 10.0f;
@@ -4997,7 +4997,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
                 fldGlobalBase.targetAngle = -fldGlobalBase.cameraTargetAngle;
             }
         } else {
-            s32 reversed = fileTestSavedSlotFlags(3) == 0;
+            s32 reversed = fileTestSavedSlotFlags(FILE_CONFIG_OPTION_REVERSE_FIELD_CAMERA) == 0;
             if (dds3PadButtonState[1][0][8] != 0 && dds3PadButtonState[1][0][10] == 0) {
                 fldGlobalBase.negatedAngle -= 4.5f;
             } else if (dds3PadButtonState[1][0][8] == 0 && dds3PadButtonState[1][0][10] != 0) {

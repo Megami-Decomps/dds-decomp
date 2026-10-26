@@ -5,6 +5,7 @@
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "common.h"
+#include "file_config_option_api.h"
 #include "btl_command_use_error.h"
 #include "btl_action_reaction_motion.h"
 #include "btl_command_target_policy.h"
@@ -1859,7 +1860,6 @@ void btlUpdateAutoMusic(void) {
     }
 }
 
-extern s32 fileTestSavedSlotFlags(u32);
 
 
 extern BtlCommandTargetEligibilityResult btlGetCommandTargetEligibility(BtlIndexList *, s32);
@@ -1879,7 +1879,7 @@ void btlPrepareSavedCommandTargets(ActionStateLink *task, BattleIndexWork *work)
     BtlUnit *target;
     BtlCommandTargetEligibilityResult reason;
 
-    if (fileTestSavedSlotFlags(2)) {
+    if (fileTestSavedSlotFlags(FILE_CONFIG_OPTION_RESTORE_BATTLE_COMMAND)) {
         if ((s16)unit->partyRecord.savedCommandPhase == 10) {
             work->phase = (s16)unit->partyRecord.savedCommandPhase;
             return;

@@ -2,6 +2,7 @@
 #include "sdf_scene_packet.h"
 #include "sdf_gs_scene_state.h"
 #include "common.h"
+#include "file_config_option_api.h"
 #include "sdf_vu0.h"
 #include "kwln_background_fade_api.h"
 #include "dds3Admin.h"
@@ -653,14 +654,13 @@ void kwlnPadStepLargeMotorLevel(void) {
     }
 }
 
-extern s32 fileTestSavedSlotFlags(u32 kind);
 extern void sdfPadSetAct0(s32 padIndex, u16 strength);
 extern void sdfPadSetAct1(s32 padIndex, u8 strength);
 
 /* Honor the saved rumble option, normalize small-motor strength and clamp
  * motor indices to the large motor. Preserve target update before output. */
 void dds3PadVibrationSet(u32 motor, u8 level, s32 duration) {
-    if (fileTestSavedSlotFlags(0) == 0) {
+    if (fileTestSavedSlotFlags(FILE_CONFIG_OPTION_RUMBLE) == 0) {
         return;
     }
     if (motor == KWLN_PAD_SMALL_MOTOR) {

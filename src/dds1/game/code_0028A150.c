@@ -4,6 +4,7 @@
 #include "common.h"
 #include "file_menu_state_result.h"
 #include "file_config_list_node.h"
+#include "file_config_option_api.h"
 #include "sdf_vu0.h"
 #include "file_job_type.h"
 #include "file_config_task.h"
@@ -3269,11 +3270,11 @@ void fileRestoreSlotFlagsToState(void) {
 
 extern s32 fileTestSlotFlagsBit(s32 kind, u32 *flags);
 
-u8 fileToggleSlotFlagsBit(u32 kind, u32 *flags) {
-    switch (kind) {
-    case 0:
+u8 fileToggleSlotFlagsBit(FileConfigOption option, u32 *flags) {
+    switch (option) {
+    case FILE_CONFIG_OPTION_RUMBLE:
         *flags ^= 2;
-        if (fileTestSlotFlagsBit(kind, flags) != 0) {
+        if (fileTestSlotFlagsBit(option, flags) != 0) {
             dds3PadVibrationSet(0, 1, 0xF);
             dds3PadVibrationSet(1, 0x80, 0xF);
         } else {
@@ -3281,13 +3282,13 @@ u8 fileToggleSlotFlagsBit(u32 kind, u32 *flags) {
             dds3PadVibrationSet(1, 0, 0xF);
         }
         return 1;
-    case 1:
+    case FILE_CONFIG_OPTION_COMMAND_SELECTION_MEMORY:
         *flags ^= 4;
         return 1;
-    case 2:
+    case FILE_CONFIG_OPTION_RESTORE_BATTLE_COMMAND:
         *flags ^= 8;
         return 1;
-    case 3:
+    case FILE_CONFIG_OPTION_REVERSE_FIELD_CAMERA:
         *flags ^= 0x10;
         return 1;
     default:
@@ -3308,13 +3309,13 @@ s32 fileTestSlotFlagsBit(kind, flags)
     u32 *flags;
 {
     switch (kind) {
-    case 0:
+    case FILE_CONFIG_OPTION_RUMBLE:
         return ((((s32)*flags >> 1) ^ 1) & 1);
-    case 1:
+    case FILE_CONFIG_OPTION_COMMAND_SELECTION_MEMORY:
         return *flags & 4;
-    case 2:
+    case FILE_CONFIG_OPTION_RESTORE_BATTLE_COMMAND:
         return *flags & 8;
-    case 3:
+    case FILE_CONFIG_OPTION_REVERSE_FIELD_CAMERA:
         return ((((s32)*flags >> 4) ^ 1) & 1);
     case 6:
         return 1;
@@ -3323,8 +3324,8 @@ s32 fileTestSlotFlagsBit(kind, flags)
     }
 }
 
-s32 fileTestSavedSlotFlags(u32 kind) {
-    return fileTestSlotFlagsBit(kind, &DDS3_GBWK->world.slotFlags);
+s32 fileTestSavedSlotFlags(FileConfigOption option) {
+    return fileTestSlotFlagsBit(option, &DDS3_GBWK->world.slotFlags);
 }
 
 
@@ -3565,14 +3566,16 @@ s32 fileUpdateConfigurationMenu(dds3ProcessID_t *task) {
     index = GBWK->frame->cursor->index;
     if (index < 4) {
         if (dds3PadButtonState[0x24] < 0 && fileTestSlotFlagsBit(index, &DDS3_GBWK->world.slotFlags) == 0) {
-            fileToggleSlotFlagsBit(GBWK->frame->cursor->index, &DDS3_GBWK->world.slotFlags);
+            fileToggleSlotFlagsBit((FileConfigOption)GBWK->frame->cursor->index,
+                                   &DDS3_GBWK->world.slotFlags);
             p2sdPlaySE(8, 0x7F, 0x3F);
             cursor = (FileConfigListNode *)GBWK->frame->cursor;
             cursor->resource->ticks = 8;
         }
         if (dds3PadButtonState[0x25] < 0) {
             if (fileTestSlotFlagsBit(GBWK->frame->cursor->index, &DDS3_GBWK->world.slotFlags) != 0) {
-                fileToggleSlotFlagsBit(GBWK->frame->cursor->index, &DDS3_GBWK->world.slotFlags);
+                fileToggleSlotFlagsBit((FileConfigOption)GBWK->frame->cursor->index,
+                                       &DDS3_GBWK->world.slotFlags);
                 p2sdPlaySE(8, 0x7F, 0x3F);
                 cursor = (FileConfigListNode *)GBWK->frame->cursor;
                 cursor->resource->ticks = 8;

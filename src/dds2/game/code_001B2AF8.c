@@ -13,6 +13,7 @@
 #include "dsp_entry_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "file_config_option_api.h"
 #include "btl_command_use_error.h"
 #include "itf_mes_entry_start_api.h"
 #include "btl_command_target_policy.h"
@@ -4940,7 +4941,6 @@ void btlReleasePsechgPanelWork(dds3ProcessID_t *task) {
     btlSetTrackedProcess(BTL_TRACKED_PROCESS_PHASE_CHANGE_PANEL, 0);
 }
 
-extern s32 fileTestSavedSlotFlags(u32);
 extern s32 D_004164C8[2][4];
 extern u16 *btlGatherActorCommandsByKind(s32, s16 *, u16, u16, u16);
 
@@ -4996,7 +4996,7 @@ void btlInitializeCommandOptionState(BattleSceneObject *object) {
         *(s32 *)(cursor + LAYOUT_INNER_HEIGHT) = slot->sourceHeight;
         *(s32 *)(cursor + LAYOUT_FIXED_INNER_HEIGHT) = *(s32 *)(cursor + LAYOUT_INNER_HEIGHT) << 3;
     }
-    if (fileTestSavedSlotFlags(1) == 0) {
+    if (fileTestSavedSlotFlags(FILE_CONFIG_OPTION_COMMAND_SELECTION_MEMORY) == 0) {
         return;
     }
     switch ((s16)object->owner->unit->partyRecord.savedCommandPhase) {
