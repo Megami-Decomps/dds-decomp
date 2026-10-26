@@ -6,8 +6,9 @@
 struct DevRequest;
 struct sdfTexHandle_t;
 
-/* The list records each texture address as a 32-bit word and retains its
- * reference until a release policy drops it. */
-void sdfTexListAdd(struct DevRequest *list, struct sdfTexHandle_t *texture);
+/* Store one acquired texture reference without incrementing its refcount.
+ * Freeing the list with RELEASE decrements it; KEEP only discards the pointer. */
+void sdfTexListAdd(struct DevRequest *list,
+                   struct sdfTexHandle_t *acquiredTextureReference);
 
 #endif /* SDF_RESOURCE_LIST_ITEM_H */

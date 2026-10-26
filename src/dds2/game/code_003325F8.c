@@ -412,11 +412,11 @@ void sdfTexListFree(DevRequest *list, SdfTexListItemReferencePolicy itemReferenc
     sdfItemArrayFree(list);
 }
 
-void sdfTexListAdd(DevRequest *list, sdfTexHandle_t *texture) {
+void sdfTexListAdd(DevRequest *list, sdfTexHandle_t *acquiredTextureReference) {
     if (list->usedCount >= (s16)list->capacity) {
         sdfItemArrayGrow(list);
     }
-    ((sdfTexHandle_t **)list->buffer)[list->usedCount] = texture;
+    ((sdfTexHandle_t **)list->buffer)[list->usedCount] = acquiredTextureReference;
     list->usedCount++;
 }
 

@@ -440,6 +440,7 @@ void sdfPacResetOutputToAllocationEntry(PacState *state) {
 /* Advance the entry index and complete or request the next entry. */
 void sdfPacAdvanceAllocationEntry(PacState *state) {
     PacListAllocation *allocation = state->slot.list;
+    /* Transfer the decoded texture's acquired reference into the resource list. */
     sdfTexListAdd(PAC_WORK_TEXTURE_LIST(state->queueTail), allocation->buffer.texture);
     {
         s32 nextIndex = allocation->entryIndex + 1;
