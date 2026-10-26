@@ -22,7 +22,7 @@ struct FileRequest *pacLoadEx(const char *requestName, u32 flags, void *packetCa
 struct FileRequest *fileLoadEx(const char *requestName, u32 callbackMode,
                                               u32 callbackAddress, u32 userData);
 #else
-struct FilePacRequest *fileCreatePacLoadWork(const char *requestName, s32 flags, void *packetCallbackAddress,
+struct FilePacRequest *fileCreatePacLoadWork(const char *requestName, s32 flags, void *dispatchValue,
                                              s32 onComplete, s32 userData);
 struct FileRequest *fileLoadEx(const char *requestName, s32 callbackMode,
                                               s32 callbackAddress, s32 userData);
