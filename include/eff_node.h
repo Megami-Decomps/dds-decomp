@@ -5,6 +5,12 @@
 
 /* Live effect node allocated in a 0x10-byte size-class block. */
 typedef u32 EffNodeInstanceWord;
+typedef s32 EffNodeConditionResult;
+
+/* A zero condition result expires the dependency; any nonzero value keeps it. */
+enum {
+    EFF_NODE_CONDITION_EXPIRED = 0
+};
 
 typedef struct EffNode {
     u32 type;       /* 0x00: type-operation row */
@@ -24,7 +30,7 @@ typedef struct EffTypeOps {
     void (*update)(EffNodeInstanceWord instanceWord);         /* 0x04 */
     void (*destroy)(EffNodeInstanceWord instanceWord);        /* 0x08 */
     void (*restart)(EffNodeInstanceWord instanceWord);        /* 0x0C */
-    s32 (*queryCondition)(EffNodeInstanceWord instanceWord);  /* 0x10 */
+    EffNodeConditionResult (*queryCondition)(EffNodeInstanceWord instanceWord); /* 0x10 */
     void (*setVector)(EffNodeInstanceWord instanceWord, const void *vector); /* 0x14 */
     void (*setMatrix)(EffNodeInstanceWord instanceWord, const void *matrix); /* 0x18 */
     void (*setParameterWord)(EffNodeInstanceWord instanceWord, u32 value);   /* 0x1C */
@@ -43,7 +49,7 @@ void dds3EffectDelete(EffNode *node);
 void dds3EffectDraw(EffNode *node);
 void dds3EffectReset(EffNode *node);
 void dds3EffectSetScale(EffNode *node, f32 factor);
-s32 effInvokeNodeConditionOrAcceptDefault(EffNode *node);
+EffNodeConditionResult effInvokeNodeConditionOrAcceptDefault(EffNode *node);
 void effCopyVectorToNodeInstance(EffNode *node, const void *vector);
 void effApplyNodeTransformMatrix(EffNode *node, const void *matrix);
 void effSetNodeParameterValue(EffNode *node, u32 parameterWord);

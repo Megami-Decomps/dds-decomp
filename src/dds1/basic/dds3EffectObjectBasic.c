@@ -175,7 +175,7 @@ s32 dds3EffectObjectBasicMainProcedure(dds3Basic_t *obj) {
         }
         result = effInvokeNodeConditionOrAcceptDefault(node);
     expired:
-        if (result == 0) {
+        if (result == EFF_NODE_CONDITION_EXPIRED) {
             u32 flags = data->flags;
 
             data->flags = flags & ~1;
