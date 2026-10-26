@@ -5,6 +5,7 @@
 #include "sdf_list_node.h"
 #include "sdf_gs_packet.h"
 #include "sdf_texture_clamp.h"
+#include "sdf_stream_read_contract.h"
 #include "sdf_thread.h"
 
 /* Native battle-parameter blobs: DDS1 0xA6C bytes, DDS2 0xC14 bytes.
@@ -219,8 +220,9 @@ typedef struct sdfIpuDecodeCb_t {
     u8 firstSlot;
     u8 *scratchBuffer;
     u8 pad58[4];
-    s32 (*read)(struct sdfIpuDecodeCb_t *, struct movieStream_t *, s32, void *, s32);
-    struct movieStream_t *readContext; /* Owner context passed to the read callback. */
+    SdfStreamReadCallback read;
+    /* Borrowed callback context; the node does not own it. */
+    struct movieStream_t *readContext;
     u8 inputFeedDmaInFlight;
     u8 unk65;
     u8 pad66[2];
@@ -262,13 +264,7 @@ typedef char SdfStreamFrameNode_scratchBuffer_offset_must_be_0x54[
 typedef char SdfStreamFrameNode_readContext_offset_must_be_0x60[
     ((u32)&((sdfIpuDecodeCb_t *)0)->readContext == 0x60) ? 1 : -1];
 
-typedef s32 (*SdfStreamRead)(sdfIpuDecodeCb_t *, struct movieStream_t *, s32, void *, s32);
-
 void sdfIpuMakeToIpuDmaTag(sdfIpuDecodeCb_t *, u8 *, s32);
-void sdfIpuStrmDecodeInit(sdfIpuDecodeCb_t *node, struct SoundFormat *format, SdfStreamRead read, struct movieStream_t *readContext);
-void sdfSoundInitFormattedAndAppendNode(sdfIpuDecodeCb_t *node, struct SoundFormat *format, SdfStreamRead read, struct movieStream_t *readContext, s32 resource);
-s32 movieCopyChunk(sdfIpuDecodeCb_t *node, struct movieStream_t *movie, s32 operation, void *dataBuffer, s32 byteCount);
-s32 movieParseHeader(sdfIpuDecodeCb_t *node, struct movieStream_t *movie, s32 operation, void *dataBuffer, s32 byteCount);
 void sdfAdvanceStreamPlayback(s32 cadence);
 /* Store the stream-frame draw-path word unchanged; 1 selects the alternate path. */
 void sdfSetStreamFrameDrawMode(u32 mode);

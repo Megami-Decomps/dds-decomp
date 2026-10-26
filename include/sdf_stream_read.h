@@ -2,6 +2,7 @@
 #define SDF_STREAM_READ_H
 
 #include "common.h"
+#include "sdf_stream_read_contract.h"
 
 /* Serialized stream-frame prefix copied before frame payload data. */
 typedef struct SdfStreamFrameHeader {
@@ -20,17 +21,5 @@ typedef char SdfStreamFrameHeader_height_offset_must_be_0xA[
 typedef char SdfStreamFrameHeader_cycleLength_offset_must_be_0xC[
     ((u32)&((SdfStreamFrameHeader *)0)->cycleLength == 0xC) ? 1 : -1];
 #define SDF_STREAM_FRAME_HEADER_BYTES 0x10
-
-/* QUERY reports buffered bytes and writes an EOF byte to dataBuffer; COPY reads
- * byteCount bytes into dataBuffer and reports bytes left in the stream; RESUME
- * requests another read when the consumer has room. The callback result is
- * operation-dependent, and RESUME returns zero. */
-typedef s32 SdfStreamReadResult;
-typedef s32 SdfStreamReadOperation;
-enum SdfStreamReadOperationValue {
-    SDF_STREAM_READ_QUERY = 0,
-    SDF_STREAM_READ_COPY = 1,
-    SDF_STREAM_READ_RESUME = 2
-};
 
 #endif /* SDF_STREAM_READ_H */

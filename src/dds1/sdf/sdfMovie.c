@@ -5,6 +5,7 @@
 #include "sdf_movie_stream.h"
 #include "sdf_movie_state.h"
 #include "sdf_stream_read.h"
+#include "sdf_stream_read_api.h"
 #include "sdf_dev_event.h"
 #include "sdf_dev_state.h"
 

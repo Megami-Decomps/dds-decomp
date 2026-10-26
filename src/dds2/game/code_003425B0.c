@@ -18,6 +18,7 @@
 #include "sdf_resource_list_item.h"
 #include "ee_mmi.h"
 #include "sdf_stream_read.h"
+#include "sdf_stream_read_api.h"
 #include "sdf_dev_event.h"
 #include "sdf_dev_state.h"
 #include "mdl_object_stream.h"
@@ -1404,7 +1405,7 @@ void sdfIpuSetDecodeParams(sdfIpuDecodeCb_t *node, SoundFormat *format, u8 *sour
 }
 
 /* Store the callback and movie context, then allocate the feed ring and leading mirror bytes. */
-void sdfIpuStrmDecodeInit(sdfIpuDecodeCb_t *node, SoundFormat *format, SdfStreamRead readSource, movieStream_t *readContext) {
+void sdfIpuStrmDecodeInit(sdfIpuDecodeCb_t *node, SoundFormat *format, SdfStreamReadCallback readSource, movieStream_t *readContext) {
     sdfIpuInitCb(node, format);
     node->read = readSource;
     node->readContext = readContext;
@@ -1836,7 +1837,7 @@ void sdfIpuSetOutputTex(sdfIpuDecodeCb_t *node, SdfStreamParams *params, u8 *sou
     sdfSoundInitAndAppendNode(node, &streamParams, source, size, sdfTexGetPixelAddr(resource));
 }
 
-void sdfSoundInitFormattedAndAppendNode(sdfIpuDecodeCb_t *node, SoundFormat *format, SdfStreamRead read, movieStream_t *readContext, s32 resourceWord) {
+void sdfSoundInitFormattedAndAppendNode(sdfIpuDecodeCb_t *node, SoundFormat *format, SdfStreamReadCallback read, movieStream_t *readContext, s32 resourceWord) {
     sdfIpuStrmDecodeInit(node, format, read, readContext);
     node->resourceWord = resourceWord;
     sdfIpuAttachTask(node);

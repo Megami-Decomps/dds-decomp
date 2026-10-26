@@ -3,6 +3,7 @@
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf_movie_api.h"
+#include "sdf_stream_read_api.h"
 #include "sdf_semaphore_api.h"
 #include "file_pac.h"
 #include "sdf_pac_callback.h"
