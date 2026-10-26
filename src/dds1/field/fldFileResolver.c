@@ -20,6 +20,7 @@
 #include "kwln_background_fade_api.h"
 #include "fld_movement_hold_state_api.h"
 #include "fld_scene_ready_api.h"
+#include "fld_area_resource_ready_api.h"
 #include "fld_area_resource_request_reuse_api.h"
 #include "fld_scene_record_api.h"
 #include "fld_scene_object_key_result.h"

@@ -15,6 +15,7 @@
 #include "sdf_vu_matrix.h"
 #include "fld_scene_status_api.h"
 #include "fld_scene_ready_api.h"
+#include "fld_area_resource_ready_api.h"
 #include "fld_movement_hold_state_api.h"
 #include "fld_scene_command_state_api.h"
 #include "fld_camp_check_state_api.h"
