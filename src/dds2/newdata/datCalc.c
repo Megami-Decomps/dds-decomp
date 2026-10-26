@@ -9,6 +9,7 @@
 #include "dat_state.h"
 #include "dat_calculated_stat_value_api.h"
 #include "dat_affinity_selector.h"
+#include "dat_effective_affinity_api.h"
 #include "pty_skill_nibble_state.h"
 #include "dat_world_field_flags.h"
 #include "btl_affinity_row.h"
@@ -244,8 +245,9 @@ extern const BtlAffinityRow *datAffinityTablePrimary;
 extern const BtlAffinityRow *datAffinityTableAlternate;
 extern const BtlAffinityRow *datExternalAffinityTable;
 
-s32 datGetEffectiveAffinity(const datUnitWork_t *unit, DatAffinitySelector selector) {
-    s32 calculatedValue;
+DatEffectiveAffinityResult datGetEffectiveAffinity(
+    const datUnitWork_t *unit, DatAffinitySelector selector) {
+    DatEffectiveAffinityResult calculatedValue;
     u16 unitId;
     u32 low;
 

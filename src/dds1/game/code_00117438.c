@@ -18,6 +18,7 @@
 #include "btl_action.h"
 #include "dat_state.h"
 #include "dat_affinity_selector.h"
+#include "dat_effective_affinity_api.h"
 #include "dat_world_field_flags.h"
 #include "dat_unit_has_skill_api.h"
 #include "evt_randomize_entry_api.h"
@@ -707,7 +708,6 @@ s32 sdfCalculateCommandVitalDelta(s32 channel, datUnitWork_t *sourceRecord, datU
     return damage > 0 ? -damage : healing;
 }
 
-extern s32 datGetEffectiveAffinity(const datUnitWork_t *, DatAffinitySelector);
 extern char D_0039F980[]; /* "btl:bad ratio = %d%%[%d][%X]\n" */
 
 /* Rolls whether the action hits: returns the surviving channel mask, or 0 on a miss. */

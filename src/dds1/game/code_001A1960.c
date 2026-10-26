@@ -36,6 +36,7 @@
 #include "dat_state.h"
 #include "dat_calculated_stat_value_api.h"
 #include "dat_affinity_selector.h"
+#include "dat_effective_affinity_api.h"
 #include "btl_resolve_unit_value_api.h"
 #include "btl_select_transform_parameters_api.h"
 #include "dat_command.h"
@@ -468,8 +469,6 @@ s8 btlGetActorIndexedSignedValue(BtlUnit *unit, s32 index) {
 s32 btlGetUnitElementAffinity(BtlUnit *battler, s32 element) {
     return btlResolveUnitValueWithOverride(&battler->partyRecord, element);
 }
-
-extern s32 datGetEffectiveAffinity(const datUnitWork_t *, DatAffinitySelector);
 
 s32 btlResolveUnitValueWithOverride(datUnitWork_t *record, s32 value) {
     s32 (*handler)(datUnitWork_t *, s32) = ((BtlState *)btlGetRuntime())->unitValueOverrideHook;
