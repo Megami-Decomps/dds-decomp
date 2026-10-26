@@ -17,6 +17,7 @@
 #include "evt_randomize_entry_api.h"
 #include "mdl_flag_api.h"
 #include "pty_roster_api.h"
+#include "pty_template_init_flags.h"
 #include "pty_frontline_promotion_api.h"
 #include "dat_unit_has_skill_api.h"
 #include "pty_item_quantity_update_view.h"
@@ -446,11 +447,6 @@ enum {
     PTY_ITEM_QUANTITY_LIMIT = 100,
     PTY_ITEM_SINGLE_MAX = 1,
     PTY_ITEM_SINGLE_LIMIT = 2
-};
-
-enum {
-    PTY_TEMPLATE_KEEP_BASE_LEVEL = 1,
-    PTY_TEMPLATE_USE_PARTY_MAX_LEVEL = 4
 };
 
 extern u8 ptyAffinityPermutationOrders[];
@@ -1070,7 +1066,7 @@ void ptyCloneTemplateAtPartyMaxLevel(datUnitWork_t *entry, s32 templateIndex) {
 extern void mtrRecomputeMantraFlagsForPartyUnit(datUnitWork_t *record);
 
 /* Consume a saved template, optionally raise its level, then mark its item owned. */
-void ptyRestoreUnitFromSavedTemplate(datUnitWork_t *entry, s32 templateIndex, s32 initFlags) {
+void ptyRestoreUnitFromSavedTemplate(datUnitWork_t *entry, s32 templateIndex, PtyTemplateInitFlags initFlags) {
     s32 targetLevel = 0;
     s32 maxPartyLevel = dds3EntryMax();
     s32 averagePartyLevel = ptyGetRoundedAveragePartyLevel();
@@ -1099,7 +1095,7 @@ void ptyRestoreUnitFromSavedTemplate(datUnitWork_t *entry, s32 templateIndex, s3
         entry->totalExp = ptyComputeTotalExp(entry, 0);
         ptyRecomputeMaxHpMp(entry);
     }
-    if (!(initFlags & 2)) {
+    if (!(initFlags & PTY_TEMPLATE_SKIP_PROFILE_SKILL_REBUILD)) {
         ptyRebuildProfileSkills(1, entry);
     }
     mtrRecomputeMantraFlagsForPartyUnit(entry);
@@ -1113,7 +1109,7 @@ void ptyRestoreUnitFromSavedTemplate(datUnitWork_t *entry, s32 templateIndex, s3
 /* Clone template 1 into roster 2 and inherit its mantra state, then clear the
  * assigned item. The maximum-party-level flag overrides keep-base-level;
  * otherwise use the rounded party average only when keep-base-level is clear. */
-void ptyInitRosterAndClearItem(datUnitWork_t *entry, s32 initFlags) {
+void ptyInitRosterAndClearItem(datUnitWork_t *entry, PtyTemplateInitFlags initFlags) {
     s32 targetLevel = 0;
     s32 maxPartyLevel = dds3EntryMax();
     s32 averagePartyLevel = ptyGetRoundedAveragePartyLevel();
@@ -1149,8 +1145,8 @@ void ptyInitRosterAndClearItem(datUnitWork_t *entry, s32 initFlags) {
 
 /* Clone template 7 into roster 3 and inherit its mantra state. After optional
  * post-initialization, mark any assigned item owned. Level-flag precedence is
- * the same as the adjacent initializer; flag mask 2 skips the optional call. */
-void ptyCloneTemplateSevenToRosterUnitThree(datUnitWork_t *entry, s32 initFlags) {
+ * the same as the adjacent initializer. */
+void ptyCloneTemplateSevenToRosterUnitThree(datUnitWork_t *entry, PtyTemplateInitFlags initFlags) {
     s32 targetLevel = 0;
     s32 maxPartyLevel = dds3EntryMax();
     s32 averagePartyLevel = ptyGetRoundedAveragePartyLevel();
@@ -1180,7 +1176,7 @@ void ptyCloneTemplateSevenToRosterUnitThree(datUnitWork_t *entry, s32 initFlags)
     memcpy(&gameState->mantraBits[3], &gameState->mantraBits[7], sizeof(gameState->mantraBits[3]));
     memcpy(gameState->profileBanks[3].records, gameState->profileBanks[7].records, sizeof(gameState->profileBanks[3].records));
     mtrRefreshMantraStateForPartyUnit();
-    if (!(initFlags & 2)) {
+    if (!(initFlags & PTY_TEMPLATE_SKIP_PROFILE_SKILL_REBUILD)) {
         ptyRebuildProfileSkills(1, entry);
     }
     if (entry->assignedItemId != 0) {
@@ -1270,7 +1266,7 @@ extern s32 D_00386048[][4];
 /* Add a roster member to the first free party slot: initialise it from its saved template or by
  * roster kind, refill HP/MP, set its model flags and apply skill-boosted maxima. Returns the
  * slot, -1 if the member is already present or -2 if the party is full. */
-PtyAddUnitResult ptyAddUnitWithFlags(s32 unitId, s32 initFlags) {
+PtyAddUnitResult ptyAddUnitWithFlags(s32 unitId, PtyTemplateInitFlags initFlags) {
     datUnitWork_t *entry;
     datUnitWork_t *party;
     s32 slotIndex;
@@ -1348,7 +1344,7 @@ PtyAddUnitResult ptyAddUnitWithFlags(s32 unitId, s32 initFlags) {
 }
 
 PtyAddUnitResult ptyAddUnit(s32 unitId) {
-    return ptyAddUnitWithFlags(unitId, 0);
+    return ptyAddUnitWithFlags(unitId, PTY_TEMPLATE_INIT_NONE);
 }
 
 PtyRemoveUnitResult ptyRemoveUnitWithFlags(s32 unitId, s32 flags) {

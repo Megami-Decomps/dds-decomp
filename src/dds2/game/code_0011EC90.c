@@ -6,10 +6,11 @@
 #include "fr_font.h"
 #include "dds3_owned_node.h"
 #include "pty_roster_api.h"
+#include "pty_template_init_flags.h"
 
 extern s32 mtrHasEnoughOwnedMantras(void);
 
-extern PtyAddUnitResult ptyAddUnitWithFlags(s32 unitId, s32 initFlags);
+extern PtyAddUnitResult ptyAddUnitWithFlags(s32 unitId, PtyTemplateInitFlags initFlags);
 
 extern PtyRemoveUnitResult ptyRemoveUnitWithFlags(s32 param0, s32 param1);
 
@@ -35,7 +36,7 @@ s32 ptyScriptRemoveUnitAndReturnResult(void) {
 /* Evaluate a two-operand VM expression and publish its result. */
 s32 ptyScriptAddUnitWithFlagsAndReturnResult(void) {
     s32 unitId = scrGetIntPara(0);
-    s32 initFlags = scrGetIntPara(1);
+    PtyTemplateInitFlags initFlags = scrGetIntPara(1);
 
     scrSetIntReturnValue(ptyAddUnitWithFlags(unitId, initFlags));
     return 1;
