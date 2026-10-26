@@ -35,6 +35,7 @@
 #include "btl_sound.h"
 #include "btl_referenced_battle_effect_task.h"
 #include "btl_actor_resource_cleanup_api.h"
+#include "btl_enemy_spawn_capacity_api.h"
 #include "btl_sound_node_api.h"
 #include "btl_sound_release_task.h"
 #include "eff_field_color.h"
@@ -57,7 +58,6 @@
 #include "btl_ui.h"
 #include "btl_target_selection_state_api.h"
 /* Declared before first use (were implicit int). */
-extern s32 btlCanSpawnAnotherEnemy(BtlUnit *requester);
 extern BtlRuntimeTask *btlScheduleRefreshTask(BtlUnit *owner);
 extern BtlRuntimeTask *btlCreateUnitFadeInTask(BtlUnit *owner, u32 value, u32 variant);
 extern s32 btlCheckStatusActionEligibility(BtlTask *task);
@@ -2357,7 +2357,8 @@ void btlCommandTaskReturnUpdate(s32 task) {
 void btlStartLinkedActorEffectTask(s32 task) {
     BtlUnit *unit = *(BtlUnit **)(task + 0x18);
     BtlRuntimeTask *entry;
-    if (((u32)unit->status.flags & 0x200) == 0 && btlCanSpawnAnotherEnemy(unit) == 0) {
+    if (((u32)unit->status.flags & 0x200) == 0 &&
+        btlCanSpawnAnotherEnemy(unit) == BTL_ENEMY_SPAWN_CAPACITY_EXHAUSTED) {
         entry = btlCreateEffObjB(*(BtlUnit **)(task + 0x18), 0x67);
         entry->startCondition.kind = BTL_TASK_CONDITION_KIND_ABSENT;
         entry->startCondition.value.taskKind = 0x40;

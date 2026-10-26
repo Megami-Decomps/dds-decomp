@@ -1,6 +1,7 @@
 #include "common.h"
 #include "btl_actor_entry_code_api.h"
 #include "btl_actor_selection_clear_api.h"
+#include "btl_enemy_spawn_capacity_api.h"
 #include "btl_skill_max_api.h"
 #include "eff_random.h"
 #include "btl_ai_slot.h"
@@ -119,7 +120,6 @@ extern u8 sdfHddValid;
 
 extern s32 btlAnyUnitHasActionInSlots(s32 mask, s32 action);
 
-extern s32 btlCanSpawnAnotherEnemy(BtlUnit *requester);
 
 extern s32 btlActionMatchesStatMask(s32, s16, s8);
 
@@ -1587,7 +1587,7 @@ s32 btlUnitBlocksElementQuery(BtlUnit *unit, s32 action, s32 mask) {
 }
 
 /* Query active/cumulative enemy capacity with a null limit-override requester. */
-s32 btlCheckEnemySpawnCapacity(void) {
+BtlEnemySpawnCapacityResult btlCheckEnemySpawnCapacity(void) {
     return btlCanSpawnAnotherEnemy(0);
 }
 

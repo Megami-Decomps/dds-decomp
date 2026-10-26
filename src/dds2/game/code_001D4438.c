@@ -3,6 +3,7 @@
 #include "btl_sound.h"
 #include "btl_actor_resource_cleanup_api.h"
 #include "btl_terminal_outcome.h"
+#include "btl_enemy_spawn_capacity_api.h"
 #include "btl_referenced_battle_effect_task.h"
 #include "dds3obj.h"
 #include "eff_random.h"
@@ -61,7 +62,6 @@
 #include "btl_sound_release_task.h"
 #include "btl_ai_table.h"
 /* Declared before first use (were implicit int). */
-extern s32 btlCanSpawnAnotherEnemy(BtlUnit *requester);
 extern u32 btlGetActiveUnitId(void);
 extern BtlCommandBlockReason btlGetCommandBlockReason(ActionStateLink *actionTask, s32 commandId);
 extern s32 btlGetLoggedIndexedCommandItem(s32 index);
@@ -3035,7 +3035,7 @@ void btlStartLinkedActorEffectTask(ActionStateLink *unit) {
     BtlUnit *owner = unit->unit;
     u8 *task;
     if (!(owner->status.flags & 0x200)) {
-        if (btlCanSpawnAnotherEnemy(owner) == 0) {
+        if (btlCanSpawnAnotherEnemy(owner) == BTL_ENEMY_SPAWN_CAPACITY_EXHAUSTED) {
             task = (u8 *)btlCreateEffObjB(unit->unit, 0x67);
             task[0] = 0xA;
             *(u16 *)(task + 8) = 0x43;

@@ -16,6 +16,7 @@
 #include "itf_mes_entry_start_api.h"
 #include "btl_command_target_policy.h"
 #include "btl_named_task_pair_status_api.h"
+#include "btl_enemy_spawn_capacity_api.h"
 #include "sdf_vu0.h"
 #include "btl_indexed_ui_resource_api.h"
 #include "btl_set_actor_effect_parameter_api.h"
@@ -489,7 +490,8 @@ u32 btlIsActorHighStateFlagClear(BtlUnit *actor) {
     return (((s32)actor->status.flags >> 0x1a) ^ 1U) & 1;
 }
 
-s32 btlCanSpawnAnotherEnemy(BtlUnit *requester) {
+/* Return AVAILABLE when scene and cumulative spawn limits permit another enemy. */
+BtlEnemySpawnCapacityResult btlCanSpawnAnotherEnemy(BtlUnit *requester) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     u32 limit;
     u32 active;
@@ -497,7 +499,7 @@ s32 btlCanSpawnAnotherEnemy(BtlUnit *requester) {
     BtlUnit *unit;
 
     if (datBattleSceneRecords[battle->battleMode].maxActiveEnemies >= 6) {
-        return 0;
+        return BTL_ENEMY_SPAWN_CAPACITY_EXHAUSTED;
     }
     limit = 5;
     if (datBattleSceneRecords[battle->battleMode].maxActiveEnemies != 0) {
@@ -516,15 +518,15 @@ s32 btlCanSpawnAnotherEnemy(BtlUnit *requester) {
         }
     }
     if (active >= limit) {
-        return 0;
+        return BTL_ENEMY_SPAWN_CAPACITY_EXHAUSTED;
     }
     if (datBattleSceneRecords[battle->battleMode].maxEnemySpawns != 0) {
         spawnLimit = datBattleSceneRecords[battle->battleMode].maxEnemySpawns;
         if (battle->spawnCount >= spawnLimit) {
-            return 0;
+            return BTL_ENEMY_SPAWN_CAPACITY_EXHAUSTED;
         }
     }
-    return 1;
+    return BTL_ENEMY_SPAWN_CAPACITY_AVAILABLE;
 }
 
 
