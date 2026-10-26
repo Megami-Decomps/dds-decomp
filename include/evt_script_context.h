@@ -3,12 +3,21 @@
 
 #include "common.h"
 
+/* The caller supplies these context words in integer form, while the data
+ * calculation handlers consume them as borrowed pointers. */
+typedef union EvtScriptArgument {
+    s32 bits;
+    void *pointer;
+} EvtScriptArgument;
+
+typedef char EvtScriptArgumentSizeCheck[(sizeof(EvtScriptArgument) == 4) ? 1 : -1];
+
 typedef struct EvtScriptContext {
     u16 stateFlags;
     u16 opaque02;
     s32 commandIndex;
-    s32 firstArgument;
-    s32 secondArgument;
+    EvtScriptArgument firstArgument;
+    EvtScriptArgument secondArgument;
     s32 returnValue;
     u16 options;
     u8 opaque16[2];
