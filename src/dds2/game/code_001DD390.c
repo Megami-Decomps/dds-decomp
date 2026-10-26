@@ -5,6 +5,7 @@
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "common.h"
+#include "btl_scene_counter_mode.h"
 #include "dds3_camera_update_flags.h"
 #include "file_config_option_api.h"
 #include "btl_command_use_error.h"
@@ -613,7 +614,7 @@ extern s32 btlGetSlotValueAdjustedForSpecialAbility(BtlUnit *, s32);
 
 extern s32 btlAdjustPointsForCombatFlags(BtlUnit *source, u32 flags, u32 otherFlags, u32 value, s32 index);
 
-extern s32 btlGetCommandResultKindFromFlags(u32, u32, s32);
+extern BtlSceneCounterMode btlGetCommandResultKindFromFlags(u32, u32, s32);
 
 /* Resolve each selected target into retained damage/status operands and the
  * aggregate press-turn result. Reflection keeps the original selected target
@@ -1239,13 +1240,13 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
             if (overrideMiss) {
                 points += 100;
             }
-            work->resultKind = 1;
+            work->resultKind = BTL_SCENE_COUNTER_MODE_NORMAL;
             work->adjustedValue = points;
         }
     }
     if (forcePoints) {
         work->adjustedValue = 4500;
-        work->resultKind = 1;
+        work->resultKind = BTL_SCENE_COUNTER_MODE_NORMAL;
     }
     btlBossDebugPrintf("btl:press=%d[type=%d]\n", work->adjustedValue, (u8)work->resultKind);
 }

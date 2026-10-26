@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_scene_counter_mode.h"
 #include "btl_action_press_result.h"
 #include "btl_command_use_error.h"
 #include "btl_special_ability.h"
@@ -1000,13 +1001,13 @@ u32 btlAdjustPointsForCombatFlags(u32 flags, u32 secondary, u32 points, s32 inde
     return points;
 }
 
-s32 btlGetCommandResultKindFromFlags(u32 flags, u32 secondary) {
-    if (flags & 0x20000) return 1;
-    if (flags & 0x40000) return 1;
-    if (flags & 0x10000) return 1;
-    if (flags & 2) return 1;
-    if (secondary & 4) return 3;
-    return secondary & 2 ? 2 : 1;
+BtlSceneCounterMode btlGetCommandResultKindFromFlags(u32 flags, u32 secondary) {
+    if (flags & 0x20000) return BTL_SCENE_COUNTER_MODE_NORMAL;
+    if (flags & 0x40000) return BTL_SCENE_COUNTER_MODE_NORMAL;
+    if (flags & 0x10000) return BTL_SCENE_COUNTER_MODE_NORMAL;
+    if (flags & 2) return BTL_SCENE_COUNTER_MODE_NORMAL;
+    if (secondary & 4) return BTL_SCENE_COUNTER_MODE_WEAKNESS;
+    return secondary & 2 ? BTL_SCENE_COUNTER_MODE_CRITICAL : BTL_SCENE_COUNTER_MODE_NORMAL;
 }
 
 s32 btlAverageMaximumValueForMask(u32 mask, s8 allowDisabled) {

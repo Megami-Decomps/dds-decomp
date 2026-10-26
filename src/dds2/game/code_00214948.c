@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_scene_counter_mode.h"
 #include "btl_camera_mode_index.h"
 #include "btl_command_target_policy.h"
 #include "btl_actor_category_flag_api.h"
@@ -3243,7 +3244,7 @@ extern s32 btlGetSlotValueAdjustedForSpecialAbility(BtlUnit *, s32);
 
 extern s32 btlAdjustPointsForCombatFlags(BtlUnit *source, u32 flags, u32 otherFlags, u32 value, s32 index);
 
-extern s8 btlGetCommandResultKindFromFlags(s32, s32, s32);
+extern BtlSceneCounterMode btlGetCommandResultKindFromFlags(s32, s32, s32);
 
 
 

@@ -13,6 +13,7 @@
 #include "dsp_entry_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_scene_counter_mode.h"
 #include "btl_action_press_result.h"
 #include "btl_camera_mode_index.h"
 #include "file_config_option_api.h"
@@ -672,36 +673,36 @@ s32 btlAdjustPointsForCombatFlags(BtlUnit *source, u32 flags, u32 otherFlags, u3
     return value;
 }
 
-s32 btlGetCommandResultKindFromFlags(u32 flags, u32 otherFlags, s32 index) {
+BtlSceneCounterMode btlGetCommandResultKindFromFlags(u32 flags, u32 otherFlags, s32 index) {
     DatCommandRecord *entry;
     u16 code;
     if (flags & 0x20000) {
-        return 1;
+        return BTL_SCENE_COUNTER_MODE_NORMAL;
     }
     if (flags & 0x40000) {
-        return 1;
+        return BTL_SCENE_COUNTER_MODE_NORMAL;
     }
     if (flags & 0x10000) {
-        return 1;
+        return BTL_SCENE_COUNTER_MODE_NORMAL;
     }
     if (flags & 2) {
-        return 1;
+        return BTL_SCENE_COUNTER_MODE_NORMAL;
     }
     if (flags & 4) {
         entry = (DatCommandRecord *)(index * 56 + (s32)datCommandRecords);
         code = entry->hpType;
         if (code != 8 && code != 10 && entry->effectType != 2 &&
             entry->unk30 != 4) {
-            return 1;
+            return BTL_SCENE_COUNTER_MODE_NORMAL;
         }
     }
     if (otherFlags & 4) {
-        return 3;
+        return BTL_SCENE_COUNTER_MODE_WEAKNESS;
     }
     if (otherFlags & 2) {
-        return 2;
+        return BTL_SCENE_COUNTER_MODE_CRITICAL;
     }
-    return 1;
+    return BTL_SCENE_COUNTER_MODE_NORMAL;
 }
 
 s32 btlAverageMaximumValueForMask(s32 mask, s8 skipDown) {

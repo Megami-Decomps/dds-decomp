@@ -12,6 +12,7 @@
 #include "btl_action_press_result.h"
 #include "btl_hunt_mp_recovery_api.h"
 #include "btl_action_state_selection.h"
+#include "btl_scene_counter_mode.h"
 #include "btl_command_target_policy.h"
 #include "btl_command_target_eligibility.h"
 #include "dds3_object_flags.h"
@@ -586,7 +587,7 @@ extern s32 btlCompareSkippedAndActiveTargetCounts(BtlIndexList *, BtlOperandGrou
 
 extern u32 btlAdjustPointsForCombatFlags(u32, u32, u32, s32);
 
-extern s32 btlGetCommandResultKindFromFlags(u32, u32);
+extern BtlSceneCounterMode btlGetCommandResultKindFromFlags(u32, u32);
 
 void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
     BtlUnit combinedUnit;
@@ -1149,7 +1150,7 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
             if (overrideMiss) {
                 points += 100;
             }
-            work->resultKind = 1;
+            work->resultKind = BTL_SCENE_COUNTER_MODE_NORMAL;
             work->adjustedValue = points;
         }
     }

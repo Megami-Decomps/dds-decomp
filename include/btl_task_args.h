@@ -3,6 +3,7 @@
 
 #include "btl_action_code.h"
 #include "btl_camera_mode_index.h"
+#include "btl_scene_counter_mode.h"
 #include "common.h"
 
 struct BtlUnit;
@@ -162,11 +163,6 @@ typedef char BtlCategoryStatDamageArgsSizeCheck[
     (sizeof(BtlCategoryStatDamageArgs) == 0x0C) ? 1 : -1];
 
 /* The scene scheduler copies these request records into its argument block. */
-#define BTL_SCENE_COUNTER_MODE_NORMAL 1
-#define BTL_SCENE_COUNTER_MODE_CRITICAL 2
-#define BTL_SCENE_COUNTER_MODE_WEAKNESS 3
-#define BTL_SCENE_COUNTER_MODE_NOOP 0
-
 typedef struct BtlSceneCounterArgs {
 #ifdef VERSION_DDS1
     struct BtlTask *actor;
