@@ -13,7 +13,7 @@ enum {
     BTL_ACTOR_ENTRY_CODE_MATCH_MIN_CODE = 2
 };
 
-BtlActorEntryCodeMatch btlMatchActorEntryCode(struct BtlUnit *unit, s32 index);
+BtlActorEntryCodeMatch btlMatchActorEntryCode(const struct BtlUnit *unit, s32 index);
 /* True only when the slot has a code and its countdown has elapsed. */
 u8 btlActorEntryIsExpired(const struct BtlUnit *unit, s32 index);
 s16 btlGetActorEntryCode(const struct BtlUnit *unit, s32 index);

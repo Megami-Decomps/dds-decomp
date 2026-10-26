@@ -1388,7 +1388,7 @@ u8 btlActorEntryIsExpired(const BtlUnit *unit, s32 index) {
     return unit->entrySlots[index].countdown < 1;
 }
 
-BtlActorEntryCodeMatch btlMatchActorEntryCode(BtlUnit *unit, s32 index) {
+BtlActorEntryCodeMatch btlMatchActorEntryCode(const BtlUnit *unit, s32 index) {
     s16 value = unit->entrySlots[index].code;
     if (btlActorEntryCodeDefaults[index].maxCode != 0) {
         if (btlActorEntryCodeDefaults[index].maxCode == value) {
