@@ -10,7 +10,7 @@
 extern const ScrCommand D_0039E288[];
 extern ScrOpcodeHandlerResult (*codefunc[])(scrProcessWork_s *scr);
 
-void CodeFunc_2Operation(scrProcessWork_s *scr, s32 operatorCode);
+void CodeFunc_2Operation(scrProcessWork_s *scr, ScrBinaryOperator operatorCode);
 
 ScrOpcodeHandlerResult CodeFunc_PushIS(scrProcessWork_s *scr)
 {
