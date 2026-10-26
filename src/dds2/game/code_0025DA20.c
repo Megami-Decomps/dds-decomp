@@ -33,6 +33,7 @@
 #include "kwln_fade.h"
 #include "evt_world.h"
 #include "evt_unit.h"
+#include "evt_event_pack_task.h"
 #include "evt_event_pack.h"
 #include "dat_state.h"
 #include "mnu_list.h"

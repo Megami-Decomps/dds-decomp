@@ -14,10 +14,9 @@
 #include "mdl.h"
 #include "file_request_api.h"
 #include "sdf_texture_offset_list.h"
+#include "evt_event_pack_task.h"
 
 #include "sdf.h"
-s32 evtCheckScriptDone(dds3ProcessID_t *task);
-void evtDestroyEventPackTask(dds3ProcessID_t *task);
 
 #include "dds3_world_primary.h"
 extern sdfMotionCtrlr_t *mdlGetMotionCtrlr(const dds3ModelHandle_t *ctx, s32 searchId);
@@ -129,7 +128,7 @@ s32 evtRegistBEField(s32 eventId, s32 resourceId) {
     return 0;
 }
 
-s32 evtMotionSeProcess1(dds3ProcessID_t *task) {
+KwlnTaskUpdateResult evtMotionSeProcess1(dds3ProcessID_t *task) {
     EvtMotionSeTaskParams *motionSeParams;
     dds3Basic_t *motionNode;
     EvtPackLoadState *packState;
@@ -142,22 +141,22 @@ s32 evtMotionSeProcess1(dds3ProcessID_t *task) {
 
     motionSeParams = (EvtMotionSeTaskParams *)dds3GetProcessData(task);
     if (dds3GetActiveScene() == NULL) {
-        return -1;
+        return KWLN_TASK_UPDATE_FINISH_CALLBACK;
     }
     motionNode = dds3SearchSceneBasic(dds3GetActiveScene(), motionSeParams->modelKey, EFF_WORLD_KIND_FOLLOW_MODEL);
     if (motionNode == NULL) {
-        return -1;
+        return KWLN_TASK_UPDATE_FINISH_CALLBACK;
     }
     packState = evtGetPackProcessData(motionSeParams->eventTaskId);
     if (packState == NULL) {
-        return -1;
+        return KWLN_TASK_UPDATE_FINISH_CALLBACK;
     }
     if (motionSeParams->eventTaskId < 600) {
-        return 0;
+        return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
     }
     unit = ((EvtMotionSeUnitLink *)motionNode->data)->unit;
     if (unit == NULL) {
-        return -1;
+        return KWLN_TASK_UPDATE_FINISH_CALLBACK;
     }
     motionId = mdlGetMotionCtrlr(unit->owner, 0)->motionIndex;
     motionFrame = unit->owner->first->currentFrame;
@@ -174,7 +173,7 @@ s32 evtMotionSeProcess1(dds3ProcessID_t *task) {
             }
         }
     }
-    return 0;
+    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 /* Free the three-word parameter block owned by the motion-SE task. */
@@ -258,7 +257,7 @@ void evtCheckEventScriptLoaded(EvtPackLoadState *state) {
     }
 }
 
-s32 evtCheckScriptDone(dds3ProcessID_t *task) {
+KwlnTaskUpdateResult evtCheckScriptDone(dds3ProcessID_t *task) {
     EvtPackLoadState *packState = (EvtPackLoadState *)dds3GetProcessData(task);
 
     switch (packState->loadPhase) {
@@ -273,7 +272,7 @@ s32 evtCheckScriptDone(dds3ProcessID_t *task) {
         evtCheckEventScriptLoaded(packState);
         break;
     }
-    return 0;
+    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 extern void fileSyncAll(void);
