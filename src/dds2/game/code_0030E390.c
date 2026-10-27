@@ -19,13 +19,6 @@ extern s32 fldMapPrevTargetPos[];
 
 
 
-extern void fldDrawMapRequestHalo(s32 x, s32 y, s32 z, MapRequestState *state, MapRequestNode *node,
-                                 f32 progress);
-
-
-extern void fldDrawMapRequestPulse(s32 x, s32 y, s32 z, MapRequestState *state, MapRequestNode *node,
-                                  f32 progress);
-
 extern MapRequestState *fldMapHaloRequest;
 
 extern MapRequestState *fldMapPulseRequest;
@@ -134,7 +127,8 @@ void fldDrawMapRequestMarker(s32 x, s32 y, s32 alpha, f32 scale) {
 }
 
 /* DDS2 keeps the halo's progress shaping but no longer draws anything. */
-void fldDrawMapRequestHalo(s32 x, s32 y, s32 z, MapRequestState *state, MapRequestNode *node, f32 progress) {
+void fldDrawMapRequestHalo(s32 x, s32 y, s32 z, const MapRequestState *state,
+                           const MapRequestNode *node, f32 progress) {
     if (progress >= 0.7f) {
         progress = (1.0f - progress) / 0.3f;
     } else {
@@ -149,7 +143,8 @@ void fldDrawMapRequestHalo(s32 x, s32 y, s32 z, MapRequestState *state, MapReque
 }
 
 /* The current request pulses; other requests enlarge and fade in later. */
-void fldDrawMapRequestPulse(s32 x, s32 y, s32 z, MapRequestState *queue, MapRequestNode *selected, f32 progress) {
+void fldDrawMapRequestPulse(s32 x, s32 y, s32 z, const MapRequestState *queue,
+                            const MapRequestNode *selected, f32 progress) {
     s32 gridX;
     s32 gridY;
     f32 scale = (1.0f - progress) * 3.0f + progress;
@@ -216,8 +211,6 @@ void fldUpdateMapRequestQueues(s32 enabled) {
 }
 
 extern f32 sdfCounterGetScaledValue(void);
-extern void fldDispatchMapRequestCallbacks(MapRequestState *);
-
 /* Draw the selected map marker and overlay its highlight twice. */
 void fldDrawSelectedMapMarker(void) {
     s8 index = sdfCounterGetDisplayValue() - 1;
@@ -359,8 +352,8 @@ done:
 }
 
 /* Report normalized progress for each active request in the ring. */
-void fldDispatchMapRequestCallbacks(MapRequestState *ring) {
-    MapRequestNode *node;
+void fldDispatchMapRequestCallbacks(const MapRequestState *ring) {
+    const MapRequestNode *node;
     s32 remaining;
     s32 end;
     f32 one;
@@ -385,7 +378,7 @@ loop:
     }
     {
         f32 progress;
-        void (*callback)(s32, s32, s32, MapRequestState *, MapRequestNode *, f32) = ring->callback;
+        MapRequestDrawCallback callback = ring->callback;
 
         progress = (f32)node->ageTicks / (f32)ring->lifetimeTicks;
         progress = one - progress;

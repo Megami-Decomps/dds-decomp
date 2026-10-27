@@ -14,6 +14,15 @@ typedef struct MapRequestNode {
     u8 pad18[8];
 } MapRequestNode;
 
+struct MapRequestState;
+
+/* Dispatch borrows the live ring and node for the callback's duration. */
+typedef void (*MapRequestDrawCallback)(s32 x, s32 y, s32 z,
+                                       const struct MapRequestState *ring,
+                                       const MapRequestNode *node, f32 progress);
+
+/* The allocation owns the node storage; const-qualified callback pointers are
+ * borrowed for dispatch and must not outlive it. */
 typedef struct MapRequestState {
     struct sdfMemHandle_t *allocation; /* 0x00: descriptor for the ring and nodes. */
     MapRequestNode *first;
@@ -23,7 +32,7 @@ typedef struct MapRequestState {
     s16 lifetimeTicks; /* 0x0E: age threshold and progress denominator for queued nodes. */
     s16 interval;
     s16 elapsed;
-    void (*callback)(s32, s32, s32, struct MapRequestState *, MapRequestNode *, f32);
+    MapRequestDrawCallback callback;
 } MapRequestState;
 
 /* Both constructors put the 0x20-byte nodes after a 0x44-byte queue prefix. */
@@ -43,6 +52,11 @@ typedef char MapRequestRing_nodes_offset_check[
 MapRequestState *sdfCreateLinkedRequestRing(s16 count, s16 arg);
 void fldAdvanceMapRequest(MapRequestState *state, s32 x, s32 y, s32 z);
 void fldSetMapRequestInterval(MapRequestState *, u16);
+void fldDrawMapRequestHalo(s32 x, s32 y, s32 z, const MapRequestState *ring,
+                           const MapRequestNode *node, f32 progress);
+void fldDrawMapRequestPulse(s32 x, s32 y, s32 z, const MapRequestState *ring,
+                            const MapRequestNode *node, f32 progress);
+void fldDispatchMapRequestCallbacks(const MapRequestState *ring);
 
 struct FileRequest;
 struct EffectSlotSet;
