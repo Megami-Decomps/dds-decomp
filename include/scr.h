@@ -171,7 +171,7 @@ typedef struct ScrCommand {
 } ScrCommand;
 
 /* Script integer register 210 (DatGameState +0x388): set/clear by the process-control script commands. */
-#define SCR_PROCESS_CONTROL_FLAG_REGISTER 210
+#define SCR_PROCESS_CONTROL_FLAG_REGISTER ((ScrGlobalIntegerIndex)210)
 
 /* XYZ float plus integer W operand (0x10); DDS1/2 script/scrCommonCommand.c. */
 typedef struct {

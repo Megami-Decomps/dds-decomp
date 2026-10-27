@@ -25,13 +25,13 @@ ScrOpcodeHandlerResult CodeFunc_PushF(scrProcessWork_s *scr) {
 }
 
 ScrOpcodeHandlerResult CodeFunc_PushIX(scrProcessWork_s *scr) {
-    PushInt(scr, DDS3_GBWK->script.ints[scr->instructions[scr->pc].parts.sOperand]);
+    PushInt(scr, DDS3_GBWK->script.ints[(ScrGlobalIntegerIndex)scr->instructions[scr->pc].parts.sOperand]);
     scr->pc++;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 ScrOpcodeHandlerResult CodeFunc_PushFX(scrProcessWork_s *scr) {
-    PushFloat(scr, DDS3_GBWK->script.floats[scr->instructions[scr->pc].parts.sOperand]);
+    PushFloat(scr, DDS3_GBWK->script.floats[(ScrGlobalFloatIndex)scr->instructions[scr->pc].parts.sOperand]);
     scr->pc++;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
@@ -64,7 +64,7 @@ ScrOpcodeHandlerResult CodeFunc_PushReg(scrProcessWork_s *scr) {
 }
 
 ScrOpcodeHandlerResult CodeFunc_PopIX(scrProcessWork_s *scr) {
-    DDS3_GBWK->script.ints[scr->instructions[scr->pc].parts.sOperand] = PopInt(scr);
+    DDS3_GBWK->script.ints[(ScrGlobalIntegerIndex)scr->instructions[scr->pc].parts.sOperand] = PopInt(scr);
     scr->pc++;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
@@ -73,7 +73,7 @@ ScrOpcodeHandlerResult CodeFunc_PopFX(scrProcessWork_s *scr) {
     f32 floatValue;
 
     floatValue = PopFloat(scr);
-    DDS3_GBWK->script.floats[scr->instructions[scr->pc].parts.sOperand] = floatValue;
+    DDS3_GBWK->script.floats[(ScrGlobalFloatIndex)scr->instructions[scr->pc].parts.sOperand] = floatValue;
     scr->pc++;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
