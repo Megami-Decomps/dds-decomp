@@ -1485,7 +1485,7 @@ void mnuCollectPanelNodeValues(MnuStatusResource *object) {
 }
 
 void mnuBeginMantraTutorialFromNormalMode(MnuStatusResource *object) {
-    object->menu.flagBytes[0] = 3;
+    object->menu.tutorialState = MTR_TUTORIAL_STATE_CHANGE_TO_NORMAL_OUT;
     object->menu.tutorialTransitionMode = 0;
     object->menu.tutorialTransitionFrame = 0;
     object->menu.flags = (object->menu.flags & 0xF0FFFFFF) | 0x20000000;
@@ -1505,8 +1505,8 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
     MantraNodePos *position;
     s32 finished = 0;
 
-    switch (state->flagBytes[0]) {
-    case 3:
+    switch (state->tutorialState) {
+    case MTR_TUTORIAL_STATE_CHANGE_TO_NORMAL_OUT:
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_MODE_CHANGE_NORMAL_OUT\n");
         mnuSetMantraBackgroundVariant(object->menu.selectionController, 2);
         mnuDisableMantraBackground(object->menu.selectionController);
@@ -1521,12 +1521,12 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
         mnuSpawnMantraIconFadeOut(object->menu.selectionController);
         mnuSpawnMantraShortLoopIconFadeOut(object->menu.selectionController);
         mnuTransitionActivePanelAnimations(state->resource, 1);
-        state->tutorialNextState = 5;
+        state->tutorialNextState = MTR_TUTORIAL_STATE_INITIALIZE;
         state->tutorialWaitFrames = 30;
-        state->flagBytes[0] = 37;
+        state->tutorialState = MTR_TUTORIAL_STATE_DELAYED_TRANSITION;
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_MODE_CHANGE_NORMAL_OUT ...->MTR_MSL_TUTORIAL_INIT\n");
         break;
-    case 4:
+    case MTR_TUTORIAL_STATE_CHANGE_TO_NORMAL_IN:
         mnuSetMantraBackgroundVariant(object->menu.selectionController, 0);
         if (state->drawBits.showOverlay) {
             mnuShowMantraLimitLine(object->menu.selectionController);
@@ -1546,7 +1546,7 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
             (s32)((f32)position->y / 10.0f * 39.0f), object->menu.selectionController);
         finished = 1;
         break;
-    case 1:
+    case MTR_TUTORIAL_STATE_CHANGE_TO_TUTORIAL_OUT:
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_MODE_CHANGE_TUTORIAL_OUT\n");
         mnuBeginMantraBackgroundMaskFadeOut(object->menu.selectionController);
         mnuToggleMantraTitleVariant(object->menu.selectionController);
@@ -1555,273 +1555,273 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
         mnuSpawnMantraIconFadeOut(object->menu.selectionController);
         mnuSpawnMantraShortLoopIconFadeOut(object->menu.selectionController);
         mnuTransitionActivePanelAnimations(state->resource, 1);
-        state->tutorialNextState = 6;
+        state->tutorialNextState = MTR_TUTORIAL_STATE_EXIT;
         state->tutorialWaitFrames = 30;
-        state->flagBytes[0] = 37;
+        state->tutorialState = MTR_TUTORIAL_STATE_DELAYED_TRANSITION;
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_MODE_CHANGE_TUTORIAL_OUT ...->MTR_MSL_TUTORIAL_MODE_CHANGE_NORMAL_IN\n");
         break;
-    case 2:
+    case MTR_TUTORIAL_STATE_CHANGE_TO_TUTORIAL_IN:
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_MODE_CHANGE_TUTORIAL_IN\n");
         mnuBeginMantraBackgroundMaskFadeIn(object->menu.selectionController);
         mnuShowMantraInfo(object->menu.selectionController);
         mnuRegisterMantraUnitPanelDraw(object->menu.selectionController, (u32)state->collectedValues);
         mnuUpdateMantraSelectionPanelSlots(object, 0, 0, 0, 0, 0);
-        state->tutorialNextState = 7;
+        state->tutorialNextState = MTR_TUTORIAL_STATE_STEP_000_RUN;
         state->tutorialWaitFrames = 30;
-        state->flagBytes[0] = 37;
+        state->tutorialState = MTR_TUTORIAL_STATE_DELAYED_TRANSITION;
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_MODE_CHANGE_TUTORIAL_IN ...->MTR_MSL_TUTORIAL_000_RUN\n");
         break;
-    case 5:
+    case MTR_TUTORIAL_STATE_INITIALIZE:
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_INIT\n");
         mnuInitializeMantraTutorialParty(object);
         object->menu.scrollX = 124;
         object->menu.scrollY = 160;
         fclDestroyMessage();
         fclInitMessage(object->messageDefinition);
-        state->tutorialNextState = 2;
+        state->tutorialNextState = MTR_TUTORIAL_STATE_CHANGE_TO_TUTORIAL_IN;
         state->tutorialWaitFrames = 0;
-        state->flagBytes[0] = 37;
+        state->tutorialState = MTR_TUTORIAL_STATE_DELAYED_TRANSITION;
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_INIT ...->MTR_MSL_TUTORIAL_MODE_CHANGE_TUTORIAL_IN\n");
         break;
-    case 6:
+    case MTR_TUTORIAL_STATE_EXIT:
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_EXIT\n");
         mnuCollectPanelNodeValues(object);
         state->flags &= ~0x20000000;
         mnuMoveNodeCursorToTargetIndex(object, state->selectionIndex);
-        state->tutorialNextState = 4;
+        state->tutorialNextState = MTR_TUTORIAL_STATE_CHANGE_TO_NORMAL_IN;
         state->tutorialWaitFrames = 0;
-        state->flagBytes[0] = 37;
+        state->tutorialState = MTR_TUTORIAL_STATE_DELAYED_TRANSITION;
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_EXIT ...->MTR_MSL_TUTORIAL_MODE_CHANGE_NORMAL_IN\n");
         break;
-    case 7:
+    case MTR_TUTORIAL_STATE_STEP_000_RUN:
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_000_RUN\n");
-        state->tutorialNextState = 8;
+        state->tutorialNextState = MTR_TUTORIAL_STATE_STEP_000;
         state->tutorialWaitFrames = 0;
-        state->flagBytes[0] = 37;
+        state->tutorialState = MTR_TUTORIAL_STATE_DELAYED_TRANSITION;
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_000_RUN ...->MTR_MSL_TUTORIAL_000\n");
         break;
-    case 8:
+    case MTR_TUTORIAL_STATE_STEP_000:
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_000\n");
         fclStartMessage(6);
-        state->tutorialNextState = 9;
+        state->tutorialNextState = MTR_TUTORIAL_STATE_STEP_000_WAIT;
         state->tutorialWaitFrames = 0;
-        state->flagBytes[0] = 37;
+        state->tutorialState = MTR_TUTORIAL_STATE_DELAYED_TRANSITION;
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_000 ...->MTR_MSL_TUTORIAL_000_WAIT\n");
         break;
-    case 9:
+    case MTR_TUTORIAL_STATE_STEP_000_WAIT:
         if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
-            state->tutorialNextState = 10;
+            state->tutorialNextState = MTR_TUTORIAL_STATE_STEP_001_RUN;
             state->tutorialWaitFrames = 0;
-            state->flagBytes[0] = 37;
+            state->tutorialState = MTR_TUTORIAL_STATE_DELAYED_TRANSITION;
             itfClearSelectionFlags(object);
             evtFinishMessageWindowAndNotify();
             evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_000_WAIT\n");
         }
         break;
-    case 10:
+    case MTR_TUTORIAL_STATE_STEP_001_RUN:
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_001_RUN\n");
         mnuStartMantraTutorialPanelReveal(object);
-        state->tutorialNextState = 11;
+        state->tutorialNextState = MTR_TUTORIAL_STATE_STEP_001_RUN2;
         state->tutorialWaitFrames = 30;
-        state->flagBytes[0] = 37;
+        state->tutorialState = MTR_TUTORIAL_STATE_DELAYED_TRANSITION;
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_001_RUN ...->MTR_MSL_TUTORIAL_001_RUN2\n");
         break;
-    case 11:
+    case MTR_TUTORIAL_STATE_STEP_001_RUN2:
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_001_RUN2\n");
         mnuInitializeMantraTutorialSelector(object);
-        state->tutorialNextState = 12;
+        state->tutorialNextState = MTR_TUTORIAL_STATE_STEP_001;
         state->tutorialWaitFrames = 30;
-        state->flagBytes[0] = 37;
+        state->tutorialState = MTR_TUTORIAL_STATE_DELAYED_TRANSITION;
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_001_RUN2 ...->MTR_MSL_TUTORIAL_001\n");
         break;
-    case 12:
+    case MTR_TUTORIAL_STATE_STEP_001:
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_001\n");
         fclStartMessage(7);
-        state->tutorialNextState = 13;
+        state->tutorialNextState = MTR_TUTORIAL_STATE_STEP_001_WAIT;
         state->tutorialWaitFrames = 0;
-        state->flagBytes[0] = 37;
+        state->tutorialState = MTR_TUTORIAL_STATE_DELAYED_TRANSITION;
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_001 ...->MTR_MSL_TUTORIAL_001_WAIT\n");
         break;
-    case 13:
+    case MTR_TUTORIAL_STATE_STEP_001_WAIT:
         if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
-            state->tutorialNextState = 14;
+            state->tutorialNextState = MTR_TUTORIAL_STATE_STEP_002_RUN;
             state->tutorialWaitFrames = 0;
-            state->flagBytes[0] = 37;
+            state->tutorialState = MTR_TUTORIAL_STATE_DELAYED_TRANSITION;
             itfClearSelectionFlags(object);
             evtFinishMessageWindowAndNotify();
             evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_001_WAIT\n");
         }
         break;
-    case 14:
+    case MTR_TUTORIAL_STATE_STEP_002_RUN:
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_002_RUN\n");
         mnuAcquireTutorialMantraNodeAndNeighbors(object);
-        state->tutorialNextState = 15;
+        state->tutorialNextState = MTR_TUTORIAL_STATE_STEP_002_RUN2;
         state->tutorialWaitFrames = 60;
-        state->flagBytes[0] = 37;
+        state->tutorialState = MTR_TUTORIAL_STATE_DELAYED_TRANSITION;
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_002_RUN ...->MTR_MSL_TUTORIAL_002_RUN2\n");
         break;
-    case 15:
+    case MTR_TUTORIAL_STATE_STEP_002_RUN2:
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_002_RUN2\n");
         itfPositionMantraSelectionController(object);
-        state->tutorialNextState = 16;
+        state->tutorialNextState = MTR_TUTORIAL_STATE_STEP_002;
         state->tutorialWaitFrames = 30;
-        state->flagBytes[0] = 37;
+        state->tutorialState = MTR_TUTORIAL_STATE_DELAYED_TRANSITION;
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_002_RUN2 ...->MTR_MSL_TUTORIAL_002\n");
         break;
-    case 16:
+    case MTR_TUTORIAL_STATE_STEP_002:
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_002\n");
         fclStartMessage(8);
-        state->tutorialNextState = 17;
+        state->tutorialNextState = MTR_TUTORIAL_STATE_STEP_002_WAIT;
         state->tutorialWaitFrames = 0;
-        state->flagBytes[0] = 37;
+        state->tutorialState = MTR_TUTORIAL_STATE_DELAYED_TRANSITION;
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_002 ...->MTR_MSL_TUTORIAL_003_WAIT\n");
         break;
-    case 17:
+    case MTR_TUTORIAL_STATE_STEP_002_WAIT:
         if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
-            state->tutorialNextState = 18;
+            state->tutorialNextState = MTR_TUTORIAL_STATE_STEP_003_RUN;
             state->tutorialWaitFrames = 0;
-            state->flagBytes[0] = 37;
+            state->tutorialState = MTR_TUTORIAL_STATE_DELAYED_TRANSITION;
             itfClearSelectionFlags(object);
             evtFinishMessageWindowAndNotify();
             evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_002_WAIT\n");
         }
         break;
-    case 18:
+    case MTR_TUTORIAL_STATE_STEP_003_RUN:
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_003_RUN\n");
         itfInstallDefaultMantraSelector(object);
-        state->tutorialNextState = 19;
+        state->tutorialNextState = MTR_TUTORIAL_STATE_STEP_003;
         state->tutorialWaitFrames = 0;
-        state->flagBytes[0] = 37;
+        state->tutorialState = MTR_TUTORIAL_STATE_DELAYED_TRANSITION;
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_003_RUN ...->MTR_MSL_TUTORIAL_003\n");
         break;
-    case 19:
+    case MTR_TUTORIAL_STATE_STEP_003:
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_003\n");
         fclStartMessage(9);
-        state->tutorialNextState = 20;
+        state->tutorialNextState = MTR_TUTORIAL_STATE_STEP_003_WAIT;
         state->tutorialWaitFrames = 0;
-        state->flagBytes[0] = 37;
+        state->tutorialState = MTR_TUTORIAL_STATE_DELAYED_TRANSITION;
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_003 ...->MTR_MSL_TUTORIAL_004_WAIT\n");
         break;
-    case 20:
+    case MTR_TUTORIAL_STATE_STEP_003_WAIT:
         if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
-            state->tutorialNextState = 21;
+            state->tutorialNextState = MTR_TUTORIAL_STATE_STEP_004_RUN;
             state->tutorialWaitFrames = 0;
-            state->flagBytes[0] = 37;
+            state->tutorialState = MTR_TUTORIAL_STATE_DELAYED_TRANSITION;
             itfClearSelectionFlags(object);
             evtFinishMessageWindowAndNotify();
             evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_003_WAIT\n");
         }
         break;
-    case 21:
+    case MTR_TUTORIAL_STATE_STEP_004_RUN:
         if (mnuRunMantraTutorialFourthSequence(object)) {
-            state->tutorialNextState = 22;
+            state->tutorialNextState = MTR_TUTORIAL_STATE_STEP_004;
             state->tutorialWaitFrames = 0;
-            state->flagBytes[0] = 37;
+            state->tutorialState = MTR_TUTORIAL_STATE_DELAYED_TRANSITION;
             evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_004_RUN ...->MTR_MSL_TUTORIAL_004\n");
         }
         break;
-    case 22:
+    case MTR_TUTORIAL_STATE_STEP_004:
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_004\n");
         fclStartMessage(10);
-        state->tutorialNextState = 23;
+        state->tutorialNextState = MTR_TUTORIAL_STATE_STEP_004_WAIT;
         state->tutorialWaitFrames = 0;
-        state->flagBytes[0] = 37;
+        state->tutorialState = MTR_TUTORIAL_STATE_DELAYED_TRANSITION;
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_004 ...->MTR_MSL_TUTORIAL_004_WAIT\n");
         break;
-    case 23:
+    case MTR_TUTORIAL_STATE_STEP_004_WAIT:
         if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
-            state->tutorialNextState = 24;
+            state->tutorialNextState = MTR_TUTORIAL_STATE_STEP_005_RUN;
             state->tutorialWaitFrames = 0;
-            state->flagBytes[0] = 37;
+            state->tutorialState = MTR_TUTORIAL_STATE_DELAYED_TRANSITION;
             itfClearSelectionFlags(object);
             evtFinishMessageWindowAndNotify();
             evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_004_WAIT\n");
         }
         break;
-    case 24:
+    case MTR_TUTORIAL_STATE_STEP_005_RUN:
         if (mnuRunMantraTutorialFifthSequence(object)) {
-            state->tutorialNextState = 25;
+            state->tutorialNextState = MTR_TUTORIAL_STATE_STEP_005;
             state->tutorialWaitFrames = 0;
-            state->flagBytes[0] = 37;
+            state->tutorialState = MTR_TUTORIAL_STATE_DELAYED_TRANSITION;
             evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_005_RUN ...->MTR_MSL_TUTORIAL_005\n");
         }
         break;
-    case 25:
+    case MTR_TUTORIAL_STATE_STEP_005:
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_005\n");
         fclStartMessage(11);
-        state->tutorialNextState = 26;
+        state->tutorialNextState = MTR_TUTORIAL_STATE_STEP_005_WAIT;
         state->tutorialWaitFrames = 0;
-        state->flagBytes[0] = 37;
+        state->tutorialState = MTR_TUTORIAL_STATE_DELAYED_TRANSITION;
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_005 ...->MTR_MSL_TUTORIAL_005_WAIT\n");
         break;
-    case 26:
+    case MTR_TUTORIAL_STATE_STEP_005_WAIT:
         if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
-            state->tutorialNextState = 27;
+            state->tutorialNextState = MTR_TUTORIAL_STATE_STEP_006_RUN;
             state->tutorialWaitFrames = 0;
-            state->flagBytes[0] = 37;
+            state->tutorialState = MTR_TUTORIAL_STATE_DELAYED_TRANSITION;
             itfClearSelectionFlags(object);
             evtFinishMessageWindowAndNotify();
             evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_005_WAIT\n");
         }
         break;
-    case 27:
+    case MTR_TUTORIAL_STATE_STEP_006_RUN:
         if (mnuRunMantraTutorialSixthSequence(object)) {
-            state->tutorialNextState = 28;
+            state->tutorialNextState = MTR_TUTORIAL_STATE_STEP_006;
             state->tutorialWaitFrames = 0;
-            state->flagBytes[0] = 37;
+            state->tutorialState = MTR_TUTORIAL_STATE_DELAYED_TRANSITION;
             evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_006_RUN ...->MTR_MSL_TUTORIAL_006\n");
         }
         break;
-    case 28:
+    case MTR_TUTORIAL_STATE_STEP_006:
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_006\n");
         fclStartMessage(12);
-        state->tutorialNextState = 29;
+        state->tutorialNextState = MTR_TUTORIAL_STATE_STEP_006_WAIT;
         state->tutorialWaitFrames = 0;
-        state->flagBytes[0] = 37;
+        state->tutorialState = MTR_TUTORIAL_STATE_DELAYED_TRANSITION;
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_006 ...->MTR_MSL_TUTORIAL_006_WAIT\n");
         break;
-    case 29:
+    case MTR_TUTORIAL_STATE_STEP_006_WAIT:
         if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
-            state->tutorialNextState = 30;
+            state->tutorialNextState = MTR_TUTORIAL_STATE_STEP_007_RUN;
             state->tutorialWaitFrames = 0;
-            state->flagBytes[0] = 37;
+            state->tutorialState = MTR_TUTORIAL_STATE_DELAYED_TRANSITION;
             itfClearSelectionFlags(object);
             evtFinishMessageWindowAndNotify();
             evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_006_WAIT\n");
         }
         break;
-    case 30:
+    case MTR_TUTORIAL_STATE_STEP_007_RUN:
         if (mnuRunMantraTutorialSeventhSequence(object)) {
-            state->tutorialNextState = 31;
+            state->tutorialNextState = MTR_TUTORIAL_STATE_STEP_007;
             state->tutorialWaitFrames = 0;
-            state->flagBytes[0] = 37;
+            state->tutorialState = MTR_TUTORIAL_STATE_DELAYED_TRANSITION;
             evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_007_RUN ...->MTR_MSL_TUTORIAL_007\n");
         }
         break;
-    case 31:
+    case MTR_TUTORIAL_STATE_STEP_007:
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_007\n");
         fclStartMessage(13);
-        state->tutorialNextState = 32;
+        state->tutorialNextState = MTR_TUTORIAL_STATE_STEP_007_WAIT;
         state->tutorialWaitFrames = 0;
-        state->flagBytes[0] = 37;
+        state->tutorialState = MTR_TUTORIAL_STATE_DELAYED_TRANSITION;
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_007 ...->MTR_MSL_TUTORIAL_007_WAIT\n");
         break;
-    case 32:
+    case MTR_TUTORIAL_STATE_STEP_007_WAIT:
         if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
-            state->tutorialNextState = 1;
+            state->tutorialNextState = MTR_TUTORIAL_STATE_CHANGE_TO_TUTORIAL_OUT;
             state->tutorialWaitFrames = 0;
-            state->flagBytes[0] = 37;
+            state->tutorialState = MTR_TUTORIAL_STATE_DELAYED_TRANSITION;
             itfClearSelectionFlags(object);
             evtFinishMessageWindowAndNotify();
             evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_007_WAIT\n");
         }
         break;
-    case 37:
+    case MTR_TUTORIAL_STATE_DELAYED_TRANSITION:
         if (state->tutorialWaitFrames > 0) {
             state->tutorialWaitFrames--;
         }
         if (state->tutorialWaitFrames == 0) {
-            state->flagBytes[0] = state->tutorialNextState;
+            state->tutorialState = state->tutorialNextState;
         }
         break;
     }

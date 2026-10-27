@@ -46,6 +46,44 @@ typedef struct MtrEquipState {
     s32 timer;
 } MtrEquipState;
 
+/* The active and delayed-successor phases of mnuUpdateMantraTutorial. */
+typedef u8 MtrTutorialState;
+enum MtrTutorialStateValue {
+    MTR_TUTORIAL_STATE_CHANGE_TO_TUTORIAL_OUT = 1,
+    MTR_TUTORIAL_STATE_CHANGE_TO_TUTORIAL_IN = 2,
+    MTR_TUTORIAL_STATE_CHANGE_TO_NORMAL_OUT = 3,
+    MTR_TUTORIAL_STATE_CHANGE_TO_NORMAL_IN = 4,
+    MTR_TUTORIAL_STATE_INITIALIZE = 5,
+    MTR_TUTORIAL_STATE_EXIT = 6,
+    MTR_TUTORIAL_STATE_STEP_000_RUN = 7,
+    MTR_TUTORIAL_STATE_STEP_000 = 8,
+    MTR_TUTORIAL_STATE_STEP_000_WAIT = 9,
+    MTR_TUTORIAL_STATE_STEP_001_RUN = 10,
+    MTR_TUTORIAL_STATE_STEP_001_RUN2 = 11,
+    MTR_TUTORIAL_STATE_STEP_001 = 12,
+    MTR_TUTORIAL_STATE_STEP_001_WAIT = 13,
+    MTR_TUTORIAL_STATE_STEP_002_RUN = 14,
+    MTR_TUTORIAL_STATE_STEP_002_RUN2 = 15,
+    MTR_TUTORIAL_STATE_STEP_002 = 16,
+    MTR_TUTORIAL_STATE_STEP_002_WAIT = 17,
+    MTR_TUTORIAL_STATE_STEP_003_RUN = 18,
+    MTR_TUTORIAL_STATE_STEP_003 = 19,
+    MTR_TUTORIAL_STATE_STEP_003_WAIT = 20,
+    MTR_TUTORIAL_STATE_STEP_004_RUN = 21,
+    MTR_TUTORIAL_STATE_STEP_004 = 22,
+    MTR_TUTORIAL_STATE_STEP_004_WAIT = 23,
+    MTR_TUTORIAL_STATE_STEP_005_RUN = 24,
+    MTR_TUTORIAL_STATE_STEP_005 = 25,
+    MTR_TUTORIAL_STATE_STEP_005_WAIT = 26,
+    MTR_TUTORIAL_STATE_STEP_006_RUN = 27,
+    MTR_TUTORIAL_STATE_STEP_006 = 28,
+    MTR_TUTORIAL_STATE_STEP_006_WAIT = 29,
+    MTR_TUTORIAL_STATE_STEP_007_RUN = 30,
+    MTR_TUTORIAL_STATE_STEP_007 = 31,
+    MTR_TUTORIAL_STATE_STEP_007_WAIT = 32,
+    MTR_TUTORIAL_STATE_DELAYED_TRANSITION = 37,
+};
+
 /* 00289CA0/00289CE8 store the ID byte; 00289CB0..00289CF8 update kind/marked as a halfword. */
 typedef struct MtrUnitMenuEntry {
     union {
@@ -136,7 +174,7 @@ typedef struct MantraMenuWork {
     s8 sourceWaitFrames; /* source-transition pending state, separate from +2/+3 */
     u8 sourceNextState;
     s8 tutorialWaitFrames;
-    u8 tutorialNextState;
+    MtrTutorialState tutorialNextState; /* delayed target state for the tutorial task */
     datUnitWork_t tutorialParty[3];
     union {
         u32 drawFlags;
@@ -183,6 +221,7 @@ typedef struct MantraMenuWork {
     union {
         u32 flags;
         u8 flagBytes[4];
+        MtrTutorialState tutorialState; /* low byte: active phase of the tutorial task */
     };
     u8 unk9B4;
     s8 tutorialTransitionMode; /* 0: hidden, 1: opening, 2: closing, 3: visible. */
@@ -214,6 +253,12 @@ typedef struct MnuStatusResource {
 
 typedef char MnuStatusResource_size[(sizeof(MnuStatusResource) == 0xC08) ? 1 : -1];
 typedef char MantraMenuWork_size[(sizeof(MantraMenuWork) == 0x9C4) ? 1 : -1];
+typedef char MtrTutorialState_width_check[(sizeof(MtrTutorialState) == 1) ? 1 : -1];
+typedef char MantraTutorialStateOffsetsCheck[
+    ((u32)&((MantraMenuWork *)0)->tutorialNextState == 7 &&
+     (u32)&((MantraMenuWork *)0)->tutorialState == 0x9B0)
+        ? 1
+        : -1];
 typedef char MantraNodePos_size[(sizeof(MantraNodePos) == 0x20) ? 1 : -1];
 typedef char MantraFlagResource_size[(sizeof(MantraFlagResource) == 0x16C) ? 1 : -1];
 
