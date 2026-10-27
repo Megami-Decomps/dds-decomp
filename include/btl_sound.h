@@ -123,7 +123,7 @@ typedef struct SoundMixer {
     SoundBank banks[2];
     u8 pad0C30[8];
     struct sdfMemHandle_t *resource; /* 0xC38: owns the mixer allocation. */
-    u32 active;
+    u32 activeVoiceCount; /* Effect voices currently linked to this mixer. */
     effBTLCutHandle_t *voiceList;
 } SoundMixer;
 

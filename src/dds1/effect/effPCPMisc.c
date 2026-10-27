@@ -4915,7 +4915,7 @@ void effPCPRadiateBEDDelete(EffPCPDriftEventWork *work) {
             i++;
         } while (i < count);
     }
-    if (work->owner->active == 0) {
+    if (work->owner->activeVoiceCount == 0) {
         effEveBEDDelete(work->owner);
     }
     sdfMemFreeDirect(work->handle);
@@ -5131,10 +5131,10 @@ void effPCPRadiateTBDelete(EffPCPPairedEventWork *work) {
             i++;
         } while (i < count);
     }
-    if (work->ownerA->active == 0) {
+    if (work->ownerA->activeVoiceCount == 0) {
         effEveBEDDelete(work->ownerA);
     }
-    if (work->ownerB->active == 0) {
+    if (work->ownerB->activeVoiceCount == 0) {
         effEveBEDDelete(work->ownerB);
     }
     sdfMemFreeDirect(work->handle);
@@ -5392,7 +5392,7 @@ void effPCPSpiralBEDDelete(EffPCPSpawnRangeWork *work) {
             i++;
         } while (i < count);
     }
-    if (work->owner->active == 0) {
+    if (work->owner->activeVoiceCount == 0) {
         effEveBEDDelete(work->owner);
     }
     sdfMemFreeDirect(work->handle);
@@ -5601,7 +5601,7 @@ void effPCPHelperBEDDelete(EffPCPMapEventWork *work) {
         }
         entry++;
     }
-    if (work->owner->active == 0) {
+    if (work->owner->activeVoiceCount == 0) {
         effEveBEDDelete(work->owner);
     }
     sdfMemFreeDirect(work->entriesHandle);

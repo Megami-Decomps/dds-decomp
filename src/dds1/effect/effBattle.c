@@ -37,9 +37,9 @@ void effBTLCutDelete(effBTLCutHandle_t *owner) {
         }
     }
     effBTLCutListRelease(owner);
-    owner->state->active--;
+    owner->state->activeVoiceCount--;
     printf(D_003A0DB8, owner->kind, owner->state,
-                  owner->state->active);
+                  owner->state->activeVoiceCount);
     sdfChipFreeDirect(owner);
 }
 

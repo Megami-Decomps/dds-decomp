@@ -553,7 +553,7 @@ SoundMixer *sndMixerClone(SoundMixer *src) {
     mixer->resource = allocation;
     memcpy(mixer, src, 0xC38);
     effBTLPartCreate(mixer, src);
-    mixer->active = 0;
+    mixer->activeVoiceCount = 0;
     mixer->voiceList = NULL;
     return mixer;
 }
@@ -674,8 +674,8 @@ effBTLCutHandle_t *effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, struct
     effect->currentFrame = 0;
     printf("effBTL:cut %d handle create(%p)[%d]\n",
                   effect->kind, effect->state,
-                  effect->state->active);
-    effect->state->active++;
+                  effect->state->activeVoiceCount);
+    effect->state->activeVoiceCount++;
     return effect;
 }
 
