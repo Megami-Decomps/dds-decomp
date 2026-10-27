@@ -20,6 +20,7 @@
 #include "mdl_flag_api.h"
 #include "pty_active_roster_index_api.h"
 #include "pty_roster_api.h"
+#include "pty_party_unit_presence_api.h"
 #include "pty_frontline_promotion_api.h"
 #include "pty_status_query_api.h"
 #include "pty_event_penalty_api.h"
@@ -894,7 +895,7 @@ PtyFrontlinePromotionResult ptyRebalanceFrontline(DatUnitId unitId) {
     return PTY_FRONTLINE_PROMOTION_PERFORMED;
 }
 
-u8 ptyIsPartyUnitPresent(DatUnitId unitId) {
+PtyPartyUnitPresenceResult ptyIsPartyUnitPresent(DatUnitId unitId) {
     return dds3FindEntry(unitId) != 0;
 }
 
@@ -2059,7 +2060,8 @@ void btlSurpriseChanceHook(s32 chance) {
 s32 evtPushRequestedRosterPresence(void) {
     s32 unitId = scrGetIntPara(0);
 
-    scrSetIntReturnValue(ptyIsPartyUnitPresent(unitId) == 1);
+    scrSetIntReturnValue(
+        ptyIsPartyUnitPresent(unitId) == PTY_PARTY_UNIT_PRESENCE_FOUND);
     return 1;
 }
 

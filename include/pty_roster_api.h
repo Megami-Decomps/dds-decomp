@@ -24,9 +24,6 @@ enum {
 /* Return whether a matching roster record was removed. */
 PtyRemoveUnitResult ptyRemoveUnit(DatUnitId unitId);
 
-/* Report whether an occupied party record has this unit ID. */
-u8 ptyIsPartyUnitPresent(DatUnitId unitId);
-
 typedef u8 PtyAffinityMatchResult;
 enum {
     PTY_AFFINITY_MATCH_NOT_FOUND = 0,

@@ -21,6 +21,7 @@
 #include "mdl_flag_api.h"
 #include "pty_active_roster_index_api.h"
 #include "pty_roster_api.h"
+#include "pty_party_unit_presence_api.h"
 #include "pty_template_init_flags.h"
 #include "pty_frontline_promotion_api.h"
 #include "pty_status_query_api.h"
@@ -991,7 +992,7 @@ PtyFrontlinePromotionResult ptyRebalanceFrontline(DatUnitId unitId) {
     return PTY_FRONTLINE_PROMOTION_PERFORMED;
 }
 
-u8 ptyIsPartyUnitPresent(DatUnitId unitId) {
+PtyPartyUnitPresenceResult ptyIsPartyUnitPresent(DatUnitId unitId) {
     datUnitWork_t *entry;
 
     entry = dds3FindEntry(unitId);

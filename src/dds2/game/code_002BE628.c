@@ -52,6 +52,7 @@
 #include "prf_current_record_view.h"
 #include "pty_skill_nibble_state.h"
 #include "pty_roster_api.h"
+#include "pty_party_unit_presence_api.h"
 #include "evt_stage_test.h"
 #include "kwln_task_lifecycle.h"
 #include "btl.h"
@@ -2941,10 +2942,10 @@ s32 btlItemApplyPermanentBonus(u16 itemId, datUnitWork_t *unit) {
 }
 
 s32 ptyChooseFirstAvailableRosterId(void) {
-    if (ptyIsPartyUnitPresent(1)) return 1;
-    if (ptyIsPartyUnitPresent(2)) return 2;
-    if (ptyIsPartyUnitPresent(5)) return 5;
-    return ptyIsPartyUnitPresent(8) ? 8 : 1;
+    if (ptyIsPartyUnitPresent(1) != PTY_PARTY_UNIT_PRESENCE_NOT_FOUND) return 1;
+    if (ptyIsPartyUnitPresent(2) != PTY_PARTY_UNIT_PRESENCE_NOT_FOUND) return 2;
+    if (ptyIsPartyUnitPresent(5) != PTY_PARTY_UNIT_PRESENCE_NOT_FOUND) return 5;
+    return ptyIsPartyUnitPresent(8) != PTY_PARTY_UNIT_PRESENCE_NOT_FOUND ? 8 : 1;
 }
 
 extern s32 fldEsutoMaChk(void);
