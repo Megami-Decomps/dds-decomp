@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "scr_integer_parameter_api.h"
 #include "scr_command_parameter_index.h"
 #include "itf_mes_entry_start_api.h"
 #include "itf.h"
@@ -35,8 +36,6 @@ extern ItfMesDebugState D_00357D80;
 extern u32 itfMessageFlags;
 
 ItfMesWindowIndex scrGetMessageHandle(void);
-
-s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 
 void fldNoopWithMode(s32 mode);
 

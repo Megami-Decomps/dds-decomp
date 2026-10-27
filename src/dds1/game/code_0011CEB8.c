@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr_integer_parameter_api.h"
 #include "scr_command_parameter_index.h"
 #include "scr_integer_return_value_api.h"
 #include "sdf_chip.h"
@@ -7,7 +8,6 @@
 #include "dds3_owned_node.h"
 #include "pty_roster_api.h"
 
-extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 /* The native VM commands pass operands to these parameterless party stubs. */
 extern u32 ptyReturnZero();
 extern u32 ptyReturnOneForCommand193();

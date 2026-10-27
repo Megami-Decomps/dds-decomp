@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "scr_integer_parameter_api.h"
 #include "bf_flw0_header.h"
 #include "scr_procedure_start_api.h"
 #include "evt_script_context.h"
@@ -482,13 +483,6 @@ extern PtyItemQuantityUpdateView ptyItemQuantityUpdates[];
 extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 
 extern void ptyRefreshEntryFromSavedTemplate(datUnitWork_t *entry);
-
-
-
-
-extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
-
-
 
 extern EventRosterStat *datRosterDetails;
 

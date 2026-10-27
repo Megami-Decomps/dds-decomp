@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "scr_integer_parameter_api.h"
 #include "scr_command_parameter_index.h"
 #include "sdf_vu0.h"
 #include "btl_indexed_ui_resource_api.h"
@@ -1231,7 +1232,6 @@ BtlRuntimeTask *btlCreateTimedActorEffectLinkTask(BtlUnit *owner, s32 arg) {
     return task;
 }
 
-extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 extern BtlUnit *btlFindUnitByModeClear(s32 id);
 extern BtlUnit *btlFindUnitByModeFlagged(s32 id);
 extern BtlRuntimeTask *btlCreateEffObjB(BtlUnit *actor, s32 arg);

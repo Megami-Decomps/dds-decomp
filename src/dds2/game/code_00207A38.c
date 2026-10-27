@@ -4,6 +4,7 @@
 #include "btl_effect_position.h"
 #include "kwln_sprite.h"
 #include "common.h"
+#include "scr_integer_parameter_api.h"
 #include "btl_horizontal_aim_api.h"
 #include "btl_camera_mode_index.h"
 #include "sdf_vu0.h"
@@ -121,11 +122,6 @@ typedef struct BtlCommandCtx {
 
 extern s32 btlRollAiBucket(void);
 extern u32 btlButtonIconTexture;
-
-
-
-extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
-
 
 extern BattleTrackedTaskWork *btlTrackedTaskHandles;
 

@@ -3,6 +3,7 @@
 #include "fld_camera_move_tracking.h"
 #include "fld_title_banner_menu.h"
 #include "common.h"
+#include "scr_integer_parameter_api.h"
 #include "fld_scene_status_api.h"
 #include "sdf_trig.h"
 #include "fld_scene_record.h"
@@ -34,7 +35,6 @@ extern s32 fldGetActorStat1(s32);
 
 extern s32 fldGetActorStat0(s32);
 
-extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 extern void fldDispatchSceneAction(u32 action);
 
 

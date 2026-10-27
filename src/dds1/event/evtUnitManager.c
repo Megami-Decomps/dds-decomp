@@ -3,6 +3,7 @@ struct SdfPoolNode;
 struct EffNodeDescriptor;
 
 #include "common.h"
+#include "scr_integer_parameter_api.h"
 #include "dds3_object_flags.h"
 #include "sdf_vu0.h"
 #include "btl_model_record.h"
@@ -1135,7 +1136,6 @@ extern evtUnitHandle_t *evtGetUnitHandle(s32 idx);
 extern evtUnitHandle_t *evtWindowMotionUnit;
 extern s32 D_003BBDB0;
 
-extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 extern s32 evtLoadUnit(s32 slotKind, s32 resource);
 
 

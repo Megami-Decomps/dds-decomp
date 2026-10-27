@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "snd_command_packet.h"
 #include "common.h"
+#include "scr_integer_parameter_api.h"
 #include "scr_integer_return_value_api.h"
 #include "scr_string_parameter_api.h"
 #include "snd_sequence_volume_pan.h"
@@ -801,8 +802,6 @@ s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *work, BrsProgressRow *prog
 #define MNU_STREAM_COMMIT_COMPLETE 4
 
 extern u32 mnuTitleStreamSemaphore;
-
-extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 
 extern u32 p2sdGetPcmState(void);
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr_integer_parameter_api.h"
 #include "scr_command_parameter_index.h"
 #include "scr_integer_return_value_api.h"
 #include "sdf_chip.h"
@@ -15,8 +16,6 @@ extern s32 mtrHasEnoughOwnedMantras(void);
 extern PtyAddUnitResult ptyAddUnitWithFlags(DatUnitId unitId, PtyTemplateInitFlags initFlags);
 
 extern PtyRemoveUnitResult ptyRemoveUnitWithFlags(DatUnitId unitId, s32 flags);
-
-extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 
 extern s32 scrSetFlag(datUnitWork_t *work, u16 index);
 

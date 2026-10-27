@@ -3,6 +3,7 @@ struct SdfPoolNode;
 struct EffNodeDescriptor;
 
 #include "common.h"
+#include "scr_integer_parameter_api.h"
 #include "dds3_object_flags.h"
 #include "sdf_vu0.h"
 #include "btl_model_record.h"
@@ -1149,13 +1150,6 @@ extern void mnuInitializeCampPanelVisualDefaults(f32 *firstVector, f32 *secondVe
 #include "dds3_world_secondary.h"
 
 extern void evtSetUnitMove1(evtUnitHandle_t *work, s32 motionSubmode, const f32 vector[4], s32 unused, s32 frames, s32 valueB6, EvtUnitMotionCallback callback, s32 unusedLast);
-
-
-
-
-extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
-
-
 
 extern void evtArmEffectObjectPendingValue(dds3Basic_t *object, s32 value);
 

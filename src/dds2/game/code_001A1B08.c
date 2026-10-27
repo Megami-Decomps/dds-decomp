@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "scr_integer_parameter_api.h"
 #include "scr_command_parameter_index.h"
 #include "scr_integer_return_value_api.h"
 #include "scr_command_timer_api.h"
@@ -59,7 +60,7 @@ extern void itfDrawThreePanelBorderBands(PanelRect *bounds, u32 *color, u32 tail
 extern u32 D_003B4760[];
 #include "sdf_packet_alloc.h"
 extern void *sdf2DMakeStdPacket(void *packet, s32 packetBytes);
-extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
+
 extern u8 D_003B45E8[], D_003B4600[], D_003B4618[];
 extern u8 D_003B4630[], D_003B4648[], D_003B4660[];
 extern u8 D_004365A8[8], D_004365B0[8];

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr_integer_parameter_api.h"
 #include "scr_command_parameter_index.h"
 #include "dds3_basic_lifecycle.h"
 #include "sdf_vu0.h"
@@ -15,8 +16,6 @@
 #include "sdf.h"
 #include "pty_read_roster_stat_api.h"
 #include "pty_event_penalty_api.h"
-
-extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 
 extern void Normalize(void);
 

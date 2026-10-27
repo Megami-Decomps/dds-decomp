@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "snd_command_packet.h"
 #include "common.h"
+#include "scr_integer_parameter_api.h"
 #include "scr_integer_return_value_api.h"
 #include "scr_string_parameter_api.h"
 #include "dds3_world_selection.h"
@@ -823,7 +824,6 @@ extern void mnuCreateTitleEffectTask(void);
 
 extern u8 D_003BC5A0[];
 
-extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 extern u32 p2sdGetPcmState(void);
 
 extern u32 D_003BC5B0[2];

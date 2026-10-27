@@ -4,6 +4,7 @@
 #include "sdf_gs_header.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "scr_integer_parameter_api.h"
 #include "scr_command_parameter_index.h"
 #include "btl_command_target_policy.h"
 #include "btl_resolve_unit_value_api.h"
@@ -63,7 +64,7 @@
 #include "mdl_flag_api.h"
 /* Declared before first use (were implicit int). */
 extern void dds3WorkClear(void);
-extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
+
 extern void p2sdLoadSMGFile(s32 packed);
 extern SndPackedTrackLoadStatus sndFindPackedTrackLoadStatus(s32 packed);
 
@@ -484,8 +485,6 @@ s32 btlCommandWaitEventSoundDeadline(void) {
     }
     return 0;
 }
-
-extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 
 extern BtlUnit *btlFindUnitByModeClear(s32);
 

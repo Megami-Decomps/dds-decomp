@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr_integer_parameter_api.h"
 #include "scr_integer_return_value_api.h"
 #include "kwln_task_add_child.h"
 #include "sdf_chip.h"
@@ -26,10 +27,6 @@ static inline s32 evtProcessHandleToVmInteger(dds3ProcessID_t *handle)
 
 extern void fldSetFadeTarget(s32 area, s32 targetMode, s32 duration);
 extern void evtSetSkyAlpha(s32 duration, s32 target);
-
-extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
-
-
 
 extern f32 gMoonCnt;
 

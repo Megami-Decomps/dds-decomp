@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr_integer_parameter_api.h"
 #include "fld_inf.h"
 #include "scr.h"
 #include "scr_string_parameter_api.h"
@@ -52,7 +53,6 @@ extern struct evtUnitHandle_t *evtGetUnitHandle(s32 param);
 
 
 /* Persona 4 func_002993c0 @ 002993C0 (src/Script/scrCommonCommand.c), recompiled unchanged */
-extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 
 extern s32 D_0032E48C[];
 

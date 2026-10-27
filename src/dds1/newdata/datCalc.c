@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "scr_integer_parameter_api.h"
 #include "bf_flw0_header.h"
 #include "scr_procedure_start_api.h"
 #include "evt_script_context.h"
@@ -441,7 +442,6 @@ extern scrProcessWork_s *evtWorkScriptTask;
 
 extern EvtScriptContext evtWorkScriptContext;
 
-extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 extern struct scrProcessWork_s *scrSetIntReturnValue(s32 retVal);
 extern struct scrProcessWork_s *scrSetFloatReturnValue(f32 value);
 extern datUnitWork_t *dds3FindEntry(DatUnitId unitId);

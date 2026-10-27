@@ -5,6 +5,7 @@
 #include "fld_activation_entry.h"
 #include "fld_scene_record.h"
 #include "common.h"
+#include "scr_integer_parameter_api.h"
 #include "fld_inf.h"
 #include "fld_scene_status_api.h"
 #include "evt_solar.h"
@@ -249,7 +250,6 @@ extern void fldClearFloorFlag(s32 area, s32 floor, s32 flagNumber);
 extern void fldSetFloorFlag(s32 area, s32 floor, s32 flagNumber);
 
 /* Persona 4 func_002993c0 @ 002993C0 (src/Script/scrCommonCommand.c), recompiled unchanged */
-extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 
 extern s32 D_0038984C[];
 

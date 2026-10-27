@@ -1,4 +1,5 @@
 #include "mnu.h"
+#include "scr_integer_parameter_api.h"
 #include "scr_command_parameter_index.h"
 #include "scr_integer_return_value_api.h"
 #include "scr_command_timer_api.h"
@@ -55,7 +56,7 @@ extern u8 D_003BB1D8[8];
 extern u8 D_003BB1E0[8];
 extern TextVector itfPanelGradientColorTemplate[];
 extern TextVector itfPanelGradientColorPair[];
-extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
+
 extern u8 D_00357BF0[], D_00357C08[], D_00357C20[];
 extern u8 D_00357C38[], D_00357C50[], D_00357C68[];
 extern u8 D_003BB1A8[8], D_003BB1B0[8];

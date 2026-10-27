@@ -7,6 +7,7 @@
 #include "btl_effect_position.h"
 #include "kwln_sprite.h"
 #include "common.h"
+#include "scr_integer_parameter_api.h"
 #include "btl_horizontal_aim_api.h"
 #include "btl_camera_mode_index.h"
 #include "sdf_vu0.h"
@@ -175,10 +176,6 @@ extern u32 btlGetEffectValue(void);
 extern u32 btlGetSelectedBossEffectId(void);
 
 extern u32 btlGetSpecialModeEffectValue(void);
-
-
-extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
-
 
 extern u32 btlButtonIconTexture;
 extern s32 btlDispatchPackedActionWithScratch(s32 context, s32 actor, u32 mask);

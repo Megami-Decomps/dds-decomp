@@ -4,6 +4,7 @@
 #include "fld.h"
 #include "scr_integer_return_value_api.h"
 #include "common.h"
+#include "scr_integer_parameter_api.h"
 #include "dds3_camera_update_flags.h"
 #include "sdf_delayed_resource_check_api.h"
 #include "sdf_vu0.h"
@@ -52,7 +53,7 @@ static inline dds3ProcessID_t *evtProcessHandleFromVmInteger(s32 value)
 }
 
 /* Script VM helpers (see script/scrCommonCommand.c for the convention). */
-s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
+
 /* Selects both the world-node tag and its per-kind scene slot. */
 typedef s32 EffWorldKind;
 dds3Basic_t *evtSearchBasic(EffWorldKind worldKind, s32 worldObjectKey);

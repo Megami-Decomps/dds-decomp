@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "btl_enc_bg_entry.h"
 #include "common.h"
+#include "scr_integer_parameter_api.h"
 #include "itf_mes_entry_start_api.h"
 #include "scr_integer_return_value_api.h"
 #include "itf.h"
@@ -70,8 +71,6 @@ u8 *GetSpeakerName(instanceMes_tag *mes);
 void ResolveResourceAddress(ItfMesSub *resource);
 
 ItfMesWindowIndex scrGetMessageHandle(void);
-
-s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 
 void fldNoopWithMode(s32 mode);
 

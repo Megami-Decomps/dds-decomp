@@ -3,6 +3,7 @@
 #include "btl_runtime_state.h"
 #include "eff_random.h"
 #include "common.h"
+#include "scr_integer_parameter_api.h"
 #include "btl_command_target_policy.h"
 #include "btl_resolve_unit_value_api.h"
 #include "sdf_delayed_resource_check_api.h"
@@ -234,8 +235,6 @@ typedef char BattleActionTaskData_size_must_be_0x0C[
 extern char D_0041B7E0[];
 
 extern u64 btlStartTask(BtlRuntimeTask *);
-
-extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 
 extern void btlApplyScaledUnitEffectParameter(BtlUnit *, s32, s32, f32);
 

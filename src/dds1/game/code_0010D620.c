@@ -1,14 +1,11 @@
 #include "common.h"
+#include "scr_integer_parameter_api.h"
 #include "scr_integer_return_value_api.h"
 #include "scr_command_timer_api.h"
 #include "scr.h"
 #include "scr_program_counter_api.h"
 #include "scr_current_process_user_data_api.h"
 #include "mdl_flag_api.h"
-
-
-extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
-
 
 extern s8 D_00398629[];
 
