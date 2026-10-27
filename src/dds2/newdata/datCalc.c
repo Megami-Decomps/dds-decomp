@@ -24,6 +24,7 @@
 #include "pty_frontline_promotion_api.h"
 #include "pty_status_query_api.h"
 #include "pty_event_penalty_api.h"
+#include "pty_field_hp_attrition_api.h"
 #include "pty_read_roster_stat_api.h"
 #include "dat_unit_has_skill_api.h"
 #include "pty_skill_recovery_api.h"
@@ -683,9 +684,9 @@ void ptyApplyEventPenalty(PtyEventPenaltyMode penaltyMode) {
 
 
 /* Apply field HP attrition without allowing a living roster entry to reach zero. */
-void ptyApplyFieldHpAttrition(s32 attritionMode) {
+void ptyApplyFieldHpAttrition(PtyFieldHpAttritionMode mode) {
     s32 nextHp, loss, slotIndex;
-    if (attritionMode == 1) {
+    if (mode == PTY_FIELD_HP_ATTRITION_STATUS_AFFECTED_FRONTLINE) {
         datUnitWork_t *entry = DDS3_GBWK->party;
         slotIndex = 0;
         do {
@@ -703,7 +704,7 @@ void ptyApplyFieldHpAttrition(s32 attritionMode) {
             entry++;
         } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
     }
-    if (attritionMode == 2) {
+    if (mode == PTY_FIELD_HP_ATTRITION_STANDARD_TERRAIN) {
         datUnitWork_t *entry = DDS3_GBWK->party;
         slotIndex = 0;
         do {
@@ -721,7 +722,7 @@ void ptyApplyFieldHpAttrition(s32 attritionMode) {
             entry++;
         } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
     }
-    if (attritionMode == 3) {
+    if (mode == PTY_FIELD_HP_ATTRITION_SOUND_CLASS_20) {
         datUnitWork_t *entry = DDS3_GBWK->party;
         slotIndex = 0;
         do {
@@ -739,7 +740,7 @@ void ptyApplyFieldHpAttrition(s32 attritionMode) {
             entry++;
         } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
     }
-    if (attritionMode == 4) {
+    if (mode == PTY_FIELD_HP_ATTRITION_SOUND_CLASS_30) {
         datUnitWork_t *entry = DDS3_GBWK->party;
         slotIndex = 0;
         do {

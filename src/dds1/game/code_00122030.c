@@ -16,6 +16,7 @@
 #include "pcp_vu0.h"
 #include "common.h"
 #include "pty_status_query_api.h"
+#include "pty_field_hp_attrition_api.h"
 #include "sdf_delayed_resource_check_api.h"
 #include "dds3_object_flags.h"
 #include "sdf_vu0.h"
@@ -1618,7 +1619,6 @@ extern void fldUpdateSmoothedCameraPose(void);
 extern u8 fldAutoMapSeqTestFlag(u32);
 extern void evtAdvanceSolarClockAndExpireControls(f32 travelDistance);
 extern void evtUpdateFlaggedStats(void);
-extern void ptyApplyFieldHpAttrition(s32 attritionMode);
 extern s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex);
 extern void dds3WorkClear(void);
 extern char D_0039FCA0[], D_0039FCB0[];
@@ -1696,12 +1696,12 @@ s32 fldUpdateTravelAndEncounters(void) {
                 } else {
                     fldGlobalBase.areaDamageReactionMovementGate = 60;
                     fldGlobalBase.attritionDistance = 0.0f;
-                    ptyApplyFieldHpAttrition(2);
+                    ptyApplyFieldHpAttrition(PTY_FIELD_HP_ATTRITION_STANDARD_TERRAIN);
                 }
             } else {
                 fldGlobalBase.attritionDistance = 0.0f;
                 fldGlobalBase.areaDamageReactionMovementGate = 60;
-                ptyApplyFieldHpAttrition(1);
+                ptyApplyFieldHpAttrition(PTY_FIELD_HP_ATTRITION_STATUS_AFFECTED_FRONTLINE);
             }
         }
     } else {
