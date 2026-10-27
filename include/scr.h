@@ -20,6 +20,12 @@ struct ItfMesSub;
 typedef s32 ScrProgramCounter;
 typedef s32 ScrGlobalIntegerIndex;
 typedef s32 ScrGlobalFloatIndex;
+/* Zero-based signed halfword selectors for the VM's per-process local arrays. */
+typedef s16 ScrLocalIntegerIndex;
+typedef s16 ScrLocalFloatIndex;
+/* Signed halfword slot counts stored in the FLW0 header. */
+typedef s16 ScrLocalIntegerCount;
+typedef s16 ScrLocalFloatCount;
 typedef s32 ScrStackDepth;
 typedef s32 ScrStackValueIndex;
 
@@ -91,13 +97,31 @@ typedef struct ScrCommandInstruction {
 typedef char ScrCommandInstruction_size_must_be_0x04[
     (sizeof(ScrCommandInstruction) == 4) ? 1 : -1];
 
-/* Four-byte decoded VM instruction; DDS1/2 script/scrTraceCode.c via scrProcessWork_s. */
+/* Local-variable opcodes use the second halfword as a typed slot index. */
+typedef struct ScrLocalIntegerInstruction {
+    ScrOpcode opCode;
+    ScrLocalIntegerIndex localIndex;
+} ScrLocalIntegerInstruction;
+
+typedef struct ScrLocalFloatInstruction {
+    ScrOpcode opCode;
+    ScrLocalFloatIndex localIndex;
+} ScrLocalFloatInstruction;
+
+typedef char ScrLocalIntegerInstruction_size_must_be_0x04[
+    (sizeof(ScrLocalIntegerInstruction) == 4) ? 1 : -1];
+typedef char ScrLocalFloatInstruction_size_must_be_0x04[
+    (sizeof(ScrLocalFloatInstruction) == 4) ? 1 : -1];
+
+/* Four-byte decoded VM instruction; localInteger/localFloat overlay local-slot opcodes. */
 typedef union ScrInstr {
     struct {
         ScrOpcode opCode;
         s16 sOperand;
     } parts;
     ScrCommandInstruction command;
+    ScrLocalIntegerInstruction localInteger;
+    ScrLocalFloatInstruction localFloat;
     s32 iOperand;
     f32 fOperand;
 } ScrInstr;

@@ -2017,17 +2017,17 @@ scrProcessWork_s *bfContextCreate(const BfFlw0Header *header, const ScrSection *
     process->task = NULL;
     process->previous = NULL;
     process->next = NULL;
-    if (header->intCount > 0) {
-        process->localInt = sdfChipAllocDirect(header->intCount * sizeof(ScrVmInteger));
-        for (i = 0; i < header->intCount; i++) {
+    if (header->localIntegerCount > 0) {
+        process->localInt = sdfChipAllocDirect(header->localIntegerCount * sizeof(ScrVmInteger));
+        for (i = 0; i < header->localIntegerCount; i++) {
             process->localInt[i] = 0;
         }
     } else {
         process->localInt = NULL;
     }
-    if (header->floatCount > 0) {
-        process->localFloat = sdfChipAllocDirect(header->floatCount * sizeof(f32));
-        for (i = 0; i < header->floatCount; i++) {
+    if (header->localFloatCount > 0) {
+        process->localFloat = sdfChipAllocDirect(header->localFloatCount * sizeof(f32));
+        for (i = 0; i < header->localFloatCount; i++) {
             process->localFloat[i] = 0;
         }
     } else {

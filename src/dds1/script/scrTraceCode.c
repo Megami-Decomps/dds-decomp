@@ -44,14 +44,14 @@ ScrOpcodeHandlerResult CodeFunc_PushFX(scrProcessWork_s *scr)
 
 ScrOpcodeHandlerResult CodeFunc_PushLIX(scrProcessWork_s *scr)
 {
-    PushInt(scr, scr->localInt[scr->instructions[scr->pc].parts.sOperand]);
+    PushInt(scr, scr->localInt[scr->instructions[scr->pc].localInteger.localIndex]);
     scr->pc++;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 ScrOpcodeHandlerResult CodeFunc_PushLFX(scrProcessWork_s *scr)
 {
-    PushFloat(scr, scr->localFloat[scr->instructions[scr->pc].parts.sOperand]);
+    PushFloat(scr, scr->localFloat[scr->instructions[scr->pc].localFloat.localIndex]);
     scr->pc++;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
@@ -92,14 +92,14 @@ ScrOpcodeHandlerResult CodeFunc_PopFX(scrProcessWork_s *scr)
 
 ScrOpcodeHandlerResult CodeFunc_PopLIX(scrProcessWork_s *scr)
 {
-    scr->localInt[scr->instructions[scr->pc].parts.sOperand] = PopInt(scr);
+    scr->localInt[scr->instructions[scr->pc].localInteger.localIndex] = PopInt(scr);
     scr->pc++;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
 ScrOpcodeHandlerResult CodeFunc_PopLFX(scrProcessWork_s *scr)
 {
-    scr->localFloat[scr->instructions[scr->pc].parts.sOperand] = PopFloat(scr);
+    scr->localFloat[scr->instructions[scr->pc].localFloat.localIndex] = PopFloat(scr);
     scr->pc++;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
