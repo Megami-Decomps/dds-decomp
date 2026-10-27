@@ -14,6 +14,7 @@
 #include "dsp_entry_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_target_list_builder.h"
 #include "btl_actor_command_selector_value_api.h"
 #include "btl_scene_counter_mode.h"
 #include "btl_action_press_result.h"
@@ -10883,7 +10884,6 @@ s32 btlUpdateTargetSelectionTask(dds3ProcessID_t *handle) {
 
 
 
-extern s32 btlBuildUnitIndexList(ActionStateLink *source, BtlIndexList *list, s32, s32, s32);
 
 /* Creates the AI work object for `source`: allocates two index lists and
  * fills them according to the current scene object state. */
@@ -10902,9 +10902,14 @@ SceneAiWork *btlCreateTargetSelectionWork(ActionStateLink *source) {
         other = (BattleActorPanelWork *)dds3GetProcessData(dds3SearchProcessName(D_004367CC));
         count = btlCountFlaggedSceneActors();
         if (count < 2 && (DDS3_GBWK->party[other->partyRecordIndex].status & 0x4800)) {
-            btlBuildUnitIndexList(source, work->eligibleTargets, 1, 4, -0x4801);
+            btlBuildUnitIndexList(
+                source, work->eligibleTargets, BTL_TARGET_LIST_AREA_ALLIES,
+                BTL_TARGET_LIST_RULE_INCLUDE_DEFEATED, -0x4801);
         } else {
-            btlBuildUnitIndexList(source, work->eligibleTargets, 1, 4, -1);
+            btlBuildUnitIndexList(
+                source, work->eligibleTargets, BTL_TARGET_LIST_AREA_ALLIES,
+                BTL_TARGET_LIST_RULE_INCLUDE_DEFEATED,
+                BTL_TARGET_STATUS_EXCLUSION_ANY);
         }
         btlGetIndexListCount(work->eligibleTargets);
         work->result = 0;

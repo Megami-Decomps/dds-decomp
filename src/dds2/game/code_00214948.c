@@ -171,7 +171,6 @@ extern s32 btlReadCurrentUnitHp(datUnitWork_t *);
 
 extern s32 btlReadCurrentUnitMp(datUnitWork_t *);
 
-extern s32 btlBuildUnitIndexList(ActionStateLink *, BtlIndexList *, s32, s32, s32);
 
 extern s32 btlUnitBlocksElementQuery(BtlUnit *, s32, s32);
 
@@ -936,6 +935,9 @@ s32 btlSelectHighestCurrentMpTarget(ActionStateLink *task, s32 unused) {
     return 1;
 }
 
+/* Keep below this matched target helper; an earlier include perturbs its code. */
+#include "btl_target_list_builder.h"
+
 s32 btlSelectTargetsExcludingActorUnit(ActionStateLink *actor) {
     BtlIndexList *list = btlAllocateIndexList(13);
     u32 mode = 0;
@@ -958,7 +960,10 @@ s32 btlSelectTargetsExcludingActorUnit(ActionStateLink *actor) {
             break;
         }
     }
-    btlBuildUnitIndexList(actor, list, 1, 2, 0);
+    btlBuildUnitIndexList(
+        actor, list, BTL_TARGET_LIST_AREA_ALLIES,
+        BTL_TARGET_LIST_RULE_LIVING_NON_ACTOR,
+        BTL_TARGET_STATUS_EXCLUSION_NO_MASK);
     count = btlGetIndexListCount(list);
     if (count == 0) {
         mode = 0;
@@ -998,7 +1003,9 @@ s32 btlSelectTargetsByTargetType(ActionStateLink *actor) {
     s32 candidateCount;
     s32 result;
 
-    btlBuildUnitIndexList(actor, list, 2, 0, 0);
+    btlBuildUnitIndexList(
+        actor, list, BTL_TARGET_LIST_AREA_OPPOSING_SIDE,
+        BTL_TARGET_LIST_RULE_NONE, BTL_TARGET_STATUS_EXCLUSION_NO_MASK);
     if (targetType != 0) {
         btlCopyIndexList(actor->indexWork.indices, list);
         btlFreeIndexList(list);
@@ -1027,7 +1034,9 @@ s32 btlSelectTargetsByTargetType(ActionStateLink *actor) {
 
 u32 btlAppendSelfAfterTargetScan(ActionStateLink *battle) {
     BtlIndexList *list = btlAllocateIndexList(13);
-    btlBuildUnitIndexList(battle, list, 1, 1, 0);
+    btlBuildUnitIndexList(
+        battle, list, BTL_TARGET_LIST_AREA_ALLIES,
+        BTL_TARGET_LIST_RULE_SELF_ONLY, BTL_TARGET_STATUS_EXCLUSION_NO_MASK);
     btlGetIndexListCount(list);
     btlAppendIndexListEntry(battle->indexWork.indices, battle->unit);
     btlFreeIndexList(list);

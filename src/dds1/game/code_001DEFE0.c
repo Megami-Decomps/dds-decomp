@@ -9,6 +9,7 @@
 #include "btl_pair_camera_preset.h"
 #include "btl_camera_parameter_record.h"
 #include "common.h"
+#include "btl_target_list_builder.h"
 #include "btl_unit_model_progress_api.h"
 #include "btl_quarter_health_result.h"
 #include "sdf_delayed_resource_check_api.h"
@@ -87,7 +88,6 @@
 #include "kwln_fade_timing.h"
 #include "btl_camera_setup_policy.h"
 /* Declared before first use (were implicit int). */
-extern s32 btlBuildEligibleTargetIndexList(BtlTask *action, BtlIndexList *targets, s32 area, s32 rule, s32 excludedStatus);
 extern s32 btlGetSelectedCommandEffectTint(BtlUnit *unit);
 extern s32 btlGetUnitMotionDurationFrames(BtlUnit *unit, s32 motionIndex);
 extern void effBTLFieldColorResetFlags(void);
@@ -3845,7 +3845,9 @@ void btlInitializeCameraCursorFromPreset(BtlLinkedCommand *action, BtlCamState *
     case 1:
         task = action->task;
         indices = btlAllocateIndexList(13);
-        btlBuildEligibleTargetIndexList(task, indices, 1, 0, 0);
+        btlBuildEligibleTargetIndexList(
+            task, indices, BTL_TARGET_LIST_AREA_ALLIES,
+            BTL_TARGET_LIST_RULE_NONE, BTL_TARGET_STATUS_EXCLUSION_NO_MASK);
         count = btlGetIndexListCount(indices);
 
         btlUnitGetPosVU((BtlUnit *)indices->entries[0], 0);

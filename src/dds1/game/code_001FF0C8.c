@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "btl_target_list_builder.h"
 #include "btl_element_block_query_result.h"
 #include "btl_command_use_error.h"
 #include "btl_resolve_unit_value_api.h"
@@ -966,7 +967,6 @@ u8 btlQueryActorOptionAvailability(BtlUnit *actor) {
     return result != 0;
 }
 
-extern s32 btlBuildEligibleTargetIndexList(BtlTask *, BtlIndexList *, s32, s32, s32);
 
 /* Query the context's index list, freeing it on both the first success and exhausted-list paths. */
 s32 btlAnyIndexedUnitPassesQuery(BtlUnit *unit) {
@@ -979,7 +979,9 @@ s32 btlAnyIndexedUnitPassesQuery(BtlUnit *unit) {
     }
     actor = btlActionScratchWork->actor;
     indexList = btlAllocateIndexList(13);
-    btlBuildEligibleTargetIndexList(actor, indexList, 2, 0, 0);
+    btlBuildEligibleTargetIndexList(
+        actor, indexList, BTL_TARGET_LIST_AREA_OPPOSING_SIDE,
+        BTL_TARGET_LIST_RULE_NONE, BTL_TARGET_STATUS_EXCLUSION_NO_MASK);
     entryCount = btlGetIndexListCount(indexList);
     for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
         if (btlAreUnitStatusAndEntryFlagsClear((BtlUnit *)btlGetIndexListEntry(indexList, entryIndex)) != 0) {

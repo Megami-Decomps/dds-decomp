@@ -6,6 +6,7 @@
 #include "btl_command_use_error.h"
 #include "btl_action_press_result.h"
 #include "btl_command_target_policy.h"
+#include "btl_target_list_builder.h"
 #include "btl_command_status_target_index.h"
 #include "btl_actor_status_table_api.h"
 #include "btl_actor_entry_code_defaults.h"
@@ -522,8 +523,9 @@ s32 btlGetActorBedAssetIdFromIndex(s32 itemIndex) {
 
 extern const char D_003A17A8[];
 
-s32 btlBuildEligibleTargetIndexList(BtlTask *action, BtlIndexList *targets,
-                  s32 area, s32 rule, s32 excludedStatus) {
+BtlTargetListBuildResult btlBuildEligibleTargetIndexList(
+    BtlTask *action, BtlIndexList *targets, BtlTargetListArea area,
+    BtlTargetListRule rule, BtlTargetStatusExclusion excludedStatus) {
     BtlUnit *collected[16];
     BtlState *battle = (BtlState *)btlGetRuntime();
     s32 alliedArea;
@@ -541,17 +543,17 @@ s32 btlBuildEligibleTargetIndexList(BtlTask *action, BtlIndexList *targets,
         alliedArea = 0x400;
         opposingArea = 0x200;
     }
-    areaMask = 0;
-    if ((area & 1) != 0) {
+    areaMask = BTL_TARGET_LIST_AREA_NONE;
+    if ((area & BTL_TARGET_LIST_AREA_ALLIES) != 0) {
         areaMask = alliedArea;
     }
-    if ((area & 2) != 0) {
+    if ((area & BTL_TARGET_LIST_AREA_OPPOSING_SIDE) != 0) {
         areaMask |= opposingArea;
     }
     btlClearIndexList(targets);
-    if ((rule & 1) != 0) {
+    if ((rule & BTL_TARGET_LIST_RULE_SELF_ONLY) != 0) {
         btlAppendIndexListEntry(targets, action->unit);
-        return 1;
+        return BTL_TARGET_LIST_BUILD_NONEMPTY;
     }
     unit = battle->units;
     count = 0;
@@ -563,29 +565,31 @@ s32 btlBuildEligibleTargetIndexList(BtlTask *action, BtlIndexList *targets,
             continue;
         }
         if ((flags & 0xE0) != 0) {
-            if (excludedStatus == 0) {
+            if (excludedStatus == BTL_TARGET_STATUS_EXCLUSION_NO_MASK) {
                 continue;
             }
-            if ((excludedStatus & 0x4000) != 0 && excludedStatus != -1) {
+            if ((excludedStatus & 0x4000) != 0 &&
+                excludedStatus != BTL_TARGET_STATUS_EXCLUSION_ANY) {
                 continue;
             }
         }
         if ((flags & areaMask) == 0) {
             continue;
         }
-        if ((rule & 2) != 0 && (unit->status.flags & 1) != 0) {
+        if ((rule & BTL_TARGET_LIST_RULE_LIVING_NON_ACTOR) != 0 &&
+            (unit->status.flags & 1) != 0) {
             if (action->unit == unit) {
                 continue;
             }
             collected[count++] = unit;
-        } else if ((rule & 8) != 0) {
+        } else if ((rule & BTL_TARGET_LIST_RULE_DEFEATED_ONLY) != 0) {
             if ((unit->status.flags & 1) != 0) {
                 continue;
             }
             collected[count] = unit;
             selected = count++;
         } else {
-            if ((rule & 4) == 0) {
+            if ((rule & BTL_TARGET_LIST_RULE_INCLUDE_DEFEATED) == 0) {
                 if ((unit->status.flags & 1) == 0) {
                     continue;
                 }
@@ -595,8 +599,8 @@ s32 btlBuildEligibleTargetIndexList(BtlTask *action, BtlIndexList *targets,
                 }
             }
             if ((unit->status.flags & 1) != 0) {
-                if (excludedStatus != 0) {
-                    if (excludedStatus != -1) {
+                if (excludedStatus != BTL_TARGET_STATUS_EXCLUSION_NO_MASK) {
+                    if (excludedStatus != BTL_TARGET_STATUS_EXCLUSION_ANY) {
                         if (unit->partyRecord.status == 0) {
                             continue;
                         }
@@ -625,10 +629,8 @@ s32 btlBuildEligibleTargetIndexList(BtlTask *action, BtlIndexList *targets,
         }
     }
     btlBossDebugPrintf(D_003A17A8, count, area, rule, excludedStatus);
-    return count != 0;
+    return count != 0 ? BTL_TARGET_LIST_BUILD_NONEMPTY : BTL_TARGET_LIST_BUILD_EMPTY;
 }
-
-extern s32 btlBuildEligibleTargetIndexList(BtlTask *, BtlIndexList *, s32, s32, s32);
 
 INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A1788);
 
@@ -637,9 +639,9 @@ INCLUDE_RODATA(const s32, "game/code_001A1960", D_003A17A8);
 BtlCommandTargetPolicy btlSelectCommandTargetPolicy(BtlTask *task, BtlIndexList *destination, s32 unused) {
     s32 category = 3;
     BtlState *battle = (BtlState *)btlGetRuntime();
-    s32 mode = 0;
-    s32 flags = 0;
-    s32 mask = 0;
+    BtlTargetListArea area = BTL_TARGET_LIST_AREA_NONE;
+    BtlTargetListRule targetRules = BTL_TARGET_LIST_RULE_NONE;
+    BtlTargetStatusExclusion excludedStatus = BTL_TARGET_STATUS_EXCLUSION_NO_MASK;
     s32 value = task->indexWork.phase;
 
     switch (value) {
@@ -652,15 +654,15 @@ BtlCommandTargetPolicy btlSelectCommandTargetPolicy(BtlTask *task, BtlIndexList 
             } else {
                 category = 0;
             }
-            mode = 2;
-            flags = 0;
-            mask = 0;
+            area = BTL_TARGET_LIST_AREA_OPPOSING_SIDE;
+            targetRules = BTL_TARGET_LIST_RULE_NONE;
+            excludedStatus = BTL_TARGET_STATUS_EXCLUSION_NO_MASK;
         } else {
             value = actor->partyRecord.unitId;
             category = datRosterDetails[value].targetType;
-            mode = datRosterDetails[value].options;
-            flags = datRosterDetails[value].targetFlags;
-            mask = datRosterDetails[value].restriction;
+            area = datRosterDetails[value].options;
+            targetRules = datRosterDetails[value].targetFlags;
+            excludedStatus = datRosterDetails[value].restriction;
         }
         break;
     }
@@ -675,28 +677,31 @@ BtlCommandTargetPolicy btlSelectCommandTargetPolicy(BtlTask *task, BtlIndexList 
             value = task->indexWork.skillId;
         }
         category = datCommandRecords[value].targetType;
-        mode = datCommandRecords[value].options;
-        flags = datCommandRecords[value].targetFlags;
-        mask = datCommandRecords[value].restriction;
-        if ((datCommandRecords[value].attribute.bits & 0x400000FF) == 0x40000002 && mask == 0) {
-            mask = -1;
+        area = datCommandRecords[value].options;
+        targetRules = datCommandRecords[value].targetFlags;
+        excludedStatus = datCommandRecords[value].restriction;
+        if ((datCommandRecords[value].attribute.bits & 0x400000FF) == 0x40000002 &&
+            excludedStatus == BTL_TARGET_STATUS_EXCLUSION_NO_MASK) {
+            excludedStatus = BTL_TARGET_STATUS_EXCLUSION_ANY;
         }
         break;
     }
     case 9:
         category = 0;
-        mode = 1;
-        flags = 4;
-        mask = -1;
+        area = BTL_TARGET_LIST_AREA_ALLIES;
+        targetRules = BTL_TARGET_LIST_RULE_INCLUDE_DEFEATED;
+        excludedStatus = BTL_TARGET_STATUS_EXCLUSION_ANY;
         break;
     }
     if (battle->runtimeFlags & BTL_STATE_FLAG_BYPASS_COMMAND_BLOCKS) {
-        mode = 3;
-        flags &= ~0xB;
-        mask = 0;
+        area = BTL_TARGET_LIST_AREA_ALLIES | BTL_TARGET_LIST_AREA_OPPOSING_SIDE;
+        targetRules &= ~(BTL_TARGET_LIST_RULE_SELF_ONLY |
+                         BTL_TARGET_LIST_RULE_LIVING_NON_ACTOR |
+                         BTL_TARGET_LIST_RULE_DEFEATED_ONLY);
+        excludedStatus = BTL_TARGET_STATUS_EXCLUSION_NO_MASK;
     }
     if (destination != NULL) {
-        btlBuildEligibleTargetIndexList(task, destination, mode, flags, mask);
+        btlBuildEligibleTargetIndexList(task, destination, area, targetRules, excludedStatus);
     }
     return category;
 }

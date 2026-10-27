@@ -10,6 +10,7 @@
 #include "btl_registered_panel_work.h"
 #include "btl_command_layout_work.h"
 #include "common.h"
+#include "btl_target_list_builder.h"
 #include "btl_actor_command_selector_value_api.h"
 #include "btl_action_press_result.h"
 #include "file_config_option_api.h"
@@ -9361,7 +9362,6 @@ s32 btlUpdateTargetSelectionTask(dds3ProcessID_t *handle) {
     return 0;
 }
 
-extern s32 btlBuildEligibleTargetIndexList(BtlTask *source, BtlIndexList *list, s32, s32, s32);
 
 extern s32 btlStepTargetGridSelection(s32, SceneAiWork *);
 
@@ -9388,9 +9388,14 @@ SceneAiWork *btlCreateTargetSelectionWork(BtlTask *source) {
         count = btlCountFlaggedSceneActors();
         if (count < 2 &&
             (DDS3_GBWK->party[other->partyRecordIndex].status & 0x4800)) {
-            btlBuildEligibleTargetIndexList(source, work->eligibleTargets, 1, 4, -0x4801);
+            btlBuildEligibleTargetIndexList(
+                source, work->eligibleTargets, BTL_TARGET_LIST_AREA_ALLIES,
+                BTL_TARGET_LIST_RULE_INCLUDE_DEFEATED, -0x4801);
         } else {
-            btlBuildEligibleTargetIndexList(source, work->eligibleTargets, 1, 4, -1);
+            btlBuildEligibleTargetIndexList(
+                source, work->eligibleTargets, BTL_TARGET_LIST_AREA_ALLIES,
+                BTL_TARGET_LIST_RULE_INCLUDE_DEFEATED,
+                BTL_TARGET_STATUS_EXCLUSION_ANY);
         }
         btlGetIndexListCount(work->eligibleTargets);
         work->result = 0;

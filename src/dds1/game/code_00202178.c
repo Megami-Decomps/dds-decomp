@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_target_list_builder.h"
 #include "btl_element_block_query_result.h"
 #include "btl_status_motion_override.h"
 #include "btl_command_availability_override.h"
@@ -114,7 +115,6 @@ extern u8 btlTestSelectedItemCategoryMask(BtlUnit *, s32);
 
 extern s32 btlReadCurrentUnitMp(datUnitWork_t *);
 
-extern s32 btlBuildEligibleTargetIndexList(BtlTask *, BtlIndexList *, s32, s32, s32);
 
 
 extern s32 btlWouldUiValueFallBelowQuarter(BtlUnit *, s32);
@@ -704,7 +704,10 @@ s32 btlSelectTargetsExcludingActorUnit(BtlTask *actor) {
         mode = 0;
         break;
     }
-    btlBuildEligibleTargetIndexList(actor, list, 1, 2, 0);
+    btlBuildEligibleTargetIndexList(
+        actor, list, BTL_TARGET_LIST_AREA_ALLIES,
+        BTL_TARGET_LIST_RULE_LIVING_NON_ACTOR,
+        BTL_TARGET_STATUS_EXCLUSION_NO_MASK);
     count = btlGetIndexListCount(list);
     if (count == 0) {
         mode = 0;
@@ -744,7 +747,9 @@ s32 btlSelectTargetsByTargetType(BtlTask *actor) {
     s32 candidateCount;
     s32 result;
 
-    btlBuildEligibleTargetIndexList(actor, list, 2, 0, 0);
+    btlBuildEligibleTargetIndexList(
+        actor, list, BTL_TARGET_LIST_AREA_OPPOSING_SIDE,
+        BTL_TARGET_LIST_RULE_NONE, BTL_TARGET_STATUS_EXCLUSION_NO_MASK);
     if (targetType != 0) {
         btlCopyIndexList(actor->indexWork.indices, list);
         btlFreeIndexList(list);
@@ -773,7 +778,9 @@ s32 btlSelectTargetsByTargetType(BtlTask *actor) {
 
 s32 btlAppendSelfAfterTargetScan(BtlTask *actor) {
     BtlIndexList *list = btlAllocateIndexList(13);
-    btlBuildEligibleTargetIndexList(actor, list, 1, 1, 0);
+    btlBuildEligibleTargetIndexList(
+        actor, list, BTL_TARGET_LIST_AREA_ALLIES,
+        BTL_TARGET_LIST_RULE_SELF_ONLY, BTL_TARGET_STATUS_EXCLUSION_NO_MASK);
     btlGetIndexListCount(list);
     btlAppendIndexListEntry(actor->indexWork.indices, actor->unit);
     btlFreeIndexList(list);

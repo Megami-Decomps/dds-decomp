@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_target_list_builder.h"
 #include "btl_element_block_query_result.h"
 #include "btl_command_use_error.h"
 #include "btl_resolve_unit_value_api.h"
@@ -103,7 +104,6 @@ extern s32 btlReadCurrentUnitMp(datUnitWork_t *);
 
 extern s32 btlAreUnitStatusAndEntryFlagsClear(BtlUnit *);
 
-extern s32 btlBuildUnitIndexList(ActionStateLink *, BtlIndexList *, s32, s32, s32);
 
 extern s32 btlUnitHasNegativeActionQueryResult(BtlUnit *unit, s32 mask);
 
@@ -1081,7 +1081,9 @@ s32 btlAnyIndexedUnitPassesQuery(BtlUnit *unit) {
     }
     actor = btlActionScratchWork->actor;
     indexList = btlAllocateIndexList(13);
-    btlBuildUnitIndexList(actor, indexList, 2, 0, 0);
+    btlBuildUnitIndexList(
+        actor, indexList, BTL_TARGET_LIST_AREA_OPPOSING_SIDE,
+        BTL_TARGET_LIST_RULE_NONE, BTL_TARGET_STATUS_EXCLUSION_NO_MASK);
     entryCount = btlGetIndexListCount(indexList);
     for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
         if (btlAreUnitStatusAndEntryFlagsClear((BtlUnit *)btlGetIndexListEntry(indexList, entryIndex)) != 0) {
