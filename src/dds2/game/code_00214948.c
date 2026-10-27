@@ -309,9 +309,9 @@ s32 btlGroup400UnitHasAction(BtlUnit *unit, s32 action) {
 /* Find one or two eligible enemy partners from the linkage requirement count, not its IDs. */
 s32 btlFindEnemyLinkagePartnersByCount(BtlUnit *actor, s32 command, BtlUnit **outFirst, BtlUnit **outSecond) {
     BtlState *state = (BtlState *)btlGetRuntime();
-    DatAffinityRecord *affinity = &datAffinityRecords[command - DAT_AFFINITY_FIRST_COMMAND];
+    const DatAffinityRecord *affinity = &datAffinityRecords[command - DAT_AFFINITY_FIRST_COMMAND];
     u32 requiredCount = 0;
-    s32 *requirementCursor;
+    const s32 *requirementCursor;
     u32 i;
     BtlUnit *head;
     BtlUnit *unit;

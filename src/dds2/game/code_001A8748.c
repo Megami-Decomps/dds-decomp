@@ -2145,7 +2145,7 @@ s32 btlBuildActorLinkageSkillList(BtlUnit *actor, BattleRosterTable *table) {
     BtlUnit *actors[3];
     BtlState *battle;
     BtlUnit *unit;
-    DatAffinityRecord *record;
+    const DatAffinityRecord *record;
     s32 actorCount;
     u32 count;
     u32 affinity;
@@ -2326,7 +2326,7 @@ extern s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, BtlUnit 
 BtlCommandAffinityPartnerResolution btlResolveCommandAffinityPartners(
     BtlUnit *unit, s32 command, BtlCommandPartnerOutput *output) {
     BtlState *controller = (BtlState *)btlGetRuntime();
-    s32 *requirementCursor;
+    const s32 *requirementCursor;
     u32 requiredCount;
     u32 i;
     BtlCommandAffinityPartnerResolution result;

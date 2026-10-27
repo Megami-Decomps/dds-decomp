@@ -302,7 +302,7 @@ s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, BtlUnit **first
     datUnitWork_t *statRecords[3];
     u32 requiredCount = 0;
     BtlState *controller = (BtlState *)btlGetRuntime();
-    s32 *requirementCursor;
+    const s32 *requirementCursor;
     BtlUnit *candidate;
     BtlUnit *partner;
     u32 i;
@@ -387,7 +387,7 @@ BtlCommandAffinityPartnerAvailability btlHasRequiredCommandAffinityPartners(BtlU
     u32 availableSlots;
     u32 requiredCount;
     u32 i;
-    s32 *requirement;
+    const s32 *requirement;
     ActionStateLink *entry;
     BtlUnit *partner;
     u32 flags;

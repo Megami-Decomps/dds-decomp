@@ -1078,7 +1078,7 @@ extern DatSkillList *D_003BAA58;
 
 /* Test whether a party record satisfies one participant requirement of an affinity. */
 PtyAffinityMatchResult ptyUnitMatchesAffinityRequirement(const datUnitWork_t *unit, s32 affinity, u8 requirementIndex) {
-    DatAffinityRecord *record;
+    const DatAffinityRecord *record;
     s32 requirement;
     s32 requirementValue;
     u32 i;
@@ -1129,7 +1129,7 @@ PtyAffinityMatchResult ptyUnitMatchesAffinityRequirement(const datUnitWork_t *un
 
 /* Try the six stored orders; success requires exactly the non-sentinel requirement count. */
 PtyAffinityMatchResult ptyMatchAffinityPermutation(const datUnitWork_t *const *actors, s32 affinity) {
-    s32 *requirementCursor = datAffinityRecords[affinity - DAT_AFFINITY_FIRST_COMMAND].requirements;
+    const s32 *requirementCursor = datAffinityRecords[affinity - DAT_AFFINITY_FIRST_COMMAND].requirements;
     u32 i;
     s32 requiredCount = 0;
     u32 orderIndex;
