@@ -3509,8 +3509,8 @@ extern FldNpcPlacementRule D_003A55F0[400];
 extern u32 sdfGetLodChunkValue(sdfModelRootNode_t *model);
 extern void fldSpawnNpcTrigger(f32 x, f32 y, f32 z, f32 height, char *name, s32 arg1, s32 room, s32 index);
 
-void func_0014C2B8(s32 key, f32 *orientation, s32 room, char *name, s32 argument,
-                   f32 x, f32 y, f32 z) {
+void func_0014C2B8(s32 key, f32 *orientation, f32 x, f32 y, f32 z,
+                   s32 room, char *name, s32 argument) {
     f32 position[4];
     f32 rotation[4];
     s32 outputIndex;
