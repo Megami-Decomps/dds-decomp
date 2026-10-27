@@ -3,6 +3,10 @@
 
 #include "common.h"
 
+/* First argument to the sceMc* APIs: the physical memory-card port. The
+ * wrappers select card slot zero separately. */
+typedef s32 McPort;
+
 /* SDK 2.4 libmc.h directory record and API. */
 typedef struct
 {
@@ -32,10 +36,10 @@ typedef enum McOpenMode {
 
 int sceMcGetDir(int, int, const char *, unsigned, int, sceMcTblGetDir *);
 
-void sdfMcFuncChdir(u32 context, const char *path);
-void sdfMcFuncMkdir(u32 context, const char *path);
-void sdfMcFuncGetDir(u32 context, const char *path, sceMcTblGetDir *directoryEntries, s32 entryLimit);
-void sdfMcFuncDelete(u32 context, const char *path);
-void sdfMcFuncOpen(u32 context, const char *path, McOpenMode openMode);
+void sdfMcFuncChdir(McPort port, const char *path);
+void sdfMcFuncMkdir(McPort port, const char *path);
+void sdfMcFuncGetDir(McPort port, const char *path, sceMcTblGetDir *directoryEntries, s32 entryLimit);
+void sdfMcFuncDelete(McPort port, const char *path);
+void sdfMcFuncOpen(McPort port, const char *path, McOpenMode openMode);
 
 #endif

@@ -30,7 +30,7 @@ McPollResult sdfMcPollFormat(void) {
 
 
 /* Start a directory change on slot zero using the supplied path. */
-void sdfMcFuncChdir(u32 port, const char *path) {
+void sdfMcFuncChdir(McPort port, const char *path) {
     sceMcChdir(port, MC_CARD_SLOT, path, 0);
 }
 
@@ -52,7 +52,7 @@ McPollResult sdfMcPollChdir(void) {
 
 
 /* Start directory creation on slot zero using the supplied path. */
-void sdfMcFuncMkdir(u32 port, const char *path) {
+void sdfMcFuncMkdir(McPort port, const char *path) {
     sceMcMkdir(port, MC_CARD_SLOT, path);
 }
 
@@ -77,7 +77,7 @@ McPollResult sdfMcPollMkdir(void) {
 
 /* Request directory entries on slot zero with SDK mode zero. The output table
  * is SDK argument six; its entry limit is argument five. */
-void sdfMcFuncGetDir(u32 port, const char *path, sceMcTblGetDir *directoryEntries, s32 entryLimit) {
+void sdfMcFuncGetDir(McPort port, const char *path, sceMcTblGetDir *directoryEntries, s32 entryLimit) {
     sceMcGetDir(port, MC_CARD_SLOT, path, 0, entryLimit, directoryEntries);
 }
 
@@ -104,7 +104,7 @@ McPollResult sdfMcPollGetDir(McDirectoryEntryCount *entryCountOut) {
 
 
 /* Start removal of the supplied path on slot zero; no completion wait here. */
-void sdfMcFuncDelete(u32 port, const char *path) {
+void sdfMcFuncDelete(McPort port, const char *path) {
     sceMcDelete(port, MC_CARD_SLOT, path);
 }
 
@@ -124,7 +124,7 @@ McPollResult sdfMcPollDelete(void) {
 
 
 /* Start opening a path on slot zero with the requested read/save mode. */
-void sdfMcFuncOpen(u32 port, const char *path, McOpenMode openMode) {
+void sdfMcFuncOpen(McPort port, const char *path, McOpenMode openMode) {
     sceMcOpen(port, MC_CARD_SLOT, path, openMode);
 }
 
