@@ -1848,12 +1848,12 @@ void effEVECombParSmokeDraw(EffEventBillSet *work) {
             }
             if (primary.count == 15) {
                 sdfDrawTagLink(primaryList, (u32)sdfBillBoardMakeN(primary.positions,
-                    primary.colors, primary.uv, primary.corners, 15, 0));
+                    primary.colors, primary.uv, primary.corners[0], 15, 0));
                 primary.count = 0;
             }
             if (secondary.count == 15) {
                 sdfDrawTagLink(secondaryList, (u32)sdfBillBoardMakeN(secondary.positions,
-                    secondary.colors, secondary.uv, secondary.corners, 15, 0));
+                    secondary.colors, secondary.uv, secondary.corners[0], 15, 0));
                 secondary.count = 0;
             }
             particle->scalePhaseX += particle->scalePhaseStepX;
@@ -1865,11 +1865,11 @@ void effEVECombParSmokeDraw(EffEventBillSet *work) {
     }
     if (primary.count > 0) {
         sdfDrawTagLink(primaryList, (u32)sdfBillBoardMakeN(primary.positions,
-            primary.colors, primary.uv, primary.corners, primary.count, 0));
+            primary.colors, primary.uv, primary.corners[0], primary.count, 0));
     }
     if (secondary.count > 0) {
         sdfDrawTagLink(secondaryList, (u32)sdfBillBoardMakeN(secondary.positions,
-            secondary.colors, secondary.uv, secondary.corners, secondary.count, 0));
+            secondary.colors, secondary.uv, secondary.corners[0], secondary.count, 0));
     }
     stateList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(stateList);

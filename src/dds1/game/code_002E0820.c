@@ -869,10 +869,10 @@ s32 sdfBillBoardGetPacketSize(s32 count) {
     return count * 0x40 + 0x40;
 }
 
-/* Build XYZ and attribute VIF streams; return the packet address.
- * vertexCount must be positive; n retains its native count/byte-size reuse. */
+/* Build XYZ and attribute VIF streams; inputs are copied into the allocated
+ * packet, and vertexCount must be positive. */
 /* vu0 routine: pack aligned positions into the VIF three-word stream. */
-u32 *sdfBillBoardMakeN(const u128 *positions, const void *byteAttributes, const void *halfAttributes, const void *wordAttributes, s32 vertexCount, void *(*allocatePacket)(s32)) {
+u32 *sdfBillBoardMakeN(const u128 *positions, const u32 *packedColors, const void *uvCorners, const f32 *cornerOffsets, s32 vertexCount, void *(*allocatePacket)(s32)) {
     s32 packetBytes;
     u32 *packet;
     u32 *cursor;
@@ -909,7 +909,7 @@ u32 *sdfBillBoardMakeN(const u128 *positions, const void *byteAttributes, const 
     unpackCode = n << 16;
     vuAddress = vertexCount + 2;
     *cursor++ = unpackCode | vuAddress | 0x6E00C000;
-    memcpy(cursor, byteAttributes, n * 4);
+    memcpy(cursor, packedColors, n * 4);
     cursor += n;
     vuAddress += n;
     n = vertexCount * 4;
@@ -917,12 +917,12 @@ u32 *sdfBillBoardMakeN(const u128 *positions, const void *byteAttributes, const 
     *cursor++ = unpackCode | vuAddress | 0x6500C000;
     vuAddress += n;
     unpackCode |= vuAddress;
-    memcpy(cursor, halfAttributes, n * 4);
+    memcpy(cursor, uvCorners, n * 4);
     cursor += n;
     n *= 8;
     unpackCode |= 0x6400C000;
     *cursor++ = unpackCode;
-    memcpy(cursor, wordAttributes, n);
+    memcpy(cursor, cornerOffsets, n);
     cursor = (u32 *)((u8 *)cursor + n);
     cursor[0] = SDF_VIF_ITOP_COMPACT_VERTEX;
     cursor[1] = SDF_VIF_MSCAL_VERTICES;

@@ -222,7 +222,7 @@ void effSwordTrackDrawTex(EffMagatuhiValueWork *work) {
                     pendingCount++;
                     if (pendingCount == 15) {
                         vertexPacket = sdfBillBoardMakeN((u128 *)positions,
-                            colors, D_00452110, offsets, 15, 0);
+                            colors, D_00452110, offsets[0], 15, 0);
                         sdfDrawTagLink(list, (u32)vertexPacket);
                         pendingCount = 0;
                     }
@@ -233,7 +233,7 @@ void effSwordTrackDrawTex(EffMagatuhiValueWork *work) {
     }
     if (pendingCount != 0) {
         vertexPacket = sdfBillBoardMakeN((u128 *)positions,
-            colors, D_00452110, offsets, pendingCount, 0);
+            colors, D_00452110, offsets[0], pendingCount, 0);
         sdfDrawTagLink(list, (u32)vertexPacket);
     }
     D_003B2050[work->drawQueueIndex]->append(D_003B2050[work->drawQueueIndex], list);

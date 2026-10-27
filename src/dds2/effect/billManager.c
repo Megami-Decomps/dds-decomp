@@ -59,7 +59,7 @@ void dds3BillboardTagLink(billHandle_t *obj, BillChildPayload *child) {
         work = child->work;
         if (work->count > 0) {
             vertexPacket = sdfBillBoardMakeN((const u128 *)work->positions, work->colors,
-                work->uv, work->offsets, work->count, 0);
+                work->uv, work->offsets[0], work->count, 0);
             sdfDrawTagLink(child->pendingLists[selected], (u32)vertexPacket);
             work->count = 0;
         }
@@ -140,7 +140,7 @@ void dds3BillboardTagLink(billHandle_t *obj, BillChildPayload *child) {
     work->count++;
     if (work->count == 15) {
         vertexPacket = sdfBillBoardMakeN((const u128 *)work->positions, work->colors,
-            work->uv, work->offsets, 15, 0);
+            work->uv, work->offsets[0], 15, 0);
         sdfDrawTagLink(child->pendingLists[selected], (u32)vertexPacket);
         work->count = 0;
     }
@@ -165,7 +165,7 @@ void billFlushPendingChildPackets(void) {
 
             if (count > 0) {
                 u32 *vertexPacket = sdfBillBoardMakeN((const u128 *)work->positions, work->colors, work->uv,
-                                           work->offsets, count, 0);
+                                           work->offsets[0], count, 0);
                 sdfDrawTagLink(node->pendingLists[node->packetListIndex], (u32)vertexPacket);
                 work->count = 0;
             }
