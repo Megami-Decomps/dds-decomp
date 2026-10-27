@@ -5,6 +5,7 @@
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "common.h"
+#include "btl_quarter_health_result.h"
 #include "btl_horizontal_aim_api.h"
 #include "btl_actor_command_selector_value_api.h"
 #include "btl_scene_counter_mode.h"
@@ -206,7 +207,6 @@ extern u16 btlRefreshUnitMaximumMpAndClampCurrentMp(datUnitWork_t *);
 
 extern void evtSetWaitMotionSpeed(evtUnitHandle_t *, f32);
 
-extern s32 btlIsCurrentValueBelowQuarterThreshold(BtlUnit *);
 
 extern s32 btlTestActorStatusPredicate(BtlUnit *);
 
@@ -2820,7 +2820,7 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
         unit->updateFlags &= ~2;
     }
     index = 0;
-    if (btlIsCurrentValueBelowQuarterThreshold(unit) != 0 &&
+    if (btlIsCurrentValueBelowQuarterThreshold(unit) != BTL_QUARTER_HEALTH_NOT_BELOW &&
         ((unit->status.flags & 0x200) || (entryFlags & 0x200))) {
         index = 10;
     }

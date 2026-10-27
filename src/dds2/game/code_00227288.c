@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_quarter_health_result.h"
 #include "btl_camera_mode_index.h"
 #include "sdf_vu0.h"
 #include "btl_boss_data_api.h"
@@ -100,7 +101,6 @@ void btlRunLinkedPairUpdateHook(void) {
     btlUpdateLinkedEffectUnitTransforms();
 }
 
-extern s32 btlIsCurrentValueBelowQuarterThreshold(BtlUnit *unit);
 extern BtlRuntimeTask *btlCreateStiffenDamageShakeTask(BtlUnit *unit, f32 amount);
 
 /* Remap the linked pair's motion using effect phase and quarter-value tests.
@@ -112,8 +112,8 @@ s32 btlChooseLinkedPairMotion(BtlUnit *unit, s32 code, s32 unused) {
     BtlUnit *first;
     BtlUnit *second;
     BtlRuntimeTask *task;
-    s32 secondLow;
-    s32 firstLow;
+    BtlQuarterHealthThresholdResult secondLow;
+    BtlQuarterHealthThresholdResult firstLow;
 
     if ((unit->status.flags & 0x400) == 0) {
         return code;
@@ -167,10 +167,10 @@ s32 btlChooseLinkedPairMotion(BtlUnit *unit, s32 code, s32 unused) {
             case 10:
                 secondLow = btlIsCurrentValueBelowQuarterThreshold(second);
                 firstLow = btlIsCurrentValueBelowQuarterThreshold(first);
-                if (secondLow != 0) {
-                    return firstLow != 0 ? 10 : 0x12;
+                if (secondLow != BTL_QUARTER_HEALTH_NOT_BELOW) {
+                    return firstLow != BTL_QUARTER_HEALTH_NOT_BELOW ? 10 : 0x12;
                 }
-                return firstLow != 0 ? 0x13 : 0;
+                return firstLow != BTL_QUARTER_HEALTH_NOT_BELOW ? 0x13 : 0;
             }
             if (code == 11) {
                 return unit == second ? 0x10 : 0x11;
@@ -1361,7 +1361,6 @@ void btlPromoteSeraphToFrontline(void) {
     ptyRebalanceFrontline(8);
 }
 
-extern s32 btlIsCurrentValueBelowQuarterThreshold(BtlUnit *unit);
 
 /* Only scene-listed special units use these alternate action codes. */
 s32 btlRemapListedUnitAction(BtlUnit *unit, s32 action) {
@@ -1385,7 +1384,7 @@ s32 btlRemapListedUnitAction(BtlUnit *unit, s32 action) {
     switch (action) {
     case 2:
     case 9:
-        return btlIsCurrentValueBelowQuarterThreshold(unit) ? 10 : 0;
+        return btlIsCurrentValueBelowQuarterThreshold(unit) != BTL_QUARTER_HEALTH_NOT_BELOW ? 10 : 0;
     case 11:
         return 1;
     case 13:

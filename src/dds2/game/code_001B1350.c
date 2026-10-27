@@ -2,6 +2,7 @@
 #include "evt_run_context_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_quarter_health_result.h"
 #include "btl_actor_command_selector_value_api.h"
 #include "btl_resolve_unit_value_api.h"
 #include "btl_action_press_result.h"
@@ -497,7 +498,7 @@ s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *unit, s32 delta) {
     return unit->partyRecord.hp + delta < 1;
 }
 
-s32 btlIsCurrentValueBelowQuarterThreshold(BtlUnit *unit) {
+BtlQuarterHealthThresholdResult btlIsCurrentValueBelowQuarterThreshold(BtlUnit *unit) {
     return unit->partyRecord.hp * 100 / unit->partyRecord.maxHp < 26;
 }
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_quarter_health_result.h"
 #include "btl_actor_command_selector_value_api.h"
 #include "evt_run_context_api.h"
 #include "btl_scene_counter_mode.h"
@@ -361,7 +362,7 @@ s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *actor, s32 delta) {
     return actor->partyRecord.hp + delta < 1;
 }
 
-s32 btlIsCurrentValueBelowQuarterThreshold(BtlUnit *object) {
+BtlQuarterHealthThresholdResult btlIsCurrentValueBelowQuarterThreshold(BtlUnit *object) {
     return object->partyRecord.hp * 100 / object->partyRecord.maxHp < 25;
 }
 

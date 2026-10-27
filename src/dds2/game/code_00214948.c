@@ -1841,7 +1841,7 @@ s32 btlGetBossModeScriptReturnCode(void) {
     return ((BattleWork *)btlGetRuntime())->mode == 0x303 ? 1 : 2;
 }
 
-extern s32 btlIsCurrentValueBelowQuarterThreshold(BtlUnit *);
+#include "btl_quarter_health_result.h"
 
 /* Enemy forms replace a few action modes according to their health state. */
 s32 btlRemapEnemyMotionForHealthAndForm(BtlUnit *unit, s32 action) {
@@ -1870,7 +1870,7 @@ s32 btlRemapEnemyMotionForHealthAndForm(BtlUnit *unit, s32 action) {
         switch (action) {
         case 2:
         case 9:
-            return btlIsCurrentValueBelowQuarterThreshold(unit) ? 10 : 0;
+            return btlIsCurrentValueBelowQuarterThreshold(unit) != BTL_QUARTER_HEALTH_NOT_BELOW ? 10 : 0;
         case 13:
             return -1;
         }
@@ -1950,7 +1950,7 @@ s32 btlIsUnitListReady(void) {
             continue;
         }
         if (!(flags & 0x1000)) {
-            if (btlIsCurrentValueBelowQuarterThreshold(unit) != 0) {
+            if (btlIsCurrentValueBelowQuarterThreshold(unit) != BTL_QUARTER_HEALTH_NOT_BELOW) {
                 continue;
             }
         }

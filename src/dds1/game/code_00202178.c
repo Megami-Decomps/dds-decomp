@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_quarter_health_result.h"
 #include "btl_camera_mode_index.h"
 #include "btl_command_target_policy.h"
 #include "btl_actor_category_flag_api.h"
@@ -1471,7 +1472,6 @@ u32 btlMode107SelectSceneVariant(void) {
     return 2;
 }
 
-extern s32 btlIsCurrentValueBelowQuarterThreshold(BtlUnit *);
 
 
 
@@ -1480,7 +1480,7 @@ s32 btlSetFirstCriticalHpUnitSideFlag(void) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     while (unit != 0) {
         if (((BtlUnit *)unit)->status.flags & 1) {
-            if (btlIsCurrentValueBelowQuarterThreshold(unit) != 0) {
+            if (btlIsCurrentValueBelowQuarterThreshold(unit) != BTL_QUARTER_HEALTH_NOT_BELOW) {
                 if (((BtlUnit *)unit)->status.flags & 0x200) {
                     evtBitOn(0x811);
                 } else {
@@ -1823,8 +1823,8 @@ s32 btlChooseLinkedPairMotion(BtlUnit *unit, s32 code, s32 unused) {
     BtlUnit *first;
     BtlUnit *second;
     BtlRuntimeTask *task;
-    s32 secondLow;
-    s32 firstLow;
+    BtlQuarterHealthThresholdResult secondLow;
+    BtlQuarterHealthThresholdResult firstLow;
 
     if ((unit->status.flags & 0x400) == 0) {
         return code;
@@ -1878,10 +1878,10 @@ s32 btlChooseLinkedPairMotion(BtlUnit *unit, s32 code, s32 unused) {
             case 10:
                 secondLow = btlIsCurrentValueBelowQuarterThreshold(second);
                 firstLow = btlIsCurrentValueBelowQuarterThreshold(first);
-                if (secondLow != 0) {
-                    return firstLow != 0 ? 10 : 0x12;
+                if (secondLow != BTL_QUARTER_HEALTH_NOT_BELOW) {
+                    return firstLow != BTL_QUARTER_HEALTH_NOT_BELOW ? 10 : 0x12;
                 }
-                return firstLow != 0 ? 0x13 : 0;
+                return firstLow != BTL_QUARTER_HEALTH_NOT_BELOW ? 0x13 : 0;
             }
             if (code == 11) {
                 return unit == second ? 0x10 : 0x11;
@@ -3142,7 +3142,7 @@ s32 btlChooseCerberusPartMotion(BtlUnit *unit, s32 animation) {
                     if (!(current->status.flags & 0xE0)) {
                         allHaveStateFlags = 0;
                     }
-                    if (!btlIsCurrentValueBelowQuarterThreshold(current)) {
+                    if (btlIsCurrentValueBelowQuarterThreshold(current) == BTL_QUARTER_HEALTH_NOT_BELOW) {
                         allLow = 0;
                     }
                 }

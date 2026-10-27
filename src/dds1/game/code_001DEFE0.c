@@ -9,6 +9,7 @@
 #include "btl_pair_camera_preset.h"
 #include "btl_camera_parameter_record.h"
 #include "common.h"
+#include "btl_quarter_health_result.h"
 #include "sdf_delayed_resource_check_api.h"
 #include "btl_camera_quaternion_pair.h"
 #include "btl_aim_horizontal_direction_clamped_api.h"
@@ -221,7 +222,6 @@ s32 btlGetEntryFlagsUnlessDisabled(datUnitWork_t *entry);
 
 struct evtUnitHandle_t;
 
-extern s32 btlIsCurrentValueBelowQuarterThreshold(BtlUnit *);
 
 extern void btlRefreshUnitEffectMotionAndEntry(BtlUnit *unit);
 
@@ -558,7 +558,7 @@ void btlConfigureBattleCameraAction(BtlLinkedCommand *action, BtlCamState *from,
         fov = action->camera.fov;
         from->fov = fov;
         to->fov = fov;
-        if (!btlIsCurrentValueBelowQuarterThreshold(unit) || !(unit->status.flags & 0x200)) {
+        if (btlIsCurrentValueBelowQuarterThreshold(unit) == BTL_QUARTER_HEALTH_NOT_BELOW || !(unit->status.flags & 0x200)) {
             if (btlSampleActorModelPositionVU(unit, 1) == 0) {
                 btlUnitGetMuzzlePosVU(unit);
             }
