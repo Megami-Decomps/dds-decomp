@@ -11,6 +11,7 @@
 #include "eff_random.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_action_state_api.h"
 #include "btl_command_id.h"
 #include "btl_unit_geometry_api.h"
 #include "btl_horizontal_aim_api.h"
@@ -79,7 +80,6 @@ extern void sndSetStationedSeVolume(u32 sequence);
 /* Original-style implicit int, kept: matched code depends on it: sndGetResourceStatus, sndHasResourceFlagsOneOrEight. */
 
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
-extern void btlDispatchStateHandler(void *obj, s32 kind);
 
 
 extern u64 itfCreateFont2TextGlyph(s32, s32, u64, u64, u64, u64);
@@ -3856,10 +3856,11 @@ void btlAdvanceUnitWhenActionGateClears(ActionStateLink *action) {
     }
 }
 
-void btlDispatchStateHandler(void *obj, s32 kind) {
-    ((s32 *)obj)[0] = kind;
-    ((s32 *)obj)[4] = 0;
-    D_003B69D8[kind].start(obj);
+void btlDispatchStateHandler(void *object, BtlActionStateIndex index) {
+    BtlActionStateOwner *owner = object;
+    owner->state = index;
+    owner->stateTime = 0;
+    D_003B69D8[index].start(owner);
 }
 
 INCLUDE_RODATA(const s32, "game/code_001D4438", D_00417508);

@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_action_state_api.h"
 #include "btl_element_block_query_result.h"
 #include "btl_actor_command_selector_value_api.h"
 #include "btl_scene_counter_mode.h"
@@ -219,7 +220,6 @@ extern s32 btlIsUnitInActorList(const BtlUnit *actor);
 
 extern void btlRefreshUnitMotionSelection(BtlUnit *);
 
-extern void btlDispatchStateHandler(void *, s32);
 
 /* Return whether the native unit-status query intersects any requested action-mask bit. */ s32 btlUnitHasAnyStatusInMask(BtlUnit *unit, s32 actionMask);
 

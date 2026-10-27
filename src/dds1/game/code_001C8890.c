@@ -2,6 +2,7 @@
 #include "evt_run_context_api.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_action_state_api.h"
 #include "btl_command_id.h"
 #include "btl_unit_geometry_api.h"
 #include "btl_horizontal_aim_api.h"
@@ -112,7 +113,6 @@ extern void btlBossDebugPrintf(const char *format, ...);
 
 extern u64 btlStartTask(BtlRuntimeTask *);
 
-extern void btlDispatchStateHandler(void *, s32);
 
 extern s32 btlCountTasksForOwner(u64);
 
@@ -3116,11 +3116,11 @@ void btlAdvanceUnitWhenActionGateClears(BtlTask *action) {
 
 extern BtlActionStateHandler D_00359B28[];
 
-void btlDispatchStateHandler(void *object, s32 kind) {
-    BtlTask *task = object;
-    task->state = kind;
-    task->stateTime = 0;
-    D_00359B28[kind].start(object);
+void btlDispatchStateHandler(void *object, BtlActionStateIndex index) {
+    BtlActionStateOwner *owner = object;
+    owner->state = index;
+    owner->stateTime = 0;
+    D_00359B28[index].start(owner);
 }
 
 extern char D_003A3788[]; /* "btl:action seq create[%p]\n" */

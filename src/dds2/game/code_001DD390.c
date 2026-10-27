@@ -6,6 +6,7 @@
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "common.h"
+#include "btl_action_state_api.h"
 #include "btl_selected_entry_api.h"
 #include "btl_unit_model_progress_api.h"
 #include "btl_quarter_health_result.h"
@@ -253,7 +254,6 @@ extern s32 btlHasSingleLinkedResource(BtlLinkedCommand *);
 
 extern void btlResetCameraMotion(BtlLinkedCommand *);
 
-extern void btlDispatchStateHandler(void *obj, s32 kind);
 
 extern s32 btlGetLoggedIndexedCommandItem(s32);
 

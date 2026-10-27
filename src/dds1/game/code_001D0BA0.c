@@ -7,6 +7,7 @@
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "common.h"
+#include "btl_action_state_api.h"
 #include "btl_selected_entry_api.h"
 #include "btl_unit_model_progress_api.h"
 #include "btl_quarter_health_result.h"
@@ -113,7 +114,6 @@ extern void btlBossDebugPrintf(const char *format, ...);
 
 extern u64 btlStartTask(BtlRuntimeTask *);
 
-extern void btlDispatchStateHandler(void *, s32);
 
 extern s32 btlHasSingleLinkedResource(BtlLinkedCommand *);
 

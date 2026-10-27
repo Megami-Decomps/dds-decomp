@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_action_state_api.h"
 #include "btl_selected_entry_api.h"
 #include "btl_area_load_phase.h"
 #include "btl_rain_effect_api.h"
@@ -73,7 +74,6 @@ typedef char BtlStateTotalApOffsetCheck[
 #define FLD_SCENE_SWAP_ACTION_ID 0x63
 extern s32 btlDoesEnabledStatusMatchCurrentId(datUnitWork_t *, u32);
 
-extern void btlDispatchStateHandler(void *, s32);
 extern u64 btlStartTask(BtlRuntimeTask *);
 extern BtlRuntimeTask *btlAllocTask(s32);
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_action_state_api.h"
 #include "btl_area_load_phase.h"
 #include "btl_rain_effect_api.h"
 #include "btl_script_resource_api.h"
@@ -148,7 +149,6 @@ typedef char BattleSceneWorkSizeCheck[(sizeof(BattleSceneWork) == 0x5FC) ? 1 : -
 extern s32 btlCountTasksForOwner(u64);
 extern u64 btlStartTask(BtlRuntimeTask *);
 extern BtlRuntimeTask *fldCreateSceneTileTask(s32 stage, s32 variant);
-extern void btlDispatchStateHandler(void *, s32);
 
 extern void btlSetCommandPanelFadeMode(s8 mode, s32 duration);
 
