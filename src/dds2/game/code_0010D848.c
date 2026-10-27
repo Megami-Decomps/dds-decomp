@@ -32,7 +32,7 @@ u32 scrGetScriptTimer(void) {
     return nowpwork->timer;
 }
 
-u32 scrGetCommandTimer(void) {
+ScrCommandYieldCount scrGetCommandTimer(void) {
     return nowpwork->cmdTimer;
 }
 

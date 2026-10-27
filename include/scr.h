@@ -8,6 +8,7 @@
 #include "scr_command_index.h"
 #include "scr_procedure_index.h"
 #include "scr_command_parameter_index.h"
+#include "scr_command_yield_count.h"
 #include "scr_vm_integer.h"
 #include "itf_mes_window_index.h"
 
@@ -146,7 +147,7 @@ typedef struct scrProcessWork_s {
     ScrProcedureIndex procedureIndex;
     ItfMesWindowIndex messageWindowIndex;
     u32 timer;
-    u32 cmdTimer;
+    ScrCommandYieldCount cmdTimer; /* prior yielded traces since last continuation */
     struct sdfMemHandle_t *scriptHandle; /* 0xD8: allocation descriptor, not scriptHeader data */
     s32 *localInt;
     f32 *localFloat;
