@@ -23,7 +23,7 @@ void *sdfAllocAuto(s32 size) {
 
 void sdfFreeAuto(void *allocation) {
     if (allocation != NULL) {
-        if (sdfChipIsInRange(allocation)) {
+        if (sdfChipIsInRange(allocation) != SDF_CHIP_ADDRESS_OUTSIDE_RANGE) {
             sdfChipFreeDirect(allocation);
             return;
         }
@@ -33,7 +33,7 @@ void sdfFreeAuto(void *allocation) {
 
 void sdfFreeAutoDelayed(void *allocation) {
     if (allocation != NULL) {
-        if (sdfChipIsInRange(allocation)) {
+        if (sdfChipIsInRange(allocation) != SDF_CHIP_ADDRESS_OUTSIDE_RANGE) {
             sdfChipFreeDelayedDirect(allocation);
             return;
         }
@@ -45,7 +45,7 @@ void sdfFreeMemorySlotFromEitherHeap(void **slot) {
     void *allocation = *slot;
     if (allocation != NULL) {
         *slot = NULL;
-        if (sdfChipIsInRange(allocation)) {
+        if (sdfChipIsInRange(allocation) != SDF_CHIP_ADDRESS_OUTSIDE_RANGE) {
             sdfChipFreeDirect(allocation);
             return;
         }
