@@ -208,8 +208,12 @@ typedef char MdlResourceItem_size_must_be_0x20[(sizeof(dds3ModelEffectCtrlr_t) =
 typedef char MdlObjectAttachment_size_must_be_0x18[(sizeof(MdlObjectAttachment) == 0x18) ? 1 : -1];
 
 /* Model-context lifetime, per-frame update, and broadcast accessors. */
+/* Destroy one context. If it leaves its resource-owning group empty, group
+ * teardown also releases that group's registered assets. */
 void mdlFree(dds3ModelHandle_t *ctx);
 void mdlLink(dds3ModelHandle_t *ctx, struct SdfPoolNode **surfaces);
+/* Allocate a distinct caller-owned context linked to the registered group.
+ * Contexts share the group node and assets; release each context with mdlFree. */
 dds3ModelHandle_t *mdlLoad(u32 group, u32 id);
 u16 mdlGetMajorNum(const dds3ModelHandle_t *ctx);
 u16 mdlGetMinorNum(const dds3ModelHandle_t *ctx);
