@@ -3345,9 +3345,9 @@ void fldDrawExpandedSpriteStrip(s32 alpha, s32 offset) {
     descriptor->append(descriptor, list);
 }
 
-s32 fldGetEncounterRuntimeResult(void) {
+FldEncounterRuntimeResult fldGetEncounterRuntimeResult(void) {
     FldEncounterRuntimeMode state = fldEncounterRuntimeState;
-    s32 result;
+    FldEncounterRuntimeResult result;
 
     if (state < FLD_ENCOUNTER_MODE_BYPASS_BATTLE_RUNTIME) {
         if (state < FLD_ENCOUNTER_MODE_STANDARD) {
@@ -3393,7 +3393,7 @@ void fldRequestEncounterWithFade(FldEncounterRuntimeMode encounterMode,
 s32 fldSetEncounterMode(FldEncounterRuntimeMode encounterMode) {
     fldEncounterRuntimeState = encounterMode;
     D_0043608C = 0;
-    if (fldGetEncounterRuntimeResult() == 0) {
+    if (fldGetEncounterRuntimeResult() == FLD_ENCOUNTER_RESULT_NONE) {
         if (fldEncounterRuntimeState < FLD_ENCOUNTER_MODE_BYPASS_BATTLE_RUNTIME) {
             if (fldEncounterRuntimeState >= FLD_ENCOUNTER_MODE_STANDARD) {
                 btlActivateRuntime(fldEncounterRuntimeState);

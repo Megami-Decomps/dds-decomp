@@ -422,7 +422,7 @@ s32 fldSceneStateRestoreDisplay(u8 *scene) {
             if (!(state->commandRestrictFlags & 8)) {
                 dds3FadeIn2(0);
             }
-            if (fldGetEncounterRuntimeResult() != 0) {
+            if (fldGetEncounterRuntimeResult() != FLD_ENCOUNTER_RESULT_NONE) {
                 fldSetEncounterPendingValue(1);
             }
             evtSetSolarOverlayFullyVisible();

@@ -12,10 +12,16 @@ enum FldEncounterRuntimeModeValue {
     FLD_ENCOUNTER_MODE_BYPASS_BATTLE_RUNTIME = 3
 };
 
+/* Zero means no runtime result; nonzero values preserve the source result. */
+typedef s32 FldEncounterRuntimeResult;
+enum {
+    FLD_ENCOUNTER_RESULT_NONE = 0
+};
+
 /* Script battle requests use this value to index datBattleSceneRecords. */
 typedef s32 FldBattleSceneRecordIndex;
 
-s32 fldGetEncounterRuntimeResult(void);
+FldEncounterRuntimeResult fldGetEncounterRuntimeResult(void);
 void fldSetEncounterPendingValue(u32 value);
 s32 fldSetEncounterMode(FldEncounterRuntimeMode mode);
 void fldRequestEncounterWithFade(FldEncounterRuntimeMode mode,

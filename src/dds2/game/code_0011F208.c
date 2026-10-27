@@ -689,7 +689,7 @@ void fldDrawShadowDisc(f32 x, f32 y, f32 z, f32 radius, s32 fade) {
 }
 
 s32 fldTestDrawUpdate(dds3ProcessID_t *task) {
-    if (fldGetEncounterRuntimeResult() != 0) {
+    if (fldGetEncounterRuntimeResult() != FLD_ENCOUNTER_RESULT_NONE) {
         return 0;
     }
     if (fldProcCampChk() == FLD_CAMP_CHECK_STATE_MENU_ACTIVE) {

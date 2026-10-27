@@ -680,7 +680,7 @@ extern u32 fldRunDanteGunFlag[];
 extern void rsetOtOfs(u32);
 
 s32 fldTestDrawUpdate(dds3ProcessID_t *task) {
-    if (fldGetEncounterRuntimeResult() != 0) {
+    if (fldGetEncounterRuntimeResult() != FLD_ENCOUNTER_RESULT_NONE) {
         return 0;
     }
     if (fldProcCampChk() == FLD_CAMP_CHECK_STATE_MENU_ACTIVE) {

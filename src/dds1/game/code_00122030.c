@@ -2335,7 +2335,7 @@ KwlnTaskUpdateResult fldProcDraw(dds3ProcessID_t *task) {
             return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
         }
     }
-    if (fldGetEncounterRuntimeResult() != 0) {
+    if (fldGetEncounterRuntimeResult() != FLD_ENCOUNTER_RESULT_NONE) {
         return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
     }
     if (fileMenuTaskExists() != 0) {
@@ -2354,7 +2354,7 @@ KwlnTaskUpdateResult fldProcDraw(dds3ProcessID_t *task) {
         fldTickWeatherEffectNodes();
     }
     if (lifecycle->phase >= FLD_SEQUENCE_PHASE_ADVANCE_TO_AREA_ARCHIVE && D_0032E598[0] != 0 &&
-        fldGetEncounterRuntimeResult() == 0) {
+        fldGetEncounterRuntimeResult() == FLD_ENCOUNTER_RESULT_NONE) {
     flags = fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1);
     if (flags & FLD_LOCATION_COORDINATE_FLAG_FIELD_EFFECT_TEXTURES) {
         effBlurStepScatterSlotsAndDraw(D_003BABE4);
