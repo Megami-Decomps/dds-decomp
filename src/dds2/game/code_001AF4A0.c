@@ -14,6 +14,7 @@
 #include "fld_next_scene_request_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_command_use_error.h"
 #include "btl_actor_command_selector_value_api.h"
 #include "btl_action_press_result.h"
 #include "btl_command_hit_count_override.h"
@@ -73,7 +74,6 @@
 #include "mdl_flag_api.h"
 #include "btl_target_result.h"
 
-extern s32 btlGetCommandUseError(BtlUnit *, s32);
 
 /* Named and indexed views of the same four signed 32-bit color channels. */
 typedef union UiQuadColor {

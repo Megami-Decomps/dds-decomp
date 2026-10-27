@@ -21,6 +21,7 @@
 #include "btl_camera_mode_index.h"
 #include "file_config_option_api.h"
 #include "btl_command_use_error.h"
+#include "btl_command_cost_api.h"
 #include "itf_mes_entry_start_api.h"
 #include "btl_command_target_policy.h"
 #include "btl_command_status_target_index.h"
@@ -83,7 +84,6 @@
 #include "fr_font.h"
 #include "mdl_flag_api.h"
 /* Declared before first use (were implicit int). */
-extern s32 btlApplyCommandAbilityMultiplier(datUnitWork_t *battler, s32 command);
 extern s32 btlCountEligibleLinkedActors(BtlState *battle);
 extern u32 btlNextScaledRandom(u32 limit);
 extern void btlResetBattleHistoryCounters(void);
@@ -209,7 +209,6 @@ void btlClearAllActorEntrySlots(BtlUnit *unit);
 s32 btlGetEntryFlagsUnlessDisabled(datUnitWork_t *record);
 
 
-s32 btlGetSlotValueAdjustedForSpecialAbility(BtlUnit *battler, s32 slot);
 
 s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *unit, s32 delta);
 
@@ -9866,7 +9865,6 @@ static inline void btlSetCornerColors(BattlePanelColors *colors, u32 color) {
     colors->values[3] = color;
 }
 
-extern s32 btlGetCombinedPartyCommandPower(datUnitWork_t *base, BtlUnit *first, BtlUnit *second, BtlUnit *third, s32 command);
 
 void btlDrawLinkageSkillOptions(BattleSceneObject *object) {
     char text[16];

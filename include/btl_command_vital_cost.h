@@ -2,6 +2,7 @@
 #define BTL_COMMAND_VITAL_COST_H
 
 #include "common.h"
+#include "btl_command_id.h"
 
 struct BtlUnit;
 
@@ -13,6 +14,6 @@ typedef s32 BtlCommandVitalCostResult;
 #define BTL_COMMAND_VITAL_COST_INSUFFICIENT_MP 2
 
 BtlCommandVitalCostResult btlCheckCommandVitalCost(
-    struct BtlUnit *unit, s32 command);
+    struct BtlUnit *unit, BtlCommandId commandId);
 
 #endif /* BTL_COMMAND_VITAL_COST_H */

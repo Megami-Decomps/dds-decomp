@@ -6,6 +6,7 @@
 #include "btl_action_press_result.h"
 #include "btl_command_status_api.h"
 #include "btl_command_use_error.h"
+#include "btl_command_cost_api.h"
 #include "btl_special_ability.h"
 #include "eff_random_mod.h"
 #include "btl_item_drop.h"
@@ -120,7 +121,6 @@ s32 btlHasMappedSpecialAbilityForSlot(BtlUnit *unit, u32 slot);
 
 u32 btlHasSpecialAbilityWhenArgumentUnset(BtlUnit *unit, s64 argumentValue);
 
-s8 btlGetLinkageSlotCost(s32 command);
 
 
 s32 btlFlagToElementIndex(s32 flag);

@@ -41,10 +41,11 @@
 #include "dds3obj.h"
 #include "mdl_flag_api.h"
 /* Declared before first use (were implicit int). */
-extern s32 btlGetSlotValueAdjustedForSpecialAbility(BtlUnit *battler, s32 slot);
 extern s32 btlHasMarkedEntry14(BtlLinkedCommand *command);
 extern s32 btlHasActiveSubtask(void);
 extern s32 ptyRebalanceFrontline(DatUnitId unitId);
+extern s32 btlGetSlotValueAdjustedForSpecialAbility(
+    BtlUnit *battler, BtlCommandId commandId);
 
 
 
@@ -385,12 +386,13 @@ s32 btlFindEnemyLinkagePartnersByCount(BtlUnit *actor, s32 command, BtlUnit **ou
 #include "sdf_debug_api.h"
 
 extern u32 fldCountSceneSlots(void);
+extern s32 btlGetPartnerCommandUseError(
+    BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *, BtlCommandId commandId);
 
 extern s32 btlFindCommandPartnersByAffinity(BtlUnit *, s32, BtlUnit **, BtlUnit **);
 
 extern s32 btlFindEnemyLinkagePartnersByCount(BtlUnit *, s32, BtlUnit **, BtlUnit **);
 
-extern s32 btlGetPartnerCommandUseError(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
 
 extern char D_00419C80[], D_00419CB0[], D_00419CD8[], D_00419D00[];
 
@@ -3251,7 +3253,9 @@ typedef struct BtlUnit BtlUnit;
 
 extern BtlActionAnimationRecord *datActionAnimationRecords;
 
-extern s32 btlGetSlotValueAdjustedForSpecialAbility(BtlUnit *, s32);
+extern s32 btlGetSlotValueAdjustedForSpecialAbility(
+    BtlUnit *battler, BtlCommandId commandId);
+
 
 extern s32 btlAdjustPointsForCombatFlags(BtlUnit *source, u32 flags, u32 otherFlags, u32 value, s32 index);
 

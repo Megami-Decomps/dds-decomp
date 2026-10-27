@@ -2,6 +2,7 @@
 #define BTL_COMMAND_USE_ERROR_H
 
 #include "common.h"
+#include "btl_command_id.h"
 
 struct BtlUnit;
 
@@ -20,13 +21,15 @@ enum {
     BTL_COMMAND_USE_ERROR_RESTRICTED_ACTOR_COMMAND = 7,
 };
 
-BtlCommandUseError btlGetCommandFailureReason(struct BtlUnit *unit, s32 command);
+BtlCommandUseError btlGetCommandFailureReason(
+    struct BtlUnit *unit, BtlCommandId commandId);
 BtlCommandUseError btlGetLinkedPartyCommandFailureReason(
     struct BtlUnit *base, struct BtlUnit *first, struct BtlUnit *second,
-    struct BtlUnit *third, s32 command);
-BtlCommandUseError btlGetCommandUseError(struct BtlUnit *unit, s32 command);
+    struct BtlUnit *third, BtlCommandId commandId);
+BtlCommandUseError btlGetCommandUseError(
+    struct BtlUnit *unit, BtlCommandId commandId);
 BtlCommandUseError btlGetPartnerCommandUseError(
     struct BtlUnit *base, struct BtlUnit *first, struct BtlUnit *second,
-    struct BtlUnit *third, s32 command);
+    struct BtlUnit *third, BtlCommandId commandId);
 
 #endif /* BTL_COMMAND_USE_ERROR_H */

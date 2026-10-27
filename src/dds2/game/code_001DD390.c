@@ -14,6 +14,7 @@
 #include "dds3_camera_update_flags.h"
 #include "file_config_option_api.h"
 #include "btl_command_use_error.h"
+#include "btl_command_cost_api.h"
 #include "btl_action_reaction_motion.h"
 #include "btl_action_press_result.h"
 #include "btl_command_status_api.h"
@@ -552,9 +553,7 @@ extern void btlSortActorMuzzleDirections(BtlUnit *, BtlIndexList *, s32);
 
 extern u32 btlEncodeActorIndexAsSelectionMask(u32);
 
-extern s32 btlApplyCommandAbilityMultiplier(datUnitWork_t *battler, s32 command);
 
-extern s32 btlGetCombinedPartyCommandPower(datUnitWork_t *, BtlUnit *, BtlUnit *, BtlUnit *, s32);
 
 extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 
@@ -612,7 +611,6 @@ extern void btlClearActorEntrySlot(BtlUnit *, s32);
 
 extern s32 btlCompareSkippedAndActiveTargetCounts(BtlIndexList *, BtlOperandGroup *);
 
-extern s32 btlGetSlotValueAdjustedForSpecialAbility(BtlUnit *, s32);
 
 extern s32 btlAdjustPointsForCombatFlags(BtlUnit *source, u32 flags, u32 otherFlags, u32 value, s32 index);
 

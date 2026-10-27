@@ -4,6 +4,7 @@
 #include "btl_actor_command_selector_value_api.h"
 #include "pty_active_roster_index_api.h"
 #include "btl_command_use_error.h"
+#include "btl_command_cost_api.h"
 #include "btl_action_press_result.h"
 #include "btl_command_target_policy.h"
 #include "btl_target_list_builder.h"
@@ -323,15 +324,15 @@ s32 btlGetStatWithStatusOverride(datUnitWork_t *unit, s32 statIndex) {
     return datGetStatWithStatusOverride(unit, statIndex);
 }
 
-s32 btlApplyCommandAbilityMultiplier(datUnitWork_t *battler, s32 command) {
-    u32 value = datCalculateCommandBaseValue(battler, command);
+s32 btlApplyCommandAbilityMultiplier(datUnitWork_t *battler, BtlCommandId commandId) {
+    u32 value = datCalculateCommandBaseValue(battler, commandId);
     f32 scale;
 
     if (value == 0) {
         return 0;
     }
     scale = 1.0f;
-    switch (datCommandRecords[command].costMode) {
+    switch (datCommandRecords[commandId].costMode) {
     case DAT_COMMAND_COST_MODE_HP:
         if (btlCheckSpecialAbility(battler, 0x234)) {
             scale = datAbilityParameters[0x234 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
@@ -348,43 +349,43 @@ s32 btlApplyCommandAbilityMultiplier(datUnitWork_t *battler, s32 command) {
 }
 
 /* Return the LINKAGE command's signed native affinity-record slot cost. */
-s8 btlGetLinkageSlotCost(s32 command) {
-    return datAffinityRecords[command - DAT_AFFINITY_FIRST_COMMAND].slotCost;
+s8 btlGetLinkageSlotCost(BtlCommandId commandId) {
+    return datAffinityRecords[commandId - DAT_AFFINITY_FIRST_COMMAND].slotCost;
 }
 
-BtlCommandUseError btlGetCommandFailureReason(BtlUnit *unit, s32 command) {
+BtlCommandUseError btlGetCommandFailureReason(BtlUnit *unit, BtlCommandId commandId) {
     BtlCommandUseError result = BTL_COMMAND_USE_ERROR_NONE;
     u32 cost;
 
-    if (command == 0) {
+    if (commandId == 0) {
         return BTL_COMMAND_USE_ERROR_NONE;
     }
-    if (datCommandRecords[command].effectType == 1 ||
-        datCommandRecords[command].costMode == DAT_COMMAND_COST_MODE_MP) {
+    if (datCommandRecords[commandId].effectType == 1 ||
+        datCommandRecords[commandId].costMode == DAT_COMMAND_COST_MODE_MP) {
         if ((unit->partyRecord.status & 0x7FFF) == 0x10) {
             return BTL_COMMAND_USE_ERROR_ACTOR_STATE;
         }
     }
-    if (datCommandSelectors[command].kind == 2 &&
+    if (datCommandSelectors[commandId].kind == 2 &&
         (unit->partyRecord.status & 0x7FFF) == 0x40) {
         return BTL_COMMAND_USE_ERROR_SELECTOR_STATE;
     }
-    if (datCommandSelectors[command].kind == 1) {
+    if (datCommandSelectors[commandId].kind == 1) {
         if ((unit->partyRecord.status & 0x7FFF) == 0x1000) {
             return BTL_COMMAND_USE_ERROR_LINKAGE_STATE;
         }
-        if (fldCountSceneSlots() < (u32)btlGetLinkageSlotCost(command)) {
+        if (fldCountSceneSlots() < (u32)btlGetLinkageSlotCost(commandId)) {
             return BTL_COMMAND_USE_ERROR_INSUFFICIENT_SCENE_SLOTS;
         }
     }
-    if (datCommandRecords[command].flags & 4) {
+    if (datCommandRecords[commandId].flags & 4) {
         return BTL_COMMAND_USE_ERROR_NONE;
     }
 
-    cost = btlApplyCommandAbilityMultiplier(&unit->partyRecord, command);
-    switch (datCommandRecords[command].costMode) {
+    cost = btlApplyCommandAbilityMultiplier(&unit->partyRecord, commandId);
+    switch (datCommandRecords[commandId].costMode) {
     case DAT_COMMAND_COST_MODE_HP:
-        if ((datCommandRecords[command].flags & 8) == 0) {
+        if ((datCommandRecords[commandId].flags & 8) == 0) {
             if (cost >= unit->partyRecord.hp) {
                 result = BTL_COMMAND_USE_ERROR_INSUFFICIENT_HP;
             }
@@ -400,7 +401,7 @@ BtlCommandUseError btlGetCommandFailureReason(BtlUnit *unit, s32 command) {
 }
 
 s32 btlGetCombinedPartyCommandPower(datUnitWork_t *base, BtlUnit *first, BtlUnit *second,
-                  BtlUnit *third, s32 command) {
+                  BtlUnit *third, BtlCommandId commandId) {
     datUnitWork_t snapshot = *base;
     s32 totalMaxHp = 0;
     s32 count = 0;
@@ -421,11 +422,11 @@ s32 btlGetCombinedPartyCommandPower(datUnitWork_t *base, BtlUnit *first, BtlUnit
     average = totalMaxHp / count;
     snapshot.maxHp = average;
     snapshot.hp = average;
-    return btlApplyCommandAbilityMultiplier(&snapshot, command);
+    return btlApplyCommandAbilityMultiplier(&snapshot, commandId);
 }
 
 BtlCommandUseError btlGetLinkedPartyCommandFailureReason(BtlUnit *base, BtlUnit *first, BtlUnit *second,
-                  BtlUnit *third, s32 command) {
+                  BtlUnit *third, BtlCommandId commandId) {
     BtlUnit snapshot = *base;
     s32 totalMaxHp = 0;
     s32 count = 0;
@@ -461,7 +462,7 @@ BtlCommandUseError btlGetLinkedPartyCommandFailureReason(BtlUnit *base, BtlUnit 
         totalMaxHp += third->partyRecord.maxHp;
     }
     snapshot.partyRecord.maxHp = totalMaxHp / count;
-    return btlGetCommandFailureReason(&snapshot, command);
+    return btlGetCommandFailureReason(&snapshot, commandId);
 }
 
 s8 btlGetActorIndexedSignedValue(const BtlUnit *actor, BtlCommandId commandId) {

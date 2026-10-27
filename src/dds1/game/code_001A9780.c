@@ -15,6 +15,7 @@
 #include "btl_action_press_result.h"
 #include "file_config_option_api.h"
 #include "btl_command_use_error.h"
+#include "btl_command_cost_api.h"
 #include "itf_mes_entry_start_api.h"
 #include "btl_command_target_policy.h"
 #include "btl_command_status_target_index.h"
@@ -170,17 +171,14 @@ void btlClearActorEntrySlot(BtlUnit *unit, s32 index);
 
 
 
-s32 btlApplyCommandAbilityMultiplier(datUnitWork_t *battler, s32 command);
 
 void btlClearAllActorEntrySlots(BtlUnit *unit);
 
-s32 btlGetCombinedPartyCommandPower(datUnitWork_t *base, BtlUnit *first, BtlUnit *second, BtlUnit *third, s32 command);
 
 
 
 s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *actor, s32 delta);
 
-s8 btlGetLinkageSlotCost(s32 command);
 
 extern void btlSerialBattleChanceHook(s32);
 extern s32 btlRollAiBucket(void);
