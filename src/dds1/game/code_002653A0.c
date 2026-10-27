@@ -7,6 +7,7 @@
 #include "brs_level_progress_api.h"
 #include "dat_state.h"
 #include "dat_party_growth.h"
+#include "pty_level_up_count.h"
 #include "mnu_result.h"
 #include "brs_result_counter_completion_api.h"
 #include "kwln.h"
@@ -24,7 +25,6 @@ typedef struct PtySkillSlotThreshold {
 
 extern const PtySkillSlotThreshold brsSkillSlotCountThresholds[];
 
-extern s32 ptyCalcLevelUps(datUnitWork_t *);
 extern u32 ptyComputeTotalExp(const datUnitWork_t *, s32);
 extern void ptyRecomputeMaxHpMp(datUnitWork_t *);
 extern s32 ptyHasSkill(datUnitWork_t *, s32);
@@ -213,12 +213,12 @@ s32 brsBuildRewardRows(BrsRewardBatch *batch, BrsRewardSummary *summary) {
 
 /* Keep the level progression indexed; see docs/idioms.md,
  * "Trace-justified party experience table progression". */
-s32 ptyCalcLevelUps(datUnitWork_t *unit) {
+PtyLevelUpCount ptyCalcLevelUps(datUnitWork_t *unit) {
     u16 level = unit->level;
     u16 unitId = unit->unitId;
     u32 exp = unit->totalExp;
     u32 total;
-    s32 steps;
+    PtyLevelUpCount steps;
 
     if (level == 99) {
         return 0;
@@ -245,8 +245,8 @@ s32 mnuCountAdvancingTitleAnimations(void) {
     s32 i;
     s32 count = 0;
     for (i = 0; i < 5; i++) {
-        s32 step = ptyCalcLevelUps(&DDS3_GBWK->party[i]);
-        count += step > 0;
+        PtyLevelUpCount levelUpCount = ptyCalcLevelUps(&DDS3_GBWK->party[i]);
+        count += levelUpCount > 0;
     }
     return count;
 }
@@ -263,13 +263,13 @@ s32 brsBuildLevelUpList(BrsRewardBatch *batch) {
         u16 occupied = unit->flags & 1;
 
         if (occupied != 0) {
-            s32 levelUps = ptyCalcLevelUps(unit);
-            if (levelUps > 0) {
+            PtyLevelUpCount levelUpCount = ptyCalcLevelUps(unit);
+            if (levelUpCount > 0) {
                 s32 count = batch->count;
                 BrsRewardValues *rowValues =
                     (BrsRewardValues *)(values + count * sizeof(BrsRewardRow));
 
-                rowValues->amount = levelUps;
+                rowValues->amount = levelUpCount;
                 batch->rows[count].unit = unit;
 
                 ((BrsRewardValues *)(values +
@@ -324,10 +324,10 @@ s32 brsBuildProfileCapList(BrsRewardBatch *batch) {
 }
 
 s32 mnuAdvanceTitleEntryAnimation(datUnitWork_t *unit) {
-    s32 step = ptyCalcLevelUps(unit);
-    unit->level += step;
+    PtyLevelUpCount levelUpCount = ptyCalcLevelUps(unit);
+    unit->level += levelUpCount;
     ptyRecomputeMaxHpMp(unit);
-    return step;
+    return levelUpCount;
 }
 
 
@@ -459,15 +459,15 @@ extern void mnuTitleInitFourParameters(u32 *, u32, u32, u32, u32);
 
 /* Set up the level and profile progress bars for one party member. */
 void brsBuildUnitProgressRow(BrsProgressRow *progressRow, datUnitWork_t *partyRecord) {
-    s32 levelDelta;
+    PtyLevelUpCount levelUpCount;
     s32 profilePoints;
 
     memset(progressRow, 0, 0x2C);
     progressRow->unit = partyRecord;
-    levelDelta = ptyCalcLevelUps(partyRecord);
+    levelUpCount = ptyCalcLevelUps(partyRecord);
     mnuTitleInitFourParameters(progressRow->levelProgress, 0x6E0, 0x50,
-        partyRecord->totalExp - ptyComputeTotalExp(partyRecord, levelDelta),
-        ptyComputeTotalExp(partyRecord, levelDelta + 1) - ptyComputeTotalExp(partyRecord, levelDelta));
+        partyRecord->totalExp - ptyComputeTotalExp(partyRecord, levelUpCount),
+        ptyComputeTotalExp(partyRecord, levelUpCount + 1) - ptyComputeTotalExp(partyRecord, levelUpCount));
     profilePoints = ptyAddProfilePoints(partyRecord, 0);
     mnuTitleInitFourParameters(progressRow->profileProgress, 0x3C0, 0x50, profilePoints,
         prfGetCapValue(ptyGetCurrentProfileId(partyRecord) & 0xFFFF));
