@@ -5,9 +5,13 @@
 
 struct sdfMemHandle_t;
 
-/* The deferred worker releases pixels only for the selected owned heap. */
+/* Policy for who retains pixel storage until the queued DMA completes. */
+typedef u8 SdfImageUploadAllocationMode;
+
 enum {
+    /* Caller retains the source; the upload worker does not release it. */
     SDF_UPLOAD_BORROWED = 0,
+    /* Upload queue owns these allocations and releases them after DMA. */
     SDF_UPLOAD_GENERAL_HEAP = 1,
     SDF_UPLOAD_CHIP_HEAP = 2
 };
@@ -16,7 +20,7 @@ enum {
 typedef struct SdfImageUploadRequest {
     u8 *pixels;
     struct sdfMemHandle_t *allocation;
-    u8 allocationMode;
+    SdfImageUploadAllocationMode allocationMode;
     u8 format;
     u16 bufferWidth;
     u32 destination;

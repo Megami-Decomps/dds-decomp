@@ -5,8 +5,13 @@
 
 struct sdfMemHandle_t;
 
+/* Deferred action for the source address after its queued transfer completes. */
+typedef u8 SdfTextureReleaseMode;
+
 enum {
+    /* Release through the general-heap descriptor. */
     SDF_TEX_RELEASE_GENERAL_ALLOCATION = 1,
+    /* Release the chip-heap address directly. */
     SDF_TEX_RELEASE_CHIP_ADDRESS = 2
 };
 
@@ -15,7 +20,7 @@ typedef struct SdfTextureReleaseHead {
     struct SdfTextureReleaseHead *next; /* 0x00 */
     void *chipMemory;                   /* 0x04 */
     struct sdfMemHandle_t *allocation;     /* 0x08 */
-    u8 releaseMode;                     /* 0x0C */
+    SdfTextureReleaseMode releaseMode;  /* 0x0C: zero leaves the source caller-owned */
     u8 reserved0D[3];
 } SdfTextureReleaseHead;
 
