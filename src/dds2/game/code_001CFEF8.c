@@ -1538,7 +1538,7 @@ void btlSetScene(s32 sceneId) {
     scene->currentScene = sceneId;
     scene->frame = 0;
     scene->sceneEndFrame = 0;
-    D_003B6938[sceneId].initialize((s32)scene);
+    D_003B6938[sceneId].initialize(scene);
 }
 
 /* Queue a transition for the next scene update. */
@@ -1553,13 +1553,13 @@ void btlQueueScene(u32 sceneId) {
 void btlUpdateScene(void) {
     BtlState *scene = (BtlState *)btlGetRuntime();
     SceneInitializer *sceneInitializer;
-    s32 updateResult;
+    BtlSceneUpdateResult updateResult;
     if (scene->queuedScene != 0) {
         btlSetScene(scene->queuedScene);
         scene->queuedScene = 0;
     }
     sceneInitializer = &D_003B6938[scene->currentScene];
-    updateResult = sceneInitializer->update((s32)scene);
+    updateResult = sceneInitializer->update(scene);
     if (updateResult != 0) {
         btlQueueScene(updateResult);
     }

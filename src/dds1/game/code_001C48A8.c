@@ -1510,7 +1510,7 @@ void btlSetScene(s32 sceneId) {
     scene->currentScene = sceneId;
     scene->frame = 0;
     scene->sceneEndFrame = 0;
-    D_00359A88[sceneId].initialize((s32)scene);
+    D_00359A88[sceneId].initialize(scene);
 }
 
 /* Queue a transition for the next scene update. */
@@ -1528,12 +1528,12 @@ extern void btlSetScene(s32);
 void btlUpdateScene(void) {
     BattleSceneWork *scene = (BattleSceneWork *)btlGetRuntime();
     s32 queuedSceneId = scene->queuedScene;
-    s32 updateResult;
+    BtlSceneUpdateResult updateResult;
     if (queuedSceneId != 0) {
         btlSetScene(queuedSceneId);
         scene->queuedScene = 0;
     }
-    updateResult = D_00359A88[scene->currentScene].update((s32)scene);
+    updateResult = D_00359A88[scene->currentScene].update(scene);
     if (updateResult != 0) {
         btlQueueScene(updateResult);
     }

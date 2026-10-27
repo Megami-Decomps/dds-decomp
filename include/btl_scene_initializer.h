@@ -15,10 +15,13 @@ enum {
 
 BtlSurpriseAttackResult btlRollSurpriseAttack(void);
 
+/* Zero keeps the current scene; a nonzero result queues that scene index. */
+typedef s32 BtlSceneUpdateResult;
+
 /* One indexed scene row stores its initializer, updater, and behavior flags. */
 typedef struct SceneInitializer {
-    void (*initialize)(s32 scene);
-    s32 (*update)(s32 scene);
+    void (*initialize)(void *sceneState);
+    BtlSceneUpdateResult (*update)(void *sceneState);
     s32 flags;
 } SceneInitializer;
 
