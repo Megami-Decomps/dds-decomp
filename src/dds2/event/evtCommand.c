@@ -407,7 +407,8 @@ void evtSubmitEventRequest(s32 eventId, s32 requestMode)
     s32 payload[2];
 
     fldBgmStop();
-    fldRequestEncounterWithFade(FLD_ENCOUNTER_MODE_SCRIPT_EVENT, eventId);
+    fldRequestEncounterWithFade(FLD_ENCOUNTER_MODE_SCRIPT_EVENT,
+                                (FldBattleSceneRecordIndex)eventId);
     evtPendingEventSelection = requestMode;
     payload[0] = 0;
     payload[1] = eventId;
@@ -430,7 +431,8 @@ void evtSubmitEventRequestImmediate(s32 eventId)
     s32 payload[2];
 
     fldPauseBgm();
-    fldRequestEncounterWithFade(FLD_ENCOUNTER_MODE_SCRIPT_EVENT, eventId);
+    fldRequestEncounterWithFade(FLD_ENCOUNTER_MODE_SCRIPT_EVENT,
+                                (FldBattleSceneRecordIndex)eventId);
     evtPendingEventSelection = 0;
     payload[0] = 0;
     payload[1] = eventId;
