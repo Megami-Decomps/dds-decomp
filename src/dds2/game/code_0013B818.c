@@ -216,7 +216,7 @@ extern s32 D_00436188;
 
 extern s32 D_0043617C;
 
-extern FldFileResource *fldDisplayValues[];
+extern const FldFileResource *fldDisplayValues[];
 
 extern s32 gFldEveRngIdx_N;
 
@@ -347,7 +347,7 @@ void fldEveHit_End(void) {
 
 /* Append a file resource for an event task and return its index. */
 FldEventDisplayResourceIndex fldEveHit_AddEveData(
-    FldFileResource *resource, dds3Basic_t *unusedObject) {
+    const FldFileResource *resource, dds3Basic_t *unusedObject) {
     s32 index = D_004361B8;
     fldDisplayValues[index] = resource;
     D_004361B8 = index + 1;

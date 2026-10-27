@@ -6,10 +6,11 @@
 struct FldFileResource;
 struct dds3Basic_t;
 
-/* Index returned for an event display resource stored in fldDisplayValues. */
+/* Index for a borrowed event display resource stored in fldDisplayValues.
+ * Its owner keeps the record alive through room-event cleanup. */
 typedef u32 FldEventDisplayResourceIndex;
 
 FldEventDisplayResourceIndex fldEveHit_AddEveData(
-    struct FldFileResource *resource, struct dds3Basic_t *object);
+    const struct FldFileResource *resource, struct dds3Basic_t *object);
 
 #endif /* FLD_EVENT_DISPLAY_RESOURCE_API_H */

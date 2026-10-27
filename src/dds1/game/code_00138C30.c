@@ -252,7 +252,7 @@ extern u32 D_003BACEC;
 
 extern sdfTexHandle_t *fldMarkerTexture;
 
-extern FldFileResource *fldDisplayValues[];
+extern const FldFileResource *fldDisplayValues[];
 
 extern s16 D_003C9518[];
 
@@ -647,7 +647,7 @@ void fldEveHit_End(void) {
 
 /* Append a file resource for an event task and return its index. */
 FldEventDisplayResourceIndex fldEveHit_AddEveData(
-    FldFileResource *resource, dds3Basic_t *object) {
+    const FldFileResource *resource, dds3Basic_t *object) {
     s32 index = D_003BAE28;
 
     fldDisplayValues[index] = resource;
