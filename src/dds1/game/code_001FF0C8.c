@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "common.h"
 #include "btl_command_use_error.h"
+#include "btl_resolve_unit_value_api.h"
 #include "btl_actor_entry_code_api.h"
 #include "btl_actor_selection_clear_api.h"
 #include "btl_enemy_spawn_capacity_api.h"
@@ -1047,7 +1048,6 @@ s32 btlElementToBitIndex(s32 mask, s32 elementIndex) {
     return -1;
 }
 
-extern s32 btlGetUnitElementAffinity(BtlUnit *, s32);
 
 s32 btlUnitHasNegativeActionQueryResult(BtlUnit *unit, s32 mask) {
     s32 i;

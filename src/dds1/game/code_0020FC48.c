@@ -6,6 +6,7 @@
 #include "common.h"
 #include "scr_command_parameter_index.h"
 #include "btl_command_target_policy.h"
+#include "btl_resolve_unit_value_api.h"
 #include "sdf_delayed_resource_check_api.h"
 #include "sdf_vu0.h"
 #include "btl_actor_status_table_api.h"
@@ -1944,7 +1945,6 @@ extern char D_003BBA98[];
 
 extern char D_003BBAA0[];
 
-extern s32 btlGetUnitElementAffinity(BtlUnit *, s32);
 
 extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
 

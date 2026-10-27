@@ -4,6 +4,7 @@
 #include "eff_random.h"
 #include "common.h"
 #include "btl_command_target_policy.h"
+#include "btl_resolve_unit_value_api.h"
 #include "sdf_delayed_resource_check_api.h"
 #include "sdf_vu0.h"
 #include "btl_actor_status_table_api.h"
@@ -2093,7 +2094,6 @@ extern char D_00436EE8[];
 
 extern char D_00436EF0[];
 
-extern s32 btlGetUnitElementAffinity(BtlUnit *, s32);
 
 extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
 

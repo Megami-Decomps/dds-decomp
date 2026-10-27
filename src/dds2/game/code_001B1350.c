@@ -3,6 +3,7 @@
 #include "sdf_packet_list.h"
 #include "common.h"
 #include "btl_actor_command_selector_value_api.h"
+#include "btl_resolve_unit_value_api.h"
 #include "btl_action_press_result.h"
 #include "btl_hunt_mp_recovery_api.h"
 #include "btl_special_ability.h"
@@ -81,7 +82,6 @@ s32 btlHasMappedSpecialAbilityForSlot(BtlUnit *unit, u32 slot);
 
 s32 btlHasSpecialAbility274(BtlUnit *unit, u32 slot);
 
-s32 btlGetUnitElementAffinity(BtlUnit *battler, s32 element);
 
 s32 btlFlagToElementIndex(s32 flag);
 

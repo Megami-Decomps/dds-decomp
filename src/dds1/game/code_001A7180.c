@@ -21,6 +21,7 @@
 #include "btl_ui.h"
 #include "sdf.h"
 #include "btl.h"
+#include "btl_resolve_unit_value_api.h"
 #include "btl_actor_selection_clear_api.h"
 #include "btl_state.h"
 #include "btl_terminal_outcome.h"
@@ -119,7 +120,6 @@ u32 btlHasSpecialAbilityWhenArgumentUnset(BtlUnit *unit, s64 argumentValue);
 
 s8 btlGetLinkageSlotCost(s32 command);
 
-s32 btlGetUnitElementAffinity(BtlUnit *battler, s32 element);
 
 s32 btlFlagToElementIndex(s32 flag);
 

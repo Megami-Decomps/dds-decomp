@@ -19,6 +19,8 @@
 #include "btl_state.h"
 #include "btl_action_state_selection.h"
 #include "btl_affinity_row.h"
+#include "dat_affinity_selector_type.h"
+#include "dat_effective_affinity_result_type.h"
 #include "btl_command.h"
 #include "btl_command_affinity_api.h"
 #include "btl_model_record.h"
@@ -4704,7 +4706,8 @@ s32 func_0020A860(void) {
 extern const BtlAffinityRow *datExternalAffinityTable;
 
 /* Resolve the mapped command's row-0x175 affinity for the special unit. */
-s32 btlResolveSpecialUnitCommandAffinity(datUnitWork_t *record, s32 command) {
+DatEffectiveAffinityResult btlResolveSpecialUnitCommandAffinity(
+    datUnitWork_t *record, DatAffinitySelector selector) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *unit;
     s32 skill;
@@ -4715,7 +4718,7 @@ s32 btlResolveSpecialUnitCommandAffinity(datUnitWork_t *record, s32 command) {
     if (record->unitId != 0x11B) {
         return -1;
     }
-    skill = btlMapCommandToSkill(command);
+    skill = btlMapCommandToSkill(selector);
     if (skill >= 0) {
         for (unit = battle->units; unit != NULL; unit = unit->next) {
             u32 flags = unit->status.flags;
@@ -4723,7 +4726,7 @@ s32 btlResolveSpecialUnitCommandAffinity(datUnitWork_t *record, s32 command) {
             if (flags & 1) {
                 if (flags & 0x400) {
                     if (unit->partyRecord.unitId == skill) {
-                        return ((const s32 *)datExternalAffinityTable)[0x175 * 19 + command];
+                        return ((const s32 *)datExternalAffinityTable)[0x175 * 19 + selector];
                     }
                 }
             }

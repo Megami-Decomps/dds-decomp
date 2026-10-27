@@ -468,19 +468,21 @@ s8 btlGetActorIndexedSignedValue(const BtlUnit *actor, BtlCommandId commandId) {
     return datCommandSelectors[commandId].stat;
 }
 
-s32 btlGetUnitElementAffinity(BtlUnit *battler, s32 element) {
-    return btlResolveUnitValueWithOverride(&battler->partyRecord, element);
+DatEffectiveAffinityResult btlGetUnitElementAffinity(
+    BtlUnit *battler, DatAffinitySelector selector) {
+    return btlResolveUnitValueWithOverride(&battler->partyRecord, selector);
 }
 
-s32 btlResolveUnitValueWithOverride(datUnitWork_t *record, s32 value) {
-    s32 (*handler)(datUnitWork_t *, s32) = ((BtlState *)btlGetRuntime())->unitValueOverrideHook;
+DatEffectiveAffinityResult btlResolveUnitValueWithOverride(
+    datUnitWork_t *record, DatAffinitySelector selector) {
+    BtlUnitValueOverrideHook handler = ((BtlState *)btlGetRuntime())->unitValueOverrideHook;
     if (handler != 0) {
-        s32 result = handler(record, value);
+        DatEffectiveAffinityResult result = handler(record, selector);
         if (result != -1) {
             return result;
         }
     }
-    return datGetEffectiveAffinity(record, value);
+    return datGetEffectiveAffinity(record, selector);
 }
 
 void *btlGetSideIndexedActorStatusTable(s32 side, s32 index) {

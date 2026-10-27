@@ -1809,20 +1809,22 @@ s8 btlGetActorIndexedSignedValue(const BtlUnit *actor, BtlCommandId commandId) {
     return datCommandSelectors[commandId].stat;
 }
 
-s32 btlGetUnitElementAffinity(BtlUnit *battler, s32 element) {
-    return btlResolveUnitValueWithOverride(&battler->partyRecord, element);
+DatEffectiveAffinityResult btlGetUnitElementAffinity(
+    BtlUnit *battler, DatAffinitySelector selector) {
+    return btlResolveUnitValueWithOverride(&battler->partyRecord, selector);
 }
 
-s32 btlResolveUnitValueWithOverride(datUnitWork_t *record, s32 element) {
-    s32 (*hook)(datUnitWork_t *, s32) =
-        *(s32 (**)(datUnitWork_t *, s32))((u8 *)btlGetRuntime() + 0x6B8);
+DatEffectiveAffinityResult btlResolveUnitValueWithOverride(
+    datUnitWork_t *record, DatAffinitySelector selector) {
+    BtlUnitValueOverrideHook hook =
+        *(BtlUnitValueOverrideHook *)((u8 *)btlGetRuntime() + 0x6B8);
     if (hook != 0) {
-        s32 value = hook(record, element);
+        DatEffectiveAffinityResult value = hook(record, selector);
         if (value != -1) {
             return value;
         }
     }
-    return datGetEffectiveAffinity(record, element);
+    return datGetEffectiveAffinity(record, selector);
 }
 
 void *btlGetSideIndexedActorStatusTable(s32 side, s32 index) {
@@ -3475,7 +3477,6 @@ void btlSyncModelFlagFromEventThresholds(void) {
 }
 
 extern u32 btlGetAdjustedSlotAffinity(BtlUnit *, s32, s32);
-
 
 INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415340);
 

@@ -1,5 +1,6 @@
 #include "common.h"
 #include "btl_command_use_error.h"
+#include "btl_resolve_unit_value_api.h"
 #include "btl_actor_entry_code_api.h"
 #include "btl_actor_selection_clear_api.h"
 #include "btl_enemy_spawn_capacity_api.h"
@@ -138,7 +139,6 @@ extern char D_00419B68[];
 
 extern char D_00419B88[];
 
-extern s32 btlGetUnitElementAffinity(BtlUnit *, s32);
 
 extern s32 btlAverageLevelsForMaskExcludingStatus20(u32);
 

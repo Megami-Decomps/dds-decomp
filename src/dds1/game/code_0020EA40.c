@@ -2,6 +2,7 @@
 #include "pcp_vu0.h"
 #include "common.h"
 #include "btl_boss_data_api.h"
+#include "btl_resolve_unit_value_api.h"
 #include "mdl_flag_api.h"
 #include "btl_state.h"
 #include "btl_action_state_selection.h"
@@ -272,7 +273,8 @@ void func_00206608(void);
 void btlQueueLinkedPairModelSwapTasks(BtlTask *, s32, u64, u64, u64);
 void func_00209EB8(BtlTask *);
 s32 func_0020A860(void);
-s32 btlResolveSpecialUnitCommandAffinity(datUnitWork_t *, s32);
+DatEffectiveAffinityResult btlResolveSpecialUnitCommandAffinity(
+    datUnitWork_t *, DatAffinitySelector);
 s32 btlUpdateLinkedDefeatCamera(BtlLinkedCommand *, BtlCamState *, s32);
 void btlUpdateBossUnitScaleTransition(void);
 s32 btlOffsetSpecialTargetPositionForActionHook(BtlLinkedCommand *, s32, s32);
