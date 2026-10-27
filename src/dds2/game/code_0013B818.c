@@ -944,21 +944,21 @@ extern s32 fldGetActorStat0(s32 attribute);
 INCLUDE_RODATA(const s32, "game/code_0013B818", D_004133A0);
 
 s32 fldResolveEventSelectorTarget(s32 selector) {
-    s32 target;
+    FldInfBranchTarget target;
     s32 index;
 
     if (selector < 10) {
         index = selector - 1;
         if (D_0038E2D0.sets[D_004361C8].flags[index].flag == 0) {
-            target = (s8)D_0038E2D0.sets[D_004361C8].flags[index].offTarget;
+            target = D_0038E2D0.sets[D_004361C8].flags[index].offTarget;
         } else if (evtBitCheck(D_0038E2D0.sets[D_004361C8].flags[index].flag)) {
-            target = (s8)D_0038E2D0.sets[D_004361C8].flags[index].onTarget;
+            target = D_0038E2D0.sets[D_004361C8].flags[index].onTarget;
         } else {
-            target = (s8)D_0038E2D0.sets[D_004361C8].flags[index].offTarget;
+            target = D_0038E2D0.sets[D_004361C8].flags[index].offTarget;
         }
     } else {
         index = selector - 10;
-        target = (s8)D_0038E2D0.sets[D_004361C8].messages[index].targets[0];
+        target = D_0038E2D0.sets[D_004361C8].messages[index].targets[0];
     }
     switch (target) {
     case 0:
@@ -1021,7 +1021,7 @@ s32 fldResolveEventSelectorTarget(s32 selector) {
 /* Apply a selected INF graph branch and its view and extra actions. */
 s32 fldDispatchInteractionAction(s32 messageId, s32 slot) {
     s32 row;
-    s8 target;
+    FldInfBranchTarget target;
     s8 extraAction = 0;
     s32 viewIndex = 0;
     dds3Basic_t *world;
@@ -1032,15 +1032,15 @@ s32 fldDispatchInteractionAction(s32 messageId, s32 slot) {
     if (messageId < 10) {
         row = messageId - 1;
         if (D_0038E2D0.sets[D_004361C8].flags[row].flag == 0) {
-            target = (s8)D_0038E2D0.sets[D_004361C8].flags[row].offTarget;
+            target = D_0038E2D0.sets[D_004361C8].flags[row].offTarget;
         } else if (evtBitCheck(D_0038E2D0.sets[D_004361C8].flags[row].flag) != 0) {
-            target = (s8)D_0038E2D0.sets[D_004361C8].flags[row].onTarget;
+            target = D_0038E2D0.sets[D_004361C8].flags[row].onTarget;
         } else {
-            target = (s8)D_0038E2D0.sets[D_004361C8].flags[row].offTarget;
+            target = D_0038E2D0.sets[D_004361C8].flags[row].offTarget;
         }
     } else {
         row = messageId - 10;
-        target = (s8)D_0038E2D0.sets[D_004361C8].messages[row].targets[slot];
+        target = D_0038E2D0.sets[D_004361C8].messages[row].targets[slot];
     }
     if (target >= 10) {
         if (D_0038E2D0.sets[D_004361C8].messages[target - 10].flags[0] != 0) {

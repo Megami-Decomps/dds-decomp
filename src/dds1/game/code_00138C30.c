@@ -1241,21 +1241,21 @@ extern const char *fldFindActorEntryByName(const char *);
 INCLUDE_RODATA(const s32, "game/code_00138C30", D_003A0150);
 
 s32 fldResolveEventSelectorTarget(s32 selector) {
-    s32 target;
+    FldInfBranchTarget target;
     s32 index;
 
     if (selector < 10) {
         index = selector - 1;
         if (D_00332E30.sets[D_003BAE38].flags[index].flag == 0) {
-            target = (s8)D_00332E30.sets[D_003BAE38].flags[index].offTarget;
+            target = D_00332E30.sets[D_003BAE38].flags[index].offTarget;
         } else if (evtBitCheck(D_00332E30.sets[D_003BAE38].flags[index].flag)) {
-            target = (s8)D_00332E30.sets[D_003BAE38].flags[index].onTarget;
+            target = D_00332E30.sets[D_003BAE38].flags[index].onTarget;
         } else {
-            target = (s8)D_00332E30.sets[D_003BAE38].flags[index].offTarget;
+            target = D_00332E30.sets[D_003BAE38].flags[index].offTarget;
         }
     } else {
         index = selector - 10;
-        target = (s8)D_00332E30.sets[D_003BAE38].messages[index].targets[0];
+        target = D_00332E30.sets[D_003BAE38].messages[index].targets[0];
     }
     switch (target) {
     case 0:
@@ -1318,7 +1318,7 @@ s32 fldResolveEventSelectorTarget(s32 selector) {
 /* Apply a selected INF graph branch and its view and extra actions. */
 s32 fldDispatchInteractionAction(s32 messageId, s32 slot) {
     s32 row;
-    s8 target;
+    FldInfBranchTarget target;
     s8 extraAction = 0;
     s32 viewIndex = 0;
     dds3Basic_t *world;
@@ -1329,15 +1329,15 @@ s32 fldDispatchInteractionAction(s32 messageId, s32 slot) {
     if (messageId < 10) {
         row = messageId - 1;
         if (D_00332E30.sets[D_003BAE38].flags[row].flag == 0) {
-            target = (s8)D_00332E30.sets[D_003BAE38].flags[row].offTarget;
+            target = D_00332E30.sets[D_003BAE38].flags[row].offTarget;
         } else if (evtBitCheck(D_00332E30.sets[D_003BAE38].flags[row].flag) != 0) {
-            target = (s8)D_00332E30.sets[D_003BAE38].flags[row].onTarget;
+            target = D_00332E30.sets[D_003BAE38].flags[row].onTarget;
         } else {
-            target = (s8)D_00332E30.sets[D_003BAE38].flags[row].offTarget;
+            target = D_00332E30.sets[D_003BAE38].flags[row].offTarget;
         }
     } else {
         row = messageId - 10;
-        target = (s8)D_00332E30.sets[D_003BAE38].messages[row].targets[slot];
+        target = D_00332E30.sets[D_003BAE38].messages[row].targets[slot];
     }
     if (target >= 10) {
         if (D_00332E30.sets[D_003BAE38].messages[target - 10].flags[0] != 0) {

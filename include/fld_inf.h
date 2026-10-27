@@ -34,10 +34,13 @@ typedef struct FldInfExtraAction {
     s32 parameter3;
 } FldInfExtraAction;
 
+/* Graph readers sign-extend these serialized branch-target bytes. */
+typedef s8 FldInfBranchTarget;
+
 typedef struct FldInfFlagSelector {
     s16 flag;
-    u8 offTarget;
-    u8 onTarget;
+    FldInfBranchTarget offTarget;
+    FldInfBranchTarget onTarget;
 } FldInfFlagSelector;
 
 typedef enum FldInfMessageAttribute {
@@ -50,7 +53,7 @@ typedef char FldInfMessageAttribute_size[(sizeof(FldInfMessageAttribute) == size
 typedef struct FldInfMessageRow {
     s16 kind;
     s16 message;
-    u8 targets[4];
+    FldInfBranchTarget targets[4];
     s16 flags[2]; /* Flag to clear, then flag to set. */
     u8 view;
     u8 extraAction;
