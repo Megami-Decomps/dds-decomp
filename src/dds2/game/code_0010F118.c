@@ -12,10 +12,10 @@
 #include "eff_transform.h"
 #include "dds3obj.h"
 #include "sdf.h"
+#include "pty_read_roster_stat_api.h"
 
 extern s32 scrGetIntPara(s32);
 
-extern s8 ptyReadSignedRosterStatByte(s32);
 extern void ptyApplyEventPenalty(s32 penaltyMode);
 
 
@@ -42,7 +42,7 @@ u32 ptyScriptGetRosterStat(void) {
     s32 value;
 
     value = scrGetIntPara(0);
-    value = ptyReadSignedRosterStatByte(value);
+    value = ptyReadSignedRosterStatByte((DatBaseStatIndex)value);
     scrSetIntReturnValue(value);
     return 1;
 }

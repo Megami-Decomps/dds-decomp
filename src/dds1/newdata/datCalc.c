@@ -21,6 +21,7 @@
 #include "pty_roster_api.h"
 #include "pty_frontline_promotion_api.h"
 #include "pty_status_query_api.h"
+#include "pty_read_roster_stat_api.h"
 #include "dat_unit_has_skill_api.h"
 #include "pty_item_quantity_update_view.h"
 #include "eff_random_mod.h"
@@ -535,10 +536,9 @@ PtyActiveRosterIndex dds3FindEntryIndex(s32 unitId) {
     return PTY_ACTIVE_ROSTER_INDEX_NOT_FOUND;
 }
 
-/* Read a signed byte relative to the first roster entry's stat-byte base;
- * the caller supplies a byte offset, not a whole-entry index. */
-s8 ptyReadSignedRosterStatByte(s32 byteOffset) {
-    return DDS3_GBWK->party[0].baseStats[byteOffset];
+/* Read one indexed signed base-stat value from the first active roster record. */
+s8 ptyReadSignedRosterStatByte(DatBaseStatIndex statIndex) {
+    return DDS3_GBWK->party[0].baseStats[statIndex];
 }
 
 extern void sdfRaisePackedChannelValue(datUnitWork_t *, u32 minimumValue);
