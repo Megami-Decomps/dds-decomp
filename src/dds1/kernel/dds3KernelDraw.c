@@ -93,7 +93,7 @@ void dds3SetFog(const KwlnDrawVectorParams *source) {
 }
 
 /* Retain the caller-owned light-data pointer in its draw slot. */
-void dds3SetLight(f32 (*lightSource)[4], s32 slot) {
+void dds3SetLight(f32 (*lightSource)[4], KwlnLightSourceSlot slot) {
     D_00324770[slot] = lightSource;
 }
 

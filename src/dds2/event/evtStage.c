@@ -81,9 +81,9 @@ s32 evtLoadArea(s32 area, s32 room)
     } else {
         dds3SetScreenFovy(0.75398216f);
     }
-    dds3SetLight((f32 (*)[4])D_003C8BA0, 0);
-    dds3SetLight((f32 (*)[4])(D_003C8BA0 + 0x10), 1);
-    dds3SetLight((f32 (*)[4])(D_003C8BA0 + 0x20), 2);
+    dds3SetLight((f32 (*)[4])D_003C8BA0, KWLN_LIGHT_SOURCE_SLOT_0);
+    dds3SetLight((f32 (*)[4])(D_003C8BA0 + 0x10), KWLN_LIGHT_SOURCE_SLOT_1);
+    dds3SetLight((f32 (*)[4])(D_003C8BA0 + 0x20), KWLN_LIGHT_SOURCE_SLOT_2);
     dds3SetFog(D_003C8C60);
     dds3SetAmbient((const u128 *)D_003C8C80);
     return 1;
@@ -107,9 +107,9 @@ s32 evtLoadArea_FromMemory(s32 area, s32 room, u8 *resource0Data, u8 *resource1D
     dds3SceneBasicMakeScene_FromMemory(worldObject, area, room, resource0Data, resource1Data, textureOffsets, flags);
     evtSetTestCamera();
     dds3SetScreenFovy(0.75398216f);
-    dds3SetLight((f32 (*)[4])D_003C8BA0, 0);
-    dds3SetLight((f32 (*)[4])(D_003C8BA0 + 0x10), 1);
-    dds3SetLight((f32 (*)[4])(D_003C8BA0 + 0x20), 2);
+    dds3SetLight((f32 (*)[4])D_003C8BA0, KWLN_LIGHT_SOURCE_SLOT_0);
+    dds3SetLight((f32 (*)[4])(D_003C8BA0 + 0x10), KWLN_LIGHT_SOURCE_SLOT_1);
+    dds3SetLight((f32 (*)[4])(D_003C8BA0 + 0x20), KWLN_LIGHT_SOURCE_SLOT_2);
     dds3SetFog(D_003C8C60);
     dds3SetAmbient((const u128 *)D_003C8C80);
     while (sdfDelayedResrcCheck() != 0) {
