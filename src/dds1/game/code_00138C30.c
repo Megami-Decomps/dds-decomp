@@ -61,6 +61,7 @@
 #include "dds3_world_secondary.h"
 #include "eff_light.h"
 #include "fld_area_work.h"
+#include "fld_elv_camera_scene_api.h"
 #include "fld_spawn_collision.h"
 #include "evt_world.h"
 #include "evt_world_source_transform.h"
@@ -210,7 +211,7 @@ extern u32 D_003BAD3C;
 
 extern u32 D_003BAD40;
 
-extern s32 D_003BAD1C;
+extern FldElvCameraSceneMode D_003BAD1C;
 
 extern u32 D_003BACF8;
 

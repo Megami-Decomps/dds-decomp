@@ -2,6 +2,7 @@
 #include "fld_integer_editor_api.h"
 #include "fld_area_work.h"
 #include "fld_camera_move_tracking.h"
+#include "fld_elv_camera_scene_api.h"
 #include "fld_runtime_reset_api.h"
 #include "fld_npc_motion.h"
 #include "fld_label_rows.h"
@@ -121,8 +122,6 @@ extern s32 fldElvFloorDisp;
 extern s32 fldElvFloorTarget;
 
 extern s32 fldElvState;
-
-extern void fldSetElvCameraScene(s32 mode);
 
 extern void fldClearCameraMoveMode(void);
 
@@ -805,9 +804,9 @@ void fldElvSetFloor(s32 start, s32 end) {
     if (gFldElvFloorNow != -999 && fldElvFloorTarget != -999) {
         fldElvFloorTarget++;
         if (fldElvFloorFrom < fldElvFloorTo) {
-            fldSetElvCameraScene(1);
+            fldSetElvCameraScene(FLD_ELV_CAMERA_SCENE_MODE_TRAVEL_INCREASING_FLOOR_INDEX);
         } else {
-            fldSetElvCameraScene(-1);
+            fldSetElvCameraScene(FLD_ELV_CAMERA_SCENE_MODE_TRAVEL_DECREASING_FLOOR_INDEX);
         }
     }
 }
@@ -831,9 +830,9 @@ FldCameraTrackingResult fldEvaluateCameraMoveTracking(void) {
     }
     if (fldElvFloorTarget != FIELD_CAMERA_TRACKING_UNSET && gFldElvFloorNow == fldElvFloorTo) {
         if (fldElvFloorFrom < gFldElvFloorNow) {
-            fldSetElvCameraScene(2);
+            fldSetElvCameraScene(FLD_ELV_CAMERA_SCENE_MODE_ARRIVAL_INCREASING_FLOOR_INDEX);
         } else {
-            fldSetElvCameraScene(-2);
+            fldSetElvCameraScene(FLD_ELV_CAMERA_SCENE_MODE_ARRIVAL_DECREASING_FLOOR_INDEX);
         }
         return FLD_CAMERA_TRACKING_MOVE_STARTED;
     }

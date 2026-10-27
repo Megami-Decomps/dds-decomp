@@ -13,6 +13,7 @@
 #include "pty_status_query_api.h"
 #include "file_config_option_api.h"
 #include "fld_camera_model_motion_request.h"
+#include "fld_elv_camera_scene_api.h"
 #include "fld_placement_batch_mode.h"
 #include "dds3_object_flags.h"
 #include "sdf_vu0.h"
@@ -643,7 +644,7 @@ extern u32 D_003BAD3C;
 
 extern u32 D_003BAD40;
 
-extern s32 D_003BAD1C;
+extern FldElvCameraSceneMode D_003BAD1C;
 
 extern u32 D_003BACF8;
 
@@ -3872,7 +3873,7 @@ dds3Basic_t *fldCamNowEveCamera(void) {
     return currentEntry;
 }
 
-void fldSetElvCameraScene(s32 mode) {
+void fldSetElvCameraScene(FldElvCameraSceneMode mode) {
     D_003BAD1C = mode;
     dds3CameraObjectBasicGetTgtCam(dds3GetActiveCameraSceneBasic(dds3GetActiveScene()), D_003C9230,
                                               D_003C9220);
@@ -3886,21 +3887,22 @@ void fldCamElvTask(void) {
     f32 phase = D_003BAD20;
     dds3Basic_t *camera;
 
-    if (D_003BAD1C != 0) {
-        if (D_003BAD1C == 1) {
+    if (D_003BAD1C != FLD_ELV_CAMERA_SCENE_MODE_IDLE) {
+        if (D_003BAD1C == FLD_ELV_CAMERA_SCENE_MODE_TRAVEL_INCREASING_FLOOR_INDEX) {
             direction = 1.0f;
         }
-        if (D_003BAD1C == 2) {
+        if (D_003BAD1C == FLD_ELV_CAMERA_SCENE_MODE_ARRIVAL_INCREASING_FLOOR_INDEX) {
             direction = 1.0f;
         }
-        if (D_003BAD1C == -1) {
+        if (D_003BAD1C == FLD_ELV_CAMERA_SCENE_MODE_TRAVEL_DECREASING_FLOOR_INDEX) {
             direction = -1.0f;
         }
-        if (D_003BAD1C == -2) {
+        if (D_003BAD1C == FLD_ELV_CAMERA_SCENE_MODE_ARRIVAL_DECREASING_FLOOR_INDEX) {
             direction = -1.0f;
         }
         camera = dds3GetActiveCameraSceneBasic(dds3GetActiveScene());
-        if (D_003BAD1C == 1 || D_003BAD1C == -1) {
+        if (D_003BAD1C == FLD_ELV_CAMERA_SCENE_MODE_TRAVEL_INCREASING_FLOOR_INDEX ||
+            D_003BAD1C == FLD_ELV_CAMERA_SCENE_MODE_TRAVEL_DECREASING_FLOOR_INDEX) {
             if (phase < 3.14f) {
                 phase += 0.2f;
                 camera->inner->position[1] = D_003C9220[1] + sdfSin(phase * direction) * 2.5f;
@@ -3909,7 +3911,8 @@ void fldCamElvTask(void) {
                 camera->inner->position[1] = D_003C9220[1] + sdfSin(phase * direction) * 2.0f;
             }
         }
-        if (D_003BAD1C == 2 || D_003BAD1C == -2) {
+        if (D_003BAD1C == FLD_ELV_CAMERA_SCENE_MODE_ARRIVAL_INCREASING_FLOOR_INDEX ||
+            D_003BAD1C == FLD_ELV_CAMERA_SCENE_MODE_ARRIVAL_DECREASING_FLOOR_INDEX) {
             phase += 11.0f;
             if (phase > 0.0f) {
                 phase -= 1.0f;
@@ -3927,7 +3930,7 @@ void fldCamElvTask(void) {
 }
 
 void fldClearCameraMoveMode(void) {
-    D_003BAD1C = 0;
+    D_003BAD1C = FLD_ELV_CAMERA_SCENE_MODE_IDLE;
 }
 
 typedef struct FldModelMatrices {
@@ -8132,7 +8135,7 @@ INCLUDE_SDATA(const s32, "field/fldFileResolver", D_003BAD14);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", D_003BAD18);
 
-INCLUDE_SDATA(const s32, "field/fldFileResolver", D_003BAD1C);
+INCLUDE_SDATA(const FldElvCameraSceneMode, "field/fldFileResolver", D_003BAD1C);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", D_003BAD20);
 
