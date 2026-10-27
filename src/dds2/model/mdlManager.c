@@ -34,6 +34,7 @@
 #include "sdf_packet_builders.h"
 #include "mdl.h"
 #include "mdl_part_info_api.h"
+#include "mdl_p2a_resource_api.h"
 #include "mdl_group_resource_ownership_api.h"
 #include "mdl_load_request_api.h"
 #include "btl_grouped_entity_api.h"
@@ -1264,7 +1265,6 @@ s32 mdlIsPartInfoPacket(PacWork *packetWork) {
 extern PacWork *mdlPackSetOld(PacWork *work, s32 group, s32 id, MdlRegistrationMode registrationMode);
 struct EffNodeDescriptor;
 extern DevRequest *mdlEffectResrcListNew(u32 count);
-extern void mdlCreateEffectResrc_P2A(DevRequest *list, void *descriptor);
 extern void mdlCreateEffectResrc_D3P(DevRequest *list, struct EffNodeDescriptor *descriptor);
 
 

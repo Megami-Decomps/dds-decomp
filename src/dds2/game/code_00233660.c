@@ -26,6 +26,7 @@
 #include "sdf_projection.h"
 #include "mdl.h"
 #include "mdl_part_info_api.h"
+#include "mdl_p2a_resource_api.h"
 #include "mdl_part_entry.h"
 #include "mdl_resource_entries.h"
 #include "mdl_track_poly_record.h"
@@ -830,12 +831,12 @@ void mdlPibEditTrackInfo(EffMarkParams *params, s16 *fieldCursor) {
 }
 
 /* Append a newly created billboard to the next part-list slot. */
-void mdlCreateEffectResrc_P2A(DevRequest *partList, void *descriptor) {
+void mdlCreateEffectResrc_P2A(DevRequest *partList, const u8 *resourceBytes) {
     MdlPartEntry *partEntry = &((MdlPartEntry *)partList->buffer)[partList->usedCount];
 
     partEntry->state = 0;
     partEntry->kind = MDL_PART_BILLBOARD;
-    partEntry->object = dds3BillboardCreate(1, (u32)descriptor);
+    partEntry->object = dds3BillboardCreate(1, (u32)resourceBytes);
     partList->usedCount += 1;
 }
 
