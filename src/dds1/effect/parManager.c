@@ -8,6 +8,7 @@
 #include "par_cell_api.h"
 #include "ee_mmi.h"
 #include "eff.h"
+#include "par_dispatch_api.h"
 #include "par_table.h"
 #include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
@@ -42,10 +43,9 @@ typedef struct {
 } ParBurstEmitter; /* 0x184 */
 
 
-/* Constructor, update and destructor operations share one 0xC-byte entry,
+/* Creation/copy, update and release callbacks share one 0xC-byte entry,
  * selected by the emitter's 16-bit dispatch index at +0x140. */
 
-extern ParDispatch dds3ParticleFuncTable[];
 /* Restart callbacks: each takes the object, which retail leaves in a0. */
 extern void (*D_0034E2F0[])(ParObj *);
 
@@ -661,7 +661,7 @@ u32 dds3ParticleColorBlend(u32 colorA, u32 colorB) {
 void dds3ParticleCreate(s32 dispatchIndex, void *creationData) {
     ParObj *createdObject;
 
-    createdObject = dds3ParticleFuncTable[dispatchIndex].func(creationData);
+    createdObject = dds3ParticleFuncTable[dispatchIndex].createOrCopy(creationData);
     createdObject->dispatchIndex = dispatchIndex;
 }
 
@@ -715,7 +715,7 @@ void dds3ParticleDraw(ParObj *effect) {
 ParObj *dds3ParticleCopy(ParObj *obj) {
     ParObj *createdObject;
 
-    createdObject = dds3ParticleFuncTable[obj->dispatchIndex].func(obj);
+    createdObject = dds3ParticleFuncTable[obj->dispatchIndex].createOrCopy(obj);
     createdObject->dispatchIndex = obj->dispatchIndex;
     return createdObject;
 }

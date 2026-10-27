@@ -23,6 +23,7 @@
 #include "par_emitter_desc.h"
 #include "par_object_client_view.h"
 #include "eff.h"
+#include "par_dispatch_api.h"
 #include "eff_track_poly_list.h"
 #include "eff_matrix4.h"
 
@@ -42,7 +43,6 @@ struct sdfDrawTag_t;
 extern void *effPkt3DPrimMakePoly(EffPacketParams *);
 
 
-extern ParDispatch dds3ParticleFuncTable[];
 
 
 
@@ -149,21 +149,21 @@ ParObj *dds3ParticleExpCreate(s32 kind, ParKindResource *resource) {
 
     if (resource->type != 3 || resource->offset != 0) {
         object->billboardCloneMarker = PAR_BILLBOARD_CLONE_FROM_RESOURCE;
-        object = dds3ParticleFuncTable[kind].func(object);
+        object = dds3ParticleFuncTable[kind].createOrCopy(object);
         billboard = dds3BillboardCreate(resource->type, (u32)(resource + 1));
         dds3BillboardSetScale(billboard, object->billboardScale, object->billboardScaleY);
         dds3BillboardSetMode(billboard, object->billboardMode);
         dds3BillboardSetAnimColorAdvMode(billboard);
         object->billboard = billboard;
     } else {
-        object = dds3ParticleFuncTable[kind].func(object);
+        object = dds3ParticleFuncTable[kind].createOrCopy(object);
     }
     object->dispatchIndex = kind;
     return object;
 }
 
 ParObj *dds3ParticleExpCopy(ParObj *source) {
-    ParObj *particle = dds3ParticleFuncTable[source->dispatchIndex].func(source);
+    ParObj *particle = dds3ParticleFuncTable[source->dispatchIndex].createOrCopy(source);
     particle->dispatchIndex = source->dispatchIndex;
     if (source->billboardCloneMarker == PAR_BILLBOARD_CLONE_FROM_RESOURCE) {
         billHandle_t *billboard = dds3BillboardCopy(source->billboard);

@@ -19,6 +19,7 @@
 #include "sdf_vu_matrix.h"
 
 #include "eff.h"
+#include "par_dispatch_api.h"
 #include "par_table.h"
 /* Declared before first use (were implicit int). */
 extern void dds3Particle_BasicDelete(EffEmitterHead *owner);
@@ -49,10 +50,9 @@ typedef struct {
 /* Restart callbacks: each takes the object, which retail leaves in a0. */
 extern void (*D_003AAC20[])(ParObj *);
 
-/* Constructor, update and destructor operations share one 0xC-byte entry,
+/* Creation/copy, update and release callbacks share one 0xC-byte entry,
  * selected by the emitter's 16-bit dispatch index at +0x140. */
 
-extern ParDispatch dds3ParticleFuncTable[];
 
 
 /* Release the radial emitter's extra allocation, shared resources, and block. */
@@ -665,7 +665,7 @@ u32 dds3ParticleColorBlend(u32 colorA, u32 colorB) {
 void dds3ParticleCreate(s32 dispatchIndex, void *creationData) {
     ParObj *createdObject;
 
-    createdObject = dds3ParticleFuncTable[dispatchIndex].func(creationData);
+    createdObject = dds3ParticleFuncTable[dispatchIndex].createOrCopy(creationData);
     createdObject->dispatchIndex = dispatchIndex;
 }
 
@@ -719,7 +719,7 @@ void dds3ParticleDraw(ParObj *effect) {
 ParObj *dds3ParticleCopy(ParObj *obj) {
     ParObj *createdObject;
 
-    createdObject = dds3ParticleFuncTable[obj->dispatchIndex].func(obj);
+    createdObject = dds3ParticleFuncTable[obj->dispatchIndex].createOrCopy(obj);
     createdObject->dispatchIndex = obj->dispatchIndex;
     return createdObject;
 }
