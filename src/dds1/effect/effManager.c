@@ -10,6 +10,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_gs_packet.h"
 #include "eff_manager_task.h"
+#include "kwln_task_runner.h"
 #include "eff_legacy_node_instance.h"
 
 extern SdfPoolNode sdfGrOtTable[];
@@ -29,7 +30,7 @@ void effManagerInitializeSubsystems(dds3ProcessID_t *task) {
 }
 
 /* Submit the test and alpha state packets to both field draw buffers. */
-s32 effSubmitFieldBlendStateTask(dds3ProcessID_t *task) {
+KwlnTaskUpdateResult effSubmitFieldBlendStateTask(dds3ProcessID_t *task) {
     sdfDrawTag_t *list;
     sdfPrimTransPacket_t *state;
     SdfPoolNode *surface;
@@ -66,7 +67,7 @@ s32 effSubmitFieldBlendStateTask(dds3ProcessID_t *task) {
     surface->append(surface, list);
 
     effObjectListCountersReset();
-    return 0;
+    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 extern void billFlushPendingChildPackets(void);
@@ -74,7 +75,7 @@ extern void billFlushPendingRenderPairs(void);
 extern void dds3UpdateCrossfade(void);
 extern void effDispatchActive(void);
 
-s32 dds3EffectManagerRun(dds3ProcessID_t *task) {
+KwlnTaskUpdateResult dds3EffectManagerRun(dds3ProcessID_t *task) {
     (void)task;
     dds3PolygonLinkOt();
     dds3TrackPolyLinkOt();
@@ -82,7 +83,7 @@ s32 dds3EffectManagerRun(dds3ProcessID_t *task) {
     billFlushPendingRenderPairs();
     dds3UpdateCrossfade();
     effDispatchActive();
-    return 0;
+    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 /* Parameter-node optional flag callback; the retail implementation is empty. */
