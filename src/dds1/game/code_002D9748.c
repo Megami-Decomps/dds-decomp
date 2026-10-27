@@ -89,7 +89,7 @@ void sdfMatListFree(DevRequest *list);
 void sdfMatCopyStat(sdfMat_t *, const sdfMat_t *);
 void sdfMatFree(sdfMat_t *);
 #include "sdf_asset_create.h"
-u8 *sdfMatSet(sdfMat_t *, DevRequest *, u8 *);
+const u8 *sdfMatSet(sdfMat_t *, const DevRequest *, const u8 *);
 void sdfMatListAdd(DevRequest *, sdfMat_t *);
 void sdfAssetCopyTextureState(sdfMat_t *, SdfAssetEntry *);
 void sdfMatUpdatePacketMultiTex(sdfMat_t *, SdfAssetEntry *);
@@ -674,61 +674,64 @@ sdfMat_t *sdfMatNew(void) {
     return asset;
 }
 
-/* Consume supported presence bits in their native order and return the next byte.
+/* Read supported presence bits in their native order and return the next byte.
  * Texture indices and packet modes are unchecked; unknown bits consume no payload. */
-u8 *sdfMatSet(sdfMat_t *asset, DevRequest *resourceLookup, u8 *serializedData) {
+const u8 *sdfMatSet(sdfMat_t *asset, const DevRequest *resourceLookup,
+                    const u8 *serializedData) {
     u32 parameterFlags;
-    u8 *parameterCursor;
+    const u8 *parameterCursor;
     u32 packedTextureMode;
 
-    asset->unk00 = *(u32 *)serializedData;
-    asset->unk04 = *(u16 *)(serializedData + 4);
-    parameterFlags = *(u16 *)(serializedData + 6);
+    asset->unk00 = *(const u32 *)serializedData;
+    asset->unk04 = *(const u16 *)(serializedData + 4);
+    parameterFlags = *(const u16 *)(serializedData + 6);
     parameterCursor = serializedData + SDF_PARAM_HEADER_BYTES;
     if (parameterFlags & SDF_PARAM_PRIMARY_WORD_FIRST_PRESENT) {
-        sdfMatSetAmbient(asset, *(u32 *)parameterCursor);
+        sdfMatSetAmbient(asset, *(const u32 *)parameterCursor);
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
     if (parameterFlags & SDF_PARAM_PRIMARY_WORD_SECOND_PRESENT) {
-        sdfMatSetDiffuse(asset, *(u32 *)parameterCursor);
+        sdfMatSetDiffuse(asset, *(const u32 *)parameterCursor);
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
     if (parameterFlags & SDF_PARAM_PRIMARY_TEXTURE_PRESENT) {
-        sdfSetAssetPrimaryTextureAddress(asset, (sdfTexHandle_t *)((u32 *)resourceLookup->buffer)[*(u16 *)parameterCursor]);
+        sdfSetAssetPrimaryTextureAddress(asset,
+            (sdfTexHandle_t *)((const u32 *)resourceLookup->buffer)[*(const u16 *)parameterCursor]);
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
     if (parameterFlags & SDF_PARAM_PRIMARY_SCALARS_PRESENT) {
-        sdfSetPrimaryTextScalars(asset, ((f32 *)parameterCursor)[0], ((f32 *)parameterCursor)[1], ((f32 *)parameterCursor)[2], ((f32 *)parameterCursor)[3], ((f32 *)parameterCursor)[4]);
+        sdfSetPrimaryTextScalars(asset, ((const f32 *)parameterCursor)[0], ((const f32 *)parameterCursor)[1], ((const f32 *)parameterCursor)[2], ((const f32 *)parameterCursor)[3], ((const f32 *)parameterCursor)[4]);
         parameterCursor += SDF_PARAM_SCALAR_BLOCK_BYTES;
     }
     if (parameterFlags & SDF_PARAM_SECONDARY_COLOR_PRESENT) {
-        sdfMatSetMultiDiffuse(asset, *(u32 *)parameterCursor);
+        sdfMatSetMultiDiffuse(asset, *(const u32 *)parameterCursor);
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
     if (parameterFlags & SDF_PARAM_SECONDARY_TEXTURE_STATE_PRESENT) {
-        packedTextureMode = *(u32 *)parameterCursor;
+        packedTextureMode = *(const u32 *)parameterCursor;
         parameterCursor += SDF_PARAM_WORD_BYTES;
-        sdfMatSetMultiTex(asset, (sdfTexHandle_t *)((u32 *)resourceLookup->buffer)[packedTextureMode & SDF_PARAM_TEXTURE_INDEX_MASK]);
+        sdfMatSetMultiTex(asset,
+            (sdfTexHandle_t *)((const u32 *)resourceLookup->buffer)[packedTextureMode & SDF_PARAM_TEXTURE_INDEX_MASK]);
         sdfMatSetMultiMethod(asset, packedTextureMode >> SDF_PARAM_PACKET_MODE_SHIFT);
     }
     if (parameterFlags & SDF_PARAM_SECONDARY_SCALARS_PRESENT) {
-        sdfMatSetMultiTexUvw(asset, ((f32 *)parameterCursor)[0], ((f32 *)parameterCursor)[1], ((f32 *)parameterCursor)[2], ((f32 *)parameterCursor)[3], ((f32 *)parameterCursor)[4]);
+        sdfMatSetMultiTexUvw(asset, ((const f32 *)parameterCursor)[0], ((const f32 *)parameterCursor)[1], ((const f32 *)parameterCursor)[2], ((const f32 *)parameterCursor)[3], ((const f32 *)parameterCursor)[4]);
         parameterCursor += SDF_PARAM_SCALAR_BLOCK_BYTES;
     }
     if (parameterFlags & SDF_PARAM_PRIMARY_WORD_THIRD_PRESENT) {
-        sdfMatSetSpecular(asset, *(u32 *)parameterCursor);
+        sdfMatSetSpecular(asset, *(const u32 *)parameterCursor);
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
     if (parameterFlags & SDF_PARAM_PRIMARY_WORD_FOURTH_PRESENT) {
-        sdfSetPrimaryStateWordFourth(asset, *(u32 *)parameterCursor);
+        sdfSetPrimaryStateWordFourth(asset, *(const u32 *)parameterCursor);
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
     if (parameterFlags & SDF_PARAM_PRIMARY_FLOAT_PRESENT) {
-        sdfMatSetConstant(asset, *(f32 *)parameterCursor);
+        sdfMatSetConstant(asset, *(const f32 *)parameterCursor);
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
     if (parameterFlags & SDF_PARAM_SCALAR_PAIR_PRESENT) {
-        sdfMatSetFaceDivParm(asset, ((f32 *)parameterCursor)[0], ((f32 *)parameterCursor)[1]);
+        sdfMatSetFaceDivParm(asset, ((const f32 *)parameterCursor)[0], ((const f32 *)parameterCursor)[1]);
         parameterCursor += SDF_PARAM_SCALAR_PAIR_BYTES;
     }
     return parameterCursor;
@@ -901,9 +904,10 @@ void sdfApplyAssetEntryChangesWithForcedTexture(sdfMat_t *asset, s32 entryIndex)
 }
 
 /* Parse the declared number of variable-sized assets, reserving at least the minimum capacity. */
-DevRequest *sdfMatListMake(DevRequest *lookup, SdfMaterialAssetList *serializedAssets) {
+DevRequest *sdfMatListMake(const DevRequest *lookup,
+                           const SdfMaterialAssetList *serializedAssets) {
     u32 remainingAssets = serializedAssets->assetCount;
-    u8 *parameterCursor = serializedAssets->records;
+    const u8 *parameterCursor = serializedAssets->records;
     DevRequest *list = sdfMatListNew(remainingAssets >= SDF_ASSET_LIST_MIN_CAPACITY ? remainingAssets : SDF_ASSET_LIST_MIN_CAPACITY);
     while (remainingAssets != 0) {
         sdfMat_t *asset = sdfMatNew();

@@ -16,7 +16,10 @@ typedef char SdfMaterialAssetList_size_must_be_4[
 typedef char SdfMaterialAssetList_records_must_start_at_4[
     ((u32)&((SdfMaterialAssetList *)0)->records == 4) ? 1 : -1];
 
+/* Parse borrowed, read-only texture lookup and material-record views into a
+ * newly allocated list. The views are consumed synchronously and not retained. */
 struct DevRequest *sdfMatListMake(
-    struct DevRequest *lookup, SdfMaterialAssetList *serializedAssets);
+    const struct DevRequest *lookup,
+    const SdfMaterialAssetList *serializedAssets);
 
 #endif /* SDF_MATERIAL_ASSET_LIST_H */
