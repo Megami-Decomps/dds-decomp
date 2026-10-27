@@ -307,7 +307,7 @@ void dds3DebugFloatEdit(f32 *value, f32 min, f32 max, f32 step, f32 bigStep) {
 /* Read the selected signed/unsigned integer, apply pad stepping, then truncate
  * back to its original width. Unsupported storage selectors leave it untouched. */
 void fldStepIntByPad(void *valueAddress, FldIntegerStorageType storageType, s64 min, s64 max, s64 step,
-                     s64 bigStep, s8 *padState) {
+                     s64 bigStep, const s8 *padState) {
     s64 adjustedValue;
     switch (storageType) {
     case FLD_INTEGER_STORAGE_UNSIGNED_BYTE:
@@ -392,7 +392,7 @@ void fldStepIntByPad(void *valueAddress, FldIntegerStorageType storageType, s64 
 
 void dds3DebugIntEdit(void *valueAddress, FldIntegerStorageType storageType, s64 min, s64 max, s64 step,
                       s64 bigStep) {
-    fldStepIntByPad(valueAddress, storageType, min, max, step, bigStep, (s8 *)D_00324530);
+    fldStepIntByPad(valueAddress, storageType, min, max, step, bigStep, (const s8 *)D_00324530);
 }
 
 /* Step a packed color byte by 10 or 1; return whether the word changed.
