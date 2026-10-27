@@ -11,6 +11,7 @@ struct EffNodeDescriptor;
 #include "sdf_chip.h"
 #include "dds3_path.h"
 #include "evt_unit.h"
+#include "evt_path_direction.h"
 #include "evt_unit_motion_api.h"
 #include "evt_unit_motion_callback_result.h"
 #include "evt_unit_motion_step_result.h"
@@ -1220,7 +1221,7 @@ void evtSetUnitMove2(evtUnitHandle_t *work, s32 motionSubmode, s32 worldObjectKe
     }
 }
 
-void evtSetUnitMove3(evtUnitHandle_t *work, s32 pathObjectKey, s32 frames, s32 valueB6, s32 pathFollowMode, s32 dirFlag, s32 sideMode) {
+void evtSetUnitMove3(evtUnitHandle_t *work, s32 pathObjectKey, s32 frames, s32 valueB6, s32 pathFollowMode, EvtPathDirection direction, s32 sideMode) {
     dds3Basic_t *pathSource;
     dds3PathBasicControl_t *path;
 
@@ -1234,12 +1235,12 @@ void evtSetUnitMove3(evtUnitHandle_t *work, s32 pathObjectKey, s32 frames, s32 v
     path = dds3AllocPathBasicWorkData(pathSource);
     work->pathControl = path;
     work->pathSpeed = 40.0f / GetSplineLength(path);
-    if (dirFlag == 0) {
+    if (direction == EVT_PATH_DIRECTION_FORWARD) {
         dds3PathBasicControlSetRatio(&path->counter, 0.0f);
-        dds3PathBasicControlAlterMode(&path->counter, 0);
+        dds3PathBasicControlAlterMode(&path->counter, EVT_PATH_DIRECTION_FORWARD);
     } else {
         dds3PathBasicControlSetRatio(&path->counter, 1.0f);
-        dds3PathBasicControlAlterMode(&path->counter, 1);
+        dds3PathBasicControlAlterMode(&path->counter, EVT_PATH_DIRECTION_REVERSE);
         work->pathSpeed = -work->pathSpeed;
     }
     switch (pathFollowMode) {
@@ -1252,11 +1253,11 @@ void evtSetUnitMove3(evtUnitHandle_t *work, s32 pathObjectKey, s32 frames, s32 v
         work->flags |= 2;
         break;
     }
-    switch (dirFlag) {
-    case 0:
+    switch (direction) {
+    case EVT_PATH_DIRECTION_FORWARD:
         work->flags &= ~EVT_UNIT_FLAG_PATH_REVERSE;
         break;
-    case 1:
+    case EVT_PATH_DIRECTION_REVERSE:
         work->flags |= EVT_UNIT_FLAG_PATH_REVERSE;
         break;
     }
@@ -2132,9 +2133,9 @@ u32 evtCommand_MODEL_MOVE2(void) {
         s32 frames = scrGetIntPara(5);
         s32 valueB6 = scrGetIntPara(6);
         s32 pathFollowMode = scrGetIntPara(2);
-        s32 dirFlag = scrGetIntPara(4);
+        EvtPathDirection direction = scrGetIntPara(4);
         s32 sideMode = scrGetIntPara(3);
-        evtSetUnitMove3(unit, pathObjectKey, frames, valueB6, pathFollowMode, dirFlag, sideMode);
+        evtSetUnitMove3(unit, pathObjectKey, frames, valueB6, pathFollowMode, direction, sideMode);
     }
     return 1;
 }

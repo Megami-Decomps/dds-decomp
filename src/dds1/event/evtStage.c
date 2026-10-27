@@ -9,6 +9,7 @@
 #include "dds3_world_selection.h"
 #include "dds3_world_lifecycle.h"
 #include "evt_world.h"
+#include "evt_path_direction.h"
 #include "evt_world_object_api.h"
 #include "kwln_task_lifecycle.h"
 #include "kwln_task_queue_query.h"
@@ -185,7 +186,7 @@ void evtPathRate(dds3Basic_t *worldNode, f32 multiplier) {
     }
 }
 
-void evtPathDir(dds3Basic_t *worldNode, u32 direction) {
+void evtPathDir(dds3Basic_t *worldNode, EvtPathDirection direction) {
     dds3PathBasicControl_t *slotData;
 
     slotData = dds3ObjectBaseGetPathControl(worldNode);

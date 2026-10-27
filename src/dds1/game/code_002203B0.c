@@ -7,6 +7,7 @@
 #include "dds3_object_mode.h"
 #include "dds3_path.h"
 #include "evt_world.h"
+#include "evt_path_direction.h"
 #include "evt_unit.h"
 #include "evt_unit_move_end_api.h"
 #include "evt_unit_path_advance_api.h"
@@ -19,7 +20,7 @@ EvtPathStatus evtCheckPathStat(dds3Basic_t *obj) {
     f32 target = 1.0f;
     dds3Basic_t *slot;
     dds3PathBasicControl_t *handle;
-    s32 kind;
+    EvtPathDirection direction;
 
     if (obj == NULL) {
         return EVT_PATH_STATUS_INVALID;
@@ -32,9 +33,9 @@ EvtPathStatus evtCheckPathStat(dds3Basic_t *obj) {
     if (handle == NULL) {
         return EVT_PATH_STATUS_INVALID;
     }
-    kind = dds3PathBasicControlGetMode(&handle->counter);
-    if (kind != 0) {
-        if (kind != 1) {
+    direction = dds3PathBasicControlGetMode(&handle->counter);
+    if (direction != EVT_PATH_DIRECTION_FORWARD) {
+        if (direction != EVT_PATH_DIRECTION_REVERSE) {
             return EVT_PATH_STATUS_INVALID;
         }
         target = 0.0f;

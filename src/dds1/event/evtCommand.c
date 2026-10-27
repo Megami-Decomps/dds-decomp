@@ -23,6 +23,7 @@
 #include "kwln.h"
 #include "evt_task.h"
 #include "evt_world.h"
+#include "evt_path_direction.h"
 #include "evt_event_pack.h"
 #include "scr.h"
 #include "scr_command_result.h"
@@ -122,7 +123,7 @@ void evtPathStop(dds3Basic_t *unit);
 
 void evtPathStart(dds3Basic_t *unit);
 
-void evtPathDir(dds3Basic_t *worldNode, u32 direction);
+void evtPathDir(dds3Basic_t *worldNode, EvtPathDirection direction);
 
 void evtPathLoop(dds3Basic_t *unit, s32 enabled);
 
@@ -837,6 +838,7 @@ s32 evtCommand_OBJ_PATH_MOVE(void) {
     dds3PathBasicControl_t *path;
     Dds3SlotResource *resource;
     s32 roomNumber;
+    EvtPathDirection direction;
 
     unit = evtSearchBasic(EFF_WORLD_KIND_EFFECT_TRANSFORM, scrGetIntPara(0));
     if (unit == NULL) {
@@ -865,17 +867,18 @@ s32 evtCommand_OBJ_PATH_MOVE(void) {
     path = dds3MoverBasicGetPathControl(slotNode);
     if (path == 0)
         return 1;
-    switch (scrGetIntPara(2)) {
-    case 0:
-        dds3PathBasicControlAlterMode(&path->counter, 0);
+    direction = scrGetIntPara(2);
+    switch (direction) {
+    case EVT_PATH_DIRECTION_FORWARD:
+        dds3PathBasicControlAlterMode(&path->counter, EVT_PATH_DIRECTION_FORWARD);
         if (target->value != 0) {
             roomNumber = fldCommand_GetHojiID(target->value);
             if (roomNumber > 0)
                 fldSetMapSlotValueFlag(fldGlobalBase.area, fldGlobalBase.floor + 1, roomNumber, 1);
         }
         break;
-    case 1:
-        dds3PathBasicControlAlterMode(&path->counter, 1);
+    case EVT_PATH_DIRECTION_REVERSE:
+        dds3PathBasicControlAlterMode(&path->counter, EVT_PATH_DIRECTION_REVERSE);
         if (target->value != 0) {
             roomNumber = fldCommand_GetHojiID(target->value);
             if (roomNumber > 0)
@@ -896,7 +899,7 @@ s32 evtCommandReattachObjectPath(void) {
     dds3PathBasicControl_t *path;
     Dds3SlotResource *resource;
     s32 targetId;
-    s32 mode;
+    EvtPathDirection direction;
 
     unit = evtSearchBasic(EFF_WORLD_KIND_EFFECT_TRANSFORM, scrGetIntPara(0));
     if (unit == NULL) {
@@ -933,13 +936,13 @@ s32 evtCommandReattachObjectPath(void) {
     if (path == 0) {
         return 1;
     }
-    mode = scrGetIntPara(2);
-    switch (mode) {
-    case 0:
-        dds3PathBasicControlAlterMode(&path->counter, 0);
+    direction = scrGetIntPara(2);
+    switch (direction) {
+    case EVT_PATH_DIRECTION_FORWARD:
+        dds3PathBasicControlAlterMode(&path->counter, EVT_PATH_DIRECTION_FORWARD);
         break;
-    case 1:
-        dds3PathBasicControlAlterMode(&path->counter, 1);
+    case EVT_PATH_DIRECTION_REVERSE:
+        dds3PathBasicControlAlterMode(&path->counter, EVT_PATH_DIRECTION_REVERSE);
         break;
     }
     return 1;
@@ -1218,11 +1221,11 @@ s32 evtCommand_PATH_RATE(void) {
     return 1;
 }
 
-/* Apply the integer state and update a positive parsed room number's flag.
- * Unlike the float command, an integer value of zero sets the room flag. */
+/* Apply the path direction and update the positive room's traversal flag. */
 s32 evtCommand_PATH_DIR(void) {
     dds3Basic_t *worldNode;
     s32 roomNumber;
+    EvtPathDirection direction;
     const char *roomName;
     EffWorldKind worldKind = EFF_WORLD_KIND_CAMERA;
 
@@ -1236,14 +1239,15 @@ s32 evtCommand_PATH_DIR(void) {
             return 1;
         }
     }
-    evtPathDir(worldNode, scrGetIntPara(1));
+    direction = scrGetIntPara(1);
+    evtPathDir(worldNode, direction);
     roomName = worldNode->value;
     if (roomName == 0) {
         return 1;
     }
     roomNumber = fldCommand_GetHojiID(roomName);
     if (roomNumber > 0) {
-        if (scrGetIntPara(1) == 0) {
+        if (scrGetIntPara(1) == EVT_PATH_DIRECTION_FORWARD) {
             fldSetMapSlotValueFlag(fldGlobalBase.area, fldGlobalBase.floor + 1, roomNumber, 1);
         } else {
             fldSetMapSlotValueFlag(fldGlobalBase.area, fldGlobalBase.floor + 1, roomNumber, 0);
