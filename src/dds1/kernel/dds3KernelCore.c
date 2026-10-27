@@ -275,23 +275,24 @@ void dds3EndingProcess(void)
     }
 }
 
-void ChangeProcessFlagChild(s32 setFlags, dds3ProcessID_t* task, u32 flags)
+void ChangeProcessFlagChild(KwlnTaskFlagUpdateAction action, dds3ProcessID_t* task, u32 flags)
 {
     dds3ProcessID_t* child;
 
-    if (setFlags != 0) {
+    if (action != KWLN_TASK_FLAG_UPDATE_CLEAR) {
         task->flags |= flags & KWLN_TASK_MUTABLE_FLAGS_MASK;
     } else {
         task->flags &= ~(flags & KWLN_TASK_MUTABLE_FLAGS_MASK);
     }
     child = task->childList;
     while (child != 0) {
-        ChangeProcessFlagChild(setFlags, child, flags);
+        ChangeProcessFlagChild(action, child, flags);
         child = child->nextSibling;
     }
 }
 
-void ChangeProcessFlag(s32 setFlags, dds3ProcessID_t *task, u32 flags, KwlnTaskFlagScope scopeArg)
+void ChangeProcessFlag(KwlnTaskFlagUpdateAction action, dds3ProcessID_t *task, u32 flags,
+                       KwlnTaskFlagScope scopeArg)
 {
     dds3ProcessID_t *node = NULL;
     s32 state;
@@ -299,7 +300,7 @@ void ChangeProcessFlag(s32 setFlags, dds3ProcessID_t *task, u32 flags, KwlnTaskF
 
     switch (scope) {
     case KWLN_TASK_FLAG_SCOPE_TARGET:
-        if (setFlags != 0) {
+        if (action != KWLN_TASK_FLAG_UPDATE_CLEAR) {
             task->flags |= flags & KWLN_TASK_MUTABLE_FLAGS_MASK;
         } else {
             task->flags &= ~(flags & KWLN_TASK_MUTABLE_FLAGS_MASK);
@@ -325,7 +326,7 @@ void ChangeProcessFlag(s32 setFlags, dds3ProcessID_t *task, u32 flags, KwlnTaskF
                 while (node != NULL) {
                     if ((node != task && scope == KWLN_TASK_FLAG_SCOPE_OTHER_QUEUED_TASKS) ||
                         scope == KWLN_TASK_FLAG_SCOPE_ALL_QUEUED_TASKS) {
-                        if (setFlags != 0) {
+                        if (action != KWLN_TASK_FLAG_UPDATE_CLEAR) {
                             node->flags |= setMask;
                         } else {
                             node->flags &= ~setMask;
@@ -337,7 +338,7 @@ void ChangeProcessFlag(s32 setFlags, dds3ProcessID_t *task, u32 flags, KwlnTaskF
         }
         return;
     case KWLN_TASK_FLAG_SCOPE_SUBTREE:
-        ChangeProcessFlagChild(setFlags, task, flags);
+        ChangeProcessFlagChild(action, task, flags);
         break;
     }
 }

@@ -17,8 +17,16 @@ typedef enum KwlnTaskFlagScope {
     KWLN_TASK_FLAG_SCOPE_ALL_QUEUED_TASKS = 3
 } KwlnTaskFlagScope;
 
+/* The dispatcher clears for CLEAR and sets for any nonzero action. */
+typedef s32 KwlnTaskFlagUpdateAction;
+enum {
+    KWLN_TASK_FLAG_UPDATE_CLEAR = 0,
+    KWLN_TASK_FLAG_UPDATE_SET = 1
+};
+
 /* Subtree includes the target; queued scopes visit all three scheduler queues. */
-void ChangeProcessFlag(s32 setFlags, dds3ProcessID_t *task, u32 flags, KwlnTaskFlagScope scope);
+void ChangeProcessFlag(KwlnTaskFlagUpdateAction action, dds3ProcessID_t *task,
+                       u32 flags, KwlnTaskFlagScope scope);
 void dds3SetProcessFlag(dds3ProcessID_t *object, u32 mask, KwlnTaskFlagScope scope);
 void dds3ResetProcessFlag(dds3ProcessID_t *object, u32 mask, KwlnTaskFlagScope scope);
 
