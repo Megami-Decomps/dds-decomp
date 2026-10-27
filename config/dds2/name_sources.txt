@@ -1199,7 +1199,7 @@
 0x00144270	fldInputPanelSetDraw	inferred	SMT3HD name via SLUS_209.11 0x001444A8, reloc-identical; was fldSetTitleBannerPending
 0x001442A0	fldInputPanelSetMessage	inferred	SMT3HD name via SLUS_209.11 0x001444D8, reloc-identical; was fldSetTitleBannerChoice
 0x001442D0	fldResolvePendingTitleBanner	inferred	confidence=high; Resolves title-banner pending/choice state after scene/input guards, clears pending and starts fade-in; adopts established DDS1 001411F0 name. [PurC readability b2]
-0x00144400	fldFieldTaskUpdate	inferred	task callback: returns 0 always, kicks func_0014B0F8/func_0014D838 unless title/event gates are set
+0x00144400	fldFieldTaskUpdate	inferred	task callback: returns 0 always, kicks fldDrawMapLabelBanner/func_0014D838 unless title/event gates are set
 0x00144498	fldAddressProcess1	inferred	SMT3HD name via SLUS_209.11 0x00144698, reloc-identical; was fldFieldTaskCreate
 0x001444E8	fldAddressShutdown	inferred	SMT3HD name via SLUS_209.11 0x001446E8, shared-hash-in-run; was fldFieldTaskDestroy
 0x00144510	fldInitAddressProcess	inferred	SMT3HD name via SLUS_209.11 0x00144710, reloc-identical; was fldEnsureTask
@@ -1260,6 +1260,7 @@
 0x0014B050	fldDrawAutomapWhenReady	inferred	confidence=high; When AutoMapSeq is exactly1, draws the backdrop and automap scene; invoked by fldProcDraw. DDS1 1470E0 counterpart. [PurC readability b1]
 0x0014B088	fldResetCameraAndSceneView	inferred	DDS1 00147118 twin; re-centers camera and calls scene initialization helper [names_R_FuncNames2.tsv]
 0x0014B0A8	fldClearAllAreaFloorFlags	inferred	DDS1 00147138 twin; zeros 13 x 64 floor flags in save work [names_R_FuncNames2.tsv]
+0x0014B0F8	fldDrawMapLabelBanner	inferred	Draws the current map label banner: fades it by fldGlobalBase.mapBannerFadeMode (in, out, held), skipped for the alternate player model and areas from 200, and draws the label text with fldKanjiDraw.
 0x0014B440	fldLoadFieldEffectTextureSlots	inferred	DDS1 001474A0 twin; loads four named field EPL resources into effect slots [names_R_FuncNames2.tsv]
 0x0014B5D8	fldUpdatePositionedTextureNodes	inferred	Inferred from the current C implementation in game/code_001442D0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x0014B6F0	fldLoadResourceByIndex	inferred	copies the two-entry id table and loads entry [index] with func_00343ED0

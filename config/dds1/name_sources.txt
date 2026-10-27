@@ -1346,6 +1346,7 @@
 0x001470E0	fldDrawAutomapWhenReady	inferred	confidence=high; When AutoMapSeq is exactly1, draws the backdrop and automap scene; invoked by fldProcDraw. DDS2 14B050 counterpart. [PurC readability b1]
 0x00147118	fldResetCameraAndSceneView	inferred	re-centers camera and calls scene initialization helper [names_R_FuncNames2.tsv]
 0x00147138	fldClearAllAreaFloorFlags	inferred	zeros 13 x 64 floor flags in save work [names_R_FuncNames2.tsv]
+0x00147188	fldDrawMapLabelBanner	inferred	Draws the current map label banner: fades it by fldGlobalBase.mapBannerFadeMode (in, out, held), skipped for the alternate player model and areas from 200, and draws the label text with fldKanjiDraw.
 0x001474A0	fldLoadFieldEffectTextureSlots	inferred	loads four named field EPL resources into effect slots [names_R_FuncNames2.tsv]
 0x00147580	fldReleaseTextureSlots	inferred	frees the four D_0034C870/880/890 handle triples
 0x00147638	fldUpdateEffectTextureTransforms	inferred	Inferred from the current C implementation in game/code_001411F0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).

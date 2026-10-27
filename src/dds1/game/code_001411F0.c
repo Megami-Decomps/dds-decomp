@@ -352,7 +352,7 @@ extern u8 fldTitleIsActive(void);
 
 extern void fldDrawAnimatedFieldBanner(s32, s32, s32);
 
-extern void func_00147188(s32);
+extern void fldDrawMapLabelBanner(s32);
 
 extern s32 gFldElvFloorNow;
 
@@ -372,7 +372,7 @@ KwlnTaskUpdateResult fldFieldTaskUpdate(dds3ProcessID_t *task) {
     if (gFldElvFloorNow != -999) {
         fldDrawAnimatedFieldBanner(0x80, 0, 0);
     } else {
-        func_00147188(0);
+        fldDrawMapLabelBanner(0);
     }
     return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
 }
@@ -2601,7 +2601,7 @@ void fldClearAllAreaFloorFlags(void) {
 extern f32 D_003BAEE8;
 extern s32 frFontMeasureTextAdvance(const u8 *, u8, u8);
 extern void fldKanjiDraw(s32 x, s32 y, u32 colors, const u8 *text);
-void func_00147188(s32 unused) {
+void fldDrawMapLabelBanner(s32 unused) {
     FldAreaWork *work;
     s32 mode;
     s32 map;

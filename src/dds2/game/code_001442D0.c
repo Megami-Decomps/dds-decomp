@@ -560,7 +560,7 @@ extern s32 gFldElvFloorNow;
 
 extern void fldDrawAnimatedFieldBanner(s32 alpha, s32 x, s32 y);
 
-void func_0014B0F8(); /* no prototype: called here with arguments */
+void fldDrawMapLabelBanner(); /* no prototype: called here with arguments */
 
 KwlnTaskUpdateResult fldFieldTaskUpdate(dds3ProcessID_t *task) {
     if (fldProcCampChk() != FLD_CAMP_CHECK_STATE_ENCOUNTER_FLAG_SET) {
@@ -581,7 +581,7 @@ KwlnTaskUpdateResult fldFieldTaskUpdate(dds3ProcessID_t *task) {
     if (gFldElvFloorNow != -0x3e7) {
         fldDrawAnimatedFieldBanner(0x80, 0, 0);
     } else {
-        func_0014B0F8(0);
+        fldDrawMapLabelBanner(0);
     }
     return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
 }
@@ -2979,7 +2979,7 @@ static inline f32 fldBannerCoordinate(f32 progress, f32 hidden, f32 shown) {
     return progress * shown + (1.0f - progress) * hidden;
 }
 
-void func_0014B0F8(void) {
+void fldDrawMapLabelBanner(void) {
     f32 progress;
     s32 x, y;
     FldSecondaryMapLabelRecordIndex secondaryLabelIndex;
