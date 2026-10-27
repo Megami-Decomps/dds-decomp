@@ -30,7 +30,6 @@ void itfMesMngMarkBitStat(ItfMesWindowIndex window, ItfMesHighStatusBits mask);
 void itfMesMngClearBitStat(ItfMesWindowIndex window, ItfMesHighStatusBits mask);
 void itfMesMngSetMaskSelect(ItfMesWindowIndex window, u32 panelMask);
 void itfMesMngSetSelect(ItfMesWindowIndex window, ItfMesOptionBitIndex selectedBitIndex);
-void itfMesMngChangeWindowType(ItfMesWindowIndex window, s32 firstValue, s32 secondValue);
 void itfMesMngSetKutiCallback(ItfMesWindowIndex window, void (*callback)(void));
 void itfMesMngMsgWndCls(ItfMesWindowIndex window);
 void evtLipsExecFunction(s32 unitUniqueId, s32 motionId);

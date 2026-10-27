@@ -6,6 +6,7 @@
 #include "snd_sequence_volume_pan.h"
 #include "snd_pad.h"
 #include "itf_mes_window.h"
+#include "itf_mes_panel_mode.h"
 #include "sdf_packet_list.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
@@ -146,14 +147,15 @@ void itfInitializeCursorResetState(ItfMesBlk40 *cursor) {
     cursor->optionCount = 0;
 }
 
-void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *block, s32 panelMode, s32 fadeLimit);
+void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *block, ItfMesPanelMode panelMode,
+    ItfMesPanelFadeLimit fadeLimit);
 
 
 void itfResetWindowResourceBlock(ItfMesBlkA4 *block) {
     block->frame = NULL;
     block->sprite = NULL;
     block->overlay = NULL;
-    itfMesConfigurePanelBoundsAndFadeLimit(block, 0, 0);
+    itfMesConfigurePanelBoundsAndFadeLimit(block, ITF_MES_PANEL_MODE_STANDARD, 0);
 }
 
 void InitializeVariable(ItfMesTextSlots *slots) {
@@ -236,7 +238,8 @@ u16 *txtFormatNumberU16(s32 number, u16 *out) {
 
 /* Select the message panel's bounds by layout mode (2 is the wide panel) and
  * reset its fade channels; nonpositive limits default to 0x80. */
-void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *block, s32 panelMode, s32 fadeLimit) {
+void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *block, ItfMesPanelMode panelMode,
+    ItfMesPanelFadeLimit fadeLimit) {
     switch (panelMode) {
     default:
         block->bounds[0] = -0x390;
@@ -248,7 +251,7 @@ void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *block, s32 panelMode, s
         block->blue = 0x80;
         block->fadeLimit = fadeLimit > 0 ? fadeLimit : 0x80;
         break;
-    case 1:
+    case ITF_MES_PANEL_MODE_STANDARD_VARIANT:
         block->bounds[0] = -0x390;
         block->bounds[1] = -0x80;
         block->bounds[2] = 0x1A30;
@@ -258,7 +261,7 @@ void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *block, s32 panelMode, s
         block->blue = 0x80;
         block->fadeLimit = fadeLimit > 0 ? fadeLimit : 0x80;
         break;
-    case 2:
+    case ITF_MES_PANEL_MODE_WIDE:
         block->bounds[0] = -0x610;
         block->bounds[1] = -0x80;
         block->bounds[2] = 0x1CB0;
@@ -293,14 +296,15 @@ void itfMesUpdatePanelFades(instanceMes_tag *panel) {
     switch (transition) {
     case 0x100:
         sprite->alpha += 24;
-        if (sprite->alpha >= place->fadeLimit || panel->panelMode == 3) {
+        if (sprite->alpha >= place->fadeLimit ||
+            panel->panelMode == ITF_MES_PANEL_MODE_NO_SPRITE_TRANSITION) {
             sprite->alpha = place->fadeLimit;
             panel->flags = (panel->flags & ~0x307) | 0x203;
         }
         break;
     case 0x300:
         sprite->alpha -= 8;
-        if (sprite->alpha <= 0 || panel->panelMode == 3) {
+        if (sprite->alpha <= 0 || panel->panelMode == ITF_MES_PANEL_MODE_NO_SPRITE_TRANSITION) {
             sprite->alpha = 0;
             panel->flags &= ~0x300;
         }
@@ -412,7 +416,7 @@ void itfUpdateSoundSelectionTransition(instanceMes_tag *panel) {
 
     switch (selection->selectionState) {
     case ITF_SOUND_SELECTION_STATE_OPENING:
-        if (panel->panelMode == 3) {
+        if (panel->panelMode == ITF_MES_PANEL_MODE_NO_SPRITE_TRANSITION) {
             selection->selectionState = ITF_SOUND_SELECTION_STATE_INTERACTIVE;
             panel->flags = (flags & ~0x38) | 0x18;
             break;
@@ -651,7 +655,7 @@ void itfUpdateSoundSelectorPanel(instanceMes_tag *panel) {
         itfDrawSoundSelectorFadeLayers(panel);
     }
     if (panel->fade.kind & 2) {
-        if (panel->panelMode == 3) {
+        if (panel->panelMode == ITF_MES_PANEL_MODE_NO_SPRITE_TRANSITION) {
             itfDrawSoundSelectorOptionPanel(panel);
         } else {
             itfDrawSelectedSoundRow(panel);
@@ -666,7 +670,7 @@ void itfMesRenderActivePanelSprites(instanceMes_tag *panel) {
     }
     place = &panel->blkA4;
     if ((panel->flags & 0x300) >= 0x100) {
-        if (panel->panelMode != 3) {
+        if (panel->panelMode != ITF_MES_PANEL_MODE_NO_SPRITE_TRANSITION) {
             itfPnlDraw(place->sprite, &sdfGrOtTable[panel->drawSurfaceIndex]);
         }
         itfMesMngManager.flags |= 2;

@@ -7,6 +7,7 @@
 #include "kwln_background_fade_api.h"
 #include "snd_sequence_volume_pan.h"
 #include "itf_mes_window.h"
+#include "itf_mes_panel_mode.h"
 #include "sdf_packet_list.h"
 #include "sdf_resource.h"
 #include "evt_viewer.h"
@@ -5224,7 +5225,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
 
     /* 002409AC..00240A84: message track exists only for a live populated window. */
     if (work->messageManagerHandle != -1 && itfMesGetEntryCount(work->messageManagerHandle) != 0) {
-        itfMesMngChangeWindowType(work->messageManagerHandle, 3, 0);
+        itfMesMngChangeWindowType(work->messageManagerHandle, ITF_MES_PANEL_MODE_NO_SPRITE_TRANSITION, 0);
         group = evtEventViewerCreateEntry(4, runtime);
         for (row = 0; row < (s32)work->subEntry4Count; row++) {
             if (evtGetRowValue(work, row) == 4) {

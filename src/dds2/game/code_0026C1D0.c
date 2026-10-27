@@ -14,6 +14,7 @@
 #include "kwln_task_state.h"
 #include "kwln_task_state_query.h"
 #include "itf_mes_window.h"
+#include "itf_mes_panel_mode.h"
 #include "itf_mes_entry_start_api.h"
 #include "evt_world.h"
 #include "sdf_resource.h"
@@ -228,7 +229,7 @@ extern ItfMesWindowIndex itfMesMngInitialize(struct ItfMesSub *);
 s32 fclInitMessage(struct ItfMesSub *definition) {
     if (gMsgID < 0) {
         gMsgID = itfMesMngInitialize(definition);
-        itfMesMngChangeWindowType(gMsgID, 2, 0);
+        itfMesMngChangeWindowType(gMsgID, ITF_MES_PANEL_MODE_WIDE, 0);
         return 1;
     }
     return 0;
@@ -239,7 +240,7 @@ EvtMessageWindowPageValueResult evtSetMessageWindowPageValue(s32 pageValue) {
     if (gMsgID < 0) {
         return EVT_MESSAGE_WINDOW_PAGE_VALUE_NO_WINDOW;
     }
-    itfMesMngChangeWindowType(gMsgID, 0, pageValue);
+    itfMesMngChangeWindowType(gMsgID, ITF_MES_PANEL_MODE_STANDARD, pageValue);
     return EVT_MESSAGE_WINDOW_PAGE_VALUE_UPDATED;
 }
 

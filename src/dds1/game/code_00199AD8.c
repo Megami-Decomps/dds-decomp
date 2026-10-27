@@ -6,6 +6,7 @@
 #include "sdf_packet_list.h"
 #include "itf.h"
 #include "itf_mes_window.h"
+#include "itf_mes_panel_mode.h"
 #include "itf_mes_entry_start_api.h"
 #include "sdf.h"
 #include "itf_panel_draw.h"
@@ -653,7 +654,7 @@ s32 itfPanelAcquireHold(void) {
     hold->unk4 = -1;
     hold->entryEndFrame = -1;
     hold->queuedCount = 0;
-    itfMesMngChangeWindowType(window, 3, 0);
+    itfMesMngChangeWindowType(window, ITF_MES_PANEL_MODE_NO_SPRITE_TRANSITION, 0);
     return 1;
 }
 
@@ -789,7 +790,7 @@ s32 itfCommandSelectOptionWithFade(void) {
         return 0;
     }
     if (elapsedTicks == ITF_PANEL_MESSAGE_FADE_TICKS) {
-        itfMesMngChangeWindowType(window, 3, 0);
+        itfMesMngChangeWindowType(window, ITF_MES_PANEL_MODE_NO_SPRITE_TRANSITION, 0);
     } else if (D_003BD820 == -1) {
         record = pinst[window].ptr;
         entryIndex = scrGetIntPara(0);

@@ -15,6 +15,7 @@
 #include "itf_text_slots_api.h"
 #include "fr_font_glyph_chain_count.h"
 #include "itf_mes_window.h"
+#include "itf_mes_panel_mode.h"
 #include "itf_panel_api.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
@@ -275,26 +276,28 @@ s32 itfMesMngValidateNext(void) {
 /* Refresh the script window with argument 0 and a zero second value; return 1. */
 s32 itfMesMngWindowType(void) {
     ItfMesWindowIndex window = scrGetMessageHandle();
+    ItfMesPanelMode panelMode;
 
     if (window < 0) {
         return 1;
     }
-    itfMesMngChangeWindowType(window, scrGetIntPara(0), 0);
+    panelMode = scrGetIntPara(0);
+    itfMesMngChangeWindowType(window, panelMode, 0);
     return 1;
 }
 
 /* Read both refresh values in order; a negative script window is a no-op. */
 s32 itfMesMngWindowTypeAlpha(void) {
     ItfMesWindowIndex window = scrGetMessageHandle();
-    s32 first;
-    s32 second;
+    ItfMesPanelMode panelMode;
+    ItfMesPanelFadeLimit fadeLimit;
 
     if (window < 0) {
         return 1;
     }
-    first = scrGetIntPara(0);
-    second = scrGetIntPara(1);
-    itfMesMngChangeWindowType(window, first, second);
+    panelMode = scrGetIntPara(0);
+    fadeLimit = scrGetIntPara(1);
+    itfMesMngChangeWindowType(window, panelMode, fadeLimit);
     return 1;
 }
 
@@ -345,7 +348,7 @@ ItfMesWindowIndex itfMesMngInitialize(ItfMesSub *sub) {
     mes->flags = 0;
     mes->drawSurfaceIndex = 0x53;
     mes->renderValue = 0xFFFFF0;
-    mes->panelMode = 0;
+    mes->panelMode = ITF_MES_PANEL_MODE_STANDARD;
     mes->entryGlyphCallback = 0;
     InitializeSpeaker(&mes->blk14, 1);
     InitializeMessage(&mes->entryBlock, 1);
@@ -534,7 +537,7 @@ void itfMesBuildOptionList(ItfMesWindowIndex window, ItfMesEntryIndex entryIndex
     optionBlock->glyphChain = itfMesBuildNodeRows(&table->items[1], table->bitCount, optionBlock->panelValue, optionBlock->x, firstRowY, mes->renderValue);
     optionBlock->rowCount = visibleRowCount;
     mes->flags = (mes->flags & ~ITF_MES_OPTION_STATE_MASK) | ITF_MES_OPTION_LIST_READY;
-    if (mes->panelMode == 3) {
+    if (mes->panelMode == ITF_MES_PANEL_MODE_NO_SPRITE_TRANSITION) {
         itfMesBuildOptionFrame(mes);
     }
     optionBlock->selectionState = ITF_SOUND_SELECTION_STATE_OPENING;
@@ -853,11 +856,13 @@ u8 *itfMesMngGetDataPtrImmediate(ItfMesWindowIndex window, ItfMesEntryIndex entr
     return GetMessagePagePtr(GetTypeHeader(pinst[window].mes, entryIndex)->table, itemIndex);
 }
 
-extern void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *blk, s32 panelMode, s32 fadeLimit);
+extern void itfMesConfigurePanelBoundsAndFadeLimit(ItfMesBlkA4 *blk, ItfMesPanelMode panelMode,
+    ItfMesPanelFadeLimit fadeLimit);
 
 /* Refresh changed panel values only when both content-status pairs are clear.
  * Release the old primitive after applying the panel mode and fade limit. */
-void itfMesMngChangeWindowType(ItfMesWindowIndex window, s32 panelMode, s32 fadeLimit) {
+void itfMesMngChangeWindowType(ItfMesWindowIndex window, ItfMesPanelMode panelMode,
+    ItfMesPanelFadeLimit fadeLimit) {
     instanceMes_tag *mes = pinst[window].mes;
     ItfMesBlkA4 *panelBlock = &mes->blkA4;
 
@@ -1207,7 +1212,7 @@ void itfMesBuildEntryGlyph(instanceMes_tag *mes) {
     }
     glyph = MessageRequestEx((s32)mes->entryBlock.x, (s32)entryBlock->y, entryBlock->color[0], entryBlock->color[1], entryBlock->color[2], entryBlock->color[3],
                           GetMessagePagePtr(entryBlock->table, entryBlock->itemIndex), 0);
-    if (mes->panelMode == 3) {
+    if (mes->panelMode == ITF_MES_PANEL_MODE_NO_SPRITE_TRANSITION) {
         if (frFontCountGlyphChainNodes(glyph) == 1) {
             frFontCenterGlyphChainAt(0x1000, 0xC60, glyph);
         } else {
