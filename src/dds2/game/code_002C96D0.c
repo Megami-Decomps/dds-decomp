@@ -3789,7 +3789,7 @@ FileConfigTask *fileCreateConfigTask(s32 mode) {
     task->backingAllocation = block;
     task->mode = mode;
     task->ticks = 0;
-    task->result = 0;
+    task->state = FILE_CONFIG_TASK_STATE_WAITING_FOR_RESOURCES;
     list = mnuCreateListState(0, 5, 0x23);
     task->frame = list;
     list->drawCallback = fileDrawConfigurationMenuEntry;
@@ -3912,8 +3912,8 @@ s32 fileUpdateConfigurationMenu(dds3ProcessID_t *task) {
     if (GBWK->transitionTicks != 0) {
         GBWK->transitionTicks--;
     }
-    switch (GBWK->result) {
-    case 0:
+    switch (GBWK->state) {
+    case FILE_CONFIG_TASK_STATE_WAITING_FOR_RESOURCES:
         if (GBWK->pending == 0) {
             GBWK->pending = 1;
             for (i = 0; i < 4; i++) {
@@ -3924,33 +3924,33 @@ s32 fileUpdateConfigurationMenu(dds3ProcessID_t *task) {
                 }
             }
         }
-        GBWK->result = 1;
+        GBWK->state = FILE_CONFIG_TASK_STATE_FADING_IN;
         /* fallthrough */
-    case 1:
+    case FILE_CONFIG_TASK_STATE_FADING_IN:
         ticks = GBWK->ticks;
         GBWK->ticks = ticks + 1;
         fade = (f32)ticks / 15.0f;
         GBWK->choiceFade = GBWK->labelFade = fade;
         if (GBWK->ticks >= 16) {
-            GBWK->result = 2;
+            GBWK->state = FILE_CONFIG_TASK_STATE_ACTIVE;
             GBWK->ticks = 0;
             GBWK->choiceFade = GBWK->labelFade = 1.0f;
         }
         break;
-    case 2:
+    case FILE_CONFIG_TASK_STATE_ACTIVE:
         GBWK->ticks++;
         if (GBWK->ticks >= 121) {
             GBWK->ticks = 0;
         }
         break;
-    case 3:
+    case FILE_CONFIG_TASK_STATE_BEGIN_CLOSE:
         if (GBWK->mode == 1) {
             dds3FadeOut(0, 0, 0, 15);
         }
         GBWK->ticks = 0;
-        GBWK->result = 4;
+        GBWK->state = FILE_CONFIG_TASK_STATE_FADING_OUT;
         /* fallthrough */
-    case 4:
+    case FILE_CONFIG_TASK_STATE_FADING_OUT:
         if (GBWK->ticks >= 6) {
             GBWK->labelFade = 0.0f;
         } else {
@@ -3960,14 +3960,14 @@ s32 fileUpdateConfigurationMenu(dds3ProcessID_t *task) {
         GBWK->ticks = ticks + 1;
         GBWK->choiceFade = 1.0f - (f32)ticks / 15.0f;
         if (GBWK->ticks >= 16) {
-            GBWK->result = 5;
+            GBWK->state = FILE_CONFIG_TASK_STATE_CLOSE_COMPLETE;
             GBWK->ticks = 0;
             GBWK->labelFade = 0.0f;
             GBWK->choiceFade = 0.0f;
         }
         return 0;
-    case 5:
-        GBWK->result |= 0x80000000;
+    case FILE_CONFIG_TASK_STATE_CLOSE_COMPLETE:
+        GBWK->state |= FILE_CONFIG_TASK_EXIT_FLAG;
         return -1;
     }
 
@@ -4010,11 +4010,11 @@ s32 fileUpdateConfigurationMenu(dds3ProcessID_t *task) {
     }
     if (dds3PadButtonState[0x21] < 0) {
         if (GBWK->frame->cursor->index == 4) {
-            GBWK->result = 3;
+            GBWK->state = FILE_CONFIG_TASK_STATE_BEGIN_CLOSE;
             p2sdPlaySE(8, 0x7F, 0x3F);
         }
     } else if (dds3PadButtonState[0x23] < 0) {
-        GBWK->result = 3;
+        GBWK->state = FILE_CONFIG_TASK_STATE_BEGIN_CLOSE;
         fileRestoreSlotFlagsToState();
         p2sdPlaySE(10, 0x7F, 0x3F);
     }
@@ -4027,7 +4027,7 @@ s32 fileStartQueuedLoad(dds3ProcessID_t *task) {
     if (GBWK->pending == 0) {
         return 0;
     }
-    if (GBWK->result < 0) {
+    if (GBWK->state < 0) {
         return -1;
     }
     fileDrawConfigurationMenuBackground((void *)GBWK);
@@ -4039,7 +4039,7 @@ s32 fileUpdateConfigOwnerTask(dds3ProcessID_t *task) {
     s32 result;
 
     result = -1;
-    if ((GBWK->result & 0x80000000) == 0) {
+    if ((GBWK->state & FILE_CONFIG_TASK_EXIT_FLAG) == 0) {
         result = 0;
     }
     return result;
@@ -4184,7 +4184,7 @@ void fileDrawConfigurationMenuEntry(s32 x, s32 y, s32 depth, struct MenuList *li
     f32 labelFade;
 
     pulse = 0.0f;
-    if (GBWK->result != 1) {
+    if (GBWK->state != FILE_CONFIG_TASK_STATE_FADING_IN) {
         pulse = (f32)(GBWK->ticks % 120) / 60.0f;
         if (pulse > choiceFade) {
             pulse = 2.0f - pulse;
