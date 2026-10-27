@@ -6,6 +6,7 @@
 #include "kwln_task_create.h"
 #include "kwln_task_runner.h"
 #include "kwln_process_main_result.h"
+#include "fld_file_io_priority_state.h"
 
 extern void kwlnUpdatePadInputState(void);
 
@@ -173,7 +174,7 @@ void dds3SoftResetOff(void) {
 
 extern s16 D_00435BA8;
 extern u16 D_00435BAA;
-extern s8 D_00435BB4;
+extern FldFileIoPriorityState D_00435BB4;
 extern u16 D_00438A1E;
 extern u16 D_00438A24;
 extern u16 dds3VblanksPerFrame;
@@ -194,7 +195,7 @@ void kwlnRunMainLoop(void) {
         sdfWaitVblank(dds3VblanksPerFrame);
         sdfGrReqDrawDelay(dds3VblanksPerFrame - 1);
         sdfPadBuildButtonStates();
-        if (D_00435BB4 != 0) {
+        if (D_00435BB4 != FLD_FILE_IO_PRIORITY_HIGH) {
             sdfFileCmdThreadSetLoPrio();
         }
         if (D_00435B8C == 0) {
@@ -214,7 +215,7 @@ void kwlnRunMainLoop(void) {
             }
         }
         D_00435B84++;
-        if (D_00435BB4 == 0) {
+        if (D_00435BB4 == FLD_FILE_IO_PRIORITY_HIGH) {
             sdfFileCmdThreadSetHiPrio();
         }
     }

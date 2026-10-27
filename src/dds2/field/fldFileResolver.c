@@ -21,6 +21,7 @@
 #include "fld_scene_ready_api.h"
 #include "fld_area_resource_ready_api.h"
 #include "fld_area_resource_request_reuse_api.h"
+#include "fld_file_io_priority_state.h"
 #include "fld_location_coordinate_flags.h"
 #include "fld_scene_record_api.h"
 #include "fld_scene_object_key_result.h"
@@ -487,7 +488,7 @@ extern u32 gFilterAlpha;
 extern FilePacRequest *pFldNextFileDataF2;
 
 
-extern u8 D_00435BB4;
+extern FldFileIoPriorityState D_00435BB4;
 
 extern u32 D_003897E8[];
 
@@ -1257,7 +1258,7 @@ s32 fldRequestAreaResource(s32 area, s32 room) {
         D_00436010 = 0;
     }
     sdfFileCmdThreadSetLoPrio();
-    D_00435BB4 = 1;
+    D_00435BB4 = FLD_FILE_IO_PRIORITY_LOW;
     fldMakeFilePath(directory, area, 1);
     sprintf(path, D_004130D8, directory, area, room);
     pFldNextFileDataF2 = (FilePacRequest *)pacLoad(path);
@@ -1292,7 +1293,7 @@ u32 fldPollAreaResourceLoad(void) {
         if (resourceState == FLD_AREA_RESOURCE_REQUEST_LOAD_PENDING) {
             if (pacCheckEnd((struct FileRequest *)pFldNextFileDataF2) != 0) {
                 fldGlobalBase.resourceFlag = FLD_AREA_RESOURCE_REQUEST_IDLE;
-                D_00435BB4 = 0;
+                D_00435BB4 = FLD_FILE_IO_PRIORITY_HIGH;
             }
         }
     }
