@@ -164,10 +164,7 @@ typedef struct evtUnitHandle_t {
         s16 unused150;               /* Legacy signed view */
         u16 colorFramesRemaining;  /* 0x150: colour interpolation countdown */
     };
-    union {
-        s16 directionMode;         /* Legacy signed view */
-        u16 directionFramesRemaining; /* 0x152: direction interpolation countdown */
-    };
+    u16 directionFramesRemaining; /* 0x152: direction interpolation countdown */
     union {
         u8 pad154[8];
         struct {
@@ -198,10 +195,7 @@ typedef struct evtUnitHandle_t {
         s16 unused1B0;               /* Legacy signed view */
         u16 colorFramesRemaining;  /* 0x1B0: colour interpolation countdown */
     };
-    union {
-        s16 directionMode;         /* Legacy signed view */
-        u16 directionFramesRemaining; /* 0x1B2: direction interpolation countdown */
-    };
+    u16 directionFramesRemaining; /* 0x1B2: direction interpolation countdown */
     union {
         u8 pad1B4[8];
         struct {
@@ -222,11 +216,14 @@ typedef struct evtUnitHandle_t {
 #endif
 } evtUnitHandle_t;
 
+/* Frames remaining for a script-requested event-unit direction transition. */
+typedef s32 EvtUnitDirectionTransitionFrames;
+
 evtUnitHandle_t *evtCreateUnitTransitionWork(dds3Basic_t *effObj, struct dds3ModelHandle_t *owner);
 s32 evtDeleteUnitHandle(evtUnitHandle_t *work);
 
 void evtSetUnitValueTransition(evtUnitHandle_t *unit, dds3Basic_t *target, s32 duration);
-void evtSetUnitLightDir(evtUnitHandle_t *unit, s32 duration);
+void evtSetUnitLightDir(evtUnitHandle_t *unit, EvtUnitDirectionTransitionFrames durationFrames);
 void evtSetUnitColorRGB(evtUnitHandle_t *unit, s32 duration, u32 color);
 void evtSetUnitColorA(evtUnitHandle_t *unit, s32 duration, u32 color);
 void evtUnitLightOn(evtUnitHandle_t *unit);

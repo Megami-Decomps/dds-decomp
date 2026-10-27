@@ -686,8 +686,8 @@ void evtSetUnitLightAndAmbient(evtUnitHandle_t *unit, s32 duration, u32 firstCol
 }
 
 /* vu0 routine: normalize the direction in vf10, store it to vec30, then vf10 from GetBaseLightDir to vec20 */
-void evtSetUnitLightDir(evtUnitHandle_t *unit, s32 directionMode) {
-    unit->directionMode = directionMode;
+void evtSetUnitLightDir(evtUnitHandle_t *unit, EvtUnitDirectionTransitionFrames durationFrames) {
+    unit->directionFramesRemaining = durationFrames;
     SDF_VU0_VECTOR_W_SET_ZERO();
     SDF_VU0_NORMALIZE();
         SDF_VU0_STOREVECTOR_NOMEM(unit->vec30);
@@ -2457,7 +2457,6 @@ u32 evtCommand_MODEL_LIGHT_RGB(void) {
     return 1;
 }
 
-extern void evtSetUnitLightDir(evtUnitHandle_t *unit, s32 index);
 INCLUDE_RODATA(const s32, "event/evtUnitManager", D_003AC480);
 
 const char D_003AC4C0[] = "WARNING: MODEL_LIGHT_DIR length zero\n";
