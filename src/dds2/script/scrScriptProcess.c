@@ -162,7 +162,7 @@ ScrProcedureStartResult scrStartProcessProcedure(scrProcessWork_s *process,
         ScrStackValue *stackValue = process->stackValues;
         ScrStackValueType *stackType = process->stackTypes;
 
-        for (cursor = SCR_STACK_RET; cursor >= 0; cursor--) {
+        for (cursor = SCR_STACK_RETURN_VALUE_SLOT; cursor >= 0; cursor--) {
             *stackType++ = 0;
             stackValue++->bits = 0;
         }

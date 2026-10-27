@@ -18,6 +18,11 @@ struct ItfMesSub;
 typedef s32 ScrProgramCounter;
 typedef s32 ScrGlobalIntegerIndex;
 typedef s32 ScrGlobalFloatIndex;
+typedef s32 ScrStackDepth;
+typedef s32 ScrStackValueIndex;
+
+#define SCR_STACK_STORAGE_SLOT_COUNT 28
+#define SCR_STACK_RETURN_VALUE_SLOT 27
 
 /* Script instruction handler table indices (35 entries in codefunc[]). */
 typedef s16 ScrOpcode;
@@ -127,9 +132,9 @@ typedef char ScrSection_size_must_be_0x10[
 typedef struct scrProcessWork_s {
     char name[24];
     ScrProgramCounter pc;
-    s32 sp;
-    ScrStackValueType stackTypes[28];
-    ScrStackValue stackValues[28];
+    ScrStackDepth sp; /* live stack depth; the next push writes at this index */
+    ScrStackValueType stackTypes[SCR_STACK_STORAGE_SLOT_COUNT];
+    ScrStackValue stackValues[SCR_STACK_STORAGE_SLOT_COUNT];
     /* Borrowed FLW0 source views; the VM reads them but does not edit them. */
     const struct BfFlw0Header *scriptHeader;
     const ScrSection *sections;
@@ -153,6 +158,8 @@ typedef struct scrProcessWork_s {
 
 typedef char ScrData_size_must_be_0xF4[
     (sizeof(scrProcessWork_s) == 0xF4) ? 1 : -1];
+typedef char ScrStack_return_value_slot_must_be_last[
+    (SCR_STACK_RETURN_VALUE_SLOT + 1 == SCR_STACK_STORAGE_SLOT_COUNT) ? 1 : -1];
 typedef char ScrData_scriptHandle_at_0xD8[
     ((u32)&((scrProcessWork_s *)0)->scriptHandle == 0xD8) ? 1 : -1];
 typedef char ScrData_messageWindowIndex_at_0xCC[
@@ -214,6 +221,4 @@ enum {
     SCR_STACK_TYPE_RETURN_ADDRESS = 4,
     SCR_STACK_TYPE_STRING = 5
 };
-#define SCR_STACK_RET 27
-
 #endif /* SCR_H */

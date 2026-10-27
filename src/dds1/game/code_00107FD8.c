@@ -1953,7 +1953,7 @@ scrProcessWork_s *bfContextCreate(const BfFlw0Header *header, const ScrSection *
     process->sp = 0;
     values = process->stackValues;
     types = process->stackTypes;
-    for (i = SCR_STACK_RET; i >= 0; i--) {
+    for (i = SCR_STACK_RETURN_VALUE_SLOT; i >= 0; i--) {
         *types++ = 0;
         values++->bits = 0;
     }

@@ -66,8 +66,8 @@ ScrOpcodeHandlerResult CodeFunc_PushSTR(scrProcessWork_s *scr)
 /* Copy the VM's reserved return slot back onto its active operand stack. */
 ScrOpcodeHandlerResult CodeFunc_PushReg(scrProcessWork_s *scr)
 {
-    scr->stackTypes[scr->sp] = scr->stackTypes[SCR_STACK_RET];
-    scr->stackValues[scr->sp].bits = scr->stackValues[SCR_STACK_RET].bits;
+    scr->stackTypes[scr->sp] = scr->stackTypes[SCR_STACK_RETURN_VALUE_SLOT];
+    scr->stackValues[scr->sp].bits = scr->stackValues[SCR_STACK_RETURN_VALUE_SLOT].bits;
     scr->sp++;
     scr->pc++;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
@@ -518,7 +518,7 @@ ScrTraceResult scrTraceCode(scrProcessWork_s *scr)
  * dereferencing global variable references. */
 ScrVmInteger scrGetIntPara(ScrCommandParameterIndex parameterIndex) {
     scrProcessWork_s *scr = nowpwork;
-    s32 stackIndex = scr->sp - parameterIndex - 1;
+    ScrStackValueIndex stackIndex = scr->sp - parameterIndex - 1;
 
     switch (scr->stackTypes[stackIndex]) {
     case SCR_STACK_TYPE_INTEGER:
@@ -538,7 +538,7 @@ ScrVmInteger scrGetIntPara(ScrCommandParameterIndex parameterIndex) {
 f32 scrGetFloatPara(ScrCommandParameterIndex parameterIndex)
 {
     scrProcessWork_s *scr = nowpwork;
-    s32 stackIndex = scr->sp - parameterIndex - 1;
+    ScrStackValueIndex stackIndex = scr->sp - parameterIndex - 1;
 
     switch (scr->stackTypes[stackIndex]) {
     case SCR_STACK_TYPE_INTEGER:
@@ -559,7 +559,7 @@ f32 scrGetFloatPara(ScrCommandParameterIndex parameterIndex)
 const char *scrGetStrPara(ScrCommandParameterIndex parameterIndex)
 {
     scrProcessWork_s *scr = nowpwork;
-    s32 stackIndex = scr->sp - parameterIndex - 1;
+    ScrStackValueIndex stackIndex = scr->sp - parameterIndex - 1;
     s32 stackType = (s8)scr->stackTypes[stackIndex];
 
     if (stackType >= 0) {
@@ -578,8 +578,8 @@ const char *scrGetStrPara(ScrCommandParameterIndex parameterIndex)
  * have changed it as far as C knows; retail reads it twice. */
 #define SCR_SET_RETURN_VALUE(scr, type, member, value)                   \
     do {                                                                 \
-        (scr)->stackTypes[SCR_STACK_RET] = (type);                       \
-        nowpwork->stackValues[SCR_STACK_RET].member = (value);  \
+        (scr)->stackTypes[SCR_STACK_RETURN_VALUE_SLOT] = (type);          \
+        nowpwork->stackValues[SCR_STACK_RETURN_VALUE_SLOT].member = (value); \
     } while (0)
 
 /* The setters return the context they set the value in, which retail

@@ -71,10 +71,10 @@ void PushRet(scrProcessWork_s *script, ScrProgramCounter returnAddress) {
 
 
 ScrVmInteger PopInt(scrProcessWork_s *script) {
-    s32 stackIndex = script->sp;
+    ScrStackDepth stackDepth = script->sp;
 
-    script->sp = stackIndex - 1;
-    switch (script->stackTypes[stackIndex - 1]) {
+    script->sp = stackDepth - 1;
+    switch (script->stackTypes[stackDepth - 1]) {
     case SCR_STACK_TYPE_INTEGER:
         return script->stackValues[script->sp].integer;
     case SCR_STACK_TYPE_RETURN_ADDRESS:
@@ -90,10 +90,10 @@ ScrVmInteger PopInt(scrProcessWork_s *script) {
 }
 
 f32 PopFloat(scrProcessWork_s *script) {
-    s32 stackIndex = script->sp;
+    ScrStackDepth stackDepth = script->sp;
 
-    script->sp = stackIndex - 1;
-    switch (script->stackTypes[stackIndex - 1]) {
+    script->sp = stackDepth - 1;
+    switch (script->stackTypes[stackDepth - 1]) {
     case SCR_STACK_TYPE_INTEGER:
         return (f32)script->stackValues[script->sp].integer;
     case SCR_STACK_TYPE_RETURN_ADDRESS:
