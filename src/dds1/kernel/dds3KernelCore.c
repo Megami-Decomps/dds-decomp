@@ -153,19 +153,23 @@ KwlnTaskCursorAction RunProcess(dds3ProcessID_t *task) {
 void RunningProcess(void)
 {
     dds3ProcessID_t* active = runninglistf;
-    dds3ProcessID_t* delayed = endinglistf;
+    dds3ProcessID_t* destroyPending = endinglistf;
     dds3ProcessID_t* current;
     /* The two single-queue drains share a predecessor snapshot; the merge
      * keeps its own. A step may unlink the selected node. SMT3 RunningProcess
      * retains the selected-node role (dds3KernelCore.c:591-717). */
     dds3ProcessID_t* drainPrevious;
 
+    /* Ending-queue tasks participate in this priority-ordered update pass.
+     * dds3EndingProcess later decrements positive delays and finalizes at zero;
+     * RunProcess still honors KWLN_TASK_SKIP_UPDATE. */
+
     for (;;) {
         if (active != 0) {
-            if (delayed != 0) {
+            if (destroyPending != 0) {
                 dds3ProcessID_t* previous;
 
-                if (active->priority <= delayed->priority) {
+                if (active->priority <= destroyPending->priority) {
                     current = active;
                     previous = current->listPrev;
                     if (RunProcess(current) != KWLN_TASK_CURSOR_ACTION_RELOAD) {
@@ -174,12 +178,12 @@ void RunningProcess(void)
                         active = previous != 0 ? previous->listNext : runninglistf;
                     }
                 } else {
-                    current = delayed;
+                    current = destroyPending;
                     previous = current->listPrev;
                     if (RunProcess(current) != KWLN_TASK_CURSOR_ACTION_RELOAD) {
-                        delayed = current->listNext;
+                        destroyPending = current->listNext;
                     } else {
-                        delayed = previous != 0 ? previous->listNext : endinglistf;
+                        destroyPending = previous != 0 ? previous->listNext : endinglistf;
                     }
                 }
             } else {
@@ -196,17 +200,17 @@ void RunningProcess(void)
                 return;
             }
         } else {
-            if (delayed != 0) {
+            if (destroyPending != 0) {
 
                 do {
-                    current = delayed;
+                    current = destroyPending;
                     drainPrevious = current->listPrev;
                     if (RunProcess(current) != KWLN_TASK_CURSOR_ACTION_RELOAD) {
-                        delayed = current->listNext;
+                        destroyPending = current->listNext;
                     } else {
-                        delayed = drainPrevious != 0 ? drainPrevious->listNext : endinglistf;
+                        destroyPending = drainPrevious != 0 ? drainPrevious->listNext : endinglistf;
                     }
-                } while (delayed != 0);
+                } while (destroyPending != 0);
             }
             return;
         }
