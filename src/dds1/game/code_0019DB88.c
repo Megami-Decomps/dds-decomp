@@ -21,12 +21,6 @@
 #include "itf_panel_draw.h"
 #include "itf_panel_api.h"
 
-enum {
-    BTL_FADE_PHASE_ALPHA_RISING = 0,
-    BTL_FADE_PHASE_ALPHA_FALLING = 1
-};
-
-
 #include "sdf.h"
 /* Declared before first use (were implicit int). */
 extern void itfMesBuildEntryGlyph(instanceMes_tag *mes);
@@ -185,7 +179,7 @@ void InitializeCurCtr(BtlFade *fade, s32 preserveKind) {
     fade->textAdvanceFrameCount = 0;
 }
 
-void ForceSetCurCtr(BtlFade *fade, s16 phase, s16 alpha, s16 timer) {
+void ForceSetCurCtr(BtlFade *fade, BtlFadePhase phase, s16 alpha, s16 timer) {
     fade->phase = phase;
     fade->alpha = alpha;
     fade->timer = timer;

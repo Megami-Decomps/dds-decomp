@@ -8,11 +8,17 @@
 #include "sdf.h"
 #include "fr_font.h"
 
+typedef s16 BtlFadePhase;
+enum {
+    BTL_FADE_PHASE_ALPHA_RISING = 0,
+    BTL_FADE_PHASE_ALPHA_FALLING = 1
+};
+
 /* Native 0xC-byte fade record shared by message windows and sound UI state. */
 typedef struct BtlFade {
     u8 kind;
     u8 pad1;
-    s16 phase;
+    BtlFadePhase phase;
     s16 alpha;
     s16 timer;
     u32 textAdvanceFrameCount; /* 0x08: entry advances count frames before triangle skip. */

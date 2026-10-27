@@ -39,11 +39,6 @@
 #include "mdl_resource_table.h"
 #include "kwln_task_lifecycle.h"
 
-enum {
-    BTL_FADE_PHASE_ALPHA_RISING = 0,
-    BTL_FADE_PHASE_ALPHA_FALLING = 1
-};
-
 /* Declared before first use (were implicit int). */
 extern s32 GetNumSelectItem(s32 bitCount, u32 remainingMask);
 
@@ -1698,7 +1693,7 @@ void InitializeCurCtr(BtlFade *fade, s32 preserveKind) {
     fade->textAdvanceFrameCount = 0;
 }
 
-void ForceSetCurCtr(BtlFade *fade, s16 phase, s16 alpha, s16 timer) {
+void ForceSetCurCtr(BtlFade *fade, BtlFadePhase phase, s16 alpha, s16 timer) {
     fade->phase = phase;
     fade->alpha = alpha;
     fade->timer = timer;
