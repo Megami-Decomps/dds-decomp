@@ -36,6 +36,7 @@
 #include "btl_state.h"
 #include "btl_action_state_handler.h"
 #include "btl_action_state_selection.h"
+#include "btl_action_state_selection_slot.h"
 #include "btl_model_record.h"
 #include "btl_task_args.h"
 #include "btl_sound.h"
@@ -176,7 +177,7 @@ void btlActionSeqStateSelect(BtlTask *task) {
         btlBossDebugPrintf("btl:actnum 0 [%p]\n", task);
         return;
     }
-    hook = *(BtlActionStateSelectionHook *)((u8 *)work + 0x5FC);
+    hook = ((BtlDds1ActionStateSelectionCallbackWindow *)work->pad5F4)->actionStateSelectionHook;
     if (hook != NULL) {
         next = hook(task);
         if (next != BTL_ACTION_STATE_SELECTION_USE_DEFAULT) {

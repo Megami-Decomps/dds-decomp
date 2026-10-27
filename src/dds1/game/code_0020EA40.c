@@ -7,6 +7,7 @@
 #include "mdl_flag_api.h"
 #include "btl_state.h"
 #include "btl_action_state_selection.h"
+#include "btl_action_state_selection_slot.h"
 #include "btl_command.h"
 #include "btl_action.h"
 #include "dat_state.h"
@@ -374,7 +375,9 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->callback5CC, 0x0, btlGetAdjustedUnitDisplaySpecies);
         BTL_INSTALL_CALLBACK(battle->beforeMotionUpdate, 0x0, btlUpdateRahuEffectActorHeights);
         BTL_INSTALL_CALLBACK(battle->pad5F4, 0x4, func_00206608);
-        BTL_INSTALL_CALLBACK(battle->pad5F4, 0x8, btlGetEffectTaskActorMatchCode);
+        BTL_INSTALL_CALLBACK(
+            ((BtlDds1ActionStateSelectionCallbackWindow *)battle->pad5F4)->actionStateSelectionHook,
+            0x0, btlGetEffectTaskActorMatchCode);
         BTL_INSTALL_CALLBACK(battle->pad5F4, 0x10, btlEffectTaskStartFinale);
         BTL_INSTALL_CALLBACK(battle->preActionHook, 0x0, btlQueueLinkedPairModelSwapTasks);
         BTL_INSTALL_CALLBACK(battle->pad650, 0x0, btlIsEffectActor);
