@@ -55,7 +55,9 @@ struct EffectSlotSet *effLoadIndexedResource(const char *base, const char *name,
 struct EffectSlotSet *effCreateResourceSlotSetFromAllocation(
     struct sdfMemHandle_t *resourceAllocation, u32 keepAllocation);
 
-struct EffectSlotSet *effCreateResourceSlotSet(struct EffectSlotSet *source, u32 slot, u32 count);
+/* The view owns its descriptions/work and borrows source's texture references; source must outlive it. */
+struct EffectSlotSet *effCreateResourceSlotSet(struct EffectSlotSet *borrowedSource,
+                                               u32 slot, u32 count);
 u32 effReleaseSlotWorkAllocation(struct EffectSlotSet *owner);
 void effInitializeAllSlotWork(struct EffectSlotSet *owner);
 void effAttachSlotWorkOwner(struct EffectSlotSet *owner, s32 slotIndex,

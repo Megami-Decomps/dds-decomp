@@ -761,13 +761,13 @@ EffectSlotSet *effCreateResourceSlotSetFromAllocation(struct sdfMemHandle_t *res
     return set;
 }
 
-EffectSlotSet *effCreateResourceSlotSet(EffectSlotSet *source, u32 slot, u32 count) {
+EffectSlotSet *effCreateResourceSlotSet(EffectSlotSet *borrowedSource, u32 slot, u32 count) {
     EffectSlotSet *effect = (EffectSlotSet *)sdfChipAllocDirect(sizeof(EffectSlotSet));
     u32 index = 0;
     effect->sharesTextureReferences = EFF_SLOT_TEXTURE_REFERENCES_BORROWED;
     {
-        u32 mode = source->textureCount;
-        sdfTexHandle_t **textureReferences = source->textureReferences;
+        u32 mode = borrowedSource->textureCount;
+        sdfTexHandle_t **textureReferences = borrowedSource->textureReferences;
         effect->textureCount = mode;
         effect->textureReferences = textureReferences;
     }
@@ -780,7 +780,7 @@ EffectSlotSet *effCreateResourceSlotSet(EffectSlotSet *source, u32 slot, u32 cou
     effect->workEntries = (BdWork *)sdfMemLock(effect->workAllocation);
     if (effect->count != 0) {
         do {
-            memcpy(&effect->descriptions[index], &source->descriptions[slot], 0x80);
+            memcpy(&effect->descriptions[index], &borrowedSource->descriptions[slot], 0x80);
             effResetSlotWork(effect, index);
             index++;
         } while (index < effect->count);
