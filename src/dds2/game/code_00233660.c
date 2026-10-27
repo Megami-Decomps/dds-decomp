@@ -38,6 +38,7 @@
 #include "mdl_flag_api.h"
 #include "mdl_world_object_source_vector_api.h"
 #include "dds3_world_counter.h"
+#include "evt_unit_object_key.h"
 #include "sdf_vu_matrix.h"
 
 #include "pcp_vu0.h"
@@ -3859,10 +3860,10 @@ s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource) {
 
 extern s32 dds3ObjectBaseRegistArea(dds3Basic_t *obj);
 
-s32 evtLoadUnit(s32 slotKind, s32 resource) {
+EvtUnitObjectKey evtLoadUnit(s32 slotKind, s32 resource) {
     f32 pos[4];
     f32 rot[4];
-    s32 world;
+    EvtUnitObjectKey world;
     dds3Basic_t *obj;
 
     memset(pos, 0, 0x10);

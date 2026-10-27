@@ -12,6 +12,7 @@ struct EffNodeDescriptor;
 #include "sdf_chip.h"
 #include "dds3_path.h"
 #include "evt_unit.h"
+#include "evt_unit_object_key.h"
 #include "evt_path_direction.h"
 #include "evt_unit_motion_api.h"
 #include "evt_unit_motion_callback_result.h"
@@ -1136,9 +1137,6 @@ extern evtUnitHandle_t *evtGetUnitHandle(s32 idx);
 extern evtUnitHandle_t *evtWindowMotionUnit;
 extern s32 D_003BBDB0;
 
-extern s32 evtLoadUnit(s32 slotKind, s32 resource);
-
-
 #include "dds3_world_secondary.h"
 extern void evtSetUnitMove1(evtUnitHandle_t *work, s32 motionSubmode, const f32 vector[4], s32 unused, s32 frames, s32 valueB6, EvtUnitMotionCallback callback, s32 unusedLast);
 
@@ -1647,16 +1645,17 @@ u32 evtCommand_MODEL_PLAYER(void) {
     return 1;
 }
 
-u32 evtCommand_MODEL_DSP(void) {
+/* The VM integer slot carries the unit key; this callback result completes the command. */
+ScrCommandResult evtCommand_MODEL_DSP(void) {
     s32 slotKind;
     s32 resource;
-    s32 viewerObjectKey;
+    EvtUnitObjectKey unitObjectKey;
 
     slotKind = scrGetIntPara(0);
     resource = scrGetIntPara(1);
-    viewerObjectKey = evtLoadUnit(slotKind, resource);
-    scrSetIntReturnValue(viewerObjectKey);
-    return 1;
+    unitObjectKey = evtLoadUnit(slotKind, resource);
+    scrSetIntReturnValue(unitObjectKey);
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 u32 evtCommand_MODEL_BE(void) {
