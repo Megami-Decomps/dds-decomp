@@ -35,6 +35,7 @@
 #include "eff_random.h"
 #include "sdf_trig.h"
 #include "snd_pad.h"
+#include "btl_enemy_selection_result.h"
 #include "btl_item_drop.h"
 #include "itf_mes_window.h"
 #include "fr_font_measure.h"
@@ -2504,11 +2505,11 @@ s32 btlDoesEnabledStatusMatchCurrentId(datUnitWork_t *partyRecord, u32 entryId) 
     return mnuGetPartyEntryCurrentId(partyRecord) == entryId;
 }
 
-u32 btlSelectEnemyDropItem(BtlUnit *enemyUnit, s32 mode);
+BtlEnemySelectionResult btlSelectEnemyDropItem(BtlUnit *enemyUnit, s32 mode);
 
 s32 btlSelectActorAction(BtlUnit *actor) {
     s32 selection = btlSelectEnemyDropItem(actor, 1);
-    if (selection == 0) {
+    if (selection == BTL_ENEMY_SELECTION_NONE) {
         selection = (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) ? 2 : 9;
     }
     return selection;
@@ -2540,11 +2541,12 @@ s32 btlIsEventThresholdSatisfiedForEntry(s32 entryValue) {
 extern s32 btlRollAiBucket(void);
 
 
-/* Select an enemy item drop; keep DDS2's party ability bonus and event exclusions. */
-u32 btlSelectEnemyDropItem(BtlUnit *enemyUnit, s32 mode) {
+/* Select a record byte; mode 0 uses it as an item and mode 1 as an action.
+ * Keep DDS2's party ability bonus and event exclusions. */
+BtlEnemySelectionResult btlSelectEnemyDropItem(BtlUnit *enemyUnit, s32 mode) {
     u16 count = 0;
     u16 bonus = 0;
-    u32 selected = 0;
+    BtlEnemySelectionResult selected = BTL_ENEMY_SELECTION_NONE;
     BtlState *battle = (BtlState *)btlGetRuntime();
     DatEnemyRecord *enemy = &datEnemyRecords[enemyUnit->partyRecord.unitId];
     BtlUnit *unit;
@@ -2585,7 +2587,7 @@ u32 btlSelectEnemyDropItem(BtlUnit *enemyUnit, s32 mode) {
             selected = enemy->overrideAction;
         }
     }
-    if (selected == 0) {
+    if (selected == BTL_ENEMY_SELECTION_NONE) {
         total = 0;
         for (index = 0; index < 2; index++) {
             if (enemy->additionalDropItemIds[index] != 0) {
@@ -2700,7 +2702,7 @@ void btlAccumulateEnemyDefeatRewards(BtlUnit *enemy) {
         btlBossDebugPrintf(D_00415238, controller->moneyEarned, amount);
     }
     item = btlSelectEnemyDropItem(enemy, 0);
-    if (item != 0) {
+    if (item != BTL_ENEMY_SELECTION_NONE) {
         btlAddItemDrop(item);
     }
     kind = enemy->partyRecord.unitId;

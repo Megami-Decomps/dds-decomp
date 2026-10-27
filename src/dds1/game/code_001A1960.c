@@ -14,6 +14,7 @@
 #include "btl_effect_position.h"
 #include "eff_random_mod.h"
 #include "eff_random.h"
+#include "btl_enemy_selection_result.h"
 #include "btl_item_drop.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
@@ -1121,11 +1122,11 @@ BtlSpecialAbilityAvailability btlCheckSpecialAbility(
 
 extern EffRandState effSharedRandomState[];
 
-extern s32 btlSelectEnemyDropItem(BtlUnit *actor, s32 mode);
+extern BtlEnemySelectionResult btlSelectEnemyDropItem(BtlUnit *actor, s32 mode);
 
 s32 btlSelectActorAction(BtlUnit *actor) {
     s32 result = btlSelectEnemyDropItem(actor, 1);
-    if (result == 0) {
+    if (result == BTL_ENEMY_SELECTION_NONE) {
         result = (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) != 0 ? 2 : 7;
     }
     return result;
@@ -1133,10 +1134,10 @@ s32 btlSelectActorAction(BtlUnit *actor) {
 
 extern s32 btlRollAiBucket(void);
 
-/* Select an enemy item drop; mode 1 bypasses the story-flag override item. */
-s32 btlSelectEnemyDropItem(BtlUnit *actor, s32 mode) {
+/* Select a record byte; mode 0 uses it as an item, while mode 1 uses it as an action. */
+BtlEnemySelectionResult btlSelectEnemyDropItem(BtlUnit *actor, s32 mode) {
     DatEnemyRecord *enemy = &datEnemyRecords[actor->partyRecord.unitId];
-    s32 item = 0;
+    BtlEnemySelectionResult item = BTL_ENEMY_SELECTION_NONE;
     u16 i;
 
 
@@ -1146,7 +1147,7 @@ s32 btlSelectEnemyDropItem(BtlUnit *actor, s32 mode) {
             item = enemy->overrideAction;
         }
     }
-    for (i = 0; i < 2 && item == 0; i++) {
+    for (i = 0; i < 2 && item == BTL_ENEMY_SELECTION_NONE; i++) {
         if (enemy->additionalDropItemIds[i] != 0 && (u8)btlRollAiBucket() < enemy->actionChances[i]) {
             item = enemy->additionalDropItemIds[i];
         }
@@ -1230,7 +1231,7 @@ void btlAccumulateEnemyDefeatRewards(BtlUnit *enemy) {
         btlBossDebugPrintf(D_003A1830, controller->moneyEarned, amount);
     }
     item = btlSelectEnemyDropItem(enemy, 0);
-    if (item != 0) {
+    if (item != BTL_ENEMY_SELECTION_NONE) {
         btlAddItemDrop(item);
     }
     enemy->status.stateFlags |= 1;
