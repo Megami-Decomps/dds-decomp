@@ -1425,7 +1425,7 @@ void btlAdjustActorEntryCode(BtlUnit *unit, s32 index, s16 delta) {
     unit->entrySlots[index].code = code;
 }
 
-void btlSetActorEntryCode(BtlUnit *unit, s32 index, u16 code) {
+void btlSetActorEntryCode(BtlUnit *unit, s32 index, s16 code) {
     unit->entrySlots[index].code = code;
 }
 
