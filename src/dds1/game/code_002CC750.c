@@ -983,8 +983,7 @@ u8 prfReqCheckGlobalCounter(PrfDds1RequirementSlot *operand) {
     return 1;
 }
 
-extern s32 prfReqEvaluateRules(u32, u32, u16, u32 *);
-s32 prfReqEvaluateRules(u32 state, u32 unitAddress, u16 requirementId, u32 *mismatchCount) {
+s32 prfReqEvaluateRules(u32 state, datUnitWork_t *unit, u16 requirementId, u32 *mismatchCount) {
     PrfDds1RequirementSlot *rules = NULL;
     u32 expected = 0;
     u32 count = 0;
@@ -1013,21 +1012,21 @@ s32 prfReqEvaluateRules(u32 state, u32 unitAddress, u16 requirementId, u32 *mism
     for (i = 0; i < 2; i++) {
         switch (rules[i].operation) {
         case 1:
-            if (ptyHasAllReqProfiles((datUnitWork_t *)unitAddress, &rules[i]) == expected) {
+            if (ptyHasAllReqProfiles(unit, &rules[i]) == expected) {
                 result = expected;
             } else {
                 count++;
             }
             break;
         case 2:
-            if (ptyReqProfileCountAtLeast((datUnitWork_t *)unitAddress, &rules[i]) == expected) {
+            if (ptyReqProfileCountAtLeast(unit, &rules[i]) == expected) {
                 result = expected;
             } else {
                 count++;
             }
             break;
         case 4:
-            if (ptyProfileCountAtLeast((datUnitWork_t *)unitAddress, &rules[i]) == expected) {
+            if (ptyProfileCountAtLeast(unit, &rules[i]) == expected) {
                 result = expected;
             } else {
                 count++;
@@ -1041,7 +1040,7 @@ s32 prfReqEvaluateRules(u32 state, u32 unitAddress, u16 requirementId, u32 *mism
             }
             break;
         case 16:
-            if (prfReqCheckUnitLevel((datUnitWork_t *)unitAddress, &rules[i]) == expected) {
+            if (prfReqCheckUnitLevel(unit, &rules[i]) == expected) {
                 result = expected;
             } else {
                 count++;
@@ -1062,9 +1061,9 @@ s32 prfReqEvaluateRules(u32 state, u32 unitAddress, u16 requirementId, u32 *mism
     return result;
 }
 
-/* Evaluate rules without mismatch-count output; retain DDS1's existing void form. */
-s32 prfCheckRequirementRules(u32 state, u32 operand, u16 requirementId) {
-    return prfReqEvaluateRules(state, operand, requirementId, 0);
+/* Evaluate the selected rule set for a party record without mismatch output. */
+s32 prfCheckRequirementRules(u32 state, datUnitWork_t *unit, u16 requirementId) {
+    return prfReqEvaluateRules(state, unit, requirementId, 0);
 }
 
 /* Read requirement flags for an unchecked profile ID. */
@@ -1094,7 +1093,7 @@ s32 prfReqCheckWithFallback(datUnitWork_t *operand, u16 requirementId) {
 
     requirementId &= SCR_FLAG_ID_MASK;
     if ((prfReq54GetWord1230(requirementId) & PRF_REQUIREMENT_RULES_BIT) != 0) {
-        if (prfReqEvaluateRules(0, (u32)operand, requirementId, &ruleResult) == 0) {
+        if (prfReqEvaluateRules(0, operand, requirementId, &ruleResult) == 0) {
             return ruleResult != 0;
         }
     }

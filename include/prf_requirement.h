@@ -4,6 +4,10 @@
 struct datUnitWork_t;
 
 #ifdef VERSION_DDS1
+/* Evaluate either serialized rule set against the borrowed party record. */
+s32 prfCheckRequirementRules(u32 state, struct datUnitWork_t *unit,
+                             u16 requirementId);
+
 /* DDS1's 0x54-byte requirement row is distinct from the DDS2 rule record.
  * Bits 0x8/0x10 select state 0/1 rule aggregation; other bits remain unknown.
  * State 0 reads two 0x14-byte slots starting at stateZeroFirstOperation. */
