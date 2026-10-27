@@ -9,9 +9,14 @@
 
 struct ItfMesSub;
 
+/* The stored word mixes low-half state with high-half flag bits. */
+typedef u32 ItfMesStatusWord;
+/* Mutators accept only the flag domain stored in the status word's high half. */
+typedef u32 ItfMesHighStatusBits;
+
 ItfMesWindowIndex itfMesMngInitialize(struct ItfMesSub *sub);
 void itfMesMngRelease(ItfMesWindowIndex window);
-u32 itfMesMngGetStat(ItfMesWindowIndex window);
+ItfMesStatusWord itfMesMngGetStat(ItfMesWindowIndex window);
 s16 itfMesMngGetSelect(ItfMesWindowIndex window);
 /* Return the entry's item-list address, NONE, or the BRANCH sentinel. */
 ItfMesEntryItemsResult itfMesGetWindowEntryItems(ItfMesWindowIndex window, ItfMesEntryIndex entryIndex);
@@ -19,10 +24,10 @@ u32 itfMesGetEntryCount(ItfMesWindowIndex window);
 /* Borrow window-owned replacement text; valid until slot replacement or window release. */
 const u8 *itfMesMngGetVar(ItfMesWindowIndex window, s32 slotIndex);
 /* Replace only the high 16 bits, retaining the window's low status bits. */
-void itfMesMngSetStat(ItfMesWindowIndex window, u32 highFlags);
+void itfMesMngSetStat(ItfMesWindowIndex window, ItfMesHighStatusBits highFlags);
 /* Set or clear only bits from the high-half mask. */
-void itfMesMngMarkBitStat(ItfMesWindowIndex window, u32 mask);
-void itfMesMngClearBitStat(ItfMesWindowIndex window, u32 mask);
+void itfMesMngMarkBitStat(ItfMesWindowIndex window, ItfMesHighStatusBits mask);
+void itfMesMngClearBitStat(ItfMesWindowIndex window, ItfMesHighStatusBits mask);
 void itfMesMngSetMaskSelect(ItfMesWindowIndex window, u32 panelMask);
 void itfMesMngSetSelect(ItfMesWindowIndex window, ItfMesOptionBitIndex selectedBitIndex);
 void itfMesMngChangeWindowType(ItfMesWindowIndex window, s32 firstValue, s32 secondValue);

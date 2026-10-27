@@ -679,12 +679,12 @@ void itfMesMngSetPriority(ItfMesWindowIndex window, s32 renderValue) {
 }
 
 /* Return the complete status/flag word, not just its high-half flags. */
-u32 itfMesMngGetStat(ItfMesWindowIndex window) {
+ItfMesStatusWord itfMesMngGetStat(ItfMesWindowIndex window) {
     return pinst[window].mes->flags;
 }
 
 /* Replace only the high half, preserving the existing low-half cast. */
-void itfMesMngSetStat(ItfMesWindowIndex window, u32 highFlags) {
+void itfMesMngSetStat(ItfMesWindowIndex window, ItfMesHighStatusBits highFlags) {
     instanceMes_tag *mes;
 
     mes = pinst[window].mes;
@@ -692,7 +692,7 @@ void itfMesMngSetStat(ItfMesWindowIndex window, u32 highFlags) {
 }
 
 /* Set only high-half mask bits; low-half status is unchanged. */
-void itfMesMngMarkBitStat(ItfMesWindowIndex window, u32 mask) {
+void itfMesMngMarkBitStat(ItfMesWindowIndex window, ItfMesHighStatusBits mask) {
     instanceMes_tag *mes;
 
     mes = pinst[window].mes;
@@ -700,7 +700,7 @@ void itfMesMngMarkBitStat(ItfMesWindowIndex window, u32 mask) {
 }
 
 /* Clear only high-half mask bits; low-half status is unchanged. */
-void itfMesMngClearBitStat(ItfMesWindowIndex window, u32 mask) {
+void itfMesMngClearBitStat(ItfMesWindowIndex window, ItfMesHighStatusBits mask) {
     instanceMes_tag *mes;
 
     mes = pinst[window].mes;
