@@ -153,10 +153,8 @@ s32 evtStopMover(struct dds3Basic_t *movie, s32 undo, s32 start, s32 end);
 
 #ifdef VERSION_DDS1
 void evtPolygonMovieClampTime(struct dds3Basic_t *movie, s32 unused, s32 start, s32 end);
-PolyMovieWork *evtGetPolygonMovieWorkData2(s32 eventId, s32 sceneId, s32 mode);
 s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, struct EvtRuntime *viewer);
 #elif VERSION_DDS2
-PolyMovieWork *evtGetPolygonMovieWorkData2(s32 eventId, s32 sceneId, s32 mode);
 s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, struct EvtRuntime *viewer);
 #endif
 

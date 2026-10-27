@@ -13,6 +13,7 @@
 #include "pcp_vu0.h"
 #include "fld.h"
 #include "evt_polygon_movie.h"
+#include "evt_polygon_movie_load_api.h"
 #include "evt_unit.h"
 #include "mdl.h"
 #include "dds3obj.h"
@@ -846,7 +847,7 @@ const char evtMovieResourcesReadyMessage[] = "evtGetPolygonMovieWorkData2:2\n";
 const char evtMovieWorkInitializedMessage[] = "evtGetPolygonMovieWorkData3:3\n";
 
 /* Load or synthesize the three PMD resources for an event scene and bind them to a new work object. */
-PolyMovieWork *evtGetPolygonMovieWorkData2(s32 eventId, s32 sceneId, s32 mode) {
+PolyMovieWork *evtGetPolygonMovieWorkData2(s32 eventId, s32 sceneId, EvtPolygonMovieResourceMode resourceMode) {
     char path1[0x40];
     char path2[0x40];
     char path3[0x40];
@@ -865,12 +866,12 @@ PolyMovieWork *evtGetPolygonMovieWorkData2(s32 eventId, s32 sceneId, s32 mode) {
         return NULL;
     }
     printf(evtMoviePrimaryLoadedMessage);
-    if (mode == 0) {
+    if (resourceMode == EVT_POLYGON_MOVIE_RESOURCE_MODE_LOAD_FILES) {
         handle2 = sdfDevLoadFileEx(path2, &address2.word, 0);
     } else {
         handle2 = evtAllocMovieWork(&address2.header);
     }
-    if (mode == 0 && sdfFileCheckExist(path3) == 1) {
+    if (resourceMode == EVT_POLYGON_MOVIE_RESOURCE_MODE_LOAD_FILES && sdfFileCheckExist(path3) == 1) {
         handle3 = sdfDevLoadFileEx(path3, &address3.word, 0);
         printf(evtMovieTertiaryLoadedMessage);
     } else {

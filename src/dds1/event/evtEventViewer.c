@@ -3829,9 +3829,9 @@ s32 evtViewCmdSelectMode(u32 unused0, u32 unused1, EvtRuntime *viewer) {
                 evtViewerSaveTrackFiles(0, viewer);
                 evtViewerSaveTrackFiles(1, viewer);
             } else if (viewer->inputA == 1) {
-                evtReloadEventViewer(0, viewer);
+                evtReloadEventViewer(EVT_POLYGON_MOVIE_RESOURCE_MODE_LOAD_FILES, viewer);
             } else if (viewer->inputA == 2) {
-                evtReloadEventViewer(1, viewer);
+                evtReloadEventViewer(EVT_POLYGON_MOVIE_RESOURCE_MODE_SYNTHESIZE, viewer);
             }
             applied = 1;
         }

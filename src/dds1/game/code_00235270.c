@@ -36,6 +36,7 @@
 #include "evt_unit_vector_slot.h"
 #include "evt_event_pack.h"
 #include "evt_polygon_movie.h"
+#include "evt_polygon_movie_load_api.h"
 #include "evt_effect_scale_object.h"
 #include "fld.h"
 #include "kwln_task_lifecycle.h"
@@ -5484,7 +5485,7 @@ extern s32 evtFormatPolygonMoviePaths(s32 eventId, s32 sceneId, char *path0, cha
 extern s32 sdfFileCheckExist(const char *path);
 extern void evtFreeStage(void);
 
-s32 evtReloadEventViewer(s32 mode, EvtRuntime *runtime) {
+s32 evtReloadEventViewer(EvtPolygonMovieResourceMode resourceMode, EvtRuntime *runtime) {
     char path0[0x80];
     char path1[0x80];
     char path2[0x80];
@@ -5509,7 +5510,7 @@ s32 evtReloadEventViewer(s32 mode, EvtRuntime *runtime) {
     }
     dds3DrawFlag |= 0x2000000;
     evtFormatPolygonMoviePaths(D_003BBE78, D_003BBE7A, path0, path1, path2);
-    if (mode == 1) {
+    if (resourceMode == EVT_POLYGON_MOVIE_RESOURCE_MODE_SYNTHESIZE) {
         if (sdfFileCheckExist(path0) != 1) {
             return 0;
         }
@@ -5525,7 +5526,7 @@ s32 evtReloadEventViewer(s32 mode, EvtRuntime *runtime) {
     runtime->flags |= 1;
     while (sdfDelayedResrcCheck() != 0) {
     }
-    work = evtGetPolygonMovieWorkData2(D_003BBE78, D_003BBE7A, mode);
+    work = evtGetPolygonMovieWorkData2(D_003BBE78, D_003BBE7A, resourceMode);
     if (work != NULL) {
         runtime->windowContext = work;
         evtPopulateViewerTimelineFromMovie(work, runtime);
