@@ -268,7 +268,7 @@ s32 mnuUpdateStaffRoll(dds3ProcessID_t *task) {
     (void)task;
     switch (mnuMovieWork->phase) {
     case 0:
-        if (mnuPollTitleStreamStateLocked() == 2) {
+        if (mnuPollTitleStreamStateLocked() == MNU_STREAM_LOAD_COPIED) {
             if (sdfDelayedResrcCheck() == 0) {
                 mnuMovieWork->phase = 1;
                 mnuMovieWork->scrollTicks = 0;

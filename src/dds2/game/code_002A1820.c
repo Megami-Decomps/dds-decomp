@@ -37,12 +37,6 @@
 #define MNU_SOUND_BUFFER_BYTES_LARGE 0x38400
 #define MNU_SOUND_BUFFER_BYTES_MEDIUM 0x1C200
 #define MNU_SOUND_BUFFER_BYTES_SMALL 0xE100
-#define MNU_STREAM_LOAD_IDLE 0
-#define MNU_STREAM_LOAD_PENDING 1
-#define MNU_STREAM_LOAD_COPIED 2
-#define MNU_STREAM_COMMIT_READY 3
-#define MNU_STREAM_COMMIT_COMPLETE 4
-
 typedef struct MovieMenuPulse {
     s32 active;
     s32 phase;
@@ -160,7 +154,7 @@ void mnuUpdateTitleAudioStreams(void) {
     s32 tick = D_00437A3C + 1;
     u8 *source;
 
-    if (mnuTitleStreamStatus.control == 1 && mnuTitleStreamStatus.loadState == 4) {
+    if (mnuTitleStreamStatus.control == 1 && mnuTitleStreamStatus.loadState == MNU_STREAM_COMMIT_COMPLETE) {
         if (mnuTitleStreamDecoderState[4] < 31) {
             if (tick < D_00437A38) {
                 D_00437A3C = tick;
@@ -299,7 +293,7 @@ void mnuInitializeTitleAudioStreams(void) {
     mnuTitleStreamStatus.allocation = 0;
     mnuTitleStreamStatus.samples = (s16 *)mnuTitleAudioSilenceBuffer;
     mnuTitleStreamStatus.decoder = mnuTitleStreamDecoderState;
-    mnuTitleStreamStatus.loadState = 0;
+    mnuTitleStreamStatus.loadState = MNU_STREAM_LOAD_IDLE;
 
     mnuTitleSoundBufferState.control = 2;
     mnuTitleSoundBufferState.compressedData = 0;
@@ -307,7 +301,7 @@ void mnuInitializeTitleAudioStreams(void) {
     mnuTitleSoundBufferState.allocation = 0;
     mnuTitleSoundBufferState.samples = (s16 *)mnuTitleAudioSilenceBuffer;
     mnuTitleSoundBufferState.decoder = mnuTitleSoundBufferDecoderState;
-    mnuTitleSoundBufferState.loadState = 0;
+    mnuTitleSoundBufferState.loadState = MNU_STREAM_LOAD_IDLE;
 
     mnuInitTitleSoundRemoteRequest(0x400);
 
@@ -356,7 +350,7 @@ void mnuLoadTitleStreamFrameData(char *filePath, TitleAudioStreamState *streamSt
 
 void mnuStoreTaskResult(char *audioPath) {
     mnuTitleStreamFileRequest = fileLoad(audioPath);
-    mnuTitleStreamStatus.loadState = 1;
+    mnuTitleStreamStatus.loadState = MNU_STREAM_LOAD_PENDING;
 }
 
 
@@ -459,7 +453,7 @@ void mnuQueueTitleSoundStreamEntry(s32 soundEntryIndex) {
 }
 
 /* Poll a pending file without acquiring the semaphore in this entry point. */
-u32 mnuUpdateTitleTransition(void) {
+MnuTitleStreamLoadState mnuUpdateTitleTransition(void) {
     if (mnuTitleStreamStatus.loadState == MNU_STREAM_LOAD_PENDING) {
         mnuCompleteTitleStreamFileLoad(&mnuTitleStreamStatus);
     }
@@ -467,7 +461,7 @@ u32 mnuUpdateTitleTransition(void) {
 }
 
 /* Poll under the semaphore, but retain the native load-state read after unlock. */
-s32 mnuPollTitleStreamStateLocked(void) {
+MnuTitleStreamLoadState mnuPollTitleStreamStateLocked(void) {
     WaitSema(mnuTitleStreamSemaphore);
     if (mnuTitleStreamStatus.loadState == MNU_STREAM_LOAD_PENDING) {
         mnuCompleteTitleStreamFileLoad(&mnuTitleStreamStatus);

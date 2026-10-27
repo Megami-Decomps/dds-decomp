@@ -4879,7 +4879,7 @@ void fldUpdateSparkMessageSequence(void) {
             dds3StartBEDEffectObjectBasic(fldSparkControlState.object, 0);
         }
         fldSparkControlState.state.dialogTimer++;
-        if (mnuPollTitleStreamStateLocked() == 2) {
+        if (mnuPollTitleStreamStateLocked() == MNU_STREAM_LOAD_COPIED) {
             p2sdPlaySE(0x670010, 0x7F, 0x3F);
             fldSparkControlState.state.dialogPhase = FLD_SPARK_DIALOG_PHASE_PLAY_EVENT;
         }

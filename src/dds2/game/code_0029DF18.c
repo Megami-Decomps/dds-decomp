@@ -795,12 +795,6 @@ s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *work, BrsProgressRow *prog
 #define MNU_SOUND_BUFFER_BYTES_SMALL 0xE100
 
 
-#define MNU_STREAM_LOAD_IDLE 0
-#define MNU_STREAM_LOAD_PENDING 1
-#define MNU_STREAM_LOAD_COPIED 2
-#define MNU_STREAM_COMMIT_READY 3
-#define MNU_STREAM_COMMIT_COMPLETE 4
-
 extern u32 mnuTitleStreamSemaphore;
 
 
@@ -1307,11 +1301,11 @@ u32 sndOpAlwaysSucceeds(void) {
 }
 
 s32 movCheckStartupSoundState(void) {
-    if (mnuPollTitleStreamStateLocked() == 0) {
+    if (mnuPollTitleStreamStateLocked() == MNU_STREAM_LOAD_IDLE) {
         mnuQueueTitleSoundStreamEntry(scrGetIntPara(0));
         return 0;
     }
-    return mnuPollTitleStreamStateLocked() != 1;
+    return mnuPollTitleStreamStateLocked() != MNU_STREAM_LOAD_PENDING;
 }
 
 u32 sndOpResetTitleStreamAfterFileIdle(void) {
@@ -1331,7 +1325,7 @@ u32 mnuAdvanceTitleStreamFromScript(void) {
 }
 
 u8 mnuIsTitleStreamIdle(void) {
-    s32 loadState;
+    MnuTitleStreamLoadState loadState;
 
     loadState = mnuPollTitleStreamStateLocked();
     return loadState == MNU_STREAM_LOAD_IDLE;

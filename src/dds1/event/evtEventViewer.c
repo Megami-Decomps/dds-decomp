@@ -4039,7 +4039,8 @@ KwlnTaskUpdateResult evtViewerAdvanceUpdate(dds3ProcessID_t *task) {
             dds3DrawFlag |= 0x2000000;
             return 0;
         }
-        if ((u32)(mnuPollTitleStreamStateLocked() - 3) < 2) {
+        if ((u32)(mnuPollTitleStreamStateLocked() - MNU_STREAM_COMMIT_READY) <
+            MNU_STREAM_COMMIT_COMPLETE - MNU_STREAM_COMMIT_READY + 1) {
             if (viewer->titleStreamWaitFrames == 0x78) {
                 mnuMarkTitleStreamResetPending();
             }

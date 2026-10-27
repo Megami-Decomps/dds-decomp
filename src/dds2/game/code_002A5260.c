@@ -1139,13 +1139,13 @@ void mnuUpdateStaffRollStreamState(void)
     }
     if (D_00437AB8 == 4) {
         switch (mnuPollTitleStreamStateLocked()) {
-        case 0: /* MNU_STREAM_LOAD_IDLE */
+        case MNU_STREAM_LOAD_IDLE:
             mnuMovieWork->streamPhase = 2;
             mnuQueueTitleSoundStreamEntry(23);
             break;
-        case 1: /* MNU_STREAM_LOAD_PENDING */
+        case MNU_STREAM_LOAD_PENDING:
             break;
-        case 2: /* MNU_STREAM_LOAD_COPIED */
+        case MNU_STREAM_LOAD_COPIED:
             mnuMovieWork->streamPhase = 3;
             mnuResetTitleStreamAfterFileIdle();
             break;

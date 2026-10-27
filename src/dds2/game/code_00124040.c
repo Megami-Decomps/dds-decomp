@@ -2229,7 +2229,7 @@ KwlnTaskUpdateResult fldUpdateFieldSceneTask(dds3ProcessID_t *task) {
     fldPollAreaResourceLoad();
     if (controller->phase == FLD_SEQUENCE_PHASE_INITIALIZE) {
         if (fldGetNextFileLoadState() == FLD_NEXT_FILE_LOAD_PENDING) return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
-        if (D_00389874[0] == 0 && mnuPollTitleStreamStateLocked() != 0) {
+        if (D_00389874[0] == 0 && mnuPollTitleStreamStateLocked() != MNU_STREAM_LOAD_IDLE) {
             mnuMarkTitleStreamResetPending();
             mnuResetTitleStreamLocked();
             return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
