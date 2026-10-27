@@ -200,7 +200,7 @@ void fldBattleSceneEnterInit(u8 *scene) {
         dds3FadeOut(0xFF, 0xFF, 0xFF, 0);
     }
     if (btlRollMajinEncounter() == 0) {
-        if (btlRollSurpriseAttack() == 0) {
+        if (btlRollSurpriseAttack() == BTL_SURPRISE_ATTACK_NOT_TRIGGERED) {
             ((BtlState *)scene)->encounterKind = 0;
         } else {
             ((BtlState *)scene)->encounterKind = 2;

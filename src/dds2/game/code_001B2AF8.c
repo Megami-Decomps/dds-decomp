@@ -1052,7 +1052,7 @@ extern const char D_004157C8[];
 /* The empty native provider still receives the calculated chance word. */
 extern void btlSurpriseChanceHook();
 
-s32 btlRollSurpriseAttack(void) {
+BtlSurpriseAttackResult btlRollSurpriseAttack(void) {
     f32 levelScale[9];
     BtlState *state;
     u32 partyLevel;
@@ -1066,16 +1066,16 @@ s32 btlRollSurpriseAttack(void) {
     memcpy(levelScale, D_004157A0, sizeof(levelScale));
     state = (BtlState *)btlGetRuntime();
     if (evtBitCheck(0x820)) {
-        return 0;
+        return BTL_SURPRISE_ATTACK_NOT_TRIGGERED;
     }
     if (datBattleSceneRecords[state->battleMode].flags & 0x200) {
-        return 1;
+        return BTL_SURPRISE_ATTACK_TRIGGERED;
     }
     if (datBattleSceneRecords[state->battleMode].flags & 0x100) {
-        return 0;
+        return BTL_SURPRISE_ATTACK_NOT_TRIGGERED;
     }
     if (state->specialEncounterBlocked) {
-        return 1;
+        return BTL_SURPRISE_ATTACK_TRIGGERED;
     }
     partyLevel = 0;
     count = 0;
@@ -1131,7 +1131,8 @@ s32 btlRollSurpriseAttack(void) {
     chance = (s32)((f32)chance * ratio);
     btlBossDebugPrintf(D_004157C8, chance, difference, ratio);
     btlSurpriseChanceHook(chance);
-    return btlRollAiBucket() < chance;
+    return btlRollAiBucket() < chance ? BTL_SURPRISE_ATTACK_TRIGGERED
+                                      : BTL_SURPRISE_ATTACK_NOT_TRIGGERED;
 }
 
 void btlClearUnitStatusMask(void) {

@@ -188,7 +188,7 @@ void fldBattleSceneEnterInit(u8 *scene) {
         work->subFlags |= 8;
         dds3FadeOut(0xFF, 0xFF, 0xFF, 0);
     }
-    if (btlRollSurpriseAttack() != 0) {
+    if (btlRollSurpriseAttack() != BTL_SURPRISE_ATTACK_NOT_TRIGGERED) {
         work->encounterKind = 2;
     } else {
         work->encounterKind = 0;

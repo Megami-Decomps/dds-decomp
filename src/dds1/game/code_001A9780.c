@@ -277,7 +277,7 @@ extern const char D_003A1D50[];
 extern void btlSurpriseChanceHook(s32 chance);
 
 /* Roll the level/ability-scaled surprise chance, including scene overrides. */
-s32 btlRollSurpriseAttack(void) {
+BtlSurpriseAttackResult btlRollSurpriseAttack(void) {
     f32 levelScale[9];
     BtlState *state;
     u32 partyLevel;
@@ -291,10 +291,10 @@ s32 btlRollSurpriseAttack(void) {
     memcpy(levelScale, D_003A1D28, sizeof(levelScale));
     state = (BtlState *)btlGetRuntime();
     if (datBattleSceneRecords[state->battleMode].flags & 0x200) {
-        return 1;
+        return BTL_SURPRISE_ATTACK_TRIGGERED;
     }
     if (datBattleSceneRecords[state->battleMode].flags & 0x100) {
-        return 0;
+        return BTL_SURPRISE_ATTACK_NOT_TRIGGERED;
     }
     partyLevel = 0;
     count = 0;
@@ -350,7 +350,8 @@ s32 btlRollSurpriseAttack(void) {
     chance = (s32)((f32)chance * ratio);
     btlBossDebugPrintf(D_003A1D50, chance, difference, ratio);
     btlSurpriseChanceHook(chance);
-    return (s32)btlRollAiBucket() < chance;
+    return (s32)btlRollAiBucket() < chance ? BTL_SURPRISE_ATTACK_TRIGGERED
+                                            : BTL_SURPRISE_ATTACK_NOT_TRIGGERED;
 }
 
 INCLUDE_RODATA(const s32, "game/code_001A9780", D_003A1D28);

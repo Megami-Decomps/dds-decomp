@@ -5,7 +5,15 @@
 
 void btlInitializeBossCallbacks(s32 mode);
 void btlRequestSceneEventResources(void);
-s32 btlRollSurpriseAttack(void);
+
+/* The encounter setup consumes the roll only as a binary surprise decision. */
+typedef s32 BtlSurpriseAttackResult;
+enum {
+    BTL_SURPRISE_ATTACK_NOT_TRIGGERED = 0,
+    BTL_SURPRISE_ATTACK_TRIGGERED = 1,
+};
+
+BtlSurpriseAttackResult btlRollSurpriseAttack(void);
 
 /* One indexed scene row stores its initializer, updater, and behavior flags. */
 typedef struct SceneInitializer {
