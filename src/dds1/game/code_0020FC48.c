@@ -51,6 +51,7 @@
 #include "btl_command.h"
 #include "btl_command_block_reason.h"
 #include "btl_command_target_eligibility.h"
+#include "btl_command_required_entry_match.h"
 #include "btl_model_record.h"
 #include "btl_model_cache_entry.h"
 #include "btl_model_pack_readiness.h"
@@ -905,23 +906,26 @@ BtlCommandTargetEligibilityResult btlGetCommandTargetEligibility(
     return btlDetermineCommandCounterEligibility(entryList, count, indexList, commandId);
 }
 
-/* Checks a command row's required-entry flags against the index list: 0 when not satisfied, 3 when every flagged pair matches. */
-s32 btlCheckCommandRequiredEntryMatches(BtlIndexList *list, s32 row) {
-    s32 result = 0;
+/* Check every required entry code against the selected target list. */
+BtlCommandRequiredEntryMatchResult btlCheckCommandRequiredEntryMatches(
+    BtlIndexList *list, BtlCommandId commandId) {
+    BtlCommandRequiredEntryMatchResult result = BTL_COMMAND_REQUIRED_ENTRY_MATCH_NONE;
     u32 flags;
     u32 mask;
     s32 bit;
     s32 index;
 
-    if (row <= 0) {
+    if (commandId <= 0) {
         return result;
     }
-    flags = datCommandRecords[row].requirementBits;
+    flags = datCommandRecords[commandId].requirementBits;
     if (flags == 0) {
         return result;
     }
     if (flags == 0x800 || flags == 0x1000) {
-        return btlIndexListNoExpiredEntryCodes(list, row) != 0 ? 3 : 0;
+        return btlIndexListNoExpiredEntryCodes(list, commandId) != 0
+            ? BTL_COMMAND_REQUIRED_ENTRY_MATCHED
+            : BTL_COMMAND_REQUIRED_ENTRY_MATCH_NONE;
     }
     for (bit = 0; bit < 0x20; bit++) {
         mask = 1 << bit;
@@ -934,7 +938,7 @@ s32 btlCheckCommandRequiredEntryMatches(BtlIndexList *list, s32 row) {
             }
         }
     }
-    return 3;
+    return BTL_COMMAND_REQUIRED_ENTRY_MATCHED;
 }
 
 /* Counter eligibility for a command against the selected party members. */

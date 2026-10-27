@@ -9,6 +9,7 @@
 #include "btl_effect_position.h"
 #include "eff_offset_if_owner_flag_clear.h"
 #include "btl_command_effect.h"
+#include "btl_command_required_entry_match.h"
 #include "btl_ai_slot.h"
 #include "dds3obj.h"
 #include "btl_resource_name.h"
@@ -486,8 +487,6 @@ s32 btlGetStatusActionEffectId(ActionStateLink *task) {
 
 
 extern BtlCommandEffect btlCommandEffectMappings[];
-extern s32 btlCheckCommandRequiredEntryMatches(BtlIndexList *, s32);
-
 s16 btlGetCommandEffectId(ActionStateLink *link, s32 command) {
     BtlOperandGroup *result = link->indexWork.groups;
     u32 i;
@@ -527,7 +526,8 @@ s16 btlGetCommandEffectId(ActionStateLink *link, s32 command) {
             break;
         }
     }
-    if (btlCheckCommandRequiredEntryMatches(link->indexWork.indices, command) != 0) {
+    if (btlCheckCommandRequiredEntryMatches(link->indexWork.indices, command) !=
+        BTL_COMMAND_REQUIRED_ENTRY_MATCH_NONE) {
         if (datCommandRecords[command].requirementBits == 0x800 ||
             datCommandRecords[command].requirementBits == 0x1000) {
             effect = 0x6A;

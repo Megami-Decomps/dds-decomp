@@ -5,6 +5,7 @@
 #include "btl_effect_position.h"
 #include "eff_offset_if_owner_flag_clear.h"
 #include "btl_command_effect.h"
+#include "btl_command_required_entry_match.h"
 #include "btl_ai_slot.h"
 #include "btl_ai_scratch.h"
 #include "dds3obj.h"
@@ -408,8 +409,6 @@ s32 btlGetStatusActionEffectId(BtlTask *task) {
 }
 
 extern BtlCommandEffect btlCommandEffectMappings[];
-extern s32 btlCheckCommandRequiredEntryMatches(BtlIndexList *, s32);
-
 /* Retained operand groups can suppress the command's effect. */
 s16 btlGetCommandEffectId(BtlTask *task, s32 command) {
     BtlOperandGroup *result = task->indexWork.groups;
@@ -436,7 +435,8 @@ s16 btlGetCommandEffectId(BtlTask *task, s32 command) {
             break;
         }
     }
-    if (btlCheckCommandRequiredEntryMatches(task->indexWork.indices, command) != 0) {
+    if (btlCheckCommandRequiredEntryMatches(task->indexWork.indices, command) !=
+        BTL_COMMAND_REQUIRED_ENTRY_MATCH_NONE) {
         if (datCommandRecords[command].requirementBits == 0x800 ||
             datCommandRecords[command].requirementBits == 0x1000) {
             effect = 0x6A;
