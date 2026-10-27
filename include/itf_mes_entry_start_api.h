@@ -2,6 +2,7 @@
 #define ITF_MES_ENTRY_START_API_H
 
 #include "common.h"
+#include "itf_mes_entry_index.h"
 #include "itf_mes_window_index.h"
 
 /* Outcome reported by starting an entry in a message window. */
@@ -11,6 +12,6 @@ enum {
     ITF_MES_ENTRY_START_STARTED = 1
 };
 
-ItfMesEntryStartResult itfMesStartEntry(ItfMesWindowIndex window, s32 entryIndex, s32 itemIndex);
+ItfMesEntryStartResult itfMesStartEntry(ItfMesWindowIndex window, ItfMesEntryIndex entryIndex, s32 itemIndex);
 
 #endif /* ITF_MES_ENTRY_START_API_H */

@@ -2,6 +2,7 @@
 #define ITF_MES_WINDOW_H
 
 #include "common.h"
+#include "itf_mes_entry_index.h"
 #include "itf_mes_entry_items_result.h"
 #include "itf_option_bit_index_api.h"
 #include "itf_mes_window_index.h"
@@ -13,7 +14,7 @@ void itfMesMngRelease(ItfMesWindowIndex window);
 u32 itfMesMngGetStat(ItfMesWindowIndex window);
 s16 itfMesMngGetSelect(ItfMesWindowIndex window);
 /* Return the entry's item-list address, NONE, or the BRANCH sentinel. */
-ItfMesEntryItemsResult itfMesGetWindowEntryItems(ItfMesWindowIndex window, s32 entryIndex);
+ItfMesEntryItemsResult itfMesGetWindowEntryItems(ItfMesWindowIndex window, ItfMesEntryIndex entryIndex);
 u32 itfMesGetEntryCount(ItfMesWindowIndex window);
 /* Borrow window-owned replacement text; valid until slot replacement or window release. */
 const u8 *itfMesMngGetVar(ItfMesWindowIndex window, s32 slotIndex);

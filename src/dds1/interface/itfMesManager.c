@@ -46,7 +46,7 @@ void itfMesMngRequestMessageRelease(ItfMesWindowIndex window, ItfMesMessageRelea
 
 void itfMesMngRequestSelectRelease(ItfMesWindowIndex window);
 
-ItfMesEntry *GetTypeHeader(instanceMes_tag *mes, s32 entryIndex);
+ItfMesEntry *GetTypeHeader(instanceMes_tag *mes, ItfMesEntryIndex entryIndex);
 
 ItfMesEntry *GetTypeHeader2(ItfMesSub *sub);
 
@@ -368,7 +368,7 @@ void itfMesBuildEntryGlyph(instanceMes_tag *mes);
 
 /* Install an entry's table into the window, rebuild its text glyphs and the
  * selected-item caption, then mark the entry block active. */
-ItfMesEntryStartResult itfMesStartEntry(ItfMesWindowIndex window, s32 entryIndex, s32 itemIndex) {
+ItfMesEntryStartResult itfMesStartEntry(ItfMesWindowIndex window, ItfMesEntryIndex entryIndex, s32 itemIndex) {
     instanceMes_tag *mes = pinst[window].mes;
     ItfMesEntryBlock *entryBlock = &mes->entryBlock;
     ItfMesTable *table = GetTypeHeader(mes, entryIndex)->table;
@@ -433,7 +433,7 @@ extern s32 itfInitTextDrawArgs(const u8 *encodedText, _FRQ *sub);
 
 /* Cache the selected table and narrowed item index, then initialize its text.
  * Empty tables return 0; nonempty tables return the text initializer's result. */
-s32 itfMesSelectTableItemText(ItfMesWindowIndex window, s32 entryIndex, s32 itemIndex) {
+s32 itfMesSelectTableItemText(ItfMesWindowIndex window, ItfMesEntryIndex entryIndex, s32 itemIndex) {
     instanceMes_tag *mes = pinst[window].mes;
     ItfMesTable *table = GetTypeHeader(mes, entryIndex)->table;
     ItfMesEntryBlock *entryBlock = &mes->entryBlock;
@@ -512,7 +512,7 @@ extern s32 GetNumSelectItem(s32 bitCount, u32 remainingMask);
 
 /* Replace the option glyph chain with rows selected by clear panel-mask bits.
  * Item zero is skipped; mode 3 additionally builds the surrounding frame. */
-void itfMesBuildOptionList(ItfMesWindowIndex window, s32 entryIndex) {
+void itfMesBuildOptionList(ItfMesWindowIndex window, ItfMesEntryIndex entryIndex) {
     instanceMes_tag *mes = pinst[window].mes;
     ItfMesBlk40 *optionBlock = &mes->blk40;
     ItfMesEntry *entry = GetTypeHeader(mes, entryIndex);
@@ -849,7 +849,7 @@ ItfMesSub *itfMesMngSetResourcePtr(ItfMesWindowIndex window, ItfMesSub *sub) {
 }
 
 /* Look up an entry-table item; only the item index has a bounds check. */
-u8 *itfMesMngGetDataPtrImmediate(ItfMesWindowIndex window, s32 entryIndex, s32 itemIndex) {
+u8 *itfMesMngGetDataPtrImmediate(ItfMesWindowIndex window, ItfMesEntryIndex entryIndex, s32 itemIndex) {
     return GetMessagePagePtr(GetTypeHeader(pinst[window].mes, entryIndex)->table, itemIndex);
 }
 
@@ -905,7 +905,7 @@ s32 itfMesMngSetSelectDefKey(ItfMesWindowIndex window, s32 id, s32 value) {
 
 /* Build and release a temporary glyph chain to measure the widest grouped row.
  * Empty tables and zero/missing encoded items return zero. */
-s32 itfMesMngGetWidth(ItfMesWindowIndex window, s32 entryIndex, s32 itemIndex) {
+s32 itfMesMngGetWidth(ItfMesWindowIndex window, ItfMesEntryIndex entryIndex, s32 itemIndex) {
     instanceMes_tag *mes = pinst[window].mes;
     ItfMesTable *table;
     u8 *encodedText;
@@ -1157,7 +1157,7 @@ u32 CheckMessageBinary(ItfMesSub *resource) {
 }
 
 /* Address an installed resource entry; caller supplies an in-range index. */
-ItfMesEntry *GetTypeHeader(instanceMes_tag *mes, s32 entryIndex) {
+ItfMesEntry *GetTypeHeader(instanceMes_tag *mes, ItfMesEntryIndex entryIndex) {
     ItfMesEntry *entries = mes->sub->entries;
 
     return &entries[entryIndex];
@@ -1171,7 +1171,7 @@ ItfMesEntry *GetTypeHeader2(ItfMesSub *sub) {
 }
 
 /* Return the entry's item-address table or branch sentinel 1; index unchecked. */
-ItfMesEntryItemsResult itfMesGetWindowEntryItems(ItfMesWindowIndex window, s32 entryIndex) {
+ItfMesEntryItemsResult itfMesGetWindowEntryItems(ItfMesWindowIndex window, ItfMesEntryIndex entryIndex) {
     return GetTypeHeader(pinst[window].mes, entryIndex)->itemList;
 }
 

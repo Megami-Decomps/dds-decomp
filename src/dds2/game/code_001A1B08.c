@@ -40,7 +40,7 @@ extern PanelEntry pinst[];
 
 extern void itfMesMngRequestMessageRelease(s32 window, s32 releasePrimaryBlock);
 extern ItfMesWindowIndex scrGetMessageHandle(void);
-extern void itfMesBuildOptionList(s32 window, s32 entryIndex);
+extern void itfMesBuildOptionList(ItfMesWindowIndex window, ItfMesEntryIndex entryIndex);
 extern void itfMesMngRequestSelectRelease(s32 window);
 extern void itfMiscSetRatioRGB(DrawColorRec *output, s32 scaleX, s32 scaleY, s32 scaleZ, s32 w, const TextVector *input, s32 count);
 extern TextVector itfPanelColorTemplates[];

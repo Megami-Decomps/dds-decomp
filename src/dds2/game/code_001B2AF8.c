@@ -3221,7 +3221,7 @@ typedef struct MsgQueueTaskData {
 
 extern const BattlePanelColors D_004165C0;
 
-extern s32 itfMesMngGetWidth(s32, s32, s32);
+extern s32 itfMesMngGetWidth(ItfMesWindowIndex window, ItfMesEntryIndex entryIndex, s32 itemIndex);
 
 extern void itfMesMngSetMesPosition(s32, s32, s32);
 
