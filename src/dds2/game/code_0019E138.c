@@ -720,7 +720,7 @@ _FRQ *itfCreateFont2TextGlyph(s32 x, s32 y, s32 depth, u32 colors, char *text, _
 }
 
 /* Build text with font index 3; retain the existing glyph chain's spacing. */
-_FRQ *itfCreateFont3TextGlyph(s32 x, s32 y, s32 depth, u32 colors, char *text, _FRQ *previousGlyph) {
+_FRQ *itfCreateFont3TextGlyph(s32 x, s32 y, s32 depth, u32 colors, const char *text, _FRQ *previousGlyph) {
     _FRQ *glyph;
 
     glyph = frFontAppendTextToGlyphChain((const char *)D_00436580, 0, 0, 0, previousGlyph);

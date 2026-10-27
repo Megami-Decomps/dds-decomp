@@ -161,7 +161,7 @@ void frSetFontColor(struct _FRQ *parentNode, u32 colorWord);
 struct _FRQ *itfCreateConvertedTextGlyph(s32 x, s32 y, s32 depth,
     u32 colors, const u8 *text, struct _FRQ *parent);
 struct _FRQ *itfCreateFont3TextGlyph(s32 x, s32 y, s32 depth,
-    u32 colors, char *text, struct _FRQ *parent);
+    u32 colors, const char *text, struct _FRQ *parent);
 
 /* Link a glyph chain into the current draw-buffer slot. */
 s32 frDestroyFontRequestAfter(struct _FRQ *glyph);
