@@ -8,8 +8,7 @@
 #include "kwln_task_create.h"
 #include "eff_manager_task.h"
 #include "eff_random.h"
-
-extern u32 p2sdGetPcmState(void);
+#include "mnu_title_sound.h"
 
 extern s32 fldGetCurrentSceneSelectionResource(void);
 

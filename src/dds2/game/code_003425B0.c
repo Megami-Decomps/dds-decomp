@@ -28,6 +28,7 @@
 #include "sdf_stream_input_dma.h"
 #include "sdf_sound_rpc_records.h"
 #include "snd_midi_state_views.h"
+#include "mnu_title_sound.h"
 
 extern s32 D_00439214;
 
@@ -131,7 +132,7 @@ void p2sdSetBgmTrack(s32 channel) {
 }
 
 s32 p2sdLoadPcmFile(const char *name, u8 channel) {
-    if (p2sdPcmState != 0) {
+    if (p2sdPcmState != MNU_TITLE_SOUND_IDLE) {
         return 1;
     }
     strcpy(D_0040BAF8, name);
@@ -139,7 +140,7 @@ s32 p2sdLoadPcmFile(const char *name, u8 channel) {
     return 0;
 }
 
-u32 p2sdGetPcmState(void) {
+MnuTitleSoundBusyState p2sdGetPcmState(void) {
     return p2sdPcmState;
 }
 
@@ -230,7 +231,7 @@ u32 *sdfFileRpcHandleCmd(u32 command, SdfSoundRpcRequest *request) {
             D_0047B440[0] = 0;
             break;
         }
-        p2sdPcmState = 1;
+        p2sdPcmState = MNU_TITLE_SOUND_BUSY;
         mnuBuildVoiceResourcePath(path, D_0040BAF8);
         state = sdfFileCmdReadOpen(path, sdfFileRpcCallback, 0);
         D_004391DC = state;
@@ -269,7 +270,7 @@ u32 *sdfFileRpcHandleCmd(u32 command, SdfSoundRpcRequest *request) {
         WaitSema(sifRpcServerSema);
         sdfFileCmdFree(D_004391DC);
         D_004391DC = NULL;
-        p2sdPcmState = 0;
+        p2sdPcmState = MNU_TITLE_SOUND_IDLE;
         D_0047B440[0] = 0;
         break;
     case SDF_SOUND_RPC_RESET_RESIDENT_BUFFER_OFFSET:

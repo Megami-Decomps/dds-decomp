@@ -803,7 +803,6 @@ extern s32 D_003BC5C8;
 extern u8 D_003D9178[];
 
 
-extern u32 p2sdGetPcmState(void);
 
 typedef struct { u64 v; } __attribute__((packed)) u64p;
 
@@ -824,7 +823,6 @@ extern void mnuCreateTitleEffectTask(void);
 
 extern u8 D_003BC5A0[];
 
-extern u32 p2sdGetPcmState(void);
 
 extern u32 D_003BC5B0[2];
 

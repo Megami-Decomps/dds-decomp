@@ -194,7 +194,6 @@ extern s32 fldFindEffectByName(const char *name);
 
 extern s32 fldGetCurrentSceneSelectionResource(void);
 
-extern s32 p2sdGetPcmState(void);
 
 extern u8 D_00436208[];
 

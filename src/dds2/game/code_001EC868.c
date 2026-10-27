@@ -109,7 +109,6 @@ extern void mdlMarkAndProcessObjectNodes(void);
 extern void mdlSetListedObjectFlag(void);
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
 extern void mnuResetTitleStreamAfterFileIdle(void);
-extern u32 p2sdGetPcmState(void);
 extern s32 p2sdLoadPcmFile(const char *name, u8 channel);
 extern void p2sdLoadSMGFile(s32 packed);
 extern s32 sndIsCommandBusySigned(void);

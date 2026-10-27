@@ -12,6 +12,10 @@ enum {
 
 MnuTitleSoundBusyState mnuQueryTitleSoundBusy(void);
 
+/* The voice-file RPC sets this busy state on open and clears it on close.
+ * It is separate from the PCM callback-command busy latch. */
+MnuTitleSoundBusyState p2sdGetPcmState(void);
+
 /* Decoder format selectors used by the title sound buffer installer. */
 typedef s32 MnuTitleSoundFormat;
 enum {
