@@ -22,6 +22,7 @@
 #include "btl_analysis_panel_wait_args.h"
 #include "btl_command.h"
 #include "btl_action.h"
+#include "btl_action_eligibility.h"
 #include "btl_ai_action_api.h"
 #include "btl_ai_table.h"
 #include "btl_ai_scratch.h"
@@ -224,16 +225,16 @@ void btlDrawActorGroundDisc(BtlUnit *unit) {
 
 /* Requires task bit 6 clear and a matching 0x2A49 status bit.
  * The masked-status switch assigns 25-bucket tests to cases 0x40/0x400. */
-s32 btlCheckStatusActionEligibility(ActionStateLink *task) {
+BtlActionEligibilityResult btlCheckStatusActionEligibility(ActionStateLink *task) {
     BtlUnit *unit = task->unit;
     u16 flags;
 
     if (task->pendingFlags & 0x40) {
-        return 0;
+        return BTL_ACTION_NOT_ELIGIBLE;
     }
     flags = unit->partyRecord.status;
     if (!(flags & 0x2A49)) {
-        return 0;
+        return BTL_ACTION_NOT_ELIGIBLE;
     }
     switch (flags & 0x7FFF) {
     /* Separate arms keep two failure predecessors through 15.ce, so the
@@ -243,25 +244,25 @@ s32 btlCheckStatusActionEligibility(ActionStateLink *task) {
         if ((u32)btlRollAiBucket() >= 25) {
             break;
         }
-        return 1;
+        return BTL_ACTION_ELIGIBLE;
     case 0x400:
         if ((u32)btlRollAiBucket() >= 25) {
             break;
         }
-        return 1;
+        return BTL_ACTION_ELIGIBLE;
     case 0x800:
-        return 1;
+        return BTL_ACTION_ELIGIBLE;
     default:
-        return 1;
+        return BTL_ACTION_ELIGIBLE;
     }
-    return 0;
+    return BTL_ACTION_NOT_ELIGIBLE;
 }
 
 
 /* Accepts only when status bit 5 is set and task bit 6 is clear.
  * For a lone bit-5 status, compare the unsigned AI roll bucket to 70. */
-s32 btlAiCheckStatusRollEligibility(ActionStateLink *task) {
-    s32 result = 0;
+BtlActionEligibilityResult btlAiCheckStatusRollEligibility(ActionStateLink *task) {
+    BtlActionEligibilityResult result = BTL_ACTION_NOT_ELIGIBLE;
     BtlUnit *unit = task->unit;
     u16 flags;
 
@@ -273,9 +274,9 @@ s32 btlAiCheckStatusRollEligibility(ActionStateLink *task) {
         return result;
     }
     if ((flags & 0x7FFF) != 0x20) {
-        return 1;
+        return BTL_ACTION_ELIGIBLE;
     }
-    return (u32)btlRollAiBucket() < 0x46;
+    return (u32)btlRollAiBucket() < 0x46 ? BTL_ACTION_ELIGIBLE : BTL_ACTION_NOT_ELIGIBLE;
 }
 
 extern f32 btlUnitGetTopY(BtlUnit *unit);

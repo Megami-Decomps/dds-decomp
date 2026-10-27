@@ -49,6 +49,7 @@
 #include "btl_unit_tasks.h"
 #include "btl_state.h"
 #include "btl_action_state_selection.h"
+#include "btl_action_eligibility.h"
 #include "btl_action_state_handler.h"
 #include "btl_ui.h"
 #include "pcp_vu0.h"
@@ -777,8 +778,6 @@ void btlEnterStartActionState(ActionStateLink *task) {
 }
 
 extern s32 btlBothSidesActive(BtlUnit *);
-extern s32 btlCheckStatusActionEligibility(ActionStateLink *);
-
 void btlActionSeqCheckDispatch(ActionStateLink *task) {
     BtlState *scene = (BtlState *)btlGetRuntime();
     u32 flags = scene->battleFlags;
@@ -800,7 +799,7 @@ void btlActionSeqCheckDispatch(ActionStateLink *task) {
                 btlDispatchStateHandler(task, 0x1D);
                 return;
             }
-            if (btlCheckStatusActionEligibility(task) != 0) {
+            if (btlCheckStatusActionEligibility(task) != BTL_ACTION_NOT_ELIGIBLE) {
                 btlDispatchStateHandler(task, 5);
             } else {
                 btlActionSeqStateSelect(task);
@@ -1015,8 +1014,6 @@ void btlEnterCommandSelectionState(ActionStateLink *task) {
 extern s32 fldGetSceneObjectState(void);
 extern void btlRequestCommandPanelClose(void);
 extern s32 btlIsSupportedCommandKind(const s32 *phase);
-extern s32 btlAiCheckStatusRollEligibility(ActionStateLink *);
-
 /* Poll command-panel selection and dispatch the selected action state. */
 void btlUpdateCommandSelectionState(ActionStateLink *task) {
     BtlState *work = (BtlState *)btlGetRuntime();
@@ -1038,7 +1035,7 @@ void btlUpdateCommandSelectionState(ActionStateLink *task) {
             btlDispatchStateHandler(task, 7);
         } else {
             btlRequestCommandPanelClose();
-            if (btlAiCheckStatusRollEligibility(task) != 0) {
+            if (btlAiCheckStatusRollEligibility(task) != BTL_ACTION_NOT_ELIGIBLE) {
                 btlDispatchStateHandler(task, 0xB);
             } else {
                 btlDispatchStateHandler(task, 0xC);
@@ -1162,7 +1159,7 @@ void btlInitializeActorCommandState(ActionStateLink *task) {
         btlCopyIndexList(task->indexWork.indices, selected);
         btlRequestCommandPanelClose();
         btlRequestTargetSelectionClose();
-        if (btlAiCheckStatusRollEligibility(task) != 0) {
+        if (btlAiCheckStatusRollEligibility(task) != BTL_ACTION_NOT_ELIGIBLE) {
             btlDispatchStateHandler(task, 0xB);
         } else {
             btlDispatchStateHandler(task, 0xC);
@@ -1187,7 +1184,6 @@ extern s32 btlAllocAndCheck(ActionStateLink *task);
 extern u32 btlAssignTaskResultAndArgument(ActionStateLink *task);
 extern void btlBindActorSlot(ActionStateLink *, s32);
 extern void btlRunRandomWeightedAiTableAction();
-extern s32 btlAiCheckStatusRollEligibility();
 
 /* AI task: binds the acting unit's slot on first run, then waits for the
  * pending AI task and dispatches state 0xB or 0xC. */
@@ -1212,7 +1208,7 @@ s32 btlAiTaskUpdate(ActionStateLink *task) {
                 }
                 if (scene->boundTask == 0) {
                     scene->battleFlags |= 0x100000;
-                    if (btlAiCheckStatusRollEligibility(task) != 0) {
+                    if (btlAiCheckStatusRollEligibility(task) != BTL_ACTION_NOT_ELIGIBLE) {
                         btlDispatchStateHandler(task, 0xB);
                     } else {
                         btlDispatchStateHandler(task, 0xC);
@@ -1224,7 +1220,7 @@ s32 btlAiTaskUpdate(ActionStateLink *task) {
                         btlRunRandomWeightedAiTableAction(task);
                     }
                     scene->battleFlags |= 0x100000;
-                    if (btlAiCheckStatusRollEligibility(task) != 0) {
+                    if (btlAiCheckStatusRollEligibility(task) != BTL_ACTION_NOT_ELIGIBLE) {
                         btlDispatchStateHandler(task, 0xB);
                     } else {
                         btlDispatchStateHandler(task, 0xC);
@@ -1242,12 +1238,11 @@ void btlMarkSceneTaskAfterReset(ActionStateLink *actor) {
 }
 
 extern void btlPrepareSavedCommandTargets(ActionStateLink *, BattleIndexWork *);
-extern s32 btlAiCheckStatusRollEligibility();
 
 s32 btlCommandStateSelectB(ActionStateLink *task) {
     if (sndHasActiveActor() == 0) {
         btlPrepareSavedCommandTargets(task, &task->indexWork);
-        if (btlAiCheckStatusRollEligibility(task) != 0) {
+        if (btlAiCheckStatusRollEligibility(task) != BTL_ACTION_NOT_ELIGIBLE) {
             btlDispatchStateHandler(task, 0xB);
         } else {
             btlDispatchStateHandler(task, 0xC);

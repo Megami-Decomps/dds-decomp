@@ -4,6 +4,7 @@
 #include "common.h"
 #include "btl_horizontal_aim_api.h"
 #include "btl_action_reaction_motion.h"
+#include "btl_action_eligibility.h"
 #include "sdf_vu0.h"
 #include "btl_actor_status_table_api.h"
 #include "btl_special_ability.h"
@@ -65,7 +66,6 @@
 /* Declared before first use (were implicit int). */
 extern BtlRuntimeTask *btlScheduleRefreshTask(BtlUnit *owner);
 extern BtlRuntimeTask *btlCreateUnitFadeInTask(BtlUnit *owner, u32 value, u32 variant);
-extern s32 btlCheckStatusActionEligibility(BtlTask *task);
 extern BtlRuntimeTask * btlCreateCommandSoundTask(BtlTask *, BtlCameraModeIndex cameraMode);
 extern BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
 extern void btlDispatchCommandViaHookOrDefault(BtlTask *command, BattleIndexWork *argument);
@@ -401,7 +401,7 @@ void btlActionSeqCheckDispatch(BtlTask *task) {
                 btlDispatchStateHandler(task, 0x1C);
                 return;
             }
-            if (btlCheckStatusActionEligibility(task) != 0) {
+            if (btlCheckStatusActionEligibility(task) != BTL_ACTION_NOT_ELIGIBLE) {
                 btlDispatchStateHandler(task, 5);
             } else {
                 btlActionSeqStateSelect(task);
@@ -595,8 +595,6 @@ extern s32 fldGetSceneObjectState(void);
 
 extern void btlRequestCommandPanelClose(void);
 
-extern s32 btlAiCheckStatusRollEligibility(BtlTask *task);
-
 /* Poll command-panel selection and dispatch the selected action state. */
 void btlUpdateCommandSelectionState(BtlTask *task) {
     BtlState *scene = (BtlState *)btlGetRuntime();
@@ -619,7 +617,7 @@ void btlUpdateCommandSelectionState(BtlTask *task) {
             btlDispatchStateHandler(task, 7);
         } else {
             btlRequestCommandPanelClose();
-            if (btlAiCheckStatusRollEligibility(task) != 0) {
+            if (btlAiCheckStatusRollEligibility(task) != BTL_ACTION_NOT_ELIGIBLE) {
                 btlDispatchStateHandler(task, 0xB);
             } else {
                 btlDispatchStateHandler(task, 0xC);
@@ -745,7 +743,7 @@ void btlInitializeActorCommandState(BtlTask *task) {
         btlCopyIndexList(task->indexWork.indices, selected);
         btlRequestCommandPanelClose();
         btlRequestTargetSelectionClose();
-        if (btlAiCheckStatusRollEligibility(task) != 0) {
+        if (btlAiCheckStatusRollEligibility(task) != BTL_ACTION_NOT_ELIGIBLE) {
             btlDispatchStateHandler(task, 0xB);
         } else {
             btlDispatchStateHandler(task, 0xC);
@@ -788,7 +786,7 @@ s32 btlAiTaskUpdate(BtlTask *task) {
                 }
                 if (scene->boundTask == 0) {
                     scene->battleFlags |= 0x100000;
-                    if (btlAiCheckStatusRollEligibility(task) != 0) {
+                    if (btlAiCheckStatusRollEligibility(task) != BTL_ACTION_NOT_ELIGIBLE) {
                         btlDispatchStateHandler(task, 0xB);
                     } else {
                         btlDispatchStateHandler(task, 0xC);
@@ -800,7 +798,7 @@ s32 btlAiTaskUpdate(BtlTask *task) {
                         btlRunRandomWeightedAiTableAction(task);
                     }
                     scene->battleFlags |= 0x100000;
-                    if (btlAiCheckStatusRollEligibility(task) != 0) {
+                    if (btlAiCheckStatusRollEligibility(task) != BTL_ACTION_NOT_ELIGIBLE) {
                         btlDispatchStateHandler(task, 0xB);
                     } else {
                         btlDispatchStateHandler(task, 0xC);
@@ -820,7 +818,7 @@ void btlMarkSceneTaskAfterReset(BtlTask *task) {
 s32 btlCommandStateSelectB(s32 task) {
     if (sndHasActiveActor() == 0) {
         btlPrepareSavedCommandTargets((BtlTask *)task, &((BtlTask *)task)->indexWork);
-        if (btlAiCheckStatusRollEligibility(task) != 0) {
+        if (btlAiCheckStatusRollEligibility(task) != BTL_ACTION_NOT_ELIGIBLE) {
             btlDispatchStateHandler(task, 0xB);
         } else {
             btlDispatchStateHandler(task, 0xC);
