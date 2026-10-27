@@ -4722,7 +4722,7 @@ void fileJobInvokeTypeCallback(FileJobPayload *job) {
     fileJobTypeOperations[idx].invoke(data);
 }
 
-void fileJobInvokePositionCallback(FileJobPayload *job, f32 position[4]) {
+void fileJobInvokePositionCallback(FileJobPayload *job, const f32 position[4]) {
     u16 id = job->type;
 
     if (fileJobTypeOperations[id].setPosition != NULL) {
@@ -4730,7 +4730,7 @@ void fileJobInvokePositionCallback(FileJobPayload *job, f32 position[4]) {
     }
 }
 
-void fileJobInvokeRotationCallback(FileJobPayload *job, f32 rotation[4]) {
+void fileJobInvokeRotationCallback(FileJobPayload *job, const f32 rotation[4]) {
     u16 id = job->type;
 
     if (fileJobTypeOperations[id].setRotation != NULL) {

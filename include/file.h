@@ -69,8 +69,8 @@ void fileJobNotifyComplete(FileJobPayload *job);
 void fileJobInvokeTypeCallback(FileJobPayload *job);
 /* Word coordinates narrow only at the serialized reset-view fields. */
 void slSetTmnlID(s32 x, s32 y);
-void fileJobInvokePositionCallback(FileJobPayload *job, f32 position[4]);
-void fileJobInvokeRotationCallback(FileJobPayload *job, f32 rotation[4]);
+void fileJobInvokePositionCallback(FileJobPayload *job, const f32 position[4]);
+void fileJobInvokeRotationCallback(FileJobPayload *job, const f32 rotation[4]);
 void fileJobInvokeScaleCallback(FileJobPayload *job, f32 scale);
 void fileDispatchJobTypeCallback(FileJobPayload *job, u32 color);
 void fileWriteToPfs(FileJobPayload *job, const char *filePath);

@@ -12,8 +12,8 @@ typedef struct FileTypeCallbacks {
     void *(*createChild)(void *data, u16 type);         /* 0x0C */
     void (*notifyPair)(void *left, void *right);        /* 0x10 */
     void (*reset)(void *data);                          /* 0x14 */
-    void (*setPosition)(void *data, f32 position[4]);   /* 0x18 */
-    void (*setRotation)(void *data, f32 rotation[4]);   /* 0x1C */
+    void (*setPosition)(void *data, const f32 position[4]); /* 0x18 */
+    void (*setRotation)(void *data, const f32 rotation[4]); /* 0x1C */
     void (*setScale)(void *data, f32 scale);            /* 0x20 */
     void (*setColor)(void *data, u32 color);            /* 0x24 */
 } FileTypeCallbacks;
