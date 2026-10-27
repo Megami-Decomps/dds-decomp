@@ -8,6 +8,7 @@
 #include "sdf_resource_list_release_api.h"
 #include "btl_stage_task_cleanup.h"
 #include "mdl_motion_api.h"
+#include "mdl_motion_controller_lookup_api.h"
 #include "mdl_motion_end_status.h"
 #include "mdl_part_tag_record.h"
 #include "sdf_motion_loop.h"
@@ -391,9 +392,6 @@ extern u8 D_0037F650[];
 
 extern u8 D_0037F660[];
 
-
-
-extern sdfMotionCtrlr_t *mdlGetMotionCtrlr(const dds3ModelHandle_t *ctx, s32 searchId);
 
 
 
@@ -924,8 +922,8 @@ void mdlSmoothSingleMotion(dds3ModelHandle_t *ctx, s32 searchId, s32 motionIndex
         ctx, searchId, motionIndex, SDF_MOTION_LOOP_DISABLED, blendLeadFrames, blendDurationFrames);
 }
 
-sdfMotionCtrlr_t *mdlGetMotionCtrlr(const dds3ModelHandle_t *ctx, s32 searchId) {
-    sdfMotionCtrlr_t *node;
+const sdfMotionCtrlr_t *mdlGetMotionCtrlr(const dds3ModelHandle_t *ctx, s32 searchId) {
+    const sdfMotionCtrlr_t *node;
     for (node = ctx->inner->motionList; node != NULL; node = node->next) {
         if (node->searchId == searchId) {
             return node;
@@ -935,7 +933,7 @@ sdfMotionCtrlr_t *mdlGetMotionCtrlr(const dds3ModelHandle_t *ctx, s32 searchId) 
 }
 
 static inline const sdfMotionCtrlr_t *mdlFindNodeByIdReadOnly(const dds3ModelHandle_t *ctx, s32 searchId) {
-    /* The mutable lookup remains available to writers; this path only reads. */
+    /* Writer paths opt into the mutable view; queries use the const borrow. */
     return mdlGetMotionCtrlr(ctx, searchId);
 }
 
@@ -988,7 +986,7 @@ f32 mdlGetMotionSpeedEx(const dds3ModelHandle_t *ctx, s32 searchId) {
 
 /* Replace the stored float only when the searched node exists. */
 void mdlSetMotionSpeedEx(dds3ModelHandle_t *ctx, s32 searchId, f32 frameStep) {
-    sdfMotionCtrlr_t *matchedNode = mdlGetMotionCtrlr(ctx, searchId);
+    sdfMotionCtrlr_t *matchedNode = mdlGetMutableMotionCtrlr(ctx, searchId);
     if (matchedNode != NULL) {
         matchedNode->frameStep = frameStep;
     }

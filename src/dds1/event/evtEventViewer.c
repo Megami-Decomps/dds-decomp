@@ -42,6 +42,7 @@
 #include "eff_object.h"
 #include "eff_object_dispatch_api.h"
 #include "mdl.h"
+#include "mdl_motion_controller_lookup_api.h"
 #include "evt_polygon_movie.h"
 #include "evt_viewer_group_record.h"
 #include "evt_sky_alpha_animation_status.h"
@@ -1844,7 +1845,6 @@ void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer) {
     }
 }
 
-extern sdfMotionCtrlr_t *mdlGetMotionCtrlr(const dds3ModelHandle_t *ctx, s32 id);
 extern EvtRuntimeChild *evtViewerFindLatestMatchingMotionKey(EvtRuntimeGroup *group, s32 frame, s32 channel);
 
 /* Synchronize four motion channels, retaining their last applied timeline key. */
@@ -1858,7 +1858,7 @@ void evtViewerSyncModelMotionChannels(s32 frame, dds3Basic_t *object, EvtRuntime
         return;
     }
     for (channel = 0; channel < 4; channel++) {
-        sdfMotionCtrlr_t *motion = mdlGetMotionCtrlr(model, channel);
+        sdfMotionCtrlr_t *motion = mdlGetMutableMotionCtrlr(model, channel);
         EvtRuntimeChild *key;
         s32 sampleFrame;
 
@@ -1870,7 +1870,7 @@ void evtViewerSyncModelMotionChannels(s32 frame, dds3Basic_t *object, EvtRuntime
             if (mode == 0 && track->motionKeyCache[channel] == key) {
                 continue;
             }
-            motion = mdlGetMotionCtrlr(model, channel);
+            motion = mdlGetMutableMotionCtrlr(model, channel);
             sdfMotionChangeBlend(motion, 0, SDF_MOTION_LOOP_DISABLED, 0.0f, 0.0f);
             if (mdlGetMotionLengthEx(model, channel) != 0) {
                 if ((s32)mdlGetMotionLengthEx(model, channel) - 1 < frame) {
@@ -1882,22 +1882,22 @@ void evtViewerSyncModelMotionChannels(s32 frame, dds3Basic_t *object, EvtRuntime
                 sampleFrame = 0;
             }
             if (channel == 0) {
-                motion = mdlGetMotionCtrlr(model, 0);
+                motion = mdlGetMutableMotionCtrlr(model, 0);
                 sdfMotionSeek(motion, (f32)sampleFrame);
             } else {
-                motion = mdlGetMotionCtrlr(model, channel);
+                motion = mdlGetMutableMotionCtrlr(model, channel);
                 sdfMotionSeek(motion, 0.0f);
             }
             if ((viewer->flags & 1) != 0) {
-                motion = mdlGetMotionCtrlr(model, channel);
+                motion = mdlGetMutableMotionCtrlr(model, channel);
                 sdfMotionPause(motion);
             } else {
-                motion = mdlGetMotionCtrlr(model, channel);
+                motion = mdlGetMutableMotionCtrlr(model, channel);
                 sdfMotionPauseOff(motion);
             }
             track->motionKeyCache[channel] = NULL;
             if (channel != 0) {
-                motion = mdlGetMotionCtrlr(model, channel);
+                motion = mdlGetMutableMotionCtrlr(model, channel);
                 sdfMotionPause(motion);
             }
             continue;
@@ -1911,7 +1911,7 @@ void evtViewerSyncModelMotionChannels(s32 frame, dds3Basic_t *object, EvtRuntime
                 continue;
             }
             loopMode = key->p0C.sb[2] == 0 ? SDF_MOTION_LOOP_ENABLED : SDF_MOTION_LOOP_DISABLED;
-            motion = mdlGetMotionCtrlr(model, channel);
+            motion = mdlGetMutableMotionCtrlr(model, channel);
             sdfMotionChangeBlend(motion, key->p0C.sb[1], loopMode,
                                 0.0f, (f32)key->p0C.sb[3]);
             if (mode == 1) {
@@ -1932,14 +1932,14 @@ void evtViewerSyncModelMotionChannels(s32 frame, dds3Basic_t *object, EvtRuntime
                         sampleFrame = frame - key->frame;
                     }
                 }
-                motion = mdlGetMotionCtrlr(model, channel);
+                motion = mdlGetMutableMotionCtrlr(model, channel);
                 sdfMotionSeek(motion, (f32)sampleFrame);
             }
             if ((viewer->flags & 1) != 0) {
-                motion = mdlGetMotionCtrlr(model, channel);
+                motion = mdlGetMutableMotionCtrlr(model, channel);
                 sdfMotionPause(motion);
             } else {
-                motion = mdlGetMotionCtrlr(model, channel);
+                motion = mdlGetMutableMotionCtrlr(model, channel);
                 sdfMotionPauseOff(motion);
             }
             track->motionKeyCache[channel] = key;

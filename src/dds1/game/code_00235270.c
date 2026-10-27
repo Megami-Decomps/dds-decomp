@@ -27,6 +27,7 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "mdl.h"
+#include "mdl_motion_controller_lookup_api.h"
 #include "sdf.h"
 #include "sdf_sif_command.h"
 #include "kwln.h"
@@ -1953,8 +1954,6 @@ typedef union EvtMotionValue {
     s32 word;
     EvtMotionBits bits;
 } EvtMotionValue;
-
-extern sdfMotionCtrlr_t *mdlGetMotionCtrlr(const dds3ModelHandle_t *model, s32 index);
 
 extern char D_003BC2A8[];
 extern char D_003BBFF0[];

@@ -12,6 +12,7 @@
 #include "eff_transform.h"
 #include "dds3obj.h"
 #include "mdl.h"
+#include "mdl_motion_controller_lookup_api.h"
 #include "file_request_api.h"
 #include "sdf_texture_offset_list.h"
 #include "evt_event_pack_task.h"
@@ -19,7 +20,6 @@
 #include "sdf.h"
 
 #include "dds3_world_primary.h"
-extern sdfMotionCtrlr_t *mdlGetMotionCtrlr(const dds3ModelHandle_t *ctx, s32 searchId);
 extern s32 evtPlaySe(s32 id, s32 fade);
 
 extern s32 evtLoadArea_FromMemory(s32 area, s32 room, u8 *resource0Data, u8 *resource1Data,

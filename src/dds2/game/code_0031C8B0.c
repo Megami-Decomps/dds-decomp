@@ -4,6 +4,7 @@
 #include "sdf_resource.h"
 #include "mnu_shooting.h"
 #include "mdl.h"
+#include "mdl_motion_controller_lookup_api.h"
 #include "mdl_broadcast_callback.h"
 #include "sdf_motion.h"
 #include "eff_random.h"
@@ -14,8 +15,6 @@ extern f32 D_0037F5EC[];
 extern f32 aViewTarget[4];
 
 extern f32 sdfViewTargetVector[4];
-
-extern sdfMotionCtrlr_t *mdlGetMotionCtrlr(const dds3ModelHandle_t *model, s32 id);
 
 /* Replace only the high byte of the model's broadcast word. */
 void mnuSetNodeModelBroadcastByte(MnuModelNode *node, u8 highByte) {
@@ -42,7 +41,7 @@ void mnuSetModelNodeVisibility(MnuModelNode *node, s8 selector) {
  * sibling decision; no reset instruction survives in the emitted code.
  */
 void mnuSampleModelMotionAtFrame(MnuModelNode *node, f32 frame) {
-    sdfMotionCtrlr_t *motion = mdlGetMotionCtrlr(node->model, 0);
+    sdfMotionCtrlr_t *motion = mdlGetMutableMotionCtrlr(node->model, 0);
     if (frame < 0.0f) {
         u32 random = dds3GetRandA(NULL);
         sdfMotionSeek(motion, (f32)(random % node->model->first->frameCount));
@@ -120,4 +119,3 @@ void mnuUpdateSectionModelWork(MnuSectionModelWork *work, u32 flags) {
         }
     }
 }
-
