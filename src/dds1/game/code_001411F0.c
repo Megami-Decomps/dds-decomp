@@ -3833,7 +3833,7 @@ void nbPanelAnalyzeStart(void) {
     D_003BAFA0 = 1;
 }
 
-s32 fldTitle(dds3ProcessID_t *task) {
+KwlnTaskUpdateResult fldTitle(dds3ProcessID_t *task) {
     s32 nextFrame;
     s32 alpha;
     s32 nextPhase;
@@ -3936,9 +3936,9 @@ s32 fldTitle(dds3ProcessID_t *task) {
         }
         break;
     default:
-        return -1;
+        return KWLN_TASK_UPDATE_FINISH_CALLBACK;
     }
-    return 0;
+    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 void fldReleaseTitleTextureReference(dds3ProcessID_t *task) {
@@ -3948,7 +3948,7 @@ void fldReleaseTitleTextureReference(dds3ProcessID_t *task) {
     }
 }
 
-extern s32 fldTitle(dds3ProcessID_t *task);
+extern KwlnTaskUpdateResult fldTitle(dds3ProcessID_t *task);
 
 
 extern u32 D_003BAFA4;
