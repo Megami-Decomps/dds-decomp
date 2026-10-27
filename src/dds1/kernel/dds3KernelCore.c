@@ -220,7 +220,7 @@ void kwlnTaskFinalizeDestroy(dds3ProcessID_t* task)
 
     child = task->childList;
     while (child != 0) {
-        next = child->next;
+        next = child->nextSibling;
         dds3KillProcess(child, 0);
         child = next;
     }
@@ -282,7 +282,7 @@ void ChangeProcessFlagChild(s32 setFlags, dds3ProcessID_t* task, u32 flags)
     child = task->childList;
     while (child != 0) {
         ChangeProcessFlagChild(setFlags, child, flags);
-        child = child->next;
+        child = child->nextSibling;
     }
 }
 
@@ -407,7 +407,7 @@ void DebugProcessTree(dds3ProcessID_t *task, s32 depth)
         if (task->parent == NULL) {
             dds3ProcessTreeDepth[0] = ' ';
         } else {
-            if (task->next == NULL) {
+            if (task->nextSibling == NULL) {
                 dds3ProcessTreeDepth[depth * 4] = ' ';
             } else {
                 dds3ProcessTreeDepth[depth * 4] = '|';
@@ -417,8 +417,8 @@ void DebugProcessTree(dds3ProcessID_t *task, s32 depth)
         DebugProcessTree(task->childList, depth + 1);
         dds3ProcessTreeDepth[depth * 4] = 0;
     }
-    if (task->next != NULL) {
-        DebugProcessTree(task->next, depth);
+    if (task->nextSibling != NULL) {
+        DebugProcessTree(task->nextSibling, depth);
     }
 }
 
@@ -486,7 +486,7 @@ dds3ProcessID_t *dds3StartProcess(const char *name, u32 priority, s32 startDelay
     task->listPrev = NULL;
     task->parent = NULL;
     task->childList = NULL;
-    task->next = NULL;
+    task->nextSibling = NULL;
     AddProcessList(task);
     if (task->startDelayTicks == 0) {
         StartProcess(task);
@@ -712,10 +712,10 @@ void dds3LinkProcess(dds3ProcessID_t* parent, dds3ProcessID_t* child)
 
     if (parent->childList != NULL) {
         tail = parent->childList;
-        while (tail->next != NULL) {
-            tail = tail->next;
+        while (tail->nextSibling != NULL) {
+            tail = tail->nextSibling;
         }
-        tail->next = child;
+        tail->nextSibling = child;
     } else {
         parent->childList = child;
     }

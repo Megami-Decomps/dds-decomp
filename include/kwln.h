@@ -42,7 +42,7 @@ struct dds3ProcessID_t {
     dds3ProcessID_t *listPrev;      /* 0x40 */
     dds3ProcessID_t *parent;        /* 0x44 */
     dds3ProcessID_t *childList;     /* 0x48 */
-    dds3ProcessID_t *next;          /* 0x4C */
+    dds3ProcessID_t *nextSibling;   /* 0x4C: next task in the parent's child list. */
 };
 
 u32 dds3GetProcessRunTime(const dds3ProcessID_t *task);

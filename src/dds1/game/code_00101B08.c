@@ -23,7 +23,7 @@ extern struct dds3Basic_t *dds3TheWorld;
 
 /* Detach a task from its parent's child list. Detached tasks are left untouched;
  * an attached task must already occur in that parent's sibling chain.
- * The hierarchy link is next, separate from scheduler listNext/listPrev. */
+ * The hierarchy link is nextSibling, separate from scheduler listNext/listPrev. */
 void dds3UnlinkProcess(dds3ProcessID_t *task) {
     dds3ProcessID_t *parent = task->parent;
 
@@ -31,17 +31,17 @@ void dds3UnlinkProcess(dds3ProcessID_t *task) {
         return;
     }
     if (parent->childList == task) {
-        parent->childList = task->next;
+        parent->childList = task->nextSibling;
     } else {
         dds3ProcessID_t *previousSibling = parent->childList;
 
-        while (previousSibling->next != task) {
-            previousSibling = previousSibling->next;
+        while (previousSibling->nextSibling != task) {
+            previousSibling = previousSibling->nextSibling;
         }
-        previousSibling->next = task->next;
+        previousSibling->nextSibling = task->nextSibling;
     }
     task->parent = 0;
-    task->next = 0;
+    task->nextSibling = 0;
 }
 
 /* Set mask bits on the object selection described by object and scope. */
