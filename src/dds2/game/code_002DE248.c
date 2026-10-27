@@ -16166,7 +16166,7 @@ void effRequestResourceByMode(const char *prefix, const char *name, s32 mode, u3
 EffMappedResource *effLoadMappedResource(const char *base, const char *name) {
     char path[EFF_RESOURCE_PATH_BYTES];
     u32 sourceAddress;
-    u32 allocation;
+    struct sdfMemHandle_t *allocation;
     EffMappedResource *mappedResource;
     sprintf(path, D_004387E8, base, name);
     allocation = sdfDevLoadFileEx(path, &sourceAddress, 0);
