@@ -7,7 +7,7 @@
 #include "btl_command_effect.h"
 #include "btl_command_required_entry_match.h"
 #include "btl_ai_slot.h"
-#include "btl_ai_scratch.h"
+#include "btl_packed_action_api.h"
 #include "dds3obj.h"
 #include "btl_resource_name.h"
 #include "sdf_chip.h"
@@ -1227,13 +1227,13 @@ void btlClearNodeFlags(void) {
 
 extern s32 btlDispatchPackedEffectAction(s32 context, u32 packedAction);
 
-s32 btlDispatchPackedActionWithScratch(s32 context, BtlUnit *owner, s32 mask) {
+s32 btlDispatchPackedActionWithScratch(BtlAiScratchActor actorTask, BtlUnit *owner, s32 mask) {
     BtlAiScratchWork *work = sdfAllocAndClearQuadwords(sizeof(BtlAiScratchWork));
     s32 result;
 
     btlActionScratchWork = work;
     work->speciesId = owner->partyRecord.unitId;
-    work->actor = (BtlTask *)context;
+    work->actor = actorTask;
     result = btlDispatchPackedEffectAction((s32)owner, mask);
     sdfChipFreeDirect((void *)btlActionScratchWork);
     return result;

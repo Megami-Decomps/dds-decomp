@@ -20,6 +20,7 @@
 #include "btl_effect_active_api.h"
 #include "kwln_task_add_child.h"
 #include "btl_command_affinity_api.h"
+#include "btl_packed_action_api.h"
 #include "sdf_trig.h"
 #include "dds3obj.h"
 #include "evt_unit.h"
@@ -95,7 +96,7 @@ typedef struct BtlCommandCtx {
     u8 pad00[0xC];
     u32 stateFlags;
     u8 pad10[8];
-    s32 actor;
+    BtlUnit *actor; /* 0x18: the command actor's unit. */
     u8 pad1C[4];
     u32 commandMode;
     u32 commandValue;
@@ -190,7 +191,6 @@ extern u32 btlGetSubtaskTargetMode(void);
 
 extern void btlPickCommandTargetWithStatusMask(ActionStateLink *context, s32);
 
-extern s32 btlDispatchPackedActionWithScratch(s32 context, s32 actor, s32 mask);
 
 extern BtlRuntimeTask *btlAllocTask(s32);
 
@@ -1583,8 +1583,8 @@ u32 btlScriptSelectActionEntry(void) {
     context = (BtlCommandCtx *)scrGetCurrentProcessUserData();
     commandId = scrGetIntPara(0);
     if (datCommandSelectors[commandId].kind == 1) {
-        if (btlHasRequiredCommandAffinityPartners((BtlUnit *)context->actor, commandId) != BTL_COMMAND_AFFINITY_PARTNERS_UNAVAILABLE &&
-            btlResolveCommandAffinityPartners((BtlUnit *)context->actor, commandId, &probe) !=
+        if (btlHasRequiredCommandAffinityPartners(context->actor, commandId) != BTL_COMMAND_AFFINITY_PARTNERS_UNAVAILABLE &&
+            btlResolveCommandAffinityPartners(context->actor, commandId, &probe) !=
                 BTL_COMMAND_AFFINITY_PARTNERS_UNRESOLVED) {
             context->actionProbeFirst = probe.firstPartner;
             context->commandMode = 3;
@@ -1671,7 +1671,7 @@ u32 btlScriptSetActorUnitParameter(void) {
 
     context = scrGetCurrentProcessUserData();
     parameterValue = scrGetIntPara(0);
-    ((BtlUnit *)((BtlCommandCtx *)context)->actor)->partyRecord.affinityTableIndex = parameterValue;
+    ((BtlCommandCtx *)context)->actor->partyRecord.affinityTableIndex = parameterValue;
     return 1;
 }
 
@@ -1836,7 +1836,7 @@ u32 btlScriptPickTargetExcludingActor(void) {
 s32 btlNbScriptCheckActorFlag(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x400000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, context->actor, choice | 0x400000)) {
         scrSetIntReturnValue(1);
         context->choicesA[0] = choice;
         context->selectionFlagsA |= 1;
@@ -1851,7 +1851,7 @@ s32 btlNbScriptCheckActorFlag(void) {
 s32 btlCmdStoreActorMpCheckChoice(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x7000000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, context->actor, choice | 0x7000000)) {
         scrSetIntReturnValue(1);
         context->choicesA[1] = choice;
         context->selectionFlagsA |= 2;
@@ -1866,7 +1866,7 @@ s32 btlCmdStoreActorMpCheckChoice(void) {
 s32 btlCmdStoreActorMpCheckChoiceUnregistered(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x7000000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, context->actor, choice | 0x7000000)) {
         scrSetIntReturnValue(1);
         context->choicesA[1] = choice;
         context->selectionFlagsA |= 2;
@@ -1880,7 +1880,7 @@ s32 btlCmdStoreActorMpCheckChoiceUnregistered(void) {
 s32 btlCmdStoreBossHealthCheckChoice(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x800000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, context->actor, choice | 0x800000)) {
         scrSetIntReturnValue(1);
         context->choicesA[2] = choice;
         context->selectionFlagsA |= 4;
@@ -1894,7 +1894,7 @@ s32 btlCmdStoreBossHealthCheckChoice(void) {
 s32 btlCmdSelectChoiceSlot2Code0C(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0xc00000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, context->actor, choice | 0xc00000)) {
         scrSetIntReturnValue(1);
         context->choicesA[2] = choice;
         context->selectionFlagsA |= 4;
@@ -1909,7 +1909,7 @@ s32 btlCmdSelectChoiceSlot2Code0C(void) {
 s32 btlCmdRememberPartyHighHpChoice(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x1000000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, context->actor, choice | 0x1000000)) {
         scrSetIntReturnValue(1);
         context->choicesA[2] = choice;
         context->selectionFlagsA |= 4;
@@ -1925,7 +1925,7 @@ s32 btlCmdRememberPartyHighHpChoice(void) {
 s32 btlCmdStoreEnemyCountCheckChoice(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | BTL_PACKED_ENEMY_COUNT_LIMIT)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, context->actor, choice | BTL_PACKED_ENEMY_COUNT_LIMIT)) {
         scrSetIntReturnValue(1);
         context->choicesA[3] = choice;
         context->selectionFlagsA |= 8;
@@ -1939,7 +1939,7 @@ s32 btlCmdStoreEnemyCountCheckChoice(void) {
 s32 btlCmdStorePartyCountCheckChoice(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x2000000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, context->actor, choice | 0x2000000)) {
         scrSetIntReturnValue(1);
         context->choicesA[4] = choice;
         context->selectionFlagsA |= 0x10;
@@ -1953,7 +1953,7 @@ s32 btlCmdStorePartyCountCheckChoice(void) {
 s32 btlCmdStoreActorActionMaskChoice(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x2400000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, context->actor, choice | 0x2400000)) {
         scrSetIntReturnValue(1);
         context->choicesA[5] = choice;
         context->selectionFlagsA |= 0x20;
@@ -1967,7 +1967,7 @@ s32 btlCmdStoreActorActionMaskChoice(void) {
 s32 btlCmdStoreEnemyActionMaskChoice(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x2800000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, context->actor, choice | 0x2800000)) {
         scrSetIntReturnValue(1);
         context->choicesA[6] = choice;
         context->selectionFlagsA |= 0x40;
@@ -1986,7 +1986,7 @@ u32 btlScriptSetChoiceFlag(void) {
     context = (BtlCommandCtx *)scrGetCurrentProcessUserData();
     first = scrGetIntPara(0);
     second = scrGetIntPara(1);
-    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, ((first & 0x3F) << 16) | (u16)second | 0x2C00000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, context->actor, ((first & 0x3F) << 16) | (u16)second | 0x2C00000)) {
         scrSetIntReturnValue(1);
         context->choicesA[6] = first;
         context->selectionFlagsA |= 0x40;
@@ -2000,7 +2000,7 @@ u32 btlScriptSetChoiceFlag(void) {
 s32 btlCmdStorePartyActionMaskChoice(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x3000000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, context->actor, choice | 0x3000000)) {
         scrSetIntReturnValue(1);
         context->choicesA[7] = choice;
         context->selectionFlagsA |= 0x80;
@@ -2014,7 +2014,7 @@ s32 btlCmdStorePartyActionMaskChoice(void) {
 s32 btlCmdRememberAllLowerActionBits(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x3400000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, context->actor, choice | 0x3400000)) {
         scrSetIntReturnValue(1);
         context->choicesExtra[0] = choice;
         context->selectionFlagsA |= 0x100;
@@ -2028,7 +2028,7 @@ s32 btlCmdRememberAllLowerActionBits(void) {
 s32 btlCmdRememberLowerUnitMode(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x3800000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, context->actor, choice | 0x3800000)) {
         scrSetIntReturnValue(1);
         context->choicesExtra[1] = choice;
         context->selectionFlagsA |= 0x200;
@@ -2042,7 +2042,7 @@ s32 btlCmdRememberLowerUnitMode(void) {
 s32 btlCmdRememberOtherUpperUnitMode(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x3C00000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, context->actor, choice | 0x3C00000)) {
         scrSetIntReturnValue(1);
         context->choicesExtra[2] = choice;
         context->selectionFlagsA |= 0x400;
@@ -2056,7 +2056,7 @@ s32 btlCmdRememberOtherUpperUnitMode(void) {
 s32 btlCmdRememberLowerEntryCondition(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x4000000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, context->actor, choice | 0x4000000)) {
         scrSetIntReturnValue(1);
         context->choicesExtra[3] = choice;
         context->selectionFlagsA |= 0x800;
@@ -2070,7 +2070,7 @@ s32 btlCmdRememberLowerEntryCondition(void) {
 s32 btlCmdRememberUpperEntryCondition(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x4400000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, context->actor, choice | 0x4400000)) {
         scrSetIntReturnValue(1);
         context->choicesExtra[4] = choice;
         context->selectionFlagsA |= 0x1000;
@@ -2084,7 +2084,7 @@ s32 btlCmdRememberUpperEntryCondition(void) {
 /* Remember the actor entry-code-10 gate result; failure clears only its selection flag. */
 u32 btlCmdRememberActorActionGate(void) {
     void *context = scrGetCurrentProcessUserData();
-    if (btlDispatchPackedActionWithScratch((s32)(u32)context, ((BtlCommandCtx *)context)->actor, 0x5400000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, ((BtlCommandCtx *)context)->actor, 0x5400000)) {
         scrSetIntReturnValue(1);
         ((BtlCommandCtx *)context)->selectionFlagsA |= 0x2000;
     } else {
@@ -2096,7 +2096,7 @@ u32 btlCmdRememberActorActionGate(void) {
 
 u32 btlCmdReturnReadyWithoutTurnsCheck(void) {
     void *context = scrGetCurrentProcessUserData();
-    if (btlDispatchPackedActionWithScratch((s32)(u32)context, ((BtlCommandCtx *)context)->actor, 0x6C00000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, ((BtlCommandCtx *)context)->actor, 0x6C00000)) {
         scrSetIntReturnValue(1);
         ((BtlCommandCtx *)context)->selectionFlagsA |= 0x2000000;
     } else {
@@ -2109,7 +2109,7 @@ u32 btlCmdReturnReadyWithoutTurnsCheck(void) {
 s32 btlCmdRememberCounterLimit(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x5800000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, context->actor, choice | 0x5800000)) {
         scrSetIntReturnValue(1);
         context->choiceD8 = choice;
         context->selectionFlagsA |= 0x4000;
@@ -2123,7 +2123,7 @@ s32 btlCmdRememberCounterLimit(void) {
 s32 btlCmdStoreCounterReachedLimitChoice(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x5C00000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, context->actor, choice | 0x5C00000)) {
         scrSetIntReturnValue(1);
         context->choiceD8 = choice;
         context->selectionFlagsA |= 0x4000;
@@ -2138,7 +2138,7 @@ u32 btlCmdReturnLowHpActionReadiness(void) {
     void *context;
 
     context = scrGetCurrentProcessUserData();
-    if (btlDispatchPackedActionWithScratch((s32)(u32)context, ((BtlCommandCtx *)context)->actor, 0x8800000) != 0) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, ((BtlCommandCtx *)context)->actor, 0x8800000) != 0) {
         scrSetIntReturnValue(1);
     } else {
         scrSetIntReturnValue(0);
@@ -2150,7 +2150,7 @@ u32 btlCmdReturnActorEligibility(void) {
     void *context;
 
     context = scrGetCurrentProcessUserData();
-    if (btlDispatchPackedActionWithScratch((s32)(u32)context, ((BtlCommandCtx *)context)->actor, 0xB000000) != 0) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, ((BtlCommandCtx *)context)->actor, 0xB000000) != 0) {
         scrSetIntReturnValue(1);
     } else {
         scrSetIntReturnValue(0);
@@ -2163,7 +2163,7 @@ u32 btlCmdReportEnemySpawnCapacity(void) {
     void *context;
 
     context = scrGetCurrentProcessUserData();
-    if (btlDispatchPackedActionWithScratch((s32)(u32)context, ((BtlCommandCtx *)context)->actor, 0xB800000) != 0) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, ((BtlCommandCtx *)context)->actor, 0xB800000) != 0) {
         scrSetIntReturnValue(1);
     } else {
         scrSetIntReturnValue(0);
@@ -2174,7 +2174,7 @@ u32 btlCmdReportEnemySpawnCapacity(void) {
 s32 btlCmdRememberLowerElementAccess(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x0A800000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, context->actor, choice | 0x0A800000)) {
         scrSetIntReturnValue(1);
         context->savedChoices[0] = choice;
         context->selectionFlagsA |= 0x40000;
@@ -2188,7 +2188,7 @@ s32 btlCmdRememberLowerElementAccess(void) {
 s32 btlCmdRememberUpperElementAccess(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x0AC00000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, context->actor, choice | 0x0AC00000)) {
         scrSetIntReturnValue(1);
         context->savedChoices[1] = choice;
         context->selectionFlagsA |= 0x80000;
@@ -2201,7 +2201,7 @@ s32 btlCmdRememberUpperElementAccess(void) {
 
 u32 btlCmdReturnPartyElementQueryCheck(void) {
     void *context = scrGetCurrentProcessUserData();
-    if (btlDispatchPackedActionWithScratch((s32)(u32)context, ((BtlCommandCtx *)context)->actor, scrGetIntPara(0) | 0x12C00000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, ((BtlCommandCtx *)context)->actor, scrGetIntPara(0) | 0x12C00000)) {
         scrSetIntReturnValue(1);
     } else {
         scrSetIntReturnValue(0);
@@ -2211,7 +2211,7 @@ u32 btlCmdReturnPartyElementQueryCheck(void) {
 
 u32 btlCmdReturnEnemyElementQueryCheck(void) {
     void *context = scrGetCurrentProcessUserData();
-    if (btlDispatchPackedActionWithScratch((s32)(u32)context, ((BtlCommandCtx *)context)->actor, scrGetIntPara(0) | 0x13000000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, ((BtlCommandCtx *)context)->actor, scrGetIntPara(0) | 0x13000000)) {
         scrSetIntReturnValue(1);
     } else {
         scrSetIntReturnValue(0);
@@ -2222,7 +2222,7 @@ u32 btlCmdReturnEnemyElementQueryCheck(void) {
 s32 btlCmdRememberLowerElementExclusion(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x0BC00000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, context->actor, choice | 0x0BC00000)) {
         scrSetIntReturnValue(1);
         context->savedChoices[2] = choice;
         context->selectionFlagsA |= 0x100000;
@@ -2236,7 +2236,7 @@ s32 btlCmdRememberLowerElementExclusion(void) {
 s32 btlCmdRememberUpperElementExclusion(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x0C000000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, context->actor, choice | 0x0C000000)) {
         scrSetIntReturnValue(1);
         context->savedChoices[3] = choice;
         context->selectionFlagsA |= 0x200000;
@@ -2250,7 +2250,7 @@ s32 btlCmdRememberUpperElementExclusion(void) {
 s32 btlCmdRememberUpperActionAvailability(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x0C400000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, context->actor, choice | 0x0C400000)) {
         scrSetIntReturnValue(1);
         context->savedChoices[4] = choice;
         context->selectionFlagsA |= 0x400000;
@@ -2264,7 +2264,7 @@ s32 btlCmdRememberUpperActionAvailability(void) {
 s32 btlCmdRememberUpperActorTripleCheck(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x0C800000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, context->actor, choice | 0x0C800000)) {
         scrSetIntReturnValue(1);
         context->savedChoices[4] = choice;
         context->selectionFlagsA |= 0x400000;
@@ -2279,7 +2279,7 @@ s32 btlCmdRememberUpperActorTripleCheck(void) {
 s32 btlCmdRememberActorEntryCondition(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0x0CC00000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, context->actor, choice | 0x0CC00000)) {
         scrSetIntReturnValue(1);
         context->savedChoices[5] = choice;
         context->selectionFlagsA |= 0x800000;
@@ -2293,7 +2293,7 @@ s32 btlCmdRememberActorEntryCondition(void) {
 s32 btlCmdStoreDefaultUnitActionChoice(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0xd800000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, context->actor, choice | 0xd800000)) {
         scrSetIntReturnValue(1);
         context->choicesB[0] = choice;
         context->selectionFlagsB |= 1;
@@ -2307,7 +2307,7 @@ s32 btlCmdStoreDefaultUnitActionChoice(void) {
 s32 btlCmdStoreAlternateUnitActionChoice(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0xdc00000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, context->actor, choice | 0xdc00000)) {
         scrSetIntReturnValue(1);
         context->choicesB[1] = choice;
         context->selectionFlagsB |= 2;
@@ -2321,7 +2321,7 @@ s32 btlCmdStoreAlternateUnitActionChoice(void) {
 s32 btlCmdStorePartyEntryCheckChoice(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0xe000000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, context->actor, choice | 0xe000000)) {
         scrSetIntReturnValue(1);
         context->choicesB[2] = choice;
         context->selectionFlagsB |= 4;
@@ -2335,7 +2335,7 @@ s32 btlCmdStorePartyEntryCheckChoice(void) {
 s32 btlCmdStoreInversePartyEntryChoice(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0xe400000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, context->actor, choice | 0xe400000)) {
         scrSetIntReturnValue(1);
         context->choicesB[3] = choice;
         context->selectionFlagsB |= 8;
@@ -2349,7 +2349,7 @@ s32 btlCmdStoreInversePartyEntryChoice(void) {
 s32 btlCmdRememberUpperEntryCodeMatch(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0xE800000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, context->actor, choice | 0xE800000)) {
         scrSetIntReturnValue(1);
         context->choicesC[0] = choice;
         context->selectionFlagsB |= 0x10;
@@ -2363,7 +2363,7 @@ s32 btlCmdRememberUpperEntryCodeMatch(void) {
 s32 btlCmdRememberUpperEntryCodeInverse(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0xEC00000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, context->actor, choice | 0xEC00000)) {
         scrSetIntReturnValue(1);
         context->choicesC[1] = choice;
         context->selectionFlagsB |= 0x20;
@@ -2377,7 +2377,7 @@ s32 btlCmdRememberUpperEntryCodeInverse(void) {
 s32 btlCmdRememberLowerEntryCodeMismatch(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0xF400000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, context->actor, choice | 0xF400000)) {
         scrSetIntReturnValue(1);
         context->choicesC[6] = choice;
         context->selectionFlagsB |= 0x400;
@@ -2391,7 +2391,7 @@ s32 btlCmdRememberLowerEntryCodeMismatch(void) {
 s32 btlCmdRememberUpperEntryCodeMismatch(void) {
     BtlCommandCtx *context = (BtlCommandCtx *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, context->actor, choice | 0xF800000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, context->actor, choice | 0xF800000)) {
         scrSetIntReturnValue(1);
         context->choicesC[7] = choice;
         context->selectionFlagsB |= 0x800;
@@ -2404,7 +2404,7 @@ s32 btlCmdRememberUpperEntryCodeMismatch(void) {
 
 u32 btlCmdReturnPartyActionPresence(void) {
     void *context = scrGetCurrentProcessUserData();
-    if (btlDispatchPackedActionWithScratch((s32)(u32)context, ((BtlCommandCtx *)context)->actor, scrGetIntPara(0) | 0x13400000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, ((BtlCommandCtx *)context)->actor, scrGetIntPara(0) | 0x13400000)) {
         scrSetIntReturnValue(1);
     } else {
         scrSetIntReturnValue(0);
@@ -2414,7 +2414,7 @@ u32 btlCmdReturnPartyActionPresence(void) {
 
 s32 btlCmdReturnEnemyActionPresence(void) {
     u8 *context = (u8 *)scrGetCurrentProcessUserData();
-    if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, scrGetIntPara(0) | 0x13800000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, ((BtlCommandCtx *)context)->actor, scrGetIntPara(0) | 0x13800000)) {
         scrSetIntReturnValue(1);
     } else {
         scrSetIntReturnValue(0);
@@ -2425,7 +2425,7 @@ s32 btlCmdReturnEnemyActionPresence(void) {
 s32 btlCmdRememberUpperSelectedElement(void) {
     u8 *context = (u8 *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, choice | 0xB400000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, ((BtlCommandCtx *)context)->actor, choice | 0xB400000)) {
         scrSetIntReturnValue(1);
         ((BtlCommandCtx *)context)->choicesC[2] = choice;
         ((BtlCommandCtx *)context)->selectionFlagsB |= 0x40;
@@ -2440,7 +2440,7 @@ s32 btlCmdRememberUpperSelectedElement(void) {
 s32 btlCmdRememberPartyQueuedActionCategory(void) {
     u8 *context = (u8 *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, choice | 0xFC00000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, ((BtlCommandCtx *)context)->actor, choice | 0xFC00000)) {
         scrSetIntReturnValue(1);
         ((BtlCommandCtx *)context)->choicesC[8] = choice;
         ((BtlCommandCtx *)context)->selectionFlagsB |= 0x1000;
@@ -2454,7 +2454,7 @@ s32 btlCmdRememberPartyQueuedActionCategory(void) {
 s32 btlCmdRememberLowerMissingStatus(void) {
     u8 *context = (u8 *)scrGetCurrentProcessUserData();
     s32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, 0xF000000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, ((BtlCommandCtx *)context)->actor, 0xF000000)) {
         scrSetIntReturnValue(1);
         ((BtlCommandCtx *)context)->choicesC[3] = choice;
         ((BtlCommandCtx *)context)->selectionFlagsB |= 0x80;
@@ -2470,7 +2470,7 @@ u32 btlCmdReturnQueuedSpecialAction(void) {
     void *context;
 
     context = scrGetCurrentProcessUserData();
-    if (btlDispatchPackedActionWithScratch((s32)(u32)context, ((BtlCommandCtx *)context)->actor, 0x10800000) != 0) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, ((BtlCommandCtx *)context)->actor, 0x10800000) != 0) {
         scrSetIntReturnValue(1);
     } else {
         scrSetIntReturnValue(0);
@@ -2481,7 +2481,7 @@ u32 btlCmdReturnQueuedSpecialAction(void) {
 /* Report extended bit 0x800000 on the actor, or an eligible enemy when requested. */
 u32 btlCmdReturnExtendedStatusCheck(void) {
     void *context = scrGetCurrentProcessUserData();
-    if (btlDispatchPackedActionWithScratch((s32)(u32)context, ((BtlCommandCtx *)context)->actor, scrGetIntPara(0) | 0x10C00000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, ((BtlCommandCtx *)context)->actor, scrGetIntPara(0) | 0x10C00000)) {
         scrSetIntReturnValue(1);
     } else {
         scrSetIntReturnValue(0);
@@ -2493,7 +2493,7 @@ u32 btlCmdReturnPartyMissingFlagCheck(void) {
     void *context;
 
     context = scrGetCurrentProcessUserData();
-    if (btlDispatchPackedActionWithScratch((s32)(u32)context, ((BtlCommandCtx *)context)->actor, 0x11000000) != 0) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, ((BtlCommandCtx *)context)->actor, 0x11000000) != 0) {
         scrSetIntReturnValue(1);
     } else {
         scrSetIntReturnValue(0);
@@ -2505,7 +2505,7 @@ u32 btlCmdReturnPartyHeldFlagCheck(void) {
     void *context;
 
     context = scrGetCurrentProcessUserData();
-    if (btlDispatchPackedActionWithScratch((s32)(u32)context, ((BtlCommandCtx *)context)->actor, 0x11400000) != 0) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, ((BtlCommandCtx *)context)->actor, 0x11400000) != 0) {
         scrSetIntReturnValue(1);
     } else {
         scrSetIntReturnValue(0);
@@ -2516,7 +2516,7 @@ u32 btlCmdReturnPartyHeldFlagCheck(void) {
 s32 btlCmdRememberNonLowerStatFlag(void) {
     u8 *context = (u8 *)scrGetCurrentProcessUserData();
     s32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, 0xD000000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, ((BtlCommandCtx *)context)->actor, 0xD000000)) {
         scrSetIntReturnValue(1);
         ((BtlCommandCtx *)context)->choice100 = choice;
         ((BtlCommandCtx *)context)->selectionFlagsA |= 0x1000000;
@@ -2530,7 +2530,7 @@ s32 btlCmdRememberNonLowerStatFlag(void) {
 s32 btlCmdRememberContextSecondaryFlag(void) {
     u8 *context = (u8 *)scrGetCurrentProcessUserData();
     s32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, 0xD400000)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, ((BtlCommandCtx *)context)->actor, 0xD400000)) {
         scrSetIntReturnValue(1);
         ((BtlCommandCtx *)context)->choice108 = choice;
         ((BtlCommandCtx *)context)->selectionFlagsA |= 0x4000000;
@@ -2626,7 +2626,7 @@ u32 btlScriptBuiltin450NoOp(void) {
 s32 btlCmdRememberUpperQueuedQuery(void) {
     u8 *context = (u8 *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, choice | BTL_PACKED_ENEMY_QUEUED_QUERY)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, ((BtlCommandCtx *)context)->actor, choice | BTL_PACKED_ENEMY_QUEUED_QUERY)) {
         scrSetIntReturnValue(1);
         ((BtlCommandCtx *)context)->choicesC[10] = choice;
         ((BtlCommandCtx *)context)->selectionFlagsB |= 0x4000;
@@ -2641,7 +2641,7 @@ s32 btlCmdRememberUpperQueuedQuery(void) {
 s32 btlCmdRememberLowerQueuedQuery(void) {
     u8 *context = (u8 *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, choice | BTL_PACKED_PARTY_QUEUED_QUERY)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, ((BtlCommandCtx *)context)->actor, choice | BTL_PACKED_PARTY_QUEUED_QUERY)) {
         scrSetIntReturnValue(1);
         ((BtlCommandCtx *)context)->choicesC[11] = choice;
         ((BtlCommandCtx *)context)->selectionFlagsB |= 0x8000;
@@ -2656,7 +2656,7 @@ s32 btlCmdRememberLowerQueuedQuery(void) {
 s32 btlCmdRememberLowerElementBlock(void) {
     u8 *context = (u8 *)scrGetCurrentProcessUserData();
     u32 choice = scrGetIntPara(0);
-    if (btlDispatchPackedActionWithScratch((s32)context, ((BtlCommandCtx *)context)->actor, choice | BTL_PACKED_PARTY_ELEMENT_BLOCK)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, ((BtlCommandCtx *)context)->actor, choice | BTL_PACKED_PARTY_ELEMENT_BLOCK)) {
         scrSetIntReturnValue(1);
         ((BtlCommandCtx *)context)->choicesC[9] = choice;
         ((BtlCommandCtx *)context)->selectionFlagsB |= 0x2000;
@@ -2670,7 +2670,7 @@ s32 btlCmdRememberLowerElementBlock(void) {
 /* Report whether an eligible party unit has zero current MP; the handler tests unit +0x12A. */
 s32 btlCmdReportPartyEmptyMp(void) {
     void *context = scrGetCurrentProcessUserData();
-    if (btlDispatchPackedActionWithScratch((s32)(u32)context, ((BtlCommandCtx *)context)->actor, BTL_PACKED_PARTY_EMPTY_MP)) {
+    if (btlDispatchPackedActionWithScratch((BtlAiScratchActor)context, ((BtlCommandCtx *)context)->actor, BTL_PACKED_PARTY_EMPTY_MP)) {
         scrSetIntReturnValue(1);
     } else {
         scrSetIntReturnValue(0);

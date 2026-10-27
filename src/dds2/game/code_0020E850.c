@@ -26,7 +26,7 @@
 #include "btl_action_eligibility.h"
 #include "btl_ai_action_api.h"
 #include "btl_ai_table.h"
-#include "btl_ai_scratch.h"
+#include "btl_packed_action_api.h"
 #include "btl_state.h"
 #include "btl_task_args.h"
 #include "evt_unit.h"
@@ -57,9 +57,6 @@ extern void btlPickCommandElementBlockTarget(ActionStateLink *, s32);
 
 extern void btlPickCommandTargetWithStatusMask(ActionStateLink *, s32);
 
-
-
-extern s32 btlDispatchPackedActionWithScratch(s32 context, BtlUnit *owner, s32 mask);
 
 
 extern BtlAiScratchWork *btlActionScratchWork;
@@ -1324,13 +1321,13 @@ void btlResetBattleHistoryCounters(void) {
     btlHistoryCounter = 0;
 }
 
-s32 btlDispatchPackedActionWithScratch(s32 context, BtlUnit *owner, s32 mask) {
+s32 btlDispatchPackedActionWithScratch(BtlAiScratchActor actorTask, BtlUnit *owner, s32 mask) {
     BtlAiScratchWork *work = sdfAllocAndClearQuadwords(sizeof(BtlAiScratchWork));
     s32 result;
 
     btlActionScratchWork = work;
     work->speciesId = owner->partyRecord.unitId;
-    work->actor = (ActionStateLink *)context;
+    work->actor = actorTask;
     result = btlDispatchPackedEffectAction((s32)owner, mask);
     sdfChipFreeDirect((void *)btlActionScratchWork);
     return result;
