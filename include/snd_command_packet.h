@@ -15,7 +15,14 @@ typedef struct CmdPacket {
 /* Queue sound command 0x40 without a payload. */
 void p2sdStopAllSe(void);
 
+/* The command ring copies the payload before publishing its queue entry, so
+ * the caller need keep packet storage valid only through this call. A nonzero
+ * result is the queue sequence, not proof of IOP delivery/completion; zero
+ * means the ring was full at the enqueue check and this call queued nothing. */
 u32 sdfSndSendCmd(u32 command, u32 channel, const void *packet, s32 payloadBytes);
+
+/* Historical name: this submits through sdfSndSendCmd and calls a no-op sync
+ * hook; it returns the queue sequence without waiting for IOP completion. */
 u32 sdfSndSendSyncCmd(u32 command, u32 channel, const void *packet, u32 size);
 
 typedef char CmdPacket_size_must_be_0x10[(sizeof(CmdPacket) == 0x10) ? 1 : -1];

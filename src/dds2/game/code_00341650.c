@@ -420,6 +420,7 @@ void p2sdLoadSMGFile(s32 packed) {
         id = packed >> 16;
         sprintf(name, "MIDI%04X.SMG", id);
         mnuBuildSoundResourcePath(path, name);
+        /* The queue copies this stack path before returning. */
         sdfSndSendSyncCmd(0xA0, 0, path, strlen(path) + 1);
         p2sdSmgHandle = id;
         break;
