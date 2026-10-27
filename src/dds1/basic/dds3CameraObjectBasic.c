@@ -178,8 +178,8 @@ void dds3CameraObjectBasicSetWorldEye(dds3Basic_t *camera, const u128 *worldEye)
     SDF_VU0_COPYVECTOR(&((CameraData *)camera->data)->worldEye, worldEye);
 }
 
-/* Return the camera's world-space eye vector in vf10. */
-void dds3CameraObjectBasicGetTargetPos(dds3Basic_t *camera) {
+/* Load the camera's world-space eye vector into vf10. */
+void dds3CameraObjectBasicLoadWorldEyeIntoVu(dds3Basic_t *camera) {
     u128 *eye = &((CameraData *)camera->data)->worldEye;
 
     SDF_VU0_LOADVECTOR_BARRIER(eye);

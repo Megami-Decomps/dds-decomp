@@ -610,7 +610,7 @@
 0x00112E58	dds3DeleteCameraObjectBasic	inferred	SMT3HD name via SLUS_209.11 0x00112870, shared-hash-in-run; was dds3ReleaseCameraWorldNode
 0x00112E70	dds3LoadObjectMatrixPointerIntoVu	inferred	confidence=high; src/dds1/basic/dds3CameraObjectBasic.c:func_00112E70; Loads the matrix from the pointer stored in the object into VU registers. [names_qp9.tsv]
 0x00112E90	dds3CameraObjectBasicSetWorldEye	inferred	Copies the supplied vector into CameraData.worldEye; direct callers use it to seed or update the camera eye. Replaces the imported GetCameraTM name, which contradicted the copy direction.
-0x00112EA8	dds3CameraObjectBasicGetTargetPos	inferred	SMT3HD name via SLUS_209.11 0x001128C0, shared-hash-in-run; was dds3LoadCameraVectorVU
+0x00112EA8	dds3CameraObjectBasicLoadWorldEyeIntoVu	inferred	Loads CameraData.worldEye into VU0 vf10; paired direct callers consume it as the camera eye vector before subtracting the target position.
 0x00112EC0	dds3CameraObjectBasicSetFovy	inferred	SMT3HD name via SLUS_209.11 0x001128D8, byte-identical; was dds3SetCameraFieldOfView
 0x00112ED8	dds3CameraObjectBasicGetFovy	inferred	SMT3HD name via SLUS_209.11 0x00112900, shared-hash-in-run; was dds3GetCameraFieldOfView
 0x00112EE8	dds3CameraObjectBasicGetTgtCam	inferred	SMT3HD name via SLUS_209.11 0x00112910, reloc-identical; was dds3TransformCameraVectorsByInnerRotation

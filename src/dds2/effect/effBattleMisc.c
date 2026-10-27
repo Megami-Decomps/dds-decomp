@@ -23,7 +23,7 @@ extern void (*GetPositionPtrTable[])();
 
 #include "dds3_world_primary.h"
 struct dds3Basic_t;
-extern void dds3CameraObjectBasicGetTargetPos(struct dds3Basic_t *object);
+extern void dds3CameraObjectBasicLoadWorldEyeIntoVu(struct dds3Basic_t *object);
 
 extern f32 effBattleAnchorHeightFactors[];
 extern f32 effBTL_Ptr_D[];
@@ -248,7 +248,7 @@ void effBattleMiscBuildUnitPartOffsetVU(BtlUnit *unit, EffectVectorRequest *requ
     if (directionMode == 9 || anchorKind == 4) {
         camera = dds3GetActiveCameraSceneBasic(dds3GetActiveScene());
         dir[0] = dir[1] = dir[2] = 750.0f;
-        dds3CameraObjectBasicGetTargetPos(camera);
+        dds3CameraObjectBasicLoadWorldEyeIntoVu(camera);
         SDF_VU0_COPYVECTOR_A_TO_B();
         dds3GetPosPoseSet(camera);
         SDF_VU0_SUBVECTOR();
