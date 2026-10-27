@@ -5,6 +5,7 @@
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "common.h"
+#include "btl_horizontal_aim_api.h"
 #include "btl_actor_command_selector_value_api.h"
 #include "dds3_camera_update_flags.h"
 #include "file_config_option_api.h"
@@ -3163,7 +3164,6 @@ void btlRefreshUnitFxVectors(BtlUnit *unit) {
 
 extern void btlUnitGetBodyPosVU(u8 *);
 
-extern s32 btlAimHorizontalDirectionVU(const f32 *, const f32 *);
 
 void btlUnitFaceTarget(BtlUnit *object, BtlUnit *target) {
     u8 first[16];

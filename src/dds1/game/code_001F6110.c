@@ -7,6 +7,7 @@
 #include "btl_effect_position.h"
 #include "kwln_sprite.h"
 #include "common.h"
+#include "btl_horizontal_aim_api.h"
 #include "btl_camera_mode_index.h"
 #include "sdf_vu0.h"
 #include "btl_aim_horizontal_direction_clamped_api.h"
@@ -1101,16 +1102,16 @@ s32 btlCountActiveUnitsWithFlags(s32 mask) {
 extern u128 btlHorizontalAimIdentityQuaternion;
 
 /* Aim along the horizontal origin-to-target delta; zero delta loads the default vf10. */
-s32 btlAimHorizontalDirectionVU(const f32 *origin, const f32 *targetPosition) {
+BtlHorizontalAimResult btlAimHorizontalDirectionVU(const f32 *origin, const f32 *targetPosition) {
     f32 delta[4];
     delta[0] = targetPosition[0] - origin[0];
     delta[2] = targetPosition[2] - origin[2];
     if (delta[0] != 0.0f || delta[2] != 0.0f) {
         sdfConvertEulerAnglesToQuaternionVU(0.0f, atan2f(delta[0], delta[2]), 0.0f);
-        return 1;
+        return BTL_HORIZONTAL_AIM_DIRECTION_BUILT;
     }
     VU0_LOAD_VF($vf10, &btlHorizontalAimIdentityQuaternion);
-    return 0;
+    return BTL_HORIZONTAL_AIM_NO_XZ_DELTA;
 }
 
 

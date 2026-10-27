@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_horizontal_aim_api.h"
 #include "mnu_title_sound.h"
 #include "sdf_vu0.h"
 #include "btl_actor_status_table_api.h"
@@ -86,7 +87,6 @@ extern void btlSetUnitPosition(BtlUnit *unit, const f32 *position);
 extern void btlSetUnitRotation(BtlUnit *unit, const f32 rotation[4]);
 
 
-extern s32 btlAimHorizontalDirectionVU(const f32 *, const f32 *);
 
 extern void btlSetUnitRotation(BtlUnit *, const f32 [4]);
 

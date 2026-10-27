@@ -2,6 +2,7 @@
 #include "evt_run_context_api.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_horizontal_aim_api.h"
 #include "btl_action_reaction_motion.h"
 #include "sdf_vu0.h"
 #include "btl_actor_status_table_api.h"
@@ -2381,7 +2382,6 @@ extern void btlSetSceneTaskActiveFlag(BtlTask *);
 extern BtlRuntimeTask *btlCreateUnitDefeatFadeInTask(BtlUnit *, s32);
 extern f32 btlMeasureMaskedUnitBounds(s32, f32 *, f32 *);
 extern void btlUnitGetBodyPosVU(BtlUnit *);
-extern s32 btlAimHorizontalDirectionVU(const f32 *, const f32 *);
 
 void btlScheduleSummonActionTasks(BtlTask *action) {
     f32 center[4] __attribute__((aligned(16)));

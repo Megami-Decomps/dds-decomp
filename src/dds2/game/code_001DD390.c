@@ -5,6 +5,7 @@
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "common.h"
+#include "btl_horizontal_aim_api.h"
 #include "btl_actor_command_selector_value_api.h"
 #include "btl_scene_counter_mode.h"
 #include "dds3_camera_update_flags.h"
@@ -3228,7 +3229,6 @@ void btlRefreshUnitFxVectors(BtlUnit *unit) {
     sdfModelEvalTm(unit->ext->owner->inner);
 }
 
-extern s32 btlAimHorizontalDirectionVU(const f32 *, const f32 *);
 
 extern void btlUnitGetBodyPosVU(BtlUnit *);
 

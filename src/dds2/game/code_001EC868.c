@@ -8,6 +8,7 @@
 #include "btl_pair_camera_preset.h"
 #include "btl_camera_parameter_record.h"
 #include "common.h"
+#include "btl_horizontal_aim_api.h"
 #include "sdf_delayed_resource_check_api.h"
 #include "btl_camera_quaternion_pair.h"
 #include "btl_camera_snapshots.h"
@@ -312,7 +313,6 @@ extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *, s32);
 
 extern void mdlGetPosition(dds3ModelHandle_t *);
 
-extern s32 btlAimHorizontalDirectionVU(const f32 *, const f32 *);
 
 extern void btlUnitGetBodyPosVU(BtlUnit *);
 
