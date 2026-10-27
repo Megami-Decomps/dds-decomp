@@ -391,8 +391,8 @@ enum {
 enum {
     EVT_DEFAULT_STAT_VALUE = 100,
     EVT_ROSTER_DETAIL_KIND = 5,
-    EVT_DEFAULT_GROUP_MASK = 4,
-    EVT_ALTERNATE_GROUP_MASK = 0x20,
+    EVT_DEFAULT_PARTY_RECORD_FLAGS_MASK = 4,
+    EVT_ALTERNATE_PARTY_RECORD_FLAGS_MASK = 0x20,
     EVT_CONTEXT_BYTES = 0x18,
     EVT_RESULT_WRITTEN_FLAG = 1,
     EVT_RESULT_RESET_MASK = 0xFFFE
@@ -441,9 +441,6 @@ extern void ptyMergeStockSkills(datUnitWork_t *unit);
 extern u8 btlIsRuntimeAllocated(void);
 extern f32 btlGetEncounterAdjustmentScale(void);
 extern u32 btlGetEscapeAttemptCount(void);
-extern s32 btlAverageAllMaximumForMask(u32 partyRecordFlagsMask);
-extern s32 btlAverageAllCurrentForMask(u32 partyRecordFlagsMask);
-extern s32 btlAverageAllLevelsForMask(u32 actorMask);
 extern void evtBitOn(s32 flagIndex);
 
 /* Flag-range items set their model flag regardless of quantityDelta.
@@ -1583,7 +1580,9 @@ s32 scrGetBattleAverageCurrentValueForGroup(void) {
     s32 averageValue;
     if (battleAvailable) {
         s32 groupChoice = scrGetIntPara(0);
-        averageValue = btlAverageAllCurrentForMask(groupChoice ? EVT_ALTERNATE_GROUP_MASK : EVT_DEFAULT_GROUP_MASK);
+        BtlPartyRecordFlagsMask partyRecordFlagsMask =
+            groupChoice ? EVT_ALTERNATE_PARTY_RECORD_FLAGS_MASK : EVT_DEFAULT_PARTY_RECORD_FLAGS_MASK;
+        averageValue = btlAverageAllCurrentForMask(partyRecordFlagsMask);
     }
     else {
         averageValue = 0;
@@ -1598,7 +1597,9 @@ s32 scrGetBattleAverageMaximumValueForGroup(void) {
     s32 averageValue;
     if (battleAvailable) {
         s32 groupChoice = scrGetIntPara(0);
-        averageValue = btlAverageAllMaximumForMask(groupChoice ? EVT_ALTERNATE_GROUP_MASK : EVT_DEFAULT_GROUP_MASK);
+        BtlPartyRecordFlagsMask partyRecordFlagsMask =
+            groupChoice ? EVT_ALTERNATE_PARTY_RECORD_FLAGS_MASK : EVT_DEFAULT_PARTY_RECORD_FLAGS_MASK;
+        averageValue = btlAverageAllMaximumForMask(partyRecordFlagsMask);
     }
     else {
         averageValue = 0;
@@ -1613,7 +1614,9 @@ s32 scrGetBattleAverageActorStatForGroup(void) {
     s32 averageValue;
     if (battleAvailable) {
         s32 groupChoice = scrGetIntPara(0);
-        averageValue = btlAverageAllLevelsForMask(groupChoice ? EVT_ALTERNATE_GROUP_MASK : EVT_DEFAULT_GROUP_MASK);
+        BtlPartyRecordFlagsMask partyRecordFlagsMask =
+            groupChoice ? EVT_ALTERNATE_PARTY_RECORD_FLAGS_MASK : EVT_DEFAULT_PARTY_RECORD_FLAGS_MASK;
+        averageValue = btlAverageAllLevelsForMask(partyRecordFlagsMask);
     }
     else {
         averageValue = 0;
@@ -1629,8 +1632,9 @@ s32 evtPushAvailableChoiceRatio(void) {
     if (battleAvailable) {
         s32 groupChoice = scrGetIntPara(0);
         DatBaseStatIndex baseStatIndex = scrGetIntPara(1);
-        s32 selectedMask = groupChoice ? EVT_ALTERNATE_GROUP_MASK : EVT_DEFAULT_GROUP_MASK;
-        averageValue = btlAverageActorAttribute(selectedMask, baseStatIndex);
+        BtlPartyRecordFlagsMask partyRecordFlagsMask =
+            groupChoice ? EVT_ALTERNATE_PARTY_RECORD_FLAGS_MASK : EVT_DEFAULT_PARTY_RECORD_FLAGS_MASK;
+        averageValue = btlAverageActorAttribute(partyRecordFlagsMask, baseStatIndex);
     }
     else {
         averageValue = 0;

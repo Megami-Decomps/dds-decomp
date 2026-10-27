@@ -705,7 +705,8 @@ BtlSceneCounterMode btlGetCommandResultKindFromFlags(u32 flags, u32 otherFlags, 
     return BTL_SCENE_COUNTER_MODE_NORMAL;
 }
 
-s32 btlAverageMaximumValueForMask(s32 mask, s8 skipDown) {
+s32 btlAverageMaximumValueForMask(
+    BtlPartyRecordFlagsMask partyRecordFlagsMask, s8 skipDown) {
     BtlUnit *unit;
     s32 total = 0;
     s32 count = 0;
@@ -714,7 +715,7 @@ s32 btlAverageMaximumValueForMask(s32 mask, s8 skipDown) {
         flags = unit->status.flags;
         if (flags & 1) {
             if (skipDown == 0 || !(flags & 0x20)) {
-                if (unit->partyRecord.flags & mask) {
+                if (unit->partyRecord.flags & partyRecordFlagsMask) {
                     count++;
                     total += unit->partyRecord.maxHp;
                 }
@@ -727,15 +728,16 @@ s32 btlAverageMaximumValueForMask(s32 mask, s8 skipDown) {
     return 1;
 }
 
-void btlAverageFilteredMaximumForMask(u32 partyRecordFlagsMask) {
+void btlAverageFilteredMaximumForMask(BtlPartyRecordFlagsMask partyRecordFlagsMask) {
     btlAverageMaximumValueForMask(partyRecordFlagsMask, 1);
 }
 
-s32 btlAverageAllMaximumForMask(u32 partyRecordFlagsMask) {
+s32 btlAverageAllMaximumForMask(BtlPartyRecordFlagsMask partyRecordFlagsMask) {
     return btlAverageMaximumValueForMask(partyRecordFlagsMask, 0);
 }
 
-s32 btlAverageCurrentValueForMask(s32 mask, s8 skipDown) {
+s32 btlAverageCurrentValueForMask(
+    BtlPartyRecordFlagsMask partyRecordFlagsMask, s8 skipDown) {
     BtlUnit *unit;
     s32 total = 0;
     s32 count = 0;
@@ -744,7 +746,7 @@ s32 btlAverageCurrentValueForMask(s32 mask, s8 skipDown) {
         flags = unit->status.flags;
         if (flags & 1) {
             if (skipDown == 0 || !(flags & 0x20)) {
-                if (unit->partyRecord.flags & mask) {
+                if (unit->partyRecord.flags & partyRecordFlagsMask) {
                     count++;
                     total += unit->partyRecord.hp;
                 }
@@ -757,16 +759,17 @@ s32 btlAverageCurrentValueForMask(s32 mask, s8 skipDown) {
     return 1;
 }
 
-void btlAverageFilteredCurrentForMask(u32 partyRecordFlagsMask) {
+void btlAverageFilteredCurrentForMask(BtlPartyRecordFlagsMask partyRecordFlagsMask) {
     btlAverageCurrentValueForMask(partyRecordFlagsMask, 1);
 }
 
 /* Return mean current HP for the mask, including bit-0x20 actors. */
-s32 btlAverageAllCurrentForMask(u32 partyRecordFlagsMask) {
+s32 btlAverageAllCurrentForMask(BtlPartyRecordFlagsMask partyRecordFlagsMask) {
     return btlAverageCurrentValueForMask(partyRecordFlagsMask, 0);
 }
 
-s32 btlAverageMaskedActorStat(s32 mask, s8 skipDown) {
+s32 btlAverageMaskedActorStat(
+    BtlPartyRecordFlagsMask partyRecordFlagsMask, s8 skipDown) {
     BtlUnit *unit;
     s32 total = 0;
     s32 count = 0;
@@ -775,7 +778,7 @@ s32 btlAverageMaskedActorStat(s32 mask, s8 skipDown) {
         flags = unit->status.flags;
         if (flags & 1) {
             if (skipDown == 0 || !(flags & 0x20)) {
-                if (unit->partyRecord.flags & mask) {
+                if (unit->partyRecord.flags & partyRecordFlagsMask) {
                     count++;
                     total += unit->partyRecord.level;
                 }
@@ -788,16 +791,18 @@ s32 btlAverageMaskedActorStat(s32 mask, s8 skipDown) {
     return 1;
 }
 
-s32 btlAverageLevelsForMaskExcludingStatus20(u32 mask) {
-    return btlAverageMaskedActorStat(mask, 1);
+s32 btlAverageLevelsForMaskExcludingStatus20(BtlPartyRecordFlagsMask partyRecordFlagsMask) {
+    return btlAverageMaskedActorStat(partyRecordFlagsMask, 1);
 }
 
 /* Return mean level for the mask, including bit-0x20 actors. */
-s32 btlAverageAllLevelsForMask(u32 actorMask) {
-    return btlAverageMaskedActorStat(actorMask, 0);
+s32 btlAverageAllLevelsForMask(BtlPartyRecordFlagsMask partyRecordFlagsMask) {
+    return btlAverageMaskedActorStat(partyRecordFlagsMask, 0);
 }
 
-s32 btlSumOrAverageActorAttribute(u32 mask, DatBaseStatIndex baseStatIndex, s8 skipDown) {
+s32 btlSumOrAverageActorAttribute(
+    BtlPartyRecordFlagsMask partyRecordFlagsMask,
+    DatBaseStatIndex baseStatIndex, s8 skipDown) {
     s32 sum = 0;
     s32 count = 0;
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
@@ -805,7 +810,7 @@ s32 btlSumOrAverageActorAttribute(u32 mask, DatBaseStatIndex baseStatIndex, s8 s
         u32 flags = unit->status.flags;
         if ((flags & 1) != 0) {
             if (skipDown == 0 || (flags & 0x20) == 0) {
-                if ((unit->partyRecord.flags & mask) != 0) {
+                if ((unit->partyRecord.flags & partyRecordFlagsMask) != 0) {
                     s32 value = datGetStatWithStatusOverride(&unit->partyRecord, baseStatIndex);
                     count++;
                     sum += value;
@@ -819,7 +824,8 @@ s32 btlSumOrAverageActorAttribute(u32 mask, DatBaseStatIndex baseStatIndex, s8 s
     return sum;
 }
 
-void btlAverageFilteredActorAttribute(u32 partyRecordFlagsMask, DatBaseStatIndex baseStatIndex) {
+void btlAverageFilteredActorAttribute(
+    BtlPartyRecordFlagsMask partyRecordFlagsMask, DatBaseStatIndex baseStatIndex) {
     btlSumOrAverageActorAttribute(partyRecordFlagsMask, baseStatIndex, 1);
 }
 

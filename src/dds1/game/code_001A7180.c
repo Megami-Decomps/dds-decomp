@@ -1010,7 +1010,8 @@ BtlSceneCounterMode btlGetCommandResultKindFromFlags(u32 flags, u32 secondary) {
     return secondary & 2 ? BTL_SCENE_COUNTER_MODE_CRITICAL : BTL_SCENE_COUNTER_MODE_NORMAL;
 }
 
-s32 btlAverageMaximumValueForMask(u32 mask, s8 allowDisabled) {
+s32 btlAverageMaximumValueForMask(
+    BtlPartyRecordFlagsMask partyRecordFlagsMask, s8 allowDisabled) {
     BtlUnit *actor = ((BtlState *)btlGetRuntime())->units;
     s32 sum = 0;
     s32 count = 0;
@@ -1018,7 +1019,7 @@ s32 btlAverageMaximumValueForMask(u32 mask, s8 allowDisabled) {
         u32 flags = actor->status.flags;
         if ((flags & 1) != 0) {
             if (allowDisabled == 0 || (flags & 0x20) == 0) {
-                if ((actor->partyRecord.flags & mask) != 0) {
+                if ((actor->partyRecord.flags & partyRecordFlagsMask) != 0) {
                     count++;
                     sum += actor->partyRecord.maxHp;
                 }
@@ -1029,15 +1030,16 @@ s32 btlAverageMaximumValueForMask(u32 mask, s8 allowDisabled) {
     return 1;
 }
 
-void btlAverageFilteredMaximumForMask(u32 partyRecordFlagsMask) {
+void btlAverageFilteredMaximumForMask(BtlPartyRecordFlagsMask partyRecordFlagsMask) {
     btlAverageMaximumValueForMask(partyRecordFlagsMask, 1);
 }
 
-s32 btlAverageAllMaximumForMask(u32 partyRecordFlagsMask) {
+s32 btlAverageAllMaximumForMask(BtlPartyRecordFlagsMask partyRecordFlagsMask) {
     return btlAverageMaximumValueForMask(partyRecordFlagsMask, 0);
 }
 
-s32 btlAverageCurrentValueForMask(u32 mask, s8 allowDisabled) {
+s32 btlAverageCurrentValueForMask(
+    BtlPartyRecordFlagsMask partyRecordFlagsMask, s8 allowDisabled) {
     BtlUnit *actor = ((BtlState *)btlGetRuntime())->units;
     s32 sum = 0;
     s32 count = 0;
@@ -1045,7 +1047,7 @@ s32 btlAverageCurrentValueForMask(u32 mask, s8 allowDisabled) {
         u32 flags = actor->status.flags;
         if ((flags & 1) != 0) {
             if (allowDisabled == 0 || (flags & 0x20) == 0) {
-                if ((actor->partyRecord.flags & mask) != 0) {
+                if ((actor->partyRecord.flags & partyRecordFlagsMask) != 0) {
                     count++;
                     sum += actor->partyRecord.hp;
                 }
@@ -1056,16 +1058,17 @@ s32 btlAverageCurrentValueForMask(u32 mask, s8 allowDisabled) {
     return 1;
 }
 
-void btlAverageFilteredCurrentForMask(u32 partyRecordFlagsMask) {
+void btlAverageFilteredCurrentForMask(BtlPartyRecordFlagsMask partyRecordFlagsMask) {
     btlAverageCurrentValueForMask(partyRecordFlagsMask, 1);
 }
 
 /* Return mean current HP for the mask, including bit-0x20 actors. */
-s32 btlAverageAllCurrentForMask(u32 partyRecordFlagsMask) {
+s32 btlAverageAllCurrentForMask(BtlPartyRecordFlagsMask partyRecordFlagsMask) {
     return btlAverageCurrentValueForMask(partyRecordFlagsMask, 0);
 }
 
-s32 btlAverageMaskedActorStat(u32 mask, s8 allowDisabled) {
+s32 btlAverageMaskedActorStat(
+    BtlPartyRecordFlagsMask partyRecordFlagsMask, s8 allowDisabled) {
     BtlUnit *actor = ((BtlState *)btlGetRuntime())->units;
     s32 sum = 0;
     s32 count = 0;
@@ -1073,7 +1076,7 @@ s32 btlAverageMaskedActorStat(u32 mask, s8 allowDisabled) {
         u32 flags = actor->status.flags;
         if ((flags & 1) != 0) {
             if (allowDisabled == 0 || (flags & 0x20) == 0) {
-                if ((actor->partyRecord.flags & mask) != 0) {
+                if ((actor->partyRecord.flags & partyRecordFlagsMask) != 0) {
                     count++;
                     sum += actor->partyRecord.level;
                 }
@@ -1084,16 +1087,18 @@ s32 btlAverageMaskedActorStat(u32 mask, s8 allowDisabled) {
     return 1;
 }
 
-s32 btlAverageLevelsForMaskExcludingStatus20(u32 partyRecordFlagsMask) {
+s32 btlAverageLevelsForMaskExcludingStatus20(BtlPartyRecordFlagsMask partyRecordFlagsMask) {
     return btlAverageMaskedActorStat(partyRecordFlagsMask, 1);
 }
 
 /* Return mean level for the mask, including bit-0x20 actors. */
-s32 btlAverageAllLevelsForMask(u32 actorMask) {
-    return btlAverageMaskedActorStat(actorMask, 0);
+s32 btlAverageAllLevelsForMask(BtlPartyRecordFlagsMask partyRecordFlagsMask) {
+    return btlAverageMaskedActorStat(partyRecordFlagsMask, 0);
 }
 
-s32 btlSumOrAverageActorAttribute(u32 mask, DatBaseStatIndex baseStatIndex, s8 allowDisabled) {
+s32 btlSumOrAverageActorAttribute(
+    BtlPartyRecordFlagsMask partyRecordFlagsMask,
+    DatBaseStatIndex baseStatIndex, s8 allowDisabled) {
     s32 sum = 0;
     s32 count = 0;
     BtlUnit *actor = ((BtlState *)btlGetRuntime())->units;
@@ -1101,7 +1106,7 @@ s32 btlSumOrAverageActorAttribute(u32 mask, DatBaseStatIndex baseStatIndex, s8 a
         u32 flags = actor->status.flags;
         if ((flags & 1) != 0) {
             if (allowDisabled == 0 || (flags & 0x20) == 0) {
-                if ((actor->partyRecord.flags & mask) != 0) {
+                if ((actor->partyRecord.flags & partyRecordFlagsMask) != 0) {
                     s32 value = datGetStatWithStatusOverride(&actor->partyRecord, baseStatIndex);
                     count++;
                     sum += value;
@@ -1115,7 +1120,8 @@ s32 btlSumOrAverageActorAttribute(u32 mask, DatBaseStatIndex baseStatIndex, s8 a
     return sum;
 }
 
-void btlAverageFilteredActorAttribute(u32 partyRecordFlagsMask, DatBaseStatIndex baseStatIndex) {
+void btlAverageFilteredActorAttribute(
+    BtlPartyRecordFlagsMask partyRecordFlagsMask, DatBaseStatIndex baseStatIndex) {
     btlSumOrAverageActorAttribute(partyRecordFlagsMask, baseStatIndex, 1);
 }
 
