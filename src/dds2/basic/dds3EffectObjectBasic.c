@@ -511,7 +511,7 @@ extern const EffectEventVectorParameters D_00412950;
 
 
 dds3Basic_t *AddBEDEffect(source, firstVector, secondVector)
-    const SoundMixer *source;
+    SoundMixer *source;
     const u128 *firstVector;
     const u128 *secondVector;
 {
@@ -549,7 +549,7 @@ dds3Basic_t *AddBEDEffect(source, firstVector, secondVector)
     return obj;
 }
 
-dds3Basic_t *dds3AddBEDEffectObjectBasic2(const struct SoundMixer *resource, const u128 *position, const void *scale) {
+dds3Basic_t *dds3AddBEDEffectObjectBasic2(struct SoundMixer *resource, const u128 *position, const void *scale) {
     return AddBEDEffect(resource, position, scale);
 }
 

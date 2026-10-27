@@ -4451,7 +4451,7 @@ BtlSelectedUnitEffectTaskResult btlUpdateSelectedUnitEffect(BtlSelectedUnitEffec
     {
         BtlState *battle = (BtlState *)btlGetRuntime();
         if (args->effect == 0) {
-            const SoundMixer *handle = battle->resources[BTL_SELECTED_UNIT_EFFECT_SOUND_SLOT]->sourceHandle;
+            SoundMixer *handle = battle->resources[BTL_SELECTED_UNIT_EFFECT_SOUND_SLOT]->sourceHandle;
             unit->status.flags |= 0x80;
             args->mixer = sndMixerClone(handle);
             args->effect = effCreateBattleVoiceOwner(args->mixer, 2, unit, 0);

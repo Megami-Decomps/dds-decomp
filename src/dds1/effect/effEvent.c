@@ -1137,7 +1137,7 @@ void rblurSetParam(dds3Effect_RippleBlurParam_t *parameters) {
     effStaggeredBlurSetupParameters = *parameters;
 }
 
-SoundMixer *effEveBEDCreate(const SoundMixer *source) {
+SoundMixer *effEveBEDCreate(SoundMixer *source) {
     return sndMixerClone(source);
 }
 

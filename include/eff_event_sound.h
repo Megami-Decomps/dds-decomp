@@ -4,7 +4,7 @@
 struct SoundMixer;
 
 /* Create an owned mixer clone, then destroy it with its active effect state. */
-struct SoundMixer *effEveBEDCreate(const struct SoundMixer *source);
+struct SoundMixer *effEveBEDCreate(struct SoundMixer *source);
 void effEveBEDDelete(struct SoundMixer *mixer);
 
 #endif

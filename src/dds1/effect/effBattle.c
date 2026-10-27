@@ -436,8 +436,8 @@ s32 effBattleHasActiveKind(effBTLCutHandle_t *owner) {
 
 /* Rebuild each cloned bank's parameter work, resolving shared-entry references
  * and preserving disabled descriptors. */
-void effBTLPartCreate(SoundMixer *destination, const SoundMixer *source) {
-    const u8 *sourceBytes = (const u8 *)source;
+void effBTLPartCreate(SoundMixer *destination, SoundMixer *source) {
+    u8 *sourceBytes = (u8 *)source;
     s32 bankIndex;
 
     for (bankIndex = 0; bankIndex < 2; bankIndex++) {

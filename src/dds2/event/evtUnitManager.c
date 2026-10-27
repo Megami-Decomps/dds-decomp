@@ -1176,7 +1176,7 @@ extern void dds3EffectObjectBasicStatOn(dds3Basic_t *object, u32 flags);
 
 extern dds3Basic_t *effObjSpawnDescriptorBoundEffect(struct EffNodeDescriptor *descriptor, void *firstVector, void *secondVector);
 struct SoundMixer;
-extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(const struct SoundMixer *resource, const void *position, const void *scale);
+extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(struct SoundMixer *resource, const void *position, const void *scale);
 extern dds3Basic_t *dds3AddMG12EffectObjectBasic2(s32 kind, struct EffNodeDescriptor *descriptor);
 extern char D_00421A78[];
 

@@ -374,7 +374,7 @@ void btlReleaseEventData(void) {
     btlBossDebugPrintf(D_003A67D0);
 }
 
-extern void btlCreateIndexedSoundResourceNode(s32, const SoundMixer *);
+extern void btlCreateIndexedSoundResourceNode(s32, SoundMixer *);
 
 extern char D_003A67E8[];
 

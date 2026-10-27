@@ -4386,7 +4386,7 @@ extern void effBattleUpdate(effBTLCutHandle_t *);
 BtlSelectedUnitEffectTaskResult btlUpdateSelectedUnitEffect(BtlSelectedUnitEffectTaskArgs *arguments) {
     BtlUnit *unit = arguments->unit;
     SoundResourceNode *work;
-    const SoundMixer *handle;
+    SoundMixer *handle;
 
     if (!(unit->status.flags & 2)) {
         return BTL_SELECTED_UNIT_EFFECT_TASK_COMPLETE;

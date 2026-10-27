@@ -8583,7 +8583,7 @@ SoundResourceNode *sndAllocResourceNode(void) {
     return node;
 }
 
-SoundResourceNode *sndCreateResourceNode(const SoundMixer *sourceMixer) {
+SoundResourceNode *sndCreateResourceNode(SoundMixer *sourceMixer) {
     SoundResourceNode *node = (SoundResourceNode *)sndAllocResourceNode();
     node->resourceHandle = sndMixerClone(sourceMixer);
     node->flags |= SOUND_RESOURCE_NODE_FLAG_AVAILABLE;
@@ -8947,7 +8947,7 @@ void sndLoadSysEffLb(void) {
     pacFileHandleFree_(archive);
 }
 
-void btlCreateIndexedSoundResourceNode(s32 slotIndex, const SoundMixer *source);
+void btlCreateIndexedSoundResourceNode(s32 slotIndex, SoundMixer *source);
 
 /* Register available SYSEFF handles; unavailable slots are left untouched. */
 void btlRefreshSoundEntries(void) {
@@ -8973,7 +8973,7 @@ void sndFreeBattleSoundEntries(void) {
 }
 
 /* Register a borrowed archive source in its SYSEFF slot, without cloning it. */
-void btlCreateIndexedSoundResourceNode(s32 slotIndex, const SoundMixer *source) {
+void btlCreateIndexedSoundResourceNode(s32 slotIndex, SoundMixer *source) {
     SoundResourceNodeFlags flags;
     s32 work;
     SoundResourceNode *node;
