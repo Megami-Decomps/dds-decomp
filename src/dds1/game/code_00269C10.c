@@ -21,6 +21,7 @@
 #include "mnu_title_stream_status_snapshot.h"
 #include "mnu_title_stream_entry.h"
 #include "mnu_title_sound.h"
+#include "mnu_title_sound_buffer_status.h"
 
 #define SND_MIX_SAMPLE_COUNT 0x800
 #define SND_MIX_SAMPLE_LIMIT 0x7FFF
@@ -629,20 +630,19 @@ void mnuInstallTitleSoundBufferFromData(const void *compressedData, s32 dataByte
     SignalSema(mnuTitleStreamSemaphore);
 }
 
-/* These return codes are not load-state codes: 0 means no allocation,
- * 2 means control 2, and 3 covers the remaining allocated states. */
-s32 mnuGetSoundBufferStateLocked(void) {
+/* This status reports allocation and stream control, not load progress. */
+MnuTitleSoundBufferStatus mnuGetSoundBufferStateLocked(void) {
     WaitSema(mnuTitleStreamSemaphore);
     if (mnuTitleSoundBufferState.allocation == 0) {
         SignalSema(mnuTitleStreamSemaphore);
-        return 0;
+        return MNU_TITLE_SOUND_BUFFER_UNALLOCATED;
     }
     if (mnuTitleSoundBufferState.control == 2) {
         SignalSema(mnuTitleStreamSemaphore);
-        return 2;
+        return MNU_TITLE_SOUND_BUFFER_INACTIVE;
     }
     SignalSema(mnuTitleStreamSemaphore);
-    return 3;
+    return MNU_TITLE_SOUND_BUFFER_ALLOCATED_OTHER_CONTROL;
 }
 
 void mnuPrintTitleDebugBanner(void) {

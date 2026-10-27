@@ -21,6 +21,7 @@
 #include "btl_blend_color_api.h"
 #include "mnu_title_stream.h"
 #include "mnu_title_sound.h"
+#include "mnu_title_sound_buffer_status.h"
 #include "eff_random_mod.h"
 #include "btl_tint_transition.h"
 #include "eff_random.h"
@@ -127,7 +128,6 @@ extern void btlClearAllUnitDefeatCandidatesTask(void);
 
 extern void btlInitializeActorCameraPreset(BtlLinkedCommand *action);
 
-extern s32 mnuGetSoundBufferStateLocked(void);
 
 extern void SetRotateMatrixX(f32);
 
@@ -9566,7 +9566,7 @@ u32 sndPollMotionSePlayback(BtlRuntimeTaskArgs *args) {
         btlBossDebugPrintf("btl:motSE load wait[%X]\n", key);
     } else {
         if (work->motionSeLoadFrame >= 0xB) {
-            if (mnuGetSoundBufferStateLocked() != 0) {
+            if (mnuGetSoundBufferStateLocked() != MNU_TITLE_SOUND_BUFFER_UNALLOCATED) {
                 mnuResetSoundBufferLocked();
                 mnuReleaseSoundBufferLocked();
             }

@@ -3,6 +3,7 @@
 #include "common.h"
 #include "btl_horizontal_aim_api.h"
 #include "mnu_title_sound.h"
+#include "mnu_title_sound_buffer_status.h"
 #include "sdf_vu0.h"
 #include "btl_actor_status_table_api.h"
 #include "sdf_trig.h"
@@ -46,7 +47,6 @@
 
 extern void btlClearAllUnitDefeatCandidates(void);
 
-extern s32 mnuGetSoundBufferStateLocked(void);
 
 typedef struct BtlUnit BtlUnit;
 
@@ -156,12 +156,12 @@ s32 sndHasOccupiedNodeSlots(void) {
 
 s32 sndWaitForEarringPlayback(void) {
     s32 ready;
-    s32 status;
+    MnuTitleSoundBufferStatus status;
 
     status = mnuGetSoundBufferStateLocked();
     ready = 1;
-    if (status != 0) {
-        if (status == 2) {
+    if (status != MNU_TITLE_SOUND_BUFFER_UNALLOCATED) {
+        if (status == MNU_TITLE_SOUND_BUFFER_INACTIVE) {
             mnuClearInactiveSoundBufferState();
             ready = 0;
         }
@@ -193,7 +193,7 @@ s32 sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
         args->request = fileLoad(path);
         btlBossDebugPrintf("btl:atrac3 SE load[%s]\n", path);
     } else if (pacFileCheckEnd(args->request) != 0) {
-        if (mnuGetSoundBufferStateLocked() != 0) {
+        if (mnuGetSoundBufferStateLocked() != MNU_TITLE_SOUND_BUFFER_UNALLOCATED) {
             mnuReleaseSoundBufferLocked();
         }
         resource = fileGetMemHandle(args->request);
@@ -230,7 +230,7 @@ void sndStartDeadAtracLoad(BtlDeadLoadArgs *args) {
     s32 id;
     char path[0x70];
     if (work->earringPlaybackCount == 0) {
-        if (mnuGetSoundBufferStateLocked() != 0) {
+        if (mnuGetSoundBufferStateLocked() != MNU_TITLE_SOUND_BUFFER_UNALLOCATED) {
             mnuReleaseSoundBufferLocked();
         }
         unit = args->unit;
@@ -271,7 +271,7 @@ SndEarringPlaybackTaskResult sndDeadAtracPlaybackTask(BtlDeadLoadArgs *args) {
         }
         return SND_EARRING_PLAYBACK_TASK_CONTINUE;
     }
-    if (mnuGetSoundBufferStateLocked() == 0) {
+    if (mnuGetSoundBufferStateLocked() == MNU_TITLE_SOUND_BUFFER_UNALLOCATED) {
         btlBossDebugPrintf("btl:ATRAC3 dead play end\n");
         return SND_EARRING_PLAYBACK_TASK_FINISHED;
     }

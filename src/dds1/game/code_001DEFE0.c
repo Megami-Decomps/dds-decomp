@@ -21,6 +21,7 @@
 #include "kwln_fade.h"
 #include "mnu_title_stream.h"
 #include "mnu_title_sound.h"
+#include "mnu_title_sound_buffer_status.h"
 #include "eff_random_mod.h"
 #include "btl_tint_transition.h"
 #include "eff_random.h"
@@ -10305,7 +10306,6 @@ void btlQueueUnitSoundSlotFileLoad(SoundTaskArgs *args) {
     }
 }
 
-extern s32 mnuGetSoundBufferStateLocked(void);
 
 extern void mnuResetSoundBufferLocked(void);
 
@@ -10357,7 +10357,7 @@ u32 sndPollMotionSePlayback(SoundTaskArgs *args) {
         btlBossDebugPrintf("btl:motSE load wait[%X]\n", key);
     } else {
         if (work->motionSeLoadFrame >= 0xB) {
-            if (mnuGetSoundBufferStateLocked() != 0) {
+            if (mnuGetSoundBufferStateLocked() != MNU_TITLE_SOUND_BUFFER_UNALLOCATED) {
                 mnuResetSoundBufferLocked();
                 mnuReleaseSoundBufferLocked();
             }
@@ -10526,11 +10526,11 @@ s32 sndHasOccupiedNodeSlots(void) {
 }
 
 u32 sndFinishEarringPlayback(void) {
-    s32 status = mnuGetSoundBufferStateLocked();
-    if (status == 0) {
+    MnuTitleSoundBufferStatus status = mnuGetSoundBufferStateLocked();
+    if (status == MNU_TITLE_SOUND_BUFFER_UNALLOCATED) {
         return 1;
     }
-    if (status == 2) {
+    if (status == MNU_TITLE_SOUND_BUFFER_INACTIVE) {
         printf("%%%%%%%%%%%%%%%% EARRING(2)\n");
         mnuPrintTitleDebugBanner();
     }
@@ -10565,7 +10565,7 @@ s32 sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
         args->request = fileLoad(path);
         btlBossDebugPrintf(D_003A5340, path);
     } else if (pacFileCheckEnd(args->request) != 0) {
-        if (mnuGetSoundBufferStateLocked() != 0) {
+        if (mnuGetSoundBufferStateLocked() != MNU_TITLE_SOUND_BUFFER_UNALLOCATED) {
             mnuReleaseSoundBufferLocked();
         }
         resource = fileGetMemHandle(args->request);
@@ -10606,7 +10606,7 @@ void sndStartDeadAtracLoad(BtlDeadLoadArgs *args) {
     char path[0x70];
 
     if (*(u16 *)(work + 0x260) == 0) {
-        if (mnuGetSoundBufferStateLocked() != 0) {
+        if (mnuGetSoundBufferStateLocked() != MNU_TITLE_SOUND_BUFFER_UNALLOCATED) {
             mnuReleaseSoundBufferLocked();
         }
         unit = args->unit;
@@ -10653,7 +10653,7 @@ SndEarringPlaybackTaskResult sndUpdateEarringDeadPlayback(BtlDeadLoadArgs *args)
         }
         return SND_EARRING_PLAYBACK_TASK_CONTINUE;
     }
-    if (mnuGetSoundBufferStateLocked() == 0) {
+    if (mnuGetSoundBufferStateLocked() == MNU_TITLE_SOUND_BUFFER_UNALLOCATED) {
         btlBossDebugPrintf(D_003A53D0);
         return SND_EARRING_PLAYBACK_TASK_FINISHED;
     }
