@@ -26,6 +26,7 @@
 #include "fr_font.h"
 #include "fr_font_context.h"
 #include "mc_poll.h"
+#include "mc_read_api.h"
 #include "mc_write_api.h"
 #include "mc_path_api.h"
 #include "bill_object_api.h"
@@ -867,7 +868,6 @@ s32 slHeadLoad(void) {
     return (s32)fileReadSlotPreviewBegin;
 }
 
-extern void sdfMcFuncRead(McFileDescriptor fileDescriptor, void *buffer, s32 size);
 extern s32 slHeadLoadProc_readFile(void);
 s32 fileReadSlotPreviewBegin(void) {
     McPollResult status = sdfMcPollOpen(&fileSaveFileDescriptor);

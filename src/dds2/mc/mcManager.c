@@ -3,6 +3,7 @@
 #include "mc_poll.h"
 #include "mc_path_api.h"
 #include "mc_file_api.h"
+#include "mc_read_api.h"
 #include "mc_write_api.h"
 
 #define MC_CARD_SLOT 0

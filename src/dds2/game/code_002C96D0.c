@@ -29,6 +29,7 @@
 #include "fr_font.h"
 #include "fr_font_context.h"
 #include "mc_poll.h"
+#include "mc_read_api.h"
 #include "mc_write_api.h"
 #include "mc_path_api.h"
 #include "bill_object_api.h"
@@ -333,7 +334,6 @@ extern s32 D_00437D78;
 extern s32 fileReadSlotPreviewBegin(void);
 extern s32 slLoadProc_readFile(void);
 extern McFileDescriptor fileSaveFileDescriptor;
-extern void sdfMcFuncRead(McFileDescriptor fileDescriptor, void *buffer, s32 size);
 extern struct sdfMemHandle_t *fileSaveReadBufferResource;
 extern s32 slHeadLoadProc_readFile(void);
 
