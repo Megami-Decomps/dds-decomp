@@ -45,13 +45,13 @@ struct dds3ProcessID_t {
     dds3ProcessID_t *next;          /* 0x4C */
 };
 
-u32 dds3GetProcessRunTime(dds3ProcessID_t *task);
+u32 dds3GetProcessRunTime(const dds3ProcessID_t *task);
 void dds3SetProcessData(dds3ProcessID_t *task, u32 userValue);
-u32 dds3GetProcessData(dds3ProcessID_t *task);
+u32 dds3GetProcessData(const dds3ProcessID_t *task);
 dds3ProcessID_t *dds3SearchProcessName(const char *name);
 /* Detach task from its parent hierarchy; scheduler queue links are unchanged. */
 void dds3UnlinkProcess(dds3ProcessID_t *task);
-s32 dds3ExistProcess(dds3ProcessID_t *task);
+s32 dds3ExistProcess(const dds3ProcessID_t *task);
 s32 kwlnTaskExists(const char *name);
 
 /* Append the common rectangle used to frame a grid of sprite cells. */

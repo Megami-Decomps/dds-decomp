@@ -6,6 +6,6 @@
 struct dds3ProcessID_t;
 
 /* Return the scheduler state, mapping unregistered or invalid states to DETACHED. */
-KwlnTaskState dds3GetProcessStat(struct dds3ProcessID_t *task);
+KwlnTaskState dds3GetProcessStat(const struct dds3ProcessID_t *task);
 
 #endif /* KWLN_TASK_STATE_QUERY_H */

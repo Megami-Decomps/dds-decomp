@@ -555,7 +555,7 @@ void dds3SetShutdownTimer(dds3ProcessID_t* task, s32 delayTicks)
     }
 }
 
-KwlnTaskState dds3GetProcessStat(dds3ProcessID_t* task)
+KwlnTaskState dds3GetProcessStat(const dds3ProcessID_t* task)
 {
     u32 state;
 
@@ -646,7 +646,7 @@ dds3ProcessID_t* dds3SearchProcessPriority(u32 prio)
 }
 
 /* Persona 4 func_00452490 @ 00452490 (src/Kernel/sdkTask.c), recompiled unchanged */
-s32 dds3ExistProcess(dds3ProcessID_t* target)
+s32 dds3ExistProcess(const dds3ProcessID_t* target)
 {
     s32 taskListIndex;
     dds3ProcessID_t* node;
@@ -678,13 +678,13 @@ s32 dds3ExistProcess(dds3ProcessID_t* target)
     return KWLN_PROCESS_NOT_REGISTERED;
 }
 
-u32 dds3GetProcessStartTime(dds3ProcessID_t* task)
+u32 dds3GetProcessStartTime(const dds3ProcessID_t* task)
 {
     return task->unk24;
 }
 
 /* Persona 4 dds3GetProcessRunTime @ 00452540 (src/Kernel/sdkTask.c), recompiled unchanged */
-u32 dds3GetProcessRunTime(dds3ProcessID_t* task)
+u32 dds3GetProcessRunTime(const dds3ProcessID_t* task)
 {
     return task->runUpdateCount;
 }
@@ -694,7 +694,7 @@ void dds3SetProcessData(dds3ProcessID_t* task, u32 userValue)
     task->userValue = userValue;
 }
 
-u32 dds3GetProcessData(dds3ProcessID_t* task)
+u32 dds3GetProcessData(const dds3ProcessID_t* task)
 {
     return task->userValue;
 }
