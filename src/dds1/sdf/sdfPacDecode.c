@@ -218,9 +218,9 @@ void sdfPacMemDecoderFuncInit(PacState *state, SdfPacStreamPacketHeader *packet)
         state->phase = SDF_PAC_PHASE_INPUT_HANDLER;
         node = sdfPacNewResrc(state, packet);
         if (state->flags & PAC_STATE_ALLOCATE_HIGH) {
-            PAC_WORK_ALLOCATION(node) = sdfMemAllocFromTailDirect(allocationSize);
+            node->resourceHandle = sdfMemAllocFromTailDirect(allocationSize);
         } else {
-            PAC_WORK_ALLOCATION(node) = sdfMemAllocDirect(allocationSize);
+            node->resourceHandle = sdfMemAllocDirect(allocationSize);
         }
         state->outputCursor = node->dataCursor = (u8 *)sdfMemLock((struct sdfMemHandle_t *)(PAC_WORK_ALLOCATION(node)));
         switch (packet->flags & PAC_ENCODING_MASK) {
@@ -382,7 +382,7 @@ void sdfPacTmxDecoderInitFunc(PacState *state, SdfPacStreamPacketHeader *packet,
 }
 
 void sdfPacTmxDecoderEndFunc(PacState *state) {
-    PAC_WORK_TEXTURE(state->queueTail) = state->slot.resource->texture;
+    state->queueTail->resourceHandle = state->slot.resource->texture;
     sdfChipFreeDirect(state->slot.resource);
     sdfDecodePacNodeAndAdvanceTail(state);
 }

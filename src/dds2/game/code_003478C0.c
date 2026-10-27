@@ -75,7 +75,7 @@ void sdfPacTexListDecoder0(PacState *state) {
         work = state->queueTail;
         allocation->entryCount = count;
         allocation->entryIndex = 0;
-        PAC_WORK_TEXTURE_LIST(work) = sdfTexListNew(count);
+        work->resourceHandle = sdfTexListNew(count);
         state->pendingBytes = ((count * 4 + 0x53) & -0x40) - 0x14;
         state->onInput = sdfPacSkipAllocationEntryBytes;
     }
