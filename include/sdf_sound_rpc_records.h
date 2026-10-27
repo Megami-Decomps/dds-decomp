@@ -14,8 +14,9 @@ enum SdfSoundRpcCommand {
     SDF_SOUND_RPC_CLEAR_PCM_CALLBACK_BUSY = 8
 };
 
-/* The PCM RPC borrows this read-only span for its IOP copy; NULL means no data. */
-typedef const void *(*SdfSoundReadCallback)(s32 byteCount);
+/* The PCM RPC borrows this read-only byte span for its synchronous IOP copy;
+ * NULL means no data. */
+typedef const u8 *(*SdfSoundReadCallback)(s32 requestedByteCount);
 
 typedef union SdfSoundCommand {
     u32 word; /* Callback address returned to the IOP. */
