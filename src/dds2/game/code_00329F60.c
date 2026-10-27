@@ -13,6 +13,7 @@
 #include "sdf_chip_range_api.h"
 
 #include "sdf.h"
+#include "sdf_gs_mem_delayed_free_api.h"
 #include "sdf_graph_buffer_state.h"
 #include "sdf_display_thread_state.h"
 #include "sdf_draw_frame_execution_state.h"

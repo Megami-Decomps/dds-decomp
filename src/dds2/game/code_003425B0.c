@@ -8,6 +8,7 @@
 #include "sdf_packed_resource.h"
 #include "sdf_pac_reloc.h"
 #include "sdf.h"
+#include "sdf_gs_mem_delayed_free_api.h"
 #include "sdf_semaphore_api.h"
 #include "sdf_movie_stream.h"
 #include "sdf_packet_alloc.h"
@@ -1475,7 +1476,6 @@ void sdfIpuAllocGsRect(sdfIpuDecodeCb_t *node) {
 }
 
 extern void sdfImageSetChainReleaseMem(void *);
-extern void sdfGsMemFreeDelayed(sdfGsMemSlice_t *texture);
 
 void sdfIpuFree(sdfIpuDecodeCb_t *node) {
     s32 interruptsEnabled;
