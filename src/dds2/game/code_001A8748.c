@@ -1480,8 +1480,8 @@ INCLUDE_RODATA(const s32, "game/code_001A8748", D_004150B0);
 void btlSyncPlayerWork(BtlUnit *actor) {
     datUnitWork_t *src = &actor->partyRecord;
     datUnitWork_t *dst = btlGetIndexedPartyEntryRecord(actor->partyIndex);
-    s32 maxHp;
-    s32 maxMp;
+    u32 maxHp;
+    u32 maxMp;
     if (src->flags & 0x1000) {
         dst->flags |= 0x1000;
     } else {
@@ -1495,8 +1495,9 @@ void btlSyncPlayerWork(BtlUnit *actor) {
     dst->level = src->level;
     maxHp = datComputeSkillBoostedMaxHp(dst);
     maxMp = datComputeSkillBoostedMaxMp(dst);
-    dst->hp = src->hp < maxHp ? src->hp : maxHp;
-    dst->mp = src->mp < maxMp ? src->mp : maxMp;
+    /* Keep the calculator's full-width results; retail compares them signed. */
+    dst->hp = src->hp < (s32)maxHp ? src->hp : (s32)maxHp;
+    dst->mp = src->mp < (s32)maxMp ? src->mp : (s32)maxMp;
     memcpy(dst->baseStats, src->baseStats, sizeof(dst->baseStats));
     dst->status = src->status & 0x7FFF;
     dst->savedCommandPhase = src->savedCommandPhase;
