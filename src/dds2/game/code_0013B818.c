@@ -301,7 +301,7 @@ void fldResetZoneRecordsAndActorSlots(void) {
         fldEveHitTable[roomIndex].mode = FLD_ROOM_INTERACTION_NONE;
         fldEveHitTable[roomIndex].entryIndex = -1;
         fldEveHitTable[roomIndex].savePointValue = -1;
-        fldEveHitTable[roomIndex].axisMode = 0;
+        fldEveHitTable[roomIndex].probePlaneMode = 0;
         fldEveHitTable[roomIndex].crossingDirection = 0;
     }
     fldActorTaskRoom = -1;
@@ -545,7 +545,7 @@ s32 fldProbeRoomPlanes(f32 *direction, s32 roomIndex) {
     f32 planar[2];
     s32 i;
 
-    if (fldEveHitTable[roomIndex].axisMode == 0) {
+    if (fldEveHitTable[roomIndex].probePlaneMode == 0) {
         probe[0] = 0.0f;
         probe[1] = direction[1];
         probe[2] = direction[2];

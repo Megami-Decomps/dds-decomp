@@ -23,6 +23,9 @@ enum FldRoomInteractionModeValue {
     FLD_ROOM_INTERACTION_HEAL_POINT = 4
 };
 
+/* Stored selector for the two-dimensional projection used by room probes. */
+typedef s16 FldRoomProbePlaneMode;
+
 /* Shared room geometry/runtime record. DDS1 and DDS2 use the same 0x140-byte
  * layout; unclassified state words and the intervening gap retain their raw
  * widths and positions. */
@@ -44,7 +47,8 @@ typedef struct FldRoomState {
     s16 mapSlot;      /* 0x134: above 0, the map slot whose flag hides the trigger */
     FldRoomInteractionMode mode; /* 0x136: selects the room's interaction behavior. */
     s16 entryIndex; /* 0x138: active entry index when mode is 1. */
-    s16 axisMode;
+    /* Probes use YZ when zero and XY for any nonzero mode. */
+    FldRoomProbePlaneMode probePlaneMode;
     s32 crossingDirection; /* 0x13C: a plane trigger's last crossing inside the room (1, -1; 0 none);
                             * its probe tests it against the plane kind, 1 */
 } FldRoomState;
