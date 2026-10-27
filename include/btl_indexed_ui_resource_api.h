@@ -5,7 +5,10 @@
 
 struct BtlUnit;
 
-/* Select the gun-type text for the unit's party-record ID. */
-const u8 *btlGetIndexedUiResource(struct BtlUnit *unit);
+/*
+ * Select the unit's gun-type text from its party-record ID. The returned
+ * read-only string is borrowed from the global name table.
+ */
+const u8 *btlGetIndexedUiResource(const struct BtlUnit *unit);
 
 #endif

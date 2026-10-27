@@ -1808,7 +1808,7 @@ s32 btlGetCommandAttributeName(s32 index) {
 }
 
 /* The label resource index is the copied party record's unit ID. */
-const u8 *btlGetIndexedUiResource(BtlUnit *unit) {
+const u8 *btlGetIndexedUiResource(const BtlUnit *unit) {
     return btlPartyUnitGunTypeNames[unit->partyRecord.unitId];
 }
 
