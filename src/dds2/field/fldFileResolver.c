@@ -380,6 +380,7 @@ void fldMakeResouceBasicFL1(FldSpawnBatch *batch, u32 batchCount) {
 #include "sdf_resource.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
+#include "kwln_task_runner.h"
 #include "fld_inf.h"
 #include "sdf_primitive_packet_api.h"
 #include "dds3obj.h"
@@ -3365,7 +3366,7 @@ void fldSetEncounterPendingValue(u32 pendingValue) {
     D_00436088 = pendingValue;
 }
 
-s32 fldEncProc(dds3ProcessID_t *task) {
+KwlnTaskUpdateResult fldEncProc(dds3ProcessID_t *task) {
     FldEncounterRuntimeMode state = fldEncounterRuntimeState;
 
     if (state < FLD_ENCOUNTER_MODE_BYPASS_BATTLE_RUNTIME) {
@@ -3373,7 +3374,7 @@ s32 fldEncProc(dds3ProcessID_t *task) {
             btlUpdateRuntimeFadeState();
         }
     }
-    return 0;
+    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 extern void p2sdPlaySE(s32 sequence, s32 volume, s32 pan);
