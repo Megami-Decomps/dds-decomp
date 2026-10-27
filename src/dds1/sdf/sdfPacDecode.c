@@ -140,13 +140,13 @@ SdfPacPacketCallbackResult sdfPacStdCallback(PacState *state, SdfPacPacketCallba
     return SDF_PAC_CALLBACK_CONTINUE;
 }
 /* Return the resource-extension payload when its extension-length nibble is nonzero. */
-u8 *sdfPacGetResrcFileName(PacWork *work) {
+const char *sdfPacGetResrcFileName(PacWork *work) {
     SdfPacStreamPacketHeader *extension = (SdfPacStreamPacketHeader *)work->packet;
     s32 extensionBytes = extension->flags & PAC_EXTENSION_BYTES_MASK;
     if (extensionBytes <= 0) {
         return NULL;
     }
-    return extension->payload;
+    return (const char *)extension->payload;
 }
 
 /* Incrementally copy raw payload bytes, invoking completion at zero remaining. */
