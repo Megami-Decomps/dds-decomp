@@ -13,11 +13,11 @@ extern dds3Basic_t *dds3GetFirstWorldObjectNodeOfKind2(void);
 
 extern s32 dds3ObjectBaseRegistArea(dds3Basic_t *object);
 
-s32 dds3CameraObjectBasicGetMode(dds3Basic_t *object) {
+CameraEyePositionMode dds3CameraObjectBasicGetMode(dds3Basic_t *object) {
     return ((CameraData *)object->data)->eyeIsRelative;
 }
 
-void dds3SetCameraMode(dds3Basic_t *camera, s32 mode) {
+void dds3SetCameraMode(dds3Basic_t *camera, CameraEyePositionMode mode) {
     if (((CameraData *)camera->data)->eyeIsRelative != mode) {
         ((CameraData *)camera->data)->eyeIsRelative = mode;
     }

@@ -2,6 +2,7 @@
 #define DDS3OBJ_H
 
 #include "common.h"
+#include "dds3_camera_eye_mode.h"
 #include "eff_transform.h"
 
 /* The slot-state constructor allocates and clears this complete 0xB4-byte owner.
@@ -225,7 +226,7 @@ typedef struct CameraData {
     u128 worldEye;
     u128 worldUp;
     dds3ObjectBaseControlWorkData_t *handle;
-    s32 eyeIsRelative;
+    CameraEyePositionMode eyeIsRelative;
     u32 fovUpdatePending; /* Bit 0 requests a field-of-view update. */
     f32 fieldOfView;      /* Radians. */
 } CameraData;

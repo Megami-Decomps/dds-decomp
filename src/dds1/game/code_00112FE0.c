@@ -3,11 +3,11 @@
 #include "eff_object.h"
 
 
-s32 dds3CameraObjectBasicGetMode(dds3Basic_t *camera) {
+CameraEyePositionMode dds3CameraObjectBasicGetMode(dds3Basic_t *camera) {
     return ((CameraData *)camera->data)->eyeIsRelative;
 }
 
-void dds3SetCameraMode(dds3Basic_t *camera, s32 mode) {
+void dds3SetCameraMode(dds3Basic_t *camera, CameraEyePositionMode mode) {
     if (((CameraData *)camera->data)->eyeIsRelative != mode) {
         ((CameraData *)camera->data)->eyeIsRelative = mode;
     }

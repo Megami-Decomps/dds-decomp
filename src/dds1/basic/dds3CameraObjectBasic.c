@@ -81,7 +81,7 @@ void MakeCamera(dds3Basic_t *camera) {
     SDF_VU0_APPLYMATRIX();
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_STOREVECTOR(&data->worldUp);
-    if (data->eyeIsRelative == 1) {
+    if (data->eyeIsRelative == CAMERA_EYE_POSITION_NODE_RELATIVE) {
         SDF_VU0_LOADVECTOR(&data->localEyeOffset);
         SDF_VU0_APPLYMATRIX();
         SDF_VU0_LOADVECTOR_B(&inner->position);
@@ -119,7 +119,7 @@ dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32 key, u128 *targetPosition, u12
     initialEyeOffset = D_0039F708;
     camera = dds3AllocCameraObjectBasic(key);
     data = ((CameraData *)camera->data);
-    data->eyeIsRelative = 1;
+    data->eyeIsRelative = CAMERA_EYE_POSITION_NODE_RELATIVE;
     data->fieldOfView = 0.6283185f;
     dds3SetRotPoseSet(camera, rotation);
     dds3SetPosPoseSet(camera, targetPosition);
@@ -136,7 +136,7 @@ dds3Basic_t *dds3AddCameraObjectBasicTypeLookAt(s32 key, u128 *targetPosition, u
     CameraData *data = obj->data;
 
     data->fieldOfView = 0.6283185f;
-    data->eyeIsRelative = 0;
+    data->eyeIsRelative = CAMERA_EYE_POSITION_WORLD_SPACE;
     dds3SetPosPoseSet(obj, targetPosition);
     dds3SetRadiusPoseSet(obj->inner);
     SDF_VU0_COPYVECTOR(&data->localUp, localUp);
@@ -145,9 +145,9 @@ dds3Basic_t *dds3AddCameraObjectBasicTypeLookAt(s32 key, u128 *targetPosition, u
     return obj;
 }
 
-/* Store the eye vector as a local offset; flag 0 also seeds the world eye.
- * The basis rebuild transforms that offset only when eyeIsRelative is 1. */
-dds3Basic_t *dds3AddCameraObjectBasic(s32 key, f32 fieldOfView, u128 *targetPosition, u128 *eyeVector, u128 *localUp, s32 eyeIsRelative) {
+/* Store the eye vector as a local offset; world-space mode also seeds it.
+ * Node-relative mode transforms the offset during basis rebuild. */
+dds3Basic_t *dds3AddCameraObjectBasic(s32 key, f32 fieldOfView, u128 *targetPosition, u128 *eyeVector, u128 *localUp, CameraEyePositionMode eyeIsRelative) {
     dds3Basic_t *obj = dds3AllocCameraObjectBasic(key);
     CameraData *data = obj->data;
 
@@ -157,7 +157,7 @@ dds3Basic_t *dds3AddCameraObjectBasic(s32 key, f32 fieldOfView, u128 *targetPosi
     dds3SetRadiusPoseSet(obj->inner);
     SDF_VU0_COPYVECTOR(&data->localUp, localUp);
     SDF_VU0_COPYVECTOR(&data->localEyeOffset, eyeVector);
-    if (eyeIsRelative == 0) {
+    if (eyeIsRelative == CAMERA_EYE_POSITION_WORLD_SPACE) {
         SDF_VU0_COPYVECTOR(&data->worldEye, eyeVector);
     }
     MakeCamera(obj);
@@ -210,7 +210,7 @@ void dds3CameraObjectBasicGetTgtCam(dds3Basic_t *obj, f32 *worldEyeOut, f32 *tar
     SDF_VU0_APPLYMATRIX();
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_STOREVECTOR(&data->worldUp);
-    if (data->eyeIsRelative == 1) {
+    if (data->eyeIsRelative == CAMERA_EYE_POSITION_NODE_RELATIVE) {
         SDF_VU0_LOADVECTOR(&data->localEyeOffset);
         SDF_VU0_APPLYMATRIX();
         SDF_VU0_LOADVECTOR_B(&inner->position);
