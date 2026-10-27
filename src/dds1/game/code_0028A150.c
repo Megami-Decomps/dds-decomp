@@ -3267,7 +3267,7 @@ void fileRestoreSlotFlagsToState(void) {
     DDS3_GBWK->world.slotFlags = fileSavedSlotFlags;
 }
 
-extern s32 fileTestSlotFlagsBit(s32 kind, u32 *flags);
+extern s32 fileTestSlotFlagsBit(FileConfigOption option, u32 *flags);
 
 u8 fileToggleSlotFlagsBit(FileConfigOption option, u32 *flags) {
     switch (option) {
@@ -3303,11 +3303,8 @@ INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B28D0);
 
 INCLUDE_RODATA(const s32, "game/code_0028A150", D_003B28E8);
 
-s32 fileTestSlotFlagsBit(kind, flags)
-    s32 kind;
-    u32 *flags;
-{
-    switch (kind) {
+s32 fileTestSlotFlagsBit(FileConfigOption option, u32 *flags) {
+    switch (option) {
     case FILE_CONFIG_OPTION_RUMBLE:
         return ((((s32)*flags >> 1) ^ 1) & 1);
     case FILE_CONFIG_OPTION_COMMAND_SELECTION_MEMORY:
@@ -3564,7 +3561,8 @@ s32 fileUpdateConfigurationMenu(dds3ProcessID_t *task) {
     }
     index = GBWK->frame->cursor->index;
     if (index < 4) {
-        if (dds3PadButtonState[0x24] < 0 && fileTestSlotFlagsBit(index, &DDS3_GBWK->world.slotFlags) == 0) {
+        if (dds3PadButtonState[0x24] < 0 &&
+            fileTestSlotFlagsBit((FileConfigOption)index, &DDS3_GBWK->world.slotFlags) == 0) {
             fileToggleSlotFlagsBit((FileConfigOption)GBWK->frame->cursor->index,
                                    &DDS3_GBWK->world.slotFlags);
             p2sdPlaySE(8, 0x7F, 0x3F);
@@ -3572,7 +3570,8 @@ s32 fileUpdateConfigurationMenu(dds3ProcessID_t *task) {
             cursor->resource->ticks = 8;
         }
         if (dds3PadButtonState[0x25] < 0) {
-            if (fileTestSlotFlagsBit(GBWK->frame->cursor->index, &DDS3_GBWK->world.slotFlags) != 0) {
+            if (fileTestSlotFlagsBit((FileConfigOption)GBWK->frame->cursor->index,
+                                     &DDS3_GBWK->world.slotFlags) != 0) {
                 fileToggleSlotFlagsBit((FileConfigOption)GBWK->frame->cursor->index,
                                        &DDS3_GBWK->world.slotFlags);
                 p2sdPlaySE(8, 0x7F, 0x3F);
@@ -3791,7 +3790,7 @@ void fileDrawConfigurationMenuEntry(s32 x, s32 y, s32 depth, struct MenuList *li
         }
     }
     if (index < 3) {
-        if (fileTestSlotFlagsBit(index, &DDS3_GBWK->world.slotFlags) != 0) {
+        if (fileTestSlotFlagsBit((FileConfigOption)index, &DDS3_GBWK->world.slotFlags) != 0) {
             effDrawSpriteWithCornerFade(fileConfigSpritePlacements[10][FILE_CONFIG_X] << 4, (fileConfigSpritePlacements[10][FILE_CONFIG_Y] + index * 35) << 3, 0,
                          (u32)(choiceFade * 256.0f), 0,
                          GBWK->slots[fileConfigSpritePlacements[10][FILE_CONFIG_SET]],
@@ -3835,7 +3834,8 @@ void fileDrawConfigurationMenuEntry(s32 x, s32 y, s32 depth, struct MenuList *li
             }
         }
     } else if (index == 3) {
-        if (fileTestSlotFlagsBit(3, &DDS3_GBWK->world.slotFlags) != 0) {
+        if (fileTestSlotFlagsBit(FILE_CONFIG_OPTION_REVERSE_FIELD_CAMERA,
+                                 &DDS3_GBWK->world.slotFlags) != 0) {
             effDrawSpriteWithCornerFade(fileConfigSpritePlacements[12][FILE_CONFIG_X] << 4, fileConfigSpritePlacements[12][FILE_CONFIG_Y] << 3, 0,
                          (u32)(choiceFade * 256.0f), 0,
                          GBWK->slots[fileConfigSpritePlacements[12][FILE_CONFIG_SET]],
