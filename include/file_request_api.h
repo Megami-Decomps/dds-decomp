@@ -16,6 +16,9 @@ s32 fileGetLoadSize(const struct FileRequest *request);
 /* Free a completed request wrapper; return one while it remains pending. */
 s32 fileRequestFreeIfComplete(struct FileRequest *request);
 
+/* Each file/PAC request copies requestName into storage it owns until cleanup.
+ * The caller keeps ownership of its input string and may modify or release it
+ * as soon as the call returns. */
 #ifdef VERSION_DDS1
 struct FileRequest *pacLoadEx(const char *requestName, u32 flags, void *packetCallbackAddress,
                                                 u32 onComplete, u32 userData);
@@ -39,8 +42,9 @@ void fileSync(struct FileRequest *request);
 void pacSync(struct FileRequest *request);
 void sdfMcFuncFormat(u32 port);
 
-/* Borrows sourceData for the asynchronous write; keep it readable and unchanged
- * until the request reaches CLOSED. */
+/* fileSave also copies requestName into request-owned storage. It separately
+ * borrows sourceData for the asynchronous write, which must stay readable and
+ * unchanged until CLOSED. */
 struct FileRequest *fileSave(const char *requestName, const void *sourceData, s32 sourceByteCount);
 
 #endif /* FILE_REQUEST_API_H */

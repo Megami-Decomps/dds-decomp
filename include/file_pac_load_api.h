@@ -18,6 +18,9 @@ enum {
 struct FileRequest;
 struct FilePacRequest;
 
+/* PAC loading copies requestName into storage owned until request cleanup. The
+ * caller keeps ownership of its input string and may modify or release it as
+ * soon as the call returns. */
 #ifdef VERSION_DDS1
 struct FileRequest *pacLoadEx(const char *requestName,
                               FilePacResourceAllocationMode allocationMode,
