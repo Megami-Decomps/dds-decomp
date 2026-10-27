@@ -108,12 +108,31 @@ typedef struct ScrLocalFloatInstruction {
     ScrLocalFloatIndex localIndex;
 } ScrLocalFloatInstruction;
 
+/* Control-flow instruction operands are signed halfword indexes into FLW0
+ * procedure and label tables, distinct from the VM program counter. */
+typedef s16 ScrProcedureTableIndexOperand;
+typedef s16 ScrLabelTableIndexOperand;
+
+typedef struct ScrProcedureIndexInstruction {
+    ScrOpcode opCode;
+    ScrProcedureTableIndexOperand procedureIndex;
+} ScrProcedureIndexInstruction;
+
+typedef struct ScrLabelIndexInstruction {
+    ScrOpcode opCode;
+    ScrLabelTableIndexOperand labelIndex;
+} ScrLabelIndexInstruction;
+
 typedef char ScrLocalIntegerInstruction_size_must_be_0x04[
     (sizeof(ScrLocalIntegerInstruction) == 4) ? 1 : -1];
 typedef char ScrLocalFloatInstruction_size_must_be_0x04[
     (sizeof(ScrLocalFloatInstruction) == 4) ? 1 : -1];
+typedef char ScrProcedureIndexInstruction_size_must_be_0x04[
+    (sizeof(ScrProcedureIndexInstruction) == 4) ? 1 : -1];
+typedef char ScrLabelIndexInstruction_size_must_be_0x04[
+    (sizeof(ScrLabelIndexInstruction) == 4) ? 1 : -1];
 
-/* Four-byte decoded VM instruction; localInteger/localFloat overlay local-slot opcodes. */
+/* Four-byte decoded VM instruction with opcode-specific operand overlays. */
 typedef union ScrInstr {
     struct {
         ScrOpcode opCode;
@@ -122,6 +141,8 @@ typedef union ScrInstr {
     ScrCommandInstruction command;
     ScrLocalIntegerInstruction localInteger;
     ScrLocalFloatInstruction localFloat;
+    ScrProcedureIndexInstruction procedureIndex;
+    ScrLabelIndexInstruction labelIndex;
     s32 iOperand;
     f32 fOperand;
 } ScrInstr;

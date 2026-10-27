@@ -143,7 +143,7 @@ ScrOpcodeHandlerResult CodeFunc_End(scrProcessWork_s *scr)
 
 ScrOpcodeHandlerResult CodeFunc_Jump(scrProcessWork_s *scr)
 {
-    scr->pc = scr->procedures[scr->instructions[scr->pc].parts.sOperand].addr;
+    scr->pc = scr->procedures[scr->instructions[scr->pc].procedureIndex.procedureIndex].addr;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
@@ -151,7 +151,7 @@ ScrOpcodeHandlerResult CodeFunc_Jump(scrProcessWork_s *scr)
 ScrOpcodeHandlerResult CodeFunc_Call(scrProcessWork_s *scr)
 {
     PushRet(scr, scr->pc);
-    scr->pc = scr->procedures[scr->instructions[scr->pc].parts.sOperand].addr;
+    scr->pc = scr->procedures[scr->instructions[scr->pc].procedureIndex.procedureIndex].addr;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
@@ -163,7 +163,7 @@ ScrOpcodeHandlerResult CodeFunc_Run(scrProcessWork_s *scr)
 
 ScrOpcodeHandlerResult CodeFunc_Goto(scrProcessWork_s *scr)
 {
-    scr->pc = scr->labels[scr->instructions[scr->pc].parts.sOperand].addr;
+    scr->pc = scr->labels[scr->instructions[scr->pc].labelIndex.labelIndex].addr;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
@@ -489,7 +489,7 @@ ScrOpcodeHandlerResult CodeFunc_IF(scrProcessWork_s *scr)
     if (conditionIsTruthy != 0)
         scr->pc++;
     else
-        scr->pc = scr->labels[scr->instructions[scr->pc].parts.sOperand].addr;
+        scr->pc = scr->labels[scr->instructions[scr->pc].labelIndex.labelIndex].addr;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
