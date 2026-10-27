@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_chip.h"
 #include "dds3obj.h"
+#include "dds3_object_control_slot.h"
 #include "dds3_path.h"
 
 extern void dds3MoverBasicFreePath(dds3Basic_t *slotObject);
@@ -10,6 +11,6 @@ void MoverBasicDestructor(dds3Basic_t *slotObject) {
 
     resource = slotObject->data;
     dds3MoverBasicFreePath(slotObject);
-    dds3ObjectBaseSetControlBasicType(resource->target, 0, 1);
+    dds3ObjectBaseSetControlBasicType(resource->target, 0, DDS3_OBJECT_DATA_SLOT);
     sdfChipFreeDirect(resource);
 }

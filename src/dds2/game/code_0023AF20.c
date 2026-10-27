@@ -4,6 +4,7 @@
 #include "eff_node.h"
 #include "eff_dependency.h"
 #include "dds3obj.h"
+#include "dds3_object_control_slot.h"
 #include "dds3_object_mode.h"
 #include "dds3_path.h"
 #include "evt_world.h"
@@ -25,7 +26,7 @@ EvtPathStatus evtCheckPathStat(dds3Basic_t *object) {
     if (object == NULL) {
         return EVT_PATH_STATUS_INVALID;
     }
-    slot = dds3ObjectBaseGetControlBasic(object, 1);
+    slot = dds3ObjectBaseGetControlBasic(object, DDS3_OBJECT_DATA_SLOT);
     if (slot == NULL) {
         return EVT_PATH_STATUS_INVALID;
     }

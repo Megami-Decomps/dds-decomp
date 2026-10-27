@@ -18,6 +18,7 @@
 #include "evt_reload_viewer_api.h"
 #include "evt_reset_unit_vector_slots_api.h"
 #include "dds3obj.h"
+#include "dds3_object_control_slot.h"
 #include "evt_world.h"
 #include "mdl_motion_api.h"
 #include "mdl_world_object_source_vector_api.h"
@@ -474,7 +475,7 @@ void evtViewerBindNamedOwner(dds3Basic_t *effectObject, EvtViewerNameIndex owner
         break;
     case EFF_WORLD_KIND_ACTION_10:
         evtPathLinkAndMake(owner, effectObject);
-        movieObject = dds3GetBaseControlWorkData(effectObject)->slots[1];
+        movieObject = dds3GetBaseControlWorkData(effectObject)->slots[DDS3_OBJECT_DATA_SLOT];
         if (viewer->flags & 1) {
             evtStopMover(movieObject, 0, startFrame, currentFrame);
         } else {
@@ -2007,7 +2008,7 @@ void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer) {
                     do {
                         trackEntry = viewer->groups;
                         while (trackEntry != NULL) {
-                            if (trackEntry->info != NULL && movieObject == dds3ObjectBaseGetControlBasic(trackEntry->info, 1)) {
+                            if (trackEntry->info != NULL && movieObject == dds3ObjectBaseGetControlBasic(trackEntry->info, DDS3_OBJECT_DATA_SLOT)) {
                                 if (trackEntry->type == 2) {
                                     startFrame = 0;
                                     if (trackEntry->childCount != 0) {
@@ -2618,7 +2619,7 @@ void evtEventViewerApplyPlaybackMode(s32 playbackMode, u32 frame, EvtRuntime *vi
                     useTrackTime = track->metadata.option;
 updateMovie:
                     if (object != NULL) {
-                        movie = dds3GetBaseControlWorkData(object)->slots[1];
+                        movie = dds3GetBaseControlWorkData(object)->slots[DDS3_OBJECT_DATA_SLOT];
                         if (movie != NULL) {
                             if (useTrackTime == 0) {
                                 evtStopMover(movie, playbackMode, key->frame, frame);

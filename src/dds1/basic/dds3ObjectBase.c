@@ -12,6 +12,7 @@
 #include "dds3_path.h"
 #include "dds3_slot1_handler_api.h"
 #include "dds3obj.h"
+#include "dds3_object_control_slot.h"
 #include "dds3_object_resource_state.h"
 #include "dds3_object_base_resource_view.h"
 #include "dds3_object_mode.h"
@@ -26,7 +27,7 @@ extern void Normalize(void);
 extern dds3Basic_t *dds3AddMoverBasic(dds3Basic_t *object);
 
 
-s32 BasicTypeToItemType(u32 kind);
+Dds3ObjectControlSlotIndex BasicTypeToItemType(u32 kind);
 void *dds3ObjectBaseGetUserValue(dds3Basic_t *object);
 void dds3MoverBasicSetCallBackPrimaryControl(dds3Basic_t *object, Dds3MoverUpdate update);
 void dds3MoverBasicMakePath(dds3Basic_t *object);
@@ -37,16 +38,13 @@ void dds3ObjectBaseFreeModelHandle(dds3Basic_t *object);
 
 #define DDS3_OBJECT_SLOT_COUNT 8
 #define DDS3_OBJECT_WORLD_SLOT_LIMIT 3
-#define DDS3_OBJECT_OWNER_SLOT 0
-#define DDS3_OBJECT_HANDLER_SLOT 5
-#define DDS3_OBJECT_DATA_SLOT 1
 
 /* Process the owner's entry in the auxiliary handler index, destroy world nodes
  * in slots 1/2, release owned resources/devices, then free the index and base. */
 void dds3ObjectBaseFreeControlWorkData(dds3ObjectBaseControlWorkData_t *base) {
     dds3Basic_t *owner;
     dds3Basic_t *handler;
-    s32 slotIndex;
+    Dds3ObjectControlSlotIndex slotIndex;
 
     owner = base->slots[DDS3_OBJECT_OWNER_SLOT];
     handler = dds3ObjectBaseGetControlBasic(owner, DDS3_OBJECT_HANDLER_SLOT);
@@ -120,7 +118,8 @@ dds3Basic_t *dds3ObjectBaseSetControlBasic(dds3Basic_t *object, dds3Basic_t *slo
 }
 
 /* Replace one caller-selected slot and return its previous pointer; no release. */
-dds3Basic_t *dds3ObjectBaseSetControlBasicType(dds3Basic_t *object, dds3Basic_t *slotData, s32 slotIndex) {
+dds3Basic_t *dds3ObjectBaseSetControlBasicType(
+    dds3Basic_t *object, dds3Basic_t *slotData, Dds3ObjectControlSlotIndex slotIndex) {
     dds3Basic_t *previousData;
 
     previousData = dds3ObjectBaseGetControlBasic(object, slotIndex);
@@ -129,7 +128,7 @@ dds3Basic_t *dds3ObjectBaseSetControlBasicType(dds3Basic_t *object, dds3Basic_t 
 }
 
 /* Read an indexed slot; the caller supplies a valid index. */
-dds3Basic_t *dds3ObjectBaseGetControlBasic(dds3Basic_t *object, s32 slotIndex) {
+dds3Basic_t *dds3ObjectBaseGetControlBasic(dds3Basic_t *object, Dds3ObjectControlSlotIndex slotIndex) {
     return dds3GetBaseControlWorkData(object)->slots[slotIndex];
 }
 
@@ -305,7 +304,7 @@ void dds3ObjectBaseMakeMatter(dds3Basic_t *object) {
     sdfModelRootNode_t *model;
 
     base = dds3GetBaseControlWorkData(object);
-    scriptModelObject = dds3ObjectBaseGetControlBasic(object, 3);
+    scriptModelObject = dds3ObjectBaseGetControlBasic(object, DDS3_OBJECT_SCRIPT_MODEL_SLOT);
     model = dds3ModelBasicMakeModel(scriptModelObject);
     motion = dds3ModelBasicSetMotion(scriptModelObject, model);
     dds3GetTMPoseSet(object);
@@ -608,7 +607,7 @@ u8 dds3ObjectBaseSetPadControl(dds3Basic_t *object, Dds3MoverUpdate update) {
 u8 dds3ObjectBaseSetPrimaryControl(dds3Basic_t *obj, Dds3MoverUpdate update) {
     dds3Basic_t *handler;
 
-    handler = dds3ObjectBaseGetControlBasic(obj, 1);
+    handler = dds3ObjectBaseGetControlBasic(obj, DDS3_OBJECT_DATA_SLOT);
     if (handler == NULL) {
         return 0;
     }

@@ -1,5 +1,6 @@
 #include "common.h"
 #include "dds3obj.h"
+#include "dds3_object_control_slot.h"
 #include "eff_object.h"
 
 
@@ -36,7 +37,8 @@ dds3Basic_t *dds3AddUnitObjectBasic(s32 worldId, u128 *position, u128 *rotation)
         data = ((EffectObjectData *)obj->data);
         data->handle = (dds3ObjectBaseControlWorkData_t *)-1;
         data->word04 = 0;
-        dds3ObjectBaseSetControlBasicType(obj, dds3GetFirstWorldObjectNodeOfKind2(), 5);
+        dds3ObjectBaseSetControlBasicType(
+            obj, dds3GetFirstWorldObjectNodeOfKind2(), DDS3_OBJECT_HANDLER_SLOT);
         dds3ObjectBaseRegistArea(obj);
         return obj;
     }

@@ -15,6 +15,7 @@
 #include "fld_resource_resolver.h"
 #include "dds3_path.h"
 #include "dds3obj.h"
+#include "dds3_object_control_slot.h"
 #include "dds3_world_selection.h"
 #include "eff_dependency.h"
 #include "eff_object.h"
@@ -855,10 +856,10 @@ s32 evtCommand_OBJ_PATH_MOVE(void) {
     if (target == NULL)
         return 1;
     data = dds3MatterObjectBasicGetControlWorkData(unit);
-    slotNode = data->slots[1];
+    slotNode = data->slots[DDS3_OBJECT_DATA_SLOT];
     if (slotNode == NULL) {
         dds3ObjectBaseCreateMover(unit);
-        slotNode = data->slots[1];
+        slotNode = data->slots[DDS3_OBJECT_DATA_SLOT];
     }
     resource = slotNode->data;
     if (resource->sourceObject == NULL) {
@@ -918,10 +919,10 @@ s32 evtCommandReattachObjectPath(void) {
         return 1;
     }
     data = dds3MatterObjectBasicGetControlWorkData(unit);
-    slotNode = data->slots[1];
+    slotNode = data->slots[DDS3_OBJECT_DATA_SLOT];
     if (slotNode == NULL) {
         dds3ObjectBaseCreateMover(unit);
-        slotNode = data->slots[1];
+        slotNode = data->slots[DDS3_OBJECT_DATA_SLOT];
     }
     resource = slotNode->data;
     if (resource->sourceObject == NULL) {

@@ -9,6 +9,7 @@
 #include "eff_dependency.h"
 #include "pcp_vu0.h"
 #include "dds3obj.h"
+#include "dds3_object_control_slot.h"
 #include "dds3_object_base_resource_view.h"
 #include "dds3_object_resource_state.h"
 #include "dds3_scene_membership.h"
@@ -309,7 +310,7 @@ dds3Basic_t *AddP2AEffect(bill, vec, extra)
     handle->resourceState = DDS3_OBJECT_RESOURCE_EFFECT_DEPENDENCY;
     id = dds3GetFirstWorldObjectNodeOfKind2();
     if (id != NULL) {
-        handle->slots[5] = id;
+        handle->slots[DDS3_OBJECT_HANDLER_SLOT] = id;
         dds3AreaBasicRegistItem(id, obj);
     }
     return obj;
@@ -376,7 +377,7 @@ dds3Basic_t *AddTMXEffect(bill, firstVector, secondVectorAddress)
     objectHandle->resourceState = DDS3_OBJECT_RESOURCE_EFFECT_DEPENDENCY;
     worldNode = dds3GetFirstWorldObjectNodeOfKind2();
     if (worldNode != NULL) {
-        objectHandle->slots[5] = worldNode;
+        objectHandle->slots[DDS3_OBJECT_HANDLER_SLOT] = worldNode;
         dds3AreaBasicRegistItem(worldNode, obj);
     }
     return obj;
@@ -439,7 +440,7 @@ dds3Basic_t *effObjCreateWithBoundBill(bill, firstVector, secondVector)
     objectHandle->resourceState = DDS3_OBJECT_RESOURCE_EFFECT_DEPENDENCY;
     worldNode = dds3GetFirstWorldObjectNodeOfKind2();
     if (worldNode != NULL) {
-        objectHandle->slots[5] = worldNode;
+        objectHandle->slots[DDS3_OBJECT_HANDLER_SLOT] = worldNode;
         dds3AreaBasicRegistItem(worldNode, obj);
     }
     return obj;
@@ -493,7 +494,7 @@ dds3Basic_t *effObjCreateBillboardInWorld(bill, firstVector, secondVector)
     objectHandle->resourceState = DDS3_OBJECT_RESOURCE_EFFECT_DEPENDENCY;
     worldNode = dds3GetFirstWorldObjectNodeOfKind2();
     if (worldNode != NULL) {
-        objectHandle->slots[5] = worldNode;
+        objectHandle->slots[DDS3_OBJECT_HANDLER_SLOT] = worldNode;
         dds3AreaBasicRegistItem(worldNode, obj);
     }
     return obj;
@@ -543,7 +544,7 @@ dds3Basic_t *AddBEDEffect(source, firstVector, secondVector)
     objectHandle->resourceState = DDS3_OBJECT_RESOURCE_EFFECT_DEPENDENCY;
     worldNode = dds3GetFirstWorldObjectNodeOfKind2();
     if (worldNode != NULL) {
-        objectHandle->slots[5] = worldNode;
+        objectHandle->slots[DDS3_OBJECT_HANDLER_SLOT] = worldNode;
         dds3AreaBasicRegistItem(worldNode, obj);
     }
     return obj;
@@ -619,7 +620,7 @@ dds3Basic_t *AddESPEffect(const char *name, const u128 *firstVector, void *secon
     objectHandle->resourceState = DDS3_OBJECT_RESOURCE_EFFECT_DEPENDENCY;
     worldNode = dds3GetFirstWorldObjectNodeOfKind2();
     if (worldNode != NULL) {
-        objectHandle->slots[5] = worldNode;
+        objectHandle->slots[DDS3_OBJECT_HANDLER_SLOT] = worldNode;
         dds3AreaBasicRegistItem(worldNode, obj);
     }
     return obj;
@@ -686,7 +687,7 @@ dds3Basic_t *AddMG12Effect(kind, descriptor)
     objectHandle->resourceState = DDS3_OBJECT_RESOURCE_EFFECT_DEPENDENCY;
     worldNode = dds3GetFirstWorldObjectNodeOfKind2();
     if (worldNode != NULL) {
-        objectHandle->slots[5] = worldNode;
+        objectHandle->slots[DDS3_OBJECT_HANDLER_SLOT] = worldNode;
         dds3AreaBasicRegistItem(worldNode, obj);
     }
     return obj;

@@ -6,6 +6,7 @@
 #include "fld_area_path.h"
 #include "dds3_path.h"
 #include "dds3obj.h"
+#include "dds3_object_control_slot.h"
 #include "dds3_world_selection.h"
 #include "dds3_world_lifecycle.h"
 #include "evt_world.h"
@@ -207,7 +208,7 @@ EvtPathLinkResult evtPathLinkAndMake(dds3Basic_t *object, dds3Basic_t *owner) {
     if (ref == NULL) {
         return EVT_PATH_LINK_FAILED;
     }
-    slotNode = ref->slots[1];
+    slotNode = ref->slots[DDS3_OBJECT_DATA_SLOT];
     if (slotNode == NULL) {
         return EVT_PATH_LINK_FAILED;
     }

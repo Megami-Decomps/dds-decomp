@@ -1,11 +1,12 @@
 #include "common.h"
 #include "dds3obj.h"
+#include "dds3_object_control_slot.h"
 #include "dds3_area_callback.h"
 
 
 /* Exchange the area's slot, retaining the native selector pair (0, 5). */
 s32 CB_ReleaseObjectBasic(dds3Basic_t *areaObject) {
-    dds3ObjectBaseSetControlBasicType(areaObject, 0, 5);
+    dds3ObjectBaseSetControlBasicType(areaObject, 0, DDS3_OBJECT_HANDLER_SLOT);
     return 1;
 }
 

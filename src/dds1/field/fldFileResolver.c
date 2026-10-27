@@ -57,6 +57,7 @@
 #include "fld_spawn_event.h"
 #include "sdf_resource.h"
 #include "dds3obj.h"
+#include "dds3_object_control_slot.h"
 #include "evt_world_object_api.h"
 #include "dds3_world_value.h"
 #include "sdf_texture_file.h"
@@ -1227,10 +1228,10 @@ void fldMakeObjectBasic3(void) {
             }
             path = dds3SceneBasicSearchNameAndType(world, 0x10, (const u8 *)pathName);
             data = dds3MatterObjectBasicGetControlWorkData(object);
-            slot = (dds3Basic_t *)data->slots[1];
+            slot = (dds3Basic_t *)data->slots[DDS3_OBJECT_DATA_SLOT];
             if (slot == NULL) {
                 dds3ObjectBaseCreateMover(object);
-                slot = (dds3Basic_t *)data->slots[1];
+                slot = (dds3Basic_t *)data->slots[DDS3_OBJECT_DATA_SLOT];
             }
             resource = (Dds3SlotResource *)slot->data;
             if (resource->sourceObject == 0) {

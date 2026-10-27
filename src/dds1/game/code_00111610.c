@@ -3,6 +3,7 @@
 #include "sdf_chip.h"
 #include "dds3_path.h"
 #include "dds3obj.h"
+#include "dds3_object_control_slot.h"
 #include "dds3_world_counter.h"
 
 /* Opaque fixed-size ring entry; this unit only selects its address. */
@@ -88,14 +89,14 @@ void dds3MoverBasicUpdate(dds3Basic_t *slotObject) {
     MoverBasicMainprocuder(slotObject);
 }
 
-/* Number of slots a given object kind occupies in the slot ring. */
-s32 BasicTypeToItemType(u32 kind)
+/* Select the owner-control slot used by a world-node kind. */
+Dds3ObjectControlSlotIndex BasicTypeToItemType(u32 kind)
 {
-    s32 slots = 0;
+    Dds3ObjectControlSlotIndex slotIndex = 0;
 
     switch (kind - 2) {
     case 1:
-        slots = 1;
+        slotIndex = DDS3_OBJECT_DATA_SLOT;
         break;
     case 2:
     case 3:
@@ -105,22 +106,22 @@ s32 BasicTypeToItemType(u32 kind)
     case 7:
         break;
     case 8:
-        slots = 3;
+        slotIndex = DDS3_OBJECT_SCRIPT_MODEL_SLOT;
         break;
     case 10:
-        slots = 3;
+        slotIndex = DDS3_OBJECT_SCRIPT_MODEL_SLOT;
         break;
     case 11:
-        slots = 3;
+        slotIndex = DDS3_OBJECT_SCRIPT_MODEL_SLOT;
         break;
     case 9:
-        slots = 4;
+        slotIndex = DDS3_OBJECT_ACTION_B_SLOT;
         break;
     case 0:
-        slots = 5;
+        slotIndex = DDS3_OBJECT_HANDLER_SLOT;
         break;
     }
-    return slots;
+    return slotIndex;
 }
 
 /* Initialize a kind-3 slot state and its index node.
@@ -134,7 +135,7 @@ dds3ObjectBaseControlWorkData_t *dds3CreateSlotResourceState(dds3Basic_t *owner)
     state->resourceState = DDS3_OBJECT_RESOURCE_RELEASED;
     node = dds3GetBasicArrayHandle(0);
     state->worldIndexNode = node;
-    state->slots[0] = owner;
+    state->slots[DDS3_OBJECT_OWNER_SLOT] = owner;
     for (i = 0; i < DDS3_OBJECT_RESOURCE_SLOT_COUNT; i++) {
         state->resourceSlots[i] = -1;
     }
