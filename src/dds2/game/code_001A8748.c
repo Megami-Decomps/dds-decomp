@@ -58,6 +58,7 @@
 #include "bf_flw0_header.h"
 #include "dat_state.h"
 #include "dat_calculated_stat_value_api.h"
+#include "dat_calculate_command_base_value_api.h"
 #include "dat_affinity_selector.h"
 #include "dat_effective_affinity_api.h"
 #include "btl_resolve_unit_value_api.h"
@@ -145,8 +146,6 @@ typedef char BattleControllerTotalApOffsetCheck[
     ((u32)&((BattleController *)0)->totalAp == 0x2F8) ? 1 : -1];
 typedef char BattleControllerDrawTaskOffsetCheck[
     ((u32)&((BattleController *)0)->drawTask == 0x2C4) ? 1 : -1];
-
-extern s32 datCalculateCommandBaseValue(datUnitWork_t *, s32);
 
 extern DatEnemyRecord *datEnemyRecords;
 

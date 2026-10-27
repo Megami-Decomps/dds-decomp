@@ -21,6 +21,7 @@
 #include "btl_boss_data_api.h"
 #include "btl_event_asset_api.h"
 #include "btl_skill_max_api.h"
+#include "dat_calculate_command_base_value_api.h"
 #include "kwln_task_add_child.h"
 #include "btl_special_ability.h"
 #include "dat_unit_has_skill_api.h"
@@ -116,8 +117,6 @@ typedef char BtlStateTotalApDds2OffsetCheck[
     ((u32)&((BtlState *)0)->totalAp == 0x2F8) ? 1 : -1];
 typedef char BtlStateCommandRangeOverrideDds2OffsetCheck[
     ((u32)&((BtlState *)0)->commandRangeOverride == 0x6DC) ? 1 : -1];
-
-extern s32 datCalculateCommandBaseValue(datUnitWork_t *, s32);
 
 extern DatEnemyRecord *datEnemyRecords;
 

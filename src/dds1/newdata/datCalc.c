@@ -8,6 +8,7 @@
 #include "pty_roster_value_record.h"
 #include "dat_state.h"
 #include "dat_calculated_stat_value_api.h"
+#include "dat_calculate_command_base_value_api.h"
 #include "btl_actor_attribute_api.h"
 #include "dat_affinity_selector.h"
 #include "dat_effective_affinity_api.h"
@@ -754,7 +755,7 @@ s32 evtHasMatchingFlaggedEntry(s32 skillId) {
  * Mode one scales max HP and floors the result at one unless the entry is
  * enemy-flagged; mode two returns a fixed value subject to the enemy flag gate.
  * commandId selects the record; cost holds the resolved result. */
-s32 datCalculateCommandBaseValue(datUnitWork_t *battler, s32 commandId) {
+s32 datCalculateCommandBaseValue(datUnitWork_t *battler, BtlCommandId commandId) {
     s32 cost = 0;
     DatCommandRecord *commands = datCommandRecords;
 

@@ -39,6 +39,7 @@
 #include "dat_calculated_stat_value_api.h"
 #include "dat_affinity_selector.h"
 #include "dat_effective_affinity_api.h"
+#include "dat_calculate_command_base_value_api.h"
 #include "btl_resolve_unit_value_api.h"
 #include "btl_select_transform_parameters_api.h"
 #include "dat_command.h"
@@ -64,7 +65,6 @@ extern const u8 *btlPartyUnitGunTypeNames[];
 extern DatEnemyRecord *datEnemyRecords;
 
 
-extern s32 datCalculateCommandBaseValue(datUnitWork_t *, s32);
 extern u8 *D_003BAA14;
 
 extern u8 *D_003BAA28;
