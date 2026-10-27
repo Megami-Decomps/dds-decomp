@@ -975,34 +975,34 @@ ScrCommandResult evtCommand_OBJ_PATH_WAIT(void) {
     }
 }
 
-u32 evtCommand_MOON_START(void)
+ScrCommandResult evtCommand_MOON_START(void)
 {
     evtEnableMoonCalc();
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
-u32 evtCommand_MOON_STOP(void)
+ScrCommandResult evtCommand_MOON_STOP(void)
 {
     evtDisableMoonCalc();
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
-s32 evtCommand_GET_MOON(void)
+ScrCommandResult evtCommand_GET_MOON(void)
 {
     scrSetIntReturnValue(evtGetMirroredSolarPhase());
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
-s32 evtCommand_GET_MOON16(void)
+ScrCommandResult evtCommand_GET_MOON16(void)
 {
     scrSetIntReturnValue(evtGetAgeOfMoon16());
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
-u32 evtCommand_CHG_MOON(void)
+ScrCommandResult evtCommand_CHG_MOON(void)
 {
     evtSetAgeOfMoon(scrGetIntPara(0));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 /* Create a missing camp task, then wait for its ready value.
