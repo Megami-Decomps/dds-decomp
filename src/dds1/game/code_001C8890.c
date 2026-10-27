@@ -72,7 +72,7 @@ extern u32 btlGetActiveUnitId(void);
 extern s32 btlGetStatusActionEffectId(BtlTask *task);
 extern void btlInitUnitFxDefaults(BtlUnit *fx);
 extern void btlInitializeBattleDebugMenu(void);
-extern s32 btlIsUnitInActorList(BtlUnit *candidate);
+extern s32 btlIsUnitInActorList(const BtlUnit *candidate);
 extern s32 btlIsSupportedCommandKind(const s32 *phase);
 extern void btlRemovePartyActorAndShiftEntries(BtlUnit *unit);
 extern void btlResetActiveUnitList(void);

@@ -214,7 +214,7 @@ extern void btlSetUnitPosition(BtlUnit *, const f32 *);
 
 extern s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *, s32);
 
-extern s32 btlIsUnitInActorList();
+extern s32 btlIsUnitInActorList(const BtlUnit *actor);
 
 extern void btlRefreshUnitMotionSelection(BtlUnit *);
 

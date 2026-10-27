@@ -5275,7 +5275,7 @@ BtlUnit *btlFindActorForOwner(u64 owner) {
     return 0;
 }
 
-s32 btlIsUnitInActorList(BtlUnit *actor) {
+s32 btlIsUnitInActorList(const BtlUnit *actor) {
     BtlUnit *unit;
     for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->next) {
         if (unit == actor) {

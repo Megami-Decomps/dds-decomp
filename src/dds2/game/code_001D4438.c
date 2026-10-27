@@ -1259,7 +1259,7 @@ void btlEnterAutoActionState(void) {
 }
 
 extern void btlDispatchCommandViaHookOrDefault(ActionStateLink *command, BattleIndexWork *argument);
-extern s32 btlIsUnitInActorList(BtlUnit *actor);
+extern s32 btlIsUnitInActorList(const BtlUnit *actor);
 
 extern s32 btlSetEligibleActorPanelTransitionState(void);
 
