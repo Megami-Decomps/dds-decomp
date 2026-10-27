@@ -9,13 +9,13 @@
 s32 CB_ReleaseObjectBasic(dds3Basic_t *areaObject);
 
 Dds3SceneMembershipResult dds3SceneBasicExistBasicFromType(
-    dds3Basic_t *object, s32 slotIndex, const dds3Basic_t *targetNode) {
-    dds3Basic_t *node;
+    const dds3Basic_t *object, s32 slotIndex, const dds3Basic_t *targetNode) {
+    const dds3Basic_t *node;
 
     if (object == NULL || targetNode == 0) {
         return DDS3_SCENE_MEMBERSHIP_ABSENT;
     }
-    node = ((EvtWorldTable *)object->data)->slots[slotIndex].head;
+    node = ((const EvtWorldTable *)object->data)->slots[slotIndex].head;
     while (node != NULL) {
         if (node == targetNode) {
             return DDS3_SCENE_MEMBERSHIP_PRESENT;
@@ -25,16 +25,17 @@ Dds3SceneMembershipResult dds3SceneBasicExistBasicFromType(
     return DDS3_SCENE_MEMBERSHIP_ABSENT;
 }
 
-Dds3SceneMembershipResult dds3SceneBasicExistBasic(dds3Basic_t *object, dds3Basic_t *targetNode) {
-    EvtWorldSlot *slots;
+Dds3SceneMembershipResult dds3SceneBasicExistBasic(
+    const dds3Basic_t *object, const dds3Basic_t *targetNode) {
+    const EvtWorldSlot *slots;
     s32 i;
 
     if (object == NULL || targetNode == 0) {
         return DDS3_SCENE_MEMBERSHIP_ABSENT;
     }
-    slots = ((EvtWorldTable *)object->data)->slots;
+    slots = ((const EvtWorldTable *)object->data)->slots;
     for (i = 0; i < 0x12; i++) {
-        dds3Basic_t *node = slots[i].head;
+        const dds3Basic_t *node = slots[i].head;
 
         if (node == NULL) {
             continue;
