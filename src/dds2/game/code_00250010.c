@@ -14,6 +14,7 @@
 #include "sdf_resource.h"
 #include "evt_viewer.h"
 #include "evt_menu_table_entry_availability.h"
+#include "mnu_camp_option_index_api.h"
 #include "evt_reload_viewer_api.h"
 #include "evt_viewer_rows.h"
 #include "evt_float_panel_row.h"
@@ -545,10 +546,6 @@ extern const char *D_004374B8[];
 extern const char *D_00423688[];
 extern char D_004374C8[];
 extern char D_004374D0[];
-/* The camp provider owns the scene type (EvtRuntime); the viewer passes its runtime. */
-extern u32 mnuCampGetPrimaryOption(EvtRuntime *scene);
-extern u32 mnuCampGetSecondaryOption(EvtRuntime *scene);
-
 /* Draw a project-menu command, including its current toggle/skip option. */
 void evtDrawProjectCommandRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, EvtRuntime *ctx) {
     char labels[11][30] = {

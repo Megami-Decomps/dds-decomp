@@ -4,6 +4,7 @@
 #include "dsp_active_api.h"
 #include "mnu_camp_display.h"
 #include "mnu_camp_font_api.h"
+#include "mnu_camp_option_index_api.h"
 #include "evt_message_window_api.h"
 #include "dat_command.h"
 #include "itf_mes_window.h"
@@ -1010,19 +1011,19 @@ void mnuShopQueueAuxiliaryTexture(EvtRuntime *scene) {
 void func_00243EE0(void) {
 }
 
-void mnuCampSetPrimaryOption(EvtRuntime *scene, u32 option) {
-    scene->optionFlags = (scene->optionFlags & CAMP_PRIMARY_OPTION_CLEAR_MASK) | (option & CAMP_OPTION_VALUE_MASK);
+void mnuCampSetPrimaryOption(EvtRuntime *scene, MnuCampPrimaryOptionIndex optionIndex) {
+    scene->optionFlags = (scene->optionFlags & CAMP_PRIMARY_OPTION_CLEAR_MASK) | (optionIndex & CAMP_OPTION_VALUE_MASK);
 }
 
-u32 mnuCampGetPrimaryOption(EvtRuntime *scene) {
+MnuCampPrimaryOptionIndex mnuCampGetPrimaryOption(EvtRuntime *scene) {
     return scene->optionFlags & CAMP_OPTION_VALUE_MASK;
 }
 
-void mnuCampSetSecondaryOption(EvtRuntime *scene, u32 option) {
-    scene->optionFlags = (scene->optionFlags & CAMP_SECONDARY_OPTION_CLEAR_MASK) | ((option & CAMP_OPTION_VALUE_MASK) << CAMP_SECONDARY_OPTION_SHIFT);
+void mnuCampSetSecondaryOption(EvtRuntime *scene, MnuCampSecondaryOptionIndex optionIndex) {
+    scene->optionFlags = (scene->optionFlags & CAMP_SECONDARY_OPTION_CLEAR_MASK) | ((optionIndex & CAMP_OPTION_VALUE_MASK) << CAMP_SECONDARY_OPTION_SHIFT);
 }
 
-u32 mnuCampGetSecondaryOption(EvtRuntime *scene) {
+MnuCampSecondaryOptionIndex mnuCampGetSecondaryOption(EvtRuntime *scene) {
     return (scene->optionFlags & CAMP_SECONDARY_OPTION_MASK) >> CAMP_SECONDARY_OPTION_SHIFT;
 }
 

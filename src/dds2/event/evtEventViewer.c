@@ -13,6 +13,7 @@
 #include "mnu_title_stream.h"
 #include "mnu_title_sound.h"
 #include "mnu_camp_font_api.h"
+#include "mnu_camp_option_index_api.h"
 #include "sdf_chip.h"
 #include "evt_viewer.h"
 #include "evt_reload_viewer_api.h"
@@ -55,8 +56,6 @@
 #include "sdf_packet_list.h"
 /* Declared before first use (were implicit int). */
 extern dds3ProcessID_t *evtInitSky(void);
-extern void mnuCampSetPrimaryOption(EvtRuntime *scene, u32 option);
-extern void mnuCampSetSecondaryOption(EvtRuntime *scene, u32 option);
 extern s32 mnuGetSelectedTableValue(EvtRuntime *runtime);
 #include "dds3_world_primary.h"
 
@@ -994,7 +993,6 @@ dds3ProcessID_t *evtInitFrameVar(void);
 
 KwlnTaskUpdateResult evtViewerScheduleFrameVariableTask(dds3ProcessID_t *task);
 
-extern u32 mnuCampGetPrimaryOption(EvtRuntime *scene);
 extern const char *D_003C91C0[];
 extern const char *D_003C91C8[];
 extern const char *D_003C91D0[];
@@ -2323,7 +2321,6 @@ void evtViewerCountFlaggedUpdates(EvtRuntime *viewer) {
 
 extern u32 mnuShouldBlockViewerEndCountdown(void);
 extern ScrCommandResult scrCommandIsProcessControlFlagClear(void);
-extern u32 mnuCampGetSecondaryOption(EvtRuntime *scene);
 extern void mnuReleaseCampSceneRegisteredIds(EvtRuntime *viewer);
 extern void mnuStopTitleVoicePlayback(void);
 extern void sdfSoundSetChannelCount(u32 channels);

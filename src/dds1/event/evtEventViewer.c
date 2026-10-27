@@ -13,6 +13,7 @@
 #include "mnu_title_stream.h"
 #include "mnu_title_sound.h"
 #include "mnu_camp_font_api.h"
+#include "mnu_camp_option_index_api.h"
 #include "kwln_draw_buffer.h"
 #include "mdl_motion_api.h"
 #include "mdl_world_object_source_vector_api.h"
@@ -63,8 +64,6 @@ extern void effEventSetScatterBlurParameters(dds3Effect_DistortionBlurParam_t *p
 extern void effSetLoadDescA(const dds3Effect_Blur_t *parameters);
 extern void effSetLoadDescD(const dds3Effect_Blur_t *parameters);
 extern u8 fldTitleIsActive(void);
-extern void mnuCampSetPrimaryOption(EvtRuntime *scene, u32 option);
-extern void mnuCampSetSecondaryOption(EvtRuntime *scene, u32 option);
 extern s32 mnuGetSelectedTableValue(EvtRuntime *runtime);
 struct EvtRuntime;
 
@@ -88,7 +87,6 @@ extern void Eve_PartialMultiFilterSetTex(sdfTexHandle_t *texture);
 extern void Eve_RippleBlurSetTex(sdfTexHandle_t *sourceHandle);
 
 
-extern u32 mnuCampGetPrimaryOption(EvtRuntime *scene);
 extern const char *D_00368410[];
 extern const char *D_00368418[];
 extern const char *D_00368420[];
@@ -2123,7 +2121,6 @@ void evtViewerCountFlaggedUpdates(EvtRuntime *viewer) {
 
 extern s32 campAnyPackedFlagSet(EvtRuntime *scene);
 extern ScrCommandResult scrCommandIsProcessControlFlagClear(void);
-extern u32 mnuCampGetSecondaryOption(EvtRuntime *scene);
 extern void mnuReleaseCampSceneRegisteredIds(EvtRuntime *viewer);
 extern void sdfSoundSetChannelCount(u32 channels);
 void evtViewerCleanupMessageWindow(EvtRuntime *viewer);
