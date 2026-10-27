@@ -44,7 +44,7 @@ EvtMotionSeModelKey evtInitMotionSeProcess(s32 eventId, s32 resourceId) {
     const u8 *modelPayload;
     EvtMotionSeModelKey viewerObjectKey;
 
-    packState = evtGetPackProcessData(eventId);
+    packState = evtGetPackProcessDataView(eventId);
     packEntryIndex = 0;
     if (packState->header->entryCount > 0) {
         entry = packState->entries;
@@ -92,7 +92,7 @@ s32 evtRegistBEField(s32 eventId, s32 resourceId) {
     u8 *resource1Data;
     const SdfTextureOffsetListHeader *textureOffsets;
 
-    packState = evtGetPackProcessData(eventId);
+    packState = evtGetPackProcessDataView(eventId);
     areaRoomIds = NULL;
     resource1Data = NULL;
     resource0Data = NULL;
@@ -150,7 +150,7 @@ KwlnTaskUpdateResult evtMotionSeProcess1(dds3ProcessID_t *task) {
     if (motionNode == NULL) {
         return KWLN_TASK_UPDATE_FINISH_CALLBACK;
     }
-    packState = evtGetPackProcessData(motionSeParams->eventTaskId);
+    packState = evtGetPackProcessDataView(motionSeParams->eventTaskId);
     if (packState == NULL) {
         return KWLN_TASK_UPDATE_FINISH_CALLBACK;
     }

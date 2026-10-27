@@ -97,8 +97,13 @@ typedef char EvtPackLoadState_effect76_at_0x40[
 typedef char EvtPackLoadState_effect75_at_0x44[
     ((u32)&((EvtPackLoadState *)0)->effect75 == 0x44) ? 1 : -1];
 
-/* Borrow the camp-owned state; it remains valid only while its task exists. */
+/* Borrow the camp-owned state for updates; valid only while its task exists. */
 EvtPackLoadState *evtGetPackProcessData(s32 taskId);
+
+/* Borrow a read-only view for readers, with the same task lifetime. */
+static inline const EvtPackLoadState *evtGetPackProcessDataView(s32 taskId) {
+    return evtGetPackProcessData(taskId);
+}
 EvtPackLoadStatus evtGetEventPackStat(s32 taskId);
 
 /* Find an entry by secondaryResourceId in a complete pack and return its
