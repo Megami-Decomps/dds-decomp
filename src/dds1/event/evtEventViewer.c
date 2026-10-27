@@ -22,6 +22,7 @@
 #include "itf_mes_entry_start_api.h"
 #include "sdf_resource.h"
 #include "evt_viewer.h"
+#include "evt_viewer_indexed_condition.h"
 #include "evt_sound_variation.h"
 #include "evt_reload_viewer_api.h"
 #include "evt_reset_unit_vector_slots_api.h"
@@ -840,7 +841,6 @@ extern void kwlnFadeBackgroundStartIn(s32);
 extern u16 D_003BBE78;
 extern char D_003ACFE8[];
 extern void mnuUnpackNibbleFields(EvtRuntimeChild *key, s32 *lowBitsOut, s32 *highBitsOut);
-extern u8 evtViewerTestIndexedCondition(u32 condition);
 extern void mnuStopTitleVoicePlayback(void);
 extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 extern void fldSetTitleDrawMode(u32);
@@ -942,7 +942,8 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
             break;
         }
         if (itfMesGetWindowEntryItems(viewer->windowContext->messageManagerHandle, nibbles[0]) == ITF_MES_ENTRY_ITEMS_NONE) {
-            if (!evtViewerTestIndexedCondition(key->p08.sh[1])) {
+            if (evtViewerTestIndexedCondition(key->p08.sh[1]) ==
+                EVT_VIEWER_INDEXED_CONDITION_NOT_MATCHED) {
                 break;
             }
             if (mnuQueryTitleSoundBusy() != MNU_TITLE_SOUND_IDLE) {
@@ -1548,14 +1549,16 @@ void evtViewApplyMovieModeKeys(EvtRuntimeGroup *track, s32 time) {
             switch (key->p08.sb[0]) {
             case 0:
             case 1:
-                if (evtViewerTestIndexedCondition(key->p10.sh[0]) == 1) {
+                if (evtViewerTestIndexedCondition(key->p10.sh[0]) ==
+                    EVT_VIEWER_INDEXED_CONDITION_MATCHED) {
                     objectMode = key->p08.sb[0];
                 }
                 break;
             case 2:
             case 3:
             case 4:
-                if (evtViewerTestIndexedCondition(key->p10.sh[0]) == 1) {
+                if (evtViewerTestIndexedCondition(key->p10.sh[0]) ==
+                    EVT_VIEWER_INDEXED_CONDITION_MATCHED) {
                     unitMode = key->p08.sb[0];
                     unit = evtGetUnitHandle2(track->info);
                 }
@@ -1575,7 +1578,8 @@ void evtViewApplyMovieModeKeys(EvtRuntimeGroup *track, s32 time) {
 
         for (key = track->children; key != NULL; key = key->next) {
             if ((key->p08.sb[0] == 3 || key->p08.sb[0] == 4) &&
-                evtViewerTestIndexedCondition(key->p10.sh[0]) == 1) {
+                evtViewerTestIndexedCondition(key->p10.sh[0]) ==
+                    EVT_VIEWER_INDEXED_CONDITION_MATCHED) {
                 if (key->frame <= time) {
                     current = key;
                 } else {
@@ -1589,7 +1593,9 @@ void evtViewApplyMovieModeKeys(EvtRuntimeGroup *track, s32 time) {
         kind = current->p08.sb[0];
         next = NULL;
         for (key = track->children; key != NULL; key = key->next) {
-            if (key->p08.sb[0] == kind && evtViewerTestIndexedCondition(key->p10.sh[0]) == 1 &&
+            if (key->p08.sb[0] == kind &&
+                evtViewerTestIndexedCondition(key->p10.sh[0]) ==
+                    EVT_VIEWER_INDEXED_CONDITION_MATCHED &&
                 time < key->frame) {
                 next = key;
                 break;
@@ -1746,12 +1752,14 @@ void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer) {
         child = group->children;
         for (; child != NULL; child = child->next) {
             if (group->type == 2) {
-                if (evtViewerTestIndexedCondition(child->p0C.sh[0]) == 0) {
+                if (evtViewerTestIndexedCondition(child->p0C.sh[0]) ==
+                    EVT_VIEWER_INDEXED_CONDITION_NOT_MATCHED) {
                     continue;
                 }
             } else {
                 if (group->type == 16 || group->type == 17 || group->type == 12) {
-                    if (evtViewerTestIndexedCondition(child->p14.sh[0]) == 0) {
+                    if (evtViewerTestIndexedCondition(child->p14.sh[0]) ==
+                        EVT_VIEWER_INDEXED_CONDITION_NOT_MATCHED) {
                         continue;
                     }
                 }
@@ -1775,10 +1783,11 @@ void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer) {
                 break;
             }
             while (selected != NULL) {
-                s16 condition;
+                EvtViewerIndexedCondition condition;
 
                 condition = (s16)selected->body.words[conditionIndex];
-                if (evtViewerTestIndexedCondition(condition) == 1) {
+                if (evtViewerTestIndexedCondition(condition) ==
+                    EVT_VIEWER_INDEXED_CONDITION_MATCHED) {
                     break;
                 }
                 selected = selected->prev;
@@ -2203,7 +2212,9 @@ void evtEventViewerApplyEffectChannels(s32 frame, EvtRuntime *viewer) {
             sdfTexHandle_t *value = 0;
 
             while (key != NULL) {
-                if (track->type != 0x11 || evtViewerTestIndexedCondition(key->p14.sh[0]) != 0) {
+                if (track->type != 0x11 ||
+                    evtViewerTestIndexedCondition(key->p14.sh[0]) !=
+                        EVT_VIEWER_INDEXED_CONDITION_NOT_MATCHED) {
                     if (frame < key->frame + track->metadata.value) {
                         break;
                     }
@@ -2307,8 +2318,6 @@ void evtViewerAdvanceGlyphTick(EvtRuntime *viewer) {
 void evtViewerFlag8ClearFrameHookNoOp(EvtRuntime *viewer) {
 }
 
-u8 evtViewerTestIndexedCondition(u32 condition);
-
 /* Returns the latest eligible kind-5 motion key at/before frame for channel,
  * or NULL. Its condition must pass; equal-frame ties retain the first key. */
 EvtRuntimeChild *evtViewerFindLatestMatchingMotionKey(EvtRuntimeGroup *group, s32 frame, s32 channel) {
@@ -2319,7 +2328,9 @@ EvtRuntimeChild *evtViewerFindLatestMatchingMotionKey(EvtRuntimeGroup *group, s3
     if (key != NULL) {
         do {
             if (frame >= key->frame && bestFrame < key->frame && key->p08.sb[0] == 5 &&
-                key->p0C.sb[0] == channel && evtViewerTestIndexedCondition(key->p10.sh[0]) == 1) {
+                key->p0C.sb[0] == channel &&
+                evtViewerTestIndexedCondition(key->p10.sh[0]) ==
+                    EVT_VIEWER_INDEXED_CONDITION_MATCHED) {
                 bestFrame = key->frame;
                 best = key;
             }
@@ -2671,14 +2682,15 @@ void evtViewerUpdateWindowShadeFade(EvtRuntime *viewer) {
     }
 }
 
-u8 evtViewerTestIndexedCondition(u32 encodedCondition) {
+EvtViewerIndexedConditionResult evtViewerTestIndexedCondition(
+    EvtViewerIndexedCondition encodedCondition) {
     u32 conditionIndex;
     u32 expectedValue;
 
-    conditionIndex = (encodedCondition << 16) >> 28;
-    expectedValue = encodedCondition & 0xfff;
+    conditionIndex = ((u32)encodedCondition << 16) >> 28;
+    expectedValue = (u32)encodedCondition & 0xfff;
     if (conditionIndex == 0) {
-        return 1;
+        return EVT_VIEWER_INDEXED_CONDITION_MATCHED;
     }
     return (DDS3_GBWK->script.ints[199 + conditionIndex] ^ expectedValue) == 0;
 }

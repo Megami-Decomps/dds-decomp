@@ -19,6 +19,7 @@
 #include "eff_resource_slots.h"
 #include "sdf_resource.h"
 #include "evt_viewer.h"
+#include "evt_viewer_indexed_condition.h"
 #include "evt_camera_color_track_api.h"
 #include "mnu.h"
 #include "mnu_staff.h"
@@ -46,7 +47,6 @@
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
 /* Declared before first use (were implicit int). */
-extern u8 evtViewerTestIndexedCondition(u32 encodedCondition);
 extern void fldDrawCameraColorLayerPass(void);
 extern void mnuSetScrollingStripOverlayPosition(DspScrollingStripState *state, s32 vertical, s32 horizontal, s32 unused);
 extern void mnuSetScrollingStripSpeedsRandomly(DspScrollingStripState *state, s32 negate, s32 minimum, s32 maximum);
@@ -695,7 +695,9 @@ void mnuFindCampKeyTrackNeighbors(EvtRuntimeGroup *track, s32 frame, EvtRuntimeC
         *lowerKey = track->lastChild;
     }
     if (track->type == 2) {
-        while (*lowerKey != 0 && evtViewerTestIndexedCondition((*lowerKey)->p0C.sh[0]) != 1) {
+        while (*lowerKey != 0 &&
+               evtViewerTestIndexedCondition((*lowerKey)->p0C.sh[0]) !=
+                   EVT_VIEWER_INDEXED_CONDITION_MATCHED) {
             *lowerKey = (*lowerKey)->prev;
         }
     }

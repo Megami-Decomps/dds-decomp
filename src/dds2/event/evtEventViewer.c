@@ -16,6 +16,7 @@
 #include "mnu_camp_option_index_api.h"
 #include "sdf_chip.h"
 #include "evt_viewer.h"
+#include "evt_viewer_indexed_condition.h"
 #include "evt_sound_variation.h"
 #include "evt_reload_viewer_api.h"
 #include "evt_reset_unit_vector_slots_api.h"
@@ -726,7 +727,6 @@ void evtViewerApplySelectedEntry(EvtRuntime *viewer) {
 }
 
 extern u16 D_004372B0;
-extern u8 evtViewerTestIndexedCondition(u32 encodedCondition);
 extern void mnuUnpackNibbleFields(EvtRuntimeChild *key, s32 *lowBitsOut, s32 *highBitsOut);
 extern s32 evtPlaySe(s32 eventId, EvtSoundVariation variation);
 extern s32 evtPlayEventBgm(s32 eventId, EvtSoundVariation variation);
@@ -822,7 +822,8 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
         break;
     case 5:
         if (evtViewerHasUpdateFlag(viewer) == 1 ||
-            evtViewerTestIndexedCondition((u32)(s32)key->p08.sh[1]) == 0) {
+            evtViewerTestIndexedCondition(key->p08.sh[1]) ==
+                EVT_VIEWER_INDEXED_CONDITION_NOT_MATCHED) {
             break;
         }
         evtPlaySe(D_004372B0, key->p08.sh[0]);
@@ -830,7 +831,8 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
         break;
     case 19:
         if (evtViewerHasUpdateFlag(viewer) == 1 ||
-            evtViewerTestIndexedCondition((u32)(s32)key->p0C.sh[0]) == 0) {
+            evtViewerTestIndexedCondition(key->p0C.sh[0]) ==
+                EVT_VIEWER_INDEXED_CONDITION_NOT_MATCHED) {
             break;
         }
         switch (key->p08.sh[0]) {
@@ -879,7 +881,8 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
             break;
         }
         if (itfMesGetWindowEntryItems(viewer->windowContext->messageManagerHandle, nibbles[0]) == ITF_MES_ENTRY_ITEMS_NONE) {
-            if (evtViewerTestIndexedCondition((u32)(s32)key->p08.sh[1]) == 0) {
+            if (evtViewerTestIndexedCondition(key->p08.sh[1]) ==
+                EVT_VIEWER_INDEXED_CONDITION_NOT_MATCHED) {
                 break;
             }
             if (mnuQueryTitleSoundBusy() != MNU_TITLE_SOUND_IDLE) {
@@ -969,7 +972,6 @@ extern void dds3FadeSet(s32 red, s32 green, s32 blue, s32 alpha);
 
 /* Effect-channel assignments driven by the viewer's timeline tracks. */
 
-extern u8 evtViewerTestIndexedCondition(u32 encodedCondition);
 extern void Eve_PartialMultiBlurSetDefTex(void);
 extern void Eve_DistortionBlurSetDefTex(void);
 extern void Eve_PartialMultiFilterSetDefTex(void);
@@ -1691,14 +1693,16 @@ void evtStepPolygonMovieConditionalKeys(EvtRuntimeGroup *track, s32 time) {
             switch (key->p08.sb[0]) {
             case 0:
             case 1:
-                if (evtViewerTestIndexedCondition(key->p10.sh[0]) == 1) {
+                if (evtViewerTestIndexedCondition(key->p10.sh[0]) ==
+                    EVT_VIEWER_INDEXED_CONDITION_MATCHED) {
                     objectMode = key->p08.sb[0];
                 }
                 break;
             case 2:
             case 3:
             case 4:
-                if (evtViewerTestIndexedCondition(key->p10.sh[0]) == 1) {
+                if (evtViewerTestIndexedCondition(key->p10.sh[0]) ==
+                    EVT_VIEWER_INDEXED_CONDITION_MATCHED) {
                     unitMode = key->p08.sb[0];
                     unit = evtGetUnitHandle2(track->info);
                 }
@@ -1718,7 +1722,8 @@ void evtStepPolygonMovieConditionalKeys(EvtRuntimeGroup *track, s32 time) {
 
         for (key = track->children; key != NULL; key = key->next) {
             if ((key->p08.sb[0] == 3 || key->p08.sb[0] == 4) &&
-                evtViewerTestIndexedCondition(key->p10.sh[0]) == 1) {
+                evtViewerTestIndexedCondition(key->p10.sh[0]) ==
+                    EVT_VIEWER_INDEXED_CONDITION_MATCHED) {
                 if (key->frame <= time) {
                     current = key;
                 } else {
@@ -1732,7 +1737,9 @@ void evtStepPolygonMovieConditionalKeys(EvtRuntimeGroup *track, s32 time) {
         kind = current->p08.sb[0];
         next = NULL;
         for (key = track->children; key != NULL; key = key->next) {
-            if (key->p08.sb[0] == kind && evtViewerTestIndexedCondition(key->p10.sh[0]) == 1 &&
+            if (key->p08.sb[0] == kind &&
+                evtViewerTestIndexedCondition(key->p10.sh[0]) ==
+                    EVT_VIEWER_INDEXED_CONDITION_MATCHED &&
                 time < key->frame) {
                 next = key;
                 break;
@@ -1786,7 +1793,6 @@ extern void evtViewerCountFlaggedUpdates(EvtRuntime *viewer);
 extern void evtEventViewerApplyEffectChannels(s32 frame, EvtRuntime *viewer);
 extern s32 evtViewerUpdateTimedAction(EvtRuntime *viewer);
 extern void evtViewerUpdateShopFlagTrack(EvtRuntime *viewer);
-extern u8 evtViewerTestIndexedCondition(u32 encodedCondition);
 extern void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key, s32 currentFrame,
                                            s32, EvtRuntime *viewer);
 extern void evtEventViewerFadeEffectSlot(EvtRuntimeGroup *group, EvtRuntimeChild *key, s32 time,
@@ -1893,12 +1899,14 @@ void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer) {
         child = group->children;
         for (; child != NULL; child = child->next) {
             if (group->type == 2) {
-                if (evtViewerTestIndexedCondition(child->p0C.sh[0]) == 0) {
+                if (evtViewerTestIndexedCondition(child->p0C.sh[0]) ==
+                    EVT_VIEWER_INDEXED_CONDITION_NOT_MATCHED) {
                     continue;
                 }
             } else {
                 if (group->type == 16 || group->type == 17 || group->type == 12) {
-                    if (evtViewerTestIndexedCondition(child->p14.sh[0]) == 0) {
+                    if (evtViewerTestIndexedCondition(child->p14.sh[0]) ==
+                        EVT_VIEWER_INDEXED_CONDITION_NOT_MATCHED) {
                         continue;
                     }
                 }
@@ -1922,10 +1930,11 @@ void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer) {
                 break;
             }
             while (selected != NULL) {
-                s16 condition;
+                EvtViewerIndexedCondition condition;
 
                 condition = (s16)selected->body.words[conditionIndex];
-                if (evtViewerTestIndexedCondition(condition) == 1) {
+                if (evtViewerTestIndexedCondition(condition) ==
+                    EVT_VIEWER_INDEXED_CONDITION_MATCHED) {
                     break;
                 }
                 selected = selected->prev;
@@ -2407,7 +2416,9 @@ void evtEventViewerApplyEffectChannels(s32 frame, EvtRuntime *viewer) {
             sdfTexHandle_t *value = 0;
 
             while (key != NULL) {
-                if (track->type != 0x11 || evtViewerTestIndexedCondition(key->p14.sh[0]) != 0) {
+                if (track->type != 0x11 ||
+                    evtViewerTestIndexedCondition(key->p14.sh[0]) !=
+                        EVT_VIEWER_INDEXED_CONDITION_NOT_MATCHED) {
                     if (frame < key->frame + track->metadata.value) {
                         break;
                     }
@@ -2522,7 +2533,9 @@ EvtRuntimeChild *evtViewerFindLatestMatchingMotionKey(EvtRuntimeGroup *group, s3
     if (key != NULL) {
         do {
             if (frame >= key->frame && bestFrame < key->frame && key->p08.sb[0] == 5 &&
-                key->p0C.sb[0] == channel && evtViewerTestIndexedCondition(key->p10.sh[0]) == 1) {
+                key->p0C.sb[0] == channel &&
+                evtViewerTestIndexedCondition(key->p10.sh[0]) ==
+                    EVT_VIEWER_INDEXED_CONDITION_MATCHED) {
                 bestFrame = key->frame;
                 best = key;
             }
@@ -2874,14 +2887,15 @@ void evtViewerUpdateWindowShadeFade(EvtRuntime *viewer) {
     }
 }
 
-u8 evtViewerTestIndexedCondition(u32 encodedCondition) {
+EvtViewerIndexedConditionResult evtViewerTestIndexedCondition(
+    EvtViewerIndexedCondition encodedCondition) {
     u32 conditionIndex;
     u32 expectedValue;
 
-    conditionIndex = (encodedCondition << 16) >> 28;
-    expectedValue = encodedCondition & 0xfff;
+    conditionIndex = ((u32)encodedCondition << 16) >> 28;
+    expectedValue = (u32)encodedCondition & 0xfff;
     if (conditionIndex == 0) {
-        return 1;
+        return EVT_VIEWER_INDEXED_CONDITION_MATCHED;
     }
     return (DDS3_GBWK->script.ints[199 + conditionIndex] ^ expectedValue) == 0;
 }

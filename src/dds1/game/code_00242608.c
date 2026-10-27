@@ -18,6 +18,7 @@
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
 #include "evt_viewer.h"
+#include "evt_viewer_indexed_condition.h"
 #include "evt_camera_color_track_api.h"
 #include "sdf_resource.h"
 #include "mnu.h"
@@ -590,8 +591,6 @@ void mnuBlendCampDisplayFields(EvtRuntimeChild *from, EvtRuntimeChild *to,
     display->variant = from->p08.sb[1];
 }
 
-extern u8 evtViewerTestIndexedCondition(u32);
-
 void mnuFindCampKeyTrackNeighbors(EvtRuntimeGroup *track, s32 frame, EvtRuntimeChild **lowerKey, EvtRuntimeChild **upperKey) {
     s32 frameOffset;
 
@@ -614,7 +613,9 @@ void mnuFindCampKeyTrackNeighbors(EvtRuntimeGroup *track, s32 frame, EvtRuntimeC
         *lowerKey = track->lastChild;
     }
     if (track->type == 2) {
-        while (*lowerKey != 0 && evtViewerTestIndexedCondition((*lowerKey)->p0C.sh[0]) != 1) {
+        while (*lowerKey != 0 &&
+               evtViewerTestIndexedCondition((*lowerKey)->p0C.sh[0]) !=
+                   EVT_VIEWER_INDEXED_CONDITION_MATCHED) {
             *lowerKey = (*lowerKey)->prev;
         }
     }
