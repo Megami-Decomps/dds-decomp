@@ -23,6 +23,7 @@
 #include "sdf_resource_list_item.h"
 #include "sdf_chunk.h"
 #include "sdf_draw_packet_groups.h"
+#include "sdf_model_surface_set.h"
 #include "sdf_motion.h"
 #include "sdf_motion_node_api.h"
 #include "sdf_material_asset_list.h"
@@ -174,7 +175,7 @@ void sdfModelSetDrawEnv(SdfDrawPacketGroups *ctx) {
 }
 
 /* Submit the four draw lists, then the trailing list to the fourth owner. */
-void sdfModelDrawEnvLinkOt(SdfPoolNode **owners, SdfDrawPacketGroups *packets) {
+void sdfModelDrawEnvLinkOt(SdfModelDrawSurfaceSet owners, SdfDrawPacketGroups *packets) {
     s32 i;
 
     for (i = 0; i != 4; i++) {

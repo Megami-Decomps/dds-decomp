@@ -4,6 +4,7 @@
 #include "sdf.h"
 #include "sdf_gs_blend.h"
 #include "sdf_dma_tag.h"
+#include "sdf_model_surface_set.h"
 
 typedef struct SdfDrawPacketGroup {
     sdfDrawTag_t list;
@@ -20,7 +21,7 @@ typedef struct SdfDrawPacketGroups {
 } SdfDrawPacketGroups;
 
 void sdfModelSetDrawEnv(SdfDrawPacketGroups *packets);
-void sdfModelDrawEnvLinkOt(SdfPoolNode **owners, SdfDrawPacketGroups *packets);
+void sdfModelDrawEnvLinkOt(SdfModelDrawSurfaceSet owners, SdfDrawPacketGroups *packets);
 
 typedef char SdfDrawPacketGroup_size_must_be_0x60[
     (sizeof(SdfDrawPacketGroup) == 0x60) ? 1 : -1];

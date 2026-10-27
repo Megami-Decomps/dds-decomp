@@ -495,7 +495,7 @@ void sdfModelEvalTm(sdfModelRootNode_t *model) {
 }
 
 /* Store a provider's four draw surfaces and make the second a key-sorted pool. */
-void sdfStoreMessageWordsAndNotifyConsumer(struct SdfPoolNode **surfaces, struct SdfPoolNode *first,
+void sdfStoreMessageWordsAndNotifyConsumer(SdfModelDrawSurfaceSet surfaces, struct SdfPoolNode *first,
                                            struct SdfPoolNode *pool, struct SdfPoolNode *third,
                                            struct SdfPoolNode *fourth) {
     surfaces[3] = fourth;
