@@ -39,6 +39,8 @@ void fileSync(struct FileRequest *request);
 void pacSync(struct FileRequest *request);
 void sdfMcFuncFormat(u32 port);
 
+/* Borrows sourceData for the asynchronous write; keep it readable and unchanged
+ * until the request reaches CLOSED. */
 struct FileRequest *fileSave(const char *requestName, const void *sourceData, s32 sourceByteCount);
 
 #endif /* FILE_REQUEST_API_H */
