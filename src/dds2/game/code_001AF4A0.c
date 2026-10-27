@@ -51,6 +51,7 @@
 #include "itf_panel_draw.h"
 #include "itf_panel_api.h"
 #include "btl_state.h"
+#include "btl_index_list_search_api.h"
 #include "btl_ui.h"
 #include "sdf.h"
 #include "sdf_projection.h"
@@ -943,7 +944,7 @@ void btlDistributeRandomTargetHits(BtlUnit *unit, BtlIndexList *targets,
     u32 hitCount;
     u32 i;
     u32 index;
-    s32 resultIndex;
+    BtlIndexListEntryIndex resultIndex;
     s32 allowConsecutiveHits;
 
     targetCount = btlGetIndexListCount(targets);

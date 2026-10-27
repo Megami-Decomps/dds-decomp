@@ -41,6 +41,7 @@
 #include "sdf_model.h"
 #include "sdf_model_release_api.h"
 #include "btl.h"
+#include "btl_index_list_search_api.h"
 #include "btl_skill_name_index.h"
 #include "btl_model_state_ownership.h"
 #include "btl_action_state_selection.h"
@@ -5369,7 +5370,7 @@ void btlSwapIndexListEntries(BtlIndexList *list, s32 firstIndex, s32 secondIndex
     entries[secondIndex] = first;
 }
 
-s32 btlFindListIndex(BtlIndexList *list, BtlUnit *entry) {
+BtlIndexListEntryIndex btlFindListIndex(BtlIndexList *list, BtlUnit *entry) {
     u32 count = btlGetIndexListCount(list);
     u32 i;
 
@@ -5378,7 +5379,7 @@ s32 btlFindListIndex(BtlIndexList *list, BtlUnit *entry) {
             return i;
         }
     }
-    return -1;
+    return BTL_INDEX_LIST_ENTRY_NOT_FOUND;
 }
 
 void btlApplyUnitEffectScale(BtlUnit *unit) {
