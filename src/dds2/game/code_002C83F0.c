@@ -2,6 +2,7 @@
 #include "common.h"
 #include "sdf_semaphore_api.h"
 #include "kwln_task_create.h"
+#include "kwln_task_runner.h"
 #include "sdf_resource.h"
 #include "file.h"
 #include "file_request_lifecycle.h"
@@ -408,9 +409,9 @@ s32 fileManager(void) {
 }
 
 /* Task callback driving asynchronous file work. */
-s32 fileManagerProc(dds3ProcessID_t *task) {
+KwlnTaskUpdateResult fileManagerProc(dds3ProcessID_t *task) {
     fileManager();
-    return 0;
+    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 void fileSysInit(void) {

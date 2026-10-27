@@ -2,6 +2,7 @@
 #include "common.h"
 #include "sdf_semaphore_api.h"
 #include "kwln_task_create.h"
+#include "kwln_task_runner.h"
 #include "file_pac.h"
 #include "sdf_pac_decode.h"
 #include "sdf_resource.h"
@@ -20,7 +21,7 @@ extern char fileManagerTaskName[];
 extern s32 D_003BC7D8;
 
 extern s32 (*p2sdSmgBuf)(void);
-s32 fileManagerProc(dds3ProcessID_t *task);
+KwlnTaskUpdateResult fileManagerProc(dds3ProcessID_t *task);
 
 extern s32 sdfFileCmdRequestFileSize(sdfFileCmdHandle_t *);
 
@@ -408,9 +409,9 @@ s32 fileManager(void) {
 }
 
 /* Task callback driving asynchronous file work. */
-s32 fileManagerProc(dds3ProcessID_t *task) {
+KwlnTaskUpdateResult fileManagerProc(dds3ProcessID_t *task) {
     fileManager();
-    return 0;
+    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 void fileSysInit(void) {
