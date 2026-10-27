@@ -98,7 +98,7 @@ extern PrfFallbackItemRequirement D_00393220[];
 extern Entry24W D_00393234[];
 
 extern SdkFileStream *fopen(const char *, const char *);
-extern void fprintf(SdkFileStream *, const char *, s32, s32);
+extern s32 fprintf(SdkFileStream *, const char *, ...);
 extern void fclose(SdkFileStream *);
 extern char sdfDebugLogAppendMode[];
 extern char sdfDebugLogPairFormat[];

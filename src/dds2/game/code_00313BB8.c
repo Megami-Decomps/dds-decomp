@@ -140,7 +140,7 @@ extern u8 D_0045C828[];
 
 
 
-extern void fprintf(SdkFileStream *, const char *, s32, s32);
+extern s32 fprintf(SdkFileStream *, const char *, ...);
 
 
 extern char sdfDebugLogAppendMode[];
