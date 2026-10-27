@@ -199,7 +199,7 @@ void sdfTexBlendPaletteToTintedIntensityVU(sdfTexHandle_t *texture, s32 tint, f3
     sdfTexClutToGs(texture);
 }
 
-/* Walk the resource chain until the requested numeric ID is found. */
+/* Borrow a matching live texture by key without changing its reference count. */
 sdfTexHandle_t *sdfTexSearch(s32 resourceKey) {
     sdfTexHandle_t *texture = sdfTexHandleLink;
 

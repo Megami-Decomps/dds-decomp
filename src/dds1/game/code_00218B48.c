@@ -953,6 +953,7 @@ void mdlCreateEffect_IPU(dds3ModelHandle_t *owner, MdlRecord *entryRecord, s32 m
     if (partSlot != 0) {
         MdlObj *object = mdlPartObjectFromStorage(partSlot->object).model;
         if (object->inUse == 0) {
+            /* The lookup did not acquire a reference for the attachment to release. */
             sdfTexHandle_t *texture = sdfTexSearch(entryRecord->payload.id);
             if (texture != 0) {
                 dds3ModelEffectCtrlr_t *resourceItem;
