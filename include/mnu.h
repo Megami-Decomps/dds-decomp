@@ -322,17 +322,21 @@ void mnuFreeSimpleSpriteWork(MenuSimpleSpriteState *);
 
 struct MenuPanelItem;
 
+/* Signed row selector; -1 leaves the panel group without a selected row. */
+typedef s32 MenuPanelGroupSelection;
+#define MENU_PANEL_GROUP_NO_SELECTION ((MenuPanelGroupSelection)-1)
+
 /* Native group allocations own five panel items and retain their selection. */
 typedef struct MenuPanelGroup {
     u8 pad00[0x0C];
 #ifdef VERSION_DDS2
     struct EffectSlotSet *texture; /* 0x0C */
     struct MenuPanelItem *entries[5]; /* 0x10 */
-    u32 selection; /* 0x24 */
+    MenuPanelGroupSelection selection; /* 0x24; -1 means no selected row. */
     s32 initialValue; /* 0x28 */
 #else
     struct MenuPanelItem *children[5]; /* 0x0C */
-    u32 selection; /* 0x20 */
+    MenuPanelGroupSelection selection; /* 0x20; -1 means no selected row. */
     s32 initialValue; /* 0x24 */
 #endif
 } MenuPanelGroup;
@@ -360,9 +364,9 @@ extern MenuPanelGroup *mnuCreatePanelGroup(struct EffectSlotSet *parent);
 extern void mnuDestroyPanelGroup(MenuPanelGroup *group);
 extern void mnuUpdateFiveListEntries(MenuPanelGroup *group,
                                     struct EffectSlotSet *gridObject);
-extern void mnuSetPanelGroupSelection(MenuPanelGroup *group, u32 selection);
+extern void mnuSetPanelGroupSelection(MenuPanelGroup *group, MenuPanelGroupSelection selection);
 extern void mnuClearPanelGroupSelection(MenuPanelGroup *group);
-extern u32 mnuGetPanelGroupSelection(MenuPanelGroup *group);
+extern MenuPanelGroupSelection mnuGetPanelGroupSelection(MenuPanelGroup *group);
 extern void mnuSetGroupSelection(MenuPanelGroup *group, s32 index, s32 selection, u32 option);
 #ifdef VERSION_DDS2
 extern void mnuApplyPackedGroupValues(MenuPanelGroup *group, s32 itemId);

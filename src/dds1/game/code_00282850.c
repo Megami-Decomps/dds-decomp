@@ -81,7 +81,6 @@ extern char D_003BC7A0[];
 #define MNU_GRADIENT_FADE_STEP 0x20
 #define MNU_PROFILE_PHASE_PERIOD 0x200
 #define MNU_PROFILE_PHASE_STEP 12
-#define MNU_NO_SELECTION 0xffffffff
 #define MNU_PANEL_TEXTURE_COUNT 9
 #define MNU_POPUP_STATE_BYTES 0x4c
 #define MNU_POPUP_ENTRY_MARK_BITS 0x60000
@@ -482,16 +481,16 @@ void mnuUpdateFiveListEntries(MenuPanelGroup *group, EffectSlotSet *gridObject) 
     }
 }
 
-void mnuSetPanelGroupSelection(MenuPanelGroup *group, u32 selection) {
+void mnuSetPanelGroupSelection(MenuPanelGroup *group, MenuPanelGroupSelection selection) {
     group->selection = selection;
 }
 
-/* Store the native unsigned no-selection sentinel. */
+/* Store the no-selection sentinel. */
 void mnuClearPanelGroupSelection(MenuPanelGroup *group) {
-    group->selection = MNU_NO_SELECTION;
+    group->selection = MENU_PANEL_GROUP_NO_SELECTION;
 }
 
-u32 mnuGetPanelGroupSelection(MenuPanelGroup *group) {
+MenuPanelGroupSelection mnuGetPanelGroupSelection(MenuPanelGroup *group) {
     return group->selection;
 }
 

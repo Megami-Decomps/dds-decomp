@@ -62,7 +62,7 @@ s32 mnuHandleStatPointAssignment(dds3ProcessID_t *task) {
     BrsSkillPackageWork *work;
     datUnitWork_t *entry;
     s32 inputFlags;
-    s32 selection;
+    MenuPanelGroupSelection selection;
     s32 changed = 0;
     s32 result;
 
@@ -153,7 +153,7 @@ u32 mnuResetGroupSelectionAndStartMessage(dds3ProcessID_t *task) {
     BrsSkillPackageWork *context;
 
     context = (BrsSkillPackageWork *)dds3GetProcessData(task);
-    mnuSetPanelGroupSelection(context->panelHandle, -1);
+    mnuSetPanelGroupSelection(context->panelHandle, MENU_PANEL_GROUP_NO_SELECTION);
     fclStartMessage(0x17);
     evtSetMessageWindowOptionWhenOpen(0);
     evtStoreValueAndCaptureWindowPanelValue(0xa3);
