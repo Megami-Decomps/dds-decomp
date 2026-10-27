@@ -663,6 +663,13 @@ extern char *D_0040BB38[16];
 extern char *D_0040BB78[8];
 extern s32 D_0040BB98[16];
 
+typedef s32 SdfGrFlushOtChainPhase;
+enum {
+    SDF_GR_FLUSH_OT_CHAIN_PHASE_READ_TAG = 0,
+    SDF_GR_FLUSH_OT_CHAIN_PHASE_SETUP_TAG_DATA = 1,
+    SDF_GR_FLUSH_OT_CHAIN_PHASE_DISPATCH_TAG = 2,
+};
+
 void sdfGrFlushOtChain(u32 sourceAddress) {
     SdfDmaTag *returnStack[2];
     SdfDmaTag *cursor;
@@ -672,7 +679,7 @@ void sdfGrFlushOtChain(u32 sourceAddress) {
     s32 depth = 0;
     s32 n = 0;
     s32 directRow;
-    s32 phase;
+    SdfGrFlushOtChainPhase phase;
     s32 wordsLeft;
     u32 tagAddress;
     s32 qwc;
@@ -684,13 +691,13 @@ void sdfGrFlushOtChain(u32 sourceAddress) {
     directRow = 0;
     tagAddress = 0;
     qwc = 0;
-    phase = 0;
+    phase = SDF_GR_FLUSH_OT_CHAIN_PHASE_READ_TAG;
     wordsLeft = 0;
     done = 0;
     for (;;) {
         if (wordsLeft == 0) {
             switch (phase) {
-            case 0: {
+            case SDF_GR_FLUSH_OT_CHAIN_PHASE_READ_TAG: {
                 u32 tag;
                 if ((u32)cursor & 0xF) {
                     sdfPrintf(D_0042E5B0, cursor);
@@ -705,10 +712,10 @@ void sdfGrFlushOtChain(u32 sourceAddress) {
                 wordCursor = ((u32 *)cursor) + 2;
                 cursor++;
                 wordsLeft = 2;
-                phase = 1;
+                phase = SDF_GR_FLUSH_OT_CHAIN_PHASE_SETUP_TAG_DATA;
                 break;
             }
-            case 1:
+            case SDF_GR_FLUSH_OT_CHAIN_PHASE_SETUP_TAG_DATA:
                 wordsLeft = qwc * 4;
                 switch (tagId) {
                 case 0:
@@ -720,9 +727,9 @@ void sdfGrFlushOtChain(u32 sourceAddress) {
                     wordCursor = (u32 *)cursor;
                     break;
                 }
-                phase = 2;
+                phase = SDF_GR_FLUSH_OT_CHAIN_PHASE_DISPATCH_TAG;
                 break;
-            case 2:
+            case SDF_GR_FLUSH_OT_CHAIN_PHASE_DISPATCH_TAG:
                 switch (tagId) {
                 case 0:
                 case 7:
@@ -754,7 +761,7 @@ void sdfGrFlushOtChain(u32 sourceAddress) {
                     }
                     break;
                 }
-                phase = 0;
+                phase = SDF_GR_FLUSH_OT_CHAIN_PHASE_READ_TAG;
                 break;
             }
         } else {
