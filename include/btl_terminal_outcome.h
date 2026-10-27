@@ -3,6 +3,12 @@
 
 #include "common.h"
 
+/* A callback supplies a terminal outcome; NO_OVERRIDE leaves the unit scan in control. */
+typedef s32 BtlTerminalOutcomeOverrideResult;
+enum {
+    BTL_TERMINAL_OUTCOME_OVERRIDE_NO_OVERRIDE = -1,
+};
+
 typedef s32 BtlTerminalOutcomeReadiness;
 enum {
     BTL_TERMINAL_OUTCOME_NOT_READY = 0,

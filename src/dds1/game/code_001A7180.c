@@ -434,8 +434,8 @@ BtlTerminalOutcomeReadiness btlResolveBattleTerminalOutcome(void) {
     state = btlGetRuntime();
     state->terminalOutcome = BTL_TERMINAL_OUTCOME_NONE;
     if (state->battleOutcomeOverride != NULL) {
-        s32 result = state->battleOutcomeOverride();
-        if (result != -1) {
+        BtlTerminalOutcomeOverrideResult result = state->battleOutcomeOverride();
+        if (result != BTL_TERMINAL_OUTCOME_OVERRIDE_NO_OVERRIDE) {
             state->terminalOutcome = result;
             return BTL_TERMINAL_OUTCOME_READY;
         }

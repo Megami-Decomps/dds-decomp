@@ -4713,6 +4713,7 @@
 0x00227CC8	btlEffectTaskStartFinale	inferred	starts sound/effect/group tasks when the task actor matches the linked effect actor [names_M59_D2Mid.tsv]
 0x00227DA8	btlQueueLinkedPairModelSwapTasks	inferred	confidence=high; Mode170/189 preActionHook queues paired model transitions and sound/camera/fade dependencies; twin=0x002069C0. Retains PurC16612aa69 trace-derived task epochs/barriers/staging. Namer1 batch46.
 0x00228320	btlIsEffectActor	inferred	DDS1 has the same unprefixed symbol; game/code_00227288 uses btl for the already-described battleIsEffectActor behavior.
+0x00228360	btlGetSoleTargetOutcomeOverride	inferred	returns outcome override 7 when the sole eligible target matches the effect actor, otherwise -1
 0x002286D8	btlQueueLinkedActorModelStateTasks	inferred	Inferred from the current C implementation in game/code_00227288.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00228A30	btlTryScheduleMarkedUnitTask	inferred	Schedules the marked unit's task only after active-effect and other marked-unit guards, then clears its 0x100 flag.
 0x00228B08	btlSetLinkedPairActionCamera	inferred	confidence=high; Mode312 cameraPoseBlendHook handles171/189 paired action cameras; twin=0x00207718. DDS2 also resets188 progress while returning0; native result joins retained. Namer1 batch46.

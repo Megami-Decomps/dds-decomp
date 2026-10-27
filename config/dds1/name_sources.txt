@@ -4592,7 +4592,7 @@
 0x00206418	btlGetAdjustedUnitDisplaySpecies	inferred	Substitutes one display species for special unit modes and otherwise returns the unit display species. [names_reviewed18.tsv]
 0x00206450	btlUpdateRahuEffectActorHeights	inferred	confidence=high; Rahu before-motion callback lowers the bound effect actor with decaying speed or raises eligible party effects toY0; original gates, limits and shared state retained. [Namer1 b57]
 0x002069C0	btlQueueLinkedPairModelSwapTasks	inferred	confidence=high; Mode170/189 preActionHook queues paired model transitions and sound/camera/fade dependencies; twin=0x00227DA8. Retains PurC16612aa69 trace-derived task epochs/barriers/staging. Namer1 batch46.
-0x00206F78	btlGetSoleTargetKind	inferred	returns 7 when exactly one eligible unit and it is the current target (or none), else -1
+0x00206F78	btlGetSoleTargetOutcomeOverride	inferred	returns outcome override 7 when the sole eligible target matches the effect actor, otherwise -1
 0x00207030	btlHasDifferentActiveTarget	inferred	btl battle control and actor operations in game/code_001FF030.c
 0x00207070	btlSetLinkFlagOff	inferred	mirror of func_002071B0
 0x002071B0	btlSetLinkFlagOn	inferred	sets/clears bit 1 in model flags for species 0x107 unit pair

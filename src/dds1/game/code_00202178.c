@@ -19,6 +19,7 @@
 #include "btl_task_condition.h"
 #include "eff_transform.h"
 #include "btl_state.h"
+#include "btl_terminal_outcome.h"
 #include "btl_action_state_selection.h"
 #include "btl_affinity_row.h"
 #include "dat_affinity_selector_type.h"
@@ -2489,14 +2490,14 @@ s32 btlIsEffectActor(BtlUnit *actor) {
 
 extern s32 btlHasEffectActor(void);
 
-s32 btlGetSoleTargetKind(void) {
+BtlTerminalOutcomeOverrideResult btlGetSoleTargetOutcomeOverride(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
     BtlUnit *target;
     BtlUnit *unit;
     BtlUnit *last;
     s32 count;
     if (btlHasEffectActor() == 0) {
-        return -1;
+        return BTL_TERMINAL_OUTCOME_OVERRIDE_NO_OVERRIDE;
     }
     target = btlGetEffectActor();
     last = NULL;
@@ -2516,7 +2517,7 @@ s32 btlGetSoleTargetKind(void) {
     if (count == 1 && (last == NULL || last == target)) {
         return 7;
     }
-    return -1;
+    return BTL_TERMINAL_OUTCOME_OVERRIDE_NO_OVERRIDE;
 }
 
 s32 btlHasDifferentActiveTarget(BtlUnit *target) {

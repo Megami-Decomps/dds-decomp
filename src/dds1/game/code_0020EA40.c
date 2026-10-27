@@ -6,6 +6,7 @@
 #include "btl_resolve_unit_value_api.h"
 #include "mdl_flag_api.h"
 #include "btl_state.h"
+#include "btl_terminal_outcome.h"
 #include "btl_action_state_selection.h"
 #include "btl_action_state_selection_slot.h"
 #include "btl_command.h"
@@ -179,7 +180,7 @@ extern s32 btlGetAdjustedUnitDisplaySpecies(BtlUnit *unit);
 extern BtlActionStateSelectionResult btlGetEffectTaskActorMatchCode(BtlTask *task);
 extern s32 btlGetEnabledEnemyActionResponse(BtlUnit *unit, s32 action);
 extern BtlUnit *btlGetReadyUnitForSpecies(u32 mode, u32 species);
-extern s32 btlGetSoleTargetKind(void);
+extern BtlTerminalOutcomeOverrideResult btlGetSoleTargetOutcomeOverride(void);
 extern s32 btlHandleLinkedUnitDefeatAction(BtlLinkedCommand *command);
 extern s32 btlHandleTargetedDefeatAction(u8 *unit);
 extern s32 btlHasDifferentActiveTarget(BtlUnit *target);
@@ -381,7 +382,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->pad5F4, 0x10, btlEffectTaskStartFinale);
         BTL_INSTALL_CALLBACK(battle->preActionHook, 0x0, btlQueueLinkedPairModelSwapTasks);
         BTL_INSTALL_CALLBACK(battle->pad650, 0x0, btlIsEffectActor);
-        BTL_INSTALL_CALLBACK(battle->battleOutcomeOverride, 0x0, btlGetSoleTargetKind);
+        BTL_INSTALL_CALLBACK(battle->battleOutcomeOverride, 0x0, btlGetSoleTargetOutcomeOverride);
         BTL_INSTALL_CALLBACK(battle->pad65C, 0x0, btlHasDifferentActiveTarget);
         BTL_INSTALL_CALLBACK(battle->allowDefeatCandidate, 0x0, btlSetLinkFlagOff);
         BTL_INSTALL_CALLBACK(battle->allowDefeatCandidateClear, 0x0, btlSetLinkFlagOn);

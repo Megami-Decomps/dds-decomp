@@ -13,6 +13,7 @@
 #include "btl_effect_position.h"
 #include "btl_task_condition.h"
 #include "btl_state.h"
+#include "btl_terminal_outcome.h"
 #include "btl_action_state_selection.h"
 #include "btl_command.h"
 #include "btl_action.h"
@@ -750,14 +751,14 @@ s32 btlIsEffectActor(BtlUnit *actor) {
     return 0;
 }
 
-s32 btlGetSoleTargetKind(void) {
+BtlTerminalOutcomeOverrideResult btlGetSoleTargetOutcomeOverride(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
     BtlUnit *target;
     BtlUnit *unit;
     BtlUnit *last;
     s32 count;
     if (btlHasEffectActor() == 0) {
-        return -1;
+        return BTL_TERMINAL_OUTCOME_OVERRIDE_NO_OVERRIDE;
     }
     target = btlGetEffectActor();
     last = NULL;
@@ -777,7 +778,7 @@ s32 btlGetSoleTargetKind(void) {
     if (count == 1 && (last == NULL || last == target)) {
         return 7;
     }
-    return -1;
+    return BTL_TERMINAL_OUTCOME_OVERRIDE_NO_OVERRIDE;
 }
 
 s32 btlHasDifferentActiveTarget(BtlUnit *target) {
@@ -2074,7 +2075,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->commandHook, 0x0, btlEffectTaskStartFinale);
         BTL_INSTALL_CALLBACK(battle->preActionHook, 0x0, btlQueueLinkedPairModelSwapTasks);
         BTL_INSTALL_CALLBACK(battle->pad694, 0x4, btlIsEffectActor);
-        BTL_INSTALL_CALLBACK(battle->battleOutcomeOverride, 0x0, btlGetSoleTargetKind);
+        BTL_INSTALL_CALLBACK(battle->battleOutcomeOverride, 0x0, btlGetSoleTargetOutcomeOverride);
         BTL_INSTALL_CALLBACK(battle->actorEligibilityOverride, 0x0, btlHasDifferentActiveTarget);
         BTL_INSTALL_CALLBACK(battle->unk69C, 0x0, btlSetLinkFlagOff);
         BTL_INSTALL_CALLBACK(battle->unk6A0, 0x0, btlSetLinkFlagOn);
