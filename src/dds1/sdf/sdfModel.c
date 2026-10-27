@@ -358,7 +358,7 @@ void sdfModelNodeAdd(sdfModelRootNode_t *list, sdfModelNode_t *owner, sdfModelNo
 sdfModelRootNode_t *sdfModelMakeRoot(DevRequest *resourceList, sdfModelDef_t *listRef) {
     s32 itemIndex = 0;
     sdfModelRootNode_t *model = sdfModelRootNew();
-    SdfItemList *list;
+    const SdfItemList *list;
     s32 count;
     const SdfItem *item;
     sdfModelNode_t *node;
@@ -393,7 +393,7 @@ sdfModelRootNode_t *sdfModelMakeRoot(DevRequest *resourceList, sdfModelDef_t *li
 sdfModelRootNode_t *sdfModelMake(DevRequest *resourceList, sdfModelDef_t *listRef) {
     s32 itemIndex = 0;
     sdfModelRootNode_t *model = sdfModelMakeRoot(resourceList, listRef);
-    SdfItemList *list = listRef->items;
+    const SdfItemList *list = listRef->items;
     s32 count = list->count;
     const SdfItem *item = list->firstItem;
 
@@ -411,7 +411,7 @@ sdfModelRootNode_t *sdfModelMake(DevRequest *resourceList, sdfModelDef_t *listRe
 sdfModelRootNode_t *sdfModelMakeEarly(DevRequest *resourceList, sdfModelDef_t *listRef) {
     s32 itemIndex = 0;
     sdfModelRootNode_t *model = sdfModelMakeRoot(resourceList, listRef);
-    SdfItemList *list;
+    const SdfItemList *list;
     s32 count;
     const SdfItem *item;
 
