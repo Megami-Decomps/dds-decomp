@@ -131,8 +131,8 @@ void dds3FontReqDestroy(Dds3IntrusiveNode *owner) {
     sdfChipFreeDirect(node);
 }
 
-void dds3FontReqDrawFont(Dds3IntrusiveNode *owner) {
-    Dds3FontNode *node = (Dds3FontNode *)owner;
+void dds3FontReqDrawFont(const Dds3IntrusiveNode *owner) {
+    const Dds3FontNode *node = (const Dds3FontNode *)owner;
 
     frFontDrawGlyphInDefaultMode(node->glyph);
 }
