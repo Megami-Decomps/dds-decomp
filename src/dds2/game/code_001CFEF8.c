@@ -24,6 +24,7 @@
 #include "btl_action.h"
 #include "btl_unit_tasks.h"
 #include "dat_state.h"
+#include "pty_skill_recovery_api.h"
 #include "sdf.h"
 #include "btl_scene_initializer.h"
 #include "fld_encounter_runtime_api.h"
@@ -1482,7 +1483,6 @@ void fldMarkLinkedSceneActors(u8 *scene) {
     btlFlagTasksForUpdate();
 }
 
-extern void ptyApplySkillRecovery(datUnitWork_t *entry, u32 skillId);
 extern void dds3WorkClear(void);
 
 /* Restore the party after all scene tasks finish, then clear battle activity. */

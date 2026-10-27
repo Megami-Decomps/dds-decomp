@@ -20,6 +20,7 @@
 #include "btl_floor_resource_readiness_api.h"
 #include "btl_terminal_outcome.h"
 #include "btl_task_args.h"
+#include "pty_skill_recovery_api.h"
 #include "btl_action.h"
 extern u8 sndIsStreamStatusTwoOrThree(void);
 extern s8 btlChooseStartVoice(void);
@@ -1447,7 +1448,6 @@ void fldMarkLinkedSceneActors(s32 context) {
     btlFlagTasksForUpdate();
 }
 
-extern void ptyApplySkillRecovery(datUnitWork_t *entry, u32 skillId);
 extern void dds3WorkClear(void);
 
 s32 btlFinishScenePartyRecovery(BtlState *scene) {

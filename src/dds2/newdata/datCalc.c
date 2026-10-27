@@ -26,6 +26,7 @@
 #include "pty_event_penalty_api.h"
 #include "pty_read_roster_stat_api.h"
 #include "dat_unit_has_skill_api.h"
+#include "pty_skill_recovery_api.h"
 #include "pty_item_quantity_update_view.h"
 #include "pty_record_slot_value_api.h"
 #include "btl_actor_attribute_api.h"
@@ -199,7 +200,7 @@ extern DatEnemyRecord *datEnemyRecords;
 
 /* Search 24 inline skill IDs or eight IDs in the selected external record.
  * Return on the first match; no record-index or pointer validation here. */
-u8 datUnitHasSkill(const datUnitWork_t *unit, s32 skillId) {
+u8 datUnitHasSkill(const datUnitWork_t *unit, DatSkillId skillId) {
     s32 skillIndex;
 
     if (!(unit->flags & DAT_EXTERNAL_SKILL_TABLE)) {
@@ -799,7 +800,7 @@ void datAddExp(datUnitWork_t *unit, s32 increment) {
 }
 
 /* Apply the owned skill's positive HP/MP recovery rate; unsupported skills do nothing. */
-void ptyApplySkillRecovery(datUnitWork_t *unit, u32 skillId) {
+void ptyApplySkillRecovery(datUnitWork_t *unit, DatSkillId skillId) {
     f32 recoveryRate;
     s32 hpRecovery;
     s32 mpRecovery;
@@ -848,7 +849,7 @@ void evtUpdateFlaggedStats(void) {
 }
 
 /* Return whether an occupied frontline entry owns the requested skill. */
-s32 evtHasMatchingFlaggedEntry(s32 skillId) {
+s32 evtHasMatchingFlaggedEntry(DatSkillId skillId) {
     s32 slotIndex = 0;
     do {
         datUnitWork_t *entry = &DDS3_GBWK->party[slotIndex];
@@ -1445,7 +1446,7 @@ PtyAffinityMatchResult ptyUnitMatchesAffinityRequirement(const datUnitWork_t *un
     }
     switch (requirement & 0xF0000000) {
     case 0:
-        if (requirement == 0 || datUnitHasSkill(unit, requirement) != 0) {
+        if (requirement == 0 || datUnitHasSkill(unit, (DatSkillId)requirement) != 0) {
             return PTY_AFFINITY_MATCH_FOUND;
         }
         break;
@@ -1468,7 +1469,7 @@ PtyAffinityMatchResult ptyUnitMatchesAffinityRequirement(const datUnitWork_t *un
         for (i = 0; i < 24; i++) {
             s16 skill = D_00435E28[requirementValue].skills[i];
 
-            if (skill >= 0 && datUnitHasSkill(unit, skill)) {
+            if (skill >= 0 && datUnitHasSkill(unit, (DatSkillId)skill)) {
                 return PTY_AFFINITY_MATCH_FOUND;
             }
         }
