@@ -36,6 +36,7 @@
 #include "evt_unit.h"
 #include "evt_event_pack_task.h"
 #include "evt_event_pack.h"
+#include "evt_sound_variation.h"
 #include "dat_state.h"
 #include "mnu_list.h"
 #include "eff.h"
@@ -114,7 +115,7 @@ extern MenuPopupEntry mnuShopMessageSequencePopupEntry[];
 extern sdfTexHandle_t *dds3RenderTexture;
 
 
-extern s32 evtStopEventBgm(s32 id, s32 fade);
+extern s32 evtStopEventBgm(s32 eventId, EvtSoundVariation variation);
 
 
 extern s32 D_003C99B8[];
@@ -1207,9 +1208,9 @@ void mnuReleaseCampSceneRegisteredIds(EvtRuntime *scene) {
     if (scene->registeredCount > 0) {
         s32 *idCursor = scene->registeredIds;
         do {
-            s32 identifier = *idCursor++;
+            EvtSoundVariation variation = *idCursor++;
             processedCount++;
-            evtStopEventBgm(scene->windowContext->eventId, identifier);
+            evtStopEventBgm(scene->windowContext->eventId, variation);
         } while (processedCount < scene->registeredCount);
     }
     scene->registeredCount = 0;

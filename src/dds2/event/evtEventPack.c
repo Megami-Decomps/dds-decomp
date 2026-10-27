@@ -9,6 +9,7 @@
 #include "evt_event_pack.h"
 #include "file.h"
 #include "evt_motion_se.h"
+#include "evt_sound_variation.h"
 #include "evt_task.h"
 #include "eff_transform.h"
 #include "dds3obj.h"
@@ -19,7 +20,7 @@
 #include "evt_event_pack_task.h"
 
 #include "dds3_world_primary.h"
-extern s32 evtPlaySe(s32 id, s32 fade);
+extern s32 evtPlaySe(s32 eventId, EvtSoundVariation variation);
 
 extern s32 evtLoadArea_FromMemory(s32 area, s32 room, u8 *resource0Data, u8 *resource1Data,
                                             const SdfTextureOffsetListHeader *textureOffsets, s32 flags);
@@ -140,6 +141,7 @@ KwlnTaskUpdateResult evtMotionSeProcess1(dds3ProcessID_t *task) {
     s32 motionFrame;
     s32 entryIndex;
     s32 cueIndex;
+    EvtSoundVariation variation;
     const EvtMotionSeCue *cues;
 
     motionSeParams = (EvtMotionSeTaskParams *)dds3GetProcessData(task);
@@ -170,7 +172,8 @@ KwlnTaskUpdateResult evtMotionSeProcess1(dds3ProcessID_t *task) {
             cues = (const EvtMotionSeCue *)(packState->data + packState->entries[entryIndex].dataOffset);
             for (cueIndex = 0; cueIndex < packState->entries[entryIndex].cueCount; cueIndex++) {
                 if (cues[cueIndex].frame == motionFrame) {
-                    evtPlaySe(motionSeParams->eventTaskId, cues[cueIndex].fade);
+                    variation = cues[cueIndex].fade;
+                    evtPlaySe(motionSeParams->eventTaskId, variation);
                     printf("EVE_SE motno = %d, frame = %d\n", motionId, motionFrame);
                 }
             }

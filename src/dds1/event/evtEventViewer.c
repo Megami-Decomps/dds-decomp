@@ -22,6 +22,7 @@
 #include "itf_mes_entry_start_api.h"
 #include "sdf_resource.h"
 #include "evt_viewer.h"
+#include "evt_sound_variation.h"
 #include "evt_reload_viewer_api.h"
 #include "evt_reset_unit_vector_slots_api.h"
 #include "kwln.h"
@@ -821,12 +822,12 @@ extern s32 evtViewerCreateObjectInFreeSlot(s32, EvtRuntimeGroup *, EvtRuntimeChi
 extern dds3Basic_t *evtEventViewerGetNameObject(EvtViewerNameIndex, EvtRuntime *);
 extern s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *, dds3Basic_t *, dds3Basic_t *, dds3Basic_t *, dds3Basic_t *);
 extern dds3Basic_t *evtEventViewerCreateOriginEffect(struct SoundMixer *, u32, EvtViewerNameIndex, s32, u32, EvtRuntime *);
-extern s32 evtPlaySe(s32 id, s32 fade);
+extern s32 evtPlaySe(s32 eventId, EvtSoundVariation variation);
 extern void mnuShopRegisterSceneObject(EvtRuntime *, s32);
-extern s32 evtPlayEventBgm(s32 id, s32 fade);
-extern s32 evtFadeInEventBgm(s32 id, s32 fade);
-extern s32 evtStopEventBgm(s32 id, s32 fade);
-extern void evtTransEventBgm(s32 id, s32 fade);
+extern s32 evtPlayEventBgm(s32 eventId, EvtSoundVariation variation);
+extern s32 evtFadeInEventBgm(s32 eventId, EvtSoundVariation variation);
+extern s32 evtStopEventBgm(s32 eventId, EvtSoundVariation variation);
+extern void evtTransEventBgm(s32 eventId, EvtSoundVariation variation);
 extern void p2sdBgmVolDown(void);
 extern void p2sdBgmVolUp(void);
 extern void p2sdStopAllBgm(void);

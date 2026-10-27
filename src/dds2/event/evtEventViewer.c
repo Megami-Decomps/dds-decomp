@@ -16,6 +16,7 @@
 #include "mnu_camp_option_index_api.h"
 #include "sdf_chip.h"
 #include "evt_viewer.h"
+#include "evt_sound_variation.h"
 #include "evt_reload_viewer_api.h"
 #include "evt_reset_unit_vector_slots_api.h"
 #include "dds3obj.h"
@@ -727,11 +728,11 @@ void evtViewerApplySelectedEntry(EvtRuntime *viewer) {
 extern u16 D_004372B0;
 extern u8 evtViewerTestIndexedCondition(u32 encodedCondition);
 extern void mnuUnpackNibbleFields(EvtRuntimeChild *key, s32 *lowBitsOut, s32 *highBitsOut);
-extern s32 evtPlaySe(s32 id, s32 fade);
-extern s32 evtPlayEventBgm(s32 id, s32 fade);
-extern s32 evtFadeInEventBgm(s32 id, s32 fade);
-extern s32 evtStopEventBgm(s32 id, s32 fade);
-extern void evtTransEventBgm(s32 id, s32 fade);
+extern s32 evtPlaySe(s32 eventId, EvtSoundVariation variation);
+extern s32 evtPlayEventBgm(s32 eventId, EvtSoundVariation variation);
+extern s32 evtFadeInEventBgm(s32 eventId, EvtSoundVariation variation);
+extern s32 evtStopEventBgm(s32 eventId, EvtSoundVariation variation);
+extern void evtTransEventBgm(s32 eventId, EvtSoundVariation variation);
 extern void fldRegisterCampSceneId(EvtRuntime *viewer, s32 identifier);
 extern void p2sdBgmVolDown(void);
 extern void p2sdBgmVolUp(void);

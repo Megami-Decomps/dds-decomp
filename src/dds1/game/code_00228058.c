@@ -17,6 +17,7 @@
 #include "evt_picture.h"
 #include "evt_event_pack.h"
 #include "evt_event_bgm_readiness.h"
+#include "evt_sound_variation.h"
 #include "evt_solar.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
@@ -212,39 +213,39 @@ u32 evtCommand_LOAD_SOUND_E(void) {
     return 0;
 }
 
-extern s32 evtPlayEventBgm(s32 eventId, s32 fade);
+extern s32 evtPlayEventBgm(s32 eventId, EvtSoundVariation variation);
 
 u32 evtCommand_BGM_PLAY_E(void) {
     s32 eventId;
-    s32 fade;
+    EvtSoundVariation variation;
 
     eventId = scrGetIntPara(0);
-    fade = scrGetIntPara(1);
-    evtPlayEventBgm(eventId, fade);
+    variation = scrGetIntPara(1);
+    evtPlayEventBgm(eventId, variation);
     return 1;
 }
 
-extern void evtTransEventBgm(s32 eventId, s32 fade);
+extern void evtTransEventBgm(s32 eventId, EvtSoundVariation variation);
 
 u32 evtCommand_BGM_TRANS_E(void) {
     s32 eventId;
-    s32 fade;
+    EvtSoundVariation variation;
 
     eventId = scrGetIntPara(0);
-    fade = scrGetIntPara(1);
-    evtTransEventBgm(eventId, fade);
+    variation = scrGetIntPara(1);
+    evtTransEventBgm(eventId, variation);
     return 1;
 }
 
-extern s32 evtStopEventBgm(s32 eventId, s32 fade);
+extern s32 evtStopEventBgm(s32 eventId, EvtSoundVariation variation);
 
 u32 evtCommand_FADEOUT_E(void) {
     s32 eventId;
-    s32 fade;
+    EvtSoundVariation variation;
 
     eventId = scrGetIntPara(0);
-    fade = scrGetIntPara(1);
-    evtStopEventBgm(eventId, fade);
+    variation = scrGetIntPara(1);
+    evtStopEventBgm(eventId, variation);
     return 1;
 }
 
@@ -265,27 +266,27 @@ u32 evtCommand_BGM_VOL_UP(void) {
     return 1;
 }
 
-extern s32 evtPlaySe(s32 eventId, s32 fade);
+extern s32 evtPlaySe(s32 eventId, EvtSoundVariation variation);
 
 u32 evtOpcodeSetBgmVolumePan(void) {
     s32 id;
-    s32 fade;
+    EvtSoundVariation variation;
 
     id = scrGetIntPara(0);
-    fade = scrGetIntPara(1);
-    evtPlaySe(id, fade);
+    variation = scrGetIntPara(1);
+    evtPlaySe(id, variation);
     return 1;
 }
 
-extern s32 evtStartBgmBySoundIdAndFade(s32 eventId, s32 fade);
+extern s32 evtStartBgmBySoundIdAndFade(s32 eventId, EvtSoundVariation variation);
 
 u32 evtCommandStartBgmWithFade(void) {
     s32 eventId;
-    s32 fade;
+    EvtSoundVariation variation;
 
     eventId = scrGetIntPara(0);
-    fade = scrGetIntPara(1);
-    evtStartBgmBySoundIdAndFade(eventId, fade);
+    variation = scrGetIntPara(1);
+    evtStartBgmBySoundIdAndFade(eventId, variation);
     return 1;
 }
 

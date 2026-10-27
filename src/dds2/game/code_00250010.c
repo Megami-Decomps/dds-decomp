@@ -25,6 +25,7 @@
 #include "evt_world.h"
 #include "evt_picture.h"
 #include "evt_event_bgm_readiness.h"
+#include "evt_sound_variation.h"
 #include "evt_sky_alpha_animation_status.h"
 #include "eff_object.h"
 #include "eff_event.h"
@@ -5621,7 +5622,7 @@ s32 evtReloadEventViewer(EvtPolygonMovieResourceMode resourceMode, EvtRuntime *r
     return 0;
 }
 
-s32 evtGetSoundIndex(s32 eventId, s32 variation) {
+s32 evtGetSoundIndex(s32 eventId, EvtSoundVariation variation) {
     s32 sequenceId;
 
     sequenceId = 0xC7;
@@ -5653,27 +5654,27 @@ EvtEventBgmReadiness evtCheckEventBgmLoaded(s32 eventId) {
         : EVT_EVENT_BGM_NOT_READY;
 }
 
-s32 evtPlayEventBgm(s32 eventId, s32 fade) {
+s32 evtPlayEventBgm(s32 eventId, EvtSoundVariation variation) {
     s32 packedTrackId;
     if ((u32)(eventId - 0x258) >= 0x100) {
         return 0;
     }
-    packedTrackId = evtGetSoundIndex(eventId, fade);
+    packedTrackId = evtGetSoundIndex(eventId, variation);
     printf("Event BGM play :%08X\n", packedTrackId);
     p2sdPlayBGM(packedTrackId);
     return packedTrackId;
 }
 
 extern char D_004247F8[]; /* "Event BGM trans :%08X\n" */
-extern s32 evtGetSoundIndex();
+extern s32 evtGetSoundIndex(s32 eventId, EvtSoundVariation variation);
 extern void p2sdSetBgmTrack();
 
-void evtTransEventBgm(s32 eventId, s32 fade) {
+void evtTransEventBgm(s32 eventId, EvtSoundVariation variation) {
     s32 packedTrackId;
     if ((u32)(eventId - 0x258) < 0x100U) {
         packedTrackId = -1;
-        if (fade >= 0) {
-            packedTrackId = evtGetSoundIndex(eventId, fade);
+        if (variation >= 0) {
+            packedTrackId = evtGetSoundIndex(eventId, variation);
         }
         printf(D_004247F8, packedTrackId);
         p2sdSetBgmTrack(packedTrackId);
@@ -5682,43 +5683,43 @@ void evtTransEventBgm(s32 eventId, s32 fade) {
 
 INCLUDE_RODATA(const s32, "game/code_00250010", D_004247F8);
 
-s32 evtFadeInEventBgm(s32 eventId, s32 fade) {
+s32 evtFadeInEventBgm(s32 eventId, EvtSoundVariation variation) {
     s32 packedTrackId;
     if ((u32)(eventId - 0x258) >= 0x100) {
         return 0;
     }
-    packedTrackId = evtGetSoundIndex(eventId, fade);
+    packedTrackId = evtGetSoundIndex(eventId, variation);
     printf("Event BGM fade in play :%08X\n", packedTrackId);
     p2sdPlayBGMFade(packedTrackId);
     return packedTrackId;
 }
 
-s32 evtStopEventBgm(s32 eventId, s32 fade) {
+s32 evtStopEventBgm(s32 eventId, EvtSoundVariation variation) {
     s32 packedTrackId;
     if ((u32)(eventId - 0x258) >= 0x100) {
         return 0;
     }
-    packedTrackId = evtGetSoundIndex(eventId, fade);
+    packedTrackId = evtGetSoundIndex(eventId, variation);
     p2sdStopBGM(packedTrackId);
     return packedTrackId;
 }
 
-s32 evtPlaySe(s32 eventId, s32 fade) {
+s32 evtPlaySe(s32 eventId, EvtSoundVariation variation) {
     s32 packedTrackId;
     if ((u32)(eventId - 0x258) >= 0x100) {
         return 0;
     }
-    packedTrackId = evtGetSoundIndex(eventId, fade);
+    packedTrackId = evtGetSoundIndex(eventId, variation);
     p2sdPlaySE(packedTrackId, 0x7F, 0x3F);
     return packedTrackId;
 }
 
-s32 evtStartBgmBySoundIdAndFade(s32 eventId, s32 fade) {
+s32 evtStartBgmBySoundIdAndFade(s32 eventId, EvtSoundVariation variation) {
     s32 packedTrackId;
     if ((u32)(eventId - 0x258) >= 0x100) {
         return 0;
     }
-    packedTrackId = evtGetSoundIndex(eventId, fade);
+    packedTrackId = evtGetSoundIndex(eventId, variation);
     p2sdStopSe(packedTrackId);
     return packedTrackId;
 }
