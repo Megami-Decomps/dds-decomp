@@ -1706,7 +1706,7 @@ void fldResetFieldRuntimeState(FldRuntimeResetMode mode) {
     area->colorEffectSuppressed = 0;
     area->defaultEncounterId = 0;
     area->encounterOverrideId = 0;
-    area->encounterMode = 0;
+    area->encounterMode = FLD_ENCOUNTER_MODE_STANDARD;
     area->transitionCount = 0;
     area->frameTravelDistance = 0.0f;
     area->titleFade = 0;

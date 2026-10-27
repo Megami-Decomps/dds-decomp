@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "fld_area_work.h"
+#include "fld_encounter_runtime_api.h"
 #include "fld.h"
 #include "dds3_admin_control_api.h"
 #include "common.h"
@@ -142,7 +143,6 @@ s32 evtRegistBEField(s32 eventId, s32 resourceId);
 
 extern s32 D_0032E3C0[];
 
-void fldRequestEncounterWithFade(s32 kind, s32 eventId);
 
 extern u32 evtPendingEventSelection;
 
@@ -443,7 +443,7 @@ void evtSubmitEventRequest(s32 eventId, s32 requestMode)
     s32 payload[2];
 
     fldBgmStop();
-    fldRequestEncounterWithFade(2, eventId);
+    fldRequestEncounterWithFade(FLD_ENCOUNTER_MODE_SCRIPT_EVENT, eventId);
     evtPendingEventSelection = requestMode;
     payload[0] = 0;
     payload[1] = eventId;
@@ -466,7 +466,7 @@ void evtSubmitEventRequestImmediate(s32 eventId)
     s32 payload[2];
 
     fldPauseBgm();
-    fldRequestEncounterWithFade(2, eventId);
+    fldRequestEncounterWithFade(FLD_ENCOUNTER_MODE_SCRIPT_EVENT, eventId);
     evtPendingEventSelection = 0;
     payload[0] = 0;
     payload[1] = eventId;

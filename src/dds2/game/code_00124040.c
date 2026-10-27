@@ -170,7 +170,6 @@ extern void fldPrepareSceneBgmArchive(void);
 
 extern s32 fldEveHit_ChkEveHitAfter(void);
 
-extern s32 fldSetEncounterMode(s32 encounterMode);
 
 extern void fldStartDeferredFieldExit(void);
 
@@ -1907,7 +1906,7 @@ s32 fldUpdateTravelAndEncounters(void) {
     }
     if (!fldGlobalBase.specialEventActive && !fldRunDanteGunFlag[0x44 / 4]) return 0;
     if (!fldEncountTestFlag(0x10)) return 0;
-    fldGlobalBase.encounterMode = 0;
+    fldGlobalBase.encounterMode = FLD_ENCOUNTER_MODE_STANDARD;
     encounter = fldGlobalBase.encounterOverrideId;
     if (encounter == 0) encounter = fldGlobalBase.defaultEncounterId;
     D_00435F98.tableIndex = encounter;
@@ -1917,7 +1916,7 @@ s32 fldUpdateTravelAndEncounters(void) {
         if (encounter != -1) {
             D_00435F98.tableIndex = encounter;
             *selection = btlAdvanceConditionalEncounterRoll(99999.0f, encounter);
-            fldGlobalBase.encounterMode = 1;
+            fldGlobalBase.encounterMode = FLD_ENCOUNTER_MODE_ALTERNATE;
         }
         if (*selection != 0) {
             if (fldRunDanteGunFlag[0x44 / 4] == 1) {

@@ -1710,7 +1710,7 @@ s32 fldUpdateTravelAndEncounters(void) {
     if (fldGetNextFileLoadState() == FLD_NEXT_FILE_LOAD_PENDING) return 0;
     if (!fldGlobalBase.specialEventActive && !fldRunDanteGunFlag[0x44 / 4]) return 0;
     if (!fldEncountTestFlag(0x10)) return 0;
-    fldGlobalBase.encounterMode = 0;
+    fldGlobalBase.encounterMode = FLD_ENCOUNTER_MODE_STANDARD;
     encounter = fldGlobalBase.encounterOverrideId;
     if (encounter == 0) encounter = fldGlobalBase.defaultEncounterId;
     D_003BAC08.tableIndex = encounter;
@@ -1720,7 +1720,7 @@ s32 fldUpdateTravelAndEncounters(void) {
         if (encounter != -1) {
             D_003BAC08.tableIndex = encounter;
             *selection = btlAdvanceConditionalEncounterRoll(99999.0f, encounter);
-            fldGlobalBase.encounterMode = 1;
+            fldGlobalBase.encounterMode = FLD_ENCOUNTER_MODE_ALTERNATE;
         }
         if (fldRunDanteGunFlag[0x44 / 4] == 1) {
             fldGlobalBase.nextFloor = fldGlobalBase.floor + 1;
@@ -1993,7 +1993,6 @@ extern void fldSetSnowActive(void);
 
 extern s32 fldEveHit_ChkEveHitAfter(void);
 
-extern s32 fldSetEncounterMode(s32 encounterMode);
 
 extern void fldStartDeferredFieldExit(void);
 

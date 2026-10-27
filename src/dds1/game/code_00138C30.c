@@ -267,7 +267,6 @@ extern u8 D_003BACE0[];
 
 extern u8 D_003BACE8[];
 
-extern s32 fldEncounterRuntimeState;
 
 extern u32 D_003BACFC;
 

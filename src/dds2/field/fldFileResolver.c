@@ -67,7 +67,6 @@
 /* Declared before first use (were implicit int). */
 extern void btlResetAsyncState(void);
 extern void fldSetFileResolverIdx(u32 state);
-extern s32 fldSetEncounterMode(s32 encounterMode);
 
 
 
@@ -616,7 +615,6 @@ extern u8 D_00436070[];
 
 extern u8 D_00436078[];
 
-extern s32 fldEncounterRuntimeState;
 
 extern u32 D_0043608C;
 
@@ -3348,11 +3346,11 @@ void fldDrawExpandedSpriteStrip(s32 alpha, s32 offset) {
 }
 
 s32 fldGetEncounterRuntimeResult(void) {
-    s32 state = fldEncounterRuntimeState;
+    FldEncounterRuntimeMode state = fldEncounterRuntimeState;
     s32 result;
 
-    if (state < 3) {
-        if (state < 0) {
+    if (state < FLD_ENCOUNTER_MODE_BYPASS_BATTLE_RUNTIME) {
+        if (state < FLD_ENCOUNTER_MODE_STANDARD) {
             result = D_0043608C;
         } else {
             result = btlGetRuntimeResult();
@@ -3368,21 +3366,19 @@ void fldSetEncounterPendingValue(u32 pendingValue) {
 }
 
 s32 fldEncProc(dds3ProcessID_t *task) {
-    s32 state = fldEncounterRuntimeState;
+    FldEncounterRuntimeMode state = fldEncounterRuntimeState;
 
-    if (state < 3) {
-        if (state >= 0) {
+    if (state < FLD_ENCOUNTER_MODE_BYPASS_BATTLE_RUNTIME) {
+        if (state >= FLD_ENCOUNTER_MODE_STANDARD) {
             btlUpdateRuntimeFadeState();
         }
     }
     return 0;
 }
 
-#define FLD_ENCOUNTER_MODE_BYPASS_BATTLE_RUNTIME 3
-
 extern void p2sdPlaySE(s32 sequence, s32 volume, s32 pan);
 
-void fldRequestEncounterWithFade(s32 encounterMode, s32 recordIndex) {
+void fldRequestEncounterWithFade(FldEncounterRuntimeMode encounterMode, s32 recordIndex) {
     if ((recordIndex < 0x400) && ((datBattleSceneRecords[recordIndex].flags & 0x8000) != 0))
     {
         kwlnFadeBackgroundStartOut(0);
@@ -3393,12 +3389,12 @@ void fldRequestEncounterWithFade(s32 encounterMode, s32 recordIndex) {
     fldSetEncounterMode(encounterMode);
 }
 
-s32 fldSetEncounterMode(s32 encounterMode) {
+s32 fldSetEncounterMode(FldEncounterRuntimeMode encounterMode) {
     fldEncounterRuntimeState = encounterMode;
     D_0043608C = 0;
     if (fldGetEncounterRuntimeResult() == 0) {
-        if (fldEncounterRuntimeState < 3) {
-            if (fldEncounterRuntimeState >= 0) {
+        if (fldEncounterRuntimeState < FLD_ENCOUNTER_MODE_BYPASS_BATTLE_RUNTIME) {
+            if (fldEncounterRuntimeState >= FLD_ENCOUNTER_MODE_STANDARD) {
                 btlActivateRuntime(fldEncounterRuntimeState);
                 if (dds3GetActiveScene() != 0) {
                     dds3VisibleSceneBasic(dds3GetActiveScene(), 1);

@@ -2,6 +2,7 @@
 #define FLD_AREA_WORK_H
 
 #include "common.h"
+#include "fld_encounter_runtime_api.h"
 
 struct sdfTexHandle_t;
 struct sdfMemHandle_t;
@@ -150,7 +151,7 @@ typedef struct FldAreaWork {
     s32 unkD8;
     s32 defaultEncounterId;      /* 0xDC: selected room encounter; D_0038984C in DDS2. */
     s32 encounterOverrideId;
-    s32 encounterMode;
+    FldEncounterRuntimeMode encounterMode;
     s32 cameraTargetGraceTicks; /* 0xE8: suppresses travel deltas after target install. */
     u32 transitionCount;
     s32 nextArea;
