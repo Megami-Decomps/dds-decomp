@@ -8383,6 +8383,7 @@ sdfFileDeviceCB = 0x0040BA10;
 ipuDefaultQuantizerMatrices = 0x0040D9A0; // type:u8 size:0x50
 ipuDefaultVqClut = 0x0040D9F0; // type:u16 size:0x20
 at3decImdctTwiddles = 0x0040E650; // type:u32 size:0x800
+_impure_ptr = 0x0040F150; // type:u32 size:0x4
 __malloc_av_ = 0x0040F158; // type:u32 size:0x408
 __malloc_trim_threshold = 0x0040F560; // size:0x8
 __malloc_top_pad = 0x0040F568; // size:0x8

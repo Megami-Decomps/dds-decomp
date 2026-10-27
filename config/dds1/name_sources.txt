@@ -1,4 +1,5 @@
 # addr	name	evidence|inferred	note
+0x0039BFD0	_impure_ptr	inferred	Newlib's active reentrancy pointer: fopen loads it as _fopen_r's first argument, as do the printf/stdio and signal wrappers. Retail data points to 0x0039BCE0, whose 64-bit random state at +0xA8 starts at 1. DDS2 twin 0x0040F150; only the four-byte pointer is named.
 0x001001D8	kwlnInitializeRuntime	inferred	confidence=high; matched-C; src/dds1/game/code_00100000.c:69; Initializes runtime tasks and game subsystems.; twin=0x001001D8 (DDS2).
 0x00100500	dds3SoftReset	inferred	SMT3HD name via SLUS_209.11 0x00100400, shared-hash-in-run; was kwlnRequestMainLoopExit
 0x00100510	dds3GetKernelCount	inferred	SMT3HD name via SLUS_209.11 0x00100410, shared-hash-in-run; was kwlnGetFrameCounter
