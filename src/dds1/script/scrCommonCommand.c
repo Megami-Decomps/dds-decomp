@@ -16,6 +16,7 @@
 #include "scr_command_timer_api.h"
 #include "scr_string_parameter_api.h"
 #include "scr_arg_read.h"
+#include "scr_integer_parameter_api.h"
 #include "kwln_task_lifecycle.h"
 #include "kwln_fade.h"
 #include "eff_event_draw.h"
@@ -45,8 +46,6 @@ extern const char scrSceneLightDirectionZeroWarning[];
 extern char D_0039F530[];
 extern char D_0039F550[];
 extern char D_0039F570[];
-
-extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 
 static inline ScrProcessHandle scrGetProcessHandlePara(s32 parameterIndex)
 {

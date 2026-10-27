@@ -8,6 +8,7 @@
 #include "scr_command_index.h"
 #include "scr_procedure_index.h"
 #include "scr_command_parameter_index.h"
+#include "scr_vm_integer.h"
 #include "itf_mes_window_index.h"
 
 struct sdfMemHandle_t;
@@ -63,7 +64,7 @@ enum {
  * a scalar, a global-register index, a return address, or a borrowed string. */
 typedef union ScrStackValue {
     u32 bits; /* raw slot copy, preserving the separately stored type tag */
-    s32 integer;
+    ScrVmInteger integer;
     f32 floating;
     ScrGlobalIntegerIndex globalIntegerIndex;
     ScrGlobalFloatIndex globalFloatIndex;
@@ -171,11 +172,11 @@ s32 scrScriptProcess(dds3ProcessID_t *task);
 ScrTraceResult scrTraceCode(scrProcessWork_s *context);
 void scrProcDestroyTask(scrProcessWork_s *process);
 scrProcessWork_s *scrCreateTaskWithDefaultOption(const struct BfFlw0Header *header);
-void PushInt(scrProcessWork_s *script, s32 value);
+void PushInt(scrProcessWork_s *script, ScrVmInteger value);
 void PushFloat(scrProcessWork_s *script, f32 value);
 void PushStr(scrProcessWork_s *script, const char *value);
 void PushRet(scrProcessWork_s *script, ScrProgramCounter returnAddress);
-s32 PopInt(scrProcessWork_s *script);
+ScrVmInteger PopInt(scrProcessWork_s *script);
 f32 PopFloat(scrProcessWork_s *script);
 /* Command callback plus operand count (0x8); DDS1 script/scrTraceCode.c. */
 typedef struct ScrCommand {

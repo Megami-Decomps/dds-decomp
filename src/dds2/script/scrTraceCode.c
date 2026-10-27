@@ -6,6 +6,7 @@
 #include "scr_trace_result.h"
 #include "scr_string_parameter_api.h"
 #include "scr_arg_read.h"
+#include "scr_integer_parameter_api.h"
 
 
 extern ScrOpcodeHandlerResult (*codefunc[])(scrProcessWork_s *scr);
@@ -486,7 +487,7 @@ ScrTraceResult scrTraceCode(scrProcessWork_s *scr) {
 
 /* Script command parameter `parameterIndex` (0 = first) as an int, converting floats and
  * dereferencing global variable references. */
-s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex) {
+ScrVmInteger scrGetIntPara(ScrCommandParameterIndex parameterIndex) {
     scrProcessWork_s *scr = nowpwork;
     s32 stackIndex = scr->sp - parameterIndex - 1;
 
@@ -555,7 +556,7 @@ const char *scrGetStrPara(ScrCommandParameterIndex parameterIndex)
 /* The setters return the context they set the value in, which retail
  * leaves in v0: a command that ends by setting its value returns it as its
  * result, and a nonzero result tells CodeFunc_Comm the command is done. */
-scrProcessWork_s *scrSetIntReturnValue(s32 retVal)
+scrProcessWork_s *scrSetIntReturnValue(ScrVmInteger retVal)
 {
     scrProcessWork_s *scr = nowpwork;
     SCR_SET_RETURN_VALUE(scr, SCR_STACK_TYPE_INTEGER, integer, retVal);

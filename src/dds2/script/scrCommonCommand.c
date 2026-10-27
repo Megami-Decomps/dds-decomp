@@ -16,6 +16,7 @@
 #include "scr_command_timer_api.h"
 #include "scr_string_parameter_api.h"
 #include "scr_arg_read.h"
+#include "scr_integer_parameter_api.h"
 #include "kwln_task_lifecycle.h"
 #include "kwln_fade.h"
 #include "eff_event_draw.h"
@@ -55,8 +56,6 @@ void dds3SetBlur2Para(f32 rotation, f32 scale, u32 gsAlphaControl);
 extern char D_004126F0[];
 extern char D_004126B0[];
 
-
-extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 
 static inline ScrProcessHandle scrGetProcessHandlePara(s32 parameterIndex)
 {

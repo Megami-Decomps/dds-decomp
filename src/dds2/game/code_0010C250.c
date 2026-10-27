@@ -43,7 +43,7 @@ s32 scrScriptProcess(dds3ProcessID_t *task) {
     }
 }
 
-void PushInt(scrProcessWork_s *script, s32 integerValue) {
+void PushInt(scrProcessWork_s *script, ScrVmInteger integerValue) {
     script->stackTypes[script->sp] = SCR_STACK_TYPE_INTEGER;
     script->stackValues[script->sp].integer = integerValue;
     script->sp = script->sp + 1;
@@ -69,7 +69,7 @@ void PushRet(scrProcessWork_s *script, ScrProgramCounter returnAddress) {
 }
 
 
-s32 PopInt(scrProcessWork_s *script) {
+ScrVmInteger PopInt(scrProcessWork_s *script) {
     s32 stackIndex = script->sp;
 
     script->sp = stackIndex - 1;
