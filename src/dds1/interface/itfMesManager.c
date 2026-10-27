@@ -8,6 +8,7 @@
 #include "sdf_resource.h"
 #include "sdf_pac_reloc.h"
 #include "fr_font_temporary_entry_api.h"
+#include "fr_font_measure.h"
 #include "itf_mes_state_api.h"
 #include "itf_text_slots_api.h"
 #include "fr_font_glyph_chain_count.h"
@@ -80,8 +81,6 @@ void CommitVarTable(u8 **table);
 s32 GetMessageWidth(_FRQ *glyph);
 
 void SetVar(instanceMes_tag *mes, s32 slotIndex, const char *source, s32 byteCount);
-
-extern s32 frFontMeasureGlyphStripWidth(s32 line, _FRQ *glyph);
 
 void itfMesInitializePanelPlacementSprite(instanceMes_tag *panel);
 

@@ -62,7 +62,6 @@ u32 frFontGetGlyphCellHeight(u8);
 extern u8 D_00436570;
 _FRQ *frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, _FRQ *head);
 _TEXT *frFontCreateGlyphFromCode(u16 glyphId, s32 fontIndexArg, u8 firstOption, u8 secondOption);
-s32 frGetStrWidth(_FRQ *parentGlyph);
 
 _FRQ *frCombineFontRequest(_FRQ *previous, _FRQ *next);
 
@@ -981,8 +980,8 @@ s32 frStrLen(s8 *text) {
 
 /* Sum one parent's child advances and signed spacing after every child, even
  * the last. Require a non-NULL parent; return the signed total. */
-s32 frGetStrWidth(_FRQ *parentGlyph) {
-    _TEXT *childGlyph = parentGlyph->firstChild;
+s32 frGetStrWidth(const _FRQ *parentGlyph) {
+    const _TEXT *childGlyph = parentGlyph->firstChild;
     s32 totalAdvance = 0;
 
     if (childGlyph != NULL) {
@@ -999,9 +998,9 @@ s32 frGetStrWidth(_FRQ *parentGlyph) {
 
 /* Sum all child advances and signed spacing from the chain origin. This is
  * neither a line count nor a maximum line width; require a non-NULL glyphChain. */
-s32 frGetStrWidth2(_FRQ *glyphChain) {
-    _FRQ *parentGlyph;
-    _TEXT *childGlyph;
+s32 frGetStrWidth2(const _FRQ *glyphChain) {
+    const _FRQ *parentGlyph;
+    const _TEXT *childGlyph;
     s32 totalAdvance = 0;
 
     for (parentGlyph = glyphChain->chainHead; parentGlyph != NULL; parentGlyph = parentGlyph->next) {
@@ -1123,8 +1122,8 @@ s32 frFontCountGlyphBands(_FRQ *glyph) {
     return 0;
 }
 
-s32 frFontMeasureLineWidth(s32 requestedLine, _FRQ *glyph) {
-    _FRQ *node;
+s32 frFontMeasureLineWidth(s32 requestedLine, const _FRQ *glyph) {
+    const _FRQ *node;
     s32 bottom;
     s32 currentY;
     u32 width = 0;
@@ -1161,10 +1160,10 @@ s32 frFontMeasureLineWidth(s32 requestedLine, _FRQ *glyph) {
 /* Write each visited position and stop at requestedIndex. Missing indices leave
  * the last visited position; empty input leaves output unchanged. DDS2 advances
  * to the first node outside its y-band, unlike DDS1's single-node advance. */
-void frFontGetGlyphPositionAtIndex(FrFontPosition *position, s32 requestedIndex, _FRQ *glyph) {
+void frFontGetGlyphPositionAtIndex(FrFontPosition *position, s32 requestedIndex, const _FRQ *glyph) {
     s32 positionIndex = 0;
-    _FRQ *currentNode;
-    _FRQ *scanNode;
+    const _FRQ *currentNode;
+    const _FRQ *scanNode;
     s32 bandLimit;
     s32 currentY;
 

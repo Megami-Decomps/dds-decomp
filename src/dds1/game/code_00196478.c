@@ -18,6 +18,7 @@
 #include "itf.h"
 #include "itf_panel_api.h"
 #include "fr_font_glyph_chain_count.h"
+#include "fr_font_measure.h"
 #include "itf_mem_node.h"
 #include "itf_resource_segments.h"
 #include "sdf.h"
@@ -755,7 +756,6 @@ void itfAttachGlyph12x16(u32 x, u32 y, s32 depth, u32 colors,
 }
 
 extern const u8 *MessageNumSearch(s32 textId, const FrFontTextBank *bank, s32 mode);
-extern s32 frFontMeasureGlyphStripWidth(s32 line, _FRQ *text);
 extern void frFontMoveChainTo(s32 x, s32 y, _FRQ *text);
 
 _FRQ *itfDrawBankTextWithLayoutFlags(s32 x, s32 y, s32 depth, u16 textId, FrFontTextBank *bank, s32 flags) {

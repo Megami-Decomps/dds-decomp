@@ -11,6 +11,7 @@
 #include "kwln_task_create.h"
 #include "sdf_resource.h"
 #include "fr_font_temporary_entry_api.h"
+#include "fr_font_measure.h"
 #include "itf_mes_state_api.h"
 #include "pcp_vu0.h"
 #include "scr.h"
@@ -41,7 +42,6 @@ extern ItfMesOptionBitIndex itfMesFindOptionBitIndex(ItfMesVisibleOptionOrdinal 
 extern s32 SelectItem(instanceMes_tag *);
 extern void itfUpdateSoundSelectionTransition(instanceMes_tag *);
 
-extern s32 frFontMeasureGlyphStripWidth(s32 line, _FRQ *glyph);
 
 extern SndPad dds3PadButtonState;
 
