@@ -12,6 +12,7 @@
 #include "dat_currency_requirement_api.h"
 #include "dat_calculated_stat_value_api.h"
 #include "dat_calculate_command_base_value_api.h"
+#include "dat_unit_dying_api.h"
 #include "dat_affinity_selector.h"
 #include "dat_effective_affinity_api.h"
 #include "pty_skill_nibble_state.h"
@@ -397,8 +398,7 @@ DatAffinitySelector datFlagToElementIndex(s32 channelFlag) {
     return selector;
 }
 
-/* Test the truncated current-HP percentage; maximum HP must be nonzero. */
-u8 datCheckDying(datUnitWork_t *unit) {
+DatUnitDyingResult datCheckDying(const datUnitWork_t *unit) {
     return unit->hp * DAT_PERCENT_SCALE / unit->maxHp < DAT_QUARTER_PERCENT;
 }
 
