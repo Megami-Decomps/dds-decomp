@@ -1176,8 +1176,9 @@ void mnuSetPanelThirdGridSlot(MenuPanelState *panel, s32 offsetX, s32 offsetY, E
     panel->headingIndices = indices;
 }
 
-void mnuSetPanelState(MenuPanelState *panel, u32 state) {
-    panel->common.state = state;
+void mnuSetPanelState(MenuPanelState *panel,
+                      MenuPanelSelectionIndex selectionIndex) {
+    panel->common.selectedIndex = selectionIndex;
 }
 
 extern void mnuDrawIconState(u32, u32, u32, u32, struct MenuIconState *, u32, u32);
@@ -1199,7 +1200,7 @@ void mnuDrawPanelState(s32 x, s32 y, s32 depth, MenuPanelState *panel, s32 drawA
     rowY = panel->thirdOffsetY;
     itfDrawGridWithResolvedSlot(x + rowX, y + rowY,
                                 depth, 1, panel->headingSlot.set,
-                                panel->headingIndices[panel->common.state], drawArg);
+                                panel->headingIndices[panel->common.selectedIndex], drawArg);
     rowX = panel->secondOffsetX;
     rowY = panel->secondOffsetY;
     rowSet = panel->rowSlot.set;
@@ -1207,7 +1208,7 @@ void mnuDrawPanelState(s32 x, s32 y, s32 depth, MenuPanelState *panel, s32 drawA
     {
         s32 index;
         for (index = 0; index < panel->common.width; index++) {
-            if (panel->common.state == index) {
+            if (panel->common.selectedIndex == index) {
                 for (corner = 1; corner < 5; corner++) {
                     itfDrawGridWithResolvedSlot(x + panel->corners[corner][0] + index * 0x2C0,
                                                 y + panel->corners[corner][1], depth, 1,

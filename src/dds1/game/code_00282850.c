@@ -394,8 +394,9 @@ void mnuSetPanelFourthGridSlot(MenuPanelState *panel, s32 offsetX, s32 offsetY,
     panel->fourthValueC = additionalValue;
 }
 
-void mnuSetPanelState(MenuPanelState *panel, u32 state) {
-    panel->common.state = state;
+void mnuSetPanelState(MenuPanelState *panel,
+                      MenuPanelSelectionIndex selectionIndex) {
+    panel->common.selectedIndex = selectionIndex;
 }
 
 /* Paired sprites derive from their row; see docs/idioms.md,
@@ -417,9 +418,9 @@ void mnuDrawPanelState(s32 x, s32 y, s32 depth, MenuPanelState *panel, s32 drawA
     offsetY = panel->fourthOffsetY;
     rowSet = panel->fourthSlot.set;
     if (panel->fourthValueC == 0) {
-        slot = panel->fourthSlot.index + panel->common.state * 2;
+        slot = panel->fourthSlot.index + panel->common.selectedIndex * 2;
     } else {
-        slot = ((s32 *)panel->fourthValueC)[panel->common.state];
+        slot = ((s32 *)panel->fourthValueC)[panel->common.selectedIndex];
     }
     i = 0;
     itfDrawGridWithResolvedSlot(x + rowX, y + offsetY, depth, 1,
@@ -430,7 +431,7 @@ void mnuDrawPanelState(s32 x, s32 y, s32 depth, MenuPanelState *panel, s32 drawA
     slot = panel->thirdSlot.index;
     if (panel->common.width > 0) {
         do {
-            if (panel->common.state != i) {
+            if (panel->common.selectedIndex != i) {
                 itfDrawGridWithResolvedSlot(x + rowX, y + offsetY, depth, 1,
                                            rowSet, slot + i * 2, drawArg);
             } else {

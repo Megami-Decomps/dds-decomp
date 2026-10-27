@@ -3,6 +3,8 @@
 
 #include "common.h"
 
+typedef u32 MenuPanelSelectionIndex;
+
 struct MenuPanelState;
 struct EffectSlotSet;
 struct EffMappedResource;
@@ -10,8 +12,9 @@ struct EffMappedResource;
 /* Release the panel's retained resources and free the panel owner. */
 void mnuDestroyPanelState(struct MenuPanelState *panel);
 
-/* Store the selected panel state in a title-specific allocated panel owner. */
-void mnuSetPanelState(struct MenuPanelState *panel, u32 state);
+/* Store the menu cursor index used to highlight a panel column. */
+void mnuSetPanelState(struct MenuPanelState *panel,
+                      MenuPanelSelectionIndex selectionIndex);
 #ifndef VERSION_DDS2
 /* Bind the four panel grid slots used by the DDS1 skill-page initializer. */
 void mnuSetPanelFirstGridSlot(struct MenuPanelState *panel, u32 valueA,
