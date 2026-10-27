@@ -41,6 +41,7 @@
 #include "file_selection_api.h"
 #include "file_request_entry.h"
 #include "file_slot_flags.h"
+#include "file_slot_flags_change_api.h"
 #include "file_scroll_arrow_state.h"
 #include "sdf_dev_state.h"
 #include "file_slot.h"
@@ -396,8 +397,6 @@ typedef struct LoadMirror {
 } LoadMirror;
 
 extern LoadMirror fileSlotFlagMirror;
-
-extern s32 fileLoadStateChanged(void);
 
 extern void fileCacheSlotFlagsFromState(void);
 
@@ -2096,7 +2095,7 @@ s32 mcdHandleSaveSetupDone(void) {
         sdfMemFreeDirect(fileSaveReadBufferResource);
         D_00437CD5 = 1;
         slKillLoadProcess();
-        if (fileLoadStateChanged() == 0) {
+        if (fileLoadStateChanged() == FILE_SLOT_FLAGS_UNCHANGED) {
             fileCacheSlotFlagsFromState();
         } else {
             fileRestoreSlotFlagsToState();
@@ -3671,7 +3670,7 @@ void fileApplyMenuFlagsToModel(MenuWork *work) {
     work->flowConditionMask |= 9;
 }
 
-s32 fileLoadStateChanged(void) {
+FileSlotFlagsChangeResult fileLoadStateChanged(void) {
     return fileSlotFlagMirror.current != fileSlotFlagMirror.previous;
 }
 

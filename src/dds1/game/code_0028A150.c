@@ -37,6 +37,7 @@
 #include "file_selection_api.h"
 #include "file_request_entry.h"
 #include "file_slot_flags.h"
+#include "file_slot_flags_change_api.h"
 #include "file_scroll_arrow_state.h"
 #include "sdf_dev_state.h"
 #include "file_slot.h"
@@ -2207,7 +2208,6 @@ s32 slLoadProc_readFile(void) {
 }
 
 extern s8 D_003BC7ED;
-extern s32 fileLoadStateChanged(void);
 extern void fileCacheSlotFlagsFromState(void);
 extern void fileRestoreSlotFlagsToState(void);
 
@@ -2221,7 +2221,7 @@ s32 mcdHandleSaveSetupDone(void) {
         sdfMemFreeDirect(fileSaveReadBufferResource);
         D_003BC7ED = 1;
         slKillLoadProcess();
-        if (fileLoadStateChanged() == 0) {
+        if (fileLoadStateChanged() == FILE_SLOT_FLAGS_UNCHANGED) {
             fileCacheSlotFlagsFromState();
         } else {
             fileRestoreSlotFlagsToState();
@@ -3256,7 +3256,7 @@ void fileLoadCtxSlideUpdate(void) {
     }
 }
 
-s32 fileLoadStateChanged(void) {
+FileSlotFlagsChangeResult fileLoadStateChanged(void) {
     return fileSlotFlagMirror.current != fileSlotFlagMirror.previous;
 }
 
