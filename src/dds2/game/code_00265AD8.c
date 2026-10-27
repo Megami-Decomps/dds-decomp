@@ -96,47 +96,47 @@ s32 mnuTickShopMessageSequence(dds3ProcessID_t *task) {
                 allowed = 1;
             }
             if (allowed) {
-                switch (state->phase) {
-                case 0:
+                switch ((MnuShopMessageSequencePhase)state->phase) {
+                case MNU_SHOP_SEQUENCE_INITIALIZE:
                     mnuShopLoadSpriteAssets(state);
                     dds3FadeIn(0, 0, 0, 0xF);
                     state->prepared = 1;
-                    state->phase = 1;
+                    state->phase = MNU_SHOP_SEQUENCE_SELECT_INTRO_MESSAGE;
                     break;
 
-                case 1:
+                case MNU_SHOP_SEQUENCE_SELECT_INTRO_MESSAGE:
                     if (state->delayFrames > 0) {
                         state->delayFrames--;
                     } else if (evtMenuSetProgressFlag(state) != 0) {
-                        state->phase = 8;
+                        state->phase = MNU_SHOP_SEQUENCE_AWARD_PROGRESS_CURRENCY;
                     } else if (evtMenuSetTypeProgressFlagOnce(state) != 0) {
-                        state->phase = 10;
+                        state->phase = MNU_SHOP_SEQUENCE_START_PRESET_ENTRY;
                     } else if (evtBitCheck(4) == 0) {
                         mnuSetPopupEntryFlagged(dispatchSlot, mnuTerminalMenuMessagePopupEntry);
                     } else if (state->options != 0) {
                         dspSetActive(1);
                         fclStartMessage(state->options + 0xF);
-                        state->phase = 2;
+                        state->phase = MNU_SHOP_SEQUENCE_WAIT_FOR_INTRO_MESSAGE;
                     } else {
-                        state->phase = 5;
+                        state->phase = MNU_SHOP_SEQUENCE_WAIT_BEFORE_COMMAND_MENU;
                     }
                     break;
 
-                case 2:
+                case MNU_SHOP_SEQUENCE_WAIT_FOR_INTRO_MESSAGE:
                     if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
                         evtFinishMessageWindowAndNotify();
                         state->options = mnuGetTerminalMessageOption();
-                        state->phase = 3;
+                        state->phase = MNU_SHOP_SEQUENCE_SCAN_STOCK;
                         state->rewardCursor = 0;
                     }
                     break;
 
-                case 3: {
+                case MNU_SHOP_SEQUENCE_SCAN_STOCK: {
                     s32 activeSlot = mnuCampFindActiveSlot();
                     u32 index;
 
                     if (activeSlot == -1) {
-                        state->phase = 5;
+                        state->phase = MNU_SHOP_SEQUENCE_WAIT_BEFORE_COMMAND_MENU;
                     }
                     index = state->rewardCursor;
                     if (index < 32) {
@@ -162,55 +162,55 @@ s32 mnuTickShopMessageSequence(dds3ProcessID_t *task) {
                     if (index == 32) {
                         state->rewardCursor = -1;
                     }
-                    state->phase = 4;
+                    state->phase = MNU_SHOP_SEQUENCE_WAIT_FOR_STOCK_MESSAGE;
                     break;
                 }
 
-                case 4:
+                case MNU_SHOP_SEQUENCE_WAIT_FOR_STOCK_MESSAGE:
                     if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
                         evtFinishMessageWindowAndNotify();
                         if (state->rewardCursor == -1) {
                             if (state->options == 2) {
-                                state->phase = 6;
+                                state->phase = MNU_SHOP_SEQUENCE_SHOW_COMPLETION_MESSAGE;
                             } else {
-                                state->phase = 1;
+                                state->phase = MNU_SHOP_SEQUENCE_SELECT_INTRO_MESSAGE;
                             }
                         } else {
-                            state->phase = 3;
+                            state->phase = MNU_SHOP_SEQUENCE_SCAN_STOCK;
                         }
                     }
                     break;
 
-                case 6:
+                case MNU_SHOP_SEQUENCE_SHOW_COMPLETION_MESSAGE:
                     dspSetActive(1);
                     fclStartMessage(0x18);
-                    state->phase = 7;
+                    state->phase = MNU_SHOP_SEQUENCE_WAIT_FOR_COMPLETION_MESSAGE;
                     break;
 
-                case 8:
+                case MNU_SHOP_SEQUENCE_AWARD_PROGRESS_CURRENCY:
                     mnuAwardCampProgressCurrency();
-                    state->phase = 9;
+                    state->phase = MNU_SHOP_SEQUENCE_WAIT_FOR_PROGRESS_CURRENCY_MESSAGE;
                     break;
 
-                case 10:
+                case MNU_SHOP_SEQUENCE_START_PRESET_ENTRY:
                     dspStartActivePresetEntry();
-                    state->phase = 11;
+                    state->phase = MNU_SHOP_SEQUENCE_WAIT_FOR_PRESET_ENTRY;
                     break;
 
-                case 7:
-                case 9:
-                case 11:
+                case MNU_SHOP_SEQUENCE_WAIT_FOR_COMPLETION_MESSAGE:
+                case MNU_SHOP_SEQUENCE_WAIT_FOR_PROGRESS_CURRENCY_MESSAGE:
+                case MNU_SHOP_SEQUENCE_WAIT_FOR_PRESET_ENTRY:
                     if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
                         evtFinishMessageWindowAndNotify();
-                        state->phase = 1;
+                        state->phase = MNU_SHOP_SEQUENCE_SELECT_INTRO_MESSAGE;
                     }
                     break;
 
-                case 5:
+                case MNU_SHOP_SEQUENCE_WAIT_BEFORE_COMMAND_MENU:
                     if (state->retryFrames < 20) {
                         state->retryFrames++;
                     } else {
-                        state->phase = 0;
+                        state->phase = MNU_SHOP_SEQUENCE_INITIALIZE;
                         mnuSetPopupEntryFlagged(dispatchSlot, mnuShopCommandPopupEntries);
                     }
                     break;

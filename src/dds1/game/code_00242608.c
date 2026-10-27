@@ -3110,14 +3110,14 @@ s32 mnuTickShopMessageSequence(dds3ProcessID_t *task) {
                 allowed = 1;
             }
             if (allowed) {
-                switch (state->action) {
-                case 0:
+                switch ((MnuShopMessageSequencePhase)state->action) {
+                case MNU_SHOP_SEQUENCE_INITIALIZE:
                     p2sdLoadSMGFile(0x300000);
                     p2sdPlayBGMFade(0x300000);
-                    state->action = 1;
+                    state->action = MNU_SHOP_SEQUENCE_SELECT_INTRO_MESSAGE;
                     break;
 
-                case 1:
+                case MNU_SHOP_SEQUENCE_SELECT_INTRO_MESSAGE:
                     if (state->pendingPriceStage != 0) {
                         dspSetActive(1);
                         fclStartMessage(state->pendingPriceStage + 0xD);
@@ -3126,27 +3126,27 @@ s32 mnuTickShopMessageSequence(dds3ProcessID_t *task) {
 
                             evtBitOn(flagIds[state->pendingPriceStage - 1]);
                         }
-                        state->action = 2;
+                        state->action = MNU_SHOP_SEQUENCE_WAIT_FOR_INTRO_MESSAGE;
                     } else {
-                        state->action = 5;
+                        state->action = MNU_SHOP_SEQUENCE_WAIT_BEFORE_COMMAND_MENU;
                     }
                     break;
 
-                case 2:
+                case MNU_SHOP_SEQUENCE_WAIT_FOR_INTRO_MESSAGE:
                     if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
                         evtFinishMessageWindowAndNotify();
                         state->pendingPriceStage = mnuCampGetShopPriceStage();
-                        state->action = 3;
+                        state->action = MNU_SHOP_SEQUENCE_SCAN_STOCK;
                         state->scanIndex = 0;
                     }
                     break;
 
-                case 3: {
+                case MNU_SHOP_SEQUENCE_SCAN_STOCK: {
                     s32 activeSlot = mnuCampFindActiveSlot();
                     u32 index;
 
                     if (activeSlot == -1) {
-                        state->action = 5;
+                        state->action = MNU_SHOP_SEQUENCE_WAIT_BEFORE_COMMAND_MENU;
                     }
                     index = state->scanIndex;
                     if (index < 32) {
@@ -3171,43 +3171,43 @@ s32 mnuTickShopMessageSequence(dds3ProcessID_t *task) {
                     if (index == 32) {
                         state->scanIndex = -1;
                     }
-                    state->action = 4;
+                    state->action = MNU_SHOP_SEQUENCE_WAIT_FOR_STOCK_MESSAGE;
                     break;
                 }
 
-                case 4:
+                case MNU_SHOP_SEQUENCE_WAIT_FOR_STOCK_MESSAGE:
                     if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
                         evtFinishMessageWindowAndNotify();
                         if (state->scanIndex == -1) {
                             if (state->pendingPriceStage == 2) {
-                                state->action = 6;
+                                state->action = MNU_SHOP_SEQUENCE_SHOW_COMPLETION_MESSAGE;
                             } else {
-                                state->action = 1;
+                                state->action = MNU_SHOP_SEQUENCE_SELECT_INTRO_MESSAGE;
                             }
                         } else {
-                            state->action = 3;
+                            state->action = MNU_SHOP_SEQUENCE_SCAN_STOCK;
                         }
                     }
                     break;
 
-                case 6:
+                case MNU_SHOP_SEQUENCE_SHOW_COMPLETION_MESSAGE:
                     dspSetActive(1);
                     fclStartMessage(0x16);
-                    state->action = 7;
+                    state->action = MNU_SHOP_SEQUENCE_WAIT_FOR_COMPLETION_MESSAGE;
                     break;
 
-                case 7:
+                case MNU_SHOP_SEQUENCE_WAIT_FOR_COMPLETION_MESSAGE:
                     if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
                         evtFinishMessageWindowAndNotify();
-                        state->action = 1;
+                        state->action = MNU_SHOP_SEQUENCE_SELECT_INTRO_MESSAGE;
                     }
                     break;
 
-                case 5:
+                case MNU_SHOP_SEQUENCE_WAIT_BEFORE_COMMAND_MENU:
                     if (state->progressTicks < 20) {
                         state->progressTicks++;
                     } else {
-                        state->action = 0;
+                        state->action = MNU_SHOP_SEQUENCE_INITIALIZE;
                         mnuSetPopupEntryFlagged(dispatchSlot, mnuShopCommandPopupEntries);
                     }
                     break;
