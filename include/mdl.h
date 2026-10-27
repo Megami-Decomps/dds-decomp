@@ -213,7 +213,7 @@ void mdlLink(dds3ModelHandle_t *ctx, struct SdfPoolNode **surfaces);
 dds3ModelHandle_t *mdlLoad(u32 group, u32 id);
 u16 mdlGetMajorNum(const dds3ModelHandle_t *ctx);
 u16 mdlGetMinorNum(const dds3ModelHandle_t *ctx);
-u32 mdlGetColor(dds3ModelHandle_t *ctx);
+u32 mdlGetColor(const dds3ModelHandle_t *ctx);
 void mdlSetEffectColor(dds3ModelHandle_t *ctx, u32 value);
 void mdlSetEffectColorSub(dds3ModelHandle_t *ctx, dds3ModelEffectCtrlr_t *item, s32 frame);
 void mdlSetEffectScaleSub(dds3ModelHandle_t *ctx, dds3ModelEffectCtrlr_t *item, f32 amount);

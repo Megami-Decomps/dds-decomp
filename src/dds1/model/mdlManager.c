@@ -1021,7 +1021,7 @@ void mdlSetScale(dds3ModelHandle_t *ctx) {
 }
 
 /* Return the last original value stored by either broadcast path. */
-u32 mdlGetColor(dds3ModelHandle_t *ctx) {
+u32 mdlGetColor(const dds3ModelHandle_t *ctx) {
     return ctx->inner->color;
 }
 
