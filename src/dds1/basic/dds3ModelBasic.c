@@ -1,12 +1,7 @@
 #include "common.h"
 #include "sdf_chip.h"
+#include "eff_transform.h"
 
-typedef struct {
-    u8 pad[0x18];
-    void *allocation;
-} ModelObj;
-
-
-void dds3PathBasicFreeControl(ModelObj *model) {
-    sdfChipFreeDirect(model->allocation);
+void dds3PathBasicFreeControl(dds3Basic_t *object) {
+    sdfChipFreeDirect(object->data);
 }
