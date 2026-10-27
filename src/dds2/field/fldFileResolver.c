@@ -152,6 +152,7 @@ dds3Basic_t *fldGetModelRange_From_MatterName(const char *resourceEntryName) {
 #include "fld_area_work.h"
 #include "fld_npc_palette.h"
 #include "fld_collision_geometry.h"
+#include "fld_collision_query_api.h"
 #include "fld_spawn_collision.h"
 
 struct EffNodeDescriptor;
@@ -3477,7 +3478,6 @@ void fldProbeCameraSupportSurface(void) {
 }
 
 extern f32 EulerAngleAxisY(void);
-extern s32 fldHitChkCamera(const f32 start[3], const f32 end[3], f32 hitPoint[3]);
 extern f32 D_004360A0, D_004360A4, D_004360A8;
 typedef union FldLookAtVector {
     u128 q;

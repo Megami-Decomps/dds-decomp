@@ -22,6 +22,7 @@
 #include "fld.h"
 #include "fld_resource_resolver.h"
 #include "fld_collision_geometry.h"
+#include "fld_collision_query_api.h"
 #include "evt_world.h"
 #include "scr.h"
 #include "sdf.h"
@@ -1261,7 +1262,7 @@ extern void fldToggleWorldNodeState(s64 enabled);
 
 extern void dds3MatterObjectBasicSetAlpMode(dds3Basic_t *object, u32 value);
 
-s32 fldHitChkCamera(const f32 start[3], const f32 end[3], f32 hitPoint[3]) {
+FldValueRecordIndex fldHitChkCamera(const f32 start[3], const f32 end[3], f32 hitPoint[3]) {
     f32 origin[4];
     f32 target[4];
     f32 delta[4];
@@ -1275,12 +1276,12 @@ s32 fldHitChkCamera(const f32 start[3], const f32 end[3], f32 hitPoint[3]) {
     f32 total;
     f32 ratio;
     f32 clearance;
-    s32 found;
+    FldValueRecordIndex found;
     FldStopEntry *entry;
     s32 relative;
-    s32 index;
+    FldValueRecordIndex index;
 
-    found = -1;
+    found = FLD_VALUE_RECORD_INDEX_NO_HIT;
     secondary = dds3GetControlScene();
     if (!((u32)(fldGlobalBase.area - 200) < 300)) {
         fldToggleWorldNodeState(0);
@@ -1380,7 +1381,7 @@ s32 fldHitChkCamera(const f32 start[3], const f32 end[3], f32 hitPoint[3]) {
     return found;
 }
 
-s32 fldHitChkEnemy(const f32 start[3], const f32 end[3], f32 hitPoint[3]) {
+FldValueRecordIndex fldHitChkEnemy(const f32 start[3], const f32 end[3], f32 hitPoint[3]) {
     f32 origin[4];
     f32 target[4];
     f32 delta[4];
@@ -1393,11 +1394,11 @@ s32 fldHitChkEnemy(const f32 start[3], const f32 end[3], f32 hitPoint[3]) {
     f32 total;
     f32 ratio;
     f32 clearance;
-    s32 found;
+    FldValueRecordIndex found;
     s32 relative;
-    s32 index;
+    FldValueRecordIndex index;
 
-    found = -1;
+    found = FLD_VALUE_RECORD_INDEX_NO_HIT;
     dds3GetControlScene();
     origin[0] = start[0];
     origin[1] = start[1];

@@ -53,6 +53,7 @@
 #include "fld.h"
 #include "fld_encounter_runtime_api.h"
 #include "fld_collision_geometry.h"
+#include "fld_collision_query_api.h"
 #include "fld_scene_request.h"
 #include "fld_room_resource_api.h"
 #include "fld_area_room_resource_load_api.h"
@@ -3662,8 +3663,6 @@ void fldProbeCameraSupportSurface(void) {
 }
 
 extern f32 EulerAngleAxisY(void);
-
-extern s32 fldHitChkCamera(const f32 start[3], const f32 end[3], f32 hitPoint[3]);
 
 extern f32 D_003BAD10, D_003BAD14, D_003BAD18;
 
@@ -7675,7 +7674,7 @@ f32 HitPositionInside3(FldCollisionAxis axis, s32 planeCount, f32 margin, const 
     return clearance;
 }
 
-s32 fldHitChkCamera(const f32 start[3], const f32 end[3], f32 hitPoint[3]) {
+FldValueRecordIndex fldHitChkCamera(const f32 start[3], const f32 end[3], f32 hitPoint[3]) {
     f32 origin[4];
     f32 target[4];
     f32 delta[4];
@@ -7689,12 +7688,12 @@ s32 fldHitChkCamera(const f32 start[3], const f32 end[3], f32 hitPoint[3]) {
     f32 total;
     f32 ratio;
     f32 clearance;
-    s32 found;
+    FldValueRecordIndex found;
     FldStopEntry *entry;
     s32 relative;
-    s32 index;
+    FldValueRecordIndex index;
 
-    found = -1;
+    found = FLD_VALUE_RECORD_INDEX_NO_HIT;
     secondary = dds3GetControlScene();
     if (!((u32)(fldGlobalBase.area - 200) < 300)) {
         fldToggleWorldNodeState(0);
@@ -7794,7 +7793,7 @@ s32 fldHitChkCamera(const f32 start[3], const f32 end[3], f32 hitPoint[3]) {
     return found;
 }
 
-s32 fldHitChkEnemy(const f32 start[3], const f32 end[3], f32 hitPoint[3]) {
+FldValueRecordIndex fldHitChkEnemy(const f32 start[3], const f32 end[3], f32 hitPoint[3]) {
     f32 origin[4];
     f32 target[4];
     f32 delta[4];
@@ -7807,11 +7806,11 @@ s32 fldHitChkEnemy(const f32 start[3], const f32 end[3], f32 hitPoint[3]) {
     f32 total;
     f32 ratio;
     f32 clearance;
-    s32 found;
+    FldValueRecordIndex found;
     s32 relative;
-    s32 index;
+    FldValueRecordIndex index;
 
-    found = -1;
+    found = FLD_VALUE_RECORD_INDEX_NO_HIT;
     dds3GetControlScene();
     origin[0] = start[0];
     origin[1] = start[1];
