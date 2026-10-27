@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "kwln_draw_light_binding.h"
 #include "sdf_vu0.h"
 #include "kwln.h"
 #include "gs_packet.h"
@@ -130,9 +131,9 @@ void dds3SetFog(const KwlnDrawVectorParams *source) {
     memcpy(&kwlnDrawVector, source, KWLN_DRAW_VECTOR_PARAM_BYTES);
 }
 
-/* Store a light-source pointer in the indexed light table. */
-void dds3SetLight(f32 (*lightSource)[4], s32 index) {
-    D_0037F770[index] = lightSource;
+/* Retain the caller-owned light-data pointer in its draw slot. */
+void dds3SetLight(f32 (*lightSource)[4], s32 slot) {
+    D_0037F770[slot] = lightSource;
 }
 
 /* Initialize bounds covering the default 512-by-448 draw viewport. */
