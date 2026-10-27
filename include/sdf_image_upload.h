@@ -33,7 +33,9 @@ typedef char SdfImageUploadRequest_layout[
      (u32)&((SdfImageUploadRequest *)0)->destination == 0x0C &&
      (u32)&((SdfImageUploadRequest *)0)->x == 0x10) ? 1 : -1];
 
-/* Queue a GS image upload with its pixel allocation and release mode. */
-void sdfImageSetReq(SdfImageUploadRequest *request);
+/* Copy descriptor metadata into the queue before returning; the request itself
+ * is not retained. Pixel storage may outlive it until DMA completion, with
+ * allocationMode selecting whether the queue releases that storage. */
+void sdfImageSetReq(const SdfImageUploadRequest *request);
 
 #endif

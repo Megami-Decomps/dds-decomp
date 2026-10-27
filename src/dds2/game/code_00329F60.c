@@ -637,7 +637,7 @@ s32 sdfImageDataSize(u32 format, s32 width, s32 height) {
 
 
 
-void sdfImageSetReq(SdfImageUploadRequest *request) {
+void sdfImageSetReq(const SdfImageUploadRequest *request) {
     SdfTextureQueue *queue = &sdfImageSetCb;
     SdfTextureReleaseHead *releaseEntry;
     SdfTextureDmaTail *oldTail;

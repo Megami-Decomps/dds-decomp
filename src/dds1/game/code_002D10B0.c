@@ -615,7 +615,7 @@ s32 sdfImageDataSize(u32 format, s32 width, s32 height) {
 
 
 /* Queue chunked GS image DMA and its pixel/allocation ownership metadata under the semaphore. */
-void sdfImageSetReq(SdfImageUploadRequest *request) {
+void sdfImageSetReq(const SdfImageUploadRequest *request) {
     SdfTextureQueue *queue = &sdfImageSetCb;
     SdfTextureReleaseHead *releaseEntry;
     SdfTextureDmaTail *oldTail;
