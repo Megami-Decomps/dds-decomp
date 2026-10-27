@@ -10416,6 +10416,7 @@ void effReplaceSharedResource(EffParticleSharedResource *work, EffParticleShared
 }
 
 void effResetParticleStateWord(EffParticleSharedResource *work) {
+    /* Restart the shared animation at its first sample. */
     work->state = 0;
 }
 
@@ -10423,7 +10424,7 @@ extern SdfPoolNode D_003255A8;
 
 extern void sdfPrimLinkGt4(sdfDrawTag_t *list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 color0, s32 x1, s32 y1, s32 u1, s32 v1, s32 color1, s32 x2, s32 y2, s32 u2, s32 v2, s32 color2, s32 x3, s32 y3, s32 u3, s32 v3, s32 color3, s32 depth, s32 (*alloc)(s32));
 
-/* Render the current shared-particle frame, then advance its frame counter. */
+/* Submit frames below the exclusive limit; zero leaves the cursor unbounded. */
 void effDrawAndAdvanceSharedParticleFrame(EffParticleSharedResource *work) {
     s32 limit = work->limit;
     s32 frame = work->state;

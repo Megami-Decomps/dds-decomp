@@ -17,12 +17,12 @@ struct EffExpandedList;
 typedef struct EffParticleSharedResource {
     u32 color;
     u32 option;
-    s32 state;                      /* 0x08: frames drawn so far */
+    s32 state;                      /* 0x08: next frame index; reset to zero, incremented after draw */
     SdfColorTrack colorTrack;       /* 0x0C */
     SdfAlphaTrack alphaTrack;       /* 0x30: surfaceIndex selects the blend (0..6) */
     EffScalarTrack scaleTrack;      /* 0x40 */
     EffScalarTrack rotationTrack;   /* 0x6C */
-    s32 limit;                      /* 0x98: frame count, 0 = unlimited */
+    s32 limit;                      /* 0x98: exclusive frame limit; 0 = unlimited */
     s32 x;                          /* 0x9C */
     s32 y;                          /* 0xA0 */
     struct billHandle_t *billHandle;     /* 0xA4 */
