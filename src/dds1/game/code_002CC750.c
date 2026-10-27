@@ -29,6 +29,7 @@
 #include "script_flag_slot.h"
 #include "pty_preset_record.h"
 #include "prf_profile_parameters.h"
+#include "prf_current_record_view.h"
 /* Declared before first use (were implicit int). */
 extern u16 prfGetSkillAtIndex(u16 profileId, u32 skillIndex);
 extern s32 scrSetFlag(datUnitWork_t *work, u16 flagId);
@@ -104,7 +105,6 @@ extern char sdfDebugLogPairFormat[];
 extern _FRQ *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
 extern s32 frFontDrawGlyphChain(_FRQ *, s8, u32);
 extern s32 ptyTestPrimaryProfileFlag(datUnitWork_t *, u16);
-DatProfileRecord *ptyGetCurrentProfileRecord(datUnitWork_t *);
 s32 ptyGetCurrentProfileId(const datUnitWork_t *);
 
 
@@ -440,7 +440,8 @@ u32 ptyAddProfilePoints(datUnitWork_t *unit, s32 increment) {
     if (ptyGetCurrentProfileId(unit) == 0) {
         return 0;
     }
-    record = ptyGetCurrentProfileRecord(unit);
+    /* This provider owns the bank mutation; callers get the read-only view. */
+    record = (DatProfileRecord *)ptyGetCurrentProfileRecord(unit);
     selectedProfile = unit->profileId;
     record->value += increment;
     recordCap = prfGetCapValue(selectedProfile & SCR_FLAG_ID_MASK);
@@ -542,7 +543,7 @@ u32 ptyGetProfileRecordValue(const datUnitWork_t *unit, u16 profileId) {
 }
 
 /* Resolve the selected ID using the native low-16-bit conversion. */
-DatProfileRecord *ptyGetCurrentProfileRecord(datUnitWork_t *unit) {
+const DatProfileRecord *ptyGetCurrentProfileRecord(datUnitWork_t *unit) {
     return ptyGetProfileRecord(unit, scrGetSelectedOperandIndex(unit) & SCR_FLAG_ID_MASK);
 }
 
@@ -835,7 +836,7 @@ s32 prfBuildRawSkillList(u16 profile, PrfSkillList *output) {
 /* Compact the selected profile's nonzero skills, optionally including nonzero
  * nibble states and marking them in the output. The profile argument is unused;
  * output may be NULL when only the resulting count is needed. */
-s32 prfBuildSkillList(datUnitWork_t *unit, DatProfileRecord *unusedProfile, PrfSkillList *output, s32 includeFlagged) {
+s32 prfBuildSkillList(datUnitWork_t *unit, const DatProfileRecord *unusedProfile, PrfSkillList *output, s32 includeFlagged) {
     PrfSkillList compactedList;
     u32 sourceIndex;
     u16 *profileSkillCursor;
@@ -871,7 +872,7 @@ s32 prfBuildSkillList(datUnitWork_t *unit, DatProfileRecord *unusedProfile, PrfS
 }
 
 /* Build the stored selection's list without flagged skills; the second argument is unused. */
-u32 prfBuildSkillListState0(datUnitWork_t *unit, DatProfileRecord *unusedProfile, PrfSkillList *output) {
+u32 prfBuildSkillListState0(datUnitWork_t *unit, const DatProfileRecord *unusedProfile, PrfSkillList *output) {
     return prfBuildSkillList(unit, unusedProfile, output, 0);
 }
 

@@ -18,6 +18,7 @@
 #include "dds3_world_counter.h"
 #include "snd_track_playback_api.h"
 #include "snd_work.h"
+#include "prf_current_record_view.h"
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
 extern void mnuTitleStreamUpdateAndLogBgm(void);
 extern s32 p2sdLoadPcmFile(const char *name, u8 channel);
@@ -848,7 +849,6 @@ typedef struct BrsResultWork {
     BrsResultCounterView profileCounters[8];
 } BrsResultWork;
 
-extern DatProfileRecord *ptyGetCurrentProfileRecord(datUnitWork_t *);
 extern s32 ptyGetCurrentProfileId(const datUnitWork_t *);
 extern u32 prfGetCapValue(u16);
 extern void nbPlaySe(u32 sequenceId);

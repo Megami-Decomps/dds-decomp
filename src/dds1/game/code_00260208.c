@@ -22,6 +22,7 @@
 #include "mnu_shop.h"
 #include "kwln_task_lifecycle.h"
 #include "brs_task_lifecycle_state.h"
+#include "prf_current_record_view.h"
 
 extern s32 evtStageTestPollModelRequest(void);
 
@@ -676,7 +677,6 @@ void gstApplyBundleMacca(BrsRewardSummary *batch) {
 
 extern u32 ptyComputeTotalExp(datUnitWork_t *unit, s32 levelDelta);
 
-extern DatProfileRecord *ptyGetCurrentProfileRecord(datUnitWork_t *unit);
 extern u32 ptyAddProfilePoints(datUnitWork_t *unit, s32 increment);
 extern void brsSetSkillProgressAnimations(BrsSkillPackageWork *, s32, s32, u32, s32, s32, s32);
 

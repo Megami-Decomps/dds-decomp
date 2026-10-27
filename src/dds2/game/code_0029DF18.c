@@ -16,6 +16,7 @@
 #include "sdf.h"
 #include "snd_track_playback_api.h"
 #include "snd_work.h"
+#include "prf_current_record_view.h"
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
 extern void mnuResetTitleStreamAfterFileIdle(void);
 #include "sdf_debug_api.h"
@@ -848,7 +849,6 @@ typedef struct BrsResultWork {
     u8 padB6E4[0x20];
 } BrsResultWork;
 
-extern DatProfileRecord *ptyGetCurrentProfileRecord(datUnitWork_t *);
 extern s32 ptyGetCurrentProfileId(const datUnitWork_t *);
 extern u32 ptyGetProfileRecordCap(u16);
 void nbPlaySe(u32 sequenceId);

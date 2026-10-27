@@ -12,6 +12,7 @@
 #include "kwln.h"
 #include "mdl_flag_api.h"
 #include "prf_profile_cap.h"
+#include "prf_current_record_view.h"
 
 extern u32 ptyBuildProfileCapSkillList(datUnitWork_t *, PrfSkillList *);
 
@@ -166,9 +167,6 @@ s32 mnuIsTitleEntryAvailable(datUnitWork_t *unit) {
     return 0;
 }
 
-extern DatProfileRecord *ptyGetCurrentProfileRecord(datUnitWork_t *);
-
-
 s32 brsBuildRewardRows(BrsRewardBatch *batch, BrsRewardSummary *summary) {
     s32 i;
     /* Value blocks are interleaved with each row's party-record pointer. */
@@ -179,7 +177,7 @@ s32 brsBuildRewardRows(BrsRewardBatch *batch, BrsRewardSummary *summary) {
         datUnitWork_t *unit = &DDS3_GBWK->party[i];
         u16 occupied = unit->flags & 1;
         if (occupied != 0 && (unit->status & 0x4000) == 0) {
-            DatProfileRecord *profile;
+            const DatProfileRecord *profile;
             s32 ap;
             s32 exp;
 
@@ -287,7 +285,7 @@ s32 brsBuildLevelUpList(BrsRewardBatch *batch) {
 
 
 extern s32 ptyTestPrimaryProfileFlag(datUnitWork_t *, u16);
-extern u32 prfBuildSkillListState0(datUnitWork_t *, DatProfileRecord *, PrfSkillList *);
+extern u32 prfBuildSkillListState0(datUnitWork_t *, const DatProfileRecord *, PrfSkillList *);
 
 s32 brsBuildProfileCapList(BrsRewardBatch *batch) {
     s32 i;
@@ -303,7 +301,7 @@ s32 brsBuildProfileCapList(BrsRewardBatch *batch) {
         partyOffset += sizeof(datUnitWork_t);
 
         if (occupied != 0) {
-            DatProfileRecord *profile = ptyGetCurrentProfileRecord(unit);
+            const DatProfileRecord *profile = ptyGetCurrentProfileRecord(unit);
             PrfSkillList skills;
             s32 profileId;
 
@@ -419,7 +417,7 @@ extern void scrSetSecondaryScriptFlag(datUnitWork_t *, u16);
 /* Apply the capped profile's pending skills and return their list to the caller. */
 u32 ptyBuildProfileCapSkillList(datUnitWork_t *unit, PrfSkillList *output) {
     PrfSkillList skills;
-    DatProfileRecord *profile;
+    const DatProfileRecord *profile;
     u32 count = 0;
     u32 i;
 

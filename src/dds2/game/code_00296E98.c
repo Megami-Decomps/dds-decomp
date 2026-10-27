@@ -21,6 +21,7 @@
 #include "brs_task_lifecycle_state.h"
 #include "brs_task_poll_done_api.h"
 #include "kwln_task_lifecycle.h"
+#include "prf_current_record_view.h"
 
 
 extern u8 brsUiUpdateAllowed;
@@ -91,7 +92,6 @@ extern char mnuStaffSecondaryPanelTaskName[];
 
 
 
-extern DatProfileRecord *ptyGetCurrentProfileRecord(datUnitWork_t *unit);
 extern u32 ptyAddProfileRecordValueClamped(datUnitWork_t *unit, u32 amount);
 extern void brsSetSkillProgressAnimations(BrsSkillPackageWork *, s32, s32, u32, s32, s32, s32);
 

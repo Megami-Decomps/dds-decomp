@@ -13,6 +13,7 @@
 #include "prf_profile_cap.h"
 #include "dsp_name.h"
 #include "kwln_fade.h"
+#include "prf_current_record_view.h"
 
 extern void ptyRecomputeMaxVitals(datUnitWork_t *, const s32 *);
 
@@ -20,8 +21,6 @@ extern u32 ptyBuildProfileCapSkillList(datUnitWork_t *, PrfSkillList *);
 
 
 
-
-extern DatProfileRecord *ptyGetCurrentProfileRecord(datUnitWork_t *);
 
 extern s32 ptyTestPrimaryProfileFlag(datUnitWork_t *, u16);
 
@@ -37,7 +36,7 @@ extern void dspRequestMessageWindowModeOne(void);
 /* Apply a capped selected profile and record whether the selection was applied. */
 void kwlnItemApplySelection(BrsSkillPackageWork *scene) {
     datUnitWork_t *item = scene->selectedRewardRow->unit;
-    DatProfileRecord *profile = ptyGetCurrentProfileRecord(item);
+    const DatProfileRecord *profile = ptyGetCurrentProfileRecord(item);
     s8 selection = item->profileId;
     if (selection != 0 && prfGetCapValue((u16)selection) == profile->value &&
         ptyTestPrimaryProfileFlag(item, item->profileId) == 0) {

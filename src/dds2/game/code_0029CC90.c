@@ -11,11 +11,11 @@
 #include "mnu_result.h"
 #include "brs_result_counter_completion_api.h"
 #include "prf_profile_cap.h"
+#include "prf_current_record_view.h"
 
 extern u32 brsBuildProfileSkillList(datUnitWork_t *, PrfSkillList *);
-extern DatProfileRecord *ptyGetCurrentProfileRecord(datUnitWork_t *);
 extern s32 ptyTestPrimaryProfileFlag(datUnitWork_t *, u16);
-extern s32 prfBuildSkillListState0(datUnitWork_t *, DatProfileRecord *, PrfSkillList *);
+extern s32 prfBuildSkillListState0(datUnitWork_t *, const DatProfileRecord *, PrfSkillList *);
 extern void scrClearAllSecondaryScriptFlags(datUnitWork_t *);
 extern s32 scrSetFlag(datUnitWork_t *, u16);
 extern void scrSetSecondaryScriptFlag(datUnitWork_t *, u16);
@@ -194,7 +194,7 @@ s32 brsBuildPartyRewardBatch(BrsRewardBatch *batch, BrsRewardSummary *summary) {
         datUnitWork_t *unit = &DDS3_GBWK->party[i];
         u16 occupied = unit->flags & 1;
         if (occupied != 0 && (unit->status & 0x4000) == 0 && unit->unitId != 9) {
-            DatProfileRecord *profile;
+            const DatProfileRecord *profile;
             s32 ap;
             s32 exp;
 
@@ -314,7 +314,7 @@ s32 brsBuildProfileCapList(BrsRewardBatch *batch) {
 
         partyOffset += sizeof(datUnitWork_t);
         if (occupied != 0 && unit->unitId != 9) {
-            DatProfileRecord *profile = ptyGetCurrentProfileRecord(unit);
+            const DatProfileRecord *profile = ptyGetCurrentProfileRecord(unit);
 
             prfBuildSkillListState0(unit, profile, &skills);
             if (unit->profileId != 0 &&
@@ -421,7 +421,7 @@ counted:
 u32 brsBuildProfileSkillList(datUnitWork_t *entry, PrfSkillList *out) {
     PrfSkillList result;
     u32 applied = 0;
-    DatProfileRecord *slot;
+    const DatProfileRecord *slot;
 
     memset(&result, 0, 0x34);
     slot = ptyGetCurrentProfileRecord(entry);

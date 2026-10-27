@@ -44,6 +44,7 @@
 #include "mdl.h"
 #include "mdl_asset_request.h"
 #include "dat_state.h"
+#include "prf_current_record_view.h"
 #include "evt_stage_test.h"
 #include "dat_command.h"
 #include "eff.h"
@@ -1216,14 +1217,13 @@ void mnuSetProfilePanelValues(MenuProfilePanel *panel, s32 capValue, s32 progres
     panel->option = progressValue;
 }
 
-extern DatProfileRecord *ptyGetCurrentProfileRecord(datUnitWork_t *);
 extern s8 scrGetSelectedOperandIndex(datUnitWork_t *);
 
 /* Create a profile panel from the selection state's current profile ID and record. */
 MenuProfilePanel *mnuCreateProfilePanel(datUnitWork_t *selectionState) {
     MenuProfilePanel *panel = (MenuProfilePanel *)sdfChipAllocDirect(sizeof(MenuProfilePanel));
     s32 profileId;
-    DatProfileRecord *profileRecord;
+    const DatProfileRecord *profileRecord;
     memset(panel, 0, sizeof(MenuProfilePanel));
     profileId = scrGetSelectedOperandIndex(selectionState);
     profileRecord = ptyGetCurrentProfileRecord(selectionState);

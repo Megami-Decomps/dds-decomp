@@ -49,6 +49,7 @@
 #include "mdl_asset_request.h"
 #include "eff.h"
 #include "dat_state.h"
+#include "prf_current_record_view.h"
 #include "pty_skill_nibble_state.h"
 #include "evt_stage_test.h"
 #include "kwln_task_lifecycle.h"
@@ -1854,14 +1855,13 @@ void mnuSetProfilePanelValues(MenuProfilePanel *panel, s32 capValue, s32 progres
     panel->option = progressValue;
 }
 
-extern DatProfileRecord *ptyGetCurrentProfileRecord(datUnitWork_t *);
 extern u32 scrGetSelectedScriptEntryId(datUnitWork_t *);
 
 /* Create a profile panel and initialize its five native random words. */
 MenuProfilePanel *mnuCreateProfilePanel(datUnitWork_t *selectionState) {
     MenuProfilePanel *panel = (MenuProfilePanel *)sdfChipAllocDirect(MNU_PROFILE_PANEL_BYTES);
     s32 profileId;
-    DatProfileRecord *profileRecord;
+    const DatProfileRecord *profileRecord;
     u32 randomWordIndex;
 
     memset(panel, 0, MNU_PROFILE_PANEL_BYTES);

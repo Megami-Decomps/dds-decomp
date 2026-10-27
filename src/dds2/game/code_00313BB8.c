@@ -33,6 +33,7 @@ extern void memset(void *dst, s32 value, s32 size);
 #include "prf_profile_cap.h"
 #include "script_flag_slot.h"
 #include "pty_preset_record.h"
+#include "prf_current_record_view.h"
 #include "prf_profile_parameters.h"
 
 
@@ -112,7 +113,6 @@ extern void ptyRefreshEntryFromSavedTemplate(datUnitWork_t *);
 
 extern s32 ptyGetCurrentProfileId(const datUnitWork_t *);
 
-extern DatProfileRecord *ptyGetCurrentProfileRecord(datUnitWork_t *);
 extern s32 scrSetFlag(datUnitWork_t *, u16);
 extern s32 scrFindSlot(datUnitWork_t *, u16);
 extern s32 scrRemoveSlot(datUnitWork_t *, u16);
@@ -470,7 +470,8 @@ u32 ptyAddProfileRecordValueClamped(datUnitWork_t *unit, u32 increment) {
     u32 recordCap;
     u8 selectedProfile;
     if (ptyGetCurrentProfileId(unit) == 0) return 0;
-    record = ptyGetCurrentProfileRecord(unit);
+    /* This provider owns the bank mutation; callers get the read-only view. */
+    record = (DatProfileRecord *)ptyGetCurrentProfileRecord(unit);
     selectedProfile = unit->profileId;
     record->value += increment;
     recordCap = ptyGetProfileRecordCap(selectedProfile);
@@ -564,7 +565,7 @@ u32 ptyGetProfileRecordValue(const datUnitWork_t *work, u16 scriptId) {
 }
 
 /* Resolve the unit's stored script-entry selection without an extra mask. */
-DatProfileRecord *ptyGetCurrentProfileRecord(datUnitWork_t *unit) {
+const DatProfileRecord *ptyGetCurrentProfileRecord(datUnitWork_t *unit) {
     return ptyGetProfileRecordPointer(unit, scrGetSelectedScriptEntryId(unit));
 }
 
@@ -842,7 +843,7 @@ s32 prfBuildRawSkillList(u16 profile, PrfSkillList *output) {
 /* Compact the selected profile's nonzero skills, optionally including nonzero
  * nibble states and marking them in the output. The profile argument is unused;
  * output may be NULL when only the resulting count is needed. */
-s32 prfBuildSkillList(datUnitWork_t *unit, DatProfileRecord *unusedProfile, PrfSkillList *output, s32 includeFlagged) {
+s32 prfBuildSkillList(datUnitWork_t *unit, const DatProfileRecord *unusedProfile, PrfSkillList *output, s32 includeFlagged) {
     PrfSkillList compactedList;
     u32 sourceIndex;
     u16 *profileSkillCursor;
@@ -880,7 +881,7 @@ s32 prfBuildSkillList(datUnitWork_t *unit, DatProfileRecord *unusedProfile, PrfS
 /* Return the selected profile's skill count without flagged skills; the second argument is unused. */
 s32 prfBuildSkillListState0(unit, unusedProfile, output)
 datUnitWork_t *unit;
-DatProfileRecord *unusedProfile;
+const DatProfileRecord *unusedProfile;
 PrfSkillList *output;
 {
     return prfBuildSkillList(unit, unusedProfile, output, 0);

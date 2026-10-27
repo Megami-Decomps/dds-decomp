@@ -14,6 +14,7 @@
 #include "dsp_name.h"
 #include "mdl_flag_api.h"
 #include "kwln_fade.h"
+#include "prf_current_record_view.h"
 
 
 
@@ -137,7 +138,6 @@ u32 mnuResultSelectionLeaveNoOp(void) {
     return 1;
 }
 
-extern DatProfileRecord *ptyGetCurrentProfileRecord(datUnitWork_t *);
 extern u32 ptyGetProfileRecordCap(u16);
 extern s32 ptyTestPrimaryProfileFlag(datUnitWork_t *, u16);
 extern void ptyApplyProfile(datUnitWork_t *, u16);
@@ -145,7 +145,7 @@ extern void ptyApplyProfile(datUnitWork_t *, u16);
 /* Apply a capped selected profile and record whether the selection was applied. */
 void mnuApplyCompletedProfile(BrsSkillPackageWork *state) {
     datUnitWork_t *item = state->selectedRewardRow->unit;
-    DatProfileRecord *profile = ptyGetCurrentProfileRecord(item);
+    const DatProfileRecord *profile = ptyGetCurrentProfileRecord(item);
 
     if (item->profileId != 0 &&
         ptyGetProfileRecordCap(item->profileId) == profile->value &&
