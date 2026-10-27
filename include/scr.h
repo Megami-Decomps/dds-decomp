@@ -168,7 +168,7 @@ void *scrGetUserData(dds3ProcessID_t *task);
 void scrSetUserData(dds3ProcessID_t *task, void *actor);
 void scrScriptShutdown(dds3ProcessID_t *task);
 void scrRunScript(scrProcessWork_s *context);
-s32 scrScriptProcess(dds3ProcessID_t *task);
+KwlnTaskUpdateResult scrScriptProcess(dds3ProcessID_t *task);
 ScrTraceResult scrTraceCode(scrProcessWork_s *context);
 void scrProcDestroyTask(scrProcessWork_s *process);
 scrProcessWork_s *scrCreateTaskWithDefaultOption(const struct BfFlw0Header *header);

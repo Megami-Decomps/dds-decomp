@@ -2,6 +2,7 @@
 #include "kwln.h"
 #include "scr.h"
 #include "scr_trace_result.h"
+#include "kwln_task_runner.h"
 #include "dat_state.h"
 
 
@@ -31,15 +32,15 @@ void scrRunScript(scrProcessWork_s *context) {
     scrTraceCode(context);
 }
 
-s32 scrScriptProcess(dds3ProcessID_t *task) {
+KwlnTaskUpdateResult scrScriptProcess(dds3ProcessID_t *task) {
     switch (scrTraceCode((scrProcessWork_s *)dds3GetProcessData(task))) {
     case 0:
-        return -1;
+        return KWLN_TASK_UPDATE_FINISH_CALLBACK;
     case SCR_TRACE_RESULT_FINISHED:
-        return -1;
+        return KWLN_TASK_UPDATE_FINISH_CALLBACK;
     case SCR_TRACE_RESULT_YIELDED:
     default:
-        return 0;
+        return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
     }
 }
 
