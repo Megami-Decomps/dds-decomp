@@ -24,7 +24,7 @@ u32 fldCmdGetCurrentSceneSelectionResource(void) {
 
 
 
-extern s32 scrGetIntPara(s32);
+extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 
 /* Clear the selected flag only if it was set, and report whether it changed. */
 s32 fldCommand_FLD_GET_KIRETA(void) {
@@ -104,7 +104,7 @@ u32 fldCommandIsSoundBusy(void) {
 
 extern s32 D_0032E3C0[];
 
-extern s32 scrGetIntPara(s32);
+extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 
 extern void fldMarkStageExplorationBitmapRegion(s32, s32, s32, s32, s32, s32);
 

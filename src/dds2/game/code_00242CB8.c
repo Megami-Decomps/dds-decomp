@@ -27,7 +27,7 @@ static inline s32 evtProcessHandleToVmInteger(dds3ProcessID_t *handle)
 extern void fldSetFadeTarget(s32 area, s32 targetMode, s32 duration);
 extern void evtSetSkyAlpha(s32 duration, s32 target);
 
-extern s32 scrGetIntPara(s32 idx);
+extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 
 
 

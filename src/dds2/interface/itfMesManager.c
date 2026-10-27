@@ -76,7 +76,7 @@ void ResolveResourceAddress(ItfMesSub *resource);
 
 ItfMesWindowIndex scrGetMessageHandle(void);
 
-s32 scrGetIntPara(s32 parameterIndex);
+s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 
 void fldNoopWithMode(s32 mode);
 

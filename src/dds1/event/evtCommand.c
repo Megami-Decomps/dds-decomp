@@ -50,7 +50,7 @@ static inline dds3ProcessID_t *evtProcessHandleFromVmInteger(s32 value)
 }
 
 /* Script VM helpers (see script/scrCommonCommand.c for the convention). */
-s32 scrGetIntPara(s32 idx);
+s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 /* Selects both the world-node tag and its per-kind scene slot. */
 typedef s32 EffWorldKind;
 dds3Basic_t *evtSearchBasic(EffWorldKind worldKind, s32 worldObjectKey);

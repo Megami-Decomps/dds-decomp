@@ -48,7 +48,7 @@ extern f32 gMoonCnt; /* solar overlay alpha, interpolated toward 0 or 1 */
 extern void fldSetFadeTarget(s32 area, s32 targetMode, s32 duration);
 extern void evtSetSkyAlpha(s32 duration, s32 target);
 
-s32 scrGetIntPara(s32 idx);
+s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 extern struct dds3Basic_t *evtSearchBasic(s32 worldKind, s32 worldObjectKey);
 extern EvtPathStatus evtCheckPathStat(struct dds3Basic_t *object);
 

@@ -46,7 +46,7 @@ extern char D_0039F530[];
 extern char D_0039F550[];
 extern char D_0039F570[];
 
-extern s32 scrGetIntPara(s32 parameterIndex);
+extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 
 static inline ScrProcessHandle scrGetProcessHandlePara(s32 parameterIndex)
 {

@@ -34,7 +34,7 @@ extern s32 fldGetActorStat1(s32);
 
 extern s32 fldGetActorStat0(s32);
 
-extern s32 scrGetIntPara(s32);
+extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 extern void fldDispatchSceneAction(u32 action);
 
 

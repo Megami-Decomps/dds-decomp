@@ -481,7 +481,7 @@ extern void ptyRefreshEntryFromSavedTemplate(datUnitWork_t *entry);
 
 
 
-extern s32 scrGetIntPara(s32 idx);
+extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 
 
 

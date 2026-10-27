@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr_command_parameter_index.h"
 #include "scr_integer_return_value_api.h"
 #include "sdf_chip.h"
 #include "dat_state.h"
@@ -15,7 +16,7 @@ extern PtyAddUnitResult ptyAddUnitWithFlags(s32 unitId, PtyTemplateInitFlags ini
 
 extern PtyRemoveUnitResult ptyRemoveUnitWithFlags(s32 param0, s32 param1);
 
-extern s32 scrGetIntPara(s32 idx);
+extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 
 extern s32 scrSetFlag(datUnitWork_t *work, u16 index);
 

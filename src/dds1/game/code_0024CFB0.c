@@ -744,7 +744,7 @@ u32 evtGetBoundedDisplayValue(s32 displayValueIndex) {
     return fclWorkValue[displayValueIndex];
 }
 
-extern s32 scrGetIntPara(s32 parameterIndex);
+extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 
 /* Script opcode: set the supplied active-entry flag without bounds checking. */
 s32 evtOpSetActiveEntryFlag(void) {

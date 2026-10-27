@@ -6,6 +6,7 @@
 #include "scr_trace_result.h"
 #include "scr_command_result.h"
 #include "scr_procedure_index.h"
+#include "scr_command_parameter_index.h"
 #include "itf_mes_window_index.h"
 
 struct sdfMemHandle_t;

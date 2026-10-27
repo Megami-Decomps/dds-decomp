@@ -1134,7 +1134,7 @@ extern evtUnitHandle_t *evtGetUnitHandle(s32 idx);
 extern evtUnitHandle_t *evtWindowMotionUnit;
 extern s32 D_003BBDB0;
 
-extern s32 scrGetIntPara(s32 idx);
+extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 extern s32 evtLoadUnit(s32 slotKind, s32 resource);
 
 

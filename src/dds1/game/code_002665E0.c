@@ -823,7 +823,7 @@ extern void mnuCreateTitleEffectTask(void);
 
 extern u8 D_003BC5A0[];
 
-extern s32 scrGetIntPara(s32);
+extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 extern u32 p2sdGetPcmState(void);
 
 extern u32 D_003BC5B0[2];

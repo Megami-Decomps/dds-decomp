@@ -7,7 +7,7 @@
 #include "mdl_flag_api.h"
 
 
-extern s32 scrGetIntPara(s32 idx);
+extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 
 extern s8 D_0040B7D9[];
 

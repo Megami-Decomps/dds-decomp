@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr_command_parameter_index.h"
 #include "scr_command_result.h"
 #include "scr_integer_return_value_api.h"
 #include "sdf_chip.h"
@@ -16,7 +17,7 @@
 #include "btl.h"
 /* Declared before first use (were implicit int). */
 extern void dds3Filter2Off(s32 duration);
-extern s32 scrGetIntPara(s32 parameterIndex);
+extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 extern void sdfIpuInit(void);
 
 extern movieStream_t mnuMovieDrawContext;

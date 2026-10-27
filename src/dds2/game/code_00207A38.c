@@ -123,7 +123,7 @@ extern u32 btlButtonIconTexture;
 
 
 
-extern s32 scrGetIntPara(s32);
+extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 
 
 extern BattleTrackedTaskWork *btlTrackedTaskHandles;

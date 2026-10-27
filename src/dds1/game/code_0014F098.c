@@ -52,7 +52,7 @@ extern struct evtUnitHandle_t *evtGetUnitHandle(s32 param);
 
 
 /* Persona 4 func_002993c0 @ 002993C0 (src/Script/scrCommonCommand.c), recompiled unchanged */
-extern s32 scrGetIntPara(s32);
+extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 
 extern s32 D_0032E48C[];
 

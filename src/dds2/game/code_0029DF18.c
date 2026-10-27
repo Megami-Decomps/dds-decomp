@@ -802,7 +802,7 @@ s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *work, BrsProgressRow *prog
 
 extern u32 mnuTitleStreamSemaphore;
 
-extern s32 scrGetIntPara(s32);
+extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 
 extern u32 p2sdGetPcmState(void);
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr_command_parameter_index.h"
 #include "scr_command_result.h"
 #include "scr_integer_return_value_api.h"
 #include "sdf_chip.h"
@@ -18,7 +19,7 @@
 extern void dds3Filter2Off(s32 duration);
 extern void sdfIpuInit(void);
 
-extern s32 scrGetIntPara(s32);
+extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 
 extern u16 dds3VblanksPerFrame;
 

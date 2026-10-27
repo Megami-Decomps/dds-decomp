@@ -486,7 +486,7 @@ ScrTraceResult scrTraceCode(scrProcessWork_s *scr) {
 
 /* Script command parameter `parameterIndex` (0 = first) as an int, converting floats and
  * dereferencing global variable references. */
-s32 scrGetIntPara(s32 parameterIndex) {
+s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex) {
     scrProcessWork_s *scr = nowpwork;
     s32 stackIndex = scr->sp - parameterIndex - 1;
 
@@ -505,7 +505,7 @@ s32 scrGetIntPara(s32 parameterIndex) {
     return 0;
 }
 
-f32 scrGetFloatPara(s32 parameterIndex)
+f32 scrGetFloatPara(ScrCommandParameterIndex parameterIndex)
 {
     scrProcessWork_s *scr = nowpwork;
     s32 stackIndex = scr->sp - parameterIndex - 1;
@@ -526,7 +526,7 @@ f32 scrGetFloatPara(s32 parameterIndex)
 }
 
 /* Return a string parameter only when its VM stack tag is STRING. */
-const char *scrGetStrPara(s32 parameterIndex)
+const char *scrGetStrPara(ScrCommandParameterIndex parameterIndex)
 {
     scrProcessWork_s *scr = nowpwork;
     s32 stackIndex = scr->sp - parameterIndex - 1;

@@ -1152,7 +1152,7 @@ extern void evtSetUnitMove1(evtUnitHandle_t *work, s32 motionSubmode, const f32 
 
 
 
-extern s32 scrGetIntPara(s32 idx);
+extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 
 
 

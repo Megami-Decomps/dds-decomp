@@ -234,7 +234,7 @@ extern char D_0041B7E0[];
 
 extern u64 btlStartTask(BtlRuntimeTask *);
 
-extern s32 scrGetIntPara(s32);
+extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 
 extern void btlApplyScaledUnitEffectParameter(BtlUnit *, s32, s32, f32);
 

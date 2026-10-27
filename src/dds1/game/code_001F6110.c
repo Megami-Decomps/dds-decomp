@@ -176,7 +176,7 @@ extern u32 btlGetSelectedBossEffectId(void);
 extern u32 btlGetSpecialModeEffectValue(void);
 
 
-extern s32 scrGetIntPara(s32);
+extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 
 
 extern u32 btlButtonIconTexture;

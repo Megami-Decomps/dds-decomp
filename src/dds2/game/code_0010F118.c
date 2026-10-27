@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scr_command_parameter_index.h"
 #include "dds3_basic_lifecycle.h"
 #include "sdf_vu0.h"
 #include "eff_inner_float_api.h"
@@ -14,7 +15,7 @@
 #include "sdf.h"
 #include "pty_read_roster_stat_api.h"
 
-extern s32 scrGetIntPara(s32);
+extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 
 extern void ptyApplyEventPenalty(s32 penaltyMode);
 
