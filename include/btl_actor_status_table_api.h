@@ -3,8 +3,10 @@
 
 #include "common.h"
 
-/* Return the selected side's actor-status entry; entries are separated by 0x270 bytes.
- * Callers interpret the payload through the appropriate record/resource view. */
+/* Return a borrowed pointer into the selected side's actor-status bank. Entries
+ * are separated by 0x270 bytes, and the returned storage is not a separate
+ * allocation for the caller to release. Callers interpret the payload through
+ * the appropriate record/resource view. */
 void *btlGetSideIndexedActorStatusTable(s32 side, s32 index);
 
 #endif
