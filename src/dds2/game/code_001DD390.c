@@ -57,6 +57,7 @@
 #include "sdf_texture_offset_list.h"
 #include "btl_model_record.h"
 #include "btl_command.h"
+#include "btl_camera_pose_step.h"
 #include "btl_command_target_eligibility.h"
 #include "btl_state.h"
 #include "btl_task_args.h"
@@ -5504,18 +5505,18 @@ void btlInterpolateVectorStep(BtlCamState *camera) {
 }
 
 /* Complete native camera flag-0x08 mode without changing command state. */
-u32 btlCompleteCameraFlag08Mode(BtlLinkedCommand *command) {
-    return 1;
+BtlCameraPoseStepResult btlCompleteCameraFlag08Mode(BtlLinkedCommand *command) {
+    return BTL_CAMERA_POSE_STEP_COMPLETE;
 }
 
 /* Complete native camera flag-0x20 mode without changing command state. */
-u32 btlCompleteCameraFlag20Mode(BtlLinkedCommand *command) {
-    return 1;
+BtlCameraPoseStepResult btlCompleteCameraFlag20Mode(BtlLinkedCommand *command) {
+    return BTL_CAMERA_POSE_STEP_COMPLETE;
 }
 
 /* Complete native camera flag-0x80 mode without changing command state. */
-u32 btlCompleteCameraFlag80Mode(BtlLinkedCommand *command) {
-    return 1;
+BtlCameraPoseStepResult btlCompleteCameraFlag80Mode(BtlLinkedCommand *command) {
+    return BTL_CAMERA_POSE_STEP_COMPLETE;
 }
 
 /* Blend position, direction, distance and FOV; both vector W lanes become zero. */
@@ -5540,13 +5541,13 @@ void btlBlendActionCameraState(BtlCamState *dst, BtlCamState *current, BtlCamSta
 
 extern void btlBlendActionCameraState(BtlCamState *, BtlCamState *, BtlCamState *, f32);
 
-s32 btlStepPoseBlendHalf(BtlLinkedCommand *command) {
+BtlCameraPoseStepResult btlStepPoseBlendHalf(BtlLinkedCommand *command) {
     f32 t;
     if (command->state == 0) {
         command->progressBits = 0;
         btlScalarRangeInitQuadratic(&command->quadraticRange, (f32)(command->durationFrames * 2));
         btlCopyMotionTransform(&command->camera, &command->frontCamera);
-        return 0;
+        return BTL_CAMERA_POSE_STEP_CONTINUE;
     }
     t = btlScalarRangeStepQuadratic(&command->quadraticRange, 1.0f);
     if (t > 0.5f) {
@@ -5555,14 +5556,14 @@ s32 btlStepPoseBlendHalf(BtlLinkedCommand *command) {
     btlBlendActionCameraState(&command->camera, &command->frontCamera, &command->backCamera, t + t);
     command->progress = t;
     if (0.5f <= t) {
-        return 1;
+        return BTL_CAMERA_POSE_STEP_COMPLETE;
     }
-    return 0;
+    return BTL_CAMERA_POSE_STEP_CONTINUE;
 }
 
 extern void btlBlendActionCameraState(BtlCamState *, BtlCamState *, BtlCamState *, f32);
 
-s32 btlStepPoseBlend(BtlLinkedCommand *command) {
+BtlCameraPoseStepResult btlStepPoseBlend(BtlLinkedCommand *command) {
     BtlExponentialRange *timer = &command->exponentialRange;
     BtlCamState *pose = &command->frontCamera;
     f32 t;
@@ -5574,38 +5575,38 @@ s32 btlStepPoseBlend(BtlLinkedCommand *command) {
     btlBlendActionCameraState(&command->camera, pose, &command->backCamera, t);
     command->progress = t;
     if (0.999999f <= t) {
-        return 1;
+        return BTL_CAMERA_POSE_STEP_COMPLETE;
     }
-    return 0;
+    return BTL_CAMERA_POSE_STEP_CONTINUE;
 }
 
 extern void btlBlendActionCameraState(BtlCamState *, BtlCamState *, BtlCamState *, f32);
 
-s32 btlStepPoseBlendFrame(BtlLinkedCommand *command) {
+BtlCameraPoseStepResult btlStepPoseBlendFrame(BtlLinkedCommand *command) {
     f32 t;
     if (command->state == 0) {
         command->progressBits = 0;
         btlScalarRangeInitQuadratic(&command->quadraticRange, (f32)command->durationFrames);
         btlCopyMotionTransform(&command->camera, &command->frontCamera);
-        return 0;
+        return BTL_CAMERA_POSE_STEP_CONTINUE;
     }
     t = btlScalarRangeStepQuadratic(&command->quadraticRange, 1.0f);
     btlBlendActionCameraState(&command->camera, &command->frontCamera, &command->backCamera, t);
     command->progress = t;
     if (0.999999f <= t) {
-        return 1;
+        return BTL_CAMERA_POSE_STEP_COMPLETE;
     }
-    return 0;
+    return BTL_CAMERA_POSE_STEP_CONTINUE;
 }
 
-s32 btlStepPoseBlendRatio(BtlLinkedCommand *command) {
+BtlCameraPoseStepResult btlStepPoseBlendRatio(BtlLinkedCommand *command) {
     f32 ratio = (f32)command->state / (f32)command->durationFrames;
     if (ratio <= 1.0f) {
         btlBlendActionCameraState(&command->camera, &command->frontCamera, &command->backCamera, ratio);
-        return 0;
+        return BTL_CAMERA_POSE_STEP_CONTINUE;
     }
     btlCopyMotionTransform(&command->camera, &command->backCamera);
-    return 0;
+    return BTL_CAMERA_POSE_STEP_CONTINUE;
 }
 
 /* Adjust the pose direction when projected camera height is above Y = -20. */
@@ -5908,7 +5909,7 @@ void btlUpdateBattleCameraFrame(void) {
             result = btlStepPoseBlendRatio(&scene->cameraCommand);
             flags = scene->cameraCommand.flags;
         }
-        if (result == 1) {
+        if (result == BTL_CAMERA_POSE_STEP_COMPLETE) {
             scene->cameraCommand.progressBits = 0;
             scene->cameraCommand.flags = flags & ~1;
             flags = scene->cameraCommand.flags;

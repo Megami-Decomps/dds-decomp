@@ -50,6 +50,7 @@
 #include "sdf_texture_offset_list.h"
 #include "btl_model_record.h"
 #include "btl_command.h"
+#include "btl_camera_pose_step.h"
 #include "btl_camera_pose_api.h"
 #include "btl_state.h"
 #include "btl_task_args.h"
@@ -411,8 +412,6 @@ void btlRefreshUnitEffectMotionAndEntry(BtlUnit *unit);
 void effBTLModelGetMarkPosition2(BtlUnit *unit, s32 mode);
 
 void btlSetUnitColor(BtlUnit *unit, u32 color, s32 mode);
-
-s32 btlStepPoseBlend(BtlLinkedCommand *command);
 
 void btlUnitFaceTarget(BtlUnit *unit, BtlUnit *target);
 
