@@ -299,7 +299,7 @@ typedef struct BtlState {
     u8 pad598[4];
     s32 (*hitResultOverride)(BtlUnit *, BtlUnit *, s32); /* 0x59C: source, target and command. */
     s32 (*chooseMotion)(BtlUnit *, s32, s32); /* 0x5A0 */
-    s32 (*statusMotionOverride)(BtlUnit *); /* 0x5A4: nonnegative result replaces status motion. */
+    s32 (*statusMotionOverride)(BtlUnit *); /* 0x5A4: negative keeps the current motion. */
     s32 (*preserveMotionRange)(BtlUnit *, s32); /* 0x5A8: keep the stored motion start/end. */
     void (*actorParameterDeltaCallback)(BtlUnit *, s32 *); /* 0x5AC */
     u8 pad5B0[4];
@@ -553,7 +553,7 @@ typedef struct BtlState {
     s32 (*selectScriptArg)(void); /* 0x5CC */
     s32 (*hitResultOverride)(BtlUnit *, BtlUnit *, s32); /* 0x5D0: 001B1848 supplies source, target and command. */
     s32 (*chooseMotion)(BtlUnit *, s32, s32); /* 0x5D4 */
-    s32 (*statusMotionOverride)(BtlUnit *); /* 0x5D8: nonnegative result replaces status motion. */
+    s32 (*statusMotionOverride)(BtlUnit *); /* 0x5D8: negative keeps the current motion. */
     s32 (*preserveMotionRange)(BtlUnit *, s32); /* 0x5DC: keep the stored motion start/end. */
     void (*actorParameterDeltaCallback)(BtlUnit *, s32 *); /* 0x5E0 */
     s32 (*sceneCallback)(); /* 0x5E4 */

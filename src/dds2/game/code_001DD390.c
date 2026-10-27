@@ -2,6 +2,7 @@
 #include "dds3_path.h"
 #include "sdf_model_packet_callback.h"
 #include "btl_motion_transform.h"
+#include "btl_status_motion_override.h"
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "common.h"
@@ -2801,7 +2802,7 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
     f32 rate;
     f32 speed;
     u32 color;
-    s32 (*chooseStatus)(BtlUnit *);
+    BtlStatusMotionOverrideCallback chooseStatus;
     s32 (*chooseMotion)(BtlUnit *, s32, s32);
     void (*setMotion)(BtlUnit *, s32, f32);
     s32 (*chooseMode)(BtlUnit *, s32, s32);

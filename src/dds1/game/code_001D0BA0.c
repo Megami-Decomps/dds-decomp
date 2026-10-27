@@ -2,6 +2,7 @@
 #include "dds3_path.h"
 #include "sdf_model_packet_callback.h"
 #include "btl_motion_transform.h"
+#include "btl_status_motion_override.h"
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "common.h"
@@ -2723,7 +2724,7 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
     f32 rate;
     f32 speed;
     u32 color;
-    s32 (*chooseStatus)(BtlUnit *);
+    BtlStatusMotionOverrideCallback chooseStatus;
     s32 (*chooseMotion)(BtlUnit *, s32, s32);
 
     if (((u32)unit->status.flags & 2) == 0) {
@@ -2816,7 +2817,8 @@ s32 btlIsActorModeAcceptedByBattleHook(BtlUnit *object) {
         return 0;
     }
     {
-        s32 (*callback)(BtlUnit *) = ((BtlState *)btlGetRuntime())->statusMotionOverride;
+        BtlStatusMotionOverrideCallback callback =
+            ((BtlState *)btlGetRuntime())->statusMotionOverride;
         if (callback != 0 && callback(0) == object->motionId) {
             return 1;
         }

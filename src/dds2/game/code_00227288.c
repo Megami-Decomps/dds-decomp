@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "btl_motion_transform.h"
+#include "btl_status_motion_override.h"
 #include "common.h"
 #include "btl_quarter_health_result.h"
 #include "btl_camera_mode_index.h"
@@ -212,7 +213,7 @@ s32 btlIsEffectPhaseInRange(s32 unused, s32 phase) {
 
 /* With no unit, report phase 18/19 from the last eligible pair.
  * A qualifying first unit instead reports 15 when its inactive effect is ready. */
-s32 btlGetLinkedEffectPhase(BtlUnit *unit) {
+BtlStatusMotionOverrideResult btlGetLinkedEffectPhase(BtlUnit *unit) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BattleLinkedEffectState *effect = &battle->effect->linked;
     BtlUnit *node;
@@ -250,21 +251,21 @@ s32 btlGetLinkedEffectPhase(BtlUnit *unit) {
                 }
             }
         }
-        return -1;
+        return BTL_STATUS_MOTION_OVERRIDE_NONE;
     }
     if (!(unit->status.flags & 1)) {
-        return -1;
+        return BTL_STATUS_MOTION_OVERRIDE_NONE;
     }
     if (!(unit->status.flags & 0x400)) {
-        return -1;
+        return BTL_STATUS_MOTION_OVERRIDE_NONE;
     }
     if (unit->partyRecord.unitId != 0x12F) {
-        return -1;
+        return BTL_STATUS_MOTION_OVERRIDE_NONE;
     }
     if (effect->active != 0) {
-        return -1;
+        return BTL_STATUS_MOTION_OVERRIDE_NONE;
     }
-    return effect->actor == NULL ? -1 : 0xF;
+    return effect->actor == NULL ? BTL_STATUS_MOTION_OVERRIDE_NONE : 0xF;
 }
 
 
@@ -1475,15 +1476,15 @@ extern s32 btlGetBossEntryKind(BtlUnit *unit, s32 index);
 extern f32 btlGetBossPresenceActionScale(BtlUnit *unit, BtlUnit *target);
 extern f32 btlGetBossRatioScale(BtlUnit *unit, s32 unused, s32 kind, s32 flag);
 extern f32 btlGetBrahmaActionScale(BtlUnit *unit, u32 actor, u32 action, u32 mode);
-extern s32 btlGetHealthyAllyActionStatus(BtlUnit *unit);
+extern BtlStatusMotionOverrideResult btlGetHealthyAllyActionStatus(BtlUnit *unit);
 extern u32 btlGetMarkedActionMotionCode(u32 unit, u32 action);
 extern u32 btlGetMarkedUnitActionResponse(BtlUnit *unit, BtlUnit *actor, u32 action);
-extern s32 btlGetMarkedUnitActionStatus(BtlUnit *unit);
+extern BtlStatusMotionOverrideResult btlGetMarkedUnitActionStatus(BtlUnit *unit);
 extern BtlUnit *btlGetReadyUnitForSpecies(u32 mode, u32 species);
 extern u32 btlGetSelectedActorAction(void);
 extern u32 btlGetSelectionEmptyValue(void);
-extern s32 btlGetSpecialEnemyActionStatus(BtlUnit *unit);
-extern s32 btlGetSpecialEnemySubtaskGuardResponse(BtlUnit *unit);
+extern BtlStatusMotionOverrideResult btlGetSpecialEnemyActionStatus(BtlUnit *unit);
+extern BtlStatusMotionOverrideResult btlGetSpecialEnemySubtaskGuardResponse(BtlUnit *unit);
 extern s32 btlGetSubtaskActorMotionClass(void);
 extern s32 btlHandleTargetDirectionOrAction(BtlLinkedCommand *unit);
 extern s32 btlInitializeEffectVectors(BtlLinkedCommand *command);
@@ -1537,7 +1538,7 @@ extern void btlRestoreMarkedUnitMotionOnStateChange(void);
 extern void btlReturnUnitToGroup(ActionStateLink *task);
 extern s32 btlSelectActionCameraByTableFlags(BtlLinkedCommand *unit);
 extern s32 btlSelectActionTransitionCamera(BtlLinkedCommand *command, s8 modeA, s8 modeB);
-extern s32 btlSelectDisabledCommand(BtlUnit *battler);
+extern BtlStatusMotionOverrideResult btlSelectDisabledCommand(BtlUnit *battler);
 extern s32 btlSelectLinkedActionCameraPose(BtlLinkedCommand *command, s8 modeA, s8 modeB);
 extern s32 btlSelectLowestStatTarget(ActionStateLink *actor);
 extern s32 btlSelectMarkedActorAndClearEntryFlags(BtlUnit *unit, BtlOperandEntry *entry);
@@ -1600,7 +1601,7 @@ extern u8 btlIsNonCalamityAction(s32 actionId);
 extern void btlApplyMarkedCommandStateMotion(void);
 extern void btlPromoteTrueHeatToFrontline(void);
 extern s32 btlRemapKartikeyaMotionForLinkedState(BtlUnit *unit, s32 command);
-extern s32 btlGetKartikeyaLinkedMotionStatus(BtlUnit *unit);
+extern BtlStatusMotionOverrideResult btlGetKartikeyaLinkedMotionStatus(BtlUnit *unit);
 extern s32 btlAllowBrahmanDefeatCandidateSet(BtlUnit *unit);
 extern s32 btlAllowBrahmanDefeatCandidateClear(BtlUnit *unit);
 extern u32 btlBoostEternalZeroActorEntries(BtlUnit *unit, BtlUnit *target, u32 action);
@@ -1642,7 +1643,7 @@ extern s32 btlSelectBrahmaActorCategoryCamera(BtlLinkedCommand *, s32, s32);
 extern s32 func_002247D0(BtlLinkedCommand *, s32, s32);
 extern s32 btlUpdateSatanDefeatCamera(BtlLinkedCommand *, BtlCamState *, s32);
 extern s32 btlSelectSatanActorCategoryCamera(BtlLinkedCommand *, s32, s32);
-extern s32 btlGetLinkedEffectPhase(BtlUnit *);
+extern BtlStatusMotionOverrideResult btlGetLinkedEffectPhase(BtlUnit *);
 extern void func_002279F0(void);
 extern void btlQueueLinkedPairModelSwapTasks(ActionStateLink *, s32, u64, u64, u64);
 

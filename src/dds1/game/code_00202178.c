@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_status_motion_override.h"
 #include "btl_quarter_health_result.h"
 #include "btl_camera_mode_index.h"
 #include "btl_command_target_policy.h"
@@ -1129,11 +1130,13 @@ u8 btlIsCommandCodeF(u32 unused, s32 command) {
     return command == 0xf;
 }
 
-s32 btlSelectDisabledCommand(BtlUnit *battler) {
+BtlStatusMotionOverrideResult btlSelectDisabledCommand(BtlUnit *battler) {
     if (battler == 0) {
         return 15;
     }
-    return (battler->partyRecord.flags & 0x2000) ? 15 : -1;
+    return (battler->partyRecord.flags & 0x2000)
+               ? 15
+               : BTL_STATUS_MOTION_OVERRIDE_NONE;
 }
 
 void btlTrackSpecialEnemyCommandRestrictionByTurn(BtlUnit *unit, BtlOperandEntry *command) {
@@ -1923,7 +1926,7 @@ s32 btlIsEffectPhaseInRange(s32 unused, s32 phase) {
 
 /* With no unit, report phase 18/19 from the last eligible pair.
  * A qualifying first unit instead reports 15 when its inactive effect is ready. */
-s32 btlGetLinkedEffectPhase(BtlUnit *unit) {
+BtlStatusMotionOverrideResult btlGetLinkedEffectPhase(BtlUnit *unit) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BattleEffectState *effect = (BattleEffectState *)battle->effect;
     BtlUnit *node;
@@ -1961,21 +1964,21 @@ s32 btlGetLinkedEffectPhase(BtlUnit *unit) {
                 }
             }
         }
-        return -1;
+        return BTL_STATUS_MOTION_OVERRIDE_NONE;
     }
     if (!(unit->status.flags & 1)) {
-        return -1;
+        return BTL_STATUS_MOTION_OVERRIDE_NONE;
     }
     if (!(unit->status.flags & 0x400)) {
-        return -1;
+        return BTL_STATUS_MOTION_OVERRIDE_NONE;
     }
     if (unit->partyRecord.unitId != 0x107) {
-        return -1;
+        return BTL_STATUS_MOTION_OVERRIDE_NONE;
     }
     if (effect->active != 0) {
-        return -1;
+        return BTL_STATUS_MOTION_OVERRIDE_NONE;
     }
-    return effect->header.owner == 0 ? -1 : 0xF;
+    return effect->header.owner == 0 ? BTL_STATUS_MOTION_OVERRIDE_NONE : 0xF;
 }
 
 

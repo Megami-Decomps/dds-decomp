@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "btl_status_motion_override.h"
 #include "btl_boss_data_api.h"
 #include "btl_resolve_unit_value_api.h"
 #include "mdl_flag_api.h"
@@ -210,7 +211,7 @@ extern void btlResetUnitPlacement(void);
 extern void btlRestoreHaritiFormation(void);
 extern void btlRestoreSlotEntriesFromEffect(void);
 extern u64 btlScheduleActionAndSoundSequence(BtlTask *action);
-extern s32 btlSelectDisabledCommand(BtlUnit *battler);
+extern BtlStatusMotionOverrideResult btlSelectDisabledCommand(BtlUnit *battler);
 extern u32 btlSelectResponseCodeForEnemyFlag(u32 unused, s32 unit);
 extern void btlSelectSlotEntries(void);
 extern u8 btlSelectSpecialActionCameraPose(BtlLinkedCommand *command, s8 a, s8 b);
@@ -268,7 +269,7 @@ extern s32 btlSelectBossLinkedActionCamera(BtlLinkedCommand *command, s8 firstSi
 /* Native providers whose bodies remain assembly in their own units. */
 s32 btlInitResourcesWrap(BtlLinkedCommand *, BtlCamState *, s32);
 void btlClearSpecialEnemyRestrictionAfterAction(BtlTask *);
-s32 btlGetLinkedEffectPhase(BtlUnit *);
+BtlStatusMotionOverrideResult btlGetLinkedEffectPhase(BtlUnit *);
 void func_00206608(void);
 void btlQueueLinkedPairModelSwapTasks(BtlTask *, s32, u64, u64, u64);
 void func_00209EB8(BtlTask *);
