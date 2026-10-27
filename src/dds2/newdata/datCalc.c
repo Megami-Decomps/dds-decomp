@@ -1030,7 +1030,7 @@ s32 ptyGetRoundedAveragePartyLevel(void) {
 }
 
 extern void ptyAccumulateStatGains(s32 *gains, s32 levelDelta, const datUnitWork_t *unit);
-extern u32 ptyComputeTotalExp(datUnitWork_t *, s32);
+extern u32 ptyComputeTotalExp(const datUnitWork_t *, s32);
 extern void ptyRecomputeMaxHpMp(datUnitWork_t *);
 extern void evtCopyRosterTableValue(datUnitWork_t *);
 extern void mtrRefreshMantraStateForUnit2(void);

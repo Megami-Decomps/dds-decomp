@@ -675,7 +675,7 @@ void gstApplyBundleMacca(BrsRewardSummary *batch) {
     datAddCurrencyClamped(batch->macca);
 }
 
-extern u32 ptyComputeTotalExp(datUnitWork_t *unit, s32 levelDelta);
+extern u32 ptyComputeTotalExp(const datUnitWork_t *unit, s32 levelDelta);
 
 extern u32 ptyAddProfilePoints(datUnitWork_t *unit, s32 increment);
 extern void brsSetSkillProgressAnimations(BrsSkillPackageWork *, s32, s32, u32, s32, s32, s32);

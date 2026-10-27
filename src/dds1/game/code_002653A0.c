@@ -25,7 +25,7 @@ typedef struct PtySkillSlotThreshold {
 extern const PtySkillSlotThreshold brsSkillSlotCountThresholds[];
 
 extern s32 ptyCalcLevelUps(datUnitWork_t *);
-extern u32 ptyComputeTotalExp(datUnitWork_t *, s32);
+extern u32 ptyComputeTotalExp(const datUnitWork_t *, s32);
 extern void ptyRecomputeMaxHpMp(datUnitWork_t *);
 extern s32 ptyHasSkill(datUnitWork_t *, s32);
 
@@ -107,7 +107,7 @@ u32 func_00265598(void) {
 
 extern s32 D_0036F40C[][100];
 
-u32 ptyComputeTotalExp(datUnitWork_t *unit, s32 levelDelta) {
+u32 ptyComputeTotalExp(const datUnitWork_t *unit, s32 levelDelta) {
     s32 unitId = unit->unitId;
     s32 total = 0;
     s32 level;

@@ -184,7 +184,7 @@ void brsDrawProgressRowOverlays(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
 
 
 extern void nbPlaySe(u32 sequenceId);
-extern u32 ptyComputeTotalExp(datUnitWork_t *unit, s32 levelDelta);
+extern u32 ptyComputeTotalExp(const datUnitWork_t *unit, s32 levelDelta);
 
 void brsUpdateLevelProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
                    BrsProgressRow *progressRow, s32 context, s32 rowIndex) {
@@ -653,7 +653,7 @@ void brsDrawProfileProgressIndicator(s32 x, s32 y, s32 z, BrsSkillPackageWork *w
 }
 
 
-extern u32 ptyComputeTotalExp(datUnitWork_t *unit, s32 levelDelta);
+extern u32 ptyComputeTotalExp(const datUnitWork_t *unit, s32 levelDelta);
 extern s32 ptyGetCurrentProfileId(const datUnitWork_t *);
 extern u32 prfGetCapValue(u16);
 

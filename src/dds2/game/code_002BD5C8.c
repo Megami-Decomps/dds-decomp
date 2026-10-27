@@ -275,7 +275,7 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
     }
 }
 
-extern u32 ptyComputeTotalExp(datUnitWork_t *, s32);
+extern u32 ptyComputeTotalExp(const datUnitWork_t *, s32);
 extern char D_00437C48[];
 extern void mnuDrawFadeIcons(s32, s32, s32, s32, MenuIconBundle *, s32);
 extern void mnuDrawIconRow(s32, s32, s32, s32, MenuSprites *, s32);

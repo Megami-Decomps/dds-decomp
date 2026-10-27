@@ -736,7 +736,7 @@ void gstApplyBundleMacca(BrsRewardSummary *batch) {
     datAddCurrencyClamped(batch->macca);
 }
 
-extern u32 ptyComputeTotalExp(datUnitWork_t *unit, s32 levelDelta);
+extern u32 ptyComputeTotalExp(const datUnitWork_t *unit, s32 levelDelta);
 
 
 

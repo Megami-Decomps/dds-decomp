@@ -2382,7 +2382,7 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
     }
 }
 
-extern u32 ptyComputeTotalExp(datUnitWork_t *, s32);
+extern u32 ptyComputeTotalExp(const datUnitWork_t *, s32);
 extern char D_003BC740[];
 
 void mnuDrawPartyProfileAndExpOverlay(s32 x, s32 y, s32 depth, MenuPageSlot *slot,
