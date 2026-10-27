@@ -131,10 +131,13 @@ ScrOpcodeHandlerResult CodeFunc_Comm(scrProcessWork_s *scr)
 
 ScrOpcodeHandlerResult CodeFunc_End(scrProcessWork_s *scr)
 {
+    ScrProgramCounter returnAddress;
+
     if (scr->sp == 0) {
         return SCR_OPCODE_HANDLER_RESULT_FINISHED;
     }
-    scr->pc = PopInt(scr) + 1;
+    returnAddress = PopInt(scr);
+    scr->pc = returnAddress + 1;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
 }
 
