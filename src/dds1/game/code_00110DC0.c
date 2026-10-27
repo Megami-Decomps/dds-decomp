@@ -6,8 +6,6 @@
 #include "evt_world.h"
 
 
-s32 CB_ReleaseObjectBasic(dds3Basic_t *areaObject);
-
 Dds3SceneMembershipResult dds3SceneBasicExistBasicFromType(
     const dds3Basic_t *object, s32 slotIndex, const dds3Basic_t *targetNode) {
     const dds3Basic_t *node;

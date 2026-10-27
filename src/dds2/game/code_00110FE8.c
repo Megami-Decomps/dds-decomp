@@ -124,10 +124,6 @@ s32 AreaBasicConstructor(dds3Basic_t *object) {
     return 1;
 }
 
-s32 CB_ReleaseObjectBasic(dds3Basic_t *areaObject);
-
-
-
 void AreaBasicDestructor(dds3Basic_t *object) {
     WorldIndexNode **indexNodes;
     u32 i;

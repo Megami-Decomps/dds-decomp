@@ -7,6 +7,7 @@
 #include "evt_world_object_api.h"
 #include "evt_world.h"
 #include "sdf_texture_offset_list.h"
+#include "dds3_basic_array_visit.h"
 
 struct WorldIndexNode;
 
@@ -102,22 +103,23 @@ u32 dds3SetNextBasicArray(dds3BasicArrayHandle_t *object) {
     return (u32)~(s32)object->cursorIndex >> 0x1f;
 }
 
-/* Call `callback` with each stored basic-node pointer in order; stop at the first 0 result. An empty list, missing callback, or all successful callbacks returns 1. */
-s32 dds3ForEachBasicArray(dds3BasicArrayHandle_t *object, s32 (*callback)(dds3Basic_t *)) {
+/* Exact zero stops traversal; any nonzero callback result continues. */
+Dds3BasicArrayVisitResult dds3ForEachBasicArray(
+    dds3BasicArrayHandle_t *object, Dds3BasicArrayVisitCallback callback) {
     u32 more;
 
     if (callback == NULL) {
-        return 1;
+        return DDS3_BASIC_ARRAY_VISIT_CONTINUE;
     }
     if (dds3GetBasicArrayCount(object) == 0) {
-        return 1;
+        return DDS3_BASIC_ARRAY_VISIT_CONTINUE;
     }
     for (more = dds3SetFirstBasicArray(object); more != 0; more = dds3SetNextBasicArray(object)) {
-        if (callback(dds3GetBasicArray(object)) == 0) {
-            return 0;
+        if (callback(dds3GetBasicArray(object)) == DDS3_BASIC_ARRAY_VISIT_STOP) {
+            return DDS3_BASIC_ARRAY_VISIT_STOP;
         }
     }
-    return 1;
+    return DDS3_BASIC_ARRAY_VISIT_CONTINUE;
 }
 
 
