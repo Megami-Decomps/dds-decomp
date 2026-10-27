@@ -365,7 +365,7 @@ s32 fldTestRoomProbeFacingAndRange(dds3Basic_t *actor, dds3Basic_t *entry) {
     f32 angle;
     EvtWorldSourceTransformPrefix *source;
     s32 i;
-    u32 kind;
+    FldTriggerShapeKind kind;
 
     memset(position, 0, sizeof(position));
     position[3] = 1.0f;
@@ -373,7 +373,7 @@ s32 fldTestRoomProbeFacingAndRange(dds3Basic_t *actor, dds3Basic_t *entry) {
         if (fldEveHitTable[i].worldObjectKey == entry->key) {
             kind = ((FldTaskInfo *)fldRoomResources[i]->data)->shape->kind;
             switch (kind) {
-            case 0:
+            case FLD_TRIGGER_SHAPE_KIND_SPHERE:
                 source = entry->data;
                 position[0] = source->position.x;
                 position[1] = source->position.y;
@@ -403,9 +403,9 @@ s32 fldTestRoomProbeFacingAndRange(dds3Basic_t *actor, dds3Basic_t *entry) {
                     return 0;
                 }
                 return 1;
-            case 1:
+            case FLD_TRIGGER_SHAPE_KIND_PLANE:
                 return fldEveHitTable[i].crossingDirection == kind;
-            case 2:
+            case FLD_TRIGGER_SHAPE_KIND_BOX:
                 SDF_VU0_LOADVECTOR(actor->inner->rotation);
                 effMiscQuaternionToMatrixVU();
                 SDF_VU0_STORE_ROW2(dir);
@@ -432,7 +432,7 @@ s32 fldTestRoomProbeFacing(dds3Basic_t *actor, dds3Basic_t *entry) {
     f32 dot;
     f32 angle;
     s32 i;
-    u32 kind;
+    FldTriggerShapeKind kind;
 
     memset(position, 0, sizeof(position));
     position[3] = 1.0f;
@@ -440,7 +440,7 @@ s32 fldTestRoomProbeFacing(dds3Basic_t *actor, dds3Basic_t *entry) {
         if (fldEveHitTable[i].worldObjectKey == entry->key) {
             kind = ((FldTaskInfo *)fldRoomResources[i]->data)->shape->kind;
             switch (kind) {
-            case 0:
+            case FLD_TRIGGER_SHAPE_KIND_SPHERE:
                 source = entry->data;
                 SDF_VU0_COPYVECTOR(position, &source->position);
                 SDF_VU0_LOADVECTOR(actor->inner->rotation);
@@ -465,9 +465,9 @@ s32 fldTestRoomProbeFacing(dds3Basic_t *actor, dds3Basic_t *entry) {
                     return 0;
                 }
                 return 1;
-            case 1:
+            case FLD_TRIGGER_SHAPE_KIND_PLANE:
                 return fldEveHitTable[i].crossingDirection == kind;
-            case 2:
+            case FLD_TRIGGER_SHAPE_KIND_BOX:
                 SDF_VU0_LOADVECTOR(actor->inner->rotation);
                 effMiscQuaternionToMatrixVU();
                 SDF_VU0_STORE_ROW2(dir);
@@ -491,11 +491,11 @@ s32 fldTestActorRoomProbeCondition(s32 roomIndex, dds3Basic_t *actor, f32 *posit
     f32 length;
     f32 dot;
     f32 angle;
-    u32 kind;
+    FldTriggerShapeKind kind;
 
     kind = ((FldTaskInfo *)fldRoomResources[roomIndex]->data)->shape->kind;
     switch (kind) {
-    case 0:
+    case FLD_TRIGGER_SHAPE_KIND_SPHERE:
         SDF_VU0_LOADVECTOR(actor->inner->rotation);
         effMiscQuaternionToMatrixVU();
         SDF_VU0_STORE_ROW2(dir);
@@ -521,9 +521,9 @@ s32 fldTestActorRoomProbeCondition(s32 roomIndex, dds3Basic_t *actor, f32 *posit
             return 0;
         }
         return 1;
-    case 1:
+    case FLD_TRIGGER_SHAPE_KIND_PLANE:
         return fldEveHitTable[roomIndex].crossingDirection == kind;
-    case 2:
+    case FLD_TRIGGER_SHAPE_KIND_BOX:
         SDF_VU0_LOADVECTOR(actor->inner->rotation);
         effMiscQuaternionToMatrixVU();
         SDF_VU0_STORE_ROW2(dir);
@@ -729,7 +729,7 @@ void fldSpawnRoomTrigger(s32 roomId, f32 x, f32 y, f32 z, f32 triggerRadius) {
     displayResourceIndex = fldEveHit_AddEveData(
         &fldActionRows[index].displayResource, object);
     fldActionRows[index].prefix.task.shape.radius = triggerRadius;
-    fldActionRows[index].prefix.shape.kind = 0;
+    fldActionRows[index].prefix.shape.kind = FLD_TRIGGER_SHAPE_KIND_SPHERE;
     fldActionRows[index].prefix.task.info.unk0 = 1;
     fldActionRows[index].prefix.task.info.slot = displayResourceIndex;
     fldActionRows[index].prefix.task.info.unk08 = 1;
@@ -772,7 +772,7 @@ void fldSpawnRoomTriggerVariant(s32 kind, s32 roomValue,
     displayResourceIndex = fldEveHit_AddEveData(
         &fldActionRows[index].displayResource, object);
     fldActionRows[index].prefix.task.shape.radius = radius;
-    fldActionRows[index].prefix.task.shape.kind = 0;
+    fldActionRows[index].prefix.task.shape.kind = FLD_TRIGGER_SHAPE_KIND_SPHERE;
     fldActionRows[index].prefix.task.info.unk0 = 1;
     fldActionRows[index].prefix.task.info.slot = displayResourceIndex;
     fldActionRows[index].prefix.task.info.unk08 = 1;

@@ -3,19 +3,27 @@
 
 #include "common.h"
 
+typedef u32 FldTriggerShapeKind;
+/* Room probes recognize these variants; any other tag matches no probe. */
+enum {
+    FLD_TRIGGER_SHAPE_KIND_SPHERE = 0,
+    FLD_TRIGGER_SHAPE_KIND_PLANE = 1,
+    FLD_TRIGGER_SHAPE_KIND_BOX = 2
+};
+
 typedef struct FldTriggerSphere {
-    u32 kind;
+    FldTriggerShapeKind kind;
     f32 radius;
 } FldTriggerSphere;
 
 typedef struct FldTriggerPlane {
-    u32 kind;
+    FldTriggerShapeKind kind;
     f32 width;
     f32 height;
 } FldTriggerPlane;
 
 typedef struct FldTriggerBox {
-    u32 kind;
+    FldTriggerShapeKind kind;
     f32 size[3];
 } FldTriggerBox;
 
@@ -23,7 +31,7 @@ typedef struct FldTriggerBox {
  * 16 bytes, with one, two, or three float words after kind. Runtime probes
  * read kind through this union before using it. */
 typedef union FldTriggerShape {
-    u32 kind;
+    FldTriggerShapeKind kind;
     FldTriggerSphere sphere;
     FldTriggerPlane plane;
     FldTriggerBox box;
