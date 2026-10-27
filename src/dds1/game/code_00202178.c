@@ -3,6 +3,7 @@
 #include "common.h"
 #include "btl_element_block_query_result.h"
 #include "btl_status_motion_override.h"
+#include "btl_command_hit_count_override.h"
 #include "btl_quarter_health_result.h"
 #include "btl_camera_mode_index.h"
 #include "btl_command_target_policy.h"
@@ -3355,7 +3356,7 @@ extern EventRosterStat *datRosterDetails;
 extern char D_003A5D78[];
 
 /* Return the Cerber hit allocation, with zero falling back to the normal range. */
-s32 btlCerberGetCommandHitCount(BtlUnit *unit, s32 command) {
+BtlCommandHitCountOverrideResult btlCerberGetCommandHitCount(BtlUnit *unit, s32 command) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     s32 result;
     s32 eligible;

@@ -11,6 +11,7 @@
 #include "common.h"
 #include "btl_actor_command_selector_value_api.h"
 #include "btl_action_press_result.h"
+#include "btl_command_hit_count_override.h"
 #include "pty_active_roster_index_api.h"
 #include "sdf_vu0.h"
 #include "btl_actor_status_table_api.h"
@@ -444,12 +445,13 @@ f32 func_001A6958(void) {
 
 u8 btlSelectCommandHitCount(BtlUnit *unit, s32 command) {
     BtlState *context = (BtlState *)btlGetRuntime();
+    BtlCommandHitCountOverrideCallback commandRangeOverride = context->commandRangeOverride;
     s32 result;
     s32 minimum;
     s32 maximum;
 
-    if (context->commandRangeOverride != NULL) {
-        result = context->commandRangeOverride(unit, command);
+    if (commandRangeOverride != NULL) {
+        result = commandRangeOverride(unit, command);
         if (result > 0) {
             return result;
         }
