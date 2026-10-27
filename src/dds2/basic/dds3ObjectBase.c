@@ -312,7 +312,7 @@ extern void dds3GetTMPoseSet(dds3Basic_t *object);
 
 void dds3ObjectBaseMakeMatter(dds3Basic_t *object) {
     dds3ObjectBaseControlWorkData_t *base;
-    dds3Basic_t *scriptModelObject;
+    const dds3Basic_t *scriptModelObject;
     sdfMotionCtrlr_t *motion;
     sdfModelRootNode_t *model;
 

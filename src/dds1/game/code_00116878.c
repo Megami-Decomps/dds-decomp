@@ -7,6 +7,7 @@
 #include "eff_transform.h"
 #include "sdf_draw.h"
 #include "evt_script_model.h"
+#include "evt_script_model_api.h"
 
 
 
@@ -39,8 +40,8 @@ dds3Basic_t *dds3AddModelBasic2(s32 key, sdfModelDef_t *itemList, MotionTable *m
 }
 
 
-sdfModelRootNode_t *dds3ModelBasicMakeModel(dds3Basic_t *obj) {
-    EvtScriptModelWork *work = obj->data;
+sdfModelRootNode_t *dds3ModelBasicMakeModel(const dds3Basic_t *obj) {
+    const EvtScriptModelWork *work = obj->data;
     sdfModelRootNode_t *model;
 
     if (work->loadedModelResource != NULL) {
@@ -51,9 +52,9 @@ sdfModelRootNode_t *dds3ModelBasicMakeModel(dds3Basic_t *obj) {
     return model;
 }
 
-sdfMotionCtrlr_t *dds3ModelBasicSetMotion(dds3Basic_t *object, sdfModelRootNode_t *owner) {
+sdfMotionCtrlr_t *dds3ModelBasicSetMotion(const dds3Basic_t *object, sdfModelRootNode_t *owner) {
     sdfMotionCtrlr_t *motion = NULL;
-    EvtScriptModelWork *work;
+    const EvtScriptModelWork *work;
 
     if (owner == NULL) {
         return NULL;
