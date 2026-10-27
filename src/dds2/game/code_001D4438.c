@@ -1425,7 +1425,7 @@ extern BtlRuntimeTask *sndCreateClearStateTask(void);
 extern SoundResourceNode *sndCreateResourceNode(struct SoundMixer *sourceMixer);
 extern BtlRuntimeTask *sndCreateSetStateTask(void);
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32 value);
-extern BtlRuntimeTask *sndCreateTimedUnitEffectTask(SoundResourceNode *effect, BtlUnit *actor, u16 frames,
+extern BtlRuntimeTask *sndCreateTimedUnitEffectTask(SoundResourceNode *effect, BtlUnit *actor, EffBattleVoiceKind kind,
                                           s32 channel, u32 volume);
 
 void btlScheduleAttackActionTasks(ActionStateLink *action) {
@@ -1911,7 +1911,7 @@ extern BtlRuntimeTask *btlCreateEffectTask3E(BtlUnit *, u16);
 extern BtlRuntimeTask *btlCreateEffObjC(BtlUnit *, s32);
 extern BtlRuntimeTask *btlCreateEffObjD(BtlUnit *, BtlSkillNameIndex);
 extern BtlRuntimeTask *sndCreateTimedUnitEffectTask(
-    SoundResourceNode *, BtlUnit *, u16, s32, u32);
+    SoundResourceNode *, BtlUnit *, EffBattleVoiceKind, s32, u32);
 extern BtlRuntimeTask *sndCreateSetStateTask(void);
 extern BtlRuntimeTask *sndCreateClearStateTask(void);
 extern BtlRuntimeTask *btlScheduleActorUpdate(BtlUnit *);
@@ -1943,7 +1943,7 @@ void sndFormatResourceNameFromIndex(s32 skillIndex, char *output);
 BtlRuntimeTask *sndCreateFileLoadTask(ActiveSoundNode *node, s32 skillIndex, const char *name);
 BtlRuntimeTask *sndCreateEffectWithTargets(SoundResourceNode *effect,
         BtlUnit *sourceOwner, s32 source, s32 target, BtlUnit *actor,
-        s32 frames);
+        EffBattleVoiceKind kind);
 BtlRuntimeTask *sndCreateSkillSeTask(const ActiveSoundNode *, u16 optionId);
 BtlRuntimeTask *btlCreateMaskedActorEntryUpdateTask(BtlUnit *unit,
         BtlOperandEntry *block);

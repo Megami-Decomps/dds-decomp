@@ -571,17 +571,17 @@ void sndMixerDestroy(SoundMixer *mixer) {
     sdfMemFreeDirect(mixer->resource);
 }
 
-s32 effBTLGetMotionChangeFrame(const SoundMixer *mixer, u16 kind) {
+s32 effBTLGetMotionChangeFrame(const SoundMixer *mixer, EffBattleVoiceKind kind) {
     int bank = kind >= 2;
     return mixer->banks[bank].list.callbackFrame;
 }
 
-s32 effBTLGetCutEndFrame(const SoundMixer *mixer, u16 kind) {
+s32 effBTLGetCutEndFrame(const SoundMixer *mixer, EffBattleVoiceKind kind) {
     int bank = kind >= 2;
     return mixer->banks[bank].list.triggerFrame;
 }
 
-s32 effBTLGetDrawEndFrame(const SoundMixer *mixer, u16 kind) {
+s32 effBTLGetDrawEndFrame(const SoundMixer *mixer, EffBattleVoiceKind kind) {
     int bank = kind >= 2;
     if (kind == 2) {
         return mixer->banks[bank].list.triggerFrame;
@@ -611,7 +611,7 @@ extern void * sdfChipAllocDirect(s32 size);
 
 INCLUDE_RODATA(const s32, "game/code_001670C0", D_00414430);
 
-effBTLCutHandle_t *effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind, struct BtlUnit *owner, s32 value) {
+effBTLCutHandle_t *effCreateBattleVoiceOwner(SoundMixer *mixer, EffBattleVoiceKind kind, struct BtlUnit *owner, s32 value) {
     EffBattleEntryList *bank;
     EffBattleEntryList *parameters;
     effBTLCutHandle_t *effect;

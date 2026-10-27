@@ -8743,11 +8743,11 @@ s32 btlUpdateReferencedBattleEffect(SoundEffectReferenceArgs *args) {
     if ((battle->battleFlags & 0x40000) == 0) {
         return 1;
     }
-    owner = args->option == 2 ? args->targetOwner.unit : args->sourceOwner.unit;
+    owner = args->kind == 2 ? args->targetOwner.unit : args->sourceOwner.unit;
     if (args->source->flags & SOUND_RESOURCE_NODE_FLAG_AVAILABLE) {
         if (args->effect == NULL) {
-            args->effect = effCreateBattleVoiceOwner(args->source->resourceHandle, args->option, owner, 0);
-            args->duration = sndSetEffectNodeParameter(args->source, args->option);
+            args->effect = effCreateBattleVoiceOwner(args->source->resourceHandle, args->kind, owner, 0);
+            args->duration = sndSetEffectNodeParameter(args->source, args->kind);
             if ((owner->effectLink.packed & 0xA) == 8) {
                 args->duration = 35;
                 effBTLCutSetCutEndFrame(args->effect, 35);
@@ -8761,7 +8761,7 @@ s32 btlUpdateReferencedBattleEffect(SoundEffectReferenceArgs *args) {
         }
         effBTLFieldColorSetSelectors(args->sourceOwner.selectorKey, args->targetOwner.selectorKey,
                                     args->sourceSelector, args->targetSelector);
-        switch (args->option) {
+        switch (args->kind) {
         case 0:
         case 2:
             if (owner->status.flags & 4) {
@@ -8798,7 +8798,7 @@ void sndReleaseEffectReferences(SoundEffectReferenceArgs *args) {
 /* Create a deferred effect task whose start/finish callbacks balance resource and actor references. */
 BtlRuntimeTask *btlCreateReferencedBattleEffectTask(SoundResourceNode *borrowedEffect,
                                                      BtlUnit *sourceOwner,
-                                                     BtlUnit *targetOwner, u16 option) {
+                                                     BtlUnit *targetOwner, EffBattleVoiceKind kind) {
     BtlRuntimeTask *task = btlAllocTask(sizeof(SoundEffectReferenceArgs));
     SoundEffectReferenceArgs *arguments;
 
@@ -8816,15 +8816,15 @@ BtlRuntimeTask *btlCreateReferencedBattleEffectTask(SoundResourceNode *borrowedE
     arguments->sourceSelector = arguments->sourceOwner.selectorKey;
     arguments->targetSelector = arguments->sourceOwner.selectorKey;
     arguments->targetOwner.unit = targetOwner;
-    arguments->option = option;
+    arguments->kind = kind;
     arguments->effect = 0;
     arguments->duration = 0;
     return task;
 }
 
 BtlRuntimeTask *sndCreateEffectWithTargets(SoundResourceNode *effect, BtlUnit *sourceOwner,
-                                         s32 source, s32 target, BtlUnit *owner, u16 variant) {
-    BtlRuntimeTask *task = btlCreateReferencedBattleEffectTask(effect, sourceOwner, owner, variant);
+                                         s32 source, s32 target, BtlUnit *owner, EffBattleVoiceKind kind) {
+    BtlRuntimeTask *task = btlCreateReferencedBattleEffectTask(effect, sourceOwner, owner, kind);
     SoundEffectReferenceArgs *data = btlGetTaskArguments(task);
     data->sourceSelector = source;
     data->targetSelector = target;
@@ -8921,7 +8921,7 @@ s32 sndWaitEffectFramesAndApplyUnitParameter(TimedUnitEffectArgs *args) {
     if ((effect->flags & SOUND_RESOURCE_NODE_FLAG_AVAILABLE) == 0) {
         return 0;
     }
-    frames = sndGetEffectNodeParameter(effect, args->option);
+    frames = sndGetEffectNodeParameter(effect, args->kind);
     if (args->frame >= frames) {
         args->source->activeCount -= 1;
         if (args->channel >= 0) {
@@ -8933,7 +8933,7 @@ s32 sndWaitEffectFramesAndApplyUnitParameter(TimedUnitEffectArgs *args) {
     return 0;
 }
 
-BtlRuntimeTask *sndCreateTimedUnitEffectTask(SoundResourceNode *effect, BtlUnit *actor, u16 frames,
+BtlRuntimeTask *sndCreateTimedUnitEffectTask(SoundResourceNode *effect, BtlUnit *actor, EffBattleVoiceKind kind,
                                           s32 channel, u32 volume) {
     BtlRuntimeTask *task = btlAllocTask(sizeof(TimedUnitEffectArgs));
     TimedUnitEffectArgs *arguments;
@@ -8948,7 +8948,7 @@ BtlRuntimeTask *sndCreateTimedUnitEffectTask(SoundResourceNode *effect, BtlUnit 
     arguments = btlGetTaskArguments(task);
     arguments->source = effect;
     arguments->unit = actor;
-    arguments->option = frames;
+    arguments->kind = kind;
     arguments->channel = channel;
     arguments->volume = volume;
     arguments->frame = 0;
@@ -9264,12 +9264,12 @@ s32 btlFormatActionEventFilename(s32 skillIndex, char *output) {
     return 1;
 }
 
-s32 sndSetEffectNodeParameter(SoundResourceNode *effect, u16 option) {
-    return effBTLGetDrawEndFrame(effect->resourceHandle, option);
+s32 sndSetEffectNodeParameter(SoundResourceNode *effect, EffBattleVoiceKind kind) {
+    return effBTLGetDrawEndFrame(effect->resourceHandle, kind);
 }
 
-s32 sndGetEffectNodeParameter(SoundResourceNode *effect, u16 option) {
-    return effBTLGetMotionChangeFrame(effect->resourceHandle, option);
+s32 sndGetEffectNodeParameter(SoundResourceNode *effect, EffBattleVoiceKind kind) {
+    return effBTLGetMotionChangeFrame(effect->resourceHandle, kind);
 }
 
 BtlSoundResourceUseResult sndIsResourceNodeReferencedOrActive(SoundResourceNode *effect) {

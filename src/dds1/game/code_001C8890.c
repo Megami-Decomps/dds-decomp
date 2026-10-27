@@ -957,7 +957,7 @@ extern BtlRuntimeTask *btlCreateFadeStateResetTask(void);
 extern BtlRuntimeTask *btlCreateEffectCounterTask(BtlUnit *, s32);
 extern BtlRuntimeTask *btlCreateEffectTask3E(BtlUnit *, u16);
 extern BtlRuntimeTask *btlCreateEffObjC(BtlUnit *, s32);
-extern BtlRuntimeTask *sndCreateTimedUnitEffectTask(SoundResourceNode *, BtlUnit *, u16, s32, u32);
+extern BtlRuntimeTask *sndCreateTimedUnitEffectTask(SoundResourceNode *, BtlUnit *, EffBattleVoiceKind, s32, u32);
 extern BtlRuntimeTask *sndCreateSetStateTask(void);
 extern BtlRuntimeTask *sndCreateClearStateTask(void);
 extern BtlRuntimeTask *btlScheduleActorUpdate(BtlUnit *unit);
@@ -1427,7 +1427,7 @@ extern char D_003A36A8[];
 extern BtlRuntimeTask *btlCreateSceneLightingRestoreTask(u32);
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
 extern BtlRuntimeTask *sndCreateTimedUnitEffectTask(
-    SoundResourceNode *, BtlUnit *, u16, s32, u32);
+    SoundResourceNode *, BtlUnit *, EffBattleVoiceKind, s32, u32);
 
 void btlBuildActionLightParameters(s32 skillIndex, BtlSceneLightParams *light);
 extern BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(const void *, u32);
@@ -1443,7 +1443,7 @@ extern BtlRuntimeTask *btlCreateCategoryStatDamageTask(BtlUnit *, s32, s32);
 extern BtlRuntimeTask *btlCreateFlaggedCommandItemConsumeTask(BtlUnit *, s32);
 s32 btlFormatActionEventFilename(s32 skillIndex, char *output);
 extern BtlRuntimeTask *sndCreateEffectLoadTask(SoundResourceNode *, const char *);
-extern BtlRuntimeTask *sndCreateEffectWithTargets(SoundResourceNode *, BtlUnit *, s32, s32, BtlUnit *, u16);
+extern BtlRuntimeTask *sndCreateEffectWithTargets(SoundResourceNode *, BtlUnit *, s32, s32, BtlUnit *, EffBattleVoiceKind);
 extern BtlRuntimeTask *sndCreateSkillSeTask(const ActiveSoundNode *, u16);
 extern BtlRuntimeTask *btlCreateMaskedActorEntryUpdateTask(BtlUnit *, BtlOperandEntry *);
 extern BtlRuntimeTask *btlCreateQueuedActorEntrySelectionTask(BtlUnit *, BtlOperandEntry *);

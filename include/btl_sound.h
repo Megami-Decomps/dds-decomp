@@ -5,6 +5,7 @@
 #include "active_sound_node.h"
 #include "eff.h"
 #include "eff_battle_color_keyframe.h"
+#include "eff_battle_voice_kind.h"
 
 enum { BTL_SOUND_ENTRY_COUNT = 0x31 };
 
@@ -235,7 +236,7 @@ typedef union ActorEffectOwner {
 
 typedef struct SoundEffectReferenceArgs {
     SoundResourceNode *source;
-    u16 option;
+    EffBattleVoiceKind kind;
     u8 pad06[2];
     effBTLCutHandle_t *effect;
     ActorEffectOwner sourceOwner;
@@ -257,7 +258,7 @@ typedef struct SoundEffectSourceArgs {
 
 typedef struct TimedUnitEffectArgs {
     SoundResourceNode *source;
-    u16 option;
+    EffBattleVoiceKind kind;
     u8 pad06[2];
     struct BtlUnit *unit;
     s32 channel;
@@ -321,22 +322,22 @@ typedef char Atrac3LoadTaskArgs_entryIndex_offset_must_be_8[
 
 SoundMixer *sndMixerClone(SoundMixer *source);
 /* Frame queries borrow a mixer and only inspect its bank metadata. */
-s32 effBTLGetMotionChangeFrame(const SoundMixer *mixer, u16 kind);
-s32 effBTLGetCutEndFrame(const SoundMixer *mixer, u16 kind);
-s32 effBTLGetDrawEndFrame(const SoundMixer *mixer, u16 kind);
+s32 effBTLGetMotionChangeFrame(const SoundMixer *mixer, EffBattleVoiceKind kind);
+s32 effBTLGetCutEndFrame(const SoundMixer *mixer, EffBattleVoiceKind kind);
+s32 effBTLGetDrawEndFrame(const SoundMixer *mixer, EffBattleVoiceKind kind);
 /* Destroy an owned mixer clone, including its voices, parts, and allocation. */
 void sndMixerDestroy(SoundMixer *mixer);
 void sndCreateSystemEffect(SoundResourceNode *effect);
 void sndDeleteSystemEffect(SoundResourceNode *effect);
-s32 sndSetEffectNodeParameter(SoundResourceNode *effect, u16 option);
-s32 sndGetEffectNodeParameter(SoundResourceNode *effect, u16 option);
+s32 sndSetEffectNodeParameter(SoundResourceNode *effect, EffBattleVoiceKind kind);
+s32 sndGetEffectNodeParameter(SoundResourceNode *effect, EffBattleVoiceKind kind);
 void btlExtendTaskFrameLimit(SoundResourceNode *effect, s32 frames);
 u32 sndGetResourceStatus(SoundResourceNode *effect);
 s32 sndHasResourceFlagsOneOrEight(struct ActiveSoundNode *node);
 struct BtlRuntimeTask *sndCreateStationedSeTask(u32 soundId);
 struct BtlRuntimeTask *sndCreateEffectSourceTask(SoundResourceNode *source, struct BtlUnit *owner,
                                                 u64 waitForTaskHandle);
-effBTLCutHandle_t *effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind,
+effBTLCutHandle_t *effCreateBattleVoiceOwner(SoundMixer *mixer, EffBattleVoiceKind kind,
                                              struct BtlUnit *owner, s32 value);
 void effBTLCutListRelease(effBTLCutHandle_t *effect);
 void effBTLCutDelete(effBTLCutHandle_t *effect);
