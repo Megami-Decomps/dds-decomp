@@ -11,6 +11,7 @@
 #include "fld_scene_ready_api.h"
 #include "fld_camp_check_state_api.h"
 #include "fld_encounter_runtime_api.h"
+#include "fld_location_coordinate_flags.h"
 #include "fld_activation_entry.h"
 #include "fld_camera_follow_row.h"
 #include "fld_named_camera_table.h"
@@ -2108,7 +2109,7 @@ const s16 *fldFindLocationCoordinateRecord(s32 area, s32 locationIndex) {
 }
 
 /* Read the matching location record's signed flags; zero on miss. */
-s16 fldGetLocationCoordinateFlags(s32 area, s32 locationIndex) {
+FldLocationCoordinateFlags fldGetLocationCoordinateFlags(s32 area, s32 locationIndex) {
     u8 *records = (u8 *)D_00387D70;
     u8 *yColumn = records + 2;
     u8 *valueColumn = records + 6;

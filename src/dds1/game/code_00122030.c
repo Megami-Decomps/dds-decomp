@@ -26,6 +26,7 @@
 #include "fld_scene_status_api.h"
 #include "fld_scene_ready_api.h"
 #include "fld_area_resource_ready_api.h"
+#include "fld_location_coordinate_flags.h"
 #include "fld_movement_hold_state_api.h"
 #include "fld_scene_command_state_api.h"
 #include "fld_camp_check_state_api.h"
@@ -230,8 +231,6 @@ extern u32 fldRunDanteGunFlag[];
 extern u32 fldRunDanteGunFlag[];
 
 /* Search location records 1..639; a miss returns the reserved first record, * not NULL, so callers can read the fallback record's fields. */ const s16 *fldFindLocationCoordinateRecord(s32 area, s32 locationIndex);
-
-/* Read the matching location record's fourth signed halfword; zero on miss. */ s16 fldGetLocationCoordinateFlags(s32 area, s32 locationIndex);
 
 void fldLoadFieldTables(void);
 
@@ -977,7 +976,8 @@ void fldRebuildFieldScene(void) {
         }
         fldGlobalBase.verticalStepDirection = 0;
         if (!evtBitCheck(0x413)) {
-            if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) & 8) {
+            if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) &
+                FLD_LOCATION_COORDINATE_FLAG_CAMERA_COLOR_SETTING) {
                 fldActivateCameraColorSetting(1);
             } else {
                 fldActivateCameraColorSetting(0);
@@ -986,11 +986,13 @@ void fldRebuildFieldScene(void) {
             fldActivateCameraColorSetting(0);
         }
         if (!evtBitCheck(0x413)) {
-            if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) & 8) {
+            if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) &
+                FLD_LOCATION_COORDINATE_FLAG_INITIALIZE_MENU_RESOURCES_DDS1) {
                 mnuInitializeResourceEntries();
             }
         }
-        if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) & 0x40) {
+        if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) &
+            FLD_LOCATION_COORDINATE_FLAG_FIELD_EFFECT_TEXTURES) {
             fldLoadFieldEffectTextureSlots();
         }
     }
@@ -1009,7 +1011,8 @@ void fldUnloadPlayerModel(void);
 void fldLoadPlayerModel(void) {
     s32 model;
 
-    if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) & 0x20) {
+    if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) &
+        FLD_LOCATION_COORDINATE_FLAG_PLAYER_MODEL_VARIANT_2) {
         model = 2;
     } else {
         model = fldGlobalBase.playerModelAlternate != 0;
@@ -1673,7 +1676,8 @@ s32 fldUpdateTravelAndEncounters(void) {
         fldUpdateSmoothedCameraPose();
         return 0;
     }
-    if (!(fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) & 0x40) &&
+    if (!(fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) &
+          FLD_LOCATION_COORDINATE_FLAG_FIELD_EFFECT_TEXTURES) &&
         previousPhase != phase) {
         evtUpdateFlaggedStats();
         if (phase == 0 && evtClearRandomStatusFlags() != EVT_RANDOM_STATUS_CLEAR_NO_FLAGS) {
@@ -2067,7 +2071,7 @@ KwlnTaskUpdateResult fldProcSequence(dds3ProcessID_t *task) {
     FieldPlayerSceneWork *scene = &fldSceneParam;
     FldSequenceController *controller = &fldAutoMapSeqFlags;
     s32 mode;
-    s32 coordinateFlags;
+    FldLocationCoordinateFlags coordinateFlags;
 
     if (dds3AdminiGetNextSequence() != -1) return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
     if (fileMenuTaskExists() != 0) return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
@@ -2108,7 +2112,7 @@ KwlnTaskUpdateResult fldProcSequence(dds3ProcessID_t *task) {
             fldSkySetTableAnime(fldRunDanteGunFlag[12]);
         }
         coordinateFlags = fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1);
-        if (coordinateFlags & 0x40) {
+        if (coordinateFlags & FLD_LOCATION_COORDINATE_FLAG_FIELD_EFFECT_TEXTURES) {
             blur.count = 15;
             blur.delaySpread = 15;
             blur.angleStep = 0.1999999881f;
@@ -2279,7 +2283,7 @@ extern s32 D_0032E590[];
 extern s32 D_0032E598[];
 extern s32 D_003BABFC;
 KwlnTaskUpdateResult fldProcDraw(dds3ProcessID_t *task) {
-    s32 flags;
+    FldLocationCoordinateFlags flags;
     FldSequenceController *lifecycle = &fldAutoMapSeqFlags;
 
     if (dds3AdminiGetNextSequence() != -1) {
@@ -2318,7 +2322,7 @@ KwlnTaskUpdateResult fldProcDraw(dds3ProcessID_t *task) {
     if (lifecycle->phase >= FLD_SEQUENCE_PHASE_ADVANCE_TO_AREA_ARCHIVE && D_0032E598[0] != 0 &&
         fldGetEncounterRuntimeResult() == 0) {
     flags = fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1);
-    if (flags & 0x40) {
+    if (flags & FLD_LOCATION_COORDINATE_FLAG_FIELD_EFFECT_TEXTURES) {
         effBlurStepScatterSlotsAndDraw(D_003BABE4);
         return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
     }

@@ -21,6 +21,7 @@
 #include "fld_scene_ready_api.h"
 #include "fld_area_resource_ready_api.h"
 #include "fld_area_resource_request_reuse_api.h"
+#include "fld_location_coordinate_flags.h"
 #include "fld_scene_record_api.h"
 #include "fld_scene_object_key_result.h"
 #include "fld_light_set.h"
@@ -706,8 +707,6 @@ extern void btlClearRuntimeState(void);
 
 extern void fldUpdateCameraModelMotion(s32 currentMotionIndex, s32 requestedMotionIndex, f32 blendFrames);
 
-extern s16 fldGetLocationCoordinateFlags(s32 area, s32 locationIndex);
-
 extern FldCamRow fldCameraFollowRows[];
 
 extern f32 D_0038BAF0[];
@@ -1252,7 +1251,7 @@ s32 fldRequestAreaResource(s32 area, s32 room) {
     fldFreeNextFile();
     fldGlobalBase.resourceArea = area;
     fldGlobalBase.resourceFloor = room;
-    if (fldGetLocationCoordinateFlags(area, room) & 0x10) {
+    if (fldGetLocationCoordinateFlags(area, room) & FLD_LOCATION_COORDINATE_FLAG_LOAD_KF2_ROOM_CHUNK) {
         D_00436010 = 1;
     } else {
         D_00436010 = 0;
@@ -1656,7 +1655,7 @@ const struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) 
         fldAddressResolver(roomData.data, chunk);
         fldProcessFieldRequest((FldSceneRequest *)fldGetInfoHeader(chunk));
     }
-    if (fldGetLocationCoordinateFlags(area, room) & 0x10) {
+    if (fldGetLocationCoordinateFlags(area, room) & FLD_LOCATION_COORDINATE_FLAG_LOAD_KF2_ROOM_CHUNK) {
         fldMakeFilePath(directory, area, 1);
         sprintf(path, D_00413128, directory, area, room);
         fldCachedRoomKF2ResourceAllocation = fldCopyCachedRoomKF2ResourceIfLocationMatches(&roomData.data, area, room);
@@ -3773,7 +3772,8 @@ void fldUpdateCameraProximity(void) {
 
     memset(vec, 0, sizeof(vec));
     vec[3] = 1.0f;
-    if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) & 0x40) {
+    if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) &
+        FLD_LOCATION_COORDINATE_FLAG_FIELD_EFFECT_TEXTURES) {
         if (fldEncountTestFlag(0x40) == 0) {
             return;
         }
@@ -4541,7 +4541,8 @@ s32 fldUpdateFieldPlayerMovement(void) {
         return 0;
     }
 
-    if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) & 0x100) {
+    if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) &
+        FLD_LOCATION_COORDINATE_FLAG_CAMERA_TILT) {
         if (D_00435C40[0][0][1] < 0x40) {
             if (fileTestSavedSlotFlags(FILE_CONFIG_OPTION_REVERSE_FIELD_CAMERA) != 0) {
                 fldGlobalBase.cameraTilt -= 10.0f;
@@ -4671,7 +4672,8 @@ s32 fldUpdateFieldPlayerMovement(void) {
             fldGlobalBase.y = position[1] + 10.0f;
         }
     }
-    if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) & 0x40) {
+    if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) &
+        FLD_LOCATION_COORDINATE_FLAG_FIELD_EFFECT_TEXTURES) {
         motion = 18;
     } else {
         motion = 2;
@@ -4686,7 +4688,8 @@ s32 fldUpdateFieldPlayerMovement(void) {
         } else {
             D_004360E0 = heading;
         }
-        if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) & 0x40) {
+        if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) &
+            FLD_LOCATION_COORDINATE_FLAG_FIELD_EFFECT_TEXTURES) {
             motion = 17;
         } else {
             motion = 1;
@@ -5122,7 +5125,8 @@ s32 fldSynchronizePlayerPositionAndAreaState(void) {
 
 void fldSetCameraNodeModeWithTen(void) {
     s16 node = fldPlayerModelContext->current.h.motionIndex;
-    if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) & 0x40) {
+    if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) &
+        FLD_LOCATION_COORDINATE_FLAG_FIELD_EFFECT_TEXTURES) {
         fldUpdateCameraModelMotion(node, 0x12, 10.0f);
         return;
     }
@@ -5131,7 +5135,8 @@ void fldSetCameraNodeModeWithTen(void) {
 
 void fldSetCameraNodeModeWithZero(void) {
     s16 node = fldPlayerModelContext->current.h.motionIndex;
-    if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) & 0x40) {
+    if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) &
+        FLD_LOCATION_COORDINATE_FLAG_FIELD_EFFECT_TEXTURES) {
         fldUpdateCameraModelMotion(node, 0x12, 0.0f);
         return;
     }

@@ -18,6 +18,7 @@
 #include "fld_scene_status_api.h"
 #include "fld_scene_ready_api.h"
 #include "fld_area_resource_ready_api.h"
+#include "fld_location_coordinate_flags.h"
 #include "fld_movement_hold_state_api.h"
 #include "fld_scene_command_state_api.h"
 #include "fld_camp_check_state_api.h"
@@ -393,8 +394,6 @@ extern char D_00435ED0[];
 extern char D_00435ED8[];
 
 /* Search location records 1..639; a miss returns the reserved first record, * not NULL, so callers can read the fallback record's fields. */ const s16 *fldFindLocationCoordinateRecord(s32 area, s32 locationIndex);
-
-/* Read the matching location record's signed flags; zero on miss. */ s16 fldGetLocationCoordinateFlags(s32 area, s32 locationIndex);
 
 void InitOoyTest(void);
 
@@ -1113,21 +1112,26 @@ void fldRebuildFieldScene(void) {
             }
         }
         fldGlobalBase.verticalStepDirection = 0;
-        if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) & 8) {
+        if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) &
+            FLD_LOCATION_COORDINATE_FLAG_CAMERA_COLOR_SETTING) {
             fldActivateCameraColorSetting(1);
         } else {
             fldActivateCameraColorSetting(0);
         }
-        if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) & 0x800) {
+        if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) &
+            FLD_LOCATION_COORDINATE_FLAG_INITIALIZE_MENU_RESOURCES_DDS2) {
             mnuInitializeResourceEntries();
         }
-        if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) & 0x40) {
+        if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) &
+            FLD_LOCATION_COORDINATE_FLAG_FIELD_EFFECT_TEXTURES) {
             fldLoadFieldEffectTextureSlots();
         }
-        if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) & 0x200) {
+        if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) &
+            FLD_LOCATION_COORDINATE_FLAG_LOAD_RESOURCE_INDEX_0) {
             fldLoadResourceByIndex(0);
         }
-        if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) & 0x400) {
+        if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) &
+            FLD_LOCATION_COORDINATE_FLAG_LOAD_RESOURCE_INDEX_1) {
             fldLoadResourceByIndex(1);
         }
     }
@@ -1143,7 +1147,8 @@ struct sdfMemHandle_t;
 void fldLoadPlayerModel(void) {
     s32 model;
 
-    if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) & 0x20) {
+    if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) &
+        FLD_LOCATION_COORDINATE_FLAG_PLAYER_MODEL_VARIANT_2) {
         model = 2;
     } else {
         model = fldGlobalBase.playerModelAlternate != 0;
@@ -1440,7 +1445,7 @@ INCLUDE_RODATA(const s32, "game/code_00124040", D_00412EC0);
 void fldSpawnPlayerUnits(f32 *input) {
     f32 work[4];
     dds3Basic_t *player;
-    s32 locationFlags;
+    FldLocationCoordinateFlags locationFlags;
 
     memset(work, 0, sizeof(work));
     work[3] = 1.0f;
@@ -1491,7 +1496,7 @@ void fldSpawnPlayerUnits(f32 *input) {
         fldSecondarySceneObject = 0;
 
         locationFlags = fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1);
-        if ((locationFlags & 4) != 0) {
+        if ((locationFlags & FLD_LOCATION_COORDINATE_FLAG_SPAWN_SECONDARY_SCENE_OBJECT) != 0) {
             SDF_VU0_LOADVECTOR(axis);
             FromRotation(3.14159265f);
             SDF_VU0_LOADVECTOR_B(input + 4);
@@ -1520,7 +1525,7 @@ void fldSpawnPlayerUnits(f32 *input) {
             fldLightMaClear();
         }
         locationFlags = fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1);
-        if ((locationFlags & 1) != 0) {
+        if ((locationFlags & FLD_LOCATION_COORDINATE_FLAG_FIELD_COMMAND_ENABLED) != 0) {
             fldGlobalBase.commandEnabled = 1;
         } else {
             fldGlobalBase.commandEnabled = 0;
@@ -1830,7 +1835,8 @@ s32 fldUpdateTravelAndEncounters(void) {
         fldUpdateCameraHeadingTransition();
         return 0;
     }
-    if (!(fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) & 0x40) &&
+    if (!(fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) &
+          FLD_LOCATION_COORDINATE_FLAG_FIELD_EFFECT_TEXTURES) &&
         previousPhase != phase) {
         evtUpdateFlaggedStats();
         if (phase == 0 && evtClearRandomStatusFlags() != EVT_RANDOM_STATUS_CLEAR_NO_FLAGS) {
@@ -2182,7 +2188,7 @@ KwlnTaskUpdateResult fldUpdateFieldSceneTask(dds3ProcessID_t *task) {
     FieldPlayerSceneWork *playerWork = &fldSceneParam;
     FldSequenceController *controller = &fldAutoMapSeqFlags;
     s32 mode;
-    s32 coordinateFlags;
+    FldLocationCoordinateFlags coordinateFlags;
 
     if (dds3AdminiGetNextSequence() != -1) return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
     if (fileMenuTaskExists() != 0) return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
@@ -2227,7 +2233,7 @@ KwlnTaskUpdateResult fldUpdateFieldSceneTask(dds3ProcessID_t *task) {
         }
         if (fldGlobalBase.specialEventActive == 0) fldRunDanteClear();
         coordinateFlags = fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1);
-        if (coordinateFlags & 0x40) {
+        if (coordinateFlags & FLD_LOCATION_COORDINATE_FLAG_FIELD_EFFECT_TEXTURES) {
             blur.count = 15;
             blur.delaySpread = 15;
             blur.angleStep = 0.1999999881f;
@@ -2414,7 +2420,7 @@ extern s32 D_003899A8[];
 extern s32 D_003899B0[];
 extern s32 D_00435F8C;
 KwlnTaskUpdateResult fldProcDraw(dds3ProcessID_t *task) {
-    s32 flags;
+    FldLocationCoordinateFlags flags;
     FldSequenceController *lifecycle = &fldAutoMapSeqFlags;
 
     if (dds3AdminiGetNextSequence() != -1) {
@@ -2453,7 +2459,7 @@ KwlnTaskUpdateResult fldProcDraw(dds3ProcessID_t *task) {
     if (lifecycle->phase >= FLD_SEQUENCE_PHASE_ADVANCE_TO_AREA_ARCHIVE && D_003899B0[0] != 0 &&
         fldGetEncounterRuntimeResult() == 0) {
     flags = fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1);
-    if (flags & 0x40) {
+    if (flags & FLD_LOCATION_COORDINATE_FLAG_FIELD_EFFECT_TEXTURES) {
         effBlurStepScatterSlotsAndDraw(D_00435F74);
         return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
     }
