@@ -193,8 +193,10 @@ void dds3CameraObjectBasicSetFovy(dds3Basic_t *camera, f32 fieldOfView) {
 }
 
 /* Return the cached field of view in radians. */
-f32 dds3CameraObjectBasicGetFovy(dds3Basic_t *camera) {
-    return ((CameraData *)camera->data)->fieldOfView;
+f32 dds3CameraObjectBasicGetFovy(const dds3Basic_t *camera) {
+    const CameraData *data = camera->data;
+
+    return data->fieldOfView;
 }
 
 

@@ -101,7 +101,7 @@ extern void dds3FadeSet(s32 red, s32 green, s32 blue, s32 alpha);
 void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer);
 void evtViewerPushCommandHistory(s32 actionMode, s32 first, s32 second, EvtRuntime *viewer);
 dds3Basic_t *dds3GetActiveScene(void);
-f32 dds3CameraObjectBasicGetFovy(dds3Basic_t *camera);
+f32 dds3CameraObjectBasicGetFovy(const dds3Basic_t *camera);
 void dds3SetScreenFovy(f32 fieldOfView);
 void movieStop(void);
 s32 mnuIsMoviePlaybackFinished(void);

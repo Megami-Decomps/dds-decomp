@@ -2917,7 +2917,7 @@ extern s32 D_003BC7BC;
 extern const char *D_003BC7B8;
 extern char D_003BC7C0[];
 extern SdfPoolNode sdfGrOtTable[];
-extern f32 dds3CameraObjectBasicGetFovy(dds3Basic_t *camera);
+extern f32 dds3CameraObjectBasicGetFovy(const dds3Basic_t *camera);
 
 INCLUDE_RODATA(const s32, "game/code_00282850", D_003B2520);
 

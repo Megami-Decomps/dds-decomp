@@ -5967,7 +5967,7 @@ u32 btlIsRuntimeFlag2000Clear(void) {
     return ((*(s32 *)(temp_v0 + 0x160) >> 0xd) ^ 1U) & 1;
 }
 
-extern f32 dds3CameraObjectBasicGetFovy(dds3Basic_t *);
+extern f32 dds3CameraObjectBasicGetFovy(const dds3Basic_t *);
 
 extern void dds3SetScreenFovy(f32);
 

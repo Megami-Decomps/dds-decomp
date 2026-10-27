@@ -598,7 +598,7 @@ void DelBED(EvtRuntimeChild *node) {
     node->payload = NULL;
 }
 
-extern f32 dds3CameraObjectBasicGetFovy(dds3Basic_t *camera);
+extern f32 dds3CameraObjectBasicGetFovy(const dds3Basic_t *camera);
 extern void dds3SetScreenFovy(f32 fieldOfView);
 extern u8 evtViewerHasUpdateFlag(EvtRuntime *);
 
@@ -954,7 +954,7 @@ extern u16 D_004372B0;
 extern u16 D_004372B2;
 extern u8 D_00423050[];
 extern s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime);
-extern f32 dds3CameraObjectBasicGetFovy(dds3Basic_t *camera);
+extern f32 dds3CameraObjectBasicGetFovy(const dds3Basic_t *camera);
 extern void dds3SetScreenFovy(f32 fieldOfView);
 
 
