@@ -8,6 +8,7 @@
 #include "btl_resolve_unit_value_api.h"
 #include "mdl_flag_api.h"
 #include "btl_state.h"
+#include "btl_battle_record_eligibility.h"
 #include "btl_serial_battle_mode_override.h"
 #include "btl_terminal_outcome.h"
 #include "btl_action_state_selection.h"
@@ -146,7 +147,8 @@ typedef struct BtlScaleStageSource BtlScaleStageSource;
 
 extern s32 btlAdjustDamageKind(BtlUnit *unit, s32 damageKind);
 extern s32 btlAdjustSpeciesAnimation(u8 *unit, s32 animation);
-extern s32 btlAllowsSpeciesCondition(BtlUnit *unit, BtlUnit *other, s32 condition);
+extern BtlBattleRecordEligibilityOverrideResult btlAllowsSpeciesCondition(
+    BtlUnit *unit, BtlUnit *other, s32 condition);
 extern s32 btlApplyActionDefeatCamera(BtlLinkedCommand *command);
 extern void btlArmEventResourceTrigger(void);
 extern s32 btlCheckActiveEffectForSpecialTarget(BtlUnit *actor, BtlUnit *target, s32 command, s32 bits);

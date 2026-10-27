@@ -13,6 +13,7 @@
 #include "evt_unit.h"
 #include "btl_task_condition.h"
 #include "btl_state.h"
+#include "btl_battle_record_eligibility.h"
 #include "btl_terminal_outcome.h"
 #include "btl_command.h"
 #include "btl_action.h"
@@ -408,21 +409,22 @@ void btlStartPairedActorCommandEffect(BtlTask *task, s32 unusedCommand, BtlUnit 
     btlStartTask(sound);
 }
 
-s32 btlAllowsSpeciesCondition(BtlUnit *unit, BtlUnit *other, s32 condition) {
+BtlBattleRecordEligibilityOverrideResult btlAllowsSpeciesCondition(
+    BtlUnit *unit, BtlUnit *other, s32 condition) {
     s32 kind;
     if ((unit->status.flags & 0x200) == 0) {
-        return 1;
+        return BTL_BATTLE_RECORD_OVERRIDE_CONTINUE;
     }
     if (condition != 0) {
-        return 0;
+        return BTL_BATTLE_RECORD_OVERRIDE_REJECT;
     }
     kind = other->partyRecord.unitId;
     switch (kind) {
     case 0x13d:
     case 0x13e:
-        return 0;
+        return BTL_BATTLE_RECORD_OVERRIDE_REJECT;
     default:
-        return 1;
+        return BTL_BATTLE_RECORD_OVERRIDE_CONTINUE;
     }
 }
 

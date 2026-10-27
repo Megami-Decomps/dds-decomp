@@ -4,6 +4,9 @@
 #include "btl.h"
 #include "btl_command.h"
 #include "btl_runtime.h"
+#ifdef VERSION_DDS1
+#include "btl_battle_record_eligibility.h"
+#endif
 
 /* Broadens command targeting and suppresses command-block reasons when set. */
 #define BTL_STATE_FLAG_BYPASS_COMMAND_BLOCKS 0x800
@@ -347,7 +350,8 @@ typedef struct BtlState {
     s32 (*summonEffectId)(s32); /* 0x674: -1 retains the default summon effect. */
     s32 (*summonEffectDelay)(u32); /* 0x678: delay for the selected summon species. */
     s32 (*actionPointsOverride)(u32, u32, s32); /* 0x67C */
-    s32 (*battleRecordEligibilityOverride)(BtlUnit *, BtlUnit *, s32); /* 0x680 */
+    /* 0x680: zero vetoes the record; nonzero continues ordinary checks. */
+    BtlBattleRecordEligibilityOverrideCallback battleRecordEligibilityOverride;
     void (*actionResourceNameHook)(BtlTask *, s32, char *); /* 0x684: formats the action event resource name. */
     u8 pad688[4];
     s32 (*commandAvailabilityOverride)(BtlUnit *, s32); /* 0x68C: DDS1 001A6EDC..001A6EF4 gates command availability. */

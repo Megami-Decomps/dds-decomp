@@ -69,6 +69,7 @@ extern void itfSetTextDrawLimit(s32 limit);
 #include "btl_indexed_ui_resource_api.h"
 #include "btl.h"
 #include "btl_state.h"
+#include "btl_battle_record_eligibility.h"
 #include "btl_serial_battle_mode_override.h"
 #include "btl_scene_initializer.h"
 #include "btl_boss_debug_api.h"
@@ -796,22 +797,24 @@ s32 btlTestSideCountEligibility(BtlTask *action) {
     return 1;
 }
 
-s32 btlIsBattleRecordEligible(BtlUnit *actor, BtlUnit *target, s32 recordIndex, s32 speciesIndex) {
-    s32 (*callback)(BtlUnit *, BtlUnit *, s32) =
+BtlBattleRecordEligibilityResult btlIsBattleRecordEligible(
+    BtlUnit *actor, BtlUnit *target, s32 recordIndex, s32 speciesIndex) {
+    BtlBattleRecordEligibilityOverrideCallback callback =
         ((BtlState *)btlGetRuntime())->battleRecordEligibilityOverride;
     u8 *resource;
-    if (callback != 0 && callback(actor, target, speciesIndex) == 0) {
-        return 0;
+    if (callback != 0 &&
+        callback(actor, target, speciesIndex) == BTL_BATTLE_RECORD_OVERRIDE_REJECT) {
+        return BTL_BATTLE_RECORD_INELIGIBLE;
     }
     resource = (u8 *)btlGetSideIndexedActorStatusTable(actor->resourceKind, actor->species);
     if (((BtlActorStatusRecord *)resource)->motions[recordIndex].moveKind != 2) {
-        return 0;
+        return BTL_BATTLE_RECORD_INELIGIBLE;
     }
     if (speciesIndex != 0 &&
         datCommandRecords[speciesIndex].targetType != 0) {
-        return 0;
+        return BTL_BATTLE_RECORD_INELIGIBLE;
     }
-    return 1;
+    return BTL_BATTLE_RECORD_ELIGIBLE;
 }
 
 s32 btlIsActorModeActionCodeAllowed(BtlUnit *actor) {

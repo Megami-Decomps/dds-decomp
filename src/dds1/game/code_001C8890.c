@@ -34,6 +34,7 @@
 #include "btl_actor_work.h"
 #include "sdf_texture_offset_list.h"
 #include "btl_state.h"
+#include "btl_battle_record_eligibility.h"
 #include "btl_action_state_handler.h"
 #include "btl_action_state_selection.h"
 #include "btl_action_state_selection_slot.h"
@@ -936,7 +937,6 @@ extern EventRosterStat *datRosterDetails;
 extern f32 btlGetActorEffectScale(BtlTask *);
 extern BtlRuntimeTask *btlCreateTargetedCommandSoundTask(BtlTask *, BtlCameraModeIndex cameraMode, BtlActionCode actionCode);
 extern BtlRuntimeTask *btlAllocateApproachTargetTask(BtlUnit *, BtlUnit *, f32);
-extern s32 btlIsBattleRecordEligible(BtlUnit *, BtlUnit *, s32, s32);
 extern SoundResourceNode *sndCreateResourceNode(SoundMixer *sourceMixer);
 extern const char D_003A3658[];
 extern const char D_003A3670[];
