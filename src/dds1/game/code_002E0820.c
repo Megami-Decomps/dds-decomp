@@ -401,10 +401,12 @@ extern u8 D_00398390[]; /* fallback up vector */
  * directions as columns (negated, unit length), colors and their sum, and a
  * basis built from the first light's direction. The axis scratch is volatile:
  * retail keeps its stores in source order. */
-void sdf3DMakeLightParallelPacket(SdfLightingPacketStorage *packet, SdfLightSources sources, f32 *ambient) {
+void sdf3DMakeLightParallelPacket(SdfLightingPacketStorage *packet,
+                                  SdfLightSources sources,
+                                  const f32 *ambient) {
     f32 direction[4] __attribute__((aligned(16)));
     volatile f32 axis[4] __attribute__((aligned(16)));
-    f32 (*first)[4];
+    const f32 (*first)[4];
     s32 i;
 
     packet->quadwordCount = 13;
@@ -414,7 +416,7 @@ void sdf3DMakeLightParallelPacket(SdfLightingPacketStorage *packet, SdfLightSour
     SDF_VU0_STOREVECTOR_B(packet->ambient);
     first = NULL;
     for (i = 0; i < 3; i++) {
-        f32 (*light)[4] = sources[i];
+        const f32 (*light)[4] = sources[i];
 
         if (light == NULL) {
             packet->normal[0][i] = 0.0f;
