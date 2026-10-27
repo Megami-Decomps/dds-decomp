@@ -297,7 +297,7 @@ u32 *sdfFileRpcHandleCmd(u32 command, SdfSoundRpcRequest *request) {
         break;
     }
     case SDF_SOUND_RPC_READ_PCM_CALLBACK_BUFFER: {
-        void *buffer;
+        const void *buffer;
         D_004391D4 = request;
         buffer = D_00438B84.read(request->byteCount);
         if (buffer != NULL) {
@@ -1905,7 +1905,7 @@ void sdfSetGridScaledDrawBounds(s32 firstStart, s32 secondStart, s32 firstLength
 INCLUDE_ASM(const s32, "game/code_003425B0", sdfMovieQueueFrameSprite);
 
 extern movieStream_t *movieSemaId;
-extern void *movieWaitSema(s32);
+extern const void *movieWaitSema(s32);
 extern void sdfMovieQueueFrameSprite(movieStream_t *, SdfPoolNode *);
 
 #include "sdf_movie_draw_packet.h"

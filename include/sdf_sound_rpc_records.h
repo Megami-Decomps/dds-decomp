@@ -14,8 +14,8 @@ enum SdfSoundRpcCommand {
     SDF_SOUND_RPC_CLEAR_PCM_CALLBACK_BUSY = 8
 };
 
-/* EE callback used to fill a requested span for the PCM sound RPC. */
-typedef void *(*SdfSoundReadCallback)(s32 byteCount);
+/* The PCM RPC borrows this read-only span for its IOP copy; NULL means no data. */
+typedef const void *(*SdfSoundReadCallback)(s32 byteCount);
 
 typedef union SdfSoundCommand {
     u32 word; /* Callback address returned to the IOP. */
@@ -25,7 +25,8 @@ typedef union SdfSoundCommand {
 typedef char SdfSoundCommand_size_must_be_4[
     (sizeof(SdfSoundCommand) == 4) ? 1 : -1];
 
-/* Returns NULL while PCM is busy; otherwise installs and returns the callback. */
+/* While idle, stores the callback (NULL clears it) and returns it; while busy,
+ * leaves the current callback installed and returns NULL. */
 SdfSoundReadCallback p2sdSetPcmCallback(SdfSoundReadCallback callback);
 
 typedef struct SdfSoundRpcRequest {
