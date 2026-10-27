@@ -4,7 +4,7 @@
 #include "common.h"
 #include "sdf_model.h"
 
-/* Relocated rows and nested records in the field scene-record resource. */
+/* Read-only views into the relocated scene-record resource held by fldAutoMapBuf. */
 typedef struct FldPoint {
     f32 x;
     f32 y;
@@ -13,31 +13,31 @@ typedef struct FldPoint {
 
 typedef struct FldIcon {
     u32 kind;
-    FldPoint *position;
+    const FldPoint *position;
 } FldIcon;
 
 typedef struct FldItem {
-    char *name;
+    const char *name;
     u32 nodeIndex;
-    FldIcon *icons;
+    const FldIcon *icons;
     u32 iconCount;
     s32 floor;
-    FldPoint *pointA;
-    FldPoint *pointB;
+    const FldPoint *pointA;
+    const FldPoint *pointB;
 } FldItem;
 
 typedef struct FldSceneRecord {
-    char *name;
-    FldItem *items;
+    const char *name;
+    const FldItem *items;
     u32 count;
     sdfModelDef_t *model;
-    FldPoint *pos;
+    const FldPoint *pos;
 } FldSceneRecord;
 
 /* Payload header produced after relocating the packed scene-record chunk. */
 typedef struct FldSceneRecordTableHeader {
     u8 opaque00[4];
-    FldSceneRecord *rows; /* 0x04: relocated first row; the next count records follow. */
+    const FldSceneRecord *rows; /* 0x04: relocated first row; the next count records follow. */
     s32 count; /* 0x08: number of scene records */
 } FldSceneRecordTableHeader;
 
@@ -69,7 +69,7 @@ typedef char FldSceneRecordTableHeader_rows_at_4[
 typedef char FldSceneRecordTableHeader_count_at_8[
     ((u32)&((FldSceneRecordTableHeader *)0)->count == 8) ? 1 : -1];
 
-extern FldSceneRecord *fldAutoMapHeader;
+extern const FldSceneRecord *fldAutoMapHeader;
 extern s32 fldAutoMapData;
 struct sdfMemHandle_t;
 extern struct sdfMemHandle_t *fldAutoMapBuf;

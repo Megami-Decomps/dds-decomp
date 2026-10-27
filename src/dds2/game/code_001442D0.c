@@ -1189,7 +1189,7 @@ void fldAdoptSceneRecordChunk(u8 *chunk, struct sdfMemHandle_t *resourceHandle) 
         {
             FldSceneRecordTableHeader *header =
                 (FldSceneRecordTableHeader *)fldGetInfoHeader(transferStart);
-            FldSceneRecord *rows = header->rows;
+            const FldSceneRecord *rows = header->rows;
             s32 count = header->count;
 
             fldAutoMapData = count;
@@ -1286,10 +1286,10 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_00145D48);
 
 s32 fldAutoMap_GetFloor(s32 scene, u32 index) {
     s32 result = 1;
-    FldSceneRecord *rec = fldAutoMapHeader;
+    const FldSceneRecord *rec = fldAutoMapHeader;
     s32 i;
     u32 j;
-    FldItem *item;
+    const FldItem *item;
 
     for (i = 0; i < (s32)fldAutoMapData; i++, rec++) {
         item = rec->items;
@@ -1350,10 +1350,10 @@ void fldAutoMapNodeSet(sdfModelRootNode_t *model, s32 index, s32 clearFlag) {
 
 s32 fldAutoMapGetFloorMax(void) {
     s32 max = 0;
-    FldSceneRecord *rec = fldAutoMapHeader;
+    const FldSceneRecord *rec = fldAutoMapHeader;
     s32 i;
     u32 j;
-    FldItem *item;
+    const FldItem *item;
 
     for (i = 0; i < (s32)fldAutoMapData; i++, rec++) {
         item = rec->items;
@@ -1418,8 +1418,8 @@ void fldDrawAutomapScene(void) {
     s32 selectedFloor;
     s32 itemVisible;
     s32 i, j, k;
-    FldSceneRecord *record;
-    FldItem *item;
+    const FldSceneRecord *record;
+    const FldItem *item;
     FieldStageCoordinate *stage;
     f32 left = 0.0f, top = 0.0f, right = 0.0f, bottom = 0.0f;
     f32 sceneX, sceneZ;
@@ -1677,7 +1677,7 @@ void fldDrawAutomapScene(void) {
                     }
                 }
                 if (itemVisible != 0) {
-                    FldIcon *icon = item->icons;
+                    const FldIcon *icon = item->icons;
 
                     if (icon != NULL) {
                         for (k = 0; k < item->iconCount; k++, icon++) {
@@ -2466,7 +2466,7 @@ void fldEnterSceneCamera(void) {
  * scene's entry point. */
 void fldLoadSceneModelsAndCamera(void) {
     FldAreaWork *cam;
-    FldSceneRecord *rec;
+    const FldSceneRecord *rec;
     f32 focus[4];
     f32 eye[4];
     SdfMathVector4 up;
@@ -2805,7 +2805,7 @@ void fldAutoMapNameD(s32 labelIndex) {
 }
 
 s32 fldAutoMapGetFloorPrev(s32 limit) {
-    FldSceneRecord *group = fldAutoMapHeader;
+    const FldSceneRecord *group = fldAutoMapHeader;
     s32 best = -1;
     s32 groupIndex = 0;
 
@@ -2832,7 +2832,7 @@ s32 fldAutoMapGetFloorPrev(s32 limit) {
 }
 
 s32 fldAutoMapGetFloorNext(s32 limit) {
-    FldSceneRecord *group = fldAutoMapHeader;
+    const FldSceneRecord *group = fldAutoMapHeader;
     s32 best = 999;
     s32 groupIndex = 0;
 
@@ -2860,10 +2860,10 @@ s32 fldAutoMapGetFloorNext(s32 limit) {
 
 void fldAllIconDel(s32 index, f32 *x, f32 *z) {
     s32 i;
-    FldSceneRecord *entry = fldAutoMapHeader;
+    const FldSceneRecord *entry = fldAutoMapHeader;
     for (i = 0; i < (s32)fldAutoMapData; i++, entry++) {
         if (i == index) {
-            FldPoint *position = entry->pos;
+            const FldPoint *position = entry->pos;
             *x = position->x;
             *z = position->z;
             return;
@@ -2878,11 +2878,11 @@ extern s32 D_00436240;
 void fldAutoMapGetBBox(f32 *minX, f32 *maxZ, f32 *maxX, f32 *minZ) {
     s32 room;
     u32 i;
-    FldSceneRecord *rec;
-    FldItem *item;
-    FldPoint *a;
+    const FldSceneRecord *rec;
+    const FldItem *item;
+    const FldPoint *a;
     s32 visible;
-    FldPoint *b;
+    const FldPoint *b;
 
     room = 0;
     *minX = 0.0f;
