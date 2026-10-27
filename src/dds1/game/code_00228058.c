@@ -322,8 +322,8 @@ u32 evtCommandSetDrawFlagWhileWaiting(void) {
 
 
 /* Fold phases 9-15 back toward zero for the symmetric solar animation. */
-s32 evtGetMirroredSolarPhase(void) {
-    s32 phase;
+EvtMirroredSolarPhase evtGetMirroredSolarPhase(void) {
+    EvtSolarCyclePhase phase;
 
     phase = DDS3_GBWK->world.phase;
     if (phase >= 9) {
@@ -332,7 +332,7 @@ s32 evtGetMirroredSolarPhase(void) {
     return phase;
 }
 
-s32 evtGetAgeOfMoon16(void) {
+EvtSolarCyclePhase evtGetAgeOfMoon16(void) {
     return DDS3_GBWK->world.phase;
 }
 

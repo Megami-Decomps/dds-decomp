@@ -1793,8 +1793,8 @@ s32 fldUpdateTravelAndEncounters(void) {
     dds3Basic_t *player;
     f32 distance;
     f32 interval;
-    s32 previousPhase;
-    s32 phase;
+    EvtSolarCyclePhase previousPhase;
+    EvtSolarCyclePhase phase;
     s32 encounter;
     s32 *selection;
     s32 floor;

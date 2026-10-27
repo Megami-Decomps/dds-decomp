@@ -100,6 +100,11 @@ typedef struct SolarOverlayWork {
     SolarOverlayState state;
 } SolarOverlayWork;
 
+/* The world clock cycles through 16 phases; the mirrored animation query
+ * folds phases 9..15 back to 7..1, so its result is in the range 0..8. */
+typedef s32 EvtSolarCyclePhase;
+typedef s32 EvtMirroredSolarPhase;
+
 typedef char SolarPoint_size_must_be_0x06[(sizeof(SolarPoint) == 0x06) ? 1 : -1];
 typedef char SolarNoiseLayer_size_must_be_0x08[(sizeof(SolarNoiseLayer) == 0x08) ? 1 : -1];
 typedef char SolarNoiseState_size_must_be_0x60[(sizeof(SolarNoiseState) == 0x60) ? 1 : -1];
@@ -108,8 +113,8 @@ typedef char SolarOverlayWork_size_must_be_0x104[(sizeof(SolarOverlayWork) == 0x
 typedef char SolarOverlayState_pulseFrame_offset_check[
     ((u32)&((SolarOverlayState *)0)->pulseFrame == 0xFC) ? 1 : -1];
 
-s32 evtGetAgeOfMoon16(void);
-s32 evtGetMirroredSolarPhase(void);
+EvtSolarCyclePhase evtGetAgeOfMoon16(void);
+EvtMirroredSolarPhase evtGetMirroredSolarPhase(void);
 void evtInitializeVisualData(SolarOverlayWork *overlay);
 void evtUpdateSolarPhaseTransition(SolarOverlayWork *overlay);
 void evtDrawFadingSolarOverlayFrame(s32 x, s32 y, s32 z, s32 alpha,
