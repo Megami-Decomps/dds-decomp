@@ -118,7 +118,7 @@ s32 dds3GetMapNo(dds3Basic_t *worldNode);
 
 /* Scene resource scripts are selected by name on a world node. The start
  * result is the scheduler task created for the script, or NULL on failure. */
-struct dds3ProcessID_t *evtStartSceneResourceTask(dds3Basic_t *worldNode, const char *taskName);
+struct dds3ProcessID_t *evtStartSceneResourceTask(const dds3Basic_t *worldNode, const char *taskName);
 void dds3SceneBasicEndScript(void *unusedContext, const char *taskName);
 
 #endif /* EVT_WORLD_H */

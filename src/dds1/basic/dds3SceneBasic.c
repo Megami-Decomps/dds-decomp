@@ -86,10 +86,11 @@ void dds3SceneBasicReleaseScriptFile(dds3Basic_t *worldNode) {
     worldData->sceneScript = NULL;
 }
 
-/* Starts the named script task on the scene object's resource; stays asm:
-   retail's beqz/b merge of the two exit paths has no plain-C shape. */
-dds3ProcessID_t *evtStartSceneResourceTask(dds3Basic_t *worldNode, const char *taskName) {
-    EvtWorldTable *worldData = (EvtWorldTable *)worldNode->data;
+/* Borrow the scene's retained script view to start its named task; do not
+ * mutate the scene or release its resource. Retail's beqz/b exit merge stays
+ * asm because it has no plain-C shape. */
+dds3ProcessID_t *evtStartSceneResourceTask(const dds3Basic_t *worldNode, const char *taskName) {
+    const EvtWorldTable *worldData = worldNode->data;
     const struct BfFlw0Header *sceneScript = worldData->sceneScript;
     ScrProcedureIndex scriptIndex;
 
