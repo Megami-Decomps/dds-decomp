@@ -6,6 +6,7 @@
 /* Indexed timed-effect table entry; the first word's meaning is unknown. */
 typedef struct EffRecordBucket {
     u32 unk_00;
+    /* Negative results hold phase; nonnegative results are per-update deltas. */
     s32 (*step)(BdWork *, BdWork *, EffTimedState *);
     u32 count;
     u8 *records;

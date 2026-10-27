@@ -873,7 +873,7 @@ extern void effBuildRadialFanStreams(EffResourceWork *, u32, u32, u32, f32, f32)
 /* Native 0x14-byte timed state embedded in a slot's kind-specific payload. */
 typedef struct EffTimedState {
     u32 flags;
-    s32 value;
+    s32 value; /* Signed 16.16 transition phase, clamped to 0..1.0 */
     union {
         s32 delay;
         u32 materialFlags;

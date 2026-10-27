@@ -12,6 +12,7 @@
 #include "sdf_packet_header.h"
 #include "fpu.h"
 #include "eff.h"
+#include "eff_slot_phase.h"
 #include "eff_resource_slots.h"
 #include "eff_resource_records.h"
 #include "itf_grid_text.h"
@@ -162,7 +163,7 @@ void itfGridStorePosition(MenuGridSlot *slot, EffectSlotSet *resource, s32 resou
     slot->index = resourceIndex;
 }
 
-s32 itfGridApplySqrtBoundsAndColorScale(BdWork *rectangle, BdWork *out, EffTimedState *timedState) {
+EffSlotPhaseStep itfGridApplySqrtBoundsAndColorScale(BdWork *rectangle, BdWork *out, EffTimedState *timedState) {
     GridAngleTable *table;
     s32 deltas[2];
     EffectSlotGeometry *geometry = &out->geometry;
@@ -185,7 +186,7 @@ s32 itfGridApplySqrtBoundsAndColorScale(BdWork *rectangle, BdWork *out, EffTimed
         }
     }
     if (table->mirrored != 0) {
-        factor = 0x10000 - timedState->value;
+        factor = EFF_SLOT_PHASE_ONE - timedState->value;
     } else {
         factor = timedState->value;
     }
@@ -194,13 +195,13 @@ s32 itfGridApplySqrtBoundsAndColorScale(BdWork *rectangle, BdWork *out, EffTimed
     for (i = 0; i < 4; i++, sourceColor++, destColor++) {
         u32 color = *sourceColor;
         s32 alpha = *(u8 *)sourceColor;
-        *destColor = (color & ~0xFF) | (alpha * factor / 0x10000);
+        *destColor = (color & ~0xFF) | (alpha * factor / EFF_SLOT_PHASE_ONE);
     }
-    return 0x10000 / table->divisor;
+    return EFF_SLOT_PHASE_ONE / table->divisor;
 }
 
 /* Apply the ZOOM_01 easing to the adjustment bounds and fade their alpha. */
-s32 itfGridApplyQuadraticZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, EffTimedState *timedState) {
+EffSlotPhaseStep itfGridApplyQuadraticZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, EffTimedState *timedState) {
     GridAngleTable *table;
     s32 squares[2];
     s32 deltas[2];
@@ -249,11 +250,11 @@ s32 itfGridApplyQuadraticZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, 
         }
         *destColor = (color & colorMask) | ((product + negative * fractionalMask) >> 16);
     }
-    return 0x10000 / table->cycleDivisor;
+    return EFF_SLOT_PHASE_ONE / table->cycleDivisor;
 }
 
 /* Shrink the grid bounds and apply the three-phase flush envelope to corner alpha. */
-s32 itfGridApplyTimedBoundsAndAlpha(BdWork *rectangle, BdWork *out, EffTimedState *timedState) {
+EffSlotPhaseStep itfGridApplyTimedBoundsAndAlpha(BdWork *rectangle, BdWork *out, EffTimedState *timedState) {
     GridFlushTable *table;
     s32 phases[3];
     s32 deltas[2];
@@ -309,7 +310,7 @@ s32 itfGridApplyTimedBoundsAndAlpha(BdWork *rectangle, BdWork *out, EffTimedStat
         for (i = 3; i >= 0; i--, sourceColor++, destColor++) {
             *destColor = *sourceColor;
         }
-        return 0x10000 / totalDuration;
+        return EFF_SLOT_PHASE_ONE / totalDuration;
     } else {
         numerator = timedState->value;
         denominator = phases[2];
@@ -327,10 +328,10 @@ s32 itfGridApplyTimedBoundsAndAlpha(BdWork *rectangle, BdWork *out, EffTimedStat
             *destColor = (color & colorMask) | (lowByte * numerator / denominator);
         }
     }
-    return 0x10000 / totalDuration;
+    return EFF_SLOT_PHASE_ONE / totalDuration;
 }
 
-s32 itfGridApplyThresholdBoundsAndAlpha(BdWork *rectangle, BdWork *out, EffTimedState *timedState) {
+EffSlotPhaseStep itfGridApplyThresholdBoundsAndAlpha(BdWork *rectangle, BdWork *out, EffTimedState *timedState) {
     GridAngleTable *table;
     s32 deltas[2];
     EffectSlotGeometry *geometry = &out->geometry;
@@ -346,7 +347,7 @@ s32 itfGridApplyThresholdBoundsAndAlpha(BdWork *rectangle, BdWork *out, EffTimed
     for (; i < 2; i++) {
         s32 delta = deltas[i];
         s32 magnitude = delta < 0 ? -delta : delta;
-        s32 amount = magnitude * timedState->value / 0x10000;
+        s32 amount = magnitude * timedState->value / EFF_SLOT_PHASE_ONE;
         if (delta > 0) {
             dimensions[i] = delta - amount;
         } else {
@@ -365,10 +366,10 @@ s32 itfGridApplyThresholdBoundsAndAlpha(BdWork *rectangle, BdWork *out, EffTimed
             *destColor = *sourceColor;
         }
     }
-    return 0x10000 / table->divisor;
+    return EFF_SLOT_PHASE_ONE / table->divisor;
 }
 
-s32 itfUpdateAngleAndGetCycleStep(BdWork *unused, BdWork *out, EffTimedState *timedState) {
+EffSlotPhaseStep itfUpdateAngleAndGetCycleStep(BdWork *unused, BdWork *out, EffTimedState *timedState) {
     GridAngleTable *table = (GridAngleTable *)timedState->source->status;
     s32 i = 3;
 
@@ -379,11 +380,11 @@ s32 itfUpdateAngleAndGetCycleStep(BdWork *unused, BdWork *out, EffTimedState *ti
             out->geometry.angleDegrees = (f32)timedState->value * 360.0f * (1.0f / 65536.0f);
         }
     } while (--i >= 0);
-    return 0x10000 / table->divisor;
+    return EFF_SLOT_PHASE_ONE / table->divisor;
 }
 
 /* Blend each saved corner color toward the table's target color. */
-s32 itfGridInterpolateCornerColorsToTarget(BdWork *rectangle, BdWork *out, EffTimedState *timedState) {
+EffSlotPhaseStep itfGridInterpolateCornerColorsToTarget(BdWork *rectangle, BdWork *out, EffTimedState *timedState) {
     GridColorTargetTable *table = (GridColorTargetTable *)timedState->source->status;
     u32 *destColor = out->geometry.cornerColors;
     u32 *sourceColor = rectangle->savedColors;
@@ -397,17 +398,17 @@ s32 itfGridInterpolateCornerColorsToTarget(BdWork *rectangle, BdWork *out, EffTi
         s32 red = *(u8 *)sourceColor;
         s32 alphaTarget = table->alpha;
 
-        blue = (blue + (table->blue - blue) * timedState->value / 0x10000) & 0xFF;
-        green = (green + (table->green - green) * timedState->value / 0x10000) & 0xFF;
-        red = (red + (table->red - red) * timedState->value / 0x10000) & 0xFF;
-        *destColor = ((alpha + (alphaTarget - alpha) * timedState->value / 0x10000) << 24) | (blue << 16)
+        blue = (blue + (table->blue - blue) * timedState->value / EFF_SLOT_PHASE_ONE) & 0xFF;
+        green = (green + (table->green - green) * timedState->value / EFF_SLOT_PHASE_ONE) & 0xFF;
+        red = (red + (table->red - red) * timedState->value / EFF_SLOT_PHASE_ONE) & 0xFF;
+        *destColor = ((alpha + (alphaTarget - alpha) * timedState->value / EFF_SLOT_PHASE_ONE) << 24) | (blue << 16)
             | (green << 8) | red;
     }
-    return 0x10000 / table->divisor;
+    return EFF_SLOT_PHASE_ONE / table->divisor;
 }
 
 /* Apply linear ZOOM easing to the adjustment bounds and fade their alpha. */
-s32 itfGridApplyLinearZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, EffTimedState *timedState) {
+EffSlotPhaseStep itfGridApplyLinearZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, EffTimedState *timedState) {
     GridAngleTable *table;
     s32 scaled[2];
     s32 deltas[2];
@@ -463,10 +464,10 @@ s32 itfGridApplyLinearZoomBoundsAndFadeAlpha(BdWork *rectangle, BdWork *out, Eff
         }
         *destColor = (color & colorMask) | ((colorProduct + negative * fractionalMask) >> 16);
     }
-    return 0x10000 / table->cycleDivisor;
+    return EFF_SLOT_PHASE_ONE / table->cycleDivisor;
 }
 
-s32 itfGridApplyLinearBoundsAndColorScale(BdWork *rectangle, BdWork *out, EffTimedState *timedState) {
+EffSlotPhaseStep itfGridApplyLinearBoundsAndColorScale(BdWork *rectangle, BdWork *out, EffTimedState *timedState) {
     GridAngleTable *table;
     s32 deltas[2];
     EffectSlotGeometry *geometry = &out->geometry;
@@ -482,7 +483,7 @@ s32 itfGridApplyLinearBoundsAndColorScale(BdWork *rectangle, BdWork *out, EffTim
     for (; i < 2; i++) {
         s32 delta = deltas[i];
         s32 magnitude = delta < 0 ? -delta : delta;
-        s32 amount = magnitude * timedState->value / 0x10000;
+        s32 amount = magnitude * timedState->value / EFF_SLOT_PHASE_ONE;
         if (delta > 0) {
             dimensions[i] = delta - amount;
         } else {
@@ -490,7 +491,7 @@ s32 itfGridApplyLinearBoundsAndColorScale(BdWork *rectangle, BdWork *out, EffTim
         }
     }
     if (table->mirrored != 0) {
-        factor = 0x10000 - timedState->value;
+        factor = EFF_SLOT_PHASE_ONE - timedState->value;
     } else {
         factor = timedState->value;
     }
@@ -499,9 +500,9 @@ s32 itfGridApplyLinearBoundsAndColorScale(BdWork *rectangle, BdWork *out, EffTim
     for (i = 0; i < 4; i++, sourceColor++, destColor++) {
         u32 color = *sourceColor;
         s32 alpha = *(u8 *)sourceColor;
-        *destColor = (color & ~0xFF) | (alpha * factor / 0x10000);
+        *destColor = (color & ~0xFF) | (alpha * factor / EFF_SLOT_PHASE_ONE);
     }
-    return 0x10000 / table->divisor;
+    return EFF_SLOT_PHASE_ONE / table->divisor;
 }
 
 /* Unpack engine RGBA order into GS packed R/G and B/A word pairs. */

@@ -168,7 +168,8 @@ extern char D_003BD198[];
 #define EFF_STATUS_PARAM_STRIDE 0x18
 #define EFF_STATUS_PARAM_HEADER_BYTES 4
 #define EFF_SLOT_WORK_BYTES 0xA0
-#define EFF_PHASE_FULL 0x10000
+#define EFF_SLOT_PHASE_ZERO 0
+#define EFF_SLOT_PHASE_ONE 0x10000
 #define EFF_PAYLOAD_RECORD_BYTES 0x6C
 #define EFF_RESOURCE_TABLE_ENTRY_BYTES 8
 
@@ -549,9 +550,9 @@ void *effGetSlotWorkOrOverride(EffectSlotSet *work, s32 slotIndex) {
 /* Start at zero when moving forward, otherwise at the full 16.16 endpoint. */
 void effInitializeSlotPhase(EffTimedState *effect) {
     if (effect->flags & EFF_TIMED_STATE_DIRECTION_FORWARD) {
-        effect->value = 0;
+        effect->value = EFF_SLOT_PHASE_ZERO;
     } else {
-        effect->value = EFF_PHASE_FULL;
+        effect->value = EFF_SLOT_PHASE_ONE;
     }
 }
 
@@ -827,9 +828,9 @@ u32 effSlotTransitionClearTarget(EffTimedState *record, u32 unused) {
 }
 
 u32 effClampSlotPhaseAtEnd(EffectSlotSet *owner, s32 index, EffTimedState *effect) {
-    if (effect->value > 0x10000) {
+    if (effect->value > EFF_SLOT_PHASE_ONE) {
         s32 flags = effect->flags;
-        effect->value = 0x10000;
+        effect->value = EFF_SLOT_PHASE_ONE;
         if (flags & EFF_TIMED_STATE_RESTART_AT_ENDPOINT) {
             if (flags & EFF_TIMED_STATE_PING_PONG) {
                 effect->flags = flags & ~EFF_TIMED_STATE_DIRECTION_FORWARD;
@@ -843,9 +844,9 @@ u32 effClampSlotPhaseAtEnd(EffectSlotSet *owner, s32 index, EffTimedState *effec
 }
 
 u32 effClampSlotPhaseAtStart(EffectSlotSet *owner, s32 index, EffTimedState *effect) {
-    if (effect->value < 0) {
+    if (effect->value < EFF_SLOT_PHASE_ZERO) {
         s32 flags = effect->flags;
-        effect->value = 0;
+        effect->value = EFF_SLOT_PHASE_ZERO;
         if (flags & EFF_TIMED_STATE_RESTART_AT_ENDPOINT) {
             if (flags & EFF_TIMED_STATE_PING_PONG) {
                 effect->flags = flags | EFF_TIMED_STATE_DIRECTION_FORWARD;
@@ -876,24 +877,24 @@ EffectSlotSet *effUpdateTimedStates(EffectSlotSet *effect, u32 slot, void *entry
 
         if (source != 0 && source->category != 0) {
             EffRecordBucket *group = &D_0038FD88[source->category];
-            s32 step = group->step(record, entry, state);
+            s32 phaseStep = group->step(record, entry, state);
 
             if (state->delay > 0) {
-                step = 0;
+                phaseStep = 0;
                 state->delay -= 1;
             }
-            if (step >= 0) {
+            if (phaseStep >= 0) {
                 if (state->flags & EFF_TIMED_STATE_DIRECTION_FORWARD) {
-                    if (state->value != 0x10000) {
-                        state->value += step;
+                    if (state->value != EFF_SLOT_PHASE_ONE) {
+                        state->value += phaseStep;
                         idle = 0;
                         if (effClampSlotPhaseAtEnd(effect, slot, state) == 0) {
                             state->delay = state->delayMax;
                             return 0;
                         }
                     }
-                } else if (state->value != 0) {
-                    state->value -= step;
+                } else if (state->value != EFF_SLOT_PHASE_ZERO) {
+                    state->value -= phaseStep;
                     idle = 0;
                     if (effClampSlotPhaseAtStart(effect, slot, state) == 0) {
                         state->delay = state->delayMax;
