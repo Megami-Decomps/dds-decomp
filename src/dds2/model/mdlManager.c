@@ -939,14 +939,12 @@ static inline const sdfMotionCtrlr_t *mdlFindNodeByIdReadOnly(const dds3ModelHan
     return mdlGetMotionCtrlr(ctx, searchId);
 }
 
-#define MDL_NODE_FIELD_MISSING (-1)
-
 /* Read the motion selector, widened to s32. Missing nodes return -1,
  * distinct from a present selector of 0xFFFF. */
-s32 mdlGetMotionNum(const dds3ModelHandle_t *ctx, s32 searchId) {
+MdlMotionIndexResult mdlGetMotionNum(const dds3ModelHandle_t *ctx, s32 searchId) {
     const sdfMotionCtrlr_t *matchedNode = mdlFindNodeByIdReadOnly(ctx, searchId);
     if (matchedNode == NULL) {
-        return MDL_NODE_FIELD_MISSING;
+        return MDL_MOTION_INDEX_MISSING;
     }
     return matchedNode->motionIndex;
 }

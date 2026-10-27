@@ -1497,7 +1497,7 @@ INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABCD8);
 
 void mdlHandleViewerAssetSelection(void) {
     s32 pageStep;
-    s32 motionIndex;
+    MdlMotionIndexResult motionIndex;
     s32 entryCount;
     s32 referenceCount;
 

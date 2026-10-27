@@ -11,8 +11,14 @@ enum {
     MDL_MOTION_PRESENT = 1
 };
 
+/* A controller's u16 motion index widened to s32; -1 means no node was found. */
+typedef s32 MdlMotionIndexResult;
+enum {
+    MDL_MOTION_INDEX_MISSING = -1
+};
+
 /* Context-level motion APIs; per-sdfMotionCtrlr_t lifecycle methods are in sdf_motion.h. */
-s32 mdlGetMotionNum(const dds3ModelHandle_t *ctx, s32 searchId);
+MdlMotionIndexResult mdlGetMotionNum(const dds3ModelHandle_t *ctx, s32 searchId);
 u16 mdlGetMotionLengthEx(const dds3ModelHandle_t *ctx, s32 searchId);
 s32 mdlGetMotionFrameEx(const dds3ModelHandle_t *ctx, s32 searchId);
 f32 mdlGetMotionSpeedEx(const dds3ModelHandle_t *ctx, s32 searchId);
