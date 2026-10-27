@@ -5,7 +5,9 @@
 #include "sdf_vu0.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_pad_entry.h"
+#include "sdf_pad_index.h"
 #include "sdf_pad_mode_api.h"
+#include "sdf_pad_motor_api.h"
 #include "sdf_cons_matrix_packet.h"
 #include "sdf_dma_packet_header.h"
 #include "kwln.h"
@@ -35,8 +37,6 @@
 #include "sdf_dev_console_node.h"
 #include "btl.h"
 extern void DiagMatrix(void);
-
-#define SDF_PAD_ENTRY_COUNT 2
 
 #define SDF_PAD_REPLY_BUFFER_BYTES 0x20
 
@@ -1412,8 +1412,8 @@ extern void sdfPadControl(SdfPadEntry *entry);
 
 /* Update each configured logical pad entry. */
 void sdfPadManager(void) {
-    s32 padIndex;
-    for (padIndex = 0; padIndex != SDF_PAD_ENTRY_COUNT; padIndex++) {
+    SdfPadIndex padIndex;
+    for (padIndex = 0; padIndex != SDF_PAD_COUNT; padIndex++) {
         sdfPadControl(&sdfPadCb[padIndex]);
     }
 }
@@ -1435,9 +1435,9 @@ extern u8 sdfPadButtonPressure[0x18];
  * retaining the original extra delay when a deadline is missed. */
 void sdfPadBuildButtonStates(void) {
     s32 currentTick = sdfVblankFlag;
-    s32 padIndex;
+    SdfPadIndex padIndex;
     s32 buttonIndex;
-    for (padIndex = 0; padIndex != SDF_PAD_ENTRY_COUNT; padIndex++) {
+    for (padIndex = 0; padIndex != SDF_PAD_COUNT; padIndex++) {
         SdfPadEntry *entry = &sdfPadCb[padIndex];
         s32 heldButtons = entry->buttons;
         s32 previousButtons = entry->prevButtons;
@@ -1476,22 +1476,22 @@ void sdfPadBuildButtonStates(void) {
 }
 
 /* Store a mode request for the indexed logical pad; setup applies it later. */
-void sdfPadChangeMode(s32 padIndex, SdfPadMode requestedMode) {
+void sdfPadChangeMode(SdfPadIndex padIndex, SdfPadMode requestedMode) {
     sdfPadCb[padIndex].requestedMode = requestedMode;
 }
 
 /* Store the small-motor request without validating the logical pad index. */
-void sdfPadSetAct0(s32 padIndex, u16 strength) {
+void sdfPadSetAct0(SdfPadIndex padIndex, u16 strength) {
     sdfPadCb[padIndex].smallMotor = strength;
 }
 
 /* Store the large-motor request without validating the logical pad index. */
-void sdfPadSetAct1(s32 padIndex, u8 strength) {
+void sdfPadSetAct1(SdfPadIndex padIndex, u8 strength) {
     sdfPadCb[padIndex].largeMotor = strength;
 }
 
 /* Despite the legacy console-prefixed name, set both pad motor low bytes. */
-void sdfPadSetAct(s32 padIndex, s32 smallMotor, s32 largeMotor) {
+void sdfPadSetAct(SdfPadIndex padIndex, s32 smallMotor, s32 largeMotor) {
     SdfPadEntry *entry = &sdfPadCb[padIndex];
     entry->smallMotor = smallMotor & SDF_PAD_MOTOR_VALUE_MASK;
     sdfPadCb[padIndex].largeMotor = largeMotor & SDF_PAD_MOTOR_VALUE_MASK;
@@ -1508,10 +1508,10 @@ extern s32 scePadInit(s32);
 
 /* Open both configured port/slot pairs and reset the public input arrays. */
 void sdfPadInitManager(void) {
-    s32 padIndex;
+    SdfPadIndex padIndex;
 
     scePadInit(0);
-    for (padIndex = 0; padIndex != SDF_PAD_ENTRY_COUNT; padIndex++) {
+    for (padIndex = 0; padIndex != SDF_PAD_COUNT; padIndex++) {
         s32 port = sdfPadPortSlotPairs[padIndex * 2];
         s32 slot = sdfPadPortSlotPairs[padIndex * 2 + 1];
         SdfPadEntry *entry;

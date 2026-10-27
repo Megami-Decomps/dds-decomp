@@ -5,6 +5,7 @@
 #include "file_config_option_api.h"
 #include "sdf_vu0.h"
 #include "kwln_background_fade_api.h"
+#include "sdf_pad_motor_api.h"
 #include "dds3Admin.h"
 #include "kwln_draw_buffer.h"
 #include "eff_random_mod.h"
@@ -667,9 +668,6 @@ void kwlnPadStepLargeMotorLevel(void) {
     }
 }
 
-extern void sdfPadSetAct0(s32 padIndex, u16 strength);
-extern void sdfPadSetAct1(s32 padIndex, u8 strength);
-
 /* Honor the saved rumble option, normalize small-motor strength and clamp
  * motor indices to the large motor. Preserve target update before output. */
 void dds3PadVibrationSet(u32 motor, u8 level, s32 duration) {
@@ -697,8 +695,6 @@ void dds3PadVibrationSet(u32 motor, u8 level, s32 duration) {
         sdfPadSetAct1(0, dds3PadVibrationState[motor]);
     }
 }
-
-extern void sdfPadSetAct(s32 padIndex, s32 smallMotor, s32 largeMotor);
 
 /* Clear motor levels and countdowns, then send both zero strengths to pad 0. */
 void kwlnPadResetMotorLevelsAndOutput(void) {
