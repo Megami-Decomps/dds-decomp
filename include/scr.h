@@ -149,8 +149,8 @@ typedef struct scrProcessWork_s {
     u32 timer;
     ScrCommandYieldCount cmdTimer; /* prior yielded traces since last continuation */
     struct sdfMemHandle_t *scriptHandle; /* 0xD8: allocation descriptor, not scriptHeader data */
-    s32 *localInt;
-    f32 *localFloat;
+    ScrVmInteger *localInt; /* process-owned VM integer locals */
+    f32 *localFloat;       /* process-owned VM float locals */
     dds3ProcessID_t *task;       /* 0xE4: scheduler object returned by dds3StartProcess */
     struct scrProcessWork_s *previous; /* 0xE8: named-process list links */
     struct scrProcessWork_s *next;     /* 0xEC */

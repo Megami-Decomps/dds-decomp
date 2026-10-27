@@ -80,7 +80,7 @@ ScrOpcodeHandlerResult CodeFunc_PopFX(scrProcessWork_s *scr) {
 }
 
 ScrOpcodeHandlerResult CodeFunc_PopLIX(scrProcessWork_s *scr) {
-    s32 integerValue;
+    ScrVmInteger integerValue;
 
     integerValue = PopInt(scr);
     scr->localInt[scr->instructions[scr->pc].parts.sOperand] = integerValue;

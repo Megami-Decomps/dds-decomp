@@ -2018,7 +2018,7 @@ scrProcessWork_s *bfContextCreate(const BfFlw0Header *header, const ScrSection *
     process->previous = NULL;
     process->next = NULL;
     if (header->intCount > 0) {
-        process->localInt = sdfChipAllocDirect(header->intCount * sizeof(s32));
+        process->localInt = sdfChipAllocDirect(header->intCount * sizeof(ScrVmInteger));
         for (i = 0; i < header->intCount; i++) {
             process->localInt[i] = 0;
         }
