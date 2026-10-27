@@ -218,6 +218,7 @@ extern void fldResetPlayerSceneObjectState(void);
 extern s32 D_003897C0[];
 #include "dds3_world_secondary.h"
 #include "sdf_debug_api.h"
+#include "fld_elevator_table_selector.h"
 
 extern s32 D_003897C8[];
 
@@ -229,8 +230,6 @@ extern s32 fldGetActorStat0(s32);
 extern s32 fldGetMappedActorStateAttribute(s32);
 
 extern s32 fldGetActorMotionEntry(s32);
-
-extern s32 fldDoor_GetElvTbl(s32);
 
 extern s32 fldGetSelectedActorMotionId(void);
 
@@ -1549,10 +1548,11 @@ u32 fldCommand_FLD_WARP_HASIGO_GETTBL(void) {
 }
 
 u32 fldCommand_FLD_WARP_ELV_GETTBL(void) {
+    FldElevatorTableSelector selector;
     s32 rowValue;
 
-    rowValue = scrGetIntPara(0);
-    rowValue = fldDoor_GetElvTbl(rowValue);
+    selector = scrGetIntPara(0);
+    rowValue = fldDoor_GetElvTbl(selector);
     scrSetIntReturnValue(rowValue);
     return 1;
 }

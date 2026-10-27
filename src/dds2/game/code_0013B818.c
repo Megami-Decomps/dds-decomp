@@ -13,6 +13,7 @@
 #include "kwln_process_registration.h"
 #include "sdf_resource.h"
 #include "fld_waypoint.h"
+#include "fld_elevator_table_selector.h"
 #include "fld_npc_motion.h"
 #include "fld_inf.h"
 #include "fld_title_banner_menu.h"
@@ -2266,39 +2267,39 @@ s32 fldGetActorMotionEntry(u32 attribute) {
     return 0;
 }
 
-s32 fldDoor_GetElvTbl(u32 kind) {
+s32 fldDoor_GetElvTbl(FldElevatorTableSelector selector) {
     s32 slot = D_004361DC;
 
-    switch (kind) {
-    case 0:
+    switch (selector) {
+    case FLD_ELEVATOR_TABLE_SELECTOR_FLOOR_COUNT:
         return fldActorWaypointRows.headers[slot].floorCount;
-    case 1:
+    case FLD_ELEVATOR_TABLE_SELECTOR_SOUND:
         return fldActorWaypointRows.headers[slot].sound;
-    case 2:
-        return fldActorWaypointRows.headers[slot].body.data[0];
-    case 3:
-        return fldActorWaypointRows.headers[slot].body.data[1];
-    case 4:
-        return fldActorWaypointRows.headers[slot].body.data[2];
-    case 5:
-        return fldActorWaypointRows.headers[slot].body.data[3];
-    case 6:
-        return fldActorWaypointRows.headers[slot].body.data[4];
-    case 7:
-        return fldActorWaypointRows.headers[slot].body.data[5];
-    case 8:
-        return fldActorWaypointRows.headers[slot].body.data[6];
-    case 9:
-        return fldActorWaypointRows.headers[slot].body.data[7];
-    case 10:
-        return fldActorWaypointRows.headers[slot].body.data[8];
-    case 11:
-        return fldActorWaypointRows.headers[slot].body.data[9];
-    case 12:
-        return fldActorWaypointRows.headers[slot].body.data[10];
-    case 13:
-        return fldActorWaypointRows.headers[slot].body.data[11];
-    case 14:
+    case FLD_ELEVATOR_TABLE_SELECTOR_FLOOR_0:
+        return fldActorWaypointRows.headers[slot].body.elevator.floors[0];
+    case FLD_ELEVATOR_TABLE_SELECTOR_FLOOR_1:
+        return fldActorWaypointRows.headers[slot].body.elevator.floors[1];
+    case FLD_ELEVATOR_TABLE_SELECTOR_FLOOR_2:
+        return fldActorWaypointRows.headers[slot].body.elevator.floors[2];
+    case FLD_ELEVATOR_TABLE_SELECTOR_FLOOR_3:
+        return fldActorWaypointRows.headers[slot].body.elevator.floors[3];
+    case FLD_ELEVATOR_TABLE_SELECTOR_FLOOR_4:
+        return fldActorWaypointRows.headers[slot].body.elevator.floors[4];
+    case FLD_ELEVATOR_TABLE_SELECTOR_FLOOR_5:
+        return fldActorWaypointRows.headers[slot].body.elevator.floors[5];
+    case FLD_ELEVATOR_TABLE_SELECTOR_BLOCK_0:
+        return fldActorWaypointRows.headers[slot].body.elevator.blocks[0];
+    case FLD_ELEVATOR_TABLE_SELECTOR_BLOCK_1:
+        return fldActorWaypointRows.headers[slot].body.elevator.blocks[1];
+    case FLD_ELEVATOR_TABLE_SELECTOR_BLOCK_2:
+        return fldActorWaypointRows.headers[slot].body.elevator.blocks[2];
+    case FLD_ELEVATOR_TABLE_SELECTOR_BLOCK_3:
+        return fldActorWaypointRows.headers[slot].body.elevator.blocks[3];
+    case FLD_ELEVATOR_TABLE_SELECTOR_BLOCK_4:
+        return fldActorWaypointRows.headers[slot].body.elevator.blocks[4];
+    case FLD_ELEVATOR_TABLE_SELECTOR_BLOCK_5:
+        return fldActorWaypointRows.headers[slot].body.elevator.blocks[5];
+    case FLD_ELEVATOR_TABLE_SELECTOR_REVERSED_SELECTED_FLOOR_INDEX:
         return fldActorWaypointRows.headers[slot].floorCount - D_004361E0 - 1;
     }
     return 0;
