@@ -561,17 +561,17 @@ void sndMixerDestroy(SoundMixer *mixer) {
     sdfMemFreeDirect(mixer->resource);
 }
 
-s32 effBTLGetMotionChangeFrame(SoundMixer *mixer, u16 kind) {
+s32 effBTLGetMotionChangeFrame(const SoundMixer *mixer, u16 kind) {
     int bank = kind >= 2;
     return mixer->banks[bank].list.callbackFrame;
 }
 
-s32 effBTLGetCutEndFrame(SoundMixer *mixer, u16 kind) {
+s32 effBTLGetCutEndFrame(const SoundMixer *mixer, u16 kind) {
     int bank = kind >= 2;
     return mixer->banks[bank].list.triggerFrame;
 }
 
-s32 effBTLGetDrawEndFrame(SoundMixer *mixer, u16 kind) {
+s32 effBTLGetDrawEndFrame(const SoundMixer *mixer, u16 kind) {
     int bank = kind >= 2;
     if (kind == 2) {
         return mixer->banks[bank].list.triggerFrame;

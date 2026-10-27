@@ -105,7 +105,6 @@ extern void mnuTitleStreamUpdateAndLogBgm(void);
 extern u32 p2sdGetPcmState(void);
 extern s32 p2sdLoadPcmFile(const char *name, u8 channel);
 extern void p2sdLoadSMGFile(s32 packed);
-extern s32 effBTLGetMotionChangeFrame(SoundMixer *mixer, u16 kind);
 extern s32 sndHasActiveFileLoad(void);
 extern s32 sndIsCommandBusySigned(void);
 /* Original-style implicit int, kept: matched code depends on it: dds3EffectFilter. */

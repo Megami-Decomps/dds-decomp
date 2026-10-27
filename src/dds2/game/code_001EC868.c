@@ -107,7 +107,6 @@ extern void mnuResetTitleStreamAfterFileIdle(void);
 extern u32 p2sdGetPcmState(void);
 extern s32 p2sdLoadPcmFile(const char *name, u8 channel);
 extern void p2sdLoadSMGFile(s32 packed);
-extern s32 effBTLGetMotionChangeFrame(SoundMixer *mixer, u16 kind);
 extern s32 sndIsCommandBusySigned(void);
 extern void p2sdStopAllBgm(void);
 extern void sndQueueNoPayloadCommand210(void);

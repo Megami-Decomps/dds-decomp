@@ -320,7 +320,10 @@ typedef char Atrac3LoadTaskArgs_entryIndex_offset_must_be_8[
     ((u32)&((Atrac3LoadTaskArgs *)0)->entryIndex == 8) ? 1 : -1];
 
 SoundMixer *sndMixerClone(SoundMixer *source);
-s32 effBTLGetDrawEndFrame(SoundMixer *mixer, u16 kind);
+/* Frame queries borrow a mixer and only inspect its bank metadata. */
+s32 effBTLGetMotionChangeFrame(const SoundMixer *mixer, u16 kind);
+s32 effBTLGetCutEndFrame(const SoundMixer *mixer, u16 kind);
+s32 effBTLGetDrawEndFrame(const SoundMixer *mixer, u16 kind);
 /* Destroy an owned mixer clone, including its voices, parts, and allocation. */
 void sndMixerDestroy(SoundMixer *mixer);
 void sndCreateSystemEffect(SoundResourceNode *effect);
