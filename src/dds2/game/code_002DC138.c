@@ -475,11 +475,10 @@ void mdlMarkAndProcessObjectNodes(void) {
 typedef char EffResourceOwner_buffer_check[(u32)&((EffResourceOwner *)0)->buffer == 0xBC ? 1 : -1];
 typedef char EffResourceOwner_model_check[(u32)&((EffResourceOwner *)0)->model == 0xC0 ? 1 : -1];
 
-extern EffResourceOwner *effCreateResourceOwner(void *);
+extern EffResourceOwner *effCreateResourceOwner(FileJobPayload *);
 
 /* Decode the type-6 configuration, load its model and clone per-position queues. */
-EffResourceOwner *effCreateResourceOwner(void *input) {
-    FileJobPayload *job = input;
+EffResourceOwner *effCreateResourceOwner(FileJobPayload *job) {
     EffResourceOwner *owner;
     void *resource;
     u32 modelOffset;

@@ -476,8 +476,7 @@ typedef char EffResourceModelConfig_size_check[
 
 
 /* Create an empty owner, or load its model and per-record queues from a file job. */
-EffResourceOwner *effCreateResourceOwner(void *input) {
-    FileJobPayload *source = input;
+EffResourceOwner *effCreateResourceOwner(FileJobPayload *source) {
     EffResourceOwner *owner = sdfChipAllocDirect(sizeof(EffResourceOwner));
     u8 *data;
     u32 i;
@@ -530,7 +529,7 @@ void effDestroyResourceOwner(EffResourceOwner *owner) {
 }
 
 
-extern EffResourceOwner *effCreateResourceOwner(void *);
+extern EffResourceOwner *effCreateResourceOwner(FileJobPayload *);
 
 extern void effCopyResourceOwner(EffResourceOwner *, EffResourceOwner *);
 
