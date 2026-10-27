@@ -2,6 +2,7 @@
 #include "common.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
+#include "sdf_general_heap_api.h"
 #include "sdf.h"
 
 #define SDF_HEAP_BLOCK_FREE 0
@@ -13,8 +14,8 @@
 SdfMemHeap sdfMemCB __attribute__((section(".bss"), aligned(8)));
 
 /* Return the next descriptor unless it is the end marker; used blocks are not filtered. */
-sdfMemHandle_t *sdfMemGetNext(const sdfMemHandle_t *block) {
-    sdfMemHandle_t *nextBlock = block->next;
+const sdfMemHandle_t *sdfMemGetNext(const sdfMemHandle_t *block) {
+    const sdfMemHandle_t *nextBlock = block->next;
     if (nextBlock->state == SDF_HEAP_BLOCK_END) {
         return NULL;
     }

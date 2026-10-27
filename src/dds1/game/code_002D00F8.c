@@ -149,12 +149,12 @@ void sdfMemInit(u32 heapSize) {
     sdfDelayedResrcInitCB(&sdfMemDelayedResrcCB, sdfMemFreeDirect);
 }
 
-u16 sdfMemGetType(sdfMemHandle_t *block) {
+u16 sdfMemGetType(const sdfMemHandle_t *block) {
     return block->state;
 }
 
 /* Return the first general-heap allocation descriptor. */
-sdfMemHandle_t *sdfMemGetTop(void) {
+const sdfMemHandle_t *sdfMemGetTop(void) {
     return sdfMemCB.head.next;
 }
 

@@ -1787,12 +1787,10 @@ void sdfDrawHeapSpanOverlay(sdfDrawTag_t *packetList, s32 x, s32 y,
     }
 }
 
-extern u16 sdfMemGetType(sdfMemHandle_t *);
-
 void sdfDrawHeapMapOverlay(sdfDrawTag_t *packetList, s32 x, s32 y) {
     SdfHeapOverlayBlock *snapshot;
     SdfHeapOverlayBlock *entry;
-    sdfMemHandle_t *block;
+    const sdfMemHandle_t *block;
     u32 count;
     u32 i;
     u32 heapBase;
