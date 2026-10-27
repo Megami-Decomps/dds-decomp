@@ -5142,11 +5142,11 @@ void btlRemoveActorsWithFlags(u32 mask) {
     }
 }
 
-BtlUnit *btlFindActorForOwner(u64 ownerId) {
+BtlUnit *btlFindActorForOwner(BtlUnitIdentity identity) {
     BtlState *context = (BtlState *)btlGetRuntime();
     BtlUnit *actor = context->units;
     while (actor != 0) {
-        if (actor->identity == ownerId) {
+        if (actor->identity == identity) {
             return actor;
         }
         actor = actor->next;

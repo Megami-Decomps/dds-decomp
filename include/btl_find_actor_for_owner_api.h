@@ -3,8 +3,12 @@
 
 #include "common.h"
 
+/* Runtime-sequence key stored in a battle unit's identity/owner field. */
+typedef u64 BtlUnitIdentity;
+
 struct BtlUnit;
 
-struct BtlUnit *btlFindActorForOwner(u64 ownerId);
+/* Find the battle unit with this runtime identity; return NULL if absent. */
+struct BtlUnit *btlFindActorForOwner(BtlUnitIdentity identity);
 
 #endif

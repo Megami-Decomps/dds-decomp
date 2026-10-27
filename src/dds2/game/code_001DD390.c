@@ -5265,10 +5265,10 @@ void btlRemoveActorsWithFlags(u32 mask) {
     }
 }
 
-BtlUnit *btlFindActorForOwner(u64 owner) {
+BtlUnit *btlFindActorForOwner(BtlUnitIdentity identity) {
     BtlUnit *unit;
     for (unit = ((BtlState *)btlGetRuntime())->units; unit != 0; unit = unit->next) {
-        if (unit->owner == owner) {
+        if (unit->owner == identity) {
             return unit;
         }
     }
