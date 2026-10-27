@@ -5,6 +5,7 @@
 #include "fld_runtime_reset_api.h"
 #include "fld_npc_motion.h"
 #include "fld_label_rows.h"
+#include "fld_coordinate_lookup_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
 #include "sdf_vu0.h"
@@ -2054,8 +2055,8 @@ u8 fldTestObjectActivationFlag(u32 flagIndex) {
 }
 
 /* Search records 1..511 of the 30-byte coordinate table; return zero on miss. */
-s32 fldFindMapLabelIndexByCoordinate(s32 mapId, s32 floorIndex) {
-    s32 index;
+FldMapLabelRecordIndex fldFindMapLabelIndexByCoordinate(s32 mapId, s32 floorIndex) {
+    FldMapLabelRecordIndex index;
     for (index = 1; index < FIELD_COORDINATE_SCAN_LIMIT; index++) {
         if (mapId == D_0039A5A8[index].x && floorIndex == D_0039A5A8[index].y) {
             return index;
@@ -2065,8 +2066,8 @@ s32 fldFindMapLabelIndexByCoordinate(s32 mapId, s32 floorIndex) {
 }
 
 /* Search the second coordinate table (34-byte records), reserving index zero. */
-s32 fldFindSecondaryMapLabelIndexByCoordinate(s32 mapId, s32 floorIndex) {
-    s32 index;
+FldSecondaryMapLabelRecordIndex fldFindSecondaryMapLabelIndexByCoordinate(s32 mapId, s32 floorIndex) {
+    FldSecondaryMapLabelRecordIndex index;
     for (index = 1; index < FIELD_COORDINATE_SCAN_LIMIT; index++) {
         if (mapId == D_0039E1A8[index].x && floorIndex == D_0039E1A8[index].y) {
             return index;
@@ -2076,10 +2077,10 @@ s32 fldFindSecondaryMapLabelIndexByCoordinate(s32 mapId, s32 floorIndex) {
 }
 
 /* Search the 28-byte map records, skipping row zero; zero denotes a miss. */
-s32 fldFindMapCoordinateIndex(s32 mapId, s32 floorIndex) {
+FldMapCoordinateRecordIndex fldFindMapCoordinateIndex(s32 mapId, s32 floorIndex) {
     u8 *records = D_003A25A8;
     u8 *yColumn = records + 2;
-    s32 index = 1;
+    FldMapCoordinateRecordIndex index = 1;
     s32 offset = 28;
     do {
         if (mapId == *(s16 *)(offset + (s32)records) &&

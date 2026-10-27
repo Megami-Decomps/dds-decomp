@@ -9,6 +9,7 @@
 #include "evt_message_window_api.h"
 #include "fld_area_work.h"
 #include "fld_label_row.h"
+#include "fld_coordinate_lookup_api.h"
 #include "fld_room_effect_entry.h"
 #include "fld_object_slot.h"
 #include "fld_activation_entry.h"
@@ -891,13 +892,6 @@ u32 fldGetCurrentBgmHandle(void) {
     return fldSeLastBgm;
 }
 
-extern s32 fldFindMapLabelIndexByCoordinate(s32 mapId, s32 floorIndex);
-
-extern s32 fldFindSecondaryMapLabelIndexByCoordinate(s32 mapId, s32 floorIndex);
-
-extern s32 fldFindMapCoordinateIndex(s32 mapId, s32 floorIndex);
-
-
 extern FldLabelRow28 D_0033F068[], D_00342868[], D_00346068[];
 
 extern char D_0033EC90[][0x18];
@@ -1223,7 +1217,6 @@ extern void fldAllIconDel(s32 index, f32 *x, f32 *z);
 extern void fldPoint3To2H(f32 *, f32 *, f32, f32, f32);
 extern void fldAutoMapDrawIconOfsRF(s32, f32, f32, f32);
 extern void fldAutoMapGetBBox(f32 *, f32 *, f32 *, f32 *);
-extern s32 fldFindMapCoordinateIndex(s32 mapId, s32 floorIndex);
 extern void frSetPriority(_FRQ *, u32);
 extern s32 frFontDrawGlyphWithSharedFlags(_FRQ *, s8);
 extern s32 frDestroyFontRequestAfter(_FRQ *);
@@ -1748,7 +1741,7 @@ void fldDrawAutomapScene(void) {
 
     if (D_003BAF04 != 0 && (u32)D_003BAEF4 - 1U < 40U
         && D_003D4408[D_003BAEF4] >= 2) {
-        s32 labelIndex;
+        FldMapCoordinateRecordIndex labelIndex;
 
         labelAlpha = D_003BAF08;
         if (labelAlpha < 0) {
@@ -1770,7 +1763,7 @@ void fldDrawAutomapScene(void) {
     }
 
     if ((u32)D_003BAEF0 - 1U < 40U && D_003D4408[D_003BAEF0] >= 2) {
-        s32 labelIndex;
+        FldMapCoordinateRecordIndex labelIndex;
 
         labelAlpha = D_003BAF04;
         if (labelAlpha < 0) {
@@ -2612,7 +2605,8 @@ void func_00147188(s32 unused) {
     FldAreaWork *work;
     s32 mode;
     s32 map;
-    s32 record;
+    FldSecondaryMapLabelRecordIndex secondaryRecord;
+    FldMapLabelRecordIndex primaryRecord;
     s32 lookupIndex;
     s32 textWidth;
     s32 x;
@@ -2692,9 +2686,9 @@ interpolate:
         {
             s32 queryY = map;
             s32 queryX = work->area % 100;
-            record = fldFindSecondaryMapLabelIndexByCoordinate(queryX, queryY);
+            secondaryRecord = fldFindSecondaryMapLabelIndexByCoordinate(queryX, queryY);
         }
-        textWidth = frFontMeasureTextAdvance(D_00342868[record].name, 1, 0);
+        textWidth = frFontMeasureTextAdvance(D_00342868[secondaryRecord].name, 1, 0);
         fldDrawAnimatedFieldBanner(textWidth, xOffset, yOffset);
         if (textWidth >= 0x9E) {
             x = 0x155;
@@ -2702,7 +2696,7 @@ interpolate:
             x = 0x1A3 - textWidth / 2;
         }
         y = (yOffset + 0x12) / 2;
-        fldKanjiDraw(xOffset + x, y, 0xF0DC6480, D_00342868[record].name);
+        fldKanjiDraw(xOffset + x, y, 0xF0DC6480, D_00342868[secondaryRecord].name);
     } else {
         lookupIndex = work->primaryMapLabelSelection;
         if (lookupIndex == map || D_003D43B0[lookupIndex] < 2) {
@@ -2711,9 +2705,9 @@ interpolate:
         {
             s32 queryY = lookupIndex;
             s32 queryX = work->area % 100;
-            record = fldFindMapLabelIndexByCoordinate(queryX, queryY);
+            primaryRecord = fldFindMapLabelIndexByCoordinate(queryX, queryY);
         }
-        textWidth = frFontMeasureTextAdvance(D_0033F068[record].name, 1, 0);
+        textWidth = frFontMeasureTextAdvance(D_0033F068[primaryRecord].name, 1, 0);
         fldDrawAnimatedFieldBanner(textWidth, xOffset, yOffset);
         if (textWidth >= 0x9E) {
             x = 0x155;
@@ -2721,7 +2715,7 @@ interpolate:
             x = 0x1A3 - textWidth / 2;
         }
         y = (yOffset + 0x12) / 2;
-        fldKanjiDraw(xOffset + x, y, 0xA09DC380, D_0033F068[record].name);
+        fldKanjiDraw(xOffset + x, y, 0xA09DC380, D_0033F068[primaryRecord].name);
     }
 }
 

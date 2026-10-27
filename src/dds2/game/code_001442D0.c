@@ -6,6 +6,7 @@
 #include "sdf_model_packet_callback.h"
 #include "sdf_model_release_api.h"
 #include "fld_label_rows.h"
+#include "fld_coordinate_lookup_api.h"
 #include "dsp_channel.h"
 #include "evt_message_window_api.h"
 #include "dsp_entry_api.h"
@@ -1138,12 +1139,6 @@ extern FldName28 D_003A25AC[];
 extern FldName24 D_0039A1D0[];
 
 
-extern s32 fldFindMapLabelIndexByCoordinate(s32 mapId, s32 floorIndex);
-
-extern s32 fldFindSecondaryMapLabelIndexByCoordinate(s32 mapId, s32 floorIndex);
-
-extern s32 fldFindMapCoordinateIndex(s32 mapId, s32 floorIndex);
-
 void fldCacheMapLabelLengths(s32 mapId) {
     s32 i;
 
@@ -1406,7 +1401,6 @@ extern void fldPoint3To2H(f32 *, f32 *, f32, f32, f32);
 extern void func_00145A08(s32, f32, f32, f32);
 extern void fldAllIconDel(s32 index, f32 *x, f32 *z);
 extern void fldAutoMapGetBBox(f32 *, f32 *, f32 *, f32 *);
-extern s32 fldFindMapCoordinateIndex(s32 mapId, s32 floorIndex);
 extern void frSetPriority(_FRQ *, u32);
 extern s32 frFontDrawGlyphWithSharedFlags(_FRQ *, s8);
 extern s32 frDestroyFontRequestAfter(_FRQ *);
@@ -1998,7 +1992,7 @@ void fldDrawAutomapScene(void) {
 
     if (D_0043629C != 0 && (u32)D_0043628C - 1U < 40U
         && D_0044FCF0[D_0043628C] >= 2) {
-        s32 labelIndex;
+        FldMapCoordinateRecordIndex labelIndex;
 
         labelAlpha = D_004362A0;
         if (labelAlpha < 0) {
@@ -2020,7 +2014,7 @@ void fldDrawAutomapScene(void) {
     }
 
     if ((u32)D_00436288 - 1U < 40U && D_0044FCF0[D_00436288] >= 2) {
-        s32 labelIndex;
+        FldMapCoordinateRecordIndex labelIndex;
 
         labelAlpha = D_0043629C;
         if (labelAlpha < 0) {
@@ -2988,7 +2982,8 @@ static inline f32 fldBannerCoordinate(f32 progress, f32 hidden, f32 shown) {
 void func_0014B0F8(void) {
     f32 progress;
     s32 x, y;
-    s32 labelIndex;
+    FldSecondaryMapLabelRecordIndex secondaryLabelIndex;
+    FldMapLabelRecordIndex primaryLabelIndex;
     s32 width;
     s32 labelX;
     if (fldGlobalBase.playerModelAlternate == 1) return;
@@ -3045,18 +3040,18 @@ interpolate:
     itfSetTextDrawLimit(0x13);
     if (fldGlobalBase.secondaryMapLabelSelection != -1) {
         if (D_0044FD48[fldGlobalBase.secondaryMapLabelSelection] < 2) return;
-        labelIndex = fldFindSecondaryMapLabelIndexByCoordinate(fldGlobalBase.area % 100, fldGlobalBase.secondaryMapLabelSelection);
-        width = frFontMeasureTextAdvance(D_0039E1A8[labelIndex].name, 1, 0);
+        secondaryLabelIndex = fldFindSecondaryMapLabelIndexByCoordinate(fldGlobalBase.area % 100, fldGlobalBase.secondaryMapLabelSelection);
+        width = frFontMeasureTextAdvance(D_0039E1A8[secondaryLabelIndex].name, 1, 0);
         fldDrawAnimatedFieldBanner(width, x, y);
         if (width >= 0x9E) labelX = 0x14A; else labelX = 0x198 - width / 2;
-        fldKanjiDraw(x + labelX, (y + 0x12) / 2, 0xF0DC6480, D_0039E1A8[labelIndex].name);
+        fldKanjiDraw(x + labelX, (y + 0x12) / 2, 0xF0DC6480, D_0039E1A8[secondaryLabelIndex].name);
     } else if (fldGlobalBase.primaryMapLabelSelection != fldGlobalBase.secondaryMapLabelSelection) {
         if (D_0044FC98[fldGlobalBase.primaryMapLabelSelection] < 2) return;
-        labelIndex = fldFindMapLabelIndexByCoordinate(fldGlobalBase.area % 100, fldGlobalBase.primaryMapLabelSelection);
-        width = frFontMeasureTextAdvance(D_0039A5A8[labelIndex].name, 1, 0);
+        primaryLabelIndex = fldFindMapLabelIndexByCoordinate(fldGlobalBase.area % 100, fldGlobalBase.primaryMapLabelSelection);
+        width = frFontMeasureTextAdvance(D_0039A5A8[primaryLabelIndex].name, 1, 0);
         fldDrawAnimatedFieldBanner(width, x, y);
         if (width >= 0x9E) labelX = 0x14A; else labelX = 0x198 - width / 2;
-        fldKanjiDraw(x + labelX, (y + 0x12) / 2, 0xA09DC380, D_0039A5A8[labelIndex].name);
+        fldKanjiDraw(x + labelX, (y + 0x12) / 2, 0xA09DC380, D_0039A5A8[primaryLabelIndex].name);
     }
     itfSetTextDrawLimit(-1);
 }
