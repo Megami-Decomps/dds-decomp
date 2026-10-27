@@ -6,6 +6,7 @@
 #include "btl_command_use_error.h"
 #include "btl_action_press_result.h"
 #include "btl_command_target_policy.h"
+#include "btl_command_status_target_index.h"
 #include "btl_actor_status_table_api.h"
 #include "btl_actor_entry_code_defaults.h"
 #include "btl_special_ability.h"
@@ -700,9 +701,8 @@ BtlCommandTargetPolicy btlSelectCommandTargetPolicy(BtlTask *task, BtlIndexList 
     return category;
 }
 
-extern s32 btlFindCommandStatusMatchInTargetList(BtlTask *actionTask, BtlIndexList *targets);
-
-s32 btlFindCommandStatusMatchInTargetList(BtlTask *actionTask, BtlIndexList *targets) {
+BtlCommandStatusTargetListIndex btlFindCommandStatusMatchInTargetList(
+    BtlTask *actionTask, BtlIndexList *targets) {
     BtlTask *action = actionTask;
     u32 count;
     u32 i;

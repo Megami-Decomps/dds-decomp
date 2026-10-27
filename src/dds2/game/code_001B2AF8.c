@@ -22,6 +22,7 @@
 #include "btl_command_use_error.h"
 #include "itf_mes_entry_start_api.h"
 #include "btl_command_target_policy.h"
+#include "btl_command_status_target_index.h"
 #include "btl_named_task_pair_status_api.h"
 #include "btl_enemy_spawn_capacity_api.h"
 #include "btl_projected_screen_point.h"
@@ -10883,15 +10884,13 @@ s32 btlUpdateTargetSelectionTask(dds3ProcessID_t *handle) {
 
 extern s32 btlBuildUnitIndexList(ActionStateLink *source, BtlIndexList *list, s32, s32, s32);
 
-extern s32 btlFindCommandStatusMatchInTargetList(ActionStateLink *actionTask, BtlIndexList *targets);
-
 /* Creates the AI work object for `source`: allocates two index lists and
  * fills them according to the current scene object state. */
 SceneAiWork *btlCreateTargetSelectionWork(ActionStateLink *source) {
     SceneAiWork *work;
     BattleSceneObject *object;
     BattleActorPanelWork *other;
-    s32 id;
+    BtlCommandStatusTargetListIndex selectedTargetIndex;
     s32 count;
     btlGetRuntime();
     work = (SceneAiWork *)sdfAllocAndClearQuadwords(0xA4);
@@ -10914,9 +10913,10 @@ SceneAiWork *btlCreateTargetSelectionWork(ActionStateLink *source) {
     work->entry = 0;
     switch (work->result) {
     case 0:
-        id = btlFindCommandStatusMatchInTargetList(source, work->eligibleTargets);
-        work->entry = id;
-        btlAppendIndexListEntry(work->selectedTargets, btlGetIndexListEntry(work->eligibleTargets, id));
+        selectedTargetIndex = btlFindCommandStatusMatchInTargetList(source, work->eligibleTargets);
+        work->entry = selectedTargetIndex;
+        btlAppendIndexListEntry(work->selectedTargets,
+                                btlGetIndexListEntry(work->eligibleTargets, selectedTargetIndex));
         break;
     case 1:
     case 2:

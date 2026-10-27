@@ -16,6 +16,7 @@
 #include "btl_command_use_error.h"
 #include "itf_mes_entry_start_api.h"
 #include "btl_command_target_policy.h"
+#include "btl_command_status_target_index.h"
 #include "btl_named_task_pair_status_api.h"
 #include "sdf_vu0.h"
 #include "btl_set_actor_effect_parameter_api.h"
@@ -159,8 +160,6 @@ extern EffRandState effSharedRandomState[];
 extern void btlAllocatePanelTaskWork(void);
 
 extern void itfMesMngRelease(ItfMesWindowIndex window);
-
-extern s32 btlFindCommandStatusMatchInTargetList(BtlTask *actionTask, BtlIndexList *targets);
 
 extern EffRandState effSharedRandomState[];
 
@@ -9366,7 +9365,7 @@ SceneAiWork *btlCreateTargetSelectionWork(BtlTask *source) {
     SceneAiWork *work;
     BattleSceneObject *object;
     BattleActorPanelWork *other;
-    s32 entry;
+    BtlCommandStatusTargetListIndex selectedTargetIndex;
     s32 count;
     u32 i;
     u32 listCount;
@@ -9397,10 +9396,10 @@ SceneAiWork *btlCreateTargetSelectionWork(BtlTask *source) {
     work->entry = 0;
     switch (work->result) {
     case 0:
-        entry = btlFindCommandStatusMatchInTargetList(source, work->eligibleTargets);
-        work->entry = entry;
+        selectedTargetIndex = btlFindCommandStatusMatchInTargetList(source, work->eligibleTargets);
+        work->entry = selectedTargetIndex;
         btlAppendIndexListEntry(work->selectedTargets,
-                                btlGetIndexListEntry(work->eligibleTargets, entry));
+                                btlGetIndexListEntry(work->eligibleTargets, selectedTargetIndex));
         break;
     case 1:
     case 2:

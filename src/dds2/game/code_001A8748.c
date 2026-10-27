@@ -10,6 +10,7 @@
 #include "btl_command_use_error.h"
 #include "btl_action_press_result.h"
 #include "btl_command_target_policy.h"
+#include "btl_command_status_target_index.h"
 #include "btl_indexed_ui_resource_api.h"
 #include "btl_actor_status_table_api.h"
 #include "btl_actor_entry_code_api.h"
@@ -2045,9 +2046,8 @@ BtlCommandTargetPolicy btlSelectCommandTargetPolicy(ActionStateLink *task, BtlIn
     return category;
 }
 
-extern s32 btlFindCommandStatusMatchInTargetList(ActionStateLink *actionTask, BtlIndexList *targets);
-
-s32 btlFindCommandStatusMatchInTargetList(ActionStateLink *actionTask, BtlIndexList *targets) {
+BtlCommandStatusTargetListIndex btlFindCommandStatusMatchInTargetList(
+    ActionStateLink *actionTask, BtlIndexList *targets) {
     ActionStateLink *action = actionTask;
     u32 count;
     u32 i;
