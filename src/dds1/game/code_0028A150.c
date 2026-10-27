@@ -42,6 +42,7 @@
 #include "file_slot.h"
 #include "file_save_record.h"
 #include "dat_state.h"
+#include "dat_new_cycle_state.h"
 #include "pcp_vu0.h"
 #include "sdf_vu_transform_api.h"
 #include "sdf_vu_matrix.h"
@@ -2521,12 +2522,12 @@ s32 fileDrawSlotListAndPreview(s32 work) {
                 u32 bannerColor;
 
                 preview = &fileSavePreviewRecords[slot];
-                if (preview->newCycle != 0) {
+                if (preview->newCycle != DAT_NEW_CYCLE_STATE_INACTIVE) {
                     mnuDrawAndStoreTextGlyphHandle(0x40, y + 0x20, detailColor, fileNewCycleLabel);
                 }
                 bannerColor = (alpha << 24) | 0x808080;
                 evtSubmitTexturedGradientQuad(0x88, y + 4, 0x137, 0x1F, 4, 0x1C5, 0x137, 0x1F, bannerColor, bannerColor, bannerColor, bannerColor, D_003BC884);
-                if (preview->newCycle == 0) {
+                if (preview->newCycle == DAT_NEW_CYCLE_STATE_INACTIVE) {
                     if (preview->mapGroup == 0) {
                         mnuDrawAndStoreTextGlyphHandle(0xF0, y, detailColor, D_00347C68[preview->mapIndex]);
                     } else {
@@ -2550,7 +2551,7 @@ s32 fileDrawSlotListAndPreview(s32 work) {
                     u32 highlightColor = ((D_0037D4D0[0] + 0x80) << 24) | 0x808080;
                     evtSubmitTexturedGradientQuad(0x1F, y, 0x1BB, 0x68, 3, 3, 0x1BB, 0x68, highlightColor, highlightColor, highlightColor, highlightColor, D_003BC86C);
                 }
-                if (fileSavePreviewRecords[slot].newCycle == 0) {
+                if (fileSavePreviewRecords[slot].newCycle == DAT_NEW_CYCLE_STATE_INACTIVE) {
                     if (fileSelectedSlotIndex == slot) {
                         partyColor = (alpha << 24) | 0x808080;
                     } else {
@@ -2732,7 +2733,7 @@ void fileEnterMcPackScene(s32 mode) {
         D_003BC824 = enabled;
         evtBitOn(0xB90);
         DDS3_GBWK->header.status = (u16)DDS3_GBWK->header.status + 1;
-        DDS3_GBWK->header.transition = enabled;
+        DDS3_GBWK->header.transition = DAT_NEW_CYCLE_STATE_ACTIVE;
         fileMenuStateHandler = (s32 (*)())fileLoadIconFileAndBeginSlotReset;
     } else {
         D_003BC824 = 0;

@@ -53,6 +53,7 @@
 #include "kwln_task_create.h"
 #include "kwln_fade.h"
 #include "dat_state.h"
+#include "dat_new_cycle_state.h"
 #include "dat_world_field_flags.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
@@ -718,7 +719,7 @@ void fldToggleWorldNodeState(s64 clearMode) {
 }
 
 void fldPrepareDeferredSceneTransition(void) {
-    if (DDS3_GBWK->header.transition != 0) {
+    if (DDS3_GBWK->header.transition != DAT_NEW_CYCLE_STATE_INACTIVE) {
         sdfResetGameRuntime(1);
     } else {
         sdfResetGameRuntime(0);
@@ -750,7 +751,7 @@ void fldMainLoadStart(void) {
     if (fileGetSelectionPendingFlag() == FILE_SELECTION_FLOW_PENDING) {
         return;
     }
-    if (DDS3_GBWK->header.transition != 0) {
+    if (DDS3_GBWK->header.transition != DAT_NEW_CYCLE_STATE_INACTIVE) {
         mode = 1;
         dds3AdminiCallSequence(0x1E, &mode, 4, 0);
         return;

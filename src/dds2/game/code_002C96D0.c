@@ -46,6 +46,7 @@
 #include "file_slot.h"
 #include "file_save_record.h"
 #include "dat_state.h"
+#include "dat_new_cycle_state.h"
 #include "mnu_list.h"
 #include "pcp_vu0.h"
 #include "sdf_vu_transform_api.h"
@@ -2422,18 +2423,18 @@ s32 fileDrawSlotListAndPreview(s32 work) {
                 u32 bannerColor;
 
                 if (mcdOriginalTitleFileMode != 0) {
-                    if (fileSavePreviewRecords[slot].newCycle != 0) {
+                    if (fileSavePreviewRecords[slot].newCycle != DAT_NEW_CYCLE_STATE_INACTIVE) {
                         mcdCreateConfiguredDrawHandle(0x40, y + 0x20, titleColor, fileOriginalTitleNewCycleClearedGameLabel);
                     } else if (fileSavePreviewRecords[slot].status != 0) {
                         mcdCreateConfiguredDrawHandle(0x40, y + 0x20, titleColor, fileOriginalTitleClearedGameLabel);
                     }
-                } else if (fileSavePreviewRecords[slot].newCycle != 0) {
+                } else if (fileSavePreviewRecords[slot].newCycle != DAT_NEW_CYCLE_STATE_INACTIVE) {
                     mcdCreateConfiguredDrawHandle(0x40, y + 0x20, detailColor, fileNewCycleLabel);
                 }
                 bannerColor = (alpha << 24) | 0x808080;
                 evtSubmitTexturedGradientQuad(0x88, y + 4, 0x137, 0x1F, 4, 0x1C5, 0x137, 0x1F, bannerColor, bannerColor, bannerColor, bannerColor, (struct sdfTexHandle_t *)(u32)(D_00437D78));
                 preview = &fileSavePreviewRecords[slot];
-                if (preview->newCycle == 0) {
+                if (preview->newCycle == DAT_NEW_CYCLE_STATE_INACTIVE) {
                     if (mcdOriginalTitleFileMode == 0) {
                         if (preview->mapGroup == 0) {
                             mcdCreateConfiguredDrawHandle(0xF0, y, detailColor, D_003A41A8[preview->mapIndex]);
@@ -2465,7 +2466,7 @@ s32 fileDrawSlotListAndPreview(s32 work) {
                     u32 highlightColor = ((D_003E8008[0] + 0x80) << 24) | 0x808080;
                     evtSubmitTexturedGradientQuad(0x1F, y, 0x1BB, 0x68, 3, 3, 0x1BB, 0x68, highlightColor, highlightColor, highlightColor, highlightColor, (struct sdfTexHandle_t *)(u32)(D_00437D60));
                 }
-                if (fileSavePreviewRecords[slot].newCycle == 0) {
+                if (fileSavePreviewRecords[slot].newCycle == DAT_NEW_CYCLE_STATE_INACTIVE) {
                     if (mcdOriginalTitleFileMode != 0) {
                         if (fileSavePreviewRecords[slot].status != 0) {
                             partyColor = (alpha << 24) | 0x808080;
@@ -2731,7 +2732,7 @@ void fileStartMemoryCardMenuForMode(s32 mode) {
         evtBitOn(0xBA0);
         DDS3_GBWK->header.status =
             (u16)DDS3_GBWK->header.status + 1;
-        DDS3_GBWK->header.transition = 1;
+        DDS3_GBWK->header.transition = DAT_NEW_CYCLE_STATE_ACTIVE;
         fileMenuStateHandler = (s32 (*)())fileLoadIconFileAndBeginSlotReset;
     } else {
         D_00437D0C = 0;

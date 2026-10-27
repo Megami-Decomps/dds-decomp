@@ -17,7 +17,7 @@ typedef struct DatStateHeader {
     u8 pad06[2];
     s32 playTicks;
     s16 status; /* 0x0C: copied to the memory-card preview status field. */
-    s16 transition;
+    s16 transition; /* 0x0E: New Cycle save flag; selects the runtime reset path. */
     s8 partyIds[8];
     s8 partyLevels[8];
     u32 savedMoney; /* 0x20: save-slot money copied to and from the live currency. */

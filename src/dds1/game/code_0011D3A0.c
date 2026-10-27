@@ -34,6 +34,7 @@
 #include "dds3_world_primary.h"
 #include "mdl.h"
 #include "dat_state.h"
+#include "dat_new_cycle_state.h"
 #include "kwln_task_lifecycle.h"
 /* Declared before first use (were implicit int). */
 extern s32 fldDoor_ElvTakasaToFloor(s32 index);
@@ -1773,7 +1774,7 @@ void fldResetFieldRuntimeState(FldRuntimeResetMode mode) {
         DDS3_GBWK->header.saveFlags1 = 0;
         DDS3_GBWK->header.saveFlags2 = 0;
         DDS3_GBWK->header.status = 0;
-        DDS3_GBWK->header.transition = 0;
+        DDS3_GBWK->header.transition = DAT_NEW_CYCLE_STATE_INACTIVE;
     }
 }
 

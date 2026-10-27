@@ -54,6 +54,7 @@
 #include "dds3_world_selection.h"
 #include "mdl.h"
 #include "dat_state.h"
+#include "dat_new_cycle_state.h"
 #include "dat_world_field_flags.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
@@ -570,7 +571,7 @@ void fldSetDeferredFieldCommand(u32, u32);
 extern void dds3AdminiCallSequence(s32, const void *, u32, s32);
 
 void fldPrepareDeferredSceneTransition(void) {
-    if (DDS3_GBWK->header.transition != 0) {
+    if (DDS3_GBWK->header.transition != DAT_NEW_CYCLE_STATE_INACTIVE) {
         sdfResetGameRuntime(1);
     } else {
         sdfResetGameRuntime(0);
@@ -601,7 +602,7 @@ void fldMainLoadStart(void) {
     if (fileGetSelectionPendingFlag() == FILE_SELECTION_FLOW_PENDING) {
         return;
     }
-    if (DDS3_GBWK->header.transition != 0) {
+    if (DDS3_GBWK->header.transition != DAT_NEW_CYCLE_STATE_INACTIVE) {
         fldPrepareDeferredSceneTransition();
         return;
     }
