@@ -7,6 +7,7 @@
 #include "sdf_resource.h"
 
 #include "scr.h"
+#include "scr_procedure_start_api.h"
 #include "scr_instruction_stream_api.h"
 #include "scr_work_task_api.h"
 #include "bf_flw0_header.h"
@@ -145,12 +146,13 @@ void scrDestroyAllNamedProcesses(void)
 }
 
 /* Start a procedure on a script process: copy its name, set pc, clear the stack and timers. */
-s32 scrStartProcessProcedure(scrProcessWork_s *process, ScrProcedureIndex procedureIndex)
+ScrProcedureStartResult scrStartProcessProcedure(scrProcessWork_s *process,
+    ScrProcedureIndex procedureIndex)
 {
     s32 cursor;
 
     if (procedureIndex < 0 || procedureIndex >= process->sections->count) {
-        return 0;
+        return SCR_PROCEDURE_START_INVALID_INDEX;
     }
     for (cursor = 0; (process->name[cursor] = process->procedures[procedureIndex].name[cursor]) != 0; cursor++) {
     }
@@ -168,7 +170,7 @@ s32 scrStartProcessProcedure(scrProcessWork_s *process, ScrProcedureIndex proced
     process->procedureIndex = procedureIndex;
     process->timer = 0;
     process->cmdTimer = 0;
-    return 1;
+    return SCR_PROCEDURE_START_INITIALIZED;
 }
 
 /* Find the node whose name matches, or NULL when the table is exhausted. */

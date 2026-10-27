@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "common.h"
 #include "bf_flw0_header.h"
+#include "scr_procedure_start_api.h"
 #include "evt_script_context.h"
 #include "evt_solar.h"
 #include "evt_random_status_clear_api.h"
@@ -508,9 +509,6 @@ extern s32 D_00386288[];
 extern u32 mnuSetPartyEntryCurrentId(datUnitWork_t *, u32);
 
 extern void scrRemoveAvailableSkillFlagAndSlot(datUnitWork_t *, u16);
-
-
-extern s32 scrStartProcessProcedure(scrProcessWork_s *context, ScrProcedureIndex procedureIndex);
 
 
 extern s32 btlAverageAllCurrentForMask(u32 partyRecordFlagsMask);

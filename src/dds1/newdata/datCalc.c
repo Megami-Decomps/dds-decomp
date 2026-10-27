@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "common.h"
 #include "bf_flw0_header.h"
+#include "scr_procedure_start_api.h"
 #include "evt_script_context.h"
 #include "evt_solar.h"
 #include "evt_random_status_clear_api.h"
@@ -1283,8 +1284,6 @@ EvtRandomStatusClearResult evtClearRandomStatusFlags(void) {
     } while (remaining >= 0);
     return clearedAny;
 }
-
-extern s32 scrStartProcessProcedure(scrProcessWork_s *context, ScrProcedureIndex procedureIndex);
 
 /* Step the script with these context values; clear the written flag, not the stored result. */
 s32 evtRunContext(ScrProcedureIndex procedureIndex, s32 firstArgument, s32 secondArgument, s32 commandIndex, u16 options) {
