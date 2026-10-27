@@ -2,6 +2,7 @@
 #include "evt_run_context_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_selected_entry_api.h"
 #include "btl_quarter_health_result.h"
 #include "btl_actor_command_selector_value_api.h"
 #include "btl_resolve_unit_value_api.h"
@@ -69,8 +70,6 @@ extern s32 btlGetEnemyMoney(BtlUnit *, BtlUnit *);
 
 extern u32 btlGetAdjustedSlotAffinity(BtlUnit *, s32, s32);
 
-
-extern s32 btlGetActionRecordLookupValue(s32);
 
 u32 btlEncodeActorIndexAsSelectionMask(u32 id);
 
@@ -649,17 +648,17 @@ s32 btlSelectedEntryHitsElement(BtlUnit *source, BtlUnit *unit, s32 selectorInde
     return (D_003B4F78[maskTableIndex * 3] & selectionMask) != 0;
 }
 
-s32 btlGetActionRecordLookupValue(s32 actionRecordIndex) {
+s32 btlGetActionRecordLookupValue(BtlCommandId commandId) {
     u16 lookupTableIndex;
 
-    lookupTableIndex = datCommandRecords[actionRecordIndex].commandEffectId;
+    lookupTableIndex = datCommandRecords[commandId].commandEffectId;
     return D_003B4F70[lookupTableIndex * 3];
 }
 
 u8 btlTestSelectedItemCategoryMask(BtlUnit *unit, s32 actorIndex) {
-    s32 selectedEntryIndex = unit->selectedEntryIndex;
+    BtlCommandId selectedEntryIndex = unit->selectedEntryIndex;
     u16 maskTableIndex;
-    if (selectedEntryIndex == -1) {
+    if (selectedEntryIndex == BTL_COMMAND_ID_INVALID) {
         return 0;
     }
     maskTableIndex = datCommandRecords[selectedEntryIndex].commandEffectId;
@@ -667,20 +666,20 @@ u8 btlTestSelectedItemCategoryMask(BtlUnit *unit, s32 actorIndex) {
 }
 
 s32 fldGetSelectedUnitStat(BtlUnit *unit) {
-    s32 index = unit->selectedEntryIndex;
-    if (index == -1) {
+    BtlCommandId commandId = unit->selectedEntryIndex;
+    if (commandId == BTL_COMMAND_ID_INVALID) {
         return 0;
     }
-    return btlGetActionRecordLookupValue(index);
+    return btlGetActionRecordLookupValue(commandId);
 }
 
 s32 btlGetSelectedCommandEffectTint(BtlUnit *unit) {
-    s32 index = unit->selectedEntryIndex;
+    BtlCommandId commandId = unit->selectedEntryIndex;
     u16 commandEffectId;
-    if (index == -1) {
+    if (commandId == BTL_COMMAND_ID_INVALID) {
         return 0;
     }
-    commandEffectId = datCommandRecords[index].commandEffectId;
+    commandEffectId = datCommandRecords[commandId].commandEffectId;
     return D_003B4F74[commandEffectId * 3];
 }
 

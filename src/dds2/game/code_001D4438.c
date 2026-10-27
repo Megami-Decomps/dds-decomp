@@ -11,6 +11,7 @@
 #include "eff_random.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_command_id.h"
 #include "btl_unit_geometry_api.h"
 #include "btl_horizontal_aim_api.h"
 #include "btl_camera_mode_index.h"
@@ -3683,7 +3684,7 @@ void btlStartActorDefeatTransition(ActionStateLink *command) {
     s32 entryFlags;
     s32 result;
 
-    actor->selectedEntryIndex = -1;
+    actor->selectedEntryIndex = BTL_COMMAND_ID_INVALID;
     btlRaisePartyRecordStatusValue(profile, 0x4000);
     btlGetSideIndexedActorStatusTable(actor->resourceKind, actor->resourceIndex);
     if (!(command->pendingFlags & 0x100)) {
@@ -3810,7 +3811,7 @@ void btlCommandTaskReleaseActor(ActionStateLink *task) {
                 BtlUnit *model = task->unit;
                 SDF_VU0_COPYVECTOR(model->currentPosition, model->position);
                 SDF_VU0_COPYVECTOR(model->orientation, model->rotation);
-                model->selectedEntryIndex = -1;
+                model->selectedEntryIndex = BTL_COMMAND_ID_INVALID;
             }
             task->unit = 0;
             task->pendingFlags &= ~8;

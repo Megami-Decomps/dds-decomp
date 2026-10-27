@@ -9,6 +9,7 @@
  * `bnez s1` slot instead of filling it unannulled.
  */
 #include "common.h"
+#include "btl_selected_entry_api.h"
 #include "btl_actor_command_selector_value_api.h"
 #include "btl_action_press_result.h"
 #include "btl_command_availability_override.h"
@@ -393,8 +394,6 @@ s32 btlRollFearChance(s32 unused, BtlUnit *unit, u32 flags, BtlActionPressResult
     return (s32)btlRollAiBucket() < ratio;
 }
 
-extern s32 btlGetActionRecordLookupValue(s32 actionRecordIndex);
-
 s32 btlRollAllFearChance(s32 unused, BtlUnit *unit, u32 flags, s32 unusedFlags,
                   u8 useSelectedAction) {
     s32 actionThreshold;
@@ -408,7 +407,7 @@ s32 btlRollAllFearChance(s32 unused, BtlUnit *unit, u32 flags, s32 unusedFlags,
     actionThreshold = 0;
     statusThreshold = 0;
     if (useSelectedAction != 0) {
-        if (unit->selectedEntryIndex == -1) {
+        if (unit->selectedEntryIndex == BTL_COMMAND_ID_INVALID) {
             return 0;
         }
         category = btlGetActionRecordLookupValue(unit->selectedEntryIndex);

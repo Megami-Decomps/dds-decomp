@@ -6,6 +6,7 @@
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "common.h"
+#include "btl_selected_entry_api.h"
 #include "btl_unit_model_progress_api.h"
 #include "btl_quarter_health_result.h"
 #include "btl_horizontal_aim_api.h"
@@ -559,8 +560,6 @@ extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 
 extern s32 btlSelectedEntryHitsElement(BtlUnit *, BtlUnit *, s32);
 
-extern s32 btlGetActionRecordLookupValue(s32);
-
 extern s32 btlResolveCommandHitResult(BtlUnit *, BtlUnit *, s32);
 
 extern u8 btlSelectCommandHitCount(BtlUnit *, s32);
@@ -634,7 +633,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
     BtlCommandId command;
     u32 costError;
     s32 helperResult;
-    s32 counterCommand;
+    BtlCommandId counterCommand;
     s32 reflectedHp;
     s32 targetIndex;
     s32 hitIndex;
@@ -1517,8 +1516,6 @@ BtlRuntimeTask *btlCreateMaskedActorEntryUpdateTask(BtlUnit *unit, BtlOperandEnt
     memcpy(&args->operand, block, sizeof(*block));
     return task;
 }
-
-extern void btlSetActorSelectedEntryIndex(BtlUnit *actor, u32 index);
 
 u32 btlApplyQueuedActorEntrySelection(BtlOperandTaskArgs *taskArgs) {
     if (0 < taskArgs->operand.entrySelection) {
@@ -5149,7 +5146,7 @@ void btlUpdateActorModelColorAndLinks(void) {
 }
 
 void btlResetUnitLinks(BtlUnit *unit) {
-    unit->selectedEntryIndex = -1;
+    unit->selectedEntryIndex = BTL_COMMAND_ID_INVALID;
     unit->pendingSkillNameIndex = BTL_SKILL_NAME_INDEX_NONE;
     unit->status.flags = 0;
     unit->status.stateFlags = 0;
@@ -5170,7 +5167,7 @@ BtlUnit *btlCreateUnit(void) {
     unit->owner = btlAdvanceRuntimeSequenceCounter();
     unit->status.flags = 0;
     unit->status.stateFlags = 0;
-    unit->lookupId = unit->selectedEntryIndex = -1;
+    unit->lookupId = unit->selectedEntryIndex = BTL_COMMAND_ID_INVALID;
     unit->partyIndex = 6;
     unit->gunResourceFlags = 0;
     unit->effectLink.referenceCount = 0;

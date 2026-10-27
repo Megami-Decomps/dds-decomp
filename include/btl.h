@@ -154,7 +154,7 @@ typedef struct BtlUnit {
     u8 partyIndex; /* 0x2C4: saved party-entry index, read with lbu. */
     u8 pad2C5;
     BtlUnitEntrySlot entrySlots[7]; /* 0x2C6 */
-    s32 selectedEntryIndex; /* 0x2F0: -1 denotes no selected entry. */
+    s32 selectedEntryIndex; /* 0x2F0: command-record index; -1 denotes no selected entry. */
     s32 pendingSkillNameIndex; /* 0x2F4: skill-name override index; -1 uses the action skill. */
     struct SoundResourceNode *resourceNode; /* 0x2F8: owned system-effect resource. */
     struct SoundResourceLink *resourceLink; /* 0x2FC: linked model-resource task. */
@@ -242,7 +242,7 @@ typedef struct BtlUnit {
     u8 partyIndex; /* 0x2E4: saved party-entry index, read with lbu. */
     u8 pad2E5;
     BtlUnitEntrySlot entrySlots[7]; /* 0x2E6: btlClearActorEntrySlot clears each signed record. */
-    s32 selectedEntryIndex; /* 0x310: -1 denotes no selected entry. */
+    s32 selectedEntryIndex; /* 0x310: command-record index; -1 denotes no selected entry. */
     s32 pendingSkillNameIndex; /* 0x314: skill-name override index; -1 uses the action skill. */
     struct SoundResourceNode *resourceNode; /* 0x318: owned system-effect resource, as DDS1's +0x2F8. */
     struct SoundResourceLink *resourceLink; /* 0x31C: linked model-resource task. */

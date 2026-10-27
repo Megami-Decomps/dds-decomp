@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_selected_entry_api.h"
 #include "btl_quarter_health_result.h"
 #include "btl_actor_command_selector_value_api.h"
 #include "evt_run_context_api.h"
@@ -517,17 +518,17 @@ s32 btlSelectedEntryHitsElement(BtlUnit *source, BtlUnit *unit, s32 selectorInde
     return (D_00358518[maskTableIndex * 3] & selectionMask) != 0;
 }
 
-s32 btlGetActionRecordLookupValue(s32 actionRecordIndex) {
+s32 btlGetActionRecordLookupValue(BtlCommandId commandId) {
     u16 lookupTableIndex;
 
-    lookupTableIndex = datCommandRecords[actionRecordIndex].commandEffectId;
+    lookupTableIndex = datCommandRecords[commandId].commandEffectId;
     return D_00358510[lookupTableIndex * 3];
 }
 
 u8 btlTestSelectedItemCategoryMask(BtlUnit *unit, s32 actorIndex) {
-    s32 selectedEntryIndex = unit->selectedEntryIndex;
+    BtlCommandId selectedEntryIndex = unit->selectedEntryIndex;
     u16 maskTableIndex;
-    if (selectedEntryIndex == -1) {
+    if (selectedEntryIndex == BTL_COMMAND_ID_INVALID) {
         return 0;
     }
     maskTableIndex = datCommandRecords[selectedEntryIndex].commandEffectId;
@@ -535,16 +536,16 @@ u8 btlTestSelectedItemCategoryMask(BtlUnit *unit, s32 actorIndex) {
 }
 
 s32 fldGetSelectedUnitStat(BtlUnit *unit) {
-    s32 selectedEntryIndex = unit->selectedEntryIndex;
-    if (selectedEntryIndex == -1) {
+    BtlCommandId selectedEntryIndex = unit->selectedEntryIndex;
+    if (selectedEntryIndex == BTL_COMMAND_ID_INVALID) {
         return 0;
     }
     return btlGetActionRecordLookupValue(selectedEntryIndex);
 }
 
 s32 btlGetSelectedCommandEffectTint(BtlUnit *unit) {
-    s32 selectedEntryIndex = unit->selectedEntryIndex;
-    if (selectedEntryIndex == -1) {
+    BtlCommandId selectedEntryIndex = unit->selectedEntryIndex;
+    if (selectedEntryIndex == BTL_COMMAND_ID_INVALID) {
         return 0;
     }
     return D_00358514[datCommandRecords[selectedEntryIndex].commandEffectId * 3];

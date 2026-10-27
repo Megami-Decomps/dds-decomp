@@ -2,6 +2,7 @@
 #include "evt_run_context_api.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_command_id.h"
 #include "btl_unit_geometry_api.h"
 #include "btl_horizontal_aim_api.h"
 #include "btl_action_reaction_motion.h"
@@ -2951,7 +2952,7 @@ void btlStartActorDefeatTransition(BtlTask *commandTask) {
     s32 entryFlags;
     s32 result;
 
-    actor->selectedEntryIndex = -1;
+    actor->selectedEntryIndex = BTL_COMMAND_ID_INVALID;
     btlRaisePartyRecordStatusValue(&actor->partyRecord, 0x4000);
     btlGetSideIndexedActorStatusTable(actor->resourceKind, actor->species);
     if (!(commandTask->flags & 0x100)) {

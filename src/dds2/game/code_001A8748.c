@@ -4,6 +4,7 @@
 #include "fld_next_scene_request_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_selected_entry_api.h"
 #include "btl_actor_command_selector_value_api.h"
 #include "pty_active_roster_index_api.h"
 #include "dat_assigned_item_id.h"
@@ -1414,14 +1415,14 @@ void btlClearPartyRecordStatusBits(datUnitWork_t *record, s32 mask) {
     datResetBadStat(record, mask);
 }
 
-/* Set the actor's selected entry index. */
-void btlSetActorSelectedEntryIndex(BtlUnit *actor, u32 index) {
-    actor->selectedEntryIndex = index;
+/* Set the actor's selected command-record index. */
+void btlSetActorSelectedEntryIndex(BtlUnit *actor, BtlCommandId commandId) {
+    actor->selectedEntryIndex = commandId;
 }
 
-/* No selected entry is represented by -1. */
+/* BTL_COMMAND_ID_INVALID represents no selected entry. */
 void btlClearActorSelectedEntryIndex(BtlUnit *actor) {
-    actor->selectedEntryIndex = -1;
+    actor->selectedEntryIndex = BTL_COMMAND_ID_INVALID;
 }
 
 /* Initialize enemy vitals/stats and pack its nonzero skill IDs into the party record. */

@@ -14,6 +14,7 @@
 #include "fld_next_scene_request_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_selected_entry_api.h"
 #include "btl_command_use_error.h"
 #include "btl_actor_command_selector_value_api.h"
 #include "btl_action_press_result.h"
@@ -690,8 +691,6 @@ s32 btlRollFearChance(s32 unused, BtlUnit *unit, s32 flagsA, BtlActionPressResul
     return btlRollAiBucket() < threshold;
 }
 
-extern s32 btlGetActionRecordLookupValue(s32);
-
 extern s32 fldCountSceneSlots(void);
 
 /* Combine both contributions; groups of three or more suppress the 30% case. */
@@ -710,7 +709,7 @@ s32 btlRollAllFearChance(s32 unused, BtlUnit *unit, u32 flags,
     actionThreshold = 0;
     statusThreshold = 0;
     if (useSelectedAction != 0) {
-        if (unit->selectedEntryIndex == -1) {
+        if (unit->selectedEntryIndex == BTL_COMMAND_ID_INVALID) {
             return 0;
         }
         category = btlGetActionRecordLookupValue(unit->selectedEntryIndex);

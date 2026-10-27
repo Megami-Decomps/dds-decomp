@@ -70,7 +70,7 @@ typedef struct BtlOperandEntry {
     u32 entryChangeMask;
     s16 entryChange;
     u16 entryChangeFlags;
-    s32 entrySelection;
+    s32 entrySelection; /* Counter command to retain; zero means no selected entry. */
     s32 hpRecovery;
     s32 mpRecovery;
     u16 deferredStatus;

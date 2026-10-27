@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_selected_entry_api.h"
 #include "btl_area_load_phase.h"
 #include "btl_rain_effect_api.h"
 #include "btl_script_resource_api.h"
@@ -276,7 +277,6 @@ extern void btlApplyMaskedActorEntryAdjustments(BtlUnit *unit, u32 flags, s16 de
 extern void btlClearUnitStatusMask(void);
 extern void btlCopyUnitStats(BtlUnit *unit, datUnitWork_t *source);
 extern void btlInitializePartyRecordFromEnemy(datUnitWork_t *entry, s32 index);
-extern void btlSetActorSelectedEntryIndex(BtlUnit *actor, u32 index);
 
 void btlInitializeBattleUnits(BtlState *scene) {
     s32 battleMode;

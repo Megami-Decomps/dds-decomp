@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "evt_run_context_api.h"
 #include "common.h"
+#include "btl_selected_entry_api.h"
 #include "btl_actor_command_selector_value_api.h"
 #include "pty_active_roster_index_api.h"
 #include "btl_command_use_error.h"
@@ -97,14 +98,14 @@ void btlClearPartyRecordStatusBits(datUnitWork_t *record, s32 mask) {
     datResetBadStat(record, mask);
 }
 
-/* Set the actor's selected entry index. */
-void btlSetActorSelectedEntryIndex(BtlUnit *actor, u32 index) {
-    actor->selectedEntryIndex = index;
+/* Set the actor's selected command-record index. */
+void btlSetActorSelectedEntryIndex(BtlUnit *actor, BtlCommandId commandId) {
+    actor->selectedEntryIndex = commandId;
 }
 
-/* No selected entry is represented by -1. */
+/* BTL_COMMAND_ID_INVALID represents no selected entry. */
 void btlClearActorSelectedEntryIndex(BtlUnit *actor) {
-    actor->selectedEntryIndex = -1;
+    actor->selectedEntryIndex = BTL_COMMAND_ID_INVALID;
 }
 
 
