@@ -9,6 +9,8 @@ extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 
 /* Add the party unit from script operand 0 and store its result in the VM. */
 s32 ptyScriptAddUnitAndReturnResult(void) {
-    scrSetIntReturnValue(ptyAddUnit(scrGetIntPara(0)));
+    DatUnitId unitId = scrGetIntPara(0);
+
+    scrSetIntReturnValue(ptyAddUnit(unitId));
     return 1;
 }

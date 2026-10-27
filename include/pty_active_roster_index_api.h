@@ -2,6 +2,7 @@
 #define PTY_ACTIVE_ROSTER_INDEX_API_H
 
 #include "common.h"
+#include "dat_unit_id.h"
 
 typedef s32 PtyActiveRosterIndex;
 enum {
@@ -12,7 +13,7 @@ enum {
 #define PTY_ACTIVE_ROSTER_INDEX_IS_NOT_FOUND(index) ((index) < 0)
 
 /* Find an occupied party-array entry by unit ID, or return NOT_FOUND. */
-PtyActiveRosterIndex dds3FindEntryIndex(s32 unitId);
+PtyActiveRosterIndex dds3FindEntryIndex(DatUnitId unitId);
 
 struct BtlUnit;
 

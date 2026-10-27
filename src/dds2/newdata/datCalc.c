@@ -464,7 +464,7 @@ ptyUnitMatchesAffinityRequirement(const datUnitWork_t *unit, s32 affinity, u8 re
 
 
 
-extern datUnitWork_t *dds3FindEntry(s32 unitId);
+extern datUnitWork_t *dds3FindEntry(DatUnitId unitId);
 
 extern scrProcessWork_s *evtWorkScriptTask;
 
@@ -599,7 +599,7 @@ u8 evtGetFlaggedRosterValue(datUnitWork_t *entry) {
     return *((u8 *)&datEnemyRecords[entry->unitId] + 4);
 }
 
-PtyActiveRosterIndex dds3FindEntryIndex(s32 unitId) {
+PtyActiveRosterIndex dds3FindEntryIndex(DatUnitId unitId) {
     PtyActiveRosterIndex slotIndex = 0;
     datUnitWork_t *entry = DDS3_GBWK->party;
     do {
@@ -931,7 +931,7 @@ u16 datGetLevelForDraw(const datUnitWork_t *entry) {
 }
 
 /* Find the first occupied party record for this unit ID, or return zero. */
-datUnitWork_t *dds3FindEntry(s32 unitId) {
+datUnitWork_t *dds3FindEntry(DatUnitId unitId) {
     s32 slotIndex = 0;
     datUnitWork_t *entry = DDS3_GBWK->party;
     do {
@@ -944,7 +944,7 @@ datUnitWork_t *dds3FindEntry(s32 unitId) {
     return 0;
 }
 
-PtyFrontlinePromotionResult ptyRebalanceFrontline(s32 unitId) {
+PtyFrontlinePromotionResult ptyRebalanceFrontline(DatUnitId unitId) {
     DatGameState *scanState;
     datUnitWork_t savedEntry;
     PtyActiveRosterIndex selectedIndex;
@@ -990,7 +990,7 @@ PtyFrontlinePromotionResult ptyRebalanceFrontline(s32 unitId) {
     return PTY_FRONTLINE_PROMOTION_PERFORMED;
 }
 
-u8 ptyIsPartyUnitPresent(s32 unitId) {
+u8 ptyIsPartyUnitPresent(DatUnitId unitId) {
     datUnitWork_t *entry;
 
     entry = dds3FindEntry(unitId);
@@ -1265,13 +1265,13 @@ void ptyMergeSavedUnitTemplates(datUnitWork_t *entry) {
     }
 }
 
-extern s32 ptyApplyUnlockedUnitStatBonusesOnce(s32 unitId);
+extern s32 ptyApplyUnlockedUnitStatBonusesOnce(DatUnitId unitId);
 extern s32 D_00386048[][4];
 
 /* Add a roster member to the first free party slot: initialise it from its saved template or by
  * roster kind, refill HP/MP, set its model flags and apply skill-boosted maxima. Returns the
  * slot, -1 if the member is already present or -2 if the party is full. */
-PtyAddUnitResult ptyAddUnitWithFlags(s32 unitId, PtyTemplateInitFlags initFlags) {
+PtyAddUnitResult ptyAddUnitWithFlags(DatUnitId unitId, PtyTemplateInitFlags initFlags) {
     datUnitWork_t *entry;
     datUnitWork_t *party;
     s32 slotIndex;
@@ -1348,11 +1348,11 @@ PtyAddUnitResult ptyAddUnitWithFlags(s32 unitId, PtyTemplateInitFlags initFlags)
     return slotIndex;
 }
 
-PtyAddUnitResult ptyAddUnit(s32 unitId) {
+PtyAddUnitResult ptyAddUnit(DatUnitId unitId) {
     return ptyAddUnitWithFlags(unitId, PTY_TEMPLATE_INIT_NONE);
 }
 
-PtyRemoveUnitResult ptyRemoveUnitWithFlags(s32 unitId, s32 flags) {
+PtyRemoveUnitResult ptyRemoveUnitWithFlags(DatUnitId unitId, s32 flags) {
     PtyActiveRosterIndex partyIndex;
     s32 i;
     s32 completeSlotCount;
@@ -1413,7 +1413,7 @@ PtyRemoveUnitResult ptyRemoveUnitWithFlags(s32 unitId, s32 flags) {
     return PTY_REMOVE_UNIT_RESULT_REMOVED;
 }
 
-PtyRemoveUnitResult ptyRemoveUnit(s32 unitId) {
+PtyRemoveUnitResult ptyRemoveUnit(DatUnitId unitId) {
     return ptyRemoveUnitWithFlags(unitId, 0);
 }
 

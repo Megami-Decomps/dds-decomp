@@ -442,7 +442,7 @@ extern EvtScriptContext evtWorkScriptContext;
 extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 extern struct scrProcessWork_s *scrSetIntReturnValue(s32 retVal);
 extern struct scrProcessWork_s *scrSetFloatReturnValue(f32 value);
-extern datUnitWork_t *dds3FindEntry(s32 unitId);
+extern datUnitWork_t *dds3FindEntry(DatUnitId unitId);
 extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 extern void ptyMergeStockSkills(datUnitWork_t *unit);
 extern u8 btlIsRuntimeAllocated(void);
@@ -524,7 +524,7 @@ u8 evtGetFlaggedRosterValue(datUnitWork_t *entry) {
     return datEnemyRecords[entry->unitId].pad04;
 }
 
-PtyActiveRosterIndex dds3FindEntryIndex(s32 unitId) {
+PtyActiveRosterIndex dds3FindEntryIndex(DatUnitId unitId) {
     datUnitWork_t *entry = DDS3_GBWK->party;
     PtyActiveRosterIndex slotIndex = 0;
 
@@ -826,7 +826,7 @@ u16 datGetLevelForDraw(const datUnitWork_t *entry) {
 }
 
 /* Find the first occupied party record for this unit ID, or return NULL. */
-datUnitWork_t *dds3FindEntry(s32 unitId) {
+datUnitWork_t *dds3FindEntry(DatUnitId unitId) {
     datUnitWork_t *entry = DDS3_GBWK->party;
     s32 slotIndex = 0;
 
@@ -846,7 +846,7 @@ datUnitWork_t *dds3FindEntry(s32 unitId) {
 
 
 /* Promote the selected roster entry into the current frontline boundary. */
-PtyFrontlinePromotionResult ptyRebalanceFrontline(s32 unitId) {
+PtyFrontlinePromotionResult ptyRebalanceFrontline(DatUnitId unitId) {
     DatGameState *scanState;
     datUnitWork_t savedEntry;
     const PtyActiveRosterIndex selectedIndex = dds3FindEntryIndex(unitId);
@@ -893,7 +893,7 @@ PtyFrontlinePromotionResult ptyRebalanceFrontline(s32 unitId) {
     return PTY_FRONTLINE_PROMOTION_PERFORMED;
 }
 
-u8 ptyIsPartyUnitPresent(s32 unitId) {
+u8 ptyIsPartyUnitPresent(DatUnitId unitId) {
     return dds3FindEntry(unitId) != 0;
 }
 
@@ -941,7 +941,7 @@ extern void evtCopyRosterTableValue(datUnitWork_t *);
 extern s32 D_0032ACA8[128];
 
 /* Restore or initialise the first free roster slot and publish its model flags. */
-PtyAddUnitResult ptyAddUnit(s32 unitId) {
+PtyAddUnitResult ptyAddUnit(DatUnitId unitId) {
     s32 gains[DAT_BASE_STAT_COUNT];
     datUnitWork_t *entry;
     s32 slotIndex;
@@ -1023,7 +1023,7 @@ PtyAddUnitResult ptyAddUnit(s32 unitId) {
 
 extern s32 D_0032ACA8[128];
 extern void evtBitOff(s32);
-PtyRemoveUnitResult ptyRemoveUnit(s32 unitId) {
+PtyRemoveUnitResult ptyRemoveUnit(DatUnitId unitId) {
     PtyActiveRosterIndex partyIndex = dds3FindEntryIndex(unitId);
     s32 i;
     s32 completeSlotCount;

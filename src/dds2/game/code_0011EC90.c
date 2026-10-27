@@ -12,9 +12,9 @@
 
 extern s32 mtrHasEnoughOwnedMantras(void);
 
-extern PtyAddUnitResult ptyAddUnitWithFlags(s32 unitId, PtyTemplateInitFlags initFlags);
+extern PtyAddUnitResult ptyAddUnitWithFlags(DatUnitId unitId, PtyTemplateInitFlags initFlags);
 
-extern PtyRemoveUnitResult ptyRemoveUnitWithFlags(s32 param0, s32 param1);
+extern PtyRemoveUnitResult ptyRemoveUnitWithFlags(DatUnitId unitId, s32 flags);
 
 extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
 
@@ -27,7 +27,7 @@ extern void scrSetSecondaryScriptFlag(datUnitWork_t *work, u16 index);
 
 
 s32 ptyScriptRemoveUnitAndReturnResult(void) {
-    s32 unitId = scrGetIntPara(0);
+    DatUnitId unitId = scrGetIntPara(0);
 
     scrSetIntReturnValue(ptyRemoveUnit(unitId) == PTY_REMOVE_UNIT_RESULT_REMOVED);
     return 1;
@@ -35,7 +35,7 @@ s32 ptyScriptRemoveUnitAndReturnResult(void) {
 
 /* Evaluate a two-operand VM expression and publish its result. */
 s32 ptyScriptAddUnitWithFlagsAndReturnResult(void) {
-    s32 unitId = scrGetIntPara(0);
+    DatUnitId unitId = scrGetIntPara(0);
     PtyTemplateInitFlags initFlags = scrGetIntPara(1);
 
     scrSetIntReturnValue(ptyAddUnitWithFlags(unitId, initFlags));
@@ -43,11 +43,11 @@ s32 ptyScriptAddUnitWithFlagsAndReturnResult(void) {
 }
 
 s32 ptyScriptRemoveUnitWithFlagsAndReturnResult(void) {
-    s32 firstOperand = scrGetIntPara(0);
-    s32 secondOperand = scrGetIntPara(1);
+    DatUnitId unitId = scrGetIntPara(0);
+    s32 flags = scrGetIntPara(1);
 
     scrSetIntReturnValue(
-        ptyRemoveUnitWithFlags(firstOperand, secondOperand) == PTY_REMOVE_UNIT_RESULT_REMOVED);
+        ptyRemoveUnitWithFlags(unitId, flags) == PTY_REMOVE_UNIT_RESULT_REMOVED);
     return 1;
 }
 
@@ -57,7 +57,7 @@ s32 scrCmdHasEnoughOwnedMantras(void) {
 }
 
 s32 scrCmdSetEntryFlagsInBothStores(void) {
-    s32 unitId = scrGetIntPara(0);
+    DatUnitId unitId = scrGetIntPara(0);
     u16 flagId = scrGetIntPara(1);
     PtyActiveRosterIndex index = dds3FindEntryIndex(unitId);
     s32 result = 0;

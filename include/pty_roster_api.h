@@ -2,6 +2,7 @@
 #define PTY_ROSTER_API_H
 
 #include "common.h"
+#include "dat_unit_id.h"
 
 struct datUnitWork_t;
 
@@ -12,7 +13,7 @@ enum {
 };
 
 /* Return the assigned party slot, or a PTY_ADD_UNIT_RESULT_* error. */
-PtyAddUnitResult ptyAddUnit(s32 unitId);
+PtyAddUnitResult ptyAddUnit(DatUnitId unitId);
 
 typedef s32 PtyRemoveUnitResult;
 enum {
@@ -21,7 +22,10 @@ enum {
 };
 
 /* Return whether a matching roster record was removed. */
-PtyRemoveUnitResult ptyRemoveUnit(s32 unitId);
+PtyRemoveUnitResult ptyRemoveUnit(DatUnitId unitId);
+
+/* Report whether an occupied party record has this unit ID. */
+u8 ptyIsPartyUnitPresent(DatUnitId unitId);
 
 typedef u8 PtyAffinityMatchResult;
 enum {

@@ -144,7 +144,7 @@ datUnitWork_t *btlGetActorEntryData(BtlUnit *actor) {
     return &actor->partyRecord;
 }
 
-datUnitWork_t *btlGetCurrentPartyEntryRecord(s32 unitId) {
+datUnitWork_t *btlGetCurrentPartyEntryRecord(DatUnitId unitId) {
     PtyActiveRosterIndex index;
 
     index = dds3FindEntryIndex(unitId);

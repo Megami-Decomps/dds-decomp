@@ -34,6 +34,7 @@
 #include "eff_transform.h"
 #include "dat_state.h"
 #include "dat_command.h"
+#include "dat_unit_id.h"
 #include "evt_unit.h"
 #include "mdl.h"
 #include "dds3obj.h"
@@ -42,7 +43,7 @@
 extern s32 btlGetSlotValueAdjustedForSpecialAbility(BtlUnit *battler, s32 slot);
 extern s32 btlHasMarkedEntry14(BtlLinkedCommand *command);
 extern s32 btlHasActiveSubtask(void);
-extern s32 ptyRebalanceFrontline(s32 rosterIndex);
+extern s32 ptyRebalanceFrontline(DatUnitId unitId);
 
 
 

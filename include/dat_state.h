@@ -102,7 +102,7 @@ typedef char EventRosterStatSizeCheck[sizeof(EventRosterStat) == 0x14 ? 1 : -1];
 typedef struct datUnitWork_t {
     u16 flags;
     u16 affinityTableIndex;
-    u16 unitId;
+    u16 unitId; /* 0x04: DatUnitId key stored at its native 16-bit width. */
     u16 hp;
     u16 maxHp;
     u16 mp;

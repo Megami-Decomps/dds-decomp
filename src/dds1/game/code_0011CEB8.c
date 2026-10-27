@@ -16,7 +16,9 @@ extern u32 ptyReturnOne();
 /* Remove the party unit specified by script operand 0 and return success to
  * the script VM, while writing whether a unit was actually removed. */
 u32 ptyScriptRemoveUnitAndReturnResult(void) {
-    scrSetIntReturnValue(ptyRemoveUnit(scrGetIntPara(0)) == PTY_REMOVE_UNIT_RESULT_REMOVED);
+    DatUnitId unitId = scrGetIntPara(0);
+
+    scrSetIntReturnValue(ptyRemoveUnit(unitId) == PTY_REMOVE_UNIT_RESULT_REMOVED);
     return 1;
 }
 

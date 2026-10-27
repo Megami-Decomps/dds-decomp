@@ -51,6 +51,7 @@
 #include "dat_state.h"
 #include "prf_current_record_view.h"
 #include "pty_skill_nibble_state.h"
+#include "pty_roster_api.h"
 #include "evt_stage_test.h"
 #include "kwln_task_lifecycle.h"
 #include "btl.h"
@@ -68,7 +69,6 @@ extern void fldActivatePendingSceneCommand(void);
 extern s32 itfGridLookupValueOrDefault(EffectSlotSet *resource, s32 resourceIndex);
 extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *resource, s32 resourceIndex, s32 x, s32 y, s32 width, s32 height);
 extern void kwlnDebugGraphSetEnabled(s8 enabled);
-extern u8 ptyIsPartyUnitPresent(s32 unitId);
 extern s32 sdfApplyCommandResults(s32 channel, datUnitWork_t *sourceRecord, datUnitWork_t *item);
 extern void sndDestroyFileQueueWrapper(struct SoundHandleNode *node);
 /* Original-style implicit int, kept: matched code depends on it: qsort, sndCreateSystemEffectHandle. */

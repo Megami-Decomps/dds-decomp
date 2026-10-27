@@ -147,7 +147,7 @@ extern void fldPrepareDeferredSceneTransition(void);
 extern void fileCopySaveHeaderNumbers(FileSavePreviewRecord *);
 extern void filePrintAccessoryLoadNotice(void);
 extern void fileSaveAndDisplayCurrentMoney(void);
-extern s32 ptyApplyUnlockedUnitStatBonusesOnce(s32);
+extern s32 ptyApplyUnlockedUnitStatBonusesOnce(DatUnitId unitId);
 extern u32 datComputeSkillBoostedMaxHp(datUnitWork_t *);
 extern u32 datComputeSkillBoostedMaxMp(datUnitWork_t *);
 extern void mtrMantraEventBitReset(void);
@@ -3582,7 +3582,7 @@ extern s8 (*D_00435E3C)[6];
 extern char D_0042B950[];
 
 /* Apply each unlocked story bonus once to the active party record. */
-s32 ptyApplyUnlockedUnitStatBonusesOnce(s32 unitId) {
+s32 ptyApplyUnlockedUnitStatBonusesOnce(DatUnitId unitId) {
     PtyActiveRosterIndex partyIndex;
     datUnitWork_t *party;
     s32 changed;

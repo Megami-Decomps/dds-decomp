@@ -2,6 +2,7 @@
 #define PTY_FRONTLINE_PROMOTION_API_H
 
 #include "common.h"
+#include "dat_unit_id.h"
 
 /* Whether a roster entry moved into the frontline. */
 typedef s32 PtyFrontlinePromotionResult;
@@ -10,6 +11,6 @@ enum {
     PTY_FRONTLINE_PROMOTION_PERFORMED = 1,
 };
 
-PtyFrontlinePromotionResult ptyRebalanceFrontline(s32 unitId);
+PtyFrontlinePromotionResult ptyRebalanceFrontline(DatUnitId unitId);
 
 #endif /* PTY_FRONTLINE_PROMOTION_API_H */
