@@ -139,7 +139,7 @@ typedef struct scrProcessWork_s {
     ScrStackValue stackValues[SCR_STACK_STORAGE_SLOT_COUNT];
     /* Borrowed FLW0 source views; the VM reads them but does not edit them. */
     const struct BfFlw0Header *scriptHeader;
-    const ScrSection *sections;
+    const ScrSection *procedureSection; /* FLW0 descriptor; count bounds the procedure table */
     const ScrLabel *procedures;
     const ScrLabel *labels;
     const ScrInstr *instructions;

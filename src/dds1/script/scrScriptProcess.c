@@ -146,7 +146,7 @@ ScrProcedureStartResult scrStartProcessProcedure(scrProcessWork_s *process,
 {
     s32 cursor;
 
-    if (procedureIndex < 0 || procedureIndex >= process->sections->count) {
+    if (procedureIndex < 0 || procedureIndex >= process->procedureSection->count) {
         return SCR_PROCEDURE_START_INVALID_INDEX;
     }
     for (cursor = 0; (process->name[cursor] = process->procedures[procedureIndex].name[cursor]) != 0; cursor++) {

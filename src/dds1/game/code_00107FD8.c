@@ -1925,7 +1925,7 @@ INCLUDE_RODATA(const s32, "game/code_00107FD8", D_0039E220);
 
 INCLUDE_RODATA(const s32, "game/code_00107FD8", D_0039E238);
 
-scrProcessWork_s *bfContextCreate(const BfFlw0Header *header, const ScrSection *sections,
+scrProcessWork_s *bfContextCreate(const BfFlw0Header *header, const ScrSection *procedureSection,
                         const ScrLabel *procedures, const ScrLabel *labels,
                         const ScrInstr *instructions, struct ItfMesSub *auxiliaryData,
                         const char *strings, ScrProcedureIndex procedureIndex) {
@@ -1934,9 +1934,9 @@ scrProcessWork_s *bfContextCreate(const BfFlw0Header *header, const ScrSection *
     ScrStackValueType *types;
     ScrStackValue *values;
 
-    if (header == NULL || sections == NULL || procedures == NULL ||
+    if (header == NULL || procedureSection == NULL || procedures == NULL ||
         instructions == NULL || procedureIndex < 0 ||
-        procedureIndex >= sections->count) {
+        procedureIndex >= procedureSection->count) {
         return NULL;
     }
     process = sdfChipAllocDirect(sizeof(scrProcessWork_s));
@@ -1955,7 +1955,7 @@ scrProcessWork_s *bfContextCreate(const BfFlw0Header *header, const ScrSection *
         *types++ = 0;
         values++->bits = 0;
     }
-    process->sections = sections;
+    process->procedureSection = procedureSection;
     process->labels = labels;
     process->instructions = instructions;
     process->strings = strings;

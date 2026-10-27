@@ -243,13 +243,13 @@ ScrCommandResult bfWaitCbCreateTask(void)
     {
         return SCR_COMMAND_RESULT_COMPLETE;
     }
-    if (procedureIndex < 0 || procedureIndex >= ctx->sections->count)
+    if (procedureIndex < 0 || procedureIndex >= ctx->procedureSection->count)
     {
         return SCR_COMMAND_RESULT_COMPLETE;
     }
     scrSetIntReturnValue(scrProcessHandleToVmInteger(scrRunScriptEx(
         ctx->task->priority + scrGetIntPara(1), ctx->scriptHeader,
-        ctx->sections, ctx->procedures, ctx->labels,
+        ctx->procedureSection, ctx->procedures, ctx->labels,
         ctx->instructions, ctx->auxiliaryData, ctx->strings, procedureIndex)));
     return SCR_COMMAND_RESULT_COMPLETE;
 }
