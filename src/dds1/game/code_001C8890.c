@@ -68,7 +68,6 @@ extern BtlRuntimeTask * btlCreateCommandSoundTask(BtlTask *, BtlCameraModeIndex 
 extern BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
 extern void btlDispatchCommandViaHookOrDefault(BtlTask *command, BattleIndexWork *argument);
 extern u32 btlGetActiveUnitId(void);
-extern BtlCommandBlockReason btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId);
 extern s32 btlGetStatusActionEffectId(BtlTask *task);
 extern void btlInitUnitFxDefaults(BtlUnit *fx);
 extern void btlInitializeBattleDebugMenu(void);
@@ -632,7 +631,7 @@ void btlUpdateCommandSelectionState(BtlTask *task) {
 }
 
 void btlCommandResultEffectSelect(BtlTask *task) {
-    s32 sel;
+    BtlCommandId commandId;
     BtlCommandBlockReason reason;
     s32 state;
 
@@ -646,11 +645,11 @@ void btlCommandResultEffectSelect(BtlTask *task) {
     case 7:
     case 8:
         if (state == 4) {
-            sel = btlGetLoggedIndexedCommandItem(task->indexWork.reference);
+            commandId = btlGetLoggedIndexedCommandItem(task->indexWork.reference);
         } else {
-            sel = task->indexWork.skillId;
+            commandId = task->indexWork.skillId;
         }
-        reason = btlGetCommandBlockReason(task, sel);
+        reason = btlGetCommandBlockReason(task, commandId);
         switch (reason) {
         case BTL_COMMAND_BLOCK_NO_RESTRICTED_UNIT:
             btlStartTask(btlCreateEffObjB(task->unit, 0x82));

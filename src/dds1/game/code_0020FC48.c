@@ -800,7 +800,7 @@ u16 btlDetermineCommandCounterEligibility(datUnitWork_t **entryList, s32 entryCo
 /* Query the command's block reason, freeing the temporary target list.
  * DDS1 additionally has the mode/flag gate returning 6. The final empty/all-
  * flagged-target reason is 9 here, versus 10 in DDS2. Zero means no block. */
-BtlCommandBlockReason btlGetCommandBlockReason(BtlTask *actionTask, s32 commandId) {
+BtlCommandBlockReason btlGetCommandBlockReason(BtlTask *actionTask, BtlCommandId commandId) {
     BtlUnit *ownerUnit;
     DatCommandRecord *commandRecord;
     BtlIndexList *targetList;

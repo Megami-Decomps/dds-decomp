@@ -66,7 +66,6 @@
 #include "btl_ai_table.h"
 /* Declared before first use (were implicit int). */
 extern u32 btlGetActiveUnitId(void);
-extern BtlCommandBlockReason btlGetCommandBlockReason(ActionStateLink *actionTask, s32 commandId);
 extern s32 btlGetLoggedIndexedCommandItem(s32 index);
 extern void btlInitializeBattleDebugMenu(void);
 extern s32 btlTestActorStatusPredicate(BtlUnit *unit);
@@ -1051,7 +1050,7 @@ void btlUpdateCommandSelectionState(ActionStateLink *task) {
 }
 
 void btlCommandResultEffectSelect(ActionStateLink *task) {
-    s32 selection;
+    BtlCommandId commandId;
 
     task->pendingFlags &= ~4;
     switch (task->indexWork.phase) {
@@ -1062,11 +1061,11 @@ void btlCommandResultEffectSelect(ActionStateLink *task) {
     case 7:
     case 8:
         if (task->indexWork.phase == 4) {
-            selection = btlGetLoggedIndexedCommandItem(task->indexWork.reference);
+            commandId = btlGetLoggedIndexedCommandItem(task->indexWork.reference);
         } else {
-            selection = task->indexWork.skillId;
+            commandId = task->indexWork.skillId;
         }
-        switch (btlGetCommandBlockReason(task, selection)) {
+        switch (btlGetCommandBlockReason(task, commandId)) {
         case BTL_COMMAND_BLOCK_NO_RESTRICTED_UNIT:
             btlStartTask(btlCreateEffObjB(task->unit, 0x82));
             sndSetStationedSeVolume(0xD);

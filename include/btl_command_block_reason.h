@@ -2,6 +2,7 @@
 #define BTL_COMMAND_BLOCK_REASON_H
 
 #include "common.h"
+#include "btl_command_id.h"
 
 typedef s32 BtlCommandBlockReason;
 
@@ -19,6 +20,16 @@ enum {
 enum {
     BTL_COMMAND_BLOCK_EMPTY_OR_ALL_FLAGGED_TARGETS = 10,
 };
+#endif
+
+#ifdef VERSION_DDS1
+struct BtlTask;
+BtlCommandBlockReason btlGetCommandBlockReason(
+    struct BtlTask *actionTask, BtlCommandId commandId);
+#elif defined(VERSION_DDS2)
+struct ActionStateLink;
+BtlCommandBlockReason btlGetCommandBlockReason(
+    struct ActionStateLink *actionTask, BtlCommandId commandId);
 #endif
 
 #endif /* BTL_COMMAND_BLOCK_REASON_H */
