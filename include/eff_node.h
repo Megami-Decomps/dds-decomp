@@ -42,7 +42,7 @@ typedef struct EffTypeOps {
 
 typedef char EffTypeOps_size_must_be_0x30[(sizeof(EffTypeOps) == 0x30) ? 1 : -1];
 
-extern EffTypeOps EffMajorTable[];
+extern const EffTypeOps EffMajorTable[];
 
 EffNode *dds3EffectCreate(u16 type, u16 arg, s32 parameter);
 void dds3EffectDelete(EffNode *node);
