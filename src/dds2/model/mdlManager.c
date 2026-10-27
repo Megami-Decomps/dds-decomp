@@ -50,6 +50,7 @@
 #include "dat_state.h"
 #include "dat_command.h"
 #include "file_request_api.h"
+#include "file_pac_load_api.h"
 #include "file_manager_api.h"
 #include "btl_group_id_entry.h"
 #include "mdl_grouped_parts_api.h"
@@ -1457,8 +1458,9 @@ s32 mdlFileLoad(s32 group, s32 id, MdlRegistrationMode registrationMode, const c
     completionJob->arg = registrationMode;
     completionJob->doneArg = callbackArg;
     completionJob->done = onComplete;
-    requestSlot = fileCreatePacLoadWork(requestPath, 0, 0,
-                                        (s32)mdlFileLoadCallback, (s32)completionJob);
+    requestSlot = fileCreatePacLoadWork(
+        requestPath, FILE_PAC_RESOURCE_ALLOCATION_DEFAULT, 0,
+        (s32)mdlFileLoadCallback, (s32)completionJob);
     completionJob->owner = requestSlot;
     if (onComplete == NULL) {
         pacSync((struct FileRequest *)requestSlot);

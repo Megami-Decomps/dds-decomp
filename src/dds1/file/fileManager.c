@@ -2,6 +2,7 @@
 #include "sdf_chip.h"
 #include "file.h"
 #include "sdf_pac_state.h"
+#include "file_pac_load_api.h"
 #include "file_request_cleanup_api.h"
 #include "file_pac_cleanup_api.h"
 #include "file_pac_completion_api.h"
@@ -125,14 +126,16 @@ void fileUnlinkCloseWait(FileManWork *work, FileTransferJob *job) {
 }
 
 /* Clear a PAC request, select its custom or standard packet callback, and
- * optionally apply extra packet setup for any nonzero flags. Queue its copied
- * name and completion context as kind one, returning the allocated work. No
- * failure guard. */
-struct FileRequest *pacLoadEx(const char *requestName, u32 flags, void *packetCallbackAddress, u32 onComplete, u32 userData) {
+ * choose the PAC payload allocator. Queue its copied name and completion
+ * context as kind one, returning the allocated work. No failure guard. */
+struct FileRequest *pacLoadEx(const char *requestName,
+                              FilePacResourceAllocationMode allocationMode,
+                              void *packetCallbackAddress, u32 onComplete,
+                              u32 userData) {
     FileRequest *request = sdfAllocAndClearQuadwords(sizeof(FileRequest));
 
     sdfPacInit(&request->packet, packetCallbackAddress);
-    if (flags != 0) {
+    if (allocationMode != FILE_PAC_RESOURCE_ALLOCATION_DEFAULT) {
         sdfPacSetFromTail(&request->packet);
     }
     fileLinkQueue(request, FILE_REQUEST_KIND_PAC, requestName,
@@ -140,14 +143,14 @@ struct FileRequest *pacLoadEx(const char *requestName, u32 flags, void *packetCa
     return request;
 }
 
-/* Queue PAC work without extra packet setup or completion context. */
+/* Queue PAC work with the default payload allocator and no completion context. */
 struct FileRequest *pacLoad(const char *requestName) {
-    return pacLoadEx(requestName, 0, 0, 0, 0);
+    return pacLoadEx(requestName, FILE_PAC_RESOURCE_ALLOCATION_DEFAULT, 0, 0, 0);
 }
 
-/* Queue PAC work with extra packet setup enabled and no completion context. */
+/* Queue PAC work with the high-address payload allocator and no completion context. */
 void pacLoadUseTail(const char *requestName) {
-    pacLoadEx(requestName, 1, 0, 0, 0);
+    pacLoadEx(requestName, FILE_PAC_RESOURCE_ALLOCATION_FROM_TAIL, 0, 0, 0);
 }
 
 /* Clear kind-zero request work and narrow allocationMode into byte three.

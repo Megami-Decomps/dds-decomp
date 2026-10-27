@@ -3,6 +3,7 @@
 #include "file.h"
 #include "file_pac.h"
 #include "sdf_pac_state.h"
+#include "file_pac_load_api.h"
 #include "file_request_cleanup_api.h"
 #include "file_pac_cleanup_api.h"
 #include "file_pac_completion_api.h"
@@ -128,16 +129,17 @@ void fileUnlinkCloseWait(FileManWork *work, FileTransferJob *job) {
 }
 
 /* Clear a PAC request, select its custom or standard packet callback, and
- * optionally apply extra packet setup for any nonzero flags. Queue its copied
- * name and completion context as kind one, returning the allocated work. No
- * failure guard. */
-struct FilePacRequest *fileCreatePacLoadWork(const char *requestName, s32 flags, void *packetCallbackAddress, s32 onComplete, s32 userData) {
+ * choose the PAC payload allocator. Queue its copied name and completion
+ * context as kind one, returning the allocated work. No failure guard. */
+struct FilePacRequest *fileCreatePacLoadWork(
+    const char *requestName, FilePacResourceAllocationMode allocationMode,
+    void *packetCallbackAddress, s32 onComplete, s32 userData) {
     FilePacRequest *request;
 
     printf("pac load %s\n", requestName);
     request = sdfAllocAndClearQuadwords(sizeof(FilePacRequest));
     sdfPacInit(&request->packet, packetCallbackAddress);
-    if (flags != 0) {
+    if (allocationMode != FILE_PAC_RESOURCE_ALLOCATION_DEFAULT) {
         sdfPacSetFromTail(&request->packet);
     }
     fileLinkQueue((FileRequest *)request, FILE_REQUEST_KIND_PAC, requestName,
@@ -145,14 +147,16 @@ struct FilePacRequest *fileCreatePacLoadWork(const char *requestName, s32 flags,
     return request;
 }
 
-/* Queue PAC work without extra packet setup or completion context. */
+/* Queue PAC work with the default payload allocator and no completion context. */
 struct FileRequest *pacLoad(const char *requestName) {
-    return (struct FileRequest *)fileCreatePacLoadWork(requestName, 0, 0, 0, 0);
+    return (struct FileRequest *)fileCreatePacLoadWork(
+        requestName, FILE_PAC_RESOURCE_ALLOCATION_DEFAULT, 0, 0, 0);
 }
 
-/* Queue PAC work with extra packet setup enabled and no completion context. */
+/* Queue PAC work with the high-address payload allocator and no completion context. */
 void pacLoadUseTail(const char *requestName) {
-    fileCreatePacLoadWork(requestName, 1, 0, 0, 0);
+    fileCreatePacLoadWork(requestName, FILE_PAC_RESOURCE_ALLOCATION_FROM_TAIL,
+                          0, 0, 0);
 }
 
 /* Clear kind-zero request work and narrow allocationMode into byte three.
