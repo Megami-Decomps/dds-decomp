@@ -9,7 +9,7 @@ struct SdfList;
 struct SdfListNode;
 struct dds3ProcessID_t;
 
-/* Caller-supplied description copied into one scheduled task entry (0x14). */
+/* Borrowed caller description copied into one scheduler-owned task entry (0x14). */
 typedef struct SdfTaskItemDesc {
     s32 key;                       /* 0x00 */
     s32 (*init)(void);             /* 0x04 */
@@ -96,11 +96,11 @@ typedef char TaskWork_layout_must_match_native_owner[
         ? 1 : -1];
 
 /* The list teardown callback is stored on TaskWork's backing list. */
-TaskWork *sdfCreateTaskWorker(char *, s32, s32, SdfTaskItemDesc *, SdfListCallback, void *);
+TaskWork *sdfCreateTaskWorker(char *, s32, s32, const SdfTaskItemDesc *, SdfListCallback, void *);
 TaskWork *sdfCreateNamedTaskWork(char *, SdfListCallback, void *);
 void sdfDestroyTaskResourceWork(TaskWork *);
 void sdfDestroyTaskWorkerTasks(TaskWork *);
-void sdfAttachTaskItem(TaskWork *, SdfTaskItemDesc *);
+void sdfAttachTaskItem(TaskWork *, const SdfTaskItemDesc *);
 void sdfRemoveTaskItem(TaskWork *, s32);
 SdfTaskEntry *sdfFindTaskItemValueByKey(TaskWork *, s32);
 SdfTaskWorkStepResult sdfTaskWorkStepEntry(TaskWork *work);
@@ -121,7 +121,7 @@ s32 sdfTaskWorkRunAll(struct dds3ProcessID_t *task);
 void sdfReleaseCurrentTaskOwnedResources(struct dds3ProcessID_t *task);
 
 void sdfSetTaskItemMode(TaskWork *, s32, u32);
-SdfTaskEntry *sdfCreateTaskEntry(SdfTaskItemDesc *);
+SdfTaskEntry *sdfCreateTaskEntry(const SdfTaskItemDesc *);
 
 /* Cleanup receives the entry itself; the list adapter receives it as value. */
 void sdfDestroyCallbackWork(SdfTaskEntry *entry);

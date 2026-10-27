@@ -115,7 +115,7 @@ void sdfDestroyTaskResourceWork(TaskWork *work) {
     }
 }
 
-SdfTaskEntry *sdfCreateTaskEntry(SdfTaskItemDesc *item) {
+SdfTaskEntry *sdfCreateTaskEntry(const SdfTaskItemDesc *item) {
     SdfTaskEntry *work = sdfChipAllocDirect(sizeof(*work));
 
     memset(work, 0, sizeof(*work));

@@ -703,7 +703,7 @@ u32 sdfReadPadDirectionMask(void) {
 }
 
 
-TaskWork *sdfCreateTaskWorker(char *name, s32 first, s32 second, SdfTaskItemDesc *item, SdfListCallback destroyCallback, void *userData) {
+TaskWork *sdfCreateTaskWorker(char *name, s32 first, s32 second, const SdfTaskItemDesc *item, SdfListCallback destroyCallback, void *userData) {
     TaskWork *work;
 
     work = sdfCreateNamedTaskWork(name, destroyCallback, userData);
@@ -736,7 +736,7 @@ s32 kwlnTaskExists(const char *name) {
     return dds3SearchProcessName(name) != NULL;
 }
 
-void sdfAttachTaskItem(TaskWork *work, SdfTaskItemDesc *item) {
+void sdfAttachTaskItem(TaskWork *work, const SdfTaskItemDesc *item) {
     SdfListNode *node = sdfListAppend(work->list, item->key, sdfCreateTaskEntry(item));
     if (work->currentNode == NULL) {
         work->currentNode = node;
@@ -835,7 +835,7 @@ void sdfDestroyTaskResourceWork(TaskWork *work) {
     }
 }
 
-SdfTaskEntry *sdfCreateTaskEntry(SdfTaskItemDesc *item) {
+SdfTaskEntry *sdfCreateTaskEntry(const SdfTaskItemDesc *item) {
     SdfTaskEntry *work = sdfChipAllocDirect(sizeof(SdfTaskEntry));
 
     memset(work, 0, 0x1C);
