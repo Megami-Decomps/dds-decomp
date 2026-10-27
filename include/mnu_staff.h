@@ -93,8 +93,6 @@ void mnuApplyResourceSelection(s32 itemId, MenuStaffContext *context);
 MnuStaffWindowEntryPresence mnuHasStaffWindowEntriesForItem(
     s32 itemId, MenuStaffContext *context);
 s32 mnuGetAbilityTargetCategory(u16 commandId);
-s32 mnuGetMatchingPartyEntryMask(struct datUnitWork_t *entry);
-s32 mnuFindMatchingPartyEntryIndex(struct datUnitWork_t *entry);
 s32 func_002C5A28(MenuPageWindow *page, u16 ability,
                   struct datUnitWork_t *target, struct datUnitWork_t *selected);
 s32 mnuTryUseFieldSkill(PartyPanel *party, MenuPageWindow *page,

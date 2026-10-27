@@ -35,6 +35,7 @@
 #include "mnu.h"
 #include "mnu_entry_cost_api.h"
 #include "mnu_popup_eligibility.h"
+#include "mnu_party_entry_lookup.h"
 #include "mnu_panel_state.h"
 #include "mnu_panel_state_prefix.h"
 #include "mnu_staff.h"
@@ -66,7 +67,6 @@ extern void sndDestroyFileQueueWrapper(struct SoundHandleNode *node);
 struct _FRQ;
 extern struct _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct _FRQ *);
 extern s32 frFontDrawGlyphChain(struct _FRQ *, s8, u32);
-extern s32 mnuGetMatchingPartyEntryMask(datUnitWork_t *);
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 extern char D_003BC7A0[];
 
@@ -1752,12 +1752,12 @@ void mnuPlayDefaultInputSounds(u32 inputFlags) {
 }
 
 /* Find the first occupied slot with the same table ID; zero also serves as no-match. */
-s32 mnuFindMatchingPartyEntryIndex(datUnitWork_t *targetEntry) {
+s32 mnuFindMatchingPartyEntryIndex(const datUnitWork_t *borrowedEntry) {
     s32 partyIndex;
-    datUnitWork_t *partyEntry = DDS3_GBWK->party;
+    const datUnitWork_t *partyEntry = DDS3_GBWK->party;
     for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++, partyEntry++) {
         if ((partyEntry->flags & 1) &&
-            targetEntry->unitId == partyEntry->unitId) {
+            borrowedEntry->unitId == partyEntry->unitId) {
             return partyIndex;
         }
     }
@@ -2295,12 +2295,12 @@ MnuPartyStatusIconIndex mnuGetPartyStatusIconIndex(const datUnitWork_t *partyRec
 }
 
 /* Return one bit for the first occupied matching table ID, or zero when absent. */
-s32 mnuGetMatchingPartyEntryMask(datUnitWork_t *targetEntry) {
+s32 mnuGetMatchingPartyEntryMask(const datUnitWork_t *borrowedEntry) {
     s32 partyIndex;
-    datUnitWork_t *partyEntry = DDS3_GBWK->party;
+    const datUnitWork_t *partyEntry = DDS3_GBWK->party;
     for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++, partyEntry++) {
         if ((partyEntry->flags & 1) &&
-            partyEntry->unitId == targetEntry->unitId) {
+            partyEntry->unitId == borrowedEntry->unitId) {
             return 1 << partyIndex;
         }
     }

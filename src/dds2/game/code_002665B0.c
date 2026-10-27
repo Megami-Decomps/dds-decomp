@@ -19,6 +19,7 @@
 #include "mnu_party_panel_api.h"
 #include "sdf_resource.h"
 #include "mnu_staff.h"
+#include "mnu_party_entry_lookup.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
 #include "kwln_fade.h"
@@ -842,7 +843,6 @@ s32 mnuPollTitleEffectsReady(MenuProgressHost *host) {
     return 0;
 }
 
-extern s32 mnuFindMatchingPartyEntryIndex(datUnitWork_t *);
 extern void mnuConfigurePartyPanelPage(s32, s32, s32, s32);
 
 void mnuSetupStaffMenuProfilePage(datUnitWork_t *entry, MenuProgressHost *host) {

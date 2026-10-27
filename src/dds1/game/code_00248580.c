@@ -20,6 +20,7 @@
 #include "fr_font.h"
 #include "itf_draw_grid.h"
 #include "mnu_staff.h"
+#include "mnu_party_entry_lookup.h"
 #include "sdf_resource.h"
 #include "mnu.h"
 #include "mnu_list.h"
@@ -73,7 +74,6 @@ extern s8 D_003BC3E1;
 
 
 
-extern s32 mnuFindMatchingPartyEntryIndex(datUnitWork_t *targetEntry);
 extern void mnuSetWindowResource(s32, MenuPageWindow *, s32, s32);
 extern void mnuAttachPartyIconBundle(s32, MenuPageWindow *, u32);
 extern MenuProfilePanel *mnuCreateProfilePanel(datUnitWork_t *selectionState);
