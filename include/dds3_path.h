@@ -85,6 +85,11 @@ struct dds3Basic_t;
 struct dds3PoseSet_t;
 struct WorldTransformParams;
 
+/* A pathless mover callback supplies a relative pose. The mover composes it
+ * into the target only for the exact apply result; all other words ignore it. */
+#define DDS3_MOVER_UPDATE_NO_RELATIVE_TRANSFORM ((s32)0)
+#define DDS3_MOVER_UPDATE_APPLY_RELATIVE_TRANSFORM ((s32)1)
+
 typedef s32 (*Dds3MoverUpdate)(struct dds3PoseSet_t *, struct dds3Basic_t *);
 
 /* Kind 3 allocates 0x10 bytes in MoverBasicConstructor. */

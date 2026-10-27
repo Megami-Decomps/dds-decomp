@@ -1428,7 +1428,7 @@ void fldCreateSecondaryWorldCamera(void) {
 }
 
 s32 fldPlayerCameraTargetNoPathUpdate(dds3PoseSet_t *relativeTransform, dds3Basic_t *target) {
-    return 0;
+    return DDS3_MOVER_UPDATE_NO_RELATIVE_TRANSFORM;
 }
 
 s32 fldLightMaIdxCalc(void) {

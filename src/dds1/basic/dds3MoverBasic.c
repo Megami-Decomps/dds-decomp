@@ -21,7 +21,7 @@ s32 MoverBasicMainprocuder(dds3Basic_t *moverNode)
     Dds3SlotResource *slotResource = moverNode->data;
     dds3Basic_t *targetObject = slotResource->target;
     dds3PoseSet_t *inner = targetObject->inner;
-    s32 (*updateCallback)(dds3PoseSet_t *, dds3Basic_t *);
+    Dds3MoverUpdate updateCallback;
     CameraData *cameraData;
     f32 fieldOfView;
 
@@ -61,7 +61,7 @@ s32 MoverBasicMainprocuder(dds3Basic_t *moverNode)
         inner->unkC8 = 0;
         if (updateCallback != NULL) {
             dds3BackupPoseSet(&relativeTransform);
-            if (updateCallback(&relativeTransform, targetObject) == 1) {
+            if (updateCallback(&relativeTransform, targetObject) == DDS3_MOVER_UPDATE_APPLY_RELATIVE_TRANSFORM) {
                 dds3GetSclPoseSetMCR(targetObject, (u128 *)relativeTransform.scale);
                 dds3AddRotPoseSet(targetObject, (u128 *)&relativeTransform.rotation);
                 dds3GetPosPoseSetMCR(targetObject, (u128 *)relativeTransform.position);
