@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_element_block_query_result.h"
 #include "btl_command_use_error.h"
 #include "btl_resolve_unit_value_api.h"
 #include "btl_actor_entry_code_api.h"
@@ -121,7 +122,6 @@ extern s32 btlActionMatchesStatMask(s32, s16, s8);
 
 extern s32 btlUnitBlocksElementQuery(BtlUnit *, s32, s32);
 
-extern s32 btlUnitBlocksElementQueryForGroup(BtlUnit *, s32, u32);
 
 extern u8 btlTestSelectedItemCategoryMask(BtlUnit *, s32);
 
@@ -1231,7 +1231,7 @@ s32 btlHasDistinctTargetSelection(s32 actor, s32 selection) {
 s32 btlAnyUnitPassesCheck200(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->next) {
-        if (btlUnitBlocksElementQueryForGroup(battler, action, 0x200) == 0) {
+        if (btlUnitBlocksElementQueryForGroup(battler, action, 0x200) == BTL_ELEMENT_BLOCK_QUERY_NOT_BLOCKED) {
             return 1;
         }
     }
@@ -1241,7 +1241,7 @@ s32 btlAnyUnitPassesCheck200(s32 unused, s32 action) {
 s32 btlCanQueryElementAgainstParty(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->next) {
-        if (btlUnitBlocksElementQueryForGroup(battler, action, 0x200) == 1) {
+        if (btlUnitBlocksElementQueryForGroup(battler, action, 0x200) == BTL_ELEMENT_BLOCK_QUERY_BLOCKED) {
             return 0;
         }
     }
@@ -1251,7 +1251,7 @@ s32 btlCanQueryElementAgainstParty(s32 unused, s32 action) {
 s32 btlAnyUnitPassesCheck400(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->next) {
-        if (btlUnitBlocksElementQueryForGroup(battler, action, 0x400) == 0) {
+        if (btlUnitBlocksElementQueryForGroup(battler, action, 0x400) == BTL_ELEMENT_BLOCK_QUERY_NOT_BLOCKED) {
             return 1;
         }
     }
@@ -1261,7 +1261,7 @@ s32 btlAnyUnitPassesCheck400(s32 unused, s32 action) {
 s32 btlCanQueryElementAgainstEnemies(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->next) {
-        if (btlUnitBlocksElementQueryForGroup(battler, action, 0x400) == 1) {
+        if (btlUnitBlocksElementQueryForGroup(battler, action, 0x400) == BTL_ELEMENT_BLOCK_QUERY_BLOCKED) {
             return 0;
         }
     }

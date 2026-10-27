@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_element_block_query_result.h"
 #include "btl_status_motion_override.h"
 #include "btl_quarter_health_result.h"
 #include "btl_camera_mode_index.h"
@@ -113,7 +114,6 @@ extern s32 btlReadCurrentUnitMp(datUnitWork_t *);
 
 extern s32 btlBuildEligibleTargetIndexList(BtlTask *, BtlIndexList *, s32, s32, s32);
 
-extern s32 btlUnitBlocksElementQueryForGroup(BtlUnit *, s32, u32);
 
 extern s32 btlWouldUiValueFallBelowQuarter(BtlUnit *, s32);
 
@@ -133,7 +133,7 @@ extern s32 btlHasMappedSpecialAbilityForSlot(BtlUnit *, u32);
 
 extern u32 btlHasSpecialAbilityWhenArgumentUnset(BtlUnit *, s64);
 
-s32 btlUnitBlocksElementQueryForGroup(BtlUnit *unit, s32 action, u32 mask) {
+BtlElementBlockQueryResult btlUnitBlocksElementQueryForGroup(BtlUnit *unit, s32 action, u32 mask) {
     u32 flags = unit->status.flags;
     if (flags & 1) {
         if (flags & mask) {
@@ -149,27 +149,27 @@ s32 btlUnitBlocksElementQueryForGroup(BtlUnit *unit, s32 action, u32 mask) {
                             btlHasMappedSpecialAbilityForSlot(unit, index) != 0 ||
                             btlHasSpecialAbilityWhenArgumentUnset(unit, index) != 0 ||
                             btlHasEnabledSpecialAbilityForSlot(unit, index) != 0) {
-                            return 0;
+                            return BTL_ELEMENT_BLOCK_QUERY_NOT_BLOCKED;
                         }
                     }
-                    return 1;
+                    return BTL_ELEMENT_BLOCK_QUERY_BLOCKED;
                 }
                 if (btlTestSelectedItemCategoryMask(unit, action) != 0 ||
                     btlHasMappedSpecialAbilityForSlot(unit, action) != 0 ||
                     btlHasSpecialAbilityWhenArgumentUnset(unit, action) != 0) {
-                    return 0;
+                    return BTL_ELEMENT_BLOCK_QUERY_NOT_BLOCKED;
                 }
                 return btlHasEnabledSpecialAbilityForSlot(unit, action) == 0;
             }
         }
     }
-    return 2;
+    return BTL_ELEMENT_BLOCK_QUERY_NOT_APPLICABLE;
 }
 
 s32 btlAllUnitsPassCheck200(s32 unused, s32 action) {
     BtlUnit *node = ((BtlState *)btlGetRuntime())->units;
     while (node != 0) {
-        if (btlUnitBlocksElementQueryForGroup(node, action, 0x200) == 0) {
+        if (btlUnitBlocksElementQueryForGroup(node, action, 0x200) == BTL_ELEMENT_BLOCK_QUERY_NOT_BLOCKED) {
             return 0;
         }
         node = node->next;
@@ -180,7 +180,7 @@ s32 btlAllUnitsPassCheck200(s32 unused, s32 action) {
 s32 btlAllUnitsPassCheck400(s32 unused, s32 action) {
     BtlUnit *node = ((BtlState *)btlGetRuntime())->units;
     while (node != 0) {
-        if (btlUnitBlocksElementQueryForGroup(node, action, 0x400) == 0) {
+        if (btlUnitBlocksElementQueryForGroup(node, action, 0x400) == BTL_ELEMENT_BLOCK_QUERY_NOT_BLOCKED) {
             return 0;
         }
         node = node->next;
@@ -349,7 +349,7 @@ s32 btlSelectLowestHealthElementBlockTarget(BtlTask *actor, s32 action) {
         bestIndex = 0;
         for (i = 0; i < count; i++) {
             BtlUnit *unit = btlGetIndexListEntry(list, i);
-            if (btlUnitBlocksElementQueryForGroup(unit, action, 0x200) == 1) {
+            if (btlUnitBlocksElementQueryForGroup(unit, action, 0x200) == BTL_ELEMENT_BLOCK_QUERY_BLOCKED) {
                 u16 current = btlReadCurrentUnitHp(&unit->partyRecord);
                 if (best >= current && current != 0) {
                     best = current;
@@ -845,11 +845,11 @@ s32 btlSelectTargetsPassingCheck(BtlTask *actor, s32 action) {
             BtlUnit *unit = btlGetIndexListEntry(list, i);
 
             if (unit->status.flags & 0x200) {
-                if (btlUnitBlocksElementQueryForGroup(unit, action, 0x200) == 1) {
+                if (btlUnitBlocksElementQueryForGroup(unit, action, 0x200) == BTL_ELEMENT_BLOCK_QUERY_BLOCKED) {
                     flags[i] = 1;
                 }
             } else {
-                if (btlUnitBlocksElementQueryForGroup(unit, action, 0x400) == 1) {
+                if (btlUnitBlocksElementQueryForGroup(unit, action, 0x400) == BTL_ELEMENT_BLOCK_QUERY_BLOCKED) {
                     flags[i] = 1;
                 }
             }
