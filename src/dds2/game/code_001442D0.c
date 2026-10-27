@@ -4050,13 +4050,13 @@ void fldDrawAnimatedFieldBanner(s32 alpha, s32 x, s32 y) {
     }
 }
 
-extern s32 fldGetSparkDialogPhase(void);
+extern FldSparkDialogPhase fldGetSparkDialogPhase(void);
 extern const s16 *fldFindLocationCoordinateRecord(s32 area, s32 locationIndex);
 
 void fldDrawLocationPanel(void) {
     u32 color;
 
-    if (fldGetSparkDialogPhase() != 0) {
+    if (fldGetSparkDialogPhase() != FLD_SPARK_DIALOG_PHASE_IDLE) {
         return;
     }
     if (fldGlobalBase.playerModelAlternate == 1 ||
@@ -5344,7 +5344,7 @@ void fldUpdateDevilizeEventSequence(void) {
 }
 
 
-s32 fldGetSparkDialogPhase(void) {
+FldSparkDialogPhase fldGetSparkDialogPhase(void) {
     return fldSparkControlState.state.dialogPhase;
 }
 
@@ -5387,7 +5387,7 @@ void fldUpdateSparkEncounterScene(void) {
             }
         }
 
-        if (fldGetSparkDialogPhase() == 0 && fldEncountTestFlag(0x40) != 0) {
+        if (fldGetSparkDialogPhase() == FLD_SPARK_DIALOG_PHASE_IDLE && fldEncountTestFlag(0x40) != 0) {
             if (fldSparkControlState.state.countdown == 300) {
                 p2sdPlaySE(0x680017, 0x7F, 0x3F);
             }

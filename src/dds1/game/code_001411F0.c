@@ -3679,7 +3679,7 @@ void fldDrawInputCursor(s32 x, s32 y) {
     }
 }
 
-extern s32 fldGetSparkDialogPhase(void);
+extern FldSparkDialogPhase fldGetSparkDialogPhase(void);
 extern const s16 *fldFindLocationCoordinateRecord(s32 area, s32 locationIndex);
 extern void fldSubmitGsGradientQuad(s32, s32, s32, s32, u32, u32, u32, u32,
     u32, u32, u32, u32, u32, u32, u32, u32, u32, u32, u32, u32);
@@ -3688,7 +3688,7 @@ void fldDrawLocationPanel(void) {
     FldAreaWork *work;
     u32 color;
 
-    if (fldGetSparkDialogPhase() != 0) {
+    if (fldGetSparkDialogPhase() != FLD_SPARK_DIALOG_PHASE_IDLE) {
         return;
     }
     work = &fldGlobalBase;
@@ -4938,7 +4938,7 @@ void fldUpdateSparkMessageSequence(void) {
     }
 }
 
-s32 fldGetSparkDialogPhase(void) {
+FldSparkDialogPhase fldGetSparkDialogPhase(void) {
     return D_003D62C8[0];
 }
 
@@ -4988,7 +4988,7 @@ void fldUpdateSparkEncounterScene(void) {
             }
         }
 
-        if (fldGetSparkDialogPhase() == 0 && fldEncountTestFlag(0x40) != 0) {
+        if (fldGetSparkDialogPhase() == FLD_SPARK_DIALOG_PHASE_IDLE && fldEncountTestFlag(0x40) != 0) {
             if (fldSparkControlState.state.countdown == 300) {
                 p2sdPlaySE(0x670017, 0x7F, 0x3F);
             }
