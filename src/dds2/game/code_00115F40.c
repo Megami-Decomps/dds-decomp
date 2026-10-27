@@ -1,5 +1,6 @@
 #include "fld_area_work.h"
 #include "common.h"
+#include "dds3_basic_lifecycle.h"
 #include "sdf_vu0.h"
 #include "fld_bill_config.h"
 #include "sdf_chip.h"
@@ -173,9 +174,9 @@ void dds3EffectObjectBasicCalcFldEx(dds3Basic_t *object) {
     }
 }
 
-/* Attach a 16-byte slot block, then publish its newly created state handle.
- * The block is attached before the state constructor sees the object. Returns 1. */
-u32 EventObjectBasicConstructor(dds3Basic_t *object) {
+/* Attach a 16-byte slot block before constructing and publishing its state handle.
+ * Return the accepted result expected by dds3AllocBasic. */
+Dds3BasicCreateResult EventObjectBasicConstructor(dds3Basic_t *object) {
     DdsSlotResourceBlock *resource;
     dds3ObjectBaseControlWorkData_t *handle;
 
@@ -184,5 +185,5 @@ u32 EventObjectBasicConstructor(dds3Basic_t *object) {
     object->data = resource;
     handle = dds3CreateSlotResourceState(object);
     resource->baseControlWorkData = handle;
-    return 1;
+    return DDS3_BASIC_CREATE_ACCEPTED;
 }
