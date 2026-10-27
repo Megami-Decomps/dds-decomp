@@ -9,6 +9,7 @@
 #include "mnu_reset_selection_widths_api.h"
 #include "mnu.h"
 #include "mnu_result.h"
+#include "pty_accumulate_stat_gains_api.h"
 #include "brs_result_counter_completion_api.h"
 #include "brs_ui_update_allowed_api.h"
 #include "dsp_name.h"
@@ -424,7 +425,6 @@ void brsUpdateStatSelectionExtent(BrsSkillPackageWork *scene) {
 
 extern void evtStageTestUpdateCamera(void);
 extern s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *);
-extern void ptyAccumulateStatGains(s32 *, s32, const datUnitWork_t *);
 extern s32 mnuAdvanceTitleEntryAnimation(datUnitWork_t *);
 extern void mnuStaffCopyPanelBlock(datUnitWork_t *, BrsSkillPackageWork *);
 extern void mnuRefreshSelectedUnitPanels(datUnitWork_t *, BrsSkillPackageWork *);

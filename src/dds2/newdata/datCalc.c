@@ -35,6 +35,7 @@
 #include "pty_skill_recovery_api.h"
 #include "pty_item_quantity_update_view.h"
 #include "pty_record_slot_value_api.h"
+#include "pty_accumulate_stat_gains_api.h"
 #include "btl_actor_attribute_api.h"
 #include "eff_random_mod.h"
 #include "btl.h"
@@ -1029,7 +1030,6 @@ s32 ptyGetRoundedAveragePartyLevel(void) {
     return (levelSum + activeCount - 1) / activeCount;
 }
 
-extern void ptyAccumulateStatGains(s32 *gains, s32 levelDelta, const datUnitWork_t *unit);
 extern u32 ptyComputeTotalExp(const datUnitWork_t *, s32);
 extern void ptyRecomputeMaxHpMp(datUnitWork_t *);
 extern void evtCopyRosterTableValue(datUnitWork_t *);

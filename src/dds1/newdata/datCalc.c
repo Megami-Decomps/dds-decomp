@@ -31,6 +31,7 @@
 #include "dat_unit_has_skill_api.h"
 #include "pty_skill_recovery_api.h"
 #include "pty_item_quantity_update_view.h"
+#include "pty_accumulate_stat_gains_api.h"
 #include "eff_random_mod.h"
 
 #define DAT_EXTERNAL_SKILL_TABLE 0x20
@@ -935,7 +936,6 @@ s32 ptyGetAverageLevel(void) {
     return (levelSum + activeCount - 1) / activeCount;
 }
 
-extern void ptyAccumulateStatGains(s32 *gains, s32 levelDelta, const datUnitWork_t *unit);
 extern u32 ptyComputeTotalExp(const datUnitWork_t *, s32);
 extern void ptyRecomputeMaxHpMp(datUnitWork_t *);
 extern void ptyRebuildProfileSkills(s32, datUnitWork_t *);

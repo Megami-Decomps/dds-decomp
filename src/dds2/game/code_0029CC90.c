@@ -9,6 +9,7 @@
 #include "dat_state.h"
 #include "dat_party_growth.h"
 #include "pty_level_up_count.h"
+#include "pty_accumulate_stat_gains_api.h"
 #include "mnu_result.h"
 #include "brs_result_counter_completion_api.h"
 #include "prf_profile_cap.h"
@@ -357,7 +358,9 @@ s32 btlAddBaseStats(s32 *src, datUnitWork_t *seq) {
 
 extern PartyStatGrowthBank D_003D6518[];
 
-void ptyAccumulateStatGains(s32 *gains, s32 levelDelta, const datUnitWork_t *unit) {
+void ptyAccumulateStatGains(s32 gains[DAT_BASE_STAT_COUNT],
+                            PtyStatGrowthRowCount growthRowCount,
+                            const datUnitWork_t *unit) {
     s32 eligible[DAT_BASE_STAT_COUNT];
     s32 eligibleCount;
     s32 overflow;
@@ -369,7 +372,7 @@ void ptyAccumulateStatGains(s32 *gains, s32 levelDelta, const datUnitWork_t *uni
     memset(gains, 0, sizeof(s32) * DAT_BASE_STAT_COUNT);
     unitId = unit->unitId;
     level = unit->level;
-    while (levelDelta-- > 0) {
+    while (growthRowCount-- > 0) {
         for (stat = 0; stat < DAT_BASE_STAT_COUNT; stat++) {
             gains[stat] += D_003D6518[unitId].levelStats[level][stat];
         }
