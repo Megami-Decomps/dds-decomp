@@ -1844,12 +1844,12 @@ s32 mnuStepSkillSlotControl(dds3ProcessID_t *callback) {
     return menuRunPanel((void *)dds3GetProcessData(callback), 2, (void *)callback);
 }
 
-void mnuClearSelectedListNodeId(dds3ProcessID_t *task) {
+void mnuClearSkillSlotReorderSelection(dds3ProcessID_t *task) {
     s32 context = dds3GetProcessData(task);
     ((StaffMenuWork *)((CampMenuContext *)context)->menu)->selectionId = 0xffffffff;
 }
 
-u32 mnuHasSelectedListNodeId(dds3ProcessID_t *callback) {
+MnuSkillSlotReorderState mnuGetSkillSlotReorderState(dds3ProcessID_t *callback) {
     s32 context = dds3GetProcessData(callback);
     return ~((StaffMenuWork *)((CampMenuContext *)context)->menu)->selectionId >> 0x1f;
 }
@@ -1875,7 +1875,7 @@ s32 mnuRestoreSkillMenuSelection(dds3ProcessID_t *task) {
 
     if (menu->selectionFlags != 0) {
         mnuSeekListNode(0, menu->selectedWindow->list);
-        mnuClearSelectedListNodeId(task);
+        mnuClearSkillSlotReorderSelection(task);
     } else if (((MenuWindowContainer *)(u32)context->panel)->list->cursor->index != 0) {
         MenuWindowContainer **categoryWindows = menu->skillWindows;
         MenuWindowContainer *window;
@@ -2051,11 +2051,11 @@ void ptySkillMenuHandleSlotReorder(dds3ProcessID_t *callback) {
     if (inputFlags & MNU_STAFF_INPUT_CONFIRM) {
         s32 selectedSlot = list->cursor->index;
 
-        if (mnuHasSelectedListNodeId(callback) == 0) {
+        if (mnuGetSkillSlotReorderState(callback) == MNU_SKILL_SLOT_REORDER_AWAITING_SOURCE) {
             menuWork->selectionId = selectedSlot;
         } else if (selectedSlot != menuWork->selectionId) {
             mnuSwapPartySkillSlots(partyEntry, menuWork->selectionId, selectedSlot);
-            mnuClearSelectedListNodeId(callback);
+            mnuClearSkillSlotReorderSelection(callback);
             window = ptySkillMenuRebuildAfterMutation(
                 PTY_SKILL_UNAVAILABLE_MARKING_DISABLED, callback);
         } else {
@@ -2064,10 +2064,10 @@ void ptySkillMenuHandleSlotReorder(dds3ProcessID_t *callback) {
     }
     if (inputFlags & MNU_STAFF_REORDER_CANCEL_MASK) {
         inputFlags = MNU_STAFF_INPUT_CANCEL;
-        if (mnuHasSelectedListNodeId(callback) == 0) {
+        if (mnuGetSkillSlotReorderState(callback) == MNU_SKILL_SLOT_REORDER_AWAITING_SOURCE) {
             mnuSetPopupEntryFlagged((s32 *)(u32)(context + 0x54), mnuSkillMenuDetailPopupEntry);
         }
-        mnuClearSelectedListNodeId(callback);
+        mnuClearSkillSlotReorderSelection(callback);
     }
     mnuHighlightSelectedListNode(callback);
     if (window != 0) {

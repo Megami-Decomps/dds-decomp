@@ -2,6 +2,7 @@
 #define MNU_STAFF_H
 
 #include "mnu.h"
+#include "mnu_skill_slot_reorder_state.h"
 
 /* Party-selection handoff mode that marks the transferred entry frontline. */
 #define CAMP_PARTY_TRANSFER_FRONTLINE 2
@@ -66,8 +67,6 @@ void mnuStepPartyPanelListFromInput(s32 mode, MenuPageWindow *page);
 struct dds3ProcessID_t;
 /* Draw the default camp screen for its scheduler task. */
 void mnuDrawCampScreenDefault(struct dds3ProcessID_t *task);
-/* Test whether the skill menu retains a selected list-node ID. */
-u32 mnuHasSelectedListNodeId(struct dds3ProcessID_t *callback);
 #ifdef VERSION_DDS1
 void mnuClearListFlags(s32 which, MenuPageWindow *page);
 struct StaffDisplayContext;

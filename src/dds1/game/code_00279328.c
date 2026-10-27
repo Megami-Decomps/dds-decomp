@@ -139,7 +139,7 @@ s32 ptySkillMenuEnterPage(dds3ProcessID_t *callback) {
     if (work->panel->list->cursor->index == 0) {
         mnuCreateStaffImageSprite(2);
     } else if (menu->selectionFlags != 0) {
-        if (mnuHasSelectedListNodeId(callback) == 0) {
+        if (mnuGetSkillSlotReorderState(callback) == MNU_SKILL_SLOT_REORDER_AWAITING_SOURCE) {
             mnuCreateStaffImageSprite(0xE);
         } else {
             mnuCreateStaffImageSprite(0xF);

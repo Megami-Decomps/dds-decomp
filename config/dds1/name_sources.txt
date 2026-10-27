@@ -1,5 +1,4 @@
 # addr	name	evidence|inferred	note
-0x0039BFD0	_impure_ptr	inferred	Newlib's active reentrancy pointer: fopen loads it as _fopen_r's first argument, as do the printf/stdio and signal wrappers. Retail data points to 0x0039BCE0, whose 64-bit random state at +0xA8 starts at 1. DDS2 twin 0x0040F150; only the four-byte pointer is named.
 0x001001D8	kwlnInitializeRuntime	inferred	confidence=high; matched-C; src/dds1/game/code_00100000.c:69; Initializes runtime tasks and game subsystems.; twin=0x001001D8 (DDS2).
 0x00100500	dds3SoftReset	inferred	SMT3HD name via SLUS_209.11 0x00100400, shared-hash-in-run; was kwlnRequestMainLoopExit
 0x00100510	dds3GetKernelCount	inferred	SMT3HD name via SLUS_209.11 0x00100410, shared-hash-in-run; was kwlnGetFrameCounter
@@ -6480,8 +6479,8 @@
 0x002788D0	ptySkillMenuShellUpdate	inferred	legacy PartySkillMenu_ShellTask_Update: shell task update for the party skill menu
 0x00278A90	mnuCampMenuDrawSlotLabel	inferred	wrong or missing short module prefix [names_audit.tsv]
 0x00278B90	mnuStepSkillSlotControl	inferred	confidence=medium; matched-C; src/dds1/game/code_00274B80.c:979:func_00278B90; Runs the current skill-slot panel control callback through panel mode two; paired with the adjacent camp slot-label draw operation.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
-0x00278BC8	mnuClearSelectedListNodeId	inferred	Stores -1 sentinel into staff menu selected-node ID; twin 0x002B5160. [names_R_FuncNames5.tsv]
-0x00278BF0	mnuHasSelectedListNodeId	inferred	Returns whether selected-node ID differs from -1; twin 0x002B5190. [names_R_FuncNames5.tsv]
+0x00278BC8	mnuClearSkillSlotReorderSelection	inferred	Clears the saved source skill slot for the two-confirm reorder flow; paired at 0x002B5160.
+0x00278BF0	mnuGetSkillSlotReorderState	inferred	Returns the idle or source-slot-selected state for the skill-slot reorder flow; paired at 0x002B5190.
 0x00278C20	mnuHighlightSelectedListNode	inferred	Sets node flag 2 only for entry matching selected-node ID; twin 0x002B51C8. [names_R_FuncNames5.tsv]
 0x00278C90	mnuRestoreSkillMenuSelection	inferred	Restores the skill-menu cursor from its mode, clearing the selected-node ID on the selection-flags path. LiteH-2 menu naming batch 2.
 0x00278D68	mnuResetStaffSelectionFlags	inferred	Clears the staff menu selection flags when its task starts. [names_reviewed13.tsv]
@@ -9804,6 +9803,7 @@
 0x0039A820	ipuDefaultQuantizerMatrices	inferred	libipu: the intra and non-intra quantizer matrices sceIpuInit loads; read by its routines. DDS2 twin 0x0040D9A0.
 0x0039A870	ipuDefaultVqClut	inferred	libipu: the VQ colour lookup table sceIpuInit loads; read by its routines. DDS2 twin 0x0040D9F0.
 0x0039B4D0	at3decImdctTwiddles	inferred	libat3dec: 128 x 4 words, the butterfly twiddles of the 256-point inverse transform; read by its routines. DDS2 twin 0x0040E650.
+0x0039BFD0	_impure_ptr	inferred	Newlib's active reentrancy pointer: fopen loads it as _fopen_r's first argument, as do the printf/stdio and signal wrappers. Retail data points to 0x0039BCE0, whose 64-bit random state at +0xA8 starts at 1. DDS2 twin 0x0040F150; only the four-byte pointer is named.
 0x0039BFD8	__malloc_av_	inferred	newlib's bin array: two words a bin, 128 bins, the top chunk in bin 0's forward link and the binblocks map in its size word. DDS2 twin 0x0040F158.
 0x0039C3E0	__malloc_trim_threshold	inferred	newlib's trim threshold, an unsigned long (64 bits on the EE): free trims the top chunk at or past it. DDS2 twin 0x0040F560.
 0x0039C3E8	__malloc_top_pad	inferred	newlib's top pad, an unsigned long: what malloc_extend_top asks sbrk for beyond the request, and malloc_trim keeps. DDS2 twin 0x0040F568.
