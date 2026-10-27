@@ -13,6 +13,7 @@
 #include "kwln.h"
 #include "pty_skill_menu_api.h"
 #include "mnu.h"
+#include "mnu_item_requirement_api.h"
 #include "mnu_party_panel_api.h"
 #include "mnu_party_menu_data.h"
 #include "brs_level_progress_api.h"
@@ -189,7 +190,7 @@ extern s8 evtGetCapturedWindowPanelValue(void);
 
 
 
-extern s32 mnuApplyRandomStatItemEffect();
+extern s32 mnuApplyRandomStatItemEffect(u8 *, datUnitWork_t *, MnuRequirementItemId);
 
 extern void mnuPrepareStaffValueChangeDialog(MenuStaffContext *, datUnitWork_t *, s32, s32);
 
@@ -448,7 +449,8 @@ u32 mnuPartySlotAssignmentLeaveNoOp(void) {
 
 extern char mnuRingCustomizationStatEligibility[];
 extern char mnuRingCustomizationBonusWeights[20];
-s32 mnuApplyRandomStatItemEffect(u8 *menu, datUnitWork_t *entry, s32 itemId) {
+s32 mnuApplyRandomStatItemEffect(u8 *menu, datUnitWork_t *entry,
+                                 MnuRequirementItemId itemId) {
     MenuStaffChoices *choices;
     MenuListNode *node;
     s32 eligibleStats[5];
@@ -499,7 +501,7 @@ s32 mnuApplyRandomStatItemEffect(u8 *menu, datUnitWork_t *entry, s32 itemId) {
         i++;
     } while (i < 20);
 
-    entryIndex = mnuGetPartyEntryCurrentId(entry) - 0xC0;
+    entryIndex = mnuGetPartyEntryCurrentId(entry) - MNU_REQUIREMENT_ITEM_ID_FIRST;
     DDS3_GBWK->itemStatBonuses[entryIndex][statIndex] += choices->thirdListValue;
     DDS3_GBWK->itemRequirementCounts[entryIndex]++;
     ptyRecomputeMaxHpMp(entry);
@@ -546,12 +548,12 @@ s32 mnuStartPanelExit(dds3ProcessID_t *callback) {
 
 /* Clear the selected item's five stat bonuses and its requirement count,
  * then recalculate the party record's maximum HP and MP. */
-void mnuClearPartySelectionValues(datUnitWork_t *entry, s32 selection) {
+void mnuClearPartySelectionValues(datUnitWork_t *entry, MnuRequirementItemId selection) {
     s32 i;
     if (selection == 0) {
         return;
     }
-    selection -= 0xc0;
+    selection -= MNU_REQUIREMENT_ITEM_ID_FIRST;
     for (i = 0; i < DAT_BASE_STAT_COUNT; i++) {
         DDS3_GBWK->itemStatBonuses[selection][i] = 0;
     }

@@ -89,17 +89,17 @@ s32 mnuClearWindowPendingFlagAfterSelection(s32 unusedX, s32 unusedY, s32 unused
 }
 
 
-u8 mnuGetItemRequirementCount(s32 itemId) {
+u8 mnuGetItemRequirementCount(MnuRequirementItemId itemId) {
     if (itemId == 0) {
         return 0;
     }
-    return DDS3_GBWK->itemRequirementCounts[itemId - 0xC0];
+    return DDS3_GBWK->itemRequirementCounts[itemId - MNU_REQUIREMENT_ITEM_ID_FIRST];
 }
 
 extern u8 *D_00435E3C;
 
-s8 mnuGetItemRequirementValue(s32 itemId) {
-    s32 index = itemId - 0xC0;
+s8 mnuGetItemRequirementValue(MnuRequirementItemId itemId) {
+    s32 index = itemId - MNU_REQUIREMENT_ITEM_ID_FIRST;
 
     if (itemId == 0) {
         return 0;
@@ -120,7 +120,8 @@ extern u32 itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, s32);
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 extern char D_00437C38[];
 
-void mnuDrawRemainingAndTotalCounts(s32 x, s32 y, s32 alpha, s32 entryId, EffectSlotSet *sprite, s32 spriteArg) {
+void mnuDrawRemainingAndTotalCounts(s32 x, s32 y, s32 alpha, MnuRequirementItemId entryId,
+                                    EffectSlotSet *sprite, s32 spriteArg) {
     char text[0x10];
     s32 current;
     s32 required;

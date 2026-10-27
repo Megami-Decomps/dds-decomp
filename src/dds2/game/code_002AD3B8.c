@@ -963,7 +963,8 @@ void mnuDrawStaffValueGrid(s32 x, s32 y, s32 itemId, MenuStaffContext *context) 
     }
 }
 
-extern void mnuDrawRemainingAndTotalCounts(s32, s32, s32, s32, struct EffectSlotSet *, s32);
+extern void mnuDrawRemainingAndTotalCounts(s32, s32, s32, MnuRequirementItemId,
+                                           struct EffectSlotSet *, s32);
 extern char D_0042AD08[];
 
 s32 mnuDrawStaffValuePage(dds3ProcessID_t *task) {
@@ -1163,8 +1164,8 @@ extern u8 *D_00435E3C;
 
 /* A zero entry has no requirement. Keep the signed requiredCount comparison:
  * the available count comes from a byte-sized game-state entry. */
-s32 mnuIsStaffRequirementUnmet(s32 entryId) {
-    s32 requirementIndex = entryId - 0xC0;
+s32 mnuIsStaffRequirementUnmet(MnuRequirementItemId entryId) {
+    s32 requirementIndex = entryId - MNU_REQUIREMENT_ITEM_ID_FIRST;
     u8 availableCount;
 
     if (entryId == 0) {
