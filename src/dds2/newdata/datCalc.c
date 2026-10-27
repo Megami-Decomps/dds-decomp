@@ -463,7 +463,8 @@ enum {
 
 extern u8 ptyAffinityPermutationOrders[];
 extern PtyAffinityMatchResult
-ptyUnitMatchesAffinityRequirement(const datUnitWork_t *unit, s32 affinity, u8 requirementIndex);
+ptyUnitMatchesAffinityRequirement(
+    const datUnitWork_t *unit, BtlCommandId commandId, u8 requirementIndex);
 
 
 
@@ -1425,7 +1426,8 @@ u32 ptyReturnOne(void) {
 extern DatSkillList *D_00435E28;
 
 /* Test whether a party record satisfies one participant requirement of an affinity. */
-PtyAffinityMatchResult ptyUnitMatchesAffinityRequirement(const datUnitWork_t *unit, s32 affinity, u8 requirementIndex) {
+PtyAffinityMatchResult ptyUnitMatchesAffinityRequirement(
+    const datUnitWork_t *unit, BtlCommandId commandId, u8 requirementIndex) {
     const DatAffinityRecord *record;
     s32 requirement;
     s32 requirementValue;
@@ -1434,7 +1436,7 @@ PtyAffinityMatchResult ptyUnitMatchesAffinityRequirement(const datUnitWork_t *un
     if (unit == NULL) {
         return PTY_AFFINITY_MATCH_NOT_FOUND;
     }
-    record = &datAffinityRecords[affinity - DAT_AFFINITY_FIRST_COMMAND];
+    record = &datAffinityRecords[commandId - DAT_AFFINITY_FIRST_COMMAND];
     if (record->flags & 2) {
         return PTY_AFFINITY_MATCH_NOT_FOUND;
     }
@@ -1477,8 +1479,10 @@ PtyAffinityMatchResult ptyUnitMatchesAffinityRequirement(const datUnitWork_t *un
 }
 
 /* Try the six stored orders; success requires exactly the non-sentinel requirement count. */
-PtyAffinityMatchResult ptyMatchAffinityPermutation(const datUnitWork_t *const *actors, s32 affinity) {
-    const s32 *requirementCursor = datAffinityRecords[affinity - DAT_AFFINITY_FIRST_COMMAND].requirements;
+PtyAffinityMatchResult ptyMatchAffinityPermutation(
+    const datUnitWork_t *const *actors, BtlCommandId commandId) {
+    const s32 *requirementCursor =
+        datAffinityRecords[commandId - DAT_AFFINITY_FIRST_COMMAND].requirements;
     u32 i;
     s32 requiredCount = 0;
     u32 orderIndex;
@@ -1498,7 +1502,7 @@ PtyAffinityMatchResult ptyMatchAffinityPermutation(const datUnitWork_t *const *a
         for (i = 0, orderCursor = ptyAffinityPermutationOrders + orderOffset, actorCursor = actors; i < 3; i++, orderCursor++) {
             actor = *actorCursor++;
             if (actor != 0 &&
-                ptyUnitMatchesAffinityRequirement(actor, affinity, *orderCursor) != PTY_AFFINITY_MATCH_NOT_FOUND) {
+                ptyUnitMatchesAffinityRequirement(actor, commandId, *orderCursor) != PTY_AFFINITY_MATCH_NOT_FOUND) {
                 matchedCount++;
             }
         }

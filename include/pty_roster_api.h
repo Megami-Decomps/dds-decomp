@@ -2,6 +2,7 @@
 #define PTY_ROSTER_API_H
 
 #include "common.h"
+#include "btl_command_id.h"
 #include "dat_unit_id.h"
 
 struct datUnitWork_t;
@@ -30,8 +31,8 @@ enum {
     PTY_AFFINITY_MATCH_FOUND = 1,
 };
 
-/* Report whether any actor ordering satisfies the affinity requirements. */
+/* Report whether any actor ordering satisfies the requirements for this command. */
 PtyAffinityMatchResult ptyMatchAffinityPermutation(
-    const struct datUnitWork_t *const *actors, s32 affinity);
+    const struct datUnitWork_t *const *actors, BtlCommandId commandId);
 
 #endif
