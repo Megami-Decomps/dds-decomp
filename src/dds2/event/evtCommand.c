@@ -1016,23 +1016,23 @@ ScrCommandResult evtCommand_LOAD_BE(void) {
  * A missing VM context completes without creating a task. */
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421ED8);
 
-s32 evtCommand_READ_BE(void) {
+ScrCommandResult evtCommand_READ_BE(void) {
     s32 taskId = scrGetIntPara(0);
     scrProcessWork_s *commandWork = scrGetScriptHandle();
 
     if (commandWork == NULL) {
-        return 1;
+        return SCR_COMMAND_RESULT_COMPLETE;
     }
     if (evtSearchEventPack(taskId) != 0) {
-        return 1;
+        return SCR_COMMAND_RESULT_COMPLETE;
     }
     evtPrintDeveloperConsoleMessage("read BE (%d)..\n", taskId);
     dds3LinkProcess(commandWork->task, evtLoadEventPack(taskId));
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 /* Store readiness in the VM result; the command itself always completes. */
-s32 evtCommand_CHK_BE(void) {
+ScrCommandResult evtCommand_CHK_BE(void) {
     s32 taskId = scrGetIntPara(0);
     s32 isReady;
 
@@ -1043,22 +1043,22 @@ s32 evtCommand_CHK_BE(void) {
         isReady = 0;
     }
     scrSetIntReturnValue(isReady);
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 /* Destroy the requested camp task; missing context or task is a completed no-op. */
-s32 evtCommand_DEL_BE(void) {
+ScrCommandResult evtCommand_DEL_BE(void) {
     s32 taskId = scrGetIntPara(0);
 
     if (scrGetScriptHandle() == 0) {
-        return 1;
+        return SCR_COMMAND_RESULT_COMPLETE;
     }
     if (evtSearchEventPack(taskId) == 0) {
-        return 1;
+        return SCR_COMMAND_RESULT_COMPLETE;
     }
     evtPrintDeveloperConsoleMessage("del BE (%d)..\n", taskId);
     evtKillEventPack(taskId);
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 /* Create an event/scene movie task using the active camp resource, set bit 0,
