@@ -18,13 +18,14 @@
 #include "sdf_timer.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_slot.h"
+#include "sdf_draw_frame_execution_state.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 extern s32 sdfGetTexelBitCount(u32 format);
 /* Polled in a spin-wait below; its writer is outside this C unit. */
-extern volatile u8 D_00438A1D;
+extern volatile SdfDrawFrameExecutionState D_00438A1D;
 extern void sdfWaitVblank(s32);
 extern struct sdfMemHandle_t *sdfGrPacketBuffHandle;
 #include "sdf.h"
@@ -1080,7 +1081,7 @@ void sdfDrawSync(void) {
     SdfPacketSlot *entry;
 
     while (1) {
-        while (D_00438A1D != 0) {
+        while (D_00438A1D != SDF_DRAW_FRAME_IDLE) {
         }
         entry = &sdfGrDrawState[sdfDrawReqQueueIndex];
         if (entry->packetList == NULL) {

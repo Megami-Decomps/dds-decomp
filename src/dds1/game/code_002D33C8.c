@@ -18,6 +18,7 @@
 #include "sdf_timer.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_slot.h"
+#include "sdf_draw_frame_execution_state.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf.h"
@@ -1047,14 +1048,14 @@ void sdfGrInitDraw(void) {
 
 INCLUDE_ASM(const s32, "game/code_002D33C8", sdfGrDrawFrame);
 
-extern vu8 D_003BD32D;
+extern volatile SdfDrawFrameExecutionState D_003BD32D;
 
-/* Wait for the shared busy flag, then sleep until the active slot is empty or ready. */
+/* Wait for frame execution to finish, then sleep until the active slot is empty or ready. */
 void sdfDrawSync(void) {
     SdfPacketSlot *table = sdfGrDrawState;
 
     for (;;) {
-        while (D_003BD32D != 0) {
+        while (D_003BD32D != SDF_DRAW_FRAME_IDLE) {
         }
         if (table[sdfDrawReqQueueIndex].packetList == NULL) {
             break;

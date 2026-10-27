@@ -12,6 +12,7 @@
 #include "sdf.h"
 #include "sdf_graph_buffer_state.h"
 #include "sdf_display_thread_state.h"
+#include "sdf_draw_frame_execution_state.h"
 #include "sdf_semaphore_api.h"
 #include "sdf_texture_primary_buffer_api.h"
 #include "sdf_texture_submit.h"
@@ -162,7 +163,7 @@ void sdfDeliverDrawEnd(s32 updateSingleSlot, SdfGraphBufferIndex bufferIndex, s3
 extern s8 reqMakeFrameBuff;
 extern s8 reqGsReset;
 extern volatile s32 dds3GsSema;
-extern volatile u8 D_003BD32D;
+extern volatile SdfDrawFrameExecutionState D_003BD32D;
 extern volatile u8 sdfDrawFrameFlag;
 extern u16 D_003BD32E;
 extern SdfHandlerNode *sdfAddHandler(SdfHandlerKind, s32, SdfHandlerCallback, s32, s32);
@@ -191,9 +192,9 @@ void sdfDrawThread(void) {
             reqGsReset = 0;
             sdfGrGsReset();
         }
-        D_003BD32D = 1;
+        D_003BD32D = SDF_DRAW_FRAME_IN_PROGRESS;
         sdfGrDrawFrame();
-        D_003BD32D = 0;
+        D_003BD32D = SDF_DRAW_FRAME_IDLE;
         if (sdfDrawFrameFlag != 0) {
             /* Preserve the controller enable state while stopping VIF1. */
             u32 enabledChannels = HW_READ(D_ENABLER);
