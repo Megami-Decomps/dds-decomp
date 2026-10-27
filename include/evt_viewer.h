@@ -6,6 +6,7 @@
 #include "evt_world.h"
 #include "evt_polygon_movie.h"
 #include "fld.h"
+#include "kwln.h"
 
 struct dds3ProcessID_t;
 struct EffNodeDescriptor;
@@ -250,8 +251,8 @@ typedef struct EvtRuntime {
 /* Find a runtime group by its name-table entry. */
 EvtRuntimeGroup *mnuCampFindEntryByName(EvtRuntime *scene, const char *name);
 
-/* Returns the next update function as the scheduler's signed callback word. */
-s32 evtViewerStartUpdate(struct dds3ProcessID_t *task);
+/* Start the viewer task's scheduler callback chain. */
+KwlnTaskUpdateResult evtViewerStartUpdate(struct dds3ProcessID_t *task);
 struct dds3ProcessID_t *evtViewerCreateTask(s32 taskId, s32 event, s32 id);
 
 typedef char EvtRuntimeChild_size[(sizeof(EvtRuntimeChild) == 0x38) ? 1 : -1];

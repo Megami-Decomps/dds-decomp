@@ -987,12 +987,12 @@ void evtViewerPushCommandHistory(s32 actionMode, s32 first, s32 second, EvtRunti
 
 /* Task user values are words; viewer callbacks decode the stored address. */
 
-s32 evtViewerUpdateFrame(dds3ProcessID_t *task);
+KwlnTaskUpdateResult evtViewerUpdateFrame(dds3ProcessID_t *task);
 
 
 dds3ProcessID_t *evtInitFrameVar(void);
 
-s32 evtViewerScheduleFrameVariableTask(dds3ProcessID_t *task);
+KwlnTaskUpdateResult evtViewerScheduleFrameVariableTask(dds3ProcessID_t *task);
 
 extern u32 mnuCampGetPrimaryOption(EvtRuntime *scene);
 extern const char *D_003C91C0[];
@@ -4211,7 +4211,7 @@ s32 evtEventViewerCopyEffectSetupPayload(s32 unused0, s32 unused1, EvtRuntime *v
 
 
 /* Hand control back to the frame update whether or not the task still owns a viewer. */
-s32 evtViewerPickNextHandler(dds3ProcessID_t *task) {
+KwlnTaskUpdateResult evtViewerPickNextHandler(dds3ProcessID_t *task) {
     if (dds3GetProcessData(task) != 0) {
         return (s32)evtViewerUpdateFrame;
     }
@@ -4224,10 +4224,10 @@ extern void evtPrintDeveloperConsoleMessage(const char *, ...);
 extern void evtUpdateViewerMessageWindow(EvtRuntime *);
 extern void mnuAdvanceShopMenuState();
 extern u8 mnuGetMoviePlaybackMode(void);
-extern s32 evtViewerPickNextHandler(dds3ProcessID_t *task);
+extern KwlnTaskUpdateResult evtViewerPickNextHandler(dds3ProcessID_t *task);
 
 /* Advance the viewer timeline, deferred voice and task-update handoff. */
-s32 evtViewerUpdateFrame(dds3ProcessID_t *task) {
+KwlnTaskUpdateResult evtViewerUpdateFrame(dds3ProcessID_t *task) {
     EvtRuntime *viewer = (EvtRuntime *)dds3GetProcessData(task);
     s32 flags;
 
@@ -4303,7 +4303,7 @@ s32 evtViewerUpdateFrame(dds3ProcessID_t *task) {
 }
 
 /* Update the active viewer, then switch to its frame-variable task. */
-s32 evtViewerScheduleFrameVariableTask(dds3ProcessID_t *task) {
+KwlnTaskUpdateResult evtViewerScheduleFrameVariableTask(dds3ProcessID_t *task) {
     EvtRuntime *viewer;
 
     viewer = (EvtRuntime *)dds3GetProcessData(task);
@@ -4314,7 +4314,7 @@ s32 evtViewerScheduleFrameVariableTask(dds3ProcessID_t *task) {
 }
 
 /* Initialize the active viewer and schedule its next update callback. */
-s32 evtViewerInitializeUpdateSequence(dds3ProcessID_t *task) {
+KwlnTaskUpdateResult evtViewerInitializeUpdateSequence(dds3ProcessID_t *task) {
     struct EvtRuntime *viewer;
 
     viewer = (struct EvtRuntime *)dds3GetProcessData(task);
@@ -4334,7 +4334,7 @@ u8 evtViewerSkipsTitleStreamWait(PolyMovieWork *ctx) {
 }
 
 /* Advance the viewer update: tick the timed action or hand over to the next task. */
-s32 evtViewerAdvanceUpdate(dds3ProcessID_t *task) {
+KwlnTaskUpdateResult evtViewerAdvanceUpdate(dds3ProcessID_t *task) {
     EvtRuntime *viewer = (EvtRuntime *)dds3GetProcessData(task);
     PolyMovieWork *window;
     s32 windowFlags;
@@ -4366,7 +4366,7 @@ s32 evtViewerAdvanceUpdate(dds3ProcessID_t *task) {
     }
 }
 
-s32 evtViewerStartUpdate(dds3ProcessID_t *task) {
+KwlnTaskUpdateResult evtViewerStartUpdate(dds3ProcessID_t *task) {
     EvtRuntime *viewer = (EvtRuntime *)dds3GetProcessData(task);
     PolyMovieWork *context;
     u16 viewerEventId;
