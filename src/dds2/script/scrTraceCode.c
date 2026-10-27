@@ -101,7 +101,7 @@ ScrOpcodeHandlerResult CodeFunc_Proc(scrProcessWork_s *scr) {
 /* Yield without consuming operands until the command completes. */
 ScrOpcodeHandlerResult CodeFunc_Comm(scrProcessWork_s *scr) {
     s32 programCounter = scr->pc;
-    s32 commandIndex = scr->instructions[programCounter].parts.sOperand;
+    ScrCommandIndex commandIndex = scr->instructions[programCounter].command.commandIndex;
     ScrCommandResult commandResult;
 
     nowpwork = scr;

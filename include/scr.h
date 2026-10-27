@@ -5,6 +5,7 @@
 #include "kwln.h"
 #include "scr_trace_result.h"
 #include "scr_command_result.h"
+#include "scr_command_index.h"
 #include "scr_procedure_index.h"
 #include "scr_command_parameter_index.h"
 #include "itf_mes_window_index.h"
@@ -72,12 +73,23 @@ typedef union ScrStackValue {
 
 typedef s8 ScrStackValueType;
 
+/* SCR_OPCODE_COMMAND uses this instruction view's second halfword to select
+ * a callback and parameter count from the command table. */
+typedef struct ScrCommandInstruction {
+    ScrOpcode opCode;
+    ScrCommandIndex commandIndex;
+} ScrCommandInstruction;
+
+typedef char ScrCommandInstruction_size_must_be_0x04[
+    (sizeof(ScrCommandInstruction) == 4) ? 1 : -1];
+
 /* Four-byte decoded VM instruction; DDS1/2 script/scrTraceCode.c via scrProcessWork_s. */
 typedef union ScrInstr {
     struct {
         ScrOpcode opCode;
         s16 sOperand;
     } parts;
+    ScrCommandInstruction command;
     s32 iOperand;
     f32 fOperand;
 } ScrInstr;

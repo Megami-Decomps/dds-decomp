@@ -113,7 +113,7 @@ ScrOpcodeHandlerResult CodeFunc_Proc(scrProcessWork_s *scr)
 ScrOpcodeHandlerResult CodeFunc_Comm(scrProcessWork_s *scr)
 {
     s32 commandPc = scr->pc;
-    s32 commandIndex = scr->instructions[commandPc].parts.sOperand;
+    ScrCommandIndex commandIndex = scr->instructions[commandPc].command.commandIndex;
     ScrCommandResult commandResult;
 
     nowpwork = scr;
