@@ -3209,7 +3209,7 @@ extern void mdlLinkEffect(dds3ModelHandle_t *, dds3ModelEffectCtrlr_t *);
 
 #include "sdf_packet_alloc.h"
 
-extern void sdfModelCopyStat(sdfModelRootNode_t *, sdfModelRootNode_t *);
+extern void sdfModelCopyStat(sdfModelRootNode_t *, const sdfModelRootNode_t *);
 
 
 extern u64 btlTransparencySurfaceTestValues[4];

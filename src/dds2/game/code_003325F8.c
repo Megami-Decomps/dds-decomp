@@ -107,12 +107,12 @@ void sdfTexBlendPaletteToTintedIntensityVU(sdfTexHandle_t *texture, s32 tint, f3
 void sdfTexReleaseReferenceViaHandler(sdfTexHandle_t *texture);
 
 extern vu8 sdfFrameId;
-extern void sdfMatListCopyStat(DevRequest *, DevRequest *);
+extern void sdfMatListCopyStat(DevRequest *, const DevRequest *);
 
 
-void sdfModelCopyStat(sdfModelRootNode_t *destination, sdfModelRootNode_t *source) {
+void sdfModelCopyStat(sdfModelRootNode_t *destination, const sdfModelRootNode_t *source) {
     sdfModelNode_t **destinationNodes;
-    sdfModelNode_t **sourceNodes;
+    const sdfModelNode_t * const *sourceNodes;
     s32 count;
     s32 buffer;
     s32 i;
@@ -133,13 +133,13 @@ void sdfModelCopyStat(sdfModelRootNode_t *destination, sdfModelRootNode_t *sourc
     destination->scalarOverrideSecond = source->scalarOverrideSecond;
     count = destination->list->usedCount;
     destinationNodes = destination->list->buffer;
-    sourceNodes = source->list->buffer;
+    sourceNodes = (const sdfModelNode_t * const *)source->list->buffer;
     i = 0;
     if (count > 0) {
         s32 bufferOffset = buffer * 0x80;
         for (; i < count; i++) {
             sdfModelNode_t *destinationNode = destinationNodes[i];
-            sdfModelNode_t *sourceNode = sourceNodes[i];
+            const sdfModelNode_t *sourceNode = sourceNodes[i];
 
             destinationNode->flags = sourceNode->flags;
             destinationNode->color = sourceNode->color;
@@ -949,8 +949,8 @@ void sdfMatListUpdatePacket(DevRequest *list, s32 entryIndex) {
 
 /* Copy base state; only present source subparameters overwrite destination
  * blocks. Each whole scalar aggregate includes its final opaque word. */
-void sdfMatCopyStat(sdfMat_t *destination, sdfMat_t *source) {
-    SdfSubParam *subParameters;
+void sdfMatCopyStat(sdfMat_t *destination, const sdfMat_t *source) {
+    const SdfSubParam *subParameters;
 
     destination->dirtyFlags = SDF_ASSET_ALL_STATE_DIRTY;
     destination->primaryStateWordFirst = source->primaryStateWordFirst;
@@ -973,16 +973,16 @@ void sdfMatCopyStat(sdfMat_t *destination, sdfMat_t *source) {
     destination->scalarPairSecond = source->scalarPairSecond;
 }
 
-void sdfMatCopyStat(sdfMat_t *, sdfMat_t *);
+void sdfMatCopyStat(sdfMat_t *, const sdfMat_t *);
 /* Copy paired items using the destination count; source must contain at least that many items. */
-void sdfMatListCopyStat(DevRequest *destination, DevRequest *source) {
+void sdfMatListCopyStat(DevRequest *destination, const DevRequest *source) {
+    const sdfMat_t * const *sourceItems = (const sdfMat_t * const *)source->buffer;
+    sdfMat_t **destinationItems = (sdfMat_t **)destination->buffer;
     s32 itemCount = destination->usedCount;
-    u32 *sourceItems = source->buffer;
-    u32 *destinationItems = destination->buffer;
     s32 itemIndex;
 
     for (itemIndex = 0; itemIndex < itemCount; itemIndex++) {
-        sdfMatCopyStat((sdfMat_t *)destinationItems[itemIndex], (sdfMat_t *)sourceItems[itemIndex]);
+        sdfMatCopyStat(destinationItems[itemIndex], sourceItems[itemIndex]);
     }
 }
 
