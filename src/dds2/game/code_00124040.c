@@ -2185,7 +2185,7 @@ KwlnTaskUpdateResult fldUpdateFieldSceneTask(dds3ProcessID_t *task) {
     if (dds3AdminiGetNextSequence() != -1) return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
     if (fileMenuTaskExists() != 0) return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
     fldPollAreaResourceLoad();
-    if (controller->phase == 0) {
+    if (controller->phase == FLD_SEQUENCE_PHASE_INITIALIZE) {
         if (fldGetNextFileLoadState() == FLD_NEXT_FILE_LOAD_PENDING) return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
         if (D_00389874[0] == 0 && mnuPollTitleStreamStateLocked() != 0) {
             mnuMarkTitleStreamResetPending();
@@ -2197,7 +2197,7 @@ KwlnTaskUpdateResult fldUpdateFieldSceneTask(dds3ProcessID_t *task) {
     if (mode < FLD_CAMP_CHECK_STATE_IDLE) {
         if (mode > FLD_CAMP_CHECK_STATE_ENCOUNTER_FLAG_SET) {
             fldUpdateCampMenuTransition();
-            if (controller->phase == 4 && D_003898AC[0] != 0 && fldRunDanteGunFlag[0x5C / 4] != 0) {
+            if (controller->phase == FLD_SEQUENCE_PHASE_ACTIVE && D_003898AC[0] != 0 && fldRunDanteGunFlag[0x5C / 4] != 0) {
                 fldReportCampVolumeError();
             }
             return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
@@ -2205,7 +2205,7 @@ KwlnTaskUpdateResult fldUpdateFieldSceneTask(dds3ProcessID_t *task) {
     }
     if (fldEncountTestFlag(0x40) == 0) fldUpdateCameraHeadingTransition();
     switch (controller->phase) {
-    case 0:
+    case FLD_SEQUENCE_PHASE_INITIALIZE:
         D_00435F78 = 0;
         fldGlobalBase.sceneBgmSuppressed = 1;
         fldInitializeAreaWork();
@@ -2263,7 +2263,7 @@ KwlnTaskUpdateResult fldUpdateFieldSceneTask(dds3ProcessID_t *task) {
         fldUpdateCameraFollow();
         controller->phase++;
         break;
-    case 1:
+    case FLD_SEQUENCE_PHASE_WAIT_FOR_BGM_ARCHIVE:
         if (fldStepSceneBgmArchive() != FLD_ARCHIVE_LOAD_PENDING) {
             fldGlobalBase.sceneBgmSuppressed = 0;
             if (fldGlobalBase.specialEventActive == 0) {
@@ -2278,19 +2278,19 @@ KwlnTaskUpdateResult fldUpdateFieldSceneTask(dds3ProcessID_t *task) {
             }
             if (fldCanUseTargetGuideInCurrentScene(fldGlobalBase.area, fldGlobalBase.floor + 1) != 0) {
                 fldResetSecondaryArchiveLoadPhase();
-                controller->phase = 8;
+                controller->phase = FLD_SEQUENCE_PHASE_WAIT_FOR_TARGET_GUIDE_ARCHIVE;
             } else {
                 controller->phase++;
             }
         }
         break;
-    case 8:
-        if (fldStepSecondaryArchiveLoad() != 0) controller->phase = 2;
+    case FLD_SEQUENCE_PHASE_WAIT_FOR_TARGET_GUIDE_ARCHIVE:
+        if (fldStepSecondaryArchiveLoad() != 0) controller->phase = FLD_SEQUENCE_PHASE_ADVANCE_TO_AREA_ARCHIVE;
         break;
-    case 2:
+    case FLD_SEQUENCE_PHASE_ADVANCE_TO_AREA_ARCHIVE:
         controller->phase++;
         break;
-    case 3:
+    case FLD_SEQUENCE_PHASE_WAIT_FOR_AREA_ARCHIVE:
         if (fldGetArchiveLoadPending() != 0) return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
         controller->phase++;
         if (fldGlobalBase.fieldTransitionMovementGate == 0 && fldGlobalBase.skipFade == 0 &&
@@ -2306,7 +2306,7 @@ KwlnTaskUpdateResult fldUpdateFieldSceneTask(dds3ProcessID_t *task) {
         fldSetSnowActive();
         if (fldGlobalBase.deferredExit == FLD_DEFERRED_EXIT_REQUESTED) fldStartDeferredFieldExit();
         break;
-    case 4:
+    case FLD_SEQUENCE_PHASE_ACTIVE:
         if (fldGlobalBase.targetGuideEnabled != 0 && fldRunDanteGunFlag[0x5C / 4] != 0) fldUpdateTargetGuideController();
         D_004360E8 = 1;
         if (fldEncountTestFlag(0x40) != 0 && fldEveHit_ChkEveHitAfter() != 0) return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
@@ -2340,23 +2340,23 @@ KwlnTaskUpdateResult fldUpdateFieldSceneTask(dds3ProcessID_t *task) {
         fldUpdateCameraFrame();
         if (fldEncountTestFlag(0x40) != 0) fldUpdateRoomTriggers(fldPlayerObject);
         break;
-    case 5:
+    case FLD_SEQUENCE_PHASE_EXIT_PREPARATION:
         dds3VisibleSceneBasic(dds3GetActiveScene(), 0);
         fldSetEncounterMode(fldGlobalBase.encounterMode);
         fldNoopWithMode(0);
         fldPauseBgm();
         p2sdPlaySE(15, 127, 63);
         /* The ordinary and deferred exit cases share this release path. */
-    case 7:
+    case FLD_SEQUENCE_PHASE_RELEASE_NEXT_AREA:
         fldFreeNextFile();
         fldLoadNextFile_SetId_BtlRet(fldGlobalBase.area, fldGlobalBase.floor + 1);
-        controller->phase = 0;
+        controller->phase = FLD_SEQUENCE_PHASE_INITIALIZE;
         fldGlobalBase.transitionCount++;
         if (fldGlobalBase.pendingSceneRequest == FLD_SCENE_ADVANCE_REQUEST_NONE) D_00435F78 = 1;
         else fldGlobalBase.pendingSceneRequest = FLD_SCENE_ADVANCE_REQUEST_NONE;
         dds3AdminiCallSequence(14, &D_00435F98, sizeof(D_00435F98), 1);
         return KWLN_TASK_UPDATE_FINISH_CALLBACK;
-    case 6:
+    case FLD_SEQUENCE_PHASE_NOOP:
         break;
     default:
         break;
@@ -2384,7 +2384,7 @@ KwlnTaskUpdateResult fldUpdateFieldSceneTask(dds3ProcessID_t *task) {
         fldUpdateSelectedValueTransition();
         fldSkyCalcFilter();
     }
-    if (controller->phase >= 4) {
+    if (controller->phase >= FLD_SEQUENCE_PHASE_ACTIVE) {
         func_001447A0();
         if (fldRunDanteGunFlag[0] == 0) {
             fldCheckSceneReady();
@@ -2422,11 +2422,11 @@ KwlnTaskUpdateResult fldProcDraw(dds3ProcessID_t *task) {
         if (D_003899A8[0] == 1) {
             fldDbgPrint2D(0x40, 0xC0, "NowLoading...");
         }
-        if (!lifecycle->phase) {
+        if (lifecycle->phase == FLD_SEQUENCE_PHASE_INITIALIZE) {
             return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
         }
     } else {
-        if (!lifecycle->phase) {
+        if (lifecycle->phase == FLD_SEQUENCE_PHASE_INITIALIZE) {
             return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
         }
     }
@@ -2448,7 +2448,7 @@ KwlnTaskUpdateResult fldProcDraw(dds3ProcessID_t *task) {
     if (fldGlobalBase.specialEventActive != 0) {
         fldTickWeatherEffectNodes();
     }
-    if (lifecycle->phase >= 2 && D_003899B0[0] != 0 &&
+    if (lifecycle->phase >= FLD_SEQUENCE_PHASE_ADVANCE_TO_AREA_ARCHIVE && D_003899B0[0] != 0 &&
         fldGetEncounterRuntimeResult() == 0) {
     flags = fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1);
     if (flags & 0x40) {
@@ -2499,7 +2499,7 @@ void fldProcTrigSequence(fldSceneParam_t *record, u32 mode) {
     FieldPlayerSceneWork *scene = &fldSceneParam;
     FldSequenceController *controller = &fldAutoMapSeqFlags;
 
-    controller->phase = 0;
+    controller->phase = FLD_SEQUENCE_PHASE_INITIALIZE;
     controller->flags = 0;
     scene->primaryState = mode;
     if (mode == 0) {
