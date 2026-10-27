@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "evt_run_context_api.h"
 #include "common.h"
+#include "btl_actor_command_selector_value_api.h"
 #include "pty_active_roster_index_api.h"
 #include "btl_command_use_error.h"
 #include "btl_action_press_result.h"
@@ -460,11 +461,11 @@ BtlCommandUseError btlGetLinkedPartyCommandFailureReason(BtlUnit *base, BtlUnit 
     return btlGetCommandFailureReason(&snapshot, command);
 }
 
-s8 btlGetActorIndexedSignedValue(BtlUnit *unit, s32 index) {
-    if (index == 0 && (unit->status.flags & 0x400) != 0) {
-        return datEnemyRecords[unit->partyRecord.unitId].indexedValueOverride;
+s8 btlGetActorIndexedSignedValue(const BtlUnit *actor, BtlCommandId commandId) {
+    if (commandId == 0 && (actor->status.flags & 0x400) != 0) {
+        return datEnemyRecords[actor->partyRecord.unitId].indexedValueOverride;
     }
-    return datCommandSelectors[index].stat;
+    return datCommandSelectors[commandId].stat;
 }
 
 s32 btlGetUnitElementAffinity(BtlUnit *battler, s32 element) {

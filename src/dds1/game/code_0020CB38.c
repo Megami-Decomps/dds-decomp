@@ -2,6 +2,7 @@
 #include "sdf_debug_api.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_actor_command_selector_value_api.h"
 #include "btl_referenced_battle_effect_task.h"
 #include "btl_actor_category_flag_api.h"
 #include "sdf_vu0.h"
@@ -338,7 +339,6 @@ void btlInitializeBossUnitScaleTransition(BtlUnit *unit) {
     }
 }
 
-extern s8 btlGetActorIndexedSignedValue(BtlUnit *, s32);
 extern s32 btlMapCommandToSkill(u32);
 extern BtlRuntimeTask *sndCreateStationedSeTask(u32);
 

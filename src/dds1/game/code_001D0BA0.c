@@ -5,6 +5,7 @@
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "common.h"
+#include "btl_actor_command_selector_value_api.h"
 #include "dds3_camera_update_flags.h"
 #include "file_config_option_api.h"
 #include "btl_command_use_error.h"
@@ -513,8 +514,6 @@ extern s32 btlShouldDistributeRandomTargetHits(BtlUnit *, s32);
 extern void btlDistributeRandomTargetHits(BtlUnit *, BtlIndexList *, BtlOperandGroup *, s32);
 
 extern void btlSortActorMuzzleDirections(BtlUnit *, BtlIndexList *, s32);
-
-extern s8 btlGetActorIndexedSignedValue(BtlUnit *, s32);
 
 extern u32 btlEncodeActorIndexAsSelectionMask(u32);
 

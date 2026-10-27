@@ -9,6 +9,7 @@
  * `bnez s1` slot instead of filling it unannulled.
  */
 #include "common.h"
+#include "btl_actor_command_selector_value_api.h"
 #include "btl_action_press_result.h"
 #include "pty_active_roster_index_api.h"
 #include "sdf_vu0.h"
@@ -52,7 +53,6 @@
 extern void btlBossDebugPrintf(const char *format, ...);
 /* Functions defined earlier in the previous translation unit. */
 datUnitWork_t *btlGetIndexedPartyEntryRecord(s32 index);
-s8 btlGetActorIndexedSignedValue(BtlUnit *unit, s32 index);
 BtlSpecialAbilityAvailability btlCheckSpecialAbility(
     const datUnitWork_t *object, s32 flag);
 f32 btlGetElementAbilityMultiplier(BtlUnit *actor, s32 attr);

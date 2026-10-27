@@ -4,6 +4,7 @@
 #include "fld_next_scene_request_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_actor_command_selector_value_api.h"
 #include "pty_active_roster_index_api.h"
 #include "dat_assigned_item_id.h"
 #include "btl_command_use_error.h"
@@ -1801,11 +1802,11 @@ BtlCommandUseError btlGetPartnerCommandUseError(BtlUnit *base, BtlUnit *first, B
     return btlGetCommandUseError(&snapshot, command);
 }
 
-s8 btlGetActorIndexedSignedValue(BtlUnit *object, s32 index) {
-    if (index == 0 && (object->status.flags & 0x400) != 0) {
-        return datEnemyRecords[object->partyRecord.unitId].indexedValueOverride;
+s8 btlGetActorIndexedSignedValue(const BtlUnit *actor, BtlCommandId commandId) {
+    if (commandId == 0 && (actor->status.flags & 0x400) != 0) {
+        return datEnemyRecords[actor->partyRecord.unitId].indexedValueOverride;
     }
-    return datCommandSelectors[index].stat;
+    return datCommandSelectors[commandId].stat;
 }
 
 s32 btlGetUnitElementAffinity(BtlUnit *battler, s32 element) {

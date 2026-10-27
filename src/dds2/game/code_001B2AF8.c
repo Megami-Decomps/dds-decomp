@@ -14,6 +14,7 @@
 #include "dsp_entry_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_actor_command_selector_value_api.h"
 #include "btl_scene_counter_mode.h"
 #include "btl_action_press_result.h"
 #include "btl_camera_mode_index.h"
@@ -201,8 +202,6 @@ extern EventRosterStat *datRosterDetails;
 extern s32 btlHasEnemyRecordDefeatExemptionFlag(BtlUnit *);
 
 void btlClearAllActorEntrySlots(BtlUnit *unit);
-
-s8 btlGetActorIndexedSignedValue(BtlUnit *object, s32 index);
 
 s32 btlGetEntryFlagsUnlessDisabled(datUnitWork_t *record);
 

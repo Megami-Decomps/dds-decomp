@@ -2,6 +2,7 @@
 #include "evt_run_context_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_actor_command_selector_value_api.h"
 #include "btl_action_press_result.h"
 #include "btl_hunt_mp_recovery_api.h"
 #include "btl_special_ability.h"
@@ -71,8 +72,6 @@ extern s32 btlGetActionRecordLookupValue(s32);
 u32 btlEncodeActorIndexAsSelectionMask(u32 id);
 
 f32 btlGetActorEntryMultiplier(BtlUnit *unit, u32 index, s8 includeCharge);
-
-s8 btlGetActorIndexedSignedValue(BtlUnit *object, s32 index);
 
 s32 btlGetEntryFlagsUnlessDisabled(datUnitWork_t *record);
 

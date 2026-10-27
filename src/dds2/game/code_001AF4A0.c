@@ -13,6 +13,7 @@
 #include "fld_next_scene_request_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_actor_command_selector_value_api.h"
 #include "btl_action_press_result.h"
 #include "pty_active_roster_index_api.h"
 #include "dat_assigned_item_id.h"
@@ -187,7 +188,6 @@ void TestMsgReloadTexture(void);
 
 /* Functions defined earlier in the previous translation unit. */
 void *btlGetRuntime(void);
-s8 btlGetActorIndexedSignedValue(BtlUnit *object, s32 index);
 BtlSpecialAbilityAvailability btlCheckSpecialAbility(
     const datUnitWork_t *record, s32 ability);
 s32 btlDoesEnabledStatusMatchCurrentId(datUnitWork_t *partyRecord, u32 entryId);

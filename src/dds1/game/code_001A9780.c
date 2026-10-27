@@ -10,6 +10,7 @@
 #include "btl_registered_panel_work.h"
 #include "btl_command_layout_work.h"
 #include "common.h"
+#include "btl_actor_command_selector_value_api.h"
 #include "btl_action_press_result.h"
 #include "file_config_option_api.h"
 #include "btl_command_use_error.h"
@@ -170,8 +171,6 @@ void btlClearActorEntrySlot(BtlUnit *unit, s32 index);
 s32 btlApplyCommandAbilityMultiplier(datUnitWork_t *battler, s32 command);
 
 void btlClearAllActorEntrySlots(BtlUnit *unit);
-
-s8 btlGetActorIndexedSignedValue(BtlUnit *unit, s32 index);
 
 s32 btlGetCombinedPartyCommandPower(datUnitWork_t *base, BtlUnit *first, BtlUnit *second, BtlUnit *third, s32 command);
 

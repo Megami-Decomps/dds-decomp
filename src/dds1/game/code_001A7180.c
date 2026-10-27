@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_actor_command_selector_value_api.h"
 #include "evt_run_context_api.h"
 #include "btl_scene_counter_mode.h"
 #include "btl_action_press_result.h"
@@ -107,8 +108,6 @@ u32 btlEncodeActorIndexAsSelectionMask(u32 id);
 s32 btlGetAbilityAttributeMultiplierPercent(BtlUnit *actor, s32 attr);
 
 f32 btlGetActorEntryMultiplier(BtlUnit *unit, u32 index, s8 includeCharge);
-
-s8 btlGetActorIndexedSignedValue(BtlUnit *unit, s32 index);
 
 s32 btlGetEntryFlagsUnlessDisabled(datUnitWork_t *record);
 

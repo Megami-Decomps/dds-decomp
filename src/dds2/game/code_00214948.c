@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_actor_command_selector_value_api.h"
 #include "btl_scene_counter_mode.h"
 #include "btl_camera_mode_index.h"
 #include "btl_command_target_policy.h"
