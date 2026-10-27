@@ -8,13 +8,13 @@
 /* The kind-11 destroy hook queues its optional resource allocation before
  * freeing its data block. dds3DeleteBasic frees the object after this returns. */
 void dds3ModelBasicFreeModel(dds3Basic_t *object) {
-    Dds3ModelRangeDataView *rangeData;
-    const void *resourceData;
+    const Dds3ModelRangeDataView *rangeData;
+    const void *ownedResourceData;
 
     rangeData = object->data;
-    resourceData = rangeData->resourceData;
-    if (resourceData != NULL) {
-        sdfMemFreeDelayedDirect(sdfMemGetHandleByPtr(resourceData));
+    ownedResourceData = rangeData->ownedResourceData;
+    if (ownedResourceData != NULL) {
+        sdfMemFreeDelayedDirect(sdfMemGetHandleByPtr(ownedResourceData));
     }
-    sdfChipFreeDirect(rangeData);
+    sdfChipFreeDirect((void *)rangeData);
 }

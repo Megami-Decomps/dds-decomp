@@ -3,15 +3,15 @@
 
 #include "eff_transform.h"
 
-/* Kind-11 data block. Release only reads the stored backing-resource address;
- * the leading word remains opaque. */
+/* Kind-11 data block. The optional resource address points into a general-heap
+ * allocation released by the kind's destroy hook; the leading word is opaque. */
 typedef struct Dds3ModelRangeDataView {
     u8 opaque_00[4];
-    const void *resourceData;
+    const void *ownedResourceData;
 } Dds3ModelRangeDataView;
 
-typedef char Dds3ModelRangeDataView_resource_at_04[
-    ((u32)&((Dds3ModelRangeDataView *)0)->resourceData == 0x04) ? 1 : -1];
+typedef char Dds3ModelRangeDataView_ownedResourceData_at_04[
+    ((u32)&((Dds3ModelRangeDataView *)0)->ownedResourceData == 0x04) ? 1 : -1];
 typedef char Dds3ModelRangeDataView_size_must_be_0x08[
     (sizeof(Dds3ModelRangeDataView) == 0x08) ? 1 : -1];
 typedef char Dds3ModelRangeNode_data_at_18[
