@@ -22,11 +22,20 @@ s32 fileRequestFreeIfComplete(struct FileRequest *request);
 #ifdef VERSION_DDS1
 struct FileRequest *pacLoadEx(const char *requestName, u32 flags, void *packetCallbackAddress,
                                                 u32 onComplete, u32 userData);
-struct FileRequest *fileLoadEx(const char *requestName, u32 allocationMode,
-                                              u32 callbackAddress, u32 userData);
 #else
 struct FilePacRequest *fileCreatePacLoadWork(const char *requestName, s32 flags, void *dispatchValue,
                                              s32 onComplete, s32 userData);
+#endif
+
+/* fileLoadEx stores userData without copying it. When callbackAddress is
+ * nonzero, the manager calls it once after the device request closes, passing
+ * the completed request and userData. The context must remain valid until then;
+ * callback delivery does not free the request wrapper, which callers release
+ * with fileRequestFreeIfComplete. */
+#ifdef VERSION_DDS1
+struct FileRequest *fileLoadEx(const char *requestName, u32 allocationMode,
+                                              u32 callbackAddress, u32 userData);
+#else
 struct FileRequest *fileLoadEx(const char *requestName, s32 allocationMode,
                                               s32 callbackAddress, s32 userData);
 #endif
