@@ -704,8 +704,8 @@ void itfMesMngClearBitStat(ItfMesWindowIndex window, ItfMesHighStatusBits mask) 
     mes->flags &= ~mask | ITF_MES_LOW_FLAGS_MASK;
 }
 
-/* Return the cached clear-bit rank; reset state uses -1. */
-s16 itfMesMngGetSelect(ItfMesWindowIndex window) {
+/* After chooser completion, selectedIndex holds the original mask bit; reset is -1. */
+ItfMesSelectedOptionBitResult itfMesMngGetSelect(ItfMesWindowIndex window) {
     return pinst[window].mes->blk40.selectedIndex;
 }
 

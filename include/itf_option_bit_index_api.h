@@ -9,6 +9,9 @@ typedef s32 ItfMesOptionBitIndex;
 /* Zero-based ordinal among the options enabled by clear mask bits. */
 typedef s32 ItfMesVisibleOptionOrdinal;
 
+/* Selected mask-bit index returned by a completed chooser; -1 means unset. */
+typedef s16 ItfMesSelectedOptionBitResult;
+
 #define ITF_MES_OPTION_BIT_INDEX_NOT_FOUND ((ItfMesOptionBitIndex)0x20)
 
 /* Map a visible option ordinal to its clear bit, or return the 32-bit mask

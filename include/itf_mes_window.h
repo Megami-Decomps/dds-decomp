@@ -17,7 +17,8 @@ typedef u32 ItfMesHighStatusBits;
 ItfMesWindowIndex itfMesMngInitialize(struct ItfMesSub *sub);
 void itfMesMngRelease(ItfMesWindowIndex window);
 ItfMesStatusWord itfMesMngGetStat(ItfMesWindowIndex window);
-s16 itfMesMngGetSelect(ItfMesWindowIndex window);
+/* After chooser completion, return the selected mask bit, or -1 if unset. */
+ItfMesSelectedOptionBitResult itfMesMngGetSelect(ItfMesWindowIndex window);
 /* Return the entry's item-list address, NONE, or the BRANCH sentinel. */
 ItfMesEntryItemsResult itfMesGetWindowEntryItems(ItfMesWindowIndex window, ItfMesEntryIndex entryIndex);
 u32 itfMesGetEntryCount(ItfMesWindowIndex window);
