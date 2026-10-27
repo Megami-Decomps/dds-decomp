@@ -2119,7 +2119,7 @@ s32 mcdAdvanceToLoadSelection(void) {
 }
 
 extern s32 D_00437D00;
-extern void fileLoadSetMode(s8);
+extern void fileLoadSetMode(FileLoadMenuSlideMode mode);
 extern void fileSetMenuValueAndInitializeFlags(u32);
 extern void fileCopyRecordHeader(FileSavePreviewRecord *, const void *);
 
@@ -2148,7 +2148,7 @@ s32 fileSlotBrowserUpdate(void) {
                     offset = 1;
                 } else if (offset == 1) {
                     D_00437D28 = selection - 1;
-                    fileLoadSetMode(2);
+                    fileLoadSetMode(FILE_LOAD_MENU_SLIDE_SELECTION_UP);
                     fileSetMenuValueAndInitializeFlags(0x80);
                 }
             } else {
@@ -2164,7 +2164,7 @@ s32 fileSlotBrowserUpdate(void) {
                     offset = 1;
                 } else if (offset == 1) {
                     D_00437D28 = selection + 1;
-                    fileLoadSetMode(1);
+                    fileLoadSetMode(FILE_LOAD_MENU_SLIDE_SELECTION_DOWN);
                     fileSetMenuValueAndInitializeFlags(0x80);
                 }
             } else {
@@ -2333,11 +2333,11 @@ s32 fileDrawSlotListAndPreview(s32 work) {
         fileDrawCursorPulse(0x25, 0x1F, 0x53);
     }
     fileLoadCtxSlideUpdate();
-    if (fileLoadMenuState.slideMode == 0) {
+    if (fileLoadMenuState.slideMode == FILE_LOAD_MENU_SLIDE_IDLE) {
         rowCount = 3;
         rowBase = D_00437D28;
         slotBase = D_00437D28;
-    } else if (fileLoadMenuState.slideMode == 1) {
+    } else if (fileLoadMenuState.slideMode == FILE_LOAD_MENU_SLIDE_SELECTION_DOWN) {
         rowCount = 4;
         rowBase = D_00437D28;
         slotBase = D_00437D28 - 1;
@@ -2368,7 +2368,7 @@ s32 fileDrawSlotListAndPreview(s32 work) {
                 detailColor = 0xA09DC380;
             }
         }
-        if (fileLoadMenuState.slideMode != 0) {
+        if (fileLoadMenuState.slideMode != FILE_LOAD_MENU_SLIDE_IDLE) {
             if (row == 0) {
                 alpha = fileLoadMenuState.leadingRowAlpha;
                 titleColor = fileClampPackedColorByte(titleColor, alpha, 0);
@@ -3226,10 +3226,10 @@ void fileDrawCursorPulse(s32 x, s32 y, s32 surface) {
     }
 }
 
-void fileLoadSetMode(s8 mode) {
+void fileLoadSetMode(FileLoadMenuSlideMode mode) {
     fileLoadMenuState.rowVerticalOffset = 0;
     fileLoadMenuState.slideMode = mode;
-    if (mode == 1) {
+    if (mode == FILE_LOAD_MENU_SLIDE_SELECTION_DOWN) {
         fileLoadMenuState.trailingRowAlpha = 0;
         fileLoadMenuState.leadingRowAlpha = 0x74;
     } else {
@@ -3240,30 +3240,30 @@ void fileLoadSetMode(s8 mode) {
 
 void fileResetLoadContextSlide(void) {
     fileLoadMenuState.rowVerticalOffset = 0;
-    fileLoadMenuState.slideMode = 0;
+    fileLoadMenuState.slideMode = FILE_LOAD_MENU_SLIDE_IDLE;
     fileLoadMenuState.transitionTickCount = 0;
 }
 
 void fileLoadCtxSlideUpdate(void) {
     switch (fileLoadMenuState.slideMode) {
-    case 1:
+    case FILE_LOAD_MENU_SLIDE_SELECTION_DOWN:
         fileLoadMenuState.rowVerticalOffset -= 0x14;
         fileLoadMenuState.rowVerticalOffset = fileLoadMenuState.rowVerticalOffset <= -0x6E ? -0x6E : fileLoadMenuState.rowVerticalOffset > 0 ? 0 : fileLoadMenuState.rowVerticalOffset;
         if (fileLoadMenuState.rowVerticalOffset <= -0x6E) {
             fileLoadMenuState.rowVerticalOffset = 0;
-            fileLoadMenuState.slideMode = 0;
+            fileLoadMenuState.slideMode = FILE_LOAD_MENU_SLIDE_IDLE;
         }
         fileLoadMenuState.leadingRowAlpha -= 0x20;
         fileLoadMenuState.leadingRowAlpha = fileLoadMenuState.leadingRowAlpha <= 0 ? 0 : fileLoadMenuState.leadingRowAlpha > 0x80 ? 0x80 : fileLoadMenuState.leadingRowAlpha;
         fileLoadMenuState.trailingRowAlpha += 0x10;
         fileLoadMenuState.trailingRowAlpha = fileLoadMenuState.trailingRowAlpha <= 0 ? 0 : fileLoadMenuState.trailingRowAlpha > 0x80 ? 0x80 : fileLoadMenuState.trailingRowAlpha;
         break;
-    case 2:
+    case FILE_LOAD_MENU_SLIDE_SELECTION_UP:
         fileLoadMenuState.rowVerticalOffset += 0x14;
         fileLoadMenuState.rowVerticalOffset = fileLoadMenuState.rowVerticalOffset <= 0 ? 0 : fileLoadMenuState.rowVerticalOffset > 0x6E ? 0x6E : fileLoadMenuState.rowVerticalOffset;
         if (fileLoadMenuState.rowVerticalOffset >= 0x6E) {
             fileLoadMenuState.rowVerticalOffset = 0;
-            fileLoadMenuState.slideMode = 0;
+            fileLoadMenuState.slideMode = FILE_LOAD_MENU_SLIDE_IDLE;
         }
         fileLoadMenuState.leadingRowAlpha += 0x10;
         fileLoadMenuState.leadingRowAlpha = fileLoadMenuState.leadingRowAlpha <= 0 ? 0 : fileLoadMenuState.leadingRowAlpha > 0x80 ? 0x80 : fileLoadMenuState.leadingRowAlpha;
