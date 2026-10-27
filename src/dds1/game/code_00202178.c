@@ -3,6 +3,7 @@
 #include "common.h"
 #include "btl_element_block_query_result.h"
 #include "btl_status_motion_override.h"
+#include "btl_command_availability_override.h"
 #include "btl_command_hit_count_override.h"
 #include "btl_quarter_health_result.h"
 #include "btl_camera_mode_index.h"
@@ -3347,7 +3348,7 @@ u32 btlCerberDeclineResourceTypeOverride(void) {
 }
 
 /* Cerber availability override: allow only actors outside party group 0x200. */
-s32 btlCerberAllowsNonPartyActor(BtlUnit *unit, s32 command) {
+BtlCommandAvailabilityOverrideResult btlCerberAllowsNonPartyActor(BtlUnit *unit, s32 command) {
     return (unit->status.flags & 0x200) < 1;
 }
 

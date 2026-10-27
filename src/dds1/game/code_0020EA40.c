@@ -2,6 +2,7 @@
 #include "pcp_vu0.h"
 #include "common.h"
 #include "btl_status_motion_override.h"
+#include "btl_command_availability_override.h"
 #include "btl_command_hit_count_override.h"
 #include "btl_boss_data_api.h"
 #include "btl_resolve_unit_value_api.h"
@@ -250,7 +251,7 @@ extern u8 btlSetLinkedPairActionCamera(BtlLinkedCommand *command, s8 unused1, s8
 extern void btlAlignCerberusPartTransforms(void);
 extern s32 btlChooseCerberusPartMotion(BtlUnit *unit, s32 animation);
 extern u32 btlCerberDeclineResourceTypeOverride(void);
-extern s32 btlCerberAllowsNonPartyActor(BtlUnit *unit, s32 command);
+extern BtlCommandAvailabilityOverrideResult btlCerberAllowsNonPartyActor(BtlUnit *unit, s32 command);
 extern BtlCommandHitCountOverrideResult btlCerberGetCommandHitCount(BtlUnit *unit, s32 command);
 extern void btlAdvanceNidhoggrScaleStage(s32 unit, BtlScaleStageSource *source);
 extern void btlUpdateNidhoggrScaleAndPosition(void);

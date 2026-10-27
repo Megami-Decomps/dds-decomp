@@ -11,6 +11,7 @@
 #include "common.h"
 #include "btl_actor_command_selector_value_api.h"
 #include "btl_action_press_result.h"
+#include "btl_command_availability_override.h"
 #include "btl_command_hit_count_override.h"
 #include "pty_active_roster_index_api.h"
 #include "sdf_vu0.h"
@@ -623,9 +624,10 @@ void btlSortActorMuzzleDirections(BtlUnit *unit, BtlIndexList *targets, s32 acti
 /* Share the policy rejection; see docs/idioms.md, "Shared rejection blocks: battle command availability". */
 s32 btlShouldDistributeRandomTargetHits(BtlUnit *unit, s32 command) {
     BtlState *runtime = btlGetRuntime();
+    BtlCommandAvailabilityOverrideCallback availabilityOverride = runtime->commandAvailabilityOverride;
 
-    if (runtime->commandAvailabilityOverride != NULL) {
-        if (runtime->commandAvailabilityOverride(unit, command) == 0) {
+    if (availabilityOverride != NULL) {
+        if (availabilityOverride(unit, command) == 0) {
             return 0;
         }
     }
