@@ -5,6 +5,7 @@
 #include "mnu_mantra_position_api.h"
 #include "mnu_panel_position_record.h"
 #include "common.h"
+#include "mdl_flag_api.h"
 #include "sdf_resource.h"
 #include "mnu.h"
 #include "mnu_list.h"
@@ -439,7 +440,6 @@ s32 mnuNavigateMantraSelector(MnuStatusResource *resource, s8 directionFlags) {
 }
 
 extern s32 mnuGetActiveMantraModelFlagState(void);
-extern s32 evtBitCheck(s32);
 
 extern const s16 mnuMantraBridgeDestinationIds[4][3];
 extern const u16 mnuMantraBridgeNodesForDirections0And5[3][5];
@@ -606,9 +606,6 @@ typedef struct MantraModelFlag {
     u8 variant;
     u8 pad05[3];
 } MantraModelFlag;
-
-extern s32 evtBitCheck(s32);
-extern void evtBitOn(s32);
 
 void mnuSynchronizeMantraModelFlags(s32 mode) {
     MantraModelFlag flags[112];

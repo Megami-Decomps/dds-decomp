@@ -3670,7 +3670,7 @@ void evtBitOff(s32 flag) {
     DDS3_GBWK->modelFlags.words[adjustedFlag >> 5] &= ~(1 << flag);
 }
 
-s32 evtBitCheck(s32 flag) {
+EvtBitTestResult evtBitCheck(s32 flag) {
     s32 adjustedFlag = (flag < 0) ? flag + 0x1f : flag;
     return (((s32)DDS3_GBWK->modelFlags.words[adjustedFlag >> 5] >> flag) & 1);
 }

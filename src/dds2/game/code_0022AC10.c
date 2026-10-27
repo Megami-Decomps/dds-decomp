@@ -143,8 +143,6 @@ typedef char BtlStateModelCacheViewSizeCheck[
 
 extern s8 D_00436F5D;
 
-extern s32 evtBitCheck(s32);
-
 typedef struct BtlLightParams {
     f32 r;
     f32 g;
