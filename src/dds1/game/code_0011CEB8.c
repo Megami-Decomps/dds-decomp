@@ -84,7 +84,7 @@ void dds3FontReqListRemove(Dds3IntrusiveNodeList *list,
 }
 
 void dds3FontReqListAdd(Dds3IntrusiveNode *node,
-                                    Dds3IntrusiveNodeCallbacks *vtable) {
+                                    const Dds3IntrusiveNodeCallbacks *vtable) {
     dds3FontReqListInsert(&dds3OwnedNodeListHead, node, 0);
     node->vtable = vtable;
 }

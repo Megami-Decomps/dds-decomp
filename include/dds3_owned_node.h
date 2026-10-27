@@ -13,7 +13,8 @@ struct Dds3IntrusiveNode {
     Dds3IntrusiveNode *prev;
     Dds3IntrusiveNode *next;
     s32 value;
-    Dds3IntrusiveNodeCallbacks *vtable;
+    /* A registered node borrows this persistent callback table for dispatch. */
+    const Dds3IntrusiveNodeCallbacks *vtable;
 };
 
 /* The list object contains the head and tail words at its native address. */
@@ -53,7 +54,7 @@ void dds3FontReqListInsert(Dds3IntrusiveNodeList *list,
 void dds3FontReqListRemove(Dds3IntrusiveNodeList *list,
     Dds3IntrusiveNode *node, s32 linkOffset);
 void dds3FontReqListAdd(Dds3IntrusiveNode *node,
-    Dds3IntrusiveNodeCallbacks *vtable);
+    const Dds3IntrusiveNodeCallbacks *vtable);
 void dds3FontReqListRunOne(Dds3IntrusiveNode *node);
 void dds3FontReqListRunAll(void);
 void dds3SetLinkedNodeValue(Dds3IntrusiveNode *node, u32 value);
