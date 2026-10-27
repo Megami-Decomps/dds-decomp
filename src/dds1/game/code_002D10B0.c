@@ -11,6 +11,7 @@
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "sdf_graph_buffer_state.h"
+#include "sdf_display_thread_state.h"
 #include "sdf_semaphore_api.h"
 #include "sdf_texture_primary_buffer_api.h"
 #include "sdf_texture_submit.h"
@@ -69,7 +70,7 @@ void sdfGrReqCapture(u8 *destination, void (*onComplete)(u8 *)) {
 
 extern sceGsStoreImage sdfGsCaptureStoreImage;
 extern sdfGrFrameSet_t D_003980E0;
-extern volatile u8 sdfDispThreadFlag;
+extern volatile SdfDisplayThreadState sdfDispThreadFlag;
 
 
 /* Interleave rows from both color buffers into the queued destination. */
@@ -96,7 +97,7 @@ void sdfGrCapture(void) {
         }
         rowBytes = pixelBytes * width;
         stride = rowBytes * 2;
-        sdfDispThreadFlag = 5;
+        sdfDispThreadFlag = SDF_DISPLAY_THREAD_CAPTURING_FRAME;
         allocation = sdfMemAllocDirect(rowBytes * height);
         pixels = (u8 *)sdfMemLock(allocation);
         sceGsSetDefStoreImage(
@@ -173,12 +174,12 @@ extern s32 sdfDrawThIntHandler(s32);
 void sdfDrawThread(void) {
     u32 startTicks;
 
-    sdfDispThreadFlag = 0;
+    sdfDispThreadFlag = SDF_DISPLAY_THREAD_STARTUP;
     sdfAddHandler(SDF_HANDLER_KIND_DMA, 1, sdfDrawThIntHandler, -1, 0);
     EnableDmac(1);
     for (;;) {
         CancelWakeupThread(GetThreadId());
-        sdfDispThreadFlag = 1;
+        sdfDispThreadFlag = SDF_DISPLAY_THREAD_WAITING_FOR_VBLANK;
         SleepThread();
         startTicks = sdfGetRunTimeCountBase();
         WaitSema(dds3GsSema);
@@ -234,8 +235,8 @@ void sdfServiceGraphicsBuffers(void) {
         }
         invertedField = (~HW_READ(GS_CSR) >> SDF_GS_CSR_FIELD_SHIFT) & 1;
         sdfFrameEvenOdd = invertedField ^ 1;
-        if (sdfDispThreadFlag == 1) {
-            sdfDispThreadFlag = 2;
+        if (sdfDispThreadFlag == SDF_DISPLAY_THREAD_WAITING_FOR_VBLANK) {
+            sdfDispThreadFlag = SDF_DISPLAY_THREAD_WAKE_REQUESTED;
             WakeupThread(sdfDrawThreadId);
             WaitSema(dds3GsThreadId);
         }
