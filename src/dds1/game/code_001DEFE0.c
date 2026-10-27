@@ -38,6 +38,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
 #include "btl_effect_position.h"
+#include "btl_unit_geometry_api.h"
 #include "btl_effect_table.h"
 #include "sdf_chip.h"
 #include "snd_slot.h"
@@ -253,7 +254,6 @@ extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *, s32);
 
 extern void mdlGetPosition(dds3ModelHandle_t *);
 
-extern void btlUnitGetBodyPosVU(u8 *);
 
 extern s32 btlAimHorizontalDirectionVU(const f32 *, const f32 *);
 
@@ -2694,7 +2694,7 @@ void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *action, BtlCamState *pose,
         if ((flags & 0x200) != 0) {
             if ((flags & 0xE0) == 0) {
                 if ((flags & 0x80000) != 0) {
-                    btlUnitGetBodyPosVU((u8 *)unit);
+                    btlUnitGetBodyPosVU(unit);
                     VU0_STORE_VF_UNCLOBBERED(vf10, vectors.firstActorPosition);
                     if (btlAimHorizontalDirectionVU(vectors.firstActorPosition, vectors.center) != 0) {
                         VU0_STORE_VF_UNCLOBBERED(vf10, vectors.rotation);
@@ -2712,7 +2712,7 @@ void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *action, BtlCamState *pose,
 
         if ((flags & 0x400) != 0) {
             if ((flags & 0x80000) != 0) {
-                btlUnitGetBodyPosVU((u8 *)unit);
+                btlUnitGetBodyPosVU(unit);
                 VU0_STORE_VF_UNCLOBBERED(vf10, vectors.secondActorPosition);
                 btlAimHorizontalDirectionClampedVU(vectors.secondActorPosition, vectors.center,
                                                      0.34906585f);

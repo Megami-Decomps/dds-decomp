@@ -11,6 +11,7 @@
 #include "eff_random.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_unit_geometry_api.h"
 #include "btl_horizontal_aim_api.h"
 #include "btl_camera_mode_index.h"
 #include "btl_skill_name_index.h"
@@ -3052,7 +3053,6 @@ extern void btlResetUnitLinks(BtlUnit *);
 extern void btlInsertPartyActorByPriority(BtlUnit *, u8, u8);
 extern void btlBindActorTaskAndSelectActionNumber(ActionStateLink *, BtlUnit *);
 extern void btlSetSceneTaskActiveFlag(ActionStateLink *);
-extern void btlUnitGetBodyPosVU(BtlUnit *);
 extern void btlApplyMaskedActorEntryAdjustments(BtlUnit *, u32, s16);
 
 void btlScheduleSummonActionTasks(ActionStateLink *action) {

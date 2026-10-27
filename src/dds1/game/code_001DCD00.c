@@ -1,6 +1,7 @@
 #include "btl_motion_transform.h"
 #include "btl_camera_pose_api.h"
 #include "common.h"
+#include "btl_unit_geometry_api.h"
 #include "btl_command_target_policy.h"
 #include "btl_actor_category_flag_api.h"
 #include "sdf_vu0.h"
@@ -67,7 +68,6 @@ extern EffRandState effSharedRandomState[];
 
 extern EffRandState effSharedRandomState[];
 
-extern void btlUnitGetBodyPosVU(u8 *);
 
 extern char D_003BB5F8[];
 

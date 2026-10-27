@@ -37,6 +37,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
 #include "btl_effect_position.h"
+#include "btl_unit_geometry_api.h"
 #include "sdf_chip.h"
 #include "snd_slot.h"
 #include "btl_task_state.h"
@@ -314,7 +315,6 @@ extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *, s32);
 extern void mdlGetPosition(dds3ModelHandle_t *);
 
 
-extern void btlUnitGetBodyPosVU(BtlUnit *);
 
 extern void btlSetUnitRotation(BtlUnit *, const f32 [4]);
 

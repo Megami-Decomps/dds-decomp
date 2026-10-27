@@ -34,6 +34,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
 #include "btl_effect_position.h"
+#include "btl_unit_geometry_api.h"
 #include "btl_actor_entry_code_api.h"
 #include "eff_offset_if_owner_flag_clear.h"
 #include "sdf_chip.h"
@@ -3231,7 +3232,6 @@ void btlRefreshUnitFxVectors(BtlUnit *unit) {
 }
 
 
-extern void btlUnitGetBodyPosVU(BtlUnit *);
 
 extern void btlSetUnitRotation(BtlUnit *, const f32 [4]);
 
@@ -3524,7 +3524,7 @@ void btlWarpUnitToMotionReach(BtlUnit *unit, BtlUnit *target, s32 index) {
         return;
     }
     reach -= margin;
-    btlUnitGetBodyPosVU((u8 *)unit);
+    btlUnitGetBodyPosVU(unit);
     SDF_VU0_STOREVECTOR(bodyPos);
     if (target != NULL) {
         btlUnitGetMuzzlePosVU(target);

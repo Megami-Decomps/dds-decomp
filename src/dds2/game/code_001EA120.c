@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_unit_geometry_api.h"
 #include "btl_command_target_policy.h"
 #include "btl_actor_category_flag_api.h"
 #include "sdf_vu0.h"
@@ -91,7 +92,6 @@ extern DatEnemyRecord *datEnemyRecords;
 
 extern DatEnemyRecord *datEnemyRecords;
 
-extern void btlUnitGetBodyPosVU(BtlUnit *);
 
 extern char D_00436A28[];
 

@@ -2,6 +2,7 @@
 #include "btl_command.h"
 #include "btl_ui.h"
 #include "btl_effect_position.h"
+#include "btl_unit_geometry_api.h"
 #include "kwln_sprite.h"
 #include "common.h"
 #include "scr_integer_parameter_api.h"
@@ -369,9 +370,10 @@ void btlUnitGetMuzzlePosVU(BtlUnit *unit) {
     SDF_VU0_ADDVECTOR();
 }
 
-void btlUnitGetBodyPosVU(BtlUnit *unit) {
+void btlUnitGetBodyPosVU(const BtlUnit *unit) {
     f32 pos[4];
-    btlGetUnitWorldPos(unit, pos);
+    /* The legacy world-position declaration is mutable, but reads unit data. */
+    btlGetUnitWorldPos((BtlUnit *)unit, pos);
     pos[2] += unit->positionZOffset;
     SDF_VU0_LOADVECTOR(unit->orientation);;
     effMiscQuaternionToMatrixVU();
