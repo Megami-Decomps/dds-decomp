@@ -5,10 +5,15 @@
 #include "kwln.h"
 #include "kwln_task_state.h"
 
+/* Zero-based position in the current linked order of one scheduler queue. */
+typedef s32 KwlnTaskQueueIndex;
+
 /* Queue size is a scalar count; unknown or detached states have no entries. */
 s32 dds3GetProcessCount(KwlnTaskState state);
 
-/* Returns a borrowed queue node, or NULL for detached/unsupported states or exhaustion. */
-dds3ProcessID_t *dds3SearchProcessNumber(KwlnTaskState taskState, s32 taskIndex);
+/* For nonnegative queueIndex, returns that borrowed queue node or NULL for an
+ * unsupported queue or an index beyond its end. Membership changes shift later
+ * indexes. */
+dds3ProcessID_t *dds3SearchProcessNumber(KwlnTaskState taskState, KwlnTaskQueueIndex queueIndex);
 
 #endif /* KWLN_TASK_QUEUE_QUERY_H */

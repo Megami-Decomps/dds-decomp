@@ -131,7 +131,7 @@ const char evtFieldScriptTerminationFormat[0x28] = "kill field script -> [%s]\n"
 void evtKillFieldScript(void)
 {
     s32 taskState;
-    s32 taskIndex;
+    KwlnTaskQueueIndex taskIndex;
     dds3ProcessID_t *task;
 
     for (taskState = KWLN_TASK_DELAYED_START; taskState < KWLN_TASK_DESTROY_PENDING; taskState++) {
@@ -141,7 +141,7 @@ void evtKillFieldScript(void)
             if (task->priority == 0x3EA) {
                 printf(evtFieldScriptTerminationFormat, task->name);
                 dds3KillProcess(task, 0);
-                /* Destruction changes the queue, so restart the current scan. */
+                /* Removal shifts queue indexes, so restart from its head. */
                 goto restartStateScan;
             }
         }

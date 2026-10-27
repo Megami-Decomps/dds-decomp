@@ -344,10 +344,10 @@ s32 dds3GetProcessCount(KwlnTaskState state)
     }
 }
 
-dds3ProcessID_t *dds3SearchProcessNumber(KwlnTaskState taskState, s32 taskIndex)
+dds3ProcessID_t *dds3SearchProcessNumber(KwlnTaskState taskState, KwlnTaskQueueIndex queueIndex)
 {
     dds3ProcessID_t *task = startinglistf;
-    s32 listPosition;
+    KwlnTaskQueueIndex listPosition;
 
     switch (taskState & KWLN_TASK_STATE_MASK) {
     case KWLN_TASK_DELAYED_START:
@@ -362,7 +362,7 @@ dds3ProcessID_t *dds3SearchProcessNumber(KwlnTaskState taskState, s32 taskIndex)
     default:
         return NULL;
     }
-    for (listPosition = 0; listPosition < taskIndex && task != NULL; listPosition++) {
+    for (listPosition = 0; listPosition < queueIndex && task != NULL; listPosition++) {
         task = task->listNext;
     }
     return task;
