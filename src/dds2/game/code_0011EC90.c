@@ -8,14 +8,13 @@
 #include "fr_font.h"
 #include "dds3_owned_node.h"
 #include "pty_roster_api.h"
+#include "pty_remove_unit_item_disposition_api.h"
 #include "pty_active_roster_index_api.h"
 #include "pty_template_init_flags.h"
 
 extern s32 mtrHasEnoughOwnedMantras(void);
 
 extern PtyAddUnitResult ptyAddUnitWithFlags(DatUnitId unitId, PtyTemplateInitFlags initFlags);
-
-extern PtyRemoveUnitResult ptyRemoveUnitWithFlags(DatUnitId unitId, s32 flags);
 
 extern s32 scrSetFlag(datUnitWork_t *work, u16 index);
 
@@ -43,10 +42,10 @@ s32 ptyScriptAddUnitWithFlagsAndReturnResult(void) {
 
 s32 ptyScriptRemoveUnitWithFlagsAndReturnResult(void) {
     DatUnitId unitId = scrGetIntPara(0);
-    s32 flags = scrGetIntPara(1);
+    PtyRemoveUnitItemDisposition itemDisposition = scrGetIntPara(1);
 
     scrSetIntReturnValue(
-        ptyRemoveUnitWithFlags(unitId, flags) == PTY_REMOVE_UNIT_RESULT_REMOVED);
+        ptyRemoveUnitWithFlags(unitId, itemDisposition) == PTY_REMOVE_UNIT_RESULT_REMOVED);
     return 1;
 }
 

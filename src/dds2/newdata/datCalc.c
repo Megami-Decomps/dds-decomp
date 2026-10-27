@@ -22,6 +22,7 @@
 #include "mdl_flag_api.h"
 #include "pty_active_roster_index_api.h"
 #include "pty_roster_api.h"
+#include "pty_remove_unit_item_disposition_api.h"
 #include "pty_party_unit_presence_api.h"
 #include "pty_template_init_flags.h"
 #include "pty_frontline_promotion_api.h"
@@ -37,9 +38,6 @@
 #include "eff_random_mod.h"
 #include "btl.h"
 #include "scr_integer_return_value_api.h"
-/* Declared before first use (were implicit int). */
-extern PtyRemoveUnitResult ptyRemoveUnitWithFlags(s32 param0, s32 param1);
-
 #define DAT_EXTERNAL_SKILL_TABLE 0x20
 #define DAT_INLINE_SKILL_COUNT 0x18
 #define DAT_TABLE_SKILL_COUNT 8
@@ -1348,7 +1346,8 @@ PtyAddUnitResult ptyAddUnit(DatUnitId unitId) {
     return ptyAddUnitWithFlags(unitId, PTY_TEMPLATE_INIT_NONE);
 }
 
-PtyRemoveUnitResult ptyRemoveUnitWithFlags(DatUnitId unitId, s32 flags) {
+PtyRemoveUnitResult ptyRemoveUnitWithFlags(
+    DatUnitId unitId, PtyRemoveUnitItemDisposition itemDisposition) {
     PtyActiveRosterIndex partyIndex;
     s32 i;
     s32 completeSlotCount;
@@ -1362,7 +1361,7 @@ PtyRemoveUnitResult ptyRemoveUnitWithFlags(DatUnitId unitId, s32 flags) {
     }
 
     itemId = DDS3_GBWK->party[partyIndex].assignedItemId;
-    if (flags == 0 && itemId != 0) {
+    if (itemDisposition == PTY_REMOVE_UNIT_ITEM_RETURN_TO_INVENTORY && itemId != 0) {
         DDS3_GBWK->inventory.counts[itemId] = 1;
         DDS3_GBWK->party[partyIndex].assignedItemId = 0;
     }
@@ -1410,7 +1409,7 @@ PtyRemoveUnitResult ptyRemoveUnitWithFlags(DatUnitId unitId, s32 flags) {
 }
 
 PtyRemoveUnitResult ptyRemoveUnit(DatUnitId unitId) {
-    return ptyRemoveUnitWithFlags(unitId, 0);
+    return ptyRemoveUnitWithFlags(unitId, PTY_REMOVE_UNIT_ITEM_RETURN_TO_INVENTORY);
 }
 
 u32 ptyReturnZero(void) {
