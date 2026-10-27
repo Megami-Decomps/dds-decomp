@@ -19,8 +19,13 @@ typedef enum EffectDependencyStateKind {
 } EffectDependencyStateKind;
 
 /* Complete 0x50-byte kind-7 payload, allocated and cleared by its constructor.
- * The dependency at 0x0C has a state-dependent owner: node, billboard or sound.
- * Bytes 0x30..0x3B remain opaque. */
+ * `handle`, `node` and `vector` form a state-tagged dependency payload:
+ * states 1, 7 and 8 own an effect node in `handle`; states 2 and 3 own a
+ * billboard there; state 4 borrows `handle`; state 5 owns a BED mixer in
+ * `handle`, an optional BED cut in `node`, and a copied parameter block in
+ * `vector`. States 7 and 8 also own a scratch block in `node` and their
+ * Magatuhi parameter rows in `vector`. States 0 and 6 have no releasable
+ * dependency. Bytes 0x30..0x3B remain opaque. */
 typedef struct EffectDependencyState {
     dds3ObjectBaseControlWorkData_t *objectHandle;
     u32 flags;
@@ -52,6 +57,9 @@ typedef char EffectDependencyState_position_at_0x40[((u32)&((EffectDependencySta
 void dds3EffectObjectBasicUnlinkObject(dds3Basic_t *object);
 void dds3EffectObjectBasicCalcFldEx(dds3Basic_t *object);
 
+/* Release dependencies owned by the active state and reset it to EMPTY.
+ * Borrowed state-4 handles are detached, not deleted. This leaves the state
+ * allocation and `objectHandle` for the enclosing object destructor to free. */
 void FreeEffectData(EffectDependencyState *state);
 
 dds3ObjectBaseControlWorkData_t *dds3EffectObjectBasicGetControlWorkData(dds3Basic_t *object);
