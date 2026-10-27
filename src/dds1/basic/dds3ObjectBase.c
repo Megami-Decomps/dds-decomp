@@ -4,6 +4,7 @@
 #include "sdf_model_packet_callback.h"
 #include "dds3_object_flags.h"
 #include "sdf_model.h"
+#include "sdf_model_eval_api.h"
 #include "sdf_model_release_api.h"
 #include "evt_gradient_rect.h"
 #include "sdf_motion.h"
