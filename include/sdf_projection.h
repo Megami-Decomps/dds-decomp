@@ -62,6 +62,6 @@ void effScreenOffset(void);
 void LookAtMatrix(const f32 *targetPoint, const f32 *eyePosition, const f32 *upVector);
 struct ConsMatrixPacket;
 extern void sdf3DMakeViewportPacket(struct ConsMatrixPacket *, SdfProjectionRecord *, const Matrix4 *);
-extern void sdf3DSetCamera(SdfProjectionRecord *, const Matrix4 *);
+extern void sdf3DSetCamera(const SdfProjectionRecord *, const Matrix4 *);
 
 #endif /* SDF_PROJECTION_H */
