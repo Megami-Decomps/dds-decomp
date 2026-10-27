@@ -1780,18 +1780,19 @@ void sdfModelRootFreeResrc(sdfModelRootNode_t *owner) {
     sdfChipFreeDirect(owner);
 }
 
-void sdfModelRootFree(sdfModelRootNode_t *slot, s32 deferRootCleanup,
-                      s32 deferMaterialResourceRelease) {
+void sdfModelRootFree(sdfModelRootNode_t *slot,
+                      SdfModelRootCleanupPolicy rootCleanupPolicy,
+                      SdfModelMaterialResourceReleasePolicy materialResourcePolicy) {
     if (slot == NULL) {
         return;
     }
-    if (deferMaterialResourceRelease != 0) {
+    if (materialResourcePolicy != 0) {
         sdfMatListFreeResrc(slot->resources, SDF_MAT_LIST_DEFER_FULL_RELEASE);
     }
     if (slot->slotPairs != NULL) {
         sdfItemArrayFree(slot->slotPairs);
     }
-    if (deferRootCleanup != 0) {
+    if (rootCleanupPolicy != 0) {
         sdfDelayedResrcEntry(&sdfModelDelayedResrcCB, slot);
     } else {
         sdfItemArrayFree(slot->list);

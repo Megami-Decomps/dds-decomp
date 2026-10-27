@@ -98,7 +98,7 @@
 #include "sdf_texture_file.h"
 #include "eff_random_mod.h"
 #include "kwln_fade_timing.h"
-#include "sdf_dev_slot_api.h"
+#include "sdf_model_release_api.h"
 /* Declared before first use (were implicit int). */
 extern s32 btlAimHorizontalDirectionVU(const f32 *origin, const f32 *targetPosition);
 extern void btlInitTintTransitionDefault(u16 soundId);
@@ -12041,7 +12041,9 @@ void effDestroyOwnedResources(s32 *work) {
         effDestroyModelContext(((EffectSlotNode80 *)work)->model);
     }
     if (((EffectSlotNode80 *)work)->deviceSlot != 0) {
-        sdfModelRootFree(((EffectSlotNode80 *)work)->deviceSlot, 1, 1);
+        sdfModelRootFree(((EffectSlotNode80 *)work)->deviceSlot,
+                         SDF_MODEL_ROOT_FREE_DEFERRED,
+                         SDF_MODEL_MATERIAL_RESOURCES_RELEASE_DEFERRED);
     }
     if (((EffectSlotNode80 *)work)->entryAllocation != 0) {
         u32 count = ((EffectSlotNode80 *)work)->record->count;
@@ -12087,7 +12089,9 @@ void effCloneSlotNodeSecondaryResources(EffectSlotNode80 *dst, EffectSlotNode80 
             effDestroyModelContext(dst->model);
         }
         if (dst->deviceSlot != 0) {
-            sdfModelRootFree(dst->deviceSlot, 1, 1);
+            sdfModelRootFree(dst->deviceSlot,
+                             SDF_MODEL_ROOT_FREE_DEFERRED,
+                             SDF_MODEL_MATERIAL_RESOURCES_RELEASE_DEFERRED);
         }
         model = effCloneModelWithVUState(src->model);
         modelData = model->sub;
@@ -12156,7 +12160,9 @@ void effReplaceEffectSlotModelAndDeviceResources(EffectSlotNode80 *work, void *s
         work->model = 0;
     }
     if (work->deviceSlot != 0) {
-        sdfModelRootFree(work->deviceSlot, 1, 1);
+        sdfModelRootFree(work->deviceSlot,
+                         SDF_MODEL_ROOT_FREE_DEFERRED,
+                         SDF_MODEL_MATERIAL_RESOURCES_RELEASE_DEFERRED);
         work->deviceSlot = 0;
     }
     model = effLoadViewerModelWithVUState(source, config);
@@ -12546,7 +12552,9 @@ void effReleaseSharedResourceReference(EffSharedEffectWork *work) {
         }
         resource = work->resource;
         if (resource->deviceSlot != 0) {
-            sdfModelRootFree(resource->deviceSlot, 1, 1);
+            sdfModelRootFree(resource->deviceSlot,
+                             SDF_MODEL_ROOT_FREE_DEFERRED,
+                             SDF_MODEL_MATERIAL_RESOURCES_RELEASE_DEFERRED);
         }
         resource = work->resource;
         if (resource->allocation != 0) {

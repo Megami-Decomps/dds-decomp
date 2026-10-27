@@ -5,6 +5,12 @@
 
 struct sdfModelRootNode_t;
 
-void sdfModelRootFree(struct sdfModelRootNode_t *slot, s32 recycle, s32 release);
+/* Independent root-storage and material-reference lifetime choices. */
+typedef s32 SdfModelRootCleanupPolicy;
+typedef s32 SdfModelMaterialResourceReleasePolicy;
+
+void sdfModelRootFree(struct sdfModelRootNode_t *slot,
+                      SdfModelRootCleanupPolicy rootCleanupPolicy,
+                      SdfModelMaterialResourceReleasePolicy materialResourcePolicy);
 
 #endif /* SDF_DEV_SLOT_API_H */
