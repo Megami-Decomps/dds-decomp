@@ -1295,28 +1295,29 @@ s32 btlCaptureRewardSummary(BrsRewardSummary *rewards) {
 }
 
 s32 btlResolveQueuedSceneRequestParameters(s32 *outCode, s32 *outParameter) {
-    s32 buffer[2];
+    FldNextSceneRequestMapCode mapCode;
+    FldNextSceneRequestEntryIndex entryIndex;
     s16 i;
 
-    if (fldConsumeNextSceneRequest(&buffer[0], &buffer[1]) == FLD_NEXT_SCENE_REQUEST_NO_REQUEST) {
+    if (fldConsumeNextSceneRequest(&mapCode, &entryIndex) == FLD_NEXT_SCENE_REQUEST_NO_REQUEST) {
         return 0;
     }
     for (i = 0; i < 0x10; i++) {
-        if (D_00435E14[i].mapIdBase + 0xC8 != buffer[0]) {
+        if (D_00435E14[i].mapIdBase + 0xC8 != mapCode) {
             continue;
         }
         *outCode = D_00435E14[i].mapIdBase + 0xC8;
-        if (D_00435E14[i].entries[buffer[1]].flagB != -1 &&
-            evtBitCheck(D_00435E14[i].entries[buffer[1]].flagB) != 0) {
-            *outParameter = D_00435E14[i].entries[buffer[1]].parameterB;
+        if (D_00435E14[i].entries[entryIndex].flagB != -1 &&
+            evtBitCheck(D_00435E14[i].entries[entryIndex].flagB) != 0) {
+            *outParameter = D_00435E14[i].entries[entryIndex].parameterB;
             return 1;
         }
-        if (D_00435E14[i].entries[buffer[1]].flagA != -1 &&
-            evtBitCheck(D_00435E14[i].entries[buffer[1]].flagA) != 0) {
-            *outParameter = D_00435E14[i].entries[buffer[1]].parameterA;
+        if (D_00435E14[i].entries[entryIndex].flagA != -1 &&
+            evtBitCheck(D_00435E14[i].entries[entryIndex].flagA) != 0) {
+            *outParameter = D_00435E14[i].entries[entryIndex].parameterA;
             return 1;
         }
-        *outParameter = D_00435E14[i].entries[buffer[1]].fallbackParameter;
+        *outParameter = D_00435E14[i].entries[entryIndex].fallbackParameter;
         return 1;
     }
     return 0;

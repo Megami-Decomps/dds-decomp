@@ -2521,12 +2521,13 @@ void fldRunPendingSceneAction(void) {
 }
 
 /* Consume the pending pair; write outputs only when a request is consumed. */
-FldNextSceneRequestResult fldConsumeNextSceneRequest(s32 *outCode, s32 *outParameter) {
+FldNextSceneRequestResult fldConsumeNextSceneRequest(FldNextSceneRequestMapCode *outMapCode,
+                                                      FldNextSceneRequestEntryIndex *outEntryIndex) {
     if (fldGlobalBase.nextArea == -1 && fldGlobalBase.nextFloor == -1) {
         return FLD_NEXT_SCENE_REQUEST_NO_REQUEST;
     }
-    *outCode = fldGlobalBase.nextArea + 0xC8;
-    *outParameter = fldGlobalBase.nextFloor;
+    *outMapCode = fldGlobalBase.nextArea + 0xC8;
+    *outEntryIndex = fldGlobalBase.nextFloor;
     fldGlobalBase.nextArea = -1;
     fldGlobalBase.nextFloor = -1;
     return FLD_NEXT_SCENE_REQUEST_CONSUMED;

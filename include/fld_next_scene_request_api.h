@@ -9,7 +9,13 @@ enum {
     FLD_NEXT_SCENE_REQUEST_CONSUMED = 1
 };
 
-/* The output values are written only when a request is consumed. */
-FldNextSceneRequestResult fldConsumeNextSceneRequest(s32 *outCode, s32 *outParameter);
+/* The map code selects a battle lookup row; the entry index selects its entry. */
+typedef s32 FldNextSceneRequestMapCode;
+typedef s32 FldNextSceneRequestEntryIndex;
+
+/* Outputs are written only when a request is consumed. */
+FldNextSceneRequestResult fldConsumeNextSceneRequest(
+    FldNextSceneRequestMapCode *outMapCode,
+    FldNextSceneRequestEntryIndex *outEntryIndex);
 
 #endif /* FLD_NEXT_SCENE_REQUEST_API_H */
