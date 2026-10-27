@@ -1508,7 +1508,7 @@ PtyActiveRosterIndex btlFindPartyEntryIndexForActor(BtlUnit *object) {
 void btlOnPartyRosterChange(void) {
 }
 
-BtlUnit *btlFindActiveActorByPartyIndex(s32 partyIndex) {
+BtlUnit *btlFindActiveActorByPartyIndex(PtyActiveRosterIndex partyIndex) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *unit;
     u32 flags;

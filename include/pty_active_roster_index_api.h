@@ -14,4 +14,9 @@ enum {
 /* Find an occupied party-array entry by unit ID, or return NOT_FOUND. */
 PtyActiveRosterIndex dds3FindEntryIndex(s32 unitId);
 
+struct BtlUnit;
+
+/* Resolve an active battle actor by its current party-array slot. */
+struct BtlUnit *btlFindActiveActorByPartyIndex(PtyActiveRosterIndex partyIndex);
+
 #endif

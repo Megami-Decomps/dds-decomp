@@ -192,7 +192,7 @@ PtyActiveRosterIndex btlFindPartyEntryIndexForActor(BtlUnit *unit) {
 void btlOnPartyRosterChange(void) {
 }
 
-BtlUnit *btlFindActiveActorByPartyIndex(s32 partyIndex) {
+BtlUnit *btlFindActiveActorByPartyIndex(PtyActiveRosterIndex partyIndex) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *node = battle->units;
     for (; node != 0; node = node->next) {
