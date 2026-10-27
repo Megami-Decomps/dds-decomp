@@ -4,6 +4,7 @@
 #include "evt_run_context_api.h"
 #include "btl_scene_counter_mode.h"
 #include "btl_action_press_result.h"
+#include "btl_command_status_api.h"
 #include "btl_command_use_error.h"
 #include "btl_special_ability.h"
 #include "eff_random_mod.h"
@@ -127,11 +128,11 @@ s32 btlFlagToElementIndex(s32 flag);
 extern u32 sdfQueryChannelValue(s32, datUnitWork_t *, datUnitWork_t *);
 #include "sdf_debug_api.h"
 
-s32 btlGetCommandAddedStatus(
+BtlPartyStatusMask btlGetCommandAddedStatus(
     BtlUnit *attacker, BtlUnit *defender, s32 command,
     BtlActionPressResult pressResult, s32 mode) {
     datUnitWork_t *record;
-    s32 value;
+    BtlPartyStatusMask value;
     s32 guard;
 
     if (((BtlState *)btlGetRuntime())->runtimeFlags & 0x80) {
@@ -177,10 +178,10 @@ s32 btlGetCommandAddedStatus(
     return value;
 }
 
-s32 btlQueryUnitChannelFlags(
+BtlPartyStatusMask btlQueryUnitChannelFlags(
     BtlUnit *source, BtlUnit *recipient, s32 command,
     BtlActionPressResult pressResult, s32 kind) {
-    s32 flags;
+    BtlPartyStatusMask flags;
     if (kind != 1) {
         return 0;
     }

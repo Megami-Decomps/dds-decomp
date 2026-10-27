@@ -6,6 +6,7 @@
 #include "btl_actor_command_selector_value_api.h"
 #include "btl_resolve_unit_value_api.h"
 #include "btl_action_press_result.h"
+#include "btl_command_status_api.h"
 #include "btl_hunt_mp_recovery_api.h"
 #include "btl_special_ability.h"
 #include "evt_solar.h"
@@ -88,12 +89,12 @@ s32 btlFlagToElementIndex(s32 flag);
 
 s32 btlGetAbilityAttributeMultiplierPercent(BtlUnit *actor, s32 attr);
 
-u32 btlGetCommandAddedStatus(
+BtlPartyStatusMask btlGetCommandAddedStatus(
     BtlUnit *attacker, BtlUnit *defender, u32 command,
     BtlActionPressResult pressResult, s32 mode) {
     u32 guardMask;
     s32 guardAbility;
-    u32 result;
+    BtlPartyStatusMask result;
 
     if (((BtlState *)btlGetRuntime())->runtimeFlags & 0x80) {
         return 0;
@@ -166,10 +167,10 @@ u32 btlGetCommandAddedStatus(
     return result;
 }
 
-s32 btlQueryUnitChannelFlags(
+BtlPartyStatusMask btlQueryUnitChannelFlags(
     BtlUnit *source, BtlUnit *recipient, s32 command,
     BtlActionPressResult pressResult, s32 kind) {
-    s32 flags;
+    BtlPartyStatusMask flags;
     if (kind != 1) {
         return 0;
     }

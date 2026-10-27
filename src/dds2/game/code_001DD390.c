@@ -16,6 +16,7 @@
 #include "btl_command_use_error.h"
 #include "btl_action_reaction_motion.h"
 #include "btl_action_press_result.h"
+#include "btl_command_status_api.h"
 #include "btl_hunt_mp_recovery_api.h"
 #include "btl_command_target_policy.h"
 #include "dds3_object_flags.h"
@@ -565,10 +566,6 @@ extern s32 btlResolveCommandHitResult(BtlUnit *, BtlUnit *, s32);
 
 extern u8 btlSelectCommandHitCount(BtlUnit *, s32);
 
-extern u32 btlGetCommandAddedStatus(BtlUnit *, BtlUnit *, u32, BtlActionPressResult, s32);
-
-extern s32 btlQueryUnitChannelFlags(BtlUnit *, BtlUnit *, s32, BtlActionPressResult, s32);
-
 extern s32 btlSelectActorAction(BtlUnit *actor);
 
 extern s32 btlCalculateMoneyDropAmount(BtlUnit *);
@@ -646,8 +643,8 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
     u32 targetCount;
     u32 hitCount;
     s32 maxHits;
-    u32 addedStatus;
-    u32 removedStatus;
+    BtlPartyStatusMask addedStatus;
+    BtlPartyStatusMask removedStatus;
     u32 deferredStatus;
     u32 operandFlags;
     BtlActionPressResult press;
