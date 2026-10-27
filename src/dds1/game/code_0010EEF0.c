@@ -14,9 +14,9 @@
 #include "dds3obj.h"
 #include "sdf.h"
 #include "pty_read_roster_stat_api.h"
+#include "pty_event_penalty_api.h"
 
 extern s32 scrGetIntPara(ScrCommandParameterIndex parameterIndex);
-extern void ptyApplyEventPenalty(s32 penaltyMode);
 
 extern void Normalize(void);
 
@@ -26,7 +26,7 @@ void dds3BackupPoseSet(dds3PoseSet_t *node);
 
 
 u32 ptyScriptApplyEventPenalty(void) {
-    s32 penaltyMode;
+    PtyEventPenaltyMode penaltyMode;
 
     penaltyMode = scrGetIntPara(0);
     ptyApplyEventPenalty(penaltyMode);

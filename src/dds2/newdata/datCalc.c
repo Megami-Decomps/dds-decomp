@@ -23,6 +23,7 @@
 #include "pty_template_init_flags.h"
 #include "pty_frontline_promotion_api.h"
 #include "pty_status_query_api.h"
+#include "pty_event_penalty_api.h"
 #include "pty_read_roster_stat_api.h"
 #include "dat_unit_has_skill_api.h"
 #include "pty_item_quantity_update_view.h"
@@ -619,9 +620,12 @@ s8 ptyReadSignedRosterStatByte(DatBaseStatIndex statIndex) {
 extern void sdfRaisePackedChannelValue(datUnitWork_t *, u32 minimumValue);
 
 /* Event penalties affect living roster slots, then optionally raise a status channel. */
-void ptyApplyEventPenalty(s32 penaltyMode) {
+void ptyApplyEventPenalty(PtyEventPenaltyMode penaltyMode) {
     s32 nextHp, loss, slotIndex;
-    if (penaltyMode == 1 || penaltyMode == 4 || penaltyMode == 5 || penaltyMode == 6) {
+    if (penaltyMode == PTY_EVENT_PENALTY_HP_LOSS_10_PERCENT ||
+        penaltyMode == PTY_EVENT_PENALTY_HP_LOSS_10_PERCENT_CHANNEL_MIN_0X80 ||
+        penaltyMode == PTY_EVENT_PENALTY_HP_LOSS_10_PERCENT_CHANNEL_MIN_0X40 ||
+        penaltyMode == PTY_EVENT_PENALTY_HP_LOSS_10_PERCENT_CHANNEL_MIN_0X10) {
         datUnitWork_t *entry = DDS3_GBWK->party;
         slotIndex = 0;
         do {
@@ -637,7 +641,7 @@ void ptyApplyEventPenalty(s32 penaltyMode) {
             entry++;
         } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
     }
-    if (penaltyMode == 2) {
+    if (penaltyMode == PTY_EVENT_PENALTY_HP_LOSS_50_PERCENT) {
         datUnitWork_t *entry = DDS3_GBWK->party;
         slotIndex = 0;
         do {
@@ -653,7 +657,7 @@ void ptyApplyEventPenalty(s32 penaltyMode) {
             entry++;
         } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
     }
-    if (penaltyMode == 3) {
+    if (penaltyMode == PTY_EVENT_PENALTY_SET_LIVING_HP_TO_ONE) {
         datUnitWork_t *entry = DDS3_GBWK->party;
         slotIndex = 0;
         do {
@@ -662,13 +666,14 @@ void ptyApplyEventPenalty(s32 penaltyMode) {
             entry++;
         } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
     }
-    if (penaltyMode >= 4 && penaltyMode <= 6) {
+    if (penaltyMode >= PTY_EVENT_PENALTY_HP_LOSS_10_PERCENT_CHANNEL_MIN_0X80 &&
+        penaltyMode <= PTY_EVENT_PENALTY_HP_LOSS_10_PERCENT_CHANNEL_MIN_0X10) {
         slotIndex = 0;
         do {
             if (DDS3_GBWK->party[slotIndex].hp != 0) {
-                if (penaltyMode == 4) sdfRaisePackedChannelValue(&DDS3_GBWK->party[slotIndex], 0x80);
-                if (penaltyMode == 5) sdfRaisePackedChannelValue(&DDS3_GBWK->party[slotIndex], 0x40);
-                if (penaltyMode == 6) sdfRaisePackedChannelValue(&DDS3_GBWK->party[slotIndex], 0x10);
+                if (penaltyMode == PTY_EVENT_PENALTY_HP_LOSS_10_PERCENT_CHANNEL_MIN_0X80) sdfRaisePackedChannelValue(&DDS3_GBWK->party[slotIndex], 0x80);
+                if (penaltyMode == PTY_EVENT_PENALTY_HP_LOSS_10_PERCENT_CHANNEL_MIN_0X40) sdfRaisePackedChannelValue(&DDS3_GBWK->party[slotIndex], 0x40);
+                if (penaltyMode == PTY_EVENT_PENALTY_HP_LOSS_10_PERCENT_CHANNEL_MIN_0X10) sdfRaisePackedChannelValue(&DDS3_GBWK->party[slotIndex], 0x10);
             }
             slotIndex++;
         } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
