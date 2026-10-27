@@ -8,6 +8,7 @@
 #include "mnu_shop.h"
 #include "dat_command.h"
 #include "pty_record_slot_value_api.h"
+#include "pty_bullet_item_count_api.h"
 #include "brs_icon_record.h"
 /* Declared before first use (were implicit int). */
 extern void mnuDrawAndAdvanceScrollingStrips(s32 x, s32 y, s32 z, s32 opacity, DspScrollingStripState *state, s32 surfaceIndex);
@@ -187,7 +188,6 @@ void mnuDrawWindowBorderAndScrollBar(s32 x, s32 y, s32 unused, MenuTerminalConte
 
 
 extern u32 evtGetIndexedEventRecordId(s32);
-extern s32 ptyCountBulletItem(s32);
 extern u32 itfCreateTightFont3TextGlyph(s32, s32, s32, u32, char *, s32);
 extern char D_00437968[];
 
@@ -264,7 +264,8 @@ void mnuDrawTerminalPanelValues(s32 x, s32 y, s32 z, MenuTerminalContext *object
         break;
     }
     if (item->mode == 1) {
-        count = ptyCountBulletItem(id);
+        PtyBulletItemId bulletItemId = id;
+        count = ptyCountBulletItem(bulletItemId);
     }
     sprintf(text, D_00437968, count);
     glyph = (struct _FRQ *)itfCreateTightFont3TextGlyph(0x1700, 0xA58, z, color, text, 0);

@@ -2731,15 +2731,15 @@ extern u16 mnuGetPartyEntryMenuValue(datUnitWork_t *);
 
 /* Count inventory plus one for every matching slot value, without an occupancy test.
  * This counter still rejects 0xBF, although DDS2's bullet-ID predicate accepts it. */
-s32 ptyCountBulletItem(s32 bulletId) {
+s32 ptyCountBulletItem(PtyBulletItemId bulletItemId) {
     s32 totalCount;
     s32 partyIndex;
-    if (bulletId < 0xA0) return 0;
-    if (bulletId >= 0xBF) return 0;
-    totalCount = DDS3_GBWK->inventory.counts[bulletId];
+    if (bulletItemId < PTY_BULLET_ITEM_ID_FIRST) return 0;
+    if (bulletItemId >= PTY_BULLET_ITEM_ID_LIMIT) return 0;
+    totalCount = DDS3_GBWK->inventory.counts[bulletItemId];
     for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++) {
         datUnitWork_t *partyEntry = &DDS3_GBWK->party[partyIndex];
-        if (bulletId == mnuGetPartyEntryMenuValue(partyEntry)) {
+        if (bulletItemId == mnuGetPartyEntryMenuValue(partyEntry)) {
             totalCount++;
         }
     }

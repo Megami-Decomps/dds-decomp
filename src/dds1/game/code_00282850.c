@@ -2116,19 +2116,19 @@ u16 mnuGetPartyEntryMenuValue(datUnitWork_t *entry);
 
 /* Count inventory plus one for every matching slot value, without an occupancy test.
  * This counter accepts only IDs 0xA0..0xBE. */
-s32 ptyCountBulletItem(s32 bulletId) {
+s32 ptyCountBulletItem(PtyBulletItemId bulletItemId) {
     s32 totalCount;
     s32 partyIndex;
 
-    if (bulletId < 0xA0) {
+    if (bulletItemId < PTY_BULLET_ITEM_ID_FIRST) {
         return 0;
     }
-    if (bulletId >= 0xBF) {
+    if (bulletItemId >= PTY_BULLET_ITEM_ID_LIMIT) {
         return 0;
     }
-    totalCount = DDS3_GBWK->inventory.counts[bulletId];
+    totalCount = DDS3_GBWK->inventory.counts[bulletItemId];
     for (partyIndex = 0; partyIndex < MNU_PARTY_SLOT_COUNT; partyIndex++) {
-        if (bulletId == mnuGetPartyEntryMenuValue(&DDS3_GBWK->party[partyIndex])) {
+        if (bulletItemId == mnuGetPartyEntryMenuValue(&DDS3_GBWK->party[partyIndex])) {
             totalCount++;
         }
     }
