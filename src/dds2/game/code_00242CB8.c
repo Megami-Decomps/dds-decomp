@@ -1,6 +1,7 @@
 #include "common.h"
 #include "scr_integer_parameter_api.h"
 #include "scr_integer_return_value_api.h"
+#include "scr_process_handle_api.h"
 #include "kwln_task_add_child.h"
 #include "sdf_chip.h"
 #include "dat_state.h"
@@ -18,12 +19,6 @@
 #include "evt_solar.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
-
-/* Preserve process handles in the script VM's signed integer result slot. */
-static inline s32 evtProcessHandleToVmInteger(dds3ProcessID_t *handle)
-{
-    return (s32)(u32)handle;
-}
 
 extern void fldSetFadeTarget(s32 area, s32 targetMode, s32 duration);
 extern void evtSetSkyAlpha(s32 duration, s32 target);
@@ -93,7 +88,7 @@ u32 evtCommand_TEX_BE(void) {
     }
     task = evtStartPictureProcess(0x2AFE, entry);
     dds3LinkProcess(work->task, task);
-    scrSetIntReturnValue(evtProcessHandleToVmInteger(task));
+    scrSetIntReturnValue(scrProcessHandleToVmInteger(task));
     return 1;
 }
 
@@ -111,7 +106,7 @@ u32 evtCommand_TEX_LOAD(void) {
     }
     childTask = evtStartPictureProcess2(0x2afe, scrGetStrPara(0));
     dds3LinkProcess(work->task, childTask);
-    scrSetIntReturnValue(evtProcessHandleToVmInteger(childTask));
+    scrSetIntReturnValue(scrProcessHandleToVmInteger(childTask));
     return 1;
 }
 
@@ -119,7 +114,7 @@ u32 evtCommand_TEX_ON(void) {
     dds3ProcessID_t *task;
     KwlnProcessRegistrationResult registered;
 
-    task = (dds3ProcessID_t *)scrGetIntPara(0);
+    task = scrVmIntegerToProcessHandle(scrGetIntPara(0));
     registered = dds3ExistProcess(task);
     if (registered != KWLN_PROCESS_NOT_REGISTERED) {
         evtPictureDrawOn(task);
@@ -131,7 +126,7 @@ u32 evtCommand_TEX_OFF(void) {
     dds3ProcessID_t *task;
     KwlnProcessRegistrationResult registered;
 
-    task = (dds3ProcessID_t *)scrGetIntPara(0);
+    task = scrVmIntegerToProcessHandle(scrGetIntPara(0));
     registered = dds3ExistProcess(task);
     if (registered != KWLN_PROCESS_NOT_REGISTERED) {
         evtPictureDrawOff(task);
@@ -145,7 +140,7 @@ u32 evtCommand_TEX_CLS(void) {
     dds3ProcessID_t *task;
     KwlnProcessRegistrationResult registered;
 
-    task = (dds3ProcessID_t *)scrGetIntPara(0);
+    task = scrVmIntegerToProcessHandle(scrGetIntPara(0));
     registered = dds3ExistProcess(task);
     if (registered != KWLN_PROCESS_NOT_REGISTERED) {
         evtKillPictureProcess(task);

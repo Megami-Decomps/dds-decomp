@@ -30,6 +30,7 @@
 #include "scr.h"
 #include "scr_command_result.h"
 #include "scr_command_timer_api.h"
+#include "scr_process_handle_api.h"
 #include "scr_string_parameter_api.h"
 #include "scr_arg_read.h"
 #include "evt_solar.h"
@@ -41,17 +42,6 @@ enum {
     EVT_PAIRED_REQUEST_SIZE = 8,
     EVT_FIELD_SEQUENCE_REQUEST_SIZE = 0xA0
 };
-
-/* Preserve process handles in the script VM's signed integer result slot. */
-static inline s32 evtProcessHandleToVmInteger(dds3ProcessID_t *handle)
-{
-    return (s32)(u32)handle;
-}
-
-static inline dds3ProcessID_t *evtProcessHandleFromVmInteger(s32 value)
-{
-    return (dds3ProcessID_t *)(u32)value;
-}
 
 /* Script VM helpers (see script/scrCommonCommand.c for the convention). */
 
@@ -1096,7 +1086,7 @@ s32 evtCommandStartPolygonMovie(void) {
     evtPrintDeveloperConsoleMessage("load PMV (%03d_%03d)..\n", scrGetIntPara(0), scrGetIntPara(1));
     dds3LinkProcess(commandWork->task, movieTask);
     evtPolygonMovieSetFlagBits(movieTask, 1);
-    scrSetIntReturnValue(evtProcessHandleToVmInteger(movieTask));
+    scrSetIntReturnValue(scrProcessHandleToVmInteger(movieTask));
     return 1;
 }
 
@@ -1107,9 +1097,9 @@ s32 evtCommandClearPolygonMovieFlag(void)
 {
     dds3ProcessID_t *movieTask;
 
-    movieTask = evtProcessHandleFromVmInteger(scrGetIntPara(0));
+    movieTask = scrVmIntegerToProcessHandle(scrGetIntPara(0));
     evtPolygonMovieClearFlagBits(movieTask, 1);
-    scrSetIntReturnValue(evtProcessHandleToVmInteger(movieTask));
+    scrSetIntReturnValue(scrProcessHandleToVmInteger(movieTask));
     return 1;
 }
 
@@ -1132,7 +1122,7 @@ s32 evtCommand_PMV_RUN(void) {
     sceneId = scrGetIntPara(1);
     movieTask = evtViewerCreateTask(commandWork->task->priority, eventId, sceneId);
     dds3LinkProcess(commandWork->task, movieTask);
-    scrSetIntReturnValue(evtProcessHandleToVmInteger(movieTask));
+    scrSetIntReturnValue(scrProcessHandleToVmInteger(movieTask));
     return 1;
 }
 
