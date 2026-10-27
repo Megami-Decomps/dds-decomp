@@ -14,14 +14,17 @@ enum FileReqSlotFlag {
     FILE_REQ_SLOT_SELECTABLE_SAVE_MASK = 0xB
 };
 
-/* Derived ten-slot menu display states, stored separately from request flags.
- * Zero is also used before a scan or when no save is recognized; state two is
- * the ready-directory case without a recognized save. */
+/* The sixteen-word array holds derived ten-slot menu display states, separate
+ * from request flags. Zero also means not yet scanned; state two is a ready
+ * directory without a recognized save. */
+typedef u32 FileSlotDisplayState;
 enum FileSlotDisplayState {
     FILE_SLOT_DISPLAY_NO_RECOGNIZED_SAVE = 0,
     FILE_SLOT_DISPLAY_SAVE_PRESENT = 1,
     FILE_SLOT_DISPLAY_DIRECTORY_WITHOUT_SAVE = 2
 };
+
+extern FileSlotDisplayState fileSlotDisplayStates[16];
 
 void fileReqClearSlotFlags(s32 request, s32 slot);
 void fileReqSetSlotFlags(s32 request, s32 slot, s32 mask);

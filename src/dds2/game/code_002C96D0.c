@@ -349,8 +349,6 @@ extern s32 fileSlotStatusPoll(void);
 
 extern s32 fileResetSelection(void);
 
-/* 0x40-byte backing region; the browser uses the first ten slot states. */
-extern u32 fileSlotDisplayStates[16];
 
 extern FileMenuContinuationCallback fileWaitContinuation;
 
@@ -1115,8 +1113,6 @@ s32 fileRestartSlotScan(void) {
     return fileResetSelection();
 }
 
-/* 0x40-byte backing region; the browser uses the first ten slot states. */
-extern u32 fileSlotDisplayStates[16];
 extern s32 fileSlotBrowserUpdate(void);
 
 s32 fileScanSlotStates(void) {
@@ -1701,7 +1697,7 @@ s32 fileScanSlotStatesAdvance(void) {
 
 s32 mcClearSlotMetadata(void) {
     s32 index = 0;
-    u32 *saved;
+    FileSlotDisplayState *saved;
     slSetInfo(1);
     D_00437CF8 = 0;
     fileSlotScanIndex = 0;

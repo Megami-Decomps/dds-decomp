@@ -423,8 +423,6 @@ extern s32 slSaveProc_Write_mkdir(void);
 
 extern s32 fileBuildMainBlobAndWrite(void);
 
-/* 0x40-byte backing region; the browser uses the first ten slot states. */
-extern u32 fileSlotDisplayStates[16];
 
 
 
@@ -1596,7 +1594,7 @@ s32 fileScanSlotStatesAdvance(void) {
 
 s32 mcClearSlotMetadata(void) {
     s32 index = 0;
-    u32 *saved;
+    FileSlotDisplayState *saved;
     slSetInfo(1);
     D_003BC810 = 0;
     fileSlotScanIndex = 0;
