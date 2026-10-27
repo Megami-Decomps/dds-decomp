@@ -1215,7 +1215,7 @@ void btlClearSpecialEnemyRestrictionAfterAction(BtlTask *task) {
 extern u64 btlStartTask(BtlRuntimeTask *);
 extern BtlRuntimeTask *btlCreateUnitFadeOutTask(BtlUnit *, u32, u32);
 
-s32 btlDisableNonBossUnits(void) {
+BtlTerminalOutcomeOverrideResult btlDisableNonBossUnits(void) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     BtlUnit *head = unit;
     s32 result = -1;
@@ -1350,7 +1350,7 @@ void btlCenterUsasEnemyFormation(void) {
     }
 }
 
-s32 btlDisableUnitsIfSpeciesFlagged(void) {
+BtlTerminalOutcomeOverrideResult btlDisableUnitsIfSpeciesFlagged(void) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     BtlUnit *head = unit;
     s32 result = -1;
@@ -1482,7 +1482,7 @@ u32 btlMode107SelectSceneVariant(void) {
 
 
 /* Flag the first active unit below 25% HP as party/enemy; return six, or -1 if none. */
-s32 btlSetFirstCriticalHpUnitSideFlag(void) {
+BtlTerminalOutcomeOverrideResult btlSetFirstCriticalHpUnitSideFlag(void) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     while (unit != 0) {
         if (((BtlUnit *)unit)->status.flags & 1) {
@@ -3914,7 +3914,7 @@ s32 btlFindSubsequentTurnScript(void) {
     return btlFindScriptResource(D_003BB898);
 }
 
-s32 btlCheckSelectedBossUnitFlag(void) {
+BtlTerminalOutcomeOverrideResult btlCheckSelectedBossUnitFlag(void) {
     u8 *battle = (u8 *)btlGetRuntime();
     u8 *unit = (u8 *)((BtlState *)battle)->units;
     u8 *effect = (u8 *)((BtlState *)battle)->effect;
@@ -4741,7 +4741,7 @@ DatEffectiveAffinityResult btlResolveSpecialUnitCommandAffinity(
     return -1;
 }
 
-s32 btlFadeOtherEnemyUnitsWhenSpecialModeActive(void) {
+BtlTerminalOutcomeOverrideResult btlFadeOtherEnemyUnitsWhenSpecialModeActive(void) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     BtlUnit *head = unit;
     s32 result = -1;

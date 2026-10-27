@@ -13,6 +13,7 @@
 #include "evt_unit.h"
 #include "btl_task_condition.h"
 #include "btl_state.h"
+#include "btl_terminal_outcome.h"
 #include "btl_command.h"
 #include "btl_action.h"
 #include "btl_task.h"
@@ -507,7 +508,7 @@ s32 btlClassifyMetatronAction(BtlUnit *unit, s32 action) {
     return -1;
 }
 
-s32 btlDeactivateOthersOnSpecialUnitDefeat(void) {
+BtlTerminalOutcomeOverrideResult btlDeactivateOthersOnSpecialUnitDefeat(void) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     BtlUnit *head = unit;
     s32 result = -1;

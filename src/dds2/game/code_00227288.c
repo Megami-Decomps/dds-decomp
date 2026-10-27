@@ -1342,7 +1342,7 @@ void btlInitializeSpecialUnitHpOverride(BtlUnit *unit) {
 }
 
 /* Mode 0x336's fixed value 6 is not proven to be an actor ID. */
-s32 btlMode336FixedCallbackValue(void) {
+BtlTerminalOutcomeOverrideResult btlMode336FixedCallbackValue(void) {
     return 6;
 }
 
@@ -1544,7 +1544,7 @@ extern s32 btlSelectLinkedActionCameraPose(BtlLinkedCommand *command, s8 modeA, 
 extern s32 btlSelectLowestStatTarget(ActionStateLink *actor);
 extern s32 btlSelectMarkedActorAndClearEntryFlags(BtlUnit *unit, BtlOperandEntry *entry);
 extern s32 btlSelectRaisedCameraFromActionFlags(BtlLinkedCommand *unit);
-extern s32 btlSelectSoleEligibleActor(void);
+extern BtlTerminalOutcomeOverrideResult btlSelectSoleEligibleActor(void);
 extern u32 btlSetBattleActionFlag(u32 unused1, u32 unused2, u32 action);
 extern u8 btlSetLinkedDefeatCameraPresetA(BtlLinkedCommand *, BtlCamState *, s32);
 extern u8 btlSetSpecialDefeatCameraPreset(BtlLinkedCommand *command, BtlCamState *camera, s32 rotate);
@@ -1562,7 +1562,7 @@ extern BtlActionStateSelectionResult btlStartActionRecordTasks(ActionStateLink *
 extern s32 btlStartLinkedActionMotionPrimary(BtlLinkedCommand *command);
 extern u32 btlStartLinkedDefeatCandidateAction(BtlLinkedCommand *unit);
 extern u32 btlStartMarkedActionRuntimeUpdate(BtlLinkedCommand *unit);
-extern s32 btlStartOtherMarkedUnitTasks(void);
+extern BtlTerminalOutcomeOverrideResult btlStartOtherMarkedUnitTasks(void);
 extern void btlStartPrevUnitScriptAction(ActionStateLink *handle);
 extern void btlStartReadyUnitAction(void);
 extern void btlStartReadyUnitActionCopy(void);
@@ -1580,7 +1580,7 @@ extern s32 btlTryTransitionSingleTargetAction(BtlLinkedCommand *unit);
 extern void btlUpdateSpecialActorChunkFade(void);
 extern void effBTLFieldColorSetFlags(u32 bits);
 extern void btlQueueBossScriptResourceAndSound(ActionStateLink *action);
-extern s32 btlCheckPhaseOnePartyStatusGate(void);
+extern BtlTerminalOutcomeOverrideResult btlCheckPhaseOnePartyStatusGate(void);
 extern void btlClearClaimedCommandUnit(void);
 extern s32 btlGetBossModeScriptReturnCode(void);
 extern s32 btlRemapEnemyMotionForHealthAndForm(BtlUnit *unit, s32 action);
@@ -1593,7 +1593,7 @@ extern void btlResetGateComponentTransforms(void);
 extern s32 btlPrepareGateDefeatCandidateSet(BtlUnit *unit);
 extern s32 btlPrepareGateDefeatCandidateClear(BtlUnit *unit);
 extern s32 btlIsGateCoreAction19Request(s32 battler, s32 action);
-extern s32 btlDisableUnitsIfSpeciesFlagged(void);
+extern BtlTerminalOutcomeOverrideResult btlDisableUnitsIfSpeciesFlagged(void);
 extern void btlRefreshVritraPresentationAfterUnitUpdate(void);
 extern void btlQueueVritraTentacleActionTasks(ActionStateLink *handle, s32 unused, u64 completionOwner, u64 prerequisite);
 extern s32 btlSelectVritraActionCamera(BtlLinkedCommand *command, s8 side, s8 targetSide);

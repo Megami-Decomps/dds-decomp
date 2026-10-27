@@ -427,6 +427,7 @@ s32 btlIsUnitStatusFlagClear(BtlUnit *object) {
 BtlTerminalOutcomeReadiness btlResolveBattleTerminalOutcome(void) {
     BtlState *state;
     BtlUnit *unit;
+    BtlTerminalOutcomeOverrideCallback outcomeOverride;
     s32 partyCount = 0;
     s32 enemyCount = 0;
     s32 stoneCount = 0;
@@ -434,8 +435,9 @@ BtlTerminalOutcomeReadiness btlResolveBattleTerminalOutcome(void) {
 
     state = btlGetRuntime();
     state->terminalOutcome = BTL_TERMINAL_OUTCOME_NONE;
-    if (state->battleOutcomeOverride != NULL) {
-        BtlTerminalOutcomeOverrideResult result = state->battleOutcomeOverride();
+    outcomeOverride = state->battleOutcomeOverride;
+    if (outcomeOverride != NULL) {
+        BtlTerminalOutcomeOverrideResult result = outcomeOverride();
         if (result != BTL_TERMINAL_OUTCOME_OVERRIDE_NO_OVERRIDE) {
             state->terminalOutcome = result;
             return BTL_TERMINAL_OUTCOME_READY;
