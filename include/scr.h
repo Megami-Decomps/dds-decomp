@@ -5,14 +5,12 @@
 #include "kwln.h"
 #include "scr_trace_result.h"
 #include "scr_command_result.h"
+#include "scr_procedure_index.h"
 #include "itf_mes_window_index.h"
 
 struct sdfMemHandle_t;
 struct BfFlw0Header;
 struct ItfMesSub;
-
-typedef s32 ScrProcedureIndex;
-#define SCR_PROCEDURE_INDEX_NOT_FOUND ((ScrProcedureIndex)-1)
 
 typedef s32 ScrProgramCounter;
 typedef s32 ScrGlobalIntegerIndex;

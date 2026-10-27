@@ -1,4 +1,5 @@
 #include "sdk_ps2.h"
+#include "evt_run_context_api.h"
 #include "fld_area_work.h"
 #include "fld_next_scene_request_api.h"
 #include "sdf_packet_list.h"
@@ -3474,7 +3475,6 @@ void btlSyncModelFlagFromEventThresholds(void) {
 
 extern u32 btlGetAdjustedSlotAffinity(BtlUnit *, s32, s32);
 
-extern s32 evtRunContext(s32, s32, s32, s32, u16);
 
 INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415340);
 

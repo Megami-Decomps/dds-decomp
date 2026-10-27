@@ -1,4 +1,5 @@
 #include "sdk_ps2.h"
+#include "evt_run_context_api.h"
 #include "common.h"
 #include "pty_active_roster_index_api.h"
 #include "btl_command_use_error.h"
@@ -1890,7 +1891,6 @@ void btlRestorePartySlotSnapshots(void) {
 }
 
 extern u32 btlGetAdjustedSlotAffinity(BtlUnit *, s32, s32);
-extern s32 evtRunContext(s32, s32, s32, s32, u16);
 
 BtlActionPressResult btlDetermineActionPressResult(BtlUnit *attacker, BtlUnit *target, u32 command) {
     BtlState *battle = (BtlState *)btlGetRuntime();

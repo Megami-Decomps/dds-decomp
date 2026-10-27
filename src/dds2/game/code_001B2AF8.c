@@ -1,4 +1,5 @@
 #include "sdk_ps2.h"
+#include "evt_run_context_api.h"
 #include "btl_selection_view.h"
 #include "btl_analysis_panel_work.h"
 #include "btl_command_hint_work.h"
@@ -225,7 +226,6 @@ typedef struct BattleEscapeParameters {
 
 const char D_004156B0[] = "btl:escape=%d%%[ratio=%.2f,sn=%d]\n";
 
-extern s32 evtRunContext(s32, s32, s32, s32, u16);
 
 s32 btlTryEscapeWithPhaseAdjustment(BtlUnit *actor) {
     BtlState *battle = (BtlState *)btlGetRuntime();

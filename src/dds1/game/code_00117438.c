@@ -1,4 +1,5 @@
 #include "sdk_ps2.h"
+#include "evt_run_context_api.h"
 #include "common.h"
 #include "bf_flw0_header.h"
 #include "sdf_vu0.h"
@@ -477,7 +478,6 @@ void sdfResetChannels(void) {
     evtInitializeWorkScriptTask();
 }
 
-extern s32 evtRunContext(s32 script, s32 firstArgument, s32 secondArgument, s32 commandIndex, u16 options);
 
 /* Enemy vitals use a 76-byte base table; party vitals come from a script,
  * a unit-specific bonus, and a maximum of 999. */

@@ -1,4 +1,5 @@
 #include "sdk_ps2.h"
+#include "evt_run_context_api.h"
 /*
  * Translation unit boundary recovered at btlCalculateHpActionAmount (twin of
  * DDS1 code_001A5C40). btlCheckSpecialAbility and btlGetActorEntryMultiplier
@@ -195,7 +196,6 @@ f32 btlGetElementAbilityMultiplier(BtlUnit *unit, s32 attr);
 f32 btlGetLowHpAbilityMultiplier(BtlUnit *unit);
 f32 btlGetClampedBattleTableValue(BtlUnit *source);
 extern EventRosterStat *datRosterDetails;
-extern s32 evtRunContext(s32, s32, s32, s32, u16);
 
 
 s32 btlGetEntryFlagsUnlessDisabled(datUnitWork_t *record);

@@ -1,4 +1,5 @@
 #include "sdk_ps2.h"
+#include "evt_run_context_api.h"
 #include "snd_packed_track_load_status.h"
 #include "btl_sound.h"
 #include "btl_sound_resource_use_result.h"
@@ -824,7 +825,6 @@ extern s32 btlGetStatusActionEffectId();
 extern BtlRuntimeTask *btlCreateActorParameterDeltaTask(BtlUnit *, BtlOperandEntry *);
 extern BtlRuntimeTask *btlCreateLinkedEffectTask(BtlUnit *, s32, u8);
 
-extern s32 evtRunContext(s32, s32, s32, s32, u16);
 extern s32 btlRollAiBucket(void);
 
 /* Try to clear the unit's condition: 2 and 4 always clear, 1 needs battle mode 2, and the

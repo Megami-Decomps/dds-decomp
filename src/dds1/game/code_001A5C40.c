@@ -1,4 +1,5 @@
 #include "sdk_ps2.h"
+#include "evt_run_context_api.h"
 /*
  * Translation unit boundary recovered at btlCalculateHpAttackOrRestoreAmount. btlGetActorEntryMultiplier
  * and the other helpers declared below belong to the preceding unit
@@ -106,7 +107,6 @@ extern EffRandState effSharedRandomState[];
 
 extern s32 sdfCalculateCommandVitalDelta(s32, datUnitWork_t *, datUnitWork_t *, u32, u8);
 
-extern s32 evtRunContext(s32 script, s32 firstArgument, s32 secondArgument, s32 commandIndex, u16 options);
 
 /* Clear the supplied party-record status mask. */
 

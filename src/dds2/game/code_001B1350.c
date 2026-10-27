@@ -1,4 +1,5 @@
 #include "fld_area_work.h"
+#include "evt_run_context_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
 #include "btl_action_press_result.h"
@@ -64,7 +65,6 @@ extern s32 btlGetEnemyMoney(BtlUnit *, BtlUnit *);
 
 extern u32 btlGetAdjustedSlotAffinity(BtlUnit *, s32, s32);
 
-extern s32 evtRunContext(s32, s32, s32, s32, u16);
 
 extern s32 btlGetActionRecordLookupValue(s32);
 

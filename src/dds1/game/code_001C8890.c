@@ -1,4 +1,5 @@
 #include "sdk_ps2.h"
+#include "evt_run_context_api.h"
 #include "btl_motion_transform.h"
 #include "common.h"
 #include "btl_action_reaction_motion.h"
@@ -414,7 +415,6 @@ void btlEnterStatusRecoveryState(void) {
 
 BtlRuntimeTask *btlCreateActorParameterDeltaTask(BtlUnit *owner, BtlOperandEntry *spec);
 
-extern s32 evtRunContext(s32, s32, s32, s32, u16);
 
 extern s32 btlRollAiBucket(void);
 

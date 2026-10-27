@@ -422,6 +422,7 @@ u8 datHasEnoughCurrency(s32 requiredAmount) {
 
 #include "common.h"
 #include "scr.h"
+#include "evt_run_context_api.h"
 #include "scr_work_task_api.h"
 #include "sdf.h"
 #include "btl_action.h"

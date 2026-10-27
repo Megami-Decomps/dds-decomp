@@ -1,4 +1,5 @@
 #include "sdk_ps2.h"
+#include "evt_run_context_api.h"
 #include "btl_selection_view.h"
 #include "btl_analysis_panel_work.h"
 #include "btl_command_hint_work.h"
@@ -165,7 +166,6 @@ extern EffRandState effSharedRandomState[];
 void btlClearActorEntrySlot(BtlUnit *unit, s32 index);
 
 
-extern s32 evtRunContext(s32, s32, s32, s32, u16);
 
 s32 btlApplyCommandAbilityMultiplier(datUnitWork_t *battler, s32 command);
 
@@ -371,7 +371,6 @@ void btlClearUnitStatusMask(void) {
     }
 }
 
-extern s32 evtRunContext(s32, s32, s32, s32, u16);
 
 extern s32 btlRollAiBucket(void);
 

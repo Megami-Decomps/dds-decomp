@@ -1,4 +1,5 @@
 #include "sdk_ps2.h"
+#include "evt_run_context_api.h"
 #include "common.h"
 #include "bf_flw0_header.h"
 #include "sdf_vu0.h"
@@ -515,7 +516,6 @@ s32 ptyComputeMaxMp(datUnitWork_t *unit) {
     return result;
 }
 
-extern s32 evtRunContext(s32 script, s32 firstArgument, s32 secondArgument, s32 commandIndex, u16 options);
 
 s32 sdfDispatchPrimaryUnitScript(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
     s32 result;

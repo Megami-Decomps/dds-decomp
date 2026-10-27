@@ -1,4 +1,5 @@
 #include "common.h"
+#include "evt_run_context_api.h"
 #include "btl_scene_counter_mode.h"
 #include "btl_action_press_result.h"
 #include "btl_command_use_error.h"
@@ -579,7 +580,6 @@ s32 btlCompareSkippedAndActiveTargetCounts(BtlIndexList *targets, BtlOperandGrou
 
 const char D_003A1C88[] = "btl:escape=%d%%[ratio=%.2f]\n";
 
-extern s32 evtRunContext(s32, s32, s32, s32, u16);
 
 extern s32 btlRollAiBucket(void);
 
