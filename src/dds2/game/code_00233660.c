@@ -945,7 +945,7 @@ MdlPartEntry *mdlGetEffectResrc(dds3ModelHandle_t *resource, s32 slotIndex) {
 }
 
 /* Bind each consecutive record ID to a newly created part when the chunk contains it. */
-void mdlCreateEffect_P2A_D3P(dds3ModelHandle_t *owner, MdlRecord *partRecord, s32 motionSlotIndex, s32 resourceType, void *(*createPart)(MdlPartEntry *)) {
+void mdlCreateEffect_P2A_D3P(dds3ModelHandle_t *owner, const MdlRecord *partRecord, s32 motionSlotIndex, s32 resourceType, void *(*createPart)(MdlPartEntry *)) {
     MdlPartEntry *partSlot = mdlGetEffectResrc(owner, partRecord->parameter.part.partIndex);
 
     if (partSlot != NULL) {
@@ -974,7 +974,7 @@ void mdlCreateEffect_P2A_D3P(dds3ModelHandle_t *owner, MdlRecord *partRecord, s3
 }
 
 /* Convert the effect record to native track parameters and retain its work pointer. */
-void mdlCreateEffect_TRACK(dds3ModelHandle_t *owner, MdlTrackPolyRecordView *record, s32 motionSlotIndex) {
+void mdlCreateEffect_TRACK(dds3ModelHandle_t *owner, const MdlTrackPolyRecordView *record, s32 motionSlotIndex) {
     dds3ModelEffectCtrlr_t *resourceItem;
     EffTrackPolyParams effectParams;
 
@@ -997,7 +997,7 @@ void mdlCreateEffect_TRACK(dds3ModelHandle_t *owner, MdlTrackPolyRecordView *rec
 
 extern void mdlSetBlur(dds3ModelHandle_t *, s32, s32, u32, u32);
 
-void mdlCreateEffect_BLUR(dds3ModelHandle_t *owner, MdlRecord *record) {
+void mdlCreateEffect_BLUR(dds3ModelHandle_t *owner, const MdlRecord *record) {
     mdlSetBlur(owner, record->payload.stream.selectorA,
                   record->payload.stream.selectorB,
                   record->parameter.word, record->tail.word10);
@@ -1005,7 +1005,7 @@ void mdlCreateEffect_BLUR(dds3ModelHandle_t *owner, MdlRecord *record) {
 
 
 /* Claim an unused object only after its data resource resolves, retaining record flags and deferred-init parameters. */
-void mdlCreateEffect_IPU(dds3ModelHandle_t *owner, MdlRecord *entryRecord, s32 motionSlotIndex) {
+void mdlCreateEffect_IPU(dds3ModelHandle_t *owner, const MdlRecord *entryRecord, s32 motionSlotIndex) {
     MdlPartEntry *partSlot = mdlGetEffectResrc(owner, entryRecord->tail.object.partIndex);
 
     if (partSlot != 0) {
@@ -1048,7 +1048,7 @@ void mdlDrawEffect_IPU(dds3ModelEffectCtrlr_t *item) {
 
 
 /* Dispatch the five record kinds; resource application ignores any callee return value. */
-void mdlCreateEffect(dds3ModelHandle_t *owner, MdlRecord *record, s32 motionSlotIndex) {
+void mdlCreateEffect(dds3ModelHandle_t *owner, const MdlRecord *record, s32 motionSlotIndex) {
     switch (record->kind) {
     case MDL_VIEWER_RECORD_KIND_BILLBOARD_PART:
         mdlCreateEffect_P2A_D3P(owner, record, motionSlotIndex, MDL_RESOURCE_BILLBOARD, mdlEffectDup_P2A);
@@ -1057,7 +1057,7 @@ void mdlCreateEffect(dds3ModelHandle_t *owner, MdlRecord *record, s32 motionSlot
         mdlCreateEffect_P2A_D3P(owner, record, motionSlotIndex, MDL_RESOURCE_EFFECT, mdlEffectDup_D3P);
         return;
     case MDL_VIEWER_RECORD_KIND_TRACK_POLY:
-        mdlCreateEffect_TRACK(owner, (MdlTrackPolyRecordView *)record, motionSlotIndex);
+        mdlCreateEffect_TRACK(owner, (const MdlTrackPolyRecordView *)record, motionSlotIndex);
         return;
     case MDL_VIEWER_RECORD_KIND_STREAM:
         mdlCreateEffect_BLUR(owner, record);
@@ -1068,7 +1068,7 @@ void mdlCreateEffect(dds3ModelHandle_t *owner, MdlRecord *record, s32 motionSlot
     }
 }
 
-/* Find the requested record list and associate each entry with this motion slot. */
+/* Copy values from the group-owned record list; context resources retain no record pointers. */
 void mdlGenEffect(dds3ModelHandle_t *owner, s32 recordId, s32 motionSlotIndex) {
     MdlRecord *recordList = mdlPibGetChunk(owner, recordId);
     if (recordList != NULL) {
