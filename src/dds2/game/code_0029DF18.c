@@ -270,29 +270,29 @@ void brsUpdateLevelProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork *w
 
     nextLevel = nextLevel < 2 ? 1 : (nextLevel > 99 ? 99 : nextLevel);
     switch (work->levelAnimation[rowIndex].drawPhase) {
-    case 0:
+    case BRS_PROGRESS_ANIMATION_PHASE_FADE_IN:
         work->levelAnimation[rowIndex].alpha = fclBlendColor(0x80808080, 0x80808000, fade) & 0xFF;
         if (work->levelAnimation[rowIndex].alpha >= 0x80) {
-            work->levelAnimation[rowIndex].drawPhase = 1;
+            work->levelAnimation[rowIndex].drawPhase = BRS_PROGRESS_ANIMATION_PHASE_BEGIN_COUNTING;
         }
         break;
-    case 1:
+    case BRS_PROGRESS_ANIMATION_PHASE_BEGIN_COUNTING:
         work->levelAnimation[rowIndex].drawPhase++;
         if (work->levelAnimation[rowIndex].applied > 0 && work->resultPhase == 0) {
             nbPlaySe(0x14);
             work->resultPhase = 1;
         }
         break;
-    case 2:
-    case 3:
-    case 4:
+    case BRS_PROGRESS_ANIMATION_PHASE_COUNTING:
+    case BRS_PROGRESS_ANIMATION_PHASE_MILESTONE_FLASH:
+    case BRS_PROGRESS_ANIMATION_PHASE_REVEAL_PROGRESS:
         if (level < 99 && progressRow->unit->hp != 0 && (progressRow->unit->status & 0x4000) == 0) {
-            if (work->levelAnimation[rowIndex].drawPhase != 3) {
+            if (work->levelAnimation[rowIndex].drawPhase != BRS_PROGRESS_ANIMATION_PHASE_MILESTONE_FLASH) {
                 work->levelAnimation[rowIndex].appliedStep = brsCalcProgressAnimationStep(
                     work, progressRow, rowIndex, BRS_PROGRESS_ANIMATION_LEVEL_EXPERIENCE);
                 currentExp = work->levelAnimation[rowIndex].remaining + work->levelAnimation[rowIndex].appliedStep;
                 work->levelAnimation[rowIndex].remaining = currentExp;
-                if (currentExp >= (s32)ptyComputeTotalExp(progressRow->unit, nextLevel - progressRow->unit->level) && work->levelAnimation[rowIndex].drawPhase == 2) {
+                if (currentExp >= (s32)ptyComputeTotalExp(progressRow->unit, nextLevel - progressRow->unit->level) && work->levelAnimation[rowIndex].drawPhase == BRS_PROGRESS_ANIMATION_PHASE_COUNTING) {
                     work->levelAnimation[rowIndex].level++;
                     work->levelAnimation[rowIndex].level = work->levelAnimation[rowIndex].level < 2 ? 1 : (work->levelAnimation[rowIndex].level > 99 ? 99 : work->levelAnimation[rowIndex].level);
                     if (work->skipProgressAnimation != 0) {
@@ -327,13 +327,13 @@ void brsUpdateLevelProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork *w
         } else {
             work->levelAnimation[rowIndex].applied = 0;
         }
-        if (work->levelAnimation[rowIndex].drawPhase == 3) {
+        if (work->levelAnimation[rowIndex].drawPhase == BRS_PROGRESS_ANIMATION_PHASE_MILESTONE_FLASH) {
             work->levelAnimation[rowIndex].flashFrame++;
             work->levelAnimation[rowIndex].flashFrame = work->levelAnimation[rowIndex].flashFrame <= 0 ? 0 : (work->levelAnimation[rowIndex].flashFrame > 15 ? 15 : work->levelAnimation[rowIndex].flashFrame);
             if (work->levelAnimation[rowIndex].flashFrame >= 15) {
                 work->levelAnimation[rowIndex].drawPhase++;
             }
-        } else if (work->levelAnimation[rowIndex].drawPhase == 4) {
+        } else if (work->levelAnimation[rowIndex].drawPhase == BRS_PROGRESS_ANIMATION_PHASE_REVEAL_PROGRESS) {
             work->levelAnimation[rowIndex].flashOpacity -= 16;
             work->levelAnimation[rowIndex].flashOpacity = work->levelAnimation[rowIndex].flashOpacity <= 0 ? 0 : (work->levelAnimation[rowIndex].flashOpacity > 128 ? 128 : work->levelAnimation[rowIndex].flashOpacity);
             if (work->levelAnimation[rowIndex].flashOpacity <= 0) {
@@ -342,7 +342,7 @@ void brsUpdateLevelProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork *w
             work->levelAnimation[rowIndex].alpha += 8;
             work->levelAnimation[rowIndex].alpha = work->levelAnimation[rowIndex].alpha <= 0 ? 0 : (work->levelAnimation[rowIndex].alpha > 128 ? 128 : work->levelAnimation[rowIndex].alpha);
             if (work->levelAnimation[rowIndex].alpha >= 128) {
-                work->levelAnimation[rowIndex].drawPhase = 2;
+                work->levelAnimation[rowIndex].drawPhase = BRS_PROGRESS_ANIMATION_PHASE_COUNTING;
                 if (work->levelAnimation[rowIndex].applied > 0 && work->resultPhase == 0) {
                     nbPlaySe(0x14);
                     work->resultPhase = 1;
@@ -427,7 +427,7 @@ void brsDrawLevelProgressDetails(s32 x, s32 y, s32 depth, BrsSkillPackageWork *w
         endProgress = (s32)ptyComputeTotalExp(row->unit, nextLevel - level + levelDelta) - currentTotal;
     }
     if (work->levelAnimation[index].completionFlashActive != 0 &&
-        work->levelAnimation[index].drawPhase == 3) {
+        work->levelAnimation[index].drawPhase == BRS_PROGRESS_ANIMATION_PHASE_MILESTONE_FLASH) {
         endProgress = 0;
         startProgress = 0;
     }
@@ -870,23 +870,23 @@ void brsUpdateProfileProgressAnimation(s32 x, s32 y, s32 z, BrsSkillPackageWork 
     }
     progress = work->profileAnimation[rowIndex].remaining;
     switch (work->profileAnimation[rowIndex].drawPhase) {
-    case 0:
+    case BRS_PROGRESS_ANIMATION_PHASE_FADE_IN:
         work->profileAnimation[rowIndex].alpha = fclBlendColor(0x80808080, 0x80808000, fade) & 0xFF;
         if (work->profileAnimation[rowIndex].alpha >= 0x80) {
-            work->profileAnimation[rowIndex].drawPhase = 1;
+            work->profileAnimation[rowIndex].drawPhase = BRS_PROGRESS_ANIMATION_PHASE_BEGIN_COUNTING;
         }
         break;
-    case 1:
+    case BRS_PROGRESS_ANIMATION_PHASE_BEGIN_COUNTING:
         work->profileAnimation[rowIndex].drawPhase++;
         if (work->profileAnimation[rowIndex].applied > 0 && work->resultPhase == 0) {
             nbPlaySe(0x14);
             work->resultPhase = 1;
         }
         break;
-    case 2:
-    case 3:
-    case 4:
-        if (work->profileAnimation[rowIndex].drawPhase == 2) {
+    case BRS_PROGRESS_ANIMATION_PHASE_COUNTING:
+    case BRS_PROGRESS_ANIMATION_PHASE_MILESTONE_FLASH:
+    case BRS_PROGRESS_ANIMATION_PHASE_REVEAL_PROGRESS:
+        if (work->profileAnimation[rowIndex].drawPhase == BRS_PROGRESS_ANIMATION_PHASE_COUNTING) {
             if (cap != 0) {
                 if (progress < cap) {
                     work->profileAnimation[rowIndex].appliedStep = brsCalcProgressAnimationStep(
@@ -1004,7 +1004,7 @@ void brsDrawProfileProgressDetails(s32 x, s32 y, s32 depth, BrsSkillPackageWork 
      * EE GCC 2.96 pass 00 retains their order; a switch reverses it, while
      * an enclosing one-pass loop also aligns the progress join. */
     if (phase >= 0) {
-        if (phase < 3) {
+        if (phase < BRS_PROGRESS_ANIMATION_PHASE_MILESTONE_FLASH) {
             fillX = coordinates.fillX;
             fillY = coordinates.fillY;
             fillSlot = coordinates.fillSlot;

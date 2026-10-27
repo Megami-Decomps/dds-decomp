@@ -42,6 +42,16 @@ typedef struct BrsRewardBatch {
     s32 count;
 } BrsRewardBatch;
 
+/* Shared per-row lifecycle for EXP and profile-point result animations. */
+typedef s8 BrsProgressAnimationPhase;
+enum {
+    BRS_PROGRESS_ANIMATION_PHASE_FADE_IN = 0,
+    BRS_PROGRESS_ANIMATION_PHASE_BEGIN_COUNTING = 1,
+    BRS_PROGRESS_ANIMATION_PHASE_COUNTING = 2,
+    BRS_PROGRESS_ANIMATION_PHASE_MILESTONE_FLASH = 3,
+    BRS_PROGRESS_ANIMATION_PHASE_REVEAL_PROGRESS = 4
+};
+
 typedef struct BrsActiveProgressList {
     BrsProgressRow rows[5];
     u32 count;
@@ -66,7 +76,7 @@ typedef struct BrsFadeAnimation {
 /* Both games use 0x68-byte progress rows, with different live field offsets. */
 typedef struct BrsProgressAnimation {
 #ifdef VERSION_DDS1
-    s8 state;
+    BrsProgressAnimationPhase state;
     u8 pad01[7];
     s32 alpha;
     u8 pad0C[0xC];
@@ -95,7 +105,7 @@ typedef struct BrsProgressAnimation {
     u8 pad61[3];
     s32 previousProgress;
 #else
-    s8 drawPhase;
+    BrsProgressAnimationPhase drawPhase;
     u8 pad01[7];
     s32 alpha;
     u8 pad0C[4];
