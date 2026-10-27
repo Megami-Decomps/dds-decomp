@@ -34,6 +34,8 @@ typedef char SdfChipHeapStats_size_must_be_0x30[
 struct sdfMemHandle_t *sdfMemAllocDirect(s32 requestedBytes);
 struct sdfMemHandle_t *sdfMemAllocFromTailDirect(s32 requestedBytes);
 struct sdfMemHandle_t *sdfMemTryAllocDirect(s32 requestedBytes);
+/* Address must equal the payload base of a live general-heap allocation; there
+ * is no miss exit. This lookup does not change the allocation's reference count. */
 struct sdfMemHandle_t *sdfMemGetHandleByPtr(const void *address);
 void sdfMemGetInfo(SdfGeneralHeapStats *stats);
 void sdfChipGetInfo(SdfChipHeapStats *stats);
