@@ -319,8 +319,9 @@ ScrCommandResult evtCommand_EFFECT_PATH_WAIT(void) {
 
 
 
-/* Return the named world-chain node's key to the script VM. */
-s32 evtCommand_SEARCH_ID(void) {
+/* Store the key in the VM return slot. The callback result only records
+ * command completion. */
+ScrCommandResult evtCommand_SEARCH_ID(void) {
     dds3Basic_t *worldNode;
 
     worldNode = dds3SceneBasicSearchName((dds3Basic_t *)dds3GetControlScene(),
@@ -332,7 +333,7 @@ s32 evtCommand_SEARCH_ID(void) {
     } else {
         scrSetIntReturnValue(worldNode->key);
     }
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 u32 evtCommand_RTRN_TITLE(void) {
