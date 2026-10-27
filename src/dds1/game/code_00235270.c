@@ -55,7 +55,7 @@ extern void p2sdLoadSMGFile(s32 sequence);
 extern s32 evtUpdateFrameVariableTask(dds3ProcessID_t *task);
 extern void dds3EffectObjectBasicStatOn(dds3Basic_t *object, u32 flags);
 struct SoundMixer;
-extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(struct SoundMixer *resource, const void *position, const void *scale);
+extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(const struct SoundMixer *resource, const void *position, const void *scale);
 extern void fldSetFilterAnime(u32 mode);
 extern void fldSkySetAlpha(u32 drawState);
 extern void fldSkySetAlphaOfs(u32 alpha);

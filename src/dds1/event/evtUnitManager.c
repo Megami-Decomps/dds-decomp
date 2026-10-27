@@ -1116,7 +1116,7 @@ void evtCopyUnitTargetVector(evtUnitHandle_t *work, const f32 src[4]) {
 #include "scr_arg_read.h"
 /* Declared before first use (were implicit int). */
 struct SoundMixer;
-extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(struct SoundMixer *resource, const void *position, const void *scale);
+extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(const struct SoundMixer *resource, const void *position, const void *scale);
 /* Original-style implicit int, kept: matched code depends on it: dds3AddMG12EffectObjectBasic2. */
 
 

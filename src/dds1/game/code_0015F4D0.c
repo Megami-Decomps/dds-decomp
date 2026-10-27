@@ -533,10 +533,10 @@ void dds3EndCrossfade(void) {
     printf(D_003A0D70);
 }
 
-extern void effBTLPartCreate(SoundMixer *dst, SoundMixer *src);
+extern void effBTLPartCreate(SoundMixer *dst, const SoundMixer *src);
 
 /* Clone a mixer: copy its banks, rebuild the voice state from the original and start with no voices. */
-SoundMixer *sndMixerClone(SoundMixer *src) {
+SoundMixer *sndMixerClone(const SoundMixer *src) {
     struct sdfMemHandle_t *allocation = sdfMemAllocDirect(sizeof(SoundMixer));
     SoundMixer *mixer = (void *)sdfMemLock(allocation);
 

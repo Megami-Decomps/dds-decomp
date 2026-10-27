@@ -2095,7 +2095,7 @@ void effPCP_ThunderPolyListDraw(EffThunderGroup *group) {
 extern EffPcpThunderFragmentResources *dds3BezierTrackPolySetVertex(s32 historyLength, s32 subdivisions);
 extern void dds3BezierTrackPolyCreate(EffPcpThunderFragmentResources *history, u32 *gradientColors);
 
-EffPcpThunderGroup *effPCPBezierBillCreate(const EffPcpThunderGroupParams *src, SoundMixer *eventParams)
+EffPcpThunderGroup *effPCPBezierBillCreate(const EffPcpThunderGroupParams *src, const SoundMixer *eventParams)
 {
     u32 count = src->groupCount;
     sdfMemHandle_t *allocation = sdfMemAllocDirect(count * sizeof(EffPcpThunderGroupSlot) + sizeof(EffPcpThunderGroup));

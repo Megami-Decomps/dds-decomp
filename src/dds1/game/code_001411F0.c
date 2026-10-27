@@ -185,7 +185,7 @@ extern struct sdfMemHandle_t *D_003BAFEC;
 extern u32 D_003BAFF0;
 extern void mnuAdvanceTitleStateUnderSemaphore(void);
 struct SoundMixer;
-extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(struct SoundMixer *, const void *, const void *);
+extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(const struct SoundMixer *, const void *, const void *);
 extern void dds3EffectObjectBasicStatOff(dds3Basic_t *, u32);
 extern void dds3EffectObjectBasicStatOn(dds3Basic_t *, u32);
 extern void dds3StartBEDEffectObjectBasic(dds3Basic_t *, u32);
@@ -4857,7 +4857,7 @@ void fldUpdateSparkMessageSequence(void) {
             position[0] = fldGlobalBase.x;
             position[1] = fldGlobalBase.y;
             position[2] = fldGlobalBase.z;
-            node = dds3AddBEDEffectObjectBasic2((struct SoundMixer *)D_003BAFF0, position, rotation);
+            node = dds3AddBEDEffectObjectBasic2((const struct SoundMixer *)D_003BAFF0, position, rotation);
             fldSparkControlState.object = node;
             dds3EffectObjectBasicStatOff(node, 1);
             fileRequestFreeIfComplete(D_003BAFE8);
@@ -5045,7 +5045,7 @@ void fldUpdateSparkEncounterScene(void) {
         firstVector[0] = area->x;
         firstVector[1] = area->y;
         firstVector[2] = area->z;
-        node = dds3AddBEDEffectObjectBasic2((struct SoundMixer *)D_003BAFF0, firstVector, secondVector);
+        node = dds3AddBEDEffectObjectBasic2((const struct SoundMixer *)D_003BAFF0, firstVector, secondVector);
         fldSparkControlState.object = node;
         dds3EffectObjectBasicStatOff(node, 1);
         fileRequestFreeIfComplete(D_003BAFE8);

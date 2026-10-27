@@ -936,7 +936,7 @@ extern f32 btlGetActorEffectScale(BtlTask *);
 extern BtlRuntimeTask *btlCreateTargetedCommandSoundTask(BtlTask *, BtlCameraModeIndex cameraMode, BtlActionCode actionCode);
 extern BtlRuntimeTask *btlAllocateApproachTargetTask(BtlUnit *, BtlUnit *, f32);
 extern s32 btlIsBattleRecordEligible(BtlUnit *, BtlUnit *, s32, s32);
-extern SoundResourceNode *sndCreateResourceNode(SoundMixer *sourceMixer);
+extern SoundResourceNode *sndCreateResourceNode(const SoundMixer *sourceMixer);
 extern const char D_003A3658[];
 extern const char D_003A3670[];
 extern s32 btlGetActionAnimationDelay(BtlUnit *, s32);

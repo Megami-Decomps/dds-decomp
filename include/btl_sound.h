@@ -164,7 +164,7 @@ typedef struct SoundResourceNode {
     u32 activeCount; /* 0x08: timed effects still using this resource. */
     s32 fadeCountdown;
     SoundMixer *resourceHandle; /* Owned clone, released by sndFreeResourceNode. */
-    SoundMixer *sourceHandle; /* Borrowed archive mixer data; clones own resourceHandle. */
+    const SoundMixer *sourceHandle; /* Borrowed archive mixer data; clones own resourceHandle. */
     struct SoundResourceNode *previous;
     struct SoundResourceNode *next;
 } SoundResourceNode;
@@ -319,7 +319,7 @@ typedef char Atrac3LoadTaskArgs_state_offset_must_be_4[
 typedef char Atrac3LoadTaskArgs_entryIndex_offset_must_be_8[
     ((u32)&((Atrac3LoadTaskArgs *)0)->entryIndex == 8) ? 1 : -1];
 
-SoundMixer *sndMixerClone(SoundMixer *source);
+SoundMixer *sndMixerClone(const SoundMixer *source);
 /* Frame queries borrow a mixer and only inspect its bank metadata. */
 s32 effBTLGetMotionChangeFrame(const SoundMixer *mixer, u16 kind);
 s32 effBTLGetCutEndFrame(const SoundMixer *mixer, u16 kind);
