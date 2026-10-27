@@ -8,6 +8,8 @@
 dds3ProcessID_t *evtSearchEventPack(s32 taskId);
 void evtMakeEventPackName(s32 taskId, char *buffer);
 EvtMotionSeModelKey evtInitMotionSeProcess(s32 eventId, s32 resourceId);
+/* The task reads borrowed event-pack state while updating. Link it under the
+ * matching event-pack task so teardown cancels it before releasing that state. */
 dds3ProcessID_t *evtLoadModelSe(EvtMotionSeModelKey modelKey, s32 eventTaskId, s32 resourceId);
 dds3ProcessID_t *evtLoadEventPack(s32 taskId);
 void evtKillEventPack(s32 taskId);
