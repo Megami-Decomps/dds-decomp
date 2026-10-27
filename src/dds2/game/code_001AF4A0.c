@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "evt_run_context_api.h"
+#include "evt_item_value_threshold_api.h"
 /*
  * Translation unit boundary recovered at btlCalculateHpActionAmount (twin of
  * DDS1 code_001A5C40). btlCheckSpecialAbility and btlGetActorEntryMultiplier
@@ -141,7 +142,6 @@ extern DatAssignedItemId mnuGetPartyEntryCurrentId(datUnitWork_t *);
 
 extern s32 btlDoesEnabledStatusMatchCurrentId(datUnitWork_t *, u32);
 
-extern u8 evtCheckValueThreshold(s32 itemId, s32 minimumQuantity);
 
 
 extern s32 TestMsgMngD_Process(dds3ProcessID_t *task);

@@ -30,6 +30,7 @@
 #include "btl_animation_mode_entry.h"
 #include "btl_effect_position.h"
 #include "evt_solar.h"
+#include "evt_item_value_threshold_api.h"
 #include "eff_random_mod.h"
 #include "eff_random.h"
 #include "sdf_trig.h"
@@ -169,7 +170,6 @@ extern DatAssignedItemId mnuGetPartyEntryCurrentId(datUnitWork_t *);
 
 extern s32 btlDoesEnabledStatusMatchCurrentId(datUnitWork_t *, u32);
 
-extern u8 evtCheckValueThreshold(s32 itemId, s32 minimumQuantity);
 
 
 extern s32 TestMsgMngD_Process(dds3ProcessID_t *task);
@@ -2518,17 +2518,20 @@ s32 btlIsEventThresholdSatisfiedForEntry(s32 entryValue) {
     s32 eventId = entryValue & 0xFFFF;
     switch (eventId) {
     case 0x8A:
-        if (evtCheckValueThreshold(0x8A, 1) != 0 || evtCheckValueThreshold(0x93, 1) != 0) {
+        if (evtCheckValueThreshold(0x8A, 1) != EVT_ITEM_VALUE_THRESHOLD_NOT_MET ||
+            evtCheckValueThreshold(0x93, 1) != EVT_ITEM_VALUE_THRESHOLD_NOT_MET) {
             return 1;
         }
         break;
     case 0x8B:
-        if (evtCheckValueThreshold(0x8B, 1) != 0 || evtCheckValueThreshold(0x94, 1) != 0) {
+        if (evtCheckValueThreshold(0x8B, 1) != EVT_ITEM_VALUE_THRESHOLD_NOT_MET ||
+            evtCheckValueThreshold(0x94, 1) != EVT_ITEM_VALUE_THRESHOLD_NOT_MET) {
             return 1;
         }
         break;
     }
-    if ((u32)((eventId + 0xFF80) & 0xFFFF) < 0x20 && evtCheckValueThreshold(eventId, 1) != 0) {
+    if ((u32)((eventId + 0xFF80) & 0xFFFF) < 0x20 &&
+        evtCheckValueThreshold(eventId, 1) != EVT_ITEM_VALUE_THRESHOLD_NOT_MET) {
         return 1;
     }
     return 0;
@@ -3469,7 +3472,8 @@ void btlRestorePartySlotSnapshots(void) {
 }
 
 void btlSyncModelFlagFromEventThresholds(void) {
-    if (evtCheckValueThreshold(0x53, 1) || evtCheckValueThreshold(0x54, 1)) {
+    if (evtCheckValueThreshold(0x53, 1) != EVT_ITEM_VALUE_THRESHOLD_NOT_MET ||
+        evtCheckValueThreshold(0x54, 1) != EVT_ITEM_VALUE_THRESHOLD_NOT_MET) {
         evtBitOn(0xa20);
     } else {
         evtBitOff(0xa20);

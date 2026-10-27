@@ -10,6 +10,7 @@
 #include "mnu_shop.h"
 #include "mnu_scroll_panel.h"
 #include "dat_state.h"
+#include "evt_item_value_threshold_api.h"
 
 typedef struct StaffDisplayContext StaffDisplayContext;
 extern void mnuCreateStaffItemWindow(StaffDisplayContext *);
@@ -62,7 +63,6 @@ extern void mnuDrawStaffItemListEntry(s32, s32, s32, struct MenuList *, struct M
 extern u8 mnuIsBulletItemId(s32);
 extern char *D_003BAA84;
 extern u8 mnuIsSolarPricedItemId(s32);
-extern u8 evtCheckValueThreshold(s32 itemId, s32 minimumQuantity);
 extern void mnuAttachWindowTextureState(MenuWindowContainer *, u32, u32, u32, u32);
 
 void mnuCreateStaffItemWindow(StaffDisplayContext *context) {
@@ -120,7 +120,7 @@ void mnuCreateStaffItemWindow(StaffDisplayContext *context) {
 
     secondTextOffset = 0x19;
     do {
-        if (evtCheckValueThreshold(itemId, minimumQuantity) != 0 &&
+        if (evtCheckValueThreshold(itemId, minimumQuantity) != EVT_ITEM_VALUE_THRESHOLD_NOT_MET &&
             (datItemSkillRecords[itemId].flags & 4) != 0) {
             node = mnuAppendWindowListNode(window, D_003BAA84 + secondTextOffset);
             node->sortKeyPrimary = minimumQuantity;

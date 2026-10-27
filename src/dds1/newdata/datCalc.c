@@ -5,6 +5,7 @@
 #include "scr_procedure_start_api.h"
 #include "evt_script_context.h"
 #include "evt_solar.h"
+#include "evt_item_value_threshold_api.h"
 #include "evt_random_status_clear_api.h"
 #include "pty_roster_value_record.h"
 #include "dat_state.h"
@@ -488,14 +489,15 @@ void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta) {
 
 /* Flag-range items test their model flag and ignore minimumQuantity.
  * Other items require at least the requested byte quantity. */
-u8 evtCheckValueThreshold(s32 itemId, s32 minimumQuantity) {
+EvtItemValueThresholdResult evtCheckValueThreshold(s32 itemId, s32 minimumQuantity) {
     if ((u32)(itemId - PTY_ITEM_FLAG_FIRST) < PTY_ITEM_FLAG_COUNT) {
-        return evtBitCheck(itemId + PTY_ITEM_MODEL_FLAG_BASE) != 0;
+        return evtBitCheck(itemId + PTY_ITEM_MODEL_FLAG_BASE) != 0 ?
+                EVT_ITEM_VALUE_THRESHOLD_MET : EVT_ITEM_VALUE_THRESHOLD_NOT_MET;
     }
     if (DDS3_GBWK->inventory.counts[itemId] < minimumQuantity) {
-        return 0;
+        return EVT_ITEM_VALUE_THRESHOLD_NOT_MET;
     }
-    return 1;
+    return EVT_ITEM_VALUE_THRESHOLD_MET;
 }
 
 /* Flag-range items have one slot; every quantity range caps at 99. */

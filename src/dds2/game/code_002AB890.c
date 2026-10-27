@@ -13,6 +13,7 @@
 #include "eff.h"
 #include "mnu_scroll_panel.h"
 #include "mdl_flag_api.h"
+#include "evt_item_value_threshold_api.h"
 
 
 
@@ -37,7 +38,6 @@ extern u8 mnuIsBulletItemId(s32);
 extern u8 mnuIsHighRangeItemId(s32);
 extern u8 mnuIsSolarPricedItemId(s32);
 extern s32 mtrMantraFindIndex(s32);
-extern u8 evtCheckValueThreshold(s32 itemId, s32 minimum);
 extern void mnuDrawCampGridResourceSlot(s32, s32, s32, struct MenuList *,
                                         struct MenuListNode *, s32);
 
@@ -118,7 +118,8 @@ void mnuBuildStaffItemWindows(MenuStaffContext *owner) {
     window->list->drawCallback = mnuDrawCampGridResourceSlot;
 
     for (itemId = 1; itemId < 0x100; itemId++) {
-        if (evtCheckValueThreshold(itemId, 1) != 0 && (datItemSkillRecords[itemId].flags & 4) != 0) {
+        if (evtCheckValueThreshold(itemId, 1) != EVT_ITEM_VALUE_THRESHOLD_NOT_MET &&
+            (datItemSkillRecords[itemId].flags & 4) != 0) {
             node = mnuAppendWindowListNode(window, D_00435E5C[itemId]);
             node->sortKeyPrimary = 1;
             node->sortKeySecondary = itemId;
