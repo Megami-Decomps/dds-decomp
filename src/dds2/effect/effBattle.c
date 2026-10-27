@@ -45,7 +45,7 @@ u16 effBTLCutGetCutNumber(effBTLCutHandle_t *effect) {
 }
 
 /* Read the frame counter that the native updater advances after callbacks. */
-u32 effBTLCutGetFrame(effBTLCutHandle_t *effect) {
+u32 effBTLCutGetFrame(const effBTLCutHandle_t *effect) {
     return effect->currentFrame;
 }
 

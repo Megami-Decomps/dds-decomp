@@ -340,7 +340,8 @@ effBTLCutHandle_t *effCreateBattleVoiceOwner(SoundMixer *mixer, u16 kind,
                                              struct BtlUnit *owner, s32 value);
 void effBTLCutListRelease(effBTLCutHandle_t *effect);
 void effBTLCutDelete(effBTLCutHandle_t *effect);
-u32 effBTLCutGetFrame(effBTLCutHandle_t *effect);
+/* Read the updater-owned frame counter through a borrowed handle view. */
+u32 effBTLCutGetFrame(const effBTLCutHandle_t *effect);
 void effBTLCutSetDrawEndFrame(effBTLCutHandle_t *effect, u32 endFrame);
 
 /* The data-file task allocates four argument bytes for its borrowed unit. */
