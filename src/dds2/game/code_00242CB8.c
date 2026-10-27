@@ -50,19 +50,19 @@ EvtEventBgmReadiness evtCheckEventBgmLoaded(s32 id);
 extern dds3Basic_t *evtSearchBasic(s32 worldKind, s32 worldObjectKey);
 extern EvtPathStatus evtCheckPathStat(dds3Basic_t *object);
 
-s32 evtCommand_LIGHT_PATH_WAIT(void) {
+ScrCommandResult evtCommand_LIGHT_PATH_WAIT(void) {
     EvtPathStatus status = evtCheckPathStat(
         evtSearchBasic(EFF_WORLD_KIND_LIGHT, scrGetIntPara(0)));
 
     switch (status) {
     case EVT_PATH_STATUS_AT_ENDPOINT:
-        return 1;
+        return SCR_COMMAND_RESULT_COMPLETE;
     case EVT_PATH_STATUS_IN_PROGRESS:
-        return 0;
+        return SCR_COMMAND_RESULT_PENDING;
     case EVT_PATH_STATUS_INVALID:
-        return 1;
+        return SCR_COMMAND_RESULT_COMPLETE;
     default:
-        return 0;
+        return SCR_COMMAND_RESULT_PENDING;
     }
 }
 
