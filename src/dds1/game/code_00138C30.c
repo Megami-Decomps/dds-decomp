@@ -40,6 +40,7 @@
 #include "fld_release_texture_slots_api.h"
 #include "fld_transfer_chunk.h"
 #include "fld_camera_follow_row.h"
+#include "fld_event_display_resource_api.h"
 #include "fld.h"
 #include "fld_encounter_runtime_api.h"
 #include "fld_collision_geometry.h"
@@ -323,8 +324,6 @@ extern char D_003BAC40[];
 extern s32 fldRoomEventPlacementCount;
 
 extern dds3Basic_t *dds3AddEventBasic(s32 key, const char *resourcePath, const char *name);
-
-extern u32 fldEveHit_AddEveData(FldFileResource *, dds3Basic_t *);
 
 extern struct DevRequest *fldRoomSoundResources;
 
@@ -648,7 +647,8 @@ void fldEveHit_End(void) {
 }
 
 /* Append a file resource for an event task and return its index. */
-u32 fldEveHit_AddEveData(FldFileResource *resource, dds3Basic_t *object) {
+FldEventDisplayResourceIndex fldEveHit_AddEveData(
+    FldFileResource *resource, dds3Basic_t *object) {
     s32 index = D_003BAE28;
 
     fldDisplayValues[index] = resource;
@@ -1005,7 +1005,7 @@ void fldSpawnRoomTrigger(s32 roomId, f32 x, f32 y, f32 z, f32 radius) {
     FldActionTransform *transform;
     s32 worldKey = dds3AllocObjectId();
     dds3Basic_t *object;
-    u32 displayResourceIndex;
+    FldEventDisplayResourceIndex displayResourceIndex;
     FldRoomRecordIndex roomRecordIndex;
 
     object = dds3AddEventBasic(worldKey, D_00330780, D_00330760);
@@ -1057,7 +1057,7 @@ void fldSpawnRoomTriggerVariant(s32 kind, s32 roomValue,
     FldActionTransform *transform;
     s32 worldKey = dds3AllocObjectId();
     dds3Basic_t *object;
-    u32 displayResourceIndex;
+    FldEventDisplayResourceIndex displayResourceIndex;
     FldRoomRecordIndex roomRecordIndex;
 
     if (kind == 0) {
@@ -3373,6 +3373,3 @@ INCLUDE_SDATA(const s32, "game/code_00138C30", D_003BAE68);
 INCLUDE_SDATA(const s32, "game/code_00138C30", fldPickedActorTemplateKind);
 
 INCLUDE_SDATA(const s32, "game/code_00138C30", addressprocess_id);
-
-/* Keep the shared declaration after this unit; moving it changes a matched routine. */
-#include "fld_event_display_resource_api.h"
