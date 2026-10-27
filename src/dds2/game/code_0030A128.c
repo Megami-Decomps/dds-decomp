@@ -575,7 +575,7 @@ s32 fldAdvanceLmapResourceLoad(LmapTaskState *task)
                 slotIndex = 0;
                 do {
                     if (node->packet[0] == 1) {
-                        evtPrintDeveloperConsoleMessage(D_0042D2A8, sdfPacGetResrcFileName((SdfPacStreamPacketHeader *)node));
+                        evtPrintDeveloperConsoleMessage(D_0042D2A8, sdfPacGetResrcFileName(node));
                         if (task->variant == 1) {
                             task->spriteSlots[slotIndex + 1] =
                                 effCreateResourceSlotSetFromAllocation(PAC_WORK_ALLOCATION(node), 0);

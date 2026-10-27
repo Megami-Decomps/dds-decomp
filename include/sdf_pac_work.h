@@ -36,4 +36,7 @@ PacWork *sdfPacNewResrc(struct PacState *state,
                              const struct SdfPacStreamPacketHeader *packet);
 PacWork *sdfPacFreeResrc(PacWork *work);
 
+/* Return the resource-extension payload in this PAC work node's inline packet. */
+u8 *sdfPacGetResrcFileName(PacWork *work);
+
 #endif /* SDF_PAC_WORK_H */
