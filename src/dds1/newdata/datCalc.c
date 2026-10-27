@@ -19,6 +19,7 @@
 #include "pty_active_roster_index_api.h"
 #include "pty_roster_api.h"
 #include "pty_frontline_promotion_api.h"
+#include "pty_status_query_api.h"
 #include "dat_unit_has_skill_api.h"
 #include "pty_item_quantity_update_view.h"
 #include "eff_random_mod.h"
@@ -656,17 +657,19 @@ void ptyRecoverAllUnits(void) {
     } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
 }
 
-/* Check occupied, nonzero-HP roster members; optionally restrict matches to frontline. */
-u8 ptyAnyLivingUnitHasStatus(u32 statusMask, s32 frontlineOnly) {
+/* Check occupied, nonzero-HP roster members for a status bit. */
+PtyPartyStatusMatchResult ptyAnyLivingUnitHasStatus(
+    u32 statusMask, PtyPartyStatusScope scope) {
     datUnitWork_t *entry = DDS3_GBWK->party;
     s32 slotIndex = 0;
 
     do {
         if (entry->flags & DAT_PARTY_FLAG_OCCUPIED) {
             if (entry->hp != 0) {
-                if (frontlineOnly != 1 || (entry->flags & DAT_PARTY_FLAG_FRONTLINE)) {
+                if (scope != PTY_PARTY_STATUS_SCOPE_FRONTLINE_ONLY ||
+                    (entry->flags & DAT_PARTY_FLAG_FRONTLINE)) {
                     if (entry->status & statusMask) {
-                        return 1;
+                        return PTY_PARTY_STATUS_MATCH_FOUND;
                     }
                 }
             }
@@ -674,7 +677,7 @@ u8 ptyAnyLivingUnitHasStatus(u32 statusMask, s32 frontlineOnly) {
         slotIndex++;
         entry++;
     } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
-    return 0;
+    return PTY_PARTY_STATUS_MATCH_NOT_FOUND;
 }
 
 void datAddExp(datUnitWork_t *unit, s32 increment) {

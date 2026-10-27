@@ -19,6 +19,7 @@
 #include "evt_unit.h"
 #include "evt_unit_color_transition.h"
 #include "common.h"
+#include "pty_status_query_api.h"
 #include "fld_camera_model_motion_api.h"
 #include "sdf_delayed_resource_check_api.h"
 #include "fld_archive_load_state.h"
@@ -3993,7 +3994,6 @@ s32 fldPlaceAreaDamageEffect(f32 x, f32 y, f32 z) {
 extern void rsetOtOfs(u32);
 extern void rsetAlpha(s32);
 extern void rsetTest(s32, s32, s32, s32, s32, s32, s32, s32);
-extern u8 ptyAnyLivingUnitHasStatus(u32 statusMask, s32 frontlineOnly);
 extern void DrwSprite2DC(s32, s32, s32, s32, s32, s32, s32, s32, u32,
                           u32, u32, u32, sdfTexHandle_t *);
 extern f32 D_0043634C;
@@ -4017,7 +4017,7 @@ void fldDrawAnimatedFieldBanner(s32 alpha, s32 x, s32 y) {
         DrwSprite2D(x + 0x1E2, y - 1, 0x20, 0x39,
                             1, 2, 0x20, 0x39, 0x80808080,
                             fldGlobalBase.fieldTextures[0].texture);
-        if (ptyAnyLivingUnitHasStatus(0x5D0, 0) != 0) {
+        if (ptyAnyLivingUnitHasStatus(0x5D0, PTY_PARTY_STATUS_SCOPE_ALL_LIVING) != 0) {
             DrwSprite2D(x + 0x1B6, y + 0x2E, 0x23, 0xB,
                                 0x3B, 0x25, 0x23, 0xB, 0x80808080,
                                 fldGlobalBase.fieldTextures[2].texture);

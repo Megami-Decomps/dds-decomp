@@ -15,6 +15,7 @@
 #include "kwln_fade.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "pty_status_query_api.h"
 #include "sdf_delayed_resource_check_api.h"
 #include "dds3_object_flags.h"
 #include "sdf_vu0.h"
@@ -1617,7 +1618,6 @@ extern void fldUpdateSmoothedCameraPose(void);
 extern u8 fldAutoMapSeqTestFlag(u32);
 extern void evtAdvanceSolarClockAndExpireControls(f32 travelDistance);
 extern void evtUpdateFlaggedStats(void);
-extern u8 ptyAnyLivingUnitHasStatus(u32 statusMask, s32 frontlineOnly);
 extern void ptyApplyFieldHpAttrition(s32 attritionMode);
 extern s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex);
 extern void dds3WorkClear(void);
@@ -1682,10 +1682,12 @@ s32 fldUpdateTravelAndEncounters(void) {
             return 0;
         }
     }
-    if (fldGlobalBase.terrainAttritionKind != FLD_TERRAIN_ATTRITION_NONE || ptyAnyLivingUnitHasStatus(0x80, 1)) {
+    if (fldGlobalBase.terrainAttritionKind != FLD_TERRAIN_ATTRITION_NONE ||
+        ptyAnyLivingUnitHasStatus(0x80, PTY_PARTY_STATUS_SCOPE_FRONTLINE_ONLY)) {
         fldGlobalBase.attritionDistance += distance;
         interval = 450.0f;
-        if (fldGlobalBase.terrainAttritionKind == FLD_TERRAIN_ATTRITION_NONE && ptyAnyLivingUnitHasStatus(0x80, 1)) interval = 1000.0f;
+        if (fldGlobalBase.terrainAttritionKind == FLD_TERRAIN_ATTRITION_NONE &&
+            ptyAnyLivingUnitHasStatus(0x80, PTY_PARTY_STATUS_SCOPE_FRONTLINE_ONLY)) interval = 1000.0f;
         if (fldGlobalBase.attritionDistance > interval) {
             if (fldGlobalBase.terrainAttritionKind != FLD_TERRAIN_ATTRITION_NONE) {
                 if (DDS3_GBWK->world.fieldFlags & DAT_WORLD_FIELD_TRANSITION_WORK) {
