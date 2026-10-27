@@ -8,6 +8,7 @@
 #include "btl_resolve_unit_value_api.h"
 #include "mdl_flag_api.h"
 #include "btl_state.h"
+#include "btl_serial_battle_mode_override.h"
 #include "btl_terminal_outcome.h"
 #include "btl_action_state_selection.h"
 #include "btl_action_state_selection_slot.h"
@@ -70,21 +71,21 @@ s32 btlDispatchActionAnimation(BtlLinkedCommand *command) {
     return 1;
 }
 
-s32 btlGetPhaseCommand(void) {
+BtlSerialBattleModeOverrideResult btlGetPhaseCommand(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     switch (battle->phase) {
     case 0: return 0x11c;
     case 1: return 0x11b;
-    default: return -1;
+    default: return BTL_SERIAL_BATTLE_MODE_OVERRIDE_CANCEL;
     }
 }
 
-s32 btlGetAlternatePhaseCommand(void) {
+BtlSerialBattleModeOverrideResult btlGetAlternatePhaseCommand(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     switch (battle->phase) {
     case 0: return 0x11f;
     case 1: return 0x120;
-    default: return -1;
+    default: return BTL_SERIAL_BATTLE_MODE_OVERRIDE_CANCEL;
     }
 }
 

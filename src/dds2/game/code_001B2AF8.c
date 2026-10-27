@@ -54,6 +54,7 @@
 #include "itf.h"
 #include "itf_panel_draw.h"
 #include "btl_state.h"
+#include "btl_serial_battle_mode_override.h"
 #include "btl_scene_initializer.h"
 #include "btl_ui.h"
 #include "btl_phase_panel_work.h"
@@ -915,7 +916,7 @@ s32 btlSelectSerialEncounter(void) {
 
     BtlState *state = (BtlState *)btlGetRuntime();
     u16 selectionIndex = (u16)state->adjustmentEntryIndex;
-    s32 (*serialOverride)(void) = state->serialOverride;
+    BtlSerialBattleModeOverrideCallback serialOverride = state->serialOverride;
     u16 encounterPack;
     u16 groupIndex;
     u16 forcedScene;
@@ -932,9 +933,9 @@ s32 btlSelectSerialEncounter(void) {
     groupIndex = (u16)state->adjustmentGroupIndex;
 
     if (serialOverride != NULL) {
-        s32 result = serialOverride();
+        BtlSerialBattleModeOverrideResult result = serialOverride();
 
-        if (result != -1) {
+        if (result != BTL_SERIAL_BATTLE_MODE_OVERRIDE_CANCEL) {
             state->nextBattleMode = result;
             state->requestMode = 3;
             btlBossDebugPrintf("btl:serial boss [%X]\n", result);
