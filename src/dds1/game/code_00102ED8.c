@@ -18,6 +18,7 @@
 #include "sdf_texture_draw_packet.h"
 #include "sdf_tex_packet.h"
 #include "kwln.h"
+#include "kwln_task_update_count.h"
 #include "kwln_process_registration.h"
 #include "kwln_named_slot.h"
 #include "kwln_task_create.h"

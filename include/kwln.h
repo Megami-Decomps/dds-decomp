@@ -45,7 +45,6 @@ struct dds3ProcessID_t {
     dds3ProcessID_t *nextSibling;   /* 0x4C: next task in the parent's child list. */
 };
 
-u32 dds3GetProcessRunTime(const dds3ProcessID_t *task);
 void dds3SetProcessData(dds3ProcessID_t *task, u32 userValue);
 u32 dds3GetProcessData(const dds3ProcessID_t *task);
 dds3ProcessID_t *dds3SearchProcessName(const char *name);

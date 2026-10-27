@@ -36,6 +36,7 @@
 #include "sdf.h"
 #include "sdf_sif_command.h"
 #include "kwln.h"
+#include "kwln_task_update_count.h"
 #include "kwln_task_create.h"
 #include "evt_task.h"
 #include "evt_unit.h"

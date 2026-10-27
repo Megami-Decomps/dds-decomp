@@ -7,6 +7,7 @@
 #include "eff_random_mod.h"
 #include "fpu.h"
 #include "kwln.h"
+#include "kwln_task_update_count.h"
 #include "kwln_process_registration.h"
 #include "scr_process_handle_api.h"
 #include "pcp_vu0.h"

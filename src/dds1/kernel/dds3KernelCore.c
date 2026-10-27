@@ -2,6 +2,7 @@
 #include "kwln_task_add_child.h"
 #include "sdf_chip.h"
 #include "kwln.h"
+#include "kwln_task_update_count.h"
 #include "kwln_process_registration.h"
 #include "kwln_task_queue_query.h"
 #include "kwln_task_priority_query.h"
@@ -688,7 +689,7 @@ u32 dds3GetProcessStartTime(const dds3ProcessID_t* task)
 }
 
 /* Persona 4 dds3GetProcessRunTime @ 00452540 (src/Kernel/sdkTask.c), recompiled unchanged */
-u32 dds3GetProcessRunTime(const dds3ProcessID_t* task)
+KwlnTaskUpdateCount dds3GetProcessRunTime(const dds3ProcessID_t* task)
 {
     return task->runUpdateCount;
 }
