@@ -541,8 +541,8 @@ u16 mdlPibGetChunkCount(MdlRecord *record) {
     return record->parameter.part.count;
 }
 
-/* Follow the relative links in a resource's record table to find an ID. */
-MdlRecord *mdlPibGetChunk(dds3ModelHandle_t *resource, s32 recordId) {
+/* Follow the relative links in a resource's part-info table to find a list key. */
+MdlRecord *mdlPibGetChunk(dds3ModelHandle_t *resource, MdlPartInfoListKey partInfoListKey) {
     MdlRecord *recordTable = resource->sub->partInfo;
     MdlRecord *recordCursor;
     s32 remainingRecords;
@@ -558,7 +558,7 @@ MdlRecord *mdlPibGetChunk(dds3ModelHandle_t *resource, s32 recordId) {
         if (remainingRecords == -1) {
             return NULL;
         }
-    } while (recordCursor->kind != recordId);
+    } while (recordCursor->kind != partInfoListKey);
     return recordCursor;
 }
 
@@ -852,10 +852,11 @@ void mdlEffectResrcListFree(DevRequest *partList) {
 
 
 /* Prepend a cleared, typed resource item to the owner's list. */
-dds3ModelEffectCtrlr_t *mdlCreateEffectCtrlr(dds3ModelHandle_t *owner, s32 type, s32 motionSlotIndex) {
+dds3ModelEffectCtrlr_t *mdlCreateEffectCtrlr(
+    dds3ModelHandle_t *owner, MdlResourceKind resourceKind, MdlMotionSlotIndex motionSlotIndex) {
     dds3ModelEffectCtrlr_t *item = sdfAllocAndClearQuadwords(sizeof(dds3ModelEffectCtrlr_t));
     dds3ModelEffectCtrlr_t *previousHead = owner->resourceItems;
-    item->type = type;
+    item->type = resourceKind;
     item->next = previousHead;
     item->motionSlotIndex = motionSlotIndex;
     owner->resourceItems = item;
@@ -889,7 +890,9 @@ MdlPartEntry *mdlGetEffectResrc(dds3ModelHandle_t *resource, s32 slotIndex) {
 }
 
 /* Bind each consecutive record ID to a newly created part when the chunk contains it. */
-void mdlCreateEffect_P2A_D3P(dds3ModelHandle_t *owner, const MdlRecord *partRecord, s32 motionSlotIndex, s32 resourceType, void *(*createPart)(MdlPartEntry *)) {
+void mdlCreateEffect_P2A_D3P(
+    dds3ModelHandle_t *owner, const MdlRecord *partRecord, MdlMotionSlotIndex motionSlotIndex,
+    MdlResourceKind resourceKind, void *(*createPart)(MdlPartEntry *)) {
     MdlPartEntry *partSlot = mdlGetEffectResrc(owner, partRecord->parameter.part.partIndex);
 
     if (partSlot != NULL) {
@@ -906,7 +909,7 @@ void mdlCreateEffect_P2A_D3P(dds3ModelHandle_t *owner, const MdlRecord *partReco
             SdfMapPositionRecord *chunkRecord = sdfModelSearchMarkPosData(model, recordId++);
 
             if (chunkRecord != NULL) {
-                dds3ModelEffectCtrlr_t *resourceItem = mdlCreateEffectCtrlr(owner, resourceType, motionSlotIndex);
+                dds3ModelEffectCtrlr_t *resourceItem = mdlCreateEffectCtrlr(owner, resourceKind, motionSlotIndex);
 
                 resourceItem->payload.part.instance = createPart(partSlot);
                 resourceItem->payload.part.slot = partSlot;
@@ -918,7 +921,9 @@ void mdlCreateEffect_P2A_D3P(dds3ModelHandle_t *owner, const MdlRecord *partReco
 }
 
 /* Convert the effect record to native track parameters and retain its work pointer. */
-void mdlCreateEffect_TRACK(dds3ModelHandle_t *owner, const MdlTrackPolyRecordView *record, s32 motionSlotIndex) {
+void mdlCreateEffect_TRACK(dds3ModelHandle_t *owner,
+                           const MdlTrackPolyRecordView *record,
+                           MdlMotionSlotIndex motionSlotIndex) {
     EffTrackPolyParams effectParams;
     dds3ModelEffectCtrlr_t *resourceItem;
 
@@ -949,7 +954,8 @@ void mdlCreateEffect_BLUR(dds3ModelHandle_t *owner, const MdlRecord *record) {
 
 
 /* Claim an unused object only after its data resource resolves, retaining record flags and deferred-init parameters. */
-void mdlCreateEffect_IPU(dds3ModelHandle_t *owner, const MdlRecord *entryRecord, s32 motionSlotIndex) {
+void mdlCreateEffect_IPU(dds3ModelHandle_t *owner, const MdlRecord *entryRecord,
+                         MdlMotionSlotIndex motionSlotIndex) {
     MdlPartEntry *partSlot = mdlGetEffectResrc(owner, entryRecord->tail.object.partIndex);
 
     if (partSlot != 0) {
@@ -991,7 +997,8 @@ void mdlDrawEffect_IPU(dds3ModelEffectCtrlr_t *item) {
 }
 
 /* Dispatch the five record kinds, retaining the game's native return behavior. */
-void mdlCreateEffect(dds3ModelHandle_t *owner, const MdlRecord *record, s32 motionSlotIndex) {
+void mdlCreateEffect(dds3ModelHandle_t *owner, const MdlRecord *record,
+                      MdlMotionSlotIndex motionSlotIndex) {
     switch (record->kind) {
     case MDL_VIEWER_RECORD_KIND_BILLBOARD_PART:
         mdlCreateEffect_P2A_D3P(owner, record, motionSlotIndex, MDL_RESOURCE_BILLBOARD, mdlEffectDup_P2A);
@@ -1012,8 +1019,9 @@ void mdlCreateEffect(dds3ModelHandle_t *owner, const MdlRecord *record, s32 moti
 }
 
 /* Copy values from the group-owned record list; context resources retain no record pointers. */
-void mdlGenEffect(dds3ModelHandle_t *owner, s32 recordId, s32 motionSlotIndex) {
-    MdlRecord *recordList = mdlPibGetChunk(owner, recordId);
+void mdlGenEffect(dds3ModelHandle_t *owner, MdlPartInfoListKey partInfoListKey,
+                  MdlMotionSlotIndex motionSlotIndex) {
+    MdlRecord *recordList = mdlPibGetChunk(owner, partInfoListKey);
     if (recordList != NULL) {
         MdlRecord *recordCursor = mdlPibGetFirstChunkItem(recordList);
         while (recordCursor != NULL) {
@@ -1040,7 +1048,7 @@ void mdlFreeEffect(dds3ModelEffectCtrlr_t *item) {
 }
 
 /* Release all items for this slot without losing the link across consecutive matches. */
-void mdlStopEffect(dds3ModelHandle_t *owner, s32 motionSlotIndex) {
+void mdlStopEffect(dds3ModelHandle_t *owner, MdlMotionSlotIndex motionSlotIndex) {
     dds3ModelEffectCtrlr_t **itemLink = &owner->resourceItems;
     dds3ModelEffectCtrlr_t *item = *itemLink;
     while (item != 0) {
@@ -2441,19 +2449,22 @@ u32 mdlRunViewerSettingsTask(void) {
     return 0;
 }
 
-/* Sum list -1 and active-entry counts, retaining both independent lookups. */
+/* Sum context-wide and selected-entry list counts, retaining both lookups. */
 s32 mdlCountActiveRecords(void) {
     dds3ModelHandle_t *resource = mdlViewerState.resources[0];
-    s32 firstListCount = mdlPibGetChunkItemCount(mdlPibGetChunk(resource, -1));
-    s32 activeListCount = mdlPibGetChunkItemCount(mdlPibGetChunk(resource, mdlViewerState.activeEntryId));
+    s32 firstListCount =
+        mdlPibGetChunkItemCount(mdlPibGetChunk(resource, MDL_PART_INFO_LIST_CONTEXT_WIDE));
+    s32 activeListCount =
+        mdlPibGetChunkItemCount(mdlPibGetChunk(resource, mdlViewerState.activeEntryId));
 
     return firstListCount + activeListCount;
 }
 
-/* Record at the cursor index, counting list -1 first and then the active entry's list. */
+/* Count the context-wide list before the selected-entry list for cursor lookup. */
 MdlRecord *mdlGetSelectedRecord(void) {
     dds3ModelHandle_t *resource = mdlViewerState.resources[0];
-    MdlRecord *firstList = mdlPibGetChunk(resource, -1);
+    MdlRecord *firstList =
+        mdlPibGetChunk(resource, MDL_PART_INFO_LIST_CONTEXT_WIDE);
     MdlRecord *secondList = mdlPibGetChunk(resource, mdlViewerState.activeEntryId);
     s32 index = mdlViewerState.selectedRecordIndex;
     MdlRecord *record;
@@ -2556,7 +2567,7 @@ void mdlDrawViewerEffectRecordList(void) {
     mdlAppendViewerRectToDrawList(0x7150, 0x7A08, 0xFF007F, 0xF60, 0x270, 0);
     resource = state->resources[0];
     packetList = state->packetList;
-    firstList = mdlPibGetChunk(resource, -1);
+    firstList = mdlPibGetChunk(resource, MDL_PART_INFO_LIST_CONTEXT_WIDE);
     firstCount = mdlPibGetChunkItemCount(firstList);
     secondList = mdlPibGetChunk(resource, state->activeEntryId);
     secondCount = mdlPibGetChunkItemCount(secondList);

@@ -703,7 +703,7 @@ dds3ModelHandle_t *mdlLoad(u32 group, u32 id) {
         }
     }
     ctx->resourceItems = NULL;
-    mdlGenEffect(ctx, -1, MDL_CONTEXT_WIDE_MOTION_SLOT);
+    mdlGenEffect(ctx, MDL_PART_INFO_LIST_CONTEXT_WIDE, MDL_MOTION_SLOT_CONTEXT_WIDE);
     return ctx;
 }
 
@@ -898,6 +898,7 @@ void mdlMotion(dds3ModelHandle_t *ctx, s32 searchId, s32 motionIndex, SdfMotionL
     sdfMotionChangeBlend(node, motionIndex, loopMode, blendLeadFrames, blendDurationFrames);
     ctx->current.h.id = searchId;
     ctx->current.h.motionIndex = motionIndex;
+    /* Replace this controller slot's effects from the selected motion list. */
     mdlStopEffect(ctx, slotIndex);
     mdlGenEffect(ctx, motionIndex, slotIndex);
 }
