@@ -141,6 +141,7 @@ BillChildPayload *BillboardLoadTex(SdfTextureFileHeader *resource) {
     }
     child->packetListIndex = 0;
 
+    /* This shared record owns sdfTexSet's acquired texture reference. */
     texture = sdfTexSet(resource);
     heightUv = (s16)((u16)texture->height << 4);
     widthUv = (s16)((u16)texture->width << 4);

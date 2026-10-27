@@ -67,7 +67,10 @@ typedef char SdfTextureFileHeader_battleTextureSlot_offset_must_be_0x20[
 
 struct sdfTexHandle_t;
 
-/* Acquire a texture from a serialized texture-file header. */
+/* Both entry points return one caller-owned texture reference. A nonzero
+ * resourceKey reuses a live matching texture and increments its count; a new
+ * texture starts at one. Release the returned reference once with
+ * sdfTexReleaseReference or sdfTexReleaseReferenceViaHandler. */
 struct sdfTexHandle_t *sdfTexSet(const SdfTextureFileHeader *header);
 struct sdfTexHandle_t *sdfTexSetDirect(const SdfTextureFileHeader *header);
 
