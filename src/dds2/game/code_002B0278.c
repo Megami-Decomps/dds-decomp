@@ -1646,7 +1646,7 @@ s32 mnuDrawSelectedStaffPartyView(dds3ProcessID_t *callback) {
 }
 
 void mnuIdleVoiceTimer(StaffMenuRuntime *object) {
-    u32 count;
+    EvtStageMotionColumnCount count;
     if (object->motionSelection == -1) {
         if (evtStageTestAdvanceResourceWork() != 1) {
             if (evtStageTestHasPendingMotion() == EVT_STAGE_MOTION_QUEUE_SETTLED) {

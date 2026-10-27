@@ -3715,7 +3715,7 @@ s8 evtStageTestUpdate(struct SdfPoolNode **surfaces) {
 }
 
 /* Count nonzero bytes in the active entry's motion column; any nonzero kind selects column 1. */
-s32 evtStageTestCountFlags(s32 columnKind) {
+EvtStageMotionColumnCount evtStageTestCountFlags(s32 columnKind) {
     StageTestSlot *activeSlot = evtStageTestState.queue.slot;
     s32 entryIndex = activeSlot->entryIndex;
     s32 nonzeroCount = 0;

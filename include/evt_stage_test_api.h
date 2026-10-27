@@ -4,7 +4,9 @@
 #include "common.h"
 #include "mdl_asset_request.h"
 
-s32 evtStageTestCountFlags(s32 columnKind);
+/* Number of nonzero entries in one eight-value stage-test motion column. */
+typedef u32 EvtStageMotionColumnCount;
+EvtStageMotionColumnCount evtStageTestCountFlags(s32 columnKind);
 
 typedef s32 EvtStageTestSelectionResult;
 

@@ -1253,7 +1253,7 @@ s32 mnuDrawAndStepStaffPartyScene(dds3ProcessID_t *task) {
 
 /* Pick another idle voice after MENU_IDLE_VOICE_TICKS eligible ticks. */
 void mnuIdleVoiceTimer(StaffMenuRuntime *menu) {
-    u32 voiceCount;
+    EvtStageMotionColumnCount voiceCount;
 
     if (menu->motionSelection == -1 && evtStageTestPollModelRequest() != 1) {
         if (evtStageTestHasPendingMotion() == EVT_STAGE_MOTION_QUEUE_SETTLED) {
