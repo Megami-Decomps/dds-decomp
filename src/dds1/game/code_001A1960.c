@@ -643,7 +643,7 @@ BtlCommandTargetPolicy btlSelectCommandTargetPolicy(BtlTask *task, BtlIndexList 
         if (btlUnitStatusPair(actor) & 0x1400) {
             if (btlCheckSpecialAbility(&actor->partyRecord, 0x21E) != 0) {
                 category = 1;
-                task->unit->pendingAbilityId = 0x21E;
+                task->unit->pendingSkillNameIndex = 0x21E;
             } else {
                 category = 0;
             }
@@ -1969,13 +1969,13 @@ BtlActionPressResult btlDetermineActionPressResult(BtlUnit *attacker, BtlUnit *t
         }
         if ((s32)btlRollAiBucket() < autoChance) {
             if (autoReason != -1) {
-                attacker->pendingAbilityId = autoReason;
+                attacker->pendingSkillNameIndex = autoReason;
             }
             return BTL_ACTION_PRESS_RESULT_CRITICAL;
         }
         if ((s32)btlRollAiBucket() < chance) {
             if (ratioReason != -1) {
-                attacker->pendingAbilityId = ratioReason;
+                attacker->pendingSkillNameIndex = ratioReason;
             }
             return BTL_ACTION_PRESS_RESULT_CRITICAL;
         }

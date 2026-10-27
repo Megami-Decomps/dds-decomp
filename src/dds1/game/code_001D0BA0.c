@@ -5031,7 +5031,7 @@ void btlUpdateActorModelColorAndLinks(void) {
 
 void btlResetUnitLinks(BtlUnit *actor) {
     actor->selectedEntryIndex = -1;
-    actor->pendingAbilityId = BTL_SKILL_NAME_INDEX_NONE;
+    actor->pendingSkillNameIndex = BTL_SKILL_NAME_INDEX_NONE;
     actor->status.flags = 0;
     actor->status.stateFlags = 0;
     actor->gunResourceFlags = 0;

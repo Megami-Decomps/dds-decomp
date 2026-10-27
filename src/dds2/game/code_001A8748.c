@@ -1988,7 +1988,7 @@ BtlCommandTargetPolicy btlSelectCommandTargetPolicy(ActionStateLink *task, BtlIn
         if ((btlUnitStatusPair(actor) & 0x1400) || (actor->partyRecord.flags & 0x10)) {
             if (btlCheckSpecialAbility(&actor->partyRecord, 0x23E) != 0) {
                 category = 1;
-                task->unit->pendingAbilityId = 0x23E;
+                task->unit->pendingSkillNameIndex = 0x23E;
             } else {
                 category = 0;
             }
@@ -3572,13 +3572,13 @@ BtlActionPressResult btlDetermineActionPressResult(BtlUnit *attacker, BtlUnit *d
         }
         if (btlRollAiBucket() < automatic) {
             if (automaticAbility != -1) {
-                attacker->pendingAbilityId = automaticAbility;
+                attacker->pendingSkillNameIndex = automaticAbility;
             }
             return BTL_ACTION_PRESS_RESULT_CRITICAL;
         }
         if (btlRollAiBucket() < critical) {
             if (criticalAbility != -1) {
-                attacker->pendingAbilityId = criticalAbility;
+                attacker->pendingSkillNameIndex = criticalAbility;
             }
             return 2;
         }

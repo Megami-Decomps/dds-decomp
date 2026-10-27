@@ -849,7 +849,7 @@ void btlChooseActorStateFromFirstLinkedUnit(u8 *actor) {
 void btlResetCommandIndexWork(BtlTask *task) {
     btlSetEligibleActorPanelTransitionState();
     btlResetIndexWork(&task->indexWork);
-    task->unit->pendingAbilityId = BTL_SKILL_NAME_INDEX_NONE;
+    task->unit->pendingSkillNameIndex = BTL_SKILL_NAME_INDEX_NONE;
 }
 
 void btlCommandStartSoundTasks(BtlTask *task) {
@@ -1037,10 +1037,10 @@ void btlScheduleAttackActionTasks(BtlTask *action) {
     task->startCondition.kind = 4;
     task->startCondition.value.handle = moveHandle;
     btlStartTask(task);
-    if (action->unit->pendingAbilityId == BTL_SKILL_NAME_INDEX_NONE)
+    if (action->unit->pendingSkillNameIndex == BTL_SKILL_NAME_INDEX_NONE)
         task = btlCreateEffObjD(action->unit, action->indexWork.skillId);
     else
-        task = btlCreateEffObjD(action->unit, action->unit->pendingAbilityId);
+        task = btlCreateEffObjD(action->unit, action->unit->pendingSkillNameIndex);
     task->startCondition.kind = 4;
     task->startCondition.value.handle = moveHandle;
     task->ownerId = btlAdvanceRuntimeSequenceCounter();
@@ -2924,7 +2924,7 @@ void btlUnitTurnEndCommit(BtlTask *task) {
     }
     btlAdvanceHistoryCounter(task);
     btlResetIndexWork(&task->indexWork);
-    owner->pendingAbilityId = BTL_SKILL_NAME_INDEX_NONE;
+    owner->pendingSkillNameIndex = BTL_SKILL_NAME_INDEX_NONE;
     task->options &= ~1;
     task->completedTurns += 1;
     owner->status.flags &= ~0x4000;
@@ -3025,7 +3025,7 @@ void btlRemoveEligibleActorSceneTask(BtlTask *task) {
             return;
         }
         btlResetIndexWork(&task->indexWork);
-        actor->pendingAbilityId = BTL_SKILL_NAME_INDEX_NONE;
+        actor->pendingSkillNameIndex = BTL_SKILL_NAME_INDEX_NONE;
         btlClearAllActorEntrySlots(actor);
         fldUpdateSceneGroupTask(task);
         btlRemoveTaskFromSceneGroup(task);

@@ -161,7 +161,7 @@ u32 btlGetCommandAddedStatus(
         }
     }
     if (guardAbility != -1 && (guardMask & result)) {
-        attacker->pendingAbilityId = guardAbility;
+        attacker->pendingSkillNameIndex = guardAbility;
     }
     return result;
 }
