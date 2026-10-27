@@ -35,7 +35,7 @@ extern void sdfCoreDrawSetFog(const SdfLightingPacketStorage *sourcePacket);
 extern void sdfCoreDrawSetLight(const struct SdfDmaTagHeader *lightingPacket);
 
 void sdfModelMakeLocalTm(sdfModelNode_t *node);
-void sdfModelNodeBaseSet(sdfModelNode_t *node, SdfItem *item);
+void sdfModelNodeBaseSet(sdfModelNode_t *node, const SdfItem *item);
 
 
 
@@ -272,8 +272,8 @@ void sdfModelMakeLocalTm(sdfModelNode_t *node) {
 }
 
 /* Copy item identity, Euler rotation, translation, scale and optional clipping bounds. */
-void sdfModelNodeBaseSet(sdfModelNode_t *node, SdfItem *item) {
-    node->sourceItem = item;
+void sdfModelNodeBaseSet(sdfModelNode_t *node, const SdfItem *item) {
+    node->sourceData = item;
     node->nodeId = item->nodeId;
     sdfConvertEulerAnglesToQuaternionVU(item->rotationX, item->rotationY, item->rotationZ);
     SDF_VU0_STOREVECTOR(node->quaternion);
@@ -284,7 +284,7 @@ void sdfModelNodeBaseSet(sdfModelNode_t *node, SdfItem *item) {
     node->boundsCorners = item->boundsCorners;
 }
 
-void sdfModelNodeSet(sdfModelNode_t *node, SdfItem *item) {
+void sdfModelNodeSet(sdfModelNode_t *node, const SdfItem *item) {
     s32 pass;
     s32 slot;
     u32 **cursor;
@@ -314,10 +314,10 @@ void sdfModelNodeSet(sdfModelNode_t *node, SdfItem *item) {
 }
 
 /* Reset a draw node's command lists and initialize both buffered passes. */
-void sdfModelNodeSetShape(sdfModelNode_t *node, u32 *commandList, s32 packetSelector) {
+void sdfModelNodeSetShape(sdfModelNode_t *node, const u32 *commandList, s32 packetSelector) {
     s32 passIndex;
 
-    node->sourceItem = commandList;
+    node->sourceData = commandList;
     sdfModelPacketFree(node);
     sdfModelAllocTmPacket(node);
     sdfModelMakeLocalTm(node);
@@ -360,7 +360,7 @@ sdfModelRootNode_t *sdfModelMakeRoot(DevRequest *resourceList, sdfModelDef_t *li
     sdfModelRootNode_t *model = sdfModelRootNew();
     SdfItemList *list;
     s32 count;
-    SdfItem *item;
+    const SdfItem *item;
     sdfModelNode_t *node;
     sdfModelNode_t *parent;
 
@@ -372,7 +372,7 @@ sdfModelRootNode_t *sdfModelMakeRoot(DevRequest *resourceList, sdfModelDef_t *li
     count = list->count;
     list++;
     sdfModelAllocNodeList(model, count);
-    item = (SdfItem *)list;
+    item = (const SdfItem *)list;
     if (count != itemIndex) {
         do {
             node = sdfModelNodeNew();
@@ -395,7 +395,7 @@ sdfModelRootNode_t *sdfModelMake(DevRequest *resourceList, sdfModelDef_t *listRe
     sdfModelRootNode_t *model = sdfModelMakeRoot(resourceList, listRef);
     SdfItemList *list = listRef->items;
     s32 count = list->count;
-    SdfItem *item = list->firstItem;
+    const SdfItem *item = list->firstItem;
 
     if (count != itemIndex) {
         do {
@@ -413,7 +413,7 @@ sdfModelRootNode_t *sdfModelMakeEarly(DevRequest *resourceList, sdfModelDef_t *l
     sdfModelRootNode_t *model = sdfModelMakeRoot(resourceList, listRef);
     SdfItemList *list;
     s32 count;
-    SdfItem *item;
+    const SdfItem *item;
 
     model->flags |= SDF_MODEL_ALTERNATE_ITEM_SETUP;
     list = listRef->items;

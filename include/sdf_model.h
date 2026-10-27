@@ -76,7 +76,7 @@ void sdfModelLinkDrawPacket(sdfModelNode_t *node, const u32 *commandList,
                                 s32 packetSelector, s32 alternateSelector,
                                 s32 listIndex);
 void sdfModelMakeLocalTm(sdfModelNode_t *node);
-void sdfModelNodeSet(sdfModelNode_t *node, SdfItem *item);
+void sdfModelNodeSet(sdfModelNode_t *node, const SdfItem *item);
 /* Build the kind-3 command packet; zero means there is no packet to append. */
 u32 sdfCorePacketGen(sdfModelNode_t *node, void *payload,
                                    s32 nodeFlags, s32 color,

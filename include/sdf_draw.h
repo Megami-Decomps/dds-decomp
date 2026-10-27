@@ -123,7 +123,7 @@ typedef struct sdfModelNode_t {
     SdfCommandNode *lists[2];     /* 0x28: command lists for both buffered frames */
     u8 *workspace; /* Two 0x80-byte frame packets, allocated on first use. */                  /* 0x30 */
     const f32 *boundsCorners;     /* 0x34: optional two xyz corners used by clipping */
-    void *sourceItem;             /* 0x38: item this node was built from */
+    const void *sourceData;       /* 0x38: read-only source item or command list */
     u8 pad3C[0x14];
     f32 quaternion[4];           /* 0x50 */
     f32 translation[4];          /* 0x60 */
