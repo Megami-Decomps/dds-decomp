@@ -1354,6 +1354,7 @@ EvtUnitMotionStepResult evtUpdateUnitMotion(dds3PoseSet_t *unused, dds3Basic_t *
     dds3ModelHandle_t *model;
     s32 i;
     u8 enabled;
+    EvtUnitMotionCallback callback;
 
     if (unit == NULL) {
         return EVT_UNIT_MOTION_STEP_NOT_APPLIED;
@@ -1436,8 +1437,9 @@ EvtUnitMotionStepResult evtUpdateUnitMotion(dds3PoseSet_t *unused, dds3Basic_t *
                 unit->motionState = EVT_UNIT_MOTION_STATE_IDLE;
                 break;
             }
-            if (unit->motionCallback != NULL) {
-                if (unit->motionCallback(unit, 0) == EVT_UNIT_MOTION_CALLBACK_COMPLETE) {
+            callback = unit->motionCallback;
+            if (callback != NULL) {
+                if (callback(unit, 0) == EVT_UNIT_MOTION_CALLBACK_COMPLETE) {
                     unit->motionState = EVT_UNIT_MOTION_STATE_IDLE;
                 }
             }
@@ -1471,8 +1473,9 @@ EvtUnitMotionStepResult evtUpdateUnitMotion(dds3PoseSet_t *unused, dds3Basic_t *
         }
         break;
     case EVT_UNIT_MOTION_STATE_VALUE:
-        if (unit->motionCallback != NULL) {
-            if (unit->motionCallback(unit, 0) == EVT_UNIT_MOTION_CALLBACK_COMPLETE) {
+        callback = unit->motionCallback;
+        if (callback != NULL) {
+            if (callback(unit, 0) == EVT_UNIT_MOTION_CALLBACK_COMPLETE) {
                 unit->motionState = EVT_UNIT_MOTION_STATE_IDLE;
             }
         } else {
