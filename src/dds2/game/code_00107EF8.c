@@ -41,6 +41,7 @@
 #include "kwln_task_lifecycle.h"
 #include "brs_task.h"
 #include "fld_resource_wait_api.h"
+#include "fld_scene_sequence_api.h"
 #include "itf.h"
 /* Declared before first use (were implicit int). */
 extern void btlCreateStageTestTask(void);
@@ -1164,12 +1165,9 @@ u8 CheckEndSave(void) {
     return operationResult == 0;
 }
 
-struct fldSceneParam_t;
-extern void fldProcTrigSequence(struct fldSceneParam_t *record, u32 mode);
-
-void evtStartAreaFromSelection(u32 selection, u32 area) {
+void evtStartAreaFromSelection(u32 selection, const struct fldSceneParam_t *record) {
     kwlnFadeBackgroundStartOut(0);
-    fldProcTrigSequence(area, selection);
+    fldProcTrigSequence(record, selection);
 }
 
 u32 ExitField(void) {

@@ -39,6 +39,7 @@
 #include "pcp_vu0.h"
 #include "fpu.h"
 #include "fld.h"
+#include "fld_scene_sequence_api.h"
 #include "evt_world.h"
 #include "evt_solar.h"
 #include "evt_random_status_clear_api.h"
@@ -2496,7 +2497,7 @@ extern char D_00412FD0[], D_00412FE0[];
 extern KwlnTaskUpdateResult fldProcDraw(dds3ProcessID_t *task);
 
 /* Start the field scene tasks; a zero mode copies the caller's sequence record into the scene work. */
-void fldProcTrigSequence(fldSceneParam_t *record, u32 mode) {
+void fldProcTrigSequence(const fldSceneParam_t *record, u32 mode) {
     FieldPlayerSceneWork *scene = &fldSceneParam;
     FldSequenceController *controller = &fldAutoMapSeqFlags;
 
