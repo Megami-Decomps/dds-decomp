@@ -8,6 +8,7 @@
 #include "btl_pair_camera_preset.h"
 #include "btl_camera_parameter_record.h"
 #include "common.h"
+#include "btl_unit_model_progress_api.h"
 #include "btl_quarter_health_result.h"
 #include "btl_horizontal_aim_api.h"
 #include "sdf_delayed_resource_check_api.h"
@@ -389,10 +390,6 @@ u32 btlGetActiveUnitId(void);
 
 
 /* Return the argument address recorded by allocation (zero for no arguments). */ void *btlGetTaskArguments(struct BtlRuntimeTask *task);
-
-s32 btlGetUnitModelFrameCount(BtlUnit *unit);
-
-f32 btlGetUnitModelCurrentFrame(BtlUnit *unit);
 
 void btlGetUnitWorldPos(BtlUnit *unit, f32 *dst);
 

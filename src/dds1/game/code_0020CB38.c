@@ -2,6 +2,7 @@
 #include "sdf_debug_api.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_unit_model_progress_api.h"
 #include "btl_actor_command_selector_value_api.h"
 #include "btl_referenced_battle_effect_task.h"
 #include "btl_actor_category_flag_api.h"
@@ -276,9 +277,6 @@ typedef struct BtlUnitScaleTransition {
 typedef char BtlUnitScaleTransitionLayout[
     (sizeof(BtlUnitScaleTransition) == 0x24 &&
      (u32)&((BtlUnitScaleTransition *)0)->range == 0x10) ? 1 : -1];
-
-
-extern f32 btlGetUnitModelCurrentFrame(BtlUnit *);
 
 /* Initialize the supported boss-unit scale transition using the active lead's model value. */
 void btlInitializeBossUnitScaleTransition(BtlUnit *unit) {

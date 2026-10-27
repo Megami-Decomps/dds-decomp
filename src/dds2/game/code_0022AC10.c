@@ -3,6 +3,7 @@
 #include "btl_runtime_state.h"
 #include "eff_random.h"
 #include "common.h"
+#include "btl_unit_model_progress_api.h"
 #include "scr_integer_parameter_api.h"
 #include "btl_command_target_policy.h"
 #include "btl_resolve_unit_value_api.h"
@@ -267,10 +268,6 @@ extern u8 D_00436EF8[];
 extern SdfPoolNode kwlnPositionedTextSurface;
 
 extern s32 abs(s32);
-
-extern f32 btlGetUnitModelCurrentFrame(BtlUnit *);
-
-
 
 extern void btlClearRuntimeFlag2000(void);
 
@@ -2422,7 +2419,6 @@ extern void btlCopyUnitStats(BtlUnit *, datUnitWork_t *);
 extern BtlRuntimeTask *btlCreateHookedUnitSoundTask(BtlUnit *, s32);
 extern BtlRuntimeTask *btlAllocateIndexedUnitEffectTask(BtlUnit *, s32, s32, f32);
 extern BtlRuntimeTask *btlCreateGunLoadPollTask(BtlUnit *);
-extern s32 btlGetUnitModelFrameCount(BtlUnit *);
 extern s32 btlCountTasksForOwner(u64);
 extern void btlRefreshUnitMotionSelection(BtlUnit *);
 extern void btlSetUnitPosition(BtlUnit *, const f32 *);

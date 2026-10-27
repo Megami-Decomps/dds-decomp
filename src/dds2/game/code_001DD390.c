@@ -6,6 +6,7 @@
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "common.h"
+#include "btl_unit_model_progress_api.h"
 #include "btl_quarter_health_result.h"
 #include "btl_horizontal_aim_api.h"
 #include "btl_actor_command_selector_value_api.h"
@@ -2995,7 +2996,7 @@ s32 btlGetUnitMotionDurationFrames(BtlUnit *unit, s32 motionIndex) {
 }
 
 /* Return the unit model's current frame, or zero while its model flag is clear. */
-f32 btlGetUnitModelCurrentFrame(BtlUnit *unit) {
+f32 btlGetUnitModelCurrentFrame(const BtlUnit *unit) {
     f32 value = 0.0f;
     if (unit->status.flags & 2) {
         value = unit->ext->owner->first->currentFrame;
@@ -3010,7 +3011,7 @@ void btlAdvanceUnitModelFrame(BtlUnit *unit, f32 frame) {
     }
 }
 
-s32 btlGetUnitModelFrameCount(BtlUnit *unit) {
+s32 btlGetUnitModelFrameCount(const BtlUnit *unit) {
     if (!(unit->status.flags & 2)) {
         return 0;
     }

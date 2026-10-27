@@ -4,6 +4,7 @@
 #include "sdf_gs_header.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "btl_unit_model_progress_api.h"
 #include "scr_integer_parameter_api.h"
 #include "scr_command_parameter_index.h"
 #include "btl_command_target_policy.h"
@@ -160,10 +161,6 @@ extern s32 abs(s32);
 
 
 extern struct BtlRuntimeTask *btlCreateSceneLightingRestoreTask(u32 value);
-
-extern f32 btlGetUnitModelCurrentFrame(BtlUnit *unit);
-
-
 
 extern void btlRefreshUnitEffects(void);
 
@@ -2304,7 +2301,6 @@ extern void btlRefreshUnitMotionSelection(BtlUnit *);
 extern BtlRuntimeTask *btlCreateMoveOtherUnitsTask(BtlUnit *, u32);
 extern BtlRuntimeTask *btlAllocateIndexedUnitEffectTask(BtlUnit *, s32, s32, f32);
 extern BtlRuntimeTask *btlCreateGunLoadPollTask(BtlUnit *);
-extern s32 btlGetUnitModelFrameCount(BtlUnit *);
 extern void btlSetUnitPosition(BtlUnit *, const f32 *);
 extern void btlApplyUnitEffectScale(BtlUnit *);
 extern void btlApplyUnitModelScaledValue(BtlUnit *);
