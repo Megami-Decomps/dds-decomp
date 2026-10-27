@@ -431,9 +431,9 @@ void dds3MultiBlurOff(s32 duration) {
 
 /* Stage filter-blur parameters, counting/clamping only counts above 100.
  * The secondary values are forwarded into the shared effect parameter body. */
-void dds3SetDistBlurPara(s32 filterCount, s32 size, s32 delaySpread, s32 blendControl,
-                           f32 angleStep, f32 uvDisplacementAngleDegrees,
-                           f32 uvDisplacementAmplitude) {
+void dds3SetDistBlurPara(s32 filterCount, s32 size, s32 delaySpread, f32 angleStep,
+                           f32 uvDisplacementAngleDegrees, f32 uvDisplacementAmplitude,
+                           s32 blendControl) {
     if (filterCount >= KWLN_DRAW_FILTER_COUNT_LIMIT) {
         distblurovercnt++;
         filterCount = KWLN_DRAW_FILTER_MAX_COUNT;
@@ -512,9 +512,9 @@ void dds3DistBlurOff(s32 duration) {
 
 /* Stage staggered-blur parameters, counting/clamping only counts above 40.
  * Blend and UV-displacement inputs map to the corresponding effect fields. */
-void dds3SetRipBlurPara(s32 count, s32 blendControl, f32 phaseStep, f32 spacing,
+void dds3SetRipBlurPara(s32 count, f32 phaseStep, f32 spacing,
                            f32 uvDisplacementAngleDegrees,
-                           f32 uvDisplacementAmplitude, f32 angleStep) {
+                           f32 uvDisplacementAmplitude, f32 angleStep, s32 blendControl) {
     if (count >= KWLN_DRAW_STAGGERED_COUNT_LIMIT) {
         ripblurovercnt++;
         count = KWLN_DRAW_STAGGERED_MAX_COUNT;

@@ -19,10 +19,10 @@
 #include "kwln_task_lifecycle.h"
 #include "kwln_fade.h"
 #include "eff_event_draw.h"
-s32 dds3SetDistBlurPara(s32 filterCount, s32 size, s32 delaySpread, f32 angleStep,
+void dds3SetDistBlurPara(s32 filterCount, s32 size, s32 delaySpread, f32 angleStep,
                           f32 uvDisplacementAngleDegrees, f32 uvDisplacementAmplitude,
                           s32 gsAlphaControl);
-s32 dds3SetRipBlurPara(s32 count, f32 phaseStep, f32 spacing,
+void dds3SetRipBlurPara(s32 count, f32 phaseStep, f32 spacing,
                           f32 uvDisplacementAngleDegrees, f32 uvDisplacementAmplitude,
                           f32 angleStep, s32 gsAlphaControl);
 
