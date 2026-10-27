@@ -576,7 +576,7 @@ u32 mnuShopCommitMode1PurchaseNoOp(u32 itemId) {
 
 /* Decode the low 16 bits: eight four-bit flag slots per word.
  * The unused first argument remains part of the existing calling convention. */
-void scrDecodePackedFlagIndex(datUnitWork_t *unused, u32 flagId, u32 *wordIndex, u32 *bitShift) {
+void scrDecodePackedFlagIndex(const datUnitWork_t *unused, u32 flagId, u32 *wordIndex, u32 *bitShift) {
     u32 slotIndex;
 
     flagId &= SCR_FLAG_ID_MASK;
@@ -644,7 +644,7 @@ u32 scrGetSecondaryScriptFlag(datUnitWork_t *work, u16 flagId) {
 
 /* Bit 1 takes precedence and returns state 2; otherwise return boolean bit 0.
  * The secondary bit does not affect this state. */
-PtySkillNibbleState ptyGetSkillNibbleState(datUnitWork_t *partyRecord, u16 flagId) {
+PtySkillNibbleState ptyGetSkillNibbleState(const datUnitWork_t *partyRecord, u16 flagId) {
     u32 wordIndex, bitShift;
     u32 flagWord;
     scrDecodePackedFlagIndex(partyRecord, flagId, &wordIndex, &bitShift);

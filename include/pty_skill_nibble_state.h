@@ -10,6 +10,6 @@ typedef enum PtySkillNibbleState {
 } PtySkillNibbleState;
 
 struct datUnitWork_t;
-PtySkillNibbleState ptyGetSkillNibbleState(struct datUnitWork_t *partyRecord, u16 flagId);
+PtySkillNibbleState ptyGetSkillNibbleState(const struct datUnitWork_t *partyRecord, u16 flagId);
 
 #endif
