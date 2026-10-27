@@ -15,6 +15,7 @@
 #include "sdf_grid.h"
 #include "sdf_task_work.h"
 #include "mnu_scene_work.h"
+#include "evt_stage_test_api.h"
 
 enum { MNU_VARIANT_X_OFFSET = 2, MNU_VARIANT_Y_OFFSET, MNU_VARIANT_SPRITE_GROUPS };
 extern EffectSlotSet *mnuMantraSpriteSlots[];
@@ -2139,7 +2140,6 @@ extern void dspRequestMessageWindowModeOne(void);
 extern void mnuDrawMantraSparkScene(MenuSceneMetadata *, s32, s32);
 extern void mnuDrawAnimatedCurrencyCounter(s32, s32, s32, s32, MenuSceneMetadata *, s32);
 extern s32 mnuDrawLoadedProgressPanels(datUnitWork_t *partyRecord, MenuProgressHost *work, s32 context);
-extern void evtStageTestSelectEntryWithoutInitialValue(u16 entryIndex, u32 assetOption);
 struct SdfPoolNode;
 extern s8 evtStageTestUpdate(struct SdfPoolNode **);
 extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
@@ -2158,7 +2158,8 @@ s32 mnuUpdateMantraSceneDisplay(void) {
     mnuDrawAnimatedCurrencyCounter(0, -27, 0, 0x80, sceneMetadata, MNU_SCENE_DRAW_CONTEXT);
     if (mnuDrawLoadedProgressPanels(&sceneMetadata->partySnapshot, sceneMetadata->attachedEffect, MNU_SCENE_DRAW_CONTEXT) != 0) {
         if (sceneMetadata->stageStarted == 0) {
-            evtStageTestSelectEntryWithoutInitialValue(sceneMetadata->entryId, 0);
+            evtStageTestSelectEntryWithoutInitialValue(
+                sceneMetadata->entryId, MDL_ASSET_REQUEST_NONBLOCKING);
         }
         sceneMetadata->stageStarted = 1;
     }

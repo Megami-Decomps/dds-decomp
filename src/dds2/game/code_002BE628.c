@@ -3443,7 +3443,8 @@ void evtStageTestInit(s32 mode) {
     for (i = 0; i < 2; i++) {
         evtStageTestState.queue.slot[i].assetResource = value;
         evtStageTestState.queue.slot[i].modelId = -1;
-        evtStageTestState.queue.slot[i].assetOption = 0;
+        evtStageTestState.queue.slot[i].assetRequestMode =
+            MDL_ASSET_REQUEST_NONBLOCKING;
         evtStageTestState.queue.slot[i].flags = 0;
     }
     mnuSetStageTestCameraOffset(offset);
@@ -3477,8 +3478,9 @@ void mnuResetWorkFloats(void) {
 }
 
 /* Remember the model asset request result for the stage viewer. */
-MdlAssetRequestResult evtStageTestRequestModelAsset(s32 resource, s32 modelId, s32 option) {
-    evtStageTestState.assetRequest = mdlPrepare(resource, modelId, option);
+MdlAssetRequestResult evtStageTestRequestModelAsset(
+    s32 resource, s32 modelId, MdlAssetRequestMode requestMode) {
+    evtStageTestState.assetRequest = mdlPrepare(resource, modelId, requestMode);
     return evtStageTestState.assetRequest;
 }
 
@@ -3486,7 +3488,9 @@ MdlAssetRequestResult evtStageTestRequestModelAsset(s32 resource, s32 modelId, s
 void mnuForwardTableByte(s32 encodedIndex) {
     StageTestSlot *activeSlot = evtStageTestState.queue.slot;
 
-    evtStageTestRequestModelAsset(activeSlot->assetResource, evtStageTestState.entries[encodedIndex & EVT_STAGE_ENTRY_INDEX_MASK].modelId, 0);
+    evtStageTestRequestModelAsset(activeSlot->assetResource,
+        evtStageTestState.entries[encodedIndex & EVT_STAGE_ENTRY_INDEX_MASK].modelId,
+        MDL_ASSET_REQUEST_NONBLOCKING);
 }
 
 /* Test the stage queue's pending-selection bit; the poller passes its flags word. */
@@ -3513,7 +3517,8 @@ void evtStageTestClearPendingFlag(void) {
 /* Return UNCHANGED for the active model; otherwise stage a selection.
  * An in-progress request uses the pending slot rather than replacing the active slot. */
 EvtStageTestSelectionResult evtStageTestSelectEntry(
-    s32 encodedIndex, s32 initialMotionIndex, s32 assetOption) {
+    s32 encodedIndex, s32 initialMotionIndex,
+    MdlAssetRequestMode assetRequestMode) {
     s32 entryIndex = encodedIndex & EVT_STAGE_ENTRY_INDEX_MASK;
     s32 slotIndex;
     StageTestSlot *selectionSlot;
@@ -3534,15 +3539,17 @@ EvtStageTestSelectionResult evtStageTestSelectEntry(
     selectionSlot = &evtStageTestState.queue.slot[slotIndex];
     selectionSlot->entryIndex = entryIndex;
     selectionSlot->modelId = evtStageTestState.entries[entryIndex].modelId;
-    selectionSlot->assetOption = assetOption;
+    selectionSlot->assetRequestMode = assetRequestMode;
     selectionSlot->initialMotionIndex = initialMotionIndex;
     selectionSlot->state = EVT_STAGE_MOTION_IDLE;
     return EVT_STAGE_TEST_SELECTION_SCHEDULED;
 }
 
 /* Select an entry using its own stored motion byte; retain the native all-bits-set literal type. */
-void evtStageTestSelectEntryWithoutInitialValue(u16 entryIndex, u32 assetOption) {
-    evtStageTestSelectEntry(entryIndex, EVT_STAGE_USE_ENTRY_MOTION, assetOption);
+void evtStageTestSelectEntryWithoutInitialValue(
+    u16 entryIndex, MdlAssetRequestMode assetRequestMode) {
+    evtStageTestSelectEntry(
+        entryIndex, EVT_STAGE_USE_ENTRY_MOTION, assetRequestMode);
 }
 
 INCLUDE_ASM(const s32, "game/code_002BE628", evtStageTestAdvanceResourceWork);

@@ -2570,7 +2570,7 @@ void btlRequestModelAssetByMode(u32 unused, u32 effect, u32 model) {
         btlEnsureModelAndSoundReady(effect, model, 0);
         return;
     }
-    mdlPrepare(effect, model, 0);
+    mdlPrepare(effect, model, MDL_ASSET_REQUEST_NONBLOCKING);
 }
 
 extern void btlReleaseFoundModelEntry(s32 modelKind, s32 modelId);
@@ -2591,8 +2591,8 @@ u8 btlCheckModelAssetByMode(u8 *object, u32 effect, u32 model) {
             return 1;
         }
     } else {
-        if (mdlPrepare(effect, model, 0) != MDL_ASSET_REQUEST_QUEUED &&
-            mdlPrepare(effect, model, 0) != MDL_ASSET_REQUEST_ALREADY_PENDING) {
+        if (mdlPrepare(effect, model, MDL_ASSET_REQUEST_NONBLOCKING) != MDL_ASSET_REQUEST_QUEUED &&
+            mdlPrepare(effect, model, MDL_ASSET_REQUEST_NONBLOCKING) != MDL_ASSET_REQUEST_ALREADY_PENDING) {
             return 1;
         }
     }

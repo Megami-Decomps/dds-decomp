@@ -970,7 +970,8 @@ s32 mnuInitializeStaffPartyScene(dds3ProcessID_t *task) {
     } else {
         menu->motionSelection = 10;
     }
-    evtStageTestSelectEntry(record->unitId, menu->motionSelection, 0);
+    evtStageTestSelectEntry(record->unitId, menu->motionSelection,
+        MDL_ASSET_REQUEST_NONBLOCKING);
     mnuConfigurePartyPanelPage(page, 1, menu->staffView, menu->staffMode);
     return 1;
 }

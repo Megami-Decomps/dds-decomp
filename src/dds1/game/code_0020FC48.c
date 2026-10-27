@@ -1054,8 +1054,8 @@ BtlModelPackReadiness btlIsModelPackEntryReady(BattleModelEntry *cacheEntry) {
     if (cacheEntry->finalized != BTL_MODEL_ENTRY_UNFINALIZED) {
         return BTL_MODEL_PACK_READY;
     }
-    if (mdlPrepare(cacheEntry->kind, cacheEntry->id, 0) == MDL_ASSET_REQUEST_QUEUED ||
-        mdlPrepare(cacheEntry->kind, cacheEntry->id, 0) == MDL_ASSET_REQUEST_ALREADY_PENDING) {
+    if (mdlPrepare(cacheEntry->kind, cacheEntry->id, MDL_ASSET_REQUEST_NONBLOCKING) == MDL_ASSET_REQUEST_QUEUED ||
+        mdlPrepare(cacheEntry->kind, cacheEntry->id, MDL_ASSET_REQUEST_NONBLOCKING) == MDL_ASSET_REQUEST_ALREADY_PENDING) {
         return BTL_MODEL_PACK_NOT_READY;
     }
     if (cacheEntry->packRequest == 0) {
@@ -1093,7 +1093,7 @@ void btlLoadModelPack(s32 modelKind, s32 modelId) {
         cacheEntry = btlCreateModelEntry();
         cacheEntry->kind = modelKind;
         cacheEntry->id = modelId;
-        mdlPrepare(modelKind, modelId, 0);
+        mdlPrepare(modelKind, modelId, MDL_ASSET_REQUEST_NONBLOCKING);
         if (sndFindListNodeForChannel(modelKind, modelId) == 0) {
             btlFormatModelResourcePath(modelKind, modelId, resourcePath);
             cacheEntry->packRequest = (FilePacRequest *)pacLoad(resourcePath);
@@ -1186,8 +1186,8 @@ extern void btlFinalizeModelPackEntry(s32, s32);
 s32 btlEnsureModelAndSoundReady(s32 kind, s32 id, s32 unused) {
     BattleModelEntry *entry;
 
-    if (mdlPrepare(kind, id, 0) != MDL_ASSET_REQUEST_QUEUED &&
-        mdlPrepare(kind, id, 0) != MDL_ASSET_REQUEST_ALREADY_PENDING &&
+    if (mdlPrepare(kind, id, MDL_ASSET_REQUEST_NONBLOCKING) != MDL_ASSET_REQUEST_QUEUED &&
+        mdlPrepare(kind, id, MDL_ASSET_REQUEST_NONBLOCKING) != MDL_ASSET_REQUEST_ALREADY_PENDING &&
         sndFindListNodeForChannel(kind, id) != 0) {
         return 1;
     }

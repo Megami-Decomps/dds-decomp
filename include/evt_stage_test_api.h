@@ -2,6 +2,7 @@
 #define EVT_STAGE_TEST_API_H
 
 #include "common.h"
+#include "mdl_asset_request.h"
 
 s32 evtStageTestCountFlags(s32 columnKind);
 
@@ -11,7 +12,12 @@ typedef s32 EvtStageTestSelectionResult;
 #define EVT_STAGE_TEST_SELECTION_SCHEDULED 1
 
 EvtStageTestSelectionResult evtStageTestSelectEntry(
-    s32 encodedIndex, s32 initialMotionIndex, s32 assetOption);
+    s32 encodedIndex, s32 initialMotionIndex,
+    MdlAssetRequestMode assetRequestMode);
+MdlAssetRequestResult evtStageTestRequestModelAsset(
+    s32 resource, s32 modelId, MdlAssetRequestMode requestMode);
+void evtStageTestSelectEntryWithoutInitialValue(
+    u16 entryIndex, MdlAssetRequestMode assetRequestMode);
 
 typedef s32 EvtStageMotionQueueStatus;
 enum {

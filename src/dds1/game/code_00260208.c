@@ -1111,7 +1111,6 @@ extern void mnuSetWindowResource(s32 index, MenuPageWindow *window, s32 resource
                                  s32 option);
 extern void mnuSetPageParams(MenuSprites *sprites, s32 mode);
 extern void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *window, u32 resource);
-extern void evtStageTestSelectEntryWithoutInitialValue(u16 entryIndex, u32 assetOption);
 extern void p2sdStopSe(u32 sequence);
 
 void brsSelectNextUnit(BrsSkillPackageWork *work, s32 selectLevelUp) {
@@ -1141,7 +1140,8 @@ void brsSelectNextUnit(BrsSkillPackageWork *work, s32 selectLevelUp) {
         work->selectedRewardRow = &work->primaryRewards.rows[(*selectedIndex)++];
         brsSelectLevelBonusMode(work->selectedRewardRow->unit, work);
         evtStageTestSelectEntryWithoutInitialValue(
-            work->selectedRewardRow->unit->unitId, 0);
+            work->selectedRewardRow->unit->unitId,
+            MDL_ASSET_REQUEST_NONBLOCKING);
         evtStageTestQueueMotion(EVT_STAGE_MOTION_SECONDARY_ALLOW_FALLBACK, 0);
 
         if (*selectedIndex < work->primaryRewards.count) {

@@ -1129,7 +1129,6 @@ extern void mnuSelectPage(MenuPageWindow *window, s32 index);
 extern void mnuResetPartyPanelFade(MenuPageWindow *window, s32 index, u32 unused,
                                  u32 retainScale);
 extern void mnuSetPageParams(MenuSprites *sprites, s32 mode);
-extern void evtStageTestSelectEntryWithoutInitialValue(u16 entryIndex, u32 assetOption);
 extern void p2sdStopSe(u32 sequence);
 
 void brsSelectNextUnit(BrsSkillPackageWork *work, s32 selectLevelUp) {
@@ -1162,7 +1161,8 @@ void brsSelectNextUnit(BrsSkillPackageWork *work, s32 selectLevelUp) {
         window->flags |= 0x200;
         work->selectedRewardRow = &work->primaryRewards.rows[(*selectedIndex)++];
         evtStageTestSelectEntryWithoutInitialValue(
-            work->selectedRewardRow->unit->unitId, 0);
+            work->selectedRewardRow->unit->unitId,
+            MDL_ASSET_REQUEST_NONBLOCKING);
         evtStageTestQueueMotion(EVT_STAGE_MOTION_SECONDARY_ALLOW_FALLBACK, 0);
 
         if (*selectedIndex < work->primaryRewards.count) {

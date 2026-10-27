@@ -2,6 +2,7 @@
 #include "dsp_entry_api.h"
 #include "dsp_channel.h"
 #include "evt_message_window_api.h"
+#include "evt_stage_test_api.h"
 #include "mnu_mantra.h"
 #include "mnu_mantra_position_api.h"
 #include "snd_sequence_volume_pan.h"
@@ -670,7 +671,6 @@ extern void mnuUpdateMantraDrawPool(struct MantraDrawPool *pool);
 extern void mnuDrawMantraSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
                                 s32 flags, s32 context);
 extern s32 mnuDrawLoadedProgressPanels(datUnitWork_t *resource, MenuProgressHost *host, s32 mode);
-extern void evtStageTestSelectEntryWithoutInitialValue(u16 entryIndex, u32 assetOption);
 extern void mnuDrawCurrentProfilePanel(s32, s32, s32, MenuProgressHost *, s32);
 struct SdfPoolNode;
 extern s8 evtStageTestUpdate(struct SdfPoolNode **);
@@ -695,7 +695,8 @@ s32 mtrMantraEquipDraw(void) {
     mnuDrawMantraSprite(0, 0, 0, value, 0x69, 0, 0x4A);
     if (mnuDrawLoadedProgressPanels(&work->snapshot, work->progressHost, 0x53) != 0) {
         if (!work->flags.profileReady) {
-            evtStageTestSelectEntryWithoutInitialValue(work->snapshot.unitId, 0);
+            evtStageTestSelectEntryWithoutInitialValue(
+                work->snapshot.unitId, MDL_ASSET_REQUEST_NONBLOCKING);
         }
         work->flags.profileReady = 1;
     }

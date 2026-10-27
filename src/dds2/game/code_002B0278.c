@@ -1424,7 +1424,8 @@ s32 mnuCreatePanels(dds3ProcessID_t *callback) {
     } else {
         party->motionSelection = 0xA;
     }
-    evtStageTestSelectEntry(data->unitId, party->motionSelection, 0);
+    evtStageTestSelectEntry(data->unitId, party->motionSelection,
+        MDL_ASSET_REQUEST_NONBLOCKING);
     mnuConfigurePartyPanelPage(window, 1, party->staffView, party->staffMode);
     mnuBeginWindowFadeTransition(0, &((MenuContext *)context)->transition);
     return 1;
