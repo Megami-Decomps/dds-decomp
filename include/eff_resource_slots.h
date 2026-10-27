@@ -41,6 +41,9 @@ EffMappedResourceDestroyResult effDestroyPackedBatch(struct EffMappedResource *b
 /* Serialized source bytes are borrowed; async mapped-resource outputs hold typed pointers. */
 struct EffMappedResource *effCreateMappedResource(const u8 *source);
 struct EffMappedResource *effLoadMappedResource(const char *base, const char *name);
+/* The request writes an owned batch to outMappedResource on completion. The
+ * caller lends that slot until the callback finishes, so its storage must
+ * outlive the pending request. */
 void effRequestMappedResource(const char *base, const char *name,
                               struct EffMappedResource **outMappedResource);
 
