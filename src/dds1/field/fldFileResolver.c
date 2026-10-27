@@ -1883,9 +1883,6 @@ const struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) 
     return fldCachedRoomF1ResourceAllocation;
 }
 
-extern struct sdfMemHandle_t *fldLoadAreaRoomResourcesFromRequest(u32, u32, u8 *, u8 *,
-                        const SdfTextureOffsetListHeader *, u32);
-
 INCLUDE_ASM(const s32, "field/fldFileResolver", fldLoadAreaRoomResourcesFromRequest);
 
 extern s32 fldRoomEventPlacementCount;
