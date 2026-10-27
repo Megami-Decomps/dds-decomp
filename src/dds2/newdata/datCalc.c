@@ -8,6 +8,7 @@
 #include "pty_roster_value_record.h"
 #include "sdf.h"
 #include "dat_state.h"
+#include "dat_currency_requirement_api.h"
 #include "dat_calculated_stat_value_api.h"
 #include "dat_calculate_command_base_value_api.h"
 #include "dat_affinity_selector.h"
@@ -416,11 +417,11 @@ void datAddCurrencyClamped(s32 delta) {
 
 /* Compare the signed balance against the requested amount; no debit or
  * validation is performed, so negative requests keep their original semantics. */
-u8 datHasEnoughCurrency(s32 requiredAmount) {
+DatCurrencyRequirementResult datHasEnoughCurrency(s32 requiredAmount) {
     if (DDS3_GBWK->header.currency < requiredAmount) {
-        return 0;
+        return DAT_CURRENCY_REQUIREMENT_UNMET;
     }
-    return 1;
+    return DAT_CURRENCY_REQUIREMENT_MET;
 }
 
 #include "common.h"

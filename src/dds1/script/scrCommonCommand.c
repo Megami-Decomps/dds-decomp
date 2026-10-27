@@ -1,4 +1,5 @@
 #include "dat_state.h"
+#include "dat_currency_requirement_api.h"
 #include "common.h"
 #include "sdf_vu0.h"
 #include "scr_integer_return_value_api.h"
@@ -964,14 +965,12 @@ ScrCommandResult scrCommandAddPartyCurrency(void)
     return SCR_COMMAND_RESULT_COMPLETE;
 }
 
-extern u8 datHasEnoughCurrency(s32 requiredAmount);
-
 /* Persona 4 scrCommand_SCR_EXISTS @ 00299600 (src/Script/scrCommonCommand.c), recompiled unchanged */
 ScrCommandResult scrCommand_SCR_EXISTS(void)
 {
     s32 requiredAmount;
     requiredAmount = scrGetIntPara(0);
-    if (datHasEnoughCurrency(requiredAmount))
+    if (datHasEnoughCurrency(requiredAmount) != DAT_CURRENCY_REQUIREMENT_UNMET)
     {
         scrSetIntReturnValue(1);
     }
