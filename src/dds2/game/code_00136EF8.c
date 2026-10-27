@@ -90,7 +90,7 @@ void fldInitializeCameraColorResource(void) {
     fldCameraColorEnabled = 1;
 }
 
-void func_00137888(void) {
+void fldDrawCameraColorLayerPass(void) {
     fldDrawCameraColorScrollingGradient();
 }
 

@@ -35,7 +35,7 @@ typedef struct SdfSlotSet SdfSlotSet;
 extern s32 fldAdvanceLmapResourceLoad(LmapTaskState *);
 
 extern void fldSkyDrawFilter(void);
-extern void func_00137888(void);
+extern void fldDrawCameraColorLayerPass(void);
 extern void sdfAdjustCounterValueAndRedraw(s32);
 extern void sdfDrawPositionedSlotImage(s32, s32, s32, s32, s32, s32, s32);
 extern void mnuDrawAnimatedTransition(s32);
@@ -803,7 +803,7 @@ void fldDrawLocalMapOverlay(void) {
     }
 
     if (D_004388B0 != 0) {
-        func_00137888();
+        fldDrawCameraColorLayerPass();
     }
 }
 

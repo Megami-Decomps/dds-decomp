@@ -77,7 +77,7 @@ typedef struct VuGeomRef {
     u128 *c;
 } VuGeomRef;
 
-extern VuGeomRef D_00468210[];
+extern VuGeomRef corePktFaceList[];
 
 extern void corePktEmitBase(corePktCb_t *work);
 
@@ -142,7 +142,7 @@ void corePktClipFace(corePktCb_t *work) {
     VuGeomRef *out;
     f32 scale;
 
-    out = D_00468210;
+    out = corePktFaceList;
     triangleCount = (s16)work->param0;
     rejected = 0;
     scale = work->depth;
@@ -280,7 +280,7 @@ void corePktClipFace(corePktCb_t *work) {
         }
     }
     work->selectedTriangleCount = rejected;
-    work->nodeCount = out - D_00468210;
+    work->nodeCount = out - corePktFaceList;
     *work->ringEnd = NULL;
 }
 
@@ -302,7 +302,7 @@ void corePktBuildFaceList(corePktCb_t *work) {
     }
     triangleCount = (s16)work->param0;
     acceptAll = corePktSoftenBias;
-    out = D_00468210;
+    out = corePktFaceList;
     triangles = (u16 *)work->strip;
     nodes = (VuBlendNode *)work->ringSrc;
     for (; triangleCount != 0; triangleCount--) {
@@ -434,7 +434,7 @@ void corePktBuildFaceList(corePktCb_t *work) {
             cRegion = firstCode;
         }
     }
-    work->nodeCount = out - D_00468210;
+    work->nodeCount = out - corePktFaceList;
     *work->ringEnd = NULL;
 }
 
@@ -457,7 +457,7 @@ void corePktBuildBackFaceList(corePktCb_t *work) {
     indices = D_00474210;
     triangles = (u16 *)work->strip;
     nodes = (VuBlendNode *)work->ringSrc;
-    out = D_00468210;
+    out = corePktFaceList;
     for (; remaining != 0; remaining--) {
         u16 *triangle = triangles + *indices++ * 3;
         VuBlendNode *a = nodes + triangle[0];
@@ -569,7 +569,7 @@ void corePktBuildBackFaceList(corePktCb_t *work) {
             cRegion = firstCode;
         }
     }
-    work->nodeCount = out - D_00468210;
+    work->nodeCount = out - corePktFaceList;
     *work->ringEnd = NULL;
 }
 
@@ -585,7 +585,7 @@ void corePktEmitTexTris(work)
 
     if (remaining != 0) {
         out = (u32 *)work->cursor;
-        ref = D_00468210;
+        ref = corePktFaceList;
         first = 1;
         do {
             chunk = remaining < 0x11 ? remaining : 0x10;
@@ -655,7 +655,7 @@ void corePktEmitTexTrisCtx2(corePktCb_t *work, u64 samplingState, u64 textureSta
 
     if (remainingTriangles != 0) {
         packetCursor = (u32 *)work->cursor;
-        triangleRefs = D_00468210;
+        triangleRefs = corePktFaceList;
         firstBatch = 1;
         do {
             batchTriangles = remainingTriangles < 0x11 ? remainingTriangles : SDF_VU_TEXTURED_BATCH_LIMIT;
@@ -733,7 +733,7 @@ void corePktEmitTris(work)
 
     if (remainingTriangles != 0) {
         packetCursor = (u32 *)work->cursor;
-        triangleRefs = D_00468210;
+        triangleRefs = corePktFaceList;
         do {
             batchTriangles = remainingTriangles < 0x19 ? remainingTriangles : SDF_VU_COLORED_BATCH_LIMIT;
             remainingTriangles -= batchTriangles;

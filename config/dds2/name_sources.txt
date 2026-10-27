@@ -1117,6 +1117,7 @@
 0x00136850	fldSkyBattle	inferred	SMT3HD name via SLUS_209.11 0x00137878, reloc-identical; was fldApplyLightSetCurrent
 0x00136EF8	fldDrawCameraColorScrollingGradient	inferred	Paired DDS1 helper advances and draws the camera-color scrolling gradient; DDS2 invokes this assembly provider from fldTestDrawUpdate in the same display-buffer/alpha setup position before fldSkyDrawFilter. Paired DDS1 provider at 0x00134348.
 0x00137818	fldInitializeCameraColorResource	inferred	Loads a field resource and initializes camera color effect state. [names_reviewed9.tsv]
+0x00137888	fldDrawCameraColorLayerPass	inferred	Entry to the camera colour layers' pass: calls fldDrawCameraColorScrollingGradient; DDS1 0x00134CD8 twin, called from the same two places.
 0x00137B60	fldAllocPlaneTable	inferred	SMT3HD name via SLUS_209.11 0x00137A98, reloc-identical; was fldHitAlloc
 0x00137BC8	fldFreeMatterTable	inferred	SMT3HD name via SLUS_209.11 0x00137B00, reloc-identical; was fldHitFree
 0x00137C08	fldVecDot	inferred	SMT3HD name via SLUS_209.11 0x00137B40, byte-identical; was fldDotVector
@@ -3506,6 +3507,7 @@
 0x001CAA30	fldSelectSceneMode	inferred	priority chain of evtBitCheck checks returning scene mode 0..6
 0x001CB158	btlRequestCommandPanelClose	inferred	Existing matched helper requests command object state5 and visual-panel state3; native command callback returns -1 at state5, so this is a close request; identifier only.
 0x001CB190	btlGetTargetRowAnimationOffset	inferred	Copies X/Y offsets from the direction-and-step lookup table. [names_reviewed5.tsv]
+0x001CB7A8	btlDrawTargetMarker	inferred	Draws the marker on one selected target: projects the unit's position (its muzzle's, lowered, for a unit flagged 0x8000000) to the screen and draws the marker's panels and rows there, faded, scaled and turned as the SceneAiWork that btlAdvanceTargetPanelAnimation and btlAdvanceTargetRowAnimation advance holds; btlUpdateAndDrawTargetActorPanels calls it for each selected unit. DDS1 0x001BFDE0 twin.
 0x001CC7C8	btlDrawCenteredPanelSegments	inferred	Draws centered battle panel segments using width-derived positions. [names_reviewed12.tsv]
 0x001CC8D0	btlUpdateTargetSelectionTask	inferred	Existing matched target-selection task updates selection input and target actor panels in state 2; state 6 returns -1; identifier only.
 0x001CC9C0	btlCreateTargetSelectionWork	inferred	Existing matched SceneAiWork allocator builds candidate and selected-target index lists, chooses the initial selection and sets state 1; retain both games existing signatures; identifier only.
@@ -11161,6 +11163,7 @@
 0x004601D0	sdfGraphicsTransferThreadStack	inferred	confidence=high; CreateThreadSimple receives this existing byte array with sdfDrawThread, stackSize=0x8000 and priority=0x44. Full call-proven span must be checked for interior references. Same role in DDS1 at 0x003E3820. Preserve all types, declarations, bounds, data and control flow. [PurC5 readability data b6; native/matched-C twin evidence; identifier-only]
 0x004681D0	sdfDisplayEnvironment	inferred	Initialized through the uncached sceGsSetDefDispEnv alias; receives the selected display buffer page and is submitted through sceGsPutDispEnv. Paired DDS1 0x003EB820.
 0x004681F8	sdfImageSetCb	inferred	SMT3HD data name via SLUS_209.11 0x00581018, 5 agreeing references; was sdfImageSetCb
+0x00468210	corePktFaceList	inferred	The node packet's face list: three vertex pointers a triangle, filled by corePktBuildFaceList and corePktBuildBackFaceList, which leave the count in the packet work's nodeCount; 4096 triangles (0xC000 bytes), the rejected triangles' index list after it.
 0x00476210	sdfModelColorTransform	inferred	the SdfVuColorTransform sdfCorePacketGen builds through corePktSetFaceDivParm; the lighting kernels load its three quadwords as vf19..vf21. DDS1 twin 0x003F9860.
 0x00476250	sdfVuObjectBasisCache	inferred	the three basis vectors corePktLoadWorldLightMtx caches (VU0_ROTATE_BASIS_AND_CACHE); corePktEmitRefMapPass reads them. DDS1 twin 0x003F98A0.
 0x00476480	sdfPadCb	inferred	SMT3HD data name via SLUS_209.11 0x0058F2C0, 2 agreeing references; was sdfPadCb

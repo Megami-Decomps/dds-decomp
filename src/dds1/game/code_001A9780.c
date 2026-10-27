@@ -8886,7 +8886,7 @@ void btlAdvanceTargetPanelAnimation(SceneAiWork *work, s32 mode) {
 
 extern void btlUnitGetMuzzlePosVU(BtlUnit *);
 
-void func_001BFDE0(BtlUnit *unit, SceneAiWork *work, u32 index) {
+void btlDrawTargetMarker(BtlUnit *unit, SceneAiWork *work, u32 index) {
     BtlProjectedScreenPoint screenPoint;
     s32 origin[5];
     f32 muzzle[4];
@@ -9215,7 +9215,7 @@ extern const u8 *D_003BAA70;
 extern const u8 *D_003BAA74;
 extern const u8 *D_003BAA88;
 extern void btlAdvanceTargetPanelAnimation(SceneAiWork *work, s32 mode);
-extern void func_001BFDE0(BtlUnit *unit, SceneAiWork *work, u32 index);
+extern void btlDrawTargetMarker(BtlUnit *unit, SceneAiWork *work, u32 index);
 extern s32 btlIsUnitInfoFlagOneEligible(BtlUnit *unit);
 extern void btlDrawCenteredPanelSegments(s32 width);
 
@@ -9283,7 +9283,7 @@ void btlUpdateAndDrawTargetActorPanels(SceneAiWork *work) {
     for (i = 0; i < count; i++) {
         unit = btlGetIndexListEntry(work->selectedTargets, i);
         if (btlIsUnitInfoFlagOneEligible(unit) == 0) {
-            func_001BFDE0(unit, work, i);
+            btlDrawTargetMarker(unit, work, i);
         }
         if ((u32)(work->state - BTL_TARGET_SELECTION_STATE_COMMITTED) >= 2 &&
             scene != 8 && scene != 9 &&
