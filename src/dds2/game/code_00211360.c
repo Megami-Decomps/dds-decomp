@@ -1233,7 +1233,7 @@ s32 btlHasDistinctTargetSelection(s32 actor, s32 selection) {
 s32 btlAnyUnitPassesCheck200(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->next) {
-        if (btlUnitBlocksElementQueryForGroup(battler, action, 0x200) == BTL_ELEMENT_BLOCK_QUERY_NOT_BLOCKED) {
+        if (btlUnitBlocksElementQueryForGroup(battler, action, BTL_UNIT_STATUS_SIDE_ALLY) == BTL_ELEMENT_BLOCK_QUERY_NOT_BLOCKED) {
             return 1;
         }
     }
@@ -1243,7 +1243,7 @@ s32 btlAnyUnitPassesCheck200(s32 unused, s32 action) {
 s32 btlCanQueryElementAgainstParty(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->next) {
-        if (btlUnitBlocksElementQueryForGroup(battler, action, 0x200) == BTL_ELEMENT_BLOCK_QUERY_BLOCKED) {
+        if (btlUnitBlocksElementQueryForGroup(battler, action, BTL_UNIT_STATUS_SIDE_ALLY) == BTL_ELEMENT_BLOCK_QUERY_BLOCKED) {
             return 0;
         }
     }
@@ -1253,7 +1253,7 @@ s32 btlCanQueryElementAgainstParty(s32 unused, s32 action) {
 s32 btlAnyUnitPassesCheck400(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->next) {
-        if (btlUnitBlocksElementQueryForGroup(battler, action, 0x400) == BTL_ELEMENT_BLOCK_QUERY_NOT_BLOCKED) {
+        if (btlUnitBlocksElementQueryForGroup(battler, action, BTL_UNIT_STATUS_SIDE_ENEMY) == BTL_ELEMENT_BLOCK_QUERY_NOT_BLOCKED) {
             return 1;
         }
     }
@@ -1263,7 +1263,7 @@ s32 btlAnyUnitPassesCheck400(s32 unused, s32 action) {
 s32 btlCanQueryElementAgainstEnemies(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->next) {
-        if (btlUnitBlocksElementQueryForGroup(battler, action, 0x400) == BTL_ELEMENT_BLOCK_QUERY_BLOCKED) {
+        if (btlUnitBlocksElementQueryForGroup(battler, action, BTL_UNIT_STATUS_SIDE_ENEMY) == BTL_ELEMENT_BLOCK_QUERY_BLOCKED) {
             return 0;
         }
     }

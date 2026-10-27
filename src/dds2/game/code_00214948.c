@@ -223,10 +223,10 @@ extern void btlDispatchStateHandler(void *, s32);
 
 /* Return whether the native unit-status query intersects any requested action-mask bit. */ s32 btlUnitHasAnyStatusInMask(BtlUnit *unit, s32 actionMask);
 
-BtlElementBlockQueryResult btlUnitBlocksElementQueryForGroup(BtlUnit *unit, s32 action, u32 mask) {
+BtlElementBlockQueryResult btlUnitBlocksElementQueryForGroup(BtlUnit *unit, s32 action, BtlUnitStatusSideMask sideMask) {
     u32 flags = unit->status.flags;
     if (flags & 1) {
-        if (flags & mask) {
+        if (flags & sideMask) {
             if (!(flags & 0x20)) {
                 if (action & 0x100000) {
                     s32 i;
@@ -259,7 +259,7 @@ BtlElementBlockQueryResult btlUnitBlocksElementQueryForGroup(BtlUnit *unit, s32 
 s32 btlAllUnitsPassCheck200(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->next) {
-        if (btlUnitBlocksElementQueryForGroup(battler, action, 0x200) == BTL_ELEMENT_BLOCK_QUERY_NOT_BLOCKED) {
+        if (btlUnitBlocksElementQueryForGroup(battler, action, BTL_UNIT_STATUS_SIDE_ALLY) == BTL_ELEMENT_BLOCK_QUERY_NOT_BLOCKED) {
             return 0;
         }
     }
@@ -269,7 +269,7 @@ s32 btlAllUnitsPassCheck200(s32 unused, s32 action) {
 s32 btlAllUnitsPassCheck400(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->next) {
-        if (btlUnitBlocksElementQueryForGroup(battler, action, 0x400) == BTL_ELEMENT_BLOCK_QUERY_NOT_BLOCKED) {
+        if (btlUnitBlocksElementQueryForGroup(battler, action, BTL_UNIT_STATUS_SIDE_ENEMY) == BTL_ELEMENT_BLOCK_QUERY_NOT_BLOCKED) {
             return 0;
         }
     }
@@ -590,7 +590,7 @@ s32 btlSelectLowestHealthElementBlockTarget(ActionStateLink *actor, s32 action) 
         bestIndex = 0;
         for (i = 0; i < count; i++) {
             BtlUnit *unit = btlGetIndexListEntry(list, i);
-            if (btlUnitBlocksElementQueryForGroup(unit, action, 0x200) == BTL_ELEMENT_BLOCK_QUERY_BLOCKED) {
+            if (btlUnitBlocksElementQueryForGroup(unit, action, BTL_UNIT_STATUS_SIDE_ALLY) == BTL_ELEMENT_BLOCK_QUERY_BLOCKED) {
                 u16 current = btlReadCurrentUnitHp(&unit->partyRecord);
                 if (current <= best && current != 0) {
                     best = current;
@@ -1159,12 +1159,12 @@ s32 btlSelectTargetsPassingCheck(ActionStateLink *task, s32 action) {
         for (i = 0; i < count; i++) {
             BtlUnit *unit = btlGetIndexListEntry(list, i);
 
-            if (unit->status.flags & 0x200) {
-                if (btlUnitBlocksElementQueryForGroup(unit, action, 0x200) == BTL_ELEMENT_BLOCK_QUERY_BLOCKED) {
+            if (unit->status.flags & BTL_UNIT_STATUS_SIDE_ALLY) {
+                if (btlUnitBlocksElementQueryForGroup(unit, action, BTL_UNIT_STATUS_SIDE_ALLY) == BTL_ELEMENT_BLOCK_QUERY_BLOCKED) {
                     picked[i] = 1;
                 }
             } else {
-                if (btlUnitBlocksElementQueryForGroup(unit, action, 0x400) == BTL_ELEMENT_BLOCK_QUERY_BLOCKED) {
+                if (btlUnitBlocksElementQueryForGroup(unit, action, BTL_UNIT_STATUS_SIDE_ENEMY) == BTL_ELEMENT_BLOCK_QUERY_BLOCKED) {
                     picked[i] = 1;
                 }
             }

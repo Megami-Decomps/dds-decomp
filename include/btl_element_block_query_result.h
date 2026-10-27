@@ -5,7 +5,15 @@
 
 struct BtlUnit;
 
-/* Result of testing whether a unit blocks an element query for its group. */
+/* Ally/enemy selector bits stored in BtlUnit.status.flags. */
+typedef u32 BtlUnitStatusSideMask;
+
+enum {
+    BTL_UNIT_STATUS_SIDE_ALLY = 0x200,
+    BTL_UNIT_STATUS_SIDE_ENEMY = 0x400
+};
+
+/* Result for a unit whose status flags intersect the requested side mask. */
 typedef s32 BtlElementBlockQueryResult;
 
 #define BTL_ELEMENT_BLOCK_QUERY_NOT_BLOCKED 0 /* Applicable unit does not block the query. */
@@ -13,6 +21,6 @@ typedef s32 BtlElementBlockQueryResult;
 #define BTL_ELEMENT_BLOCK_QUERY_NOT_APPLICABLE 2 /* Unit state or group excludes the query. */
 
 BtlElementBlockQueryResult btlUnitBlocksElementQueryForGroup(
-    struct BtlUnit *unit, s32 action, u32 mask);
+    struct BtlUnit *unit, s32 action, BtlUnitStatusSideMask sideMask);
 
 #endif /* BTL_ELEMENT_BLOCK_QUERY_RESULT_H */

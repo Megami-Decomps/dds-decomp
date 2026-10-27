@@ -1140,7 +1140,7 @@ s32 btlHasOtherGroup400DifferentUnitMode(BtlUnit *actor, s32 kind) {
 s32 btlAnyUnitPassesCheck200(s32 unused, s32 action) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     while (unit != 0) {
-        if (btlUnitBlocksElementQueryForGroup(unit, action, 0x200) == BTL_ELEMENT_BLOCK_QUERY_NOT_BLOCKED) {
+        if (btlUnitBlocksElementQueryForGroup(unit, action, BTL_UNIT_STATUS_SIDE_ALLY) == BTL_ELEMENT_BLOCK_QUERY_NOT_BLOCKED) {
             return 1;
         }
         unit = unit->next;
@@ -1151,7 +1151,7 @@ s32 btlAnyUnitPassesCheck200(s32 unused, s32 action) {
 s32 btlCanQueryElementAgainstParty(s32 unused, s32 action) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     while (unit != 0) {
-        if (btlUnitBlocksElementQueryForGroup(unit, action, 0x200) == BTL_ELEMENT_BLOCK_QUERY_BLOCKED) {
+        if (btlUnitBlocksElementQueryForGroup(unit, action, BTL_UNIT_STATUS_SIDE_ALLY) == BTL_ELEMENT_BLOCK_QUERY_BLOCKED) {
             return 0;
         }
         unit = unit->next;
@@ -1162,7 +1162,7 @@ s32 btlCanQueryElementAgainstParty(s32 unused, s32 action) {
 s32 btlAnyUnitPassesCheck400(s32 unused, s32 action) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     while (unit != 0) {
-        if (btlUnitBlocksElementQueryForGroup(unit, action, 0x400) == BTL_ELEMENT_BLOCK_QUERY_NOT_BLOCKED) {
+        if (btlUnitBlocksElementQueryForGroup(unit, action, BTL_UNIT_STATUS_SIDE_ENEMY) == BTL_ELEMENT_BLOCK_QUERY_NOT_BLOCKED) {
             return 1;
         }
         unit = unit->next;
@@ -1173,7 +1173,7 @@ s32 btlAnyUnitPassesCheck400(s32 unused, s32 action) {
 s32 btlCanQueryElementAgainstEnemies(s32 unused, s32 action) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
     while (unit != 0) {
-        if (btlUnitBlocksElementQueryForGroup(unit, action, 0x400) == BTL_ELEMENT_BLOCK_QUERY_BLOCKED) {
+        if (btlUnitBlocksElementQueryForGroup(unit, action, BTL_UNIT_STATUS_SIDE_ENEMY) == BTL_ELEMENT_BLOCK_QUERY_BLOCKED) {
             return 0;
         }
         unit = unit->next;
