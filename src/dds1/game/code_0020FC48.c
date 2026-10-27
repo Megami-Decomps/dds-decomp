@@ -390,7 +390,7 @@ void btlBindEventEffectResources(void) {
     }
 
     for (resourceIndex = 0; resourceIndex < BTL_EVENT_SOUND_RESOURCE_COUNT; resourceIndex++) {
-        s32 resourceKey = resourceIndex + BTL_EVENT_SOUND_KEY_FIRST;
+        EvtPackSecondaryResourceId resourceKey = resourceIndex + BTL_EVENT_SOUND_KEY_FIRST;
         s32 slotIndex;
         void *resourceValue;
 
@@ -429,7 +429,7 @@ extern BtlUnit *btlFindUnitByModeFlagged(s32);
 s32 btlCommandSelectEventAction(void) {
     s32 modeSelector = scrGetIntPara(0);
     s32 unitId = scrGetIntPara(1);
-    s32 actionKey = scrGetIntPara(2);
+    EvtPackSecondaryResourceId actionKey = scrGetIntPara(2);
     BtlUnit *selectedUnit;
     BtlState *battleState;
     void *actionResource;

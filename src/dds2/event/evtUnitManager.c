@@ -2602,7 +2602,7 @@ u32 evtCommand_EFFECT_BE(void) {
     u8 firstVector[16];
     u8 secondVector[16];
     s32 taskId;
-    s32 key;
+    EvtPackSecondaryResourceId key;
     struct EffNodeDescriptor *descriptor;
     dds3Basic_t *object;
 
@@ -2683,7 +2683,7 @@ u32 evtCommand_EFFBED_BE(void) {
     u8 position[16];
     u8 scale[16];
     s32 taskId;
-    s32 key;
+    EvtPackSecondaryResourceId key;
     struct SoundMixer *resource;
     dds3Basic_t *object;
 
@@ -2791,7 +2791,7 @@ const char D_00421B50[] = "EFFMG1_BE not fount RID = %d\n";
 
 u32 evtCommand_EFFMG1_BE(void) {
     s32 taskId;
-    s32 key;
+    EvtPackSecondaryResourceId key;
     struct EffNodeDescriptor *descriptor;
     dds3Basic_t *object;
 
@@ -2837,7 +2837,7 @@ const char D_00421BA0[] = "EFFMG2_BE not fount RID = %d\n";
 
 u32 evtCommand_EFFMG2_BE(void) {
     s32 taskId;
-    s32 key;
+    EvtPackSecondaryResourceId key;
     struct EffNodeDescriptor *descriptor;
     dds3Basic_t *object;
 

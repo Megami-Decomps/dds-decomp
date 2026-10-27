@@ -2543,7 +2543,7 @@ u32 evtCommand_EFFECT_BE(void) {
     u8 firstVector[16];
     u8 secondVector[16];
     s32 taskId;
-    s32 key;
+    EvtPackSecondaryResourceId key;
     struct EffNodeDescriptor *descriptor;
     dds3Basic_t *object;
 
@@ -2622,7 +2622,7 @@ u32 evtCommand_EFFBED_BE(void) {
     f32 position[4];
     f32 scale[4];
     s32 taskId;
-    s32 key;
+    EvtPackSecondaryResourceId key;
     struct SoundMixer *resource;
     dds3Basic_t *object;
 
@@ -2734,7 +2734,7 @@ INCLUDE_RODATA(const s32, "event/evtUnitManager", D_003AC5B0);
 
 u32 evtCommand_EFFMG1_BE(void) {
     s32 taskId;
-    s32 key;
+    EvtPackSecondaryResourceId key;
     struct EffNodeDescriptor *descriptor;
     dds3Basic_t *object;
 
@@ -2778,7 +2778,7 @@ INCLUDE_RODATA(const s32, "event/evtUnitManager", D_003AC600);
 
 u32 evtCommand_EFFMG2_BE(void) {
     s32 taskId;
-    s32 key;
+    EvtPackSecondaryResourceId key;
     struct EffNodeDescriptor *descriptor;
     dds3Basic_t *object;
 

@@ -5666,7 +5666,7 @@ EvtPackLoadState *evtGetPackProcessData(s32 taskId) {
 }
 
 
-void *evtGetEventPackResourceAddress(s32 taskId, s32 secondaryResourceId) {
+void *evtGetEventPackResourceAddress(s32 taskId, EvtPackSecondaryResourceId secondaryResourceId) {
     s32 i;
     EvtPackLoadState *data;
     dds3ProcessID_t *task;
@@ -5688,7 +5688,7 @@ void *evtGetEventPackResourceAddress(s32 taskId, s32 secondaryResourceId) {
 }
 extern void Eve_DistortionBlurSetTex(sdfTexHandle_t *);
 
-void evtRefreshTaskEffectTexture(s32 taskId, s32 key) {
+void evtRefreshTaskEffectTexture(s32 taskId, EvtPackSecondaryResourceId key) {
     EvtPackLoadState *data = evtGetPackProcessData(taskId);
     void *address = evtGetEventPackResourceAddress(taskId, key);
     sdfTexHandle_t *texture;
@@ -5709,7 +5709,7 @@ extern EvtModelScaleEntry *D_003BAA20;
 
 /* Spawn from a keyed task resource with two zeroed constructor vectors.
  * A nonnegative index applies the selected model-table scale relative to the base. */
-dds3Basic_t *evtSpawnResourceObject(s32 taskId, s32 key, s32 index) {
+dds3Basic_t *evtSpawnResourceObject(s32 taskId, EvtPackSecondaryResourceId key, s32 index) {
     u8 vecA[16];
     u8 vecB[16];
     void *found;

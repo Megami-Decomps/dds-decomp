@@ -19,13 +19,16 @@ typedef enum EvtPackKind {
     EVT_PACK_KIND_MOTION_CUES = 6
 } EvtPackKind;
 
+/* Key used to locate a payload by the BE record's secondaryResourceId. */
+typedef s32 EvtPackSecondaryResourceId;
+
 /* BE resource files have a 0x20-byte header and fixed 0x20-byte records. */
 typedef struct EvtPackEntry {
     EvtPackKind kind;             /* 0x00 */
     s32 dataSize;                 /* 0x04: package byte count loaded at DDS1 241E7C. */
     s32 cueCount;                 /* 0x08: type-6 count at DDS2 0025D5EC/0025D634. */
     u32 dataOffset;               /* 0x0C: relative to the retained file base */
-    s32 secondaryResourceId;      /* 0x10 */
+    EvtPackSecondaryResourceId secondaryResourceId; /* 0x10 */
     s32 resourceId;               /* 0x14 */
     u8 pad18[4];
     s32 motionId;                 /* 0x1C: type-6 motion index at DDS2 0025D5D4. */
@@ -108,6 +111,7 @@ EvtPackLoadStatus evtGetEventPackStat(s32 taskId);
 
 /* Find an entry by secondaryResourceId in a complete pack and return its
  * borrowed payload address; resource kinds stay opaque. */
-void *evtGetEventPackResourceAddress(s32 taskId, s32 secondaryResourceId);
+void *evtGetEventPackResourceAddress(s32 taskId,
+                                     EvtPackSecondaryResourceId secondaryResourceId);
 
 #endif /* EVT_EVENT_PACK_H */
