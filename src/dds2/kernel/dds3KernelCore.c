@@ -645,7 +645,7 @@ dds3ProcessID_t* dds3SearchProcessPriority(u32 priority)
 }
 
 /* Persona 4 func_00452490 @ 00452490 (src/Kernel/sdkTask.c), recompiled unchanged */
-s32 dds3ExistProcess(const dds3ProcessID_t* target)
+KwlnProcessRegistrationResult dds3ExistProcess(const dds3ProcessID_t* target)
 {
     s32 taskListIndex;
     dds3ProcessID_t* node;
