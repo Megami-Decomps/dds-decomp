@@ -8,6 +8,7 @@
 #include "scr_command_index.h"
 #include "scr_procedure_index.h"
 #include "scr_command_parameter_index.h"
+#include "scr_command_parameter_count.h"
 #include "scr_command_yield_count.h"
 #include "scr_vm_integer.h"
 #include "itf_mes_window_index.h"
@@ -189,7 +190,7 @@ f32 PopFloat(scrProcessWork_s *script);
 /* Command callback plus operand count (0x8); DDS1 script/scrTraceCode.c. */
 typedef struct ScrCommand {
     ScrCommandResult (*func)(void);
-    s32 paramCount;
+    ScrCommandParameterCount paramCount;
 } ScrCommand;
 
 /* Script integer register 210 (DatGameState +0x388): set/clear by the process-control script commands. */
