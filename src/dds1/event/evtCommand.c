@@ -565,12 +565,12 @@ s32 evtCommand_FIELD_DSP(void)
 {
     s32 area;
     s32 room;
-    s32 worldKey;
+    Dds3AreaRoomKey areaRoomKey;
 
     area = scrGetIntPara(0);
     room = scrGetIntPara(1);
-    worldKey = (area << 16) + room;
-    if (dds3GetMapNo(dds3GetControlScene()) != worldKey) {
+    areaRoomKey = (area << 16) + room;
+    if (dds3GetMapNo(dds3GetControlScene()) != areaRoomKey) {
         area = scrGetIntPara(0);
         room = scrGetIntPara(1);
         evtLoadArea(area, room);

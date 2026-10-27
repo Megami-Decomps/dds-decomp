@@ -47,15 +47,15 @@ Dds3SceneMembershipResult dds3SceneBasicExistBasic(
     return DDS3_SCENE_MEMBERSHIP_ABSENT;
 }
 
-void dds3SetMapNo(dds3Basic_t *worldNode, u32 areaRoomKey) {
+void dds3SetMapNo(dds3Basic_t *worldNode, Dds3AreaRoomKey areaRoomKey) {
     if (worldNode != NULL) {
         ((EvtWorldTable *)worldNode->data)->areaRoomKey = areaRoomKey;
     }
 }
 
-s32 dds3GetMapNo(dds3Basic_t *worldNode) {
+Dds3AreaRoomKey dds3GetMapNo(const dds3Basic_t *worldNode) {
     if (worldNode == NULL) {
-        return -1;
+        return DDS3_AREA_ROOM_KEY_UNASSIGNED;
     }
     return ((EvtWorldTable *)worldNode->data)->areaRoomKey;
 }

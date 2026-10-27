@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "eff_transform.h"
+#include "dds3_area_room_key.h"
 
 /* Result of querying a path object's movement state. */
 typedef enum EvtPathStatus {
@@ -89,7 +90,7 @@ typedef struct EvtWorldSlot {
 } EvtWorldSlot;
 
 typedef struct EvtWorldTable {
-    s32 areaRoomKey; /* 0x00: packed area in the high halfword and room in the low halfword; -1 before assignment. */
+    Dds3AreaRoomKey areaRoomKey; /* 0x00: (area << 16) + room; unassigned before location setup. */
     struct sdfMemHandle_t *resource; /* 0x04: descriptor owning the slot array */
     EvtWorldSlot *slots; /* 0x08; valid index range is a caller contract */
     dds3Basic_t *cameraObject; /* 0x0C: retained camera world node */
@@ -113,9 +114,6 @@ typedef char EvtWorldTable_size_must_be_0x40[
 
 /* Preserve the signed-byte drawing gate; only a missing payload is ignored. */
 void dds3VisibleSceneBasic(dds3Basic_t *object, s8 enabled);
-void dds3SetMapNo(dds3Basic_t *worldNode, u32 areaRoomKey);
-s32 dds3GetMapNo(dds3Basic_t *worldNode);
-
 /* Scene resource scripts are selected by name on a world node. The start
  * result is the scheduler task created for the script, or NULL on failure. */
 struct dds3ProcessID_t *evtStartSceneResourceTask(const dds3Basic_t *worldNode, const char *taskName);

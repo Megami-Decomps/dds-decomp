@@ -78,9 +78,9 @@ typedef struct {
 /* Recreate the secondary world selection only when its packed key changes.
  * Preserve the signed shift/add rather than treating this as an unsigned OR. */
 void fclLoadStage(s32 high, s32 low) {
-    s32 key = (high << 16) + low;
+    Dds3AreaRoomKey areaRoomKey = (high << 16) + low;
 
-    if (dds3GetMapNo(dds3GetControlScene()) != key) {
+    if (dds3GetMapNo(dds3GetControlScene()) != areaRoomKey) {
         evtLoadArea(high, low);
     }
 }

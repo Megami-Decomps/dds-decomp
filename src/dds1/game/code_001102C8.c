@@ -131,7 +131,7 @@ Dds3BasicCreateResult dds3CreateWorldObjectData(dds3Basic_t *object) {
     s32 listIndex;
 
     if (data != NULL) {
-        data->areaRoomKey = -1;
+        data->areaRoomKey = DDS3_AREA_ROOM_KEY_UNASSIGNED;
         data->drawEnabled = 1;
         data->resource = 0;
         data->slots = NULL;
