@@ -966,7 +966,8 @@ s32 mnuInitializeStaffPartyScene(dds3ProcessID_t *task) {
     menu->resourceList = mnuCreatePanelSpriteHandles(
         1, (EffectSlotSet *)(u32)context->displayVariant,
         context->panelTarget);
-    if (mnuClassifyQuarterHalfPercent(record->hp, record->maxHp) < 2) {
+    if (mnuClassifyQuarterHalfPercent(record->hp, record->maxHp) <
+        MNU_QUARTER_HALF_PERCENT_CLASS_BELOW_QUARTER) {
         menu->motionSelection = -1;
     } else {
         menu->motionSelection = 10;

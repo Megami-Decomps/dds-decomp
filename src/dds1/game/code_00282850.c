@@ -989,10 +989,10 @@ u32 mnuGetPanelRatioColor(s32 useDefault, s32 amount, s32 divisor) {
     u32 color = 0xA09DC380;
     if (!useDefault) {
         switch (mnuClassifyQuarterHalfPercent(amount, divisor)) {
-        case 1:
+        case MNU_QUARTER_HALF_PERCENT_CLASS_BELOW_HALF:
             color = 0xB4A06480;
             break;
-        case 2:
+        case MNU_QUARTER_HALF_PERCENT_CLASS_BELOW_QUARTER:
             color = 0x89554780;
             break;
         }
@@ -2310,21 +2310,21 @@ s32 mnuGetMatchingPartyEntryMask(const datUnitWork_t *borrowedEntry) {
     return 0;
 }
 
-/* Classify the truncated signed percentage: below 25 -> 2, below 50 -> 1, else 0.
- * A zero divisor returns zero without division. */
-s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor) {
+/* Classify the truncated signed percentage into default, below-half, and
+ * below-quarter bands. A zero divisor returns the default class. */
+MnuQuarterHalfPercentClass mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor) {
     s32 ratioPercent;
 
     if (divisor != 0) {
         ratioPercent = amount * MNU_PERCENT_SCALE / divisor;
         if (ratioPercent < MNU_RATIO_QUARTER_PERCENT) {
-            return 2;
+            return MNU_QUARTER_HALF_PERCENT_CLASS_BELOW_QUARTER;
         }
         if (ratioPercent < MNU_RATIO_HALF_PERCENT) {
-            return 1;
+            return MNU_QUARTER_HALF_PERCENT_CLASS_BELOW_HALF;
         }
     }
-    return 0;
+    return MNU_QUARTER_HALF_PERCENT_CLASS_DEFAULT;
 }
 
 u8 mnuIsStaffMenuInputBlocked(void) {

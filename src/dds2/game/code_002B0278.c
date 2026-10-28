@@ -1421,7 +1421,8 @@ s32 mnuCreatePanels(dds3ProcessID_t *callback) {
     mnuSetGroupProperties(profile, (EffectSlotSet *)menuContext->displayHandle,
                           menuContext->alternateResources[0], 1, 2);
     party->iconPanel = mnuCreatePanelIconState(4, (s32)menuContext->displayHandle, menuContext->skillPanelResource);
-    if (mnuClassifyQuarterHalfPercent(data->hp, data->maxHp) < 2) {
+    if (mnuClassifyQuarterHalfPercent(data->hp, data->maxHp) <
+        MNU_QUARTER_HALF_PERCENT_CLASS_BELOW_QUARTER) {
         party->motionSelection = -1;
     } else {
         party->motionSelection = 0xA;

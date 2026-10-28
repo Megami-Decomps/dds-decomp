@@ -7,9 +7,16 @@
 /* Party-selection handoff mode that marks the transferred entry frontline. */
 #define CAMP_PARTY_TRANSFER_FRONTLINE 2
 
-/* Classify signed, truncated (amount * 100) / divisor: below 25 returns 2,
- * below 50 returns 1, otherwise 0. A zero divisor also returns 0. */
-s32 mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor);
+/* Classify signed, truncated (amount * 100) / divisor. Zero is the default
+ * class for ratios of at least one half and for a zero divisor. */
+typedef s32 MnuQuarterHalfPercentClass;
+enum {
+    MNU_QUARTER_HALF_PERCENT_CLASS_DEFAULT = 0,
+    MNU_QUARTER_HALF_PERCENT_CLASS_BELOW_HALF = 1,
+    MNU_QUARTER_HALF_PERCENT_CLASS_BELOW_QUARTER = 2
+};
+
+MnuQuarterHalfPercentClass mnuClassifyQuarterHalfPercent(s32 amount, s32 divisor);
 
 /* Staff-list nodes with unavailable entries carry this lifecycle flag. */
 #define MNU_STAFF_NODE_UNAVAILABLE 1
