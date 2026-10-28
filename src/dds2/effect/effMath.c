@@ -13,7 +13,8 @@ void dds3Bezier4PDelete(EffCubicBezierArray *work) {
 
 /* Evaluate the curve at the current t, advance t, and report whether the
  * stored next position was clamped to the endpoint. */
-EffCubicBezierStepResult dds3Bezier4PPartRun(EffCubicBezierArray *table, s32 slotIndex, f32 *out) {
+EffCubicBezierStepResult dds3Bezier4PPartRun(
+    EffCubicBezierArray *table, EffCubicBezierSlotIndex slotIndex, f32 *out) {
     EffCubicBezierSlot *slot = &table->slots[slotIndex];
     f32 w[4];
     f32 t = slot->t;
@@ -58,12 +59,13 @@ EffCubicBezierStepResult nbCameraLerpVec(EffCubicBezierSlot *slot, f32 *out) {
     return EFF_CUBIC_BEZIER_STEP_WITHIN_RANGE;
 }
 
-void effMathResetBezierSlot(EffCubicBezierArray *table, s32 slotIndex) {
+void effMathResetBezierSlot(EffCubicBezierArray *table, EffCubicBezierSlotIndex slotIndex) {
     EffCubicBezierSlot *slot = &table->slots[slotIndex];
     slot->step = 0.05f;
     slot->t = 0;
 }
 
-EffCubicBezierSlot *dds3Bezier4PGetPart(EffCubicBezierArray *table, s32 slotIndex) {
+EffCubicBezierSlot *dds3Bezier4PGetPart(
+    EffCubicBezierArray *table, EffCubicBezierSlotIndex slotIndex) {
     return &table->slots[slotIndex];
 }
