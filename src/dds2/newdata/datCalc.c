@@ -1701,7 +1701,7 @@ EvtRandomStatusClearResult evtClearRandomStatusFlags(void) {
     return clearedAny;
 }
 
-s32 ptyGetCombinedRecordAndSlotValue(s32 itemId, DatBaseStatIndex baseStatIndex) {
+s32 ptyGetCombinedRecordAndSlotValue(PtyItemId itemId, DatBaseStatIndex baseStatIndex) {
     s32 itemStatIndex = itemId - 0xC0;
     if (itemStatIndex <= 0) {
         return 0;
