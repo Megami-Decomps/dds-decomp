@@ -528,7 +528,7 @@ s32 btlSelectedEntryHitsElement(BtlUnit *source, BtlUnit *unit, s32 selectorInde
     return (D_00358518[maskTableIndex * 3] & selectionMask) != 0;
 }
 
-s32 btlGetActionRecordLookupValue(BtlCommandId commandId) {
+BtlCommandHitResult btlGetActionRecordLookupValue(BtlCommandId commandId) {
     u16 lookupTableIndex;
 
     lookupTableIndex = datCommandRecords[commandId].commandEffectId;
