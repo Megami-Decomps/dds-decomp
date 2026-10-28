@@ -2206,7 +2206,7 @@ void btlSweepFinishedTasks(void) {
 }
 
 /* Run deferred tasks, saving the next link before callbacks may free the task. */
-void btlClearDeferredTasks(void) {
+void btlRunDeferredTasks(void) {
     BtlRuntimeTask *node = btlDeferredTaskHead;
     while (node != 0) {
         BtlRuntimeTask *next = node->deferNext;

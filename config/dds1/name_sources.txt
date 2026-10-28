@@ -3775,7 +3775,7 @@
 0x001D4508	btlCountRegisteredTasks	inferred	counts linked battle tasks at +0x230; DDS2 twin [names_R_FuncNames8.tsv]
 0x001D4558	btlCountTasksForOwner	inferred	btl battle control and actor operations in game/code_0019DB88.c
 0x001D45A8	btlCountTasksByKind	inferred	btl battle control and actor operations in game/code_0019DB88.c
-0x001D4A98	btlClearDeferredTasks	inferred	btl battle control and actor operations in game/code_0019DB88.c
+0x001D4A98	btlRunDeferredTasks	inferred	Runs deferred task callbacks, saving each next link before btlRunTask may free the node, then resets both queue heads; DDS2 twin 0x001E17B8.
 0x001D4B28	btlCompleteTaskImmediately	inferred	confidence=high; process callback returns 1 unconditionally and is installed by btlCreateImmediateCompletionTask's zero-argument task; DDS2 twin 0x001E1848. Namer1 batch 28.
 0x001D4B78	btlDumpTaskQueue	inferred	btl battle control and actor operations in game/code_0019DB88.c
 0x001D4BF8	btlInitUnitFxDefaults	inferred	btl sets unit fx vector and scalar defaults (DDS2 twin func_001E1918)

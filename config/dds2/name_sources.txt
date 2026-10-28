@@ -3683,8 +3683,9 @@
 0x001E1500	btlFreeTask	inferred	runs task->onFinish, unlinks from both task lists, frees
 0x001E1580	btlStartTask	inferred	DDS1 has the same unprefixed symbol; game/code_001DACF8 uses btl for the already-described startBattleTask behavior.
 0x001E15E0	btlResetDeferredTaskQueue	inferred	Zeros both deferred-task queue globals. [names_reviewed5.tsv]
-0x001E15F0	btlRunTask	inferred	per-frame task state machine (start cond -> delay -> wait cond/callback -> linger -> btlFreeTask); called from btlSweepFinishedTasks/btlClearDeferredTasks [names_reviewed2.tsv]
+0x001E15F0	btlRunTask	inferred	per-frame task state machine (start cond -> delay -> wait cond/callback -> linger -> btlFreeTask); called from btlSweepFinishedTasks/btlRunDeferredTasks [names_reviewed2.tsv]
 0x001E1730	btlSweepFinishedTasks	inferred	walks taskList254; frees tasks without flag 2, queues the rest on the deferred list
+0x001E17B8	btlRunDeferredTasks	inferred	Runs deferred task callbacks, saving each next link before btlRunTask may free the node, then resets both queue heads; DDS1 twin 0x001D4A98.
 0x001E1800	btlClearTaskLists	inferred	frees every task on taskList250 then clears the deferred list heads
 0x001E1848	btlCompleteTaskImmediately	inferred	confidence=high; process callback returns 1 unconditionally and is installed by btlCreateImmediateCompletionTask's zero-argument task; DDS1 twin 0x001D4B28. Namer1 batch 28.
 0x001E1850	btlCreateImmediateCompletionTask	inferred	Allocates zero-argument task whose callback immediately returns completion. [names_reviewed5.tsv]

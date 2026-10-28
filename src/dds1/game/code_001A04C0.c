@@ -324,7 +324,7 @@ s32 btlUpdateActiveBattleFrame(dds3ProcessID_t *task) {
     return 0;
 }
 
-extern void btlClearDeferredTasks(void);
+extern void btlRunDeferredTasks(void);
 extern void btlDispatchLinkedEffectWhenBattleGatesClear(void);
 extern void btlSweepFloorModelLists(void);
 extern void btlTickFieldSwayAndTint(void);
@@ -346,7 +346,7 @@ s32 btlUpdateBattleFieldPresentation(dds3ProcessID_t *task) {
         btlUpdateEventPlayback();
         btlUpdateFieldPresentationNoOp();
         btlUpdateSceneFlow();
-        btlClearDeferredTasks();
+        btlRunDeferredTasks();
     }
     return 0;
 }
