@@ -5167,7 +5167,7 @@ BtlUnit *btlCreateUnit(void) {
     unit->status.flags = 0;
     unit->status.stateFlags = 0;
     unit->battleSideSlotIndex = unit->selectedEntryIndex = BTL_COMMAND_ID_INVALID;
-    unit->partyIndex = 6;
+    unit->partyIndex = BTL_UNIT_PARTY_INDEX_NO_ACTIVE_SLOT;
     unit->gunResourceFlags = 0;
     unit->effectLink.referenceCount = 0;
     unit->resourceNode = 0;

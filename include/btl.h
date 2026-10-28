@@ -44,6 +44,9 @@ typedef char BtlBossEffectPayloadSizeCheck[(sizeof(BtlBossEffectPayload) == 0x10
 
 typedef struct BtlUnit BtlUnit;
 
+/* Stored party indices use 6 when the unit has no active roster slot. */
+#define BTL_UNIT_PARTY_INDEX_NO_ACTIVE_SLOT 6
+
 void btlInitFxLights(BtlUnit *unit);
 void btlInitializeEffectVectorsFromSourceRecords(
     BtlUnit *unit, s32 resourceKind, s32 resourceIndex);

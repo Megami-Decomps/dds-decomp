@@ -1605,7 +1605,7 @@ void btlMoveActorOutOfActiveParty(BtlUnit *unit) {
     memcpy(&DDS3_GBWK->party[index], &saved, sizeof(saved));
     unit->partyRecord.flags &= ~2;
     DDS3_GBWK->party[index].flags &= ~2;
-    unit->partyIndex = 6;
+    unit->partyIndex = BTL_UNIT_PARTY_INDEX_NO_ACTIVE_SLOT;
     btlOnPartyRosterChange();
     btlBossDebugPrintf("btl:party out %d->%d[%d]\n", originalIndex, index, saved.unitId);
 }
