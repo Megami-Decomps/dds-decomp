@@ -97,6 +97,7 @@
 #include "dat_state.h"
 #include "dat_command.h"
 #include "btl_command_id.h"
+#include "btl_command_effect.h"
 #include "mdl_flag_api.h"
 #include "dds3_world_counter.h"
 #include "sdf_vu_matrix.h"
@@ -609,7 +610,7 @@ extern s32 btlSelectCounterSkill(BtlUnit *, BtlUnit *);
 
 extern void fldAppendSceneGroupHandle(ActionStateLink *);
 
-extern s16 btlGetCommandEffectId(ActionStateLink *, BtlCommandId);
+extern BtlCommandEffectId btlGetCommandEffectId(ActionStateLink *, BtlCommandId);
 
 extern s32 btlCompareSkippedAndActiveTargetCounts(BtlIndexList *, BtlOperandGroup *);
 

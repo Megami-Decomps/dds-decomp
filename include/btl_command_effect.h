@@ -4,9 +4,12 @@
 #include "common.h"
 #include "btl_command_id.h"
 
+/* Positive IDs select a command effect; nonpositive values suppress it. */
+typedef s16 BtlCommandEffectId;
+
 typedef struct BtlCommandEffect {
     BtlCommandId command;
-    s16 effect;
+    BtlCommandEffectId effect;
     u8 adjustSide;
     u8 pad07;
 } BtlCommandEffect;

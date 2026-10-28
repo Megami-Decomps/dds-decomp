@@ -95,6 +95,7 @@
 #include "file.h"
 #include "dat_command.h"
 #include "btl_command_id.h"
+#include "btl_command_effect.h"
 #include "file_request_api.h"
 #include "dat_affinity.h"
 #include "mdl_flag_api.h"
@@ -580,7 +581,7 @@ extern s32 btlRollPassiveAbilityAction(BtlUnit *);
 
 extern void fldAppendSceneGroupHandle(BtlTask *);
 
-extern s16 btlGetCommandEffectId(BtlTask *, BtlCommandId);
+extern BtlCommandEffectId btlGetCommandEffectId(BtlTask *, BtlCommandId);
 
 extern s32 btlCompareSkippedAndActiveTargetCounts(BtlIndexList *, BtlOperandGroup *);
 
