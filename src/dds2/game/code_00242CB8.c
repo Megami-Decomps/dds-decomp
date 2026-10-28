@@ -18,6 +18,7 @@
 #include "evt_event_bgm_readiness.h"
 #include "evt_sound_variation.h"
 #include "evt_solar.h"
+#include "kwln_task_runner.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
 
@@ -378,7 +379,7 @@ void evtDisableMoonDraw2(void) {
     DDS3_GBWK->world.flags = DDS3_GBWK->world.flags & ~SOLAR_ALPHA_ENABLED_FLAG;
 }
 
-s32 evtUpdateSolarOverlayFade(dds3ProcessID_t *task) {
+KwlnTaskUpdateResult evtUpdateSolarOverlayFade(dds3ProcessID_t *task) {
     DatWorldState *state;
     SolarOverlayWork *overlay;
     f32 alpha;
@@ -386,7 +387,7 @@ s32 evtUpdateSolarOverlayFade(dds3ProcessID_t *task) {
 
     f = 0.0f;
     if ((fileMenuTaskExists() != 0) || (dds3NullDrawProc() != 0)) {
-        return 0;
+        return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
     }
     overlay = (SolarOverlayWork *)dds3GetProcessData(task);
     state = &DDS3_GBWK->world;
@@ -414,7 +415,7 @@ s32 evtUpdateSolarOverlayFade(dds3ProcessID_t *task) {
     } else if (alpha > 0.0f) {
         evtAdvanceSolarOverlayFadeAndDraw(0, 0, 1, (s32)(alpha * 128.0f), overlay, 0x53);
     }
-    return 0;
+    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 extern s32 D_004371FC;
@@ -463,14 +464,14 @@ void evtAdvanceSolarClockAndExpireControls(f32 travelDistance) {
 
 
 
-s32 evtCreateSolarOverlayWork(dds3ProcessID_t *task) {
+KwlnTaskUpdateResult evtCreateSolarOverlayWork(dds3ProcessID_t *task) {
     SolarOverlayWork *overlay;
 
     overlay = sdfChipAllocDirect(0x104);
     evtInitializeVisualData(overlay);
     evtLoadSolarNoiseSprite(&overlay->noiseSprite);
     dds3SetProcessData(task, (u32)overlay);
-    return (s32)evtUpdateSolarOverlayFade;
+    return (KwlnTaskUpdateResult)evtUpdateSolarOverlayFade;
 }
 
 void evtFreeSolarOverlayWork(dds3ProcessID_t *task) {

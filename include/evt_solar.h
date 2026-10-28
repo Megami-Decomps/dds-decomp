@@ -134,8 +134,8 @@ void evtLoadSolarNoiseSprite(struct EffectSlotSet **sprite);
 void evtReleaseSolarNoiseSprite(struct EffectSlotSet **sprite);
 
 extern dds3ProcessID_t *moonprocess_id;
-s32 evtCreateSolarOverlayWork(dds3ProcessID_t *task);
-s32 evtUpdateSolarOverlayFade(dds3ProcessID_t *task);
+KwlnTaskUpdateResult evtCreateSolarOverlayWork(dds3ProcessID_t *task);
+KwlnTaskUpdateResult evtUpdateSolarOverlayFade(dds3ProcessID_t *task);
 void evtFreeSolarOverlayWork(dds3ProcessID_t *task);
 
 #endif /* EVT_SOLAR_H */
