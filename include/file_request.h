@@ -12,11 +12,11 @@ struct sdfMemHandle_t;
  * with the same header (0x00-0x2F). It waits in the manager's queue through
  * next, then in its completion list through completionNext.
  *
- * - PAC requests (kind 1) embed their dispatch packet at 0x30 and queue their
+ * - PAC-load requests (kind 1) embed their dispatch packet at 0x30 and queue their
  *   completion callbacks through callbackNext.
  * - Device-transfer jobs use the same bytes for state not yet identified.
- * - Callback (kind 0) and value-pair (kind 2) requests are allocated with the
- *   header alone (FILE_REQUEST_HEADER_BYTES).
+ * - Ordinary file-load (kind 0) and file-save (kind 2) requests are allocated
+ *   with the header alone (FILE_REQUEST_HEADER_BYTES).
  *
  * The manager, its core and PAC clients each see a request through their own
  * struct type (FileRequest, FileTransferJob, FilePacRequest), as retail's
@@ -37,7 +37,7 @@ enum {
     Link *next;                           /* 0x04 */                         \
     char *name;                           /* 0x08: the duplicated request name */ \
     struct sdfFileCmdHandle_t *deviceRequest; /* 0x0C: owned file-device handle */ \
-    s32 transferBytes;                    /* 0x10: a value-pair request's byte count */ \
+    s32 transferBytes;                    /* 0x10: bytes remaining in the current transfer */ \
     s32 totalBytes;                       /* 0x14 */                         \
     Callback completionCallback;          /* 0x18 */                         \
     void *completionArg;                  /* 0x1C */                         \

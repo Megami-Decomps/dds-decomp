@@ -27,7 +27,7 @@ FileManWork fileQueueHead __attribute__((section(".bss")));
 /* PAC requests delegate cleanup. Other kinds remain pending until the device
  * request closes, then release its state, duplicated name and entry. */
 FileRequestCleanupResult fileRequestFreeIfComplete(struct FileRequest *request) {
-    if (request->kind == FILE_REQUEST_KIND_PAC) {
+    if (request->kind == FILE_REQUEST_KIND_PAC_LOAD) {
         return pacFileHandleFree((struct FilePacRequest *)request);
     }
     if (request->state == FILE_REQUEST_LIFECYCLE_CLOSED) {
@@ -142,7 +142,7 @@ struct FilePacRequest *fileCreatePacLoadWork(
     if (allocationMode != FILE_PAC_RESOURCE_ALLOCATION_DEFAULT) {
         sdfPacSetFromTail(&request->packet);
     }
-    fileLinkQueue((FileRequest *)request, FILE_REQUEST_KIND_PAC, requestName,
+    fileLinkQueue((FileRequest *)request, FILE_REQUEST_KIND_PAC_LOAD, requestName,
                              (void *)onComplete, (void *)userData);
     return request;
 }
@@ -159,7 +159,7 @@ void pacLoadUseTail(const char *requestName) {
                           0, 0, 0);
 }
 
-/* Clear kind-zero request work and narrow allocationMode into byte three.
+/* Queue an ordinary file load and narrow allocationMode into byte three.
  * callbackAddress is the queue callback; userData is its context, not another
  * callback. Keep the raw byte store and existing provider parameter types. */
 struct FileRequest *fileLoadEx(const char *requestName, s32 allocationMode, s32 callbackAddress, s32 userData) {
@@ -168,17 +168,17 @@ struct FileRequest *fileLoadEx(const char *requestName, s32 allocationMode, s32 
     printf("file load %s\n", requestName);
     request = sdfAllocAndClearQuadwords(FILE_REQUEST_HEADER_BYTES);
     request->allocationMode = allocationMode;
-    fileLinkQueue(request, FILE_REQUEST_KIND_CALLBACK, requestName,
+    fileLinkQueue(request, FILE_REQUEST_KIND_FILE_LOAD, requestName,
                              (void *)callbackAddress, (void *)userData);
     return request;
 }
 
-/* Queue a callback-kind request with retryable direct allocation and no callback/context. */
+/* Queue an ordinary file load with retryable direct allocation and no callback/context. */
 struct FileRequest *fileLoad(const char *requestName) {
     return fileLoadEx(requestName, FILE_REQUEST_ALLOCATION_MODE_DIRECT, 0, 0);
 }
 
-/* Queue a callback-kind request with tail allocation and no callback/context. */
+/* Queue an ordinary file load with tail allocation and no callback/context. */
 struct FileRequest *fileLoadUseTail(const char *requestName) {
     return fileLoadEx(requestName, FILE_REQUEST_ALLOCATION_MODE_FROM_TAIL, 0, 0);
 }
@@ -208,7 +208,7 @@ u32 fileGetLoadRemain(FileRequest *request) {
 FileRequestEndCheckResult pacFileCheckEnd(const FileRequest *request) {
     FileRequestEndCheckResult result;
 
-    if (request->kind == FILE_REQUEST_KIND_PAC) {
+    if (request->kind == FILE_REQUEST_KIND_PAC_LOAD) {
         result = FILE_REQUEST_END_CHECK_PENDING;
         if (request->pacDecodeComplete != 0) {
             result = request->state == FILE_REQUEST_LIFECYCLE_CLOSED
@@ -258,7 +258,7 @@ void fileSyncAll(void) {
     }
 }
 
-/* Create a kind-two request with the caller's source buffer and byte count.
+/* Create a file-save request with the caller's source buffer and byte count.
  * Its address is stored in the existing value word at +0x24. */
 FileRequest *fileSaveEx(const char *requestName, const void *sourceData, s32 sourceByteCount, s32 callbackAddress, s32 userDataAddress) {
     FileRequest *request = sdfAllocAndClearQuadwords(FILE_REQUEST_HEADER_BYTES);
@@ -267,12 +267,12 @@ FileRequest *fileSaveEx(const char *requestName, const void *sourceData, s32 sou
     request->transferAddress = (u8 *)sourceData;
     request->totalBytes = sourceByteCount;
     request->transferBytes = sourceByteCount;
-    fileLinkQueue(request, FILE_REQUEST_KIND_VALUE_PAIR, requestName, (void *)callbackAddress,
+    fileLinkQueue(request, FILE_REQUEST_KIND_FILE_SAVE, requestName, (void *)callbackAddress,
                              (void *)userDataAddress);
     return request;
 }
 
-/* Queue the value-pair request and expose its opaque request handle. */
+/* Queue the file-save request and expose its opaque request handle. */
 struct FileRequest *fileSave(const char *requestName, const void *sourceData, s32 sourceByteCount) {
     return fileSaveEx(requestName, sourceData, sourceByteCount, 0, 0);
 }

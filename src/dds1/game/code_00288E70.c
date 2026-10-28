@@ -282,7 +282,7 @@ void fileExecQueue(void) {
     }
     locked = 1;
     switch (job->kind) {
-    case FILE_REQUEST_KIND_CALLBACK:
+    case FILE_REQUEST_KIND_FILE_LOAD:
         switch (job->state) {
         case FILE_REQUEST_LIFECYCLE_QUEUED:
             job->state = FILE_REQUEST_LIFECYCLE_OPENING;
@@ -307,7 +307,7 @@ void fileExecQueue(void) {
             break;
         }
         break;
-    case FILE_REQUEST_KIND_PAC:
+    case FILE_REQUEST_KIND_PAC_LOAD:
         switch (job->state) {
         case FILE_REQUEST_LIFECYCLE_QUEUED:
             job->state = FILE_REQUEST_LIFECYCLE_OPENING;
@@ -322,7 +322,7 @@ void fileExecQueue(void) {
             break;
         }
         break;
-    case FILE_REQUEST_KIND_VALUE_PAIR:
+    case FILE_REQUEST_KIND_FILE_SAVE:
         if (job->state == FILE_REQUEST_LIFECYCLE_QUEUED) {
             job->state = FILE_REQUEST_LIFECYCLE_OPENING;
             locked = 0;
@@ -367,7 +367,7 @@ s32 fileManager(void) {
         FileTransferJob *job = (FileTransferJob *)work->slots[slot].request;
         u8 kind = job->kind;
 
-        if (kind == FILE_REQUEST_KIND_PAC) {
+        if (kind == FILE_REQUEST_KIND_PAC_LOAD) {
             FilePacRequest *request = (FilePacRequest *)job;
             if (request != NULL &&
                 sdfPacDecode(&request->packet, input, work->slots[slot].value) == SDF_PAC_PHASE_COMPLETE) {
