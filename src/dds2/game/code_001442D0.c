@@ -111,7 +111,8 @@ extern void fldUpdateTargetGuideMovementState(void);
 extern void fldDispatchTargetGuideMotionUpdate(void);
 extern void fldUpdateTargetGuideEffects(void);
 extern void func_00153068(void);
-extern s32 fldFindNearestOccupiedMapGridCell(f32 x, f32 z, s16 *gridX, s16 *gridY);
+extern s32 fldFindNearestOccupiedMapGridCell(
+    f32 worldX, f32 worldZ, s16 *gridX, s16 *gridY);
 
 
 extern s32 D_003899E0[];
@@ -5675,9 +5676,10 @@ typedef struct FieldCellGrid {
 } FieldCellGrid;
 
 /* Find the occupied grid cell nearest to a world position; returns -1 when it is cell (0, 0). */
-s32 fldFindNearestOccupiedMapGridCell(f32 x, f32 z, s16 *outX, s16 *outY) {
+s32 fldFindNearestOccupiedMapGridCell(
+    f32 worldX, f32 worldZ, s16 *gridX, s16 *gridY) {
     f32 originX = D_004363BC;
-    f32 originY = D_004363BE;
+    f32 originZ = D_004363BE;
     f32 nearest = 10000.0f;
     s16 bestCol = 0;
     s16 bestRow = 0;
@@ -5685,8 +5687,8 @@ s32 fldFindNearestOccupiedMapGridCell(f32 x, f32 z, s16 *outX, s16 *outY) {
     s16 col;
 
     if (D_004363D0 == 0) {
-        *outX = 0;
-        *outY = 0;
+        *gridX = 0;
+        *gridY = 0;
         return 0;
     }
     for (row = 0; row < ((FieldCellGrid *)D_004363D0)->height; row++) {
@@ -5694,8 +5696,8 @@ s32 fldFindNearestOccupiedMapGridCell(f32 x, f32 z, s16 *outX, s16 *outY) {
             s32 offset = (((FieldCellGrid *)D_004363D0)->width * row + col) * 2;
 
             if (*(u8 *)(D_004363D4 + offset) != 0) {
-                f32 dx = x - (originX + (f32)D_004363C0 * (f32)col);
-                f32 dz = z - (originY + (f32)-D_004363C2 * (f32)row);
+                f32 dx = worldX - (originX + (f32)D_004363C0 * (f32)col);
+                f32 dz = worldZ - (originZ + (f32)-D_004363C2 * (f32)row);
                 f32 distance = fsqrtf(dx * dx + dz * dz);
 
                 if (distance < nearest) {
@@ -5706,22 +5708,23 @@ s32 fldFindNearestOccupiedMapGridCell(f32 x, f32 z, s16 *outX, s16 *outY) {
             }
         }
     }
-    *outX = bestCol;
-    *outY = bestRow;
+    *gridX = bestCol;
+    *gridY = bestRow;
     if (bestCol != 0 || bestRow != 0) {
         return 0;
     }
     return -1;
 }
 
-void fldMapIndexToPos(s16 x, s16 y, f32 *outX, f32 *outY) {
+/* Convert grid column/row coordinates to world-space X/Z. */
+void fldMapIndexToPos(s16 gridX, s16 gridY, f32 *worldX, f32 *worldZ) {
     f32 scaleX = (f32)D_004363C0;
     f32 originX = (f32)D_004363BC;
-    f32 originY = (f32)D_004363BE;
-    f32 sourceX = (f32)x;
-    f32 sourceY = (f32)y;
-    *outX = originX + scaleX * sourceX;
-    *outY = originY + (f32)(-D_004363C2) * sourceY;
+    f32 originZ = (f32)D_004363BE;
+    f32 sourceGridX = (f32)gridX;
+    f32 sourceGridY = (f32)gridY;
+    *worldX = originX + scaleX * sourceGridX;
+    *worldZ = originZ + (f32)(-D_004363C2) * sourceGridY;
 }
 
 typedef struct FieldCoordinateRecord {
