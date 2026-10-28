@@ -14644,7 +14644,7 @@ void effReleaseResourceBankDescriptors(void) {
 typedef struct EffBankStatus {
     char fullName[0xC8]; /* Formatted path or selected built-in name. */
     s32 type;
-    s32 state;
+    s32 selectionStatus;
     s32 pathVariant;
 } EffBankStatus;
 
@@ -14667,10 +14667,10 @@ void effPollResourceBank(u32 mode, EffBankStatus *status) {
         btlSetResourceBrowserPosition(effResourceBankDescriptor, 0xBA, 0x1C);
     } else {
         btlUpdateAndDrawResourceBrowser(effResourceBankDescriptor);
-        status->state = btlGetResourceBrowserSelectionStatus(effResourceBankDescriptor);
+        status->selectionStatus = btlGetResourceBrowserSelectionStatus(effResourceBankDescriptor);
         status->type = btlFormatSelectedResourceName(effResourceBankDescriptor, status->fullName);
         status->pathVariant = btlGetResourcePathVariant(effResourceBankDescriptor);
-        if (status->state == BTL_RESOURCE_SELECTION_ACCEPTED) {
+        if (status->selectionStatus == BTL_RESOURCE_SELECTION_ACCEPTED) {
             btlDestroyResourceDescriptor(effResourceBankDescriptor);
             effResourceBankDescriptor = 0;
             btlDestroyEntryList(effResourceBankEntries);
@@ -15527,9 +15527,9 @@ s32 effPollFileQueueRecord(s32 mode) {
     s32 result = 0x600001;
 
     effPollResourceBank(mode, (EffBankStatus *)status);
-    if (((EffBankStatus *)status)->state == BTL_RESOURCE_SELECTION_CANCELED) {
+    if (((EffBankStatus *)status)->selectionStatus == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
-    } else if (((EffBankStatus *)status)->state == BTL_RESOURCE_SELECTION_ACCEPTED) {
+    } else if (((EffBankStatus *)status)->selectionStatus == BTL_RESOURCE_SELECTION_ACCEPTED) {
         if (((EffBankStatus *)status)->type != 8) {
             entry = fileQueueGetAt(effFileQueue, -((EffBankStatus *)status)->pathVariant);
             if (effCurrentFileQueueEntry != entry) {

@@ -12289,7 +12289,7 @@ void effReleaseResourceBankDescriptors(void) {
 typedef struct EffectPollRecord {
     char fullName[0xC8]; /* Formatted path or selected built-in name. */
     s32 type;   // 0xC8
-    s32 state;  // 0xCC
+    s32 selectionStatus;  // 0xCC
     s32 pathVariant; // 0xD0
 } EffectPollRecord;
 
@@ -12312,10 +12312,10 @@ void effPollResourceBank(s32 flags, EffectPollRecord *record) {
         btlSetResourceBrowserPosition(effResourceBankDescriptor, 0xBA, 0x1C);
     } else {
         btlUpdateAndDrawResourceBrowser(effResourceBankDescriptor);
-        record->state = btlGetResourceBrowserSelectionStatus(effResourceBankDescriptor);
+        record->selectionStatus = btlGetResourceBrowserSelectionStatus(effResourceBankDescriptor);
         record->type = btlFormatSelectedResourceName(effResourceBankDescriptor, record->fullName);
         record->pathVariant = btlGetResourcePathVariant(effResourceBankDescriptor);
-        if (record->state == BTL_RESOURCE_SELECTION_ACCEPTED) {
+        if (record->selectionStatus == BTL_RESOURCE_SELECTION_ACCEPTED) {
             btlDestroyResourceDescriptor(effResourceBankDescriptor);
             effResourceBankDescriptor = 0;
             btlDestroyEntryList(effResourceBankEntries);
@@ -13087,14 +13087,14 @@ extern void effPollResourceBank(s32, EffectPollRecord *);
 s32 effPollFileQueueRecord(s32 request) {
     u8 record[0xE0];
     EffectPollRecord *status = (EffectPollRecord *)record;
-    s32 kind;
+    s32 selectionStatus;
     s32 result = 0x600001;
 
     effPollResourceBank(request, status);
-    kind = status->state;
-    if (kind == BTL_RESOURCE_SELECTION_CANCELED) {
+    selectionStatus = status->selectionStatus;
+    if (selectionStatus == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
-    } else if (kind == BTL_RESOURCE_SELECTION_ACCEPTED) {
+    } else if (selectionStatus == BTL_RESOURCE_SELECTION_ACCEPTED) {
         if (status->type != 8) {
             FileJob *entry = fileQueueGetAt(effFileQueue, -status->pathVariant);
             if (effCurrentFileQueueEntry != entry) {
