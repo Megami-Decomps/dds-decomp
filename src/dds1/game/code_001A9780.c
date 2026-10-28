@@ -7666,26 +7666,26 @@ extern const s8 D_003BB468[];
 
 extern const s8 D_003BB470[];
 
-/* Resolve the command class through the owning actor's status-selected table. */
-s32 btlGetActorCommandClass(BattleSceneObject *object, s8 mode) {
+/* Map a panel slot to the command-selection bank used by selections and highlights. */
+s32 btlGetActorCommandClass(BattleSceneObject *object, s8 panelSlotIndex) {
     s32 flags = object->owner->unit->status.flags;
     s8 normal[6];
     s8 alternate[6];
     s8 restricted[6];
-    const s8 *classes;
+    const s8 *selectionBanksByPanelSlot;
 
     memcpy(normal, D_003BB460, sizeof(normal));
     memcpy(alternate, D_003BB468, sizeof(alternate));
     memcpy(restricted, D_003BB470, sizeof(restricted));
     if ((flags & 0x400) != 0) {
-        classes = restricted;
+        selectionBanksByPanelSlot = restricted;
     } else {
-        classes = normal;
+        selectionBanksByPanelSlot = normal;
         if ((flags & 0x1000) != 0) {
-            classes = alternate;
+            selectionBanksByPanelSlot = alternate;
         }
     }
-    return classes[mode];
+    return selectionBanksByPanelSlot[panelSlotIndex];
 }
 
 extern u16 *btlGatherActorCommandsByKind(s32, s16 *, u16, u16, u16);

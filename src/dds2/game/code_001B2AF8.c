@@ -8899,23 +8899,23 @@ extern const BtlSlotTable D_00436888[];
 extern const BtlSlotTable D_00436890[];
 extern const BtlSlotTable D_00436898[];
 
-/* Resolve the command class through the actor's status/party-flag-selected table. */
-u32 btlGetActorCommandClass(BattleSceneObject *object, s8 index) {
+/* Map a panel slot to the command-selection bank used by selections and highlights. */
+u32 btlGetActorCommandClass(BattleSceneObject *object, s8 panelSlotIndex) {
     BtlUnit *unit = object->owner->unit;
     BtlSlotTable normal = D_00436880[0];
     s32 flags = unit->status.flags;
     BtlSlotTable alternate = D_00436888[0];
     BtlSlotTable retreat = D_00436890[0];
     BtlSlotTable special = D_00436898[0];
-    BtlSlotTable *table = &retreat;
+    BtlSlotTable *selectionBanksByPanelSlot = &retreat;
 
     if (!(flags & 0x400)) {
-        table = &special;
+        selectionBanksByPanelSlot = &special;
         if (!(unit->partyRecord.flags & 0x10)) {
-            table = (flags & 0x1000) ? &alternate : &normal;
+            selectionBanksByPanelSlot = (flags & 0x1000) ? &alternate : &normal;
         }
     }
-    return table->values[index];
+    return selectionBanksByPanelSlot->values[panelSlotIndex];
 }
 
 
