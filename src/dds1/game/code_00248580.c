@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "mnu_terminal_work.h"
+#include "fld_terminal_scene_state.h"
 #include "dsp_entry_api.h"
 #include "dsp_channel.h"
 #include "dsp_active_api.h"
@@ -934,7 +935,7 @@ extern s32 mnuCheckResourceTask(void);
 extern void mnuStopResourceTask(void);
 extern void fldApplyTerminalActorSelection(s32 a, s32 b);
 extern void fldProc_CallSisetuReturn(void);
-extern s8 mnuTerminalTaskState;
+extern FldTerminalTaskState mnuTerminalTaskState;
 
 /* Release the terminal task's resources/effects, then hand its mode/slot to the field.
  * Native final work-field reads remain after allocation release and outside the NULL guard. */
@@ -949,7 +950,7 @@ void mnuReleaseTerminalWorkAndResumeField(dds3ProcessID_t *task) {
         fclDestroyMessage();
         evtReleaseResourcePairHandle(&work->messageResources);
         sdfMemFreeDirect(work->allocation);
-        mnuTerminalTaskState = 2;
+        mnuTerminalTaskState = FLD_TERMINAL_TASK_STATE_RESOURCES_RELEASED;
     }
     if (mnuCheckResourceTask() != 0) {
         mnuStopResourceTask();
@@ -987,7 +988,7 @@ s32 mnuTerminalCreateTasks(s32 reduced, s32 slot) {
     D_003BC3E4 = dds3StartProcess(D_003AF658, 0x404, 1, 1, mnuPrepareTerminalPopupAndDispatch, 0, (u32)work);
     dds3StartProcess(D_003AF668, 0x2B14, 1, 1, evtRunTerminalPanel, 0, (u32)work);
     result = (s32)dds3StartProcess(D_003AF678, 0x5210, 1, 1, evtRunTerminalPanelSync, mnuReleaseTerminalWorkAndResumeField, (u32)work);
-    mnuTerminalTaskState = 1;
+    mnuTerminalTaskState = FLD_TERMINAL_TASK_STATE_ACTIVE;
     return result;
 }
 
@@ -999,19 +1000,19 @@ void fldStopSceneTasks(void) {
     D_003BC3E4 = NULL;
 }
 
-/* Report one only for active state one; consume completed state two by clearing it. */
-s32 fldPollSceneState(void) {
+/* Report pending while active; consume the resource-release marker when polled. */
+FldTerminalScenePollResult fldPollSceneState(void) {
     s32 state = mnuTerminalTaskState;
-    if (state == 1) {
-        return 1;
+    if (state == FLD_TERMINAL_TASK_STATE_ACTIVE) {
+        return FLD_TERMINAL_SCENE_POLL_PENDING;
     }
-    if (state < 2) {
-        return 0;
+    if (state < FLD_TERMINAL_TASK_STATE_RESOURCES_RELEASED) {
+        return FLD_TERMINAL_SCENE_POLL_NOT_PENDING;
     }
-    if (state == 2) {
-        mnuTerminalTaskState = 0;
+    if (state == FLD_TERMINAL_TASK_STATE_RESOURCES_RELEASED) {
+        mnuTerminalTaskState = FLD_TERMINAL_TASK_STATE_IDLE;
     }
-    return 0;
+    return FLD_TERMINAL_SCENE_POLL_NOT_PENDING;
 }
 
 extern MenuPopupEntry mnuTerminalPreparationPopupEntry[];

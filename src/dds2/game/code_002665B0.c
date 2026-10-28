@@ -8,6 +8,7 @@
 #include "fr_font.h"
 #include "fr_font_draw_glyph.h"
 #include "mnu_text_entry.h"
+#include "fld_terminal_scene_state.h"
 #include "snd_sequence_volume_pan.h"
 #include "ui_color.h"
 #include "mnu_input.h"
@@ -160,7 +161,7 @@ extern s32 fldGetModeFrameRecordIndex(MenuSlotState *);
 
 extern void mnuDrawTerminalBackdrop(s32);
 
-extern s8 gProcessStat_2;
+extern FldTerminalTaskState gProcessStat_2;
 
 
 extern void mnuDrawAndAdvanceProfilePanel(s32 x, s32 y, s32 z, MenuProfilePanel *panel, s32 option);
@@ -1079,7 +1080,7 @@ void mnuReleaseTerminalWorkAndResumeField(dds3ProcessID_t *task) {
         fclDestroyMessage();
         evtReleaseResourcePairHandle(&work->messageResources);
         sdfMemFreeDirect(work->heapHandle);
-        gProcessStat_2 = 2;
+        gProcessStat_2 = FLD_TERMINAL_TASK_STATE_RESOURCES_RELEASED;
     }
     if (mnuCheckResourceTask() != 0) {
         mnuStopResourceTask();
@@ -1121,7 +1122,7 @@ void mnuCreateTerminalSceneTasks(s32 reduced, s32 slot) {
     fadeTask = dds3StartProcess("term_fade", 0x2B15, 1, 0,
         mnuUpdateTerminalMessageWindowIndicator, NULL, (u32)scene);
     dds3LinkProcess(drawTask, fadeTask);
-    gProcessStat_2 = 1;
+    gProcessStat_2 = FLD_TERMINAL_TASK_STATE_ACTIVE;
 }
 
 
@@ -1133,19 +1134,19 @@ void fldStopSceneTasks(void) {
     D_0043785C = 0;
 }
 
-/* Report one only for active state one; consume completed state two by clearing it. */
-s32 fldPollSceneState(void) {
+/* Report pending while active; consume the resource-release marker when polled. */
+FldTerminalScenePollResult fldPollSceneState(void) {
     s32 state = gProcessStat_2;
-    if (state == 1) {
-        return 1;
+    if (state == FLD_TERMINAL_TASK_STATE_ACTIVE) {
+        return FLD_TERMINAL_SCENE_POLL_PENDING;
     }
-    if (state < 2) {
-        return 0;
+    if (state < FLD_TERMINAL_TASK_STATE_RESOURCES_RELEASED) {
+        return FLD_TERMINAL_SCENE_POLL_NOT_PENDING;
     }
-    if (state == 2) {
-        gProcessStat_2 = 0;
+    if (state == FLD_TERMINAL_TASK_STATE_RESOURCES_RELEASED) {
+        gProcessStat_2 = FLD_TERMINAL_TASK_STATE_IDLE;
     }
-    return 0;
+    return FLD_TERMINAL_SCENE_POLL_NOT_PENDING;
 }
 
 /* Seed the task's popup slot before dispatching mode zero with the supplied request. */

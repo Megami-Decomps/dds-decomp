@@ -11,6 +11,7 @@
 #include "kwln_background_fade_api.h"
 #include "mnu_camp_state_ack_api.h"
 #include "fld_lmap_task_presence.h"
+#include "fld_terminal_scene_state.h"
 #include "dds3_admin_control_api.h"
 #include "sdf_heap_overlay_block.h"
 #include "kwln_draw_buffer.h"
@@ -120,7 +121,7 @@ extern s32 checkConfigState(void);
 
 extern s32 mnuCampConsumePanelTaskCompletion(void);
 
-extern s32 fldPollSceneState(void);
+extern FldTerminalScenePollResult fldPollSceneState(void);
 
 extern u8 fldLmapTaskExists(void);
 
@@ -1460,10 +1461,10 @@ u32 ExitTerminalTest(void) {
 }
 
 u8 CheckTerminalTest(void) {
-    s32 sceneState;
+    FldTerminalScenePollResult pollResult;
 
-    sceneState = fldPollSceneState();
-    return sceneState == 0;
+    pollResult = fldPollSceneState();
+    return pollResult == FLD_TERMINAL_SCENE_POLL_NOT_PENDING;
 }
 
 s32 evtCreateStaffTasksAlternate(void) {
