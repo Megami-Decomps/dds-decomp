@@ -3041,7 +3041,7 @@ void btlAlignCerberusPartTransforms(void) {
     for (unit = head; unit != NULL; unit = unit->next) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x400) {
-                if (unit->lookupId == 1) {
+                if (unit->battleSideSlotIndex == 1) {
                     selected = unit;
                     break;
                 }
@@ -3668,7 +3668,7 @@ s32 btlFilterBossCommandBySelection(u8 *unit, s32 command) {
     if (flags & 1) {
         if (flags & 0x400) {
             u8 *effect = (u8 *)((BtlState *)btlGetRuntime())->effect;
-            if (((BtlUnit *)unit)->lookupId == ((BtlBossEffectPayload *)effect)->selectedId) {
+            if (((BtlUnit *)unit)->battleSideSlotIndex == ((BtlBossEffectPayload *)effect)->selectedId) {
                 if (((BtlBossEffectPayload *)effect)->options & 4) {
                     return command;
                 }
@@ -3692,7 +3692,7 @@ void btlConfigureRavanaUnitDimensions(BtlUnit *unit) {
     unit->reach = 25.0f;
     unit->geometryHeight = 100.0f;
     unit->bodyRadius = 25.0f;
-    if (((BtlBossEffectPayload *)battleData)->selectedId != unit->lookupId) {
+    if (((BtlBossEffectPayload *)battleData)->selectedId != unit->battleSideSlotIndex) {
         entry = btlFindUnitByActor(unit);
         if (entry != 0) {
             entry->actionNumber = 0;
@@ -3776,7 +3776,7 @@ void btlStepFocusAngle(void) {
     for (unit = battle->units; unit != NULL; unit = unit->next) {
         if (unit->status.flags & 1) {
             if (unit->status.flags & 0x400) {
-                if (unit->lookupId == slot[3]) {
+                if (unit->battleSideSlotIndex == slot[3]) {
                     break;
                 }
             }
@@ -3827,7 +3827,7 @@ s32 btlCheckLinkedActionEffectTarget(BtlUnit *actor, BtlUnit *target, s32 comman
     if (blocked != 0) {
         return 4;
     }
-    if (target->lookupId != effect->targetId) {
+    if (target->battleSideSlotIndex != effect->targetId) {
         return 4;
     }
     effect->flags |= 1;
@@ -3884,8 +3884,8 @@ s32 btlSwapRandomBossSelection(void) {
         unitFlags = unit->status.flags;
         if (unitFlags & 1) {
             if (unitFlags & 0x400) {
-                oldUnit = unit->lookupId == effect->selectedId ? unit : oldUnit;
-                newUnit = unit->lookupId == newId ? unit : newUnit;
+                oldUnit = unit->battleSideSlotIndex == effect->selectedId ? unit : oldUnit;
+                newUnit = unit->battleSideSlotIndex == newId ? unit : newUnit;
             }
         }
     }
@@ -3908,7 +3908,7 @@ s32 btlSwapRandomBossSelection(void) {
         entry = btlFindUnitByActor(oldUnit);
         entry->actionNumber = 0;
     }
-    btlBossDebugPrintf(D_003A5DB8, oldUnit->lookupId, newUnit->lookupId, oldUnit, newUnit);
+    btlBossDebugPrintf(D_003A5DB8, oldUnit->battleSideSlotIndex, newUnit->battleSideSlotIndex, oldUnit, newUnit);
     effect->options = ((effect->options & ~4) | 2) & ~1;
     return -1;
 }
@@ -3937,7 +3937,7 @@ BtlTerminalOutcomeOverrideResult btlCheckSelectedBossUnitFlag(void) {
         u32 flags = ((BtlUnit *)unit)->status.flags;
         if (flags & 1) {
             if (flags & 0x400) {
-                if (((BtlBossEffectPayload *)effect)->selectedId == ((BtlUnit *)unit)->lookupId) {
+                if (((BtlBossEffectPayload *)effect)->selectedId == ((BtlUnit *)unit)->battleSideSlotIndex) {
                     break;
                 }
             }
@@ -3964,7 +3964,7 @@ void btlRefreshRavanaUnitModelsAndPose(void) {
             if (flags & 1) {
                 if (flags & 0x400) {
                     if (flags & 2) {
-                        if (unit->lookupId == effect->selectedId && (effect->options & 4)) {
+                        if (unit->battleSideSlotIndex == effect->selectedId && (effect->options & 4)) {
                             btlInitializeEffectVectorsFromSourceRecords(unit, effect->header.actor->resourceKind,
                                                                         effect->header.actor->species);
                         } else {
@@ -3988,7 +3988,7 @@ void btlRefreshRavanaUnitModelsAndPose(void) {
             if (flags & 1) {
                 if (flags & 0x400) {
                     if (flags & 2) {
-                        if (unit->lookupId == effect->selectedId && (effect->options & 4)) {
+                        if (unit->battleSideSlotIndex == effect->selectedId && (effect->options & 4)) {
                             vector = unit->position;
                             actor = effect->header.actor;
                             SDF_VU0_COPYVECTOR(actor->position, vector);
@@ -4076,7 +4076,7 @@ s32 btlRemapSelectedBossCommand(u8 *unit, s32 command, u8 mode) {
         return command;
     }
     effect = (u8 *)((BtlState *)btlGetRuntime())->effect;
-    if (((BtlUnit *)unit)->lookupId != ((BtlBossEffectPayload *)effect)->selectedId) {
+    if (((BtlUnit *)unit)->battleSideSlotIndex != ((BtlBossEffectPayload *)effect)->selectedId) {
         return -1;
     }
     if (command == 13) {
@@ -4105,7 +4105,7 @@ void btlSyncEffectActorToUnit(BtlUnit *unit, u8 *task) {
         target = effect->header.actor;
         if (target != 0) {
             if (target->status.flags & 2) {
-                if (unit->lookupId == effect->selectedId) {
+                if (unit->battleSideSlotIndex == effect->selectedId) {
                     if ((*(u16 *)(task + 0x26) & 0x800) == 0) {
                         effect->options |= 4;
                         SDF_VU0_COPYVECTOR(target->position, unit->position);
@@ -4986,9 +4986,9 @@ u8 btlSetLinkedDefeatCameraPresetA(BtlLinkedCommand *command, BtlCamState *camer
         return 1;
     }
     if (runtime[0x122] == 3) {
-        kind = unit->lookupId;
+        kind = unit->battleSideSlotIndex;
     } else {
-        kind = unit->lookupId == 0 ? 0 : 2;
+        kind = unit->battleSideSlotIndex == 0 ? 0 : 2;
     }
     btlFlagAllUnitDefeatCandidatesTask();
     switch (kind) {

@@ -3729,9 +3729,9 @@ u8 btlSetLinkedDefeatCameraPresetA(BtlLinkedCommand *command, BtlCamState *camer
         return 1;
     }
     if (runtime[0x134] == 3) {
-        kind = unit->lookupId;
+        kind = unit->battleSideSlotIndex;
     } else {
-        kind = unit->lookupId == 0 ? 0 : 2;
+        kind = unit->battleSideSlotIndex == 0 ? 0 : 2;
     }
     btlFlagAllUnitDefeatCandidatesTask();
     switch (kind) {
@@ -4000,9 +4000,9 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
                         return 1;
                     }
                     if (runtime->cameraPresetMode == 3) {
-                        targetSlot = target->lookupId;
+                        targetSlot = target->battleSideSlotIndex;
                     } else {
-                        targetSlot = target->lookupId == 0 ? 0 : 2;
+                        targetSlot = target->battleSideSlotIndex == 0 ? 0 : 2;
                     }
                     btlFlagAllUnitDefeatCandidatesTask();
                     switch (targetSlot) {
@@ -4201,9 +4201,9 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
                 return 1;
             }
             if (runtime->cameraPresetMode == 3) {
-                targetSlot = attackTarget->lookupId;
+                targetSlot = attackTarget->battleSideSlotIndex;
             } else {
-                targetSlot = attackTarget->lookupId == 0 ? 0 : 2;
+                targetSlot = attackTarget->battleSideSlotIndex == 0 ? 0 : 2;
             }
             btlFlagAllUnitDefeatCandidatesTask();
             if (link->unit->partyRecord.unitId == 0x111) {
@@ -5112,7 +5112,7 @@ void btlScheduleCherunShadowSkillPresentation(ActionStateLink *actor, BtlUnit *t
 
     if (battle->cameraPresetMode != twoUnitCameraMode) {
         if (battle->cameraPresetMode == 3) {
-            preset = boss->lookupId * 2;
+            preset = boss->battleSideSlotIndex * 2;
         } else {
             preset = 2;
         }
@@ -5120,11 +5120,11 @@ void btlScheduleCherunShadowSkillPresentation(ActionStateLink *actor, BtlUnit *t
         /* Stage the first-unit preset before the default; see the same idiom. */
         u32 firstUnitCameraPreset = 8;
         preset = 6;
-        if (boss->lookupId == 0) {
+        if (boss->battleSideSlotIndex == 0) {
             preset = firstUnitCameraPreset;
         }
     }
-    if (target->lookupId != 0) {
+    if (target->battleSideSlotIndex != 0) {
         preset++;
     }
     switch (preset) {
@@ -6442,9 +6442,9 @@ u8 btlSetBrahmanPartyCameraPreset(BtlLinkedCommand *command, BtlCamState *camera
     }
 
     if (battle->cameraPresetMode == 3) {
-        cameraPreset = target->lookupId;
+        cameraPreset = target->battleSideSlotIndex;
     } else {
-        cameraPreset = target->lookupId == 0 ? 0 : 2;
+        cameraPreset = target->battleSideSlotIndex == 0 ? 0 : 2;
     }
     if ((u32)cameraPreset >= 3) {
         return 1;
@@ -6578,7 +6578,7 @@ void btlChooseBrahmaMoveCamera(BtlLinkedCommand *command) {
     btlClearAllUnitDefeatCandidatesTask();
     btlFlagUnitDefeatCandidate(target);
     btlApplyCombinedActorFlags(command);
-    switch (target->lookupId) {
+    switch (target->battleSideSlotIndex) {
     case 0:
         switch (btlFindSpecialActionIndex()) {
         case 2:
@@ -7305,9 +7305,9 @@ u8 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *camer
         return 1;
     }
     if (runtime[0x134] == 3) {
-        kind = unit->lookupId;
+        kind = unit->battleSideSlotIndex;
     } else {
-        kind = unit->lookupId == 0 ? 0 : 2;
+        kind = unit->battleSideSlotIndex == 0 ? 0 : 2;
     }
     btlFlagAllUnitDefeatCandidatesTask();
     switch (kind) {
@@ -7667,7 +7667,7 @@ void btlSelectTargetCameraPose(BtlLinkedCommand *command) {
     btlClearAllUnitDefeatCandidatesTask();
     btlFlagUnitDefeatCandidate(target);
     btlApplyCombinedActorFlags(command);
-    switch (target->lookupId) {
+    switch (target->battleSideSlotIndex) {
     case 0:
         btlSetEffectCameraKeys((s32)command,
             464.7f, -124.1f, -797.1f, -0.11f, 0.202f, -0.039f, 0.962f, 527.6f,
@@ -7703,9 +7703,9 @@ u8 btlSetSpecialDefeatCameraPreset(BtlLinkedCommand *command, BtlCamState *camer
         return 1;
     }
     if (runtime->formationMode == 3) {
-        kind = unit->lookupId;
+        kind = unit->battleSideSlotIndex;
     } else {
-        kind = unit->lookupId == 0 ? 0 : 2;
+        kind = unit->battleSideSlotIndex == 0 ? 0 : 2;
     }
     btlFlagAllUnitDefeatCandidatesTask();
     unit = runtime->firstUnit;

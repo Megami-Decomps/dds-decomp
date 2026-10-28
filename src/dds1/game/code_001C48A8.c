@@ -291,7 +291,7 @@ void btlInitializeBattleUnits(BtlState *scene) {
                 unit=btlCreateUnit();
                 btlCopyUnitStats(unit,&DDS3_GBWK->party[partyIndex]);
                 unit->partyIndex=partyIndex;
-                unit->lookupId=slot;
+                unit->battleSideSlotIndex=slot;
                 unit->status.flags |= 0x301;
                 unit->partyRecord.flags |= 7;
                 if (btlCheckSpecialAbility(&unit->partyRecord,0x259) != 0) {
@@ -321,7 +321,7 @@ void btlInitializeBattleUnits(BtlState *scene) {
             unit=btlCreateUnit();
             btlReleaseUnitResources(unit);
             unit->status.flags=(unit->status.flags|0x200)&~0x103;
-            unit->lookupId=index;
+            unit->battleSideSlotIndex=index;
         }
     }
     battleMode=scene->battleMode;
@@ -331,7 +331,7 @@ void btlInitializeBattleUnits(BtlState *scene) {
         if (enemyId != 0 && index<8) {
             unit=btlCreateUnit();
             btlInitializePartyRecordFromEnemy(&unit->partyRecord,enemyId);
-            unit->lookupId=index;
+            unit->battleSideSlotIndex=index;
             unit->status.flags |= 1;
             unit->status.flags |= 0x500;
             unit->partyRecord.flags |= 0x23;
@@ -347,7 +347,7 @@ void btlInitializeBattleUnits(BtlState *scene) {
             unit=btlCreateUnit();
             btlReleaseUnitResources(unit);
             unit->status.flags=(unit->status.flags|0x500)&~3;
-            unit->lookupId=index;
+            unit->battleSideSlotIndex=index;
         }
         initializeBattleUnitHook(scene,unit);
         index++;
@@ -1656,7 +1656,7 @@ void fldSortGroupByPriority(BtlTask **group, s32 entryCount) {
             BtlTask *first = pairCursor[0];
             BtlTask *second = pairCursor[1];
             if (first != 0 && second != 0 &&
-                first->unit->lookupId > second->unit->lookupId) {
+                first->unit->battleSideSlotIndex > second->unit->battleSideSlotIndex) {
                 pairCursor[0] = second;
                 swapped = 1;
                 pairCursor[1] = first;

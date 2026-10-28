@@ -690,9 +690,9 @@ u8 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *camer
         return 1;
     }
     if (runtime[0x122] == 3) {
-        kind = unit->lookupId;
+        kind = unit->battleSideSlotIndex;
     } else {
-        kind = unit->lookupId == 0 ? 0 : 2;
+        kind = unit->battleSideSlotIndex == 0 ? 0 : 2;
     }
     btlFlagAllUnitDefeatCandidatesTask();
     switch (kind) {

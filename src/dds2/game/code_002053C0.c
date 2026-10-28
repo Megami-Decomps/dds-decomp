@@ -570,9 +570,9 @@ void btlPlaceTripleFormationAroundCenter(ActionStateLink *link, BtlUnit *first, 
     slot[0] = NULL;
     slot[1] = NULL;
     slot[2] = NULL;
-    slot[link->unit->lookupId] = link->unit;
-    slot[first->lookupId] = first;
-    slot[second->lookupId] = second;
+    slot[link->unit->battleSideSlotIndex] = link->unit;
+    slot[first->battleSideSlotIndex] = first;
+    slot[second->battleSideSlotIndex] = second;
     radius = btlMeasureFilteredUnitGroupBounds(0x400, 0, 0) + 200.0f;
     SDF_VU0_STOREVECTOR_NOMEM(center);
     pos[0] = center[0];
@@ -619,9 +619,9 @@ void btlPlaceTripleFormationAroundTarget(ActionStateLink *link, BtlUnit *first, 
         slot[0] = 0;
         slot[1] = 0;
         slot[2] = 0;
-        slot[link->unit->lookupId] = link->unit;
-        slot[first->lookupId] = first;
-        slot[second->lookupId] = second;
+        slot[link->unit->battleSideSlotIndex] = link->unit;
+        slot[first->battleSideSlotIndex] = first;
+        slot[second->battleSideSlotIndex] = second;
         btlUnitGetMuzzlePosVU(target);
         SDF_VU0_STOREVECTOR(center);
         center[1] = 0.0f;
@@ -677,15 +677,15 @@ void btlPlaceTripleFormationAroundMiddleActor(ActionStateLink *link, BtlUnit *fi
     slot[1] = 0;
     slot[2] = 0;
     if (first != 0 && second != 0) {
-        slot[link->unit->lookupId] = link->unit;
-        slot[first->lookupId] = first;
-        slot[second->lookupId] = second;
+        slot[link->unit->battleSideSlotIndex] = link->unit;
+        slot[first->battleSideSlotIndex] = first;
+        slot[second->battleSideSlotIndex] = second;
     } else {
         for (unit = work->units; unit != NULL; unit = unit->next) {
             u32 flags = unit->status.flags;
             if (flags & 1) {
                 if (flags & 0x200) {
-                    slot[unit->lookupId] = unit;
+                    slot[unit->battleSideSlotIndex] = unit;
                 }
             }
         }
@@ -808,9 +808,9 @@ void btlAlignTripleFormationWithTarget(ActionStateLink *link, BtlUnit *first, Bt
         slot[0] = NULL;
         slot[1] = NULL;
         slot[2] = NULL;
-        slot[link->unit->lookupId] = link->unit;
-        slot[first->lookupId] = first;
-        slot[second->lookupId] = second;
+        slot[link->unit->battleSideSlotIndex] = link->unit;
+        slot[first->battleSideSlotIndex] = first;
+        slot[second->battleSideSlotIndex] = second;
         if ((work->commandRestrictFlags & 0x400000) != 0 &&
             btlGetBossSceneStateWhenActive() == 0) {
             switch (target->partyRecord.unitId) {
@@ -891,7 +891,7 @@ void btlPlacePairedFormationAtFixedCenter(ActionStateLink *link, BtlUnit *other)
     f32 radius;
     u32 i;
     BtlUnit *linked = link->unit;
-    if (linked->lookupId < other->lookupId) {
+    if (linked->battleSideSlotIndex < other->battleSideSlotIndex) {
         slot[0] = linked;
         slot[1] = other;
     } else {
@@ -970,7 +970,7 @@ void btlPlacePairedFormationNearTarget(ActionStateLink *link, BtlUnit *other) {
 
     state = (BtlState *)btlGetRuntime();
     linked = link->unit;
-    if (linked->lookupId < other->lookupId) {
+    if (linked->battleSideSlotIndex < other->battleSideSlotIndex) {
         slots[0] = linked;
         slots[1] = other;
     } else {

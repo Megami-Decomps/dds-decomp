@@ -2328,7 +2328,7 @@ void btlBuildActorGroupProjectionCameraPose(BtlLinkedCommand *source, BtlCamStat
         }
     }
 
-    if (actor->lookupId != 1 && markedCount == 1) {
+    if (actor->battleSideSlotIndex != 1 && markedCount == 1) {
         f32 y = -height * 0.55f;
         shiftedCenter[1] = y;
         center[1] = y;
@@ -2337,7 +2337,7 @@ void btlBuildActorGroupProjectionCameraPose(BtlLinkedCommand *source, BtlCamStat
     btlUnitGetMuzzlePosVU(actor);
     VU0_STORE_VF_PTR(vf10, point);
     point[1] = -btlUnitGetTopY(actor) * 0.775f;
-    if (actor->lookupId != 1) {
+    if (actor->battleSideSlotIndex != 1) {
         if (point[0] > 0.0f) {
             if (markedCount >= 2) {
                 if (side == 0) {
@@ -2383,13 +2383,13 @@ void btlBuildActorGroupProjectionCameraPose(BtlLinkedCommand *source, BtlCamStat
     btlUnitGetMuzzlePosVU(farthestUnit);
     VU0_STORE_VF_PTR(vf10, farthestPos);
     farthestPos[2] -= farthestUnit->reach * farthestUnit->scale;
-    if (actor->lookupId != 1 && side != 0) {
+    if (actor->battleSideSlotIndex != 1 && side != 0) {
         farthestPos[2] -= farthestUnit->reach * farthestUnit->scale * 0.75f;
     }
 
     fov = source->camera.fov;
     out->fov = fov;
-    if (actor->lookupId == 1 || markedCount >= 2) {
+    if (actor->battleSideSlotIndex == 1 || markedCount >= 2) {
         center[2] = -50.0f;
     }
     projectedDistance = btlProjectOnPlaneVU(center, point, farthestPos);
@@ -2648,7 +2648,7 @@ void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *action, BtlCamState *pose,
         } else if (runtime->cameraPresetMode != 3) {
             flags = unit->status.flags;
         } else {
-            if (unit->lookupId != 1) {
+            if (unit->battleSideSlotIndex != 1) {
                 btlCopyUnitCurrentPosition(unit, vectors.position);
                 vectors.position[2] = unit->position[2] - 45.0f;
                 btlSetUnitPosition((u8 *)unit, vectors.position);
@@ -2719,7 +2719,7 @@ void btlApplyMarkedUnitActionCamera(BtlLinkedCommand *action, BtlCamState *pose,
 
     if (target != NULL && (target->status.flags & 2) != 0 &&
         (runtime->cameraPresetMode == 1 ||
-         (runtime->cameraPresetMode == 3 && target->lookupId == 1))) {
+         (runtime->cameraPresetMode == 3 && target->battleSideSlotIndex == 1))) {
         s32 field = mdlGetMotionNum(target->ext->owner, 0);
 
         if (field == 0xD || field == 0x12) {
@@ -3039,10 +3039,10 @@ void btlFrameEarliestAnimatedUnitCameraPair(BtlLinkedCommand *action, BtlCamStat
         pose = 1;
         break;
     case 2:
-        pose = selected->lookupId ? 2 : 0;
+        pose = selected->battleSideSlotIndex ? 2 : 0;
         break;
     default:
-        pose = selected->lookupId;
+        pose = selected->battleSideSlotIndex;
         break;
     }
     halfFov = action->camera.fov;
@@ -3523,7 +3523,7 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
         CURSOR->scriptSetIndex = 3;
         CURSOR->unk_0E = 0;
         unit = command->task->unit;
-        if (unit->lookupId > command->linkedA->lookupId) {
+        if (unit->battleSideSlotIndex > command->linkedA->battleSideSlotIndex) {
             orientation = !btlHasFlag(unit->status.flags, 0x1000);
         } else {
             orientation = btlHasFlag(unit->status.flags, 0x1000);
@@ -3555,7 +3555,7 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
         CURSOR->scriptSetIndex = 3;
         CURSOR->unk_0E = 0;
         unit = command->task->unit;
-        if (unit->lookupId > command->linkedA->lookupId) {
+        if (unit->battleSideSlotIndex > command->linkedA->battleSideSlotIndex) {
             orientation = !btlHasFlag(unit->status.flags, 0x1000);
         } else {
             orientation = btlHasFlag(unit->status.flags, 0x1000);
@@ -3596,7 +3596,7 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
     case 0x1D5:
         CURSOR->scriptSetIndex = 3;
         CURSOR->unk_0E = 0;
-        switch (command->task->unit->lookupId) {
+        switch (command->task->unit->battleSideSlotIndex) {
         case 0: choice = 0; break;
         case 2: choice = 1; break;
         default: choice = (s16)btlNextScaledRandom(2); break;
@@ -3609,7 +3609,7 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
         CURSOR->scriptSetIndex = 3;
         CURSOR->unk_0E = 0;
         choice = (s16)btlNextScaledRandom(2);
-        switch (command->task->unit->lookupId) {
+        switch (command->task->unit->battleSideSlotIndex) {
         case 0: CURSOR->scriptIndex = 9; break;
         case 2: CURSOR->scriptIndex = 10; break;
         default: CURSOR->scriptIndex = choice + 9; break;
@@ -3621,7 +3621,7 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
         CURSOR->scriptSetIndex = 3;
         CURSOR->unk_0E = 0;
         choice = (s16)btlNextScaledRandom(2);
-        switch (command->task->unit->lookupId) {
+        switch (command->task->unit->battleSideSlotIndex) {
         case 0: CURSOR->scriptIndex = 0xF; break;
         case 2: CURSOR->scriptIndex = 0x10; break;
         default: CURSOR->scriptIndex = choice + 0xF; break;
@@ -3763,7 +3763,7 @@ void btlInitializeRandomCameraCursor(BtlLinkedCommand *action, BtlCamState *stat
         }
     }
 
-    CURSOR->category = action->task->unit->lookupId;
+    CURSOR->category = action->task->unit->battleSideSlotIndex;
     random = btlNextScaledRandom(8);
     CURSOR->index = choices.values[markedCount][CURSOR->category - 3][random];
     btlBuildPresetCameraPose(action, state, 0, D_0035D810[CURSOR->index]);
@@ -3785,15 +3785,15 @@ BtlUnit *btlFindLinkedActorById(BtlLinkedCommand *action, s32 id) {
     BtlUnit *second;
     BtlUnit *third;
 
-    if (first->lookupId == id) {
+    if (first->battleSideSlotIndex == id) {
         return first;
     }
     second = action->linkedA;
-    if (second->lookupId == id) {
+    if (second->battleSideSlotIndex == id) {
         return second;
     }
     third = action->linkedB;
-    if (third != NULL && third->lookupId == id) {
+    if (third != NULL && third->battleSideSlotIndex == id) {
         return third;
     }
     return NULL;
@@ -4793,15 +4793,15 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
             worldAxis[0] = p->eyePolicy.side;
             if (btlCountUnitsByFlags(0x200) < 3) {
                 if (p->eyePolicy.kind == 0x19) {
-                    sourceId = action->task->unit->lookupId;
-                    if (sourceId == 1 || action->linkedA->lookupId == 1) {
-                        if (sourceId == 0 || action->linkedA->lookupId == 0)
+                    sourceId = action->task->unit->battleSideSlotIndex;
+                    if (sourceId == 1 || action->linkedA->battleSideSlotIndex == 1) {
+                        if (sourceId == 0 || action->linkedA->battleSideSlotIndex == 0)
                             worldAxis[0] *= 0.5f;
                     }
                 } else {
-                    sourceId = action->task->unit->lookupId;
-                    if (sourceId == 1 || action->linkedA->lookupId == 1) {
-                        if (sourceId == 2 || action->linkedA->lookupId == 2)
+                    sourceId = action->task->unit->battleSideSlotIndex;
+                    if (sourceId == 1 || action->linkedA->battleSideSlotIndex == 1) {
+                        if (sourceId == 2 || action->linkedA->battleSideSlotIndex == 2)
                             worldAxis[0] *= 0.5f;
                     }
                 }
@@ -4812,20 +4812,20 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
             measuredDistance = span / tanf(halfFov);
             VU0_STORE_VF_UNCLOBBERED(vf10, eye);
             if (btlCountUnitsByFlags(0x200) < 3) {
-                if (action->task->unit->lookupId == 1 || action->linkedA->lookupId == 1)
+                if (action->task->unit->battleSideSlotIndex == 1 || action->linkedA->battleSideSlotIndex == 1)
                     measuredDistance *= 1.3f;
             }
         } else { /* 001E87C0 */
             if (action->task->unit->status.flags & 0x1000) {
-                if (action->task->unit->lookupId < action->linkedA->lookupId)
+                if (action->task->unit->battleSideSlotIndex < action->linkedA->battleSideSlotIndex)
                     worldAxis[0] = -p->eyePolicy.side;
                 else worldAxis[0] = p->eyePolicy.side;
             } else {
-                if (action->linkedA->lookupId < action->task->unit->lookupId)
+                if (action->linkedA->battleSideSlotIndex < action->task->unit->battleSideSlotIndex)
                     worldAxis[0] = -p->eyePolicy.side;
                 else worldAxis[0] = p->eyePolicy.side;
             }
-            if (action->task->unit->lookupId == 1 || action->linkedA->lookupId == 1)
+            if (action->task->unit->battleSideSlotIndex == 1 || action->linkedA->battleSideSlotIndex == 1)
                 worldAxis[0] *= 0.6f;
             VU0_LOAD_VF(vf10, worldAxis);
             VU0_STORE_VF_UNCLOBBERED(vf10, direction);
@@ -4834,7 +4834,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
             measuredDistance = span / tanf(halfFov);
             VU0_STORE_VF_UNCLOBBERED(vf10, eye);
             /* 001E8894: fresh task/unit/linkedA reads after both calls */
-            if (action->task->unit->lookupId == 1 || action->linkedA->lookupId == 1)
+            if (action->task->unit->battleSideSlotIndex == 1 || action->linkedA->battleSideSlotIndex == 1)
                 measuredDistance *= 1.3f;
         }
         /* 001E88C0 */
@@ -5576,16 +5576,16 @@ void btlApplyTimedCameraInstruction(BtlLinkedCommand *action, BtlCamState *pose,
             if (instruction->startFrame <= (f32)CURSOR->frame &&
                 (f32)CURSOR->frame < instruction->startFrame + instruction->duration) {
                 unit = ((BtlState *)btlGetRuntime())->units;
-                if (action->task->unit->lookupId == 1) {
+                if (action->task->unit->battleSideSlotIndex == 1) {
                     while (unit != NULL) {
                         if ((btlUnitStatusPair(unit) & 0x201) == 0x201 &&
-                            unit->lookupId != action->task->unit->lookupId) {
+                            unit->battleSideSlotIndex != action->task->unit->battleSideSlotIndex) {
                             if (instruction->kind == 37) {
-                                lower = unit->lookupId;
-                                upper = action->task->unit->lookupId;
+                                lower = unit->battleSideSlotIndex;
+                                upper = action->task->unit->battleSideSlotIndex;
                             } else {
-                                lower = action->task->unit->lookupId;
-                                upper = unit->lookupId;
+                                lower = action->task->unit->battleSideSlotIndex;
+                                upper = unit->battleSideSlotIndex;
                             }
                             if (lower < upper &&
                                 ((unit->status.flags & 0x20) != 0 ||
@@ -5608,24 +5608,24 @@ void btlApplyTimedCameraInstruction(BtlLinkedCommand *action, BtlCamState *pose,
                 unit = ((BtlState *)btlGetRuntime())->units;
                 while (unit != NULL) {
                     if ((btlUnitStatusPair(unit) & 0x201) == 0x201 &&
-                        unit->lookupId != action->task->unit->lookupId) {
+                        unit->battleSideSlotIndex != action->task->unit->battleSideSlotIndex) {
                         switch ((u32)instruction->kind) {
                         case 34:
-                            lower = unit->lookupId;
-                            upper = action->task->unit->lookupId;
+                            lower = unit->battleSideSlotIndex;
+                            upper = action->task->unit->battleSideSlotIndex;
                             break;
                         case 35:
-                            lower = action->task->unit->lookupId;
-                            upper = unit->lookupId;
+                            lower = action->task->unit->battleSideSlotIndex;
+                            upper = unit->battleSideSlotIndex;
                             break;
                         case 36:
                         default:
                             if (CURSOR->counter == 0) {
-                                lower = action->task->unit->lookupId;
-                                upper = unit->lookupId;
+                                lower = action->task->unit->battleSideSlotIndex;
+                                upper = unit->battleSideSlotIndex;
                             } else {
-                                lower = unit->lookupId;
-                                upper = action->task->unit->lookupId;
+                                lower = unit->battleSideSlotIndex;
+                                upper = action->task->unit->battleSideSlotIndex;
                             }
                             break;
                         }
@@ -6653,7 +6653,7 @@ BtlUnit *btlFindActiveActorById(s32 id) {
         if (flags & 1) {
             if ((flags & 0xC0) == 0) {
                 if (flags & 0x200) {
-                    if (node->lookupId == id) {
+                    if (node->battleSideSlotIndex == id) {
                         return node;
                     }
                 }
@@ -10930,9 +10930,9 @@ void btlPlaceTripleFormationAroundCenter(BtlTask *link, BtlUnit *first, BtlUnit 
     slot[0] = NULL;
     slot[1] = NULL;
     slot[2] = NULL;
-    slot[link->unit->lookupId] = link->unit;
-    slot[first->lookupId] = first;
-    slot[second->lookupId] = second;
+    slot[link->unit->battleSideSlotIndex] = link->unit;
+    slot[first->battleSideSlotIndex] = first;
+    slot[second->battleSideSlotIndex] = second;
     radius = btlMeasureMaskedUnitBounds(0x400, 0, 0) + 200.0f;
     VU0_STORE_VF_UNCLOBBERED(vf10, center);
     pos[0] = center[0];
@@ -10983,9 +10983,9 @@ void btlPlaceTripleFormationAroundTarget(BtlTask *link, BtlUnit *first, BtlUnit 
         slot[0] = 0;
         slot[1] = 0;
         slot[2] = 0;
-        slot[link->unit->lookupId] = link->unit;
-        slot[first->lookupId] = first;
-        slot[second->lookupId] = second;
+        slot[link->unit->battleSideSlotIndex] = link->unit;
+        slot[first->battleSideSlotIndex] = first;
+        slot[second->battleSideSlotIndex] = second;
         btlUnitGetMuzzlePosVU(target);
         VU0_STORE_VF(vf10, center);
         center[1] = 0.0f;
@@ -11039,9 +11039,9 @@ void btlPlaceTripleFormationAroundMiddleActor(BtlTask *link, BtlUnit *first, Btl
     slot[0] = NULL;
     slot[1] = NULL;
     slot[2] = NULL;
-    slot[link->unit->lookupId] = link->unit;
-    slot[first->lookupId] = first;
-    slot[second->lookupId] = second;
+    slot[link->unit->battleSideSlotIndex] = link->unit;
+    slot[first->battleSideSlotIndex] = first;
+    slot[second->battleSideSlotIndex] = second;
     VU0_LOAD_VF(vf10, &slot[1]->orientation);
     effMiscQuaternionToMatrixVU();
     VU0_LOAD_VF(vf10, D_0037E110);
@@ -11148,9 +11148,9 @@ void btlAlignTripleFormationWithTarget(BtlTask *link, BtlUnit *first, BtlUnit *s
         slot[0] = NULL;
         slot[1] = NULL;
         slot[2] = NULL;
-        slot[link->unit->lookupId] = link->unit;
-        slot[first->lookupId] = first;
-        slot[second->lookupId] = second;
+        slot[link->unit->battleSideSlotIndex] = link->unit;
+        slot[first->battleSideSlotIndex] = first;
+        slot[second->battleSideSlotIndex] = second;
         btlUnitGetMuzzlePosVU(slot[1]);
         VU0_STORE_VF_UNCLOBBERED(vf10, position);
         btlUnitGetMuzzlePosVU(target);

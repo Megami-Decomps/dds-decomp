@@ -2633,7 +2633,7 @@ s32 btlSyncEligibleActorPanelHpMp(void) {
     /* i is never advanced: the count only gates the walk on any eligible actor. */
     for (i = 0; unit != NULL && i < eligibleCount; unit = unit->next) {
         if (btlHasRequiredActorStatusBits(unit) != 0) {
-            s32 slot = unit->lookupId;
+            s32 slot = unit->battleSideSlotIndex;
 
             if (panel->activeEntries[slot].presentation.hpState == 3) {
                 panel->activeEntries[slot].presentation.hpLevel = unit->partyRecord.hp;
@@ -2667,7 +2667,7 @@ s32 btlSetEligibleActorPanelTransitionState(void) {
     /* i is never advanced: the count only gates the walk on any eligible actor. */
     for (i = 0; unit != NULL && i < eligibleCount; unit = unit->next) {
         if (btlHasRequiredActorStatusBits(unit) != 0) {
-            panel->activeEntries[unit->lookupId].presentation.transitionState = 4;
+            panel->activeEntries[unit->battleSideSlotIndex].presentation.transitionState = 4;
         }
     }
     return 1;
@@ -2773,7 +2773,7 @@ void btlHighlightActorStatPanel(BtlUnit *unit, s8 side) {
     u32 index;
 
     if (unit->status.flags & 0x200) {
-        index = unit->lookupId;
+        index = unit->battleSideSlotIndex;
         task = dds3SearchProcessName(D_004367CC);
         if (task != NULL) {
             work = (BattleActorPanelWork *)dds3GetProcessData(task);
@@ -6399,7 +6399,7 @@ s32 btlSetActorPanelYForMode(s8 mode) {
     case 1:
         for (i = 0; actor != NULL && i < eligibleCount; actor = actor->next) {
             if (btlHasRequiredActorStatusBits(actor)) {
-                slot = actor->lookupId;
+                slot = actor->battleSideSlotIndex;
                 work->activeEntries[slot].basePosition[1] += 6;
                 work->activeEntries[slot].basePosition[1] = work->activeEntries[slot].basePosition[1] <= 0x143 ? 0x143 :
                     work->activeEntries[slot].basePosition[1] > 0x159 ? 0x159 : work->activeEntries[slot].basePosition[1];
@@ -6412,7 +6412,7 @@ s32 btlSetActorPanelYForMode(s8 mode) {
     case 2:
         for (i = 0; actor != NULL && i < eligibleCount; actor = actor->next) {
             if (btlHasRequiredActorStatusBits(actor)) {
-                slot = actor->lookupId;
+                slot = actor->battleSideSlotIndex;
                 work->activeEntries[slot].basePosition[1] -= 6;
                 work->activeEntries[slot].basePosition[1] = work->activeEntries[slot].basePosition[1] <= 0x143 ? 0x143 :
                     work->activeEntries[slot].basePosition[1] > 0x159 ? 0x159 : work->activeEntries[slot].basePosition[1];
@@ -6425,7 +6425,7 @@ s32 btlSetActorPanelYForMode(s8 mode) {
     case 3:
         for (i = 0; actor != NULL && i < eligibleCount; actor = actor->next) {
             if (btlHasRequiredActorStatusBits(actor)) {
-                slot = actor->lookupId;
+                slot = actor->battleSideSlotIndex;
                 work->activeEntries[slot].basePosition[1] = 0x159;
                 work->activeEntries[slot].position[1] = 0x159;
             }
@@ -6434,7 +6434,7 @@ s32 btlSetActorPanelYForMode(s8 mode) {
     case 4:
         for (i = 0; actor != NULL && i < eligibleCount; actor = actor->next) {
             if (btlHasRequiredActorStatusBits(actor)) {
-                slot = actor->lookupId;
+                slot = actor->battleSideSlotIndex;
                 work->activeEntries[slot].basePosition[1] = 0x143;
                 work->activeEntries[slot].position[1] = 0x143;
             }
@@ -6474,7 +6474,7 @@ void btlUpdateActorPanelPresentation(BtlState *battle, BattleActorPanelWork *wor
         ordinal = 0;
         while (actor != NULL && ordinal < eligibleCount) {
             if (btlHasRequiredActorStatusBits(actor)) {
-                slot = actor->lookupId;
+                slot = actor->battleSideSlotIndex;
                 switch (btlTrackedTaskHandles->presentationState) {
                 case 1:
                     work->activeEntries[slot].presentation.fade -= btlTrackedTaskHandles->status.bytes.fadeStep;
@@ -6500,7 +6500,7 @@ void btlUpdateActorPanelPresentation(BtlState *battle, BattleActorPanelWork *wor
         scene = (BattleSceneObject *)dds3GetProcessData(task);
         while (actor != NULL && ordinal < eligibleCount) {
             if (btlHasRequiredActorStatusBits(actor)) {
-                slot = actor->lookupId;
+                slot = actor->battleSideSlotIndex;
                 switch (scene->commandState) {
                 case BTL_COMMAND_SCENE_STATE_INPUT_ACTIVE:
                     work->activeEntries[slot].presentation.fade += 0x20;
@@ -6599,7 +6599,7 @@ s32 func_001C1F10(dds3ProcessID_t *task) {
     btlUpdateActorPanelPresentation(battle, work);
     for (; unit != NULL && i < count; unit = unit->next) {
         if (btlHasRequiredActorStatusBits(unit)) {
-            slot = unit->lookupId;
+            slot = unit->battleSideSlotIndex;
             btlUpdateActorVitalEffectState(unit, work, slot);
             work->activeEntries[slot].position[0] =
                 work->activeEntries[slot].basePosition[0] + work->activeEntries[slot].presentation.offset[0];
@@ -7142,7 +7142,7 @@ void btlSetActionActorPanelPresentation(ActionStateLink *actor, s8 mode, s8 valu
     slot = 0;
     for (; node != NULL; node = node->next) {
         if (btlHasRequiredActorStatusBits(node) != 0) {
-            slot = node->lookupId;
+            slot = node->battleSideSlotIndex;
             if (actor->unit->owner == node->owner) {
                 break;
             }
@@ -7179,7 +7179,7 @@ void btlUpdateActorSlotPresentationState(BtlUnit *object, s8 mode, s8 value) {
 
     for (; node != 0; node = node->next) {
         if (btlHasRequiredActorStatusBits(node) != 0) {
-            slot = node->lookupId;
+            slot = node->battleSideSlotIndex;
             if (object->owner == node->owner) {
                 break;
             }
@@ -7211,7 +7211,7 @@ void btlSetActorSecondaryPresentation(BtlUnit *actor, s32 unused, s8 mode) {
 
     for (; node != NULL; node = node->next) {
         if (btlHasRequiredActorStatusBits(node) != 0) {
-            slot = node->lookupId;
+            slot = node->battleSideSlotIndex;
             if (actor->owner == node->owner) {
                 break;
             }
@@ -7250,7 +7250,7 @@ void btlResetActorSlotPresentationValue(BtlUnit *object, BattleSceneObject *scen
     s32 offset;
     for (; node != 0; node = node->next) {
         if (btlHasRequiredActorStatusBits(node) != 0) {
-            slot = object->lookupId;
+            slot = object->battleSideSlotIndex;
             if (object->owner == node->owner) {
                 break;
             }
@@ -7369,7 +7369,7 @@ void btlSyncActorPanelCommandGroups(ActionStateLink *unused, BattleActorPanelWor
             continue;
         }
         group = 0;
-        slot = node->lookupId;
+        slot = node->battleSideSlotIndex;
         if (battle->groupPrimary[0] != NULL) {
             while (group < 20 && battle->groupPrimary[group] != NULL) {
                 if (battle->groupPrimary[group]->unit->owner == node->owner) {
@@ -10062,7 +10062,7 @@ s32 btlUpdateBattleSceneCommands(dds3ProcessID_t *task) {
             object->commandState = BTL_COMMAND_SCENE_STATE_COMMAND_SUBMITTED;
             ((SceneAiWork *)dds3GetProcessData(dds3SearchProcessName(D_004367B8)))->state =
                 BTL_TARGET_SELECTION_STATE_COMMITTED;
-            slot = object->commandData->linkedUnit->lookupId;
+            slot = object->commandData->linkedUnit->battleSideSlotIndex;
             panel->activeEntries[slot].presentation.unkF0 = 0;
             panel->activeEntries[slot].presentation.pendingSceneState = 5;
             panel->activeEntries[slot].presentation.hpState = 3;

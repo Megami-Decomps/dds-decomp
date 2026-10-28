@@ -227,7 +227,7 @@ void btlInsertPartyActorByPriority(BtlUnit *unit, u8 sourceIndex, u8 priority) {
             if ((u16)(DDS3_GBWK->party[insertion].flags & 1) == 0) {
                 break;
             }
-            if (priority < btlFindActiveActorByPartyIndex(insertion)->lookupId) {
+            if (priority < btlFindActiveActorByPartyIndex(insertion)->battleSideSlotIndex) {
                 break;
             }
             insertion++;
@@ -759,7 +759,7 @@ s32 btlMarkInactiveActorCandidates(void) {
     BtlUnit **read;
     s32 count;
     s32 remaining;
-    s32 lowestId;
+    s32 lowestSlotIndex;
 
     unit = battle->units;
     count = 0;
@@ -783,17 +783,17 @@ s32 btlMarkInactiveActorCandidates(void) {
         eligible[0]->status.flags |= 0x100;
         eligible[1]->status.flags |= 0x100;
     } else {
-        lowestId = 4;
+        lowestSlotIndex = 4;
         unit = NULL;
         if (count > 0) {
             remaining = count;
             read = eligible;
             do {
                 BtlUnit *candidate = *read++;
-                s32 lookupId = candidate->lookupId;
-                if (lookupId < lowestId) {
+                s32 slotIndex = candidate->battleSideSlotIndex;
+                if (slotIndex < lowestSlotIndex) {
                     unit = candidate;
-                    lowestId = lookupId;
+                    lowestSlotIndex = slotIndex;
                 }
             } while (--remaining != 0);
         }

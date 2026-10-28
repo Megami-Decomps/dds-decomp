@@ -148,7 +148,7 @@ typedef struct BtlUnit {
     u64 identity; /* 0x108: copied to effect tasks and compared to command IDs */
     BtlUnitStatus status; /* 0x110: complete low/high status record. */
     u32 gunResourceFlags; /* 0x118 */
-    u8 lookupId; /* 0x11C: retail lookup consumers use unsigned byte loads. */
+    u8 lookupId; /* 0x11C: party slots 0-2 or enemy slots 0-8; 0xFF when unset. */
     u8 pad11D[3];
     datUnitWork_t partyRecord; /* 0x120: complete copied actor record (0x1A4). */
     u8 partyIndex; /* 0x2C4: saved party-entry index, read with lbu. */
@@ -236,7 +236,7 @@ typedef struct BtlUnit {
     u64 owner;      /* 0x108: compared against the battle command's unit ID */
     BtlUnitStatus status; /* 0x110: complete low/high status record. */
     u32 gunResourceFlags; /* 0x118: model/gun request and readiness bits. */
-    u8 lookupId;
+    u8 lookupId; /* 0x11C: party slots 0-2 or enemy slots 0-8; 0xFF when unset. */
     u8 pad11D[3];
     datUnitWork_t partyRecord; /* 0x120: complete copied roster record (0x1C4). */
     u8 partyIndex; /* 0x2E4: saved party-entry index, read with lbu. */
@@ -298,5 +298,8 @@ static inline u64 btlUnitStatusPair(BtlUnit *unit) {
 
 /* Returns the signed projection length in f0; the projected point is in vf10. */
 f32 btlProjectOnPlaneVU(const f32 *vertexA, const f32 *vertexB, const f32 *vertexC);
+
+/* Preserve the field token for compiler matching; source uses its side-slot role. */
+#define battleSideSlotIndex lookupId
 
 #endif /* BTL_H */

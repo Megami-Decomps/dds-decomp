@@ -5046,7 +5046,7 @@ BtlUnit *btlCreateUnit(void) {
     unit->identity = btlAdvanceRuntimeSequenceCounter();
     unit->status.flags = 0;
     unit->status.stateFlags = 0;
-    unit->lookupId = unit->selectedEntryIndex = BTL_COMMAND_ID_INVALID;
+    unit->battleSideSlotIndex = unit->selectedEntryIndex = BTL_COMMAND_ID_INVALID;
     unit->partyIndex = 6;
     unit->gunResourceFlags = 0;
     unit->effectLink.referenceCount = 0;

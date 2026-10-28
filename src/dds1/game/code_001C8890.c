@@ -2418,7 +2418,7 @@ void btlScheduleSummonActionTasks(BtlTask *action) {
     if (action->unit->status.flags & 0x200) {
         btlBossDebugPrintf("summon:player=%X\n", action->indexWork.summonId);
         unit->status.flags |= 0x301;
-        btlInsertPartyActorByPriority(unit, (u8)action->indexWork.summonId, unit->lookupId);
+        btlInsertPartyActorByPriority(unit, (u8)action->indexWork.summonId, unit->battleSideSlotIndex);
         if (unit->partyRecord.flags & 0x1000) {
             unit->status.flags |= 0x1000;
         }
@@ -2513,7 +2513,7 @@ void btlScheduleSummonActionTasks(BtlTask *action) {
     task->ownerId = action->unit->identity;
     btlStartTask(task);
     if (action->unit->status.flags & 0x200) {
-        if (unit->lookupId != 1 && battle->cameraPresetMode == 3) {
+        if (unit->battleSideSlotIndex != 1 && battle->cameraPresetMode == 3) {
             unit->currentPosition[2] = unit->position[2] - 45.0f;
         }
         if (!(unit->status.flags & 0xE0)) {

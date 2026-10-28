@@ -5165,7 +5165,7 @@ BtlUnit *btlCreateUnit(void) {
     unit->owner = btlAdvanceRuntimeSequenceCounter();
     unit->status.flags = 0;
     unit->status.stateFlags = 0;
-    unit->lookupId = unit->selectedEntryIndex = BTL_COMMAND_ID_INVALID;
+    unit->battleSideSlotIndex = unit->selectedEntryIndex = BTL_COMMAND_ID_INVALID;
     unit->partyIndex = 6;
     unit->gunResourceFlags = 0;
     unit->effectLink.referenceCount = 0;
@@ -6253,11 +6253,11 @@ s32 btlPositionActorIndexUnits(BtlLinkedCommand *action) {
     if (!(unit->status.flags & 0x200)) {
         return 0;
     }
-    if (unit->lookupId != count) {
+    if (unit->battleSideSlotIndex != count) {
         return 0;
     }
     for (unit = work->units; unit != 0; unit = unit->next) {
-        if ((unit->status.flags & 0x100) && unit->lookupId != 1) {
+        if ((unit->status.flags & 0x100) && unit->battleSideSlotIndex != 1) {
             btlCopyUnitCurrentPosition(unit, pos);
             pos[2] = unit->position[2] - 90.0f;
             btlSetUnitPosition(unit, pos);
