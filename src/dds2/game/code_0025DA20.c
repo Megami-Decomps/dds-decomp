@@ -17,6 +17,7 @@
 #include "fr_font_context.h"
 #include "sdf_packet_list.h"
 #include "eff_resource_slots.h"
+#include "eff_mapped_resource_destroy_result.h"
 #include "eff_resource_source_lifetime.h"
 #include "sdf_resource.h"
 #include "evt_viewer.h"
@@ -147,7 +148,7 @@ extern void mnuShopReleaseWindowSprites();
 extern void mnuShopReleaseWindowAndEffectResources();
 
 
-extern s32 mnuShopReleaseSceneObjects(MenuTerminalContext *);
+extern EffMappedResourceDestroyResult mnuShopReleaseSceneObjects(MenuTerminalContext *);
 
 
 extern void evtReleaseResourcePairHandle(EvtResourcePair *);
@@ -1291,8 +1292,6 @@ void mnuInitializeShopStatusBatches(MenuTerminalContext *scene) {
     batchParameters[0] = initialParameter;
     batchParameters[1] = 0;
 }
-
-#include "eff_mapped_resource_destroy_result.h"
 
 /* Destroy both batches and return the second destruction result. */
 EffMappedResourceDestroyResult mnuShopReleaseSceneObjects(MenuTerminalContext *scene) {
