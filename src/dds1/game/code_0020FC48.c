@@ -2798,7 +2798,6 @@ extern u32 btlDebugMenuSetupNoOp(void *);
 extern void btlDebugMenuBeforeRecordNoOp(void);
 extern void btlDebugMenuRecordNoOp(void *);
 extern void btlDebugMenuAfterRecordNoOp(void);
-extern s32 btlGetConditionalEncounterInterval(s32 encounterIndex);
 #include "btl_conditional_encounter_roll_api.h"
 extern void btlApplyDebugEncounterPartySelection(void);
 /* Preview/select a debug encounter or pack; return one when it can launch. */

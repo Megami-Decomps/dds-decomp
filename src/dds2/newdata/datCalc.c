@@ -2437,13 +2437,13 @@ BtlScenePartyLevelThresholdResult btlCheckScenePartyLevelThreshold(u32 sceneInde
 }
 
 /* Reuse an active interval, or seed one for a nonempty encounter group. */
-s32 btlGetConditionalEncounterInterval(s32 encounterIndex) {
+BtlConditionalEncounterGaugeThreshold btlGetConditionalEncounterInterval(s32 encounterIndex) {
     s32 variant;
     s32 total;
     s32 i;
     s32 interval;
     if (encounterIndex == 0) {
-        return 0;
+        return BTL_CONDITIONAL_ENCOUNTER_GAUGE_THRESHOLD_UNAVAILABLE;
     }
     variant = btlSelectConditionalEncounterGroup(encounterIndex);
     total = 0;
@@ -2451,14 +2451,14 @@ s32 btlGetConditionalEncounterInterval(s32 encounterIndex) {
         total += D_00435E0C[encounterIndex].groups[variant].entries[i].weight;
     }
     if (total == 0) {
-        return 0;
+        return BTL_CONDITIONAL_ENCOUNTER_GAUGE_THRESHOLD_UNAVAILABLE;
     }
     if (btlConditionalEncounterCachedInterval > 0) {
         return btlConditionalEncounterCachedInterval;
     }
     interval = D_00435E0C[encounterIndex].groups[variant].interval;
     if (interval <= 0) {
-        return 0;
+        return BTL_CONDITIONAL_ENCOUNTER_GAUGE_THRESHOLD_UNAVAILABLE;
     }
     btlConditionalEncounterCachedInterval = dds3GetRandIntA(0, interval * 2 - 60) + 30;
     return btlConditionalEncounterCachedInterval;
@@ -2470,7 +2470,7 @@ extern void dds3WorkClear(void);
 
 BtlConditionalEncounterRollResult btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex) {
     s32 group;
-    s32 interval;
+    BtlConditionalEncounterGaugeThreshold threshold;
     s32 count;
     s32 i;
     s32 total;
@@ -2483,9 +2483,9 @@ BtlConditionalEncounterRollResult btlAdvanceConditionalEncounterRoll(f32 step, s
         return BTL_CONDITIONAL_ENCOUNTER_ROLL_NO_SELECTION;
     }
     group = btlSelectConditionalEncounterGroup(encounterIndex);
-    interval = btlGetConditionalEncounterInterval(encounterIndex);
-    if (interval == 0) {
-        return interval;
+    threshold = btlGetConditionalEncounterInterval(encounterIndex);
+    if (threshold == BTL_CONDITIONAL_ENCOUNTER_GAUGE_THRESHOLD_UNAVAILABLE) {
+        return BTL_CONDITIONAL_ENCOUNTER_ROLL_NO_SELECTION;
     }
     counter = DDS3_GBWK->conditionalEncounterStepRemainder + step;
     DDS3_GBWK->conditionalEncounterStepRemainder = counter;
@@ -2504,7 +2504,7 @@ BtlConditionalEncounterRollResult btlAdvanceConditionalEncounterRoll(f32 step, s
     if (DDS3_GBWK->conditionalEncounterGauge > 0xFDE8) {
         DDS3_GBWK->conditionalEncounterGauge = -0x218;
     }
-    if (DDS3_GBWK->conditionalEncounterGauge < interval) {
+    if (DDS3_GBWK->conditionalEncounterGauge < threshold) {
         return BTL_CONDITIONAL_ENCOUNTER_ROLL_NO_SELECTION;
     }
     total = 0;

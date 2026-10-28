@@ -2971,7 +2971,6 @@ extern u32 btlReturnDebugMenuSetupWord(u32);
 extern void btlDebugMenuBeforeRecordNoOp(void);
 extern void btlDebugMenuRecordNoOp(u32);
 extern void btlDebugMenuAfterRecordNoOp(void);
-extern s32 btlGetConditionalEncounterInterval(s32 encounterIndex);
 #include "btl_conditional_encounter_roll_api.h"
 extern void btlApplyDebugEncounterPartySelection(void);
 /* Edit encounter settings, preview party/enemy names, and launch the test. */
