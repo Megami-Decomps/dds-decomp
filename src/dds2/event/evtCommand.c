@@ -9,6 +9,7 @@
 #include "sdf_delayed_resource_check_api.h"
 #include "sdf_vu0.h"
 #include "dds3_admin_control_api.h"
+#include "evt_stage_anime_control_api.h"
 #include "kwln_task_add_child.h"
 #include "sdf_vu_matrix.h"
 #include "evt_world_object_api.h"
@@ -540,8 +541,6 @@ ScrCommandResult evtCommand_FIELD_DSP(void)
     }
     return 1;
 }
-
-extern s32 evtStageAnimeControl(s32 modeSelector, s32 modeValue);
 
 ScrCommandResult evtCommand_FIELD_ANIME_START(void) {
     s32 baseMode;

@@ -10,6 +10,7 @@
 #include "evt_world.h"
 #include "evt_path_direction.h"
 #include "evt_unit.h"
+#include "evt_stage_anime_control_api.h"
 #include "evt_unit_move_end_api.h"
 #include "evt_unit_path_advance_api.h"
 #include "pcp_vu0.h"
@@ -96,19 +97,19 @@ void evtEffectLoopControl(dds3Basic_t *owner, s32 nodeFlag) {
 
 #include "dds3_world_primary.h"
 
-s32 evtStageAnimeControl(s32 modeSelector, s32 modeValue) {
+EvtStageAnimeControlResult evtStageAnimeControl(s32 modeSelector, s32 modeValue) {
     dds3Basic_t *world = dds3GetActiveScene();
     dds3Basic_t *node;
     Dds3ObjectMatterAnimeMode requestedMode;
 
     if (world == NULL) {
-        return 0;
+        return EVT_STAGE_ANIME_CONTROL_NO_ACTIVE_WORLD;
     }
     requestedMode = modeSelector * 3 + modeValue;
     for (node = ((EvtWorldTable *)world->data)->slots[6].head; node != NULL; node = node->next) {
         dds3ObjectBaseMatterAnimeSpeed(node, requestedMode);
     }
-    return 1;
+    return EVT_STAGE_ANIME_CONTROL_ACTIVE_WORLD;
 }
 
 

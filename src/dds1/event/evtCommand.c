@@ -14,6 +14,7 @@
 #include "evt_world_object_api.h"
 #include "fld_resource_resolver.h"
 #include "dds3_path.h"
+#include "evt_stage_anime_control_api.h"
 #include "dds3obj.h"
 #include "dds3_object_control_slot.h"
 #include "dds3_world_selection.h"
@@ -58,8 +59,6 @@ s32 dds3EffectObjectBasicLinkObjectIndex(dds3Basic_t *obj, dds3Basic_t *owner, s
 void evtEffectLoopControl(dds3Basic_t *unit, s32 flag);
 
 void dds3EffectObjectBasicStatOn(dds3Basic_t *unit, u32 flag);
-
-void evtStageAnimeControl(s32 modeSelector, s32 modeValue);
 
 void dds3AdminiCallSequence(s32 command, const void *payload, u32 payloadSize, s32 mode);
 void evtEnableMoonCalc(void);
