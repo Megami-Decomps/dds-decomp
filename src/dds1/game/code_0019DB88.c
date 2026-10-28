@@ -3,6 +3,7 @@
 #include "itf.h"
 #include "itf_message_manager_task.h"
 #include "itf_option_bit_index_api.h"
+#include "itf_mes_selection_commit_result.h"
 #include "snd_sequence_volume_pan.h"
 #include "snd_pad.h"
 #include "itf_mes_window.h"
@@ -34,7 +35,7 @@ extern ItfMesGlobals itfMesMngManager;
 extern void itfMesShiftPanelVertically(instanceMes_tag *panel, s32 dy);
 extern void ChangeFontColorAll(_FRQ *node, u8 flagValue);
 extern ItfMesOptionBitIndex itfMesFindOptionBitIndex(ItfMesVisibleOptionOrdinal optionOrdinal, u32 optionMask);
-extern s32 SelectItem(instanceMes_tag *);
+extern ItfMesSelectionCommitResult SelectItem(instanceMes_tag *);
 extern void itfUpdateSoundSelectionTransition(instanceMes_tag *);
 
 
@@ -440,7 +441,7 @@ void itfUpdateSoundSelectionTransition(instanceMes_tag *panel) {
         }
         break;
     case ITF_SOUND_SELECTION_STATE_INTERACTIVE:
-        if ((flags & 0x38) == 0x20 && SelectItem(panel) == 1) {
+        if ((flags & 0x38) == 0x20 && SelectItem(panel) == ITF_MES_SELECTION_COMMITTED) {
             selection->glyphChain = UnchainFontHandleUnit(selection->glyphChain,
                 selection->selectedIndex, selection->rowCount);
             if ((flags & 0xC00) == 0x800) {
@@ -493,7 +494,7 @@ void itfMesShiftPanelVertically(instanceMes_tag *panel, s32 dy) {
 
 void SelectItemMove(ItfMesBlk40 *obj, s32 dir);
 
-s32 SelectItem(instanceMes_tag *panel) {
+ItfMesSelectionCommitResult SelectItem(instanceMes_tag *panel) {
     ItfMesBlk40 *sel = &panel->blk40;
     s32 dir = 0;
     s32 index;
@@ -514,7 +515,7 @@ s32 SelectItem(instanceMes_tag *panel) {
     }
     if (dds3PadButtonState.confirm < 0) {
         p2sdPlaySE(8, 0x7F, 0x3F);
-        return 1;
+        return ITF_MES_SELECTION_COMMITTED;
     }
     if (sel->optionCount > 0 && (index = SelectItemDefKey(sel)) >= 0) {
         p2sdPlaySE(8, 0x7F, 0x3F);
@@ -524,9 +525,9 @@ s32 SelectItem(instanceMes_tag *panel) {
             sel->selectedIndex = index;
             sel->savedIndex = index;
         }
-        return 1;
+        return ITF_MES_SELECTION_COMMITTED;
     }
-    return 0;
+    return ITF_MES_SELECTION_NOT_COMMITTED;
 }
 
 void SelectItemMove(ItfMesBlk40 *obj, s32 dir) {
