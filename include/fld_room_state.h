@@ -26,6 +26,9 @@ enum FldRoomInteractionModeValue {
 /* Stored selector for the two-dimensional projection used by room probes. */
 typedef s16 FldRoomProbePlaneMode;
 
+/* Room IDs are stored in room records; -1 means a task has no room. */
+typedef s16 FldRoomId;
+
 /* Shared room geometry/runtime record. DDS1 and DDS2 use the same 0x140-byte
  * layout; unclassified state words and the intervening gap retain their raw
  * widths and positions. */
@@ -43,7 +46,7 @@ typedef struct FldRoomState {
     s32 savePointValue; /* 0x120: a save point's (mode 3) spawn value, else -1 */
     u8 pad124[0xC];
     s16 unk130;
-    s16 roomId;       /* 0x132: returned by fldFindRoomIdByTask */
+    FldRoomId roomId; /* 0x132: returned by fldFindRoomIdByTask */
     s16 mapSlot;      /* 0x134: above 0, the map slot whose flag hides the trigger */
     FldRoomInteractionMode mode; /* 0x136: selects the room's interaction behavior. */
     s16 entryIndex; /* 0x138: active entry index when mode is 1. */

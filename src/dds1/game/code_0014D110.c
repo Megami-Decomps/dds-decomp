@@ -27,6 +27,7 @@ extern void fldApplyCurrentTaskScene(const char *name);
 #include "fld_scene_object_key_result.h"
 #include "fld_activation_entry.h"
 #include "fld_elevator_table_selector.h"
+#include "fld_room_state.h"
 
 
 
@@ -39,7 +40,7 @@ extern s32 fldGetActorStat0(s32);
 extern void fldDispatchSceneAction(u32 action);
 
 
-extern s16 fldFindRoomIdByTask(struct dds3ProcessID_t *task);
+extern FldRoomId fldFindRoomIdByTask(struct dds3ProcessID_t *task);
 
 extern u32 fldDamEffectResource;
 

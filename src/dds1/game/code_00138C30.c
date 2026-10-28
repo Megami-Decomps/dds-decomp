@@ -971,7 +971,7 @@ s32 fldEveHitResID_Find(dds3ProcessID_t *task) {
 extern s32 fldEveRngCount;
 
 /* Return the room ID stored for the matching task; -1 denotes a miss. */
-s16 fldFindRoomIdByTask(dds3ProcessID_t *task) {
+FldRoomId fldFindRoomIdByTask(dds3ProcessID_t *task) {
     s32 slotIndex;
 
     for (slotIndex = 0; slotIndex < fldEveRngCount; slotIndex++) {

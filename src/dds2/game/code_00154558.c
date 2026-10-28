@@ -29,6 +29,7 @@ extern void fldApplyCurrentTaskScene(const char *name);
 #include "scr.h"
 #include "scr_string_parameter_api.h"
 #include "fld_scene_object_key_result.h"
+#include "fld_room_state.h"
 
 /* The setter returns the context it set the value in (scrTraceCode.c). */
 extern scrProcessWork_s *scrSetIntReturnValue(s32 retVal);
@@ -153,7 +154,7 @@ extern s32 D_00436360;
 
 extern struct sdfTexHandle_t *D_0043637C;
 
-extern s16 fldFindRoomIdByTask(dds3ProcessID_t *task);
+extern FldRoomId fldFindRoomIdByTask(dds3ProcessID_t *task);
 
 extern s32 fldQuerySelectedActorMotionState(s32 value);
 
