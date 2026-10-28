@@ -36,7 +36,7 @@ void sdfCopyCornerWordsWithEdgeByte(u32 *source, u32 *destination, u8 *edgeValue
 
 
 extern void sdfDrawTexturedQuad(s32, s32, s32, s32, s32, const u32 *, const u32 *, u32,
-                          f32, u32, u32, u32, u32);
+                          f32, u32, u32, sdfTexHandle_t *, u32);
 
 /* Draw enabled border strips and restore the temporary texture-coordinate changes. */
 void effDrawTexturedRectBorderStrips(s32 x, s32 y, s32 depth, s32 width, s32 height,
@@ -65,7 +65,7 @@ void effDrawTexturedRectBorderStrips(s32 x, s32 y, s32 depth, s32 width, s32 hei
                       dimensions[0], dimensions[1],
                       textureCoordinates, cornerColors,
                       kind, 0.0f, mode, flip,
-                      texture, buffer);
+                      (sdfTexHandle_t *)texture, buffer);
         textureCoordinates[3] = savedTextureCoordinates[3];
     }
 
@@ -81,7 +81,7 @@ void effDrawTexturedRectBorderStrips(s32 x, s32 y, s32 depth, s32 width, s32 hei
                       dimensions[0], dimensions[1],
                       textureCoordinates, cornerColors,
                       kind, 0.0f, mode, flip,
-                      texture, buffer);
+                      (sdfTexHandle_t *)texture, buffer);
         textureCoordinates[1] = savedTextureCoordinates[1];
     }
 
@@ -97,7 +97,7 @@ void effDrawTexturedRectBorderStrips(s32 x, s32 y, s32 depth, s32 width, s32 hei
                       dimensions[0], dimensions[1],
                       textureCoordinates, cornerColors,
                       kind, 0.0f, mode, flip,
-                      texture, buffer);
+                      (sdfTexHandle_t *)texture, buffer);
         textureCoordinates[2] = savedTextureCoordinates[2];
     }
 
@@ -113,7 +113,7 @@ void effDrawTexturedRectBorderStrips(s32 x, s32 y, s32 depth, s32 width, s32 hei
                       dimensions[0], dimensions[1],
                       textureCoordinates, cornerColors,
                       kind, 0.0f, mode, flip,
-                      texture, buffer);
+                      (sdfTexHandle_t *)texture, buffer);
         textureCoordinates[0] = savedTextureCoordinates[0];
     }
 }
@@ -178,7 +178,7 @@ void effDrawTextureSlot(s32 x, s32 y, s32 z, s32 color, u32 flags,
                      kind, mode, flip, texture, buffer);
         sdfDrawTexturedQuad(x, y, z, draw->geometry.bounds[2], draw->geometry.bounds[3],
                      (const u32 *)colors, (const u32 *)color,
-                     kind, draw->geometry.angleDegrees, mode, flip, texture, buffer);
+                     kind, draw->geometry.angleDegrees, mode, flip, (sdfTexHandle_t *)texture, buffer);
     }
     if (flags & 0x80) {
         effUpdateTimedStates(set, slotIndex, draw);
