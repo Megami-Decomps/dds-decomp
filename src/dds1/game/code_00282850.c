@@ -2118,7 +2118,7 @@ u16 mnuGetPartyEntryMenuValue(datUnitWork_t *entry);
 
 /* Count inventory plus one for every matching slot value, without an occupancy test.
  * This counter accepts only IDs 0xA0..0xBE. */
-s32 ptyCountBulletItem(PtyBulletItemId bulletItemId) {
+PtyBulletItemCount ptyCountBulletItem(PtyBulletItemId bulletItemId) {
     s32 totalCount;
     s32 partyIndex;
 
