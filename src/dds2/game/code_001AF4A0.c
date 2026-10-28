@@ -14,6 +14,7 @@
 #include "fld_next_scene_request_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_command_id.h"
 #include "btl_selected_entry_api.h"
 #include "btl_command_use_error.h"
 #include "btl_actor_command_selector_value_api.h"
@@ -751,7 +752,7 @@ f32 func_001B0B20(void) {
 }
 
 
-u8 btlSelectCommandHitCount(BtlUnit *unit, s32 command) {
+u8 btlSelectCommandHitCount(BtlUnit *unit, BtlCommandId command) {
     BtlState *controller = (BtlState *)btlGetRuntime();
     BtlCommandHitCountOverrideCallback commandRangeOverride = controller->commandRangeOverride;
     s32 result;
@@ -921,7 +922,7 @@ void btlSortActorMuzzleDirections(BtlUnit *unit, BtlIndexList *targets, s32 acti
     }
 }
 
-s32 btlShouldDistributeRandomTargetHits(BtlUnit *unit, s32 command) {
+s32 btlShouldDistributeRandomTargetHits(BtlUnit *unit, BtlCommandId command) {
     BtlState *runtime = btlGetRuntime();
     /* 0x6D8: command-availability override (named in DDS1's BtlState). */
     s32 (*availability)(BtlUnit *, s32) = *(s32 (**)(BtlUnit *, s32))runtime->pad6D8;
@@ -942,7 +943,7 @@ s32 btlShouldDistributeRandomTargetHits(BtlUnit *unit, s32 command) {
 }
 
 void btlDistributeRandomTargetHits(BtlUnit *unit, BtlIndexList *targets,
-                   BtlTargetResult *results, s32 command) {
+                   BtlTargetResult *results, BtlCommandId command) {
     u8 selected[13];
     BtlIndexList *copy;
     void *previous;

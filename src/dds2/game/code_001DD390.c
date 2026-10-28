@@ -554,11 +554,12 @@ extern DatEnemyRecord *datEnemyRecords;
 
 extern void btlBuildCombinedActorUnit(BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *);
 
-extern s32 btlShouldDistributeRandomTargetHits(BtlUnit *, s32);
+extern s32 btlShouldDistributeRandomTargetHits(BtlUnit *, BtlCommandId);
 
 struct BtlTargetResult;
 
-extern void btlDistributeRandomTargetHits(BtlUnit *, BtlIndexList *, struct BtlTargetResult *, s32);
+extern void btlDistributeRandomTargetHits(
+    BtlUnit *, BtlIndexList *, struct BtlTargetResult *, BtlCommandId);
 
 extern void btlSortActorMuzzleDirections(BtlUnit *, BtlIndexList *, s32);
 
@@ -572,7 +573,7 @@ extern s32 btlSelectedEntryHitsElement(BtlUnit *, BtlUnit *, s32);
 
 extern BtlCommandHitResult btlResolveCommandHitResult(BtlUnit *, BtlUnit *, s32);
 
-extern u8 btlSelectCommandHitCount(BtlUnit *, s32);
+extern u8 btlSelectCommandHitCount(BtlUnit *, BtlCommandId);
 
 extern s32 btlSelectActorAction(BtlUnit *actor);
 

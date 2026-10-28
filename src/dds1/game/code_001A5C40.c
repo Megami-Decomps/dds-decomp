@@ -9,6 +9,7 @@
  * `bnez s1` slot instead of filling it unannulled.
  */
 #include "common.h"
+#include "btl_command_id.h"
 #include "btl_selected_entry_api.h"
 #include "btl_actor_command_selector_value_api.h"
 #include "btl_action_press_result.h"
@@ -450,7 +451,7 @@ f32 func_001A6958(void) {
 
 
 
-u8 btlSelectCommandHitCount(BtlUnit *unit, s32 command) {
+u8 btlSelectCommandHitCount(BtlUnit *unit, BtlCommandId command) {
     BtlState *context = (BtlState *)btlGetRuntime();
     BtlCommandHitCountOverrideCallback commandRangeOverride = context->commandRangeOverride;
     s32 result;
@@ -628,7 +629,7 @@ void btlSortActorMuzzleDirections(BtlUnit *unit, BtlIndexList *targets, s32 acti
 }
 
 /* Share the policy rejection; see docs/idioms.md, "Shared rejection blocks: battle command availability". */
-s32 btlShouldDistributeRandomTargetHits(BtlUnit *unit, s32 command) {
+s32 btlShouldDistributeRandomTargetHits(BtlUnit *unit, BtlCommandId command) {
     BtlState *runtime = btlGetRuntime();
     BtlCommandAvailabilityOverrideCallback availabilityOverride = runtime->commandAvailabilityOverride;
 
@@ -649,7 +650,7 @@ s32 btlShouldDistributeRandomTargetHits(BtlUnit *unit, s32 command) {
 
 
 void btlDistributeRandomTargetHits(BtlUnit *unit, BtlIndexList *targets,
-                   BtlOperandGroup *results, s32 command) {
+                   BtlOperandGroup *results, BtlCommandId command) {
     u8 selected[13];
     BtlIndexList *copy;
     void *previous;
