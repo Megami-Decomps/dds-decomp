@@ -3124,13 +3124,13 @@ typedef struct EvtSelectionCache {
 extern EvtSelectionCache *D_003BB128;
 extern s32 evtActiveEntryFlags;
 
-/* Cache nonzero entry selections, publishing first-tick flags only at timer zero.
- * A zero setup status clears runtime control and returns -1. */
-s32 evtSynchronizeSelectedEntry(dds3ProcessID_t *task) {
+/* Cache nonzero selections and publish first-tick flags at timer zero. A zero
+ * setup status clears runtime control and finishes the polling task. */
+KwlnTaskUpdateResult evtSynchronizeSelectedEntry(dds3ProcessID_t *task) {
     EvtRuntime *runtime = (EvtRuntime *)dds3GetProcessData(task);
     if (mfilterRun() == 0) {
         runtime->controlState = 0;
-        return -1;
+        return KWLN_TASK_UPDATE_FINISH_CALLBACK;
     }
     if (dds3GetProcessRunTime(task) == 0) {
         s32 selected = runtime->selectedEntry;
@@ -3145,19 +3145,19 @@ s32 evtSynchronizeSelectedEntry(dds3ProcessID_t *task) {
             D_003BB128->selectedEntry = selected;
         }
     }
-    return 0;
+    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
-/* Poll solid-rectangle setup; zero status clears runtime control and returns -1. */
-s32 evtPollRuntimeControlReady(dds3ProcessID_t *task) {
+/* Poll solid-rectangle setup until it clears runtime control and finishes. */
+KwlnTaskUpdateResult evtPollRuntimeControlReady(dds3ProcessID_t *task) {
     EvtRuntime *runtime;
 
     runtime = (EvtRuntime *)dds3GetProcessData(task);
     if (evtViewerCheckDirty() == 0) {
         runtime->controlState = 0;
-        return -1;
+        return KWLN_TASK_UPDATE_FINISH_CALLBACK;
     }
-    return 0;
+    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 

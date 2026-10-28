@@ -2947,8 +2947,8 @@ extern char D_003BBF68[];
 extern char D_003BBF70[];
 extern u8 corePktSoftenBias;
 extern s32 mdlDebugPrintEffectScale2(dds3ProcessID_t *task);
-extern s32 evtPollRuntimeControlReady(dds3ProcessID_t *task);
-extern s32 evtSynchronizeSelectedEntry(dds3ProcessID_t *task);
+extern KwlnTaskUpdateResult evtPollRuntimeControlReady(dds3ProcessID_t *task);
+extern KwlnTaskUpdateResult evtSynchronizeSelectedEntry(dds3ProcessID_t *task);
 extern void dds3SetFogPara(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
 
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_003AD4B0);

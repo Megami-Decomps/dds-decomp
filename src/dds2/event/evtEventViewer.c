@@ -3176,8 +3176,8 @@ extern void rblurSetParam(dds3Effect_RippleBlurParam_t *parameters);
 extern void mfilterSetParam(dds3Effect_PartialMultiFilterParam_t *parameters);
 extern void campResolvePendingValue(EvtRuntime *scene, EvtRuntimeChild *cue);
 extern s32 mdlDebugPrintEffectScale2(dds3ProcessID_t *task);
-extern s32 evtPollRuntimeControlReady(dds3ProcessID_t *task);
-extern s32 evtSynchronizeSelectedEntry(dds3ProcessID_t *task);
+extern KwlnTaskUpdateResult evtPollRuntimeControlReady(dds3ProcessID_t *task);
+extern KwlnTaskUpdateResult evtSynchronizeSelectedEntry(dds3ProcessID_t *task);
 extern EvtRuntimeChild *AddFrameInfo2(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer);
 
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_004229A0);
