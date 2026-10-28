@@ -3086,12 +3086,12 @@ void effBTLModelGetMarkMatrix2(BtlUnit *unit, s32 mode) {
     SDF_VU0_LOADIDENTITY();
 }
 
-s32 btlIsUnitAtStoredPosition(u8 *object) {
+s32 btlIsUnitAtStoredPosition(BtlUnit *unit) {
     f32 position[4];
-    btlCopyUnitCurrentPosition((BtlUnit *)object, position);
-    if (*(f32 *)(object + 0x30) == position[0] &&
-        *(f32 *)(object + 0x34) == position[1] &&
-        *(f32 *)(object + 0x38) == position[2]) {
+    btlCopyUnitCurrentPosition(unit, position);
+    if (unit->position[0] == position[0] &&
+        unit->position[1] == position[1] &&
+        unit->position[2] == position[2]) {
         return 1;
     }
     return 0;
