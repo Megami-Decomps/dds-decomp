@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "brs_icon_record.h"
 #include "common.h"
+#include "pty_experience_threshold_type.h"
 #include "evt_message_window_api.h"
 #include "snd_track_playback_api.h"
 #include "dsp_channel.h"
@@ -737,7 +738,7 @@ void gstApplyBundleMacca(BrsRewardSummary *batch) {
     datAddCurrencyClamped(batch->macca);
 }
 
-extern u32 ptyComputeTotalExp(const datUnitWork_t *unit, s32 levelDelta);
+extern PtyExperienceThreshold ptyComputeTotalExp(const datUnitWork_t *unit, s32 levelDelta);
 
 
 

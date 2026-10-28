@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "fld_spark_reward_profile.h"
 #include "common.h"
+#include "pty_experience_threshold_type.h"
 #include "eff_random.h"
 #include "ui_color.h"
 #include "kwln.h"
@@ -111,7 +112,7 @@ u32 func_0029CE88(void) {
 
 extern s32 D_003D845C[][100];
 
-u32 ptyComputeTotalExp(const datUnitWork_t *unit, s32 levelDelta) {
+PtyExperienceThreshold ptyComputeTotalExp(const datUnitWork_t *unit, s32 levelDelta) {
     s32 unitId = unit->unitId;
     s32 total = 0;
     s32 level;
@@ -460,7 +461,7 @@ void mnuTitleInitFourParameters(u32 *state, u32 first, u32 second, u32 third, u3
 }
 
 
-extern u32 ptyComputeTotalExp(const datUnitWork_t *, s32);
+extern PtyExperienceThreshold ptyComputeTotalExp(const datUnitWork_t *, s32);
 
 extern u32 ptyAddProfileRecordValueClamped(datUnitWork_t *, u32);
 

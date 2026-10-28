@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "pty_experience_threshold_type.h"
 #include "eff_random.h"
 #include "ui_color.h"
 #include "fr_font_context.h"
@@ -26,7 +27,7 @@ typedef struct PtySkillSlotThreshold {
 
 extern const PtySkillSlotThreshold brsSkillSlotCountThresholds[];
 
-extern u32 ptyComputeTotalExp(const datUnitWork_t *, s32);
+extern PtyExperienceThreshold ptyComputeTotalExp(const datUnitWork_t *, s32);
 extern void ptyRecomputeMaxHpMp(datUnitWork_t *);
 extern s32 ptyHasSkill(datUnitWork_t *, s32);
 
@@ -108,7 +109,7 @@ u32 func_00265598(void) {
 
 extern s32 D_0036F40C[][100];
 
-u32 ptyComputeTotalExp(const datUnitWork_t *unit, s32 levelDelta) {
+PtyExperienceThreshold ptyComputeTotalExp(const datUnitWork_t *unit, s32 levelDelta) {
     s32 unitId = unit->unitId;
     s32 total = 0;
     s32 level;

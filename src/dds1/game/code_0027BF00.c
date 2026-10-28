@@ -14,6 +14,7 @@
 #include "mnu_staff.h"
 #include "mnu_scroll_panel.h"
 #include "dat_state.h"
+#include "pty_experience_threshold_type.h"
 #include "dat_command.h"
 #include "itf.h"
 #include "menu_fade_entry.h"
@@ -2384,7 +2385,7 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
     }
 }
 
-extern u32 ptyComputeTotalExp(const datUnitWork_t *, s32);
+extern PtyExperienceThreshold ptyComputeTotalExp(const datUnitWork_t *, s32);
 extern char D_003BC740[];
 
 void mnuDrawPartyProfileAndExpOverlay(s32 x, s32 y, s32 depth, MenuPageSlot *slot,

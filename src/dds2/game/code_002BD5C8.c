@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "pty_experience_threshold_type.h"
 #include "dat_assigned_item_id.h"
 #include "ui_color.h"
 #include "fr_font.h"
@@ -276,7 +277,7 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
     }
 }
 
-extern u32 ptyComputeTotalExp(const datUnitWork_t *, s32);
+extern PtyExperienceThreshold ptyComputeTotalExp(const datUnitWork_t *, s32);
 extern char D_00437C48[];
 extern void mnuDrawFadeIcons(s32, s32, s32, s32, MenuIconBundle *, s32);
 extern void mnuDrawIconRow(s32, s32, s32, s32, MenuSprites *, s32);

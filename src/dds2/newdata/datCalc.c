@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "pty_experience_threshold_type.h"
 #include "scr_integer_parameter_api.h"
 #include "bf_flw0_header.h"
 #include "scr_procedure_start_api.h"
@@ -1034,7 +1035,7 @@ s32 ptyGetRoundedAveragePartyLevel(void) {
     return (levelSum + activeCount - 1) / activeCount;
 }
 
-extern u32 ptyComputeTotalExp(const datUnitWork_t *, s32);
+extern PtyExperienceThreshold ptyComputeTotalExp(const datUnitWork_t *, s32);
 extern void ptyRecomputeMaxHpMp(datUnitWork_t *);
 extern void evtCopyRosterTableValue(datUnitWork_t *);
 extern void mtrRefreshMantraStateForUnit2(void);
