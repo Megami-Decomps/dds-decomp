@@ -1,6 +1,7 @@
 #include "btl_motion_transform.h"
 #include "common.h"
 #include "btl_action_state_api.h"
+#include "btl_task.h"
 #include "btl_element_block_query_result.h"
 #include "btl_actor_command_selector_value_api.h"
 #include "btl_scene_counter_mode.h"
@@ -4736,9 +4737,10 @@ void btlRestoreMarkedUnitMotionOnStateChange(void) {
     }
 }
 
-void btlToggleActionByteForFlaggedActor(u32 unused, u32 actor) {
+void btlToggleActionByteForFlaggedActor(BtlUnit *unusedActor, s32 *operandData) {
+    BtlOperandEntry *operand = (BtlOperandEntry *)operandData;
     u8 *state = ((BattleActionScene *)btlGetRuntime())->state;
-    if (*(u32 *)(actor + 0x28) & 0x8000) {
+    if (operand->flags & 0x8000) {
         if (((BattleActionByteState *)state)->previous != 0) {
             *state = 0;
         } else {

@@ -1572,7 +1572,7 @@ extern u32 btlTickAction19A(BtlLinkedCommand *unit);
 extern u32 btlTickAction6B(BtlLinkedCommand *unit);
 extern u32 btlTickDelayedMarkedAction(BtlLinkedCommand *unit);
 extern u32 btlTickLinkedDefeatCandidateAction(BtlLinkedCommand *unit);
-extern void btlToggleActionByteForFlaggedActor(u32 unused, u32 actor);
+extern void btlToggleActionByteForFlaggedActor(BtlUnit *unusedActor, s32 *operandData);
 extern void btlToggleMarkedTaskActionState(BtlUnit *unused, s32 *delta);
 extern s32 btlTriggerLinkedActionMotion(BtlLinkedCommand *command);
 extern s32 btlTriggerLinkedActionMotionAlternate(BtlLinkedCommand *command);
