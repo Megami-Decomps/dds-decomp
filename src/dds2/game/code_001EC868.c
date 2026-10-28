@@ -7863,11 +7863,11 @@ void btlSetCommandEffectLinkFlags(ActionStateLink *task, BattleIndexWork *work) 
                 if ((u32)skillId < 0x2A0) {
                     s32 animationKind = ((BtlActionAnimationRecord *)datActionAnimationRecords)[skillId].effectKind;
                     switch (animationKind) {
-                    case 3:
+                    case BTL_ACTION_EFFECT_KIND_TARGET_EFFECT_WITH_ACTOR_OWNER:
                         actor = task->unit;
                         target->effectLink.flags |= 0x10;
                         break;
-                    case 4:
+                    case BTL_ACTION_EFFECT_KIND_TARGET_AND_ACTOR_FLAGS:
                         target->effectLink.flags |= 0x10;
                     case 0:
                     case 1:

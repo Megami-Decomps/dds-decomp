@@ -2171,7 +2171,8 @@ void btlScheduleLinkageActionTasks(ActionStateLink *action) {
             } else {
                 mode = -1;
             }
-            effectTarget = mode == 3 ? indexedTarget : currentTarget;
+            effectTarget = mode == BTL_ACTION_EFFECT_KIND_TARGET_EFFECT_WITH_ACTOR_OWNER
+                ? indexedTarget : currentTarget;
             if (group->inactiveOrStatusChanged != 0 && (state->battleFlags & 0x80) != 0) {
                 btlBossDebugPrintf(D_00417360, currentTarget);
                 commandOwner = unit->owner;

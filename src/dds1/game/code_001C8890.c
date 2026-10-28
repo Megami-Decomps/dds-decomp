@@ -1605,7 +1605,8 @@ void btlScheduleLinkageActionTasks(BtlTask *action) {
             if (group->reflected == 0) currentTarget = indexedTarget;
             if (group->reflected != 0 || group->kind == 0x40000)
                 mode = datActionAnimationRecords[skill].effectKind;
-            effectTarget = mode == 3 ? indexedTarget : currentTarget;
+            effectTarget = mode == BTL_ACTION_EFFECT_KIND_TARGET_EFFECT_WITH_ACTOR_OWNER
+                ? indexedTarget : currentTarget;
             if (group->inactiveOrStatusChanged != 0 && (state->battleFlags & 0x80) != 0) {
                 btlBossDebugPrintf(D_003A3670, currentTarget);
                 commandOwner = unit->identity;

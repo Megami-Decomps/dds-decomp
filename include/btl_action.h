@@ -59,10 +59,17 @@ enum { BTL_ABILITY_PARAMETER_FIRST_SKILL = 0x200 };
 extern BtlAbilityParameter *datAbilityParameters;
 
 /* Native 0x20-byte action-animation descriptor, shared by motion and camera selection. */
+/* In reflected/special linkage groups, 3 routes the effect to the indexed
+ * target while later command flags remain owned by the action actor. Value 4
+ * marks the target with 0x10 and shares 0x20 across target and actor. Other
+ * record values remain opaque and use the existing fallback paths. */
+#define BTL_ACTION_EFFECT_KIND_TARGET_EFFECT_WITH_ACTOR_OWNER 3
+#define BTL_ACTION_EFFECT_KIND_TARGET_AND_ACTOR_FLAGS 4
+
 typedef struct BtlActionAnimationRecord {
     u8 cameraKind; /* 0x00: values 6 and 7 select an aim pose. */
     u8 delayIndex; /* 0x01: row of the action delay table */
-    u8 effectKind; /* 0x02: values 3 and 4 select target effect-flag behavior. */
+    u8 effectKind; /* 0x02: observed special target-effect policies are 3 and 4. */
     u8 resourceType; /* 0x03: aliases BtlActionTableEntry.resourceType. */
     u16 displayCode;
     u8 pad06[0x16];
