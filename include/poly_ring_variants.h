@@ -15,9 +15,9 @@ typedef struct PolyArc {
     f32 radialWidth;
     f32 radius;
     f32 radiusJitter;
-    void *dispatchArgB;             /* 0xD4 */
+    u32 secondColor;                 /* 0xD4: second packed-color word */
     u8 padD8[4];
-    void *dispatchArgA;             /* 0xDC */
+    u32 firstColor;                  /* 0xDC: first packed-color word */
     struct ParSystem *strip;         /* 0xE0 */
     PolyArcRecord *records;          /* 0xE4 */
     struct sdfMemHandle_t *allocation;  /* 0xE8 */
@@ -36,9 +36,9 @@ typedef struct PolyRotatingBand {
     u32 spawnDelayGroupSize;
     f32 rotationXDegrees;
     f32 rotationStepDegrees;
-    void *dispatchArgB;             /* 0xE8 */
+    u32 secondColor;                 /* 0xE8: second packed-color word */
     u8 padEC[4];
-    void *dispatchArgA;             /* 0xF0 */
+    u32 firstColor;                  /* 0xF0: first packed-color word */
     struct ParSystem *strip;         /* 0xF4 */
     PolyRotatingBandRecord *records; /* 0xF8 */
     struct sdfMemHandle_t *allocation;  /* 0xFC */

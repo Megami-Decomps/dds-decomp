@@ -217,7 +217,6 @@ void dds3WhirlwindPolyListSetRotateMatrix(dds3WhirlwindPolyList_tag *object, con
     VU0_STORE_MATRIX(object->matrix);
 }
 
-extern void dds3TrackPolyVCSet(ParSystem *, s32, s32, s32);
 extern EffRandState effDefaultRandomState[];
 
 /* effPCPNeedleSpiralCreate */

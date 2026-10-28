@@ -902,7 +902,6 @@ struct ParColorRamp;
 extern void dds3ParticleSetColorTable(struct ParColorRamp *, s32);
 extern dds3Particle_BlurBuff_t *dds3Particle_BlurCreate(u32, u16, billHandle_t **);
 extern u32 dds3Particle_TrackPolyGetRecTiming(u16);
-extern void dds3TrackPolyVCSet(ParSystem *, s32, void *, void *);
 
 /* Allocate drawing resources and reset the emitter's common runtime state. */
 /* The subrecord bitfield keeps native int-alias dependencies; see
@@ -929,7 +928,8 @@ void dds3Particle_BasicCreate(EffEmitterHead *owner) {
             owner->particleCount, owner->sub.templateEntryCount,
             dds3Particle_TrackPolyGetRecTiming(owner->sub.templateEntryCount), 0);
         dds3TrackPolyVCSet(owner->sub.payload.crossStrip.drawSystem, 1,
-                       owner->sub.payload.crossStrip.dispatchParameter, owner->sub.payload.crossStrip.dispatchParameter);
+                       (u32)owner->sub.payload.crossStrip.dispatchParameter,
+                       (u32)owner->sub.payload.crossStrip.dispatchParameter);
         dds3TrackPolySetMode(owner->sub.payload.crossStrip.drawSystem, (u16)owner->drawKind);
         break;
     case PAR_KIND_STATE_BILLBOARD_CROSS_TRIANGLE:
@@ -937,7 +937,8 @@ void dds3Particle_BasicCreate(EffEmitterHead *owner) {
             owner->particleCount, owner->sub.templateEntryCount,
             dds3Particle_TrackPolyGetRecTiming(owner->sub.templateEntryCount), 1);
         dds3TrackPolyVCSet(owner->sub.payload.crossTriangle.drawSystem, 1,
-                       owner->sub.payload.crossTriangle.dispatchParameter, owner->sub.payload.crossStrip.drawSystem);
+                       (u32)owner->sub.payload.crossTriangle.dispatchParameter,
+                       *(u32 *)&owner->sub.payload.crossTriangle.opaque10[0]);
         dds3TrackPolySetMode(owner->sub.payload.crossTriangle.drawSystem, (u16)owner->drawKind);
         break;
     case PAR_KIND_STATE_TRACK_POLYGON_CROSS_AXES:

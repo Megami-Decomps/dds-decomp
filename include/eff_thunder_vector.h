@@ -6,7 +6,7 @@
 struct ParSystem;
 struct sdfMemHandle_t;
 
-/* Indexed-vector parameters retain a dispatch pointer and geometry widths. */
+/* Indexed-vector parameters retain a color word and geometry widths. */
 typedef struct EffThunderVectorParams {
     f32 origin[4];
     u16 systemParam;
@@ -21,7 +21,7 @@ typedef struct EffThunderVectorParams {
     u16 perCell;
     u8 pad32[0xA];
     f32 bandWidth;
-    void *dispatchArg;
+    u32 colorWord;
     f32 edgeWidth;
     u8 pad48[4];
 } EffThunderVectorParams;

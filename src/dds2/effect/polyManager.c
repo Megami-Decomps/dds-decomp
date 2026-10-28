@@ -27,7 +27,6 @@ void dds3SpPoly_Ring_Old_Calc(PolyNode *node);
 void dds3SpPoly_Ring_Old_New(PolyNode *node, s32 cellIndex);
 void dds3SpPoly_Ring_Old_Move(PolyNode *node, s32 cellIndex);
 extern void memcpy(void *dst, const void *src, s32 size);
-extern void dds3TrackPolyVCSet(ParSystem *work, s32 sub, void *dispatchArgA, void *dispatchArgB);
 void dds3SpPoly_RingAllBuffInit(PolyBand *band);
 void dds3SpPoly_SphereRingAllBuffInit(PolyArc *arc);
 void dds3SpPoly_RollRingAllBuffInit(PolyRotatingBand *rotatingBand);
@@ -244,7 +243,7 @@ PolyBand *dds3SpPoly_RingCreate(PolyRingHead *templateHead) {
         ((PolyRing *)band)->band.segments = 3;
     }
     band->strip = dds3TrackPolyCreate(band->head.entryCount, band->segments, 1, 0);
-    dds3TrackPolyVCSet(band->strip, 0, band->dispatchArgA, band->dispatchArgB);
+    dds3TrackPolyVCSet(band->strip, 0, band->firstColor, band->secondColor);
     dds3SpPoly_RingAllBuffInit(band);
     VU0_LOAD_MATRIX(band->head.matrix);
     VU0_STORE_MATRIX(band->head.matrixCopy);
@@ -495,7 +494,7 @@ PolyArc *dds3SpPoly_SphereRingCreate(PolyArc *source) {
         ((PolyRing *)clone)->arc.segments = 3;
     }
     clone->strip = dds3TrackPolyCreate(clone->head.entryCount, clone->segments, 1, 0);
-    dds3TrackPolyVCSet(clone->strip, 0, clone->dispatchArgA, clone->dispatchArgB);
+    dds3TrackPolyVCSet(clone->strip, 0, clone->firstColor, clone->secondColor);
     dds3SpPoly_SphereRingAllBuffInit(clone);
     VU0_LOAD_MATRIX(clone->head.matrix);
     VU0_STORE_MATRIX(clone->head.matrixCopy);
@@ -686,7 +685,7 @@ PolyRotatingBand *dds3SpPoly_RollRingCreate(PolyRingHead *templateHead) {
         ((PolyRing *)band)->rotating.segments = 3;
     }
     band->strip = dds3TrackPolyCreate(band->head.entryCount, band->segments, 1, 0);
-    dds3TrackPolyVCSet(band->strip, 0, band->dispatchArgA, band->dispatchArgB);
+    dds3TrackPolyVCSet(band->strip, 0, band->firstColor, band->secondColor);
     dds3SpPoly_RollRingAllBuffInit(band);
     VU0_LOAD_MATRIX(band->head.matrix);
     VU0_STORE_MATRIX(band->head.matrixCopy);

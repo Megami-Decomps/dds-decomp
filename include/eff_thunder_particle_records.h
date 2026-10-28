@@ -34,7 +34,7 @@ typedef struct EffThunderSparkParams {
     u16 halfLife;                    /* 0x48 */
     u8 pad4A[2];
     f32 width;                       /* 0x4C */
-    void *dispatchArg;               /* 0x50 */
+    u32 colorWord;                    /* 0x50: passed to the selected color setter */
     u8 pad54[0x10];
     f32 heightOffset;                /* 0x64 */
     u32 sparkCount;                  /* 0x68 */

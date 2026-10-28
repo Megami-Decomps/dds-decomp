@@ -56,7 +56,7 @@ extern dds3Polygon_t *hDrawListTop;
 
 extern ParSystem *D_00436404;
 
-extern void (*D_003AAF10[])(void *, void *, void *);
+extern void (*D_003AAF10[])(ParSystem *, u32, u32);
 
 
 extern u16 dds3ParticleGetState(ParObj *obj);
@@ -1555,10 +1555,10 @@ void dds3TrackPolySetMode(ParSystem *system, u16 bucket) {
     system->bucket = bucket;
 }
 
-void dds3TrackPolyVCSet(ParSystem *system, s32 sub, void *dispatchArgA, void *dispatchArgB) {
+void dds3TrackPolyVCSet(ParSystem *system, s32 sub, u32 colorWordA, u32 colorWordB) {
     u16 id = system->kind;
 
-    D_003AAF10[id * 3 + sub](system, dispatchArgA, dispatchArgB);
+    D_003AAF10[id * 3 + sub](system, colorWordA, colorWordB);
 }
 
 extern const u32 D_003AAC90[];
@@ -1785,8 +1785,8 @@ ParEmitDesc *dds3SpPoly_Ring_Old_Create(ParEmitDesc *src) {
     }
     desc->cells.cellSystem = dds3TrackPolyCreate(desc->count, desc->cells.verticesPerCell, 1, PAR_CELL_TOPOLOGY_PAIR);
     dds3TrackPolyVCSet(desc->cells.cellSystem, 0,
-                   *(void **)((u8 *)&desc->cells + 0x14),
-                   *(void **)((u8 *)&desc->cells + 0x18));
+                   *(u32 *)((u8 *)&desc->cells + 0x14),
+                   *(u32 *)((u8 *)&desc->cells + 0x18));
     dds3SpPoly_Ring_Old_BuffInit(desc);
     return desc;
 }

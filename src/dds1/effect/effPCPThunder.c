@@ -97,7 +97,6 @@ EffThunderParameterHead *effPCPThunderSpherePolyGetParam(EffThunderVectorWork *w
     return &work->head;
 }
 
-extern void dds3TrackPolyVCSet(ParSystem *work, s32 sub, void *dispatchArgA, void *dispatchArgB);
 extern u32 effMagaCylinderCalcColor(u32 color, u32 param);
 
 
@@ -347,7 +346,7 @@ EffThunderVectorWork *effBTLBindCreateTrack(EffThunderVectorParams *parameters) 
     work->baseHeightScale = parameters->heightScale;
     work->allocationHandle = allocationHandle;
     work->cellSystem = dds3TrackPolyCreate(work->head.vector.cellCount, work->head.vector.perCell, 0, PAR_CELL_TOPOLOGY_PAIR);
-    dds3TrackPolyVCSet(work->cellSystem, 2, work->head.vector.dispatchArg, work->head.vector.dispatchArg);
+    dds3TrackPolyVCSet(work->cellSystem, 2, work->head.vector.colorWord, work->head.vector.colorWord);
     dds3TrackPolySetMode(work->cellSystem, work->head.vector.systemParam);
     for (cellIndex = 0; cellIndex < work->head.vector.cellCount; cellIndex++) {
         work->cells[cellIndex].delayFrames = 0;
@@ -619,7 +618,7 @@ EffThunderSparkWork *effThunderSparkCreate(EffThunderSparkParams *parameters) {
     delaySpread = work->head.startDelaySpread;
     for (sparkIndex = 0; sparkIndex < work->head.sparkCount; sparkIndex++) {
         work->sparks[sparkIndex].system = dds3TrackPolyCreate(EFF_THUNDER_SINGLE_CELL, work->head.halfLife * 2 - 1, 0, PAR_CELL_TOPOLOGY_PAIR);
-        dds3TrackPolyVCSet(work->sparks[sparkIndex].system, 2, work->head.dispatchArg, work->head.dispatchArg);
+        dds3TrackPolyVCSet(work->sparks[sparkIndex].system, 2, work->head.colorWord, work->head.colorWord);
         dds3TrackPolySetMode(work->sparks[sparkIndex].system, work->head.systemParam);
         effThunderSparkInit(work, sparkIndex);
         work->sparks[sparkIndex].age = -(dds3GetRandA((EffRandState *)effDefaultRandomState) % delaySpread);

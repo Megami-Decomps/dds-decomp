@@ -19,9 +19,9 @@ typedef struct PolyBand {
     f32 targetRadiusJitter;
     f32 liftStep;
     u8 padE0[4];
-    void *dispatchArgB;             /* +0xE4 */
+    u32 secondColor;                /* +0xE4: second packed-color word */
     u8 padE8[4];
-    void *dispatchArgA;             /* +0xEC */
+    u32 firstColor;                 /* +0xEC: first packed-color word */
     struct ParSystem *strip;         /* +0xF0 */
     PolyBandRecord *records;         /* +0xF4 */
     struct sdfMemHandle_t *allocation;  /* +0xF8 */
@@ -48,10 +48,10 @@ typedef char PolyBand_targetRadiusJitter_offset_must_be_0xD8[
     ((u32)&((PolyBand *)0)->targetRadiusJitter == 0xD8) ? 1 : -1];
 typedef char PolyBand_liftStep_offset_must_be_0xDC[
     ((u32)&((PolyBand *)0)->liftStep == 0xDC) ? 1 : -1];
-typedef char PolyBand_dispatchArgB_offset_must_be_0xE4[
-    ((u32)&((PolyBand *)0)->dispatchArgB == 0xE4) ? 1 : -1];
-typedef char PolyBand_dispatchArgA_offset_must_be_0xEC[
-    ((u32)&((PolyBand *)0)->dispatchArgA == 0xEC) ? 1 : -1];
+typedef char PolyBand_secondColor_offset_must_be_0xE4[
+    ((u32)&((PolyBand *)0)->secondColor == 0xE4) ? 1 : -1];
+typedef char PolyBand_firstColor_offset_must_be_0xEC[
+    ((u32)&((PolyBand *)0)->firstColor == 0xEC) ? 1 : -1];
 typedef char PolyBand_strip_offset_must_be_0xF0[
     ((u32)&((PolyBand *)0)->strip == 0xF0) ? 1 : -1];
 typedef char PolyBand_records_offset_must_be_0xF4[

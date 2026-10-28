@@ -12,6 +12,9 @@ void dds3TrackPolyListInit(struct ParSystem *system, s32 cellIndex);
 void dds3TrackPolyDraw(struct ParSystem *system);
 void dds3TrackPolySetMode(struct ParSystem *system, u16 value);
 void dds3TrackPolyColorSet(struct ParSystem *system, s32 cellIndex, u32 color);
+/* Dispatch the selected color setter with two raw packed-color words. */
+void dds3TrackPolyVCSet(struct ParSystem *system, s32 sub,
+                        u32 colorWordA, u32 colorWordB);
 void dds3TrackPolyLinkOt(void);
 void dds3TrackPolyVC3Set_Acute(struct ParSystem *system, u32 centerWord,
                                u32 middleWord, u32 edgeWord);
