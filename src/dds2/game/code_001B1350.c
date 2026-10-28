@@ -673,7 +673,7 @@ u8 btlTestSelectedItemCategoryMask(BtlUnit *unit, s32 actorIndex) {
     return (D_003B4F78[maskTableIndex * 3] & btlEncodeActorIndexAsSelectionMask(actorIndex)) != 0;
 }
 
-s32 fldGetSelectedUnitStat(BtlUnit *unit) {
+BtlCommandHitResult btlGetSelectedActionHitResult(BtlUnit *unit) {
     BtlCommandId commandId = unit->selectedEntryIndex;
     if (commandId == BTL_COMMAND_ID_INVALID) {
         return 0;

@@ -3,6 +3,7 @@
 #include "btl_target_list_builder.h"
 #include "btl_element_block_query_result.h"
 #include "btl_command_use_error.h"
+#include "btl_command_hit_result.h"
 #include "btl_resolve_unit_value_api.h"
 #include "btl_actor_entry_code_api.h"
 #include "btl_actor_selection_clear_api.h"
@@ -1414,16 +1415,16 @@ s32 btlAnyUnitHasQueuedQuery(s32 unused, s32 query, u32 mask) {
 
 extern s32 btlHasEnabledSpecialAbilityForSlot(BtlUnit *, u32);
 
-extern s32 fldGetSelectedUnitStat(BtlUnit *);
+extern BtlCommandHitResult btlGetSelectedActionHitResult(BtlUnit *);
 
 s32 btlUnitBlocksElementQuery(BtlUnit *unit, s32 action, s32 mask) {
     u32 flags = unit->status.flags;
-    s32 stat;
+    BtlCommandHitResult hitResult;
     s32 value;
     if (flags & 1) {
         if (flags & mask) {
             if (!(flags & 0x20)) {
-                stat = fldGetSelectedUnitStat(unit);
+                hitResult = btlGetSelectedActionHitResult(unit);
                 if (action & 0x100000) {
                     s32 i;
                     for (i = 0; i < 19; i++) {
@@ -1433,7 +1434,7 @@ s32 btlUnitBlocksElementQuery(BtlUnit *unit, s32 action, s32 mask) {
                         }
                         value = btlGetUnitElementAffinity(unit, index);
                         if (btlHasEnabledSpecialAbilityForSlot(unit, index) != 0 || (value & 0x20000) ||
-                            (stat == 0x20000 && btlTestSelectedItemCategoryMask(unit, index) != 0)) {
+                            (hitResult == 0x20000 && btlTestSelectedItemCategoryMask(unit, index) != 0)) {
                             return 1;
                         }
                     }
@@ -1441,7 +1442,7 @@ s32 btlUnitBlocksElementQuery(BtlUnit *unit, s32 action, s32 mask) {
                 }
                 value = btlGetUnitElementAffinity(unit, action);
                 if (btlHasEnabledSpecialAbilityForSlot(unit, action) != 0 || (value & 0x20000) ||
-                    (stat == 0x20000 && btlTestSelectedItemCategoryMask(unit, action) != 0)) {
+                    (hitResult == 0x20000 && btlTestSelectedItemCategoryMask(unit, action) != 0)) {
                     return 1;
                 }
             }
