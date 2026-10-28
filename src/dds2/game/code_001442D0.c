@@ -21,6 +21,7 @@
 #include "evt_unit.h"
 #include "evt_unit_color_transition.h"
 #include "common.h"
+#include "fld_spatial_sound_id.h"
 #include "pty_status_query_api.h"
 #include "fld_camera_model_motion_api.h"
 #include "sdf_delayed_resource_check_api.h"
@@ -323,7 +324,7 @@ extern s32 gFldSe3DNum;
 
 typedef struct {
     s32 flags;
-    s32 soundId;
+    FldSpatialSoundId soundId;
     f32 radius;
     f32 x;
     f32 y;
@@ -635,7 +636,8 @@ void fldSe_Init(void) {
     gFldSe3DNum = 0;
 }
 
-void fldAppendPendingSoundForScene(s32 soundId, f32 radius, f32 sourceX, f32 sourceY, f32 sourceZ) {
+void fldAppendPendingSoundForScene(FldSpatialSoundId soundId, f32 radius, f32 sourceX,
+                                  f32 sourceY, f32 sourceZ) {
     if (fldGlobalBase.area == 0x1A && evtBitCheck(0x1F) != 0) {
         return;
     }

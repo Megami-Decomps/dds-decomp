@@ -876,7 +876,7 @@ extern void func_001486D0(u32, f32 *, f32, f32, f32);
 
 extern s32 fldSetSparkVectors(s32 index, const u128 *position, const u128 *rotation);
 
-extern void fldAddSe3D(s32 soundId, f32 radius, f32 sourceX, f32 sourceY, f32 sourceZ);
+extern void fldAddSe3D(FldSpatialSoundId soundId, f32 radius, f32 sourceX, f32 sourceY, f32 sourceZ);
 
 extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32, u128 *, u128 *);
 
@@ -1035,7 +1035,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
                     break;
                 case FLD_PLACEMENT_KIND_PENDING_SOUND:
                     pendingSound = ((FldPlacementData *)spawnResource->data)->payload.pendingSound;
-                    fldAddSe3D(pendingSound->value, pendingSound->scalar,
+                    fldAddSe3D(pendingSound->soundId, pendingSound->radius,
                                         position[0], position[1], position[2]);
                     break;
                 }

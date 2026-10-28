@@ -2,6 +2,7 @@
 #define FLD_PLACEMENT_DATA_H
 
 #include "common.h"
+#include "fld_spatial_sound_id.h"
 
 struct FldSpecialPoint;
 
@@ -19,11 +20,11 @@ enum FldPlacementKind {
 
 /* The kind word at +0 selects the pointed-to view of this relocated payload.
  * Kind 8 points to a two-word special point. Kinds 2 and 3 are consumed as
- * word arrays, while kind 7 carries a float followed by an integer. Keep the
+ * word arrays, while kind 7 carries a radius followed by a sound ID. Keep the
  * +0x08 bytes in the enclosing record opaque. */
 typedef struct FldPendingSoundParams {
-    f32 scalar;
-    u32 value;
+    f32 radius;
+    FldSpatialSoundId soundId;
 } FldPendingSoundParams;
 
 typedef union FldPlacementPayloadRef {
@@ -57,8 +58,8 @@ typedef char FldPlacementDataPayloadOffsetCheck[
     ((u32)&((FldPlacementData *)0)->payload == 0xC) ? 1 : -1];
 typedef char FldPlacementPayloadWordsOffsetCheck[
     ((u32)&((FldPlacementPayloadRef *)0)->words == 0) ? 1 : -1];
-typedef char FldPendingSoundValueOffsetCheck[
-    ((u32)&((FldPendingSoundParams *)0)->value == 4) ? 1 : -1];
+typedef char FldPendingSoundIdOffsetCheck[
+    ((u32)&((FldPendingSoundParams *)0)->soundId == 4) ? 1 : -1];
 typedef char FldSpecialPointSizeCheck[(sizeof(FldSpecialPoint) == 8) ? 1 : -1];
 typedef char FldSpecialPointKindOffsetCheck[
     ((u32)&((FldSpecialPoint *)0)->kind == 0) ? 1 : -1];
