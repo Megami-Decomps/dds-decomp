@@ -110,6 +110,13 @@ typedef union EvtFrameRange {
     struct { u16 end; u16 unk02; } f;
 } EvtFrameRange;
 
+/* EvtRuntime.flags: the viewer plays its scene, set as evtViewerCreateTask's
+ * task ("(ZikkiPlayMode)EventViewer") starts (evtViewerStartUpdate); and the
+ * scene's end countdown has begun (evtEventViewerStartEndCountdown, which
+ * Start's skip calls; evtViewerHasUpdateFlag tests it). */
+#define EVT_VIEWER_FLAG_PLAYING 0x08
+#define EVT_VIEWER_FLAG_ENDING 0x10
+
 /* One allocation retained by the EventViewer task. Camp-named timeline
  * helpers receive this same pointer; their old types omitted the voice tail. */
 typedef struct EvtRuntime {

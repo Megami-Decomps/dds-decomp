@@ -30,4 +30,27 @@ typedef char AdminWork_ownedRequestData_at_0x1C[((u32)&((AdminWork *)0)->ownedRe
 typedef char AdminWork_requestSize_at_0x20[((u32)&((AdminWork *)0)->requestSizeLowByte == 0x20) ? 1 : -1];
 typedef char AdminWork_transitionDelay_at_0x21[((u32)&((AdminWork *)0)->modeTransitionDelay == 0x21) ? 1 : -1];
 
+/* The administrator's modes (activeMode, requestedMode): rows of
+ * ddsAdminModeCallbacks, the same rows in both titles. Named are the rows
+ * whose functions keep their original names (Call<Mode>, Exit<Mode>,
+ * Check<Mode>), and the battle's, whose cleanup is CheckNewBattleTest. */
+typedef enum Dds3AdminMode {
+    DDS3_ADMIN_MODE_DEBUG = 0,
+    DDS3_ADMIN_MODE_BOOT_MC = 1,
+    DDS3_ADMIN_MODE_TITLE = 2,
+    DDS3_ADMIN_MODE_LOAD = 3,
+    DDS3_ADMIN_MODE_END_SAVE = 4,
+    DDS3_ADMIN_MODE_FIELD = 5,
+    DDS3_ADMIN_MODE_RECOVER = 8,
+    DDS3_ADMIN_MODE_TERMINAL = 9,
+    DDS3_ADMIN_MODE_RESULT2 = 10,
+    DDS3_ADMIN_MODE_STAFF = 12,
+    DDS3_ADMIN_MODE_CONFIG = 13,
+    DDS3_ADMIN_MODE_BATTLE = 14,
+    DDS3_ADMIN_MODE_TERMINAL_TEST = 21,
+    DDS3_ADMIN_MODE_SOUND_TEST = 23,
+    DDS3_ADMIN_MODE_BILLBOARD_TEST = 24,
+    DDS3_ADMIN_MODE_FONT_TEST = 25
+} Dds3AdminMode;
+
 #endif /* DDS3_ADMIN_H */
