@@ -4,6 +4,7 @@
 #include "btl_command_target_policy.h"
 #include "btl_actor_category_flag_api.h"
 #include "btl_linked_actor_eligibility.h"
+#include "btl_marked_entry10_api.h"
 #include "sdf_vu0.h"
 #include "btl_actor_resource_bank_api.h"
 #include "sdf_vu_rotation_axes.h"
@@ -188,23 +189,23 @@ BtlLinkedActorEligibilityResult btlCanUseLinkedActor(BtlLinkedCommand *actor) {
 }
 
 /* Return whether a live linked group has its byte at 0x10 marked. */
-s32 btlHasMarkedEntry10(BtlLinkedCommand *command) {
+BtlMarkedEntry10Result btlHasMarkedEntry10(BtlLinkedCommand *command) {
     ActionStateLink *linked = command->link;
     u32 count;
     BtlOperandGroup *entry;
     u32 i;
 
     if (linked == 0) {
-        return 0;
+        return BTL_MARKED_ENTRY10_NOT_FOUND;
     }
     count = btlGetIndexListCount(linked->indexWork.indices);
     entry = linked->indexWork.groups;
     for (i = 0; i < count; i++, entry++) {
         if (entry->inactive != 0) {
-            return 1;
+            return BTL_MARKED_ENTRY10_FOUND;
         }
     }
-    return 0;
+    return BTL_MARKED_ENTRY10_NOT_FOUND;
 }
 
 extern f32 btlUnitGetTopY(BtlUnit *);

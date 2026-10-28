@@ -352,7 +352,7 @@ s32 btlHasFirstLinkedCategoryFlag1000(BtlLinkedCommand *node);
 
 /* Find an unmarked linked kind-two slot whose unit is not disabled. */ s32 btlHasIdleLinkedSlotKindTwo(BtlLinkedCommand *actor);
 
-/* Return whether a live linked group has its byte at 0x10 marked. */ u32 btlHasMarkedEntry10(BtlLinkedCommand *command);
+#include "btl_marked_entry10_api.h"
 
 void btlInterpolateVectorStep(BtlCamState *camera);
 
