@@ -1216,7 +1216,10 @@ void btlSelectLinkedTargets(ActionStateLink *task, s32 unused, s8 linked) {
     btlFreeIndexList(list);
 }
 
-extern s32 btlCanUseLinkedActor(BtlLinkedCommand *);
+/* Keep this API at its original declaration point: moving it to the include
+ * block changes unrelated function codegen.
+ */
+#include "btl_linked_actor_eligibility.h"
 
 /* Pick the acting unit for a linked command: a usable linked unit without flag 0x1000, else the link's own unit. */
 BtlUnit *btlGetTargetUnitForLink(BtlLinkedCommand *command) {
@@ -1231,7 +1234,7 @@ BtlUnit *btlGetTargetUnitForLink(BtlLinkedCommand *command) {
     if (command->linkedA == NULL && command->linkedB == NULL) {
         return command->link->unit;
     }
-    if (btlCanUseLinkedActor(command) == 0) {
+    if (btlCanUseLinkedActor(command) == BTL_LINKED_ACTOR_INELIGIBLE) {
         return command->link->unit;
     }
     if (command->linkedA != NULL) {

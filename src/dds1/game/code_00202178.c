@@ -10,6 +10,7 @@
 #include "btl_camera_mode_index.h"
 #include "btl_command_target_policy.h"
 #include "btl_actor_category_flag_api.h"
+#include "btl_linked_actor_eligibility.h"
 #include "sdf_vu0.h"
 #include "btl_actor_resource_bank_api.h"
 #include "sdf_vu_rotation_axes.h"
@@ -907,8 +908,6 @@ void btlSelectLinkedTargets(BtlTask *actor, s32 input, s8 invert) {
     btlFreeIndexList(list);
 }
 
-extern s32 btlCanUseLinkedActor(BtlLinkedCommand *);
-
 /* Resolve a command's linked actor, retaining each independent task fallback. */
 BtlUnit *btlGetTargetUnitForLink(BtlLinkedCommand *command) {
     s32 kind = command->actionCode;
@@ -922,7 +921,7 @@ BtlUnit *btlGetTargetUnitForLink(BtlLinkedCommand *command) {
     if (command->linkedA == NULL && command->linkedB == NULL) {
         return command->task->unit;
     }
-    if (btlCanUseLinkedActor(command) == 0) {
+    if (btlCanUseLinkedActor(command) == BTL_LINKED_ACTOR_INELIGIBLE) {
         return command->task->unit;
     }
     if (command->linkedA != NULL) {

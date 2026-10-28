@@ -8,6 +8,7 @@
 #include "btl_pair_camera_preset.h"
 #include "btl_camera_parameter_record.h"
 #include "common.h"
+#include "btl_linked_actor_eligibility.h"
 #include "btl_target_list_builder.h"
 #include "btl_unit_model_progress_api.h"
 #include "btl_quarter_health_result.h"
@@ -371,8 +372,6 @@ extern void btlBuildHeightClampedApproachCamera(BtlLinkedCommand *, BtlCamState 
 void btlApplyCombinedActorFlags(BtlLinkedCommand *command);
 
 void btlBlendUnitColor(BtlUnit *unit, u32 color, s32 mode);
-
-s32 btlCanUseLinkedActor(BtlLinkedCommand *actor);
 
 void btlClearUnitDefeatCandidate(BtlUnit *unit);
 
@@ -3959,7 +3958,7 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
     case 0x1D4:
         CURSOR->scriptSetIndex = 1;
         CURSOR->unk_0E = 0;
-        if (btlCanUseLinkedActor(command) == 0) {
+        if (btlCanUseLinkedActor(command) == BTL_LINKED_ACTOR_INELIGIBLE) {
             CURSOR->scriptIndex = 0x1E;
         } else {
             CURSOR->scriptIndex = 0x21;
@@ -4016,7 +4015,7 @@ void btlInitSkillCommandCursor(BtlLinkedCommand *command, BtlCamState *pose) {
         CURSOR->scriptSetIndex = 2;
         CURSOR->unk_0E = 0;
         btlBuildPresetCameraPose(command, pose, 1, groupChoices[(s16)btlNextScaledRandom(2)]);
-        if (btlCanUseLinkedActor(command) == 0) {
+        if (btlCanUseLinkedActor(command) == BTL_LINKED_ACTOR_INELIGIBLE) {
             CURSOR->scriptIndex = 0x1E;
         } else {
             CURSOR->scriptIndex = 0xB;
@@ -5058,7 +5057,7 @@ void btlApplyTimedCameraInstruction(BtlLinkedCommand *action, BtlCamState *pose,
             if (instruction->startFrame <= (f32)CURSOR->frame &&
                 (f32)CURSOR->frame < instruction->startFrame + instruction->duration) {
                 if (kind == 42) {
-                    if (btlCanUseLinkedActor(action) == 0) {
+                    if (btlCanUseLinkedActor(action) == BTL_LINKED_ACTOR_INELIGIBLE) {
                         CURSOR->restoreAlternate = 1;
                     } else {
                         CURSOR->restoreAlternate = 0;

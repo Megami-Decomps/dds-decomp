@@ -3,6 +3,7 @@
 #include "btl_unit_geometry_api.h"
 #include "btl_command_target_policy.h"
 #include "btl_actor_category_flag_api.h"
+#include "btl_linked_actor_eligibility.h"
 #include "sdf_vu0.h"
 #include "btl_actor_resource_bank_api.h"
 #include "sdf_vu_rotation_axes.h"
@@ -155,7 +156,7 @@ s32 btlHasMarkedEntry14(BtlLinkedCommand *command) {
     return 0;
 }
 
-s32 btlCanUseLinkedActor(BtlLinkedCommand *actor) {
+BtlLinkedActorEligibilityResult btlCanUseLinkedActor(BtlLinkedCommand *actor) {
     u32 status = actor->status;
     ActionStateLink *linked;
     s32 category;
@@ -167,23 +168,23 @@ s32 btlCanUseLinkedActor(BtlLinkedCommand *actor) {
     case 8:
         break;
     default:
-        return 1;
+        return BTL_LINKED_ACTOR_ELIGIBLE;
     }
     linked = actor->link;
     if (linked == 0) {
-        return 1;
+        return BTL_LINKED_ACTOR_ELIGIBLE;
     }
     if (btlHasMarkedEntry14(actor)) {
-        return 0;
+        return BTL_LINKED_ACTOR_INELIGIBLE;
     }
     if (linked->unit->partyRecord.status & 0x480) {
-        return 0;
+        return BTL_LINKED_ACTOR_INELIGIBLE;
     }
     category = actor->actionCode;
     if (category != 0 && (((BtlActionTableEntry *)datActionAnimationRecords)[category].flags & 1)) {
-        return 0;
+        return BTL_LINKED_ACTOR_INELIGIBLE;
     }
-    return 1;
+    return BTL_LINKED_ACTOR_ELIGIBLE;
 }
 
 /* Return whether a live linked group has its byte at 0x10 marked. */
@@ -1324,7 +1325,7 @@ void btlSelectActionCameraPose(BtlLinkedCommand *action) {
         } else {
             index = ((policy >> 10) ^ 1) & 1;
         }
-        if ((btlCanUseLinkedActor(action) == 0 || index != 0) && battle->handleActorCategoryCamera == 0) {
+        if ((btlCanUseLinkedActor(action) == BTL_LINKED_ACTOR_INELIGIBLE || index != 0) && battle->handleActorCategoryCamera == 0) {
             btlPrepareUnitPoseWithTiltRotation(action, &action->frontCamera, &action->backCamera);
             action->motionParameter = 200.0f;
             action->flags |= 0x10041;

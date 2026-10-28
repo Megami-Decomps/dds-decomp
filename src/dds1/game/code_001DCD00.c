@@ -4,6 +4,7 @@
 #include "btl_unit_geometry_api.h"
 #include "btl_command_target_policy.h"
 #include "btl_actor_category_flag_api.h"
+#include "btl_linked_actor_eligibility.h"
 #include "sdf_vu0.h"
 #include "btl_actor_resource_bank_api.h"
 #include "eff_random_mod.h"
@@ -108,8 +109,7 @@ s32 btlMatchFirstLinkedActorFlags(BtlLinkedCommand *action) {
 
 extern s32 btlIsActorCategoryMarked(BtlLinkedCommand *);
 
-/* Check actor status, linked-group marks, and owner restrictions before use. */
-s32 btlCanUseLinkedActor(BtlLinkedCommand *actor) {
+BtlLinkedActorEligibilityResult btlCanUseLinkedActor(BtlLinkedCommand *actor) {
     u32 status = actor->status;
     BtlTask *linked;
     s32 category;
@@ -124,27 +124,27 @@ s32 btlCanUseLinkedActor(BtlLinkedCommand *actor) {
     case 8:
         break;
     default:
-        return 1;
+        return BTL_LINKED_ACTOR_ELIGIBLE;
     }
     linked = actor->task;
     if (linked == 0) {
-        return 1;
+        return BTL_LINKED_ACTOR_ELIGIBLE;
     }
     count = btlGetIndexListCount(linked->indexWork.indices);
     entry = linked->indexWork.groups;
     for (i = 0; i < count; i++, entry++) {
         if (entry->reflected != 0) {
-            return 0;
+            return BTL_LINKED_ACTOR_INELIGIBLE;
         }
     }
     if (linked->unit->partyRecord.status & 0x480) {
-        return 0;
+        return BTL_LINKED_ACTOR_INELIGIBLE;
     }
     category = actor->actionCode;
     if (category != 0 && (datActionAnimationRecords[category].flags & 1)) {
-        return 0;
+        return BTL_LINKED_ACTOR_INELIGIBLE;
     }
-    return 1;
+    return BTL_LINKED_ACTOR_ELIGIBLE;
 }
 
 /* Return whether a live linked group has its byte at 0x10 marked. */
@@ -281,7 +281,7 @@ BtlActorCategoryFlagUseResult btlCanUseActorCategoryFlag2(BtlLinkedCommand *acto
     if (btlIsActorCategoryMarked(actor) != 0) {
         return 1;
     }
-    if (btlCanUseLinkedActor(actor) == 0) {
+    if (btlCanUseLinkedActor(actor) == BTL_LINKED_ACTOR_INELIGIBLE) {
         return 0;
     }
     index = actor->actionCode;
@@ -304,7 +304,7 @@ s32 btlHasSingleLinkedResource(BtlLinkedCommand *actor) {
 
 BtlActorCategoryFlagUseResult btlCanUseActorCategoryFlag4(BtlLinkedCommand *actor) {
     s32 index;
-    if (btlCanUseLinkedActor(actor) == 0) {
+    if (btlCanUseLinkedActor(actor) == BTL_LINKED_ACTOR_INELIGIBLE) {
         return 0;
     }
     index = actor->actionCode;
@@ -1150,7 +1150,6 @@ void btlAdvanceUnblockedPlayerCursorAnimation(BtlLinkedCommand *action) {
     btlAdvancePlayerCursorAnimation(action, &action->camera);
 }
 extern BtlActionAnimationRecord *datActionAnimationRecords;
-extern s32 btlCanUseLinkedActor(BtlLinkedCommand *);
 extern void btlPrepareUnitPoseWithTiltRotation(BtlLinkedCommand *,BtlCamState *,BtlCamState *);
 extern void btlInitializeActionCamera(BtlLinkedCommand *);
 extern void btlBuildGroupSizeActionCameraPair(BtlLinkedCommand *,BtlCamState *,BtlCamState *);
@@ -1185,7 +1184,7 @@ void btlSelectActionCameraPose(BtlLinkedCommand *action) {
         } else {
             index = ((policy >> 10) ^ 1) & 1;
         }
-        if ((btlCanUseLinkedActor(action) == 0 || index != 0) && battle->handleActorCategoryCamera == 0) {
+        if ((btlCanUseLinkedActor(action) == BTL_LINKED_ACTOR_INELIGIBLE || index != 0) && battle->handleActorCategoryCamera == 0) {
             btlPrepareUnitPoseWithTiltRotation(action, &action->frontCamera, &action->backCamera);
             action->motionParameter = 200.0f;
             action->flags |= 0x10041;

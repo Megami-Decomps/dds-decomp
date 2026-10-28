@@ -6,6 +6,7 @@
 #include "btl_actor_command_selector_value_api.h"
 #include "btl_referenced_battle_effect_task.h"
 #include "btl_actor_category_flag_api.h"
+#include "btl_linked_actor_eligibility.h"
 #include "sdf_vu0.h"
 #include "sdf_vu_rotation_axes.h"
 #include "btl_effect_position.h"
@@ -828,7 +829,6 @@ u8 btlSelectSpecialActionCameraPose(BtlLinkedCommand *command, s8 a, s8 b) {
     return 1;
 }
 
-extern s32 btlCanUseLinkedActor(BtlLinkedCommand *);
 extern void btlClearAllUnitDefeatCandidatesTask(void);
 extern void btlApplyCombinedActorFlags(BtlLinkedCommand *);
 extern void btlBuildRandomTargetCameraStates(u8 *, u8 *, u8 *);
