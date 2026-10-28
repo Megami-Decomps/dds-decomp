@@ -57,12 +57,12 @@
 #include "evt_stage_test.h"
 #include "kwln_task_lifecycle.h"
 #include "btl.h"
+#include "btl_party_command_use_result.h"
 #include "dds3_world_primary.h"
 #include "fld_scene_command_state_api.h"
 #include "itf_draw_grid.h"
 #include "prf_profile_cap.h"
 /* Declared before first use (were implicit int). */
-extern u16 btlCheckSelectedPartyCommandEligibility(s32 commandId, u32 memberMask);
 extern s32 datAddHp(datUnitWork_t *unit, s32 delta);
 extern s32 datAddMp(datUnitWork_t *unit, s32 delta);
 extern void evtCopyEntryStringToActiveWindow(s32 slotIndex, const char *sourceText);
@@ -2608,7 +2608,7 @@ s32 ptySkillApplyFieldUseEffect(MenuPageWindow *context, u16 ability, datUnitWor
         MNU_ABILITY_TARGET_CATEGORY_SINGLE_ENTRY) {
         mask = mnuGetMatchingPartyEntryMask(entry);
 
-        if (btlCheckSelectedPartyCommandEligibility(ability, mask) != 0) {
+        if (btlCheckSelectedPartyCommandEligibility(ability, mask) != BTL_PARTY_COMMAND_USE_GATE_ALLOW) {
             return 0;
         }
         datDelDevil(ability, target, entry);
@@ -2622,7 +2622,7 @@ s32 ptySkillApplyFieldUseEffect(MenuPageWindow *context, u16 ability, datUnitWor
             if ((entry->flags & 1) != 0 && (entry->flags & 2) != 0) {
                 mask = mnuGetMatchingPartyEntryMask(entry);
 
-                if (btlCheckSelectedPartyCommandEligibility(ability, mask) == 0) {
+                if (btlCheckSelectedPartyCommandEligibility(ability, mask) == BTL_PARTY_COMMAND_USE_GATE_ALLOW) {
                     datDelDevil(ability, target, entry);
                     applied = 1;
                 }

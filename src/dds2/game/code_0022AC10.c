@@ -47,6 +47,7 @@
 #include "btl_command.h"
 #include "btl_command_block_reason.h"
 #include "btl_command_target_eligibility.h"
+#include "btl_party_command_use_result.h"
 #include "btl_command_required_entry_match.h"
 #include "pcp_vu0.h"
 #include "sdf_vu_transform_api.h"
@@ -1192,8 +1193,8 @@ BtlCommandRequiredEntryMatchResult btlCheckCommandRequiredEntryMatches(
     return BTL_COMMAND_REQUIRED_ENTRY_MATCHED;
 }
 
-/* Counter eligibility for a command against the selected party members. */
-u16 btlCheckSelectedPartyCommandEligibility(s32 commandId, u32 memberMask) {
+/* Return a nonzero gate result when the selected party cannot use the command. */
+BtlPartyCommandUseGateResult btlCheckSelectedPartyCommandEligibility(s32 commandId, u32 memberMask) {
     datUnitWork_t *entryList[5];
     s32 count = 0;
     s32 i;
@@ -1208,22 +1209,22 @@ u16 btlCheckSelectedPartyCommandEligibility(s32 commandId, u32 memberMask) {
     if ((datCommandRecords[commandId].attribute.bits & 0x400000FF) == 0x40000002 &&
         (~datCommandRecords[commandId].restriction & 0x7FFF) == 0x4000 &&
         btlListHasMarkedFlag(entryList, count) == 0) {
-        return 2;
+        return BTL_PARTY_COMMAND_USE_GATE_MARKED_MEMBER_REQUIRED;
     }
     switch (commandId) {
     case 0xC4:
         if (DDS3_GBWK->world.fieldFlags & DAT_WORLD_FIELD_PRIMARY_SCENE_WORK) {
-            return 4;
+            return BTL_PARTY_COMMAND_USE_GATE_SPECIAL_FIELD_FLAG_SET;
         }
         break;
     case 0xC5:
         if (DDS3_GBWK->world.fieldFlags & DAT_WORLD_FIELD_SECONDARY_SCENE_WORK) {
-            return 4;
+            return BTL_PARTY_COMMAND_USE_GATE_SPECIAL_FIELD_FLAG_SET;
         }
         break;
     case 0xC6:
         if (DDS3_GBWK->world.fieldFlags & DAT_WORLD_FIELD_TRANSITION_WORK) {
-            return 4;
+            return BTL_PARTY_COMMAND_USE_GATE_SPECIAL_FIELD_FLAG_SET;
         }
         break;
     }
