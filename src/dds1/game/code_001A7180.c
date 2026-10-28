@@ -1,4 +1,5 @@
 #include "common.h"
+#include "btl_unit_defeat_by_delta_result.h"
 #include "btl_selected_entry_api.h"
 #include "btl_quarter_health_result.h"
 #include "btl_actor_command_selector_value_api.h"
@@ -355,12 +356,22 @@ BtlHuntMpRecoveryAmount btlGetHuntMpRecoveryAmount(BtlUnit *actor, BtlUnit *targ
     return recovery;
 }
 
-s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *actor, s32 delta) {
-    if (btlGetEntryFlagsUnlessDisabled(&actor->partyRecord) & 4) return 0;
-    if (btlHasEnemyRecordDefeatExemptionFlag(actor)) return 0;
-    if ((actor->partyRecord.status & 0x7FFF) == 0x4000) return 1;
-    if ((((BtlState *)btlGetRuntime())->battleFlags & 0x80) == 0) return 0;
-    return actor->partyRecord.hp + delta < 1;
+BtlUnitDefeatByDeltaResult btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *actor, s32 delta) {
+    if (btlGetEntryFlagsUnlessDisabled(&actor->partyRecord) & 4) {
+        return BTL_UNIT_DEFEAT_BY_DELTA_RESULT_NOT_DEFEATED;
+    }
+    if (btlHasEnemyRecordDefeatExemptionFlag(actor)) {
+        return BTL_UNIT_DEFEAT_BY_DELTA_RESULT_NOT_DEFEATED;
+    }
+    if ((actor->partyRecord.status & 0x7FFF) == 0x4000) {
+        return BTL_UNIT_DEFEAT_BY_DELTA_RESULT_DEFEATED;
+    }
+    if ((((BtlState *)btlGetRuntime())->battleFlags & 0x80) == 0) {
+        return BTL_UNIT_DEFEAT_BY_DELTA_RESULT_NOT_DEFEATED;
+    }
+    return actor->partyRecord.hp + delta < 1
+               ? BTL_UNIT_DEFEAT_BY_DELTA_RESULT_DEFEATED
+               : BTL_UNIT_DEFEAT_BY_DELTA_RESULT_NOT_DEFEATED;
 }
 
 BtlQuarterHealthThresholdResult btlIsCurrentValueBelowQuarterThreshold(BtlUnit *object) {

@@ -11,6 +11,7 @@
 #include "eff_random.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_unit_defeat_by_delta_result.h"
 #include "btl_action_state_api.h"
 #include "btl_action_entry_is_empty_api.h"
 #include "btl_command_id.h"
@@ -3547,7 +3548,6 @@ void btlEnterStatusDamageState(void) {
 
 extern s32 btlSumOtherTargetHitAmounts(ActionStateLink *);
 extern s32 btlComputeStatusPenaltyFifth(BtlUnit *);
-extern s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *, s32);
 extern BtlRuntimeTask *btlCreateStiffenDamageShakeTask(BtlUnit *, f32);
 
 /* After owned tasks finish, queue ailment damage, penalties and their effects. */

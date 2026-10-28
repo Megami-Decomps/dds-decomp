@@ -2,6 +2,7 @@
 #include "evt_run_context_api.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_unit_defeat_by_delta_result.h"
 #include "btl_action_state_api.h"
 #include "btl_action_entry_is_empty_api.h"
 #include "btl_command_id.h"
@@ -159,8 +160,6 @@ extern BtlRuntimeTask *btlCreateStiffenDamageShakeTask(BtlUnit *, f32);
 
 s32 btlGetLoggedIndexedCommandItem(s32 index);
 
-
-s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *actor, s32 delta);
 
 void btlSyncPlayerWork(BtlUnit *actor);
 

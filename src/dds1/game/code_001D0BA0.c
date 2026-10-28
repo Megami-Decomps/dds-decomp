@@ -8,6 +8,7 @@
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "common.h"
+#include "btl_unit_defeat_by_delta_result.h"
 #include "btl_action_entry_is_empty_api.h"
 #include "btl_action_state_api.h"
 #include "btl_selected_entry_api.h"
@@ -215,8 +216,6 @@ extern BtlRuntimeTask *btlCreateStiffenDamageShakeTask(BtlUnit *, f32);
 s32 btlGetLoggedIndexedCommandItem(s32 index);
 
 
-
-s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *actor, s32 delta);
 
 
 void btlSetTrackedTaskDisplayMode(s32 mode);

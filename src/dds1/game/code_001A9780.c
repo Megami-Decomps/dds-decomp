@@ -10,6 +10,7 @@
 #include "btl_registered_panel_work.h"
 #include "btl_command_layout_work.h"
 #include "common.h"
+#include "btl_unit_defeat_by_delta_result.h"
 #include "btl_target_list_builder.h"
 #include "btl_target_selection_state_api.h"
 #include "btl_actor_command_selector_value_api.h"
@@ -175,8 +176,6 @@ void btlClearAllActorEntrySlots(BtlUnit *unit);
 
 
 
-
-s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *actor, s32 delta);
 
 
 extern void btlSerialBattleChanceHook(s32);

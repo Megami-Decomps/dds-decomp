@@ -14,6 +14,7 @@
 #include "dsp_entry_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "btl_unit_defeat_by_delta_result.h"
 #include "btl_target_list_builder.h"
 #include "btl_target_selection_state_api.h"
 #include "btl_actor_command_selector_value_api.h"
@@ -212,8 +213,6 @@ void btlClearAllActorEntrySlots(BtlUnit *unit);
 s32 btlGetEntryFlagsUnlessDisabled(datUnitWork_t *record);
 
 
-
-s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *unit, s32 delta);
 
 /* Read current HP from a unit-entry address. */ s32 btlReadCurrentUnitHp(datUnitWork_t *entry);
 
