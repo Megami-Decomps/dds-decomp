@@ -79,6 +79,7 @@
 #include "eff_queue.h"
 #include "btl_resource_name.h"
 #include "btl_state.h"
+#include "btl_unit_pose_state.h"
 #include "evt_unit.h"
 #include "evt_unit_color_transition.h"
 #include "mdl.h"
@@ -10973,7 +10974,7 @@ void effUpdateActorPoseFromModelResource(EffActiveResource *resource)
         VU0_STORE_VF_UNCLOBBERED(vf10, &quaternion);
         dds3SetPosPoseSet(unit->effectObject, (u128 *)matrix[3]);
         dds3SetRotPoseSet(unit->effectObject, &quaternion);
-        unit->status.stateFlags |= 0x200000;
+        unit->status.stateFlags |= BTL_UNIT_STATE_MODEL_EFFECT_POSE_ACTIVE;
     }
 }
 

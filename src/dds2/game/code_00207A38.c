@@ -35,6 +35,7 @@
 #include "sdf_resource.h"
 #include "bill_object_api.h"
 #include "btl_state.h"
+#include "btl_unit_pose_state.h"
 #include "btl_action.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
@@ -1111,7 +1112,7 @@ void btlUpdateUnitActors(void) {
             btlApplyUnitMotionSelection(unit, unit->effectIndex, unit->effectParameter, unit->effectScale);
         }
         unit->status.stateFlags &= ~0x8000;
-        unit->status.stateFlags &= ~0x200000;
+        unit->status.stateFlags &= ~BTL_UNIT_STATE_MODEL_EFFECT_POSE_ACTIVE;
         unit = unit->next;
     }
     {

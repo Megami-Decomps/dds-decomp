@@ -66,6 +66,7 @@
 #include "btl_camera_pose_step.h"
 #include "btl_command_target_eligibility.h"
 #include "btl_state.h"
+#include "btl_unit_pose_state.h"
 #include "btl_task_args.h"
 #include "btl_deferred_unit_status_args.h"
 #include "btl_sound.h"
@@ -4609,7 +4610,7 @@ u32 btlStiffenDamageShakeStep(BtlStiffenTaskArgs *args) {
     if (!(args->unit->status.flags & 2)) {
         return 1;
     }
-    if (args->unit->status.stateFlags & 0x200000) {
+    if (args->unit->status.stateFlags & BTL_UNIT_STATE_MODEL_EFFECT_POSE_ACTIVE) {
         return 1;
     }
     if (args->count == 0) {
