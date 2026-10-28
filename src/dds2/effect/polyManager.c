@@ -82,7 +82,7 @@ void dds3SpPoly_Ring_Old_Calc(PolyNode *node) {
     ParCell *entry;
     s32 *ages;
 
-    if (node->active != 0) {
+    if (node->active != POLY_ACTIVITY_INACTIVE) {
         duration = node->duration;
         completed = 0;
         count = node->entryCount;
@@ -108,7 +108,7 @@ void dds3SpPoly_Ring_Old_Calc(PolyNode *node) {
                     completed++;
                     if (completed >= count) {
                         entry->color = 0;
-                        node->active = 0;
+                        node->active = POLY_ACTIVITY_INACTIVE;
                     }
                 }
             } else {
@@ -463,7 +463,7 @@ void dds3SpPoly_RingDraw(PolyBand *band) {
                 } else {
                     completed++;
                     if (completed >= (u32)count) {
-                        band->head.active = 0;
+                        band->head.active = POLY_ACTIVITY_INACTIVE;
                     }
                 }
                 entry->vertexCount = 0;
@@ -654,7 +654,7 @@ void dds3SpPoly_SphereRingDraw(PolyArc *arc) {
                 } else {
                     completed++;
                     if (completed >= (u32)count) {
-                        arc->head.active = 0;
+                        arc->head.active = POLY_ACTIVITY_INACTIVE;
                     }
                 }
                 entry->vertexCount = 0;
@@ -855,7 +855,7 @@ void polyUpdateRotatingBandCells(PolyRotatingBand *rotatingBand) {
                 } else {
                     completed++;
                     if (completed >= (u32)count) {
-                        rotatingBand->head.active = 0;
+                        rotatingBand->head.active = POLY_ACTIVITY_INACTIVE;
                     }
                 }
                 entry->vertexCount = 0;

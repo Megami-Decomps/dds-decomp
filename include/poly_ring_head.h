@@ -2,6 +2,7 @@
 #define DDS_POLY_RING_HEAD_H
 
 #include "common.h"
+#include "poly_activity_state.h"
 
 /* Shared 0xC0 template prefix copied by the band, arc, and rotating-band
  * owners. Their parameter/resource tails are distinct and remain local. */
@@ -20,7 +21,7 @@ typedef struct PolyRingHead {
     u32 endColorRampFrames;
     f32 matrixCopy[16]; /* Initialized from matrix when the owner is created. */
     u8 padB0[2];
-    u16 active; /* Cleared when every entry finishes. */
+    PolyActivityState active; /* Cleared when every entry finishes. */
     u8 padB4[0xC];
 } PolyRingHead;
 

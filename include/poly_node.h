@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "par_cell_api.h"
+#include "poly_activity_state.h"
 
 /* Basic radial-fan state shared by the paired polyManager implementations.
  * Its fixed header uses the same serialized field positions as PolyRingHead;
@@ -24,7 +25,7 @@ typedef struct PolyNode {
     u32 endColorRampFrames;
     f32 matrixCopy[16];
     u8 padB0[2];
-    u16 active;
+    PolyActivityState active;
     u8 padB4[0xC];
     u8 loop;
     u8 padC1[3];
