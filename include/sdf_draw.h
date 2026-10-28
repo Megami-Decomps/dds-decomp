@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "sdf_dma_tag.h"
+#include "sdf_motion.h"
 
 struct SdfChunkHeader;
 
@@ -269,8 +270,8 @@ typedef struct sdfMotionCtrlr_t {
     s16 slotIndex;
     u16 motionIndex;
     u16 frameCount;
-    u8 state;
-    u8 previousState;
+    SdfMotionState state;
+    SdfMotionState previousState;
     u8 loopEnabled;
     u8 pad33;
 } sdfMotionCtrlr_t;

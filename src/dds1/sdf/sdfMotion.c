@@ -230,7 +230,7 @@ SdfMotionNextResult sdfMotionNext(sdfMotionCtrlr_t *motion) {
 }
 /* State 6 parks motion processing, retaining the previous state to resume. */
 void sdfMotionPause(sdfMotionCtrlr_t *motion) {
-    u8 previousState;
+    SdfMotionState previousState;
 
     previousState = motion->state;
     if (previousState != SDF_MOTION_STATE_SUSPENDED) {

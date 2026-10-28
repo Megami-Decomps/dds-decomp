@@ -7,13 +7,15 @@ struct sdfMotionCtrlr_t;
 struct MotionTable;
 struct sdfModelRootNode_t;
 
-typedef enum {
+/* Controller storage keeps the current and suspended state in one byte. */
+typedef u8 SdfMotionState;
+enum SdfMotionStateValue {
     SDF_MOTION_STATE_UNINITIALIZED = 0,
     SDF_MOTION_STATE_INITIALIZED = 1,
     SDF_MOTION_STATE_SAMPLING = 4,
     SDF_MOTION_STATE_TERMINAL = 5,
     SDF_MOTION_STATE_SUSPENDED = 6,
-} SdfMotionState;
+};
 
 struct sdfMotionCtrlr_t *sdfMotionCtrlrNew(struct sdfModelRootNode_t *model, struct MotionTable *table);
 void sdfMotionCtrlrFree(struct sdfMotionCtrlr_t *motion);
