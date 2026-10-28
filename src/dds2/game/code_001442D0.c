@@ -2731,8 +2731,11 @@ void fldSetSceneLocation(s32 area, s32 floor, s32 stage) {
 
 extern s32 D_00387CE0[];
 
-/* The area number's last two digits map to a save-table row; floor and bit are zero-based. */
-FldAutoMapEntryDiscoveryState fldGetFloorFlag(s32 area, s32 floor, s32 bit) {
+/* The area number's last two digits map to a save-table row; scene-record and
+ * entry indexes are zero-based. */
+FldAutoMapEntryDiscoveryState fldGetFloorFlag(
+    s32 area, FldAutoMapSceneRecordIndex floor,
+    FldAutoMapEntryIndex bit) {
     s32 areaIndex = D_00387CE0[area % 100];
 
     if (areaIndex == -1) {
