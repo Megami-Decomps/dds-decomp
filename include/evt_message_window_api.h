@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "itf_mes_entry_index.h"
+#include "itf_option_bit_index_api.h"
 
 struct ItfMesSub;
 
@@ -39,6 +40,7 @@ typedef s32 EvtMessageWindowPageValueResult;
  * Returns UPDATED when applied, or NO_WINDOW when no window is open. */
 EvtMessageWindowPageValueResult evtSetMessageWindowPageValue(s32 pageValue);
 
-void evtSetMessageWindowOptionWhenOpen(s32 option);
+/* Defer selecting this option-mask bit until the open window reaches its gate. */
+void evtSetMessageWindowOptionWhenOpen(ItfMesOptionBitIndex selectedBitIndex);
 
 #endif

@@ -532,9 +532,9 @@ s32 evtStoreValueAndCaptureWindowPanelValue(ItfMesEntryIndex entryIndex) {
 }
 
 /* Update the byte-sized option only while the singleton window is open. */
-void evtSetMessageWindowOptionWhenOpen(s32 option) {
+void evtSetMessageWindowOptionWhenOpen(ItfMesOptionBitIndex selectedBitIndex) {
     if (gMsgID >= 0) {
-        gSelMsgPos = option;
+        gSelMsgPos = selectedBitIndex;
     }
 }
 
