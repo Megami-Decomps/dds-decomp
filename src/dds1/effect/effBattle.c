@@ -266,9 +266,9 @@ void effBattleUpdate(effBTLCutHandle_t *work) {
             if (entry->zeroKindCount >= frame) {
                 continue;
             }
-            if (entry->kind != 0) {
+            if (entry->effBattleEntryActorFilterMode != EFF_BATTLE_ENTRY_ACTOR_FILTER_BYPASS) {
                 u16 eligibilityFlags = unit->effectLink.flags;
-                if (entry->kind == 3) {
+                if (entry->effBattleEntryActorFilterMode == EFF_BATTLE_ENTRY_ACTOR_FILTER_LINK_FLAG_2) {
                     if ((eligibilityFlags & 2) == 0) {
                         continue;
                     }
@@ -276,10 +276,14 @@ void effBattleUpdate(effBTLCutHandle_t *work) {
                     if ((eligibilityFlags & 4) == 0) {
                         continue;
                     }
-                    if (entry->kind == 1 && (eligibilityFlags & 1) != 0) {
+                    if (entry->effBattleEntryActorFilterMode ==
+                            EFF_BATTLE_ENTRY_ACTOR_FILTER_LINK_FLAG_4_WITHOUT_FLAG_1 &&
+                        (eligibilityFlags & 1) != 0) {
                         continue;
                     }
-                    if (entry->kind == 2 && (eligibilityFlags & 1) == 0) {
+                    if (entry->effBattleEntryActorFilterMode ==
+                            EFF_BATTLE_ENTRY_ACTOR_FILTER_LINK_FLAGS_4_AND_1 &&
+                        (eligibilityFlags & 1) == 0) {
                         continue;
                     }
                 }
@@ -424,10 +428,10 @@ s32 effBattleHasActiveKind(effBTLCutHandle_t *owner) {
     s32 i;
 
     for (i = 0; i < count; i++, entry++) {
-        if (entry->kind == 3) {
+        if (entry->effBattleEntryActorFilterMode == EFF_BATTLE_ENTRY_ACTOR_FILTER_LINK_FLAG_2) {
             return 1;
         }
-        if (entry->kind == 2) {
+        if (entry->effBattleEntryActorFilterMode == EFF_BATTLE_ENTRY_ACTOR_FILTER_LINK_FLAGS_4_AND_1) {
             return 1;
         }
     }

@@ -49,13 +49,26 @@ typedef union EffBattleParameterValue {
     struct effPartHandle_t *work;
 } EffBattleParameterValue;
 
+/* Per-entry actor eligibility selector; preserve the stored byte width. */
+typedef u8 EffBattleEntryActorFilterMode;
+enum EffBattleEntryActorFilterMode {
+    EFF_BATTLE_ENTRY_ACTOR_FILTER_BYPASS = 0,
+    EFF_BATTLE_ENTRY_ACTOR_FILTER_LINK_FLAG_4_WITHOUT_FLAG_1 = 1,
+    EFF_BATTLE_ENTRY_ACTOR_FILTER_LINK_FLAGS_4_AND_1 = 2,
+    EFF_BATTLE_ENTRY_ACTOR_FILTER_LINK_FLAG_2 = 3,
+#ifdef VERSION_DDS2
+    EFF_BATTLE_ENTRY_ACTOR_FILTER_LINK_FLAG_4_NON_SPECIAL_CLASS = 4,
+    EFF_BATTLE_ENTRY_ACTOR_FILTER_LINK_FLAG_4_RECORD_FLAG_CLASS = 5
+#endif
+};
+
 typedef struct EffBattleEntry {
     EffBattleParameterKind parameterKind; /* 0x00: work kind or row-state sentinel. */
     u8 pad02[2];
     EffBattleParameterValue value; /* 0x04 */
     EffectVectorRequest aimParams;        /* 0x08 */
     u32 zeroKindCount;             /* 0x10 */
-    u8 kind;                       /* 0x14 */
+    EffBattleEntryActorFilterMode kind; /* 0x14: actor eligibility filter mode. */
     u8 pad15[3];
 } EffBattleEntry; /* 0x18 */
 
@@ -445,5 +458,8 @@ struct BtlRuntimeTask *sndCreateEarringPlaybackTask(struct BtlUnit *unit);
 
 void sndFormatResourceNameFromIndex(s32 index, char *output);
 void sndFormatResourceNameFromUnitMode(const struct BtlUnit *unit, char *output);
+
+/* Preserve the compiler-visible member token while naming the actor filter. */
+#define effBattleEntryActorFilterMode kind
 
 #endif /* BTL_SOUND_H */
