@@ -3,6 +3,9 @@
 
 #include "common.h"
 
+typedef s32 BtlSceneSlotCount;
+typedef s32 BtlSceneFadingRecordIndex;
+
 /* The scene-slot fade root is allocated and cleared as 0xD8 bytes.
  * Known slot-count producers yield 0..8. Updates visit rows 0..count and
  * activate the next phase, proving these minimum array extents. Bytes
@@ -78,9 +81,10 @@ typedef char ActorSlotOrder_colorAdjustments_offset[((unsigned long)&((ActorSlot
 /* Copy the selected fixed order into its actor-slot bank. */
 void btlInitializeActorSlotOrder(s32 selector, s32 count);
 /* Return occupied scene slots, refreshing cached fade-kind counts as needed. */
-s32 btlCountSceneSlots(void);
+BtlSceneSlotCount btlCountSceneSlots(void);
 /* The output is the last fading-record index, including -1 for an empty list. */
 struct BtlState;
-s32 fldCountSceneFadeKinds(struct BtlState *scene, s32 *outLastFadeIndex);
+BtlSceneSlotCount fldCountSceneFadeKinds(
+    struct BtlState *scene, BtlSceneFadingRecordIndex *outLastFadeIndex);
 
 #endif

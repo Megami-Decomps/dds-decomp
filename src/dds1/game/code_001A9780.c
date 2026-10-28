@@ -1654,7 +1654,7 @@ void btlInitializeActorSlotOrder(s32 selector, s32 count) {
     }
 }
 
-s32 btlCountSceneSlots(void) {
+BtlSceneSlotCount btlCountSceneSlots(void) {
     BtlState *scene;
     s32 fadeCounts[4];
 
@@ -10362,7 +10362,8 @@ s32 btlFadeStaleSceneSlots(s32 lastFadeIndex) {
     return changed;
 }
 
-s32 fldCountSceneFadeKinds(BtlState *scene, s32 *outFadeCount) {
+BtlSceneSlotCount fldCountSceneFadeKinds(
+    BtlState *scene, BtlSceneFadingRecordIndex *outLastFadeIndex) {
     BtlSceneFadingRecord *record = scene->fading;
     BtlSceneSlot *slot;
     u32 fadeCount = 0;
@@ -10395,7 +10396,7 @@ s32 fldCountSceneFadeKinds(BtlState *scene, s32 *outFadeCount) {
         slotCount++;
         slot++;
     }
-    *outFadeCount = fadeCount;
+    *outLastFadeIndex = fadeCount;
     return slotCount;
 }
 
