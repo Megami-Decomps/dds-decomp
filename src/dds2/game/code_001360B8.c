@@ -7,6 +7,7 @@
 #include "fld.h"
 #include "sdf.h"
 #include "fld_light_set.h"
+#include "fld_light_set_index.h"
 #include "fld_sky_buffer.h"
 
 extern u32 D_0038BBD8[];
@@ -151,11 +152,12 @@ void fldApplySceneLightSet(s32 lightSetIndex, s32 durationMode) {
 extern u32 D_00436158;
 extern s32 D_00436168;
 
-void fldSetFileResolverIdx(u32 state) {
-    D_00436128 = state;
+/* Select the scene light set and reset transient light overrides. */
+void fldSetFileResolverIdx(FldLightSetIndex initialLightSetIndex) {
+    D_00436128 = initialLightSetIndex;
     D_00436158 = 0;
     fldRunDanteGunFlag[12] = 0;
-    fldRunDanteGunFlag[11] = state;
+    fldRunDanteGunFlag[11] = initialLightSetIndex;
     D_00436168 = 0;
 }
 

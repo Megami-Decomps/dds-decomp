@@ -2,11 +2,13 @@
 #define FLD_SCENE_REQUEST_H
 
 #include "fld.h"
+#include "fld_light_set_index.h"
 
-/* File-batch chunks use +0x04 as an index into the file-resolver state. */
+/* File-batch records select the initial scene light set at +0x04 and carry
+ * optional resource path suffixes. */
 typedef struct FldFileResolverRecord {
     u32 unk00;
-    u32 fileResolverIndex;
+    FldLightSetIndex initialLightSetIndex;
     /* Optional path suffixes appended by the field resource resolver. */
     const char *resourceA;
     const char *resourceB;
@@ -59,8 +61,8 @@ typedef struct FldSceneRequest {
     struct FldActionSpawn *spawnList;
 } FldSceneRequest;
 
-typedef char FldFileResolverRecord_fileResolverIndex_offset_check[
-    ((u32)&((FldFileResolverRecord *)0)->fileResolverIndex == 0x04) ? 1 : -1];
+typedef char FldFileResolverRecord_initialLightSetIndex_offset_check[
+    ((u32)&((FldFileResolverRecord *)0)->initialLightSetIndex == 0x04) ? 1 : -1];
 typedef char FldFileResolverRecord_resourceA_offset_check[
     ((u32)&((FldFileResolverRecord *)0)->resourceA == 0x08) ? 1 : -1];
 typedef char FldSceneResourceRecord_fallbackResourceName_offset_check[

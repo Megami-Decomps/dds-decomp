@@ -72,7 +72,7 @@
 #include "itf.h"
 /* Declared before first use (were implicit int). */
 extern void btlResetAsyncState(void);
-extern void fldSetFileResolverIdx(u32 state);
+extern void fldSetFileResolverIdx(FldLightSetIndex initialLightSetIndex);
 
 
 
@@ -1133,7 +1133,7 @@ void fldLoadSceneRequestFiles(const FldLoadRequest *request) {
     char path[64];
     s32 resourceSlotIndex;
 
-    fldSetFileResolverIdx(request->record->fileResolverIndex);
+    fldSetFileResolverIdx(request->record->initialLightSetIndex);
     D_00444920[0] = (u32)request->record->resourceA;
     D_00444920[1] = (u32)request->record->resourceB;
     D_00444920[2] = (u32)request->record->resourceC;

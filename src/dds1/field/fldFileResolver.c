@@ -1260,14 +1260,14 @@ void fldMakeObjectBasic3(void) {
     }
 }
 
-void fldSetFileResolverIdx(u32 state);
+void fldSetFileResolverIdx(FldLightSetIndex initialLightSetIndex);
 
 void fldLoadSceneRequestFiles(const FldLoadRequest *request) {
     char directory[32];
     char path[64];
     s32 resourceSlotIndex;
 
-    fldSetFileResolverIdx(request->record->fileResolverIndex);
+    fldSetFileResolverIdx(request->record->initialLightSetIndex);
     D_003C91D0[0] = (u32)request->record->resourceA;
     D_003C91D0[1] = (u32)request->record->resourceB;
     D_003C91D0[2] = (u32)request->record->resourceC;
@@ -6210,11 +6210,12 @@ void fldApplySceneLightSet(s32 lightSetIndex, s32 durationMode) {
 
 /*END fldApplySceneLightSet*/
 
-void fldSetFileResolverIdx(u32 state) {
-    D_003BAD98 = state;
+/* Select the scene light set and reset transient light overrides. */
+void fldSetFileResolverIdx(FldLightSetIndex initialLightSetIndex) {
+    D_003BAD98 = initialLightSetIndex;
     D_003BADC8 = 0;
     fldRunDanteGunFlag[12] = 0;
-    fldRunDanteGunFlag[11] = state;
+    fldRunDanteGunFlag[11] = initialLightSetIndex;
     D_003BADD8 = 0;
 }
 
