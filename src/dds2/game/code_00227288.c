@@ -2080,7 +2080,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->allowDefeatCandidate, 0x0, btlSetLinkFlagOff);
         BTL_INSTALL_CALLBACK(battle->allowDefeatCandidateClear, 0x0, btlSetLinkFlagOn);
         BTL_INSTALL_CALLBACK(battle->linkedActionHook, 0x0, btlQueueLinkedActorModelStateTasks);
-        BTL_INSTALL_CALLBACK(battle->unk61C, 0x0, btlTryScheduleMarkedUnitTask);
+        BTL_INSTALL_CALLBACK(battle->markedUnitDefeatTransitionHook, 0x0, btlTryScheduleMarkedUnitTask);
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlSetLinkedPairActionCamera);
         BTL_INSTALL_CALLBACK(battle->actionCameraStepHook, 0x0, btlUnitStartAimAtTarget);
         BTL_INSTALL_CALLBACK(battle->handleActorCategoryCamera, 0x0, btlIsSpecialActionKind);

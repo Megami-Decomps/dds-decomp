@@ -574,7 +574,7 @@ typedef struct BtlState {
     u8 pad610[4];
     void (*afterActorModelReady)(BtlUnit *); /* 0x614 */
     s32 (*actorSceneExceptionPredicate)(BtlUnit *); /* 0x618: battle-mode predicate for scene-flagged actor handling. */
-    s32 (*unk61C)(BtlUnit *);
+    s32 (*markedUnitDefeatTransitionHook)(BtlUnit *); /* Mode-specific marked-unit task hook; nonzero runs the defeat-motion refresh. */
     s32 (*serialOverride)(void); /* 0x620: -1 cancels a scripted follow-up encounter. */
     void (*afterUnitUpdate)(void); /* 0x624 */
     s32 (*selectScriptState)(void); /* 0x628 */

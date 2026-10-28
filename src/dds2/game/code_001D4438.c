@@ -3731,8 +3731,8 @@ void btlStartActorDefeatTransition(ActionStateLink *command) {
             }
             if ((entryFlags & 0x200) && result == 0) {
                 result = 1;
-                if (work->unk61C != NULL) {
-                    result = work->unk61C(actor);
+                if (work->markedUnitDefeatTransitionHook != NULL) {
+                    result = work->markedUnitDefeatTransitionHook(actor);
                 }
                 if (result != 0) {
                     if (actor->motionId != 11) {
