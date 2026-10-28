@@ -42,6 +42,7 @@
 #include "sdf_trig.h"
 #include "snd_pad.h"
 #include "btl_enemy_selection_result.h"
+#include "btl_enemy_selection_context.h"
 #include "btl_item_drop.h"
 #include "itf_mes_window.h"
 #include "fr_font_measure.h"
@@ -2520,10 +2521,12 @@ s32 btlDoesEnabledStatusMatchCurrentId(datUnitWork_t *partyRecord, u32 entryId) 
     return mnuGetPartyEntryCurrentId(partyRecord) == entryId;
 }
 
-BtlEnemySelectionResult btlSelectEnemyDropItem(BtlUnit *enemyUnit, s32 mode);
+BtlEnemySelectionResult btlSelectEnemyDropItem(
+    BtlUnit *enemyUnit, BtlEnemySelectionContext selectionContext);
 
 s32 btlSelectActorAction(BtlUnit *actor) {
-    s32 selection = btlSelectEnemyDropItem(actor, 1);
+    s32 selection = btlSelectEnemyDropItem(
+        actor, BTL_ENEMY_SELECTION_CONTEXT_ACTOR_ACTION);
     if (selection == BTL_ENEMY_SELECTION_NONE) {
         selection = (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) ? 2 : 9;
     }
@@ -2556,9 +2559,10 @@ s32 btlIsEventThresholdSatisfiedForEntry(s32 entryValue) {
 extern s32 btlRollAiBucket(void);
 
 
-/* Select a record byte; mode 0 uses it as an item and mode 1 as an action.
+/* Select a record byte; its context determines whether it is an item or action.
  * Keep DDS2's party ability bonus and event exclusions. */
-BtlEnemySelectionResult btlSelectEnemyDropItem(BtlUnit *enemyUnit, s32 mode) {
+BtlEnemySelectionResult btlSelectEnemyDropItem(
+    BtlUnit *enemyUnit, BtlEnemySelectionContext selectionContext) {
     u16 count = 0;
     u16 bonus = 0;
     BtlEnemySelectionResult selected = BTL_ENEMY_SELECTION_NONE;
@@ -2596,7 +2600,8 @@ BtlEnemySelectionResult btlSelectEnemyDropItem(BtlUnit *enemyUnit, s32 mode) {
             break;
         }
     }
-    if (mode != 1 && enemy->overrideAction != 0 && enemy->overrideFlag != 0 &&
+    if (selectionContext != BTL_ENEMY_SELECTION_CONTEXT_ACTOR_ACTION &&
+        enemy->overrideAction != 0 && enemy->overrideFlag != 0 &&
         evtBitCheck(enemy->overrideFlag)) {
         if ((u8)btlRollAiBucket() < enemy->overrideChance) {
             selected = enemy->overrideAction;
@@ -2716,7 +2721,8 @@ void btlAccumulateEnemyDefeatRewards(BtlUnit *enemy) {
         controller->moneyEarned += amount;
         btlBossDebugPrintf(D_00415238, controller->moneyEarned, amount);
     }
-    item = btlSelectEnemyDropItem(enemy, 0);
+    item = btlSelectEnemyDropItem(
+        enemy, BTL_ENEMY_SELECTION_CONTEXT_ITEM_DROP);
     if (item != BTL_ENEMY_SELECTION_NONE) {
         btlAddItemDrop(item);
     }

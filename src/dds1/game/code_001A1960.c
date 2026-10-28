@@ -19,6 +19,7 @@
 #include "eff_random_mod.h"
 #include "eff_random.h"
 #include "btl_enemy_selection_result.h"
+#include "btl_enemy_selection_context.h"
 #include "btl_item_drop.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
@@ -1135,10 +1136,12 @@ BtlSpecialAbilityAvailability btlCheckSpecialAbility(
 
 extern EffRandState effSharedRandomState[];
 
-extern BtlEnemySelectionResult btlSelectEnemyDropItem(BtlUnit *actor, s32 mode);
+extern BtlEnemySelectionResult btlSelectEnemyDropItem(
+    BtlUnit *actor, BtlEnemySelectionContext selectionContext);
 
 s32 btlSelectActorAction(BtlUnit *actor) {
-    s32 result = btlSelectEnemyDropItem(actor, 1);
+    s32 result = btlSelectEnemyDropItem(
+        actor, BTL_ENEMY_SELECTION_CONTEXT_ACTOR_ACTION);
     if (result == BTL_ENEMY_SELECTION_NONE) {
         result = (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) != 0 ? 2 : 7;
     }
@@ -1147,14 +1150,16 @@ s32 btlSelectActorAction(BtlUnit *actor) {
 
 extern s32 btlRollAiBucket(void);
 
-/* Select a record byte; mode 0 uses it as an item, while mode 1 uses it as an action. */
-BtlEnemySelectionResult btlSelectEnemyDropItem(BtlUnit *actor, s32 mode) {
+/* Select a record byte; its context determines whether it is an item or action. */
+BtlEnemySelectionResult btlSelectEnemyDropItem(
+    BtlUnit *actor, BtlEnemySelectionContext selectionContext) {
     DatEnemyRecord *enemy = &datEnemyRecords[actor->partyRecord.unitId];
     BtlEnemySelectionResult item = BTL_ENEMY_SELECTION_NONE;
     u16 i;
 
 
-    if (mode != 1 && enemy->overrideAction != 0 && enemy->overrideFlag != 0 &&
+    if (selectionContext != BTL_ENEMY_SELECTION_CONTEXT_ACTOR_ACTION &&
+        enemy->overrideAction != 0 && enemy->overrideFlag != 0 &&
         evtBitCheck(enemy->overrideFlag) != 0) {
         if ((u8)btlRollAiBucket() < enemy->overrideChance) {
             item = enemy->overrideAction;
@@ -1243,7 +1248,8 @@ void btlAccumulateEnemyDefeatRewards(BtlUnit *enemy) {
         controller->moneyEarned += amount;
         btlBossDebugPrintf(D_003A1830, controller->moneyEarned, amount);
     }
-    item = btlSelectEnemyDropItem(enemy, 0);
+    item = btlSelectEnemyDropItem(
+        enemy, BTL_ENEMY_SELECTION_CONTEXT_ITEM_DROP);
     if (item != BTL_ENEMY_SELECTION_NONE) {
         btlAddItemDrop(item);
     }
