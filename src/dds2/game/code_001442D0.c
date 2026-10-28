@@ -269,7 +269,7 @@ extern u32 fldSeLastBgm;
 
 extern u32 fldArchiveLoadPending;
 
-extern u32 fldFixedArchiveLoadPhase;
+extern FldArchiveLoadPhase fldFixedArchiveLoadPhase;
 
 extern u32 AutoMapSeq;
 
@@ -426,7 +426,7 @@ extern s32 fldResolveSpecialBgmTrack(s32);
 
 extern s32 MidiNo;
 
-extern s32 fldBgmReloadStep;
+extern FldArchiveLoadPhase fldBgmReloadStep;
 
 extern SndPackedTrackLoadStatus sndFindPackedTrackLoadStatus(s32);
 
@@ -1014,12 +1014,12 @@ void fldPrepareSceneBgmArchive(void) {
         handle = fldSceneSoundBase + idx;
     }
     MidiNo = handle;
-    fldBgmReloadStep = 0;
+    fldBgmReloadStep = FLD_ARCHIVE_LOAD_PHASE_CHECK;
 }
 
 FldArchiveLoadResult fldStepSceneBgmArchive(void) {
     switch (fldBgmReloadStep) {
-    case 0:
+    case FLD_ARCHIVE_LOAD_PHASE_CHECK:
         if (sndFindPackedTrackLoadStatus(MidiNo) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
             p2sdLoadSMGFile(MidiNo);
             fldBgmReloadStep = fldBgmReloadStep + 1;
@@ -1027,13 +1027,13 @@ FldArchiveLoadResult fldStepSceneBgmArchive(void) {
             fldBgmReloadStep = fldBgmReloadStep + 2;
         }
         break;
-    case 1:
+    case FLD_ARCHIVE_LOAD_PHASE_WAIT:
         if (sndFindPackedTrackLoadStatus(MidiNo) == SND_PACKED_TRACK_LOAD_RESIDENT) {
             fldBgmReloadStep = fldBgmReloadStep + 1;
         }
         break;
     default:
-        fldBgmReloadStep = -1;
+        fldBgmReloadStep = FLD_ARCHIVE_LOAD_PHASE_REPORTED;
         return FLD_ARCHIVE_LOAD_COMPLETE;
     }
     return FLD_ARCHIVE_LOAD_PENDING;
@@ -1086,7 +1086,7 @@ FldArchiveLoadResult fldStepArchiveLoad(void) {
         }
         break;
     default:
-        /* Phase 2 and other non-pending phases report completion. */
+        /* The resident and reported phases both complete the one-shot load. */
         fldFixedArchiveLoadPhase = FLD_ARCHIVE_LOAD_PHASE_REPORTED;
         return FLD_ARCHIVE_LOAD_COMPLETE;
     }

@@ -30,6 +30,7 @@ extern void fldApplyCurrentTaskScene(const char *name);
 #include "scr_string_parameter_api.h"
 #include "fld_scene_object_key_result.h"
 #include "fld_room_state.h"
+#include "fld_archive_load_state.h"
 
 /* The setter returns the context it set the value in (scrTraceCode.c). */
 extern scrProcessWork_s *scrSetIntReturnValue(s32 retVal);
@@ -136,7 +137,7 @@ extern u32 fldSeLastBgm;
 
 extern u32 fldArchiveLoadPending;
 
-extern u32 fldFixedArchiveLoadPhase;
+extern FldArchiveLoadPhase fldFixedArchiveLoadPhase;
 
 extern u32 AutoMapSeq;
 
@@ -272,7 +273,7 @@ extern void fldSetFilterAnime(u32 mode);
 
 extern s32 MidiNo;
 
-extern s32 fldBgmReloadStep;
+extern FldArchiveLoadPhase fldBgmReloadStep;
 
 extern s32 D_00436300;
 

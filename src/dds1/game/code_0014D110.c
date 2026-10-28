@@ -28,6 +28,7 @@ extern void fldApplyCurrentTaskScene(const char *name);
 #include "fld_activation_entry.h"
 #include "fld_elevator_table_selector.h"
 #include "fld_room_state.h"
+#include "fld_archive_load_state.h"
 
 
 
@@ -72,7 +73,7 @@ extern u32 D_003BAFB0;
 
 extern u32 AutoMapSeq;
 
-extern u32 fldFixedArchiveLoadPhase;
+extern FldArchiveLoadPhase fldFixedArchiveLoadPhase;
 
 extern u32 fldArchiveLoadPending;
 
@@ -129,7 +130,7 @@ extern s32 fldCurrentBgmMode;
 
 extern s32 MidiNo;
 
-extern s32 fldBgmReloadStep;
+extern FldArchiveLoadPhase fldBgmReloadStep;
 
 extern s32 D_003BAEB8;
 
