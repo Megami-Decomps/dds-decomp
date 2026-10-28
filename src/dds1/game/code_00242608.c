@@ -106,7 +106,7 @@ extern char D_003AF428[]; extern f32 mnuShopSavedLastTransformVector[];
 extern f32 mnuShopSavedMiddleTransformVector[];
 extern f32 mnuShopSavedFirstTransformVector[];
 extern s32 mnuShopRestoreMiddleVector;
-extern s32 evtStopEventBgm(s32 eventId, EvtSoundVariation variation);
+extern EvtPackedSoundTrackId evtStopEventBgm(s32 eventId, EvtSoundVariation variation);
 extern s32 mnuShopPrimarySpriteNames[];
 
 #define CAMP_TASK_PRIORITY 0x3EC

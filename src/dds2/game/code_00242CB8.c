@@ -46,7 +46,7 @@ extern u32 dds3NullDrawProc(void);
 void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 extern char D_00422030[];
 extern char D_00421FE8[];
-s32 evtLoadEventBgm(s32 id);
+EvtPackedSoundTrackId evtLoadEventBgm(s32 id);
 EvtEventBgmReadiness evtCheckEventBgmLoaded(s32 id);
 
 extern dds3Basic_t *evtSearchBasic(s32 worldKind, s32 worldObjectKey);
@@ -216,7 +216,7 @@ u32 evtCommand_LOAD_SOUND_E(void) {
     return 0;
 }
 
-extern s32 evtPlayEventBgm(s32 eventId, EvtSoundVariation variation);
+extern EvtPackedSoundTrackId evtPlayEventBgm(s32 eventId, EvtSoundVariation variation);
 
 u32 evtCommand_BGM_PLAY_E(void) {
     s32 eventId;
@@ -240,7 +240,7 @@ u32 evtCommand_BGM_TRANS_E(void) {
     return 1;
 }
 
-extern s32 evtStopEventBgm(s32 eventId, EvtSoundVariation variation);
+extern EvtPackedSoundTrackId evtStopEventBgm(s32 eventId, EvtSoundVariation variation);
 
 u32 evtCommand_FADEOUT_E(void) {
     s32 eventId;
@@ -266,7 +266,7 @@ u32 evtCommand_BGM_VOL_UP(void) {
     return 1;
 }
 
-extern s32 evtPlaySe(s32 eventId, EvtSoundVariation variation);
+extern EvtPackedSoundTrackId evtPlaySe(s32 eventId, EvtSoundVariation variation);
 
 u32 evtOpcodeSetBgmVolumePan(void) {
     s32 eventId;
@@ -278,7 +278,8 @@ u32 evtOpcodeSetBgmVolumePan(void) {
     return 1;
 }
 
-extern s32 evtStartBgmBySoundIdAndFade(s32 eventId, EvtSoundVariation variation);
+extern EvtPackedSoundTrackId evtStartBgmBySoundIdAndFade(
+    s32 eventId, EvtSoundVariation variation);
 
 u32 evtCommandStartBgmWithFade(void) {
     s32 eventId;

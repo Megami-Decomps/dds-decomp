@@ -731,10 +731,10 @@ void evtViewerApplySelectedEntry(EvtRuntime *viewer) {
 
 extern u16 D_004372B0;
 extern void mnuUnpackNibbleFields(EvtRuntimeChild *key, s32 *lowBitsOut, s32 *highBitsOut);
-extern s32 evtPlaySe(s32 eventId, EvtSoundVariation variation);
-extern s32 evtPlayEventBgm(s32 eventId, EvtSoundVariation variation);
-extern s32 evtFadeInEventBgm(s32 eventId, EvtSoundVariation variation);
-extern s32 evtStopEventBgm(s32 eventId, EvtSoundVariation variation);
+extern EvtPackedSoundTrackId evtPlaySe(s32 eventId, EvtSoundVariation variation);
+extern EvtPackedSoundTrackId evtPlayEventBgm(s32 eventId, EvtSoundVariation variation);
+extern EvtPackedSoundTrackId evtFadeInEventBgm(s32 eventId, EvtSoundVariation variation);
+extern EvtPackedSoundTrackId evtStopEventBgm(s32 eventId, EvtSoundVariation variation);
 extern void evtTransEventBgm(s32 eventId, EvtSoundVariation variation);
 extern void fldRegisterCampSceneId(EvtRuntime *viewer, s32 identifier);
 extern void p2sdBgmVolDown(void);

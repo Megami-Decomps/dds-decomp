@@ -824,11 +824,11 @@ void evtViewerApplySelectedEntry(EvtRuntime *viewer) {
 extern dds3Basic_t *evtEventViewerGetNameObject(EvtViewerNameIndex, EvtRuntime *);
 extern s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *, dds3Basic_t *, dds3Basic_t *, dds3Basic_t *, dds3Basic_t *);
 extern dds3Basic_t *evtEventViewerCreateOriginEffect(struct SoundMixer *, u32, EvtViewerNameIndex, s32, u32, EvtRuntime *);
-extern s32 evtPlaySe(s32 eventId, EvtSoundVariation variation);
+extern EvtPackedSoundTrackId evtPlaySe(s32 eventId, EvtSoundVariation variation);
 extern void mnuShopRegisterSceneObject(EvtRuntime *, s32);
-extern s32 evtPlayEventBgm(s32 eventId, EvtSoundVariation variation);
-extern s32 evtFadeInEventBgm(s32 eventId, EvtSoundVariation variation);
-extern s32 evtStopEventBgm(s32 eventId, EvtSoundVariation variation);
+extern EvtPackedSoundTrackId evtPlayEventBgm(s32 eventId, EvtSoundVariation variation);
+extern EvtPackedSoundTrackId evtFadeInEventBgm(s32 eventId, EvtSoundVariation variation);
+extern EvtPackedSoundTrackId evtStopEventBgm(s32 eventId, EvtSoundVariation variation);
 extern void evtTransEventBgm(s32 eventId, EvtSoundVariation variation);
 extern void p2sdBgmVolDown(void);
 extern void p2sdBgmVolUp(void);

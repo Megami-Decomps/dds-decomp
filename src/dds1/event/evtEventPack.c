@@ -22,7 +22,7 @@
 #include "sdf.h"
 
 #include "dds3_world_primary.h"
-extern s32 evtPlaySe(s32 eventId, EvtSoundVariation variation);
+extern EvtPackedSoundTrackId evtPlaySe(s32 eventId, EvtSoundVariation variation);
 
 extern s32 evtLoadArea_FromMemory(s32 area, s32 room, u8 *resource0Data, u8 *resource1Data,
                                             const SdfTextureOffsetListHeader *textureOffsets, s32 flags);

@@ -119,7 +119,7 @@ extern MenuPopupEntry mnuShopMessageSequencePopupEntry[];
 extern sdfTexHandle_t *dds3RenderTexture;
 
 
-extern s32 evtStopEventBgm(s32 eventId, EvtSoundVariation variation);
+extern EvtPackedSoundTrackId evtStopEventBgm(s32 eventId, EvtSoundVariation variation);
 
 
 extern s32 D_003C99B8[];

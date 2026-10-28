@@ -4627,7 +4627,7 @@ extern s32 mdlSpawnCameraSlotViewerObject(s32 packageId, s32 partId);
 extern evtUnitHandle_t *evtGetUnitHandle(EvtUnitObjectKey worldObjectKey);
 extern EvtPathLinkResult evtPathLinkAndMake(dds3Basic_t *object, dds3Basic_t *owner);
 extern EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, EvtRuntime *runtime);
-extern s32 evtLoadEventBgm(s32 eventId);
+extern EvtPackedSoundTrackId evtLoadEventBgm(s32 eventId);
 extern EvtEventBgmReadiness evtCheckEventBgmLoaded(s32 eventId);
 extern u8 fldTitleIsActive(void);
 extern void fldStartTitle(s32 field, s32 mode, s32 option);
@@ -5536,7 +5536,7 @@ EvtViewerReloadResult evtReloadEventViewer(EvtPolygonMovieResourceMode resourceM
     return EVT_VIEWER_RELOAD_FAILED;
 }
 
-s32 evtGetSoundIndex(s32 eventId, EvtSoundVariation variation) {
+EvtPackedSoundTrackId evtGetSoundIndex(s32 eventId, EvtSoundVariation variation) {
     s32 sequenceId;
 
     sequenceId = 0xC7;
@@ -5549,8 +5549,8 @@ s32 evtGetSoundIndex(s32 eventId, EvtSoundVariation variation) {
     return ((sequenceId + 0x100) << 0x10) + variation;
 }
 
-s32 evtLoadEventBgm(s32 eventId) {
-    s32 packedTrackId;
+EvtPackedSoundTrackId evtLoadEventBgm(s32 eventId) {
+    EvtPackedSoundTrackId packedTrackId;
     if ((u32)(eventId - 0x258) >= 0x100) {
         return 0;
     }
@@ -5568,8 +5568,8 @@ EvtEventBgmReadiness evtCheckEventBgmLoaded(s32 eventId) {
         : EVT_EVENT_BGM_NOT_READY;
 }
 
-s32 evtPlayEventBgm(s32 eventId, EvtSoundVariation variation) {
-    s32 packedTrackId;
+EvtPackedSoundTrackId evtPlayEventBgm(s32 eventId, EvtSoundVariation variation) {
+    EvtPackedSoundTrackId packedTrackId;
     if ((u32)(eventId - 0x258) >= 0x100) {
         return 0;
     }
@@ -5580,7 +5580,7 @@ s32 evtPlayEventBgm(s32 eventId, EvtSoundVariation variation) {
 }
 
 void evtTransEventBgm(s32 eventId, EvtSoundVariation variation) {
-    s32 packedTrackId;
+    EvtPackedSoundTrackId packedTrackId;
     if ((u32)(eventId - 0x258) >= 0x100) {
         return;
     }
@@ -5592,8 +5592,8 @@ void evtTransEventBgm(s32 eventId, EvtSoundVariation variation) {
     p2sdSetBgmTrack(packedTrackId);
 }
 
-s32 evtFadeInEventBgm(s32 eventId, EvtSoundVariation variation) {
-    s32 packedTrackId;
+EvtPackedSoundTrackId evtFadeInEventBgm(s32 eventId, EvtSoundVariation variation) {
+    EvtPackedSoundTrackId packedTrackId;
     if ((u32)(eventId - 0x258) >= 0x100) {
         return 0;
     }
@@ -5603,8 +5603,8 @@ s32 evtFadeInEventBgm(s32 eventId, EvtSoundVariation variation) {
     return packedTrackId;
 }
 
-s32 evtStopEventBgm(s32 eventId, EvtSoundVariation variation) {
-    s32 packedTrackId;
+EvtPackedSoundTrackId evtStopEventBgm(s32 eventId, EvtSoundVariation variation) {
+    EvtPackedSoundTrackId packedTrackId;
     if ((u32)(eventId - 0x258) >= 0x100) {
         return 0;
     }
@@ -5613,8 +5613,8 @@ s32 evtStopEventBgm(s32 eventId, EvtSoundVariation variation) {
     return packedTrackId;
 }
 
-s32 evtPlaySe(s32 eventId, EvtSoundVariation variation) {
-    s32 packedTrackId;
+EvtPackedSoundTrackId evtPlaySe(s32 eventId, EvtSoundVariation variation) {
+    EvtPackedSoundTrackId packedTrackId;
     if ((u32)(eventId - 0x258) >= 0x100) {
         return 0;
     }
@@ -5623,8 +5623,8 @@ s32 evtPlaySe(s32 eventId, EvtSoundVariation variation) {
     return packedTrackId;
 }
 
-s32 evtStartBgmBySoundIdAndFade(s32 eventId, EvtSoundVariation variation) {
-    s32 packedTrackId;
+EvtPackedSoundTrackId evtStartBgmBySoundIdAndFade(s32 eventId, EvtSoundVariation variation) {
+    EvtPackedSoundTrackId packedTrackId;
     if ((u32)(eventId - 0x258) >= 0x100) {
         return 0;
     }

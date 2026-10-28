@@ -7,4 +7,7 @@
  * evtTransEventBgm preserves the existing negative value as a no-track ID. */
 typedef s32 EvtSoundVariation;
 
+/* Packed sequence/variation identifier consumed by the sound engine. */
+typedef s32 EvtPackedSoundTrackId;
+
 #endif /* EVT_SOUND_VARIATION_H */
