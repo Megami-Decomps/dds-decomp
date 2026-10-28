@@ -1377,7 +1377,7 @@ BtlTaskPollResult btlApplyCategoryStatDamage(BtlCategoryStatDamageArgs *args) {
     BtlState *work = (BtlState *)btlGetRuntime();
     BtlUnit *unit = args->unit;
     if ((work->battleFlags & 0x80) == 0) {
-        return 1;
+        return BTL_TASK_POLL_END_DELAY;
     }
     if (datCommandRecords[args->category].flags & 8) {
         btlAdjustUnitHp(&unit->partyRecord, -0x7FFF);
@@ -1385,17 +1385,17 @@ BtlTaskPollResult btlApplyCategoryStatDamage(BtlCategoryStatDamageArgs *args) {
         unit->status.flags |= 0x20;
     }
     if (args->amount == 0) {
-        return 1;
+        return BTL_TASK_POLL_END_DELAY;
     }
     switch (datCommandRecords[args->category].costMode) {
     case DAT_COMMAND_COST_MODE_HP:
         btlAdjustUnitHp(&unit->partyRecord, -args->amount);
-        return 1;
+        return BTL_TASK_POLL_END_DELAY;
     case DAT_COMMAND_COST_MODE_MP:
         btlAdjustUnitMp(&unit->partyRecord, -args->amount);
-        return 1;
+        return BTL_TASK_POLL_END_DELAY;
     default:
-        return 1;
+        return BTL_TASK_POLL_END_DELAY;
     }
 }
 

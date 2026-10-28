@@ -7,6 +7,7 @@
 typedef s32 BtlTaskPollResult;
 enum {
     BTL_TASK_POLL_CONTINUE = 0,
+    BTL_TASK_POLL_END_DELAY = 1,
 };
 
 #endif /* BTL_TASK_POLL_RESULT_H */
