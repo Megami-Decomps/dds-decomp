@@ -24,6 +24,7 @@
 #include "btl_hunt_mp_recovery_api.h"
 #include "btl_action_state_selection.h"
 #include "btl_scene_counter_mode.h"
+#include "btl_command_result_kind_api.h"
 #include "btl_command_target_policy.h"
 #include "btl_command_target_eligibility.h"
 #include "dds3_object_flags.h"
@@ -583,8 +584,6 @@ extern s16 btlGetCommandEffectId(BtlTask *, s32);
 extern s32 btlCompareSkippedAndActiveTargetCounts(BtlIndexList *, BtlOperandGroup *);
 
 extern u32 btlAdjustPointsForCombatFlags(u32, u32, u32, s32);
-
-extern BtlSceneCounterMode btlGetCommandResultKindFromFlags(u32, u32);
 
 void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
     BtlUnit combinedUnit;

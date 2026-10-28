@@ -13,6 +13,7 @@
 #include "btl_horizontal_aim_api.h"
 #include "btl_actor_command_selector_value_api.h"
 #include "btl_scene_counter_mode.h"
+#include "btl_command_result_kind_api.h"
 #include "dds3_camera_update_flags.h"
 #include "file_config_option_api.h"
 #include "btl_command_use_error.h"
@@ -612,8 +613,6 @@ extern s32 btlCompareSkippedAndActiveTargetCounts(BtlIndexList *, BtlOperandGrou
 
 
 extern s32 btlAdjustPointsForCombatFlags(BtlUnit *source, u32 flags, u32 otherFlags, u32 value, s32 index);
-
-extern BtlSceneCounterMode btlGetCommandResultKindFromFlags(u32, u32, s32);
 
 /* Resolve each selected target into retained damage/status operands and the
  * aggregate press-turn result. Reflection keeps the original selected target

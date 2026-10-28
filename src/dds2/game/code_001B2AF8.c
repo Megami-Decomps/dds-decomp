@@ -17,6 +17,7 @@
 #include "btl_target_list_builder.h"
 #include "btl_actor_command_selector_value_api.h"
 #include "btl_scene_counter_mode.h"
+#include "btl_command_result_kind_api.h"
 #include "btl_action_press_result.h"
 #include "btl_camera_mode_index.h"
 #include "file_config_option_api.h"
@@ -674,7 +675,8 @@ s32 btlAdjustPointsForCombatFlags(BtlUnit *source, u32 flags, u32 otherFlags, u3
     return value;
 }
 
-BtlSceneCounterMode btlGetCommandResultKindFromFlags(u32 flags, u32 otherFlags, s32 index) {
+BtlSceneCounterMode btlGetCommandResultKindFromFlags(
+    u32 flags, BtlActionPressResult otherFlags, BtlCommandId index) {
     DatCommandRecord *entry;
     u16 code;
     if (flags & 0x20000) {

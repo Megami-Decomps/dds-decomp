@@ -5,6 +5,7 @@
 #include "evt_run_context_api.h"
 #include "btl_scene_counter_mode.h"
 #include "btl_action_press_result.h"
+#include "btl_command_result_kind_api.h"
 #include "btl_command_status_api.h"
 #include "btl_command_use_error.h"
 #include "btl_command_cost_api.h"
@@ -1006,7 +1007,8 @@ u32 btlAdjustPointsForCombatFlags(u32 flags, u32 secondary, u32 points, s32 inde
     return points;
 }
 
-BtlSceneCounterMode btlGetCommandResultKindFromFlags(u32 flags, u32 secondary) {
+BtlSceneCounterMode btlGetCommandResultKindFromFlags(
+    u32 flags, BtlActionPressResult secondary) {
     if (flags & 0x20000) return BTL_SCENE_COUNTER_MODE_NORMAL;
     if (flags & 0x40000) return BTL_SCENE_COUNTER_MODE_NORMAL;
     if (flags & 0x10000) return BTL_SCENE_COUNTER_MODE_NORMAL;
