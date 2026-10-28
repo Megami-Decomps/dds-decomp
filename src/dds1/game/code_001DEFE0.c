@@ -8207,14 +8207,13 @@ u32 btlPollFieldArchiveLoad(BtlFieldLoadArgs *args) {
 
 BtlRuntimeTask *fldCreateSceneTileTask(s32 stage, s32 variant) {
     BtlRuntimeTask *task = btlAllocTask(40);
-    u8 *taskBytes = (u8 *)task;
     BtlFieldLoadArgs *args;
 
-    taskBytes[0] = BTL_TASK_CONDITION_ALWAYS;
-    *(u16 *)((u8 *)task + 0x24) &= ~BTL_TASK_FLAG_REGISTERED;
-    *(u16 *)((u8 *)task + 0x20) = 1;
-    *(void **)((u8 *)task + 0x4C) = btlPollFieldArchiveLoad;
-    taskBytes[0x10] = BTL_TASK_CONDITION_NEVER;
+    task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
+    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
+    task->taskId = 1;
+    task->callback = btlPollFieldArchiveLoad;
+    task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     args = (BtlFieldLoadArgs *)btlGetTaskArguments(task);
     memset(args, 0, 40);
     args->stage = stage;
@@ -8268,14 +8267,13 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
 
 BtlRuntimeTask *btlCreateFloorLoadTask(s32 stage, s32 variant) {
     BtlRuntimeTask *task = btlAllocTask(20);
-    u8 *taskBytes = (u8 *)task;
     BtlFloorLoadArgs *arguments;
 
-    taskBytes[0] = BTL_TASK_CONDITION_ALWAYS;
-    *(u16 *)((u8 *)task + 0x24) &= ~BTL_TASK_FLAG_REGISTERED;
-    *(u16 *)((u8 *)task + 0x20) = 2;
-    *(void **)((u8 *)task + 0x4C) = btlPollFloorLoadTask;
-    taskBytes[0x10] = BTL_TASK_CONDITION_NEVER;
+    task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
+    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
+    task->taskId = 2;
+    task->callback = btlPollFloorLoadTask;
+    task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     arguments = btlGetTaskArguments(task);
     arguments->frontRequest = 0;
     arguments->sideRequest = 0;
@@ -8331,15 +8329,14 @@ extern u32 btlApplySceneLightingTransition(SceneLightTransitionArgs *);
 
 BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(const void *sourceParams, u32 value) {
     BtlRuntimeTask *task = btlAllocTask(0x34);
-    u8 *taskBytes = (u8 *)task;
     u8 *arguments;
 
-    taskBytes[0] = BTL_TASK_CONDITION_ALWAYS;
-    taskBytes[0x10] = BTL_TASK_CONDITION_NEVER;
-    *(u16 *)((u8 *)task + 0x20) = 3;
-    *(u16 *)((u8 *)task + 0x24) |= BTL_TASK_FLAG_DEFERRED;
-    *(void **)((u8 *)task + 0x4C) = btlApplySceneLightingTransition;
-    *(u32 *)((u8 *)task + 0x48) = 0;
+    task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
+    task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
+    task->taskId = 3;
+    task->flags |= BTL_TASK_FLAG_DEFERRED;
+    task->callback = btlApplySceneLightingTransition;
+    task->onStart = 0;
     arguments = btlGetTaskArguments(task);
     *(u32 *)(arguments + 0x30) = value;
     if (sourceParams != 0) {
