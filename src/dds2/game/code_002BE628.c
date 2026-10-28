@@ -38,6 +38,7 @@
 #include "mnu.h"
 #include "mnu_ability_target_category.h"
 #include "mnu_entry_cost_api.h"
+#include "mnu_entry_use_status_api.h"
 #include "mnu_popup_eligibility.h"
 #include "mnu_party_entry_lookup.h"
 #include "mnu_panel_item.h"
@@ -2516,13 +2517,13 @@ MnuEntryCostAffordability mnuCanAffordEntryCost(
     return MNU_ENTRY_COST_AFFORDABLE;
 }
 
-/* Return -1 for insufficient raw cost, else 0 for flagged IDs below the boundary, or 1. */
-s32 mnuGetEntryUseStatus(datUnitWork_t *actorEntry, u16 commandId) {
+/* Return the menu's three-way unavailable-marker status. */
+MnuEntryUseStatus mnuGetEntryUseStatus(datUnitWork_t *actorEntry, u16 commandId) {
     if (mnuCanAffordEntryCost(commandId, actorEntry) ==
-        MNU_ENTRY_COST_UNAFFORDABLE) return -1;
-    if ((((DatCommandRecord *)((s32)datCommandRecords + commandId * MNU_COMMAND_RECORD_BYTES))->menuFlags & 1) == 0) return 1;
-    if (commandId < MNU_COMMAND_USE_STATUS_BOUNDARY) return 0;
-    return 1;
+        MNU_ENTRY_COST_UNAFFORDABLE) return MNU_ENTRY_USE_COST_UNAFFORDABLE;
+    if ((((DatCommandRecord *)((s32)datCommandRecords + commandId * MNU_COMMAND_RECORD_BYTES))->menuFlags & 1) == 0) return MNU_ENTRY_USE_MARK_UNAVAILABLE;
+    if (commandId < MNU_COMMAND_USE_STATUS_BOUNDARY) return MNU_ENTRY_USE_MARKER_SUPPRESSED;
+    return MNU_ENTRY_USE_MARK_UNAVAILABLE;
 }
 
 /* Report insufficient raw HP/MP cost; equality and unhandled kinds return zero. */

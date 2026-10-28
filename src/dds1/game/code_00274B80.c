@@ -14,6 +14,7 @@
 #include "mnu_shop.h"
 #include "mnu_scroll_panel.h"
 #include "mnu_list.h"
+#include "mnu_entry_use_status_api.h"
 #include "dat_state.h"
 #include "pty_skill_nibble_state.h"
 #include "prf_skill_list_buffer.h"
@@ -1427,7 +1428,6 @@ extern const MenuListDefaultRecord D_003B22E0;
 extern DspUnitName *D_003BAA8C;
 extern const u8 D_003BC708[];
 extern void ptySkillMenuDrawEquippedSkillEntry();
-extern s32 mnuGetEntryUseStatus(datUnitWork_t *, u16);
 
 s32 ptySkillMenuBuildEquippedSlots(
     PtySkillUnavailableMarking markUnavailableSkills, dds3ProcessID_t *task) {
@@ -1476,7 +1476,7 @@ s32 ptySkillMenuBuildEquippedSlots(
             node->sortKeySecondary = i;
             node->sortKeyPrimary = skill;
             if (markUnavailableSkills != PTY_SKILL_UNAVAILABLE_MARKING_DISABLED &&
-                mnuGetEntryUseStatus(entry, skill) != 0) {
+                mnuGetEntryUseStatus(entry, skill) != MNU_ENTRY_USE_MARKER_SUPPRESSED) {
                 node->flags48 |= 1;
             }
         } else {

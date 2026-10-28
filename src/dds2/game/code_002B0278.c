@@ -22,6 +22,7 @@
 #include "mnu_staff.h"
 #include "mnu_ability_target_category.h"
 #include "mnu_list.h"
+#include "mnu_entry_use_status_api.h"
 #include "eff.h"
 #include "mnu_shop.h"
 #include "mnu_scroll_panel.h"
@@ -348,7 +349,6 @@ extern MenuListDefaults D_0042AF00;
 extern const MenuListDefaults D_0042AE18;
 extern u8 (*datSkillNames)[17];
 extern char D_00437C00[];
-extern s32 mnuGetEntryUseStatus(datUnitWork_t *, u16);
 extern void ptySkillMenuDrawEquippedSkillEntry(s32, s32, s32, MenuList *, MenuListNode *, s32);
 
 /* Allocate a zeroed window and its list; the last two arguments configure list rows. */
@@ -1834,7 +1834,7 @@ s32 ptySkillMenuBuildEquippedSlots(
             node->sortKeySecondary = i;
             node->sortKeyPrimary = skill;
             if (markUnavailableSkills != PTY_SKILL_UNAVAILABLE_MARKING_DISABLED &&
-                mnuGetEntryUseStatus(entry, skill) != 0) {
+                mnuGetEntryUseStatus(entry, skill) != MNU_ENTRY_USE_MARKER_SUPPRESSED) {
                 node->flags48 |= MNU_STAFF_NODE_UNAVAILABLE;
             }
         } else {

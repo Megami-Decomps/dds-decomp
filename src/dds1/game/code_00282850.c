@@ -34,6 +34,7 @@
 #include "pcp_vu0.h"
 #include "mnu.h"
 #include "mnu_entry_cost_api.h"
+#include "mnu_entry_use_status_api.h"
 #include "mnu_popup_eligibility.h"
 #include "mnu_party_entry_lookup.h"
 #include "mnu_panel_state.h"
@@ -1906,19 +1907,19 @@ MnuEntryCostAffordability mnuCanAffordEntryCost(
     return MNU_ENTRY_COST_AFFORDABLE;
 }
 
-/* Return -1 for insufficient raw cost, else 0 for flagged IDs below the boundary, or 1. */
-s32 mnuGetEntryUseStatus(datUnitWork_t *actorEntry, u16 commandId) {
+/* Return the menu's three-way unavailable-marker status. */
+MnuEntryUseStatus mnuGetEntryUseStatus(datUnitWork_t *actorEntry, u16 commandId) {
     if (mnuCanAffordEntryCost(commandId, actorEntry) ==
         MNU_ENTRY_COST_UNAFFORDABLE) {
-        return -1;
+        return MNU_ENTRY_USE_COST_UNAFFORDABLE;
     }
     if (!(datCommandRecords[commandId].menuFlags & 1)) {
-        return 1;
+        return MNU_ENTRY_USE_MARK_UNAVAILABLE;
     }
     if (commandId < MNU_COMMAND_USE_STATUS_BOUNDARY) {
-        return 0;
+        return MNU_ENTRY_USE_MARKER_SUPPRESSED;
     }
-    return 1;
+    return MNU_ENTRY_USE_MARK_UNAVAILABLE;
 }
 
 /* Report insufficient raw HP/MP cost; equality and unhandled kinds return zero. */
