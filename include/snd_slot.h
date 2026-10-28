@@ -16,7 +16,7 @@ typedef struct SoundSlotTableEntry {
 typedef struct SoundSlotWork {
     s32 id;
     u32 refCount;
-    s32 pendingSoundId;
+    u32 pendingPackedTrackPosition; /* Owner +0x10: key passed to packed-track load queries. */
     s32 pendingSlot;
     struct FileRequest *fileRequests[0x1D];
     struct sdfMemHandle_t *resourceHandles[0x1D];
@@ -44,6 +44,8 @@ typedef char SoundSlotOwnerSizeCheck[(sizeof(SoundSlotOwner) == 0x108) ? 1 : -1]
 typedef char SoundSlotWorkOffsetCheck[((u32)&((SoundSlotOwner *)0)->work == 0x08) ? 1 : -1];
 typedef char SoundSlotWorkIdOffsetCheck[((u32)&((SoundSlotOwner *)0)->work.id == 0x08) ? 1 : -1];
 typedef char SoundSlotRefCountOffsetCheck[((u32)&((SoundSlotOwner *)0)->work.refCount == 0x0C) ? 1 : -1];
+typedef char SoundSlotPendingPackedTrackPositionOffsetCheck[
+    ((u32)&((SoundSlotOwner *)0)->work.pendingPackedTrackPosition == 0x10) ? 1 : -1];
 typedef char SoundSlotRequestsOffsetCheck[((u32)&((SoundSlotOwner *)0)->work.fileRequests == 0x18) ? 1 : -1];
 typedef char SoundSlotResourcesOffsetCheck[((u32)&((SoundSlotOwner *)0)->work.resourceHandles == 0x8C) ? 1 : -1];
 typedef char SoundSlotPreviousOffsetCheck[((u32)&((SoundSlotOwner *)0)->prev == 0x100) ? 1 : -1];

@@ -9520,7 +9520,7 @@ void btlQueueUnitSoundSlotFileLoad(BtlRuntimeTaskArgs *args) {
     entry = &table[args->resourceIndex];
     args->option = entry->fileId;
     if (args->resourceIndex != 0xB) {
-        owner->work.pendingSoundId = sndBuildMotSeResourceKey(owner, args->resourceIndex);
+        owner->work.pendingPackedTrackPosition = sndBuildMotSeResourceKey(owner, args->resourceIndex);
         owner->work.pendingSlot = args->resourceIndex;
         owner->flags |= SOUND_SLOT_TRACK_LOAD_REQUESTED;
         owner->flags &= ~SOUND_SLOT_TRACK_LOADING;
@@ -9684,7 +9684,7 @@ void btlUpdateMotionSoundLoading(void) {
     tracksReady = 1;
     for (owner = state->soundSlotOwners; owner != NULL; owner = owner->next) {
         if (owner->flags & SOUND_SLOT_TRACK_LOADING) {
-            SndPackedTrackLoadStatus status = sndFindPackedTrackLoadStatus((u32)owner->work.pendingSoundId);
+            SndPackedTrackLoadStatus status = sndFindPackedTrackLoadStatus(owner->work.pendingPackedTrackPosition);
 
             if (status != SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
                 u32 flags = owner->flags;
