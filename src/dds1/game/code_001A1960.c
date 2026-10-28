@@ -1120,7 +1120,7 @@ extern s32 evtGetMirroredSolarPhase(void);
 
 BtlSpecialAbilityAvailability btlCheckSpecialAbility(
     const datUnitWork_t *object, DatSkillId skillId) {
-    if (datUnitHasSkill(object, skillId) == 0) {
+    if (datUnitHasSkill(object, skillId) == DAT_UNIT_SKILL_RESULT_ABSENT) {
         return BTL_SPECIAL_ABILITY_UNAVAILABLE;
     }
     switch (skillId) {

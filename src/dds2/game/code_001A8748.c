@@ -2472,7 +2472,7 @@ DatAffinitySelector btlFlagToElementIndex(s32 channelFlag) {
 
 BtlSpecialAbilityAvailability btlCheckSpecialAbility(
     const datUnitWork_t *record, DatSkillId skillId) {
-    if (datUnitHasSkill(record, skillId) == 0) {
+    if (datUnitHasSkill(record, skillId) == DAT_UNIT_SKILL_RESULT_ABSENT) {
         return BTL_SPECIAL_ABILITY_UNAVAILABLE;
     }
     switch (skillId) {

@@ -209,23 +209,24 @@ extern DatEnemyRecord *datEnemyRecords;
 
 /* Search 24 inline skill IDs or eight IDs in the selected external record.
  * Return on the first match; no record-index or pointer validation here. */
-u8 datUnitHasSkill(const datUnitWork_t *unit, DatSkillId skillId) {
+DatUnitHasSkillResult datUnitHasSkill(
+    const datUnitWork_t *unit, DatSkillId skillId) {
     s32 skillIndex;
 
     if (!(unit->flags & DAT_EXTERNAL_SKILL_TABLE)) {
         for (skillIndex = 0; skillIndex < DAT_INLINE_SKILL_COUNT; skillIndex++) {
             if (unit->effectData[skillIndex] == skillId) {
-                return 1;
+                return DAT_UNIT_SKILL_RESULT_PRESENT;
             }
         }
     } else {
         for (skillIndex = 0; skillIndex < DAT_TABLE_SKILL_COUNT; skillIndex++) {
             if (datEnemyRecords[unit->unitId].skills[skillIndex] == skillId) {
-                return 1;
+                return DAT_UNIT_SKILL_RESULT_PRESENT;
             }
         }
     }
-    return 0;
+    return DAT_UNIT_SKILL_RESULT_ABSENT;
 }
 
 /* Unless a skip-status bit is set, adjust only the low 16 bits by exact masked
@@ -804,7 +805,7 @@ void ptyApplySkillRecovery(datUnitWork_t *unit, DatSkillId skillId) {
     s32 hpRecovery;
     s32 mpRecovery;
 
-    if (datUnitHasSkill(unit, skillId) == 0) {
+    if (datUnitHasSkill(unit, skillId) == DAT_UNIT_SKILL_RESULT_ABSENT) {
         return;
     }
     hpRecovery = 0;
@@ -1446,7 +1447,8 @@ PtyAffinityMatchResult ptyUnitMatchesAffinityRequirement(
     }
     switch (requirement & 0xF0000000) {
     case 0:
-        if (requirement == 0 || datUnitHasSkill(unit, (DatSkillId)requirement) != 0) {
+        if (requirement == 0 ||
+            datUnitHasSkill(unit, (DatSkillId)requirement) != DAT_UNIT_SKILL_RESULT_ABSENT) {
             return PTY_AFFINITY_MATCH_FOUND;
         }
         break;
