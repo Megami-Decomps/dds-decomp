@@ -25,6 +25,7 @@
 #include "sdf_texture_registry.h"
 #include "sdf_projection.h"
 #include "mdl.h"
+#include "mdl_blur_api.h"
 #include "mdl_part_info_api.h"
 #include "mdl_p2a_resource_api.h"
 #include "mdl_part_entry.h"
@@ -1001,8 +1002,6 @@ void mdlCreateEffect_TRACK(dds3ModelHandle_t *owner,
     resourceItem = mdlCreateEffectCtrlr(owner, MDL_RESOURCE_TRACK_POLY, motionSlotIndex);
     resourceItem->payload.part.track = effTrackPolyCreateWork(&effectParams);
 }
-
-extern void mdlSetBlur(dds3ModelHandle_t *, s32, s32, u32, u32);
 
 void mdlCreateEffect_BLUR(dds3ModelHandle_t *owner, const MdlRecord *record) {
     mdlSetBlur(owner, record->payload.stream.selectorA,

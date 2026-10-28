@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "mdl_dev_slot_color.h"
+#include "mdl_blur_api.h"
 #include "sdf_model_packet_callback.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
@@ -541,7 +542,8 @@ void mdlUnlinkResrc(dds3ModelHandle_t *ctx) {
 extern void mdlFreeBlur(dds3ModelHandle_t *ctx);
 
 /* vu0 routine: initialize the slot-list endpoint color and interpolation step. */
-void mdlSetBlur(dds3ModelHandle_t *ctx, s32 stride, s32 capacity,
+void mdlSetBlur(dds3ModelHandle_t *ctx, MdlBlurSpawnInterval spawnInterval,
+                         MdlBlurSnapshotCapacity snapshotCapacity,
                          u32 endColor, u32 startColor) {
     MdlDevList *deviceList;
     f32 inverseSpan;
@@ -550,15 +552,15 @@ void mdlSetBlur(dds3ModelHandle_t *ctx, s32 stride, s32 capacity,
     u32 endCarrier[4];
 
     mdlFreeBlur(ctx);
-    if (capacity > 0) {
+    if (snapshotCapacity > 0) {
         deviceList = sdfAllocAndClearQuadwords(sizeof(MdlDevList));
         deviceList->growStep = 1;
         ctx->devList = deviceList;
-        deviceList->usedCount = capacity;
-        deviceList->capacity = capacity;
-        deviceList->stride = stride;
+        deviceList->usedCount = snapshotCapacity;
+        deviceList->capacity = snapshotCapacity;
+        deviceList->stride = spawnInterval;
         /* Final argument use: see docs/idioms.md, "Final argument use: mdlCreateDevSlotList". */
-        deviceList->byteCount = capacity * stride;
+        deviceList->byteCount = snapshotCapacity * spawnInterval;
         inverseSpan = 1.0f / deviceList->byteCount;
         startCarrier[0] = startColor;
         EE_MMI_RGBA_UNPACK(startCarrier, 0.0078125f);
