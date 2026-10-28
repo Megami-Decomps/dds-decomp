@@ -2391,9 +2391,9 @@ void evtEventViewerFadeBackground(EvtRuntime *viewer) {
         fade = 0;
     }
     if (fade < 0x80 && evtViewerHasUpdateFlag(viewer) != 0) {
-        s32 option = (s32)mnuCampGetSecondaryOption(viewer);
+        MnuCampSecondaryOptionIndex option = mnuCampGetSecondaryOption(viewer);
 
-        switch (option) {
+        switch ((s32)option) {
         case 0:
             D_004372C0[0] = D_004372C0[1] = D_004372C0[2] = 0;
             break;
