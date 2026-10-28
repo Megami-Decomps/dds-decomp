@@ -22,7 +22,7 @@ enum {
     FILE_MENU_OPERATION_LOAD_SUCCEEDED = 2
 };
 
-FileMenuOperationResult fileGetLoadSelectionState(void);
+FileMenuOperationResult fileGetSaveLoadResult(void);
 
 s32 slQueryYesNo(FileSelectionCallback start, FileSelectionCallback finish, s32 mode);
 

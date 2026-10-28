@@ -3049,7 +3049,7 @@ s32 slQueryYesNo(FileSelectionCallback start, FileSelectionCallback finish, s32 
 
 INCLUDE_ASM(const s32, "game/code_0028A150", fileShowPromptDialog);
 
-FileMenuOperationResult fileGetLoadSelectionState(void) {
+FileMenuOperationResult fileGetSaveLoadResult(void) {
     return D_003BC81C;
 }
 

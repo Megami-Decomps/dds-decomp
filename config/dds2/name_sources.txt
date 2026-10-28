@@ -7265,7 +7265,7 @@
 0x002CE958	fileUpdatePromptDialog	inferred	Asynchronous prompt-dialog state handler: slQueryYesNo stores start/finish callbacks and mode, begins the memory-card request when needed, and returns this handler; it polls request/readiness state, updates prompt audio, invokes the selected continuation, and resumes slot selection on errors. Paired with DDS1 0x0028F630; both handlers have the same prompt-dialog callback role.
 0x002CEE70	slQueryYesNo	inferred	SMT3HD name via SLUS_209.11 0x001576B8, reloc-identical; was fileBeginPromptDialog
 0x002CEEC0	fileShowPromptDialog	inferred	confidence=high; DDS1 twin fileShowPromptDialog at 0x0028FB98 builds the same local prompt-message table and draws the save, format, overwrite, insufficient-space, new-cycle, and title-transition dialogs from file-flow state.
-0x002CF928	fileGetLoadSelectionState	inferred	Reads the file load-selection state tested by mcdContinueLoadSelection. [names_reviewed15.tsv]
+0x002CF928	fileGetSaveLoadResult	inferred	Returns 0 for no completed save/load result, 1 for save success, or 2 for load success; the DDS2 continuation advances only on 2.
 0x002CF930	slSetTmnlID	inferred	SMT3HD name via SLUS_209.11 0x00157EF0, reloc-identical; was fileSetPreviewLocation
 0x002CF958	fileSetMenuValueAndInitializeFlags	inferred	Stores supplied menu value, sets one control flag and clears another. [names_reviewed7.tsv]
 0x002CF978	fileClampPackedColorByte	inferred	confidence=high; matched-C; Signed downward clamp of low byte or high alpha byte selected by mode; unmasked bound and trace-justified result staging retained. DDS1 twin 0x002904C8. Namer1 batch 19.

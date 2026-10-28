@@ -3053,7 +3053,7 @@ s32 slQueryYesNo(FileSelectionCallback start, FileSelectionCallback finish, s32 
 
 INCLUDE_ASM(const s32, "game/code_002C96D0", fileShowPromptDialog);
 
-FileMenuOperationResult fileGetLoadSelectionState(void) {
+FileMenuOperationResult fileGetSaveLoadResult(void) {
     return D_00437D04;
 }
 
@@ -3497,7 +3497,7 @@ s32 fileBeginLoadOrAbortDialog(void) {
 }
 
 s32 mcdContinueLoadSelection(void) {
-    FileMenuOperationResult result = fileGetLoadSelectionState();
+    FileMenuOperationResult result = fileGetSaveLoadResult();
     MenuWork *block;
     s32 next = (s32)fileMenuWorkStart;
     if (result != FILE_MENU_OPERATION_NO_RESULT) {
