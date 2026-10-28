@@ -7,7 +7,9 @@ struct FileRequest;
 struct FilePacRequest;
 struct sdfMemHandle_t;
 
-/* Return the request's allocation descriptor without changing ownership. */
+/* Return the payload allocation descriptor. For normal file loads, freeing the
+ * request wrapper does not free this allocation; its resource owner must keep
+ * or release it separately. */
 struct sdfMemHandle_t *fileGetMemHandle(const struct FileRequest *request);
 /* Return the address of the loaded resource payload as a byte pointer. */
 u8 *fileGetLoadPtr(const struct FileRequest *request);
