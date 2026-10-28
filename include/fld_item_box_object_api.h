@@ -3,6 +3,11 @@
 
 #include "common.h"
 
-void fldAddItemBoxObject(f32 x, f32 y, f32 z, f32 extent, f32 height, s32 id);
+/* Positive values select a map-slot auxiliary flag that hides the collision
+ * record when set; zero and negative values bypass that gate. */
+typedef s32 FldMapSlotAuxiliaryFlagSelector;
+
+void fldAddItemBoxObject(f32 x, f32 y, f32 z, f32 extent, f32 height,
+                         FldMapSlotAuxiliaryFlagSelector auxiliaryFlagSelector);
 
 #endif

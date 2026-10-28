@@ -7912,7 +7912,8 @@ FldValueRecordIndex fldHitChkEnemy(const f32 start[3], const f32 end[3], f32 hit
 }
 
 /* Add the four vertical faces of an axis-aligned field collision box. */
-void fldAddItemBoxObject(f32 x, f32 y, f32 z, f32 extent, f32 height, s32 id) {
+void fldAddItemBoxObject(f32 x, f32 y, f32 z, f32 extent, f32 height,
+                         FldMapSlotAuxiliaryFlagSelector auxiliaryFlagSelector) {
     f32 origin[4] = {0.0f, 0.0f, 0.0f, 1.0f};
     s32 index;
     f32 minX, minY, minZ, maxX, maxZ;
@@ -8025,7 +8026,7 @@ void fldAddItemBoxObject(f32 x, f32 y, f32 z, f32 extent, f32 height, s32 id) {
     fldItemBoxObjBuf[index].faces[3].special[0] = 0;
     fldItemBoxObjBuf[index].faces[3].special[1] = 0;
     fldMakePlane(&fldItemBoxObjBuf[index].geometry,
-                  origin, dds3AllocObjectId(), 0, id);
+                  origin, dds3AllocObjectId(), 0, auxiliaryFlagSelector);
     D_003BADEC++;
 }
 
