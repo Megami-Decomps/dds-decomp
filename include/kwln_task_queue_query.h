@@ -8,8 +8,10 @@
 /* Zero-based position in the current linked order of one scheduler queue. */
 typedef s32 KwlnTaskQueueIndex;
 
-/* Queue size is a scalar count; unknown or detached states have no entries. */
-s32 dds3GetProcessCount(KwlnTaskState state);
+/* Nonnegative queue size; unknown or detached states have no entries. */
+typedef s32 KwlnTaskQueueCount;
+
+KwlnTaskQueueCount dds3GetProcessCount(KwlnTaskState state);
 
 /* For nonnegative queueIndex, returns that borrowed queue node or NULL for an
  * unsupported queue or an index beyond its end. Membership changes shift later

@@ -336,7 +336,7 @@ void ChangeProcessFlag(KwlnTaskFlagUpdateAction action, dds3ProcessID_t *task, u
     }
 }
 
-s32 dds3GetProcessCount(KwlnTaskState state)
+KwlnTaskQueueCount dds3GetProcessCount(KwlnTaskState state)
 {
     switch (state & KWLN_TASK_STATE_MASK) {
     case KWLN_TASK_DELAYED_START:
