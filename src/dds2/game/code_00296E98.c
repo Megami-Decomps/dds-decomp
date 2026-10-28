@@ -696,7 +696,7 @@ void brsTaskStart(void) {
     brsUpdateBlocked = 1;
 }
 
-s8 brsTaskIsUpdateBlocked(void) {
+BrsUiUpdateBlockedState brsTaskIsUpdateBlocked(void) {
     return brsUpdateBlocked;
 }
 
@@ -713,7 +713,7 @@ s8 brsTaskHasPendingRows(void) {
     return brsPendingRowsLatched;
 }
 
-s8 brsTaskIsUiUpdateAllowed(BrsSkillPackageWork *work) {
+BrsUiUpdatePermission brsTaskIsUiUpdateAllowed(BrsSkillPackageWork *work) {
     if (work->teardownResource != NULL) {
         brsUpdateBlocked = 0;
     }

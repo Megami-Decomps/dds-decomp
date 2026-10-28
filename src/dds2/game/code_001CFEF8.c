@@ -12,6 +12,7 @@
 #include "fld_scene_ready_api.h"
 #include "kwln_background_fade_api.h"
 #include "brs_primary_panel_update_api.h"
+#include "brs_ui_update_allowed_api.h"
 #include "btl_special_ability.h"
 #include "eff_random_mod.h"
 #include "eff_random.h"
@@ -1233,7 +1234,6 @@ extern s32 btlCountRegisteredTasks(void);
 #include "mnu_title_stream.h"
 extern s32 sndIsCommandBusySigned(void);
 extern s32 sndLoadAndPlayStationedSe(u32 soundId);
-extern s8 brsTaskIsUpdateBlocked(void);
 extern void btlClearModelFlagRange(void);
 extern void btlRemoveActorsWithFlags(u32 mask);
 extern void btlResetActorEntryState(void);

@@ -10,6 +10,7 @@
 #include "fld_scene_ready_api.h"
 #include "kwln_background_fade_api.h"
 #include "brs_primary_panel_update_api.h"
+#include "brs_ui_update_allowed_api.h"
 #include "btl_unit_base_light_task.h"
 #include "btl_special_ability.h"
 #include "kwln_fade.h"
@@ -26,7 +27,6 @@
 #include "btl_action.h"
 extern u8 sndIsStreamStatusTwoOrThree(void);
 extern s8 btlChooseStartVoice(void);
-extern s8 brsTaskIsUpdateBlocked(void);
 extern BtlRuntimeTask *btlCreateSoundUpdateTask(u32);
 #include "pcp_vu0.h"
 #include "dat_state.h"
