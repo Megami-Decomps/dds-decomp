@@ -4628,22 +4628,27 @@ FileJobPayload *fileCreateJob(FileJobType type) {
     return job;
 }
 
+/* allocation selects the representation of the payload location word. */
+#define FILE_JOB_LOCATION_AS_JOB_RELATIVE_OFFSET(payload) ((payload).offset)
+#define FILE_JOB_LOCATION_AS_LOCKED_ADDRESS_WORD(payload) ((payload).offset)
+#define FILE_JOB_LOCATION_CLEAR(payload) ((payload).offset = 0)
+
 void *fileResolvePrimaryBuffer(FileJobPayload *job) {
     if (job->primary.allocation != NULL) {
-        return (void *)job->primary.offset;
+        return (void *)FILE_JOB_LOCATION_AS_LOCKED_ADDRESS_WORD(job->primary);
     }
-    if (job->primary.offset != 0) {
-        return (u8 *)job + job->primary.offset;
+    if (FILE_JOB_LOCATION_AS_JOB_RELATIVE_OFFSET(job->primary) != 0) {
+        return (u8 *)job + FILE_JOB_LOCATION_AS_JOB_RELATIVE_OFFSET(job->primary);
     }
     return NULL;
 }
 
 void *fileResolveSecondaryBuffer(FileJobPayload *job) {
     if (job->secondary.allocation != NULL) {
-        return (void *)job->secondary.offset;
+        return (void *)FILE_JOB_LOCATION_AS_LOCKED_ADDRESS_WORD(job->secondary);
     }
-    if (job->secondary.offset != 0) {
-        return (u8 *)job + job->secondary.offset;
+    if (FILE_JOB_LOCATION_AS_JOB_RELATIVE_OFFSET(job->secondary) != 0) {
+        return (u8 *)job + FILE_JOB_LOCATION_AS_JOB_RELATIVE_OFFSET(job->secondary);
     }
     return NULL;
 }
@@ -4670,7 +4675,7 @@ void fileJobFreePrimaryBuffer(FileJobPayload *job) {
     struct sdfMemHandle_t *allocation = job->primary.allocation;
     if (allocation != NULL) {
         sdfMemFreeDirect(allocation);
-        job->primary.offset = 0;
+        FILE_JOB_LOCATION_CLEAR(job->primary);
         job->primary.size = 0;
         job->primary.allocation = NULL;
     }
@@ -4680,7 +4685,7 @@ void fileJobFreeSecondaryBuffer(FileJobPayload *job) {
     struct sdfMemHandle_t *allocation = job->secondary.allocation;
     if (allocation != NULL) {
         sdfMemFreeDirect(allocation);
-        job->secondary.offset = 0;
+        FILE_JOB_LOCATION_CLEAR(job->secondary);
         job->secondary.size = 0;
         job->secondary.allocation = NULL;
     }
@@ -4755,10 +4760,10 @@ void fileJobSetPrimaryData(FileJobPayload *job, const void *src, s32 size, u16 o
     fileJobFreePrimaryBuffer(job);
     if (src != NULL && size > 0) {
         job->primary.allocation = sdfMemAllocDirect(size);
-        job->primary.offset = sdfMemLock(job->primary.allocation);
+        FILE_JOB_LOCATION_AS_LOCKED_ADDRESS_WORD(job->primary) = sdfMemLock(job->primary.allocation);
         job->primary.size = size;
         job->option = option;
-        memcpy((void *)job->primary.offset, src, size);
+        memcpy((void *)FILE_JOB_LOCATION_AS_LOCKED_ADDRESS_WORD(job->primary), src, size);
     }
 }
 
@@ -4785,10 +4790,10 @@ void fileJobSetSecondaryData(FileJobPayload *job, const void *src, s32 size, u16
     fileJobFreeSecondaryBuffer(job);
     if (src != NULL && size > 0) {
         job->secondary.allocation = sdfMemAllocDirect(size);
-        job->secondary.offset = sdfMemLock(job->secondary.allocation);
+        FILE_JOB_LOCATION_AS_LOCKED_ADDRESS_WORD(job->secondary) = sdfMemLock(job->secondary.allocation);
         job->secondary.size = size;
         job->primary.selector = selector;
-        memcpy((void *)job->secondary.offset, src, size);
+        memcpy((void *)FILE_JOB_LOCATION_AS_LOCKED_ADDRESS_WORD(job->secondary), src, size);
     }
 }
 
@@ -5012,9 +5017,10 @@ FileQueue *fileCloneQueueEntries(FileQueue *source) {
                         FileJobPayload *secondary = (FileJobPayload *)((u8 *)source + records[entry->sector].id);
 
                         request->secondary.size = secondary->secondary.size;
-                        request->secondary.offset = (u32)fileResolveSecondaryBuffer(secondary) - (u32)request;
+                        FILE_JOB_LOCATION_AS_JOB_RELATIVE_OFFSET(request->secondary) =
+                            (u32)fileResolveSecondaryBuffer(secondary) - (u32)request;
                         job->id = (u32)fileJobCreateFromJob(request);
-                        request->secondary.offset = request->secondary.size = 0;
+                        FILE_JOB_LOCATION_AS_JOB_RELATIVE_OFFSET(request->secondary) = request->secondary.size = 0;
                     } else {
                         job->id = (u32)fileJobCreateFromJob(request);
                     }
@@ -5362,7 +5368,9 @@ void fileQueueLinkJobToSectorLeader(FileQueue *queue, FileJob *job, FileJob *ref
     if (!(flags & FILE_JOB_FLAG_SHARED_PAYLOAD)) {
         fileJobFreeSecondaryBuffer((FileJobPayload *)job->id);
         source = (FileJobPayload *)ref->id;
-        fileJobSetSecondaryData((FileJobPayload *)job->id, (void *)source->secondary.offset, source->secondary.size,
+        fileJobSetSecondaryData((FileJobPayload *)job->id,
+                                (void *)FILE_JOB_LOCATION_AS_LOCKED_ADDRESS_WORD(source->secondary),
+                                source->secondary.size,
                                 source->primary.selector);
         flags = job->flags;
     }
@@ -5458,7 +5466,7 @@ void fileQueueSaveImage(FileQueue *queue, const char *filePath) {
                 size = fileJobSerializedSize((FileJobPayload *)job->id);
             } else {
                 payload = *(FileJobPayload *)job->id;
-                payload.secondary.offset = 0;
+                FILE_JOB_LOCATION_CLEAR(payload.secondary);
                 payload.secondary.size = 0;
                 payload.secondary.allocation = NULL;
                 size = fileJobSerializedSize(&payload);
@@ -5490,7 +5498,7 @@ void fileQueueSaveImage(FileQueue *queue, const char *filePath) {
             fileJobWriteSerializedPayload(fd, (FileJobPayload *)job->id);
         } else {
             payload = *(FileJobPayload *)job->id;
-            payload.secondary.offset = 0;
+            FILE_JOB_LOCATION_CLEAR(payload.secondary);
             payload.secondary.size = 0;
             payload.secondary.allocation = NULL;
             size = fileJobSerializedSize(&payload);
@@ -5563,7 +5571,7 @@ void fileQueueSaveVersionedImage(FileQueue *queue, const char *filePath) {
                 size = fileJobSerializedSize((FileJobPayload *)job->id);
             } else {
                 payload = *(FileJobPayload *)job->id;
-                payload.secondary.offset = 0;
+                FILE_JOB_LOCATION_CLEAR(payload.secondary);
                 payload.secondary.size = 0;
                 payload.secondary.allocation = NULL;
                 size = fileJobSerializedSize(&payload);
@@ -5595,7 +5603,7 @@ void fileQueueSaveVersionedImage(FileQueue *queue, const char *filePath) {
             fileJobWriteSerializedPayload(fd, (FileJobPayload *)job->id);
         } else {
             payload = *(FileJobPayload *)job->id;
-            payload.secondary.offset = 0;
+            FILE_JOB_LOCATION_CLEAR(payload.secondary);
             payload.secondary.size = 0;
             payload.secondary.allocation = NULL;
             size = fileJobSerializedSize(&payload);
@@ -5615,6 +5623,10 @@ void fileQueueSaveVersionedImage(FileQueue *queue, const char *filePath) {
     sceClose(fd);
     sceSync(D_00437E20, 0);
 }
+
+#undef FILE_JOB_LOCATION_AS_JOB_RELATIVE_OFFSET
+#undef FILE_JOB_LOCATION_AS_LOCKED_ADDRESS_WORD
+#undef FILE_JOB_LOCATION_CLEAR
 
 FileQueue *fileQueueCreateFromCommandState(const char *entry) {
     sdfFileCmdHandle_t *command = sdfFileOpen(entry);
