@@ -10,6 +10,7 @@
 #include "pty_roster_value_record.h"
 #include "pty_adjust_item_quantity_api.h"
 #include "dat_state.h"
+#include "dat_battle_adjustment_condition.h"
 #include "dat_currency_requirement_api.h"
 #include "dat_calculated_stat_value_api.h"
 #include "dat_calculate_command_base_value_api.h"
@@ -1794,17 +1795,17 @@ s32 evtSelectFineStatGrade(void) {
 }
 
 
-u8 evtTestSolarPhaseOrModelFlag(u32 condition) {
+u8 evtTestSolarPhaseOrModelFlag(DatBattleAdjustmentCondition condition) {
     u32 conditionType = condition >> 16;
     switch (conditionType) {
-    case 0:
+    case DAT_BATTLE_ADJUSTMENT_CONDITION_NONE:
         break;
-    case 1:
+    case DAT_BATTLE_ADJUSTMENT_CONDITION_SOLAR_PHASE_MASK:
         if (condition & (1 << evtGetMirroredSolarPhase()) & 0xFFFF) {
             return 1;
         }
         break;
-    case 2:
+    case DAT_BATTLE_ADJUSTMENT_CONDITION_MODEL_FLAG:
         if (evtBitCheck(condition & 0xFFFF)) {
             return 1;
         }

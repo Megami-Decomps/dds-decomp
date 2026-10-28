@@ -399,7 +399,7 @@ typedef struct BattleAdjustmentRecord {
     u16 encounterParamB; /* 0x02 */
     u16 streamSelection; /* 0x04: default stream selector used by 001F3278. */
     u8 pad06[2];
-    u32 conditions[3];
+    u32 conditions[3]; /* Packed kind and solar-phase-mask/model-flag condition. */
     u8 variantCodes[8];
     BattleAdjustmentGroup groups[4];
 } BattleAdjustmentRecord;
@@ -432,7 +432,7 @@ typedef struct BattleAdjustmentRecord {
     u16 encounterParamA; /* 0x00: background major ID read by btlStart. */
     u16 encounterParamB; /* 0x02: background minor ID read by btlStart. */
     u16 opaque04[2];     /* 0x04: retained without assigning field meanings. */
-    u32 conditions[3];   /* 0x08 */
+    u32 conditions[3]; /* 0x08: packed kind and kind-specific condition value. */
     u8 variantCodes[8];  /* 0x14 */
     BattleAdjustmentGroup groups[3]; /* 0x1C */
 } BattleAdjustmentRecord;
