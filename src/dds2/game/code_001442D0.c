@@ -32,6 +32,7 @@
 #include "sdf_texture_draw_packet.h"
 #include "fld_scene_ready_api.h"
 #include "fld_camp_check_state_api.h"
+#include "fld_scene_transition_gate_api.h"
 #include "fld_clear_menu_entries_api.h"
 #include "fld_play_pending_sounds_api.h"
 #include "fld_scene_record_api.h"
@@ -491,7 +492,6 @@ extern s32 fldAttachSparkSlotToWorldObject(s32, s32);
 
 
 
-extern u8 fldProcAmChk(void);
 extern s32 fileMenuTaskExists(void);
 extern u8 fldHasKiretaLabelProcess(void);
 extern u8 fldProcKiretaChk(void);
@@ -515,7 +515,7 @@ FldTitleBannerResult fldResolvePendingTitleBanner(void) {
     if (fldProcCampChk() != FLD_CAMP_CHECK_STATE_ENCOUNTER_FLAG_SET) {
         return FLD_TITLE_BANNER_UNRESOLVED;
     }
-    if (fldProcAmChk() != 0) {
+    if (fldProcAmChk() != FLD_SCENE_TRANSITION_GATE_PROCEED) {
         return FLD_TITLE_BANNER_UNRESOLVED;
     }
     if (fldRunDanteGunFlag[0] != 0) {
@@ -567,7 +567,7 @@ KwlnTaskUpdateResult fldFieldTaskUpdate(dds3ProcessID_t *task) {
     if (fldProcCampChk() != FLD_CAMP_CHECK_STATE_ENCOUNTER_FLAG_SET) {
         return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
     }
-    if (fldProcAmChk() != 0) {
+    if (fldProcAmChk() != FLD_SCENE_TRANSITION_GATE_PROCEED) {
         return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
     }
     if (fileMenuTaskExists() != 0) {
@@ -4113,7 +4113,7 @@ void fldFlushQueuedEffectPositions(void) {
         if (fldProcCampChk() != FLD_CAMP_CHECK_STATE_ENCOUNTER_FLAG_SET) {
             return;
         }
-        if (fldProcAmChk() != 0) {
+        if (fldProcAmChk() != FLD_SCENE_TRANSITION_GATE_PROCEED) {
             return;
         }
         if (fldSecondaryEffectPositionPending != 0) {
@@ -6569,7 +6569,7 @@ void fldUpdateTargetGuideController(void) {
                 func_00153068();
                 return;
             }
-            if (fldProcAmChk() != 0) {
+            if (fldProcAmChk() != FLD_SCENE_TRANSITION_GATE_PROCEED) {
                 printf(D_00413F78);
                 return;
             }

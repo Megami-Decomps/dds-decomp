@@ -30,6 +30,7 @@
 #include "fld_movement_hold_state_api.h"
 #include "fld_scene_command_state_api.h"
 #include "fld_camp_check_state_api.h"
+#include "fld_scene_transition_gate_api.h"
 #include "mnu_camp_state_ack_api.h"
 #include "fld_next_scene_request_api.h"
 #include "sdf_message.h"
@@ -1906,9 +1907,9 @@ s32 fldUpdateCampMenuTransition(void) {
     return 0;
 }
 
-u8 fldProcAmChk(void) {
+FldSceneTransitionGateResult fldProcAmChk(void) {
     if (D_003BABF0 > 0) {
-        return 2;
+        return FLD_SCENE_TRANSITION_GATE_HANDOFF_DELAY;
     }
     return fldGetSceneReadyFlag() != FLD_SCENE_NOT_READY;
 }
@@ -1955,7 +1956,7 @@ s32 fldUpdateNextFloorTransition(void) {
             }
             return 0;
         }
-        if (fldProcAmChk() != 0) {
+        if (fldProcAmChk() != FLD_SCENE_TRANSITION_GATE_PROCEED) {
             return 0;
         }
         fldMarkStageExplorationCellsAroundPosition(scene->floor, scene->flagStage, scene->x, scene->z, 50.0f);
