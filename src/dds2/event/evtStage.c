@@ -130,11 +130,11 @@ void evtStartEvent(s32 eventId) {
 const char evtFieldScriptTerminationFormat[0x28] = "kill field script -> [%s]\n";
 
 void evtKillFieldScript(void) {
-    s32 taskState;
+    KwlnTaskState taskState;
     KwlnTaskQueueIndex taskIndex;
     dds3ProcessID_t *task;
 
-    for (taskState = KWLN_TASK_DELAYED_START; taskState < KWLN_TASK_DESTROY_PENDING; taskState++) {
+    for (taskState = KWLN_TASK_DELAYED_START; (s32)taskState < KWLN_TASK_DESTROY_PENDING; taskState++) {
     restartStateScan:
         for (taskIndex = 0; taskIndex < dds3GetProcessCount(taskState); taskIndex++) {
             task = dds3SearchProcessNumber(taskState, taskIndex);
