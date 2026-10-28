@@ -19,6 +19,7 @@
 #include "dat_assigned_item_id.h"
 #include "pty_record_slot_value_api.h"
 #include "dat_command.h"
+#include "dat_command_record_index.h"
 #include "mdl_flag_api.h"
 #include "pty_adjust_item_quantity_api.h"
 
@@ -51,7 +52,7 @@ extern s32 mnuRingCustomizationStatLabels[];
 extern s32 itfCreateFont2TextGlyph(s32, s32, s32, s32, s32, s32);
 typedef struct _FRQ _FRQ;
 extern s32 frFontDrawGlyphChain(_FRQ *, s8, u32);
-extern u32 evtGetIndexedEventRecordId(s32);
+extern DatCommandRecordIndex evtGetIndexedEventRecordId(s32);
 extern u8 *D_00435E5C;
 extern u8 *datUnitNames;
 extern u16 mnuGetPartyEntryMenuValue(datUnitWork_t *);

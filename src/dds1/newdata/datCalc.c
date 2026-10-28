@@ -398,6 +398,7 @@ DatCurrencyRequirementResult datHasEnoughCurrency(s32 requiredAmount) {
 #include "sdf.h"
 #include "btl_action.h"
 #include "dat_command.h"
+#include "dat_command_record_index.h"
 
 enum {
     PTY_ACTIVE_ROSTER_COUNT = 5,
@@ -822,7 +823,7 @@ void ptyInitRuntime(void) {
 }
 
 /* Return the record's command index, zero-extended: its callers read a word. */
-u32 evtGetIndexedEventRecordId(s32 tableIndex) {
+DatCommandRecordIndex evtGetIndexedEventRecordId(s32 tableIndex) {
     return datItemSkillRecords[tableIndex].commandIndex;
 }
 

@@ -13,6 +13,7 @@
 #include "dat_state.h"
 #include "mdl_flag_api.h"
 #include "pty_adjust_item_quantity_api.h"
+#include "dat_command_record_index.h"
 
 /* Legacy staff callbacks retain their word-address interfaces; the exit
  * callback forwards its task pointer to the task-user-value provider. */
@@ -262,7 +263,7 @@ u32 mnuStaffItemUseLeaveNoOp(void) {
     return 1;
 }
 
-extern u32 evtGetIndexedEventRecordId(s32);
+extern DatCommandRecordIndex evtGetIndexedEventRecordId(s32);
 extern MenuPopupEntry mnuCampItemUseListPopupEntry[];
 
 s32 mnuHandleStaffItemUseInput(dds3ProcessID_t *task) {

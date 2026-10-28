@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "evt_message_window_api.h"
 #include "dat_command.h"
+#include "dat_command_record_index.h"
 #include "mnu_input.h"
 #include "kwln.h"
 #include "mnu.h"
@@ -388,7 +389,7 @@ s32 mnuStaffRunPanel2b(dds3ProcessID_t *request) {
 }
 
 extern s32 btlItemApplyDirectEffect(MenuPageWindow *, u16, s32, datUnitWork_t *);
-extern u32 evtGetIndexedEventRecordId(s32);
+extern DatCommandRecordIndex evtGetIndexedEventRecordId(s32);
 extern void mnuUpdatePartyPanelPercentDisplays(s32);
 
 /* Use a field item: resolve its direct effect (or field-use skill) against the

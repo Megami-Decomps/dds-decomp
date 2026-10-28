@@ -7,6 +7,7 @@
 #include "mnu_list.h"
 #include "mnu_shop.h"
 #include "dat_command.h"
+#include "dat_command_record_index.h"
 #include "pty_record_slot_value_api.h"
 #include "pty_bullet_item_count_api.h"
 #include "brs_icon_record.h"
@@ -187,7 +188,7 @@ void mnuDrawWindowBorderAndScrollBar(s32 x, s32 y, s32 unused, MenuTerminalConte
 }
 
 
-extern u32 evtGetIndexedEventRecordId(s32);
+extern DatCommandRecordIndex evtGetIndexedEventRecordId(s32);
 extern u32 itfCreateTightFont3TextGlyph(s32, s32, s32, u32, char *, s32);
 extern char D_00437968[];
 

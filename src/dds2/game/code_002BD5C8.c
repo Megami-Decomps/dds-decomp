@@ -8,6 +8,7 @@
 #include "fr_font_context.h"
 #include "dat_state.h"
 #include "dat_command.h"
+#include "dat_command_record_index.h"
 #include "eff.h"
 #include "mnu.h"
 #include "mnu_party_row_draw_state.h"
@@ -117,7 +118,7 @@ extern char D_00437C38[];
 extern char D_00437C40[];
 extern u16 mnuGetPartyEntryMenuValue(datUnitWork_t *);
 extern DatAssignedItemId mnuGetPartyEntryCurrentId(datUnitWork_t *);
-extern u32 evtGetIndexedEventRecordId(s32);
+extern DatCommandRecordIndex evtGetIndexedEventRecordId(s32);
 extern u32 itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, s32);
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 extern char D_00437C38[];

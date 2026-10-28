@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "evt_message_window_api.h"
 #include "dat_command.h"
+#include "dat_command_record_index.h"
 #include "mnu_input.h"
 #include "kwln.h"
 #include "mnu.h"
@@ -668,7 +669,7 @@ s32 mnuFinishStaffReturnPopup(dds3ProcessID_t *callback) {
     return menuSetHandler((void *)dds3GetProcessData(callback), 2, (void *)callback);
 }
 
-extern u32 evtGetIndexedEventRecordId(s32);
+extern DatCommandRecordIndex evtGetIndexedEventRecordId(s32);
 
 
 MnuStaffItemUseResult mnuUseStaffItem(s32 itemId,
