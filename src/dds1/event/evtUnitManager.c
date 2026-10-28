@@ -1663,7 +1663,7 @@ ScrCommandResult evtCommand_MODEL_DSP(void) {
 
 u32 evtCommand_MODEL_BE(void) {
     EvtPackEventId eventId;
-    s32 resourceId;
+    EvtMotionSeResourceId resourceId;
     EvtMotionSeModelKey modelKey;
     dds3ProcessID_t *motionSeTask;
 

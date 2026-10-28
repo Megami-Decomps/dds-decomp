@@ -8,11 +8,14 @@
 typedef s32 EvtMotionSeModelKey;
 enum { EVT_MOTION_SE_MODEL_KEY_NOT_FOUND = -1 };
 
+/* MODEL_BE key shared by the model and motion-cue row lookups. */
+typedef s32 EvtMotionSeResourceId;
+
 /* Runtime user value for the event's motion-sound task. */
 typedef struct EvtMotionSeTaskParams {
     EvtMotionSeModelKey modelKey;
     EvtPackEventId eventId;
-    s32 resourceId;
+    EvtMotionSeResourceId resourceId;
 } EvtMotionSeTaskParams;
 
 typedef char EvtMotionSeTaskParamsSizeCheck[sizeof(EvtMotionSeTaskParams) == 0xC ? 1 : -1];

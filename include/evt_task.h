@@ -8,10 +8,12 @@
 /* Event-pack IDs identify camp tasks; lookup returns the scheduler handle. */
 dds3ProcessID_t *evtSearchEventPack(EvtPackEventId eventId);
 void evtMakeEventPackName(EvtPackEventId eventId, char *buffer);
-EvtMotionSeModelKey evtInitMotionSeProcess(EvtPackEventId eventId, s32 resourceId);
+EvtMotionSeModelKey evtInitMotionSeProcess(EvtPackEventId eventId,
+                                           EvtMotionSeResourceId resourceId);
 /* The task reads borrowed event-pack state while updating. Link it under the
  * matching event-pack task so teardown cancels it before releasing that state. */
-dds3ProcessID_t *evtLoadModelSe(EvtMotionSeModelKey modelKey, EvtPackEventId eventId, s32 resourceId);
+dds3ProcessID_t *evtLoadModelSe(EvtMotionSeModelKey modelKey, EvtPackEventId eventId,
+                                EvtMotionSeResourceId resourceId);
 dds3ProcessID_t *evtLoadEventPack(EvtPackEventId eventId);
 void evtKillEventPack(EvtPackEventId eventId);
 
