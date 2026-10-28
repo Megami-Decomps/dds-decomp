@@ -147,7 +147,7 @@ extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32 world, u128 *pos, u128 
 
 
 /* Copy two source points into the primary effect object. */
-s32 evtCommand_EFFMG1_POS(void) {
+ScrCommandResult evtCommand_EFFMG1_POS(void) {
     dds3Basic_t *primaryEffect;
     dds3Basic_t *sourcePoint0;
     dds3Basic_t *sourcePoint1;
@@ -184,7 +184,7 @@ extern char D_003AC9E0[];
 extern char D_003AC958[];
 
 /* Apply four effect parameters after resolving every input object. */
-s32 evtCommand_EFFMG2_POS(void) {
+ScrCommandResult evtCommand_EFFMG2_POS(void) {
     dds3Basic_t *primaryEffect;
     dds3Basic_t *sourcePoint0;
     dds3Basic_t *sourcePoint1;
@@ -213,7 +213,7 @@ s32 evtCommand_EFFMG2_POS(void) {
     return 1;
 }
 
-s32 evtCommand_EFFECT_ON(void)
+ScrCommandResult evtCommand_EFFECT_ON(void)
 {
     s32 effectId;
     dds3Basic_t *effectObject;
@@ -229,7 +229,7 @@ s32 evtCommand_EFFECT_ON(void)
 
 /* Bind the selected effect path to the first owner found from camera through light.
  * Missing paths or owners complete the command without binding anything. */
-s32 evtCommand_EFFECT_LINK(void) {
+ScrCommandResult evtCommand_EFFECT_LINK(void) {
     dds3Basic_t *effectPath = evtSearchBasic(EFF_WORLD_KIND_EFFECT_OBJECT, scrGetIntPara(0));
     dds3Basic_t *owner;
     EffWorldKind worldKind;
@@ -250,7 +250,7 @@ s32 evtCommand_EFFECT_LINK(void) {
 }
 
 /* Search the same owner kinds, then bind with the VM's third entry argument. */
-s32 evtCommand_EFFECT_LINK2(void) {
+ScrCommandResult evtCommand_EFFECT_LINK2(void) {
     dds3Basic_t *effectPath = evtSearchBasic(EFF_WORLD_KIND_EFFECT_OBJECT, scrGetIntPara(0));
     dds3Basic_t *owner;
     EffWorldKind worldKind;
@@ -270,7 +270,7 @@ s32 evtCommand_EFFECT_LINK2(void) {
     return 1;
 }
 
-s32 evtCommand_EFFECT_UNLINK(void)
+ScrCommandResult evtCommand_EFFECT_UNLINK(void)
 {
     s32 effectId;
     dds3Basic_t *effectObject;
@@ -284,7 +284,7 @@ s32 evtCommand_EFFECT_UNLINK(void)
     return 1;
 }
 
-s32 evtCommand_EFFECT_OFF(void)
+ScrCommandResult evtCommand_EFFECT_OFF(void)
 {
     s32 effectId;
     dds3Basic_t *effectObject;
@@ -297,7 +297,7 @@ s32 evtCommand_EFFECT_OFF(void)
     return 1;
 }
 
-s32 evtCommand_EFFECT_PATH_MOVE(void) {
+ScrCommandResult evtCommand_EFFECT_PATH_MOVE(void) {
     dds3Basic_t *effect;
     dds3Basic_t *path;
 
@@ -362,26 +362,26 @@ ScrCommandResult evtCommand_SEARCH_ID(void) {
     return SCR_COMMAND_RESULT_COMPLETE;
 }
 
-u32 evtCommand_RTRN_TITLE(void)
+ScrCommandResult evtCommand_RTRN_TITLE(void)
 {
     dds3AdminiCallSequence(2, 0, 0, 0);
     return 1;
 }
 
-u32 evtCommand_CALL_STAFF(void)
+ScrCommandResult evtCommand_CALL_STAFF(void)
 {
     dds3AdminiCallSequence(0xc, 0, 0, 0);
     return 1;
 }
 
-u32 evtCommand_CALL_ENDSAVE(void)
+ScrCommandResult evtCommand_CALL_ENDSAVE(void)
 {
     dds3AdminiCallSequence(4, 0, 0, 0);
     return 1;
 }
 
 /* Forward two VM integers as the admin request's two-word payload. */
-s32 evtCommand_CALL_SAVE(void)
+ScrCommandResult evtCommand_CALL_SAVE(void)
 {
     s32 payload[2];
 
@@ -393,7 +393,7 @@ s32 evtCommand_CALL_SAVE(void)
 }
 
 /* Log all three arguments, then re-read command and parameter for dispatch. */
-s32 evtCommand_CALL_NEXT(void) {
+ScrCommandResult evtCommand_CALL_NEXT(void) {
     s32 loggedArgument = scrGetIntPara(0);
     s32 loggedCommand = scrGetIntPara(1);
     s32 loggedParameter = scrGetIntPara(2);
@@ -440,7 +440,7 @@ void evtSubmitEventRequest(FldBattleSceneRecordIndex sceneRecordIndex,
     scrDestroyAllNamedProcesses();
 }
 
-s32 evtCommandSubmitEvent(void)
+ScrCommandResult evtCommandSubmitEvent(void)
 {
     FldBattleSceneRecordIndex sceneRecordIndex;
 
@@ -463,7 +463,7 @@ void evtSubmitEventRequestImmediate(FldBattleSceneRecordIndex sceneRecordIndex)
     scrDestroyAllNamedProcesses();
 }
 
-s32 evtCommand_CALL_BATTLE2(void)
+ScrCommandResult evtCommand_CALL_BATTLE2(void)
 {
     FldBattleSceneRecordIndex sceneRecordIndex;
 
@@ -472,7 +472,7 @@ s32 evtCommand_CALL_BATTLE2(void)
     return 1;
 }
 
-s32 evtCommand_RESTORE_BATTLE(void)
+ScrCommandResult evtCommand_RESTORE_BATTLE(void)
 {
     FldBattleSceneRecordIndex sceneRecordIndex;
     EvtScriptEventId followupEventId;
@@ -484,7 +484,7 @@ s32 evtCommand_RESTORE_BATTLE(void)
 }
 
 /* A field-sequence request is a fixed 0xa0-byte VM message. */
-s32 evtCommand_CALL_FIELD(void)
+ScrCommandResult evtCommand_CALL_FIELD(void)
 {
     s32 stage;
     s32 kind;
@@ -502,7 +502,7 @@ s32 evtCommand_CALL_FIELD(void)
 }
 
 /* Use the current group's stage with the VM's kind and sequence-name inputs. */
-s32 evtCommand_CALL_FIELD2(void)
+ScrCommandResult evtCommand_CALL_FIELD2(void)
 {
     s32 kind;
     const char *sequenceName;
@@ -517,7 +517,7 @@ s32 evtCommand_CALL_FIELD2(void)
 }
 
 /* Forward the first VM integer as an opaque four-byte admin payload. */
-s32 evtCommandSubmitScalarAdminRequest(void)
+ScrCommandResult evtCommandSubmitScalarAdminRequest(void)
 {
     s32 payloadValue;
 
@@ -527,7 +527,7 @@ s32 evtCommandSubmitScalarAdminRequest(void)
 }
 
 /* Build the current group's field request using the alternate initializer. */
-s32 evtCommand_CALL_FIELD3(void)
+ScrCommandResult evtCommand_CALL_FIELD3(void)
 {
     s32 kind;
     const char *sequenceName;
@@ -541,7 +541,7 @@ s32 evtCommand_CALL_FIELD3(void)
     return 1;
 }
 
-s32 evtCommand_FIELD_BE(void)
+ScrCommandResult evtCommand_FIELD_BE(void)
 {
     EvtPackEventId eventId;
     EvtPackFieldResourceId resourceId;
@@ -554,7 +554,7 @@ s32 evtCommand_FIELD_BE(void)
     return 1;
 }
 
-s32 evtCommand_FIELD_DSP(void)
+ScrCommandResult evtCommand_FIELD_DSP(void)
 {
     s32 area;
     s32 room;
@@ -571,7 +571,7 @@ s32 evtCommand_FIELD_DSP(void)
     return 1;
 }
 
-u32 evtCommand_FIELD_ANIME_START(void)
+ScrCommandResult evtCommand_FIELD_ANIME_START(void)
 {
     s32 baseMode;
 
@@ -580,7 +580,7 @@ u32 evtCommand_FIELD_ANIME_START(void)
     return 1;
 }
 
-u32 evtCommand_FIELD_ANIME_STOP(void)
+ScrCommandResult evtCommand_FIELD_ANIME_STOP(void)
 {
     s32 upperMode;
 
@@ -589,7 +589,7 @@ u32 evtCommand_FIELD_ANIME_STOP(void)
     return 1;
 }
 
-s32 evtCommand_FIELD_CLS(void)
+ScrCommandResult evtCommand_FIELD_CLS(void)
 {
     evtFreeAllUnit();
     while (sdfDelayedResrcCheck()) {
@@ -603,7 +603,7 @@ s32 evtCommand_FIELD_CLS(void)
     return 1;
 }
 
-s32 evtCommand_FIELD_CLS_STOP(void)
+ScrCommandResult evtCommand_FIELD_CLS_STOP(void)
 {
     evtFreeAllUnit();
     while (sdfDelayedResrcCheck()) {
@@ -617,7 +617,7 @@ s32 evtCommand_FIELD_CLS_STOP(void)
     return 1;
 }
 
-s32 evtCommand_UNIT_CLS(void)
+ScrCommandResult evtCommand_UNIT_CLS(void)
 {
     evtFreeAllUnit();
     printf("unit all clear !!\n");
@@ -625,7 +625,7 @@ s32 evtCommand_UNIT_CLS(void)
     return 1;
 }
 
-s32 evtCommand_UNIT_CLS_STOP(void)
+ScrCommandResult evtCommand_UNIT_CLS_STOP(void)
 {
     evtFreeAllUnit();
     while (sdfDelayedResrcCheck()) {
@@ -635,7 +635,7 @@ s32 evtCommand_UNIT_CLS_STOP(void)
     return 1;
 }
 
-s32 evtCommandAddEffectUnitToWorld(void) {
+ScrCommandResult evtCommandAddEffectUnitToWorld(void) {
     dds3Basic_t *cameraOwner;
 
     if (scrGetIntPara(0) < 0) {
@@ -650,7 +650,7 @@ s32 evtCommandAddEffectUnitToWorld(void) {
     return 1;
 }
 
-s32 evtCommand_CAM_SEL_FOVY(void) {
+ScrCommandResult evtCommand_CAM_SEL_FOVY(void) {
     dds3Basic_t *cameraOwner;
     CameraData *cameraData;
 
@@ -669,7 +669,7 @@ s32 evtCommand_CAM_SEL_FOVY(void) {
 }
 
 /* Relink the selected camera owner to its path, reporting any failure. */
-s32 evtCommand_CAM_PATH_MOVE(void) {
+ScrCommandResult evtCommand_CAM_PATH_MOVE(void) {
     dds3Basic_t *owner;
     dds3Basic_t *path;
 
@@ -720,7 +720,7 @@ ScrCommandResult evtCommand_CAM_PATH_WAIT(void) {
 }
 
 /* Create with a zero position and identity rotation; return the world value to the VM. */
-s32 evtCommand_CAM_CREATE(void) {
+ScrCommandResult evtCommand_CAM_CREATE(void) {
     f32 position[4];
     f32 rotation[4];
     s32 world;
@@ -734,7 +734,7 @@ s32 evtCommand_CAM_CREATE(void) {
     return 1;
 }
 
-s32 evtCommand_CAM_CLS(void)
+ScrCommandResult evtCommand_CAM_CLS(void)
 {
     s32 cameraObjectId;
     dds3Basic_t *cameraObject;
@@ -748,7 +748,7 @@ s32 evtCommand_CAM_CLS(void)
     return 1;
 }
 
-s32 evtCommand_CAM_POS_XYZ(void) {
+ScrCommandResult evtCommand_CAM_POS_XYZ(void) {
     dds3Basic_t *cameraObject;
     f32 position[4];
 
@@ -769,7 +769,7 @@ s32 evtCommand_CAM_POS_XYZ(void) {
 }
 
 /* Convert the three degree inputs before composing and storing a quaternion. */
-s32 evtCommand_CAM_ROT_XYZ(void) {
+ScrCommandResult evtCommand_CAM_ROT_XYZ(void) {
     dds3Basic_t *cameraObject;
     f32 quaternion[4];
     f32 degreesToRadians;
@@ -794,7 +794,7 @@ s32 evtCommand_CAM_ROT_XYZ(void) {
     return 1;
 }
 
-s32 evtCommand_CAM_ROT_Q(void) {
+ScrCommandResult evtCommand_CAM_ROT_Q(void) {
     dds3Basic_t *cameraObject;
     f32 quaternion[4];
 
@@ -818,7 +818,7 @@ s32 evtCommand_CAM_ROT_Q(void) {
 extern void dds3MoverBasicMakePath(dds3Basic_t *object);
 extern char D_003AC8E8[], D_003AC8F8[], D_003AC908[];
 
-s32 evtCommand_OBJ_PATH_MOVE(void) {
+ScrCommandResult evtCommand_OBJ_PATH_MOVE(void) {
     dds3Basic_t *unit;
     dds3Basic_t *target;
     dds3ObjectBaseControlWorkData_t *data;
@@ -879,7 +879,7 @@ s32 evtCommand_OBJ_PATH_MOVE(void) {
 
 extern char D_003AC928[]; /* "re attach...!\n" */
 
-s32 evtCommandReattachObjectPath(void) {
+ScrCommandResult evtCommandReattachObjectPath(void) {
     dds3Basic_t *unit;
     dds3Basic_t *target;
     dds3ObjectBaseControlWorkData_t *data;
@@ -1078,7 +1078,7 @@ extern void evtPolygonMovieSetFlagBits(dds3ProcessID_t *task, u32 bits);
 
 /* Create an event/scene movie task at the owning task's priority, set bit 0,
  * and return its handle through the VM result. Missing work skips creation. */
-s32 evtCommandStartPolygonMovie(void) {
+ScrCommandResult evtCommandStartPolygonMovie(void) {
     scrProcessWork_s *commandWork = scrGetScriptHandle();
     s32 eventId;
     s32 sceneId;
@@ -1104,7 +1104,7 @@ s32 evtCommandStartPolygonMovie(void) {
 extern void evtPolygonMovieClearFlagBits(dds3ProcessID_t *task, u32 bits);
 
 /* Clear bit 0 and echo the movie ID through the VM result. */
-s32 evtCommandClearPolygonMovieFlag(void)
+ScrCommandResult evtCommandClearPolygonMovieFlag(void)
 {
     dds3ProcessID_t *movieTask;
 
@@ -1116,7 +1116,7 @@ s32 evtCommandClearPolygonMovieFlag(void)
 
 /* Create and return an event/scene movie task without setting bit 0.
  * The owning scheduler task supplies the viewer task's priority. */
-s32 evtCommand_PMV_RUN(void) {
+ScrCommandResult evtCommand_PMV_RUN(void) {
     scrProcessWork_s *commandWork = scrGetScriptHandle();
     s32 eventId;
     s32 sceneId;
@@ -1138,7 +1138,7 @@ s32 evtCommand_PMV_RUN(void) {
 }
 
 /* Look up a world unit across the six kinds before trying the fallback slot. */
-s32 evtCommand_PATH_STOP(void) {
+ScrCommandResult evtCommand_PATH_STOP(void) {
     dds3Basic_t *slotObject;
     EffWorldKind worldKind = EFF_WORLD_KIND_CAMERA;
 
@@ -1157,7 +1157,7 @@ s32 evtCommand_PATH_STOP(void) {
 }
 
 /* Resume the first matching path controller, using the same fallback search. */
-s32 evtCommand_PATH_START(void) {
+ScrCommandResult evtCommand_PATH_START(void) {
     dds3Basic_t *slotObject;
     EffWorldKind worldKind = EFF_WORLD_KIND_CAMERA;
 
@@ -1177,7 +1177,7 @@ s32 evtCommand_PATH_START(void) {
 
 /* Apply the float state, then update a room flag when its parsed number is positive.
  * Values above 0.5 set that flag; the VM float parameter is deliberately re-read. */
-s32 evtCommand_PATH_RATE(void) {
+ScrCommandResult evtCommand_PATH_RATE(void) {
     dds3Basic_t *worldNode;
     s32 roomNumber;
     const char *roomName;
@@ -1210,7 +1210,7 @@ s32 evtCommand_PATH_RATE(void) {
 }
 
 /* Apply the path direction and update the positive room's traversal flag. */
-s32 evtCommand_PATH_DIR(void) {
+ScrCommandResult evtCommand_PATH_DIR(void) {
     dds3Basic_t *worldNode;
     s32 roomNumber;
     EvtPathDirection direction;
@@ -1245,7 +1245,7 @@ s32 evtCommand_PATH_DIR(void) {
 }
 
 /* Enable the scaled-value flag on the first unit found, including the fallback. */
-s32 evtCommand_PATH_LOOP_ON(void)
+ScrCommandResult evtCommand_PATH_LOOP_ON(void)
 {
     EffWorldKind worldKind;
     dds3Basic_t *slotObject;
@@ -1266,7 +1266,7 @@ s32 evtCommand_PATH_LOOP_ON(void)
 }
 
 /* Disable the scaled-value flag using the same six-kind and fallback search. */
-s32 evtCommand_PATH_LOOP_OFF(void)
+ScrCommandResult evtCommand_PATH_LOOP_OFF(void)
 {
     EffWorldKind worldKind;
     dds3Basic_t *slotObject;
@@ -1286,7 +1286,7 @@ s32 evtCommand_PATH_LOOP_OFF(void)
     return 1;
 }
 
-s32 evtCommand_LIGHT_PATH_MOVE(void) {
+ScrCommandResult evtCommand_LIGHT_PATH_MOVE(void) {
     dds3Basic_t *pathOwner = evtSearchBasic(EFF_WORLD_KIND_LIGHT, scrGetIntPara(0));
 
     if (evtPathLinkAndMake(evtSearchBasic(EFF_WORLD_KIND_ACTION_10, scrGetIntPara(1)), pathOwner) != EVT_PATH_LINK_FAILED) {
