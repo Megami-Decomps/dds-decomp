@@ -2931,7 +2931,8 @@ void btlAdjustActorEntryCode(BtlUnit *unit, BtlActorEntrySlotIndex slotIndex, s1
     unit->entrySlots[slotIndex].code = code;
 }
 
-void btlSetActorEntryCode(BtlUnit *unit, BtlActorEntrySlotIndex slotIndex, s16 code) {
+void btlSetActorEntryCode(BtlUnit *unit, BtlActorEntrySlotIndex slotIndex,
+                          BtlActorEntryCodeValue code) {
     unit->entrySlots[slotIndex].code = code;
 }
 
@@ -2941,7 +2942,8 @@ void btlClearActorEntrySlot(BtlUnit *unit, BtlActorEntrySlotIndex slotIndex) {
     unit->entrySlots[slotIndex].countdown = -1;
 }
 
-s16 btlGetActorEntryCode(const BtlUnit *unit, BtlActorEntrySlotIndex slotIndex) {
+BtlActorEntryCodeValue btlGetActorEntryCode(
+    const BtlUnit *unit, BtlActorEntrySlotIndex slotIndex) {
     return unit->entrySlots[slotIndex].code;
 }
 

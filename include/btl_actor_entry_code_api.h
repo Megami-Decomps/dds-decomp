@@ -27,6 +27,9 @@ enum {
     BTL_ACTOR_ENTRY_CODE_MATCH_MIN_CODE = 2
 };
 
+/* Signed stored code value; distinct from the match classification above. */
+typedef s16 BtlActorEntryCodeValue;
+
 typedef u8 BtlActorEntryExpirationResult;
 enum {
     BTL_ACTOR_ENTRY_EXPIRATION_RESULT_NOT_EXPIRED = 0,
@@ -39,11 +42,12 @@ BtlActorEntrySlotIndexResult btlLowestSetPairIndex(u32 mask);
 /* Empty slots and slots with a positive countdown are not expired. */
 BtlActorEntryExpirationResult btlActorEntryIsExpired(
     const struct BtlUnit *unit, BtlActorEntrySlotIndex slotIndex);
-s16 btlGetActorEntryCode(const struct BtlUnit *unit, BtlActorEntrySlotIndex slotIndex);
+BtlActorEntryCodeValue btlGetActorEntryCode(
+    const struct BtlUnit *unit, BtlActorEntrySlotIndex slotIndex);
 void btlAdjustActorEntryCode(struct BtlUnit *unit, BtlActorEntrySlotIndex slotIndex,
                              s16 delta);
 void btlSetActorEntryCode(struct BtlUnit *unit, BtlActorEntrySlotIndex slotIndex,
-                          s16 code);
+                          BtlActorEntryCodeValue code);
 void btlClearActorEntrySlot(struct BtlUnit *unit, BtlActorEntrySlotIndex slotIndex);
 
 #endif
