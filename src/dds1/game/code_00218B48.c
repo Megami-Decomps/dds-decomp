@@ -238,7 +238,7 @@ void mdlDrawViewerSelectionLabel(void);
 
 
 
-void sdfIpuSetOutputTex(sdfIpuDecodeCb_t *, SdfStreamParams *, u8 *, s32, sdfTexHandle_t *);
+void sdfIpuSetOutputTex(sdfIpuDecodeCb_t *, const SdfStreamParams *, u8 *, s32, sdfTexHandle_t *);
 void sdfIpuFree(sdfIpuDecodeCb_t *);
 void mdlCleanupViewerTasksAndResources(void);
 
@@ -814,7 +814,7 @@ void mdlDeleteEffectResrc_IPU(MdlObj *obj) {
     sdfChipFreeDirect(obj);
 }
 
-void mdlStartEffectResrc_IPU(MdlObj *obj, sdfTexHandle_t *resource, SdfStreamParams *params) {
+void mdlStartEffectResrc_IPU(MdlObj *obj, sdfTexHandle_t *resource, const SdfStreamParams *params) {
     if (obj->initialized == 0) {
         obj->initialized = 1;
         sdfIpuSetOutputTex(&obj->soundNode, params, obj->sourceAddress, obj->sourceSize, resource);
@@ -991,7 +991,7 @@ void mdlDrawEffect_IPU(dds3ModelEffectCtrlr_t *item) {
             return;
         }
         mdlStartEffectResrc_IPU(object, item->payload.object.texture,
-                   (SdfStreamParams *)item->payload.object.attributes);
+                   (const SdfStreamParams *)item->payload.object.attributes);
     }
 }
 

@@ -1824,7 +1824,7 @@ void sdfSoundInitAndAppendNode(sdfIpuDecodeCb_t *node, SoundFormat *format, u8 *
     sdfIpuAttachTask(node);
 }
 
-void sdfIpuSetOutputTex(sdfIpuDecodeCb_t *node, SdfStreamParams *params, u8 *sourceData, s32 sourceSize, sdfTexHandle_t *source) {
+void sdfIpuSetOutputTex(sdfIpuDecodeCb_t *node, const SdfStreamParams *params, u8 *sourceData, s32 sourceSize, sdfTexHandle_t *source) {
     SdfStreamParams streamParams = *params;
     switch (source->pixelFormat) {
     case 0:
