@@ -213,7 +213,7 @@ extern s32 btlRunSceneActorEventTask(struct BattleScriptTaskData *);
 extern void btlStartSkillEventTask(u32);
 
 
-extern BattleModelEntry *btlFindModelEntry(s32 modelKind, s32 modelId);
+extern BattleModelEntry *btlFindModelEntry(BtlModelResourceKind modelKind, BtlModelId modelId);
 
 
 typedef struct BattleScriptTaskData {
@@ -1286,8 +1286,8 @@ void btlReleaseAllModelEntries(void) {
 }
 
 /* Format the model path into the caller's buffer; nonzero selects devil data. */
-void btlFormatModelResourcePath(s32 isDevil, s32 modelId, char *pathOut) {
-    if (isDevil == 0) {
+void btlFormatModelResourcePath(BtlModelResourceKind modelKind, BtlModelId modelId, char *pathOut) {
+    if (modelKind == 0) {
         sprintf(pathOut, "%spc%03X_ms.LB", "/model/human/", modelId);
     } else {
         sprintf(pathOut, "%s%03X_ms.LB", "/model/devil/", modelId);
@@ -1313,7 +1313,7 @@ BtlModelPackReadiness btlIsModelPackEntryReady(BattleModelEntry *cacheEntry) {
 }
 
 /* Return the matching cache entry, or null. */
-BattleModelEntry *btlFindModelEntry(s32 modelKind, s32 modelId) {
+BattleModelEntry *btlFindModelEntry(BtlModelResourceKind modelKind, BtlModelId modelId) {
     BattleModelEntry *cacheCursor = ((BtlStateModelCacheView *)btlGetRuntime())->modelEntries;
     while (cacheCursor != 0) {
         if (cacheCursor->kind == modelKind && cacheCursor->id == modelId) {
@@ -1332,7 +1332,7 @@ void btlReleaseCachedModelReferences(void) {
 }
 
 /* Reuse a cached kind/id pair or request its model pack and first reference. */
-void btlLoadModelPack(s32 modelKind, s32 modelId) {
+void btlLoadModelPack(BtlModelResourceKind modelKind, BtlModelId modelId) {
     char resourcePath[128];
     BattleModelEntry *cacheEntry = btlFindModelEntry(modelKind, modelId);
 
@@ -1357,7 +1357,7 @@ void btlLoadModelPack(s32 modelKind, s32 modelId) {
 }
 
 /* Drop one reference from the matching kind/id cache entry, if it exists. */
-void btlReleaseFoundModelEntry(s32 modelKind, s32 modelId) {
+void btlReleaseFoundModelEntry(BtlModelResourceKind modelKind, BtlModelId modelId) {
     BattleModelEntry *cacheEntry;
 
     cacheEntry = btlFindModelEntry(modelKind, modelId);
@@ -1372,7 +1372,7 @@ extern const SoundSlotTableEntry *btlSelectSideIndexedActorParameterTable(s32 ca
 
 /* Finalize the existing kind/id entry's motion-SE pack ownership and ready state.
  * The native DDS2 twin also logs each adopted resource slot. */
-void btlFinalizeModelPackEntry(s32 kind, s32 id) {
+void btlFinalizeModelPackEntry(BtlModelResourceKind kind, BtlModelId id) {
     BattleModelEntry *entry = btlFindModelEntry(kind, id);
     PacWork *node;
     const SoundSlotTableEntry *parts;
@@ -1412,7 +1412,7 @@ void btlFinalizeModelPackEntry(s32 kind, s32 id) {
 }
 
 /* Return the sign-extended finalization state, or zero when no entry exists. */
-s32 btlGetEntryState(s32 modelKind, s32 modelId) {
+s32 btlGetEntryState(BtlModelResourceKind modelKind, BtlModelId modelId) {
     BattleModelEntry *cacheEntry = btlFindModelEntry(modelKind, modelId);
     if (cacheEntry != 0) {
         return cacheEntry->finalized;
@@ -1421,7 +1421,7 @@ s32 btlGetEntryState(s32 modelKind, s32 modelId) {
 }
 
 /* Query readiness for the matching kind/id cache entry. */
-BtlModelPackReadiness btlIsModelEntryReady(s32 kind, s32 id) {
+BtlModelPackReadiness btlIsModelEntryReady(BtlModelResourceKind kind, BtlModelId id) {
     BattleModelEntry *entry = btlFindModelEntry(kind, id);
     if (entry != 0) {
         return btlIsModelPackEntryReady(entry);
@@ -1429,10 +1429,10 @@ BtlModelPackReadiness btlIsModelEntryReady(s32 kind, s32 id) {
     return BTL_MODEL_PACK_NOT_READY;
 }
 
-extern void btlFinalizeModelPackEntry(s32, s32);
+extern void btlFinalizeModelPackEntry(BtlModelResourceKind kind, BtlModelId id);
 
 /* Return 1 once model and motion-sound work are ready; request/poll them otherwise. */
-BtlModelAndSoundReadiness btlEnsureModelAndSoundReady(s32 kind, s32 id, s32 unused) {
+BtlModelAndSoundReadiness btlEnsureModelAndSoundReady(BtlModelResourceKind kind, BtlModelId id, s32 unused) {
     BattleModelEntry *entry;
 
     if (mdlPrepare(kind, id, MDL_ASSET_REQUEST_NONBLOCKING) != MDL_ASSET_REQUEST_QUEUED &&

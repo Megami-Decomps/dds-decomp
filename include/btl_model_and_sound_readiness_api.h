@@ -2,6 +2,7 @@
 #define BTL_MODEL_AND_SOUND_READINESS_API_H
 
 #include "common.h"
+#include "btl_model_key.h"
 
 typedef s32 BtlModelAndSoundReadiness;
 enum {
@@ -10,6 +11,6 @@ enum {
 };
 
 /* Whether the model and its associated motion-sound work are complete. */
-BtlModelAndSoundReadiness btlEnsureModelAndSoundReady(s32 kind, s32 id, s32 unused);
+BtlModelAndSoundReadiness btlEnsureModelAndSoundReady(BtlModelResourceKind kind, BtlModelId id, s32 unused);
 
 #endif /* BTL_MODEL_AND_SOUND_READINESS_API_H */

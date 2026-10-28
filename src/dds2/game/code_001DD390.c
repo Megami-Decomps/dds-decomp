@@ -2393,7 +2393,7 @@ void btlInitializeEffectVectorsFromSourceRecords(
     unit->unk58 = base->zOffset;
 }
 
-BtlReusableModelAvailability btlHasMatchingModel(s32 effectId, s32 modelId) {
+BtlReusableModelAvailability btlHasMatchingModel(s32 effectId, BtlModelId modelId) {
     BtlState *work = (BtlState *)btlGetRuntime();
     BtlUnit *unit = work->units;
     while (unit != NULL) {
@@ -2573,7 +2573,7 @@ void btlRequestModelAssetByMode(u32 unused, u32 effect, u32 model) {
     mdlPrepare(effect, model, MDL_ASSET_REQUEST_NONBLOCKING);
 }
 
-extern void btlReleaseFoundModelEntry(s32 modelKind, s32 modelId);
+extern void btlReleaseFoundModelEntry(BtlModelResourceKind modelKind, BtlModelId modelId);
 
 void btlReleaseModelAssetByMode(u32 unused, u32 effect, u32 model) {
     s32 available;

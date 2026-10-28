@@ -2,6 +2,7 @@
 #define BTL_MODEL_CACHE_ENTRY_H
 
 #include "common.h"
+#include "btl_model_key.h"
 #include "file_pac.h"
 #include "snd_slot.h"
 
@@ -11,8 +12,8 @@
 #define BTL_MODEL_ENTRY_FINALIZED 1
 
 typedef struct BattleModelEntry {
-    s32 kind;                         /* 0x00: model resource kind */
-    s32 id;                           /* 0x04: model id */
+    BtlModelResourceKind kind;        /* 0x00: model resource kind */
+    BtlModelId id;                    /* 0x04: model id */
     s32 refCount;                     /* 0x08: retained users */
     s8 finalized;                     /* 0x0C: pack-request finalization completed */
     u8 pad0D[3];
