@@ -8,6 +8,6 @@
 typedef s32 PtyLevelUpCount;
 
 /* Return the currently available level-up count; returns zero at level 99. */
-PtyLevelUpCount ptyCalcLevelUps(datUnitWork_t *unit);
+PtyLevelUpCount ptyCalcLevelUps(const datUnitWork_t *unit);
 
 #endif /* PTY_LEVEL_UP_COUNT_H */

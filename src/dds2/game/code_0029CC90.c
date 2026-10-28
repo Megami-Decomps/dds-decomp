@@ -231,7 +231,7 @@ s32 brsBuildPartyRewardBatch(BrsRewardBatch *batch, BrsRewardSummary *summary) {
 
 /* Keep the level progression indexed; see docs/idioms.md,
  * "Trace-justified party experience table progression". */
-PtyLevelUpCount ptyCalcLevelUps(datUnitWork_t *unit) {
+PtyLevelUpCount ptyCalcLevelUps(const datUnitWork_t *unit) {
     u16 level = unit->level;
     u16 unitId = unit->unitId;
     u32 exp = unit->totalExp;
