@@ -3,6 +3,7 @@
 #include "sdf_model_packet_callback.h"
 #include "btl_motion_transform.h"
 #include "btl_status_motion_override.h"
+#include "btl_reusable_model_api.h"
 #include "btl_camera_pose_step.h"
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
@@ -2311,20 +2312,20 @@ void btlInitializeEffectVectorsFromSourceRecords(
     fx->unk58 = base->zOffset;
 }
 
-s32 btlHasMatchingModel(s32 effect, s32 model) {
+BtlReusableModelAvailability btlHasMatchingModel(s32 effectId, s32 modelId) {
     s32 context = (s32)(u32)btlGetRuntime();
     BtlUnit *node = ((BtlState *)context)->units;
     while (node != 0) {
         if ((node->status.flags & 2) != 0 &&
             node->ext != 0 &&
             node->soundSlotOwner != 0 &&
-            mdlGetMajorNum(node->ext->owner) == effect &&
-            mdlGetMinorNum(node->ext->owner) == model) {
-            return 1;
+            mdlGetMajorNum(node->ext->owner) == effectId &&
+            mdlGetMinorNum(node->ext->owner) == modelId) {
+            return BTL_REUSABLE_MODEL_AVAILABLE;
         }
         node = node->next;
     }
-    return 0;
+    return BTL_REUSABLE_MODEL_UNAVAILABLE;
 }
 
 /* Inherit the source unit's sound owner, transparency model, world node and
@@ -3773,7 +3774,7 @@ void btlRequestModelOrReuse(BtlRuntimeTaskArgs *arguments) {
     if (((u32)object->status.flags & 2) != 0) {
         return;
     }
-    if (btlHasMatchingModel(effect, model)) {
+    if (btlHasMatchingModel(effect, model) != BTL_REUSABLE_MODEL_UNAVAILABLE) {
         btlBindActorModel(object, effect, model);
         if (arguments->mode == 0) {
             btlClearUnitDefeatCandidate(object);
@@ -3865,9 +3866,9 @@ void btlBeginModelChange(BtlModelChangeArgs *arguments) {
     BtlUnit *owner = arguments->unit;
     u32 model = arguments->resourceKind;
     u32 variant = arguments->resourceId;
-    s32 status = btlHasMatchingModel(model, variant);
+    BtlReusableModelAvailability availability = btlHasMatchingModel(model, variant);
 
-    if (status == 0) {
+    if (availability == BTL_REUSABLE_MODEL_UNAVAILABLE) {
         btlRequestModelAssetByMode((u32)owner, model, variant);
         owner->gunResourceFlags = (owner->gunResourceFlags | 1) & ~2;
         btlBossDebugPrintf("btl:model change start[%X,%X]\n", model, variant);
