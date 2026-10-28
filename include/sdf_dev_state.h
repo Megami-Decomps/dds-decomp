@@ -22,7 +22,7 @@ typedef struct sdfFileCmdHandle_t {
     s32 requestExtra; /* 0x1C */
     void *requestData; /* 0x20 */
     s32 options; /* 0x24 */
-    s32 resourceId; /* 0x28 */
+    s32 fileHandle; /* 0x28: SCE descriptor, or -1 when no file is open */
     s32 result; /* 0x2C */
     s32 transferred; /* 0x30 */
     u8 pad34[4]; /* 0x34 */
