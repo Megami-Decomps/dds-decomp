@@ -14548,7 +14548,7 @@ void effPollResourceBankSlot(char *path, u32 flags, EffResourceBankSlot *slot) {
         btlUpdateAndDrawResourceBrowser(effResourceBankDescriptor);
         slot->state = btlGetResourceBrowserSelectionStatus(effResourceBankDescriptor);
         slot->type = btlFormatSelectedResourceName(effResourceBankDescriptor, slot->fullName);
-        slot->count = btlGetResourcePathVariant(effResourceBankDescriptor);
+        slot->pathVariant = btlGetResourcePathVariant(effResourceBankDescriptor);
         btlTrimResourceName(effResourceBankDescriptor, slot->name);
         if (slot->state == BTL_RESOURCE_SELECTION_ACCEPTED) {
             btlDestroyResourceDescriptor(effResourceBankDescriptor);
@@ -15574,7 +15574,7 @@ s32 effPollFileRecord(const char *resourceName, s32 mode) {
                            (const char *)&status,
                            effClassifyResourceMask(status.type));
         } else {
-            fileJobSetSecondaryData(effQueuedFileHandle, &status.count, 4, 4);
+            fileJobSetSecondaryData(effQueuedFileHandle, &status.pathVariant, 4, 4);
         }
         result = 0x400002;
     }

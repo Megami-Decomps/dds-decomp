@@ -8,7 +8,7 @@ typedef struct EffResourceBankSlot {
     char name[0x34];     /* Selected resource name without its extension. */
     s32 type;            /* Resource category returned by the formatter. */
     s32 state;           /* Browser selection status. */
-    s32 count;           /* Category-specific metadata from the selected row. */
+    s32 pathVariant;     /* Selected path variant returned by the browser. */
     u8 opaque108[8];     /* In caller-sized buffers; not written by this provider. */
 } EffResourceBankSlot;
 
@@ -25,7 +25,7 @@ typedef char EffResourceBankSlot_state_must_be_at_0x100[
     sizeof(((EffResourceBankSlot *)0)->fullName) +
     sizeof(((EffResourceBankSlot *)0)->name) +
     sizeof(((EffResourceBankSlot *)0)->type) == 0x100 ? 1 : -1];
-typedef char EffResourceBankSlot_count_must_be_at_0x104[
+typedef char EffResourceBankSlot_pathVariant_must_be_at_0x104[
     sizeof(((EffResourceBankSlot *)0)->fullName) +
     sizeof(((EffResourceBankSlot *)0)->name) +
     sizeof(((EffResourceBankSlot *)0)->type) +
@@ -35,6 +35,6 @@ typedef char EffResourceBankSlot_opaque_must_be_at_0x108[
     sizeof(((EffResourceBankSlot *)0)->name) +
     sizeof(((EffResourceBankSlot *)0)->type) +
     sizeof(((EffResourceBankSlot *)0)->state) +
-    sizeof(((EffResourceBankSlot *)0)->count) == 0x108 ? 1 : -1];
+    sizeof(((EffResourceBankSlot *)0)->pathVariant) == 0x108 ? 1 : -1];
 
 #endif
