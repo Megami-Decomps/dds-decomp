@@ -484,7 +484,7 @@ extern s8 dds3PadButtonState[];
 
 extern SdfTaskItemDesc D_0036C65C;
 
-extern s32 mnuTickInitState(MenuProgressHost *);
+extern MnuProgressLoadPollResult mnuTickInitState(MenuProgressHost *);
 
 extern void mnuCommitTitleStreamReadyState(void);
 
@@ -505,7 +505,10 @@ s32 mnuUpdateResourceTaskState(s32 key, MnuResourceTask *task) {
     taskState = task->state;
     switch (taskState) {
     case MNU_RESOURCE_TASK_STATE_WAIT_RESOURCES:
-        if (mnuTickInitState(metadata->attachedEffect)==0 && mnuAreResourceSlotsOccupied(metadata)==1) task->state=MNU_RESOURCE_TASK_STATE_OPEN_INITIAL_PROFILE;
+        if (mnuTickInitState(metadata->attachedEffect) == MNU_PROGRESS_LOAD_POLL_COMPLETE &&
+            mnuAreResourceSlotsOccupied(metadata) == 1) {
+            task->state = MNU_RESOURCE_TASK_STATE_OPEN_INITIAL_PROFILE;
+        }
         return 0;
     case MNU_RESOURCE_TASK_STATE_OPEN_INITIAL_PROFILE:
         selectedParty=(datUnitWork_t **)(u32)list->cursor->userValue;

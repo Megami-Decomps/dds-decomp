@@ -683,26 +683,25 @@ void mnuReleaseStaffMenuContextAndResources(MenuProgressHost *work) {
 
 extern void mnuInitializeStaffPageWindows(MenuPageWindow *, StaffSlots *, u32, PartyPanel *);
 
-/* Return one while initialization is pending (including state zero), zero when ready.
- * On resource readiness, release loading resources, initialize windows, and store state two. */
-s32 mnuTickInitState(MenuProgressHost *work) {
+/* Keep polling until resources are ready, released, and the page windows are initialized. */
+MnuProgressLoadPollResult mnuTickInitState(MenuProgressHost *work) {
     MnuProgressLoadState state = work->loadState;
     StaffSlots *group;
 
     if (state == MNU_PROGRESS_LOAD_NOT_STARTED) {
-        return 1;
+        return MNU_PROGRESS_LOAD_POLL_PENDING;
     }
     if (state == MNU_PROGRESS_LOAD_READY) {
-        return 0;
+        return MNU_PROGRESS_LOAD_POLL_COMPLETE;
     }
     group = &work->staffSlots;
     if (mnuStaffSlotsAllFilled(work->titleEffectHandle, group) == 0) {
-        return 1;
+        return MNU_PROGRESS_LOAD_POLL_PENDING;
     }
     mnuReleaseStaffMenuResources(&group->baseResources[0]);
     mnuInitializeStaffPageWindows(&work->partyWindow, group, 0, &work->partyPanel);
     work->loadState = MNU_PROGRESS_LOAD_READY;
-    return 0;
+    return MNU_PROGRESS_LOAD_POLL_COMPLETE;
 }
 
 /* Bind the party selection's textures/grid, then create its panel and profile visuals. */

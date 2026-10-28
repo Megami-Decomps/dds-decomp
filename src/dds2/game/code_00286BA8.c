@@ -197,7 +197,7 @@ extern MenuProgressHost *mnuCreateProgressHost(void);
 extern void mnuInitPanelSoundEntries(void);
 
 extern s32 mtrUnitSelectUpdateState(MnuStatusResource *);
-extern s32 mnuPollTitleEffectsReady(MenuProgressHost *);
+extern MnuProgressLoadPollResult mnuPollTitleEffectsReady(MenuProgressHost *);
 extern void mnuRebuildProfilePanelFromRenderSnapshot(MnuStatusResource *);
 extern SdfTaskItemDesc D_003CFCE8;
 
@@ -298,7 +298,8 @@ s32 mtrUnitSelectUpdate(s32 mode) {
     switch (mtrUnitSelectUpdateState(resource)) {
     case 1:
         if (resource->flags.titleEffectsReadyPendingDisplay == 0) {
-            if (mnuPollTitleEffectsReady(resource->progressHost) == 0) {
+            if (mnuPollTitleEffectsReady(resource->progressHost) ==
+                MNU_PROGRESS_LOAD_POLL_COMPLETE) {
                 resource->flags.titleEffectsReadyPendingDisplay = 1;
             }
         } else {

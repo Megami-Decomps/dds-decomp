@@ -11,4 +11,11 @@ enum {
     MNU_PROGRESS_LOAD_READY = 2,
 };
 
+/* Pollers return whether startup loading is pending or complete. */
+typedef s32 MnuProgressLoadPollResult;
+enum {
+    MNU_PROGRESS_LOAD_POLL_COMPLETE = 0,
+    MNU_PROGRESS_LOAD_POLL_PENDING = 1,
+};
+
 #endif /* MNU_PROGRESS_LOAD_STATE_H */

@@ -826,22 +826,21 @@ void mnuReleaseStaffAndTitleVisualResources(MenuProgressHost *host) {
     sdfMemFreeDirect(host->allocation);
 }
 
-/* Return one while initialization is pending (including state zero), zero when ready.
- * On resource readiness, release loading resources and store state two. */
-s32 mnuPollTitleEffectsReady(MenuProgressHost *host) {
+/* Keep polling until title effects are ready and their loading resources are released. */
+MnuProgressLoadPollResult mnuPollTitleEffectsReady(MenuProgressHost *host) {
     MnuProgressLoadState state = host->loadState;
     if (state == MNU_PROGRESS_LOAD_NOT_STARTED) {
-        return 1;
+        return MNU_PROGRESS_LOAD_POLL_PENDING;
     }
     if (state == MNU_PROGRESS_LOAD_READY) {
-        return 0;
+        return MNU_PROGRESS_LOAD_POLL_COMPLETE;
     }
     if (movAreTitleEffectsReady(host->titleEffectHandle, &host->staffSlots) == 0) {
-        return 1;
+        return MNU_PROGRESS_LOAD_POLL_PENDING;
     }
     mnuReleaseStaffMenuResources(&host->staffSlots.baseResources[0]);
     host->loadState = MNU_PROGRESS_LOAD_READY;
-    return 0;
+    return MNU_PROGRESS_LOAD_POLL_COMPLETE;
 }
 
 extern void mnuConfigurePartyPanelPage(s32, s32, s32, s32);
