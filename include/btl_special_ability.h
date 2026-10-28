@@ -2,6 +2,7 @@
 #define BTL_SPECIAL_ABILITY_H
 
 #include "common.h"
+#include "dat_skill_id.h"
 
 struct datUnitWork_t;
 
@@ -13,6 +14,6 @@ enum {
 
 /* Returns availability after ownership and any ability-specific phase checks. */
 BtlSpecialAbilityAvailability btlCheckSpecialAbility(
-    const struct datUnitWork_t *record, s32 ability);
+    const struct datUnitWork_t *record, DatSkillId skillId);
 
 #endif /* BTL_SPECIAL_ABILITY_H */

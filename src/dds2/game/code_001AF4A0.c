@@ -191,7 +191,7 @@ void TestMsgReloadTexture(void);
 /* Functions defined earlier in the previous translation unit. */
 void *btlGetRuntime(void);
 BtlSpecialAbilityAvailability btlCheckSpecialAbility(
-    const datUnitWork_t *record, s32 ability);
+    const datUnitWork_t *record, DatSkillId skillId);
 s32 btlDoesEnabledStatusMatchCurrentId(datUnitWork_t *partyRecord, u32 entryId);
 f32 btlGetActorEntryMultiplier(BtlUnit *unit, u32 index, s8 includeCharge);
 f32 btlGetElementAbilityMultiplier(BtlUnit *unit, s32 attr);

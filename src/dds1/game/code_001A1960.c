@@ -1115,11 +1115,11 @@ s32 btlFlagToElementIndex(s32 flag) {
 extern s32 evtGetMirroredSolarPhase(void);
 
 BtlSpecialAbilityAvailability btlCheckSpecialAbility(
-    const datUnitWork_t *object, s32 flag) {
-    if (datUnitHasSkill(object, flag) == 0) {
+    const datUnitWork_t *object, DatSkillId skillId) {
+    if (datUnitHasSkill(object, skillId) == 0) {
         return BTL_SPECIAL_ABILITY_UNAVAILABLE;
     }
-    switch (flag) {
+    switch (skillId) {
     case 0x207:
         return evtGetMirroredSolarPhase() == 8 ? BTL_SPECIAL_ABILITY_AVAILABLE
                                                : BTL_SPECIAL_ABILITY_UNAVAILABLE;

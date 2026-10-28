@@ -57,7 +57,7 @@ extern void btlBossDebugPrintf(const char *format, ...);
 /* Functions defined earlier in the previous translation unit. */
 datUnitWork_t *btlGetIndexedPartyEntryRecord(s32 index);
 BtlSpecialAbilityAvailability btlCheckSpecialAbility(
-    const datUnitWork_t *object, s32 flag);
+    const datUnitWork_t *object, DatSkillId skillId);
 f32 btlGetElementAbilityMultiplier(BtlUnit *actor, s32 attr);
 s32 btlGetAbilityAttributeMultiplierPercent(BtlUnit *actor, s32 attr);
 f32 btlGetActorEntryMultiplier(BtlUnit *unit, u32 index, s8 includeCharge);
