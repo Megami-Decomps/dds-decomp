@@ -839,7 +839,7 @@ extern void btlUpdateFieldPresentationNoOp(void);
 
 extern s32 btlUpdateSceneFlow(void);
 
-extern s32 btlClearDeferredTasks(void);
+extern void btlClearDeferredTasks(void);
 
 s32 btlUpdateBattleFieldPresentation(dds3ProcessID_t *task) {
     BattleController *battle = (BattleController *)btlRuntime;
