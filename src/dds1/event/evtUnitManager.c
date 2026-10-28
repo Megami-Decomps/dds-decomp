@@ -13,6 +13,7 @@ struct EffNodeDescriptor;
 #include "dds3_path.h"
 #include "evt_unit.h"
 #include "evt_unit_object_key.h"
+#include "evt_unit_path_mode.h"
 #include "evt_path_direction.h"
 #include "evt_unit_motion_api.h"
 #include "evt_unit_motion_callback_result.h"
@@ -1219,7 +1220,7 @@ void evtSetUnitMove2(evtUnitHandle_t *work, s32 motionSubmode, s32 worldObjectKe
     }
 }
 
-void evtSetUnitMove3(evtUnitHandle_t *work, s32 pathObjectKey, s32 frames, s32 valueB6, s32 pathFollowMode, EvtPathDirection direction, s32 sideMode) {
+void evtSetUnitMove3(evtUnitHandle_t *work, s32 pathObjectKey, s32 frames, s32 valueB6, EvtUnitPathFollowMode pathFollowMode, EvtPathDirection direction, EvtUnitPathSideMode sideMode) {
     dds3Basic_t *pathSource;
     dds3PathBasicControl_t *path;
 
@@ -1242,11 +1243,11 @@ void evtSetUnitMove3(evtUnitHandle_t *work, s32 pathObjectKey, s32 frames, s32 v
         work->pathSpeed = -work->pathSpeed;
     }
     switch (pathFollowMode) {
-    case 0:
+    case EVT_UNIT_PATH_FOLLOW_MODE_TARGET_XZ:
         work->motionSubmode = EVT_UNIT_MOTION_SUBMODE_TARGET_XZ;
         work->flags &= ~2;
         break;
-    case 1:
+    case EVT_UNIT_PATH_FOLLOW_MODE_ENDPOINT:
         work->motionSubmode = EVT_UNIT_MOTION_SUBMODE_PATH_ENDPOINT;
         work->flags |= 2;
         break;
@@ -1260,15 +1261,15 @@ void evtSetUnitMove3(evtUnitHandle_t *work, s32 pathObjectKey, s32 frames, s32 v
         break;
     }
     switch (sideMode) {
-    case 0:
+    case EVT_UNIT_PATH_SIDE_MODE_DEFAULT:
         work->flags &= ~8;
         work->flags &= ~EVT_UNIT_FLAG_USE_PATH_ROTATION;
         break;
-    case 1:
+    case EVT_UNIT_PATH_SIDE_MODE_SIDE:
         work->flags |= 8;
         work->flags &= ~EVT_UNIT_FLAG_USE_PATH_ROTATION;
         break;
-    case 2:
+    case EVT_UNIT_PATH_SIDE_MODE_PATH_ROTATION:
         work->flags &= ~8;
         work->flags |= EVT_UNIT_FLAG_USE_PATH_ROTATION;
         break;
@@ -2133,9 +2134,9 @@ u32 evtCommand_MODEL_MOVE2(void) {
         s32 pathObjectKey = scrGetIntPara(1);
         s32 frames = scrGetIntPara(5);
         s32 valueB6 = scrGetIntPara(6);
-        s32 pathFollowMode = scrGetIntPara(2);
+        EvtUnitPathFollowMode pathFollowMode = scrGetIntPara(2);
         EvtPathDirection direction = scrGetIntPara(4);
-        s32 sideMode = scrGetIntPara(3);
+        EvtUnitPathSideMode sideMode = scrGetIntPara(3);
         evtSetUnitMove3(unit, pathObjectKey, frames, valueB6, pathFollowMode, direction, sideMode);
     }
     return 1;
