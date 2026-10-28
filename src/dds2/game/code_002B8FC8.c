@@ -25,6 +25,7 @@
 #include "mdl_flag_api.h"
 #include "btl.h"
 #include "mnu_party_menu_data.h"
+#include "mnu_standard_partner_requirements_api.h"
 
 struct StaffMenuRuntime;
 
@@ -574,7 +575,6 @@ void mnuDrawSelectionLabel(u16 id);
 /* Collect up to max pointers to occupied, frontline party slots. */
 void mnuCollectFrontlinePartySlots(const datUnitWork_t **out, s32 max);
 
-s32 mnuHasStandardPartnerRequirements(s32 id);
 
 
 

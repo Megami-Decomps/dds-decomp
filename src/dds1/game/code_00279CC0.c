@@ -11,6 +11,7 @@
 #include "mnu_scroll_panel.h"
 #include "dat_state.h"
 #include "pty_roster_api.h"
+#include "mnu_standard_partner_requirements_api.h"
 #include "eff.h"
 #include "eff_resource_records.h"
 #include "itf.h"
@@ -340,14 +341,14 @@ void mnuCollectFrontlinePartySlots(const datUnitWork_t **out, s32 max) {
     }
 }
 
-s32 mnuHasStandardPartnerRequirements(s32 id) {
+u8 mnuHasStandardPartnerRequirements(BtlCommandId commandId) {
+    s32 affinityIndex = commandId - DAT_AFFINITY_FIRST_COMMAND;
     s32 i;
-    id -= DAT_AFFINITY_FIRST_COMMAND;
-    if ((datAffinityRecords[id].flags & 2) != 0) {
+    if ((datAffinityRecords[affinityIndex].flags & 2) != 0) {
         return 0;
     }
     for (i = 0; i < 3; i++) {
-        if (datAffinityRecords[id].requirements[i] != -1) {
+        if (datAffinityRecords[affinityIndex].requirements[i] != -1) {
             return 1;
         }
     }
