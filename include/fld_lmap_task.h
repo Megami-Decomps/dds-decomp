@@ -61,21 +61,39 @@ void fldDispatchMapRequestCallbacks(const MapRequestState *ring);
 struct FileRequest;
 struct EffectSlotSet;
 
+/* Resource loading advances through request, poll, consume, and slot install. */
+typedef s16 LmapResourceLoadPhase;
+enum {
+    LMAP_RESOURCE_LOAD_PHASE_INITIALIZE = 0,
+    LMAP_RESOURCE_LOAD_PHASE_INSTALL_SLOTS = 1,
+    LMAP_RESOURCE_LOAD_PHASE_REQUEST_ENTRY = 2,
+    LMAP_RESOURCE_LOAD_PHASE_WAIT_FOR_ENTRY = 3,
+    LMAP_RESOURCE_LOAD_PHASE_CONSUME_ENTRY = 4,
+};
+
 /* The file loader retains this subrecord at task + 0x78 between updates. */
 typedef struct LmapLoadState {
     struct FileRequest *file;
     struct FileRequest *archive;
-    s16 phase;
+    LmapResourceLoadPhase phase;
     s16 entry;
     u32 unknown0C;
 } LmapLoadState;
 
 typedef char LmapLoadState_size_must_be_0x10[(sizeof(LmapLoadState) == 0x10) ? 1 : -1];
 
+/* The main task loads resources, initializes the scene, then runs selection. */
+typedef s32 LmapTaskPhase;
+enum {
+    LMAP_TASK_PHASE_LOADING_RESOURCES = 0,
+    LMAP_TASK_PHASE_INITIALIZING_SCENE = 1,
+    LMAP_TASK_PHASE_INTERACTIVE = 2,
+};
+
 /* User data allocated by fldStartLmapTask and passed to the LmapMain task. */
 typedef struct LmapTaskState {
     u32 unknown00;                /* 0x00 */
-    s32 phase;                    /* 0x04: task lifecycle phase */
+    LmapTaskPhase phase;          /* 0x04: main task lifecycle */
     s32 variant;                  /* 0x08: selected local-map variant */
     struct EffectSlotSet *spriteSlots[25]; /* 0x0C: retained local-map sprite owners */
     sdfMemHandle_t *allocation;      /* 0x70: loaded resource allocation */

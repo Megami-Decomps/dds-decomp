@@ -329,21 +329,21 @@ extern void fldDrawLocalMapOverlay(void);
 
 KwlnTaskUpdateResult fldLmapTaskUpdate(dds3ProcessID_t *task) {
     LmapTaskState *state = (LmapTaskState *)dds3GetProcessData(task);
-    s32 phase = state->phase;
+    LmapTaskPhase phase = state->phase;
     s32 result;
 
     D_0043888C = state;
     switch (phase) {
-    case 0:
+    case LMAP_TASK_PHASE_LOADING_RESOURCES:
         if (fldUpdateLmapResourceLoad(state)) {
-            D_0043888C->phase = 1;
+            D_0043888C->phase = LMAP_TASK_PHASE_INITIALIZING_SCENE;
         }
         break;
-    case 1:
+    case LMAP_TASK_PHASE_INITIALIZING_SCENE:
         fldInitializeLocalMapScene();
-        D_0043888C->phase = 2;
+        D_0043888C->phase = LMAP_TASK_PHASE_INTERACTIVE;
         break;
-    case 2:
+    case LMAP_TASK_PHASE_INTERACTIVE:
         result = fldUpdateLocalMapCounterSelection();
         if (result == -1) {
             return result;
@@ -440,7 +440,7 @@ void fldInitializeLmapTaskVariant(LmapTaskState *task) {
         }
     }
     task->variant = variant;
-    task->phase = 0;
+    task->phase = LMAP_TASK_PHASE_LOADING_RESOURCES;
 }
 
 void fldShutdownLmapResources(void) {
@@ -494,16 +494,16 @@ s32 fldAdvanceLmapResourceLoad(LmapTaskState *task)
     s32 slotIndex;
 
     switch (load->phase) {
-    case 0:
-        load->phase = 2;
+    case LMAP_RESOURCE_LOAD_PHASE_INITIALIZE:
+        load->phase = LMAP_RESOURCE_LOAD_PHASE_REQUEST_ENTRY;
         load->entry = 0;
         load->unknown0C = 0;
         break;
-    case 1:
+    case LMAP_RESOURCE_LOAD_PHASE_INSTALL_SLOTS:
         sdfInstallNonzeroSpriteSlots((SdfSlotSet *)task);
         evtPrintDeveloperConsoleMessage(D_0042D280);
         return 1;
-    case 2:
+    case LMAP_RESOURCE_LOAD_PHASE_REQUEST_ENTRY:
         load->file = NULL;
         switch (files[load->entry].kind) {
         case 1:
@@ -514,9 +514,9 @@ s32 fldAdvanceLmapResourceLoad(LmapTaskState *task)
             if (task->variant != files[load->entry].argument) {
                 load->entry++;
                 if (load->entry < 6U) {
-                    load->phase = 2;
+                    load->phase = LMAP_RESOURCE_LOAD_PHASE_REQUEST_ENTRY;
                 } else {
-                    load->phase = 1;
+                    load->phase = LMAP_RESOURCE_LOAD_PHASE_INSTALL_SLOTS;
                 }
                 return 0;
             }
@@ -527,43 +527,43 @@ s32 fldAdvanceLmapResourceLoad(LmapTaskState *task)
                 p2sdLoadSMGFile(files[load->entry].argument);
             } else {
                 /* Native 0x0030AD7C stores 4 before the common phase-3 store. */
-                load->phase = 4;
+                load->phase = LMAP_RESOURCE_LOAD_PHASE_CONSUME_ENTRY;
             }
             break;
         case 5:
             if (files[load->entry].argument == 0) {
                 task->allocation = sdfDevLoadFileEx(files[load->entry].name, &task->resourceAddress, NULL);
             }
-            load->phase = 4;
+            load->phase = LMAP_RESOURCE_LOAD_PHASE_CONSUME_ENTRY;
             return 0;
         }
-        load->phase = 3;
+        load->phase = LMAP_RESOURCE_LOAD_PHASE_WAIT_FOR_ENTRY;
         break;
-    case 3:
+    case LMAP_RESOURCE_LOAD_PHASE_WAIT_FOR_ENTRY:
         switch (files[load->entry].kind) {
         case 3:
             if (pacFileCheckEnd(load->file)) {
-                load->phase = 4;
+                load->phase = LMAP_RESOURCE_LOAD_PHASE_CONSUME_ENTRY;
             }
             break;
         case 1:
             if (task->spriteSlots[files[load->entry].argument] != NULL) {
-                load->phase = 4;
+                load->phase = LMAP_RESOURCE_LOAD_PHASE_CONSUME_ENTRY;
             }
             break;
         case 2:
             if (pacCheckEnd(load->archive)) {
-                load->phase = 4;
+                load->phase = LMAP_RESOURCE_LOAD_PHASE_CONSUME_ENTRY;
             }
             break;
         case 4:
             if (sndFindPackedTrackLoadStatus(files[load->entry].argument) == SND_PACKED_TRACK_LOAD_RESIDENT) {
-                load->phase = 4;
+                load->phase = LMAP_RESOURCE_LOAD_PHASE_CONSUME_ENTRY;
             }
             break;
         }
         break;
-    case 4:
+    case LMAP_RESOURCE_LOAD_PHASE_CONSUME_ENTRY:
         if (load->file != NULL) {
             fileGetLoadPtr(load->file);
             evtPrintDeveloperConsoleMessage(D_0042D298, fileGetLoadSize(load->file));
@@ -606,9 +606,9 @@ s32 fldAdvanceLmapResourceLoad(LmapTaskState *task)
         }
         load->entry++;
         if (load->entry < 6U) {
-            load->phase = 2;
+            load->phase = LMAP_RESOURCE_LOAD_PHASE_REQUEST_ENTRY;
         } else {
-            load->phase = 1;
+            load->phase = LMAP_RESOURCE_LOAD_PHASE_INSTALL_SLOTS;
         }
         break;
     }
