@@ -385,7 +385,8 @@ s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, BtlUnit **first
 extern ActionStateLink *fldGetSceneGroupEntry(s32 entryIndex);
 #include "btl_command_affinity_api.h"
 
-BtlCommandAffinityPartnerAvailability btlHasRequiredCommandAffinityPartners(BtlUnit *unit, s32 command) {
+BtlCommandAffinityPartnerAvailability btlHasRequiredCommandAffinityPartners(
+    BtlUnit *unit, BtlCommandId commandId) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     s32 result;
     u32 availableSlots;
@@ -396,18 +397,18 @@ BtlCommandAffinityPartnerAvailability btlHasRequiredCommandAffinityPartners(BtlU
     BtlUnit *partner;
     u32 flags;
 
-    if (datCommandSelectors[command].kind != 1) {
+    if (datCommandSelectors[commandId].kind != 1) {
         return BTL_COMMAND_AFFINITY_PARTNERS_UNAVAILABLE;
     }
-    if ((u32)(command - DAT_AFFINITY_FIRST_COMMAND) >= 0x75) {
+    if ((u32)(commandId - DAT_AFFINITY_FIRST_COMMAND) >= 0x75) {
         return BTL_COMMAND_AFFINITY_PARTNERS_UNAVAILABLE;
     }
     availableSlots = fldCountSceneSlots();
-    if (availableSlots < (u32)btlGetSlotValueAdjustedForSpecialAbility(unit, command)) {
+    if (availableSlots < (u32)btlGetSlotValueAdjustedForSpecialAbility(unit, commandId)) {
         return BTL_COMMAND_AFFINITY_PARTNERS_UNAVAILABLE;
     }
     requiredCount = 0;
-    requirement = datAffinityRecords[command - DAT_AFFINITY_FIRST_COMMAND].requirements;
+    requirement = datAffinityRecords[commandId - DAT_AFFINITY_FIRST_COMMAND].requirements;
     for (i = 0; i < 3; i++) {
         if (*requirement++ != -1) {
             requiredCount++;
@@ -416,9 +417,9 @@ BtlCommandAffinityPartnerAvailability btlHasRequiredCommandAffinityPartners(BtlU
     if (requiredCount < 2) {
         return BTL_COMMAND_AFFINITY_PARTNERS_UNAVAILABLE;
     }
-    if (!(datAffinityRecords[command - DAT_AFFINITY_FIRST_COMMAND].flags & 2) &&
+    if (!(datAffinityRecords[commandId - DAT_AFFINITY_FIRST_COMMAND].flags & 2) &&
         !(datBattleSceneRecords[battle->battleMode].flags & 1)) {
-        result = btlFindCommandPartnersByAffinity(unit, command, NULL, NULL);
+        result = btlFindCommandPartnersByAffinity(unit, commandId, NULL, NULL);
     } else {
         if (requiredCount == 3) {
             i = 1;

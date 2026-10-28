@@ -985,21 +985,21 @@ extern BtlTask *fldGetSceneGroupEntry(s32 entryIndex);
 extern s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, BtlUnit **first, BtlUnit **second);
 
 BtlCommandAffinityPartnerResolution btlResolveCommandAffinityPartners(
-    BtlUnit *unit, s32 command, BtlCommandPartnerOutput *output) {
+    BtlUnit *unit, BtlCommandId commandId, BtlCommandPartnerOutput *output) {
     BtlState *controller = (BtlState *)btlGetRuntime();
     const s32 *requirementCursor;
     u32 requiredCount;
     u32 i;
     BtlCommandAffinityPartnerResolution result;
 
-    if (datCommandSelectors[command].kind != 1) {
+    if (datCommandSelectors[commandId].kind != 1) {
         return BTL_COMMAND_AFFINITY_PARTNERS_UNRESOLVED;
     }
-    if ((u32)(command - DAT_AFFINITY_FIRST_COMMAND) >= 0x55) {
+    if ((u32)(commandId - DAT_AFFINITY_FIRST_COMMAND) >= 0x55) {
         return BTL_COMMAND_AFFINITY_PARTNERS_UNRESOLVED;
     }
     requiredCount = 0;
-    requirementCursor = datAffinityRecords[command - DAT_AFFINITY_FIRST_COMMAND].requirements;
+    requirementCursor = datAffinityRecords[commandId - DAT_AFFINITY_FIRST_COMMAND].requirements;
     for (i = 0; i < 3; i++) {
         if (*requirementCursor++ != -1) {
             requiredCount++;
@@ -1008,12 +1008,12 @@ BtlCommandAffinityPartnerResolution btlResolveCommandAffinityPartners(
     if (requiredCount == 0) {
         return BTL_COMMAND_AFFINITY_PARTNERS_UNRESOLVED;
     }
-    if ((datAffinityRecords[command - DAT_AFFINITY_FIRST_COMMAND].flags & 2) == 0 &&
+    if ((datAffinityRecords[commandId - DAT_AFFINITY_FIRST_COMMAND].flags & 2) == 0 &&
         (datBattleSceneRecords[controller->battleMode].flags & 1) == 0) {
-        output->commandId = command;
-        result = btlFindCommandPartnersByAffinity(unit, command, &output->firstPartner, &output->secondPartner);
+        output->commandId = commandId;
+        result = btlFindCommandPartnersByAffinity(unit, commandId, &output->firstPartner, &output->secondPartner);
     } else {
-        output->commandId = command;
+        output->commandId = commandId;
         output->firstPartner = NULL;
         output->secondPartner = NULL;
         if (requiredCount == 3) {
