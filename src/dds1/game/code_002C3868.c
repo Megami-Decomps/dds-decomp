@@ -6,6 +6,7 @@
 #include "sdf_counter_display.h"
 #include "sdf_counter_timer.h"
 #include "sdf_counter_runtime_api.h"
+#include "sdf_counter_selection_boundary_api.h"
 #include "dds3obj.h"
 #include "sdf_textured_rect.h"
 #include "sdf_chip.h"
@@ -423,8 +424,6 @@ extern s8 D_003BD280;
 extern void mnuClearListFlagsOneAndTwo(u32 *);
 extern void sdfCounterSetMode(s32);
 extern void sdfCounterStartTimerPositionTransition(s32 x, s32 y);
-extern s32 sdfCounterGetSelectionBoundaryFlags(void);
-extern void mnuSetMapTimerFlags(s32);
 
 /* Step the map selection, restore its starting channel, or confirm/cancel. */
 s32 sdfHandleMapCounterSelectionInput(void) {
@@ -619,16 +618,16 @@ void sdfCounterTickCountdown(void) {
 }
 
 /* Enabling a stopped timer starts it at one; disabling clears it. */
-void mnuSetMapTimerFlags(s32 mapTimerFlags) {
+void mnuSetMapTimerFlags(SdfCounterSelectionBoundaryFlags boundaryFlags) {
     SdfCounterTimer *timer = sdfActiveCounterRuntime->context;
-    if ((mapTimerFlags & 1) != 0) {
+    if ((boundaryFlags & SDF_COUNTER_SELECTION_HAS_PREVIOUS_ITEMS) != 0) {
         if (timer->mapTimerPrimary == 0) {
             timer->mapTimerPrimary = 1;
         }
     } else {
         timer->mapTimerPrimary = 0;
     }
-    if ((mapTimerFlags & 2) != 0) {
+    if ((boundaryFlags & SDF_COUNTER_SELECTION_HAS_FOLLOWING_ITEMS) != 0) {
         if (timer->mapTimerSecondary == 0) {
             timer->mapTimerSecondary = 1;
         }
@@ -701,16 +700,17 @@ void mnuDrawMapCounterTimerHints(void) {
 }
 
 
-s32 sdfCounterGetSelectionBoundaryFlags(void) {
-    struct MenuList *rt = sdfActiveCounterRuntime;
-    s32 count;
-    s32 done;
-    if (rt->count == 0) {
-        return 0;
+SdfCounterSelectionBoundaryFlags sdfCounterGetSelectionBoundaryFlags(void) {
+    struct MenuList *runtime = sdfActiveCounterRuntime;
+    s32 headIndex;
+    SdfCounterSelectionBoundaryFlags boundaryFlags;
+    if (runtime->count == 0) {
+        return SDF_COUNTER_SELECTION_BOUNDARY_NONE;
     }
-    count = rt->head->index;
-    done = count != 0;
-    return ((count + rt->visibleCount - 1) ^ rt->last->index) != 0 ? (done | 2) : done;
+    headIndex = runtime->head->index;
+    boundaryFlags = headIndex != 0;
+    return ((headIndex + runtime->visibleCount - 1) ^ runtime->last->index) != 0
+        ? (boundaryFlags | SDF_COUNTER_SELECTION_HAS_FOLLOWING_ITEMS) : boundaryFlags;
 }
 
 void sdfCounterStartTimerPositionTransition(s32 x, s32 y) {
