@@ -5484,7 +5484,7 @@ extern s32 evtFormatPolygonMoviePaths(s32 eventId, s32 sceneId, char *path0, cha
 extern s32 sdfFileCheckExist(const char *path);
 extern void evtFreeStage(void);
 
-s32 evtReloadEventViewer(EvtPolygonMovieResourceMode resourceMode, EvtRuntime *runtime) {
+EvtViewerReloadResult evtReloadEventViewer(EvtPolygonMovieResourceMode resourceMode, EvtRuntime *runtime) {
     char path0[0x80];
     char path1[0x80];
     char path2[0x80];
@@ -5511,11 +5511,11 @@ s32 evtReloadEventViewer(EvtPolygonMovieResourceMode resourceMode, EvtRuntime *r
     evtFormatPolygonMoviePaths(D_003BBE78, D_003BBE7A, path0, path1, path2);
     if (resourceMode == EVT_POLYGON_MOVIE_RESOURCE_MODE_SYNTHESIZE) {
         if (sdfFileCheckExist(path0) != 1) {
-            return 0;
+            return EVT_VIEWER_RELOAD_FAILED;
         }
     } else {
         if (sdfFileCheckExist(path0) != 1 || sdfFileCheckExist(path1) != 1) {
-            return 0;
+            return EVT_VIEWER_RELOAD_FAILED;
         }
     }
     evtEventViewerShutdown(runtime);
@@ -5529,9 +5529,9 @@ s32 evtReloadEventViewer(EvtPolygonMovieResourceMode resourceMode, EvtRuntime *r
     if (work != NULL) {
         runtime->windowContext = work;
         evtPopulateViewerTimelineFromMovie(work, runtime);
-        return 1;
+        return EVT_VIEWER_RELOAD_SUCCEEDED;
     }
-    return 0;
+    return EVT_VIEWER_RELOAD_FAILED;
 }
 
 s32 evtGetSoundIndex(s32 eventId, EvtSoundVariation variation) {
