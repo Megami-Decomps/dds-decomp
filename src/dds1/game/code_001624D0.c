@@ -14,6 +14,7 @@
 #include "evt_unit.h"
 #include "evt_unit_color_transition.h"
 #include "pcp_vu0.h"
+#include "eff_matrix4.h"
 #include "mdl.h"
 #include "bill_object_api.h"
 
@@ -347,7 +348,7 @@ dds3ModelHandle_t *dds3EffectPartModelCopy(dds3ModelHandle_t *source) {
 }
 
 /* Load a full source quadword into vf10 and store it as the primary vector. */
-void dds3EffectPartModelSetPosition(dds3ModelHandle_t *work, void *vector) {
+void dds3EffectPartModelSetPosition(dds3ModelHandle_t *work, const f32 vector[4]) {
     SDF_VU0_LOADVECTOR_BARRIER(vector);
     mdlSetPosition(work);
 }
@@ -363,7 +364,7 @@ void dds3EffectPartModelSetScale(dds3ModelHandle_t *work, f32 scalar) {
 }
 
 /* Load four source quadwords, then scatter only vf28-vf30 to the destination block. */
-void dds3EffectPartModelSetRotateMatrix(dds3ModelHandle_t *work, void *matrix) {
+void dds3EffectPartModelSetRotateMatrix(dds3ModelHandle_t *work, const Matrix4 *matrix) {
     void *firstVector;
     void *secondVector;
     void *thirdVector;
