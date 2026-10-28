@@ -8997,7 +8997,21 @@ void btlDrawTargetMarker(BtlUnit *unit, SceneAiWork *work, u32 index) {
 
 /* Step through the fixed 3x3 target-ID grid, skipping missing IDs; return whether the ID changed. */
 
-s32 btlStepTargetGridSelection(s32 direction, SceneAiWork *work) {
+typedef s32 BtlTargetGridDirection;
+typedef s32 BtlTargetGridSelectionChanged;
+
+enum {
+    BTL_TARGET_GRID_DIRECTION_STAY = 0,
+    BTL_TARGET_GRID_DIRECTION_UP = 1,
+    BTL_TARGET_GRID_DIRECTION_DOWN = 2,
+    BTL_TARGET_GRID_DIRECTION_LEFT = 3,
+    BTL_TARGET_GRID_DIRECTION_RIGHT = 4,
+    BTL_TARGET_GRID_SELECTION_UNCHANGED = 0,
+    BTL_TARGET_GRID_SELECTION_CHANGED = 1
+};
+
+BtlTargetGridSelectionChanged btlStepTargetGridSelection(BtlTargetGridDirection direction,
+                                                         SceneAiWork *work) {
     s32 ids[9] = {0x13E, 0xFFFF, 0x13D, 0x140, 0xFFFF, 0x13F, 0x141, 0x11B, 0x142};
     s32 count;
     s32 oldId;
@@ -9011,7 +9025,7 @@ s32 btlStepTargetGridSelection(s32 direction, SceneAiWork *work) {
 
     do {
         switch (direction) {
-        case 1: {
+        case BTL_TARGET_GRID_DIRECTION_UP: {
             if (work->cursor.position.row == 2 && work->cursor.position.column == 1) {
                 work->cursor.position.row = 0;
                 work->cursor.position.column = 0;
@@ -9022,7 +9036,7 @@ s32 btlStepTargetGridSelection(s32 direction, SceneAiWork *work) {
             }
             break;
         }
-        case 2: {
+        case BTL_TARGET_GRID_DIRECTION_DOWN: {
             if (work->cursor.position.row == 2 && work->cursor.position.column == 1) {
                 work->cursor.position.row = 0;
                 work->cursor.position.column = 2;
@@ -9033,7 +9047,7 @@ s32 btlStepTargetGridSelection(s32 direction, SceneAiWork *work) {
             }
             break;
         }
-        case 3:
+        case BTL_TARGET_GRID_DIRECTION_LEFT:
             work->cursor.position.column--;
             if ((s16)work->cursor.position.column < 0) {
                 work->cursor.position.column = 2;
@@ -9041,7 +9055,7 @@ s32 btlStepTargetGridSelection(s32 direction, SceneAiWork *work) {
                 if ((s16)work->cursor.position.row < 0) work->cursor.position.row = 2;
             }
             break;
-        case 4:
+        case BTL_TARGET_GRID_DIRECTION_RIGHT:
             work->cursor.position.column++;
             if ((s16)work->cursor.position.column >= 3) {
                 work->cursor.position.column = 0;
@@ -9066,13 +9080,14 @@ s32 btlStepTargetGridSelection(s32 direction, SceneAiWork *work) {
                 }
             }
             if (index < count) {
-                s32 changed = oldId != targetId;
+                BtlTargetGridSelectionChanged changed =
+                    (oldId != targetId) ? BTL_TARGET_GRID_SELECTION_CHANGED : BTL_TARGET_GRID_SELECTION_UNCHANGED;
                 work->entry = index;
                 return changed;
             }
         }
     } while (missing == 1);
-    return 0;
+    return BTL_TARGET_GRID_SELECTION_UNCHANGED;
 }
 
 extern s16 D_003BB494;
@@ -9183,7 +9198,7 @@ void btlUpdateTargetSelectionInput(BtlState *battle, SceneAiWork *work, s32 mode
     }
 
     if (battle->battleMode == 0x10E && selection != 0 && mode >= 4) {
-        if (btlStepTargetGridSelection(selection, work) != 0) {
+        if (btlStepTargetGridSelection(selection, work) != BTL_TARGET_GRID_SELECTION_UNCHANGED) {
             sndSetStationedSeVolume(1);
         }
     } else {
@@ -9359,7 +9374,8 @@ s32 btlUpdateTargetSelectionTask(dds3ProcessID_t *handle) {
 }
 
 
-extern s32 btlStepTargetGridSelection(s32, SceneAiWork *);
+extern BtlTargetGridSelectionChanged btlStepTargetGridSelection(
+    BtlTargetGridDirection, SceneAiWork *);
 
 SceneAiWork *btlCreateTargetSelectionWork(BtlTask *source) {
     SceneAiWork *work;
@@ -9430,7 +9446,7 @@ nextActor:
 selectTarget:
     work->cursor.position.row = 2;
     work->cursor.position.column = 1;
-    btlStepTargetGridSelection(0, work);
+    btlStepTargetGridSelection(BTL_TARGET_GRID_DIRECTION_STAY, work);
     btlClearIndexList(work->selectedTargets);
     btlAppendIndexListEntry(work->selectedTargets,
                             btlGetIndexListEntry(work->eligibleTargets, work->entry));
