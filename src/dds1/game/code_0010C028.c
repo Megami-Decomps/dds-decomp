@@ -2,6 +2,7 @@
 #include "kwln.h"
 #include "dat_state.h"
 #include "scr.h"
+#include "scr_process_task_owner_api.h"
 #include "scr_trace_result.h"
 #include "kwln_task_runner.h"
 
@@ -21,9 +22,9 @@ void *scrGetUserData(dds3ProcessID_t *task) {
 }
 
 void scrScriptShutdown(dds3ProcessID_t *task) {
-    scrProcessWork_s *previousContext;
+    ScrProcessTaskOwner previousContext;
 
-    previousContext = (scrProcessWork_s *)dds3GetProcessData(task);
+    previousContext = scrProcessTaskOwnerFromUserValue(dds3GetProcessData(task));
     if (previousContext != NULL) {
         scrProcDestroyTask(previousContext);
     }
@@ -35,7 +36,9 @@ void scrRunScript(scrProcessWork_s *context) {
 }
 
 KwlnTaskUpdateResult scrScriptProcess(dds3ProcessID_t *task) {
-    switch (scrTraceCode((scrProcessWork_s *)dds3GetProcessData(task))) {
+    ScrProcessTaskOwner context = scrProcessTaskOwnerFromUserValue(dds3GetProcessData(task));
+
+    switch (scrTraceCode(context)) {
     case 0:
         return KWLN_TASK_UPDATE_FINISH_CALLBACK;
     case SCR_TRACE_RESULT_FINISHED:

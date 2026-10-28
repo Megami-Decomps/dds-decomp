@@ -6,6 +6,7 @@
 #include "kwln_task_create.h"
 #include "sdf_resource.h"
 #include "scr.h"
+#include "scr_process_task_owner_api.h"
 #include "scr_procedure_start_api.h"
 #include "scr_instruction_stream_api.h"
 #include "scr_work_task_api.h"
@@ -35,12 +36,12 @@ scrProcessWork_s *scrLoadScriptFile(const char *path, ScrProcedureIndex procedur
     return process;
 }
 
-dds3ProcessID_t *scrStartScriptProcess(u32 priority, scrProcessWork_s *process)
+dds3ProcessID_t *scrStartScriptProcess(u32 priority, ScrProcessTaskOwner process)
 {
     dds3ProcessID_t *task;
     task = dds3StartProcess(process->procedures[process->procedureIndex].name,
                           priority, 1, 1, scrScriptProcess, scrScriptShutdown,
-                          (u32)process);
+                          scrProcessTaskOwnerToUserValue(process));
     process->task = task;
     return task;
 }
