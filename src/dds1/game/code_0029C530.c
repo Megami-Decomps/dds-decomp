@@ -11602,7 +11602,7 @@ u32 effPollPartResource(void) {
     u32 result = 0x400001;
 
     effPollResourceBankSlot(D_003B39C8, BTL_RESOURCE_SCAN_EP, &record);
-    state = record.state;
+    state = record.selectionStatus;
     if (state == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
     } else if (state == BTL_RESOURCE_SELECTION_ACCEPTED) {
@@ -11624,7 +11624,7 @@ u32 effPollNamedFileJob(void) {
     u32 result = 0x400001;
 
     effPollResourceBankSlot(D_003B39E0, BTL_RESOURCE_SCAN_EPL, &record);
-    state = record.state;
+    state = record.selectionStatus;
     if (state == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
     } else if (state == BTL_RESOURCE_SELECTION_ACCEPTED) {
@@ -12193,11 +12193,11 @@ void effPollResourceBankSlot(char *path, u32 flags, EffResourceBankSlot *selecti
         return;
     }
     btlUpdateAndDrawResourceBrowser(effResourceBankDescriptor);
-    selection->state = btlGetResourceBrowserSelectionStatus(effResourceBankDescriptor);
+    selection->selectionStatus = btlGetResourceBrowserSelectionStatus(effResourceBankDescriptor);
     selection->type = btlFormatSelectedResourceName(effResourceBankDescriptor, selection->fullName);
     selection->pathVariant = btlGetResourcePathVariant(effResourceBankDescriptor);
     btlTrimResourceName(effResourceBankDescriptor, selection->name);
-    if (selection->state == BTL_RESOURCE_SELECTION_ACCEPTED) {
+    if (selection->selectionStatus == BTL_RESOURCE_SELECTION_ACCEPTED) {
         btlDestroyResourceDescriptor(effResourceBankDescriptor);
         effResourceBankDescriptor = 0;
         btlDestroyEntryList(effResourceBankEntries);
@@ -13144,7 +13144,7 @@ s32 effPollFileRecord(char *path, s32 flags) {
     s32 result = 0x600001;
 
     effPollResourceBankSlot(path, flags, &record);
-    kind = record.state;
+    kind = record.selectionStatus;
     if (kind == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
     } else if (kind == BTL_RESOURCE_SELECTION_ACCEPTED) {
@@ -13240,7 +13240,7 @@ u32 fileLoadEffectSlotA(void) {
     u32 result;
 
     effPollResourceBankSlot(D_003B3B88, BTL_RESOURCE_SCAN_PB, &fileInfo);
-    status = fileInfo.state;
+    status = fileInfo.selectionStatus;
     result = 0x600001;
     if (status == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
@@ -13287,7 +13287,7 @@ u32 fileLoadEffectSlotHelp(void) {
     struct sdfMemHandle_t *allocation;
 
     effPollResourceBankSlot(D_003B3BA0, BTL_RESOURCE_SCAN_PB, &fileInfo);
-    status = fileInfo.state;
+    status = fileInfo.selectionStatus;
     result = 0x600001;
     if (status == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
@@ -13344,7 +13344,7 @@ u32 fileLoadEffectSlotB(void) {
     u32 result;
 
     effPollResourceBankSlot(D_003B3B88, BTL_RESOURCE_SCAN_PB, &fileInfo);
-    status = fileInfo.state;
+    status = fileInfo.selectionStatus;
     result = 0x600001;
     if (status == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
@@ -13405,7 +13405,7 @@ u32 effLoadFileSlotF2(void) {
     u32 result;
 
     effPollResourceBankSlot("/tool/effect/f2/", BTL_RESOURCE_SCAN_F2, &fileInfo);
-    status = fileInfo.state;
+    status = fileInfo.selectionStatus;
     result = 0x600001;
     if (status == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
@@ -13446,7 +13446,7 @@ u32 effLoadMaterialFile(void) {
     u32 result;
 
     effPollResourceBankSlot(D_003B3B88, BTL_RESOURCE_SCAN_P2A, &fileInfo);
-    status = fileInfo.state;
+    status = fileInfo.selectionStatus;
     result = 0x600001;
     if (status == BTL_RESOURCE_SELECTION_CANCELED) {
         result = 0x400000;
