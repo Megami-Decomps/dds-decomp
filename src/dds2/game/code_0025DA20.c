@@ -46,6 +46,7 @@
 #include "evt_task.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_flag_api.h"
+#include "pty_adjust_item_quantity_api.h"
 /* Declared before first use (were implicit int). */
 extern void fldDrawCameraColorLayerPass(void);
 extern void mnuSetScrollingStripOverlayPosition(DspScrollingStripState *state, s32 vertical, s32 horizontal, s32 unused);
@@ -3866,7 +3867,6 @@ u32 mnuCampRewardSelectionLeaveNoOp(void) {
     return 1;
 }
 
-extern void ptyAdjustItemQuantity(s32, s32);
 extern s32 mnuCampChooseWideRewardEntry(s32);
 extern u8 mnuCampGetWideRewardKind(s32, s32);
 extern u8 mnuCampGetCompactRewardKind(s32, s32);
@@ -4166,7 +4166,6 @@ extern char D_00437840[];
 extern void dspAdvanceMessageWindowControl();
 extern s32 mnuCampResolveProgressTierValue();
 extern void evtCopyEntryStringToActiveWindow(s32, const char *);
-extern void ptyAdjustItemQuantity();
 extern s32 evtIsLastSlot(s32);
 struct dds3ProcessID_t;
 

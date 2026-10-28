@@ -11,6 +11,7 @@
 #include "mnu_scroll_panel.h"
 #include "dat_state.h"
 #include "evt_item_value_threshold_api.h"
+#include "pty_adjust_item_quantity_api.h"
 
 typedef struct StaffDisplayContext StaffDisplayContext;
 extern void mnuCreateStaffItemWindow(StaffDisplayContext *);
@@ -382,7 +383,6 @@ s32 mnuStaffRunPanel2b(dds3ProcessID_t *request) {
 
 extern s32 btlItemApplyDirectEffect(MenuPageWindow *, u16, s32, datUnitWork_t *);
 extern u32 evtGetIndexedEventRecordId(s32);
-extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 extern void mnuUpdatePartyPanelPercentDisplays(s32);
 
 /* Use a field item: resolve its direct effect (or field-use skill) against the

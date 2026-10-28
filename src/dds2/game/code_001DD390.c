@@ -98,6 +98,7 @@
 #include "sdf_vu_matrix.h"
 #include "btl_unit_fade_task_args.h"
 #include "btl_unit_color_fade_args.h"
+#include "pty_adjust_item_quantity_api.h"
 
 /* SYSEFF metadata and runtime registrations share these indices. */
 enum {
@@ -1656,7 +1657,6 @@ typedef struct {
     s32 itemId;
 } BtlCommandItemWork;
 
-extern void ptyAdjustItemQuantity(s32, s32);
 
 extern void btlSyncModelFlagFromEventThresholds(void);
 

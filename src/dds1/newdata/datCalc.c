@@ -8,6 +8,7 @@
 #include "evt_item_value_threshold_api.h"
 #include "evt_random_status_clear_api.h"
 #include "pty_roster_value_record.h"
+#include "pty_adjust_item_quantity_api.h"
 #include "dat_state.h"
 #include "dat_currency_requirement_api.h"
 #include "dat_calculated_stat_value_api.h"
@@ -411,9 +412,6 @@ enum {
 };
 
 enum {
-    PTY_ITEM_FLAG_FIRST = 0x80,
-    PTY_ITEM_FLAG_COUNT = 0x20,
-    PTY_ITEM_MODEL_FLAG_BASE = 0x980,
     PTY_ITEM_MAX_QUANTITY = 99,
     PTY_ITEM_QUANTITY_LIMIT = 100,
     PTY_ITEM_SINGLE_MAX = 1,
@@ -448,7 +446,6 @@ extern EvtScriptContext evtWorkScriptContext;
 extern struct scrProcessWork_s *scrSetIntReturnValue(s32 retVal);
 extern struct scrProcessWork_s *scrSetFloatReturnValue(f32 value);
 extern datUnitWork_t *dds3FindEntry(DatUnitId unitId);
-extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 extern void ptyMergeStockSkills(datUnitWork_t *unit);
 extern u8 btlIsRuntimeAllocated(void);
 extern f32 btlGetEncounterAdjustmentScale(void);
@@ -457,7 +454,7 @@ extern void evtBitOn(s32 flagIndex);
 
 /* Flag-range items set their model flag regardless of quantityDelta.
  * Other items add the delta to their byte quantity and clamp it. */
-void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta) {
+void ptyAdjustItemQuantity(PtyItemId itemId, s32 quantityDelta) {
     s32 quantity;
 
     if ((u32)(itemId - PTY_ITEM_FLAG_FIRST) < PTY_ITEM_FLAG_COUNT) {
@@ -490,7 +487,7 @@ void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta) {
 
 /* Flag-range items test their model flag and ignore minimumQuantity.
  * Other items require at least the requested byte quantity. */
-EvtItemValueThresholdResult evtCheckValueThreshold(s32 itemId, s32 minimumQuantity) {
+EvtItemValueThresholdResult evtCheckValueThreshold(PtyItemId itemId, s32 minimumQuantity) {
     if ((u32)(itemId - PTY_ITEM_FLAG_FIRST) < PTY_ITEM_FLAG_COUNT) {
         return evtBitCheck(itemId + PTY_ITEM_MODEL_FLAG_BASE) != 0 ?
                 EVT_ITEM_VALUE_THRESHOLD_MET : EVT_ITEM_VALUE_THRESHOLD_NOT_MET;
@@ -502,7 +499,7 @@ EvtItemValueThresholdResult evtCheckValueThreshold(s32 itemId, s32 minimumQuanti
 }
 
 /* Flag-range items have one slot; every quantity range caps at 99. */
-u8 ptyIsInventoryItemAtCapacity(s32 itemId) {
+u8 ptyIsInventoryItemAtCapacity(PtyItemId itemId) {
     s32 quantity = DDS3_GBWK->inventory.counts[itemId];
 
     if (itemId >= 0xA0) {

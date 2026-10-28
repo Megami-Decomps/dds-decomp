@@ -22,6 +22,7 @@
 #include "kwln_task_lifecycle.h"
 #include "kwln_fade.h"
 #include "eff_event_draw.h"
+#include "pty_adjust_item_quantity_api.h"
 void dds3SetDistBlurPara(s32 filterCount, s32 size, s32 delaySpread, f32 angleStep,
                           f32 uvDisplacementAngleDegrees, f32 uvDisplacementAmplitude,
                           s32 gsAlphaControl);
@@ -948,7 +949,6 @@ ScrCommandResult scrCommandIsProcessControlFlagClear(void)
     return DDS3_GBWK->script.ints[SCR_PROCESS_CONTROL_FLAG_REGISTER] == 0;
 }
 
-extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 
 ScrCommandResult scrCommandAdjustItemQuantity(void)
 {

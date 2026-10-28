@@ -23,6 +23,7 @@
 #include "kwln_task_lifecycle.h"
 #include "brs_task_lifecycle_state.h"
 #include "prf_current_record_view.h"
+#include "pty_adjust_item_quantity_api.h"
 
 extern s32 evtStageTestPollModelRequest(void);
 
@@ -653,7 +654,6 @@ s8 brsTaskIsUiUpdateAllowed(BrsSkillPackageWork *work) {
 }
 
 
-extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 
 void gstApplyCounterDeltaTable(MenuIconRef *refs) {
     u32 i;

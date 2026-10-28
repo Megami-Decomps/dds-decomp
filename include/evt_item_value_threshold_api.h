@@ -1,7 +1,7 @@
 #ifndef EVT_ITEM_VALUE_THRESHOLD_API_H
 #define EVT_ITEM_VALUE_THRESHOLD_API_H
 
-#include "common.h"
+#include "pty_item_id.h"
 
 typedef u8 EvtItemValueThresholdResult;
 enum {
@@ -10,6 +10,6 @@ enum {
 };
 
 /* Flag items test their model flag and ignore minimumQuantity; others compare count against it. */
-EvtItemValueThresholdResult evtCheckValueThreshold(s32 itemId, s32 minimumQuantity);
+EvtItemValueThresholdResult evtCheckValueThreshold(PtyItemId itemId, s32 minimumQuantity);
 
 #endif /* EVT_ITEM_VALUE_THRESHOLD_API_H */

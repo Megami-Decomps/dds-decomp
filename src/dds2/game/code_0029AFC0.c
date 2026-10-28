@@ -10,6 +10,7 @@
 #include "mnu_result.h"
 #include "eff_random.h"
 #include "mdl_flag_api.h"
+#include "pty_adjust_item_quantity_api.h"
 
 
 
@@ -299,7 +300,6 @@ s32 mnuChooseWeightedItem(s32 rewardRowIndex) {
 
 extern s32 scrFindSlot(datUnitWork_t *, u16);
 extern s32 mnuStaffPickRollByMode(u32);
-extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 
 typedef struct StaffItemRow {
     u8 minLevel;

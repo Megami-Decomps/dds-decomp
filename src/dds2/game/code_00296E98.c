@@ -22,6 +22,7 @@
 #include "brs_task_poll_done_api.h"
 #include "kwln_task_lifecycle.h"
 #include "prf_current_record_view.h"
+#include "pty_adjust_item_quantity_api.h"
 
 
 extern u8 brsUiUpdateAllowed;
@@ -75,7 +76,6 @@ extern char D_00428368[];
 
 
 
-extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 
 extern char brsStaffInputTaskName[];
 

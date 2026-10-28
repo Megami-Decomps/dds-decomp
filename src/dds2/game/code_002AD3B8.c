@@ -17,6 +17,7 @@
 #include "pty_record_slot_value_api.h"
 #include "dat_command.h"
 #include "mdl_flag_api.h"
+#include "pty_adjust_item_quantity_api.h"
 
 /* Staff callbacks receive a task handle as an integer word. Preserve the
  * native parameter widths and the short-arity task-user-value calls. */
@@ -53,7 +54,6 @@ extern u8 *datUnitNames;
 extern u16 mnuGetPartyEntryMenuValue(datUnitWork_t *);
 extern DatAssignedItemId mnuGetPartyEntryCurrentId(datUnitWork_t *);
 extern void evtCopyEntryStringToActiveWindow(s32, const char *);
-extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 extern void mnuRefreshStaffWindowDescription();
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);
 extern MenuPopupEntry mnuCampAmmoEquipmentPopupEntry[];

@@ -97,6 +97,7 @@
 #include "mdl_flag_api.h"
 #include "dds3_world_counter.h"
 #include "sdf_vu_matrix.h"
+#include "pty_adjust_item_quantity_api.h"
 
 /* SYSEFF metadata and runtime registrations share these indices. */
 enum { BTL_SELECTED_UNIT_EFFECT_SOUND_SLOT = 0x26 };
@@ -1578,7 +1579,6 @@ BtlRuntimeTask *btlCreateActorSoundOptionTask(BtlUnit *actor, s32 option) {
     return task;
 }
 
-extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 
 /* Consume one item when its table flag 4 is set, then signal task completion. */
 typedef struct {

@@ -9,6 +9,7 @@
 #include "kwln.h"
 #include "dat_state.h"
 #include "mdl_flag_api.h"
+#include "pty_adjust_item_quantity_api.h"
 
 /* Legacy staff callbacks retain their word-address interfaces; the exit
  * callback forwards its task pointer to the task-user-value provider. */
@@ -378,7 +379,6 @@ s32 mnuReleaseStaffValuePageResources(dds3ProcessID_t *task) {
 
 extern u16 mnuGetPartyEntryMenuValue(datUnitWork_t *);
 extern void evtCopyEntryStringToActiveWindow(s32, const char *);
-extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 extern u8 *D_003BAA70;
 extern u8 *D_003BAA84;
 

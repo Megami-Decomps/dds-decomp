@@ -46,6 +46,7 @@
 #include "mdl_world_object_source_vector_api.h"
 #include "dds3_world_counter.h"
 #include "fld_index_pair.h"
+#include "pty_adjust_item_quantity_api.h"
 /* Declared before first use (were implicit int). */
 extern void dds3AdminiCallSequence(s32 requestedMode, const void *requestData, u32 dataBytes, s32 markHistory);
 extern void fldMarkStageExplorationBitmapRegion(s32, s32, s32, s32, s32, s32);
@@ -55,7 +56,6 @@ extern void fldMarkStageExplorationBitmapRegion(s32, s32, s32, s32, s32, s32);
 
 extern struct dds3Basic_t *fldPlayerObject;
 extern s32 D_003897C0[];
-extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 extern void datAddCurrencyClamped(s32 delta);
 extern void scrDestroyAllNamedProcesses(void);
 extern void evtSubmitEventRequestImmediate(s32 eventId);

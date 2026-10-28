@@ -71,6 +71,7 @@
 #include "sdf_quaternion.h"
 #include "sdf_gs_packet.h"
 #include "fpu.h"
+#include "pty_adjust_item_quantity_api.h"
 
 /* DDS2 stores the linked model-cache head in the word at battle-work +0x264.
  * Keep the surrounding state opaque while describing this proven field. */
@@ -198,7 +199,6 @@ extern u8 btlScriptGroupSlotByte1View[];
 extern u16 btlScriptGroupSlotAuxValueView[];
 
 
-extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 
 extern BtlRuntimeFadeStepResult btlDrawCapturedScreenTileOverlay(u32, u32);
 

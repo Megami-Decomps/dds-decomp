@@ -14,6 +14,7 @@
 #include "mnu_scroll_panel.h"
 #include "mdl_flag_api.h"
 #include "evt_item_value_threshold_api.h"
+#include "pty_adjust_item_quantity_api.h"
 
 
 
@@ -662,7 +663,6 @@ s32 mnuFinishStaffReturnPopup(dds3ProcessID_t *callback) {
 }
 
 extern u32 evtGetIndexedEventRecordId(s32);
-extern void ptyAdjustItemQuantity(s32 itemId, s32 quantityDelta);
 
 
 s32 mnuUseStaffItem(s32 itemId, MenuStaffContext *context) {
