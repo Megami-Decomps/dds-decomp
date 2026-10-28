@@ -34,7 +34,6 @@ extern void itfSetTextDrawLimit(s32 limit);
 extern void mnuResetWorkFloats(void);
 /* Original-style implicit int, kept: matched code depends on it: mnuSetStaffDisplayMode. */
 extern void mnuSetWindowResource(s32, MenuPageWindow *, s32, s32);
-extern void mnuAttachPartyIconBundle(s32, MenuPageWindow *, u32);
 extern MenuProfilePanel *mnuCreateProfilePanel(datUnitWork_t *selectionState);
 extern void mnuCacheProfilePanelGridPositions(MenuProfilePanel *, u32, u32, u32, u32);
 extern void mnuFreeProfilePanelWork(MenuProfilePanel *);
@@ -954,7 +953,7 @@ s32 mnuInitializeStaffPartyScene(dds3ProcessID_t *task) {
     mnuStoreScrollPanelSelectionAndGridPosition((struct MenuScrollPanel *)context->display,
                                                context->staffVariant, 0x3D, 1);
     mnuSetWindowResource(index, page, (s32)context->staffVariant, context->staffParam);
-    mnuAttachPartyIconBundle(index, page, (s32)context->staffVariant);
+    mnuAttachPartyIconBundle(index, page, context->staffVariant);
     context->sceneGroup = mnuCreatePanelGroup(context->staffVariant);
     context->sprite = mnuCreateSpriteState((EffectSlotSet *)context->option,
                                         (EffectSlotSet *)context->unk68,

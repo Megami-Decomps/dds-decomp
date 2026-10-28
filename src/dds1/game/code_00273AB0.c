@@ -95,7 +95,6 @@ extern MnuStaffBulletListRefreshResult mnuRefreshStaffBulletItemList(
 extern void mnuSelectPage(MenuPageWindow *, s32);
 extern void mnuCreateStaffBulletItemWindow(struct StaffDisplayContext *context);
 extern void mnuSetWindowResource(s32, MenuPageWindow *, s32, s32);
-extern void mnuAttachPartyIconBundle(s32, MenuPageWindow *, u32);
 extern void mnuConfigurePartyPanelPage(MenuPageWindow *, s32, s32, s32);
 extern void mnuReleaseStaffExtraWindow(struct StaffDisplayContext *context);
 extern void mnuClearEntries(MenuPageWindow *);
@@ -348,7 +347,7 @@ s32 mnuInitializeStaffValuePage(dds3ProcessID_t *task) {
                          ((StaffImageContext *)context)->spriteScene,
                          ((StaffImageContext *)context)->windowParam);
     mnuAttachPartyIconBundle(index, &((StaffImageContext *)context)->pageWindow,
-                             ((StaffImageContext *)context)->spriteScene);
+                             (struct EffectSlotSet *)(u32)((StaffImageContext *)context)->spriteScene);
     ((StaffImageContext *)context)->panelHandle =
         mnuCreatePanelGroup((struct EffectSlotSet *)(u32)((StaffImageContext *)context)->spriteScene);
     ((StaffImageContext *)context)->spriteHandle =

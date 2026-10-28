@@ -1111,7 +1111,6 @@ extern void mnuResetPartyPanelFade(MenuPageWindow *window, s32 index, s32 unused
 extern void mnuSetWindowResource(s32 index, MenuPageWindow *window, s32 resource,
                                  s32 option);
 extern void mnuSetPageParams(MenuSprites *sprites, s32 mode);
-extern void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *window, u32 resource);
 extern void p2sdStopSe(u32 sequence);
 
 void brsSelectNextUnit(BrsSkillPackageWork *work, s32 selectLevelUp) {
@@ -1134,7 +1133,7 @@ void brsSelectNextUnit(BrsSkillPackageWork *work, s32 selectLevelUp) {
         mnuSetWindowResource(page, window, (s32)work->staffSlots.pairResources[0],
                              (s32)work->staffSlots.pairResources[1]);
         mnuSetPageParams(work->partyWindow.slots[page].windowSprites, 2);
-        mnuAttachPartyIconBundle(page, window, (u32)work->staffSlots.pairResources[0]);
+        mnuAttachPartyIconBundle(page, window, work->staffSlots.pairResources[0]);
 
         work->partyWindow.slots[page].iconBundle->fade = 0x100;
         window->flags |= 0x400;

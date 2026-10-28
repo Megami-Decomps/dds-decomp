@@ -91,7 +91,7 @@ extern void mnuRebuildPartySlotResources(MenuPageWindow *, s32, s32);
 
 
 
-extern MenuIconBundle *mnuCreateFadeSpriteResourceSet(u32);
+extern MenuIconBundle *mnuCreateFadeSpriteResourceSet(EffectSlotSet *resource);
 
 
 extern struct MenuWindowSpriteGroup *mnuCreateWindowState(u32, u32, u32, u32);
@@ -1614,21 +1614,21 @@ void mnuClearEntries(MenuPageWindow *menu) {
     menu->flags &= ~0x100;
 }
 
-MenuIconBundle *mnuCreateFadeSpriteResourceSet(u32 resource) {
+MenuIconBundle *mnuCreateFadeSpriteResourceSet(EffectSlotSet *resource) {
     MenuIconBundle *item = (MenuIconBundle *)sdfChipAllocDirect(sizeof(MenuIconBundle));
     EffectSlotSet *sprite;
 
     memset(item, 0, 0x24);
-    sprite = effCreateResourceSlotSet((EffectSlotSet *)resource, 0x1F, 1);
+    sprite = effCreateResourceSlotSet(resource, 0x1F, 1);
     item->sprite[0] = sprite;
     itfSetGridEntryQuantizedAndRefresh(sprite, 0, 0, 0x40, 0, 0);
-    sprite = effCreateResourceSlotSet((EffectSlotSet *)resource, 0x1E, 1);
+    sprite = effCreateResourceSlotSet(resource, 0x1E, 1);
     item->sprite[1] = sprite;
     itfSetGridEntryQuantizedAndRefresh(sprite, 0, 0x5E0, -0x20, 0, 0);
-    sprite = effCreateResourceSlotSet((EffectSlotSet *)resource, 7, 1);
+    sprite = effCreateResourceSlotSet(resource, 7, 1);
     item->sprite[2] = sprite;
     itfSetGridEntryQuantizedAndRefresh(sprite, 0, 0x5E0, -0x18, 0, 0);
-    sprite = effCreateResourceSlotSet((EffectSlotSet *)resource, 0x1D, 1);
+    sprite = effCreateResourceSlotSet(resource, 0x1D, 1);
     item->sprite[3] = sprite;
     itfSetGridEntryQuantizedAndRefresh(sprite, 0, 0xB40, 0x40, 0, 0);
     return item;
@@ -1678,7 +1678,8 @@ void mnuDrawAndUpdateFadingSprites(s32 x, s32 y, s32 z, s32 unused, MenuIconBund
 }
 
 
-void mnuAttachPartyIconBundle(s32 slotIndex, MenuPageWindow *window, u32 resource) {
+void mnuAttachPartyIconBundle(s32 slotIndex, MenuPageWindow *window,
+                              EffectSlotSet *resource) {
     MenuIconBundle *sprites;
 
     sprites = mnuCreateFadeSpriteResourceSet(resource);

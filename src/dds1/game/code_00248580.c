@@ -76,7 +76,6 @@ extern s8 D_003BC3E1;
 
 
 extern void mnuSetWindowResource(s32, MenuPageWindow *, s32, s32);
-extern void mnuAttachPartyIconBundle(s32, MenuPageWindow *, u32);
 extern MenuProfilePanel *mnuCreateProfilePanel(datUnitWork_t *selectionState);
 extern void mnuCacheProfilePanelGridPositions(MenuProfilePanel *, u32, u32, u32, u32);
 extern void mnuFreeProfilePanelWork(MenuProfilePanel *);
@@ -713,7 +712,7 @@ void mnuSetupStaffMenuProfilePage(datUnitWork_t *source, MenuProgressHost *work)
     mnuSeekListNode(mnuFindMatchingPartyEntryIndex(source), work->partyWindow.lists[0]);
     index = work->partyWindow.lists[0]->cursor->index;
     mnuSetWindowResource(index, window, (s32)work->staffSlots.pairResources[0], (s32)work->staffSlots.pairResources[1]);
-    mnuAttachPartyIconBundle(index, window, (u32)work->staffSlots.pairResources[0]);
+    mnuAttachPartyIconBundle(index, window, work->staffSlots.pairResources[0]);
     work->panelGroup = mnuCreatePanelGroup(work->staffSlots.pairResources[0]);
     work->effectResource = mnuAllocateSimpleSprite(
         work->staffSlots.baseResources[5],

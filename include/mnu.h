@@ -591,9 +591,9 @@ typedef struct MenuPageWindow {
 
 #ifdef VERSION_DDS2
 MenuIconBundle *mnuCreateIconBundle(struct EffectSlotSet *resource);
+#endif
 void mnuAttachPartyIconBundle(s32 index, MenuPageWindow *window,
                               struct EffectSlotSet *resource);
-#endif
 
 #ifdef VERSION_DDS2
 /* Marks the window-sprite mode toggled by page setup and entry resets. */
