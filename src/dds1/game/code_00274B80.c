@@ -84,6 +84,10 @@ extern char D_003BC700[];
 #define MNU_STAFF_REORDER_INPUT_MASK 0x37
 #define MNU_STAFF_REORDER_CANCEL_MASK 6
 
+enum {
+    MNU_PARTY_SELECTION_MEMBER_ROW = 0,
+    MNU_PARTY_SELECTION_CONFIRM_ROW = 1,
+};
 
 
 
@@ -235,7 +239,7 @@ void mnuDrawPartySelectionListEntry(s32 x, s32 y, s32 z, struct MenuList *list, 
     s32 posX;
 
     switch (mnuIsFinalItemIndex(node->index, list)) {
-    case 0:
+    case MNU_PARTY_SELECTION_MEMBER_ROW:
         posX = x + 0x640;
         y += 0x30;
         if (list->cursor == node) {
@@ -249,7 +253,7 @@ void mnuDrawPartySelectionListEntry(s32 x, s32 y, s32 z, struct MenuList *list, 
         frFontDrawGlyphChain(glyph, 1, 0x53);
         frDestroyFontRequestAfter(glyph);
         break;
-    case 1:
+    case MNU_PARTY_SELECTION_CONFIRM_ROW:
         if (list->cursor == node) {
             itfDrawGridWithResolvedSlot(x + 0x130, y, 0, 0, (EffectSlotSet *)context->panelResource, 7, 0x53);
         } else {
@@ -519,7 +523,7 @@ s32 mnuHandlePartySelectionInput(s32 callback) {
         mnuClearWindowPanelTransitionFlag(window);
         if (inputFlags & 1) {
             switch (mnuIsFinalItemIndex(window->list->cursor->index, window->list)) {
-            case 0:
+            case MNU_PARTY_SELECTION_MEMBER_ROW:
                 if ((u16)(menuWork->current[entryIndex].flags & 1) != 0) {
                     window->list->cursor->flags48 |= 1;
                     mnuTransferPartyEntryToSelection(entryIndex, CAMP_PARTY_TRANSFER_FRONTLINE, 0, context);
@@ -527,7 +531,7 @@ s32 mnuHandlePartySelectionInput(s32 callback) {
                     inputFlags = 0x8000;
                 }
                 break;
-            case 1:
+            case MNU_PARTY_SELECTION_CONFIRM_ROW:
                 if (menuWork->selection > 0) {
                     mnuPreparePartyPanelTransition(context);
                 } else {
