@@ -4827,19 +4827,19 @@ void btlStartGunFinishLoad(GunLoadArgs *taskArgs) {
     unit->gunResourceFlags = (unit->gunResourceFlags | 4) & ~8;
 }
 
-u32 btlPollGunLoad(GunLoadArgs *loadArgs) {
+BtlTaskPollResult btlPollGunLoad(GunLoadArgs *loadArgs) {
     BtlUnit *unit = loadArgs->unit;
     if (loadArgs->request == NULL) {
-        return 1;
+        return BTL_TASK_POLL_END_DELAY;
     }
     if (pacFileCheckEnd(loadArgs->request) == 0) {
-        return 0;
+        return BTL_TASK_POLL_CONTINUE;
     }
     btlBossDebugPrintf("btl:gun & finish load end[%p]\n", loadArgs->request);
     unit->gunResource = (void *)sdfMemLock(fileGetMemHandle(loadArgs->request));
     fileRequestFreeIfComplete(loadArgs->request);
     unit->gunResourceFlags = (unit->gunResourceFlags & ~4) | 8;
-    return 1;
+    return BTL_TASK_POLL_END_DELAY;
 }
 
 BtlRuntimeTask *btlCreateGunLoadPollTask(BtlUnit *unit) {
