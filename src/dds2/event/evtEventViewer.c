@@ -1786,7 +1786,7 @@ void evtStepPolygonMovieConditionalKeys(EvtRuntimeGroup *track, s32 time) {
 }
 
 extern void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer);
-extern void evtViewerSyncWorldGroups(u32 position, EvtRuntime *viewer);
+extern void evtViewerSyncWorldGroups(s32 position, EvtRuntime *viewer);
 extern void evtViewerApplyGlyphLodChannel(s32 position, EvtRuntime *viewer);
 extern void evtEventViewerAttachIndexedObject(s32 position, EvtRuntime *viewer);
 extern void evtViewerActivateWindowForGlyphEntry(s32 position, EvtRuntime *viewer);
@@ -2168,7 +2168,7 @@ void evtViewerSyncModelMotionChannels(s32 frame, dds3Basic_t *object, EvtRuntime
 
 /* Updates world units at position using the first track whose owner word
  * matches that unit's object-chain node. */
-void evtViewerSyncWorldGroups(u32 position, EvtRuntime *viewer) {
+void evtViewerSyncWorldGroups(s32 position, EvtRuntime *viewer) {
     dds3Basic_t *unitObject;
     EvtRuntimeGroup *node;
     EvtRuntimeGroup *found;
