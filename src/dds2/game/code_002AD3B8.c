@@ -561,7 +561,7 @@ s32 mnuUpdateStaffPartySelectionState(dds3ProcessID_t *task) {
     MenuStaffChoices *menu = (MenuStaffChoices *)context->menu;
     s32 *popup = &context->popupState;
     MenuWindowContainer *window;
-    s32 buttons = mnuMapPadMaskToFlags(0xC33);
+    MnuInputActionFlags buttons = mnuMapPadMaskToFlags(0xC33);
     s32 state;
     s32 input;
     datUnitWork_t *party =
@@ -590,7 +590,7 @@ s32 mnuUpdateStaffPartySelectionState(dds3ProcessID_t *task) {
             if (buttons & MNU_STAFF_INPUT_NEXT_ROW) {
                 mnuAdvanceWindowListSelection(window);
             }
-            mnuHandlePanelListPageJumpInput(window, (u32 *)&buttons);
+            mnuHandlePanelListPageJumpInput(window, &buttons);
             mnuClearWindowPanelTransitionFlag(window);
             input = buttons;
 
@@ -831,7 +831,7 @@ s32 mnuHandleStaffSelectionPageInput(dds3ProcessID_t *task) {
     MenuStaffChoices *menu = (MenuStaffChoices *)context->menu;
     MenuWindowContainer *window;
     datUnitWork_t *party;
-    s32 buttons = mnuMapPadMaskToFlags(0xC33);
+    MnuInputActionFlags buttons = mnuMapPadMaskToFlags(0xC33);
     s32 result;
     s32 eligible;
     s32 selectionId;
@@ -860,7 +860,7 @@ s32 mnuHandleStaffSelectionPageInput(dds3ProcessID_t *task) {
             if (buttons & MNU_STAFF_INPUT_NEXT_ROW) {
                 mnuAdvanceWindowListSelection(window);
             }
-            mnuHandlePanelListPageJumpInput(window, (u32 *)&buttons);
+            mnuHandlePanelListPageJumpInput(window, &buttons);
             mnuClearWindowPanelTransitionFlag(window);
 
             if (buttons & MNU_STAFF_INPUT_CONFIRM) {
