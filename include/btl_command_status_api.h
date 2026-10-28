@@ -2,6 +2,7 @@
 #define BTL_COMMAND_STATUS_API_H
 
 #include "btl_action_press_result.h"
+#include "btl_command_id.h"
 
 struct BtlUnit;
 
@@ -11,11 +12,11 @@ typedef u32 BtlPartyStatusMask;
 /* Status bits the command adds to the target's party record. */
 #if defined(VERSION_DDS1)
 BtlPartyStatusMask btlGetCommandAddedStatus(
-    struct BtlUnit *attacker, struct BtlUnit *target, s32 command,
+    struct BtlUnit *attacker, struct BtlUnit *target, BtlCommandId commandId,
     BtlActionPressResult pressResult, s32 mode);
 #elif defined(VERSION_DDS2)
 BtlPartyStatusMask btlGetCommandAddedStatus(
-    struct BtlUnit *attacker, struct BtlUnit *target, u32 command,
+    struct BtlUnit *attacker, struct BtlUnit *target, BtlCommandId commandId,
     BtlActionPressResult pressResult, s32 mode);
 #else
 #error "btl_command_status_api.h requires a DDS title version"
@@ -23,7 +24,7 @@ BtlPartyStatusMask btlGetCommandAddedStatus(
 
 /* Status bits to clear from the target's party record. */
 BtlPartyStatusMask btlQueryUnitChannelFlags(
-    struct BtlUnit *source, struct BtlUnit *target, s32 command,
+    struct BtlUnit *source, struct BtlUnit *target, BtlCommandId commandId,
     BtlActionPressResult pressResult, s32 kind);
 
 #endif /* BTL_COMMAND_STATUS_API_H */

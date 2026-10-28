@@ -130,7 +130,7 @@ extern u32 sdfQueryChannelValue(s32, datUnitWork_t *, datUnitWork_t *);
 #include "sdf_debug_api.h"
 
 BtlPartyStatusMask btlGetCommandAddedStatus(
-    BtlUnit *attacker, BtlUnit *defender, s32 command,
+    BtlUnit *attacker, BtlUnit *defender, BtlCommandId commandId,
     BtlActionPressResult pressResult, s32 mode) {
     datUnitWork_t *record;
     BtlPartyStatusMask value;
@@ -139,7 +139,7 @@ BtlPartyStatusMask btlGetCommandAddedStatus(
     if (((BtlState *)btlGetRuntime())->runtimeFlags & 0x80) {
         return 0;
     }
-    if (datCommandRecords[command].effectType != 2) {
+    if (datCommandRecords[commandId].effectType != 2) {
         if (mode != 1) {
             return 0;
         }
@@ -147,7 +147,7 @@ BtlPartyStatusMask btlGetCommandAddedStatus(
         return 0;
     }
     record = &attacker->partyRecord;
-    value = sdfQueryChannelValue(command, record, &defender->partyRecord);
+    value = sdfQueryChannelValue(commandId, record, &defender->partyRecord);
     if ((value & 0x8000) && !(defender->status.flags & 0x1000)) {
         value &= ~0x8000;
     }
@@ -162,10 +162,10 @@ BtlPartyStatusMask btlGetCommandAddedStatus(
             return 0x800;
         }
     }
-    if (datCommandRecords[command].unk30 == 4 && (defender->partyRecord.status & 0x7FFF) == 8) {
+    if (datCommandRecords[commandId].unk30 == 4 && (defender->partyRecord.status & 0x7FFF) == 8) {
         return value;
     }
-    if (value != 0 && !(datCommandRecords[command].options & 1)) {
+    if (value != 0 && !(datCommandRecords[commandId].options & 1)) {
         guard = btlFlagToElementIndex(value);
         if (btlHasMappedSpecialAbilityForSlot(defender, guard) || btlHasSpecialAbilityWhenArgumentUnset(defender, guard) ||
             btlHasEnabledSpecialAbilityForSlot(defender, guard)) {
@@ -180,13 +180,13 @@ BtlPartyStatusMask btlGetCommandAddedStatus(
 }
 
 BtlPartyStatusMask btlQueryUnitChannelFlags(
-    BtlUnit *source, BtlUnit *recipient, s32 command,
+    BtlUnit *source, BtlUnit *recipient, BtlCommandId commandId,
     BtlActionPressResult pressResult, s32 kind) {
     BtlPartyStatusMask flags;
     if (kind != 1) {
         return 0;
     }
-    flags = sdfQueryChannelBits(command, &source->partyRecord, &recipient->partyRecord);
+    flags = sdfQueryChannelBits(commandId, &source->partyRecord, &recipient->partyRecord);
     if ((recipient->partyRecord.status & 8) != 0 && pressResult == BTL_ACTION_PRESS_RESULT_CRITICAL) {
         flags |= 8;
     }

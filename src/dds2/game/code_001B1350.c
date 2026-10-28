@@ -90,7 +90,7 @@ s32 btlFlagToElementIndex(s32 flag);
 s32 btlGetAbilityAttributeMultiplierPercent(BtlUnit *actor, s32 attr);
 
 BtlPartyStatusMask btlGetCommandAddedStatus(
-    BtlUnit *attacker, BtlUnit *defender, u32 command,
+    BtlUnit *attacker, BtlUnit *defender, BtlCommandId commandId,
     BtlActionPressResult pressResult, s32 mode) {
     u32 guardMask;
     s32 guardAbility;
@@ -101,7 +101,7 @@ BtlPartyStatusMask btlGetCommandAddedStatus(
     }
     guardAbility = -1;
     guardMask = 0;
-    if (datCommandRecords[command].effectType != 2) {
+    if (datCommandRecords[commandId].effectType != 2) {
         if (mode != 1) {
             return 0;
         }
@@ -109,12 +109,13 @@ BtlPartyStatusMask btlGetCommandAddedStatus(
         return 0;
     }
 
-    result = sdfQueryChannelValue(command, &attacker->partyRecord,
+    result = sdfQueryChannelValue(commandId, &attacker->partyRecord,
                                  &defender->partyRecord);
     if ((result & 0x8000) && !(defender->status.flags & 0x1000)) {
         result &= ~0x8000;
     }
-    switch (command) {
+    /* Preserve DDS2's native unsigned command selector comparison. */
+    switch ((u32)commandId) {
     case 0x94:
         guardMask = 0x20;
         guardAbility = 0x22A;
@@ -138,7 +139,7 @@ BtlPartyStatusMask btlGetCommandAddedStatus(
             result = 0;
         }
     }
-    switch (datCommandRecords[command].unk30) {
+    switch (datCommandRecords[commandId].unk30) {
     case 4:
         if ((defender->partyRecord.status & 0x7FFF) == 8) {
             return result;
@@ -149,7 +150,7 @@ BtlPartyStatusMask btlGetCommandAddedStatus(
         return result;
     }
 
-    if (result != 0 && !(datCommandRecords[command].options & 1)) {
+    if (result != 0 && !(datCommandRecords[commandId].options & 1)) {
         s32 element = btlFlagToElementIndex(result);
         if (btlHasMappedSpecialAbilityForSlot(defender, element) != 0 ||
             btlHasSpecialAbility274(defender, element) != 0 ||
@@ -168,13 +169,13 @@ BtlPartyStatusMask btlGetCommandAddedStatus(
 }
 
 BtlPartyStatusMask btlQueryUnitChannelFlags(
-    BtlUnit *source, BtlUnit *recipient, s32 command,
+    BtlUnit *source, BtlUnit *recipient, BtlCommandId commandId,
     BtlActionPressResult pressResult, s32 kind) {
     BtlPartyStatusMask flags;
     if (kind != 1) {
         return 0;
     }
-    flags = sdfQueryChannelBits(command, &source->partyRecord, &recipient->partyRecord);
+    flags = sdfQueryChannelBits(commandId, &source->partyRecord, &recipient->partyRecord);
     if ((recipient->partyRecord.status & 8) != 0 && pressResult == BTL_ACTION_PRESS_RESULT_CRITICAL) {
         flags |= 8;
     }
