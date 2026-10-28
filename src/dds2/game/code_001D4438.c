@@ -1932,7 +1932,7 @@ BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(const void *sourceParams, u3
 s32 btlGetActionDefaultOrOverride(s32 skillIndex);
 BtlRuntimeTask *sndCreateAcquireTask(s32 value, s32 option);
 BtlRuntimeTask *btlCreateLinkageFormationTask(ActionStateLink *link,
-        BtlUnit *firstActor, BtlUnit *secondActor, u32 skillId, u32 flags);
+        BtlUnit *firstActor, BtlUnit *secondActor, BtlCommandId commandId, u32 flags);
 BtlRuntimeTask *btlCreateCommandSoundWithArguments(ActionStateLink *, BtlUnit *, BtlUnit *, BtlCameraModeIndex cameraMode, BtlActionCode actionCode);
 s32 sndLookupResourceType(BtlUnit *actor, s32 resourceIndex);
 BtlRuntimeTask *sndCreateActorEffectTask(SoundResourceNode *source,

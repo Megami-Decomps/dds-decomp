@@ -22,6 +22,7 @@
 #include "sdf_texture_offset_list.h"
 #include "btl_model_record.h"
 #include "btl_command.h"
+#include "btl_command_id.h"
 #include "btl_state.h"
 #include "btl_task_args.h"
 #include "btl_sound.h"
@@ -1263,7 +1264,7 @@ typedef struct BtlFormationTaskArgs {
     ActionStateLink *actor;
     BtlUnit *first;
     BtlUnit *second;
-    u32 commandId;
+    BtlCommandId commandId;
     u32 flags;
 } BtlFormationTaskArgs;
 
@@ -1335,9 +1336,10 @@ s32 btlApplyLinkageFormation(BtlFormationTaskArgs *args) {
     return 1;
 }
 
-/* Package the action, two companion addresses, skill and flags for formation. */
+/* Package the action, two companion addresses, command ID and flags for formation. */
 BtlRuntimeTask *btlCreateLinkageFormationTask(ActionStateLink *link, BtlUnit *firstActor,
-                                              BtlUnit *secondActor, u32 skillId, u32 flags) {
+                                              BtlUnit *secondActor, BtlCommandId commandId,
+                                              u32 flags) {
     BtlRuntimeTask *task = btlAllocTask(20);
     BtlFormationTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
@@ -1350,7 +1352,7 @@ BtlRuntimeTask *btlCreateLinkageFormationTask(ActionStateLink *link, BtlUnit *fi
     args->actor = link;
     args->first = firstActor;
     args->second = secondActor;
-    args->commandId = skillId;
+    args->commandId = commandId;
     args->flags = flags;
     return task;
 }
