@@ -9,6 +9,7 @@
 #include "eff_resource_records.h"
 #include "eff_resource_list.h"
 #include "common.h"
+#include "evt_stage_test_resource_work_result.h"
 #include "dds3_admin_control_api.h"
 #include "staff_grid_label_row.h"
 #include "kwln_task_add_child.h"
@@ -881,7 +882,7 @@ s32 mnuDrawAndStepStaffGradientFade(dds3ProcessID_t *task) {
 }
 
 
-extern s32 evtStageTestAdvanceResourceWork(void);
+extern EvtStageTestResourceWorkResult evtStageTestAdvanceResourceWork(void);
 
 extern s32 checkConfigState(void);
 
@@ -901,7 +902,7 @@ s32 mnuStaffCampCancelCheck(dds3ProcessID_t *task) {
     result = 0;
     if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
         if (mappedButtons & MNU_CAMP_CANCEL_MASK) {
-            if (evtStageTestAdvanceResourceWork() != 1) {
+            if (evtStageTestAdvanceResourceWork() != EVT_STAGE_TEST_RESOURCE_WORK_PROCESSING) {
                 if (checkConfigState() == 0) {
                     mnuDestroyCampTasks();
                     mnuPlayInputSound(0, 2, 0);

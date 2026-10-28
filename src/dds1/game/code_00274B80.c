@@ -8,6 +8,7 @@
 #include "mnu.h"
 #include "brs_level_progress_api.h"
 #include "evt_stage_test_api.h"
+#include "evt_stage_test_resource_work_result.h"
 #include "mnu_staff.h"
 #include "sdf_resource.h"
 #include "sdf.h"
@@ -191,7 +192,7 @@ extern MenuPopupEntry mnuStaffPartyBrowsePopupEntry[];
 extern MenuPopupEntry mnuStaffFieldSkillDisplayPopupEntry[];
 extern void evtStageTestInit(s32);
 
-extern s32 evtStageTestPollModelRequest(void);
+extern EvtStageTestResourceWorkResult evtStageTestPollModelRequest(void);
 
 
 
@@ -733,7 +734,7 @@ u8 mnuIsStateNotOne(void) {
     s32 result;
 
     result = evtStageTestPollModelRequest();
-    return result != 1;
+    return result != EVT_STAGE_TEST_RESOURCE_WORK_PROCESSING;
 }
 
 /* Select the visual category used while the staff/party view is active. */
@@ -1101,7 +1102,7 @@ s32 mnuStaffBrowsePartyUpdate(dds3ProcessID_t *callback) {
             menuWork->idleFrames = 0;
         }
         if (inputFlags & MNU_STAFF_INPUT_CANCEL) {
-            if (evtStageTestPollModelRequest() != 1) {
+            if (evtStageTestPollModelRequest() != EVT_STAGE_TEST_RESOURCE_WORK_PROCESSING) {
                 btlStopStage();
                 menuWork->staffExit = 1;
                 menuWork->active = 1;
@@ -1260,7 +1261,8 @@ s32 mnuDrawAndStepStaffPartyScene(dds3ProcessID_t *task) {
 void mnuIdleVoiceTimer(StaffMenuRuntime *menu) {
     EvtStageMotionColumnCount voiceCount;
 
-    if (menu->motionSelection == -1 && evtStageTestPollModelRequest() != 1) {
+    if (menu->motionSelection == -1 &&
+        evtStageTestPollModelRequest() != EVT_STAGE_TEST_RESOURCE_WORK_PROCESSING) {
         if (evtStageTestHasPendingMotion() == EVT_STAGE_MOTION_QUEUE_SETTLED) {
             menu->idleFrames = menu->idleFrames + 1;
         }

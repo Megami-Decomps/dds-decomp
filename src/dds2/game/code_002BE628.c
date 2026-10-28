@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "dsp_entry_api.h"
 #include "evt_stage_test_api.h"
+#include "evt_stage_test_resource_work_result.h"
 #include "mnu_input.h"
 #include "sdf_packet_list.h"
 #include "eff_resource_slots.h"
@@ -129,7 +130,7 @@ extern s32 mnuLookupRangeEntry(u16);
 extern void ptyRecomputeMaxHpMp(datUnitWork_t *);
 
 
-extern s32 evtStageTestAdvanceResourceWork(void);
+extern EvtStageTestResourceWorkResult evtStageTestAdvanceResourceWork(void);
 
 
 
@@ -3559,7 +3560,7 @@ void evtStageTestSelectEntryWithoutInitialValue(
         entryIndex, EVT_STAGE_USE_ENTRY_MOTION, assetRequestMode);
 }
 
-INCLUDE_ASM(const s32, "game/code_002BE628", evtStageTestAdvanceResourceWork);
+INCLUDE_ASM(const EvtStageTestResourceWorkResult, "game/code_002BE628", evtStageTestAdvanceResourceWork);
 
 void evtStageTestApplyInitialMotion(s32 initialMotionIndex) {
     dds3ModelHandle_t *model = evtStageTestState.model;
@@ -3694,7 +3695,7 @@ void evtStageTestUpdateCamera(void)
 s8 evtStageTestUpdate(struct SdfPoolNode **surfaces) {
     s8 result = evtStageTestAdvanceResourceWork();
 
-    if (result == 1) {
+    if (result == EVT_STAGE_TEST_RESOURCE_WORK_PROCESSING) {
         return 1;
     }
     if (evtStageTestState.mode != 1) {

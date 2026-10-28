@@ -6,6 +6,7 @@
 #include "eff_resource_records.h"
 #include "eff_resource_list.h"
 #include "common.h"
+#include "evt_stage_test_resource_work_result.h"
 #include "dds3_admin_control_api.h"
 #include "staff_grid_label_row.h"
 #include "kwln_task_add_child.h"
@@ -170,7 +171,7 @@ extern void mnuPlayInputSound(s32, s32, u32 *);
 
 void mnuDestroyCampTasks(void);
 
-extern s32 evtStageTestPollModelRequest(void);
+extern EvtStageTestResourceWorkResult evtStageTestPollModelRequest(void);
 extern s32 checkConfigState(void);
 
 /* Mapped cancel input closes camp only through the full guard chain.
@@ -185,7 +186,7 @@ s32 mnuStaffCampCancelCheck(dds3ProcessID_t *task) {
     result = 0;
     if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
         if (mappedButtons & MNU_CAMP_CANCEL_MASK) {
-            if (evtStageTestPollModelRequest() != 1) {
+            if (evtStageTestPollModelRequest() != EVT_STAGE_TEST_RESOURCE_WORK_PROCESSING) {
                 if (checkConfigState() == 0) {
                     mnuDestroyCampTasks();
                     mnuPlayInputSound(0, 2, 0);

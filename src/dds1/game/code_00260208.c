@@ -5,6 +5,7 @@
 #include "pty_profile_record_value.h"
 #include "evt_message_window_api.h"
 #include "evt_stage_test_api.h"
+#include "evt_stage_test_resource_work_result.h"
 #include "snd_track_playback_api.h"
 #include "dsp_channel.h"
 #include "brs_primary_panel_update_api.h"
@@ -28,7 +29,7 @@
 #include "prf_current_record_view.h"
 #include "pty_adjust_item_quantity_api.h"
 
-extern s32 evtStageTestPollModelRequest(void);
+extern EvtStageTestResourceWorkResult evtStageTestPollModelRequest(void);
 
 
 extern s8 brsPendingRowsLatched;
@@ -837,7 +838,7 @@ s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *ctx) {
     if (mnuStaffSlotsAllFilled(ctx->resourceList, &ctx->staffSlots) == 0) {
         return 1;
     }
-    if (evtStageTestPollModelRequest() == 1) {
+    if (evtStageTestPollModelRequest() == EVT_STAGE_TEST_RESOURCE_WORK_PROCESSING) {
         return 1;
     }
     if (ctx->unitResource == NULL) {
@@ -1042,7 +1043,7 @@ s32 brsTaskIsFadeIdle(void) {
     if (dds3FadeCheck() != 0) {
         return 0;
     }
-    return evtStageTestPollModelRequest() != 1;
+    return evtStageTestPollModelRequest() != EVT_STAGE_TEST_RESOURCE_WORK_PROCESSING;
 }
 
 extern void mnuUpdatePartyPanelPercentDisplays(MenuPageWindow *page);

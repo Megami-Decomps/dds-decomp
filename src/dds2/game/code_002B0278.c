@@ -3,6 +3,7 @@
 #include "dsp_message_window_api.h"
 #include "evt_message_window_api.h"
 #include "evt_stage_test_api.h"
+#include "evt_stage_test_resource_work_result.h"
 #include "dsp_entry_api.h"
 #include "sdf_chip.h"
 #include "snd_sequence_volume_pan.h"
@@ -124,7 +125,7 @@ extern u8 *D_00435E5C;
 
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 
-extern s32 evtStageTestAdvanceResourceWork(void);
+extern EvtStageTestResourceWorkResult evtStageTestAdvanceResourceWork(void);
 
 extern s32 mnuIsStaffMenuInputBlocked();
 
@@ -1193,10 +1194,10 @@ s32 mnuStepPartySelectionControl(dds3ProcessID_t *callback) {
 }
 
 u8 mnuIsStateNotOne(void) {
-    s32 state;
+    EvtStageTestResourceWorkResult state;
 
     state = evtStageTestAdvanceResourceWork();
-    return state != 1;
+    return state != EVT_STAGE_TEST_RESOURCE_WORK_PROCESSING;
 }
 
 /* Select the visual category used while the staff/party view is active. */
@@ -1540,7 +1541,7 @@ s32 mnuStaffBrowsePartyUpdate(dds3ProcessID_t *callback) {
             menuWork->idleFrames = 0;
         }
         if (inputFlags & MNU_STAFF_INPUT_CANCEL) {
-            if (evtStageTestAdvanceResourceWork() != 1) {
+            if (evtStageTestAdvanceResourceWork() != EVT_STAGE_TEST_RESOURCE_WORK_PROCESSING) {
                 evtStageTestStop();
                 menuWork->staffExit = 1;
                 menuWork->active = 1;
@@ -1652,7 +1653,7 @@ s32 mnuDrawSelectedStaffPartyView(dds3ProcessID_t *callback) {
 void mnuIdleVoiceTimer(StaffMenuRuntime *object) {
     EvtStageMotionColumnCount count;
     if (object->motionSelection == -1) {
-        if (evtStageTestAdvanceResourceWork() != 1) {
+        if (evtStageTestAdvanceResourceWork() != EVT_STAGE_TEST_RESOURCE_WORK_PROCESSING) {
             if (evtStageTestHasPendingMotion() == EVT_STAGE_MOTION_QUEUE_SETTLED) {
                 object->idleFrames += 1;
             }

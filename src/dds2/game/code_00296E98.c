@@ -7,6 +7,7 @@
 #include "snd_track_playback_api.h"
 #include "dsp_channel.h"
 #include "evt_stage_test_api.h"
+#include "evt_stage_test_resource_work_result.h"
 #include "brs_primary_panel_update_api.h"
 #include "eff_random.h"
 #include "eff_resource_slots.h"
@@ -32,7 +33,7 @@ extern u8 brsUiUpdateAllowed;
 
 
 
-extern s32 evtStageTestAdvanceResourceWork(void);
+extern EvtStageTestResourceWorkResult evtStageTestAdvanceResourceWork(void);
 
 extern void mnuSetCommandPhase(MenuTerminalContext *, u32);
 
@@ -889,7 +890,7 @@ s32 brsAdvanceSkillPackagePanel(BrsSkillPackageWork *ctx) {
     if (movAreTitleEffectsReady(ctx->resourceList, &ctx->staffSlots) == 0) {
         return 1;
     }
-    if (evtStageTestAdvanceResourceWork() == 1) {
+    if (evtStageTestAdvanceResourceWork() == EVT_STAGE_TEST_RESOURCE_WORK_PROCESSING) {
         return 1;
     }
     if (ctx->unitResource == NULL) {
@@ -1098,7 +1099,7 @@ s32 brsTaskIsFadeIdle(void) {
     if (dds3FadeCheck() != 0) {
         return 0;
     }
-    return evtStageTestAdvanceResourceWork() != 1;
+    return evtStageTestAdvanceResourceWork() != EVT_STAGE_TEST_RESOURCE_WORK_PROCESSING;
 }
 
 void mnuRefreshSelectedUnitPanels(u32 unusedPartyRecord, BrsSkillPackageWork *menu) {

@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "fr_font.h"
 #include "evt_stage_test_api.h"
+#include "evt_stage_test_resource_work_result.h"
 #include "dsp_entry_api.h"
 #include "snd_sequence_volume_pan.h"
 #include "ui_color.h"
@@ -101,7 +102,7 @@ extern u8 *D_00435E5C;
 
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 
-extern s32 evtStageTestAdvanceResourceWork(void);
+extern EvtStageTestResourceWorkResult evtStageTestAdvanceResourceWork(void);
 
 
 extern char mnuStaffCampPagePopupEntry[];

@@ -10,6 +10,7 @@
 #include "sdf_delayed_resource_check_api.h"
 #include "sdf_vu0.h"
 #include "evt_stage_test_api.h"
+#include "evt_stage_test_resource_work_result.h"
 #include "pty_bullet_item_count_api.h"
 #include "sdf_vu_matrix.h"
 #include "kwln_draw_buffer.h"
@@ -160,7 +161,7 @@ extern s32 mnuLookupRangeEntry(u16);
 extern void mnuReleaseResourceList(MenuPanelHandles *);
 
 
-extern s32 evtStageTestPollModelRequest(void);
+extern EvtStageTestResourceWorkResult evtStageTestPollModelRequest(void);
 
 typedef struct MenuPanelItem MenuPanelItem;
 
@@ -2596,7 +2597,7 @@ void evtStageTestSelectEntryWithoutInitialValue(
         entryIndex, EVT_STAGE_USE_ENTRY_MOTION, assetRequestMode);
 }
 /* Poll model requests: 0 for an empty queue, 1 while handling a request, 2 otherwise. */
-s32 evtStageTestPollModelRequest(void) {
+EvtStageTestResourceWorkResult evtStageTestPollModelRequest(void) {
     StageTestSlot *slot = evtStageTestState.queue.slot;
     s32 ready;
 
@@ -2624,18 +2625,18 @@ s32 evtStageTestPollModelRequest(void) {
                     btlStopStage();
                     mnuCommitPendingBlock(&evtStageTestState.queue);
                     evtStageTestState.queue.flags |= EVT_STAGE_QUEUE_REQUESTING;
-                    return 1;
+                    return EVT_STAGE_TEST_RESOURCE_WORK_PROCESSING;
                 }
                 evtStageTestApplyInitialMotion(slot->initialMotionIndex);
                 evtStageTestState.queue.flags =
                     (evtStageTestState.queue.flags & ~EVT_STAGE_QUEUE_REQUESTING) |
                     EVT_STAGE_QUEUE_SETUP_COMPLETE;
             }
-            return 1;
+            return EVT_STAGE_TEST_RESOURCE_WORK_PROCESSING;
         }
-        return 2;
+        return EVT_STAGE_TEST_RESOURCE_WORK_SETUP_COMPLETE;
     }
-    return 0;
+    return EVT_STAGE_TEST_RESOURCE_WORK_EMPTY;
 }
 
 void evtStageTestApplyInitialMotion(s32 initialMotionIndex) {
@@ -2757,7 +2758,7 @@ void evtStageTestUpdateCamera(void)
 s8 evtStageTestUpdate(struct SdfPoolNode **surfaces) {
     s8 result = evtStageTestPollModelRequest();
 
-    if (result == 1) {
+    if (result == EVT_STAGE_TEST_RESOURCE_WORK_PROCESSING) {
         return 1;
     }
     if (evtStageTestState.mode != 1) {
