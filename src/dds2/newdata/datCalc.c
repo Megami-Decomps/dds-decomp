@@ -16,6 +16,7 @@
 #include "dat_calculated_stat_value_api.h"
 #include "dat_calculate_command_base_value_api.h"
 #include "dat_unit_dying_api.h"
+#include "btl_scene_party_level_threshold_api.h"
 #include "dat_affinity_selector.h"
 #include "dat_effective_affinity_api.h"
 #include "pty_skill_nibble_state.h"
@@ -2371,7 +2372,7 @@ enum {
  * occupied, level-gate-eligible and frontline flags. No eligible entries returns zero.
  * count and remaining serve both loops; word holds enemy IDs, then entry flags.
  * partyLevel is accumulated first and divided in place before comparison. */
-u8 btlCheckScenePartyLevelThreshold(u32 sceneIndex) {
+BtlScenePartyLevelThresholdResult btlCheckScenePartyLevelThreshold(u32 sceneIndex) {
     s32 result = 0;
     s32 enemyTotal;
     u16 *levelCursor;
@@ -2464,7 +2465,6 @@ s32 btlGetConditionalEncounterInterval(s32 encounterIndex) {
 
 extern s32 btlSelectedConditionalEncounterIndex;
 extern s32 btlSelectedConditionalEncounterResult;
-extern u8 btlCheckScenePartyLevelThreshold(u32 scene);
 extern void dds3WorkClear(void);
 
 s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex) {
@@ -2518,7 +2518,7 @@ s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex) {
         if (D_00435E0C[encounterIndex].groups[group].entries[i].battleMode != 0) {
             if (roll < count + D_00435E0C[encounterIndex].groups[group].entries[i].weight) {
                 scene = D_00435E0C[encounterIndex].groups[group].entries[i].battleMode;
-                if ((DDS3_GBWK->world.fieldFlags & DAT_WORLD_FIELD_ENCOUNTER_LEVEL_GATE) == 0 || btlCheckScenePartyLevelThreshold(scene) != 0) {
+                if ((DDS3_GBWK->world.fieldFlags & DAT_WORLD_FIELD_ENCOUNTER_LEVEL_GATE) == 0 || btlCheckScenePartyLevelThreshold(scene) != BTL_SCENE_PARTY_LEVEL_THRESHOLD_REJECTED) {
                     packed = (group << 24) | (i << 16) | scene;
                     btlSelectedConditionalEncounterIndex = encounterIndex;
                     btlConditionalEncounterCachedInterval = 0;
