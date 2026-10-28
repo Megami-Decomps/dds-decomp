@@ -134,7 +134,7 @@ void fldDrawMapRequestHalo(s32 x, s32 y, s32 z, const MapRequestState *state,
     } else {
         progress /= 0.7f;
     }
-    if (state->next->prev != node) {
+    if (state->nextEnqueueNode->prev != node) {
         progress -= 0.2f;
         if (progress < 0.0f) {
             progress = 0.0f;
@@ -149,7 +149,7 @@ void fldDrawMapRequestPulse(s32 x, s32 y, s32 z, const MapRequestState *queue,
     s32 gridY;
     f32 scale = (1.0f - progress) * 3.0f + progress;
 
-    if (queue->next->prev != selected) {
+    if (queue->nextEnqueueNode->prev != selected) {
         progress -= 0.5f;
         if (progress < 0.0f) {
             progress = 0.0f;
@@ -251,16 +251,16 @@ MapRequestState *sdfCreateLinkedRequestRing(s16 count, s16 limit) {
     memset(ring, 0, size);
     ring->allocation = allocation;
     node = block->nodes;
-    ring->first = node;
-    ring->third = node;
-    ring->next = node;
+    ring->ringFirstNode = node;
+    ring->oldestActiveNode = node;
+    ring->nextEnqueueNode = node;
     for (n = count - 2; n != -1; n--) {
         next = node + 1;
         node->next = next;
         next->prev = node;
         node = node->next;
     }
-    first = ring->first;
+    first = ring->ringFirstNode;
     node->next = first;
     first->prev = node;
     ring->lifetimeTicks = limit;
@@ -278,13 +278,13 @@ void fldReleaseMapRequestQueue(MapRequestState *state) {
 void fldAdvanceMapRequest(MapRequestState *queue, s32 x, s32 y, s32 z) {
     MapRequestNode *entry;
 
-    entry = queue->next;
+    entry = queue->nextEnqueueNode;
     if (queue->elapsed == queue->interval) {
         if (entry->ageTicks == 0) {
             entry->x = x;
             entry->y = y;
             entry->z = z;
-            queue->next = entry->next;
+            queue->nextEnqueueNode = entry->next;
             entry->ageTicks = 1;
         }
         queue->elapsed = 0;
@@ -306,7 +306,7 @@ void fldAdvanceMapRequestAges(MapRequestState *ring) {
     MapRequestNode *node;
 
     remaining = ring->count;
-    first = ring->third;
+    first = ring->oldestActiveNode;
     if (--remaining == -1) {
         goto done;
     }
@@ -319,7 +319,7 @@ void fldAdvanceMapRequestAges(MapRequestState *ring) {
     if (!pending) {
         node = first->next;
         first->ageTicks = 0;
-        ring->third = node;
+        ring->oldestActiveNode = node;
         goto loop;
     }
     node = first->next;
@@ -340,10 +340,10 @@ loop:
         goto advance;
     }
     {
-        MapRequestNode *nextHead = ring->third->next;
+        MapRequestNode *nextHead = ring->oldestActiveNode->next;
         node->ageTicks = 0;
         node = node->next;
-        ring->third = nextHead;
+        ring->oldestActiveNode = nextHead;
     }
     goto loop;
 
@@ -358,7 +358,7 @@ void fldDispatchMapRequestCallbacks(const MapRequestState *ring) {
     s32 end;
     f32 one;
 
-    node = ring->third;
+    node = ring->oldestActiveNode;
     remaining = ring->count;
     end = -1;
     one = 1.0f;

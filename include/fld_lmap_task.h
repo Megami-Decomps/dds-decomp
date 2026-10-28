@@ -25,9 +25,9 @@ typedef void (*MapRequestDrawCallback)(s32 x, s32 y, s32 z,
  * borrowed for dispatch and must not outlive it. */
 typedef struct MapRequestState {
     struct sdfMemHandle_t *allocation; /* 0x00: descriptor for the ring and nodes. */
-    MapRequestNode *first;
-    MapRequestNode *next;
-    MapRequestNode *third;
+    MapRequestNode *ringFirstNode;
+    MapRequestNode *nextEnqueueNode;
+    MapRequestNode *oldestActiveNode;
     s16 count;
     s16 lifetimeTicks; /* 0x0E: age threshold and progress denominator for queued nodes. */
     s16 interval;
