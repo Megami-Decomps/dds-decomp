@@ -21,7 +21,7 @@
 #include "btl_command_hit_count_override.h"
 #include "pty_active_roster_index_api.h"
 #include "dat_assigned_item_id.h"
-#include "btl_actor_status_table_api.h"
+#include "btl_actor_resource_bank_api.h"
 #include "itf_debug_panel_work.h"
 #include "itf_color_panel_row.h"
 #include "btl_boss_data_api.h"

@@ -8,7 +8,7 @@
 #include "btl_command_target_policy.h"
 #include "btl_actor_category_flag_api.h"
 #include "sdf_vu0.h"
-#include "btl_actor_status_table_api.h"
+#include "btl_actor_resource_bank_api.h"
 #include "sdf_vu_rotation_axes.h"
 #include "btl_skill_max_api.h"
 #include "btl_effect_position.h"
@@ -1620,7 +1620,7 @@ s32 btlShiftUnitUpForScriptAction(BtlLinkedCommand *command) {
         return 0;
     }
     if (user->partyRecord.unitId == 0x5F || user->partyRecord.unitId == 0x101) {
-        table = (u8 *)btlGetSideIndexedActorStatusTable(user->resourceKind, user->resourceIndex);
+        table = (u8 *)btlGetActorResourceBankEntry(user->resourceKind, user->resourceIndex);
         if (btlHasLinkedEffectNodeTrigger(command) == 0) {
             kind = ((BtlActionKindTable *)table)->rows[command->link->indexWork.slot].kind;
             if (kind == 2 || kind == 7) {
@@ -2178,7 +2178,7 @@ s32 btlRaiseUnitForCommandSlot(BtlLinkedCommand *command) {
         return 0;
     }
     if (user->partyRecord.unitId == 0x108) {
-        table = (u8 *)btlGetSideIndexedActorStatusTable(user->resourceKind, user->resourceIndex);
+        table = (u8 *)btlGetActorResourceBankEntry(user->resourceKind, user->resourceIndex);
         if (btlHasLinkedEffectNodeTrigger(command) == 0) {
             kind = ((BtlActionKindTable *)table)->rows[command->link->indexWork.slot].kind;
             if (kind == 2 || kind == 7) {
@@ -3181,7 +3181,7 @@ void btlResetSpecialActionActorPresentation(void) {
                             break;
                         case 0xB:
                             table = (BtlActorStatusRecord *)
-                                btlGetSideIndexedActorStatusTable(unit->resourceKind,
+                                btlGetActorResourceBankEntry(unit->resourceKind,
                                                                  unit->resourceIndex);
                             btlApplyUnitMotionSelection(unit, 0xA, 1, table->motions[10].alphaFrameScale);
                             break;
@@ -6168,7 +6168,7 @@ void btlPrepareLinkedSpecialActionMotion(BtlUnit *unit, s32 selector, s32 firstP
             if (unit->partyRecord.unitId == 0x121) {
                 state->alternateMotion = 1;
             }
-            frameStep = ((BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(
+            frameStep = ((BtlActorStatusRecord *)btlGetActorResourceBankEntry(
                 unit->resourceKind, unit->resourceIndex))->motions[0].alphaFrameScale;
             selector = btlGetSpecialActionGroupEntry(unit, 0);
             evtSetWaitMotion(unit->ext, selector);
@@ -8246,7 +8246,7 @@ s32 btlOffsetKaliTargetForScriptAction(BtlLinkedCommand *command) {
         return 0;
     }
     if (unit->partyRecord.unitId == 0x113) {
-        table = (u8 *)btlGetSideIndexedActorStatusTable(
+        table = (u8 *)btlGetActorResourceBankEntry(
             unit->resourceKind, unit->resourceIndex);
         if (btlHasLinkedEffectNodeTrigger(command) == 0) {
             s32 slot = command->link->indexWork.slot;

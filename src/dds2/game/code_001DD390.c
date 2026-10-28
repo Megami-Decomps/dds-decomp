@@ -28,7 +28,7 @@
 #include "btl_aim_horizontal_direction_clamped_api.h"
 #include "btl_set_actor_effect_parameter_api.h"
 #include "btl_raise_party_record_status_value.h"
-#include "btl_actor_status_table_api.h"
+#include "btl_actor_resource_bank_api.h"
 #include "btl_special_ability.h"
 #include "eff_random_mod.h"
 #include "snd_sequence_volume_pan.h"
@@ -2362,7 +2362,7 @@ void btlInitializeEffectVectorsFromSourceRecords(
     BtlUnit *unit, s32 resourceKind, s32 resourceIndex) {
     BtlActorTransformParameters *alt =
         btlSelectSharedOrIndexedTransformParameters(resourceKind, resourceIndex);
-    BtlEffectResource *base = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(
+    BtlEffectResource *base = (BtlEffectResource *)btlGetActorResourceBankEntry(
         resourceKind, resourceIndex);
     if (alt->overrideEnabled == 0.0f) {
         SDF_VU0_COPYVECTOR(unit->bodyOffset, base);
@@ -2512,7 +2512,7 @@ void btlBindUnitModel(BtlUnit *unit, u32 kind, u32 index) {
         unit->ext->motionState = EVT_UNIT_MOTION_STATE_IDLE;
         model = unit->ext->owner;
         unit->ext->flags &= ~0xA0;
-        status = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(kind, index);
+        status = (BtlActorStatusRecord *)btlGetActorResourceBankEntry(kind, index);
         mdlSingleMotion(model, 0, 1);
         unit->motionId = 1;
         sdfMotionSeek(model->first, (f32)status->model);
@@ -2681,7 +2681,7 @@ void btlApplyUnitMotionSelection(BtlUnit *unit, u32 index, s32 mode, f32 rate) {
         unit->updateFlags &= ~4;
         unit->updateFlags &= ~2;
     }
-    table = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(unit->resourceKind,
+    table = (BtlEffectResource *)btlGetActorResourceBankEntry(unit->resourceKind,
                                                                 unit->resourceIndex);
     if (table->nodes[index].rateKind == 2) {
         unit->updateFlags |= 6;
@@ -2853,7 +2853,7 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
         unit->status.flags &= 0x7FFFFFFF;
         unit->status.flags &= ~0x2000;
     }
-    resource = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(
+    resource = (BtlEffectResource *)btlGetActorResourceBankEntry(
         unit->resourceKind, unit->resourceIndex);
     rate = resource->nodes[index].scale;
     chooseMotion = work->chooseMotion;
@@ -2916,12 +2916,12 @@ s32 btlIsActorModeAcceptedByBattleHook(BtlUnit *unit) {
 extern void btlApplyUnitMotionSelection(BtlUnit *, u32, s32, f32);
 
 void btlApplyScaledUnitEffectParameter(BtlUnit *unit, s32 index, s32 option, f32 scale) {
-    u8 *table = (u8 *)btlGetSideIndexedActorStatusTable(((BtlUnit *)unit)->resourceKind, ((BtlUnit *)unit)->resourceIndex);
+    u8 *table = (u8 *)btlGetActorResourceBankEntry(((BtlUnit *)unit)->resourceKind, ((BtlUnit *)unit)->resourceIndex);
     btlApplyUnitMotionSelection(unit, index, option, ((BtlEffectResource *)table)->nodes[index].scale * scale);
 }
 
 s32 btlGetSlotRateKind(BtlUnit *unit, s32 index) {
-    BtlEffectResource *resource = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(
+    BtlEffectResource *resource = (BtlEffectResource *)btlGetActorResourceBankEntry(
         unit->resourceKind, unit->resourceIndex);
     s32 value = resource->nodes[index].rateKind;
     switch (value) {
@@ -2942,7 +2942,7 @@ void btlUpdateUnitEffects(void) {
 
     while (object != 0) {
         if (object->status.flags & 2) {
-            u8 *resource = (u8 *)btlGetSideIndexedActorStatusTable(object->resourceKind,
+            u8 *resource = (u8 *)btlGetActorResourceBankEntry(object->resourceKind,
                                                   object->resourceIndex);
             dds3ModelHandle_t *model = object->ext->owner;
             s32 node = mdlGetMotionNum(model, 0);
@@ -2981,7 +2981,7 @@ void btlResetUnitModelProgress(BtlUnit *unit) {
 s32 btlGetUnitMotionDurationFrames(BtlUnit *unit, s32 motionIndex) {
     BtlState *state = (BtlState *)btlGetRuntime();
     BtlActorStatusRecord *status = (BtlActorStatusRecord *)
-        btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->resourceIndex);
+        btlGetActorResourceBankEntry(unit->resourceKind, unit->resourceIndex);
 
     return (s32)(status->motions[motionIndex].frameCount /
         (status->motions[motionIndex].alphaFrameScale * state->modelFrameScale));
@@ -3504,7 +3504,7 @@ void btlWarpUnitToMotionReach(BtlUnit *unit, BtlUnit *target, s32 index) {
             return;
         }
     }
-    table = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->resourceIndex);
+    table = (BtlEffectResource *)btlGetActorResourceBankEntry(unit->resourceKind, unit->resourceIndex);
     if (table->nodes[index].triggerKind != 2) {
         return;
     }
@@ -3675,7 +3675,7 @@ s32 btlApproachTargetTask(BtlApproachTaskArgs *args) {
     f32 toPos[4] __attribute__((aligned(16)));
     scale = args->scale == 0.0f ? 1.0f : args->scale;
     if (args->count == 0) {
-        BtlEffectResource *table = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->resourceIndex);
+        BtlEffectResource *table = (BtlEffectResource *)btlGetActorResourceBankEntry(unit->resourceKind, unit->resourceIndex);
         args->motionReachOffset = table->nodes[unit->motionId].reachOffset * unit->scale;
     }
     reach = args->motionReachOffset + target->reach * target->scale;
@@ -4616,7 +4616,7 @@ u32 btlStiffenDamageShakeStep(BtlStiffenTaskArgs *args) {
     if (args->count == 0) {
         node = mdlGetMotionNum(args->unit->ext->owner, 0);
         if (node < 0x1D) {
-            u8 *resource = (u8 *)btlGetSideIndexedActorStatusTable(args->unit->resourceKind, args->unit->resourceIndex);
+            u8 *resource = (u8 *)btlGetActorResourceBankEntry(args->unit->resourceKind, args->unit->resourceIndex);
             if (((BtlEffectResource *)resource)->nodes[node].rateKind == 2) {
                 btlRefreshUnitEffectMotionAndEntry(args->unit);
                 btlBossDebugPrintf("btl:stiffen damage motion wait\n");
@@ -5040,7 +5040,7 @@ void btlUpdateActiveActorModelState(void) {
         if (!(unit->status.flags & 0x600) || !(unit->status.flags & 2)) {
             continue;
         }
-        status = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(
+        status = (BtlActorStatusRecord *)btlGetActorResourceBankEntry(
             unit->resourceKind, unit->resourceIndex);
         if (unit->status.flags & 0x40000000) {
             btlSeekRandomModelFrame(unit);

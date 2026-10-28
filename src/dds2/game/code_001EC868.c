@@ -19,7 +19,7 @@
 #include "btl_aim_horizontal_direction_clamped_api.h"
 #include "btl_set_actor_effect_parameter_api.h"
 #include "btl_action_camera_preset.h"
-#include "btl_actor_status_table_api.h"
+#include "btl_actor_resource_bank_api.h"
 #include "btl_rain_effect_api.h"
 #include "btl_blend_color_api.h"
 #include "mnu_title_stream.h"
@@ -2383,7 +2383,7 @@ void btlFrameCommandTargetGroups(BtlLinkedCommand *action) {
 
     {
         BtlActorStatusRecord *statusTable = (BtlActorStatusRecord *)
-            btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->resourceIndex);
+            btlGetActorResourceBankEntry(unit->resourceKind, unit->resourceIndex);
         f32 clearance = statusTable->motions[unit->motionId].muzzleGuideScale * unit->scale;
         btlCopyUnitCurrentPosition(unit, position);
         if (position[2] - clearance < -100.0f) {
@@ -3472,7 +3472,7 @@ void btlBuildSpeciesFramedCameraPair(BtlLinkedCommand *action, BtlCamState *from
     SDF_VU0_LOADVECTOR(D_003E9130);
     SDF_VU0_APPLYMATRIX_XYZ();
     SDF_VU0_STOREVECTOR(to->direction);
-    resource = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(resourceKind, resourceIndex);
+    resource = (BtlEffectResource *)btlGetActorResourceBankEntry(resourceKind, resourceIndex);
     btlGetUnitWorldPos(unit, position);
     position[2] += resource->zOffset;
     SDF_VU0_LOADVECTOR(unit->orientation);
@@ -3688,7 +3688,7 @@ void btlInitializeActorClearanceCameraPair(BtlLinkedCommand *action, BtlCamState
     action->motionProgress = 1;
     action->flags = (action->flags & ~0x14) | 0x41;
     unit = action->link->unit;
-    resource = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(
+    resource = (BtlEffectResource *)btlGetActorResourceBankEntry(
         BTL_ACTOR_RESOURCE_TABLE_OPPOSING, action->link->indexWork.summonId);
     scaledReach = resource->reach * resource->actorScale;
     scaledHeight = resource->height * resource->actorScale;

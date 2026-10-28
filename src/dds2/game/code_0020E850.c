@@ -5,7 +5,7 @@
 #include "sdf_vu0.h"
 #include "btl_indexed_ui_resource_api.h"
 #include "btl_set_actor_effect_parameter_api.h"
-#include "btl_actor_status_table_api.h"
+#include "btl_actor_resource_bank_api.h"
 #include "btl_effect_position.h"
 #include "eff_offset_if_owner_flag_clear.h"
 #include "btl_command_effect.h"
@@ -190,7 +190,7 @@ void btlDrawActorGroundDisc(BtlUnit *unit) {
         return;
     }
 
-    status = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(
+    status = (BtlActorStatusRecord *)btlGetActorResourceBankEntry(
         unit->resourceKind, unit->resourceIndex);
     switch (status->shadowKind) {
     case BTL_ACTOR_SHADOW_NONE:

@@ -15,7 +15,7 @@
 #include "btl_target_list_builder.h"
 #include "btl_command_status_target_index.h"
 #include "btl_indexed_ui_resource_api.h"
-#include "btl_actor_status_table_api.h"
+#include "btl_actor_resource_bank_api.h"
 #include "btl_actor_entry_code_api.h"
 #include "btl_actor_entry_code_defaults.h"
 #include "itf_debug_panel_work.h"
@@ -1834,7 +1834,7 @@ DatEffectiveAffinityResult btlResolveUnitValueWithOverride(
     return datGetEffectiveAffinity(record, selector);
 }
 
-void *btlGetSideIndexedActorStatusTable(s32 resourceTableKind, s32 index) {
+void *btlGetActorResourceBankEntry(s32 resourceTableKind, s32 index) {
     if (resourceTableKind == BTL_ACTOR_RESOURCE_TABLE_PARTY) {
         return (void *)(u32)(D_00435DE0 + index * 0x270);
     }

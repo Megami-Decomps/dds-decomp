@@ -1,7 +1,7 @@
 #include "common.h"
 #include "sdf_vu0.h"
 #include "btl_set_actor_effect_parameter_api.h"
-#include "btl_actor_status_table_api.h"
+#include "btl_actor_resource_bank_api.h"
 #include "btl_effect_position.h"
 #include "eff_offset_if_owner_flag_clear.h"
 #include "btl_command_effect.h"
@@ -96,7 +96,7 @@ void btlDrawUnitStatusShadowDisc(BtlUnit *unit) {
         }
         model = unit->ext->owner;
         alpha = ((u8 *)&unit->overlayColor)[3];
-        status = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->species);
+        status = (BtlActorStatusRecord *)btlGetActorResourceBankEntry(unit->resourceKind, unit->species);
         switch (status->shadowKind) {
         case BTL_ACTOR_SHADOW_NONE:
             return;

@@ -31,7 +31,7 @@
 #include "btl_aim_horizontal_direction_clamped_api.h"
 #include "btl_set_actor_effect_parameter_api.h"
 #include "btl_raise_party_record_status_value.h"
-#include "btl_actor_status_table_api.h"
+#include "btl_actor_resource_bank_api.h"
 #include "btl_unit_fade_task_args.h"
 #include "btl_unit_color_fade_args.h"
 #include "btl_special_ability.h"
@@ -2281,7 +2281,7 @@ void btlInitializeEffectVectorsFromSourceRecords(
     BtlUnit *fx, s32 resourceKind, s32 resourceIndex) {
     BtlActorTransformParameters *alt =
         btlSelectSharedOrIndexedTransformParameters(resourceKind, resourceIndex);
-    BtlEffectResource *base = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(
+    BtlEffectResource *base = (BtlEffectResource *)btlGetActorResourceBankEntry(
         resourceKind, resourceIndex);
 
     if (alt->overrideEnabled == 0.0f) {
@@ -2431,7 +2431,7 @@ void btlBindActorModel(BtlUnit *unit, u32 kind, u32 id) {
         unit->ext->motionState = EVT_UNIT_MOTION_STATE_IDLE;
         model = unit->ext->owner;
         unit->ext->flags &= ~0xA0;
-        status = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(kind, id);
+        status = (BtlActorStatusRecord *)btlGetActorResourceBankEntry(kind, id);
         mdlSingleMotion(model, 0, 1);
         unit->motionId = 1;
         sdfMotionSeek(model->first, status->model);
@@ -2618,7 +2618,7 @@ void btlApplyUnitMotionSelection(BtlUnit *unit, u32 index, s32 mode, f32 rate) {
         unit->updateFlags &= ~4;
         unit->updateFlags &= ~2;
     }
-    table = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(unit->resourceKind,
+    table = (BtlEffectResource *)btlGetActorResourceBankEntry(unit->resourceKind,
                                                                 unit->species);
     if (table->nodes[index].rateKind == 2) {
         unit->updateFlags |= 6;
@@ -2775,7 +2775,7 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
         unit->status.flags = (u32)unit->status.flags & (0x7FFFFFFF);
         unit->status.flags = (u32)unit->status.flags & (~0x2000);
     }
-    statusTable = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(
+    statusTable = (BtlActorStatusRecord *)btlGetActorResourceBankEntry(
         unit->resourceKind, unit->species);
     rate = statusTable->motions[index].alphaFrameScale;
     chooseMotion = context->chooseMotion;
@@ -2834,13 +2834,13 @@ s32 btlIsActorModeAcceptedByBattleHook(BtlUnit *object) {
 extern void btlApplyUnitMotionSelection(BtlUnit *, u32, s32, f32);
 
 void btlApplyScaledUnitEffectParameter(BtlUnit *unit, s32 index, s32 argument, f32 scale) {
-    BtlEffectResource *resource = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(
+    BtlEffectResource *resource = (BtlEffectResource *)btlGetActorResourceBankEntry(
         unit->resourceKind, unit->species);
     btlApplyUnitMotionSelection(unit, index, argument, resource->nodes[index].scale * scale);
 }
 
 s32 btlGetSlotRateKind(BtlUnit *unit, s32 index) {
-    BtlEffectResource *resource = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(
+    BtlEffectResource *resource = (BtlEffectResource *)btlGetActorResourceBankEntry(
         unit->resourceKind, unit->species);
     s32 value = resource->nodes[index].rateKind;
 
@@ -2861,7 +2861,7 @@ void btlUpdateUnitEffects(void) {
 
     while (object != 0) {
         if ((u32)object->status.flags & 2) {
-            BtlEffectResource *resource = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(
+            BtlEffectResource *resource = (BtlEffectResource *)btlGetActorResourceBankEntry(
                 object->resourceKind, object->species);
             dds3ModelHandle_t *model = object->ext->owner;
             s32 node = mdlGetMotionNum(model, 0);
@@ -2899,7 +2899,7 @@ void btlResetUnitModelProgress(BtlUnit *object) {
 s32 btlGetUnitMotionDurationFrames(BtlUnit *unit, s32 motionIndex) {
     BtlState *state = (BtlState *)btlGetRuntime();
     BtlActorStatusRecord *status = (BtlActorStatusRecord *)
-        btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->species);
+        btlGetActorResourceBankEntry(unit->resourceKind, unit->species);
 
     return (s32)(status->motions[motionIndex].frameCount /
         (status->motions[motionIndex].alphaFrameScale * state->modelFrameScale));
@@ -3429,7 +3429,7 @@ void btlWarpUnitToMotionReach(BtlUnit *unit, BtlUnit *target, s32 index) {
     if ((unit->status.stateFlags & 0x8000) != 0) {
         return;
     }
-    table = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->species);
+    table = (BtlEffectResource *)btlGetActorResourceBankEntry(unit->resourceKind, unit->species);
     if (table->nodes[index].triggerKind != 2) {
         return;
     }
@@ -3599,7 +3599,7 @@ s32 btlApproachTargetTask(BtlApproachTaskArgs *args) {
     f32 toPos[4] __attribute__((aligned(16)));
     scale = args->scale == 0.0f ? 1.0f : args->scale;
     if (args->count == 0) {
-        BtlEffectResource *table = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->species);
+        BtlEffectResource *table = (BtlEffectResource *)btlGetActorResourceBankEntry(unit->resourceKind, unit->species);
         args->motionReachOffset = table->nodes[unit->motionId].reachOffset * unit->scale;
     }
     reach = args->motionReachOffset + target->reach * target->scale;
@@ -4568,7 +4568,7 @@ u32 btlStiffenDamageShakeStep(BtlDamageShakeArgs *task) {
     if (task->tick == 0) {
         node = mdlGetMotionNum(task->unit->ext->owner, 0);
         if (node < 0x1D) {
-            BtlActorStatusRecord *resource = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(task->unit->resourceKind,
+            BtlActorStatusRecord *resource = (BtlActorStatusRecord *)btlGetActorResourceBankEntry(task->unit->resourceKind,
                                                  task->unit->species);
             if (resource->motions[node].endBehavior == BTL_MOTION_END_OUT) {
                 btlRefreshUnitEffectMotionAndEntry(task->unit);
@@ -4934,7 +4934,7 @@ void btlUpdateActiveActorModelState(void) {
         if (!(unit->status.flags & 0x600) || !(unit->status.flags & 2)) {
             continue;
         }
-        status = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(
+        status = (BtlActorStatusRecord *)btlGetActorResourceBankEntry(
             unit->resourceKind, unit->species);
         if (unit->status.flags & 0x40000000) {
             btlSeekRandomModelFrame(unit);

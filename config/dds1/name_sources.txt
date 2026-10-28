@@ -3341,7 +3341,7 @@
 0x001A2F00	btlGetActorIndexedSignedValue	inferred	Returns an indexed signed value, with an actor-specific lookup when flagged. [names_reviewed9.tsv]
 0x001A2F50	btlGetUnitElementAffinity	inferred	Resolves the unit's element affinity through the runtime override hook, falling back to its party-record affinity.
 0x001A2F68	btlResolveUnitValueWithOverride	inferred	Uses a registered callback value unless it declines, then uses the default result. [names_reviewed8.tsv]
-0x001A2FD8	btlGetSideIndexedActorStatusTable	inferred	Selects one of two indexed battle status record tables according to side. [names_reviewed16.tsv]
+0x001A2FD8	btlGetActorResourceBankEntry	inferred	Returns the borrowed entry in the selected 0x270-strided party or opposing resource bank; callers view it through actor-status, effect-resource, and other record types. Zero selects party and every nonzero selector selects opposing. [provider and caller dataflow, 2026-10-28]
 0x001A3020	btlSelectSharedOrIndexedTransformParameters	inferred	Chooses global transform parameters or indexed record parameters by selector; caller copies vector and scale data. [names_reviewed17.tsv]
 0x001A3050	btlSelectSideIndexedActorParameterTable	inferred	Chooses between indexed actor parameter tables based on the selected side. [names_reviewed19.tsv]
 0x001A3098	btlGetLoggedIndexedCommandItem	inferred	Reads an indexed battle command item and logs it. [names_reviewed8.tsv]

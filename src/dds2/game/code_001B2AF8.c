@@ -31,7 +31,7 @@
 #include "sdf_vu0.h"
 #include "btl_indexed_ui_resource_api.h"
 #include "btl_set_actor_effect_parameter_api.h"
-#include "btl_actor_status_table_api.h"
+#include "btl_actor_resource_bank_api.h"
 #include "btl_actor_entry_code_api.h"
 #include "btl_stat_effect_offsets.h"
 #include "btl_command_panel_owner_linkage_skill_api.h"
@@ -1689,7 +1689,7 @@ s32 btlCanUseActorCommandForModelEntry(BtlUnit *unit, BtlUnit *target, s32 comma
     if (skillId == 0x91) {
         return 0;
     }
-    table = (BtlCommandActorEffectTable *)btlGetSideIndexedActorStatusTable(
+    table = (BtlCommandActorEffectTable *)btlGetActorResourceBankEntry(
         unit->resourceKind, unit->resourceIndex);
     if (table->nodes[commandSlot].triggerKind != 2) {
         return 0;

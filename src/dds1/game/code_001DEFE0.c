@@ -17,7 +17,7 @@
 #include "btl_aim_horizontal_direction_clamped_api.h"
 #include "btl_set_actor_effect_parameter_api.h"
 #include "btl_action_camera_preset.h"
-#include "btl_actor_status_table_api.h"
+#include "btl_actor_resource_bank_api.h"
 #include "btl_formation_spacing_cell.h"
 #include "btl_rain_effect_api.h"
 #include "btl_blend_color_api.h"
@@ -2275,7 +2275,7 @@ void btlFrameCommandTargetGroups(BtlLinkedCommand *action) {
 
     {
         BtlActorStatusRecord *statusTable = (BtlActorStatusRecord *)
-            btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->species);
+            btlGetActorResourceBankEntry(unit->resourceKind, unit->species);
         f32 clearance = statusTable->motions[unit->motionId].muzzleGuideScale * unit->scale;
         btlCopyUnitCurrentPosition(unit, position);
         if (position[2] - clearance < -100.0f) {
@@ -11231,7 +11231,7 @@ void btlApplyRadialLinkageFormation(BtlLinkedCommand *command) {
         if (selector == -1) {
             continue;
         }
-        actorStatusAddress = btlGetSideIndexedActorStatusTable(actor->resourceKind, actor->species);
+        actorStatusAddress = btlGetActorResourceBankEntry(actor->resourceKind, actor->species);
         spacing = (const BtlFormationSpacingCell *)(selector * sizeof(BtlFormationSpacingCell) + (s32)(u32)actorStatusAddress + 0x38);
         distance = spacing->spacing * participants[i]->scale + target->reach * target->scale;
         btlCopyUnitCurrentPosition(participants[i], oldPosition);

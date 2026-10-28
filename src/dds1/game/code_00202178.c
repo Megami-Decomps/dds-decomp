@@ -11,7 +11,7 @@
 #include "btl_command_target_policy.h"
 #include "btl_actor_category_flag_api.h"
 #include "sdf_vu0.h"
-#include "btl_actor_status_table_api.h"
+#include "btl_actor_resource_bank_api.h"
 #include "sdf_vu_rotation_axes.h"
 #include "btl_skill_max_api.h"
 #include "btl_effect_active_api.h"
@@ -3497,9 +3497,9 @@ void btlAdvanceNidhoggrScaleStage(s32 unit, BtlScaleStageSource *source) {
     if (selected == 0) {
         return;
     }
-    modelA = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(
+    modelA = (BtlActorStatusRecord *)btlGetActorResourceBankEntry(
         BTL_ACTOR_RESOURCE_TABLE_OPPOSING, 0x10D);
-    modelB = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(
+    modelB = (BtlActorStatusRecord *)btlGetActorResourceBankEntry(
         BTL_ACTOR_RESOURCE_TABLE_OPPOSING, 0x11D);
     transition->targetScale = (modelA->scale - modelB->scale) * D_00360F00[transition->stage];
     transition->targetScale += modelB->scale;
@@ -3585,9 +3585,9 @@ void btlUpdateNidhoggrScaleAndPosition(void) {
     SDF_VU0_STOREVECTOR(inner->scale);
     mdlSetScale(selected->ext->owner);
 
-    modelA = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(
+    modelA = (BtlActorStatusRecord *)btlGetActorResourceBankEntry(
         BTL_ACTOR_RESOURCE_TABLE_OPPOSING, 0x10D);
-    modelB = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(
+    modelB = (BtlActorStatusRecord *)btlGetActorResourceBankEntry(
         BTL_ACTOR_RESOURCE_TABLE_OPPOSING, 0x11D);
     if (modelA->scale != modelB->scale) {
         modelAScale = modelA->scale;

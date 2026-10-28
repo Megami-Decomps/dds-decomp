@@ -16,7 +16,7 @@
 #include "btl_command_hit_count_override.h"
 #include "pty_active_roster_index_api.h"
 #include "sdf_vu0.h"
-#include "btl_actor_status_table_api.h"
+#include "btl_actor_resource_bank_api.h"
 #include "btl_special_ability.h"
 #include "dat_unit_has_skill_api.h"
 #include "btl_animation_mode_entry.h"

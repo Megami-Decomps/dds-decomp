@@ -5,7 +5,7 @@
 #include "btl_command_target_policy.h"
 #include "btl_actor_category_flag_api.h"
 #include "sdf_vu0.h"
-#include "btl_actor_status_table_api.h"
+#include "btl_actor_resource_bank_api.h"
 #include "eff_random_mod.h"
 #include "eff_random.h"
 #include "btl_stage_task_cleanup.h"
@@ -251,7 +251,7 @@ s32 btlHasLinkedEffectNodeTrigger(BtlLinkedCommand *fx) {
     task = fx->task;
     owner = task->unit;
     index = task->indexWork.slot;
-    table = (BtlEffectResource *)btlGetSideIndexedActorStatusTable(owner->resourceKind, owner->species);
+    table = (BtlEffectResource *)btlGetActorResourceBankEntry(owner->resourceKind, owner->species);
     return table->nodes[index].triggerKind == 2;
 }
 

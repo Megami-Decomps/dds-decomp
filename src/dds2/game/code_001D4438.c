@@ -22,7 +22,7 @@
 #include "sdf_vu0.h"
 #include "btl_set_actor_effect_parameter_api.h"
 #include "btl_raise_party_record_status_value.h"
-#include "btl_actor_status_table_api.h"
+#include "btl_actor_resource_bank_api.h"
 #include "btl_model_record.h"
 #include "sdf_vu_rotation_axes.h"
 #include "btl_effect_active_api.h"
@@ -1478,7 +1478,7 @@ void btlScheduleAttackActionTasks(ActionStateLink *action) {
     commandOwner = btlAdvanceRuntimeSequenceCounter();
     operandOwner = btlAdvanceRuntimeSequenceCounter();
     lastOperandHandle = btlAdvanceRuntimeSequenceCounter();
-    statusTable = (u8 *)btlGetSideIndexedActorStatusTable(action->unit->resourceKind, action->unit->resourceIndex);
+    statusTable = (u8 *)btlGetActorResourceBankEntry(action->unit->resourceKind, action->unit->resourceIndex);
     if (skipMovement == 0) {
         operandTask = btlCreateHookedUnitSoundTask(action->unit, action->indexWork.slot);
         btlStartTask(operandTask);
@@ -2547,7 +2547,7 @@ s32 btlCommandGunChangeStart(ActionStateLink *task) {
     }
     state = (BtlState *)btlGetRuntime();
     unit = task->unit;
-    status = (u16 *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->resourceIndex);
+    status = (u16 *)btlGetActorResourceBankEntry(unit->resourceKind, unit->resourceIndex);
     if (!(unit->status.flags & 0x20)) {
         motion = btlGetUnitMotionDurationFrames(unit, 0x11) + 0x14;
     } else {
@@ -2678,7 +2678,7 @@ void btlScheduleDevilStateModelChange(ActionStateLink *task) {
     }
     state = (BtlState *)btlGetRuntime();
     unit = task->unit;
-    status = (u16 *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->resourceIndex);
+    status = (u16 *)btlGetActorResourceBankEntry(unit->resourceKind, unit->resourceIndex);
     if (!(unit->status.flags & 0x20)) {
         motion = btlGetUnitMotionDurationFrames(unit, 0x10) + 0x14;
     } else {
@@ -2790,7 +2790,7 @@ void btlScheduleBatStateModelChange(u8 *task) {
 
     btlGetRuntime();
     actor = *(BtlUnit **)(task + 0x18);
-    statusTable = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(
+    statusTable = (BtlActorStatusRecord *)btlGetActorResourceBankEntry(
         actor->resourceKind, actor->resourceIndex);
     model = statusTable->model;
     effectTask = (u8 *)btlCreateEffObjB(actor, 0x7E);
@@ -3693,7 +3693,7 @@ void btlStartActorDefeatTransition(ActionStateLink *command) {
 
     actor->selectedEntryIndex = BTL_COMMAND_ID_INVALID;
     btlRaisePartyRecordStatusValue(profile, 0x4000);
-    btlGetSideIndexedActorStatusTable(actor->resourceKind, actor->resourceIndex);
+    btlGetActorResourceBankEntry(actor->resourceKind, actor->resourceIndex);
     if (!(command->pendingFlags & 0x100)) {
         soundTask = btlCreateHookedUnitSoundTask(actor, 11);
         btlStartTask(soundTask);

@@ -5,7 +5,7 @@
 #include "mnu_title_sound.h"
 #include "mnu_title_sound_buffer_status.h"
 #include "sdf_vu0.h"
-#include "btl_actor_status_table_api.h"
+#include "btl_actor_resource_bank_api.h"
 #include "sdf_trig.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
@@ -1115,7 +1115,7 @@ void btlApplyRadialLinkageFormation(BtlLinkedCommand *command) {
         if (selector == -1) {
             continue;
         }
-        actorStatusAddress = btlGetSideIndexedActorStatusTable(actor->resourceKind, actor->resourceIndex);
+        actorStatusAddress = btlGetActorResourceBankEntry(actor->resourceKind, actor->resourceIndex);
         spacing = (const BtlFormationSpacingCell *)(selector * sizeof(BtlFormationSpacingCell) + (s32)(u32)actorStatusAddress + 0x38);
         distance = spacing->spacing * participants[i]->scale + target->reach * target->scale;
         btlCopyUnitCurrentPosition(participants[i], oldPosition);

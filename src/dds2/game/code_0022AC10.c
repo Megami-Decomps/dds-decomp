@@ -9,7 +9,7 @@
 #include "btl_resolve_unit_value_api.h"
 #include "sdf_delayed_resource_check_api.h"
 #include "sdf_vu0.h"
-#include "btl_actor_status_table_api.h"
+#include "btl_actor_resource_bank_api.h"
 #include "btl_actor_entry_code_api.h"
 #include "scr_integer_return_value_api.h"
 #include "btl_script_resource_api.h"
@@ -2731,7 +2731,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
         }
         parameters = btlSelectSharedOrIndexedTransformParameters(unit->resourceKind, unit->resourceIndex);
         if (dds3PadBitTable[2] < 0) {
-            record = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->resourceIndex);
+            record = (BtlActorStatusRecord *)btlGetActorResourceBankEntry(unit->resourceKind, unit->resourceIndex);
             parameters->reach = record->reach;
             parameters->height = record->height;
             parameters->position[0] = record->position[0];
@@ -2753,7 +2753,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
     case 9:
         unit = battle->debug.selectedUnit;
         D_00436D90 = unit;
-        record = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->resourceIndex);
+        record = (BtlActorStatusRecord *)btlGetActorResourceBankEntry(unit->resourceKind, unit->resourceIndex);
         memcpy(&btlDebugEditorActorStatus, record, sizeof(BtlActorStatusRecord));
         memcpy(&btlDebugEditorMotionSlot, &record->motions[D_00436E58], sizeof(BtlActorMotionSlot));
         btlReturnDebugMenuSetupWord((u32)&btlDebugActorStatusEditor);
@@ -2875,7 +2875,7 @@ void btlWriteActorModelTableFile(void) {
     u32 i;
 
     btlGetRuntime();
-    record = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(unit->resourceKind, unit->resourceIndex);
+    record = (BtlActorStatusRecord *)btlGetActorResourceBankEntry(unit->resourceKind, unit->resourceIndex);
     buffer = sdfAllocAuto(10000);
     cursor = buffer;
     if (unit->status.flags & 0x200) {

@@ -36,7 +36,7 @@ extern void itfMesMngRequestMessageRelease(s32 window, s32 releasePrimaryBlock);
 /* Original-style implicit int, kept: matched code depends on it: btlCountEligibleLinkedActors. */
 
 extern void itfSetTextDrawLimit(s32 limit);
-#include "btl_actor_status_table_api.h"
+#include "btl_actor_resource_bank_api.h"
 #include "btl_actor_entry_code_api.h"
 #include "btl_model_record.h"
 #include "dsp_channel.h"
@@ -802,7 +802,7 @@ BtlBattleRecordEligibilityResult btlIsBattleRecordEligible(
         callback(actor, target, speciesIndex) == BTL_BATTLE_RECORD_OVERRIDE_REJECT) {
         return BTL_BATTLE_RECORD_INELIGIBLE;
     }
-    resource = (u8 *)btlGetSideIndexedActorStatusTable(actor->resourceKind, actor->species);
+    resource = (u8 *)btlGetActorResourceBankEntry(actor->resourceKind, actor->species);
     if (((BtlActorStatusRecord *)resource)->motions[recordIndex].moveKind != 2) {
         return BTL_BATTLE_RECORD_INELIGIBLE;
     }
