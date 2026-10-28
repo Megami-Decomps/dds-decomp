@@ -434,7 +434,7 @@ EffResourceDescriptor *dds3EffectFileListWindowCreate(EffResourceList *list) {
 
     resource->x = 0;
     resource->y = 0xC8;
-    resource->result = 0;
+    resource->selectionResult = EFF_RESOURCE_BROWSER_RESULT_PENDING;
     resource->resourceCount = list->resourceCount;
     resource->word10 = 0;
     resource->selectedIndex = 0;
@@ -455,7 +455,7 @@ EffResourceDescriptor *dds3EffectFileListWindowCreate(EffResourceList *list) {
 
 /* Navigate the resource list, update its held preview, and submit fifteen rows. */
 /* Retail 0x001953AC reloads selectedEntry after the case-1 texture update. */
-s32 dds3EffectFileListWindowDraw(EffResourceDescriptor *descriptor) {
+EffResourceBrowserResult dds3EffectFileListWindowDraw(EffResourceDescriptor *descriptor) {
     EffResourceListNode *visibleEntry;
     sdfDrawTag_t *packetList;
     SdfPoolNode *surface;
@@ -466,9 +466,9 @@ s32 dds3EffectFileListWindowDraw(EffResourceDescriptor *descriptor) {
         descriptor->repeatDelay--;
     } else if (descriptor->firstVisibleEntry == NULL) {
         if (D_0040B7DB[0] < 0) {
-            descriptor->result = 2;
+            descriptor->selectionResult = EFF_RESOURCE_BROWSER_RESULT_CANCELED;
         }
-    } else if (descriptor->result == 0) {
+    } else if (descriptor->selectionResult == EFF_RESOURCE_BROWSER_RESULT_PENDING) {
         EffResourceListNode *navigationEntry;
         EffResourceListNode *selectedEntry;
         s32 navigationStep;
@@ -535,9 +535,9 @@ s32 dds3EffectFileListWindowDraw(EffResourceDescriptor *descriptor) {
                 }
             }
         } else if (dds3PadBitTable[3] < 0) {
-            descriptor->result = 2;
+            descriptor->selectionResult = EFF_RESOURCE_BROWSER_RESULT_CANCELED;
         } else if (dds3PadBitTable[1] < 0) {
-            descriptor->result = 1;
+            descriptor->selectionResult = EFF_RESOURCE_BROWSER_RESULT_CONFIRMED;
         } else {
             EffResourceListNode *cachedEntry = descriptor->cachedEntry;
             selectedEntry = descriptor->selectedEntry;
@@ -605,7 +605,7 @@ s32 dds3EffectFileListWindowDraw(EffResourceDescriptor *descriptor) {
     }
     surface = &sdfGrOtTable[descriptor->drawSurface];
     surface->append(surface, packetList);
-    return descriptor->result;
+    return descriptor->selectionResult;
 }
 
 
@@ -634,7 +634,7 @@ u32 effGetWorkParam(EffResourceDescriptor *work) {
 
 /* Return the browser selection result as its native word. */
 u32 dds3EffectFileListWindowGetState(EffResourceDescriptor *work) {
-    return work->result;
+    return work->selectionResult;
 }
 
 /* Format the selected filename and return its resource category.

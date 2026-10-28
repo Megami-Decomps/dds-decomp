@@ -29,12 +29,18 @@ typedef struct EffResourceList {
 typedef char EffResourceList_size_must_be_12[(sizeof(EffResourceList) == 12) ? 1 : -1];
 typedef char EffResourceListNode_size_must_be_60[(sizeof(EffResourceListNode) == 60) ? 1 : -1];
 
+typedef s32 EffResourceBrowserResult;
+enum EffResourceBrowserResultValue {
+    EFF_RESOURCE_BROWSER_RESULT_PENDING = 0,
+    EFF_RESOURCE_BROWSER_RESULT_CONFIRMED = 1,
+    EFF_RESOURCE_BROWSER_RESULT_CANCELED = 2,
+};
 
 /* Complete 0x44-byte browser owner returned by dds3EffectFileListWindowCreate. */
 typedef struct EffResourceDescriptor {
     s32 x;
     s32 y;
-    s32 result;
+    EffResourceBrowserResult selectionResult; /* 0x08 */
     s32 resourceCount;
     u32 word10;
     s32 selectedIndex;
@@ -67,7 +73,7 @@ void dds3EffectFileListWindowSetPadWait(EffResourceDescriptor *work, u32 surface
 void dds3EffectFileListWindowSetWindowColor(EffResourceDescriptor *work, u32 borderColor, u32 fillColor);
 void dds3EffectListSetTexture(EffResourceDescriptor *work, const char *textureResource);
 EffResourceList *dds3EffectFileListCreate(const char *path, s32 flags);
-s32 dds3EffectFileListWindowDraw(EffResourceDescriptor *work);
+EffResourceBrowserResult dds3EffectFileListWindowDraw(EffResourceDescriptor *work);
 void dds3EffectFileListWindowDrawSprite(EffResourceDescriptor *overlay);
 
 #endif
