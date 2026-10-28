@@ -1057,7 +1057,7 @@ u32 btlPickLinkedPartyTarget(ActionStateLink *task, u32 input) {
     return 1;
 }
 
-s32 btlSelectTargetsByMode(ActionStateLink *task, s32 mode) {
+s32 btlSelectTargetsByMode(ActionStateLink *task, DatUnitId targetUnitId) {
     BtlCommandTargetPolicy selectionPolicy;
     u32 count;
     BtlIndexList *list;
@@ -1071,8 +1071,8 @@ s32 btlSelectTargetsByMode(ActionStateLink *task, s32 mode) {
 
         for (i = 0; i < count; i++) {
             unit = btlGetIndexListEntry(list, i);
-            if (mode != 0) {
-                if (unit->partyRecord.unitId == mode) {
+            if (targetUnitId != 0) {
+                if (unit->partyRecord.unitId == targetUnitId) {
                     picked[i] = 1;
                 }
             } else if (task->lastMode == unit->partyRecord.unitId) {
@@ -1081,7 +1081,7 @@ s32 btlSelectTargetsByMode(ActionStateLink *task, s32 mode) {
         }
         unit = btlSelectRandomUnitFromMask(list, picked, count);
         btlAppendIndexListEntry(task->indexWork.indices, unit);
-        if (mode == 0) {
+        if (targetUnitId == 0) {
             task->lastMode = unit->partyRecord.unitId;
         }
         break;

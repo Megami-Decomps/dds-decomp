@@ -35,6 +35,7 @@
 #include "btl_model_record.h"
 #include "pcp_vu0.h"
 #include "dat_command.h"
+#include "dat_unit_id.h"
 #include "btl_boss_debug_api.h"
 #include "eff.h"
 /* Declared before first use (were implicit int). */
@@ -87,7 +88,7 @@ extern void btlAppendEffectActorToCommandIndices(ActionStateLink *, s32);
 
 extern void btlAppendSelectedOrCurrentActorTarget(ActionStateLink *, s32);
 
-extern void btlSelectTargetsByMode(ActionStateLink *, s32);
+extern void btlSelectTargetsByMode(ActionStateLink *, DatUnitId targetUnitId);
 
 
 extern s8 dds3PadButtonState[];

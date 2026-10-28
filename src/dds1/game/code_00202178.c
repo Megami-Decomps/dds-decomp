@@ -29,6 +29,7 @@
 #include "btl_affinity_row.h"
 #include "dat_affinity_selector_type.h"
 #include "dat_effective_affinity_result_type.h"
+#include "dat_unit_id.h"
 #include "btl_command.h"
 #include "btl_command_affinity_api.h"
 #include "btl_model_record.h"
@@ -473,7 +474,7 @@ s32 btlSelectTargetsWithoutActionMask(BtlTask *actor, s32 mask) {
     return 1;
 }
 
-s32 btlSelectTargetsByMode(BtlTask *actor, s32 mode) {
+s32 btlSelectTargetsByMode(BtlTask *actor, DatUnitId targetUnitId) {
     BtlCommandTargetPolicy selectionPolicy;
     u32 count;
     u16 flags[12];
@@ -484,7 +485,7 @@ s32 btlSelectTargetsByMode(BtlTask *actor, s32 mode) {
     case 0:
         memset(flags, 0, sizeof(flags));
         for (i = 0; i < count; i++) {
-            if (((BtlUnit *)btlGetIndexListEntry(list, i))->partyRecord.unitId == mode) {
+            if (((BtlUnit *)btlGetIndexListEntry(list, i))->partyRecord.unitId == targetUnitId) {
                 flags[i] = 1;
             }
         }

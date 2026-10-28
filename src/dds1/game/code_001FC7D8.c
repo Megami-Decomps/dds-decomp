@@ -30,6 +30,7 @@
 #include "btl_task_args.h"
 #include "pcp_vu0.h"
 #include "dat_command.h"
+#include "dat_unit_id.h"
 #include "eff.h"
 /* Declared before first use (were implicit int). */
 extern s32 btlCreateAnalysisPanelTask(BtlUnit *unit, s32 duration);
@@ -53,7 +54,7 @@ extern void btlSelectHighestCurrentMpTarget(BtlTask *, s32);
 extern s32 btlSelectTargetsPassingCheck(BtlTask *, s32);
 extern void btlSelectTargetsByActionMask(BtlTask *, s32);
 extern void btlSelectTargetsWithoutActionMask(BtlTask *, s32);
-extern void btlSelectTargetsByMode(BtlTask *, s32);
+extern void btlSelectTargetsByMode(BtlTask *, DatUnitId targetUnitId);
 extern void btlPickUnlinkedPartyTarget(BtlTask *, u32);
 extern void btlPickLinkedPartyTarget(BtlTask *, u32);
 extern void btlAppendSelfAfterTargetScan(BtlTask *);
