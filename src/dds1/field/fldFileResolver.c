@@ -3817,7 +3817,150 @@ void fldCamUpdateFollow(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", fldUpdateCameraFollowPlayer);
+extern s32 D_003BAB50;
+
+extern s32 D_003BAD30;
+
+extern void dds3CameraObjectBasicSetWorldEye(dds3Basic_t *camera, const u128 *worldEye);
+
+void fldUpdateCameraFollowPlayer(void) {
+    FldLookAtVector nearPoint;
+    f32 referencePoint[4] __attribute__((aligned(16)));
+    FldLookAtVector farPoint;
+    FldLookAtVector referenceCopy;
+    FldLookAtVector farCopy;
+    FldLookAtVector collisionPoint;
+    dds3Basic_t **sceneSlot = fldGetPlayerSceneStateAddress();
+    dds3Basic_t *node;
+    /* Disjoint phases: homogeneous W first, then the tilt-distance divisor. */
+    f32 cameraScalar = 1.0f;
+    f32 heightOffset;
+    f32 baseDistance;
+    f32 fallbackLength;
+    f32 collisionLength;
+    f32 ratio;
+    f32 fx;
+    f32 fy;
+    f32 fz;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    f32 unitX;
+    f32 unitY;
+    f32 unitZ;
+
+    nearPoint.f[0] = fldGlobalBase.x - sdfSin(fldGlobalBase.negatedAngle * 3.14f / 180.0f) * 50.0f;
+    nearPoint.f[1] = fldGlobalBase.y + fldCameraFollowRows[fldGlobalBase.rowIdx].y;
+    nearPoint.f[2] = fldGlobalBase.z - sdfCos(fldGlobalBase.negatedAngle * 3.14f / 180.0f) * 50.0f;
+    nearPoint.f[3] = cameraScalar;
+    nearPoint.f[1] += fldGlobalBase.cameraTilt;
+    if (fldGlobalBase.cameraTiltActive) {
+        nearPoint.f[0] = fldLookAtNearPoint[0] + (nearPoint.f[0] - fldLookAtNearPoint[0]) * 0.5f;
+        nearPoint.f[1] = fldLookAtNearPoint[1] + (nearPoint.f[1] - fldLookAtNearPoint[1]) * 0.5f;
+        nearPoint.f[2] = fldLookAtNearPoint[2] + (nearPoint.f[2] - fldLookAtNearPoint[2]) * 0.5f;
+    } else {
+        nearPoint.f[0] = fldLookAtNearPoint[0] + (nearPoint.f[0] - fldLookAtNearPoint[0]) * 0.5f;
+        nearPoint.f[1] = fldLookAtNearPoint[1] + (nearPoint.f[1] - fldLookAtNearPoint[1]) * 0.125f;
+        nearPoint.f[2] = fldLookAtNearPoint[2] + (nearPoint.f[2] - fldLookAtNearPoint[2]) * 0.5f;
+    }
+    dds3CameraObjectBasicSetWorldEye(*sceneSlot, &nearPoint.q);
+    referencePoint[0] = fldGlobalBase.x;
+    referencePoint[1] = fldGlobalBase.y + fldCameraFollowRows[fldGlobalBase.rowIdx].y;
+    referencePoint[2] = fldGlobalBase.z;
+    if (fldGlobalBase.cameraTiltActive) {
+        cameraScalar = 3.0f;
+    } else {
+        cameraScalar = 1.0f;
+    }
+    fx = fldGlobalBase.x + sdfSin(fldGlobalBase.negatedAngle * 3.14f / 180.0f) *
+        (fldCameraFollowRows[fldGlobalBase.rowIdx].dist / cameraScalar);
+    farPoint.f[0] = fx;
+    fy = fldGlobalBase.y + fldCameraFollowRows[fldGlobalBase.rowIdx].targetY;
+    farPoint.f[1] = fy;
+    fz = fldGlobalBase.z + sdfCos(fldGlobalBase.negatedAngle * 3.14f / 180.0f) *
+        (fldCameraFollowRows[fldGlobalBase.rowIdx].dist / cameraScalar);
+    farPoint.f[2] = fz;
+    farPoint.f[3] = 1.0f;
+    if (D_003BAB50 != 0) {
+        heightOffset = fldGlobalBase.unk60 + (fldGlobalBase.cameraSupportHeightOffset - fldGlobalBase.unk60) * 0.0625f;
+        fldGlobalBase.unk60 = fldGlobalBase.cameraSupportHeightOffset;
+        fy = farPoint.f[1] + heightOffset;
+        farPoint.f[1] = fy;
+    } else {
+        fldGlobalBase.unk60 = fldGlobalBase.cameraSupportHeightOffset = 0.0f;
+    }
+    dds3SetPosPoseSet(*sceneSlot, &farPoint.q);
+    fx = farPoint.f[0];
+    dx = fx - referencePoint[0];
+    fy = farPoint.f[1];
+    dy = fy - referencePoint[1];
+    fz = farPoint.f[2];
+    dz = fz - referencePoint[2];
+    baseDistance = fsqrtf(dx * dx + dy * dy + dz * dz);
+    SDF_VU0_COPYVECTOR(&referenceCopy, &referencePoint);
+    SDF_VU0_COPYVECTOR(&farCopy, &farPoint);
+    if (D_003BAD14 > D_003BAD10) {
+        D_003BAD14 -= 1000.0f;
+        if (D_003BAD14 < D_003BAD10) {
+            D_003BAD14 = D_003BAD10;
+        }
+    } else if (D_003BAD14 < D_003BAD10) {
+        D_003BAD14 += 1000.0f;
+        if (D_003BAD10 < D_003BAD14) {
+            D_003BAD14 = D_003BAD10;
+        }
+    }
+    if (D_003BAB50 != 0) {
+        fldHitChkCamera(farCopy.f, referenceCopy.f, collisionPoint.f);
+        dx = farPoint.f[0] - collisionPoint.f[0];
+        dy = farPoint.f[1] - collisionPoint.f[1];
+        dz = farPoint.f[2] - collisionPoint.f[2];
+        if (baseDistance < fsqrtf(dx * dx + dy * dy + dz * dz)) {
+            dx = farPoint.f[0] - referencePoint[0];
+            dy = farPoint.f[1] - referencePoint[1];
+            dz = farPoint.f[2] - referencePoint[2];
+            fallbackLength = fsqrtf(dx * dx + dy * dy + dz * dz);
+            collisionPoint.f[0] = referencePoint[0] + dx / fallbackLength * 45.0f;
+            collisionPoint.f[1] = referencePoint[1] + dy / fallbackLength * 45.0f;
+            collisionPoint.f[2] = referencePoint[2] + dz / fallbackLength * 45.0f;
+        }
+        ratio = D_003BAD10 / D_003BAD18;
+        dx = collisionPoint.f[0] - referencePoint[0];
+        dy = collisionPoint.f[1] - referencePoint[1];
+        dz = collisionPoint.f[2] - referencePoint[2];
+        collisionLength = fsqrtf(dx * dx + dy * dy + dz * dz);
+        unitX = (referencePoint[0] - collisionPoint.f[0]) / collisionLength;
+        unitY = (referencePoint[1] - collisionPoint.f[1]) / collisionLength;
+        unitZ = (referencePoint[2] - collisionPoint.f[2]) / collisionLength;
+        if (collisionLength * ratio < D_003BAD14) {
+            D_003BAD14 = collisionLength * ratio;
+        }
+        fx = referencePoint[0] - unitX * D_003BAD14;
+        fy = referencePoint[1] - unitY * D_003BAD14;
+        fz = referencePoint[2] - unitZ * D_003BAD14;
+        farPoint.f[0] = fx;
+        farPoint.f[1] = fy;
+        farPoint.f[2] = fz;
+    }
+    fx = fldCamTarget[0] + (fx - fldCamTarget[0]) * 0.5f;
+    farPoint.f[0] = fx;
+    if (D_003BAD30 != 0) {
+        fy = fldCamTarget[1] + (fy - fldCamTarget[1]) * 0.5f;
+        farPoint.f[1] = fy;
+    } else {
+        fy = fldCamTarget[1] + (fy - fldCamTarget[1]) * 0.125f;
+        farPoint.f[1] = fy;
+    }
+    node = *sceneSlot;
+    fz = fldCamTarget[2] + (fz - fldCamTarget[2]) * 0.5f;
+    farPoint.f[2] = fz;
+    dds3SetPosPoseSet(node, &farPoint.q);
+    SDF_VU0_COPYVECTOR(fldLookAtNearPoint, &nearPoint);
+    SDF_VU0_COPYVECTOR(fldCamTarget, &farPoint);
+    node = *sceneSlot;
+    node->ops->update(node);
+    fldUpdateLookAtSegmentDistance();
+}
 
 extern void dds3CameraObjectBasicSetWorldEye(dds3Basic_t *camera, const u128 *worldEye);
 

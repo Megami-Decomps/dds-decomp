@@ -5,8 +5,10 @@ it, decompile it, verify it, name it, and share it with the other game.
 
 ## Matching rules
 
-A function counts as decompiled only when it compiles to exactly the retail
-bytes, and it has to reach that the way the original developers would have.
+A function counts as decompiled only when plausible, ordinary source compiles
+to exactly the retail bytes and passes the rules below. Preserve the observed
+behavior and explain compiler-sensitive choices with evidence. Exact bytes do
+not prove that we recovered the original source spelling or variable names.
 
 - **No fakematches.** Inline asm is allowed only for COP2/VU0 and MMI
   sequences gcc 2.96 cannot emit from C, under the rules in docs/idioms.md
@@ -70,11 +72,31 @@ bytes, and it has to reach that the way the original developers would have.
   division's zero check survives) and `mnuDrawCommandPhaseTransition` (case 14
   repeats case 0's clamp) are examples.
 - These three are the only exceptions to the dead-variable and dead-store ban.
-- **One temporary for two values.** A local may hold two successive values of
-  the same kind (two lengths, two scale factors, two loop counters) when its
-  name fits both uses and a `cc1probe` trace shows the allocation depends on
-  the values sharing one pseudo. Two unrelated values in one variable, or a
-  value kept only to tie registers, are still dummy variables.
+- **Scratch scalar reuse across disjoint phases.** An ordinary local may hold
+  successive values, including values with different semantic roles, when all
+  of these hold:
+  - Each value has real program consumers. No extra reads, writes, arithmetic,
+    or artificial lifetime extensions are added merely to tie registers.
+  - The value lifetimes are disjoint, every path reaching a use supplies the
+    correct definition before that use, and the scalar's address does not
+    escape. Reuse must introduce no behavioral coupling or aliasing between
+    phases; preserve the original operations, evaluation requirements, calls,
+    and observable memory effects.
+  - The type is truthful for every value. Use a name that fits all uses, or a
+    neutral scratch name with comments identifying the distinct phases; do not
+    disguise different roles under a misleading semantic name.
+  - A qualified trace of the real compiler explains the matching dependency
+    on shared pseudo ownership, rather than merely observing that retail uses
+    the same physical register. Record the deciding pass and property in a
+    comment or landing note, with ordinary/probed output parity verified.
+  - Independent semantic review confirms these conditions, and the complete
+    affected owners remain exact in every affected game. The normal complete
+    build and test requirements still apply before publication.
+  This is reuse of live scalar storage, not an exception to the dead-variable
+  or dead-store ban. It does not permit register pinning, fake arithmetic,
+  dummy uses, false types or qualifiers, unjustified compiler flags, or wrappers
+  created solely to steer codegen. The original spelling remains unknown;
+  see [player-follow camera](matching/player-follow-camera.md) for an example.
 - **A one-pass block inside a function.** A one-pass `do { ... } while (0)` or
   a forward `goto` around a few statements is allowed when a `cc1probe` trace
   or a matched sibling in the same TU or the twin shows the block shape the
