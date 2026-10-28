@@ -21,6 +21,7 @@
 #include "fld_movement_hold_state_api.h"
 #include "fld_scene_ready_api.h"
 #include "fld_area_resource_ready_api.h"
+#include "fld_area_resource_name_change_api.h"
 #include "fld_area_resource_request_reuse_api.h"
 #include "fld_file_io_priority_state.h"
 #include "fld_location_coordinate_flags.h"
@@ -1415,7 +1416,7 @@ void fldFormatAreaResourceName(char *out) {
     sprintf(out, "%sf%03d_000.LB", directory, area);
 }
 
-u8 fldHasAreaResourceNameChanged(void) {
+FldAreaResourceNameChangeResult fldHasAreaResourceNameChanged(void) {
     char buf[32];
 
     fldFormatAreaResourceName(buf);
@@ -1527,7 +1528,6 @@ extern void fldDrwZAlloc(void);
 #include "fld_object_slot_api.h"
 extern void fldReleaseResourceSlots(void);
 extern void fldCreateResourceScriptObjects(void);
-extern u8 fldHasAreaResourceNameChanged(void);
 extern void fldLoadFieldPack(void);
 extern void fldFreePac0(void);
 const char D_00413128[] = "%sk%03d_%03d.f2";
@@ -1579,7 +1579,8 @@ const struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) 
     if (fldGlobalBase.reuseAreaResources == 0) {
         fldInitializeMenuResources();
         fldLoadFieldPack();
-    } else if (fldHasAreaResourceNameChanged() != 0 || (u32)(fldGlobalBase.area - 0x1B) < 2) {
+    } else if (fldHasAreaResourceNameChanged() != FLD_AREA_RESOURCE_NAME_UNCHANGED ||
+               (u32)(fldGlobalBase.area - 0x1B) < 2) {
         fldReleaseResourceSlots();
         fldReleaseSceneRecordChunk();
         fldFreePac0();
