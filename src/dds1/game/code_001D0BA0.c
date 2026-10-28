@@ -1930,12 +1930,13 @@ BtlRuntimeTask *btlFindTaskByKind(u16 kind) {
 
 /* Count all registrations, including tasks awaiting startup or release. */
 s32 btlCountRegisteredTasks(void) {
-    s32 address;
+    BtlActorWork *actorWork;
+    BtlRuntimeTask *task;
     s32 count;
 
-    address = (s32)(u32)btlGetRuntime();
+    actorWork = btlGetRuntime();
     count = 0;
-    for (address = (s32)((BtlActorWork *)address)->taskHead; address != 0; address = (s32)((BtlRuntimeTask *)address)->next) {
+    for (task = actorWork->taskHead; task != 0; task = task->next) {
         count = count + 1;
     }
     return count;

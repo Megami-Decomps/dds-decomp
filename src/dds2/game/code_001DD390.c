@@ -2024,12 +2024,13 @@ BtlRuntimeTask *btlFindTaskByKind(u16 kind) {
 
 /* Count all registrations, including tasks awaiting startup or release. */
 s32 btlCountRegisteredTasks(void) {
-    s32 task;
+    BtlState *state;
+    BtlRuntimeTask *task;
     s32 count;
 
-    task = (s32)(u32)btlGetRuntime();
+    state = btlGetRuntime();
     count = 0;
-    for (task = (s32)((BtlState *)task)->taskHead; task != 0; task = (s32)((BtlRuntimeTask *)task)->next) {
+    for (task = state->taskHead; task != 0; task = task->next) {
         count = count + 1;
     }
     return count;
