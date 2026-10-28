@@ -36,6 +36,7 @@
 #include "sdf_sif_command.h"
 #include "pcp_vu0.h"
 #include "mnu.h"
+#include "mnu_party_row_draw_state.h"
 #include "mnu_ability_target_category.h"
 #include "mnu_entry_cost_api.h"
 #include "mnu_entry_use_status_api.h"
@@ -195,13 +196,13 @@ extern s32 D_00437CBC;
 extern SdfPoolNode D_00380708;
 extern s8 dds3PadButtonState[];
 
-extern s32 mnuGetPanelWindowTransitionState(MenuPageWindow *window, s32 mode);
+extern MnuPartyRowDrawState mnuGetPanelWindowTransitionState(MenuPageWindow *window, s32 mode);
 extern void mnuBlendPanelSlots(EffectSlotSet *dst, EffectSlotSet *src, s32 amount);
 
 /* Draw the window surface; while the window is in selection state 1, blend its second resource in. */
 void mnuDrawPanelWindowSurface(s32 x, s32 y, s32 z, MenuPageWindow *window, s32 mode, EffectSlotSet **resources, u32 alpha, s32 surface) {
     EffectSlotSet *resource;
-    s32 blendState = 1;
+    MnuPartyRowDrawState blendState = MNU_PARTY_ROW_DRAW_STATE_ACTIVE;
 
     if (mnuGetPanelWindowTransitionState(window, mode) == blendState) {
         mnuBlendPanelSlots(resources[1], resources[0], window->fade);
@@ -842,7 +843,7 @@ void mnuDrawPartyMemberCommandPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     }
     selection = mnuClearWindowPendingFlagAfterSelection(
         x + framePositions[2], y + framePositions[3], z,
-        &menu->flags, panelIndex, surface);
+        menu, panelIndex, surface);
     effDrawTextureSlotWithBlendedCornerColors(x + framePositions[2], y + framePositions[3], z,
                   transition, 1, panel->frame[selection + 4], 0, surface);
 
@@ -955,7 +956,7 @@ void mnuDrawPartyMemberStatusPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     }
     selection = mnuClearWindowPendingFlagAfterSelection(
         x + framePositions[2], y + framePositions[3], z,
-        &menu->flags, panelIndex, surface);
+        menu, panelIndex, surface);
     effDrawTextureSlotWithBlendedCornerColors(x + framePositions[2], y + framePositions[3], z,
                   alpha, 1, panel->frame[selection + 4], 0, surface);
     if (panel->hp.textures[0] != 0) {

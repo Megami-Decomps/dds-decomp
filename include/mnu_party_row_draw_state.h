@@ -1,0 +1,13 @@
+#ifndef MNU_PARTY_ROW_DRAW_STATE_H
+#define MNU_PARTY_ROW_DRAW_STATE_H
+
+#include "common.h"
+
+typedef s32 MnuPartyRowDrawState;
+enum {
+    MNU_PARTY_ROW_DRAW_STATE_NONE = 0,
+    MNU_PARTY_ROW_DRAW_STATE_ACTIVE = 1,
+    MNU_PARTY_ROW_DRAW_STATE_PRIMARY_CURSOR = 2
+};
+
+#endif /* MNU_PARTY_ROW_DRAW_STATE_H */

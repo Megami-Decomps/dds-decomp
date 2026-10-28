@@ -6,6 +6,7 @@
 #include "eff_resource_records.h"
 #include "mnu_input.h"
 #include "mnu.h"
+#include "mnu_party_row_draw_state.h"
 #include "sdf_resource.h"
 #include "mnu_list.h"
 #include "eff.h"
@@ -2181,10 +2182,10 @@ void mnuStepPartyPanelListFromInput(s32 mode, MenuPageWindow *window) {
     mnuClearPageSelection(window);
 }
 
-/* Classify a party row while no selection is pending: 1 when it is the active
- * list's cursor row (or a highlighted frontline row), 2 when only the primary
- * list's cursor rests on it during secondary selection, otherwise 0. */
-s32 mnuGetPartyRowDrawState(MenuPageWindow *window, s32 row) {
+/* Classify a party row while no selection is pending: ACTIVE marks the active
+ * cursor or a highlighted frontline row; PRIMARY_CURSOR marks the primary
+ * cursor during secondary selection; otherwise return NONE. */
+MnuPartyRowDrawState mnuGetPartyRowDrawState(MenuPageWindow *window, s32 row) {
     u32 flags;
     s32 mode;
     s32 target;
@@ -2194,7 +2195,7 @@ s32 mnuGetPartyRowDrawState(MenuPageWindow *window, s32 row) {
     target = 0;
     mode = 0;
     if (window->selected >= 0) {
-        return 0;
+        return MNU_PARTY_ROW_DRAW_STATE_NONE;
     }
     flags = window->flags;
     if (flags & 4) {
@@ -2223,22 +2224,22 @@ s32 mnuGetPartyRowDrawState(MenuPageWindow *window, s32 row) {
     switch (mode) {
     case 1:
         if (target == 1 || highlighted) {
-            return 1;
+            return MNU_PARTY_ROW_DRAW_STATE_ACTIVE;
         }
         break;
     case 2:
         if (target == mode || highlighted) {
-            return 1;
+            return MNU_PARTY_ROW_DRAW_STATE_ACTIVE;
         }
         if (target == 1) {
-            return 2;
+            return MNU_PARTY_ROW_DRAW_STATE_PRIMARY_CURSOR;
         }
         break;
     }
-    return 0;
+    return MNU_PARTY_ROW_DRAW_STATE_NONE;
 }
 
-extern s32 mnuGetPartyRowDrawState(MenuPageWindow *, s32);
+extern MnuPartyRowDrawState mnuGetPartyRowDrawState(MenuPageWindow *, s32);
 extern void uiDrawSurfaceAtNearDepth(u32);
 
 /* Draw the party row's frame variant and restore the near-depth surface. */
@@ -2247,7 +2248,7 @@ void mnuDrawPartyRowFrameVariant(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     s32 alpha = menu->fade / 2 + 0x80;
     u16 *partyFlags = &DDS3_GBWK->party[menu->records->slots[index].index].flags;
 
-    if (mnuGetPartyRowDrawState(menu, index) == 1 || force != 0) {
+    if (mnuGetPartyRowDrawState(menu, index) == MNU_PARTY_ROW_DRAW_STATE_ACTIVE || force != 0) {
         if (*partyFlags & 2) {
             effDrawSpriteWithCornerFade(x + 0x150, y + 0xA8, z, alpha, 1, menu->resources, 11, context);
             effDrawSpriteWithCornerFade(x + 0x660, y + 0x110, z, alpha, 1, menu->resources, 16, context);
@@ -2264,13 +2265,13 @@ void mnuDrawPartyRowFrameVariant(s32 x, s32 y, s32 z, MenuPageWindow *menu,
 }
 
 s32 mnuClearWindowPendingFlagAfterSelection(s32 unusedX, s32 unusedY, s32 unusedDepth, MenuPageWindow *window, s32 option) {
-    s32 result = mnuGetPartyRowDrawState(window, option);
+    MnuPartyRowDrawState result = mnuGetPartyRowDrawState(window, option);
 
     switch (result) {
-    case 1:
+    case MNU_PARTY_ROW_DRAW_STATE_ACTIVE:
         window->flags &= ~2;
         return 1;
-    case 2:
+    case MNU_PARTY_ROW_DRAW_STATE_PRIMARY_CURSOR:
         window->flags &= ~2;
         return 1;
     default:
@@ -2475,7 +2476,7 @@ void mnuBlendPanelSlots(EffectSlotSet *dst, EffectSlotSet *src, s32 amount) {
 }
 
 void mnuDrawPartyPanelSlotWithBlend(s32 x, s32 y, s32 depth, MenuPageWindow *window, s32 index, EffectSlotSet **pair, s32 flag, s32 surface) {
-    s32 blendState = 1;
+    MnuPartyRowDrawState blendState = MNU_PARTY_ROW_DRAW_STATE_ACTIVE;
     s32 alpha = window->transitionValue;
     EffectSlotSet *resource;
 

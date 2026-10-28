@@ -9,15 +9,16 @@
 #include "dat_command.h"
 #include "eff.h"
 #include "mnu.h"
+#include "mnu_party_row_draw_state.h"
 #include "mnu_list.h"
 #include "mnu_item_requirement_api.h"
 #include "mdl_flag_api.h"
 #include "btl.h"
 
-/* Classify a party row while no selection is pending: 1 when it is the active
- * list's cursor row (or a highlighted frontline row), 2 when only the primary
- * list's cursor rests on it during secondary selection, otherwise 0. */
-s32 mnuGetPanelWindowTransitionState(MenuPageWindow *window, s32 row) {
+/* Classify a party row while no selection is pending: ACTIVE marks the active
+ * cursor or a highlighted frontline row; PRIMARY_CURSOR marks the primary
+ * cursor during secondary selection; otherwise return NONE. */
+MnuPartyRowDrawState mnuGetPanelWindowTransitionState(MenuPageWindow *window, s32 row) {
     u32 flags;
     s32 mode;
     s32 target;
@@ -27,7 +28,7 @@ s32 mnuGetPanelWindowTransitionState(MenuPageWindow *window, s32 row) {
     target = 0;
     mode = 0;
     if (window->selected >= 0) {
-        return 0;
+        return MNU_PARTY_ROW_DRAW_STATE_NONE;
     }
     flags = window->flags;
     if (flags & 4) {
@@ -56,32 +57,32 @@ s32 mnuGetPanelWindowTransitionState(MenuPageWindow *window, s32 row) {
     switch (mode) {
     case 1:
         if (target == 1 || highlighted) {
-            return 1;
+            return MNU_PARTY_ROW_DRAW_STATE_ACTIVE;
         }
         break;
     case 2:
         if (target == mode || highlighted) {
-            return 1;
+            return MNU_PARTY_ROW_DRAW_STATE_ACTIVE;
         }
         if (target == 1) {
-            return 2;
+            return MNU_PARTY_ROW_DRAW_STATE_PRIMARY_CURSOR;
         }
         break;
     }
-    return 0;
+    return MNU_PARTY_ROW_DRAW_STATE_NONE;
 }
 INCLUDE_ASM(const s32, "game/code_002BD5C8", mnuDrawPartyStatusValuePanel);
 
 s32 mnuClearWindowPendingFlagAfterSelection(s32 unusedX, s32 unusedY, s32 unusedDepth,
-                                            u32 *windowFlags, s32 panelIndex) {
-    s32 result = mnuGetPanelWindowTransitionState(windowFlags, panelIndex);
+                                            MenuPageWindow *window, s32 panelIndex) {
+    MnuPartyRowDrawState result = mnuGetPanelWindowTransitionState(window, panelIndex);
 
     switch (result) {
-    case 1:
-        *windowFlags &= ~2;
+    case MNU_PARTY_ROW_DRAW_STATE_ACTIVE:
+        window->flags &= ~2;
         return 1;
-    case 2:
-        *windowFlags &= ~2;
+    case MNU_PARTY_ROW_DRAW_STATE_PRIMARY_CURSOR:
+        window->flags &= ~2;
         return 1;
     default:
         return 0;
