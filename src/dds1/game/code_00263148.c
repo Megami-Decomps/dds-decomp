@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "snd_command_packet.h"
 #include "evt_message_window_api.h"
+#include "btl_runtime_activity_status_api.h"
 #include "dsp_active_api.h"
 #include "dsp_entry_api.h"
 #include "fr_font.h"
@@ -117,7 +118,6 @@ u32 mnuMarkItemSelectionSceneVisited(BrsSkillPackageWork *scene) {
 }
 
 extern void brsSelectNextUnit(BrsSkillPackageWork *, s32);
-extern s32 btlHasPendingRuntimeActivity(void);
 extern s32 mnuStaffInitPanel(BrsSkillPackageWork *);
 extern MenuPopupEntry brsRewardFadeWaitPopupEntry[];
 extern MenuPopupEntry brsPrimaryRewardPopupEntry[];
@@ -155,7 +155,7 @@ s32 prfCapTaskStep(dds3ProcessID_t *request) {
                 mnuSetPopupEntryFlagged(dispatchStatus, brsRewardFadeWaitPopupEntry);
                 return 0;
             }
-            if (btlHasPendingRuntimeActivity() != 0) {
+            if (btlHasPendingRuntimeActivity() != BTL_RUNTIME_ACTIVITY_NONE) {
                 return 0;
             }
             mnuStaffInitPanel(scene);
@@ -480,4 +480,3 @@ void mnuRefreshPartyUnitVitalsPanels(datUnitWork_t *unit, BrsSkillPackageWork *m
 }
 
 INCLUDE_SDATA(const s32, "game/code_00263148", D_003BC550);
-

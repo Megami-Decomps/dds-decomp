@@ -18,6 +18,7 @@
 #include "pcp_vu0.h"
 #include "dat_state.h"
 #include "btl_state.h"
+#include "btl_runtime_activity_status_api.h"
 #include "mnu_result.h"
 #include "sdf.h"
 #include "kwln_task_lifecycle.h"
@@ -663,19 +664,20 @@ u8 btlIsCurrentActorFullyMarked(void) {
     return (btlRuntime->battleFlags & 0x6000000) == 0x6000000;
 }
 
-s32 btlHasPendingRuntimeActivity(void) {
+BtlRuntimeActivityStatus btlHasPendingRuntimeActivity(void) {
     BtlState *battle;
     if (btlIsRuntimeAllocated() == 0) {
-        return 0;
+        return BTL_RUNTIME_ACTIVITY_NONE;
     }
     battle = btlRuntime;
     if (battle->tasks != NULL) {
-        return 1;
+        return BTL_RUNTIME_ACTIVITY_PENDING;
     }
     if ((battle->eventFlags & 2) != 0) {
-        return 1;
+        return BTL_RUNTIME_ACTIVITY_PENDING;
     }
-    return battle->effect != NULL;
+    return battle->effect != NULL ? BTL_RUNTIME_ACTIVITY_PENDING
+                                  : BTL_RUNTIME_ACTIVITY_NONE;
 }
 
 void btlResetActorEntryState(void) {

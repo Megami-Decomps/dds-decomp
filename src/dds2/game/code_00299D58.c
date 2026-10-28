@@ -2,6 +2,7 @@
 #include "fld_spark_reward_profile.h"
 #include "snd_command_packet.h"
 #include "evt_message_window_api.h"
+#include "btl_runtime_activity_status_api.h"
 #include "dsp_active_api.h"
 #include "dsp_entry_api.h"
 #include "mnu_input.h"
@@ -48,7 +49,6 @@ extern FldSparkRewardProfileIndex fldGetSparkRewardProfileIndex(void);
 extern s16 fldGetSparkPickupCount(void);
 extern void brsSelectNextUnit(BrsSkillPackageWork *, s32);
 extern s32 brsStartPartyPanelResourcesOnce(BrsSkillPackageWork *);
-extern s32 btlHasPendingRuntimeActivity(void);
 extern MenuPopupEntry brsRewardFadeWaitPopupEntry[];
 extern MenuPopupEntry brsPrimaryRewardPopupEntry[];
 
@@ -309,7 +309,7 @@ s32 mnuDispatchProfileSelectionScene(dds3ProcessID_t *task) {
                 mnuSetPopupEntryFlagged(dispatchStatus, brsRewardFadeWaitPopupEntry);
                 return 0;
             }
-            if (btlHasPendingRuntimeActivity() != 0) {
+            if (btlHasPendingRuntimeActivity() != BTL_RUNTIME_ACTIVITY_NONE) {
                 return 0;
             }
             brsStartPartyPanelResourcesOnce(scene);

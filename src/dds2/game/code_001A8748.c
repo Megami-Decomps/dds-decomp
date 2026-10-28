@@ -9,6 +9,7 @@
 #include "pty_active_roster_index_api.h"
 #include "dat_assigned_item_id.h"
 #include "btl_command_use_error.h"
+#include "btl_runtime_activity_status_api.h"
 #include "btl_command_cost_api.h"
 #include "btl_action_press_result.h"
 #include "btl_command_target_policy.h"
@@ -1237,19 +1238,20 @@ u8 btlIsCurrentActorFullyMarked(void) {
     return (((BattleController *)btlRuntime)->flags & 0x06000000) == 0x06000000;
 }
 
-s32 btlHasPendingRuntimeActivity(void) {
+BtlRuntimeActivityStatus btlHasPendingRuntimeActivity(void) {
     BtlState *state;
     if (btlIsRuntimeAllocated() == 0) {
-        return 0;
+        return BTL_RUNTIME_ACTIVITY_NONE;
     }
     state = (BtlState *)btlRuntime;
     if (state->tasks != 0) {
-        return 1;
+        return BTL_RUNTIME_ACTIVITY_PENDING;
     }
     if ((state->eventFlags & 2) != 0) {
-        return 1;
+        return BTL_RUNTIME_ACTIVITY_PENDING;
     }
-    return state->effect != 0;
+    return state->effect != 0 ? BTL_RUNTIME_ACTIVITY_PENDING
+                              : BTL_RUNTIME_ACTIVITY_NONE;
 }
 
 void btlResetActorEntryState(void) {
