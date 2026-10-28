@@ -5611,7 +5611,7 @@ void fileDrawLoadObjectSlots(s32 object) {
             billboard = obj->deviceHandle;
             if (!(record->flags & 1)) {
                 for (i = 0; i < count; i++, slot++) {
-                    if (slot->state >= 0) {
+                    if (FILE_SLOT_FRAME(slot) >= 0) {
 
                         eeUnpackRGBAWordFloat(slot->color, 0.0078125f);
                         SDF_VU0_LOADVECTOR_B(modulation);
@@ -5622,7 +5622,7 @@ void fileDrawLoadObjectSlots(s32 object) {
                         dds3BillboardSetScale(billboard, scale, scale);
                         dds3BillboardSetRotate(billboard, slot->angle);
                         effCopyVector(billboard->position, slot->pos);
-                        dds3BillboardSetAnimKey(billboard, slot->state);
+                        dds3BillboardSetAnimKey(billboard, FILE_SLOT_FRAME(slot));
                         dds3BillboardDraw(billboard);
                     }
                 }
@@ -5634,7 +5634,7 @@ void fileDrawLoadObjectSlots(s32 object) {
                 SDF_VU0_LOAD_ROW3(origin);
                 VU0_STORE_MATRIX(matrix);
                 for (i = 0; i < count; i++, slot++) {
-                    if (slot->state >= 0) {
+                    if (FILE_SLOT_FRAME(slot) >= 0) {
 
                         VU0_LOAD_MATRIX(matrix);
                         SDF_VU0_LOADVECTOR(slot->pos);
@@ -5649,7 +5649,7 @@ void fileDrawLoadObjectSlots(s32 object) {
                         dds3BillboardSetScale(billboard, scale, scale);
                         dds3BillboardSetRotate(billboard, slot->angle);
                         effCopyVector(billboard->position, transformed);
-                        dds3BillboardSetAnimKey(billboard, slot->state);
+                        dds3BillboardSetAnimKey(billboard, FILE_SLOT_FRAME(slot));
                         dds3BillboardDraw(billboard);
                     }
                 }
@@ -5659,10 +5659,10 @@ void fileDrawLoadObjectSlots(s32 object) {
             jobs = obj->jobs;
             if (!(record->flags & 1)) {
                 for (i = 0; i < count; i++, slot++, jobs++) {
-                    if (slot->state == 0) {
+                    if (FILE_SLOT_FRAME(slot) == 0) {
                         fileJobNotifyComplete(*jobs);
                     }
-                    if (slot->state >= 0) {
+                    if (FILE_SLOT_FRAME(slot) >= 0) {
 
                         eeUnpackRGBAWordFloat(slot->color, 0.0078125f);
                         SDF_VU0_LOADVECTOR_B(modulation);
@@ -5682,10 +5682,10 @@ void fileDrawLoadObjectSlots(s32 object) {
                 SDF_VU0_LOAD_ROW3(origin);
                 VU0_STORE_MATRIX(matrix);
                 for (i = 0; i < count; i++, slot++, jobs++) {
-                    if (slot->state == 0) {
+                    if (FILE_SLOT_FRAME(slot) == 0) {
                         fileJobNotifyComplete(*jobs);
                     }
-                    if (slot->state >= 0) {
+                    if (FILE_SLOT_FRAME(slot) >= 0) {
 
                         VU0_LOAD_MATRIX(matrix);
                         SDF_VU0_LOADVECTOR(slot->pos);
@@ -5715,7 +5715,7 @@ void fileDrawLoadObjectSlots(s32 object) {
             textureSink = effGetPacketSubmissionSurface(((FileKeyBlock *)record->data0)->alphaTrack.surfaceIndex);
             if (!(((FileSlotTable *)obj->recordWork)->flags & 1)) {
                 for (i = 0; i < count; i++, slot++) {
-                    if (slot->state >= 0) {
+                    if (FILE_SLOT_FRAME(slot) >= 0) {
 
                         directInput[0] = slot->color;
                         EE_MMI_RGBA_UNPACK(directInput, 0.0078125f);
@@ -5728,7 +5728,7 @@ void fileDrawLoadObjectSlots(s32 object) {
                             EE_MMI_RGBA_PACK_UNIT(packedOutput[0], 128.0f);
                             packedColor = packedOutput[0];
                             params.color = packedColor;
-                            frameInput = &slot->state;
+                            frameInput = &FILE_SLOT_FRAME(slot);
                             directFrame = *frameInput;
                         }
                         effSampleAnimSet(animation, directFrame, &sample);
@@ -5752,7 +5752,7 @@ void fileDrawLoadObjectSlots(s32 object) {
                 SDF_VU0_LOAD_ROW3(origin);
                 VU0_STORE_MATRIX(matrix);
                 for (i = 0; i < count; i++, slot++) {
-                    if (slot->state >= 0) {
+                    if (FILE_SLOT_FRAME(slot) >= 0) {
 
                         VU0_LOAD_MATRIX(matrix);
                         SDF_VU0_LOADVECTOR(slot->pos);
@@ -5769,7 +5769,7 @@ void fileDrawLoadObjectSlots(s32 object) {
                             EE_MMI_RGBA_PACK_UNIT(packedOutput[0], 128.0f);
                             packedColor = packedOutput[0];
                             params.color = packedColor;
-                            frameInput = &slot->state;
+                            frameInput = &FILE_SLOT_FRAME(slot);
                             transformedFrame = *frameInput;
                         }
                         effSampleAnimSet(animation, transformedFrame, &sample);
@@ -5821,7 +5821,7 @@ void fileResetSlotStates(FileSlotTable *record) {
     if (count != 0) {
         do {
             index++;
-            slot->state = 0xffffffff;
+            FILE_SLOT_FRAME(slot) = FILE_SLOT_FRAME_NONE;
             slot++;
         } while (index < count);
     }
@@ -6032,7 +6032,7 @@ void fileInvalidateSlotGroup(FileSlotTable *group, FileSlot *slot) {
         u8 *base = (u8 *)group->slots;
         p = (FileSlot *)(base + ((group->instances + ((u32)((u8 *)slot - base) >> 5) * count) << 5));
         for (i = 0; i < count; i++) {
-            p->state = -1;
+            FILE_SLOT_FRAME(p) = FILE_SLOT_FRAME_NONE;
             p++;
         }
     }
@@ -6050,7 +6050,7 @@ void fileCopyAndInvalidateSlotGroup(FileSlotTable *group, FileSlot *slot) {
         u8 *base = (u8 *)group->slots;
         p = (FileSlot *)(base + ((group->instances + ((u32)((u8 *)slot - base) >> 5) * count) << 5));
         *p = *slot;
-        p->state = -1;
+        FILE_SLOT_FRAME(p) = FILE_SLOT_FRAME_NONE;
     }
 }
 
@@ -6086,18 +6086,18 @@ void effUpdateGridRecordSlotHistory(FileSlotTable *record, FileSlot *slot) {
 
     if (count != 0) {
         u8 *base = (u8 *)record->slots;
-        frame = slot->state;
+        frame = FILE_SLOT_FRAME(slot);
         group = (FileSlot *)(base +
             ((record->instances + ((u32)((u8 *)slot - base) >> 5) * count) << 5));
         if (frame == 0) {
             *group = *slot;
             cursor = group;
             for (historyIndex = 0; historyIndex < count; historyIndex++) {
-                cursor->state = -1;
+                FILE_SLOT_FRAME(cursor) = FILE_SLOT_FRAME_NONE;
                 cursor++;
             }
         } else {
-            group->state = (s32)((u32)frame - 1u);
+            FILE_SLOT_FRAME(group) = (s32)((u32)frame - 1u);
             step = 1.0f / (f32)count;
             fraction = 0.0f;
             alpha = (f32)(slot->color >> 24);
@@ -6115,10 +6115,10 @@ void effUpdateGridRecordSlotHistory(FileSlotTable *record, FileSlot *slot) {
                 shiftTarget--;
             }
             *group = *slot;
-            group->state = -1;
+            FILE_SLOT_FRAME(group) = FILE_SLOT_FRAME_NONE;
             if (rows != 1 && columns >= 2) {
                 if (frame >= 2 && columns >= 3) {
-                    if (group[rows * 2].state >= 0) {
+                    if (FILE_SLOT_FRAME(&group[rows * 2]) >= 0) {
                         FileSlot *previous;
                         SDF_VU0_COPYVECTOR(points[0], group[rows * 2].pos);
                         previous = group + rows;
@@ -6155,12 +6155,12 @@ void effUpdateGridRecordSlotHistory(FileSlotTable *record, FileSlot *slot) {
                             SDF_VU0_STOREVECTOR_NOMEM(color);
                             EE_MMI_RGBA_PACK_UNIT(curveResultColor[0], 128.0f);
                             cursor->color = curveResultColor[0];
-                            cursor->state = frame;
+                            FILE_SLOT_FRAME(cursor) = frame;
                             cursor--;
                         }
                     }
                 } else if (frame > 0) {
-                    if (group[rows].state >= 0) {
+                    if (FILE_SLOT_FRAME(&group[rows]) >= 0) {
                         FileSlot *previous = group + rows;
                         shiftTarget = previous;
                         fraction = 0.0f;
@@ -6202,7 +6202,7 @@ void effUpdateGridRecordSlotHistory(FileSlotTable *record, FileSlot *slot) {
                                     EE_MMI_RGBA_PACK_UNIT(packedOutput[0], 128.0f);
                                     slotBytes = (u8 *)cursor;
                                     *(u32 *)(slotBytes + (u32)&((FileSlot *)0)->color) = packedOutput[0];
-                                    *(s32 *)(slotBytes + (u32)&((FileSlot *)0)->state) = frame;
+                                    *(s32 *)(slotBytes + (u32)&FILE_SLOT_FRAME((FileSlot *)0)) = frame;
                                 }
                                 cursor--;
                             }
@@ -6299,11 +6299,11 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
         i = 0;
         if (count != 0) {
             do {
-                if (slot->state >= length) {
-                    slot->state = duration != 0 ? -2 : -1;
+                if (FILE_SLOT_FRAME(slot) >= length) {
+                    FILE_SLOT_FRAME(slot) = duration != 0 ? FILE_SLOT_FRAME_DISABLED : FILE_SLOT_FRAME_NONE;
                     fileInvalidateSlotGroup((FileSlotTable *)record, slot);
                 }
-                frame = slot->state;
+                frame = FILE_SLOT_FRAME(slot);
                 if (frame != -2) {
                     if (frame == -1) {
                         if (toSpawn != 0) {
@@ -6385,7 +6385,7 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
                                 motion->angleMultiplier = 1.0f;
                                 motion->angle = 0.0f;
                             }
-                            slot->state = 0;
+                            FILE_SLOT_FRAME(slot) = 0;
                             SDF_VU0_COPYVECTOR(previousPosition, slot->pos);
                             if (prewarm != 0) {
                                 f32 age = (f32)(dds3GetRandA(&effSharedRandomState) % prewarmLength);
@@ -6398,7 +6398,7 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
                                 motion->amplitude += motion->amplitudeStep * age;
                                 sine = sdfSin(motion->phase);
                                 sway = motion->amplitude * sine;
-                                slot->state = (s32)age;
+                                FILE_SLOT_FRAME(slot) = (s32)age;
                                 slot->pos[0] += motion->swayDirection[0] * sway;
                                 slot->pos[1] += motion->swayDirection[1] * sway;
                                 slot->pos[2] += motion->swayDirection[2] * sway;
@@ -6406,13 +6406,13 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
                                 motion->phase += motion->phaseStep;
                                 motion->amplitude += motion->amplitudeStep;
                             }
-                            fileSampleKeyTracks(slot, keys, slot->state, previousPosition);
+                            fileSampleKeyTracks(slot, keys, FILE_SLOT_FRAME(slot), previousPosition);
                             slot->scale *= motion->scaleMultiplier;
                             slot->angle *= motion->angleMultiplier;
                             slot->angle += motion->angle;
                             if (prewarm != 0) {
                                 fileCopyAndInvalidateSlotGroup((FileSlotTable *)record, slot);
-                                slot->state++;
+                                FILE_SLOT_FRAME(slot)++;
                             }
                             toSpawn--;
                         }
@@ -6435,7 +6435,7 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
                         slot->angle *= motion->angleMultiplier;
                         slot->angle += motion->angle;
                         effUpdateGridRecordSlotHistory(record, slot);
-                        slot->state = frame + 1;
+                        FILE_SLOT_FRAME(slot) = frame + 1;
                     }
                 }
                 motion++;
@@ -6536,11 +6536,11 @@ void effUpdateRadialEmitterSlots(FileSlotTable *record) {
         i = 0;
         if (count != 0) {
             do {
-                if (slot->state >= length) {
-                    slot->state = duration != 0 ? -2 : -1;
+                if (FILE_SLOT_FRAME(slot) >= length) {
+                    FILE_SLOT_FRAME(slot) = duration != 0 ? FILE_SLOT_FRAME_DISABLED : FILE_SLOT_FRAME_NONE;
                     fileInvalidateSlotGroup((FileSlotTable *)record, slot);
                 }
-                frame = slot->state;
+                frame = FILE_SLOT_FRAME(slot);
                 if (frame != -2) {
                     if (frame == -1) {
                         if (toSpawn != 0) {
@@ -6592,7 +6592,7 @@ void effUpdateRadialEmitterSlots(FileSlotTable *record) {
                                 motion->angleMultiplier = 1.0f;
                                 motion->angle = 0.0f;
                             }
-                            slot->state = 0;
+                            FILE_SLOT_FRAME(slot) = 0;
                             SDF_VU0_COPYVECTOR(previousPosition, slot->pos);
                             if (prewarm != 0) {
                                 f32 age = (f32)(dds3GetRandA(&effSharedRandomState) % prewarmLength);
@@ -6609,15 +6609,15 @@ void effUpdateRadialEmitterSlots(FileSlotTable *record) {
                                 SDF_VU0_LOADVECTOR(delta);
                                 SDF_VU0_ADDVECTOR();
                                 SDF_VU0_STOREVECTOR(slot->pos);
-                                slot->state = (s32)age;
+                                FILE_SLOT_FRAME(slot) = (s32)age;
                             }
-                            fileSampleKeyTracks(slot, keys, slot->state, previousPosition);
+                            fileSampleKeyTracks(slot, keys, FILE_SLOT_FRAME(slot), previousPosition);
                             slot->scale *= motion->scaleMultiplier;
                             slot->angle *= motion->angleMultiplier;
                             slot->angle += motion->angle;
                             if (prewarm != 0) {
                                 fileCopyAndInvalidateSlotGroup((FileSlotTable *)record, slot);
-                                slot->state++;
+                                FILE_SLOT_FRAME(slot)++;
                             }
                             toSpawn--;
                         }
@@ -6642,7 +6642,7 @@ void effUpdateRadialEmitterSlots(FileSlotTable *record) {
                         slot->angle *= motion->angleMultiplier;
                         slot->angle += motion->angle;
                         effUpdateGridRecordSlotHistory(record, slot);
-                        slot->state = frame + 1;
+                        FILE_SLOT_FRAME(slot) = frame + 1;
                     }
                 }
                 motion++;
@@ -6756,11 +6756,11 @@ void effUpdateCircularEmitterSlots(FileSlotTable *record) {
         i = 0;
         if (count != 0) {
             do {
-                if (slot->state >= length) {
-                    slot->state = duration != 0 ? -2 : -1;
+                if (FILE_SLOT_FRAME(slot) >= length) {
+                    FILE_SLOT_FRAME(slot) = duration != 0 ? FILE_SLOT_FRAME_DISABLED : FILE_SLOT_FRAME_NONE;
                     fileInvalidateSlotGroup((FileSlotTable *)record, slot);
                 }
-                frame = slot->state;
+                frame = FILE_SLOT_FRAME(slot);
                 if (frame != -2) {
                     if (frame == -1) {
                         if (toSpawn != 0) {
@@ -6822,7 +6822,7 @@ void effUpdateCircularEmitterSlots(FileSlotTable *record) {
                                 motion->angleMultiplier = 1.0f;
                                 motion->angle = 0.0f;
                             }
-                            slot->state = 0;
+                            FILE_SLOT_FRAME(slot) = 0;
                             SDF_VU0_COPYVECTOR(previousPosition, slot->pos);
                             if (prewarm != 0) {
                                 age = (f32)(dds3GetRandA(&effSharedRandomState) % prewarmLength);
@@ -6842,15 +6842,15 @@ void effUpdateCircularEmitterSlots(FileSlotTable *record) {
                                     SDF_VU0_LOADVECTOR(position);
                                 }
                                 SDF_VU0_STOREVECTOR(slot->pos);
-                                slot->state = (s32)age;
+                                FILE_SLOT_FRAME(slot) = (s32)age;
                             }
-                            fileSampleKeyTracks(slot, keys, slot->state, previousPosition);
+                            fileSampleKeyTracks(slot, keys, FILE_SLOT_FRAME(slot), previousPosition);
                             slot->scale *= motion->scaleMultiplier;
                             slot->angle *= motion->angleMultiplier;
                             slot->angle += motion->angle;
                             if (prewarm != 0) {
                                 fileCopyAndInvalidateSlotGroup((FileSlotTable *)record, slot);
-                                slot->state++;
+                                FILE_SLOT_FRAME(slot)++;
                             }
                             toSpawn--;
                         }
@@ -6885,7 +6885,7 @@ void effUpdateCircularEmitterSlots(FileSlotTable *record) {
                         slot->angle *= motion->angleMultiplier;
                         slot->angle += motion->angle;
                         effUpdateGridRecordSlotHistory(record, slot);
-                        slot->state = frame + 1;
+                        FILE_SLOT_FRAME(slot) = frame + 1;
                     }
                 }
                 motion++;
@@ -6998,11 +6998,11 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
         i = 0;
         if (count != 0) {
             do {
-                if (slot->state >= length) {
-                    slot->state = duration != 0 ? -2 : -1;
+                if (FILE_SLOT_FRAME(slot) >= length) {
+                    FILE_SLOT_FRAME(slot) = duration != 0 ? FILE_SLOT_FRAME_DISABLED : FILE_SLOT_FRAME_NONE;
                     fileInvalidateSlotGroup((FileSlotTable *)record, slot);
                 }
-                frame = slot->state;
+                frame = FILE_SLOT_FRAME(slot);
                 if (frame != -2) {
                     if (frame == -1) {
                         if (toSpawn != 0) {
@@ -7059,7 +7059,7 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
                                 motion->angleMultiplier = 1.0f;
                                 motion->angle = 0.0f;
                             }
-                            slot->state = 0;
+                            FILE_SLOT_FRAME(slot) = 0;
                             SDF_VU0_COPYVECTOR(previousPosition, slot->pos);
                             if (prewarm != 0) {
                                 age = (f32)(dds3GetRandA(&effSharedRandomState) % prewarmLength);
@@ -7077,16 +7077,16 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
                                     SDF_VU0_ADDVECTOR();
                                 }
                                 SDF_VU0_STOREVECTOR(slot->pos);
-                                slot->state = (s32)age;
+                                FILE_SLOT_FRAME(slot) = (s32)age;
                                 slot->pos[1] += motion->height;
                             }
-                            fileSampleKeyTracks(slot, keys, slot->state, previousPosition);
+                            fileSampleKeyTracks(slot, keys, FILE_SLOT_FRAME(slot), previousPosition);
                             slot->scale *= motion->scaleMultiplier;
                             slot->angle *= motion->angleMultiplier;
                             slot->angle += motion->angle;
                             if (prewarm != 0) {
                                 fileCopyAndInvalidateSlotGroup((FileSlotTable *)record, slot);
-                                slot->state++;
+                                FILE_SLOT_FRAME(slot)++;
                             }
                             toSpawn--;
                         }
@@ -7119,7 +7119,7 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
                         slot->angle *= motion->angleMultiplier;
                         slot->angle += motion->angle;
                         effUpdateGridRecordSlotHistory(record, slot);
-                        slot->state = frame + 1;
+                        FILE_SLOT_FRAME(slot) = frame + 1;
                     }
                 }
                 motion++;
@@ -7211,11 +7211,11 @@ void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
         i = 0;
         if (count != 0) {
             do {
-                if (slot->state >= length) {
-                    slot->state = duration != 0 ? -2 : -1;
+                if (FILE_SLOT_FRAME(slot) >= length) {
+                    FILE_SLOT_FRAME(slot) = duration != 0 ? FILE_SLOT_FRAME_DISABLED : FILE_SLOT_FRAME_NONE;
                     fileInvalidateSlotGroup((FileSlotTable *)record, slot);
                 }
-                frame = slot->state;
+                frame = FILE_SLOT_FRAME(slot);
                 if (frame != -2) {
                     if (frame == -1) {
                         if (toSpawn != 0) {
@@ -7277,7 +7277,7 @@ void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
                                 motion->angleMultiplier = 1.0f;
                                 motion->angle = 0.0f;
                             }
-                            slot->state = 0;
+                            FILE_SLOT_FRAME(slot) = 0;
                             SDF_VU0_COPYVECTOR(previousPosition, slot->pos);
                             if (prewarm != 0) {
                                 f32 age = (f32)(dds3GetRandA(&effSharedRandomState) % prewarmLength);
@@ -7294,15 +7294,15 @@ void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
                                 SDF_VU0_LOADVECTOR(delta);
                                 SDF_VU0_ADDVECTOR();
                                 SDF_VU0_STOREVECTOR(slot->pos);
-                                slot->state = (s32)age;
+                                FILE_SLOT_FRAME(slot) = (s32)age;
                             }
-                            fileSampleKeyTracks(slot, keys, slot->state, previousPosition);
+                            fileSampleKeyTracks(slot, keys, FILE_SLOT_FRAME(slot), previousPosition);
                             slot->scale *= motion->scaleMultiplier;
                             slot->angle *= motion->angleMultiplier;
                             slot->angle += motion->angle;
                             if (prewarm != 0) {
                                 fileCopyAndInvalidateSlotGroup((FileSlotTable *)record, slot);
-                                slot->state++;
+                                FILE_SLOT_FRAME(slot)++;
                             }
                             toSpawn--;
                         }
@@ -7327,7 +7327,7 @@ void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
                         slot->angle *= motion->angleMultiplier;
                         slot->angle += motion->angle;
                         effUpdateGridRecordSlotHistory(record, slot);
-                        slot->state = frame + 1;
+                        FILE_SLOT_FRAME(slot) = frame + 1;
                     }
                 }
                 motion++;

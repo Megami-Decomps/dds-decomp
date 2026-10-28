@@ -6710,7 +6710,7 @@ void effDrawEffectStrip(EffectStripNode *node) {
     if (count > 0) {
         remaining = count;
         do {
-            if ((u32)(entry->state + 2) < 2) {
+            if ((u32)(FILE_SLOT_FRAME(entry) + 2) < 2) {
                 quad = positions;
                 for (i = 0; i < 4; i++, quad += 4) {
                     VU0_STORE_VF(vf0, quad[0]);
@@ -6718,7 +6718,7 @@ void effDrawEffectStrip(EffectStripNode *node) {
                     VU0_STORE_VF(vf0, quad[2]);
                     VU0_STORE_VF(vf0, quad[3]);
                 }
-            } else if (entry->state > 0) {
+            } else if (FILE_SLOT_FRAME(entry) > 0) {
                 scale = entry->scale * opacity;
                 if (hasTransform) {
                     VU0_LOAD_MATRIX(&matrix);

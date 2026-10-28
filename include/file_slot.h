@@ -6,13 +6,19 @@
 #include "sdf.h"
 
 /* Primary cells and their address-valued record, shared by both file engines. */
+#define FILE_SLOT_FRAME_NONE (-1)
+#define FILE_SLOT_FRAME_DISABLED (-2)
+
 typedef struct FileSlot {
     f32 pos[4];       /* 0x00 */
-    s32 state;        /* 0x10: frame, -1 available, -2 disabled */
+    s32 state;        /* 0x10: signed animation frame or lifecycle sentinel */
     u32 color;        /* 0x14 */
     f32 scale;        /* 0x18 */
     f32 angle;        /* 0x1C */
 } FileSlot;
+
+/* Keep the member token used by the matching compiler; callers treat it as a frame. */
+#define FILE_SLOT_FRAME(slot) ((slot)->state)
 
 typedef struct FileSlotTable {
     u16 type;

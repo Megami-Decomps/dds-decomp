@@ -7148,7 +7148,7 @@ void effDrawEffectStrip(EffectStripNode *node) {
     if (count > 0) {
         remaining = count;
         do {
-            if ((u32)(entry->state + 2) < 2) {
+            if ((u32)(FILE_SLOT_FRAME(entry) + 2) < 2) {
                 quad = positions;
                 for (i = 0; i < 4; i++, quad += 4) {
                     VU0_STORE_VF(vf0, quad[0]);
@@ -7156,7 +7156,7 @@ void effDrawEffectStrip(EffectStripNode *node) {
                     VU0_STORE_VF(vf0, quad[2]);
                     VU0_STORE_VF(vf0, quad[3]);
                 }
-            } else if (entry->state > 0) {
+            } else if (FILE_SLOT_FRAME(entry) > 0) {
                 scale = entry->scale * opacity;
                 if (hasTransform) {
                     VU0_LOAD_MATRIX(&matrix);
@@ -12262,10 +12262,10 @@ void func_002FAD98(EffectSlotNode80 *node) {
         model = node->deviceSlot;
         if (!(record->flags & 1)) {
             for (i = 0; i < count; i++, slot++, direction += 6) {
-                if (slot->state == 0) {
+                if (FILE_SLOT_FRAME(slot) == 0) {
                     effInitializeParticleDirection((u8 *)node, direction);
                 }
-                if (slot->state < 0) {
+                if (FILE_SLOT_FRAME(slot) < 0) {
                     continue;
                 }
                 modelRGBA[0] = slot->color;
@@ -12287,7 +12287,7 @@ void func_002FAD98(EffectSlotNode80 *node) {
                 VU0_LOAD_VF(vf10, slot->pos);
                 VU0_SET_W_ONE(vf10);
                 VU0_STORE_VF(vf10, model->matrix[3]);
-                effSetRotationFromAcceleratedFrameAngle((u8 *)node, direction, slot->state);
+                effSetRotationFromAcceleratedFrameAngle((u8 *)node, direction, FILE_SLOT_FRAME(slot));
                 VU0_STORE_VF(vf28, model->matrix[0]);
                 VU0_STORE_VF(vf29, model->matrix[1]);
                 VU0_STORE_VF(vf30, model->matrix[2]);
@@ -12302,10 +12302,10 @@ void func_002FAD98(EffectSlotNode80 *node) {
             VU0_LOAD_VF(vf31, translation);
             VU0_STORE_MATRIX(matrix);
             for (i = 0; i < count; i++, slot++, direction += 6) {
-                if (slot->state == 0) {
+                if (FILE_SLOT_FRAME(slot) == 0) {
                     effInitializeParticleDirection((u8 *)node, direction);
                 }
-                if (slot->state < 0) {
+                if (FILE_SLOT_FRAME(slot) < 0) {
                     continue;
                 }
                 VU0_LOAD_MATRIX(matrix);
@@ -12329,7 +12329,7 @@ void func_002FAD98(EffectSlotNode80 *node) {
                 VU0_LOAD_VF(vf10, world);
                 VU0_SET_W_ONE(vf10);
                 VU0_STORE_VF(vf10, model->matrix[3]);
-                effSetRotationFromAcceleratedFrameAngle((u8 *)node, direction, slot->state);
+                effSetRotationFromAcceleratedFrameAngle((u8 *)node, direction, FILE_SLOT_FRAME(slot));
                 VU0_STORE_VF(vf28, model->matrix[0]);
                 VU0_STORE_VF(vf29, model->matrix[1]);
                 VU0_STORE_VF(vf30, model->matrix[2]);
@@ -12342,10 +12342,10 @@ void func_002FAD98(EffectSlotNode80 *node) {
         queues = node->resourceEntries;
         if (!(record->flags & 1)) {
             for (i = 0; i < count; i++, slot++, queues++) {
-                if (slot->state == 0) {
+                if (FILE_SLOT_FRAME(slot) == 0) {
                     fileQueueNotifyAllJobsComplete(*queues);
                 }
-                if (slot->state < 0) {
+                if (FILE_SLOT_FRAME(slot) < 0) {
                     continue;
                 }
                 queueRGBA[0] = slot->color;
@@ -12371,10 +12371,10 @@ void func_002FAD98(EffectSlotNode80 *node) {
             VU0_LOAD_VF(vf31, translation);
             VU0_STORE_MATRIX(matrix);
             for (i = 0; i < count; i++, slot++, queues++) {
-                if (slot->state == 0) {
+                if (FILE_SLOT_FRAME(slot) == 0) {
                     fileQueueNotifyAllJobsComplete(*queues);
                 }
-                if (slot->state < 0) {
+                if (FILE_SLOT_FRAME(slot) < 0) {
                     continue;
                 }
                 unpackScale = 1.0f / 128.0f;
