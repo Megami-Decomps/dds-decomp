@@ -3872,13 +3872,13 @@ void btlRequestModelOrReuse(BtlRuntimeTaskArgs *arguments) {
     }
 }
 
-u32 btlPollModelLoadCompletion(BtlRuntimeTaskArgs *arguments) {
+BtlTaskPollResult btlPollModelLoadCompletion(BtlRuntimeTaskArgs *arguments) {
     BtlUnit *unit = arguments->actor;
     u32 effect = arguments->option;
     u32 model = arguments->unk_08;
     if ((unit->status.flags & 2) == 0) {
         if (!btlCheckModelAssetByMode((u8 *)unit, effect, model)) {
-            return 0;
+            return BTL_TASK_POLL_CONTINUE;
         }
         btlBindUnitModel(unit, effect, model);
         btlReleaseModelAssetByMode((u32)unit, effect, model);
@@ -3890,7 +3890,7 @@ u32 btlPollModelLoadCompletion(BtlRuntimeTaskArgs *arguments) {
         unit->overlayColor = unit->baseColor & 0xFFFFFF;
     }
     unit->gunResourceFlags = (unit->gunResourceFlags & ~1) | 2;
-    return 1;
+    return BTL_TASK_POLL_END_DELAY;
 }
 
 BtlRuntimeTask *btlCreateModelLoadPollTask(BtlUnit *unit, u32 effectId, u32 modelId, s8 preserveDefeatCandidate) {

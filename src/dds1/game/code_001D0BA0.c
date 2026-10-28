@@ -3790,13 +3790,13 @@ extern char D_003A3C08[];
 
 extern u8 btlCheckModelAssetByMode(u8 *, u32, u32);
 
-u32 btlPollModelLoadCompletion(BtlRuntimeTaskArgs *arguments) {
+BtlTaskPollResult btlPollModelLoadCompletion(BtlRuntimeTaskArgs *arguments) {
     BtlUnit *object = arguments->actor;
     u32 effect = arguments->option;
     u32 model = arguments->unk_08;
     if (((u32)object->status.flags & 2) == 0) {
         if (!btlCheckModelAssetByMode(object, effect, model)) {
-            return 0;
+            return BTL_TASK_POLL_CONTINUE;
         }
         btlBindActorModel(object, effect, model);
         btlReleaseModelAssetByMode(object, effect, model);
@@ -3808,7 +3808,7 @@ u32 btlPollModelLoadCompletion(BtlRuntimeTaskArgs *arguments) {
         object->overlayColor = object->baseColor & 0xFFFFFF;
     }
     object->gunResourceFlags = (object->gunResourceFlags & ~1) | 2;
-    return 1;
+    return BTL_TASK_POLL_END_DELAY;
 }
 
 BtlRuntimeTask *btlCreateModelLoadPollTask(BtlUnit *owner, u32 effectId, u32 modelId, s8 preserveDefeatCandidate) {
