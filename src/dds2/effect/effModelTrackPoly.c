@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_map_position_api.h"
 #include "sdf_vu0.h"
 #include "sdf_asset_state.h"
 #include "sdf_asset_create.h"

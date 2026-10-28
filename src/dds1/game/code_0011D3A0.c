@@ -12,6 +12,7 @@
 #include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
 #include "common.h"
+#include "sdf_map_position_api.h"
 #include "sdf_vu0.h"
 #include "fld_scene_ready_api.h"
 #include "fld_camp_check_state_api.h"
@@ -899,7 +900,6 @@ void drawSceneBasicList(void) {
 /* All declarations below refer to the existing primary runtime owners. */
 extern evtUnitHandle_t *dds3GetUnitHandleObjectBasic(dds3Basic_t *);
 extern dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *, u32, s32);
-extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *, s32);
 extern void fldMakeEveHitPlanes(const f32 *, f32 *, f32 *, f32 *, f32 *);
 extern void aDrawBoxF(s32, s32, s32, s32, u32, u32, u32, u32);
 extern void aDrawBoxF_Direct(s32, s32, s32, s32, u32, u32, u32, u32);

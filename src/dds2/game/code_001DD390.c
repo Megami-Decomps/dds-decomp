@@ -7,6 +7,7 @@
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "common.h"
+#include "sdf_map_position_api.h"
 #include "btl_unit_defeat_by_delta_result.h"
 #include "btl_action_entry_is_empty_api.h"
 #include "btl_action_state_api.h"
@@ -3074,7 +3075,6 @@ void btlGetUnitWorldPos(BtlUnit *unit, f32 *dst) {
     SDF_VU0_STOREVECTOR(dst);
 }
 
-extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *, s32);
 
 
 extern void btlRefreshUnitFxVectors(BtlUnit *);
@@ -3130,7 +3130,6 @@ s32 btlSampleActorModelPositionVU(BtlUnit *unit, s32 value) {
     return result;
 }
 
-extern s32 sdfModelGetMarkPosMatrix(sdfModelRootNode_t *, s32);
 
 s8 btlSetActorAlternateEffectParameter(unit, mode)
     BtlUnit *unit;

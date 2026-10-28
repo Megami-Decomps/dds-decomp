@@ -10,6 +10,7 @@
 #include "fld_marker_packet.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "sdf_map_position_api.h"
 #include "pty_status_query_api.h"
 #include "file_config_option_api.h"
 #include "fld_camera_model_motion_request.h"
@@ -4296,7 +4297,6 @@ extern void fldQueuePrimaryEffectPosition(f32 x, f32 y, f32 z);
 
 extern void fldQueueSecondaryEffectPosition(f32 x, f32 y, f32 z);
 
-extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *model, s32 id);
 
 extern s32 D_003BAD44;
 

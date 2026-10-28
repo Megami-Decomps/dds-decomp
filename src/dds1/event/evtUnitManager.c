@@ -3,6 +3,7 @@ struct SdfPoolNode;
 struct EffNodeDescriptor;
 
 #include "common.h"
+#include "sdf_map_position_api.h"
 #include "scr_integer_parameter_api.h"
 #include "dds3_object_flags.h"
 #include "sdf_vu0.h"
@@ -78,7 +79,6 @@ f32 GetSplineLength(dds3PathBasicControl_t *path) {
 extern f32 sdfFaceDivSoften, sdfFaceDivBias;
 #include "dds3_world_primary.h"
 #include "dds3_scene_membership.h"
-extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *model, s32 mapRecordId);
 extern void dds3RotationArc(void);
 
 

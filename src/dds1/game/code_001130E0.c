@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "mdl.h"
 #include "common.h"
+#include "sdf_map_position_api.h"
 #include "sdf_vu0.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_trig.h"

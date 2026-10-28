@@ -49,6 +49,5 @@ u32 sdfModelGetMarkPosCount(const struct sdfModelRootNode_t *model);
 SdfMapPositionRecord *sdfModelSearchMarkPosData(struct sdfModelRootNode_t *model, s32 recordId);
 void sdfModelMakeMarkPosMatrix(struct sdfModelRootNode_t *model, SdfMapPositionRecord *record);
 void sdfModelMakeMarkPos(struct sdfModelRootNode_t *model, SdfMapPositionRecord *record);
-s32 sdfModelGetMarkPos(struct sdfModelRootNode_t *model, s32 id);
 
 #endif /* SDF_CHUNK_H */

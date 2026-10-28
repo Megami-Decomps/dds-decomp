@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_map_position_api.h"
 #include "sdf_vu0.h"
 #include "dds3_object_flags.h"
 #include "mdl.h"
@@ -69,7 +70,6 @@ extern billHandle_t *billCreateFromResource(s32 kind, const char *path);
 
 
 
-extern s32 sdfModelGetMarkPosMatrix(sdfModelRootNode_t *model, s32 id);
 
 
 extern void dds3SetRadiusPoseSet(dds3PoseSet_t *node);

@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_map_position_api.h"
 #include "eff_matrix4.h"
 #include "sdf_vu0.h"
 #include "sdf_model_packet_callback.h"
@@ -180,7 +181,6 @@ extern EffRandState effDefaultRandomState[];
 
 extern EffRandState effDefaultRandomState[];
 
-extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *model, s32 value);
 
 extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 

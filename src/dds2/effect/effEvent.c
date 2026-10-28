@@ -3,6 +3,7 @@
 #include "bill_object_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "sdf_map_position_api.h"
 #include "sdf_vu0.h"
 #include "sdf_vu_rotation_axes.h"
 #include "sdf_sif_command.h"
@@ -1175,8 +1176,6 @@ void effEveBEDCutSetUnitHandle(effEveBEDCutHandle_t *work, struct evtUnitHandle_
 #include "mdl.h"
 
 extern void effEveBEDPartGetPositionPtr(EffEventInit *source, EffectVectorRequest *params);
-extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *model, s32 id);
-extern s32 sdfModelGetMarkPosMatrix(sdfModelRootNode_t *model, s32 id);
 extern const f32 D_00414A00[4];
 
 /* Callbacks consume the VU0 output buffers; see docs/idioms.md,

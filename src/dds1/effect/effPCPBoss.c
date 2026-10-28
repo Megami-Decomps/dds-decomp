@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "sdf_projection.h"
 #include "common.h"
+#include "sdf_map_position_api.h"
 #include "sdf_vu0.h"
 #include "btl_effect_position.h"
 #include "eff_random.h"
@@ -172,7 +173,6 @@ void effPCPCrackDelete(effPCPCrack_t *work) {
 extern u32 effMagaCylinderCalcColor(u32, u32);
 extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 extern f32 D_003556B0[4];
-extern s32 sdfModelGetMarkPosMatrix(struct sdfModelRootNode_t *, s32);
 extern void dds3FlashPolyListSetABGR(dds3FlashPolyList_t *, u32);
 extern void dds3FlashPolyListDraw(dds3FlashPolyList_t *);
 

@@ -2,6 +2,7 @@
 #include "sdf_projection.h"
 #include "sdf_model_packet_callback.h"
 #include "common.h"
+#include "sdf_map_position_api.h"
 #include "eff_matrix4.h"
 #include "sdf_vu0.h"
 #include "sdf_vu_rotation_axes.h"
@@ -115,7 +116,6 @@ struct EffPCPBeamWork;
 extern void effPCPRingPolyExpSetVertex(f32 value, struct EffPCPBeamWork *work);
 extern void SetRotateMatrixY(f32 scale);
 extern void SetRotateMatrixX_B(f32 angle);
-extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *model, s32 value);
 extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 extern u32 effBTLFieldColorUsesActorSelectors(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);

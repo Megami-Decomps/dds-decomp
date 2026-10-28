@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_map_position_api.h"
 #include "scr_integer_parameter_api.h"
 #include "scr_command_parameter_index.h"
 #include "sdf_vu0.h"
@@ -164,7 +165,6 @@ void func_0020EA10(void) {
 
 
 
-extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *model, s32 id);
 extern void fldDrawShadowDisc(f32 x, f32 y, f32 z, f32 radius, s32 fade);
 
 void btlDrawActorGroundDisc(BtlUnit *unit) {

@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_map_position_api.h"
 #include "eff_texture_table.h"
 #include "sdf_vu0.h"
 #include "eff_object_node.h"
@@ -614,7 +615,6 @@ void effResetModelMotionAndOwnerFlag(EffResourceOwner *owner) {
 #include "sdf_vu_matrix.h"
 extern void effGetWorldVector(u32);
 extern s32 effResolveRequestPositionIntoVu(EffectVectorRequest *, s16);
-extern s32 sdfModelGetMarkPosMatrix(sdfModelRootNode_t *, s32);
 extern void sdfVuMatrixToQuaternion(const f32 [4][4]);
 extern void Normalize(void);
 extern void btlDebugDrawSegment(f32 *, f32 *, u32);

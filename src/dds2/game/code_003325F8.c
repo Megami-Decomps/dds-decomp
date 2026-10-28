@@ -2,6 +2,7 @@
 #include "sdf_request.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "sdf_map_position_api.h"
 #include "sdf_vu0.h"
 #include "sdf_resource_list_release_api.h"
 #include "sdf_vu_matrix.h"
@@ -325,22 +326,22 @@ SdfMapPositionRecord *sdfModelSearchMarkPosData(sdfModelRootNode_t *model, s32 r
     return NULL;
 }
 
-s32 sdfModelGetMarkPosMatrix(sdfModelRootNode_t *model, s32 mapRecordId) {
+SdfMapPositionLookupResult sdfModelGetMarkPosMatrix(sdfModelRootNode_t *model, s32 mapRecordId) {
     SdfMapPositionRecord *resource = sdfModelSearchMarkPosData(model, mapRecordId);
     if (resource != NULL) {
         sdfModelMakeMarkPosMatrix(model, resource);
-        return 1;
+        return SDF_MAP_POSITION_LOOKUP_FOUND;
     }
-    return 0;
+    return SDF_MAP_POSITION_LOOKUP_NOT_FOUND;
 }
 
-s32 sdfModelGetMarkPos(sdfModelRootNode_t *model, s32 mapRecordId) {
+SdfMapPositionLookupResult sdfModelGetMarkPos(sdfModelRootNode_t *model, s32 mapRecordId) {
     SdfMapPositionRecord *resource = sdfModelSearchMarkPosData(model, mapRecordId);
     if (resource != NULL) {
         sdfModelMakeMarkPos(model, resource);
-        return 1;
+        return SDF_MAP_POSITION_LOOKUP_FOUND;
     }
-    return 0;
+    return SDF_MAP_POSITION_LOOKUP_NOT_FOUND;
 }
 
 u32 sdfGetUniqueChunkValue(const sdfModelRootNode_t *model) {

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sdf_map_position_api.h"
 #include "sdf_vu0.h"
 #include "btl_set_actor_effect_parameter_api.h"
 #include "btl_actor_resource_bank_api.h"

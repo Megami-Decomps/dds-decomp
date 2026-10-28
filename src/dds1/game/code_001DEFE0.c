@@ -10,6 +10,7 @@
 #include "btl_camera_parameter_record.h"
 #include "btl_camera_mode_index.h"
 #include "common.h"
+#include "sdf_map_position_api.h"
 #include "btl_action_entry_is_empty_api.h"
 #include "btl_linked_actor_eligibility.h"
 #include "btl_target_list_builder.h"
@@ -253,7 +254,6 @@ extern void btlSetUnitPosition(BtlUnit *object, const f32 *position);
 
 extern void btlSetUnitRotation(BtlUnit *object, const f32 rotation[4]);
 
-extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *, s32);
 
 extern void mdlGetPosition(dds3ModelHandle_t *);
 
