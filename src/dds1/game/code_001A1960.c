@@ -1121,9 +1121,11 @@ BtlSpecialAbilityAvailability btlCheckSpecialAbility(
     }
     switch (flag) {
     case 0x207:
-        return evtGetMirroredSolarPhase() == 8;
+        return evtGetMirroredSolarPhase() == 8 ? BTL_SPECIAL_ABILITY_AVAILABLE
+                                               : BTL_SPECIAL_ABILITY_UNAVAILABLE;
     case 0x208:
-        return evtGetMirroredSolarPhase() == 0;
+        return evtGetMirroredSolarPhase() == 0 ? BTL_SPECIAL_ABILITY_AVAILABLE
+                                               : BTL_SPECIAL_ABILITY_UNAVAILABLE;
     default:
         return BTL_SPECIAL_ABILITY_AVAILABLE;
     }

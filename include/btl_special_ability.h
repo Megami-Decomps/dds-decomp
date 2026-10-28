@@ -11,7 +11,7 @@ enum {
     BTL_SPECIAL_ABILITY_AVAILABLE = 1,
 };
 
-/* Tests whether a party record has the requested special ability. */
+/* Returns availability after ownership and any ability-specific phase checks. */
 BtlSpecialAbilityAvailability btlCheckSpecialAbility(
     const struct datUnitWork_t *record, s32 ability);
 
