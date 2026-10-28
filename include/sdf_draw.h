@@ -265,7 +265,7 @@ typedef struct sdfMotionCtrlr_t {
     f32 currentFrame;
     f32 frameStep;
     s32 unk24;
-    s16 searchId;
+    s16 searchId; /* MdlMotionSearchId stored in the controller's halfword. */
     s16 slotIndex;
     u16 motionIndex;
     u16 frameCount;

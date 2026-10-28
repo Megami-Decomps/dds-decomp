@@ -177,7 +177,7 @@ struct dds3ModelHandle_t {
     union {
         u32 word;
         struct {
-            s16 id;
+            s16 id; /* Current MdlMotionSearchId, stored in its native halfword. */
             s16 motionIndex; /* Entry index passed to sdfMotionChangeBlend. */
         } h;
     } current;

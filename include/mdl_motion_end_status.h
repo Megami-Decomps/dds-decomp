@@ -11,6 +11,7 @@ enum {
 };
 
 /* Return the terminal state, or the distinct missing-node status. */
-MdlMotionEndStatus mdlChkMotionEndEx(const dds3ModelHandle_t *ctx, s32 searchId);
+MdlMotionEndStatus mdlChkMotionEndEx(
+    const dds3ModelHandle_t *ctx, MdlMotionSearchId searchId);
 
 #endif /* MDL_MOTION_END_STATUS_H */

@@ -239,7 +239,7 @@ void mdlUnRegistAll(void) {
 }
 
 /* Create and attach the motion selected by the resource record's search ID. */
-sdfMotionCtrlr_t *mdlCreateMotion(dds3ModelHandle_t *owner, s32 searchId) {
+sdfMotionCtrlr_t *mdlCreateMotion(dds3ModelHandle_t *owner, MdlMotionSearchId searchId) {
     MotionTable *motionTable = owner->sub->slots[searchId].motionTable;
     s16 motionSlotIndex = owner->sub->slots[searchId].motionSlotIndex;
     sdfMotionCtrlr_t *object = sdfMotionCtrlrNew(owner->inner, motionTable);
@@ -283,7 +283,7 @@ extern u8 D_003BBB60[];
 extern MdlResourceTable D_00367900[];
 extern MdlResourceTable D_00365858[];
 
-void mdlMotion(dds3ModelHandle_t *ctx, s32 searchId, s32 motionIndex, SdfMotionLoopMode loopMode,
+void mdlMotion(dds3ModelHandle_t *ctx, MdlMotionSearchId searchId, s32 motionIndex, SdfMotionLoopMode loopMode,
                                      f32 blendLeadFrames, f32 blendDurationFrames);
 
 extern u32 mdlManagerWork;
@@ -295,7 +295,7 @@ void mdlFreeMotionCtrlr(dds3ModelHandle_t *ctx, sdfMotionCtrlr_t *node) {
     sdfMotionCtrlrFree(node);
 }
 
-void mdlFreeMotion(dds3ModelHandle_t *ctx, s32 searchId) {
+void mdlFreeMotion(dds3ModelHandle_t *ctx, MdlMotionSearchId searchId) {
     sdfMotionCtrlr_t *node = ctx->inner->motionList;
 
     while (node != NULL) {
@@ -310,7 +310,7 @@ void mdlFreeMotion(dds3ModelHandle_t *ctx, s32 searchId) {
 
 
 /* Release the grouped resource record and matching motions for `searchId`. */
-void mdlUnRegistResrcMotion(dds3ModelResrc_t *owner, s32 searchId) {
+void mdlUnRegistResrcMotion(dds3ModelResrc_t *owner, MdlMotionSearchId searchId) {
     dds3ModelHandle_t *ctx;
 
     if (owner != NULL) {
@@ -330,14 +330,14 @@ void mdlUnRegistResrcMotion(dds3ModelResrc_t *owner, s32 searchId) {
     }
 }
 
-void mdlUnRegistMotion(s32 group, s32 id, s32 searchId) {
+void mdlUnRegistMotion(s32 group, s32 id, MdlMotionSearchId searchId) {
     dds3ModelResrc_t *entity;
 
     entity = mdlSearchResrc(group, id);
     mdlUnRegistResrcMotion(entity, searchId);
 }
 
-void mdlRegistMotion(s32 group, s32 id, MdlRegistrationMode registrationMode, s32 motionIndex, s32 searchId, s32 slotIndex, MotionTable *data, struct sdfMemHandle_t *resourceHandle) {
+void mdlRegistMotion(s32 group, s32 id, MdlRegistrationMode registrationMode, s32 motionIndex, MdlMotionSearchId searchId, s32 slotIndex, MotionTable *data, struct sdfMemHandle_t *resourceHandle) {
     dds3ModelResrc_t *owner = mdlSearchResrc(group, id);
     BattleGroupSlot *slot;
 
@@ -643,7 +643,7 @@ void mdlLinkBlur(dds3ModelHandle_t *ctx, struct SdfPoolNode **surfaces) {
 }
 
 extern DevRequest *sdfTexListDup(DevRequest *list);
-extern sdfMotionCtrlr_t *mdlCreateMotion(dds3ModelHandle_t *owner, s32 searchId);
+extern sdfMotionCtrlr_t *mdlCreateMotion(dds3ModelHandle_t *owner, MdlMotionSearchId searchId);
 
 /* Instantiate a model context from the group's resource list and item list, then
  * start every populated slot's motion owner. */
@@ -654,7 +654,7 @@ dds3ModelHandle_t *mdlLoad(u32 group, u32 id) {
     sdfModelRootNode_t *inner;
     f32 modelScale;
     f32 scale[4];
-    s32 searchId;
+    MdlMotionSearchId searchId;
 
     ctx->sub = node;
     head = node->modelContext;
@@ -854,11 +854,11 @@ void mdlEnableAllEntries(dds3ModelHandle_t *ctx) {
     }
 }
 
-extern sdfMotionCtrlr_t *mdlCreateMotion(dds3ModelHandle_t *owner, s32 searchId);
+extern sdfMotionCtrlr_t *mdlCreateMotion(dds3ModelHandle_t *owner, MdlMotionSearchId searchId);
 /* Select the first matching searchId, or create it, and make it current in its
  * signed slot index. Allocation success/slot bounds are assumed. Slot zero
  * also becomes ctx->first; id and motionIndex narrow into the current pair. */
-void mdlMotion(dds3ModelHandle_t *ctx, s32 searchId, s32 motionIndex, SdfMotionLoopMode loopMode,
+void mdlMotion(dds3ModelHandle_t *ctx, MdlMotionSearchId searchId, s32 motionIndex, SdfMotionLoopMode loopMode,
                                      f32 blendLeadFrames, f32 blendDurationFrames) {
     sdfMotionCtrlr_t *node;
     s16 slotIndex;
@@ -885,30 +885,30 @@ void mdlMotion(dds3ModelHandle_t *ctx, s32 searchId, s32 motionIndex, SdfMotionL
 }
 
 /* Select a looping motion with both blend-frame parameters zero. */
-void mdlLoopMotion(dds3ModelHandle_t *ctx, s32 searchId, s32 motionIndex) {
+void mdlLoopMotion(dds3ModelHandle_t *ctx, MdlMotionSearchId searchId, s32 motionIndex) {
     mdlMotion(ctx, searchId, motionIndex, SDF_MOTION_LOOP_ENABLED, 0.0f, 0.0f);
 }
 
 /* Select a nonlooping motion with both blend-frame parameters zero. */
-void mdlSingleMotion(dds3ModelHandle_t *ctx, s32 searchId, s32 motionIndex) {
+void mdlSingleMotion(dds3ModelHandle_t *ctx, MdlMotionSearchId searchId, s32 motionIndex) {
     mdlMotion(ctx, searchId, motionIndex, SDF_MOTION_LOOP_DISABLED, 0.0f, 0.0f);
 }
 
 /* Select a looping motion with the supplied blend-frame parameters. */
-void mdlSmoothLoopMotion(dds3ModelHandle_t *ctx, s32 searchId, s32 motionIndex, f32 blendLeadFrames,
+void mdlSmoothLoopMotion(dds3ModelHandle_t *ctx, MdlMotionSearchId searchId, s32 motionIndex, f32 blendLeadFrames,
                           f32 blendDurationFrames) {
     mdlMotion(
         ctx, searchId, motionIndex, SDF_MOTION_LOOP_ENABLED, blendLeadFrames, blendDurationFrames);
 }
 
 /* Select a nonlooping motion with the supplied blend-frame parameters. */
-void mdlSmoothSingleMotion(dds3ModelHandle_t *ctx, s32 searchId, s32 motionIndex, f32 blendLeadFrames,
+void mdlSmoothSingleMotion(dds3ModelHandle_t *ctx, MdlMotionSearchId searchId, s32 motionIndex, f32 blendLeadFrames,
                         f32 blendDurationFrames) {
     mdlMotion(
         ctx, searchId, motionIndex, SDF_MOTION_LOOP_DISABLED, blendLeadFrames, blendDurationFrames);
 }
 
-const sdfMotionCtrlr_t *mdlGetMotionCtrlr(const dds3ModelHandle_t *ctx, s32 searchId) {
+const sdfMotionCtrlr_t *mdlGetMotionCtrlr(const dds3ModelHandle_t *ctx, MdlMotionSearchId searchId) {
     const sdfMotionCtrlr_t *node;
 
     for (node = ctx->inner->motionList; node != NULL; node = node->next) {
@@ -919,14 +919,14 @@ const sdfMotionCtrlr_t *mdlGetMotionCtrlr(const dds3ModelHandle_t *ctx, s32 sear
     return NULL;
 }
 
-static inline const sdfMotionCtrlr_t *mdlFindNodeByIdReadOnly(const dds3ModelHandle_t *ctx, s32 searchId) {
+static inline const sdfMotionCtrlr_t *mdlFindNodeByIdReadOnly(const dds3ModelHandle_t *ctx, MdlMotionSearchId searchId) {
     /* Writer paths opt into the mutable view; queries use the const borrow. */
     return mdlGetMotionCtrlr(ctx, searchId);
 }
 
 /* Read the motion selector, widened to s32. Missing nodes return -1,
  * distinct from a present selector of 0xFFFF. */
-MdlMotionIndexResult mdlGetMotionNum(const dds3ModelHandle_t *ctx, s32 searchId) {
+MdlMotionIndexResult mdlGetMotionNum(const dds3ModelHandle_t *ctx, MdlMotionSearchId searchId) {
     const sdfMotionCtrlr_t *matchedNode = mdlFindNodeByIdReadOnly(ctx, searchId);
 
     if (matchedNode == NULL) {
@@ -936,7 +936,7 @@ MdlMotionIndexResult mdlGetMotionNum(const dds3ModelHandle_t *ctx, s32 searchId)
 }
 
 /* Read the selected motion's frame count; return zero for a missing node. */
-u16 mdlGetMotionLengthEx(const dds3ModelHandle_t *ctx, s32 searchId) {
+u16 mdlGetMotionLengthEx(const dds3ModelHandle_t *ctx, MdlMotionSearchId searchId) {
     const sdfMotionCtrlr_t *matchedNode = mdlFindNodeByIdReadOnly(ctx, searchId);
 
     if (matchedNode == NULL) {
@@ -947,7 +947,7 @@ u16 mdlGetMotionLengthEx(const dds3ModelHandle_t *ctx, s32 searchId) {
 
 /* Numerically convert the stored float to s32, not a bit reinterpretation.
  * Return zero when the searched node is absent. */
-s32 mdlGetMotionFrameEx(const dds3ModelHandle_t *ctx, s32 searchId) {
+s32 mdlGetMotionFrameEx(const dds3ModelHandle_t *ctx, MdlMotionSearchId searchId) {
     const sdfMotionCtrlr_t *matchedNode = mdlFindNodeByIdReadOnly(ctx, searchId);
 
     if (matchedNode == NULL) {
@@ -957,7 +957,7 @@ s32 mdlGetMotionFrameEx(const dds3ModelHandle_t *ctx, s32 searchId) {
 }
 
 /* Report its terminal state, or the shared missing-node status. */
-MdlMotionEndStatus mdlChkMotionEndEx(const dds3ModelHandle_t *ctx, s32 searchId) {
+MdlMotionEndStatus mdlChkMotionEndEx(const dds3ModelHandle_t *ctx, MdlMotionSearchId searchId) {
     const sdfMotionCtrlr_t *matchedNode = mdlFindNodeByIdReadOnly(ctx, searchId);
 
     if (matchedNode == NULL) {
@@ -967,7 +967,7 @@ MdlMotionEndStatus mdlChkMotionEndEx(const dds3ModelHandle_t *ctx, s32 searchId)
 }
 
 /* Read the stored float, defaulting to zero when the searched node is absent. */
-f32 mdlGetMotionSpeedEx(const dds3ModelHandle_t *ctx, s32 searchId) {
+f32 mdlGetMotionSpeedEx(const dds3ModelHandle_t *ctx, MdlMotionSearchId searchId) {
     const sdfMotionCtrlr_t *matchedNode = mdlFindNodeByIdReadOnly(ctx, searchId);
     f32 result = 0.0f;
 
@@ -978,7 +978,7 @@ f32 mdlGetMotionSpeedEx(const dds3ModelHandle_t *ctx, s32 searchId) {
 }
 
 /* Replace the stored float only when the searched node exists. */
-void mdlSetMotionSpeedEx(dds3ModelHandle_t *ctx, s32 searchId, f32 frameStep) {
+void mdlSetMotionSpeedEx(dds3ModelHandle_t *ctx, MdlMotionSearchId searchId, f32 frameStep) {
     sdfMotionCtrlr_t *matchedNode = mdlGetMutableMotionCtrlr(ctx, searchId);
 
     if (matchedNode != NULL) {
@@ -1126,7 +1126,7 @@ void mdlMotionPauseOff(dds3ModelHandle_t *ctx) {
 }
 
 /* Return whether the searched node exists; do not expose the lookup result. */
-MdlMotionPresence mdlHasMotionEx(const dds3ModelHandle_t *ctx, s32 searchId) {
+MdlMotionPresence mdlHasMotionEx(const dds3ModelHandle_t *ctx, MdlMotionSearchId searchId) {
     const sdfMotionCtrlr_t *lookupResult;
 
     lookupResult = mdlGetMotionCtrlr(ctx, searchId);
@@ -1155,7 +1155,7 @@ u32 mdlGetNumOfMinor(s32 tableIndex) {
 
 /* Read the referenced halfword or return zero for a missing node. A present
  * node's motion-table reference is dereferenced without a separate NULL check. */
-s32 mdlGetNumOfCut(const dds3ModelHandle_t *ctx, s32 searchId) {
+s32 mdlGetNumOfCut(const dds3ModelHandle_t *ctx, MdlMotionSearchId searchId) {
     const sdfMotionCtrlr_t *matchedNode = mdlFindNodeByIdReadOnly(ctx, searchId);
 
     if (matchedNode == NULL) {
