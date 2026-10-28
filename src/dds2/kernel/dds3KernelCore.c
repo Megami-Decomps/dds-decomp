@@ -513,7 +513,7 @@ KwlnTaskKillRequestResult dds3KillProcessName(const char* name, s32 delayTicks)
  * finalizes immediately when its delay is reset to zero. */
 KwlnTaskKillRequestResult dds3KillProcess(dds3ProcessID_t* task, s32 delayTicks)
 {
-    if (task == 0 || task == (dds3ProcessID_t*)-1) {
+    if (task == 0 || task == KWLN_TASK_HANDLE_INVALID) {
         return KWLN_TASK_KILL_REQUEST_REJECTED;
     }
     switch (task->flags & KWLN_TASK_STATE_MASK) {
