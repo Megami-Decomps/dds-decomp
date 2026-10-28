@@ -1658,7 +1658,7 @@ extern void fldUpdateSmoothedCameraPose(void);
 extern u8 fldAutoMapSeqTestFlag(u32);
 extern void evtAdvanceSolarClockAndExpireControls(f32 travelDistance);
 extern void evtUpdateFlaggedStats(void);
-extern s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex);
+#include "btl_conditional_encounter_roll_api.h"
 extern void dds3WorkClear(void);
 extern char D_0039FCA0[], D_0039FCB0[];
 
@@ -1755,7 +1755,8 @@ s32 fldUpdateTravelAndEncounters(void) {
     if (encounter == 0) encounter = fldGlobalBase.defaultEncounterId;
     D_003BAC08.tableIndex = encounter;
     selection = &D_003BAC08.encounterSelection;
-    if ((*selection = btlAdvanceConditionalEncounterRoll(distance, encounter)) != 0) {
+    if ((*selection = btlAdvanceConditionalEncounterRoll(distance, encounter)) !=
+        BTL_CONDITIONAL_ENCOUNTER_ROLL_NO_SELECTION) {
         encounter = fldRollEncounter();
         if (encounter != -1) {
             D_003BAC08.tableIndex = encounter;

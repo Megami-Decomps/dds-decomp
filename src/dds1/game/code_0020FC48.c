@@ -2796,7 +2796,7 @@ extern void btlDebugMenuBeforeRecordNoOp(void);
 extern void btlDebugMenuRecordNoOp(void *);
 extern void btlDebugMenuAfterRecordNoOp(void);
 extern s32 btlGetConditionalEncounterInterval(s32 encounterIndex);
-extern s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex);
+#include "btl_conditional_encounter_roll_api.h"
 extern void btlApplyDebugEncounterPartySelection(void);
 /* Preview/select a debug encounter or pack; return one when it can launch. */
 /* Keep the native snapshot/save/restore order around the debug window calls. */
@@ -2912,7 +2912,7 @@ s32 btlUpdateDebugEncounterSelector(void) {
     }
     if (D_003BBB0F != 0) {
         encounter = btlAdvanceConditionalEncounterRoll(200.0f, D_003BBB14);
-        if (encounter == 0) {
+        if (encounter == BTL_CONDITIONAL_ENCOUNTER_ROLL_NO_SELECTION) {
             return 0;
         }
         state->encounterPack = D_003BBB14;

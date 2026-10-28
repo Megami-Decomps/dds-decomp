@@ -23,6 +23,7 @@
 #include "dat_world_field_flags.h"
 #include "btl_affinity_row.h"
 #include "btl_resolve_unit_value_api.h"
+#include "btl_conditional_encounter_roll_api.h"
 #include "evt_randomize_entry_api.h"
 #include "mdl_flag_api.h"
 #include "pty_active_roster_index_api.h"
@@ -2467,7 +2468,7 @@ extern s32 btlSelectedConditionalEncounterIndex;
 extern s32 btlSelectedConditionalEncounterResult;
 extern void dds3WorkClear(void);
 
-s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex) {
+BtlConditionalEncounterRollResult btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex) {
     s32 group;
     s32 interval;
     s32 count;
@@ -2479,7 +2480,7 @@ s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex) {
     f32 counter;
 
     if (encounterIndex == 0 || step == 0.0f) {
-        return 0;
+        return BTL_CONDITIONAL_ENCOUNTER_ROLL_NO_SELECTION;
     }
     group = btlSelectConditionalEncounterGroup(encounterIndex);
     interval = btlGetConditionalEncounterInterval(encounterIndex);
@@ -2489,7 +2490,7 @@ s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex) {
     counter = DDS3_GBWK->conditionalEncounterStepRemainder + step;
     DDS3_GBWK->conditionalEncounterStepRemainder = counter;
     if (counter < 100.0f) {
-        return 0;
+        return BTL_CONDITIONAL_ENCOUNTER_ROLL_NO_SELECTION;
     }
     count = (s32)(counter / 100.0f);
     DDS3_GBWK->conditionalEncounterStepRemainder = counter - (f32)count * 100.0f;
@@ -2504,7 +2505,7 @@ s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex) {
         DDS3_GBWK->conditionalEncounterGauge = -0x218;
     }
     if (DDS3_GBWK->conditionalEncounterGauge < interval) {
-        return 0;
+        return BTL_CONDITIONAL_ENCOUNTER_ROLL_NO_SELECTION;
     }
     total = 0;
     for (i = 0; i < 20; i++) {
@@ -2526,12 +2527,12 @@ s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex) {
                     return packed;
                 }
                 dds3WorkClear();
-                return 0;
+                return BTL_CONDITIONAL_ENCOUNTER_ROLL_NO_SELECTION;
             }
             count += D_00435E0C[encounterIndex].groups[group].entries[i].weight;
         }
     }
-    return 0;
+    return BTL_CONDITIONAL_ENCOUNTER_ROLL_NO_SELECTION;
 }
 
 void dds3WorkClear(void) {

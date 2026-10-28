@@ -2969,7 +2969,7 @@ extern void btlDebugMenuBeforeRecordNoOp(void);
 extern void btlDebugMenuRecordNoOp(u32);
 extern void btlDebugMenuAfterRecordNoOp(void);
 extern s32 btlGetConditionalEncounterInterval(s32 encounterIndex);
-extern s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex);
+#include "btl_conditional_encounter_roll_api.h"
 extern void btlApplyDebugEncounterPartySelection(void);
 /* Edit encounter settings, preview party/enemy names, and launch the test. */
 /* Preview/select a debug encounter or pack; return one when it can launch. */
@@ -3104,7 +3104,7 @@ s32 btlUpdateDebugEncounterSelector(void) {
     }
     if (D_00436F5F != 0) {
         encounter = btlAdvanceConditionalEncounterRoll(200.0f, D_00436F64);
-        if (encounter == 0) {
+        if (encounter == BTL_CONDITIONAL_ENCOUNTER_ROLL_NO_SELECTION) {
             return 0;
         }
         state->encounterPack = D_00436F64;

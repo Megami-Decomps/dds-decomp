@@ -87,7 +87,7 @@ extern u8 fldAutoMapSeqTestFlag(u32);
 extern f32 D_0038A6F0[4];
 extern void evtAdvanceSolarClockAndExpireControls(f32 travelDistance);
 extern void evtUpdateFlaggedStats(void);
-extern s32 btlAdvanceConditionalEncounterRoll(f32 step, s32 encounterIndex);
+#include "btl_conditional_encounter_roll_api.h"
 
 extern s32 fldNext_fld;
 
@@ -1953,7 +1953,8 @@ s32 fldUpdateTravelAndEncounters(void) {
     if (encounter == 0) encounter = fldGlobalBase.defaultEncounterId;
     D_00435F98.tableIndex = encounter;
     selection = &D_00435F98.encounterSelection;
-    if ((*selection = btlAdvanceConditionalEncounterRoll(distance, encounter)) != 0) {
+    if ((*selection = btlAdvanceConditionalEncounterRoll(distance, encounter)) !=
+        BTL_CONDITIONAL_ENCOUNTER_ROLL_NO_SELECTION) {
         encounter = fldRollEncounter();
         if (encounter != -1) {
             D_00435F98.tableIndex = encounter;
