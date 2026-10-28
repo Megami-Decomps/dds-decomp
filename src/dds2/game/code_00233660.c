@@ -837,7 +837,7 @@ void mdlPibEditTrackInfo(EffMarkParams *params, s16 *fieldCursor) {
 void mdlCreateEffectResrc_P2A(DevRequest *partList, const u8 *resourceBytes) {
     MdlPartEntry *partEntry = &((MdlPartEntry *)partList->buffer)[partList->usedCount];
 
-    partEntry->state = 0;
+    partEntry->cloneCount = 0;
     partEntry->kind = MDL_PART_BILLBOARD;
     partEntry->object = dds3BillboardCreate(1, (u32)resourceBytes);
     partList->usedCount += 1;
@@ -848,7 +848,7 @@ void mdlCreateEffectResrc_D3P(DevRequest *partList, EffNodeDescriptor *descripto
     MdlPartEntry *partEntry = &((MdlPartEntry *)partList->buffer)[partList->usedCount];
 
     partEntry->kind = MDL_PART_EFFECT;
-    partEntry->state = 0;
+    partEntry->cloneCount = 0;
     partEntry->object = dds3EffectLoad(descriptor);
     partList->usedCount += 1;
 }
@@ -862,7 +862,7 @@ void mdlCreateEffectResrc_IPU(DevRequest *list, u8 *sourceAddress, sdfMemHandle_
     *(u32 *)&node->sourceAddress = (u32)sourceAddress;
     node->backingAllocation = backingAllocation;
     entry->kind = MDL_PART_OBJECT;
-    entry->state = 0;
+    entry->cloneCount = 0;
     entry->object = node;
     list->usedCount += 1;
 }
@@ -925,13 +925,13 @@ dds3ModelEffectCtrlr_t *mdlCreateEffectCtrlr(
 
 void *mdlEffectDup_P2A(MdlPartEntry *entry) {
     struct billHandle_t *clone = dds3BillboardCopy(mdlPartObjectFromStorage(entry->object).billboard);
-    entry->state = entry->state + 1;
+    entry->cloneCount = entry->cloneCount + 1;
     return clone;
 }
 
 void *mdlEffectDup_D3P(MdlPartEntry *entry) {
     EffNode *clone = dds3EffectCopy(mdlPartObjectFromStorage(entry->object).effect);
-    entry->state = entry->state + 1;
+    entry->cloneCount = entry->cloneCount + 1;
     return clone;
 }
 

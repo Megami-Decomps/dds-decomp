@@ -18,7 +18,7 @@ typedef union MdlPartObject {
 /* One model-viewer part-list slot; the request buffer uses a 0x10-byte stride. */
 typedef struct MdlPartEntry {
     u32 kind;       /* 0x00 */
-    s32 state;      /* 0x04 */
+    s32 cloneCount; /* 0x04: duplication calls made from this source entry */
     void *object;   /* 0x08 */
     u8 opaque0C[4]; /* 0x0C */
 } MdlPartEntry;
