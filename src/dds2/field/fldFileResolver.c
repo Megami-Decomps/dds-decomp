@@ -19,6 +19,7 @@
 #include "sdf_resource_list_release_api.h"
 #include "kwln_background_fade_api.h"
 #include "fld_movement_hold_state_api.h"
+#include "fld_movement_gate_result.h"
 #include "fld_scene_ready_api.h"
 #include "fld_area_resource_ready_api.h"
 #include "fld_area_resource_name_change_api.h"
@@ -4387,12 +4388,6 @@ extern void mnuResetTitleStreamAfterFileIdle(void);
 
 extern void dds3PadVibrationSet(u32 motor, u8 level, s32 duration);
 extern void fldEncountSetFlag(u32 mask);
-
-typedef s32 FldMovementGateResult;
-enum {
-    FLD_MOVEMENT_GATE_PROCEED = 0,
-    FLD_MOVEMENT_GATE_HELD = -1
-};
 
 /* Advance the field transition while the camera model's motion drives completion. */
 FldMovementGateResult fldUpdateFieldTransition(void) {
