@@ -98,7 +98,6 @@ extern FrFontTextBank frFontColoredGlyphResource;
 extern s32 ptyTestPrimaryProfileFlag(datUnitWork_t *, u16);
 
 extern PtyPresetRecord D_004052A8[];
-extern s32 mnuGetActiveMantraModelFlagState(void);
 extern u8 scrSelectScriptEntryAndInitialize(datUnitWork_t *, u32);
 extern void ptySetSecondaryProfileFlag(datUnitWork_t *, u16);
 extern u32 ptyAddProfileRecordValueClamped(datUnitWork_t *, u32);
@@ -1052,7 +1051,7 @@ void mnuRebuildMantraCategoryAvailability(void) {
         }
         for (index = 1; index < 0xB0; index++) {
             MantraNodePos *record = mnuGetMantraNodePositionRecord(index);
-            s32 modelFlagState;
+            MnuMantraModelFlagState modelFlagState;
             s32 category;
             s32 neighborIndex;
 

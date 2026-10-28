@@ -3,6 +3,7 @@
 
 #include "mnu.h"
 #include "dat_state.h"
+#include "mnu_mantra_model_flag_state.h"
 
 struct ItfMesSub;
 struct FileRequest;
@@ -153,7 +154,7 @@ typedef struct MantraNodePos {
         MenuPanelSelector selector;
         struct {
             s32 kind : 4;
-            s32 modelFlagState : 4;
+            MnuMantraModelFlagState modelFlagState : 4;
             u32 reserved : 8;
             s16 id;
         };

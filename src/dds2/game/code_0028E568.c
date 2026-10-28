@@ -24,8 +24,6 @@ typedef struct MantraProfileRequirement {
 
 
 
-extern s32 mnuGetActiveMantraModelFlagState(void);
-
 extern const MantraProfileRequirement mnuMantraState0ProfileRequirements[16];
 extern const MantraProfileRequirement mnuMantraState1ProfileRequirements[12];
 extern const MantraProfileRequirement mnuMantraOtherStateProfileRequirements[18];
@@ -385,7 +383,7 @@ s32 mnuFindMantraSourceCandidate(MnuStatusResource *object, MantraMenuSrc *state
     const MantraProfileRequirement *requirements;
     u32 value;
     u32 cap;
-    s32 modelFlagState;
+    MnuMantraModelFlagState modelFlagState;
     s32 slotIndex;
     s32 entryIndex;
     s32 requirementCount;
@@ -412,10 +410,10 @@ s32 mnuFindMantraSourceCandidate(MnuStatusResource *object, MantraMenuSrc *state
     }
 
     evtPrintDeveloperConsoleMessage(mnuMantraNoNeighborCandidateDebugText);
-    if (modelFlagState == 0) {
+    if (modelFlagState == MNU_MANTRA_MODEL_FLAG_STATE_LEVEL_0) {
         requirements = mnuMantraState0ProfileRequirements;
         requirementCount = 16;
-    } else if (modelFlagState == 1) {
+    } else if (modelFlagState == MNU_MANTRA_MODEL_FLAG_STATE_LEVEL_1) {
         requirements = mnuMantraState1ProfileRequirements;
         requirementCount = 12;
     } else {
@@ -617,7 +615,7 @@ s32 mnuScanMantraSourceCandidates(MnuStatusResource *object) {
     datUnitWork_t *party;
     s32 changed = 0;
     s32 rank;
-    s32 modelRank;
+    MnuMantraModelFlagState modelRank;
     s32 remaining;
 
     selectedPartySlot = &object->list->cursor->partyRecord;

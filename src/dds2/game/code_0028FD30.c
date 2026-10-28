@@ -439,8 +439,6 @@ s32 mnuNavigateMantraSelector(MnuStatusResource *resource, s8 directionFlags) {
     return 0;
 }
 
-extern s32 mnuGetActiveMantraModelFlagState(void);
-
 extern const s16 mnuMantraBridgeDestinationIds[4][3];
 extern const u16 mnuMantraBridgeNodesForDirections0And5[3][5];
 extern const u16 mnuMantraBridgeNodesForDirections2And3[3][5];
@@ -461,7 +459,7 @@ MantraNodePos *mnuResolveSpecialMantraNeighbor(MnuStatusResource *unused, u16 no
     memcpy(verticalNodes, mnuMantraBridgeNodesForDirections2And3, sizeof(verticalNodes));
     state = mnuGetActiveMantraModelFlagState();
 
-    if (state == 3) {
+    if (state == MNU_MANTRA_MODEL_FLAG_STATE_LEVEL_3) {
         return NULL;
     }
     for (i = 0; i < 4; i++) {
@@ -1906,7 +1904,7 @@ void mnuUpdateMantraTutorialPanelSprites(MnuStatusResource *object) {
         s32 id = position->selector.fields.index;
         if (id != 0) {
             MenuPanelPositionRecord *record;
-            s32 modelFlagState = position->modelFlagState;
+            MnuMantraModelFlagState modelFlagState = position->modelFlagState;
             u32 menuFlags = work->flags;
             u16 *flagWord;
 

@@ -193,8 +193,6 @@ void evtReleaseMantraSelectionWork(MantraFlagResource *work) {
     }
 }
 
-extern s32 mnuGetActiveMantraModelFlagState(void);
-
 extern u32 scrGetSelectedScriptEntryId(datUnitWork_t *);
 
 extern s32 ptyTestSecondaryProfileFlag(datUnitWork_t *, u16);
@@ -214,7 +212,7 @@ extern const char D_00425098[];
 
 /* Populate mantra selection flags from rank, profile state and node rules. */
 void mnuUpdateMantraRecordFlags(MantraFlagResource *work, datUnitWork_t *unit, s32 mode) {
-    s32 rank;
+    MnuMantraModelFlagState rank;
     u32 selected;
     u16 *entry;
     MantraNodePos *node;

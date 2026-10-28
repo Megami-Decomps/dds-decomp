@@ -15,6 +15,7 @@
 #include "sdf_resource.h"
 #include "file_request_api.h"
 #include "mnu_mantra_position_api.h"
+#include "mnu_mantra_model_flag_state.h"
 #include "mnu_panel_position_record.h"
 #include "mdl_flag_api.h"
 #include "mnu_mantra_draw.h"
@@ -87,7 +88,7 @@ extern MnuMantraDrawUpdateResult mnuUpdateMantraFadeA(struct MantraDrawPool *, M
 extern s32 mnuDrawMantraIconList(struct MantraDrawPool *, MantraDrawItem *);
 typedef struct MantraNodePos {
     s32 kind : 4;
-    s32 modelFlagState : 4;
+    MnuMantraModelFlagState modelFlagState : 4;
     u32 reserved : 8;
     s16 panelIndex;
     s16 x;
@@ -312,17 +313,17 @@ extern void mnuReleaseMantraUnitPanelDraw(struct MantraDrawItem *);
 void mnuStorePanelEntry(u32, u32);
 struct sdfMemHandle_t;
 
-s32 mnuGetActiveMantraModelFlagState(void) {
-    s32 result = 0;
+MnuMantraModelFlagState mnuGetActiveMantraModelFlagState(void) {
+    MnuMantraModelFlagState result = MNU_MANTRA_MODEL_FLAG_STATE_LEVEL_0;
 
     if (evtBitCheck(0x920)) {
-        result = 1;
+        result = MNU_MANTRA_MODEL_FLAG_STATE_LEVEL_1;
     }
     if (evtBitCheck(0x921)) {
-        result = 2;
+        result = MNU_MANTRA_MODEL_FLAG_STATE_LEVEL_2;
     }
     if (evtBitCheck(0x922)) {
-        result = 3;
+        result = MNU_MANTRA_MODEL_FLAG_STATE_LEVEL_3;
     }
     return result;
 }
@@ -334,7 +335,7 @@ extern void scrSetEntryLowFlags(datUnitWork_t *, u16, u16);
 extern s32 mnuCheckMantraNeighborRequirements(u16);
 
 void func_0026DC48(datUnitWork_t *party) {
-    s32 modelFlagState;
+    MnuMantraModelFlagState modelFlagState;
     u32 selected;
     MantraNodePos *node;
     s32 index;

@@ -292,8 +292,6 @@ extern void mnuBuildMantraSourceList(MnuStatusResource *);
 extern s32 mnuScanMantraSourceCandidates(MnuStatusResource *);
 extern s32 mnuRefreshMantraSelectionResources(MnuStatusResource *);
 extern MantraPanelPool *mnuCreateMantraPanelPool(s32, MnuStatusResource *);
-extern s32 mnuGetActiveMantraModelFlagState(void);
-
 const char D_00426300[] = "******************** Debug Error!!!! ********************\n";
 const char D_00426340[] = "mtrMantraPlayerDataCreate!!!! \n";
 
@@ -646,7 +644,6 @@ extern s32 mnuSelectMatchingNode(MnuStatusResource *, MantraMenuSrc *);
 extern void mnuSelectMantraLimitLine(MnuStatusResource *, u16);
 extern void mnuApplyMantraUnlockToPartyList(MnuStatusResource *, u16);
 extern s32 mnuRefreshMantraSelectionResources(MnuStatusResource *);
-extern s32 mnuGetActiveMantraModelFlagState(void);
 extern void mnuSetMantraBackgroundVariant(struct MantraDrawPool *, s8);
 extern void mnuEnableMantraBackground(struct MantraDrawPool *);
 extern void mnuBeginMantraBackgroundMaskFadeIn(struct MantraDrawPool *);
@@ -803,7 +800,7 @@ s32 mnuAdvanceMantraSourceTransition(MnuStatusResource *object) {
         if (!work->drawBits.hasQueuedMastery) {
             evtPrintDeveloperConsoleMessage(D_00426DD0);
             mnuRefreshMantraSelectionResources(object);
-            if (mnuGetActiveMantraModelFlagState() >= 2 ||
+            if (mnuGetActiveMantraModelFlagState() >= MNU_MANTRA_MODEL_FLAG_STATE_LEVEL_2 ||
                 evtBitCheck(0x977) || evtBitCheck(0x978) ||
                 evtBitCheck(0x979) || evtBitCheck(0x97A)) {
                 mnuShowMantraScrollCursor(object->menu.selectionController);
@@ -1246,7 +1243,6 @@ void mnuDrawMantraMapNodes(s32 offsetX, s32 offsetY, MnuStatusResource *object, 
     } while (--count >= 0);
 }
 
-extern s32 mnuGetActiveMantraModelFlagState(void);
 typedef struct MantraPanelAnimation MantraPanelAnimation;
 extern MantraPanelAnimation *mnuSpawnPanelSlotA(MantraPanelPool *, s32, s8, s16, s16, u32);
 extern void mnuOffsetPanelAndSetVisualParams(MantraPanelAnimation *, s32, s32, u32, u32, u32, u8, u8);
@@ -1387,7 +1383,7 @@ s32 mnuActivateMantraNeighborEdges(MnuStatusResource *object, u16 nodeId, s16 mo
             }
         }
     }
-    if (modelFlagState == 3) {
+    if (modelFlagState == MNU_MANTRA_MODEL_FLAG_STATE_LEVEL_3) {
         for (i = 0; i < 6; i++) {
             if ((edges >> i) & 1) {
                 mnuActivateMantraNeighborEdges(object, neighbors[i]->id, modelFlagState, panelX + 2);
@@ -1399,7 +1395,8 @@ s32 mnuActivateMantraNeighborEdges(MnuStatusResource *object, u16 nodeId, s16 mo
         for (i = 0; i < 6; i++) {
             if (neighbors[i] != NULL) {
                 flags = resource->flags + neighbors[i]->id;
-                if (neighbors[i]->modelFlagState == 2 && ((*flags >> 8) & 0x10) == 0) {
+                if (neighbors[i]->modelFlagState == MNU_MANTRA_MODEL_FLAG_STATE_LEVEL_2 &&
+                    ((*flags >> 8) & 0x10) == 0) {
                     edges |= 1 << i;
                 }
             }
@@ -1446,7 +1443,8 @@ MantraNodePos *mnuFindCompatibleMantraNeighbor(MnuStatusResource *object, u16 no
         neighbors = record->neighbors;
         for (i = 0; i < 6; i++) {
             neighbor = neighbors[i];
-            if (neighbor == NULL || neighbor->modelFlagState == 3) {
+            if (neighbor == NULL ||
+                neighbor->modelFlagState == MNU_MANTRA_MODEL_FLAG_STATE_LEVEL_3) {
                 compatible |= 1 << i;
             }
         }
@@ -1479,7 +1477,7 @@ void mtrDrawRankPass(MnuStatusResource *object, u16 index) {
     s32 hasNode = 0;
     s16 rank = 0;
     s16 remaining;
-    s32 modelFlagState = mnuGetActiveMantraModelFlagState();
+    MnuMantraModelFlagState modelFlagState = mnuGetActiveMantraModelFlagState();
     s32 selected;
 
     evtPrintDeveloperConsoleMessage("DrawRank[%d]\n", modelFlagState);
@@ -1514,7 +1512,7 @@ void mtrDrawRankPass(MnuStatusResource *object, u16 index) {
 }
 
 void mnuRefreshMantraUnitNodeFlags(MnuStatusResource *object) {
-    s32 modelFlagState = mnuGetActiveMantraModelFlagState();
+    MnuMantraModelFlagState modelFlagState = mnuGetActiveMantraModelFlagState();
     struct MenuListNode *node = object->list->first;
     MantraFlagResource **resourceSlot;
 

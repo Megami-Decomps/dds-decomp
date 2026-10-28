@@ -118,7 +118,6 @@ const char D_00425F70[] = "*****************[mtrMantraUpdate():[0x%x]]**********
 
 extern MantraFlagResource *evtAllocateMantraSelectionWork(datUnitWork_t *, s32);
 extern void evtReleaseMantraSelectionWork(MantraFlagResource *);
-extern s32 mnuGetActiveMantraModelFlagState(void);
 extern void mnuValidateProfileEntry(MantraFlagResource *, datUnitWork_t *);
 extern DatProfileRecord *ptyGetProfileRecordPointer(const datUnitWork_t *, u16);
 extern void ptyApplyProfile(datUnitWork_t *, u16);
@@ -126,7 +125,7 @@ extern void scrSetEntryLowFlags(datUnitWork_t *, u16, u16);
 
 /* Recompute every mantra node's unlock state for a party member and report changes. */
 void mtrRecomputeMantraFlagsForPartyUnit(datUnitWork_t *record) {
-    s32 modelFlagState;
+    MnuMantraModelFlagState modelFlagState;
     MantraFlagResource *current;
     MantraFlagResource *source;
     MantraNodePos *node;
