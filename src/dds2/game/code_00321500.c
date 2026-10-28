@@ -3,6 +3,7 @@
 #include "mnu_callback_list.h"
 #include "mnu_work.h"
 #include "dds_nested_resource.h"
+#include "mnu_timed_state_advance_result.h"
 
 #define MNU_WORK_ACTIVE   1
 
@@ -48,7 +49,6 @@ extern void mnuFreeOptionalBlock(void *ptr);
 void mnuReleaseResourceBlockCallback(u32, u32);
 
 
-s32 mnuAdvanceTimedStateRecord(MenuStateRecord *record);
 extern MenuRuntimeRecord *mnuCreateRuntimeAnimationRecord(MenuStateRecord *record,
                                         MenuRuntimeList *runtimeList,
                                         s32 x, s32 y, f32 angle);
@@ -111,7 +111,7 @@ void mnuUpdateLinkedTimedStateList(MnuCallbackList *list, MenuRuntimeList *runti
     if (node != NULL) {
         do {
             record = (MenuStateRecord *)node->value;
-            if (mnuAdvanceTimedStateRecord(record) != 0 && enabled != 0) {
+            if (mnuAdvanceTimedStateRecord(record) != MNU_TIMED_STATE_ADVANCE_PENDING && enabled != 0) {
                 record->flags.word &= 0xFFFE;
                 /* The native dispatcher retains separate kind paths even
                  * though both currently invoke the same spawn provider. */
@@ -134,7 +134,7 @@ void mnuUpdateKindMaskedTimedSpawns(MnuCallbackList *callbackList, MenuRuntimeLi
     if (node != NULL) {
         do {
             record = (MenuStateRecord *)node->value;
-            if (mnuAdvanceTimedStateRecord(record) != 0 && enabled != 0) {
+            if (mnuAdvanceTimedStateRecord(record) != MNU_TIMED_STATE_ADVANCE_PENDING && enabled != 0) {
                 u32 kind = record->tag.flags & 0xF;
                 if ((kindMask >> kind) & 1) {
                     record->flags.word &= 0xFFFE;
@@ -173,17 +173,17 @@ void mnuFreeOptionalBlock(void *ptr) {
 
 
 /* Advance optional wait and active counters; completion stays latched. */
-s32 mnuAdvanceTimedStateRecord(MenuStateRecord *record) {
+MnuTimedStateAdvanceResult mnuAdvanceTimedStateRecord(MenuStateRecord *record) {
     if (record->flags.bits.completed) {
-        return 1;
+        return MNU_TIMED_STATE_ADVANCE_COMPLETE;
     }
     if (record->flags.word & MNU_STATE_WAIT_PENDING) {
         /* A zero wait limit leaves the pending wait stalled. */
         if (record->valueGate.waitLimit == 0) {
-            return 0;
+            return MNU_TIMED_STATE_ADVANCE_PENDING;
         }
         if (++record->waitCount < record->valueGate.waitLimit) {
-            return 0;
+            return MNU_TIMED_STATE_ADVANCE_PENDING;
         }
         record->waitCount = 0;
         record->flags.word &= ~MNU_STATE_WAIT_PENDING;
@@ -193,13 +193,13 @@ s32 mnuAdvanceTimedStateRecord(MenuStateRecord *record) {
         record->elapsedCount = 0;
         if (!(record->flags.word & MNU_STATE_VALUE_GATED) || record->valueGate.limit > record->value) {
             record->flags.word |= MNU_STATE_COMPLETED;
-            return 1;
+            return MNU_TIMED_STATE_ADVANCE_COMPLETE;
         }
         /* A failed value gate rearms the wait instead of marking completion. */
         record->waitCount = 0;
         record->flags.word |= MNU_STATE_WAIT_PENDING;
     }
-    return 0;
+    return MNU_TIMED_STATE_ADVANCE_PENDING;
 }
 
 /* Test the idle counter and value gate; the pending-wait bit is not checked. */

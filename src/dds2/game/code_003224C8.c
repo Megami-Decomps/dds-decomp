@@ -52,7 +52,6 @@ extern void dds3DestroyCallbackNodeAfterLastNotification(MnuCallbackList *);
 extern void *malloc(u32 bytes) __attribute__((malloc));
 
 
-s32 mnuAdvanceTimedStateRecord(MenuStateRecord *record);
 extern MenuRuntimeRecord *mnuCreateRuntimeAnimationRecord(MenuStateRecord *record,
                                         MenuRuntimeList *runtimeList,
                                         s32 x, s32 y, f32 angle);
