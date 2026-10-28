@@ -126,7 +126,8 @@ typedef struct FldAreaWork {
     s32 sceneState;
     FldAreaResourceRequestState resourceRequestState; /* 0x78: local-map request state. */
     s32 resourceArea;
-    s32 resourceFloor;
+    /* Resource/cache key; (0, 0) is the battle-return no-request sentinel. */
+    s32 resourceRoomKey;
     FldPositionUpdateState positionPending; /* 0x84: corrected pose awaits application. */
     s32 selectedRoomIndex;
     s32 unk8C;

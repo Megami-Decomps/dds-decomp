@@ -1225,7 +1225,7 @@ FldBattleReturnAreaLoadResult fldTryStartPendingBattleReturnAreaLoad(void) {
     if (area != 0 || floor != 0) {
         fldFreeNextFile();
         fldGlobalBase.resourceArea = area;
-        fldGlobalBase.resourceFloor = floor;
+        fldGlobalBase.resourceRoomKey = floor;
         fldMakeFilePath(directory, area, 1);
         sprintf(path, D_004130D8, directory, area, floor);
         pFldNextFileDataF2 = (FilePacRequest *)pacLoad(path);
@@ -1250,13 +1250,13 @@ s32 fldRequestAreaResource(s32 area, s32 room) {
         return 1;
     }
     if (fldGlobalBase.resourceArea == area &&
-        fldGlobalBase.resourceFloor == room) {
+        fldGlobalBase.resourceRoomKey == room) {
         fldGlobalBase.resourceRequestState = FLD_AREA_RESOURCE_REQUEST_SATISFIED_FROM_CACHE;
         return 1;
     }
     fldFreeNextFile();
     fldGlobalBase.resourceArea = area;
-    fldGlobalBase.resourceFloor = room;
+    fldGlobalBase.resourceRoomKey = room;
     if (fldGetLocationCoordinateFlags(area, room) & FLD_LOCATION_COORDINATE_FLAG_LOAD_KF2_ROOM_CHUNK) {
         D_00436010 = 1;
     } else {
@@ -1287,7 +1287,7 @@ void fldFreeNextFile(void) {
     fldPendingArea = 0;
     fldPendingFloor = 0;
     fldGlobalBase.resourceArea = 0;
-    fldGlobalBase.resourceFloor = 0;
+    fldGlobalBase.resourceRoomKey = 0;
     fldGlobalBase.resourceRequestState = FLD_AREA_RESOURCE_REQUEST_IDLE;
 }
 
@@ -1319,7 +1319,7 @@ FldAreaResourceReadyState fldIsAreaResourceReady(void) {
 }
 
 FldAreaResourceRequestReuseResult fldCanReuseAreaResourceRequest(s32 area, s32 room) {
-    if (fldGlobalBase.resourceArea != area || fldGlobalBase.resourceFloor != room) {
+    if (fldGlobalBase.resourceArea != area || fldGlobalBase.resourceRoomKey != room) {
         return FLD_AREA_RESOURCE_REQUEST_NOT_REUSABLE;
     }
     if (pFldNextFileDataF2 != 0 && pacCheckEnd((struct FileRequest *)pFldNextFileDataF2) != 0) {
@@ -1334,7 +1334,7 @@ struct sdfMemHandle_t *fldCopyCachedRoomResourceIfLocationMatches(const SdfTextu
     FldAreaWork *state = &fldGlobalBase;
 
     if (state->resourceArea == area) {
-        if (state->resourceFloor == room) {
+        if (state->resourceRoomKey == room) {
             struct sdfMemHandle_t *allocation = sdfMemAllocDirect(fldCachedRoomResourceSize);
             void *data = (void *)sdfMemLock(allocation);
             *destination = data;
@@ -1349,7 +1349,7 @@ struct sdfMemHandle_t *fldCopyCachedRoomF1ResourceIfLocationMatches(u8 **destina
     FldAreaWork *state = &fldGlobalBase;
 
     if (state->resourceArea == area) {
-        if (state->resourceFloor == room) {
+        if (state->resourceRoomKey == room) {
             struct sdfMemHandle_t *allocation = sdfMemAllocDirect(fldCachedRoomF1ResourceSize);
             u8 *data = (u8 *)sdfMemLock(allocation);
             *destination = data;
@@ -1364,7 +1364,7 @@ struct sdfMemHandle_t *fldCopyCachedRoomF2ResourceIfLocationMatches(u8 **destina
     FldAreaWork *state = &fldGlobalBase;
 
     if (state->resourceArea == area) {
-        if (state->resourceFloor == room) {
+        if (state->resourceRoomKey == room) {
             struct sdfMemHandle_t *allocation = sdfMemAllocDirect(fldCachedRoomF2ResourceSize);
             u8 *data = (u8 *)sdfMemLock(allocation);
             *destination = data;
@@ -1379,7 +1379,7 @@ struct sdfMemHandle_t *fldCopyCachedRoomKF2ResourceIfLocationMatches(u8 **destin
     FldAreaWork *state = &fldGlobalBase;
 
     if (state->resourceArea == area) {
-        if (state->resourceFloor == room) {
+        if (state->resourceRoomKey == room) {
             struct sdfMemHandle_t *allocation = sdfMemAllocDirect(fldCachedRoomKF2ResourceSize);
             u8 *data = (u8 *)sdfMemLock(allocation);
             *destination = data;
