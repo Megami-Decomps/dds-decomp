@@ -82,14 +82,14 @@ scrProcessWork_s *scrCreateTaskWithDefaultOption(const BfFlw0Header *header) {
 }
 
 dds3ProcessID_t *scrRunScriptEx(u32 priority, const BfFlw0Header *header,
-    const ScrSection *procedureSection, const ScrLabel *procedures, const ScrLabel *labels,
+    const ScrSection *procedureSection, const ScrProcedure *procedures, const ScrLabel *labels,
     const ScrInstr *instructions, struct ItfMesSub *auxiliaryData, const char *strings, ScrProcedureIndex procedureIndex)
 {
     return scrStartScriptProcess(priority, bfContextCreate(header, procedureSection, procedures, labels, instructions, auxiliaryData, strings, procedureIndex));
 }
 
 scrProcessWork_s *scrCreateProcessAtFirstProcedure(const BfFlw0Header *header, const ScrSection *procedureSection,
-    const ScrLabel *procedures, const ScrLabel *labels, const ScrInstr *instructions,
+    const ScrProcedure *procedures, const ScrLabel *labels, const ScrInstr *instructions,
     struct ItfMesSub *auxiliaryData, const char *strings)
 {
     return bfContextCreate(header, procedureSection, procedures, labels, instructions, auxiliaryData, strings, 0);
@@ -189,7 +189,7 @@ scrProcessWork_s *scrSearchScriptName(const char *name) {
 
 /* Index of the named procedure in the FLW0 procedure section, or -1. */
 ScrProcedureIndex scrSearchProcedureName(const BfFlw0Header *header, const char *procedureName) {
-    const ScrLabel *procedures = NULL;
+    const ScrProcedure *procedures = NULL;
     const ScrSection *sections;
     s32 sectionIndex;
     ScrProcedureIndex procedureIndex;
@@ -200,7 +200,7 @@ ScrProcedureIndex scrSearchProcedureName(const BfFlw0Header *header, const char 
     sections = header->sections;
     for (sectionIndex = 0; sectionIndex < header->sectionCount; sectionIndex++) {
         if (sections[sectionIndex].type == BF_FLW0_SECTION_PROCEDURES) {
-            procedures = (const ScrLabel *)((const u8 *)header + sections[sectionIndex].offset);
+            procedures = (const ScrProcedure *)((const u8 *)header + sections[sectionIndex].offset);
             break;
         }
     }

@@ -147,12 +147,25 @@ typedef union ScrInstr {
     f32 fOperand;
 } ScrInstr;
 
-/* Named script label/procedure and address (0x20); DDS1/2 script/scrTraceCode.c. */
+/* FLW0 label-table entry (0x20); its instruction address is at 0x18. */
 typedef struct ScrLabel {
     char name[24];
     ScrProgramCounter addr; /* 0x18 */
     s32 unk1C;
 } ScrLabel;
+
+typedef char ScrLabel_size_must_be_0x20[
+    (sizeof(ScrLabel) == 0x20) ? 1 : -1];
+
+/* Procedure-table entry; distinct from a label despite sharing its 0x20 layout. */
+typedef struct ScrProcedure {
+    char name[24];
+    ScrProgramCounter addr; /* 0x18 */
+    s32 unk1C;
+} ScrProcedure;
+
+typedef char ScrProcedure_size_must_be_0x20[
+    (sizeof(ScrProcedure) == 0x20) ? 1 : -1];
 
 /* FLW0 section descriptor (0x10), including the file-relative data offset. */
 typedef s32 BfFlw0SectionKind;
@@ -185,8 +198,8 @@ typedef struct scrProcessWork_s {
     /* Borrowed FLW0 source views; the VM reads them but does not edit them. */
     const struct BfFlw0Header *scriptHeader;
     const ScrSection *procedureSection; /* FLW0 descriptor; count bounds the procedure table */
-    const ScrLabel *procedures;
-    const ScrLabel *labels;
+    const ScrProcedure *procedures; /* FLW0 PROCEDURES section */
+    const ScrLabel *labels;          /* FLW0 LABELS section */
     const ScrInstr *instructions;
     struct ItfMesSub *auxiliaryData; /* mutable: message initialization relocates it */
     const char *strings;          /* borrowed read-only view; lifetime follows source owner/caller */

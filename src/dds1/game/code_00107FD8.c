@@ -1926,7 +1926,7 @@ INCLUDE_RODATA(const s32, "game/code_00107FD8", D_0039E220);
 INCLUDE_RODATA(const s32, "game/code_00107FD8", D_0039E238);
 
 scrProcessWork_s *bfContextCreate(const BfFlw0Header *header, const ScrSection *procedureSection,
-                        const ScrLabel *procedures, const ScrLabel *labels,
+                        const ScrProcedure *procedures, const ScrLabel *labels,
                         const ScrInstr *instructions, struct ItfMesSub *auxiliaryData,
                         const char *strings, ScrProcedureIndex procedureIndex) {
     scrProcessWork_s *process;
@@ -2001,7 +2001,7 @@ scrProcessWork_s *bfContextCreate(const BfFlw0Header *header, const ScrSection *
    Zero-count auxiliary sections are ignored, and absent sections remain null. */
 scrProcessWork_s *fldFlowParse(const BfFlw0Header *header, ScrProcedureIndex procedureIndex) {
     const ScrSection *sections;
-    const ScrLabel *procedures = NULL;
+    const ScrProcedure *procedures = NULL;
     const ScrLabel *labels = NULL;
     const u8 *instructionSection = NULL;
     struct ItfMesSub *auxiliaryData = NULL;
@@ -2015,7 +2015,7 @@ scrProcessWork_s *fldFlowParse(const BfFlw0Header *header, ScrProcedureIndex pro
     for (i = 0; i < header->sectionCount; i++) {
         switch (sections[i].type) {
             case BF_FLW0_SECTION_PROCEDURES:
-                procedures = (const ScrLabel *)((const u8 *)header + sections[i].offset);
+                procedures = (const ScrProcedure *)((const u8 *)header + sections[i].offset);
                 break;
             case BF_FLW0_SECTION_LABELS:
                 labels = (const ScrLabel *)((const u8 *)header + sections[i].offset);
