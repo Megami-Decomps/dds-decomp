@@ -11,6 +11,7 @@
 #include "mnu_item_requirement_api.h"
 #include "mnu_staff.h"
 #include "mnu_staff_item_use_api.h"
+#include "mnu_staff_bullet_list_refresh_api.h"
 #include "mnu_list.h"
 #include "mnu_shop.h"
 #include "dat_state.h"
@@ -544,7 +545,8 @@ s32 mnuStaffListInput(dds3ProcessID_t *task) {
     return 1;
 }
 
-extern s32 mnuRefreshStaffBulletItemList(s32, s32, MenuStaffContext *);
+extern MnuStaffBulletListRefreshResult mnuRefreshStaffBulletItemList(
+    s32 itemId, s32 previousItemId, MenuStaffContext *owner);
 extern u32 mnuSetPartyEntryMenuValue(datUnitWork_t *entry, u32 menuValue);
 extern MenuPopupEntry mnuCampItemCategoryPopupEntry[];
 extern MenuPopupEntry mnuCampAmmoPartySelectionPopupEntry[];
@@ -614,7 +616,8 @@ s32 mnuUpdateStaffPartySelectionState(dds3ProcessID_t *task) {
             mnuPlayInputSound(0, input, &window->list->stateFlags);
         }
     } else {
-        if (mnuRefreshStaffBulletItemList(menu->previous, menu->requested, context) == 0) {
+        if (mnuRefreshStaffBulletItemList(menu->previous, menu->requested, context) ==
+            MNU_STAFF_BULLET_LIST_REFRESH_RETURN_TO_CATEGORY) {
             mnuClearActionFlags(0, &context->partyWindow);
             mnuSetPopupEntryFlagged(popup, mnuCampItemCategoryPopupEntry);
         } else {

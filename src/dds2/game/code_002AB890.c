@@ -9,6 +9,7 @@
 #include "sdf_resource.h"
 #include "mnu_staff.h"
 #include "mnu_staff_item_use_api.h"
+#include "mnu_staff_bullet_list_refresh_api.h"
 #include "mnu_list.h"
 #include "dat_state.h"
 #include "eff.h"
@@ -188,7 +189,8 @@ void mnuDestroyStaffBulletItemWindow(MenuStaffContext *object) {
     mnuDestroyWindowContainer(((MenuStaffChoices *)object->menu)->windows[2]);
 }
 
-s32 mnuRefreshStaffBulletItemList(s32 itemId, s32 previousItemId, MenuStaffContext *owner) {
+MnuStaffBulletListRefreshResult mnuRefreshStaffBulletItemList(
+    s32 itemId, s32 previousItemId, MenuStaffContext *owner) {
     s32 previousCursorId = -1;
     s32 needsInsertion = 0;
     s32 insertBefore = 0;
@@ -198,7 +200,7 @@ s32 mnuRefreshStaffBulletItemList(s32 itemId, s32 previousItemId, MenuStaffConte
     u8 quantity;
 
     if (itemId == 0 && previousItemId == 0) {
-        return 1;
+        return MNU_STAFF_BULLET_LIST_REFRESH_KEEP_SELECTION;
     }
     if (DDS3_GBWK->inventory.counts[previousItemId] == 0) {
         window = resources->windows[2];
@@ -234,7 +236,9 @@ s32 mnuRefreshStaffBulletItemList(s32 itemId, s32 previousItemId, MenuStaffConte
         quantity = DDS3_GBWK->inventory.counts[itemId];
     }
     node->sortKeyPrimary = quantity;
-    return window->list->count != 0;
+    return window->list->count != 0
+               ? MNU_STAFF_BULLET_LIST_REFRESH_KEEP_SELECTION
+               : MNU_STAFF_BULLET_LIST_REFRESH_RETURN_TO_CATEGORY;
 }
 
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);

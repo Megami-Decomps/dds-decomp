@@ -5,6 +5,7 @@
 #include "mnu.h"
 #include "mnu_staff.h"
 #include "mnu_staff_item_use_api.h"
+#include "mnu_staff_bullet_list_refresh_api.h"
 #include "mnu_shop.h"
 #include "mnu_list.h"
 #include "kwln.h"
@@ -87,7 +88,8 @@ typedef char StaffImageContext_size_check[
     sizeof(StaffImageContext) == 0x924 ? 1 : -1];
 typedef char StaffImageContext_page_list_check[
     (u32)&((StaffImageContext *)0)->pageWindow.lists[0] == 0x7D8 ? 1 : -1];
-extern s32 mnuRefreshStaffBulletItemList(s32 itemToInsert, s32 inventoryItem, void *context);
+extern MnuStaffBulletListRefreshResult mnuRefreshStaffBulletItemList(
+    s32 itemToInsert, s32 inventoryItem, void *context);
 
 extern void mnuSelectPage(MenuPageWindow *, s32);
 extern void mnuCreateStaffBulletItemWindow(struct StaffDisplayContext *context);
@@ -529,7 +531,8 @@ s32 mnuUpdateStaffPartySelectionState(dds3ProcessID_t *task) {
         }
         mnuPlayInputSound(0, buttons, (u32 *)list->list);
     } else {
-        if (mnuRefreshStaffBulletItemList(menu->itemToInsert, menu->inventoryItem, context) == 0) {
+        if (mnuRefreshStaffBulletItemList(menu->itemToInsert, menu->inventoryItem, context) ==
+            MNU_STAFF_BULLET_LIST_REFRESH_RETURN_TO_CATEGORY) {
             mnuClearListFlags(0, &context->pageWindow);
             mnuSetPopupEntryFlagged(&context->popupState, mnuCampItemCategoryPopupEntry);
         } else {
