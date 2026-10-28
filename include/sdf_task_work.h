@@ -2,6 +2,7 @@
 #define SDF_TASK_WORK_H
 
 #include "common.h"
+#include "kwln.h"
 #include "sdf.h"
 
 struct sdfMemHandle_t;
@@ -113,10 +114,10 @@ SdfTaskWorkStepResult sdfTaskWorkStep(TaskWork *work);
  * Both domains retain the native signed 32-bit word return. */
 s32 sdfGetTaskValueByKey(TaskWork *work, s32 key);
 
-/* Scheduler updates drain the current entry/callback pass. They return -1
- * when the task work has no current entry, otherwise 0 after the pass. */
-s32 sdfTaskWorkRunAllEntries(struct dds3ProcessID_t *task);
-s32 sdfTaskWorkRunAll(struct dds3ProcessID_t *task);
+/* These scheduler updates drain the current entry/callback pass. They finish
+ * the task when no current entry remains, otherwise retain the callback. */
+KwlnTaskUpdateResult sdfTaskWorkRunAllEntries(struct dds3ProcessID_t *task);
+KwlnTaskUpdateResult sdfTaskWorkRunAll(struct dds3ProcessID_t *task);
 /* The scheduler destroy callback releases the TaskWork owned by task's user value. */
 void sdfReleaseCurrentTaskOwnedResources(struct dds3ProcessID_t *task);
 

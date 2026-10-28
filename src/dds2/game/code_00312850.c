@@ -227,7 +227,7 @@ SdfTaskWorkStepResult sdfTaskWorkStep(TaskWork *work) {
     return SDF_TASK_WORK_STEP_RESULT_NODE_VISITED;
 }
 
-s32 sdfTaskWorkRunAllEntries(dds3ProcessID_t *task) {
+KwlnTaskUpdateResult sdfTaskWorkRunAllEntries(dds3ProcessID_t *task) {
     TaskWork *work = (TaskWork *)dds3GetProcessData(task);
 
     if (work->currentNode == NULL) {
@@ -238,7 +238,7 @@ s32 sdfTaskWorkRunAllEntries(dds3ProcessID_t *task) {
     return 0;
 }
 
-s32 sdfTaskWorkRunAll(dds3ProcessID_t *task) {
+KwlnTaskUpdateResult sdfTaskWorkRunAll(dds3ProcessID_t *task) {
     TaskWork *work = (TaskWork *)dds3GetProcessData(task);
 
     if (work->currentNode == NULL) {
