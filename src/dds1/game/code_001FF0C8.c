@@ -23,6 +23,7 @@
 #include "btl_action.h"
 #include "btl_ai_table.h"
 #include "btl_ai_scratch.h"
+#include "btl_ai_route_predicate_selection.h"
 #include "btl_unit_tasks.h"
 #include "dat_state.h"
 #include "dat_command.h"
@@ -230,7 +231,7 @@ s32 btlSelectTierMatrixAiRoute(BtlUnit *context, s32 species, s32 *selected, s32
             if (datEnemyAiRecords[species].decisions[tier].routes[0] != 8) {
                 *selected = datEnemyAiRecords[species].decisions[tier].routes[0];
                 btlActionScratchWork->rowIndex = tier;
-                btlActionScratchWork->conditionKind = 0;
+                btlActionScratchWork->routePredicateSelection = BTL_AI_ROUTE_PREDICATE_SET_ALL;
                 return 1;
             }
         }
@@ -238,7 +239,7 @@ s32 btlSelectTierMatrixAiRoute(BtlUnit *context, s32 species, s32 *selected, s32
             if (datEnemyAiRecords[species].decisions[tier].routes[1] != 8) {
                 *selected = datEnemyAiRecords[species].decisions[tier].routes[1];
                 btlActionScratchWork->rowIndex = tier;
-                btlActionScratchWork->conditionKind = 1;
+                btlActionScratchWork->routePredicateSelection = BTL_AI_ROUTE_PREDICATE_SET_FIRST_TWO;
                 return 1;
             }
         }
@@ -246,7 +247,7 @@ s32 btlSelectTierMatrixAiRoute(BtlUnit *context, s32 species, s32 *selected, s32
             if (datEnemyAiRecords[species].decisions[tier].routes[2] != 8) {
                 *selected = datEnemyAiRecords[species].decisions[tier].routes[2];
                 btlActionScratchWork->rowIndex = tier;
-                btlActionScratchWork->conditionKind = 2;
+                btlActionScratchWork->routePredicateSelection = BTL_AI_ROUTE_PREDICATE_SET_FIRST_AND_THIRD;
                 return 1;
             }
         }
@@ -254,7 +255,7 @@ s32 btlSelectTierMatrixAiRoute(BtlUnit *context, s32 species, s32 *selected, s32
             if (datEnemyAiRecords[species].decisions[tier].routes[3] != 8) {
                 *selected = datEnemyAiRecords[species].decisions[tier].routes[3];
                 btlActionScratchWork->rowIndex = tier;
-                btlActionScratchWork->conditionKind = 3;
+                btlActionScratchWork->routePredicateSelection = BTL_AI_ROUTE_PREDICATE_SET_SECOND_AND_THIRD;
                 return 1;
             }
         }
@@ -262,7 +263,7 @@ s32 btlSelectTierMatrixAiRoute(BtlUnit *context, s32 species, s32 *selected, s32
             if (datEnemyAiRecords[species].decisions[tier].routes[4] != 8) {
                 *selected = datEnemyAiRecords[species].decisions[tier].routes[4];
                 btlActionScratchWork->rowIndex = tier;
-                btlActionScratchWork->conditionKind = 4;
+                btlActionScratchWork->routePredicateSelection = BTL_AI_ROUTE_PREDICATE_SET_FIRST;
                 return 1;
             }
         }
@@ -270,7 +271,7 @@ s32 btlSelectTierMatrixAiRoute(BtlUnit *context, s32 species, s32 *selected, s32
             if (datEnemyAiRecords[species].decisions[tier].routes[5] != 8) {
                 *selected = datEnemyAiRecords[species].decisions[tier].routes[5];
                 btlActionScratchWork->rowIndex = tier;
-                btlActionScratchWork->conditionKind = 5;
+                btlActionScratchWork->routePredicateSelection = BTL_AI_ROUTE_PREDICATE_SET_SECOND;
                 return 1;
             }
         }
@@ -278,20 +279,20 @@ s32 btlSelectTierMatrixAiRoute(BtlUnit *context, s32 species, s32 *selected, s32
             if (datEnemyAiRecords[species].decisions[tier].routes[6] != 8) {
                 *selected = datEnemyAiRecords[species].decisions[tier].routes[6];
                 btlActionScratchWork->rowIndex = tier;
-                btlActionScratchWork->conditionKind = 6;
+                btlActionScratchWork->routePredicateSelection = BTL_AI_ROUTE_PREDICATE_SET_THIRD;
                 return 1;
             }
         }
         if (datEnemyAiRecords[species].decisions[tier].routes[7] != 8) {
             *selected = datEnemyAiRecords[species].decisions[tier].routes[7];
             btlActionScratchWork->rowIndex = tier;
-            btlActionScratchWork->conditionKind = 7;
+            btlActionScratchWork->routePredicateSelection = BTL_AI_ROUTE_UNCONDITIONAL;
             return 1;
         }
     }
     *selected = 0;
     btlActionScratchWork->rowIndex = 0;
-    btlActionScratchWork->conditionKind = 8;
+    btlActionScratchWork->routePredicateSelection = BTL_AI_ROUTE_NO_MATCH;
     return 1;
 }
 
@@ -318,7 +319,7 @@ s32 btlSelectConditionalAiRoute(BtlUnit *context, s32 species, s32 *selected, s3
             if (datEnemyAiRecords[species].decisions[tier].routes[0] != 8) {
                 *selected = datEnemyAiRecords[species].decisions[tier].routes[0];
                 btlActionScratchWork->rowIndex = tier;
-                btlActionScratchWork->conditionKind = 0;
+                btlActionScratchWork->routePredicateSelection = BTL_AI_ROUTE_PREDICATE_SET_ALL;
                 return 1;
             }
         }
@@ -326,7 +327,7 @@ s32 btlSelectConditionalAiRoute(BtlUnit *context, s32 species, s32 *selected, s3
             if (datEnemyAiRecords[species].decisions[tier].routes[1] != 8) {
                 *selected = datEnemyAiRecords[species].decisions[tier].routes[1];
                 btlActionScratchWork->rowIndex = tier;
-                btlActionScratchWork->conditionKind = 1;
+                btlActionScratchWork->routePredicateSelection = BTL_AI_ROUTE_PREDICATE_SET_FIRST_TWO;
                 return 1;
             }
         }
@@ -334,7 +335,7 @@ s32 btlSelectConditionalAiRoute(BtlUnit *context, s32 species, s32 *selected, s3
             if (datEnemyAiRecords[species].decisions[tier].routes[2] != 8) {
                 *selected = datEnemyAiRecords[species].decisions[tier].routes[2];
                 btlActionScratchWork->rowIndex = tier;
-                btlActionScratchWork->conditionKind = 2;
+                btlActionScratchWork->routePredicateSelection = BTL_AI_ROUTE_PREDICATE_SET_FIRST_AND_THIRD;
                 return 1;
             }
         }
@@ -342,7 +343,7 @@ s32 btlSelectConditionalAiRoute(BtlUnit *context, s32 species, s32 *selected, s3
             if (datEnemyAiRecords[species].decisions[tier].routes[3] != 8) {
                 *selected = datEnemyAiRecords[species].decisions[tier].routes[3];
                 btlActionScratchWork->rowIndex = tier;
-                btlActionScratchWork->conditionKind = 3;
+                btlActionScratchWork->routePredicateSelection = BTL_AI_ROUTE_PREDICATE_SET_SECOND_AND_THIRD;
                 return 1;
             }
         }
@@ -350,7 +351,7 @@ s32 btlSelectConditionalAiRoute(BtlUnit *context, s32 species, s32 *selected, s3
             if (datEnemyAiRecords[species].decisions[tier].routes[4] != 8) {
                 *selected = datEnemyAiRecords[species].decisions[tier].routes[4];
                 btlActionScratchWork->rowIndex = tier;
-                btlActionScratchWork->conditionKind = 4;
+                btlActionScratchWork->routePredicateSelection = BTL_AI_ROUTE_PREDICATE_SET_FIRST;
                 return 1;
             }
         }
@@ -358,7 +359,7 @@ s32 btlSelectConditionalAiRoute(BtlUnit *context, s32 species, s32 *selected, s3
             if (datEnemyAiRecords[species].decisions[tier].routes[5] != 8) {
                 *selected = datEnemyAiRecords[species].decisions[tier].routes[5];
                 btlActionScratchWork->rowIndex = tier;
-                btlActionScratchWork->conditionKind = 5;
+                btlActionScratchWork->routePredicateSelection = BTL_AI_ROUTE_PREDICATE_SET_SECOND;
                 return 1;
             }
         }
@@ -366,20 +367,20 @@ s32 btlSelectConditionalAiRoute(BtlUnit *context, s32 species, s32 *selected, s3
             if (datEnemyAiRecords[species].decisions[tier].routes[6] != 8) {
                 *selected = datEnemyAiRecords[species].decisions[tier].routes[6];
                 btlActionScratchWork->rowIndex = tier;
-                btlActionScratchWork->conditionKind = 6;
+                btlActionScratchWork->routePredicateSelection = BTL_AI_ROUTE_PREDICATE_SET_THIRD;
                 return 1;
             }
         }
         if (datEnemyAiRecords[species].decisions[tier].routes[7] != 8) {
             *selected = datEnemyAiRecords[species].decisions[tier].routes[7];
             btlActionScratchWork->rowIndex = tier;
-            btlActionScratchWork->conditionKind = 7;
+            btlActionScratchWork->routePredicateSelection = BTL_AI_ROUTE_UNCONDITIONAL;
             return 1;
         }
     }
     *selected = 0;
     btlActionScratchWork->rowIndex = 0;
-    btlActionScratchWork->conditionKind = 8;
+    btlActionScratchWork->routePredicateSelection = BTL_AI_ROUTE_NO_MATCH;
     return 1;
 }
 

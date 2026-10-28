@@ -43,6 +43,7 @@
 #include "btl_find_actor_for_owner_api.h"
 #include "btl_ai_table.h"
 #include "btl_ai_scratch.h"
+#include "btl_ai_route_predicate_selection.h"
 #include "btl_unit_tasks.h"
 #include "dat_state.h"
 #include "dat_command.h"
@@ -524,26 +525,26 @@ s32 btlSelectEnemyAiConditionalTargets(BtlTask *actor) {
             values[i] = kinds[i] & 0x3FFFFF;
             kinds[i] = (kinds[i] & 0xFFC00000) >> 22;
         }
-        switch (btlActionScratchWork->conditionKind) {
-        case 0:
+        switch (btlActionScratchWork->routePredicateSelection) {
+        case BTL_AI_ROUTE_PREDICATE_SET_ALL:
             enabled[0] = enabled[1] = enabled[2] = 1;
             break;
-        case 1:
+        case BTL_AI_ROUTE_PREDICATE_SET_FIRST_TWO:
             enabled[0] = enabled[1] = 1;
             break;
-        case 2:
+        case BTL_AI_ROUTE_PREDICATE_SET_FIRST_AND_THIRD:
             enabled[0] = enabled[2] = 1;
             break;
-        case 3:
+        case BTL_AI_ROUTE_PREDICATE_SET_SECOND_AND_THIRD:
             enabled[1] = enabled[2] = 1;
             break;
-        case 4:
+        case BTL_AI_ROUTE_PREDICATE_SET_FIRST:
             enabled[0] = 1;
             break;
-        case 5:
+        case BTL_AI_ROUTE_PREDICATE_SET_SECOND:
             enabled[1] = 1;
             break;
-        case 6:
+        case BTL_AI_ROUTE_PREDICATE_SET_THIRD:
             enabled[2] = 1;
             break;
         default:

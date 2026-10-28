@@ -22,7 +22,7 @@ typedef struct BtlAiScratchWork {
     BtlAiScratchActor actor; /* 0x00 */
     s32 speciesId; /* 0x04 */
     s32 rowIndex; /* 0x08: selected AiDecisionRow */
-    s32 conditionKind; /* 0x0C: conditional-route selector */
+    s32 conditionKind; /* 0x0C: 0-6 predicate set, 7 unconditional, 8 no route. */
 } BtlAiScratchWork;
 
 typedef char BtlAiScratchWork_size_must_be_0x10[
