@@ -50,7 +50,6 @@ u32 dds3GetProcessData(const dds3ProcessID_t *task);
 dds3ProcessID_t *dds3SearchProcessName(const char *name);
 /* Detach task from its parent hierarchy; scheduler queue links are unchanged. */
 void dds3UnlinkProcess(dds3ProcessID_t *task);
-s32 kwlnTaskExists(const char *name);
 
 /* Append the common rectangle used to frame a grid of sprite cells. */
 void dds3ConsPanelTagLink(struct sdfDrawTag_t *packetList, s32 column, s32 row,

@@ -7,6 +7,7 @@
 #include "eff_resource_slots.h"
 #include "eff_resource_source_lifetime.h"
 #include "kwln.h"
+#include "kwln_process_registration.h"
 #include "sdf_resource.h"
 #include "eff.h"
 #include "mnu_list.h"
@@ -310,7 +311,7 @@ void mnuCreateResourceTask(void) {
 
 /* Return whether the named resource task exists; invalidate the cached handle when it does not. */
 s32 mnuCheckResourceTask(void) {
-    if (kwlnTaskExists(mnuResourceTaskName) != 0) {
+    if (kwlnTaskExists(mnuResourceTaskName) != KWLN_PROCESS_NOT_REGISTERED) {
         return 1;
     }
     mnuSceneResourceContext = 0;
@@ -4607,4 +4608,3 @@ void mnuDrawMantraGridEntryIndicators(s32 x, s32 y, s32 depth, s32 alpha,
 }
 
 INCLUDE_RODATA(const s32, "game/code_0024F0D0", D_003AF9B8);
-

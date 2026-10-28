@@ -7,6 +7,7 @@
 #include "fr_font_measure.h"
 #include "sdf_quaternion.h"
 #include "kwln.h"
+#include "kwln_process_registration.h"
 #include "kwln_task_create.h"
 #include "sdf_resource.h"
 
@@ -732,7 +733,7 @@ u8 sdfIsPrimaryTaskRegistered(TaskWork *work) {
     return registered;
 }
 
-s32 kwlnTaskExists(const char *name) {
+KwlnProcessRegistrationResult kwlnTaskExists(const char *name) {
     return dds3SearchProcessName(name) != NULL;
 }
 

@@ -7,6 +7,7 @@
 #include "mnu_mantra_position_api.h"
 #include "snd_sequence_volume_pan.h"
 #include "kwln.h"
+#include "kwln_process_registration.h"
 #include "sdf_resource.h"
 #include "mnu.h"
 #include "mnu_staff.h"
@@ -245,7 +246,7 @@ void mnuCreateResourceTask(void) {
 
 /* Return whether the named resource task exists; invalidate the cached handle when it does not. */
 s32 mnuCheckResourceTask(void) {
-    if (kwlnTaskExists(mnuResourceTaskName) != 0) {
+    if (kwlnTaskExists(mnuResourceTaskName) != KWLN_PROCESS_NOT_REGISTERED) {
         return 1;
     }
     mnuMantraSelectionResource = 0;
