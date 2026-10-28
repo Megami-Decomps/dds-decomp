@@ -2662,7 +2662,7 @@ s32 mnuShopPollCommandSelection(dds3ProcessID_t *task) {
     MenuTerminalContext *state;
     MenuWindowContainer *window;
     struct MenuList *list;
-    s32 inputFlags;
+    MnuInputActionFlags inputFlags;
     s32 phase;
     s32 dispatchResult;
     u32 selection;
@@ -2794,7 +2794,7 @@ s32 mnuShopPollBuyCommandSelection(dds3ProcessID_t *task) {
     MenuWindowContainer *window;
     struct MenuList *list;
     struct MenuListNode *cursor;
-    s32 inputFlags;
+    MnuInputActionFlags inputFlags;
     s32 dispatchResult;
     s32 phase;
     s32 confirmAccepted = 0;
@@ -2863,7 +2863,7 @@ s32 mnuShopPollBuyCommandSelection(dds3ProcessID_t *task) {
         }
 
         mnuHandleListPageJumpInput(state->windowResource, state->window,
-                                   (u32 *)&inputFlags);
+                                   &inputFlags);
     }
 
     if (confirmAccepted == 1) {

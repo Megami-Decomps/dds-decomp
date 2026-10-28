@@ -2139,115 +2139,115 @@ extern u8 D_0037F530[];
 
 /* Translate requested inputs using native sign-bit/trigger-bit and nonzero tests.
  * Input bit zero has exclusive priority over every other result bit. */
-s32 mnuMapPadMaskToFlags(s32 buttonMask) {
-    s32 inputFlags = 0;
+MnuInputActionFlags mnuMapPadMaskToFlags(MnuPadButtonQueryMask requestedButtons) {
+    MnuInputActionFlags inputFlags = 0;
 
-    if (buttonMask & MNU_INPUT_PRIORITY_BIT) {
+    if (requestedButtons & MNU_INPUT_PRIORITY_BIT) {
         if (dds3PadButtonState[0x21] < 0) {
             inputFlags = MNU_INPUT_PRIORITY_BIT;
         }
     }
-    if (buttonMask & 0x2) {
+    if (requestedButtons & 0x2) {
         if (dds3PadButtonState[0x23] < 0) {
             inputFlags |= 0x2;
         }
     }
-    if (buttonMask & 0x10) {
+    if (requestedButtons & 0x10) {
         if (D_0037F530[6] & MNU_PAD_TRIGGER_BIT) {
             inputFlags |= 0x10;
         }
     }
-    if (buttonMask & 0x20) {
+    if (requestedButtons & 0x20) {
         if (D_0037F530[7] & MNU_PAD_TRIGGER_BIT) {
             inputFlags |= 0x20;
         }
     }
-    if (buttonMask & 0x40) {
+    if (requestedButtons & 0x40) {
         if (D_0037F530[4] & MNU_PAD_TRIGGER_BIT) {
             inputFlags |= 0x40;
         }
     }
-    if (buttonMask & 0x80) {
+    if (requestedButtons & 0x80) {
         if (D_0037F530[5] & MNU_PAD_TRIGGER_BIT) {
             inputFlags |= 0x80;
         }
     }
-    if (buttonMask & 0x4) {
+    if (requestedButtons & 0x4) {
         if (dds3PadButtonState[0x22] < 0) {
             inputFlags |= 0x4;
         }
     }
-    if (buttonMask & 0x8) {
+    if (requestedButtons & 0x8) {
         if (dds3PadButtonState[0x20] < 0) {
             inputFlags |= 0x8;
         }
     }
-    if (buttonMask & 0x200) {
+    if (requestedButtons & 0x200) {
         if (D_0037F530[0xA] & MNU_PAD_TRIGGER_BIT) {
             inputFlags |= 0x200;
         }
     }
-    if (buttonMask & 0x100) {
+    if (requestedButtons & 0x100) {
         if (D_0037F530[8] & MNU_PAD_TRIGGER_BIT) {
             inputFlags |= 0x100;
         }
     }
-    if (buttonMask & 0x800) {
+    if (requestedButtons & 0x800) {
         if (D_0037F530[0xB] & MNU_PAD_TRIGGER_BIT) {
             inputFlags |= 0x800;
         }
     }
-    if (buttonMask & 0x400) {
+    if (requestedButtons & 0x400) {
         if (D_0037F530[9] & MNU_PAD_TRIGGER_BIT) {
             inputFlags |= 0x400;
         }
     }
-    if (buttonMask & 0x1000) {
+    if (requestedButtons & 0x1000) {
         if (dds3PadButtonState[0x2C] < 0) {
             inputFlags |= 0x1000;
         }
     }
-    if (buttonMask & 0x2000) {
+    if (requestedButtons & 0x2000) {
         if (dds3PadButtonState[0x2D] < 0) {
             inputFlags |= 0x2000;
         }
     }
-    if (buttonMask & 0x20000) {
+    if (requestedButtons & 0x20000) {
         if (dds3PadButtonState[0x2A] < 0) {
             inputFlags |= 0x20000;
         }
     }
-    if (buttonMask & 0x10000) {
+    if (requestedButtons & 0x10000) {
         if (dds3PadButtonState[0x28] < 0) {
             inputFlags |= 0x10000;
         }
     }
-    if (buttonMask & 0x80000) {
+    if (requestedButtons & 0x80000) {
         if (dds3PadButtonState[0x2B] < 0) {
             inputFlags |= 0x80000;
         }
     }
-    if (buttonMask & 0x40000) {
+    if (requestedButtons & 0x40000) {
         if (dds3PadButtonState[0x29] < 0) {
             inputFlags |= 0x40000;
         }
     }
-    if (buttonMask & 0x10) {
+    if (requestedButtons & 0x10) {
         if (dds3PadButtonState[0x26] != 0) {
             inputFlags |= 0x100000;
         }
     }
-    if (buttonMask & 0x20) {
+    if (requestedButtons & 0x20) {
         if (dds3PadButtonState[0x27] != 0) {
             inputFlags |= 0x200000;
         }
     }
-    if (buttonMask & 0x40) {
+    if (requestedButtons & 0x40) {
         if (dds3PadButtonState[0x24] != 0) {
             inputFlags |= 0x400000;
         }
     }
-    if (buttonMask & 0x80) {
+    if (requestedButtons & 0x80) {
         if (dds3PadButtonState[0x25] != 0) {
             inputFlags |= 0x800000;
         }
@@ -2255,17 +2255,17 @@ s32 mnuMapPadMaskToFlags(s32 buttonMask) {
             inputFlags |= 0x1000000;
         }
     }
-    if (buttonMask & 0x40) {
+    if (requestedButtons & 0x40) {
         if (dds3PadButtonState[0x28] != 0) {
             inputFlags |= 0x2000000;
         }
     }
-    if (buttonMask & 0x80) {
+    if (requestedButtons & 0x80) {
         if (dds3PadButtonState[0x2B] != 0) {
             inputFlags |= 0x4000000;
         }
     }
-    if (buttonMask & 0x40) {
+    if (requestedButtons & 0x40) {
         if (dds3PadButtonState[0x29] != 0) {
             inputFlags |= 0x8000000;
         }
@@ -2276,35 +2276,37 @@ s32 mnuMapPadMaskToFlags(s32 buttonMask) {
     return inputFlags;
 }
 
-void mnuHandleListPageJumpInput(const void *resource, MenuWindowContainer *window, u32 *buttons) {
+void mnuHandleListPageJumpInput(const void *resource, MenuWindowContainer *window,
+                                MnuInputActionFlags *actionFlags) {
     struct MenuListNode *top = NULL;
     struct MenuListNode *bottom = NULL;
     MenuList *list = window->list;
 
     if (resource != NULL) {
         if (list->count >= list->visibleCount) {
-            if (*buttons & 0x400) {
+            if (*actionFlags & MNU_INPUT_ACTION_PREVIOUS_PAGE) {
                 top = mnuScrollListToPreviousPage(list);
             }
-            if (*buttons & 0x800) {
+            if (*actionFlags & MNU_INPUT_ACTION_LAST_PAGE) {
                 bottom = mnuScrollListToEnd(window->list);
             }
             if (top == NULL) {
-                *buttons &= ~0x400;
+                *actionFlags &= ~MNU_INPUT_ACTION_PREVIOUS_PAGE;
             }
             if (bottom == NULL) {
-                *buttons &= ~0x800;
+                *actionFlags &= ~MNU_INPUT_ACTION_LAST_PAGE;
             }
             mnuClearWindowPanelTransitionFlag(window);
             return;
         }
     }
-    *buttons &= ~0x400;
-    *buttons &= ~0x800;
+    *actionFlags &= ~MNU_INPUT_ACTION_PREVIOUS_PAGE;
+    *actionFlags &= ~MNU_INPUT_ACTION_LAST_PAGE;
 }
 
-void mnuHandlePanelListPageJumpInput(MenuWindowContainer *window, u32 *buttons) {
-    mnuHandleListPageJumpInput(window->resource, window, buttons);
+void mnuHandlePanelListPageJumpInput(MenuWindowContainer *window,
+                                     MnuInputActionFlags *actionFlags) {
+    mnuHandleListPageJumpInput(window->resource, window, actionFlags);
 }
 
 /* Bits 0x8000 and 0x4000 return early in that order; state bits may suppress navigation SE. */

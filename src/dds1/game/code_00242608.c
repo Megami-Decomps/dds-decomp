@@ -2159,7 +2159,6 @@ s32 evtAdvancePhaseOne(dds3ProcessID_t *task) {
     return 1;
 }
 
-extern s32 mnuMapPadMaskToFlags(s32);
 extern s32 mnuTickCommandPhase(ShopScene *);
 extern MenuPopupEntry mnuShopReturnDelayPopupEntry[];
 
