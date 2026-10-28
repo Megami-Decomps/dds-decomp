@@ -3,6 +3,7 @@
 #include "btl_script_resource_api.h"
 #include "kwln_task_add_child.h"
 #include "btl_state.h"
+#include "btl_event_pack_id_api.h"
 #include "btl_command.h"
 #include "pcp_vu0.h"
 #include "kwln.h"
@@ -27,7 +28,7 @@ ScrProcedureIndex btlFindScriptResource(const char *name) {
     if (battle->scriptHandle == 0) {
         return SCR_PROCEDURE_INDEX_NOT_FOUND;
     }
-    sprintf(path, "e%03d_%s", battle->eventTaskId, name);
+    sprintf(path, "e%03d_%s", battle->eventPackId, name);
     return scrSearchProcedureName((const BfFlw0Header *)battle->scriptHandle, path);
 }
 
@@ -36,7 +37,7 @@ ScrProcedureIndex btlFindScriptResource(const char *name) {
 void btlStartSkillEventTask(u32 skill) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     dds3ProcessID_t *taskId;
-    if (battle->eventTaskId == -1) {
+    if (battle->eventPackId == BTL_EVENT_PACK_ID_NONE) {
         return;
     }
     taskId = scrStartScript2(battle->scriptOwner->priority - 1,
@@ -48,7 +49,7 @@ void btlStartSkillEventTask(u32 skill) {
 
 s32 btlReleaseScriptResource(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
-    if (battle->eventTaskId == -1) {
+    if (battle->eventPackId == BTL_EVENT_PACK_ID_NONE) {
         return 1;
     }
     if (dds3ExistProcess(battle->scriptTask) == KWLN_PROCESS_NOT_REGISTERED) {
@@ -60,7 +61,7 @@ s32 btlReleaseScriptResource(void) {
 
 BtlPrimaryScriptTaskAvailability btlCanStartPrimaryScriptTask(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
-    if (battle->eventTaskId == -1) {
+    if (battle->eventPackId == BTL_EVENT_PACK_ID_NONE) {
         return BTL_PRIMARY_SCRIPT_TASK_CANNOT_START;
     }
     if (battle->scriptFlags & 1) {
@@ -79,7 +80,7 @@ void btlStartPrimaryScriptTask(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     ScrProcedureIndex scriptId;
     dds3ProcessID_t *taskId;
-    if (battle->eventTaskId == -1) {
+    if (battle->eventPackId == BTL_EVENT_PACK_ID_NONE) {
         return;
     }
     scriptId = btlFindScriptResource(btlPrimaryScriptResourceName);
@@ -101,7 +102,7 @@ s32 btlReleaseScriptResourceA(void) {
 s32 btlHasScriptResource(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
 
-    if (battle->eventTaskId == -1) {
+    if (battle->eventPackId == BTL_EVENT_PACK_ID_NONE) {
         return 0;
     }
     if (battle->scriptHandle == 0) {
@@ -118,7 +119,7 @@ void btlStartSecondaryScriptTask(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     ScrProcedureIndex scriptId;
     dds3ProcessID_t *taskId;
-    if (battle->eventTaskId == -1) {
+    if (battle->eventPackId == BTL_EVENT_PACK_ID_NONE) {
         return;
     }
     scriptId = btlFindScriptResource(btlSecondaryScriptResourceName);

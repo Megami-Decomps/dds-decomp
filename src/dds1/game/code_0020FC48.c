@@ -107,7 +107,7 @@ extern SndPackedTrackLoadStatus sndFindPackedTrackLoadStatus(s32 packed);
 
 #define MNU_LIST_SELECTED_TEXT_FLAG 4
 
-#define BTL_EVENT_TASK_NONE (-1)
+#include "btl_event_pack_id_api.h"
 
 #define BTL_EVENT_ACTION_NONE (-1)
 
@@ -295,11 +295,11 @@ void btlRequestSceneEventResources(void) {
     BtlState *battleState = (BtlState *)btlGetRuntime();
     u32 battleMode = battleState->battleMode;
     u16 rawEventId;
-    s16 eventId;
+    BtlEventPackId eventPackId;
     char scriptPath[0x80];
     dds3ProcessID_t *eventTask;
 
-    battleState->eventTaskId = BTL_EVENT_TASK_NONE;
+    battleState->eventPackId = BTL_EVENT_PACK_ID_NONE;
     battleState->eventAction = BTL_EVENT_ACTION_NONE;
     battleState->eventActive = 0;
     battleState->scriptFlags = 0;
@@ -315,16 +315,16 @@ void btlRequestSceneEventResources(void) {
     if (rawEventId == 0) {
         return;
     }
-    eventId = (s16)rawEventId;
-    battleState->eventTaskId = eventId;
-    sprintf(scriptPath, D_003A6738, eventId - eventId % 10, eventId, eventId);
+    eventPackId = (BtlEventPackId)rawEventId;
+    battleState->eventPackId = eventPackId;
+    sprintf(scriptPath, D_003A6738, eventPackId - eventPackId % 10, eventPackId, eventPackId);
     battleState->eventAssets = sdfDevLoadFileEx(scriptPath, &battleState->scriptHandle, 0);
     btlBossDebugPrintf(D_003A6758, scriptPath);
-    eventTask = evtLoadEventPack(battleState->eventTaskId);
-    btlBossDebugPrintf(D_003A6768, battleState->eventTaskId);
+    eventTask = evtLoadEventPack(battleState->eventPackId);
+    btlBossDebugPrintf(D_003A6768, battleState->eventPackId);
     dds3LinkProcess(battleState->scriptOwner, eventTask);
     battleState->sequenceHandle =
-        ((battleState->eventTaskId - BTL_EVENT_SEQUENCE_ID_BIAS) << 16) + BTL_EVENT_SEQUENCE_BASE;
+        ((battleState->eventPackId - BTL_EVENT_SEQUENCE_ID_BIAS) << 16) + BTL_EVENT_SEQUENCE_BASE;
     if (sndFindPackedTrackLoadStatus(battleState->sequenceHandle) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
         p2sdLoadSMGFile(battleState->sequenceHandle);
         btlBossDebugPrintf(D_003A6788, battleState->sequenceHandle);
@@ -336,14 +336,14 @@ extern char D_003A67A0[], D_003A67B8[];
 
 BtlEventSequenceTaskAvailability btlIsEventSequenceTaskReady(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
-    if (battle->eventTaskId == -1) {
+    if (battle->eventPackId == BTL_EVENT_PACK_ID_NONE) {
         return BTL_EVENT_SEQUENCE_TASK_READY;
     }
     if (sndFindPackedTrackLoadStatus(battle->sequenceHandle) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
         btlBossDebugPrintf(D_003A67A0);
         return BTL_EVENT_SEQUENCE_TASK_NOT_READY;
     }
-    if (evtGetEventPackStat(battle->eventTaskId) == EVT_PACK_LOAD_COMPLETE) {
+    if (evtGetEventPackStat(battle->eventPackId) == EVT_PACK_LOAD_COMPLETE) {
         return BTL_EVENT_SEQUENCE_TASK_READY;
     }
     btlBossDebugPrintf(D_003A67B8);
@@ -387,7 +387,7 @@ void btlBindEventEffectResources(void) {
     BtlState *battleState = (BtlState *)btlGetRuntime();
     s32 resourceIndex;
 
-    if (battleState->eventTaskId == BTL_EVENT_TASK_NONE) {
+    if (battleState->eventPackId == BTL_EVENT_PACK_ID_NONE) {
         return;
     }
 
@@ -396,7 +396,7 @@ void btlBindEventEffectResources(void) {
         s32 slotIndex;
         void *resourceValue;
 
-        resourceValue = evtGetEventPackResourceAddress(battleState->eventTaskId, resourceKey);
+        resourceValue = evtGetEventPackResourceAddress(battleState->eventPackId, resourceKey);
         slotIndex = resourceIndex + BTL_EVENT_SOUND_SLOT_FIRST;
         if (resourceValue == 0) {
             btlBossDebugPrintf(D_003A67E8, slotIndex, resourceKey);
@@ -447,7 +447,7 @@ s32 btlCommandSelectEventAction(void) {
         return 1;
     }
     battleState = (BtlState *)btlGetRuntime();
-    actionResource = evtGetEventPackResourceAddress(battleState->eventTaskId, actionKey);
+    actionResource = evtGetEventPackResourceAddress(battleState->eventPackId, actionKey);
     if (actionResource == 0) {
         return 1;
     }
@@ -578,7 +578,7 @@ s32 btlRunSceneActorEventTask(BattleTaskData *data) {
         if ((data->battler->status.flags & 2) == 0) {
             return 1;
         }
-        resource = evtGetEventPackResourceAddress(battle->eventTaskId, data->action);
+        resource = evtGetEventPackResourceAddress(battle->eventPackId, data->action);
         if (resource == 0) {
             return 1;
         }

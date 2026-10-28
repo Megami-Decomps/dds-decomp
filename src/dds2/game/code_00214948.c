@@ -1680,12 +1680,14 @@ s32 btlCheckPhaseOnePartyStatusGate(void) {
 
 extern char D_00436CC0[];
 
+#include "btl_event_pack_id_api.h"
+
 /* Look up the primary script resource once the event task, script handle and
  * script-ready state 6 are in place; return the missing-index sentinel until ready. */
 ScrProcedureIndex btlFindReadyScriptResource(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
 
-    if (battle->eventTaskId == -1 || battle->scriptHandle == 0) {
+    if (battle->eventPackId == BTL_EVENT_PACK_ID_NONE || battle->scriptHandle == 0) {
         return SCR_PROCEDURE_INDEX_NOT_FOUND;
     }
     if ((battle->battleFlags & 0x800) == 0 || battle->terminalOutcome != 6) {
