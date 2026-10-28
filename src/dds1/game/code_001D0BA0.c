@@ -3559,14 +3559,14 @@ BtlRuntimeTask *btlCreateScaledUnitModelTask(BtlUnit *owner) {
     return task;
 }
 
-u32 btlPollThresholdTask(BtlThresholdTaskArgs *arguments) {
+BtlTaskPollResult btlPollThresholdTask(BtlThresholdTaskArgs *arguments) {
     if ((s32)btlGetUnitModelCurrentFrame(arguments->unit) >= arguments->frameThreshold) {
         if ((arguments->unit->updateFlags & 1) == 0) {
             btlResetUnitModelProgress(arguments->unit);
         }
-        return 1;
+        return BTL_TASK_POLL_END_DELAY;
     }
-    return 0;
+    return BTL_TASK_POLL_CONTINUE;
 }
 
 BtlRuntimeTask *btlScheduleThresholdTask(BtlUnit *actor, s32 option) {
