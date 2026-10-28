@@ -19,6 +19,7 @@
 #include "btl_command_cost_api.h"
 #include "btl_action_reaction_motion.h"
 #include "btl_action_press_result.h"
+#include "btl_command_hit_result.h"
 #include "btl_command_status_api.h"
 #include "btl_hunt_mp_recovery_api.h"
 #include "btl_action_state_selection.h"
@@ -531,7 +532,7 @@ extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 
 extern s32 btlSelectedEntryHitsElement(BtlUnit *, BtlUnit *, s32);
 
-extern s32 btlResolveCommandHitResult(BtlUnit *, BtlUnit *, s32);
+extern BtlCommandHitResult btlResolveCommandHitResult(BtlUnit *, BtlUnit *, s32);
 
 extern u8 btlSelectCommandHitCount(BtlUnit *, s32);
 

@@ -7,6 +7,7 @@
 #include "btl_actor_command_selector_value_api.h"
 #include "btl_resolve_unit_value_api.h"
 #include "btl_action_press_result.h"
+#include "btl_command_hit_result.h"
 #include "btl_command_status_api.h"
 #include "btl_hunt_mp_recovery_api.h"
 #include "btl_special_ability.h"
@@ -220,7 +221,7 @@ u32 btlGetAdjustedSlotAffinity(BtlUnit *unit, s32 unused, s32 index) {
  * DDS2 command-flag, scale-hook, solar and minimum-chance paths are native-led. */
 s32 btlAreUnitStatusAndEntryFlagsClear(BtlUnit *);
 
-s32 btlResolveCommandHitResult(BtlUnit *source, BtlUnit *target, s32 command) {
+BtlCommandHitResult btlResolveCommandHitResult(BtlUnit *source, BtlUnit *target, s32 command) {
     BtlState *runtime;
     datUnitWork_t *targetRecord;
     s32 entryFlags;
