@@ -319,7 +319,7 @@ extern void fldResetPlayerSceneTransformState(void);
 
 extern u32 D_00435F78;
 
-extern void fldLoadNextFile_SetId_BtlRet(s32 area, s32 floor);
+extern void fldLoadNextFile_SetId_BtlRet(u32 area, u32 floor);
 
 void fldUnloadPlayerModel(void);
 

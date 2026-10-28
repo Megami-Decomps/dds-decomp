@@ -148,7 +148,7 @@ extern u32 D_003BABE8;
 
 extern dds3ModelHandle_t *fldPlayerModelContext;
 
-extern void fldLoadNextFile_SetId_BtlRet(u32, u32);
+extern void fldLoadNextFile_SetId_BtlRet(u32 area, u32 floor);
 
 
 
