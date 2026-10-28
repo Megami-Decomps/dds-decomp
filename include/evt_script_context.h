@@ -2,6 +2,7 @@
 #define EVT_SCRIPT_CONTEXT_H
 
 #include "common.h"
+#include "scr_vm_integer.h"
 
 /* The caller supplies these context words in integer form, while the data
  * calculation handlers consume them as borrowed pointers. */
@@ -18,7 +19,7 @@ typedef struct EvtScriptContext {
     s32 commandIndex;
     EvtScriptArgument firstArgument;
     EvtScriptArgument secondArgument;
-    s32 returnValue;
+    ScrVmInteger returnValue;
     u16 options;
     u8 opaque16[2];
 } EvtScriptContext;

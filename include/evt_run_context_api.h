@@ -5,7 +5,7 @@
 #include "scr_procedure_index.h"
 
 /* Run one FLW0 procedure with the supplied event context words. */
-s32 evtRunContext(ScrProcedureIndex procedureIndex, s32 firstArgument,
+ScrVmInteger evtRunContext(ScrProcedureIndex procedureIndex, s32 firstArgument,
     s32 secondArgument, s32 commandIndex, u16 options);
 
 static inline EvtScriptArgument evtScriptArgumentFromBits(s32 bits) {
@@ -21,7 +21,7 @@ static inline EvtScriptArgument evtScriptArgumentFromPointer(void *pointer) {
 }
 
 /* Keep the retail entry point's two integer arguments at this typed boundary. */
-static inline s32 evtRunContextWithArguments(ScrProcedureIndex procedureIndex,
+static inline ScrVmInteger evtRunContextWithArguments(ScrProcedureIndex procedureIndex,
     EvtScriptArgument firstArgument, EvtScriptArgument secondArgument,
     s32 commandIndex, u16 options) {
     return evtRunContext(procedureIndex, firstArgument.bits, secondArgument.bits,

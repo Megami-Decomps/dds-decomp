@@ -1745,7 +1745,7 @@ void ptyAssignPartyRosterItemsAndMarkOwned(void) {
 }
 
 /* Step the script with these context values; clear the written flag, not the stored result. */
-s32 evtRunContext(ScrProcedureIndex procedureIndex, s32 firstArgument, s32 secondArgument, s32 commandIndex, u16 options) {
+ScrVmInteger evtRunContext(ScrProcedureIndex procedureIndex, s32 firstArgument, s32 secondArgument, s32 commandIndex, u16 options) {
     scrStartProcessProcedure(evtWorkScriptTask, procedureIndex);
     evtWorkScriptContext.commandIndex = commandIndex;
     evtWorkScriptContext.firstArgument.bits = firstArgument;
