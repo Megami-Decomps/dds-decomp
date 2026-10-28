@@ -288,8 +288,8 @@ void effBattleMiscBuildUnitPartOffsetVU(BtlUnit *unit, EffectVectorRequest *requ
     SDF_VU0_LOADVECTOR(out);
 }
 
-void effBattleMiscApplyParamByte(u32 owner, EffectVectorRequest *request) {
-    effBTLModelGetMarkPosition2((BtlUnit *)owner, request->count);
+void effBattleMiscApplyParamByte(BtlUnit *owner, EffectVectorRequest *request) {
+    effBTLModelGetMarkPosition2(owner, request->count);
 }
 
 f32 effBattleMiscQueryScalar(const BtlUnit *unit, const EffectVectorRequest *request) {
