@@ -1223,7 +1223,7 @@ void sdfFileCmdThread(DevWorkerEntry *worker) {
 
         case SDF_DEV_OPERATION_SEEK - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_SEEKING;
-            endOffset = sceLseek(state->fileHandle, state->operationArg, state->options);
+            endOffset = sceLseek(state->fileHandle, state->seekOffset, state->options);
             if (endOffset < 0) {
                 sdfFileCmdFinish(state, endOffset);
                 continue;
@@ -1673,7 +1673,7 @@ s32 sdfFileCmdSeek(sdfFileCmdHandle_t *state, s32 seekOffset, s32 seekOrigin) {
     if (state->state != SDF_DEV_STATE_ACTIVE) {
         return -1;
     }
-    state->operationArg = seekOffset;
+    state->seekOffset = seekOffset;
     state->options = seekOrigin;
     state->operation = SDF_DEV_OPERATION_SEEK;
     SignalSema(sdfFileDeviceCB[state->workerIndex].semaphore);
@@ -1760,7 +1760,7 @@ sdfFileCmdHandle_t *sdfFileCmdReadFile(const char *path, void *buffer, s32 byteC
     state = sdfFileCmdNewHandle(resolvedPath, workerIndex, SDF_DEV_OPERATION_READ_BUFFER, callback, callbackContext);
     state->requestExtra = byteCount;
     state->requestData = buffer;
-    state->operationArg = 0;
+    state->seekOffset = 0;
     sdfFileCmdAllocHandle(state);
     return state;
 }
@@ -1780,7 +1780,7 @@ sdfFileCmdHandle_t *sdfFileCmdWriteFile(const char *path, void *buffer, s32 byte
     state->requestExtra = byteCount;
     state->requestData = buffer;
     state->options = options != 0 ? options : sdfFileCmdDefaultCreateMode;
-    state->operationArg = 0;
+    state->seekOffset = 0;
     sdfFileCmdAllocHandle(state);
     return state;
 }

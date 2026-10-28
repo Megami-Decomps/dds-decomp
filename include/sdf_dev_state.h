@@ -18,7 +18,7 @@ typedef struct sdfFileCmdHandle_t {
     SdfDevOperationCode operation; /* 0x15 */
     SdfDevStateCode state; /* 0x16 */
     u8 pad17; /* 0x17 */
-    s32 operationArg; /* 0x18 */
+    s32 seekOffset; /* 0x18 */
     s32 requestExtra; /* 0x1C */
     void *requestData; /* 0x20 */
     s32 options; /* 0x24 */
