@@ -2772,8 +2772,8 @@ u32 btlGetEscapeAttemptCount(void) {
 
 
 /* Return a random eligible actor task, or 0 if no candidate is available. */
-s32 btlChooseAvailableUnit(void) {
-    s32 candidates[16];
+ActionStateLink *btlChooseAvailableUnit(void) {
+    ActionStateLink *candidates[16];
     s32 count = 0;
     ActionStateLink *node;
     BtlUnit *unit;
@@ -2788,7 +2788,7 @@ s32 btlChooseAvailableUnit(void) {
             if (flags & 0x200) {
                 if (flags & 2) {
                     if (!(flags & 0xE0)) {
-                        candidates[count] = (s32)node;
+                        candidates[count] = node;
                         count++;
                     }
                 }

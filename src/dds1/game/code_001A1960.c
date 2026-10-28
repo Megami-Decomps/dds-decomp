@@ -1292,8 +1292,8 @@ u32 btlGetEscapeAttemptCount(void) {
 }
 
 /* Return a random eligible actor task, or 0 if no candidate is available. */
-s32 btlChooseAvailableUnit(void) {
-    s32 candidates[16];
+BtlTask *btlChooseAvailableUnit(void) {
+    BtlTask *candidates[16];
     s32 count = 0;
     BtlTask *node = ((BtlState *)btlGetRuntime())->tasks;
     for (; node != 0; node = node->next) {
@@ -1304,7 +1304,7 @@ s32 btlChooseAvailableUnit(void) {
                 if ((flags & 0x200) != 0) {
                     if ((flags & 2) != 0) {
                         if ((flags & 0xE0) == 0) {
-                            candidates[count++] = (s32)node;
+                            candidates[count++] = node;
                         }
                     }
                 }

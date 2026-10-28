@@ -982,7 +982,7 @@ extern void btlSetTaskPhase5(void);
 extern s32 btlSetEligibleActorPanelTransitionState(void);
 extern s32 btlDestroyTaskC(void);
 extern s32 btlDestroyTaskD(void);
-extern s32 btlChooseAvailableUnit(void);
+extern ActionStateLink *btlChooseAvailableUnit(void);
 extern BtlRuntimeTask *btlCreateHookedUnitSoundTask(BtlUnit *, s32);
 extern BtlRuntimeTask *sndCreateClearBattleFlagTask(void);
 extern s32 btlGetSlotRateKind(BtlUnit *, s32);
@@ -1035,7 +1035,7 @@ void btlFinalizeBattleRewards(BtlState *scene) {
                 if (current->unit->status.flags & 0x200) {
                     actor = current;
                     if (current->unit->status.flags & 0xE0) {
-                        actor = (ActionStateLink *)btlChooseAvailableUnit();
+                        actor = btlChooseAvailableUnit();
                     }
                     unit = actor->unit;
                     sound = btlCreateHookedUnitSoundTask(unit, 0xF);
