@@ -674,13 +674,14 @@ s32 btlListHasMatchingFlag(datUnitWork_t **entryList, s32 entryCount, u32 reques
 
 /* Every entry must match the max/min code with a corresponding allowed mask bit.
  * Other classifications fail the all-entry check; an empty list passes. */
-s32 btlIndexListMatchesEntryCodes(BtlIndexList *indexList, s32 entryCode, u32 allowedCodeBits) {
+s32 btlIndexListMatchesEntryCodes(BtlIndexList *indexList,
+                                  BtlActorEntrySlotIndex slotIndex, u32 allowedCodeBits) {
     u32 matchedCount = 0;
     u32 entryIndex;
     u32 entryCount = btlGetIndexListCount(indexList);
 
     for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
-        switch (btlMatchActorEntryCode(btlGetIndexListEntry(indexList, entryIndex), entryCode)) {
+        switch (btlMatchActorEntryCode(btlGetIndexListEntry(indexList, entryIndex), slotIndex)) {
         case BTL_ACTOR_ENTRY_CODE_MATCH_MAX_CODE:
             if (allowedCodeBits & 0x2555) {
                 matchedCount++;
@@ -721,7 +722,7 @@ INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6838);
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A6848);
 
 s32 btlIndexListNoExpiredEntryCodes(BtlIndexList *indexList, s32 commandId) {
-    s32 entryCodes[BTL_ENTRY_CODE_COUNT] = {0, 1, 2, 3, 4};
+    BtlActorEntrySlotIndex entrySlotIndices[BTL_ENTRY_CODE_COUNT] = {0, 1, 2, 3, 4};
     s32 entryCount = btlGetIndexListCount(indexList);
     s32 entryIndex;
     u32 codeIndex;
@@ -736,8 +737,8 @@ s32 btlIndexListNoExpiredEntryCodes(BtlIndexList *indexList, s32 commandId) {
         switch (requirementBits) {
         case BTL_EXPIRED_POSITIVE_ENTRY_RULE:
             for (codeIndex = 0; codeIndex < BTL_ENTRY_CODE_COUNT; codeIndex++) {
-                if (btlActorEntryIsExpired(actorEntry, entryCodes[codeIndex]) != 0) {
-                    if (btlGetActorEntryCode(actorEntry, entryCodes[codeIndex]) > 0) {
+                if (btlActorEntryIsExpired(actorEntry, entrySlotIndices[codeIndex]) != 0) {
+                    if (btlGetActorEntryCode(actorEntry, entrySlotIndices[codeIndex]) > 0) {
                         return 0;
                     }
                 }
@@ -745,8 +746,8 @@ s32 btlIndexListNoExpiredEntryCodes(BtlIndexList *indexList, s32 commandId) {
             break;
         case BTL_EXPIRED_NEGATIVE_ENTRY_RULE:
             for (codeIndex = 0; codeIndex < BTL_ENTRY_CODE_COUNT; codeIndex++) {
-                if (btlActorEntryIsExpired(actorEntry, entryCodes[codeIndex]) != 0) {
-                    if (btlGetActorEntryCode(actorEntry, entryCodes[codeIndex]) < 0) {
+                if (btlActorEntryIsExpired(actorEntry, entrySlotIndices[codeIndex]) != 0) {
+                    if (btlGetActorEntryCode(actorEntry, entrySlotIndices[codeIndex]) < 0) {
                         return 0;
                     }
                 }
@@ -859,7 +860,7 @@ BtlCommandTargetEligibilityResult btlGetCommandTargetEligibility(
     s32 i;
     u32 flags;
     s32 requirement;
-    s32 code;
+    s32 entrySlotIndex;
 
     if (battle->runtimeFlags & 0x40) {
         return BTL_COMMAND_TARGET_ELIGIBILITY_RESULT_NONE;
@@ -895,9 +896,9 @@ BtlCommandTargetEligibilityResult btlGetCommandTargetEligibility(
     }
     requirement = datCommandRecords[commandId].requirementBits;
     if (requirement == 0x400 || requirement == 0x2000) {
-        code = btlLowestSetPairIndex(requirement);
-        if (code >= 0) {
-            if (btlIndexListMatchesEntryCodes(indexList, code,
+        entrySlotIndex = btlLowestSetPairIndex(requirement);
+        if (entrySlotIndex >= 0) {
+            if (btlIndexListMatchesEntryCodes(indexList, entrySlotIndex,
                     datCommandRecords[commandId].requirementBits)) {
                 return BTL_COMMAND_TARGET_ELIGIBILITY_RESULT_REQUIREMENTS_MET;
             }
@@ -913,7 +914,7 @@ BtlCommandRequiredEntryMatchResult btlCheckCommandRequiredEntryMatches(
     u32 flags;
     u32 mask;
     s32 bit;
-    s32 index;
+    s32 entrySlotIndex;
 
     if (commandId <= 0) {
         return result;
@@ -930,9 +931,9 @@ BtlCommandRequiredEntryMatchResult btlCheckCommandRequiredEntryMatches(
     for (bit = 0; bit < 0x20; bit++) {
         mask = 1 << bit;
         if (flags & mask) {
-            index = btlLowestSetPairIndex(mask);
-            if (index < 7 && index != -1) {
-                if (btlIndexListMatchesEntryCodes(list, index, mask) == 0) {
+            entrySlotIndex = btlLowestSetPairIndex(mask);
+            if (entrySlotIndex < 7 && entrySlotIndex != -1) {
+                if (btlIndexListMatchesEntryCodes(list, entrySlotIndex, mask) == 0) {
                     return 0;
                 }
             }

@@ -37,6 +37,7 @@ extern void itfMesMngRequestMessageRelease(s32 window, s32 releasePrimaryBlock);
 
 extern void itfSetTextDrawLimit(s32 limit);
 #include "btl_actor_status_table_api.h"
+#include "btl_actor_entry_code_api.h"
 #include "btl_model_record.h"
 #include "dsp_channel.h"
 #include "mdl_flag_api.h"
@@ -166,11 +167,6 @@ extern void btlAllocatePanelTaskWork(void);
 extern void itfMesMngRelease(ItfMesWindowIndex window);
 
 extern EffRandState effSharedRandomState[];
-
-void btlClearActorEntrySlot(BtlUnit *unit, s32 index);
-
-
-
 
 void btlClearAllActorEntrySlots(BtlUnit *unit);
 
@@ -525,8 +521,8 @@ void btlBuildCombinedActorUnit(BtlUnit *dst, BtlUnit *first, BtlUnit *second, Bt
     }
   }
 
-  btlClearActorEntrySlot(dst, 5);
-  btlClearActorEntrySlot(dst, 6);
+  btlClearActorEntrySlot(dst, BTL_ACTOR_ENTRY_SLOT_PHYSICAL_CHARGE);
+  btlClearActorEntrySlot(dst, BTL_ACTOR_ENTRY_SLOT_MAGIC_CHARGE);
   count = 0;
   for (n = 0; n < 3; n++)
   {

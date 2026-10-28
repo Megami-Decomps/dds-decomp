@@ -629,7 +629,7 @@ s32 btlHasOtherGroup400UnitMode(BtlUnit *excludedUnit, s32 unitMode) {
     return 0;
 }
 
-extern s32 btlEntryCodeConditionIndices[];
+extern BtlActorEntrySlotIndex btlEntryCodeConditionIndices[];
 
 /* Kinds 0xB/0xC scan the even/odd entry codes; other kinds test their own entry. */
 s32 btlMatchesActorEntryCodeCondition(BtlUnit *actor, s32 conditionIndex) {

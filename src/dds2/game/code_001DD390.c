@@ -608,8 +608,6 @@ extern void fldAppendSceneGroupHandle(ActionStateLink *);
 
 extern s16 btlGetCommandEffectId(ActionStateLink *, s32);
 
-extern void btlClearActorEntrySlot(BtlUnit *, s32);
-
 extern s32 btlCompareSkippedAndActiveTargetCounts(BtlIndexList *, BtlOperandGroup *);
 
 
@@ -1203,14 +1201,14 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
     }
     if (datCommandRecords[command].effectType == 0 && !(calculationFlags & 1) &&
         datCommandSelectors[command].kind != 1 && !(u8)(datCommandRecords[command].flags & 1)) {
-        if (btlActorEntryIsExpired(action->unit, 5)) {
-            btlClearActorEntrySlot(action->unit, 5);
+        if (btlActorEntryIsExpired(action->unit, BTL_ACTOR_ENTRY_SLOT_PHYSICAL_CHARGE)) {
+            btlClearActorEntrySlot(action->unit, BTL_ACTOR_ENTRY_SLOT_PHYSICAL_CHARGE);
         }
     }
     if (datCommandRecords[command].effectType == 1 && !(calculationFlags & 1) &&
         datCommandSelectors[command].kind != 1 && !(u8)(datCommandRecords[command].flags & 1)) {
-        if (btlActorEntryIsExpired(action->unit, 6)) {
-            btlClearActorEntrySlot(action->unit, 6);
+        if (btlActorEntryIsExpired(action->unit, BTL_ACTOR_ENTRY_SLOT_MAGIC_CHARGE)) {
+            btlClearActorEntrySlot(action->unit, BTL_ACTOR_ENTRY_SLOT_MAGIC_CHARGE);
         }
     }
     if (btlCompareSkippedAndActiveTargetCounts(work->indices, work->groups)) {

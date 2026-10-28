@@ -78,7 +78,7 @@ extern s8 btlHistoryCounter;
 
 extern void btlSyncEligibleActorPanelHpMp(ActionStateLink *);
 
-extern s32 btlEntryCodeConditionIndices[];
+extern BtlActorEntrySlotIndex btlEntryCodeConditionIndices[];
 
 
 extern s32 fldGetSelectedUnitStat(BtlUnit *);

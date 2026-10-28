@@ -2862,36 +2862,35 @@ f32 btlGetActorStateScale(ActionStateLink *task) {
     return 1.0f;
 }
 
-void btlClearActorEntrySlot(BtlUnit *unit, s32 index);
-
 void btlClearAllActorEntrySlots(BtlUnit *unit) {
-    u32 temp_v0;
-    u32 temp_v1;
+    u32 nextIndex;
+    BtlActorEntrySlotIndex slotIndex;
 
-    temp_v1 = 0;
+    slotIndex = 0;
     do {
-        temp_v0 = temp_v1 + 1;
-        btlClearActorEntrySlot(unit, temp_v1);
-        temp_v1 = temp_v0;
-    } while (temp_v0 < 7);
+        nextIndex = slotIndex + 1;
+        btlClearActorEntrySlot(unit, slotIndex);
+        slotIndex = nextIndex;
+    } while (nextIndex < 7);
 }
 
-u8 btlActorEntryIsExpired(const BtlUnit *unit, s32 index) {
-    if (unit->entrySlots[index].code == 0) {
+u8 btlActorEntryIsExpired(const BtlUnit *unit, BtlActorEntrySlotIndex slotIndex) {
+    if (unit->entrySlots[slotIndex].code == 0) {
         return 0;
     }
-    return unit->entrySlots[index].countdown < 1;
+    return unit->entrySlots[slotIndex].countdown < 1;
 }
 
-BtlActorEntryCodeMatch btlMatchActorEntryCode(const BtlUnit *unit, s32 index) {
-    s16 value = unit->entrySlots[index].code;
-    if (btlActorEntryCodeDefaults[index].maxCode != 0) {
-        if (btlActorEntryCodeDefaults[index].maxCode == value) {
+BtlActorEntryCodeMatch btlMatchActorEntryCode(
+    const BtlUnit *unit, BtlActorEntrySlotIndex slotIndex) {
+    s16 value = unit->entrySlots[slotIndex].code;
+    if (btlActorEntryCodeDefaults[slotIndex].maxCode != 0) {
+        if (btlActorEntryCodeDefaults[slotIndex].maxCode == value) {
             return BTL_ACTOR_ENTRY_CODE_MATCH_MAX_CODE;
         }
     }
-    if (btlActorEntryCodeDefaults[index].minCode != 0) {
-        if (btlActorEntryCodeDefaults[index].minCode == value) {
+    if (btlActorEntryCodeDefaults[slotIndex].minCode != 0) {
+        if (btlActorEntryCodeDefaults[slotIndex].minCode == value) {
             return BTL_ACTOR_ENTRY_CODE_MATCH_MIN_CODE;
         }
     }
@@ -2899,37 +2898,35 @@ BtlActorEntryCodeMatch btlMatchActorEntryCode(const BtlUnit *unit, s32 index) {
 }
 
 /* Clamp a signed entry-code delta and refresh timing only when the result is nonzero. */
-void btlAdjustActorEntryCode(BtlUnit *unit, s32 index, s16 delta) {
-    s16 code = unit->entrySlots[index].code;
+void btlAdjustActorEntryCode(BtlUnit *unit, BtlActorEntrySlotIndex slotIndex, s16 delta) {
+    s16 code = unit->entrySlots[slotIndex].code;
     code += delta;
 
-    if (code > btlActorEntryCodeDefaults[index].maxCode) {
-        code = btlActorEntryCodeDefaults[index].maxCode;
+    if (code > btlActorEntryCodeDefaults[slotIndex].maxCode) {
+        code = btlActorEntryCodeDefaults[slotIndex].maxCode;
     }
-    if (code < btlActorEntryCodeDefaults[index].minCode) {
-        code = btlActorEntryCodeDefaults[index].minCode;
+    if (code < btlActorEntryCodeDefaults[slotIndex].minCode) {
+        code = btlActorEntryCodeDefaults[slotIndex].minCode;
     }
     if (code != 0) {
-        unit->entrySlots[index].initialValue = btlActorEntryCodeDefaults[index].initialValue;
-        unit->entrySlots[index].countdown = btlActorEntryCodeDefaults[index].countdownFrames;
+        unit->entrySlots[slotIndex].initialValue = btlActorEntryCodeDefaults[slotIndex].initialValue;
+        unit->entrySlots[slotIndex].countdown = btlActorEntryCodeDefaults[slotIndex].countdownFrames;
     }
-    unit->entrySlots[index].code = code;
+    unit->entrySlots[slotIndex].code = code;
 }
 
-void btlSetActorEntryCode(BtlUnit *unit, s32 index, s16 code) {
-    unit->entrySlots[index].code = code;
+void btlSetActorEntryCode(BtlUnit *unit, BtlActorEntrySlotIndex slotIndex, s16 code) {
+    unit->entrySlots[slotIndex].code = code;
 }
 
-void btlClearActorEntrySlot(BtlUnit *unit, s32 index) {
-    unit->entrySlots[index].code = 0;
-    unit->entrySlots[index].initialValue = -1;
-    unit->entrySlots[index].countdown = -1;
+void btlClearActorEntrySlot(BtlUnit *unit, BtlActorEntrySlotIndex slotIndex) {
+    unit->entrySlots[slotIndex].code = 0;
+    unit->entrySlots[slotIndex].initialValue = -1;
+    unit->entrySlots[slotIndex].countdown = -1;
 }
 
-#include "btl_actor_entry_code_api.h"
-
-s16 btlGetActorEntryCode(const BtlUnit *unit, s32 index) {
-    return unit->entrySlots[index].code;
+s16 btlGetActorEntryCode(const BtlUnit *unit, BtlActorEntrySlotIndex slotIndex) {
+    return unit->entrySlots[slotIndex].code;
 }
 
 INCLUDE_RODATA(const s32, "game/code_001A8748", D_004151E8);
@@ -2980,15 +2977,15 @@ f32 btlGetActorEntryMultiplier(BtlUnit *unit, u32 index, s8 includeCharge) {
         break;
     }
     if (index == 0 && includeCharge != 0 &&
-        btlGetActorEntryCode(unit, 5) > 0) {
-        if (btlActorEntryIsExpired(unit, 5) != 0) {
+        btlGetActorEntryCode(unit, BTL_ACTOR_ENTRY_SLOT_PHYSICAL_CHARGE) > 0) {
+        if (btlActorEntryIsExpired(unit, BTL_ACTOR_ENTRY_SLOT_PHYSICAL_CHARGE) != 0) {
             factor *= 2.25f;
             btlBossDebugPrintf("btl:BUTURIx2\n");
         }
     }
     if (index == 1 && includeCharge != 0 &&
-        btlGetActorEntryCode(unit, 6) > 0) {
-        if (btlActorEntryIsExpired(unit, 6) != 0) {
+        btlGetActorEntryCode(unit, BTL_ACTOR_ENTRY_SLOT_MAGIC_CHARGE) > 0) {
+        if (btlActorEntryIsExpired(unit, BTL_ACTOR_ENTRY_SLOT_MAGIC_CHARGE) != 0) {
             factor *= 2.25f;
             btlBossDebugPrintf("btl:MAGICx2\n");
         }
@@ -3032,10 +3029,10 @@ void btlApplyMaskedActorEntryAdjustments(BtlUnit *unit, u32 flags, s16 delta) {
         btlAdjustActorEntryCode(unit, 4, -delta);
     }
     if (flags & 0x400) {
-        btlAdjustActorEntryCode(unit, 5, delta);
+        btlAdjustActorEntryCode(unit, BTL_ACTOR_ENTRY_SLOT_PHYSICAL_CHARGE, delta);
     }
     if (flags & 0x2000) {
-        btlAdjustActorEntryCode(unit, 6, delta);
+        btlAdjustActorEntryCode(unit, BTL_ACTOR_ENTRY_SLOT_MAGIC_CHARGE, delta);
     }
     if (flags & 0x800) {
         if (btlGetActorEntryCode(unit, 0) > 0) {

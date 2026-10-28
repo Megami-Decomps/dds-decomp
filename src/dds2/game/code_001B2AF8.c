@@ -32,6 +32,7 @@
 #include "btl_indexed_ui_resource_api.h"
 #include "btl_set_actor_effect_parameter_api.h"
 #include "btl_actor_status_table_api.h"
+#include "btl_actor_entry_code_api.h"
 #include "btl_stat_effect_offsets.h"
 #include "btl_command_panel_owner_linkage_skill_api.h"
 #include "btl_effect_active_api.h"
@@ -195,8 +196,6 @@ extern s32 evtGetMirroredSolarPhase(void);
 extern s32 btlRollAiBucket(void);
 
 extern s32 btlAverageLevelsForMaskExcludingStatus20(u32);
-
-void btlClearActorEntrySlot(BtlUnit *unit, s32 index);
 
 extern s32 fldCountSceneSlots(void);
 
@@ -1365,8 +1364,8 @@ void btlBuildCombinedActorUnit(BtlUnit *dst, BtlUnit *first, BtlUnit *second, Bt
     }
   }
 
-  btlClearActorEntrySlot(dst, 5);
-  btlClearActorEntrySlot(dst, 6);
+  btlClearActorEntrySlot(dst, BTL_ACTOR_ENTRY_SLOT_PHYSICAL_CHARGE);
+  btlClearActorEntrySlot(dst, BTL_ACTOR_ENTRY_SLOT_MAGIC_CHARGE);
   count = 0;
   for (n = 0; n < 3; n++)
   {
