@@ -10,6 +10,7 @@
 #include "fld_marker_packet.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "fld_map_slot_auxiliary_flag_selector.h"
 #include "fld_camera_model_motion_request.h"
 #include "sdf_vu0.h"
 #include "fld_stop_entry.h"
@@ -491,7 +492,8 @@ extern u32 D_003BADDC;
 
 extern s32 fldCameraColorFade;
 
-extern u8 fldTestMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit);
+extern u8 fldTestMapSlotAuxiliaryFlag(
+    s32 mapId, u32 slotIndex, FldMapSlotAuxiliaryFlagSelector bit);
 
 void fldApplyPendingCameraHeading(void);
 

@@ -9,6 +9,7 @@
 #include "fld_coordinate_lookup_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "fld_map_slot_auxiliary_flag_selector.h"
 #include "sdf_map_position_api.h"
 #include "sdf_vu0.h"
 #include "fld_scene_ready_api.h"
@@ -1995,7 +1996,8 @@ s32 fldGetMapSlotByte(s32 mapId, u32 slotIndex, s32 valueIndex) {
     return value == FIELD_MAP_EMPTY_VALUE ? -1 : value;
 }
 
-void fldSetMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
+void fldSetMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex,
+                                FldMapSlotAuxiliaryFlagSelector bit, s32 enabled) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
         if (enabled) {
@@ -2006,7 +2008,8 @@ void fldSetMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) 
     }
 }
 
-u8 fldTestMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit) {
+u8 fldTestMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex,
+                               FldMapSlotAuxiliaryFlagSelector bit) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
         u32 flags = DDS3_GBWK->maps[mapIndex].slots[slotIndex].auxiliaryFlags;

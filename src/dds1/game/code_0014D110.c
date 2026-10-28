@@ -3,6 +3,7 @@
 #include "fld_camera_move_tracking.h"
 #include "fld_title_banner_menu.h"
 #include "common.h"
+#include "fld_map_slot_auxiliary_flag_selector.h"
 #include "scr_integer_parameter_api.h"
 #include "fld_scene_status_api.h"
 #include "sdf_trig.h"
@@ -978,7 +979,8 @@ s32 fldCommand_FLD_MAP_OFF(void) {
     return 1;
 }
 
-extern void fldSetMapSlotAuxiliaryFlag(s32 area, u32 slotIndex, s32 bit, s32 enabled);
+extern void fldSetMapSlotAuxiliaryFlag(
+    s32 area, u32 slotIndex, FldMapSlotAuxiliaryFlagSelector bit, s32 enabled);
 
 s32 fldOpClearRoomStateFlags(void) {
     s32 world;

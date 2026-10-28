@@ -3755,7 +3755,8 @@ void fldFlushQueuedEffectPositions(void) {
 
 INCLUDE_ASM(const s32, "game/code_001411F0", func_00149B68);
 
-extern u8 fldTestMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit);
+extern u8 fldTestMapSlotAuxiliaryFlag(
+    s32 mapId, u32 slotIndex, FldMapSlotAuxiliaryFlagSelector bit);
 
 
 void fldNpcHojiRefresh(void) {

@@ -6,6 +6,7 @@
 #include "fld_scene_transition_gate_api.h"
 #include "fld_deferred_transition.h"
 #include "common.h"
+#include "fld_map_slot_auxiliary_flag_selector.h"
 #include "sdf_vu0.h"
 #include "fld_stop_entry.h"
 #include "sdf_textured_rect.h"
@@ -254,7 +255,8 @@ extern FldActorEntry fldDoorTable[256];
 /* Initialized by fldInitializeActorMotionSlots. */
 extern FldActorRow fldActorSlots[];
 
-extern u8 fldTestMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit);
+extern u8 fldTestMapSlotAuxiliaryFlag(
+    s32 mapId, u32 slotIndex, FldMapSlotAuxiliaryFlagSelector bit);
 
 extern void dds3MatterObjectBasicSetAlpMode(dds3Basic_t *object, u32 value);
 

@@ -7488,7 +7488,8 @@ extern f32 fldResolvedPosition[3];
 
 extern u8 fldTestRoomSceneFlag(s32 mapId, u32 slotIndex, s32 bit);
 
-extern u8 fldTestMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex, s32 bit);
+extern u8 fldTestMapSlotAuxiliaryFlag(
+    s32 mapId, u32 slotIndex, FldMapSlotAuxiliaryFlagSelector bit);
 
 void fldHitChkUnitElvOnly(const f32 *input) {
     f32 position[4];
