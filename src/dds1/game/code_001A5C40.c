@@ -12,6 +12,7 @@
 #include "btl_selected_entry_api.h"
 #include "btl_actor_command_selector_value_api.h"
 #include "btl_action_press_result.h"
+#include "btl_fear_infliction_roll.h"
 #include "btl_command_availability_override.h"
 #include "btl_command_hit_count_override.h"
 #include "pty_active_roster_index_api.h"
@@ -380,12 +381,13 @@ s32 btlComputeStatusPenaltyFifth(BtlUnit *object) {
 
 extern s32 btlRollAiBucket(void);
 
-s32 btlRollFearChance(s32 unused, BtlUnit *unit, u32 flags, BtlActionPressResult pressFlags) {
+BtlFearInflictionRollResult btlRollFearChance(
+    s32 unused, BtlUnit *unit, u32 flags, BtlActionPressResult pressFlags) {
     s32 ratio;
-    if ((((BtlState *)btlGetRuntime())->runtimeFlags & 0x80) != 0) return 0;
-    if ((unit->status.stateFlags & 8) != 0) return 0;
-    if ((flags & 1) == 0) return 0;
-    if ((unit->partyRecord.status & 1) != 0) return 0;
+    if ((((BtlState *)btlGetRuntime())->runtimeFlags & 0x80) != 0) return BTL_FEAR_INFLICTION_ROLL_FAILED;
+    if ((unit->status.stateFlags & 8) != 0) return BTL_FEAR_INFLICTION_ROLL_FAILED;
+    if ((flags & 1) == 0) return BTL_FEAR_INFLICTION_ROLL_FAILED;
+    if ((unit->partyRecord.status & 1) != 0) return BTL_FEAR_INFLICTION_ROLL_FAILED;
     ratio = 0;
     if (pressFlags & BTL_ACTION_PRESS_RESULT_CRITICAL) {
         ratio = 30;
@@ -393,7 +395,9 @@ s32 btlRollFearChance(s32 unused, BtlUnit *unit, u32 flags, BtlActionPressResult
         ratio = 40;
     }
     btlBossDebugPrintf("btl:fear ratio[%d]\n", ratio);
-    return (s32)btlRollAiBucket() < ratio;
+    return (s32)btlRollAiBucket() < ratio
+        ? BTL_FEAR_INFLICTION_ROLL_SUCCEEDED
+        : BTL_FEAR_INFLICTION_ROLL_FAILED;
 }
 
 s32 btlRollAllFearChance(s32 unused, BtlUnit *unit, u32 flags, s32 unusedFlags,

@@ -23,6 +23,7 @@
 #include "btl_command_cost_api.h"
 #include "btl_action_reaction_motion.h"
 #include "btl_action_press_result.h"
+#include "btl_fear_infliction_roll.h"
 #include "btl_command_hit_result.h"
 #include "btl_command_status_api.h"
 #include "btl_hunt_mp_recovery_api.h"
@@ -597,8 +598,6 @@ extern f32 btlGetActionCategoryGateAsFloat(s32, s32, s32);
 extern void btlFindSoundTaskByWorkValue(u32, BtlActionPressResult);
 
 extern s32 btlRollAllFearChance(s32, BtlUnit *, u32, s32, u8);
-
-extern s32 btlRollFearChance(s32, BtlUnit *, s32, BtlActionPressResult);
 
 extern s32 btlRollPetrifiedDeathChance(BtlUnit *, s32);
 

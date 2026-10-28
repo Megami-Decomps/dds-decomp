@@ -18,6 +18,7 @@
 #include "btl_command_use_error.h"
 #include "btl_actor_command_selector_value_api.h"
 #include "btl_action_press_result.h"
+#include "btl_fear_infliction_roll.h"
 #include "btl_command_hit_count_override.h"
 #include "pty_active_roster_index_api.h"
 #include "dat_assigned_item_id.h"
@@ -671,26 +672,29 @@ extern char D_00415440[]; /* "btl:fear ratio[%d]\n" */
 
 extern s32 btlRollAiBucket(void);
 
-s32 btlRollFearChance(s32 unused, BtlUnit *unit, s32 flagsA, BtlActionPressResult pressFlags) {
+BtlFearInflictionRollResult btlRollFearChance(
+    s32 unused, BtlUnit *unit, s32 flagsA, BtlActionPressResult pressFlags) {
     s32 threshold;
     if (((BtlState *)btlGetRuntime())->runtimeFlags & 0x80) {
-        return 0;
+        return BTL_FEAR_INFLICTION_ROLL_FAILED;
     }
     if (unit->status.stateFlags & 8) {
-        return 0;
+        return BTL_FEAR_INFLICTION_ROLL_FAILED;
     }
     if (!(flagsA & 1)) {
-        return 0;
+        return BTL_FEAR_INFLICTION_ROLL_FAILED;
     }
     if (unit->partyRecord.status & 1) {
-        return 0;
+        return BTL_FEAR_INFLICTION_ROLL_FAILED;
     }
     threshold = 0x1E;
     if (!(pressFlags & BTL_ACTION_PRESS_RESULT_CRITICAL)) {
         threshold = !(pressFlags & BTL_ACTION_PRESS_RESULT_WEAKNESS) ? 0 : 0x28;
     }
     btlBossDebugPrintf(D_00415440, threshold);
-    return btlRollAiBucket() < threshold;
+    return btlRollAiBucket() < threshold
+        ? BTL_FEAR_INFLICTION_ROLL_SUCCEEDED
+        : BTL_FEAR_INFLICTION_ROLL_FAILED;
 }
 
 extern s32 fldCountSceneSlots(void);
