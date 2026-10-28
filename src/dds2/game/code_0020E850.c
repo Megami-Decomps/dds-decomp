@@ -484,7 +484,7 @@ s32 btlGetStatusActionEffectId(ActionStateLink *task) {
 
 
 extern BtlCommandEffect btlCommandEffectMappings[];
-s16 btlGetCommandEffectId(ActionStateLink *link, s32 command) {
+s16 btlGetCommandEffectId(ActionStateLink *link, BtlCommandId command) {
     BtlOperandGroup *result = link->indexWork.groups;
     u32 i;
     u32 count = btlGetIndexListCount(link->indexWork.indices);

@@ -607,7 +607,7 @@ extern s32 btlSelectCounterSkill(BtlUnit *, BtlUnit *);
 
 extern void fldAppendSceneGroupHandle(ActionStateLink *);
 
-extern s16 btlGetCommandEffectId(ActionStateLink *, s32);
+extern s16 btlGetCommandEffectId(ActionStateLink *, BtlCommandId);
 
 extern s32 btlCompareSkippedAndActiveTargetCounts(BtlIndexList *, BtlOperandGroup *);
 

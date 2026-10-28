@@ -579,7 +579,7 @@ extern s32 btlRollPassiveAbilityAction(BtlUnit *);
 
 extern void fldAppendSceneGroupHandle(BtlTask *);
 
-extern s16 btlGetCommandEffectId(BtlTask *, s32);
+extern s16 btlGetCommandEffectId(BtlTask *, BtlCommandId);
 
 extern s32 btlCompareSkippedAndActiveTargetCounts(BtlIndexList *, BtlOperandGroup *);
 

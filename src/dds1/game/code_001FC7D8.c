@@ -410,7 +410,7 @@ s32 btlGetStatusActionEffectId(BtlTask *task) {
 
 extern BtlCommandEffect btlCommandEffectMappings[];
 /* Retained operand groups can suppress the command's effect. */
-s16 btlGetCommandEffectId(BtlTask *task, s32 command) {
+s16 btlGetCommandEffectId(BtlTask *task, BtlCommandId command) {
     BtlOperandGroup *result = task->indexWork.groups;
     u32 i;
     u32 count = btlGetIndexListCount(task->indexWork.indices);

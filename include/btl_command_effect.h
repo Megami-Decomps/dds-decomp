@@ -2,9 +2,10 @@
 #define BTL_COMMAND_EFFECT_H
 
 #include "common.h"
+#include "btl_command_id.h"
 
 typedef struct BtlCommandEffect {
-    s32 command;
+    BtlCommandId command;
     s16 effect;
     u8 adjustSide;
     u8 pad07;
