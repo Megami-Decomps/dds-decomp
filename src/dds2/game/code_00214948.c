@@ -390,7 +390,8 @@ extern u32 fldCountSceneSlots(void);
 extern s32 btlGetPartnerCommandUseError(
     BtlUnit *, BtlUnit *, BtlUnit *, BtlUnit *, BtlCommandId commandId);
 
-extern s32 btlFindCommandPartnersByAffinity(BtlUnit *, s32, BtlUnit **, BtlUnit **);
+extern s32 btlFindCommandPartnersByAffinity(
+    BtlUnit *, BtlCommandId, BtlUnit **, BtlUnit **);
 
 extern s32 btlFindEnemyLinkagePartnersByCount(BtlUnit *, s32, BtlUnit **, BtlUnit **);
 
@@ -399,7 +400,7 @@ extern char D_00419C80[], D_00419CB0[], D_00419CD8[], D_00419D00[];
 
 /* Whether unit can start combo command cmd with two partners, none of which may be
  * blocked by action mask 0x10 or by btlGetPartnerCommandUseError against the other two. */
-s32 btlCanStartCommandWithPartners(BtlUnit *unit, s32 command) {
+s32 btlCanStartCommandWithPartners(BtlUnit *unit, BtlCommandId commandId) {
     BtlUnit *members[3];
     BtlState *state;
     u32 i = 0;
@@ -407,20 +408,20 @@ s32 btlCanStartCommandWithPartners(BtlUnit *unit, s32 command) {
     memset(members, 0, sizeof(members));
     state = (BtlState *)btlGetRuntime();
     if ((btlUnitStatusPair(unit) & 0x421) == 0x401) {
-        if (!(datAffinityRecords[command - DAT_AFFINITY_FIRST_COMMAND].flags & 2) && !(datBattleSceneRecords[state->battleMode].flags & 1)) {
-            if (datCommandSelectors[command].kind != 1) {
+        if (!(datAffinityRecords[commandId - DAT_AFFINITY_FIRST_COMMAND].flags & 2) && !(datBattleSceneRecords[state->battleMode].flags & 1)) {
+            if (datCommandSelectors[commandId].kind != 1) {
                 printf(D_00419C80);
                 return 0;
             }
-            if ((u32)(command - DAT_AFFINITY_FIRST_COMMAND) >= 0x75) {
+            if ((u32)(commandId - DAT_AFFINITY_FIRST_COMMAND) >= 0x75) {
                 printf(D_00419CB0);
                 return 0;
             }
-            if (fldCountSceneSlots() < btlGetSlotValueAdjustedForSpecialAbility(unit, command)) {
+            if (fldCountSceneSlots() < btlGetSlotValueAdjustedForSpecialAbility(unit, commandId)) {
                 printf(D_00419CD8);
                 return 0;
             }
-            if (btlFindCommandPartnersByAffinity(unit, command, &members[1], &members[2]) != 0) {
+            if (btlFindCommandPartnersByAffinity(unit, commandId, &members[1], &members[2]) != 0) {
                 members[0] = unit;
                 for (; i < 3; i++) {
                     if (members[i] != NULL && btlUnitHasAnyStatusInMask(members[i], 0x10)) {
@@ -429,13 +430,13 @@ s32 btlCanStartCommandWithPartners(BtlUnit *unit, s32 command) {
                 }
                 for (i = 0; i < 3; i++) {
                     if (members[i % 3] != NULL &&
-                        btlGetPartnerCommandUseError(members[i % 3], members[(i + 1) % 3], members[(i + 2) % 3], 0, command)) {
+                        btlGetPartnerCommandUseError(members[i % 3], members[(i + 1) % 3], members[(i + 2) % 3], 0, commandId)) {
                         return 0;
                     }
                 }
                 return 1;
             }
-        } else if (btlFindEnemyLinkagePartnersByCount(unit, command, &members[1], &members[2]) != 0) {
+        } else if (btlFindEnemyLinkagePartnersByCount(unit, commandId, &members[1], &members[2]) != 0) {
             members[0] = unit;
             for (i = 0; i < 3; i++) {
                 if (members[i] != NULL && btlUnitHasAnyStatusInMask(members[i], 0x10)) {
@@ -444,7 +445,7 @@ s32 btlCanStartCommandWithPartners(BtlUnit *unit, s32 command) {
             }
             for (i = 0; i < 3; i++) {
                 if (members[i % 3] != NULL &&
-                    btlGetPartnerCommandUseError(members[i % 3], members[(i + 1) % 3], members[(i + 2) % 3], 0, command)) {
+                    btlGetPartnerCommandUseError(members[i % 3], members[(i + 1) % 3], members[(i + 2) % 3], 0, commandId)) {
                     return 0;
                 }
             }

@@ -2333,7 +2333,8 @@ s32 btlBuildActorLinkageSkillList(BtlUnit *actor, BattleRosterTable *table) {
 
 
 extern ActionStateLink *fldGetSceneGroupEntry(s32 entryIndex);
-extern s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, BtlUnit **first, BtlUnit **second);
+extern s32 btlFindCommandPartnersByAffinity(
+    BtlUnit *unit, BtlCommandId commandId, BtlUnit **first, BtlUnit **second);
 
 BtlCommandAffinityPartnerResolution btlResolveCommandAffinityPartners(
     BtlUnit *unit, BtlCommandId commandId, BtlCommandPartnerOutput *output) {

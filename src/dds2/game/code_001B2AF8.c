@@ -303,7 +303,7 @@ s32 btlAreUnitStatusAndEntryFlagsClear(BtlUnit *actor) {
     return (btlGetEntryFlagsUnlessDisabled(&actor->partyRecord) & 0x40) < 1;
 }
 
-s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, BtlUnit **first, BtlUnit **second) {
+s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, BtlCommandId commandId, BtlUnit **first, BtlUnit **second) {
     datUnitWork_t *statRecords[3];
     u32 requiredCount = 0;
     BtlState *controller = (BtlState *)btlGetRuntime();
@@ -312,7 +312,7 @@ s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, BtlUnit **first
     BtlUnit *partner;
     u32 i;
 
-    requirementCursor = datAffinityRecords[command - DAT_AFFINITY_FIRST_COMMAND].requirements;
+    requirementCursor = datAffinityRecords[commandId - DAT_AFFINITY_FIRST_COMMAND].requirements;
     for (i = 0; i < 3; i++) {
         if (*requirementCursor++ != -1) {
             requiredCount++;
@@ -356,7 +356,7 @@ s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, BtlUnit **first
                     continue;
                 }
                 statRecords[2] = &partner->partyRecord;
-                if (ptyMatchAffinityPermutation(statRecords, command) == PTY_AFFINITY_MATCH_NOT_FOUND) {
+                if (ptyMatchAffinityPermutation(statRecords, commandId) == PTY_AFFINITY_MATCH_NOT_FOUND) {
                     continue;
                 }
                 if (first != NULL) {
@@ -369,7 +369,7 @@ s32 btlFindCommandPartnersByAffinity(BtlUnit *unit, s32 command, BtlUnit **first
             }
         } else {
             statRecords[2] = 0;
-            if (ptyMatchAffinityPermutation(statRecords, command) != PTY_AFFINITY_MATCH_NOT_FOUND) {
+            if (ptyMatchAffinityPermutation(statRecords, commandId) != PTY_AFFINITY_MATCH_NOT_FOUND) {
                 if (first != NULL) {
                     *first = candidate;
                 }
