@@ -364,7 +364,7 @@ void evtEventViewerReset(EvtRuntime *viewer) {
     viewer->unk2238 = 1;
 }
 
-/* Shut the viewer down: reset effect channels, destroy entries, release the handle. */
+/* Shut down viewer state; the caller releases resourceHandle after this returns. */
 void evtEventViewerShutdown(EvtRuntime *viewer) {
     Eve_PartialMultiBlurSetDefTex();
     Eve_DistortionBlurSetDefTex();
