@@ -5101,7 +5101,7 @@ void func_00150800(void) {
         fclStartMessage(6);
         D_00389874[0] = 1;
         fldSparkControlState.state.dialogPhase = FLD_SPARK_DIALOG_PHASE_UNAVAILABLE_MESSAGE;
-        fldSparkControlState.state.phase = 0;
+        fldSparkControlState.state.phase = FLD_SPARK_CONTROLLER_PHASE_IDLE;
         fldSparkControlState.state.dialogTimer = 0;
         fldResetPlayerSceneObjectState();
         return;
@@ -5111,7 +5111,7 @@ void func_00150800(void) {
         fclStartMessage(5);
         D_00389874[0] = 1;
         fldSparkControlState.state.dialogPhase = FLD_SPARK_DIALOG_PHASE_UNAVAILABLE_MESSAGE;
-        fldSparkControlState.state.phase = 0;
+        fldSparkControlState.state.phase = FLD_SPARK_CONTROLLER_PHASE_IDLE;
         fldSparkControlState.state.dialogTimer = 0;
         fldResetPlayerSceneObjectState();
         return;
@@ -5143,7 +5143,7 @@ void func_00150800(void) {
     } while (0);
     control->entry = record;
     do {
-    control->state.phase = 0;
+    control->state.phase = FLD_SPARK_CONTROLLER_PHASE_IDLE;
     control->state.terminated = 0;
     control->state.animationState = FLD_SPARK_ANIMATION_READY;
     control->state.modeCountdown = 0;
@@ -5175,7 +5175,7 @@ void fldFinishEventFieldState(void) {
         fldStartSceneBgmAlternate();
         fldPreparePlayerSceneCameraTarget();
         work->specialEventActive = 0;
-        fldSparkControlState.state.phase = 0;
+        fldSparkControlState.state.phase = FLD_SPARK_CONTROLLER_PHASE_IDLE;
         fldSparkControlState.state.countdown = 0;
         evtSetSolarOverlayFullyVisible();
     }
@@ -5331,11 +5331,11 @@ void fldUpdateDevilizeEventSequence(void) {
     case FLD_SPARK_DIALOG_PHASE_ENTER_ENCOUNTER:
         fldDrawSparkStatusOverlay();
         fldSparkControlState.state.dialogPhase = FLD_SPARK_DIALOG_PHASE_IDLE;
-        fldSparkControlState.state.phase = 1;
+        fldSparkControlState.state.phase = FLD_SPARK_CONTROLLER_PHASE_ENCOUNTER_ACTIVE;
         fldPreparePlayerSceneCameraTarget();
         break;
     case FLD_SPARK_DIALOG_PHASE_CANCELLED:
-        fldSparkControlState.state.phase = 1;
+        fldSparkControlState.state.phase = FLD_SPARK_CONTROLLER_PHASE_ENCOUNTER_ACTIVE;
         fldSparkControlState.state.dialogPhase = FLD_SPARK_DIALOG_PHASE_IDLE;
         fldPreparePlayerSceneCameraTarget();
         break;
@@ -5349,11 +5349,11 @@ FldSparkDialogPhase fldGetSparkDialogPhase(void) {
 
 /* Update the spark encounter, its timeout dialog, and the return-to-field fade. */
 void fldUpdateSparkEncounterScene(void) {
-    s32 phase;
+    FldSparkControllerPhase phase;
     s32 value;
 
     phase = fldSparkControlState.state.phase;
-    if (phase == 1) {
+    if (phase == FLD_SPARK_CONTROLLER_PHASE_ENCOUNTER_ACTIVE) {
         if (fldSparkControlState.state.animationState == FLD_SPARK_ANIMATION_READY) {
             if ((s8)dds3PadButtonState[1][0][0] < 0) {
                 fldSetCameraModelMotionRequest(6, 20);
@@ -5402,7 +5402,7 @@ void fldUpdateSparkEncounterScene(void) {
             fldReleaseCameraModel(0);
             fldSetCameraModelMotionRequest(2, 0);
             fldSetCameraNodeModeWithTen();
-            fldSparkControlState.state.phase = 3;
+            fldSparkControlState.state.phase = FLD_SPARK_CONTROLLER_PHASE_TIMEOUT_MESSAGE;
             fclInitMessage(D_003A9EB0);
             fclStartMessage(7);
             fldResetPlayerSceneObjectState();
@@ -5410,26 +5410,26 @@ void fldUpdateSparkEncounterScene(void) {
             fldUpdateSparkSequence();
         }
         return;
-    } else if (phase == 3) {
+    } else if (phase == FLD_SPARK_CONTROLLER_PHASE_TIMEOUT_MESSAGE) {
         dspRequestMessageWindowModeOne();
         if (fclChkMessage() == EVT_MESSAGE_WINDOW_CONTROL_RESULT_NO_ACTIVE_CONTROL) {
             evtFinishMessageWindowAndNotify();
             fclDestroyMessage();
             fldSparkControlState.state.frame = 0;
-            fldSparkControlState.state.phase = 6;
+            fldSparkControlState.state.phase = FLD_SPARK_CONTROLLER_PHASE_POST_MESSAGE_HANDOFF;
             fldSparkControlState.state.terminated = 1;
         }
         if (fldSparkControlState.state.terminated != 0) {
             mnuMarkTitleStreamResetPending();
             fldGlobalBase.pendingSceneRequest = FLD_SCENE_ADVANCE_REQUEST_PENDING;
             fldResetPlayerSceneObjectState();
-            fldSparkControlState.state.phase = 7;
+            fldSparkControlState.state.phase = FLD_SPARK_CONTROLLER_PHASE_FADE_TO_EVENT;
             evtBitOn(0x802);
             return;
         }
-    } else if (phase == 6) {
+    } else if (phase == FLD_SPARK_CONTROLLER_PHASE_POST_MESSAGE_HANDOFF) {
         return;
-    } else if (phase == 7) {
+    } else if (phase == FLD_SPARK_CONTROLLER_PHASE_FADE_TO_EVENT) {
         fldSparkControlState.state.frame++;
         if (fldSparkControlState.state.frame == 40) {
             dds3FadeOut(255, 255, 255, 4);
@@ -5437,16 +5437,16 @@ void fldUpdateSparkEncounterScene(void) {
         if (fldSparkControlState.state.frame < 45) {
             return;
         }
-        fldSparkControlState.state.phase = 8;
-    } else if (phase == 8) {
+        fldSparkControlState.state.phase = FLD_SPARK_CONTROLLER_PHASE_ENTER_EVENT;
+    } else if (phase == FLD_SPARK_CONTROLLER_PHASE_ENTER_EVENT) {
         p2sdPlaySE(0x680011, 0x7F, 0x3F);
         fldTogglePlayerModel();
         fldStartSceneBgmAlternate();
         evtSetSolarOverlayFullyVisible();
         fldGlobalBase.unk138 = 1;
-        fldSparkControlState.state.phase = 9;
+        fldSparkControlState.state.phase = FLD_SPARK_CONTROLLER_PHASE_RETURN_TO_FIELD;
         fldSparkControlState.state.frame = 0;
-    } else if (phase == 9) {
+    } else if (phase == FLD_SPARK_CONTROLLER_PHASE_RETURN_TO_FIELD) {
         fldSparkControlState.state.frame++;
         if (fldSparkControlState.state.frame == 1) {
             dds3FadeIn(255, 255, 255, 4);
@@ -5459,7 +5459,7 @@ void fldUpdateSparkEncounterScene(void) {
         if (fldSparkControlState.state.frame >= 11) {
             D_003899E0[0] = 0;
             fldPreparePlayerSceneCameraTarget();
-            fldSparkControlState.state.phase = 0;
+            fldSparkControlState.state.phase = FLD_SPARK_CONTROLLER_PHASE_IDLE;
             fldGlobalBase.specialEventActive = 0;
         }
     } else {
@@ -5485,7 +5485,7 @@ void fldResetEventSceneState(void) {
     fldPreparePlayerSceneCameraTarget();
     fldGlobalBase.deferredExit = FLD_DEFERRED_EXIT_REQUESTED;
     fldGlobalBase.specialEventActive = 0;
-    fldSparkControlState.state.phase = 0;
+    fldSparkControlState.state.phase = FLD_SPARK_CONTROLLER_PHASE_IDLE;
     fldGlobalBase.unk138 = 1;
 }
 
@@ -5501,7 +5501,7 @@ void fldResetAfterEvent(void) {
     fldStartSceneBgmAlternate();
     fldGlobalBase.deferredExit = FLD_DEFERRED_EXIT_IDLE;
     fldGlobalBase.specialEventActive = 0;
-    fldSparkControlState.state.phase = 0;
+    fldSparkControlState.state.phase = FLD_SPARK_CONTROLLER_PHASE_IDLE;
     fldGlobalBase.unk138 = 1;
     evtSetSolarOverlayFullyVisible();
 }
@@ -5528,7 +5528,7 @@ void fldFinishDeferredExit(void) {
 }
 
 u8 fldIsEventPhaseAtLeastTwo(void) {
-    if (fldSparkControlState.state.phase < 2) {
+    if (fldSparkControlState.state.phase < FLD_SPARK_CONTROLLER_PHASE_EVENT_THRESHOLD) {
         return 0;
     }
     return 1;

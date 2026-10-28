@@ -9,6 +9,19 @@ enum {
     FLD_SPARK_ANIMATION_RUNNING = 1
 };
 
+/* Outer encounter flow; dialogPhase tracks the nested prompt/message state. */
+typedef s32 FldSparkControllerPhase;
+enum FldSparkControllerPhaseValue {
+    FLD_SPARK_CONTROLLER_PHASE_IDLE = 0,
+    FLD_SPARK_CONTROLLER_PHASE_ENCOUNTER_ACTIVE = 1,
+    FLD_SPARK_CONTROLLER_PHASE_EVENT_THRESHOLD = 2, /* Comparison boundary, not a stored state. */
+    FLD_SPARK_CONTROLLER_PHASE_TIMEOUT_MESSAGE = 3,
+    FLD_SPARK_CONTROLLER_PHASE_POST_MESSAGE_HANDOFF = 6, /* The follow-up work differs by title. */
+    FLD_SPARK_CONTROLLER_PHASE_FADE_TO_EVENT = 7,
+    FLD_SPARK_CONTROLLER_PHASE_ENTER_EVENT = 8,
+    FLD_SPARK_CONTROLLER_PHASE_RETURN_TO_FIELD = 9
+};
+
 /* Values for the spark-event prompt, playback, and field-return state machine. */
 typedef s32 FldSparkDialogPhase;
 enum FldSparkDialogPhaseValue {
@@ -29,7 +42,7 @@ enum FldSparkDialogPhaseValue {
 
 /* Shared field-spark phase, timer, and serialized-sequence progress state. */
 typedef struct FldSparkControllerState {
-    s32 phase;
+    FldSparkControllerPhase phase;
     s32 countdown;
     s32 terminated;
     FldSparkAnimationState animationState;
