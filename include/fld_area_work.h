@@ -124,7 +124,7 @@ typedef struct FldAreaWork {
     f32 dist;
     s32 sceneMode;
     s32 sceneState;
-    FldAreaResourceRequestState resourceFlag; /* 0x78: local-map request state. */
+    FldAreaResourceRequestState resourceRequestState; /* 0x78: local-map request state. */
     s32 resourceArea;
     s32 resourceFloor;
     FldPositionUpdateState positionPending; /* 0x84: corrected pose awaits application. */
@@ -247,7 +247,7 @@ typedef char FldTextureResource_resourceData_offset_check[
     ((u32)&((FldTextureResource *)0)->resourceData == 0x04) ? 1 : -1];
 typedef char FldAreaWork_area_offset_check[(FLD_AREA_OFFSET(area) == 0x10) ? 1 : -1];
 typedef char FldAreaWork_defaultEncounterId_offset_check[(FLD_AREA_OFFSET(defaultEncounterId) == 0xDC) ? 1 : -1];
-typedef char FldAreaWork_resourceFlag_offset_check[(FLD_AREA_OFFSET(resourceFlag) == 0x78) ? 1 : -1];
+typedef char FldAreaWork_resourceRequestState_offset_check[(FLD_AREA_OFFSET(resourceRequestState) == 0x78) ? 1 : -1];
 typedef char FldAreaWork_positionPending_offset_check[
     (FLD_AREA_OFFSET(positionPending) == 0x84) ? 1 : -1];
 typedef char FldAreaWork_cameraTargetGraceTicks_offset_check[

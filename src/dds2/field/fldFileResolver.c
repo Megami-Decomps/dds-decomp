@@ -1228,7 +1228,7 @@ FldBattleReturnAreaLoadResult fldTryStartPendingBattleReturnAreaLoad(void) {
         fldMakeFilePath(directory, area, 1);
         sprintf(path, D_004130D8, directory, area, floor);
         pFldNextFileDataF2 = (FilePacRequest *)pacLoad(path);
-        fldGlobalBase.resourceFlag = FLD_AREA_RESOURCE_REQUEST_LOAD_PENDING;
+        fldGlobalBase.resourceRequestState = FLD_AREA_RESOURCE_REQUEST_LOAD_PENDING;
         return FLD_BATTLE_RETURN_AREA_LOAD_STARTED;
     }
     return FLD_BATTLE_RETURN_AREA_LOAD_NOT_REQUESTED;
@@ -1245,12 +1245,12 @@ s32 fldRequestAreaResource(s32 area, s32 room) {
     if (fldGlobalBase.area != area) {
         return 1;
     }
-    if (fldGlobalBase.resourceFlag == FLD_AREA_RESOURCE_REQUEST_LOAD_PENDING) {
+    if (fldGlobalBase.resourceRequestState == FLD_AREA_RESOURCE_REQUEST_LOAD_PENDING) {
         return 1;
     }
     if (fldGlobalBase.resourceArea == area &&
         fldGlobalBase.resourceFloor == room) {
-        fldGlobalBase.resourceFlag = FLD_AREA_RESOURCE_REQUEST_SATISFIED_FROM_CACHE;
+        fldGlobalBase.resourceRequestState = FLD_AREA_RESOURCE_REQUEST_SATISFIED_FROM_CACHE;
         return 1;
     }
     fldFreeNextFile();
@@ -1266,7 +1266,7 @@ s32 fldRequestAreaResource(s32 area, s32 room) {
     fldMakeFilePath(directory, area, 1);
     sprintf(path, D_004130D8, directory, area, room);
     pFldNextFileDataF2 = (FilePacRequest *)pacLoad(path);
-    fldGlobalBase.resourceFlag = FLD_AREA_RESOURCE_REQUEST_LOAD_PENDING;
+    fldGlobalBase.resourceRequestState = FLD_AREA_RESOURCE_REQUEST_LOAD_PENDING;
     return 1;
 }
 
@@ -1287,16 +1287,16 @@ void fldFreeNextFile(void) {
     fldPendingFloor = 0;
     fldGlobalBase.resourceArea = 0;
     fldGlobalBase.resourceFloor = 0;
-    fldGlobalBase.resourceFlag = FLD_AREA_RESOURCE_REQUEST_IDLE;
+    fldGlobalBase.resourceRequestState = FLD_AREA_RESOURCE_REQUEST_IDLE;
 }
 
 u32 fldPollAreaResourceLoad(void) {
-    FldAreaResourceRequestState resourceState = fldGlobalBase.resourceFlag;
+    FldAreaResourceRequestState resourceState = fldGlobalBase.resourceRequestState;
 
     if (resourceState != FLD_AREA_RESOURCE_REQUEST_IDLE) {
         if (resourceState == FLD_AREA_RESOURCE_REQUEST_LOAD_PENDING) {
             if (pacCheckEnd((struct FileRequest *)pFldNextFileDataF2) != 0) {
-                fldGlobalBase.resourceFlag = FLD_AREA_RESOURCE_REQUEST_IDLE;
+                fldGlobalBase.resourceRequestState = FLD_AREA_RESOURCE_REQUEST_IDLE;
                 D_00435BB4 = FLD_FILE_IO_PRIORITY_HIGH;
             }
         }
@@ -1324,7 +1324,7 @@ FldAreaResourceRequestReuseResult fldCanReuseAreaResourceRequest(s32 area, s32 r
     if (pFldNextFileDataF2 != 0 && pacCheckEnd((struct FileRequest *)pFldNextFileDataF2) != 0) {
         return FLD_AREA_RESOURCE_REQUEST_REUSABLE;
     }
-    return fldGlobalBase.resourceFlag != FLD_AREA_RESOURCE_REQUEST_IDLE
+    return fldGlobalBase.resourceRequestState != FLD_AREA_RESOURCE_REQUEST_IDLE
                ? FLD_AREA_RESOURCE_REQUEST_REUSABLE
                : FLD_AREA_RESOURCE_REQUEST_NOT_REUSABLE;
 }
