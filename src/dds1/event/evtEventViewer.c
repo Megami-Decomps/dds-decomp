@@ -25,6 +25,7 @@
 #include "sdf_resource.h"
 #include "evt_viewer.h"
 #include "evt_viewer_indexed_condition.h"
+#include "evt_viewer_object_slot_api.h"
 #include "evt_sound_variation.h"
 #include "evt_reload_viewer_api.h"
 #include "evt_reset_unit_vector_slots_api.h"
@@ -599,8 +600,8 @@ extern s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *obj, dds3Basic_t *first,
                                                dds3Basic_t *second, dds3Basic_t *third,
                                                dds3Basic_t *fourth);
 
-/* Create the viewer object for a command in the first free slot; returns the slot, or -1 when full. */
-s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtRuntimeGroup *track, EvtRuntimeChild *key, EvtRuntime *viewer) {
+/* Create the viewer object for a command in the first free slot, if available. */
+EvtViewerObjectSlotResult evtViewerCreateObjectInFreeSlot(s32 unused, EvtRuntimeGroup *track, EvtRuntimeChild *key, EvtRuntime *viewer) {
     f32 vec0[4];
     f32 vec1[4];
     dds3Basic_t *object = NULL;
@@ -618,7 +619,7 @@ s32 evtViewerCreateObjectInFreeSlot(s32 unused, EvtRuntimeGroup *track, EvtRunti
         }
     }
     if (slot == 0x7F) {
-        return -1;
+        return EVT_VIEWER_OBJECT_SLOT_NOT_FOUND;
     }
     switch (track->type) {
     case 3:
@@ -820,7 +821,6 @@ void evtViewerApplySelectedEntry(EvtRuntime *viewer) {
     dds3SetScreenFovy(dds3CameraObjectBasicGetFovy(selectedEntry));
 }
 
-extern s32 evtViewerCreateObjectInFreeSlot(s32, EvtRuntimeGroup *, EvtRuntimeChild *, EvtRuntime *);
 extern dds3Basic_t *evtEventViewerGetNameObject(EvtViewerNameIndex, EvtRuntime *);
 extern s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *, dds3Basic_t *, dds3Basic_t *, dds3Basic_t *, dds3Basic_t *);
 extern dds3Basic_t *evtEventViewerCreateOriginEffect(struct SoundMixer *, u32, EvtViewerNameIndex, s32, u32, EvtRuntime *);
