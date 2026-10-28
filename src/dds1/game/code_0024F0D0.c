@@ -3416,7 +3416,7 @@ void mnuDrawSelectedMantraEntry(MenuSceneWork *object, s32 alpha, s32 context) {
 
     if (entry != NULL) {
         if (object->entryMessageInProgress == 0) {
-            if (entry->state != 3) {
+            if (entry->state != MNU_MANTRA_GRID_ENTRY_FIRST_PATH_REJECTED) {
                 if (entry->profileFlag != 0) {
                     mnuDrawMantraCostPlaceholder(0, 0, 1, alpha, entry->sceneId, context);
                 } else {
@@ -3472,7 +3472,7 @@ void mnuDrawMantraGridPulseEntry(s32 x, s32 y, s32 z, MenuSceneWork *work, s32 a
     entry = (MnuMantraGridEntry *)(u32)work->gridHandle->cursor->value;
     if (entry != NULL) {
         if (work->entryMessageInProgress == 0) {
-            if (entry->state != 3) {
+            if (entry->state != MNU_MANTRA_GRID_ENTRY_FIRST_PATH_REJECTED) {
                 if (entry->profileFlag != 0) {
                     mnuDrawMantraCostPlaceholder(x, y, z, alpha, entry->sceneId, surface);
                 } else {
@@ -3839,10 +3839,10 @@ u32 mnuGetMantraPrerequisiteFlags(s32 direction, MnuMantraGridEntry *scene, MnuM
     if (prfGetCapValue(scene->sceneId) == ptyGetProfileRecordValue(target->partyRecord, scene->sceneId)) {
         flags = 0x101;
     }
-    if (states[record->ids[direction]].state == 1) {
+    if (states[record->ids[direction]].state == MNU_MANTRA_GRID_ENTRY_SECOND_CHECK_OR_PROFILE_FLAG) {
         flags |= 0x12;
     }
-    if (states[record->ids[direction]].state == 2) {
+    if (states[record->ids[direction]].state == MNU_MANTRA_GRID_ENTRY_FIRST_CHECK_OR_SPECIAL_PROFILE) {
         flags |= 0x10;
     }
     if (prfGetCapValue((u16)record->ids[direction]) ==

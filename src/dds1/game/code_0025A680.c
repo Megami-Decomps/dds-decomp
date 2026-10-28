@@ -64,7 +64,7 @@ void mnuDrawMantraEntryStatus(s32 x, s32 y, s32 depth, SdfGrid *grid,
     memset(prerequisiteFlags, 0, sizeof(prerequisiteFlags));
     if (record->kind == 0) {
         for (i = 0; i < 4 && record->ids[i] != 0; i++) {
-            if (states[record->ids[i]].state != 0) {
+            if (states[record->ids[i]].state != MNU_MANTRA_GRID_ENTRY_ABSENT) {
                 prerequisiteFlags[i] = mnuGetMantraPrerequisiteFlags(i, scene, states, selection);
             }
         }
@@ -294,7 +294,7 @@ void mnuDrawScaledMantraGraphCell(s32 x, s32 y, s32 z, SdfGrid *grid, SdfGridCel
     memset(prerequisiteFlags, 0, sizeof(prerequisiteFlags));
     if (record->kind == 0) {
         for (i = 0; i < 4 && record->ids[i] != 0; i++) {
-            if (states[record->ids[i]].state != 0) {
+            if (states[record->ids[i]].state != MNU_MANTRA_GRID_ENTRY_ABSENT) {
                 prerequisiteFlags[i] = mnuGetMantraPrerequisiteFlags(i, scene, states, selection);
             }
         }

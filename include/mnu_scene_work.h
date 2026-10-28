@@ -4,6 +4,9 @@
 #include "common.h"
 #include "sdf_grid.h"
 #include "mnu_scene_list.h"
+#ifndef VERSION_DDS2
+#include "mnu_mantra_grid_entry_state.h"
+#endif
 
 typedef struct MenuScenePoint {
     s16 x;
@@ -43,7 +46,11 @@ typedef struct MnuMantraNodeState {
     s16 y;
     s16 xRemainder;
     s16 yRemainder;
+#ifndef VERSION_DDS2
+    MnuMantraGridEntryState state;
+#else
     s32 state;
+#endif
 } MnuMantraNodeState;
 
 typedef char MnuMantraNodeStateLayoutAssert[

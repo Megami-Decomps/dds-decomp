@@ -384,7 +384,7 @@ void mnuDrawMantraProfileGridEntry(s32 x, s32 y, s32 depth, s32 alpha,
     i = 0;
     if (record->ids[i] != 0) {
         do {
-            if (states[record->ids[i]].state != 0) {
+            if (states[record->ids[i]].state != MNU_MANTRA_GRID_ENTRY_ABSENT) {
                 prerequisiteFlags[i] = mnuGetMantraPrerequisiteFlags(i, scene,
                                                                    states, profileOwner);
                 prerequisiteIds[i] = record->ids[i];

@@ -4,6 +4,7 @@
 #include "dat_state.h"
 
 #ifndef VERSION_DDS2
+#include "mnu_mantra_grid_entry_state.h"
 
 /* Result bits shared by the mantra-entry flag producer and its draw/update readers. */
 enum MnuMantraDisplayFlag {
@@ -32,13 +33,6 @@ typedef struct MnuMantraGridPulse {
     MnuMantraGridPulseMode mode;
 } MnuMantraGridPulse;
 
-/* Branch outcomes produced by the two profile checks and the profile-0x4E exception. */
-enum MnuMantraGridEntryState {
-    MNU_MANTRA_GRID_ENTRY_SECOND_CHECK_OR_PROFILE_FLAG = 1,
-    MNU_MANTRA_GRID_ENTRY_FIRST_CHECK_OR_SPECIAL_PROFILE = 2,
-    MNU_MANTRA_GRID_ENTRY_FIRST_PATH_REJECTED = 3,
-};
-
 /* The profile-selection grid allocates and passes this 0x58-byte entry to
  * the mantra display and pulse callbacks. */
 typedef struct MnuMantraGridEntry {
@@ -48,7 +42,7 @@ typedef struct MnuMantraGridEntry {
     u16 sceneId;
     u16 requiredLevel;
     u32 backgroundColorIndex;
-    enum MnuMantraGridEntryState state;
+    MnuMantraGridEntryState state;
     PrfSkillList skills;
     MnuMantraGridPulse pulse;
     s8 profileFlag;
