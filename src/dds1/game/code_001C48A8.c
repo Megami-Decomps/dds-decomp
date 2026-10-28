@@ -1192,7 +1192,7 @@ const char D_003A3550[] __attribute__((aligned(8))) = "btl:end [BTL_END_COMPULSO
 extern s8 dds3PadButtonState[];
 extern s32 btlCountRegisteredTasks(void);
 extern s32 btlReleaseScriptResourceB(void);
-extern s32 mnuPollTitleStreamStateLocked(void);
+#include "mnu_title_stream.h"
 extern s32 sndIsCommandBusySigned(void);
 extern s32 sndLoadAndPlayStationedSe(u32 soundId);
 extern void btlClearModelFlagRange(void);
@@ -1218,7 +1218,7 @@ s32 btlUpdateBattleEnd(BtlState *scene) {
         scene->endFlags |= 1;
     } else if (scene->terminalOutcome == BTL_TERMINAL_OUTCOME_LOSS && !(scene->endFlags & 4) && scene->scenePhaseFrame >= 75) {
         if (scene->scenePhaseFrame == 75) {
-            if (mnuPollTitleStreamStateLocked()) mnuResetTitleStreamLocked();
+            if (mnuPollTitleStreamStateLocked() != MNU_STREAM_LOAD_IDLE) mnuResetTitleStreamLocked();
             mnuQueueTitleSoundStreamEntry(0x15);
         } else if (sndIsStreamStatusTwoOrThree()) {
             btlResetTitleStreamOnBattleFlag();
