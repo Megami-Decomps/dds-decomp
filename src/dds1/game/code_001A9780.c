@@ -32,7 +32,6 @@ extern u32 btlNextScaledRandom(u32 limit);
 extern u16 btlRefreshUnitMaximumHpAndClampCurrentHp(struct datUnitWork_t *entryAddress);
 extern u16 btlRefreshUnitMaximumMpAndClampCurrentMp(struct datUnitWork_t *entryAddress);
 extern void evtCopyEntryStringToActiveWindow(s32 slotIndex, const char *sourceText);
-extern s32 fldGetSceneObjectState(void);
 extern void itfMesMngRequestMessageRelease(s32 window, s32 releasePrimaryBlock);
 /* Original-style implicit int, kept: matched code depends on it: btlCountEligibleLinkedActors. */
 
@@ -4605,7 +4604,6 @@ void btlCreateMessageWindow(void) {
 INCLUDE_ASM(const s32, "game/code_001A9780", btlDrawWindowHelpLine);
 
 extern const BattlePanelColors D_003A2AF0;
-extern s32 fldGetSceneObjectState(void);
 extern s32 btlGetActorCommandClass(BattleSceneObject *,s8);
 extern u32 btlGetCommandOptionCount(s32,s8,s8);
 extern u16 *btlGatherActorCommandsByKind(s32,s16 *,u16,u16,u16);
@@ -8676,7 +8674,7 @@ BattleSceneObject *btlGetCommandPanelTaskWork(void) {
     return (BattleSceneObject *)dds3GetProcessData(task);
 }
 
-s32 fldGetSceneObjectState(void) {
+BattleCommandSceneState fldGetSceneObjectState(void) {
     dds3ProcessID_t *temp_v0;
 
     temp_v0 = dds3SearchProcessName(btlCommandPanelTaskNameRef);

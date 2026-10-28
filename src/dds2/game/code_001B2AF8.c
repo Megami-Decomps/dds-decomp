@@ -1890,7 +1890,6 @@ void btlGetActorClassPair(s8 classId, u32 *first, u32 *second) {
     *second = pairs[classId * 2 + 1];
 }
 
-extern s32 fldGetSceneObjectState(void);
 extern u32 fldUpdateSceneKindCounter(s32, s8, s8);
 extern u32 btlGetActorCommandClass(BattleSceneObject *, s8);
 extern void sndSetStationedSeVolume(u32);
@@ -5538,7 +5537,6 @@ INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004165C0);
 INCLUDE_ASM(const s32, "game/code_001B2AF8", btlDrawWindowHelpLine);
 
 extern const BattlePanelColors D_00416620;
-extern s32 fldGetSceneObjectState(void);
 extern u32 btlGetActorCommandClass(BattleSceneObject *,s8);
 extern u32 fldUpdateSceneKindCounter(s32,s8,s8);
 extern u16 *btlGatherActorCommandsByKind(s32,s16 *,u16,u16,u16);
@@ -10104,7 +10102,7 @@ BattleSceneObject *btlGetCommandPanelTaskWork(void) {
     return (BattleSceneObject *)dds3GetProcessData(task);
 }
 
-s32 fldGetSceneObjectState(void) {
+BattleCommandSceneState fldGetSceneObjectState(void) {
     dds3ProcessID_t *task = dds3SearchProcessName(btlCommandPanelTaskNameRef);
     if (task == NULL) {
         return 0;

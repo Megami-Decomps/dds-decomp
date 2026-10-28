@@ -78,6 +78,9 @@ s32 fldSelectSceneMode(struct ActionStateLink *task);
 void btlOpenBattleCommandPanel(struct ActionStateLink *task);
 #endif
 
+/* Return the command-panel state, or zero when its process is absent. */
+BattleCommandSceneState fldGetSceneObjectState(void);
+
 /* One allocated 0xCC-byte command panel, not a header plus overlapping rows.
  * Rows begin at +0x14/+0x64; the class Y coordinate occupies +0x10. */
 enum {

@@ -599,8 +599,6 @@ void btlEnterCommandSelectionState(BtlTask *task) {
     btlOpenBattleCommandPanel(task);
 }
 
-extern s32 fldGetSceneObjectState(void);
-
 extern void btlRequestCommandPanelClose(void);
 
 /* Poll command-panel selection and dispatch the selected action state. */
