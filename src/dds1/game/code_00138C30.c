@@ -44,7 +44,7 @@
 #include "fld_camera_follow_row.h"
 #include "fld_event_display_resource_api.h"
 #include "fld.h"
-#include "fld_encounter_runtime_api.h"
+#include "evt_encounter_request_api.h"
 #include "fld_collision_geometry.h"
 #include "fld_scene_request.h"
 #include "fld_spawn_event.h"
@@ -122,7 +122,6 @@ extern void fldSetFlagBit(s32 area, s32 floor, s32 bit);
 extern void datAddCurrencyClamped(s32 delta);
 extern void scrDestroyAllNamedProcesses(void);
 extern void fldSetDeferredFieldCommand(u32 command, u32 parameter);
-extern void evtSubmitEventRequestImmediate(s32 eventId);
 
 struct dds3Basic_t;
 

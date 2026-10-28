@@ -1,6 +1,6 @@
 #include "sdk_ps2.h"
 #include "fld_area_work.h"
-#include "fld_encounter_runtime_api.h"
+#include "evt_encounter_request_api.h"
 #include "fld.h"
 #include "scr_integer_return_value_api.h"
 #include "common.h"
@@ -27,7 +27,6 @@
 #include "evt_world.h"
 #include "evt_path_direction.h"
 #include "evt_event_pack.h"
-#include "evt_script_event_id.h"
 #include "scr.h"
 #include "scr_command_result.h"
 #include "scr_command_timer_api.h"
@@ -64,13 +63,9 @@ void dds3AdminiCallSequence(s32 command, const void *payload, u32 payloadSize, s
 
 void scrDestroyAllNamedProcesses(void);
 
-void evtSubmitEventRequest(s32 eventId, EvtScriptEventId followupEventId);
-
 void fldBgmStop(void);
 
 
-
-void evtSubmitEventRequestImmediate(s32 eventId);
 
 void fldPauseBgm(void);
 
@@ -401,61 +396,60 @@ ScrCommandResult evtCommandSignalAdminAtTimerZero(void) {
 }
 
 /* Queue the encounter and retain a positive follow-up event ID for dispatch. */
-void evtSubmitEventRequest(s32 eventId, EvtScriptEventId followupEventId)
+void evtSubmitEventRequest(FldBattleSceneRecordIndex sceneRecordIndex,
+                           EvtScriptEventId followupEventId)
 {
     s32 payload[2];
 
     fldBgmStop();
-    fldRequestEncounterWithFade(FLD_ENCOUNTER_MODE_SCRIPT_EVENT,
-                                (FldBattleSceneRecordIndex)eventId);
+    fldRequestEncounterWithFade(FLD_ENCOUNTER_MODE_SCRIPT_EVENT, sceneRecordIndex);
     evtPendingEventSelection = followupEventId;
     payload[0] = 0;
-    payload[1] = eventId;
+    payload[1] = sceneRecordIndex;
     dds3AdminiCallSequence(0xe, payload, EVT_PAIRED_REQUEST_SIZE, followupEventId > 0);
     scrDestroyAllNamedProcesses();
 }
 
 s32 evtCommandSubmitEvent(void)
 {
-    s32 eventId;
+    FldBattleSceneRecordIndex sceneRecordIndex;
 
-    eventId = scrGetIntPara(0);
-    evtSubmitEventRequest(eventId, 0);
+    sceneRecordIndex = scrGetIntPara(0);
+    evtSubmitEventRequest(sceneRecordIndex, 0);
     return 1;
 }
 
 /* Stop BGM and submit the event payload with immediate dispatch enabled. */
-void evtSubmitEventRequestImmediate(s32 eventId)
+void evtSubmitEventRequestImmediate(FldBattleSceneRecordIndex sceneRecordIndex)
 {
     s32 payload[2];
 
     fldPauseBgm();
-    fldRequestEncounterWithFade(FLD_ENCOUNTER_MODE_SCRIPT_EVENT,
-                                (FldBattleSceneRecordIndex)eventId);
+    fldRequestEncounterWithFade(FLD_ENCOUNTER_MODE_SCRIPT_EVENT, sceneRecordIndex);
     evtPendingEventSelection = 0;
     payload[0] = 0;
-    payload[1] = eventId;
+    payload[1] = sceneRecordIndex;
     dds3AdminiCallSequence(0xe, payload, EVT_PAIRED_REQUEST_SIZE, 1);
     scrDestroyAllNamedProcesses();
 }
 
 s32 evtCommand_CALL_BATTLE2(void)
 {
-    s32 eventId;
+    FldBattleSceneRecordIndex sceneRecordIndex;
 
-    eventId = scrGetIntPara(0);
-    evtSubmitEventRequestImmediate(eventId);
+    sceneRecordIndex = scrGetIntPara(0);
+    evtSubmitEventRequestImmediate(sceneRecordIndex);
     return 1;
 }
 
 s32 evtCommand_RESTORE_BATTLE(void)
 {
-    s32 eventId;
+    FldBattleSceneRecordIndex sceneRecordIndex;
     EvtScriptEventId followupEventId;
 
-    eventId = scrGetIntPara(0);
+    sceneRecordIndex = scrGetIntPara(0);
     followupEventId = scrGetIntPara(1);
-    evtSubmitEventRequest(eventId, followupEventId);
+    evtSubmitEventRequest(sceneRecordIndex, followupEventId);
     return 1;
 }
 

@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "fld_area_work.h"
+#include "evt_encounter_request_api.h"
 #include "fld_actor_motion_step_result_api.h"
 #include "fld_camp_check_state_api.h"
 #include "fld_scene_transition_gate_api.h"
@@ -59,7 +60,6 @@ extern struct dds3Basic_t *fldPlayerObject;
 extern s32 D_003897C0[];
 extern void datAddCurrencyClamped(s32 delta);
 extern void scrDestroyAllNamedProcesses(void);
-extern void evtSubmitEventRequestImmediate(s32 eventId);
 extern dds3Basic_t *fldCamNowEveCamera(void);
 extern void fldShowSceneModels(void);
 extern void fldHideSceneModelsAndResetCamera(void);

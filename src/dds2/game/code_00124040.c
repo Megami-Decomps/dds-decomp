@@ -43,7 +43,7 @@
 #include "fld.h"
 #include "fld_scene_sequence_api.h"
 #include "evt_world.h"
-#include "evt_script_event_id.h"
+#include "evt_encounter_request_api.h"
 #include "evt_solar.h"
 #include "evt_random_status_clear_api.h"
 #include "evt_world_source_transform.h"
@@ -81,8 +81,6 @@ extern dds3Basic_t *dds3AddCameraObjectBasicTypeLookAt(s32 key, u128 *targetPosi
 /* Field travel and encounter providers. Integer/FPU argument classes have
  * independent register sequences; the field-controller call establishes
  * step-before-index, and all callers are verified. */
-extern void evtSubmitEventRequest(s32 eventId, EvtScriptEventId followupEventId);
-extern void evtSubmitEventRequestImmediate(s32);
 #include "dds3_world_primary.h"
 extern void fldUpdateCameraHeadingTransition(void);
 extern u8 fldAutoMapSeqTestFlag(u32);

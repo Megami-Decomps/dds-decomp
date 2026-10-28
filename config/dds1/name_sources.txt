@@ -5130,9 +5130,9 @@
 0x00226730	evtCommand_CALL_NEXT	inferred	SMT3HD name via SLUS_209.11 0x001E7098, reloc-identical; was evtCommandDeferFieldTransition
 0x002267B0	evtCommand_CALL_EVENT	inferred	SMT3HD name via SLUS_209.11 0x001E7118, unique-masked-hash; was evtCommandCallEvent
 0x00226800	evtCommandSignalAdminAtTimerZero	inferred	Signals administrative flag when script command timer equals zero. [names_reviewed6.tsv]
-0x00226830	evtSubmitEventRequest	inferred	Submits request type 0xE for an event ID, preserving the supplied mode in D_003BBDA8.
-0x00226898	evtCommandSubmitEvent	inferred	Reads the script event identifier and submits the ordinary event request.
-0x002268C8	evtSubmitEventRequestImmediate	inferred	Submits request type 0xE for an event ID with immediate mode and zeroes D_003BBDA8.
+0x00226830	evtSubmitEventRequest	inferred	Submits request type 0xE for a battle-scene record index, preserving the supplied mode in D_003BBDA8.
+0x00226898	evtCommandSubmitEvent	inferred	Reads the script battle-scene record index and submits the ordinary encounter request.
+0x002268C8	evtSubmitEventRequestImmediate	inferred	Submits request type 0xE for a battle-scene record index with immediate mode and zeroes D_003BBDA8.
 0x00226920	evtCommand_CALL_BATTLE2	inferred	SMT3HD name via SLUS_209.11 0x001E7290, shared-hash-in-run; was evtCommandSubmitEventImmediate
 0x00226948	evtCommand_RESTORE_BATTLE	inferred	SMT3HD name via SLUS_209.11 0x001E72B8, shared-hash-in-run; was evtCommandSubmitEventWithMode
 0x00226988	evtCommand_CALL_FIELD	inferred	SMT3HD name via SLUS_209.11 0x001E72F8, unique-masked-hash; was evtCommandRequestFieldSequence
