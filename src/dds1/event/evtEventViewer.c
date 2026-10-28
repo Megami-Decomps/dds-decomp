@@ -1532,8 +1532,8 @@ extern s32 evtHokanInt(s32 enable, f32 t, s32 a, s32 b);
  * unit's byte and float parameters from the active kind-3/4 key to the next
  * enabled key of the same kind. */
 void evtViewApplyMovieModeKeys(EvtRuntimeGroup *track, s32 time) {
-    u32 objectMode = 0;
-    u32 unitMode = 2;
+    EvtPolygonMovieObjectMode objectMode = EVT_POLYGON_MOVIE_MODE_TRANSFORMS_ENABLED;
+    EvtPolygonMovieObjectMode unitMode = EVT_POLYGON_MOVIE_MODE_UNIT_DEFAULT_FLAGS_OFF;
     s32 pass;
     u32 setFlags = 0;
     u32 clearFlags = 0;

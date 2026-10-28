@@ -144,11 +144,22 @@ typedef char PolyMovieWork_task_at_0x108[((u32)&((PolyMovieWork *)0)->task == 0x
 typedef char PolyMovieWork_eventId_at_0x10C[((u32)&((PolyMovieWork *)0)->eventId == 0x10C) ? 1 : -1];
 typedef char PolyMovieState_clip_at_0x4[((u32)&((PolyMovieState *)0)->clip == 0x4) ? 1 : -1];
 
+/* Serialized mode values select transform behavior (0-1) or unit flags (2-4). */
+typedef u32 EvtPolygonMovieObjectMode;
+enum {
+    EVT_POLYGON_MOVIE_MODE_TRANSFORMS_ENABLED = 0,
+    EVT_POLYGON_MOVIE_MODE_TRANSFORMS_SKIPPED = 1,
+    EVT_POLYGON_MOVIE_MODE_UNIT_DEFAULT_FLAGS_OFF = 2,
+    EVT_POLYGON_MOVIE_MODE_UNIT_400_ON_200_OFF = 3,
+    EVT_POLYGON_MOVIE_MODE_UNIT_400_OFF_200_ON = 4
+};
+
 PolyMovieWork *InitPolygonMovieWorkData(void);
 PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *, PmdHeader *, PmdHeader *, PmdHeader *);
 sdfMemHandle_t *evtAllocMovieWork(PmdHeader **out);
 sdfMemHandle_t *evtPolygonMovieSynthesizePmd3Header(PmdHeader **out);
-void evtPolygonMovieSetObjectMode(struct dds3Basic_t *obj, u32 mode, u32 setFlags, u32 clearFlags);
+void evtPolygonMovieSetObjectMode(struct dds3Basic_t *obj, EvtPolygonMovieObjectMode mode,
+                                  u32 setFlags, u32 clearFlags);
 s32 evtStopMover(struct dds3Basic_t *movie, s32 undo, s32 start, s32 end);
 
 #ifdef VERSION_DDS1

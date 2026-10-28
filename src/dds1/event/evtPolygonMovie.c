@@ -440,15 +440,8 @@ void evtBlendParamsH(s32 enable, f32 t, const EvtBlendKey *a, const EvtBlendKey 
     }
 }
 
-enum {
-    EVT_POLYGON_MOVIE_MODE_TRANSFORMS_ENABLED = 0,
-    EVT_POLYGON_MOVIE_MODE_TRANSFORMS_SKIPPED = 1,
-    EVT_POLYGON_MOVIE_MODE_UNIT_DEFAULT_FLAGS_OFF = 2,
-    EVT_POLYGON_MOVIE_MODE_UNIT_400_ON_200_OFF = 3,
-    EVT_POLYGON_MOVIE_MODE_UNIT_400_OFF_200_ON = 4,
-};
-
-void evtPolygonMovieSetObjectMode(dds3Basic_t *obj, u32 mode, u32 setFlags, u32 clearFlags)
+void evtPolygonMovieSetObjectMode(dds3Basic_t *obj, EvtPolygonMovieObjectMode mode,
+                                  u32 setFlags, u32 clearFlags)
 {
     switch (mode) {
     case EVT_POLYGON_MOVIE_MODE_TRANSFORMS_ENABLED:
