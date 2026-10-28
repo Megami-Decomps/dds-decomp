@@ -836,7 +836,8 @@ void btlAverageFilteredActorAttribute(
     btlSumOrAverageActorAttribute(partyRecordFlagsMask, baseStatIndex, 1);
 }
 
-s32 btlAverageActorAttribute(u32 partyRecordFlagsMask, DatBaseStatIndex baseStatIndex) {
+s32 btlAverageActorAttribute(
+    BtlPartyRecordFlagsMask partyRecordFlagsMask, DatBaseStatIndex baseStatIndex) {
     return btlSumOrAverageActorAttribute(partyRecordFlagsMask, baseStatIndex, 0);
 }
 
