@@ -35,7 +35,8 @@ extern BfFlw0Header *D_00435E80;
 
 
 extern void dds3WorkInit(const BfFlw0Header *header);
-extern s32 sdfDispatchPrimaryUnitScript(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode);
+extern s32 sdfDispatchPrimaryUnitScript(u32 unitIndex, datUnitWork_t *sourceRecord,
+    datUnitWork_t *targetRecord, u8 mode);
 extern char sdfRuntimeTaskName[]; /* "GBWK" */
 extern void sdfRuntimeTaskTeardownHook(void);
 
@@ -517,62 +518,77 @@ s32 ptyComputeMaxMp(datUnitWork_t *unit) {
 }
 
 
-s32 sdfDispatchPrimaryUnitScript(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
+s32 sdfDispatchPrimaryUnitScript(u32 unitIndex, datUnitWork_t *sourceRecord,
+    datUnitWork_t *targetRecord, u8 mode) {
     s32 result;
     u8 flags;
 
     if (datCommandSelectors[unitIndex].kind == 5) {
-        result = evtRunContext(0x19, scriptArg, contextArg, unitIndex, mode);
+        result = evtRunContextWithArguments(0x19, evtScriptArgumentFromPointer(sourceRecord),
+            evtScriptArgumentFromPointer(targetRecord), unitIndex, mode);
     } else {
         flags = datCommandRecords[unitIndex].flags;
         if (flags & 0x40) {
             if (unitIndex != 0x1E0) {
-                result = evtRunContext(0x1F, scriptArg, contextArg, unitIndex, mode);
+                result = evtRunContextWithArguments(0x1F, evtScriptArgumentFromPointer(sourceRecord),
+                    evtScriptArgumentFromPointer(targetRecord), unitIndex, mode);
             } else {
-                result = evtRunContext(0x1C, scriptArg, contextArg, 0x1E0, mode);
+                result = evtRunContextWithArguments(0x1C, evtScriptArgumentFromPointer(sourceRecord),
+                    evtScriptArgumentFromPointer(targetRecord), 0x1E0, mode);
             }
         } else if (flags & 0x80) {
-            result = evtRunContext(0x1D, scriptArg, contextArg, unitIndex, mode);
+            result = evtRunContextWithArguments(0x1D, evtScriptArgumentFromPointer(sourceRecord),
+                evtScriptArgumentFromPointer(targetRecord), unitIndex, mode);
         } else {
-            result = evtRunContext(5, scriptArg, contextArg, unitIndex, mode);
+            result = evtRunContextWithArguments(5, evtScriptArgumentFromPointer(sourceRecord),
+                evtScriptArgumentFromPointer(targetRecord), unitIndex, mode);
         }
     }
     return result;
 }
 
-s32 sdfDispatchCmd(u32 unitIndex, u32 scriptArg, u32 contextArg, u32 mode) {
-    return sdfDispatchPrimaryUnitScript(unitIndex, scriptArg, contextArg, (u8)mode);
+s32 sdfDispatchCmd(u32 unitIndex, datUnitWork_t *sourceRecord,
+    datUnitWork_t *targetRecord, u32 mode) {
+    return sdfDispatchPrimaryUnitScript(unitIndex, sourceRecord, targetRecord, (u8)mode);
 }
 
-s32 sdfDispatchUnitScriptDefault9(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
+s32 sdfDispatchUnitScriptDefault9(u32 unitIndex, datUnitWork_t *sourceRecord,
+    datUnitWork_t *targetRecord, u8 mode) {
     s32 result;
     u8 flags;
 
     if (datCommandSelectors[unitIndex].kind == 5) {
-        result = evtRunContext(0x19, scriptArg, contextArg, unitIndex, mode);
+        result = evtRunContextWithArguments(0x19, evtScriptArgumentFromPointer(sourceRecord),
+            evtScriptArgumentFromPointer(targetRecord), unitIndex, mode);
     } else {
         flags = datCommandRecords[unitIndex].flags;
         if (flags & 0x40) {
-            result = evtRunContext(0x1C, scriptArg, contextArg, unitIndex, mode);
+            result = evtRunContextWithArguments(0x1C, evtScriptArgumentFromPointer(sourceRecord),
+                evtScriptArgumentFromPointer(targetRecord), unitIndex, mode);
         } else if (flags & 0x80) {
-            result = evtRunContext(0x1D, scriptArg, contextArg, unitIndex, mode);
+            result = evtRunContextWithArguments(0x1D, evtScriptArgumentFromPointer(sourceRecord),
+                evtScriptArgumentFromPointer(targetRecord), unitIndex, mode);
         } else {
-            result = evtRunContext(9, scriptArg, contextArg, unitIndex, mode);
+            result = evtRunContextWithArguments(9, evtScriptArgumentFromPointer(sourceRecord),
+                evtScriptArgumentFromPointer(targetRecord), unitIndex, mode);
         }
     }
     return result;
 }
 
-s32 evtRunCommandContext10(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
-    return evtRunContext(10, scriptArg, contextArg, unitIndex, mode);
+s32 evtRunCommandContext10(u32 unitIndex, datUnitWork_t *sourceRecord,
+    datUnitWork_t *targetRecord, u8 mode) {
+    return evtRunContext(10, (s32)sourceRecord, (s32)targetRecord, unitIndex, mode);
 }
 
-s32 evtRunCommandContext7(u32 unitIndex, u32 scriptArg, u32 contextArg, u8 mode) {
-    return evtRunContext(7, scriptArg, contextArg, unitIndex, mode);
+s32 evtRunCommandContext7(u32 unitIndex, datUnitWork_t *sourceRecord,
+    datUnitWork_t *targetRecord, u8 mode) {
+    return evtRunContext(7, (s32)sourceRecord, (s32)targetRecord, unitIndex, mode);
 }
 
-s32 sdfDispatchSubCmd(u32 unitIndex, u32 scriptArg, u32 contextArg, u32 mode) {
-    return evtRunCommandContext7(unitIndex, scriptArg, contextArg, (u8)mode);
+s32 sdfDispatchSubCmd(u32 unitIndex, datUnitWork_t *sourceRecord,
+    datUnitWork_t *targetRecord, u32 mode) {
+    return evtRunCommandContext7(unitIndex, sourceRecord, targetRecord, (u8)mode);
 }
 
 
@@ -654,10 +670,10 @@ s32 sdfCalculateCommandVitalDelta(s32 channel, datUnitWork_t *sourceRecord, datU
     case 2:
         switch (datCommandRecords[channel].effectType) {
         case 0:
-            healing = sdfDispatchCmd(channel, (u32)sourceRecord, (u32)item, vital);
+            healing = sdfDispatchCmd(channel, sourceRecord, item, vital);
             break;
         case 1:
-            healing = evtRunCommandContext10(channel, (u32)sourceRecord, (u32)item, vital);
+            healing = evtRunCommandContext10(channel, sourceRecord, item, vital);
             break;
         }
         healing += base;
@@ -666,7 +682,7 @@ s32 sdfCalculateCommandVitalDelta(s32 channel, datUnitWork_t *sourceRecord, datU
         }
         break;
     case 7:
-        healing = sdfDispatchSubCmd(channel, (u32)sourceRecord, (u32)item, vital) + base;
+        healing = sdfDispatchSubCmd(channel, sourceRecord, item, vital) + base;
         if (healing == 0) {
             healing = 1;
         }
@@ -698,10 +714,10 @@ s32 sdfCalculateCommandVitalDelta(s32 channel, datUnitWork_t *sourceRecord, datU
     case 16:
         switch (datCommandRecords[channel].effectType) {
         case 0:
-            damage = sdfDispatchPrimaryUnitScript(channel, (u32)sourceRecord, (u32)item, vital);
+            damage = sdfDispatchPrimaryUnitScript(channel, sourceRecord, item, vital);
             break;
         case 1:
-            damage = sdfDispatchUnitScriptDefault9(channel, (u32)sourceRecord, (u32)item, vital);
+            damage = sdfDispatchUnitScriptDefault9(channel, sourceRecord, item, vital);
             break;
         }
         damage += base;
@@ -723,7 +739,7 @@ s32 sdfCalculateCommandVitalDelta(s32 channel, datUnitWork_t *sourceRecord, datU
         }
         break;
     case 6:
-        damage = evtRunCommandContext7(channel, (u32)sourceRecord, (u32)item, vital) + base;
+        damage = evtRunCommandContext7(channel, sourceRecord, item, vital) + base;
         if (damage == 0) {
             damage = 1;
         }
@@ -813,7 +829,8 @@ u32 sdfRollActionHit(s32 channel, datUnitWork_t *sourceRecord, datUnitWork_t *pa
     }
     hit = 1;
     if (datCommandRecords[channel].attribute.parts.hitChance < 100) {
-        scaled = evtRunContext(0xC, (s32)sourceRecord, packed, channel, mask) * ((f32)ratio / 100.0f);
+        scaled = evtRunContextWithArguments(0xC, evtScriptArgumentFromPointer(sourceRecord),
+            evtScriptArgumentFromPointer(packed), channel, mask) * ((f32)ratio / 100.0f);
         printf(D_00412B08, scaled, ratio, mask);
         roll = dds3GetRandIntA(0, 100);
         hit = roll < scaled;

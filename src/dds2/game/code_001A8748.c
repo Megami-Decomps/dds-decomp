@@ -3565,7 +3565,8 @@ BtlActionPressResult btlDetermineActionPressResult(BtlUnit *attacker, BtlUnit *d
             return BTL_ACTION_PRESS_RESULT_CRITICAL;
         }
         if (critical == 0) {
-            critical = evtRunContext(4, (s32)&attacker->partyRecord, (s32)&defender->partyRecord, command, 0);
+            critical = evtRunContextWithArguments(4, evtScriptArgumentFromPointer(&attacker->partyRecord),
+                evtScriptArgumentFromPointer(&defender->partyRecord), command, 0);
         }
         if (evtBitCheck(0x80E) && (attacker->status.flags & 0x400) && (defender->status.flags & 0x200)) {
             scale *= datBattleParameters->criticalScale;

@@ -260,7 +260,8 @@ s32 btlTryEscapeWithPhaseAdjustment(BtlUnit *actor) {
         return 1;
     }
     record = &actor->partyRecord;
-    chance = evtRunContext(0x15, (s32)record, 0, 0, 0);
+    chance = evtRunContextWithArguments(0x15, evtScriptArgumentFromPointer(record),
+        evtScriptArgumentFromBits(0), 0, 0);
     ratio = 1.0f;
     if (btlCheckSpecialAbility(record, 0x250)) {
         ratio = datAbilityParameters[0x250 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
@@ -840,7 +841,8 @@ s32 btlCalculateMoneyDropAmount(BtlUnit *actor) {
     s32 money;
     f32 ratio;
 
-    money = evtRunContext(0x1E, (s32)record, (s32)record, 0, 0);
+    money = evtRunContextWithArguments(0x1E, evtScriptArgumentFromPointer(record),
+        evtScriptArgumentFromPointer(record), 0, 0);
     ratio = 1.0f;
     if (btlCheckSpecialAbility(record, 0x27C)) {
         ratio = datAbilityParameters[0x27C - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
@@ -880,7 +882,8 @@ s32 btlSelectPreemptiveOutcome(void) {
         return 2;
     }
     ratio = 1.0f;
-    chance = evtRunContext(0x17, 0, 0, 0, 0);
+    chance = evtRunContextWithArguments(0x17, evtScriptArgumentFromBits(0),
+        evtScriptArgumentFromBits(0), 0, 0);
     if (state->encounterKind == 3) {
         ratio = datBattleParameters->preemptiveModeScale;
     }
@@ -1199,7 +1202,8 @@ s32 btlRollPetrifiedDeathChance(BtlUnit *unit, s32 command) {
         return 0;
     }
     record = &unit->partyRecord;
-    chance = evtRunContext(0x13, (s32)record, 0, command, 0);
+    chance = evtRunContextWithArguments(0x13, evtScriptArgumentFromPointer(record),
+        evtScriptArgumentFromBits(0), command, 0);
     ratio = 1.0f;
     if (btlCheckSpecialAbility(record, 0x253) != 0) {
         ratio = datAbilityParameters[0x253 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
@@ -9710,7 +9714,7 @@ INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_004366D0);
 
 INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_004366D8);
 
-INCLUDE_SDATA(struct sdfMemHandle_t * const, "game/code_001B2AF8", D_004366E0);
+INCLUDE_SDATA(const s32, "game/code_001B2AF8", D_004366E0);
 
 INCLUDE_SDATA(const s32, "game/code_001B2AF8", btlRuntime);
 

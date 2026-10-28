@@ -393,7 +393,8 @@ s32 btlCalculateHpActionAmount(BtlUnit *source, BtlUnit *target, s32 command,
     amount = (s32)((f32)base * attack * defense * status * automatic * solar);
     if (!(target->status.flags & 0x10) && press == BTL_ACTION_PRESS_RESULT_CRITICAL && amount != 0) {
         amount = (s32)((f32)amount *
-                       (f32)evtRunContext(6, (s32)&source->partyRecord, 0, 0, 0) /
+                       (f32)evtRunContextWithArguments(6, evtScriptArgumentFromPointer(&source->partyRecord),
+                           evtScriptArgumentFromBits(0), 0, 0) /
                        100.0f);
     }
     if ((target->status.flags & 0x10) && side == 1) {
@@ -575,7 +576,8 @@ s32 btlCalculateMpActionAmount(BtlUnit *source, BtlUnit *target, s32 command,
     amount = (s32)((f32)base * attack * defense * status * automatic * solar);
     if (press == BTL_ACTION_PRESS_RESULT_CRITICAL && amount != 0) {
         amount = (s32)((f32)amount *
-                       (f32)evtRunContext(6, (s32)&source->partyRecord, 0, 0, 0) /
+                       (f32)evtRunContextWithArguments(6, evtScriptArgumentFromPointer(&source->partyRecord),
+                           evtScriptArgumentFromBits(0), 0, 0) /
                        100.0f);
     }
     if ((target->status.flags & 0x10) && side == 1) {

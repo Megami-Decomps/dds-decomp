@@ -616,7 +616,8 @@ s32 btlRollEscapeChance(BtlUnit *actor) {
         return 1;
     }
     record = &actor->partyRecord;
-    chance = evtRunContext(0x14, (s32)record, 0, 0, 0);
+    chance = evtRunContextWithArguments(0x14, evtScriptArgumentFromPointer(record),
+        evtScriptArgumentFromBits(0), 0, 0);
     ratio = 1.0f;
     if (btlCheckSpecialAbility(record, 0x230)) {
         ratio = datAbilityParameters[0x230 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
@@ -1159,7 +1160,8 @@ s32 btlSelectPreemptiveOutcome(void) {
         return 2;
     }
     ratio = 1.0f;
-    chance = evtRunContext(0x16, 0, 0, 0, 0);
+    chance = evtRunContextWithArguments(0x16, evtScriptArgumentFromBits(0),
+        evtScriptArgumentFromBits(0), 0, 0);
     for (i = 0; i < 5; i++) {
         if (DDS3_GBWK->party[i].flags & 1) {
             if (DDS3_GBWK->party[i].flags & 2) {

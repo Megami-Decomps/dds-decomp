@@ -1966,7 +1966,8 @@ BtlActionPressResult btlDetermineActionPressResult(BtlUnit *attacker, BtlUnit *t
             return BTL_ACTION_PRESS_RESULT_CRITICAL;
         }
         if (chance == 0) {
-            chance = evtRunContext(4, (s32)&attacker->partyRecord, (s32)record, command, 0);
+            chance = evtRunContextWithArguments(4, evtScriptArgumentFromPointer(&attacker->partyRecord),
+                evtScriptArgumentFromPointer(record), command, 0);
         }
         chance = (s32)((f32)chance * multiplier);
         if (chance >= 36) {

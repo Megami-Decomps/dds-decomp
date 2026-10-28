@@ -858,22 +858,27 @@ void btlProcessStatusRecoveryAction(ActionStateLink *task) {
         unit->status.stateFlags &= ~4;
         switch (unit->partyRecord.status & 0x7FFF) {
         case 0x1000:
-            chance = evtRunContext(0xE, (s32)&unit->partyRecord.flags, 0, 0, 0);
+            chance = evtRunContextWithArguments(0xE, evtScriptArgumentFromPointer(&unit->partyRecord.flags),
+                evtScriptArgumentFromBits(0), 0, 0);
             break;
         case 0x200:
-            chance = evtRunContext(0xF, (s32)&unit->partyRecord.flags, 0, 0, 0);
+            chance = evtRunContextWithArguments(0xF, evtScriptArgumentFromPointer(&unit->partyRecord.flags),
+                evtScriptArgumentFromBits(0), 0, 0);
             break;
         case 0x20:
-            chance = evtRunContext(0x10, (s32)&unit->partyRecord.flags, 0, 0, 0);
+            chance = evtRunContextWithArguments(0x10, evtScriptArgumentFromPointer(&unit->partyRecord.flags),
+                evtScriptArgumentFromBits(0), 0, 0);
             break;
         case 8:
-            chance = evtRunContext(0x11, (s32)&unit->partyRecord.flags, 0, 0, 0);
+            chance = evtRunContextWithArguments(0x11, evtScriptArgumentFromPointer(&unit->partyRecord.flags),
+                evtScriptArgumentFromBits(0), 0, 0);
             break;
         case 1:
             chance = ((BtlState *)btlGetRuntime())->mode == 2 ? 100 : 0;
             break;
         case 0x2000:
-            chance = evtRunContext(0x12, (s32)&unit->partyRecord.flags, 0, 0, 0);
+            chance = evtRunContextWithArguments(0x12, evtScriptArgumentFromPointer(&unit->partyRecord.flags),
+                evtScriptArgumentFromBits(0), 0, 0);
             break;
         default:
             chance = 0;

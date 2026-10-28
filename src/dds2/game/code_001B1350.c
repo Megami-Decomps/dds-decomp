@@ -307,10 +307,12 @@ BtlCommandHitResult btlResolveCommandHitResult(BtlUnit *source, BtlUnit *target,
     }
     switch (datCommandRecords[command].effectType) {
     case 0:
-        chance = evtRunContext(3, (s32)&source->partyRecord, (s32)targetRecord, command, 0);
+        chance = evtRunContextWithArguments(3, evtScriptArgumentFromPointer(&source->partyRecord),
+            evtScriptArgumentFromPointer(targetRecord), command, 0);
         break;
     case 1:
-        chance = evtRunContext(8, (s32)&source->partyRecord, (s32)targetRecord, command, 0);
+        chance = evtRunContextWithArguments(8, evtScriptArgumentFromPointer(&source->partyRecord),
+            evtScriptArgumentFromPointer(targetRecord), command, 0);
         if (datCommandRecords[command].hpType == 8 || datCommandRecords[command].hpType == 10) {
             affinity = btlGetAdjustedSlotAffinity(target, command, attribute);
             affinity &= 0xFFFF;
@@ -327,7 +329,8 @@ BtlCommandHitResult btlResolveCommandHitResult(BtlUnit *source, BtlUnit *target,
         if (!btlAreUnitStatusAndEntryFlagsClear(target)) return 4;
         if ((target->partyRecord.status & 0x7FFF) == 0x800) return 0x10000;
         if (btlGetAdjustedSlotAffinity(target, command, attribute) & 0x100000) return 4;
-        chance = evtRunContext(11, (s32)&source->partyRecord, (s32)targetRecord, command, 0);
+        chance = evtRunContextWithArguments(11, evtScriptArgumentFromPointer(&source->partyRecord),
+            evtScriptArgumentFromPointer(targetRecord), command, 0);
         switch (command) {
         case 0xE7:
             if (evtGetMirroredSolarPhase() != 8) autoMultiplier *= 0.2f;

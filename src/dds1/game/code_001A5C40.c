@@ -192,7 +192,8 @@ s32 btlCalculateHpAttackOrRestoreAmount(BtlUnit *attacker, BtlUnit *recipient, s
     base = result;
     result = (s32)((f32)result * attack * defense * status * automatic);
     if (!(recipient->status.flags & 0x10) && press == BTL_ACTION_PRESS_RESULT_CRITICAL && result != 0) {
-        result = (s32)((f32)result * (f32)evtRunContext(6, (s32)&attacker->partyRecord, 0, 0, 0) / 100.0f);
+        result = (s32)((f32)result * (f32)evtRunContextWithArguments(6, evtScriptArgumentFromPointer(&attacker->partyRecord),
+            evtScriptArgumentFromBits(0), 0, 0) / 100.0f);
     }
     if ((recipient->status.flags & 0x10) && attackMode == 1) {
         result = (s32)((f32)result * 2.0f);
@@ -291,7 +292,8 @@ s32 btlCalculateMpAttackOrRestoreAmount(BtlUnit *attacker, BtlUnit *recipient, s
     base = result;
     result = (s32)((f32)result * attack * defense * status * automatic);
     if (press == BTL_ACTION_PRESS_RESULT_CRITICAL && result != 0) {
-        result = (s32)((f32)result * (f32)evtRunContext(6, (s32)&attacker->partyRecord, 0, 0, 0) / 100.0f);
+        result = (s32)((f32)result * (f32)evtRunContextWithArguments(6, evtScriptArgumentFromPointer(&attacker->partyRecord),
+            evtScriptArgumentFromBits(0), 0, 0) / 100.0f);
     }
     if ((recipient->status.flags & 0x10) && attackMode == 1) {
         result = (s32)((f32)result * 2.0f);

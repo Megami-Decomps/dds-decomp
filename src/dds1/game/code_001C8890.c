@@ -460,16 +460,20 @@ void btlProcessStatusRecoveryAction(BtlTask *link) {
         unit->status.stateFlags &= ~4;
         switch (unit->partyRecord.status & 0x7FFF) {
         case 0x1000:
-            chance = evtRunContext(0xE, (s32)&unit->partyRecord, 0, 0, 0);
+            chance = evtRunContextWithArguments(0xE, evtScriptArgumentFromPointer(&unit->partyRecord),
+                evtScriptArgumentFromBits(0), 0, 0);
             break;
         case 0x200:
-            chance = evtRunContext(0xF, (s32)&unit->partyRecord, 0, 0, 0);
+            chance = evtRunContextWithArguments(0xF, evtScriptArgumentFromPointer(&unit->partyRecord),
+                evtScriptArgumentFromBits(0), 0, 0);
             break;
         case 0x20:
-            chance = evtRunContext(0x10, (s32)&unit->partyRecord, 0, 0, 0);
+            chance = evtRunContextWithArguments(0x10, evtScriptArgumentFromPointer(&unit->partyRecord),
+                evtScriptArgumentFromBits(0), 0, 0);
             break;
         case 8:
-            chance = evtRunContext(0x11, (s32)&unit->partyRecord, 0, 0, 0);
+            chance = evtRunContextWithArguments(0x11, evtScriptArgumentFromPointer(&unit->partyRecord),
+                evtScriptArgumentFromBits(0), 0, 0);
             break;
         case 1:
             chance = ((BtlState *)btlGetRuntime())->mode == 2 ? 100 : 0;

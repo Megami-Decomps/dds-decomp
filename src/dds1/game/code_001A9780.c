@@ -391,7 +391,8 @@ s32 btlRollStoneDeathChance(BtlUnit *actor, s32 index) {
         return 0;
     }
     record = &actor->partyRecord;
-    chance = evtRunContext(0x12, (s32)record, 0, index, 0);
+    chance = evtRunContextWithArguments(0x12, evtScriptArgumentFromPointer(record),
+        evtScriptArgumentFromBits(0), index, 0);
     ratio = 1.0f;
     if (btlCheckSpecialAbility(record, 0x233)) {
         ratio = datAbilityParameters[0x233 - BTL_ABILITY_PARAMETER_FIRST_SKILL].value;
