@@ -9276,23 +9276,23 @@ void sndFormatResourceNameFromUnitMode(const BtlUnit *unit, char *output) {
     sprintf(output, D_004192E8, unit->partyRecord.unitId);
 }
 
-s32 sndResolveResourceId(BtlUnit *actor, s32 id) {
+s32 sndResolveResourceId(BtlUnit *actor, s32 actionRecordIndex) {
     BtlState *work = (BtlState *)btlGetRuntime();
-    s32 type = -1;
+    s32 resourceType = -1;
     if (work->unk688 != 0) {
-        type = work->unk688(actor, id);
+        resourceType = work->unk688(actor, actionRecordIndex);
     }
-    if (type == -1) {
-        type = sndLookupResourceType(actor, id);
+    if (resourceType == -1) {
+        resourceType = sndLookupResourceType(actor, actionRecordIndex);
     }
-    if (type < 26) {
-        if (type == 0) {
+    if (resourceType < 26) {
+        if (resourceType == 0) {
             return -1;
         }
-        if (type >= 11) {
-            return type + work->sequenceHandle - 6;
+        if (resourceType >= 11) {
+            return resourceType + work->sequenceHandle - 6;
         }
-        return type + 0xFFFF;
+        return resourceType + 0xFFFF;
     }
     return -1;
 }

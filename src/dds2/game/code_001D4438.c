@@ -1937,7 +1937,7 @@ BtlRuntimeTask *btlCreateCommandSoundWithArguments(ActionStateLink *, BtlUnit *,
 s32 sndLookupResourceType(BtlUnit *actor, s32 resourceIndex);
 BtlRuntimeTask *sndCreateActorEffectTask(SoundResourceNode *source,
         BtlUnit *owner, u32 duration);
-s32 sndResolveResourceId(BtlUnit *actor, s32 id);
+s32 sndResolveResourceId(BtlUnit *actor, s32 actionRecordIndex);
 BtlRuntimeTask *btlCreateCategoryStatDamageTask(BtlUnit *unit,
         s32 category, s32 amount);
 BtlRuntimeTask *btlCreateFlaggedCommandItemConsumeTask(BtlUnit *actor,
