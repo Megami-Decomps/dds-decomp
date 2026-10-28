@@ -3390,12 +3390,12 @@ f32 btlGetClampedBattleTableValue(BtlUnit *source) {
     return btlActiveGroupCountMultipliers[index];
 }
 
-s32 btlGetCommandAttributeName(s32 commandIndex) {
+void *btlGetCommandAttributeName(s32 commandIndex) {
     s8 resource = datCommandSelectors[commandIndex].stat;
     if (resource < 0) {
-        return 0;
+        return NULL;
     }
-    return (s32)btlCommandAttributeNames[resource];
+    return btlCommandAttributeNames[resource];
 }
 
 /* The label resource index is the copied party record's unit ID. */
