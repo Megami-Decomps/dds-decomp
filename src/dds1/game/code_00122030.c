@@ -1739,12 +1739,12 @@ s32 fldUpdateTravelAndEncounters(void) {
                 } else {
                     fldGlobalBase.areaDamageReactionMovementGate = 60;
                     fldGlobalBase.attritionDistance = 0.0f;
-                    ptyApplyFieldHpAttrition(PTY_FIELD_HP_ATTRITION_STANDARD_TERRAIN);
+                    ptyApplyFieldHpAttrition(PTY_FIELD_HP_ATTRITION_FRONTLINE_3_PERCENT);
                 }
             } else {
                 fldGlobalBase.attritionDistance = 0.0f;
                 fldGlobalBase.areaDamageReactionMovementGate = 60;
-                ptyApplyFieldHpAttrition(PTY_FIELD_HP_ATTRITION_STATUS_AFFECTED_FRONTLINE);
+                ptyApplyFieldHpAttrition(PTY_FIELD_HP_ATTRITION_FRONTLINE_STATUS_0X80_3_PERCENT);
             }
         }
     } else {

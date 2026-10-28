@@ -684,7 +684,7 @@ void ptyApplyEventPenalty(PtyEventPenaltyMode penaltyMode) {
 /* Apply field HP attrition without allowing a living roster entry to reach zero. */
 void ptyApplyFieldHpAttrition(PtyFieldHpAttritionMode mode) {
     s32 nextHp, loss, slotIndex;
-    if (mode == PTY_FIELD_HP_ATTRITION_STATUS_AFFECTED_FRONTLINE) {
+    if (mode == PTY_FIELD_HP_ATTRITION_FRONTLINE_STATUS_0X80_3_PERCENT) {
         datUnitWork_t *entry = DDS3_GBWK->party;
         slotIndex = 0;
         do {
@@ -702,7 +702,7 @@ void ptyApplyFieldHpAttrition(PtyFieldHpAttritionMode mode) {
             entry++;
         } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
     }
-    if (mode == PTY_FIELD_HP_ATTRITION_STANDARD_TERRAIN) {
+    if (mode == PTY_FIELD_HP_ATTRITION_FRONTLINE_10_PERCENT) {
         datUnitWork_t *entry = DDS3_GBWK->party;
         slotIndex = 0;
         do {
@@ -720,7 +720,7 @@ void ptyApplyFieldHpAttrition(PtyFieldHpAttritionMode mode) {
             entry++;
         } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
     }
-    if (mode == PTY_FIELD_HP_ATTRITION_SOUND_CLASS_20) {
+    if (mode == PTY_FIELD_HP_ATTRITION_FRONTLINE_50_PERCENT) {
         datUnitWork_t *entry = DDS3_GBWK->party;
         slotIndex = 0;
         do {
@@ -738,7 +738,7 @@ void ptyApplyFieldHpAttrition(PtyFieldHpAttritionMode mode) {
             entry++;
         } while (slotIndex < PTY_ACTIVE_ROSTER_COUNT);
     }
-    if (mode == PTY_FIELD_HP_ATTRITION_SOUND_CLASS_30) {
+    if (mode == PTY_FIELD_HP_ATTRITION_FRONTLINE_30_PERCENT) {
         datUnitWork_t *entry = DDS3_GBWK->party;
         slotIndex = 0;
         do {

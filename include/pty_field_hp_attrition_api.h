@@ -3,15 +3,26 @@
 
 #include "common.h"
 
-/* Select the field-driven HP-loss pass over the frontline roster. Mode 1 also
- * requires the member's 0x80 status bit; modes 3 and 4 are DDS2 terrain cases. */
+/* Select a field-driven HP-loss pass over the frontline roster. Each pass
+ * leaves living units at 1 HP or above. */
 typedef s32 PtyFieldHpAttritionMode;
 enum {
-    PTY_FIELD_HP_ATTRITION_STATUS_AFFECTED_FRONTLINE = 1,
-    PTY_FIELD_HP_ATTRITION_STANDARD_TERRAIN = 2,
-    PTY_FIELD_HP_ATTRITION_SOUND_CLASS_20 = 3,
-    PTY_FIELD_HP_ATTRITION_SOUND_CLASS_30 = 4,
+    PTY_FIELD_HP_ATTRITION_FRONTLINE_STATUS_0X80_3_PERCENT = 1,
 };
+
+#if defined(VERSION_DDS1)
+enum {
+    PTY_FIELD_HP_ATTRITION_FRONTLINE_3_PERCENT = 2,
+};
+#elif defined(VERSION_DDS2)
+enum {
+    PTY_FIELD_HP_ATTRITION_FRONTLINE_10_PERCENT = 2,
+    PTY_FIELD_HP_ATTRITION_FRONTLINE_50_PERCENT = 3,
+    PTY_FIELD_HP_ATTRITION_FRONTLINE_30_PERCENT = 4,
+};
+#else
+#error "pty_field_hp_attrition_api.h requires a DDS title version"
+#endif
 
 void ptyApplyFieldHpAttrition(PtyFieldHpAttritionMode mode);
 

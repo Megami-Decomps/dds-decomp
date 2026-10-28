@@ -1897,14 +1897,14 @@ s32 fldUpdateTravelAndEncounters(void) {
                 } else {
                     fldGlobalBase.areaDamageReactionMovementGate = 60;
                     fldGlobalBase.attritionDistance = 0.0f;
-                    if (fldGlobalBase.terrainAttritionKind == FLD_TERRAIN_ATTRITION_SOUND_CLASS_20) ptyApplyFieldHpAttrition(PTY_FIELD_HP_ATTRITION_SOUND_CLASS_20);
-                    else if (fldGlobalBase.terrainAttritionKind == FLD_TERRAIN_ATTRITION_SOUND_CLASS_30) ptyApplyFieldHpAttrition(PTY_FIELD_HP_ATTRITION_SOUND_CLASS_30);
-                    else ptyApplyFieldHpAttrition(PTY_FIELD_HP_ATTRITION_STANDARD_TERRAIN);
+                    if (fldGlobalBase.terrainAttritionKind == FLD_TERRAIN_ATTRITION_SOUND_CLASS_20) ptyApplyFieldHpAttrition(PTY_FIELD_HP_ATTRITION_FRONTLINE_50_PERCENT);
+                    else if (fldGlobalBase.terrainAttritionKind == FLD_TERRAIN_ATTRITION_SOUND_CLASS_30) ptyApplyFieldHpAttrition(PTY_FIELD_HP_ATTRITION_FRONTLINE_30_PERCENT);
+                    else ptyApplyFieldHpAttrition(PTY_FIELD_HP_ATTRITION_FRONTLINE_10_PERCENT);
                 }
             } else {
                 fldGlobalBase.attritionDistance = 0.0f;
                 fldGlobalBase.areaDamageReactionMovementGate = 60;
-                ptyApplyFieldHpAttrition(PTY_FIELD_HP_ATTRITION_STATUS_AFFECTED_FRONTLINE);
+                ptyApplyFieldHpAttrition(PTY_FIELD_HP_ATTRITION_FRONTLINE_STATUS_0X80_3_PERCENT);
             }
         }
     } else {
