@@ -1298,8 +1298,8 @@ s32 fldAutoMap_GetFloor(s32 scene, u32 index) {
     return result;
 }
 
-void fldAutoMapNodeSet(sdfModelRootNode_t *model, s32 index, s32 clearFlag) {
-    sdfModelNode_t *parent = ((sdfModelNode_t **)model->list->buffer)[index + 1];
+void fldAutoMapNodeSet(sdfModelRootNode_t *model, s32 nodeIndex, s32 visible) {
+    sdfModelNode_t *parent = ((sdfModelNode_t **)model->list->buffer)[nodeIndex + 1];
     sdfModelNode_t *first;
     sdfModelNode_t *node;
     sdfModelNode_t *next;
@@ -1310,7 +1310,7 @@ void fldAutoMapNodeSet(sdfModelRootNode_t *model, s32 index, s32 clearFlag) {
         return;
     }
     parent->children->flags &= ~SDF_DRAW_NODE_FLAG_SKIP_RENDER;
-    if (clearFlag == 0) {
+    if (visible == 0) {
         parent->children->flags |= SDF_DRAW_NODE_FLAG_SKIP_RENDER;
     }
 
@@ -1326,7 +1326,7 @@ void fldAutoMapNodeSet(sdfModelRootNode_t *model, s32 index, s32 clearFlag) {
     for (;;) {
         flags = node->flags & ~SDF_DRAW_NODE_FLAG_SKIP_RENDER;
         node->flags = flags;
-        if (clearFlag == 0) {
+        if (visible == 0) {
             node->flags = flags | SDF_DRAW_NODE_FLAG_SKIP_RENDER;
         }
         next = node->next;
