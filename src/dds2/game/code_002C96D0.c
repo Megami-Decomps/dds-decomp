@@ -837,7 +837,7 @@ void fileDrawModeSpecificMemoryCardPrompt(void) {
             mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, fileSaveSuccessfulText);
             fileDrawPulsingSaveHighlight();
         }
-        D_00437D04 = 1;
+        D_00437D04 = FILE_MENU_OPERATION_SAVE_SUCCEEDED;
     }
     if (D_00437D38 == 5) {
         if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
@@ -858,7 +858,7 @@ void fileDrawModeSpecificMemoryCardPrompt(void) {
             mcdCreateFontDrawHandle(86, 114, 0x89FEFF80U, fileLoadSuccessfulText);
             fileDrawPulsingSaveHighlight();
         }
-        D_00437D04 = 2;
+        D_00437D04 = FILE_MENU_OPERATION_LOAD_SUCCEEDED;
     }
     if (D_00437D38 >= 20) {
         if (fileDrawFileMenuPromptAndCheckDelay() != 0) {
@@ -2611,7 +2611,7 @@ s32 fileDrawMenuFrame(s32 task) {
 
 void fileResetMenuFlowState(void) {
     slSetInfo(0);
-    D_00437D04 = 0;
+    D_00437D04 = FILE_MENU_OPERATION_NO_RESULT;
     fileWaitTicksRemaining = 0;
     D_00437D18 = 0xffffffff;
     fileSelectionPending = FILE_SELECTION_FLOW_IDLE;
@@ -3053,7 +3053,7 @@ s32 slQueryYesNo(FileSelectionCallback start, FileSelectionCallback finish, s32 
 
 INCLUDE_ASM(const s32, "game/code_002C96D0", fileShowPromptDialog);
 
-u32 fileGetLoadSelectionState(void) {
+FileMenuOperationResult fileGetLoadSelectionState(void) {
     return D_00437D04;
 }
 
@@ -3497,11 +3497,11 @@ s32 fileBeginLoadOrAbortDialog(void) {
 }
 
 s32 mcdContinueLoadSelection(void) {
-    u32 state = fileGetLoadSelectionState();
+    FileMenuOperationResult result = fileGetLoadSelectionState();
     MenuWork *block;
     s32 next = (s32)fileMenuWorkStart;
-    if (state != 0) {
-        if (state == 2) {
+    if (result != FILE_MENU_OPERATION_NO_RESULT) {
+        if (result == FILE_MENU_OPERATION_LOAD_SUCCEEDED) {
             block = fileLoadSelectionWork;
             block->flowRowCursor = 0;
             fileApplyMenuFlagsToModel(block);

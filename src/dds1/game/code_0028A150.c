@@ -806,7 +806,7 @@ void fileShowFlowDialog(void) {
                 fileDrawDialogLine(0, fileSaveSuccessfulText);
                 fileDrawPulsingSaveHighlight();
             }
-            D_003BC81C = 1;
+            D_003BC81C = FILE_MENU_OPERATION_SAVE_SUCCEEDED;
         }
         if (D_003BC850 == 5) {
             if (fileDrawStatusDialogFrame() != 0) {
@@ -828,7 +828,7 @@ void fileShowFlowDialog(void) {
                 fileDrawDialogLine(0, fileLoadSuccessfulText);
                 fileDrawPulsingSaveHighlight();
             }
-            D_003BC81C = 2;
+            D_003BC81C = FILE_MENU_OPERATION_LOAD_SUCCEEDED;
         }
     }
 }
@@ -2744,7 +2744,7 @@ void fileEnterMcPackScene(s32 mode) {
     fileInitCursorPulse();
     dds3FadeIn(0, 0, 0, 8);
     slSetInfo(0);
-    D_003BC81C = 0;
+    D_003BC81C = FILE_MENU_OPERATION_NO_RESULT;
     D_003BC848 = mode;
     D_003BC830 = -1;
     fileWaitTicksRemaining = 0;
@@ -3049,7 +3049,7 @@ s32 slQueryYesNo(FileSelectionCallback start, FileSelectionCallback finish, s32 
 
 INCLUDE_ASM(const s32, "game/code_0028A150", fileShowPromptDialog);
 
-u32 fileGetLoadSelectionState(void) {
+FileMenuOperationResult fileGetLoadSelectionState(void) {
     return D_003BC81C;
 }
 

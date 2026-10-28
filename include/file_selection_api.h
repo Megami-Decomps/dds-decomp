@@ -14,6 +14,16 @@ enum {
 
 FileSelectionFlowState fileGetSelectionPendingFlag(void);
 
+/* Zero means no successful save/load result has been recorded. */
+typedef u32 FileMenuOperationResult;
+enum {
+    FILE_MENU_OPERATION_NO_RESULT = 0,
+    FILE_MENU_OPERATION_SAVE_SUCCEEDED = 1,
+    FILE_MENU_OPERATION_LOAD_SUCCEEDED = 2
+};
+
+FileMenuOperationResult fileGetLoadSelectionState(void);
+
 s32 slQueryYesNo(FileSelectionCallback start, FileSelectionCallback finish, s32 mode);
 
 #endif
