@@ -40,6 +40,7 @@
 #include "kwln_task_create.h"
 #include "evt_task.h"
 #include "evt_unit.h"
+#include "evt_unit_object_key.h"
 #include "evt_unit_vector_slot.h"
 #include "evt_event_pack.h"
 #include "evt_polygon_movie.h"
@@ -4863,7 +4864,7 @@ typedef struct EvtPmdRuntimeHeader {
 extern s32 evtLoadArea_FromMemory(s32 area, s32 room, u8 *resource0Data, u8 *resource1Data, const SdfTextureOffsetListHeader *textureOffsets, s32 flags);
 extern void mdlPackDecode(s32, s32, s32, const u8 *, s32);
 extern s32 mdlSpawnCameraSlotViewerObject(s32, s32);
-extern evtUnitHandle_t *evtGetUnitHandle(s32);
+extern evtUnitHandle_t *evtGetUnitHandle(EvtUnitObjectKey worldObjectKey);
 extern EvtPathLinkResult evtPathLinkAndMake(dds3Basic_t *object, dds3Basic_t *owner);
 extern EvtRuntimeGroup *evtEventViewerCreateEntry(s32, EvtRuntime *);
 extern EvtRuntimeChild *evtCreateViewerTimelineKey(EvtRuntimeGroup *, s32, EvtRuntime *);

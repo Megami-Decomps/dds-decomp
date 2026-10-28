@@ -1,5 +1,6 @@
 #include "common.h"
 #include "scr_integer_parameter_api.h"
+#include "evt_unit_object_key.h"
 #include "fld_inf.h"
 #include "scr.h"
 #include "scr_string_parameter_api.h"
@@ -49,7 +50,7 @@ extern s32 fldFindEffectByName(const char *name);
 
 extern void fldStartTitle(s32 field, s32 mode, s32 option);
 
-extern struct evtUnitHandle_t *evtGetUnitHandle(s32 param);
+extern struct evtUnitHandle_t *evtGetUnitHandle(EvtUnitObjectKey worldObjectKey);
 
 
 /* Persona 4 func_002993c0 @ 002993C0 (src/Script/scrCommonCommand.c), recompiled unchanged */

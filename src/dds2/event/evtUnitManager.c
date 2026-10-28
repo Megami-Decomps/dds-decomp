@@ -773,7 +773,7 @@ void evtUnitLightOff(evtUnitHandle_t *unit, s32 duration) {
     }
 }
 
-evtUnitHandle_t *evtGetUnitHandle(s32 worldObjectKey) {
+evtUnitHandle_t *evtGetUnitHandle(EvtUnitObjectKey worldObjectKey) {
     dds3Basic_t *obj = dds3SearchSceneBasic(dds3GetActiveScene(), worldObjectKey, EFF_WORLD_KIND_FOLLOW_MODEL);
 
     if (obj != NULL) {
@@ -1161,7 +1161,7 @@ extern void evtResetObjectPendingValue(dds3Basic_t *object);
 
 
 /* World object views used by the model-parameter opcodes. */
-extern evtUnitHandle_t *evtGetUnitHandle(s32 idx);
+extern evtUnitHandle_t *evtGetUnitHandle(EvtUnitObjectKey worldObjectKey);
 
 
 

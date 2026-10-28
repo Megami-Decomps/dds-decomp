@@ -9,6 +9,7 @@
 #include "fld_inf.h"
 #include "fld_scene_status_api.h"
 #include "evt_solar.h"
+#include "evt_unit_object_key.h"
 #include "eff_random_mod.h"
 #include "sdf_trig.h"
 #include "kwln_task_create.h"
@@ -188,7 +189,7 @@ extern FldActivationEntry D_003A8EB0[];
 
 extern void fldInitializeHuntSparkUnit(struct evtUnitHandle_t *unit);
 
-extern struct evtUnitHandle_t *evtGetUnitHandle(s32 param);
+extern struct evtUnitHandle_t *evtGetUnitHandle(EvtUnitObjectKey worldObjectKey);
 
 
 extern s32 fldFindEffectByName(const char *name);

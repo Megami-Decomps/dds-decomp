@@ -766,7 +766,7 @@ void evtUnitLightOff(evtUnitHandle_t *unit, s32 duration) {
     }
 }
 
-evtUnitHandle_t *evtGetUnitHandle(s32 worldObjectKey) {
+evtUnitHandle_t *evtGetUnitHandle(EvtUnitObjectKey worldObjectKey) {
     dds3Basic_t *obj = dds3SearchSceneBasic(dds3GetActiveScene(), worldObjectKey, EFF_WORLD_KIND_FOLLOW_MODEL);
 
     if (obj != NULL) {
@@ -1133,7 +1133,7 @@ extern EvtUnitVectorSlot D_003D7BD8[7];
 extern BtlActorStatusRecord *D_003BAA20;
 
 
-extern evtUnitHandle_t *evtGetUnitHandle(s32 idx);
+extern evtUnitHandle_t *evtGetUnitHandle(EvtUnitObjectKey worldObjectKey);
 
 
 extern evtUnitHandle_t *evtWindowMotionUnit;

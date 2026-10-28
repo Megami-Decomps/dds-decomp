@@ -38,6 +38,7 @@
 #include "kwln_task_create.h"
 #include "evt_task.h"
 #include "evt_unit.h"
+#include "evt_unit_object_key.h"
 #include "evt_unit_vector_slot.h"
 #include "evt_event_pack.h"
 #include "evt_polygon_movie.h"
@@ -4622,7 +4623,7 @@ extern EvtRuntimeGroup *evtEventViewerCreateEntry(s32 kind, EvtRuntime *runtime)
 extern EvtViewerNameIndex evtEventViewerAddName(const char *name, EvtRuntime *runtime);
 extern void mdlPackDecode(s32 packageId, s32 partId, s32 flags, const u8 *data, s32 length);
 extern s32 mdlSpawnCameraSlotViewerObject(s32 packageId, s32 partId);
-extern evtUnitHandle_t *evtGetUnitHandle(s32 key);
+extern evtUnitHandle_t *evtGetUnitHandle(EvtUnitObjectKey worldObjectKey);
 extern EvtPathLinkResult evtPathLinkAndMake(dds3Basic_t *object, dds3Basic_t *owner);
 extern EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, EvtRuntime *runtime);
 extern s32 evtLoadEventBgm(s32 eventId);
