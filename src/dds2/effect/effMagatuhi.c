@@ -78,7 +78,7 @@ typedef struct {
 typedef struct {
     EffMagatuhiHeadFirst head;
     EffMagatuhiDriftParticle *particles; /* 0x17C */
-    EffArrHdr *mathResource;    /* 0x180 */
+    struct EffCubicBezierArray *mathResource; /* 0x180 */
     u8 pad184[8];
     EffMagatuhiOwner *managedResource; /* 0x18C */
     sdfMemHandle_t *allocationHandle; /* 0x190 backing allocation, not the particle address */
@@ -102,7 +102,7 @@ typedef struct {
 typedef struct {
     EffMagatuhiHeadSecond head;
     s32 *delays;           /* 0x180 */
-    EffArrHdr *mathResource;    /* 0x184 */
+    struct EffCubicBezierArray *mathResource; /* 0x184 */
     EffMagatuhiOwner *managedResource; /* 0x188 */
     sdfMemHandle_t *allocationHandle; /* 0x18C backing allocation, not the work address */
 } EffMagatuhiWideSecond;
@@ -456,7 +456,7 @@ void effMagaSmokeConvDraw(EffMagatuhiWideFirst *work) {
     f32 sideAxis[4];
     f32 towardTarget[4];
     f32 startTangent[4];
-    EffArrHdr *mathResource;
+    struct EffCubicBezierArray *mathResource;
     EffMagatuhiValueWork *valueWork;
     EffMagatuhiDriftParticle *particle;
     EffCubicBezierSlot *slot;
@@ -710,7 +710,7 @@ void effMagaPoint4PartInit(EffMagatuhiWideSecond *work, s32 index) {
 /* Advance delayed Bezier particles, pack their fade, and submit the owner.
  * Fade-in wins when its interval overlaps fade-out; divisors are unchecked. */
 void effMagaPoint4Draw(EffMagatuhiWideSecond *work) {
-    EffArrHdr *slots = work->mathResource;
+    struct EffCubicBezierArray *slots = work->mathResource;
     EffMagatuhiValueWork *valueWork = work->managedResource->valueWork;
     s32 *delays = work->delays;
     u8 respawn = work->head.respawn;

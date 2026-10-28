@@ -16,6 +16,7 @@
 #include "eff.h"
 #include "eff_magatuhi_api.h"
 #include "eff_math.h"
+#include "eff_cubic_bezier_array.h"
 #include "sdf_texture_file.h"
 #include "sdf_projection.h"
 #include "eff_dirent.h"
@@ -837,16 +838,16 @@ f32 effLinePointLength(f32 *direction, f32 *origin, f32 *point) {
 
 /* Allocate/retain slot storage and return its header after the slots, not the slot base.
    Only the two native slot defaults are initialized; count/allocation validity is unchecked. */
-EffArrHdr *dds3Bezier4PCreate(s32 count) {
+EffCubicBezierArray *dds3Bezier4PCreate(s32 count) {
     struct sdfMemHandle_t *allocation = sdfMemAllocDirect(count * EFF_SLOT_BYTES + EFF_SLOT_HEADER_BYTES);
     void *retainedAddress = (void *)sdfMemLock(allocation);
     u32 slotIndex = 0;
     EffCubicBezierSlot *slot = retainedAddress;
     u8 *headerAddress = (u8 *)slot + count * EFF_SLOT_BYTES;
 
-    ((EffArrHdr *)headerAddress)->allocation = allocation;
-    ((EffArrHdr *)headerAddress)->slots = retainedAddress;
-    ((EffArrHdr *)headerAddress)->slotCount = count;
+    ((EffCubicBezierArray *)headerAddress)->allocation = allocation;
+    ((EffCubicBezierArray *)headerAddress)->slots = slot;
+    ((EffCubicBezierArray *)headerAddress)->slotCount = count;
     if (count != 0) {
         do {
             slotIndex++;
@@ -855,7 +856,7 @@ EffArrHdr *dds3Bezier4PCreate(s32 count) {
             slot = (EffCubicBezierSlot *)((u8 *)slot + EFF_SLOT_BYTES);
         } while (slotIndex < count);
     }
-    return (EffArrHdr *)headerAddress;
+    return (EffCubicBezierArray *)headerAddress;
 }
 
 INCLUDE_RODATA(const s32, "game/code_0018CAC8", D_003A0F88);

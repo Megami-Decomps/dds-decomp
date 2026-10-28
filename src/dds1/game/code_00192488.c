@@ -184,7 +184,7 @@ void effAPPoint4PartInit(EffChanWork *work, u32 recordIndex) {
  * The slot-zero lookup precedes the empty-count check; retain the time snapshot and later stored increments. */
 void effAPPoint4Draw(EffChanWork *work) {
     EffChanRecord *recordCursor = work->records;
-    EffArrHdr *bezierSlots = work->slots;
+    struct EffCubicBezierArray *bezierSlots = work->slots;
     u32 recordCount = work->head.count;
     u32 recordIndex = 0;
     u8 cycleEnabled = work->head.enabled;

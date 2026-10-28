@@ -2,17 +2,18 @@
 #include "sdf_resource.h"
 #include "eff.h"
 #include "eff_math.h"
+#include "eff_cubic_bezier_array.h"
 extern f32 D_00433528;
 
 
-void dds3Bezier4PDelete(EffArrHdr *work) {
+void dds3Bezier4PDelete(EffCubicBezierArray *work) {
     sdfMemFreeDirect(work->allocation);
 }
 
 
 /* Evaluate the cubic Bezier at t into out[3], advance t, and report whether it is still below 1. */
-s32 dds3Bezier4PPartRun(EffArrHdr *table, s32 slotIndex, f32 *out) {
-    EffCubicBezierSlot *slot = &((EffCubicBezierSlot *)table->slots)[slotIndex];
+s32 dds3Bezier4PPartRun(EffCubicBezierArray *table, s32 slotIndex, f32 *out) {
+    EffCubicBezierSlot *slot = &table->slots[slotIndex];
     f32 w[4];
     f32 t = slot->t;
     f32 u = 1.0f - t;
@@ -56,12 +57,12 @@ s32 nbCameraLerpVec(EffCubicBezierSlot *slot, f32 *out) {
     return 1;
 }
 
-void effMathResetBezierSlot(EffArrHdr *table, s32 slotIndex) {
-    EffCubicBezierSlot *slot = &((EffCubicBezierSlot *)table->slots)[slotIndex];
+void effMathResetBezierSlot(EffCubicBezierArray *table, s32 slotIndex) {
+    EffCubicBezierSlot *slot = &table->slots[slotIndex];
     slot->step = 0.05f;
     slot->t = 0;
 }
 
-EffCubicBezierSlot *dds3Bezier4PGetPart(EffArrHdr *table, s32 slotIndex) {
-    return &((EffCubicBezierSlot *)table->slots)[slotIndex];
+EffCubicBezierSlot *dds3Bezier4PGetPart(EffCubicBezierArray *table, s32 slotIndex) {
+    return &table->slots[slotIndex];
 }

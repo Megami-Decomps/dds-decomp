@@ -69,6 +69,21 @@
 #define EFF_EVENT_JITTER_RANGE 0.3f
 #define EFF_EVENT_JITTER_BASE 0.7f
 
+/* The event curve array stores segmented slots, separate from effMath's cubic slots. */
+typedef struct EffSegmentedBezierArray {
+    EffSegmentedBezierSlot *slots;
+    u32 slotCount;
+    struct sdfMemHandle_t *allocation;
+} EffSegmentedBezierArray;
+
+typedef char EffSegmentedBezierArraySizeAssert[(sizeof(EffSegmentedBezierArray) == 0xC) ? 1 : -1];
+typedef char EffSegmentedBezierArraySlotsOffsetAssert[
+    ((u32)&((EffSegmentedBezierArray *)0)->slots == 0x00) ? 1 : -1];
+typedef char EffSegmentedBezierArrayCountOffsetAssert[
+    ((u32)&((EffSegmentedBezierArray *)0)->slotCount == 0x04) ? 1 : -1];
+typedef char EffSegmentedBezierArrayAllocationOffsetAssert[
+    ((u32)&((EffSegmentedBezierArray *)0)->allocation == 0x08) ? 1 : -1];
+
 
 
 
@@ -138,11 +153,11 @@ extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *arg);
 extern void dds3EffectFilter(dds3Effect_Filter_t *arg);
 
 /* Allocate contiguous slots followed by their count and allocation handle. */
-EffArrHdr *effCreateSlotArray(u32 count) {
+EffSegmentedBezierArray *effCreateSlotArray(u32 count) {
     s32 slotBytes = count * EFF_EVENT_BEZIER_SLOT_BYTES;
     sdfMemHandle_t *allocation = sdfMemAllocDirect(slotBytes + EFF_EVENT_SLOT_HEADER_BYTES);
     EffSegmentedBezierSlot *slot = (EffSegmentedBezierSlot *)sdfMemLock(allocation);
-    EffArrHdr *table = (EffArrHdr *)((u8 *)slot + slotBytes);
+    EffSegmentedBezierArray *table = (EffSegmentedBezierArray *)((u8 *)slot + slotBytes);
     u32 index = 0;
     table->allocation = allocation;
     table->slots = slot;
@@ -160,14 +175,14 @@ EffArrHdr *effCreateSlotArray(u32 count) {
 }
 
 /* Release the allocation handle stored after the contiguous slot array. */
-void effReleaseSlotArrayAllocation(EffArrHdr *header) {
+void effReleaseSlotArrayAllocation(EffSegmentedBezierArray *header) {
     sdfMemFreeDirect(header->allocation);
 }
 
 /* Return 0 before evaluation only for the point-index sentinel 7. Overflow t
  * clamps to 1 and advances the index by three; there is no general bounds check. */
-s32 effStepActiveBezierSlot(EffArrHdr *table, s32 index, f32 *out) {
-    EffSegmentedBezierSlot *slot = &((EffSegmentedBezierSlot *)table->slots)[index];
+s32 effStepActiveBezierSlot(EffSegmentedBezierArray *table, s32 index, f32 *out) {
+    EffSegmentedBezierSlot *slot = &table->slots[index];
     u32 pointIndex = slot->pointIndex;
     f32 weights[EFF_EVENT_BEZIER_WEIGHT_COUNT];
     f32 t;
@@ -250,16 +265,16 @@ void effEvaluateSlotBezierPosition(EffSegmentedBezierSlot *slot, f32 *out) {
 }
 
 /* Reset only curve progress and its default step; retain all control points. */
-void effInitSlotTail(EffArrHdr *table, s32 index) {
-    EffSegmentedBezierSlot *slot = &((EffSegmentedBezierSlot *)table->slots)[index];
+void effInitSlotTail(EffSegmentedBezierArray *table, s32 index) {
+    EffSegmentedBezierSlot *slot = &table->slots[index];
 
     slot->parameterStep = EFF_EVENT_CURVE_DEFAULT_STEP;
     slot->pointIndex = slot->t = 0;
 }
 
 /* Return the selected slot; index bounds remain the caller's responsibility. */
-EffSegmentedBezierSlot *effGetSlotAt(EffArrHdr *table, s32 index) {
-    return &((EffSegmentedBezierSlot *)table->slots)[index];
+EffSegmentedBezierSlot *effGetSlotAt(EffSegmentedBezierArray *table, s32 index) {
+    return &table->slots[index];
 }
 
 extern SdfPoolNode kwlnPositionedTextSurface;

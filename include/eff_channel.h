@@ -4,7 +4,7 @@
 #include "common.h"
 #include "sdf.h"
 
-struct EffArrHdr;
+struct EffCubicBezierArray;
 
 /* Shared channel parameter block copied into each allocated channel work. */
 typedef struct EffChanHead {
@@ -32,7 +32,7 @@ typedef struct EffChanRecord {
 typedef struct EffChanWork {
     EffChanHead head;
     EffChanRecord *records;
-    struct EffArrHdr *slots; /* Trailing allocation header, not the slot base. */
+    struct EffCubicBezierArray *slots; /* Trailing owner for the cubic slot array. */
     sdfMemHandle_t *buffer;
 } EffChanWork;
 

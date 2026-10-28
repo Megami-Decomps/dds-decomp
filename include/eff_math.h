@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-struct EffArrHdr;
+struct EffCubicBezierArray;
 
 /* One cubic segment: four XYZ controls, evaluation position and frame step.
  * The allocation header follows the slots; it is a distinct pointer. */
@@ -18,12 +18,12 @@ typedef char EffCubicBezierSlotLayoutAssert[
      (u32)&((EffCubicBezierSlot *)0)->t == 0x30 &&
      (u32)&((EffCubicBezierSlot *)0)->step == 0x34) ? 1 : -1];
 
-struct EffArrHdr *dds3Bezier4PCreate(s32 count);
-void dds3Bezier4PDelete(struct EffArrHdr *work);
-s32 dds3Bezier4PPartRun(struct EffArrHdr *table, s32 slotIndex, f32 *out);
+struct EffCubicBezierArray *dds3Bezier4PCreate(s32 count);
+void dds3Bezier4PDelete(struct EffCubicBezierArray *work);
+s32 dds3Bezier4PPartRun(struct EffCubicBezierArray *table, s32 slotIndex, f32 *out);
 s32 nbCameraLerpVec(EffCubicBezierSlot *slot, f32 *out);
-void effMathResetBezierSlot(struct EffArrHdr *table, s32 slotIndex);
-EffCubicBezierSlot *dds3Bezier4PGetPart(struct EffArrHdr *table, s32 slotIndex);
+void effMathResetBezierSlot(struct EffCubicBezierArray *table, s32 slotIndex);
+EffCubicBezierSlot *dds3Bezier4PGetPart(struct EffCubicBezierArray *table, s32 slotIndex);
 /* Blend packed RGBA8888 colors; t >= 1 returns colorB unchanged. */
 u32 effColorBlend(u32 colorA, u32 colorB, f32 t);
 
