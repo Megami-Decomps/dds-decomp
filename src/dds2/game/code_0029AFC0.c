@@ -37,7 +37,7 @@ extern char D_004379B0[];
 extern char D_004379B8[];
 
 /* All five projected base stats must meet the cap. */
-s32 mnuAreAllProjectedBaseStatsAtCap(const datUnitWork_t *unit, const BrsSkillPackageWork *skillPackage) {
+u8 mnuAreAllProjectedBaseStatsAtCap(const datUnitWork_t *unit, const BrsSkillPackageWork *skillPackage) {
     const s32 *statGains = skillPackage->statGains;
     const s8 *baseStats = unit->baseStats;
     s32 statIndex = 0;
@@ -83,7 +83,7 @@ s32 mnuHandleStatPointAssignment(dds3ProcessID_t *task) {
         work->selectionInitialized = 1;
     }
     if (work->assignedStatPoints == work->availableStatPoints ||
-        mnuAreAllProjectedBaseStatsAtCap(entry, work) != 0) {
+        mnuAreAllProjectedBaseStatsAtCap(entry, work)) {
         fclStartMessage(0x17);
         evtSetMessageWindowOptionWhenOpen(0);
         evtStoreValueAndCaptureWindowPanelValue(0xA3);
