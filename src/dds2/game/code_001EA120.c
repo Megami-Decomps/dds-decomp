@@ -1,6 +1,7 @@
 #include "btl_motion_transform.h"
 #include "common.h"
 #include "btl_unit_geometry_api.h"
+#include "btl_entry_height_limit_api.h"
 #include "btl_command_target_policy.h"
 #include "btl_actor_category_flag_api.h"
 #include "btl_linked_actor_eligibility.h"
@@ -227,11 +228,11 @@ s32 btlCheckActorDistanceLimit(void) {
     return 1;
 }
 
-s32 btlIsEntryHeightWithinLimit(void) {
+BtlEntryHeightLimitResult btlIsEntryHeightWithinLimit(void) {
     if (btlMeasureFilteredUnitGroupBounds(BTL_UNIT_STATUS_FLAG_ENEMY, 0, 0) > 600.0f) {
-        return 0;
+        return BTL_ENTRY_HEIGHT_LIMIT_RESULT_EXCEEDS_LIMIT;
     }
-    return 1;
+    return BTL_ENTRY_HEIGHT_LIMIT_RESULT_WITHIN_LIMIT;
 }
 
 /* Find an unmarked linked kind-two slot whose unit is not disabled. */
@@ -723,7 +724,8 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
                 if (btlCanUseActorCategoryFlag2(action) != 0 || btlCanUseActorCategoryFlag4(action) != 0 ||
                     btlIsLinkedFireOfSinaiCommand(action) != 0 || btlMapActorCategory(action) != 0) {
                     action->stepKind = BTL_LINKED_CAMERA_STEP_INITIAL_POSE_SELECTION;
-                } else if (btlIsEntryHeightWithinLimit() == 0 && btlHasSingleLinkedResource(action) == 0) {
+                } else if (btlIsEntryHeightWithinLimit() == BTL_ENTRY_HEIGHT_LIMIT_RESULT_EXCEEDS_LIMIT &&
+                           btlHasSingleLinkedResource(action) == 0) {
                     action->stepKind = BTL_LINKED_CAMERA_STEP_INITIAL_POSE_SELECTION;
                 } else {
                     action->stepKind = (dds3GetRandA((EffRandState *)effSharedRandomState) & 1)
