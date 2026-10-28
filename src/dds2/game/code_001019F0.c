@@ -491,7 +491,7 @@ struct dds3Basic_t;
 extern s32 dds3CallBasicMainProc(struct dds3Basic_t *holder);
 
 /* Invoke the active world's first callback column; this task step returns zero. */
-s32 dds3BasicMainProcess(dds3ProcessID_t *task) {
+KwlnTaskUpdateResult dds3BasicMainProcess(dds3ProcessID_t *task) {
     dds3CallBasicMainProc(dds3TheWorld);
     return 0;
 }
@@ -500,7 +500,7 @@ struct dds3Basic_t;
 extern s32 dds3CallBasicDrawProc(struct dds3Basic_t *holder);
 
 /* Invoke the active world's second callback column; this task step returns zero. */
-s32 dds3BasicDrawProcess(dds3ProcessID_t *task) {
+KwlnTaskUpdateResult dds3BasicDrawProcess(dds3ProcessID_t *task) {
     dds3CallBasicDrawProc(dds3TheWorld);
     return 0;
 }

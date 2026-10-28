@@ -65,8 +65,8 @@ extern char D_003BA7F8[]; /* "22\n" */
 extern s32 kwlnPrepareFrameDrawPackets(dds3ProcessID_t *task);
 extern s32 kwlnBuildFrameScenePackets(dds3ProcessID_t *task);
 extern s32 kwlnRenderFrame(dds3ProcessID_t *task);
-extern s32 dds3BasicMainProcess(dds3ProcessID_t *task);
-extern s32 dds3BasicDrawProcess(dds3ProcessID_t *task);
+extern KwlnTaskUpdateResult dds3BasicMainProcess(dds3ProcessID_t *task);
+extern KwlnTaskUpdateResult dds3BasicDrawProcess(dds3ProcessID_t *task);
 extern KwlnTaskUpdateResult frFlipPacketBuf(dds3ProcessID_t *task);
 extern void frDestroyFontTable(dds3ProcessID_t *task);
 extern s32 dds3DebugDevDumpProcess(dds3ProcessID_t *task);
