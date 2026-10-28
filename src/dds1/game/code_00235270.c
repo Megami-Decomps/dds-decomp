@@ -34,6 +34,7 @@
 #include "sdf.h"
 #include "sdf_sif_command.h"
 #include "kwln.h"
+#include "kwln_task_runner.h"
 #include "kwln_task_update_count.h"
 #include "kwln_task_create.h"
 #include "evt_task.h"
@@ -58,7 +59,7 @@ extern void evtWriteSerializedBytes(s32 output, void *data, s32 size);
 extern s8 evtViewerCheckDirty(void);
 extern SndPackedTrackLoadStatus sndFindPackedTrackLoadStatus(s32 sequence);
 extern void p2sdLoadSMGFile(s32 sequence);
-extern s32 evtUpdateFrameVariableTask(dds3ProcessID_t *task);
+extern KwlnTaskUpdateResult evtUpdateFrameVariableTask(dds3ProcessID_t *task);
 extern void dds3EffectObjectBasicStatOn(dds3Basic_t *object, u32 flags);
 struct SoundMixer;
 extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(struct SoundMixer *resource, const void *position, const void *scale);
@@ -214,11 +215,11 @@ dds3ProcessID_t *evtInitSky(void) {
 }
 
 /* Frame-variable task update: polls the parent task's user value each frame. */
-s32 evtUpdateFrameVariableTask(dds3ProcessID_t *task) {
+KwlnTaskUpdateResult evtUpdateFrameVariableTask(dds3ProcessID_t *task) {
     u8 unused[16]; /* retail frame 0x20: unused local storage */
 
     dds3GetProcessData(task->parent);
-    return 0;
+    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 dds3ProcessID_t *evtInitFrameVar(void) {

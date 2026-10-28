@@ -36,6 +36,7 @@
 #include "sdf.h"
 #include "sdf_sif_command.h"
 #include "kwln.h"
+#include "kwln_task_runner.h"
 #include "kwln_task_update_count.h"
 #include "kwln_task_create.h"
 #include "evt_task.h"
@@ -241,11 +242,11 @@ dds3ProcessID_t *evtInitSky(void) {
 }
 
 /* Frame-variable task update: polls the parent task's user value each frame. */
-s32 evtUpdateFrameVariableTask(dds3ProcessID_t *task) {
+KwlnTaskUpdateResult evtUpdateFrameVariableTask(dds3ProcessID_t *task) {
     u8 unused[16]; /* retail frame 0x20: unused local storage */
 
     dds3GetProcessData(task->parent);
-    return 0;
+    return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
 extern char D_00423380[]; /* "FrameVar" */
