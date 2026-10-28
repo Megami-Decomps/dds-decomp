@@ -16,8 +16,16 @@ enum {
     BTL_SECONDARY_SCRIPT_RESOURCE_AVAILABLE = 1,
 };
 
-s32 btlReleaseScriptResource(void);
-s32 btlReleaseScriptResourceA(void);
+/* Whether the tracked battle script task still blocks resource-release work. */
+typedef s32 BtlScriptResourceReleaseReadiness;
+enum {
+    BTL_SCRIPT_RESOURCE_RELEASE_PENDING = 0,
+    BTL_SCRIPT_RESOURCE_RELEASE_READY = 1,
+};
+
+BtlScriptResourceReleaseReadiness btlReleaseScriptResource(void);
+BtlScriptResourceReleaseReadiness btlReleaseScriptResourceA(void);
+BtlScriptResourceReleaseReadiness btlReleaseScriptResourceB(void);
 BtlPrimaryScriptTaskAvailability btlCanStartPrimaryScriptTask(void);
 BtlSecondaryScriptResourceAvailability btlHasScriptResource(void);
 

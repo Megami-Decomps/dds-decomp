@@ -39,16 +39,16 @@ void btlStartSkillEventTask(s32 skill) {
     battle->scriptTask = taskId;
 }
 
-s32 btlReleaseScriptResource(void) {
+BtlScriptResourceReleaseReadiness btlReleaseScriptResource(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     if (battle->eventPackId == BTL_EVENT_PACK_ID_NONE) {
-        return 1;
+        return BTL_SCRIPT_RESOURCE_RELEASE_READY;
     }
     if (dds3ExistProcess(battle->scriptTask) == KWLN_PROCESS_NOT_REGISTERED) {
         battle->scriptTask = 0;
-        return 1;
+        return BTL_SCRIPT_RESOURCE_RELEASE_READY;
     }
-    return 0;
+    return BTL_SCRIPT_RESOURCE_RELEASE_PENDING;
 }
 
 extern char btlPrimaryScriptResourceName[];
@@ -90,7 +90,7 @@ void btlStartPrimaryScriptTask(void) {
     battle->scriptFlags |= 1;
 }
 
-s32 btlReleaseScriptResourceA(void) {
+BtlScriptResourceReleaseReadiness btlReleaseScriptResourceA(void) {
     return btlReleaseScriptResource();
 }
 
@@ -131,6 +131,6 @@ void btlStartSecondaryScriptTask(void) {
     battle->scriptFlags |= 2;
 }
 
-s32 btlReleaseScriptResourceB(void) {
+BtlScriptResourceReleaseReadiness btlReleaseScriptResourceB(void) {
     return btlReleaseScriptResource();
 }
