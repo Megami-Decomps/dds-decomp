@@ -19,7 +19,8 @@ typedef struct FldRoomEffectEntry {
     f32 unk2C;          /* 0x2C: float counter inferred from the paired SMT3 cntf layout. */
     s32 unk30, unk34;
     s32 room;           /* 0x38 */
-    s16 unk3C, unk3E;
+    s16 unk3C;
+    s16 lodIndex;       /* 0x3E: selected LOD copied to the spawned model. */
     char name[0x10];    /* 0x40 */
 } FldRoomEffectEntry;
 
@@ -28,6 +29,8 @@ typedef char FldRoomEffectEntry_object_offset_check[
     ((u32)&((FldRoomEffectEntry *)0)->object == 0x20) ? 1 : -1];
 typedef char FldRoomEffectEntry_room_offset_check[
     ((u32)&((FldRoomEffectEntry *)0)->room == 0x38) ? 1 : -1];
+typedef char FldRoomEffectEntry_lodIndex_offset_check[
+    ((u32)&((FldRoomEffectEntry *)0)->lodIndex == 0x3E) ? 1 : -1];
 
 extern FldRoomEffectEntry fldModelSlotTable[];
 extern s32 fldNpcModelTable;

@@ -3048,7 +3048,7 @@ void fldClearMenuEntries(void) {
         fldModelSlotTable[i].unk34 = 0;
         fldModelSlotTable[i].room = 0;
         fldModelSlotTable[i].unk3C = 0;
-        fldModelSlotTable[i].unk3E = 0;
+        fldModelSlotTable[i].lodIndex = 0;
     }
     fldNpcModelTable = 0;
 }
@@ -3244,7 +3244,7 @@ void func_001480D0(u32 key, f32 *orientation, f32 x, f32 y, f32 z,
         }
         fldModelSlotTable[outputIndex].kind = kind;
         fldModelSlotTable[outputIndex].kindId = resource;
-        fldModelSlotTable[outputIndex].unk3E = lod;
+        fldModelSlotTable[outputIndex].lodIndex = lod;
         if (behavior == 1) {
             radius = 50.0f; height = 180.0f; hitHeight = 100.0f;
             size = 30.0f;
