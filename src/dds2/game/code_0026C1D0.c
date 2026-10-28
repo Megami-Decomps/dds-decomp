@@ -503,21 +503,21 @@ u32 evtGetBoundedDisplayValue(s32 displayValueIndex) {
 }
 
 /* Script opcode: set the supplied active-entry flag without bounds checking. */
-s32 evtOpSetActiveEntryFlag(void) {
+ScrCommandResult evtOpSetActiveEntryFlag(void) {
     s32 flagIndex = scrGetIntPara(0);
     evtActiveEntryFlags[8 + flagIndex] = 1;
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 /* Script opcode: return a display-table value, clamping only its upper index.
  * It does not activate or test an active-entry flag. */
-s32 evtOpReadDisplayValue(void) {
+ScrCommandResult evtOpReadDisplayValue(void) {
     s32 displayValueIndex = scrGetIntPara(0);
     if (displayValueIndex >= EVT_DISPLAY_VALUE_COUNT) {
         displayValueIndex = EVT_LAST_DISPLAY_VALUE;
     }
     scrSetIntReturnValue(fclWorkValue[displayValueIndex]);
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 /* Acquire the loaded data's texture reference, then release its temporary resource.
