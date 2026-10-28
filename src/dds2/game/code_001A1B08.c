@@ -251,19 +251,18 @@ void CreateVertexFacility(UiSpriteBandPayload *base, s32 x0, s32 y0, s32 x1, s32
     }
 }
 
-/* Populate RGBA rows at bytes 0x40/0x50; the first row is transparent.
-   The existing vertex-typed view addresses the same color records as the quad consumer. */
+/* Populate DrawColorRec RGBA rows at bytes 0x40/0x50; the first row is transparent. */
 void CreateColorNormal(DrawVertex *panelData, s32 red, s32 green, s32 blue, s32 alpha) {
-    DrawVertex *colorRow = &panelData[8];
-    colorRow->x = red;
-    colorRow->y = green;
-    colorRow[1].x = blue;
-    colorRow[1].y = 0;
-    colorRow = &panelData[10];
-    colorRow->x = red;
-    colorRow->y = green;
-    colorRow[1].x = blue;
-    colorRow[1].y = alpha;
+    DrawColorRec *colorRow = (DrawColorRec *)((u8 *)panelData + 0x40);
+    colorRow->components[0] = red;
+    colorRow->components[1] = green;
+    colorRow->components[2] = blue;
+    colorRow->components[3] = 0;
+    colorRow = (DrawColorRec *)((u8 *)panelData + 0x50);
+    colorRow->components[0] = red;
+    colorRow->components[1] = green;
+    colorRow->components[2] = blue;
+    colorRow->components[3] = alpha;
 }
 
 /* Write the two color rows, then scale six template rows; the first fourth component is one. */
@@ -295,29 +294,27 @@ void CreateColorPlain(u8 *base, u32 red, u32 green, u32 blue, u32 alpha) {
     itfMiscSetRatioRGB((DrawColorRec *)(base + 0x40), red, green, blue, ITF_PANEL_FULL_COLOR_SCALE, itfPanelGradientColorPair, 2);
 }
 
-/* Set the four color words at byte 0x20, consumed as a color record by the quad path.
-   Preserve the existing vertex-typed access and signed arguments. */
+/* Set the four components of the DrawColorRec at byte 0x20. */
 void CreateColorPera1(DrawVertex *panelData, s32 red, s32 green, s32 blue, s32 alpha) {
-    DrawVertex *colorRow = &panelData[4];
-    colorRow->x = red;
-    colorRow->y = green;
-    colorRow[1].x = blue;
-    colorRow[1].y = alpha;
+    DrawColorRec *color = (DrawColorRec *)((u8 *)panelData + 0x20);
+    color->components[0] = red;
+    color->components[1] = green;
+    color->components[2] = blue;
+    color->components[3] = alpha;
 }
 
-/* Populate RGBA rows at bytes 0x30/0x40; the first row is transparent.
-   The six-index quad path consumes its color rows from this same base offset. */
+/* Populate DrawColorRec RGBA rows at bytes 0x30/0x40; the first row is transparent. */
 void CreateColorLeftFade(DrawVertex *panelData, s32 red, s32 green, s32 blue, s32 alpha) {
-    DrawVertex *colorRow = &panelData[6];
-    colorRow->x = red;
-    colorRow->y = green;
-    colorRow[1].x = blue;
-    colorRow[1].y = 0;
-    colorRow = &panelData[8];
-    colorRow->x = red;
-    colorRow->y = green;
-    colorRow[1].x = blue;
-    colorRow[1].y = alpha;
+    DrawColorRec *colorRow = (DrawColorRec *)((u8 *)panelData + 0x30);
+    colorRow->components[0] = red;
+    colorRow->components[1] = green;
+    colorRow->components[2] = blue;
+    colorRow->components[3] = 0;
+    colorRow = (DrawColorRec *)((u8 *)panelData + 0x40);
+    colorRow->components[0] = red;
+    colorRow->components[1] = green;
+    colorRow->components[2] = blue;
+    colorRow->components[3] = alpha;
 }
 
 

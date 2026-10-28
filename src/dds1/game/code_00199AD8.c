@@ -249,13 +249,13 @@ void CreateVertexFacility(UiSpriteBandPayload *base, s32 x0, s32 y0, s32 x1, s32
     }
 }
 
-/* Populate RGBA rows at bytes 0x40/0x50; the first row is transparent. */
+/* Populate DrawColorRec RGBA rows at bytes 0x40/0x50; the first row is transparent. */
 void CreateColorNormal(u8 *panelData, u32 red, u32 green, u32 blue, u32 alpha) {
-    u32 *colorRow = (u32 *)(panelData + 0x40);
+    DrawColorRec *colorRow = (DrawColorRec *)(panelData + 0x40);
 
-    panelSetVec4(colorRow, red, green, blue, 0);
-    colorRow = (u32 *)(panelData + 0x50);
-    panelSetVec4(colorRow, red, green, blue, alpha);
+    panelSetVec4(colorRow->components, red, green, blue, 0);
+    colorRow = (DrawColorRec *)(panelData + 0x50);
+    panelSetVec4(colorRow->components, red, green, blue, alpha);
 }
 
 /* Write the two color rows, then scale six template rows; the first fourth component is one. */
@@ -287,22 +287,22 @@ void CreateColorPlain(u8 *base, u32 red, u32 green, u32 blue, u32 alpha) {
     itfMiscSetRatioRGB((DrawColorRec *)(base + 0x40), red, green, blue, ITF_PANEL_FULL_COLOR_SCALE, itfPanelGradientColorPair, 2);
 }
 
-/* Set the four color words at byte 0x20, consumed as a color record by the quad path. */
+/* Set the four components of the DrawColorRec at byte 0x20. */
 void CreateColorPera1(u8 *panelData, s32 red, s32 green, s32 blue, s32 alpha) {
-    u32 *color = (u32 *)(panelData + 0x20);
-    color[0] = red;
-    color[1] = green;
-    color[2] = blue;
-    color[3] = alpha;
+    DrawColorRec *color = (DrawColorRec *)(panelData + 0x20);
+    color->components[0] = red;
+    color->components[1] = green;
+    color->components[2] = blue;
+    color->components[3] = alpha;
 }
 
-/* Populate RGBA rows at bytes 0x30/0x40; the first row is transparent. */
+/* Populate DrawColorRec RGBA rows at bytes 0x30/0x40; the first row is transparent. */
 void CreateColorLeftFade(u8 *panelData, u32 red, u32 green, u32 blue, u32 alpha) {
-    u32 *colorRow = (u32 *)(panelData + 0x30);
+    DrawColorRec *colorRow = (DrawColorRec *)(panelData + 0x30);
 
-    panelSetVec4(colorRow, red, green, blue, 0);
-    colorRow = (u32 *)(panelData + 0x40);
-    panelSetVec4(colorRow, red, green, blue, alpha);
+    panelSetVec4(colorRow->components, red, green, blue, 0);
+    colorRow = (DrawColorRec *)(panelData + 0x40);
+    panelSetVec4(colorRow->components, red, green, blue, alpha);
 }
 
 /* Set both panel colors to the same blue tint with zero alpha. */
