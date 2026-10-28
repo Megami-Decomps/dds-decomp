@@ -1046,15 +1046,15 @@ ScrCommandResult evtCommand_READ_BE(void) {
 /* Store readiness in the VM result; the command itself always completes. */
 ScrCommandResult evtCommand_CHK_BE(void) {
     EvtPackEventId eventId = scrGetIntPara(0);
-    s32 isReady;
+    EvtPackLoadQueryResult result;
 
     if (scrGetScriptHandle() != 0 && evtSearchEventPack(eventId) != 0 && evtGetEventPackStat(eventId) == EVT_PACK_LOAD_COMPLETE) {
         evtPrintDeveloperConsoleMessage(D_003AC968, eventId);
-        isReady = 1;
+        result = EVT_PACK_LOAD_QUERY_READY;
     } else {
-        isReady = 0;
+        result = EVT_PACK_LOAD_QUERY_NOT_READY;
     }
-    scrSetIntReturnValue(isReady);
+    scrSetIntReturnValue(result);
     return SCR_COMMAND_RESULT_COMPLETE;
 }
 

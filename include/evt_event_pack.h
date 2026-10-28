@@ -61,6 +61,13 @@ typedef enum EvtPackLoadPhase {
 typedef s32 EvtPackLoadStatus;
 enum { EVT_PACK_LOAD_NOT_FOUND = -1 };
 
+/* Script-visible result of querying whether an event pack is fully loaded. */
+typedef s32 EvtPackLoadQueryResult;
+enum {
+    EVT_PACK_LOAD_QUERY_NOT_READY = 0,
+    EVT_PACK_LOAD_QUERY_READY = 1,
+};
+
 /* The camp constructor allocates/clears 0x48 bytes and publishes this state to
  * the event-pack load and release callbacks. */
 typedef struct EvtPackLoadState {
