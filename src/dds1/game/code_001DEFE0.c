@@ -9024,11 +9024,10 @@ u32 btlWaitUnitListIdle(void) {
 
 BtlRuntimeTask *btlCreateWaitUnitListIdleTask(u32 sound) {
     BtlRuntimeTask *task = btlAllocTask(4);
-    u8 *taskBytes = (u8 *)task;
-    taskBytes[0] = BTL_TASK_CONDITION_ALWAYS;
-    *(u16 *)((u8 *)task + 0x20) = 0x30;
-    *(void **)((u8 *)task + 0x4C) = btlWaitUnitListIdle;
-    taskBytes[0x10] = BTL_TASK_CONDITION_NEVER;
+    task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
+    task->taskId = 0x30;
+    task->callback = btlWaitUnitListIdle;
+    task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     *(u32 *)btlGetTaskArguments(task) = sound;
     return task;
 }
@@ -9052,11 +9051,10 @@ u32 sndApplyToActiveActors(u32 *soundId) {
 
 BtlRuntimeTask *btlCreateApplyToActiveActorsTask(u32 sound) {
     BtlRuntimeTask *task = btlAllocTask(4);
-    u8 *taskBytes = (u8 *)task;
-    taskBytes[0] = BTL_TASK_CONDITION_ALWAYS;
-    *(u16 *)((u8 *)task + 0x20) = 0x31;
-    *(void **)((u8 *)task + 0x4C) = sndApplyToActiveActors;
-    taskBytes[0x10] = BTL_TASK_CONDITION_NEVER;
+    task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
+    task->taskId = 0x31;
+    task->callback = sndApplyToActiveActors;
+    task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     *(u32 *)btlGetTaskArguments(task) = sound;
     return task;
 }
@@ -9170,12 +9168,11 @@ u32 btlTaskStartFadeIn(u32 *taskArgs) {
 
 BtlRuntimeTask *btlCreateFadeInTask(u32 sound) {
     BtlRuntimeTask *task = btlAllocTask(4);
-    u8 *taskBytes = (u8 *)task;
-    taskBytes[0] = BTL_TASK_CONDITION_ALWAYS;
-    *(u16 *)((u8 *)task + 0x20) = 0x35;
-    *(void **)((u8 *)task + 0x4C) = btlTaskStartFadeIn;
-    taskBytes[0x10] = BTL_TASK_CONDITION_NEVER;
-    *(u32 *)((u8 *)task + 0x48) = 0;
+    task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
+    task->taskId = 0x35;
+    task->callback = btlTaskStartFadeIn;
+    task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
+    task->onStart = 0;
     *(u32 *)btlGetTaskArguments(task) = sound;
     return task;
 }
@@ -9973,16 +9970,15 @@ s32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *request) {
 
 BtlRuntimeTask *sndCreateFileLoadTask(ActiveSoundNode *node, u32 skillIndex, const char *filename) {
     BtlRuntimeTask *task = btlAllocTask(strlen(filename) + 20);
-    u8 *taskBytes = (u8 *)task;
     SoundFileTaskArgs *request;
     char *name;
 
-    taskBytes[0] = BTL_TASK_CONDITION_ALWAYS;
-    *(u16 *)((u8 *)task + 0x20) = 0x53;
-    *(u16 *)((u8 *)task + 0x24) &= ~BTL_TASK_FLAG_REGISTERED;
-    *(void **)((u8 *)task + 0x48) = sndStartFileLoad;
-    *(void **)((u8 *)task + 0x4C) = sndPollMotSeFileAndSpu;
-    taskBytes[0x10] = BTL_TASK_CONDITION_NEVER;
+    task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
+    task->taskId = 0x53;
+    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
+    task->onStart = sndStartFileLoad;
+    task->callback = sndPollMotSeFileAndSpu;
+    task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     request = btlGetTaskArguments(task);
     name = (char *)(request + 1);
     request->node = node;
@@ -10381,15 +10377,14 @@ u32 sndPollMotionSePlayback(SoundTaskArgs *args) {
 
 BtlRuntimeTask *btlCreateMoveOtherUnitsTask(BtlUnit *unit, u32 soundId) {
     BtlRuntimeTask *task = btlAllocTask(16);
-    u8 *taskBytes = (u8 *)task;
     SoundTaskArgs *arguments;
 
-    taskBytes[0x10] = BTL_TASK_CONDITION_NEVER;
-    taskBytes[0] = BTL_TASK_CONDITION_ALWAYS;
-    *(u16 *)((u8 *)task + 0x20) = 0x54;
-    *(u64 *)((u8 *)task + 0x40) = *(u64 *)((u8 *)unit + 0x108);
-    *(void **)((u8 *)task + 0x48) = btlQueueUnitSoundSlotFileLoad;
-    *(void **)((u8 *)task + 0x4C) = sndPollMotionSePlayback;
+    task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
+    task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
+    task->taskId = 0x54;
+    task->ownerId = *(u64 *)((u8 *)unit + 0x108);
+    task->onStart = btlQueueUnitSoundSlotFileLoad;
+    task->callback = sndPollMotionSePlayback;
     arguments = btlGetTaskArguments(task);
     arguments->actor = unit;
     arguments->slot = soundId;
@@ -11335,15 +11330,14 @@ extern u32 btlApplyLinkageFormation(BattleFormationActionArgs *);
 BtlRuntimeTask *btlCreateLinkageFormationTask(BtlTask *owner, BtlUnit *firstActor,
         BtlUnit *secondActor, u32 skillId, u32 flags) {
     BtlRuntimeTask *task = btlAllocTask(20);
-    u8 *taskBytes = (u8 *)task;
     BattleFormationActionArgs *arguments;
 
-    taskBytes[0] = BTL_TASK_CONDITION_ALWAYS;
-    taskBytes[0x10] = BTL_TASK_CONDITION_NEVER;
-    *(void **)((u8 *)task + 0x4C) = btlApplyLinkageFormation;
-    *(u16 *)((u8 *)task + 0x20) = 0x5F;
-    *(u32 *)((u8 *)task + 0x48) = 0;
-    *(u64 *)((u8 *)task + 0x40) = owner->unit->identity;
+    task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
+    task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
+    task->callback = btlApplyLinkageFormation;
+    task->taskId = 0x5F;
+    task->onStart = 0;
+    task->ownerId = owner->unit->identity;
     arguments = btlGetTaskArguments(task);
     arguments->link = owner;
     arguments->first = firstActor;
