@@ -147,61 +147,61 @@ extern s8 dds3PadButtonState[];
 
 MnuShootingRoundPhaseResult mnuAdvanceShootingRoundPhase(MnuShootingWork *work) {
     switch (work->phase) {
-    case 0:
+    case MNU_SHOOTING_PHASE_FADE_IN_START:
         work->phaseTicks = 0;
-        work->phase = 1;
+        work->phase = MNU_SHOOTING_PHASE_WAIT_FOR_PLAY;
         dds3FadeIn(0, 0, 0, 30);
         break;
-    case 1:
+    case MNU_SHOOTING_PHASE_WAIT_FOR_PLAY:
         if (++work->phaseTicks > 180) {
             work->phaseTicks = 0;
-            work->phase = 2;
+            work->phase = MNU_SHOOTING_PHASE_PLAY;
         }
         break;
-    case 3:
-        work->phase = 4;
+    case MNU_SHOOTING_PHASE_ROUND_END_PENDING:
+        work->phase = MNU_SHOOTING_PHASE_SCORE_FADE;
         work->phaseTicks = 0;
         itfSetFadeMode(&work->scoreFade, 1, 8);
         itfQueueFadeMode(&work->scoreFade, 0, 8, 120);
         break;
-    case 4:
+    case MNU_SHOOTING_PHASE_SCORE_FADE:
         if (++work->phaseTicks > 200) {
             work->phaseTicks = 0;
-            work->phase = 5;
+            work->phase = MNU_SHOOTING_PHASE_SCORE_HOLD;
         }
         break;
-    case 5:
+    case MNU_SHOOTING_PHASE_SCORE_HOLD:
         if (++work->phaseTicks > 180) {
             work->phaseTicks = 0;
-            work->phase = 6;
+            work->phase = MNU_SHOOTING_PHASE_FADE_OUT;
             dds3FadeOut(0, 0, 0, 30);
             mnuAdvanceTitleStateUnderSemaphore();
         }
         break;
-    case 6:
+    case MNU_SHOOTING_PHASE_FADE_OUT:
         if (++work->phaseTicks > 60) {
             work->phaseTicks = 0;
-            work->phase = 7;
+            work->phase = MNU_SHOOTING_PHASE_ROUND_COMPLETE;
         }
         break;
-    case 7:
+    case MNU_SHOOTING_PHASE_ROUND_COMPLETE:
         work->state = 0;
-        work->phase = 0;
+        work->phase = MNU_SHOOTING_PHASE_FADE_IN_START;
         work->round++;
         return MNU_SHOOTING_ROUND_RESULT_ROUND_COMPLETE;
-    case 8:
+    case MNU_SHOOTING_PHASE_SESSION_RESET_DELAY:
         work->phaseTicks = 0;
-        work->phase = 9;
+        work->phase = MNU_SHOOTING_PHASE_SESSION_RESET_WAIT;
         break;
-    case 9:
+    case MNU_SHOOTING_PHASE_SESSION_RESET_WAIT:
         if (++work->phaseTicks > 120) {
             work->phaseTicks = 0;
-            work->phase = 10;
+            work->phase = MNU_SHOOTING_PHASE_SESSION_CHOICE;
             work->choiceIndex = 0;
             itfSetFadeMode(&work->choiceFade.fade, 1, 8);
         }
         break;
-    case 10:
+    case MNU_SHOOTING_PHASE_SESSION_CHOICE:
         if (dds3PadButtonState[0x26] < 0) {
             work->choiceIndex--;
         }
@@ -216,27 +216,27 @@ MnuShootingRoundPhaseResult mnuAdvanceShootingRoundPhase(MnuShootingWork *work) 
         }
         itfSetTwoChoiceFadeSelection(&work->choiceFade, work->choiceIndex);
         if (dds3PadButtonState[0x21] < 0) {
-            work->phase = 11;
+            work->phase = MNU_SHOOTING_PHASE_SESSION_EXIT;
             work->result = work->choiceIndex;
         }
         break;
-    case 11:
+    case MNU_SHOOTING_PHASE_SESSION_EXIT:
         work->phaseTicks = 0;
-        work->phase = 12;
+        work->phase = MNU_SHOOTING_PHASE_SESSION_EXIT_WAIT;
         itfSetFadeMode(&work->choiceFade.fade, 0, 8);
         dds3FadeOut(0, 0, 0, 120);
         mnuAdvanceTitleStateUnderSemaphore();
         break;
-    case 12:
+    case MNU_SHOOTING_PHASE_SESSION_EXIT_WAIT:
         if (++work->phaseTicks > 120) {
             work->phaseTicks = 0;
             switch (work->result) {
             case 0:
-                work->phase = 0;
+                work->phase = MNU_SHOOTING_PHASE_FADE_IN_START;
                 work->state = 0;
                 return MNU_SHOOTING_ROUND_RESULT_SESSION_RESET;
             case 1:
-                work->phase = 0;
+                work->phase = MNU_SHOOTING_PHASE_FADE_IN_START;
                 work->state = 0;
                 return MNU_SHOOTING_ROUND_RESULT_SESSION_STOP;
             }

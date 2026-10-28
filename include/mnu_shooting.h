@@ -10,6 +10,23 @@ struct dds3ModelHandle_t;
 struct FileQueue;
 struct FileRequest;
 
+typedef s16 MnuShootingPhase;
+enum {
+    MNU_SHOOTING_PHASE_FADE_IN_START = 0,
+    MNU_SHOOTING_PHASE_WAIT_FOR_PLAY = 1,
+    MNU_SHOOTING_PHASE_PLAY = 2,
+    MNU_SHOOTING_PHASE_ROUND_END_PENDING = 3,
+    MNU_SHOOTING_PHASE_SCORE_FADE = 4,
+    MNU_SHOOTING_PHASE_SCORE_HOLD = 5,
+    MNU_SHOOTING_PHASE_FADE_OUT = 6,
+    MNU_SHOOTING_PHASE_ROUND_COMPLETE = 7,
+    MNU_SHOOTING_PHASE_SESSION_RESET_DELAY = 8,
+    MNU_SHOOTING_PHASE_SESSION_RESET_WAIT = 9,
+    MNU_SHOOTING_PHASE_SESSION_CHOICE = 10,
+    MNU_SHOOTING_PHASE_SESSION_EXIT = 11,
+    MNU_SHOOTING_PHASE_SESSION_EXIT_WAIT = 12
+};
+
 typedef enum MnuShootingPackageLoadState {
     MNU_SHOOTING_PACKAGE_LOAD_INITIALIZE = 0,
     MNU_SHOOTING_PACKAGE_LOAD_FINISHED = 1,
@@ -247,7 +264,7 @@ typedef struct MnuShootingWork {
     s32 horizontalTilt;            /* integer input tilt; arithmetic uses floats */
     s16 savedPlayerMode;           /* player mode restored after loading a round */
     s16 round;                      /* 0x96 */
-    s16 phase;
+    MnuShootingPhase phase;
     s16 result;
     s32 phaseTicks;
     s32 targets; /* 0xA0: remaining shooting targets (mnuFinishOrDeactivateShootingEntry decrements per hit); cleared by mnuInitializeShootingWorkResources. */

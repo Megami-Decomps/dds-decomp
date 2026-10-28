@@ -925,7 +925,7 @@ s32 mnuInitializeShootingWorkResources(MnuShootingWork *work) {
     work->unkA4 = 0;
     D_00438934 = 0;
     work->flags = ((work->flags & ~4) | 0x10) & ~0x20;
-    work->phase = 0;
+    work->phase = MNU_SHOOTING_PHASE_FADE_IN_START;
     work->result = 0;
     work->phaseTicks = 0;
     work->playerResetState = 0;
@@ -998,7 +998,8 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
     s32 alternateAction;
     s32 mode;
 
-    if ((s8)dds3PadButtonState[1][0][12] < 0 && work->phase == 2 &&
+    if ((s8)dds3PadButtonState[1][0][12] < 0 &&
+        work->phase == MNU_SHOOTING_PHASE_PLAY &&
         !D_0040ABF8.flagsBits.updated && D_0040ABF8.inputCountdown == 0 &&
         !D_0040ABF8.flagsBits.inputDisabled) {
         mnuToggleShootingPause(work);
@@ -1015,7 +1016,7 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
             work->flags |= 4;
             mnuToggleShootingPause(work);
             work->flags |= 0x20;
-            work->phase = 11;
+            work->phase = MNU_SHOOTING_PHASE_SESSION_EXIT;
             work->result = 0;
             D_0040ABF8.remaining = 0;
             return 1;
@@ -1024,17 +1025,17 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
             mnuToggleShootingPause(work);
             work->flags |= 0x20;
             work->result = 1;
-            work->phase = 11;
+            work->phase = MNU_SHOOTING_PHASE_SESSION_EXIT;
             D_0040ABF8.remaining = 0;
             return 1;
         }
         return 0;
     }
-    if (work->phase == 2) mnuAdvanceCursorStepUntilThreshold();
+    if (work->phase == MNU_SHOOTING_PHASE_PLAY) mnuAdvanceCursorStepUntilThreshold();
     mnuTriggerProgressResourceRecords(mnuGetResourceProgressStepState());
     mnuVisitActiveRecords(work);
     mnuProcessMenuWorkEntryLifecycle(&D_0040ABF8, work);
-    if (work->phase == 2) mnuUpdateActiveMenuWorkEntries(0);
+    if (work->phase == MNU_SHOOTING_PHASE_PLAY) mnuUpdateActiveMenuWorkEntries(0);
     else mnuUpdateActiveMenuWorkEntries(1);
     mnuAdvanceRuntimeHitTargets();
     memset(&input, 0, sizeof(input));
@@ -1069,9 +1070,10 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
             record->state.word &= ~1;
         }
     }
-    if (work->phase < 3) {
+    if (work->phase < MNU_SHOOTING_PHASE_ROUND_END_PENDING) {
         mnuDispatchRuntimeListPairOverlaps(work);
-        if (work->phase < 3) mnuAdvanceWorkEntriesOverlappingInput(&D_0040ABF8);
+        if (work->phase < MNU_SHOOTING_PHASE_ROUND_END_PENDING)
+            mnuAdvanceWorkEntriesOverlappingInput(&D_0040ABF8);
     }
     mnuDispatchRuntimeWorkOverlaps(mnuGetRuntimeAnimationList(), work);
     CalcCamera();
@@ -1110,7 +1112,8 @@ s32 mnuUpdateShootingWork(MnuShootingWork *work) {
         return 1;
     }
     dds3UpdateSoundSlots();
-    if ((s8)dds3PadButtonState[1][1][13] < 0) work->phase = 3;
+    if ((s8)dds3PadButtonState[1][1][13] < 0)
+        work->phase = MNU_SHOOTING_PHASE_ROUND_END_PENDING;
     if (D_00438934 > 0) {
         D_00438934--;
         if (D_00438934 == 0) {
@@ -1388,7 +1391,7 @@ void mnuFinishOrDeactivateShootingEntry(MenuWorkEntry *entry, MnuShootingWork *w
         if (--work->frameDisplayValue < 0) {
             mnuClampPendingScoreToPeak(work);
             work->playerResetState = 4;
-            work->phase = 8;
+            work->phase = MNU_SHOOTING_PHASE_SESSION_RESET_DELAY;
         }
         if (entry->flagsBits.mode >= 2) {
             runtime = mnuGetRuntimeHitTargetList();
@@ -1447,7 +1450,7 @@ void mnuFinishOrDeactivateShootingEntry(MenuWorkEntry *entry, MnuShootingWork *w
         }
         if (registry->parameterIndex == 0x22 && work->playerResetState != 4) {
             D_0040ABF8.remaining = 0;
-            work->phase = 3;
+            work->phase = MNU_SHOOTING_PHASE_ROUND_END_PENDING;
         }
     }
 
