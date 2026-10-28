@@ -22,7 +22,7 @@ typedef struct dds3ObjectBaseControlWorkData_t {
     u32 resourceState;
     void *resourceHandle; /* Owner-held model context/device-motion root;
                            * borrowed views expire on release or rebuild. */
-    void *slots[8];
+    dds3Basic_t *slots[8];
     void *extData;
     struct sdfModelRootNode_t *devSlot;
     struct sdfMotionCtrlr_t *motion;
