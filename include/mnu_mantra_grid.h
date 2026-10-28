@@ -15,10 +15,21 @@ enum MnuMantraDisplayFlag {
     MNU_MANTRA_DISPLAY_FLAG_REQUIREMENT_PAIR_SET_FALLBACK = 0x20,
 };
 
+typedef u32 MnuMantraGridPulseMode;
+enum MnuMantraGridPulseMode {
+    MNU_MANTRA_GRID_PULSE_INITIAL = 0,
+    MNU_MANTRA_GRID_PULSE_WAITING = 1,
+    MNU_MANTRA_GRID_PULSE_OPENING = 2,
+    MNU_MANTRA_GRID_PULSE_OPEN = 3,
+    MNU_MANTRA_GRID_PULSE_CLOSING = 4,
+    MNU_MANTRA_GRID_PULSE_FLASH = 5,
+    MNU_MANTRA_GRID_PULSE_MODE_COUNT = 6
+};
+
 typedef struct MnuMantraGridPulse {
     u16 timer;
     s16 duration;
-    u32 mode;
+    MnuMantraGridPulseMode mode;
 } MnuMantraGridPulse;
 
 /* Branch outcomes produced by the two profile checks and the profile-0x4E exception. */

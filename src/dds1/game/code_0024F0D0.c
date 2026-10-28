@@ -4076,35 +4076,35 @@ void mnuUpdateMantraGridEntryPulse(MnuMantraGridEntry *entry) {
     pulse->timer = 0;
     random = dds3GetRandFloatA(0);
     switch (pulse->mode) {
-    case 1:
+    case MNU_MANTRA_GRID_PULSE_WAITING:
         if (random < 0.3f) {
-            pulse->mode = 2;
+            pulse->mode = MNU_MANTRA_GRID_PULSE_OPENING;
             pulse->duration = 50;
             return;
         }
         if (random < 0.5f) {
-            pulse->mode = 5;
+            pulse->mode = MNU_MANTRA_GRID_PULSE_FLASH;
             pulse->duration = 60;
             return;
         }
         pulse->duration = mnuRandomPulseDuration(0);
         return;
-    case 2:
-        pulse->mode = 3;
+    case MNU_MANTRA_GRID_PULSE_OPENING:
+        pulse->mode = MNU_MANTRA_GRID_PULSE_OPEN;
         pulse->duration = mnuRandomPulseDuration(0);
         return;
-    case 3:
+    case MNU_MANTRA_GRID_PULSE_OPEN:
         if (dds3GetRandFloatA(0) < 0.1f) {
-            pulse->mode = 4;
+            pulse->mode = MNU_MANTRA_GRID_PULSE_CLOSING;
             pulse->duration = 50;
             return;
         }
         pulse->duration = mnuRandomPulseDuration(0);
         return;
-    case 0:
-    case 4:
-    case 5:
-        pulse->mode = 1;
+    case MNU_MANTRA_GRID_PULSE_INITIAL:
+    case MNU_MANTRA_GRID_PULSE_CLOSING:
+    case MNU_MANTRA_GRID_PULSE_FLASH:
+        pulse->mode = MNU_MANTRA_GRID_PULSE_WAITING;
         pulse->duration = mnuRandomPulseDuration(0);
         return;
     default:
@@ -4116,23 +4116,23 @@ void mnuUpdateMantraGridEntryPulse(MnuMantraGridEntry *entry) {
 void mnuDrawMantraGridEntryPulse(s32 x, s32 y, s32 z, s32 alpha, MnuMantraGridEntry *entry,
                    s32 context) {
     MnuMantraGridPulse *pulse = &entry->pulse;
-    u32 mode = pulse->mode;
+    MnuMantraGridPulseMode mode = pulse->mode;
     f32 progress;
 
-    if (mode >= 6) {
+    if (mode >= MNU_MANTRA_GRID_PULSE_MODE_COUNT) {
         return;
     }
 
     /* The first two ring pieces interpolate in radians, then draw in degrees. */
     switch (mode) {
-    case 0:
-    case 1:
+    case MNU_MANTRA_GRID_PULSE_INITIAL:
+    case MNU_MANTRA_GRID_PULSE_WAITING:
         mnuDrawPlacedSpriteWithFlags(x, y, z, alpha, 0x20, 0x44, context);
         mnuDrawPlacedSpriteWithFlags(x, y, z, alpha, 0x20, 0x45, context);
         mnuDrawPlacedSpriteWithFlags(x, y, z, alpha, 0x20, 0x46, context);
         return;
 
-    case 2: {
+    case MNU_MANTRA_GRID_PULSE_OPENING: {
         progress = (f32)(s16)pulse->timer / (f32)pulse->duration;
 
         mnuDrawRotatedPlacedSprite(x, y, z, alpha, 0x20, 0x44, context,
@@ -4143,7 +4143,7 @@ void mnuDrawMantraGridEntryPulse(s32 x, s32 y, s32 z, s32 alpha, MnuMantraGridEn
         return;
     }
 
-    case 3:
+    case MNU_MANTRA_GRID_PULSE_OPEN:
         mnuDrawRotatedPlacedSprite(x, y, z, alpha, 0x20, 0x44, context,
                       -1.0210175f * 57.29578f);
         mnuDrawRotatedPlacedSprite(x, y, z, alpha, 0x20, 0x45, context,
@@ -4151,7 +4151,7 @@ void mnuDrawMantraGridEntryPulse(s32 x, s32 y, s32 z, s32 alpha, MnuMantraGridEn
         mnuDrawPlacedSpriteWithFlags(x, y, z, alpha, 0x20, 0x46, context);
         return;
 
-    case 4: {
+    case MNU_MANTRA_GRID_PULSE_CLOSING: {
         progress = (f32)(s16)pulse->timer / (f32)pulse->duration;
         progress = 1.0f - progress;
 
@@ -4163,7 +4163,7 @@ void mnuDrawMantraGridEntryPulse(s32 x, s32 y, s32 z, s32 alpha, MnuMantraGridEn
         return;
     }
 
-    case 5: {
+    case MNU_MANTRA_GRID_PULSE_FLASH: {
         s16 timer = (s16)pulse->timer;
 
         if (timer < 50) {
