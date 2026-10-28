@@ -15,6 +15,7 @@
 #include "kwln.h"
 #include "kwln_task_create.h"
 #include "sdf_movie_api.h"
+#include "mnu_movie_playback_api.h"
 #include "mnu.h"
 #include "eff.h"
 #include "mnu_list.h"
@@ -31,9 +32,6 @@ extern void frFontUploadClearedTexture(void);
 extern void frwLoadStaffFont(void);
 extern void frwFreeStaffFont(void);
 #include "sdf_debug_api.h"
-extern s32 sdfMovieIsFinished(movieStream_t *job);
-
-
 /* Title menu's selected page, sequence timers and draw-task state. */
 typedef struct MenuTitleState {
     u8 pad00[0x14];
@@ -1231,8 +1229,6 @@ s32 mnuUpdateStaffRoll(dds3ProcessID_t *task) {
 
 extern MnuStaffImageRecord mnuStaffRollImageRecords[19];
 extern s32 D_00437AB4;
-extern s32 mnuIsMoviePlaybackFinished(void);
-
 INCLUDE_RODATA(const s32, "game/code_002A5260", D_00429938);
 
 void mnuAdvanceStaffImageSequence(void) {
@@ -1245,7 +1241,7 @@ void mnuAdvanceStaffImageSequence(void) {
 
     switch (D_00437AB8) {
     case 1:
-        if (mnuIsMoviePlaybackFinished() != 0) {
+        if (mnuIsMoviePlaybackFinished() != SDF_MOVIE_COMPLETION_INCOMPLETE) {
             mnuMovieWork->fadeFrame = 0;
             D_00437AB8 = 2;
         } else {
@@ -1302,7 +1298,7 @@ void mnuAdvanceStaffImageSequence(void) {
         }
         for (i = 18; i >= D_00437AB4; i--) {
             if (mnuMovieWork->frame >= mnuStaffRollImageRecords[i].startFrame) {
-                if (mnuIsMoviePlaybackFinished() != 0 || D_00437AB4 == 0) {
+                if (mnuIsMoviePlaybackFinished() != SDF_MOVIE_COMPLETION_INCOMPLETE || D_00437AB4 == 0) {
                     sdfSetGridScaledDrawBounds(mnuStaffRollImageRecords[D_00437AB4].x,
                         mnuStaffRollImageRecords[D_00437AB4].y,
                         mnuStaffRollImageRecords[D_00437AB4].width,
@@ -1877,7 +1873,7 @@ void movieStop(void) {
     PlayingNo = 0;
 }
 
-s32 mnuIsMoviePlaybackFinished(void) {
+SdfMovieCompletionResult mnuIsMoviePlaybackFinished(void) {
     return sdfMovieIsFinished(&mnuMovieDrawContext);
 }
 

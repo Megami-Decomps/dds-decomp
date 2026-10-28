@@ -12,6 +12,7 @@
 #include "kwln_task_add_child.h"
 #include "mnu_title_stream.h"
 #include "mnu_title_sound.h"
+#include "mnu_movie_playback_api.h"
 #include "mnu_camp_font_api.h"
 #include "mnu_camp_option_index_api.h"
 #include "sdf_chip.h"
@@ -2480,7 +2481,6 @@ void evtEventViewerApplyEffectChannels(s32 frame, EvtRuntime *viewer) {
     }
 }
 
-extern s32 mnuIsMoviePlaybackFinished(void);
 extern void movieStop(void);
 /* Advance or stop the timed viewer action according to the current position. */
 s32 evtViewerUpdateTimedAction(EvtRuntime *viewer) {

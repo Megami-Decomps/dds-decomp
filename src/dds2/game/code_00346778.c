@@ -144,9 +144,9 @@ void movieCloseStream(movieStream_t *job) {
 }
 
 /* Decoder completion requires drained input and no completed output buffers pending. */
-s32 sdfMovieIsFinished(movieStream_t *job) {
+SdfMovieCompletionResult sdfMovieIsFinished(movieStream_t *job) {
     if (job->soundNode.drained == 0) {
-        return 0;
+        return SDF_MOVIE_COMPLETION_INCOMPLETE;
     }
     return job->soundNode.completedBufferCount == 0;
 }

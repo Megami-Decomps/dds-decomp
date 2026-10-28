@@ -5,6 +5,7 @@
 #include "kwln_task_runner.h"
 #include "mnu.h"
 #include "mnu_sprite_resource.h"
+#include "mnu_movie_playback_api.h"
 
 extern u8 mnuTitleCameraPosition[];
 
@@ -54,7 +55,6 @@ extern void mnuDrawMovieMenuSpriteSlot18(s32 volume);
 extern u8 mnuIsAnyMenuInputPressed(void);
 extern void dds3PlayMovieByIndex(s32 index);
 extern u8 mnuGetMoviePlaybackMode(void);
-extern s32 mnuIsMoviePlaybackFinished(void);
 extern void sdfSoundSetChannelCount(u32 channelCount);
 extern void mnuRequestDefaultMovieResource(void);
 extern void mnuDrawMovieMenuSpriteLayers(s32 context);
@@ -263,7 +263,7 @@ KwlnTaskUpdateResult mnuUpdateMovieMenuTask(dds3ProcessID_t *task) {
             sdfSoundSetChannelCount(0x2D);
             mnuMovieMenuState->movieSkipped = 1;
         }
-        if (mnuIsMoviePlaybackFinished() != 0) {
+        if (mnuIsMoviePlaybackFinished() != SDF_MOVIE_COMPLETION_INCOMPLETE) {
             mnuMovieMenuState->state = 0x11;
             mnuMovieMenuState->cursor = 0x16;
         }
@@ -302,7 +302,7 @@ KwlnTaskUpdateResult mnuUpdateMovieMenuTask(dds3ProcessID_t *task) {
             mnuMovieMenuState->cursor = 0;
             movieStop();
         }
-        if (mnuIsMoviePlaybackFinished() != 0) {
+        if (mnuIsMoviePlaybackFinished() != SDF_MOVIE_COMPLETION_INCOMPLETE) {
             mnuDrawMovieMenuBackgroundQuad(0x80);
             mnuDrawMovieMenuSpriteLayers(0x3E);
             mnuMovieMenuState->state = 0x16;

@@ -12,6 +12,7 @@
 #include "kwln_task_add_child.h"
 #include "mnu_title_stream.h"
 #include "mnu_title_sound.h"
+#include "mnu_movie_playback_api.h"
 #include "mnu_camp_font_api.h"
 #include "mnu_camp_option_index_api.h"
 #include "kwln_draw_buffer.h"
@@ -106,7 +107,6 @@ dds3Basic_t *dds3GetActiveScene(void);
 f32 dds3CameraObjectBasicGetFovy(const dds3Basic_t *camera);
 void dds3SetScreenFovy(f32 fieldOfView);
 void movieStop(void);
-s32 mnuIsMoviePlaybackFinished(void);
 
 /* Handles retained by the viewer and by its owning task context. */
 

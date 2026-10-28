@@ -9,6 +9,7 @@
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "sdf.h"
+#include "mnu_movie_playback_api.h"
 #include "sdf_semaphore_api.h"
 #include "kwln.h"
 #include "kwln_task_runner.h"
@@ -900,7 +901,6 @@ extern void mnuDrawMovieMenuSpriteSlot1F(s32);
 extern void mnuDrawMovieMenuSpriteSlot20(u32);
 extern void mnuDrawMovieMenuSpriteSlot21(u32);
 extern u8 mnuGetMoviePlaybackMode(void);
-extern s32 mnuIsMoviePlaybackFinished(void);
 extern void mnuClearGlobalMenuStateFields(void);
 extern s32 mnuPollMovieMenuInputAndTimeout(void);
 extern void mnuUpdateTitlePageByMode(void);
@@ -1117,7 +1117,7 @@ KwlnTaskUpdateResult mnuUpdateTitleMenuTask(dds3ProcessID_t *task) {
             sdfSoundSetChannelCount(0x2D);
             titleWork->movieOpened = 1;
         }
-        if (mnuIsMoviePlaybackFinished() != 0) {
+        if (mnuIsMoviePlaybackFinished() != SDF_MOVIE_COMPLETION_INCOMPLETE) {
             titleWork->state = 18;
             titleWork->cursor = 0x2D;
         }
@@ -1155,7 +1155,7 @@ KwlnTaskUpdateResult mnuUpdateTitleMenuTask(dds3ProcessID_t *task) {
             titleWork->cursor = 0;
             mnuStopTitleMovieDraw();
         }
-        if (mnuIsMoviePlaybackFinished() != 0) {
+        if (mnuIsMoviePlaybackFinished() != SDF_MOVIE_COMPLETION_INCOMPLETE) {
             titleWork->state = 23;
             titleWork->cursor = 0;
             mnuStopTitleMovieDraw();

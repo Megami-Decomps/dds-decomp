@@ -14,6 +14,7 @@
 #include "kwln_task_lifecycle.h"
 #include "mnu_movie_transfer.h"
 #include "mnu_movie_list.h"
+#include "mnu_movie_playback_api.h"
 #include "sce_io.h"
 #include "btl.h"
 /* Declared before first use (were implicit int). */
@@ -49,8 +50,6 @@ extern void mnuStartMovieDrawTaskForResource(const char *, const SdfMovieDescrip
 void mnuRequestIndexedMovieResource(s32 index);
 
 void movieStop(void);
-
-s32 mnuIsMoviePlaybackFinished(void);
 
 KwlnTaskUpdateResult movieMan_Process(dds3ProcessID_t *task) {
     sdfAdvanceStreamPlayback(0x3c / dds3VblanksPerFrame);
@@ -101,7 +100,7 @@ s32 mnuUpdateMovieDrawShutdownCountdown(void) {
         }
         mnuMovieShutdownCounter = mnuMovieShutdownCounter + 1;
     }
-    scrSetIntReturnValue(mnuIsMoviePlaybackFinished() == 0);
+    scrSetIntReturnValue(mnuIsMoviePlaybackFinished() == SDF_MOVIE_COMPLETION_INCOMPLETE);
     return 1;
 }
 
@@ -185,7 +184,7 @@ void movieDebugDrawInfo(void) {
 
 void MovieViewerDrawFrameInfo(void) {
     sdfDrawTag_t *list;
-    if (mnuIsMoviePlaybackFinished() == 0) {
+    if (mnuIsMoviePlaybackFinished() == SDF_MOVIE_COMPLETION_INCOMPLETE) {
         list = mnuMovieList.packets;
         sdfDrawTagLink(list, (u32)dds3PrimFrameRect(0x8810, 0x85E8, 0xFF0080, 0x720, 0x90, 0x30000000, 0x60404040));
         sdfDrawTagLink(list, (u32)sdfDevPrintf(0x8840, 0x8600, 0xFF0080, 0, "%04d/%04d", mnuMovieDrawContext.soundNode.playbackFrameIndex, (s32)mnuMovieDrawContext.soundNode.cycleLength));
@@ -216,7 +215,7 @@ KwlnTaskUpdateResult mnuMovieViewer(dds3ProcessID_t *task) {
     }
 
     if (mnuMovieList.playing != 0) {
-        if (mnuIsMoviePlaybackFinished() != 0) {
+        if (mnuIsMoviePlaybackFinished() != SDF_MOVIE_COMPLETION_INCOMPLETE) {
             mnuMovieList.playing = 0;
         } else {
             s32 previousButtons = D_00438FF0;
