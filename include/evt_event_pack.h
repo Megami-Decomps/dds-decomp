@@ -22,6 +22,9 @@ typedef enum EvtPackKind {
 /* Key used to locate a payload by the BE record's secondaryResourceId. */
 typedef s32 EvtPackSecondaryResourceId;
 
+/* Numeric event key used to name and find the camp's event-pack task. */
+typedef s32 EvtPackEventId;
+
 /* BE resource files have a 0x20-byte header and fixed 0x20-byte records. */
 typedef struct EvtPackEntry {
     EvtPackKind kind;             /* 0x00 */
@@ -61,7 +64,7 @@ enum { EVT_PACK_LOAD_NOT_FOUND = -1 };
 /* The camp constructor allocates/clears 0x48 bytes and publishes this state to
  * the event-pack load and release callbacks. */
 typedef struct EvtPackLoadState {
-    s32 eventId;                  /* 0x00 */
+    EvtPackEventId eventId;       /* 0x00: event-pack key, not a scheduler handle */
     EvtPackLoadPhase loadPhase;    /* 0x04 */
     struct FileRequest *pendingRequest; /* 0x08: queued event-script request, then cleanup */
     struct sdfMemHandle_t *resourceAllocation; /* 0x0C: retained descriptor */
@@ -101,17 +104,17 @@ typedef char EvtPackLoadState_effect75_at_0x44[
     ((u32)&((EvtPackLoadState *)0)->effect75 == 0x44) ? 1 : -1];
 
 /* Borrow the camp-owned state for updates; valid only while its task exists. */
-EvtPackLoadState *evtGetPackProcessData(s32 taskId);
+EvtPackLoadState *evtGetPackProcessData(EvtPackEventId eventId);
 
 /* Borrow a read-only view for readers, with the same task lifetime. */
-static inline const EvtPackLoadState *evtGetPackProcessDataView(s32 taskId) {
-    return evtGetPackProcessData(taskId);
+static inline const EvtPackLoadState *evtGetPackProcessDataView(EvtPackEventId eventId) {
+    return evtGetPackProcessData(eventId);
 }
-EvtPackLoadStatus evtGetEventPackStat(s32 taskId);
+EvtPackLoadStatus evtGetEventPackStat(EvtPackEventId eventId);
 
 /* Find an entry by secondaryResourceId in a complete pack and return its
  * borrowed payload address; resource kinds stay opaque. */
-void *evtGetEventPackResourceAddress(s32 taskId,
+void *evtGetEventPackResourceAddress(EvtPackEventId eventId,
                                      EvtPackSecondaryResourceId secondaryResourceId);
 
 #endif /* EVT_EVENT_PACK_H */

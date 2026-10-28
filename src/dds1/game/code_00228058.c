@@ -71,7 +71,7 @@ INCLUDE_RODATA(const s32, "game/code_00228058", D_003ACA78);
 
 u32 evtCommand_TEX_BE(void) {
     scrProcessWork_s *work;
-    s32 id;
+    EvtPackEventId eventId;
     struct sdfTexHandle_t *entry;
     dds3ProcessID_t *task;
 
@@ -83,8 +83,8 @@ u32 evtCommand_TEX_BE(void) {
         printf(D_003ACA78);
         return 1;
     }
-    id = scrGetIntPara(0);
-    entry = evtGetEventPackResourceAddress(id, scrGetIntPara(1));
+    eventId = scrGetIntPara(0);
+    entry = evtGetEventPackResourceAddress(eventId, scrGetIntPara(1));
     if (entry == 0) {
         evtPrintDeveloperConsoleMessage("TEX_BE not fount RID = %d\n", scrGetIntPara(1));
         return 1;
@@ -290,15 +290,15 @@ u32 evtCommandStartBgmWithFade(void) {
     return 1;
 }
 
-extern void evtRefreshTaskEffectTexture(s32 taskId, s32 key);
+extern void evtRefreshTaskEffectTexture(EvtPackEventId eventId, EvtPackSecondaryResourceId key);
 
 u32 evtOpcodeRefreshTaskData(void) {
-    s32 task;
-    s32 value;
+    EvtPackEventId eventId;
+    EvtPackSecondaryResourceId key;
 
-    task = scrGetIntPara(0);
-    value = scrGetIntPara(1);
-    evtRefreshTaskEffectTexture(task, value);
+    eventId = scrGetIntPara(0);
+    key = scrGetIntPara(1);
+    evtRefreshTaskEffectTexture(eventId, key);
     return 1;
 }
 

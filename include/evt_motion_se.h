@@ -2,6 +2,7 @@
 #define EVT_MOTION_SE_H
 
 #include "common.h"
+#include "evt_event_pack.h"
 
 /* The model's world key is also the result; this sentinel means it is absent. */
 typedef s32 EvtMotionSeModelKey;
@@ -10,7 +11,7 @@ enum { EVT_MOTION_SE_MODEL_KEY_NOT_FOUND = -1 };
 /* Runtime user value for the event's motion-sound task. */
 typedef struct EvtMotionSeTaskParams {
     EvtMotionSeModelKey modelKey;
-    s32 eventTaskId;
+    EvtPackEventId eventId;
     s32 resourceId;
 } EvtMotionSeTaskParams;
 

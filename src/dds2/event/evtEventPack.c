@@ -37,7 +37,7 @@ const char D_00424830[0x20] __attribute__((aligned(8))) = "unit decode rid:%d, s
 const char D_00424850[0x20] __attribute__((aligned(8))) = "BE regist unit %d < %d >\n";
 
 /* Decode one retained unit payload and return its new viewer-object key. */
-EvtMotionSeModelKey evtInitMotionSeProcess(s32 eventId, s32 resourceId) {
+EvtMotionSeModelKey evtInitMotionSeProcess(EvtPackEventId eventId, s32 resourceId) {
     const EvtPackLoadState *packState;
     const EvtPackEntry *entry;
     s32 packEntryIndex;
@@ -83,7 +83,7 @@ EvtMotionSeModelKey evtInitMotionSeProcess(s32 eventId, s32 resourceId) {
 }
 
 /* Start a field BE from the task's resource table when all four payloads exist. */
-s32 evtRegistBEField(s32 eventId, s32 resourceId) {
+s32 evtRegistBEField(EvtPackEventId eventId, s32 resourceId) {
     const EvtPackLoadState *packState;
     const EvtPackEntry *entry;
     s32 entryCount;
@@ -152,11 +152,11 @@ KwlnTaskUpdateResult evtMotionSeProcess1(dds3ProcessID_t *task) {
     if (motionNode == NULL) {
         return KWLN_TASK_UPDATE_FINISH_CALLBACK;
     }
-    packState = evtGetPackProcessDataView(motionSeParams->eventTaskId);
+    packState = evtGetPackProcessDataView(motionSeParams->eventId);
     if (packState == NULL) {
         return KWLN_TASK_UPDATE_FINISH_CALLBACK;
     }
-    if (motionSeParams->eventTaskId < 600) {
+    if (motionSeParams->eventId < 600) {
         return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
     }
     unit = ((EvtMotionSeUnitLink *)motionNode->data)->unit;
@@ -173,7 +173,7 @@ KwlnTaskUpdateResult evtMotionSeProcess1(dds3ProcessID_t *task) {
             for (cueIndex = 0; cueIndex < packState->entries[entryIndex].cueCount; cueIndex++) {
                 if (cues[cueIndex].frame == motionFrame) {
                     variation = cues[cueIndex].fade;
-                    evtPlaySe(motionSeParams->eventTaskId, variation);
+                    evtPlaySe(motionSeParams->eventId, variation);
                     printf("EVE_SE motno = %d, frame = %d\n", motionId, motionFrame);
                 }
             }
@@ -194,15 +194,15 @@ const char evtMotionSeTaskNameFormat[0x10] __attribute__((aligned(8))) = "mse_%d
 
 
 /* Allocate a three-word task parameter block and format its "mse_..." name. */
-dds3ProcessID_t *evtLoadModelSe(EvtMotionSeModelKey modelKey, s32 eventTaskId, s32 resourceId) {
+dds3ProcessID_t *evtLoadModelSe(EvtMotionSeModelKey modelKey, EvtPackEventId eventId, s32 resourceId) {
     char taskName[0x20];
     EvtMotionSeTaskParams *params;
 
-    sprintf(taskName, evtMotionSeTaskNameFormat, eventTaskId, resourceId);
+    sprintf(taskName, evtMotionSeTaskNameFormat, eventId, resourceId);
     params = sdfChipAllocDirect(sizeof(*params));
     memset(params, 0, sizeof(*params));
     params->modelKey = modelKey;
-    params->eventTaskId = eventTaskId;
+    params->eventId = eventId;
     params->resourceId = resourceId;
     return dds3StartProcess(taskName, 0x3EC, 0, 0, evtMotionSeProcess1, evtFreeScriptProcessData, (u32)params);
 }
@@ -213,7 +213,7 @@ extern char evtPackScriptPathBuffer[];
 
 /* Resolve the event's script path ("/event/eNNN/eNNN/scr/eNNN.be", grouped by tens) and start loading it. */
 void evtLoadEventScript(EvtPackLoadState *state) {
-    s32 eventId;
+    EvtPackEventId eventId;
     s32 eventDirectoryId;
     struct FileRequest *request;
 

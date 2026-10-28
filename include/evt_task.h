@@ -2,16 +2,17 @@
 #define EVT_TASK_H
 
 #include "kwln.h"
+#include "evt_event_pack.h"
 #include "evt_motion_se.h"
 
-/* Event and camp task identities are scheduler task pointers. */
-dds3ProcessID_t *evtSearchEventPack(s32 taskId);
-void evtMakeEventPackName(s32 taskId, char *buffer);
-EvtMotionSeModelKey evtInitMotionSeProcess(s32 eventId, s32 resourceId);
+/* Event-pack IDs identify camp tasks; lookup returns the scheduler handle. */
+dds3ProcessID_t *evtSearchEventPack(EvtPackEventId eventId);
+void evtMakeEventPackName(EvtPackEventId eventId, char *buffer);
+EvtMotionSeModelKey evtInitMotionSeProcess(EvtPackEventId eventId, s32 resourceId);
 /* The task reads borrowed event-pack state while updating. Link it under the
  * matching event-pack task so teardown cancels it before releasing that state. */
-dds3ProcessID_t *evtLoadModelSe(EvtMotionSeModelKey modelKey, s32 eventTaskId, s32 resourceId);
-dds3ProcessID_t *evtLoadEventPack(s32 taskId);
-void evtKillEventPack(s32 taskId);
+dds3ProcessID_t *evtLoadModelSe(EvtMotionSeModelKey modelKey, EvtPackEventId eventId, s32 resourceId);
+dds3ProcessID_t *evtLoadEventPack(EvtPackEventId eventId);
+void evtKillEventPack(EvtPackEventId eventId);
 
 #endif /* EVT_TASK_H */

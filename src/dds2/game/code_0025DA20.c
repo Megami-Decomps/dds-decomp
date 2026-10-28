@@ -202,27 +202,27 @@ extern SdfPoolNode sdfGrOtTable[];
 extern ShopRankPriceRow mnuShopRankPriceRows[];
 
 /* Schedule the camp task only if no task currently owns this event ID. */
-dds3ProcessID_t *evtLoadEventPack(s32 taskId) {
+dds3ProcessID_t *evtLoadEventPack(EvtPackEventId eventId) {
     char taskName[CAMP_TASK_NAME_BYTES];
     EvtPackLoadState *taskData;
     dds3ProcessID_t *task;
 
-    task = evtSearchEventPack(taskId);
+    task = evtSearchEventPack(eventId);
     if (task == 0) {
-        evtMakeEventPackName(taskId, taskName);
+        evtMakeEventPackName(eventId, taskName);
         taskData = sdfChipAllocDirect(CAMP_TASK_DATA_BYTES);
         memset(taskData, 0, CAMP_TASK_DATA_BYTES);
-        taskData->eventId = taskId;
+        taskData->eventId = eventId;
         taskData->loadPhase = EVT_PACK_LOAD_NOT_STARTED;
         task = dds3StartProcess(taskName, CAMP_TASK_PRIORITY, 1, 1, evtTickPackLoad, evtDestroyEventPackTask, (u32)taskData);
     }
     return task;
 }
 
-void evtKillEventPack(s32 taskId) {
+void evtKillEventPack(EvtPackEventId eventId) {
     dds3ProcessID_t *taskHandle;
 
-    taskHandle = evtSearchEventPack(taskId);
+    taskHandle = evtSearchEventPack(eventId);
     if (taskHandle != 0) {
         dds3KillProcess(taskHandle, 0);
         return;

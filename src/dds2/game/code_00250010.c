@@ -5727,28 +5727,28 @@ s32 evtStartBgmBySoundIdAndFade(s32 eventId, EvtSoundVariation variation) {
 
 extern char D_004377D0[];
 
-void evtMakeEventPackName(s32 taskId, char *buffer) {
-    sprintf(buffer, D_004377D0, taskId);
+void evtMakeEventPackName(EvtPackEventId eventId, char *buffer) {
+    sprintf(buffer, D_004377D0, eventId);
 }
 
-dds3ProcessID_t *evtSearchEventPack(s32 taskId) {
+dds3ProcessID_t *evtSearchEventPack(EvtPackEventId eventId) {
     char taskName[32];
 
-    evtMakeEventPackName(taskId, taskName);
+    evtMakeEventPackName(eventId, taskName);
     return dds3SearchProcessName((const char *)taskName);
 }
 
 /* Return its load phase, or EVT_PACK_LOAD_NOT_FOUND when the task is absent. */
-EvtPackLoadStatus evtGetEventPackStat(s32 taskId) {
-    dds3ProcessID_t *task = evtSearchEventPack(taskId);
+EvtPackLoadStatus evtGetEventPackStat(EvtPackEventId eventId) {
+    dds3ProcessID_t *task = evtSearchEventPack(eventId);
     if (task == 0) {
         return EVT_PACK_LOAD_NOT_FOUND;
     }
     return ((EvtPackLoadState *)dds3GetProcessData(task))->loadPhase;
 }
 
-EvtPackLoadState *evtGetPackProcessData(s32 taskId) {
-    dds3ProcessID_t *task = evtSearchEventPack(taskId);
+EvtPackLoadState *evtGetPackProcessData(EvtPackEventId eventId) {
+    dds3ProcessID_t *task = evtSearchEventPack(eventId);
     if (task != 0) {
         return (EvtPackLoadState *)dds3GetProcessData(task);
     }
@@ -5756,12 +5756,12 @@ EvtPackLoadState *evtGetPackProcessData(s32 taskId) {
 }
 
 
-void *evtGetEventPackResourceAddress(s32 taskId, EvtPackSecondaryResourceId secondaryResourceId) {
+void *evtGetEventPackResourceAddress(EvtPackEventId eventId, EvtPackSecondaryResourceId secondaryResourceId) {
     dds3ProcessID_t *task;
     EvtPackLoadState *data;
     s32 i;
 
-    task = evtSearchEventPack(taskId);
+    task = evtSearchEventPack(eventId);
     if (task == 0) {
         return 0;
     }
@@ -5778,9 +5778,9 @@ void *evtGetEventPackResourceAddress(s32 taskId, EvtPackSecondaryResourceId seco
 }
 
 extern void Eve_DistortionBlurSetTex(sdfTexHandle_t *);
-void evtRefreshTaskEffectTexture(s32 taskId, EvtPackSecondaryResourceId key) {
-    EvtPackLoadState *data = evtGetPackProcessData(taskId);
-    void *address = evtGetEventPackResourceAddress(taskId, key);
+void evtRefreshTaskEffectTexture(EvtPackEventId eventId, EvtPackSecondaryResourceId key) {
+    EvtPackLoadState *data = evtGetPackProcessData(eventId);
+    void *address = evtGetEventPackResourceAddress(eventId, key);
     sdfTexHandle_t *texture;
     if (address != 0) {
         if (data->effect72 != 0) {
@@ -5801,7 +5801,7 @@ extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(struct SoundMixer *resource, co
 
 /* Spawn from a keyed task resource with two zeroed constructor vectors.
  * A nonnegative index applies the selected model-table scale relative to the base. */
-dds3Basic_t *evtSpawnResourceObject(s32 taskId, EvtPackSecondaryResourceId key, s32 index) {
+dds3Basic_t *evtSpawnResourceObject(EvtPackEventId eventId, EvtPackSecondaryResourceId key, s32 index) {
     u8 vecA[16];
     u8 vecB[16];
     void *found;
@@ -5810,7 +5810,7 @@ dds3Basic_t *evtSpawnResourceObject(s32 taskId, EvtPackSecondaryResourceId key, 
 
     memset(vecA, 0, 0x10);
     memset(vecB, 0, 0x10);
-    found = evtGetEventPackResourceAddress(taskId, key);
+    found = evtGetEventPackResourceAddress(eventId, key);
     if (found != 0) {
         obj = dds3AddBEDEffectObjectBasic2(found, vecA, vecB);
         if (obj != 0) {

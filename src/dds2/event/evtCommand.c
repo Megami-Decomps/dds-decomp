@@ -80,7 +80,7 @@ void fldSetSceneParam3(fldSceneParam_t *record, s32 stage, s32 kind, const char 
 
 void sdfPrintf(const char *msg, ...);
 
-s32 evtRegistBEField(s32 eventId, s32 resourceId);
+s32 evtRegistBEField(EvtPackEventId eventId, s32 resourceId);
 
 void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 
@@ -984,24 +984,24 @@ ScrCommandResult evtCommand_CHG_MOON(void) {
 /* Create a missing camp task, then wait for its ready value.
  * No VM context completes immediately; a pending task returns zero. */
 ScrCommandResult evtCommand_LOAD_BE(void) {
-    s32 taskId = scrGetIntPara(0);
+    EvtPackEventId eventId = scrGetIntPara(0);
     scrProcessWork_s *commandWork = scrGetScriptHandle();
     char *message;
 
     if (commandWork == NULL) {
         return SCR_COMMAND_RESULT_COMPLETE;
     }
-    if (evtSearchEventPack(taskId) == 0) {
+    if (evtSearchEventPack(eventId) == 0) {
         message = "load BE (%d)..\n";
-        evtPrintDeveloperConsoleMessage(message, taskId);
-        sdfPrintf(message, taskId);
-        dds3LinkProcess(commandWork->task, evtLoadEventPack(taskId));
+        evtPrintDeveloperConsoleMessage(message, eventId);
+        sdfPrintf(message, eventId);
+        dds3LinkProcess(commandWork->task, evtLoadEventPack(eventId));
         return SCR_COMMAND_RESULT_PENDING;
     }
-    if (evtGetEventPackStat(taskId) == EVT_PACK_LOAD_COMPLETE) {
+    if (evtGetEventPackStat(eventId) == EVT_PACK_LOAD_COMPLETE) {
         message = D_00421ED8;
-        evtPrintDeveloperConsoleMessage(message, taskId);
-        sdfPrintf(message, taskId);
+        evtPrintDeveloperConsoleMessage(message, eventId);
+        sdfPrintf(message, eventId);
         return SCR_COMMAND_RESULT_COMPLETE;
     }
     return SCR_COMMAND_RESULT_PENDING;
@@ -1012,27 +1012,27 @@ ScrCommandResult evtCommand_LOAD_BE(void) {
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421ED8);
 
 ScrCommandResult evtCommand_READ_BE(void) {
-    s32 taskId = scrGetIntPara(0);
+    EvtPackEventId eventId = scrGetIntPara(0);
     scrProcessWork_s *commandWork = scrGetScriptHandle();
 
     if (commandWork == NULL) {
         return SCR_COMMAND_RESULT_COMPLETE;
     }
-    if (evtSearchEventPack(taskId) != 0) {
+    if (evtSearchEventPack(eventId) != 0) {
         return SCR_COMMAND_RESULT_COMPLETE;
     }
-    evtPrintDeveloperConsoleMessage("read BE (%d)..\n", taskId);
-    dds3LinkProcess(commandWork->task, evtLoadEventPack(taskId));
+    evtPrintDeveloperConsoleMessage("read BE (%d)..\n", eventId);
+    dds3LinkProcess(commandWork->task, evtLoadEventPack(eventId));
     return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 /* Store readiness in the VM result; the command itself always completes. */
 ScrCommandResult evtCommand_CHK_BE(void) {
-    s32 taskId = scrGetIntPara(0);
+    EvtPackEventId eventId = scrGetIntPara(0);
     s32 isReady;
 
-    if (scrGetScriptHandle() != 0 && evtSearchEventPack(taskId) != 0 && evtGetEventPackStat(taskId) == EVT_PACK_LOAD_COMPLETE) {
-        evtPrintDeveloperConsoleMessage(D_00421ED8, taskId);
+    if (scrGetScriptHandle() != 0 && evtSearchEventPack(eventId) != 0 && evtGetEventPackStat(eventId) == EVT_PACK_LOAD_COMPLETE) {
+        evtPrintDeveloperConsoleMessage(D_00421ED8, eventId);
         isReady = 1;
     } else {
         isReady = 0;
@@ -1043,16 +1043,16 @@ ScrCommandResult evtCommand_CHK_BE(void) {
 
 /* Destroy the requested camp task; missing context or task is a completed no-op. */
 ScrCommandResult evtCommand_DEL_BE(void) {
-    s32 taskId = scrGetIntPara(0);
+    EvtPackEventId eventId = scrGetIntPara(0);
 
     if (scrGetScriptHandle() == 0) {
         return SCR_COMMAND_RESULT_COMPLETE;
     }
-    if (evtSearchEventPack(taskId) == 0) {
+    if (evtSearchEventPack(eventId) == 0) {
         return SCR_COMMAND_RESULT_COMPLETE;
     }
-    evtPrintDeveloperConsoleMessage("del BE (%d)..\n", taskId);
-    evtKillEventPack(taskId);
+    evtPrintDeveloperConsoleMessage("del BE (%d)..\n", eventId);
+    evtKillEventPack(eventId);
     return SCR_COMMAND_RESULT_COMPLETE;
 }
 
