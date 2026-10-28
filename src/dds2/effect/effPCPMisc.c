@@ -2148,7 +2148,7 @@ EffPCPFadeTimer *effPCPFilterExpCreate(const EffPCPFadeTimerParams *src) {
     return dst;
 }
 
-void *effPCPFilterExpCreatePCF(void *args) {
+EffPCPFadeTimer *effPCPFilterExpCreatePCF(void *args) {
     void *param0;
 
     param0 = dds3EffectPCPDataGetData(args, 0);
@@ -2211,14 +2211,14 @@ EffPCPFadeTimerLong *effPCPBlurExpCreate(const EffPCPFadeTimerLongParams *src) {
     return dst;
 }
 
-void *effPCPBlurExpCreatePCF(void *args) {
+EffPCPFadeTimerLong *effPCPBlurExpCreatePCF(void *args) {
     void *param0;
 
     param0 = dds3EffectPCPDataGetData(args, 0);
     return effPCPBlurExpCreate(param0);
 }
 
-void *effPCPBlurExpCopy(EffPCPFadeTimerLongParams *src) {
+EffPCPFadeTimerLong *effPCPBlurExpCopy(EffPCPFadeTimerLongParams *src) {
     return effPCPBlurExpCreate(src);
 }
 
