@@ -205,7 +205,7 @@ extern EventRosterStat *datRosterDetails;
 s32 btlGetEntryFlagsUnlessDisabled(datUnitWork_t *record);
 s32 btlGetAbilityAttributeMultiplierPercent(BtlUnit *actor, s32 attr);
 extern s32 sdfCalculateCommandVitalDelta(s32, datUnitWork_t *, datUnitWork_t *, u32, u8);
-s32 btlCalculateHpActionAmount(BtlUnit *source, BtlUnit *target, s32 command,
+s32 btlCalculateHpActionAmount(BtlUnit *source, BtlUnit *target, BtlCommandId command,
                                u32 maxHits, BtlActionPressResult press, s32 side,
                                u32 calculationFlags) {
     BtlState *battle = (BtlState *)btlGetRuntime();
@@ -435,7 +435,7 @@ s32 btlCalculateHpActionAmount(BtlUnit *source, BtlUnit *target, s32 command,
     }
 }
 
-s32 btlCalculateMpActionAmount(BtlUnit *source, BtlUnit *target, s32 command,
+s32 btlCalculateMpActionAmount(BtlUnit *source, BtlUnit *target, BtlCommandId command,
                                u32 maxHits, BtlActionPressResult press, s32 side,
                                u32 calculationFlags) {
     BtlState *battle = (BtlState *)btlGetRuntime();

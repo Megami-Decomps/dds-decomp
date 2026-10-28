@@ -9,6 +9,7 @@
 #include "btl_panel_transition_work.h"
 #include "btl_registered_panel_work.h"
 #include "btl_command_layout_work.h"
+#include "btl_command_id.h"
 #include "common.h"
 #include "btl_unit_defeat_by_delta_result.h"
 #include "btl_target_list_builder.h"
@@ -636,7 +637,7 @@ extern const BattleStartVoiceRow btlStartVoiceRows[];
 extern s32 btlRollAiBucket(void);
 extern s32 btlReadCurrentUnitHp(datUnitWork_t *);
 extern s32 btlCalculateHpAttackOrRestoreAmount(
-    BtlUnit *, BtlUnit *, s32, u32, BtlActionPressResult, s32, u32);
+    BtlUnit *, BtlUnit *, BtlCommandId, u32, BtlActionPressResult, s32, u32);
 
 extern char D_003A1DD8[]; /* "btl:start voice off[ESC_OFF]\n" */
 extern char D_003A1DF8[]; /* "btl:start voice off[SERIAL]\n" */

@@ -556,10 +556,10 @@ extern u32 btlGetHuntPenaltyFlags(BtlUnit *unit, BtlUnit *enemy);
 
 /* The damage/restore result is signed; keep this cross-unit declaration aligned with its provider. */
 extern s32 btlCalculateHpAttackOrRestoreAmount(
-    BtlUnit *, BtlUnit *, s32, u32, BtlActionPressResult, s32, u32);
+    BtlUnit *, BtlUnit *, BtlCommandId, u32, BtlActionPressResult, s32, u32);
 
 extern s32 btlCalculateMpAttackOrRestoreAmount(
-    BtlUnit *, BtlUnit *, s32, u32, BtlActionPressResult, s32, u32);
+    BtlUnit *, BtlUnit *, BtlCommandId, u32, BtlActionPressResult, s32, u32);
 
 extern f32 btlGetActionCategoryMultiplier(BtlUnit *, s32, s32);
 

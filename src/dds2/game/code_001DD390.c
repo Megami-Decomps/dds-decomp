@@ -586,10 +586,10 @@ extern u32 btlGetHuntHpRecoveryAmount(BtlUnit *, BtlUnit *);
 extern u32 btlGetHuntPenaltyFlags(BtlUnit *unit, BtlUnit *enemy);
 
 extern s32 btlCalculateHpActionAmount(
-    BtlUnit *, BtlUnit *, s32, u32, BtlActionPressResult, s32, u32);
+    BtlUnit *, BtlUnit *, BtlCommandId, u32, BtlActionPressResult, s32, u32);
 
 extern s32 btlCalculateMpActionAmount(
-    BtlUnit *, BtlUnit *, s32, u32, BtlActionPressResult, s32, u32);
+    BtlUnit *, BtlUnit *, BtlCommandId, u32, BtlActionPressResult, s32, u32);
 
 extern f32 btlGetActionCategoryMultiplier(BtlUnit *, s32, s32);
 

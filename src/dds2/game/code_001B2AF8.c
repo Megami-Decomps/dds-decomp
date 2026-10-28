@@ -7,6 +7,7 @@
 #include "btl_panel_transition_work.h"
 #include "btl_registered_panel_work.h"
 #include "btl_command_layout_work.h"
+#include "btl_command_id.h"
 #include "btl_tutorial_dialog_work.h"
 #include "btl_selection_trail_work.h"
 #include "fld_area_work.h"
@@ -1479,7 +1480,7 @@ extern s8 btlMajinStartVoiceIds[16];
 extern char D_004158F8[], D_00415920[];
 extern s32 btlReadCurrentUnitHp(datUnitWork_t *);
 extern s32 btlCalculateHpActionAmount(
-    BtlUnit *, BtlUnit *, s32, u32, BtlActionPressResult, s32, u32);
+    BtlUnit *, BtlUnit *, BtlCommandId, u32, BtlActionPressResult, s32, u32);
 
 extern char D_00415878[]; /* "btl:start voice off[ESC_OFF]\n" */
 extern char D_00415898[]; /* "btl:start voice off[SERIAL]\n" */

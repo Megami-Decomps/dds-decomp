@@ -115,7 +115,7 @@ extern s32 sdfCalculateCommandVitalDelta(s32, datUnitWork_t *, datUnitWork_t *, 
 
 /* Clear the supplied party-record status mask. */
 
-s32 btlCalculateHpAttackOrRestoreAmount(BtlUnit *attacker, BtlUnit *recipient, s32 command,
+s32 btlCalculateHpAttackOrRestoreAmount(BtlUnit *attacker, BtlUnit *recipient, BtlCommandId command,
                    u32 maxHits, BtlActionPressResult press, s32 attackMode, u32 calculationFlags) {
     f32 attack;
     f32 defense = 1.0f;
@@ -223,7 +223,7 @@ s32 btlCalculateHpAttackOrRestoreAmount(BtlUnit *attacker, BtlUnit *recipient, s
     }
 }
 
-s32 btlCalculateMpAttackOrRestoreAmount(BtlUnit *attacker, BtlUnit *recipient, s32 command,
+s32 btlCalculateMpAttackOrRestoreAmount(BtlUnit *attacker, BtlUnit *recipient, BtlCommandId command,
                    u32 maxHits, BtlActionPressResult press, s32 attackMode, u32 calculationFlags) {
     f32 attack;
     f32 defense = 1.0f;
