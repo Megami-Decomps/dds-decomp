@@ -22,7 +22,7 @@ extern s16 blurscalebase;
 extern s16 bluralphatarget;
 extern s16 blurscaletarget;
 
-extern f32 (*D_00324770[4])[4]; /* three light sources and a null */
+extern KwlnDrawLightSourceTable D_00324770;
 
 /* Pending, saved, and frame blocks share the effect owner's parameter type.
  * dds3DrawFlag tracks each family's running fades and transitions. */

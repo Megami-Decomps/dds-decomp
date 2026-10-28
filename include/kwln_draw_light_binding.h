@@ -10,7 +10,15 @@ enum {
     KWLN_LIGHT_SOURCE_SLOT_1 = 1,
     KWLN_LIGHT_SOURCE_SLOT_2 = 2,
     KWLN_LIGHT_SOURCE_SLOT_COUNT = 3,
+    KWLN_LIGHT_SOURCE_NULL_SLOT = KWLN_LIGHT_SOURCE_SLOT_COUNT,
+    KWLN_LIGHT_SOURCE_BINDING_COUNT = 4,
 };
+
+/* The runtime binding table has one reserved null entry after its three live
+ * sources; packet-building inputs use only the three live entries. */
+typedef f32 (*KwlnDrawLightSourceTable[KWLN_LIGHT_SOURCE_BINDING_COUNT])[4];
+typedef char KwlnDrawLightSourceTable_size_must_be_0x10[
+    (sizeof(KwlnDrawLightSourceTable) == 0x10) ? 1 : -1];
 
 /* Install caller-owned mutable light data in a draw slot. The draw table
  * retains this address without copying or freeing it, and light-update code

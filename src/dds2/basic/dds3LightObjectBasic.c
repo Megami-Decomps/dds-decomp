@@ -5,10 +5,11 @@
 #include "sdf_chip.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
+#include "kwln_draw_light_binding.h"
 
 void dds3FreePoseSet(dds3Basic_t *object);
 void dds3ObjectBaseFreeControlWorkData(dds3ObjectBaseControlWorkData_t *object);
-extern f32 (*D_0037F770[4])[4];
+extern KwlnDrawLightSourceTable D_0037F770;
 extern f32 kwlnDefaultColorVector[4];
 
 

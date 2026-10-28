@@ -11,7 +11,7 @@
 #include "eff_event_work_api.h"
 #include "eff.h"
 
-extern f32 (*D_0037F770[4])[4]; /* three light sources and a null */
+extern KwlnDrawLightSourceTable D_0037F770;
 
 extern u32 dds3DrawFlag;
 
