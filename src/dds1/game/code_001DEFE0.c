@@ -8,6 +8,7 @@
 #include "btl_camera_path_preset.h"
 #include "btl_pair_camera_preset.h"
 #include "btl_camera_parameter_record.h"
+#include "btl_camera_mode_index.h"
 #include "common.h"
 #include "btl_linked_actor_eligibility.h"
 #include "btl_target_list_builder.h"
@@ -339,7 +340,7 @@ void btlFlagUnitDefeatCandidate(BtlUnit *unit);
 
 void btlFreeIndexList(BtlIndexList *list);
 
-u32 btlGetActiveUnitId(void);
+BtlCameraModeIndex btlGetCameraCommandMode(void);
 
 
 
@@ -9347,7 +9348,7 @@ void btlUpdateFadeColor(void) {
             node->fadeCountdown = node->fadeCountdown - 1;
         }
     }
-    if ((u32)(btlGetActiveUnitId() - 9) < 2 || context->boundTask != 0 || context->currentScene == 8) {
+    if ((u32)(btlGetCameraCommandMode() - 9) < 2 || context->boundTask != 0 || context->currentScene == 8) {
         context->fadeEnabled = 0;
     } else {
         context->fadeEnabled = 1;

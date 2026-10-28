@@ -71,7 +71,7 @@
 #include "btl_sound_release_task.h"
 #include "btl_ai_table.h"
 /* Declared before first use (were implicit int). */
-extern u32 btlGetActiveUnitId(void);
+extern BtlCameraModeIndex btlGetCameraCommandMode(void);
 extern s32 btlGetLoggedIndexedCommandItem(s32 index);
 extern void btlInitializeBattleDebugMenu(void);
 extern s32 btlTestActorStatusPredicate(BtlUnit *unit);
@@ -1116,7 +1116,7 @@ void btlInitializeActorCommandState(ActionStateLink *task) {
     if ((task->pendingFlags & 4) == 0 &&
         state != BTL_TARGET_SELECTION_STATE_COMMITTED &&
         sndHasActiveActor() == 0) {
-        if (btlGetActiveUnitId() != 9) {
+        if (btlGetCameraCommandMode() != 9) {
             btlStartTask(btlCreateCommandSoundUpdateTask());
             btlStartTask(btlCreateSecondaryCommandSoundTask());
         }

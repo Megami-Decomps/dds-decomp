@@ -5790,7 +5790,7 @@ s32 btlDestroyTaskC(void) {
 
 extern const BattlePanelColors D_00416650;
 extern u8 *datSkillNames;
-extern u32 btlGetActiveUnitId(void);
+extern BtlCameraModeIndex btlGetCameraCommandMode(void);
 extern void dspRequestMessageWindowModeOne(void);
 extern void btlSetCommandPanelFadeMode(s8, s32);
 extern void sndSetStationedSeVolume(u32);
@@ -5808,7 +5808,7 @@ s32 btlUpdateLinkageNoticeTask(dds3ProcessID_t *task) {
     u16 scanIndex;
     u16 id;
 
-    if (btlGetActiveUnitId() != 9 && btlGetActiveUnitId() != 10) {
+    if (btlGetCameraCommandMode() != 9 && btlGetCameraCommandMode() != 10) {
         return 0;
     }
     work = (BtlTutorialDialogWork *)dds3GetProcessData(task);

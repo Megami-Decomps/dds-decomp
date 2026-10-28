@@ -3828,7 +3828,7 @@
 0x001E95D0	btlInitMotionTransformFromVectors	inferred	uses origin and quaternion to initialize transform vectors and angle [names_R_FuncNames8.tsv]
 0x001E9660	btlInitMotionTransformFromComponents	inferred	packs position and quaternion then initializes transform with degree angle [names_R_FuncNames8.tsv]
 0x001E96C8	btlSetEffectCameraKeys	inferred	two func_001E9660 calls (origin+dir+scale) on effect+0x30 and +0xC0, stores f154 and flags |= 0x41 [names_M74_BattleLarge.tsv]
-0x001E9798	btlGetActiveUnitId	inferred	returns BtlWork.activeUnitId [names_R_FuncNames2.tsv]
+0x001E9798	btlGetCameraCommandMode	inferred	Returns cameraCommand.status set by btlSetCameraCommandMode and used as a btlCameraModeDefinitions index.
 0x001E97B8	btlGetPoseBlendProgress	inferred	returns BattlePoseBlendState.progress float [names_R_FuncNames2.tsv]
 0x001E9860	btlResetActiveUnitList	inferred	clears active slot and index list; sets runtime flag 0x400 [names_R_FuncNames2.tsv]
 0x001E9890	btlClearRuntimeFlag2000	inferred	clears runtime bit 0x2000 [names_R_FuncNames2.tsv]

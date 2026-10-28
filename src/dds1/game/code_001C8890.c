@@ -74,7 +74,7 @@ extern BtlRuntimeTask *btlCreateUnitFadeInTask(BtlUnit *owner, u32 value, u32 va
 extern BtlRuntimeTask * btlCreateCommandSoundTask(BtlTask *, BtlCameraModeIndex cameraMode);
 extern BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
 extern void btlDispatchCommandViaHookOrDefault(BtlTask *command, BattleIndexWork *argument);
-extern u32 btlGetActiveUnitId(void);
+extern BtlCameraModeIndex btlGetCameraCommandMode(void);
 extern s32 btlGetStatusActionEffectId(BtlTask *task);
 extern void btlInitUnitFxDefaults(BtlUnit *fx);
 extern void btlInitializeBattleDebugMenu(void);
@@ -703,7 +703,7 @@ void btlInitializeActorCommandState(BtlTask *task) {
     state = btlGetTargetSelectionState();
     if ((task->flags & 4) == 0 && state != BTL_TARGET_SELECTION_STATE_COMMITTED &&
         sndHasActiveActor() == 0) {
-        if (btlGetActiveUnitId() != 9) {
+        if (btlGetCameraCommandMode() != 9) {
             btlStartTask(btlCreateCommandSoundUpdateTask());
             btlStartTask(btlCreateSecondaryCommandSoundTask());
         }

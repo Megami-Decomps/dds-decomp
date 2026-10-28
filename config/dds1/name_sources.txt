@@ -3915,7 +3915,7 @@
 0x001DC2A0	btlSetMotionTransformFieldOfView	inferred	Stores radians at camera pose field-of-view offset 0x24; keyframe caller converts degrees to radians.
 0x001DC2A8	btlInitMotionTransformFromVectors	inferred	uses origin and quaternion to initialize transform vectors and angle [names_R_FuncNames8.tsv]
 0x001DC338	btlInitMotionTransformFromComponents	inferred	packs position and quaternion then initializes transform with degree angle [names_R_FuncNames8.tsv]
-0x001DC470	btlGetActiveUnitId	inferred	DDS2 001E9798 twin; returns BtlWork.activeUnitId [names_R_FuncNames2.tsv]
+0x001DC470	btlGetCameraCommandMode	inferred	Returns cameraCommand.status set by btlSetCameraCommandMode and used as a btlCameraModeDefinitions index.
 0x001DC498	btlIsUnitInActiveList	inferred	unit equals current slot owner or is in the func_001DAE48 list
 0x001DC538	btlResetActiveUnitList	inferred	DDS2 001E9860 twin; clears active slot and index list; sets runtime flag 0x400 [names_R_FuncNames2.tsv]
 0x001DC568	btlClearRuntimeFlag2000	inferred	DDS2 001E9890 twin; clears runtime bit 0x2000 [names_R_FuncNames2.tsv]

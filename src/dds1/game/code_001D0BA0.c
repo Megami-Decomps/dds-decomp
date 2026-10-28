@@ -5905,7 +5905,7 @@ void btlSetEffectCameraKeys(u8 *fx, f32 x0, f32 y0, f32 z0, f32 vx0, f32 vy0, f3
     *(u32 *)(fx + 0xF0) |= 0x41;
 }
 
-u32 btlGetActiveUnitId(void) {
+BtlCameraModeIndex btlGetCameraCommandMode(void) {
     s32 temp_v0;
 
     temp_v0 = (s32)(u32)btlGetRuntime();

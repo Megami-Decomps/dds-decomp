@@ -6044,7 +6044,7 @@ void btlSetEffectCameraKeys(s32 fx, f32 x0, f32 y0, f32 z0, f32 vx0, f32 vy0, f3
     ((BtlLinkedCommand *)fx)->flags |= 0x41;
 }
 
-u32 btlGetActiveUnitId(void) {
+BtlCameraModeIndex btlGetCameraCommandMode(void) {
     s32 workAddress;
 
     workAddress = (s32)(u32)btlGetRuntime();
