@@ -14409,9 +14409,10 @@ separate pointee banks and the alternate raw-source path for duplicate kinds.
 
 `effBattleTransitionDurations` is the getter-backed four-choice table used
 for start/end transition windows by the matched unit color commands. Both
-games contain `(0,5,15,30)`. This caller evidence supplies a narrower role than
-the getter name alone; the getter interface and its unchecked lookup remain
-unchanged. Numeric fallback bytes agree across titles; pointer-bank bytes do not.
+games contain `(0,5,15,30)`. `EffBattleTransitionDurationIndex` distinguishes
+the signed table selector from `EffBattleTransitionDuration`, the unsigned
+frame count returned by the lookup. The lookup remains unchecked. Numeric
+fallback bytes agree across titles; pointer-bank bytes do not.
 
 ## DDS2 original-title save notices
 

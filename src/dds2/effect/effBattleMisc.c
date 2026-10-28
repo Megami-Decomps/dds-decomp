@@ -10,14 +10,13 @@
 #include "btl.h"
 #include "eff.h"
 #include "eff_field_color.h"
+#include "eff_battle_transition_duration.h"
 #include "sdf_projection.h"
 
 extern u32 effBTLFieldColorGetVariantSelector(void);
 
 extern u32 effBTLFieldColorGetOriginalSelector(void);
 
-
-extern u32 effBattleTransitionDurations[];
 
 extern void (*GetPositionPtrTable[])();
 
@@ -364,6 +363,6 @@ void effBTLPartGetRotateMatrixPtr(EffectVectorRequest *request, u128 *out) {
     VU0_STORE_MATRIX(out);
 }
 
-u32 effBattleMiscGetTableEntry(s32 durationIndex) {
+EffBattleTransitionDuration effBattleMiscGetTableEntry(EffBattleTransitionDurationIndex durationIndex) {
     return effBattleTransitionDurations[durationIndex];
 }

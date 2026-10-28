@@ -9,6 +9,7 @@
 #include "btl_state.h"
 #include "eff.h"
 #include "eff_battle_color_keyframe.h"
+#include "eff_battle_transition_duration.h"
 #include "ee_mmi.h"
 #include "evt_unit.h"
 #include "evt_unit_color_transition.h"
@@ -40,7 +41,6 @@ extern u16 D_003BB044;
 
 extern void mdlPackDecode(s32 resourceGroup, u16 resourceId, s32 flags, const u8 *packageData, s32 packageSize);
 
-extern u32 effBattleMiscGetTableEntry(s32 index);
 extern u32 effBTLFieldColorGetOriginalSelector(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
 
@@ -56,8 +56,8 @@ void effBattleApplyUnitColorDirection(BtlUnit *unit, EffBattleUnitColorCommand *
     u32 packedEnd[4];
     u32 startFrame = command->startFrame;
     u32 endFrame = command->endFrame;
-    u32 startDuration = effBattleMiscGetTableEntry(command->startDurationIndex);
-    u32 endDuration = effBattleMiscGetTableEntry(command->endDurationIndex);
+    EffBattleTransitionDuration startDuration = effBattleMiscGetTableEntry(command->startDurationIndex);
+    EffBattleTransitionDuration endDuration = effBattleMiscGetTableEntry(command->endDurationIndex);
     u32 restoreFrame;
     u32 mask = 0;
     u32 count;
@@ -148,8 +148,8 @@ void effBattleApplyUnitColorDirection(BtlUnit *unit, EffBattleUnitColorCommand *
 void effBattleApplyUnitRgbKeyframe(BtlUnit *unit, EffBattleUnitRgbCommand *command, s32 frame) {
     u32 startFrame = command->startFrame;
     u32 endFrame = command->endFrame;
-    u32 startDuration = effBattleMiscGetTableEntry(command->startDurationIndex);
-    u32 endDuration = effBattleMiscGetTableEntry(command->endDurationIndex);
+    EffBattleTransitionDuration startDuration = effBattleMiscGetTableEntry(command->startDurationIndex);
+    EffBattleTransitionDuration endDuration = effBattleMiscGetTableEntry(command->endDurationIndex);
     u32 restoreFrame;
 
     if ((unit->status.flags & 0xE0) != 0) {
