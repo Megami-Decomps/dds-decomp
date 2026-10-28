@@ -157,12 +157,11 @@ void dds3BillboardSetMode(billHandle_t *effect, s32 mode) {
 
 
 /* Store the variant bits in one child payload or every child of a list. */
-void dds3BillboardSetCondition(billHandle_t *effect, s32 variant) {
+void dds3BillboardSetCondition(billHandle_t *effect, s16 variant) {
     s32 remainingChildren;
     BillChildPayload **childEntries;
     BillChildPayload **childCursor;
 
-    variant = (s16)variant;
     switch (effect->kind) {
     case 0:
         effect->child->variant = (u16)variant;
