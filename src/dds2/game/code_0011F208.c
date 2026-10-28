@@ -32,6 +32,7 @@
 #include "fld.h"
 #include "evt_world.h"
 #include "dds3obj.h"
+#include "dds3_basic_array_cursor.h"
 #include "dds3_world_primary.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
@@ -857,7 +858,7 @@ void drawSceneBasicList(void) {
 
     objectChain = dds3SceneBasicGetList(dds3GetControlScene(), 5);
     if (objectChain != 0) {
-        if (dds3SetFirstBasicArray((dds3BasicArrayHandle_t *)objectChain) != 0) {
+        if (dds3SetFirstBasicArray((dds3BasicArrayHandle_t *)objectChain) != DDS3_BASIC_ARRAY_CURSOR_EXHAUSTED) {
             do {
                 worldObject = dds3GetBasicArray((dds3BasicArrayHandle_t *)objectChain);
                 if (dds3ObjectBaseCheckFlag(worldObject, FIELD_BACKGROUND_REQUIRED_OBJECT_FLAG) != 0) {
@@ -865,7 +866,7 @@ void drawSceneBasicList(void) {
                         hasEligibleBackground = 1;
                     }
                 }
-            } while (dds3SetNextBasicArray((dds3BasicArrayHandle_t *)objectChain) != 0);
+            } while (dds3SetNextBasicArray((dds3BasicArrayHandle_t *)objectChain) != DDS3_BASIC_ARRAY_CURSOR_EXHAUSTED);
         }
         dds3FreeBasicArrayHandle(objectChain);
     }

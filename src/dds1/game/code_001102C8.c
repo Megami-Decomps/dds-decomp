@@ -4,6 +4,7 @@
 #include "sdf_resource.h"
 #include "fld_area_room_resource_load_api.h"
 #include "dds3obj.h"
+#include "dds3_basic_array_cursor.h"
 #include "evt_world_object_api.h"
 #include "evt_world.h"
 #include "sdf_texture_offset_list.h"
@@ -91,14 +92,14 @@ dds3Basic_t *dds3GetBasicArray(const dds3BasicArrayHandle_t *object) {
 }
 
 /* Signed comparison via complement-and-shift: zero counts as nonnegative. */
-u32 dds3SetFirstBasicArray(dds3BasicArrayHandle_t *object) {
+Dds3BasicArrayCursorResult dds3SetFirstBasicArray(dds3BasicArrayHandle_t *object) {
     object->cursorIndex = object->headIndex;
     return (u32)~(s32)object->headIndex >> 0x1f;
 }
 
-u32 dds3SetNextBasicArray(dds3BasicArrayHandle_t *object) {
+Dds3BasicArrayCursorResult dds3SetNextBasicArray(dds3BasicArrayHandle_t *object) {
     if (object->cursorIndex < 0) {
-        return 0;
+        return DDS3_BASIC_ARRAY_CURSOR_EXHAUSTED;
     }
     object->cursorIndex = ((WorldInfo *)dds3TheWorld->data)->entries[object->cursorIndex].nextIndex;
     return (u32)~(s32)object->cursorIndex >> 0x1f;
@@ -107,7 +108,7 @@ u32 dds3SetNextBasicArray(dds3BasicArrayHandle_t *object) {
 /* Exact zero stops traversal; any nonzero callback result continues. */
 Dds3BasicArrayVisitResult dds3ForEachBasicArray(
     dds3BasicArrayHandle_t *object, Dds3BasicArrayVisitCallback callback) {
-    u32 more;
+    Dds3BasicArrayCursorResult more;
 
     if (callback == NULL) {
         return DDS3_BASIC_ARRAY_VISIT_CONTINUE;
@@ -115,7 +116,8 @@ Dds3BasicArrayVisitResult dds3ForEachBasicArray(
     if (dds3GetBasicArrayCount(object) == 0) {
         return DDS3_BASIC_ARRAY_VISIT_CONTINUE;
     }
-    for (more = dds3SetFirstBasicArray(object); more != 0; more = dds3SetNextBasicArray(object)) {
+    for (more = dds3SetFirstBasicArray(object); more != DDS3_BASIC_ARRAY_CURSOR_EXHAUSTED;
+         more = dds3SetNextBasicArray(object)) {
         if (callback(dds3GetBasicArray(object)) == DDS3_BASIC_ARRAY_VISIT_STOP) {
             return DDS3_BASIC_ARRAY_VISIT_STOP;
         }

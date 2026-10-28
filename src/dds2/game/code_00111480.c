@@ -2,6 +2,7 @@
 #include "common.h"
 #include "sdf_chip.h"
 #include "dds3obj.h"
+#include "dds3_basic_array_cursor.h"
 #include "dds3_basic_array_search.h"
 #include "dds3_path.h"
 
@@ -40,7 +41,7 @@ WorldIndexNode *dds3AreaBasicArrangeGetItemArray(dds3Basic_t *worldIndexOwner, s
             dds3AddBasicArray((dds3BasicArrayHandle_t *)result, 1);
             dds3SetBasicArray((dds3BasicArrayHandle_t *)result, value);
         }
-    } while (dds3SetNextBasicArray((dds3BasicArrayHandle_t *)slot) != 0);
+    } while (dds3SetNextBasicArray((dds3BasicArrayHandle_t *)slot) != DDS3_BASIC_ARRAY_CURSOR_EXHAUSTED);
     if (dds3GetBasicArrayCount((dds3BasicArrayHandle_t *)result) == 0) {
         dds3FreeBasicArrayHandle(result);
         return NULL;

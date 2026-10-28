@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_chip.h"
 #include "dds3obj.h"
+#include "dds3_basic_array_cursor.h"
 #include "dds3_basic_array_search.h"
 #include "dds3_path.h"
 #include "evt_action_object.h"

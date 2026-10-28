@@ -2,6 +2,7 @@
 #include "sdf_chip.h"
 
 #include "dds3obj.h"
+#include "dds3_basic_array_cursor.h"
 #include "dds3_world_scene_node_view.h"
 #include "dds3_basic_array_search.h"
 #include "dds3_world_selection.h"
@@ -310,6 +311,6 @@ Dds3BasicArrayMatchResult dds3SetSearchNextBasicArray(dds3BasicArrayHandle_t *in
         if (targetNode == candidate) {
             return DDS3_BASIC_ARRAY_MATCH_FOUND;
         }
-    } while (dds3SetNextBasicArray(indexNode) != 0);
+    } while (dds3SetNextBasicArray(indexNode) != DDS3_BASIC_ARRAY_CURSOR_EXHAUSTED);
     return DDS3_BASIC_ARRAY_NO_MATCH;
 }

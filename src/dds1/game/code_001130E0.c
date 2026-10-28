@@ -8,6 +8,7 @@
 #include "sdf_chunk.h"
 #include "sdf_chip.h"
 #include "dds3obj.h"
+#include "dds3_basic_array_cursor.h"
 #include "dds3_object_flags.h"
 #include "eff_dependency.h"
 #include "pcp_vu0.h"
@@ -431,7 +432,7 @@ void dds3UnitObjectBasicEL_Link(dds3Basic_t *obj) {
         dds3FreeBasicArrayHandle(list);
         return;
     }
-    if (dds3SetFirstBasicArray((dds3BasicArrayHandle_t *)list) != 0) {
+    if (dds3SetFirstBasicArray((dds3BasicArrayHandle_t *)list) != DDS3_BASIC_ARRAY_CURSOR_EXHAUSTED) {
         do {
             other = (EffectValueObject *)dds3GetBasicArray((dds3BasicArrayHandle_t *)list);
             otherData = other->data;
@@ -441,13 +442,13 @@ void dds3UnitObjectBasicEL_Link(dds3Basic_t *obj) {
                 dds3UnlinkLightObjectFromUnitObject(obj, 10);
                 data->activeId = -1;
             }
-        } while (dds3SetNextBasicArray((dds3BasicArrayHandle_t *)list) != 0);
+        } while (dds3SetNextBasicArray((dds3BasicArrayHandle_t *)list) != DDS3_BASIC_ARRAY_CURSOR_EXHAUSTED);
     }
     dds3FreeBasicArrayHandle(list);
 
     if (data->activeId == -1) {
         list = dds3SceneBasicGetList(world, 9);
-        if (dds3SetFirstBasicArray((dds3BasicArrayHandle_t *)list) == 0) {
+        if (dds3SetFirstBasicArray((dds3BasicArrayHandle_t *)list) == DDS3_BASIC_ARRAY_CURSOR_EXHAUSTED) {
             goto destroy_list;
         }
         do {
@@ -457,7 +458,7 @@ void dds3UnitObjectBasicEL_Link(dds3Basic_t *obj) {
                 dds3ComparePosPoseSet2(((f32 *)obj->inner), other->source) != 0) {
                 goto attach_transition;
             }
-        } while (dds3SetNextBasicArray((dds3BasicArrayHandle_t *)list) != 0);
+        } while (dds3SetNextBasicArray((dds3BasicArrayHandle_t *)list) != DDS3_BASIC_ARRAY_CURSOR_EXHAUSTED);
 
 destroy_list:
         dds3FreeBasicArrayHandle(list);

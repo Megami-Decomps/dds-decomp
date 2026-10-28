@@ -52,6 +52,7 @@
 #include "evt_random_status_clear_api.h"
 #include "evt_world_source_transform.h"
 #include "dds3obj.h"
+#include "dds3_basic_array_cursor.h"
 #include "dds3_world_value.h"
 #include "dds3_world_selection.h"
 #include "mdl.h"
@@ -586,7 +587,7 @@ void fldToggleWorldNodeState(s64 clearMode) {
             }
         }
         status = dds3SetNextBasicArray((dds3BasicArrayHandle_t *)valueChain);
-    } while (status != 0);
+    } while (status != DDS3_BASIC_ARRAY_CURSOR_EXHAUSTED);
     dds3FreeBasicArrayHandle(valueChain);
 }
 

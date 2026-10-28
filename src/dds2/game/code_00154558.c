@@ -20,6 +20,7 @@ extern void fldApplyCurrentTaskScene(const char *name);
 #include "pcp_vu0.h"
 #include "fpu.h"
 #include "dds3obj.h"
+#include "dds3_basic_array_cursor.h"
 #include "dds3_object_mode.h"
 #include "eff_object.h"
 #include "fld_player_scene_state.h"
@@ -814,7 +815,7 @@ s32 fldCommand_FLD_MODEL_ON(void) {
                         break;
                     }
                 }
-            } while (dds3SetNextBasicArray((dds3BasicArrayHandle_t *)list) != 0);
+            } while (dds3SetNextBasicArray((dds3BasicArrayHandle_t *)list) != DDS3_BASIC_ARRAY_CURSOR_EXHAUSTED);
             dds3FreeBasicArrayHandle(list);
         }
     }
@@ -874,7 +875,7 @@ s32 fldCmdApplyNumericRoomModeGroupZero(void) {
                         break;
                     }
                 }
-            } while (dds3SetNextBasicArray((dds3BasicArrayHandle_t *)list) != 0);
+            } while (dds3SetNextBasicArray((dds3BasicArrayHandle_t *)list) != DDS3_BASIC_ARRAY_CURSOR_EXHAUSTED);
             dds3FreeBasicArrayHandle(list);
         }
     }
@@ -932,7 +933,7 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
                         break;
                     }
                 }
-            } while (dds3SetNextBasicArray((dds3BasicArrayHandle_t *)list) != 0);
+            } while (dds3SetNextBasicArray((dds3BasicArrayHandle_t *)list) != DDS3_BASIC_ARRAY_CURSOR_EXHAUSTED);
             dds3FreeBasicArrayHandle(list);
         }
     }
@@ -988,7 +989,7 @@ s32 fldCmdApplyNumericRoomModeGroupOne(void) {
                         break;
                     }
                 }
-            } while (dds3SetNextBasicArray((dds3BasicArrayHandle_t *)list) != 0);
+            } while (dds3SetNextBasicArray((dds3BasicArrayHandle_t *)list) != DDS3_BASIC_ARRAY_CURSOR_EXHAUSTED);
             dds3FreeBasicArrayHandle(list);
         }
     }
