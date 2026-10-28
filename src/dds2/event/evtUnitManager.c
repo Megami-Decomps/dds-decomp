@@ -3,6 +3,7 @@ struct SdfPoolNode;
 struct EffNodeDescriptor;
 
 #include "common.h"
+#include "scr_command_result.h"
 #include "sdf_map_position_api.h"
 #include "scr_integer_parameter_api.h"
 #include "dds3_object_flags.h"
@@ -1688,7 +1689,7 @@ dds3Basic_t *evtSearchBasic(s32 worldKind, s32 worldObjectKey) {
     return dds3SearchSceneBasic(world, worldObjectKey, worldKind);
 }
 
-u32 evtCommand_MODEL_PLAYER(void) {
+ScrCommandResult evtCommand_MODEL_PLAYER(void) {
     dds3Basic_t *world;
     dds3Basic_t *object;
     s32 playerObjectKey;
@@ -1716,7 +1717,7 @@ ScrCommandResult evtCommand_MODEL_DSP(void) {
     return SCR_COMMAND_RESULT_COMPLETE;
 }
 
-u32 evtCommand_MODEL_BE(void) {
+ScrCommandResult evtCommand_MODEL_BE(void) {
     EvtPackEventId eventId;
     EvtMotionSeResourceId resourceId;
     EvtMotionSeModelKey modelKey;
@@ -1742,7 +1743,7 @@ u32 evtCommand_MODEL_BE(void) {
     scrSetIntReturnValue(modelKey);
 }
 
-u32 evtCommand_MODEL_POS(void) {
+ScrCommandResult evtCommand_MODEL_POS(void) {
     u32 targetKey;
     u32 sourceKey;
 
@@ -1752,7 +1753,7 @@ u32 evtCommand_MODEL_POS(void) {
     return 1;
 }
 
-u32 evtCommand_MODEL_SHADOW_ON(void) {
+ScrCommandResult evtCommand_MODEL_SHADOW_ON(void) {
     dds3Basic_t *ctx;
     s32 worldObjectKey;
     dds3Basic_t *unit;
@@ -1769,7 +1770,7 @@ u32 evtCommand_MODEL_SHADOW_ON(void) {
     return 1;
 }
 
-u32 evtCommand_MODEL_SHADOW_ON2(void) {
+ScrCommandResult evtCommand_MODEL_SHADOW_ON2(void) {
     dds3Basic_t *ctx;
     s32 worldObjectKey;
     dds3Basic_t *unit;
@@ -1786,7 +1787,7 @@ u32 evtCommand_MODEL_SHADOW_ON2(void) {
     return 1;
 }
 
-u32 evtCommand_MODEL_SHADOW_OFF(void) {
+ScrCommandResult evtCommand_MODEL_SHADOW_OFF(void) {
     dds3Basic_t *ctx;
     s32 worldObjectKey;
     dds3Basic_t *unit;
@@ -1803,7 +1804,7 @@ u32 evtCommand_MODEL_SHADOW_OFF(void) {
     return 1;
 }
 
-u32 evtOpQueueWorldObjectPendingValue(void) {
+ScrCommandResult evtOpQueueWorldObjectPendingValue(void) {
     dds3Basic_t *ctx;
     s32 worldObjectKey;
     dds3Basic_t *unit;
@@ -1819,7 +1820,7 @@ u32 evtOpQueueWorldObjectPendingValue(void) {
     return 1;
 }
 
-u32 evtOpClearWorldObjectPendingValue(void) {
+ScrCommandResult evtOpClearWorldObjectPendingValue(void) {
     dds3Basic_t *ctx;
     s32 worldObjectKey;
     dds3Basic_t *unit;
@@ -1835,7 +1836,7 @@ u32 evtOpClearWorldObjectPendingValue(void) {
     return 1;
 }
 
-u32 evtOpModelLodChg(void) {
+ScrCommandResult evtOpModelLodChg(void) {
     s32 lod;
     dds3Basic_t *world;
     dds3Basic_t *unit;
@@ -1879,7 +1880,7 @@ u32 evtOpModelLodChg(void) {
     return 1;
 }
 
-u32 evtCommand_MODEL_POS_XYZ(void) {
+ScrCommandResult evtCommand_MODEL_POS_XYZ(void) {
     f32 vector[4];
     dds3Basic_t *world;
     s32 worldObjectKey;
@@ -1899,7 +1900,7 @@ u32 evtCommand_MODEL_POS_XYZ(void) {
     return 1;
 }
 
-u32 evtCommand_MODEL_ROT_XYZ(void) {
+ScrCommandResult evtCommand_MODEL_ROT_XYZ(void) {
     f32 v[4];
     dds3Basic_t *ctx;
     s32 worldObjectKey;
@@ -1928,7 +1929,7 @@ u32 evtCommand_MODEL_ROT_XYZ(void) {
     return 1;
 }
 
-u32 evtCommand_MODEL_SCL_XYZ(void) {
+ScrCommandResult evtCommand_MODEL_SCL_XYZ(void) {
     f32 vector[4];
     dds3Basic_t *world;
     s32 worldObjectKey;
@@ -1951,7 +1952,7 @@ u32 evtCommand_MODEL_SCL_XYZ(void) {
 
 extern char D_00421810[];
 
-u32 evtOpDeprecatedModelMotion(void) {
+ScrCommandResult evtOpDeprecatedModelMotion(void) {
     evtUnitHandle_t *unit;
 
     unit = evtGetUnitHandle(scrGetIntPara(0));
@@ -1964,7 +1965,7 @@ u32 evtOpDeprecatedModelMotion(void) {
     return 1;
 }
 
-u32 evtOpSetUnitParams5(void) {
+ScrCommandResult evtOpSetUnitParams5(void) {
     evtUnitHandle_t *unit;
 
     unit = evtGetUnitHandle(scrGetIntPara(0));
@@ -1981,7 +1982,7 @@ u32 evtOpSetUnitParams5(void) {
     return 1;
 }
 
-u32 evtOpSetUnitParams6(void) {
+ScrCommandResult evtOpSetUnitParams6(void) {
     evtUnitHandle_t *unit;
 
     unit = evtGetUnitHandle(scrGetIntPara(0));
@@ -2064,7 +2065,7 @@ void evtLipsStopFunction(void) {
     D_004371F0 = 0;
 }
 
-u32 evtCommand_KUTISET(void) {
+ScrCommandResult evtCommand_KUTISET(void) {
     evtUnitHandle_t *unit;
 
     unit = evtGetUnitHandle(scrGetIntPara(0));
@@ -2087,7 +2088,7 @@ u32 evtCommand_KUTISET(void) {
     return 1;
 }
 
-u32 evtCommand_KUTI(void) {
+ScrCommandResult evtCommand_KUTI(void) {
     evtUnitHandle_t *unit;
 
     unit = evtGetUnitHandle(scrGetIntPara(0));
@@ -2111,7 +2112,7 @@ u32 evtCommand_KUTI(void) {
     return 1;
 }
 
-u32 evtCommand_MODEL_WAIT(void) {
+ScrCommandResult evtCommand_MODEL_WAIT(void) {
     s32 worldObjectKey;
     evtUnitHandle_t *unit;
     u32 ret = 1;
@@ -2124,7 +2125,7 @@ u32 evtCommand_MODEL_WAIT(void) {
     return evtCheckUnitWait(unit) != EVT_UNIT_WAIT_IN_PROGRESS;
 }
 
-u32 evtCommand_MODEL_EXWAIT(void) {
+ScrCommandResult evtCommand_MODEL_EXWAIT(void) {
     s32 worldObjectKey;
     evtUnitHandle_t *unit;
     s32 motionNodeIndex;
@@ -2158,7 +2159,7 @@ u32 evtCmdDestroySelectedWorldUnit(void) {
     return 1;
 }
 
-u32 evtOpStartUnitTransitionTowardWorldObject(void) {
+ScrCommandResult evtOpStartUnitTransitionTowardWorldObject(void) {
     evtUnitHandle_t *unit;
 
     unit = evtGetUnitHandle(scrGetIntPara(0));
@@ -2179,7 +2180,7 @@ u32 evtOpStartUnitTransitionTowardWorldObject(void) {
     return 1;
 }
 
-u32 evtCommand_MODEL_MOVE2(void) {
+ScrCommandResult evtCommand_MODEL_MOVE2(void) {
     evtUnitHandle_t *unit;
 
     unit = evtGetUnitHandle(scrGetIntPara(0));
@@ -2218,7 +2219,7 @@ u32 evtScriptSetUnitTableValueAndReset(void) {
 }
 
 /* Store the script-supplied value for the selected event unit. */
-u32 evtCommand_MODEL_WAIT_MOT(void) {
+ScrCommandResult evtCommand_MODEL_WAIT_MOT(void) {
     s32 worldObjectKey;
     evtUnitHandle_t *unit;
 
@@ -2232,7 +2233,7 @@ u32 evtCommand_MODEL_WAIT_MOT(void) {
 }
 
 /* Store the two script-supplied world-unit state values. */
-u32 evtCommand_MODEL_WAIT_HOKAN(void) {
+ScrCommandResult evtCommand_MODEL_WAIT_HOKAN(void) {
     s32 worldObjectKey;
     evtUnitHandle_t *unit;
 
@@ -2246,7 +2247,7 @@ u32 evtCommand_MODEL_WAIT_HOKAN(void) {
     return 1;
 }
 
-u32 evtCommand_MODEL_MOVE_MOT(void) {
+ScrCommandResult evtCommand_MODEL_MOVE_MOT(void) {
     s32 worldObjectKey;
     evtUnitHandle_t *unit;
 
@@ -2261,7 +2262,7 @@ u32 evtCommand_MODEL_MOVE_MOT(void) {
     return 1;
 }
 
-u32 evtCommand_MODEL_ROT(void) {
+ScrCommandResult evtCommand_MODEL_ROT(void) {
     s32 unitObjectKey;
     evtUnitHandle_t *unit;
     s32 worldObjectKey;
@@ -2302,7 +2303,7 @@ f32 evtGetShortestAngleDelta(f32 a, f32 b) {
 
 extern f32 EulerAngleAxisY(void);
 
-u32 evtOpTurnUnitRelativeToWorldNode(void) {
+ScrCommandResult evtOpTurnUnitRelativeToWorldNode(void) {
     evtUnitHandle_t *unit;
     dds3Basic_t *actor;
     dds3Basic_t *source;
@@ -2384,7 +2385,7 @@ u32 evtOpTurnUnitRelativeToWorldNode(void) {
     return 1;
 }
 
-u32 evtOpRestoreUnitReferenceAngle(void) {
+ScrCommandResult evtOpRestoreUnitReferenceAngle(void) {
     evtUnitHandle_t *unit;
     dds3Basic_t *actor;
     f32 rotation[4] __attribute__((aligned(16)));
@@ -2434,7 +2435,7 @@ u32 evtOpRestoreUnitReferenceAngle(void) {
     return 1;
 }
 
-u32 evtCommand_MODEL_ON(void) {
+ScrCommandResult evtCommand_MODEL_ON(void) {
     s32 worldObjectKey;
     evtUnitHandle_t *unit;
 
@@ -2446,7 +2447,7 @@ u32 evtCommand_MODEL_ON(void) {
     return 1;
 }
 
-u32 evtCommand_MODEL_OFF(void) {
+ScrCommandResult evtCommand_MODEL_OFF(void) {
     s32 worldObjectKey;
     evtUnitHandle_t *unit;
 
@@ -2458,7 +2459,7 @@ u32 evtCommand_MODEL_OFF(void) {
     return 1;
 }
 
-u32 evtCommand_MODEL_LIGHT_ON(void) {
+ScrCommandResult evtCommand_MODEL_LIGHT_ON(void) {
     s32 worldObjectKey;
     evtUnitHandle_t *unit;
 
@@ -2468,7 +2469,7 @@ u32 evtCommand_MODEL_LIGHT_ON(void) {
     return 1;
 }
 
-u32 evtCommand_MODEL_LIGHT_OFF(void) {
+ScrCommandResult evtCommand_MODEL_LIGHT_OFF(void) {
     s32 worldObjectKey;
     evtUnitHandle_t *unit;
     s32 duration;
@@ -2480,7 +2481,7 @@ u32 evtCommand_MODEL_LIGHT_OFF(void) {
     return 1;
 }
 
-u32 evtCommand_MODEL_LIGHT_WAIT(void) {
+ScrCommandResult evtCommand_MODEL_LIGHT_WAIT(void) {
     s32 worldObjectKey;
     evtUnitHandle_t *unit;
     EvtUnitLightAnimationStatus active;
@@ -2491,7 +2492,7 @@ u32 evtCommand_MODEL_LIGHT_WAIT(void) {
     return active == EVT_UNIT_LIGHT_ANIMATION_INACTIVE;
 }
 
-u32 evtCommand_MODEL_LIGHT_RGB(void) {
+ScrCommandResult evtCommand_MODEL_LIGHT_RGB(void) {
     evtUnitHandle_t *unit;
     s32 color1[4];
     s32 color2[4];
@@ -2519,7 +2520,7 @@ u32 evtCommand_MODEL_LIGHT_RGB(void) {
 
 const char D_00421A30[] = "WARNING: MODEL_LIGHT_DIR length zero\n";
 
-u32 evtCommand_MODEL_LIGHT_DIR(void) {
+ScrCommandResult evtCommand_MODEL_LIGHT_DIR(void) {
     f32 direction[4];
     evtUnitHandle_t *unit;
 
@@ -2539,7 +2540,7 @@ u32 evtCommand_MODEL_LIGHT_DIR(void) {
 }
 
 
-u32 evtCommand_MODEL_RGB(void) {
+ScrCommandResult evtCommand_MODEL_RGB(void) {
     evtUnitHandle_t *unit;
     s32 color[4];
     u32 packed;
@@ -2554,7 +2555,7 @@ u32 evtCommand_MODEL_RGB(void) {
     return 1;
 }
 
-u32 evtCommand_MODEL_A(void) {
+ScrCommandResult evtCommand_MODEL_A(void) {
     evtUnitHandle_t *unit;
     s32 color[4];
     u32 packed;
@@ -2568,7 +2569,7 @@ u32 evtCommand_MODEL_A(void) {
     return 1;
 }
 
-u32 evtCommand_MODEL_LIGHT_LINK(void) {
+ScrCommandResult evtCommand_MODEL_LIGHT_LINK(void) {
     s32 worldObjectKey;
     evtUnitHandle_t *unit;
     dds3Basic_t *target;
@@ -2583,7 +2584,7 @@ u32 evtCommand_MODEL_LIGHT_LINK(void) {
     return 1;
 }
 
-u32 evtCommand_MODEL_LIGHT_UNLINK(void) {
+ScrCommandResult evtCommand_MODEL_LIGHT_UNLINK(void) {
     s32 worldObjectKey;
     evtUnitHandle_t *unit;
     s32 duration;
@@ -2597,7 +2598,7 @@ u32 evtCommand_MODEL_LIGHT_UNLINK(void) {
 
 const char D_00421A58[] = "EFFECT_BE not fount RID = %d\n";
 
-u32 evtCommand_EFFECT_BE(void) {
+ScrCommandResult evtCommand_EFFECT_BE(void) {
     u8 firstVector[16];
     u8 secondVector[16];
     EvtPackEventId eventId;
@@ -2627,7 +2628,7 @@ u32 evtCommand_EFFECT_BE(void) {
     return 1;
 }
 
-u32 evtCommand_EFFECT_LOAD(void) {
+ScrCommandResult evtCommand_EFFECT_LOAD(void) {
     u8 buf1[16];
     u8 buf2[16];
     const char *resourceName;
@@ -2648,7 +2649,7 @@ u32 evtCommand_EFFECT_LOAD(void) {
     return 1;
 }
 
-u32 evtCommand_EFFBED_LOAD(void) {
+ScrCommandResult evtCommand_EFFBED_LOAD(void) {
     f32 buf1[4];
     f32 buf2[4];
     const char *param0;
@@ -2678,7 +2679,7 @@ INCLUDE_RODATA(const s32, "event/evtUnitManager", D_00421AC0);
 
 const char D_00421AD8[] = "EFFBED_BE not fount RID = %d\n";
 
-u32 evtCommand_EFFBED_BE(void) {
+ScrCommandResult evtCommand_EFFBED_BE(void) {
     u8 position[16];
     u8 scale[16];
     EvtPackEventId eventId;
@@ -2707,11 +2708,11 @@ u32 evtCommand_EFFBED_BE(void) {
     return 1;
 }
 
-u32 evtCommand_EFFBED_BE_EVO(void) {
+ScrCommandResult evtCommand_EFFBED_BE_EVO(void) {
     return 1;
 }
 
-u32 evtCommand_EFFBED_START(void) {
+ScrCommandResult evtCommand_EFFBED_START(void) {
     s32 worldObjectKey;
     dds3Basic_t *unit;
     u32 entryId;
@@ -2741,7 +2742,7 @@ f32 evtComputeClampedModelScale(s32 modelRecordIndex) {
     return scale;
 }
 
-u32 evtCommand_EFFBED_START_EVO(void) {
+ScrCommandResult evtCommand_EFFBED_START_EVO(void) {
     dds3Basic_t *unit;
 
     unit = evtSearchBasic(7, scrGetIntPara(0));
@@ -2765,7 +2766,7 @@ u32 evtCommand_EFFBED_START_EVO(void) {
     return 1;
 }
 
-u32 evtCommand_EFFMG1_LOAD(void) {
+ScrCommandResult evtCommand_EFFMG1_LOAD(void) {
     const char *param0;
     dds3Basic_t *unit;
 
@@ -2788,7 +2789,7 @@ INCLUDE_RODATA(const s32, "event/evtUnitManager", D_00421B20);
 
 const char D_00421B50[] = "EFFMG1_BE not fount RID = %d\n";
 
-u32 evtCommand_EFFMG1_BE(void) {
+ScrCommandResult evtCommand_EFFMG1_BE(void) {
     EvtPackEventId eventId;
     EvtPackSecondaryResourceId key;
     struct EffNodeDescriptor *descriptor;
@@ -2813,7 +2814,7 @@ u32 evtCommand_EFFMG1_BE(void) {
     return 1;
 }
 
-u32 evtCommand_EFFMG2_LOAD(void) {
+ScrCommandResult evtCommand_EFFMG2_LOAD(void) {
     const char *param0;
     dds3Basic_t *unit;
 
@@ -2834,7 +2835,7 @@ INCLUDE_RODATA(const s32, "event/evtUnitManager", D_00421B70);
 
 const char D_00421BA0[] = "EFFMG2_BE not fount RID = %d\n";
 
-u32 evtCommand_EFFMG2_BE(void) {
+ScrCommandResult evtCommand_EFFMG2_BE(void) {
     EvtPackEventId eventId;
     EvtPackSecondaryResourceId key;
     struct EffNodeDescriptor *descriptor;
@@ -2859,7 +2860,7 @@ u32 evtCommand_EFFMG2_BE(void) {
     return 1;
 }
 
-u32 evtCommand_EFFMG2_PRESET(void) {
+ScrCommandResult evtCommand_EFFMG2_PRESET(void) {
     s32 worldObjectKey;
     dds3Basic_t *obj;
 
@@ -2871,7 +2872,7 @@ u32 evtCommand_EFFMG2_PRESET(void) {
     return 1;
 }
 
-u32 evtCommand_EFFECT_PRESET(void) {
+ScrCommandResult evtCommand_EFFECT_PRESET(void) {
     s32 worldObjectKey;
     dds3Basic_t *obj;
 
@@ -2883,7 +2884,7 @@ u32 evtCommand_EFFECT_PRESET(void) {
     return 1;
 }
 
-u32 evtCommand_EFFECT_CLS(void) {
+ScrCommandResult evtCommand_EFFECT_CLS(void) {
     s32 worldObjectKey;
     dds3Basic_t *obj;
 
@@ -2895,7 +2896,7 @@ u32 evtCommand_EFFECT_CLS(void) {
     return 1;
 }
 
-u32 evtCommand_EFFECT_POS_XYZ(void) {
+ScrCommandResult evtCommand_EFFECT_POS_XYZ(void) {
     dds3Basic_t *obj;
     EvtModelHeader *header;
 
@@ -2914,7 +2915,7 @@ u32 evtCommand_EFFECT_POS_XYZ(void) {
     return 1;
 }
 
-u32 evtCommand_EFFECT_ROT_XYZ(void) {
+ScrCommandResult evtCommand_EFFECT_ROT_XYZ(void) {
     f32 v[4];
     dds3Basic_t *obj;
     f32 toRad;
@@ -2938,7 +2939,7 @@ u32 evtCommand_EFFECT_ROT_XYZ(void) {
     return 1;
 }
 
-u32 evtCommand_EFFECT_POS(void) {
+ScrCommandResult evtCommand_EFFECT_POS(void) {
     dds3Basic_t *obj;
     dds3Basic_t *source;
     EvtWorldSourceTransformPrefix *vec;
