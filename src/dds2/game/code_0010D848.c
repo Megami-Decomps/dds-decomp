@@ -46,7 +46,7 @@ void *scrGetCurrentProcessUserData(void) {
     return nowpwork->userData;
 }
 
-s32 scrCommand_KEY(void) {
+ScrCommandResult scrCommand_KEY(void) {
     if (scrGetCommandTimer() == 0) {
         return 0;
     }
@@ -57,7 +57,7 @@ s32 scrCommand_KEY(void) {
 }
 
 /* Evaluate a script-supplied model flag and push the test result. */
-u32 scrCommand_BIT_CHK(void) {
+ScrCommandResult scrCommand_BIT_CHK(void) {
     s32 value;
 
     value = scrGetIntPara(0);
@@ -66,7 +66,7 @@ u32 scrCommand_BIT_CHK(void) {
     return 1;
 }
 
-u32 scrCommand_BIT_ON(void) {
+ScrCommandResult scrCommand_BIT_ON(void) {
     s32 flagId;
 
     flagId = scrGetIntPara(0);
@@ -74,7 +74,7 @@ u32 scrCommand_BIT_ON(void) {
     return 1;
 }
 
-u32 scrCommand_BIT_OFF(void) {
+ScrCommandResult scrCommand_BIT_OFF(void) {
     s32 flagId;
 
     flagId = scrGetIntPara(0);
