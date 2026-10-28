@@ -10,6 +10,7 @@
 #include "mnu.h"
 #include "mnu_item_requirement_api.h"
 #include "mnu_staff.h"
+#include "mnu_staff_item_use_api.h"
 #include "mnu_list.h"
 #include "mnu_shop.h"
 #include "dat_state.h"
@@ -376,7 +377,8 @@ s32 mnuStaffUseSelectedItemTask(dds3ProcessID_t *task) {
         party->flags |= 0x20;
     }
     if (buttons & MNU_STAFF_INPUT_CONFIRM) {
-        buttons = mnuUseStaffItem(item, context) ? 0 : 0x8000;
+        buttons = mnuUseStaffItem(item, context) !=
+                  MNU_STAFF_ITEM_USE_RESULT_NOT_CONSUMED ? 0 : 0x8000;
         menu->windows[0]->list->cursor->sortKeyPrimary = DDS3_GBWK->inventory.counts[item];
         if (mnuHasStaffWindowEntriesForItem(item & 0xFFFF, context) ==
             MNU_STAFF_WINDOW_ENTRIES_ABSENT) {

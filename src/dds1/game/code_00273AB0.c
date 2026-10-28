@@ -4,6 +4,7 @@
 #include "snd_sequence_volume_pan.h"
 #include "mnu.h"
 #include "mnu_staff.h"
+#include "mnu_staff_item_use_api.h"
 #include "mnu_shop.h"
 #include "mnu_list.h"
 #include "kwln.h"
@@ -287,7 +288,8 @@ s32 mnuHandleStaffItemUseInput(dds3ProcessID_t *task) {
         staff->pageWindow.flags |= 0x20;
     }
     if (buttons & MNU_STAFF_INPUT_CONFIRM) {
-        buttons = mnuUseStaffItem(itemId, (struct StaffDisplayContext *)staff) == 0 ? 0x8000 : 0;
+        buttons = mnuUseStaffItem(itemId, (struct StaffDisplayContext *)staff) ==
+                  MNU_STAFF_ITEM_USE_RESULT_NOT_CONSUMED ? 0x8000 : 0;
         menu->primaryObject->list->cursor->sortKeyPrimary = DDS3_GBWK->inventory.counts[itemId];
         if (mnuHasStaffWindowEntriesForItem((u16)itemId,
                                             (struct StaffDisplayContext *)staff) ==

@@ -70,7 +70,6 @@ void mnuDrawCampScreenDefault(struct dds3ProcessID_t *task);
 #ifdef VERSION_DDS1
 void mnuClearListFlags(s32 which, MenuPageWindow *page);
 struct StaffDisplayContext;
-s32 mnuUseStaffItem(s32 itemId, struct StaffDisplayContext *context);
 MnuStaffWindowEntryPresence mnuHasStaffWindowEntriesForItem(
     s32 itemId, struct StaffDisplayContext *context);
 #endif
@@ -87,7 +86,6 @@ void mnuBeginWindowFadeTransition(MenuWindowContainer *window,
 void mnuUpdateAndDrawWindowTransition(s32 x, s32 y, s32 depth,
                                      MenuFadeFields *fade, s32 option);
 void mnuClearActionFlags(s32 kind, MenuPageWindow *page);
-s32 mnuUseStaffItem(s32 itemId, MenuStaffContext *context);
 void mnuApplyResourceSelection(s32 itemId, MenuStaffContext *context);
 MnuStaffWindowEntryPresence mnuHasStaffWindowEntriesForItem(
     s32 itemId, MenuStaffContext *context);

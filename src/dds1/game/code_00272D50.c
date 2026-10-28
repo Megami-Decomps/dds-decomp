@@ -5,6 +5,7 @@
 #include "kwln.h"
 #include "mnu.h"
 #include "mnu_staff.h"
+#include "mnu_staff_item_use_api.h"
 #include "sdf_resource.h"
 #include "mnu_list.h"
 #include "mnu_shop.h"
@@ -387,8 +388,9 @@ extern void mnuUpdatePartyPanelPercentDisplays(s32);
 
 /* Use a field item: resolve its direct effect (or field-use skill) against the
  * active unit row; on success consume one from the inventory and refresh the
- * party panels. Returns 1 when the item was consumed. */
-s32 mnuUseStaffItem(s32 itemId, StaffDisplayContext *context) {
+ * party panels. */
+MnuStaffItemUseResult mnuUseStaffItem(s32 itemId,
+                                     StaffDisplayContext *context) {
     s32 partyPanel = (s32)context + 0x15C;
     s32 targetUnit = (s32)&DDS3_GBWK->party[context->selectionList->cursor->index];
     s32 result = btlItemApplyDirectEffect((MenuPageWindow *)partyPanel, itemId & 0xFFFF,
@@ -396,17 +398,17 @@ s32 mnuUseStaffItem(s32 itemId, StaffDisplayContext *context) {
 
     if (result != 1) {
         if (result == 2) {
-            return 0;
+            return MNU_STAFF_ITEM_USE_RESULT_NOT_CONSUMED;
         }
         if (ptySkillApplyFieldUseEffect((MenuPageWindow *)partyPanel, evtGetIndexedEventRecordId(itemId) & 0xFFFF, (datUnitWork_t *)targetUnit, (datUnitWork_t *)targetUnit) == 0) {
-            return 0;
+            return MNU_STAFF_ITEM_USE_RESULT_NOT_CONSUMED;
         }
     }
     ptyAdjustItemQuantity(itemId, -1);
     mnuInitPartyPanelSlots(&context->partyPanel);
     mnuUpdateHandleStates((MenuPageWindow *)partyPanel);
     mnuUpdatePartyPanelPercentDisplays(partyPanel);
-    return 1;
+    return MNU_STAFF_ITEM_USE_RESULT_CONSUMED;
 }
 
 extern void mnuSetStateValue(u32 *, u32);
@@ -414,11 +416,11 @@ extern void mnuSetStateValue(u32 *, u32);
 /* On successful item use, publish the remaining count and record the selected item. */
 void mnuRefreshStaffItemSelection(s32 selection, StaffDisplayContext *context) {
     StaffWindowResources *resources;
-    s32 consumed;
+    MnuStaffItemUseResult consumed;
 
     resources = context->resources;
     consumed = mnuUseStaffItem(selection, context);
-    if (consumed != 0) {
+    if (consumed != MNU_STAFF_ITEM_USE_RESULT_NOT_CONSUMED) {
         resources->windows[0]->list->cursor->sortKeyPrimary =
                   DDS3_GBWK->inventory.counts[selection];
         resources->selection = selection;

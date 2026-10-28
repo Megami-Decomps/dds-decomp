@@ -8,6 +8,7 @@
 #include "mnu_shop.h"
 #include "sdf_resource.h"
 #include "mnu_staff.h"
+#include "mnu_staff_item_use_api.h"
 #include "mnu_list.h"
 #include "dat_state.h"
 #include "eff.h"
@@ -665,34 +666,35 @@ s32 mnuFinishStaffReturnPopup(dds3ProcessID_t *callback) {
 extern u32 evtGetIndexedEventRecordId(s32);
 
 
-s32 mnuUseStaffItem(s32 itemId, MenuStaffContext *context) {
+MnuStaffItemUseResult mnuUseStaffItem(s32 itemId,
+                                     MenuStaffContext *context) {
     MenuPageWindow *partyPanel = &context->partyWindow;
     datUnitWork_t *targetUnit = &DDS3_GBWK->party[context->partyWindow.lists[0]->cursor->index];
     s32 result = func_002C5A28(partyPanel, itemId & 0xFFFF, targetUnit, targetUnit);
 
     if (result != 1) {
         if (result == 2) {
-            return 0;
+            return MNU_STAFF_ITEM_USE_RESULT_NOT_CONSUMED;
         }
         if (ptySkillApplyFieldUseEffect(partyPanel, evtGetIndexedEventRecordId(itemId) & 0xFFFF, targetUnit, targetUnit) == 0) {
-            return 0;
+            return MNU_STAFF_ITEM_USE_RESULT_NOT_CONSUMED;
         }
     }
     ptyAdjustItemQuantity(itemId, -1);
     mnuInitPartyPanelSlots(&context->partyPanel);
     mnuReleaseAndRefreshWindowSlots(partyPanel);
     mnuRefreshPartyPanelBars(partyPanel);
-    return 1;
+    return MNU_STAFF_ITEM_USE_RESULT_CONSUMED;
 }
 
 /* On successful item use, publish the remaining count and record the selected item. */
 void mnuApplyResourceSelection(s32 index, MenuStaffContext *context) {
     MenuStaffChoices *resources;
-    s32 consumed;
+    MnuStaffItemUseResult consumed;
 
     resources = (MenuStaffChoices *)((MenuStaffContext *)context)->menu;
     consumed = mnuUseStaffItem(index, context);
-    if (consumed != 0) {
+    if (consumed != MNU_STAFF_ITEM_USE_RESULT_NOT_CONSUMED) {
         resources->windows[0]->list->cursor->sortKeyPrimary =
                   DDS3_GBWK->inventory.counts[index];
         resources->secondListState = index;
