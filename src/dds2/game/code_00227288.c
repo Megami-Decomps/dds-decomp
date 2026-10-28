@@ -1816,7 +1816,7 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->defeatCameraHook, 0x0, btlUpdateLinkedDefeatCamera);
         BTL_INSTALL_CALLBACK(battle->unk684, 0x0, btlMapBossEntryKindToIndex);
         BTL_INSTALL_CALLBACK(battle->unk688, 0x0, btlGetBossEntryKind);
-        BTL_INSTALL_CALLBACK(battle->unk710, 0x0, btlRemapBossResponseForActionPhase);
+        BTL_INSTALL_CALLBACK(battle->motionSeResourceIndexOverride, 0x0, btlRemapBossResponseForActionPhase);
         BTL_INSTALL_CALLBACK(battle->actorParameterDeltaCallback, 0x0, btlPlayStationedSoundForActiveBossAction);
         BTL_INSTALL_CALLBACK(battle->actionCameraSetupHook, 0x0, btlSetupVritraCameraFromActionFlags);
         BTL_INSTALL_CALLBACK(battle->timedCameraFinishHook, 0x0, btlSetupDefeatCameraFromAnimationFlags);

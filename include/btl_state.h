@@ -651,7 +651,7 @@ typedef struct BtlState {
     f32 (*hitChanceScale)(BtlUnit *, BtlUnit *, s32); /* 0x704: 001B1B20 multiplies the callback result in f0. */
     f32 (*commandAmountScaleHook)(BtlUnit *, BtlUnit *, u32, s32); /* 0x708: HP/MP command amount multiplier. */
     s32 (*selectSingleTargetOverride)(struct ActionStateLink *); /* 0x70C: 0021552C calls the single-target override. */
-    s32 (*unk710)(BtlUnit *, s32);
+    s32 (*motionSeResourceIndexOverride)(BtlUnit *, s32); /* 0x710: optional motion-SE resource-index remapper. */
     void (*modelChangeSoundHook)(struct ActionStateLink *, u64, s32); /* 0x714: prerequisite handle, delay */
     BattleEffectPayload *effect; /* 0x718: allocation depends on battle mode. */
     u32 tint71C;

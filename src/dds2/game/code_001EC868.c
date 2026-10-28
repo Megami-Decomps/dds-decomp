@@ -9604,8 +9604,8 @@ struct BtlRuntimeTask *btlCreateHookedUnitSoundTask(unit, option)
     task->onStart = btlQueueUnitSoundSlotFileLoad;
     task->callback = sndPollMotionSePlayback;
     work = (BtlState *)btlGetRuntime();
-    if (work->unk710 != 0) {
-        option = work->unk710(unit, option);
+    if (work->motionSeResourceIndexOverride != 0) {
+        option = work->motionSeResourceIndexOverride(unit, option);
     }
     args = btlGetTaskArguments(task);
     args->actor = unit;
