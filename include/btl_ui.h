@@ -19,11 +19,25 @@ typedef struct BattleSceneSelection {
     BattleSceneOptionIndex selectedOption;
 } BattleSceneSelection;
 
+/* Lifecycle states shared by command-panel input, reserve selection, and close flows. */
+typedef s32 BattleCommandSceneState;
+enum {
+    BTL_COMMAND_SCENE_STATE_INPUT_ACTIVE = 1,
+    BTL_COMMAND_SCENE_STATE_PRIORITY_INPUT = 2,
+    BTL_COMMAND_SCENE_STATE_COMMAND_SUBMITTED = 3,
+    BTL_COMMAND_SCENE_STATE_CLOSE_REQUESTED = 5,
+    BTL_COMMAND_SCENE_STATE_RESERVE_SELECTION = 6,
+    BTL_COMMAND_SCENE_STATE_RESERVE_CANCEL_WAIT = 7,
+    BTL_COMMAND_SCENE_STATE_RESERVE_CONFIRM_WAIT = 8,
+    BTL_COMMAND_SCENE_STATE_TARGET_COMMIT_WAIT = 9,
+    BTL_COMMAND_SCENE_STATE_TIMED_CLOSE_MODE = 11
+};
+
 /* Both fldInitializeSceneObject constructors clear one 0x30-byte allocation.
  * Its final two pointers refer to the owning task's command work and task;
  * the state word alone is not a complete scene-object allocation. */
 typedef struct BattleSceneObject {
-    s32 state;
+    BattleCommandSceneState commandState;
     BattleSceneSelection selections[9]; /* +0x04: command classes include kind 8. */
     struct BattleIndexWork *commandData; /* +0x28: owning actor's complete +0x20 work. */
 #ifdef VERSION_DDS1
@@ -34,6 +48,8 @@ typedef struct BattleSceneObject {
 } BattleSceneObject;
 
 typedef char BattleSceneObjectSizeCheck[sizeof(BattleSceneObject) == 0x30 ? 1 : -1];
+typedef char BattleSceneObjectCommandStateOffsetCheck[
+    ((u32)&((BattleSceneObject *)0)->commandState == 0x00) ? 1 : -1];
 typedef char BattleSceneObjectCommandDataOffsetCheck[((u32)&((BattleSceneObject *)0)->commandData == 0x28) ? 1 : -1];
 typedef char BattleSceneObjectOwnerOffsetCheck[((u32)&((BattleSceneObject *)0)->owner == 0x2C) ? 1 : -1];
 

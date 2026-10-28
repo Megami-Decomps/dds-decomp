@@ -5079,17 +5079,17 @@ void btlUpdateAndDrawCommandSelectionHighlight(BattleSceneObject *object, s32 ki
     s32 row = 0;
     s32 entry;
     s32 cursor;
-    s32 state;
+    BattleCommandSceneState state;
     s32 y;
     s32 optionCount;
     u32 opacity;
     u32 color;
     u32 shade;
 
-    switch (object->state) {
-    case 1:
-    case 7:
-    case 9:
+    switch (object->commandState) {
+    case BTL_COMMAND_SCENE_STATE_INPUT_ACTIVE:
+    case BTL_COMMAND_SCENE_STATE_RESERVE_CANCEL_WAIT:
+    case BTL_COMMAND_SCENE_STATE_TARGET_COMMIT_WAIT:
         btlCommandSelectionHighlightWork->alpha += 16;
         btlCommandSelectionHighlightWork->alpha = btlCommandSelectionHighlightWork->alpha <= 0 ? 0 : btlCommandSelectionHighlightWork->alpha <= 128 ? btlCommandSelectionHighlightWork->alpha : 128;
         entry = object->selections[kind].selectedOption;
@@ -5104,15 +5104,15 @@ void btlUpdateAndDrawCommandSelectionHighlight(BattleSceneObject *object, s32 ki
         btlCommandSelectionHighlightWork->alpha += 16;
         btlCommandSelectionHighlightWork->alpha = btlCommandSelectionHighlightWork->alpha <= 0 ? 0 : btlCommandSelectionHighlightWork->alpha <= 128 ? btlCommandSelectionHighlightWork->alpha : 128;
         break;
-    case 2:
-    case 3:
+    case BTL_COMMAND_SCENE_STATE_PRIORITY_INPUT:
+    case BTL_COMMAND_SCENE_STATE_COMMAND_SUBMITTED:
         btlCommandSelectionHighlightWork->phase = (btlCommandSelectionHighlightWork->phase + 16) % 360;
         btlCommandSelectionHighlightWork->alpha = (s32)((sdfSin((f32)((btlCommandSelectionHighlightWork->phase + 90) % 360) / 180.0f * 3.14159f) + 1.0f) * 0.5f * 64.0f + 64.0f);
         entry = object->selections[kind].selectedOption;
         cursor = object->selections[kind].firstVisibleOption;
         row = entry - cursor;
-        state = object->state;
-        if (state == 2 && (optionCount = fldUpdateSceneKindCounter((s32)object, btlCommandPanelWork->classIndex, 1)) >= 2) {
+        state = object->commandState;
+        if (state == BTL_COMMAND_SCENE_STATE_PRIORITY_INPUT && (optionCount = fldUpdateSceneKindCounter((s32)object, btlCommandPanelWork->classIndex, 1)) >= 2) {
             if ((dds3PadButtonState.prev & 2) || (dds3PadButtonState.next & 2)) {
                 /* Retail compares cached entry with the relative row at 001B2FE4. */
                 if (btlCommandSelectionHighlightWork->cursor != cursor || btlCommandSelectionHighlightWork->entry != row || btlCommandSelectionHighlightWork->row != row) {
@@ -5132,7 +5132,7 @@ void btlUpdateAndDrawCommandSelectionHighlight(BattleSceneObject *object, s32 ki
                     }
                 }
             }
-        } else if (state != 2 || object->state != state) {
+        } else if (state != BTL_COMMAND_SCENE_STATE_PRIORITY_INPUT || object->commandState != state) {
             btlCommandSelectionHighlightWork->alpha = 128;
             btlCommandSelectionHighlightWork->phase = 0;
         }
@@ -5140,15 +5140,15 @@ void btlUpdateAndDrawCommandSelectionHighlight(BattleSceneObject *object, s32 ki
         btlCommandSelectionHighlightWork->cursor = cursor;
         btlCommandSelectionHighlightWork->row = row;
         break;
-    case 11:
+    case BTL_COMMAND_SCENE_STATE_TIMED_CLOSE_MODE:
         btlCommandSelectionHighlightWork->alpha -= btlTrackedTaskHandles->status.bytes.fadeStep;
         btlCommandSelectionHighlightWork->alpha = btlCommandSelectionHighlightWork->alpha <= 0 ? 0 : btlCommandSelectionHighlightWork->alpha <= 128 ? btlCommandSelectionHighlightWork->alpha : 128;
         entry = object->selections[kind].selectedOption;
         cursor = object->selections[kind].firstVisibleOption;
         row = entry - cursor;
         break;
-    case 6:
-    case 8:
+    case BTL_COMMAND_SCENE_STATE_RESERVE_SELECTION:
+    case BTL_COMMAND_SCENE_STATE_RESERVE_CONFIRM_WAIT:
         btlCommandSelectionHighlightWork->alpha -= 32;
         btlCommandSelectionHighlightWork->alpha = btlCommandSelectionHighlightWork->alpha <= 0 ? 0 : btlCommandSelectionHighlightWork->alpha <= 128 ? btlCommandSelectionHighlightWork->alpha : 128;
         entry = object->selections[kind].selectedOption;
@@ -6495,24 +6495,24 @@ void btlUpdateActorPanelPresentation(BtlState *battle, BattleActorPanelWork *wor
         while (actor != NULL && ordinal < eligibleCount) {
             if (btlHasRequiredActorStatusBits(actor)) {
                 slot = actor->lookupId;
-                switch (scene->state) {
-                case 1:
+                switch (scene->commandState) {
+                case BTL_COMMAND_SCENE_STATE_INPUT_ACTIVE:
                     work->activeEntries[slot].presentation.fade += 0x20;
                     work->activeEntries[slot].presentation.fade = work->activeEntries[slot].presentation.fade <= 0 ? 0 :
                         work->activeEntries[slot].presentation.fade > 0x80 ? 0x80 : work->activeEntries[slot].presentation.fade;
                     break;
-                case 2:
+                case BTL_COMMAND_SCENE_STATE_PRIORITY_INPUT:
                     work->activeEntries[slot].presentation.fade += 0x20;
                     work->activeEntries[slot].presentation.fade = work->activeEntries[slot].presentation.fade <= 0 ? 0 :
                         work->activeEntries[slot].presentation.fade > 0x80 ? 0x80 : work->activeEntries[slot].presentation.fade;
                     break;
-                case 3:
+                case BTL_COMMAND_SCENE_STATE_COMMAND_SUBMITTED:
                     work->activeEntries[slot].presentation.fade += 0x20;
                     work->activeEntries[slot].presentation.fade = work->activeEntries[slot].presentation.fade <= 0 ? 0 :
                         work->activeEntries[slot].presentation.fade > 0x80 ? 0x80 : work->activeEntries[slot].presentation.fade;
                     break;
-                case 7:
-                case 9:
+                case BTL_COMMAND_SCENE_STATE_RESERVE_CANCEL_WAIT:
+                case BTL_COMMAND_SCENE_STATE_TARGET_COMMIT_WAIT:
                     work->activeEntries[slot].presentation.fade += 0x20;
                     work->activeEntries[slot].presentation.fade = work->activeEntries[slot].presentation.fade <= 0 ? 0 :
                         work->activeEntries[slot].presentation.fade > 0x80 ? 0x80 : work->activeEntries[slot].presentation.fade;
@@ -6520,11 +6520,11 @@ void btlUpdateActorPanelPresentation(BtlState *battle, BattleActorPanelWork *wor
                     limit = positions.entries[slot].x;
                     work->activeEntries[slot].basePosition[0] = work->activeEntries[slot].basePosition[0] <= limit - 8 ? limit - 8 :
                         work->activeEntries[slot].basePosition[0] < limit ? work->activeEntries[slot].basePosition[0] : limit;
-                    if (scene->state == 9) {
+                    if (scene->commandState == BTL_COMMAND_SCENE_STATE_TARGET_COMMIT_WAIT) {
                         btlSetActorPanelYForMode(1);
                     }
                     break;
-                case 11:
+                case BTL_COMMAND_SCENE_STATE_TIMED_CLOSE_MODE:
                     work->activeEntries[slot].presentation.fade -= btlTrackedTaskHandles->status.bytes.fadeStep;
                     work->activeEntries[slot].presentation.fade = work->activeEntries[slot].presentation.fade <= 0 ? 0 :
                         work->activeEntries[slot].presentation.fade > 0x80 ? 0x80 : work->activeEntries[slot].presentation.fade;
@@ -6532,8 +6532,8 @@ void btlUpdateActorPanelPresentation(BtlState *battle, BattleActorPanelWork *wor
                     work->activeEntries[slot].presentation.pendingSceneState = 5;
                     work->activeEntries[slot].presentation.transitionState = 4;
                     break;
-                case 6:
-                case 8:
+                case BTL_COMMAND_SCENE_STATE_RESERVE_SELECTION:
+                case BTL_COMMAND_SCENE_STATE_RESERVE_CONFIRM_WAIT:
                     work->activeEntries[slot].presentation.fade -= 0x20;
                     work->activeEntries[slot].presentation.fade = work->activeEntries[slot].presentation.fade <= 0 ? 0 :
                         work->activeEntries[slot].presentation.fade > 0x80 ? 0x80 : work->activeEntries[slot].presentation.fade;
@@ -6768,15 +6768,15 @@ s32 btlUpdateReservePanelSelection(dds3ProcessID_t *task, BtlState *battle) {
 
     if (commandTask != NULL) {
         command = (BattleSceneObject *)dds3GetProcessData(commandTask);
-        if (command->state == 6) {
+        if (command->commandState == BTL_COMMAND_SCENE_STATE_RESERVE_SELECTION) {
             if (dds3PadButtonState.confirm < 0) {
                 work->partyRecordIndex = DDS3_GBWK->partyOrder[work->selectedReserveIndex + work->activeCount];
                 sndSetStationedSeVolume(8);
-                command->state = 8;
+                command->commandState = BTL_COMMAND_SCENE_STATE_RESERVE_CONFIRM_WAIT;
                 command->commandData->phase = 9;
             } else if (dds3PadButtonState.primaryCancel < 0) {
                 btlSlotBankPromoteStates(work);
-                command->state = 7;
+                command->commandState = BTL_COMMAND_SCENE_STATE_RESERVE_CANCEL_WAIT;
                 sndSetStationedSeVolume(0xA);
                 btlSetActionActorPanelPresentation(command->owner, 0, 0);
             } else {
@@ -6804,9 +6804,9 @@ s32 btlUpdateReservePanelSelection(dds3ProcessID_t *task, BtlState *battle) {
             }
         }
         for (i = 0; i < count; i++) {
-            switch ((u32)command->state) {
-            case 6:
-            case 8:
+            switch ((u32)command->commandState) {
+            case BTL_COMMAND_SCENE_STATE_RESERVE_SELECTION:
+            case BTL_COMMAND_SCENE_STATE_RESERVE_CONFIRM_WAIT:
                 work->reserveEntries[i].presentation.fade += 0x20;
                 work->reserveEntries[i].presentation.fade =
                     work->reserveEntries[i].presentation.fade <= 0 ? 0 :
@@ -6817,8 +6817,8 @@ s32 btlUpdateReservePanelSelection(dds3ProcessID_t *task, BtlState *battle) {
                     work->reserveEntries[i].position[0] >= positions.entries[i][0] + 8 ? positions.entries[i][0] + 8 :
                     work->reserveEntries[i].position[0];
                 break;
-            case 7:
-            case 9:
+            case BTL_COMMAND_SCENE_STATE_RESERVE_CANCEL_WAIT:
+            case BTL_COMMAND_SCENE_STATE_TARGET_COMMIT_WAIT:
                 work->reserveEntries[i].presentation.fade -= 0x20;
                 work->reserveEntries[i].presentation.fade =
                     work->reserveEntries[i].presentation.fade <= 0 ? 0 :
@@ -6827,13 +6827,13 @@ s32 btlUpdateReservePanelSelection(dds3ProcessID_t *task, BtlState *battle) {
                 break;
             }
         }
-        if (command->state == 7 && work->reserveEntries[0].presentation.fade <= 0) {
+        if (command->commandState == BTL_COMMAND_SCENE_STATE_RESERVE_CANCEL_WAIT && work->reserveEntries[0].presentation.fade <= 0) {
             return 0;
         }
-        if (command->state == 9 && work->reserveEntries[0].presentation.fade <= 0) {
+        if (command->commandState == BTL_COMMAND_SCENE_STATE_TARGET_COMMIT_WAIT && work->reserveEntries[0].presentation.fade <= 0) {
             return 0;
         }
-        if (command->state == 5) {
+        if (command->commandState == BTL_COMMAND_SCENE_STATE_CLOSE_REQUESTED) {
             return 0;
         }
     }
@@ -8681,7 +8681,7 @@ void btlSetCommandPanelFadeMode(s8 mode, s32 duration) {
     case 0: {
         s32 step;
         if (commandTask != NULL) {
-            ((BattleSceneObject *)dds3GetProcessData(commandTask))->state = 11;
+            ((BattleSceneObject *)dds3GetProcessData(commandTask))->commandState = BTL_COMMAND_SCENE_STATE_TIMED_CLOSE_MODE;
             btlCommandPanelWork->state = BTL_COMMAND_PANEL_STATE_TIMED_CLOSE;
         }
         if (panelTask != NULL) {
@@ -8704,7 +8704,7 @@ void btlSetCommandPanelFadeMode(s8 mode, s32 duration) {
     case 1: {
         s32 step;
         if (commandTask != NULL) {
-            ((BattleSceneObject *)dds3GetProcessData(commandTask))->state = mode;
+            ((BattleSceneObject *)dds3GetProcessData(commandTask))->commandState = BTL_COMMAND_SCENE_STATE_INPUT_ACTIVE;
             btlCommandPanelWork->state = BTL_COMMAND_PANEL_STATE_ENTERING;
         }
         if (panelTask != NULL) {
@@ -9204,7 +9204,7 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
                     }
                 }
             }
-            object->state = 3;
+            object->commandState = BTL_COMMAND_SCENE_STATE_COMMAND_SUBMITTED;
             sndSetStationedSeVolume(8);
             return 1;
         case 4:
@@ -9223,7 +9223,7 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
                 object->commandData->phase = 2;
                 object->owner->indexWork.companionB = partners.secondPartner;
                 object->owner->indexWork.skillId = partners.commandId;
-                object->state = 3;
+                object->commandState = BTL_COMMAND_SCENE_STATE_COMMAND_SUBMITTED;
                 sndSetStationedSeVolume(8);
                 return 1;
             }
@@ -9235,7 +9235,7 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
             object->commandData->skillId = D_003B5D10.entries[entry].skill;
             object->owner->indexWork.skillId = D_003B5D10.entries[entry].skill;
             object->owner->indexWork.companionA = D_003B5D10.entries[entry].first;
-            object->state = 3;
+            object->commandState = BTL_COMMAND_SCENE_STATE_COMMAND_SUBMITTED;
             object->owner->indexWork.companionB = D_003B5D10.entries[entry].second;
             if ((battle->battleFlags & 0x1000000) != 0) {
                 btlSetActorCommandSelection((s32)object, 3, entry, (s16)D_003B5D10.entries[entry].skill);
@@ -9247,7 +9247,7 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
         case 2:
             object->commandData->phase = 4;
             object->commandData->reference = D_003B5B10[entry * 2];
-            object->state = 3;
+            object->commandState = BTL_COMMAND_SCENE_STATE_COMMAND_SUBMITTED;
             btlSetActorCommandSelection((s32)object, 0, 0, 0);
             sndSetStationedSeVolume(8);
             return 1;
@@ -9261,7 +9261,7 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
                     break;
                 }
                 object->commandData->phase = 5;
-                object->state = 3;
+                object->commandState = BTL_COMMAND_SCENE_STATE_COMMAND_SUBMITTED;
                 btlSetActorCommandSelection((s32)object, 0, 0, 0);
                 sndSetStationedSeVolume(8);
                 return 1;
@@ -9279,7 +9279,7 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
                     sndSetStationedSeVolume(10);
                     break;
                 }
-                object->state = 6;
+                object->commandState = BTL_COMMAND_SCENE_STATE_RESERVE_SELECTION;
                 sndSetStationedSeVolume(8);
                 btlCreateReserveActorPanelTask();
                 return 1;
@@ -9292,7 +9292,7 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
                 }
                 object->commandData->phase = 11;
                 object->commandData->linkedUnit = object->owner->unit;
-                object->state = 3;
+                object->commandState = BTL_COMMAND_SCENE_STATE_COMMAND_SUBMITTED;
                 btlSetActorCommandSelection((s32)object, 0, 0, 0);
                 sndSetStationedSeVolume(8);
                 return 1;
@@ -9304,7 +9304,7 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
                 break;
             }
             object->commandData->phase = 6;
-            object->state = 3;
+            object->commandState = BTL_COMMAND_SCENE_STATE_COMMAND_SUBMITTED;
             btlSetActorCommandSelection((s32)object, 0, 0, 0);
             sndSetStationedSeVolume(8);
             return 1;
@@ -9314,7 +9314,7 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
             return 0;
         }
     } else if (dds3PadButtonState.primaryCancel < 0) {
-        if ((u32)(object->state - 1) < 2) {
+        if ((u32)(object->commandState - 1) < 2) {
             if (kind == 4) {
                 btlSetActionActorPanelPresentation(object->owner, 1, 0);
             }
@@ -9366,7 +9366,7 @@ s32 btlHandleBattleCommandPanelInput(BattleSceneObject *object) {
         object->commandData->phase = 10;
         count = fldUpdateSceneKindCounter((s32)object, 0, 1);
         btlSetActorCommandSelection((s32)object, 10, (s16)(count - 1), 0);
-        object->state = 3;
+        object->commandState = BTL_COMMAND_SCENE_STATE_COMMAND_SUBMITTED;
         sndSetStationedSeVolume(8);
         return 1;
     }
@@ -10018,42 +10018,42 @@ s32 btlUpdateBattleSceneCommands(dds3ProcessID_t *task) {
     func_001C1300();
     func_001B5A20(object);
     func_001BFB58(task);
-    switch (object->state) {
-    case 5:
+    switch (object->commandState) {
+    case BTL_COMMAND_SCENE_STATE_CLOSE_REQUESTED:
         return -1;
-    case 1:
+    case BTL_COMMAND_SCENE_STATE_INPUT_ACTIVE:
         btlHandleBattleCommandPanelInput(object);
         btlUpdateSceneCommandSelection(object);
-        if (btlHasHighPriorityState() && object->state == 1) {
-            object->state = 2;
+        if (btlHasHighPriorityState() && object->commandState == BTL_COMMAND_SCENE_STATE_INPUT_ACTIVE) {
+            object->commandState = BTL_COMMAND_SCENE_STATE_PRIORITY_INPUT;
         }
         break;
-    case 2:
+    case BTL_COMMAND_SCENE_STATE_PRIORITY_INPUT:
         btlHandleBattleCommandPanelInput(object);
-    case 3:
-    case 6:
-    case 8:
+    case BTL_COMMAND_SCENE_STATE_COMMAND_SUBMITTED:
+    case BTL_COMMAND_SCENE_STATE_RESERVE_SELECTION:
+    case BTL_COMMAND_SCENE_STATE_RESERVE_CONFIRM_WAIT:
     case 10:
-    case 11:
+    case BTL_COMMAND_SCENE_STATE_TIMED_CLOSE_MODE:
         btlUpdateSceneCommandSelection(object);
         break;
-    case 7:
+    case BTL_COMMAND_SCENE_STATE_RESERVE_CANCEL_WAIT:
         if (btlHandleBattleCommandPanelInput(object)) {
             btlUpdateSceneCommandSelection(object);
         } else {
             btlUpdateSceneCommandSelection(object);
             if (btlAreLinkedSceneCountersAtThreshold()) {
-                object->state = 2;
+                object->commandState = BTL_COMMAND_SCENE_STATE_PRIORITY_INPUT;
             }
         }
         break;
-    case 9:
+    case BTL_COMMAND_SCENE_STATE_TARGET_COMMIT_WAIT:
         btlUpdateSceneCommandSelection(object);
         if (btlAreLinkedSceneCountersAtThreshold()) {
             object->commandData->phase = 9;
             panel = (BattleActorPanelWork *)dds3GetProcessData(dds3SearchProcessName(D_004367CC));
             BTL_COMMAND_PARTY_RECORD_INDEX(object->commandData) = panel->partyRecordIndex;
-            object->state = 3;
+            object->commandState = BTL_COMMAND_SCENE_STATE_COMMAND_SUBMITTED;
             ((SceneAiWork *)dds3GetProcessData(dds3SearchProcessName(D_004367B8)))->state =
                 BTL_TARGET_SELECTION_STATE_COMMITTED;
             slot = object->commandData->linkedUnit->lookupId;
@@ -10083,7 +10083,7 @@ void btlReleaseCommandPanelTask(dds3ProcessID_t *task) {
 
 void fldInitializeSceneObject(BattleSceneObject *object, ActionStateLink *owner) {
     memset(object, 0, sizeof(*object));
-    object->state = 1;
+    object->commandState = BTL_COMMAND_SCENE_STATE_INPUT_ACTIVE;
     object->owner = owner;
     object->commandData = &owner->indexWork;
 }
@@ -10101,7 +10101,7 @@ s32 fldGetSceneObjectState(void) {
     if (task == NULL) {
         return 0;
     }
-    return btlGetCommandPanelTaskWork()->state;
+    return btlGetCommandPanelTaskWork()->commandState;
 }
 
 s32 btlHasSpecialActiveSceneActor(void) {
@@ -10334,15 +10334,15 @@ void btlOpenBattleCommandPanel(ActionStateLink *task) {
         }
     }
     object = btlGetCommandPanelTaskWork();
-    if (object->state == 3) {
+    if (object->commandState == BTL_COMMAND_SCENE_STATE_COMMAND_SUBMITTED) {
         btlCommandPanelWork->state = BTL_COMMAND_PANEL_STATE_ACTIVE;
-        object->state = 1;
-    } else if (object->state == 8) {
-        object->state = 6;
+        object->commandState = BTL_COMMAND_SCENE_STATE_INPUT_ACTIVE;
+    } else if (object->commandState == BTL_COMMAND_SCENE_STATE_RESERVE_CONFIRM_WAIT) {
+        object->commandState = BTL_COMMAND_SCENE_STATE_RESERVE_SELECTION;
         btlCommandPanelWork->state = BTL_COMMAND_PANEL_STATE_ACTIVE;
-    } else if (object->state != 0xB) {
+    } else if (object->commandState != BTL_COMMAND_SCENE_STATE_TIMED_CLOSE_MODE) {
         btlCommandPanelWork->state = BTL_COMMAND_PANEL_STATE_ENTERING;
-        object->state = 1;
+        object->commandState = BTL_COMMAND_SCENE_STATE_INPUT_ACTIVE;
     }
     btlLinkedSelectionTaskBuffer->selectedRow = fldUpdateSceneKindCounter((s32)object, btlCommandPanelWork->classIndex, 0);
 }
@@ -10350,7 +10350,7 @@ void btlOpenBattleCommandPanel(ActionStateLink *task) {
 void btlRequestCommandPanelClose(void) {
     BattleSceneObject *object = btlGetCommandPanelTaskWork();
     if (object != 0) {
-        object->state = 5;
+        object->commandState = BTL_COMMAND_SCENE_STATE_CLOSE_REQUESTED;
         btlCommandPanelWork->state = BTL_COMMAND_PANEL_STATE_CLOSING;
     }
 }
@@ -10618,9 +10618,9 @@ void btlUpdateTargetSelectionInput(BtlState *scene, SceneAiWork *state, s32 mode
     if (dds3PadButtonState.confirm < 0) {
         task = (dds3ProcessID_t *)dds3SearchProcessName(btlCommandPanelTaskNameRef);
         object = (BattleSceneObject *)dds3GetProcessData((s32)task);
-        if (object->state == 8) {
+        if (object->commandState == BTL_COMMAND_SCENE_STATE_RESERVE_CONFIRM_WAIT) {
             state->state = BTL_TARGET_SELECTION_STATE_COMMAND_PANEL_HANDOFF;
-            object->state = 9;
+            object->commandState = BTL_COMMAND_SCENE_STATE_TARGET_COMMIT_WAIT;
             object->commandData->linkedUnit =
                 (BtlUnit *)btlGetIndexListEntry(state->eligibleTargets, state->entry);
             btlSetActorCommandSelection(object, 0, 0, 0);
@@ -10896,7 +10896,7 @@ SceneAiWork *btlCreateTargetSelectionWork(ActionStateLink *source) {
     object = (BattleSceneObject *)dds3GetProcessData(dds3SearchProcessName(btlCommandPanelTaskNameRef));
     work->eligibleTargets = btlAllocateIndexList(0xD);
     work->selectedTargets = btlAllocateIndexList(0xD);
-    if (object->state == 8) {
+    if (object->commandState == BTL_COMMAND_SCENE_STATE_RESERVE_CONFIRM_WAIT) {
         other = (BattleActorPanelWork *)dds3GetProcessData(dds3SearchProcessName(D_004367CC));
         count = btlCountFlaggedSceneActors();
         if (count < 2 && (DDS3_GBWK->party[other->partyRecordIndex].status & 0x4800)) {
