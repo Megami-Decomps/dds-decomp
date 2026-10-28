@@ -503,7 +503,7 @@
 0x00110CD8	dds3SceneBasicGetList	inferred	SMT3HD name via SLUS_209.11 0x0010F270, reloc-identical; was dds3CopyWorldListToValueChain
 0x00110D70	dds3SceneBasicMakeScene	inferred	SMT3HD name via SLUS_209.11 0x0010F308, reloc-identical; was dds3AttachResourceHandleToWorldObject
 0x00110DA0	dds3SceneBasicMakeScene_FromMemory	inferred	SMT3HD name via SLUS_209.11 0x0010F338, reloc-identical; was dds3AttachConstructedResourceToWorldObject
-0x00110DE0	dds3SceneBasicFreeScene	inferred	SMT3HD name via SLUS_209.11 0x0010F378, reloc-identical; was dds3ClearSceneObjectState
+0x00110DE0	dds3SceneBasicReleaseFieldResources	inferred	Releases globally owned field resources and clears the node alias; the separate scene-script allocation is released by dds3SceneBasicReleaseScriptFile
 0x00110E08	evtLoadSceneResourceFrom	inferred	loads another scene's resource into this scene object (dds2/basic/dds3SceneBasic.c) [names_L16_Units.tsv]
 0x00110E80	dds3SceneBasicLoadScriptFile_FromMem	inferred	SMT3HD name via SLUS_209.11 0x0010F430, reloc-identical; was evtRetainSceneResource
 0x00110EE8	dds3SceneBasicReleaseScriptFile	inferred	SMT3HD name via SLUS_209.11 0x0010F498, reloc-identical; was evtReleaseSceneResource

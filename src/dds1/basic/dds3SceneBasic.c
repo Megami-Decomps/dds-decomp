@@ -16,7 +16,7 @@ extern void fldReleaseFieldResources(void);
 
 /* Release globally owned field resources before clearing their borrowed alias.
  * The scene resource handle/address are released separately. */
-void dds3SceneBasicFreeScene(dds3Basic_t *worldNode) {
+void dds3SceneBasicReleaseFieldResources(dds3Basic_t *worldNode) {
     EvtWorldTable *worldData;
 
     worldData = (EvtWorldTable *)worldNode->data;

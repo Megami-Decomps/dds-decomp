@@ -158,7 +158,7 @@ Dds3BasicCreateResult dds3CreateWorldObjectData(dds3Basic_t *object) {
     return 0;
 }
 
-extern void dds3SceneBasicFreeScene(dds3Basic_t *object);
+extern void dds3SceneBasicReleaseFieldResources(dds3Basic_t *object);
 
 /* Destroy every node of every list, then release the data block and scene state. */
 void dds3DestroyWorldObjectData(dds3Basic_t *object) {
@@ -174,7 +174,7 @@ void dds3DestroyWorldObjectData(dds3Basic_t *object) {
         if (data->resource != 0) {
             sdfMemFreeDirect(data->resource);
         }
-        dds3SceneBasicFreeScene(object);
+        dds3SceneBasicReleaseFieldResources(object);
         dds3SceneBasicReleaseScriptFile(object);
         sdfChipFreeDirect(data);
     }
