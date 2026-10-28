@@ -99,14 +99,14 @@ void evtEffectLoopControl(dds3Basic_t *owner, s32 nodeFlag) {
 s32 evtStageAnimeControl(s32 modeSelector, s32 modeValue) {
     dds3Basic_t *world = dds3GetActiveScene();
     dds3Basic_t *node;
-    s32 combinedMode;
+    Dds3ObjectMatterAnimeMode requestedMode;
 
     if (world == NULL) {
         return 0;
     }
-    combinedMode = modeSelector * 3 + modeValue;
+    requestedMode = modeSelector * 3 + modeValue;
     for (node = ((EvtWorldTable *)world->data)->slots[6].head; node != NULL; node = node->next) {
-        dds3ObjectBaseMatterAnimeSpeed(node, combinedMode);
+        dds3ObjectBaseMatterAnimeSpeed(node, requestedMode);
     }
     return 1;
 }

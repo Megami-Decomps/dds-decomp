@@ -753,16 +753,16 @@ s32 fldCommand_FLD_ANIME_ON(void) {
             object = dds3SearchSceneBasic(dds3GetControlScene(), id, 6);
             switch (scrGetIntPara(3)) {
             case 0:
-                dds3ObjectBaseMatterAnimeSpeed(object, 0);
+                dds3ObjectBaseMatterAnimeSpeed(object, DDS3_OBJECT_MATTER_ANIME_MODE_FULL_SPEED);
                 break;
             case 1:
-                dds3ObjectBaseMatterAnimeSpeed(object, 1);
+                dds3ObjectBaseMatterAnimeSpeed(object, DDS3_OBJECT_MATTER_ANIME_MODE_RAMP_UP_FAST);
                 break;
             case 2:
-                dds3ObjectBaseMatterAnimeSpeed(object, 2);
+                dds3ObjectBaseMatterAnimeSpeed(object, DDS3_OBJECT_MATTER_ANIME_MODE_RAMP_UP_SLOW);
                 break;
             case 3:
-                dds3ObjectBaseMatterAnimeSpeed(object, 6);
+                dds3ObjectBaseMatterAnimeSpeed(object, DDS3_OBJECT_MATTER_ANIME_MODE_SEEK_TO_END);
                 break;
             }
         }
@@ -800,13 +800,13 @@ s32 fldCommand_FLD_ANIME_OFF(void) {
             object = dds3SearchSceneBasic(dds3GetControlScene(), id, 6);
             switch (scrGetIntPara(3)) {
             case 0:
-                dds3ObjectBaseMatterAnimeSpeed(object, 3);
+                dds3ObjectBaseMatterAnimeSpeed(object, DDS3_OBJECT_MATTER_ANIME_MODE_HOLD_AT_ZERO);
                 break;
             case 1:
-                dds3ObjectBaseMatterAnimeSpeed(object, 4);
+                dds3ObjectBaseMatterAnimeSpeed(object, DDS3_OBJECT_MATTER_ANIME_MODE_RAMP_DOWN_FAST);
                 break;
             case 2:
-                dds3ObjectBaseMatterAnimeSpeed(object, 5);
+                dds3ObjectBaseMatterAnimeSpeed(object, DDS3_OBJECT_MATTER_ANIME_MODE_RAMP_DOWN_SLOW);
                 break;
             }
         }

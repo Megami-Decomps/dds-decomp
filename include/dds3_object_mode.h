@@ -5,8 +5,21 @@
 
 struct dds3Basic_t;
 
-/* Set a resolved object's mode and default weight: weight is 1 for modes
- * 0, 4, and 5, and 0 for modes 1, 2, 3, and 6. Other modes leave both alone. */
-void dds3ObjectBaseMatterAnimeSpeed(struct dds3Basic_t *object, u32 requestedMode);
+typedef u32 Dds3ObjectMatterAnimeMode;
+
+enum Dds3ObjectMatterAnimeMode {
+    DDS3_OBJECT_MATTER_ANIME_MODE_FULL_SPEED = 0,
+    DDS3_OBJECT_MATTER_ANIME_MODE_RAMP_UP_FAST = 1,
+    DDS3_OBJECT_MATTER_ANIME_MODE_RAMP_UP_SLOW = 2,
+    DDS3_OBJECT_MATTER_ANIME_MODE_HOLD_AT_ZERO = 3,
+    DDS3_OBJECT_MATTER_ANIME_MODE_RAMP_DOWN_FAST = 4,
+    DDS3_OBJECT_MATTER_ANIME_MODE_RAMP_DOWN_SLOW = 5,
+    DDS3_OBJECT_MATTER_ANIME_MODE_SEEK_TO_END = 6,
+};
+
+/* Full-speed and ramp-down requests start at weight 1; the others start at 0.
+ * Unrecognized values leave the current mode and weight unchanged. */
+void dds3ObjectBaseMatterAnimeSpeed(struct dds3Basic_t *object,
+                                    Dds3ObjectMatterAnimeMode requestedMode);
 
 #endif /* DDS3_OBJECT_MODE_H */

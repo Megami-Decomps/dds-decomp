@@ -316,43 +316,44 @@ void dds3ObjectBaseMakeMatter(dds3Basic_t *object) {
     dds3ObjectBaseSetDeviceMotionRoot(base, model);
     base->motion = motion;
     base->weight = 1.0f;
-    base->mode = 0;
+    base->mode = DDS3_OBJECT_MATTER_ANIME_MODE_FULL_SPEED;
     base->unk44 = 0;
 }
 
 
 /* Modes 0, 4 and 5 use weight 1; the other valid modes use 0.
  * Values outside 0..6 leave both the current mode and weight unchanged. */
-void dds3ObjectBaseMatterAnimeSpeed(dds3Basic_t *object, u32 requestedMode) {
+void dds3ObjectBaseMatterAnimeSpeed(
+    dds3Basic_t *object, Dds3ObjectMatterAnimeMode requestedMode) {
     dds3ObjectBaseControlWorkData_t *base = dds3GetBaseControlWorkData(object);
 
     switch (requestedMode) {
-    case 0:
-        base->mode = 0;
+    case DDS3_OBJECT_MATTER_ANIME_MODE_FULL_SPEED:
+        base->mode = DDS3_OBJECT_MATTER_ANIME_MODE_FULL_SPEED;
         base->weight = 1.0f;
         break;
-    case 1:
-        base->mode = 1;
+    case DDS3_OBJECT_MATTER_ANIME_MODE_RAMP_UP_FAST:
+        base->mode = DDS3_OBJECT_MATTER_ANIME_MODE_RAMP_UP_FAST;
         base->weight = 0.0f;
         break;
-    case 2:
-        base->mode = 2;
+    case DDS3_OBJECT_MATTER_ANIME_MODE_RAMP_UP_SLOW:
+        base->mode = DDS3_OBJECT_MATTER_ANIME_MODE_RAMP_UP_SLOW;
         base->weight = 0.0f;
         break;
-    case 3:
-        base->mode = 3;
+    case DDS3_OBJECT_MATTER_ANIME_MODE_HOLD_AT_ZERO:
+        base->mode = DDS3_OBJECT_MATTER_ANIME_MODE_HOLD_AT_ZERO;
         base->weight = 0.0f;
         break;
-    case 4:
-        base->mode = 4;
+    case DDS3_OBJECT_MATTER_ANIME_MODE_RAMP_DOWN_FAST:
+        base->mode = DDS3_OBJECT_MATTER_ANIME_MODE_RAMP_DOWN_FAST;
         base->weight = 1.0f;
         break;
-    case 5:
-        base->mode = 5;
+    case DDS3_OBJECT_MATTER_ANIME_MODE_RAMP_DOWN_SLOW:
+        base->mode = DDS3_OBJECT_MATTER_ANIME_MODE_RAMP_DOWN_SLOW;
         base->weight = 1.0f;
         break;
-    case 6:
-        base->mode = 6;
+    case DDS3_OBJECT_MATTER_ANIME_MODE_SEEK_TO_END:
+        base->mode = DDS3_OBJECT_MATTER_ANIME_MODE_SEEK_TO_END;
         base->weight = 0.0f;
         break;
     }
@@ -478,28 +479,28 @@ void effObjApplyTransformParameters(struct SdfPoolNode **surfaces, dds3Basic_t *
         if (roomObjectIndex > 0) {
             if (fldTestRoomObjectModeFlag(fldGlobalBase.area, fldGlobalBase.floor + 1, roomObjectIndex) == 0) {
                 switch (base->mode) {
-                case 0:
+                case DDS3_OBJECT_MATTER_ANIME_MODE_FULL_SPEED:
                     base->weight = 1.0f;
                     break;
-                case 1:
+                case DDS3_OBJECT_MATTER_ANIME_MODE_RAMP_UP_FAST:
                     base->weight += 0.05f;
                     if (base->weight > 1.0f) {
                         base->weight = 1.0f;
                     }
                     break;
-                case 2:
+                case DDS3_OBJECT_MATTER_ANIME_MODE_RAMP_UP_SLOW:
                     base->weight += 0.025f;
                     if (base->weight > 1.0f) {
                         base->weight = 1.0f;
                     }
                     break;
-                case 3:
-                case 4:
-                case 5:
-                case 6:
+                case DDS3_OBJECT_MATTER_ANIME_MODE_HOLD_AT_ZERO:
+                case DDS3_OBJECT_MATTER_ANIME_MODE_RAMP_DOWN_FAST:
+                case DDS3_OBJECT_MATTER_ANIME_MODE_RAMP_DOWN_SLOW:
+                case DDS3_OBJECT_MATTER_ANIME_MODE_SEEK_TO_END:
                     break;
                 }
-                if (base->mode == 6) {
+                if (base->mode == DDS3_OBJECT_MATTER_ANIME_MODE_SEEK_TO_END) {
                     sdfMotionSeek(base->motion, base->motion->frameCount);
                 } else if (base->weight > 0.0f) {
                     base->motion->frameStep = base->weight;
@@ -508,31 +509,31 @@ void effObjApplyTransformParameters(struct SdfPoolNode **surfaces, dds3Basic_t *
                 sdfModelEvalTm(dds3ObjectBaseBorrowDeviceMotionRoot(base));
             } else {
                 switch (base->mode) {
-                case 0:
-                case 1:
-                case 2:
+                case DDS3_OBJECT_MATTER_ANIME_MODE_FULL_SPEED:
+                case DDS3_OBJECT_MATTER_ANIME_MODE_RAMP_UP_FAST:
+                case DDS3_OBJECT_MATTER_ANIME_MODE_RAMP_UP_SLOW:
                     base->weight = 0.0f;
-                    base->mode = 3;
+                    base->mode = DDS3_OBJECT_MATTER_ANIME_MODE_HOLD_AT_ZERO;
                     break;
-                case 3:
+                case DDS3_OBJECT_MATTER_ANIME_MODE_HOLD_AT_ZERO:
                     base->weight = 0.0f;
                     break;
-                case 4:
+                case DDS3_OBJECT_MATTER_ANIME_MODE_RAMP_DOWN_FAST:
                     base->weight -= 0.05f;
                     if (base->weight < 0.0f) {
                         base->weight = 0.0f;
                     }
                     break;
-                case 5:
+                case DDS3_OBJECT_MATTER_ANIME_MODE_RAMP_DOWN_SLOW:
                     base->weight -= 0.02f;
                     if (base->weight < 0.0f) {
                         base->weight = 0.0f;
                     }
                     break;
-                case 6:
+                case DDS3_OBJECT_MATTER_ANIME_MODE_SEEK_TO_END:
                     break;
                 }
-                if (base->mode == 6) {
+                if (base->mode == DDS3_OBJECT_MATTER_ANIME_MODE_SEEK_TO_END) {
                     sdfMotionSeek(base->motion, base->motion->frameCount);
                 } else if (base->weight > 0.0f) {
                     base->motion->frameStep = base->weight;
@@ -542,31 +543,31 @@ void effObjApplyTransformParameters(struct SdfPoolNode **surfaces, dds3Basic_t *
             }
         } else {
             switch (base->mode) {
-            case 0:
+            case DDS3_OBJECT_MATTER_ANIME_MODE_FULL_SPEED:
                 base->weight = 1.0f;
                 break;
-            case 1:
+            case DDS3_OBJECT_MATTER_ANIME_MODE_RAMP_UP_FAST:
                 base->weight += 0.05f;
                 if (base->weight > 1.0f) {
                     base->weight = 1.0f;
                 }
                 break;
-            case 2:
+            case DDS3_OBJECT_MATTER_ANIME_MODE_RAMP_UP_SLOW:
                 base->weight += 0.025f;
                 if (base->weight > 1.0f) {
                     base->weight = 1.0f;
                 }
                 break;
-            case 3:
+            case DDS3_OBJECT_MATTER_ANIME_MODE_HOLD_AT_ZERO:
                 base->weight = 0.0f;
                 break;
-            case 4:
+            case DDS3_OBJECT_MATTER_ANIME_MODE_RAMP_DOWN_FAST:
                 base->weight -= 0.05f;
                 if (base->weight < 0.0f) {
                     base->weight = 0.0f;
                 }
                 /* Fallthrough is native. */
-            case 5:
+            case DDS3_OBJECT_MATTER_ANIME_MODE_RAMP_DOWN_SLOW:
                 base->weight -= 0.02f;
                 if (base->weight < 0.0f) {
                     base->weight = 0.0f;
