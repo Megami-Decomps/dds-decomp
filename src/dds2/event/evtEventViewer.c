@@ -1962,9 +1962,9 @@ void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer) {
 
 
 
-/* Returns the address word of the nearest kind-2 key at/before the current
- * frame, or zero. Equal-distance ties retain the first key visited. */
-s32 evtViewFindGlyphAtOrBefore(EvtRuntime *viewer) {
+/* Returns the nearest kind-2 key at/before the current frame, or NULL.
+ * Equal-distance ties retain the first key visited. */
+EvtRuntimeChild *evtViewFindGlyphAtOrBefore(EvtRuntime *viewer) {
     EvtRuntimeChild *result = NULL;
     s32 best = 99999;
     EvtRuntimeGroup *node = viewer->groups;
@@ -1991,7 +1991,7 @@ s32 evtViewFindGlyphAtOrBefore(EvtRuntime *viewer) {
         }
         node = node->next;
     }
-    return (s32)result;
+    return result;
 }
 
 extern void evtSetMovieClipPositionClampedToDuration(dds3Basic_t *movie, s32 unused, s32 start, s32 end, s32 offset);
@@ -2024,7 +2024,7 @@ void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer) {
                                     if (trackEntry->childCount != 0) {
                                         startFrame = trackEntry->children->frame;
                                     }
-                                    glyph = (EvtRuntimeChild *)evtViewFindGlyphAtOrBefore(viewer);
+                                    glyph = evtViewFindGlyphAtOrBefore(viewer);
                                     extra = 0;
                                     if (glyph != NULL) {
                                         extra = glyph->p0C.sh[1];
