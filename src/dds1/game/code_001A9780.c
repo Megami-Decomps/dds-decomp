@@ -11,6 +11,7 @@
 #include "btl_command_layout_work.h"
 #include "common.h"
 #include "btl_target_list_builder.h"
+#include "btl_target_selection_state_api.h"
 #include "btl_actor_command_selector_value_api.h"
 #include "btl_action_press_result.h"
 #include "file_config_option_api.h"
@@ -1803,7 +1804,8 @@ extern const char *D_003BB3A0;
 s32 btlSetTaskPhase2(void) {
     dds3ProcessID_t *task = dds3SearchProcessName(D_003BB3A0);
     if (task != 0) {
-        *(s32 *)dds3GetProcessData(task) = 2;
+        ((SceneAiWork *)dds3GetProcessData(task))->state =
+            BTL_TARGET_SELECTION_STATE_ACTIVE;
         return 1;
     }
     return 0;
@@ -7888,7 +7890,6 @@ BattleRosterTable *btlGetActorLinkageSkillList(BattleSceneObject *object, u16 *v
 
 extern u16 btlReadUnitStatusMask(datUnitWork_t *);
 #include "btl_command_affinity_api.h"
-#include "btl_target_selection_state_api.h"
 extern void btlCreateReserveActorPanelTask(void);
 extern s32 btlIsSupportedCommandKind(const s32 *phase);
 extern BtlCommandUseError btlCheckScenePairResult(BtlUnit *, BattleRosterPair *);

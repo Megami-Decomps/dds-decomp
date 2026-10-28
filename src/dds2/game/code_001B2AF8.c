@@ -15,6 +15,7 @@
 #include "sdf_packet_list.h"
 #include "common.h"
 #include "btl_target_list_builder.h"
+#include "btl_target_selection_state_api.h"
 #include "btl_actor_command_selector_value_api.h"
 #include "btl_scene_counter_mode.h"
 #include "btl_command_result_kind_api.h"
@@ -2760,7 +2761,8 @@ extern const char *D_004367B8;
 s32 btlSetTaskPhase2(void) {
     dds3ProcessID_t *task = dds3SearchProcessName(D_004367B8);
     if (task != 0) {
-        *(s32 *)dds3GetProcessData(task) = 2;
+        ((SceneAiWork *)dds3GetProcessData(task))->state =
+            BTL_TARGET_SELECTION_STATE_ACTIVE;
         return 1;
     }
     return 0;
@@ -8625,7 +8627,6 @@ void btlDrawActorVitalGauge(BtlUnit *unit, s32 current, s32 displayed, s32 maxim
 
 extern SdfPoolNode D_003805A8;
 #include "sdf_packet_alloc.h"
-#include "btl_target_selection_state_api.h"
 /* Draw a textured command-panel quad with independently colored corners. */
 s32 btlDrawGouraudTexturedPanelQuad(s32 x0, s32 y0, s32 x1, s32 y1,
                   s32 x2, s32 y2, s32 x3, s32 y3,
