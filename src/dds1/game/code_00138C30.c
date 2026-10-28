@@ -107,6 +107,7 @@
 #include "fld_label_cache_api.h"
 #include "fld_sprite_vertex.h"
 #include "fld_room_state.h"
+#include "fld_file_addr_reset_mode.h"
 #include "fld_room_resource_api.h"
 #include "fld_trigger_shape.h"
 #include "fld_action_row.h"
@@ -221,7 +222,7 @@ extern s32 fldDrwZBuf;
 
 extern u32 rsetFrameMaskOtOffset;
 
-extern u32 gFldFileResetMode;
+extern FldFileAddrResetMode gFldFileResetMode;
 
 extern u32 fldPendingArea;
 
@@ -346,7 +347,7 @@ extern void fldInfLoadFromMem(const FldInfTable *source);
 
 extern s32 fldRoomEventPlacementCount;
 
-extern u32 gFldFileResetMode;
+extern FldFileAddrResetMode gFldFileResetMode;
 
 extern s32 gFldInf_WpExit;
 

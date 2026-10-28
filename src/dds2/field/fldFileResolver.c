@@ -55,6 +55,7 @@
 #include "fld_scene_request.h"
 #include "fld_room_resource_api.h"
 #include "fld_area_room_resource_load_api.h"
+#include "fld_file_addr_reset_mode.h"
 #include "fld_spawn_event.h"
 #include "dds3obj.h"
 #include "dds3_object_control_slot.h"
@@ -454,7 +455,7 @@ extern u32 fldPendingArea;
 
 extern u32 fldPendingFloor;
 
-extern u32 gFldFileResetMode;
+extern FldFileAddrResetMode gFldFileResetMode;
 
 extern u32 rsetFrameMaskOtOffset;
 
@@ -1503,7 +1504,7 @@ void fldFreePac0(void) {
     D_00444950[0] = D_00436020[0];
 }
 
-extern u32 gFldFileResetMode;
+extern FldFileAddrResetMode gFldFileResetMode;
 extern s32 gFldInf_WpExit;
 extern FldTransferChunk *fldRoomF1Chunk;
 extern u8 *fldRoomF1Data;
@@ -1559,7 +1560,7 @@ const struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) 
     PacWork *work;
     s32 index;
 
-    gFldFileResetMode = 0;
+    gFldFileResetMode = FLD_FILE_ADDR_RESET_MODE_DISABLED;
     fldRoomEventPlacementCount = 0;
     fldCachedRoomF1ResourceAllocation = NULL;
     fldCachedRoomF2ResourceAllocation = NULL;
@@ -1810,7 +1811,7 @@ void fldReleaseFieldResources(void) {
             D_00444940[i] = NULL;
         }
     }
-    if (gFldFileResetMode != 0) {
+    if (gFldFileResetMode != FLD_FILE_ADDR_RESET_MODE_DISABLED) {
         if (fldRoomF1Chunk != 0) {
             fldRelocateTransferChunkWords(fldRoomF1Data, fldRoomF1Chunk);
             fldRoomF1Chunk = 0;
@@ -1977,8 +1978,8 @@ void fldHojiDebugView2(void) {
 }
 
 /* Enable or skip relocation of remaining transfer chunks during field teardown. */
-void fldFileAddrResetMode(u32 relocateOnRelease) {
-    gFldFileResetMode = relocateOnRelease;
+void fldFileAddrResetMode(FldFileAddrResetMode mode) {
+    gFldFileResetMode = mode;
 }
 
 void fldDrawInit(void) {

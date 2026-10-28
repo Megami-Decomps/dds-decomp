@@ -17,6 +17,7 @@
 #include "mdl_motion_controller_lookup_api.h"
 #include "file_request_api.h"
 #include "sdf_texture_offset_list.h"
+#include "fld_file_addr_reset_mode.h"
 #include "evt_event_pack_task.h"
 
 #include "dds3_world_primary.h"
@@ -24,7 +25,6 @@ extern s32 evtPlaySe(s32 eventId, EvtSoundVariation variation);
 
 extern s32 evtLoadArea_FromMemory(s32 area, s32 room, u8 *resource0Data, u8 *resource1Data,
                                             const SdfTextureOffsetListHeader *textureOffsets, s32 flags);
-extern void fldFileAddrResetMode(u32 relocateOnRelease);
 extern u32 dds3DrawFlag;
 
 extern s32 evtMotionSeWork;
@@ -125,7 +125,7 @@ s32 evtRegistBEField(EvtPackEventId eventId, EvtPackFieldResourceId resourceId) 
 
     if (areaRoomIds != NULL && resource0Data != NULL && resource1Data != NULL && textureOffsets != NULL) {
         evtLoadArea_FromMemory(areaRoomIds->area, areaRoomIds->room, resource0Data, resource1Data, textureOffsets, 0);
-        fldFileAddrResetMode(1);
+        fldFileAddrResetMode(FLD_FILE_ADDR_RESET_MODE_RELOCATE_ON_RELEASE);
         dds3DrawFlag |= 0x02000000;
         return 1;
     }
