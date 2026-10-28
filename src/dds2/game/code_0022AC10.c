@@ -1099,8 +1099,6 @@ BtlCommandBlockReason btlGetCommandBlockReason(ActionStateLink *actionTask, BtlC
 
 extern s32 btlGetEntryFlagsUnlessDisabled(datUnitWork_t *);
 
-extern s32 btlLowestSetPairIndex(u32);
-
 BtlCommandTargetEligibilityResult btlGetCommandTargetEligibility(
     BtlIndexList *indexList, BtlCommandId commandId) {
     datUnitWork_t *entryList[26];
@@ -1109,7 +1107,7 @@ BtlCommandTargetEligibilityResult btlGetCommandTargetEligibility(
     s32 i;
     u32 flags;
     s32 requirement;
-    s32 entrySlotIndex;
+    BtlActorEntrySlotIndexResult entrySlotIndex;
 
     if (battle->runtimeFlags & BTL_STATE_FLAG_DISABLE_COMMAND_TARGET_ELIGIBILITY) {
         return BTL_COMMAND_TARGET_ELIGIBILITY_RESULT_NONE;
@@ -1166,7 +1164,7 @@ BtlCommandRequiredEntryMatchResult btlCheckCommandRequiredEntryMatches(
     u32 flags;
     u32 mask;
     s32 bit;
-    s32 entrySlotIndex;
+    BtlActorEntrySlotIndexResult entrySlotIndex;
 
     if (commandId <= 0) {
         return result;
@@ -1184,7 +1182,8 @@ BtlCommandRequiredEntryMatchResult btlCheckCommandRequiredEntryMatches(
         mask = 1 << bit;
         if (flags & mask) {
             entrySlotIndex = btlLowestSetPairIndex(mask);
-            if (entrySlotIndex < 7 && entrySlotIndex != -1) {
+            if (entrySlotIndex < 7 &&
+                entrySlotIndex != BTL_ACTOR_ENTRY_SLOT_INDEX_NOT_FOUND) {
                 if (btlIndexListMatchesEntryCodes(list, entrySlotIndex, mask) == 0) {
                     return 0;
                 }

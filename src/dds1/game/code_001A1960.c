@@ -1595,7 +1595,7 @@ void btlApplyMaskedActorEntryAdjustments(BtlUnit *unit, u32 flags, s16 delta) {
 }
 
 /* Index of the lowest set bit pair in the mask (bits 10 and 13 are single), or -1. */
-s32 btlLowestSetPairIndex(u32 mask) {
+BtlActorEntrySlotIndexResult btlLowestSetPairIndex(u32 mask) {
     s32 index = 0;
     s32 step = 1;
 

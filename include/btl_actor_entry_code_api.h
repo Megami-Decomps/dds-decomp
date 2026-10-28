@@ -8,6 +8,12 @@ struct BtlUnit;
 /* Signed index into BtlUnit.entrySlots; valid values are 0 through 6. */
 typedef s32 BtlActorEntrySlotIndex;
 
+/* A slot lookup returns a valid index or this sentinel when no bit is set. */
+typedef s32 BtlActorEntrySlotIndexResult;
+enum {
+    BTL_ACTOR_ENTRY_SLOT_INDEX_NOT_FOUND = -1
+};
+
 enum {
     BTL_ACTOR_ENTRY_SLOT_PHYSICAL_CHARGE = 5,
     BTL_ACTOR_ENTRY_SLOT_MAGIC_CHARGE = 6
@@ -23,6 +29,7 @@ enum {
 
 BtlActorEntryCodeMatch btlMatchActorEntryCode(
     const struct BtlUnit *unit, BtlActorEntrySlotIndex slotIndex);
+BtlActorEntrySlotIndexResult btlLowestSetPairIndex(u32 mask);
 /* True only when the slot has a code and its countdown has elapsed. */
 u8 btlActorEntryIsExpired(const struct BtlUnit *unit, BtlActorEntrySlotIndex slotIndex);
 s16 btlGetActorEntryCode(const struct BtlUnit *unit, BtlActorEntrySlotIndex slotIndex);
