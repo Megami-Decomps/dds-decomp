@@ -2045,13 +2045,14 @@ void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer) {
     }
 }
 
-extern EvtRuntimeChild *evtViewerFindLatestMatchingMotionKey(EvtRuntimeGroup *group, s32 frame, s32 channel);
+extern EvtRuntimeChild *evtViewerFindLatestMatchingMotionKey(EvtRuntimeGroup *group, s32 frame,
+                                                             MdlMotionSearchId channel);
 
 void evtViewerSyncModelMotionChannels(s32 frame, dds3Basic_t *object, EvtRuntimeGroup *track,
                    EvtRuntime *viewer, s32 mode) {
     EffectObjectData *data = object->data;
     dds3ModelHandle_t *model = (dds3ModelHandle_t *)data->modelHolder->resourceHandle;
-    s32 channel;
+    MdlMotionSearchId channel;
 
     if (model->first == NULL) {
         return;
@@ -2525,7 +2526,8 @@ void evtViewerFlag8ClearFrameHookNoOp(EvtRuntime *viewer) {
 
 /* Returns the latest eligible kind-5 motion key at/before frame for channel,
  * or NULL. Its condition must pass; equal-frame ties retain the first key. */
-EvtRuntimeChild *evtViewerFindLatestMatchingMotionKey(EvtRuntimeGroup *group, s32 frame, s32 channel) {
+EvtRuntimeChild *evtViewerFindLatestMatchingMotionKey(EvtRuntimeGroup *group, s32 frame,
+                                                      MdlMotionSearchId channel) {
     s32 bestFrame = -1;
     EvtRuntimeChild *best = NULL;
     EvtRuntimeChild *key = group->children;
