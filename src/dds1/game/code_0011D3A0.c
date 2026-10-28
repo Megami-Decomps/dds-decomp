@@ -2097,13 +2097,13 @@ FldLocationCoordinateFlags fldGetLocationCoordinateFlags(s32 area, s32 locationI
 }
 
 /* Search all 640 stage entries; the miss result is 640 rather than zero. */
-u32 fldFindStageCoordinateIndex(s32 x, s32 y) {
+u32 fldFindStageCoordinateIndex(s32 area, s32 stage) {
     FieldStageCoordinate *record = fldStageCoordinateRecords;
     s32 index = 0;
     s32 visited = 0;
 
     do {
-        if (record->x == x && record->y == y) {
+        if (record->area == area && record->stage == stage) {
             return index;
         }
         index++;
@@ -2114,12 +2114,12 @@ u32 fldFindStageCoordinateIndex(s32 x, s32 y) {
 }
 
 /* This pointer lookup searches only the first 96 stage entries; NULL on miss. */
-FieldStageCoordinate *fldFindStageCoordinateRecord(s32 x, s32 y) {
+FieldStageCoordinate *fldFindStageCoordinateRecord(s32 area, s32 stage) {
     FieldStageCoordinate *record = fldStageCoordinateRecords;
     s32 index = 0;
 
     do {
-        if (record->x == x && record->y == y) {
+        if (record->area == area && record->stage == stage) {
             return record;
         }
         index++;

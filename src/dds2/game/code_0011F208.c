@@ -1620,7 +1620,7 @@ void fldLoadFieldTablesAndIndexStages(void) {
         D_003899F0[i] = 0;
     }
     for (i = 0; i < 0x60; i++) {
-        s16 id = (fldStageCoordinateRecords)[i].x;
+        s16 id = (fldStageCoordinateRecords)[i].area;
 
         if (id > 0) {
             if (id < 0x1F) {
@@ -2126,13 +2126,13 @@ FldLocationCoordinateFlags fldGetLocationCoordinateFlags(s32 area, s32 locationI
 }
 
 /* Search all 640 stage entries; the miss result is 640 rather than zero. */
-u32 fldFindStageCoordinateIndex(s32 x, s32 y) {
+u32 fldFindStageCoordinateIndex(s32 area, s32 stage) {
     FieldStageCoordinate *record = fldStageCoordinateRecords;
     s32 index = 0;
     s32 visited = 0;
 
     do {
-        if (record->x == x && record->y == y) {
+        if (record->area == area && record->stage == stage) {
             return index;
         }
         index++;
@@ -2144,14 +2144,14 @@ u32 fldFindStageCoordinateIndex(s32 x, s32 y) {
 
 /* Return the area's base row plus rows preceding the matching stage record.
  * A missing coordinate pair returns zero, unlike the index lookup's sentinel. */
-u32 fldFindStageCoordinateRowOffset(s32 x, s32 y) {
+u32 fldFindStageCoordinateRowOffset(s32 area, s32 stage) {
     FieldStageCoordinate *records = fldStageCoordinateRecords;
     s32 rowOffset = 0;
     s32 index = 0;
     do {
-        if (records[index].x == x) {
-            if (records[index].y == y) {
-                return D_003899F0[x] + rowOffset;
+        if (records[index].area == area) {
+            if (records[index].stage == stage) {
+                return D_003899F0[area] + rowOffset;
             }
             rowOffset += records[index].rows;
         }
@@ -2161,12 +2161,12 @@ u32 fldFindStageCoordinateRowOffset(s32 x, s32 y) {
 }
 
 /* This pointer lookup searches only the first 96 stage entries; NULL on miss. */
-FieldStageCoordinate *fldFindStageCoordinateRecord(s32 x, s32 y) {
+FieldStageCoordinate *fldFindStageCoordinateRecord(s32 area, s32 stage) {
     FieldStageCoordinate *record = fldStageCoordinateRecords;
     s32 index = 0;
 
     do {
-        if (record->x == x && record->y == y) {
+        if (record->area == area && record->stage == stage) {
             return record;
         }
         index++;

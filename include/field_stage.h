@@ -3,11 +3,11 @@
 
 #include "common.h"
 
-/* Stage-map coordinates: each resource record is exactly sixteen bytes.
+/* Stage-map entries are keyed by area/stage and store spatial layout in sixteen bytes.
  * The index and pointer lookups intentionally have different scan limits. */
 typedef struct FieldStageCoordinate {
-    s16 x;
-    s16 y;
+    s16 area;
+    s16 stage;
     f32 originX;
     f32 originZ;
     u8 cols;
@@ -60,6 +60,6 @@ typedef char FieldPlayerSceneWork_sequenceCode_at_60[((u32)&((FieldPlayerSceneWo
 typedef char FieldPlayerSceneWork_cameraLinkMode_at_64[((u32)&((FieldPlayerSceneWork *)0)->cameraLinkMode == 0x64) ? 1 : -1];
 typedef char FieldPlayerSceneWork_cameraName_at_70[((u32)&((FieldPlayerSceneWork *)0)->cameraName == 0x70) ? 1 : -1];
 
-FieldStageCoordinate *fldFindStageCoordinateRecord(s32 x, s32 y);
+FieldStageCoordinate *fldFindStageCoordinateRecord(s32 area, s32 stage);
 
 #endif /* FIELD_STAGE_H */
