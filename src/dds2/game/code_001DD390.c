@@ -598,7 +598,7 @@ extern f32 btlGetActionCategoryGateAsFloat(s32, s32, s32);
 
 extern void btlFindSoundTaskByWorkValue(u32, BtlActionPressResult);
 
-extern s32 btlRollAllFearChance(s32, BtlUnit *, u32, s32, u8);
+extern BtlFearInflictionRollResult btlRollAllFearChance(s32, BtlUnit *, u32, s32, u8);
 
 extern s32 btlRollPetrifiedDeathChance(BtlUnit *, s32);
 

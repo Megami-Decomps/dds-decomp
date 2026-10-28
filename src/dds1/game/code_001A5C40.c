@@ -400,7 +400,8 @@ BtlFearInflictionRollResult btlRollFearChance(
         : BTL_FEAR_INFLICTION_ROLL_FAILED;
 }
 
-s32 btlRollAllFearChance(s32 unused, BtlUnit *unit, u32 flags, s32 unusedFlags,
+BtlFearInflictionRollResult btlRollAllFearChance(
+    s32 unused, BtlUnit *unit, u32 flags, s32 unusedFlags,
                   u8 useSelectedAction) {
     s32 actionThreshold;
     s32 statusThreshold;

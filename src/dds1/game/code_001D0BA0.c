@@ -568,7 +568,7 @@ extern f32 btlGetActionCategoryGateAsFloat(s32, s32, s32);
 /* Native resolver hook passes kind and press; both are unused by this title's no-op. */
 extern void btlFindSoundTaskByWorkValue(s32 kind, BtlActionPressResult press);
 
-extern s32 btlRollAllFearChance(s32, BtlUnit *, u32, s32, u8);
+extern BtlFearInflictionRollResult btlRollAllFearChance(s32, BtlUnit *, u32, s32, u8);
 
 extern s32 btlRollStoneDeathChance(BtlUnit *, s32);
 
