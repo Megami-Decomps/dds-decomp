@@ -16,6 +16,7 @@
 #include "btl_sound.h"
 #include "btl_sound_release_task.h"
 #include "btl_task_condition.h"
+#include "btl_actor_resource_table_kind.h"
 #include "btl.h"
 #include "btl_state.h"
 #include "btl_floor_resource_readiness_api.h"
@@ -310,8 +311,8 @@ void btlInitializeBattleUnits(BtlState *scene) {
                 unit->modelVariant=unit->partyRecord.unitId;
                 unit->modelResourceKind=0;
                 unit->displaySpecies=unit->partyRecord.unitId+16;
-                if (unit->status.flags & 0x1000) btlInitializeEffectVectorsFromSourceRecords(unit,0,unit->displaySpecies);
-                else btlInitializeEffectVectorsFromSourceRecords(unit,0,unit->partyRecord.unitId);
+                if (unit->status.flags & 0x1000) btlInitializeEffectVectorsFromSourceRecords(unit, BTL_ACTOR_RESOURCE_TABLE_PARTY, unit->displaySpecies);
+                else btlInitializeEffectVectorsFromSourceRecords(unit, BTL_ACTOR_RESOURCE_TABLE_PARTY, unit->partyRecord.unitId);
                 initializeBattleUnitHook(scene,unit);
                 slot++;
             }
@@ -341,7 +342,7 @@ void btlInitializeBattleUnits(BtlState *scene) {
             btlSetSceneTaskActiveFlag(task);
             unit->modelResourceKind=1;
             unit->displaySpecies=enemyId;
-            btlInitializeEffectVectorsFromSourceRecords(unit,1,enemyId);
+            btlInitializeEffectVectorsFromSourceRecords(unit, BTL_ACTOR_RESOURCE_TABLE_OPPOSING, enemyId);
         } else {
             unit=btlCreateUnit();
             btlReleaseUnitResources(unit);

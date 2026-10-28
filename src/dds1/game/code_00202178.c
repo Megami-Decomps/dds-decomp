@@ -1286,7 +1286,8 @@ void btlResetUnitPlacement(void) {
                         ((BtlUnit *)unit)->reach = 180.0f;
                         ((BtlUnit *)unit)->height = 220.0f;
                     } else {
-                        btlInitializeEffectVectorsFromSourceRecords(unit, 1, species);
+                        btlInitializeEffectVectorsFromSourceRecords(
+                            unit, BTL_ACTOR_RESOURCE_TABLE_OPPOSING, species);
                     }
                 }
             }
@@ -1800,7 +1801,8 @@ void btlUpdateLinkedEffectUnitTransforms(void) {
             position[0] += 420.0f;
             btlSetUnitPosition(first, position);
             btlSetUnitRotation(first, first->rotation);
-            btlInitializeEffectVectorsFromSourceRecords(first, 1, 0x107);
+            btlInitializeEffectVectorsFromSourceRecords(
+                first, BTL_ACTOR_RESOURCE_TABLE_OPPOSING, 0x107);
             first->status.stateFlags |= 0x100;
             btlRestoreLinkedEffectUnitPose(first);
             first->status.stateFlags |= 0x200;
@@ -1815,7 +1817,8 @@ void btlUpdateLinkedEffectUnitTransforms(void) {
             SDF_VU0_COPYVECTOR(position, first->position);
             btlSetUnitPosition(second, second->position);
             btlSetUnitRotation(second, second->rotation);
-            btlInitializeEffectVectorsFromSourceRecords(second, 1, 0x108);
+            btlInitializeEffectVectorsFromSourceRecords(
+                second, BTL_ACTOR_RESOURCE_TABLE_OPPOSING, 0x108);
         }
     }
 }
@@ -3494,8 +3497,10 @@ void btlAdvanceNidhoggrScaleStage(s32 unit, BtlScaleStageSource *source) {
     if (selected == 0) {
         return;
     }
-    modelA = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(1, 0x10D);
-    modelB = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(1, 0x11D);
+    modelA = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(
+        BTL_ACTOR_RESOURCE_TABLE_OPPOSING, 0x10D);
+    modelB = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(
+        BTL_ACTOR_RESOURCE_TABLE_OPPOSING, 0x11D);
     transition->targetScale = (modelA->scale - modelB->scale) * D_00360F00[transition->stage];
     transition->targetScale += modelB->scale;
     statScale = D_00360F18[transition->stage];
@@ -3513,7 +3518,8 @@ void btlTriggerSpecialUnitActionAndResetPose(s32 unit) {
         return;
     }
     btlGetRuntime();
-    btlInitializeEffectVectorsFromSourceRecords(unit, 1, 0x11d);
+    btlInitializeEffectVectorsFromSourceRecords(
+        unit, BTL_ACTOR_RESOURCE_TABLE_OPPOSING, 0x11d);
     btlAdvanceNidhoggrScaleStage(unit, 0);
 }
 
@@ -3579,8 +3585,10 @@ void btlUpdateNidhoggrScaleAndPosition(void) {
     SDF_VU0_STOREVECTOR(inner->scale);
     mdlSetScale(selected->ext->owner);
 
-    modelA = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(1, 0x10D);
-    modelB = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(1, 0x11D);
+    modelA = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(
+        BTL_ACTOR_RESOURCE_TABLE_OPPOSING, 0x10D);
+    modelB = (BtlActorStatusRecord *)btlGetSideIndexedActorStatusTable(
+        BTL_ACTOR_RESOURCE_TABLE_OPPOSING, 0x11D);
     if (modelA->scale != modelB->scale) {
         modelAScale = modelA->scale;
         modelBScale = modelB->scale;
@@ -3635,7 +3643,8 @@ void btlTriggerSpecialUnitAction(void) {
     }
     if (unit != 0) {
         ((BtlState *)battle)->postPlacementCallback = 0;
-        btlInitializeEffectVectorsFromSourceRecords(unit, 1, 0x11d);
+        btlInitializeEffectVectorsFromSourceRecords(
+            unit, BTL_ACTOR_RESOURCE_TABLE_OPPOSING, 0x11d);
         btlArrangeOpponentFormationSlots();
     }
 }

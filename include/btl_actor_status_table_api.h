@@ -2,11 +2,14 @@
 #define BTL_ACTOR_STATUS_TABLE_API_H
 
 #include "common.h"
+#include "btl_actor_resource_table_kind.h"
 
-/* Return a borrowed pointer into the selected side's actor-status bank. Entries
- * are separated by 0x270 bytes, and the returned storage is not a separate
- * allocation for the caller to release. Callers interpret the payload through
- * the appropriate record/resource view. */
-void *btlGetSideIndexedActorStatusTable(s32 side, s32 index);
+/* Return a borrowed pointer into the selected actor-resource bank. The party
+ * setup paths use selector 0; opposing-actor paths use selector 1. The provider
+ * routes every nonzero selector to the second bank. Entries are separated by
+ * 0x270 bytes. Callers interpret the shared payload through the appropriate
+ * record/resource view; the returned storage is not a separate allocation. */
+void *btlGetSideIndexedActorStatusTable(
+    s32 resourceTableKind, s32 index);
 
 #endif

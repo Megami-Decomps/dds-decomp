@@ -3149,7 +3149,8 @@ void btlScheduleSummonActionTasks(ActionStateLink *action) {
         unit->partyRecord.flags |= 0x23;
         modelId = action->indexWork.summonId;
         unit->combatantKind = modelId;
-        btlInitializeEffectVectorsFromSourceRecords(unit, 1, modelId);
+        btlInitializeEffectVectorsFromSourceRecords(
+            unit, BTL_ACTOR_RESOURCE_TABLE_OPPOSING, modelId);
         if (action->indexWork.skillId < 0x2A0 && action->indexWork.skillId != -1) {
             if (datActionAnimationRecords[action->indexWork.skillId].flags & 0x100) {
                 controlDelay = 2;

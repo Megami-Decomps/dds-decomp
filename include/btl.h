@@ -126,7 +126,7 @@ typedef struct BtlUnit {
     f32 geometryHeight; /* 0xB8: geometry height, independently copied or overridden. */
     f32 bodyRadius; /* 0xBC: unscaled actor half-width used by formation and positioning. */
     f32 cameraRadius; /* 0xC0: scaled actor clearance used by camera framing. */
-    s32 resourceKind; /* 0xC4: selects the actor resource table, as in DDS2 */
+    s32 resourceKind; /* 0xC4: actor resource table selector. */
     u32 species; /* 0xC8 */
     u8 modelBorrowed; /* Nonzero shares another unit's model state. */
     u8 padCD[3];
@@ -214,7 +214,7 @@ typedef struct BtlUnit {
     f32 geometryHeight; /* 0xB8: geometry height, copied from or overridden from height. */
     f32 bodyRadius; /* 0xBC: unscaled actor half-width used by formation and positioning. */
     f32 cameraRadius; /* 0xC0: scaled actor clearance used by camera framing. */
-    s32 resourceKind; /* 0xC4 */
+    s32 resourceKind; /* 0xC4: actor resource table selector. */
     s32 resourceIndex; /* 0xC8 */
     u8 modelBorrowed; /* Nonzero shares another unit's model state. */
     u8 padCD[3];

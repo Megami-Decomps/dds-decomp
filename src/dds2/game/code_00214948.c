@@ -2915,7 +2915,8 @@ void btlUpdateSpecialActorFormation(void) {
     }
     if (sub->specialActorFormationEnabled != 0) {
         if (core != NULL) {
-            btlInitializeEffectVectorsFromSourceRecords(core, 1, core->partyRecord.unitId);
+            btlInitializeEffectVectorsFromSourceRecords(
+                core, BTL_ACTOR_RESOURCE_TABLE_OPPOSING, core->partyRecord.unitId);
             core->bodyOffset[2] += 1050.0f;
             core->reach = 100.0f;
         }
@@ -2946,11 +2947,13 @@ void btlUpdateSpecialActorFormation(void) {
                 left->bodyOffset[3] = 0.0f;
             }
             if (right != NULL) {
-                btlInitializeEffectVectorsFromSourceRecords(right, 1, right->partyRecord.unitId);
+                btlInitializeEffectVectorsFromSourceRecords(
+                    right, BTL_ACTOR_RESOURCE_TABLE_OPPOSING, right->partyRecord.unitId);
             }
         } else {
             if (left != NULL) {
-                btlInitializeEffectVectorsFromSourceRecords(left, 1, left->partyRecord.unitId);
+                btlInitializeEffectVectorsFromSourceRecords(
+                    left, BTL_ACTOR_RESOURCE_TABLE_OPPOSING, left->partyRecord.unitId);
             }
             if (right != NULL) {
                 right->bodyOffset[0] = 10.0f;
@@ -2963,13 +2966,16 @@ void btlUpdateSpecialActorFormation(void) {
         }
     } else {
         if (core != NULL) {
-            btlInitializeEffectVectorsFromSourceRecords(core, 1, core->partyRecord.unitId);
+            btlInitializeEffectVectorsFromSourceRecords(
+                core, BTL_ACTOR_RESOURCE_TABLE_OPPOSING, core->partyRecord.unitId);
         }
         if (left != NULL) {
-            btlInitializeEffectVectorsFromSourceRecords(left, 1, left->partyRecord.unitId);
+            btlInitializeEffectVectorsFromSourceRecords(
+                left, BTL_ACTOR_RESOURCE_TABLE_OPPOSING, left->partyRecord.unitId);
         }
         if (right != NULL) {
-            btlInitializeEffectVectorsFromSourceRecords(right, 1, right->partyRecord.unitId);
+            btlInitializeEffectVectorsFromSourceRecords(
+                right, BTL_ACTOR_RESOURCE_TABLE_OPPOSING, right->partyRecord.unitId);
         }
     }
     if (core != NULL) {
@@ -8360,7 +8366,7 @@ u32 btlUpdateSpiralEdgeMarkedCamera(BtlLinkedCommand *unit) {
     return 1;
 }
 
-extern void btlInitializeEffectVectorsFromSourceRecords();
+extern void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *, s32, s32);
 
 void btlResetUnitPlacement(void) {
     BtlUnit *unit = ((BtlState *)btlGetRuntime())->units;
@@ -8379,7 +8385,8 @@ void btlResetUnitPlacement(void) {
                     unit->reach = 180.0f;
                     unit->height = 220.0f;
                 } else {
-                    btlInitializeEffectVectorsFromSourceRecords(unit, 1, 0x118);
+                    btlInitializeEffectVectorsFromSourceRecords(
+                        unit, BTL_ACTOR_RESOURCE_TABLE_OPPOSING, 0x118);
                 }
             }
         }
@@ -8586,7 +8593,8 @@ s32 btlCheckActiveEffectForSpecialTarget(BtlUnit *actor, BtlUnit *target, s32 co
     return (bits * 2) & 4;
 }
 
-extern void btlInitializeEffectVectorsFromSourceRecords(BtlUnit *, s32, s32);
+extern void btlInitializeEffectVectorsFromSourceRecords(
+    BtlUnit *, s32, s32);
 
 extern void btlBeginEffectActorFadeOut(void);
 
@@ -8669,7 +8677,8 @@ void btlUpdateLinkedEffectUnitTransforms(void) {
             position[0] += 420.0f;
             btlSetUnitPosition(twin, position);
             btlSetUnitRotation(twin, twin->rotation);
-            btlInitializeEffectVectorsFromSourceRecords(twin, 1, 0x12F);
+            btlInitializeEffectVectorsFromSourceRecords(
+                twin, BTL_ACTOR_RESOURCE_TABLE_OPPOSING, 0x12F);
             twin->status.stateFlags |= 0x100;
             btlRestoreLinkedEffectUnitPose(twin);
             twin->status.stateFlags |= 0x200;
@@ -8685,7 +8694,8 @@ void btlUpdateLinkedEffectUnitTransforms(void) {
             SDF_VU0_COPYVECTOR(position, twin->position);
             btlSetUnitPosition(mainUnit, mainUnit->position);
             btlSetUnitRotation(mainUnit, mainUnit->rotation);
-            btlInitializeEffectVectorsFromSourceRecords(mainUnit, 1, 0x12E);
+            btlInitializeEffectVectorsFromSourceRecords(
+                mainUnit, BTL_ACTOR_RESOURCE_TABLE_OPPOSING, 0x12E);
         }
     }
 }

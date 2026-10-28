@@ -1834,15 +1834,16 @@ DatEffectiveAffinityResult btlResolveUnitValueWithOverride(
     return datGetEffectiveAffinity(record, selector);
 }
 
-void *btlGetSideIndexedActorStatusTable(s32 side, s32 index) {
-    if (side == 0) {
+void *btlGetSideIndexedActorStatusTable(s32 resourceTableKind, s32 index) {
+    if (resourceTableKind == BTL_ACTOR_RESOURCE_TABLE_PARTY) {
         return (void *)(u32)(D_00435DE0 + index * 0x270);
     }
     return (void *)(u32)(D_00435DF0 + index * 0x270);
 }
 
-BtlActorTransformParameters *btlSelectSharedOrIndexedTransformParameters(s32 side, s32 index) {
-    if (side == 0) {
+BtlActorTransformParameters *btlSelectSharedOrIndexedTransformParameters(
+    s32 resourceTableKind, s32 index) {
+    if (resourceTableKind == BTL_ACTOR_RESOURCE_TABLE_PARTY) {
         return (BtlActorTransformParameters *)btlSharedActorTransformParameters;
     }
     return (BtlActorTransformParameters *)(D_00435E00 + index * 24);

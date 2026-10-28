@@ -1,5 +1,6 @@
 #include "common.h"
 #include "btl_action_state_api.h"
+#include "btl_actor_resource_table_kind.h"
 #include "btl_selected_entry_api.h"
 #include "btl_area_load_phase.h"
 #include "btl_rain_effect_api.h"
@@ -355,7 +356,7 @@ void btlInitializeBattleUnits(BtlState *scene) {
                 unit->modelVariant=modelKind;
                 unit->modelResourceKind=0;
                 unit->combatantKind=baseKind+16;
-                if (unit->status.flags & 0x1000) btlInitializeEffectVectorsFromSourceRecords(unit,0,unit->combatantKind);
+                if (unit->status.flags & 0x1000) btlInitializeEffectVectorsFromSourceRecords(unit, BTL_ACTOR_RESOURCE_TABLE_PARTY, unit->combatantKind);
                 else btlInitializeEffectVectorsFromSourceRecords(unit,unit->modelId,modelKind);
                 if (scene->initializeUnitEntry != NULL) scene->initializeUnitEntry(unit);
                 slot++;
@@ -386,7 +387,7 @@ void btlInitializeBattleUnits(BtlState *scene) {
             btlSetSceneTaskActiveFlag(task);
             unit->modelResourceKind=1;
             unit->combatantKind=enemyId;
-            btlInitializeEffectVectorsFromSourceRecords(unit,1,enemyId);
+            btlInitializeEffectVectorsFromSourceRecords(unit, BTL_ACTOR_RESOURCE_TABLE_OPPOSING, enemyId);
         } else {
             unit=btlCreateUnit();
             btlReleaseUnitResources(unit);
