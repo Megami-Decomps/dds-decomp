@@ -163,7 +163,7 @@ typedef struct FldValueRecord {
     FldCollisionFace *face;
     void *stopData;
     s32 sceneFlag;
-    s32 ownerIndex; /* 0xE0: guarded (> 0) map-slot auxiliary-flag bit selector */
+    s32 ownerIndex; /* 0xE0: map-slot auxiliary-flag selector; <= 0 bypasses its gate */
 } FldValueRecord;
 
 typedef char FldCollisionFaceSizeCheck[(sizeof(FldCollisionFace) == 0x24) ? 1 : -1];

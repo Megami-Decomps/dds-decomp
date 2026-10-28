@@ -7,6 +7,7 @@
 #include "sdf_packet_header.h"
 #include "eff.h"
 #include "fld_player_scene_state.h"
+#include "fld_map_slot_auxiliary_flag_selector.h"
 #include "fld_marker_packet.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
@@ -186,7 +187,8 @@ extern dds3Basic_t *dds3AddModelRangeBasicNew(s32, void *, const f32 *, const ch
 extern void dds3GetRadiusPoseSet(dds3Basic_t *, f32);
 extern void dds3SetLightObjectResoruce(dds3Basic_t *, WorldTransformSetup *);
 extern void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation,
-                                               u32 id, s32 sceneFlag, s32 ownerIndex);
+                         u32 id, s32 sceneFlag,
+                         FldMapSlotAuxiliaryFlagSelector auxiliaryFlagSelector);
 extern s32 fldCommand_GetHojiID(const char *);
 extern void dds3SetPathBasicSpline(dds3Basic_t *path, u32 value);
 
@@ -740,7 +742,8 @@ extern s32 fldRoomEventPlacementCount;
 extern s16 D_00389874[];
 extern s32 fldCommand_GetHojiID(const char *);
 extern void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation,
-                                               u32 id, s32 sceneFlag, s32 ownerIndex);
+                         u32 id, s32 sceneFlag,
+                         FldMapSlotAuxiliaryFlagSelector auxiliaryFlagSelector);
 extern dds3Basic_t *dds3AddModelRangeBasicNew(s32, void *, const f32 *, const char *);
 extern void dds3SetPathBasicSpline(dds3Basic_t *path, u32 value);
 extern dds3Basic_t *dds3AddEventBasic(s32 key, const char *resourcePath, const char *name);

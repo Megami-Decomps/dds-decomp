@@ -271,7 +271,8 @@ extern void dds3GetRadiusPoseSet(dds3Basic_t *, f32);
 extern void dds3SetLightObjectResoruce(dds3Basic_t *, WorldTransformSetup *);
 
 extern void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation,
-                                               u32 id, s32 sceneFlag, s32 ownerIndex);
+                         u32 id, s32 sceneFlag,
+                         FldMapSlotAuxiliaryFlagSelector auxiliaryFlagSelector);
 
 extern s32 fldCommand_GetHojiID(const char *);
 
@@ -854,7 +855,8 @@ extern s16 D_0032E4B4[];
 extern s32 fldCommand_GetHojiID(const char *);
 
 extern void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation,
-                                               u32 id, s32 sceneFlag, s32 ownerIndex);
+                         u32 id, s32 sceneFlag,
+                         FldMapSlotAuxiliaryFlagSelector auxiliaryFlagSelector);
 
 extern dds3Basic_t *dds3AddModelRangeBasicNew(s32, void *, const f32 *, const char *);
 
@@ -6825,7 +6827,8 @@ void fldClrCollision(void) {
 }
 
 void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation,
-                   u32 id, s32 sceneFlag, s32 ownerIndex) {
+                   u32 id, s32 sceneFlag,
+                   FldMapSlotAuxiliaryFlagSelector auxiliaryFlagSelector) {
     f32 vertices[4][4];
     f32 copiedVertices[4][4];
     /* Inferred four-point capacity from related native workspace maps;
@@ -7415,7 +7418,7 @@ void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation
                 record->face = face;
                 record->stopData = stopData;
                 record->sceneFlag = sceneFlag;
-                record->ownerIndex = ownerIndex;
+                record->ownerIndex = auxiliaryFlagSelector;
                 record->unkCA = 0;
                 fldValueRecordCount++;
             }
