@@ -374,7 +374,7 @@ s32 evtCommand_CALL_NEXT(void) {
 }
 
 /* The event ID becomes a four-byte dispatch payload. */
-s32 evtCommand_CALL_EVENT(void)
+ScrCommandResult evtCommand_CALL_EVENT(void)
 {
     s32 eventId;
 
