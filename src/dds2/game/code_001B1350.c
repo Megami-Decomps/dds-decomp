@@ -10,6 +10,7 @@
 #include "btl_command_hit_result.h"
 #include "btl_command_status_api.h"
 #include "btl_hunt_mp_recovery_api.h"
+#include "btl_reward_level_scale_kind.h"
 #include "btl_special_ability.h"
 #include "evt_solar.h"
 #include "btl_item_drop.h"
@@ -373,7 +374,7 @@ BtlCommandHitResult btlResolveCommandHitResult(BtlUnit *source, BtlUnit *target,
 void func_001B1F78(void) {
 }
 
-extern f32 btlGetRewardLevelMultiplier(BtlUnit *, BtlUnit *, s32);
+extern f32 btlGetRewardLevelMultiplier(BtlUnit *, BtlUnit *, BtlRewardLevelScaleKind);
 
 /* Scale the enemy's normal EP reward; flag 0x2000 multiplies it by 100. */
 s32 btlCalculateEnemyExperienceReward(BtlUnit *acquirer, BtlUnit *enemy) {
@@ -389,7 +390,7 @@ s32 btlCalculateEnemyExperienceReward(BtlUnit *acquirer, BtlUnit *enemy) {
         return result;
     }
     entry = &datEnemyRecords[enemy->partyRecord.unitId];
-    ratio = btlGetRewardLevelMultiplier(acquirer, enemy, 1);
+    ratio = btlGetRewardLevelMultiplier(acquirer, enemy, BTL_REWARD_LEVEL_SCALE_ENEMY_EXPERIENCE);
     ep = (u32)((f32)entry->experience * ratio);
     if (entry->flags & 0x2000) {
         ep *= 100;
@@ -403,7 +404,7 @@ s32 btlCalculateEnemyExperienceReward(BtlUnit *acquirer, BtlUnit *enemy) {
 }
 
 /* Return the normal/hunt EP level multiplier with the native level-difference caps. */
-f32 btlGetRewardLevelMultiplier(BtlUnit *acquirer, BtlUnit *enemy, s32 rewardKind) {
+f32 btlGetRewardLevelMultiplier(BtlUnit *acquirer, BtlUnit *enemy, BtlRewardLevelScaleKind rewardKind) {
     s32 level;
     s32 difference;
     f32 factor;
@@ -459,7 +460,7 @@ s32 btlGetEnemyMoney(BtlUnit *acquirer, BtlUnit *enemy) {
 /* Hunt EP uses its own table quantity and the ratio calculator's mode 0. */
 s32 btlCalculateHuntEpReward(BtlUnit *acquirer, BtlUnit *enemy) {
     DatEnemyRecord *entry = &datEnemyRecords[enemy->partyRecord.unitId];
-    f32 ratio = btlGetRewardLevelMultiplier(acquirer, enemy, 0);
+    f32 ratio = btlGetRewardLevelMultiplier(acquirer, enemy, BTL_REWARD_LEVEL_SCALE_HUNT_EXPERIENCE);
     u32 ep = (u32)((f32)entry->huntExperience * ratio);
     if (entry->flags & 0x2000) {
         ep *= 100;
