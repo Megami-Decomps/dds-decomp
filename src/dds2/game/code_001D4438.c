@@ -1183,7 +1183,7 @@ void btlInitializeActorCommandState(ActionStateLink *task) {
 
 /* Allow the AI updater to bind this acting unit's script slot once again. */
 void btlEnterAiActionState(ActionStateLink *task) {
-    task->pendingFlags = task->pendingFlags & 0xffffff7f;
+    task->pendingFlags = task->pendingFlags & ~BTL_AI_TASK_FLAG_ACTION_DISPATCHED;
 }
 
 extern AiSpecies *datEnemyAiRecords;
@@ -1200,7 +1200,7 @@ s32 btlAiTaskUpdate(ActionStateLink *task) {
     if (!(scene->battleFlags & 0x20)) {
         if (sndHasActiveActor() == 0) {
             if (btlPollBattleResourceCleanup(task->unit) != BTL_BATTLE_RESOURCE_CLEANUP_PENDING) {
-                if (!(task->pendingFlags & 0x80)) {
+                if (!(task->pendingFlags & BTL_AI_TASK_FLAG_ACTION_DISPATCHED)) {
                     index = task->unit->partyRecord.unitId;
                     scene->boundTask = 0;
                     if (datEnemyAiRecords[index].kind != 1 && btlAllocAndCheck(task) != 0) {
@@ -1210,7 +1210,7 @@ s32 btlAiTaskUpdate(ActionStateLink *task) {
                     } else {
                         btlRunRandomWeightedAiTableAction(task);
                     }
-                    task->pendingFlags |= 0x80;
+                    task->pendingFlags |= BTL_AI_TASK_FLAG_ACTION_DISPATCHED;
                     scene->battleFlags &= ~0x100000;
                 }
                 if (scene->boundTask == 0) {
