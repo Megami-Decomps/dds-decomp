@@ -5,6 +5,7 @@
 #include "evt_run_context_api.h"
 #include "btl_scene_counter_mode.h"
 #include "btl_action_press_result.h"
+#include "btl_flag_to_element_index_api.h"
 #include "btl_command_result_kind_api.h"
 #include "btl_command_status_api.h"
 #include "btl_command_use_error.h"
@@ -124,8 +125,6 @@ u32 btlHasSpecialAbilityWhenArgumentUnset(BtlUnit *unit, s64 argumentValue);
 
 
 
-s32 btlFlagToElementIndex(s32 flag);
-
 extern u32 sdfQueryChannelValue(s32, datUnitWork_t *, datUnitWork_t *);
 #include "sdf_debug_api.h"
 
@@ -134,7 +133,7 @@ BtlPartyStatusMask btlGetCommandAddedStatus(
     BtlActionPressResult pressResult, s32 mode) {
     datUnitWork_t *record;
     BtlPartyStatusMask value;
-    s32 guard;
+    DatAffinitySelector guard;
 
     if (((BtlState *)btlGetRuntime())->runtimeFlags & 0x80) {
         return 0;

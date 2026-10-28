@@ -7,6 +7,7 @@
 #include "btl_actor_command_selector_value_api.h"
 #include "btl_resolve_unit_value_api.h"
 #include "btl_action_press_result.h"
+#include "btl_flag_to_element_index_api.h"
 #include "btl_command_hit_result.h"
 #include "btl_command_status_api.h"
 #include "btl_hunt_mp_recovery_api.h"
@@ -86,8 +87,6 @@ s32 btlHasMappedSpecialAbilityForSlot(BtlUnit *unit, u32 slot);
 s32 btlHasSpecialAbility274(BtlUnit *unit, u32 slot);
 
 
-s32 btlFlagToElementIndex(s32 flag);
-
 s32 btlGetAbilityAttributeMultiplierPercent(BtlUnit *actor, s32 attr);
 
 BtlPartyStatusMask btlGetCommandAddedStatus(
@@ -152,7 +151,7 @@ BtlPartyStatusMask btlGetCommandAddedStatus(
     }
 
     if (result != 0 && !(datCommandRecords[commandId].options & 1)) {
-        s32 element = btlFlagToElementIndex(result);
+        DatAffinitySelector element = btlFlagToElementIndex(result);
         if (btlHasMappedSpecialAbilityForSlot(defender, element) != 0 ||
             btlHasSpecialAbility274(defender, element) != 0 ||
             btlHasEnabledSpecialAbilityForSlot(defender, element) != 0) {

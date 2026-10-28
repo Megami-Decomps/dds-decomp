@@ -36,6 +36,7 @@
 #include "btl_indexed_ui_resource_api.h"
 #include "btl.h"
 #include "btl_actor_entry_code_api.h"
+#include "btl_flag_to_element_index_api.h"
 #include "btl_command_affinity_api.h"
 #include "btl_active_units_ready_api.h"
 #include "btl_state.h"
@@ -1108,9 +1109,9 @@ u32 btlEncodeActorIndexAsSelectionMask(u32 id) {
     return mask;
 }
 
-/* Decode an element flag through the shared native flag-to-index table. */
-s32 btlFlagToElementIndex(s32 flag) {
-    return datFlagToElementIndex(flag);
+/* Map a battle channel flag to the shared affinity selector. */
+DatAffinitySelector btlFlagToElementIndex(s32 channelFlag) {
+    return datFlagToElementIndex(channelFlag);
 }
 
 extern s32 evtGetMirroredSolarPhase(void);

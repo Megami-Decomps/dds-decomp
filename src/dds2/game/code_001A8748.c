@@ -18,6 +18,7 @@
 #include "btl_indexed_ui_resource_api.h"
 #include "btl_actor_resource_bank_api.h"
 #include "btl_actor_entry_code_api.h"
+#include "btl_flag_to_element_index_api.h"
 #include "btl_actor_entry_code_defaults.h"
 #include "itf_debug_panel_work.h"
 #include "itf_color_panel_row.h"
@@ -2462,9 +2463,9 @@ u32 btlEncodeActorIndexAsSelectionMask(u32 id) {
     return mask;
 }
 
-/* Decode an element flag through the shared native flag-to-index table. */
-s32 btlFlagToElementIndex(s32 flag) {
-    return datFlagToElementIndex(flag);
+/* Map a battle channel flag to the shared affinity selector. */
+DatAffinitySelector btlFlagToElementIndex(s32 channelFlag) {
+    return datFlagToElementIndex(channelFlag);
 }
 
 BtlSpecialAbilityAvailability btlCheckSpecialAbility(
