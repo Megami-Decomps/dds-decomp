@@ -458,7 +458,7 @@ extern void evtBitOn(s32 flagIndex);
 
 /* Flag-range items set their model flag regardless of quantityDelta.
  * Other items add the delta to their byte quantity and clamp it. */
-void ptyAdjustItemQuantity(PtyItemId itemId, s32 quantityDelta) {
+void ptyAdjustItemQuantity(PtyItemId itemId, PtyItemQuantityDelta quantityDelta) {
     s32 quantity;
 
     if ((u32)(itemId - PTY_ITEM_FLAG_FIRST) < PTY_ITEM_FLAG_COUNT) {
