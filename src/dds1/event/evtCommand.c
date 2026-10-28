@@ -1073,7 +1073,7 @@ ScrCommandResult evtCommand_DEL_BE(void) {
     return SCR_COMMAND_RESULT_COMPLETE;
 }
 
-extern dds3ProcessID_t * evtViewerCreateTask(s32 taskId, s32 event, s32 id);
+extern dds3ProcessID_t * evtViewerCreateTask(u32 priority, s32 eventId, s32 sceneId);
 extern void evtPolygonMovieSetFlagBits(dds3ProcessID_t *task, u32 bits);
 
 /* Create an event/scene movie task at the owning task's priority, set bit 0,

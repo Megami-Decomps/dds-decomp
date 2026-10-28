@@ -260,7 +260,7 @@ EvtRuntimeGroup *mnuCampFindEntryByName(EvtRuntime *scene, const char *name);
 
 /* Start the viewer task's scheduler callback chain. */
 KwlnTaskUpdateResult evtViewerStartUpdate(struct dds3ProcessID_t *task);
-struct dds3ProcessID_t *evtViewerCreateTask(s32 taskId, s32 event, s32 id);
+struct dds3ProcessID_t *evtViewerCreateTask(u32 priority, s32 eventId, s32 sceneId);
 
 typedef char EvtRuntimeChild_size[(sizeof(EvtRuntimeChild) == 0x38) ? 1 : -1];
 typedef char EvtGroupMetadata_size[(sizeof(EvtGroupMetadata) == 8) ? 1 : -1];

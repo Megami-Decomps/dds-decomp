@@ -900,8 +900,8 @@ extern void evtEventViewerDestroyActiveAlternate(dds3ProcessID_t *task);
 extern void evtEventViewerInitCampFontResource(EvtRuntime *viewer);
 extern char D_00423360[]; /* "(ZikkiPlayMode)EventViewer" */
 
-/* Create the event viewer task `taskId` for event `event`/scene `id` and request its movie files. */
-dds3ProcessID_t *evtViewerCreateTask(s32 taskId, s32 event, s32 id) {
+/* Create the event viewer task at `priority` for `eventId`/`sceneId` and request its movie files. */
+dds3ProcessID_t *evtViewerCreateTask(u32 priority, s32 eventId, s32 sceneId) {
     char path0[0x40];
     char path1[0x40];
     char path2[0x40];
@@ -915,10 +915,10 @@ dds3ProcessID_t *evtViewerCreateTask(s32 taskId, s32 event, s32 id) {
     viewer = (EvtRuntime *)sdfMemLock(viewerHandle);
     memset(viewer, 0, 0x24BC);
     viewer->resourceHandle = viewerHandle;
-    evtFormatPolygonMoviePaths(event, id, path0, path1, path2);
+    evtFormatPolygonMoviePaths(eventId, sceneId, path0, path1, path2);
     work = InitPolygonMovieWorkData();
-    work->eventId = event;
-    work->sceneId = id;
+    work->eventId = eventId;
+    work->sceneId = sceneId;
     work->mainResource.request = fileLoad(path0);
     work->flags |= EVT_POLY_MOVIE_MAIN_LOAD_PENDING;
     work->secondaryResource.request = fileLoad(path1);
@@ -930,7 +930,7 @@ dds3ProcessID_t *evtViewerCreateTask(s32 taskId, s32 event, s32 id) {
         work->tertiaryResource.request = 0;
         work->tertiaryResource.address = 0;
     }
-    task = dds3StartProcess(D_00423360, taskId, 1, 1, evtViewerStartUpdate, evtEventViewerDestroyActiveAlternate, (u32)viewer);
+    task = dds3StartProcess(D_00423360, priority, 1, 1, evtViewerStartUpdate, evtEventViewerDestroyActiveAlternate, (u32)viewer);
     viewer->windowContext = work;
     work->task = task;
     evtEventViewerInitCampFontResource(viewer);

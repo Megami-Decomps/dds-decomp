@@ -1058,7 +1058,7 @@ ScrCommandResult evtCommand_DEL_BE(void) {
 
 /* Create an event/scene movie task using the active camp resource, set bit 0,
  * and return its handle through the VM result. Missing work skips creation. */
-extern dds3ProcessID_t * evtViewerCreateTask(s32 taskId, s32 event, s32 id);
+extern dds3ProcessID_t * evtViewerCreateTask(u32 priority, s32 eventId, s32 sceneId);
 extern void evtPolygonMovieSetFlagBits(dds3ProcessID_t *task, u32 bits);
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421F08);
