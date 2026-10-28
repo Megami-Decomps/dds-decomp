@@ -3006,7 +3006,7 @@ void btlAdvanceUnitModelFrame(BtlUnit *unit, f32 frame) {
     }
 }
 
-s32 btlGetUnitModelFrameCount(const BtlUnit *unit) {
+BtlUnitModelFrameCount btlGetUnitModelFrameCount(const BtlUnit *unit) {
     if (!(unit->status.flags & 2)) {
         return 0;
     }
@@ -3021,7 +3021,7 @@ void btlSeekUnitModelFrameZero(BtlUnit *unit) {
 
 
 void btlSeekRandomModelFrame(BtlUnit *object) {
-    s32 duration;
+    BtlUnitModelFrameCount duration;
     u32 randomFrame;
     f32 frame;
 
