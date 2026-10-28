@@ -13,6 +13,7 @@
 #include "kwln_task_add_child.h"
 #include "sdf_vu_matrix.h"
 #include "evt_world_object_api.h"
+#include "evt_polygon_movie_flags_api.h"
 #include "fld_resource_resolver.h"
 #include "dds3_path.h"
 #include "dds3obj.h"
@@ -1055,10 +1056,10 @@ ScrCommandResult evtCommand_DEL_BE(void) {
     return SCR_COMMAND_RESULT_COMPLETE;
 }
 
-/* Create an event/scene movie task using the active camp resource, set bit 0,
- * and return its handle through the VM result. Missing work skips creation. */
+/* Create an event/scene movie task using the active camp resource, hold its
+ * viewer setup until the script releases it, and return its handle through the
+ * VM result. Missing work skips creation. */
 extern dds3ProcessID_t * evtViewerCreateTask(u32 priority, s32 eventId, s32 sceneId);
-extern void evtPolygonMovieSetFlagBits(dds3ProcessID_t *task, u32 bits);
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421F08);
 
@@ -1080,25 +1081,23 @@ ScrCommandResult evtCommandStartPolygonMovie(void) {
     movieTask = evtViewerCreateTask(commandWork->task->priority, eventId, sceneId);
     evtPrintDeveloperConsoleMessage("load PMV (%03d_%03d)..\n", scrGetIntPara(0), scrGetIntPara(1));
     dds3LinkProcess(commandWork->task, movieTask);
-    evtPolygonMovieSetFlagBits(movieTask, 1);
+    evtPolygonMovieSetFlagBits(movieTask, EVT_POLY_MOVIE_SCRIPT_STARTUP_HOLD);
     scrSetIntReturnValue(scrProcessHandleToVmInteger(movieTask));
     return 1;
 }
 
-extern void evtPolygonMovieClearFlagBits(dds3ProcessID_t *task, u32 bits);
-
-/* Clear bit 0 and echo the movie ID through the VM result. */
+/* Release viewer setup and echo the movie ID through the VM result. */
 ScrCommandResult evtCommandClearPolygonMovieFlag(void)
 {
     dds3ProcessID_t *movieTask;
 
     movieTask = scrVmIntegerToProcessHandle(scrGetIntPara(0));
-    evtPolygonMovieClearFlagBits(movieTask, 1);
+    evtPolygonMovieClearFlagBits(movieTask, EVT_POLY_MOVIE_SCRIPT_STARTUP_HOLD);
     scrSetIntReturnValue(scrProcessHandleToVmInteger(movieTask));
     return 1;
 }
 
-/* Create and return an event/scene movie task without setting bit 0.
+/* Create and return an event/scene movie task without holding viewer setup.
  * The owning scheduler task supplies the viewer task's priority. */
 ScrCommandResult evtCommand_PMV_RUN(void) {
     scrProcessWork_s *commandWork = scrGetScriptHandle();

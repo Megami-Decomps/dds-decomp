@@ -2,12 +2,14 @@
 #define EVT_POLYGON_MOVIE_H
 
 #include "common.h"
+#include "evt_polygon_movie_flags_api.h"
 #include "itf_mes_window_index.h"
 #include "sdf.h"
 #include "sdf_float_counter.h"
 
 struct dds3ProcessID_t;
 struct EvtRuntime;
+struct PolyMovieWork;
 struct dds3Basic_t;
 struct FileRequest;
 struct EvtCompactRow;
@@ -17,11 +19,11 @@ struct EvtExtendedRow;
 typedef struct EvtPolygonMovieTaskState {
     u32 movieFlags; /* 0x0 */
     u32 opaque_04;  /* 0x4 */
-    u32 *flags;     /* 0x8 */
+    struct PolyMovieWork *work; /* 0x8: viewer's movie work context. */
 } EvtPolygonMovieTaskState;
 
 typedef char EvtPolygonMovieTaskState_size_must_be_0x0C[(sizeof(EvtPolygonMovieTaskState) == 0x0C) ? 1 : -1];
-typedef char EvtPolygonMovieTaskState_flags_at_0x8[((u32)&((EvtPolygonMovieTaskState *)0)->flags == 0x8) ? 1 : -1];
+typedef char EvtPolygonMovieTaskState_work_at_0x8[((u32)&((EvtPolygonMovieTaskState *)0)->work == 0x8) ? 1 : -1];
 
 /* PMD2 records and the complete 0x11C-byte owner cleared by both games'
  * InitPolygonMovieWorkData. Movie parsing, asynchronous resource loading,
@@ -63,7 +65,7 @@ typedef struct PolyMovieResourceSlot {
 } PolyMovieResourceSlot;
 
 typedef struct PolyMovieWork {
-    u32 flags;         /* 0x00 */
+    EvtPolygonMovieWorkFlags flags; /* 0x00 */
     PolyMovieResourceSlot mainResource; /* 0x04 */
     PmdHeader *data;   /* 0x10 */
     const PmdEntry *entries; /* 0x14: borrowed directory records. */
@@ -146,8 +148,6 @@ PolyMovieWork *InitPolygonMovieWorkData(void);
 PolyMovieWork *evtPolygonMovieInitWork(PolyMovieWork *, PmdHeader *, PmdHeader *, PmdHeader *);
 sdfMemHandle_t *evtAllocMovieWork(PmdHeader **out);
 sdfMemHandle_t *evtPolygonMovieSynthesizePmd3Header(PmdHeader **out);
-void evtPolygonMovieSetFlagBits(struct dds3ProcessID_t *task, u32 bits);
-void evtPolygonMovieClearFlagBits(struct dds3ProcessID_t *task, u32 bits);
 void evtPolygonMovieSetObjectMode(struct dds3Basic_t *obj, u32 mode, u32 setFlags, u32 clearFlags);
 s32 evtStopMover(struct dds3Basic_t *movie, s32 undo, s32 start, s32 end);
 

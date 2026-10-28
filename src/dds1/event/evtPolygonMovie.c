@@ -486,21 +486,21 @@ void evtPolygonMovieSetObjectMode(dds3Basic_t *obj, u32 mode, u32 setFlags, u32 
     }
 }
 
-/* Apply a caller-provided mask to the event state's flag word. */
-void evtPolygonMovieSetFlagBits(dds3ProcessID_t *task, u32 bits)
+/* Apply a caller-provided mask to the viewer's movie-work flags. */
+void evtPolygonMovieSetFlagBits(dds3ProcessID_t *task, EvtPolygonMovieWorkFlags flags)
 {
     EvtPolygonMovieTaskState *state;
 
     state = (EvtPolygonMovieTaskState *)dds3GetProcessData(task);
-    *state->flags = *state->flags | bits;
+    state->work->flags = state->work->flags | flags;
 }
 
-void evtPolygonMovieClearFlagBits(dds3ProcessID_t *task, u32 bits)
+void evtPolygonMovieClearFlagBits(dds3ProcessID_t *task, EvtPolygonMovieWorkFlags flags)
 {
     EvtPolygonMovieTaskState *state;
 
     state = (EvtPolygonMovieTaskState *)dds3GetProcessData(task);
-    *state->flags = *state->flags & ~bits;
+    state->work->flags = state->work->flags & ~flags;
 }
 
 /* Scale the clip to the elapsed fraction of its duration, then apply or undo it. */

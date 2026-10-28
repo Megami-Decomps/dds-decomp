@@ -4040,7 +4040,7 @@ KwlnTaskUpdateResult evtViewerInitializeUpdateSequence(dds3ProcessID_t *task) {
 KwlnTaskUpdateResult evtViewerAdvanceUpdate(dds3ProcessID_t *task) {
     EvtRuntime *viewer = (EvtRuntime *)dds3GetProcessData(task);
     PolyMovieWork *window;
-    s32 windowFlags;
+    EvtPolygonMovieWorkFlags windowFlags;
 
     evtEventViewerPollMovieResources(viewer->windowContext);
     window = viewer->windowContext;
@@ -4049,7 +4049,7 @@ KwlnTaskUpdateResult evtViewerAdvanceUpdate(dds3ProcessID_t *task) {
         dds3DrawFlag |= 0x2000000;
         return 0;
     } else {
-        if ((windowFlags & 1) != 0) {
+        if ((windowFlags & EVT_POLY_MOVIE_SCRIPT_STARTUP_HOLD) != 0) {
             dds3DrawFlag |= 0x2000000;
             return 0;
         }
