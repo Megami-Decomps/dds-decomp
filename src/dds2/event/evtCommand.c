@@ -80,7 +80,7 @@ void fldSetSceneParam3(fldSceneParam_t *record, s32 stage, s32 kind, const char 
 
 void sdfPrintf(const char *msg, ...);
 
-s32 evtRegistBEField(EvtPackEventId eventId, s32 resourceId);
+s32 evtRegistBEField(EvtPackEventId eventId, EvtPackFieldResourceId resourceId);
 
 void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
 
@@ -513,8 +513,8 @@ s32 evtCommand_CALL_FIELD3(void)
 
 s32 evtCommand_FIELD_BE(void)
 {
-    s32 eventId;
-    s32 resourceId;
+    EvtPackEventId eventId;
+    EvtPackFieldResourceId resourceId;
 
     sdfPrintf("FIELD_BE start\n");
     eventId = scrGetIntPara(0);

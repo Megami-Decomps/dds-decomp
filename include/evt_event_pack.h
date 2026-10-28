@@ -22,6 +22,9 @@ typedef enum EvtPackKind {
 /* Key used to locate a payload by the BE record's secondaryResourceId. */
 typedef s32 EvtPackSecondaryResourceId;
 
+/* FIELD_BE selector matched to each required resource row's key field. */
+typedef s32 EvtPackFieldResourceId;
+
 /* Numeric event key used to name and find the camp's event-pack task. */
 typedef s32 EvtPackEventId;
 

@@ -83,7 +83,7 @@ EvtMotionSeModelKey evtInitMotionSeProcess(EvtPackEventId eventId, EvtMotionSeRe
 }
 
 /* Start a field BE from the task's resource table when all four payloads exist. */
-s32 evtRegistBEField(EvtPackEventId eventId, s32 resourceId) {
+s32 evtRegistBEField(EvtPackEventId eventId, EvtPackFieldResourceId resourceId) {
     const EvtPackLoadState *packState;
     const EvtPackEntry *entry;
     s32 entryCount;

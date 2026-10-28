@@ -128,7 +128,7 @@ extern char D_003ACA58[]; /* "error: LIGHT_PATH_MOVE.\n" */
 
 void sdfPrintf(const char *msg, ...);
 
-s32 evtRegistBEField(EvtPackEventId eventId, s32 resourceId);
+s32 evtRegistBEField(EvtPackEventId eventId, EvtPackFieldResourceId resourceId);
 
 extern s32 D_0032E3C0[];
 
@@ -543,8 +543,8 @@ s32 evtCommand_CALL_FIELD3(void)
 
 s32 evtCommand_FIELD_BE(void)
 {
-    s32 eventId;
-    s32 resourceId;
+    EvtPackEventId eventId;
+    EvtPackFieldResourceId resourceId;
 
     sdfPrintf("FIELD_BE start\n");
     eventId = scrGetIntPara(0);
