@@ -71,6 +71,12 @@ enum {
     LMAP_RESOURCE_LOAD_PHASE_CONSUME_ENTRY = 4,
 };
 
+typedef s32 LmapResourceLoadResult;
+enum {
+    LMAP_RESOURCE_LOAD_IN_PROGRESS = 0,
+    LMAP_RESOURCE_LOAD_COMPLETE = 1,
+};
+
 /* The file loader retains this subrecord at task + 0x78 between updates. */
 typedef struct LmapLoadState {
     struct FileRequest *file;
@@ -100,6 +106,8 @@ typedef struct LmapTaskState {
     u32 resourceAddress;          /* 0x74: loaded resource address */
     LmapLoadState load;           /* 0x78 */
 } LmapTaskState;
+
+LmapResourceLoadResult fldAdvanceLmapResourceLoad(LmapTaskState *task);
 
 extern LmapTaskState *D_0043888C;
 

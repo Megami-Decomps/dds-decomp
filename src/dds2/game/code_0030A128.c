@@ -33,8 +33,6 @@
 
 typedef struct SdfSlotSet SdfSlotSet;
 
-extern s32 fldAdvanceLmapResourceLoad(LmapTaskState *);
-
 extern void fldSkyDrawFilter(void);
 extern void fldDrawCameraColorLayerPass(void);
 extern void sdfAdjustCounterValueAndRedraw(s32);
@@ -486,7 +484,7 @@ INCLUDE_RODATA(const s32, "game/code_0030A128", D_0042D2A8);
 
 INCLUDE_RODATA(const s32, "game/code_0030A128", D_0042D2B8);
 
-s32 fldAdvanceLmapResourceLoad(LmapTaskState *task)
+LmapResourceLoadResult fldAdvanceLmapResourceLoad(LmapTaskState *task)
 {
     LmapLoadState *load = &task->load;
     LmapFileEntry *files = D_00400598;
@@ -502,7 +500,7 @@ s32 fldAdvanceLmapResourceLoad(LmapTaskState *task)
     case LMAP_RESOURCE_LOAD_PHASE_INSTALL_SLOTS:
         sdfInstallNonzeroSpriteSlots((SdfSlotSet *)task);
         evtPrintDeveloperConsoleMessage(D_0042D280);
-        return 1;
+        return LMAP_RESOURCE_LOAD_COMPLETE;
     case LMAP_RESOURCE_LOAD_PHASE_REQUEST_ENTRY:
         load->file = NULL;
         switch (files[load->entry].kind) {
@@ -518,7 +516,7 @@ s32 fldAdvanceLmapResourceLoad(LmapTaskState *task)
                 } else {
                     load->phase = LMAP_RESOURCE_LOAD_PHASE_INSTALL_SLOTS;
                 }
-                return 0;
+                return LMAP_RESOURCE_LOAD_IN_PROGRESS;
             }
             load->archive = pacLoad(files[load->entry].name);
             break;
@@ -535,7 +533,7 @@ s32 fldAdvanceLmapResourceLoad(LmapTaskState *task)
                 task->allocation = sdfDevLoadFileEx(files[load->entry].name, &task->resourceAddress, NULL);
             }
             load->phase = LMAP_RESOURCE_LOAD_PHASE_CONSUME_ENTRY;
-            return 0;
+            return LMAP_RESOURCE_LOAD_IN_PROGRESS;
         }
         load->phase = LMAP_RESOURCE_LOAD_PHASE_WAIT_FOR_ENTRY;
         break;
@@ -612,7 +610,7 @@ s32 fldAdvanceLmapResourceLoad(LmapTaskState *task)
         }
         break;
     }
-    return 0;
+    return LMAP_RESOURCE_LOAD_IN_PROGRESS;
 }
 
 void fldInitializeLocalMapScene(void) {
