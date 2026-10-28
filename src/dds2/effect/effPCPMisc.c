@@ -198,10 +198,9 @@ extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
 
 
 
-/* Effect initializers implemented in assembly below (effPCPHamaCardSpiralCreate lives in
-   another unit). Each is entered with and without spawn arguments, so they
-   are declared unchecked. */
-extern EffPCPSpawnRangeWork *effPCPSpiralBEDCreate();
+/* The PCF callback receives one data pointer, then forwards slots 0 and 1. */
+extern EffPCPSpawnRangeWork *effPCPSpiralBEDCreate(
+    EffPCPSpawnRangeParams *spawnParams, struct SoundMixer *eventParams);
 
 typedef struct EffPCPRingWork {
     f32 pos[4];
@@ -5309,8 +5308,9 @@ void effPCPRadiateTBSetColor(EffPCPPairedEventWork *work, u32 value) {
 }
 
 /* Clone the source header, then give every entry one event (placed at the unit scale) and a random negative start frame. */
-EffPCPSpawnRangeWork *effPCPSpiralBEDCreate(EffPCPSpawnRangeParams *src, void *params) {
-    u32 count = src->count;
+EffPCPSpawnRangeWork *effPCPSpiralBEDCreate(EffPCPSpawnRangeParams *spawnParams,
+                                            struct SoundMixer *eventParams) {
+    u32 count = spawnParams->count;
     struct sdfMemHandle_t *handle;
     EffPCPSpawnRangeWork *work;
     EffPCPEventPlace place;
@@ -5320,14 +5320,14 @@ EffPCPSpawnRangeWork *effPCPSpiralBEDCreate(EffPCPSpawnRangeParams *src, void *p
 
     handle = sdfMemAllocDirect(sizeof(*work) + count * sizeof(*entry));
     work = (void *)sdfMemLock(handle);
-    work->params = *src;
+    work->params = *spawnParams;
     entry = (EffPCPSpawnRangeEventRow *)(work + 1);
     work->handle = handle;
     work->color = 0x80808080;
     work->unk9C = 1;
     work->entries = entry;
     work->scale = 1.0f;
-    work->owner = effEveBEDCreate(params);
+    work->owner = effEveBEDCreate(eventParams);
     place.payload[0] = 0;
     place.payload[1] = 0;
     place.payload[2] = 0;

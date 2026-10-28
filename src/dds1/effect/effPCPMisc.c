@@ -5283,8 +5283,9 @@ void effPCPRadiateTBSetColor(EffPCPPairedEventWork *work, u32 val) {
 }
 
 /* Clone the source header, then give every entry one event (placed at the unit scale) and a random negative start frame. */
-EffPCPSpawnRangeWork *effPCPSpiralBEDCreate(EffPCPSpawnRangeParams *src, void *params) {
-    u32 count = src->count;
+EffPCPSpawnRangeWork *effPCPSpiralBEDCreate(EffPCPSpawnRangeParams *spawnParams,
+                                            struct SoundMixer *eventParams) {
+    u32 count = spawnParams->count;
     struct sdfMemHandle_t *handle;
     EffPCPSpawnRangeWork *work;
     EffPCPEventPlace place;
@@ -5294,14 +5295,14 @@ EffPCPSpawnRangeWork *effPCPSpiralBEDCreate(EffPCPSpawnRangeParams *src, void *p
 
     handle = sdfMemAllocDirect(sizeof(*work) + count * sizeof(*entry));
     work = (void *)sdfMemLock(handle);
-    work->params = *src;
+    work->params = *spawnParams;
     entry = (EffPCPSpawnRangeEventRow *)(work + 1);
     work->handle = handle;
     work->color = 0x80808080;
     work->unk9C = 1;
     work->entries = entry;
     work->scale = 1.0f;
-    work->owner = effEveBEDCreate(params);
+    work->owner = effEveBEDCreate(eventParams);
     place.payload[0] = 0;
     place.payload[1] = 0;
     place.payload[2] = 0;
