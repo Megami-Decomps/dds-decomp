@@ -3,10 +3,19 @@
 
 #include "common.h"
 
+/* Values stored at offset zero and dispatched by the interpolation assembly. */
+typedef u32 EvtSelStateMode;
+enum {
+    EVT_SEL_STATE_MODE_RAMP_UP = 0,
+    EVT_SEL_STATE_MODE_HOLD = 1,
+    EVT_SEL_STATE_MODE_RAMP_DOWN = 2,
+};
+#define EVT_SEL_STATE_UNBOUNDED_LIMIT (-1)
+
 /* The selection shake: a per-axis offset that ramps up, holds and ramps down. */
 typedef struct EvtSelState {
-    u32 mode;          /* 0x00: 0 ramps the offset up, 1 holds it, 2 ramps it down */
-    s32 limit;         /* 0x04: frame count at which the shake ends; -1 never ends */
+    EvtSelStateMode mode;  /* 0x00: current interpolation phase */
+    s32 limit;              /* 0x04: deadline frame; unbounded sentinel never ends */
     s32 rampUpFrames;   /* 0x08: frames to ramp up over */
     s32 rampDownFrames; /* 0x0C: frames to ramp down over */
     s16 amplitude[3];  /* 0x10: per-axis peak shake offset */

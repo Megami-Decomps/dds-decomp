@@ -1004,7 +1004,7 @@ s32 evtSelStateCreate(s32 countLimit, s16 frames, s32 firstValue, s32 secondValu
     selectionState = sdfAllocAndClearQuadwords(EVT_SELECTION_ALLOCATION_BYTES);
     evtSelectionState = selectionState;
     if (countLimit == 0) {
-        selectionState->limit = -1;
+        selectionState->limit = EVT_SEL_STATE_UNBOUNDED_LIMIT;
     } else {
         selectionState->limit = countLimit;
     }
@@ -1024,7 +1024,8 @@ u32 evtCheckSelectionState(void) {
         return 0;
     }
     selectionState = evtSelectionState;
-    if (selectionState->limit > selectionState->count || selectionState->limit == -1) {
+    if (selectionState->limit > selectionState->count ||
+        selectionState->limit == EVT_SEL_STATE_UNBOUNDED_LIMIT) {
         evtUpdateSelectionStateInterpolation();
     } else {
         evtSelStateDestroy();
