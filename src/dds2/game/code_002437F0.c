@@ -412,7 +412,8 @@ void evtDeactivateLastSolarPoint(SolarOverlayWork *overlay) {
     }
 }
 
-void evtSetSolarPointActiveCount(SolarOverlayWork *overlay, u32 desiredCount) {
+void evtSetSolarPointActiveCount(
+    SolarOverlayWork *overlay, EvtMirroredSolarPhase mirroredPhase) {
     SolarPoint *point;
     u8 *active;
     u32 activeCount;
@@ -426,11 +427,11 @@ void evtSetSolarPointActiveCount(SolarOverlayWork *overlay, u32 desiredCount) {
             activeCount++;
         }
     }
-    while (activeCount != desiredCount) {
-        if (activeCount < desiredCount) {
+    while (activeCount != mirroredPhase) {
+        if (activeCount < mirroredPhase) {
             activeCount++;
             evtActivateNextSolarPoint(overlay);
-        } else if (desiredCount < activeCount) {
+        } else if (mirroredPhase < activeCount) {
             activeCount--;
             evtDeactivateLastSolarPoint(overlay);
         }

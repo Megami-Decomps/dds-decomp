@@ -125,7 +125,9 @@ void evtBeginSolarOverlayFadeIn(s32 fadeDuration);
 void evtBeginSolarOverlayFadeOut(s32 fadeDuration);
 void evtActivateNextSolarPoint(SolarOverlayWork *overlay);
 void evtDeactivateLastSolarPoint(SolarOverlayWork *overlay);
-void evtSetSolarPointActiveCount(SolarOverlayWork *overlay, u32 desiredCount);
+/* Keep the active-point count aligned with the mirrored phase (0..8). */
+void evtSetSolarPointActiveCount(
+    SolarOverlayWork *overlay, EvtMirroredSolarPhase mirroredPhase);
 void evtUpdateSolarPointTimers(SolarOverlayWork *overlay);
 void evtSetSolarOverlayFullyVisible(void);
 void evtLoadSolarNoiseSprite(struct EffectSlotSet **sprite);
