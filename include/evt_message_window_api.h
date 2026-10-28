@@ -2,6 +2,7 @@
 #define EVT_MESSAGE_WINDOW_API_H
 
 #include "common.h"
+#include "itf_mes_entry_index.h"
 
 struct ItfMesSub;
 
@@ -24,9 +25,10 @@ typedef s32 EvtMessageWindowControlResult;
 EvtMessageWindowControlResult fclChkMessage(void);
 
 s32 evtSetBoundedDisplayValue(s32 displayValueIndex, s32 displayValue);
-/* Store the opaque value and snapshot the panel field when a window is open.
- * Returns 1 on success, or 0 when no window is open. */
-s32 evtStoreValueAndCaptureWindowPanelValue(s32 requestedValue);
+/* Store an option-list entry index for deferred construction and snapshot the
+ * second panel value while a window is open. Returns 1 on success or 0 when
+ * no window is open. */
+s32 evtStoreValueAndCaptureWindowPanelValue(ItfMesEntryIndex entryIndex);
 
 typedef s32 EvtMessageWindowPageValueResult;
 

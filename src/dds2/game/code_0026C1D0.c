@@ -261,13 +261,13 @@ s32 fclStartMessage(s32 entry) {
 
 extern s32 dspReadWindowSecondPanelValue(void);
 
-/* Store the caller's opaque value and snapshot the panel's second halfword.
- * This routine itself performs no sound-driver operation. */
-s32 evtStoreValueAndCaptureWindowPanelValue(s32 requestedValue) {
+/* Store an option-list entry for deferred construction and snapshot the
+ * panel's second halfword. */
+s32 evtStoreValueAndCaptureWindowPanelValue(ItfMesEntryIndex entryIndex) {
     if (gMsgID < 0) {
         return 0;
     }
-    D_00437888 = requestedValue;
+    D_00437888 = entryIndex;
     dspCapturedSoundMode = dspReadWindowSecondPanelValue();
     return 1;
 }
