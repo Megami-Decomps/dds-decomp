@@ -12,6 +12,7 @@
 #include "btl_motion_transform.h"
 #include "common.h"
 #include "btl_action_state_api.h"
+#include "btl_action_entry_is_empty_api.h"
 #include "btl_command_id.h"
 #include "btl_unit_geometry_api.h"
 #include "btl_horizontal_aim_api.h"
@@ -1389,7 +1390,6 @@ extern DatEnemyRecord *datEnemyRecords;
 struct SoundMixer;
 extern const char D_00417348[];
 extern const char D_00417360[];
-extern s32 btlActionEntryIsEmpty(s32 index, BtlOperandGroup *slot, BtlOperandEntry *entry);
 extern u64 btlAdvanceRuntimeSequenceCounter(void);
 extern BtlRuntimeTask *btlAllocateApproachTargetTask(BtlUnit *unit, BtlUnit *target, f32 scale);
 extern BtlRuntimeTask *btlAllocateIndexedUnitEffectTask(BtlUnit *unit, s32 index, s32 value, f32 scale);
@@ -1900,7 +1900,6 @@ extern s32 btlGetSlotRateKind(BtlUnit *, s32);
 extern s32 btlGetActionAnimationDelay(BtlUnit *, s32);
 extern s32 btlMapActionCode(s32, u32);
 extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
-extern s32 btlActionEntryIsEmpty(s32, BtlOperandGroup *, BtlOperandEntry *);
 extern BtlRuntimeTask *btlCreateDeferredActorStatsTask(BtlUnit *, BtlOperandEntry *);
 extern BtlRuntimeTask *btlCreateActorSoundOptionTask(BtlUnit *, s32);
 extern BtlRuntimeTask *btlScheduleEpPacketTask(BtlUnit *, s32);

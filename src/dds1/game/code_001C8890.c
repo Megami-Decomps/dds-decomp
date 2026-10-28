@@ -3,6 +3,7 @@
 #include "btl_motion_transform.h"
 #include "common.h"
 #include "btl_action_state_api.h"
+#include "btl_action_entry_is_empty_api.h"
 #include "btl_command_id.h"
 #include "btl_unit_geometry_api.h"
 #include "btl_horizontal_aim_api.h"
@@ -946,7 +947,6 @@ extern const char D_003A3670[];
 extern s32 btlGetActionAnimationDelay(BtlUnit *, s32);
 extern s32 btlResolveSkillCategory(s32, u32);
 extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
-extern s32 btlActionEntryIsEmpty(s32, BtlOperandGroup *, BtlOperandEntry *);
 extern BtlRuntimeTask *btlCreateDeferredActorStatsTask(BtlUnit *, BtlOperandEntry *);
 extern BtlRuntimeTask *btlCreateActorSoundOptionTask(BtlUnit *, s32);
 extern BtlRuntimeTask *btlScheduleEpPacketTask(BtlUnit *, s32);

@@ -6,6 +6,7 @@
 #include "btl_actor_transform_parameters.h"
 #include "btl_select_transform_parameters_api.h"
 #include "common.h"
+#include "btl_action_entry_is_empty_api.h"
 #include "btl_action_state_api.h"
 #include "btl_selected_entry_api.h"
 #include "btl_unit_model_progress_api.h"
@@ -468,19 +469,20 @@ BtlActionReactionMotionIndex btlClassifyActionResult(
     return motionIndex;
 }
 
-/* Test whether the operand is empty, subject to command-category and slot-kind exclusions. */
-s32 btlActionEntryIsEmpty(s32 index, BtlOperandGroup *slot, BtlOperandEntry *entry) {
+/* Test entry emptiness after command-category and operand-group-kind exclusions. */
+s32 btlActionEntryIsEmpty(BtlCommandId commandId, BtlOperandGroup *group,
+                          BtlOperandEntry *entry) {
     s32 kind;
 
-    if (index >= 0) {
-        switch (index) {
+    if (commandId >= 0) {
+        switch (commandId) {
         case 0x109:
         case 0x179:
         case 0x19C:
         case 0x1A5:
             return 0;
         }
-        switch (datCommandRecords[index].unk30) {
+        switch (datCommandRecords[commandId].unk30) {
         case 1:
         case 2:
         case 9:
@@ -495,8 +497,8 @@ s32 btlActionEntryIsEmpty(s32 index, BtlOperandGroup *slot, BtlOperandEntry *ent
             return 0;
         }
     }
-    if (slot != 0) {
-        kind = slot->kind;
+    if (group != 0) {
+        kind = group->kind;
         if (kind == 2 || kind == 0x10000) {
             return 0;
         }

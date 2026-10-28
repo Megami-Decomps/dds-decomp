@@ -10,6 +10,7 @@
 #include "btl_camera_parameter_record.h"
 #include "btl_camera_mode_index.h"
 #include "common.h"
+#include "btl_action_entry_is_empty_api.h"
 #include "btl_linked_actor_eligibility.h"
 #include "btl_target_list_builder.h"
 #include "btl_unit_model_progress_api.h"
@@ -310,7 +311,6 @@ extern void btlUpdateApproachCameraPose(BtlLinkedCommand *, BtlCamState *);
 
 extern void btlBuildHeightClampedApproachCamera(BtlLinkedCommand *, BtlCamState *);
 
-/* Test whether the operand is empty, subject to command-category and slot-kind exclusions. */ s32 btlActionEntryIsEmpty(s32 index, BtlOperandGroup *slot, BtlOperandEntry *entry);
 
 s32 btlAdjustCameraDirectionForDefaultPlane(BtlCamState *state);
 
