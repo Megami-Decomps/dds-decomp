@@ -13,6 +13,7 @@
 #include "mnu_input.h"
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
+#include "eff_resource_source_lifetime.h"
 #include "eff_resource_records.h"
 #include "eff_resource_list.h"
 #include "mnu.h"
@@ -244,12 +245,12 @@ void mnuLoadTerminalSceneResourceBanks(MenuSlotState *scene) {
     if (scene->reducedMode == 0) {
         for (i = 0; i < 3; i++) {
             scene->resourceBank[i] = effLoadIndexedResource(
-                (const char *)mnuTerminalSpriteDirectory, mnuTerminalPrimarySpriteNames[i], 1);
+                (const char *)mnuTerminalSpriteDirectory, mnuTerminalPrimarySpriteNames[i], EFF_RESOURCE_SOURCE_RETAINED);
             effResolveAndReleaseResource(scene->resourceBank[i]);
         }
         scene->resourceBank[3] = effLoadIndexedResource(
             (const char *)mnuTerminalSpriteDirectory,
-            mnuTerminalCharacterBackgroundSpriteNames[mnuFirstPresentMainCharacterIndex()], 1);
+            mnuTerminalCharacterBackgroundSpriteNames[mnuFirstPresentMainCharacterIndex()], EFF_RESOURCE_SOURCE_RETAINED);
         effResolveAndReleaseResource(scene->resourceBank[3]);
         mnuInitScrollingStripState(&scene->panels[0], 0,
             scene->resourceBank[0], 0x46, 0x43);
@@ -262,7 +263,7 @@ void mnuLoadTerminalSceneResourceBanks(MenuSlotState *scene) {
     } else {
         for (i = 0; i < 2; i++) {
             scene->resourceBank[i] = effLoadIndexedResource(
-                (const char *)mnuTerminalSpriteDirectory, mnuTerminalReducedModeSpriteNames[i], 1);
+                (const char *)mnuTerminalSpriteDirectory, mnuTerminalReducedModeSpriteNames[i], EFF_RESOURCE_SOURCE_RETAINED);
             effResolveAndReleaseResource(scene->resourceBank[i]);
         }
         mnuInitScrollingStripState(&scene->panels[0], 1,

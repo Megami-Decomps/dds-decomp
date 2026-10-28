@@ -4,6 +4,7 @@
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "eff_resource_slots.h"
+#include "eff_resource_source_lifetime.h"
 #include "sdf_resource.h"
 #include "mnu.h"
 #include "mnu_movie.h"
@@ -199,7 +200,7 @@ void mnuDrawScaledMovieRollSprite(s32 x, s32 y, s32 z, s32 alpha, EffectSlotSet 
 }
 
 void mnuLoadMovieRollSprite(void) {
-    mnuMovieWork->spriteSet = effLoadIndexedResource(D_003BC620, "roll.spr", 0);
+    mnuMovieWork->spriteSet = effLoadIndexedResource(D_003BC620, "roll.spr", EFF_RESOURCE_SOURCE_TRANSIENT);
 }
 
 /* Assign the 32 roll entries to columns 1-6 (1, 1, 4, 5, 9 and 12 entries) with a

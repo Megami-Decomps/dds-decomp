@@ -12,6 +12,7 @@
 #include "file_pac.h"
 #include "file_request_api.h"
 #include "eff_resource_slots.h"
+#include "eff_resource_source_lifetime.h"
 #include "sdf_pac_packet.h"
 #include "sdf_packet_list.h"
 #include "kwln.h"
@@ -506,7 +507,7 @@ s32 fldAdvanceLmapResourceLoad(LmapTaskState *task)
         load->file = NULL;
         switch (files[load->entry].kind) {
         case 1:
-            effRequestResourceByMode(D_00438898, files[load->entry].name, 0,
+            effRequestResourceByMode(D_00438898, files[load->entry].name, EFF_RESOURCE_SOURCE_TRANSIENT,
                                      (u32 *)&task->spriteSlots[files[load->entry].argument]);
             break;
         case 2:
@@ -578,13 +579,13 @@ s32 fldAdvanceLmapResourceLoad(LmapTaskState *task)
                         evtPrintDeveloperConsoleMessage(D_0042D2A8, sdfPacGetResrcFileName(node));
                         if (task->variant == 1) {
                             task->spriteSlots[slotIndex + 1] =
-                                effCreateResourceSlotSetFromAllocation(PAC_WORK_ALLOCATION(node), 0);
+                                effCreateResourceSlotSetFromAllocation(PAC_WORK_ALLOCATION(node), EFF_RESOURCE_SOURCE_TRANSIENT);
                         } else if (task->variant == 2) {
                             task->spriteSlots[slotIndex + 9] =
-                                effCreateResourceSlotSetFromAllocation(PAC_WORK_ALLOCATION(node), 0);
+                                effCreateResourceSlotSetFromAllocation(PAC_WORK_ALLOCATION(node), EFF_RESOURCE_SOURCE_TRANSIENT);
                         } else if (task->variant == 3) {
                             task->spriteSlots[slotIndex + 17] =
-                                effCreateResourceSlotSetFromAllocation(PAC_WORK_ALLOCATION(node), 0);
+                                effCreateResourceSlotSetFromAllocation(PAC_WORK_ALLOCATION(node), EFF_RESOURCE_SOURCE_TRANSIENT);
                         }
                         sdfMemFreeDirect(PAC_WORK_ALLOCATION(node));
                     }

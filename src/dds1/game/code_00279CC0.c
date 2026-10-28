@@ -2,6 +2,7 @@
 #include "sdf_chip.h"
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
+#include "eff_resource_source_lifetime.h"
 #include "mnu_input.h"
 #include "kwln.h"
 #include "mnu.h"
@@ -595,11 +596,11 @@ void mnuLoadBackdropAssetsAndTintSlots(MenuAssets *assets) {
     s32 i;
     s32 j;
 
-    assets->sprites[0] = effLoadIndexedResource(D_003B2330, (const char *)mnuCampBackdropSpriteResourceNames[1], 0);
+    assets->sprites[0] = effLoadIndexedResource(D_003B2330, (const char *)mnuCampBackdropSpriteResourceNames[1], EFF_RESOURCE_SOURCE_TRANSIENT);
     assets->sprites[1] = effCreateResourceSlotSet(assets->sprites[0], 0, 1);
     assets->sprites[2] = effCreateResourceSlotSet(assets->sprites[0], 0, 1);
     assets->sprites[3] = effCreateResourceSlotSet(assets->sprites[0], 0, 1);
-    assets->sprites[4] = effLoadIndexedResource(D_003B2330, (const char *)mnuCampBackdropSpriteResourceNames[0], 0);
+    assets->sprites[4] = effLoadIndexedResource(D_003B2330, (const char *)mnuCampBackdropSpriteResourceNames[0], EFF_RESOURCE_SOURCE_TRANSIENT);
     assets->material = effLoadMappedResource(D_003B2348, (const char *)mnuCampBackdropAnimationResourceNames[0]);
     mnuBindAssetEffectPayloads(assets);
     for (i = 0; i < 5; i++) {
@@ -618,9 +619,9 @@ extern u32 mnuCampBackdropSpriteResourceNames[];
 extern u32 mnuCampBackdropAnimationResourceNames[];
 
 void mnuRequestBaseAssets(MenuAssets *assets) {
-    effRequestResourceByMode(D_003B2330, mnuCampBackdropSpriteResourceNames[1], 0,
+    effRequestResourceByMode(D_003B2330, mnuCampBackdropSpriteResourceNames[1], EFF_RESOURCE_SOURCE_TRANSIENT,
                              (u32 *)&assets->sprites[0]);
-    effRequestResourceByMode(D_003B2330, mnuCampBackdropSpriteResourceNames[0], 0,
+    effRequestResourceByMode(D_003B2330, mnuCampBackdropSpriteResourceNames[0], EFF_RESOURCE_SOURCE_TRANSIENT,
                              (u32 *)&assets->sprites[4]);
     effRequestMappedResource(D_003B2348, mnuCampBackdropAnimationResourceNames[0], &assets->material);
 }

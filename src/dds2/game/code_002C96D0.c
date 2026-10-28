@@ -34,6 +34,7 @@
 #include "mc_path_api.h"
 #include "bill_object_api.h"
 #include "eff_resource_slots.h"
+#include "eff_resource_source_lifetime.h"
 #include "eff_update_flags.h"
 #include "sdf_resource.h"
 #include "sdf_chip.h"
@@ -3798,7 +3799,7 @@ FileConfigTask *fileCreateConfigTask(s32 mode) {
     switch (mode) {
     case 1:
         for (i = 0; i < 5; i++) {
-            effRequestResourceByMode(D_00437DF0, fileConfigSpriteResourceNames[5 + i], 0, (u32 *)&task->slots[i]);
+            effRequestResourceByMode(D_00437DF0, fileConfigSpriteResourceNames[5 + i], EFF_RESOURCE_SOURCE_TRANSIENT, (u32 *)&task->slots[i]);
         }
         mnuResetTitleStreamLocked();
         mnuQueueTitleSoundStreamEntry(0x14);
@@ -3807,7 +3808,7 @@ FileConfigTask *fileCreateConfigTask(s32 mode) {
         break;
     default:
         for (i = 0; i < 4; i++) {
-            effRequestResourceByMode(D_00437DF0, fileConfigSpriteResourceNames[i], 0, (u32 *)&task->slots[i]);
+            effRequestResourceByMode(D_00437DF0, fileConfigSpriteResourceNames[i], EFF_RESOURCE_SOURCE_TRANSIENT, (u32 *)&task->slots[i]);
         }
         task->slots[i] = 0;
         break;

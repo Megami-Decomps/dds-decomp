@@ -11,6 +11,7 @@
 #include "fr_font_measure.h"
 #include "fr_font.h"
 #include "eff_resource_slots.h"
+#include "eff_resource_source_lifetime.h"
 #include "sdf_resource.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
@@ -991,7 +992,7 @@ INCLUDE_RODATA(const s32, "game/code_002A5260", D_004298D8);
 INCLUDE_RODATA(const s32, "game/code_002A5260", D_004298E8);
 
 void mnuLoadMovieRollSprite(void) {
-    mnuMovieWork->sprite = effLoadIndexedResource(D_00437AC0, "staff_01.spr", 0);
+    mnuMovieWork->sprite = effLoadIndexedResource(D_00437AC0, "staff_01.spr", EFF_RESOURCE_SOURCE_TRANSIENT);
 }
 
 void mnuPrepareStaffRollText(void) {

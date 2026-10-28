@@ -3,6 +3,7 @@
 #include "sdf_gs_alpha_register_api.h"
 #include "prf_requirement.h"
 #include "eff_resource_slots.h"
+#include "eff_resource_source_lifetime.h"
 #include "common.h"
 #include "sdf_vu0.h"
 #include "snd_sequence_volume_pan.h"
@@ -576,7 +577,7 @@ s32 mnuLoadMantraSpriteTask(dds3ProcessID_t *task) {
         for (i = 4; entry != 0; entry = entry->next, i++) {
             if (((SdfPacStreamPacketHeader *)entry->packet)->command == 1) {
                 mnuMantraSpriteSlots[i] = (u32)effCreateResourceSlotSetFromAllocation(
-                    PAC_WORK_ALLOCATION(entry), 0);
+                    PAC_WORK_ALLOCATION(entry), EFF_RESOURCE_SOURCE_TRANSIENT);
                 sdfMemFreeDirect(PAC_WORK_ALLOCATION(entry));
             }
         }
@@ -7383,7 +7384,7 @@ MantraBurstSlot *mnuSpawnBurstSlot(MantraBurstPool *pool, s8 wide, s8 side) {
 MantraEffectResource *mnuRequestEffectResource(const char *resourcePath, const char *configPath) {
     MantraEffectResource *resource = (MantraEffectResource *)sdfChipAllocDirect(sizeof(MantraEffectResource));
     memset(resource, 0, sizeof(MantraEffectResource));
-    effRequestResourceByMode(resourcePath, configPath, 0, (u32 *)&resource->resourceSlots);
+    effRequestResourceByMode(resourcePath, configPath, EFF_RESOURCE_SOURCE_TRANSIENT, (u32 *)&resource->resourceSlots);
     return resource;
 }
 

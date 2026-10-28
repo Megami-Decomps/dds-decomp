@@ -59,6 +59,7 @@ extern void itfSetTextDrawLimit(s32 limit);
 #include "fr_font_measure.h"
 #include "fr_font.h"
 #include "eff_resource_slots.h"
+#include "eff_resource_source_lifetime.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "btl_scene_fade.h"
@@ -1509,11 +1510,11 @@ void btlLoadResourceBlock(void) {
     BtlState *work = (BtlState *)btlGetRuntime();
     if (btlResourceBlockLoaded == 0) {
         btlResourceBlock->resA = effCreateResourceSlotSetFromAllocation(
-            btlResourceBlock->resourceAllocationA, 0);
+            btlResourceBlock->resourceAllocationA, EFF_RESOURCE_SOURCE_TRANSIENT);
         btlResourceBlock->resB = effCreateResourceSlotSetFromAllocation(
-            btlResourceBlock->resourceAllocationB, 0);
+            btlResourceBlock->resourceAllocationB, EFF_RESOURCE_SOURCE_TRANSIENT);
         btlResourceBlock->resC = effCreateResourceSlotSetFromAllocation(
-            btlResourceBlock->resourceAllocationC, 0);
+            btlResourceBlock->resourceAllocationC, EFF_RESOURCE_SOURCE_TRANSIENT);
         work->resA = btlResourceBlock->resA;
         work->numberGlyphSlots = btlResourceBlock->resB;
         btlResourceBlockLoaded = 1;

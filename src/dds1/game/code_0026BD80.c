@@ -4,6 +4,7 @@
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "eff_resource_slots.h"
+#include "eff_resource_source_lifetime.h"
 #include "sdf_quaternion.h"
 #include "mnu_list.h"
 
@@ -105,13 +106,13 @@ u8 mnuIsAnyMenuInputPressed(void) {
 void mnuLoadMovieMenuResourceSlots(void) {
     if (mnuMovieMenuState->spriteHandles[0] == 0) {
         mnuMovieMenuState->spriteHandles[0] =
-            (u32)effLoadIndexedResource(D_003BC5D8, mnuMovieMenuSpriteResourceNames, 0);
+            (u32)effLoadIndexedResource(D_003BC5D8, mnuMovieMenuSpriteResourceNames, EFF_RESOURCE_SOURCE_TRANSIENT);
     }
     if (mnuMovieMenuState->spriteHandles[2] == 0) {
         const char *name = mnuMovieMenuSpriteResourceNames;
         name += 0x20;
         mnuMovieMenuState->spriteHandles[2] =
-            (u32)effLoadIndexedResource(D_003BC5D8, name, 0);
+            (u32)effLoadIndexedResource(D_003BC5D8, name, EFF_RESOURCE_SOURCE_TRANSIENT);
     }
 }
 
@@ -141,11 +142,11 @@ void mnuEnsureMovieMenuSpriteHandle(s32 loadImmediately) {
             const char *name = mnuMovieMenuSpriteResourceNames;
             name += 0x10;
             mnuMovieMenuState->spriteHandles[1] =
-                (u32)effLoadIndexedResource(D_003BC5D8, name, 0);
+                (u32)effLoadIndexedResource(D_003BC5D8, name, EFF_RESOURCE_SOURCE_TRANSIENT);
         } else {
             const char *name = mnuMovieMenuSpriteResourceNames;
             name += 0x10;
-            effRequestResourceByMode(D_003BC5D8, name, 0,
+            effRequestResourceByMode(D_003BC5D8, name, EFF_RESOURCE_SOURCE_TRANSIENT,
                                      handle);
         }
     }

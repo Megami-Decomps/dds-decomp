@@ -11,6 +11,7 @@
 #include "sdf_motion.h"
 #include "file.h"
 #include "eff_resource_slots.h"
+#include "eff_resource_source_lifetime.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
 #include "sdf_resource.h"
@@ -292,7 +293,7 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
         case 1:
             if (work->resourceSlots[D_0040A970[work->packageEntryIndex].value] == 0) {
                 effRequestResourceByMode(D_00438920,
-                    D_0040A970[work->packageEntryIndex].name, 0,
+                    D_0040A970[work->packageEntryIndex].name, EFF_RESOURCE_SOURCE_TRANSIENT,
                     (u32 *)&work->resourceSlots[D_0040A970[work->packageEntryIndex].value]);
             } else {
                 work->packageLoadState = MNU_SHOOTING_PACKAGE_LOAD_PROCESS_ENTRY;

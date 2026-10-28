@@ -16,6 +16,7 @@
 #include "kwln_fade.h"
 #include "sdf_packet_list.h"
 #include "eff_resource_slots.h"
+#include "eff_resource_source_lifetime.h"
 #include "eff_resource_records.h"
 #include "evt_viewer.h"
 #include "evt_viewer_indexed_condition.h"
@@ -1178,7 +1179,7 @@ INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF3D0);
 
 void mnuShopLoadSpriteAssets(ShopScene *scene) {
     struct EffectSlotSet **resource = &scene->spriteResource;
-    *resource = effLoadIndexedResource("/facility/spr/shop/", mnuShopPrimarySpriteNames[0], 0);
+    *resource = effLoadIndexedResource("/facility/spr/shop/", mnuShopPrimarySpriteNames[0], EFF_RESOURCE_SOURCE_TRANSIENT);
 }
 
 void mnuReleaseShopSceneSpriteResources(ShopScene *scene) {
@@ -3373,7 +3374,7 @@ void mnuLoadResourceHandles(MenuTerminalWork *menuWork) {
 
     for (resourceIndex = 0; resourceIndex < 2; resourceIndex++) {
         struct EffectSlotSet *resourceHandle = effLoadIndexedResource(
-            mnuTerminalSpriteDirectory, (const char *)mnuTerminalPrimarySpriteNames[resourceIndex], 1);
+            mnuTerminalSpriteDirectory, (const char *)mnuTerminalPrimarySpriteNames[resourceIndex], EFF_RESOURCE_SOURCE_RETAINED);
 
         menuWork->resourceSets[resourceIndex] = resourceHandle;
         effResolveAndReleaseResource(resourceHandle);

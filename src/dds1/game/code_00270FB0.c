@@ -1,5 +1,6 @@
 #include "mnu_input.h"
 #include "eff_resource_slots.h"
+#include "eff_resource_source_lifetime.h"
 #include "eff_resource_records.h"
 #include "eff_resource_list.h"
 #include "common.h"
@@ -41,14 +42,13 @@ extern char D_003B2020[];
 
 #define MNU_STAFF_PARTY_CATEGORY 4
 
-#define MNU_STAFF_RETAIN_RESOURCE 1
 
 /* Load the base image handles into the global table, retaining each resource. */
 void mnuLoadStaffImageHandles(void) {
     s32 resourceIndex;
 
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_BASE_RESOURCE_COUNT; resourceIndex++) {
-        mnuCampResourceHandles[resourceIndex] = effLoadIndexedResource(D_003B2020, (const char *)mnuCampBaseResourceNameRows[resourceIndex].index, MNU_STAFF_RETAIN_RESOURCE);
+        mnuCampResourceHandles[resourceIndex] = effLoadIndexedResource(D_003B2020, (const char *)mnuCampBaseResourceNameRows[resourceIndex].index, EFF_RESOURCE_SOURCE_RETAINED);
     }
 }
 

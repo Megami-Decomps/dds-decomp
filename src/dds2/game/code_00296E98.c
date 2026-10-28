@@ -8,6 +8,7 @@
 #include "brs_primary_panel_update_api.h"
 #include "eff_random.h"
 #include "eff_resource_slots.h"
+#include "eff_resource_source_lifetime.h"
 #include "eff_resource_list.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
@@ -864,7 +865,7 @@ s32 brsStartPartyPanelResourcesOnce(BrsSkillPackageWork *work) {
     p2sdLoadSMGFile(0x50000);
     mnuInitPartyPanelSlots(&work->partyPanel);
     mnuAppendCampSpriteRequests(work->resourceList, &work->staffSlots);
-    effRequestResourceByMode(D_00428358, D_00428368, 0,
+    effRequestResourceByMode(D_00428358, D_00428368, EFF_RESOURCE_SOURCE_TRANSIENT,
                              (u32 *)&work->unitResource);
     mnuRequestEffectResources(&work->campEffect.resources);
     work->setupState = BRS_SKILL_PANEL_SETUP_WAITING_FOR_RESOURCES;
@@ -986,7 +987,7 @@ BrsSkillPackageWork *brsCreateRewardTaskWork(void) {
     work->fadeProgress = 0x100;
     brsTaskLatchPendingRows(work);
     work->teardownResource = NULL;
-    effRequestResourceByMode(D_00428358, "easy_r01.spr", 0,
+    effRequestResourceByMode(D_00428358, "easy_r01.spr", EFF_RESOURCE_SOURCE_TRANSIENT,
                             (u32 *)&work->teardownResource);
     return work;
 }

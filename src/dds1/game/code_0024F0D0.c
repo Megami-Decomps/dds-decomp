@@ -5,6 +5,7 @@
 #include "mnu_title_stream.h"
 #include "sdf_chip.h"
 #include "eff_resource_slots.h"
+#include "eff_resource_source_lifetime.h"
 #include "kwln.h"
 #include "sdf_resource.h"
 #include "eff.h"
@@ -232,7 +233,7 @@ void mnuRequestMantraResources(MnuResourceTaskWork *work) {
 
     for (i = 0; i < 14; i++) {
         if (mnuMantraSpriteSlots[i] == 0) {
-            effRequestResourceByMode("/facility/spr/mantra/", &mnuMantraSpriteResourceNames[i * 0x10], 0, (u32 *)&mnuMantraSpriteSlots[i]);
+            effRequestResourceByMode("/facility/spr/mantra/", &mnuMantraSpriteResourceNames[i * 0x10], EFF_RESOURCE_SOURCE_TRANSIENT, (u32 *)&mnuMantraSpriteSlots[i]);
         }
     }
 }

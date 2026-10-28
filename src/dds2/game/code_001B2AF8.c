@@ -46,6 +46,7 @@
 #include "btl_roster_pair.h"
 #include "fr_font_measure.h"
 #include "eff_resource_slots.h"
+#include "eff_resource_source_lifetime.h"
 #include "sdf_chip.h"
 #include "kwln.h"
 #include "kwln_process_registration.h"
@@ -2471,11 +2472,11 @@ void btlLoadResourceBlock(void) {
     BtlWorkRes *work = (BtlWorkRes *)btlGetRuntime();
     if (btlResourceBlockLoaded == 0) {
         btlResourceBlock->resA = effCreateResourceSlotSetFromAllocation(
-            btlResourceBlock->resourceAllocationA, 0);
+            btlResourceBlock->resourceAllocationA, EFF_RESOURCE_SOURCE_TRANSIENT);
         btlResourceBlock->resB = effCreateResourceSlotSetFromAllocation(
-            btlResourceBlock->resourceAllocationB, 0);
+            btlResourceBlock->resourceAllocationB, EFF_RESOURCE_SOURCE_TRANSIENT);
         btlResourceBlock->resC = effCreateResourceSlotSetFromAllocation(
-            btlResourceBlock->resourceAllocationC, 0);
+            btlResourceBlock->resourceAllocationC, EFF_RESOURCE_SOURCE_TRANSIENT);
         work->resA = btlResourceBlock->resA;
         work->resB = btlResourceBlock->resB;
         btlResourceBlockLoaded = 1;

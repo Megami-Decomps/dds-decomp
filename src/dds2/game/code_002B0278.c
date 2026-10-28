@@ -9,6 +9,7 @@
 #include "ui_color.h"
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
+#include "eff_resource_source_lifetime.h"
 #include "mnu_input.h"
 #include "kwln.h"
 #include "pty_skill_menu_api.h"
@@ -3345,7 +3346,7 @@ INCLUDE_RODATA(const s32, "game/code_002B0278", D_0042AE58);
 void mnuLoadEffectResources(MenuEffectResources *resources) {
     mnuInitializeMapPacket(0, mnuCampBackdropFrameMap, 0xb, &resources->packet);
     mnuCopyCampEffectRowData(&mnuCampBackdropEffectRows, resources);
-    resources->packet.sheets[0] = effLoadIndexedResource("/camp/spr/n_min/", mnuCampBackdropSpriteResourceNames[0], 0);
+    resources->packet.sheets[0] = effLoadIndexedResource("/camp/spr/n_min/", mnuCampBackdropSpriteResourceNames[0], EFF_RESOURCE_SOURCE_TRANSIENT);
     resources->animationHandle = effLoadMappedResource("/camp/mot/", mnuCampBackdropAnimationResourceNames[0]);
     mnuBindCampEffectAnimation(resources);
 }
@@ -3353,7 +3354,7 @@ void mnuLoadEffectResources(MenuEffectResources *resources) {
 void mnuRequestEffectResources(MenuEffectResources *resources) {
     mnuInitializeMapPacket(0, mnuCampBackdropFrameMap, 0xb, &resources->packet);
     mnuCopyCampEffectRowData(&mnuCampBackdropEffectRows, resources);
-    effRequestResourceByMode("/camp/spr/n_min/", mnuCampBackdropSpriteResourceNames[0], 0,
+    effRequestResourceByMode("/camp/spr/n_min/", mnuCampBackdropSpriteResourceNames[0], EFF_RESOURCE_SOURCE_TRANSIENT,
                              (u32 *)&resources->packet.sheets[0]);
     effRequestMappedResource("/camp/mot/", mnuCampBackdropAnimationResourceNames[0], &resources->animationHandle);
 }

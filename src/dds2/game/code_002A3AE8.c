@@ -2,6 +2,7 @@
 #include "common.h"
 #include "eff_random.h"
 #include "eff_resource_slots.h"
+#include "eff_resource_source_lifetime.h"
 #include "fpu.h"
 #include "mnu.h"
 #include "mnu_list.h"
@@ -125,14 +126,14 @@ void mnuLoadMovieMenuResourceSlots(void) {
 
     if (state[1] == 0) {
         resource = (u32)effLoadIndexedResource((const char *)D_00437A48,
-            (const char *)mnuMovieMenuSpriteResourceNames, 0);
+            (const char *)mnuMovieMenuSpriteResourceNames, EFF_RESOURCE_SOURCE_TRANSIENT);
         state = (u32 *)titleWork;
         state[1] = resource;
     }
     if (state[3] == 0) {
         const char *name = (const char *)mnuMovieMenuSpriteResourceNames;
         name += 0x20;
-        resource = (u32)effLoadIndexedResource((const char *)D_00437A48, name, 0);
+        resource = (u32)effLoadIndexedResource((const char *)D_00437A48, name, EFF_RESOURCE_SOURCE_TRANSIENT);
         state = (u32 *)titleWork;
         state[3] = resource;
     }
@@ -160,11 +161,11 @@ void mnuEnsureMovieMenuSpriteHandle(s32 loadImmediately) {
             const char *name = (const char *)mnuMovieMenuSpriteResourceNames;
             name += 0x10;
             ((SpriteMenuState *)titleWork)->spriteHandle =
-                (u32)effLoadIndexedResource((const char *)D_00437A48, name, 0);
+                (u32)effLoadIndexedResource((const char *)D_00437A48, name, EFF_RESOURCE_SOURCE_TRANSIENT);
         } else {
             const char *name = (const char *)mnuMovieMenuSpriteResourceNames;
             name += 0x10;
-            effRequestResourceByMode((const char *)D_00437A48, name, 0,
+            effRequestResourceByMode((const char *)D_00437A48, name, EFF_RESOURCE_SOURCE_TRANSIENT,
                                      handle);
         }
     }

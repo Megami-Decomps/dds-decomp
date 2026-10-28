@@ -3,6 +3,7 @@
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "eff_resource_slots.h"
+#include "eff_resource_source_lifetime.h"
 #include "evt_solar.h"
 
 
@@ -37,7 +38,7 @@ extern void effDrawTextureSlotWithBlendedCornerColors(s32 x, s32 y, s32 depth, u
 
 
 void evtLoadSolarNoiseSprite(struct EffectSlotSet **sprite) {
-    *sprite = effLoadIndexedResource(D_00437210, "solarnoise.spr", 0);
+    *sprite = effLoadIndexedResource(D_00437210, "solarnoise.spr", EFF_RESOURCE_SOURCE_TRANSIENT);
 }
 
 void evtReleaseSolarNoiseSprite(struct EffectSlotSet **sprite) {

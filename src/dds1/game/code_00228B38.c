@@ -2,6 +2,7 @@
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "eff_resource_slots.h"
+#include "eff_resource_source_lifetime.h"
 #include "evt_solar.h"
 
 extern void evtDrawSolarNoiseLayerAtCenteredScale(s32 x, s32 y, s32 z, s32 alpha, s32 layer,
@@ -28,7 +29,7 @@ void uiDrawActiveSurfaceRegion(s32 object);
 extern char D_003BBDD0[];
 
 void evtLoadSolarNoiseSprite(struct EffectSlotSet **sprite) {
-    *sprite = effLoadIndexedResource(D_003BBDD0, "solarnoise.spr", 0);
+    *sprite = effLoadIndexedResource(D_003BBDD0, "solarnoise.spr", EFF_RESOURCE_SOURCE_TRANSIENT);
 }
 
 void evtReleaseSolarNoiseSprite(struct EffectSlotSet **sprite) {

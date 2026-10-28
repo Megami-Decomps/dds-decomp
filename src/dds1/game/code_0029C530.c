@@ -56,6 +56,7 @@
 #include "eff_ref_obj.h"
 #include "sdf_resource.h"
 #include "eff_resource_slots.h"
+#include "eff_resource_source_lifetime.h"
 #include "dds3_path.h"
 #include "eff_transform.h"
 #include "btl_state.h"
@@ -13586,7 +13587,7 @@ s32 effPollResourceList(EffectList *list) {
                         node = list->first;
                         allocation = PAC_WORK_ALLOCATION(item);
                         *node->reference = effCreateResourceSlotSetFromAllocation(allocation, node->kind);
-                        if (node->kind == 0) {
+                        if (node->kind == EFF_RESOURCE_SOURCE_TRANSIENT) {
                             sdfMemFreeDirect(allocation);
                         }
                         effRemoveListEntry(list);

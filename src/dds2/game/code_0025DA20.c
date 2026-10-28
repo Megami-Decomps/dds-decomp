@@ -17,6 +17,7 @@
 #include "fr_font_context.h"
 #include "sdf_packet_list.h"
 #include "eff_resource_slots.h"
+#include "eff_resource_source_lifetime.h"
 #include "sdf_resource.h"
 #include "evt_viewer.h"
 #include "evt_viewer_indexed_condition.h"
@@ -1369,24 +1370,24 @@ void mnuShopLoadSpriteAssets(MenuTerminalContext *scene) {
     DspScrollingStripState *secondPanel = &scene->panelWork[1];
 
     scene->effectSlots[0] = effLoadIndexedResource(
-        "/facility/spr/shop/", mnuShopPrimarySpriteNames[0], 0);
+        "/facility/spr/shop/", mnuShopPrimarySpriteNames[0], EFF_RESOURCE_SOURCE_TRANSIENT);
     switch (scene->type) {
     case 0:
     case 2:
         scene->effectSlots[1] = effLoadIndexedResource(
-            "/facility/spr/shop/", mnuShopPrimarySpriteNames[1], 0);
+            "/facility/spr/shop/", mnuShopPrimarySpriteNames[1], EFF_RESOURCE_SOURCE_TRANSIENT);
         break;
     case 1:
     case 3:
         scene->effectSlots[1] = effLoadIndexedResource(
-            "/facility/spr/shop/", mnuShopPrimarySpriteNames[2], 0);
+            "/facility/spr/shop/", mnuShopPrimarySpriteNames[2], EFF_RESOURCE_SOURCE_TRANSIENT);
         mnuInitializeCampEffectResources(scene->effectSlots[1], &scene->campEffect.resources);
         break;
     }
     scene->effectSlots[2] = effLoadIndexedResource(
-        "/facility/spr/shop/", mnuShopManWomanSpriteNames[0], 0);
+        "/facility/spr/shop/", mnuShopManWomanSpriteNames[0], EFF_RESOURCE_SOURCE_TRANSIENT);
     scene->effectSlots[3] = effLoadIndexedResource(
-        "/facility/spr/shop/", mnuShopCharacterSpriteNames[mnuFirstPresentMainCharacterIndex()], 0);
+        "/facility/spr/shop/", mnuShopCharacterSpriteNames[mnuFirstPresentMainCharacterIndex()], EFF_RESOURCE_SOURCE_TRANSIENT);
     mnuInitScrollingStripState(firstPanel, 0, scene->effectSlots[0], 0x46, 0x43);
     mnuSetScrollingStripSpeedsRandomly(firstPanel, 1, 0x10, 0x20);
     mnuInitScrollingStripState(secondPanel, 0, scene->effectSlots[0], 0x46, 0x43);

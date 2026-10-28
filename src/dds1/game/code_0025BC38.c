@@ -5,6 +5,7 @@
 #include "eff_random.h"
 #include "sdf_chip.h"
 #include "eff_resource_slots.h"
+#include "eff_resource_source_lifetime.h"
 #include "sdf_resource.h"
 #include "sdf.h"
 #include "dat_state.h"
@@ -164,7 +165,7 @@ typedef struct MenuResourceWork {
 MenuResourceWork *mnuRequestEffectResource(const char *ctx, const char *config) {
     MenuResourceWork *work = (MenuResourceWork *)sdfChipAllocDirect(0x70);
     memset(work, 0, 0x70);
-    effRequestResourceByMode(ctx, config, 0, (u32 *)&work->resourceHandle);
+    effRequestResourceByMode(ctx, config, EFF_RESOURCE_SOURCE_TRANSIENT, (u32 *)&work->resourceHandle);
     return work;
 }
 

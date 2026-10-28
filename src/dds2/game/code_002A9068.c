@@ -4,6 +4,7 @@
 #include "mnu_input.h"
 #include "itf_draw_grid.h"
 #include "eff_resource_slots.h"
+#include "eff_resource_source_lifetime.h"
 #include "eff.h"
 #include "eff_resource_records.h"
 #include "eff_resource_list.h"
@@ -156,7 +157,6 @@ extern const char D_0042A950[];
 #define MNU_STAFF_PARTY_COUNT 5
 #define MNU_STAFF_PARTY_PRESENT_BIT 1
 #define MNU_STAFF_PARTY_CATEGORY 4
-#define MNU_STAFF_RETAIN_RESOURCE 1
 #define MNU_CAMP_STATE_IDLE 0
 #define MNU_CAMP_STATE_ACTIVE 1
 #define MNU_CAMP_STATE_CLEANED_UP 2
@@ -168,7 +168,7 @@ void mnuLoadCampResources(void) {
     s32 resourceIndex;
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_BASE_RESOURCE_COUNT; resourceIndex++) {
         mnuCampResourceHandles[resourceIndex] = effLoadIndexedResource(
-            (const char *)D_0042A950, (const char *)mnuCampBaseResourceNameRows[resourceIndex * 2], MNU_STAFF_RETAIN_RESOURCE);
+            (const char *)D_0042A950, (const char *)mnuCampBaseResourceNameRows[resourceIndex * 2], EFF_RESOURCE_SOURCE_RETAINED);
     }
 }
 
@@ -485,13 +485,13 @@ void mnuAppendCampSpriteRequests(struct EffectList *resourceList, StaffSlots *re
     mnuSnapshotCampTextureHandles(resourceSlots->baseResources);
     tableColumn = mnuGetValueRecordOwner(resourceList) == 1;
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_MAIN_RESOURCE_COUNT; resourceIndex++) {
-        effAppendListEntry(resourceList, (u32)D_0042A950, mnuCampMainResourceNamePairs[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32)&resourceSlots->mainResources[resourceIndex]);
+        effAppendListEntry(resourceList, (u32)D_0042A950, mnuCampMainResourceNamePairs[resourceIndex][tableColumn], EFF_RESOURCE_SOURCE_RETAINED, (u32)&resourceSlots->mainResources[resourceIndex]);
     }
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_EXTRA_RESOURCE_COUNT; resourceIndex++) {
-        effAppendListEntry(resourceList, (u32)D_0042A950, mnuCampExtraResourceNamePairs[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32)&resourceSlots->extraResources[resourceIndex]);
+        effAppendListEntry(resourceList, (u32)D_0042A950, mnuCampExtraResourceNamePairs[resourceIndex][tableColumn], EFF_RESOURCE_SOURCE_RETAINED, (u32)&resourceSlots->extraResources[resourceIndex]);
     }
     for (resourceIndex = 0; resourceIndex < MNU_STAFF_PAIR_RESOURCE_COUNT; resourceIndex++) {
-        effAppendListEntry(resourceList, (u32)"/camp/spr/n_sta/", mnuCampPairedResourceNamePairs[resourceIndex][tableColumn], MNU_STAFF_RETAIN_RESOURCE, (u32)&resourceSlots->pairResources[resourceIndex]);
+        effAppendListEntry(resourceList, (u32)"/camp/spr/n_sta/", mnuCampPairedResourceNamePairs[resourceIndex][tableColumn], EFF_RESOURCE_SOURCE_RETAINED, (u32)&resourceSlots->pairResources[resourceIndex]);
     }
 }
 
