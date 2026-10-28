@@ -2036,6 +2036,7 @@ void mnuQueueCampTextGlyphWithChildColor(s32 fontValue, s32 enabled, s32 unused2
 #include "mnu_input.h"
 #include "eff_resource_slots.h"
 #include "common.h"
+#include "evt_active_entry_flag_api.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_resource.h"
 #include "mnu_flag_snapshot.h"
@@ -3089,7 +3090,6 @@ u32 mnuShopMessageLeaveNoOp(void) {
 }
 
 extern const char D_003AF528[];
-extern s32 evtIsActiveFlagSet(s32);
 extern void p2sdLoadSMGFile(s32);
 extern void p2sdPlayBGMFade(s32);
 
@@ -3255,7 +3255,6 @@ u32 evtStartFadeOut(void) {
 
 extern const char D_003AF528[];
 extern MenuPopupEntry mnuShopFadeCompletePopupEntry[];
-extern s32 evtIsActiveFlagSet(s32 flagIndex);
 
 s32 evtUpdateMainTaskPopupEntry(dds3ProcessID_t *task) {
     ShopScene *scene = (ShopScene *)dds3GetProcessData(task);

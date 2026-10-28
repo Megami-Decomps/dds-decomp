@@ -8,6 +8,7 @@
 #include "dsp_active_api.h"
 #include "evt_message_window_api.h"
 #include "evt_world_object_api.h"
+#include "evt_active_entry_flag_api.h"
 #include "kwln_task_state.h"
 #include "kwln_task_state_query.h"
 #include "itf_mes_window.h"
@@ -236,7 +237,6 @@ s32 mnuStartTerminalPanelFadeOut(dds3ProcessID_t *task) {
     return 1;
 }
 
-extern s32 evtIsActiveFlagSet(s32 flagIndex);
 extern char D_003AF710[];
 extern char D_0036AE48[];
 
@@ -727,8 +727,9 @@ void evtClearActiveFlag(s32 flagIndex) {
 }
 
 /* Test one active-entry flag; the caller supplies a valid index. */
-s32 evtIsActiveFlagSet(s32 flagIndex) {
-    return evtActiveEntryFlags.flags[flagIndex] != 0;
+EvtActiveEntryFlagState evtIsActiveFlagSet(s32 flagIndex) {
+    return evtActiveEntryFlags.flags[flagIndex] != 0 ? EVT_ACTIVE_ENTRY_FLAG_SET
+                                                      : EVT_ACTIVE_ENTRY_FLAG_CLEAR;
 }
 
 /* Reject only indices at/above the upper bound; negative indices are not checked. */

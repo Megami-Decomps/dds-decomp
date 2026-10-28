@@ -1,6 +1,7 @@
 #include "dsp_entry_api.h"
 #include "dsp_active_api.h"
 #include "evt_message_window_api.h"
+#include "evt_active_entry_flag_api.h"
 #include "eff_resource_slots.h"
 #include "kwln.h"
 #include "kwln_fade.h"
@@ -66,7 +67,6 @@ extern MenuPopupEntry mnuTerminalMenuMessagePopupEntry[];
 extern MenuPopupEntry mnuShopCommandPopupEntries[];
 extern ShopRankPriceRow mnuShopRankPriceRows[];
 extern const u8 (*D_00435E5C)[25];
-extern s32 evtIsActiveFlagSet(s32);
 extern void mnuShopLoadSpriteAssets(MenuTerminalContext *);
 extern u32 evtMenuSetProgressFlag(MenuTerminalContext *);
 extern s32 evtMenuSetTypeProgressFlagOnce(MenuTerminalContext *);

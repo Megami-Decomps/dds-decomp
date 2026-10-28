@@ -6,6 +6,7 @@
 #include "kwln_task_add_child.h"
 #include "evt_message_window_api.h"
 #include "evt_start_event_api.h"
+#include "evt_active_entry_flag_api.h"
 #include "fr_font.h"
 #include "fr_font_draw_glyph.h"
 #include "mnu_text_entry.h"
@@ -36,7 +37,6 @@
 #include "mnu_effect_pair.h"
 /* Declared before first use (were implicit int). */
 extern void datAddCurrencyClamped(s32 delta);
-extern s32 evtIsActiveFlagSet(s32 flagIndex);
 extern void mnuClearEntries(MenuPageWindow *menu);
 extern void mnuDrawAndAdvanceScrollingStrips(s32 x, s32 y, s32 z, s32 opacity, DspScrollingStripState *state, s32 surfaceIndex);
 extern void mnuReleasePartyIconBundles(MenuPageWindow *menu);

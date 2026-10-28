@@ -9,6 +9,7 @@
 #include "dsp_active_api.h"
 #include "evt_message_window_api.h"
 #include "evt_world_object_api.h"
+#include "evt_active_entry_flag_api.h"
 #include "kwln.h"
 #include "mnu_list.h"
 #include "kwln_task_state.h"
@@ -482,8 +483,9 @@ void evtClearActiveFlag(s32 flagIndex) {
 }
 
 /* Test one active-entry flag; the caller supplies a valid index. */
-s32 evtIsActiveFlagSet(s32 flagIndex) {
-    return evtActiveEntryFlags[8 + flagIndex] != 0;
+EvtActiveEntryFlagState evtIsActiveFlagSet(s32 flagIndex) {
+    return evtActiveEntryFlags[8 + flagIndex] != 0 ? EVT_ACTIVE_ENTRY_FLAG_SET
+                                                      : EVT_ACTIVE_ENTRY_FLAG_CLEAR;
 }
 
 /* Reject only indices at/above the upper bound; negative indices are not checked. */

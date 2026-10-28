@@ -13,6 +13,7 @@
 #include "eff_resource_list.h"
 #include "eff.h"
 #include "common.h"
+#include "evt_active_entry_flag_api.h"
 #include "sdf_delayed_resource_check_api.h"
 #include "mnu_text_entry.h"
 #include "dds3_world_selection.h"
@@ -757,7 +758,6 @@ s32 mnuDrawLoadedProgressPanels(datUnitWork_t *partyRecord, MenuProgressHost *wo
 extern dds3ProcessID_t *D_003BC3E4;
 extern char mnuTerminalSpriteDirectory[];
 extern char D_003AF620[];
-extern s32 evtIsActiveFlagSet(s32);
 
 /* Wait for the terminal effect or world-menu transition to finish. */
 s32 mnuAdvanceTerminalTransition(s8 closing) {
