@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "btl_find_script_resource_api.h"
 #include "btl_status_motion_override.h"
 #include "btl_command_availability_override.h"
 #include "btl_command_hit_count_override.h"
@@ -161,7 +162,7 @@ extern s32 btlChooseDefeatCameraByActionAndTargets(u8 *unit);
 extern s32 btlClassifyLinkedSkillRequest(BtlUnit *source, BtlUnit *unit, s32 index);
 extern void btlClearEventEffectValue(void);
 extern s32 btlClearUnitRestrictionFlag(void);
-extern s32 btlConsumeReadyEventScriptResource(void);
+extern ScrProcedureIndex btlConsumeReadyEventScriptResource(void);
 extern u64 btlCreateSpecialUnitAndLoadModel(u64 prerequisiteHandle);
 extern BtlTerminalOutcomeOverrideResult btlDeactivateOthersOnSpecialUnitDefeat(void);
 extern void btlDestroyActiveMemberSlot(void);
@@ -178,7 +179,7 @@ extern s32 btlFilterBossCommandBySelection(u8 *unit, s32 command);
 extern s32 btlFilterRestrictedCommand(BtlUnit *battler, s32 command);
 extern BtlUnit *btlFindActiveMember(u32 group, u32 type);
 extern BtlUnit *btlFindFlaggedSpecialSpeciesUnit(u32 category, u32 species);
-extern s32 btlFindSubsequentTurnScript(void);
+extern ScrProcedureIndex btlFindSubsequentTurnScript(void);
 extern void btlFormatBattleEffectResourceName(BtlTask *actor, s32 action, char *pathBuffer);
 extern s32 btlFrameMarkedTargetDefeatCamera(BtlLinkedCommand *command);
 extern s32 btlGetAdjustedUnitDisplaySpecies(BtlUnit *unit);

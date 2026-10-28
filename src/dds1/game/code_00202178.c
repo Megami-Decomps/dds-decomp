@@ -51,7 +51,7 @@
 #include "btl_unit_tasks.h"
 /* Declared before first use (were implicit int). */
 extern void btlDestroyUnit(BtlUnit *actor);
-extern s32 btlFindScriptResource(char *name);
+#include "btl_find_script_resource_api.h"
 #include "sdf_debug_api.h"
 
 extern void btlUnitFaceTarget(BtlUnit *, BtlUnit *);
@@ -3915,18 +3915,18 @@ s32 btlSwapRandomBossSelection(void) {
     return -1;
 }
 
-s32 btlFindSubsequentTurnScript(void) {
+ScrProcedureIndex btlFindSubsequentTurnScript(void) {
     s32 battle;
 
     battle = (s32)(u32)btlGetRuntime();
     if (((BtlState *)battle)->turnCount == 0) {
-        return -1;
+        return SCR_PROCEDURE_INDEX_NOT_FOUND;
     }
     if ((((BtlState *)battle)->battleFlags & 0x800) != 0) {
-        return -1;
+        return SCR_PROCEDURE_INDEX_NOT_FOUND;
     }
     if (((BtlState *)battle)->mode != 1) {
-        return -1;
+        return SCR_PROCEDURE_INDEX_NOT_FOUND;
     }
     return btlFindScriptResource(D_003BB898);
 }
@@ -4217,8 +4217,8 @@ s32 btlPickRandomMarkedTask(void) {
     return -1;
 }
 
-s32 btlConsumeReadyEventScriptResource(void) {
-    s32 absent = -1;
+ScrProcedureIndex btlConsumeReadyEventScriptResource(void) {
+    ScrProcedureIndex absent = SCR_PROCEDURE_INDEX_NOT_FOUND;
     s32 data;
 
     data = (s32)((BtlState *)btlGetRuntime())->effect;
@@ -4228,7 +4228,7 @@ s32 btlConsumeReadyEventScriptResource(void) {
             return btlFindScriptResource(D_003BB8A0);
         }
         ((BtlEventTriggers *)data)->pending = 0;
-        return -1;
+        return SCR_PROCEDURE_INDEX_NOT_FOUND;
     }
     return absent;
 }

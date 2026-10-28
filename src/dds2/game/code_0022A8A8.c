@@ -21,11 +21,11 @@ extern dds3ProcessID_t *scrStartScript2(u32 priority, const BfFlw0Header *script
 
 extern char btlSecondaryScriptResourceName[];
 
-s32 btlFindScriptResource(char *name) {
+ScrProcedureIndex btlFindScriptResource(const char *name) {
     char path[128];
     BtlState *battle = (BtlState *)btlGetRuntime();
     if (battle->scriptHandle == 0) {
-        return -1;
+        return SCR_PROCEDURE_INDEX_NOT_FOUND;
     }
     sprintf(path, "e%03d_%s", battle->eventTaskId, name);
     return scrSearchProcedureName((const BfFlw0Header *)battle->scriptHandle, path);
@@ -69,7 +69,7 @@ BtlPrimaryScriptTaskAvailability btlCanStartPrimaryScriptTask(void) {
     if (battle->scriptHandle == 0) {
         return BTL_PRIMARY_SCRIPT_TASK_CANNOT_START;
     }
-    return btlFindScriptResource(btlPrimaryScriptResourceName) != -1
+    return btlFindScriptResource(btlPrimaryScriptResourceName) != SCR_PROCEDURE_INDEX_NOT_FOUND
         ? BTL_PRIMARY_SCRIPT_TASK_CAN_START
         : BTL_PRIMARY_SCRIPT_TASK_CANNOT_START;
 }
@@ -77,13 +77,13 @@ BtlPrimaryScriptTaskAvailability btlCanStartPrimaryScriptTask(void) {
 /* Find the primary script entry, launch it at owner priority minus one, and mark it started. */
 void btlStartPrimaryScriptTask(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
-    s32 scriptId;
+    ScrProcedureIndex scriptId;
     dds3ProcessID_t *taskId;
     if (battle->eventTaskId == -1) {
         return;
     }
     scriptId = btlFindScriptResource(btlPrimaryScriptResourceName);
-    if (scriptId == -1) {
+    if (scriptId == SCR_PROCEDURE_INDEX_NOT_FOUND) {
         return;
     }
     taskId = scrStartScript2(battle->scriptOwner->priority - 1,
@@ -110,19 +110,19 @@ s32 btlHasScriptResource(void) {
     if ((battle->battleFlags & 0x800) == 0 || battle->terminalOutcome != 1) {
         return 0;
     }
-    return btlFindScriptResource(btlSecondaryScriptResourceName) != -1;
+    return btlFindScriptResource(btlSecondaryScriptResourceName) != SCR_PROCEDURE_INDEX_NOT_FOUND;
 }
 
 /* Find the secondary script entry, launch it at owner priority minus one, and mark it started. */
 void btlStartSecondaryScriptTask(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
-    s32 scriptId;
+    ScrProcedureIndex scriptId;
     dds3ProcessID_t *taskId;
     if (battle->eventTaskId == -1) {
         return;
     }
     scriptId = btlFindScriptResource(btlSecondaryScriptResourceName);
-    if (scriptId == -1) {
+    if (scriptId == SCR_PROCEDURE_INDEX_NOT_FOUND) {
         return;
     }
     taskId = scrStartScript2(battle->scriptOwner->priority - 1,

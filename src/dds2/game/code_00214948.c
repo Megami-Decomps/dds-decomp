@@ -131,7 +131,7 @@ extern char D_00436CC8[], D_00436CD0[], D_00436CD8[];
 
 extern BtlRuntimeTask *btlCreateActionTask(ActionStateLink *, s32);
 
-extern s32 btlFindScriptResource(char *);
+#include "btl_find_script_resource_api.h"
 
 
 extern s32 btlHasLinkedEffectNodeTrigger(BtlLinkedCommand *);
@@ -1681,15 +1681,15 @@ s32 btlCheckPhaseOnePartyStatusGate(void) {
 extern char D_00436CC0[];
 
 /* Look up the primary script resource once the event task, script handle and
- * script-ready state 6 are in place; -1 when it cannot be looked up yet. */
-s32 btlFindReadyScriptResource(void) {
+ * script-ready state 6 are in place; return the missing-index sentinel until ready. */
+ScrProcedureIndex btlFindReadyScriptResource(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
 
     if (battle->eventTaskId == -1 || battle->scriptHandle == 0) {
-        return -1;
+        return SCR_PROCEDURE_INDEX_NOT_FOUND;
     }
     if ((battle->battleFlags & 0x800) == 0 || battle->terminalOutcome != 6) {
-        return -1;
+        return SCR_PROCEDURE_INDEX_NOT_FOUND;
     }
     /* Retail calls and returns here instead of sibcalling: GCC does not sibcall
      * while a loop is still open, so the return sits in a one-pass loop. */
@@ -1762,7 +1762,7 @@ void btlStartReadyUnitAction(void) {
  */
 void btlStartPrevUnitScriptAction(ActionStateLink *handle) {
     BtlSelectCtrl *ctrl = (BtlSelectCtrl *)((BattleWork *)btlGetRuntime())->sub;
-    s32 script;
+    ScrProcedureIndex script;
     BtlRuntimeTask *task;
     u32 flags;
 
@@ -1775,7 +1775,7 @@ void btlStartPrevUnitScriptAction(ActionStateLink *handle) {
     if ((handle->pendingFlags & 8) == 0) {
         return;
     }
-    script = -1;
+    script = SCR_PROCEDURE_INDEX_NOT_FOUND;
     switch (ctrl->prevUnit->partyRecord.unitId) {
     case 0x105:
     case 0x139:
@@ -1790,7 +1790,7 @@ void btlStartPrevUnitScriptAction(ActionStateLink *handle) {
         script = btlFindScriptResource(D_00436CD8);
         break;
     }
-    if (script != -1) {
+    if (script != SCR_PROCEDURE_INDEX_NOT_FOUND) {
         task = btlCreateActionTask(handle, script);
         task->ownerId = handle->unit->owner;
         task->startDelay = 0x14;

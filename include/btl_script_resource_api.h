@@ -1,7 +1,7 @@
 #ifndef BTL_SCRIPT_RESOURCE_API_H
 #define BTL_SCRIPT_RESOURCE_API_H
 
-#include "common.h"
+#include "btl_find_script_resource_api.h"
 
 typedef s32 BtlPrimaryScriptTaskAvailability;
 enum {

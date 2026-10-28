@@ -1254,12 +1254,12 @@ u32 btlMode313KeepDefaultSceneVariant(void) {
     return 0xffffffff;
 }
 
-extern s32 btlFindScriptResource(char *name);
+#include "btl_find_script_resource_api.h"
 
-s32 btlConsumeReadyEventScriptResource(void) {
+ScrProcedureIndex btlConsumeReadyEventScriptResource(void) {
     BattleEventResourceTriggerState *trigger;
     BtlState *battle;
-    s32 result = -1;
+    ScrProcedureIndex result = SCR_PROCEDURE_INDEX_NOT_FOUND;
 
     battle = (BtlState *)btlGetRuntime();
     trigger = &battle->effect->eventTrigger;
@@ -1269,7 +1269,7 @@ s32 btlConsumeReadyEventScriptResource(void) {
             return btlFindScriptResource(D_00436CF8);
         }
         trigger->consumed = 0;
-        return -1;
+        return SCR_PROCEDURE_INDEX_NOT_FOUND;
     }
     return result;
 }
@@ -1632,7 +1632,7 @@ extern void evtBitOff(s32 flag);
 extern void btlTrackSpecialEnemyCommandRestrictionByTurn(BtlUnit *, BtlOperandEntry *);
 extern s32 btlUpdateBrahmanDefeatCamera(BtlLinkedCommand *, BtlCamState *, s32);
 extern s32 btlUnitWrapB(BtlLinkedCommand *, BtlCamState *, s32);
-extern s32 btlFindReadyScriptResource(void);
+extern ScrProcedureIndex btlFindReadyScriptResource(void);
 extern void btlPrepareVritraUnitMotion(BtlUnit *, s32, s32, s32, s32, f32);
 extern void func_0021B828(ActionStateLink *);
 extern s32 btlUpdateLinkedDefeatCamera(BtlLinkedCommand *, BtlCamState *, s32);
