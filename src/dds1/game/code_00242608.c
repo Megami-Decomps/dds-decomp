@@ -2675,7 +2675,7 @@ s32 evtPollQuantitySelection(dds3ProcessID_t *callbackContext) {
     s32 stateAddress = dds3GetProcessData(callbackContext);
     s32 *dispatchSlot = &((ShopScene *)stateAddress)->dispatchState;
     s32 previousQuantity = ((ShopScene *)stateAddress)->counter;
-    s32 input = mnuMapPadMaskToFlags(0xF000F3);
+    MnuInputActionFlags input = mnuMapPadMaskToFlags(0xF000F3);
     s32 result = menuRunPanel((void *)stateAddress, EVT_DISPATCH_OPERATION_POLL, callbackContext);
 
     if (result != 0) {

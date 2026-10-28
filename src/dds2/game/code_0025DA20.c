@@ -3434,7 +3434,7 @@ s32 evtPollQuantitySelection(dds3ProcessID_t *callbackContext) {
     s32 previousQuantity = ((MenuTerminalContext *)stateAddress)->multiplier;
     CampWindowParams *values =
         &((MenuTerminalContext *)stateAddress)->window->list->cursor->camp;
-    s32 input = mnuMapPadMaskToFlags(0xF000F3);
+    MnuInputActionFlags input = mnuMapPadMaskToFlags(0xF000F3);
     s32 result = mnuDispatchPopupTransition(&((MenuTerminalContext *)stateAddress)->transitionWork, dispatchSlot,
                              EVT_DISPATCH_OPERATION_POLL, (void *)callbackContext);
 
