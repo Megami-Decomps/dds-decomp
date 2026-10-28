@@ -2131,7 +2131,7 @@ u32 evtBReleaseImagesAndQueueMenuTransition(dds3ProcessID_t *task) {
     mnuAnimateTerminalSelection(2, work);
     evtRememberDispatchCallback(0, work);
     work->exitPending = 1;
-    work->resourcePhase = 0;
+    work->resourcePhase = MNU_TERMINAL_RESOURCE_PHASE_WAIT_FOR_PANEL_FADE;
     evtFinishMessageWindowAndNotify();
     fclDestroyMessage();
     p2sdStopBGM(work->bgmHandle);
@@ -2165,31 +2165,31 @@ s32 evtPollTerminalResourceTransition(dds3ProcessID_t *request) {
     if (dds3FadeCheck() != 0) {
         return 0;
     }
-    if (work->resourcePhase == 0) {
+    if (work->resourcePhase == MNU_TERMINAL_RESOURCE_PHASE_WAIT_FOR_PANEL_FADE) {
         if (fldClassifyRemainingFrames(work) == 0) {
             mnuReleaseBothVisualResourceTextures(work);
             mnuAdvanceTerminalTransition(0);
-            work->resourcePhase = 1;
+            work->resourcePhase = MNU_TERMINAL_RESOURCE_PHASE_WAIT_FOR_LOAD_START;
         }
-    } else if (work->resourcePhase == 1) {
+    } else if (work->resourcePhase == MNU_TERMINAL_RESOURCE_PHASE_WAIT_FOR_LOAD_START) {
         if (mnuAdvanceTerminalTransition(0) != 0 && sdfDelayedResrcCheck() == 0) {
             mnuCreateResourceTask();
             dds3FadeIn(0, 0, 0, 0);
-            work->resourcePhase = 2;
+            work->resourcePhase = MNU_TERMINAL_RESOURCE_PHASE_WAIT_FOR_RESOURCE_LOAD;
         }
     }
     if (work->popupState == 0) {
-        if (work->resourcePhase == 2) {
+        if (work->resourcePhase == MNU_TERMINAL_RESOURCE_PHASE_WAIT_FOR_RESOURCE_LOAD) {
             if (mnuCheckResourceTask() != 0 || sdfDelayedResrcCheck() != 0) {
                 return 0;
             }
             mnuReleaseVisualResources(work);
             mnuAdvanceTerminalTransition(1);
-            work->resourcePhase = 3;
-        } else if (work->resourcePhase == 3) {
+            work->resourcePhase = MNU_TERMINAL_RESOURCE_PHASE_WAIT_FOR_RETURN_TRANSITION;
+        } else if (work->resourcePhase == MNU_TERMINAL_RESOURCE_PHASE_WAIT_FOR_RETURN_TRANSITION) {
             if (mnuAdvanceTerminalTransition(1) != 0) {
                 mnuTerminalSelectResourceBank(work);
-                work->resourcePhase = 0;
+                work->resourcePhase = MNU_TERMINAL_RESOURCE_PHASE_WAIT_FOR_PANEL_FADE;
                 mnuSetPopupEntryFlagged(&work->popupState, mnuTerminalPopupEntries);
             }
         }

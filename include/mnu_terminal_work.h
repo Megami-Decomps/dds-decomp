@@ -10,6 +10,15 @@
 
 struct MenuResourceWork;
 
+/* Phases of the terminal's visual-resource handoff and return transition. */
+typedef s32 MnuTerminalResourceTransitionPhase;
+enum {
+    MNU_TERMINAL_RESOURCE_PHASE_WAIT_FOR_PANEL_FADE = 0,
+    MNU_TERMINAL_RESOURCE_PHASE_WAIT_FOR_LOAD_START = 1,
+    MNU_TERMINAL_RESOURCE_PHASE_WAIT_FOR_RESOURCE_LOAD = 2,
+    MNU_TERMINAL_RESOURCE_PHASE_WAIT_FOR_RETURN_TRANSITION = 3,
+};
+
 /* The Karma Terminal's menu scene: its resources, list and panel state. */
 typedef struct MenuTerminalWork {
     struct sdfMemHandle_t *allocation; /* 0x00: retained scene allocation */
@@ -28,7 +37,7 @@ typedef struct MenuTerminalWork {
     u8 pad84[4];
     s32 panelMode;         /* 0x88 */
     u8 pad8C[0xC];
-    s32 resourcePhase;      /* 0x98 */
+    MnuTerminalResourceTransitionPhase resourcePhase; /* 0x98 */
     s32 panelFade;          /* 0x9C: 0..0x100 color blend weight */
     EffMappedResource *effect[7];           /* 0xA0: effect batches; [4] and [5] are the pair selected via cursor */
     s32 cursor[2];           /* 0xBC: current and previous node, -1 until selected */
