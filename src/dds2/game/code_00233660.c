@@ -54,6 +54,7 @@
 #include "sdf_sif_command.h"
 #include "eff_transform.h"
 #include "evt_world_source_transform.h"
+#include "evt_script_event_id.h"
 #include "file.h"
 #include "kwln_task_lifecycle.h"
 #include "mdl_object_stream.h"
@@ -4063,4 +4064,4 @@ INCLUDE_SDATA(const s32, "game/code_00233660", D_004371D8);
 
 INCLUDE_SDATA(const s32, "game/code_00233660", D_004371E0);
 
-INCLUDE_SDATA(const s32, "game/code_00233660", evtPendingEventSelection);
+INCLUDE_SDATA(const EvtScriptEventId, "game/code_00233660", evtPendingEventSelection);

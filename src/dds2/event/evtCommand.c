@@ -27,6 +27,7 @@
 #include "evt_world.h"
 #include "evt_path_direction.h"
 #include "evt_event_pack.h"
+#include "evt_script_event_id.h"
 #include "scr.h"
 #include "scr_command_result.h"
 #include "scr_command_timer_api.h"
@@ -63,12 +64,11 @@ void dds3AdminiCallSequence(s32 command, const void *payload, u32 payloadSize, s
 
 void scrDestroyAllNamedProcesses(void);
 
-void evtSubmitEventRequest(s32 eventId, s32 requestMode);
+void evtSubmitEventRequest(s32 eventId, EvtScriptEventId followupEventId);
 
 void fldBgmStop(void);
 
 
-extern u32 evtPendingEventSelection;
 
 void evtSubmitEventRequestImmediate(s32 eventId);
 
@@ -400,19 +400,18 @@ ScrCommandResult evtCommandSignalAdminAtTimerZero(void) {
     return SCR_COMMAND_RESULT_PENDING;
 }
 
-/* Queue an event request after preparing BGM/encounter state, then stop scripts.
- * The mode is retained separately; only its positivity controls dispatch mode. */
-void evtSubmitEventRequest(s32 eventId, s32 requestMode)
+/* Queue the encounter and retain a positive follow-up event ID for dispatch. */
+void evtSubmitEventRequest(s32 eventId, EvtScriptEventId followupEventId)
 {
     s32 payload[2];
 
     fldBgmStop();
     fldRequestEncounterWithFade(FLD_ENCOUNTER_MODE_SCRIPT_EVENT,
                                 (FldBattleSceneRecordIndex)eventId);
-    evtPendingEventSelection = requestMode;
+    evtPendingEventSelection = followupEventId;
     payload[0] = 0;
     payload[1] = eventId;
-    dds3AdminiCallSequence(0xe, payload, EVT_PAIRED_REQUEST_SIZE, requestMode > 0);
+    dds3AdminiCallSequence(0xe, payload, EVT_PAIRED_REQUEST_SIZE, followupEventId > 0);
     scrDestroyAllNamedProcesses();
 }
 
@@ -452,11 +451,11 @@ s32 evtCommand_CALL_BATTLE2(void)
 s32 evtCommand_RESTORE_BATTLE(void)
 {
     s32 eventId;
-    s32 requestMode;
+    EvtScriptEventId followupEventId;
 
     eventId = scrGetIntPara(0);
-    requestMode = scrGetIntPara(1);
-    evtSubmitEventRequest(eventId, requestMode);
+    followupEventId = scrGetIntPara(1);
+    evtSubmitEventRequest(eventId, followupEventId);
     return 1;
 }
 

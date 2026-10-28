@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "evt_sel_state.h"
+#include "evt_script_event_id.h"
 #include "sdf_line_pair_packet_api.h"
 #include "sdf_gs_header.h"
 #include "sdf_dev_cons.h"
@@ -245,8 +246,6 @@ extern u8 sdfViewShakeVector[];
 
 
 extern s32 kwlnTaskNoopCallback(dds3ProcessID_t *task);
-
-extern s32 evtPendingEventSelection;
 
 extern void evtStartEvent(s32 eventId);
 
@@ -1202,24 +1201,24 @@ u32 evtKeepSelectionFadeOutPending(void) {
     return 0;
 }
 
-/* Source zero takes an explicit value; source one uses the pending event mode. */
-void evtDispatchSelectionValue(s32 valueSource, s32 *selectionParams) {
-    s32 eventSelection = 0;
+/* Source zero takes an explicit event ID; source one uses the pending event ID. */
+void evtDispatchSelectionValue(s32 selectionSource, EvtScriptEventId *eventParams) {
+    EvtScriptEventId eventIdToDispatch = 0;
 
     D_00435BB0 = 0;
-    switch (valueSource) {
+    switch (selectionSource) {
     case 0:
-        eventSelection = selectionParams[0];
+        eventIdToDispatch = eventParams[0];
         break;
     case 1:
-        eventSelection = evtPendingEventSelection;
+        eventIdToDispatch = evtPendingEventSelection;
         break;
     }
-    if (eventSelection <= 0) {
+    if (eventIdToDispatch <= 0) {
         return;
     }
     evtInitSky();
-    evtStartEvent(eventSelection);
+    evtStartEvent(eventIdToDispatch);
 }
 
 u32 evtCloseSkyEventTask(void) {
