@@ -1689,18 +1689,18 @@ void kwlnFadeBackgroundStartIn(s32 duration) {
 
 /* Direction flags take precedence; idle visibility uses alpha in mode zero,
  * otherwise it tests whether the first ramp differs from its inactive maximum. */
-s32 kwlnFadeIsBackgroundOverlayActive(void) {
+KwlnBackgroundOverlayActivity kwlnFadeIsBackgroundOverlayActive(void) {
     if (dds3DrawFlag & KWLN_BGFADE_DIRECTION_BITS) {
-        return 1;
+        return KWLN_BACKGROUND_OVERLAY_ACTIVE;
     }
     if (kwlnBackgroundFadeMode == 0) {
         if (KWLN_FADE_MAX_ALPHA - kwlnBackgroundFadeColor[KWLN_COLOR_ALPHA_CHANNEL] >= KWLN_FADE_MAX_ALPHA) {
-            return 0;
+            return KWLN_BACKGROUND_OVERLAY_INACTIVE;
         }
     } else if (kwlnBackgroundFadeFirstRamp == KWLN_BGFADE_FIRST_RAMP_MAX) {
-        return 0;
+        return KWLN_BACKGROUND_OVERLAY_INACTIVE;
     }
-    return 1;
+    return KWLN_BACKGROUND_OVERLAY_ACTIVE;
 }
 
 /* Store the visibility mode; its stored zero value clears ramps, otherwise

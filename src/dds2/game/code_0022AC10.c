@@ -177,7 +177,6 @@ extern BattleRuntimeState btlRuntimeState;
 
 extern s8 dds3PadBitTable[32];
 
-extern s32 kwlnFadeIsBackgroundOverlayActive();
 
 extern void btlReleaseOwnedData(void);
 
@@ -2035,7 +2034,7 @@ void btlActivateRuntime(u8 condition) {
     battle->active = 1;
     battle->pending = 0;
     battle->options = 0;
-    if (kwlnFadeIsBackgroundOverlayActive() != 0) {
+    if (kwlnFadeIsBackgroundOverlayActive() != KWLN_BACKGROUND_OVERLAY_INACTIVE) {
         battle->options |= 4;
     }
 }

@@ -2,6 +2,7 @@
 #include "bill_object_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "kwln_background_fade_api.h"
 #include "kwln_draw_buffer.h"
 #include "sdf_trig.h"
 #include "kwln_frame_draw_buffer.h"
@@ -61,7 +62,6 @@ extern SdfPoolNode D_003253C8;
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 #include "sdf_packet_alloc.h"
 extern u32 dds3NullDrawProc();
-extern s32 kwlnFadeIsBackgroundOverlayActive(void);
 extern u64 *effPkt2DAllocF4(u32 flags);
 
 extern void effAppendBlurRenderState(void *list, s32 blendControl, sdfTexHandle_t *resource);
@@ -209,7 +209,7 @@ void effBlurDrawFramebufferQuad(const dds3Effect_Blur_t *source)
         clampPacket[1] = 0x5000000210000000ULL;
         clampPacket[2] = 0x1000000000008001ULL;
         clampPacket[3] = 0xE;
-        if (kwlnFadeIsBackgroundOverlayActive() != 0) {
+        if (kwlnFadeIsBackgroundOverlayActive() != KWLN_BACKGROUND_OVERLAY_INACTIVE) {
             clampPacket[4] = 0x2DC19000009ULL;
         } else {
             clampPacket[4] = 0x37C00000009ULL;

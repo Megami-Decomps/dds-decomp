@@ -155,7 +155,6 @@ extern void dds3RenderTextureOFF(void);
 
 extern void dds3FreeRenderTexture(void);
 
-extern s32 kwlnFadeIsBackgroundOverlayActive(void);
 
 extern s32 abs(s32);
 
@@ -1888,7 +1887,7 @@ void btlActivateRuntime(u8 fadeMode) {
     battle->active = 1;
     battle->pending = 0;
     battle->options = 0;
-    if (kwlnFadeIsBackgroundOverlayActive() != 0) {
+    if (kwlnFadeIsBackgroundOverlayActive() != KWLN_BACKGROUND_OVERLAY_INACTIVE) {
         battle->options |= 4;
     }
 }

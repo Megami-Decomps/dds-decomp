@@ -3,6 +3,7 @@
 #include "bill_object_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "kwln_background_fade_api.h"
 #include "sdf_vu0.h"
 #include "kwln_draw_buffer.h"
 #include "sdf_trig.h"
@@ -107,7 +108,6 @@ extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 extern void sdfBuildFrameRegisterReference(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
 
 extern u32 dds3NullDrawProc(void);
-extern s32 kwlnFadeIsBackgroundOverlayActive(void);
 
 
 void effBuildBlurTransformedQuad(const BlurSource *source, BlurPacketQuad *quad, u8 fixedPointCoordinates)
@@ -294,7 +294,7 @@ void effDrawBlurRectangle(const dds3Effect_Blur_t *source)
         clampPacket[1] = 0x5000000210000000ULL;
         clampPacket[2] = 0x1000000000008001ULL;
         clampPacket[3] = 0xE;
-        if (kwlnFadeIsBackgroundOverlayActive() != 0) {
+        if (kwlnFadeIsBackgroundOverlayActive() != KWLN_BACKGROUND_OVERLAY_INACTIVE) {
             clampPacket[4] = 0x2DC19000009ULL;
         } else {
             clampPacket[4] = 0x37C00000009ULL;
@@ -372,7 +372,7 @@ void effAppendBlurRenderState(struct sdfDrawTag_t *list, s32 blendControl, sdfTe
     clampPacket[1] = 0x5000000210000000ULL;
     clampPacket[2] = 0x1000000000008001ULL;
     clampPacket[3] = 0xE;
-    if (kwlnFadeIsBackgroundOverlayActive() != 0) {
+    if (kwlnFadeIsBackgroundOverlayActive() != KWLN_BACKGROUND_OVERLAY_INACTIVE) {
         clampPacket[4] = 0x2DC19000009ULL;
     } else {
         clampPacket[4] = 0x37C00000009ULL;
