@@ -2,6 +2,7 @@
 #include "brs_icon_record.h"
 #include "common.h"
 #include "pty_experience_threshold_type.h"
+#include "pty_profile_record_value.h"
 #include "evt_message_window_api.h"
 #include "snd_track_playback_api.h"
 #include "dsp_channel.h"
@@ -94,7 +95,7 @@ extern char mnuStaffSecondaryPanelTaskName[];
 
 
 
-extern u32 ptyAddProfileRecordValueClamped(datUnitWork_t *unit, u32 amount);
+extern PtyProfileRecordValue ptyAddProfileRecordValueClamped(datUnitWork_t *unit, u32 amount);
 extern void brsSetSkillProgressAnimations(BrsSkillPackageWork *, s32, s32, u32, s32, s32, s32);
 
 

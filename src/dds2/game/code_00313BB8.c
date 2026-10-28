@@ -8,6 +8,7 @@
 #include "sdf_packet_list.h"
 #include "dsp_name.h"
 #include "common.h"
+#include "pty_profile_record_value.h"
 #include "sdf_vu0.h"
 #include "eff_random.h"
 #include "sdf_resource.h"
@@ -100,7 +101,7 @@ extern s32 ptyTestPrimaryProfileFlag(datUnitWork_t *, u16);
 extern PtyPresetRecord D_004052A8[];
 extern u8 scrSelectScriptEntryAndInitialize(datUnitWork_t *, u32);
 extern void ptySetSecondaryProfileFlag(datUnitWork_t *, u16);
-extern u32 ptyAddProfileRecordValueClamped(datUnitWork_t *, u32);
+extern PtyProfileRecordValue ptyAddProfileRecordValueClamped(datUnitWork_t *, u32);
 
 extern u16 D_004052E8[][80];
 
@@ -464,7 +465,7 @@ void ptySetProfileRecordToCap(datUnitWork_t *unitAddress, u16 profileId) {
 }
 
 /* Add to the selected record and cap the unsigned result; no selection returns zero. */
-u32 ptyAddProfileRecordValueClamped(datUnitWork_t *unit, u32 increment) {
+PtyProfileRecordValue ptyAddProfileRecordValueClamped(datUnitWork_t *unit, u32 increment) {
     DatProfileRecord *record;
     u32 recordCap;
     u8 selectedProfile;

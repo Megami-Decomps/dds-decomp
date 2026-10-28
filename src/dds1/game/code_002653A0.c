@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "common.h"
 #include "pty_experience_threshold_type.h"
+#include "pty_profile_record_value.h"
 #include "eff_random.h"
 #include "ui_color.h"
 #include "fr_font_context.h"
@@ -455,7 +456,7 @@ void mnuTitleInitFourParameters(u32 *state, u32 first, u32 second, u32 third, u3
     state[3] = fourth;
 }
 
-extern u32 ptyAddProfilePoints(datUnitWork_t *unit, s32 increment);
+extern PtyProfileRecordValue ptyAddProfilePoints(datUnitWork_t *unit, s32 increment);
 extern s32 ptyGetCurrentProfileId(const datUnitWork_t *);
 extern void mnuTitleInitFourParameters(u32 *, u32, u32, u32, u32);
 
@@ -464,7 +465,7 @@ extern void mnuTitleInitFourParameters(u32 *, u32, u32, u32, u32);
 /* Set up the level and profile progress bars for one party member. */
 void brsBuildUnitProgressRow(BrsProgressRow *progressRow, datUnitWork_t *partyRecord) {
     PtyLevelUpCount levelUpCount;
-    s32 profilePoints;
+    PtyProfileRecordValue profileRecordValue;
 
     memset(progressRow, 0, 0x2C);
     progressRow->unit = partyRecord;
@@ -472,8 +473,8 @@ void brsBuildUnitProgressRow(BrsProgressRow *progressRow, datUnitWork_t *partyRe
     mnuTitleInitFourParameters(progressRow->levelProgress, 0x6E0, 0x50,
         partyRecord->totalExp - ptyComputeTotalExp(partyRecord, levelUpCount),
         ptyComputeTotalExp(partyRecord, levelUpCount + 1) - ptyComputeTotalExp(partyRecord, levelUpCount));
-    profilePoints = ptyAddProfilePoints(partyRecord, 0);
-    mnuTitleInitFourParameters(progressRow->profileProgress, 0x3C0, 0x50, profilePoints,
+    profileRecordValue = ptyAddProfilePoints(partyRecord, 0);
+    mnuTitleInitFourParameters(progressRow->profileProgress, 0x3C0, 0x50, profileRecordValue,
         prfGetCapValue(ptyGetCurrentProfileId(partyRecord) & 0xFFFF));
 }
 

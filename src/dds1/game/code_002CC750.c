@@ -19,6 +19,7 @@
 #include "itf.h"
 #include "fr_font.h"
 #include "dat_state.h"
+#include "pty_profile_record_value.h"
 #include "pty_skill_nibble_state.h"
 #include "file.h"
 #include "prf_profile_cap.h"
@@ -125,7 +126,7 @@ void ptyClearProfileRecords(void) {
 
 s8 scrSelectOperandIndex(datUnitWork_t *unit, s32 profileId);
 extern void ptySetSecondaryProfileFlag(datUnitWork_t *, u16);
-u32 ptyAddProfilePoints(datUnitWork_t *unit, s32 increment);
+PtyProfileRecordValue ptyAddProfilePoints(datUnitWork_t *unit, s32 increment);
 
 /* Pick the highest preset stage whose required profiles all sit at their cap, then apply that stage's script. */
 void ptySelectProfileStage(datUnitWork_t *unit) {
@@ -432,7 +433,7 @@ void ptySetProfileRecordToCap(datUnitWork_t *unitAddress, u16 profileId) {
 }
 
 /* Add to the selected record and cap the unsigned result; no selection returns zero. */
-u32 ptyAddProfilePoints(datUnitWork_t *unit, s32 increment) {
+PtyProfileRecordValue ptyAddProfilePoints(datUnitWork_t *unit, s32 increment) {
     DatProfileRecord *record;
     u32 recordCap;
     u32 recordValue;

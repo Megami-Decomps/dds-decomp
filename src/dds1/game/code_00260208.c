@@ -2,6 +2,7 @@
 #include "brs_icon_record.h"
 #include "common.h"
 #include "pty_experience_threshold_type.h"
+#include "pty_profile_record_value.h"
 #include "evt_message_window_api.h"
 #include "evt_stage_test_api.h"
 #include "snd_track_playback_api.h"
@@ -679,7 +680,7 @@ void gstApplyBundleMacca(BrsRewardSummary *batch) {
 
 extern PtyExperienceThreshold ptyComputeTotalExp(const datUnitWork_t *unit, s32 levelDelta);
 
-extern u32 ptyAddProfilePoints(datUnitWork_t *unit, s32 increment);
+extern PtyProfileRecordValue ptyAddProfilePoints(datUnitWork_t *unit, s32 increment);
 extern void brsSetSkillProgressAnimations(BrsSkillPackageWork *, s32, s32, u32, s32, s32, s32);
 
 
