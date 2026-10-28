@@ -10,7 +10,9 @@
 #include "dds3_world_selection.h"
 #include "evt_world_object_api.h"
 #include "file_pac.h"
+#include "file_pac_completion_api.h"
 #include "file_request_api.h"
+#include "file_request_end_check_api.h"
 #include "eff_resource_slots.h"
 #include "eff_resource_source_lifetime.h"
 #include "sdf_pac_packet.h"
@@ -540,7 +542,7 @@ LmapResourceLoadResult fldAdvanceLmapResourceLoad(LmapTaskState *task)
     case LMAP_RESOURCE_LOAD_PHASE_WAIT_FOR_ENTRY:
         switch (files[load->entry].kind) {
         case 3:
-            if (pacFileCheckEnd(load->file)) {
+            if (pacFileCheckEnd(load->file) != FILE_REQUEST_END_CHECK_PENDING) {
                 load->phase = LMAP_RESOURCE_LOAD_PHASE_CONSUME_ENTRY;
             }
             break;
@@ -550,7 +552,7 @@ LmapResourceLoadResult fldAdvanceLmapResourceLoad(LmapTaskState *task)
             }
             break;
         case 2:
-            if (pacCheckEnd(load->archive)) {
+            if (pacCheckEnd(load->archive) != FILE_PAC_REQUEST_COMPLETION_INCOMPLETE) {
                 load->phase = LMAP_RESOURCE_LOAD_PHASE_CONSUME_ENTRY;
             }
             break;
