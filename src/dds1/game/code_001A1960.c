@@ -493,7 +493,8 @@ DatEffectiveAffinityResult btlResolveUnitValueWithOverride(
     return datGetEffectiveAffinity(record, selector);
 }
 
-void *btlGetActorResourceBankEntry(s32 resourceTableKind, s32 index) {
+void *btlGetActorResourceBankEntry(
+    BtlActorResourceTableKind resourceTableKind, s32 index) {
     if (resourceTableKind == BTL_ACTOR_RESOURCE_TABLE_PARTY) {
         return (void *)(u32)(D_003BAA10 + index * 0x270);
     }
@@ -501,7 +502,7 @@ void *btlGetActorResourceBankEntry(s32 resourceTableKind, s32 index) {
 }
 
 BtlActorTransformParameters *btlSelectSharedOrIndexedTransformParameters(
-    s32 resourceTableKind, s32 index) {
+    BtlActorResourceTableKind resourceTableKind, s32 index) {
     if (resourceTableKind == BTL_ACTOR_RESOURCE_TABLE_PARTY) {
         return (BtlActorTransformParameters *)btlSharedActorTransformParameters;
     }

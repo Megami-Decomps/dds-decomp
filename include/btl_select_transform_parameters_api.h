@@ -3,8 +3,9 @@
 
 #include "btl_actor_transform_parameters.h"
 #include "btl_actor_resource_table_kind.h"
+#include "btl_actor_resource_table_kind_type.h"
 
 BtlActorTransformParameters *btlSelectSharedOrIndexedTransformParameters(
-    s32 resourceTableKind, s32 index);
+    BtlActorResourceTableKind resourceTableKind, s32 index);
 
 #endif /* BTL_SELECT_TRANSFORM_PARAMETERS_API_H */

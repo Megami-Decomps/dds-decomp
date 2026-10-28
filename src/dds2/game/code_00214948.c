@@ -9,7 +9,7 @@
 #include "btl_command_target_policy.h"
 #include "btl_actor_category_flag_api.h"
 #include "sdf_vu0.h"
-#include "btl_actor_resource_bank_api.h"
+#include "btl_actor_resource_table_kind.h"
 #include "sdf_vu_rotation_axes.h"
 #include "btl_skill_max_api.h"
 #include "btl_effect_position.h"
@@ -48,6 +48,8 @@ extern s32 btlHasActiveSubtask(void);
 extern s32 ptyRebalanceFrontline(DatUnitId unitId);
 extern s32 btlGetSlotValueAdjustedForSpecialAbility(
     BtlUnit *battler, BtlCommandId commandId);
+/* Keep the shared typed header out to preserve btlSelectLowestRankTarget. */
+extern void *btlGetActorResourceBankEntry(s32 resourceTableKind, s32 index);
 
 
 
