@@ -3,6 +3,7 @@
 #include "common.h"
 #include "scr_integer_parameter_api.h"
 #include "itf_mes_entry_start_api.h"
+#include "itf_mes_voice_cue_result.h"
 #include "itf_mes_selection_commit_result.h"
 #include "scr_integer_return_value_api.h"
 #include "itf.h"
@@ -447,9 +448,8 @@ ItfMesEntryStartResult itfMesStartEntry(ItfMesWindowIndex window, ItfMesEntryInd
 
 extern s32 itfInitTextDrawArgs(const u8 *encodedText, _FRQ *sub);
 
-/* Cache the selected table and narrowed item index, then initialize its text.
- * Empty tables return 0; nonempty tables return the text initializer's result. */
-s32 itfMesSelectTableItemText(ItfMesWindowIndex window, ItfMesEntryIndex entryIndex, s32 itemIndex) {
+/* Cache the selected table/item; report whether its text contains the F413 cue. */
+ItfMesVoiceCueResult itfMesSelectTableItemText(ItfMesWindowIndex window, ItfMesEntryIndex entryIndex, s32 itemIndex) {
     instanceMes_tag *mes = pinst[window].mes;
     ItfMesTable *table = GetTypeHeader(mes, entryIndex)->table;
     ItfMesEntryBlock *entryBlock = &mes->entryBlock;
@@ -460,7 +460,7 @@ s32 itfMesSelectTableItemText(ItfMesWindowIndex window, ItfMesEntryIndex entryIn
     if (table->count != 0) {
         return itfInitTextDrawArgs(GetMessagePagePtr(table, (s16)itemIndex), 0);
     }
-    return 0;
+    return ITF_MES_VOICE_CUE_NOT_FOUND;
 }
 
 /* Release/reset selected-entry glyphs and their status; optionally do the same

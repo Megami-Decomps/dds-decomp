@@ -28,6 +28,7 @@
 #include "sdf_motion_loop.h"
 #include "itf_mes_window.h"
 #include "itf_mes_entry_start_api.h"
+#include "itf_mes_voice_cue_result.h"
 #include "sdf_resource.h"
 #include "kwln.h"
 #include "kwln_fade.h"
@@ -743,7 +744,6 @@ extern u8 fldTitleIsActive(void);
 extern void fldSetTitleDrawMode(u32 enabled);
 extern void nbPanelAnalyzeStart(void);
 extern void kwlnFadeBackgroundStartIn(s32 duration);
-extern s32 itfMesSelectTableItemText(ItfMesWindowIndex window, ItfMesEntryIndex entryIndex, s32 itemIndex);
 extern void itfMesBuildOptionList(ItfMesWindowIndex window, ItfMesEntryIndex entryIndex);
 extern void mnuStopTitleVoicePlayback(void);
 extern void evtPrintDeveloperConsoleMessage(const char *format, ...);
@@ -871,7 +871,7 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
         }
         break;
     case 4: {
-        s32 selectedText;
+        ItfMesVoiceCueResult voiceCueResult;
 
         if (viewer->windowContext->messageManagerHandle == -1 || evtViewerHasUpdateFlag(viewer) != 0) {
             break;
@@ -886,11 +886,11 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
                 break;
             }
             if (mnuQueryTitleSoundBusy() != MNU_TITLE_SOUND_IDLE) {
-                selectedText = itfMesSelectTableItemText(viewer->windowContext->messageManagerHandle, nibbles[0], 0);
-                if (selectedText == 1) {
+                voiceCueResult = itfMesSelectTableItemText(viewer->windowContext->messageManagerHandle, nibbles[0], 0);
+                if (voiceCueResult == ITF_MES_VOICE_CUE_FOUND) {
                     evtPrintDeveloperConsoleMessage(D_004224A8, nibbles[0]);
                     mnuStopTitleVoicePlayback();
-                    viewer->voicePending = selectedText;
+                    viewer->voicePending = ITF_MES_VOICE_CUE_FOUND;
                     viewer->voiceMessage = nibbles[0];
                     viewer->voiceFrame = viewer->curFrame;
                     break;
@@ -4271,11 +4271,11 @@ KwlnTaskUpdateResult evtViewerUpdateFrame(dds3ProcessID_t *task) {
             evtEventViewerStartEndCountdown(viewer);
         }
     }
-    if (viewer->voicePending == 1 && evtViewerHasUpdateFlag(viewer) == 0 &&
+    if (viewer->voicePending == ITF_MES_VOICE_CUE_FOUND && evtViewerHasUpdateFlag(viewer) == 0 &&
         mnuQueryTitleSoundBusy() == MNU_TITLE_SOUND_IDLE) {
         itfMesStartEntry(viewer->windowContext->messageManagerHandle,
             viewer->voiceMessage, 0);
-        viewer->voicePending = 0;
+        viewer->voicePending = ITF_MES_VOICE_CUE_NOT_FOUND;
         evtPrintDeveloperConsoleMessage("[conflict voice play      ] mesno= %d\n",
             viewer->voiceMessage);
     }
