@@ -474,7 +474,7 @@ BtlActionReactionMotionIndex btlClassifyActionResult(
 }
 
 /* Test entry emptiness after command-category and operand-group-kind exclusions. */
-s32 btlActionEntryIsEmpty(BtlCommandId commandId, BtlOperandGroup *group,
+BtlActionEntryEmptyResult btlActionEntryIsEmpty(BtlCommandId commandId, BtlOperandGroup *group,
                           BtlOperandEntry *entry) {
     s32 kind;
 
@@ -484,7 +484,7 @@ s32 btlActionEntryIsEmpty(BtlCommandId commandId, BtlOperandGroup *group,
         case 0x179:
         case 0x19C:
         case 0x1A5:
-            return 0;
+            return BTL_ACTION_ENTRY_NOT_EMPTY;
         }
         switch (datCommandRecords[commandId].unk30) {
         case 1:
@@ -498,20 +498,20 @@ s32 btlActionEntryIsEmpty(BtlCommandId commandId, BtlOperandGroup *group,
         case 16:
         case 17:
         case 18:
-            return 0;
+            return BTL_ACTION_ENTRY_NOT_EMPTY;
         }
     }
     if (group != 0) {
         kind = group->kind;
         if (kind == 2 || kind == 0x10000) {
-            return 0;
+            return BTL_ACTION_ENTRY_NOT_EMPTY;
         }
     }
     if ((entry->flags & 1) != 0) {
-        return 0;
+        return BTL_ACTION_ENTRY_NOT_EMPTY;
     }
     if ((entry->flags & 2) != 0) {
-        return 0;
+        return BTL_ACTION_ENTRY_NOT_EMPTY;
     }
     if (entry->hpDelta == 0) {
         if (entry->mpDelta == 0) {
@@ -521,7 +521,7 @@ s32 btlActionEntryIsEmpty(BtlCommandId commandId, BtlOperandGroup *group,
                         if (entry->mpRecovery == 0) {
                             if (entry->entryChangeMask == 0) {
                                 if (entry->entrySelection == 0) {
-                                    return 1;
+                                    return BTL_ACTION_ENTRY_EMPTY;
                                 }
                             }
                         }
@@ -530,7 +530,7 @@ s32 btlActionEntryIsEmpty(BtlCommandId commandId, BtlOperandGroup *group,
             }
         }
     }
-    return 0;
+    return BTL_ACTION_ENTRY_NOT_EMPTY;
 }
 
 /* Return whether any grouped operand has flag bit 0; the selector is unused. */
