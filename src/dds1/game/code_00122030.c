@@ -67,6 +67,7 @@
 #include "fld_sequence_controller.h"
 #include "file_selection_api.h"
 #include "fld_player_scene_state.h"
+#include "fld_spark_controller_state.h"
 #include "btl.h"
 /* Declared before first use (were implicit int). */
 extern void evtFreeStage(void);
@@ -2068,7 +2069,7 @@ extern void func_001415F8(void);
 
 extern void fldUpdateSparkMessageSequence(void);
 
-extern s32 fldGetSparkDialogPhase(void);
+extern FldSparkDialogPhase fldGetSparkDialogPhase(void);
 
 extern void fldUpdateSparkEncounterScene(void);
 
@@ -2210,7 +2211,8 @@ KwlnTaskUpdateResult fldProcSequence(dds3ProcessID_t *task) {
             fldGlobalBase.titleFade == 0 && dds3FadeCheck() == 0) {
             dds3FadeIn2(8);
         }
-        if (dds3SearchProcessPriority(0x3EA) == NULL && fldGetSparkDialogPhase() == 0) {
+        if (dds3SearchProcessPriority(0x3EA) == NULL &&
+            fldGetSparkDialogPhase() == FLD_SPARK_DIALOG_PHASE_IDLE) {
             fldPreparePlayerSceneCameraTarget();
         }
         dds3ObjectBaseOffFlag(fldPlayerObject, 0x40);
@@ -2236,7 +2238,7 @@ KwlnTaskUpdateResult fldProcSequence(dds3ProcessID_t *task) {
             if (fldEncountTestFlag(0x20) == 0) break;
             if (fldRunDanteGunFlag[0] == 0) fldUpdateNextFloorTransition();
         }
-        if (fldGetSparkDialogPhase() != 0) fldUpdateSparkMessageSequence();
+        if (fldGetSparkDialogPhase() != FLD_SPARK_DIALOG_PHASE_IDLE) fldUpdateSparkMessageSequence();
         if (fldGlobalBase.pendingSceneRequest == FLD_SCENE_ADVANCE_REQUEST_PENDING) fldAdvanceToNextScene();
         if (fldEncountTestFlag(0x40) != 0) {
             fldNoopWithMode(1);
