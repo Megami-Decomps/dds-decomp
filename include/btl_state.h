@@ -617,8 +617,8 @@ typedef struct BtlState {
             u8 pad698[4];
         };
     };
-    s32 (*unk69C)(BtlUnit *);
-    s32 (*unk6A0)(BtlUnit *);
+    s32 (*allowDefeatCandidate)(BtlUnit *);
+    s32 (*allowDefeatCandidateClear)(BtlUnit *);
     s32 (*actorEligibilityOverride)(BtlUnit *); /* 0x6A4: optional actor eligibility check. */
     void (*linkedActionHook)(struct ActionStateLink *);
     s32 (*cameraStateChangePredicate)(BtlLinkedCommand *); /* 0x6AC */

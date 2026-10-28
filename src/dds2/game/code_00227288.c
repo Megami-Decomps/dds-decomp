@@ -1762,8 +1762,8 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->linkedActionHook, 0x0, btlQueueGateComponentScriptAndSound);
         BTL_INSTALL_CALLBACK(battle->afterUnitUpdate, 0x0, btlResetGateComponentTransforms);
         BTL_INSTALL_CALLBACK(battle->scriptReturnHook, 0x0, btlGetSubtaskActorMotionClass);
-        BTL_INSTALL_CALLBACK(battle->unk69C, 0x0, btlPrepareGateDefeatCandidateSet);
-        BTL_INSTALL_CALLBACK(battle->unk6A0, 0x0, btlPrepareGateDefeatCandidateClear);
+        BTL_INSTALL_CALLBACK(battle->allowDefeatCandidate, 0x0, btlPrepareGateDefeatCandidateSet);
+        BTL_INSTALL_CALLBACK(battle->allowDefeatCandidateClear, 0x0, btlPrepareGateDefeatCandidateClear);
         BTL_INSTALL_CALLBACK(battle->unk648, 0x0, btlTriggerLinkedActionMotionAlternate);
         BTL_INSTALL_CALLBACK(battle->unk64C, 0x0, btlTriggerLinkedActionMotion);
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlStartLinkedActionMotionPrimary);
@@ -1953,8 +1953,8 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->effectParameterCallback, 0x0, btlOffsetSpecialActionValue);
         BTL_INSTALL_CALLBACK(battle->beginBattleEntryTasks, 0x0, btlCreateLinkedActorTransformTasks);
         BTL_INSTALL_CALLBACK(battle->pad604, 0x0, btlDestroyActionActor);
-        BTL_INSTALL_CALLBACK(battle->unk69C, 0x0, btlAllowBrahmanDefeatCandidateSet);
-        BTL_INSTALL_CALLBACK(battle->unk6A0, 0x0, btlAllowBrahmanDefeatCandidateClear);
+        BTL_INSTALL_CALLBACK(battle->allowDefeatCandidate, 0x0, btlAllowBrahmanDefeatCandidateSet);
+        BTL_INSTALL_CALLBACK(battle->allowDefeatCandidateClear, 0x0, btlAllowBrahmanDefeatCandidateClear);
         BTL_INSTALL_CALLBACK(battle->cameraArrangementHook, 0x0, btlSetBrahmanPartyCameraPreset);
         BTL_INSTALL_CALLBACK(battle->defeatCameraHook, 0x0, btlUpdateBrahmanDefeatCamera);
         BTL_INSTALL_CALLBACK(battle->timedCameraSetupHook, 0x0, btlApplySingleTargetCameraOffset);
@@ -2077,8 +2077,8 @@ void btlInitializeBossCallbacks(s32 battleSceneId) {
         BTL_INSTALL_CALLBACK(battle->pad694, 0x4, btlIsEffectActor);
         BTL_INSTALL_CALLBACK(battle->battleOutcomeOverride, 0x0, btlGetSoleTargetOutcomeOverride);
         BTL_INSTALL_CALLBACK(battle->actorEligibilityOverride, 0x0, btlHasDifferentActiveTarget);
-        BTL_INSTALL_CALLBACK(battle->unk69C, 0x0, btlSetLinkFlagOff);
-        BTL_INSTALL_CALLBACK(battle->unk6A0, 0x0, btlSetLinkFlagOn);
+        BTL_INSTALL_CALLBACK(battle->allowDefeatCandidate, 0x0, btlSetLinkFlagOff);
+        BTL_INSTALL_CALLBACK(battle->allowDefeatCandidateClear, 0x0, btlSetLinkFlagOn);
         BTL_INSTALL_CALLBACK(battle->linkedActionHook, 0x0, btlQueueLinkedActorModelStateTasks);
         BTL_INSTALL_CALLBACK(battle->unk61C, 0x0, btlTryScheduleMarkedUnitTask);
         BTL_INSTALL_CALLBACK(battle->cameraPoseBlendHook, 0x0, btlSetLinkedPairActionCamera);
