@@ -20,7 +20,7 @@
 /* Declared before first use (were implicit int). */
 extern s32 btlAccessRecordedLinkageSkillFlag(s32 id, s32 operation);
 extern u16 mnuPickPairedTableValue(s32 boundWordIndex, s32 alternate);
-extern void memset(void *dst, s32 value, s32 size);
+extern void *memset(void *dst, s32 value, u32 size);
 
 #include "fpu.h"
 #include "pcp_vu0.h"
@@ -820,14 +820,12 @@ u8 scrIsSelectedScriptEntryId(datUnitWork_t *work, u16 id) {
 s32 prfBuildRawSkillList(u16 profile, PrfSkillList *output) {
     PrfSkillList list;
     u32 i;
-    u16 *skills;
     u16 skill;
 
     memset(&list, 0, sizeof(PrfSkillList));
     list.count = 0;
-    skills = D_00401320[profile].skills;
     for (i = 0; i < 8; i++) {
-        skill = *skills++;
+        skill = D_00401320[profile].skills[i];
         if (skill != 0) {
             list.flags[list.count] = 0;
             list.skills[list.count] = skill;
@@ -1034,7 +1032,53 @@ s32 prfCheckAdjacentMantraRequirements(s32 requirementId, datUnitWork_t *context
     return 0;
 }
 
-INCLUDE_ASM(const s32, "game/code_00313BB8", mnuRebuildMantraCategoryAvailability);
+/* Enable the starting categories, then unlock the next category when an occupied
+ * party member owns a profile whose node connects to that category. The roster
+ * countdown still visits the five party slots in ascending order. */
+void mnuRebuildMantraCategoryAvailability(void) {
+    u32 index;
+    s32 partyRemaining;
+
+    memset(D_0045C828, 0, 0x11);
+    D_0045C828[0] = 1;
+    for (index = mnuGetActiveMantraModelFlagState(); (s32)index >= 0; index--) {
+        D_0045C828[index] = 1;
+    }
+    for (partyRemaining = 4; partyRemaining >= 0; partyRemaining--) {
+        datUnitWork_t *partyUnit = &DDS3_GBWK->party[4 - partyRemaining];
+
+        if (!(partyUnit->flags & 1)) {
+            continue;
+        }
+        for (index = 1; index < 0xB0; index++) {
+            MantraNodePos *record = mnuGetMantraNodePositionRecord(index);
+            s32 modelFlagState;
+            s32 category;
+            s32 neighborIndex;
+
+            if (record == NULL) {
+                continue;
+            }
+            modelFlagState = record->modelFlagState;
+            category = modelFlagState + 1;
+            if (D_0045C828[category] != 0) {
+                continue;
+            }
+            for (neighborIndex = 0; neighborIndex < 6; neighborIndex++) {
+                MantraNodePos *neighbor = record->neighbors[neighborIndex];
+
+                if (neighbor != NULL) {
+                    s32 neighborCategory = neighbor->modelFlagState;
+
+                    if (neighborCategory == modelFlagState + 1 && ptyTestPrimaryProfileFlag(partyUnit, index)) {
+                        D_0045C828[neighborCategory] = 1;
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 s32 mnuIsResourceCategoryAvailable(s32 requirementId) {
     MantraNodePos *info = mnuGetMantraNodePositionRecord(requirementId);

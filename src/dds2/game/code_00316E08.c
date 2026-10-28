@@ -26,6 +26,7 @@
 #include "pcp_vu0.h"
 #include "eff_random.h"
 #include "sdf_trig.h"
+#include "sdf_gs_register_submit_api.h"
 #include "btl.h"
 #include "dds3_world_selection.h"
 #include "evt_action_object.h"
@@ -1137,6 +1138,8 @@ extern void mnuUpdateEffectQueues(MnuEffectWork *work, s32 paused);
 extern void mnuUpdateSectionModelWork(MnuSectionModelWork *work, s32 paused);
 extern void mnuSetNodePrimaryVector(MnuModelNode *node, f32 x, f32 y, f32 z);
 extern void mnuSetNodeScaleVector(MnuModelNode *node, f32 value);
+extern void mnuSetViewFacingModelNodeRotation(MnuModelNode *node, f32 xAngle, f32 yAngle, f32 zAngle);
+extern void uiDrawUniformColorRect(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32 surfaceIndex);
 extern void mnuBroadcastNodeModelState(MnuModelNode *node, u32 state);
 struct SdfPoolNode;
 extern void itfDrawFullExtentWorkPanels(MnuShootingWork *work);
@@ -1348,6 +1351,7 @@ extern void itfProjectScreenPointToViewPlane(f32 *, s32, s32);
 extern void mnuSetNodePairValue(MnuModelNode *, s32);
 extern void mnuSetNodePosition(MnuModelNode *, f32, f32, f32);
 extern void itfSetModelInstanceValuePair(ModelInstance *, s32);
+extern void itfSetModelInstancePrimaryVector(ModelInstance *model, f32 x, f32 y, f32 z);
 extern void itfSetModelInstanceSecondaryVector(ModelInstance *, f32, f32, f32);
 
 /* Finish/deactivate a shooting entry. Keep the timed coordinate distinct from
@@ -1507,7 +1511,100 @@ void mnuFinishOrDeactivateShootingEntry(MenuWorkEntry *entry, MnuShootingWork *w
 }
 
 
-INCLUDE_ASM(const s32, "game/code_00316E08", mnuPlaceShootingEntryObject);
+/* Place and render the current object, then apply keyed motion even if absent. */
+void mnuPlaceShootingEntryObject(MenuWorkEntry *entry, MnuShootingWork *work) {
+    f32 position[4];
+    MenuRegistryParameters *parameters = NULL;
+    MenuRegistry *registry = NULL;
+    s32 isBoss = 0;
+    MenuProgressParameters *origin;
+    MenuProgressState *progress;
+    MenuResourceRecord *resource;
+    void *object;
+    s32 originX, originY;
+    s32 screenX, screenY;
+    u32 entryClass;
+    f32 tilt = 0.0f;
+
+    origin = mnuGetResourceProgressParameters();
+    originX = origin->x;
+    originY = origin->y;
+    progress = mnuGetResourceProgressStepState();
+    object = entry->object.modelNode;
+    if (object != NULL) {
+        screenX = (s32)(entry->currentX + (f32)originX);
+        screenY = (s32)(entry->currentY + (f32)originY);
+        entryClass = entry->tag & MNU_WORK_TAG_CLASS_MASK;
+        switch (entryClass) {
+        case MNU_WORK_TAG_MOVEMENT_TABLE:
+            parameters = mnuGetMenuRegistryParametersByIndex(
+                mnuGetMovementRecordByIndex(entry->tag)->parameterTag);
+            isBoss = 0;
+            tilt = (f32)work->horizontalTilt / 20.0f;
+            break;
+        case MNU_WORK_TAG_REGISTRY_TABLE:
+            registry = mnuGetMenuRecordRegistryEntry(entry->tag);
+            resource = mnuGetResourceRecordByIndex(entry->resourceRecordIndex);
+            if (registry->table->flags & 1) {
+                screenY += progress->progress - resource->progress;
+            }
+            parameters = mnuGetMenuRegistryParametersByIndex(registry->parameterIndex);
+            isBoss = registry->parameterIndex == 0x22;
+            break;
+        }
+        screenX += parameters->xOffset;
+        screenY += parameters->yOffset;
+        switch (parameters->kind) {
+        case 3: {
+            MnuModelNode *node = object;
+            itfProjectScreenPointToViewPlane(position, screenX, screenY);
+            mnuSetNodePrimaryVector(node, position[0], position[1], position[2]);
+            mnuSetViewFacingModelNodeRotation(node,
+                (f32)parameters->rotationX * 0.017453293f,
+                (f32)parameters->rotationY * 0.017453293f + tilt * 0.78539816f,
+                (f32)parameters->rotationZ * 0.017453293f);
+            if ((!isBoss && (entry->flags & 0x3FE0) == 0x20) || ((entry->flags >> 1) & 1)) {
+                mnuSetNodeScaleVector(node, (f32)parameters->scale / 100.0f);
+                mnuBroadcastNodeModelState(node, 0x80000080);
+            } else {
+                mnuSetNodeScaleVector(node, (f32)parameters->scale / 100.0f);
+                mnuBroadcastNodeModelState(node, 0x80808080);
+            }
+            if (entry->inputCountdown % 10 > 0) {
+                mnuBroadcastNodeModelState(node, 0x40808080);
+            }
+            if (entryClass == MNU_WORK_TAG_MOVEMENT_TABLE) {
+                sdfSubmitGsTestOneRegisterPacket(0x30000, 0x4A);
+                uiDrawUniformColorRect(0, 0, 0, 0x2000, 0xE00, 0, 0x4A);
+                sdfSubmitGsTestOneRegisterPacket(0x5100D, 0x4A);
+                mdlLink(node->model, kwlnSceneSurfaceSets[9]);
+            } else if (registry->parameterIndex == 0x22) {
+                mdlLink(node->model, kwlnSceneSurfaceSets[0]);
+            } else {
+                mdlLink(node->model, kwlnSceneSurfaceSets[7]);
+            }
+            break;
+        }
+        case 1: {
+            ModelInstance *instance = object;
+            /* Read the actual bitfield member, not an aliased union word.
+             * Decode the update bit before the half-count blink test. */
+            MenuWorkFlagBits *flags = &entry->flagsBits;
+            u32 updated;
+            instance->flags &= ~4;
+            updated = flags->updated;
+            if ((flags->halfRemainingCountReached &&
+                 flags->halfRemainingTicks == 0) || updated) {
+                instance->flags |= 4;
+            }
+            itfSetModelInstancePrimaryVector(instance, (f32)screenX, (f32)screenY, 0.0f);
+            break;
+        }
+        }
+    }
+    mnuApplyFrameKeyedModelMotion(entry, work);
+}
+
 
 void mnuApplyPlayerRuntimeRecordFeedback(MenuRuntimeRecord *record) {
     MnuModelNode *node;
