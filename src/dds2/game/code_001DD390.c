@@ -1458,7 +1458,7 @@ BtlRuntimeTask *btlCreateDeferredUnitStatusTask(BtlUnit *actor, s32 option) {
     return task;
 }
 
-s32 btlApplyCategoryStatDamage(BtlCategoryStatDamageArgs *args) {
+BtlTaskPollResult btlApplyCategoryStatDamage(BtlCategoryStatDamageArgs *args) {
     BtlState *work = (BtlState *)btlGetRuntime();
     BtlUnit *unit = args->unit;
     if (!(work->battleFlags & 0x80)) {

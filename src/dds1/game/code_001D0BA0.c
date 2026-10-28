@@ -1373,7 +1373,7 @@ BtlRuntimeTask *btlCreateDeferredUnitStatusTask(BtlUnit *owner, u32 value) {
     return task;
 }
 
-u32 btlApplyCategoryStatDamage(BtlCategoryStatDamageArgs *args) {
+BtlTaskPollResult btlApplyCategoryStatDamage(BtlCategoryStatDamageArgs *args) {
     BtlState *work = (BtlState *)btlGetRuntime();
     BtlUnit *unit = args->unit;
     if ((work->battleFlags & 0x80) == 0) {
@@ -1399,7 +1399,7 @@ u32 btlApplyCategoryStatDamage(BtlCategoryStatDamageArgs *args) {
     }
 }
 
-extern u32 btlApplyCategoryStatDamage(BtlCategoryStatDamageArgs *);
+extern BtlTaskPollResult btlApplyCategoryStatDamage(BtlCategoryStatDamageArgs *);
 
 BtlRuntimeTask *btlCreateCategoryStatDamageTask(BtlUnit *owner, s32 category, s32 amount) {
     BtlRuntimeTask *task = btlAllocTask(12);
