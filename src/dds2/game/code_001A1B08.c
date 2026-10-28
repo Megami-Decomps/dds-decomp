@@ -13,6 +13,7 @@
 #include "itf_text_vector.h"
 #include "itf_panel_api.h"
 #include "itf_panel_layouts.h"
+#include "itf_held_panel_message_step.h"
 
 #define ITF_PANEL_COLUMN_COUNT 4
 #define ITF_PANEL_ROW_COUNT 2
@@ -716,17 +717,17 @@ s32 itfCommandQueueHeldPanelEntry(void) {
     return 1;
 }
 
-s32 itfStepHeldPanelMessages(void) {
+ItfHeldPanelMessageStepResult itfStepHeldPanelMessages(void) {
     s32 frame;
     s32 latest = -1;
     s32 i;
 
     if (itfHeldPanelCursor.window < 0) {
-        return 1;
+        return ITF_HELD_PANEL_MESSAGES_COMPLETE;
     }
     frame = scrGetCommandTimer();
     if (itfHeldPanelCursor.queuedCount == 0) {
-        return 1;
+        return ITF_HELD_PANEL_MESSAGES_COMPLETE;
     }
     for (i = 0; i < itfHeldPanelCursor.queuedCount; i++) {
         s32 start = itfHeldPanelCursor.items[i].first;
@@ -749,9 +750,9 @@ s32 itfStepHeldPanelMessages(void) {
     }
     if (frame >= latest && frame >= itfHeldPanelCursor.entryEndFrame) {
         itfPanelReleaseHold();
-        return 1;
+        return ITF_HELD_PANEL_MESSAGES_COMPLETE;
     }
-    return 0;
+    return ITF_HELD_PANEL_MESSAGES_PENDING;
 }
 
 
