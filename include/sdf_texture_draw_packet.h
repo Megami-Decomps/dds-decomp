@@ -59,6 +59,6 @@ typedef char SdfTextureDrawPacket_registerAddressC_at_48[
 u32 sdf2DGetTexPacketSize(sdfTexHandle_t *texture);
 SdfTextureDrawPacket *sdf2DMakeTexPacket(SdfTextureDrawPacket *drawPacket,
                                                    sdfTexHandle_t *texture, s32 context);
-s32 sdf2DLinkTexPacket(sdfDrawTag_t *packetList, sdfTexHandle_t *texture, s32 context);
+SdfTextureDrawPacket *sdf2DLinkTexPacket(sdfDrawTag_t *packetList, sdfTexHandle_t *texture, s32 context);
 
 #endif

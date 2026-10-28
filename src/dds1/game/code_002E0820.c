@@ -235,12 +235,12 @@ SdfTextureDrawPacket *sdf2DMakeTexPacket(SdfTextureDrawPacket *drawPacket, sdfTe
 }
 
 /* Allocate and append texture state; return its packet address. */
-s32 sdf2DLinkTexPacket(sdfDrawTag_t *packetList, sdfTexHandle_t *texture, s32 context) {
+SdfTextureDrawPacket *sdf2DLinkTexPacket(sdfDrawTag_t *packetList, sdfTexHandle_t *texture, s32 context) {
     s32 packetBytes = sdf2DGetTexPacketSize(texture);
     SdfTextureDrawPacket *packet = (SdfTextureDrawPacket *)sdfGrAllocPacketBuff(packetBytes);
-    s32 packetAddress = (s32)sdf2DMakeTexPacket(packet, texture, context);
-    sdfDrawTagLink(packetList, packetAddress);
-    return packetAddress;
+    packet = sdf2DMakeTexPacket(packet, texture, context);
+    sdfDrawTagLink(packetList, (u32)packet);
+    return packet;
 }
 
 /* Exclude the two header quadwords from the reference payload count. */

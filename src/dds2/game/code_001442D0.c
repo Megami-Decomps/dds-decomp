@@ -2040,7 +2040,7 @@ void fldDrawAutomapScene(void) {
 
 extern s32 sdfGrAllocPacketBuff(s32);
 extern void sdfDrawTagInit(sdfDrawTag_t *);
-extern s32 sdf2DLinkTexPacket(sdfDrawTag_t *, sdfTexHandle_t *, s32);
+extern SdfTextureDrawPacket *sdf2DLinkTexPacket(sdfDrawTag_t *, sdfTexHandle_t *, s32);
 extern void SetRotateMatrixY(f32);
 extern SdfPoolNode *fldDrawGetOt(void);
 extern sdfTexHandle_t *D_0044F7F0[];
