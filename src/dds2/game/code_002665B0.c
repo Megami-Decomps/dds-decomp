@@ -814,7 +814,7 @@ MenuProgressHost *mnuCreateProgressHost(void) {
     host->titleEffectHandle = mnuAllocateValueRecord(1);
     mnuInitPartyPanelSlots(&host->partyPanel);
     mnuAppendCampSpriteRequests(host->titleEffectHandle, &host->staffSlots);
-    host->loadState = 1;
+    host->loadState = MNU_PROGRESS_LOAD_LOADING;
     return host;
 }
 
@@ -829,18 +829,18 @@ void mnuReleaseStaffAndTitleVisualResources(MenuProgressHost *host) {
 /* Return one while initialization is pending (including state zero), zero when ready.
  * On resource readiness, release loading resources and store state two. */
 s32 mnuPollTitleEffectsReady(MenuProgressHost *host) {
-    s32 state = host->loadState;
-    if (state == 0) {
+    MnuProgressLoadState state = host->loadState;
+    if (state == MNU_PROGRESS_LOAD_NOT_STARTED) {
         return 1;
     }
-    if (state == 2) {
+    if (state == MNU_PROGRESS_LOAD_READY) {
         return 0;
     }
     if (movAreTitleEffectsReady(host->titleEffectHandle, &host->staffSlots) == 0) {
         return 1;
     }
     mnuReleaseStaffMenuResources(&host->staffSlots.baseResources[0]);
-    host->loadState = 2;
+    host->loadState = MNU_PROGRESS_LOAD_READY;
     return 0;
 }
 
@@ -906,7 +906,7 @@ void mnuDrawCurrentProfilePanel(s32 x, s32 y, s32 mode, MenuProgressHost *host, 
 
 /* Draw loaded progress panels only in state two; preserve the accumulated draw flags. */
 s32 mnuDrawLoadedProgressPanels(datUnitWork_t *resource, MenuProgressHost *host, s32 mode) {
-    if (host->loadState != 2) {
+    if (host->loadState != MNU_PROGRESS_LOAD_READY) {
         return 0;
     }
     host->partyWindow.flags |= 0x280;

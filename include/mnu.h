@@ -6,6 +6,7 @@
 #include "dat_stat.h"
 #include "evt_world.h"
 #include "mnu_transition.h"
+#include "mnu_progress_load_state.h"
 #ifdef VERSION_DDS2
 #include "mnu_shop.h"
 #endif
@@ -853,7 +854,7 @@ typedef struct MenuProgressHost {
     struct sdfMemHandle_t *allocation; /* Retained descriptor for this entire host. */
     struct EffectList *titleEffectHandle;
     StaffSlots staffSlots;
-    s32 loadState;
+    MnuProgressLoadState loadState;
     PartyPanel partyPanel;
     MenuPageWindow partyWindow;
     MenuPanelGroup *panelGroup;

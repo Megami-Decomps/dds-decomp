@@ -666,7 +666,7 @@ MenuProgressHost *mnuCreateWorkBlock(void) {
     work->titleEffectHandle = mnuAllocateValueRecord(1);
     mnuInitPartyPanelSlots(&work->partyPanel);
     mnuAppendCampSpriteRequests(work->titleEffectHandle, &work->staffSlots);
-    work->loadState = 1;
+    work->loadState = MNU_PROGRESS_LOAD_LOADING;
     return work;
 }
 
@@ -686,13 +686,13 @@ extern void mnuInitializeStaffPageWindows(MenuPageWindow *, StaffSlots *, u32, P
 /* Return one while initialization is pending (including state zero), zero when ready.
  * On resource readiness, release loading resources, initialize windows, and store state two. */
 s32 mnuTickInitState(MenuProgressHost *work) {
-    s32 state = work->loadState;
+    MnuProgressLoadState state = work->loadState;
     StaffSlots *group;
 
-    if (state == 0) {
+    if (state == MNU_PROGRESS_LOAD_NOT_STARTED) {
         return 1;
     }
-    if (state == 2) {
+    if (state == MNU_PROGRESS_LOAD_READY) {
         return 0;
     }
     group = &work->staffSlots;
@@ -701,7 +701,7 @@ s32 mnuTickInitState(MenuProgressHost *work) {
     }
     mnuReleaseStaffMenuResources(&group->baseResources[0]);
     mnuInitializeStaffPageWindows(&work->partyWindow, group, 0, &work->partyPanel);
-    work->loadState = 2;
+    work->loadState = MNU_PROGRESS_LOAD_READY;
     return 0;
 }
 
@@ -742,7 +742,7 @@ void effUpdateAttached(s32 x, s32 y, s32 mode, void *owner, s32 layer) {
 }
 
 s32 mnuDrawLoadedProgressPanels(datUnitWork_t *partyRecord, MenuProgressHost *work, s32 context) {
-    if (work->loadState != 2) {
+    if (work->loadState != MNU_PROGRESS_LOAD_READY) {
         return 0;
     }
 
