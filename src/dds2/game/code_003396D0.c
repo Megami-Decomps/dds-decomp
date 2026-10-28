@@ -1096,7 +1096,7 @@ u32 sdfBillBoardVcGetPacketSize(s32 count) {
 }
 
 /* Build a quad packet with four corner colors, UV pairs and XY offset pairs. */
-u32 sdfBillBoardVcMakeN(const u128 *positions, const void *attributes,
+u32 *sdfBillBoardVcMakeN(const u128 *positions, const void *attributes,
                   const void *halfAttributes, const void *wordAttributes,
                   s32 count, void *(*alloc)(s32)) {
     s32 bytes;
@@ -1154,7 +1154,7 @@ u32 sdfBillBoardVcMakeN(const u128 *positions, const void *attributes,
     while (((u32)cursor & 0xF) != 0) {
         *cursor++ = 0;
     }
-    return (u32)packet;
+    return packet;
 }
 
 /* Build a one-vertex VIF packet for a two-texture quad with eight colors: the
@@ -1200,7 +1200,7 @@ u32 sdfMultiBillBoardVcGetPacketSize(s32 count) {
 /* Build the wider attribute VIF stream; return the packet address.
  * vertexCount must be positive; preserve the native copy lengths and n reuse. */
 /* vu0 routine: pack aligned positions into the VIF three-word stream. */
-u32 sdfMultiBillBoardVcMakeN(u128 *positions, void *byteAttributes, void *halfAttributes, void *wordAttributes, s32 vertexCount, void *(*allocatePacket)(s32)) {
+u32 *sdfMultiBillBoardVcMakeN(u128 *positions, void *byteAttributes, void *halfAttributes, void *wordAttributes, s32 vertexCount, void *(*allocatePacket)(s32)) {
     s32 packetBytes;
     u32 *packet;
     u32 *cursor;
@@ -1255,7 +1255,7 @@ u32 sdfMultiBillBoardVcMakeN(u128 *positions, void *byteAttributes, void *halfAt
     while (((u32)cursor & SDF_QWORD_ALIGNMENT_MASK) != 0) {
         *cursor++ = 0;
     }
-    return (u32)packet;
+    return packet;
 }
 
 extern u8 sdfPadCb_0[];
