@@ -9,6 +9,7 @@
 #include "eff_channel_layout.h"
 #include "pcp_vu0.h"
 #include "fr_font.h"
+#include "font_mem_control_api.h"
 
 #define EFF_CURVE_COMPONENT_COUNT 3
 #define EFF_CURVE_POINT_BYTES 12
@@ -654,7 +655,6 @@ s32 effGetFontListCount(void) {
 }
 
 extern s8 D_00436540;
-extern s32 fmDestroyFontMemControl(void);
 
 /* Build the glyph atlas once: COLUMNS x ROWS cells in a circular node list, each with its
  * UV rectangle in 1/16-texel units and an optional RECORDBYTES-sized per-cell record. */

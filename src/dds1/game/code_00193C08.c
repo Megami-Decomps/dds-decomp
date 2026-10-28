@@ -8,6 +8,7 @@
 #include "itf.h"
 #include "itf_mem_node.h"
 #include "kwln.h"
+#include "font_mem_control_api.h"
 /* Declared before first use (were implicit int). */
 extern void frLoadStyleAll(void);
 extern sdfGsMemSlice_t * sdfGsMemAllocFromTail(s32 size, s32 allocationMode);
@@ -29,7 +30,6 @@ extern sdfGsMemSlice_t * sdfGsMemAllocFromTail(s32 size, s32 allocationMode);
 extern u32 frFontLoaded[];
 extern void frDelStyleAll(void);
 extern _FRQ *frFontReleaseGlyphChain(_FRQ *glyph);
-extern s32 fmDestroyFontMemControl(void);
 
 /* Insert after the list's fixed anchor and update the entry count. */
 void fmRetFontMem(FntNode *node) {
