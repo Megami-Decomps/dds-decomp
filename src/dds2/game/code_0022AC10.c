@@ -854,7 +854,7 @@ s32 btlUpdateScriptResourceTask(BattleActionTaskData *record) {
             scrSetUserData(object, record->action);
         }
     }
-    if (btlReleaseScriptResource()) {
+    if (btlReleaseScriptResource() != BTL_SCRIPT_RESOURCE_RELEASE_PENDING) {
         return 1;
     }
     ++record->frames;

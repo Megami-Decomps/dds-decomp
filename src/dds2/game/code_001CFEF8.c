@@ -929,7 +929,7 @@ s32 fldSceneStateWaitScriptRelease(BtlState *scene) {
 
     switch (state) {
     case 0xF000002:
-        if (btlReleaseScriptResourceA() == 0) {
+        if (btlReleaseScriptResourceA() == BTL_SCRIPT_RESOURCE_RELEASE_PENDING) {
             finished = 0;
         } else if (!(scene->commandRestrictFlags & 0x40000)) {
             btlStartTask(btlCreateSoundUpdateTask(0xC));
@@ -959,7 +959,7 @@ s32 fldSceneStateWaitScriptRelease(BtlState *scene) {
         break;
     default:
         if (state != -1) {
-            finished = btlReleaseScriptResource() != 0;
+            finished = btlReleaseScriptResource() != BTL_SCRIPT_RESOURCE_RELEASE_PENDING;
         }
         break;
     }
@@ -1230,7 +1230,6 @@ const char D_00417200[] __attribute__((aligned(8))) = "btl:end [BTL_END_SERIAL]\
 const char D_00417220[] __attribute__((aligned(8))) = "btl:end [BTL_END_COMPULSORY]\n";
 extern s8 dds3PadButtonState[];
 extern s32 btlCountRegisteredTasks(void);
-extern s32 btlReleaseScriptResourceB(void);
 #include "mnu_title_stream.h"
 extern s32 sndIsCommandBusySigned(void);
 extern s32 sndLoadAndPlayStationedSe(u32 soundId);
@@ -1282,7 +1281,7 @@ s32 btlUpdateBattleEnd(BtlState *scene) {
     if (scene->scriptState == 0xF000003) {
         state = scene->scriptState;
         if (!(scene->endFlags & 2)) {
-            if (!btlReleaseScriptResourceB()) return 0;
+            if (btlReleaseScriptResourceB() == BTL_SCRIPT_RESOURCE_RELEASE_PENDING) return 0;
             scene->endFlags |= 2;
         }
     }
