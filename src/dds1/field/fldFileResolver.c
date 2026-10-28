@@ -985,19 +985,19 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
                 case FLD_PLACEMENT_KIND_SPECIAL_POINT:
                     point = ((FldPlacementData *)spawnResource->data)->payload.specialPoint;
                     switch (point->kind) {
-                    case 1:
+                    case FLD_SPECIAL_POINT_KIND_SAVE_TERMINAL:
                         func_00148FF0(0, point->id, rotation, position[0], position[1], position[2]);
                         if (mode == FLD_PLACEMENT_BATCH_MODE_INITIAL) {
                             fldRoomEventPlacementCount++;
                         }
                         break;
-                    case 2:
+                    case FLD_SPECIAL_POINT_KIND_HEAL_TERMINAL:
                         func_00148FF0(1, point->id, rotation, position[0], position[1], position[2]);
                         if (mode == FLD_PLACEMENT_BATCH_MODE_INITIAL) {
                             fldRoomEventPlacementCount++;
                         }
                         break;
-                    case 3:
+                    case FLD_SPECIAL_POINT_KIND_HUNT_MARKER_TRANSFORM:
                         fldSetSparkVectors(point->id, (const u128 *)position, (const u128 *)rotation);
                         break;
                     }

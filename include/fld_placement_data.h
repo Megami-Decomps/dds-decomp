@@ -18,6 +18,14 @@ enum FldPlacementKind {
     FLD_PLACEMENT_KIND_SPECIAL_POINT = 8
 };
 
+/* Kind-8 payload discriminators select these special point behaviors. */
+typedef u32 FldSpecialPointKind;
+enum {
+    FLD_SPECIAL_POINT_KIND_SAVE_TERMINAL = 1,
+    FLD_SPECIAL_POINT_KIND_HEAL_TERMINAL = 2,
+    FLD_SPECIAL_POINT_KIND_HUNT_MARKER_TRANSFORM = 3
+};
+
 /* The kind word at +0 selects the pointed-to view of this relocated payload.
  * Kind 8 points to a two-word special point. Kinds 2 and 3 are consumed as
  * word arrays, while kind 7 carries a radius followed by a sound ID. Keep the
@@ -35,7 +43,7 @@ typedef union FldPlacementPayloadRef {
 } FldPlacementPayloadRef;
 
 typedef struct FldSpecialPoint {
-    u32 kind;
+    FldSpecialPointKind kind;
     u32 id;
 } FldSpecialPoint;
 
