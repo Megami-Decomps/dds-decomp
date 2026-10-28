@@ -380,9 +380,9 @@ s32 mnuCompleteTitleStreamFileLoad(TitleAudioStreamState *destinationState) {
         sdfMemFreeDelayedDirect(resourceHandle);
         at3decReset(mnuTitleStreamDecoderState);
         mnuTitleStreamStatus.loadState = MNU_STREAM_LOAD_COPIED;
-        ready = 1;
+        endCheck = FILE_REQUEST_END_CHECK_REACHED;
     }
-    return ready;
+    return endCheck;
 }
 
 
