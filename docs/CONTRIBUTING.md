@@ -44,6 +44,18 @@ not prove that we recovered the original source spelling or variable names.
   (`x++; x--;`), `^ 0` / `* 1` / full-width masks, chained assignments that
   only share a register, and reading a typed struct through a flat word array
   or cursor.
+- **Real constant endpoints are not dummy arithmetic.** An ordinary
+  floating-point formula may retain a constant zero endpoint, such as
+  `(end - 0.0f) * weight + 0.0f`, when that endpoint has a genuine algorithmic
+  role and retail explicitly performs those operations on the path to a real
+  result. Map the operands, operations and consumers; corroborate the formula
+  with the twin or matched family code; and preserve the target's evaluation
+  and floating-point behavior. Native instructions alone do not justify an
+  arbitrary or misleading formula. Do not insert identities or cancelling
+  operations merely to affect allocation, scheduling or CSE. This is live
+  computation, not a dead-code exception, and all normal source-review,
+  whole-owner exactness and build requirements still apply. See the
+  [camera fade audit](compiler-trace-fade.md#zero-endpoint-interpolation).
 - **Unused locals that explain a frame gap.** ee-gcc 2.96 still reserves
   stack space for a local array or aggregate that is never read or written,
   so a leftover buffer in the original can leave a frame larger than the
