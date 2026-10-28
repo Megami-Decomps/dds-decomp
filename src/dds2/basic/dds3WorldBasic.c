@@ -280,7 +280,7 @@ void dds3DeleteAllBasicArray(dds3BasicArrayHandle_t *object) {
 
 /* Reset the cursor and remove this node's matching address once, or all matches
  * when processAllMatches is nonzero. Return whether any match was processed. */
-Dds3BasicArrayMatchResult dds3SearchDeleteBasicArray(dds3BasicArrayHandle_t *indexNode, dds3Basic_t *targetNode, s32 processAllMatches) {
+Dds3BasicArrayMatchResult dds3SearchDeleteBasicArray(dds3BasicArrayHandle_t *indexNode, const dds3Basic_t *targetNode, s32 processAllMatches) {
     Dds3BasicArrayMatchResult processedMatch;
 
     processedMatch = DDS3_BASIC_ARRAY_NO_MATCH;

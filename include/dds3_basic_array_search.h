@@ -10,8 +10,10 @@ enum {
     DDS3_BASIC_ARRAY_MATCH_FOUND = 1
 };
 
+/* targetNode is borrowed and compared by identity; the search never writes it. */
 Dds3BasicArrayMatchResult dds3SearchDeleteBasicArray(
-    dds3BasicArrayHandle_t *indexNode, dds3Basic_t *targetNode, s32 processAllMatches);
+    dds3BasicArrayHandle_t *indexNode, const dds3Basic_t *targetNode,
+    s32 processAllMatches);
 Dds3BasicArrayMatchResult dds3SetSearchNextBasicArray(
     dds3BasicArrayHandle_t *indexNode, const dds3Basic_t *targetNode);
 
