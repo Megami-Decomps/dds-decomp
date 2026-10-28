@@ -75,7 +75,7 @@ extern void fldSetDeferredFieldCommand(u32 command, u32 parameter);
 
 extern void fldBgmFadeOut(void);
 
-extern void fldSetFloorFlag(s32 area, s32 floor, s32 bit);
+extern void fldSetFloorFlag(s32 area, s32 floor, s32 flagNumber);
 
 extern void fldSetSceneParam4(fldSceneParam_t *record,
     s32 stage, s32 kind, const char *name, s32 code, s32 link, const char *subname);

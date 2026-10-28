@@ -2762,25 +2762,25 @@ void fldSetCurrentFloorFlag(s32 flagNumber) {
 }
 
 /* The public setters take one-based floor and flag numbers. */
-void fldSetFloorFlag(s32 area, s32 floor, s32 bit) {
+void fldSetFloorFlag(s32 area, s32 floor, s32 flagNumber) {
     s32 areaIndex;
 
     floor--;
-    bit--;
+    flagNumber--;
     areaIndex = D_00387CE0[area % 100];
     if (areaIndex != -1) {
-        DDS3_GBWK->areaFlags[areaIndex][floor] |= 1ULL << bit;
+        DDS3_GBWK->areaFlags[areaIndex][floor] |= 1ULL << flagNumber;
     }
 }
 
-void fldClearFloorFlag(s32 area, s32 floor, s32 bit) {
+void fldClearFloorFlag(s32 area, s32 floor, s32 flagNumber) {
     s32 areaIndex;
 
     floor--;
-    bit--;
+    flagNumber--;
     areaIndex = D_00387CE0[area % 100];
     if (areaIndex != -1) {
-        DDS3_GBWK->areaFlags[areaIndex][floor] &= ~(1ULL << bit);
+        DDS3_GBWK->areaFlags[areaIndex][floor] &= ~(1ULL << flagNumber);
     }
 }
 
