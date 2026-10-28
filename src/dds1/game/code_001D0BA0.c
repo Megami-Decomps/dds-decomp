@@ -29,6 +29,7 @@
 #include "btl_command_result_kind_api.h"
 #include "btl_command_target_policy.h"
 #include "btl_command_target_eligibility.h"
+#include "btl_actor_roll_eligibility.h"
 #include "dds3_object_flags.h"
 #include "sdf_vu0.h"
 #include "btl_aim_horizontal_direction_clamped_api.h"
@@ -572,8 +573,6 @@ extern s32 btlRollFearChance(s32, BtlUnit *, u32, BtlActionPressResult);
 
 extern s32 btlRollStoneDeathChance(BtlUnit *, s32);
 
-extern s32 btlRollActorEligibilityWithAbilityOverride(BtlUnit *);
-
 extern s32 btlCalculateEnemyExperienceReward(BtlUnit *, BtlUnit *);
 
 extern s32 btlGetEnemyMoney(BtlUnit *, BtlUnit *);
@@ -1052,7 +1051,8 @@ void btlResolveActionTargetResults(BtlTask *action, BattleIndexWork *work) {
         if (group->inactive || (group->reflected && btlIsUnitDefeatTriggeredByValueDelta(recipient, reflectedHp))) {
             if (!(recipient->partyRecord.status & 0x7C0E) &&
                 (btlUnitStatusPair(recipient) & 0x4000001200) == 0x1200 &&
-                btlRollActorEligibilityWithAbilityOverride(recipient)) {
+                btlRollActorEligibilityWithAbilityOverride(recipient) !=
+                    BTL_ACTOR_ROLL_ELIGIBILITY_REJECTED) {
                 recipient->status.stateFlags |= 0x40;
             }
         }

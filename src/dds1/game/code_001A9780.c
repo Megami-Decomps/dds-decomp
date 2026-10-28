@@ -75,6 +75,7 @@ extern void itfSetTextDrawLimit(s32 limit);
 #include "btl.h"
 #include "btl_state.h"
 #include "btl_battle_record_eligibility.h"
+#include "btl_actor_roll_eligibility.h"
 #include "btl_serial_battle_mode_override.h"
 #include "btl_scene_initializer.h"
 #include "btl_boss_debug_api.h"
@@ -406,15 +407,25 @@ s32 btlRollStoneDeathChance(BtlUnit *actor, s32 index) {
 
 extern char D_003A1DA0[]; /* "btl:endure=%d%%[ratio=%.2f]\n" */
 
-s32 btlRollActorEligibilityWithAbilityOverride(BtlUnit *actor) {
+BtlActorRollEligibilityResult btlRollActorEligibilityWithAbilityOverride(
+    BtlUnit *actor) {
     u8 *battle = (u8 *)btlGetRuntime();
     s32 (*predicate)(BtlUnit *) = *(s32 (**)(BtlUnit *))(battle + 0x65C);
-    if (predicate != 0 && predicate(actor) == 0) return 0;
-    if (actor->status.stateFlags & 0x2000) return 0;
-    if ((actor->partyRecord.status & 0x7FFF) == 0x4000) return 0;
-    if (btlCheckSpecialAbility(&actor->partyRecord, 0x231)) return 1;
+    if (predicate != 0 && predicate(actor) == 0) {
+        return BTL_ACTOR_ROLL_ELIGIBILITY_REJECTED;
+    }
+    if (actor->status.stateFlags & 0x2000) {
+        return BTL_ACTOR_ROLL_ELIGIBILITY_REJECTED;
+    }
+    if ((actor->partyRecord.status & 0x7FFF) == 0x4000) {
+        return BTL_ACTOR_ROLL_ELIGIBILITY_REJECTED;
+    }
+    if (btlCheckSpecialAbility(&actor->partyRecord, 0x231)) {
+        return BTL_ACTOR_ROLL_ELIGIBILITY_ACCEPTED;
+    }
     btlBossDebugPrintf(D_003A1DA0, 5, 1.0);
-    return (s32)btlRollAiBucket() < 5;
+    return (s32)btlRollAiBucket() < 5 ?
+        BTL_ACTOR_ROLL_ELIGIBILITY_ACCEPTED : BTL_ACTOR_ROLL_ELIGIBILITY_REJECTED;
 }
 
 s32 btlHasEnemyRecordDefeatExemptionFlag(BtlUnit *object) {

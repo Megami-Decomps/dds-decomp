@@ -67,6 +67,7 @@
 #include "btl_command.h"
 #include "btl_camera_pose_step.h"
 #include "btl_command_target_eligibility.h"
+#include "btl_actor_roll_eligibility.h"
 #include "btl_state.h"
 #include "btl_unit_pose_state.h"
 #include "btl_task_args.h"
@@ -601,8 +602,6 @@ extern s32 btlRollFearChance(s32, BtlUnit *, s32, BtlActionPressResult);
 
 extern s32 btlRollPetrifiedDeathChance(BtlUnit *, s32);
 
-extern s32 btlRollActorEligibilityWithAbilityOverride(BtlUnit *);
-
 extern s32 btlCalculateEnemyExperienceReward(BtlUnit *, BtlUnit *);
 
 extern s32 btlGetEnemyMoney(BtlUnit *, BtlUnit *);
@@ -1121,7 +1120,8 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
         if (group->inactive || (group->reflected && btlIsUnitDefeatTriggeredByValueDelta(recipient, reflectedHp))) {
             if (!(recipient->partyRecord.status & 0x5800) &&
                 (btlUnitStatusPair(recipient) & 0x4000001200) == 0x1200 &&
-                btlRollActorEligibilityWithAbilityOverride(recipient)) {
+                btlRollActorEligibilityWithAbilityOverride(recipient) !=
+                    BTL_ACTOR_ROLL_ELIGIBILITY_REJECTED) {
                 recipient->status.stateFlags |= 0x40;
             }
         }

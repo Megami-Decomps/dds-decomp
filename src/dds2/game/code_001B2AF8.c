@@ -62,6 +62,7 @@
 #include "itf.h"
 #include "itf_panel_draw.h"
 #include "btl_state.h"
+#include "btl_actor_roll_eligibility.h"
 #include "btl_serial_battle_mode_override.h"
 #include "btl_scene_initializer.h"
 #include "btl_ui.h"
@@ -1219,22 +1220,24 @@ s32 btlRollPetrifiedDeathChance(BtlUnit *unit, s32 command) {
     return btlRollAiBucket() < chance;
 }
 
-s32 btlRollActorEligibilityWithAbilityOverride(BtlUnit *unit) {
+BtlActorRollEligibilityResult btlRollActorEligibilityWithAbilityOverride(
+    BtlUnit *unit) {
     s32 (*hook)(BtlUnit *) = ((BtlState *)btlGetRuntime())->actorEligibilityOverride;
     if (hook != 0 && hook(unit) == 0) {
-        return 0;
+        return BTL_ACTOR_ROLL_ELIGIBILITY_REJECTED;
     }
     if (unit->status.stateFlags & 0x2000) {
-        return 0;
+        return BTL_ACTOR_ROLL_ELIGIBILITY_REJECTED;
     }
     if ((unit->partyRecord.status & 0x7FFF) == 0x4000) {
-        return 0;
+        return BTL_ACTOR_ROLL_ELIGIBILITY_REJECTED;
     }
     if (btlCheckSpecialAbility(&unit->partyRecord, 0x251) != 0) {
-        return 1;
+        return BTL_ACTOR_ROLL_ELIGIBILITY_ACCEPTED;
     }
     btlBossDebugPrintf(D_00415840, 5, 1.0);
-    return btlRollAiBucket() < 5;
+    return btlRollAiBucket() < 5 ?
+        BTL_ACTOR_ROLL_ELIGIBILITY_ACCEPTED : BTL_ACTOR_ROLL_ELIGIBILITY_REJECTED;
 }
 
 s32 btlHasEnemyRecordDefeatExemptionFlag(BtlUnit *object) {
