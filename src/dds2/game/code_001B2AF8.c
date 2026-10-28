@@ -37,6 +37,7 @@
 #include "btl_actor_entry_code_api.h"
 #include "btl_stat_effect_offsets.h"
 #include "btl_command_panel_owner_linkage_skill_api.h"
+#include "btl_priority_input_availability_api.h"
 #include "btl_effect_active_api.h"
 #include "kwln_task_add_child.h"
 #include "btl_special_ability.h"
@@ -1805,7 +1806,7 @@ s32 btlSelectRandomAutoAttackSkill(BtlUnit *unit) {
     return skill;
 }
 
-s32 btlHasHighPriorityState(void) {
+BtlPriorityInputAvailability btlHasHighPriorityState(void) {
     BattleSelectionWork *table;
     s32 index;
     if (btlCommandPanelWork->state == BTL_COMMAND_PANEL_STATE_ACTIVE) {
@@ -1813,11 +1814,11 @@ s32 btlHasHighPriorityState(void) {
         index = table->selectedRow;
         if (table->rowFade[index - 1] >= 0x80) {
             if (table->positions[index - 1][0] >= 0xB) {
-                return 1;
+                return BTL_PRIORITY_INPUT_AVAILABLE;
             }
         }
     }
-    return 0;
+    return BTL_PRIORITY_INPUT_UNAVAILABLE;
 }
 
 s32 btlCountFlaggedSceneActors(void) {
@@ -9998,7 +9999,7 @@ extern void func_001B5A20(BattleSceneObject *);
 extern s32 func_001BFB58(dds3ProcessID_t *);
 extern s32 btlHandleBattleCommandPanelInput(BattleSceneObject *);
 extern void btlUpdateAndDrawCommandSelectionHighlight(BattleSceneObject *, s32);
-extern s32 btlHasHighPriorityState(void);
+
 extern s32 btlAreLinkedSceneCountersAtThreshold(void);
 
 /* The same native command-selection sequence occurs in four switch paths. */
