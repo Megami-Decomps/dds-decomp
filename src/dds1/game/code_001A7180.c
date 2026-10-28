@@ -9,6 +9,7 @@
 #include "btl_command_status_api.h"
 #include "btl_command_use_error.h"
 #include "btl_command_cost_api.h"
+#include "btl_option_skill_api.h"
 #include "btl_special_ability.h"
 #include "eff_random_mod.h"
 #include "btl_item_drop.h"
@@ -98,9 +99,6 @@ typedef struct BattleController {
 extern s32 D_00358510[];
 
 extern DatEnemyRecord *datEnemyRecords;
-
-extern s32 btlCollectAvailableOptionSkills(BtlUnit *, s32 *);
-
 
 extern s32 btlHasEnemyRecordDefeatExemptionFlag(BtlUnit *);
 
@@ -890,7 +888,7 @@ BtlEnemySpawnCapacityResult btlCanSpawnAnotherEnemy(BtlUnit *requester) {
 }
 
 /* Count eligible option-skill IDs; a non-NULL output receives those IDs. */
-s32 btlCollectAvailableOptionSkills(BtlUnit *actor, s32 *choices) {
+s32 btlCollectAvailableOptionSkills(BtlUnit *actor, BtlCommandId *choices) {
     u16 *ids = actor->partyRecord.effectData;
     s32 count = 0;
     u32 i;
@@ -927,13 +925,13 @@ u8 btlHasAvailableOption(BtlUnit *actor) {
     return availableOptionCount != 0;
 }
 
-s32 btlChooseRandomAvailableOption(BtlUnit *actor) {
-    s32 choices[24];
+BtlCommandId btlChooseRandomAvailableOption(BtlUnit *actor) {
+    BtlCommandId choices[24];
     s32 count = btlCollectAvailableOptionSkills(actor, choices);
     if (count != 0) {
         return choices[dds3GetRandIntA(0, count)];
     }
-    return -1;
+    return BTL_COMMAND_ID_INVALID;
 }
 
 s32 btlChooseEligibleSkill(BtlUnit *actor) {

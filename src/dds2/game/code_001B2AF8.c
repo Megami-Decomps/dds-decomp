@@ -24,6 +24,7 @@
 #include "file_config_option_api.h"
 #include "btl_command_use_error.h"
 #include "btl_command_cost_api.h"
+#include "btl_option_skill_api.h"
 #include "itf_mes_entry_start_api.h"
 #include "btl_command_target_policy.h"
 #include "btl_command_status_target_index.h"
@@ -151,8 +152,6 @@ extern void evtBitOn(s32);
 extern void evtBitOff(s32);
 
 extern AiSpecies *datEnemyAiRecords;
-
-extern s32 btlCollectAvailableOptionSkills(BtlUnit *, s32 *);
 
 extern char D_00415840[]; /* "btl:endure=%d%%[ratio=%.2f]\n" */
 
@@ -542,7 +541,7 @@ BtlEnemySpawnCapacityResult btlCanSpawnAnotherEnemy(BtlUnit *requester) {
 
 
 /* Count eligible option-skill IDs; a non-NULL output receives those IDs. */
-s32 btlCollectAvailableOptionSkills(BtlUnit *actor, s32 *choices) {
+s32 btlCollectAvailableOptionSkills(BtlUnit *actor, BtlCommandId *choices) {
     s32 count = 0;
     u32 i;
     u16 *entry = actor->partyRecord.effectData;
@@ -579,13 +578,13 @@ u8 btlHasAvailableOption(BtlUnit *actor) {
     return availableOptionCount != 0;
 }
 
-s32 btlChooseRandomAvailableOption(BtlUnit *actor) {
-    s32 choices[24];
+BtlCommandId btlChooseRandomAvailableOption(BtlUnit *actor) {
+    BtlCommandId choices[24];
     s32 count = btlCollectAvailableOptionSkills(actor, choices);
     if (count != 0) {
         return choices[dds3GetRandIntA(0, count)];
     }
-    return -1;
+    return BTL_COMMAND_ID_INVALID;
 }
 
 s32 btlChooseEligibleSkill(BtlUnit *actor) {
