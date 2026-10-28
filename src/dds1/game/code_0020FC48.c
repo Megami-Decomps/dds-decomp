@@ -56,6 +56,7 @@
 #include "btl_model_record.h"
 #include "btl_model_cache_entry.h"
 #include "btl_model_pack_readiness.h"
+#include "btl_model_and_sound_readiness_api.h"
 #include "sdf.h"
 #include "sdf_linked_packet.h"
 #include "sdf_packet_builders.h"
@@ -1185,13 +1186,13 @@ BtlModelPackReadiness btlIsModelEntryReady(s32 kind, s32 id) {
 
 extern void btlFinalizeModelPackEntry(s32, s32);
 
-s32 btlEnsureModelAndSoundReady(s32 kind, s32 id, s32 unused) {
+BtlModelAndSoundReadiness btlEnsureModelAndSoundReady(s32 kind, s32 id, s32 unused) {
     BattleModelEntry *entry;
 
     if (mdlPrepare(kind, id, MDL_ASSET_REQUEST_NONBLOCKING) != MDL_ASSET_REQUEST_QUEUED &&
         mdlPrepare(kind, id, MDL_ASSET_REQUEST_NONBLOCKING) != MDL_ASSET_REQUEST_ALREADY_PENDING &&
         sndFindListNodeForChannel(kind, id) != 0) {
-        return 1;
+        return BTL_MODEL_AND_SOUND_READY;
     }
     entry = btlFindModelEntry(kind, id);
     if (entry != 0) {
@@ -1199,12 +1200,12 @@ s32 btlEnsureModelAndSoundReady(s32 kind, s32 id, s32 unused) {
             if (entry->finalized == BTL_MODEL_ENTRY_UNFINALIZED) {
                 btlFinalizeModelPackEntry(kind, id);
             }
-            return 1;
+            return BTL_MODEL_AND_SOUND_READY;
         }
     } else {
         btlLoadModelPack(kind, id);
     }
-    return 0;
+    return BTL_MODEL_AND_SOUND_NOT_READY;
 }
 
 /* vu0 routine: modulate two RGBA8888 colours, (a/128 * b/128) * 128 per channel */

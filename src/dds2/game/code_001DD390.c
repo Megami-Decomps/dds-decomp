@@ -89,6 +89,7 @@
 #include "eff_object.h"
 #include "mdl.h"
 #include "mdl_asset_request.h"
+#include "btl_model_and_sound_readiness_api.h"
 #include "file_request_api.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
@@ -2556,8 +2557,6 @@ void btlReleaseActorModelResources(BtlUnit *unit) {
     unit->gunResourceFlags &= ~2;
 }
 
-extern s32 btlEnsureModelAndSoundReady(s32 kind, s32 id, s32 input);
-
 void btlRequestModelAssetByMode(u32 unused, u32 effect, u32 model) {
     s32 available;
 
@@ -2583,7 +2582,7 @@ void btlReleaseModelAssetByMode(u32 unused, u32 effect, u32 model) {
 
 u8 btlCheckModelAssetByMode(u8 *object, u32 effect, u32 model) {
     if (evtBitCheck(0xC0F) != 0) {
-        if (btlEnsureModelAndSoundReady(effect, model, 0) != 0) {
+        if (btlEnsureModelAndSoundReady(effect, model, 0) != BTL_MODEL_AND_SOUND_NOT_READY) {
             return 1;
         }
     } else {

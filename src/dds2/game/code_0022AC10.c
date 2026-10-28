@@ -41,6 +41,7 @@
 #include "btl_model_record.h"
 #include "btl_model_cache_entry.h"
 #include "btl_model_pack_readiness.h"
+#include "btl_model_and_sound_readiness_api.h"
 #include "btl_sound.h"
 #include "btl_sound_release_task.h"
 #include "btl_task_args.h"
@@ -1432,13 +1433,13 @@ BtlModelPackReadiness btlIsModelEntryReady(s32 kind, s32 id) {
 extern void btlFinalizeModelPackEntry(s32, s32);
 
 /* Return 1 once model and motion-sound work are ready; request/poll them otherwise. */
-s32 btlEnsureModelAndSoundReady(s32 kind, s32 id, s32 unused) {
+BtlModelAndSoundReadiness btlEnsureModelAndSoundReady(s32 kind, s32 id, s32 unused) {
     BattleModelEntry *entry;
 
     if (mdlPrepare(kind, id, MDL_ASSET_REQUEST_NONBLOCKING) != MDL_ASSET_REQUEST_QUEUED &&
         mdlPrepare(kind, id, MDL_ASSET_REQUEST_NONBLOCKING) != MDL_ASSET_REQUEST_ALREADY_PENDING &&
         sndFindListNodeForChannel(kind, id) != 0) {
-        return 1;
+        return BTL_MODEL_AND_SOUND_READY;
     }
     entry = btlFindModelEntry(kind, id);
     if (entry != 0) {
@@ -1446,12 +1447,12 @@ s32 btlEnsureModelAndSoundReady(s32 kind, s32 id, s32 unused) {
             if (entry->finalized == BTL_MODEL_ENTRY_UNFINALIZED) {
                 btlFinalizeModelPackEntry(kind, id);
             }
-            return 1;
+            return BTL_MODEL_AND_SOUND_READY;
         }
     } else {
         btlLoadModelPack(kind, id);
     }
-    return 0;
+    return BTL_MODEL_AND_SOUND_NOT_READY;
 }
 
 /* Queue the held texture as a centered scaled quad with caller primitive/color/depth. */
