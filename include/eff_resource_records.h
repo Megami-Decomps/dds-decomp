@@ -14,6 +14,9 @@ typedef struct EffMappedRecord {
     u8 *status;
 } EffMappedRecord;
 
+/* Timed states borrow records through EffTimedState.source. Keep this
+ * resource alive until those states no longer reference its records.
+ */
 typedef struct EffMappedResource {
     s32 count;
     struct sdfMemHandle_t *allocation;
