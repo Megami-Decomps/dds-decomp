@@ -276,13 +276,13 @@ BtlUnit *btlSelectFlaggedIndexListEntry(BtlIndexList *list, u16 *flags, u16 coun
     return btlGetIndexListEntry(list, i);
 }
 
-BtlIndexList *btlBuildActorIndexListAndCount(BtlTask *actor, u32 *matchingCount, u32 *listCount) {
+BtlIndexList *btlBuildActorIndexListAndCount(BtlTask *actor, BtlCommandTargetPolicy *selectionPolicy, u32 *listCount) {
     s32 result;
     BtlIndexList *list;
 
     list = btlAllocateIndexList(0xd);
     result = btlSelectCommandTargetPolicy(actor, list, 0);
-    *matchingCount = result;
+    *selectionPolicy = result;
     result = btlGetIndexListCount(list);
     *listCount = result;
     return list;
@@ -298,14 +298,14 @@ INCLUDE_ASM(const s32, "game/code_00202178", func_00202668);
 
 /* Select the lowest nonzero current HP, preferring earlier entries on a tie. */
 s32 btlSelectLowestNonzeroHpTarget(BtlTask *actor, s32 action) {
-    u32 matching;
+    BtlCommandTargetPolicy selectionPolicy;
     u32 count;
-    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &matching, &count);
+    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &selectionPolicy, &count);
     u32 best;
     u32 bestIndex;
     u16 i;
 
-    switch (matching) {
+    switch (selectionPolicy) {
     case 0:
         bestIndex = i = 0;
         best = 0x7FFF;
@@ -335,16 +335,16 @@ s32 btlSelectLowestNonzeroHpTarget(BtlTask *actor, s32 action) {
 /* Picks the target with the lowest nonzero health value among units that block the
  * element query; when none qualifies, every listed unit is a candidate. */
 s32 btlSelectLowestHealthElementBlockTarget(BtlTask *actor, s32 action) {
-    u32 matching;
+    BtlCommandTargetPolicy selectionPolicy;
     u32 count;
     u16 flags[12];
-    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &matching, &count);
+    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &selectionPolicy, &count);
     u32 best;
     u32 bestIndex;
     u16 found;
     u16 i;
 
-    switch (matching) {
+    switch (selectionPolicy) {
     case 0:
         memset(flags, 0, sizeof(flags));
         found = 0;
@@ -381,16 +381,16 @@ s32 btlSelectLowestHealthElementBlockTarget(BtlTask *actor, s32 action) {
 }
 
 s32 btlSelectLowestHealthRateTarget(BtlTask *actor) {
-    u32 matching;
+    BtlCommandTargetPolicy selectionPolicy;
     u32 count;
     u16 flags[12];
-    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &matching, &count);
+    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &selectionPolicy, &count);
     s32 best;
     u32 bestIndex;
     u32 i;
     BtlUnit *result;
 
-    switch (matching) {
+    switch (selectionPolicy) {
     case 0:
         best = 0x63;
         memset(flags, 0, sizeof(flags));
@@ -422,13 +422,13 @@ s32 btlSelectLowestHealthRateTarget(BtlTask *actor) {
 }
 
 s32 btlSelectTargetsByActionMask(BtlTask *actor, s32 mask) {
-    u32 matching;
+    BtlCommandTargetPolicy selectionPolicy;
     u32 count;
     u16 flags[12];
-    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &matching, &count);
+    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &selectionPolicy, &count);
     u16 i;
 
-    switch (matching) {
+    switch (selectionPolicy) {
     case 0:
         memset(flags, 0, sizeof(flags));
         for (i = 0; i < count; i++) {
@@ -448,13 +448,13 @@ s32 btlSelectTargetsByActionMask(BtlTask *actor, s32 mask) {
 }
 
 s32 btlSelectTargetsWithoutActionMask(BtlTask *actor, s32 mask) {
-    u32 matching;
+    BtlCommandTargetPolicy selectionPolicy;
     u32 count;
     u16 flags[12];
-    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &matching, &count);
+    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &selectionPolicy, &count);
     u16 i;
 
-    switch (matching) {
+    switch (selectionPolicy) {
     case 0:
         memset(flags, 0, sizeof(flags));
         for (i = 0; i < count; i++) {
@@ -474,13 +474,13 @@ s32 btlSelectTargetsWithoutActionMask(BtlTask *actor, s32 mask) {
 }
 
 s32 btlSelectTargetsByMode(BtlTask *actor, s32 mode) {
-    u32 matching;
+    BtlCommandTargetPolicy selectionPolicy;
     u32 count;
     u16 flags[12];
-    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &matching, &count);
+    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &selectionPolicy, &count);
     u16 i;
 
-    switch (matching) {
+    switch (selectionPolicy) {
     case 0:
         memset(flags, 0, sizeof(flags));
         for (i = 0; i < count; i++) {
@@ -505,13 +505,13 @@ s32 btlSelectEnemyAiConditionalTargets(BtlTask *actor) {
     s32 kinds[3];
     s32 values[3]; /* Decoded payloads are retained but not consumed by this selector. */
     s32 enabled[3];
-    u32 matching;
+    BtlCommandTargetPolicy selectionPolicy;
     u32 count;
-    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &matching, &count);
+    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &selectionPolicy, &count);
     u16 i;
     u16 j;
 
-    switch (matching) {
+    switch (selectionPolicy) {
     case 0:
         for (i = 0; i < 3; i++) {
             memset(flags[i], 0, sizeof(flags[i]));
@@ -613,7 +613,7 @@ s32 btlSelectEnemyAiConditionalTargets(BtlTask *actor) {
 
 /* The index-list builder returns its policy and count as one query result. */
 typedef struct BtlIndexQuery {
-    u32 matching;
+    BtlCommandTargetPolicy selectionPolicy;
     u32 count;
 } BtlIndexQuery;
 
@@ -624,8 +624,8 @@ s32 btlSelectLowestRankTarget(BtlTask *task, s32 unusedOperand) {
     BtlIndexList *list;
     u16 i;
 
-    list = btlBuildActorIndexListAndCount(task, &query.matching, &query.count);
-    switch (query.matching) {
+    list = btlBuildActorIndexListAndCount(task, &query.selectionPolicy, &query.count);
+    switch (query.selectionPolicy) {
     case 0: {
         u16 best = 0x7FFF;
         u16 bestIndex = 0;
@@ -655,14 +655,14 @@ s32 btlSelectLowestRankTarget(BtlTask *task, s32 unusedOperand) {
 
 /* Select the highest current MP, preferring later entries on a tie. */
 s32 btlSelectHighestCurrentMpTarget(BtlTask *actor, s32 unused) {
-    u32 matching;
+    BtlCommandTargetPolicy selectionPolicy;
     u32 count;
-    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &matching, &count);
+    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &selectionPolicy, &count);
     u32 best;
     u32 bestIndex;
     u16 i;
 
-    switch (matching) {
+    switch (selectionPolicy) {
     case 0:
         best = bestIndex = i = 0;
         i = bestIndex;
@@ -811,13 +811,13 @@ u32 btlAppendEffectActorToCommandIndices(BtlTask *task) {
 }
 
 s32 btlSelectTargetsBlockingElement(BtlTask *actor, s32 mask) {
-    u32 matching;
+    BtlCommandTargetPolicy selectionPolicy;
     u32 count;
     u16 flags[12];
-    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &matching, &count);
+    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &selectionPolicy, &count);
     u16 i;
 
-    switch (matching) {
+    switch (selectionPolicy) {
     case 0:
         memset(flags, 0, sizeof(flags));
         for (i = 0; i < count; i++) {
@@ -842,13 +842,13 @@ u32 btlAiActionOperation22NoOp(void) {
 }
 
 s32 btlSelectTargetsPassingCheck(BtlTask *actor, s32 action) {
-    u32 matching;
+    BtlCommandTargetPolicy selectionPolicy;
     u32 count;
     u16 flags[12];
-    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &matching, &count);
+    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &selectionPolicy, &count);
     u16 i;
 
-    switch (matching) {
+    switch (selectionPolicy) {
     case 0:
         memset(flags, 0, sizeof(flags));
         for (i = 0; i < count; i++) {
@@ -876,13 +876,13 @@ s32 btlSelectTargetsPassingCheck(BtlTask *actor, s32 action) {
 }
 
 void btlSelectLinkedTargets(BtlTask *actor, s32 input, s8 invert) {
-    u32 matching;
+    BtlCommandTargetPolicy selectionPolicy;
     u32 count;
     u16 flags[12];
-    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &matching, &count);
+    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &selectionPolicy, &count);
     u16 i;
 
-    switch (matching) {
+    switch (selectionPolicy) {
     case 0:
         memset(flags, 0, sizeof(flags));
         for (i = 0; i < count; i++) {

@@ -505,13 +505,13 @@ BtlUnit *btlSelectRandomUnitFromMask(BtlIndexList *list, u16 *flags, u16 count) 
     return btlGetIndexListEntry(list, i);
 }
 
-BtlIndexList *btlBuildActorIndexListAndCount(ActionStateLink *actor, u32 *matched, u32 *count) {
+BtlIndexList *btlBuildActorIndexListAndCount(ActionStateLink *actor, BtlCommandTargetPolicy *selectionPolicy, u32 *count) {
     s32 value;
     BtlIndexList *indexList;
 
     indexList = btlAllocateIndexList(0xd);
     value = btlSelectCommandTargetPolicy(actor, indexList, 0);
-    *matched = value;
+    *selectionPolicy = value;
     value = btlGetIndexListCount(indexList);
     *count = value;
     return indexList;
@@ -537,14 +537,14 @@ INCLUDE_ASM(const s32, "game/code_00214948", func_002152D8);
 
 /* Select the lowest nonzero current HP, preferring later entries on a tie. */
 s32 btlSelectLowestNonzeroHpTarget(ActionStateLink *task, s32 action) {
-    u32 matching;
+    BtlCommandTargetPolicy selectionPolicy;
     u32 count;
-    BtlIndexList *list = btlBuildActorIndexListAndCount(task, &matching, &count);
+    BtlIndexList *list = btlBuildActorIndexListAndCount(task, &selectionPolicy, &count);
     u32 best;
     u32 bestIndex;
     u16 i;
 
-    switch (matching) {
+    switch (selectionPolicy) {
     case 0:
         bestIndex = i = 0;
         best = 0x7FFF;
@@ -573,16 +573,16 @@ s32 btlSelectLowestNonzeroHpTarget(ActionStateLink *task, s32 action) {
 
 /* Prefer the lowest nonzero HP among element-blocking units; otherwise use the list. */
 s32 btlSelectLowestHealthElementBlockTarget(ActionStateLink *actor, s32 action) {
-    u32 matching;
+    BtlCommandTargetPolicy selectionPolicy;
     u32 count;
     u16 flags[12];
-    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &matching, &count);
+    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &selectionPolicy, &count);
     u32 best;
     u32 bestIndex;
     u16 found;
     u16 i;
 
-    switch (matching) {
+    switch (selectionPolicy) {
     case 0:
         memset(flags, 0, sizeof(flags));
         found = 0;
@@ -618,7 +618,7 @@ s32 btlSelectLowestHealthElementBlockTarget(ActionStateLink *actor, s32 action) 
 }
 
 s32 btlSelectLowestHealthRateTarget(ActionStateLink *task) {
-    u32 matched;
+    BtlCommandTargetPolicy selectionPolicy;
     u32 count;
     BtlIndexList *list;
     u16 picked[12];
@@ -627,8 +627,8 @@ s32 btlSelectLowestHealthRateTarget(ActionStateLink *task) {
     u32 i;
     BtlUnit *target;
 
-    list = btlBuildActorIndexListAndCount(task, &matched, &count);
-    switch (matched) {
+    list = btlBuildActorIndexListAndCount(task, &selectionPolicy, &count);
+    switch (selectionPolicy) {
     case 0:
         lowestPercent = 0x63;
         memset(picked, 0, sizeof(picked));
@@ -660,13 +660,13 @@ s32 btlSelectLowestHealthRateTarget(ActionStateLink *task) {
 }
 
 s32 btlSelectTargetsByActionMask(ActionStateLink *task, s32 mask) {
-    u32 matched;
+    BtlCommandTargetPolicy selectionPolicy;
     u32 count;
     BtlIndexList *list;
     u16 i;
 
-    list = btlBuildActorIndexListAndCount(task, &matched, &count);
-    switch (matched) {
+    list = btlBuildActorIndexListAndCount(task, &selectionPolicy, &count);
+    switch (selectionPolicy) {
     case 0: {
         u16 picked[12] = {0};
 
@@ -688,13 +688,13 @@ s32 btlSelectTargetsByActionMask(ActionStateLink *task, s32 mask) {
 }
 
 s32 btlSelectTargetsWithoutActionMask(ActionStateLink *task, s32 mask) {
-    u32 matched;
+    BtlCommandTargetPolicy selectionPolicy;
     u32 count;
     BtlIndexList *list;
     u16 i;
 
-    list = btlBuildActorIndexListAndCount(task, &matched, &count);
-    switch (matched) {
+    list = btlBuildActorIndexListAndCount(task, &selectionPolicy, &count);
+    switch (selectionPolicy) {
     case 0: {
         u16 picked[12] = {0};
 
@@ -717,7 +717,7 @@ s32 btlSelectTargetsWithoutActionMask(ActionStateLink *task, s32 mask) {
 
 /* Out-values of btlBuildActorIndexListAndCount kept in their query record. */
 typedef struct BtlIndexQuery {
-    u32 matching;
+    BtlCommandTargetPolicy selectionPolicy;
     u32 count;
 } BtlIndexQuery;
 
@@ -725,10 +725,10 @@ typedef struct BtlIndexQuery {
 s32 btlFilterTargetListByUnitId(ActionStateLink *task, s32 mode) {
     u16 picked[12];
     BtlIndexQuery query;
-    BtlIndexList *list = btlBuildActorIndexListAndCount(task, &query.matching, &query.count);
+    BtlIndexList *list = btlBuildActorIndexListAndCount(task, &query.selectionPolicy, &query.count);
     u16 i;
 
-    switch (query.matching) {
+    switch (query.selectionPolicy) {
     case 0:
         memset(picked, 0, sizeof(picked));
         for (i = 0; i < query.count; i++) {
@@ -755,11 +755,11 @@ s32 btlSelectTargetsByAiPredicateKinds(ActionStateLink *actor) {
     s32 values[3]; /* Decoded payloads are retained but not consumed by this selector. */
     s32 enabled[3];
     BtlIndexQuery query;
-    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &query.matching, &query.count);
+    BtlIndexList *list = btlBuildActorIndexListAndCount(actor, &query.selectionPolicy, &query.count);
     u16 i;
     u16 j;
 
-    switch (query.matching) {
+    switch (query.selectionPolicy) {
     case 0:
         for (i = 0; i < 3; i++) {
             memset(flags[i], 0, sizeof(flags[i]));
@@ -869,13 +869,13 @@ s32 btlSelectTargetsByAiPredicateKinds(ActionStateLink *actor) {
 
 /* AI operation 10 ignores its operand; the direct wrapper passes zero. */
 s32 btlSelectLowestRankTarget(ActionStateLink *task, s32 unusedOperand) {
-    u32 matched;
+    BtlCommandTargetPolicy selectionPolicy;
     u32 count;
     BtlIndexList *list;
     u16 i;
 
-    list = btlBuildActorIndexListAndCount(task, &matched, &count);
-    switch (matched) {
+    list = btlBuildActorIndexListAndCount(task, &selectionPolicy, &count);
+    switch (selectionPolicy) {
     case 0: {
         u16 picked[12] = {0};
         u16 best = 0x7FFF;
@@ -905,14 +905,14 @@ s32 btlSelectLowestRankTarget(ActionStateLink *task, s32 unusedOperand) {
 
 /* Select the highest current MP, preferring later entries on a tie. */
 s32 btlSelectHighestCurrentMpTarget(ActionStateLink *task, s32 unused) {
-    u32 matching;
+    BtlCommandTargetPolicy selectionPolicy;
     u32 count;
-    BtlIndexList *list = btlBuildActorIndexListAndCount(task, &matching, &count);
+    BtlIndexList *list = btlBuildActorIndexListAndCount(task, &selectionPolicy, &count);
     u32 best;
     u32 bestIndex;
     u16 i;
 
-    switch (matching) {
+    switch (selectionPolicy) {
     case 0:
         best = bestIndex = i = 0;
         i = bestIndex;
@@ -1058,13 +1058,13 @@ u32 btlPickLinkedPartyTarget(ActionStateLink *task, u32 input) {
 }
 
 s32 btlSelectTargetsByMode(ActionStateLink *task, s32 mode) {
-    u32 matched;
+    BtlCommandTargetPolicy selectionPolicy;
     u32 count;
     BtlIndexList *list;
     u16 i;
 
-    list = btlBuildActorIndexListAndCount(task, &matched, &count);
-    switch (matched) {
+    list = btlBuildActorIndexListAndCount(task, &selectionPolicy, &count);
+    switch (selectionPolicy) {
     case 0: {
         u16 picked[12] = {0};
         BtlUnit *unit;
@@ -1113,13 +1113,13 @@ u32 btlAppendSelectedOrCurrentActorTarget(ActionStateLink *task) {
 }
 
 s32 btlSelectTargetsBlockingElement(ActionStateLink *task, s32 action) {
-    u32 matched;
+    BtlCommandTargetPolicy selectionPolicy;
     u32 count;
     BtlIndexList *list;
     u16 i;
 
-    list = btlBuildActorIndexListAndCount(task, &matched, &count);
-    switch (matched) {
+    list = btlBuildActorIndexListAndCount(task, &selectionPolicy, &count);
+    switch (selectionPolicy) {
     case 0: {
         u16 picked[12] = {0};
 
@@ -1146,13 +1146,13 @@ u32 btlAiActionOperation22NoOp(void) {
 }
 
 s32 btlSelectTargetsPassingCheck(ActionStateLink *task, s32 action) {
-    u32 matched;
+    BtlCommandTargetPolicy selectionPolicy;
     u32 count;
     BtlIndexList *list;
     u16 i;
 
-    list = btlBuildActorIndexListAndCount(task, &matched, &count);
-    switch (matched) {
+    list = btlBuildActorIndexListAndCount(task, &selectionPolicy, &count);
+    switch (selectionPolicy) {
     case 0: {
         u16 picked[12] = {0};
 
@@ -1182,13 +1182,13 @@ s32 btlSelectTargetsPassingCheck(ActionStateLink *task, s32 action) {
 }
 
 void btlSelectLinkedTargets(ActionStateLink *task, s32 unused, s8 linked) {
-    u32 matched;
+    BtlCommandTargetPolicy selectionPolicy;
     u32 count;
     BtlIndexList *list;
     u16 i;
 
-    list = btlBuildActorIndexListAndCount(task, &matched, &count);
-    switch (matched) {
+    list = btlBuildActorIndexListAndCount(task, &selectionPolicy, &count);
+    switch (selectionPolicy) {
     case 0: {
         u16 picked[12] = {0};
 
