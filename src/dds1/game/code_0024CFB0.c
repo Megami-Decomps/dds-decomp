@@ -408,18 +408,18 @@ extern dds3ProcessID_t *scrStartScript2(u32 priority, const BfFlw0Header *script
 
 /* Replace an optional task slot, clear active flag zero, and return the new task.
  * Creation is still attempted if no slot is supplied. */
-s32 fclScriptStart(BfFlw0Header *script, s32 processValue, s32 *taskSlot) {
+dds3ProcessID_t *fclScriptStart(BfFlw0Header *script, ScrProcedureIndex procedureIndex, dds3ProcessID_t **taskSlot) {
     dds3ProcessID_t *task;
 
     if (taskSlot != 0) {
-        fclScriptForcedEnd((dds3ProcessID_t *)*taskSlot);
+        fclScriptForcedEnd(*taskSlot);
     }
-    task = scrStartScript2(EVT_SCRIPT_PROCESS_PRIORITY, script, processValue);
+    task = scrStartScript2(EVT_SCRIPT_PROCESS_PRIORITY, script, procedureIndex);
     evtClearActiveFlag(0);
     if (taskSlot != 0) {
-        *taskSlot = (s32)task;
+        *taskSlot = task;
     }
-    return (s32)task;
+    return task;
 }
 
 /* Emit active game-entry indices in ascending order, excluding entry zero.
