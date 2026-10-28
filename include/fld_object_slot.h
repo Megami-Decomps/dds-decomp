@@ -7,18 +7,21 @@ struct EffNode;
 struct dds3Basic_t;
 
 /* Pair lifecycle request and current-state fields with these transitions. */
-#define FLD_OBJECT_ACTIVATION_INACTIVE 0
-#define FLD_OBJECT_ACTIVATION_ANIMATING 1
-#define FLD_OBJECT_ACTIVATION_WAITING_FOR_ENCOUNTER 2
-#define FLD_OBJECT_ACTIVATION_ACTIVE 3
+typedef s32 FldObjectActivationState;
+enum {
+    FLD_OBJECT_ACTIVATION_INACTIVE = 0,
+    FLD_OBJECT_ACTIVATION_ANIMATING = 1,
+    FLD_OBJECT_ACTIVATION_WAITING_FOR_ENCOUNTER = 2,
+    FLD_OBJECT_ACTIVATION_ACTIVE = 3
+};
 
 /* One of the 32 field object slots. DDS1 and DDS2 use the same 0x30-byte
  * layout. */
 typedef struct FldObjectSlot {
     struct dds3Basic_t *unitObject; /* 0x00: borrowed world node owned by the active scene. */
     s32 id;
-    s32 activationState;     /* 0x08 */
-    s32 activationRequested; /* 0x0C */
+    FldObjectActivationState activationState;     /* 0x08: current lifecycle state. */
+    FldObjectActivationState activationRequested; /* 0x0C: requested state transition. */
     f32 x;                   /* 0x10: placement position */
     f32 y;
     f32 z;
