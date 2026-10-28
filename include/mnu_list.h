@@ -17,7 +17,7 @@ struct SdfCounterDisplay;
 /* Native list owner, shared by both games' allocator and window consumers. */
 struct MenuListNode {
     s32 index;
-    const void *value; /* 0x04: DDS1 245A40 and DDS2 2B0FA0 pass caption/table-entry pointers. */
+    const u8 *text; /* 0x04: borrowed encoded display text; removing a node frees only the node. */
     struct {
         struct EffectSlotSet *sprite;
         u32 effect;
@@ -105,20 +105,22 @@ void mnuDrawListScrollbar(s32 x, s32 y, s32 depth, u32 opacity,
 #endif
 
 struct MenuWindowContainer;
-struct MenuListNode *mnuListAppendNode(struct MenuList *list, const void *value);
-struct MenuListNode *mnuAppendWindowListNode(struct MenuWindowContainer *window, const void *value);
+/* Append a node borrowing display text that must outlive its use by the list. */
+struct MenuListNode *mnuListAppendNode(struct MenuList *list, const void *text);
+struct MenuListNode *mnuAppendWindowListNode(struct MenuWindowContainer *window, const void *text);
 
 #define MNU_LIST_INSERT_AFTER_ANCHOR 0x2
 
 /* Anchored insertion defaults before; empty/null/last anchors append regardless of this option. */
+/* Insert a node borrowing display text; the list owns only its node. */
 struct MenuListNode *mnuInsertListNodeRelativeToAnchor(struct MenuList *list,
                                                        struct MenuListNode *anchor,
-                                                       const void *value, s32 mode,
+                                                       const void *text, s32 mode,
                                                        u32 options);
 struct MenuListNode *mnuInsertWindowListNodeRelativeToAnchor(struct MenuWindowContainer *window,
-                                                             struct MenuListNode *anchor,
-                                                             const void *value, s32 mode,
-                                                             u32 options);
+                                                       struct MenuListNode *anchor,
+                                                       const void *text, s32 mode,
+                                                       u32 options);
 
 /* Walk the indexed entry and return its node, or NULL when it is absent. */
 struct MenuListNode *mnuWalkNodeList(s32 index, struct MenuList *list);

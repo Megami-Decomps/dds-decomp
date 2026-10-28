@@ -324,7 +324,7 @@ void mnuDrawOrderedStaffItemEntry(s32 x, s32 y, s32 depth, struct MenuList *list
         }
         markerX = x + 0x1C0;
         placementY = y + 0x40;
-        node->value = D_00437BC8;
+        node->text = (const u8 *)D_00437BC8;
         mnuDispatchEntryWords(resource, entryIndex, node);
         mnuDrawRepeatedPanelSprites(markerX, placementY, depth, scale, 8,
                                     resource, entryIndex, texture);

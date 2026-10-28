@@ -332,7 +332,7 @@ void mnuDrawCampGridEntry(s32 x, s32 y, s32 depth, s32 offset, struct MenuList *
         s32 entryIndex;
         s32 markerX;
 
-        node->value = D_00437BC8;
+        node->text = (const u8 *)D_00437BC8;
         {
             s32 highlight = list->cursor == node;
 

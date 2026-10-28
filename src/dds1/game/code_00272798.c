@@ -194,7 +194,7 @@ void mnuDrawStaffItemListEntry(s32 x, s32 y, s32 z, struct MenuList *list,
     } else {
         s32 selected = (list->cursor == node);
 
-        node->value = D_003BC6D8;
+        node->text = (const u8 *)D_003BC6D8;
         itfDrawGridWithResolvedSlot(x + 0x80, y + 0x30, z, 1,
                                    context->staffSlots.baseResources[2], selected + 9, drawArg);
         itfDrawGridWithResolvedSlot(x + 0x7F0, y + 0x30, z, 1,

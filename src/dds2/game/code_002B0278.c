@@ -3591,9 +3591,9 @@ void mnuUpdateListScrollFlags(MenuList *list) {
     list->flags |= 2;
 }
 
-MenuListNode *mnuListAppendNode(list, value)
+MenuListNode *mnuListAppendNode(list, text)
     MenuList *list;
-    const void *value;
+    const void *text;
 {
     MenuListNode *node = sdfAllocAndClearQuadwords(sizeof(*node));
     s32 index = list->count;
@@ -3606,7 +3606,7 @@ MenuListNode *mnuListAppendNode(list, value)
     }
     node->prev = list->last;
     node->next = NULL;
-    node->value = value;
+    node->text = text;
     last = list->last;
     node->prev = last;
     if (last != NULL) {
@@ -3649,12 +3649,12 @@ MenuListNode *mnuListRetreatCursor(MenuList *, s32, s32);
 /* Insert a node holding `value` before (or, with options & MNU_LIST_INSERT_AFTER_ANCHOR, after) anchor, keeping the visible window and
  * cursor in place. */
 MenuListNode *mnuInsertListNodeRelativeToAnchor(MenuList *list, MenuListNode *anchor,
-                         const void *value, s32 mode, u32 options) {
+                         const void *text, s32 mode, u32 options) {
     MenuListNode *node;
     MenuListNode *walk;
 
     if (list->count == 0 || anchor == NULL || anchor == list->last) {
-        node = mnuListAppendNode(list, value);
+        node = mnuListAppendNode(list, text);
         if (list->windowOffset >= list->visibleCount - 1 && list->cursor != list->last) {
             list->head = list->head->next;
             list->cursor = list->cursor->next;
@@ -3668,7 +3668,7 @@ MenuListNode *mnuInsertListNodeRelativeToAnchor(MenuList *list, MenuListNode *an
     }
 
     node = sdfAllocAndClearQuadwords(sizeof(MenuListNode));
-    node->value = value;
+    node->text = text;
     if (options & MNU_LIST_INSERT_AFTER_ANCHOR) {
         node->prev = anchor;
         node->index = anchor->index;

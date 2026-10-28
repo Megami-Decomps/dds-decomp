@@ -816,9 +816,9 @@ void mnuDrawWindowListEntries(s32 x, s32 y, s32 depth, s32 xOffset, s32 yOffset,
         }
 
         mnuDrawFourEntries(x, rowY, depth, list, node, drawArg);
-        if (node->value != NULL) {
+        if (node->text != NULL) {
             glyph = itfCreateConvertedTextGlyph(x + xOffset, rowY + yOffset, depth, color,
-                                                (const u8 *)node->value, NULL);
+                                                node->text, NULL);
             frSetFontColorNo(glyph, chainFlag);
             if ((list->id & 1) != 0) {
                 sprintf(text, D_00437C28, (s32)node->sortKeyPrimary);
@@ -932,14 +932,14 @@ void mnuClearWindowPanelTransitionFlag(MenuWindowContainer *window) {
     window->flags = window->flags & MNU_WINDOW_TRANSITION_CLEAR_MASK;
 }
 
-MenuListNode *mnuAppendWindowListNode(MenuWindowContainer *menu, const void *nodeValue) {
-    return mnuListAppendNode(menu->list, nodeValue);
+MenuListNode *mnuAppendWindowListNode(MenuWindowContainer *menu, const void *text) {
+    return mnuListAppendNode(menu->list, text);
 }
 
 
 /* Insert `value` beside anchor in the window's list (see mnuInsertListNodeRelativeToAnchor). */
-MenuListNode *mnuInsertWindowListNodeRelativeToAnchor(MenuWindowContainer *menu, MenuListNode *anchor, const void *nodeValue, s32 mode, u32 options) {
-    return mnuInsertListNodeRelativeToAnchor(menu->list, anchor, nodeValue, mode, options);
+MenuListNode *mnuInsertWindowListNodeRelativeToAnchor(MenuWindowContainer *menu, MenuListNode *anchor, const void *text, s32 mode, u32 options) {
+    return mnuInsertListNodeRelativeToAnchor(menu->list, anchor, text, mode, options);
 }
 
 void mnuRemoveWindowListCursorNode(MenuWindowContainer *menu) {

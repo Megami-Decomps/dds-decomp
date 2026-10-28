@@ -256,7 +256,7 @@ void mnuDrawCampItemListRow(s32 x, s32 y, s32 z, struct MenuList *list, struct M
     } else {
         color |= (s32)(fade * 128.0f);
     }
-    glyph = itfCreateConvertedTextGlyph(0x570, (row * 21 + 0x99) << 3, z, color, (const u8 *)node->value, NULL);
+    glyph = itfCreateConvertedTextGlyph(0x570, (row * 21 + 0x99) << 3, z, color, node->text, NULL);
     if (selected) {
         frSetFontColorNo(glyph, 4);
     }
@@ -311,7 +311,7 @@ void mnuDrawShopRowTextAndValue(s32 x, s32 y, s32 z, struct MenuList *list,
 
     rowOffset = row * 21;
     glyph = itfCreateConvertedTextGlyph(0x570, (rowOffset + 0x99) << 3, z,
-                                        style, (const u8 *)node->value, NULL);
+                                        style, node->text, NULL);
     if (selected) {
         frSetFontColorNo(glyph, 4);
     }

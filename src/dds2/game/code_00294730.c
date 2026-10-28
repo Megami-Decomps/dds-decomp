@@ -346,7 +346,7 @@ void mnuDrawCampItemListRow(s32 x, s32 y, s32 z, struct MenuList *list,
     color |= (s32)(value ? alpha * 64.0f : alpha * 128.0f);
     glyph = itfCreateConvertedTextGlyph(
         0x420, (row * 22 + 0x87) << 3, z, color,
-        (const u8 *)node->value, NULL);
+        node->text, NULL);
     itfSetTextDrawLimit(-1);
     if (selected) {
         frSetFontColorNo(glyph, 4);
@@ -413,7 +413,7 @@ void mnuDrawFadingValueListRow(s32 x, s32 y, s32 z, struct MenuList *list,
     itfSetTextDrawLimit(0x13);
     rowOffset = row * 22;
     glyph = itfCreateConvertedTextGlyph(0x420, (rowOffset + 0x87) << 3, z,
-                                        style, (const u8 *)node->value, NULL);
+                                        style, node->text, NULL);
     if (selected) {
         frSetFontColorNo(glyph, 4);
     }
