@@ -89,7 +89,6 @@ void mnuClearActionFlags(s32 kind, MenuPageWindow *page);
 void mnuApplyResourceSelection(s32 itemId, MenuStaffContext *context);
 MnuStaffWindowEntryPresence mnuHasStaffWindowEntriesForItem(
     s32 itemId, MenuStaffContext *context);
-s32 mnuGetAbilityTargetCategory(u16 commandId);
 s32 func_002C5A28(MenuPageWindow *page, u16 ability,
                   struct datUnitWork_t *target, struct datUnitWork_t *selected);
 s32 mnuTryUseFieldSkill(PartyPanel *party, MenuPageWindow *page,

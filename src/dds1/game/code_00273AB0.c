@@ -4,6 +4,7 @@
 #include "snd_sequence_volume_pan.h"
 #include "mnu.h"
 #include "mnu_staff.h"
+#include "mnu_ability_target_category.h"
 #include "mnu_staff_item_use_api.h"
 #include "mnu_staff_bullet_list_refresh_api.h"
 #include "mnu_shop.h"
@@ -263,7 +264,6 @@ u32 mnuStaffItemUseLeaveNoOp(void) {
 }
 
 extern u32 evtGetIndexedEventRecordId(s32);
-extern s32 mnuGetAbilityTargetCategory(u16);
 extern MenuPopupEntry mnuCampItemUseListPopupEntry[];
 
 s32 mnuHandleStaffItemUseInput(dds3ProcessID_t *task) {
@@ -283,10 +283,12 @@ s32 mnuHandleStaffItemUseInput(dds3ProcessID_t *task) {
     if (menu->primaryObject->list->count != 0) {
         itemId = menu->primaryObject->list->cursor->sortKeySecondary;
     }
-    if (mnuGetAbilityTargetCategory((u16)evtGetIndexedEventRecordId(itemId)) == 2) {
+    if (mnuGetAbilityTargetCategory((u16)evtGetIndexedEventRecordId(itemId)) ==
+        MNU_ABILITY_TARGET_CATEGORY_PARTY_GROUP_1) {
         staff->pageWindow.flags |= 0x10;
     }
-    if (mnuGetAbilityTargetCategory((u16)evtGetIndexedEventRecordId(itemId)) == 3) {
+    if (mnuGetAbilityTargetCategory((u16)evtGetIndexedEventRecordId(itemId)) ==
+        MNU_ABILITY_TARGET_CATEGORY_PARTY_GROUP_2) {
         staff->pageWindow.flags |= 0x20;
     }
     if (buttons & MNU_STAFF_INPUT_CONFIRM) {

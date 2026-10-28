@@ -39,6 +39,7 @@
 #include "mnu_panel_state.h"
 #include "mnu_panel_state_prefix.h"
 #include "mnu_staff.h"
+#include "mnu_ability_target_category.h"
 #include "eff.h"
 #include "mnu_shop.h"
 #include "mdl.h"
@@ -1963,22 +1964,22 @@ s32 mnuConsumeEntryCost(s32 commandId, datUnitWork_t *actorEntry) {
     }
 }
 
-/* Map the native category byte 0/1/2 to 1/2/3; command zero bypasses the record read. */
-s32 mnuGetAbilityTargetCategory(u16 commandId) {
+/* Map target_type to the menu's single-entry or party-group selection category. */
+MnuAbilityTargetCategory mnuGetAbilityTargetCategory(u16 commandId) {
     u8 category;
     if (commandId == 0) {
-        return 1;
+        return MNU_ABILITY_TARGET_CATEGORY_SINGLE_ENTRY;
     }
     category = datCommandRecords[commandId].targetType;
     switch (category) {
     case 0:
-        return 1;
+        return MNU_ABILITY_TARGET_CATEGORY_SINGLE_ENTRY;
     case 1:
-        return 2;
+        return MNU_ABILITY_TARGET_CATEGORY_PARTY_GROUP_1;
     case 2:
-        return 3;
+        return MNU_ABILITY_TARGET_CATEGORY_PARTY_GROUP_2;
     }
-    return 0;
+    return MNU_ABILITY_TARGET_CATEGORY_UNSUPPORTED;
 }
 
 void datDelDevil(u16 ability, datUnitWork_t *target, datUnitWork_t *entry) {
@@ -1999,7 +2000,8 @@ s32 ptySkillApplyFieldUseEffect(MenuPageWindow *context, u16 ability, datUnitWor
         return 1;
     }
 
-    if (mnuGetAbilityTargetCategory(ability) == 1) {
+    if (mnuGetAbilityTargetCategory(ability) ==
+        MNU_ABILITY_TARGET_CATEGORY_SINGLE_ENTRY) {
         mask = mnuGetMatchingPartyEntryMask(entry);
 
         if (btlCheckPartyCommandCounterEligibility(ability, mask) != 0) {

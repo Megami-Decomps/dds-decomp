@@ -5,6 +5,7 @@
 #include "kwln.h"
 #include "mnu.h"
 #include "mnu_staff.h"
+#include "mnu_ability_target_category.h"
 #include "mnu_staff_item_use_api.h"
 #include "mnu_staff_bullet_list_refresh_api.h"
 #include "sdf_resource.h"
@@ -432,7 +433,6 @@ void mnuRefreshStaffItemSelection(s32 selection, StaffDisplayContext *context) {
     mnuSetStateValue(&((StaffDisplayContext *)context)->gradient.active, 1);
 }
 
-extern s32 mnuGetAbilityTargetCategory(u16);
 extern MenuPopupEntry mnuCampItemTargetSelectionPopupEntry[];
 extern MenuPopupEntry mnuCampItemCategoryPopupEntry[];
 
@@ -464,7 +464,8 @@ s32 mnuHandleStaffInventoryListInput(dds3ProcessID_t *task) {
                 node = list->cursor;
                 if (node->flags48 == 0) {
                     item = node->sortKeySecondary;
-                    if (mnuGetAbilityTargetCategory((u16)evtGetIndexedEventRecordId(item)) == 0) {
+                    if (mnuGetAbilityTargetCategory((u16)evtGetIndexedEventRecordId(item)) ==
+                        MNU_ABILITY_TARGET_CATEGORY_UNSUPPORTED) {
                         mnuRefreshStaffItemSelection(item, context);
                     } else {
                         mnuSetPopupEntry(popup, mnuCampItemTargetSelectionPopupEntry);

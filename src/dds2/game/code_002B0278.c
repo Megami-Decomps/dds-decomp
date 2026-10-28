@@ -20,6 +20,7 @@
 #include "mnu_panel_state.h"
 #include "sdf_resource.h"
 #include "mnu_staff.h"
+#include "mnu_ability_target_category.h"
 #include "mnu_list.h"
 #include "eff.h"
 #include "mnu_shop.h"
@@ -2693,10 +2694,12 @@ s32 ptySkillMenuHandleFieldUse(dds3ProcessID_t *callback) {
     }
     label = ((SkillMenuRuntime *)menu)->selectedWindow->list->cursor->sortKeyPrimary;
     code = label;
-    if (mnuGetAbilityTargetCategory(code) == 2) {
+    if (mnuGetAbilityTargetCategory(code) ==
+        MNU_ABILITY_TARGET_CATEGORY_PARTY_GROUP_1) {
         ((MenuContext *)context)->partyWindow.flags |= 0x10;
     }
-    if (mnuGetAbilityTargetCategory(code) == 3) {
+    if (mnuGetAbilityTargetCategory(code) ==
+        MNU_ABILITY_TARGET_CATEGORY_PARTY_GROUP_2) {
         ((MenuContext *)context)->partyWindow.flags |= 0x20;
     }
     window = &((MenuContext *)context)->partyWindow;

@@ -9,6 +9,7 @@
 #include "mnu_list.h"
 #include "mnu_shop.h"
 #include "mnu_staff.h"
+#include "mnu_ability_target_category.h"
 #include "dat_state.h"
 
 
@@ -20,7 +21,6 @@ extern void mnuDrawCampGridAndLabel(s32, s32, s32, s32, s32, s32, s32);
 extern void mnuDrawCampGridAndLabelDefault(s32, s32, s32, s32, s32, s32);
 extern u8 *datSkillMessages;
 extern void mnuUpdatePartyPanelPercentDisplays(s32);
-extern s32 mnuGetAbilityTargetCategory(u16);
 extern MenuPopupEntry mnuSkillMenuPagePopupEntry[];
 extern void mnuPlayInputSound(s32, s32, u32 *);
 
@@ -220,10 +220,12 @@ s32 ptySkillMenuHandleFieldUse(dds3ProcessID_t *callback) {
     }
     label = menu->selected->list->cursor->sortKeyPrimary;
     code = label;
-    if (mnuGetAbilityTargetCategory(code) == 2) {
+    if (mnuGetAbilityTargetCategory(code) ==
+        MNU_ABILITY_TARGET_CATEGORY_PARTY_GROUP_1) {
         ((SkillMenuContext *)context)->actionFlags |= 0x10;
     }
-    if (mnuGetAbilityTargetCategory(code) == 3) {
+    if (mnuGetAbilityTargetCategory(code) ==
+        MNU_ABILITY_TARGET_CATEGORY_PARTY_GROUP_2) {
         ((SkillMenuContext *)context)->actionFlags |= 0x20;
     }
     window = context + 0x15C;

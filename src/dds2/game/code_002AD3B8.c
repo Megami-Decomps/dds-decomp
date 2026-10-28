@@ -10,6 +10,7 @@
 #include "mnu.h"
 #include "mnu_item_requirement_api.h"
 #include "mnu_staff.h"
+#include "mnu_ability_target_category.h"
 #include "mnu_staff_item_use_api.h"
 #include "mnu_staff_bullet_list_refresh_api.h"
 #include "mnu_list.h"
@@ -371,10 +372,12 @@ s32 mnuStaffUseSelectedItemTask(dds3ProcessID_t *task) {
     if (menu->windows[0]->list->count != 0) {
         item = menu->windows[0]->list->cursor->sortKeySecondary;
     }
-    if (mnuGetAbilityTargetCategory(evtGetIndexedEventRecordId(item)) == 2) {
+    if (mnuGetAbilityTargetCategory(evtGetIndexedEventRecordId(item)) ==
+        MNU_ABILITY_TARGET_CATEGORY_PARTY_GROUP_1) {
         party->flags |= 0x10;
     }
-    if (mnuGetAbilityTargetCategory(evtGetIndexedEventRecordId(item)) == 3) {
+    if (mnuGetAbilityTargetCategory(evtGetIndexedEventRecordId(item)) ==
+        MNU_ABILITY_TARGET_CATEGORY_PARTY_GROUP_2) {
         party->flags |= 0x20;
     }
     if (buttons & MNU_STAFF_INPUT_CONFIRM) {

@@ -8,6 +8,7 @@
 #include "mnu_shop.h"
 #include "sdf_resource.h"
 #include "mnu_staff.h"
+#include "mnu_ability_target_category.h"
 #include "mnu_staff_item_use_api.h"
 #include "mnu_staff_bullet_list_refresh_api.h"
 #include "mnu_list.h"
@@ -752,7 +753,8 @@ s32 mnuHandleStaffInventoryListInput(dds3ProcessID_t *callback) {
                 node = panel->cursor;
                 if (node->flags48 == 0) {
                     itemId = node->sortKeySecondary;
-                    if (mnuGetAbilityTargetCategory(evtGetIndexedEventRecordId(itemId)) == 0) {
+                    if (mnuGetAbilityTargetCategory(evtGetIndexedEventRecordId(itemId)) ==
+                        MNU_ABILITY_TARGET_CATEGORY_UNSUPPORTED) {
                         mnuApplyResourceSelection(itemId, context);
                     } else {
                         mnuSetPopupEntry(popup, mnuCampItemTargetSelectionPopupEntry);
