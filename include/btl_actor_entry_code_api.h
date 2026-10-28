@@ -27,11 +27,18 @@ enum {
     BTL_ACTOR_ENTRY_CODE_MATCH_MIN_CODE = 2
 };
 
+typedef u8 BtlActorEntryExpirationResult;
+enum {
+    BTL_ACTOR_ENTRY_EXPIRATION_RESULT_NOT_EXPIRED = 0,
+    BTL_ACTOR_ENTRY_EXPIRATION_RESULT_EXPIRED = 1
+};
+
 BtlActorEntryCodeMatch btlMatchActorEntryCode(
     const struct BtlUnit *unit, BtlActorEntrySlotIndex slotIndex);
 BtlActorEntrySlotIndexResult btlLowestSetPairIndex(u32 mask);
-/* True only when the slot has a code and its countdown has elapsed. */
-u8 btlActorEntryIsExpired(const struct BtlUnit *unit, BtlActorEntrySlotIndex slotIndex);
+/* Empty slots and slots with a positive countdown are not expired. */
+BtlActorEntryExpirationResult btlActorEntryIsExpired(
+    const struct BtlUnit *unit, BtlActorEntrySlotIndex slotIndex);
 s16 btlGetActorEntryCode(const struct BtlUnit *unit, BtlActorEntrySlotIndex slotIndex);
 void btlAdjustActorEntryCode(struct BtlUnit *unit, BtlActorEntrySlotIndex slotIndex,
                              s16 delta);

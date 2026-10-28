@@ -2879,11 +2879,14 @@ void btlClearAllActorEntrySlots(BtlUnit *unit) {
     } while (nextIndex < 7);
 }
 
-u8 btlActorEntryIsExpired(const BtlUnit *unit, BtlActorEntrySlotIndex slotIndex) {
+BtlActorEntryExpirationResult btlActorEntryIsExpired(
+    const BtlUnit *unit, BtlActorEntrySlotIndex slotIndex) {
     if (unit->entrySlots[slotIndex].code == 0) {
-        return 0;
+        return BTL_ACTOR_ENTRY_EXPIRATION_RESULT_NOT_EXPIRED;
     }
-    return unit->entrySlots[slotIndex].countdown < 1;
+    return unit->entrySlots[slotIndex].countdown < 1
+               ? BTL_ACTOR_ENTRY_EXPIRATION_RESULT_EXPIRED
+               : BTL_ACTOR_ENTRY_EXPIRATION_RESULT_NOT_EXPIRED;
 }
 
 BtlActorEntryCodeMatch btlMatchActorEntryCode(
