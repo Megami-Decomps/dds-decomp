@@ -821,7 +821,7 @@ extern BtlRuntimeTask *btlCreateCommandSoundUpdateTask(void);
 extern BtlRuntimeTask *btlCreateSecondaryCommandSoundTask(void);
 extern BtlRuntimeTask *btlCreateCommandSoundTask(ActionStateLink *, BtlCameraModeIndex cameraMode);
 extern void btlSelectAndRunModeAiAction();
-extern s32 btlGetStatusActionEffectId();
+extern s32 btlGetStatusActionEffectId(ActionStateLink *task);
 
 
 extern BtlRuntimeTask *btlCreateActorParameterDeltaTask(BtlUnit *, BtlOperandEntry *);
