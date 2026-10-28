@@ -214,7 +214,7 @@ BtlRuntimeTask *sndCreateAtracEffectLoadTask(s32 entryIndex) {
     Atrac3LoadTaskArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x5D;
-    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
+    task->flags &= ~BTL_TASK_FLAG_BULK_RELEASE_ELIGIBLE;
     task->callback = sndPollAtrac3SELoadTask;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     args = btlGetTaskArguments(task);
@@ -292,7 +292,7 @@ BtlRuntimeTask *sndCreateEarringPlaybackTask(BtlUnit *unit) {
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x5E;
-    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
+    task->flags &= ~BTL_TASK_FLAG_BULK_RELEASE_ELIGIBLE;
     task->ownerId = unit->owner;
     task->onStart = sndStartDeadAtracLoad;
     task->callback = sndDeadAtracPlaybackTask;

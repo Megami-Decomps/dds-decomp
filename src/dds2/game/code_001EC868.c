@@ -7477,7 +7477,7 @@ BtlRuntimeTask *fldCreateSceneTileTask(s32 value, s32 option) {
     BtlFieldLoadArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 1;
-    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
+    task->flags &= ~BTL_TASK_FLAG_BULK_RELEASE_ELIGIBLE;
     task->callback = btlPollFieldArchiveLoad;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     args = (BtlFieldLoadArgs *)btlGetTaskArguments(task);
@@ -7533,7 +7533,7 @@ BtlRuntimeTask *btlCreateFloorLoadTask(s32 stage, s32 variant) {
     BtlFloorLoadArgs *args;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 2;
-    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
+    task->flags &= ~BTL_TASK_FLAG_BULK_RELEASE_ELIGIBLE;
     task->callback = btlPollFloorLoadTask;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     args = btlGetTaskArguments(task);
@@ -8274,7 +8274,7 @@ BtlRuntimeTask *sndCreateEffectLoadTask(SoundResourceNode *effect, char *name) {
     char *copy;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x32;
-    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
+    task->flags &= ~BTL_TASK_FLAG_BULK_RELEASE_ELIGIBLE;
     task->onStart = sndBeginEffectLoad;
     task->callback = sndPollEffectLoad;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
@@ -9217,7 +9217,7 @@ BtlRuntimeTask *sndCreateFileLoadTask(ActiveSoundNode *node, s32 skillIndex, con
     char *copy;
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x58;
-    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
+    task->flags &= ~BTL_TASK_FLAG_BULK_RELEASE_ELIGIBLE;
     task->onStart = sndStartFileLoad;
     task->callback = sndPollMotSeFileAndSpu;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;

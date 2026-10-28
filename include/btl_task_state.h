@@ -10,7 +10,8 @@ enum BtlRuntimeTaskPhase {
 };
 
 enum BtlRuntimeTaskFlags {
-    BTL_TASK_FLAG_REGISTERED = 1,
+    /* Selected by the scheduler's bulk-release sweep. */
+    BTL_TASK_FLAG_BULK_RELEASE_ELIGIBLE = 1,
     BTL_TASK_FLAG_DEFERRED = 2,
     BTL_TASK_FLAG_RELEASE_REQUESTED = 4,
     BTL_TASK_FLAG_STARTED = 8,

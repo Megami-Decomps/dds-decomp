@@ -1965,14 +1965,14 @@ s32 btlCountTasksByKind(u16 kind) {
     return count;
 }
 
-/* Walk newest first and request release for tasks carrying allocation bit 1. */
+/* Walk newest first and request release for bulk-release-eligible tasks. */
 void btlFlagTasksForUpdate(void) {
     BtlRuntimeTask *task = ((BtlActorWork *)btlGetRuntime())->taskTail;
     while (task != 0) {
         u16 flags = task->flags;
         BtlRuntimeTask *next = task->prev;
-        if ((flags & 1) != 0) {
-            task->flags = flags | 4;
+        if ((flags & BTL_TASK_FLAG_BULK_RELEASE_ELIGIBLE) != 0) {
+            task->flags = flags | BTL_TASK_FLAG_RELEASE_REQUESTED;
         }
         task = next;
     }
@@ -2073,7 +2073,7 @@ BtlRuntimeTask *btlAllocTask(s32 size) {
         task->prev = 0;
     }
     context->taskTail = task;
-    task->flags |= BTL_TASK_FLAG_REGISTERED;
+    task->flags |= BTL_TASK_FLAG_BULK_RELEASE_ELIGIBLE;
     return task;
 }
 
@@ -3817,7 +3817,7 @@ BtlRuntimeTask *btlCreateModelLoadPollTask(BtlUnit *owner, u32 effectId, u32 mod
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x18;
-    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
+    task->flags &= ~BTL_TASK_FLAG_BULK_RELEASE_ELIGIBLE;
     task->ownerId = owner->identity;
     task->onStart = btlRequestModelOrReuse;
     task->callback = btlPollModelLoadCompletion;
@@ -4023,7 +4023,7 @@ BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 resourceKind, s32 re
     taskBytes[0] = BTL_TASK_CONDITION_ALWAYS;
     taskBytes[0x10] = BTL_TASK_CONDITION_NEVER;
     *(u16 *)((u8 *)task + 0x20) = 0x1A;
-    *(u16 *)((u8 *)task + 0x24) &= ~BTL_TASK_FLAG_REGISTERED;
+    *(u16 *)((u8 *)task + 0x24) &= ~BTL_TASK_FLAG_BULK_RELEASE_ELIGIBLE;
     *(u64 *)((u8 *)task + 0x40) = *(u64 *)((u8 *)unit + 0x108);
     *(void **)((u8 *)task + 0x48) = btlBeginModelChange;
     *(void **)((u8 *)task + 0x4C) = btlUpdateModelChangeTask;
@@ -4813,7 +4813,7 @@ BtlRuntimeTask *btlCreateGunLoadPollTask(BtlUnit *owner) {
     taskBytes[0] = BTL_TASK_CONDITION_ALWAYS;
     taskBytes[0x10] = BTL_TASK_CONDITION_NEVER;
     *(u16 *)((u8 *)task + 0x20) = 0x23;
-    *(u16 *)((u8 *)task + 0x24) &= ~BTL_TASK_FLAG_REGISTERED;
+    *(u16 *)((u8 *)task + 0x24) &= ~BTL_TASK_FLAG_BULK_RELEASE_ELIGIBLE;
     *(u64 *)((u8 *)task + 0x40) = *(u64 *)(ownerBytes + 0x108);
     *(void **)((u8 *)task + 0x48) = btlStartGunFinishLoad;
     *(void **)((u8 *)task + 0x4C) = btlPollGunLoad;

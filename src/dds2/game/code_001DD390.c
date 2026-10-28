@@ -2055,15 +2055,15 @@ s32 btlCountTasksByKind(u16 kind) {
     return count;
 }
 
-/* Walk newest first and request release for tasks carrying allocation bit 1. */
+/* Walk newest first and request release for bulk-release-eligible tasks. */
 void btlFlagTasksForUpdate(void) {
     BtlRuntimeTask *task;
     BtlRuntimeTask *next;
     for (task = ((BtlState *)btlGetRuntime())->taskTail; task != 0; task = next) {
         u16 flags = task->flags;
         next = task->prev;
-        if (flags & 1) {
-            task->flags = flags | 4;
+        if (flags & BTL_TASK_FLAG_BULK_RELEASE_ELIGIBLE) {
+            task->flags = flags | BTL_TASK_FLAG_RELEASE_REQUESTED;
         }
     }
 }
@@ -2165,7 +2165,7 @@ BtlRuntimeTask *btlAllocTask(s32 size) {
         task->prev = 0;
     }
     work->taskTail = task;
-    task->flags |= BTL_TASK_FLAG_REGISTERED;
+    task->flags |= BTL_TASK_FLAG_BULK_RELEASE_ELIGIBLE;
     return task;
 }
 
@@ -3897,7 +3897,7 @@ BtlRuntimeTask *btlCreateModelLoadPollTask(BtlUnit *unit, u32 effectId, u32 mode
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x18;
-    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
+    task->flags &= ~BTL_TASK_FLAG_BULK_RELEASE_ELIGIBLE;
     task->ownerId = unit->owner;
     task->onStart = btlRequestModelOrReuse;
     task->callback = btlPollModelLoadCompletion;
@@ -4112,7 +4112,7 @@ BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 resourceKind, s32 re
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x1A;
-    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
+    task->flags &= ~BTL_TASK_FLAG_BULK_RELEASE_ELIGIBLE;
     task->ownerId = unit->owner;
     task->onStart = btlBeginModelChange;
     task->callback = btlUpdateModelChangeTask;
@@ -4846,7 +4846,7 @@ BtlRuntimeTask *btlCreateGunLoadPollTask(BtlUnit *unit) {
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x23;
-    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
+    task->flags &= ~BTL_TASK_FLAG_BULK_RELEASE_ELIGIBLE;
     task->ownerId = unit->owner;
     task->onStart = btlStartGunFinishLoad;
     task->callback = btlPollGunLoad;

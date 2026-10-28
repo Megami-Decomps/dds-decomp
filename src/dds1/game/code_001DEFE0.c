@@ -8210,7 +8210,7 @@ BtlRuntimeTask *fldCreateSceneTileTask(s32 stage, s32 variant) {
     BtlFieldLoadArgs *args;
 
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
-    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
+    task->flags &= ~BTL_TASK_FLAG_BULK_RELEASE_ELIGIBLE;
     task->taskId = 1;
     task->callback = btlPollFieldArchiveLoad;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
@@ -8270,7 +8270,7 @@ BtlRuntimeTask *btlCreateFloorLoadTask(s32 stage, s32 variant) {
     BtlFloorLoadArgs *arguments;
 
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
-    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
+    task->flags &= ~BTL_TASK_FLAG_BULK_RELEASE_ELIGIBLE;
     task->taskId = 2;
     task->callback = btlPollFloorLoadTask;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
@@ -8996,7 +8996,7 @@ BtlRuntimeTask *sndCreateEffectLoadTask(SoundResourceNode *effect, const char *f
 
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x2F;
-    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
+    task->flags &= ~BTL_TASK_FLAG_BULK_RELEASE_ELIGIBLE;
     task->onStart = sndBeginEffectLoad;
     task->callback = sndPollEffectLoad;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
@@ -9975,7 +9975,7 @@ BtlRuntimeTask *sndCreateFileLoadTask(ActiveSoundNode *node, u32 skillIndex, con
 
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x53;
-    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
+    task->flags &= ~BTL_TASK_FLAG_BULK_RELEASE_ELIGIBLE;
     task->onStart = sndStartFileLoad;
     task->callback = sndPollMotSeFileAndSpu;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
@@ -10577,7 +10577,7 @@ BtlRuntimeTask *sndCreateAtracEffectLoadTask(u32 entryIndex) {
 
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->taskId = 0x58;
-    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
+    task->flags &= ~BTL_TASK_FLAG_BULK_RELEASE_ELIGIBLE;
     task->callback = sndPollAtrac3SELoadTask;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     arguments = btlGetTaskArguments(task);
@@ -10665,7 +10665,7 @@ BtlRuntimeTask *sndCreateEarringPlaybackTask(BtlUnit *unit) {
     task->startCondition.kind = BTL_TASK_CONDITION_ALWAYS;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
     task->taskId = 0x59;
-    task->flags &= ~BTL_TASK_FLAG_REGISTERED;
+    task->flags &= ~BTL_TASK_FLAG_BULK_RELEASE_ELIGIBLE;
     task->ownerId = unit->identity;
     task->onStart = sndStartDeadAtracLoad;
     task->callback = sndUpdateEarringDeadPlayback;
