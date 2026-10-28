@@ -21,7 +21,7 @@ s32 btlFindScriptResource(char *name) {
     return scrSearchProcedureName((const BfFlw0Header *)battle->scriptHandle, path);
 }
 
-extern dds3ProcessID_t *scrStartScript2(s32 priority, const BfFlw0Header *script, ScrProcedureIndex procedureIndex);
+extern dds3ProcessID_t *scrStartScript2(u32 priority, const BfFlw0Header *script, ScrProcedureIndex procedureIndex);
 
 /* Start the requested skill script as a child of the battle owner task.
  * The new task uses the owner's scheduler priority minus one. */
@@ -31,7 +31,7 @@ void btlStartSkillEventTask(s32 skill) {
     if (battle->eventTaskId == -1) {
         return;
     }
-    taskId = scrStartScript2((s32)battle->scriptOwner->priority - 1,
+    taskId = scrStartScript2(battle->scriptOwner->priority - 1,
                             (const BfFlw0Header *)battle->scriptHandle, skill);
     scrSetUserData(taskId, NULL);
     dds3LinkProcess(battle->scriptOwner, taskId);
@@ -81,7 +81,7 @@ void btlStartPrimaryScriptTask(void) {
     if (scriptId == -1) {
         return;
     }
-    taskId = scrStartScript2((s32)battle->scriptOwner->priority - 1,
+    taskId = scrStartScript2(battle->scriptOwner->priority - 1,
                             (const BfFlw0Header *)battle->scriptHandle, scriptId);
     scrSetUserData(taskId, NULL);
     dds3LinkProcess(battle->scriptOwner, taskId);
@@ -122,7 +122,7 @@ void btlStartSecondaryScriptTask(void) {
     if (scriptId == -1) {
         return;
     }
-    taskId = scrStartScript2((s32)battle->scriptOwner->priority - 1,
+    taskId = scrStartScript2(battle->scriptOwner->priority - 1,
                             (const BfFlw0Header *)battle->scriptHandle, scriptId);
     scrSetUserData(taskId, NULL);
     dds3LinkProcess(battle->scriptOwner, taskId);

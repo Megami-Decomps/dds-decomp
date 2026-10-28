@@ -2691,11 +2691,11 @@ u32 btlCmdClearSpecialEnemyFlags(void) {
 extern u8 *D_003BAAA8;
 extern void itfMesSetTextSlotFromValue(s32, s32, s32, s32);
 
-extern dds3ProcessID_t *scrStartScript2(s32 priority, const BfFlw0Header *script, ScrProcedureIndex procedureIndex);
+extern dds3ProcessID_t *scrStartScript2(u32 priority, const BfFlw0Header *script, ScrProcedureIndex procedureIndex);
 
 void btlBindActorSlot(BtlTask *task, s32 taskArg) {
     BtlState *state = (BtlState *)btlGetRuntime();
-    dds3ProcessID_t *slot = scrStartScript2((s32)state->scriptOwner->priority - 1, (const BfFlw0Header *)D_003BAAA8, taskArg);
+    dds3ProcessID_t *slot = scrStartScript2(state->scriptOwner->priority - 1, (const BfFlw0Header *)D_003BAAA8, taskArg);
     s32 handle;
     scrSetUserData(slot, task);
     handle = ((scrProcessWork_s *)dds3GetProcessData(slot))->messageWindowIndex;

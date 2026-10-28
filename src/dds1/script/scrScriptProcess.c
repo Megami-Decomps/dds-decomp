@@ -67,7 +67,7 @@ scrProcessWork_s *scrCreateProcessWithDefaultOption(const char *path)
     return scrLoadScriptFile(path, 0);
 }
 
-dds3ProcessID_t *scrStartScript2(s32 priority, const BfFlw0Header *script, ScrProcedureIndex procedureIndex)
+dds3ProcessID_t *scrStartScript2(u32 priority, const BfFlw0Header *script, ScrProcedureIndex procedureIndex)
 {
     return scrStartScriptProcess(priority, fldFlowParse(script, procedureIndex));
 }
