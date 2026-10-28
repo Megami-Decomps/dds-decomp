@@ -19,8 +19,8 @@ typedef struct fldSceneParam_t {
     u32 sequenceWord38;
     u32 sequenceWord3C;
     char name[16];
-    s32 stage;
-    s32 kind;
+    s32 stage; /* 0x50: destination area; source spelling fldSceneDestinationArea */
+    s32 kind; /* 0x54: destination room; source spelling fldSceneDestinationRoom */
     u32 retainCachedAreaResource;
     s32 mode;
     u16 code;
@@ -255,5 +255,9 @@ typedef char FldCameraSettingSizeCheck[(sizeof(FldCameraSetting) == 0x54) ? 1 : 
 void evtBlendParamsH(s32 enable, f32 t, const EvtBlendKey *a, const EvtBlendKey *b, EvtBlendKey *out);
 void fldCopyCameraSetting(FldCameraSetting *destination);
 void fldUpdateCameraColorEffect(const FldCameraSetting *setting);
+
+/* Semantic packet spellings preserve the compiler-visible member identifiers. */
+#define fldSceneDestinationArea stage
+#define fldSceneDestinationRoom kind
 
 #endif /* FLD_H */
