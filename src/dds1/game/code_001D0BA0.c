@@ -33,6 +33,7 @@
 #include "btl_command_target_policy.h"
 #include "btl_command_target_eligibility.h"
 #include "btl_actor_roll_eligibility.h"
+#include "btl_actor_mode_acceptance.h"
 #include "dds3_object_flags.h"
 #include "sdf_vu0.h"
 #include "btl_aim_horizontal_direction_clamped_api.h"
@@ -200,8 +201,6 @@ extern void evtSetWaitMotionSpeed(struct evtUnitHandle_t *, f32);
 extern s32 btlTestActorStatusPredicate(BtlUnit *);
 
 extern void btlApplyUnitModelScaledValue(BtlUnit *);
-
-extern s32 btlIsActorModeAcceptedByBattleHook(BtlUnit *object);
 
 extern void btlApplyUnitMotionSelection(BtlUnit *, u32, s32, f32);
 
@@ -2803,22 +2802,22 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
     }
     unit->effectParameter = mode;
     if (unit->motionId != 11 &&
-        (btlIsActorModeAcceptedByBattleHook(unit) != 0 || index == 11) &&
+        (btlIsActorModeAcceptedByBattleHook(unit) != BTL_ACTOR_MODE_NOT_ACCEPTED || index == 11) &&
         unit->motionId != index) {
         btlApplyUnitMotionSelection(unit, index, mode, rate);
     }
 }
 
-s32 btlIsActorModeAcceptedByBattleHook(BtlUnit *object) {
+BtlActorModeAcceptanceResult btlIsActorModeAcceptedByBattleHook(BtlUnit *object) {
     s32 value;
     if (((u32)object->status.flags & 2) == 0) {
-        return 0;
+        return BTL_ACTOR_MODE_NOT_ACCEPTED;
     }
     {
         BtlStatusMotionOverrideCallback callback =
             ((BtlState *)btlGetRuntime())->statusMotionOverride;
         if (callback != 0 && callback(0) == object->motionId) {
-            return 1;
+            return BTL_ACTOR_MODE_ACCEPTED;
         }
     }
     value = object->motionId;
@@ -2828,9 +2827,9 @@ s32 btlIsActorModeAcceptedByBattleHook(BtlUnit *object) {
     case 9:
     case 10:
     case 11:
-        return 1;
+        return BTL_ACTOR_MODE_ACCEPTED;
     }
-    return 0;
+    return BTL_ACTOR_MODE_NOT_ACCEPTED;
 }
 
 extern void btlApplyUnitMotionSelection(BtlUnit *, u32, s32, f32);
@@ -2868,7 +2867,7 @@ void btlUpdateUnitEffects(void) {
             dds3ModelHandle_t *model = object->ext->owner;
             s32 node = mdlGetMotionNum(model, 0);
             if (resource->nodes[node].rateKind == 1 &&
-                btlIsActorModeAcceptedByBattleHook(object) == 0) {
+                btlIsActorModeAcceptedByBattleHook(object) == BTL_ACTOR_MODE_NOT_ACCEPTED) {
                 btlRefreshUnitMotionSelection(object);
                 btlApplyUnitMotionSelection(object, object->effectIndex, object->effectParameter,
                                             object->effectScale);

@@ -13,6 +13,7 @@
 #include "btl_camera_mode_index.h"
 #include "sdf_vu0.h"
 #include "btl_aim_horizontal_direction_clamped_api.h"
+#include "btl_actor_mode_acceptance.h"
 #include "btl_boss_debug_api.h"
 #include "btl_vec3.h"
 #include "btl_projected_screen_point.h"
@@ -1028,7 +1029,6 @@ void btlClearActorUnitDefeatCandidates(BtlIndexList *list) {
 }
 
 
-extern s32 btlIsActorModeAcceptedByBattleHook(BtlUnit *object);
 extern void btlSetUnitPosition(BtlUnit *object, const f32 *position);
 extern void btlSetUnitRotation(BtlUnit *object, const f32 rotation[4]);
 extern void btlRefreshUnitMotionSelection(BtlUnit *unit);
@@ -1042,7 +1042,8 @@ void btlUpdateUnitActors(void) {
         btlFlagUnitDefeatCandidate(unit);
         btlSetUnitPosition(unit, unit->position);
         btlSetUnitRotation(unit, unit->rotation);
-        if ((btlIsActorModeAcceptedByBattleHook(unit) == 0 && unit->effectState != 0) ||
+        if ((btlIsActorModeAcceptedByBattleHook(unit) == BTL_ACTOR_MODE_NOT_ACCEPTED &&
+             unit->effectState != 0) ||
             (unit->updateFlags & 2) != 0) {
             btlRefreshUnitMotionSelection(unit);
             unit->motionStartFrame = 0;

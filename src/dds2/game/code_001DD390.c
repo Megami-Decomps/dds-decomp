@@ -71,6 +71,7 @@
 #include "btl_camera_pose_step.h"
 #include "btl_command_target_eligibility.h"
 #include "btl_actor_roll_eligibility.h"
+#include "btl_actor_mode_acceptance.h"
 #include "btl_state.h"
 #include "btl_unit_pose_state.h"
 #include "btl_task_args.h"
@@ -232,9 +233,6 @@ extern s32 btlTestActorStatusPredicate(BtlUnit *);
 
 
 extern void btlApplyUnitModelScaledValue(BtlUnit *);
-
-extern s32 btlIsActorModeAcceptedByBattleHook(BtlUnit *);
-
 
 extern void btlApplyUnitMotionSelection(BtlUnit *, u32, s32, f32);
 
@@ -2889,20 +2887,20 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
     }
     unit->effectParameter = mode;
     if (unit->motionId != 11 &&
-        (btlIsActorModeAcceptedByBattleHook(unit) != 0 || index == 11) &&
+        (btlIsActorModeAcceptedByBattleHook(unit) != BTL_ACTOR_MODE_NOT_ACCEPTED || index == 11) &&
         unit->motionId != index) {
         btlApplyUnitMotionSelection(unit, index, mode, rate);
     }
 }
 
-s32 btlIsActorModeAcceptedByBattleHook(BtlUnit *unit) {
+BtlActorModeAcceptanceResult btlIsActorModeAcceptedByBattleHook(BtlUnit *unit) {
     BtlState *work;
     if (!(unit->status.flags & 2)) {
-        return 0;
+        return BTL_ACTOR_MODE_NOT_ACCEPTED;
     }
     work = (BtlState *)btlGetRuntime();
     if (work->statusMotionOverride != 0 && work->statusMotionOverride(0) == unit->motionId) {
-        return 1;
+        return BTL_ACTOR_MODE_ACCEPTED;
     }
     switch (unit->motionId) {
     case 0:
@@ -2910,9 +2908,9 @@ s32 btlIsActorModeAcceptedByBattleHook(BtlUnit *unit) {
     case 9:
     case 10:
     case 11:
-        return 1;
+        return BTL_ACTOR_MODE_ACCEPTED;
     default:
-        return 0;
+        return BTL_ACTOR_MODE_NOT_ACCEPTED;
     }
 }
 
@@ -2951,7 +2949,7 @@ void btlUpdateUnitEffects(void) {
             dds3ModelHandle_t *model = object->ext->owner;
             s32 node = mdlGetMotionNum(model, 0);
             if (((BtlEffectResource *)resource)->nodes[node].rateKind == 1 &&
-                btlIsActorModeAcceptedByBattleHook(object) == 0) {
+                btlIsActorModeAcceptedByBattleHook(object) == BTL_ACTOR_MODE_NOT_ACCEPTED) {
                 btlRefreshUnitMotionSelection(object);
                 btlApplyUnitMotionSelection(object, object->effectIndex,
                               object->effectParameter,
