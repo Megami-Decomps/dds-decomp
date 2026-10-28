@@ -2,6 +2,7 @@
 #define FILE_REQUEST_API_H
 
 #include "common.h"
+#include "file_request_cleanup_result_type.h"
 
 struct FileRequest;
 struct FilePacRequest;
@@ -16,7 +17,7 @@ u8 *fileGetLoadPtr(const struct FileRequest *request);
 /* Return the signed byte count recorded by the file transfer request. */
 s32 fileGetLoadSize(const struct FileRequest *request);
 /* Free a completed request wrapper; return one while it remains pending. */
-s32 fileRequestFreeIfComplete(struct FileRequest *request);
+FileRequestCleanupResult fileRequestFreeIfComplete(struct FileRequest *request);
 
 /* Each file/PAC request copies requestName into storage it owns until cleanup.
  * The caller keeps ownership of its input string and may modify or release it
