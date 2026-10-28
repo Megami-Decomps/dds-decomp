@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "mnu_movie.h"
 #include "common.h"
+#include "mnu_movie_menu_selection_index.h"
 #include "sdf_delayed_resource_check_api.h"
 #include "mnu_sprite_placement.h"
 #include "snd_track_callback.h"
@@ -353,11 +354,11 @@ mnuDrawMovieMenuListItem(s32 x, s32 y, s32 unused, struct MenuList *list, struct
 
 extern s8 dds3PadButtonState[];
 extern void mnuClearListFlagsOneAndTwo(u32 *);
-extern s32 mnuGetMovieMenuSelectionIndex(void);
+extern MnuMovieMenuSelectionIndex mnuGetMovieMenuSelectionIndex(void);
 
 s32 mnuHandleMovieMenuInput(void) {
     s32 moved = 0;
-    s32 selection;
+    MnuMovieMenuSelectionIndex selection;
 
     if (dds3PadButtonState[0x26] & 2) {
         if (mnuRetreatListCursorDefault(titleWork->selectionList) != NULL) {

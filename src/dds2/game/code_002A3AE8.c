@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "mnu_movie_menu_selection_index.h"
 #include "eff_random.h"
 #include "eff_resource_slots.h"
 #include "eff_resource_source_lifetime.h"
@@ -84,7 +85,7 @@ void mnuDestroyMovieMenuSelectionList(void) {
     mnuDestroyListState(((SpriteMenuState *)titleWork)->list);
 }
 
-s32 mnuGetMovieMenuSelectionIndex(void) {
+MnuMovieMenuSelectionIndex mnuGetMovieMenuSelectionIndex(void) {
     return ((SpriteMenuState *)titleWork)->list->cursor->index;
 }
 

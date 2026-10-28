@@ -3,6 +3,7 @@
  * "Title-audio controller transport boundary". */
 
 #include "common.h"
+#include "mnu_movie_menu_selection_index.h"
 #include "snd_track_callback.h"
 #include "kwln_background_fade_api.h"
 #include "mnu_result.h"
@@ -907,7 +908,7 @@ extern s32 mnuPollMovieMenuInputAndTimeout(void);
 extern void mnuUpdateTitlePageByMode(void);
 extern void mnuTitleResetSequenceTimers(void);
 extern void mnuDrawTitleSceneForPhase(void);
-extern s32 mnuGetMovieMenuSelectionIndex(void);
+extern MnuMovieMenuSelectionIndex mnuGetMovieMenuSelectionIndex(void);
 extern s32 mnuUpdateMovieMenuInputState(void);
 extern void mnuResetTitleMovieMenuStateAndStartTrack(void);
 extern void mnuStartTitleMovieDraw(void);
@@ -932,7 +933,7 @@ extern void fileRestoreSlotFlagsToState(void);
 KwlnTaskUpdateResult mnuUpdateTitleMenuTask(dds3ProcessID_t *task) {
     s32 volume;
     s32 menuAction;
-    s32 selectedItem;
+    MnuMovieMenuSelectionIndex selectedItem;
 
     switch (titleWork->state) {
     case 0:

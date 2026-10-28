@@ -1,4 +1,5 @@
 #include "common.h"
+#include "mnu_movie_menu_selection_index.h"
 #include "kwln_fade.h"
 #include "sdf_resource.h"
 #include "kwln_task_lifecycle.h"
@@ -72,7 +73,7 @@ extern void mnuRunMovieMenuIdleFrame(void);
 extern s32 mnuUpdateMovieMenuInputState(void);
 extern void mnuDrawMovieChoiceTransition(void);
 extern void mnuClearGlobalMenuStateFields(void);
-extern s32 mnuGetMovieMenuSelectionIndex(void);
+extern MnuMovieMenuSelectionIndex mnuGetMovieMenuSelectionIndex(void);
 extern void dds3AdminiCallSequence(s32 requestedMode, const void *requestData,
                                        u32 dataBytes, s32 markHistory);
 extern void mnuRestartRuntimeAfterViewer(s32 unused);
@@ -83,7 +84,7 @@ extern void dds3FadeClear(void);
 KwlnTaskUpdateResult mnuUpdateMovieMenuTask(dds3ProcessID_t *task) {
     s32 alpha;
     s32 menuAction;
-    s32 selectedItem;
+    MnuMovieMenuSelectionIndex selectedItem;
 
     /* The byte at 0x3C records an input interruption of the movie. */
     switch (mnuMovieMenuState->state) {

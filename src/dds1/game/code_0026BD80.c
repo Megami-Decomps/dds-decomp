@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "mnu_movie_menu_selection_index.h"
 #include "snd_sequence_volume_pan.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
@@ -78,7 +79,7 @@ void mnuDestroyMovieMenuSelectionList(void) {
     mnuDestroyListState(mnuMovieMenuState->selectionList);
 }
 
-s32 mnuGetMovieMenuSelectionIndex(void) {
+MnuMovieMenuSelectionIndex mnuGetMovieMenuSelectionIndex(void) {
     return mnuMovieMenuState->selectionList->cursor->index;
 }
 
