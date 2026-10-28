@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "evt_sel_state.h"
+#include "evt_start_event_api.h"
 #include "evt_script_event_id.h"
 #include "sdf_line_pair_packet_api.h"
 #include "sdf_gs_header.h"
@@ -171,8 +172,6 @@ extern u16 D_003BD704;
 extern char D_0039E1F0[];
 
 extern char D_0039E200[];
-
-extern void evtStartEvent(s32 eventId);
 
 extern dds3ProcessID_t *evtInitSky(void);
 

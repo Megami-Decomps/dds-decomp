@@ -11,6 +11,7 @@
 #include "dds3_world_lifecycle.h"
 #include "evt_world.h"
 #include "evt_path_direction.h"
+#include "evt_start_event_api.h"
 #include "evt_world_object_api.h"
 #include "kwln_task_lifecycle.h"
 #include "kwln_task_queue_query.h"
@@ -122,7 +123,7 @@ extern dds3ProcessID_t *scrStartScriptByName(u32 priority, const char *path, Scr
 #include "sdf_debug_api.h"
 
 /* DDS2 twin of DDS1 func_00220110: start the event BF script by id. */
-void evtStartEvent(s32 eventId) {
+void evtStartEvent(EvtScriptEventId eventId) {
     sprintf(evtScriptResourcePathBuffer, evtScriptResourcePathFormat, eventId - eventId % 10, eventId, eventId);
     scrStartScriptByName(0x3EB, evtScriptResourcePathBuffer, 0);
 }

@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "evt_sel_state.h"
+#include "evt_start_event_api.h"
 #include "evt_script_event_id.h"
 #include "sdf_line_pair_packet_api.h"
 #include "sdf_gs_header.h"
@@ -247,8 +248,6 @@ extern u8 sdfViewShakeVector[];
 
 
 extern s32 kwlnTaskNoopCallback(dds3ProcessID_t *task);
-
-extern void evtStartEvent(s32 eventId);
 
 extern dds3ProcessID_t *evtInitSky(void);
 

@@ -5,6 +5,7 @@
 #include "dsp_channel.h"
 #include "dsp_active_api.h"
 #include "evt_message_window_api.h"
+#include "evt_start_event_api.h"
 #include "mnu_input.h"
 #include "evt_world.h"
 #include "eff_resource_slots.h"
@@ -613,8 +614,6 @@ void mnuReleaseWorkResources(MenuTerminalWork *host) {
     mnuDestroyListState(host->owner);
 }
 
-
-extern void evtStartEvent(s32);
 
 extern void evtClearActiveFlag(s32);
 

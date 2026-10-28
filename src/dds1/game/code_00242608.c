@@ -33,6 +33,7 @@
 #include "sdf_packet_builders.h"
 #include "itf_panel_draw.h"
 #include "evt_unit.h"
+#include "evt_start_event_api.h"
 #include "evt_event_pack_task.h"
 #include "evt_event_pack.h"
 #include "evt_sound_variation.h"
@@ -47,7 +48,6 @@
 #include "fr_font.h"
 #include "mnu_staff.h"
 /* Declared before first use (were implicit int). */
-extern void evtStartEvent(s32 eventId);
 extern void fldDrawCameraColorLayerPass(void);
 /* Original-style implicit int, kept: matched code depends on it: evtViewerCleanupMessageWindow. */
 

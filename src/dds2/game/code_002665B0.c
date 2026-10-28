@@ -5,6 +5,7 @@
 #include "dsp_active_api.h"
 #include "kwln_task_add_child.h"
 #include "evt_message_window_api.h"
+#include "evt_start_event_api.h"
 #include "fr_font.h"
 #include "fr_font_draw_glyph.h"
 #include "mnu_text_entry.h"
@@ -64,7 +65,6 @@ extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, E
 
 extern void mnuDrawTerminalRecoveryListEntry(s32, s32, s32, struct MenuList *, struct MenuListNode *, s32);
 extern s32 mnuFirstPresentMainCharacterIndex(void);
-extern void evtStartEvent(s32);
 extern void evtClearActiveFlag(s32);
 extern s8 D_00437859;
 

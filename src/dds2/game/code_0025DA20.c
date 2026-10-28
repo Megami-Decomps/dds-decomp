@@ -39,6 +39,7 @@
 #include "evt_unit.h"
 #include "evt_event_pack_task.h"
 #include "evt_event_pack.h"
+#include "evt_start_event_api.h"
 #include "evt_sound_variation.h"
 #include "dat_state.h"
 #include "mnu_list.h"
@@ -4159,7 +4160,6 @@ extern void mnuBuildEnabledCampEntryWindow();
 extern s32 mnuCampHasEligibleOwnedItems();
 extern void mnuShopLoadMessageResource(MenuTerminalContext *);
 extern s32 mnuFirstPresentMainCharacterIndex();
-extern void evtStartEvent();
 extern void evtClearActiveFlag();
 extern u32 D_003CE460[];
 extern char D_00437840[];

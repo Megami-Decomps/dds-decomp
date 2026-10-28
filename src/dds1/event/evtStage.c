@@ -11,6 +11,7 @@
 #include "dds3_world_lifecycle.h"
 #include "evt_world.h"
 #include "evt_path_direction.h"
+#include "evt_start_event_api.h"
 #include "evt_world_object_api.h"
 #include "kwln_task_lifecycle.h"
 #include "kwln_task_queue_query.h"
@@ -123,7 +124,7 @@ s32 evtLoadArea_FromMemory(s32 area, s32 room, u8 *resource0Data, u8 *resource1D
 extern dds3ProcessID_t *scrStartScriptByName(u32 priority, const char *path, ScrProcedureIndex procedureIndex);
 extern char evtScriptResourcePathBuffer[];
 
-void evtStartEvent(s32 eventId) {
+void evtStartEvent(EvtScriptEventId eventId) {
     sprintf(evtScriptResourcePathBuffer, "/event/e%03d/e%03d/scr/e%03d.bf", eventId - eventId % 10, eventId, eventId);
     scrStartScriptByName(0x3EB, evtScriptResourcePathBuffer, 0);
 }
