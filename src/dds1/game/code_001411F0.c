@@ -8,6 +8,7 @@
 #include "dsp_channel.h"
 #include "evt_message_window_api.h"
 #include "fld_area_work.h"
+#include "fld_automap_entry_discovery_state.h"
 #include "fld_label_row.h"
 #include "fld_coordinate_lookup_api.h"
 #include "fld_room_effect_entry.h"
@@ -1211,7 +1212,6 @@ extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 extern void eglLinkPoly4(f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,u32,u32,u32,u32);
 extern u8 fldIsStageExplorationCellMarked(s32 floor, f32 x, f32 z);
-extern s32 fldGetFloorFlag(s32 area, s32 floor, s32 bit);
 extern void fldSubmitPrimaryFramePacket(void), fldSubmitAlternateFramePacket(void);
 extern void fldAllIconDel(s32 index, f32 *x, f32 *z);
 extern void fldPoint3To2H(f32 *, f32 *, f32, f32, f32);
@@ -1344,7 +1344,7 @@ void fldDrawAutomapScene(void) {
         for (j = 0; j < record->count; j++, item++) {
             itemVisible = 0;
             if (selectedFloor == item->floor) {
-                if (fldGetFloorFlag(fldAutoMapField, i, j) != 0) {
+                if (fldGetFloorFlag(fldAutoMapField, i, j) != FLD_AUTO_MAP_ENTRY_NOT_DISCOVERED) {
                     itemVisible = 1;
                 }
                 if (D_003BAEAC != 0) {
@@ -1372,7 +1372,7 @@ void fldDrawAutomapScene(void) {
         for (j = 0; j < record->count; j++, item++) {
             itemVisible = 0;
             if (selectedFloor == item->floor) {
-                if (fldGetFloorFlag(fldAutoMapField, i, j) != 0) {
+                if (fldGetFloorFlag(fldAutoMapField, i, j) != FLD_AUTO_MAP_ENTRY_NOT_DISCOVERED) {
                     itemVisible = 1;
                 }
                 if (D_003BAEAC != 0) {
@@ -1474,7 +1474,7 @@ void fldDrawAutomapScene(void) {
             for (j = 0; j < record->count; j++, item++) {
                 itemVisible = 0;
                 if (selectedFloor == item->floor) {
-                    if (fldGetFloorFlag(fldAutoMapField, i, j) != 0) {
+                    if (fldGetFloorFlag(fldAutoMapField, i, j) != FLD_AUTO_MAP_ENTRY_NOT_DISCOVERED) {
                     itemVisible = 1;
                 }
                     if (D_003BAEAC != 0) {
@@ -2369,9 +2369,9 @@ void fldSetSceneLocation(s32 area, s32 floor, s32 stage) {
 extern s32 D_0032C900[];
 
 /* The area's last two digits map to a save-table row; floor and bit are zero-based. */
-s32 fldGetFloorFlag(s32 area, s32 floor, s32 bit) {
+FldAutoMapEntryDiscoveryState fldGetFloorFlag(s32 area, s32 floor, s32 bit) {
     s32 areaIndex = D_0032C900[area % 100];
-    if (areaIndex == -1) return 0;
+    if (areaIndex == -1) return FLD_AUTO_MAP_ENTRY_NOT_DISCOVERED;
     return (DDS3_GBWK->areaFlags[areaIndex][floor] >> bit) & 1;
 }
 
@@ -2443,7 +2443,7 @@ s32 fldAutoMapGetFloorPrev(s32 limit) {
 
     for (i = 0; i < (s32)fldAutoMapData; i++, entry++) {
         for (j = 0; j < entry->count; j++) {
-            if (fldGetFloorFlag(fldAutoMapField, i, j) != 0) {
+            if (fldGetFloorFlag(fldAutoMapField, i, j) != FLD_AUTO_MAP_ENTRY_NOT_DISCOVERED) {
                 item = fldAutoMap_GetFloor(i, j);
                 if (item < limit && best < item) {
                     best = item;
@@ -2466,7 +2466,7 @@ s32 fldAutoMapGetFloorNext(s32 limit) {
 
     for (i = 0; i < (s32)fldAutoMapData; i++, entry++) {
         for (j = 0; j < entry->count; j++) {
-            if (fldGetFloorFlag(fldAutoMapField, i, j) != 0) {
+            if (fldGetFloorFlag(fldAutoMapField, i, j) != FLD_AUTO_MAP_ENTRY_NOT_DISCOVERED) {
                 item = fldAutoMap_GetFloor(i, j);
                 if (limit < item && item < best) {
                     best = item;
@@ -2516,7 +2516,7 @@ void fldAutoMapGetBBox(f32 *minX, f32 *maxZ, f32 *maxX, f32 *minZ) {
         item = rec->items;
         for (i = 0; i < rec->count; i++, item++) {
             visible = 0;
-            if (fldGetFloorFlag(fldAutoMapField, room, i) != 0) {
+            if (fldGetFloorFlag(fldAutoMapField, room, i) != FLD_AUTO_MAP_ENTRY_NOT_DISCOVERED) {
                 visible = 1;
             }
             if (D_003BAEAC != 0) {
