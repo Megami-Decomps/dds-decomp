@@ -20,6 +20,7 @@
 #include "file.h"
 #include "kwln_task_lifecycle.h"
 #include "file_request_api.h"
+#include "file_request_end_check_api.h"
 #include "sdf_thread.h"
 #include "sdf_thread_sleep.h"
 #include "mnu_title_stream.h"
@@ -361,9 +362,9 @@ extern void at3decReset(u32 *);
  * and frame counts. Keep those distinct accesses and the cleanup-before-copy
  * ordering; return 1 after a ready file is copied, otherwise its ready result. */
 s32 mnuCompleteTitleStreamFileLoad(TitleAudioStreamState *destinationState) {
-    s32 ready = pacFileCheckEnd(mnuTitleStreamFileRequest);
+    FileRequestEndCheckResult endCheck = pacFileCheckEnd(mnuTitleStreamFileRequest);
 
-    if (ready != 0) {
+    if (endCheck != FILE_REQUEST_END_CHECK_PENDING) {
         struct sdfMemHandle_t *resourceHandle = fileGetMemHandle(mnuTitleStreamFileRequest);
         void *fileData = fileGetLoadPtr(mnuTitleStreamFileRequest);
         s32 fileBytes = fileGetLoadSize(mnuTitleStreamFileRequest);
