@@ -826,7 +826,6 @@ s32 btlAdvanceSceneWhenActorTasksReady(BattleSceneWork *scene) {
 }
 
 extern BtlPrimaryScriptTaskAvailability btlCanStartPrimaryScriptTask(void);
-extern s32 btlHasScriptResource(void);
 extern void btlStartPrimaryScriptTask(void);
 extern void btlStartSecondaryScriptTask(void);
 extern void btlStartSkillEventTask(s32);
@@ -844,7 +843,8 @@ void btlChooseAndStartSceneScript(BattleSceneWork *scene) {
     if (scene->scriptState == -1) {
         if (btlCanStartPrimaryScriptTask() != BTL_PRIMARY_SCRIPT_TASK_CANNOT_START) {
             scene->scriptState = 0xF000002;
-        } else if (btlHasScriptResource() != 0) {
+        } else if (btlHasScriptResource() !=
+                   BTL_SECONDARY_SCRIPT_RESOURCE_UNAVAILABLE) {
             scene->scriptState = 0xF000003;
         } else if (scene->selectScriptArg != NULL) {
             s32 arg = scene->selectScriptArg();

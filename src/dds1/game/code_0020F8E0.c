@@ -96,7 +96,7 @@ s32 btlReleaseScriptResourceA(void) {
 
 extern char btlSecondaryScriptResourceName[];
 
-s32 btlHasScriptResource(void) {
+BtlSecondaryScriptResourceAvailability btlHasScriptResource(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
 
     if (battle->eventPackId == BTL_EVENT_PACK_ID_NONE) {

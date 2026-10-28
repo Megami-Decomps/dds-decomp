@@ -99,7 +99,7 @@ s32 btlReleaseScriptResourceA(void) {
     return btlReleaseScriptResource();
 }
 
-s32 btlHasScriptResource(void) {
+BtlSecondaryScriptResourceAvailability btlHasScriptResource(void) {
     BtlState *battle = (BtlState *)btlGetRuntime();
 
     if (battle->eventPackId == BTL_EVENT_PACK_ID_NONE) {
