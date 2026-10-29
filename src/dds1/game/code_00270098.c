@@ -153,7 +153,111 @@ void movieViewerFree(void) {
     }
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "scr_integer_return_value_api.h"
+#include "sdf_chip.h"
+#include "sdf_packet_list.h"
+#include "sdf_packet_builders.h"
+#include "kwln.h"
+#include "kwln_task_create.h"
+#include "sdf.h"
+#include "sdf_sif_command.h"
+#include "kwln_task_lifecycle.h"
+#include "mnu_movie_transfer.h"
+#include "mnu_movie_list.h"
+#include "sce_io.h"
+#include "btl.h"
+#include "sdk_libkernl.h"
+#include "sdk_libc.h"
+extern void movieViewerFree(void);
+
+extern MnuMovieList mnuMovieList;
+
+extern u8 sdfHddValid;
+/* Builds the movie viewer's file list in debug mode: scans pfs0:/movie and then
+ * pfs0:/movie2 for .ipu and .ips files (skipping directories), appending one
+ * allocated node holding the full path per file, and stores the total count.
+ * Upstream: INCLUDE_ASM in game/code_00270098; written from the retail routine.
+ * It differs from retail only in register allocation, scheduling and the
+ * address forms of the path stores; the two extension strings (D_003BC638
+ * ".ipu", D_003BC640 ".ips") and the two directory strings (D_003B1A98,
+ * D_003B1AA8) are string literals checked against retail data. */
+void mnuBuildMovieViewerList(void) {
+    SceDirent entry;
+    MnuMovieListNode *node;
+    MnuMovieListNode **tail;
+    char *extension;
+    s32 directory;
+    s32 nameLength;
+    s32 prefixLength;
+    s32 count;
+
+    movieViewerFree();
+    if (sdfHddValid == 0) {
+        return;
+    }
+    directory = sceDopen("pfs0:/movie");
+    if (directory < 0) {
+        return;
+    }
+    prefixLength = sizeof("pfs0:/movie") - 1;
+    count = 0;
+    tail = &mnuMovieList.head;
+    while ((nameLength = sceDread(directory, &entry)) > 0) {
+        if ((entry.stat.mode & 0xF000) == 0x1000) {
+            continue;
+        }
+        extension = strrchr(entry.name, '.');
+        if (extension == NULL) {
+            continue;
+        }
+        if (strcasecmp(extension, ".ipu") != 0 && strcasecmp(extension, ".ips") != 0) {
+            continue;
+        }
+        node = sdfChipAllocDirect(prefixLength + 1 + nameLength + 8);
+        count++;
+        memcpy(node->path, "pfs0:/movie", prefixLength);
+        node->path[prefixLength] = '/';
+        memcpy(node->path + prefixLength + 1, entry.name, nameLength);
+        node->path[prefixLength + 1 + nameLength] = '\0';
+        *tail = node;
+        tail = &node->next;
+    }
+    sceDclose(directory);
+
+    directory = sceDopen("pfs0:/movie2");
+    if (directory < 0) {
+        return;
+    }
+    prefixLength = sizeof("pfs0:/movie2") - 1;
+    while ((nameLength = sceDread(directory, &entry)) > 0) {
+        if ((entry.stat.mode & 0xF000) == 0x1000) {
+            continue;
+        }
+        extension = strrchr(entry.name, '.');
+        if (extension == NULL) {
+            continue;
+        }
+        if (strcasecmp(extension, ".ipu") != 0 && strcasecmp(extension, ".ips") != 0) {
+            continue;
+        }
+        node = sdfChipAllocDirect(prefixLength + 1 + nameLength + 8);
+        count++;
+        memcpy(node->path, "pfs0:/movie2", prefixLength);
+        node->path[prefixLength] = '/';
+        memcpy(node->path + prefixLength + 1, entry.name, nameLength);
+        node->path[prefixLength + 1 + nameLength] = '\0';
+        *tail = node;
+        tail = &node->next;
+    }
+    *tail = NULL;
+    mnuMovieList.total = count;
+    sceDclose(directory);
+}
+#else
 INCLUDE_ASM(const s32, "game/code_00270098", mnuBuildMovieViewerList);
+#endif
 
 MnuMovieListNode *movieViewerStep(void) {
     MnuMovieListNode *entry = mnuMovieList.head;
