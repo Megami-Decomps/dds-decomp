@@ -293,4 +293,29 @@ void sdfLoadModulesAndBindNamedResourceRpc(const char *modulePath, const char *o
     }
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "sdf.h"
+
+extern SdfGraphModeDefaults sdfGrFrameModes[];
+
+/* Copy a display mode's defaults into a graph target, optionally forgetting
+ * its buffers. Upstream: INCLUDE_ASM in both games; same loads and
+ * stores as the retail routine. */
+void sdfGrSetFrameSetMode(sdfGrFrameSet_t *graph, s32 mode, s32 initializeBuffers) {
+    const SdfGraphModeDefaults *defaults = &sdfGrFrameModes[mode];
+
+    if (initializeBuffers) {
+        graph->buffers[0] = NULL;
+        graph->buffers[1] = NULL;
+        graph->buffers[2] = NULL;
+    }
+    graph->width = defaults->width;
+    graph->unk2 = defaults->unk2;
+    graph->height = defaults->height;
+    graph->bufferFormat = defaults->bufferFormat;
+    graph->auxiliaryFormat = defaults->auxiliaryFormat;
+}
+#else
 INCLUDE_ASM(const s32, "game/code_002D0750", sdfGrSetFrameSetMode);
+#endif
