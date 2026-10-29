@@ -183,6 +183,13 @@ typedef struct BtlSceneInsertArgs {
     s32 count;
 } BtlSceneInsertArgs;
 
+/* The model-blend task advances once from apply-effect to motion-reach. */
+typedef u32 BtlActorModelBlendStage;
+enum {
+    BTL_ACTOR_MODEL_BLEND_STAGE_APPLY_EFFECT = 0,
+    BTL_ACTOR_MODEL_BLEND_STAGE_MOTION_REACH = 1,
+};
+
 /* The model-blend task allocates and initializes this complete 0x1C-byte packet. */
 typedef struct BtlActorModelBlendArgs {
     struct BtlUnit *unit;
@@ -191,7 +198,7 @@ typedef struct BtlActorModelBlendArgs {
     s32 previousMotionIndex;
     s32 value;
     f32 scale;
-    u32 stage;
+    BtlActorModelBlendStage stage;
 } BtlActorModelBlendArgs;
 typedef char BtlActorModelBlendArgsSizeCheck[sizeof(BtlActorModelBlendArgs) == 0x1C ? 1 : -1];
 

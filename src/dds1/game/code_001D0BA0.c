@@ -4869,16 +4869,16 @@ BtlRuntimeTask *btlCreateActorTransparencyTask(BtlUnit *actor) {
 }
 
 /* Advance the queued model-motion blend in two stages; return one when done. */
-s32 btlAdvanceActorModelBlendTask(BtlActorModelBlendArgs *args) {
+BtlTaskPollResult btlAdvanceActorModelBlendTask(BtlActorModelBlendArgs *args) {
     BtlUnit *unit;
     BtlUnit *target;
 
     if (args->index < 0) {
-        return 1;
+        return BTL_TASK_POLL_END_DELAY;
     }
     unit = args->unit;
     target = args->target;
-    if (args->stage == 0) {
+    if (args->stage == BTL_ACTOR_MODEL_BLEND_STAGE_APPLY_EFFECT) {
         if (unit->status.flags & 2) {
             args->previousMotionIndex = mdlGetMotionNum(unit->ext->owner, 0);
         } else {
@@ -4891,10 +4891,10 @@ s32 btlAdvanceActorModelBlendTask(BtlActorModelBlendArgs *args) {
         if (unit != target) {
             btlWarpUnitToMotionReach(unit, target, args->previousMotionIndex);
         }
-        return 1;
+        return BTL_TASK_POLL_END_DELAY;
     }
     args->stage++;
-    return 0;
+    return BTL_TASK_POLL_CONTINUE;
 }
 
 BtlRuntimeTask *btlCreateActorModelBlendTask(BtlUnit *actor, BtlUnit *target, s32 index, s32 value, f32 scale) {
@@ -4913,7 +4913,7 @@ BtlRuntimeTask *btlCreateActorModelBlendTask(BtlUnit *actor, BtlUnit *target, s3
     arguments->value = value;
     arguments->scale = scale;
     arguments->previousMotionIndex = -1;
-    arguments->stage = 0;
+    arguments->stage = BTL_ACTOR_MODEL_BLEND_STAGE_APPLY_EFFECT;
     return task;
 }
 
