@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "eff_random.h"
 #include "common.h"
+#include "snd_battle_sound_file_request_status.h"
 #include "itf_mes_window_index.h"
 #include "fld_next_scene_request_api.h"
 #include "btl_boss_data_api.h"
@@ -501,7 +502,6 @@ extern char D_003A15C8[];
 extern void itfMesMngRelease(ItfMesWindowIndex window);
 
 extern s32 btlCountRegisteredTasks(void);
-extern s32 sndHasOccupiedNodeSlots(void);
 extern u32 brsTaskTryDestroy(void);
 extern void btlAdvanceTitleStateWithAudioCleanup(void);
 extern void btlClearPendingSoundList(void);
@@ -535,7 +535,7 @@ s32 btlExitWhenAudioAndTasksIdle(void) {
         btlBossDebugPrintf(D_003A15A8);
         return 0;
     }
-    if (sndHasOccupiedNodeSlots() != 0) {
+    if (sndHasOccupiedNodeSlots() != SND_BATTLE_SOUND_FILE_REQUESTS_CLEAR) {
         btlBossDebugPrintf(D_003A15C8);
         return -1;
     }

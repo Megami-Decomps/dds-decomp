@@ -10,6 +10,7 @@
 #include "btl_camera_parameter_record.h"
 #include "btl_camera_mode_index.h"
 #include "common.h"
+#include "snd_battle_sound_file_request_status.h"
 #include "sdf_map_position_api.h"
 #include "btl_action_entry_is_empty_api.h"
 #include "btl_linked_actor_eligibility.h"
@@ -10496,7 +10497,7 @@ void btlPollMotionSoundResources(void) {
 }
 
 /* Return whether a not-yet-file-ready owner still has an outstanding request. */
-s32 sndHasOccupiedNodeSlots(void) {
+SndBattleSoundFileRequestStatus sndHasOccupiedNodeSlots(void) {
     s32 context = (s32)(u32)btlGetRuntime();
     SoundSlotOwner *node = ((BtlActorWork *)context)->soundSlotOwners;
     while (node != 0) {
@@ -10505,14 +10506,14 @@ s32 sndHasOccupiedNodeSlots(void) {
             struct FileRequest **requests = node->work.fileRequests;
             for (; index < 0x1D; index++) {
                 if (*requests != 0) {
-                    return 1;
+                    return SND_BATTLE_SOUND_FILE_REQUESTS_PENDING;
                 }
                 requests++;
             }
         }
         node = node->next;
     }
-    return 0;
+    return SND_BATTLE_SOUND_FILE_REQUESTS_CLEAR;
 }
 
 u32 sndFinishEarringPlayback(void) {

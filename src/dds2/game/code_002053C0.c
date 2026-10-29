@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "snd_battle_sound_file_request_status.h"
 #include "btl_horizontal_aim_api.h"
 #include "mnu_title_sound.h"
 #include "mnu_title_sound_buffer_status.h"
@@ -140,19 +141,19 @@ void btlCopyUnitCurrentPosition(BtlUnit *unit, f32 *destination);
 s32 sndLoadAndPlayStationedSe(u32 soundId);
 
 /* Return whether a not-yet-file-ready owner still has an outstanding request. */
-s32 sndHasOccupiedNodeSlots(void) {
+SndBattleSoundFileRequestStatus sndHasOccupiedNodeSlots(void) {
     SoundSlotOwner *owner;
     u32 i;
     for (owner = ((BtlState *)btlGetRuntime())->soundSlotOwners; owner != 0; owner = owner->next) {
         if (!(owner->flags & 2)) {
             for (i = 0; i < 0x1D; i++) {
                 if (owner->work.fileRequests[i] != 0) {
-                    return 1;
+                    return SND_BATTLE_SOUND_FILE_REQUESTS_PENDING;
                 }
             }
         }
     }
-    return 0;
+    return SND_BATTLE_SOUND_FILE_REQUESTS_CLEAR;
 }
 
 s32 sndWaitForEarringPlayback(void) {

@@ -4,6 +4,7 @@
 #include "fld_next_scene_request_api.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "snd_battle_sound_file_request_status.h"
 #include "btl_selected_entry_api.h"
 #include "btl_actor_command_selector_value_api.h"
 #include "pty_active_roster_index_api.h"
@@ -1034,7 +1035,6 @@ extern char D_00414F98[];
 
 extern char D_00414FB0[];
 
-extern s32 sndHasOccupiedNodeSlots(void);
 
 extern s32 btlCountRegisteredTasks(void);
 
@@ -1067,7 +1067,7 @@ s32 btlExitWhenAudioAndTasksIdle(void) {
         btlBossDebugPrintf(D_00414F48);
         return 0;
     }
-    if (sndHasOccupiedNodeSlots() != 0) {
+    if (sndHasOccupiedNodeSlots() != SND_BATTLE_SOUND_FILE_REQUESTS_CLEAR) {
         btlBossDebugPrintf(D_00414F68);
         return -1;
     }
