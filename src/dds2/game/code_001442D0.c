@@ -3419,33 +3419,33 @@ void fldSetSceneLocation(s32 area, s32 floor, s32 stage) {
     fldAutoMapField = area % 100;
 }
 
-extern s32 D_00387CE0[];
+extern FldAutoMapAreaFlagRowIndex D_00387CE0[];
 
 /* The area number's last two digits map to a save-table row; scene-record and
  * entry indexes are zero-based. */
 FldAutoMapEntryDiscoveryState fldGetFloorFlag(
     s32 area, FldAutoMapSceneRecordIndex floor,
     FldAutoMapEntryIndex bit) {
-    s32 areaIndex = D_00387CE0[area % 100];
+    FldAutoMapAreaFlagRowIndex areaFlagRow = D_00387CE0[area % 100];
 
-    if (areaIndex == -1) {
+    if (areaFlagRow == FLD_AUTO_MAP_AREA_FLAG_ROW_UNMAPPED) {
         return FLD_AUTO_MAP_ENTRY_NOT_DISCOVERED;
     }
-    return (DDS3_GBWK->areaFlags[areaIndex][floor] >> bit) & 1;
+    return (DDS3_GBWK->areaFlags[areaFlagRow][floor] >> bit) & 1;
 }
 
 /* Set a one-based flag on the current floor, and retain the associated record. */
 void fldSetCurrentFloorFlag(s32 flagNumber) {
-    s32 areaIndex;
+    FldAutoMapAreaFlagRowIndex areaFlagRow;
     s32 bit;
 
     if (flagNumber > 0) {
-        areaIndex = D_00387CE0[fldAutoMapField % 100];
-        if (areaIndex != -1) {
+        areaFlagRow = D_00387CE0[fldAutoMapField % 100];
+        if (areaFlagRow != FLD_AUTO_MAP_AREA_FLAG_ROW_UNMAPPED) {
             bit = flagNumber - 1;
             fldGlobalBase.unk18 = bit;
             fldGlobalBase.flagNumber = flagNumber;
-            DDS3_GBWK->areaFlags[areaIndex][fldGlobalBase.floor] |= 1ULL << bit;
+            DDS3_GBWK->areaFlags[areaFlagRow][fldGlobalBase.floor] |= 1ULL << bit;
             fldGlobalBase.flagStage = fldAutoMap_GetFloor(fldGlobalBase.floor, bit);
         }
     }
@@ -3453,24 +3453,24 @@ void fldSetCurrentFloorFlag(s32 flagNumber) {
 
 /* The public setters take one-based floor and flag numbers. */
 void fldSetFloorFlag(s32 area, s32 floor, s32 flagNumber) {
-    s32 areaIndex;
+    FldAutoMapAreaFlagRowIndex areaFlagRow;
 
     floor--;
     flagNumber--;
-    areaIndex = D_00387CE0[area % 100];
-    if (areaIndex != -1) {
-        DDS3_GBWK->areaFlags[areaIndex][floor] |= 1ULL << flagNumber;
+    areaFlagRow = D_00387CE0[area % 100];
+    if (areaFlagRow != FLD_AUTO_MAP_AREA_FLAG_ROW_UNMAPPED) {
+        DDS3_GBWK->areaFlags[areaFlagRow][floor] |= 1ULL << flagNumber;
     }
 }
 
 void fldClearFloorFlag(s32 area, s32 floor, s32 flagNumber) {
-    s32 areaIndex;
+    FldAutoMapAreaFlagRowIndex areaFlagRow;
 
     floor--;
     flagNumber--;
-    areaIndex = D_00387CE0[area % 100];
-    if (areaIndex != -1) {
-        DDS3_GBWK->areaFlags[areaIndex][floor] &= ~(1ULL << flagNumber);
+    areaFlagRow = D_00387CE0[area % 100];
+    if (areaFlagRow != FLD_AUTO_MAP_AREA_FLAG_ROW_UNMAPPED) {
+        DDS3_GBWK->areaFlags[areaFlagRow][floor] &= ~(1ULL << flagNumber);
     }
 }
 

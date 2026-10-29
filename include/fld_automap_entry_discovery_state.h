@@ -7,9 +7,14 @@
 typedef s32 FldAutoMapEntryDiscoveryState;
 typedef s32 FldAutoMapSceneRecordIndex;
 typedef s32 FldAutoMapEntryIndex;
+/* Row in saved areaFlags selected by the area's lookup, or the unmapped value. */
+typedef s32 FldAutoMapAreaFlagRowIndex;
 enum {
     FLD_AUTO_MAP_ENTRY_NOT_DISCOVERED = 0,
     FLD_AUTO_MAP_ENTRY_DISCOVERED = 1
+};
+enum {
+    FLD_AUTO_MAP_AREA_FLAG_ROW_UNMAPPED = -1,
 };
 
 /* An unmapped area row has the same state as an unset discovery bit. The
