@@ -1311,14 +1311,14 @@ u32 mnuOpenTitleMenuDefaultMode(void) {
 }
 
 extern void evtFreeStage(void);
-extern void sdfCreateRuntimeTask(void);
-extern void sdfDestroyRuntimeTask(void);
+extern void dds3GlobalWorkInit(void);
+extern void dds3GlobalWorkDestroy(void);
 
 /* The title-menu callback passes zero; the restart does not use it. */
 void mnuRestartRuntimeAfterViewer(s32 unused) {
     evtFreeStage();
-    sdfDestroyRuntimeTask();
-    sdfCreateRuntimeTask();
+    dds3GlobalWorkDestroy();
+    dds3GlobalWorkInit();
 }
 
 INCLUDE_SDATA(const s32, "game/code_002A1820", D_00437A30);

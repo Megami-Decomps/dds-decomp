@@ -30,18 +30,18 @@ void dds3UnlinkProcess(dds3ProcessID_t *task) {
     if (parent == 0) {
         return;
     }
-    if (parent->childList == task) {
-        parent->childList = task->nextSibling;
+    if (parent->child == task) {
+        parent->child = task->sibling;
     } else {
-        dds3ProcessID_t *previousSibling = parent->childList;
+        dds3ProcessID_t *previousSibling = parent->child;
 
-        while (previousSibling->nextSibling != task) {
-            previousSibling = previousSibling->nextSibling;
+        while (previousSibling->sibling != task) {
+            previousSibling = previousSibling->sibling;
         }
-        previousSibling->nextSibling = task->nextSibling;
+        previousSibling->sibling = task->sibling;
     }
     task->parent = 0;
-    task->nextSibling = 0;
+    task->sibling = 0;
 }
 
 /* Set mask bits on the object selection described by object and scope. */
@@ -84,7 +84,9 @@ extern u32 sdfDiscType;
 extern u8 D_00438A8C;
 extern SdfThreadNode kwlnMainLoopThreadNode;
 extern u8 D_00439410[];
-s32 sdfInitializeRuntimeAndStartMainLoop(void) {
+s32 sdfDefaultMain(void) asm("main");
+
+s32 sdfDefaultMain(void) {
     __main();
     sceSifInitRpc(0);
     sceSifInitIopHeap();
@@ -158,7 +160,7 @@ extern void kwlnInitializeFrameDrawPackets(s32 bufferIndex);
 
 /* Prepare the selected buffer's thirteen packet groups and link its draw sink.
  * The buffer index is sampled before waiting/selecting; keep that ordering. */
-s32 kwlnPrepareFrameDrawPackets(dds3ProcessID_t *task) {
+s32 dds3FirstProcess(dds3ProcessID_t *task) {
     s32 bufferIndex = dds3GetFrameID();
     s32 groupIndex;
     SdfDrawPacketGroups *packetGroups;
@@ -221,7 +223,7 @@ extern void evtSubmitPrimaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 d
 extern void evtSubmitPrimaryAlphaBlendMode(s32);
 
 /* Rebuild and queue the selected buffer's scene, overlay and view packets. */
-s32 kwlnBuildFrameScenePackets(dds3ProcessID_t *task) {
+s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
     s128 eye;
     s128 target;
     const u32 bufferIndex = dds3GetFrameID();
@@ -392,7 +394,7 @@ extern s8 sdfGrFrameComplete;
 
 /* Update draw controls, submit thirteen packet groups, optionally draw the
  * vignette, then flush pools. The skip bit suppresses one packet-slot publication. */
-s32 kwlnRenderFrame(dds3ProcessID_t *task) {
+s32 dds3DrawProcess(dds3ProcessID_t *task) {
     s32 bufferIndex = dds3GetFrameID();
     SdfPoolNode *(*groupHeads)[4];
     SdfDrawPacketGroups *packetGroups;

@@ -46,10 +46,10 @@
 0x00101B08	dds3UnlinkProcess	inferred	SMT3HD name via SLUS_209.11 0x00101B80, byte-identical; was kwlnUnlinkListNode
 0x00101B78	dds3SetProcessFlag	inferred	SMT3HD name via SLUS_209.11 0x00101BF0, reloc-identical; was dds3SetScopedObjectFlags
 0x00101BA8	dds3ResetProcessFlag	inferred	SMT3HD name via SLUS_209.11 0x00101C20, reloc-identical; was dds3ClearScopedObjectFlags
-0x00101BD8	sdfInitializeRuntimeAndStartMainLoop	inferred	Reboots and initializes IOP/runtime services, loads system modules, starts device workers and the main-loop thread, then sleeps the bootstrap thread; paired with DDS2 0x00101AC0. [code-quality cleanup, 2026-10-13]
-0x00101D60	kwlnPrepareFrameDrawPackets	inferred	readability/matching review (QP16)
-0x00101E40	kwlnBuildFrameScenePackets	inferred	confidence=high; matched-C; src/dds1/game/code_00101B08.c:234; Rebuilds and queues the selected buffer's scene, overlay, and view packets.; twin=0x00101D30 (DDS2).
-0x001024D8	kwlnRenderFrame	inferred	Runs frame-level draw/update dispatch and rendering. [names_qp9.tsv]
+0x00101BD8	main	inferred	HD original name; native callback/dispatcher role and paired Nocturne implementation establish identity; was sdfInitializeRuntimeAndStartMainLoop.
+0x00101D60	dds3FirstProcess	inferred	HD original name; native callback/dispatcher role and paired Nocturne implementation establish identity; was kwlnPrepareFrameDrawPackets.
+0x00101E40	dds3DrawFirstProcess	inferred	HD original name; native callback/dispatcher role and paired Nocturne implementation establish identity; was kwlnBuildFrameScenePackets.
+0x001024D8	dds3DrawProcess	inferred	HD original name; native callback/dispatcher role and paired Nocturne implementation establish identity; was kwlnRenderFrame.
 0x00102850	dds3BasicMainProcess	inferred	SMT3HD name via SLUS_209.11 0x001027B0, shared-hash-in-run; was dds3RunWorldPrimaryCallbacks
 0x00102878	dds3BasicDrawProcess	inferred	SMT3HD name via SLUS_209.11 0x001027D8, shared-hash-in-run; was dds3RunWorldSecondaryCallbacks
 0x001028A0	GetAdminiProcessData	inferred	SMT3HD name via SLUS_209.11 0x00102800, shared-hash-in-run; was dds3GetAdminTaskWork
@@ -61,9 +61,9 @@
 0x00102A60	dds3AdminiGetNextSequence	inferred	SMT3HD name via SLUS_209.11 0x001029C0, reloc-identical; was dds3AdminGetRequestedMode
 0x00102A80	dds3AdminiGetPrevSequence	inferred	SMT3HD name via SLUS_209.11 0x001029E0, reloc-identical; was dds3AdminReadPreviousSignedSample
 0x00102AB0	dds3AdminiGetPrevHistoryFlag	inferred	SMT3HD name via SLUS_209.11 0x00102A10, reloc-identical; was dds3AdminReadPreviousUnsignedSample
-0x00102AE0	dds3AdminActivateRequestedMode	inferred	confidence=high; matched-C; src/dds1/kernel/dds3AdminiProcess.c:71:func_00102AE0; Activates a pending administrative mode after its delay, records/restores history, clears request flags, invokes the selected entry callback with data, and returns the next dispatcher.; source=names_P5.tsv:12 [names_qp11.tsv]
+0x00102AE0	dds3AdminiStartSequence	inferred	HD original administration callback: native request/history activation or per-mode completion polling; was dds3AdminActivateRequestedMode.
 0x00102C58	dds3AdminiEndCheck	inferred	SMT3HD name via SLUS_209.11 0x00102C60, reloc-identical; was dds3AdminPollModeDestruction
-0x00102CD8	dds3AdminPollModeCompletion	inferred	Fam_Tail: cleanup/history restore then completion
+0x00102CD8	dds3AdminiNeoProcess	inferred	HD original administration callback: native request/history activation or per-mode completion polling; was dds3AdminPollModeCompletion.
 0x00102E58	dds3AdminiNeoShutdown	inferred	SMT3HD name via SLUS_209.11 0x00102E78, reloc-identical; was dds3AdminReleaseTaskWork
 0x00102ED8	dds3InitAdmini	inferred	SMT3HD name via SLUS_209.11 0x00102EF8, unique-masked-hash; was kwlnDebugTaskCreate
 0x00102F98	fclEncycFindFreeSlot	inferred	SMT3HD name via SLUS_209.11 0x00102FB8, unique-masked-hash; was kwlnRegisterNamedSlot
@@ -118,7 +118,7 @@
 0x001059F0	dds3LinkZClearDrawTag	inferred	SMT3HD name via SLUS_209.11 0x00104F00, reloc-identical; was evtBuildFrameStatePacketList
 0x00105A68	dds3FadeClear	inferred	SMT3HD name via SLUS_209.11 0x00104F78, reloc-identical; was kwlnFadeClear
 0x00105A90	dds3FadeSet	inferred	SMT3HD name via SLUS_209.11 0x00104FA0, reloc-identical; was kwlnFadeSetColor
-0x00105AC8	kwlnFadeSetRGB	inferred	sets fade RGB bytes, leaves alpha
+0x00105AC8	dds3FadeColorSet	inferred	HD original name; native callback/dispatcher role and paired Nocturne implementation establish identity; was kwlnFadeSetRGB.
 0x00105AE0	dds3FadeIn	inferred	SMT3HD name via SLUS_209.11 0x00104FE0, reloc-identical; was kwlnFadeOutStart
 0x00105B48	dds3FadeIn2	inferred	SMT3HD name via SLUS_209.11 0x00105048, reloc-identical; was kwlnFadeStartIn
 0x00105B98	dds3FadeOut	inferred	SMT3HD name via SLUS_209.11 0x00105098, reloc-identical; was kwlnFadeInStart
@@ -223,18 +223,18 @@
 0x0010A398	CallEndSave	inferred	SMT3HD name via SLUS_209.11 0x00108CE0, reloc-identical; was evtOpenFileMenuModeTwo
 0x0010A3B0	ExitEndSave	inferred	SMT3HD name via SLUS_209.11 0x00108CF8, shared-hash-in-run; was evtPollFileMenuModeTwo
 0x0010A3E8	CheckEndSave	inferred	SMT3HD name via SLUS_209.11 0x00108D30, shared-hash-in-run; was evtWaitFileMenuTaskExit
-0x0010A408	evtStartAreaFromSelection	inferred	DDS2 0010A548 twin; resets event mode then passes selected area values to field helper [names_R_FuncNames2.tsv]
+0x0010A408	CallField	inferred	HD original name; native callback/dispatcher role and paired Nocturne implementation establish identity; was evtStartAreaFromSelection.
 0x0010A448	ExitField	inferred	SMT3HD name via SLUS_209.11 0x00108D70, reloc-identical; was evtPollSelectedAreaReady
 0x0010A478	CheckField	inferred	SMT3HD name via SLUS_209.11 0x00108DA0, shared-hash-in-run; was evtKeepSelectedAreaModePending
 0x0010A480	evtStartSelectionFadeOut	inferred	Starts background fade-out among the selection-scene callbacks. [names_reviewed8.tsv]
 0x0010A498	evtDestroySelectionFadeOutNoOp	inferred	confidence=high; Native ddsAdminModeCallbacks mode11 destroy slot0x00329858: mode 11 destroy callback returns zero without side effects. Both dds3AdminPollModeCompletion bodies set completion flag2 only for nonzero cleanup; destroy zero is accepted with transition delay1. DDS2 twin0x0010A5D8, same mode/role at0x00384858. Existing return/formals retained. [Namer1 readability b75; paired native registry and typed dispatcher contract]
 0x0010A4A0	evtKeepSelectionFadeOutPending	inferred	confidence=high; Native ddsAdminModeCallbacks mode11 cleanup slot0x0032985C: mode 11 cleanup after selection fade-out; constant zero keeps polling. Both dds3AdminPollModeCompletion bodies set completion flag2 only for nonzero cleanup; destroy zero is accepted with transition delay1. DDS2 twin0x0010A5E0, same mode/role at0x0038485C. Existing return/formals retained. [Namer1 readability b75; paired native registry and typed dispatcher contract]
-0x0010A4A8	evtDispatchSelectionValue	inferred	address-based Unk placeholder; inferred action from provenance [names_audit.tsv]
-0x0010A510	evtCloseSkyEventTask	inferred	DDS2 0010A650 twin; sets sky-event flag, destroys sky task and resets mode [names_R_FuncNames2.tsv]
-0x0010A540	evtKeepSkyEventModePending	inferred	confidence=high; Native ddsAdminModeCallbacks mode6 cleanup slot0x00329820: mode 6 cleanup after sky/event-script create and destroy; constant zero keeps polling. Both dds3AdminPollModeCompletion bodies set completion flag2 only for nonzero cleanup; destroy zero is accepted with transition delay1. DDS2 twin0x0010A680, same mode/role at0x00384820. Existing return/formals retained. [Namer1 readability b75; paired native registry and typed dispatcher contract]
-0x0010A548	evtCreateCampTasks	inferred	DDS2 twin 0x0010A688; event entry delegates to mnuCreateCampTasks.
-0x0010A560	evtDestroyCampTasks	inferred	DDS2 0010A6A0 twin; calls mnuDestroyCampTasks [names_R_FuncNames2.tsv]
-0x0010A580	evtWaitCampStateAcknowledged	inferred	DDS2 0010A6C0 twin; polls mnuAcknowledgeCampState until zero [names_R_FuncNames2.tsv]
+0x0010A4A8	CallEvent	inferred	HD original name; native callback/dispatcher role and paired Nocturne implementation establish identity; was evtDispatchSelectionValue.
+0x0010A510	ExitEvent	inferred	HD original name; native callback/dispatcher role and paired Nocturne implementation establish identity; was evtCloseSkyEventTask.
+0x0010A540	CheckEvent	inferred	HD original name; native callback/dispatcher role and paired Nocturne implementation establish identity; was evtKeepSkyEventModePending.
+0x0010A548	CallCamp	inferred	HD original name; native callback/dispatcher role and paired Nocturne implementation establish identity; was evtCreateCampTasks.
+0x0010A560	ExitCamp	inferred	HD original name; native callback/dispatcher role and paired Nocturne implementation establish identity; was evtDestroyCampTasks.
+0x0010A580	CheckCamp	inferred	HD original name; native callback/dispatcher role and paired Nocturne implementation establish identity; was evtWaitCampStateAcknowledged.
 0x0010A5A0	CallRecover	inferred	SMT3HD name via SLUS_209.11 0x00108F30, shared-hash-in-run; was evtAdminModeEightEntryNoOp
 0x0010A5A8	ExitRecover	inferred	SMT3HD name via SLUS_209.11 0x00108F38, shared-hash-in-run; was evtAdminModeEightDestroyNoOp
 0x0010A5B0	CheckRecover	inferred	SMT3HD name via SLUS_209.11 0x00108F40, shared-hash-in-run; was evtIsAdminModeEightComplete
@@ -742,9 +742,9 @@
 0x00117650	dds3GetWorldNodeData	inferred	Returns the canonical dds3Basic_t.data pointer at offset +0x18; the payload interpretation depends on node kind.
 0x00117658	evtLoadValueVectorIntoVu	inferred	Loads the event value pointer vector directly into VU0 VF10; no scaling occurs. [names_reviewed16.tsv]
 0x00117678	evtLoadValueSecondaryVectorIntoVu	inferred	Loads the second vector quadword directly; the value getter performs no scaling. [names_reviewed18.tsv]
-0x001176A0	sdfCreateRuntimeTask	inferred	allocates/zeroes the 0x33600 GBWK runtime and schedules its tick task
-0x00117730	sdfDestroyRuntimeTask	inferred	destroys the GBWK task hierarchy and frees the runtime allocation
-0x00117780	sdfBumpTickCounters	inferred	sdf system, device, DMA, or task infrastructure in game/code_00117438.c
+0x001176A0	dds3GlobalWorkInit	inferred	HD original name; native callback/dispatcher role and paired Nocturne implementation establish identity; was sdfCreateRuntimeTask.
+0x00117730	dds3GlobalWorkDestroy	inferred	HD original name; native callback/dispatcher role and paired Nocturne implementation establish identity; was sdfDestroyRuntimeTask.
+0x00117780	dds3GlobalWorkMainProc	inferred	HD original name; native callback/dispatcher role and paired Nocturne implementation establish identity; was sdfBumpTickCounters.
 0x001177A8	evtResetWorldAndProfileRuntime	inferred	Clears script state and reinitializes world and profile runtime records. [names_reviewed9.tsv]
 0x00117808	sdfRuntimeTaskTeardownHook	inferred	confidence=medium; Empty GBWK teardown hook called immediately after hierarchy destruction and before backing-allocation release. DDS2 00117A80 has the same role and body. [Namer1 b63]
 0x00117810	sdfSaveResetSnapshot	inferred	Fam
@@ -900,7 +900,7 @@
 0x0011D3E8	dds3PrimFrameRect	inferred	SMT3HD name via SLUS_209.11 0x00117B40, reloc-identical; was sdfCreateBorderedRectanglePacket
 0x0011D570	dds3PrimLine	inferred	SMT3HD name via SLUS_209.11 0x00117CC8, reloc-identical; was fldCreateColoredLinePacket
 0x0011D6B0	dds3PrimLine3D	inferred	SMT3HD name via SLUS_209.11 0x00117E08, unique-masked-hash; was func_0011D6B0
-0x0011D998	fldStepValueByPad	inferred	adds/subtracts a step to *value per d-pad direction bytes 4..7 with wrap (0x80 bit) or clamp (0x02 bit) between min and max
+0x0011D998	dds3DebugFloatEditEx	inferred	HD original name; native callback/dispatcher role and paired Nocturne implementation establish identity; was fldStepValueByPad.
 0x0011DAA0	dds3DebugFloatEdit	inferred	SMT3HD name via SLUS_209.11 0x001181F8, shared-hash-in-run; was fldStepValueByCurrentPad
 0x0011DC50	dds3DebugIntEdit	inferred	SMT3HD name via SLUS_209.11 0x001183A8, reloc-identical; was fldAdjustIntegerUsingMainPad
 0x0011DE00	dds3DebugColorEdit	inferred	SMT3HD name via SLUS_209.11 0x00118558, reloc-identical; was fldStepColorChannelByCurrentPad
@@ -10523,3 +10523,5 @@
 0x00315758	__fixunsdfdi	inferred	Native SDK body pairs with the verified GCC helper in Nocturne; was func_00315758. Existing C ABI unchanged.
 0x003156b0	__floatdidf	inferred	Native SDK body pairs with the verified GCC helper in Nocturne; was func_003156B0. Existing C ABI unchanged.
 0x002fc718	__make_dp	inferred	Native SDK body pairs with the verified GCC helper in Nocturne; was func_002FC718. Existing C ABI unchanged.
+0x0011DAC0	dds3DebugIntEditEx	inferred	HD original name; native callback/dispatcher role and paired Nocturne implementation establish identity; was fldStepIntByPad.
+0x0011DC70	dds3DebugColorEditEx	inferred	HD original name; native callback/dispatcher role and paired Nocturne implementation establish identity; was fldStepColorChannelByPad.

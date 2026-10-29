@@ -82,7 +82,7 @@ extern u8 D_00324530[];
 
 extern char D_0039FA00[];
 
-extern void fldStepValueByPad(f32 *controlledValue, u8 *padState, f32 min, f32 max, f32 step, f32 bigStep);
+extern void dds3DebugFloatEditEx(f32 *controlledValue, u8 *padState, f32 min, f32 max, f32 step, f32 bigStep);
 
 extern s32 fldTestDrawUpdate(dds3ProcessID_t *task);
 
@@ -252,7 +252,7 @@ void *dds3PrimLine3D(s32 x, s32 y, s32 z, s32 highlighted) {
 
 /* Wrap input cycles past the bounds; clamp input saturates there.
  * Coarse controls take priority over fine controls. */
-void fldStepValueByPad(f32 *controlledValue, u8 *padState, f32 minimum, f32 maximum, f32 step, f32 bigStep) {
+void dds3DebugFloatEditEx(f32 *controlledValue, u8 *padState, f32 minimum, f32 maximum, f32 step, f32 bigStep) {
     f32 adjustedValue = *controlledValue;
 
     if ((s8)padState[5] & FIELD_EDIT_WRAP_INPUT) {
@@ -302,12 +302,12 @@ void fldStepValueByPad(f32 *controlledValue, u8 *padState, f32 minimum, f32 maxi
 }
 
 void dds3DebugFloatEdit(f32 *value, f32 min, f32 max, f32 step, f32 bigStep) {
-    fldStepValueByPad(value, D_00324530, min, max, step, bigStep);
+    dds3DebugFloatEditEx(value, D_00324530, min, max, step, bigStep);
 }
 
 /* Read the selected signed/unsigned integer, apply pad stepping, then truncate
  * back to its original width. Unsupported storage selectors leave it untouched. */
-void fldStepIntByPad(void *valueAddress, FldIntegerStorageType storageType, s64 min, s64 max, s64 step,
+void dds3DebugIntEditEx(void *valueAddress, FldIntegerStorageType storageType, s64 min, s64 max, s64 step,
                      s64 bigStep, const s8 *padState) {
     s64 adjustedValue;
     switch (storageType) {
@@ -393,13 +393,13 @@ void fldStepIntByPad(void *valueAddress, FldIntegerStorageType storageType, s64 
 
 void dds3DebugIntEdit(void *valueAddress, FldIntegerStorageType storageType, s64 min, s64 max, s64 step,
                       s64 bigStep) {
-    fldStepIntByPad(valueAddress, storageType, min, max, step, bigStep, (const s8 *)D_00324530);
+    dds3DebugIntEditEx(valueAddress, storageType, min, max, step, bigStep, (const s8 *)D_00324530);
 }
 
 /* Step a packed color byte by 10 or 1; return whether the word changed.
  * Wrap input only wraps at endpoints. An invalid channel reads the low byte
  * but replaces the high byte, preserving the native selector fallback. */
-s32 fldStepColorChannelByPad(u32 *color, s32 channel, s8 *padState) {
+s32 dds3DebugColorEditEx(u32 *color, s32 channel, s8 *padState) {
     s32 originalColor = *color;
     s32 channelValue = originalColor;
     s32 updatedColor;
@@ -463,7 +463,7 @@ s32 fldStepColorChannelByPad(u32 *color, s32 channel, s8 *padState) {
 }
 
 void dds3DebugColorEdit(u32 *color, s32 channel) {
-    fldStepColorChannelByPad(color, channel, D_00324530);
+    dds3DebugColorEditEx(color, channel, D_00324530);
 }
 
 /* Emit one whole-value character and two fractional digits after rounding.

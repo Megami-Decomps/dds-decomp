@@ -17,7 +17,7 @@ typedef char FldIntegerStorageType_size_must_be_4[
     (sizeof(FldIntegerStorageType) == 4) ? 1 : -1];
 
 /* The pad-state bytes are borrowed read-only input; valueAddress is updated. */
-void fldStepIntByPad(void *valueAddress, FldIntegerStorageType storageType, s64 min, s64 max,
+void dds3DebugIntEditEx(void *valueAddress, FldIntegerStorageType storageType, s64 min, s64 max,
                      s64 step, s64 bigStep, const s8 *padState);
 void dds3DebugIntEdit(void *valueAddress, FldIntegerStorageType storageType, s64 min, s64 max,
                       s64 step, s64 bigStep);

@@ -31,21 +31,21 @@ typedef void (*KwlnTaskDestroyCallback)(dds3ProcessID_t *task);
 
 struct dds3ProcessID_t {
     char name[0x18];          /* 0x00: NUL-padded task name, compared byte-wise */
-    s32 nameSum;             /* 0x18 */
-    u32 flags;               /* 0x1C */
+    s32 namehash;             /* 0x18 */
+    u32 flag;               /* 0x1C */
     u32 priority;            /* 0x20: ascending task queue priority. */
-    u32 unk24;
-    u32 runUpdateCount;      /* 0x28 */
-    s16 startDelayTicks;     /* 0x2C: signed; positive values count down, zero activates, negatives remain queued. */
-    s16 destroyDelayTicks;   /* 0x2E: signed; positive values count down, zero destroys, negatives stay pending. */
-    KwlnTaskUpdateCallback update; /* 0x30 */
-    KwlnTaskDestroyCallback destroy; /* 0x34 */
-    u32 userValue;           /* 0x38: caller-supplied value exposed by accessors. */
-    dds3ProcessID_t *listNext;      /* 0x3C */
-    dds3ProcessID_t *listPrev;      /* 0x40 */
+    u32 starttime;
+    u32 runtime;      /* 0x28 */
+    s16 starttimer;     /* 0x2C: signed; positive values count down, zero activates, negatives remain queued. */
+    s16 shutdowntimer;   /* 0x2E: signed; positive values count down, zero destroys, negatives stay pending. */
+    KwlnTaskUpdateCallback processfunc; /* 0x30 */
+    KwlnTaskDestroyCallback shutdownfunc; /* 0x34 */
+    u32 workdata;           /* 0x38: caller-supplied value exposed by accessors. */
+    dds3ProcessID_t *next;      /* 0x3C */
+    dds3ProcessID_t *prev;      /* 0x40 */
     dds3ProcessID_t *parent;        /* 0x44 */
-    dds3ProcessID_t *childList;     /* 0x48 */
-    dds3ProcessID_t *nextSibling;   /* 0x4C: next task in the parent's child list. */
+    dds3ProcessID_t *child;     /* 0x48 */
+    dds3ProcessID_t *sibling;   /* 0x4C: next task in the parent's child list. */
 };
 
 void dds3SetProcessData(dds3ProcessID_t *task, u32 userValue);

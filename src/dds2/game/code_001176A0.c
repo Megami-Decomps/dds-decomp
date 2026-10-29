@@ -53,7 +53,7 @@ extern void ptyAssignPartyRosterItemsAndMarkOwned(void);
 extern void sdfSaveResetSnapshot(void);
 extern void sdfRestoreResetSnapshot(void);
 
-s32 sdfBumpTickCounters(dds3ProcessID_t *task);
+s32 dds3GlobalWorkMainProc(dds3ProcessID_t *task);
 
 void evtResetWorldAndProfileRuntime(void);
 
@@ -189,7 +189,7 @@ void evtLoadValueSecondaryVectorIntoVu(dds3Basic_t *node) {
 
 
 /* Allocate the runtime state block, zero it and register the "GBWK" tick task. */
-void sdfCreateRuntimeTask(void) {
+void dds3GlobalWorkInit(void) {
     struct sdfMemHandle_t *mem = sdfMemAllocDirect(0x1E840);
     DatGameState *state = (void *)sdfMemLock(mem);
 
@@ -197,12 +197,12 @@ void sdfCreateRuntimeTask(void) {
     state->header.backingAllocation = mem;
     state->header.firstTick = 0;
     state->header.secondTick = 0;
-    dds3StartProcess(sdfRuntimeTaskName, 1, 0, 0, sdfBumpTickCounters, 0, (u32)state);
+    dds3StartProcess(sdfRuntimeTaskName, 1, 0, 0, dds3GlobalWorkMainProc, 0, (u32)state);
     DDS3_GBWK = state;
     evtResetWorldAndProfileRuntime();
 }
 
-void sdfDestroyRuntimeTask(void) {
+void dds3GlobalWorkDestroy(void) {
     struct sdfMemHandle_t *allocation;
 
     dds3KillProcessName(sdfRuntimeTaskName, 0);
@@ -213,7 +213,7 @@ void sdfDestroyRuntimeTask(void) {
     DDS3_GBWK = 0;
 }
 
-s32 sdfBumpTickCounters(dds3ProcessID_t *task) {
+s32 dds3GlobalWorkMainProc(dds3ProcessID_t *task) {
     DatGameState *runtime;
 
     runtime = DDS3_GBWK;

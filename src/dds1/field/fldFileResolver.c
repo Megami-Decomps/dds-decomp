@@ -477,7 +477,7 @@ typedef struct DmaPacketHeader DmaPacketHeader;
 
 extern void fldPlayFieldSeVolumePan(s32);
 
-extern void kwlnFadeSetRGB(s32 red, s32 green, s32 blue);
+extern void dds3FadeColorSet(s32 red, s32 green, s32 blue);
 
 extern void fldReleaseActorTasksById(s32);
 

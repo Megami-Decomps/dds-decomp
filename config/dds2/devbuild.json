@@ -521,8 +521,8 @@
   ],
   "redirects": [
     {
-      "symbol": "sdfInitializeRuntimeAndStartMainLoop",
-      "wrapper": "__wrap_sdfInitializeRuntimeAndStartMainLoop",
+      "symbol": "main",
+      "wrapper": "__wrap_main",
       "old_vaddr": "0x00101AC0",
       "expected_relocations": 1
     }

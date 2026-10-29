@@ -147,7 +147,7 @@ extern const char *fldFindActorEntryByName(const char *);
 
 extern void fldPlayMenuSound(s32);
 
-extern void kwlnFadeSetRGB(s32 red, s32 green, s32 blue);
+extern void dds3FadeColorSet(s32 red, s32 green, s32 blue);
 
 extern void fldApplyPendingCameraHeading(void);
 
@@ -2355,7 +2355,7 @@ void fldApplyActorEntryTrigger(s32 useTaskRecord) {
             return;
         }
     } else if (kind == 3) {
-        kwlnFadeSetRGB(0, 0, 0);
+        dds3FadeColorSet(0, 0, 0);
         return;
     } else if (kind == 5) {
         if (entry->motion == 0) {

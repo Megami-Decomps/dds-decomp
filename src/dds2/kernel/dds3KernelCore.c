@@ -59,10 +59,10 @@ extern void RunningProcess(void);
 void StartProcess(dds3ProcessID_t* task)
 {
     DeleteProcessList(task);
-    task->flags = (task->flags & ~KWLN_TASK_STATE_MASK) | KWLN_TASK_ACTIVE;
+    task->flag = (task->flag & ~KWLN_TASK_STATE_MASK) | KWLN_TASK_ACTIVE;
     AddProcessList(task);
-    task->unk24 = 0;
-    task->runUpdateCount = 0;
+    task->starttime = 0;
+    task->runtime = 0;
 }
 
 void StartingProcess(void)
@@ -72,12 +72,12 @@ void StartingProcess(void)
 
     node = startinglistf;
     while (node != 0) {
-        if (node->startDelayTicks > 0) {
-            node->startDelayTicks--;
+        if (node->starttimer > 0) {
+            node->starttimer--;
         }
         curr = node;
-        node = node->listNext;
-        if (curr->startDelayTicks == 0) {
+        node = node->next;
+        if (curr->starttimer == 0) {
             StartProcess(curr);
         }
     }
@@ -96,12 +96,12 @@ KwlnTaskCursorAction RunProcess(dds3ProcessID_t *task) {
     s32 inputIndex;
     KwlnTaskUpdateResult nextUpdate;
 
-    if (task->flags & KWLN_TASK_SKIP_UPDATE) {
+    if (task->flag & KWLN_TASK_SKIP_UPDATE) {
         return KWLN_TASK_CURSOR_ACTION_ADVANCE;
     }
     runprocess = task;
 
-    if (task->flags & KWLN_TASK_CLEAR_INPUT_STATE) {
+    if (task->flag & KWLN_TASK_CLEAR_INPUT_STATE) {
         for (port = 0; port < 2; port++) {
             for (inputIndex = 0; inputIndex < 16; inputIndex++) {
                 dds3PadButtonState[0][port][inputIndex] = 0;
@@ -127,19 +127,19 @@ KwlnTaskCursorAction RunProcess(dds3ProcessID_t *task) {
         }
     }
 
-    if (task->update != NULL && task->update != (KwlnTaskUpdateCallback)KWLN_TASK_UPDATE_FINISH_CALLBACK) {
-        nextUpdate = task->update(task);
+    if (task->processfunc != NULL && task->processfunc != (KwlnTaskUpdateCallback)KWLN_TASK_UPDATE_FINISH_CALLBACK) {
+        nextUpdate = task->processfunc(task);
         if (nextUpdate != KWLN_TASK_UPDATE_RETAIN_CALLBACK) {
-            task->update = (KwlnTaskUpdateCallback)nextUpdate;
+            task->processfunc = (KwlnTaskUpdateCallback)nextUpdate;
         }
         if (nextUpdate == KWLN_TASK_UPDATE_FINISH_CALLBACK &&
-            (task->flags & KWLN_TASK_STATE_MASK) == KWLN_TASK_ACTIVE) {
+            (task->flag & KWLN_TASK_STATE_MASK) == KWLN_TASK_ACTIVE) {
             EndProcess(task);
             runprocess = 0;
             return KWLN_TASK_CURSOR_ACTION_RELOAD;
         }
     }
-    task->runUpdateCount++;
+    task->runtime++;
     runprocess = 0;
     return KWLN_TASK_CURSOR_ACTION_ADVANCE;
 }
@@ -165,30 +165,30 @@ void RunningProcess(void)
 
                 if (active->priority <= destroyPending->priority) {
                     current = active;
-                    previous = current->listPrev;
+                    previous = current->prev;
                     if (RunProcess(current) != KWLN_TASK_CURSOR_ACTION_RELOAD) {
-                        active = current->listNext;
+                        active = current->next;
                     } else {
-                        active = previous != 0 ? previous->listNext : runninglistf;
+                        active = previous != 0 ? previous->next : runninglistf;
                     }
                 } else {
                     current = destroyPending;
-                    previous = current->listPrev;
+                    previous = current->prev;
                     if (RunProcess(current) != KWLN_TASK_CURSOR_ACTION_RELOAD) {
-                        destroyPending = current->listNext;
+                        destroyPending = current->next;
                     } else {
-                        destroyPending = previous != 0 ? previous->listNext : endinglistf;
+                        destroyPending = previous != 0 ? previous->next : endinglistf;
                     }
                 }
             } else {
 
                 do {
                     current = active;
-                    drainPrevious = current->listPrev;
+                    drainPrevious = current->prev;
                     if (RunProcess(current) != KWLN_TASK_CURSOR_ACTION_RELOAD) {
-                        active = current->listNext;
+                        active = current->next;
                     } else {
-                        active = drainPrevious != 0 ? drainPrevious->listNext : runninglistf;
+                        active = drainPrevious != 0 ? drainPrevious->next : runninglistf;
                     }
                 } while (active != 0);
                 return;
@@ -198,11 +198,11 @@ void RunningProcess(void)
 
                 do {
                     current = destroyPending;
-                    drainPrevious = current->listPrev;
+                    drainPrevious = current->prev;
                     if (RunProcess(current) != KWLN_TASK_CURSOR_ACTION_RELOAD) {
-                        destroyPending = current->listNext;
+                        destroyPending = current->next;
                     } else {
-                        destroyPending = drainPrevious != 0 ? drainPrevious->listNext : endinglistf;
+                        destroyPending = drainPrevious != 0 ? drainPrevious->next : endinglistf;
                     }
                 } while (destroyPending != 0);
             }
@@ -216,17 +216,17 @@ void kwlnTaskFinalizeDestroy(dds3ProcessID_t* task)
     dds3ProcessID_t* child;
     dds3ProcessID_t* next;
 
-    child = task->childList;
+    child = task->child;
     while (child != 0) {
-        next = child->nextSibling;
+        next = child->sibling;
         dds3KillProcess(child, 0);
         child = next;
     }
     DeleteProcessList(task);
-    if (task->destroy != 0) {
-        task->destroy(task);
+    if (task->shutdownfunc != 0) {
+        task->shutdownfunc(task);
     }
-    task->flags &= ~KWLN_TASK_STATE_MASK;
+    task->flag &= ~KWLN_TASK_STATE_MASK;
     dds3UnlinkProcess(task);
     sdfChipFreeDirect(task);
 }
@@ -235,7 +235,7 @@ void EndProcess(dds3ProcessID_t* task)
 {
     u32 state;
 
-    state = task->flags & KWLN_TASK_STATE_MASK;
+    state = task->flag & KWLN_TASK_STATE_MASK;
     if (state >= KWLN_TASK_DESTROY_PENDING) {
         return;
     }
@@ -243,9 +243,9 @@ void EndProcess(dds3ProcessID_t* task)
         return;
     }
     DeleteProcessList(task);
-    task->flags = (task->flags & ~KWLN_TASK_STATE_MASK) | KWLN_TASK_DESTROY_PENDING;
+    task->flag = (task->flag & ~KWLN_TASK_STATE_MASK) | KWLN_TASK_DESTROY_PENDING;
     AddProcessList(task);
-    if (task->destroyDelayTicks == 0) {
+    if (task->shutdowntimer == 0) {
         kwlnTaskFinalizeDestroy(task);
     }
 }
@@ -257,12 +257,12 @@ void dds3EndingProcess(void)
 
     node = endinglistf;
     while (node != 0) {
-        if (node->destroyDelayTicks > 0) {
-            node->destroyDelayTicks--;
+        if (node->shutdowntimer > 0) {
+            node->shutdowntimer--;
         }
         curr = node;
-        node = node->listNext;
-        if (curr->destroyDelayTicks == 0) {
+        node = node->next;
+        if (curr->shutdowntimer == 0) {
             kwlnTaskFinalizeDestroy(curr);
         }
     }
@@ -273,14 +273,14 @@ void ChangeProcessFlagChild(KwlnTaskFlagUpdateAction action, dds3ProcessID_t* ta
     dds3ProcessID_t* child;
 
     if (action != KWLN_TASK_FLAG_UPDATE_CLEAR) {
-        task->flags |= flags & KWLN_TASK_MUTABLE_FLAGS_MASK;
+        task->flag |= flags & KWLN_TASK_MUTABLE_FLAGS_MASK;
     } else {
-        task->flags &= ~(flags & KWLN_TASK_MUTABLE_FLAGS_MASK);
+        task->flag &= ~(flags & KWLN_TASK_MUTABLE_FLAGS_MASK);
     }
-    child = task->childList;
+    child = task->child;
     while (child != 0) {
         ChangeProcessFlagChild(action, child, flags);
-        child = child->nextSibling;
+        child = child->sibling;
     }
 }
 
@@ -294,9 +294,9 @@ void ChangeProcessFlag(KwlnTaskFlagUpdateAction action, dds3ProcessID_t *task, u
     switch (scope) {
     case KWLN_TASK_FLAG_SCOPE_TARGET:
         if (action != KWLN_TASK_FLAG_UPDATE_CLEAR) {
-            task->flags |= flags & KWLN_TASK_MUTABLE_FLAGS_MASK;
+            task->flag |= flags & KWLN_TASK_MUTABLE_FLAGS_MASK;
         } else {
-            task->flags &= ~(flags & KWLN_TASK_MUTABLE_FLAGS_MASK);
+            task->flag &= ~(flags & KWLN_TASK_MUTABLE_FLAGS_MASK);
         }
         return;
     case KWLN_TASK_FLAG_SCOPE_OTHER_QUEUED_TASKS:
@@ -320,12 +320,12 @@ void ChangeProcessFlag(KwlnTaskFlagUpdateAction action, dds3ProcessID_t *task, u
                     if ((node != task && scope == KWLN_TASK_FLAG_SCOPE_OTHER_QUEUED_TASKS) ||
                         scope == KWLN_TASK_FLAG_SCOPE_ALL_QUEUED_TASKS) {
                         if (action != KWLN_TASK_FLAG_UPDATE_CLEAR) {
-                            node->flags |= setMask;
+                            node->flag |= setMask;
                         } else {
-                            node->flags &= ~setMask;
+                            node->flag &= ~setMask;
                         }
                     }
-                    node = node->listNext;
+                    node = node->next;
                 }
             }
         }
@@ -369,7 +369,7 @@ dds3ProcessID_t *dds3SearchProcessNumber(KwlnTaskState taskState, KwlnTaskQueueI
         return NULL;
     }
     for (listPosition = 0; listPosition < queueIndex && task != NULL; listPosition++) {
-        task = task->listNext;
+        task = task->next;
     }
     return task;
 }
@@ -380,7 +380,7 @@ void kwlnTraverseDiagnosticTaskQueue(dds3ProcessID_t* task, void* unused)
         return;
     }
     do {
-        task = task->listNext;
+        task = task->next;
     } while (task != 0);
 }
 
@@ -404,22 +404,22 @@ extern u8 D_00435C00[];
 void DebugProcessTree(dds3ProcessID_t *task, s32 depth)
 {
     printf(D_00435C00, dds3ProcessTreeDepth, task);
-    if (task->childList != NULL) {
+    if (task->child != NULL) {
         if (task->parent == NULL) {
             dds3ProcessTreeDepth[0] = ' ';
         } else {
-            if (task->nextSibling == NULL) {
+            if (task->sibling == NULL) {
                 dds3ProcessTreeDepth[depth * 4] = ' ';
             } else {
                 dds3ProcessTreeDepth[depth * 4] = '|';
             }
         }
         dds3ProcessTreeDepth[depth * 4 + 4] = 0;
-        DebugProcessTree(task->childList, depth + 1);
+        DebugProcessTree(task->child, depth + 1);
         dds3ProcessTreeDepth[depth * 4] = 0;
     }
-    if (task->nextSibling != NULL) {
-        DebugProcessTree(task->nextSibling, depth);
+    if (task->sibling != NULL) {
+        DebugProcessTree(task->sibling, depth);
     }
 }
 
@@ -435,19 +435,19 @@ void dds3PrintProcessTree(void)
     for (prefixByteIndex = 0; prefixByteIndex < 0x40; prefixByteIndex++) {
         dds3ProcessTreeDepth[prefixByteIndex] = 0x20;
     }
-    for (task = startinglistf; task != NULL; task = task->listNext) {
+    for (task = startinglistf; task != NULL; task = task->next) {
         if (task->parent == NULL) {
             dds3ProcessTreeDepth[0] = 0;
             DebugProcessTree(task, 0);
         }
     }
-    for (task = runninglistf; task != NULL; task = task->listNext) {
+    for (task = runninglistf; task != NULL; task = task->next) {
         if (task->parent == NULL) {
             dds3ProcessTreeDepth[0] = 0;
             DebugProcessTree(task, 0);
         }
     }
-    for (task = endinglistf; task != NULL; task = task->listNext) {
+    for (task = endinglistf; task != NULL; task = task->next) {
         if (task->parent == NULL) {
             dds3ProcessTreeDepth[0] = 0;
             DebugProcessTree(task, 0);
@@ -471,28 +471,28 @@ dds3ProcessID_t *dds3StartProcess(const char *name, u32 priority, s32 startDelay
     if (task == NULL) {
         return NULL;
     }
-    task->nameSum = 0;
+    task->namehash = 0;
     while ((task->name[taskNameByteIndex] = name[taskNameByteIndex]) != 0 && taskNameByteIndex < 0x18) {
-        task->nameSum += name[taskNameByteIndex];
+        task->namehash += name[taskNameByteIndex];
         taskNameByteIndex++;
     }
     task->priority = priority;
-    task->flags = KWLN_TASK_DELAYED_START;
-    task->startDelayTicks = startDelay;
-    task->destroyDelayTicks = destroyDelay;
-    task->update = update;
-    task->destroy = destroy;
-    task->userValue = userValue;
+    task->flag = KWLN_TASK_DELAYED_START;
+    task->starttimer = startDelay;
+    task->shutdowntimer = destroyDelay;
+    task->processfunc = update;
+    task->shutdownfunc = destroy;
+    task->workdata = userValue;
     task->name[0x17] = 0;
-    task->unk24 = 0;
-    task->runUpdateCount = 0;
-    task->listNext = NULL;
-    task->listPrev = NULL;
+    task->starttime = 0;
+    task->runtime = 0;
+    task->next = NULL;
+    task->prev = NULL;
     task->parent = NULL;
-    task->childList = NULL;
-    task->nextSibling = NULL;
+    task->child = NULL;
+    task->sibling = NULL;
     AddProcessList(task);
-    if (task->startDelayTicks == 0) {
+    if (task->starttimer == 0) {
         StartProcess(task);
     }
     return task;
@@ -516,15 +516,15 @@ KwlnTaskKillRequestResult dds3KillProcess(dds3ProcessID_t* task, s32 delayTicks)
     if (task == 0 || task == KWLN_TASK_HANDLE_INVALID) {
         return KWLN_TASK_KILL_REQUEST_REJECTED;
     }
-    switch (task->flags & KWLN_TASK_STATE_MASK) {
+    switch (task->flag & KWLN_TASK_STATE_MASK) {
     case KWLN_TASK_DELAYED_START:
     case KWLN_TASK_ACTIVE:
-        task->destroyDelayTicks = delayTicks;
+        task->shutdowntimer = delayTicks;
         EndProcess(task);
         return KWLN_TASK_KILL_REQUEST_ACCEPTED;
     case KWLN_TASK_DESTROY_PENDING:
-        task->destroyDelayTicks = delayTicks;
-        if (task->destroyDelayTicks == 0) {
+        task->shutdowntimer = delayTicks;
+        if (task->shutdowntimer == 0) {
             kwlnTaskFinalizeDestroy(task);
             return KWLN_TASK_KILL_REQUEST_ACCEPTED;
         }
@@ -538,11 +538,11 @@ KwlnTaskKillRequestResult dds3KillProcess(dds3ProcessID_t* task, s32 delayTicks)
 
 void dds3EndProcess(dds3ProcessID_t* task)
 {
-    if ((task->flags & KWLN_TASK_STATE_MASK) != KWLN_TASK_ACTIVE) {
+    if ((task->flag & KWLN_TASK_STATE_MASK) != KWLN_TASK_ACTIVE) {
         return;
     }
     DeleteProcessList(task);
-    task->flags = (task->flags & ~KWLN_TASK_STATE_MASK) | KWLN_TASK_DESTROY_PENDING;
+    task->flag = (task->flag & ~KWLN_TASK_STATE_MASK) | KWLN_TASK_DESTROY_PENDING;
     AddProcessList(task);
 }
 
@@ -550,12 +550,12 @@ void dds3SetShutdownTimer(dds3ProcessID_t* task, s32 delayTicks)
 {
     u32 state;
 
-    state = task->flags & KWLN_TASK_STATE_MASK;
+    state = task->flag & KWLN_TASK_STATE_MASK;
     if (state == KWLN_TASK_DETACHED) {
         return;
     }
     if (state < KWLN_TASK_STATE_LIMIT) {
-        task->destroyDelayTicks = delayTicks;
+        task->shutdowntimer = delayTicks;
     }
 }
 
@@ -566,7 +566,7 @@ KwlnTaskState dds3GetProcessStat(const dds3ProcessID_t* task)
     if (dds3ExistProcess(task) == KWLN_PROCESS_NOT_REGISTERED) {
         return KWLN_TASK_DETACHED;
     }
-    state = task->flags & KWLN_TASK_STATE_MASK;
+    state = task->flag & KWLN_TASK_STATE_MASK;
     return (state < KWLN_TASK_STATE_LIMIT) ? state : KWLN_TASK_DETACHED;
 }
 
@@ -601,7 +601,7 @@ dds3ProcessID_t* dds3SearchProcessName(const char* name)
         }
 
         while (task != NULL) {
-            if (task->nameSum == nameSum) {
+            if (task->namehash == nameSum) {
                 for (nameCharacterIndex = nameLength; ; nameCharacterIndex--) {
                     if (name[nameCharacterIndex] != task->name[nameCharacterIndex]) {
                         break;
@@ -611,7 +611,7 @@ dds3ProcessID_t* dds3SearchProcessName(const char* name)
                     }
                 }
             }
-            task = task->listNext;
+            task = task->next;
         }
     }
     return NULL;
@@ -640,7 +640,7 @@ dds3ProcessID_t* dds3SearchProcessPriority(u32 priority)
             if (node->priority == priority) {
                 return node;
             }
-            node = node->listNext;
+            node = node->next;
         }
     }
     return 0;
@@ -673,7 +673,7 @@ KwlnProcessRegistrationResult dds3ExistProcess(const dds3ProcessID_t* target)
             {
                 return KWLN_PROCESS_REGISTERED;
             }
-            node = node->listNext;
+            node = node->next;
         }
     }
     return KWLN_PROCESS_NOT_REGISTERED;
@@ -681,23 +681,23 @@ KwlnProcessRegistrationResult dds3ExistProcess(const dds3ProcessID_t* target)
 
 u32 dds3GetProcessStartTime(const dds3ProcessID_t* task)
 {
-    return task->unk24;
+    return task->starttime;
 }
 
 /* Persona 4 dds3GetProcessRunTime @ 00452540 (src/Kernel/sdkTask.c), recompiled unchanged */
 KwlnTaskUpdateCount dds3GetProcessRunTime(const dds3ProcessID_t* task)
 {
-    return task->runUpdateCount;
+    return task->runtime;
 }
 
 void dds3SetProcessData(dds3ProcessID_t* task, u32 userValue)
 {
-    task->userValue = userValue;
+    task->workdata = userValue;
 }
 
 u32 dds3GetProcessData(const dds3ProcessID_t* task)
 {
-    return task->userValue;
+    return task->workdata;
 }
 
 void func_00101960(void) {
@@ -710,14 +710,14 @@ void dds3LinkProcess(dds3ProcessID_t* parent, dds3ProcessID_t* child)
     if (child->parent != NULL) {
         dds3UnlinkProcess(child);
     }
-    if (parent->childList != NULL) {
-        sibling = parent->childList;
-        while (sibling->nextSibling != NULL) {
-            sibling = sibling->nextSibling;
+    if (parent->child != NULL) {
+        sibling = parent->child;
+        while (sibling->sibling != NULL) {
+            sibling = sibling->sibling;
         }
-        sibling->nextSibling = child;
+        sibling->sibling = child;
     } else {
-        parent->childList = child;
+        parent->child = child;
     }
     child->parent = parent;
 }

@@ -1294,7 +1294,7 @@ u8 CheckEndSave(void) {
     return operationResult == 0;
 }
 
-void evtStartAreaFromSelection(u32 selection, const struct fldSceneParam_t *record) {
+void CallField(u32 selection, const struct fldSceneParam_t *record) {
     kwlnFadeBackgroundStartOut(0);
     fldProcTrigSequence(record, selection);
 }
@@ -1332,7 +1332,7 @@ u32 evtKeepSelectionFadeOutPending(void) {
 }
 
 /* Source zero takes an explicit event ID; source one uses the pending event ID. */
-void evtDispatchSelectionValue(s32 selectionSource, EvtScriptEventId *eventParams) {
+void CallEvent(s32 selectionSource, EvtScriptEventId *eventParams) {
     EvtScriptEventId eventIdToDispatch = 0;
 
     D_003BA730 = 0;
@@ -1351,7 +1351,7 @@ void evtDispatchSelectionValue(s32 selectionSource, EvtScriptEventId *eventParam
     evtStartEvent(eventIdToDispatch);
 }
 
-u32 evtCloseSkyEventTask(void) {
+u32 ExitEvent(void) {
     D_003BA730 = 1;
     evtExitSky();
     fldProcNextJump();
@@ -1359,20 +1359,20 @@ u32 evtCloseSkyEventTask(void) {
 }
 
 /* Admin mode 6 cleanup: zero leaves the mode pending. */
-u32 evtKeepSkyEventModePending(void) {
+u32 CheckEvent(void) {
     return 0;
 }
 
-void evtCreateCampTasks(void) {
+void CallCamp(void) {
     mnuCreateCampTasks();
 }
 
-u32 evtDestroyCampTasks(void) {
+u32 ExitCamp(void) {
     mnuDestroyCampTasks();
     return 0;
 }
 
-u8 evtWaitCampStateAcknowledged(void) {
+u8 CheckCamp(void) {
     MnuCampStateAcknowledgementResult campState;
 
     campState = mnuAcknowledgeCampState();

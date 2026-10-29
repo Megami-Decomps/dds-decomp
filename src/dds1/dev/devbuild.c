@@ -8,9 +8,9 @@ typedef struct DevBuildState {
 const char devBuildIdentifier[] = "DDS1 development ELF";
 DevBuildState devBuildState = { 0x44455631, 0 };
 
-extern s32 __real_sdfInitializeRuntimeAndStartMainLoop(void);
+extern s32 __real_main(void);
 
-s32 __wrap_sdfInitializeRuntimeAndStartMainLoop(void) {
+s32 __wrap_main(void) {
     devBuildState.entryCount++;
-    return __real_sdfInitializeRuntimeAndStartMainLoop();
+    return __real_main();
 }

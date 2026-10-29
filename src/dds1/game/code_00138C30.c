@@ -143,7 +143,7 @@ extern FldInfTable D_00332E30;
 
 extern void fldPlayFieldSeVolumePan(s32);
 
-extern void kwlnFadeSetRGB(s32 red, s32 green, s32 blue);
+extern void dds3FadeColorSet(s32 red, s32 green, s32 blue);
 
 extern void fldReleaseActorTasksById(s32);
 
@@ -2739,7 +2739,7 @@ void fldApplyActorEntryTrigger(s32 checkTaskRecord) {
             return;
         }
     } else if (kind == 3) {
-        kwlnFadeSetRGB(0, 0, 0);
+        dds3FadeColorSet(0, 0, 0);
         return;
     } else if (kind == 5) {
         if (entry->motion == 0) {

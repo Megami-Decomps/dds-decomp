@@ -132,7 +132,7 @@ extern u8 kwlnLargeMotorTarget;
 
 extern u8 dds3PadVibrationState[2];
 
-extern KwlnTaskUpdateResult dds3AdminPollModeCompletion(dds3ProcessID_t *task);
+extern KwlnTaskUpdateResult dds3AdminiNeoProcess(dds3ProcessID_t *task);
 extern void dds3AdminiNeoShutdown(dds3ProcessID_t *task);
 extern char dds3AdminTaskName[];
 extern u16 kwlnBackgroundFadeCounter;
@@ -143,23 +143,23 @@ extern EffRandState effSharedRandomState[];
 extern void sdfRandomize(void *data, u32 tag);
 
 void dds3InitAdmini(void) {
-    AdminWork *work;
+    dds3AdminiData_t *work;
     s32 i;
 
     if (dds3SearchProcessName(dds3AdminTaskName) == NULL) {
         work = sdfChipAllocDirect(0x24);
-        work->flags = 0;
-        work->value = 0;
-        work->activeMode = -1;
-        work->requestedMode = -1;
-        work->historyIndex = 0;
+        work->Stat = 0;
+        work->RunTimer = 0;
+        work->NowSequence = -1;
+        work->NextSequence = -1;
+        work->HistoryPointer = 0;
         for (i = 0; i < 8; i++) {
-            work->signedHistory[i] = -1;
-            work->unsignedHistory[i] = 0;
+            work->SequenceHistory[i] = -1;
+            work->FlagHistory[i] = 0;
         }
-        work->ownedRequestData = 0;
-        work->requestSizeLowByte = 0;
-        dds3StartProcess(dds3AdminTaskName, 2, 0, 1, dds3AdminPollModeCompletion, dds3AdminiNeoShutdown, (u32)work);
+        work->CallData = 0;
+        work->CallDataSize = 0;
+        dds3StartProcess(dds3AdminTaskName, 2, 0, 1, dds3AdminiNeoProcess, dds3AdminiNeoShutdown, (u32)work);
     }
 }
 
@@ -1515,7 +1515,7 @@ void kwlnFadeGetColor(KwlnFadeColor **outColor) {
 }
 
 /* Replace RGB only; alpha, direction flags and timing are preserved. */
-void kwlnFadeSetRGB(s8 red, s8 green, s8 blue) {
+void dds3FadeColorSet(s8 red, s8 green, s8 blue) {
     fadergba.r = red;
     fadergba.g = green;
     fadergba.b = blue;

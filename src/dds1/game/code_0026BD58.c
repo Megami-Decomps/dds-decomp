@@ -23,12 +23,12 @@ extern s32 D_003BC5A8;
 extern s32 D_003BC5AC;
 
 
-extern void sdfCreateRuntimeTask(void);
-extern void sdfDestroyRuntimeTask(void);
+extern void dds3GlobalWorkInit(void);
+extern void dds3GlobalWorkDestroy(void);
 
 /* The title-menu callback passes zero; the restart does not use it. */
 void mnuRestartRuntimeAfterViewer(s32 unused) {
     evtFreeStage();
-    sdfDestroyRuntimeTask();
-    sdfCreateRuntimeTask();
+    dds3GlobalWorkDestroy();
+    dds3GlobalWorkInit();
 }

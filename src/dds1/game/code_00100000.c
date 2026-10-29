@@ -62,9 +62,9 @@ extern char D_003BA7E8[]; /* "20\n" */
 extern char D_003BA7F0[]; /* "21\n" */
 extern char D_003BA7F8[]; /* "22\n" */
 #include "sdf_debug_api.h"
-extern s32 kwlnPrepareFrameDrawPackets(dds3ProcessID_t *task);
-extern s32 kwlnBuildFrameScenePackets(dds3ProcessID_t *task);
-extern s32 kwlnRenderFrame(dds3ProcessID_t *task);
+extern s32 dds3FirstProcess(dds3ProcessID_t *task);
+extern s32 dds3DrawFirstProcess(dds3ProcessID_t *task);
+extern s32 dds3DrawProcess(dds3ProcessID_t *task);
 extern KwlnTaskUpdateResult dds3BasicMainProcess(dds3ProcessID_t *task);
 extern KwlnTaskUpdateResult dds3BasicDrawProcess(dds3ProcessID_t *task);
 extern KwlnTaskUpdateResult frFlipPacketBuf(dds3ProcessID_t *task);
@@ -91,7 +91,7 @@ extern void dds3InitDebugSystem(void);
 extern void dds3StartMovieManager(void);
 extern void mnuInitializeTitleAudioAndEffects(void);
 extern void mnuLoadStaffImageHandles(void);
-extern void sdfCreateRuntimeTask(void);
+extern void dds3GlobalWorkInit(void);
 extern void sdfDevConsInit(void);
 extern void sdfResetChannels(void);
 
@@ -104,11 +104,11 @@ void kwlnInitializeRuntime(void) {
     printf(D_003BA740);
     dds3PadInitialize();
     printf(D_003BA748);
-    dds3StartProcess(D_003BA750, 0, 0, 0, kwlnPrepareFrameDrawPackets, 0, 0);
+    dds3StartProcess(D_003BA750, 0, 0, 0, dds3FirstProcess, 0, 0);
     printf(D_003BA758);
-    dds3StartProcess(D_003BA760, 0x2710, 0, 0, kwlnBuildFrameScenePackets, 0, 0);
+    dds3StartProcess(D_003BA760, 0x2710, 0, 0, dds3DrawFirstProcess, 0, 0);
     printf(D_003BA768);
-    dds3StartProcess("RequestDraw", 0x4E20, 0, 0, kwlnRenderFrame, 0, 0);
+    dds3StartProcess("RequestDraw", 0x4E20, 0, 0, dds3DrawProcess, 0, 0);
     printf(D_003BA770);
     dds3StartProcess("basic_main", 0x3FC, 1, 1, dds3BasicMainProcess, 0, 0);
     printf(D_003BA778);
@@ -136,7 +136,7 @@ void kwlnInitializeRuntime(void) {
     printf(D_003BA7C0);
     dds3StartMovieManager();
     printf(D_003BA7C8);
-    sdfCreateRuntimeTask();
+    dds3GlobalWorkInit();
     printf(D_003BA7D0);
     D_003BA708 = 0;
     D_003BA700 = 0;
@@ -273,7 +273,7 @@ void kwlnRunMainLoop(void) {
 
 /* Remove a task from the doubly linked queue of its state (1 delayed start, 2 active, 3 delayed destroy). */
 void DeleteProcessList(dds3ProcessID_t *task) {
-    switch (task->flags & 0xF) {
+    switch (task->flag & 0xF) {
     case 0:
         return;
     case 1:
@@ -283,39 +283,39 @@ void DeleteProcessList(dds3ProcessID_t *task) {
     default:
         return;
     }
-    if (task->listPrev != NULL) {
-        task->listPrev->listNext = task->listNext;
+    if (task->prev != NULL) {
+        task->prev->next = task->next;
     } else {
-        switch (task->flags & 0xF) {
+        switch (task->flag & 0xF) {
         case 1:
-            startinglistf = task->listNext;
+            startinglistf = task->next;
             break;
         case 2:
-            runninglistf = task->listNext;
+            runninglistf = task->next;
             break;
         case 3:
-            endinglistf = task->listNext;
+            endinglistf = task->next;
             break;
         }
     }
-    if (task->listNext != NULL) {
-        task->listNext->listPrev = task->listPrev;
+    if (task->next != NULL) {
+        task->next->prev = task->prev;
     } else {
-        switch (task->flags & 0xF) {
+        switch (task->flag & 0xF) {
         case 1:
-            D_003BA804 = task->listPrev;
+            D_003BA804 = task->prev;
             break;
         case 2:
-            D_003BA81C = task->listPrev;
+            D_003BA81C = task->prev;
             break;
         case 3:
-            D_003BA810 = task->listPrev;
+            D_003BA810 = task->prev;
             break;
         }
     }
-    task->listNext = NULL;
-    task->listPrev = NULL;
-    switch (task->flags & 0xF) {
+    task->next = NULL;
+    task->prev = NULL;
+    switch (task->flag & 0xF) {
     case 1:
         startinglistcnt--;
         break;
@@ -332,7 +332,7 @@ void AddProcessList(dds3ProcessID_t *task) {
     dds3ProcessID_t *cur;
     dds3ProcessID_t *prev;
 
-    switch (task->flags & 0xF) {
+    switch (task->flag & 0xF) {
     case 1:
         cur = startinglistf;
         break;
@@ -348,7 +348,7 @@ void AddProcessList(dds3ProcessID_t *task) {
         return;
     }
     if (cur == NULL) {
-        switch (task->flags & 0xF) {
+        switch (task->flag & 0xF) {
         case 1:
             startinglistf = task;
             D_003BA804 = task;
@@ -362,18 +362,18 @@ void AddProcessList(dds3ProcessID_t *task) {
             D_003BA810 = task;
             break;
         }
-        task->listPrev = NULL;
-        task->listNext = NULL;
+        task->prev = NULL;
+        task->next = NULL;
     } else {
         while (cur != NULL) {
             if (task->priority < cur->priority) {
-                if (cur->listPrev != NULL) {
-                    cur->listPrev->listNext = task;
-                    task->listPrev = cur->listPrev;
-                    task->listNext = cur;
-                    cur->listPrev = task;
+                if (cur->prev != NULL) {
+                    cur->prev->next = task;
+                    task->prev = cur->prev;
+                    task->next = cur;
+                    cur->prev = task;
                 } else {
-                    switch (task->flags & 0xF) {
+                    switch (task->flag & 0xF) {
                     case 1:
                         startinglistf = task;
                         break;
@@ -384,39 +384,39 @@ void AddProcessList(dds3ProcessID_t *task) {
                         endinglistf = task;
                         break;
                     }
-                    task->listPrev = NULL;
-                    task->listNext = cur;
-                    cur->listPrev = task;
+                    task->prev = NULL;
+                    task->next = cur;
+                    cur->prev = task;
                 }
                 break;
             }
-            cur = cur->listNext;
+            cur = cur->next;
         }
         if (cur == NULL) {
-            switch (task->flags & 0xF) {
+            switch (task->flag & 0xF) {
             case 1:
                 prev = D_003BA804;
-                prev->listNext = task;
-                task->listPrev = prev;
+                prev->next = task;
+                task->prev = prev;
                 D_003BA804 = task;
                 break;
             case 2:
                 prev = D_003BA81C;
-                prev->listNext = task;
-                task->listPrev = prev;
+                prev->next = task;
+                task->prev = prev;
                 D_003BA81C = task;
                 break;
             case 3:
                 prev = D_003BA810;
-                prev->listNext = task;
-                task->listPrev = prev;
+                prev->next = task;
+                task->prev = prev;
                 D_003BA810 = task;
                 break;
             }
-            task->listNext = NULL;
+            task->next = NULL;
         }
     }
-    switch (task->flags & 0xF) {
+    switch (task->flag & 0xF) {
     case 1:
         startinglistcnt++;
         break;

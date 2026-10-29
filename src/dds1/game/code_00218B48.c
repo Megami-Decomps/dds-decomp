@@ -250,7 +250,7 @@ extern u32 D_003BA8EC;
 
 extern void kwlnDebugGraphSetEnabled(s8 mode);
 
-extern s32 fldStepColorChannelByPad(u32 *color, s32 channel, s8 *pad);
+extern s32 dds3DebugColorEditEx(u32 *color, s32 channel, s8 *pad);
 
 
 extern s8 dds3PadButtonState[64];
@@ -730,25 +730,25 @@ void mdlPibEditTrackInfo(EffMarkParams *params, s16 *fieldCursor) {
     } else {
         switch (selectedField) {
         case 0:
-            fldStepIntByPad(&params->mark0, FLD_INTEGER_STORAGE_UNSIGNED_WORD, 0, 99999, 0, 1, dds3PadButtonState);
+            dds3DebugIntEditEx(&params->mark0, FLD_INTEGER_STORAGE_UNSIGNED_WORD, 0, 99999, 0, 1, dds3PadButtonState);
             break;
         case 1:
-            fldStepIntByPad(&params->mark1, FLD_INTEGER_STORAGE_UNSIGNED_WORD, 0, 99999, 0, 1, dds3PadButtonState);
+            dds3DebugIntEditEx(&params->mark1, FLD_INTEGER_STORAGE_UNSIGNED_WORD, 0, 99999, 0, 1, dds3PadButtonState);
             break;
         case 2:
-            fldStepIntByPad(&params->start, FLD_INTEGER_STORAGE_UNSIGNED_HALFWORD, 0, 9999, 0, 1, dds3PadButtonState);
+            dds3DebugIntEditEx(&params->start, FLD_INTEGER_STORAGE_UNSIGNED_HALFWORD, 0, 9999, 0, 1, dds3PadButtonState);
             break;
         case 3:
-            fldStepIntByPad(&params->end, FLD_INTEGER_STORAGE_UNSIGNED_HALFWORD, 0, 9999, 0, 1, dds3PadButtonState);
+            dds3DebugIntEditEx(&params->end, FLD_INTEGER_STORAGE_UNSIGNED_HALFWORD, 0, 9999, 0, 1, dds3PadButtonState);
             break;
         case 4:
-            fldStepIntByPad(&params->interval, FLD_INTEGER_STORAGE_UNSIGNED_HALFWORD, 1, 10, 0, 1, dds3PadButtonState);
+            dds3DebugIntEditEx(&params->interval, FLD_INTEGER_STORAGE_UNSIGNED_HALFWORD, 1, 10, 0, 1, dds3PadButtonState);
             break;
         case 5:
-            fldStepIntByPad(&params->face, FLD_INTEGER_STORAGE_UNSIGNED_BYTE, 1, 10, 0, 1, dds3PadButtonState);
+            dds3DebugIntEditEx(&params->face, FLD_INTEGER_STORAGE_UNSIGNED_BYTE, 1, 10, 0, 1, dds3PadButtonState);
             break;
         case 6:
-            fldStepIntByPad(&params->blend, FLD_INTEGER_STORAGE_UNSIGNED_BYTE, 0, 4, 0, 1, dds3PadButtonState);
+            dds3DebugIntEditEx(&params->blend, FLD_INTEGER_STORAGE_UNSIGNED_BYTE, 0, 4, 0, 1, dds3PadButtonState);
             break;
         default:
             colorChannel = (u8 *)params->colors + selectedField - MDL_MARK_COLOR_FIRST_FIELD;
@@ -2347,7 +2347,7 @@ void mdlUpdateViewerSettingsInput(void) {
         }
         break;
     case 1:
-        fldStepColorChannelByPad(&D_003BA8EC, mdlViewerState.settingsCursor - 3, dds3PadBitTable);
+        dds3DebugColorEditEx(&D_003BA8EC, mdlViewerState.settingsCursor - 3, dds3PadBitTable);
         if (dds3PadBitTable[1] < 0 || dds3PadBitTable[3] < 0) {
             mdlViewerState.settingsPage = 0;
         }
@@ -3122,7 +3122,7 @@ extern f32 kwlnDefaultColorVector[4];
 extern char D_003BBCF8[]; /* ">" in .sdata */
 extern char D_003BBD00[]; /* "%6.2f" in .sdata */
 extern SdfPoolNode D_00325708;
-extern void fldStepValueByPad(f32 *value, u8 *padState, f32 min, f32 max, f32 step, f32 bigStep);
+extern void dds3DebugFloatEditEx(f32 *value, u8 *padState, f32 min, f32 max, f32 step, f32 bigStep);
 extern void dds3PrimDebugTextBox(void *packetList, s32 x, s32 y, s32 selected, f32 *values);
 /* Direction-preview packet builder consumes the vector loaded in vf10. */
 extern void *dds3PrimLine3D(s32, s32, s32, s32);
@@ -3241,12 +3241,12 @@ s32 mdlDebugPrintEffectScale(dds3ProcessID_t *task) {
                 if ((state->selection & 3) == 3) {
                     mdlSetDebugMatrix(state, light[1]);
                 } else {
-                    fldStepValueByPad(&light[0][state->selection & 3], (u8 *)state->pad,
+                    dds3DebugFloatEditEx(&light[0][state->selection & 3], (u8 *)state->pad,
                                       0.0f, 2.0f, 0.1f, 0.01f);
                 }
             }
         } else if (state->selection < 15) {
-            fldStepValueByPad(&state->ambient[state->selection - 12], (u8 *)state->pad,
+            dds3DebugFloatEditEx(&state->ambient[state->selection - 12], (u8 *)state->pad,
                               0.0f, 2.0f, 0.1f, 0.01f);
         }
     }
@@ -3466,7 +3466,7 @@ s32 mdlDebugPrintEffectScale2(dds3ProcessID_t *task) {
         } else if (mdlDebugScaleWork.selection < 4) {
             mdlGetDebugEntry(mdlDebugScaleWork.selection);
         } else {
-            fldStepColorChannelByPad(&kwlnDrawVector.fogColor, mdlDebugScaleWork.selection - 4, (s8 *)mdlDebugScaleWork.pad);
+            dds3DebugColorEditEx(&kwlnDrawVector.fogColor, mdlDebugScaleWork.selection - 4, (s8 *)mdlDebugScaleWork.pad);
         }
     }
     sdfDrawTagLink(mdlDebugScaleWork.packetList,
@@ -3585,11 +3585,11 @@ s32 soften_bias_Process(dds3ProcessID_t *task) {
         } else {
             switch (D_003D7B60.control.fields.cursor) {
             case 0:
-                fldStepValueByPad(&D_003D7B60.value, (u8 *)D_003D7B60.pad,
+                dds3DebugFloatEditEx(&D_003D7B60.value, (u8 *)D_003D7B60.pad,
                                   1.0f, 50.0f, 1.0f, 0.1f);
                 break;
             case 1:
-                fldStepValueByPad(&D_003D7B60.adjustment, (u8 *)D_003D7B60.pad,
+                dds3DebugFloatEditEx(&D_003D7B60.adjustment, (u8 *)D_003D7B60.pad,
                                   -50.0f, 50.0f, 0.1f, 0.01f);
                 break;
             }
