@@ -242,7 +242,7 @@ BtlCommandHitResult btlResolveCommandHitResult(BtlUnit *source, BtlUnit *target,
 
     runtime = btlGetRuntime();
     if (runtime->hitResultOverride != NULL) {
-        s32 result = runtime->hitResultOverride(source, target, command);
+        BtlCommandHitResult result = runtime->hitResultOverride(source, target, command);
         if (result != 0) return result;
     }
     targetRecord = &target->partyRecord;

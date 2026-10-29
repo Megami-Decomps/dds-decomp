@@ -277,7 +277,7 @@ extern s32 btlRollAiBucket(void);
  * from the retail routine. It differs from retail only in register allocation
  * and scheduling, the addressing of the three debug-print format strings (their
  * text equals retail's), and how the effect-type test is compiled. */
-s32 btlResolveCommandHitResult(BtlUnit *source, BtlUnit *target, s32 command) {
+BtlCommandHitResult btlResolveCommandHitResult(BtlUnit *source, BtlUnit *target, s32 command) {
     BtlState *runtime = btlGetRuntime();
     datUnitWork_t *targetRecord = &target->partyRecord;
     s32 entryFlags;
@@ -294,7 +294,7 @@ s32 btlResolveCommandHitResult(BtlUnit *source, BtlUnit *target, s32 command) {
     f32 affinityMultiplier;
 
     if (runtime->hitResultOverride != NULL) {
-        s32 result = runtime->hitResultOverride(source, target, command);
+        BtlCommandHitResult result = runtime->hitResultOverride(source, target, command);
 
         if (result != 0) {
             return result;
@@ -413,7 +413,7 @@ s32 btlResolveCommandHitResult(BtlUnit *source, BtlUnit *target, s32 command) {
     return (entryFlags & 0x20) ? 4 : 2;
 }
 #else
-INCLUDE_ASM(const s32, "game/code_001A7180", btlResolveCommandHitResult);
+INCLUDE_ASM(const BtlCommandHitResult, "game/code_001A7180", btlResolveCommandHitResult);
 #endif
 
 void func_001A7AD0(void) {
