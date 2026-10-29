@@ -1280,9 +1280,337 @@ void fldDrawProjectedMapIcon(f32 x, f32 y, s32 index, u32 color) {
                         D_0044F7F0[D_0039A0E0[index].textureSlot]);
 }
 
-INCLUDE_ASM(const s32, "game/code_001442D0", func_00145A08);
+#ifdef NON_MATCHING
+#include "fld_projected_sprite.h"
+#include "dsp_entry_api.h"
+#include "dsp_channel.h"
+#include "evt_message_window_api.h"
+#include "fld_area_work.h"
+#include "fld_room_effect_entry.h"
+#include "fld_object_slot.h"
+#include "fld_npc_palette.h"
+#include "file_pac.h"
+#include "evt_world.h"
+#include "common.h"
+#include "snd_track_playback_api.h"
+#include "fld_scene_ready_api.h"
+#include "fld_clear_menu_entries_api.h"
+#include "fld_play_pending_sounds_api.h"
+#include "fld_scene_record_api.h"
+#include "fld_object_slot_api.h"
+#include "fld_release_texture_slots_api.h"
+#include "fld_spark_object_entry.h"
+#include "fld_spark_slot.h"
+#include "sdf_math_vector4.h"
+#include "kwln_fade.h"
+#include "mnu_title_stream.h"
+#include "eff_random.h"
+#include "snd_sequence_volume_pan.h"
+#include "sdf_trig.h"
+#include "fld_area_path.h"
+#include "btl_stage_task_cleanup.h"
+#include "sdf_textured_rect.h"
+#include "sdf_motion.h"
+#include "mdl.h"
+#include "sdf_chip.h"
+#include "dds3obj.h"
+#include "dds3_world_selection.h"
+#include "dds3_world_value.h"
+#include "sdf_dev_state.h"
+#include "fld_transfer_chunk.h"
+#include "sdf_resource.h"
+#include "eff_transform.h"
+#include "sdf_model.h"
+#include "fld_scene_record.h"
+#include "sdf.h"
+#include "sdf_projection.h"
+#include "sdf_draw.h"
+#include "fpu.h"
+#include "pcp_vu0.h"
+#include "dat_state.h"
+#include "eff.h"
+#include "eff_node.h"
+#include "eff_node_descriptor.h"
+#include "kwln.h"
+#include "kwln_task_lifecycle.h"
+#include "file_request_api.h"
+#include "sdf_texture_file.h"
+#include "mdl_flag_api.h"
+#include "dds3_world_counter.h"
+#include "fr_font.h"
+#include "itf.h"
+#include "btl.h"
+#include "evt_unit.h"
+#include "fld_title_banner_menu.h"
+#include "fld_label_cache_api.h"
+#include "sdf_packet_alloc.h"
+#include "sdf_texture_draw_packet.h"
+#include "sdf_packet_list.h"
+#include "sdf_packet_builders.h"
+#include "sdf_vu_matrix.h"
 
+extern FldProjectedSprite D_0039A0E0[];
+
+extern f32 D_00436280;
+extern sdfTexHandle_t *D_00389978;
+extern SdfPoolNode *fldDrawGetOt(void);
+/* Draw a minimap icon from the icon table: its textured quad rotated about its
+ * anchor, squashed to the map's tilt and placed at the map position, the
+ * player's (index 1) pulsing in alpha. DDS1's func_001428C0 with DDS2's
+ * names, but turned about Y where DDS1's turns about Z. Upstream:
+ * INCLUDE_ASM in game/code_001442D0; written from the retail routine. Checked
+ * against retail: the same memory accesses, calls
+ * and immediates, and the same float, conversion and VU0 operations. */
+void func_00145A08(s32 index, f32 x, f32 y, f32 rotation) {
+    f32 x0, x1, z0, z1;
+    s32 textureU, textureV, textureWidth, textureHeight;
+    s32 textureURight, textureVBottom;
+    f32 corner0[4] __attribute__((aligned(16)));
+    f32 corner1[4] __attribute__((aligned(16)));
+    f32 corner2[4] __attribute__((aligned(16)));
+    f32 corner3[4] __attribute__((aligned(16)));
+    f32 xOffset, yOffset;
+    u32 color;
+    sdfDrawTag_t *packetList;
+    SdfPoolNode *appendTarget;
+    SdfPoolNode *drawSurface;
+
+    if (index == 1) {
+        color = (u32)(s32)(sdfSin(D_00436280) * 64.0f) << 24;
+        color += 0x80000000u;
+        D_00436280 += 0.2f;
+    } else {
+        color = 0x80000000;
+    }
+
+    packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(packetList);
+    sdf2DLinkTexPacket(packetList, D_00389978, 0);
+
+    textureU = (s32)D_0039A0E0[index].u * 16;
+    textureV = (s32)D_0039A0E0[index].v * 16;
+    textureWidth = (s32)D_0039A0E0[index].width * 16;
+    textureHeight = (s32)D_0039A0E0[index].height * 16;
+    textureURight = textureU + textureWidth;
+    textureVBottom = textureV + textureHeight;
+    x0 = (f32)-((s32)D_0039A0E0[index].anchorX * 16);
+    z0 = (f32)-((s32)D_0039A0E0[index].anchorY * 16);
+    x1 = x0 + (f32)textureWidth;
+    z1 = z0 + (f32)textureHeight;
+
+    corner0[0] = x0; corner0[1] = 0.0f; corner0[2] = z0;
+    corner3[0] = x1; corner3[1] = 0.0f; corner3[2] = z1;
+    corner1[0] = corner3[0]; corner1[1] = 0.0f; corner1[2] = corner0[2];
+    corner2[0] = corner0[0]; corner2[1] = 0.0f; corner2[2] = corner3[2];
+
+    SetRotateMatrixY((rotation + 180.0f) * 3.14f / 180.0f);
+    VU0_LOAD_VF_MEMORY(vf10, corner0);
+    VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
+    VU0_STORE_VF(vf10, corner0);
+    VU0_LOAD_VF_MEMORY(vf10, corner1);
+    VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
+    VU0_STORE_VF(vf10, corner1);
+    VU0_LOAD_VF_MEMORY(vf10, corner2);
+    VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
+    VU0_STORE_VF(vf10, corner2);
+    VU0_LOAD_VF_MEMORY(vf10, corner3);
+    VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
+    VU0_STORE_VF(vf10, corner3);
+
+    xOffset = x * 16.0f;
+    yOffset = y * 16.0f;
+    corner0[0] += xOffset; corner0[2] = corner0[2] * 0.5f + yOffset;
+    corner1[2] = corner1[2] * 0.5f + yOffset; corner1[0] += xOffset;
+    corner2[0] += xOffset; corner2[2] = corner2[2] * 0.5f + yOffset;
+    corner3[0] += xOffset; corner3[2] = corner3[2] * 0.5f + yOffset;
+
+    sdfPrimLinkFt4(packetList, color | 0x808080, 0x44,
+                         (s32)corner0[0], (s32)corner0[2],
+                         textureU, textureV,
+                         (s32)corner1[0], (s32)corner1[2],
+                         textureURight, textureV,
+                         (s32)corner2[0], (s32)corner2[2],
+                         textureU, textureVBottom,
+                         (s32)corner3[0], (s32)corner3[2],
+                         textureURight, textureVBottom,
+                         0, NULL);
+
+    appendTarget = fldDrawGetOt();
+    drawSurface = fldDrawGetOt();
+    drawSurface->append(appendTarget, packetList);
+}
+#else
+INCLUDE_ASM(const s32, "game/code_001442D0", func_00145A08);
+#endif
+
+#ifdef NON_MATCHING
+#include "fld_projected_sprite.h"
+#include "dsp_entry_api.h"
+#include "dsp_channel.h"
+#include "evt_message_window_api.h"
+#include "fld_area_work.h"
+#include "fld_room_effect_entry.h"
+#include "fld_object_slot.h"
+#include "fld_npc_palette.h"
+#include "file_pac.h"
+#include "evt_world.h"
+#include "common.h"
+#include "snd_track_playback_api.h"
+#include "fld_scene_ready_api.h"
+#include "fld_clear_menu_entries_api.h"
+#include "fld_play_pending_sounds_api.h"
+#include "fld_scene_record_api.h"
+#include "fld_object_slot_api.h"
+#include "fld_release_texture_slots_api.h"
+#include "fld_spark_object_entry.h"
+#include "fld_spark_slot.h"
+#include "sdf_math_vector4.h"
+#include "kwln_fade.h"
+#include "mnu_title_stream.h"
+#include "eff_random.h"
+#include "snd_sequence_volume_pan.h"
+#include "sdf_trig.h"
+#include "fld_area_path.h"
+#include "btl_stage_task_cleanup.h"
+#include "sdf_textured_rect.h"
+#include "sdf_motion.h"
+#include "mdl.h"
+#include "sdf_chip.h"
+#include "dds3obj.h"
+#include "dds3_world_selection.h"
+#include "dds3_world_value.h"
+#include "sdf_dev_state.h"
+#include "fld_transfer_chunk.h"
+#include "sdf_resource.h"
+#include "eff_transform.h"
+#include "sdf_model.h"
+#include "fld_scene_record.h"
+#include "sdf.h"
+#include "sdf_projection.h"
+#include "sdf_draw.h"
+#include "fpu.h"
+#include "pcp_vu0.h"
+#include "dat_state.h"
+#include "eff.h"
+#include "eff_node.h"
+#include "eff_node_descriptor.h"
+#include "kwln.h"
+#include "kwln_task_lifecycle.h"
+#include "file_request_api.h"
+#include "sdf_texture_file.h"
+#include "mdl_flag_api.h"
+#include "dds3_world_counter.h"
+#include "fr_font.h"
+#include "itf.h"
+#include "btl.h"
+#include "evt_unit.h"
+#include "fld_title_banner_menu.h"
+#include "fld_label_cache_api.h"
+#include "sdf_packet_alloc.h"
+#include "sdf_texture_draw_packet.h"
+#include "sdf_packet_list.h"
+#include "sdf_packet_builders.h"
+#include "sdf_vu_matrix.h"
+
+extern FldProjectedSprite D_0039A0E0[];
+
+extern f32 D_00436284;
+extern sdfTexHandle_t *D_00389978;
+extern SdfPoolNode *fldDrawGetOt(void);
+/* Draw a minimap icon from the icon table with an alpha: as func_00145A08,
+ * but the alpha is given, and the player's (index 1) pulses it, its pulse
+ * scaled by the alpha out of 128 and clamped to a byte. Upstream: INCLUDE_ASM
+ * in game/code_001442D0; written from the retail routine. Checked against
+ * retail (scripts/bodies/check.sh): the same memory accesses and calls; the
+ * same immediates but one a branch-likely copies. */
+void func_00145D48(s32 index, s32 alpha, f32 x, f32 y, f32 rotation) {
+    f32 x0, x1, z0, z1;
+    s32 textureU, textureV, textureWidth, textureHeight;
+    s32 textureURight, textureVBottom;
+    f32 corner0[4] __attribute__((aligned(16)));
+    f32 corner1[4] __attribute__((aligned(16)));
+    f32 corner2[4] __attribute__((aligned(16)));
+    f32 corner3[4] __attribute__((aligned(16)));
+    f32 xOffset, yOffset;
+    u32 color;
+    sdfDrawTag_t *packetList;
+    SdfPoolNode *appendTarget;
+    SdfPoolNode *drawSurface;
+
+    if (index == 1) {
+        s32 pulsed = (s32)((u32)(sdfSin(D_00436284) * 64.0f) + 0x80) * alpha / 128;
+
+        D_00436284 += 0.2f;
+        if (pulsed < 0) {
+            pulsed = 0;
+        }
+        if (pulsed >= 256) {
+            pulsed = 255;
+        }
+        color = (u32)pulsed << 24;
+    } else {
+        color = (u32)alpha << 24;
+    }
+
+    packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(packetList);
+    sdf2DLinkTexPacket(packetList, D_00389978, 0);
+
+    textureU = (s32)D_0039A0E0[index].u * 16;
+    textureV = (s32)D_0039A0E0[index].v * 16;
+    textureWidth = (s32)D_0039A0E0[index].width * 16;
+    textureHeight = (s32)D_0039A0E0[index].height * 16;
+    textureURight = textureU + textureWidth;
+    textureVBottom = textureV + textureHeight;
+    x0 = (f32)-((s32)D_0039A0E0[index].anchorX * 16);
+    z0 = (f32)-((s32)D_0039A0E0[index].anchorY * 16);
+    x1 = x0 + (f32)textureWidth;
+    z1 = z0 + (f32)textureHeight;
+
+    corner0[0] = x0; corner0[1] = 0.0f; corner0[2] = z0;
+    corner3[0] = x1; corner3[1] = 0.0f; corner3[2] = z1;
+    corner1[0] = corner3[0]; corner1[1] = 0.0f; corner1[2] = corner0[2];
+    corner2[0] = corner0[0]; corner2[1] = 0.0f; corner2[2] = corner3[2];
+
+    SetRotateMatrixY((rotation + 180.0f) * 3.14f / 180.0f);
+    VU0_LOAD_VF_MEMORY(vf10, corner0);
+    VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
+    VU0_STORE_VF(vf10, corner0);
+    VU0_LOAD_VF_MEMORY(vf10, corner1);
+    VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
+    VU0_STORE_VF(vf10, corner1);
+    VU0_LOAD_VF_MEMORY(vf10, corner2);
+    VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
+    VU0_STORE_VF(vf10, corner2);
+    VU0_LOAD_VF_MEMORY(vf10, corner3);
+    VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
+    VU0_STORE_VF(vf10, corner3);
+
+    xOffset = x * 16.0f;
+    yOffset = y * 16.0f;
+    corner0[0] += xOffset; corner0[2] = corner0[2] * 0.5f + yOffset;
+    corner1[2] = corner1[2] * 0.5f + yOffset; corner1[0] += xOffset;
+    corner2[0] += xOffset; corner2[2] = corner2[2] * 0.5f + yOffset;
+    corner3[0] += xOffset; corner3[2] = corner3[2] * 0.5f + yOffset;
+
+    sdfPrimLinkFt4(packetList, color | 0x808080, 0x44,
+                         (s32)corner0[0], (s32)corner0[2],
+                         textureU, textureV,
+                         (s32)corner1[0], (s32)corner1[2],
+                         textureURight, textureV,
+                         (s32)corner2[0], (s32)corner2[2],
+                         textureU, textureVBottom,
+                         (s32)corner3[0], (s32)corner3[2],
+                         textureURight, textureVBottom,
+                         0, NULL);
+
+    appendTarget = fldDrawGetOt();
+    drawSurface = fldDrawGetOt();
+    drawSurface->append(appendTarget, packetList);
+}
+#else
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00145D48);
+#endif
 
 s32 fldAutoMap_GetFloor(s32 scene, u32 index) {
     s32 result = 1;
@@ -2227,7 +2555,370 @@ void fldDrawScrollingLayerOverlay(void) {
     rsetAlpha(0);
 }
 
+#ifdef NON_MATCHING
+#include "dsp_entry_api.h"
+#include "dsp_channel.h"
+#include "evt_message_window_api.h"
+#include "fld_area_work.h"
+#include "fld_room_effect_entry.h"
+#include "fld_object_slot.h"
+#include "fld_npc_palette.h"
+#include "file_pac.h"
+#include "evt_world.h"
+#include "common.h"
+#include "snd_track_playback_api.h"
+#include "fld_scene_ready_api.h"
+#include "fld_clear_menu_entries_api.h"
+#include "fld_play_pending_sounds_api.h"
+#include "fld_scene_record_api.h"
+#include "fld_object_slot_api.h"
+#include "fld_release_texture_slots_api.h"
+#include "fld_spark_object_entry.h"
+#include "fld_spark_slot.h"
+#include "sdf_math_vector4.h"
+#include "kwln_fade.h"
+#include "mnu_title_stream.h"
+#include "eff_random.h"
+#include "snd_sequence_volume_pan.h"
+#include "sdf_trig.h"
+#include "fld_area_path.h"
+#include "btl_stage_task_cleanup.h"
+#include "sdf_textured_rect.h"
+#include "sdf_motion.h"
+#include "mdl.h"
+#include "sdf_chip.h"
+#include "dds3obj.h"
+#include "dds3_world_selection.h"
+#include "dds3_world_value.h"
+#include "sdf_dev_state.h"
+#include "fld_transfer_chunk.h"
+#include "sdf_resource.h"
+#include "eff_transform.h"
+#include "sdf_model.h"
+#include "fld_scene_record.h"
+#include "sdf.h"
+#include "sdf_projection.h"
+#include "sdf_draw.h"
+#include "fpu.h"
+#include "pcp_vu0.h"
+#include "dat_state.h"
+#include "eff.h"
+#include "eff_node.h"
+#include "eff_node_descriptor.h"
+#include "kwln.h"
+#include "kwln_task_lifecycle.h"
+#include "file_request_api.h"
+#include "sdf_texture_file.h"
+#include "mdl_flag_api.h"
+#include "dds3_world_counter.h"
+#include "fr_font.h"
+#include "itf.h"
+#include "btl.h"
+#include "evt_unit.h"
+#include "fld_title_banner_menu.h"
+#include "fld_label_cache_api.h"
+#include "field_stage.h"
+#include "fld_automap_entry_discovery_state.h"
+
+extern void evtSubmitDefaultDepthGradientRect(s32 x, s32 y, s32 width, s32 height, s32 topLeftColor, s32 topRightColor, s32 bottomRightColor, s32 bottomLeftColor);
+extern s32 fldAutoMapGetFloorMax(void);
+extern void fldDrawProjectedMapIcon(f32 x, f32 y, s32 index, u32 color);
+extern void fldAutoMapDrawMdl1(sdfModelRootNode_t *emitter, f32 x, f32 y, f32 z);
+extern void fldAutoMapNodeSet(sdfModelRootNode_t *model, s32 index, s32 clearFlag);
+extern f32 D_0037FA20[4] __attribute__((aligned(16)));
+extern s32 D_00436240, D_0043624C;
+extern s32 fldAutoMapField;
+extern s32 D_00436248;
+extern void rsetOtOfs(u32);
+extern void rsetAlpha(s32);
+extern void rsetTest(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void DrwSprite2D(s32, s32, s32, s32, s32, s32, s32, s32, s32, sdfTexHandle_t *);
+extern sdfModelRootNode_t *D_003A5470[];
+extern sdfTexHandle_t *D_0044F7F0[];
+
+extern void InversMatrix(void);
+extern void aDrawBoxF(s32, s32, s32, s32, u32, u32, u32, u32);
+extern void eglSetOt(u32);
+extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void evtSubmitPrimaryAlphaBlendMode(s32);
+extern void eglLinkPoly4(f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,f32,u32,u32,u32,u32);
+
+extern void fldAllIconDel(s32 index, f32 *x, f32 *z);
+extern void fldPoint3To2H(f32 *, f32 *, f32, f32, f32);
+extern void func_00145D48(s32 index, s32 alpha, f32 x, f32 y, f32 rotation);
+extern s32 D_004362B8, D_004362BC;
+extern f32 D_004362C0, D_004362C4;
+
+/* The overlay's fade as an alpha: 20 frames from clear to 0x80. */
+#define FLD_MAP_OVERLAY_ALPHA() ((20 - fldGlobalBase.overlayFadeInFrames) * 128 / 20)
+
+/* An icon of the kind's sprite, shown once its cell is explored (or the whole
+ * map is revealed). */
+#define FLD_MAP_ICON_CASE(kind, sprite)                                                         \
+    case kind:                                                                                  \
+        if (D_00436240 != 0 ||                                                                  \
+            fldIsStageExplorationCellMarked(D_004362B8, icon->position->x + sceneX + offsetX,  \
+                                            icon->position->z + sceneZ + offsetZ) != 0) {       \
+            spriteIndex = sprite;                                                               \
+            iconVisible = 1;                                                                    \
+        }                                                                                       \
+        break;
+
+/* Draw the field minimap: the explored cells and the items around the player
+ * on the selected floor, projected through the map matrix, with the player's
+ * marker and, while a scene command may run, the map frame. DDS1's
+ * func_00144D30 is the shape; DDS2's routine fades the models, icons and
+ * marker in with the overlay (overlayFadeInFrames), lays the panel out its
+ * own way (the depth rects, the window, the frame's six sprites), maps two
+ * more icon kinds to sprites (9: 3; 11: 11, explored like the rest) and draws
+ * the marker through func_00145D48 with the fade's alpha. Upstream:
+ * INCLUDE_ASM in game/code_001442D0; written from the retail routine. Checked
+ * against retail: the same memory accesses, calls
+ * and immediates, and the same branches, comparisons and arithmetic (823 of
+ * 986 instructions in place). */
+void func_00148A98(void) {
+    s32 i, j, k;
+    s32 selectedFloor;
+    s32 itemVisible;
+    FldSceneRecord *record;
+    FldItem *item;
+    FieldStageCoordinate *stage;
+    f32 sceneX, sceneZ;
+    f32 projectedX, projectedY;
+    f32 playerX, playerY;
+    f32 playerWorldX, playerWorldZ;
+    f32 focus[4] __attribute__((aligned(16)));
+
+    if (fldGlobalBase.unk138 > 0) {
+        fldGlobalBase.unk138--;
+        return;
+    }
+
+    fldAllIconDel(D_00436248, &sceneX, &sceneZ);
+    playerWorldX = fldGlobalBase.x + sceneX;
+    playerWorldZ = fldGlobalBase.z + sceneZ;
+    fldAutoMapGetFloorMax();
+    VU0_LOAD_MATRIX(&D_00384790);
+    InversMatrix();
+    D_004362B8 = D_0043624C;
+    D_004362BC = 128;
+    sdf3DSetCamera(&dds3ScreenParam, &D_00384790);
+    rsetOtOfs(0x56);
+    rsetAlpha(0);
+    rsetTest(1, 0, 128, 1, 0, 0, 1, 1);
+    aDrawBoxF(0, 0, 512, 224, 0, 0, 0, 0);
+    rsetOtOfs(0x56);
+    rsetTest(1, 1, 128, 1, 0, 0, 1, 1);
+
+    if (D_00436240 == 0) {
+        stage = fldFindStageCoordinateRecord(fldGlobalBase.area, D_004362B8);
+        if (stage != NULL) {
+            f32 step = (f32)stage->cellSize;
+
+            eglSetOt(0x56);
+            evtSubmitPrimaryGsTest(1, 0, 128, 1, 0, 0, 1, 1);
+            evtSubmitPrimaryAlphaBlendMode(1);
+            for (i = 0, sceneX = stage->originX; i < stage->cols; i++, sceneX += step) {
+                if (sceneX > playerWorldX + 3000.0f) {
+                    continue;
+                }
+                if (sceneX < playerWorldX - 3000.0f) {
+                    continue;
+                }
+                for (j = 0, sceneZ = stage->originZ; j < stage->rows; j++, sceneZ -= step) {
+                    if (sceneZ > playerWorldZ + 3600.0f) {
+                        continue;
+                    }
+                    if (sceneZ < playerWorldZ - 3600.0f) {
+                        continue;
+                    }
+                    if (fldIsStageExplorationCellMarked(D_004362B8, sceneX, sceneZ) != 0) {
+                        eglLinkPoly4(sceneX - 50.0f, -10.0f, sceneZ + 50.0f,
+                                                  sceneX + step + 50.0f, -10.0f, sceneZ + 50.0f,
+                                                  sceneX - 50.0f, -10.0f, sceneZ - step - 50.0f,
+                                                  sceneX + step + 50.0f, -10.0f, sceneZ - step - 50.0f,
+                                                  0x80000000, 0x80000000, 0x80000000, 0x80000000);
+                    }
+                }
+            }
+            evtSubmitPrimaryGsTest(1, 0, 128, 1, 1, 1, 1, 1);
+            evtSubmitPrimaryAlphaBlendMode(0);
+        }
+    }
+
+    eglSetOt(0x56);
+    evtSubmitPrimaryAlphaBlendMode(1);
+    evtSubmitDefaultDepthGradientRect(0, 0, 512, 289, 0, 0, 0, 0);
+    evtSubmitDefaultDepthGradientRect(0, 289, 403, 135, 0, 0, 0, 0);
+    evtSubmitDefaultDepthGradientRect(495, 289, 18, 135, 0, 0, 0, 0);
+    evtSubmitDefaultDepthGradientRect(0, 424, 512, 24, 0, 0, 0, 0);
+    evtSubmitPrimaryAlphaBlendMode(0);
+
+    record = fldAutoMapHeader;
+    selectedFloor = D_004362B8 - 1;
+    for (i = 0; i < (s32)fldAutoMapData; i++, record++) {
+        item = record->items;
+        for (j = 0; j < record->count; j++, item++) {
+            itemVisible = 0;
+            if (selectedFloor == item->floor) {
+                if (fldGetFloorFlag(fldAutoMapField, i, j) != 0) {
+                    itemVisible = 1;
+                }
+                if (D_00436240 != 0) {
+                    itemVisible = 1;
+                }
+            }
+            fldAutoMapNodeSet(D_003A5470[i], item->nodeIndex, itemVisible);
+        }
+    }
+
+    eglSetOt(0x57);
+    evtSubmitPrimaryGsTest(1, 0, 128, 3, 1, 1, 1, 1);
+    evtSubmitPrimaryAlphaBlendMode(0);
+    for (i = 0; i < (s32)fldAutoMapData; i++) {
+        sdfModelRootNode_t *model;
+
+        model = D_003A5470[i];
+        model->color = ((u32)FLD_MAP_OVERLAY_ALPHA() << 24) | 0x808080;
+        fldAutoMapDrawMdl1(model, 0.0f, 0.0f, 0.0f);
+    }
+
+    rsetOtOfs(0x5A);
+    rsetAlpha(0);
+    rsetTest(1, 0, 128, 1, 0, 0, 1, 1);
+    sdf3DSetCamera(&dds3ScreenParam, &sdfViewMatrix);
+    D_004362C0 += 0.4f;
+    D_004362C4 += 0.2f;
+    PCP_COPY_VECTOR_F32(focus, D_0037FA20);
+
+    if (D_004362BC >= 128) {
+        rsetAlpha(1);
+        aDrawBoxF(0, 0, 512, 224, 0, 0, 0, 0);
+        aDrawBoxF(404, 145, 92, 67, 0, 0, 0, 128);
+        rsetAlpha(0);
+        rsetTest(1, 0, 128, 3, 1, 1, 1, 1);
+
+        record = fldAutoMapHeader;
+        selectedFloor = D_004362B8 - 1;
+        for (i = 0; i < (s32)fldAutoMapData; i++, record++) {
+            sceneX = 0.0f;
+            sceneZ = 0.0f;
+            item = record->items;
+            for (j = 0; j < record->count; j++, item++) {
+                FldIcon *icon;
+
+                itemVisible = 0;
+                if (selectedFloor == item->floor) {
+                    if (fldGetFloorFlag(fldAutoMapField, i, j) != 0) {
+                        itemVisible = 1;
+                    }
+                    if (D_00436240 != 0) {
+                        itemVisible = 1;
+                    }
+                }
+                if (itemVisible == 0) {
+                    continue;
+                }
+                icon = item->icons;
+                if (icon == NULL) {
+                    continue;
+                }
+                for (k = 0; k < item->iconCount; k++, icon++) {
+                    u32 color = ((u32)FLD_MAP_OVERLAY_ALPHA() << 24) | 0x808080;
+                    s32 spriteIndex = 0;
+                    s32 iconVisible = 0;
+                    f32 offsetX = 0.0f;
+                    f32 offsetZ = 0.0f;
+
+                    switch (icon->kind) {
+                    FLD_MAP_ICON_CASE(1, 8)
+                    FLD_MAP_ICON_CASE(2, 9)
+                    FLD_MAP_ICON_CASE(3, 10)
+                    FLD_MAP_ICON_CASE(4, 5)
+                    FLD_MAP_ICON_CASE(5, 2)
+                    FLD_MAP_ICON_CASE(6, 4)
+                    FLD_MAP_ICON_CASE(7, 6)
+                    FLD_MAP_ICON_CASE(8, 7)
+                    FLD_MAP_ICON_CASE(9, 3)
+                    FLD_MAP_ICON_CASE(10, 12)
+                    FLD_MAP_ICON_CASE(11, 11)
+                    FLD_MAP_ICON_CASE(12, 13)
+                    FLD_MAP_ICON_CASE(13, 14)
+                    default:
+                        spriteIndex = 11;
+                        break;
+                    }
+                    if (iconVisible != 0) {
+                        f32 x;
+                        f32 z;
+
+                        x = icon->position->x + sceneX + offsetX;
+                        offsetX = focus[0] - x;
+                        if (offsetX < 0.0f) {
+                            offsetX = -offsetX;
+                        }
+                        z = icon->position->z + sceneZ + offsetZ;
+                        offsetZ = focus[2] - z;
+                        if (offsetZ < 0.0f) {
+                            offsetZ = -offsetZ;
+                        }
+                        if (offsetX < 80000.0f && offsetZ < 80000.0f) {
+                            fldPoint3To2H(&projectedX, &projectedY, x, 0.0f, z);
+                            fldDrawProjectedMapIcon(projectedX, projectedY, spriteIndex, color);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (D_004362B8 == fldGlobalBase.flagStage) {
+            f32 worldX;
+            f32 worldZ;
+            f32 distanceX;
+            f32 distanceZ;
+
+            rsetTest(1, 0, 128, 3, 0, 0, 1, 1);
+            fldAllIconDel(D_00436248, &sceneX, &sceneZ);
+            rsetAlpha(1);
+            worldX = fldGlobalBase.x + sceneX;
+            distanceX = focus[0] - worldX;
+            if (distanceX < 0.0f) {
+                distanceX = -distanceX;
+            }
+            worldZ = fldGlobalBase.z + sceneZ;
+            distanceZ = focus[2] - worldZ;
+            if (distanceZ < 0.0f) {
+                distanceZ = -distanceZ;
+            }
+            fldPoint3To2H(&playerX, &playerY, worldX, 0.0f, worldZ);
+            if (distanceX < 80000.0f && distanceZ < 80000.0f) {
+                s32 alpha = FLD_MAP_OVERLAY_ALPHA();
+
+                rsetAlpha(1);
+                func_00145D48(1, alpha, playerX, playerY, -fldGlobalBase.negatedAngle);
+                rsetAlpha(0);
+                func_00145D48(0, alpha, playerX, playerY, fldGlobalBase.angle);
+            }
+            if (fldGlobalBase.commandEnabled != 0 && fldGlobalBase.sceneLightSetOverrideIndex == 0) {
+                rsetAlpha(0);
+                rsetTest(1, 0, 128, 1, 0, 0, 1, 1);
+                DrwSprite2D(403, 289, 9, 135, 2, 2, 1, 1, 0x80808080, D_0044F7F0[9]);
+                DrwSprite2D(486, 289, 9, 135, 2, 2, 1, 1, 0x80808080, D_0044F7F0[9]);
+                DrwSprite2D(412, 289, 74, 26, 2, 2, 74, 1, 0x80808080, D_0044F7F0[9]);
+                DrwSprite2D(412, 393, 74, 31, 2, 2, 74, 1, 0x80808080, D_0044F7F0[9]);
+                DrwSprite2D(412, 315, 74, 39, 2, 2, 74, 39, 0x80808080, D_0044F7F0[9]);
+                DrwSprite2D(412, 354, 74, 39, 2, 41, 74, -39, 0x80808080, D_0044F7F0[9]);
+            }
+        }
+        rsetTest(1, 0, 128, 1, 0, 0, 1, 1);
+    }
+    rsetOtOfs(0x5E);
+    rsetAlpha(0);
+    VU0_LOAD_MATRIX(&sdfViewMatrix);
+}
+#else
 INCLUDE_ASM(const s32, "game/code_001442D0", func_00148A98);
+#endif
 
 extern u8 fldAutoMapSeqTestFlag(u32);
 extern void fldAutoMapSeqSetFlag(u32);
@@ -4135,7 +4826,225 @@ void fldFlushQueuedEffectPositions(void) {
     }
 }
 
+#ifdef NON_MATCHING
+#include "dsp_entry_api.h"
+#include "dsp_channel.h"
+#include "evt_message_window_api.h"
+#include "fld_area_work.h"
+#include "fld_room_effect_entry.h"
+#include "fld_object_slot.h"
+#include "fld_npc_palette.h"
+#include "file_pac.h"
+#include "evt_world.h"
+#include "common.h"
+#include "snd_track_playback_api.h"
+#include "fld_scene_ready_api.h"
+#include "fld_clear_menu_entries_api.h"
+#include "fld_play_pending_sounds_api.h"
+#include "fld_scene_record_api.h"
+#include "fld_object_slot_api.h"
+#include "fld_release_texture_slots_api.h"
+#include "fld_spark_object_entry.h"
+#include "fld_spark_slot.h"
+#include "sdf_math_vector4.h"
+#include "kwln_fade.h"
+#include "mnu_title_stream.h"
+#include "eff_random.h"
+#include "snd_sequence_volume_pan.h"
+#include "sdf_trig.h"
+#include "fld_area_path.h"
+#include "btl_stage_task_cleanup.h"
+#include "sdf_textured_rect.h"
+#include "sdf_motion.h"
+#include "mdl.h"
+#include "sdf_chip.h"
+#include "dds3obj.h"
+#include "dds3_world_selection.h"
+#include "dds3_world_value.h"
+#include "sdf_dev_state.h"
+#include "fld_transfer_chunk.h"
+#include "sdf_resource.h"
+#include "eff_transform.h"
+#include "sdf_model.h"
+#include "fld_scene_record.h"
+#include "sdf.h"
+#include "sdf_projection.h"
+#include "sdf_draw.h"
+#include "fpu.h"
+#include "pcp_vu0.h"
+#include "dat_state.h"
+#include "eff.h"
+#include "eff_node.h"
+#include "eff_node_descriptor.h"
+#include "kwln.h"
+#include "kwln_task_lifecycle.h"
+#include "file_request_api.h"
+#include "sdf_texture_file.h"
+#include "mdl_flag_api.h"
+#include "dds3_world_counter.h"
+#include "fr_font.h"
+#include "itf.h"
+#include "btl.h"
+#include "evt_unit.h"
+#include "fld_title_banner_menu.h"
+#include "fld_label_cache_api.h"
+#include "field_stage.h"
+#include "sdf_chunk.h"
+#include "sdk_libc.h"
+#include "dds3_object_flags.h"
+#include "sdf_map_position_api.h"
+
+
+extern void fldDrawLocationPanel(void);
+extern void fldUpdatePositionedTextureNodes(void);
+extern void fldUpdateIndexedResourceEffectPosition(void);
+extern void fldUpdateMenuResourceEffects(void);
+
+extern f32 sdfViewTargetVector[4];
+
+extern EffNode *D_004362DC;
+extern EffNode *D_004362E8;
+extern EffNode *D_004362F4;
+
+extern s32 fldAreaDamageEffectPlaced;
+
+extern evtUnitHandle_t *dds3GetUnitHandleObjectBasic(dds3Basic_t *);
+
+
+/* Move an effect node to a position and update it. */
+static void placeEffectNode(EffNode *node, f32 *position) {
+    effCopyVectorToNodeInstance(node, position);
+    dds3EffectDispatchUpdate(node);
+}
+
+/* Each field frame outside battle areas: move the field objects' effects to
+ * their map records' positions, hide the room's placed NPC models that are
+ * switched off or close to the camera's target (by their size), update the
+ * area's damage effect, and draw the menu resource effects, the positioned
+ * texture nodes, the indexed resource effect and the location panel. DDS1's
+ * func_00149B68 with DDS2's names; DDS2's routine ends in its own texture
+ * and resource-effect updates. Upstream: INCLUDE_ASM in game/code_001442D0;
+ * written from the retail routine, on the shared FldObjectSlot and
+ * FldEffectKind types (the activation table's effect kind at +8). Checked
+ * against retail: the same callees and float
+ * arithmetic; memory accesses through the loops' base registers where
+ * retail's trace resolves addresses; the compiler merging the call and
+ * comparison sites retail makes in each branch. */
+void func_0014DEA8(void) {
+    f32 position[4];
+    FldAreaWork *area = &fldGlobalBase;
+    s32 i;
+
+    memset(position, 0, sizeof(position));
+    position[3] = 1.0f;
+    if (fldGlobalBase.area >= 200 || fldAutoMapSeqTestFlag(1) != 0) {
+        return;
+    }
+
+    for (i = 0; i < fldTakaraCount; i++) {
+        FldObjectSlot *slot = &fldTakaraSlotTable[i];
+        evtUnitHandle_t *transition;
+        s32 kind;
+
+        if (slot->activationKind < 0 || slot->activationKind >= 4) {
+            continue;
+        }
+        if (slot->activationState == 0) {
+            if (slot->effectNode == 0) {
+                continue;
+            }
+            transition = dds3GetUnitHandleObjectBasic(slot->unitObject);
+            if (sdfModelGetMarkPos(transition->owner->inner, 2) != 0) {
+                VU0_STORE_VF(vf10, position);
+            }
+            placeEffectNode((EffNode *)(u32)slot->effectNode, position);
+        } else if (slot->activationState == 1 || slot->activationState == 2) {
+            transition = dds3GetUnitHandleObjectBasic(slot->unitObject);
+            if (sdfModelGetMarkPos(transition->owner->inner, 1) != 0) {
+                VU0_STORE_VF(vf10, position);
+            }
+            kind = D_003A8EB0[slot->effectKindIndex].kind;
+            if (kind == 2 || kind == 3) {
+                if (effInvokeNodeConditionOrAcceptDefault(D_004362DC) != 0) {
+                    placeEffectNode(D_004362DC, position);
+                }
+                continue;
+            }
+            if (D_004362E8 != 0) {
+                placeEffectNode(D_004362E8, position);
+            }
+            if (D_004362F4 != 0) {
+                placeEffectNode(D_004362F4, position);
+            }
+        }
+    }
+
+    for (i = 0; i < fldNpcModelTable; i++) {
+        FldRoomEffectEntry *entry = &fldModelSlotTable[i];
+        f32 target[4];
+        f32 height;
+        f32 dx;
+        f32 dz;
+        f32 distance;
+        s32 near;
+
+        if (entry->room != 0 && fldTestMapSlotAuxiliaryFlag(area->area, area->floor + 1, entry->room) != 0) {
+            if (entry->object != 0) {
+                dds3ObjectBaseOnFlag((void *)entry->object, 1);
+            }
+            continue;
+        }
+        if (entry->placementId == 999) {
+            continue;
+        }
+        SDF_VU0_COPYVECTOR(target, sdfViewTargetVector);
+        if (entry->object == 0) {
+            continue;
+        }
+        dds3ObjectBaseOffFlag((void *)entry->object, 1);
+        dds3GetPosPoseSet((dds3Basic_t *)(u32)entry->object);
+        VU0_STORE_VF(vf10, position);
+
+        height = target[1] - position[1];
+        if (height < 0.0f) {
+            height = -height;
+        }
+        if (height >= 250.0f) {
+            continue;
+        }
+        dx = target[0] - position[0];
+        dz = target[2] - position[2];
+        distance = fsqrtf(dx * dx + dz * dz);
+        if (entry->size >= 79.0f) {
+            near = distance < 95.0f;
+        } else if (entry->size >= 29.0f) {
+            near = distance < 75.0f;
+        } else {
+            near = distance < 60.0f;
+        }
+        if (near) {
+            dds3ObjectBaseOnFlag((void *)entry->object, 1);
+        }
+        if (entry->kind == 6 && entry->kindId == 0x49 && distance < 110.0f) {
+            dds3ObjectBaseOnFlag((void *)entry->object, 1);
+        }
+    }
+
+    if (fldAreaDamageEffectPlaced != 0) {
+        if (effInvokeNodeConditionOrAcceptDefault((EffNode *)(u32)fldAreaDamageEffect) != 0) {
+            dds3EffectDispatchUpdate((EffNode *)(u32)fldAreaDamageEffect);
+        } else {
+            fldAreaDamageEffectPlaced = 0;
+        }
+    }
+    fldUpdateMenuResourceEffects();
+    fldUpdatePositionedTextureNodes();
+    fldUpdateIndexedResourceEffectPosition();
+    fldDrawLocationPanel();
+}
+#else
 INCLUDE_ASM(const s32, "game/code_001442D0", func_0014DEA8);
+#endif
 
 void fldNpcHojiRefresh(void) {
     s32 i;
