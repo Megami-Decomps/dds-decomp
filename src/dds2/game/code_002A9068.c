@@ -609,7 +609,55 @@ s64 mnuReleaseTitleEffectResourceGroups(MenuStaffContext *work) {
     return (s32)effDestroyResourceSlotSet(work->contextTitle);
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "kwln.h"
+#include "eff.h"
+#include "mnu.h"
+#include "mnu_staff.h"
+#include "mnu_scroll_panel.h"
+
+extern void mnuStaffInitResourceLists(u8 *work);
+extern u32 mnuPrepareCampFieldSkillDisplay(dds3ProcessID_t *task);
+
+/* Each frame until it is done: wait for the camp menu's staff resources, its
+ * two title frames, nine party titles and context title, then build its
+ * resource lists, field skill display, scroll panel and party panels once.
+ * Returns whether the menu is built. DDS1's routine waited for a group of
+ * four more resources and had no field skill display. Upstream: INCLUDE_ASM
+ * in game/code_002A9068. */
+s32 mnuInitializeCampMenuWhenResourcesReady(dds3ProcessID_t *task) {
+    MenuStaffContext *menu = (MenuStaffContext *)dds3GetProcessData(task);
+    s32 i;
+
+    if (menu->panelsBuilt != 0) {
+        return 1;
+    }
+    if (movAreTitleEffectsReady(menu->menuResource, &menu->resources) == 0) {
+        return 0;
+    }
+    if (menu->titleFrames[0] == NULL || menu->titleFrames[1] == NULL) {
+        return 0;
+    }
+    for (i = 0; i < 9; i++) {
+        if (menu->partyTitles[i] == NULL) {
+            return 0;
+        }
+    }
+    if (menu->contextTitle == NULL) {
+        return 0;
+    }
+    menu->panelsBuilt = 1;
+    mnuStaffInitResourceLists((u8 *)menu);
+    mnuPrepareCampFieldSkillDisplay(task);
+    menu->scrollPanel = mnuCreateScrollPanel(menu->resources.baseResources[1]);
+    mnuConfigurePanelResource(menu->scrollPanel, menu->resources.baseResources[0], 0, 1);
+    mnuInitializeCampPanelResources(&menu->partyWindow, &menu->resources, (u32)menu->motionResource, &menu->partyPanel);
+    return 1;
+}
+#else
 INCLUDE_ASM(const s32, "game/code_002A9068", mnuInitializeCampMenuWhenResourcesReady);
+#endif
 
 typedef struct StaffResourceHeader {
     u8 pad00[0x64];
