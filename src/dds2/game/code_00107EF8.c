@@ -719,7 +719,56 @@ void evtSubmitTexturedGradientQuad(s32 x, s32 y, s32 width, s32 height,
     surface->append(surface, list);
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "sdf.h"
+#include "sdf_packet_list.h"
+#include "sdf_packet_builders.h"
+#include "sdf_texture_draw_packet.h"
+
+extern u32 egl_OT_Offset;
+extern SdfPoolNode sdfGrOtTable[];
+
+/* Submit a textured quad with four corner colours to the current draw
+ * surface, as evtSubmitTexturedGradientQuad does, but placed by four screen
+ * points (top left, top right, bottom left, bottom right) where that one takes
+ * a rectangle. The points are float pixels: x times 16 and y times 8 (the
+ * field's half height), each truncated, then offset by 0x7000 and 0x7900 as
+ * there. The texture rectangle and the colours (top left, top right, bottom
+ * right, bottom left) are as there. Upstream: INCLUDE_ASM in
+ * game/code_00107EF8; DDS2's own, written from the retail routine. Nothing
+ * calls it directly, and its float and integer parameters travel in separate
+ * registers, so their interleaving is unknown: the order here follows
+ * evtSubmitTexturedGradientQuad's. */
+void evtSubmitTexturedGradientQuadPoints(f32 topLeftX, f32 topLeftY, f32 topRightX, f32 topRightY,
+                                         f32 bottomLeftX, f32 bottomLeftY, f32 bottomRightX,
+                                         f32 bottomRightY, s32 u, s32 v, s32 textureWidth,
+                                         s32 textureHeight, u32 color0, u32 color1, u32 color2,
+                                         u32 color3, sdfTexHandle_t *texture) {
+    sdfDrawTag_t *list;
+    SdfPoolNode *surface;
+    s32 uLeft, vTop, uRight, vBottom;
+
+    list = dds3FontReqAllocDrawTag();
+    sdf2DLinkTexPacket(list, texture, 0);
+    uLeft = u << 4;
+    vTop = v << 4;
+    uRight = uLeft + (textureWidth << 4);
+    vBottom = vTop + (textureHeight << 4);
+    sdfPrimLinkGt4(list, 0x40,
+                   (s32)(topLeftX * 16.0f) + 0x7000, (s32)(topLeftY * 8.0f) + 0x7900, uLeft, vTop, color0,
+                   (s32)(topRightX * 16.0f) + 0x7000, (s32)(topRightY * 8.0f) + 0x7900, uRight, vTop, color1,
+                   (s32)(bottomLeftX * 16.0f) + 0x7000, (s32)(bottomLeftY * 8.0f) + 0x7900, uLeft, vBottom,
+                   color3,
+                   (s32)(bottomRightX * 16.0f) + 0x7000, (s32)(bottomRightY * 8.0f) + 0x7900, uRight, vBottom,
+                   color2,
+                   -1, NULL);
+    surface = &sdfGrOtTable[egl_OT_Offset];
+    surface->append(surface, list);
+}
+#else
 INCLUDE_ASM(const s32, "game/code_00107EF8", evtSubmitTexturedGradientQuadPoints);
+#endif
 
 /* Native rectangle emitter: x/y/width/height, explicit depth, then TL/TR/BR/BL colors. */
 void evtSubmitGradientRectAtDepth(s32 x, s32 y, s32 w, s32 h, u32 depth, s32 color0, s32 color1, s32 color2, s32 color3) {
@@ -1034,7 +1083,129 @@ u32 evtCheckSelectionState(void) {
     return 1;
 }
 
+#ifdef NON_MATCHING
+#include "sdf_line_pair_packet_api.h"
+#include "sdf_gs_header.h"
+#include "dds3_admin_control_api.h"
+#include "sdf_dev_cons.h"
+#include "sdf_dev_console_node.h"
+#include "sdf_gs_blend.h"
+#include "ee_mmi.h"
+#include "sdf_packet_list.h"
+#include "sdf_packet_builders.h"
+#include "pcp_vu0.h"
+#include "common.h"
+#include "kwln_background_fade_api.h"
+#include "sdf_heap_overlay_block.h"
+#include "kwln_draw_buffer.h"
+#include "kwln_frame_draw_buffer.h"
+#include "evt_gradient_rect.h"
+#include "sdf_textured_rect.h"
+#include "sdf_packet_header.h"
+#include "sdf_packet_append.h"
+#include "fr_font.h"
+#include "sdf_chip.h"
+#include "sdf_primitive_packet_api.h"
+#include "kwln.h"
+#include "kwln_task_priority_query.h"
+#include "kwln_task_create.h"
+#include "sdf.h"
+#include "sdf_asset_state.h"
+#include "sdf_resource.h"
+#include "sdf_general_heap_api.h"
+#include "sdf_sif_command.h"
+#include "scr.h"
+#include "bf_flw0_header.h"
+#include "kwln_task_lifecycle.h"
+#include "brs_task.h"
+#include "fld_resource_wait_api.h"
+#include "itf.h"
+#include "sdf_asset_create.h"
+#include "sdf_packet_alloc.h"
+#include "eff_random.h"
+#include "fpu.h"
+#include "evt_sel_state.h"
+
+
+extern u32 dds3DrawFlag;
+
+
+extern void evtUpdateSelectionStateInterpolation(void);
+
+extern f32 aViewTarget[];
+/* Advances the camera-shake selection state by one frame: ramps the per-axis
+ * shake limit up over its first frames, holds it, then ramps it down as the
+ * frame limit approaches, and on each frame random-walks the shake offset on
+ * all three axes within that limit (adding on odd frames, subtracting on even),
+ * keeping the vertical shake from pushing the view eye above its floor unless
+ * the draw-control flag is set. Upstream: INCLUDE_ASM in DDS1's
+ * game/code_00107FD8 and DDS2's game/code_00107EF8; written from the retail
+ * routine. It differs from retail in structure but not
+ * behavior: retail keeps the random, limit and jitter values in stack arrays,
+ * reloads the state pointer from memory in each iteration, tests a dead
+ * zero-limit case and repeats the whole axis loop for odd and even frames,
+ * which the body folds into one loop. */
+void evtUpdateSelectionStateInterpolation(void) {
+    EvtSelState *state = evtSelectionState;
+    f32 *shake = sdfViewShakeVector;
+    s32 randomPercent;
+    s32 limitPercent;
+    f32 jitter;
+    s32 axis;
+
+    switch (state->mode) {
+    case 0:
+        if (state->rampUpFrames <= state->count) {
+            state->mode = 1;
+            state->offset[0] = state->amplitude[0];
+            state->offset[1] = state->amplitude[1];
+            state->offset[2] = state->amplitude[2];
+        } else {
+            for (axis = 0; axis < 3; axis++) {
+                state->offset[axis] = (f32)(state->amplitude[axis] * (state->count + 1)) / (f32)state->rampUpFrames;
+            }
+        }
+        break;
+    case 1:
+        if (state->count >= state->limit - state->rampDownFrames) {
+            if (state->limit != -1) {
+                state->mode = 2;
+            }
+        }
+        break;
+    case 2:
+        for (axis = 0; axis < 3; axis++) {
+            state->offset[axis] = (f32)(state->amplitude[axis] * (state->limit - state->count)) / (f32)state->rampDownFrames;
+        }
+        break;
+    }
+
+    for (axis = 0; axis < 3; axis++) {
+        randomPercent = (s32)(dds3GetRandFloatA(NULL) * 100.0f);
+        limitPercent = (s32)(state->offset[axis] * 100.0f);
+        jitter = (f32)(randomPercent % limitPercent) / 10.0f;
+        if (state->count & 1) {
+            shake[axis] += jitter;
+            if (state->offset[axis] <= ffabsf(shake[axis])) {
+                shake[axis] = state->offset[axis];
+            }
+        } else {
+            shake[axis] -= jitter;
+            if (shake[axis] <= -state->offset[axis]) {
+                shake[axis] = -state->offset[axis];
+            }
+        }
+        if (!(dds3DrawFlag & 0x20000000) && axis == 1) {
+            if (-11.0f < aViewTarget[1] + shake[1]) {
+                shake[1] = 0.0f;
+            }
+        }
+    }
+    state->count++;
+}
+#else
 INCLUDE_ASM(const s32, "game/code_00107EF8", evtUpdateSelectionStateInterpolation);
+#endif
 
 void evtDestroySelectionState(void) {
     evtSelStateDestroy();

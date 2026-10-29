@@ -1040,7 +1040,129 @@ u32 evtCheckSelectionState(void) {
     return 1;
 }
 
+#ifdef NON_MATCHING
+#include "sdf_line_pair_packet_api.h"
+#include "sdf_gs_header.h"
+#include "dds3_admin_control_api.h"
+#include "sdf_dev_cons.h"
+#include "sdf_dev_console_node.h"
+#include "sdf_gs_blend.h"
+#include "ee_mmi.h"
+#include "sdf_packet_list.h"
+#include "sdf_packet_builders.h"
+#include "pcp_vu0.h"
+#include "common.h"
+#include "kwln_background_fade_api.h"
+#include "sdf_heap_overlay_block.h"
+#include "kwln_draw_buffer.h"
+#include "kwln_frame_draw_buffer.h"
+#include "evt_gradient_rect.h"
+#include "sdf_textured_rect.h"
+#include "sdf_packet_header.h"
+#include "sdf_packet_append.h"
+#include "fr_font.h"
+#include "sdf_chip.h"
+#include "sdf_primitive_packet_api.h"
+#include "kwln.h"
+#include "kwln_task_priority_query.h"
+#include "kwln_task_create.h"
+#include "sdf.h"
+#include "sdf_asset_state.h"
+#include "sdf_resource.h"
+#include "sdf_general_heap_api.h"
+#include "sdf_sif_command.h"
+#include "scr.h"
+#include "bf_flw0_header.h"
+#include "kwln_task_lifecycle.h"
+#include "brs_task.h"
+#include "fld_resource_wait_api.h"
+#include "itf.h"
+#include "sdf_asset_create.h"
+#include "sdf_packet_alloc.h"
+#include "eff_random.h"
+#include "fpu.h"
+#include "evt_sel_state.h"
+
+
+extern u32 dds3DrawFlag;
+
+
+extern void evtUpdateSelectionStateInterpolation(void);
+
+extern f32 aViewTarget[];
+/* Advances the camera-shake selection state by one frame: ramps the per-axis
+ * shake limit up over its first frames, holds it, then ramps it down as the
+ * frame limit approaches, and on each frame random-walks the shake offset on
+ * all three axes within that limit (adding on odd frames, subtracting on even),
+ * keeping the vertical shake from pushing the view eye above its floor unless
+ * the draw-control flag is set. Upstream: INCLUDE_ASM in DDS1's
+ * game/code_00107FD8 and DDS2's game/code_00107EF8; written from the retail
+ * routine. It differs from retail in structure but not
+ * behavior: retail keeps the random, limit and jitter values in stack arrays,
+ * reloads the state pointer from memory in each iteration, tests a dead
+ * zero-limit case and repeats the whole axis loop for odd and even frames,
+ * which the body folds into one loop. */
+void evtUpdateSelectionStateInterpolation(void) {
+    EvtSelState *state = evtSelectionState;
+    f32 *shake = sdfViewShakeVector;
+    s32 randomPercent;
+    s32 limitPercent;
+    f32 jitter;
+    s32 axis;
+
+    switch (state->mode) {
+    case 0:
+        if (state->rampUpFrames <= state->count) {
+            state->mode = 1;
+            state->offset[0] = state->amplitude[0];
+            state->offset[1] = state->amplitude[1];
+            state->offset[2] = state->amplitude[2];
+        } else {
+            for (axis = 0; axis < 3; axis++) {
+                state->offset[axis] = (f32)(state->amplitude[axis] * (state->count + 1)) / (f32)state->rampUpFrames;
+            }
+        }
+        break;
+    case 1:
+        if (state->count >= state->limit - state->rampDownFrames) {
+            if (state->limit != -1) {
+                state->mode = 2;
+            }
+        }
+        break;
+    case 2:
+        for (axis = 0; axis < 3; axis++) {
+            state->offset[axis] = (f32)(state->amplitude[axis] * (state->limit - state->count)) / (f32)state->rampDownFrames;
+        }
+        break;
+    }
+
+    for (axis = 0; axis < 3; axis++) {
+        randomPercent = (s32)(dds3GetRandFloatA(NULL) * 100.0f);
+        limitPercent = (s32)(state->offset[axis] * 100.0f);
+        jitter = (f32)(randomPercent % limitPercent) / 10.0f;
+        if (state->count & 1) {
+            shake[axis] += jitter;
+            if (state->offset[axis] <= ffabsf(shake[axis])) {
+                shake[axis] = state->offset[axis];
+            }
+        } else {
+            shake[axis] -= jitter;
+            if (shake[axis] <= -state->offset[axis]) {
+                shake[axis] = -state->offset[axis];
+            }
+        }
+        if (!(dds3DrawFlag & 0x20000000) && axis == 1) {
+            if (-11.0f < aViewTarget[1] + shake[1]) {
+                shake[1] = 0.0f;
+            }
+        }
+    }
+    state->count++;
+}
+#else
 INCLUDE_ASM(const s32, "game/code_00107FD8", evtUpdateSelectionStateInterpolation);
+#endif
 
 void evtDestroySelectionState(void) {
     evtSelStateDestroy();
