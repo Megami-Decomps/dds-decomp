@@ -5515,7 +5515,7 @@ s32 btlSelectSpecialDefeatCameraPose(BtlLinkedCommand *command, s32 any200, s32 
             return 1;
         }
         if (count >= 2 && selector == 0 && mode == 1) {
-            if (btlCanUseActorCategoryFlag4(command)) {
+            if (btlCanUseActorCategoryFlag4(command) != BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE) {
                 btlFlagAllUnitDefeatCandidatesTask();
                 shot = dds3GetRandIntA(0, 3);
                 switch (shot) {
@@ -5539,7 +5539,7 @@ s32 btlSelectSpecialDefeatCameraPose(BtlLinkedCommand *command, s32 any200, s32 
             }
             if (btlCanUseLinkedActor(command)) {
                 variant = 0;
-                if (!btlCanUseActorCategoryFlag2(command)) {
+                if (btlCanUseActorCategoryFlag2(command) == BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE) {
                     variant = dds3GetRandIntA(0, 2);
                 }
             } else {
@@ -5583,7 +5583,7 @@ s32 btlSelectSpecialDefeatCameraPose(BtlLinkedCommand *command, s32 any200, s32 
 
     if (btlCanUseLinkedActor(command)) {
         variant = 0;
-        if (!btlCanUseActorCategoryFlag2(command)) {
+        if (btlCanUseActorCategoryFlag2(command) == BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE) {
             variant = dds3GetRandIntA(0, 2);
         }
     } else {

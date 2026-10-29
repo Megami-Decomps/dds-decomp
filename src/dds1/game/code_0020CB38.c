@@ -857,7 +857,7 @@ s32 btlSelectBossLinkedActionCamera(BtlLinkedCommand *command, s8 firstSide, s8 
         btlGetIndexListCount(task->indexWork.indices);
         if (firstSide == 1 && secondSide == 0) return 0;
         if (firstSide == 0 && secondSide == 1) {
-            if (btlCanUseActorCategoryFlag4(command) && btlCanUseLinkedActor(command)) {
+            if (btlCanUseActorCategoryFlag4(command) != BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE && btlCanUseLinkedActor(command)) {
                 btlClearAllUnitDefeatCandidatesTask();
                 btlApplyCombinedActorFlags(command);
                 switch (dds3GetRandIntA(0, 2)) {
@@ -874,7 +874,7 @@ s32 btlSelectBossLinkedActionCamera(BtlLinkedCommand *command, s8 firstSide, s8 
             }
             if (btlCanUseLinkedActor(command)) {
                 choice = 0;
-                if (!btlCanUseActorCategoryFlag2(command)) choice = dds3GetRandIntA(0, 2);
+                if (btlCanUseActorCategoryFlag2(command) == BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE) choice = dds3GetRandIntA(0, 2);
             } else {
                 choice = 1;
             }
@@ -902,7 +902,7 @@ s32 btlSelectBossLinkedActionCamera(BtlLinkedCommand *command, s8 firstSide, s8 
     }
     if (btlCanUseLinkedActor(command)) {
         choice = 0;
-        if (!btlCanUseActorCategoryFlag2(command)) choice = dds3GetRandIntA(0, 2);
+        if (btlCanUseActorCategoryFlag2(command) == BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE) choice = dds3GetRandIntA(0, 2);
     } else {
         choice = 1;
     }
@@ -924,7 +924,7 @@ s32 btlSelectBossLinkedActionCamera(BtlLinkedCommand *command, s8 firstSide, s8 
         return 1;
     }
     if (count >= 2 && firstSide == 1 && secondSide == 0) {
-        if (btlCanUseActorCategoryFlag4(command)) {
+        if (btlCanUseActorCategoryFlag4(command) != BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE) {
             btlBuildRandomizedActionCameraPosePair(command, &command->frontCamera, &command->backCamera);
             return 0;
         }

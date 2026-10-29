@@ -281,19 +281,19 @@ s32 btlIsActorCategoryTypeTwo(BtlLinkedCommand *action) {
 BtlActorCategoryFlagUseResult btlCanUseActorCategoryFlag2(BtlLinkedCommand *actor) {
     s32 index;
     if (btlIsActorCategoryMarked(actor) != 0) {
-        return 1;
+        return BTL_ACTOR_CATEGORY_FLAG_USE_AVAILABLE;
     }
     if (btlCanUseLinkedActor(actor) == BTL_LINKED_ACTOR_INELIGIBLE) {
-        return 0;
+        return BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE;
     }
     index = actor->actionCode;
     if (index == 0) {
-        return 0;
+        return BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE;
     }
     if ((datActionAnimationRecords[index].flags & 2) != 0) {
-        return 1;
+        return BTL_ACTOR_CATEGORY_FLAG_USE_AVAILABLE;
     }
-    return 0;
+    return BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE;
 }
 
 s32 btlHasSingleLinkedResource(BtlLinkedCommand *actor) {
@@ -307,16 +307,16 @@ s32 btlHasSingleLinkedResource(BtlLinkedCommand *actor) {
 BtlActorCategoryFlagUseResult btlCanUseActorCategoryFlag4(BtlLinkedCommand *actor) {
     s32 index;
     if (btlCanUseLinkedActor(actor) == BTL_LINKED_ACTOR_INELIGIBLE) {
-        return 0;
+        return BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE;
     }
     index = actor->actionCode;
     if (index == 0) {
-        return 0;
+        return BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE;
     }
     if ((datActionAnimationRecords[index].flags & 4) != 0) {
-        return 1;
+        return BTL_ACTOR_CATEGORY_FLAG_USE_AVAILABLE;
     }
-    return 0;
+    return BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE;
 }
 
 s32 btlIsActorCategoryMarked(BtlLinkedCommand *actor) {
@@ -581,7 +581,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
             return;
         }
         if (task->unit->status.flags & BTL_UNIT_STATUS_FLAG_ALLY) {
-            if ((hasFlag200 == 1 || hasFlag400 != 1) && btlCanUseActorCategoryFlag4(action) == 0) {
+            if ((hasFlag200 == 1 || hasFlag400 != 1) && btlCanUseActorCategoryFlag4(action) == BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE) {
                 if (btlHasSingleLinkedResource(action) == 0) {
                     if (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) {
                         btlBuildGroupSizeActionCameraPair(action, &action->frontCamera, &action->backCamera);
@@ -618,7 +618,7 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
                 }
                 action->flags |= 0x800;
             } else {
-                if (btlCanUseActorCategoryFlag2(action) != 0 || btlCanUseActorCategoryFlag4(action) != 0 ||
+                if (btlCanUseActorCategoryFlag2(action) != BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE || btlCanUseActorCategoryFlag4(action) != BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE ||
                     btlIsLinkedFireOfSinaiCommand(action) != 0) {
                     action->stepKind = BTL_LINKED_CAMERA_STEP_INITIAL_POSE_SELECTION;
                 } else if (btlIsEntryHeightWithinLimit() == BTL_ENTRY_HEIGHT_LIMIT_RESULT_EXCEEDS_LIMIT &&
@@ -654,17 +654,17 @@ void btlChooseLinkedActionCameraPose(BtlLinkedCommand *action) {
             } else if (btlHasSingleLinkedResource(action) != 0 && btlHasLinkedEffectNodeTrigger(action) != 0) {
                 action->stepKind = BTL_LINKED_CAMERA_STEP_ACTION_END_PULLBACK;
                 btlBuildDistanceClampedActionCameraBlend(action, &action->frontCamera, &action->backCamera);
-            } else if (btlCanUseActorCategoryFlag4(action) != 0 && (hasFlag200 != 1 || hasFlag400 == hasFlag200)) {
+            } else if (btlCanUseActorCategoryFlag4(action) != BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE && (hasFlag200 != 1 || hasFlag400 == hasFlag200)) {
                 btlBuildRandomizedActionCameraPosePair(action, &action->frontCamera, &action->backCamera);
                 action->flags |= 0x800;
             } else if ((hasFlag200 != 1 || hasFlag400 == hasFlag200) &&
-                       (btlCanUseActorCategoryFlag2(action) != 0 ||
+                       (btlCanUseActorCategoryFlag2(action) != BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE ||
                         ((dds3GetRandA((EffRandState *)effSharedRandomState) & 1) && btlIsActorCategoryTypeTwo(action) == 0))) {
                 btlBuildGroupSizeActionCameraPair(action, &action->frontCamera, &action->backCamera);
                 action->flags |= 0x800;
             } else {
-                if (btlHasActorCategoryFlag100(action) == 0 && btlCanUseActorCategoryFlag2(action) == 0 &&
-                    btlCanUseActorCategoryFlag4(action) == 0 && (hasFlag200 == 1 || hasFlag400 != 1)) {
+                if (btlHasActorCategoryFlag100(action) == 0 && btlCanUseActorCategoryFlag2(action) == BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE &&
+                    btlCanUseActorCategoryFlag4(action) == BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE && (hasFlag200 == 1 || hasFlag400 != 1)) {
                     action->stepKind = (dds3GetRandA((EffRandState *)effSharedRandomState) & 1)
                         ? BTL_LINKED_CAMERA_STEP_AIM_EFFECT_POSE
                         : BTL_LINKED_CAMERA_STEP_ACTION_END_PULLBACK;
@@ -749,7 +749,7 @@ static inline s32 btlChooseLinkedCameraVariant(BtlLinkedCommand *action, s32 *sh
     s32 choice;
 
     if (btlCanUseLinkedActor(action)) {
-        if (btlCanUseActorCategoryFlag2(action)) {
+        if (btlCanUseActorCategoryFlag2(action) != BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE) {
             if (shrinkDistance != NULL) {
                 *shrinkDistance = 0;
             }
@@ -807,7 +807,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
                 if (btlIsActorCategoryMarked(action)) {
                     btlInitCommandCursorForFirstActor(action, &action->camera);
                     action->stepKind = BTL_LINKED_CAMERA_STEP_ADVANCE_TARGET_CURSOR_DDS1;
-                } else if (btlCanUseActorCategoryFlag4(action)) {
+                } else if (btlCanUseActorCategoryFlag4(action) != BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE) {
                     btlBuildRandomizedActionCameraPosePair(action, &action->frontCamera, &action->backCamera);
                 } else {
                     choice = btlChooseLinkedCameraVariant(action, &reduceDistance);
@@ -831,7 +831,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
                     }
                 }
             } else if (hasFlag200 == 1 && hasFlag400 != hasFlag200) {
-                if (btlCanUseActorCategoryFlag4(action)) {
+                if (btlCanUseActorCategoryFlag4(action) != BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE) {
                     btlBuildRandomizedActionCameraPosePair(action, &action->frontCamera, &action->backCamera);
                 } else if (btlMatchFirstLinkedActorFlags(action)) {
                     btlBuildRandomTargetCameraStates(action, &action->frontCamera, &action->backCamera);
@@ -854,7 +854,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
         } else if (hasFlag200 != 1 && hasFlag400 == 1) {
             if (btlIsLinkedFireOfSinaiCommand(action)) {
                 btlInitTargetCursorAndFacing(action, &action->camera);
-            } else if (btlCanUseActorCategoryFlag4(action)) {
+            } else if (btlCanUseActorCategoryFlag4(action) != BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE) {
                 btlBuildRandomizedActionCameraPosePair(action, &action->frontCamera, &action->backCamera);
             } else {
                 choice = btlChooseLinkedCameraVariant(action, NULL);
@@ -873,7 +873,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
                 }
             }
         } else if (hasFlag200 == 1 && hasFlag400 != hasFlag200) {
-            if (btlCanUseActorCategoryFlag4(action)) {
+            if (btlCanUseActorCategoryFlag4(action) != BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE) {
                 btlBuildRandomizedActionCameraPosePair(action, &action->frontCamera, &action->backCamera);
             } else {
                 btlBuildFilteredGroupCameraPair(action, &action->frontCamera, &action->backCamera);
@@ -885,11 +885,11 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
         }
     } else if (hasFlag200 == 1 && hasFlag400 != 1) {
         if (btlHasSingleLinkedResource(action)) {
-            if (btlCanUseActorCategoryFlag4(action)) {
+            if (btlCanUseActorCategoryFlag4(action) != BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE) {
                 btlBuildRandomizedActionCameraPosePair(action, &action->frontCamera, &action->backCamera);
             } else if (btlCanUseLinkedActor(action) &&
                        ((dds3GetRandA((EffRandState *)effSharedRandomState) & 1) ||
-                        btlCanUseActorCategoryFlag2(action))) {
+                        btlCanUseActorCategoryFlag2(action) != BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE)) {
                 btlBuildRandomTargetCameraStates(action, &action->frontCamera, &action->backCamera);
                 action->motionParameter = 30.0f;
                 action->flags |= 0x41;
@@ -904,11 +904,11 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
                 action->backCamera.distance = distance + 150.0f;
                 btlAdjustCameraDirectionForDefaultPlane(&action->backCamera);
             }
-        } else if (btlCanUseActorCategoryFlag4(action)) {
+        } else if (btlCanUseActorCategoryFlag4(action) != BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE) {
             btlBuildRandomizedActionCameraPosePair(action, &action->frontCamera, &action->backCamera);
         } else if (btlCanUseLinkedActor(action) &&
                    ((dds3GetRandA((EffRandState *)effSharedRandomState) & 1) ||
-                    btlCanUseActorCategoryFlag2(action))) {
+                    btlCanUseActorCategoryFlag2(action) != BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE)) {
             btlBuildFilteredGroupCameraPair(action, &action->frontCamera, &action->backCamera);
         } else {
             btlPrepareUnitPoseWithTiltRotation(action, &action->frontCamera, &action->backCamera);
@@ -917,7 +917,7 @@ void btlInitializeActionCamera(BtlLinkedCommand *action) {
             action->flags |= 0x41;
         }
     } else if (hasFlag200 != 1 && hasFlag400 == 1) {
-        if (btlCanUseActorCategoryFlag4(action)) {
+        if (btlCanUseActorCategoryFlag4(action) != BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE) {
             btlBuildRandomizedActionCameraPosePair(action, &action->frontCamera, &action->backCamera);
         } else {
             btlPrepareUnitPoseWithTiltRotation(action, &action->frontCamera, &action->backCamera);

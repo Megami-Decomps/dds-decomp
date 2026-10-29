@@ -4472,7 +4472,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
                 return 0;
             }
             if (entry->partyRecord.unitId == 0x110) {
-                if (btlCanUseActorCategoryFlag4(command)) {
+                if (btlCanUseActorCategoryFlag4(command) != BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE) {
                     btlClearAllUnitDefeatCandidatesTask();
                     btlApplyCombinedActorFlags(command);
                     switch (dds3GetRandIntA(0, 2)) {
@@ -4546,14 +4546,14 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
             return 1;
         }
         if (count >= 2 && side == 0 && targetSide == 1) {
-            if (btlCanUseActorCategoryFlag4(command)) {
+            if (btlCanUseActorCategoryFlag4(command) != BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE) {
                 btlBuildRandomizedActionCameraPosePair(command, &command->frontCamera, &command->backCamera);
                 btlFlagAllUnitDefeatCandidatesTask();
                 return 1;
             }
             if (btlCanUseLinkedActor(command)) {
                 cameraMode = 0;
-                if (!btlCanUseActorCategoryFlag2(command)) {
+                if (btlCanUseActorCategoryFlag2(command) == BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE) {
                     cameraMode = dds3GetRandIntA(0, 2);
                 }
             } else {
@@ -4581,7 +4581,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
     }
     if (btlCanUseLinkedActor(command)) {
         cameraMode = 0;
-        if (!btlCanUseActorCategoryFlag2(command)) {
+        if (btlCanUseActorCategoryFlag2(command) == BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE) {
             cameraMode = dds3GetRandIntA(0, 2);
         }
     } else {
@@ -7208,7 +7208,7 @@ s32 btlSelectActionTransitionCamera(BtlLinkedCommand *command, s8 modeA, s8 mode
         return 1;
     }
     if (modeA != 1 || modeB == 1) {
-        if (btlCanUseActorCategoryFlag4(command) == 0) {
+        if (btlCanUseActorCategoryFlag4(command) == BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE) {
             command->flags |= 0x800;
             btlChooseBrahmaIndividualCamera((u32)command);
             return 1;
@@ -7305,7 +7305,7 @@ s32 btlSelectBrahmaActorCategoryCamera(BtlLinkedCommand *command, s32 argModeA, 
         }
         if (count == 1 && modeA == 0 && modeB == 1) {
             btlFlagAllUnitDefeatCandidatesTask();
-            if (btlCanUseActorCategoryFlag4(command)) {
+            if (btlCanUseActorCategoryFlag4(command) != BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE) {
                 switch (dds3GetRandIntA(0, 2)) {
                 case 0:
                     btlBossDebugPrintf(D_0041A5E0);
@@ -7323,7 +7323,7 @@ s32 btlSelectBrahmaActorCategoryCamera(BtlLinkedCommand *command, s32 argModeA, 
             } else {
                 if (btlCanUseLinkedActor(command)) {
                     cameraMode = 0;
-                    if (btlCanUseActorCategoryFlag2(command) == 0) {
+                    if (btlCanUseActorCategoryFlag2(command) == BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE) {
                         cameraMode = dds3GetRandIntA(0, 2);
                     }
                 } else {
@@ -7405,14 +7405,14 @@ s32 btlSelectBrahmaActorCategoryCamera(BtlLinkedCommand *command, s32 argModeA, 
         }
         if (btlCanUseLinkedActor(command)) {
             cameraMode = 0;
-            if (btlCanUseActorCategoryFlag2(command) == 0) {
+            if (btlCanUseActorCategoryFlag2(command) == BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE) {
                 cameraMode = dds3GetRandIntA(0, 2);
             }
         } else {
             cameraMode = 1;
         }
         count = btlGetIndexListCount(link->indexWork.indices);
-        if (btlCanUseActorCategoryFlag4(command) && modeA == 1 && modeB == 0) {
+        if (btlCanUseActorCategoryFlag4(command) != BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE && modeA == 1 && modeB == 0) {
             btlBossDebugPrintf("BRAHMA:EFFP-Def ++++\n");
             btlBuildRandomizedActionCameraPosePair(command, &command->frontCamera, &command->backCamera);
             return 1;
@@ -7875,12 +7875,12 @@ s32 func_002247D0(BtlLinkedCommand *command, s32 argModeA, s32 argModeB) {
         }
         if (count == 1 && modeA == 0 && modeB == 1) {
             btlFlagAllUnitDefeatCandidatesTask();
-            if (btlCanUseActorCategoryFlag4(command)) {
+            if (btlCanUseActorCategoryFlag4(command) != BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE) {
                 return 0;
             }
             if (btlCanUseLinkedActor(command) != 0) {
                 cameraMode = 0;
-                if (btlCanUseActorCategoryFlag2(command) == 0) {
+                if (btlCanUseActorCategoryFlag2(command) == BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE) {
                     cameraMode = dds3GetRandIntA(0, 2);
                 }
             } else {
@@ -7926,14 +7926,14 @@ s32 func_002247D0(BtlLinkedCommand *command, s32 argModeA, s32 argModeB) {
     } else {
         if (btlCanUseLinkedActor(command) != 0) {
             cameraMode = 0;
-            if (btlCanUseActorCategoryFlag2(command) == 0) {
+            if (btlCanUseActorCategoryFlag2(command) == BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE) {
                 cameraMode = dds3GetRandIntA(0, 2);
             }
         } else {
             cameraMode = 1;
         }
         count = btlGetIndexListCount(link->indexWork.indices);
-        if (btlCanUseActorCategoryFlag4(command) && modeA == 1 && modeB == 0) {
+        if (btlCanUseActorCategoryFlag4(command) != BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE && modeA == 1 && modeB == 0) {
             btlBossDebugPrintf("SETO:EFFP ++++\n");
             btlBuildRandomizedActionCameraPosePair(command, &command->frontCamera, &command->backCamera);
             return 1;
@@ -8432,12 +8432,12 @@ s32 btlSelectSatanActorCategoryCamera(BtlLinkedCommand *command, s32 argModeA, s
         }
         if (count == 1 && modeA == 0 && modeB == 1) {
             btlFlagAllUnitDefeatCandidatesTask();
-            if (btlCanUseActorCategoryFlag4(command)) {
+            if (btlCanUseActorCategoryFlag4(command) != BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE) {
                 return 0;
             }
             if (btlCanUseLinkedActor(command) != 0) {
                 cameraMode = 0;
-                if (btlCanUseActorCategoryFlag2(command) == 0) {
+                if (btlCanUseActorCategoryFlag2(command) == BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE) {
                     cameraMode = dds3GetRandIntA(0, 2);
                 }
             } else {
@@ -8461,7 +8461,7 @@ s32 btlSelectSatanActorCategoryCamera(BtlLinkedCommand *command, s32 argModeA, s
     } else {
         if (btlCanUseLinkedActor(command) != 0) {
             cameraMode = 0;
-            if (btlCanUseActorCategoryFlag2(command) == 0) {
+            if (btlCanUseActorCategoryFlag2(command) == BTL_ACTOR_CATEGORY_FLAG_USE_UNAVAILABLE) {
                 cameraMode = dds3GetRandIntA(0, 2);
             }
         } else {
