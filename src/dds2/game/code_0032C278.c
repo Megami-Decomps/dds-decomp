@@ -835,7 +835,7 @@ void sdfGrSetRefGifPacket(SdfDmaReferenceChainPacket *packet, u32 sourceAddress,
  * Register IDs are separate from their values; fieldOffset adds a half-pixel Y step. */
 void sdfGrSetDrawFramePacket(SdfGsContextRegisters *packet, s32 frameAddress, s32 width, s32 height,
                   s32 frameFormat, s32 depthAddress, s32 depthFormat,
-                  s32 fieldOffset, s32 gsContext) {
+                  s32 fieldOffset, SdfGsContext context) {
     s64 frameRegisterId;
     s64 depthRegisterId;
     s64 offsetRegisterId;
@@ -843,7 +843,7 @@ void sdfGrSetDrawFramePacket(SdfGsContextRegisters *packet, s32 frameAddress, s3
     s32 xOffset;
     s32 yOffset;
 
-    if (gsContext == 0) {
+    if (context == SDF_GS_CONTEXT_1) {
         frameRegisterId = SDF_GS_FRAME_1;
         depthRegisterId = SDF_GS_ZBUF_1;
         offsetRegisterId = SDF_GS_XYOFFSET_1;
@@ -900,9 +900,9 @@ void sdfGrSetDrawDefParmPacket(SdfGsDrawDefaultsRegisters *packet) {
 
 /* Build the common header and FRAME/ZBUF/XYOFFSET/SCISSOR state for one GS context. */
 void sdfGrSetDrawFrame(SdfGsContextPacket *packet, s32 frameAddress, s32 width, s32 height,
-                           s32 frameFormat, s32 depthAddress, s32 depthFormat, s32 gsContext) {
+                           s32 frameFormat, s32 depthAddress, s32 depthFormat, SdfGsContext context) {
     sdfGrSetRegsPacketHeader(&packet->header, SDF_SCENE_DRAW_PAYLOAD_QWORDS);
-    sdfGrSetDrawFramePacket(&packet->registers, frameAddress, width, height, frameFormat, depthAddress, depthFormat, 0, gsContext);
+    sdfGrSetDrawFramePacket(&packet->registers, frameAddress, width, height, frameFormat, depthAddress, depthFormat, 0, context);
 }
 
 
@@ -924,8 +924,8 @@ void sdfGrSetDrawEnv(SdfSceneDrawPacket *packet, sdfGrFrameSet_t *view, s32 buff
     frameFormat = view->bufferFormat;
     height = view->height;
     depthFormat = view->auxiliaryFormat;
-    sdfGrSetDrawFramePacket(&packet->contextOne, frameAddress, width, height, frameFormat, depthAddress, depthFormat, sdfGrBufferSlotIndex, 0);
-    sdfGrSetDrawFramePacket(&packet->contextTwo, frameAddress, width, height, frameFormat, depthAddress, depthFormat, sdfGrBufferSlotIndex, 1);
+    sdfGrSetDrawFramePacket(&packet->contextOne, frameAddress, width, height, frameFormat, depthAddress, depthFormat, sdfGrBufferSlotIndex, SDF_GS_CONTEXT_1);
+    sdfGrSetDrawFramePacket(&packet->contextTwo, frameAddress, width, height, frameFormat, depthAddress, depthFormat, sdfGrBufferSlotIndex, SDF_GS_CONTEXT_2);
     sdfGrSetClearPacket(&packet->centeredBounds, view->width, view->height, view->bufferFormat, view->auxiliaryFormat);
     packet->blendState.contextOne.test.value = SDF_GS_SCENE_TEST;
     packet->blendState.contextOne.test.registerId = SDF_GS_TEST_1;
@@ -967,9 +967,9 @@ void sdfGrStdDrawEnvPredraw(SdfSceneNode *node, s32 bufferIndex) {
     s64 frame;
 
     sdfGrSetDrawFramePacket(&node->contextOne, frameAddress, width, height, frameFormat, depthAddress,
-                                    depthFormat, sdfGrBufferSlotIndex, 0);
+                                    depthFormat, sdfGrBufferSlotIndex, SDF_GS_CONTEXT_1);
     sdfGrSetDrawFramePacket(&node->contextTwo, frameAddress, width, height, frameFormat, depthAddress,
-                                    depthFormat, sdfGrBufferSlotIndex, 1);
+                                    depthFormat, sdfGrBufferSlotIndex, SDF_GS_CONTEXT_2);
     /* FRAME: FBP in 2048-word pages, FBW in 64-pixel units, PSM. */
     frame = (s64)(frameFormat << 24) | (s64)(frameAddress >> 11) | (s64)((width >> 6) << 16) |
             SDF_FRAME_MASK_ALPHA;
@@ -981,9 +981,9 @@ void sdfGrStdDrawEnvPredraw(SdfSceneNode *node, s32 bufferIndex) {
         frameFormat = 1; /* a PSMCT32 buffer is sampled as PSMCT24 */
     }
     sdfTexSetPacket(&node->texturePackets[1], width, height, frameAddress, frameFormat, 0, 0, 1, 0, 0, 5,
-                               0);
+                               SDF_GS_CONTEXT_1);
     sdfTexSetPacket(&node->texturePackets[0], width, height, view->buffers[bufferIndex ^ 1]->word,
-                               frameFormat, 0, 0, 1, 0, 0, 5, 0);
+                               frameFormat, 0, 0, 1, 0, 0, 5, SDF_GS_CONTEXT_1);
 }
 #else
 INCLUDE_ASM(const s32, "game/code_0032C278", sdfGrStdDrawEnvPredraw);

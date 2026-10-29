@@ -2,6 +2,7 @@
 #define SDF_GS_CONTEXT_H
 
 #include "sdf_gs_packet.h"
+#include "sdf_gs_context_selector.h"
 
 /* Four A+D writes define one GS drawing context, without a DMA/GIF header. */
 typedef struct SdfGsContextRegisters {
@@ -33,10 +34,11 @@ typedef char SdfGsContextPacket_registers_at_0x20[
 
 void sdfGrSetDrawFrame(SdfGsContextPacket *packet, s32 frameAddress,
     s32 width, s32 height, s32 frameFormat, s32 depthAddress,
-    s32 depthFormat, s32 gsContext);
+    s32 depthFormat, SdfGsContext context);
 
 void sdfGrSetDrawFramePacket(SdfGsContextRegisters *packet,
     s32 frameAddress, s32 width, s32 height, s32 frameFormat,
-    s32 depthAddress, s32 depthFormat, s32 fieldOffset, s32 gsContext);
+    s32 depthAddress, s32 depthFormat, s32 fieldOffset,
+    SdfGsContext context);
 
 #endif

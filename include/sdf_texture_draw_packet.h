@@ -3,8 +3,12 @@
 
 #include "sdf.h"
 
+#ifndef SDF_GS_CONTEXT_1
 #define SDF_GS_CONTEXT_1 0
+#endif
+#ifndef SDF_GS_CONTEXT_2
 #define SDF_GS_CONTEXT_2 1
+#endif
 
 /* Variable-sized packet header initialized by sdf2DMakePrimPacketHeader. */
 typedef struct SdfDrawPacket {

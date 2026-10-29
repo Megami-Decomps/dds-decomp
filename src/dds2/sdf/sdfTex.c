@@ -33,7 +33,7 @@ enum {
 
 
 
-sdfTexPacket_t *sdfTexMakeGIFPacketSub(sdfTexHandle_t *texture, s32 variant);
+sdfTexPacket_t *sdfTexMakeGIFPacketSub(sdfTexHandle_t *texture, SdfGsContext context);
 
 extern SdfPendingRequest sdfTexDelayedResrcCB;
 
@@ -193,12 +193,12 @@ static s32 sdfTexSizeLog2(s32 size) {
 }
 
 /* A three-register A+D packet: TEX1 (filtering and LOD), TEX0 (buffer,
- * size, format, CLUT) and CLAMP, for context 1 or 2 (variant). Upstream:
+ * size, format, CLUT) and CLAMP, for GS context 1 or 2. Upstream:
  * INCLUDE_ASM in both games. */
 void sdfTexSetPacket(struct sdfTexPacket_t *packet, s32 width, s32 height, u32 primaryResourceWord,
                                 s32 pixelFormat, u32 secondaryResourceWord, s32 clutFormat,
                                 s32 textureColorComponents, s32 maxMipLevel, s32 lodParameters, s32 clampMode,
-                                s32 variant) {
+                                SdfGsContext context) {
     u64 tbw = (u64)(u32)((width >> 6) << 14);
     u64 tw = (u64)(u32)(sdfTexSizeLog2(width) << 26);
     u64 th = (u64)sdfTexSizeLog2(height) << 30;
@@ -218,21 +218,21 @@ void sdfTexSetPacket(struct sdfTexPacket_t *packet, s32 width, s32 height, u32 p
     } else {
         packet->samplingState = 0x61;
     }
-    packet->samplingRegister = variant ? 0x15 : 0x14; /* TEX1_2 / TEX1_1 */
+    packet->samplingRegister = context != SDF_GS_CONTEXT_1 ? 0x15 : 0x14; /* TEX1_2 / TEX1_1 */
     if (secondaryResourceWord != 0) {
         textureState |= 1ULL << 63; /* CLD 4 */
     }
     packet->textureState = textureState;
-    packet->textureRegister = variant ? 7 : 6; /* TEX0_2 / TEX0_1 */
+    packet->textureRegister = context != SDF_GS_CONTEXT_1 ? 7 : 6; /* TEX0_2 / TEX0_1 */
     packet->clampState = (clampMode & 0xFF) == 0xFF ? 0 : (u64)(clampMode & 0xF);
-    packet->clampRegister = variant ? 9 : 8; /* CLAMP_2 / CLAMP_1 */
+    packet->clampRegister = context != SDF_GS_CONTEXT_1 ? 9 : 8; /* CLAMP_2 / CLAMP_1 */
 }
 #else
 INCLUDE_ASM(const s32, "sdf/sdfTex", sdfTexSetPacket);
 #endif
 
-/* Allocate and populate one of the two resource packet variants. */
-sdfTexPacket_t *sdfTexMakeGIFPacketSub(sdfTexHandle_t *texture, s32 variant) {
+/* Allocate and populate one of the two GS-context resource packets. */
+sdfTexPacket_t *sdfTexMakeGIFPacketSub(sdfTexHandle_t *texture, SdfGsContext context) {
     sdfTexPacket_t *packet;
     u32 primary;
     u32 secondary;
@@ -240,18 +240,18 @@ sdfTexPacket_t *sdfTexMakeGIFPacketSub(sdfTexHandle_t *texture, s32 variant) {
     packet = sdfChipAllocDirect(0x40);
     primary = sdfTexGetPixelAddr(texture);
     secondary = sdfTexGetCLUTAddr(texture);
-    sdfTexSetPacket(packet, texture->width, texture->height, primary, texture->pixelFormat, secondary, texture->clutFormat, 1, texture->maxMipLevel, texture->lodParameters, texture->clampMode, variant);
+    sdfTexSetPacket(packet, texture->width, texture->height, primary, texture->pixelFormat, secondary, texture->clutFormat, 1, texture->maxMipLevel, texture->lodParameters, texture->clampMode, context);
     return packet;
 }
 
 /* Store the first packet on the texture. */
 void sdfTexMakeGIFPacket(sdfTexHandle_t *texture) {
-    texture->primaryBuffer = sdfTexMakeGIFPacketSub(texture, 0);
+    texture->primaryBuffer = sdfTexMakeGIFPacketSub(texture, SDF_GS_CONTEXT_1);
 }
 
 /* Store the second packet on the texture. */
 void sdfTexMakeGIFPacketCtx2(sdfTexHandle_t *texture) {
-    texture->secondaryBuffer = sdfTexMakeGIFPacketSub(texture, 1);
+    texture->secondaryBuffer = sdfTexMakeGIFPacketSub(texture, SDF_GS_CONTEXT_2);
 }
 
 /* Rebuild existing texture packets while preserving each packet's TEX0 TCC bit. */
@@ -265,7 +265,7 @@ void sdfTexRebuildPacket(sdfTexHandle_t *texture) {
                      sdfTexGetCLUTAddr(texture), texture->clutFormat,
                      (buffer->textureState >> 34) & 1,
                      texture->maxMipLevel, texture->lodParameters,
-                     texture->clampMode, 0);
+                     texture->clampMode, SDF_GS_CONTEXT_1);
     }
 
     buffer = texture->secondaryBuffer;
@@ -275,7 +275,7 @@ void sdfTexRebuildPacket(sdfTexHandle_t *texture) {
                      sdfTexGetCLUTAddr(texture), texture->clutFormat,
                      (buffer->textureState >> 34) & 1,
                      texture->maxMipLevel, texture->lodParameters,
-                     texture->clampMode, 1);
+                     texture->clampMode, SDF_GS_CONTEXT_2);
     }
 }
 
