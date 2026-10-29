@@ -8,6 +8,7 @@
 #include "fld_area_encounter_table.h"
 #include "sdf_packet_list.h"
 #include "common.h"
+#include "fld_camera_link_mode.h"
 #include "pty_status_query_api.h"
 #include "pty_field_hp_attrition_api.h"
 #include "sdf_delayed_resource_check_api.h"
@@ -894,7 +895,7 @@ void fldSetSceneParam3(fldSceneParam_t *record, s32 stage, s32 kind, const char 
 /* Fill a field sequence packet, including its narrowed code, link and detail name.
  * A running sequence in the same area requests reuse rather than a work clear. */
 void fldSetSceneParam4(fldSceneParam_t *record, s32 stage, s32 kind, const char *name,
-                   s32 code, s32 link, const char *subname) {
+                   s32 code, FldCameraLinkMode link, const char *subname) {
     if (dds3SearchProcessName(D_00412D50) != NULL) {
         if (fldGlobalBase.area == stage) {
             fldGlobalBase.reuseAreaResources = FLD_AREA_RESOURCE_REUSE_ENABLED;
@@ -946,7 +947,7 @@ void fldSetSceneParam5(fldSceneParam_t *record, s32 stage, s32 kind, const char 
 }
 
 void fldSetSceneParamLoad(fldSceneParam_t *record, s32 stage, s32 kind, const char *name,
-                    s32 code, s32 link, const char *subname) {
+                    s32 code, FldCameraLinkMode link, const char *subname) {
     record->unk_30 = 0;
     record->sequenceWord3C = 0;
     record->sequenceWord38 = 0;
@@ -1018,7 +1019,7 @@ void fldRebuildFieldScene(void) {
     s32 selection;
     s32 flag;
     s32 encounter;
-    s32 cameraLinkMode;
+    FldCameraLinkMode cameraLinkMode;
     dds3PoseSet_t *camera;
 
     memset(fallback, 0, sizeof(fallback));
@@ -1120,7 +1121,7 @@ void fldRebuildFieldScene(void) {
         fldCreateSecondaryWorldCamera();
         if (sceneWork->primaryState == 0) {
             cameraLinkMode = sceneWork->cameraLinkMode;
-            if (cameraLinkMode == 1) {
+            if (cameraLinkMode == FLD_CAMERA_LINK_MODE_NAMED_CAMERA_FOCUS) {
                 node = dds3SceneBasicSearchNameAndType(dds3GetControlScene(),
                     4, (const u8 *)sceneWork->cameraName);
                 if (node != NULL) {
@@ -1135,7 +1136,7 @@ void fldRebuildFieldScene(void) {
                     fldInitializeCameraViewFromPlayer();
                 }
             } else {
-                if (cameraLinkMode == 2) {
+                if (cameraLinkMode == FLD_CAMERA_LINK_MODE_ALTERNATE_FOCUS) {
                     fldGlobalBase.mode = FLD_CAMERA_MODE_ALTERNATE_FOCUS;
                 } else {
                     fldGlobalBase.mode = FLD_CAMERA_MODE_PLAYER_FOLLOW;

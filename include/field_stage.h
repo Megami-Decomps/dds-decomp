@@ -39,7 +39,7 @@ typedef struct FieldPlayerSceneWork {
     FldSequenceSceneMode secondaryState;
     u16 sequenceCode; /* 0x60: copied from fldSceneParam_t.code */
     s16 sequenceMode; /* 0x62: copied by the sequence initializer */
-    s32 cameraLinkMode; /* 0x64: sequence packet link mode */
+    s32 cameraLinkMode; /* 0x64: sequence packet camera focus mode */
     u8 pad68[8];
     char cameraName[0x10]; /* 0x70: kind-4 camera-node name */
     char resourceName[0x10]; /* 0x80: sequence note; nonzero source is "elvstart_label". */

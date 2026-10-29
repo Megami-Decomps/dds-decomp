@@ -1,0 +1,14 @@
+#ifndef FLD_CAMERA_LINK_MODE_H
+#define FLD_CAMERA_LINK_MODE_H
+
+#include "common.h"
+
+typedef s32 FldCameraLinkMode;
+
+enum {
+    FLD_CAMERA_LINK_MODE_PLAYER_FOLLOW = 0,
+    FLD_CAMERA_LINK_MODE_NAMED_CAMERA_FOCUS = 1,
+    FLD_CAMERA_LINK_MODE_ALTERNATE_FOCUS = 2
+};
+
+#endif /* FLD_CAMERA_LINK_MODE_H */

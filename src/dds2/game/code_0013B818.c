@@ -7,6 +7,7 @@
 #include "fld_scene_transition_gate_api.h"
 #include "fld_deferred_transition.h"
 #include "common.h"
+#include "fld_camera_link_mode.h"
 #include "fld_map_slot_auxiliary_flag_selector.h"
 #include "sdf_vu0.h"
 #include "fld_stop_entry.h"
@@ -80,7 +81,7 @@ extern void fldBgmFadeOut(void);
 extern void fldSetFloorFlag(s32 area, s32 floor, s32 flagNumber);
 
 extern void fldSetSceneParam4(fldSceneParam_t *record,
-    s32 stage, s32 kind, const char *name, s32 code, s32 link, const char *subname);
+    s32 stage, s32 kind, const char *name, s32 code, FldCameraLinkMode link, const char *subname);
 
 /* vu0 routine: normalize vf10 and return its original XYZ length. */
 static inline f32 fldNormalizeProbeVector(void) {
@@ -1940,7 +1941,7 @@ void fldSubmitSelectedActorWaypointTransition(void) {
     }
 }
 
-extern void fldSetSceneParamLoad(fldSceneParam_t *, s32, s32, const char *, s32, s32, const char *);
+extern void fldSetSceneParamLoad(fldSceneParam_t *, s32, s32, const char *, s32, FldCameraLinkMode, const char *);
 
 /* Start the linked sequence of the first enabled waypoint actor that matches this field transition. */
 void fldInitializeActorLinkedSequence(s32 mode, s32 index, fldSceneParam_t *sequence) {

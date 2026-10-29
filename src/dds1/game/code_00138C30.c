@@ -10,6 +10,7 @@
 #include "fld_marker_packet.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "fld_camera_link_mode.h"
 #include "fld_map_slot_auxiliary_flag_selector.h"
 #include "fld_camera_model_motion_request.h"
 #include "sdf_vu0.h"
@@ -1800,7 +1801,7 @@ extern char D_003A0270[], D_003A0280[];
 extern void dds3WorkClear(void);
 extern void fldBgmFadeOut(void);
 extern void fldSetSceneParam4(fldSceneParam_t *record, s32 stage, s32 kind,
-                                             const char *name, s32 code, s32 link,
+                                             const char *name, s32 code, FldCameraLinkMode link,
                                              const char *subname);
 extern void fldSetSceneParam3(fldSceneParam_t *, s32, s32, const char *);
 extern void fldSetSceneParam5(fldSceneParam_t *, s32, s32, const char *, s32, const char *);
@@ -2012,7 +2013,7 @@ extern char D_003A0270[], D_003A0280[];
 extern void dds3WorkClear(void);
 extern void fldBgmFadeOut(void);
 extern void fldSetSceneParam4(fldSceneParam_t *record, s32 stage, s32 kind,
-                                             const char *name, s32 code, s32 link,
+                                             const char *name, s32 code, FldCameraLinkMode link,
                                              const char *subname);
 extern void fldSetSceneParam3(fldSceneParam_t *, s32, s32, const char *);
 extern void fldSetSceneParam5(fldSceneParam_t *, s32, s32, const char *, s32, const char *);
@@ -2304,7 +2305,7 @@ void fldSubmitSelectedActorWaypointTransition(void) {
     }
 }
 
-extern void fldSetSceneParamLoad(fldSceneParam_t *, s32, s32, const char *, s32, s32, const char *);
+extern void fldSetSceneParamLoad(fldSceneParam_t *, s32, s32, const char *, s32, FldCameraLinkMode, const char *);
 
 void fldInitializeActorLinkedSequence(s32 mode, s32 index, fldSceneParam_t *sequence) {
     s32 field;
