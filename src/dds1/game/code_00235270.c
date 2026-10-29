@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "snd_packed_track_load_status.h"
 #include "common.h"
+#include "sdf_file_existence_api.h"
 #include "evt_viewer_track_file_format.h"
 #include "sdf_delayed_resource_check_api.h"
 #include "sdf_vu0.h"
@@ -5484,7 +5485,6 @@ extern void movieStop(void);
 extern void dds3FreeRenderTexture(void);
 extern u32 dds3DrawFlag;
 extern s32 evtFormatPolygonMoviePaths(s32 eventId, s32 sceneId, char *path0, char *path1, char *path2);
-extern s32 sdfFileCheckExist(const char *path);
 extern void evtFreeStage(void);
 
 EvtViewerReloadResult evtReloadEventViewer(EvtPolygonMovieResourceMode resourceMode, EvtRuntime *runtime) {
@@ -5513,11 +5513,12 @@ EvtViewerReloadResult evtReloadEventViewer(EvtPolygonMovieResourceMode resourceM
     dds3DrawFlag |= 0x2000000;
     evtFormatPolygonMoviePaths(D_003BBE78, D_003BBE7A, path0, path1, path2);
     if (resourceMode == EVT_POLYGON_MOVIE_RESOURCE_MODE_SYNTHESIZE) {
-        if (sdfFileCheckExist(path0) != 1) {
+        if (sdfFileCheckExist(path0) != SDF_FILE_EXISTS) {
             return EVT_VIEWER_RELOAD_FAILED;
         }
     } else {
-        if (sdfFileCheckExist(path0) != 1 || sdfFileCheckExist(path1) != 1) {
+        if (sdfFileCheckExist(path0) != SDF_FILE_EXISTS ||
+            sdfFileCheckExist(path1) != SDF_FILE_EXISTS) {
             return EVT_VIEWER_RELOAD_FAILED;
         }
     }

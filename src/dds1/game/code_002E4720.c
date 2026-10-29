@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "sdf_request.h"
 #include "common.h"
+#include "sdf_file_existence_api.h"
 #include "sdf_console_packet.h"
 #include "sif_rpc_client_prefix.h"
 #include "sdf.h"
@@ -948,7 +949,7 @@ sdfFileCmdHandle_t *sdfFileOpen(const char *path) {
     return state;
 }
 
-s32 sdfFileCheckExist(const char *path) {
+SdfFileExistenceResult sdfFileCheckExist(const char *path) {
     char *resolved = sdfFileMakeFilename(path);
     s32 fd;
 

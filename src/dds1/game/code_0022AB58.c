@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "scr.h"
 #include "common.h"
+#include "sdf_file_existence_api.h"
 #include "mdl_flag_api.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
@@ -36,7 +37,6 @@ void *evtGetDebugProcess(void) {
     return (void *)EventDebugProcess1;
 }
 
-extern s32 sdfFileCheckExist(const char *);
 
 extern dds3ProcessID_t *scrStartScriptByName(u32, const char *, ScrProcedureIndex);
 
@@ -68,7 +68,7 @@ s32 EventDebugProcess1(dds3ProcessID_t *task) {
     if ((s8)dds3PadButtonState[1][0][1] < 0) {
         sprintf(path, "/event/e%03d/e%03d/scr/e%03d.bf",
                       D_003BBDEC - D_003BBDEC % 10, D_003BBDEC, D_003BBDEC);
-        if (sdfFileCheckExist(path) != 0) {
+        if (sdfFileCheckExist(path) != SDF_FILE_NOT_FOUND) {
             D_003BA8EC = 0x80000000;
             scrStartScriptByName(0x3EB, path, 0);
             return (s32)evtDebugCameraStep;

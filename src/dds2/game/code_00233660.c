@@ -8,6 +8,7 @@
 #include "sdf_packet_builders.h"
 #include "sdf_bordered_rectangle_packet.h"
 #include "common.h"
+#include "sdf_file_existence_api.h"
 #include "dds3_object_flags.h"
 #include "sdf_vu0.h"
 #include "mdl_option_label.h"
@@ -2977,7 +2978,6 @@ extern char D_00437108[]; /* "fovy=" */
 extern char D_00437110[]; /* "%f" */
 extern char D_00437118[]; /* "fog=" */
 extern KwlnDrawVectorParams kwlnDrawVector;
-extern s32 sdfFileCheckExist(const char *path);
 
 
 /* Read the viewer's config text file: bg-color=, eye-position=, target-position=, fovy=, fog= lines. */
@@ -3001,7 +3001,7 @@ void mdlLoadViewerPresentationConfig(void) {
     s32 fogFar;
     f32 fogFarB;
 
-    if (sdfFileCheckExist(D_003C88A8) == 0) {
+    if (sdfFileCheckExist(D_003C88A8) == SDF_FILE_NOT_FOUND) {
         return;
     }
     fileRequest = fileLoad(D_003C88A8);

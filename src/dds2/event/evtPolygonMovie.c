@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_file_existence_api.h"
 #include "dds3_object_flags.h"
 #include "sdf_vu0.h"
 #include "eff.h"
@@ -832,7 +833,6 @@ s32 evtFormatPolygonMoviePaths(s32 eventId, s32 sceneId, char *path1, char *path
                          eventId / 10 * 10, eventId, eventId, sceneId, eventId, sceneId);
 }
 
-extern s32 sdfFileCheckExist(const char *path);
 const char evtMovieBeforePrimaryLoadMessage[] = "evtGetPolygonMovieWorkData2:0\n";
 const char evtMoviePrimaryLoadedMessage[] = "evtGetPolygonMovieWorkData2:1\n";
 const char evtMovieTertiaryLoadedMessage[] = "eventedit: load pm3 file\n";
@@ -864,7 +864,8 @@ PolyMovieWork *evtGetPolygonMovieWorkData2(s32 eventId, s32 sceneId, EvtPolygonM
     } else {
         handle2 = evtAllocMovieWork(&address2.header);
     }
-    if (resourceMode == EVT_POLYGON_MOVIE_RESOURCE_MODE_LOAD_FILES && sdfFileCheckExist(path3) == 1) {
+    if (resourceMode == EVT_POLYGON_MOVIE_RESOURCE_MODE_LOAD_FILES &&
+        sdfFileCheckExist(path3) == SDF_FILE_EXISTS) {
         handle3 = sdfDevLoadFileEx(path3, &address3.word, 0);
         printf(evtMovieTertiaryLoadedMessage);
     } else {
@@ -888,7 +889,6 @@ PolyMovieWork *evtGetPolygonMovieWorkData2(s32 eventId, s32 sceneId, EvtPolygonM
 
 extern u32 D_00435CBC;
 extern s32 evtFormatPolygonMoviePaths(s32 eventId, s32 sceneId, char *path1, char *path2, char *path3);
-extern s32 sdfFileCheckExist(const char *path);
 extern void evtEventViewerDestroyActiveAlternate(dds3ProcessID_t *task);
 extern void evtEventViewerInitCampFontResource(EvtRuntime *viewer);
 extern char D_00423360[]; /* "(ZikkiPlayMode)EventViewer" */
@@ -916,7 +916,7 @@ dds3ProcessID_t *evtViewerCreateTask(u32 priority, s32 eventId, s32 sceneId) {
     work->flags |= EVT_POLY_MOVIE_MAIN_LOAD_PENDING;
     work->secondaryResource.request = fileLoad(path1);
     work->flags |= EVT_POLY_MOVIE_SECONDARY_LOAD_PENDING;
-    if (sdfFileCheckExist(path2) != 0) {
+    if (sdfFileCheckExist(path2) != SDF_FILE_NOT_FOUND) {
         work->tertiaryResource.request = fileLoad(path2);
         work->flags |= EVT_POLY_MOVIE_TERTIARY_LOAD_PENDING;
     } else {
