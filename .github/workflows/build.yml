@@ -54,7 +54,6 @@ jobs:
 
       # The compiler, binutils, objdiff and glibc are all pinned URLs.
       - name: Cache build tools
-        if: steps.orig.outputs.available == 'true'
         uses: actions/cache@v4
         with:
           path: |
@@ -64,16 +63,22 @@ jobs:
           key: tools-${{ hashFiles('tools/download_tools.py', 'tools/ee_as_relax.py', 'tools/ee_gcc_aslr.py') }}
 
       - name: Install dependencies
-        if: steps.orig.outputs.available == 'true'
         run: |
           sudo apt-get update -q
           sudo apt-get install -y -q ninja-build cpp
           python3 -m pip install -q -r requirements.txt
           python3 tools/download_tools.py
+
+      - name: Prepare retail inputs
+        if: steps.orig.outputs.available == 'true'
+        run: |
           mkdir -p orig/dds1 orig/dds2
           cp .orig-src/orig/dds1/SLUS_209.74 orig/dds1/
           cp .orig-src/orig/dds2/SLUS_211.52 orig/dds2/
           rm -rf .orig-src
+
+      - name: Compile non-matching C
+        run: python3 tools/check_nonmatching.py
 
       - name: Configure
         if: steps.orig.outputs.available == 'true'

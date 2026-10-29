@@ -24,6 +24,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from pairing import RETAIL, ROOT, load_segments, off_to_va, va_to_off  # noqa: E402
 from symbol_aliases import load_symbol_aliases  # noqa: E402
+from nonmatching import matching_source  # noqa: E402
 from resolved_code import (  # noqa: E402
     hi_lo_addend,
     instruction_shape_matches,
@@ -732,7 +733,7 @@ def main():
     args = ap.parse_args()
     unit = args.unit.resolve()
     source = args.source.resolve() if args.source else unit
-    source_text = source.read_text()
+    source_text = matching_source(source.read_text())
     version = unit.relative_to(ROOT / "src").parts[0]
     unit_name = unit.relative_to(ROOT / "src" / version).with_suffix("").as_posix()
     syms = symbols(version)
@@ -1436,7 +1437,7 @@ def main():
                    "(this section has no accepted per-unit source owner)")
         print(f"DATA {name}: 0x{size:X} bytes emitted by the unit; {why}")
     # Constructs that force codegen rather than express the original source.
-    source_text = re.sub(r"/\*.*?\*/|//[^\n]*", "", unit.read_text(), flags=re.S)
+    source_text = re.sub(r"/\*.*?\*/|//[^\n]*", "", matching_source(unit.read_text()), flags=re.S)
     for pattern, why in ((r"goto\s*\*", "computed goto (write the switch)"),
                          (r"&&\s*[A-Za-z_]\w*\s*[,}]", "label address table (write the switch)"),
                          (r"\bregister\b[^;]*\basm\s*\(", "register pinned with asm()")):
@@ -1453,7 +1454,7 @@ def main():
         if (args.func and name != args.func) or asm < 8 or asm * 2 <= total:
             continue
         if re.search(rf"(?:libvu0|vu0 routine):[^\n]*\n(?:[^\n]*\n){{0,2}}[^\n]*\b{re.escape(name)}\s*\(",
-                     unit.read_text()):
+                     matching_source(unit.read_text())):
             continue
         print(f"ASMBODY {name}: {asm} of {total} instructions are inline asm; mark it as an SDK copy "
               "or VU0 routine, or keep it as INCLUDE_ASM (docs/idioms.md, Inline asm)")
@@ -1462,7 +1463,7 @@ def main():
     # owner, so their actual object offsets provide the ordering check instead.
     # (an implicit-int K&R definition starts with the function name itself)
     order = re.findall(r'^INCLUDE_ASM\([^\n]*\b(\w+)\);|^(?:[A-Za-z_][^;\n=]*?\b)?([A-Za-z_]\w*)\s*\([^;\n]*\)\s*\{?\s*$',
-                       unit.read_text(), re.M)
+                       matching_source(unit.read_text()), re.M)
     placed = [(0, address(a or b, syms), a or b) for a, b in order if address(a or b, syms) is not None]
     for (_, a, n), (_, b, m) in zip(placed, placed[1:]):
         if b < a:
@@ -1477,7 +1478,7 @@ def main():
     # Every retail function of the unit must still be there, as C or INCLUDE_ASM.
     full = ROOT / "asm" / version / f"{unit_name}.s"
     if full.exists() and not args.func:
-        source = unit.read_text()
+        source = matching_source(unit.read_text())
         for name in re.findall(r"^glabel (\w+)", full.read_text(), re.M):
             if not re.search(rf"^INCLUDE_ASM\([^\n]*\b{name}\);|^[ \t]*(?:[A-Za-z_][^;\n]*\b)?{name}\s*\([^;]*$", source, re.M):
                 bad += 1
@@ -1487,7 +1488,7 @@ def main():
     renamed = {f"func_{int(a, 16):08X}": n for n, a in re.findall(
         r"^\s*(\w+)\s*=\s*0x([0-9A-Fa-f]+)\s*;[^\n]*type:func", (ROOT / "config" / version / "symbol_addrs.txt").read_text(), re.M)
         if not n.startswith("func_")}
-    for old in sorted(set(re.findall(r"\bfunc_[0-9A-F]{8}\b", unit.read_text())) & renamed.keys()):
+    for old in sorted(set(re.findall(r"\bfunc_[0-9A-F]{8}\b", matching_source(unit.read_text()))) & renamed.keys()):
         bad += 1
         print(f"STALE {old}: symbol_addrs names it {renamed[old]}; use that name")
     # A symbol the C references but nothing defines (symbol_addrs, the

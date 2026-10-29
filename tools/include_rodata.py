@@ -28,6 +28,7 @@ import sys
 from pathlib import Path
 
 from include_sdata import DATA_DEF
+from nonmatching import matching_source
 
 ROOT = Path(__file__).resolve().parent.parent
 INCLUDE = re.compile(r'^INCLUDE_(?:ASM|RODATA)\([^,]+,\s*"[^"]+",\s*(\w+)\);$', re.M)
@@ -70,8 +71,9 @@ def place(version):
         # Placed from scratch every time: once a function compiles its own
         # literal, the lines around it must move with it.
         text = re.sub(r'^INCLUDE_RODATA\([^,]+,\s*"[^"]+",\s*(\w+)\);\n\n?', "", text, flags=re.M)
+        active = matching_source(text)
         defined_at = {
-            m.group(1): m.start() for m in DATA_DEF.finditer(text)
+            m.group(1): m.start() for m in DATA_DEF.finditer(active)
             if m.group(1) in unit_rodata
         }
         # Rodata a C function no longer names is compiled by that function itself
@@ -85,8 +87,8 @@ def place(version):
             for f in re.finditer(r"^glabel (\w+)\n(.*?)^endlabel \1", full.read_text(), re.M | re.S):
                 retail_refs[f.group(1)] = set(re.findall(r"%lo\((\w+)\)", f.group(2)))
         compiled = set()
-        for m in DEF.finditer(text):
-            code = function_text(text, m.start())
+        for m in DEF.finditer(active):
+            code = function_text(active, m.start())
             for sym in retail_refs.get(m.group(1), ()):
                 # Named (renamed D_) rodata counts too: compiled &= unit_rodata below.
                 if (sym.startswith(("D_", "jtbl_")) or sym in unit_rodata) and not re.search(rf"\b{sym}\b", code):
@@ -96,7 +98,7 @@ def place(version):
         compiled &= unit_rodata
         compiled -= defined_at.keys()
         # ... unless an asm function still needs the retail copy (check_unit SHARED).
-        for f in INCLUDE_ASM.findall(text):
+        for f in INCLUDE_ASM.findall(active):
             compiled -= retail_refs.get(f, set())
         # A string that only a compiled initializer table points at (`.word` entries of
         # a table the C now writes as `{"..", ..}`) is compiled with that table: no
@@ -109,25 +111,25 @@ def place(version):
             for sym in unit_rodata - compiled - set(defined_at):
                 held = holders.get(sym)
                 if held and held <= compiled and sym not in asm_named \
-                        and not re.search(rf"\b{sym}\b", text):
+                        and not re.search(rf"\b{sym}\b", active):
                     compiled.add(sym)
                     grown = True
         # The compiler emits each such literal with the first function using it.
         compiled_at = {}
-        for m in DEF.finditer(text):
+        for m in DEF.finditer(active):
             for sym in retail_refs.get(m.group(1), ()):
                 if sym in compiled:
                     compiled_at.setdefault(sym, m.start())
         owned -= compiled
         owned -= defined_at.keys()
-        have = set(INCLUDE.findall(text))
+        have = set(INCLUDE.findall(active))
         anchors = []   # (address, position in text or None, symbol, needs a line)
         for sym, pos in defined_at.items():
             anchors.append((int(labels[sym], 16), pos, None, False))
-        for m in INCLUDE_ASM.finditer(text):
+        for m in INCLUDE_ASM.finditer(active):
             for _, addr in LABEL.findall(rodata_part(nonmatchings / f"{m.group(1)}.s")):
                 anchors.append((int(addr, 16), m.start(), None, False))
-        for m in DEF.finditer(text):
+        for m in DEF.finditer(active):
             rodata = rodata_part(matchings / f"{m.group(1)}.s")
             for block in SYMBOL_BLOCK.finditer(rodata):
                 sym = block.group(1)

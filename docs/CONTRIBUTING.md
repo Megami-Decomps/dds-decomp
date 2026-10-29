@@ -123,8 +123,25 @@ not prove that we recovered the original source spelling or variable names.
   functions in one file needs it (so far only `-fno-optimize-sibling-calls`,
   found by `tools/find_nosibcall.py` and confirmed with `tools/flag_probe.py`).
   One function that matches under some option is not evidence.
-- **Close is not matched.** A near miss stays `INCLUDE_ASM`. Save its best C
-  somewhere outside the build with a note on the remaining difference.
+- **Non-matching C stays in the unit.** Use the plain form below. The normal
+  build takes the assembly fallback; builds defining `NON_MATCHING` compile
+  the C. This guard is the marking, with no additional state or metadata.
+
+```c
+#ifdef NON_MATCHING
+void unfinished(void) {
+    /* Reconstructed behaviour. */
+}
+#else
+INCLUDE_ASM(const s32, "module/unit", unfinished);
+#endif
+```
+
+`python tools/check_nonmatching.py` compiles every guarded unit with
+`NON_MATCHING` and `SKIP_ASM`, using its compiler and per-unit flags. CI runs
+this check too, so header changes cannot silently break the retained C.
+Non-matching C earns no matching credit; retain the original assembly fallback
+until the C matches.
 
 `tools/check_unit.py` enforces most of this. `docs/idioms.md` lists the source
 shapes that are confirmed to produce specific retail code sequences. Read it

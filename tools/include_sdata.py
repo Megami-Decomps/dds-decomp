@@ -22,6 +22,8 @@ import re
 import sys
 from pathlib import Path
 
+from nonmatching import matching_source
+
 ROOT = Path(__file__).resolve().parent.parent
 LINE = re.compile(r'^INCLUDE_SDATA\([^,]+,\s*"[^"]+",\s*(\w+)\);\n\n?', re.M)
 DEF = re.compile(r"^[A-Za-z_][\w \t\*]*?\b(\w+)\s*\([^;{]*\)\s*\{?[ \t]*$", re.M)
@@ -90,9 +92,10 @@ def place(version):
             write_text_if_changed(out_dir / f"{sym}.s", f".section .sdata\n\n{align}nonmatching {sym}\n\ndlabel {sym}\n{m.group(4)}enddlabel {sym}\n")
             syms.append((addr, sym))
         mine = {s for _, s in syms}
+        active = matching_source(text)
         # What the C emits itself: defined variables, and literals its functions write.
         anchors = []
-        for m in DATA_DEF.finditer(text):
+        for m in DATA_DEF.finditer(active):
             n = m.group(1)
             addr = names.get(n, int(n[2:], 16) if re.fullmatch(r"D_[0-9A-F]{8}", n) else None)
             if addr is not None and any(a == addr for a, _ in syms):
@@ -105,11 +108,11 @@ def place(version):
             written_symbols = set(STORE_REF.findall(native_text))
             for f in re.finditer(r"^glabel (\w+)\n(.*?)^endlabel \1", native_text, re.M | re.S):
                 refs[f.group(1)] = set(re.findall(r"%(?:lo|gp_rel)\((\w+)\)", f.group(2)))
-        asm_funcs = set(re.findall(r'^INCLUDE_ASM\([^\n]*\b(\w+)\);', text, re.M))
+        asm_funcs = set(re.findall(r'^INCLUDE_ASM\([^\n]*\b(\w+)\);', active, re.M))
         still_asm = set().union(*(refs.get(f, set()) for f in asm_funcs)) if asm_funcs else set()
         addr_of = {s: a for a, s in syms}
-        for m in DEF.finditer(text):
-            code = function_text(text, m.start())
+        for m in DEF.finditer(active):
+            code = function_text(active, m.start())
             for sym in refs.get(m.group(1), ()):
                 # An indexed C store can use the containing array's name instead
                 # of a native label for its last byte. Written storage is not a

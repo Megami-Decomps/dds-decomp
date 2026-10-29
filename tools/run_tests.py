@@ -28,6 +28,7 @@ MODULES = [
     "test_production_report",
     "test_configure",
     "test_check_unit",
+    "test_nonmatching",
     "test_dev_elf",
     "test_ee_gcc_diagnostics",
     "test_ee_gcc_aslr",

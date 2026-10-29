@@ -9,6 +9,7 @@ import unittest
 from unittest.mock import patch
 
 import include_rodata
+from nonmatching import matching_source
 
 
 class IncludeRodataTests(unittest.TestCase):
@@ -89,6 +90,23 @@ class IncludeRodataTests(unittest.TestCase):
         self.assertIn(definition, first)
         self.assertIn("INCLUDE_ASM", first)
         self.assertNotIn("INCLUDE_RODATA", first)
+        self.assert_stable(first)
+
+    def test_nonmatching_definition_does_not_replace_retail_rodata(self) -> None:
+        self.prepare(
+            '#ifdef NON_MATCHING\n'
+            'const u32 panelColors[4] = {1, 2, 3, 4};\n'
+            'void drawPanel(void) {\n    draw(panelColors);\n}\n'
+            '#else\nINCLUDE_ASM(const s32, "game/testUnit", drawPanel);\n#endif\n',
+            [("panelColors", 0x00300000)],
+            "glabel drawPanel\n    addiu $2, $2, %lo(panelColors)\nendlabel drawPanel\n",
+        )
+        (self.nonmatchings / "drawPanel.s").write_text(
+            ".section .text\n\nglabel drawPanel\nendlabel drawPanel\n"
+        )
+        first = self.place()
+        self.assertIn('INCLUDE_RODATA(const s32, "game/testUnit", panelColors);',
+                      matching_source(first))
         self.assert_stable(first)
 
     def test_definition_anchors_neighboring_includes_by_address(self) -> None:
