@@ -1,7 +1,7 @@
 #ifndef FLD_COLLISION_GEOMETRY_H
 #define FLD_COLLISION_GEOMETRY_H
 
-#include "fld.h"
+#include "field.h"
 
 struct FldStopEntry;
 
