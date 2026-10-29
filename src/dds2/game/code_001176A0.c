@@ -762,7 +762,7 @@ u32 sdfRollActionHit(s32 channel, datUnitWork_t *sourceRecord, datUnitWork_t *pa
     u16 bit;
     u16 mask;
     s32 ratio = 100;
-    u32 kind;
+    DatAffinitySelector affinitySelector;
     s32 scaled;
     s32 roll;
     s32 hit;
@@ -782,13 +782,14 @@ u32 sdfRollActionHit(s32 channel, datUnitWork_t *sourceRecord, datUnitWork_t *pa
     if (mask != 0 &&
         (datCommandRecords[channel].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_ELEMENT_MASK ||
          datCommandRecords[channel].attribute.parts.kind == DAT_COMMAND_ATTRIBUTE_KIND_RANDOM_ELEMENT_MASK)) {
-        kind = datFlagToElementIndex(mask);
+        affinitySelector = datFlagToElementIndex(mask);
         if (!(datCommandRecords[channel].unk30 == 4 && (packed->status & 0x7FFF) == 8)) {
-            if (datGetEffectiveAffinity(packed, kind) & 0x170000) {
+            if (datGetEffectiveAffinity(packed, affinitySelector) & 0x170000) {
                 return 0;
             }
         }
-        switch (kind) {
+        /* Retain unsigned dispatch for the unmapped selector sentinel. */
+        switch ((u32)affinitySelector) {
         case 3:
             if (datUnitHasSkill(packed, 0x25E)) {
                 ratio = (u32)(datAbilityParameters[0x25E - BTL_ABILITY_PARAMETER_FIRST_SKILL].value * (f32)ratio);
