@@ -303,7 +303,7 @@ class ObjdiffProgressTests(unittest.TestCase):
                     "base": None,
                 },
                 {
-                    "name": f"asm/{version}/hand/vu/example",
+                    "name": f"{'asm' if version == 'dds1' else 'src'}/{version}/hand/vu/example",
                     "target": f"build/{version}/hand/vu/example.o",
                     "base": None,
                 },
@@ -433,6 +433,21 @@ class ObjdiffProgressTests(unittest.TestCase):
 
 
 class ProgressLabelTests(unittest.TestCase):
+    def test_handwritten_c_wrapper_does_not_change_source_scope(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for unit in ("game/example", "hand/vu/example"):
+                source = root / "src/dds1" / f"{unit}.c"
+                assembly = root / "asm/dds1" / f"{unit}.s"
+                source.parent.mkdir(parents=True, exist_ok=True)
+                assembly.parent.mkdir(parents=True, exist_ok=True)
+                source.write_text("void example(void) {}\n")
+                assembly.write_text("glabel example\n"
+                                    "    /* 0000 00100000 00000000 */ nop\n"
+                                    "endlabel example\n")
+            with patch.object(progress, "ROOT", root):
+                self.assertEqual(progress.version_stats("dds1"), (1, 1, 4, 4))
+
     def test_text_labels_source_coverage(self) -> None:
         out = io.StringIO()
         with patch.object(sys, "argv", ["progress.py", "dds1"]), \

@@ -23,6 +23,9 @@ def version_stats(version):
     funcs = c_funcs = size = c_size = 0
     for unit in (ROOT / "src" / version).rglob("*.c"):
         name = unit.relative_to(ROOT / "src" / version).with_suffix("").as_posix()
+        # Handwritten units keep their separate scope when wrapped in C.
+        if name.startswith("hand/"):
+            continue
         full = ROOT / "asm" / version / f"{name}.s"
         if not full.exists():
             continue

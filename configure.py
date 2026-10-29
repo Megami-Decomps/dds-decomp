@@ -432,7 +432,7 @@ def objdiff_progress_category(version: str, name: str) -> str:
         return "vu1"
     # Whole functions Atlus wrote in assembly (crt0, VU0 loops) are `asm` segments
     # under hand/, not C targets; like the SDK they never enter the game-code totals.
-    if name.startswith(f"asm/{version}/hand/"):
+    if any(name.startswith(f"{tree}/{version}/hand/") for tree in ("asm", "src")):
         return "handwritten"
     return "sdk" if "/sdk/" in name else "game"
 
