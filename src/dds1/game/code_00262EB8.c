@@ -44,10 +44,11 @@ s32 brsMessageInputStep(dds3ProcessID_t *input) {
 s32 mnuStaffRunPanel1(dds3ProcessID_t *task) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(task);
 
-    if (brsTaskIsUiUpdateAllowed(context) != BRS_UI_UPDATE_NOT_ALLOWED) {
-        mnuRefreshPanelLayer(context);
-        return menuRunPanel(context, 1, (void *)task);
+    if (brsTaskIsUiUpdateAllowed(context) == BRS_UI_UPDATE_NOT_ALLOWED) {
+        return 0;  /* the scheduler keeps this callback (the test's own 0, retail's v0) */
     }
+    mnuRefreshPanelLayer(context);
+    return menuRunPanel(context, 1, (void *)task);
 }
 
 extern void brsDecaySharedAnimCounter(BrsSkillPackageWork *);
@@ -55,10 +56,11 @@ extern void brsDecaySharedAnimCounter(BrsSkillPackageWork *);
 s32 mnuStaffRunPanel2(dds3ProcessID_t *task) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(task);
 
-    if (brsTaskIsUiUpdateAllowed(context) != BRS_UI_UPDATE_NOT_ALLOWED) {
-        brsDecaySharedAnimCounter(context);
-        return menuRunPanel(context, 2, (void *)task);
+    if (brsTaskIsUiUpdateAllowed(context) == BRS_UI_UPDATE_NOT_ALLOWED) {
+        return 0;  /* the scheduler keeps this callback (the test's own 0, retail's v0) */
     }
+    brsDecaySharedAnimCounter(context);
+    return menuRunPanel(context, 2, (void *)task);
 }
 
 /* Registered result message enter hook: no side effects; returns one. */

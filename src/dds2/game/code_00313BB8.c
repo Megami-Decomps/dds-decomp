@@ -829,6 +829,7 @@ u32 scrCallIfOperandReady(datUnitWork_t *operand, s32 byteIndex) {
     if (ptyGetCurrentProfileId(operand)) {
         return prfGetIndexedProfileByte((u16)selectedProfileId, byteIndex);
     }
+    return 0;
 }
 
 /* Read one of the profile row's eight skills; an unsigned out-of-range slot returns zero. */
