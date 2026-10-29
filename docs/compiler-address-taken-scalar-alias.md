@@ -229,7 +229,7 @@ stage = command;
 if (entry->variant != 0) {
     stage = entry->variant;
 }
-room = entry->warpEntry;
+room = entry->sequenceKind;
 if (fldGlobalBase.area != stage) {
     fldBgmFadeOut();
 }

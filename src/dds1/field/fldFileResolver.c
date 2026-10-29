@@ -818,7 +818,7 @@ extern void mnuReleaseResourceEntries(void);
 
 extern void fldDrwZFree(void);
 
-extern FldWaypointBlock fldActorWaypointRows;
+extern fldWaypointBlock_t fldActorWaypointRows;
 
 extern FldFileResource *fldRoomResources[];
 
@@ -1590,7 +1590,7 @@ FldAreaResourceNameChangeResult fldHasAreaResourceNameChanged(void) {
     return strcmp(D_003C9200, buf) != 0;
 }
 
-extern void fldGetDoorEntry(const FldWaypointBlock *source);
+extern void fldGetDoorEntry(const fldWaypointBlock_t *source);
 
 extern void fldInfLoadFromMem(const FldInfTable *source);
 
@@ -1625,7 +1625,7 @@ void fldLoadFieldPack(void) {
                     PAC_WORK_ALLOCATION(work));
                 break;
             case FLD_PACKED_RESOURCE_ACTOR_WAYPOINT_TABLE:
-                fldGetDoorEntry((const FldWaypointBlock *)work->dataCursor);
+                fldGetDoorEntry((const fldWaypointBlock_t *)work->dataCursor);
                 sdfMemFreeDelayedDirect(
                     PAC_WORK_ALLOCATION(work));
                 break;

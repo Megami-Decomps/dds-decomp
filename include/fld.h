@@ -34,9 +34,11 @@ typedef struct fldSceneParam_t {
 } fldSceneParam_t;
 
 
-/* Packed actor placement rows used by field searches, motion and sound dispatch.
- * Both games use 0x6C-byte rows, with different signed flags and sequence fields. */
-typedef struct FldActorEntry {
+/* A field's door table row (its WAP file's, fldWaypointBlock_t), named and laid
+ * out as Nocturne's build has it, used by field searches, motion and sound
+ * dispatch, and fldDoor_Warp. Both games use 0x6C-byte rows: Nocturne's 0x64
+ * bytes, then the exploration map's marks; their flags differ in signedness. */
+typedef struct doormovetbl_s {
     s8 kind; /* 0x00 */
     u8 pad01;
     s16 requiredFlag; /* 0x02: zero or a model-flag ID */
@@ -88,9 +90,9 @@ typedef struct FldActorEntry {
     s8 variantMode; /* 0x30 */
     u8 flags31;
     s16 variant;
-    s16 warpEntry; /* 0x34 */
-    s16 warpEntry2;
-    char warpName[0xC]; /* 0x38 */
+    s16 sequenceKind; /* 0x34 */
+    s16 sequenceValue;
+    char sequenceName[0xC]; /* 0x38 */
     s8 linkKind; /* 0x44 */
     s8 cameraFollowRowIndex; /* 0x45: camera-follow row selector, matching DDS1. */
     char linkName[0xC]; /* 0x46 */
@@ -119,14 +121,14 @@ typedef struct FldActorEntry {
         s8 explorationRowCount; /* 0x6B: number of bitmap rows to mark */
     };
 #endif
-} FldActorEntry;
+} doormovetbl_s;
 
-typedef char FldActorExplorationAreaOffset[((u32)&((FldActorEntry *)0)->explorationArea == 0x65) ? 1 : -1];
-typedef char FldActorExplorationFloorOffset[((u32)&((FldActorEntry *)0)->explorationFloor == 0x66) ? 1 : -1];
-typedef char FldActorExplorationColumnOffset[((u32)&((FldActorEntry *)0)->explorationColumn == 0x68) ? 1 : -1];
-typedef char FldActorExplorationRowOffset[((u32)&((FldActorEntry *)0)->explorationRow == 0x69) ? 1 : -1];
-typedef char FldActorExplorationColumnCountOffset[((u32)&((FldActorEntry *)0)->explorationColumnCount == 0x6A) ? 1 : -1];
-typedef char FldActorExplorationRowCountOffset[((u32)&((FldActorEntry *)0)->explorationRowCount == 0x6B) ? 1 : -1];
+typedef char FldActorExplorationAreaOffset[((u32)&((doormovetbl_s *)0)->explorationArea == 0x65) ? 1 : -1];
+typedef char FldActorExplorationFloorOffset[((u32)&((doormovetbl_s *)0)->explorationFloor == 0x66) ? 1 : -1];
+typedef char FldActorExplorationColumnOffset[((u32)&((doormovetbl_s *)0)->explorationColumn == 0x68) ? 1 : -1];
+typedef char FldActorExplorationRowOffset[((u32)&((doormovetbl_s *)0)->explorationRow == 0x69) ? 1 : -1];
+typedef char FldActorExplorationColumnCountOffset[((u32)&((doormovetbl_s *)0)->explorationColumnCount == 0x6A) ? 1 : -1];
+typedef char FldActorExplorationRowCountOffset[((u32)&((doormovetbl_s *)0)->explorationRowCount == 0x6B) ? 1 : -1];
 
 /* fldFileResolver::fldMakeResouceBasicFL1 publishes file rows; fldSpawnPlacementObjectsFromBatches walks them
  * at stride 0x24. Both game resolvers walk counted names at stride 0x0C.

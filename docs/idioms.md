@@ -4651,7 +4651,7 @@ the real `EvtRuntime.groupFirst` and `groupCursor` addresses to its pointer API.
 ## Serialized waypoint and actor block
 
 `fld_waypoint.h` owns the complete WAP payload: five DDS1 or eight DDS2
-`0x20`-byte headers followed by 256 canonical `FldActorEntry` records.
+`0x20`-byte headers followed by 256 canonical `doormovetbl_s` records.
 The loader/copy lengths are `0x6CA0` and `0x6D00`, and the actor arrays
 start at `+0xA0` and `+0x100`. Header `sequenceArg` is a signed word:
 the actor-trigger sequence constructor reads it with `LW`; the short
@@ -4660,7 +4660,7 @@ Use the block's `headers` and `actors` members, including the selected
 actor's motion, rather than separate interior-address aliases or a
 second word-array view of the copied allocation.
 
-`fldApplySceneRoomSelection` takes the same `FldActorEntry *` in both
+`fldApplySceneRoomSelection` takes the same `doormovetbl_s *` in both
 games: its signed-byte reads are `selectedRoom` at `+0x53` and `rowIndex`
 at `+0x45`. DDS1 stores these into the primary `FldAreaWork` fields at
 `+0x88` and `+0x58`, not into a separate word-array view.
@@ -15225,7 +15225,7 @@ DDS1 additionally fades in and publishes `commandEnabled`.
 
 The packed actor member remains `s8`: other native consumers use `lb`.
 The bitset reader is instead a shared `static inline u8
-fldGetActorControlFlags(const FldActorEntry *)`, used by both name searches
+fldGetActorControlFlags(const doormovetbl_s *)`, used by both name searches
 and twice by the dispatcher. Acquire `commandFlag = getter(entry) & 1`,
 then the orientation flags, then publish `commandEnabled`. Both acquired
 values are consumed. This preserves the native `lbu` followed by a register

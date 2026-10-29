@@ -14,7 +14,7 @@ header-selected transitions; both become sequence record `kind`, consumed as
 scene `room`. The elevator selector is a distinct local. Floor flags before
 callbacks and bitmap flags reloaded afterward are distinct values/epochs.
 
-The final address expression uses the existing `FldWaypointHeaderValues.data`
+The final address expression uses the existing `fldWaypointHeaderValues_t.data`
 view, `body.data[headerFloor + 6]`. It accesses the second six-halfword bank of
 the real 12-halfword union, as already used by `fldDoor_GetElvTbl` and
 `fldDoor_ElvTakasaToFloor`. Valid elevator inputs remain header index 0..7 and floor

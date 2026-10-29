@@ -315,7 +315,7 @@ extern s32 D_003BAE50;
 
 extern void fldResetZoneRecordsAndActorSlots();
 
-extern FldWaypointBlock fldActorWaypointRows;
+extern fldWaypointBlock_t fldActorWaypointRows;
 
 extern FldFileResource *fldRoomResources[];
 
@@ -350,7 +350,7 @@ extern const u8 *fldCachedRoomResourceData, *fldCachedRoomF1ResourceData, *fldCa
 
 extern u32 fldCachedRoomResourceSize, fldCachedRoomF1ResourceSize, fldCachedRoomF2ResourceSize, fldCachedRoomKF2ResourceSize;
 
-extern void fldGetDoorEntry(const FldWaypointBlock *source);
+extern void fldGetDoorEntry(const fldWaypointBlock_t *source);
 
 extern void fldInfLoadFromMem(const FldInfTable *source);
 
@@ -2539,11 +2539,11 @@ extern const char D_00336A50[];
 
 extern s32 fldPickedActorTemplateKind;
 
-static inline FldActorEntry *fldGetActorRows(void) {
+static inline doormovetbl_s *fldGetActorRows(void) {
     return fldActorWaypointRows.actors;
 }
 
-static inline u8 fldGetActorControlFlags(const FldActorEntry *entry) {
+static inline u8 fldGetActorControlFlags(const doormovetbl_s *entry) {
     return entry->flags31;
 }
 
@@ -2553,7 +2553,7 @@ INCLUDE_RODATA(const s32, "game/code_00138C30", D_003A0200);
 
 const char *fldPickActorTemplateByName(const char *name) {
     s32 i = 0;
-    FldActorEntry *entry;
+    doormovetbl_s *entry;
     s16 flag;
     s16 sub;
 
@@ -2611,7 +2611,7 @@ const char *fldPickActorTemplateByName(const char *name) {
 
 const char *fldFindActorEntryByName(const char *name) {
     s32 i = 0;
-    FldActorEntry *entry;
+    doormovetbl_s *entry;
     s16 flag;
     s16 sub;
 
@@ -2675,7 +2675,7 @@ extern const char D_00336A30[];
 
 const char *fldSelectCurrentActorOnNextFloor(void) {
     s32 index = D_003BAB40;
-    FldActorEntry *entry = &fldActorWaypointRows.actors[index];
+    doormovetbl_s *entry = &fldActorWaypointRows.actors[index];
     if (entry->floor == D_0032E3C4[0] + 1 && entry->kind == FLD_ACTOR_ENTRY_KIND_WARP) {
         fldSelectedActorEntryIndex = index;
         D_003BAE68 = 8;
@@ -2689,7 +2689,7 @@ s32 fldGetSelectedActorMotionId(void) {
 }
 
 s32 fldQuerySelectedActorMotionState(s32 query) {
-    FldActorEntry *entry = &fldActorWaypointRows.actors[fldSelectedActorEntryIndex];
+    doormovetbl_s *entry = &fldActorWaypointRows.actors[fldSelectedActorEntryIndex];
 
     if (query == 0 && entry->kind == FLD_ACTOR_ENTRY_KIND_DOOR) {
         if (entry->motion == 5 || entry->secondaryMotion == 5 || entry->motion == 6
@@ -2712,7 +2712,7 @@ void fldApplyActorEntryTrigger(s32 checkTaskRecord) {
     s32 index;
     FldActorEntryKind kind;
     const char *record;
-    FldActorEntry *entry;
+    doormovetbl_s *entry;
 
     if (checkTaskRecord != 0) {
         record = fldEveHitResName_Find(scrGetScriptHandle()->task);
@@ -2763,7 +2763,7 @@ void fldApplyActorEntryTrigger(s32 checkTaskRecord) {
 }
 
 void fldDoor_ExitCamera(const char *name) {
-    FldActorEntry *entry;
+    doormovetbl_s *entry;
     char *entryName;
     dds3Basic_t *camera;
     s32 i;
@@ -2801,7 +2801,7 @@ u8 fldDoor_ChkWarp(void) {
     return D_003BAE68 == 8;
 }
 
-void fldApplySceneRoomSelection(FldActorEntry *entry) {
+void fldApplySceneRoomSelection(doormovetbl_s *entry) {
     if (entry->selectedRoom != 0) {
         fldGlobalBase.selectedRoomIndex = entry->selectedRoom - 1;
     }
@@ -2829,7 +2829,7 @@ void fldApplyCurrentTaskScene(const char *name) {
     s32 headerFloor;
     s32 currentArea;
     s32 i;
-    FldActorEntry *entry;
+    doormovetbl_s *entry;
     const char *entryName;
     s32 match;
     u32 floorFlags;
@@ -3044,7 +3044,7 @@ void fldDispatchSceneAction(u32 action) {
     s32 headerFloor;
     u32 floorFlags;
     u32 flags;
-    FldActorEntry *entry;
+    doormovetbl_s *entry;
 
     if (action == 0) return;
     if (action == 0x384) {
@@ -3225,7 +3225,7 @@ void fldSubmitSelectedActorWaypointTransition(void) {
     u32 floorFlags;
     u32 flags;
     s32 i;
-    FldActorEntry *entry;
+    doormovetbl_s *entry;
 
     if (D_003BAE54 == 0) {
         return;
@@ -3325,7 +3325,7 @@ void fldInitializeActorLinkedSequence(s32 mode, s32 index, fldSceneParam_t *sequ
     s32 motion;
     s32 kind;
     s32 i;
-    FldActorEntry *entry;
+    doormovetbl_s *entry;
 
     if (mode == 0) {
         field = D_0032EF18[index].unk0;
@@ -3485,14 +3485,14 @@ void fldInitializeActorLinkedSequence(s32 mode, s32 index, fldSceneParam_t *sequ
 #include "sdk_libc.h"
 
 
-extern void fldApplySceneRoomSelection(FldActorEntry *entry);
+extern void fldApplySceneRoomSelection(doormovetbl_s *entry);
 extern void fldSetSceneParam4(fldSceneParam_t *record, s32 stage, s32 kind, const char *name, s32 code, s32 link, const char *subname);
 extern void fldMarkStageExplorationBitmapRegion(s32, s32, s32, s32, s32, s32);
 extern void fldSetFlagBit(s32 area, s32 floor, s32 bit);
 
 extern s8 D_0032C9A0[];
 extern u8 D_003BAB3C;
-extern FldWaypointBlock fldActorWaypointRows;
+extern fldWaypointBlock_t fldActorWaypointRows;
 extern s32 D_003BAB40;
 extern void fldBgmFadeOut(void);
 extern void fldDoorLoad(s32);
@@ -3509,7 +3509,7 @@ void func_0013F100(s32 field, s32 motion) {
     u32 floorFlags;
     u32 flags;
     s32 i;
-    FldActorEntry *entry;
+    doormovetbl_s *entry;
 
     fldDoorLoad(field);
     for (i = 0; i < 0x100; i++) {
@@ -3583,7 +3583,7 @@ INCLUDE_ASM(const s32, "game/code_00138C30", func_0013F100);
 #endif
 
 void fldDoor_WarpCash(const char *name) {
-    FldActorEntry *entry;
+    doormovetbl_s *entry;
     s32 area;
     s32 room;
     s32 i;
@@ -3653,7 +3653,7 @@ void fldDoor_WarpCash(const char *name) {
 /* Read a selected actor state or a named world-object value; cases 1 and 2
  * deliberately fall through when no named object is found. */
 s32 fldGetActorStat0(s32 attribute) {
-    FldActorEntry *actor = &fldActorWaypointRows.actors[fldSelectedActorEntryIndex];
+    doormovetbl_s *actor = &fldActorWaypointRows.actors[fldSelectedActorEntryIndex];
     dds3Basic_t *objectNode;
     s32 secondaryMotion;
 
@@ -3687,7 +3687,7 @@ INCLUDE_RODATA(const s32, "game/code_00138C30", D_003A0270);
 INCLUDE_RODATA(const s32, "game/code_00138C30", D_003A0280);
 
 s32 fldGetActorStat1(u32 attribute) {
-    FldActorEntry *actor = &fldActorWaypointRows.actors[fldSelectedActorEntryIndex];
+    doormovetbl_s *actor = &fldActorWaypointRows.actors[fldSelectedActorEntryIndex];
     dds3Basic_t *objectNode;
 
     switch (attribute) {
@@ -3727,7 +3727,7 @@ s32 fldGetActorStat1(u32 attribute) {
 /* Look up a motion-table attribute indexed by this actor's state; named
  * object lookups fall through to the next attribute if absent. */
 s32 fldGetActorMotionEntry(u32 attribute) {
-    FldActorEntry *actor = &fldActorWaypointRows.actors[fldSelectedActorEntryIndex];
+    doormovetbl_s *actor = &fldActorWaypointRows.actors[fldSelectedActorEntryIndex];
     s16 motionIndex = actor->motion;
     dds3Basic_t *objectNode;
     s32 flags;
@@ -3827,7 +3827,7 @@ void fldDispatchSceneRoomSelection(s32 index) {
     s32 i;
     s32 area;
     s32 floor;
-    FldActorEntry *entry;
+    doormovetbl_s *entry;
 
     sourceRoom = D_003BAE50;
     count = D_00337C66[D_003BAE4C * 16];
@@ -3933,7 +3933,7 @@ void fldDoorLoad(s32 field) {
     }
 }
 
-void fldGetDoorEntry(const FldWaypointBlock *source) {
+void fldGetDoorEntry(const fldWaypointBlock_t *source) {
     memcpy(&fldActorWaypointRows, source, 0x6CA0);
 }
 
@@ -3948,7 +3948,7 @@ void fldInitializeActorMotionSlots(void) {
     s32 actorIndex;
     s32 slotIndex;
     s32 primaryMotion;
-    FldActorEntry *actor;
+    doormovetbl_s *actor;
     FldActorRow *row;
     dds3Basic_t *node;
 
@@ -4351,7 +4351,7 @@ void fldInitializeActorMotionSlots(void) {
 void fldReleaseActorTasksById(s32 id) {
     s32 i;
     FldActorRow *task;
-    FldActorEntry *actor;
+    doormovetbl_s *actor;
 
     if (id != 0) {
         if (id != -1) {
