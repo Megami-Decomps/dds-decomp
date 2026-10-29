@@ -20436,6 +20436,17 @@ void itfRotateScreenOffset(s32 *outX, s32 *outY, s32 x, s32 y, s32 centerX, s32 
 }
 
 
+/* XYZ2 lanes contain the signed coordinate's 32-bit representation. Reading
+ * that representation explicitly avoids ee-gcc 2.96's context-sensitive alias
+ * metadata for escaped scalar outputs. The original casts were valid C; this
+ * is a serialization model, not recovered original spelling. See
+ * docs/matching/quad-coordinate-serialization.md for the native/owner checks. */
+static inline u32 sdfCoordinatePacketWord(const s32 *coordinate) {
+    u32 word;
+    memcpy(&word, coordinate, sizeof(word));
+    return word;
+}
+
 void sdfDrawTexturedQuad(s32 x, s32 y, u32 depth, s32 width, s32 height,
                    const EffSpriteUV *uvRect, const EffSpriteColor *cornerColors,
                    u32 flipFlags, f32 angle, u32 blendKind, s32 mode, s32 aspectMode,
@@ -20541,16 +20552,16 @@ void sdfDrawTexturedQuad(s32 x, s32 y, u32 depth, s32 width, s32 height,
     }
     /* Six u64 per vertex: RGBAQ, UV, then XYZ2 (the 0x531 register list). */
     packetWords[2] = textureCoordinates[0] | ((u64)textureCoordinates[1] << 32);
-    packetWords[4] = (u64)(u32)x0 | ((u64)(u32)y0 << 32);
+    packetWords[4] = (u64)sdfCoordinatePacketWord(&x0) | ((u64)sdfCoordinatePacketWord(&y0) << 32);
     packetWords[5] = depth >> 4;
     packetWords[8] = textureCoordinates[2] | ((u64)textureCoordinates[1] << 32);
-    packetWords[10] = (u64)(u32)x1 | ((u64)(u32)y1 << 32);
+    packetWords[10] = (u64)sdfCoordinatePacketWord(&x1) | ((u64)sdfCoordinatePacketWord(&y1) << 32);
     packetWords[11] = depth >> 4;
     packetWords[14] = textureCoordinates[0] | ((u64)textureCoordinates[3] << 32);
-    packetWords[16] = (u64)(u32)x2 | ((u64)(u32)y2 << 32);
+    packetWords[16] = (u64)sdfCoordinatePacketWord(&x2) | ((u64)sdfCoordinatePacketWord(&y2) << 32);
     packetWords[17] = depth >> 4;
     packetWords[20] = textureCoordinates[2] | ((u64)textureCoordinates[3] << 32);
-    packetWords[22] = (u64)(u32)x3 | ((u64)(u32)y3 << 32);
+    packetWords[22] = (u64)sdfCoordinatePacketWord(&x3) | ((u64)sdfCoordinatePacketWord(&y3) << 32);
     packetWords[23] = depth >> 4;
     effSelectPresetByKind(blendKind, surfaceId);
     packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);

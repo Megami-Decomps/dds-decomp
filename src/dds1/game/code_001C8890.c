@@ -73,17 +73,6 @@
 #include "btl_ui.h"
 #include "btl_target_selection_state_api.h"
 
-#ifdef NON_MATCHING
-extern BtlRuntimeTask *btlCreateCategoryStatDamageTask(BtlUnit *, s32, s32);
-extern BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(const void *, u32);
-extern BtlRuntimeTask *btlCreateFlaggedCommandItemConsumeTask(BtlUnit *, s32);
-extern BtlRuntimeTask *btlCreateMaskedActorEntryUpdateTask(BtlUnit *, BtlOperandEntry *);
-extern BtlRuntimeTask *btlCreateQueuedActorEntrySelectionTask(BtlUnit *, BtlOperandEntry *);
-extern void btlFlagUnitDefeatCandidate(BtlUnit *unit);
-extern BtlRuntimeTask *sndCreateSkillSeTask(const ActiveSoundNode *, u16);
-extern s32 sndLookupResourceType(BtlUnit *actor, s32 resourceIndex);
-extern s32 sndMapResourceType(BtlUnit *actor, s32 resourceIndex);
-#endif
 /* Declared before first use (were implicit int). */
 extern BtlRuntimeTask *btlScheduleRefreshTask(BtlUnit *owner);
 extern BtlRuntimeTask *btlCreateUnitFadeInTask(BtlUnit *owner, u32 value, u32 variant);
@@ -1432,7 +1421,6 @@ INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3658);
 
 INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3670);
 
-#ifdef NON_MATCHING
 #include "btl_motion_transform.h"
 #include "common.h"
 #include "btl_actor_resource_bank_api.h"
@@ -1549,11 +1537,19 @@ extern BtlRuntimeTask *btlCreateLinkedEffectTask(BtlUnit *, s32, u8);
  * status and reward tasks (reflected hits and kind-specific effects included),
  * the trailing effects and the scene actions, then hand the actor to the next
  * state handler (state 0x15 for kind 2 commands, 0x18 when stunned or dead,
- * otherwise 0x1A). Upstream: INCLUDE_ASM in game/code_001C8890; written from
- * the retail routine. It differs from retail only in register allocation,
- * scheduling, one constant load placement, a nop and the jump table address,
- * and keeps the retail call order throughout. */
+ * otherwise 0x1A). Reconstructed from the retail routine while preserving
+ * its call order and the existing shared task, unit and operand owners. */
 void func_001CB410(BtlTask *actor) {
+    extern BtlRuntimeTask *btlCreateCategoryStatDamageTask(BtlUnit *, s32, s32);
+    extern BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(const void *, u32);
+    extern BtlRuntimeTask *btlCreateFlaggedCommandItemConsumeTask(BtlUnit *, s32);
+    extern BtlRuntimeTask *btlCreateMaskedActorEntryUpdateTask(BtlUnit *, BtlOperandEntry *);
+    extern BtlRuntimeTask *btlCreateQueuedActorEntrySelectionTask(BtlUnit *, BtlOperandEntry *);
+    extern void btlFlagUnitDefeatCandidate(BtlUnit *unit);
+    extern BtlRuntimeTask *sndCreateSkillSeTask(const ActiveSoundNode *, u16);
+    extern s32 sndLookupResourceType(BtlUnit *actor, s32 resourceIndex);
+    extern s32 sndMapResourceType(BtlUnit *actor, s32 resourceIndex);
+
     BtlState *runtime;
     BtlUnit *unit;
     BtlUnit *targetUnit;
@@ -1573,7 +1569,7 @@ void func_001CB410(BtlTask *actor) {
     u64 damageSequence;
     u64 finalSequence;
     s32 reflectedEffectStarted;
-    u64 categoryEnabled = 1;
+    s32 categoryEnabled = 1;
     s32 soundEnabled;
     s32 trailingSound;
     s32 trailingEffect;
@@ -1625,6 +1621,13 @@ void func_001CB410(BtlTask *actor) {
 
     if (datCommandSelectors[skillId].kind == 2) {
         soundEnabled = 0;
+        /* Keep this initialized category flag independent of the trailing
+         * flags' literal 1 at the operand-query boundary. Qualified 19.lreg /
+         * 20.greg traces show reload otherwise substitutes this live register
+         * for their constant loads and changes the native branch layout.
+         * The tied operand preserves its value; no instruction or memory effect.
+         * This is an allocation reconstruction, not original-source spelling. */
+        __asm__("" : "+r"(categoryEnabled));
         if (btlHasAnyOperandLowFlag(skillId, &actor->indexWork) != 0) {
             trailingSound = 1;
             trailingEffect = 1;
@@ -2300,9 +2303,7 @@ void func_001CB410(BtlTask *actor) {
     }
 
 }
-#else
-INCLUDE_ASM(const s32, "game/code_001C8890", func_001CB410);
-#endif
+
 
 /* Empty entry callback for the retail LINKAGE action state. */
 void btlEnterLinkageActionState(void) {

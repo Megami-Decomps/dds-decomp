@@ -67,9 +67,7 @@
 #include "fr_font_draw_glyph.h"
 #include "itf.h"
 
-#ifdef NON_MATCHING
 extern void fileShowPromptDialog(void);
-#endif
 typedef s32 (*FileMenuContinuationCallback)(void);
 /* Declared before first use (were implicit int). */
 extern void effLoadFlashTextures(void);
@@ -3058,7 +3056,6 @@ s32 slQueryYesNo(FileSelectionCallback start, FileSelectionCallback finish, s32 
     return (s32)fileUpdatePromptDialog;
 }
 
-#ifdef NON_MATCHING
 #include "common.h"
 #include "sdf_textured_rect.h"
 #include "itf_mes_window.h"
@@ -3072,7 +3069,7 @@ extern u32 D_00437D1C;        /* the prompt shown; 0 for none. As DDS1's 1-9, an
                                * asks the difficulty) */
 extern s32 fileSelectedSlotIndex;
 extern s32 D_003E8008[];      /* highlight pulse: [2] its angle in degrees, [3] its alpha */
-extern char *D_0042B770[16];  /* each slot's prompt title (retail copies the table to its frame) */
+extern char *D_0042B770[20];  /* each slot's prompt title (retail copies the table to its frame) */
 extern char D_003E83F0[], D_003E8410[], D_003E8438[];
 extern char D_003E8100[], D_003E8130[], D_003E8250[];
 extern char D_003E8648[];
@@ -3108,132 +3105,152 @@ extern s32 slChkWindowOpenDone(void);
 #define FILE_PROMPT_ANSWER_X 86
 #define FILE_PROMPT_DIFFICULTY 12
 
-/* Text line `line` of a prompt whose first line is at (x, top). */
-static void filePromptLine(s32 x, s32 top, s32 line, const char *text) {
-    mcdCreateFontDrawHandle(x, top + line * FILE_PROMPT_LINE_HEIGHT, FILE_PROMPT_TEXT_COLOR, (u32)text);
-}
-
-static void filePromptLines(s32 x, s32 top, const char *const *lines, s32 count) {
-    s32 i;
-
-    for (i = 0; i < count; i++) {
-        filePromptLine(x, top, i, lines[i]);
-    }
-}
-
-static void filePromptSurface(void) {
-    eglSetOt(0x53);
-    evtSubmitPrimaryAlphaBlendMode(0);
-    evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
-}
-
-/* Draw the two answers under a prompt, the highlighted one under a pulsing
- * bar and cursor; the difficulty's bar is wider. */
-static void filePromptAnswers(void) {
-    s32 firstRow = (D_00437D1C == 5 || D_00437D1C == 6) ? 0x132 : 0x102;
-    s32 secondRow = firstRow + FILE_PROMPT_LINE_HEIGHT;
-    s32 barWidth = (D_00437D1C == FILE_PROMPT_DIFFICULTY ? 0x14 : 0xC) * 4;
-    s32 highlightRow;
+/* Snapshot all twenty slot titles before the early exits, then render each
+ * live prompt and its selected answer. The independent mode tests preserve
+ * changes made by the reveal callback.
+ *
+ * The two rendering scalars below have real, disjoint phases. On the first
+ * selection, drawParameter carries the gradient RGB through the cursor-color
+ * OR before becoming the lower answer Y. On the second selection, renderValue
+ * carries the selected width through both rectangles before becoming cursor
+ * RGB. No value escapes; each overwrite follows its last real consumer.
+ * Qualified EE GCC 2.96 traces show these shared pseudos retain the native
+ * allocation dependencies. This reconstructs compiler behavior, not original
+ * variable names; see docs/matching/file-prompt-rendering.md. */
+void fileShowPromptDialog(void) {
+    char *titles[20];
+    s32 firstRow;
+    /* First selection: actual gradient RGB, then the lower answer Y.
+     * Second selection: lower answer Y throughout. Values do not overlap. */
+    u32 drawParameter;
+    /* Selected bar half-width, then RGB for the second-selection cursor. */
+    s32 renderValue;
     struct sdfTexHandle_t *texture;
     s32 angle;
     f32 wave;
     u32 cursorColor;
 
-    eglSetOt(0x56);
-    evtSubmitPrimaryAlphaBlendMode(1);
-    evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
-    texture = itfMesGetWindowTexture();
-    angle = (D_003E8008[2] + 8) % 360;
-    D_003E8008[2] = angle;
-    wave = sdfSin((f32)((angle + 90) % 360) / 180.0f * 3.1415899f);
-    D_003E8008[3] = (s32)((wave + 1.0f) * 0.5f * 80.0f + 112.0f);
-
-    highlightRow = D_00437D18 == 0 ? firstRow : secondRow;
-    /* The bar's halves fade in from its ends. */
-    evtSubmitDefaultDepthGradientRect(0x3D, highlightRow, barWidth, 0x18, FILE_PROMPT_HIGHLIGHT_RGB,
-                                      FILE_PROMPT_HIGHLIGHT_EDGE, FILE_PROMPT_HIGHLIGHT_EDGE,
-                                      FILE_PROMPT_HIGHLIGHT_RGB);
-    evtSubmitDefaultDepthGradientRect(0x3D + barWidth, highlightRow, barWidth, 0x18, FILE_PROMPT_HIGHLIGHT_EDGE,
-                                      FILE_PROMPT_HIGHLIGHT_RGB, FILE_PROMPT_HIGHLIGHT_RGB,
-                                      FILE_PROMPT_HIGHLIGHT_EDGE);
-    cursorColor = ((u32)D_003E8008[3] << 24) | FILE_PROMPT_HIGHLIGHT_RGB;
-    evtSubmitTexturedGradientQuad(0x45, highlightRow + 8, 0xC, 0xB, 0x29, 1, 0xC, 0xB, cursorColor, cursorColor,
-                                  cursorColor, cursorColor, texture);
-
-    if (D_00437D1C == FILE_PROMPT_DIFFICULTY) {
-        mcdCreateFontDrawHandle(FILE_PROMPT_ANSWER_X, firstRow, FILE_PROMPT_ANSWER_COLOR, (u32)D_00437DD0);
-        mcdCreateFontDrawHandle(FILE_PROMPT_ANSWER_X, secondRow, FILE_PROMPT_ANSWER_COLOR, (u32)D_00437DD8);
-    } else {
-        mcdCreateFontDrawHandle(FILE_PROMPT_ANSWER_X, firstRow, FILE_PROMPT_ANSWER_COLOR, (u32)D_00437DB0);
-        mcdCreateFontDrawHandle(FILE_PROMPT_ANSWER_X, secondRow, FILE_PROMPT_ANSWER_COLOR, (u32)D_00437DB8);
-    }
-}
-
-/* Draw the memory-card menu's current prompt and, once its load step is
- * complete, its answers. DDS1's fileShowPromptDialog with DDS2's prompts.
- * Upstream: INCLUDE_ASM in game/code_002C96D0; same calls and arguments as
- * the retail routine, with its repeated text blocks as tables. */
-void fileShowPromptDialog(void) {
-    static const char *const overwriteFileLines[] = {D_003E83F0, D_003E8410, D_003E8438};
-    static const char *const unformattedCardLines[] = {D_003E8100, D_003E8130, D_003E8250};
-    static const char *const newCycleLines[] = {D_003E86E0, D_003E86F0, D_003E8710, D_00437DC0};
-    static const char *const noCardLines[] = {D_003E87A0, D_003E87B8, D_003E87D0, D_003E87F0,
-                                              D_003E8808, D_003E8828, D_003E8840, D_003E8868};
-    static const char *const noSpaceLines[] = {D_003E8880, D_003E8898, D_003E88B0, D_003E88C8, D_003E88E0,
-                                            D_003E88F8, D_003E8918, D_003E8930, D_003E8950};
-    static const char *const overwriteDataLines[] = {D_003E8758, D_003E8778, D_003E8790};
-    static const char *const prompt10Lines[] = {D_003E8990, D_003E89B8, D_003E89E0, D_003E8A00};
-
+    memcpy(titles, D_0042B770, sizeof(titles));
     if (D_00437D18 == -1 || D_00437D1C == 0) {
         return;
     }
-    filePromptSurface();
-    if (D_00437D1C == 1 && fileDrawFileMenuPromptAndCheckDelay() == FILE_PROMPT_REVEAL_READY) {
-        filePromptLines(86, 114, overwriteFileLines, 3);
+    eglSetOt(0x53);
+    evtSubmitPrimaryAlphaBlendMode(0);
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    if (D_00437D1C == 1 && fileDrawFileMenuPromptAndCheckDelay() != FILE_PROMPT_REVEAL_PENDING) {
+        mcdCreateFontDrawHandle(86, 114, FILE_PROMPT_TEXT_COLOR, (u32)D_003E83F0);
+        mcdCreateFontDrawHandle(86, 138, FILE_PROMPT_TEXT_COLOR, (u32)D_003E8410);
+        mcdCreateFontDrawHandle(86, 162, FILE_PROMPT_TEXT_COLOR, (u32)D_003E8438);
     }
-    if (D_00437D1C == 2 && fileDrawFileMenuPromptAndCheckDelay() == FILE_PROMPT_REVEAL_READY) {
-        filePromptLines(62, 114, unformattedCardLines, 3);
+    if (D_00437D1C == 2 && fileDrawFileMenuPromptAndCheckDelay() != FILE_PROMPT_REVEAL_PENDING) {
+        mcdCreateFontDrawHandle(62, 114, FILE_PROMPT_TEXT_COLOR, (u32)D_003E8100);
+        mcdCreateFontDrawHandle(62, 138, FILE_PROMPT_TEXT_COLOR, (u32)D_003E8130);
+        mcdCreateFontDrawHandle(62, 162, FILE_PROMPT_TEXT_COLOR, (u32)D_003E8250);
     }
-    if (D_00437D1C == 3 && fileDrawFileMenuPromptAndCheckDelay() == FILE_PROMPT_REVEAL_READY) {
-        filePromptLine(86, 114, 0, D_0042B770[fileSelectedSlotIndex]);
-        filePromptLine(86, 114, 1, D_003E8648);
+    if (D_00437D1C == 3 && fileDrawFileMenuPromptAndCheckDelay() != FILE_PROMPT_REVEAL_PENDING) {
+        mcdCreateFontDrawHandle(86, 114, FILE_PROMPT_TEXT_COLOR, (u32)titles[fileSelectedSlotIndex]);
+        mcdCreateFontDrawHandle(86, 138, FILE_PROMPT_TEXT_COLOR, (u32)D_003E8648);
     }
-    if (D_00437D1C == 4 && fileDrawFileMenuPromptAndCheckDelay() == FILE_PROMPT_REVEAL_READY) {
-        filePromptLines(86, 114, newCycleLines, 4);
+    if (D_00437D1C == 4 && fileDrawFileMenuPromptAndCheckDelay() != FILE_PROMPT_REVEAL_PENDING) {
+        mcdCreateFontDrawHandle(86, 114, FILE_PROMPT_TEXT_COLOR, (u32)D_003E86E0);
+        mcdCreateFontDrawHandle(86, 138, FILE_PROMPT_TEXT_COLOR, (u32)D_003E86F0);
+        mcdCreateFontDrawHandle(86, 162, FILE_PROMPT_TEXT_COLOR, (u32)D_003E8710);
+        mcdCreateFontDrawHandle(86, 186, FILE_PROMPT_TEXT_COLOR, (u32)D_00437DC0);
     }
-    if (D_00437D1C == 5 && fileDrawFileMenuPromptAndCheckDelay() == FILE_PROMPT_REVEAL_READY) {
-        filePromptLines(62, 90, noCardLines, 8);
+    if (D_00437D1C == 5 && fileDrawFileMenuPromptAndCheckDelay() != FILE_PROMPT_REVEAL_PENDING) {
+        mcdCreateFontDrawHandle(62, 90, FILE_PROMPT_TEXT_COLOR, (u32)D_003E87A0);
+        mcdCreateFontDrawHandle(62, 114, FILE_PROMPT_TEXT_COLOR, (u32)D_003E87B8);
+        mcdCreateFontDrawHandle(62, 138, FILE_PROMPT_TEXT_COLOR, (u32)D_003E87D0);
+        mcdCreateFontDrawHandle(62, 162, FILE_PROMPT_TEXT_COLOR, (u32)D_003E87F0);
+        mcdCreateFontDrawHandle(62, 186, FILE_PROMPT_TEXT_COLOR, (u32)D_003E8808);
+        mcdCreateFontDrawHandle(62, 210, FILE_PROMPT_TEXT_COLOR, (u32)D_003E8828);
+        mcdCreateFontDrawHandle(62, 234, FILE_PROMPT_TEXT_COLOR, (u32)D_003E8840);
+        mcdCreateFontDrawHandle(62, 258, FILE_PROMPT_TEXT_COLOR, (u32)D_003E8868);
     }
-    if (D_00437D1C == 6 && fileDrawFileMenuPromptAndCheckDelay() == FILE_PROMPT_REVEAL_READY) {
-        filePromptLines(62, 90, noSpaceLines, 9);
+    if (D_00437D1C == 6 && fileDrawFileMenuPromptAndCheckDelay() != FILE_PROMPT_REVEAL_PENDING) {
+        mcdCreateFontDrawHandle(62, 90, FILE_PROMPT_TEXT_COLOR, (u32)D_003E8880);
+        mcdCreateFontDrawHandle(62, 114, FILE_PROMPT_TEXT_COLOR, (u32)D_003E8898);
+        mcdCreateFontDrawHandle(62, 138, FILE_PROMPT_TEXT_COLOR, (u32)D_003E88B0);
+        mcdCreateFontDrawHandle(62, 162, FILE_PROMPT_TEXT_COLOR, (u32)D_003E88C8);
+        mcdCreateFontDrawHandle(62, 186, FILE_PROMPT_TEXT_COLOR, (u32)D_003E88E0);
+        mcdCreateFontDrawHandle(62, 210, FILE_PROMPT_TEXT_COLOR, (u32)D_003E88F8);
+        mcdCreateFontDrawHandle(62, 234, FILE_PROMPT_TEXT_COLOR, (u32)D_003E8918);
+        mcdCreateFontDrawHandle(62, 258, FILE_PROMPT_TEXT_COLOR, (u32)D_003E8930);
+        mcdCreateFontDrawHandle(62, 282, FILE_PROMPT_TEXT_COLOR, (u32)D_003E8950);
     }
-    if (D_00437D1C == 7 && fileDrawFileMenuPromptAndCheckDelay() == FILE_PROMPT_REVEAL_READY) {
-        filePromptLine(86, 114, 0, D_003E8280);
+    if (D_00437D1C == 7 && fileDrawFileMenuPromptAndCheckDelay() != FILE_PROMPT_REVEAL_PENDING) {
+        mcdCreateFontDrawHandle(86, 114, FILE_PROMPT_TEXT_COLOR, (u32)D_003E8280);
     }
-    if (D_00437D1C == 8 && fileDrawFileMenuPromptAndCheckDelay() == FILE_PROMPT_REVEAL_READY) {
-        filePromptLine(86, 114, 0, D_003E8738);
+    if (D_00437D1C == 8 && fileDrawFileMenuPromptAndCheckDelay() != FILE_PROMPT_REVEAL_PENDING) {
+        mcdCreateFontDrawHandle(86, 114, FILE_PROMPT_TEXT_COLOR, (u32)D_003E8738);
     }
-    if (D_00437D1C == 9 && fileDrawFileMenuPromptAndCheckDelay() == FILE_PROMPT_REVEAL_READY) {
-        filePromptLines(86, 114, overwriteDataLines, 3);
+    if (D_00437D1C == 9 && fileDrawFileMenuPromptAndCheckDelay() != FILE_PROMPT_REVEAL_PENDING) {
+        mcdCreateFontDrawHandle(86, 114, FILE_PROMPT_TEXT_COLOR, (u32)D_003E8758);
+        mcdCreateFontDrawHandle(86, 138, FILE_PROMPT_TEXT_COLOR, (u32)D_003E8778);
+        mcdCreateFontDrawHandle(86, 162, FILE_PROMPT_TEXT_COLOR, (u32)D_003E8790);
     }
-    if (D_00437D1C == 10 && fileDrawFileMenuPromptAndCheckDelay() == FILE_PROMPT_REVEAL_READY) {
-        filePromptLines(86, 114, prompt10Lines, 4);
-        filePromptLine(86, 114, 5, D_003E8A20);
+    if (D_00437D1C == 10 && fileDrawFileMenuPromptAndCheckDelay() != FILE_PROMPT_REVEAL_PENDING) {
+        mcdCreateFontDrawHandle(86, 114, FILE_PROMPT_TEXT_COLOR, (u32)D_003E8990);
+        mcdCreateFontDrawHandle(86, 138, FILE_PROMPT_TEXT_COLOR, (u32)D_003E89B8);
+        mcdCreateFontDrawHandle(86, 162, FILE_PROMPT_TEXT_COLOR, (u32)D_003E89E0);
+        mcdCreateFontDrawHandle(86, 186, FILE_PROMPT_TEXT_COLOR, (u32)D_003E8A00);
+        mcdCreateFontDrawHandle(86, 234, FILE_PROMPT_TEXT_COLOR, (u32)D_003E8A20);
     }
-    if (D_00437D1C == 11 && fileDrawFileMenuPromptAndCheckDelay() == FILE_PROMPT_REVEAL_READY) {
-        filePromptLine(86, 114, 0, D_003E8B40);
+    if (D_00437D1C == 11 && fileDrawFileMenuPromptAndCheckDelay() != FILE_PROMPT_REVEAL_PENDING) {
+        mcdCreateFontDrawHandle(86, 114, FILE_PROMPT_TEXT_COLOR, (u32)D_003E8B40);
     }
-    if (D_00437D1C == FILE_PROMPT_DIFFICULTY && fileDrawFileMenuPromptAndCheckDelay() == FILE_PROMPT_REVEAL_READY) {
-        filePromptLine(86, 114, 0, D_003E8B78);
+    if (D_00437D1C == FILE_PROMPT_DIFFICULTY && fileDrawFileMenuPromptAndCheckDelay() != FILE_PROMPT_REVEAL_PENDING) {
+        mcdCreateFontDrawHandle(86, 114, FILE_PROMPT_TEXT_COLOR, (u32)D_003E8B78);
     }
     if (slChkWindowOpenDone()) {
-        filePromptAnswers();
+        if (D_00437D1C == 5) {
+            firstRow = 0x132;
+        } else if (D_00437D1C == 6) {
+            firstRow = 0x132;
+        } else {
+            firstRow = 0x102;
+        }
+        eglSetOt(0x56);
+        evtSubmitPrimaryAlphaBlendMode(1);
+        evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+        texture = itfMesGetWindowTexture();
+        angle = (D_003E8008[2] + 8) % 360;
+        D_003E8008[2] = angle;
+        wave = sdfSin((f32)((angle + 90) % 360) / 180.0f * 3.1415899f);
+        D_003E8008[3] = (s32)((wave + 1.0f) * 0.5f * 80.0f + 112.0f);
+        if (D_00437D1C != 12) {
+            renderValue = 12;
+        } else {
+            renderValue = 20;
+        }
+        if (D_00437D18 == 0) {
+            evtSubmitDefaultDepthGradientRect(0x3D, firstRow, renderValue * 4, 0x18, FILE_PROMPT_HIGHLIGHT_RGB, FILE_PROMPT_HIGHLIGHT_EDGE, FILE_PROMPT_HIGHLIGHT_EDGE, FILE_PROMPT_HIGHLIGHT_RGB);
+            drawParameter = FILE_PROMPT_HIGHLIGHT_RGB;
+            evtSubmitDefaultDepthGradientRect(0x3D + renderValue * 4, firstRow, renderValue * 4, 0x18, FILE_PROMPT_HIGHLIGHT_EDGE, drawParameter, drawParameter, FILE_PROMPT_HIGHLIGHT_EDGE);
+            cursorColor = ((u32)D_003E8008[3] << 24) | drawParameter;
+            drawParameter = (u32)(firstRow + 24);
+            evtSubmitTexturedGradientQuad(0x45, firstRow + 8, 0xC, 0xB, 0x29, 1, 0xC, 0xB, cursorColor, cursorColor, cursorColor, cursorColor, texture);
+        }
+        else {
+            drawParameter = (u32)(firstRow + 24);
+            evtSubmitDefaultDepthGradientRect(0x3D, (s32)drawParameter, renderValue * 4, 0x18, FILE_PROMPT_HIGHLIGHT_RGB, FILE_PROMPT_HIGHLIGHT_EDGE, FILE_PROMPT_HIGHLIGHT_EDGE, FILE_PROMPT_HIGHLIGHT_RGB);
+            evtSubmitDefaultDepthGradientRect(0x3D + renderValue * 4, (s32)drawParameter, renderValue * 4, 0x18, FILE_PROMPT_HIGHLIGHT_EDGE, FILE_PROMPT_HIGHLIGHT_RGB, FILE_PROMPT_HIGHLIGHT_RGB, FILE_PROMPT_HIGHLIGHT_EDGE);
+            renderValue = FILE_PROMPT_HIGHLIGHT_RGB;
+            cursorColor = ((u32)D_003E8008[3] << 24) | (u32)renderValue;
+            evtSubmitTexturedGradientQuad(0x45, firstRow + 32, 0xC, 0xB, 0x29, 1, 0xC, 0xB, cursorColor, cursorColor, cursorColor, cursorColor, texture);
+        }
+        if (D_00437D1C != 12) {
+            mcdCreateFontDrawHandle(86, firstRow, FILE_PROMPT_ANSWER_COLOR, (u32)D_00437DB0);
+            mcdCreateFontDrawHandle(86, (s32)drawParameter, FILE_PROMPT_ANSWER_COLOR, (u32)D_00437DB8);
+        } else {
+            mcdCreateFontDrawHandle(86, firstRow, FILE_PROMPT_ANSWER_COLOR, (u32)D_00437DD0);
+            mcdCreateFontDrawHandle(86, (s32)drawParameter, FILE_PROMPT_ANSWER_COLOR, (u32)D_00437DD8);
+        }
     }
-    filePromptSurface();
+    eglSetOt(0x53);
+    evtSubmitPrimaryAlphaBlendMode(0);
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
 }
-#else
-INCLUDE_ASM(const s32, "game/code_002C96D0", fileShowPromptDialog);
-#endif
 
 FileMenuOperationResult fileGetSaveLoadResult(void) {
     return D_00437D04;
