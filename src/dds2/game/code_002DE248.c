@@ -17622,7 +17622,8 @@ void effUpdateResourceQueue(const char *directoryPath, const char *extension, Ef
     state = btlGetResourceNameSelectionStatus(effQueuedResourceNameRecord);
     record->completion.state = state;
     if (state == BTL_RESOURCE_SELECTION_ACCEPTED) {
-        if (btlPollResourceNameOverwrite(effQueuedResourceNameRecord, directoryPath) != 0) {
+        if (btlPollResourceNameOverwrite(effQueuedResourceNameRecord, directoryPath) !=
+            BTL_RESOURCE_WRITE_PERMISSION_NOT_GRANTED) {
             btlDestroyResourceNameRecord(effQueuedResourceNameRecord);
             effQueuedResourceNameRecord = 0;
         } else {

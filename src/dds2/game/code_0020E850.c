@@ -208,7 +208,8 @@ extern char D_00436C70[];
  * as a guide (the same routine). The string literals the unit itself holds
  * ("pfs:", "CANCEL" and the three in its rodata) are the body's literals;
  * their text equals retail's. */
-u32 btlPollResourceNameOverwrite(struct BtlResourceNameRecord *record, const char *directoryPath) {
+BtlResourceWritePermissionResult btlPollResourceNameOverwrite(
+    struct BtlResourceNameRecord *record, const char *directoryPath) {
     char path[0xD0];
     s32 x;
     s32 y;
@@ -224,33 +225,33 @@ u32 btlPollResourceNameOverwrite(struct BtlResourceNameRecord *record, const cha
     if (record->overwritePromptActive == 0) {
         fd = sceOpen(path, 1);
         if (fd < 0) {
-            return 1;
+            return BTL_RESOURCE_WRITE_PERMISSION_GRANTED;
         }
         record->selection = 0;
-        record->selectionStatus = 1;
+        record->selectionStatus = BTL_RESOURCE_SELECTION_ACCEPTED;
         record->overwritePromptActive = 1;
         sceClose(fd);
         sceSync("pfs:", 0);
-        return 0;
+        return BTL_RESOURCE_WRITE_PERMISSION_NOT_GRANTED;
     }
     if ((dds3PadBitTable[6] & 2) || (dds3PadBitTable[7] & 2)) {
         record->selection ^= 1;
     } else if (dds3PadBitTable[1] < 0) {
         if (record->selection == 1) {
-            return 1;
+            return BTL_RESOURCE_WRITE_PERMISSION_GRANTED;
         }
-        record->selectionStatus = 0;
+        record->selectionStatus = BTL_RESOURCE_SELECTION_PENDING;
         record->overwritePromptActive = 0;
-        return 0;
+        return BTL_RESOURCE_WRITE_PERMISSION_NOT_GRANTED;
     } else if (dds3PadBitTable[3] < 0) {
-        record->selectionStatus = 0;
+        record->selectionStatus = BTL_RESOURCE_SELECTION_PENDING;
         record->overwritePromptActive = 0;
-        return 0;
+        return BTL_RESOURCE_WRITE_PERMISSION_NOT_GRANTED;
     }
     btlDebugDrawText(x + 4, y + 0x1C, 0, "OVERWRITE OK?");
     btlDebugDrawText(x + 0x2E, y + 0x3A, record->selection == 0 ? 4 : 0, "CANCEL");
     btlDebugDrawText(x + 0x46, y + 0x46, record->selection == 1 ? 4 : 0, D_00436C70);
-    return 0;
+    return BTL_RESOURCE_WRITE_PERMISSION_NOT_GRANTED;
 }
 #else
 INCLUDE_ASM(const s32, "game/code_0020E850", btlPollResourceNameOverwrite);

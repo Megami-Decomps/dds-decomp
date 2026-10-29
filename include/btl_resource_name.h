@@ -4,6 +4,13 @@
 #include "common.h"
 #include "btl_resource_selection.h"
 
+typedef u32 BtlResourceWritePermissionResult;
+
+enum {
+    BTL_RESOURCE_WRITE_PERMISSION_NOT_GRANTED = 0,
+    BTL_RESOURCE_WRITE_PERMISSION_GRANTED = 1,
+};
+
 typedef struct BtlResourceNameRecord {
     s32 x; /* UI origin for the name and overwrite prompts. */
     s32 y;
@@ -29,9 +36,10 @@ void btlResourceRecordSetName(struct BtlResourceNameRecord *record, const char *
 void btlFormatResourceNameWithExtension(const struct BtlResourceNameRecord *record, char *output);
 void btlFormatResourceNameWithoutExtension(const struct BtlResourceNameRecord *record, char *output);
 
-/* Poll the overwrite prompt; an absent file also permits the write immediately. */
-u32 btlPollResourceNameOverwrite(struct BtlResourceNameRecord *record,
-                                 const char *directoryPath);
+/* Reports immediate permission; an active prompt or cancellation is not
+ * granted. */
+BtlResourceWritePermissionResult btlPollResourceNameOverwrite(
+    struct BtlResourceNameRecord *record, const char *directoryPath);
 
 u32 btlGetResourceNameSelectionStatus(const struct BtlResourceNameRecord *record);
 void btlSetResourceNameLengthLimit(struct BtlResourceNameRecord *record, u32 maximumNameLength);
