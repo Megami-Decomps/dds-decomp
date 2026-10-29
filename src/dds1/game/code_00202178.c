@@ -296,7 +296,254 @@ INCLUDE_RODATA(const s32, "game/code_00202178", D_003A5B50);
 
 INCLUDE_RODATA(const s32, "game/code_00202178", D_003A5BD0);
 
+#ifdef NON_MATCHING
+#include "btl_motion_transform.h"
+#include "common.h"
+#include "btl_actor_resource_bank_api.h"
+#include "sdf_vu_rotation_axes.h"
+#include "btl_skill_max_api.h"
+#include "btl_effect_active_api.h"
+#include "eff_random_mod.h"
+#include "eff_random.h"
+#include "dds3obj.h"
+#include "mdl_motion_api.h"
+#include "btl_effect_position.h"
+#include "btl_task_condition.h"
+#include "eff_transform.h"
+#include "btl_state.h"
+#include "btl_command.h"
+#include "btl_command_affinity_api.h"
+#include "btl_model_record.h"
+#include "sdf_draw.h"
+#include "evt_unit.h"
+#include "mdl.h"
+#include "ee_mmi.h"
+#include "pcp_vu0.h"
+#include "sdf_vu_matrix.h"
+#include "btl_action.h"
+#include "btl_ai_table.h"
+#include "btl_ai_scratch.h"
+#include "btl_unit_tasks.h"
+#include "dat_state.h"
+#include "dat_command.h"
+#include "mdl_flag_api.h"
+#include "btl_unit_tasks.h"
+#include "sdf_debug_api.h"
+
+
+extern EffRandState effSharedRandomState;
+extern s32 btlRollAiBucket(void);
+
+typedef struct BtlSelectorRank {
+    s32 value;
+    u32 listIndex;
+} BtlSelectorRank;
+
+/* Percent chances that the pick lands on the 1st, 2nd, ... ranked target when there are n of them (row n - 1).
+ * The first table is used when targets are ranked for damage, the second for status commands (retail rodata
+ * D_003A5B50 and D_003A5BD0). */
+static const s16 btlSelectorDamageWeights[8][8] = {
+    {99, 99, 99, 99, 99, 99, 99, 99}, {69, 30, 99, 99, 99, 99, 99, 99}, {64, 25, 10, 99, 99, 99, 99, 99},
+    {59, 25, 10, 5, 99, 99, 99, 99},  {49, 20, 15, 10, 5, 99, 99, 99},  {39, 20, 20, 10, 5, 5, 99, 99},
+    {29, 20, 15, 10, 10, 10, 5, 99},  {19, 15, 15, 15, 10, 10, 10, 5},
+};
+static const s16 btlSelectorStatusWeights[8][8] = {
+    {99, 99, 99, 99, 99, 99, 99, 99}, {39, 60, 99, 99, 99, 99, 99, 99}, {9, 30, 60, 99, 99, 99, 99, 99},
+    {9, 15, 15, 60, 99, 99, 99, 99},  {9, 10, 10, 10, 60, 99, 99, 99},  {9, 10, 10, 15, 15, 40, 99, 99},
+    {9, 10, 10, 15, 15, 15, 25, 99},  {9, 10, 10, 10, 15, 15, 15, 15},
+};
+
+/* Insert a rank before the first stored rank (of eight) whose value is not below it; returns the new count. */
+static inline s32 btlInsertSelectorRank(BtlSelectorRank *ranks, s32 inserted, s32 value, u32 listIndex) {
+    s32 position;
+    s32 shift;
+
+    for (position = 0; position < 8; position++) {
+        if (ranks[position].value >= value) {
+            for (shift = inserted; shift > position; shift--) {
+                ranks[shift] = ranks[shift - 1];
+            }
+            ranks[position].value = value;
+            ranks[position].listIndex = listIndex;
+            return inserted + 1;
+        }
+    }
+    return inserted;
+}
+
+/* Roll against the cumulative weights of the first `eligible` ranks and return the chosen list index (0 if the
+ * weights run out). */
+static inline u32 btlPickRankedTarget(const BtlSelectorRank *ranks, const s16 (*weights)[8], s32 eligible) {
+    s32 roll = btlRollAiBucket();
+    s32 total = 0;
+    s32 i;
+
+    for (i = 0; i < eligible; i++) {
+        total += weights[eligible - 1][i];
+        if (total >= roll) {
+            return ranks[i].listIndex;
+        }
+    }
+    return 0;
+}
+
+/* Choose which candidate unit a battle task's command targets and append it to
+ * the task's targets: a list already resolved to one or two matches is copied
+ * whole; otherwise the choice depends on the command, being the first available
+ * unit, a status-matching unit, a weighted pick among targets ranked by lowest
+ * HP or MP, or a random one. Upstream: INCLUDE_ASM in game/code_00202178;
+ * written from the retail routine. Retail also copies the three 128-byte rodata
+ * tables (the rank sentinels and the two weight tables) onto the stack; the
+ * body fills the rank array in a loop and reads the weight tables from static
+ * tables in the body. It also differs from retail in register allocation,
+ * scheduling, jump table addresses, and in sharing the rank insertion and the
+ * weighted pick between their uses (small inline helpers). */
+s32 func_00202668(BtlTask *actor, s32 unused) {
+    BtlSelectorRank ranks[16];
+    u32 matching;
+    u32 count;
+    BtlIndexList *list;
+    BtlUnit *unit;
+    DatCommandRecord *command;
+    u16 commandId;
+    u32 selectedIndex;
+    s32 i;
+    s32 roll;
+    s32 total;
+    s32 priority;
+
+    for (i = 0; i < 16; i++) {
+        ranks[i].value = 0xFFFFFF;
+        ranks[i].listIndex = 0x80;
+    }
+    list = btlBuildActorIndexListAndCount((s32)actor, &matching, &count);
+    if (matching != 0) {
+        if (matching < 3) {
+            btlCopyIndexList(actor->indexWork.indices, list);
+        }
+        btlFreeIndexList(list);
+        return 1;
+    }
+    commandId = actor->indexWork.skillId;
+    command = &datCommandRecords[commandId];
+    selectedIndex = 0;
+    if (command->unk30 == 2 && (command->targetFlags & 8)) {
+        for (i = 0; i < count; i++) {
+            unit = (BtlUnit *)btlGetIndexListEntry(list, i);
+            if (!(unit->status.flags & 1)) {
+                break;
+            }
+        }
+        selectedIndex = i;
+    } else if (command->attribute.parts.kind == 2) {
+        selectedIndex = 0x80;
+        for (i = 0; i < count; i++) {
+            unit = (BtlUnit *)btlGetIndexListEntry(list, i);
+            if (unit->identity == actor->unit->identity &&
+                (unit->partyRecord.status & datCommandRecords[commandId].attribute.parts.valueMask)) {
+                if (btlRollAiBucket() < 20) {
+                    selectedIndex = i;
+                }
+            }
+        }
+        if (selectedIndex == 0x80) {
+            total = 100 / count + 1;
+            selectedIndex = 0;
+            roll = btlRollAiBucket();
+            for (i = 0; i < count; i++) {
+                unit = (BtlUnit *)btlGetIndexListEntry(list, i);
+                if (!(unit->partyRecord.status & datCommandRecords[commandId].attribute.parts.valueMask)) {
+                    total *= 2;
+                    continue;
+                }
+                selectedIndex = i;
+                if (unit->identity == actor->unit->identity) {
+                    total *= 2;
+                    continue;
+                }
+                if (total >= roll) {
+                    break;
+                }
+                total *= 2;
+            }
+        }
+    } else if (datCommandSelectors[commandId].stat == 16) {
+        if (count != 1) {
+            s32 hpInserted = 0;
+            s32 mpInserted = 0;
+            s16 hpEligible = 0;
+            s16 mpEligible = 0;
+
+            for (i = 0; i < count; i++) {
+                unit = (BtlUnit *)btlGetIndexListEntry(list, i);
+                if (unit->identity == actor->unit->identity) {
+                    continue;
+                }
+                if (datCommandRecords[commandId].hpType != 0) {
+                    hpInserted = btlInsertSelectorRank(ranks, hpInserted, unit->partyRecord.hp, i);
+                    hpEligible++;
+                }
+                if (datCommandRecords[commandId].mpType != 0) {
+                    mpInserted = btlInsertSelectorRank(ranks + 8, mpInserted, unit->partyRecord.mp, i);
+                    mpEligible++;
+                }
+            }
+            selectedIndex = btlPickRankedTarget(ranks, btlSelectorDamageWeights, hpEligible);
+            if (hpEligible == 0) {
+                selectedIndex = btlPickRankedTarget(ranks + 8, btlSelectorDamageWeights, mpEligible);
+            }
+        }
+    } else if (datCommandSelectors[commandId].stat == 17) {
+        selectedIndex = dds3GetRandA(&effSharedRandomState) % count;
+    } else {
+        priority = 0;
+        if (command->options & 2) {
+            switch (command->hpType) {
+            case 1:
+            case 4:
+            case 6:
+            case 8:
+            case 10:
+            case 12:
+            case 13:
+            case 14:
+                priority = 1;
+                break;
+            }
+            switch (command->mpType) {
+            case 1:
+            case 4:
+            case 6:
+            case 8:
+            case 10:
+            case 12:
+            case 13:
+            case 14:
+                priority = 1;
+                break;
+            }
+        }
+        if (priority == 0) {
+            selectedIndex = dds3GetRandA(&effSharedRandomState) % count;
+        } else if (count != 1) {
+            s32 hpInserted = 0;
+            s16 hpEligible = 0;
+
+            for (i = 0; i < count; i++) {
+                unit = (BtlUnit *)btlGetIndexListEntry(list, i);
+                hpInserted = btlInsertSelectorRank(ranks, hpInserted, unit->partyRecord.hp, i);
+                hpEligible++;
+            }
+            selectedIndex = btlPickRankedTarget(ranks, btlSelectorStatusWeights, hpEligible);
+        }
+    }
+    btlAppendIndexListEntry(actor->indexWork.indices, btlGetIndexListEntry(list, selectedIndex));
+    btlFreeIndexList(list);
+    return 1;
+}
+#else
 INCLUDE_ASM(const s32, "game/code_00202178", func_00202668);
+#endif
 
 /* Select the lowest nonzero current HP, preferring earlier entries on a tie. */
 s32 btlSelectLowestNonzeroHpTarget(BtlTask *actor, s32 action) {
