@@ -2199,7 +2199,7 @@ void btlEnterBatActionState(BtlTask *task) {
 
 
 /* Retail BAT state: schedule the status-table model; BAT's meaning is not expanded. */
-void btlScheduleBatStateModelChange(u8 *task) {
+void btlScheduleBatStateModelChange(BtlActionStateOwner *task) {
     BtlUnit *actor;
     u8 *effectTask;
     u8 *modelTask;
@@ -2213,7 +2213,7 @@ void btlScheduleBatStateModelChange(u8 *task) {
     }
 
     btlGetRuntime();
-    actor = *(BtlUnit **)(task + 0x18);
+    actor = task->unit;
     statusTable = (BtlActorStatusRecord *)btlGetActorResourceBankEntry(
         actor->resourceKind, actor->species);
     model = statusTable->model;
@@ -2224,7 +2224,7 @@ void btlScheduleBatStateModelChange(u8 *task) {
 
     actor->status.flags = ((u32)actor->status.flags | 0x1000) & 0xEFFFFFFF;
     actor->partyRecord.flags |= 0x1000;
-    if (*(u32 *)(task + 8) & 0x10) {
+    if (task->flags & 0x10) {
         btlDispatchStateHandler(task, 0x1B);
     } else {
         btlDispatchStateHandler(task, 0x1A);
