@@ -446,6 +446,26 @@ def relocations(obj):
     return out
 
 
+def paired_hi16_addends(text, relocs):
+    """Pair MIPS REL addends in ELF relocation order, not instruction order.
+
+    ee-as can emit a loop-backedge LUI after its ADDIU in .text while placing
+    that HI16 before the LO16 in the relocation table. One LO16 also resolves
+    every pending HI16 for that symbol, as in the native linker.
+    """
+    pending, addends = {}, {}
+    for offset, (rtype, symbol) in relocs.items():
+        base = symbol.split("+")[0]
+        if rtype == "R_MIPS_HI16":
+            pending.setdefault(base, []).append(offset)
+        elif rtype == "R_MIPS_LO16":
+            low = struct.unpack_from("<I", text, offset)[0]
+            for high_offset in pending.pop(base, []):
+                high = struct.unpack_from("<I", text, high_offset)[0]
+                addends[high_offset] = hi_lo_addend(high, low)
+    return addends
+
+
 def relocate_sdata_item(item, item_offset, relocs, funcs, syms,
                         section_bases=None):
     """Apply resolvable R_MIPS_32 relocations to one emitted data item.
@@ -1016,6 +1036,7 @@ def main():
     tables = []  # (offset in our .rodata, retail address, function)
     bounds = []  # .rodata items of unexamined functions: they only end a neighbour
     small = []   # the same for .sdata
+    hi16_addends = paired_hi16_addends(text, relocs)
     for off, size, name in sorted(funcs):
         # Filtering reports must not change the compiled section's item
         # boundaries. Tables of other C functions remain in SKIP_ASM's
@@ -1133,23 +1154,23 @@ def main():
             if rtype == "R_MIPS_26":
                 good = (want & 0x3FFFFFF) == linked_jump_field(target, addend)
             elif rtype == "R_MIPS_HI16":
-                pending_hi.setdefault(base, []).append((i, mine, want, rtype, sym, target))
-                good = True
+                paired_addend = hi16_addends.get(off + i)
+                if paired_addend is None:
+                    pending_hi.setdefault(base, []).append((i, mine, want, rtype, sym, target))
+                    good = True
+                else:
+                    good = (want & 0xFFFF) == linked_hi_field(target, paired_addend)
             elif rtype == "R_MIPS_LO16":
                 good = (want & 0xFFFF) == linked_lo_field(target, addend)
-                for hi in pending_hi.pop(base, []):
-                    combined_addend = hi_lo_addend(hi[1], mine)
-                    if (hi[2] & 0xFFFF) != linked_hi_field(target, combined_addend):
-                        diffs.append(hi[:3] + (f"{hi[3]} {hi[4]}",))
             elif rtype == "R_MIPS_GPREL16":
                 good = (want & 0xFFFF) == linked_gprel_field(target, addend, gp)
             else:
                 good = True
             if not good:
                 diffs.append((i, mine, want, f"{rtype} {sym} (retail uses a different address)"))
-        # An HI16 whose LO16 was emitted against another symbol form (e.g. the
-        # section rather than a unit-local rodata label) has no pair here: check
-        # its high field with its own addend alone, as the linker resolves it.
+        # A true orphan has no following LO16 in ELF relocation order.
+        # Backedge LUIs paired with earlier instructions were resolved above.
+        # Check an orphan's own high addend, as the linker resolves it.
         for pending in pending_hi.values():
             for hi in pending:
                 if (hi[2] & 0xFFFF) != linked_hi_field(hi[5], hi_lo_addend(hi[1], 0)):

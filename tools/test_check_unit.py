@@ -40,9 +40,11 @@ from check_unit import (
 
 
 class FocusedFunctionTests(unittest.TestCase):
-    def run_checker(self, requested, emitted="target", full_emitted=None):
+    def run_checker(self, requested, emitted="target", full_emitted=None, *,
+                    code=None, retail_code=None, text_relocs=None, extra_symbols=""):
         """Exercise the CLI with synthetic objects, without invoking a compiler."""
-        code = struct.pack("<II", 0x03E00008, 0)
+        if code is None:
+            code = struct.pack("<II", 0x03E00008, 0)
         with tempfile.TemporaryDirectory() as tmp, contextlib.ExitStack() as stack:
             root = Path(tmp)
             unit = root / "src/dds1/game/unit.c"
@@ -51,11 +53,12 @@ class FocusedFunctionTests(unittest.TestCase):
             config = root / "config/dds1"
             config.mkdir(parents=True)
             (config / "symbol_addrs.txt").write_text(
-                "target = 0x1000; // type:func\nalias = 0x1000; // type:func\n")
+                "target = 0x1000; // type:func\nalias = 0x1000; // type:func\n"
+                + extra_symbols)
             (config / "SLUS_209.74.yaml").write_text("")
             original = root / check_unit.RETAIL["dds1"]
             original.parent.mkdir(parents=True)
-            original.write_bytes(code)
+            original.write_bytes(code if retail_code is None else retail_code)
             argv = ["check_unit.py", str(unit)]
             if requested is not None:
                 argv.extend(["--func", requested])
@@ -66,13 +69,13 @@ class FocusedFunctionTests(unittest.TestCase):
             stack.enter_context(patch.object(check_unit, "va_to_off", side_effect=lambda segments, addr: addr - 0x1000))
             stack.enter_context(patch.object(check_unit, "text_section", return_value=code))
             stack.enter_context(patch.object(check_unit, "sections", return_value=(b"", {})))
-            stack.enter_context(patch.object(check_unit, "relocations", return_value={".text": {}, ".rodata": {}, ".sdata": {}}))
+            stack.enter_context(patch.object(check_unit, "relocations", return_value={".text": text_relocs or {}, ".rodata": {}, ".sdata": {}}))
 
             def object_output(*args):
                 if "-S" not in args:
                     return ""
                 names = full_emitted if str(args[-1]).endswith("full.o") and full_emitted is not None else emitted
-                return "".join(f"0 8 T {name}\n" for name in names.split())
+                return "".join(f"0 {len(code):x} T {name}\n" for name in names.split())
 
             stack.enter_context(patch.object(check_unit, "run", side_effect=object_output))
             stack.enter_context(patch.object(check_unit.subprocess, "run", return_value=SimpleNamespace(returncode=0, stderr="")))
@@ -113,6 +116,34 @@ class FocusedFunctionTests(unittest.TestCase):
                 status, report = self.run_checker(None, emitted=emitted)
                 self.assertEqual(status, 0)
                 self.assertIn(f"{matches} match, 0 differ", report)
+
+
+    def test_backedge_hi16_uses_elf_relocation_order_and_shared_low(self):
+        # ee-as puts both HI16 entries before their shared LO16, although the
+        # second LUI lives after the ADDIU in the function's instruction stream.
+        compiled = struct.pack("<III", 0x3C020000, 0x244216F0, 0x3C020000)
+        retail = struct.pack("<III", 0x3C020030, 0x24428170, 0x3C020030)
+        relocs = {0: ("R_MIPS_HI16", "drawBank"),
+                  8: ("R_MIPS_HI16", "drawBank"),
+                  4: ("R_MIPS_LO16", "drawBank")}
+        status, report = self.run_checker(
+            "target", code=compiled, retail_code=retail, text_relocs=relocs,
+            extra_symbols="drawBank = 0x002F6A80;\n")
+        self.assertEqual(status, 0)
+        self.assertIn("1 match, 0 differ", report)
+
+    def test_backedge_hi16_still_rejects_an_incorrect_high_field(self):
+        compiled = struct.pack("<III", 0x3C020000, 0x244216F0, 0x3C020000)
+        retail = struct.pack("<III", 0x3C020030, 0x24428170, 0x3C02002F)
+        relocs = {0: ("R_MIPS_HI16", "drawBank"),
+                  8: ("R_MIPS_HI16", "drawBank"),
+                  4: ("R_MIPS_LO16", "drawBank")}
+        status, report = self.run_checker(
+            "target", code=compiled, retail_code=retail, text_relocs=relocs,
+            extra_symbols="drawBank = 0x002F6A80;\n")
+        self.assertEqual(status, 1)
+        self.assertIn("DIFF target", report)
+        self.assertIn("0 match, 1 differ", report)
 
 
 class TextResidualTests(unittest.TestCase):
