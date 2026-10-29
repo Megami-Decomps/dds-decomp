@@ -31,6 +31,7 @@
 #include "dds3obj.h"
 #include "evt_world_source_transform.h"
 #include "fld.h"
+#include "field.h"
 #include "fld_actor_entry_kind.h"
 #include "fld_resource_resolver.h"
 #include "fld_collision_geometry.h"

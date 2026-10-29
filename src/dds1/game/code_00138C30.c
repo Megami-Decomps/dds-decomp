@@ -47,6 +47,7 @@
 #include "fld_camera_follow_row.h"
 #include "fld_event_display_resource_api.h"
 #include "fld.h"
+#include "field.h"
 #include "fld_actor_entry_kind.h"
 #include "evt_encounter_request_api.h"
 #include "fld_collision_geometry.h"

@@ -20,6 +20,7 @@
 #include "dds3obj.h"
 #include "evt_world_source_transform.h"
 #include "fld.h"
+#include "field.h"
 #include "fld_resource_resolver.h"
 #include "fld_collision_geometry.h"
 #include "fld_collision_query_api.h"

@@ -55,6 +55,7 @@
 #include "fld_camera_follow_row.h"
 #include "fld_named_camera_table.h"
 #include "fld.h"
+#include "field.h"
 #include "fld_encounter_runtime_api.h"
 #include "fld_collision_geometry.h"
 #include "fld_collision_query_api.h"
