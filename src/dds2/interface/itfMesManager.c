@@ -69,7 +69,7 @@ ItfMesEntry *GetTypeHeader(instanceMes_tag *mes, ItfMesEntryIndex index);
 ItfMesEntry *GetTypeHeader2(ItfMesSub *sub);
 
 u8 *GetMessagePagePtr(ItfMesTable *table, s32 index);
-u8 *GetSpeakerName(instanceMes_tag *mes);
+const u8 *GetSpeakerName(instanceMes_tag *mes);
 
 void ResolveResourceAddress(ItfMesSub *resource);
 
@@ -1291,11 +1291,11 @@ void CommitVarTable(u8 **table) {
 }
 
 /* Read the selected item from the window's trailing entry, without validation. */
-u8 *GetSpeakerName(instanceMes_tag *mes) {
+const u8 *GetSpeakerName(instanceMes_tag *mes) {
     u32 *items;
 
     items = (u32 *)GetTypeHeader2(mes->sub)->itemList;
-    return (u8 *)items[mes->blk14.selectedIndex];
+    return (const u8 *)items[mes->blk14.selectedIndex];
 }
 
 /* Count clear low bits by consuming one bit per iteration. Nonpositive counts
