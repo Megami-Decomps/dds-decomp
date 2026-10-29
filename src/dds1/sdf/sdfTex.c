@@ -176,7 +176,60 @@ void sdfTexReleaseReferenceViaHandler(sdfTexHandle_t *texture) {
     }
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "ee_mmi.h"
+#include "sdf.h"
+#include "sdf_tex_packet.h"
+
+/* log2 of the next power of two at or above size (GS TW/TH): 31 minus
+ * plzcw of size - 1, as retail computes it. */
+static s32 sdfTexSizeLog2(s32 size) {
+    s32 bits;
+
+    size--;
+    EE_MMI_PLZCW(bits, size);
+    return 0x1F - (bits & 0xFF);
+}
+
+/* A three-register A+D packet: TEX1 (filtering and LOD), TEX0 (buffer,
+ * size, format, CLUT) and CLAMP, for context 1 or 2 (variant). Upstream:
+ * INCLUDE_ASM in both games. */
+void sdfTexSetPacket(struct sdfTexPacket_t *packet, s32 width, s32 height, u32 primaryResourceWord,
+                                s32 pixelFormat, u32 secondaryResourceWord, s32 clutFormat,
+                                s32 textureColorComponents, s32 maxMipLevel, s32 lodParameters, s32 clampMode,
+                                s32 variant) {
+    u64 tbw = (u64)(u32)((width >> 6) << 14);
+    u64 tw = (u64)(u32)(sdfTexSizeLog2(width) << 26);
+    u64 th = (u64)sdfTexSizeLog2(height) << 30;
+    u64 psm = (u64)(u32)(pixelFormat << 20);
+    u64 cbp = (u64)((s32)secondaryResourceWord >> 6) << 37;
+    u64 cpsm = (u64)clutFormat << 51;
+    u64 tcc = (u64)textureColorComponents << 34;
+    u64 tbp = (u64)(s64)((s32)primaryResourceWord >> 6);
+    u64 textureState = cpsm | tbp | th | psm | cbp | tcc | tw | tbw;
+
+    *(u64 *)packet = 0x1000000000008003ULL; /* NLOOP 3, EOP, NREG 1 */
+    packet->gifTagRegisters = 0xE;          /* A+D */
+    if (maxMipLevel != 0) {
+        packet->samplingState = ((u64)(maxMipLevel << 2) | ((u64)(lodParameters & 0xFFF) << 32) |
+                                 ((u64)((lodParameters >> 12) & 3) << 19)) |
+                                0x360;
+    } else {
+        packet->samplingState = 0x61;
+    }
+    packet->samplingRegister = variant ? 0x15 : 0x14; /* TEX1_2 / TEX1_1 */
+    if (secondaryResourceWord != 0) {
+        textureState |= 1ULL << 63; /* CLD 4 */
+    }
+    packet->textureState = textureState;
+    packet->textureRegister = variant ? 7 : 6; /* TEX0_2 / TEX0_1 */
+    packet->clampState = (clampMode & 0xFF) == 0xFF ? 0 : (u64)(clampMode & 0xF);
+    packet->clampRegister = variant ? 9 : 8; /* CLAMP_2 / CLAMP_1 */
+}
+#else
 INCLUDE_ASM(const s32, "sdf/sdfTex", sdfTexSetPacket);
+#endif
 
 /* Allocate and populate one of the two resource packet variants. */
 sdfTexPacket_t *sdfTexMakeGIFPacketSub(sdfTexHandle_t *texture, s32 variant) {
