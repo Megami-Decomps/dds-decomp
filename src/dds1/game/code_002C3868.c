@@ -558,7 +558,96 @@ void sdfCounterDrawLabelPlateRow(s32 x, s32 y, s32 z, struct MenuList *rt, s32 d
         PACK(0x40, 0x40, 0x40, (u32)(fade * 64.0f)));
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "snd_sequence_volume_pan.h"
+#include "sdf_vector_latch.h"
+#include "sdf_counter_display.h"
+#include "sdf_counter_timer.h"
+#include "sdf_counter_runtime_api.h"
+#include "dds3obj.h"
+#include "sdf_textured_rect.h"
+#include "sdf_chip.h"
+#include "eff_transform.h"
+#include "gs_packet.h"
+#include "sdf.h"
+#include "mnu_list.h"
+#include "fld_map_resource.h"
+#include "mdl_flag_api.h"
+#include "dds3_world_secondary.h"
+#include "pcp_vu0.h"
+
+extern void eglSetOt(u32 surfaceIndex);
+extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void evtSubmitPrimaryAlphaBlendMode(s32);
+extern void sdfDrawCounterMapSelectionRow(s32, s32, s32, struct MenuList *, struct MenuListNode *, s32);
+
+/* Draws one row of the counter map selection list: the row background (skipped
+ * for the rows hidden behind the selected one), the name plate tinted for
+ * channels that are flagged and not the active one, and for the active row an
+ * extra marker and plate plus a pulsing additive marker, with a faint pulsing
+ * overlay on the row the timer mode points at; everything fades with the
+ * counter timer. Upstream: INCLUDE_ASM in game/code_002C3868; written from the
+ * retail routine. It differs from retail in register allocation, scheduling and
+ * code shape: retail has two identical plate calls (one per tint) where the
+ * body has one, and recomputes the unsigned float-to-color conversion for each
+ * of the four color arguments of the two pulse quads where the body computes it
+ * once; retail builds the 0x808080 color mask as 0x80 | 0x808000 in places. */
+void sdfDrawCounterMapSelectionRow(s32 x, s32 y, s32 unused, struct MenuList *runtime, struct MenuListNode *channel, s32 unusedMode) {
+    SdfCounterTimer *timer = runtime->context;
+    f32 frame = (f32)timer->value;
+    s32 index = channel->index;
+    f32 pulse = (f32)timer->selectionPulseFramesRemaining * 0.125f;
+    s16 mode = timer->mode;
+    SdfCounterDisplay *display = channel->counterDisplay;
+    struct MenuListNode *selected = runtime->head;
+    s32 isCurrent = index == mode;
+    s32 row = display->value - 1;
+    s32 relative = index - selected->index;
+    s32 active = runtime->cursor->index;
+    f32 fade = 1.0f - frame / 10.0f;
+    s32 left;
+    s32 top;
+    u32 color;
+
+    eglSetOt(0x54);
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    evtSubmitPrimaryAlphaBlendMode(0);
+    left = x >> 4;
+    top = y >> 3;
+    if ((relative != 5 || runtime->count < 6) && (relative != 4 || runtime->count != 5)) {
+        color = ((u32)(s32)(fade * 128.0f) << 24) | 0x808080;
+        evtSubmitTexturedGradientQuad(left, top + 25, 147, 4, 10, 504, 147, 4, color, color, color, color,
+                                  fldLocalMapTextureResource.texture);
+    }
+    if (channel->counterDisplay->flag && channel->index != active) {
+        color = ((u32)(s32)(fade * 128.0f) << 24) | 0xAFF082;
+    } else {
+        color = ((u32)(s32)(fade * 112.0f) << 24) | 0x808080;
+    }
+    evtSubmitTexturedGradientQuad(left + 24, top + 1, 116, 30, 6, row * 33 + 6, 116, 30, color, color, color, color,
+                              fldLocalMapTextureResource.texture);
+    if (channel->index == active) {
+        color = ((u32)(s32)(fade * 128.0f) << 24) | 0x808080;
+        evtSubmitTexturedGradientQuad(left + 13, top + 7, 17, 17, 182, 337, 17, 17, color, color, color, color,
+                                  fldLocalMapTextureResource.texture);
+        evtSubmitTexturedGradientQuad(left + 24, top + 1, 116, 30, 136, row * 33 + 6, 116, 30, color, color, color,
+                                  color, fldLocalMapTextureResource.texture);
+        evtSubmitPrimaryAlphaBlendMode(1);
+        color = ((u32)(pulse * 128.0f * fade) << 24) | 0x808080;
+        evtSubmitTexturedGradientQuad(left + 13, top + 7, 17, 17, 182, 337, 17, 17, color, color, color, color,
+                                  fldLocalMapTextureResource.texture);
+        evtSubmitPrimaryAlphaBlendMode(0);
+    }
+    if (isCurrent) {
+        color = ((u32)(pulse * 76.0f * fade) << 24) | 0x808080;
+        evtSubmitTexturedGradientQuad(left + 24, top + 1, 116, 30, 136, row * 33 + 6, 116, 30, color, color, color,
+                                  color, fldLocalMapTextureResource.texture);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "game/code_002C3868", sdfDrawCounterMapSelectionRow);
+#endif
 
 /* Draw one counter channel's label plate at (x, y): a shaded frame whose alpha follows the timer fraction, then the channel's text centred in it. */
 void sdfCounterDrawChannelPlate(s32 x, s32 y, s32 unused, struct MenuList *rt, struct MenuListNode *channel, s32 drawContext) {
