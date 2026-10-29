@@ -41,7 +41,13 @@
 #include "dat_unit_id.h"
 #include "evt_unit.h"
 #include "mdl.h"
-#include "dds3obj.h"
+#include "dds3_object_payload.h"
+#include "dds3_world_secondary.h"
+
+/* Only the basic APIs used by this unit; the world payload is not needed. */
+void dds3SetPosPoseSet(dds3Basic_t *, u128 *);
+void dds3SetRotPoseSet(dds3Basic_t *, u128 *);
+dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *, s32, const char *);
 #include "mdl_flag_api.h"
 
 #ifdef NON_MATCHING
@@ -569,7 +575,7 @@ INCLUDE_RODATA(const s32, "game/code_00214948", D_00419EA0);
 #include "dat_command.h"
 #include "evt_unit.h"
 #include "mdl.h"
-#include "dds3obj.h"
+
 #include "mdl_flag_api.h"
 #include "sdf_debug_api.h"
 #include "dds3_world_secondary.h"
@@ -3361,7 +3367,7 @@ void btlReturnUnitToGroup(ActionStateLink *task) {
 #include "dat_command.h"
 #include "evt_unit.h"
 #include "mdl.h"
-#include "dds3obj.h"
+
 #include "mdl_flag_api.h"
 #include "sdf_debug_api.h"
 #include "dds3_world_secondary.h"
