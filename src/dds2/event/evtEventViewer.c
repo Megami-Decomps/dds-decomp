@@ -2504,7 +2504,129 @@ s32 evtViewerUpdateTimedAction(EvtRuntime *viewer) {
     }
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "sdf_dma_tag.h"
+#include "evt_window_shade_packet.h"
+#include "evt_camera_color_track_api.h"
+#include "kwln_background_fade_api.h"
+#include "kwln_task_add_child.h"
+#include "mnu_title_stream.h"
+#include "mnu_camp_font_api.h"
+#include "kwln_draw_buffer.h"
+#include "mdl_motion_api.h"
+#include "mdl_world_object_source_vector_api.h"
+#include "sdf_motion.h"
+#include "itf_mes_window.h"
+#include "sdf_resource.h"
+#include "evt_viewer.h"
+#include "evt_reload_viewer_api.h"
+#include "evt_reset_unit_vector_slots_api.h"
+#include "kwln.h"
+#include "kwln_fade.h"
+#include "kwln_fade_timing.h"
+#include "kwln_task_create.h"
+#include "sdf.h"
+#include "sdf_draw.h"
+#include "dds3obj.h"
+#include "evt_world.h"
+#include "pcp_vu0.h"
+#include "evt_unit.h"
+#include "eff_transform.h"
+#include "eff_blur.h"
+#include "eff_event_draw.h"
+#include "dat_state.h"
+#include "eff.h"
+#include "eff_object.h"
+#include "eff_object_dispatch_api.h"
+#include "mdl.h"
+#include "evt_polygon_movie.h"
+#include "evt_viewer_group_record.h"
+#include "kwln_task_lifecycle.h"
+#include "file_request_api.h"
+#include "eff_dependency.h"
+#include "eff_node.h"
+#include "common.h"
+#include "sdf_chip.h"
+#include "evt_viewer.h"
+#include "dds3obj.h"
+#include "evt_world.h"
+
+#define EVT_TRACK_SHOP 31 /* the viewer's shop flag track */
+
+extern s32 evtHokanInt(s32 enable, f32 t, s32 a, s32 b);
+extern void mnuEnterCampSceneMenuState(EvtRuntime *scene);
+
+/* Whether the key's frame, offset by the track's, is still ahead. */
+static s32 evtShopKeyIsAhead(const EvtRuntimeChild *key, s32 position, s32 frameOffset) {
+    return position < key->frame + frameOffset;
+}
+
+/* Update the viewer's shop flag and value from its shop track (type 31). A
+ * kind-0 key exactly at the current frame enters the camp scene menu state.
+ * The last passed kind-1 key sets the value, and a positive value sets the
+ * shop flag; with a kind-1 key ahead, the value is interpolated toward that
+ * key's. Without a passed kind-1 key the flag is cleared. Upstream:
+ * INCLUDE_ASM in event/evtEventViewer; written from the retail routine. The
+ * same calls and stores; scheduling differs. */
+void evtViewerUpdateShopFlagTrack(EvtRuntime *viewer) {
+    EvtRuntimeGroup *track = viewer->groups;
+    s32 position = viewer->curFrame;
+    s32 frameOffset;
+    EvtRuntimeChild *key;
+    EvtRuntimeChild *passed;
+    EvtRuntimeChild *ahead;
+    s16 value;
+
+    while (track != NULL && track->type != EVT_TRACK_SHOP) {
+        track = track->next;
+    }
+    if (track == NULL) {
+        return;
+    }
+    frameOffset = track->metadata.value;
+
+    /* The key at or before the current frame. */
+    for (key = track->children; key != NULL && !evtShopKeyIsAhead(key, position, frameOffset); key = key->next) {
+    }
+    passed = key != NULL ? key->prev : track->lastChild;
+    if (passed != NULL && passed->frame == position && passed->p08.sh[0] == 0) {
+        mnuEnterCampSceneMenuState(viewer);
+    }
+
+    passed = NULL;
+    for (key = track->children; key != NULL && !evtShopKeyIsAhead(key, position, frameOffset); key = key->next) {
+        if (key->p08.sh[0] == 1) {
+            passed = key;
+        }
+    }
+    if (passed == NULL) {
+        viewer->shopFlag = 0;
+        return;
+    }
+    value = passed->p08.sh[1];
+    if (value > 0) {
+        viewer->shopFlag = 1;
+    }
+
+    for (ahead = track->children; ahead != NULL; ahead = ahead->next) {
+        if (evtShopKeyIsAhead(ahead, position, frameOffset) && ahead->p08.sh[0] == 1) {
+            break;
+        }
+    }
+    if (ahead == NULL) {
+        viewer->auxResource = value;
+    } else {
+        f32 fraction = 0.0f;
+        if (ahead->frame != passed->frame) {
+            fraction = (f32)(position - passed->frame) / (f32)(ahead->frame - passed->frame);
+        }
+        viewer->auxResource = evtHokanInt(1, fraction, value, ahead->p08.sh[1]);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "event/evtEventViewer", evtViewerUpdateShopFlagTrack);
+#endif
 
 void evtViewerPreGlyphTickHookNoOp(EvtRuntime *viewer) {
 }
@@ -4154,7 +4276,159 @@ s32 evtViewCmdSelectMode(s32 unused0, s32 unused1, EvtRuntime *viewer) {
     return handled ? -1 : 0;
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "sdf_dma_tag.h"
+#include "evt_window_shade_packet.h"
+#include "evt_camera_color_track_api.h"
+#include "kwln_background_fade_api.h"
+#include "kwln_task_add_child.h"
+#include "mnu_title_stream.h"
+#include "mnu_camp_font_api.h"
+#include "kwln_draw_buffer.h"
+#include "mdl_motion_api.h"
+#include "mdl_world_object_source_vector_api.h"
+#include "sdf_motion.h"
+#include "itf_mes_window.h"
+#include "sdf_resource.h"
+#include "evt_viewer.h"
+#include "evt_reload_viewer_api.h"
+#include "evt_reset_unit_vector_slots_api.h"
+#include "kwln.h"
+#include "kwln_fade.h"
+#include "kwln_fade_timing.h"
+#include "kwln_task_create.h"
+#include "sdf.h"
+#include "sdf_draw.h"
+#include "dds3obj.h"
+#include "evt_world.h"
+#include "pcp_vu0.h"
+#include "evt_unit.h"
+#include "eff_transform.h"
+#include "eff_blur.h"
+#include "eff_event_draw.h"
+#include "dat_state.h"
+#include "eff.h"
+#include "eff_object.h"
+#include "eff_object_dispatch_api.h"
+#include "mdl.h"
+#include "evt_polygon_movie.h"
+#include "evt_viewer_group_record.h"
+#include "kwln_task_lifecycle.h"
+#include "file_request_api.h"
+#include "eff_dependency.h"
+#include "eff_node.h"
+#include "itf.h"
+#include "sdf_packet_list.h"
+#include "common.h"
+#include "sdf_chip.h"
+#include "evt_viewer.h"
+#include "dds3obj.h"
+#include "evt_world.h"
+#include "dds3_world_primary.h"
+extern void evtApplyViewerTimelineFrame(s32 time, EvtRuntime *viewer);
+extern s32 evtEventViewerAddName(const char *name, EvtRuntime *viewer);
+extern u16 evtViewerPopHistory(EvtRuntime *viewer);
+
+extern s8 evtViewerFrameColumnCategories[];
+extern void evtEndUnitValueTransition(evtUnitHandle_t *unit, s32 duration);
+
+/* Assign the selected world object's name to the pending key field that the
+ * current command kind and frame group type select (-1 when nothing is chosen). */
+/* In the event viewer, assigns the name of the world object selected by the
+ * cursor (counted over the world slots other than slot 3) to the pending key's
+ * target field, which depends on the current command column's value type and
+ * the frame group type, or -1 when nothing is selected; then reapplies the
+ * timeline frame and pops the history. Upstream: INCLUDE_ASM in both games'
+ * event/evtEventViewer; written from the retail routine. It differs from retail
+ * only in the code layout of the last case: the body stores the name in each
+ * arm of the conditional, retail joins them before one store. */
+s32 evtViewCmdSetObjectTarget(s32 unused0, s32 unused1, EvtRuntime *viewer) {
+    EvtRuntimeChild *entry = evtEventViewerGetPendingNode(viewer);
+    dds3Basic_t *object;
+    dds3Basic_t *node;
+    s32 count;
+    s32 slot;
+
+    if (entry == NULL) {
+        return 0;
+    }
+    object = NULL;
+    if (viewer->groupFirst + viewer->groupCursor != 0) {
+        count = 0;
+        for (slot = 0; slot < 18; slot++) {
+            if (slot == 3) {
+                continue;
+            }
+            object = ((EvtWorldTable *)((dds3Basic_t *)dds3GetActiveScene())->data)->slots[slot].head;
+            while (object != NULL) {
+                if (object->value != NULL) {
+                    count++;
+                    if (viewer->groupFirst + viewer->groupCursor == count) {
+                        slot = 18;
+                        break;
+                    }
+                }
+                object = object->next;
+            }
+        }
+    }
+    switch (evtViewerFrameColumnCategories[viewer->frameColumn + viewer->frameGroup->type * 10]) {
+    case 13:
+        if (viewer->frameGroup->type < 22) {
+            if (viewer->frameGroup->type >= 20) {
+                if (object == NULL) {
+                    entry->p0C.sb[viewer->inputB] = -1;
+                } else {
+                    entry->p0C.sb[viewer->inputB] = evtEventViewerAddName(object->value, viewer);
+                }
+            }
+        }
+        break;
+    case 10:
+        switch (viewer->frameGroup->type) {
+        case 3:
+        case 26:
+            if (object == NULL) {
+                entry->p0C.sh[1] = -1;
+            } else {
+                entry->p0C.sh[1] = evtEventViewerAddName(object->value, viewer);
+            }
+            break;
+        case 9:
+            node = dds3SceneBasicSearchNameAndType(dds3GetActiveScene(), EVT_WORLD_SLOT_UNIT,
+                                                        viewer->entryName[entry->p08.sh[0]]);
+            if (node != NULL) {
+                evtEndUnitValueTransition(evtGetUnitHandle2(node), 0);
+            }
+            if (object == NULL) {
+                entry->p08.sh[0] = -1;
+            } else {
+                entry->p08.sh[0] = evtEventViewerAddName(object->value, viewer);
+            }
+            break;
+        case 18:
+            if (object == NULL) {
+                entry->p08.sh[1] = -1;
+            } else {
+                entry->p08.sh[1] = evtEventViewerAddName(object->value, viewer);
+            }
+            break;
+        }
+        break;
+    case 19:
+        if (entry->p08.sb[0] == 7) {
+            entry->p0C.sh[0] = object != NULL ? evtEventViewerAddName(object->value, viewer) : -1;
+        }
+        break;
+    }
+    evtApplyViewerTimelineFrame(viewer->curFrame, viewer);
+    evtViewerPopHistory(viewer);
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "event/evtEventViewer", evtViewCmdSetObjectTarget);
+#endif
 
 u32 evtViewerClearPendingNodeAndPushHistory(u32 unused0, u32 unused1, EvtRuntime *viewer) {
     if (evtEventViewerGetPendingNode(viewer) != 0) {
