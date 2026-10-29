@@ -94,7 +94,74 @@ void brsDrawProgressRowEntries(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
     }
 }
 
+#ifdef NON_MATCHING
+#include "snd_command_packet.h"
+#include "common.h"
+#include "scr_integer_return_value_api.h"
+#include "scr_string_parameter_api.h"
+#include "dds3_world_selection.h"
+#include "snd_sequence_volume_pan.h"
+#include "sdf_trig.h"
+#include "dds3_world_value.h"
+#include "mnu_sound_resource_path_api.h"
+#include "mnu_voice_resource_path_api.h"
+#include "ui_color.h"
+#include "mnu_result.h"
+#include "brs_result_counter.h"
+#include "dds3_world_counter.h"
+#include "snd_track_playback_api.h"
+#include "fr_font.h"
+#include "fr_font_draw_glyph.h"
+#include "sdk_libc.h"
+
+extern const u8 *D_003BAA70;
+extern struct _FRQ *itfCreateFont2TextGlyph(s32 x, s32 y, s32 depth, u32 colors, char *text, struct _FRQ *previousGlyph);
+extern void mnuSetFontChainDimensionsAndMeasure(u32 fontContext);
+extern void effDrawSpriteWithCornerColors(s32 x, s32 y, s32 z, u32 *palette, s32 flags, struct EffectSlotSet *set, s32 slot, s32 layer);
+/* Draws a party unit's status icon, level number and name in a result progress
+ * row, dimmed when the unit is down or incapacitated; nothing is drawn without
+ * the teardown resource. Upstream: INCLUDE_ASM in game/code_002665E0; written
+ * from the retail routine. It differs from retail in register allocation and
+ * scheduling, in the sprite choice (a conditional move where retail branches),
+ * in the format string (the literal "%2d" for the data word D_003BC570, checked
+ * against retail), and in omitting a dead 16-byte copy of the constant table
+ * D_003AFC30 (0x80808080 x4) into the corner-color array, which retail
+ * overwrites at once. */
+void brsDrawProgressRowUnitInfo(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
+                                BrsProgressRow *row, s32 context, s32 index) {
+    char buffer[16];
+    u32 color = work->fadeAnimation[index].backgroundOpacity | 0x80808000;
+    u32 corners[4] = {color, color, color, color};
+    datUnitWork_t *unit = row->unit;
+    struct _FRQ *glyph;
+    s32 sprite;
+
+    if (work->teardownResource == NULL) {
+        return;
+    }
+    if (unit->hp == 0) {
+        sprite = 9;
+    } else if (unit->status & 0x4000) {
+        sprite = 9;
+    } else {
+        sprite = 8;
+    }
+    effDrawSpriteWithCornerColors(x + 0x2B0, y + 0xD8, 0xFF0000, corners, 0, work->teardownResource, sprite, context);
+    if (unit->hp == 0 || (unit->status & 0x4000)) {
+        color = work->fadeAnimation[index].portraitOpacity | 0x4F4E4E00;
+    }
+    sprintf(buffer, "%2d", work->levelAnimation[index].level);
+    glyph = itfCreateFont2TextGlyph(x + 0x440, y + 0xD8, 0xFF0000, color, buffer, NULL);
+    frFontDrawGlyphChain(glyph, 1, context);
+    frDestroyFontRequestAfter(glyph);
+    glyph = itfCreateConvertedTextGlyph(x + 0x600, y + 0xB8, z, color, D_003BAA70 + unit->unitId * 17, NULL);
+    frFontDrawGlyphChain(glyph, 1, context);
+    mnuSetFontChainDimensionsAndMeasure((u32)glyph);
+    frDestroyFontRequestAfter(glyph);
+}
+#else
 INCLUDE_ASM(const s32, "game/code_002665E0", brsDrawProgressRowUnitInfo);
+#endif
 
 void brsUpdateResultPortraitFade(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
                                  BrsProgressRow *row, s32 context, s32 rowIndex) {
