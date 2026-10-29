@@ -1778,7 +1778,104 @@ u8 mnuHasActivePanelResource(MenuScrollPanel *resources) {
     return resources->active.set != 0;
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "itf_draw_grid.h"
+#include "eff.h"
+#include "mnu_scroll_panel.h"
+
+extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
+extern s32 itfGridLookupValueOrDefault(EffectSlotSet *object, s32 key);
+
+/* The camp scroll panel: its base grid, its tab (positions[1]) slid
+ * frame * 16 to the right, fading out over the first 0x20 frames and in again
+ * over the last 0x20 before 0xB5, its third grid, and the active and pending
+ * grids at the panel's own offset. Then advance the slide by 10 a frame, out
+ * to 0xB5 or (retract set) back to 0, jumping across 0x20..0x95. Retail
+ * counts the active grid as finished when its first timed state has no
+ * source, but clears it only when that count reaches 2, which one grid never
+ * does: DDS1 counted two active grids here. */
+void mnuDrawStaffScrollPanel(s32 x, s32 y, s32 depth, MenuScrollPanel *panel, s32 surface) {
+    /* Base grid, sliding tab (x set from the frame), third grid, active and pending grids. */
+    s32 offsets[4][2] = { { 0, 0 }, { 0, 0 }, { 0x900, 0xC0 }, { 0x2C0, 0x80 } };
+    s32 fadeFrames = 0x20;
+    s32 alpha;
+    s32 drawX;
+    s32 drawY;
+    EffectSlotSet *object;
+    s32 index;
+    s32 finished;
+
+    itfDrawGridWithResolvedSlot(x + offsets[0][0], y + offsets[0][1], depth, 1,
+                                panel->positions[0].set, panel->positions[0].index, surface);
+    offsets[1][0] = panel->animationFrame * 16;
+    if (panel->animationFrame < fadeFrames) {
+        alpha = 0x100 - (panel->animationFrame << 8) / fadeFrames;
+    } else {
+        alpha = 0;
+    }
+    effDrawTextureSlotWithBlendedCornerColors(x + offsets[1][0], y + offsets[1][1], depth, alpha, 1,
+                                              panel->positions[1].set, panel->positions[1].index, surface);
+    if (panel->animationFrame > 0x95) {
+        alpha = 0x100 - ((0xB5 - panel->animationFrame) << 8) / fadeFrames;
+    } else {
+        alpha = 0;
+    }
+    effDrawTextureSlotWithBlendedCornerColors(x + offsets[1][0], y + offsets[1][1], depth, alpha, 1,
+                                              panel->positions[1].set, panel->positions[1].index, surface);
+    itfDrawGridWithResolvedSlot(x + offsets[2][0], y + offsets[2][1], depth, 1,
+                                panel->positions[2].set, panel->positions[2].index, surface);
+
+    drawX = x + panel->firstSprite;
+    drawY = y + panel->secondSprite;
+    if (panel->active.set != NULL) {
+        object = panel->active.set;
+        index = panel->active.index;
+        itfDrawGridWithResolvedSlot(drawX + offsets[3][0], drawY + offsets[3][1], depth, 0, object, index, surface);
+        itfGridLookupValueOrDefault(object, index);
+    }
+    if (panel->pending.set != NULL) {
+        object = panel->pending.set;
+        index = panel->pending.index;
+        itfDrawGridWithResolvedSlot(drawX + offsets[3][0], drawY + offsets[3][1], depth, 0, object, index, surface);
+        itfGridLookupValueOrDefault(object, index);
+    }
+
+    finished = 0;
+    object = panel->active.set;
+    index = panel->active.index;
+    if (object != NULL) {
+        finished = object->workEntries[index].states[0].source == NULL;
+    }
+    if (finished == 2) {
+        panel->active.set = NULL;
+    }
+
+    if (panel->retract == 0) {
+        if (panel->animationFrame < 0xB5) {
+            panel->animationFrame += 10;
+        }
+        if (panel->animationFrame > 0xB5) {
+            panel->animationFrame = 0xB5;
+        }
+        if (panel->animationFrame > fadeFrames && panel->animationFrame < 0x95) {
+            panel->animationFrame = 0x95;
+        }
+    } else {
+        if (panel->animationFrame > 0) {
+            panel->animationFrame -= 10;
+        }
+        if (panel->animationFrame < 0) {
+            panel->animationFrame = 0;
+        }
+        if (panel->animationFrame > fadeFrames && panel->animationFrame < 0x95) {
+            panel->animationFrame = fadeFrames;
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "game/code_002B8FC8", mnuDrawStaffScrollPanel);
+#endif
 
 void mnuLoadPanelSectionResources(MenuPageSlot *slot,
                                   EffectSlotSet *model, u32 firstValue,
