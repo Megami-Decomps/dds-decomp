@@ -1056,42 +1056,42 @@ s32 prfReqEvaluateRules(u32 state, datUnitWork_t *unit, u16 requirementId, u32 *
     }
     for (i = 0; i < 2; i++) {
         switch (rules[i].operation) {
-        case 1:
+        case PRF_REQUIREMENT_OP_ALL_PROFILES:
             if (ptyHasAllReqProfiles(unit, &rules[i]) == expected) {
                 result = expected;
             } else {
                 count++;
             }
             break;
-        case 2:
+        case PRF_REQUIREMENT_OP_PROFILE_COUNT:
             if (ptyReqProfileCountAtLeast(unit, &rules[i]) == expected) {
                 result = expected;
             } else {
                 count++;
             }
             break;
-        case 4:
+        case PRF_REQUIREMENT_OP_PROFILE_VALUE_COUNT:
             if (ptyProfileCountAtLeast(unit, &rules[i]) == expected) {
                 result = expected;
             } else {
                 count++;
             }
             break;
-        case 8:
+        case PRF_REQUIREMENT_OP_PROFILES_IN_PARTY:
             if (ptyAreReqProfilesInParty(&rules[i]) == expected) {
                 result = expected;
             } else {
                 count++;
             }
             break;
-        case 16:
+        case PRF_REQUIREMENT_OP_UNIT_LEVEL:
             if (prfReqCheckUnitLevel(unit, &rules[i]) == expected) {
                 result = expected;
             } else {
                 count++;
             }
             break;
-        case 32:
+        case PRF_REQUIREMENT_OP_GLOBAL_MINIMUM:
             if (prfReqCheckGlobalCounter(&rules[i]) == expected) {
                 result = expected;
             } else {
