@@ -3,6 +3,13 @@
 
 #include "common.h"
 
+typedef s8 BtlCameraCursorPosePhase;
+
+#define BTL_CAMERA_CURSOR_POSE_PHASE_INITIAL 0
+#define BTL_CAMERA_CURSOR_POSE_PHASE_TRANSITION 1
+#define BTL_CAMERA_CURSOR_POSE_PHASE_ENDPOINT_CAPTURED 2
+/* Modes 1, 3, and 5 use TRANSITION while the desired distance changes. */
+
 /* Shared battle-camera script cursor and path state (0x130 bytes).
  * Both title providers use the same field offsets. */
 typedef struct BtlCameraCursorView {
@@ -18,7 +25,7 @@ typedef struct BtlCameraCursorView {
     s16 scriptIndex;       /* 0x0C */
     u16 unk_0E;
     u16 kind;              /* 0x10: path kind */
-    s8 phase;
+    BtlCameraCursorPosePhase posePhase;
     s8 counter;
     s8 busy;                /* 0x14: nonzero suspends camera updates */
     s8 restoreAlternate;   /* 0x15: snapshot restore selector */
@@ -73,6 +80,10 @@ typedef char BtlCameraCursorViewDirectionOffsetCheck[
     ((u32)&((BtlCameraCursorView *)0)->direction == 0x80) ? 1 : -1];
 typedef char BtlCameraCursorViewKindOffsetCheck[
     ((u32)&((BtlCameraCursorView *)0)->kind == 0x10) ? 1 : -1];
+typedef char BtlCameraCursorViewPosePhaseSizeCheck[
+    (sizeof(((BtlCameraCursorView *)0)->posePhase) == 1) ? 1 : -1];
+typedef char BtlCameraCursorViewPosePhaseOffsetCheck[
+    ((u32)&((BtlCameraCursorView *)0)->posePhase == 0x12) ? 1 : -1];
 typedef char BtlCameraCursorViewTargetFromOffsetCheck[
     ((u32)&((BtlCameraCursorView *)0)->targetFrom == 0x40) ? 1 : -1];
 typedef char BtlCameraCursorViewCameraFromOffsetCheck[

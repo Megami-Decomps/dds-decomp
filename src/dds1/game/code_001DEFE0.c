@@ -6113,15 +6113,15 @@ s32 btlUpdateCameraCursorPose(BtlLinkedCommand *action, BtlCamState *pose) {
             }
             cursor = CURSOR;
             desiredDistance = cursor->distance;
-            activePhase = 1;
-            if (cursor->phase == activePhase) {
+            activePhase = BTL_CAMERA_CURSOR_POSE_PHASE_TRANSITION;
+            if (cursor->posePhase == activePhase) {
                 if (desiredDistance <= pose->distance) {
                     return 1;
                 }
                 endpoint[0] = pose->position[0];
             }
             if (pose->distance < desiredDistance) {
-                cursor->phase = activePhase;
+                cursor->posePhase = activePhase;
             }
             if (desiredDistance <= 450.0f) {
                 cursor->distance = 450.0f;
@@ -6135,27 +6135,28 @@ s32 btlUpdateCameraCursorPose(BtlLinkedCommand *action, BtlCamState *pose) {
             break;
         }
         case 4: {
-            if (CURSOR->phase == 0) {
+            if (CURSOR->posePhase == BTL_CAMERA_CURSOR_POSE_PHASE_INITIAL) {
                 CURSOR->counter++;
                 CURSOR->counter = CURSOR->counter <= 0 ? 0 :
                                      CURSOR->counter >= 0x21 ? 0x20 : CURSOR->counter;
                 if (CURSOR->counter >= 0x1A) {
-                    CURSOR->phase = 2;
+                    CURSOR->posePhase = BTL_CAMERA_CURSOR_POSE_PHASE_ENDPOINT_CAPTURED;
                 }
             }
             if (pose->position[1] < endpoint[1]) {
                 endpoint[1] = pose->position[1];
-                if (CURSOR->phase == 0) {
-                    CURSOR->phase = 1;
+                if (CURSOR->posePhase == BTL_CAMERA_CURSOR_POSE_PHASE_INITIAL) {
+                    CURSOR->posePhase = BTL_CAMERA_CURSOR_POSE_PHASE_TRANSITION;
                 }
             }
-            if (CURSOR->phase == 2) {
+            if (CURSOR->posePhase == BTL_CAMERA_CURSOR_POSE_PHASE_ENDPOINT_CAPTURED) {
                 CURSOR->distance = pose->distance;
                 endpoint[0] = pose->position[0];
                 endpoint[2] = pose->position[2];
             }
-            if (CURSOR->phase == 1 && pose->position[1] > endpoint[1]) {
-                CURSOR->phase = 2;
+            if (CURSOR->posePhase == BTL_CAMERA_CURSOR_POSE_PHASE_TRANSITION &&
+                pose->position[1] > endpoint[1]) {
+                CURSOR->posePhase = BTL_CAMERA_CURSOR_POSE_PHASE_ENDPOINT_CAPTURED;
             }
             pose->distance = CURSOR->distance;
             VU0_LOAD_VF(vf10, endpoint);
