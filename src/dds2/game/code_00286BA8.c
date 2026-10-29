@@ -271,7 +271,170 @@ s32 mtrPollResourceLoadTask(void) {
 
 INCLUDE_RODATA(const s32, "game/code_00286BA8", mnuResourceTaskName);
 
+#ifdef NON_MATCHING
+#include "mnu_mantra.h"
+#include "mtr_resource_file.h"
+#include "dat_state.h"
+#include "sdf_resource.h"
+#include "sdf_task_work.h"
+#include "file_request_api.h"
+#include "btl_stage_task_cleanup.h"
+
+extern TaskWork *mnuMantraSelectionResource;
+extern MtrResourceFile mtrMantraResourceFiles[7];
+extern void evtPrintDeveloperConsoleMessage(const char *, ...);
+extern void effRequestResourceByMode(const char *prefix, const char *name, s32 mode, u32 *outInstance);
+extern void mnuStartMantraSpriteLoad(void);
+extern s32 mnuHasMantraSpriteTaskFinished(void);
+extern void mnuMergeMantraSpriteSlots(u32 *values);
+extern s32 sndFindPackedTrackLoadStatus(s32 packed);
+extern void p2sdLoadSMGFile(s32 packed);
+extern void mnuLoadMantraPanelPositionTable(u32 resourceId);
+
+/* Load the mantra menu's files for one pass (`mode`), one row of
+ * mtrMantraResourceFiles at a time: 0 notes the active party members, 2 starts the
+ * row's load (skipping rows of another pass or of an absent member), 3
+ * waits for it, 4 takes the result (the panel-position table, or the two
+ * message files' data and handles) and frees the request, 1 reports the
+ * pass done (returns 1; otherwise 0). */
+s32 mtrAdvanceMantraResourceLoadState(MtrResourceLoadState *load, u16 mode) {
+    MnuStatusResource *work = (MnuStatusResource *)sdfGetTaskValueByKey(mnuMantraSelectionResource, SDF_TASK_VALUE_USER_DATA_KEY);
+    MtrResourceFile *files = mtrMantraResourceFiles;
+    u8 *data = NULL;
+    s32 i;
+
+    switch (load->state) {
+    case 0:
+        load->state = 2;
+        load->entryIndex = 0;
+        load->partyMask = 0;
+        for (i = 0; i < 5; i++) {
+            if ((u16)(DDS3_GBWK->party[i].flags & 1) != 0) {
+                load->partyMask |= 1 << (DDS3_GBWK->party[i].unitId - 1);
+            }
+        }
+        evtPrintDeveloperConsoleMessage("fileload ...Start!!\n");
+        return 0;
+    case 1:
+        load->state = 0;
+        evtPrintDeveloperConsoleMessage("fileload ...OK!!\n");
+        return 1;
+    case 2:
+        if (files[load->entryIndex].mode != mode) {
+            evtPrintDeveloperConsoleMessage("File Check NotHit!! UnLoad [%s]\n", files[load->entryIndex].name);
+            load->entryIndex++;
+            if (load->entryIndex >= 7) {
+                load->state = 1;
+            }
+            return 0;
+        }
+        load->fileEntry = NULL;
+        switch (files[load->entryIndex].kind) {
+        case 1:
+            if (files[load->entryIndex].argument >= 4 && files[load->entryIndex].argument < 12 &&
+                !((load->partyMask >> (load->entryIndex - 3)) & 1)) {
+                evtPrintDeveloperConsoleMessage("Party Check NotHit!! UnLoad [%s]\n", files[load->entryIndex].name);
+                load->entryIndex++;
+                if (load->entryIndex >= 7) {
+                    load->state = 1;
+                }
+                return 0;
+            }
+            effRequestResourceByMode("", files[load->entryIndex].name, 0,
+                                     &work->resourceSlots[files[load->entryIndex].argument]);
+            break;
+        case 2:
+            mnuStartMantraSpriteLoad();
+            break;
+        case 4:
+            if (sndFindPackedTrackLoadStatus(files[load->entryIndex].argument) == 0) {
+                p2sdLoadSMGFile(files[load->entryIndex].argument);
+            } else {
+                load->state = 4;
+                evtPrintDeveloperConsoleMessage("SMG already Read[%s]\n", files[load->entryIndex].name);
+            }
+            break;
+        case 3:
+        case 5:
+            load->fileEntry = fileLoad(files[load->entryIndex].name);
+            break;
+        }
+        load->state = 3;
+        return 0;
+    case 3:
+        switch (files[load->entryIndex].kind) {
+        case 3:
+            if (pacFileCheckEnd(load->fileEntry)) {
+                load->state = 4;
+            }
+            break;
+        case 1:
+            if (work->resourceSlots[files[load->entryIndex].argument] != 0) {
+                load->state = 4;
+                mnuMergeMantraSpriteSlots(work->resourceSlots);
+            }
+            break;
+        case 2:
+            if (mnuHasMantraSpriteTaskFinished()) {
+                load->state = 4;
+            }
+            break;
+        case 4:
+            if (sndFindPackedTrackLoadStatus(files[load->entryIndex].argument) == 1) {
+                load->state = 4;
+            }
+            break;
+        case 5:
+            if (pacFileCheckEnd(load->fileEntry)) {
+                load->state = 4;
+            }
+            break;
+        }
+        return 0;
+    case 4:
+        if (load->fileEntry != NULL) {
+            data = fileGetLoadPtr(load->fileEntry);
+            evtPrintDeveloperConsoleMessage("FileSize %d\n", fileGetLoadSize(load->fileEntry));
+        }
+        switch (files[load->entryIndex].kind) {
+        case 3:
+            mnuLoadMantraPanelPositionTable((u32)data);
+            break;
+        case 5:
+            if (files[load->entryIndex].argument == 0) {
+                work->messageWindow = (struct ItfMesSub *)data;
+                work->resourceAllocationA = fileGetMemHandle(load->fileEntry);
+            } else {
+                work->messageDefinition = (struct ItfMesSub *)data;
+                work->resourceAllocationB = fileGetMemHandle(load->fileEntry);
+            }
+            break;
+        }
+        evtPrintDeveloperConsoleMessage("%s ... OK!! \n", files[load->entryIndex].name);
+        if (load->fileEntry != NULL) {
+            if (files[load->entryIndex].kind == 3) {
+                sdfMemFreeDirect(fileGetMemHandle(load->fileEntry));
+            }
+            fileRequestFreeIfComplete(load->fileEntry);
+            evtPrintDeveloperConsoleMessage("FileHandle Free... OK!! \n");
+        }
+        if (load->archive != NULL) {
+            pacFileHandleFree_(load->archive);
+            load->archive = NULL;
+        }
+        load->entryIndex++;
+        if (load->entryIndex < 7) {
+            load->state = 2;
+        } else {
+            load->state = 1;
+        }
+        return 0;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "game/code_00286BA8", mtrAdvanceMantraResourceLoadState);
+#endif
 
 /* Initialize the unit-selection state of the current resource-task work; return zero. */
 s32 mtrUnitSelectInit(void) {
