@@ -355,7 +355,6 @@ extern FieldEncounterRequest D_00435F98;
 
 extern void fldResetEventSceneState(void);
 
-extern s32 fldGetSparkEncounterSelection(void);
 
 extern void fldEveHit_End(void);
 

@@ -5623,7 +5623,7 @@ typedef struct FieldResourceRecord {
     s16 category;
     s16 id;
     s16 entryCount;
-    s16 encounterSelection;
+    FldSparkEncounterSelection encounterSelection;
     s16 duration;
     u8 pad0A[0x16];
     FldSparkSequence sequences[16];
@@ -6451,7 +6451,7 @@ void fldTickWeatherEffectNodes(void) {
 }
 
 /* The serialized resource row retains a signed parameter at +6. */
-s32 fldGetSparkEncounterSelection(void) {
+FldSparkEncounterSelection fldGetSparkEncounterSelection(void) {
     return fldSparkControlState.entry->encounterSelection;
 }
 

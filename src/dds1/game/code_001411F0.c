@@ -245,7 +245,7 @@ typedef struct {
     s16 unk2;
     s32 entryCount;            /* 0x04 */
     s32 duration;              /* 0x08 */
-    s16 encounterSelection;
+    FldSparkEncounterSelection encounterSelection;
     s16 reservedModel;         /* 0x0E: model for reserved object slot 16. */
     FldSparkSequence sequences[16]; /* 0x10 */
 } FldEnt110; /* 0x110 bytes */
@@ -5952,7 +5952,7 @@ void fldTickWeatherEffectNodes(void) {
 }
 
 
-s32 fldGetEncounterSelection(void) {
+FldSparkEncounterSelection fldGetEncounterSelection(void) {
     return ((FldEnt110 *)D_003D62A4[0])->encounterSelection;
 }
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAE78);

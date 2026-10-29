@@ -3,6 +3,12 @@
 
 #include "common.h"
 
+/* Signed halfword selected by the current field-spark resource record. */
+typedef s16 FldSparkEncounterSelection;
+
+FldSparkEncounterSelection fldGetEncounterSelection(void);
+FldSparkEncounterSelection fldGetSparkEncounterSelection(void);
+
 typedef s32 FldSparkAnimationState;
 enum {
     FLD_SPARK_ANIMATION_READY = 0,

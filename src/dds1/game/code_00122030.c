@@ -210,7 +210,6 @@ extern FieldEncounterRequest D_003BAC08;
 
 extern void fldResetEventSceneState(void);
 
-extern s32 fldGetEncounterSelection(void);
 
 extern void fldEveHit_End(void);
 
