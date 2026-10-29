@@ -42,7 +42,7 @@ extern void sdfDrawPositionedSlotImage(s32, s32, s32, s32, s32, s32, s32);
 extern void mnuDrawAnimatedTransition(s32);
 extern void fldDrawSelectedMapMarker(void);
 
-extern u32 D_004388AC;
+extern LmapCounterSelectionPhase D_004388AC;
 
 extern u32 D_004388B0;
 
@@ -427,7 +427,7 @@ void fldInitializeLmapTaskVariant(LmapTaskState *task) {
     u32 variant;
 
     D_0043908C = 0;
-    D_004388AC = 1;
+    D_004388AC = LMAP_COUNTER_SELECTION_PHASE_ACTIVE;
     D_00439090 = 0;
     D_004388B0 = 0;
     flagSet = evtBitCheck(0x1c);
@@ -685,42 +685,42 @@ s32 fldUpdateLocalMapCounterSelection(void) {
     s32 result = 0;
 
     switch (D_004388AC) {
-    case 1:
+    case LMAP_COUNTER_SELECTION_PHASE_ACTIVE:
         result = sdfPollCounterSelectionInput();
         sdfCounterTickCountdownAndMapTimers();
         fldUpdateMapRequestQueues(1);
         sdfCounterStepDownAnimationValue();
         if (result == -2) {
             D_00439094 = 0;
-            D_004388AC = 3;
+            D_004388AC = LMAP_COUNTER_SELECTION_PHASE_EXIT_MESSAGE;
             sdfLatchBaseVectorsForSelection();
             sdfCounterInitializeDisplayAnimation();
             evtBeginSolarOverlayFadeOut(10);
         }
         sdfStepSelectedMapCameraTransition();
         if (result == 1) {
-            D_004388AC = 2;
+            D_004388AC = LMAP_COUNTER_SELECTION_PHASE_CAMERA_TRANSITION;
             sdfLatchBaseVectorsForSelection();
         }
         break;
-    case 2:
+    case LMAP_COUNTER_SELECTION_PHASE_CAMERA_TRANSITION:
         result = sdfPollCounterSelectionInput();
         sdfCounterTickCountdownAndMapTimers();
         fldUpdateMapRequestQueues(1);
         sdfCounterStepDownAnimationValue();
         if (result == -2) {
             D_00439094 = 0;
-            D_004388AC = 3;
+            D_004388AC = LMAP_COUNTER_SELECTION_PHASE_EXIT_MESSAGE;
             sdfLatchBaseVectorsForSelection();
             sdfCounterInitializeDisplayAnimation();
         }
         fldAdvanceLocalMapCameraTransition();
         if (result == 0) {
-            D_004388AC = 1;
+            D_004388AC = LMAP_COUNTER_SELECTION_PHASE_ACTIVE;
             sdfLatchBaseVectorsForSelection();
         }
         break;
-    case 3:
+    case LMAP_COUNTER_SELECTION_PHASE_EXIT_MESSAGE:
         sdfCounterTickCountdownAndMapTimers();
         fldUpdateMapRequestQueues(0);
         if (dds3PadButtonState[0x21] < 0) {
@@ -736,20 +736,20 @@ s32 fldUpdateLocalMapCounterSelection(void) {
                 D_0043908C = 1;
             } else {
                 D_0043908C = 0;
-                D_004388AC = 4;
+                D_004388AC = LMAP_COUNTER_SELECTION_PHASE_EXIT_MESSAGE_INPUT;
                 sdfLatchBaseVectorsForSelection();
             }
         }
         sdfUpdateSelectedCounterMapCameraTransition();
         break;
-    case 4:
+    case LMAP_COUNTER_SELECTION_PHASE_EXIT_MESSAGE_INPUT:
         result = evtGetCapturedWindowPanelValue();
         if (result == 1) {
-            D_004388AC = result;
+            D_004388AC = LMAP_COUNTER_SELECTION_PHASE_ACTIVE;
             evtBeginSolarOverlayFadeIn(30);
             D_00439094 = 0;
         } else {
-            D_004388AC = 5;
+            D_004388AC = LMAP_COUNTER_SELECTION_PHASE_EXIT_FADE;
             if (evtBitCheck(0x13)) {
                 dds3FadeOut(0, 0, 0, 30);
             } else {
@@ -758,13 +758,13 @@ s32 fldUpdateLocalMapCounterSelection(void) {
             D_00439094 = 0;
         }
         break;
-    case 5:
+    case LMAP_COUNTER_SELECTION_PHASE_EXIT_FADE:
         D_00439090++;
         if (D_00439090 >= 31) {
-            D_004388AC = 6;
+            D_004388AC = LMAP_COUNTER_SELECTION_PHASE_COMMIT_EXIT;
         }
         break;
-    case 6:
+    case LMAP_COUNTER_SELECTION_PHASE_COMMIT_EXIT:
         result = -1;
         sdfClearCounterDisplayFlags();
         fldSetPendingSceneAction(sdfCounterGetDisplayValue());
@@ -783,22 +783,22 @@ void fldDrawLocalMapOverlay(void) {
     sdfDrawPositionedSlotImage(0, 0, 0, 0x80, 0x22, 0, 0x53);
 
     switch (D_004388AC) {
-    case 1:
-    case 2:
+    case LMAP_COUNTER_SELECTION_PHASE_ACTIVE:
+    case LMAP_COUNTER_SELECTION_PHASE_CAMERA_TRANSITION:
         sdfAdjustCounterValueAndRedraw(1);
         fldDrawSelectedMapMarker();
         mnuDrawAnimatedTransition(0);
         break;
-    case 3:
+    case LMAP_COUNTER_SELECTION_PHASE_EXIT_MESSAGE:
         sdfAdjustCounterValueAndRedraw(0);
         fldDrawSelectedMapMarker();
         mnuDrawAnimatedTransition(1);
         break;
-    case 4:
+    case LMAP_COUNTER_SELECTION_PHASE_EXIT_MESSAGE_INPUT:
         sdfAdjustCounterValueAndRedraw(0);
         mnuDrawAnimatedTransition(1);
         break;
-    case 5:
+    case LMAP_COUNTER_SELECTION_PHASE_EXIT_FADE:
         mnuDrawAnimatedTransition(0);
         break;
     }

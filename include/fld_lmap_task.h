@@ -96,6 +96,17 @@ enum {
     LMAP_TASK_PHASE_INTERACTIVE = 2,
 };
 
+/* Counter selection runs after scene setup and stages the exit message/fade. */
+typedef u32 LmapCounterSelectionPhase;
+enum {
+    LMAP_COUNTER_SELECTION_PHASE_ACTIVE = 1,
+    LMAP_COUNTER_SELECTION_PHASE_CAMERA_TRANSITION = 2,
+    LMAP_COUNTER_SELECTION_PHASE_EXIT_MESSAGE = 3,
+    LMAP_COUNTER_SELECTION_PHASE_EXIT_MESSAGE_INPUT = 4,
+    LMAP_COUNTER_SELECTION_PHASE_EXIT_FADE = 5,
+    LMAP_COUNTER_SELECTION_PHASE_COMMIT_EXIT = 6,
+};
+
 /* User data allocated by fldStartLmapTask and passed to the LmapMain task. */
 typedef struct LmapTaskState {
     u32 unknown00;                /* 0x00 */

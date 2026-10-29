@@ -22,6 +22,7 @@
 #include "mdl_flag_api.h"
 #include "kwln_fade.h"
 #include "sdf_counter_display.h"
+#include "fld_lmap_task.h"
 #include "fld_lmap_task_presence.h"
 
 extern void fldShutdownLmapResources(void);
@@ -29,7 +30,7 @@ extern void fldShutdownLmapResources(void);
 extern char fldLocalMapTaskName[]; /* "LmapMain" */
 
 
-extern u32 D_003BD25C;
+extern LmapCounterSelectionPhase D_003BD25C;
 
 extern u32 D_003BD260;
 
@@ -426,7 +427,7 @@ s32 fldLocalMapTrackSlotFromMode(s32 mode) {
 void fldInitializeLmapState(void) {
     s32 flagSet;
 
-    D_003BD25C = 1;
+    D_003BD25C = LMAP_COUNTER_SELECTION_PHASE_ACTIVE;
     D_003BD970 = 0;
     D_003BD974 = 0;
     flagSet = evtBitCheck(0x413);
@@ -509,13 +510,13 @@ s32 fldUpdateLocalMapController(void) {
     s32 result = 0;
 
     switch (D_003BD25C) {
-    case 1:
+    case LMAP_COUNTER_SELECTION_PHASE_ACTIVE:
         result = sdfHandleMapCounterSelectionInput();
         sdfCounterTickCountdownAndMapTimers();
         fldUpdateMapRequestQueues(1);
         sdfCounterStepDownAnimationValue();
         if (result == -2) {
-            D_003BD25C = 3;
+            D_003BD25C = LMAP_COUNTER_SELECTION_PHASE_EXIT_MESSAGE;
             sdfLatchBaseVectorsForSelection();
             sdfCounterInitializeDisplayAnimation();
         }
@@ -523,26 +524,26 @@ s32 fldUpdateLocalMapController(void) {
         if (result != 1) {
             break;
         }
-        D_003BD25C = 2;
+        D_003BD25C = LMAP_COUNTER_SELECTION_PHASE_CAMERA_TRANSITION;
         sdfLatchBaseVectorsForSelection();
         break;
-    case 2:
+    case LMAP_COUNTER_SELECTION_PHASE_CAMERA_TRANSITION:
         result = sdfHandleMapCounterSelectionInput();
         sdfCounterTickCountdownAndMapTimers();
         fldUpdateMapRequestQueues(1);
         sdfCounterStepDownAnimationValue();
         if (result == -2) {
-            D_003BD25C = 3;
+            D_003BD25C = LMAP_COUNTER_SELECTION_PHASE_EXIT_MESSAGE;
             sdfLatchBaseVectorsForSelection();
             sdfCounterInitializeDisplayAnimation();
         }
         fldAdvanceLocalMapCameraTransition();
         if (result == 0) {
-            D_003BD25C = 1;
+            D_003BD25C = LMAP_COUNTER_SELECTION_PHASE_ACTIVE;
             sdfLatchBaseVectorsForSelection();
         }
         break;
-    case 3:
+    case LMAP_COUNTER_SELECTION_PHASE_EXIT_MESSAGE:
         sdfCounterTickCountdownAndMapTimers();
         fldUpdateMapRequestQueues(0);
         sdfCounterAdvanceBoundedAnimationValue();
@@ -552,28 +553,28 @@ s32 fldUpdateLocalMapController(void) {
                 D_003BD970 = 1;
             } else {
                 D_003BD970 = 0;
-                D_003BD25C = 4;
+                D_003BD25C = LMAP_COUNTER_SELECTION_PHASE_EXIT_MESSAGE_INPUT;
                 sdfLatchBaseVectorsForSelection();
             }
         }
         sdfUpdateSelectedCounterMapCameraTransition();
         break;
-    case 4:
+    case LMAP_COUNTER_SELECTION_PHASE_EXIT_MESSAGE_INPUT:
         result = evtGetCapturedWindowPanelValue();
         if (result == 1) {
-            D_003BD25C = 1;
+            D_003BD25C = LMAP_COUNTER_SELECTION_PHASE_ACTIVE;
         } else {
-            D_003BD25C = 5;
+            D_003BD25C = LMAP_COUNTER_SELECTION_PHASE_EXIT_FADE;
             dds3FadeOut(255, 255, 255, 30);
         }
         break;
-    case 5:
+    case LMAP_COUNTER_SELECTION_PHASE_EXIT_FADE:
         D_003BD974++;
         if (D_003BD974 >= 31) {
-            D_003BD25C = 6;
+            D_003BD25C = LMAP_COUNTER_SELECTION_PHASE_COMMIT_EXIT;
         }
         break;
-    case 6:
+    case LMAP_COUNTER_SELECTION_PHASE_COMMIT_EXIT:
         result = -1;
         sdfClearCounterDisplayFlags();
         fldSetPendingSceneAction(sdfCounterGetDisplayValue());
@@ -601,22 +602,22 @@ void fldDrawLocalMapOverlay(void) {
     evtSubmitDefaultDepthGradientRect(0, 0, 170, 195, 0x3300101E, 0x101E, 0x101E, 0x101E);
 
     switch (D_003BD25C) {
-    case 1:
-    case 2:
+    case LMAP_COUNTER_SELECTION_PHASE_ACTIVE:
+    case LMAP_COUNTER_SELECTION_PHASE_CAMERA_TRANSITION:
         sdfAdjustCounterValueAndRedraw(1);
         fldDrawCounterMapMarker();
         fldDrawLocalMapTransition(0);
         break;
-    case 3:
+    case LMAP_COUNTER_SELECTION_PHASE_EXIT_MESSAGE:
         sdfAdjustCounterValueAndRedraw(0);
         fldDrawCounterMapMarker();
         fldDrawLocalMapTransition(1);
         break;
-    case 4:
+    case LMAP_COUNTER_SELECTION_PHASE_EXIT_MESSAGE_INPUT:
         sdfAdjustCounterValueAndRedraw(0);
         fldDrawLocalMapTransition(1);
         break;
-    case 5:
+    case LMAP_COUNTER_SELECTION_PHASE_EXIT_FADE:
         fldDrawLocalMapTransition(0);
         break;
     }
