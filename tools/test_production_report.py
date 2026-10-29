@@ -122,6 +122,9 @@ class ProductionFixture(unittest.TestCase):
         self.syms = {name: 0x1000 + offset for name, offset, _ in self.functions}
         self.write("config/dds1/symbol_addrs.txt",
                    "".join(f"{name} = 0x{value:X};\n" for name, value in self.syms.items()))
+        self.write("build/dds1/objdiff.json", json.dumps({"units": [{
+            "name": "game/test", "metadata": {"progress_categories": ["game"]},
+        }]}))
         self.config_patch = patch.dict(production_report.VERSIONS, {
             "dds1": {"serial": self.serial,
                      "elf_sha1": hashlib.sha1(self.retail).hexdigest()}
@@ -785,6 +788,10 @@ class ReconciliationTests(ProductionFixture):
         self.write(missing_source, 'INCLUDE_ASM(int, "game/test", fallback);\n')
         self.write(missing + ".s", f'#APP\n.include "{self.include_path}"\n')
         self.write(missing + ".d", f"{missing}: {missing_source} include/test.h\n")
+        self.write("build/dds1/objdiff.json", json.dumps({"units": [
+            {"name": "game/test", "metadata": {"progress_categories": ["game"]}},
+            {"name": "game/missing", "metadata": {"progress_categories": ["game"]}},
+        ]}))
         self.write(self.map_path, f" .text 0x1000 0x10 {self.object_path}\n"
                                  f" .text 0x1010 0x8 {missing}\n")
         production_report.record_object(self.root, Path(self.source_path), Path(self.object_path))
@@ -799,6 +806,25 @@ class ReconciliationTests(ProductionFixture):
         report["categories"][0]["measures"] = copy.deepcopy(unit["measures"])
         with self.assertRaisesRegex(ValueError, "unit inventory.*game/missing"):
             production_report.reconcile(report, "dds1", self.root)
+
+    def test_mapped_hand_unit_does_not_hide_an_omitted_game_unit(self):
+        hand = "build/dds1/src/dds1/hand/vu/retained.o"
+        missing = "build/dds1/src/dds1/game/missing.o"
+        production_map = {
+            self.object_path: (0x1000, 0x18),
+            hand: (0x1018, 0x8),
+            missing: (0x1020, 0x8),
+        }
+        self.write("build/dds1/objdiff.json", json.dumps({"units": [
+            {"name": "game/test", "metadata": {"progress_categories": ["game"]}},
+            {"name": "hand/vu/retained", "metadata": {"progress_categories": ["handwritten"]}},
+            {"name": "game/missing", "metadata": {"progress_categories": ["game"]}},
+        ]}))
+
+        expected = production_report.configured_game_units(self.root, "dds1", production_map)
+        self.assertEqual(expected, {"game/test", "game/missing"})
+        with self.assertRaisesRegex(ValueError, "inventory differs; missing: game/missing"):
+            production_report.validate_report_unit_inventory("dds1", expected, {"game/test"})
 
     def test_reconciliation_keeps_denominators_and_unrelated_categories(self):
         report = self.report()

@@ -466,6 +466,7 @@ def write_objdiff_reports(n, units: dict[str, list[dict]]) -> None:
                     f"build/{version}/{VERSIONS[version]['serial']}.ok",
                     f"build/{version}/{VERSIONS[version]['serial']}.elf.proof.json",
                     f"config/{version}/symbol_addrs.txt",
+                    f"build/{version}/objdiff.json",
                     f"orig/{version}/{VERSIONS[version]['serial']}",
                 ])
         n.build(out, "production_report", raw, implicit=dependencies,

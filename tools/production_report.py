@@ -430,6 +430,38 @@ class Production:
         return {"unit": name, "version": self.version, "functions": evidence}
 
 
+def configured_game_units(root: Path, version: str, production_map: dict) -> set[str]:
+    """Return linked C units in the independently generated game inventory."""
+    config_path = root / f"build/{version}/objdiff.json"
+    config = json.loads(config_path.read_text())
+    categories = {}
+    for unit in config["units"]:
+        name = unit["name"]
+        if name in categories:
+            raise ValueError(f"{version}: duplicate configured unit: {name}")
+        categories[name] = unit.get("metadata", {}).get("progress_categories", [])
+
+    prefix = f"build/{version}/src/{version}/"
+    linked_sources = {path[len(prefix):-2] for path in production_map if path.startswith(prefix)}
+    unconfigured = linked_sources - categories.keys()
+    if unconfigured:
+        names = ", ".join(sorted(unconfigured))
+        raise ValueError(f"{version}: production units missing from objdiff config: {names}")
+    return {name for name in linked_sources if "game" in categories[name]}
+
+
+def validate_report_unit_inventory(version: str, expected: set[str], actual: set[str]) -> None:
+    if actual != expected:
+        details = []
+        missing = sorted(expected - actual)
+        extra = sorted(actual - expected)
+        if missing:
+            details.append(f"missing: {', '.join(missing)}")
+        if extra:
+            details.append(f"unexpected: {', '.join(extra)}")
+        raise ValueError(f"{version}: report/production unit inventory differs; {'; '.join(details)}")
+
+
 def reconcile(report: dict, scope: str, root: Path = ROOT, *,
               expected_versions: list[str] | None = None) -> dict:
     if expected_versions is None:
@@ -481,12 +513,9 @@ def reconcile(report: dict, scope: str, root: Path = ROOT, *,
     if not proven:
         raise ValueError("report contains no game-code production evidence")
     for version, production in proofs.items():
-        prefix = f"build/{version}/src/{version}/"
-        expected = {path[len(prefix):-2] for path in production.map if path.startswith(prefix)}
+        expected = configured_game_units(root, version, production.map)
         actual = {unit["unit"] for unit in evidence["units"] if unit["version"] == version}
-        if actual != expected:
-            missing = ", ".join(sorted(expected - actual))
-            raise ValueError(f"{version}: report/production unit inventory differs; missing: {missing}")
+        validate_report_unit_inventory(version, expected, actual)
     def aggregate(measures: dict, units: list[dict]) -> None:
         code = sum(int(u["measures"].get("total_code", 0)) for u in units)
         functions = sum(int(u["measures"].get("total_functions", 0)) for u in units)

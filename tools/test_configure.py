@@ -425,6 +425,7 @@ class ObjdiffProgressTests(unittest.TestCase):
                         for dependency in (
                             f"build/{version}/{configure.VERSIONS[version]['serial']}.ok",
                             f"build/{version}/{configure.VERSIONS[version]['serial']}.elf.proof.json",
+                            f"build/{version}/objdiff.json",
                             f"config/{version}/symbol_addrs.txt",
                             f"orig/{version}/{configure.VERSIONS[version]['serial']}",
                         ):
