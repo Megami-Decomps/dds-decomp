@@ -149,7 +149,7 @@ void dds3InitAdmini(void) {
 
     if (dds3SearchProcessName(dds3AdminTaskName) == NULL) {
         work = sdfChipAllocDirect(0x24);
-        work->Stat = 0;
+        work->ControlFlags = 0;
         work->RunTimer = 0;
         work->NowSequence = -1;
         work->NextSequence = -1;
