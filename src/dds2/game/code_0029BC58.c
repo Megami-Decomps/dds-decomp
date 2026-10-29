@@ -229,7 +229,26 @@ void brsAnimateSkillIconRows(BrsSkillPackageWork *work) {
     }
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "mnu_result.h"
+
+/* The lead icon row's colour: its opacity over a grey of 0x80. Retail also
+ * fills a four-corner block with it, which nothing uses. Upstream:
+ * INCLUDE_ASM in game/code_0029BC58. */
+u32 brsPackProgressPanelColor(BrsSkillPackageWork *work) {
+    u32 corners[4] = {0x80808080, 0x80808080, 0x80808080, 0x80808080};
+    u32 color = work->leadIconRow.opacity | 0x80808000;
+
+    corners[0] = color;
+    corners[1] = color;
+    corners[2] = color;
+    corners[3] = color;
+    return color;
+}
+#else
 INCLUDE_ASM(const s32, "game/code_0029BC58", brsPackProgressPanelColor);
+#endif
 
 
 /* The opacity is latched at 0x80; later fade steps leave it untouched. */
