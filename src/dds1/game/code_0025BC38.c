@@ -290,7 +290,80 @@ void mnuAdvanceLoopingFrame(s32 *frame) {
     }
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "sdf_trig.h"
+#include "eff_random.h"
+#include "sdf_chip.h"
+#include "eff_resource_slots.h"
+#include "sdf_resource.h"
+#include "sdf.h"
+#include "dat_state.h"
+#include "mnu_profile_progress.h"
+#include "mnu_sprite_resource.h"
+#include "mnu_scene_list.h"
+#include "sdf_grid.h"
+#include "mnu_scene_work.h"
+#include "mnu_mantra_grid.h"
+#include "mnu_scene.h"
+#include "mdl_flag_api.h"
+#include "prf_requirement_fallback.h"
+extern void mnuDrawMantraSceneSpriteAtPlacement(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 flags, s32 context);
+
+/* Records the mantra grid cursor position in a ten-entry ring and draws the
+ * cursor sprite with a fading trail of its previous positions, each drawn 80%
+ * of the way back to its old position and faded by age; positions equal to the
+ * current cursor are skipped. Upstream: INCLUDE_ASM in game/code_0025BC38;
+ * written from the retail routine. It differs from retail in register
+ * allocation and scheduling, in where the compiler here hoists the loop's float
+ * constants into registers and in the addressing of the ring entries. */
+void mnuDrawMantraGridCursorHistory(s32 x, s32 y, s32 z, s32 alpha, s32 workAddress, s32 context) {
+    MenuSceneWork *work = (MenuSceneWork *)(u32)workAddress;
+    MenuSceneCoordinateRing *ring = &work->coordinateRing;
+    s32 cursorX = work->entryPosition.x;
+    s32 cursorY = work->entryPosition.y;
+    f32 baseAlpha;
+    s32 i;
+
+    mnuDrawMantraSceneSpriteAtPlacement(x + cursorX, y + cursorY, 0, alpha, 0x31, 0x20, context);
+    ring->coordinates[ring->cursor].x = work->entryPosition.x;
+    ring->coordinates[ring->cursor].y = work->entryPosition.y;
+    ring->cursor++;
+    if (ring->cursor >= 10) {
+        ring->cursor = 0;
+    }
+    baseAlpha = (f32)alpha;
+    for (i = 0; i < 10; i++) {
+        MenuSceneCoordinate *point = &ring->coordinates[i];
+        s32 age;
+        s32 drawX;
+        s32 drawY;
+        f32 fade;
+
+        if (point->x == work->entryPosition.x && point->y == work->entryPosition.y) {
+            continue;
+        }
+        age = i - ring->cursor;
+        if (age < 0) {
+            age += 10;
+        }
+        fade = (f32)(age - 4) / 5.0f;
+        drawX = (s32)((f32)cursorX - (f32)(cursorX - point->x) * 0.8f);
+        drawY = (s32)((f32)cursorY - (f32)(cursorY - point->y) * 0.8f);
+        if (fade < 0.0f) {
+            fade = 0.0f;
+        }
+        mnuDrawMantraSceneSpriteAtPlacement(x + drawX, y + drawY, 0, (s32)(baseAlpha * fade * 0.3f),
+                                            0x31, 0x20, context + 1);
+    }
+    cursorX = work->entryPosition.x;
+    cursorY = work->entryPosition.y;
+    mnuDrawMantraSceneSpriteAtPlacement(x + cursorX, y + cursorY, 0, (s32)(baseAlpha * 0.8f), 0x31, 0x20,
+                                        context + 1);
+}
+#else
 INCLUDE_ASM(const s32, "game/code_0025BC38", mnuDrawMantraGridCursorHistory);
+#endif
 
 extern u32 mnuGetMantraDisplayFlags(MnuMantraGridEntry *, MnuProfileProgress *);
 
