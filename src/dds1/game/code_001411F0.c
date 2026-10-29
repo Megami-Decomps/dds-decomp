@@ -5215,7 +5215,7 @@ void fldCreateSparkSlotObjects(void) {
 
         for (i = 0; i < 17; i++) {
             fldSparkObjectEntries[i].objectHandle = NULL;
-            fldSparkObjectEntries[i].sparkSlotIndex = -1;
+            fldSparkObjectEntries[i].sparkSlotIndex = FLD_SPARK_SLOT_INDEX_UNBOUND;
             *(s32 *)fldSparkObjectEntries[i].pad8 = 0;
         }
         for (i = 0; i < 17; i++) {
@@ -5266,13 +5266,13 @@ void fldInitSparkTable(void) {
             fldSparkSlots[i].hasVectors = 0;
             fldSparkSlots[i].active = 0;
             fldSparkSlots[i].reservedObjectSlot = 0;
-            fldSparkSlots[i].objectSlot = -1;
+            fldSparkSlots[i].objectSlot = FLD_SPARK_OBJECT_INDEX_UNBOUND;
             fldSparkSlots[i].tickCounter = dds3GetRandA(0) % 60 + 15;
         }
     } else {
         for (i = 0; i < 64; i++) {
             fldSparkSlots[i].hasVectors = 0;
-            fldSparkSlots[i].objectSlot = -1;
+            fldSparkSlots[i].objectSlot = FLD_SPARK_OBJECT_INDEX_UNBOUND;
         }
     }
 }
@@ -5283,12 +5283,12 @@ void fldResetSparkTable(void) {
     for (i = 0; i < 64; i++) {
         fldSparkSlots[i].active = 0;
         fldSparkSlots[i].reservedObjectSlot = 0;
-        fldSparkSlots[i].objectSlot = -1;
+        fldSparkSlots[i].objectSlot = FLD_SPARK_OBJECT_INDEX_UNBOUND;
         fldSparkSlots[i].tickCounter = dds3GetRandA(0) % 60 + 15;
     }
 }
 
-s32 fldSetSparkVectors(s32 index, const u128 *position, const u128 *rotation) {
+s32 fldSetSparkVectors(FldSparkSlotIndex index, const u128 *position, const u128 *rotation) {
     SDF_VU0_COPYVECTOR(fldSparkSlots[index].position, position);
     SDF_VU0_COPYVECTOR(fldSparkSlots[index].rotation, rotation);
     fldSparkSlots[index].hasVectors = 1;
@@ -5300,7 +5300,7 @@ extern s32 D_003D62DC[];
 struct dds3Basic_t;
 
 
-s32 fldBindSparkSlotObject(s32 index, s32 reserved) {
+s32 fldBindSparkSlotObject(FldSparkSlotIndex index, s32 reserved) {
     s32 slot;
     s32 i;
     s32 candidate;
@@ -5308,10 +5308,10 @@ s32 fldBindSparkSlotObject(s32 index, s32 reserved) {
     u128 position;
 
     if (reserved == 0) {
-        slot = -1;
+        slot = FLD_SPARK_OBJECT_INDEX_UNBOUND;
         for (i = 0; i < 16; i++) {
             candidate = (fldSparkControlState.cursor + i) % 16;
-            if (fldSparkObjectEntries[candidate].sparkSlotIndex == -1) {
+            if (fldSparkObjectEntries[candidate].sparkSlotIndex == FLD_SPARK_SLOT_INDEX_UNBOUND) {
                 slot = candidate;
                 break;
             }
@@ -5339,14 +5339,15 @@ s32 fldBindSparkSlotObject(s32 index, s32 reserved) {
 
 extern SdfMathVector4 D_003A0918;
 
-void fldFreeSparkSlot(s32 index) {
+void fldFreeSparkSlot(FldSparkSlotIndex index) {
     SdfMathVector4 vec;
     dds3Basic_t *obj;
     s32 *flags;
-    s16 slot;
+    FldSparkObjectIndex slot;
 
     vec = D_003A0918;
-    if (fldSparkSlots[index].hasVectors == 1 && fldSparkSlots[index].active != 0 && fldSparkSlots[index].objectSlot != -1) {
+    if (fldSparkSlots[index].hasVectors == 1 && fldSparkSlots[index].active != 0 &&
+        fldSparkSlots[index].objectSlot != FLD_SPARK_OBJECT_INDEX_UNBOUND) {
         vec.x = fldSparkSlots[index].position[0];
         vec.z = fldSparkSlots[index].position[2];
         dds3SetPosPoseSet(fldSparkObjectEntries[fldSparkSlots[index].objectSlot].objectHandle, (u128 *)&vec);
@@ -5355,8 +5356,8 @@ void fldFreeSparkSlot(s32 index) {
         *flags |= 1;
         dds3ObjectBaseOffFlag(obj, 0x400);
         slot = fldSparkSlots[index].objectSlot;
-        fldSparkSlots[index].objectSlot = -1;
-        fldSparkObjectEntries[slot].sparkSlotIndex = -1;
+        fldSparkSlots[index].objectSlot = FLD_SPARK_OBJECT_INDEX_UNBOUND;
+        fldSparkObjectEntries[slot].sparkSlotIndex = FLD_SPARK_SLOT_INDEX_UNBOUND;
     }
 }
 
@@ -5364,7 +5365,7 @@ extern FldSparkController fldSparkControlState;
 
 extern void fldCreateSparkSlotObjects();
 
-extern s32 fldBindSparkSlotObject(s32, s32);
+extern s32 fldBindSparkSlotObject(FldSparkSlotIndex, s32);
 
 void fldUpdateSparkSlots(void) {
     s32 i;
@@ -5420,7 +5421,7 @@ void fldUpdateSparkSequence(void) {
             break;
         case 1:
             fldSparkSlots[i].tickCounter++;
-            if (fldSparkSlots[i].objectSlot != -1 &&
+            if (fldSparkSlots[i].objectSlot != FLD_SPARK_OBJECT_INDEX_UNBOUND &&
                 fldSparkControlState.state.animationState == FLD_SPARK_ANIMATION_RUNNING &&
                 fldSparkControlState.state.pulse != 0 && (u32)(fldSparkControlState.state.modeCountdown - 10) < 6) {
                 SDF_VU0_COPYVECTOR(&position, fldSparkSlots[i].position);
@@ -5454,7 +5455,8 @@ u8 fldIsNearSpark(f32 x, f32 y, f32 z) {
     s32 i;
 
     for (i = 0; i < 64 && i < fldSparkControlState.state.entryCount; i++) {
-        if (fldSparkSlots[i].active == 1 && fldSparkSlots[i].objectSlot != -1) {
+        if (fldSparkSlots[i].active == 1 &&
+            fldSparkSlots[i].objectSlot != FLD_SPARK_OBJECT_INDEX_UNBOUND) {
             f32 dx = x - fldSparkSlots[i].position[0];
             f32 dy = y - fldSparkSlots[i].position[1];
             f32 dz = z - fldSparkSlots[i].position[2];

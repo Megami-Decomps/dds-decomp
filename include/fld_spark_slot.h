@@ -3,6 +3,10 @@
 
 #include "common.h"
 
+/* Index into the field-spark object-entry table. */
+typedef s16 FldSparkObjectIndex;
+#define FLD_SPARK_OBJECT_INDEX_UNBOUND (-1)
+
 /* One field-spark record. The paired field systems index 64 records at a
  * 0x30-byte stride. */
 typedef struct FldSparkSlot {
@@ -11,7 +15,7 @@ typedef struct FldSparkSlot {
     s32 hasVectors;          /* 0x20 */
     s32 active;              /* 0x24 */
     s32 reservedObjectSlot;  /* 0x28 */
-    s16 objectSlot;           /* 0x2C */
+    FldSparkObjectIndex objectSlot; /* 0x2C: unbound when no object is attached. */
     s16 tickCounter;          /* 0x2E */
 } FldSparkSlot;
 
@@ -29,6 +33,8 @@ typedef char FldSparkSlot_reservedObjectSlot_offset_check[
     ((u32)&((FldSparkSlot *)0)->reservedObjectSlot == 0x28) ? 1 : -1];
 typedef char FldSparkSlot_objectSlot_offset_check[
     ((u32)&((FldSparkSlot *)0)->objectSlot == 0x2C) ? 1 : -1];
+typedef char FldSparkSlot_objectSlot_size_check[
+    (sizeof(((FldSparkSlot *)0)->objectSlot) == 2) ? 1 : -1];
 typedef char FldSparkSlot_tickCounter_offset_check[
     ((u32)&((FldSparkSlot *)0)->tickCounter == 0x2E) ? 1 : -1];
 
