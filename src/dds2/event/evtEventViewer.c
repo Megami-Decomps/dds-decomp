@@ -921,12 +921,12 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
         viewer->timedStart = key->frame;
         if (key->duration == 0) {
             if (key->p0C.sb[0] == 0) {
-                viewer->timedEnd = -1;
+                viewer->timedEnd.mode = EVT_TIMED_ACTION_END_UNBOUNDED;
             } else {
-                viewer->timedEnd = -2;
+                viewer->timedEnd.mode = EVT_TIMED_ACTION_END_PRESERVE_MOVIE_ON_RELEASE;
             }
         } else {
-            viewer->timedEnd = key->frame + key->duration;
+            viewer->timedEnd.frame = key->frame + key->duration;
         }
         viewer->timedActive = 1;
         break;
@@ -2492,14 +2492,14 @@ s32 evtViewerUpdateTimedAction(EvtRuntime *viewer) {
             movieStop();
             viewer->timedActive = 0;
             viewer->timedStart = 0;
-            viewer->timedEnd = 0;
-        } else if (viewer->timedEnd < 0) {
+            viewer->timedEnd.frame = 0;
+        } else if (viewer->timedEnd.frame < 0) {
             mnuIsMoviePlaybackFinished();
-        } else if (viewer->curFrame >= viewer->timedEnd) {
+        } else if (viewer->curFrame >= viewer->timedEnd.frame) {
             movieStop();
             viewer->timedActive = 0;
             viewer->timedStart = 0;
-            viewer->timedEnd = 0;
+            viewer->timedEnd.frame = 0;
         }
     }
 }
@@ -4702,7 +4702,8 @@ void evtViewerRelease(viewer)
     dds3StopQuake();
     sdfViewShakeVector[0] = sdfViewShakeVector[1] = sdfViewShakeVector[2] = sdfViewShakeVector[3] = 0.0f;
     if (viewer->timedActive == 1) {
-        if (viewer->timedEnd != -2 || evtViewerHasUpdateFlag(viewer) == 1) {
+        if (viewer->timedEnd.mode != EVT_TIMED_ACTION_END_PRESERVE_MOVIE_ON_RELEASE ||
+            evtViewerHasUpdateFlag(viewer) == 1) {
             movieStop();
         }
         viewer->timedActive = 0;

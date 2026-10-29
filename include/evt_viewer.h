@@ -72,6 +72,18 @@ typedef enum EvtObjectAttachmentState {
     EVT_OBJECT_ATTACHMENT_ATTACHED = 1
 } EvtObjectAttachmentState;
 
+/* The timed action's end word is either a frame limit or an open-ended policy. */
+typedef enum EvtTimedActionEndMode {
+    EVT_TIMED_ACTION_END_UNBOUNDED = -1,
+    EVT_TIMED_ACTION_END_PRESERVE_MOVIE_ON_RELEASE = -2
+} EvtTimedActionEndMode;
+
+typedef union EvtTimedActionEnd {
+    s32 frame;
+    EvtTimedActionEndMode mode;
+} EvtTimedActionEnd;
+typedef char EvtTimedActionEnd_size[(sizeof(EvtTimedActionEnd) == sizeof(s32)) ? 1 : -1];
+
 /* Complete 0x84-byte entry: metadata, selected object and owned key list. */
 typedef struct EvtRuntimeGroup {
     s32 type;
@@ -218,7 +230,7 @@ typedef struct EvtRuntime {
     u32 glyph;
     s32 timedActive;
     s32 timedStart;
-    s32 timedEnd;
+    EvtTimedActionEnd timedEnd;
     u8 shadowMode;
     u8 shadowAlpha;
     u8 pad2422[2];
@@ -272,9 +284,11 @@ typedef char EvtRuntimeGroup_entryHeader_at_0x08[
     ((u32)&((EvtRuntimeGroup *)0)->entryHeader == 0x08) ? 1 : -1];
 #ifdef VERSION_DDS1
 typedef char EvtRuntime_size[(sizeof(EvtRuntime) == 0x2490) ? 1 : -1];
+typedef char EvtRuntime_timedEnd_at241C[((u32)&((EvtRuntime *)0)->timedEnd == 0x241C) ? 1 : -1];
 #else
 typedef char EvtRuntime_size[(sizeof(EvtRuntime) == 0x24BC) ? 1 : -1];
 typedef char EvtRuntime_voiceFrame_at24A8[((u32)&((EvtRuntime *)0)->voiceFrame == 0x24A8) ? 1 : -1];
+typedef char EvtRuntime_timedEnd_at241C[((u32)&((EvtRuntime *)0)->timedEnd == 0x241C) ? 1 : -1];
 #endif
 typedef char EvtRuntime_camera_at23CC[((u32)&((EvtRuntime *)0)->cameraColorActive == 0x23CC) ? 1 : -1];
 typedef char EvtRuntime_color_at2408[((u32)&((EvtRuntime *)0)->colorSelection == 0x2408) ? 1 : -1];

@@ -982,9 +982,9 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
         viewer->timedActive = 1;
         viewer->timedStart = key->frame;
         if (key->duration == 0) {
-            viewer->timedEnd = -1;
+            viewer->timedEnd.mode = EVT_TIMED_ACTION_END_UNBOUNDED;
         } else {
-            viewer->timedEnd = key->frame + key->duration;
+            viewer->timedEnd.frame = key->frame + key->duration;
         }
         break;
     case 0x1E:
@@ -2285,14 +2285,14 @@ s32 evtViewerUpdateTimedAction(EvtRuntime *viewer) {
             movieStop();
             viewer->timedActive = 0;
             viewer->timedStart = 0;
-            viewer->timedEnd = 0;
-        } else if (viewer->timedEnd == -1) {
+            viewer->timedEnd.frame = 0;
+        } else if (viewer->timedEnd.mode == EVT_TIMED_ACTION_END_UNBOUNDED) {
             mnuIsMoviePlaybackFinished();
-        } else if (viewer->curFrame >= viewer->timedEnd) {
+        } else if (viewer->curFrame >= viewer->timedEnd.frame) {
             movieStop();
             viewer->timedActive = 0;
             viewer->timedStart = 0;
-            viewer->timedEnd = 0;
+            viewer->timedEnd.frame = 0;
         }
     }
 }
