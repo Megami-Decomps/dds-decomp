@@ -7,6 +7,7 @@
 #include "sdf_chip.h"
 #include "fr_font_measure.h"
 #include "fr_font_glyph_measure.h"
+#include "fr_font_text_measure_mode.h"
 #include "fr_font_clone_entry_resource.h"
 #include "fr_font_glyph_chain_count.h"
 #include "itf.h"
@@ -263,7 +264,7 @@ void frFontFillGlyphMetrics(FrFontGlyphMeasureWork *work, s32 glyphIndex) {
         scale = 1.0f;
     }
 
-    if ((work->mode & 2) != 0 && defaultSlot == 0 && work->code < 0x80) {
+    if ((work->mode & FR_FONT_TEXT_MEASURE_HALF_ASCII_WIDTH) != 0 && defaultSlot == 0 && work->code < 0x80) {
         work->advance >>= 1;
         work->cellWidth >>= 1;
     }
@@ -987,7 +988,7 @@ u32 frFontGetGlyphCellWidth(u8 fontIndex);
 u32 frFontGetGlyphCellHeight(u8 fontIndex);
 extern void frFontFillGlyphMetrics(FrFontGlyphMeasureWork *work, s32 glyphIndex);
 
-s32 frFontMeasureTextAdvance(const u8 *text, u8 fontIndex, u8 mode) {
+s32 frFontMeasureTextAdvance(const u8 *text, u8 fontIndex, FrFontTextMeasureMode mode) {
     FrFontGlyphMeasureWork work;
     s32 totalAdvance = 0;
     u32 offset = 0;

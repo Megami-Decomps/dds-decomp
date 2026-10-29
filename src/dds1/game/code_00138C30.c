@@ -4462,7 +4462,7 @@ extern u8 fldHasKiretaLabelProcess(void), fldProcKiretaChk(void), fldProcHiraken
 
 extern u8 fldIsEventPhaseAtLeastTwo(void);
 
-extern s32 frFontMeasureTextAdvance(const u8 *text, u8 fontIndex, u8 mode);
+#include "fr_font_text_measure_mode.h"
 
 extern void fldDrawGaugeBar(s32);
 

@@ -2,6 +2,7 @@
 #define FR_FONT_GLYPH_MEASURE_H
 
 #include "common.h"
+#include "fr_font_text_measure_mode.h"
 
 typedef struct FrFontGlyphMeasureWork {
     u16 code;           /* 0x00 */
@@ -12,7 +13,7 @@ typedef struct FrFontGlyphMeasureWork {
     u8 opaque10[5];
     u8 fontIndex;       /* 0x15 */
     u8 opaque16;
-    u8 mode;            /* 0x17 */
+    FrFontTextMeasureMode mode; /* 0x17 */
     u8 cellWidth;       /* 0x18 */
     u8 cellHeight;      /* 0x19 */
     u8 opaque1A[0x16];

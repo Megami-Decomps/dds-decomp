@@ -3202,7 +3202,7 @@ void fldClearAllAreaFloorFlags(void) {
 }
 
 extern f32 D_003BAEE8;
-extern s32 frFontMeasureTextAdvance(const u8 *, u8, u8);
+#include "fr_font_text_measure_mode.h"
 extern void fldKanjiDraw(s32 x, s32 y, u32 colors, const u8 *text);
 void fldDrawMapLabelBanner(s32 unused) {
     FldAreaWork *work;

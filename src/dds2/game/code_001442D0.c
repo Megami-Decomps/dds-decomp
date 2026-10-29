@@ -3667,7 +3667,7 @@ void fldClearAllAreaFloorFlags(void) {
 
 extern f32 D_0043627C;
 extern void itfSetTextDrawLimit(s32 value);
-extern s32 frFontMeasureTextAdvance(const u8 *text, u8 fontIndex, u8 mode);
+#include "fr_font_text_measure_mode.h"
 extern void fldKanjiDraw(s32, s32, u32, const u8 *);
 
 /* Both banner coordinates are interpolated, including the fixed zero Y endpoint. */
