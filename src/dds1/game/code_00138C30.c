@@ -47,6 +47,7 @@
 #include "fld_camera_follow_row.h"
 #include "fld_event_display_resource_api.h"
 #include "fld.h"
+#include "fld_actor_entry_kind.h"
 #include "evt_encounter_request_api.h"
 #include "fld_collision_geometry.h"
 #include "fld_scene_request.h"
@@ -2561,7 +2562,7 @@ const char *fldPickActorTemplateByName(const char *name) {
             && entry->floor == fldGlobalBase.floor + 1
             && strcmp(name, entry->name) == 0) {
             switch (entry->kind) {
-            case 1:
+            case FLD_ACTOR_ENTRY_KIND_DOOR:
                 if (entry->variantMode == 0) {
                     sub = entry->variant;
                     if (sub != 0) {
@@ -2573,25 +2574,25 @@ const char *fldPickActorTemplateByName(const char *name) {
                 }
                 fldPickedActorTemplateKind = 0;
                 return D_003369B0;
-            case 2:
+            case FLD_ACTOR_ENTRY_KIND_RUN_WARP:
                 fldPickedActorTemplateKind = 1;
                 return D_003369C0;
-            case 3:
+            case FLD_ACTOR_ENTRY_KIND_HOLE_WARP:
                 fldPickedActorTemplateKind = 2;
                 return D_003369D0;
-            case 4:
+            case FLD_ACTOR_ENTRY_KIND_JUMP_WARP:
                 fldPickedActorTemplateKind = 3;
                 return D_003369E0;
-            case 5:
+            case FLD_ACTOR_ENTRY_KIND_LADDER:
                 fldPickedActorTemplateKind = 5;
                 return D_00336A00;
-            case 10:
+            case FLD_ACTOR_ENTRY_KIND_WARP:
                 fldPickedActorTemplateKind = 8;
                 return D_00336A30;
-            case 11:
+            case FLD_ACTOR_ENTRY_KIND_SUCTION_WARP:
                 fldPickedActorTemplateKind = 9;
                 return D_00336A40;
-            case 12:
+            case FLD_ACTOR_ENTRY_KIND_BARRIER:
                 fldPickedActorTemplateKind = 10;
                 return D_00336A50;
             }
@@ -2620,7 +2621,7 @@ const char *fldFindActorEntryByName(const char *name) {
             && strcmp(name, entry->name) == 0) {
             fldSelectedActorEntryIndex = i;
             switch (entry->kind) {
-            case 1:
+            case FLD_ACTOR_ENTRY_KIND_DOOR:
                 if (entry->variantMode == 0) {
                     sub = entry->variant;
                     if (sub != 0) {
@@ -2632,25 +2633,25 @@ const char *fldFindActorEntryByName(const char *name) {
                 }
                 D_003BAE68 = 0;
                 return D_003369B0;
-            case 2:
+            case FLD_ACTOR_ENTRY_KIND_RUN_WARP:
                 D_003BAE68 = 1;
                 return D_003369C0;
-            case 3:
+            case FLD_ACTOR_ENTRY_KIND_HOLE_WARP:
                 D_003BAE68 = 2;
                 return D_003369D0;
-            case 4:
+            case FLD_ACTOR_ENTRY_KIND_JUMP_WARP:
                 D_003BAE68 = 3;
                 return D_003369E0;
-            case 5:
+            case FLD_ACTOR_ENTRY_KIND_LADDER:
                 D_003BAE68 = 5;
                 return D_00336A00;
-            case 10:
+            case FLD_ACTOR_ENTRY_KIND_WARP:
                 D_003BAE68 = 0;
                 return D_00336A30;
-            case 11:
+            case FLD_ACTOR_ENTRY_KIND_SUCTION_WARP:
                 D_003BAE68 = 0;
                 return D_00336A40;
-            case 12:
+            case FLD_ACTOR_ENTRY_KIND_BARRIER:
                 D_003BAE68 = 0;
                 return D_00336A50;
             }
@@ -2669,7 +2670,7 @@ extern const char D_00336A30[];
 const char *fldSelectCurrentActorOnNextFloor(void) {
     s32 index = D_003BAB40;
     FldActorEntry *entry = &fldActorWaypointRows.actors[index];
-    if (entry->floor == D_0032E3C4[0] + 1 && entry->kind == 10) {
+    if (entry->floor == D_0032E3C4[0] + 1 && entry->kind == FLD_ACTOR_ENTRY_KIND_WARP) {
         fldSelectedActorEntryIndex = index;
         D_003BAE68 = 8;
         return D_00336A30;
@@ -2684,7 +2685,7 @@ s32 fldGetSelectedActorMotionId(void) {
 s32 fldQuerySelectedActorMotionState(s32 query) {
     FldActorEntry *entry = &fldActorWaypointRows.actors[fldSelectedActorEntryIndex];
 
-    if (query == 0 && entry->kind == 1) {
+    if (query == 0 && entry->kind == FLD_ACTOR_ENTRY_KIND_DOOR) {
         if (entry->motion == 5 || entry->secondaryMotion == 5 || entry->motion == 6
             || entry->secondaryMotion == 6 || entry->motion == 7 || entry->secondaryMotion == 7
             || entry->motion == 8 || entry->secondaryMotion == 8) {
@@ -2703,7 +2704,7 @@ s32 fldQuerySelectedActorMotionState(s32 query) {
    changes the branch layout and stops matching. */
 void fldApplyActorEntryTrigger(s32 checkTaskRecord) {
     s32 index;
-    s32 kind;
+    FldActorEntryKind kind;
     const char *record;
     FldActorEntry *entry;
 
@@ -2719,13 +2720,13 @@ void fldApplyActorEntryTrigger(s32 checkTaskRecord) {
     index = fldSelectedActorEntryIndex;
     entry = &fldGetActorRows()[index];
     kind = entry->kind;
-    if (kind == 1) {
+    if (kind == FLD_ACTOR_ENTRY_KIND_DOOR) {
         if (entry->floor == D_0032E3C4[0] + 1) {
             fldPlayFieldSeVolumePan(entry->sound);
             fldReleaseActorTasksById(fldActorSlots[index].actorId);
             return;
         }
-    } else if (kind == 2) {
+    } else if (kind == FLD_ACTOR_ENTRY_KIND_RUN_WARP) {
         if (entry->floor == fldGlobalBase.floor + 1) {
             s32 motion = entry->motion;
 
@@ -2738,19 +2739,19 @@ void fldApplyActorEntryTrigger(s32 checkTaskRecord) {
             dds3FadeOut(0, 0, 0, 0xF);
             return;
         }
-    } else if (kind == 3) {
+    } else if (kind == FLD_ACTOR_ENTRY_KIND_HOLE_WARP) {
         dds3FadeColorSet(0, 0, 0);
         return;
-    } else if (kind == 5) {
+    } else if (kind == FLD_ACTOR_ENTRY_KIND_LADDER) {
         if (entry->motion == 0) {
             D_0032E530[0] = 0x64;
         } else {
             D_0032E530[0] = -0x64;
         }
-    } else if (kind == 10) {
-    } else if (kind == 11) {
-    } else if (kind == 12) {
-    } else if (kind == 4) {
+    } else if (kind == FLD_ACTOR_ENTRY_KIND_WARP) {
+    } else if (kind == FLD_ACTOR_ENTRY_KIND_SUCTION_WARP) {
+    } else if (kind == FLD_ACTOR_ENTRY_KIND_BARRIER) {
+    } else if (kind == FLD_ACTOR_ENTRY_KIND_JUMP_WARP) {
         fldApplyPendingCameraHeading();
     }
 }
@@ -2769,7 +2770,7 @@ void fldDoor_ExitCamera(const char *name) {
         if (entry->requiredFlag != 0 && evtBitCheck(entry->requiredFlag) == 0) {
             continue;
         }
-        if (entry->kind == 0) {
+        if (entry->kind == FLD_ACTOR_ENTRY_KIND_INACTIVE) {
             continue;
         }
         entryName = entry->name;
@@ -2839,7 +2840,7 @@ void fldApplyCurrentTaskScene(const char *name) {
         if (entry->requiredFlag != 0 && evtBitCheck(entry->requiredFlag) == 0) {
             continue;
         }
-        if (entry->kind == 0) {
+        if (entry->kind == FLD_ACTOR_ENTRY_KIND_INACTIVE) {
             continue;
         }
         entryName = entry->name;
@@ -2856,17 +2857,17 @@ void fldApplyCurrentTaskScene(const char *name) {
         if (!match) {
             continue;
         }
-        if (entry->kind == 3) {
+        if (entry->kind == FLD_ACTOR_ENTRY_KIND_HOLE_WARP) {
             if (entry->motion != 0) {
                 fldSetFlagBit(fldGlobalBase.area, fldGlobalBase.floor + 1,
                                 entry->motion);
             }
-        } else if (entry->kind == 10) {
+        } else if (entry->kind == FLD_ACTOR_ENTRY_KIND_WARP) {
             if (entry->secondaryMotion != 0) {
                 fldSetFlagBit(fldGlobalBase.area, fldGlobalBase.floor + 1,
                                 entry->secondaryMotion);
             }
-        } else if (entry->kind == 11) {
+        } else if (entry->kind == FLD_ACTOR_ENTRY_KIND_SUCTION_WARP) {
             if (entry->secondaryMotion != 0) {
                 fldSetFlagBit(fldGlobalBase.area, fldGlobalBase.floor + 1,
                                 entry->secondaryMotion);
@@ -2966,7 +2967,8 @@ void fldApplyCurrentTaskScene(const char *name) {
             } else {
                 fldGlobalBase.pendingEntryDialogDisposition = FLD_ENTRY_DIALOG_NONE;
             }
-            if (entry->kind == 3 || entry->kind == 4) {
+            if (entry->kind == FLD_ACTOR_ENTRY_KIND_HOLE_WARP
+                || entry->kind == FLD_ACTOR_ENTRY_KIND_JUMP_WARP) {
                 fldGlobalBase.fieldTransitionMovementGate = 15;
                 dds3FadeOut(0, 0, 0, 0);
                 if (entry->linkKind == 1 || entry->linkKind == 2) {
@@ -3070,7 +3072,7 @@ void fldDispatchSceneAction(u32 action) {
     for (index = 0; index < 256; index++) {
         entry = &fldActorWaypointRows.actors[index];
         if (entry->requiredFlag != 0 && !evtBitCheck(entry->requiredFlag)) continue;
-        if (entry->kind != 9 || entry->motion != action) continue;
+        if (entry->kind != FLD_ACTOR_ENTRY_KIND_SPECIAL_WARP || entry->motion != action) continue;
         floorFlags = entry->flags64;
         if (floorFlags & 1) {
             if (entry->explorationArea == 0) area[0] = fldGlobalBase.area;
@@ -3147,7 +3149,7 @@ void fldDispatchSceneAction(u32 action) {
             if (flags & 2) fldGlobalBase.pendingEntryDialogDisposition = FLD_ENTRY_DIALOG_REQUEST;
             else if (flags & 4) fldGlobalBase.pendingEntryDialogDisposition = FLD_ENTRY_DIALOG_SUPPRESS;
             else fldGlobalBase.pendingEntryDialogDisposition = FLD_ENTRY_DIALOG_NONE;
-            if ((u32)((u8)entry->kind - 3) < 2U) {
+            if ((u32)((u8)entry->kind - FLD_ACTOR_ENTRY_KIND_HOLE_WARP) < 2U) {
                 fldGlobalBase.fieldTransitionMovementGate = 15;
                 if (entry->linkKind == 1) {
                     fldSetSceneParam4(&sequence, area[0], room, entry->sequenceName,
@@ -3231,7 +3233,7 @@ void fldSubmitSelectedActorWaypointTransition(void) {
         if (entry->requiredFlag != 0 && !evtBitCheck(entry->requiredFlag)) {
             continue;
         }
-        if (entry->kind != 7) {
+        if (entry->kind != FLD_ACTOR_ENTRY_KIND_SIDE_EXIT) {
             continue;
         }
         if ((u32)(motion - 3) >= 2 && extra != entry->floor) {
@@ -3335,7 +3337,7 @@ void fldInitializeActorLinkedSequence(s32 mode, s32 index, fldSceneParam_t *sequ
         if (entry->requiredFlag != 0 && !evtBitCheck(entry->requiredFlag)) {
             continue;
         }
-        if (entry->kind != 7 || motion != entry->motion ||
+        if (entry->kind != FLD_ACTOR_ENTRY_KIND_SIDE_EXIT || motion != entry->motion ||
             index != entry->secondaryMotion || entry->variantMode != 0) {
             continue;
         }
@@ -3509,7 +3511,7 @@ void func_0013F100(s32 field, s32 motion) {
         if (entry->requiredFlag != 0 && !evtBitCheck(entry->requiredFlag)) {
             continue;
         }
-        if (entry->kind != 8) {
+        if (entry->kind != FLD_ACTOR_ENTRY_KIND_BATTLE_EXIT) {
             continue;
         }
         if (entry->motion != motion) {
@@ -3588,7 +3590,7 @@ void fldDoor_WarpCash(const char *name) {
         if (entry->requiredFlag != 0 && evtBitCheck(entry->requiredFlag) == 0) {
             continue;
         }
-        if (entry->kind == 1 && entry->variantMode == 0) {
+        if (entry->kind == FLD_ACTOR_ENTRY_KIND_DOOR && entry->variantMode == 0) {
             if (entry->floor == fldGlobalBase.floor + 1 && strcmp(name, entry->name) == 0) {
                 area = entry->variant ? entry->variant : fldGlobalBase.area;
                 room = entry->sequenceKind;
@@ -3598,7 +3600,7 @@ void fldDoor_WarpCash(const char *name) {
                 fldRequestAreaResource(area, room);
                 return;
             }
-        } else if (entry->kind == 2 && entry->variantMode == 0) {
+        } else if (entry->kind == FLD_ACTOR_ENTRY_KIND_RUN_WARP && entry->variantMode == 0) {
             if (entry->floor == fldGlobalBase.floor + 1 && strcmp(name, entry->name) == 0) {
                 area = entry->variant ? entry->variant : fldGlobalBase.area;
                 room = entry->sequenceKind;
@@ -3608,7 +3610,7 @@ void fldDoor_WarpCash(const char *name) {
                 fldRequestAreaResource(area, room);
                 return;
             }
-        } else if (entry->kind == 3 && entry->variantMode == 0) {
+        } else if (entry->kind == FLD_ACTOR_ENTRY_KIND_HOLE_WARP && entry->variantMode == 0) {
             if (entry->floor == fldGlobalBase.floor + 1 && strcmp(name, entry->name) == 0) {
                 area = entry->variant ? entry->variant : fldGlobalBase.area;
                 room = entry->sequenceKind;
@@ -3618,7 +3620,7 @@ void fldDoor_WarpCash(const char *name) {
                 fldRequestAreaResource(area, room);
                 return;
             }
-        } else if (entry->kind == 4 && entry->variantMode == 0) {
+        } else if (entry->kind == FLD_ACTOR_ENTRY_KIND_JUMP_WARP && entry->variantMode == 0) {
             if (entry->floor == fldGlobalBase.floor + 1 && strcmp(name, entry->name) == 0) {
                 area = entry->variant ? entry->variant : fldGlobalBase.area;
                 room = entry->sequenceKind;
@@ -3628,7 +3630,7 @@ void fldDoor_WarpCash(const char *name) {
                 fldRequestAreaResource(area, room);
                 return;
             }
-        } else if (entry->kind == 5 && entry->variantMode == 0) {
+        } else if (entry->kind == FLD_ACTOR_ENTRY_KIND_LADDER && entry->variantMode == 0) {
             if (entry->floor == fldGlobalBase.floor + 1 && strcmp(name, entry->name) == 0) {
                 area = entry->variant ? entry->variant : fldGlobalBase.area;
                 room = entry->sequenceKind;
@@ -3834,7 +3836,7 @@ void fldDispatchSceneRoomSelection(s32 index) {
         if (entry->requiredFlag != 0 && evtBitCheck(entry->requiredFlag) == 0) {
             continue;
         }
-        if (entry->kind == 6 && entry->motion - 1 == D_003BAE4C &&
+        if (entry->kind == FLD_ACTOR_ENTRY_KIND_ELEVATOR_EXIT && entry->motion - 1 == D_003BAE4C &&
             entry->secondaryMotion == sourceRoom && entry->variantMode == 0) {
             if (entry->variant == 0) {
                 area = fldGlobalBase.area;
@@ -3864,7 +3866,8 @@ void fldDispatchSceneRoomSelection(s32 index) {
             fldSetSceneParam4(&sequence, area, floor, entry->sequenceName, entry->sequenceCode, entry->linkKind, entry->linkName);
             dds3AdminiCallSequence(5, &sequence, sizeof(sequence), 0);
             return;
-        } else if (entry->kind == 6 && entry->motion - 1 == D_003BAE4C &&
+        } else if (entry->kind == FLD_ACTOR_ENTRY_KIND_ELEVATOR_EXIT
+            && entry->motion - 1 == D_003BAE4C &&
                    entry->secondaryMotion == sourceRoom && entry->variantMode == 3) {
             command = entry->variant;
             fldSetDeferredFieldCommand(fldGlobalBase.area, command);
@@ -3949,7 +3952,7 @@ void fldInitializeActorMotionSlots(void) {
     for (actorIndex = 0; actorIndex < FIELD_ACTOR_SLOT_COUNT; actorIndex++) {
         actor = &fldActorWaypointRows.actors[actorIndex];
         row = &fldActorSlots[actorIndex];
-        if (actor->kind == 2) {
+        if (actor->kind == FLD_ACTOR_ENTRY_KIND_RUN_WARP) {
             if (actor->floor == D_0032E3C4[0] + 1) {
                 for (slotIndex = 0; slotIndex < fldEveRngCount; slotIndex++) {
                     if (fldRoomResources[slotIndex]->name != NULL &&
@@ -3981,7 +3984,7 @@ void fldInitializeActorMotionSlots(void) {
                 row->secondValues[1] = 0.0f;
                 row->secondValues[2] = 0.0f;
             }
-        } else if (actor->kind == 1) {
+        } else if (actor->kind == FLD_ACTOR_ENTRY_KIND_DOOR) {
             if (actor->floor != D_0032E3C4[0] + 1) {
                 continue;
             }
