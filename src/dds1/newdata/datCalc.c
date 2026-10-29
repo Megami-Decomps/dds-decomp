@@ -771,7 +771,8 @@ s32 evtHasMatchingFlaggedEntry(DatSkillId skillId) {
  * Mode one scales max HP and floors the result at one unless the entry is
  * enemy-flagged; mode two returns a fixed value subject to the enemy flag gate.
  * commandId selects the record; cost holds the resolved result. */
-s32 datCalculateCommandBaseValue(datUnitWork_t *battler, BtlCommandId commandId) {
+DatCommandBaseCost datCalculateCommandBaseValue(
+    datUnitWork_t *battler, BtlCommandId commandId) {
     s32 cost = 0;
     DatCommandRecord *commands = datCommandRecords;
 
