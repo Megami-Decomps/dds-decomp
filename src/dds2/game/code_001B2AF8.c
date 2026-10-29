@@ -10803,40 +10803,40 @@ s32 btlHaveActiveSceneActorEntriesCleared(void) {
 
 
 
-s32 fldSelectSceneMode(ActionStateLink *task) {
+BtlCommandPanelIntroMode fldSelectSceneMode(ActionStateLink *task) {
     s32 flag = ((BtlState *)btlGetRuntime())->encounterKind == 3;
     if (evtBitCheck(0x801) != 0) {
-        return 1;
+        return BTL_COMMAND_PANEL_INTRO_FIRST_BATTLE;
     }
     if (evtBitCheck(0x81D) == 0 && evtBitCheck(0x801) == 0 && !(btlTrackedTaskHandles->status.flags & 0x200)) {
         if (btlHasSpecialActiveSceneActor() != 0) {
-            return 2;
+            return BTL_COMMAND_PANEL_INTRO_WEAKNESS;
         }
     }
     if (evtBitCheck(0x81A) == 0) {
         if (flag != 0) {
-            return 6;
+            return BTL_COMMAND_PANEL_INTRO_MAJIN;
         }
     }
     if (flag == 0) {
         if (btlCommandPanelOwnerHasUnmarkedLinkageSkill() !=
             BTL_COMMAND_PANEL_LINKAGE_SKILL_UNAVAILABLE) {
-            return 5;
+            return BTL_COMMAND_PANEL_INTRO_LINKAGE;
         }
     }
     if (evtBitCheck(0x805) == 0 && !(btlTrackedTaskHandles->status.flags & 0x200)) {
         if (btlFindHuntTutorialSkill() != 0 && btlHaveActiveSceneActorEntriesCleared() != 0) {
-            return 3;
+            return BTL_COMMAND_PANEL_INTRO_HUNT;
         }
     }
     if (evtBitCheck(0x805) != 0) {
         if (evtBitCheck(0x806) == 0) {
             if (btlHasSelectedActiveSceneActor() != 0) {
-                return 4;
+                return BTL_COMMAND_PANEL_INTRO_FEAR;
             }
         }
     }
-    return 0;
+    return BTL_COMMAND_PANEL_INTRO_NONE;
 }
 
 extern void btlInitializeSelectionWork(void);
@@ -10879,7 +10879,7 @@ void btlOpenBattleCommandPanel(ActionStateLink *task) {
         btlInitializeCommandOptionState(object);
         if ((task->unit->status.flags & 0x200) && !(scene->battleFlags & 0x1000000)) {
             switch (fldSelectSceneMode(task)) {
-            case 1:
+            case BTL_COMMAND_PANEL_INTRO_FIRST_BATTLE:
                 btlBossDebugPrintf("-----------------First Battle!!-------------------\n");
                 evtBitOff(0x801);
                 btlTrackedTaskHandles->status.flags |= 0x100;
@@ -10893,7 +10893,7 @@ void btlOpenBattleCommandPanel(ActionStateLink *task) {
                 fclStartMessage(2);
                 btlSetCommandPanelFadeMode(0, 8);
                 break;
-            case 6:
+            case BTL_COMMAND_PANEL_INTRO_MAJIN:
                 btlBossDebugPrintf("-----------------Tutorial Majin!!-------------------\n");
                 evtBitOn(0x81A);
                 btlTrackedTaskHandles->status.flags |= 0x300;
@@ -10907,7 +10907,7 @@ void btlOpenBattleCommandPanel(ActionStateLink *task) {
                 fclStartMessage(4);
                 btlSetCommandPanelFadeMode(0, 8);
                 break;
-            case 2:
+            case BTL_COMMAND_PANEL_INTRO_WEAKNESS:
                 btlBossDebugPrintf("-----------------Tutorial Weak!!-------------------\n");
                 evtBitOn(0x81D);
                 btlTrackedTaskHandles->status.flags |= 0x300;
@@ -10921,7 +10921,7 @@ void btlOpenBattleCommandPanel(ActionStateLink *task) {
                 fclStartMessage(1);
                 btlSetCommandPanelFadeMode(0, 8);
                 break;
-            case 3:
+            case BTL_COMMAND_PANEL_INTRO_HUNT:
                 btlBossDebugPrintf("-----------------Tutorial Hunt!!-------------------\n");
                 evtBitOn(0x805);
                 btlTrackedTaskHandles->status.flags |= 0x100;
@@ -10938,7 +10938,7 @@ void btlOpenBattleCommandPanel(ActionStateLink *task) {
                 fclStartMessage(2);
                 btlSetCommandPanelFadeMode(0, 8);
                 break;
-            case 4:
+            case BTL_COMMAND_PANEL_INTRO_FEAR:
                 btlBossDebugPrintf("-----------------Tutorial Fear!!-------------------\n");
                 evtBitOn(0x806);
                 btlTrackedTaskHandles->status.flags |= 0x100;
@@ -10952,7 +10952,7 @@ void btlOpenBattleCommandPanel(ActionStateLink *task) {
                 fclStartMessage(3);
                 btlSetCommandPanelFadeMode(0, 8);
                 break;
-            case 5:
+            case BTL_COMMAND_PANEL_INTRO_LINKAGE:
                 btlBossDebugPrintf("-----------------New Linkage!!-------------------\n");
                 btlTrackedTaskHandles->status.flags |= 0x200;
                 scene->battleFlags &= ~0x100000;

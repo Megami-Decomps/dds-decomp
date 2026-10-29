@@ -73,8 +73,18 @@ typedef char SceneKindTable_value_offset_check[
 #ifdef VERSION_DDS1
 void fldInitializeSceneObject(BattleSceneObject *object, struct BtlTask *owner);
 #else
+typedef s32 BtlCommandPanelIntroMode;
+
+#define BTL_COMMAND_PANEL_INTRO_NONE ((BtlCommandPanelIntroMode)0)
+#define BTL_COMMAND_PANEL_INTRO_FIRST_BATTLE ((BtlCommandPanelIntroMode)1)
+#define BTL_COMMAND_PANEL_INTRO_WEAKNESS ((BtlCommandPanelIntroMode)2)
+#define BTL_COMMAND_PANEL_INTRO_HUNT ((BtlCommandPanelIntroMode)3)
+#define BTL_COMMAND_PANEL_INTRO_FEAR ((BtlCommandPanelIntroMode)4)
+#define BTL_COMMAND_PANEL_INTRO_LINKAGE ((BtlCommandPanelIntroMode)5)
+#define BTL_COMMAND_PANEL_INTRO_MAJIN ((BtlCommandPanelIntroMode)6)
+
 void fldInitializeSceneObject(BattleSceneObject *object, struct ActionStateLink *owner);
-s32 fldSelectSceneMode(struct ActionStateLink *task);
+BtlCommandPanelIntroMode fldSelectSceneMode(struct ActionStateLink *task);
 void btlOpenBattleCommandPanel(struct ActionStateLink *task);
 #endif
 
