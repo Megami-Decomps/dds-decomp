@@ -409,7 +409,8 @@ static inline void fldRotateTriggerCorner(f32 *offset, f32 *rotated, f32 x, f32 
  * key and word 0x11C (slot * 1.3); its entry, save point value, room id and
  * map-slot gate -1 and its mode 0. Upstream: INCLUDE_ASM in DDS1's
  * game/code_00138C30 and DDS2's game/code_0013B818. */
-s32 fldRegisterRoomObject(FldFileResource *resource, dds3Basic_t *object) {
+FldRoomRecordIndex fldRegisterRoomObject(
+    FldFileResource *resource, dds3Basic_t *object) {
     f32 rotated[8][4] __attribute__((aligned(16)));
     f32 offset[4] __attribute__((aligned(16)));
     f32 rotation[4] __attribute__((aligned(16)));
@@ -418,10 +419,10 @@ s32 fldRegisterRoomObject(FldFileResource *resource, dds3Basic_t *object) {
     f32 vertices[4][4] __attribute__((aligned(16)));
     f32 edge[3][4];
     f32 center[4];
-    s32 slot;
+    FldRoomRecordIndex slot;
     s32 face;
     s32 i;
-    s32 result;
+    FldRoomRecordIndex result;
     FldTriggerShape *shape;
     f32 sizeX, sizeY, sizeZ;
     f32 positionX, positionY, positionZ;
