@@ -76,12 +76,10 @@
 #include "btl_sound_release_task.h"
 #include "btl_ai_table.h"
 
-#ifdef NON_MATCHING
 extern BtlRuntimeTask *btlCreateCategoryStatDamageTask(BtlUnit *unit, s32 category, s32 amount);
 extern BtlRuntimeTask *sndCreateSkillSeTask(const ActiveSoundNode *, u16 optionId);
 extern s32 sndLookupResourceType(BtlUnit *actor, s32 resourceIndex);
 extern s32 sndResolveResourceId(BtlUnit *actor, s32 actionRecordIndex);
-#endif
 /* Declared before first use (were implicit int). */
 extern BtlCameraModeIndex btlGetCameraCommandMode(void);
 extern s32 btlGetLoggedIndexedCommandItem(s32 index);
@@ -1892,7 +1890,7 @@ void btlScheduleAttackActionTasks(ActionStateLink *action) {
 void btlEnterSkillActionState(void) {
 }
 
-#ifdef NON_MATCHING
+
 #include "sdk_ps2.h"
 #include "btl_sound.h"
 #include "dds3obj.h"
@@ -2010,6 +2008,10 @@ extern BtlRuntimeTask *btlCreateClearActorEntrySelectionTask(BtlUnit *unit);
 extern BtlRuntimeTask *btlCreateActorPositionEffectTask(BtlUnit *unit);
 extern BtlRuntimeTask *btlCreateLinkedEffectTask(BtlUnit *, s32, u8);
 
+INCLUDE_RODATA(const s32, "game/code_001D4438", D_00417348);
+
+INCLUDE_RODATA(const s32, "game/code_001D4438", D_00417360);
+
 /* Schedule the whole battle action sequence for one command on its actor:
  * the hooked unit sound, sounds, effect load, the other units' movement,
  * approach, per-target hit effects with damage, status and reward tasks
@@ -2032,9 +2034,18 @@ void func_001D7230(ActionStateLink *actor) {
     BtlUnit *effectUnit;
     BtlUnit *sceneUnit = NULL;
     BtlIndexList *indexList;
+    /* Keep operand with its group and the runtime task pointers together.
+     * Qualified whole-owner GCSE/PRE traces create the flags address before
+     * the last-target expression; reload then reproduces retail spill slots
+     * 0x13C and 0x140. This is compiler-order reconstruction, not proof of the
+     * original declaration spelling. */
     BtlOperandGroup *group;
+    BtlOperandEntry *operand;
     BtlRuntimeTask *taskWork;
     BtlRuntimeTask *initialTask;
+    BtlRuntimeTask *effectTask;
+    BtlRuntimeTask *phaseTask;
+    BtlRuntimeTask *sceneGroupTask;
     SoundResourceNode *effect;
     ActiveSoundNode *listNode;
     BtlSceneLightParams light;
@@ -2045,7 +2056,7 @@ void func_001D7230(ActionStateLink *actor) {
     u64 damageSequence;
     u64 finalSequence;
     s32 reflectedEffectStarted;
-    u64 categoryEnabled = 1;
+    s32 categoryEnabled = 1;
     s32 soundEnabled;
     s32 trailingSound;
     s32 trailingEffect;
@@ -2069,10 +2080,6 @@ void func_001D7230(ActionStateLink *actor) {
     s32 resourceType;
     s32 animationLength;
     BtlUnit *currentUnit;
-    BtlOperandEntry *operand;
-    BtlRuntimeTask *effectTask;
-    BtlRuntimeTask *phaseTask;
-    BtlRuntimeTask *sceneGroupTask;
     s32 reaction;
     s32 specialModel;
 
@@ -2097,6 +2104,13 @@ void func_001D7230(ActionStateLink *actor) {
 
     if (datCommandSelectors[skillId].kind == 2) {
         soundEnabled = 0;
+        /* Keep this initialized category flag independent of the trailing
+         * flags' literal 1 at the operand-query boundary. Qualified 19.lreg /
+         * 20.greg traces show reload otherwise substitutes this live register
+         * for their constant loads and changes the native branch layout.
+         * The tied operand preserves its value; no instruction or memory effect.
+         * This is an allocation reconstruction, not original-source spelling. */
+        __asm__("" : "+r"(categoryEnabled));
         if (btlHasAnyOperandLowFlag(skillId, &actor->indexWork) != 0) {
             trailingSound = 1;
             trailingEffect = 1;
@@ -2324,6 +2338,8 @@ void func_001D7230(ActionStateLink *actor) {
             }
             if (group->reflected || group->kind == 0x40000) {
                 selector = ((BtlActionAnimationRecord *)datActionAnimationRecords)[skillId].effectKind;
+            } else {
+                selector = -1;
             }
             if (selector == 1) {
                 category = 0;
@@ -2379,11 +2395,9 @@ void func_001D7230(ActionStateLink *actor) {
                 BtlRuntimeTask *stageTask;
                 operand = &group->entries[entryIndex];
                 if (btlActionEntryIsEmpty(skillId, group, operand) != BTL_ACTION_ENTRY_NOT_EMPTY) {
-                    DatCommandRecord *record = &datCommandRecords[skillId];
-
                     reaction = -1;
-                    if (record->hpType == 8 || record->hpType == 10 || record->effectType == 2 ||
-                        record->unk30 == 4) {
+                    if (datCommandRecords[skillId].hpType == 8 || datCommandRecords[skillId].hpType == 10 || datCommandRecords[skillId].effectType == 2 ||
+                        datCommandRecords[skillId].unk30 == 4) {
                         hitKind = 0;
                     } else {
                         hitKind = group->kind == 4 ? 4 : 0;
@@ -2581,7 +2595,7 @@ void func_001D7230(ActionStateLink *actor) {
                     btlStartTask(taskWork);
                 }
                 if (!(group->entries[entryIndex].flags & 0x1000)) {
-                    if (hitKind == 0x10000 || hitKind == 4) {
+                    if (hitKind == 0x10000 || hitKind == 4 || hitKind == 2) {
                         if (hitKind == 0x10000) taskWork = btlCreateEffectCounterTask(currentUnit, 4);
                         else taskWork = btlCreateEffectCounterTask(currentUnit, 3);
                         taskWork->startCondition.kind = 4;
@@ -2745,7 +2759,7 @@ void func_001D7230(ActionStateLink *actor) {
     }
 
     if (sceneUnit != 0 && actor->indexWork.wait >= 0 &&
-        (actor->flags & 0x20) == 0) {
+        (actor->pendingFlags & 0x20) == 0) {
         currentUnit = sceneUnit;
         taskWork = btlCreateEffObjC(currentUnit, actor->indexWork.wait);
         taskWork->startCondition.kind = 7;
@@ -2798,13 +2812,7 @@ void func_001D7230(ActionStateLink *actor) {
     }
 
 }
-#else
-INCLUDE_RODATA(const s32, "game/code_001D4438", D_00417348);
 
-INCLUDE_RODATA(const s32, "game/code_001D4438", D_00417360);
-
-INCLUDE_ASM(const s32, "game/code_001D4438", func_001D7230);
-#endif
 
 /* Empty entry callback for the retail LINKAGE action state. */
 void btlEnterLinkageActionState(void) {
