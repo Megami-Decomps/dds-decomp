@@ -8931,13 +8931,13 @@ void sndAddEffectReferences(SoundEffectReferenceArgs *args) {
 
 extern void effBTLCutSetCutEndFrame(effBTLCutHandle_t *, s32);
 
-/* Advance the referenced battle effect; return one when its battle or duration ends. */
-s32 btlUpdateReferencedBattleEffect(SoundEffectReferenceArgs *args) {
+/* Advance the effect until its battle or duration ends. */
+BtlTaskPollResult btlUpdateReferencedBattleEffect(SoundEffectReferenceArgs *args) {
     BtlState *battle = (BtlState *)btlGetRuntime();
     BtlUnit *owner;
 
     if ((battle->battleFlags & 0x40000) == 0) {
-        return 1;
+        return BTL_TASK_POLL_END_DELAY;
     }
     owner = args->kind == 2 ? args->targetOwner.unit : args->sourceOwner.unit;
     if (args->source->flags & SOUND_RESOURCE_NODE_FLAG_AVAILABLE) {
@@ -8950,10 +8950,10 @@ s32 btlUpdateReferencedBattleEffect(SoundEffectReferenceArgs *args) {
                 effBTLCutSetDrawEndFrame(args->effect, args->duration);
             }
             btlExtendTaskFrameLimit(args->source, args->duration);
-            return 0;
+            return BTL_TASK_POLL_CONTINUE;
         }
         if (effBTLCutGetFrame(args->effect) >= args->duration) {
-            return 1;
+            return BTL_TASK_POLL_END_DELAY;
         }
         effBTLFieldColorSetSelectors(args->sourceOwner.selectorKey, args->targetOwner.selectorKey,
                                     args->sourceSelector, args->targetSelector);
@@ -8971,7 +8971,7 @@ s32 btlUpdateReferencedBattleEffect(SoundEffectReferenceArgs *args) {
     if (args->effect != NULL && (owner->status.flags & 2)) {
         effBattleUpdate(args->effect);
     }
-    return 0;
+    return BTL_TASK_POLL_CONTINUE;
 }
 
 void sndReleaseEffectReferences(SoundEffectReferenceArgs *args) {
