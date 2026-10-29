@@ -1918,7 +1918,7 @@ void btlRestorePartySlotSnapshots(void) {
     }
 }
 
-extern u32 btlGetAdjustedSlotAffinity(BtlUnit *, s32, s32);
+extern u32 btlGetAdjustedSlotAffinity(BtlUnit *, s32, DatAffinitySelector);
 
 BtlActionPressResult btlDetermineActionPressResult(BtlUnit *attacker, BtlUnit *target, u32 command) {
     BtlState *battle = (BtlState *)btlGetRuntime();

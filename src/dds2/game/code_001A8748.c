@@ -3508,7 +3508,7 @@ void btlSyncModelFlagFromEventThresholds(void) {
     }
 }
 
-extern u32 btlGetAdjustedSlotAffinity(BtlUnit *, s32, s32);
+extern u32 btlGetAdjustedSlotAffinity(BtlUnit *, s32, DatAffinitySelector);
 
 INCLUDE_RODATA(const s32, "game/code_001A8748", D_00415340);
 

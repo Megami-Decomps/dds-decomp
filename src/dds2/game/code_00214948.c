@@ -51,7 +51,6 @@ dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *, s32, const char *);
 #include "mdl_flag_api.h"
 
 #ifdef NON_MATCHING
-extern u32 btlGetAdjustedSlotAffinity(BtlUnit *unit, s32 unused, s32 index);
 extern s32 btlGetLoggedIndexedCommandItem(s32 index);
 #endif
 /* Declared before first use (were implicit int). */
@@ -3852,6 +3851,12 @@ void btlSetSkillTaskResults(ActionStateLink *task, s32 flags, s32 otherFlags, s3
     task->indexWork.adjustedValue = btlAdjustPointsForCombatFlags(task->unit, flags, otherFlags, percent, skillId);
     task->indexWork.resultKind = btlGetCommandResultKindFromFlags(flags, otherFlags, skillId);
 }
+
+#ifdef NON_MATCHING
+#include "dat_affinity_selector_type.h"
+extern u32 btlGetAdjustedSlotAffinity(
+    BtlUnit *unit, s32 unused, DatAffinitySelector selector);
+#endif
 
 void func_0021B828(ActionStateLink *task) {
     BtlUnit *guards[2];

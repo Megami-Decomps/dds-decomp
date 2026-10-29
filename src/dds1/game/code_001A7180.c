@@ -193,35 +193,35 @@ BtlPartyStatusMask btlQueryUnitChannelFlags(
     return flags;
 }
 
-u32 btlGetAdjustedSlotAffinity(BtlUnit *unit, s32 unused, s32 index) {
+u32 btlGetAdjustedSlotAffinity(BtlUnit *unit, s32 unused, DatAffinitySelector selector) {
     s32 selection;
     u32 value;
     u32 ratio;
 
-    if (index == -1) {
+    if (selector == DAT_AFFINITY_SELECTOR_UNMAPPED) {
         return 0;
     }
-    selection = btlEncodeActorIndexAsSelectionMask(index);
+    selection = btlEncodeActorIndexAsSelectionMask(selector);
     if ((selection & 1) != 0) {
         return 0;
     }
     if ((selection & 0xE0000) != 0) {
         return 100;
     }
-    value = btlGetUnitElementAffinity(unit, index);
-    ratio = btlGetAbilityAttributeMultiplierPercent(unit, index);
+    value = btlGetUnitElementAffinity(unit, selector);
+    ratio = btlGetAbilityAttributeMultiplierPercent(unit, selector);
     if (ratio != 100) {
         ratio = (u16)value * ratio / 100;
         value = (value & 0xFFFF0000) | ratio;
         value &= 0x7FFFFFFF;
     }
-    if (btlHasEnabledSpecialAbilityForSlot(unit, index) != 0) {
+    if (btlHasEnabledSpecialAbilityForSlot(unit, selector) != 0) {
         value |= 0x20000;
     }
-    if (btlHasSpecialAbilityWhenArgumentUnset(unit, index) != 0) {
+    if (btlHasSpecialAbilityWhenArgumentUnset(unit, selector) != 0) {
         value |= 0x40000;
     }
-    if (btlHasMappedSpecialAbilityForSlot(unit, index) != 0) {
+    if (btlHasMappedSpecialAbilityForSlot(unit, selector) != 0) {
         value |= 0x10000;
     }
     btlBossDebugPrintf("btl:aisyo=%d%%[%X][ratio=%d]\n",
@@ -264,7 +264,7 @@ u32 btlGetAdjustedSlotAffinity(BtlUnit *unit, s32 unused, s32 index) {
 extern s32 btlAreUnitStatusAndEntryFlagsClear(BtlUnit *actor);
 extern u32 btlEncodeActorIndexAsSelectionMask(u32 id);
 extern f32 btlGetActorEntryMultiplier(BtlUnit *unit, u32 index, s8 includeCharge);
-extern u32 btlGetAdjustedSlotAffinity(BtlUnit *unit, s32 unused, s32 index);
+extern u32 btlGetAdjustedSlotAffinity(BtlUnit *unit, s32 unused, DatAffinitySelector index);
 extern s32 btlGetEntryFlagsUnlessDisabled(datUnitWork_t *record);
 
 extern s32 btlRollAiBucket(void);
