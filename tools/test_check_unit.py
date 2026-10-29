@@ -41,7 +41,8 @@ from check_unit import (
 
 class FocusedFunctionTests(unittest.TestCase):
     def run_checker(self, requested, emitted="target", full_emitted=None, *,
-                    code=None, retail_code=None, text_relocs=None, extra_symbols=""):
+                    code=None, retail_code=None, text_relocs=None, extra_symbols="",
+                    source_text="void target(void) {}\n", retail_functions=()):
         """Exercise the CLI with synthetic objects, without invoking a compiler."""
         if code is None:
             code = struct.pack("<II", 0x03E00008, 0)
@@ -49,7 +50,11 @@ class FocusedFunctionTests(unittest.TestCase):
             root = Path(tmp)
             unit = root / "src/dds1/game/unit.c"
             unit.parent.mkdir(parents=True)
-            unit.write_text("void target(void) {}\n")
+            unit.write_text(source_text)
+            if retail_functions:
+                asm = root / "asm" / "dds1/game/unit.s"
+                asm.parent.mkdir(parents=True)
+                asm.write_text("".join(f"glabel {name}\n" for name in retail_functions))
             config = root / "config/dds1"
             config.mkdir(parents=True)
             (config / "symbol_addrs.txt").write_text(
@@ -83,6 +88,27 @@ class FocusedFunctionTests(unittest.TestCase):
             with self.assertRaises(SystemExit) as stopped:
                 check_unit.main()
             return stopped.exception.code, output.getvalue()
+
+    def test_c_assembler_name_satisfies_native_presence(self):
+        status, report = self.run_checker(
+            None, source_text='void entry(void) asm("target");\nvoid entry(void) {}\n',
+            retail_functions=("target",))
+        self.assertEqual(status, 0, report)
+        self.assertNotIn("MISSING", report)
+
+    def test_assembler_prototype_alone_cannot_satisfy_presence(self):
+        status, report = self.run_checker(
+            None, emitted="", source_text='void entry(void) asm("target");\n',
+            retail_functions=("target",))
+        self.assertEqual(status, 1)
+        self.assertIn("MISSING target", report)
+
+    def test_wrong_assembler_name_cannot_satisfy_presence(self):
+        status, report = self.run_checker(
+            None, source_text='void entry(void) asm("alias");\nvoid entry(void) {}\n',
+            retail_functions=("target",))
+        self.assertEqual(status, 1)
+        self.assertIn("MISSING target", report)
 
     def test_missing_requested_name_fails_even_at_an_emitted_address(self):
         for requested in ("typo", "func_00001000", "alias"):

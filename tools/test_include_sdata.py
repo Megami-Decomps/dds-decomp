@@ -25,7 +25,8 @@ class IncludeSdataTests(unittest.TestCase):
             source = root / "src/dds1/game/test.c"
             source.write_text(
                 'u32 D_00001008 = 3;\n'
-                'void reset(void) {\n'
+                'void resetBody(void) asm("reset");\n'
+                'void resetBody(void) {\n'
                 '    byteArray[3] = 0;\n'
                 '    puts("abc");\n'
                 '    D_00001008 = 0;\n'

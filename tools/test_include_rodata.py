@@ -56,6 +56,22 @@ class IncludeRodataTests(unittest.TestCase):
     def assert_stable(self, first: str) -> None:
         self.assertEqual(self.place(), first)
 
+    def test_assembler_named_function_keeps_its_uncompiled_rodata(self):
+        self.prepare(
+            'extern char D_00300000[];\n'
+            'void entry(void) asm("main");\n'
+            'void entry(void) {\n    use(D_00300000);\n}\n',
+            [("D_00300000", 0x00300000)],
+            'glabel main\n    addiu $4, $0, %lo(D_00300000)\nendlabel main\n')
+        (self.nonmatchings / 'D_00300000.s').unlink()
+        (self.matchings / 'main.s').write_text(
+            '.section .rodata\n' + self.block('D_00300000', 0x00300000)
+            + '.section .text\nglabel main\nendlabel main\n')
+        first = self.place()
+        self.assertIn('INCLUDE_RODATA(const s32, "game/testUnit", D_00300000);', first)
+        self.assertTrue((self.nonmatchings / 'D_00300000.s').exists())
+        self.assert_stable(first)
+
     def test_aligned_array_definition_keeps_its_matching_rodata_owner(self) -> None:
         definition = "const f32 D_00300000[4] __attribute__((aligned(16))) = {0, 1, 0, 0};"
         self.prepare(

@@ -23,6 +23,7 @@ import sys
 from pathlib import Path
 
 from nonmatching import matching_source
+from c_aliases import function_aliases
 
 ROOT = Path(__file__).resolve().parent.parent
 LINE = re.compile(r'^INCLUDE_SDATA\([^,]+,\s*"[^"]+",\s*(\w+)\);\n\n?', re.M)
@@ -93,6 +94,7 @@ def place(version):
             syms.append((addr, sym))
         mine = {s for _, s in syms}
         active = matching_source(text)
+        aliases = function_aliases(active)
         # What the C emits itself: defined variables, and literals its functions write.
         anchors = []
         for m in DATA_DEF.finditer(active):
@@ -113,7 +115,7 @@ def place(version):
         addr_of = {s: a for a, s in syms}
         for m in DEF.finditer(active):
             code = function_text(active, m.start())
-            for sym in refs.get(m.group(1), ()):
+            for sym in refs.get(aliases.get(m.group(1), m.group(1)), ()):
                 # An indexed C store can use the containing array's name instead
                 # of a native label for its last byte. Written storage is not a
                 # compiler literal; its initialized bytes must remain included.

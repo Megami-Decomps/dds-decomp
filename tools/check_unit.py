@@ -25,6 +25,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from pairing import RETAIL, ROOT, load_segments, off_to_va, va_to_off  # noqa: E402
 from symbol_aliases import load_symbol_aliases  # noqa: E402
 from nonmatching import matching_source  # noqa: E402
+from c_aliases import function_aliases  # noqa: E402
 from resolved_code import (  # noqa: E402
     hi_lo_addend,
     instruction_shape_matches,
@@ -1464,7 +1465,11 @@ def main():
     # (an implicit-int K&R definition starts with the function name itself)
     order = re.findall(r'^INCLUDE_ASM\([^\n]*\b(\w+)\);|^(?:[A-Za-z_][^;\n=]*?\b)?([A-Za-z_]\w*)\s*\([^;\n]*\)\s*\{?\s*$',
                        matching_source(unit.read_text()), re.M)
-    placed = [(0, address(a or b, syms), a or b) for a, b in order if address(a or b, syms) is not None]
+    # A C identifier can deliberately use a different assembler name, e.g.
+    # sdfDefaultMain avoids GCC's special treatment of a definition named main.
+    source_aliases = function_aliases(matching_source(unit.read_text()))
+    ordered_names = [source_aliases.get(a or b, a or b) for a, b in order]
+    placed = [(0, address(n, syms), n) for n in ordered_names if address(n, syms) is not None]
     for (_, a, n), (_, b, m) in zip(placed, placed[1:]):
         if b < a:
             bad += 1
@@ -1480,7 +1485,11 @@ def main():
     if full.exists() and not args.func:
         source = matching_source(unit.read_text())
         for name in re.findall(r"^glabel (\w+)", full.read_text(), re.M):
-            if not re.search(rf"^INCLUDE_ASM\([^\n]*\b{name}\);|^[ \t]*(?:[A-Za-z_][^;\n]*\b)?{name}\s*\([^;]*$", source, re.M):
+            source_names = [name] + [n for n, target in source_aliases.items()
+                                    if target == name and any(f[2] == name for f in funcs)]
+            if not any(re.search(
+                    rf"^INCLUDE_ASM\([^\n]*\b{name}\);|^[ \t]*(?:[A-Za-z_][^;\n]*\b)?{n}\s*\([^;]*$",
+                    source, re.M) for n in source_names):
                 bad += 1
                 print(f"MISSING {name}: neither C nor INCLUDE_ASM in the unit")
     # A func_XXXXXXXX whose address symbol_addrs now names differently fails a fresh link
