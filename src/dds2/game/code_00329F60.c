@@ -568,7 +568,7 @@ void sdfGsMemInit(void) {
     head->word = 0;
     gsMemHandleLinkHead = head;
     gsMemHandleLinkTail = head;
-    sdfDelayedResrcInitCB(&gsMemDelayedResrcCB, sdfGsMemFree);
+    sdfDelayedResrcInitCB(&gsMemDelayedResrcCB, (SdfPendingEntryCallback)sdfGsMemFree);
 }
 
 /* Align the storage rows, pack 16-bit formats two pixels per word, then allocate whole GS pages. */

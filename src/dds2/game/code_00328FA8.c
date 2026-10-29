@@ -145,7 +145,7 @@ void sdfMemInit(u32 heapSize) {
     freeBlock->address = alignedStart;
     freeBlock->referenceCount = 0;
     D_004389CC = 0;
-    sdfDelayedResrcInitCB(&sdfMemDelayedResrcCB, sdfMemFreeDirect);
+    sdfDelayedResrcInitCB(&sdfMemDelayedResrcCB, (SdfPendingEntryCallback)sdfMemFreeDirect);
 }
 
 u16 sdfMemGetType(const sdfMemHandle_t *block) {

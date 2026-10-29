@@ -193,7 +193,7 @@ sdfTexHandle_t *sdfTexSearch(s32 resourceKey) {
 }
 
 void sdfTexInit(void) {
-    sdfDelayedResrcInitCB(&sdfTexDelayedResrcCB, sdfTexDestroy);
+    sdfDelayedResrcInitCB(&sdfTexDelayedResrcCB, (SdfPendingEntryCallback)sdfTexDestroy);
 }
 
 /* Transfer setup, deferred image metadata, and its linked primitive-reset tail. */
@@ -313,11 +313,11 @@ void sdfLinkLoadImage(sdfDrawTag_t *list, sdfGsMemSlice_t *source,
 }
 
 /* Register a completion callback, creating the shared semaphore on first use. */
-void sdfDelayedResrcInitCB(SdfPendingRequest *request, SdfPendingCallback callback) {
+void sdfDelayedResrcInitCB(SdfPendingRequest *request, SdfPendingEntryCallback callback) {
     if (sdfDelayedResrcSemaId < 0) {
         sdfDelayedResrcSemaId = sdfCreateSema(1, 0x7f, 0);
     }
-    request->handler = callback;
+    request->handler = (SdfPendingCallback)callback;
     request->pending = NULL;
 }
 
@@ -1683,7 +1683,7 @@ void sdfPrimLinkBoxLine(sdfDrawTag_t *list, s32 color, s32 primitive, s32 left, 
 }
 
 void sdfModelInitSystem(void) {
-    sdfDelayedResrcInitCB(&sdfModelDelayedResrcCB, sdfModelRootFreeResrc);
+    sdfDelayedResrcInitCB(&sdfModelDelayedResrcCB, (SdfPendingEntryCallback)sdfModelRootFreeResrc);
 }
 
 

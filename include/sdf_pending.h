@@ -15,6 +15,9 @@ typedef struct SdfPendingBuffer {
 
 typedef s32 SdfPendingBufferFreeEntryCount;
 
+/* Registration callbacks receive one opaque resource address. */
+typedef void (*SdfPendingEntryCallback)(void *entry);
+
 /* One pending callback owner's node: global-chain link, owner, data chunk,
  * and the number of unused slots in the current head chunk. */
 struct SdfPendingNode {
@@ -29,7 +32,7 @@ typedef char SdfPendingBuffer_size_must_be_0x100[(sizeof(SdfPendingBuffer) == 0x
 typedef char SdfPendingBuffer_entry_offset_must_be_0x04[
     ((u32)&((SdfPendingBuffer *)0)->entry == 0x04) ? 1 : -1];
 
-void sdfDelayedResrcInitCB(SdfPendingRequest *request, SdfPendingCallback callback);
+void sdfDelayedResrcInitCB(SdfPendingRequest *request, SdfPendingEntryCallback callback);
 void sdfDelayedResrcEntry(SdfPendingRequest *owner, void *entry);
 SdfPendingNode *sdfDelayedResrcClose(void);
 

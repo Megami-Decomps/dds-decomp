@@ -468,8 +468,8 @@ void sdfTexListSetClutColor(DevRequest *list, s32 tint, f32 amount) {
 }
 
 void sdfMatInitSystem(void) {
-    sdfDelayedResrcInitCB(&sdfMatDelayedResrcCB, sdfMatListFree);
-    sdfDelayedResrcInitCB(&sdfMatDelayedResrcCB2, sdfMatFree);
+    sdfDelayedResrcInitCB(&sdfMatDelayedResrcCB, (SdfPendingEntryCallback)sdfMatListFree);
+    sdfDelayedResrcInitCB(&sdfMatDelayedResrcCB2, (SdfPendingEntryCallback)sdfMatFree);
 }
 
 DevRequest *sdfMatListNew(s32 capacity) {
