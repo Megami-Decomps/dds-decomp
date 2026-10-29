@@ -909,7 +909,56 @@ void sdfGrSetDrawEnv(SdfSceneDrawPacket *packet, sdfGrFrameSet_t *view, s32 buff
     sdfGrSetDrawDefParmPacket(&packet->drawDefaults);
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "sdf.h"
+#include "sdf_gs_packet.h"
+#include "sdf_scene_packet.h"
+#include "sdf_tex_packet.h"
+
+extern u8 sdfGrBufferSlotIndex;
+
+#define SDF_GRAPH_DEPTH_BUFFER 2 /* the view's buffers: two colour, then depth */
+#define SDF_FRAME_MASK_ALPHA 0x00FFFFFF00000000LL /* FBMSK: keep destination alpha */
+
+/* Point a scene node's packets at the view's colour buffer for this frame:
+ * both contexts' frame, depth and scissor; FRAME_1 and FRAME_2 writing colour
+ * only; and textures of this colour buffer and the other one. Upstream:
+ * INCLUDE_ASM in both games; written from the retail routine. It
+ * differs from retail in four words of scheduling; the calls, arguments and
+ * stores are the same. */
+void sdfGrStdDrawEnvPredraw(SdfSceneNode *node, s32 bufferIndex) {
+    sdfGrFrameSet_t *view = node->view;
+    s32 frameAddress = view->buffers[bufferIndex]->word;
+    s16 width = view->width;
+    s32 depthAddress = view->buffers[SDF_GRAPH_DEPTH_BUFFER]->word;
+    s32 frameFormat = view->bufferFormat;
+    s32 height = view->height;
+    s32 depthFormat = view->auxiliaryFormat;
+    s64 frame;
+
+    sdfGrSetDrawFramePacket(&node->contextOne, frameAddress, width, height, frameFormat, depthAddress,
+                                    depthFormat, sdfGrBufferSlotIndex, 0);
+    sdfGrSetDrawFramePacket(&node->contextTwo, frameAddress, width, height, frameFormat, depthAddress,
+                                    depthFormat, sdfGrBufferSlotIndex, 1);
+    /* FRAME: FBP in 2048-word pages, FBW in 64-pixel units, PSM. */
+    frame = (s64)(frameFormat << 24) | (s64)(frameAddress >> 11) | (s64)((width >> 6) << 16) |
+            SDF_FRAME_MASK_ALPHA;
+    node->frameContextOne.registerId = SDF_GS_FRAME_1;
+    node->frameContextOne.value = frame;
+    node->frameContextTwo.registerId = SDF_GS_FRAME_2;
+    node->frameContextTwo.value = frame;
+    if (frameFormat == 0) {
+        frameFormat = 1; /* a PSMCT32 buffer is sampled as PSMCT24 */
+    }
+    sdfTexSetPacket(&node->texturePackets[1], width, height, frameAddress, frameFormat, 0, 0, 1, 0, 0, 5,
+                               0);
+    sdfTexSetPacket(&node->texturePackets[0], width, height, view->buffers[bufferIndex ^ 1]->word,
+                               frameFormat, 0, 0, 1, 0, 0, 5, 0);
+}
+#else
 INCLUDE_ASM(const s32, "game/code_002D33C8", sdfGrStdDrawEnvPredraw);
+#endif
 
 
 
@@ -1046,7 +1095,166 @@ void sdfGrInitDraw(void) {
     sdfDrawReqQueueIndex = 0;
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "eeregs.h"
+#include "sdf.h"
+#include "sdf_packet_patch.h"
+#include "sdf_packet_slot.h"
+#include "sdk_libkernl.h"
+#include "sdk_libdma.h"
+
+extern SdfPacketSlot sdfGrDrawState[];
+extern s32 sdfDrawReqQueueIndex;
+extern s32 dds3GsThreadId;
+extern u8 sdfGrDrawFirstFlag;
+extern u8 sdfFrameEvenOdd;
+extern s8 sdfGrFrameComplete;
+extern u8 sdfGrDrawFrameId;
+extern u8 sdfGrBufferSlotIndex;
+extern u32 sdfGrDrawFrameTagHead;
+extern s8 sdfDrawImageTrans;
+extern volatile u8 sdfDispThreadFlag;
+extern volatile u8 sdfDrawFrameFlag;
+
+extern void sdfDeliverDrawStart(s32 oldBuffer, s32 nextBuffer);
+extern void sdfDeliverDrawEnd(s32 updateSingleSlot, s32 bufferIndex, s32 slotIndex);
+extern void sdfImageSetTrans(void);
+extern void sdfDevConsDrawAll(void);
+extern void sdfDelayedResrcProc(void);
+extern void sceDmaRecvN(void *channel, void *destination, s32 quadwords);
+extern u64 sceGsGetIMR(void);
+extern u64 sceGsPutIMR(u64 imr);
+
+#define CHCR_STR 0x100
+#define CHCR_TIE_TTE 0xC0
+#define GS_CSR_FINISH 2
+#define GS_IMR_FINISH_MASK 0x200
+
+/* The data the chain points at when it pauses for a readback: a transfer of
+ * GS memory into EE RAM, then an optional end call before the chain resumes.
+ * The end function is a code address held in a word. */
+typedef struct SdfGsReadback {
+    s32 quadwordCount;
+    u32 destination;
+    u32 endFunction;
+    u32 endArgument;
+} SdfGsReadback;
+
+/* The chain paused at an interrupting tag. Let the GS finish drawing, then
+ * read the requested GS memory into EE RAM over VIF1 and resume the chain
+ * where it paused. Returns 0 if the worker is told to stop. */
+static s32 sdfServeGsReadback(void *channel) {
+    u32 imr = (u32)sceGsGetIMR();
+    SdfGsReadback *readback;
+    u32 resume;
+    u32 destination;
+    s32 remaining;
+    s32 count;
+
+    sceGsPutIMR(imr | GS_IMR_FINISH_MASK);
+    HW_WRITE(GS_CSR, GS_CSR_FINISH);
+    HW_WRITE(D1_CHCR, HW_READ(D1_CHCR) | CHCR_STR);
+    SleepThread();
+    while (!(HW_READ(GS_CSR) & GS_CSR_FINISH)) {
+        if (sdfDrawFrameFlag) {
+            sceGsPutIMR(imr);
+            return 0;
+        }
+    }
+    HW_WRITE(GS_CSR, 0);
+    sceGsPutIMR(imr);
+    HW_WRITE(D1_CHCR, HW_READ(D1_CHCR) | CHCR_STR);
+    SleepThread();
+
+    resume = HW_READ(D1_TADR);
+    readback = (SdfGsReadback *)HW_READ(D1_MADR);
+    while (HW_READ(VIF1_STAT) & 3) {
+        if (sdfDrawFrameFlag) return 0;
+    }
+    while (HW_READ(GIF_STAT) & 0x80) {
+        if (sdfDrawFrameFlag) return 0;
+    }
+    HW_WRITE(GIF_CTRL, 8);            /* PSE: pause the GIF */
+    HW_WRITE(VIF1_STAT, 0x800000);    /* FDR: the VIF1 FIFO reads from the GS */
+    HW_WRITE(GS_BUSDIR, 1);
+    HW_WRITE(GIF_CTRL, 0);
+    remaining = readback->quadwordCount;
+    destination = readback->destination;
+    while (remaining > 0) {
+        count = remaining > 0xF000 ? 0xF000 : remaining;
+        sceDmaRecvN(channel, (void *)destination, count);
+        remaining -= count;
+        SleepThread();
+        destination += count * 16;
+        if (sdfDrawFrameFlag) break;
+    }
+    HW_WRITE(VIF1_STAT, 0);
+    HW_WRITE(GS_BUSDIR, 0);
+    HW_WRITE(D1_CHCR, HW_READ(D1_CHCR) & ~1);
+    if (sdfDrawFrameFlag) return 0;
+    if (readback->endFunction != 0) {
+        ((void (*)(u32, u32))readback->endFunction)(readback->endArgument, resume);
+    }
+    sceDmaSend(channel, (void *)resume);
+    return 1;
+}
+
+/* Send the current slot's frame to the GS over VIF1 DMA, serving the GS
+ * readbacks its chain requests, then commit the slot's buffers. Upstream:
+ * INCLUDE_ASM in both games; same register and call sequence as the
+ * retail routine. */
+void sdfGrDrawFrame(void) {
+    SdfPacketSlot *slot = &sdfGrDrawState[sdfDrawReqQueueIndex];
+    struct sdfDrawTag_t *packets = slot->packetList;
+    SdfPacketPatchLink *link;
+    void *channel;
+
+    if (packets == NULL || slot->slotUpdatePhase == 2) {
+        SignalSema(dds3GsThreadId);
+    } else {
+        sdfGrBufferSlotIndex = (slot->slotUpdatePhase != 0 ? slot->bufferSlotIndex : sdfFrameEvenOdd) ^ 1;
+        slot->bufferSlotIndex = sdfGrBufferSlotIndex;
+        slot->bufferIndex = sdfGrDrawFrameId;
+        sdfDeliverDrawStart(sdfGrDrawFrameId, slot->queuedBufferIndex);
+        SignalSema(dds3GsThreadId);
+        if (sdfDrawImageTrans != 0) {
+            sdfDrawImageTrans = 0;
+            sdfImageSetTrans();
+        }
+        for (link = slot->callbackHead; link != NULL; link = link->next) {
+            link->patch(link, slot->bufferIndex);
+        }
+
+        FlushCache(0);
+        channel = sceDmaGetChan(1);
+        HW_WRITE(D1_CHCR, HW_READ(D1_CHCR) | CHCR_TIE_TTE);
+        sdfDispThreadFlag = 3;
+        sceDmaSend(channel, (void *)(packets->first & 0x0FFFFFFF));
+        sdfGrDrawFrameTagHead = packets->first;
+        for (;;) {
+            SleepThread();
+            if (sdfDrawFrameFlag) return;
+            /* The chain stops at its end tag, or pauses at an interrupting one. */
+            if (((HW_READ(D1_CHCR) >> 16) & 0x7000) == 0x7000) break;
+            if (!sdfServeGsReadback(channel)) return;
+        }
+        while (HW_READ(VIF1_STAT) & 3) {
+        }
+        while (HW_READ(GIF_STAT) & 0x180) {
+        }
+        sdfDeliverDrawEnd(slot->slotUpdatePhase, slot->bufferIndex, slot->bufferSlotIndex);
+        sdfGrDrawFirstFlag = 1;
+        slot->slotUpdatePhase++;
+        sdfGrDrawFrameId ^= 1;
+    }
+    sdfGrFrameComplete = 1;
+    if (sdfGrDrawFirstFlag) sdfDevConsDrawAll();
+    sdfDelayedResrcProc();
+}
+#else
 INCLUDE_ASM(const s32, "game/code_002D33C8", sdfGrDrawFrame);
+#endif
 
 extern volatile SdfDrawFrameExecutionState D_003BD32D;
 
