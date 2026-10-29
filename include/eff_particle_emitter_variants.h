@@ -2,7 +2,7 @@
 #define EFF_PARTICLE_EMITTER_VARIANTS_H
 
 #include "eff.h"
-#include "eff_ballistic_launch_mode.h"
+#include "eff_particle_launch_mode.h"
 
 /* Kind-specific state following the shared 0x150-byte emitter prefix. */
 typedef struct EffDiscEmitter {
@@ -29,7 +29,7 @@ typedef char EffDiscEmitter_jitterB_offset_check[
 
 typedef struct EffBallisticEmitter {
     EffEmitterHead head;
-    EffBallisticLaunchMode launchMode; /* 0x150 */
+    EffParticleLaunchMode launchMode; /* 0x150 */
     u8 loop;         /* 0x151 */
     u8 pad152[2];
     u32 spread;      /* 0x154 */

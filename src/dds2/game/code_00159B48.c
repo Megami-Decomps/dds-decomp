@@ -1421,7 +1421,7 @@ void dds3Particle_SparkBuffInit(EffBallisticEmitter *effect, s32 index) {
 
     packet += index;
     switch (effect->launchMode) {
-    case EFF_BALLISTIC_LAUNCH_MODE_RING:
+    case EFF_PARTICLE_LAUNCH_MODE_RING:
         if (effect->randomDir) {
             direction[0] = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f;
             direction[1] = 0;
@@ -1470,7 +1470,7 @@ void dds3Particle_SparkBuffInit(EffBallisticEmitter *effect, s32 index) {
             packet->f38 = gravity;
         }
         break;
-    case EFF_BALLISTIC_LAUNCH_MODE_ORIGIN:
+    case EFF_PARTICLE_LAUNCH_MODE_ORIGIN:
         if (effect->randomDir) {
             packet->pos[0] = effect->head.origin[0];
             packet->pos[1] = effect->head.origin[1];
@@ -1497,7 +1497,7 @@ void dds3Particle_SparkBuffInit(EffBallisticEmitter *effect, s32 index) {
             packet->f38 = gravity;
         }
         break;
-    case EFF_BALLISTIC_LAUNCH_MODE_REVERSE_TRAJECTORY:
+    case EFF_PARTICLE_LAUNCH_MODE_REVERSE_TRAJECTORY:
         if (effect->randomDir) {
             decay = effect->decayPct / 100.0f + 1.0f;
             EE_MMI_UNIT_MATRIX(effect->head.matrix);
@@ -1562,7 +1562,7 @@ void dds3Particle_SparkBuffInit(EffBallisticEmitter *effect, s32 index) {
 void dds3Particle_SparkDraw(EffBallisticEmitter *effect) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     u32 subeffectKind = effect->head.sub.kind;
-    EffBallisticLaunchMode launchMode;
+    EffParticleLaunchMode launchMode;
     f32 positionDelta[4];
     f32 velocityScale;
     s32 completedCount;
@@ -1573,7 +1573,7 @@ void dds3Particle_SparkDraw(EffBallisticEmitter *effect) {
 
     dds3Particle_EffectInit(&effect->head.sub);
     launchMode = effect->launchMode;
-    if (launchMode == EFF_BALLISTIC_LAUNCH_MODE_RING) {
+    if (launchMode == EFF_PARTICLE_LAUNCH_MODE_RING) {
         VU0_LOAD_MATRIX(effect->head.matrix);
     }
     velocityScale = effect->decayPct / 100.0f + 1.0f;
@@ -1598,7 +1598,7 @@ void dds3Particle_SparkDraw(EffBallisticEmitter *effect) {
             packet->vel[0] *= velocityScale;
             packet->vel[2] *= velocityScale;
             SDF_VU0_LOADVECTOR(packet->vel);
-            if (launchMode == EFF_BALLISTIC_LAUNCH_MODE_RING) {
+            if (launchMode == EFF_PARTICLE_LAUNCH_MODE_RING) {
                 SDF_VU0_APPLYMATRIX();
             }
             SDF_VU0_STOREVECTOR(positionDelta);
@@ -2891,7 +2891,7 @@ void dds3Particle_SparkOffsetDelete(u32 effect) {
 
 typedef struct EffOffsetGravityEmitter {
     EffEmitterHead head;
-    u8 mode;         /* 0x150 */
+    EffParticleLaunchMode launchMode; /* 0x150 */
     u8 loop;         /* 0x151 */
     u8 pad152[2];
     u32 spread;      /* 0x154: random activation delay bound */
@@ -2924,8 +2924,8 @@ void dds3Particle_SparkOffsetBuffInit(EffOffsetGravityEmitter *effect, s32 index
     s32 frame;
 
     packet += index;
-    switch (effect->mode) {
-    case 0:
+    switch (effect->launchMode) {
+    case EFF_PARTICLE_LAUNCH_MODE_RING:
         if (effect->randomDir) {
             direction[0] = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f;
             direction[1] = 0;
@@ -2970,7 +2970,7 @@ void dds3Particle_SparkOffsetBuffInit(EffOffsetGravityEmitter *effect, s32 index
             packet->f3C = gravity;
         }
         break;
-    case 1:
+    case EFF_PARTICLE_LAUNCH_MODE_ORIGIN:
         if (effect->randomDir) {
             packet->f30 = 0;
             packet->f34 = 0;
@@ -2999,7 +2999,7 @@ void dds3Particle_SparkOffsetBuffInit(EffOffsetGravityEmitter *effect, s32 index
             packet->f3C = gravity;
         }
         break;
-    case 2:
+    case EFF_PARTICLE_LAUNCH_MODE_REVERSE_TRAJECTORY:
         if (effect->randomDir) {
             decay = effect->decayPct / 100.0f + 1.0f;
             EE_MMI_UNIT_MATRIX(effect->head.matrix);
@@ -3052,11 +3052,11 @@ void dds3Particle_SparkOffsetBuffInit(EffOffsetGravityEmitter *effect, s32 index
 }
 
 /* Accumulate motion in the stored offset, then add the emitter origin.
- * Only mode zero transforms the per-frame displacement through the matrix. */
+ * Only ring launches transform the per-frame displacement through the matrix. */
 void dds3Particle_SparkOffsetDraw(EffOffsetGravityEmitter *effect) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     u32 subeffectKind = effect->head.sub.kind;
-    u32 mode;
+    EffParticleLaunchMode launchMode;
     f32 positionDelta[4];
     f32 origin[4];
     f32 velocityScale;
@@ -3067,8 +3067,8 @@ void dds3Particle_SparkOffsetDraw(EffOffsetGravityEmitter *effect) {
     s32 packetIndex;
 
     dds3Particle_EffectInit(&effect->head.sub);
-    mode = effect->mode;
-    if (mode == 0) {
+    launchMode = effect->launchMode;
+    if (launchMode == EFF_PARTICLE_LAUNCH_MODE_RING) {
         VU0_LOAD_MATRIX(effect->head.matrix);
     }
     velocityScale = effect->decayPct / 100.0f + 1.0f;
@@ -3094,7 +3094,7 @@ void dds3Particle_SparkOffsetDraw(EffOffsetGravityEmitter *effect) {
             packet->vel[0] *= velocityScale;
             packet->vel[2] *= velocityScale;
             SDF_VU0_LOADVECTOR(packet->vel);
-            if (mode == 0) {
+            if (launchMode == EFF_PARTICLE_LAUNCH_MODE_RING) {
                 SDF_VU0_APPLYMATRIX();
             }
             SDF_VU0_STOREVECTOR(positionDelta);
