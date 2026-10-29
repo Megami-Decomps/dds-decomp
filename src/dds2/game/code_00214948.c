@@ -537,7 +537,276 @@ INCLUDE_RODATA(const s32, "game/code_00214948", D_00419E20);
 
 INCLUDE_RODATA(const s32, "game/code_00214948", D_00419EA0);
 
+#ifdef NON_MATCHING
+#include "btl_motion_transform.h"
+#include "common.h"
+#include "btl_actor_resource_bank_api.h"
+#include "sdf_vu_rotation_axes.h"
+#include "btl_skill_max_api.h"
+#include "btl_effect_position.h"
+#include "eff_random_mod.h"
+#include "eff_random.h"
+#include "mdl_motion_api.h"
+#include "sdf_motion.h"
+#include "btl_task_condition.h"
+#include "sdf.h"
+#include "sdf_draw.h"
+#include "btl_command.h"
+#include "btl_command_affinity_api.h"
+#include "btl_camera_pose_api.h"
+#include "pcp_vu0.h"
+#include "sdf_vu_matrix.h"
+#include "sdf_vu_matrix_multiply_api.h"
+#include "ee_mmi.h"
+#include "btl_action.h"
+#include "btl_ai_table.h"
+#include "btl_ai_scratch.h"
+#include "btl_unit_tasks.h"
+#include "btl_state.h"
+#include "btl_battle_work.h"
+#include "btl_model_record.h"
+#include "eff_transform.h"
+#include "dat_state.h"
+#include "dat_command.h"
+#include "evt_unit.h"
+#include "mdl.h"
+#include "dds3obj.h"
+#include "mdl_flag_api.h"
+#include "sdf_debug_api.h"
+#include "dds3_world_secondary.h"
+#include "dds3_object_payload.h"
+
+
+extern EffRandState effSharedRandomState[];
+extern s32 btlDoesEnabledStatusMatchCurrentId(datUnitWork_t *, u32);
+extern char D_00419EA0[]; /* "%d 災いリング所持!!!!!!!!!!!\n" (EUC-JP): "%d holds a calamity ring" */
+extern s32 btlRollAiBucket(void);
+
+typedef struct BtlSelectorRank {
+    s32 value;
+    u32 listIndex;
+} BtlSelectorRank;
+
+/* Percent chances that the pick lands on the 1st, 2nd, ... ranked target when there are n of them (row n - 1).
+ * The first table is used when targets are ranked for damage, the second for status commands (retail rodata
+ * D_00419DA0 and D_00419E20, DDS1's tables byte for byte). */
+static const s16 btlSelectorDamageWeights[8][8] = {
+    {99, 99, 99, 99, 99, 99, 99, 99}, {69, 30, 99, 99, 99, 99, 99, 99}, {64, 25, 10, 99, 99, 99, 99, 99},
+    {59, 25, 10, 5, 99, 99, 99, 99},  {49, 20, 15, 10, 5, 99, 99, 99},  {39, 20, 20, 10, 5, 5, 99, 99},
+    {29, 20, 15, 10, 10, 10, 5, 99},  {19, 15, 15, 15, 10, 10, 10, 5},
+};
+static const s16 btlSelectorStatusWeights[8][8] = {
+    {99, 99, 99, 99, 99, 99, 99, 99}, {39, 60, 99, 99, 99, 99, 99, 99}, {9, 30, 60, 99, 99, 99, 99, 99},
+    {9, 15, 15, 60, 99, 99, 99, 99},  {9, 10, 10, 10, 60, 99, 99, 99},  {9, 10, 10, 15, 15, 40, 99, 99},
+    {9, 10, 10, 15, 15, 15, 25, 99},  {9, 10, 10, 10, 15, 15, 15, 15},
+};
+
+/* Insert a rank before the first stored rank (of eight) whose value is not below it; returns the new count. */
+static inline s32 btlInsertSelectorRank(BtlSelectorRank *ranks, s32 inserted, s32 value, u32 listIndex) {
+    s32 position;
+    s32 shift;
+
+    for (position = 0; position < 8; position++) {
+        if (ranks[position].value >= value) {
+            for (shift = inserted; shift > position; shift--) {
+                ranks[shift] = ranks[shift - 1];
+            }
+            ranks[position].value = value;
+            ranks[position].listIndex = listIndex;
+            return inserted + 1;
+        }
+    }
+    return inserted;
+}
+
+/* Roll against the cumulative weights of the first `eligible` ranks and return the chosen list index (0 if the
+ * weights run out). */
+static inline u32 btlPickRankedTarget(const BtlSelectorRank *ranks, const s16 (*weights)[8], s32 eligible) {
+    s32 roll = btlRollAiBucket();
+    s32 total = 0;
+    s32 i;
+
+    for (i = 0; i < eligible; i++) {
+        total += weights[eligible - 1][i];
+        if (total >= roll) {
+            return ranks[i].listIndex;
+        }
+    }
+    return 0;
+}
+
+/* Choose which candidate unit a battle task's command targets and append it to
+ * the task's targets. The battle's single-target override decides first when
+ * one is set. Then a list already resolved to one or two matches is copied
+ * whole; otherwise the choice depends on the command, being the first available
+ * unit, a status-matching unit, a weighted pick among targets ranked by lowest
+ * HP or MP (for status commands a calamity ring's holder ranks last, with a
+ * debug message), or a random one. Upstream: INCLUDE_ASM in
+ * game/code_00214948; written from the retail routine, with DDS1's
+ * func_00202668 as a guide: DDS2 adds the override and the ring. Retail also
+ * copies the three 128-byte rodata tables (the rank sentinels and the two
+ * weight tables) onto the stack; the body fills the rank array in a loop and
+ * reads the weight tables from static tables in the body. It shares the rank
+ * insertion and the weighted pick between their uses (small inline helpers). */
+s32 func_002152D8(ActionStateLink *actor, s32 unused) {
+    s32 (*override)(ActionStateLink *);
+    BtlSelectorRank ranks[16];
+    u32 matching;
+    u32 count;
+    BtlIndexList *list;
+    BtlUnit *unit;
+    DatCommandRecord *command;
+    u16 commandId;
+    u32 selectedIndex;
+    s32 i;
+    s32 roll;
+    s32 total;
+    s32 priority;
+
+    for (i = 0; i < 16; i++) {
+        ranks[i].value = 0xFFFFFF;
+        ranks[i].listIndex = 0x80;
+    }
+    override = ((BtlState *)btlGetRuntime())->selectSingleTargetOverride;
+    if (override != NULL && override(actor) != 0) {
+        return 1;
+    }
+    list = btlBuildActorIndexListAndCount((s32)actor, &matching, &count);
+    if (matching != 0) {
+        if (matching < 3) {
+            btlCopyIndexList(actor->indexWork.indices, list);
+        }
+        btlFreeIndexList(list);
+        return 1;
+    }
+    commandId = actor->indexWork.skillId;
+    command = &datCommandRecords[commandId];
+    selectedIndex = 0;
+    if (command->unk30 == 2 && (command->targetFlags & 8)) {
+        for (i = 0; i < count; i++) {
+            unit = (BtlUnit *)btlGetIndexListEntry(list, i);
+            if (!(unit->status.flags & 1)) {
+                break;
+            }
+        }
+        selectedIndex = i;
+    } else if (command->attribute.parts.kind == 2) {
+        selectedIndex = 0x80;
+        for (i = 0; i < count; i++) {
+            unit = (BtlUnit *)btlGetIndexListEntry(list, i);
+            if (unit->owner == actor->unit->owner &&
+                (unit->partyRecord.status & datCommandRecords[commandId].attribute.parts.valueMask)) {
+                if (btlRollAiBucket() < 20) {
+                    selectedIndex = i;
+                }
+            }
+        }
+        if (selectedIndex == 0x80) {
+            total = 100 / count + 1;
+            selectedIndex = 0;
+            roll = btlRollAiBucket();
+            for (i = 0; i < count; i++) {
+                unit = (BtlUnit *)btlGetIndexListEntry(list, i);
+                if (!(unit->partyRecord.status & datCommandRecords[commandId].attribute.parts.valueMask)) {
+                    total *= 2;
+                    continue;
+                }
+                selectedIndex = i;
+                if (unit->owner == actor->unit->owner) {
+                    total *= 2;
+                    continue;
+                }
+                if (total >= roll) {
+                    break;
+                }
+                total *= 2;
+            }
+        }
+    } else if (datCommandSelectors[commandId].stat == 16) {
+        if (count != 1) {
+            s32 hpInserted = 0;
+            s32 mpInserted = 0;
+            s16 hpEligible = 0;
+            s16 mpEligible = 0;
+
+            for (i = 0; i < count; i++) {
+                unit = (BtlUnit *)btlGetIndexListEntry(list, i);
+                if (unit->owner == actor->unit->owner) {
+                    continue;
+                }
+                if (datCommandRecords[commandId].hpType != 0) {
+                    hpInserted = btlInsertSelectorRank(ranks, hpInserted, unit->partyRecord.hp, i);
+                    hpEligible++;
+                }
+                if (datCommandRecords[commandId].mpType != 0) {
+                    mpInserted = btlInsertSelectorRank(ranks + 8, mpInserted, unit->partyRecord.mp, i);
+                    mpEligible++;
+                }
+            }
+            selectedIndex = btlPickRankedTarget(ranks, btlSelectorDamageWeights, hpEligible);
+            if (hpEligible == 0) {
+                selectedIndex = btlPickRankedTarget(ranks + 8, btlSelectorDamageWeights, mpEligible);
+            }
+        }
+    } else if (datCommandSelectors[commandId].stat == 17) {
+        selectedIndex = dds3GetRandA(effSharedRandomState) % count;
+    } else {
+        priority = 0;
+        if (command->options & 2) {
+            switch (command->hpType) {
+            case 1:
+            case 4:
+            case 6:
+            case 8:
+            case 10:
+            case 12:
+            case 13:
+            case 14:
+                priority = 1;
+                break;
+            }
+            switch (command->mpType) {
+            case 1:
+            case 4:
+            case 6:
+            case 8:
+            case 10:
+            case 12:
+            case 13:
+            case 14:
+                priority = 1;
+                break;
+            }
+        }
+        if (priority == 0) {
+            selectedIndex = dds3GetRandA(effSharedRandomState) % count;
+        } else if (count != 1) {
+            s32 hpInserted = 0;
+            s16 hpEligible = 0;
+
+            for (i = 0; i < count; i++) {
+                s32 value;
+
+                unit = (BtlUnit *)btlGetIndexListEntry(list, i);
+                if (btlDoesEnabledStatusMatchCurrentId(&unit->partyRecord, 0xE1)) {
+                    printf(D_00419EA0, unit->lookupId);
+                    value = 1000;
+                } else {
+                    value = unit->partyRecord.hp;
+                }
+                hpInserted = btlInsertSelectorRank(ranks, hpInserted, value, i);
+                hpEligible++;
+            }
+            selectedIndex = btlPickRankedTarget(ranks, btlSelectorStatusWeights, hpEligible);
+        }
+    }
+    btlAppendIndexListEntry(actor->indexWork.indices, btlGetIndexListEntry(list, selectedIndex));
+    btlFreeIndexList(list);
+    return 1;
+}
+#else
 INCLUDE_ASM(const s32, "game/code_00214948", func_002152D8);
+#endif
 
 /* Select the lowest nonzero current HP, preferring later entries on a tie. */
 s32 btlSelectLowestNonzeroHpTarget(ActionStateLink *task, s32 action) {
@@ -3057,7 +3326,228 @@ void btlReturnUnitToGroup(ActionStateLink *task) {
 }
 
 
+#ifdef NON_MATCHING
+#include "btl_motion_transform.h"
+#include "common.h"
+#include "btl_actor_resource_bank_api.h"
+#include "sdf_vu_rotation_axes.h"
+#include "btl_skill_max_api.h"
+#include "btl_effect_position.h"
+#include "eff_random_mod.h"
+#include "eff_random.h"
+#include "mdl_motion_api.h"
+#include "sdf_motion.h"
+#include "btl_task_condition.h"
+#include "sdf.h"
+#include "sdf_draw.h"
+#include "btl_command.h"
+#include "btl_command_affinity_api.h"
+#include "btl_camera_pose_api.h"
+#include "pcp_vu0.h"
+#include "sdf_vu_matrix.h"
+#include "sdf_vu_matrix_multiply_api.h"
+#include "ee_mmi.h"
+#include "btl_action.h"
+#include "btl_ai_table.h"
+#include "btl_ai_scratch.h"
+#include "btl_unit_tasks.h"
+#include "btl_state.h"
+#include "btl_battle_work.h"
+#include "btl_model_record.h"
+#include "eff_transform.h"
+#include "dat_state.h"
+#include "dat_command.h"
+#include "evt_unit.h"
+#include "mdl.h"
+#include "dds3obj.h"
+#include "mdl_flag_api.h"
+#include "sdf_debug_api.h"
+#include "dds3_world_secondary.h"
+#include "dds3_object_payload.h"
+#include "evt_unit_motion_slot.h"
+#include "evt_unit_motion_api.h"
+
+/* The core (0x110) takes a motion itself, and records it. */
+static void btlSetCoreMotion(BtlUnit *core, s32 motion, s32 startFrame, s32 endFrame, s32 mode, f32 speed) {
+    evtSetUnitMotion(core->ext, motion, startFrame, endFrame, mode);
+    core->motionId = motion;
+    core->ext->owner->first->frameStep = speed;
+}
+
+/* A side part (0x111 in slot 1, 0x112 in slot 2) takes a motion in its model slot, and records it. */
+static void btlSetPartMotion(BtlUnit *part, s32 slot, s32 motion, s32 startFrame, s32 endFrame, s32 mode,
+                             f32 speed) {
+    evtConfigureUnitMotionSlot(part->ext, slot, motion, startFrame, endFrame, mode);
+    mdlSetMotionSpeedEx(part->ext->owner, slot, speed);
+    part->motionId = motion;
+}
+
+/* A side part rests: motion 0 over 30 frames at speed 1. */
+static void btlRestPart(BtlUnit *part, s32 slot) {
+    evtConfigureUnitMotionSlot(part->ext, slot, 0, 0, 0x1E, 1);
+    mdlSetMotionSpeedEx(part->ext->owner, slot, 1.0f);
+    part->motionId = 0;
+}
+
+/* The Vritra battle's prepare-motion hook: start a unit's motion. A unit that
+ * is not one of the three parts (status bit 0x400) takes it as any unit
+ * does, looped and from the start unless it has an end frame. For the parts'
+ * shared motions 0xE to 0x14, the core (0x110) and the side parts (0x111,
+ * 0x112) move together: each in its own way, a side part in state 0xE0
+ * resting instead (motion 0x10 moves the targeted side part, or both side
+ * parts in the alternate formation; motion 0x11 only those in state 0xE0).
+ * Then the unit itself takes the motion, the core directly and a side part in
+ * its model slot, unless a side part in state 0x20 already holds motion 0xB
+ * there. The unit the battle has selected is left alone. Upstream:
+ * INCLUDE_ASM in game/code_00214948; written from the retail routine. Against
+ * retail it makes the same calls and accesses: the three helpers stand for
+ * code retail repeats or shares through jumps, so their counts differ, and
+ * the motion's range is one unsigned compare where retail tests 0xE and 0xB
+ * apart. Like retail, motions 0xE and 0x10 read a side part's state without
+ * checking it is there. */
+void btlPrepareVritraUnitMotion(BtlUnit *unit, s32 motion, s32 startFrame, s32 endFrame, s32 mode, f32 speed) {
+    BattleWork *work = (BattleWork *)btlGetRuntime();
+    BattleSub *sub = work->sub;
+    BtlUnit *core;
+    BtlUnit *left;
+    BtlUnit *right;
+    BtlUnit *member;
+    s32 unitId;
+
+    if (((BtlSelectCtrl *)sub)->unit == unit) {
+        return;
+    }
+    if (!(unit->status.flags & 0x400)) {
+        evtSetUnitMotion(unit->ext, motion, startFrame, endFrame, mode);
+        unit->ext->owner->first->frameStep = speed;
+        if (endFrame == 0) {
+            mdlLoopMotion(unit->ext->owner, 0, motion);
+            sdfMotionSeek(unit->ext->owner->first, 0.0f);
+        }
+        return;
+    }
+    if (motion < 0x15 && motion >= 0xE) {
+        core = NULL;
+        left = NULL;
+        right = NULL;
+        for (member = work->actorList; member != NULL; member = member->next) {
+            if (member->status.flags & 1) {
+                if (member->status.flags & 0x400) {
+                    switch (member->partyRecord.unitId) {
+                    case 0x110:
+                        core = member;
+                        break;
+                    case 0x111:
+                        left = member;
+                        break;
+                    case 0x112:
+                        right = member;
+                        break;
+                    }
+                }
+            }
+        }
+        switch (motion) {
+        case 0xE:
+            if (core != NULL) {
+                btlSetCoreMotion(core, motion, startFrame, endFrame, mode, speed);
+            }
+            if (left->status.flags & 0xE0) {
+                btlRestPart(left, 1);
+            }
+            if (right->status.flags & 0xE0) {
+                btlRestPart(right, 2);
+            }
+            break;
+        case 0xF:
+        case 0x14:
+            if (core != NULL) {
+                btlSetCoreMotion(core, motion, startFrame, endFrame, mode, speed);
+            }
+            if (left != NULL) {
+                btlSetPartMotion(left, 1, motion, startFrame, endFrame, mode, speed);
+            }
+            if (right != NULL) {
+                btlSetPartMotion(right, 2, motion, startFrame, endFrame, mode, speed);
+            }
+            break;
+        case 0x10:
+            if (core != NULL) {
+                btlSetCoreMotion(core, motion, startFrame, endFrame, mode, speed);
+            }
+            if (sub->alternateFormation == 0) {
+                if (left == sub->targetActor && left != NULL) {
+                    if (left->status.flags & 0xE0) {
+                        btlRestPart(left, 1);
+                    } else {
+                        btlSetPartMotion(left, 1, motion, startFrame, endFrame, mode, speed);
+                    }
+                    if (right->status.flags & 0xE0) {
+                        btlRestPart(right, 2);
+                    }
+                } else if (right == sub->targetActor && right != NULL) {
+                    if (right->status.flags & 0xE0) {
+                        btlRestPart(right, 2);
+                    } else {
+                        btlSetPartMotion(right, 2, motion, startFrame, endFrame, mode, speed);
+                    }
+                    if (left->status.flags & 0xE0) {
+                        btlRestPart(left, 1);
+                    }
+                }
+                break;
+            }
+            /* In the alternate formation, both side parts move, as for 0x12 and 0x13. */
+        case 0x12:
+        case 0x13:
+            if (left != NULL) {
+                if (left->status.flags & 0xE0) {
+                    btlRestPart(left, 1);
+                } else {
+                    btlSetPartMotion(left, 1, motion, startFrame, endFrame, mode, speed);
+                }
+            }
+            if (right != NULL) {
+                if (right->status.flags & 0xE0) {
+                    btlRestPart(right, 2);
+                } else {
+                    btlSetPartMotion(right, 2, motion, startFrame, endFrame, mode, speed);
+                }
+            }
+            break;
+        case 0x11:
+            if (left != NULL && (left->status.flags & 0xE0)) {
+                btlSetPartMotion(left, 1, motion, startFrame, endFrame, mode, speed);
+            }
+            if (right != NULL && (right->status.flags & 0xE0)) {
+                btlSetPartMotion(right, 2, motion, startFrame, endFrame, mode, speed);
+            }
+            break;
+        }
+    }
+    unitId = unit->partyRecord.unitId;
+    if (motion == 0xB && (unit->status.flags & 0x20) && unitId < 0x113 && unitId >= 0x111 &&
+        unit->ext->slotA[unitId == 0x111 ? 1 : 2] == motion) {
+        return;
+    }
+    switch (unitId) {
+    case 0x110:
+        evtSetUnitMotion(unit->ext, motion, startFrame, endFrame, mode);
+        unit->ext->owner->first->frameStep = speed;
+        break;
+    case 0x111:
+        evtConfigureUnitMotionSlot(unit->ext, 1, motion, startFrame, endFrame, mode);
+        mdlSetMotionSpeedEx(unit->ext->owner, 1, speed);
+        break;
+    case 0x112:
+        evtConfigureUnitMotionSlot(unit->ext, 2, motion, startFrame, endFrame, mode);
+        mdlSetMotionSpeedEx(unit->ext->owner, 2, speed);
+        break;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "game/code_00214948", btlPrepareVritraUnitMotion);
+#endif
 
 void btlSetUnitResourceFloatByMode(BtlUnit *unit, s32 group, f32 value) {
     if (((BtlSelectCtrl *)((BattleWork *)btlGetRuntime())->sub)->unit != unit) {
