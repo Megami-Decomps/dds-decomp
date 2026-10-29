@@ -4360,7 +4360,7 @@ void fldDispatchCameraModelFrameEvents(s32 motion, s32 selector) {
         if (volume < 0) volume = 0;
     }
 
-    if (fldGlobalBase.playerModelAlternate == 1) {
+    if (fldGlobalBase.playerModelAlternate == FLD_PLAYER_MODEL_ALTERNATE_ENABLED) {
         sequenceCategory = (D_003BAD44 % 2) + 0x19;
         if (selector != 1) return;
         if ((previousFrame < 7.0f && currentFrame >= 7.0f) ||
@@ -4977,7 +4977,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
         } else {
             motion = 1;
         }
-        if (fldGlobalBase.playerModelAlternate != 0) {
+        if (fldGlobalBase.playerModelAlternate != FLD_PLAYER_MODEL_ALTERNATE_DISABLED) {
             distance = 32.0f;
         } else {
             distance = 25.0f;
@@ -5229,7 +5229,7 @@ s32 fldUpdateCameraFrame(void) {
         fldUpdateModeOneCameraPose();
         node = fldPlayerModelContext->current.h.motionIndex;
         fldDispatchCameraModelFrameEvents(node, node);
-        if (fldGlobalBase.playerModelAlternate == 1) {
+        if (fldGlobalBase.playerModelAlternate == FLD_PLAYER_MODEL_ALTERNATE_ENABLED) {
             fldUpdateCameraModelMotion(0, 0, 6.0f);
         }
         return 0;

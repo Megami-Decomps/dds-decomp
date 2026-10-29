@@ -1053,7 +1053,7 @@ void fldLoadPlayerModel(void) {
         FLD_LOCATION_COORDINATE_FLAG_PLAYER_MODEL_VARIANT_2) {
         model = 2;
     } else {
-        model = fldGlobalBase.playerModelAlternate != 0;
+        model = fldGlobalBase.playerModelAlternate != FLD_PLAYER_MODEL_ALTERNATE_DISABLED;
     }
     if (fldGlobalBase.playerModelVariant != model || fldPlayerModelResource == NULL) {
         if (fldPlayerModelResource != NULL) {
@@ -1130,7 +1130,7 @@ void fldTogglePlayerModel(void) {
          * real phase uses; the resulting two-definition pseudo stays global,
          * rather than merging snapshot HIGH/base/+16 in local-alloc. */
         sceneWork = &fldSceneParam;
-        fldGlobalBase.playerModelAlternate ^= 1;
+        fldGlobalBase.playerModelAlternate ^= FLD_PLAYER_MODEL_ALTERNATE_ENABLED;
         SDF_VU0_LOADVECTOR(&axis);
         FromRotation(3.1415926f);
         SDF_VU0_LOADVECTOR_B(&sceneWork->rotation);
@@ -1372,7 +1372,7 @@ void fldPreparePlayerAndCameraScene(u128 *transform) {
     dds3SetSclPoseSet(fldPlayerObject, (u128 *)&scale);
     fldPlayerModelContext = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle(fldPlayerObject);
     dds3GetRadiusPoseSet(fldPlayerObject, 90.0f);
-    if (fldGlobalBase.playerModelAlternate == 0) {
+    if (fldGlobalBase.playerModelAlternate == FLD_PLAYER_MODEL_ALTERNATE_DISABLED) {
         mdlLoopMotion(fldPlayerModelContext, 0, 2);
     } else {
         mdlLoopMotion(fldPlayerModelContext, 0, 2);

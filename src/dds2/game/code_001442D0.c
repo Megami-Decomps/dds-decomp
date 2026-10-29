@@ -2994,7 +2994,7 @@ void fldDrawMapLabelBanner(void) {
     FldMapLabelRecordIndex primaryLabelIndex;
     s32 width;
     s32 labelX;
-    if (fldGlobalBase.playerModelAlternate == 1) return;
+    if (fldGlobalBase.playerModelAlternate == FLD_PLAYER_MODEL_ALTERNATE_ENABLED) return;
     if (fldGlobalBase.area >= 200) return;
     switch (fldGlobalBase.mapBannerFadeMode) {
     case 0:
@@ -4006,7 +4006,7 @@ extern f32 D_0043634C;
 void fldDrawAnimatedFieldBanner(s32 alpha, s32 x, s32 y) {
     u32 color;
 
-    if (fldGlobalBase.playerModelAlternate != 1 &&
+    if (fldGlobalBase.playerModelAlternate != FLD_PLAYER_MODEL_ALTERNATE_ENABLED &&
         fldGlobalBase.deferredExit != FLD_DEFERRED_EXIT_REQUESTED) {
         rsetOtOfs(0x53);
         rsetAlpha(0);
@@ -4062,7 +4062,7 @@ void fldDrawLocationPanel(void) {
     if (fldGetSparkDialogPhase() != FLD_SPARK_DIALOG_PHASE_IDLE) {
         return;
     }
-    if (fldGlobalBase.playerModelAlternate == 1 ||
+    if (fldGlobalBase.playerModelAlternate == FLD_PLAYER_MODEL_ALTERNATE_ENABLED ||
         fldGlobalBase.deferredExit != FLD_DEFERRED_EXIT_IDLE) {
         return;
     }
@@ -5483,7 +5483,7 @@ void fldRunDanteClear(void) {
 void fldResetEventSceneState(void) {
     fldReleaseCameraModel(0);
     D_003899E0[0] = 0;
-    fldGlobalBase.playerModelAlternate = 0;
+    fldGlobalBase.playerModelAlternate = FLD_PLAYER_MODEL_ALTERNATE_DISABLED;
     fldClearObjectEntryHandles();
     fldReleaseWeatherEffects();
     fldPreparePlayerSceneCameraTarget();
@@ -5499,7 +5499,7 @@ void fldResetAfterEvent(void) {
     p2sdStopSe(0x680017);
     mnuAdvanceTitleStateUnderSemaphore();
     D_003899E0[0] = 0;
-    fldGlobalBase.playerModelAlternate = 0;
+    fldGlobalBase.playerModelAlternate = FLD_PLAYER_MODEL_ALTERNATE_DISABLED;
     fldClearObjectEntryHandles();
     fldReleaseWeatherEffects();
     fldStartSceneBgmAlternate();

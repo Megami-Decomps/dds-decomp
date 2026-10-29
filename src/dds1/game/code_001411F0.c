@@ -2620,7 +2620,7 @@ void fldDrawMapLabelBanner(s32 unused) {
     s32 xOffset;
     s32 yOffset;
 
-    if (fldGlobalBase.playerModelAlternate == 1) {
+    if (fldGlobalBase.playerModelAlternate == FLD_PLAYER_MODEL_ALTERNATE_ENABLED) {
         return;
     }
     if (fldGlobalBase.area >= 200) {
@@ -3690,7 +3690,8 @@ void fldDrawLocationPanel(void) {
         return;
     }
     work = &fldGlobalBase;
-    if (work->playerModelAlternate == 1 || work->deferredExit != FLD_DEFERRED_EXIT_IDLE) {
+    if (work->playerModelAlternate == FLD_PLAYER_MODEL_ALTERNATE_ENABLED ||
+        work->deferredExit != FLD_DEFERRED_EXIT_IDLE) {
         return;
     }
     if (fldFindLocationCoordinateRecord(work->area, work->floor + 1)[2] <= 0) {
@@ -5096,7 +5097,7 @@ void fldUpdateSparkEncounterScene(void) {
 void fldResetEventSceneState(void) {
     fldReleaseCameraModel(0);
     D_0032E5C4[0] = 0;
-    fldGlobalBase.playerModelAlternate = 0;
+    fldGlobalBase.playerModelAlternate = FLD_PLAYER_MODEL_ALTERNATE_DISABLED;
     fldClearObjectEntryHandles();
     fldReleaseWeatherEffects();
     fldPreparePlayerSceneCameraTarget();

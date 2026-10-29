@@ -39,6 +39,13 @@ enum FldModeOneCameraStateValue {
     FLD_MODE_ONE_CAMERA_ACTIVE = 1
 };
 
+/* Alternate player model latch; distinct from the cached model variant. */
+typedef s32 FldPlayerModelAlternateState;
+enum FldPlayerModelAlternateStateValue {
+    FLD_PLAYER_MODEL_ALTERNATE_DISABLED = 0,
+    FLD_PLAYER_MODEL_ALTERNATE_ENABLED = 1
+};
+
 typedef s32 FldAreaResourceReuseState;
 
 enum FldAreaResourceReuseState {
@@ -171,7 +178,7 @@ typedef struct FldAreaWork {
     f32 unk10C;                  /* 0x10C: cleared when a spark run starts. */
     FldSceneAdvanceRequestState pendingSceneRequest; /* one-shot request to advance to the next scene */
     FldDeferredExitState deferredExit; /* 0x114: idle, requested, or waiting for the exit message to finish. */
-    s32 playerModelAlternate;    /* 0x118: toggles the player_a/player_b model selection. */
+    FldPlayerModelAlternateState playerModelAlternate; /* 0x118: selects the alternate player model. */
     FldTerrainAttritionKind terrainAttritionKind; /* 0x11C: collision-zone category for HP attrition. */
     f32 attritionDistance;      /* 0x120: movement toward the next HP attrition tick. */
 #ifdef VERSION_DDS2
