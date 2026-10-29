@@ -10065,7 +10065,7 @@ void btlDrawActorCommandRows(BattleSceneObject *ctx, u16 kind, u16 page, u16 col
     u32 color;
     struct _FRQ *glyph;
     BtlCommandUseError failure;
-    s32 cost;
+    BtlCommandVitalCostAmount cost;
     u32 iconColor;
 
     memcpy(back, D_00436858, sizeof(back));
@@ -10519,7 +10519,7 @@ void btlDrawLinkageSkillOptions(BattleSceneObject *object) {
     s32 row;
     s32 j;
     BtlCommandUseError blocked;
-    s32 power;
+    BtlCommandVitalCostAmount commandCost;
     u32 textColor;
     u32 glyphColor;
     u32 color;
@@ -10550,10 +10550,10 @@ void btlDrawLinkageSkillOptions(BattleSceneObject *object) {
         btlSetCornerColors(&colors, btlLinkedSelectionTaskBuffer->backdropFade | 0x80808000);
         effDrawSpriteWithCornerColors(0x7C0, y << 3, 0, colors.values, 0, btlResourceBlock->resA, 0x29, 0x53);
 
-        power = btlGetCombinedPartyCommandPower(&object->owner->unit->partyRecord, object->owner->unit,
+        commandCost = btlGetCombinedPartyCommandPower(&object->owner->unit->partyRecord, object->owner->unit,
                                                 list->entries[row].first, list->entries[row].second,
                                                 list->entries[row].skill);
-        sprintf(text, D_00436818, power);
+        sprintf(text, D_00436818, commandCost);
         fldSubmitSceneObjectAtCoordinates(0x86, y + 2, textColor, text);
 
         cost = btlGetSlotValueAdjustedForSpecialAbility(object->owner->unit, list->entries[row].skill);

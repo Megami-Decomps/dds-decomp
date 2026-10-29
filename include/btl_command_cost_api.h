@@ -6,10 +6,13 @@
 struct BtlUnit;
 struct datUnitWork_t;
 
+/* Ability-scaled HP/MP command amount; distinct from affordability results. */
+typedef s32 BtlCommandVitalCostAmount;
+
 /* These APIs take the command-table key, not the computed cost. */
-s32 btlApplyCommandAbilityMultiplier(
+BtlCommandVitalCostAmount btlApplyCommandAbilityMultiplier(
     struct datUnitWork_t *battler, BtlCommandId commandId);
-s32 btlGetCombinedPartyCommandPower(
+BtlCommandVitalCostAmount btlGetCombinedPartyCommandPower(
     struct datUnitWork_t *base, struct BtlUnit *first,
     struct BtlUnit *second, struct BtlUnit *third, BtlCommandId commandId);
 

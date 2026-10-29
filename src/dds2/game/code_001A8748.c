@@ -1654,7 +1654,7 @@ s32 btlGetStatWithStatusOverride(datUnitWork_t *unit, s32 statIndex) {
     return datGetStatWithStatusOverride(unit, statIndex);
 }
 
-s32 btlApplyCommandAbilityMultiplier(datUnitWork_t *battler, BtlCommandId commandId) {
+BtlCommandVitalCostAmount btlApplyCommandAbilityMultiplier(datUnitWork_t *battler, BtlCommandId commandId) {
     u32 value = datCalculateCommandBaseValue(battler, commandId);
     f32 scale;
 
@@ -1748,7 +1748,7 @@ BtlCommandUseError btlGetCommandUseError(BtlUnit *unit, BtlCommandId commandId) 
     return btlCheckCommandVitalCost(unit, commandId);
 }
 
-s32 btlGetCombinedPartyCommandPower(datUnitWork_t *base, BtlUnit *first, BtlUnit *second,
+BtlCommandVitalCostAmount btlGetCombinedPartyCommandPower(datUnitWork_t *base, BtlUnit *first, BtlUnit *second,
                   BtlUnit *third, BtlCommandId commandId) {
     datUnitWork_t snapshot = *base;
     s32 totalMaxHp = 0;
