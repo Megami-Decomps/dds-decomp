@@ -2358,16 +2358,15 @@ void btlCommandTaskReturnUpdate(BtlTask *task) {
     }
 }
 
-void btlStartLinkedActorEffectTask(s32 task) {
-    BtlUnit *unit = *(BtlUnit **)(task + 0x18);
+void btlStartLinkedActorEffectTask(BtlTask *task) {
     BtlRuntimeTask *entry;
-    if (((u32)unit->status.flags & 0x200) == 0 &&
-        btlCanSpawnAnotherEnemy(unit) == BTL_ENEMY_SPAWN_CAPACITY_EXHAUSTED) {
-        entry = btlCreateEffObjB(*(BtlUnit **)(task + 0x18), 0x67);
+    if (((u32)task->unit->status.flags & 0x200) == 0 &&
+        btlCanSpawnAnotherEnemy(task->unit) == BTL_ENEMY_SPAWN_CAPACITY_EXHAUSTED) {
+        entry = btlCreateEffObjB(task->unit, 0x67);
         entry->startCondition.kind = BTL_TASK_CONDITION_KIND_ABSENT;
         entry->startCondition.value.taskKind = 0x40;
         btlStartTask(entry);
-        if ((*(u16 *)(*(s32 *)(task + 0x18) + 0x12E) & 0x480) != 0) {
+        if ((task->unit->partyRecord.status & 0x480) != 0) {
             btlDispatchStateHandler(task, 0x18);
         } else {
             btlDispatchStateHandler(task, 0x1A);
