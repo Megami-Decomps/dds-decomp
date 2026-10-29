@@ -2003,7 +2003,7 @@ s32 mnuBeginMantraProfileSelection(void) {
 
 extern s8 scrSelectOperandIndex(datUnitWork_t *, s32);
 extern s8 scrGetSelectedOperandIndex(datUnitWork_t *);
-extern void mnuSetMantraGridFeedbackMode(MnuGridFeedbackState *, u32);
+extern void mnuSetMantraGridFeedbackMode(MnuGridFeedbackState *, MnuGridFeedbackMode);
 void mnuFinishMantraProfileSelection(void) {
     MenuSceneMetadata *scene = (MenuSceneMetadata *)sdfGetTaskValueByKey(mnuSceneResourceContext, SDF_TASK_VALUE_USER_DATA_KEY);
 
@@ -2019,7 +2019,7 @@ void mnuFinishMantraProfileSelection(void) {
 
         work = (MenuSceneWork *)sdfGetTaskValueByKey(mnuSceneResourceContext, 1);
         mnuReinitializeSceneGrid((s32)work);
-        mnuSetMantraGridFeedbackMode(&work->gridFeedback, 1);
+        mnuSetMantraGridFeedbackMode(&work->gridFeedback, MNU_GRID_FEEDBACK_FADE_WITH_CUE);
     }
 
     evtFinishMessageWindowAndNotify();
@@ -3966,29 +3966,29 @@ void mnuDrawMantraEntryStatusIcon(s32 x, s32 y, s32 z, s32 alpha, u32 flags,
 }
 
 
-void mnuSetMantraGridFeedbackMode(MnuGridFeedbackState *state, u32 mode) {
+void mnuSetMantraGridFeedbackMode(MnuGridFeedbackState *state, MnuGridFeedbackMode mode) {
     state->mode = mode;
     state->frame = 0;
 }
-/* Step the notification frame (wraps at 31); mode 1 plays the cue once at frame 0.
+/* Step the notification frame (wraps at 31); the fade-with-cue mode plays once at frame 0.
  * Its unused implicit-int result preserves the call's non-sibling epilogue. */
 mnuAdvanceMantraGridFeedback(MnuGridFeedbackState *voice) {
     s32 notify;
 
     notify = 0;
     switch (voice->mode) {
-    case 0:
+    case MNU_GRID_FEEDBACK_LOOPING:
         voice->frame = voice->frame + 1;
         if (voice->frame >= 0x1F) {
             voice->frame = 0;
         }
         break;
-    case 1:
+    case MNU_GRID_FEEDBACK_FADE_WITH_CUE:
         notify = voice->frame == 0;
         voice->frame = voice->frame + 1;
         if (voice->frame >= 0x1F) {
             voice->frame = 0;
-            voice->mode = 0;
+            voice->mode = MNU_GRID_FEEDBACK_LOOPING;
         }
         break;
     }
@@ -4008,7 +4008,7 @@ void mnuDrawMantraGridFeedback(s32 x, s32 y, s32 z, s32 alpha, MnuGridFeedbackSt
 
     /* Both modes interpolate in radians and draw the ring pieces in degrees. */
     switch (state->mode) {
-    case 0: {
+    case MNU_GRID_FEEDBACK_LOOPING: {
         f32 rotation;
         f32 degrees;
         progress = (f32)state->frame / 30.0f;
@@ -4021,7 +4021,7 @@ void mnuDrawMantraGridFeedback(s32 x, s32 y, s32 z, s32 alpha, MnuGridFeedbackSt
         mnuDrawRotatedPlacedSprite(x, y, z, alpha, 0x20, 0x42, context, rotation * degrees);
         return;
     }
-    case 1: {
+    case MNU_GRID_FEEDBACK_FADE_WITH_CUE: {
         f32 originalAlpha;
         f32 fade;
         f32 secondary;

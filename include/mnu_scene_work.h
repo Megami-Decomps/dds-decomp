@@ -18,10 +18,16 @@ typedef struct MenuSceneCoordinate {
     s32 y;
 } MenuSceneCoordinate;
 
+typedef s32 MnuGridFeedbackMode;
+enum MnuGridFeedbackModeValue {
+    MNU_GRID_FEEDBACK_LOOPING = 0,
+    MNU_GRID_FEEDBACK_FADE_WITH_CUE = 1
+};
+
 /* Ring animation state that also schedules the one-shot profile-match cue. */
 typedef struct MnuGridFeedbackState {
     s32 frame;
-    s32 mode; /* 0: looping ring, 1: fading ring and one-shot cue */
+    MnuGridFeedbackMode mode;
 } MnuGridFeedbackState;
 
 /* Requirement groups evaluated while building the scene grid. The final bit
