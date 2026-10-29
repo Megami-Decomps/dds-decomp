@@ -385,7 +385,126 @@ u32 itfGetTextLipsMotionId(void) {
     return itfTextLipsMotionId;
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "itf_bit_range.h"
+#include "dds3_admin_control_api.h"
+#include "itf_text_vector.h"
+#include "itf_text_slots_api.h"
+#include "fr_font_text_slots.h"
+#include "sdf_packet_list.h"
+#include "sdf_packet_header.h"
+#include "itf_gs_state_packet.h"
+#include "fr_font.h"
+#include "kwln.h"
+#include "kwln_task_create.h"
+#include "kwln_task_state.h"
+#include "sdf_resource.h"
+#include "itf.h"
+#include "fr_font_glyph_chain_count.h"
+#include "itf_mem_node.h"
+#include "itf_resource_segments.h"
+#include "sdf.h"
+#include "itf_panel_draw.h"
+#include "sdf_texture_file.h"
+#include "btl.h"
+#include "fr_font.h"
+#include "sdf_debug_api.h"
+#include "fr_font_atlas_packet.h"
+#include "kwln_draw_buffer.h"
+extern void frCreateDrawEnvPacket(FrFontGsPacket *packet);
+
+extern FrFontSystem frFontWork;
+
+extern SdfPoolNode sdfGrOtTable[];
+extern sdfDrawTag_t frFontSetupPacketLists[2];
+extern FrFontGsPacket frFontSetupPackets[2];
+extern sdfDrawTag_t frFontAtlasPacketLists[2];
+extern FrFontAtlasPacket frDumpFontTexturePacket[2];
+
+#define FR_FONT_ATLAS_SURFACE 83 /* the draw surface the atlas is submitted through */
+
+/* Draws the whole glyph atlas as a textured four-corner strip at a screen
+ * position and submits it, with the GS setup packet, through the current draw
+ * buffer's packet lists. Upstream: INCLUDE_ASM in game/code_00196478 (DDS2's
+ * game/code_0019E138); written from the retail routine. It differs from retail only in register allocation
+ * and in stack spills of intermediate values. */
+void frDumpFontTexture(s32 x, s32 y, s32 depth) {
+    FrFontAtlasPacket *packet;
+    FrFontGsPacket *setup;
+    FrFontAtlasDraw *draw;
+    s32 x1;
+    s32 y1;
+    s32 u1;
+    s32 v1;
+    u8 buffer;
+
+    buffer = dds3GetFrameID();
+    x = (x << 4) + 0x7000;
+    y = (y << 3) + 0x7900;
+    x1 = x + (frFontWork.atlas.width << 4);
+    y1 = y + (frFontWork.atlas.height << 3);
+    u1 = frFontWork.atlas.width << 4;
+    v1 = frFontWork.atlas.height << 4;
+
+    packet = &frDumpFontTexturePacket[buffer];
+    setup = &frFontSetupPackets[buffer];
+    draw = &packet->draw;
+    packet->dma.words[0] = 0x70000010;
+    packet->dma.words[1] = 0;
+    packet->dma.words[2] = 0;
+    packet->dma.words[3] = 0x50000010;
+    draw->gifTag = 0x10AE40000000800FULL;
+    draw->gifRegisters = 0xE;
+    draw->tex0.value = (u64)frFontWork.atlas.bufferBase |
+                       ((u64)frFontWork.atlas.bufferWidth << 14) | (0x14ULL << 20) |
+                       ((u64)frFontWork.atlas.widthExponent << 26) |
+                       ((u64)frFontWork.atlas.heightExponent << 30) | (1ULL << 34) |
+                       ((u64)frFontWork.imageBuffers[0] << 37) | (4ULL << 61);
+    draw->tex0.reg = 6;
+    draw->tex1.value = 0x60;
+    draw->tex1.reg = 0x14;
+    draw->clamp.value = 5;
+    draw->clamp.reg = 8;
+
+    draw->corners[0].uv.value = (u64)u1 | ((u64)v1 << 16);
+    draw->corners[0].uv.reg = 3;
+    draw->corners[0].rgbaq.value = 0x3F800000FFFFFFFFULL;
+    draw->corners[0].rgbaq.reg = 1;
+    draw->corners[0].xyz.value = (u64)x1 | ((u64)y1 << 16) | ((u64)depth << 32);
+    draw->corners[0].xyz.reg = 4;
+    draw->corners[1].uv.value = (u64)v1 << 16;
+    draw->corners[1].uv.reg = 3;
+    draw->corners[1].rgbaq.value = 0x3F800000FFFFFFFFULL;
+    draw->corners[1].rgbaq.reg = 1;
+    draw->corners[1].xyz.value = (u64)x | ((u64)y1 << 16) | ((u64)depth << 32);
+    draw->corners[1].xyz.reg = 4;
+    draw->corners[2].uv.value = (u64)u1;
+    draw->corners[2].uv.reg = 3;
+    draw->corners[2].rgbaq.value = 0x3F800000FFFFFFFFULL;
+    draw->corners[2].rgbaq.reg = 1;
+    draw->corners[2].xyz.value = (u64)x1 | ((u64)y << 16) | ((u64)depth << 32);
+    draw->corners[2].xyz.reg = 4;
+    draw->corners[3].uv.value = 0;
+    draw->corners[3].uv.reg = 3;
+    draw->corners[3].rgbaq.value = 0x3F800000FFFFFFFFULL;
+    draw->corners[3].rgbaq.reg = 1;
+    draw->corners[3].xyz.value = (u64)x | ((u64)y << 16) | ((u64)depth << 32);
+    draw->corners[3].xyz.reg = 4;
+
+    frCreateDrawEnvPacket(setup);
+    sdfDrawTagInit(&frFontSetupPacketLists[buffer]);
+    sdfDrawTagLink(&frFontSetupPacketLists[buffer], (u32)setup);
+    sdfGrOtTable[FR_FONT_ATLAS_SURFACE].append(&sdfGrOtTable[FR_FONT_ATLAS_SURFACE],
+                                                   &frFontSetupPacketLists[buffer]);
+    sdfDrawTagInit(&frFontAtlasPacketLists[buffer]);
+    sdfDrawTagLink(&frFontAtlasPacketLists[buffer], (u32)packet);
+    sdfGrOtTable[FR_FONT_ATLAS_SURFACE].append(&sdfGrOtTable[FR_FONT_ATLAS_SURFACE],
+                                                   &frFontAtlasPacketLists[buffer]);
+}
+#else
 INCLUDE_ASM(const s32, "game/code_0019E138", frDumpFontTexture);
+#endif
 
 /* Skip one encoded-text control without executing it; returns 1 for the stop codes and 2 for the voice trigger. */
 s32 itfSkipEncodedTextOpcode(s32 code, FrFontCtx *stream) {
