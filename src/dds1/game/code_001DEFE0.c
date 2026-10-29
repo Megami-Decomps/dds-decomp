@@ -50,6 +50,7 @@
 #include "btl_effect_table.h"
 #include "sdf_chip.h"
 #include "snd_slot.h"
+#include "snd_track_load_activity.h"
 #include "active_sound_node.h"
 #include "kwln.h"
 #include "btl_task_state.h"
@@ -114,7 +115,6 @@ extern void mnuAdvanceTitleStateUnderSemaphore(void);
 extern void mnuTitleStreamUpdateAndLogBgm(void);
 extern s32 p2sdLoadPcmFile(const char *name, u8 channel);
 extern void p2sdLoadSMGFile(s32 packed);
-extern s32 sndHasActiveFileLoad(void);
 extern s32 sndIsCommandBusySigned(void);
 /* Original-style implicit int, kept: matched code depends on it: dds3EffectFilter. */
 
@@ -10630,15 +10630,15 @@ void btlStartMoveOtherUnitsTask(BtlUnit *unit, s32 soundId) {
 }
 
 /* Flag 8 denotes packed-track loading, distinct from queued motion-SE files. */
-s32 sndHasActiveFileLoad(void) {
+SndTrackLoadActivity sndHasActiveFileLoad(void) {
     SoundSlotOwner *node = ((BtlActorWork *)btlGetRuntime())->soundSlotOwners;
     while (node) {
         if (node->flags & SOUND_SLOT_TRACK_LOADING) {
-            return 1;
+            return SND_TRACK_LOAD_ACTIVE;
         }
         node = node->next;
     }
-    return 0;
+    return SND_TRACK_LOAD_INACTIVE;
 }
 
 void btlQueueUnitSoundSlotFileLoad(SoundTaskArgs *args) {

@@ -47,6 +47,7 @@
 #include "btl_unit_geometry_api.h"
 #include "sdf_chip.h"
 #include "snd_slot.h"
+#include "snd_track_load_activity.h"
 #include "btl_task_state.h"
 #include "btl_task_condition.h"
 #include "active_sound_node.h"
@@ -262,8 +263,6 @@ extern s32 btlConstrainCameraEndpointHeight(BtlLinkedCommand *, BtlCamState *, s
 #define CURSOR (&btlCameraCursor)
 
 extern char D_00418C58[];
-
-extern s32 sndHasActiveFileLoad(void);
 
 extern void p2sdSetPcmBuffer(const void *, s32);
 
@@ -11938,15 +11937,15 @@ void btlStartMoveOtherUnitsTask(BtlUnit *unit, s32 soundId) {
 }
 
 /* Flag 8 denotes packed-track loading, distinct from queued motion-SE files. */
-s32 sndHasActiveFileLoad(void) {
+SndTrackLoadActivity sndHasActiveFileLoad(void) {
     SoundSlotOwner *node = ((BtlState *)btlGetRuntime())->soundSlotOwners;
     while (node != 0) {
         if ((node->flags & SOUND_SLOT_TRACK_LOADING) != 0) {
-            return 1;
+            return SND_TRACK_LOAD_ACTIVE;
         }
         node = node->next;
     }
-    return 0;
+    return SND_TRACK_LOAD_INACTIVE;
 }
 
 /* Queue a ready owner's packed track; stream slot 11 only supplies its file ID. */

@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "evt_run_context_api.h"
 #include "snd_packed_track_load_status.h"
+#include "snd_track_load_activity.h"
 #include "btl_sound.h"
 #include "btl_sound_resource_use_result.h"
 #include "btl_actor_resource_cleanup_api.h"
@@ -502,7 +503,6 @@ typedef struct SoundCursor {
 extern char D_00418C58[];
 
 
-extern s32 sndHasActiveFileLoad(void);
 
 
 extern void p2sdSetPcmBuffer(const void *, s32);
