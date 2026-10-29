@@ -115,11 +115,11 @@ s32 mnuFinishStaffConfigPopup(dds3ProcessID_t *request) {
     return menuRunPanel(context, 2, (void *)request);
 }
 
-extern void mnuSetStaffDisplayMode(s32 nextCategory, StaffMenuWork *menu);
+extern void mnuSetStaffDisplayMode(MnuStaffVisualCategory nextCategory, StaffMenuWork *menu);
 
 s32 mnuStartStaffDisplay(dds3ProcessID_t *task) {
     StaffMenuWork *context = (StaffMenuWork *)dds3GetProcessData(task);
-    mnuSetStaffDisplayMode(5, context);
+    mnuSetStaffDisplayMode(MNU_STAFF_VISUAL_CATEGORY_CAMP_CONFIGURATION, context);
     mnuActivatePanelAndConfigureGridResources(context->scrollPanel, context->singleResource, 0, 1);
     dds3ConfigProcessStart(0);
     return 1;

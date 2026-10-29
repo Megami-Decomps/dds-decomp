@@ -210,11 +210,11 @@ extern void mnuSortItems(struct MenuList *, s32, s32);
 extern void ptySkillMenuDrawEntry();
 extern u8 mnuCampSkillHeadingFrameIndices[];
 
-extern void mnuSetStaffDisplayMode(s32 nextCategory, StaffMenuWork *menu);
+extern void mnuSetStaffDisplayMode(MnuStaffVisualCategory nextCategory, StaffMenuWork *menu);
 
 /* Select the visual category used by the party-selection window. */
 void mnuSelectPartySelectionVisuals(u32 context) {
-    mnuSetStaffDisplayMode(4, context);
+    mnuSetStaffDisplayMode(MNU_STAFF_VISUAL_CATEGORY_PARTY_SELECTION, context);
 }
 
 void mnuNoOpPartySelectionCleanup(s32 context) {
@@ -739,7 +739,7 @@ u8 mnuIsStateNotOne(void) {
 
 /* Select the visual category used while the staff/party view is active. */
 void mnuSelectStaffSelectionVisuals(u32 context) {
-    mnuSetStaffDisplayMode(3, context);
+    mnuSetStaffDisplayMode(MNU_STAFF_VISUAL_CATEGORY_STAFF_SELECTION, context);
 }
 
 void mnuReleaseMenuWindowHandles(s32 context) {
@@ -1538,7 +1538,7 @@ MenuWindowContainer *ptySkillMenuRebuildAfterMutation(
 
 /* Select the visual category used by the skill-selection windows. */
 void mnuSelectSkillSelectionVisuals(u32 context) {
-    mnuSetStaffDisplayMode(1, context);
+    mnuSetStaffDisplayMode(MNU_STAFF_VISUAL_CATEGORY_SKILL_SELECTION, context);
 }
 
 void mnuNoOpItemSelectionTeardown(s32 context) {

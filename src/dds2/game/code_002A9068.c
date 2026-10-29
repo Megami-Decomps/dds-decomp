@@ -157,7 +157,6 @@ extern const char D_0042A950[];
 #define MNU_STAFF_PANEL_COUNT 3
 #define MNU_STAFF_PARTY_COUNT 5
 #define MNU_STAFF_PARTY_PRESENT_BIT 1
-#define MNU_STAFF_PARTY_CATEGORY 4
 #define MNU_CAMP_STATE_IDLE 0
 #define MNU_CAMP_STATE_ACTIVE 1
 #define MNU_CAMP_STATE_CLEANED_UP 2
@@ -335,22 +334,22 @@ const char D_0042A940[] = "cursor.mot";
 
 const char D_0042A950[] = "/camp/spr/n_min/";
 
-struct EffectSlotSet **mnuGetStaffCategoryEntries(s32 category, s32 *outEntryCount,
+struct EffectSlotSet **mnuGetStaffCategoryEntries(MnuStaffVisualCategory category, s32 *outEntryCount,
                                                  MenuStaffContext *menu) {
     switch (category) {
-    case 1:
+    case MNU_STAFF_VISUAL_CATEGORY_SKILL_SELECTION:
         *outEntryCount = 1;
         return &menu->titleFrames[1];
-    case 2:
+    case MNU_STAFF_VISUAL_CATEGORY_STAFF_DISPLAY:
         *outEntryCount = 1;
         return &menu->titleFrames[0];
-    case 3:
+    case MNU_STAFF_VISUAL_CATEGORY_STAFF_SELECTION:
         *outEntryCount = 2;
         return menu->resources.pairResources;
-    case MNU_STAFF_PARTY_CATEGORY:
+    case MNU_STAFF_VISUAL_CATEGORY_PARTY_SELECTION:
         *outEntryCount = 9;
         return menu->partyTitles;
-    case 5:
+    case MNU_STAFF_VISUAL_CATEGORY_CAMP_CONFIGURATION:
         *outEntryCount = 1;
         return &menu->contextTitle;
     default:
@@ -378,11 +377,11 @@ void movReleaseActivePartyCategoryModels(struct EffectSlotSet **modelHandles, s3
 }
 
 /* Resolve all category entries, except party models selected by active records. */
-void movReleaseCategoryModels(s32 category, MenuStaffContext *menu) {
+void movReleaseCategoryModels(MnuStaffVisualCategory category, MenuStaffContext *menu) {
     s32 entryCount;
     struct EffectSlotSet **modelHandles =
         mnuGetStaffCategoryEntries(category, &entryCount, menu);
-    if (category != MNU_STAFF_PARTY_CATEGORY) {
+    if (category != MNU_STAFF_VISUAL_CATEGORY_PARTY_SELECTION) {
         s32 resourceIndex;
         for (resourceIndex = 0; resourceIndex < entryCount; resourceIndex++) {
             effResolveAndReleaseResource(modelHandles[resourceIndex]);
@@ -393,7 +392,7 @@ void movReleaseCategoryModels(s32 category, MenuStaffContext *menu) {
 }
 
 /* Release each category entry's textures without overwriting the handle array. */
-void mnuReleaseStaffCategoryTextureHandles(s32 category, MenuStaffContext *menu) {
+void mnuReleaseStaffCategoryTextureHandles(MnuStaffVisualCategory category, MenuStaffContext *menu) {
     s32 entryCount;
     s32 resourceIndex = 0;
     struct EffectSlotSet **entries =
@@ -410,15 +409,15 @@ void mnuReleaseStaffCategoryTextureHandles(s32 category, MenuStaffContext *menu)
 
 
 /* On a category change, release old textures and resolve the new model entries. */
-void mnuSwitchCampVisualCategory(s32 nextCategory, MenuStaffContext *menu) {
-    s32 previousCategory = menu->categoryKind;
+void mnuSwitchCampVisualCategory(MnuStaffVisualCategory nextCategory, MenuStaffContext *menu) {
+    MnuStaffVisualCategory previousCategory = menu->categoryKind;
     if (nextCategory == previousCategory) {
         return;
     }
-    if (previousCategory != 0) {
+    if (previousCategory != MNU_STAFF_VISUAL_CATEGORY_NONE) {
         mnuReleaseStaffCategoryTextureHandles(previousCategory, menu);
     }
-    if (nextCategory != 0) {
+    if (nextCategory != MNU_STAFF_VISUAL_CATEGORY_NONE) {
         movReleaseCategoryModels(nextCategory, menu);
     }
     menu->categoryKind = nextCategory;

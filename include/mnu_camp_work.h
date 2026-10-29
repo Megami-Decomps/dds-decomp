@@ -33,7 +33,7 @@ typedef struct StaffMenuWork {
     u8 background[0x6B0];
     PartyPanel partyPanel; /* 0x7EC: initialized by mnuInitPartyPanelSlots */
     u8 pad8F8[0x18];
-    s32 displayMode;
+    MnuStaffVisualCategory visualCategory;
     u8 timer[0x10];
 } StaffMenuWork;
 

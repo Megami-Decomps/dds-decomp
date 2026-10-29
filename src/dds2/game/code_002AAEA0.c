@@ -15,7 +15,7 @@
 /* Declared before first use (were implicit int). */
 extern void dds3ConfigProcessStart(s32 mode);
 extern void mnuDrawCampIconBackdrop(MenuCampEffect *set, s32 surface);
-extern void mnuSwitchCampVisualCategory(s32 nextCategory, MenuStaffContext *menu);
+extern void mnuSwitchCampVisualCategory(MnuStaffVisualCategory nextCategory, MenuStaffContext *menu);
 
 
 extern s32 checkConfigState(void);
@@ -140,7 +140,7 @@ u32 mnuOpenCampConfigPanelTasks(dds3ProcessID_t *task) {
     MenuStaffContext *context;
 
     context = (MenuStaffContext *)dds3GetProcessData(task);
-    mnuSwitchCampVisualCategory(5, context);
+    mnuSwitchCampVisualCategory(MNU_STAFF_VISUAL_CATEGORY_CAMP_CONFIGURATION, context);
     mnuConfigurePanelResource(context->scrollPanel, context->contextTitle, 0, 0);
     dds3ConfigProcessStart(0);
     return 1;

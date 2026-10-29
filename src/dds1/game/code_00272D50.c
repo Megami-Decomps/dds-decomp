@@ -260,10 +260,10 @@ MnuStaffBulletListRefreshResult mnuRefreshStaffBulletItemList(
 }
 
 struct StaffMenuWork;
-extern void mnuSetStaffDisplayMode(s32 nextCategory, struct StaffMenuWork *menu);
+extern void mnuSetStaffDisplayMode(MnuStaffVisualCategory nextCategory, struct StaffMenuWork *menu);
 
 void mnuSelectStaffDisplayCategory(u32 context) {
-    mnuSetStaffDisplayMode(2, context);
+    mnuSetStaffDisplayMode(MNU_STAFF_VISUAL_CATEGORY_STAFF_DISPLAY, context);
 }
 
 void mnuNoOpStaffDisplayTeardown(StaffDisplayContext *context) {

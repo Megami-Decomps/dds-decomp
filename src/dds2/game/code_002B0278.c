@@ -47,7 +47,7 @@ extern void evtStageTestStop(void);
 extern s32 itfGridLookupValueOrDefault(EffectSlotSet *resource, s32 resourceIndex);
 extern void mnuResetWorkFloats(void);
 extern void mnuSetStateValue(u32 *out, u32 value);
-extern void mnuSwitchCampVisualCategory(s32 nextCategory, MenuStaffContext *menu);
+extern void mnuSwitchCampVisualCategory(MnuStaffVisualCategory nextCategory, MenuStaffContext *menu);
 extern void uiDrawUniformColorRect(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32 surfaceIndex);
 struct MenuListNode;
 struct StaffMenuRuntime;
@@ -630,7 +630,7 @@ u32 mnuAllowPartySelectionReturn(void) {
 
 /* Select the visual category used by the party-selection window. */
 void mnuSelectPartySelectionVisuals(u32 context) {
-    mnuSwitchCampVisualCategory(4, (MenuStaffContext *)context);
+    mnuSwitchCampVisualCategory(MNU_STAFF_VISUAL_CATEGORY_PARTY_SELECTION, (MenuStaffContext *)context);
 }
 
 void mnuNoOpPartySelectionCleanup(u32 callback) {
@@ -1265,7 +1265,7 @@ u8 mnuIsStateNotOne(void) {
 
 /* Select the visual category used while the staff/party view is active. */
 void mnuSelectStaffSelectionVisuals(u32 context) {
-    mnuSwitchCampVisualCategory(3, (MenuStaffContext *)context);
+    mnuSwitchCampVisualCategory(MNU_STAFF_VISUAL_CATEGORY_STAFF_SELECTION, (MenuStaffContext *)context);
 }
 
 void mnuReleaseMenuWindowHandles(s32 context) {
@@ -1964,7 +1964,7 @@ MenuWindowContainer *mnuSeekSelectedWindowCursor(
 
 /* Select the visual category used by the skill-selection windows. */
 void mnuSelectSkillSelectionVisuals(u32 context) {
-    mnuSwitchCampVisualCategory(1, (MenuStaffContext *)context);
+    mnuSwitchCampVisualCategory(MNU_STAFF_VISUAL_CATEGORY_SKILL_SELECTION, (MenuStaffContext *)context);
 }
 
 void mnuNoOpItemSelectionTeardown(s32 context) {

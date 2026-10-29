@@ -7,6 +7,7 @@
 #include "evt_world.h"
 #include "mnu_transition.h"
 #include "mnu_progress_load_state.h"
+#include "mnu_staff_visual_category.h"
 #ifdef VERSION_DDS2
 #include "mnu_shop.h"
 #endif
@@ -958,7 +959,7 @@ typedef struct MenuStaffContext {
     MenuSpriteState *spriteHandle; /* 0xAA38 */
     u8 padAA3C[0xC];
     void *menu;           /* 0xAA48: menu-mode-specific child allocation */
-    s32 categoryKind; /* 0xAA4C: currently resolved staff texture category. */
+    MnuStaffVisualCategory categoryKind; /* 0xAA4C: currently resolved staff texture category. */
     MenuGradientFade gradientFade; /* 0xAA50: staff-menu overlay transition state. */
     u8 padAA5C[0x3C4];
     u16 catalogOrdinals[0x100]; /* 0xAE20: item-ID-indexed list sorting keys */

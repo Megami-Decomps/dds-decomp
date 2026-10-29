@@ -40,7 +40,6 @@ extern char D_003B2020[];
 
 #define MNU_STAFF_PARTY_PRESENT_BIT 1
 
-#define MNU_STAFF_PARTY_CATEGORY 4
 
 
 /* Load the base image handles into the global table, retaining each resource. */
@@ -78,22 +77,22 @@ void mnuReleaseStaffImageHandles(struct EffectSlotSet **resources) {
 /* Return this category's handle array and count; unknown categories have none. */
 INCLUDE_RODATA(const s32, "game/code_00270FB0", D_003B2020);
 
-struct EffectSlotSet **mnuGetStaffCategoryEntries(s32 category, s32 *outEntryCount,
+struct EffectSlotSet **mnuGetStaffCategoryEntries(MnuStaffVisualCategory category, s32 *outEntryCount,
                                                   StaffMenuWork *menu) {
     switch (category) {
-    case 1:
+    case MNU_STAFF_VISUAL_CATEGORY_SKILL_SELECTION:
         *outEntryCount = 4;
         return menu->categoryGroup;
-    case 2:
+    case MNU_STAFF_VISUAL_CATEGORY_STAFF_DISPLAY:
         *outEntryCount = 2;
         return menu->categoryPair;
-    case 3:
+    case MNU_STAFF_VISUAL_CATEGORY_STAFF_SELECTION:
         *outEntryCount = 2;
         return menu->staffSlots.pairResources;
-    case MNU_STAFF_PARTY_CATEGORY:
+    case MNU_STAFF_VISUAL_CATEGORY_PARTY_SELECTION:
         *outEntryCount = 9;
         return menu->partyModels;
-    case 5:
+    case MNU_STAFF_VISUAL_CATEGORY_CAMP_CONFIGURATION:
         *outEntryCount = 1;
         return &menu->singleResource;
     default:
@@ -124,10 +123,10 @@ void movReleaseActivePartyCategoryModels(struct EffectSlotSet **modelHandles, s3
 }
 
 /* Resolve all category entries, except party models selected by active records. */
-void movReleaseCategoryModels(s32 category, StaffMenuWork *menu) {
+void movReleaseCategoryModels(MnuStaffVisualCategory category, StaffMenuWork *menu) {
     s32 entryCount;
     struct EffectSlotSet **modelHandles = mnuGetStaffCategoryEntries(category, &entryCount, menu);
-    if (category != MNU_STAFF_PARTY_CATEGORY) {
+    if (category != MNU_STAFF_VISUAL_CATEGORY_PARTY_SELECTION) {
         s32 resourceIndex;
         for (resourceIndex = 0; resourceIndex < entryCount; resourceIndex++) {
             effResolveAndReleaseResource(modelHandles[resourceIndex]);
@@ -139,7 +138,7 @@ void movReleaseCategoryModels(s32 category, StaffMenuWork *menu) {
 
 /* Release each category entry's textures without overwriting the handle array. */
 void mnuReleaseStaffCategoryTextureHandles(category, menu)
-s32 category;
+MnuStaffVisualCategory category;
 StaffMenuWork *menu;
 {
     s32 entryCount;
@@ -155,16 +154,16 @@ StaffMenuWork *menu;
 }
 
 /* On a category change, release old textures and resolve the new model entries. */
-void mnuSetStaffDisplayMode(s32 nextCategory, StaffMenuWork *menu) {
-    s32 previousCategory = menu->displayMode;
+void mnuSetStaffDisplayMode(MnuStaffVisualCategory nextCategory, StaffMenuWork *menu) {
+    MnuStaffVisualCategory previousCategory = menu->visualCategory;
     if (nextCategory != previousCategory) {
-        if (previousCategory != 0) {
+        if (previousCategory != MNU_STAFF_VISUAL_CATEGORY_NONE) {
             mnuReleaseStaffCategoryTextureHandles(previousCategory, menu);
         }
-        if (nextCategory != 0) {
+        if (nextCategory != MNU_STAFF_VISUAL_CATEGORY_NONE) {
             movReleaseCategoryModels(nextCategory, menu);
         }
-        menu->displayMode = nextCategory;
+        menu->visualCategory = nextCategory;
     }
 }
 
