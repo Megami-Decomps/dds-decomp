@@ -1254,11 +1254,13 @@ void mdlGetFilebase(s32 selectionListIndex, s32 selectionIndex, char *destinatio
 #define MDL_PART_INFO_TAG 0x30424950
 
 /* A part-info packet has command 1 and the PIB0 tag in its inline packet header. */
-s32 mdlIsPartInfoPacket(PacWork *packetWork) {
-    s32 isPartInfoPacket = 0;
+MdlPartInfoPacketResult mdlIsPartInfoPacket(const PacWork *packetWork) {
+    MdlPartInfoPacketResult isPartInfoPacket = MDL_PART_INFO_PACKET_NO_MATCH;
 
-    if (((SdfPacModelPacketHeader *)packetWork->packet)->command == MDL_PART_PACKET_COMMAND) {
-        isPartInfoPacket = ((SdfPacModelPacketHeader *)packetWork->packet)->tag == MDL_PART_INFO_TAG;
+    if (((const SdfPacModelPacketHeader *)packetWork->packet)->command == MDL_PART_PACKET_COMMAND) {
+        isPartInfoPacket = ((const SdfPacModelPacketHeader *)packetWork->packet)->tag == MDL_PART_INFO_TAG
+                               ? MDL_PART_INFO_PACKET_MATCH
+                               : MDL_PART_INFO_PACKET_NO_MATCH;
     }
     return isPartInfoPacket;
 }
@@ -1343,7 +1345,7 @@ PacWork *mdlPackSet(PacWork *packetWork, s32 group, s32 id, MdlRegistrationMode 
     s32 remainingParts;
     s32 payloadValue;
 
-    if (mdlIsPartInfoPacket(packetWork) == 0) {
+    if (mdlIsPartInfoPacket(packetWork) == MDL_PART_INFO_PACKET_NO_MATCH) {
         return mdlPackSetOld(packetWork, group, id, registrationMode);
     }
     record = (MdlRecord *)packetWork->dataCursor;
