@@ -17,6 +17,7 @@
 #include "itf_mes_window.h"
 #include "itf_mes_panel_mode.h"
 #include "itf_mes_entry_start_api.h"
+#include "itf_mes_select_def_key_result.h"
 #include "evt_world.h"
 #include "sdf_resource.h"
 #include "dat_state.h"
@@ -369,8 +370,6 @@ s32 dspCaptureWindowSecondPanelValue(void) {
 }
 
 extern s8 itfMesMngGetPhase(s32 windowIndex);
-
-extern s32 itfMesMngSetSelectDefKey(s32 window, s32 id, s32 value);
 
 extern void itfMesBuildOptionList(ItfMesWindowIndex window, ItfMesEntryIndex entryIndex);
 

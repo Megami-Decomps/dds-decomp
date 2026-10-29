@@ -4,6 +4,7 @@
 #include "scr_command_parameter_index.h"
 #include "itf_mes_entry_start_api.h"
 #include "itf_mes_voice_cue_result.h"
+#include "itf_mes_select_def_key_result.h"
 #include "itf.h"
 #include "itf_message_manager_task.h"
 #include "itf_option_bit_index_api.h"
@@ -60,11 +61,6 @@ void ResolveResourceAddress(ItfMesSub *resource);
 void DestructFlow(ItfMesWindowIndex window);
 
 void itfMesSetTextSlotFromValue(ItfMesWindowIndex window, s32 slotIndex, s32 value, s32 selector);
-
-s32 itfMesMngSetSelectDefKey(ItfMesWindowIndex window, s32 id, s32 value);
-
-
-
 
 void frFontCenterGlyphChainAt(s32 x, s32 y, _FRQ *glyphChain);
 
@@ -879,16 +875,17 @@ void itfMesMngChangeWindowType(ItfMesWindowIndex window, ItfMesPanelMode panelMo
 }
 
 /* Set or append the option with `id` in the window's option list; ids 1, 6, 7 and >= 16 are rejected. */
-s32 itfMesMngSetSelectDefKey(ItfMesWindowIndex window, s32 id, s32 value) {
+ItfMesSelectDefKeyResult itfMesMngSetSelectDefKey(ItfMesWindowIndex window,
+    s32 id, s32 value) {
     ItfMesBlk40 *optionBlock = &pinst[window].mes->blk40;
     ItfMesOption *option = NULL;
     s32 optionIndex;
 
     if ((u32)id >= 0x10) {
-        return 0;
+        return ITF_MES_SELECT_DEF_KEY_REJECTED;
     }
     if (id == 1 || id == 6 || id == 7) {
-        return 0;
+        return ITF_MES_SELECT_DEF_KEY_REJECTED;
     }
     for (optionIndex = 0; optionIndex < optionBlock->optionCount; optionIndex++) {
         if (optionBlock->options[optionIndex].id == id) {
@@ -898,14 +895,14 @@ s32 itfMesMngSetSelectDefKey(ItfMesWindowIndex window, s32 id, s32 value) {
     }
     if (option == NULL) {
         if (optionBlock->optionCount >= 15) {
-            return 0;
+            return ITF_MES_SELECT_DEF_KEY_REJECTED;
         }
         option = &optionBlock->options[optionBlock->optionCount];
         optionBlock->optionCount++;
     }
     option->id = id;
     option->value = value;
-    return 1;
+    return ITF_MES_SELECT_DEF_KEY_SET;
 }
 
 /* Build and release a temporary glyph chain to measure the widest grouped row.
