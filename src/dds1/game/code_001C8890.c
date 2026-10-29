@@ -1777,7 +1777,7 @@ void func_001CB410(BtlTask *actor) {
     }
 
     if (datCommandRecords[skillId].unk30 == 2) {
-        if ((actor->unit->status.flags & 0x200) == 0 && btlCanSpawnAnotherEnemy(actor->unit) != 0) {
+        if ((actor->unit->status.flags & 0x200) == 0 && btlCanSpawnAnotherEnemy(actor->unit) != BTL_ENEMY_SPAWN_CAPACITY_EXHAUSTED) {
             currentUnit = btlGetIndexListEntry(actor->indexWork.indices, 0);
             effectTask = btlCreateReferencedBattleEffectTask(unit->resourceNode, unit, currentUnit, 2);
             effectTask->startCondition.kind = 7;
