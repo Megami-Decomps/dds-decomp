@@ -19,6 +19,7 @@
 #include "dat_unit_dying_api.h"
 #include "btl_scene_party_level_threshold_api.h"
 #include "dat_affinity_selector.h"
+#include "dat_affinity_value_api.h"
 #include "dat_effective_affinity_api.h"
 #include "pty_skill_nibble_state.h"
 #include "dat_world_field_flags.h"
@@ -343,7 +344,7 @@ DatEffectiveAffinityResult datGetEffectiveAffinity(
     return calculatedValue;
 }
 
-u16 datGetAisyoValue(const datUnitWork_t *unit, DatAffinitySelector selector) {
+DatAffinityValue datGetAisyoValue(const datUnitWork_t *unit, DatAffinitySelector selector) {
     return (u16)datGetEffectiveAffinity(unit, selector);
 }
 
@@ -1804,7 +1805,6 @@ s32 evtPushSecondRosterMaximumHp(void) {
     return 1;
 }
 
-extern u16 datGetAisyoValue(const datUnitWork_t *, DatAffinitySelector);
 /* Push the first entry's selected stat; selectors -1, 16 and 17 use the default. */
 s32 evtPushFirstRosterSelectedStat(void) {
     DatAffinitySelector selector = datCommandSelectors[evtWorkScriptContext.commandIndex].stat;
