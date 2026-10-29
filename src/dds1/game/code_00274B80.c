@@ -1544,7 +1544,107 @@ void mnuSelectSkillSelectionVisuals(u32 context) {
 void mnuNoOpItemSelectionTeardown(s32 context) {
 }
 
+#ifdef NON_MATCHING
+#include "camp_menu_context.h"
+#include "mnu_input.h"
+#include "snd_sequence_volume_pan.h"
+#include "ui_color.h"
+#include "itf_draw_grid.h"
+#include "eff_resource_slots.h"
+#include "mnu.h"
+#include "brs_level_progress_api.h"
+#include "evt_stage_test_api.h"
+#include "mnu_staff.h"
+#include "sdf_resource.h"
+#include "sdf.h"
+#include "mnu_shop.h"
+#include "mnu_scroll_panel.h"
+#include "mnu_list.h"
+#include "dat_state.h"
+#include "prf_skill_list_buffer.h"
+#include "kwln.h"
+#include "pty_skill_menu_api.h"
+#include "eff.h"
+#include "itf.h"
+#include "sdf_chip.h"
+#include "mnu_panel_state.h"
+#include "dsp_name.h"
+#include "eff_random.h"
+#include "fr_font.h"
+#include "btl.h"
+#include "mnu_staff.h"
+extern void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade, datUnitWork_t *actor, u16 rangeId, s32 style, s32 dim, EffectSlotSet *specialResource, EffectSlotSet *costResource, u32 texture);
+extern u32 scrGetSecondaryScriptFlag(datUnitWork_t *work, u16 flagId);
+
+extern void ptySkillMenuDrawEntry();
+extern void mnuDispatchEntryWords(EffectSlotSet *, s32, struct MenuListNode *);
+extern void itfGridCopyEntryQuad(s32 resource, s32 entryIndex);
+
+/* Draws one row of the skill menu list: the category marker on the list head,
+ * the frame pieces of the index-0 header row, or a skill row (a secondary-flag
+ * badge and the range cost and icon) or an empty slot's frame, word table and
+ * selection marker. Upstream: INCLUDE_ASM in game/code_00274B80; written from
+ * the retail routine. It differs from retail in register allocation and
+ * scheduling, and in the empty-slot frame flag (a compare where retail
+ * branches). The category marker table is an initialized local array (checked
+ * against rodata D_003B22F0), as retail copies it to the frame. */
+void ptySkillMenuDrawEntry(s32 x, s32 y, s32 depth, struct MenuList *list,
+                           struct MenuListNode *node, s32 texture) {
+    s32 categoryMarkerPositions[4][2] = {
+        {0x17F0, 0x390}, {0x17C0, 0x390}, {0x1950, 0x390}, {0x19D0, 0x390},
+    };
+    CampMenuContext *context = (CampMenuContext *)list->context;
+    s32 selected = list->cursor == node;
+    u32 skill;
+    datUnitWork_t *actor = &DDS3_GBWK->party[context->partyWindow.lists[0]->cursor->index];
+
+    if (node == list->head && list->categoryMarkerEnabled != 0) {
+        itfDrawGridWithResolvedSlot(categoryMarkerPositions[list->categoryIndex][0] + 0x30,
+                                    categoryMarkerPositions[list->categoryIndex][1], depth, 1,
+                                    (EffectSlotSet *)(u32)context->variant, 0x32, texture);
+    }
+    if (node->index == 0) {
+        s32 markerSelected;
+
+        if (selected != 0) {
+            markerSelected = 0;
+        } else {
+            markerSelected = 1;
+        }
+        itfDrawGridWithResolvedSlot(x + 0x4E0, y, depth, 1, context->windowSpriteResources,
+                                    markerSelected + 0x12, texture);
+        itfDrawGridWithResolvedSlot(x + 0xA0, y + 0x40, depth, 1, (EffectSlotSet *)(u32)context->unk68,
+                                    0xA - markerSelected, texture);
+        itfDrawGridWithResolvedSlot(x + 0x7E0, y + 0x40, depth, 1, (EffectSlotSet *)(u32)context->unk68,
+                                    0xA - markerSelected, texture);
+        return;
+    }
+    skill = node->sortKeyPrimary;
+    if (skill - 1 <= 0xFFFD && scrGetSecondaryScriptFlag(actor, (u16)skill) != 0) {
+        itfDrawGridWithResolvedSlot(x - 0x80, y - 0x38, depth, 1, (EffectSlotSet *)(u32)context->variant,
+                                    0x32, texture);
+    }
+    if (skill != 0 && skill != 0xFFFF) {
+        mnuDrawRangeCostAndIcon(x + 0x930, y + 0x30, depth, 0x80, list->scale, actor, (u16)skill, selected,
+                                node->flags48 & 1, (EffectSlotSet *)(u32)context->unk68,
+                                (EffectSlotSet *)(u32)context->displayVariant, texture);
+        return;
+    }
+    {
+        EffectSlotSet *resource = (EffectSlotSet *)(u32)context->unk68;
+        s32 highlight = selected != 0;
+        s32 entryIndex = highlight + 9;
+
+        mnuDispatchEntryWords(resource, entryIndex, node);
+        itfDrawGridWithResolvedSlot(x + 0x100, y + 0x30, depth, 1, resource, entryIndex, texture);
+        itfGridCopyEntryQuad((s32)resource, entryIndex);
+        itfDrawGridWithResolvedSlot(x + 0x930, y + 0x30, depth, 1, (EffectSlotSet *)(u32)context->unk68,
+                                    highlight + 0xB, texture);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "game/code_00274B80", ptySkillMenuDrawEntry);
+#endif
 
 extern s32 ptyHasSkill(datUnitWork_t *unit, s32 skillId);
 extern u32 scrGetSecondaryScriptFlag(datUnitWork_t *unit, u16 code);
