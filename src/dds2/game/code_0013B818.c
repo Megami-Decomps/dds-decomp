@@ -2419,7 +2419,7 @@ void fldApplySceneRoomSelection(FldActorEntry *actorEntry) {
     if (actorEntry->selectedRoom != 0) {
         fldGlobalBase.selectedRoomIndex = actorEntry->selectedRoom - 1;
     }
-    fldGlobalBase.rowIdx = actorEntry->rowIndex;
+    fldGlobalBase.cameraFollowRowIndex = actorEntry->cameraFollowRowIndex;
 }
 
 #include "dat_state.h"
@@ -2922,7 +2922,7 @@ void fldInitializeActorLinkedSequence(s32 mode, s32 index, fldSceneParam_t *sequ
             index != entry->secondaryMotion || entry->variantMode != 0) {
             continue;
         }
-        fldGlobalBase.rowIdx = entry->rowIndex;
+        fldGlobalBase.cameraFollowRowIndex = entry->cameraFollowRowIndex;
         if (entry->flags54 != 0) {
             D_00435F24 = entry->flags54;
             strcpy((char *)D_00387D60, entry->taskName);

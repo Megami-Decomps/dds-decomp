@@ -55,7 +55,7 @@ typedef struct FldActorEntry {
     s16 sequenceValue; /* 0x36: flag ID or deferred-field selector */
     char sequenceName[0xC]; /* 0x38 */
     s8 linkKind; /* 0x44 */
-    s8 rowIndex;
+    s8 cameraFollowRowIndex; /* 0x45: camera-follow row selector. */
     char linkName[0xC]; /* 0x46 */
     s8 sequenceCode; /* 0x52 */
     s8 selectedRoom; /* 0x53: optional one-based room */
@@ -92,7 +92,7 @@ typedef struct FldActorEntry {
     s16 warpEntry2;
     char warpName[0xC]; /* 0x38 */
     s8 linkKind; /* 0x44 */
-    s8 rowIndex; /* 0x45: selected row, matching the DDS1 actor entry. */
+    s8 cameraFollowRowIndex; /* 0x45: camera-follow row selector, matching DDS1. */
     char linkName[0xC]; /* 0x46 */
     s8 sequenceCode; /* 0x52: sequence selector, matching the DDS1 actor entry. */
     s8 selectedRoom; /* 0x53: optional one-based room */

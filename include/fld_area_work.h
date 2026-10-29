@@ -88,6 +88,9 @@ enum FldPositionUpdateStateValue {
 
 typedef s32 FldCameraMode;
 
+/* Runtime index into the FLDALL.TBL camera-follow row table. */
+typedef s32 FldCameraFollowRowIndex;
+
 enum FldCameraMode {
     FLD_CAMERA_MODE_PLAYER_FOLLOW = 0,
     FLD_CAMERA_MODE_OBJECT_FOCUS = 1,
@@ -128,7 +131,7 @@ typedef struct FldAreaWork {
     char requestedSceneName[0x10];
     FldCameraMode mode;          /* 0x50: camera follow/focus state */
     s32 unk54;
-    s32 rowIdx;
+    FldCameraFollowRowIndex cameraFollowRowIndex; /* 0x58 */
     f32 cameraSupportHeightOffset;
     f32 unk60;
     f32 negatedAngle;

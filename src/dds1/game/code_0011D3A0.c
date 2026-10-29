@@ -1754,7 +1754,7 @@ void fldResetFieldRuntimeState(FldRuntimeResetMode mode) {
     area->overlayCounter = 0;
     area->mapBannerFadeMode = FLD_MAP_BANNER_FADE_VISIBLE;
     area->unkD8 = -1;
-    area->rowIdx = 0;
+    area->cameraFollowRowIndex = 0;
     area->sequenceCode = 1;
     area->cameraSupportHeightOffset = 0.0f;
     area->unk60 = 0.0f;

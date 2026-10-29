@@ -3641,12 +3641,12 @@ void fldProbeCameraSupportSurface(void) {
     xs[2] = fldMatterTable[index].vertices[2][0] + offset[0];
     ys[2] = fldMatterTable[index].vertices[2][1] + offset[1];
     zs[2] = fldMatterTable[index].vertices[2][2] + offset[2];
-    x = cam->x - sdfSin(cam->negatedAngle * 3.14f / 180.0f) * fldCameraFollowRows[cam->rowIdx].dist;
+    x = cam->x - sdfSin(cam->negatedAngle * 3.14f / 180.0f) * fldCameraFollowRows[cam->cameraFollowRowIndex].dist;
     cam->cameraSupportHeightOffset = cam->y - fldCamCalcSlopeOffset(x,
-        cam->z - sdfCos(cam->negatedAngle * 3.14f / 180.0f) * fldCameraFollowRows[cam->rowIdx].dist, xs, ys, zs);
-    x = cam->x - sdfSin(-cam->angle * 3.14f / 180.0f) * fldCameraFollowRows[cam->rowIdx].dist;
+        cam->z - sdfCos(cam->negatedAngle * 3.14f / 180.0f) * fldCameraFollowRows[cam->cameraFollowRowIndex].dist, xs, ys, zs);
+    x = cam->x - sdfSin(-cam->angle * 3.14f / 180.0f) * fldCameraFollowRows[cam->cameraFollowRowIndex].dist;
     cam->cameraSupportHeightDelta = cam->y - fldCamCalcSlopeOffset(x,
-        cam->z - sdfCos(-cam->angle * 3.14f / 180.0f) * fldCameraFollowRows[cam->rowIdx].dist, xs, ys, zs);
+        cam->z - sdfCos(-cam->angle * 3.14f / 180.0f) * fldCameraFollowRows[cam->cameraFollowRowIndex].dist, xs, ys, zs);
     if (cam->overrideSupportRecordIndex == -1) {
         cam->cameraSupportHeightOffset = 0.0f;
     }
@@ -3703,17 +3703,17 @@ void fldInitializeCameraViewFromPlayer(void) {
     phase = area->negatedAngle * radiansPerHalfTurn / 180.0f;
     trigResult = sdfSin(phase);
     nearPoint.f[0] = area->x - trigResult * 80.0f;
-    nearPoint.f[1] = area->y + fldCameraFollowRows[area->rowIdx].y;
+    nearPoint.f[1] = area->y + fldCameraFollowRows[area->cameraFollowRowIndex].y;
     phase = area->negatedAngle * radiansPerHalfTurn / 180.0f;
     trigResult = sdfCos(phase);
     nearPoint.f[2] = area->z - trigResult * 80.0f;
     phase = area->negatedAngle * radiansPerHalfTurn / 180.0f;
     trigResult = sdfSin(phase);
-    farPoint.f[0] = area->x + trigResult * fldCameraFollowRows[area->rowIdx].dist;
-    farPoint.f[1] = area->y + fldCameraFollowRows[area->rowIdx].targetY;
+    farPoint.f[0] = area->x + trigResult * fldCameraFollowRows[area->cameraFollowRowIndex].dist;
+    farPoint.f[1] = area->y + fldCameraFollowRows[area->cameraFollowRowIndex].targetY;
     phase = area->negatedAngle * radiansPerHalfTurn / 180.0f;
     trigResult = sdfCos(phase);
-    rowDistance = fldCameraFollowRows[area->rowIdx].dist;
+    rowDistance = fldCameraFollowRows[area->cameraFollowRowIndex].dist;
     positionZ = area->z;
     farPoint.f[2] = positionZ + trigResult * rowDistance;
     PCP_COPY_VECTOR_UNCLOBBERED(fldLookAtNearPoint, &nearPoint);
@@ -3726,7 +3726,7 @@ void fldInitializeCameraViewFromPlayer(void) {
     heightOffset = area->cameraSupportHeightOffset;
     farPoint.f[1] += heightOffset;
     referencePoint.f[0] = area->x;
-    referencePoint.f[1] = area->y + fldCameraFollowRows[area->rowIdx].y;
+    referencePoint.f[1] = area->y + fldCameraFollowRows[area->cameraFollowRowIndex].y;
     referencePoint.f[2] = positionZ;
     SDF_VU0_COPYVECTOR(&referenceCopy, &referencePoint);
     SDF_VU0_COPYVECTOR(&farCopy, &farPoint);
@@ -3818,13 +3818,13 @@ void func_0012F400(void) {
     camera->z = playerPosition.f[2];
 
     nearPoint.f[0] = camera->x - sdfSin((camera->angle + 180.0f) * 3.14f / 180.0f);
-    nearPoint.f[1] = camera->y + fldCameraFollowRows[camera->rowIdx].y;
+    nearPoint.f[1] = camera->y + fldCameraFollowRows[camera->cameraFollowRowIndex].y;
     nearPoint.f[2] = camera->z + sdfCos((camera->angle + 180.0f) * 3.14f / 180.0f);
     farPoint.f[0] = camera->x + sdfSin(camera->negatedAngle * 3.14f / 180.0f) *
-                                    fldCameraFollowRows[camera->rowIdx].dist;
-    farPoint.f[1] = camera->y + fldCameraFollowRows[camera->rowIdx].targetY;
+                                    fldCameraFollowRows[camera->cameraFollowRowIndex].dist;
+    farPoint.f[1] = camera->y + fldCameraFollowRows[camera->cameraFollowRowIndex].targetY;
     farPoint.f[2] = camera->z + sdfCos(camera->negatedAngle * 3.14f / 180.0f) *
-                                    fldCameraFollowRows[camera->rowIdx].dist;
+                                    fldCameraFollowRows[camera->cameraFollowRowIndex].dist;
     PCP_COPY_VECTOR_UNCLOBBERED(fldLookAtNearPoint, nearPoint.f);
     PCP_COPY_VECTOR_UNCLOBBERED(fldCamTarget, farPoint.f);
 
@@ -3833,7 +3833,7 @@ void func_0012F400(void) {
     camera->unk60 = camera->cameraSupportHeightOffset;
     farPoint.f[1] += heightOffset;
     referencePoint.f[0] = camera->x;
-    referencePoint.f[1] = camera->y + fldCameraFollowRows[camera->rowIdx].y;
+    referencePoint.f[1] = camera->y + fldCameraFollowRows[camera->cameraFollowRowIndex].y;
     referencePoint.f[2] = camera->z;
     PCP_COPY_VECTOR_UNCLOBBERED(referenceCopy.f, referencePoint.f);
     PCP_COPY_VECTOR_UNCLOBBERED(farCopy.f, farPoint.f);
@@ -3869,13 +3869,13 @@ void fldUpdateCameraProjectionEndpoints(void) {
     f32 angle;
 
     D_0038BAF0[0] = cam->x - sdfSin(cam->negatedAngle * 3.14f / 180.0f) * 80.0f;
-    D_0038BAF0[1] = cam->y + fldCameraFollowRows[cam->rowIdx].y;
+    D_0038BAF0[1] = cam->y + fldCameraFollowRows[cam->cameraFollowRowIndex].y;
     D_0038BAF0[2] = cam->z - sdfCos(cam->negatedAngle * 3.14f / 180.0f) * 80.0f;
     D_0038BAF0[3] = 1.0f;
     angle = cam->negatedAngle * 3.14f / 180.0f;
-    D_0038BB00[0] = cam->x + sdfSin(angle) * fldCameraFollowRows[cam->rowIdx].dist;
-    D_0038BB00[1] = cam->y + fldCameraFollowRows[cam->rowIdx].targetY;
-    D_0038BB00[2] = cam->z + sdfCos(angle) * fldCameraFollowRows[cam->rowIdx].dist;
+    D_0038BB00[0] = cam->x + sdfSin(angle) * fldCameraFollowRows[cam->cameraFollowRowIndex].dist;
+    D_0038BB00[1] = cam->y + fldCameraFollowRows[cam->cameraFollowRowIndex].targetY;
+    D_0038BB00[2] = cam->z + sdfCos(angle) * fldCameraFollowRows[cam->cameraFollowRowIndex].dist;
     D_0038BB00[3] = 1.0f;
 }
 
@@ -3945,7 +3945,7 @@ void func_0012FA58(void) {
     f32 unitZ;
 
     nearPoint.f[0] = fldGlobalBase.x - sdfSin(fldGlobalBase.negatedAngle * 3.14f / 180.0f) * 50.0f;
-    nearPoint.f[1] = fldGlobalBase.y + fldCameraFollowRows[fldGlobalBase.rowIdx].y;
+    nearPoint.f[1] = fldGlobalBase.y + fldCameraFollowRows[fldGlobalBase.cameraFollowRowIndex].y;
     nearPoint.f[2] = fldGlobalBase.z - sdfCos(fldGlobalBase.negatedAngle * 3.14f / 180.0f) * 50.0f;
     nearPoint.f[3] = cameraScalar;
     nearPoint.f[1] += fldGlobalBase.cameraTilt;
@@ -3960,7 +3960,7 @@ void func_0012FA58(void) {
     }
     dds3CameraObjectBasicSetWorldEye(*sceneSlot, &nearPoint.q);
     referencePoint[0] = fldGlobalBase.x;
-    referencePoint[1] = fldGlobalBase.y + fldCameraFollowRows[fldGlobalBase.rowIdx].y;
+    referencePoint[1] = fldGlobalBase.y + fldCameraFollowRows[fldGlobalBase.cameraFollowRowIndex].y;
     referencePoint[2] = fldGlobalBase.z;
     if (fldGlobalBase.cameraTiltActive) {
         cameraScalar = 3.0f;
@@ -3968,12 +3968,12 @@ void func_0012FA58(void) {
         cameraScalar = 1.0f;
     }
     fx = fldGlobalBase.x + sdfSin(fldGlobalBase.negatedAngle * 3.14f / 180.0f) *
-        (fldCameraFollowRows[fldGlobalBase.rowIdx].dist / cameraScalar);
+        (fldCameraFollowRows[fldGlobalBase.cameraFollowRowIndex].dist / cameraScalar);
     farPoint.f[0] = fx;
-    fy = fldGlobalBase.y + fldCameraFollowRows[fldGlobalBase.rowIdx].targetY;
+    fy = fldGlobalBase.y + fldCameraFollowRows[fldGlobalBase.cameraFollowRowIndex].targetY;
     farPoint.f[1] = fy;
     fz = fldGlobalBase.z + sdfCos(fldGlobalBase.negatedAngle * 3.14f / 180.0f) *
-        (fldCameraFollowRows[fldGlobalBase.rowIdx].dist / cameraScalar);
+        (fldCameraFollowRows[fldGlobalBase.cameraFollowRowIndex].dist / cameraScalar);
     farPoint.f[2] = fz;
     farPoint.f[3] = 1.0f;
     if (D_00435F30 != 0) {
@@ -4072,7 +4072,7 @@ void fldUpdateCameraViewFromPlayer(void) {
     dds3GetRotPoseSet(fldPlayerObject);
     angle = EulerAngleAxisY() * 180.0f / 3.14f;
     nearPoint[0] = fldLookAtNearPoint[0] + (fldGlobalBase.x - fldLookAtNearPoint[0]);
-    nearPoint[1] = fldLookAtNearPoint[1] + ((fldGlobalBase.y + fldCameraFollowRows[fldGlobalBase.rowIdx].y) - fldLookAtNearPoint[1]);
+    nearPoint[1] = fldLookAtNearPoint[1] + ((fldGlobalBase.y + fldCameraFollowRows[fldGlobalBase.cameraFollowRowIndex].y) - fldLookAtNearPoint[1]);
     nearPoint[2] = fldLookAtNearPoint[2] + (fldGlobalBase.z - fldLookAtNearPoint[2]);
     fldGlobalBase.angle = angle;
     fldGlobalBase.targetAngle = angle;
@@ -4268,7 +4268,7 @@ void func_001302A0(void) {
     secondPoint.f[3] = 1.0f;
     nearPoint.f[0] = area->x;
     nearPoint.f[2] = area->z;
-    nearPoint.f[1] = area->y + fldCameraFollowRows[area->rowIdx].y;
+    nearPoint.f[1] = area->y + fldCameraFollowRows[area->cameraFollowRowIndex].y;
     nearPoint.f[0] = fldLookAtNearPoint[0] + (nearPoint.f[0] - fldLookAtNearPoint[0]) * 0.5f;
     nearPoint.f[1] = fldLookAtNearPoint[1] + (nearPoint.f[1] - fldLookAtNearPoint[1]) * 0.125f;
     nearPoint.f[2] = fldLookAtNearPoint[2] + (nearPoint.f[2] - fldLookAtNearPoint[2]) * 0.5f;
@@ -4278,21 +4278,21 @@ void func_001302A0(void) {
     farPoint.f[1] = area->focusPos[1];
     farPoint.f[2] = area->focusPos[2];
     farPoint.f[3] = 1.0f;
-    if (fldCameraFollowRows[area->rowIdx].flags & FLD_CAM_ROW_NAMED) {
+    if (fldCameraFollowRows[area->cameraFollowRowIndex].flags & FLD_CAM_ROW_NAMED) {
         secondary = dds3GetControlScene();
         node = dds3SceneBasicSearchNameAndType(
-            secondary, 4, (const u8 *)D_0038A9B0[fldCameraFollowRows[area->rowIdx].namedCamera].firstNode);
+            secondary, 4, (const u8 *)D_0038A9B0[fldCameraFollowRows[area->cameraFollowRowIndex].namedCamera].firstNode);
         transform = node->inner;
         firstPoint.f[0] = transform->position[0];
         firstPoint.f[1] = transform->position[1];
         firstPoint.f[2] = transform->position[2];
         node = dds3SceneBasicSearchNameAndType(
-            secondary, 4, (const u8 *)D_0038A9B0[fldCameraFollowRows[area->rowIdx].namedCamera].secondNode);
+            secondary, 4, (const u8 *)D_0038A9B0[fldCameraFollowRows[area->cameraFollowRowIndex].namedCamera].secondNode);
         transform = node->inner;
         secondPoint.f[0] = transform->position[0];
         secondPoint.f[1] = transform->position[1];
         secondPoint.f[2] = transform->position[2];
-        named = &D_0038A9B0[fldCameraFollowRows[area->rowIdx].namedCamera];
+        named = &D_0038A9B0[fldCameraFollowRows[area->cameraFollowRowIndex].namedCamera];
         switch (named->axis) {
         case 0:
             coordinate = area->x;
@@ -4323,13 +4323,13 @@ void func_001302A0(void) {
         farPoint.f[2] = firstPoint.f[2] * weight + secondPoint.f[2] * remaining;
     }
     SDF_VU0_COPYVECTOR(&previousFar, &farPoint);
-    if (fldCameraFollowRows[fldGlobalBase.rowIdx].flags & FLD_CAM_ROW_LIMITED) {
+    if (fldCameraFollowRows[fldGlobalBase.cameraFollowRowIndex].flags & FLD_CAM_ROW_LIMITED) {
         dx = farPoint.f[0] - nearPoint.f[0];
         dy = farPoint.f[1] - nearPoint.f[1];
         dz = farPoint.f[2] - nearPoint.f[2];
         distance = fsqrtf(dx * dx + dy * dy + dz * dz);
-        nearLimit = fldCameraFollowRows[fldGlobalBase.rowIdx].dist;
-        farLimit = fldCameraFollowRows[fldGlobalBase.rowIdx].targetY;
+        nearLimit = fldCameraFollowRows[fldGlobalBase.cameraFollowRowIndex].dist;
+        farLimit = fldCameraFollowRows[fldGlobalBase.cameraFollowRowIndex].targetY;
         if (farLimit + nearLimit < distance) {
             dx /= distance;
             dy /= distance;
@@ -4364,7 +4364,7 @@ void func_001302A0(void) {
         sprintf(text, D_00413260, (s32)(remaining * 100.0f));
         fldDbgPrintStr2DC(180, 312, 0, (s32)text);
     }
-    if (fldCameraFollowRows[fldGlobalBase.rowIdx].flags & FLD_CAM_ROW_LIMITED) {
+    if (fldCameraFollowRows[fldGlobalBase.cameraFollowRowIndex].flags & FLD_CAM_ROW_LIMITED) {
         SDF_VU0_COPYVECTOR(&collisionNear, &nearPoint);
         SDF_VU0_COPYVECTOR(&collisionFar, &previousFar);
         if (fldHitChkEnemy(collisionFar.f, collisionNear.f, collisionPoint.f) != -1) {
@@ -4546,7 +4546,7 @@ s32 fldUpdateCameraFollow(void) {
         }
         fldProbeCameraSupportSurface();
         cam = &fldGlobalBase;
-        dds3CameraObjectBasicSetFovy(*world, fldCameraFollowRows[cam->rowIdx].fov * 3.14f / 180.0f);
+        dds3CameraObjectBasicSetFovy(*world, fldCameraFollowRows[cam->cameraFollowRowIndex].fov * 3.14f / 180.0f);
         switch (cam->mode) {
         case FLD_CAMERA_MODE_PLAYER_FOLLOW:
             func_0012FA58();
