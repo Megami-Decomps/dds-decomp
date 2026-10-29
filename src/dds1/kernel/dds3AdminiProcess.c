@@ -40,11 +40,11 @@ void dds3AdminiCallSequence(s32 requestedMode, const void *requestData, u32 data
         work = GetAdminiProcessData();
         previousRequestData = work->CallData;
         work->NextSequence = requestedMode;
-        flags = work->ControlFlags;
+        flags = work->Stat;
         flags |= DDS3_ADMIN_CONTROL_REQUEST_PENDING;
         flags &= ~DDS3_ADMIN_CONTROL_KEEP_CURRENT_HISTORY_SLOT;
         flags &= ~DDS3_ADMIN_CONTROL_RESTORE_PREVIOUS_MODE;
-        work->ControlFlags = flags;
+        work->Stat = flags;
         work->CallCount = DDS3_ADMIN_REQUEST_DELAY;
         if (previousRequestData != NULL) {
             sdfChipFreeDirect(previousRequestData);
@@ -60,9 +60,9 @@ void dds3AdminiCallSequence(s32 requestedMode, const void *requestData, u32 data
             work->CallDataSize = 0;
         }
         if (markHistory != 0) {
-            work->ControlFlags |= DDS3_ADMIN_CONTROL_MARK_HISTORY_SLOT_FOR_RESTORE;
+            work->Stat |= DDS3_ADMIN_CONTROL_MARK_HISTORY_SLOT_FOR_RESTORE;
         } else {
-            work->ControlFlags &= ~DDS3_ADMIN_CONTROL_MARK_HISTORY_SLOT_FOR_RESTORE;
+            work->Stat &= ~DDS3_ADMIN_CONTROL_MARK_HISTORY_SLOT_FOR_RESTORE;
         }
     }
 }
@@ -76,7 +76,7 @@ void dds3AdminiOverwriteSequence(s32 requestedMode, const void *requestData, u32
 
     dds3AdminiCallSequence(requestedMode, requestData, dataBytes, 0);
     work = GetAdminiProcessData();
-    work->ControlFlags |= DDS3_ADMIN_CONTROL_KEEP_CURRENT_HISTORY_SLOT;
+    work->Stat |= DDS3_ADMIN_CONTROL_KEEP_CURRENT_HISTORY_SLOT;
 }
 
 /* Request exit of the active administration mode. */
@@ -85,7 +85,7 @@ void dds3AdminiExitSequence(void)
     dds3AdminiData_t* work;
 
     work = GetAdminiProcessData();
-    work->ControlFlags |= DDS3_ADMIN_CONTROL_EXIT_REQUESTED;
+    work->Stat |= DDS3_ADMIN_CONTROL_EXIT_REQUESTED;
 }
 
 s8 dds3AdminiGetActiveSequence(void)
@@ -119,7 +119,7 @@ Dds3AdminHistoryFlags dds3AdminiGetPrevHistoryFlag(void)
 /* Activate a pending mode request and continue through the mode dispatcher. */
 KwlnTaskUpdateResult dds3AdminiStartSequence(dds3ProcessID_t *task) {
     dds3AdminiData_t *work = (dds3AdminiData_t *)dds3GetProcessData(task);
-    Dds3AdminControlFlags flags = work->ControlFlags;
+    Dds3AdminControlFlags flags = work->Stat;
     s32 isRestoringHistory;
     void (*modeEntryCallback)(s32, void *);
 
@@ -130,21 +130,21 @@ KwlnTaskUpdateResult dds3AdminiStartSequence(dds3ProcessID_t *task) {
         }
         work->NowSequence = work->NextSequence;
         work->NextSequence = -1;
-        work->ControlFlags &= ~DDS3_ADMIN_CONTROL_REQUEST_PENDING;
-        work->ControlFlags &= ~DDS3_ADMIN_CONTROL_EXIT_REQUESTED;
+        work->Stat &= ~DDS3_ADMIN_CONTROL_REQUEST_PENDING;
+        work->Stat &= ~DDS3_ADMIN_CONTROL_EXIT_REQUESTED;
         work->RunTimer = 0;
         if (flags & DDS3_ADMIN_CONTROL_MARK_HISTORY_SLOT_FOR_RESTORE) {
             work->FlagHistory[work->HistoryPointer] |= DDS3_ADMIN_HISTORY_FLAG_RESTORE_PREVIOUS_MODE;
-            work->ControlFlags &= ~DDS3_ADMIN_CONTROL_MARK_HISTORY_SLOT_FOR_RESTORE;
+            work->Stat &= ~DDS3_ADMIN_CONTROL_MARK_HISTORY_SLOT_FOR_RESTORE;
         }
-        if (work->ControlFlags & DDS3_ADMIN_CONTROL_RESTORE_PREVIOUS_MODE) {
-            work->ControlFlags &= ~DDS3_ADMIN_CONTROL_RESTORE_PREVIOUS_MODE;
+        if (work->Stat & DDS3_ADMIN_CONTROL_RESTORE_PREVIOUS_MODE) {
+            work->Stat &= ~DDS3_ADMIN_CONTROL_RESTORE_PREVIOUS_MODE;
             work->HistoryPointer = (work->HistoryPointer + 7) & 7;
             isRestoringHistory = 1;
         } else {
             isRestoringHistory = 0;
-            if (work->ControlFlags & DDS3_ADMIN_CONTROL_KEEP_CURRENT_HISTORY_SLOT) {
-                work->ControlFlags &= ~DDS3_ADMIN_CONTROL_KEEP_CURRENT_HISTORY_SLOT;
+            if (work->Stat & DDS3_ADMIN_CONTROL_KEEP_CURRENT_HISTORY_SLOT) {
+                work->Stat &= ~DDS3_ADMIN_CONTROL_KEEP_CURRENT_HISTORY_SLOT;
             } else {
                 work->HistoryPointer = (work->HistoryPointer + 1) & 7;
             }
@@ -184,7 +184,7 @@ KwlnTaskUpdateResult dds3AdminiEndCheck(dds3ProcessID_t *task) {
 
 KwlnTaskUpdateResult dds3AdminiNeoProcess(dds3ProcessID_t *task) {
     dds3AdminiData_t *work = (dds3AdminiData_t *)dds3GetProcessData(task);
-    Dds3AdminControlFlags flags = work->ControlFlags;
+    Dds3AdminControlFlags flags = work->Stat;
     Dds3AdminModeCleanupResult (*cleanup)(void);
     s32 previousHistoryIndex;
 
@@ -192,11 +192,11 @@ KwlnTaskUpdateResult dds3AdminiNeoProcess(dds3ProcessID_t *task) {
         if (work->NowSequence >= 0) {
             cleanup = ddsAdminModeCallbacks[work->NowSequence].check;
             if (cleanup != NULL && cleanup() != DDS3_ADMIN_MODE_CLEANUP_CONTINUE) {
-                work->ControlFlags |= DDS3_ADMIN_CONTROL_EXIT_REQUESTED;
+                work->Stat |= DDS3_ADMIN_CONTROL_EXIT_REQUESTED;
             }
             work->RunTimer++;
         }
-        flags = work->ControlFlags;
+        flags = work->Stat;
     }
     if ((flags & DDS3_ADMIN_CONTROL_EXIT_REQUESTED) && work->NowSequence >= 0) {
         previousHistoryIndex = (work->HistoryPointer + 7) & 7;
@@ -204,23 +204,23 @@ KwlnTaskUpdateResult dds3AdminiNeoProcess(dds3ProcessID_t *task) {
             (work->FlagHistory[previousHistoryIndex] & DDS3_ADMIN_HISTORY_FLAG_RESTORE_PREVIOUS_MODE)) {
             void *requestData = work->CallData;
 
-            work->ControlFlags |= DDS3_ADMIN_CONTROL_REQUEST_PENDING |
+            work->Stat |= DDS3_ADMIN_CONTROL_REQUEST_PENDING |
                                   DDS3_ADMIN_CONTROL_RESTORE_PREVIOUS_MODE;
             work->NextSequence = work->SequenceHistory[previousHistoryIndex];
             work->CallCount = 2;
-            work->ControlFlags &= ~DDS3_ADMIN_CONTROL_MARK_HISTORY_SLOT_FOR_RESTORE;
+            work->Stat &= ~DDS3_ADMIN_CONTROL_MARK_HISTORY_SLOT_FOR_RESTORE;
             if (requestData != NULL) {
                 sdfChipFreeDirect(requestData);
                 work->CallData = NULL;
                 work->CallDataSize = 0;
             }
         }
-        if ((work->ControlFlags & DDS3_ADMIN_CONTROL_REQUEST_PENDING) == 0) {
+        if ((work->Stat & DDS3_ADMIN_CONTROL_REQUEST_PENDING) == 0) {
             dds3AdminiCallSequence(0, 0, 0, 0);
         }
-        work->ControlFlags &= ~DDS3_ADMIN_CONTROL_EXIT_REQUESTED;
+        work->Stat &= ~DDS3_ADMIN_CONTROL_EXIT_REQUESTED;
     }
-    if ((work->ControlFlags & DDS3_ADMIN_CONTROL_REQUEST_PENDING) != 0 && work->NextSequence >= 0) {
+    if ((work->Stat & DDS3_ADMIN_CONTROL_REQUEST_PENDING) != 0 && work->NextSequence >= 0) {
         return (KwlnTaskUpdateResult)dds3AdminiEndCheck;
     }
     return KWLN_TASK_UPDATE_RETAIN_CALLBACK;

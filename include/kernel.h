@@ -7,7 +7,7 @@
  * allocate this record and pass it to the mode-transition callbacks below. */
 typedef u32 Dds3AdminControlFlags;
 typedef struct dds3AdminiData_t {
-    Dds3AdminControlFlags ControlFlags; /* +0x00: request, exit and history flow */
+    Dds3AdminControlFlags Stat; /* +0x00: request, exit and history flow */
     u32 RunTimer;                 /* +0x04 */
     s8 NowSequence;               /* +0x08; -1 when no mode is active */
     s8 NextSequence;              /* +0x09; -1 when no request is pending */
@@ -22,7 +22,7 @@ typedef struct dds3AdminiData_t {
 } dds3AdminiData_t;
 
 typedef char dds3AdminiData_t_size_must_be_0x24[(sizeof(dds3AdminiData_t) == 0x24) ? 1 : -1];
-typedef char dds3AdminiData_t_controlFlags_at_0x00[((u32)&((dds3AdminiData_t *)0)->ControlFlags == 0x00) ? 1 : -1];
+typedef char dds3AdminiData_t_controlFlags_at_0x00[((u32)&((dds3AdminiData_t *)0)->Stat == 0x00) ? 1 : -1];
 typedef char dds3AdminiData_t_activeMode_at_0x08[((u32)&((dds3AdminiData_t *)0)->NowSequence == 0x08) ? 1 : -1];
 typedef char dds3AdminiData_t_requestedMode_at_0x09[((u32)&((dds3AdminiData_t *)0)->NextSequence == 0x09) ? 1 : -1];
 typedef char dds3AdminiData_t_historyIndex_at_0x0A[((u32)&((dds3AdminiData_t *)0)->HistoryPointer == 0x0A) ? 1 : -1];
