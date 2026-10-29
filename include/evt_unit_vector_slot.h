@@ -11,10 +11,10 @@ typedef enum EvtUnitVectorSlotState {
     EVT_UNIT_VECTOR_SLOT_UNIT_BOUND = 3
 } EvtUnitVectorSlotState;
 
-typedef s32 EvtUnitVectorSlotAuxCoordinatesResult;
+typedef s32 EvtUnitVectorSlotLookupResult;
 enum {
-    EVT_UNIT_VECTOR_SLOT_AUX_COORDINATES_NOT_FOUND = 0,
-    EVT_UNIT_VECTOR_SLOT_AUX_COORDINATES_FOUND = 1
+    EVT_UNIT_VECTOR_SLOT_LOOKUP_NOT_FOUND = 0,
+    EVT_UNIT_VECTOR_SLOT_LOOKUP_FOUND = 1
 };
 
 /* Native 0x40-byte slot: three vec4 followed by two auxiliary coordinates.
@@ -35,9 +35,13 @@ void evtSetSlotVectors(s32 slotIndex, EvtUnitVectorSlotState slotState,
                        struct evtUnitHandle_t *unitHandle, const f32 *firstEndpoint,
                        const f32 *secondEndpoint, const f32 *color);
 
+/* Copy the selected slot's second endpoint; outputs are unchanged when no slot is found. */
+EvtUnitVectorSlotLookupResult evtCopyUnitVectorSlotEndpoint(
+    struct evtUnitHandle_t *unitHandle, f32 *out);
+
 /* Copy auxiliary coordinates from the unit-bound slot or shared fallback.
  * Outputs are written only when a slot is found. */
-EvtUnitVectorSlotAuxCoordinatesResult evtFindUnitSlotAuxCoordinates(
+EvtUnitVectorSlotLookupResult evtFindUnitSlotAuxCoordinates(
     struct evtUnitHandle_t *unit, f32 *outX, f32 *outY);
 
 #endif /* EVT_UNIT_VECTOR_SLOT_H */

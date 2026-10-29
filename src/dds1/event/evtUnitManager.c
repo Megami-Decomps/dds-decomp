@@ -1532,7 +1532,7 @@ void evtSetSlotVector(s32 slotIndex, f32 x, f32 y) {
 }
 
 /* Copy the second vector of the slot bound to `unitHandle` (else the first state-2 slot). */
-s32 evtCopyUnitVectorSlotEndpoint(evtUnitHandle_t *unitHandle, f32 *out) {
+EvtUnitVectorSlotLookupResult evtCopyUnitVectorSlotEndpoint(evtUnitHandle_t *unitHandle, f32 *out) {
     s32 found = -1;
     s32 i;
 
@@ -1550,13 +1550,13 @@ s32 evtCopyUnitVectorSlotEndpoint(evtUnitHandle_t *unitHandle, f32 *out) {
             }
         }
         if (found == -1) {
-            return 0;
+            return EVT_UNIT_VECTOR_SLOT_LOOKUP_NOT_FOUND;
         }
     }
     out[0] = D_003D7BD8[found].vec[4];
     out[1] = D_003D7BD8[found].vec[5];
     out[2] = D_003D7BD8[found].vec[6];
-    return 1;
+    return EVT_UNIT_VECTOR_SLOT_LOOKUP_FOUND;
 }
 
 /* Select a matching slot and write its endpoint render work. */
@@ -1606,7 +1606,7 @@ void evtApplyMatchingUnitSlotEndpoints(evtUnitHandle_t *unit) {
 }
 
 /* Find auxiliary coordinates for the unit-bound slot, else the shared fallback. */
-EvtUnitVectorSlotAuxCoordinatesResult evtFindUnitSlotAuxCoordinates(
+EvtUnitVectorSlotLookupResult evtFindUnitSlotAuxCoordinates(
     evtUnitHandle_t *unit, f32 *outX, f32 *outY) {
     s32 i;
 
@@ -1614,17 +1614,17 @@ EvtUnitVectorSlotAuxCoordinatesResult evtFindUnitSlotAuxCoordinates(
         if (D_003D7BD8[i].state == EVT_UNIT_VECTOR_SLOT_UNIT_BOUND && D_003D7BD8[i].unitHandle == unit) {
             *outX = D_003D7BD8[i].auxX;
             *outY = D_003D7BD8[i].auxY;
-            return EVT_UNIT_VECTOR_SLOT_AUX_COORDINATES_FOUND;
+            return EVT_UNIT_VECTOR_SLOT_LOOKUP_FOUND;
         }
     }
     for (i = 0; i < 7; i++) {
         if (D_003D7BD8[i].state == EVT_UNIT_VECTOR_SLOT_SHARED_FALLBACK) {
             *outX = D_003D7BD8[i].auxX;
             *outY = D_003D7BD8[i].auxY;
-            return EVT_UNIT_VECTOR_SLOT_AUX_COORDINATES_FOUND;
+            return EVT_UNIT_VECTOR_SLOT_LOOKUP_FOUND;
         }
     }
-    return EVT_UNIT_VECTOR_SLOT_AUX_COORDINATES_NOT_FOUND;
+    return EVT_UNIT_VECTOR_SLOT_LOOKUP_NOT_FOUND;
 }
 
 dds3Basic_t *evtSearchBasic(s32 worldKind, s32 worldObjectKey) {
