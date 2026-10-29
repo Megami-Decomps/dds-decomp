@@ -133,8 +133,6 @@ void mnuDrawScaledVariantSpriteByIndex(s32 x, s32 y, s32 z, s32 alpha, s32 place
 
 #define MNU_MANTRA_RESOURCE_SLOT_COUNT 14
 
-#define MNU_MANTRA_SOURCE_ACTIVE_BIT 0x20
-
 #define MNU_PARTY_RECORD_BYTES 0x1A4
 
 #define MNU_GAME_PARTY_RECORD_OFFSET ((u32)&((DatGameState *)0)->party)
@@ -336,9 +334,9 @@ s32 mnuGetMantraSourceValue(u16 profileId) {
     PrfDds1RequirementRecord *sourceEntry = prfReqGetEntryRecord(profileId);
     s32 slotIndex = 0;
 
-    if (sourceEntry->slots[0].operation & MNU_MANTRA_SOURCE_ACTIVE_BIT) {
+    if (sourceEntry->slots[0].operation & PRF_REQUIREMENT_OP_GLOBAL_MINIMUM) {
         slotIndex = 0;
-    } else if (sourceEntry->slots[1].operation & MNU_MANTRA_SOURCE_ACTIVE_BIT) {
+    } else if (sourceEntry->slots[1].operation & PRF_REQUIREMENT_OP_GLOBAL_MINIMUM) {
         slotIndex = 1;
     } else {
         return defaultValue;
@@ -783,7 +781,7 @@ u8 *mnuGetProfileRequirementIds(u16 profileId) {
     if ((mnuGetProfileRequirementFlags(profileId) &
          MNU_PROFILE_REQUIREMENT_FLAG_HAS_AT_LEAST_THREE_IDS) != 0) {
         profileRecord = prfReqGetEntryRecord(profileId);
-        while (profileRecord->slots[slotIndex].operation != 1) {
+        while (profileRecord->slots[slotIndex].operation != PRF_REQUIREMENT_OP_ALL_PROFILES) {
             slotIndex++;
             if (slotIndex >= MNU_REQUIREMENT_SLOT_COUNT) {
                 return NULL;

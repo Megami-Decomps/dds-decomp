@@ -3,16 +3,16 @@
 #include "common.h"
 struct datUnitWork_t;
 
-/* Operation codes shared by the two titles' profile-requirement rules. */
-typedef enum PrfRequirementOperation {
+/* Operation flags shared by the two titles' profile-requirement rules. */
+typedef enum PrfRequirementOperationFlags {
     PRF_REQUIREMENT_OP_ALL_PROFILES = 0x01,
     PRF_REQUIREMENT_OP_PROFILE_COUNT = 0x02,
     PRF_REQUIREMENT_OP_PROFILE_VALUE_COUNT = 0x04,
     PRF_REQUIREMENT_OP_PROFILES_IN_PARTY = 0x08,
     PRF_REQUIREMENT_OP_UNIT_LEVEL = 0x10,
     PRF_REQUIREMENT_OP_GLOBAL_MINIMUM = 0x20
-} PrfRequirementOperation;
-typedef char PrfRequirementOperation_size[(sizeof(PrfRequirementOperation) == 4) ? 1 : -1];
+} PrfRequirementOperationFlags;
+typedef char PrfRequirementOperationFlags_size[(sizeof(PrfRequirementOperationFlags) == 4) ? 1 : -1];
 
 #ifdef VERSION_DDS1
 /* Evaluate either serialized rule set against the borrowed party record. */
@@ -23,7 +23,7 @@ s32 prfCheckRequirementRules(u32 state, struct datUnitWork_t *unit,
  * Bits 0x8/0x10 select state 0/1 rule aggregation; other bits remain unknown.
  * State 0 reads two 0x14-byte slots starting at stateZeroFirstOperation. */
 typedef struct PrfDds1RequirementSlot {
-    PrfRequirementOperation operation;
+    PrfRequirementOperationFlags operation;
     u8 levelThreshold;
     u8 profileThreshold;
     u8 reserved06[2];
@@ -58,7 +58,7 @@ typedef char PrfDds1RequirementRecord_slots[((u32)&((PrfDds1RequirementRecord *)
 #ifdef VERSION_DDS2
 /* Serialized rule: operation-specific byte thresholds, word minimum and ID list. */
 typedef struct PrfRequirementOperand {
-    PrfRequirementOperation operation;
+    PrfRequirementOperationFlags operation;
     u8 levelThreshold;
     u8 profileThreshold;
     u8 reserved06[2];
