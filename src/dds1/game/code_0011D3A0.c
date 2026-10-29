@@ -1660,8 +1660,8 @@ void fldResetFieldRuntimeState(FldRuntimeResetMode mode) {
     area->mode = 0;
     area->unk54 = 0;
     area->cameraTargetGraceTicks = 0;
-    area->sceneMode = 0;
-    area->sceneState = 0;
+    area->sceneTransitionCooldown = 0;
+    area->movementInputSuppressionFrames = 0;
     area->selectedRoomIndex = 0;
     area->unk8C = 0;
     area->primaryMovingMatterIndex = -1;

@@ -4917,7 +4917,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
             snapInput = 1;
         }
     }
-    if (fldGlobalBase.sceneState > 0) {
+    if (fldGlobalBase.movementInputSuppressionFrames > 0) {
         direction = -1;
         snapInput = 0;
     }

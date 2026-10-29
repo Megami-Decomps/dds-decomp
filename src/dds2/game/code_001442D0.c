@@ -2425,7 +2425,7 @@ void fldEnterSceneCamera(void) {
     fldPreparePlayerSceneCameraTarget();
     evtSetSolarOverlayFullyVisible();
     fldApplySkyLightSetToPlayerVU();
-    cam->sceneMode = 4;
+    cam->sceneTransitionCooldown = 4;
     frSetFontDrawOT(0x54);
     dds3VisibleSceneBasic((dds3Basic_t *)(u32)dds3GetActiveScene(), 1);
     D_00436268 = 0;

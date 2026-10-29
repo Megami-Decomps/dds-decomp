@@ -1249,11 +1249,11 @@ void fldPreparePlayerSceneCameraTarget(void) {
         dds3ObjectBaseSetPrimaryControl(fldPlayerObject, fldPlayerCameraTargetNoPathUpdate);
     }
     fldGlobalBase.cameraTargetGraceTicks = 4;
-    if (fldGlobalBase.sceneMode < 4) {
-        fldGlobalBase.sceneMode = 4;
+    if (fldGlobalBase.sceneTransitionCooldown < 4) {
+        fldGlobalBase.sceneTransitionCooldown = 4;
     }
-    if (fldGlobalBase.sceneState < 5) {
-        fldGlobalBase.sceneState = 5;
+    if (fldGlobalBase.movementInputSuppressionFrames < 5) {
+        fldGlobalBase.movementInputSuppressionFrames = 5;
     }
     fldGlobalBase.primaryMovingMatterIndex = -1;
     fldGlobalBase.secondaryMovingMatterIndex = -1;
@@ -1681,8 +1681,8 @@ s32 fldUpdateTravelAndEncounters(void) {
     s32 encounter;
     s32 *selection;
 
-    if (fldGlobalBase.sceneMode > 0) fldGlobalBase.sceneMode--;
-    if (fldGlobalBase.sceneState > 0) fldGlobalBase.sceneState--;
+    if (fldGlobalBase.sceneTransitionCooldown > 0) fldGlobalBase.sceneTransitionCooldown--;
+    if (fldGlobalBase.movementInputSuppressionFrames > 0) fldGlobalBase.movementInputSuppressionFrames--;
     if (fldGlobalBase.cameraTargetGraceTicks > 0) fldGlobalBase.cameraTargetGraceTicks--;
     if (!fldEncountTestFlag(0x40)) return 0;
     if (fldAutoMapSeqTestFlag(1) == 1) return 0;
@@ -1719,8 +1719,8 @@ s32 fldUpdateTravelAndEncounters(void) {
         previousPhase != phase) {
         evtUpdateFlaggedStats();
         if (phase == 0 && evtClearRandomStatusFlags() != EVT_RANDOM_STATUS_CLEAR_NO_FLAGS) {
-            fldGlobalBase.sceneMode = 4;
-            fldGlobalBase.sceneState = 5;
+            fldGlobalBase.sceneTransitionCooldown = 4;
+            fldGlobalBase.movementInputSuppressionFrames = 5;
             fldResetPlayerSceneObjectState();
             evtStartSceneResourceTask(dds3GetActiveScene(), D_0039FCB0);
             return 0;
@@ -1893,14 +1893,14 @@ s32 fldUpdateCampMenuTransition(void) {
         return 0;
     }
     scene = &fldGlobalBase;
-    if (scene->sceneMode == 0 && (s8)D_00324530[0] < 0) {
+    if (scene->sceneTransitionCooldown == 0 && (s8)D_00324530[0] < 0) {
         p2sdPlaySE(0xE, 0x7F, 0x3F);
         fldAutoMapSeqSetFlag(1);
         fldResetPlayerSceneObjectState();
         fldUpdateSmoothedCameraPose();
         evtDisableMoonDraw();
-        scene->sceneMode = 4;
-        scene->sceneState = 5;
+        scene->sceneTransitionCooldown = 4;
+        scene->movementInputSuppressionFrames = 5;
         fldEncountClearFlag(0x20);
         dds3FadeOut(0, 0, 0, 4);
         D_003BABEC = 5;
@@ -1940,10 +1940,10 @@ s32 fldUpdateNextFloorTransition(void) {
     }
     scene = &fldGlobalBase;
     if (fldFindLocationCoordinateRecord(scene->area, scene->floor + 1)[2] <= 0) {
-        if (scene->sceneMode == 0) {
+        if (scene->sceneTransitionCooldown == 0) {
             if (fldEncountTestFlag(0x40) != 0 && transitionInput != 0) {
-                scene->sceneMode = 4;
-                scene->sceneState = 5;
+                scene->sceneTransitionCooldown = 4;
+                scene->movementInputSuppressionFrames = 5;
                 fldResetPlayerSceneObjectState();
                 evtStartSceneResourceTask(dds3GetActiveScene(), D_0039FCC8);
             }
@@ -1962,13 +1962,13 @@ s32 fldUpdateNextFloorTransition(void) {
             return 0;
         }
         fldMarkStageExplorationCellsAroundPosition(scene->floor, scene->flagStage, scene->x, scene->z, 50.0f);
-        if (scene->sceneMode == 0) {
+        if (scene->sceneTransitionCooldown == 0) {
             if (fldGetMovementHoldState() != FLD_MOVEMENT_HOLD_CLEAR) {
                 return 0;
             }
             if (fldEncountTestFlag(0x40) != 0 && transitionInput != 0 && fldRunDanteGunFlag[0x48 / 4] == 0) {
-                scene->sceneMode = 4;
-                scene->sceneState = 5;
+                scene->sceneTransitionCooldown = 4;
+                scene->movementInputSuppressionFrames = 5;
                 fldResetPlayerSceneObjectState();
                 fldUpdateSmoothedCameraPose();
                 dds3FadeOut(0, 0, 0, 4);

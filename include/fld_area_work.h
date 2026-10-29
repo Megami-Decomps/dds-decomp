@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "fld_encounter_runtime_api.h"
+#include "fld_scene_timing_state.h"
 
 struct sdfTexHandle_t;
 struct sdfMemHandle_t;
@@ -122,8 +123,8 @@ typedef struct FldAreaWork {
     f32 negatedAngle;
     f32 cameraTargetAngle;       /* 0x68 */
     f32 dist;
-    s32 sceneMode;
-    s32 sceneState;
+    FldSceneTransitionCooldown sceneTransitionCooldown;
+    FldMovementInputSuppressionFrames movementInputSuppressionFrames;
     FldAreaResourceRequestState resourceRequestState; /* 0x78: local-map request state. */
     s32 resourceArea;
     /* Resource/cache key; (0, 0) is the battle-return no-request sentinel. */
