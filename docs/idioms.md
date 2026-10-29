@@ -15951,7 +15951,7 @@ complete timed owner to a second nominal prefix type.
 
 ## Placed field models: infer the retained counter from the complete owner
 
-`FldRoomEffectEntry` is the shared 0x50-byte placed-field-model record. Its
+`fldNpcSlot_t` is the shared 0x50-byte placed-field-model record. Its
 32 entries include NPC, treasure, save and heal placements. The native ranges
 are DDS1 `003D46A0..003D50A0` and DDS2 `0044FF90..00450990`.
 

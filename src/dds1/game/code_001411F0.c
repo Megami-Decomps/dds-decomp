@@ -3644,7 +3644,7 @@ void fldClearMenuEntries(void) {
     s32 i;
 
     for (i = 0; i < 32; i++) {
-        fldModelSlotTable[i].placementId = 0;
+        fldModelSlotTable[i].type = 0;
         fldModelSlotTable[i].x = 0.0f;
         fldModelSlotTable[i].y = 0.0f;
         fldModelSlotTable[i].z = 0.0f;
@@ -3816,11 +3816,11 @@ void func_001480D0(u32 key, f32 *orientation, f32 x, f32 y, f32 z,
         fldModelSlotTable[outputIndex].x = x;
         fldModelSlotTable[outputIndex].y = y;
         fldModelSlotTable[outputIndex].z = z;
-        fldModelSlotTable[outputIndex].orientation[0] = orientation[0];
-        fldModelSlotTable[outputIndex].orientation[1] = orientation[1];
-        fldModelSlotTable[outputIndex].orientation[2] = orientation[2];
-        fldModelSlotTable[outputIndex].placementId = key;
-        fldModelSlotTable[outputIndex].orientation[3] = orientation[3];
+        fldModelSlotTable[outputIndex].rot[0] = orientation[0];
+        fldModelSlotTable[outputIndex].rot[1] = orientation[1];
+        fldModelSlotTable[outputIndex].rot[2] = orientation[2];
+        fldModelSlotTable[outputIndex].type = key;
+        fldModelSlotTable[outputIndex].rot[3] = orientation[3];
         fldModelSlotTable[outputIndex].unk2C = 0.0f;
         fldModelSlotTable[outputIndex].unk30 = 0;
         fldModelSlotTable[outputIndex].unk3C = 0;
@@ -3924,14 +3924,14 @@ void func_001486D0(u32 id, f32 *rotation, f32 x, f32 y, f32 z) {
         f32 direction[4];
         entryIndex = fldNpcModelTable;
         fldNpcModelTable = entryIndex + 1;
-        fldModelSlotTable[entryIndex].placementId = 999;
+        fldModelSlotTable[entryIndex].type = 999;
         fldModelSlotTable[entryIndex].x = x;
         fldModelSlotTable[entryIndex].y = y;
         fldModelSlotTable[entryIndex].z = z;
-        fldModelSlotTable[entryIndex].orientation[0] = rotation[0];
-        fldModelSlotTable[entryIndex].orientation[1] = rotation[1];
-        fldModelSlotTable[entryIndex].orientation[2] = rotation[2];
-        fldModelSlotTable[entryIndex].orientation[3] = rotation[3];
+        fldModelSlotTable[entryIndex].rot[0] = rotation[0];
+        fldModelSlotTable[entryIndex].rot[1] = rotation[1];
+        fldModelSlotTable[entryIndex].rot[2] = rotation[2];
+        fldModelSlotTable[entryIndex].rot[3] = rotation[3];
         fldModelSlotTable[entryIndex].unk2C = 0.0f;
         fldModelSlotTable[entryIndex].unk30 = 0;
         fldModelSlotTable[entryIndex].unk34 = 0;
@@ -4150,14 +4150,14 @@ void func_00148FF0(s32 kind, u32 id, f32 *rotation, f32 x, f32 y, f32 z) {
         f32 direction[4];
         entryIndex = fldNpcModelTable;
         fldNpcModelTable = entryIndex + 1;
-        fldModelSlotTable[entryIndex].placementId = 999;
+        fldModelSlotTable[entryIndex].type = 999;
         fldModelSlotTable[entryIndex].x = x;
         fldModelSlotTable[entryIndex].y = y;
         fldModelSlotTable[entryIndex].z = z;
-        fldModelSlotTable[entryIndex].orientation[0] = rotation[0];
-        fldModelSlotTable[entryIndex].orientation[1] = rotation[1];
-        fldModelSlotTable[entryIndex].orientation[2] = rotation[2];
-        fldModelSlotTable[entryIndex].orientation[3] = rotation[3];
+        fldModelSlotTable[entryIndex].rot[0] = rotation[0];
+        fldModelSlotTable[entryIndex].rot[1] = rotation[1];
+        fldModelSlotTable[entryIndex].rot[2] = rotation[2];
+        fldModelSlotTable[entryIndex].rot[3] = rotation[3];
         fldModelSlotTable[entryIndex].unk2C = 0.0f;
         fldModelSlotTable[entryIndex].unk30 = 0;
         fldModelSlotTable[entryIndex].unk34 = 0;
@@ -4510,7 +4510,7 @@ void func_00149B68(void) {
     }
 
     for (i = 0; i < fldNpcModelTable; i++) {
-        FldRoomEffectEntry *entry = &fldModelSlotTable[i];
+        fldNpcSlot_t *entry = &fldModelSlotTable[i];
         f32 target[4];
         f32 height;
         f32 dx;
@@ -4524,7 +4524,7 @@ void func_00149B68(void) {
             }
             continue;
         }
-        if (entry->placementId == 999) {
+        if (entry->type == 999) {
             continue;
         }
         SDF_VU0_COPYVECTOR(target, sdfViewTargetVector);
@@ -4622,7 +4622,7 @@ s32 fldFindEffectByName(const char *name) {
     s32 i;
 
     for (i = 0; i < fldNpcModelTable; i++) {
-        if (fldModelSlotTable[i].placementId != 999 && strcmp(fldModelSlotTable[i].name, name) == 0) {
+        if (fldModelSlotTable[i].type != 999 && strcmp(fldModelSlotTable[i].name, name) == 0) {
             return (s32)fldModelSlotTable[i].object->key;
         }
     }
