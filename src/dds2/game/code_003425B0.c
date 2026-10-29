@@ -105,7 +105,7 @@ extern sdfIpuDecodeCb_t *sdfIpuQueueTail;
 
 
 extern void sdfIpuExecQueue(s32 skipInterruptGuard);
-extern s32 sdfIpuDecode(sdfIpuDecodeCb_t *);
+extern void sdfIpuDecode(sdfIpuDecodeCb_t *);
 
 
 extern char sdfGsMemoryDumpHeader[]; /* " <<< GS memory information >>>..." */
@@ -1644,7 +1644,7 @@ extern const u8 sdfIpuAudioModeIdecBits[];          /* per audio mode: IDEC's OF
  * frame), and issues IDEC with the mode's output format and dithering.
  * Upstream: INCLUDE_ASM in both games; written from the retail routine.
  * The same register accesses, calls and stores in the same order. */
-s32 sdfIpuDecode(sdfIpuDecodeCb_t *stream) {
+void sdfIpuDecode(sdfIpuDecodeCb_t *stream) {
     IpuDmaState *dma = &stream->dma;
     u8 bufferIndex;
     s32 header;
@@ -1689,10 +1689,9 @@ s32 sdfIpuDecode(sdfIpuDecodeCb_t *stream) {
     command = ((u32)modeBits[0] << 27) | ((u32)modeBits[1] << 26) | IPU_CMD_IDEC;
     command |= (header & SDF_STREAM_HEADER_DT) ? (IPU_IDEC_DTD | IPU_IDEC_QSC1) : IPU_IDEC_QSC1;
     HW_WRITE(IPU_CMD, command);
-    return command & (IPU_IDEC_DTD | IPU_IDEC_QSC1); /* what retail leaves in v0; unused */
 }
 #else
-INCLUDE_ASM(const s32, "game/code_003425B0", sdfIpuDecode);
+INCLUDE_ASM(void, "game/code_003425B0", sdfIpuDecode);
 #endif
 
 /* Remove and advance the first list item matching the IPU cleanup test. */
