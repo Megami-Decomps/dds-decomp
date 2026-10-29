@@ -1,5 +1,8 @@
+#define SDK_SKIP_sceMcSync
 #include "sdk_ps2.h"
+#undef SDK_SKIP_sceMcSync
 #include "common.h"
+#include "mc_sync_api.h"
 #include "kwln_task_create.h"
 #include "sdf_resource.h"
 #include "file.h"
@@ -34,19 +37,20 @@ void fileReqBegin(s32 request) {
  * see docs/idioms.md, "Trace-justified switch tails: fileReqPoll". */
 FileReqPollResult fileReqPoll(void) {
     FileReqEntry *entry = &fileRequestEntries[fileActiveCardDetectionRequestIndex];
-    s32 info[2];
-    s32 result = sceMcSync(1, info, &info[1]);
+    s32 commandId;
+    McSyncCommandResult commandResult;
+    McSyncPollStatus pollStatus = sceMcSync(1, &commandId, &commandResult);
     s32 retries;
 
-    if (result == 1) {
-        entry->unk0 = info[1];
-        if (info[1] == -1) {
-            entry->slotMetadataDirty = result;
+    if (pollStatus == 1) {
+        entry->unk0 = commandResult;
+        if (commandResult == -1) {
+            entry->slotMetadataDirty = pollStatus;
             entry->selectedSlot = 0;
         }
         switch (entry->cardType) {
         case 0:
-            entry->slotMetadataDirty = result;
+            entry->slotMetadataDirty = pollStatus;
             entry->status = FILE_REQ_STATUS_NO_CARD;
             entry->selectedSlot = 0;
             break;
@@ -59,7 +63,7 @@ FileReqPollResult fileReqPoll(void) {
                     return FILE_REQ_POLL_PENDING;
                 }
                 entry->status = FILE_REQ_STATUS_UNFORMATTED;
-                entry->slotMetadataDirty = result;
+                entry->slotMetadataDirty = pollStatus;
                 entry->selectedSlot = 0;
             } else {
                 entry->status = FILE_REQ_STATUS_READY;
