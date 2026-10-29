@@ -8844,7 +8844,7 @@ void btlSetCommandEffectLinkFlags(BtlTask *task, BattleIndexWork *work) {
                     case 0x40000:
                         break;
                     default:
-                        if (btlActionEntryIsEmpty(skillId, group, &group->entries[entryIndex]) == 0) {
+                        if (btlActionEntryIsEmpty(skillId, group, &group->entries[entryIndex]) == BTL_ACTION_ENTRY_NOT_EMPTY) {
                             target->effectLink.flags |= 4;
                         }
                         break;

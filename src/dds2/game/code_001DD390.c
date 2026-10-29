@@ -1098,7 +1098,7 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
                     group->inactive = 1;
                     break;
                 }
-                if (!btlActionEntryIsEmpty(command, group, &group->entries[hitIndex])) {
+            if (btlActionEntryIsEmpty(command, group, &group->entries[hitIndex]) == BTL_ACTION_ENTRY_NOT_EMPTY) {
                     allEmpty = 0;
                 } else {
                     emptyHits++;

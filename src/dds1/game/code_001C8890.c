@@ -1220,7 +1220,7 @@ void btlScheduleAttackActionTasks(BtlTask *action) {
         }
         for (operandIndex = 0, operandDelay = 0, effectFrameOffset = 0; operandIndex < operandCount; operandIndex++) {
             BtlActionReactionMotionIndex selection;
-            if (btlActionEntryIsEmpty(action->indexWork.skillId, group, &group->entries[operandIndex]) != 0) {
+            if (btlActionEntryIsEmpty(action->indexWork.skillId, group, &group->entries[operandIndex]) != BTL_ACTION_ENTRY_NOT_EMPTY) {
                 selection = BTL_ACTION_REACTION_MOTION_NONE;
                 categoryKind = 4;
                 extraKind = 1;
@@ -1523,7 +1523,6 @@ extern const char D_003A3658[];
 extern const char D_003A3670[];
 extern s32 btlGetActionAnimationDelay(BtlUnit *, s32);
 extern s32 btlResolveSkillCategory(s32, u32);
-extern s32 btlActionEntryIsEmpty(s32, BtlOperandGroup *, BtlOperandEntry *);
 
 
 
@@ -1901,7 +1900,7 @@ void func_001CB410(BtlTask *actor) {
             for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
                 BtlRuntimeTask *stageTask;
                 operand = &group->entries[entryIndex];
-                if (btlActionEntryIsEmpty(skillId, group, operand)) {
+                if (btlActionEntryIsEmpty(skillId, group, operand) != BTL_ACTION_ENTRY_NOT_EMPTY) {
                     reaction = -1;
                     hitKind = 4;
                     hitParameter = 1;
@@ -2529,7 +2528,7 @@ void btlScheduleLinkageActionTasks(BtlTask *action) {
             for (operandIndex = 0, operandDelay = 0, effectFrameOffset = 0; operandIndex < operandCount; operandIndex++) {
                 BtlActionReactionMotionIndex selection;
                 BtlRuntimeTask *operandTask;
-                if (btlActionEntryIsEmpty(skill, group, &group->entries[operandIndex]) != 0) {
+                if (btlActionEntryIsEmpty(skill, group, &group->entries[operandIndex]) != BTL_ACTION_ENTRY_NOT_EMPTY) {
                     selection = BTL_ACTION_REACTION_MOTION_NONE;
                     categoryKind = 4;
                     extraKind = 1;

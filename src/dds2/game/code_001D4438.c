@@ -1684,7 +1684,7 @@ void btlScheduleAttackActionTasks(ActionStateLink *action) {
         }
         for (operandIndex = 0, operandDelay = 0, effectFrameOffset = 0; operandIndex < operandCount; operandIndex++) {
             BtlActionReactionMotionIndex selection;
-            if (btlActionEntryIsEmpty(action->indexWork.skillId, group, &group->entries[operandIndex]) != 0) {
+            if (btlActionEntryIsEmpty(action->indexWork.skillId, group, &group->entries[operandIndex]) != BTL_ACTION_ENTRY_NOT_EMPTY) {
                 selection = BTL_ACTION_REACTION_MOTION_NONE;
                 categoryKind = group->kind == 4 ? 4 : 0;
                 extraKind = 1;
@@ -1993,7 +1993,6 @@ extern const char D_00417348[];
 extern const char D_00417360[];
 extern s32 btlGetActionAnimationDelay(BtlUnit *unit, s32 actionId);
 extern s32 btlMapActionCode(s32 unused, u32 id);
-extern s32 btlActionEntryIsEmpty(s32 index, BtlOperandGroup *slot, BtlOperandEntry *entry);
 extern BtlRuntimeTask *btlCreateDeferredActorStatsTask(BtlUnit *unit, BtlOperandEntry *block);
 extern BtlRuntimeTask *btlCreateActorSoundOptionTask(BtlUnit *actor, s32 option);
 extern BtlRuntimeTask *btlScheduleEpPacketTask(BtlUnit *actor, s32 amount);
@@ -2383,7 +2382,7 @@ void func_001D7230(ActionStateLink *actor) {
             for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
                 BtlRuntimeTask *stageTask;
                 operand = &group->entries[entryIndex];
-                if (btlActionEntryIsEmpty(skillId, group, operand)) {
+                if (btlActionEntryIsEmpty(skillId, group, operand) != BTL_ACTION_ENTRY_NOT_EMPTY) {
                     DatCommandRecord *record = &datCommandRecords[skillId];
 
                     reaction = -1;
@@ -3129,7 +3128,7 @@ void btlScheduleLinkageActionTasks(ActionStateLink *action) {
             for (operandIndex = 0, operandDelay = 0, effectFrameOffset = 0; operandIndex < operandCount; operandIndex++ ) {
                 BtlActionReactionMotionIndex selection;
                 BtlRuntimeTask *operandTask;
-                if (btlActionEntryIsEmpty(skill, group, &group->entries[operandIndex]) != 0) {
+                if (btlActionEntryIsEmpty(skill, group, &group->entries[operandIndex]) != BTL_ACTION_ENTRY_NOT_EMPTY) {
                     selection = BTL_ACTION_REACTION_MOTION_NONE;
                     if (datCommandRecords[skill].hpType == 8 || datCommandRecords[skill].hpType == 10 || datCommandRecords[skill].effectType == 2 || datCommandRecords[skill].unk30 == 4) categoryKind = 0;
                     else categoryKind = group->kind == 4 ? 4 : 0;
