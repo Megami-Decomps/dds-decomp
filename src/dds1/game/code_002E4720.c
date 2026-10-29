@@ -1724,14 +1724,14 @@ s32 sdfFileCmdClearError(sdfFileCmdHandle_t *state) {
     return 0;
 }
 
-/* Active state and close operation share an ID; retain the original byte assignment. */
+/* Queue a close for an active request. */
 s32 sdfFileCmdClose(sdfFileCmdHandle_t *request) {
     SdfDevStateCode requestState = request->state;
 
     if (requestState != SDF_DEV_STATE_ACTIVE) {
         return -1;
     }
-    request->operation = requestState;
+    request->operation = SDF_DEV_OPERATION_CLOSE;
     SignalSema(sdfFileDeviceCB[request->workerIndex].semaphore);
     return 0;
 }
