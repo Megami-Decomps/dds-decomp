@@ -3595,7 +3595,7 @@ void fldUpdateLookAtSegmentDistance(void) {
     *distance = fsqrtf(dx * dx + dy * dy + dz * dz) - 50.0f;
 }
 
-extern FldValueRecord *fldMatterTable;
+extern collision_s *fldMatterTable;
 extern f32 fldCamCalcSlopeOffset(f32 x, f32 z, f32 *xs, f32 *ys, f32 *zs);
 
 /* Probe the support surface under the camera's focus and its mirrored heading. */
@@ -3632,15 +3632,15 @@ void fldProbeCameraSupportSurface(void) {
         offset[2] = 0.0f;
     }
     cam = &fldGlobalBase;
-    xs[0] = fldMatterTable[index].vertices[0][0] + offset[0];
-    ys[0] = fldMatterTable[index].vertices[0][1] + offset[1];
-    zs[0] = fldMatterTable[index].vertices[0][2] + offset[2];
-    xs[1] = fldMatterTable[index].vertices[1][0] + offset[0];
-    ys[1] = fldMatterTable[index].vertices[1][1] + offset[1];
-    zs[1] = fldMatterTable[index].vertices[1][2] + offset[2];
-    xs[2] = fldMatterTable[index].vertices[2][0] + offset[0];
-    ys[2] = fldMatterTable[index].vertices[2][1] + offset[1];
-    zs[2] = fldMatterTable[index].vertices[2][2] + offset[2];
+    xs[0] = fldMatterTable[index].point[0][0] + offset[0];
+    ys[0] = fldMatterTable[index].point[0][1] + offset[1];
+    zs[0] = fldMatterTable[index].point[0][2] + offset[2];
+    xs[1] = fldMatterTable[index].point[1][0] + offset[0];
+    ys[1] = fldMatterTable[index].point[1][1] + offset[1];
+    zs[1] = fldMatterTable[index].point[1][2] + offset[2];
+    xs[2] = fldMatterTable[index].point[2][0] + offset[0];
+    ys[2] = fldMatterTable[index].point[2][1] + offset[1];
+    zs[2] = fldMatterTable[index].point[2][2] + offset[2];
     x = cam->x - sdfSin(cam->negatedAngle * 3.14f / 180.0f) * fldCameraFollowRows[cam->cameraFollowRowIndex].dist;
     cam->cameraSupportHeightOffset = cam->y - fldCamCalcSlopeOffset(x,
         cam->z - sdfCos(cam->negatedAngle * 3.14f / 180.0f) * fldCameraFollowRows[cam->cameraFollowRowIndex].dist, xs, ys, zs);

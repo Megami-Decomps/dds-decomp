@@ -108,7 +108,7 @@ extern void evtSubmitPrimaryAlphaBlendMode();
 
 extern FldWallMeshRecord *fldItemBoxObjBuf;
 
-extern FldValueRecord *fldMatterTable;
+extern collision_s *fldMatterTable;
 
 extern u32 fldAuxRecordResource;
 

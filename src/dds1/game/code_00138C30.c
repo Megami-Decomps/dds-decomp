@@ -190,7 +190,7 @@ extern s32 D_003BAE68;
 
 extern FldWallMeshRecord *fldItemBoxObjBuf;
 
-extern FldValueRecord *fldMatterTable;
+extern collision_s *fldMatterTable;
 
 extern struct sdfMemHandle_t *fldAuxRecordResource;
 
