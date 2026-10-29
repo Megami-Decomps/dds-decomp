@@ -709,7 +709,7 @@ u32 sdfReadPadDirectionMask(void) {
     return flags;
 }
 
-TaskWork *sdfCreateTaskWorker(char *name, s32 first, s32 second, const SdfTaskItemDesc *item, SdfListCallback destroyCallback, void *userData) {
+TaskWork *sdfCreateTaskWorker(const char *name, s32 first, s32 second, const SdfTaskItemDesc *item, SdfListCallback destroyCallback, void *userData) {
     TaskWork *work;
 
     work = sdfCreateNamedTaskWork(name, destroyCallback, userData);

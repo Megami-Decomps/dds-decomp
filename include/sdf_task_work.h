@@ -97,8 +97,8 @@ typedef char TaskWork_layout_must_match_native_owner[
         ? 1 : -1];
 
 /* The list teardown callback is stored on TaskWork's backing list. */
-TaskWork *sdfCreateTaskWorker(char *, s32, s32, const SdfTaskItemDesc *, SdfListCallback, void *);
-TaskWork *sdfCreateNamedTaskWork(char *, SdfListCallback, void *);
+TaskWork *sdfCreateTaskWorker(const char *, s32, s32, const SdfTaskItemDesc *, SdfListCallback, void *);
+TaskWork *sdfCreateNamedTaskWork(const char *, SdfListCallback, void *);
 void sdfDestroyTaskResourceWork(TaskWork *);
 void sdfDestroyTaskWorkerTasks(TaskWork *);
 void sdfAttachTaskItem(TaskWork *, const SdfTaskItemDesc *);

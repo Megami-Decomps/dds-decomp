@@ -90,7 +90,7 @@ void sdfSetTaskItemMode(TaskWork *work, s32 key, u32 taskItemMode) {
     }
 }
 
-TaskWork *sdfCreateNamedTaskWork(char *name, SdfListCallback destroyCallback, void *userData) {
+TaskWork *sdfCreateNamedTaskWork(const char *name, SdfListCallback destroyCallback, void *userData) {
     sdfMemHandle_t *allocation = sdfMemAllocDirect(0x14);
     TaskWork *work = (TaskWork *)sdfMemGetPtr(allocation);
 

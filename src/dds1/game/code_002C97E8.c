@@ -704,7 +704,7 @@ u32 sdfReadPadDirectionMask(void) {
 }
 
 
-TaskWork *sdfCreateTaskWorker(char *name, s32 first, s32 second, const SdfTaskItemDesc *item, SdfListCallback destroyCallback, void *userData) {
+TaskWork *sdfCreateTaskWorker(const char *name, s32 first, s32 second, const SdfTaskItemDesc *item, SdfListCallback destroyCallback, void *userData) {
     TaskWork *work;
 
     work = sdfCreateNamedTaskWork(name, destroyCallback, userData);
@@ -810,7 +810,7 @@ void sdfSetTaskItemMode(TaskWork *work, s32 key, u32 taskItemMode) {
 
 
 /* Create a task resource work block with the name copied to two formatted buffers. */
-TaskWork *sdfCreateNamedTaskWork(char *name, SdfListCallback destroyCallback, void *userData) {
+TaskWork *sdfCreateNamedTaskWork(const char *name, SdfListCallback destroyCallback, void *userData) {
     struct sdfMemHandle_t *allocation = sdfMemAllocDirect(0x14);
     TaskWork *work = (TaskWork *)sdfMemGetPtr(allocation);
 
