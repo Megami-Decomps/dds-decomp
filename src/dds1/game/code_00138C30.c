@@ -1330,7 +1330,9 @@ s32 fldTestActorRoomProbeCondition(s32 roomIndex, dds3Basic_t *actor, f32 *posit
     return 0;
 }
 
-s32 fldProbeRoomPlanes(f32 *direction, s32 roomIndex) {
+#include "fld_room_probe_plane_result.h"
+
+FldRoomProbePlaneResult fldProbeRoomPlanes(f32 *direction, s32 roomIndex) {
     f32 probe[3];
     f32 planar[2];
     s32 i;
@@ -1350,10 +1352,10 @@ s32 fldProbeRoomPlanes(f32 *direction, s32 roomIndex) {
     }
     for (i = 0; i < 4; i++) {
         if (fldVecDot(probe, D_003C9470[roomIndex].plane[i + 1]) - D_003C9470[roomIndex].limit[i + 1] < 0.0f) {
-            return -1;
+            return FLD_ROOM_PROBE_PLANES_REJECTED;
         }
     }
-    return 0;
+    return FLD_ROOM_PROBE_PLANES_PASSED;
 }
 
 s32 fldRoomContainsPoint(f32 *point, s32 room) {
@@ -1561,7 +1563,6 @@ s32 fldEveHit_ChkEveHitAfter(void) {
 
 extern s32 dds3ComparePosPoseSet(dds3PoseSet_t *left, dds3PoseSet_t *right);
 extern s32 fldEveHit_ScriptEnd(char *flag, u32 slot);
-extern s32 fldProbeRoomPlanes(f32 *direction, s32 roomIndex);
 extern s32 fldRoomContainsPoint(f32 *point, s32 room);
 extern s32 fldTestActorRoomProbeCondition(s32 roomIndex, dds3Basic_t *actor, f32 *position);
 extern u32 fldEveHit_ScriptEnd2(u32 slot);
@@ -1744,7 +1745,8 @@ void fldUpdateRoomTriggers(dds3Basic_t *object) {
                     direction = 1;
                 }
                 if (direction != 0) {
-                    if (fldProbeRoomPlanes(probePoint, roomIndex) != -1) {
+                    if (fldProbeRoomPlanes(probePoint, roomIndex) !=
+                        FLD_ROOM_PROBE_PLANES_REJECTED) {
                         room->crossingDirection = direction;
                         if (fldRunDanteGunFlag[8] == 1) {
                             fldDbgPrint2D(0x40, 0x140, fldRoomResources[roomIndex]->name);
