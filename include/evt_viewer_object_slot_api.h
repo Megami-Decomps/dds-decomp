@@ -10,6 +10,6 @@ enum {
 };
 
 EvtViewerObjectSlotResult evtViewerCreateObjectInFreeSlot(
-    s32 unused, EvtRuntimeGroup *track, EvtRuntimeChild *key, EvtRuntime *viewer);
+    s32 unused, EvtRuntimeGroup *track, EvtRuntimeChild *key, evtViewerInfo_t *viewer);
 
 #endif /* EVT_VIEWER_OBJECT_SLOT_API_H */

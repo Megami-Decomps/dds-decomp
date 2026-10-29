@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-struct EvtRuntime;
+struct evtViewerInfo_t;
 
 /* Zero-based selections stored in the camp viewer's primary and secondary
  * option fields. The current menus expose two primary rows and three
@@ -11,9 +11,9 @@ struct EvtRuntime;
 typedef u32 MnuCampPrimaryOptionIndex;
 typedef u32 MnuCampSecondaryOptionIndex;
 
-void mnuCampSetPrimaryOption(struct EvtRuntime *scene, MnuCampPrimaryOptionIndex optionIndex);
-MnuCampPrimaryOptionIndex mnuCampGetPrimaryOption(struct EvtRuntime *scene);
-void mnuCampSetSecondaryOption(struct EvtRuntime *scene, MnuCampSecondaryOptionIndex optionIndex);
-MnuCampSecondaryOptionIndex mnuCampGetSecondaryOption(struct EvtRuntime *scene);
+void mnuCampSetPrimaryOption(struct evtViewerInfo_t *scene, MnuCampPrimaryOptionIndex optionIndex);
+MnuCampPrimaryOptionIndex mnuCampGetPrimaryOption(struct evtViewerInfo_t *scene);
+void mnuCampSetSecondaryOption(struct evtViewerInfo_t *scene, MnuCampSecondaryOptionIndex optionIndex);
+MnuCampSecondaryOptionIndex mnuCampGetSecondaryOption(struct evtViewerInfo_t *scene);
 
 #endif /* MNU_CAMP_OPTION_INDEX_API_H */

@@ -104,16 +104,16 @@ void SortFrameInfo(EvtRuntimeGroup *list) {
     }
 }
 
-extern EvtViewerNameIndex evtEventViewerAddName(const char *, EvtRuntime *);
-extern void mnuSampleCampPanelVisualTrack(EvtRuntime *runtime, EvtRuntimeGroup *group, s32 frame,
+extern EvtViewerNameIndex evtEventViewerAddName(const char *, evtViewerInfo_t *);
+extern void mnuSampleCampPanelVisualTrack(evtViewerInfo_t *runtime, EvtRuntimeGroup *group, s32 frame,
                                           f32 (*outVectors)[4], f32 *outValueA, f32 *outValueB);
-extern void mnuSampleCampDisplayTrack(EvtRuntime *viewer, EvtRuntimeGroup *track, s32 value,
+extern void mnuSampleCampDisplayTrack(evtViewerInfo_t *viewer, EvtRuntimeGroup *track, s32 value,
                                       CampDisplayDefaults *display);
-extern void mnuSampleCampListLayoutTrack(EvtRuntime *viewer, EvtRuntimeGroup *track, EvtBlendKey *out);
+extern void mnuSampleCampListLayoutTrack(evtViewerInfo_t *viewer, EvtRuntimeGroup *track, EvtBlendKey *out);
 extern KwlnDrawVectorParams kwlnDrawVector;
 
 /* Capture kind-specific defaults before adding a new key to its track. */
-EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, EvtRuntime *viewer) {
+EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, evtViewerInfo_t *viewer) {
     CampDisplayDefaults display;
     EvtBlendKey layout;
     f32 first, second;
@@ -126,7 +126,7 @@ EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, Evt
         mnuSampleCampPanelVisualTrack(viewer, group, frame, vectors, &first, &second);
         break;
     case 24:
-        mnuSampleCampDisplayTrack(viewer, viewer->frameGroup, viewer->curFrame, &display);
+        mnuSampleCampDisplayTrack(viewer, viewer->frameGroup, viewer->nowframe, &display);
         break;
     case 25:
         mnuSampleCampListLayoutTrack(viewer, viewer->frameGroup, &layout);

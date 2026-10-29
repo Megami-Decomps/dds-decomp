@@ -102,3 +102,14 @@ DDS1 matching. The quad bodies and compiler flags are unchanged. This is the
 one withheld row of the port audit; the other nineteen rows are aligned.
 The shared record names still apply to this row. No alias, padding, unused
 declaration or alternate function status is introduced to hide the exclusion.
+
+## Public-record names
+
+DDS's `EvtRuntime` is `evtViewerInfo_t`, with `curFrame` named `nowframe`
+at +0x18. Its native record, field types and other member names remain as
+reconstructed for each game. Nocturne already has these names.
+
+The separate `WorldInfo` → `dds3WorldBasic_t` name is held while its public
+owner-header move is checked: renaming it in the broad provider changes
+DDS2's full-unit `sdfDrawTexturedQuad`. The existing world member spellings
+remain until that dependency can be narrowed without disturbing matching.

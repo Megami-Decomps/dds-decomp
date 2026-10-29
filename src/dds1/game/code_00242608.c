@@ -163,7 +163,7 @@ void mnuCampDestroyAllTasks(void) {
 
 
 /* Shift the selected track's frames; values exactly at the upper limit are kept. */
-void mnuShopScrollList(EvtRuntime *scene, s32 delta) {
+void mnuShopScrollList(evtViewerInfo_t *scene, s32 delta) {
     EvtRuntimeGroup *track = scene->frameGroup;
     EvtRuntimeChild *key;
     s32 absoluteFrame;
@@ -186,7 +186,7 @@ void mnuShopScrollList(EvtRuntime *scene, s32 delta) {
 /* Shift qualifying keys and their supported payload offsets. Preserve the
  * incoming base/offset/ubase arguments when no key overwrites them: the native
  * cleanup call receives those values even after an empty track traversal. */
-void mnuFxWorldScrollDelta(EvtRuntime *scene, s32 delta, s32 threshold, s32 base, s32 offset, s32 ubase) {
+void mnuFxWorldScrollDelta(evtViewerInfo_t *scene, s32 delta, s32 threshold, s32 base, s32 offset, s32 ubase) {
     EvtRuntimeGroup *track;
     EvtRuntimeChild *key;
     s32 absoluteFrame;
@@ -204,8 +204,8 @@ void mnuFxWorldScrollDelta(EvtRuntime *scene, s32 delta, s32 threshold, s32 base
     } else {
         scene->headerThird += delta;
     }
-    if (scene->curFrame > scene->headerThird) {
-        scene->curFrame = scene->headerThird;
+    if (scene->nowframe > scene->headerThird) {
+        scene->nowframe = scene->headerThird;
     }
     track = scene->groups;
     while (track != NULL) {
@@ -262,7 +262,7 @@ void mnuFxWorldScrollDelta(EvtRuntime *scene, s32 delta, s32 threshold, s32 base
 }
 
 /* Process keys at or beyond threshold, restarting at the head after each call. */
-void mnuFxWorldDropOutOfRange(EvtRuntime *scene, s32 threshold) {
+void mnuFxWorldDropOutOfRange(evtViewerInfo_t *scene, s32 threshold) {
     EvtRuntimeGroup *track;
     EvtRuntimeChild *key;
 
@@ -282,7 +282,7 @@ void mnuFxWorldDropOutOfRange(EvtRuntime *scene, s32 threshold) {
     }
 }
 
-void mnuAdjustTimelineDurations(EvtRuntime *world, s32 threshold, s32 delta) {
+void mnuAdjustTimelineDurations(evtViewerInfo_t *world, s32 threshold, s32 delta) {
     EvtRuntimeGroup *track;
     EvtRuntimeChild *key;
     s32 end = 0;
@@ -366,7 +366,7 @@ extern f32 evtHokanFloat(s32 enable, f32 t, f32 first, f32 second);
 void mnuFindCampKeyTrackNeighbors(EvtRuntimeGroup *track, s32 frame, EvtRuntimeChild **selected, EvtRuntimeChild **future);
 
 /* Sample three panel vectors and two scalar values from neighboring timeline keys. */
-void mnuSampleCampPanelVisualTrack(EvtRuntime *runtime, EvtRuntimeGroup *group, s32 frame,
+void mnuSampleCampPanelVisualTrack(evtViewerInfo_t *runtime, EvtRuntimeGroup *group, s32 frame,
                    f32 (*outVectors)[4], f32 *outValueA, f32 *outValueB) {
     EvtRuntimeChild *selected;
     EvtRuntimeChild *future;
@@ -481,7 +481,7 @@ void mnuCampInitDisplayDefaults(CampDisplayDefaults *display) {
 void mnuFindCampKeyTrackNeighbors(EvtRuntimeGroup *track, s32 frame, EvtRuntimeChild **lowerKey, EvtRuntimeChild **upperKey);
 void mnuBlendCampDisplayFields(EvtRuntimeChild *from, EvtRuntimeChild *to, CampDisplayDefaults *display, f32 ratio);
 
-void mnuSampleCampDisplayTrack(EvtRuntime *viewer, EvtRuntimeGroup *track, s32 frame, CampDisplayDefaults *display) {
+void mnuSampleCampDisplayTrack(evtViewerInfo_t *viewer, EvtRuntimeGroup *track, s32 frame, CampDisplayDefaults *display) {
     EvtRuntimeChild *lowerKey;
     EvtRuntimeChild *upperKey;
     s32 startFrame;
@@ -524,13 +524,13 @@ void mnuInitializeCampListLayoutDefaults(EvtBlendKey *layout) {
     layout->z[2] = 0x10;
 }
 
-void mnuSampleCampListLayoutTrack(EvtRuntime *viewer, EvtRuntimeGroup *track, EvtBlendKey *out) {
+void mnuSampleCampListLayoutTrack(evtViewerInfo_t *viewer, EvtRuntimeGroup *track, EvtBlendKey *out) {
     EvtRuntimeChild *lower;
     EvtRuntimeChild *upper;
     EvtCameraColorPayload fallback;
     EvtCameraColorPayload *lowerPayload;
     EvtCameraColorPayload *upperPayload;
-    s32 currentFrame = viewer->curFrame;
+    s32 currentFrame = viewer->nowframe;
     s32 lowerFrame;
     s32 upperFrame;
     s32 duration;
@@ -623,7 +623,7 @@ void mnuFindCampKeyTrackNeighbors(EvtRuntimeGroup *track, s32 frame, EvtRuntimeC
 }
 
 /* Return 1 if a type-4 key's low 12-bit index yields 1 from the owner's item query. */
-s32 campAnyPackedFlagSet(EvtRuntime *scene) {
+s32 campAnyPackedFlagSet(evtViewerInfo_t *scene) {
     EvtRuntimeGroup *node;
     EvtRuntimeChild *child;
     s32 low;
@@ -649,7 +649,7 @@ void mnuUnpackNibbleFields(EvtRuntimeChild *key, s32 *lowBitsOut, s32 *highBitsO
 }
 
 /* Return the scene's matching name index, or -1 when the track list has no match. */
-EvtViewerNameIndex mnuCampFindMatchingEntryIndex(PolyMovieWork *lookup, EvtRuntime *scene, s32 nameIndex) {
+EvtViewerNameIndex mnuCampFindMatchingEntryIndex(PolyMovieWork *lookup, evtViewerInfo_t *scene, s32 nameIndex) {
     EvtRuntimeGroup *track = scene->groups;
     while (track != NULL) {
         if (strcmp(scene->entryName[track->entryHeader],
@@ -662,7 +662,7 @@ EvtViewerNameIndex mnuCampFindMatchingEntryIndex(PolyMovieWork *lookup, EvtRunti
 }
 
 /* Return the first track with this fixed-width name, or NULL when absent. */
-EvtRuntimeGroup *mnuCampFindEntryByName(EvtRuntime *scene, const char *name) {
+EvtRuntimeGroup *mnuCampFindEntryByName(evtViewerInfo_t *scene, const char *name) {
     EvtRuntimeGroup *track = scene->groups;
     while (track != NULL) {
         if (strcmp(scene->entryName[track->entryHeader], name) == 0) {
@@ -675,7 +675,7 @@ EvtRuntimeGroup *mnuCampFindEntryByName(EvtRuntime *scene, const char *name) {
 
 /* Follow zero-coded alternatives, clear on code 1, otherwise resolve a name.
  * Keep the native signed code and separately retained halfword bits distinct. */
-void campResolvePendingValue(EvtRuntime *scene, EvtRuntimeChild *cue) {
+void campResolvePendingValue(evtViewerInfo_t *scene, EvtRuntimeChild *cue) {
     EvtRuntimeChild *linkedKey;
     s32 entryCode;
     u16 entryCodeBits;
@@ -749,7 +749,7 @@ void mnuDrawCampScaledTexture(sdfTexHandle_t *texture, CampDisplayDefaults *disp
 }
 
 /* Clear each track's unknown word and the scene state; do not alter links or values. */
-void fldResetCampSceneEntries(EvtRuntime *scene) {
+void fldResetCampSceneEntries(evtViewerInfo_t *scene) {
     EvtRuntimeGroup *track;
 
     track = scene->groups;
@@ -766,7 +766,7 @@ void fldResetCampSceneEntries(EvtRuntime *scene) {
 /* Blend the first camera-color track at the clamped frame. Lookup includes
  * the track base, but interpolation retains the native unre-based key frames.
  * Without a future key, pass zero blend and the uninitialized fallback block. */
-void evtApplyCameraColorTrackAtFrame(EvtRuntime *scene) {
+void evtApplyCameraColorTrackAtFrame(evtViewerInfo_t *scene) {
     EvtRuntimeGroup *track;
     EvtRuntimeChild *selectedKey;
     EvtRuntimeChild *futureKey;
@@ -780,7 +780,7 @@ void evtApplyCameraColorTrackAtFrame(EvtRuntime *scene) {
 
     selectedKey = NULL;
     futureKey = NULL;
-    frameValue = scene->curFrame;
+    frameValue = scene->nowframe;
     if (scene->colorEditorActive == 1) {
         return;
     }
@@ -816,7 +816,7 @@ void evtApplyCameraColorTrackAtFrame(EvtRuntime *scene) {
 
 
 /* The genuine three-row typed candidate remains non-matching. */
-void fldApplyCameraColorKeyWords(EvtRuntime *viewer, const EvtBlendKey *source) {
+void fldApplyCameraColorKeyWords(evtViewerInfo_t *viewer, const EvtBlendKey *source) {
     FldCameraSetting setting;
     s32 i;
 
@@ -849,7 +849,7 @@ void fldApplyCameraColorKeyWords(EvtRuntime *viewer, const EvtBlendKey *source) 
     }
 }
 
-void evtUpdateCameraColorTrackEffect(EvtRuntime *scene) {
+void evtUpdateCameraColorTrackEffect(evtViewerInfo_t *scene) {
     evtApplyCameraColorTrackAtFrame(scene);
     if (scene->cameraColorActive == 1) {
         fldDrawCameraColorLayerPass();
@@ -861,7 +861,7 @@ extern s32 D_00368BD8[];
 struct _FRQ;
 extern struct _FRQ * frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, struct _FRQ *existingGlyph);
 
-void mnuCampInitFontResource(EvtRuntime *scene) {
+void mnuCampInitFontResource(evtViewerInfo_t *scene) {
     s32 fontHandle;
     scene->glyph = 0;
     fontHandle = (s32)(u32)frFontBuildGlyphChain((const char *)D_00368BD8, 0, 0, 0, 0);
@@ -870,7 +870,7 @@ void mnuCampInitFontResource(EvtRuntime *scene) {
         CAMP_FONT_CONTEXT_WIDTH, CAMP_FONT_CONTEXT_HEIGHT);
 }
 
-void mnuCampLinkFontGlyph(EvtRuntime *scene) {
+void mnuCampLinkFontGlyph(evtViewerInfo_t *scene) {
     frDestroyFontRequestAfter((struct _FRQ *)(u32)scene->glyph);
     scene->glyph = 0;
 }
@@ -884,7 +884,7 @@ void mnuCampCheckClockDivisor(void) {
     quotient = 1 / heapStats.totalBytes;
 }
 
-void mnuEnterCampSceneMenuState(EvtRuntime *scene) {
+void mnuEnterCampSceneMenuState(evtViewerInfo_t *scene) {
     if ((scene->menuState == 0) || (scene->menuState == 5)) {
         scene->menuState = 1;
     }
@@ -892,13 +892,13 @@ void mnuEnterCampSceneMenuState(EvtRuntime *scene) {
 
 extern sdfTexHandle_t *dds3RenderTexture;
 extern s32 dds3AllocRenderTexture(u16 width, u16 height, f32 value);
-extern void mnuShopCreateDescriptorSurface(EvtRuntime *scene);
-extern void mnuShopSubmitDescriptor(EvtRuntime *scene);
-extern void mnuShopQueueAuxiliaryTexture(EvtRuntime *scene);
+extern void mnuShopCreateDescriptorSurface(evtViewerInfo_t *scene);
+extern void mnuShopSubmitDescriptor(evtViewerInfo_t *scene);
+extern void mnuShopQueueAuxiliaryTexture(evtViewerInfo_t *scene);
 
 /* Stages 1, 3, 4 and 5 fall through; stage 0 stops. All other stages,
  * including 2, advance once through the default arm. */
-void mnuAdvanceShopMenuState(EvtRuntime *scene) {
+void mnuAdvanceShopMenuState(evtViewerInfo_t *scene) {
     switch (scene->menuState) {
     case 1:
         if (dds3RenderTexture == 0) {
@@ -927,7 +927,7 @@ void mnuAdvanceShopMenuState(EvtRuntime *scene) {
 extern sdfGrOt_t D_00325708;
 extern u8 D_00325860[];
 
-void mnuShopCreateDescriptorSurface(EvtRuntime *scene) {
+void mnuShopCreateDescriptorSurface(evtViewerInfo_t *scene) {
     sdfDrawTag_t *surface;
     sdfPreDrawTag_t *context;
     sdfMemHandle_t *allocation;
@@ -947,7 +947,7 @@ void mnuShopCreateDescriptorSurface(EvtRuntime *scene) {
     D_00325708.append(&D_00325708, surface);
 }
 
-void mnuShopSubmitDescriptor(EvtRuntime *scene) {
+void mnuShopSubmitDescriptor(evtViewerInfo_t *scene) {
     sdfDrawTag_t *drawPacket;
 
     if (scene->pendingFrameBuffer != NULL) {
@@ -1008,31 +1008,31 @@ void mnuShopQueueAuxiliaryTexturePacket(s32 alpha) {
     D_003255A8.append(&D_003255A8, list);
 }
 
-void mnuShopQueueAuxiliaryTexture(EvtRuntime *scene) {
+void mnuShopQueueAuxiliaryTexture(evtViewerInfo_t *scene) {
     mnuShopQueueAuxiliaryTexturePacket(scene->auxResource);
 }
 
 void func_00243EE0(void) {
 }
 
-void mnuCampSetPrimaryOption(EvtRuntime *scene, MnuCampPrimaryOptionIndex optionIndex) {
+void mnuCampSetPrimaryOption(evtViewerInfo_t *scene, MnuCampPrimaryOptionIndex optionIndex) {
     scene->optionFlags = (scene->optionFlags & CAMP_PRIMARY_OPTION_CLEAR_MASK) | (optionIndex & CAMP_OPTION_VALUE_MASK);
 }
 
-MnuCampPrimaryOptionIndex mnuCampGetPrimaryOption(EvtRuntime *scene) {
+MnuCampPrimaryOptionIndex mnuCampGetPrimaryOption(evtViewerInfo_t *scene) {
     return scene->optionFlags & CAMP_OPTION_VALUE_MASK;
 }
 
-void mnuCampSetSecondaryOption(EvtRuntime *scene, MnuCampSecondaryOptionIndex optionIndex) {
+void mnuCampSetSecondaryOption(evtViewerInfo_t *scene, MnuCampSecondaryOptionIndex optionIndex) {
     scene->optionFlags = (scene->optionFlags & CAMP_SECONDARY_OPTION_CLEAR_MASK) | ((optionIndex & CAMP_OPTION_VALUE_MASK) << CAMP_SECONDARY_OPTION_SHIFT);
 }
 
-MnuCampSecondaryOptionIndex mnuCampGetSecondaryOption(EvtRuntime *scene) {
+MnuCampSecondaryOptionIndex mnuCampGetSecondaryOption(evtViewerInfo_t *scene) {
     return (scene->optionFlags & CAMP_SECONDARY_OPTION_MASK) >> CAMP_SECONDARY_OPTION_SHIFT;
 }
 
 /* Clear script registers 200..209 whose type-4 key is not active at this frame. */
-void mnuValidateCampTimelineScriptRegisters(EvtRuntime *scene) {
+void mnuValidateCampTimelineScriptRegisters(evtViewerInfo_t *scene) {
     EvtRuntimeGroup *track = scene->groups;
     s32 slotIndex;
 
@@ -1050,7 +1050,7 @@ void mnuValidateCampTimelineScriptRegisters(EvtRuntime *scene) {
                 s32 low;
                 s32 high;
                 mnuUnpackNibbleFields(key, &low, &high);
-                if (key->frame > scene->curFrame) {
+                if (key->frame > scene->nowframe) {
                     break;
                 }
                 if (high - 1 == slotIndex) {
@@ -1069,7 +1069,7 @@ void mnuValidateCampTimelineScriptRegisters(EvtRuntime *scene) {
 }
 
 /* Save the first and last four-component vectors; leave the middle unsaved. */
-void mnuShopSavePrimaryTransform(EvtRuntime *scene) {
+void mnuShopSavePrimaryTransform(evtViewerInfo_t *scene) {
     s32 componentIndex;
     f32 *transformComponents = scene->commandMatrix;
     for (componentIndex = 0; componentIndex < CAMP_TRANSFORM_COMPONENT_COUNT; componentIndex++) {
@@ -1080,7 +1080,7 @@ void mnuShopSavePrimaryTransform(EvtRuntime *scene) {
 }
 
 /* Save all three vectors and enable the middle-vector restore path. */
-void mnuShopSaveFullTransform(EvtRuntime *scene) {
+void mnuShopSaveFullTransform(evtViewerInfo_t *scene) {
     s32 componentIndex;
     f32 *transformComponents = scene->commandMatrix;
     for (componentIndex = 0; componentIndex < CAMP_TRANSFORM_COMPONENT_COUNT; componentIndex++) {
@@ -1092,7 +1092,7 @@ void mnuShopSaveFullTransform(EvtRuntime *scene) {
 }
 
 /* Keep the native restore-mode snapshot and last/middle/first write order. */
-void mnuShopRestoreTransform(EvtRuntime *scene) {
+void mnuShopRestoreTransform(evtViewerInfo_t *scene) {
     s32 componentIndex;
     f32 *transformComponents = scene->commandMatrix;
     s32 restoreMiddle = mnuShopRestoreMiddleVector;
@@ -1106,7 +1106,7 @@ void mnuShopRestoreTransform(EvtRuntime *scene) {
 }
 
 /* Append a distinct identifier only while the native registry has room. */
-void mnuShopRegisterSceneObject(EvtRuntime *scene, s32 identifier) {
+void mnuShopRegisterSceneObject(evtViewerInfo_t *scene, s32 identifier) {
     s32 registeredCount = scene->registeredCount;
     s32 idIndex = 0;
     if (registeredCount > 0) {
@@ -1127,7 +1127,7 @@ void mnuShopRegisterSceneObject(EvtRuntime *scene, s32 identifier) {
 
 /* Queue the scene's BGM ID with each registered variation, then clear the list.
  * The loop bound is read again after each queue call, not cached up front. */
-void mnuReleaseCampSceneRegisteredIds(EvtRuntime *scene) {
+void mnuReleaseCampSceneRegisteredIds(evtViewerInfo_t *scene) {
     s32 processedCount = 0;
     if (scene->registeredCount > 0) {
         s32 *idCursor = scene->registeredIds;

@@ -137,14 +137,14 @@ typedef union EvtFrameRange {
 
 /* One allocation retained by the EventViewer task. Camp-named timeline
  * helpers receive this same pointer; their old types omitted the voice tail. */
-typedef struct EvtRuntime {
+typedef struct evtViewerInfo_t {
     sdfMemHandle_t *resourceHandle;
     u32 flags;
     PolyMovieWork *windowContext;
     s32 headerThird;
     s32 headerFirst;
     EvtFrameRange frameRange;
-    s32 curFrame;
+    s32 nowframe;
     s32 previousGlyphPosition;
     s32 entryTotal;
     char entryName[256][32];
@@ -271,10 +271,10 @@ typedef struct EvtRuntime {
     s32 optionFrameBase;
     s32 curveComponent;
 #endif
-} EvtRuntime;
+} evtViewerInfo_t;
 
 /* Find a runtime group by its name-table entry. */
-EvtRuntimeGroup *mnuCampFindEntryByName(EvtRuntime *scene, const char *name);
+EvtRuntimeGroup *mnuCampFindEntryByName(evtViewerInfo_t *scene, const char *name);
 
 /* Start the viewer task's scheduler callback chain. */
 KwlnTaskUpdateResult evtViewerStartUpdate(struct dds3ProcessID_t *task);
@@ -289,28 +289,28 @@ typedef char EvtRuntimeGroup_size[(sizeof(EvtRuntimeGroup) == 0x84) ? 1 : -1];
 typedef char EvtRuntimeGroup_entryHeader_at_0x08[
     ((u32)&((EvtRuntimeGroup *)0)->entryHeader == 0x08) ? 1 : -1];
 #ifdef VERSION_DDS1
-typedef char EvtRuntime_size[(sizeof(EvtRuntime) == 0x2490) ? 1 : -1];
-typedef char EvtRuntime_timedEnd_at241C[((u32)&((EvtRuntime *)0)->timedEnd == 0x241C) ? 1 : -1];
+typedef char evtViewerInfo_t_size[(sizeof(evtViewerInfo_t) == 0x2490) ? 1 : -1];
+typedef char evtViewerInfo_t_timedEnd_at241C[((u32)&((evtViewerInfo_t *)0)->timedEnd == 0x241C) ? 1 : -1];
 #else
-typedef char EvtRuntime_size[(sizeof(EvtRuntime) == 0x24BC) ? 1 : -1];
-typedef char EvtRuntime_voiceFrame_at24A8[((u32)&((EvtRuntime *)0)->voiceFrame == 0x24A8) ? 1 : -1];
-typedef char EvtRuntime_timedEnd_at241C[((u32)&((EvtRuntime *)0)->timedEnd == 0x241C) ? 1 : -1];
+typedef char evtViewerInfo_t_size[(sizeof(evtViewerInfo_t) == 0x24BC) ? 1 : -1];
+typedef char evtViewerInfo_t_voiceFrame_at24A8[((u32)&((evtViewerInfo_t *)0)->voiceFrame == 0x24A8) ? 1 : -1];
+typedef char evtViewerInfo_t_timedEnd_at241C[((u32)&((evtViewerInfo_t *)0)->timedEnd == 0x241C) ? 1 : -1];
 #endif
-typedef char EvtRuntime_camera_at23CC[((u32)&((EvtRuntime *)0)->cameraColorActive == 0x23CC) ? 1 : -1];
-typedef char EvtRuntime_color_at2408[((u32)&((EvtRuntime *)0)->colorSelection == 0x2408) ? 1 : -1];
-typedef char EvtRuntime_color_at240C[((u32)&((EvtRuntime *)0)->colorEditorActive == 0x240C) ? 1 : -1];
-typedef char EvtRuntime_pendingFrameBuffer_at2428[
-    ((u32)&((EvtRuntime *)0)->pendingFrameBuffer == 0x2428) ? 1 : -1];
-typedef char EvtRuntime_pendingFrameBufferAllocation_at242C[
-    ((u32)&((EvtRuntime *)0)->pendingFrameBufferAllocation == 0x242C) ? 1 : -1];
+typedef char evtViewerInfo_t_camera_at23CC[((u32)&((evtViewerInfo_t *)0)->cameraColorActive == 0x23CC) ? 1 : -1];
+typedef char evtViewerInfo_t_color_at2408[((u32)&((evtViewerInfo_t *)0)->colorSelection == 0x2408) ? 1 : -1];
+typedef char evtViewerInfo_t_color_at240C[((u32)&((evtViewerInfo_t *)0)->colorEditorActive == 0x240C) ? 1 : -1];
+typedef char evtViewerInfo_t_pendingFrameBuffer_at2428[
+    ((u32)&((evtViewerInfo_t *)0)->pendingFrameBuffer == 0x2428) ? 1 : -1];
+typedef char evtViewerInfo_t_pendingFrameBufferAllocation_at242C[
+    ((u32)&((evtViewerInfo_t *)0)->pendingFrameBufferAllocation == 0x242C) ? 1 : -1];
 
-EvtRuntimeChild *evtEventViewerGetPendingNode(EvtRuntime *viewer);
-void evtEventViewerReleaseQueuedNode(EvtRuntime *viewer, EvtRuntimeGroup *entry, EvtRuntimeChild *node);
-void evtViewerDispatchFlagMode(EvtRuntime *viewer);
-void evtEventViewerReset(EvtRuntime *viewer);
-void evtEventViewerShutdown(EvtRuntime *viewer);
-void evtEventViewerReleaseGroups(EvtRuntime *viewer);
-void evtViewerSetMinimumFromCurrent(EvtRuntime *viewer);
-void evtViewerSetMaximumFromCurrent(EvtRuntime *viewer);
-void fldApplyCameraColorKeyWords(EvtRuntime *viewer, const EvtBlendKey *source);
+EvtRuntimeChild *evtEventViewerGetPendingNode(evtViewerInfo_t *viewer);
+void evtEventViewerReleaseQueuedNode(evtViewerInfo_t *viewer, EvtRuntimeGroup *entry, EvtRuntimeChild *node);
+void evtViewerDispatchFlagMode(evtViewerInfo_t *viewer);
+void evtEventViewerReset(evtViewerInfo_t *viewer);
+void evtEventViewerShutdown(evtViewerInfo_t *viewer);
+void evtEventViewerReleaseGroups(evtViewerInfo_t *viewer);
+void evtViewerSetMinimumFromCurrent(evtViewerInfo_t *viewer);
+void evtViewerSetMaximumFromCurrent(evtViewerInfo_t *viewer);
+void fldApplyCameraColorKeyWords(evtViewerInfo_t *viewer, const EvtBlendKey *source);
 #endif

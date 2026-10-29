@@ -14,6 +14,6 @@ enum {
  * files were unavailable or movie-work creation failed. Failure may follow
  * resource cleanup and does not promise rollback to the previous viewer. */
 EvtViewerReloadResult evtReloadEventViewer(
-    EvtPolygonMovieResourceMode resourceMode, EvtRuntime *runtime);
+    EvtPolygonMovieResourceMode resourceMode, evtViewerInfo_t *runtime);
 
 #endif

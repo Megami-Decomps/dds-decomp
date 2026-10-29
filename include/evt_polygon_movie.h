@@ -8,7 +8,7 @@
 #include "sdf_float_counter.h"
 
 struct dds3ProcessID_t;
-struct EvtRuntime;
+struct evtViewerInfo_t;
 struct PolyMovieWork;
 struct dds3Basic_t;
 struct FileRequest;
@@ -164,9 +164,9 @@ s32 evtStopMover(struct dds3Basic_t *movie, s32 undo, s32 start, s32 end);
 
 #ifdef VERSION_DDS1
 void evtPolygonMovieClampTime(struct dds3Basic_t *movie, s32 unused, s32 start, s32 end);
-s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, struct EvtRuntime *viewer);
+s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, struct evtViewerInfo_t *viewer);
 #elif VERSION_DDS2
-s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, struct EvtRuntime *viewer);
+s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, struct evtViewerInfo_t *viewer);
 #endif
 
 #endif

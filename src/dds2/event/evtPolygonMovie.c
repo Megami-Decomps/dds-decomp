@@ -890,7 +890,7 @@ PolyMovieWork *evtGetPolygonMovieWorkData2(s32 eventId, s32 sceneId, EvtPolygonM
 extern u32 D_00435CBC;
 extern s32 evtFormatPolygonMoviePaths(s32 eventId, s32 sceneId, char *path1, char *path2, char *path3);
 extern void evtEventViewerDestroyActiveAlternate(dds3ProcessID_t *task);
-extern void evtEventViewerInitCampFontResource(EvtRuntime *viewer);
+extern void evtEventViewerInitCampFontResource(evtViewerInfo_t *viewer);
 extern char D_00423360[]; /* "(ZikkiPlayMode)EventViewer" */
 
 /* Create the event viewer task at `priority` for `eventId`/`sceneId` and request its movie files. */
@@ -899,13 +899,13 @@ dds3ProcessID_t *evtViewerCreateTask(u32 priority, s32 eventId, s32 sceneId) {
     char path1[0x40];
     char path2[0x40];
     sdfMemHandle_t *viewerHandle;
-    EvtRuntime *viewer;
+    evtViewerInfo_t *viewer;
     PolyMovieWork *work;
     dds3ProcessID_t *task;
 
     D_00435CBC = 0x80000000;
     viewerHandle = sdfMemAllocDirect(0x24BC);
-    viewer = (EvtRuntime *)sdfMemLock(viewerHandle);
+    viewer = (evtViewerInfo_t *)sdfMemLock(viewerHandle);
     memset(viewer, 0, 0x24BC);
     viewer->resourceHandle = viewerHandle;
     evtFormatPolygonMoviePaths(eventId, sceneId, path0, path1, path2);
