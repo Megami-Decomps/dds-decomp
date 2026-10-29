@@ -1177,7 +1177,64 @@ void frFontMoveChainTo(s32 targetX, s32 targetY, _FRQ *glyphChain) {
     }
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "fr_font_draw_glyph.h"
+#include "fr_font_position.h"
+#include "fr_font_text_slots.h"
+#include "sdf_image_upload.h"
+#include "sdf_chip.h"
+#include "fr_font_measure.h"
+#include "fr_font_glyph_measure.h"
+#include "fr_font_clone_entry_resource.h"
+#include "fr_font_glyph_chain_count.h"
+#include "itf.h"
+#include "fr_font_temporary_entry_api.h"
+#include "itf_mem_node.h"
+#include "itf_resource_segments.h"
+#include "kwln.h"
+#include "kwln_draw_buffer.h"
+
+#define FR_FONT_POSITION_BAND_HEIGHT 0x54 /* a text line's band: glyphs within it share a line */
+
+/* Move a glyph chain so its first line starts at y and each line is centred
+ * on x: a line is the glyphs from its first one whose y is within the band
+ * height of it. Every glyph moves by the first line's y offset; each line's
+ * glyphs move by x minus the line's first x, less half the line's measured
+ * width (in 1/16 pixels). Retail reads the chain head's y before checking
+ * the head for null; this reads it after. Upstream: INCLUDE_ASM in
+ * interface/frFont; written from the retail routine. The same calls and stores;
+ * scheduling differs. DDS2's body is this one with its own band height
+ * (game/dds2/bodies/interface/frFont/). */
+void frFontCenterGlyphChainAt(s32 x, s32 y, _FRQ *chain) {
+    _FRQ *glyph;
+    s32 deltaY;
+
+    if (chain == NULL || chain->chainHead == NULL) {
+        return;
+    }
+    glyph = chain->chainHead;
+    deltaY = y - glyph->y;
+    do {
+        s32 limit = glyph->y + FR_FONT_POSITION_BAND_HEIGHT;
+        s32 width = 0;
+        s32 deltaX;
+        _FRQ *scan;
+
+        for (scan = glyph; scan != NULL && scan->y < limit; scan = scan->next) {
+            width += frGetStrWidth(scan);
+        }
+        deltaX = x - glyph->x;
+        while (glyph != NULL && glyph->y < limit) {
+            glyph->y += deltaY;
+            glyph->x += deltaX - (width / 2) * 16;
+            glyph = glyph->next;
+        }
+    } while (glyph != NULL);
+}
+#else
 INCLUDE_ASM(const s32, "interface/frFont", frFontCenterGlyphChainAt);
+#endif
 
 /* Return a borrowed read-only bank view. Read the packed table count, skip the
  * table and trailing metadata word; the parser copies that metadata too. */
