@@ -8224,8 +8224,8 @@ BtlRuntimeTask *fldCreateSceneTileTask(s32 stage, s32 variant) {
     return task;
 }
 
-s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
-    s32 result = 1;
+BtlTaskPollResult btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
+    BtlTaskPollResult pollResult = BTL_TASK_POLL_END_DELAY;
     BtlState *work = (BtlState *)btlGetRuntime();
     s32 stage = args->stage;
     s32 variant = args->variant;
@@ -8233,7 +8233,7 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
 
     if (args->state == 0) {
         sprintf(path, D_003A4B98, stage, stage, variant);
-        result = 0;
+        pollResult = BTL_TASK_POLL_CONTINUE;
         args->frontRequest = fileLoad(path);
         btlBossDebugPrintf(D_003A4BB8, path);
         sprintf(path, D_003A4BC8, stage, stage, variant);
@@ -8248,7 +8248,7 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
                 args->frontRequest = 0;
                 btlBossDebugPrintf(D_003A4BF8);
             } else {
-                result = 0;
+                pollResult = BTL_TASK_POLL_CONTINUE;
             }
         }
         if (args->sideRequest != 0) {
@@ -8259,12 +8259,12 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
                 args->sideRequest = 0;
                 btlBossDebugPrintf(D_003A4C10);
             } else {
-                result = 0;
+                pollResult = BTL_TASK_POLL_CONTINUE;
             }
         }
     }
     args->state++;
-    return result;
+    return pollResult;
 }
 
 BtlRuntimeTask *btlCreateFloorLoadTask(s32 stage, s32 variant) {

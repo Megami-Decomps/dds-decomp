@@ -7489,15 +7489,15 @@ BtlRuntimeTask *fldCreateSceneTileTask(s32 value, s32 option) {
     return task;
 }
 
-s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
-    s32 result = 1;
+BtlTaskPollResult btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
+    BtlTaskPollResult pollResult = BTL_TASK_POLL_END_DELAY;
     BtlState *work = (BtlState *)btlGetRuntime();
     s32 stage = args->stage;
     s32 variant = args->variant;
     char path[0x70];
     if (args->state == 0) {
         sprintf(path, "/fld/b/f%03d/f%03d_%03df.tmx", stage, stage, variant);
-        result = 0;
+        pollResult = BTL_TASK_POLL_CONTINUE;
         args->frontRequest = fileLoad(path);
         btlBossDebugPrintf("btl:load 0[%s]\n", path);
         sprintf(path, "/fld/b/f%03d/f%03d_%03ds.tmx", stage, stage, variant);
@@ -7511,7 +7511,7 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
                 args->frontRequest = 0;
                 btlBossDebugPrintf("btl:floor load end 0\n");
             } else {
-                result = 0;
+                pollResult = BTL_TASK_POLL_CONTINUE;
             }
         }
         if (args->sideRequest != 0) {
@@ -7521,12 +7521,12 @@ s32 btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
                 args->sideRequest = 0;
                 btlBossDebugPrintf("btl:floor load end 1\n");
             } else {
-                result = 0;
+                pollResult = BTL_TASK_POLL_CONTINUE;
             }
         }
     }
     args->state++;
-    return result;
+    return pollResult;
 }
 
 BtlRuntimeTask *btlCreateFloorLoadTask(s32 stage, s32 variant) {
