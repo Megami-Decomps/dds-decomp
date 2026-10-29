@@ -248,8 +248,8 @@ typedef struct BtlState {
     u16 phase; /* 0x25C */
     u8 requestMode; /* 0x25E: script sets this to 4 with nextBattleMode */
     u8 pad25F[5];
-    u32 motionSeLoadFrame; /* 0x264: disabled at -1; native updater tests the signed word. */
-    u32 skillSeLoadFrame; /* 0x268: same signed disabled sentinel. */
+    u32 motionSeLoadFrame; /* 0x264: all-ones disables signed frame polling. */
+    u32 skillSeLoadFrame; /* 0x268: same value disables the unsigned throttle. */
     u16 defeatedLevelCount; /* Number of defeated enemy levels accumulated for the reward average. */
     u16 defeatedLevelTotal; /* Sum of partyRecord.level for defeated enemies. */
     s32 encounterPack; /* 0x270: ENC PACK test selection (btlUpdateDebugEncounterSelector) */
@@ -494,8 +494,8 @@ typedef struct BtlState {
     u8 pad283;
     u16 earringPlaybackCount;
     u8 pad286[2];
-    u32 motionSeLoadFrame; /* 0x288: -1 disables the motion-SE ATRAC3 buffer delay. */
-    u32 skillSeLoadFrame; /* 0x28C: -1 disables the skill-SE frame gate. */
+    u32 motionSeLoadFrame; /* 0x288: all-ones disables signed frame polling. */
+    u32 skillSeLoadFrame; /* 0x28C: same value disables the unsigned throttle. */
     u16 defeatedLevelCount; /* Number of defeated enemy levels accumulated for the reward average. */
     u16 defeatedLevelTotal; /* Sum of partyRecord.level for defeated enemies. */
     s32 encounterPack; /* 0x294: encounter table selector, matching the DDS1 state field. */

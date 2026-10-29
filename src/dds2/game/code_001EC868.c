@@ -12064,11 +12064,13 @@ struct BtlRuntimeTask *btlCreateHookedUnitSoundTask(unit, option)
     return task;
 }
 
-/* Disable the motion- and skill-SE load-frame counters with their -1 sentinel. */
+#include "btl_sound_load_frame_counter.h"
+
+/* Disable the motion- and skill-SE load-frame counters with their all-ones value. */
 void btlResetMotionSoundFrameCounters(void) {
     s32 context = (s32)(u32)btlGetRuntime();
-    ((BtlState *)context)->motionSeLoadFrame = -1;
-    ((BtlState *)context)->skillSeLoadFrame = -1;
+    ((BtlState *)context)->motionSeLoadFrame = BTL_SOUND_LOAD_FRAME_COUNTER_DISABLED;
+    ((BtlState *)context)->skillSeLoadFrame = BTL_SOUND_LOAD_FRAME_COUNTER_DISABLED;
 }
 
 extern char D_00419408[]; /* "btl:sound load BSE SMG\n" */

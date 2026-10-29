@@ -10764,12 +10764,14 @@ BtlRuntimeTask *btlCreateMoveOtherUnitsTask(BtlUnit *unit, u32 soundId) {
     return task;
 }
 
-/* Disable the motion- and skill-SE load-frame counters with their -1 sentinel. */
+#include "btl_sound_load_frame_counter.h"
+
+/* Disable the motion- and skill-SE load-frame counters with their all-ones value. */
 void btlResetMotionSoundFrameCounters(void) {
     BtlActorWork *work = (BtlActorWork *)btlGetRuntime();
 
-    work->motionSeLoadFrame = -1;
-    work->skillSeLoadFrame = -1;
+    work->motionSeLoadFrame = BTL_SOUND_LOAD_FRAME_COUNTER_DISABLED;
+    work->skillSeLoadFrame = BTL_SOUND_LOAD_FRAME_COUNTER_DISABLED;
 }
 
 void sndLoadBattleBank(void) {

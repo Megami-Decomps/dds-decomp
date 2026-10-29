@@ -22,8 +22,8 @@ typedef struct BtlActorWork {
     struct ActiveSoundNode *soundList; /* Independent active-node list. */
     struct SoundSlotOwner *soundSlotOwners; /* Shared category/id owners. */
     u8 pad240[0x24];
-    u32 motionSeLoadFrame; /* 0x264: shared with BtlState; -1 disables frame counting. */
-    u32 skillSeLoadFrame; /* 0x268: -1 disables the skill-SE frame gate. */
+    u32 motionSeLoadFrame; /* 0x264: shared with BtlState; all-ones disables counting. */
+    u32 skillSeLoadFrame; /* 0x268: all-ones disables the unsigned throttle. */
     u8 pad26C[0x38];
     struct dds3ProcessID_t *boundTask; /* 0x2A4: actor-slot AI script task. */
     u8 pad2A8[0x210];
