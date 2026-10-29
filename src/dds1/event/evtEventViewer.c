@@ -734,7 +734,8 @@ void evtViewerApplyParameterKeyTracks(EvtRuntime *viewer) {
 
     while (track != NULL) {
         if (track->type == 24) {
-            if (track->usePendingKey == 1) {
+            if (track->parameterKeySource ==
+                EVT_VIEWER_PARAMETER_KEY_SOURCE_PENDING_KEY) {
                 u16 *key = (u16 *)evtEventViewerGetPendingNode(viewer);
                 evtViewerApplyInterpolatedNodeKey(viewer, track, key, NULL);
             } else {
@@ -3469,7 +3470,8 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, EvtRuntime *view
                         break;
                     case 24:
                         viewer->editField = 0;
-                        viewer->frameGroup->usePendingKey = 1;
+                        viewer->frameGroup->parameterKeySource =
+                            EVT_VIEWER_PARAMETER_KEY_SOURCE_PENDING_KEY;
                         evtViewerPushCommandHistory(11, 0, 0, viewer);
                         break;
                     case 25:

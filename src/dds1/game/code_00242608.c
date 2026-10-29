@@ -754,9 +754,10 @@ void fldResetCampSceneEntries(EvtRuntime *scene) {
 
     track = scene->groups;
     if (track != 0) {
-        track->usePendingKey = 0;
+        track->parameterKeySource = EVT_VIEWER_PARAMETER_KEY_SOURCE_TIMELINE;
         while (track = track->next, track != 0) {
-            track->usePendingKey = 0;
+            track->parameterKeySource =
+                EVT_VIEWER_PARAMETER_KEY_SOURCE_TIMELINE;
         }
     }
     scene->colorEditorActive = 0;

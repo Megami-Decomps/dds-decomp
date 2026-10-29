@@ -3397,7 +3397,8 @@ s32 evtEditEffectSpriteFrame(EvtRuntime *runtime) {
 
 
     if (dds3PadButtonState.cancel < 0) {
-        runtime->frameGroup->usePendingKey = 0;
+        runtime->frameGroup->parameterKeySource =
+            EVT_VIEWER_PARAMETER_KEY_SOURCE_TIMELINE;
         return 0;
     }
     return 1;

@@ -67,6 +67,12 @@ typedef struct EvtGroupMetadata {
     s8 extra2;
 } EvtGroupMetadata;
 
+typedef s32 EvtViewerParameterKeySource;
+enum {
+    EVT_VIEWER_PARAMETER_KEY_SOURCE_TIMELINE = 0,
+    EVT_VIEWER_PARAMETER_KEY_SOURCE_PENDING_KEY = 1
+};
+
 typedef enum EvtObjectAttachmentState {
     EVT_OBJECT_ATTACHMENT_DETACHED = 0,
     EVT_OBJECT_ATTACHMENT_ATTACHED = 1
@@ -103,7 +109,7 @@ typedef struct EvtRuntimeGroup {
     EvtGroupMetadata metadata;
     u8 pad20[4];
     sdfTexHandle_t *texture; /* Retained kind-0x18 texture; released with the group. */
-    s32 usePendingKey; /* 0x28: type-24 tracks apply the queued key when set. */
+    EvtViewerParameterKeySource parameterKeySource; /* 0x28: timeline or pending key. */
     f32 savedPosition[4];
     f32 savedRotation[4];
     EvtObjectAttachmentState attachmentState;
