@@ -218,7 +218,7 @@ extern vu8 sdfFrameId;
 #include "sdf_compact_vertex_vif_packet.h"
 #include "sdf_dev_console_node.h"
 #include "sdf_packet_alloc.h"
-#include "sdf_vu_work.h"
+#include "sdfCorePacketCb_t.h"
 
 
 

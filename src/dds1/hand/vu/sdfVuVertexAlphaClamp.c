@@ -2,7 +2,7 @@
 
 #ifdef NON_MATCHING
 #include "common.h"
-#include "sdf_vu_work.h"
+#include "sdfCorePacketCb_t.h"
 
 /* Colour each of the work's vertex records from its normal's light term w
  * (2d - 1, from the lighting kernels): colour = parameters[1] +

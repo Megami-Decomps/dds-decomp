@@ -17,8 +17,8 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "sdf_texture_file.h"
-#include "sdf_vu_blend_node.h"
-#include "sdf_vu_work.h"
+#include "sdfCorePacketPointBuff_tag.h"
+#include "sdfCorePacketCb_t.h"
 
 #define SDF_DMA_ADDRESS_MASK 0x0FFFFFFF
 

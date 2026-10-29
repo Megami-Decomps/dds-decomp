@@ -1,5 +1,5 @@
-#ifndef SDF_VU_BLEND_NODE_H
-#define SDF_VU_BLEND_NODE_H
+#ifndef SDF_CORE_PACKET_POINT_BUFF_TAG_H
+#define SDF_CORE_PACKET_POINT_BUFF_TAG_H
 
 #include "common.h"
 
@@ -33,4 +33,4 @@ typedef char sdfCorePacketPointBuff_tag_region_offset_must_be_0x50[
 typedef char sdfCorePacketPointBuff_tag_clipFlags_offset_must_be_0x51[
     ((unsigned long)&((sdfCorePacketPointBuff_tag *)0)->clipFlags == 0x51) ? 1 : -1];
 
-#endif /* SDF_VU_BLEND_NODE_H */
+#endif /* SDF_CORE_PACKET_POINT_BUFF_TAG_H */

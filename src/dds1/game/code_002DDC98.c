@@ -21,8 +21,8 @@
 #include "sdf_vu_matrix_multiply_api.h"
 #include "ee_mmi.h"
 #include "sdf_texture_file.h"
-#include "sdf_vu_blend_node.h"
-#include "sdf_vu_work.h"
+#include "sdfCorePacketPointBuff_tag.h"
+#include "sdfCorePacketCb_t.h"
 
 extern const struct SdfDmaTagHeader *corePktCurrLight;
 

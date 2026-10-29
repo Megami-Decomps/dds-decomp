@@ -16,7 +16,7 @@
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "sdf_texture_file.h"
-#include "sdf_vu_blend_node.h"
+#include "sdfCorePacketPointBuff_tag.h"
 
 void corePktLerpUVChain(sdfCorePacketPointBuff_tag *node) {
     while (node != NULL) {

@@ -2,7 +2,7 @@
 
 #ifdef NON_MATCHING
 #include "common.h"
-#include "sdf_vu_work.h"
+#include "sdfCorePacketCb_t.h"
 
 extern u32 corePktCurrLight;  /* the selected block; its light vector at 0xD0 */
 extern u128 sdfVuObjectBasisCache[3];

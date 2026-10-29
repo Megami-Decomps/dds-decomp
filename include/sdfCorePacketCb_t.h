@@ -1,9 +1,9 @@
-#ifndef SDF_VU_WORK_H
-#define SDF_VU_WORK_H
+#ifndef SDF_CORE_PACKET_CB_T_H
+#define SDF_CORE_PACKET_CB_T_H
 
 #include "common.h"
 #include "sdf.h"
-#include "sdf_vu_blend_node.h"
+#include "sdfCorePacketPointBuff_tag.h"
 
 /* The VU packet builders' work block, filled by
  * corePktInitCb from a command's parameter words. */
@@ -41,4 +41,4 @@ typedef struct {
     f32 backfaceSign;             /* 0xAC */
 } sdfCorePacketCb_t;
 
-#endif /* SDF_VU_WORK_H */
+#endif /* SDF_CORE_PACKET_CB_T_H */
