@@ -2286,7 +2286,142 @@ void itfDrawSelectedSoundRow(instanceMes_tag *panel) {
     surface->append(surface, list);
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "itf.h"
+#include "itf_mes_window.h"
+#include "itf_panel_draw.h"
+#include "sdf_packet_list.h"
+#include "sdf_packet_alloc.h"
+#include "kwln.h"
+#include "fr_font_measure.h"
+#include "fr_font_position.h"
+
+extern ItfMesGlobals itfMesMngManager;
+extern SdfPoolNode sdfGrOtTable[];
+extern DrawColorRec itfSoundSelectorBorderColor;
+extern s32 frFontCountGlyphBands(_FRQ *glyph);
+extern void itfDrawThreePanelBorderBands(DrawVertex *bounds, DrawColorRec *color, u32 tail, s32 borderWidth,
+                                         sdfDrawTag_t *command);
+
+/* Draws the sound selector's option panel border and row highlights behind the
+ * selected row: it widens the stored selection extent to the widest row, draws
+ * the three-band border and the two end caps tinted by the panel fade, then
+ * one pair of side bars for every row, and queues the packets on the panel's
+ * draw surface. DDS2's rows are 0x10 shorter than DDS1's (its font's narrower
+ * band) and it measures them by line and band. Upstream: INCLUDE_ASM in
+ * interface/itfMesManager. */
+void itfDrawSoundSelectorOptionPanel(instanceMes_tag *panel) {
+    DrawColorRec uv;
+    DrawColorRec color;
+    DrawVertex bounds[2];
+    FrFontPosition position;
+    ItfMesBlk40 *selection = &panel->blk40;
+    BtlFade *fade = &panel->fade;
+    s32 selected = selection->savedIndex;
+    sdfDrawTag_t *list;
+    SdfPoolNode *surface;
+    s32 i;
+    s32 width;
+    s32 left;
+    s32 right;
+    s32 top;
+    s32 bottom;
+    s32 repeatLeft;
+    s32 repeatRight;
+
+    if (selected == -1) {
+        return;
+    }
+    list = (sdfDrawTag_t *)(u32)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
+    for (i = 0; i < frFontCountGlyphBands(selection->glyphChain); i++) {
+        width = frFontMeasureLineWidth(i, selection->glyphChain);
+        if (selection->widestRowWidth < width) {
+            frFontGetGlyphPositionAtIndex(&position, i, selection->glyphChain);
+            selection->widestRowWidth = width;
+            selection->widestRowX = position.x;
+        }
+    }
+    frFontGetGlyphPositionAtIndex(&position, selected, selection->glyphChain);
+    left = selection->widestRowX;
+    right = left + selection->widestRowWidth;
+    repeatLeft = left - 0x250;
+    repeatRight = right + 0x250;
+    top = position.y + 0x28;
+    bottom = position.y + 0x90;
+    bounds[0].x = left - 0x370;
+    bounds[0].y = position.y + 0x10;
+    bounds[1].x = right + 0x370;
+    bounds[1].y = position.y + 0xA0;
+    itfDrawThreePanelBorderBands(bounds, &itfSoundSelectorBorderColor, panel->renderValue, 0x370, list);
+
+    bounds[0].x = left - 0x140;
+    bounds[0].y = top;
+    bounds[1].x = left - 0x60;
+    bounds[1].y = bottom;
+    uv.components[0] = 0x410;
+    uv.components[1] = 0xF0;
+    uv.components[2] = 0x4F0;
+    uv.components[3] = 0x1E0;
+    color.components[0] = 0x80;
+    color.components[1] = 0x80;
+    color.components[2] = 0x80;
+    color.components[3] = fade->alpha;
+    itfMiscDrawSpritePrim(bounds, &uv, &color, panel->renderValue, itfMesMngManager.windowTexture, 0, list);
+
+    bounds[0].x = right + 0x60;
+    bounds[0].y = top;
+    bounds[1].x = right + 0x140;
+    bounds[1].y = bottom;
+    uv.components[0] = 0x4F0;
+    uv.components[1] = 0xF0;
+    uv.components[2] = 0x410;
+    uv.components[3] = 0x1E0;
+    color.components[0] = 0x80;
+    color.components[1] = 0x80;
+    color.components[2] = 0x80;
+    color.components[3] = fade->alpha;
+    itfMiscDrawSpritePrim(bounds, &uv, &color, panel->renderValue, itfMesMngManager.windowTexture, 0, list);
+
+    for (i = 0; i < frFontCountGlyphBands(selection->glyphChain); i++) {
+        frFontGetGlyphPositionAtIndex(&position, i, selection->glyphChain);
+        top = position.y + 0x28;
+        bottom = position.y + 0x90;
+        bounds[0].x = repeatLeft;
+        bounds[0].y = top;
+        bounds[1].x = left - 0x120;
+        bounds[1].y = bottom;
+        uv.components[0] = 0x2C0;
+        uv.components[1] = 0xF0;
+        uv.components[2] = 0x3F0;
+        uv.components[3] = 0x1E0;
+        color.components[0] = 0x80;
+        color.components[1] = 0x80;
+        color.components[2] = 0x80;
+        color.components[3] = 0x80;
+        itfMiscDrawSpritePrim(bounds, &uv, &color, panel->renderValue, itfMesMngManager.windowTexture, 0, list);
+
+        bounds[0].x = right + 0x120;
+        bounds[0].y = top;
+        bounds[1].x = repeatRight;
+        bounds[1].y = bottom;
+        uv.components[0] = 0x3F0;
+        uv.components[1] = 0xF0;
+        uv.components[2] = 0x2C0;
+        uv.components[3] = 0x1E0;
+        color.components[0] = 0x80;
+        color.components[1] = 0x80;
+        color.components[2] = 0x80;
+        color.components[3] = 0x80;
+        itfMiscDrawSpritePrim(bounds, &uv, &color, panel->renderValue, itfMesMngManager.windowTexture, 0, list);
+    }
+    surface = &sdfGrOtTable[panel->drawSurfaceIndex];
+    surface->append(surface, list);
+}
+#else
 INCLUDE_ASM(const s32, "interface/itfMesManager", itfDrawSoundSelectorOptionPanel);
+#endif
 
 extern u8 D_003B49F8[];
 
