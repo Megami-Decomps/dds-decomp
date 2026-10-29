@@ -9766,7 +9766,7 @@ BtlTaskPollResult btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
     s32 stage = args->stage;
     s32 variant = args->variant;
     char path[0x70];
-    if (args->state == 0) {
+    if (args->pollCount == 0) {
         sprintf(path, "/fld/b/f%03d/f%03d_%03df.tmx", stage, stage, variant);
         pollResult = BTL_TASK_POLL_CONTINUE;
         args->frontRequest = fileLoad(path);
@@ -9796,7 +9796,7 @@ BtlTaskPollResult btlPollFloorLoadTask(BtlFloorLoadArgs *args) {
             }
         }
     }
-    args->state++;
+    args->pollCount++;
     return pollResult;
 }
 
@@ -9813,7 +9813,7 @@ BtlRuntimeTask *btlCreateFloorLoadTask(s32 stage, s32 variant) {
     args->sideRequest = 0;
     args->stage = stage;
     args->variant = variant;
-    args->state = 0;
+    args->pollCount = 0;
     return task;
 }
 
