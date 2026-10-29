@@ -277,7 +277,7 @@ segments:
       - [0x1DE038, c, game/code_002DD038]
       - [0x1DE8B8, c, game/code_002DD8B8]  # P4 transfer (P4 effMiscVu; sits among sdf*, name unconfirmed)
       - [0x1DEC98, c, game/code_002DDC98]
-      - [0x1DF118, asm, hand/vu/sdfVuVertexKernels]
+      - [0x1DF118, c, hand/vu/sdfVuVertexKernels]
       - [0x1DF8C8, c, game/code_002DE8C8]
       - [0x1DF980, asm, hand/vu/sdfVuVertexAlphaClamp]
       - [0x1DFA18, c, game/code_002DEA18]
