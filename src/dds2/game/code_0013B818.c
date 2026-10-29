@@ -1549,15 +1549,17 @@ void fldPurgeEveRngProcesses(void) {
     }
 }
 
-/* Return the first matching task slot's record ID; -1 denotes a miss. */
-s32 fldEveHitResID_Find(dds3ProcessID_t *task) {
+#include "fld_room_task_scene_key_api.h"
+
+/* Return the first matching task slot's scene key; -1 denotes a miss. */
+FldSceneObjectKeyResult fldEveHitResID_Find(dds3ProcessID_t *task) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < fldEveRngCount; slotIndex++) {
         if (fldRoomTaskHandles[slotIndex] == task) {
             return fldRoomResources[slotIndex]->id;
         }
     }
-    return -1;
+    return FLD_SCENE_OBJECT_KEY_NOT_FOUND;
 }
 
 /* Return the room ID stored for the matching task; -1 denotes a miss. */

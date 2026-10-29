@@ -187,7 +187,7 @@ extern void evtSetSolarOverlayFullyVisible(void);
 
 void fldNpcHojiRefresh(void);
 
-extern s32 fldEveHitResID_Find(struct dds3ProcessID_t *task);
+#include "fld_room_task_scene_key_api.h"
 s32 fldCmdQueryActorEntrySceneStatus(void) {
     dds3Basic_t *world = dds3GetActiveScene();
     dds3Basic_t *unit = dds3GetActiveUnitSceneBasic(world);

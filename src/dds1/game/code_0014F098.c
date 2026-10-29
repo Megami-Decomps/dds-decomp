@@ -66,7 +66,7 @@ s32 fldCommand_FLD_WARP_GET_DOOR(void) {
     return 1;
 }
 
-extern s32 fldEveHitResID_Find(dds3ProcessID_t *task);
+#include "fld_room_task_scene_key_api.h"
 extern void fldApplyActorEntryTrigger(s32 checkTaskRecord);
 
 u32 fldCommand_FLD_WARP_RUN_START(void) {

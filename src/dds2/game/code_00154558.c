@@ -369,7 +369,7 @@ extern s32 fldTestRoomProbeFacingAndRange(dds3Basic_t *actor, dds3Basic_t *entry
 
 extern s32 fldTestRoomProbeFacing(dds3Basic_t *actor, dds3Basic_t *entry);
 
-extern s32 fldEveHitResID_Find(dds3ProcessID_t *task);
+#include "fld_room_task_scene_key_api.h"
 s32 fldCmdQueryActorEntrySceneStatus(void) {
     dds3Basic_t *world = dds3GetActiveScene();
     dds3Basic_t *unit = fldPlayerObject;
