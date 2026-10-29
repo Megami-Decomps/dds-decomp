@@ -511,7 +511,51 @@ void scrClearProfileFlagsTable(void) {
     memset(DDS3_GBWK->mantraBits, 0, sizeof(DDS3_GBWK->mantraBits));
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "dat_state.h"
+#include "mdl_flag_api.h"
+#include "prf_profile_parameters.h"
+
+extern s32 D_00404A50[]; /* each unit's flag for holding every profile, or 0 */
+
+extern void prfDecodeFlagPair(u32 v, u32 *a, u32 *b);
+extern s32 scrSetFlag(datUnitWork_t *, u16);
+extern void ptySetProfileRecordToCap(datUnitWork_t *unitAddress, u16 profileId);
+extern u32 ptySetMappedGlobalFlagForSlot(datUnitWork_t *unit, u32 slotId);
+extern s32 prfAreAllRequiredProfileFlagsSet(datUnitWork_t *unit);
+
+/* Mark the profile's primary flag, grant its skills, cap its record and set
+ * its mapped flag; once the unit holds every profile it needs, set the
+ * unit's flag, where it has one. DDS1's ptyApplyProfile on DDS2's layouts.
+ * Upstream: INCLUDE_ASM in game/code_00313BB8; the same loads and stores as
+ * the retail routine. */
+void ptyApplyProfile(datUnitWork_t *unit, u16 profileId) {
+    u32 word;
+    u32 shift;
+    u16 *skills;
+    u32 skillIndex;
+
+    prfDecodeFlagPair(profileId, &word, &shift);
+    DDS3_GBWK->mantraBits[unit->unitId].words[word] |= 1 << shift;
+    skills = D_00401320[profileId].skills;
+    skillIndex = 0;
+    do {
+        u16 skillId = *skills++;
+        if (skillId != 0) {
+            scrSetFlag(unit, skillId);
+        }
+        skillIndex++;
+    } while (skillIndex < 8);
+    ptySetProfileRecordToCap(unit, profileId);
+    ptySetMappedGlobalFlagForSlot(unit, profileId);
+    if (prfAreAllRequiredProfileFlagsSet(unit) && D_00404A50[unit->unitId] != 0) {
+        evtBitOn(D_00404A50[unit->unitId]);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "game/code_00313BB8", ptyApplyProfile);
+#endif
 
 /* Test the first bit of the decoded profile flag pair for this unit. */
 s32 ptyTestPrimaryProfileFlag(datUnitWork_t *partyRecord, u16 id) {
