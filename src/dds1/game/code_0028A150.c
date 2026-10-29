@@ -3049,7 +3049,161 @@ s32 slQueryYesNo(FileSelectionCallback start, FileSelectionCallback finish, s32 
     return (s32)fileUpdatePromptDialog;
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "sdf_textured_rect.h"
+#include "itf_mes_window.h"
+#include "sdf_trig.h"
+
+struct sdfTexHandle_t;
+
+extern s32 D_003BC830;        /* the highlighted answer: 0 yes, otherwise no; -1 while no prompt runs */
+extern u32 D_003BC834;        /* the prompt shown; 0 for none. 1 overwrite the save file, 2 card
+                              * unformatted, 3 a slot's action, 4 save a new cycle, 5 no memory
+                              * card, 6 too little free space, 7 cancel the save, 8 return to the
+                              * title screen, 9 overwrite data */
+extern s32 fileSelectedSlotIndex;
+extern s32 D_0037D4D0[];      /* highlight pulse: [2] its angle in degrees, [3] its alpha */
+extern char *D_003B2718[20];  /* each slot's prompt title */
+extern char D_0037D8B8[], D_0037D8D8[], D_0037D900[];
+extern char D_0037D5C8[], D_0037D5F8[], D_0037D718[];
+extern char D_0037DB10[];
+extern char D_0037DBA0[], D_0037DBB0[], D_0037DBD0[];
+extern char D_0037DC60[], D_0037DC78[], D_0037DC90[], D_0037DCB0[], D_0037DCC8[], D_0037DCE8[], D_0037DD00[],
+    D_0037DD28[];
+extern char D_0037DD40[], D_0037DD58[], D_0037DD70[], D_0037DD88[], D_0037DDA0[], D_0037DDB8[], D_0037DDD8[],
+    D_0037DDF0[], D_0037DE10[];
+extern char D_0037D748[];
+extern char D_0037DBF8[];
+extern char D_0037DC18[], D_0037DC38[], D_0037DC50[];
+extern char D_003BC8B0[]; /* "Yes" */
+extern char D_003BC8B8[]; /* "No" */
+extern char D_003BC8C0[]; /* " " */
+
+extern void eglSetOt(u32);
+extern void evtSubmitPrimaryAlphaBlendMode(s32);
+extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, s32, s32, s32, s32);
+
+extern s32 fileDrawStatusDialogFrame(void);
+extern s32 slChkWindowOpenDone(void);
+
+#define FILE_PROMPT_TEXT_COLOR 0x89FEFF80
+#define FILE_PROMPT_ANSWER_COLOR 0xA09DC380
+#define FILE_PROMPT_HIGHLIGHT_RGB 0xAEC014
+#define FILE_PROMPT_HIGHLIGHT_EDGE 0x40AEC014
+#define FILE_PROMPT_LINE_HEIGHT 24
+#define FILE_PROMPT_ANSWER_X 86
+
+/* Text line `line` of a prompt whose first line is at (x, top). */
+static void filePromptLine(s32 x, s32 top, s32 line, const char *text) {
+    mcdCreateFontDrawHandle(x, top + line * FILE_PROMPT_LINE_HEIGHT, FILE_PROMPT_TEXT_COLOR, (u32)text);
+}
+
+static void filePromptLines(s32 x, s32 top, const char *const *lines, s32 count) {
+    s32 i;
+
+    for (i = 0; i < count; i++) {
+        filePromptLine(x, top, i, lines[i]);
+    }
+}
+
+static void filePromptSurface(void) {
+    eglSetOt(0x53);
+    evtSubmitPrimaryAlphaBlendMode(0);
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+}
+
+/* Draw the yes/no answers under a prompt, the highlighted one under a pulsing
+ * bar and cursor. */
+static void filePromptAnswers(void) {
+    s32 yesRow = (D_003BC834 == 5 || D_003BC834 == 6) ? 0x132 : 0x102;
+    s32 noRow = yesRow + FILE_PROMPT_LINE_HEIGHT;
+    s32 highlightRow;
+    struct sdfTexHandle_t *texture;
+    s32 angle;
+    f32 wave;
+    u32 cursorColor;
+
+    eglSetOt(0x56);
+    evtSubmitPrimaryAlphaBlendMode(1);
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    texture = itfMesGetWindowTexture();
+    angle = (D_0037D4D0[2] + 8) % 360;
+    D_0037D4D0[2] = angle;
+    wave = sdfSin((f32)((angle + 90) % 360) / 180.0f * 3.1415899f);
+    D_0037D4D0[3] = (s32)((wave + 1.0f) * 0.5f * 80.0f + 112.0f);
+
+    highlightRow = D_003BC830 == 0 ? yesRow : noRow;
+    /* The bar's halves fade in from its ends. */
+    evtSubmitDefaultDepthGradientRect(0x3D, highlightRow, 0x30, 0x18, FILE_PROMPT_HIGHLIGHT_RGB,
+                                      FILE_PROMPT_HIGHLIGHT_EDGE, FILE_PROMPT_HIGHLIGHT_EDGE,
+                                      FILE_PROMPT_HIGHLIGHT_RGB);
+    evtSubmitDefaultDepthGradientRect(0x6D, highlightRow, 0x30, 0x18, FILE_PROMPT_HIGHLIGHT_EDGE,
+                                      FILE_PROMPT_HIGHLIGHT_RGB, FILE_PROMPT_HIGHLIGHT_RGB,
+                                      FILE_PROMPT_HIGHLIGHT_EDGE);
+    cursorColor = ((u32)D_0037D4D0[3] << 24) | FILE_PROMPT_HIGHLIGHT_RGB;
+    evtSubmitTexturedGradientQuad(0x45, highlightRow + 8, 0xC, 0xB, 0x29, 1, 0xC, 0xB, cursorColor, cursorColor,
+                              cursorColor, cursorColor, texture);
+
+    mcdCreateFontDrawHandle(FILE_PROMPT_ANSWER_X, yesRow, FILE_PROMPT_ANSWER_COLOR, (u32)D_003BC8B0);
+    mcdCreateFontDrawHandle(FILE_PROMPT_ANSWER_X, noRow, FILE_PROMPT_ANSWER_COLOR, (u32)D_003BC8B8);
+}
+
+/* Draw the memory-card menu's current prompt and, once its load step is
+ * complete, its answers. Upstream: INCLUDE_ASM in game/code_0028A150; same
+ * calls and arguments as the retail routine, with its repeated text blocks
+ * as tables. */
+void fileShowPromptDialog(void) {
+    static const char *const overwriteFileLines[] = {D_0037D8B8, D_0037D8D8, D_0037D900};
+    static const char *const unformattedCardLines[] = {D_0037D5C8, D_0037D5F8, D_0037D718};
+    static const char *const newCycleLines[] = {D_0037DBA0, D_0037DBB0, D_0037DBD0, D_003BC8C0};
+    static const char *const noCardLines[] = {D_0037DC60, D_0037DC78, D_0037DC90, D_0037DCB0,
+                                              D_0037DCC8, D_0037DCE8, D_0037DD00, D_0037DD28};
+    static const char *const noSpaceLines[] = {D_0037DD40, D_0037DD58, D_0037DD70, D_0037DD88, D_0037DDA0,
+                                            D_0037DDB8, D_0037DDD8, D_0037DDF0, D_0037DE10};
+    static const char *const overwriteDataLines[] = {D_0037DC18, D_0037DC38, D_0037DC50};
+
+    if (D_003BC830 == -1 || D_003BC834 == 0) {
+        return;
+    }
+    filePromptSurface();
+    if (D_003BC834 == 1 && fileDrawStatusDialogFrame()) {
+        filePromptLines(86, 114, overwriteFileLines, 3);
+    }
+    if (D_003BC834 == 2 && fileDrawStatusDialogFrame()) {
+        filePromptLines(62, 114, unformattedCardLines, 3);
+    }
+    if (D_003BC834 == 3 && fileDrawStatusDialogFrame()) {
+        filePromptLine(86, 114, 0, D_003B2718[fileSelectedSlotIndex]);
+        filePromptLine(86, 114, 1, D_0037DB10);
+    }
+    if (D_003BC834 == 4 && fileDrawStatusDialogFrame()) {
+        filePromptLines(86, 114, newCycleLines, 4);
+    }
+    if (D_003BC834 == 5 && fileDrawStatusDialogFrame()) {
+        filePromptLines(62, 90, noCardLines, 8);
+    }
+    if (D_003BC834 == 6 && fileDrawStatusDialogFrame()) {
+        filePromptLines(62, 90, noSpaceLines, 9);
+    }
+    if (D_003BC834 == 7 && fileDrawStatusDialogFrame()) {
+        filePromptLine(86, 114, 0, D_0037D748);
+    }
+    if (D_003BC834 == 8 && fileDrawStatusDialogFrame()) {
+        filePromptLine(86, 114, 0, D_0037DBF8);
+    }
+    if (D_003BC834 == 9 && fileDrawStatusDialogFrame()) {
+        filePromptLines(86, 114, overwriteDataLines, 3);
+    }
+    if (slChkWindowOpenDone()) {
+        filePromptAnswers();
+    }
+    filePromptSurface();
+}
+#else
 INCLUDE_ASM(const s32, "game/code_0028A150", fileShowPromptDialog);
+#endif
 
 FileMenuOperationResult fileGetSaveLoadResult(void) {
     return D_003BC81C;
@@ -4378,7 +4532,67 @@ void fileJobCopyCommandIntoSecondaryData(FileJobPayload *job, const char *comman
     }
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "file.h"
+#include "sdk_libkernl.h"
+
+extern u8 fileJobZeroPadding[16];
+
+/* Write a file job: its header with the buffer pointers cleared and the
+ * payload offsets resolved, the primary buffer, zero padding to sixteen
+ * bytes, then the secondary buffer. Upstream: INCLUDE_ASM in DDS1's
+ * game/code_0028A150 and DDS2's game/code_002C96D0. */
+void fileJobWriteSerializedPayload(s32 fd, FileJobPayload *job) {
+    FileJobPayload header;
+    void *primary;
+    void *secondary;
+    s32 payloadStart;
+    s32 alignedStart;
+    s32 primaryOffset;
+    s32 padding = 0;
+
+    header = *job;
+    header.data = NULL;
+    primary = fileResolvePrimaryBuffer(job);
+    primaryOffset = header.primary.offset;
+    if (primary != NULL) {
+        primaryOffset = sizeof(FileJobPayload);
+    }
+    header.primary.offset = primaryOffset;
+    header.primary.allocation = NULL;
+    secondary = fileResolveSecondaryBuffer(job);
+    if (secondary != NULL) {
+        if (primary != NULL) {
+            payloadStart = header.primary.offset + header.primary.size;
+        } else {
+            payloadStart = sizeof(FileJobPayload);
+        }
+        padding = payloadStart >> 4;
+        if ((payloadStart & 0xF) != 0) {
+            alignedStart = (padding + 1) << 4;
+        } else {
+            alignedStart = padding << 4;
+        }
+        header.secondary.offset = alignedStart;
+        padding = alignedStart - payloadStart;
+    }
+    header.secondary.allocation = NULL;
+
+    sceWrite(fd, &header, sizeof(FileJobPayload));
+    if (primary != NULL) {
+        sceWrite(fd, primary, job->primary.size);
+    }
+    if (padding > 0) {
+        sceWrite(fd, fileJobZeroPadding, padding);
+    }
+    if (secondary != NULL) {
+        sceWrite(fd, secondary, job->secondary.size);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "game/code_0028A150", fileJobWriteSerializedPayload);
+#endif
 
 extern u8 sdfHddValid;
 extern char D_003BC928[];
