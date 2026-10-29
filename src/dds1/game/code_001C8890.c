@@ -3055,32 +3055,32 @@ void btlRemoveEligibleActorSceneTask(BtlTask *task) {
 void btlEnterDeadActionState(void) {
 }
 
-void btlCommandTaskReleaseActor(s32 task) {
-    if ((*(u32 *)(task + 8) & 8) != 0) {
-        if (btlPollActorResourceCleanup((BtlUnit *)*(s32 *)(task + 0x18)) == BTL_ACTOR_RESOURCE_CLEANUP_PENDING) {
+void btlCommandTaskReleaseActor(BtlTask *task) {
+    if ((task->flags & 8) != 0) {
+        if (btlPollActorResourceCleanup(task->unit) == BTL_ACTOR_RESOURCE_CLEANUP_PENDING) {
             return;
         }
-        if (*(s32 *)(task + 0x18) != 0) {
-            btlReleaseUnitResources((BtlUnit *)*(s32 *)(task + 0x18));
+        if (task->unit != 0) {
+            btlReleaseUnitResources(task->unit);
             {
-                BtlUnit *fx = (BtlUnit *)*(s32 *)(task + 0x18);
-                *(u32 *)((u8 *)fx + 0x54) = 0x80808080;
-                *(u32 *)((u8 *)fx + 0x84) = 0x80808080;
+                BtlUnit *fx = task->unit;
+                fx->baseColor = 0x80808080;
+                fx->overlayColor = 0x80808080;
                 fx->status.flags = (u32)fx->status.flags & 0x700;
                 btlInitUnitFxDefaults(fx);
             }
             {
-                u8 *model = (u8 *)*(s32 *)(task + 0x18);
-                SDF_VU0_COPYVECTOR(model + 0x60, model + 0x30);
-                SDF_VU0_COPYVECTOR(model + 0x70, model + 0x40);
-                *(s32 *)(model + 0x2F0) = -1;
+                BtlUnit *model = task->unit;
+                SDF_VU0_COPYVECTOR(model->currentPosition, model->position);
+                SDF_VU0_COPYVECTOR(model->orientation, model->rotation);
+                model->selectedEntryIndex = -1;
             }
-            *(u32 *)(task + 0x18) = 0;
-            *(u32 *)(task + 8) &= ~8;
+            task->unit = 0;
+            task->flags &= ~8;
         }
     }
-    btlClearSceneTaskActiveFlag((BtlTask *)task);
-    *(u32 *)(task + 8) |= 2;
+    btlClearSceneTaskActiveFlag(task);
+    task->flags |= 2;
 }
 
 void btlFlagLinkedActorActionInProgress(BtlTask *unit) {
