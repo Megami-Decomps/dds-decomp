@@ -4601,8 +4601,8 @@ void btlUpdatePhasePanelAnimation(BattlePhasePanelWork *work) {
     BattlePhaseFadeLimits limits = D_004163C0;
     BattlePhaseXBounds bounds = D_004163F0;
     s32 i, j;
-    switch (work->phase) {
-    case 0:
+    switch (work->stripAnimationPhase) {
+    case BTL_PHASE_PANEL_STRIP_ANIMATION_INITIAL_ENTRY:
         work->waitCounter++;
         work->waitCounter = work->waitCounter <= 0 ? 0 : work->waitCounter > 10 ? 10 : work->waitCounter;
         if (work->waitCounter >= 3) {
@@ -4615,32 +4615,32 @@ void btlUpdatePhasePanelAnimation(BattlePhasePanelWork *work) {
                     work->fade[i][j] = work->fade[i][j] <= 0 ? 0 : work->fade[i][j] < limits.values[i][j] ? work->fade[i][j] : limits.values[i][j];
                 }
             }
-            if (work->fade[0][0] >= 0x80) work->phase++;
+            if (work->fade[0][0] >= 0x80) work->stripAnimationPhase++;
         }
         break;
-    case 1:
+    case BTL_PHASE_PANEL_STRIP_ANIMATION_FIRST_STRIP_SHIFT:
         work->fade[0][0] = 0xFF;
         work->current[0][0] -= 2;
-        if (work->current[0][0] <= 300) work->phase++;
+        if (work->current[0][0] <= 300) work->stripAnimationPhase++;
         break;
-    case 2:
+    case BTL_PHASE_PANEL_STRIP_ANIMATION_FIRST_TWO_STRIPS_SHIFT:
         work->current[0][0] -= 20;
         work->current[1][0] -= 16;
         work->fade[0][0] -= 16;
         work->fade[0][0] = work->fade[0][0] <= 0 ? 0 : work->fade[0][0] > 0xFF ? 0xFF : work->fade[0][0];
-        if (work->current[0][0] <= 128) work->phase++;
+        if (work->current[0][0] <= 128) work->stripAnimationPhase++;
         break;
-    case 3:
+    case BTL_PHASE_PANEL_STRIP_ANIMATION_ALL_THREE_STRIPS_SHIFT:
         work->current[0][0] -= 18;
         work->current[1][0] -= 18;
         work->current[2][0] -= 18;
         if (work->current[0][0] <= 96) {
-            work->phase++;
+            work->stripAnimationPhase++;
             work->fade[0][0] = 0;
             work->fade[0][2] = 0;
         }
         break;
-    case 4:
+    case BTL_PHASE_PANEL_STRIP_ANIMATION_ALL_THREE_STRIPS_SHIFT_WITH_EDGE_FADE:
         work->current[0][0] -= 20;
         work->current[1][0] -= 20;
         work->current[2][0] -= 20;
@@ -4664,7 +4664,7 @@ void btlUpdatePhasePanelAnimation(BattlePhasePanelWork *work) {
         }
         break;
     }
-    if (work->phase >= 3) {
+    if (work->stripAnimationPhase >= BTL_PHASE_PANEL_STRIP_ANIMATION_ALL_THREE_STRIPS_SHIFT) {
         for (i = 0; i < 3; i++) {
             s32 height = btlResourceBlock->resC->workEntries[slots.values[i]].sourceHeight;
             work->saved[i][1] += 3;
@@ -4750,13 +4750,14 @@ void btlDrawPhaseChangePanelStrips(BattlePhasePanelWork *work) {
     s32 i;
     s32 j;
 
-    if (work->phase >= 5 || work->phase < 0) {
+    if (work->stripAnimationPhase >= BTL_PHASE_PANEL_STRIP_ANIMATION_PHASE_COUNT ||
+        work->stripAnimationPhase < BTL_PHASE_PANEL_STRIP_ANIMATION_INITIAL_ENTRY) {
         return;
     }
     for (i = 0; i < 3; i++) {
         for (j = 0; j < 4; j++) {
             colors[j] = btlSetSlotLowByteClamped(btlResourceBlock->resC, slots[i], j, work->fade[i][j]);
-            if (work->phase > 0 && j == 0 && i == 0) {
+            if (work->stripAnimationPhase > BTL_PHASE_PANEL_STRIP_ANIMATION_INITIAL_ENTRY && j == 0 && i == 0) {
                 colors[j] |= 0xFFFFFF00;
             }
         }
@@ -4764,7 +4765,7 @@ void btlDrawPhaseChangePanelStrips(BattlePhasePanelWork *work) {
             btlResourceBlock->resC->workEntries[slots[i]].geometry.bounds[2] =
                 (work->current[i + 1][0] - work->current[i][0]) << 4;
         }
-        if (work->phase >= 2) {
+        if (work->stripAnimationPhase >= BTL_PHASE_PANEL_STRIP_ANIMATION_FIRST_TWO_STRIPS_SHIFT) {
             btlResourceBlock->resC->workEntries[slots[i]].geometry.bounds[3] =
                 (btlResourceBlock->resC->workEntries[slots[i]].sourceHeight - work->saved[i][1]) << 3;
         }
