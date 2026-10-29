@@ -2329,8 +2329,8 @@ extern void fldUpdateSceneGroupTask(s32 task);
 
 extern void btlRemoveTaskFromSceneGroup(BtlTask *task);
 
-void btlCommandTaskReturnUpdate(s32 task) {
-    BtlUnit *unit = *(BtlUnit **)(task + 0x18);
+void btlCommandTaskReturnUpdate(BtlTask *task) {
+    BtlUnit *unit = task->unit;
     u32 flags = (u32)unit->status.flags;
 
     unit->status.flags = flags & ~1;
@@ -2347,13 +2347,13 @@ void btlCommandTaskReturnUpdate(s32 task) {
     if (((u32)unit->status.flags & 0x40) == 0) {
         return;
     }
-    if (btlPollActorResourceCleanup((BtlUnit *)*(s32 *)(task + 0x18)) != BTL_ACTOR_RESOURCE_CLEANUP_PENDING) {
+    if (btlPollActorResourceCleanup(task->unit) != BTL_ACTOR_RESOURCE_CLEANUP_PENDING) {
         if ((u32)unit->status.flags & 0x200) {
             btlClearPartyRecordStatusBits(&unit->partyRecord, 8);
             btlRemovePartyActorAndShiftEntries(unit);
         }
-        fldUpdateSceneGroupTask(task);
-        btlRemoveTaskFromSceneGroup((BtlTask *)task);
+        fldUpdateSceneGroupTask((s32)task);
+        btlRemoveTaskFromSceneGroup(task);
         btlDispatchStateHandler(task, 0x1E);
     }
 }
