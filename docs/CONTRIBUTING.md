@@ -107,6 +107,26 @@ not prove that we recovered the original source spelling or variable names.
   macro body); and a comment names the trace. DDS2 `func_00153068` (a
   division's zero check survives) and `mnuDrawCommandPhaseTransition` (case 14
   repeats case 0's clamp) are examples.
+  As an alternative to the sibling/copy-shape requirement, an equal-arm
+  conditional may retain the same real calculation in both branches when:
+  - Its predicate is an existing value already used by live computation,
+    initialized on every reaching path; exactly one copy of the real
+    calculation executes. It adds no calls,
+    source-visible memory effects, arithmetic operations or other observable
+    effects.
+  - A qualified whole-unit trace of the actual compiler causally connects
+    that decision to the residual and shows the decision and duplicate arm
+    being deleted while the residual survives. Ordinary/probed assembly,
+    allocated sections and resolved relocation contracts must agree.
+  - The residual's native location, operands and ordering are reproduced,
+    not merely a similar instruction or an improved matching score.
+  - Independent semantic review verifies the definitions, consumers and
+    unchanged behavior. A comment cites the causal evidence and calls this
+    a mechanistic reconstruction, not recovered original branch spelling,
+    historical constants or a copied macro.
+  This alternative does not allow unrelated dead stores, dummy computations,
+  cancelling arithmetic or new side effects. All normal affected-owner,
+  owned-data, full-build and test requirements remain unchanged.
 - These three are the only exceptions to the dead-variable and dead-store ban.
 - **Scratch scalar reuse across disjoint phases.** An ordinary local may hold
   successive values, including values with different semantic roles, when all
