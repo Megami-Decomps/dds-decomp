@@ -25,6 +25,15 @@ typedef s32 EvtPackSecondaryResourceId;
 /* FIELD_BE selector matched to each required resource row's key field. */
 typedef s32 EvtPackFieldResourceId;
 
+/* MODEL_BE key used to select a motion-cue record. */
+typedef s32 EvtPackMotionResourceId;
+
+/* Entry resource keys are interpreted according to EvtPackEntry.kind. */
+typedef union EvtPackResourceId {
+    EvtPackFieldResourceId field; /* resource and texture-offset entries */
+    EvtPackMotionResourceId motion; /* motion-cue entries */
+} EvtPackResourceId;
+
 /* Numeric event key used to name and find the camp's event-pack task. */
 typedef s32 EvtPackEventId;
 
@@ -35,7 +44,7 @@ typedef struct EvtPackEntry {
     s32 cueCount;                 /* 0x08: type-6 count at DDS2 0025D5EC/0025D634. */
     u32 dataOffset;               /* 0x0C: relative to the retained file base */
     EvtPackSecondaryResourceId secondaryResourceId; /* 0x10 */
-    s32 resourceId;               /* 0x14 */
+    EvtPackResourceId resourceId; /* 0x14: field or motion key by kind */
     u8 pad18[4];
     s32 motionId;                 /* 0x1C: type-6 motion index at DDS2 0025D5D4. */
 } EvtPackEntry;

@@ -100,7 +100,7 @@ s32 evtRegistBEField(EvtPackEventId eventId, EvtPackFieldResourceId resourceId) 
         entry = packState->entries;
         remainingEntryCount = entryCount;
         do {
-            if (entry->resourceId == resourceId) {
+            if (entry->resourceId.field == resourceId) {
                 switch (entry->kind) {
                 case EVT_PACK_KIND_AREA_RESOURCE_PRIMARY:
                     resource0Data = packState->data + entry->dataOffset;
@@ -164,7 +164,7 @@ KwlnTaskUpdateResult evtMotionSeProcess1(dds3ProcessID_t *task) {
     motionFrame = unit->owner->first->currentFrame;
     for (entryIndex = 0; entryIndex < packState->header->entryCount; entryIndex++) {
         if (packState->entries[entryIndex].kind == EVT_PACK_KIND_MOTION_CUES &&
-            packState->entries[entryIndex].resourceId == motionSeParams->resourceId &&
+            packState->entries[entryIndex].resourceId.motion == motionSeParams->resourceId &&
             packState->entries[entryIndex].motionId == motionId) {
             cues = (const EvtMotionSeCue *)(packState->data + packState->entries[entryIndex].dataOffset);
             for (cueIndex = 0; cueIndex < packState->entries[entryIndex].cueCount; cueIndex++) {
