@@ -14,6 +14,7 @@
 #include "snd_battle_sound_file_request_status.h"
 #include "sdf_map_position_api.h"
 #include "btl_action_entry_is_empty_api.h"
+#include "btl_horizontal_aim_api.h"
 #include "btl_linked_actor_eligibility.h"
 #include "btl_target_list_builder.h"
 #include "btl_unit_model_progress_api.h"
@@ -259,8 +260,6 @@ extern void btlSetUnitRotation(BtlUnit *object, const f32 rotation[4]);
 
 extern void mdlGetPosition(dds3ModelHandle_t *);
 
-
-extern s32 btlAimHorizontalDirectionVU(const f32 *, const f32 *);
 
 extern u8 D_0037E110[];
 

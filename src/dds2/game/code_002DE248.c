@@ -38,6 +38,7 @@
 #include "eff_point_set_table.h"
 #include "eff_span_work.h"
 #include "common.h"
+#include "btl_horizontal_aim_result.h"
 #include "dds3_camera_update_flags.h"
 #include "sdf_vu_rotation_axes.h"
 #include "file_pac.h"
@@ -107,7 +108,7 @@ extern s32 effUpdatePartsListEditor(s32 unused);
 extern u8 *sdf2DGetPrimPtr(SdfDrawPacket *packet);
 #endif
 /* Declared before first use (were implicit int). */
-extern s32 btlAimHorizontalDirectionVU(const f32 *origin, const f32 *targetPosition);
+extern BtlHorizontalAimResult btlAimHorizontalDirectionVU(const f32 *origin, const f32 *targetPosition);
 extern void btlInitTintTransitionDefault(u16 soundId);
 extern void btlInitTintTransitionResource(u32 resource, u16 soundId);
 extern u32 dds3BillboardGeneralNumber(void);
