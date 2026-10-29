@@ -466,7 +466,7 @@ KwlnProcessMainResult dds3ProcessMain(void)
 }
 
 dds3ProcessID_t *dds3StartProcess(const char *name, u32 priority, s32 startDelay, s32 destroyDelay,
-                         KwlnTaskUpdateCallback update, TaskDestroy destroy, u32 userValue) {
+                         KwlnTaskUpdateCallback update, KwlnTaskDestroyCallback destroy, u32 userValue) {
     dds3ProcessID_t *task = sdfChipAllocDirect(sizeof(dds3ProcessID_t));
     s32 taskNameByteIndex = 0;
 

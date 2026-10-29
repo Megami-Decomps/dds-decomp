@@ -24,7 +24,10 @@ typedef struct dds3ProcessID_t dds3ProcessID_t;
  * other words select a replacement callback. */
 typedef s32 KwlnTaskUpdateResult;
 typedef KwlnTaskUpdateResult (*KwlnTaskUpdateCallback)(dds3ProcessID_t *task);
-typedef void (*TaskDestroy)(dds3ProcessID_t *task);
+/* Called after linked children receive immediate kill requests and the task
+ * leaves scheduler queues, while its allocation is still valid; the scheduler
+ * frees it after the callback returns. */
+typedef void (*KwlnTaskDestroyCallback)(dds3ProcessID_t *task);
 
 struct dds3ProcessID_t {
     char name[0x18];          /* 0x00: NUL-padded task name, compared byte-wise */
@@ -36,7 +39,7 @@ struct dds3ProcessID_t {
     s16 startDelayTicks;     /* 0x2C: signed; positive values count down, zero activates, negatives remain queued. */
     s16 destroyDelayTicks;   /* 0x2E: signed; positive values count down, zero destroys, negatives stay pending. */
     KwlnTaskUpdateCallback update; /* 0x30 */
-    TaskDestroy destroy;     /* 0x34 */
+    KwlnTaskDestroyCallback destroy; /* 0x34 */
     u32 userValue;           /* 0x38: caller-supplied value exposed by accessors. */
     dds3ProcessID_t *listNext;      /* 0x3C */
     dds3ProcessID_t *listPrev;      /* 0x40 */

@@ -206,7 +206,7 @@ s32 fclEncycFindFreeSlot(const char *name) {
 }
 
 /* One shared initializer for the three configure modes and unregister. */
-static inline void kwlnSetNamedSlotState(s32 index, s32 kind, KwlnTaskUpdateCallback update, TaskDestroy destroy,
+static inline void kwlnSetNamedSlotState(s32 index, s32 kind, KwlnTaskUpdateCallback update, KwlnTaskDestroyCallback destroy,
                                          void (*setState)(s32), void *userValue) {
     D_003C1C90[index].kind = kind;
     D_003C1C90[index].task = NULL;
@@ -305,7 +305,7 @@ s32 kwlnConfigureNamedSlotMode3(const char *name, void (*setState)(s32)) {
     return 1;
 }
 
-s32 fclEncycAllocEntry(const char *name, KwlnTaskUpdateCallback update, TaskDestroy destroy, void *userValue) {
+s32 fclEncycAllocEntry(const char *name, KwlnTaskUpdateCallback update, KwlnTaskDestroyCallback destroy, void *userValue) {
     s32 index = fclEncycFindFreeSlot(name);
     if (index < 0) {
         return 0;
@@ -314,7 +314,7 @@ s32 fclEncycAllocEntry(const char *name, KwlnTaskUpdateCallback update, TaskDest
     return 1;
 }
 
-s32 kwlnConfigureNamedSlotMode2(const char *name, KwlnTaskUpdateCallback update, TaskDestroy destroy, void *userValue) {
+s32 kwlnConfigureNamedSlotMode2(const char *name, KwlnTaskUpdateCallback update, KwlnTaskDestroyCallback destroy, void *userValue) {
     s32 index = fclEncycFindFreeSlot(name);
     if (index < 0) {
         return 0;
