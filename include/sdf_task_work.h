@@ -43,6 +43,7 @@ typedef char SdfTaskItemDesc_size_must_be_0x14[
 /* Mode arguments accepted by sdfSetTaskItemMode: 0 ORs active/update/callback,
  * 1 queues activation, 2 suspends, 3 selects callback only, and 4 selects update
  * only. The two single-pass modes preserve the other low controls. */
+typedef u32 SdfTaskItemMode;
 #define SDF_TASK_ITEM_MODE_ENABLE_UPDATE_AND_CALLBACK 0
 #define SDF_TASK_ITEM_MODE_PENDING_ACTIVATION 1
 #define SDF_TASK_ITEM_MODE_SUSPENDED 2
@@ -121,7 +122,7 @@ KwlnTaskUpdateResult sdfTaskWorkRunAll(struct dds3ProcessID_t *task);
 /* The scheduler destroy callback releases the TaskWork owned by task's user value. */
 void sdfReleaseCurrentTaskOwnedResources(struct dds3ProcessID_t *task);
 
-void sdfSetTaskItemMode(TaskWork *, s32, u32);
+void sdfSetTaskItemMode(TaskWork *, s32, SdfTaskItemMode);
 SdfTaskEntry *sdfCreateTaskEntry(const SdfTaskItemDesc *);
 
 /* Cleanup receives the entry itself; the list adapter receives it as value. */

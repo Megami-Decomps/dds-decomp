@@ -780,7 +780,7 @@ s32 sdfGetTaskValueByKey(TaskWork *work, s32 key) {
 }
 
 
-void sdfSetTaskItemMode(TaskWork *work, s32 key, u32 taskItemMode) {
+void sdfSetTaskItemMode(TaskWork *work, s32 key, SdfTaskItemMode taskItemMode) {
     SdfTaskEntry *item = sdfFindTaskItemValueByKey(work, key);
     if (item == NULL) {
         return;

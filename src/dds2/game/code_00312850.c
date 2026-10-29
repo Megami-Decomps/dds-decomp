@@ -63,7 +63,7 @@ extern char D_004388E0[];
 
 extern void sdfNoOpGridDrawCallback(void);
 
-void sdfSetTaskItemMode(TaskWork *work, s32 key, u32 taskItemMode) {
+void sdfSetTaskItemMode(TaskWork *work, s32 key, SdfTaskItemMode taskItemMode) {
     SdfTaskEntry *item = sdfFindTaskItemValueByKey(work, key);
     if (item == NULL) {
         return;

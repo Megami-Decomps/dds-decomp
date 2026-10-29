@@ -535,7 +535,7 @@ s32 mnuUpdateResourceTaskState(s32 key, MnuResourceTask *task) {
         task->frameCounter=frame;
         if ((f32)frame>=10.0f) {
             sdfAttachTaskItem(mnuSceneResourceContext,&D_0036C65C);
-            sdfSetTaskItemMode(mnuSceneResourceContext,key,2);
+            sdfSetTaskItemMode(mnuSceneResourceContext, key, SDF_TASK_ITEM_MODE_SUSPENDED);
             task->state=MNU_RESOURCE_TASK_STATE_REOPEN_SELECTED_PROFILE;task->frameCounter=0;
             mnuReleaseMenuVisualWorkResources(metadata->attachedEffect);
         }
@@ -2319,7 +2319,7 @@ s32 mnuHandleMantraSceneInput(void) {
         }
         host->frame = 0;
         host->phase = 0;
-        sdfSetTaskItemMode(mnuSceneResourceContext, 1, 1);
+        sdfSetTaskItemMode(mnuSceneResourceContext, 1, SDF_TASK_ITEM_MODE_PENDING_ACTIVATION);
         return -1;
     case 1:
         if (work->hasPendingUnlockedMantraMessages != 0) {
