@@ -8,6 +8,7 @@
 #include "bill_object_api.h"
 #include "sdf_resource.h"
 #include "eff_dependency.h"
+#include "eff_parameter_position_readiness.h"
 #include "pcp_vu0.h"
 #include "dds3obj.h"
 #include "dds3_object_control_slot.h"
@@ -732,16 +733,16 @@ EffectDependencyState *CheckESP(dds3Basic_t *obj) {
     return data;
 }
 
-/* Load the ready parameter vector into vf10; return one for success, zero otherwise. */
-s32 GetESPPos(dds3Basic_t *obj) {
+/* Publish the position in vf10; report readiness separately from the scalar value. */
+EffectParameterPositionReadiness GetESPPos(dds3Basic_t *obj) {
     if (CheckESP(obj) == NULL) {
-        return 0;
+        return EFFECT_PARAMETER_POSITION_NOT_READY;
     }
     SDF_VU0_LOADVECTOR(obj->inner->position);
-    return 1;
+    return EFFECT_PARAMETER_POSITION_READY;
 }
 
-/* Truncate the ready scalar float to s32; zero also represents unavailable data. */
+/* Truncate the ready scalar; zero can be data, so callers check position readiness first. */
 s32 GetESPR(dds3Basic_t *obj) {
     dds3PoseSet_t *parameters;
 
@@ -789,11 +790,11 @@ s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *obj, dds3Basic_t *first, dds3Basic_t
     switch (data->state) {
     case EFF_DEPENDENCY_STATE_MAGATUHI_TWO_ROWS:
         parameterRows = data->vector;
-        if (GetESPPos(first)) {
+        if (GetESPPos(first) != EFFECT_PARAMETER_POSITION_NOT_READY) {
             SDF_VU0_STOREVECTOR(parameterRows);
             parameterRows[8] = GetESPR(first);
         }
-        if (GetESPPos(second)) {
+        if (GetESPPos(second) != EFFECT_PARAMETER_POSITION_NOT_READY) {
             SDF_VU0_STOREVECTOR(parameterRows + 4);
             parameterRows[9] = GetESPR(second);
         }
@@ -801,19 +802,19 @@ s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *obj, dds3Basic_t *first, dds3Basic_t
         return 1;
     case EFF_DEPENDENCY_STATE_MAGATUHI_FOUR_ROWS:
         parameterRows = data->vector;
-        if (GetESPPos(first)) {
+        if (GetESPPos(first) != EFFECT_PARAMETER_POSITION_NOT_READY) {
             SDF_VU0_STOREVECTOR(parameterRows);
             parameterRows[16] = GetESPR(first);
         }
-        if (GetESPPos(second)) {
+        if (GetESPPos(second) != EFFECT_PARAMETER_POSITION_NOT_READY) {
             SDF_VU0_STOREVECTOR(parameterRows + 4);
             parameterRows[17] = GetESPR(second);
         }
-        if (GetESPPos(third)) {
+        if (GetESPPos(third) != EFFECT_PARAMETER_POSITION_NOT_READY) {
             SDF_VU0_STOREVECTOR(parameterRows + 8);
             parameterRows[18] = GetESPR(third);
         }
-        if (GetESPPos(fourth)) {
+        if (GetESPPos(fourth) != EFFECT_PARAMETER_POSITION_NOT_READY) {
             SDF_VU0_STOREVECTOR(parameterRows + 12);
             parameterRows[19] = GetESPR(fourth);
         }
