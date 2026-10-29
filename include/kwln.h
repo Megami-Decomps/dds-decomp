@@ -47,6 +47,9 @@ struct dds3ProcessID_t {
 
 void dds3SetProcessData(dds3ProcessID_t *task, u32 userValue);
 u32 dds3GetProcessData(const dds3ProcessID_t *task);
+/* Return a borrowed scheduler-owned handle from the starting, active, or
+ * destroy-pending queue. The handle remains valid through its destroy callback
+ * and is freed when finalization completes; return NULL when no name matches. */
 dds3ProcessID_t *dds3SearchProcessName(const char *name);
 /* Detach task from its parent hierarchy; scheduler queue links are unchanged. */
 void dds3UnlinkProcess(dds3ProcessID_t *task);
