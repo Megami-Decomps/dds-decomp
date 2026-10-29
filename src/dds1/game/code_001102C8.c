@@ -17,7 +17,7 @@ extern dds3Basic_t *dds3TheWorld;
 
 
 u32 dds3AddBasicArray(dds3BasicArrayHandle_t *object, s32 count) {
-    WorldInfo *world;
+    dds3WorldBasic_t *world;
     s16 firstIndex;
     s16 lastIndex;
     s32 i;
@@ -78,7 +78,7 @@ u32 dds3SetBasicArray(dds3BasicArrayHandle_t *object, dds3Basic_t *node) {
     if (object->cursorIndex < 0) {
         return 0;
     }
-    ((WorldInfo *)dds3TheWorld->workdata)->entries[object->cursorIndex].value = (s32)(u32)node;
+    ((dds3WorldBasic_t *)dds3TheWorld->workdata)->entries[object->cursorIndex].value = (s32)(u32)node;
     return 1;
 }
 
@@ -89,7 +89,7 @@ dds3Basic_t *dds3GetBasicArray(const dds3BasicArrayHandle_t *object) {
     if (object->cursorIndex < 0) {
         return 0;
     }
-    return (dds3Basic_t *)(u32)((WorldInfo *)dds3TheWorld->workdata)->entries[object->cursorIndex].value;
+    return (dds3Basic_t *)(u32)((dds3WorldBasic_t *)dds3TheWorld->workdata)->entries[object->cursorIndex].value;
 }
 
 /* Signed comparison via complement-and-shift: zero counts as nonnegative. */
@@ -102,7 +102,7 @@ Dds3BasicArrayCursorResult dds3SetNextBasicArray(dds3BasicArrayHandle_t *object)
     if (object->cursorIndex < 0) {
         return DDS3_BASIC_ARRAY_CURSOR_EXHAUSTED;
     }
-    object->cursorIndex = ((WorldInfo *)dds3TheWorld->workdata)->entries[object->cursorIndex].nextIndex;
+    object->cursorIndex = ((dds3WorldBasic_t *)dds3TheWorld->workdata)->entries[object->cursorIndex].nextIndex;
     return (u32)~(s32)object->cursorIndex >> 0x1f;
 }
 

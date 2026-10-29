@@ -113,9 +113,9 @@ u32 dds3GetWorldNodeValue(dds3Basic_t *node) {
 /* Allocate and clear the world node's 0x28-byte WorldInfo payload. The native
    callback stores the payload on the node before initializing its fields. */
 s32 worldconstructor(dds3Basic_t *object) {
-    WorldInfo *entry;
+    dds3WorldBasic_t *entry;
 
-    entry = (WorldInfo *)sdfChipAllocDirect(sizeof(WorldInfo));
+    entry = (dds3WorldBasic_t *)sdfChipAllocDirect(sizeof(dds3WorldBasic_t));
     if (entry == NULL) {
         return 0;
     }
@@ -123,7 +123,7 @@ s32 worldconstructor(dds3Basic_t *object) {
     entry->firstNode = NULL;
     entry->lastNode = NULL;
     entry->activeScene = NULL;
-    entry->controlScene = NULL;
+    entry->controlscene = NULL;
     entry->entryAllocation = NULL;
     entry->entries = NULL;
     entry->entryCapacity = 0;
@@ -136,7 +136,7 @@ s32 worldconstructor(dds3Basic_t *object) {
 }
 
 void worlddestructor(dds3Basic_t *object) {
-    WorldInfo *entry = object->workdata;
+    dds3WorldBasic_t *entry = object->workdata;
 
     if (entry == NULL) {
         return;
@@ -154,7 +154,7 @@ void worlddestructor(dds3Basic_t *object) {
 }
 
 u32 worldmainprocuder(dds3Basic_t *obj) {
-    WorldInfo *entry = obj->workdata;
+    dds3WorldBasic_t *entry = obj->workdata;
     dds3Basic_t *callbackTarget;
 
     callbackTarget = ((WorldInfoSceneNodeView *)entry)->activeScene;
@@ -165,7 +165,7 @@ u32 worldmainprocuder(dds3Basic_t *obj) {
 }
 
 u32 worlddrawprocuder(dds3Basic_t *obj) {
-    WorldInfo *entry = obj->workdata;
+    dds3WorldBasic_t *entry = obj->workdata;
     dds3Basic_t *callbackTarget;
 
     callbackTarget = ((WorldInfoSceneNodeView *)entry)->activeScene;
@@ -180,7 +180,7 @@ extern dds3Basic_t *dds3TheWorld;
 
 dds3Basic_t *dds3AddWorld(s32 capacity) {
     dds3Basic_t *world;
-    WorldInfo *info;
+    dds3WorldBasic_t *info;
     struct sdfMemHandle_t *allocation;
     s32 index;
 

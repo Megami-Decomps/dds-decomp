@@ -63,7 +63,7 @@ dds3Basic_t *dds3GetActiveScene(void) {
 /* Set the secondary world node without releasing it; no world is a no-op. */
 void dds3SetControlScene(dds3Basic_t *secondaryWorldNode) {
     if (dds3TheWorld != NULL) {
-        ((WorldInfoSceneNodeView *)dds3TheWorld->workdata)->controlScene = secondaryWorldNode;
+        ((WorldInfoSceneNodeView *)dds3TheWorld->workdata)->controlscene = secondaryWorldNode;
     }
 }
 
@@ -75,19 +75,19 @@ dds3Basic_t *dds3GetControlScene(void) {
     if (world == NULL) {
         return NULL;
     }
-    return ((WorldInfoSceneNodeView *)world->workdata)->controlScene;
+    return ((WorldInfoSceneNodeView *)world->workdata)->controlscene;
 }
 
 /* Create a kind-1 world node and append it at the tail.
  * Missing active world or failed creation returns NULL without changing the list. */
 dds3Basic_t *dds3AddScene(void) {
-    WorldInfo *worldInfo;
+    dds3WorldBasic_t *worldInfo;
     dds3Basic_t *worldNode;
 
     if (dds3TheWorld == NULL) {
         return NULL;
     }
-    worldInfo = (WorldInfo *)dds3TheWorld->workdata;
+    worldInfo = (dds3WorldBasic_t *)dds3TheWorld->workdata;
     worldNode = dds3AllocBasic(DDS3_WORLD_NODE_KIND);
     if (worldNode == NULL) {
         return NULL;
@@ -106,7 +106,7 @@ dds3Basic_t *dds3AddScene(void) {
 /* Clear boundary and selected-object references before generic node destruction.
  * NULL node or missing active world leaves the node untouched. */
 void dds3DeleteScene(dds3Basic_t *worldNode) {
-    WorldInfo *worldInfo;
+    dds3WorldBasic_t *worldInfo;
     WorldInfoSceneNodeView *sceneNodeView;
 
     if (worldNode == NULL) {
@@ -115,7 +115,7 @@ void dds3DeleteScene(dds3Basic_t *worldNode) {
     if (dds3TheWorld == NULL) {
         return;
     }
-    worldInfo = (WorldInfo *)dds3TheWorld->workdata;
+    worldInfo = (dds3WorldBasic_t *)dds3TheWorld->workdata;
     sceneNodeView = (WorldInfoSceneNodeView *)worldInfo;
     if (worldInfo->firstNode == worldNode) {
         worldInfo->firstNode = worldNode->next;
@@ -126,8 +126,8 @@ void dds3DeleteScene(dds3Basic_t *worldNode) {
     if (sceneNodeView->activeScene == worldNode) {
         sceneNodeView->activeScene = NULL;
     }
-    if (sceneNodeView->controlScene == worldNode) {
-        sceneNodeView->controlScene = NULL;
+    if (sceneNodeView->controlscene == worldNode) {
+        sceneNodeView->controlscene = NULL;
     }
     dds3DeleteBasic(worldNode);
 }
@@ -136,13 +136,13 @@ void dds3DeleteScene(dds3Basic_t *worldNode) {
  * value pool. Only the upper-bound check occurs here: negative counts can still
  * produce a linked empty node when the growth helper rejects the request. */
 WorldIndexNode *dds3GetBasicArrayHandle(s32 initialCount) {
-    WorldInfo *worldInfo;
+    dds3WorldBasic_t *worldInfo;
     WorldIndexNode *indexNode;
 
     if (dds3TheWorld == NULL) {
         return NULL;
     }
-    worldInfo = (WorldInfo *)dds3TheWorld->workdata;
+    worldInfo = (dds3WorldBasic_t *)dds3TheWorld->workdata;
     if (worldInfo->freeEntryCount < initialCount) {
         return NULL;
     }
@@ -171,7 +171,7 @@ WorldIndexNode *dds3GetBasicArrayHandle(s32 initialCount) {
 /* Return the node's value entries to the shared pool, unlink the index node,
  * then release its block. NULL node or missing active world is a no-op. */
 void dds3FreeBasicArrayHandle(WorldIndexNode *indexNode) {
-    WorldInfo *worldInfo;
+    dds3WorldBasic_t *worldInfo;
 
     if (indexNode == NULL) {
         return;
@@ -179,7 +179,7 @@ void dds3FreeBasicArrayHandle(WorldIndexNode *indexNode) {
     if (dds3TheWorld == NULL) {
         return;
     }
-    worldInfo = (WorldInfo *)dds3TheWorld->workdata;
+    worldInfo = (dds3WorldBasic_t *)dds3TheWorld->workdata;
     dds3DeleteAllBasicArray((dds3BasicArrayHandle_t *)indexNode);
     if (indexNode->previous == NULL) {
         worldInfo->firstIndex = indexNode->next;
@@ -197,7 +197,7 @@ void dds3FreeBasicArrayHandle(WorldIndexNode *indexNode) {
 /* Preserve native-width tail copies; see docs/idioms.md,
  * "Trace-justified world free-list tail publication". */
 void dds3DeleteBasicArray(dds3BasicArrayHandle_t *iterator) {
-    WorldInfo *info;
+    dds3WorldBasic_t *info;
     WorldValueEntry *entries;
     s16 previous;
     s16 next;
@@ -214,7 +214,7 @@ void dds3DeleteBasicArray(dds3BasicArrayHandle_t *iterator) {
     if (dds3TheWorld == NULL) {
         return;
     }
-    info = (WorldInfo *)dds3TheWorld->workdata;
+    info = (dds3WorldBasic_t *)dds3TheWorld->workdata;
     entries = info->entries;
     previous = entries[iterator->cursorIndex].previousIndex;
     entries[iterator->cursorIndex].value = 0;
@@ -246,7 +246,7 @@ void dds3DeleteBasicArray(dds3BasicArrayHandle_t *iterator) {
 
 /* Return this index record's values to the active world's free-entry chain. */
 void dds3DeleteAllBasicArray(dds3BasicArrayHandle_t *object) {
-    WorldInfo *world;
+    dds3WorldBasic_t *world;
     s32 entryIndex;
 
     if (object == NULL) {

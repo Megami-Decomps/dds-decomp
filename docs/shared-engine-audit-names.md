@@ -109,7 +109,14 @@ DDS's `EvtRuntime` is `evtViewerInfo_t`, with `curFrame` named `nowframe`
 at +0x18. Its native record, field types and other member names remain as
 reconstructed for each game. Nocturne already has these names.
 
-The separate `WorldInfo` → `dds3WorldBasic_t` name is held while its public
-owner-header move is checked: renaming it in the broad provider changes
-DDS2's full-unit `sdfDrawTexturedQuad`. The existing world member spellings
-remain until that dependency can be narrowed without disturbing matching.
+DDS's `WorldInfo` is `dds3WorldBasic_t`, with the original struct tag
+and typedef name. `controlScene` is `controlscene` at +0x0C, including the
+selected-node view. The complete native world record is public in `basic.h`.
+The administration and viewer records are in `kernel.h` and `event.h`.
+Native sizes stay 0x24 for administration, 0x28 for world state, and viewer
+0x2490 in DDS1 / 0x24BC in DDS2 (Nocturne's viewer is 0x2328).
+
+The battle action unit imports its five used basic interfaces without the
+unused world payload; its bodies and expressions are unchanged. This lets
+the original world name coexist with all full-unit matches. No callback or
+compiler flag is added to compensate for declaration context.
