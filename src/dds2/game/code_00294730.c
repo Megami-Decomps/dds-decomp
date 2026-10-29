@@ -167,7 +167,39 @@ void mnuDrawPulsingMenuIcon(MenuTerminalContext *object, s32 amplitude, s32 draw
     }
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "mnu.h"
+#include "mnu_list.h"
+#include "brs_icon_record.h"
+
+extern void effDrawTextureSlotWithBlendedCornerColors(s32 x, s32 y, s32 depth, u32 blend, s32 flags,
+                                                      struct EffectSlotSet *set, s32 slotIndex, s32 layer);
+
+/* The terminal's list panel: its frame (icon 56), a row band (icon 9) for
+ * each entry of its window's list, 0xB0 apart, and its foot (icon 2), all
+ * from the terminal's first sprite set. Upstream: INCLUDE_ASM in
+ * game/code_00294730. */
+void mnuDrawTerminalPanelListRows(s32 x, s32 y, s32 depth, MenuTerminalContext *object, s32 scale, s32 option) {
+    struct EffectSlotSet *texture = mnuCurrentTerminalContext->effectSlots[0];
+    s32 row;
+
+    effDrawTextureSlotWithBlendedCornerColors(x + mnuCommonIconPlacements[56][BRS_ICON_X] * 16,
+                  y + mnuCommonIconPlacements[56][BRS_ICON_Y] * 8, depth, scale, 0, texture,
+                  mnuCommonIconPlacements[56][BRS_ICON_ID], option);
+    for (row = 0; row < object->ownedWindows[0]->list->count; row++) {
+        effDrawTextureSlotWithBlendedCornerColors(x + mnuCommonIconPlacements[9][BRS_ICON_X] * 16,
+                      y + mnuCommonIconPlacements[9][BRS_ICON_Y] * 8, depth, scale, 0, texture,
+                      mnuCommonIconPlacements[9][BRS_ICON_ID], option);
+        y += 0xB0;
+    }
+    effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[2][BRS_ICON_X] * 16,
+                  mnuCommonIconPlacements[2][BRS_ICON_Y] * 8, depth, scale, 0, texture,
+                  mnuCommonIconPlacements[2][BRS_ICON_ID], option);
+}
+#else
 INCLUDE_ASM(const s32, "game/code_00294730", mnuDrawTerminalPanelListRows);
+#endif
 
 void mnuDrawWindowBorderAndScrollBar(s32 x, s32 y, s32 unused, MenuTerminalContext *object, s32 scale, s32 option) {
     struct EffectSlotSet *texture = mnuCurrentTerminalContext->effectSlots[0];
@@ -274,7 +306,77 @@ void mnuDrawTerminalPanelValues(s32 x, s32 y, s32 z, MenuTerminalContext *object
     frDestroyFontRequestAfter(glyph);
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "sdf_trig.h"
+#include "mnu.h"
+#include "mnu_list.h"
+#include "brs_icon_record.h"
+
+extern void effDrawTextureSlotWithBlendedCornerColors(s32 x, s32 y, s32 depth, u32 blend, s32 flags,
+                                                      struct EffectSlotSet *set, s32 slotIndex, s32 layer);
+
+/* Draws one row of the camp's command list: its fade comes from the list's
+ * entry or exit countdown, the cursor row also draws its highlight (two end
+ * caps, the row band and a pulsing band) and takes the command's highlighted
+ * icon, and the item commands' icons are dimmed by half while the party has
+ * no eligible item. DDS2's rows are 22 high (DDS1's 21) and its icon comes
+ * from one table by the row's command, the highlighted icons seven further.
+ * Upstream: INCLUDE_ASM in game/code_00294730. */
+void mnuDrawMenuItemListRow(s32 x, s32 y, s32 depth, struct MenuList *list, struct MenuListNode *entry, s32 surface) {
+    s32 icons[14] = {0x21, 0x23, 0x26, 0x0D, 0x28, 0x2A, 0x0F, 0x22, 0x24, 0x27, 0x0E, 0x29, 0x2B, 0x10};
+    MenuTerminalWindowState *state = list->context;
+    struct EffectSlotSet *texture = mnuCurrentTerminalContext->effectSlots[0];
+    f32 fade = 1.0f;
+    s32 row = entry->index;
+    s32 icon;
+
+    switch (state->command.mode) {
+    case 1:
+        fade = (f32)(state->command.value + row) / ((f32)list->count + 10.0f);
+        if (fade > 1.0f) {
+            fade = 1.0f;
+        }
+        fade = 1.0f - fade;
+        break;
+    case 2:
+        fade = (f32)state->command.value * 0.25f;
+        break;
+    }
+    icon = icons[entry->camp.value];
+    if (list->cursor->index == row) {
+        f32 pulse;
+
+        state->pulseFrame++;
+        if (state->pulseFrame >= 61) {
+            state->pulseFrame = 0;
+        }
+        pulse = sdfSin(((f32)state->pulseFrame / 60.0f) * 3.1415926f) * fade;
+        effDrawTextureSlotWithBlendedCornerColors(0x3B0, (row * 22 + 0x8D) * 8, 0, (u32)(fade * 256.0f), 0, texture,
+                                                  0x22, surface);
+        effDrawTextureSlotWithBlendedCornerColors(0x8B0, (row * 22 + 0x8D) * 8, 0, (u32)(fade * 256.0f), 0, texture,
+                                                  0x23, surface);
+        effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[10][BRS_ICON_X] * 16,
+                                                  (mnuCommonIconPlacements[10][BRS_ICON_Y] + row * 22) * 8, 0,
+                                                  (u32)(fade * 256.0f), 0, texture,
+                                                  mnuCommonIconPlacements[10][BRS_ICON_ID], surface);
+        effDrawTextureSlotWithBlendedCornerColors(mnuCommonIconPlacements[10][BRS_ICON_X] * 16,
+                                                  (mnuCommonIconPlacements[10][BRS_ICON_Y] + row * 22) * 8, 0,
+                                                  (u32)(pulse * 256.0f), 0, texture,
+                                                  mnuCommonIconPlacements[10][BRS_ICON_ID], surface);
+        icon = icons[7 + entry->camp.value];
+    }
+    if ((u32)(icon - 13) < 2 && state->selectedSlot == 0) {
+        fade *= 0.5f;
+    }
+    effDrawTextureSlotWithBlendedCornerColors(x + mnuCommonIconPlacements[11][BRS_ICON_X] * 16,
+                                              y + (mnuCommonIconPlacements[11][BRS_ICON_Y] + row * 22) * 8, depth,
+                                              (u32)(fade * 256.0f), 0, texture,
+                                              mnuCommonIconPlacements[icon][BRS_ICON_ID], surface);
+}
+#else
 INCLUDE_ASM(const s32, "game/code_00294730", mnuDrawMenuItemListRow);
+#endif
 
 extern s32 itfSetTextDrawLimit(s32);
 extern char D_00437970[];
