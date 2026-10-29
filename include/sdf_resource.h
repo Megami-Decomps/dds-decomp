@@ -43,9 +43,14 @@ void sdfChipGetInfo(SdfChipHeapStats *stats);
 /* Return the descriptor's payload base as a byte address, not the descriptor. */
 u8 *sdfMemGetPtr(const struct sdfMemHandle_t *block);
 s32 sdfMemGetSize(const struct sdfMemHandle_t *block);
-/* Route payload addresses between the chip and general heaps. */
+/* Allocate from the chip heap through 0x400 bytes; larger requests use the
+ * general heap and return its locked payload address. */
 void *sdfAllocAuto(s32 size);
+/* Release the sdfAllocAuto base in its source heap; interior pointers are
+ * invalid. */
 void sdfFreeAuto(void *data);
+/* Queue release of the sdfAllocAuto base in its source heap; interior pointers
+ * are invalid. */
 void sdfFreeAutoDelayed(void *data);
 
 void *sdfMemLock(struct sdfMemHandle_t *allocation);
