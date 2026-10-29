@@ -162,9 +162,209 @@ SdfDmaTagHeader *sdfModelSetNormalDrawPacket(sdfModelNode_t *node, const SdfInde
     return payload + 1;
 }
 
-INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelSetOneSkinDrawPacket);
+#ifdef NON_MATCHING
+#include "common.h"
+#include "sdf_measure_command.h"
+#include "sdf_asset_packets.h"
+#include "sdf_dma_tag.h"
+#include "sdf_vu_lighting.h"
+#include "sdf_chip.h"
+#include "sdf_model.h"
+#include "pcp_vu0.h"
+#include "sdf_draw.h"
+#include "sdf_model_copy.h"
+#include "sdf_vu_matrix.h"
+#include "sdf_vu_matrix_multiply_api.h"
+#include "sdf_message.h"
+#include "sdf_key_pool.h"
+#include "sdf_model_command_views.h"
+#include "sdf_packet_alloc.h"
 
+extern SdfDmaTagHeader *sdfModelSetMatRefPacket(sdfModelRootNode_t *model, s32 index, SdfDmaTagHeader *packet, s32 frame);
+
+/* Indexed command with the per-node unpack list that follows the payload words. */
+typedef struct SdfIndexedNodeCommandView {
+    u8 kind;
+    u8 pad01[3];
+    u32 assetIndexAndCount; /* 0x04 */
+    u32 address;            /* 0x08 */
+    u32 nodeCount;          /* 0x0C */
+    u16 nodeIds[0];         /* 0x10 */
+} SdfIndexedNodeCommandView;
+
+/* Emit an indexed command's packets: the asset packet, a 7-quadword unpack of
+ * each listed node's frame workspace, the closing VIF block, then the command's
+ * own payload. Upstream: INCLUDE_ASM in sdf/sdfModel; written from the retail
+ * routine. 87 of 96 words match retail; two saved registers swap. */
+SdfDmaTagHeader *sdfModelSetOneSkinDrawPacket(sdfModelNode_t *node, SdfIndexedNodeCommandView *command,
+                                                    SdfDmaTagHeader *packet, s32 frame) {
+    u32 packed = command->assetIndexAndCount;
+    u32 count;
+    u32 i;
+    u16 *ids;
+    u32 unpackAddress;
+    u8 *workspace;
+    u32 *vifBlock;
+
+    packet = sdfModelSetMatRefPacket(node->root, packed >> 16, packet, frame);
+    packed &= 0xFFFF;
+    count = command->nodeCount;
+    ids = command->nodeIds;
+    unpackAddress = 1;
+    i = 0;
+    do {
+        sdfModelNode_t *target = sdfModelSearchNode(node->root, *ids++);
+        i++;
+        packet->quadwordCount = 7;
+        packet->control = 0x30;
+        workspace = sdfModelAllocTmPacket(target);
+        packet->address = (u32)(workspace + frame * 0x80) & 0x0FFFFFFF;
+        packet->firstVifCode = 0;
+        packet->secondVifCode = unpackAddress | 0x6C07C000;
+        unpackAddress += 7;
+        packet++;
+    } while (i != count);
+    packet->quadwordCount = 1;
+    packet->control = 0x10;
+    packet->firstVifCode = 0;
+    packet->secondVifCode = 0;
+    vifBlock = (u32 *)(packet + 1);
+    packet += 2;
+    vifBlock[1] = count;
+    vifBlock[0] = 0x6001C000;
+    vifBlock[2] = 0x0400000E;
+    vifBlock[3] = 0x14000000;
+    packet->control = 0x30;
+    packet->quadwordCount = packed;
+    packet->address = command->address & 0x0FFFFFFF;
+    packet->firstVifCode = 0;
+    packet->secondVifCode = 0;
+    return packet + 1;
+}
+#else
+INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelSetOneSkinDrawPacket);
+#endif
+
+#ifdef NON_MATCHING
+#include "common.h"
+#include "sdf_measure_command.h"
+#include "sdf_asset_packets.h"
+#include "sdf_dma_tag.h"
+#include "sdf_vu_lighting.h"
+#include "sdf_chip.h"
+#include "sdf_model.h"
+#include "pcp_vu0.h"
+#include "sdf_draw.h"
+#include "sdf_model_copy.h"
+#include "sdf_vu_matrix.h"
+#include "sdf_vu_matrix_multiply_api.h"
+#include "sdf_message.h"
+#include "sdf_key_pool.h"
+#include "sdf_model_command_views.h"
+#include "sdf_packet_alloc.h"
+#include "sdf_packet_list.h"
+#include "sdf.h"
+
+extern SdfDmaTagHeader *sdfModelSetMatRefPacket(sdfModelRootNode_t *model, s32 index, SdfDmaTagHeader *packet, s32 frame);
+
+/* A run of quadwords a DMA ref tag sends. */
+typedef struct SdfShapedSource {
+    u32 address;
+    u16 quadwordCount;
+    u16 pad06;
+} SdfShapedSource;
+
+/* One item of a shaped command: its base data, then one run per shape
+ * target, indexed by the slot pairs' indices. */
+typedef struct SdfShapedItem {
+    SdfShapedSource base;
+    SdfShapedSource targets[1];
+} SdfShapedItem;
+
+/* A kind-2 (shaped) command's payload, as this function reads it. */
+typedef struct SdfShapedCommand {
+    u8 pad00[4];
+    u32 slotIndexAndAssetIndex; /* 0x04: slot entry in the low half, asset in the high */
+    u16 itemCount;              /* 0x08 */
+    u16 pad0A;
+    SdfShapedItem *items[1];    /* 0x0C */
+} SdfShapedCommand;
+
+/* The weights' packet: a cnt tag with the UNPACK of two words, then the
+ * quadword it sends, two weights followed by ITOP 10 and MSCAL 0. */
+typedef struct SdfShapedWeightsPacket {
+    SdfModelPacket tag;
+    f32 weights[2];
+    u32 itopCode;
+    u32 mscalCode;
+} SdfShapedWeightsPacket;
+
+#define SDF_SHAPED_DMA_REF 0x30000000
+#define SDF_SHAPED_PHYSICAL_MASK 0x0FFFFFFF
+
+/* Link a kind-2 (shaped) command's packets onto a list: the asset's packet,
+ * then the weights above 1e-6 of the command's slot entry (one of the model's
+ * slot pairs; at most two, zero-filled) unpacked to the VU ahead of ITOP 10
+ * and MSCAL 0, then for each item a DMA ref to each weighted shape target's
+ * run and one to the item's base, and a closing empty quadword. Upstream: INCLUDE_ASM in sdf/sdfModel in
+ * both games, whose routines are the same; written from the retail routine.
+ * Kept from retail: the item loop is a do-while, so a command with no items
+ * would emit the first item's references and not stop until its count
+ * wrapped. */
+void sdfModelLinkShapedDrawPacket(sdfModelNode_t *node, SdfShapedCommand *command, sdfDrawTag_t *list,
+                                  s32 frame) {
+    SdfSlotEntry *slot =
+        (SdfSlotEntry *)node->root->slotPairs->buffer + (command->slotIndexAndAssetIndex & 0xFFFF);
+    u32 assetIndex = command->slotIndexAndAssetIndex >> 16;
+    u16 itemCount = command->itemCount;
+    SdfSlotPair shapes[2];
+    s32 shapeCount = 0;
+    s32 packetStart;
+    SdfShapedWeightsPacket *weightsPacket;
+    SdfModelPacket *packet;
+    SdfShapedItem *item;
+    s32 i, k;
+
+    for (i = 0; i != 2; i++) {
+        if (slot->pair[i].weight > 1e-6f) {
+            shapes[shapeCount++] = slot->pair[i];
+        }
+    }
+    packetStart = sdfGrAllocPacketBuff(((shapeCount << 4) + 0x10) * itemCount + 0x40);
+    weightsPacket = (SdfShapedWeightsPacket *)sdfModelSetMatRefPacket(
+        node->root, assetIndex, (SdfDmaTagHeader *)packetStart, frame);
+    weightsPacket->tag.dmaTag.bits = 0x10000001;
+    weightsPacket->tag.vifCodes.bits = (s64)0x6002C000 << 32;
+    for (i = 0; i < shapeCount; i++) {
+        weightsPacket->weights[i] = shapes[i].weight;
+    }
+    for (; i < 2; i++) {
+        weightsPacket->weights[i] = 0.0f;
+    }
+    weightsPacket->mscalCode = 0x14000000;
+    weightsPacket->itopCode = 0x0400000A;
+    packet = (SdfModelPacket *)(weightsPacket + 1);
+    i = 0;
+    do {
+        item = command->items[i];
+        for (k = 0; k < shapeCount; k++) {
+            packet->vifCodes.bits = 0;
+            packet->dmaTag.bits =
+                (item->targets[shapes[k].index].quadwordCount | SDF_SHAPED_DMA_REF) |
+                ((u64)(item->targets[shapes[k].index].address & SDF_SHAPED_PHYSICAL_MASK) << 32);
+            packet++;
+        }
+        packet->vifCodes.bits = 0;
+        packet->dmaTag.bits = (item->base.quadwordCount | SDF_SHAPED_DMA_REF) |
+                              ((u64)(item->base.address & SDF_SHAPED_PHYSICAL_MASK) << 32);
+        packet++;
+    } while (++i != itemCount);
+    *(u128 *)packet = 0;
+    sdfAppendPacketRange(list, packetStart, (u32)packet);
+}
+#else
 INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelLinkShapedDrawPacket);
+#endif
 
 /* Prepend a chip-allocated command node to one buffered draw list. */
 SdfCommandNode *sdfModelNewPacketHeader(sdfModelNode_t *drawNode, s32 packetSelector,
@@ -525,7 +725,194 @@ SdfClipPlaneMask sdfModelCheckBounds(const f32 *bounds) {
     return result;
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "sdf_measure_command.h"
+#include "sdf_asset_packets.h"
+#include "sdf_dma_tag.h"
+#include "sdf_vu_lighting.h"
+#include "sdf_chip.h"
+#include "sdf_model.h"
+#include "pcp_vu0.h"
+#include "sdf_draw.h"
+#include "sdf_model_copy.h"
+#include "sdf_vu_matrix.h"
+#include "sdf_vu_matrix_multiply_api.h"
+#include "sdf_message.h"
+#include "sdf_key_pool.h"
+#include "sdf_model_command_views.h"
+#include "sdf_packet_alloc.h"
+#include "sdf_packet_list.h"
+#include "sdf.h"
+
+extern SdfDmaTagHeader *sdfModelSetMatRefPacket(sdfModelRootNode_t *model, s32 index, SdfDmaTagHeader *packet, s32 frame);
+
+extern void sdfResourceListApplyEntryChanges(DevRequest *list, s32 entryIndex);
+extern vu8 sdfFrameId;
+
+extern void sdfResourceListApplyEntryChanges(DevRequest *, s32);
+extern void sdfCoreDrawSetZBias(f32);
+extern f32 sdf3DScreenTm[16];
+extern u8 corePktSoftenBias;
+extern f32 sdfFaceDivSoften, sdfFaceDivBias;
+
+extern void *sdf3DFogDefault;
+extern const struct SdfDmaTagHeader *sdf3DLightDefault;
+/* Queue a model's visible draw nodes: for each command-list node that passes
+ * the clip test, start each output list with the node's lighting and unpack
+ * state (the model's light and fog, the 3D layer's defaults where it has
+ * none; its soften and bias, the 3D layer's unless it overrides them; soften
+ * switched off among the unpack flags), append its indexed asset packets,
+ * then hand each list to its surface; mark the model drawn when any were
+ * queued. Upstream: INCLUDE_ASM in both games' sdf/sdfModel; written from the
+ * retail routine. Its instructions equal retail's apart from register
+ * allocation and scheduling. */
+void sdfModelTempPacketLinkOt(SdfPoolNode **surfaces, sdfModelRootNode_t *model) {
+    sdfDrawTag_t *lists[4];
+    DevRequest *nodeList;
+    s32 nodeIndex;
+    s32 frame;
+    u32 modelColor;
+    u32 color;
+    u32 drawFlags;
+    SdfDmaTagHeader *light;
+    SdfDmaTagHeader *fog;
+    SdfDmaTagHeader *defaultLight, *defaultFog;
+    u32 overrides;
+    u32 softenOff;
+    s32 anyPackets;
+    u32 softenFlags;
+    u64 unpack;
+    s32 negativeColor;
+    f32 soften, bias, depth;
+    u32 **groups;
+    u32 *group;
+    SdfIndexedCommandView *command;
+    sdfModelNode_t *node;
+    const SdfItem *item;
+    sdfDrawTag_t *list;
+    s32 j;
+    s32 header;
+    u32 nodeFlags;
+    void *matrix;
+    SdfModelPacket *packet;
+    SdfDmaTagHeader *payload;
+    frame = (s8)sdfFrameId;
+    sdfResourceListApplyEntryChanges(model->resources, frame);
+    modelColor = model->color;
+    defaultLight = (SdfDmaTagHeader *)sdf3DLightDefault;
+    light = model->lighting;
+    overrides = model->flags & 2;
+    fog = model->secondaryLighting;
+    defaultFog = (SdfDmaTagHeader *)sdf3DFogDefault;
+    light = light == NULL ? defaultLight : light;
+    fog = fog == NULL ? defaultFog : fog;
+    drawFlags = model->drawFlags;
+    softenOff = corePktSoftenBias;
+    if (overrides) {
+        soften = model->scalarOverrideFirst;
+        bias = model->scalarOverrideSecond;
+    } else {
+        soften = sdfFaceDivSoften;
+        bias = sdfFaceDivBias;
+    }
+    nodeIndex = 0;
+    anyPackets = 0;
+    for (; nodeIndex < model->list->usedCount; nodeIndex++) {
+            nodeList = model->list;
+            softenFlags = softenOff;
+            softenFlags <<= 16;
+            node = ((sdfModelNode_t **)nodeList->buffer)[nodeIndex];
+            item = node->sourceData;
+            if (item == NULL) continue;
+            if (item->commandSetupMode != 1) continue;
+            groups = item->commandData.commandList.commandLists;
+            if (groups == NULL) continue;
+            if (node->flags & 0x11) continue;
+            matrix = node->worldMatrix;
+            VU0_LOAD_MATRIX(matrix);
+            sdfPostmultiplyVuMatrixFromMemory(sdf3DScreenTm);
+            if (node->boundsCorners != NULL && sdfModelCheckBounds(node->boundsCorners) != 0) continue;
+            VU0_MOVE_VF(vf10, vf31);
+            SDF_VU0_GETVECTOR_W(depth);
+            color = modelColor;
+            if (node->flags & 2) color = node->color;
+            nodeFlags = drawFlags & (u16)node->drawFlagMask;
+            for (j = 0; j != 4; j++) lists[j] = NULL;
+            sdfCoreDrawSetZBias(model->modelScale);
+            group = *groups++;
+            if (group != NULL) {
+                negativeColor = (color >> 31) != 0;
+                unpack = ((u64)(nodeFlags | softenFlags) << 32) | 0x6102C000;
+                do {
+                    header = *group++;
+                    j = (u32)header >> 16;
+                    j = j == 0 ? negativeColor == 0 : j;
+                    list = lists[j];
+                    if (list == NULL) {
+                        SdfModelPacket *statePacket;
+                        list = sdfPrimAllocDrawTag(NULL);
+                        ((f32 *)list)[3] = depth;
+                        list->firstReferenceSource = (u32)light;
+                        lists[j] = list;
+                        list->secondReferenceSource = (u32)fog;
+                        statePacket = (SdfModelPacket *)(u32)sdfGrAllocPacketBuff(0xC0);
+                        statePacket[0].dmaTag.bits = 0x10000008;
+                        statePacket[0].vifCodes.bits = (u64)0x6C07C000 << 32;
+                        VU0_LOAD_MATRIX(matrix);
+                        sdf3DPrimSetTmPacket((VuLightingPacket *)(statePacket + 1));
+                        *(u64 *)((u8 *)statePacket + 0x90) = 0x20000002;
+                        *(u32 *)((u8 *)statePacket + 0xA0) = 0x6E01C002;
+                        *(u32 *)((u8 *)statePacket + 0xA8) = 0x6003C003;
+                        *(u32 *)((u8 *)statePacket + 0xA4) = color;
+                        *(u32 *)((u8 *)statePacket + 0xAC) = *(u32 *)&model->modelScale;
+                        *(u32 *)((u8 *)statePacket + 0xB8) = 0x04000004;
+                        *(u32 *)((u8 *)statePacket + 0xBC) = 0x14000000;
+                        *(u64 *)((u8 *)statePacket + 0x98) = unpack;
+                        *(f32 *)((u8 *)statePacket + 0xB0) = soften;
+                        *(f32 *)((u8 *)statePacket + 0xB4) = bias;
+                        sdfAppendPacketRange(list, (u32)statePacket, (u32)statePacket + 0x90);
+                    }
+                    command = (SdfIndexedCommandView *)*group++;
+                    if (command != NULL) {
+                        do {
+                            if (command->kind == 1) {
+                                u32 packed;
+                                u16 quadwordCount;
+                                packet = (SdfModelPacket *)(u32)sdfGrAllocPacketBuff(0x30);
+                                packed = command->assetIndexAndCount;
+                                quadwordCount = packed;
+                                payload = sdfModelSetMatRefPacket(model, packed >> 16, (SdfDmaTagHeader *)packet, frame);
+                                ((SdfModelPacket *)payload)->vifCodes.bits = 0;
+                                ((SdfModelPacket *)payload)->dmaTag.bits = (u64)(0x30000000 | quadwordCount) | ((u64)(command->address & 0x0FFFFFFF) << 32);
+                                payload++;
+                                ((SdfModelPacket *)payload)->dmaTag.bits = 0x20000000;
+                                ((SdfModelPacket *)payload)->vifCodes.bits = 0;
+                                sdfAppendPacketRange(list, (u32)packet, (u32)payload);
+                            }
+                            command = (SdfIndexedCommandView *)*group++;
+                        } while (command != NULL);
+                    }
+                    group = *groups++;
+                } while (group != NULL);
+            }
+            j = 0;
+            do {
+                list = lists[j];
+                if (list != NULL) {
+                    SdfPoolNode **slot = surfaces + j;
+                    anyPackets = 1;
+                    (*slot)->append(*slot, list);
+                }
+                lists[j] = NULL;
+                j++;
+            } while (j != 4);
+    }
+    if (anyPackets) model->flags |= 0x10;
+}
+#else
 INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelTempPacketLinkOt);
+#endif
 
 #include "sdf.h"
 extern u8 corePktSoftenBias;
