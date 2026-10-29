@@ -2,6 +2,7 @@
 #define BASIC_H
 
 #include "common.h"
+#include "eff_transform.h"
 
 struct dds3Basic_t;
 struct sdfMemHandle_t;
