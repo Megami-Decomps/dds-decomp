@@ -31,6 +31,7 @@
 #include "evt_sky_alpha_animation_status.h"
 #include "eff_object.h"
 #include "eff_event.h"
+#include "eff_event_setup_readiness.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "mdl.h"
@@ -88,11 +89,6 @@ typedef struct {
 
 extern EvtTblEntry D_003C9730[];
 
-
-extern s8 evtViewerCheckDirty(void);
-
-
-
 /* Native viewer child node; frame rows traverse this same linked record. */
 
 
@@ -110,12 +106,6 @@ extern s8 evtViewerCheckDirty(void);
 
 /* Native 0x24BC-byte viewer runtime shared by dialogs, task polls and file writers. */
 
-
-extern s8 effUpdateCh72Params(void);
-extern s8 effEventAdvanceBlurTemplateSetup(void);
-extern s8 effEventAdvanceScatterBlurSetup(void);
-extern s8 rblurProcess(void);
-extern s8 effEventAdvanceScreenDrawSetup(void);
 extern s32 evtEditEffectSpriteFrame(EvtRuntime *runtime);
 extern s32 evtEditCameraColorKeyFrame(EvtRuntime *runtime);
 extern s32 func_002582D0(EvtRuntime *runtime);
@@ -3240,9 +3230,6 @@ s32 evtViewerEditShadowProperties(s32 x, s32 y, EvtRuntime *ctx) {
     return 0;
 }
 
-extern s8 mfilterRun(void);
-
-
 typedef struct EvtSelectionCache {
     u8 pad00[0x24];
     s32 selectedEntry; /* 0x24 */
@@ -3257,7 +3244,7 @@ extern s32 evtActiveEntryFlags;
 KwlnTaskUpdateResult evtSynchronizeSelectedEntry(dds3ProcessID_t *task) {
     EvtRuntime *runtime = (EvtRuntime *)dds3GetProcessData(task);
 
-    if (mfilterRun() == 0) {
+    if (mfilterRun() == EFF_EVENT_SETUP_NOT_READY) {
         runtime->controlState = 0;
         return KWLN_TASK_UPDATE_FINISH_CALLBACK;
     }
@@ -3282,7 +3269,7 @@ KwlnTaskUpdateResult evtSynchronizeSelectedEntry(dds3ProcessID_t *task) {
 /* Poll solid-rectangle setup until it clears runtime control and finishes. */
 KwlnTaskUpdateResult evtPollRuntimeControlReady(dds3ProcessID_t *task) {
     EvtRuntime *runtime = (EvtRuntime *)dds3GetProcessData(task);
-    if (evtViewerCheckDirty() == 0) {
+    if (evtViewerCheckDirty() == EFF_EVENT_SETUP_NOT_READY) {
         runtime->controlState = 0;
         return KWLN_TASK_UPDATE_FINISH_CALLBACK;
     }

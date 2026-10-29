@@ -29,6 +29,7 @@
 #include "evt_sky_alpha_animation_status.h"
 #include "eff_object.h"
 #include "eff_event.h"
+#include "eff_event_setup_readiness.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "mdl.h"
@@ -58,7 +59,6 @@ extern s32 evtDrawFrameListColumnHeadings(sdfDrawTag_t *list, s32 x, s32 y, EvtR
 
 extern void evtWriteSerializedBytes(s32 output, void *data, s32 size);
 
-extern s8 evtViewerCheckDirty(void);
 extern SndPackedTrackLoadStatus sndFindPackedTrackLoadStatus(s32 sequence);
 extern void p2sdLoadSMGFile(s32 sequence);
 extern KwlnTaskUpdateResult evtUpdateFrameVariableTask(dds3ProcessID_t *task);
@@ -91,9 +91,6 @@ extern u16 skyanow;
 extern u16 skyamax;
 extern s16 skyatarget;
 extern s16 skyabase_par;
-
-
-
 
 /* Native viewer child node; frame rows traverse this same linked record. */
 
@@ -3117,7 +3114,6 @@ s32 evtViewerEditShadowProperties(s32 x, s32 y, EvtRuntime *ctx) {
     return 0;
 }
 
-extern s8 mfilterRun(void);
 typedef struct EvtSelectionCache {
     u8 pad00[0x24];
     s32 selectedEntry; /* 0x24 */
@@ -3130,7 +3126,7 @@ extern s32 evtActiveEntryFlags;
  * setup status clears runtime control and finishes the polling task. */
 KwlnTaskUpdateResult evtSynchronizeSelectedEntry(dds3ProcessID_t *task) {
     EvtRuntime *runtime = (EvtRuntime *)dds3GetProcessData(task);
-    if (mfilterRun() == 0) {
+    if (mfilterRun() == EFF_EVENT_SETUP_NOT_READY) {
         runtime->controlState = 0;
         return KWLN_TASK_UPDATE_FINISH_CALLBACK;
     }
@@ -3155,7 +3151,7 @@ KwlnTaskUpdateResult evtPollRuntimeControlReady(dds3ProcessID_t *task) {
     EvtRuntime *runtime;
 
     runtime = (EvtRuntime *)dds3GetProcessData(task);
-    if (evtViewerCheckDirty() == 0) {
+    if (evtViewerCheckDirty() == EFF_EVENT_SETUP_NOT_READY) {
         runtime->controlState = 0;
         return KWLN_TASK_UPDATE_FINISH_CALLBACK;
     }
@@ -3738,11 +3734,6 @@ s32 evtEditCameraColorKeyFrame(EvtRuntime *runtime) {
 }
 
 
-extern s8 effUpdateCh72Params(void);
-extern s8 effEventAdvanceBlurTemplateSetup(void);
-extern s8 effEventAdvanceScatterBlurSetup(void);
-extern s8 rblurProcess(void);
-extern s8 effEventAdvanceScreenDrawSetup(void);
 extern s32 evtEditEffectSpriteFrame(EvtRuntime *runtime);
 extern s32 evtEditCameraColorKeyFrame(EvtRuntime *runtime);
 extern void *D_003BB0C0;

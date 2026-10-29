@@ -25,6 +25,7 @@
 #include "eff_event_work_api.h"
 #include "eff_event_sound.h"
 #include "eff_event_setup.h"
+#include "eff_event_setup_readiness.h"
 #include "eff_event_bill.h"
 #include "eff_event_bill_batch.h"
 #include "pcp_vu0.h"
@@ -856,7 +857,7 @@ extern void effEventSetupAfterRecordNoOp();
 
 /* Prepare once per flag cycle, then run the registered operations while ready.
  * A negative control byte clears readiness only after those operations. */
-s8 effUpdateCh72Params(void) {
+EffEventSetupReadiness effUpdateCh72Params(void) {
     if (effRectangleBlurSetupReady == 0) {
         if (effRectangleBlurSetupRecord.callback != 0) {
             *effRectangleBlurSetupRecord.callbackResult = effRectangleBlurSetupRecord.callback(effRectangleBlurSetupRecord.source);
@@ -893,7 +894,7 @@ extern s8 mblurDone;
 
 /* Prepare the blur-template callback from its explicit parameter block,
  * then process the channel; its optional copy still uses source/destination. */
-s8 effEventAdvanceBlurTemplateSetup(void) {
+EffEventSetupReadiness effEventAdvanceBlurTemplateSetup(void) {
     if (mblurDone == 0) {
         if (mblurDebugMenu.callback != 0) {
             *mblurDebugMenu.callbackResult = mblurDebugMenu.callback(&effTexturedBlurSetupParameters);
@@ -929,7 +930,7 @@ extern EffEventSetupRecord dblurDebugMenu;
 extern s8 dblurDone;
 
 /* Prepare scatter setup from its explicit parameters, then process the channel. */
-s8 effEventAdvanceScatterBlurSetup(void) {
+EffEventSetupReadiness effEventAdvanceScatterBlurSetup(void) {
     if (dblurDone == 0) {
         if (dblurDebugMenu.callback != 0) {
             *dblurDebugMenu.callbackResult = dblurDebugMenu.callback(&effScatterBlurSetupParameters);
@@ -965,7 +966,7 @@ extern EffEventSetupRecord effFramebufferQuadSetupRecord;
 extern s8 D_00436504;
 
 /* Prepare from the channel's source, process it, then honor the control-byte reset. */
-s8 effEventAdvanceScreenDrawSetup(void) {
+EffEventSetupReadiness effEventAdvanceScreenDrawSetup(void) {
     if (D_00436504 == 0) {
         if (effFramebufferQuadSetupRecord.callback != 0) {
             *effFramebufferQuadSetupRecord.callbackResult = effFramebufferQuadSetupRecord.callback(effFramebufferQuadSetupRecord.source);
@@ -1001,7 +1002,7 @@ extern EffEventSetupRecord filterDebugMenu;
 extern s8 evtViewerDirty;
 
 /* Prepare solid-rectangle setup from the channel source, then process it. */
-s8 evtViewerCheckDirty(void) {
+EffEventSetupReadiness evtViewerCheckDirty(void) {
     if (evtViewerDirty == 0) {
         if (filterDebugMenu.callback != 0) {
             *filterDebugMenu.callbackResult = filterDebugMenu.callback(filterDebugMenu.source);
@@ -1037,7 +1038,7 @@ extern EffEventSetupRecord mfilterDebugMenu;
 extern s8 D_0043651C;
 
 /* Prepare resource-template setup from its explicit body, then process the channel. */
-s8 mfilterRun(void) {
+EffEventSetupReadiness mfilterRun(void) {
     if (D_0043651C == 0) {
         if (mfilterDebugMenu.callback != 0) {
             *mfilterDebugMenu.callbackResult = mfilterDebugMenu.callback(&effResourceRectangleSetupParameters);
@@ -1073,7 +1074,7 @@ extern EffEventSetupRecord rblurDebugMenu;
 extern s8 rblurDone;
 
 /* Prepare scale-blur setup from its explicit parameters, then process the channel. */
-s8 rblurProcess(void) {
+EffEventSetupReadiness rblurProcess(void) {
     if (rblurDone == 0) {
         if (rblurDebugMenu.callback != 0) {
             *rblurDebugMenu.callbackResult = rblurDebugMenu.callback(&effStaggeredBlurSetupParameters);
