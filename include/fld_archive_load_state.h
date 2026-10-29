@@ -23,5 +23,6 @@ typedef enum FldArchivePendingState {
 
 /* Advance the scene-BGM archive request until its packed track is resident. */
 FldArchiveLoadResult fldStepSceneBgmArchive(void);
+FldArchiveLoadResult fldPollArchiveLoad(s32 archiveId);
 
 #endif

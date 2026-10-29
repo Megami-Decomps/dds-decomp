@@ -1,6 +1,7 @@
 #include "common.h"
 #include "scr_integer_parameter_api.h"
 #include "evt_unit_object_key.h"
+#include "fld_archive_load_state.h"
 #include "fld_inf.h"
 #include "scr.h"
 #include "scr_string_parameter_api.h"
@@ -37,8 +38,6 @@ extern void fldBgmStop(void);
 extern void fldPlayFieldSeVolumePan(s32 soundId);
 
 extern void fldPlayFieldSe(s32 soundId);
-
-extern u8 fldPollArchiveLoad(s32 archiveId);
 
 extern void fldSetArchiveSoundVolumePan(s32 archiveId, s32 soundId);
 
@@ -149,7 +148,7 @@ s32 fldCommandPlaySe(void) {
 
 /* Unlike the other field commands, this reports the archive poll result. */
 u8 fldCommandLoadArchive(void) {
-    return fldPollArchiveLoad(scrGetIntPara(0)) != 0;
+    return fldPollArchiveLoad(scrGetIntPara(0)) != FLD_ARCHIVE_LOAD_PENDING;
 }
 
 /* Script command: set volume and pan for a grouped sequence ID. */

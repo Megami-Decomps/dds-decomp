@@ -302,8 +302,6 @@ extern void fldPlayMenuSound(s32 soundId);
 
 extern void fldPlayFieldSe(s32 soundId);
 
-extern u8 fldPollArchiveLoad(s32 archiveId);
-
 extern void fldSetArchiveSoundVolumePan(s32 archiveId, s32 soundId);
 
 extern void fldPlayArchiveSound(s32 archiveId, s32 soundId);
@@ -1040,19 +1038,19 @@ FldArchivePendingState fldGetArchiveLoadPending(void) {
     return fldArchiveLoadPending;
 }
 
-u8 fldPollArchiveLoad(s32 archiveId) {
+FldArchiveLoadResult fldPollArchiveLoad(s32 archiveId) {
     s32 name = 0x30000000 + (archiveId << 16);
     SndPackedTrackLoadStatus result = sndFindPackedTrackLoadStatus(name);
     if (result == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
         p2sdLoadSMGFile(name);
         fldArchiveLoadPending = FLD_ARCHIVE_PENDING_ACTIVE;
-        return 0;
+        return FLD_ARCHIVE_LOAD_PENDING;
     }
     if (result == SND_PACKED_TRACK_LOAD_RESIDENT) {
         fldArchiveLoadPending = FLD_ARCHIVE_PENDING_NONE;
-        return 1;
+        return FLD_ARCHIVE_LOAD_COMPLETE;
     }
-    return 0;
+    return FLD_ARCHIVE_LOAD_PENDING;
 }
 
 void fldSetArchiveSoundVolumePan(s32 archiveId, s32 soundId) {

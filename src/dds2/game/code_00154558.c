@@ -176,8 +176,6 @@ extern void fldPlayMenuSound(s32 soundId);
 
 extern void fldPlayFieldSe(s32 soundId);
 
-extern u8 fldPollArchiveLoad(s32 archiveId);
-
 extern void fldSetArchiveSoundVolumePan(s32 archiveId, s32 soundId);
 
 extern void fldPlayArchiveSound(s32 archiveId, s32 soundId);
@@ -1681,7 +1679,7 @@ s32 fldCommandPlaySe(void) {
 }
 
 u8 fldCommandLoadArchive(void) {
-    return fldPollArchiveLoad(scrGetIntPara(0)) != 0;
+    return fldPollArchiveLoad(scrGetIntPara(0)) != FLD_ARCHIVE_LOAD_PENDING;
 }
 
 s32 fldCommand_FLD_MSE_PLAY2(void) {
