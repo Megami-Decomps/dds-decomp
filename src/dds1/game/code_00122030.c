@@ -1632,26 +1632,28 @@ enum {
 
 #define FIELD_ENCOUNTER_PERCENT_RANGE 100U
 
-/* Return the first successful stage/flag-gated roll, or -1 when none succeed.
+/* Return the first successful stage/flag-gated roll, or FLD_ENCOUNTER_TABLE_INDEX_NO_SELECTION.
  * Each eligible row rolls independently; chance retains its unsigned cast. */
-s16 fldRollEncounter(void) {
+FldEncounterTableIndex fldRollEncounter(void) {
     s32 encounterIndex;
     s32 eligible;
 
     for (encounterIndex = 0; encounterIndex < FIELD_ENCOUNTER_ROLL_ENTRY_COUNT; encounterIndex++) {
         if (fldEncounterRollTable[encounterIndex].stage == fldGlobalBase.area) {
             eligible = 1;
-            if (fldEncounterRollTable[encounterIndex].flag != -1) {
-                eligible = evtBitCheck(fldEncounterRollTable[encounterIndex].flag) != 0;
+            if (fldEncounterRollTable[encounterIndex].eventFlagIndex !=
+                FLD_ENCOUNTER_EVENT_FLAG_INDEX_UNGATED) {
+                eligible = evtBitCheck(fldEncounterRollTable[encounterIndex].eventFlagIndex) != 0;
             }
             if (eligible != 0) {
-                if ((u32)dds3GetRandA(0) % FIELD_ENCOUNTER_PERCENT_RANGE < (u32)fldEncounterRollTable[encounterIndex].chance) {
-                    return fldEncounterRollTable[encounterIndex].result;
+                if ((u32)dds3GetRandA(0) % FIELD_ENCOUNTER_PERCENT_RANGE <
+                    (u32)fldEncounterRollTable[encounterIndex].chancePercent) {
+                    return fldEncounterRollTable[encounterIndex].encounterTableIndex;
                 }
             }
         }
     }
-    return -1;
+    return FLD_ENCOUNTER_TABLE_INDEX_NO_SELECTION;
 }
 
 extern f32 D_0032F250[4];
@@ -1760,7 +1762,7 @@ s32 fldUpdateTravelAndEncounters(void) {
     if ((*selection = btlAdvanceConditionalEncounterRoll(distance, encounter)) !=
         BTL_CONDITIONAL_ENCOUNTER_ROLL_NO_SELECTION) {
         encounter = fldRollEncounter();
-        if (encounter != -1) {
+        if (encounter != FLD_ENCOUNTER_TABLE_INDEX_NO_SELECTION) {
             D_003BAC08.tableIndex = encounter;
             *selection = btlAdvanceConditionalEncounterRoll(99999.0f, encounter);
             fldGlobalBase.encounterMode = FLD_ENCOUNTER_MODE_ALTERNATE;
