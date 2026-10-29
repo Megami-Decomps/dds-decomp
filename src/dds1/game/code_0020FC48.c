@@ -1321,7 +1321,145 @@ void btlBuildOverlayQuadPacket(sdfDrawTag_t *list, s32 primitive, s32 color, s32
                      0x8700, 0x9000, 0x8700, depth, 0);
 }
 
+#ifdef NON_MATCHING
+#include "sdf_gs_header.h"
+#include "pcp_vu0.h"
+#include "common.h"
+#include "btl_actor_resource_bank_api.h"
+#include "btl_event_asset_api.h"
+#include "btl_skill_max_api.h"
+#include "kwln_background_fade_api.h"
+#include "kwln_task_add_child.h"
+#include "btl_actor_transform_parameters.h"
+#include "btl_select_transform_parameters_api.h"
+#include "btl_effect_position.h"
+#include "btl_affinity_row.h"
+#include "kwln_draw_buffer.h"
+#include "kwln_frame_draw_buffer.h"
+#include "snd_sequence_volume_pan.h"
+#include "btl_stage_task_cleanup.h"
+#include "sdf_motion.h"
+#include "sdf_texture_draw_packet.h"
+#include "fr_font.h"
+#include "sdf_packet_list.h"
+#include "sdf_chip.h"
+#include "snd_slot.h"
+#include "sdf_resource.h"
+#include "eff_ref_obj.h"
+#include "file_pac.h"
+#include "dat_state.h"
+#include "btl_state.h"
+#include "btl_scene_initializer.h"
+#include "btl_action.h"
+#include "btl_sound.h"
+#include "btl_sound_release_task.h"
+#include "evt_unit.h"
+#include "evt_event_pack.h"
+#include "evt_task.h"
+#include "btl_task_args.h"
+#include "btl_command.h"
+#include "btl_model_record.h"
+#include "btl_model_cache_entry.h"
+#include "sdf.h"
+#include "sdf_linked_packet.h"
+#include "sdf_packet_builders.h"
+#include "ee_mmi.h"
+#include "mdl.h"
+#include "mdl_asset_request.h"
+#include "dat_command.h"
+#include "file_request_api.h"
+#include "mdl_flag_api.h"
+#include "btl_actor_entry_code_api.h"
+#include "sdf_packet_alloc.h"
+#include "sdf_trig.h"
+
+extern sdfTexHandle_t *sdfGetOrCreateTextureForReference(void *, struct RefObj *);
+extern SdfPoolNode D_00325708;
+extern struct RefObj *D_003D75C0;
+extern void effAppendGouraudTexturedQuadPacket(sdfDrawTag_t *, s32,
+                                               s32, s32, f32, f32, s32,
+                                               s32, s32, f32, f32, s32,
+                                               s32, s32, f32, f32, s32,
+                                               s32, s32, f32, f32, s32, s32);
+/* Draw one wind overlay sweep: a squashed polar mesh of 50 rings (7 units wide
+ * each) by 20 segments of Gouraud-textured quads over the shared wind texture,
+ * with the tint's alpha ramping in over the first 8 rings and the texture
+ * coordinates scrolled by the sweep phase and scaled by the texture span and
+ * scale. Upstream: INCLUDE_ASM in game/code_0020FC48; written from the retail
+ * routine. It differs from retail in register allocation, scheduling and
+ * spilling (retail keeps the mesh coordinates in stack arrays), constant
+ * materialization (the angle step is a literal here, retail loads it from a
+ * gp-relative float), the addressing of D_003D75C0, and a dropped addition of
+ * 0.0f to the quad's second texture coordinate. */
+void btlDrawWindOverlaySweep(sdfDrawTag_t *list, s32 primitive, u32 color, s32 depth, f32 startTexture,
+                             f32 textureSpan, f32 textureScale) {
+    f32 alpha = (f32)(color >> 24);
+    f32 textureBase = startTexture * textureScale;
+    f32 radius = 0.0f;
+    f32 innerV = textureBase;
+    s32 ring = 0;
+
+    color &= 0xFFFFFF;
+    sdf2DLinkTexPacket(list, sdfGetOrCreateTextureForReference(&D_00325708, D_003D75C0), (primitive >> 9) & 1);
+    do {
+        s32 nextRing = ring + 1;
+        f32 outerRadius = radius + 7.0f;
+        f32 outerV;
+        f32 angle = 0.0f;
+        f32 cosine;
+        f32 sine;
+        f32 u0 = 0.0f;
+        f32 u1;
+        s32 segment = 0;
+        s32 innerX0, innerY0, outerX0, outerY0;
+        s32 innerX1, innerY1, outerX1, outerY1;
+        u32 innerColor;
+        u32 outerColor;
+
+        if (ring < 8) {
+            innerColor = color | ((u32)(alpha * ((f32)ring * 0.125f)) << 24);
+            outerColor = color | ((u32)(alpha * ((f32)nextRing * 0.125f)) << 24);
+        } else {
+            innerColor = color | ((u32)alpha << 24);
+            outerColor = color | ((u32)alpha << 24);
+        }
+        cosine = sdfCos(angle);
+        sine = sdfSin(angle);
+        innerX0 = (s32)(cosine * radius * 16.0f);
+        outerX0 = (s32)(cosine * outerRadius * 16.0f);
+        innerY0 = (s32)(sine * radius * 8.0f);
+        outerY0 = (s32)(sine * outerRadius * 8.0f);
+        outerV = textureBase + textureScale * ((f32)nextRing / 50.0f);
+        do {
+            segment++;
+            angle += 0.31415925f;
+            cosine = sdfCos(angle);
+            sine = sdfSin(angle);
+            innerX1 = (s32)(cosine * radius * 16.0f);
+            outerX1 = (s32)(cosine * outerRadius * 16.0f);
+            innerY1 = (s32)(sine * radius * 8.0f);
+            outerY1 = (s32)(sine * outerRadius * 8.0f);
+            u1 = textureSpan * ((f32)segment / 20.0f);
+            effAppendGouraudTexturedQuadPacket(list, primitive,
+                                               innerX0 + 0x8000, innerY0 + 0x8000, u0, innerV, innerColor,
+                                               innerX1 + 0x8000, innerY1 + 0x8000, u1, innerV, innerColor,
+                                               outerX0 + 0x8000, outerY0 + 0x8000, u0, outerV, outerColor,
+                                               outerX1 + 0x8000, outerY1 + 0x8000, u1, outerV, outerColor,
+                                               depth);
+            innerX0 = innerX1;
+            innerY0 = innerY1;
+            outerX0 = outerX1;
+            outerY0 = outerY1;
+            u0 = u1;
+        } while (segment < 20);
+        ring = nextRing;
+        radius = outerRadius;
+        innerV = outerV;
+    } while (ring < 50);
+}
+#else
 INCLUDE_ASM(const s32, "game/code_0020FC48", btlDrawWindOverlaySweep);
+#endif
 
 extern u32 effGetWindTextureHandle(void);
 
