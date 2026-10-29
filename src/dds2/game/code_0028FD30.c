@@ -592,7 +592,72 @@ u16 mnuGetPanelValueAt(MnuStatusResource *resource, s32 panelIndex) {
                     (s32)resource->menu.slots[resource->list->cursor->index]->flags);
 }
 
+#ifdef NON_MATCHING
+#include "mnu_mantra.h"
+#include "mnu_mantra_position_api.h"
+#include "mnu_list.h"
+
+extern u32 frFontDrawStyledGlyphChainAndMeasure(s32, s32, s32, u32, u8, const u8 *, s32, s32);
+extern void mnuDrawOptionalMantraLabel(u32 x, u32 y, u32 depth, u32 fade, u16 entryId, u32 drawArg);
+extern void mnuDrawMantraLabelA(u32 x, u32 y, u32 depth, s32 fade, u32 iconId, u32 drawArg);
+extern void mnuDrawMantraDigitRow(u32 x, u32 y, u32 depth, u32 fade, u32 entryId, u32 drawArg);
+extern void mnuDrawMantraCostCounter(u32 x, u32 y, u32 depth, s32 fade, u32 entryId, u32 showCost, u32 drawArg);
+extern u16 mnuGetSelectedPanelValue(MnuStatusResource *);
+extern void mnuDrawAnimatedMantraValue(u32 x, u32 y, u32 depth, u32 fade, MnuStatusResource *object, u32 drawArg);
+
+/* The selected node's detail panel. A kind-2 node the selected unit has not
+ * opened (its flag 2) shows a fixed caption (font glyphs 8BBA 87C1 84FF 8488,
+ * "...unknown"), one whose map record has bit 8 set another (85CE 89E6 86E7,
+ * "release..."); every other node shows its name, icon, rank row and cost,
+ * the cost hidden ("---") while the node's flag 0x200 is set. The animated
+ * currency counter follows in every case. */
+void mnuDrawMantraNodeDetails(s32 x, s32 y, s32 depth, s32 fade, MnuStatusResource *object, s32 drawArg) {
+    MantraMenuWork *state = &object->menu;
+    MantraNodePos *node;
+    s32 caption = 0;
+    s32 unit;
+    u8 nodeId;
+    u16 flags;
+    u32 costHidden;
+
+    nodeId = state->defaultSelector->id;
+    unit = object->list->cursor->index;
+    if (nodeId >= 0xB0) {
+        return;
+    }
+    node = mnuGetMantraNodePositionRecord(nodeId);
+    flags = object->menu.slots[unit]->flags[nodeId];
+    if (node->kind == 2) {
+        if (flags & 2) {
+            caption = 1;
+        } else if (node->selector.packed & 0x100) {
+            caption = 2;
+        }
+    } else {
+        caption = 0;
+    }
+    switch (caption) {
+    case 1:
+        frFontDrawStyledGlyphChainAndMeasure(x + 0x80, y + 0x172, depth, fade | 0xA09DC300, 4,
+                                            (const u8 *)"\x8B\xBA\x87\xC1\x84\xFF\x84\x88", 0, drawArg);
+        break;
+    case 2:
+        frFontDrawStyledGlyphChainAndMeasure(x + 0x80, y + 0x172, depth, fade | 0xA09DC300, 4,
+                                            (const u8 *)"\x85\xCE\x89\xE6\x86\xE7", 0, drawArg);
+        break;
+    default:
+        mnuDrawOptionalMantraLabel(x, y, depth, fade, state->defaultSelector->id, drawArg);
+        costHidden = (mnuGetSelectedPanelValue(object) >> 8) & 2;
+        mnuDrawMantraLabelA(x, y, depth, fade, state->defaultSelector->id, drawArg);
+        mnuDrawMantraDigitRow(x, y, depth, fade, state->defaultSelector->id, drawArg);
+        mnuDrawMantraCostCounter(x, y, depth, fade, state->defaultSelector->id, costHidden == 0, drawArg);
+        break;
+    }
+    mnuDrawAnimatedMantraValue(0, 0, 0, 0x80, object, 0x53);
+}
+#else
 INCLUDE_ASM(const s32, "game/code_0028FD30", mnuDrawMantraNodeDetails);
+#endif
 
 
 typedef struct MantraModelFlag {
@@ -847,7 +912,81 @@ void mnuSetPanelSelection(MnuStatusResource *object, s8 selection) {
     }
 }
 
+#ifdef NON_MATCHING
+#include "mnu_mantra.h"
+#include "mnu_mantra_position_api.h"
+#include "mnu_panel_position_record.h"
+
+struct MantraPanelAnimation;
+extern struct MantraPanelAnimation *mnuSpawnPanelSlotB(MantraPanelPool *, s32, s8, s16, s16, u32);
+extern void mnuOffsetPanelAndSetVisualParams(struct MantraPanelAnimation *, s32, s32, u32, u32, u32, u8, u8);
+extern u32 mnuQueuePanelAnimationTransition(struct MantraPanelAnimation *, u32, s16);
+
+/* Respawn the map's node panels for one unit's panel records: every node
+ * within the unlocked tier gets the panel kind its record calls for (kind-1
+ * nodes 2/1/0 when acquired/available/visible; kind-2 nodes 7 or 6 when the
+ * map marks them (bit 8), else 5/4 when acquired/available, 3 when flagged 8,
+ * 6 when visible), then plays the opening (mode 1) or plain (mode 2)
+ * transition. */
+void mnuUpdateMantraSelectionPanelSlots(MnuStatusResource *object, s16 delay, s32 transitionMode, s8 selector, s8 maxTier, s32 unused) {
+    MantraPanelPool *pool = object->menu.resource;
+    MantraNodePos *node = mnuGetMantraPanelPositionRecord(0);
+    MenuPanelPositionRecord *record;
+    struct MantraPanelAnimation *animation;
+    s32 panelKind;
+    s32 i;
+
+    for (i = 175; i >= 0; i--, node++) {
+        if (node->id == 0) {
+            continue;
+        }
+        if (node->modelFlagState > maxTier) {
+            continue;
+        }
+        panelKind = -1;
+        record = mnuFindPanelPositionRecordByScriptId(selector, node->id);
+        if (record == NULL) {
+            continue;
+        }
+        if (node->kind == 1) {
+            if (record->flags & 1) {
+                panelKind = 2;
+            } else if ((record->stateFlags & 15) == 1) {
+                panelKind = 1;
+            } else if ((record->stateFlags & 15) == 2) {
+                panelKind = 0;
+            }
+        } else if (node->kind == 2) {
+            if (node->selector.packed & 0x100) {
+                panelKind = (record->flags & 8) ? 7 : 6;
+            } else if (record->flags & 1) {
+                panelKind = 5;
+            } else if ((record->stateFlags & 15) == 1) {
+                panelKind = 4;
+            } else if (record->flags & 8) {
+                panelKind = 3;
+            } else if ((record->stateFlags & 15) == 2) {
+                panelKind = 6;
+            }
+        }
+        if (panelKind == -1) {
+            continue;
+        }
+        animation = mnuSpawnPanelSlotB(pool, node->id, panelKind, delay, 0, 0);
+        if (animation == NULL) {
+            continue;
+        }
+        mnuOffsetPanelAndSetVisualParams(animation, 0, 0, 0, 0x80, 0x53, 0, 0);
+        if (transitionMode == 1) {
+            mnuQueuePanelAnimationTransition(animation, 8, 0);
+        } else if (transitionMode == 2) {
+            mnuQueuePanelAnimationTransition(animation, 0, 0);
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "game/code_0028FD30", mnuUpdateMantraSelectionPanelSlots);
+#endif
 
 void mnuAcquireMantraAndUnlockNeighbors(MnuStatusResource *object, s32 selector, u16 id) {
     MantraMenuWork *state = &object->menu;
@@ -1825,7 +1964,76 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
 }
 
 
+#ifdef NON_MATCHING
+#include "mnu_mantra.h"
+#include "mnu_mantra_position_api.h"
+#include "mnu_panel_position_record.h"
+
+extern void mnuSetMantraInfoDrawPosition(struct MantraDrawPool *pool, s16 x, u16 y);
+extern void mnuSetMantraUnitPanelValue(struct MantraDrawPool *pool, s16 value);
+s32 mnuFindOtherPanelSelectorForScriptId(MnuStatusResource *object, u16 id);
+
+/* The tutorial map's panels: point the info panel at the selected node (style
+ * 1 for an unconfirmed kind-2 node, else 3 or 2 by its panel record's flag 2),
+ * then give the unit panel the node's status from the selected unit's panel
+ * record. Flag bit 29 hides both. */
+s32 mnuUpdateMantraTutorialPanelStatus(MnuStatusResource *object) {
+    MantraMenuWork *state = &object->menu;
+    MantraNodePos *node;
+    MenuPanelPositionRecord *record;
+    s16 status = 0;
+    s32 style;
+
+    if ((state->flags >> 29) & 1) {
+        mnuSetMantraInfoDrawPosition(object->menu.selectionController, 0, 1);
+    } else {
+        node = mnuGetMantraPanelPositionRecord(state->defaultSelector->id);
+        record = mnuFindPanelPositionRecordByScriptId((state->flags >> 24) & 0xF, state->defaultSelector->id);
+        if (node->kind == 2) {
+            if (record->flags & 8) {
+                style = (record->flags & 2) ? 3 : 2;
+            } else {
+                style = 1;
+            }
+        } else {
+            style = (record->flags & 2) ? 3 : 2;
+        }
+        mnuSetMantraInfoDrawPosition(object->menu.selectionController, object->menu.defaultSelector->id, style);
+    }
+
+    if ((state->flags >> 29) & 1) {
+        status = 0;
+    } else if (state->drawBits.iconFade) {
+        node = mnuGetMantraPanelPositionRecord(state->defaultSelector->id);
+        if (node->id != 0 && node->modelFlagState <= (s32)((state->flags >> 28) & 1)) {
+            u32 bits;
+
+            record = mnuFindPanelPositionRecordByScriptId((state->flags >> 24) & 0xF, node->id);
+            bits = record->stateFlags;
+            if ((bits & 15) != 3 && node->kind < 5 && node->kind > 0) {
+                status = 3;
+                if (!((bits >> 8) & 1)) {
+                    status = (mnuFindOtherPanelSelectorForScriptId(object, node->id) != -1) ? 5 : 0;
+                }
+            }
+        }
+    } else {
+        status = 2;
+        record = mnuFindPanelPositionRecordByScriptId((state->flags >> 24) & 0xF, state->defaultSelector->id);
+        if (record->flags & 4) {
+            status = 4;
+        } else if (record->flags & 1) {
+            status = 3;
+        } else if ((record->stateFlags & 15) == 1) {
+            status = 1;
+        }
+    }
+    mnuSetMantraUnitPanelValue(object->menu.selectionController, status);
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "game/code_0028FD30", mnuUpdateMantraTutorialPanelStatus);
+#endif
 
 s32 mnuFindOtherPanelSelectorForScriptId(MnuStatusResource *object, u16 id) {
     MantraMenuWork *state = &object->menu;
