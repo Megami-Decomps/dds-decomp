@@ -62,6 +62,7 @@
 #include "mdl_asset_request.h"
 #include "btl_action.h"
 #include "btl_unit_tasks.h"
+#include "btl_unit_fade_task_types.h"
 #include "sdf.h"
 #include "file.h"
 #include "dat_command.h"
@@ -3156,7 +3157,7 @@ void btlCommandTaskStartEffects(u8 *task) {
     }
 }
 
-extern BtlRuntimeTask *btlCreateUnitExitFadeTask(BtlUnit *, s32);
+extern BtlRuntimeTask *btlCreateUnitExitFadeTask(BtlUnit *, BtlUnitExitFadeMode);
 
 u64 btlCommandTaskReturnStart(u8 *task) {
     BtlUnit *linked = *(BtlUnit **)(task + 0x34);
@@ -3191,7 +3192,7 @@ u64 btlCommandTaskReturnStart(u8 *task) {
     *(s32 *)(object + 0x28) = 0xF;
     *(u64 *)(object + 0x40) = *(u64 *)(*(u8 **)(task + 0x18) + 0x108);
     btlStartTask(object);
-    object = (u8 *)btlCreateUnitExitFadeTask(actor, 1);
+    object = (u8 *)btlCreateUnitExitFadeTask(actor, BTL_UNIT_EXIT_FADE_MODE_FRAME_ALPHA);
     *(s32 *)(object + 0x28) = 0xF;
     return btlStartTask(object);
 }
@@ -3487,7 +3488,7 @@ u64 btlStartOwnerEffectTasks(s32 *arguments) {
     BtlUnit *owner = (BtlUnit *)arguments[0x34 / 4];
     BtlRuntimeTask *value = btlCreateEffObjA(owner, arguments[0x20 / 4]);
     btlStartTask(value);
-    value = btlCreateUnitExitFadeTask(owner, 1);
+    value = btlCreateUnitExitFadeTask(owner, BTL_UNIT_EXIT_FADE_MODE_FRAME_ALPHA);
     value->startDelay = 7;
     return btlStartTask(value);
 }
@@ -3602,7 +3603,7 @@ void btlRecordEscapeAttemptOutcome(BtlTask *task) {
     }
 }
 
-extern BtlRuntimeTask *btlCreateUnitDefeatFadeOutTask(BtlUnit *unit, s32 durationOrMode);
+extern BtlRuntimeTask *btlCreateUnitDefeatFadeOutTask(BtlUnit *unit, s32 duration);
 
 /* Queue escape-result sounds and stagger eligible party effects; successful
  * escapes also fade each eligible actor, with its identity as the task owner. */
@@ -3879,7 +3880,7 @@ void btlStartActorDefeatTransition(BtlTask *commandTask) {
                     btlRefreshUnitMotionSelection(actor);
                 }
             } else {
-                object = btlCreateUnitExitFadeTask(actor, 0);
+                object = btlCreateUnitExitFadeTask(actor, BTL_UNIT_EXIT_FADE_MODE_EVENT_COLOR);
                 object->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                 object->startCondition.value.handle = sequence;
                 btlStartTask(object);

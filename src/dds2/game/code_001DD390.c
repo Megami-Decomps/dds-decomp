@@ -4289,7 +4289,7 @@ s32 btlStepUnitDefeatFadeIn(BtlUnitFadeTaskArgs *taskArgs) {
     BtlUnit *unit = taskArgs->unit;
     u32 alpha;
 
-    if (taskArgs->durationOrMode == -1) {
+    if (taskArgs->duration == -1) {
         unit->overlayColor = (unit->baseColor & 0xFFFFFF) | 0x80000000;
         evtSetUnitColorRGB(unit->ext, 0, unit->overlayColor);
         evtSetUnitColorA(unit->ext, 0, unit->overlayColor);
@@ -4299,25 +4299,25 @@ s32 btlStepUnitDefeatFadeIn(BtlUnitFadeTaskArgs *taskArgs) {
     if (taskArgs->elapsed == 0) {
         btlFlagUnitDefeatCandidate(unit);
     }
-    if (taskArgs->durationOrMode == 0) {
+    if (taskArgs->duration == 0) {
         evtSetUnitColorRGB(unit->ext, 0, unit->overlayColor);
         evtSetUnitColorA(unit->ext, 0,
                                   (unit->overlayColor & 0xFFFFFF) | 0x80000000);
     }
-    if (taskArgs->elapsed >= taskArgs->durationOrMode) {
+    if (taskArgs->elapsed >= taskArgs->duration) {
         unit->status.flags &= ~0x20000;
         unit->overlayColor = (unit->baseColor & 0xFFFFFF) | 0x80000000;
         return 1;
     }
     unit->status.flags |= 0x20000;
-    alpha = (u32)((f32)taskArgs->elapsed * 128.0f / (f32)taskArgs->durationOrMode);
+    alpha = (u32)((f32)taskArgs->elapsed * 128.0f / (f32)taskArgs->duration);
     alpha <<= 24;
     unit->overlayColor = alpha | (unit->baseColor & 0xFFFFFF);
     taskArgs->elapsed++;
     return 0;
 }
 
-BtlRuntimeTask *btlCreateUnitDefeatFadeInTask(BtlUnit *actor, s32 option) {
+BtlRuntimeTask *btlCreateUnitDefeatFadeInTask(BtlUnit *actor, s32 duration) {
     BtlRuntimeTask *task = btlAllocTask(0xC);
     BtlUnitFadeTaskArgs *args;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
@@ -4328,7 +4328,7 @@ BtlRuntimeTask *btlCreateUnitDefeatFadeInTask(BtlUnit *actor, s32 option) {
     task->onStart = 0;
     args = (BtlUnitFadeTaskArgs *)btlGetTaskArguments(task);
     args->unit = actor;
-    args->durationOrMode = option;
+    args->duration = duration;
     args->elapsed = 0;
     return task;
 }
@@ -4340,13 +4340,13 @@ s32 btlStepUnitDefeatFadeOut(BtlUnitFadeTaskArgs *taskArgs) {
     if (taskArgs->elapsed == 0) {
         btlFlagUnitDefeatCandidate(unit);
     }
-    if (taskArgs->elapsed >= taskArgs->durationOrMode) {
+    if (taskArgs->elapsed >= taskArgs->duration) {
         unit->status.flags &= ~0x20000;
         unit->overlayColor = unit->baseColor & 0xFFFFFF;
         return 1;
     }
     unit->status.flags |= 0x20000;
-    alpha = (u32)((1.0f - (f32)taskArgs->elapsed / (f32)taskArgs->durationOrMode) * 128.0f);
+    alpha = (u32)((1.0f - (f32)taskArgs->elapsed / (f32)taskArgs->duration) * 128.0f);
     alpha <<= 24;
     unit->overlayColor = alpha | (unit->baseColor & 0xFFFFFF);
     taskArgs->elapsed++;
@@ -4354,7 +4354,7 @@ s32 btlStepUnitDefeatFadeOut(BtlUnitFadeTaskArgs *taskArgs) {
 }
 
 /* Create the owner-bound defeat fade-out task with a zero elapsed count. */
-BtlRuntimeTask *btlCreateUnitDefeatFadeOutTask(BtlUnit *actor, s32 option) {
+BtlRuntimeTask *btlCreateUnitDefeatFadeOutTask(BtlUnit *actor, s32 duration) {
     BtlRuntimeTask *task = btlAllocTask(0xC);
     BtlUnitFadeTaskArgs *args;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
@@ -4365,7 +4365,7 @@ BtlRuntimeTask *btlCreateUnitDefeatFadeOutTask(BtlUnit *actor, s32 option) {
     task->onStart = 0;
     args = (BtlUnitFadeTaskArgs *)btlGetTaskArguments(task);
     args->unit = actor;
-    args->durationOrMode = option;
+    args->duration = duration;
     args->elapsed = 0;
     return task;
 }
@@ -4381,8 +4381,8 @@ u32 btlStepUnitExitFade(BtlUnitFadeTaskArgs *taskArgs) {
         btlFlagUnitDefeatCandidate(unit);
     }
 
-    switch (taskArgs->durationOrMode) {
-    case 0:
+    switch (taskArgs->exitMode) {
+    case BTL_UNIT_EXIT_FADE_MODE_EVENT_COLOR:
         if (taskArgs->elapsed == 1) {
             btlFlagUnitDefeatCandidate(unit);
             evtSetUnitColorRGB(unit->ext, 10, 0x80000000);
@@ -4396,7 +4396,7 @@ u32 btlStepUnitExitFade(BtlUnitFadeTaskArgs *taskArgs) {
         }
         break;
 
-    case 1:
+    case BTL_UNIT_EXIT_FADE_MODE_FRAME_ALPHA:
         if (taskArgs->elapsed >= 8) {
             unit->status.flags &= ~0x20000;
             unit->overlayColor = unit->baseColor & 0xFFFFFF;
@@ -4419,7 +4419,7 @@ u32 btlStepUnitExitFade(BtlUnitFadeTaskArgs *taskArgs) {
 }
 
 /* Queue the selected exit-fade mode for this owner, starting at tick zero. */
-BtlRuntimeTask *btlCreateUnitExitFadeTask(BtlUnit *actor, s32 option) {
+BtlRuntimeTask *btlCreateUnitExitFadeTask(BtlUnit *actor, BtlUnitExitFadeMode mode) {
     BtlRuntimeTask *task = btlAllocTask(0xC);
     BtlUnitFadeTaskArgs *args;
     task->endCondition.kind = BTL_TASK_CONDITION_NEVER;
@@ -4430,7 +4430,7 @@ BtlRuntimeTask *btlCreateUnitExitFadeTask(BtlUnit *actor, s32 option) {
     task->onStart = 0;
     args = (BtlUnitFadeTaskArgs *)btlGetTaskArguments(task);
     args->unit = actor;
-    args->durationOrMode = option;
+    args->exitMode = mode;
     args->elapsed = 0;
     return task;
 }

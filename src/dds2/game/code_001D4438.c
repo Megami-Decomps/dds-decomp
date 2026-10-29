@@ -52,6 +52,7 @@
 #include "btl_action.h"
 #include "btl_effect_table.h"
 #include "btl_unit_tasks.h"
+#include "btl_unit_fade_task_types.h"
 #include "btl_state.h"
 #include "btl_action_state_selection.h"
 #include "btl_action_eligibility.h"
@@ -528,7 +529,7 @@ extern void btlBuildPresetCameraPose(BtlLinkedCommand *, BtlCamState *, s16, s16
 extern void mnuReleaseSoundBufferLocked(void);
 
 extern void btlMoveActorOutOfActiveParty(BtlUnit *);
-extern BtlRuntimeTask *btlCreateUnitExitFadeTask(BtlUnit *owner, s32 option);
+extern BtlRuntimeTask *btlCreateUnitExitFadeTask(BtlUnit *owner, BtlUnitExitFadeMode mode);
 
 
 extern void btlDebugPrintf(s32 tag, ...);
@@ -3908,7 +3909,7 @@ void btlCommandTaskReturnStart(ActionStateLink *task) {
         object->ownerId = task->unit->owner;
         btlStartTask(object);
     }
-    object = btlCreateUnitExitFadeTask(actor, 1);
+    object = btlCreateUnitExitFadeTask(actor, BTL_UNIT_EXIT_FADE_MODE_FRAME_ALPHA);
     object->startDelay = 0xF;
     btlStartTask(object);
     actor->status.stateFlags &= ~0x40000;
@@ -4236,7 +4237,7 @@ u64 btlStartOwnerEffectTasks(s32 *arguments) {
     s32 value = btlCreateEffObjA(owner, arguments[0x20 / 4]);
     BtlRuntimeTask *fadeTask;
     btlStartTask(value);
-    fadeTask = btlCreateUnitExitFadeTask((BtlUnit *)owner, 1);
+    fadeTask = btlCreateUnitExitFadeTask((BtlUnit *)owner, BTL_UNIT_EXIT_FADE_MODE_FRAME_ALPHA);
     fadeTask->startDelay = 7;
     return btlStartTask(fadeTask);
 }
@@ -4384,7 +4385,7 @@ void btlRecordEscapeAttemptOutcome(ActionStateLink *link) {
     }
 }
 
-extern BtlRuntimeTask *btlCreateUnitDefeatFadeOutTask(BtlUnit *unit, s32 durationOrMode);
+extern BtlRuntimeTask *btlCreateUnitDefeatFadeOutTask(BtlUnit *unit, s32 duration);
 
 /* Queue escape-result sounds and stagger eligible party effects; successful
  * escapes also fade each eligible actor, with its identity as the task owner. */
@@ -4652,7 +4653,7 @@ void btlStartActorDefeatTransition(ActionStateLink *command) {
                     btlRefreshUnitMotionSelection(actor);
                 }
             } else {
-                object = btlCreateUnitExitFadeTask(actor, 0);
+                object = btlCreateUnitExitFadeTask(actor, BTL_UNIT_EXIT_FADE_MODE_EVENT_COLOR);
                 object->startCondition.kind = BTL_TASK_CONDITION_HANDLE_ABSENT;
                 object->startCondition.value.handle = sequence;
                 btlStartTask(object);

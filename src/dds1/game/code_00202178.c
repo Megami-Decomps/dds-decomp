@@ -3522,7 +3522,7 @@ void btlDestroySpecialUnitSlot(void) {
     }
 }
 
-extern BtlRuntimeTask *btlCreateUnitDefeatFadeInTask(BtlUnit *owner, s32 value);
+extern BtlRuntimeTask *btlCreateUnitDefeatFadeInTask(BtlUnit *owner, s32 duration);
 
 /* Launch a subtask from the active slot and return its new scheduler handle.
  * Zero leaves the constructor's condition intact; otherwise wait for the
