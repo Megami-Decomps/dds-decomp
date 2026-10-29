@@ -2996,14 +2996,16 @@ f32 btlGetActorEntryMultiplier(BtlUnit *unit, u32 index, s8 includeCharge) {
     }
     if (index == 0 && includeCharge != 0 &&
         btlGetActorEntryCode(unit, BTL_ACTOR_ENTRY_SLOT_PHYSICAL_CHARGE) > 0) {
-        if (btlActorEntryIsExpired(unit, BTL_ACTOR_ENTRY_SLOT_PHYSICAL_CHARGE) != 0) {
+        if (btlActorEntryIsExpired(unit, BTL_ACTOR_ENTRY_SLOT_PHYSICAL_CHARGE) !=
+            BTL_ACTOR_ENTRY_EXPIRATION_RESULT_NOT_EXPIRED) {
             factor *= 2.25f;
             btlBossDebugPrintf("btl:BUTURIx2\n");
         }
     }
     if (index == 1 && includeCharge != 0 &&
         btlGetActorEntryCode(unit, BTL_ACTOR_ENTRY_SLOT_MAGIC_CHARGE) > 0) {
-        if (btlActorEntryIsExpired(unit, BTL_ACTOR_ENTRY_SLOT_MAGIC_CHARGE) != 0) {
+        if (btlActorEntryIsExpired(unit, BTL_ACTOR_ENTRY_SLOT_MAGIC_CHARGE) !=
+            BTL_ACTOR_ENTRY_EXPIRATION_RESULT_NOT_EXPIRED) {
             factor *= 2.25f;
             btlBossDebugPrintf("btl:MAGICx2\n");
         }

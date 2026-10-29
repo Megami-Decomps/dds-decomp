@@ -993,17 +993,23 @@ s32 btlMatchesActorEntryCodeCondition(BtlUnit *actor, s32 conditionIndex) {
 
     if (conditionIndex == 0xB) {
         for (evenIndex = 0; evenIndex < BTL_ENTRY_CODE_SCAN_COUNT; evenIndex += 2) {
-            if (btlActorEntryIsExpired(actor, btlEntryCodeConditionIndices[evenIndex]) != 0 && btlGetActorEntryCode(actor, btlEntryCodeConditionIndices[evenIndex]) > 0) {
+            if (btlActorEntryIsExpired(actor, btlEntryCodeConditionIndices[evenIndex]) !=
+                BTL_ACTOR_ENTRY_EXPIRATION_RESULT_NOT_EXPIRED &&
+                btlGetActorEntryCode(actor, btlEntryCodeConditionIndices[evenIndex]) > 0) {
                 return 1;
             }
         }
     } else if (conditionIndex == 0xC) {
         for (oddIndex = 1; oddIndex < BTL_ENTRY_CODE_SCAN_COUNT; oddIndex += 2) {
-            if (btlActorEntryIsExpired(actor, btlEntryCodeConditionIndices[oddIndex]) != 0 && btlGetActorEntryCode(actor, btlEntryCodeConditionIndices[oddIndex]) <= 0) {
+            if (btlActorEntryIsExpired(actor, btlEntryCodeConditionIndices[oddIndex]) !=
+                BTL_ACTOR_ENTRY_EXPIRATION_RESULT_NOT_EXPIRED &&
+                btlGetActorEntryCode(actor, btlEntryCodeConditionIndices[oddIndex]) <= 0) {
                 return 1;
             }
         }
-    } else if (btlActorEntryIsExpired(actor, btlEntryCodeConditionIndices[conditionIndex]) != 0 || conditionIndex == 0xA || conditionIndex == 0xD) {
+    } else if (btlActorEntryIsExpired(actor, btlEntryCodeConditionIndices[conditionIndex]) !=
+               BTL_ACTOR_ENTRY_EXPIRATION_RESULT_NOT_EXPIRED ||
+               conditionIndex == 0xA || conditionIndex == 0xD) {
         if ((conditionIndex & 1) == 0 || conditionIndex == 0xD) {
             if (btlGetActorEntryCode(actor, btlEntryCodeConditionIndices[conditionIndex]) > 0) {
                 return 1;

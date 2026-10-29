@@ -736,7 +736,8 @@ s32 btlIndexListNoExpiredEntryCodes(BtlIndexList *indexList, s32 commandId) {
         switch (requirementBits) {
         case BTL_EXPIRED_POSITIVE_ENTRY_RULE:
             for (codeIndex = 0; codeIndex < BTL_ENTRY_CODE_COUNT; codeIndex++) {
-                if (btlActorEntryIsExpired(actorEntry, entrySlotIndices[codeIndex]) != 0) {
+                if (btlActorEntryIsExpired(actorEntry, entrySlotIndices[codeIndex]) !=
+                    BTL_ACTOR_ENTRY_EXPIRATION_RESULT_NOT_EXPIRED) {
                     if (btlGetActorEntryCode(actorEntry, entrySlotIndices[codeIndex]) > 0) {
                         return 0;
                     }
@@ -745,7 +746,8 @@ s32 btlIndexListNoExpiredEntryCodes(BtlIndexList *indexList, s32 commandId) {
             break;
         case BTL_EXPIRED_NEGATIVE_ENTRY_RULE:
             for (codeIndex = 0; codeIndex < BTL_ENTRY_CODE_COUNT; codeIndex++) {
-                if (btlActorEntryIsExpired(actorEntry, entrySlotIndices[codeIndex]) != 0) {
+                if (btlActorEntryIsExpired(actorEntry, entrySlotIndices[codeIndex]) !=
+                    BTL_ACTOR_ENTRY_EXPIRATION_RESULT_NOT_EXPIRED) {
                     if (btlGetActorEntryCode(actorEntry, entrySlotIndices[codeIndex]) < 0) {
                         return 0;
                     }

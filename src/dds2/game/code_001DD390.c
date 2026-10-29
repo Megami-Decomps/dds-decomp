@@ -1206,13 +1206,15 @@ void btlResolveActionTargetResults(ActionStateLink *action, BattleIndexWork *wor
     }
     if (datCommandRecords[command].effectType == 0 && !(calculationFlags & 1) &&
         datCommandSelectors[command].kind != 1 && !(u8)(datCommandRecords[command].flags & 1)) {
-        if (btlActorEntryIsExpired(action->unit, BTL_ACTOR_ENTRY_SLOT_PHYSICAL_CHARGE)) {
+        if (btlActorEntryIsExpired(action->unit, BTL_ACTOR_ENTRY_SLOT_PHYSICAL_CHARGE) !=
+            BTL_ACTOR_ENTRY_EXPIRATION_RESULT_NOT_EXPIRED) {
             btlClearActorEntrySlot(action->unit, BTL_ACTOR_ENTRY_SLOT_PHYSICAL_CHARGE);
         }
     }
     if (datCommandRecords[command].effectType == 1 && !(calculationFlags & 1) &&
         datCommandSelectors[command].kind != 1 && !(u8)(datCommandRecords[command].flags & 1)) {
-        if (btlActorEntryIsExpired(action->unit, BTL_ACTOR_ENTRY_SLOT_MAGIC_CHARGE)) {
+        if (btlActorEntryIsExpired(action->unit, BTL_ACTOR_ENTRY_SLOT_MAGIC_CHARGE) !=
+            BTL_ACTOR_ENTRY_EXPIRATION_RESULT_NOT_EXPIRED) {
             btlClearActorEntrySlot(action->unit, BTL_ACTOR_ENTRY_SLOT_MAGIC_CHARGE);
         }
     }
