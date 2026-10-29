@@ -838,7 +838,88 @@ FldCameraTrackingResult fldEvaluateCameraMoveTracking(void) {
 
 INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FA00);
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "fld_camera_tracking.h"
+
+extern void fldDrawPercentValue(s32 x, s32 y, s32 value);
+extern s8 dds3PadButtonState[2][2][16];
+extern s32 gFldElvFloorNow;
+extern s32 fldElvFloorFrom;
+extern s32 fldElvFloorNum;
+extern s32 fldElvFloorTo;
+extern s32 fldElvFloorDisp;
+extern s32 fldElvFloorTarget;
+extern s32 fldElvState;
+
+/* The camera move's floor counter, each frame while tracking is set: unless
+ * start and target are the same, count a frame and, once more frames have
+ * passed than the delay for the counter's distance from the nearer of start
+ * and target (slow at either end), step it one toward the target, passing
+ * over zero. A press of the first pad's cancel (bank 1, button 3) is latched
+ * for fldEvaluateCameraMoveTracking. Then draw the counter at (380, 18), or
+ * the target's or else the start's full label (above 1000) when the counter
+ * equals that label's remainder by 1000. Upstream: INCLUDE_ASM in DDS1's
+ * game/code_0011D3A0 and DDS2's game/code_0011F208. */
+void fldElvDrawFloorNum(void) {
+    s32 delays[6] = {50, 45, 30, 20, 15, 15};
+    s32 current = gFldElvFloorNow;
+    s32 toTarget;
+    s32 toStart;
+    s32 delay;
+    s32 shown;
+
+    if (current == FIELD_CAMERA_TRACKING_UNSET) {
+        return;
+    }
+    if (fldElvFloorTarget != FIELD_CAMERA_TRACKING_UNSET) {
+        fldElvFloorTarget++;
+        toTarget = fldElvFloorTo - current;
+        if (toTarget < 0) {
+            toTarget = -toTarget;
+        }
+        toStart = fldElvFloorFrom - current;
+        if (toStart < 0) {
+            toStart = -toStart;
+        }
+        if (toStart < toTarget) {
+            delay = delays[toStart < 6 ? toStart : 5];
+        } else {
+            delay = delays[toTarget < 6 ? toTarget : 5];
+        }
+        if (delay < fldElvFloorTarget) {
+            fldElvFloorTarget = 0;
+            if (current < fldElvFloorTo) {
+                gFldElvFloorNow = current + 1;
+                if (gFldElvFloorNow == 0) {
+                    gFldElvFloorNow = current + 2;
+                }
+            } else if (fldElvFloorTo < current) {
+                gFldElvFloorNow = current - 1;
+                if (gFldElvFloorNow == 0) {
+                    gFldElvFloorNow = current - 2;
+                }
+            }
+        }
+    }
+    if (dds3PadButtonState[1][0][3] < 0) {
+        fldElvState = 1;
+    }
+    shown = gFldElvFloorNow;
+    if (fldElvFloorDisp > 1000) {
+        if (gFldElvFloorNow == fldElvFloorDisp % 1000) {
+            shown = fldElvFloorDisp;
+        }
+    } else if (fldElvFloorNum > 1000) {
+        if (gFldElvFloorNow == fldElvFloorNum % 1000) {
+            shown = fldElvFloorNum;
+        }
+    }
+    fldDrawPercentValue(380, 18, shown);
+}
+#else
 INCLUDE_ASM(const s32, "game/code_0011D3A0", fldElvDrawFloorNum);
+#endif
 
 
 extern void rsetOtOfs(u32);
@@ -2201,7 +2282,60 @@ void fldMarkStageExplorationCellsAroundPosition(s32 room, s32 stage, f32 x, f32 
     }
 }
 
+#ifdef NON_MATCHING
+#include "fld_area_work.h"
+#include "fld_npc_motion.h"
+#include "sdf_packet_list.h"
+#include "ee_mmi.h"
+#include "kwln.h"
+#include "kwln_task_create.h"
+#include "pcp_vu0.h"
+#include "common.h"
+#include "fld_scene_ready_api.h"
+#include "fld_encounter_runtime_api.h"
+#include "fld_activation_entry.h"
+#include "fld_camera_follow_row.h"
+#include "mdl_flag_api.h"
+#include "sdf_trig.h"
+#include "dds3_path.h"
+#include "dds3_object_flags.h"
+#include "sdf_dev_state.h"
+#include "sdf_resource.h"
+#include "field_stage.h"
+#include "eff_blur.h"
+#include "fpu.h"
+#include "fld.h"
+#include "evt_world.h"
+#include "dds3obj.h"
+#include "mdl.h"
+#include "dat_state.h"
+#include "kwln_task_lifecycle.h"
+#include "dds3_world_secondary.h"
+#include "sdf_packet_alloc.h"
+#include "fld_camera_tracking.h"
+#include "fld_vr_reset_view.h"
+extern u32 fldFindStageCoordinateIndex(s32 x, s32 y);
+
+/* Mark a rectangle of a stage's exploration map as visited: one bit a cell, ten
+ * bytes a row, 800 bytes a stage. Upstream: INCLUDE_ASM in game/code_0011D3A0;
+ * written from the retail routine. It differs from retail only in register
+ * allocation and one register saved across the loops. */
+void fldMarkStageExplorationBitmapRegion(s32 area, s32 stage, s32 x, s32 z, s32 width, s32 height) {
+    u32 stageIndex = fldFindStageCoordinateIndex(area, stage);
+    s32 row;
+    s32 column;
+    s32 cellX;
+
+    for (row = 0; row < height; row++) {
+        for (column = 0; column < width; column++) {
+            cellX = x + column;
+            DDS3_GBWK->stageCellBits[(z + row) * 10 + stageIndex * 800 + cellX / 8] |= 1 << (cellX % 8);
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "game/code_0011D3A0", fldMarkStageExplorationBitmapRegion);
+#endif
 
 u8 fldIsStageExplorationCellMarked(s32 floor, f32 x, f32 z) {
     FieldStageCoordinate *record = fldFindStageCoordinateRecord(fldGlobalBase.area, floor);
