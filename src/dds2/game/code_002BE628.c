@@ -1411,7 +1411,114 @@ void mnuDrawRangeSpriteVariant(u32 x, u32 y, u32 depth, u32 color,
     effDrawTextureSlotWithBlendedCornerColors(x, y, depth, color, 1, drawArg, rangeIndex + 8, texture);
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "sdk_ps2.h"
+#include "fr_font.h"
+#include "fr_font_draw_glyph.h"
+#include "itf.h"
+#include "eff.h"
+#include "dat_state.h"
+#include "mnu.h"
+#include "mnu_panel_sprite.h"
+#include "brs_level_progress_api.h"
+
+extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
+void mnuDrawRepeatedPanelSprites(s32 x, s32 y, s32 depth, s32 fade, s32 count, EffectSlotSet *drawArg, s32 variant,
+                                 s32 texture);
+extern u8 (*datSkillNames)[17];
+
+/* A party member's skill list: two columns of rows, 2, 3 or 4 of them as the
+ * member's level step is 4, 6 or anything else, drawn over a frame whose two
+ * row backings repeat per row and whose foot sprites are picked by the row
+ * count. The columns list the record's skills in order; an empty slot shows
+ * eight blank cells. Everything fades with the panel. Upstream: INCLUDE_ASM
+ * in game/code_002BE628. */
+void mnuDrawPartySkillListPanel(s32 x, s32 y, s32 depth, datUnitWork_t *record, MenuSpriteState *panel, s32 surface) {
+    /* Skill-name column origins (left, right), then blank-row origins. */
+    MenuPoint text[4] = { { 0x1010, 0x9F0 }, { 0x1880, 0x9F0 }, { 0x1010, 0xA18 }, { 0x1880, 0xA18 } };
+    /* Row backings 0 and 6 repeat per row; 1 and 2 head the frame; 3..5 and
+     * 7..9 are the feet for 2, 3 and 4 rows. */
+    MenuPanelSprite sprites[10] = {
+        { 2, 0x18, { 0xDA0, 0x9E8 } },
+        { 0, 0x4B, { 0xE00, 0x908 } },
+        { 1, 2, { 0x1000, 0x928 } },
+        { 0, 0x4D, { 0x17A0, 0x9D0 } },
+        { 0, 0x4E, { 0x17A0, 0x9D0 } },
+        { 0, 0x4F, { 0x17A0, 0x9D0 } },
+        { 0, 0x4C, { 0xF70, 0xA80 } },
+        { 0, 0x50, { 0xF70, 0xB30 } },
+        { 0, 0x50, { 0xF70, 0xBE0 } },
+        { 0, 0x50, { 0xF70, 0xC88 } },
+    };
+    s32 fade = panel->initialValue;
+    u8 step;
+    s32 rows;
+    s32 i;
+    s32 drawX;
+    s32 drawY;
+    s32 column;
+    s32 row;
+    s32 first;
+    s32 rowOffset;
+    u16 *skill;
+    u16 skillId;
+    _FRQ *glyph;
+
+    step = brsGetLevelStepForValue(record->level);
+    rows = 2;
+    if (step != 4) {
+        rows = step == 6 ? 3 : 4;
+    }
+
+    drawX = x + sprites[0].offset.x;
+    drawY = y + sprites[0].offset.y;
+    for (i = 0; i < rows; i++) {
+        effDrawTextureSlotWithBlendedCornerColors(drawX, drawY, depth, fade, 1, panel->resourceSets[sprites[0].set],
+                                                  sprites[0].slot, surface);
+        drawY += 0xB0;
+    }
+    effDrawTextureSlotWithBlendedCornerColors(x + sprites[1].offset.x, y + sprites[1].offset.y, depth, fade, 1,
+                                              panel->resourceSets[sprites[1].set], sprites[1].slot, surface);
+    effDrawTextureSlotWithBlendedCornerColors(x + sprites[2].offset.x, y + sprites[2].offset.y, depth, fade, 1,
+                                              panel->resourceSets[sprites[2].set], sprites[2].slot, surface);
+    effDrawTextureSlotWithBlendedCornerColors(x + sprites[rows + 1].offset.x, y + sprites[rows + 1].offset.y, depth,
+                                              fade, 1, panel->resourceSets[sprites[rows + 1].set],
+                                              sprites[rows + 1].slot, surface);
+    drawX = x + sprites[6].offset.x;
+    drawY = y + sprites[6].offset.y;
+    for (i = 0; i < rows; i++) {
+        effDrawTextureSlotWithBlendedCornerColors(drawX, drawY, depth, fade, 1, panel->resourceSets[sprites[6].set],
+                                                  sprites[6].slot, surface);
+        drawY += 0xB0;
+    }
+    effDrawTextureSlotWithBlendedCornerColors(x + sprites[rows + 5].offset.x, y + sprites[rows + 5].offset.y, depth,
+                                              fade, 1, panel->resourceSets[sprites[rows + 5].set],
+                                              sprites[rows + 5].slot, surface);
+
+    first = 0;
+    for (column = 0; column < 2; column++) {
+        skill = &record->effectData[first];
+        rowOffset = 0;
+        for (row = 0; row < rows; row++) {
+            skillId = *skill++;
+            if (skillId != 0) {
+                glyph = itfCreateConvertedTextGlyph(x + text[column].x, y + text[column].y + rowOffset, depth,
+                                                    0xA09DC380, datSkillNames[skillId], NULL);
+                frFontDrawGlyphChain(glyph, 1, surface);
+                frDestroyFontRequestAfter(glyph);
+            } else {
+                mnuDrawRepeatedPanelSprites(x + text[2 + column].x, y + (rowOffset + text[2 + column].y) + 0x18, depth,
+                                            fade, 8, panel->resourceSets[0], 0x1B, surface);
+            }
+            rowOffset += 0xB0;
+        }
+        first += rows;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "game/code_002BE628", mnuDrawPartySkillListPanel);
+#endif
 
 /* Create the DDS2 simple sprite state from its three resource sets. */
 MenuSpriteState *mnuAllocateSimpleSprite(struct EffectSlotSet *resourceSet0,
@@ -1430,7 +1537,100 @@ void mnuFreeSimpleSpriteWork(MenuSpriteState *sprite) {
     sdfChipFreeDirect(sprite);
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "sdk_ps2.h"
+#include "fr_font.h"
+#include "fr_font_draw_glyph.h"
+#include "itf.h"
+#include "eff.h"
+#include "dat_state.h"
+#include "mnu.h"
+#include "mnu_panel_sprite.h"
+#include "prf_skill_list_buffer.h"
+
+extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
+void mnuDrawRangeSpriteVariant(u32 x, u32 y, u32 depth, u32 color,
+                               u16 rangeId, EffectSlotSet *drawArg, u32 texture);
+void mnuDrawRepeatedPanelSprites(s32 x, s32 y, s32 depth, s32 fade, s32 count, EffectSlotSet *drawArg, s32 variant,
+                                 s32 texture);
+void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
+                             datUnitWork_t *actor, u16 rangeId, s32 style, s32 dim,
+                             EffectSlotSet *costResource, u32 texture);
+extern u8 (*datSkillNames)[17];
+
+/* A profile's panel in the party menu: its frame (four rows of sprite 4,
+ * sprites 0 and 1, three rows of sprite 2, sprite 3), then one row per skill
+ * of the profile's raw list, 0xB0 apart: range sprite, name, cost and icon,
+ * or eight blank cells for an empty slot. Everything fades with the panel. */
+void mnuDrawPartyProfilePanelContents(s32 x, s32 y, s32 depth, datUnitWork_t *actor, s32 profile,
+                                      MenuSpriteState *panel, s32 surface) {
+    PrfSkillListBuffer list;
+    MenuPanelSprite sprites[5] = {
+        { 0, 0x4B, { 0xE00, 0x818 } },
+        { 1, 6, { 0xFD0, 0x840 } },
+        { 0, 0x4C, { 0xF70, 0x990 } },
+        { 0, 0x50, { 0xF70, 0xB98 } },
+        { 2, 0x18, { 0xDA0, 0x8F8 } },
+    };
+    /* A skill row's range sprite, name, cost and icon, and blank cells. */
+    MenuPoint rows[4] = { { 0x1120, 0x8F8 }, { 0x12A0, 0x900 }, { 0x1A30, 0x920 }, { 0x1490, 0x938 } };
+    s32 fade = panel->initialValue;
+    s32 row;
+    s32 i;
+    s32 drawX;
+    s32 drawY;
+    s32 rowOffset;
+    u16 *skill;
+    u16 skillId;
+    _FRQ *glyph;
+
+    prfBuildRawSkillList(profile, &list.list);
+
+    drawX = x + sprites[4].offset.x;
+    drawY = y + sprites[4].offset.y;
+    for (row = 3; row >= 0; row--) {
+        effDrawTextureSlotWithBlendedCornerColors(drawX, drawY, depth, fade, 1, panel->resourceSets[sprites[4].set],
+                                                  sprites[4].slot, surface);
+        drawY += 0xB0;
+    }
+    for (i = 0; i < 2; i++) {
+        effDrawTextureSlotWithBlendedCornerColors(x + sprites[i].offset.x, y + sprites[i].offset.y, depth, fade, 1,
+                                                  panel->resourceSets[sprites[i].set], sprites[i].slot, surface);
+    }
+    drawX = x + sprites[2].offset.x;
+    drawY = y + sprites[2].offset.y;
+    for (row = 2; row >= 0; row--) {
+        effDrawTextureSlotWithBlendedCornerColors(drawX, drawY, depth, fade, 1, panel->resourceSets[sprites[2].set],
+                                                  sprites[2].slot, surface);
+        drawY += 0xB0;
+    }
+    effDrawTextureSlotWithBlendedCornerColors(x + sprites[3].offset.x, y + sprites[3].offset.y, depth, fade, 1,
+                                              panel->resourceSets[sprites[3].set], sprites[3].slot, surface);
+
+    skill = list.list.skills;
+    rowOffset = 0;
+    for (row = 3; row >= 0; row--) {
+        skillId = *skill++;
+        if (skillId != 0) {
+            mnuDrawRangeSpriteVariant(x + rows[0].x, y + rows[0].y + rowOffset, depth, fade, skillId,
+                                      panel->resourceSets[1], surface);
+            glyph = itfCreateConvertedTextGlyph(x + rows[1].x, y + rows[1].y + rowOffset, depth, 0xA09DC380,
+                                                datSkillNames[skillId], NULL);
+            frFontDrawGlyphChain(glyph, 1, surface);
+            frDestroyFontRequestAfter(glyph);
+            mnuDrawRangeCostAndIcon(x + rows[2].x, y + rows[2].y + rowOffset, depth, 0x1F0, fade, actor, skillId, 0, 0,
+                                    panel->resourceSets[0], surface);
+        } else {
+            mnuDrawRepeatedPanelSprites(x + rows[3].x, y + rows[3].y + rowOffset, depth, fade, 8,
+                                        panel->resourceSets[0], 0x1B, surface);
+        }
+        rowOffset += 0xB0;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "game/code_002BE628", mnuDrawPartyProfilePanelContents);
+#endif
 
 
 void mnuResetGradientFadeColor(MenuGradientFade *state, s32 color) {
@@ -1658,7 +1858,53 @@ typedef struct _FRQ _FRQ;
 extern char D_00437C88[];
 extern _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, _FRQ *);
 extern s32 frFontDrawGlyphChain(_FRQ *, s8, u32);
+#ifdef NON_MATCHING
+#include "common.h"
+#include "sdk_ps2.h"
+#include "ui_color.h"
+#include "fr_font.h"
+#include "eff.h"
+#include "mnu.h"
+#include "fr_font_draw_glyph.h"
+
+typedef struct _FRQ _FRQ;
+extern _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, _FRQ *);
+extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
+/* The ratio panel's figures. A negative value draws nothing. With a total,
+ * draw its two marks (bar textures 5 and 6), the value in the faded color and
+ * the total in the half-faded grey; without one, one mark and the value. */
+void mnuDrawRatioPanelContents(s32 x, s32 y, s32 depth, u32 color, u32 fade,
+                  s32 value, s32 total, MenuPageBar *pair, u32 flags) {
+    char text[16];
+    u32 totalColor;
+    _FRQ *glyph;
+
+    color = fclBlendColor(color, color & ~0xFF, fade);
+    totalColor = fclBlendColor(0xA09DC380, 0xA09DC300, fade >> 1);
+    if (value >= 0) {
+        if (total >= 0) {
+            effDrawTextureSlotWithBlendedCornerColors(x + 0x950, y + 8, depth, fade, 1, pair->textures[5], 0, flags);
+            effDrawTextureSlotWithBlendedCornerColors(x + 0x6C0, y, depth, fade, 1, pair->textures[6], 0, flags);
+            sprintf(text, "%3d", value);
+            glyph = itfCreateFont2TextGlyph(x + 0x520, y, depth, color, text, NULL);
+            frFontDrawGlyphChain(glyph, 1, flags);
+            frDestroyFontRequestAfter(glyph);
+            sprintf(text, "%3d", total);
+            glyph = itfCreateFont2TextGlyph(x + 0x7A0, y, depth, totalColor, text, NULL);
+            frFontDrawGlyphChain(glyph, 1, flags);
+            frDestroyFontRequestAfter(glyph);
+        } else {
+            effDrawTextureSlotWithBlendedCornerColors(x + 0x6D0, y + 8, depth, fade, 1, pair->textures[5], 0, flags);
+            sprintf(text, "%3d", value);
+            glyph = itfCreateFont2TextGlyph(x + 0x520, y, depth, color, text, NULL);
+            frFontDrawGlyphChain(glyph, 1, flags);
+            frDestroyFontRequestAfter(glyph);
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "game/code_002BE628", mnuDrawRatioPanelContents);
+#endif
 
 extern void mnuDrawRatioPanelContents(s32, s32, s32, u32, u32, s32, s32, MenuPageBar *, u32);
 extern void mnuDrawAndSwapPageBarEffect(s32, s32, s32, u32, MenuPageBar *, u32);
@@ -1796,7 +2042,145 @@ void mnuFreePanelItemWork(MenuPanelItem *item) {
     sdfChipFreeDirect(item);
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "sdk_ps2.h"
+#include "ui_color.h"
+#include "fr_font.h"
+#include "fr_font_draw_glyph.h"
+#include "itf.h"
+#include "eff.h"
+#include "mnu.h"
+#include "mnu_panel_item.h"
+
+extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
+extern _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, _FRQ *);
+
+/* A stat panel item's meter. The value bar is cropped to value / max of the
+ * item's pixel span; a selected item adds its marker and a ramp sprite (fading
+ * out by 16 a frame with an option set, else cycling by 8). The candidate gain
+ * extends the bar up to the max, the bonus (2 per point plus 20) after it,
+ * with two sparkles sweeping the bonus bar, blinking, fading over their last
+ * 0xAA phase steps. A selected item ends with its selection number. Mode is
+ * unused, as in DDS1. */
+void mnuDrawPanelItemDetail(s32 x, s32 y, s32 depth, s32 opacity, s32 mode, MenuPanelItem *item, u32 layer) {
+    char text[16];
+    _FRQ *glyph;
+    EffectSlotSet *set;
+    s32 index;
+    s32 value;
+    s32 offset;
+    s32 gain;
+    s32 gainOffset = 0;
+    s32 total;
+    s32 bonus;
+    s32 barX;
+    s32 width;
+    s32 sparkle;
+    s32 t;
+    s32 blink;
+    s32 blinkScale = 0x40;
+    u32 color;
+
+    value = item->value18;
+    value += item->option;
+    offset = item->value10 * value / item->value14;
+    if (value != 0) {
+        set = item->spriteGridSlots[2].set;
+        index = item->spriteGridSlots[2].index;
+        set->descriptions[index].rect[2] = offset;
+        effDrawTextureSlotWithBlendedCornerColors(x + (offset << 4), y, depth, opacity, 0, set, index, layer);
+        effDrawTextureSlotWithBlendedCornerColors(x + (offset << 4), y, depth, opacity, 0, item->spriteGridSlots[4].set,
+                                                  item->spriteGridSlots[4].index, layer);
+    }
+    if (item->selection != 0) {
+        set = item->gridSlots[1].set;
+        index = item->gridSlots[1].index;
+        effDrawTextureSlotWithBlendedCornerColors(x + (offset << 4), y, depth, opacity, 0, set, index, layer);
+        if (item->selection != 0 && item->option != 0) {
+            set = item->gridSlots[2].set;
+            index = item->gridSlots[2].index;
+            if (item->selectionRamp != 0) {
+                effDrawTextureSlotWithBlendedCornerColors(x + (offset << 4), y, depth, item->selectionRamp, 0, set,
+                                                          index, layer);
+                if (item->selectionRamp > 0) {
+                    item->selectionRamp -= 16;
+                }
+                if (item->selectionRamp < 0) {
+                    item->selectionRamp = 0;
+                }
+            }
+        } else {
+            effDrawTextureSlotWithBlendedCornerColors(x + (offset << 4), y, depth, item->selectionRamp, 0, set, index,
+                                                      layer);
+            item->selectionRamp += 8;
+            if (item->selectionRamp > 512) {
+                item->selectionRamp -= 512;
+            }
+        }
+    }
+
+    gain = item->value24;
+    total = value + gain;
+    if (total > item->value14) {
+        gain = item->value14 - value;
+        total = value + gain;
+    }
+    if (gain != 0) {
+        gainOffset = item->value10 * gain / item->value14;
+        set = item->spriteGridSlots[3].set;
+        index = item->spriteGridSlots[3].index;
+        set->descriptions[index].rect[2] = gainOffset;
+        barX = x + ((offset + gainOffset) << 4);
+        effDrawTextureSlotWithBlendedCornerColors(barX, y, depth, opacity, 0, set, index, layer);
+        effDrawTextureSlotWithBlendedCornerColors(barX, y, depth, opacity, 0, item->spriteGridSlots[5].set,
+                                                  item->spriteGridSlots[5].index, layer);
+    }
+
+    if (item->value28 != 0) {
+        bonus = item->value28 * 2 + 20;
+    } else {
+        bonus = 0;
+    }
+    if (total + bonus > item->value14) {
+        bonus = item->value14 - total;
+    }
+    if (bonus != 0) {
+        set = item->spriteGridSlots[6].set;
+        index = item->spriteGridSlots[6].index;
+        width = (item->value10 * bonus / item->value14) << 4;
+        set->workEntries[index].geometry.bounds[2] = width;
+        barX = x + ((offset + gainOffset) << 4);
+        effDrawTextureSlotWithBlendedCornerColors(barX, y, depth, opacity, 0, set, index, layer);
+        for (sparkle = 0; sparkle < 2; sparkle++) {
+            t = (item->phase + (sparkle << 8)) % 0x200;
+            blink = (t << 8) / blinkScale % 0x200;
+            if (blink > 0x100) {
+                blink = 0x200 - blink;
+            }
+            if (t >= 0x156) {
+                blink = blink * (0x200 - t) / 0xAA;
+            }
+            effDrawTextureSlotWithBlendedCornerColors(barX + width * t / 0x200, y, depth, blink * opacity / 0x100, 0,
+                                                      item->spriteGridSlots[7].set, item->spriteGridSlots[7].index,
+                                                      layer);
+        }
+    }
+
+    if (item->selection != 0) {
+        effDrawTextureSlotWithBlendedCornerColors(x + ((offset + gainOffset - 8) << 4), y + 8, depth, opacity, 0,
+                                                  item->gridSlots[3].set, item->gridSlots[3].index, layer);
+        color = fclBlendColor(0xA09DC380, 0xA09DC300, opacity);
+        sprintf(text, "%d", item->selection);
+        glyph = itfCreateFont2TextGlyph(x + ((offset + gainOffset + 0x64) << 4), y, depth, color, text, NULL);
+        frSetFontColorNo(glyph, 3);
+        frFontDrawGlyphChain(glyph, 1, layer);
+        frDestroyFontRequestAfter(glyph);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "game/code_002BE628", mnuDrawPanelItemDetail);
+#endif
 
 extern void mnuDrawPanelItemDetail(s32, s32, s32, s32, s32, MenuPanelItem *, u32);
 
@@ -1892,7 +2276,159 @@ void mnuSetGroupProperties(MenuProfilePanel *panel, EffectSlotSet *panelSet,
     panel->particleIndex = particleIndex;
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "sdk_ps2.h"
+#include "eff.h"
+#include "eff_random.h"
+#include "mnu.h"
+#include "mnu_panel_sprite.h"
+
+extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
+extern void uiDrawActiveSurfaceWithTestMode(u32 context);
+extern void uiConfigureSurfaceAlphaState(s32 context);
+extern void uiDrawSurfaceAtNearDepth(u32);
+
+/* The profile progress panel. Its frame (sprites 2 and 3) always; when the
+ * profile is complete, the completed sprite (4) and nothing else. Otherwise
+ * the frame again additively, five particles that each cross their path once
+ * per 0x200 phase steps with a fresh random opacity, the fill bar (sprite 0)
+ * cropped to the percentage with its end cap (sprite 1) at the fill's edge,
+ * two rows of pulsing sparkles in opposite phase that show once the fill has
+ * reached them, the bar's glow cropped the same way, and the trail sprite
+ * sweeping along it. */
+void mnuDrawProfilePanel(s32 x, s32 y, s32 depth, MenuProfilePanel *panel, s32 surface) {
+    /* Fill bar, its end cap, frame back, frame front, completed sprite. */
+    MenuPanelSprite sprites[5] = {
+        { 0, 0xF, { 0x1E0, 0x38 } },
+        { 0, 0x10, { 0x1E0, 0x38 } },
+        { 0, 0x12, { 0, 0 } },
+        { 0, 0x13, { 0x980, 0 } },
+        { 0, 0x1C, { 0x460, 0x38 } },
+    };
+    /* The bar's glow; the trail (its slot comes from the panel). */
+    MenuPanelSprite glow[2] = {
+        { 0, 0x1B, { 0x200, 0x28 } },
+        { 1, 1, { 0x10, 0 } },
+    };
+    MenuPanelSprite dimSparkles[6] = {
+        { 0, 0x11, { 0x240, 0x68 } },
+        { 0, 0x11, { 0x410, 0x28 } },
+        { 0, 0x11, { 0x560, 0x60 } },
+        { 0, 0x11, { 0x730, 0x30 } },
+        { 0, 0x11, { 0x9E0, 0x38 } },
+        { 0, 0x11, { 0xAF0, 0x48 } },
+    };
+    MenuPanelSprite brightSparkles[7] = {
+        { 0, 0x11, { 0x280, 0x20 } },
+        { 0, 0x11, { 0x3D0, 0x70 } },
+        { 0, 0x11, { 0x510, 0x28 } },
+        { 0, 0x11, { 0x630, 0x78 } },
+        { 0, 0x11, { 0x810, 0x68 } },
+        { 0, 0x11, { 0x8F0, 0x38 } },
+        { 0, 0x11, { 0xA50, 0x70 } },
+    };
+    /* Particle paths (their slot comes from the panel). */
+    MenuPanelSpritePath paths[5] = {
+        { 1, 2, { -0x140, -0x128 }, { 0x4C0, 0x140 } },
+        { 1, 2, { 0x140, 0x130 }, { 0xA80, -0xF8 } },
+        { 1, 2, { 0xB80, 0x110 }, { 0x4B0, -0x108 } },
+        { 1, 2, { -0x230, 0x118 }, { 0x760, -0x128 } },
+        { 1, 2, { 0xDE0, -0x150 }, { 0x820, 0x130 } },
+    };
+    s32 opacity = panel->opacity;
+    s32 percent;
+    s32 travel;
+    s32 t;
+    s32 pulse;
+    s32 width;
+    s32 hidden;
+    s32 shown;
+    BdWork *bar;
+    u32 i;
+
+    percent = panel->option * 100 / panel->capValue;
+    effDrawTextureSlotWithBlendedCornerColors(x + sprites[2].offset.x, y + sprites[2].offset.y, depth, opacity, 0,
+                                              panel->sets[sprites[2].set], sprites[2].slot, surface);
+    effDrawTextureSlotWithBlendedCornerColors(x + sprites[3].offset.x, y + sprites[3].offset.y, depth, opacity, 0,
+                                              panel->sets[sprites[3].set], sprites[3].slot, surface);
+    if (panel->option == panel->capValue) {
+        effDrawTextureSlotWithBlendedCornerColors(x + sprites[4].offset.x, y + sprites[4].offset.y, depth, opacity, 0,
+                                                  panel->sets[sprites[4].set], sprites[4].slot, surface);
+        return;
+    }
+
+    uiDrawActiveSurfaceWithTestMode(surface);
+    effDrawTextureSlotWithBlendedCornerColors(x + sprites[2].offset.x, y + sprites[2].offset.y, depth, opacity, 0x60,
+                                              panel->sets[sprites[2].set], sprites[2].slot, surface);
+    effDrawTextureSlotWithBlendedCornerColors(x + sprites[3].offset.x, y + sprites[3].offset.y, depth, opacity, 0x60,
+                                              panel->sets[sprites[3].set], sprites[3].slot, surface);
+    uiConfigureSurfaceAlphaState(surface);
+    for (i = 0; i < 5; i++) {
+        travel = panel->phase + i * 0x80;
+        t = travel % 0x200;
+        if (t == 0) {
+            panel->randomOpacity[i] = dds3GetRandA(0) % 0xC0 + 0x40;
+        }
+        effDrawTextureSlotWithBlendedCornerColors(
+            x + (paths[i].from.x + (paths[i].to.x - paths[i].from.x) * t / 0x200),
+            y + (paths[i].from.y + (paths[i].to.y - paths[i].from.y) * t / 0x200), depth,
+            panel->randomOpacity[i] * opacity / 0x100, 0, panel->sets[paths[i].set], panel->particleIndex, surface);
+    }
+    uiDrawSurfaceAtNearDepth(surface);
+
+    bar = &panel->sets[sprites[0].set]->workEntries[sprites[0].slot];
+    width = bar->sourceWidth;
+    hidden = width - width * percent / 100;
+    shown = width - hidden;
+    bar->parameters[2] = -hidden;
+    bar->geometry.bounds[2] = shown << 4;
+    effDrawTextureSlotWithBlendedCornerColors(x + sprites[0].offset.x, y + sprites[0].offset.y, depth, opacity, 0,
+                                              panel->sets[sprites[0].set], sprites[0].slot, surface);
+    effDrawTextureSlotWithBlendedCornerColors(x + (sprites[1].offset.x + (shown << 4)), y + sprites[1].offset.y, depth,
+                                              opacity, 0, panel->sets[sprites[1].set], sprites[1].slot, surface);
+
+    t = panel->phase * 6 % 0x200;
+    pulse = t < 0x100 ? t : 0x200 - t;
+    if (pulse > opacity) {
+        pulse = opacity;
+    }
+    pulse /= 2;
+    for (i = 0; i < 6; i++) {
+        if (sprites[1].offset.x + (shown << 4) >= dimSparkles[i].offset.x) {
+            effDrawTextureSlotWithBlendedCornerColors(x + dimSparkles[i].offset.x, y + dimSparkles[i].offset.y, depth,
+                                                      pulse, 0, panel->sets[dimSparkles[i].set], dimSparkles[i].slot,
+                                                      surface);
+        }
+    }
+    t = (panel->phase * 6 + 0x100) % 0x200;
+    pulse = t < 0x100 ? t : 0x200 - t;
+    if (pulse > opacity) {
+        pulse = opacity;
+    }
+    for (i = 0; i < 7; i++) {
+        if (sprites[1].offset.x + (shown << 4) >= brightSparkles[i].offset.x) {
+            effDrawTextureSlotWithBlendedCornerColors(x + brightSparkles[i].offset.x, y + brightSparkles[i].offset.y,
+                                                      depth, pulse, 0, panel->sets[brightSparkles[i].set],
+                                                      brightSparkles[i].slot, surface);
+        }
+    }
+
+    uiDrawActiveSurfaceWithTestMode(surface);
+    bar = &panel->sets[glow[0].set]->workEntries[glow[0].slot];
+    bar->geometry.bounds[2] = shown << 4;
+    bar->parameters[2] = -hidden;
+    effDrawTextureSlotWithBlendedCornerColors(x + glow[0].offset.x, y + glow[0].offset.y, depth, opacity, 0x60,
+                                              panel->sets[glow[0].set], glow[0].slot, surface);
+    uiConfigureSurfaceAlphaState(surface);
+    t = panel->phase * 10 % 0x200;
+    effDrawTextureSlotWithBlendedCornerColors(x + (glow[1].offset.x + t * 8), y + glow[1].offset.y, depth, opacity, 0,
+                                              panel->sets[glow[1].set], panel->trailIndex, surface);
+    uiDrawSurfaceAtNearDepth(surface);
+}
+#else
 INCLUDE_ASM(const s32, "game/code_002BE628", mnuDrawProfilePanel);
+#endif
 extern void mnuDrawProfilePanel(s32, s32, s32, MenuProfilePanel *, s32);
 
 /* Draw first, then advance the native phase by one with a single period subtraction. */
@@ -3560,7 +4096,61 @@ void evtStageTestSelectEntryWithoutInitialValue(
         entryIndex, EVT_STAGE_USE_ENTRY_MOTION, assetRequestMode);
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "evt_stage_test.h"
+#include "mdl.h"
+#include "sdf_delayed_resource_check_api.h"
+
+extern StageTestState evtStageTestState;
+s32 evtStageTestRequestModelAsset(s32 resource, s32 modelId, s32 option);
+u32 mnuHasPendingBlockFlag(u32 *queueFlags);
+s32 mnuCommitPendingBlock(StageTestQueue *queue);
+extern void evtStageTestStop(void);
+extern void evtStageTestApplyInitialMotion(s32 initialMotionIndex);
+
+/* Advance the viewer's model request: 0 with nothing queued, 2 once the
+ * request phase is over, otherwise 1. Outside mode 1, once the pending sdf
+ * work has drained and the asset request reports ready, create the model
+ * context (its first update not yet run), then either promote a pending
+ * selection and keep requesting, or apply the entry's initial motion and mark
+ * setup complete. */
+s32 evtStageTestAdvanceResourceWork(void) {
+    StageTestSlot *slot = evtStageTestState.queue.slot;
+    s32 ready;
+
+    if (evtStageTestState.queue.flags == 0) {
+        return 0;
+    }
+    if (!(evtStageTestState.queue.flags & EVT_STAGE_QUEUE_REQUESTING)) {
+        return 2;
+    }
+    ready = 0;
+    if (evtStageTestState.mode != 1 && sdfDelayedResrcCheck() == 0
+        && evtStageTestRequestModelAsset(slot->assetResource, slot->modelId, slot->assetRequestMode) != 0
+        && evtStageTestRequestModelAsset(slot->assetResource, slot->modelId, slot->assetRequestMode) != -1) {
+        ready = 1;
+    }
+    if (ready) {
+        if (evtStageTestState.mode != 1) {
+            evtStageTestState.model = mdlLoad(slot->assetResource, slot->modelId);
+            evtStageTestState.modelUpdateStarted = 0;
+        }
+        if (mnuHasPendingBlockFlag(&evtStageTestState.queue.flags)) {
+            evtStageTestStop();
+            mnuCommitPendingBlock(&evtStageTestState.queue);
+            evtStageTestState.queue.flags |= EVT_STAGE_QUEUE_REQUESTING;
+            return 1;
+        }
+        evtStageTestApplyInitialMotion(slot->initialMotionIndex);
+        evtStageTestState.queue.flags =
+            (evtStageTestState.queue.flags & ~EVT_STAGE_QUEUE_REQUESTING) | EVT_STAGE_QUEUE_SETUP_COMPLETE;
+    }
+    return 1;
+}
+#else
 INCLUDE_ASM(const EvtStageTestResourceWorkResult, "game/code_002BE628", evtStageTestAdvanceResourceWork);
+#endif
 
 void evtStageTestApplyInitialMotion(s32 initialMotionIndex) {
     dds3ModelHandle_t *model = evtStageTestState.model;
