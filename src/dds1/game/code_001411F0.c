@@ -18,6 +18,7 @@
 #include "file_pac.h"
 #include "evt_world.h"
 #include "common.h"
+#include "fld_scene_selection_index.h"
 #include "fld_spatial_sound_id.h"
 #include "pty_status_query_api.h"
 #include "fld_camera_model_motion_api.h"
@@ -255,8 +256,6 @@ typedef char FldEnt110_encounterSelection_offset_must_be_0x0C[
     ((u32)&((FldEnt110 *)0)->encounterSelection == 0x0C) ? 1 : -1];
 
 extern FldEnt110 *D_003BAA48;
-
-extern s32 fldGetCurrentSceneSelectionId(void);
 
 typedef struct {
     s32 *unk0;
@@ -4624,7 +4623,7 @@ s32 fldFindEffectByName(const char *name) {
 }
 
 s32 fldGetCurrentSceneSelectionResource(void) {
-    s32 index = fldGetCurrentSceneSelectionId();
+    FldSceneSelectionIndex index = fldGetCurrentSceneSelectionId();
 
     if (index < 0) {
         return 0;

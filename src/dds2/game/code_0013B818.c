@@ -7,6 +7,7 @@
 #include "fld_scene_transition_gate_api.h"
 #include "fld_deferred_transition.h"
 #include "common.h"
+#include "fld_scene_selection_index.h"
 #include "fld_camera_link_mode.h"
 #include "fld_map_slot_auxiliary_flag_selector.h"
 #include "sdf_vu0.h"
@@ -1788,11 +1789,11 @@ s32 fldCheckEveRngEncount(void) {
     return 0;
 }
 
-s32 fldGetCurrentSceneSelectionId(void) {
+FldSceneSelectionIndex fldGetCurrentSceneSelectionId(void) {
     s32 index = gFldInf_HitIdx;
 
     if (index < 0) {
-        return -1;
+        return FLD_SCENE_SELECTION_INDEX_NONE;
     }
     return D_00444C68[index * 160];
 }

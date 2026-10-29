@@ -10,6 +10,7 @@
 #include "fld_marker_packet.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "fld_scene_selection_index.h"
 #include "fld_camera_link_mode.h"
 #include "fld_map_slot_auxiliary_flag_selector.h"
 #include "fld_camera_model_motion_request.h"
@@ -2137,11 +2138,11 @@ s32 fldCheckEveRngEncount(void) {
     return 0;
 }
 
-s32 fldGetCurrentSceneSelectionId(void) {
+FldSceneSelectionIndex fldGetCurrentSceneSelectionId(void) {
     s32 slot = gFldInf_HitIdx;
 
     if (slot < 0) {
-        return -1;
+        return FLD_SCENE_SELECTION_INDEX_NONE;
     }
     return D_003C9518[slot * 160];
 }

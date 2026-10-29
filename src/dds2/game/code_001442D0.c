@@ -21,6 +21,7 @@
 #include "evt_unit.h"
 #include "evt_unit_color_transition.h"
 #include "common.h"
+#include "fld_scene_selection_index.h"
 #include "fld_spatial_sound_id.h"
 #include "pty_status_query_api.h"
 #include "fld_camera_model_motion_api.h"
@@ -396,8 +397,6 @@ extern void sdfDrawSync(void);
 
 extern void fldReleaseSceneDevSlotsAndTextures(void);
 
-
-extern s32 fldGetCurrentSceneSelectionId(void);
 
 typedef struct {
     s32 *resource;
@@ -5103,7 +5102,7 @@ s32 fldFindEffectByName(const char *name) {
 }
 
 s32 fldGetCurrentSceneSelectionResource(void) {
-    s32 index = fldGetCurrentSceneSelectionId();
+    FldSceneSelectionIndex index = fldGetCurrentSceneSelectionId();
     if (index >= 0) {
         return D_0044FFB0[index].resource[1];
     }
