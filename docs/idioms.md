@@ -15985,3 +15985,36 @@ all 1532 DDS1 bytes without initializer permutations, alternate views or extra
 writes, and preserves the exact DDS2 donor and both complete owners. Keep the
 DDS1 resolver's interleaved floating-argument declaration when transferring the
 body; independent EE integer/float banks can hide a C declaration-order mismatch.
+
+## DDS2 staff scroll panel: preserve field addresses and the completion threshold
+
+`mnuDrawStaffScrollPanel` (`002BB510`, 832 bytes) retains the addresses of the
+sliding tab's resource and index (`MenuScrollPanel +0x1C/+0x20`), then reads
+through them separately for both fade draws. Native address definitions are
+`002BB600/608`; neither the C nor native caches the field values across those
+calls. The corresponding first-sprite and retract addresses (`+8/+4`) are
+formed at `002BB678/6B8` and read after the intervening callbacks. Typed field
+pointers express these real address lifetimes without fake reads, qualifiers,
+register bindings or compiler constraints.
+
+The final frame (181) minus the fade duration (32) gives the fade-in boundary
+149, also used when skipping the inactive middle interval. This is the actual
+animation interval relationship, not an identity introduced to shape code.
+The later drawing phase retains a translated X local and reuses Y for its
+translated coordinate; the original Y has no remaining consumer.
+
+Preserve the observed completion test: this DDS2 routine counts at most one
+completed active grid but compares that count with two (`002BB754..788`).
+The matched DDS1 sibling in `code_0027BF00.c` counts two active grids and tests
+against its final loop index. That corroborates, but does not prove, a carried
+over two-grid threshold. Do not repair the unreachable clear or invent another
+grid. Naming the real expected count `requiredCompletions` preserves the test
+and its native allocation. Qualified ee-gcc 2.96 whole-owner traces show the
+initialized threshold as pseudo100 (definition insn33, comparison insn576),
+versus a late anonymous constant pseudo203 (definition574, comparison575) in
+the literal-only control. Ordinary and probed assembly agree except `.file`.
+This is an allocation reconstruction, not a claim about original spelling.
+
+The owned 32-byte offset initializer replaces `D_0042AFB8`'s separate assembly
+owner. The complete DDS2 owner, including its data, verifies 119 matches and
+zero differences; the unchanged 532-byte DDS1 sibling also verifies exact.
