@@ -776,7 +776,79 @@ void mnuDrawMantraCostIconOffset(u32 unusedX, u32 unusedY, u32 depth, u32 record
 }
 
 extern s32 mnuDrawMantraSelectionTransitionNode(s32 x, s32 y, s32 depth, MantraDisplayNode *node, s32 nodeIndex, s32 drawArg);
+#ifdef NON_MATCHING
+#include "sdf_trig.h"
+#include "mnu_mantra_draw.h"
+
+extern void mnuDrawMantraSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+                                s32 flags, s32 context);
+extern void mnuDrawMantraCostBadge(s32 x, s32 y, s32 depth, u8 *record, s32 amount, s32 drawArg);
+extern void mnuDrawMantraCostIcon(u32 unusedX, u32 unusedY, u32 depth, u32 recordAddress,
+                                  u32 amount, u32 drawArg);
+
+/* One queued change of the selected cost entry (kind 1: previous, 2: next).
+ * Frames 0..6 fade the new entry's badge and icon in (frame / 6 of full
+ * alpha) while its direction arrow (sprite 0x27 or 0x29) slides 16 units into
+ * place and brightens from 32 to 128; the last queued node then holds the
+ * entry at full alpha. Frames 4..8 flash the direction marker (0x26 or 0x28)
+ * over half a sine wave. Each call counts a frame; the node is done (1) once
+ * it was drawn at frame 11. */
+s32 mnuDrawMantraSelectionTransitionNode(s32 x, s32 y, s32 depth, MantraDisplayNode *node, s32 nodeIndex, s32 drawArg) {
+    s32 frame = node->frame;
+    s32 fade;
+    f32 ratio;
+    f32 wave;
+
+    if (frame < 7) {
+        ratio = (f32)frame / 6.0f;
+        if (ratio > 1.0f) {
+            ratio = 1.0f;
+        }
+        fade = (s32)(ratio * 128.0f);
+        mnuDrawMantraCostBadge(x, y, depth, (u8 *)node->toValue, fade, drawArg);
+        if (node->transitionKind == 1) {
+            mnuDrawMantraCostIcon(x, y, depth, node->toValue, fade, drawArg);
+        } else if (node->transitionKind == 2) {
+            mnuDrawMantraCostIcon(x, y, depth, node->toValue, fade, drawArg);
+        }
+    }
+    if (node->next == NULL && frame >= 7) {
+        mnuDrawMantraCostBadge(x, y, depth, (u8 *)node->toValue, 0x80, drawArg);
+        if (node->transitionKind == 1) {
+            mnuDrawMantraCostIcon(x, y, depth, node->toValue, 0x80, drawArg);
+        } else if (node->transitionKind == 2) {
+            mnuDrawMantraCostIcon(x, y, depth, node->toValue, 0x80, drawArg);
+        }
+    }
+    if (frame < 7) {
+        ratio = (f32)frame / 6.0f;
+        if (node->transitionKind == 1) {
+            mnuDrawMantraSprite((s32)((f32)(x + 16) - ratio * 16.0f), y, depth,
+                                (s32)(ratio * 96.0f + 32.0f), 0x27, 0, drawArg);
+        } else if (node->transitionKind == 2) {
+            mnuDrawMantraSprite((s32)((f32)(x - 16) + ratio * 16.0f), y, depth,
+                                (s32)(ratio * 96.0f + 32.0f), 0x29, 0, drawArg);
+        }
+    }
+    if (frame >= 4) {
+        if (frame < 9) {
+            wave = sdfSin((f32)(frame - 3) / 6.0f * 3.14159265f);
+            if (node->transitionKind == 1) {
+                mnuDrawMantraSprite(x, y, depth, (s32)(wave * 128.0f), 0x26, 0, drawArg);
+            } else if (node->transitionKind == 2) {
+                mnuDrawMantraSprite(x, y, depth, (s32)(wave * 128.0f), 0x28, 0, drawArg);
+            }
+        }
+    }
+    node->frame++;
+    if (frame < 11) {
+        return 0;
+    }
+    return 1;
+}
+#else
 INCLUDE_ASM(const s32, "game/code_0026DBF8", mnuDrawMantraSelectionTransitionNode);
+#endif
 
 MantraDisplayNode *mnuAllocateDisplayListNode(void) {
     MantraDisplayNode *node = (MantraDisplayNode *)sdfChipAllocDirect(sizeof(MantraDisplayNode));
@@ -2726,7 +2798,101 @@ MnuMantraDrawUpdateResult mnuUpdateMantraUnitPanelFade(struct MantraDrawPool *po
     return MNU_MANTRA_DRAW_UPDATE_CONTINUE;
 }
 
+#ifdef NON_MATCHING
+#include "sdf_trig.h"
+#include "mnu_mantra_draw.h"
+
+extern void mnuDrawMantraSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex,
+                                s32 flags, s32 context);
+extern s32 mnuDrawMantraSelectionListAndCost(s32 x, s32 y, s32 depth, MantraListState *state, s32 amount, s32 drawArg);
+
+/* The unit panel: the selection list and cost, then the status icon of the
+ * lamp's status (1..5: sprites 0x47, 0x48, 0x4A, 0x49, 0x4B). Opening, it
+ * slides in from 64 units right after frame 14 and fades in over frames
+ * 16..20; the alpha follows the lamp's fade and, while its hold countdown
+ * runs, that countdown over 5. */
+s32 mnuDrawMantraUnitPanel(struct MantraDrawPool *unused, MantraDrawItem *item) {
+    MantraLampState *lamp = item->data;
+    s32 sprite = 0;
+    f32 visibility;
+    f32 position;
+    f32 opacity;
+    s32 alpha;
+    s32 clock;
+    s32 duration;
+
+    if (lamp->reverse) {
+        visibility = (f32)lamp->countdown / 5.0f;
+    } else {
+        visibility = 1.0f;
+    }
+    alpha = (s32)(lamp->value * 128.0f * visibility);
+    switch (lamp->state) {
+    case 1:
+    case 6:
+        clock = lamp->timer - 14;
+        duration = 6;
+        position = 0.0f;
+        if (clock > 0) {
+            if (clock < duration) position = (f32)clock / (f32)duration;
+            else position = 1.0f;
+        }
+        clock -= 2;
+        duration = 4;
+        opacity = 0.0f;
+        if (clock > 0) {
+            if (clock < duration) opacity = (f32)clock / (f32)duration;
+            else opacity = 1.0f;
+        }
+        alpha = (s32)((f32)alpha * (sdfSin(-1.5707963f - opacity * 1.5707963f) + 1.0f));
+        mnuDrawMantraSelectionListAndCost((s32)((1.0f - position) * 64.0f), 0, 0, &lamp->list, alpha, 0x53);
+        switch (lamp->status) {
+        case 4: sprite = 0x49; break;
+        case 3: sprite = 0x4A; break;
+        case 1: sprite = 0x47; break;
+        case 2: sprite = 0x48; break;
+        case 5: sprite = 0x4B; break;
+        case 0: sprite = 0; break;
+        }
+        if (sprite != 0) {
+            mnuDrawMantraSprite(0, 0, 0, alpha, sprite, 0, 0x53);
+        }
+        break;
+    case 2:
+        mnuDrawMantraSelectionListAndCost(0, 0, 0, &lamp->list, alpha, 0x53);
+        switch (lamp->status) {
+        case 4: sprite = 0x49; break;
+        case 3: sprite = 0x4A; break;
+        case 1: sprite = 0x47; break;
+        case 2: sprite = 0x48; break;
+        case 5: sprite = 0x4B; break;
+        case 0: sprite = 0; break;
+        }
+        if (sprite != 0) {
+            mnuDrawMantraSprite(0, 0, 0, alpha, sprite, 0, 0x53);
+        }
+        break;
+    case 3:
+    case 5:
+        mnuDrawMantraSelectionListAndCost(0, 0, 0, &lamp->list, alpha, 0x53);
+        switch (lamp->status) {
+        case 4: sprite = 0x49; break;
+        case 3: sprite = 0x4A; break;
+        case 1: sprite = 0x47; break;
+        case 2: sprite = 0x48; break;
+        case 5: sprite = 0x4B; break;
+        case 0: sprite = 0; break;
+        }
+        if (sprite != 0) {
+            mnuDrawMantraSprite(0, 0, 0, alpha, sprite, 0, 0x53);
+        }
+        break;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "game/code_0026DBF8", mnuDrawMantraUnitPanel);
+#endif
 
 MantraDrawItem *mnuRegisterMantraTypeOnePanelDraw(MantraDrawPool *pool) {
     return mnuRegisterMantraDrawItem(pool, 10, mnuUpdateMantraRecordPanelFade, mnuDrawMantraRecordPanel,
