@@ -9,6 +9,10 @@
 #include "sdf_resource.h"
 #include "mnu.h"
 #include "mnu_list.h"
+
+typedef s32 MnuOtherPanelSelectorIndex;
+#define MNU_OTHER_PANEL_SELECTOR_INDEX_NOT_FOUND (-1)
+
 /* Declared before first use (were implicit int). */
 extern void mnuDrawMantraSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 flags, s32 context);
 extern void mnuTransitionActivePanelAnimations(MantraPanelPool *pool, s32 mode);
@@ -1971,7 +1975,7 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
 
 extern void mnuSetMantraInfoDrawPosition(struct MantraDrawPool *pool, s16 x, u16 y);
 extern void mnuSetMantraUnitPanelValue(struct MantraDrawPool *pool, s16 value);
-s32 mnuFindOtherPanelSelectorForScriptId(MnuStatusResource *object, u16 id);
+MnuOtherPanelSelectorIndex mnuFindOtherPanelSelectorForScriptId(MnuStatusResource *object, u16 id);
 
 /* The tutorial map's panels: point the info panel at the selected node (style
  * 1 for an unconfirmed kind-2 node, else 3 or 2 by its panel record's flag 2),
@@ -2013,7 +2017,10 @@ s32 mnuUpdateMantraTutorialPanelStatus(MnuStatusResource *object) {
             if ((bits & 15) != 3 && node->kind < 5 && node->kind > 0) {
                 status = 3;
                 if (!((bits >> 8) & 1)) {
-                    status = (mnuFindOtherPanelSelectorForScriptId(object, node->id) != -1) ? 5 : 0;
+                    status = (mnuFindOtherPanelSelectorForScriptId(object, node->id) !=
+                              MNU_OTHER_PANEL_SELECTOR_INDEX_NOT_FOUND)
+                                 ? 5
+                                 : 0;
                 }
             }
         }
@@ -2035,11 +2042,13 @@ s32 mnuUpdateMantraTutorialPanelStatus(MnuStatusResource *object) {
 INCLUDE_ASM(const s32, "game/code_0028FD30", mnuUpdateMantraTutorialPanelStatus);
 #endif
 
-s32 mnuFindOtherPanelSelectorForScriptId(MnuStatusResource *object, u16 id) {
+/* Returns the first non-active selector whose script record has flags bit 0
+ * set, or NOT_FOUND if neither other selector does. */
+MnuOtherPanelSelectorIndex mnuFindOtherPanelSelectorForScriptId(MnuStatusResource *object, u16 id) {
     MantraMenuWork *state = &object->menu;
     const MenuPanelPositionRecord *record;
-    s32 selector;
-    s32 result = -1;
+    MnuOtherPanelSelectorIndex selector;
+    MnuOtherPanelSelectorIndex result = MNU_OTHER_PANEL_SELECTOR_INDEX_NOT_FOUND;
 
     for (selector = 0; selector < 3; selector++) {
         if (((state->flags >> 24) & 0xF) == selector) {
@@ -2134,7 +2143,8 @@ void mnuUpdateMantraTutorialPanelSprites(MnuStatusResource *object) {
                     if (headerFlags & 1) {
                         mnuDrawMantraSprite(x, y, 0, fade, 0x105, 0, 0x52);
                     } else if (mnuFindOtherPanelSelectorForScriptId(
-                                   object, (u16)position->id) != -1) {
+                                   object, (u16)position->id) !=
+                               MNU_OTHER_PANEL_SELECTOR_INDEX_NOT_FOUND) {
                         mnuDrawMantraSprite(x, y, 0, fade, 0x106, 0, 0x52);
                     } else {
                         mnuDrawMantraSprite(x, y, 0, fade, 0x107, 0, 0x52);
