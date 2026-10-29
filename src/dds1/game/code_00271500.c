@@ -147,7 +147,74 @@ s64 mnuReleaseStaffResourceSlotGroups(StaffMenuWork *menu) {
     return (s32)effDestroyResourceSlotSet(menu->singleResource);
 }
 
+#ifdef NON_MATCHING
+#include "mnu_input.h"
+#include "eff_resource_slots.h"
+#include "eff_resource_records.h"
+#include "eff_resource_list.h"
+#include "common.h"
+#include "fr_font.h"
+#include "itf_draw_grid.h"
+#include "mnu_staff.h"
+#include "kwln.h"
+#include "sdf_resource.h"
+#include "dat_state.h"
+#include "mnu.h"
+#include "eff.h"
+#include "mnu_shop.h"
+#include "mnu_camp_work.h"
+#include "mnu_list.h"
+#include "kwln_task_lifecycle.h"
+#include "mdl_flag_api.h"
+extern void mnuCreateStaffPanelSet(StaffMenuWork *menu);
+extern void mnuInitializeStaffPageWindows(MenuPageWindow *container, StaffSlots *resources, u32 unused, PartyPanel *partyPanel);
+
+/* Each frame until it is done, wait for the camp menu's staff slots and its
+ * category, party model and single resources, then build its panels, scroll
+ * panel and staff page windows once. Upstream: INCLUDE_ASM in
+ * game/code_00271500; written from the retail routine. Its instructions equal
+ * retail's apart from register allocation and scheduling. */
+s32 mnuInitializeCampMenuWhenResourcesReady(dds3ProcessID_t *task) {
+    StaffMenuWork *menu = (StaffMenuWork *)dds3GetProcessData(task);
+    struct EffectList *queue = menu->resourceQueue;
+    s32 i;
+
+    if (menu->panelsBuilt != 0) {
+        return 1;
+    }
+    if (!mnuStaffSlotsAllFilled(queue, &menu->staffSlots)) {
+        return 0;
+    }
+    for (i = 0; i < 2; i++) {
+        if (menu->categoryPair[i] == NULL) {
+            return 0;
+        }
+    }
+    for (i = 0; i < 4; i++) {
+        if (menu->categoryGroup[i] == NULL) {
+            return 0;
+        }
+    }
+    for (i = 0; i < 9; i++) {
+        if (menu->partyModels[i] == NULL) {
+            return 0;
+        }
+    }
+    if (menu->singleResource == NULL) {
+        return 0;
+    }
+    menu->panelsBuilt = 1;
+    mnuCreateStaffPanelSet(menu);
+    menu->scrollPanel = mnuCreateScrollPanel((u32)menu->staffSlots.baseResources[1], 0,
+                                             (u32)menu->staffSlots.baseResources[2], 0);
+    mnuActivatePanelAndConfigureGridResources(menu->scrollPanel, menu->staffSlots.baseResources[3], 0, 1);
+    mnuInitializeStaffPageWindows((MenuPageWindow *)(menu->background + 0x20), &menu->staffSlots,
+                                  (u32)menu->secondaryImage, &menu->partyPanel);
+    return 1;
+}
+#else
 INCLUDE_ASM(const s32, "game/code_00271500", mnuInitializeCampMenuWhenResourcesReady);
+#endif
 
 void func_00271B40(void) {
 }
