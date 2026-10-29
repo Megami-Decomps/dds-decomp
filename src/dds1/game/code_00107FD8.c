@@ -107,7 +107,7 @@ enum {
 
 extern sdfDevConsCB_tag *evtConsoleFontResourceChain;
 
-extern s32 fldLmapTaskExists(void);
+extern u8 fldLmapTaskExists(void);
 
 extern FldTerminalScenePollResult fldPollSceneState(void);
 
@@ -1575,7 +1575,7 @@ u32 evtDestroyLmapTask(void) {
 }
 
 u8 evtWaitLmapTaskGone(void) {
-    s32 taskPresence;
+    u8 taskPresence;
 
     taskPresence = fldLmapTaskExists();
     return taskPresence == FLD_LOCAL_MAP_TASK_ABSENT;
