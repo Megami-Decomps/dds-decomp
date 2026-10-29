@@ -73,7 +73,71 @@ MnuPartyRowDrawState mnuGetPanelWindowTransitionState(MenuPageWindow *window, s3
     }
     return MNU_PARTY_ROW_DRAW_STATE_NONE;
 }
+#ifdef NON_MATCHING
+#include "common.h"
+#include "ui_color.h"
+#include "dat_state.h"
+#include "eff.h"
+#include "mnu.h"
+
+s32 mnuGetPanelWindowTransitionState(MenuPageWindow *window, s32 row);
+extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
+extern void uiDrawSurfaceAtNearDepth(u32);
+/* A party row's status marks, from the window's alternate sprite set: two
+ * marks for a frontline member, one for a reserve, each piece's slot taken
+ * from the row of the table for `status` (0 idle, 1 and 2 the two queued
+ * command kinds). They are drawn when the row is the active selection or
+ * a command is running. A running command shows them at its phase, capped
+ * at 0x100; idle marks pulse at half the window's fade plus 0x80. While the
+ * phase is above 0x100, the command's pieces' saved colors are blended
+ * toward the idle pieces', but retail discards every blend. */
+void mnuDrawPartyStatusValuePanel(s32 x, s32 y, s32 depth, MenuPageWindow *window, s32 row,
+                                  s32 status, s32 fade, s32 surface) {
+    s32 slots[3][3] = {
+        { 0x2E, 0x2F, 0x30 },
+        { 0x31, 0x32, 0x33 },
+        { 0x36, 0x37, 0x38 },
+    };
+    datUnitWork_t *party = &DDS3_GBWK->party[window->records->slots[row].index];
+    s32 alpha;
+    s32 piece;
+    s32 corner;
+
+    switch (status) {
+    case 1:
+    case 2:
+        alpha = fade;
+        if (fade > 0x100) {
+            for (piece = 0; piece < 3; piece++) {
+                for (corner = 0; corner < 4; corner++) {
+                    fclBlendColor(window->alternateResource->workEntries[slots[0][piece]].savedColors[corner],
+                                  window->alternateResource->workEntries[slots[status][piece]].savedColors[corner],
+                                  0x200 - fade);
+                }
+            }
+            alpha = 0x100;
+        }
+        break;
+    default:
+        alpha = fade / 2 + 0x80;
+        break;
+    }
+    if (mnuGetPanelWindowTransitionState(window, row) == 1 || status != 0) {
+        if (party->flags & DAT_PARTY_FLAG_FRONTLINE) {
+            effDrawTextureSlotWithBlendedCornerColors(x + 0x70, y + 0x268, depth, alpha, 1,
+                                                      window->alternateResource, slots[status][0], surface);
+            effDrawTextureSlotWithBlendedCornerColors(x + 0x450, y + 0x108, depth, alpha, 1,
+                                                      window->alternateResource, slots[status][1], surface);
+        } else {
+            effDrawTextureSlotWithBlendedCornerColors(x + 0x1C0, y + 0x58, depth, alpha, 1,
+                                                      window->alternateResource, slots[status][2], surface);
+        }
+    }
+    uiDrawSurfaceAtNearDepth(surface);
+}
+#else
 INCLUDE_ASM(const s32, "game/code_002BD5C8", mnuDrawPartyStatusValuePanel);
+#endif
 
 s32 mnuClearWindowPendingFlagAfterSelection(s32 unusedX, s32 unusedY, s32 unusedDepth,
                                             MenuPageWindow *window, s32 panelIndex) {
