@@ -4070,15 +4070,15 @@ void fldDrawLocationPanel(void) {
         return;
     }
     switch (fldGlobalBase.overlayMode) {
-    case 0:
-    case 2:
-    case 4:
-    case 6:
+    case FLD_SOLAR_OVERLAY_MODE_HIDE_MOON:
+    case FLD_SOLAR_OVERLAY_MODE_MOON_FADE_OUT:
+    case FLD_SOLAR_OVERLAY_MODE_PANEL_HIDDEN:
+    case FLD_SOLAR_OVERLAY_MODE_PANEL_FADE_OUT:
         break;
-    case 1:
-    case 3:
-    case 5:
-    case 7:
+    case FLD_SOLAR_OVERLAY_MODE_SHOW_MOON:
+    case FLD_SOLAR_OVERLAY_MODE_MOON_FADE_IN:
+    case FLD_SOLAR_OVERLAY_MODE_PANEL_VISIBLE:
+    case FLD_SOLAR_OVERLAY_MODE_PANEL_FADE_IN:
         rsetOtOfs(0x53);
         rsetAlpha(0);
         rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);

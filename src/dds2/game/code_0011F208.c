@@ -1691,7 +1691,7 @@ void fldResetFieldRuntimeState(FldRuntimeResetMode mode) {
     area->unk98 = -1;
     area->primaryMapLabelSelection = -1;
     area->secondaryMapLabelSelection = -1;
-    area->overlayMode = 1;
+    area->overlayMode = FLD_SOLAR_OVERLAY_MODE_SHOW_MOON;
     area->overlayCounter = 0;
     area->mapBannerFadeMode = 1;
     area->unkD8 = -1;
@@ -1835,7 +1835,7 @@ void fldInitializeAreaWork(void) {
     area->unkA4 = -1;
     area->overrideSupportRecordIndex = -1;
     area->unkAC = -1;
-    area->overlayMode = 1;
+    area->overlayMode = FLD_SOLAR_OVERLAY_MODE_SHOW_MOON;
     area->overlayCounter = 0;
     area->unkD8 = -1;
     area->terrainAttritionKind = FLD_TERRAIN_ATTRITION_NONE;

@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "fld_encounter_runtime_api.h"
+#include "fld_solar_overlay_mode.h"
 #include "fld_scene_timing_state.h"
 
 struct sdfTexHandle_t;
@@ -147,7 +148,7 @@ typedef struct FldAreaWork {
     s32 flagStage;                /* 0xC0: one-based stage associated with the current floor flag. */
     s32 primaryMapLabelSelection;   /* -1 means no primary label selection. */
     s32 secondaryMapLabelSelection; /* -1 means no secondary label selection. */
-    s32 overlayMode;
+    FldSolarOverlayMode overlayMode;
     s32 overlayCounter;
     s32 mapBannerFadeMode;
     s32 unkD8;

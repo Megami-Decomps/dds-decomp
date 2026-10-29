@@ -2279,14 +2279,14 @@ KwlnTaskUpdateResult fldProcSequence(dds3ProcessID_t *task) {
     case 6:
         if (fldGlobalBase.overlayCounter > 0) fldGlobalBase.overlayCounter--;
         break;
-    case 3:
-    case 7:
+    case FLD_SOLAR_OVERLAY_MODE_MOON_FADE_IN:
+    case FLD_SOLAR_OVERLAY_MODE_PANEL_FADE_IN:
         if (fldGlobalBase.overlayCounter < 15) fldGlobalBase.overlayCounter++;
         break;
-    case 0:
-    case 1:
-    case 4:
-    case 5:
+    case FLD_SOLAR_OVERLAY_MODE_HIDE_MOON:
+    case FLD_SOLAR_OVERLAY_MODE_SHOW_MOON:
+    case FLD_SOLAR_OVERLAY_MODE_PANEL_HIDDEN:
+    case FLD_SOLAR_OVERLAY_MODE_PANEL_VISIBLE:
     default:
         break;
     }

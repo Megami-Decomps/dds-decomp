@@ -497,34 +497,34 @@ extern void evtDisableMoonDraw2(void);
 extern void evtEnableMoonDraw2(void);
 
 s32 fldCmdSetSolarOverlayMode(void) {
-    s32 mode = scrGetIntPara(0);
+    FldSolarOverlayMode mode = scrGetIntPara(0);
 
     fldGlobalBase.overlayMode = mode;
     fldGlobalBase.overlayCounter = 0;
-    if (mode < 4) {
+    if (mode < FLD_SOLAR_OVERLAY_MODE_PANEL_HIDDEN) {
         fldGlobalBase.mapBannerFadeMode = mode;
     }
     switch (fldGlobalBase.overlayMode) {
-    case 0:
+    case FLD_SOLAR_OVERLAY_MODE_HIDE_MOON:
         evtDisableMoonDraw();
         break;
-    case 1:
+    case FLD_SOLAR_OVERLAY_MODE_SHOW_MOON:
         evtSetSolarOverlayFullyVisible();
         fldGlobalBase.unk138 = 1;
         break;
-    case 2:
+    case FLD_SOLAR_OVERLAY_MODE_MOON_FADE_OUT:
         evtDisableMoonDraw2();
         fldGlobalBase.overlayCounter = 0xF;
         break;
-    case 3:
+    case FLD_SOLAR_OVERLAY_MODE_MOON_FADE_IN:
         evtEnableMoonDraw2();
         fldGlobalBase.overlayCounter = 0;
         fldGlobalBase.unk138 = 1;
         break;
-    case 4:
-    case 5:
-    case 6:
-    case 7:
+    case FLD_SOLAR_OVERLAY_MODE_PANEL_HIDDEN:
+    case FLD_SOLAR_OVERLAY_MODE_PANEL_VISIBLE:
+    case FLD_SOLAR_OVERLAY_MODE_PANEL_FADE_OUT:
+    case FLD_SOLAR_OVERLAY_MODE_PANEL_FADE_IN:
         break;
     }
     return 1;
