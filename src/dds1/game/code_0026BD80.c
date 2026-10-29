@@ -537,7 +537,9 @@ void dds3TitleClearFade(void) {
     state->cursor = 0;
 }
 
-s32 mnuPollMovieMenuInputAndTimeout(void) {
+#include "mnu_movie_menu_poll_result.h"
+
+MnuMovieMenuPollResult mnuPollMovieMenuInputAndTimeout(void) {
     MovieMenuState *state = mnuMovieMenuState;
     switch (state->transitionMode) {
     case 0:
@@ -549,10 +551,10 @@ s32 mnuPollMovieMenuInputAndTimeout(void) {
                 opening->transitionMode = 1;
                 opening->cursor = 0;
             }
-            return 0;
+            return MNU_MOVIE_MENU_POLL_WAITING;
         }
         p2sdPlaySE(8, 127, 63);
-        return 1;
+        return MNU_MOVIE_MENU_POLL_ADVANCE;
     case 1:
         if (state->cursor < 90) {
             state->cursor++;
@@ -561,24 +563,24 @@ s32 mnuPollMovieMenuInputAndTimeout(void) {
         }
         if (mnuIsAnyMenuInputPressed() != 0) {
             p2sdPlaySE(8, 127, 63);
-            return 1;
+            return MNU_MOVIE_MENU_POLL_ADVANCE;
         }
         state = mnuMovieMenuState;
         state->idleTicks++;
         if (state->idleTicks >= 601) {
             state->idleTicks = 0;
-            return -1;
+            return MNU_MOVIE_MENU_POLL_IDLE_TIMEOUT;
         }
         break;
     case 2:
         if (state->cursor < 0) {
             state->cursor++;
         } else {
-            return 1;
+            return MNU_MOVIE_MENU_POLL_ADVANCE;
         }
         break;
     }
-    return 0;
+    return MNU_MOVIE_MENU_POLL_WAITING;
 }
 
 INCLUDE_RODATA(const s32, "game/code_0026BD80", D_003AFE40);

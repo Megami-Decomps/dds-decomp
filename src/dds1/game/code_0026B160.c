@@ -64,7 +64,7 @@ extern void mnuSwapStateWords(void);
 extern s32 mnuAdvanceMovieMenuOpeningAnimation(void);
 extern void mnuResetMovieMenuStateAndStartTrack(void);
 extern void mnuAdvanceMovieMenuIdleAnimation(void);
-extern s32 mnuPollMovieMenuInputAndTimeout(void);
+#include "mnu_movie_menu_poll_result.h"
 extern void mnuDrawMovieMenuBackdrop(void);
 extern void mnuSelectMenuListCursorByAdvance(s32 amount);
 extern void mnuTitleResetSequenceTimers(void);
@@ -83,7 +83,7 @@ extern void dds3FadeClear(void);
 
 KwlnTaskUpdateResult mnuUpdateMovieMenuTask(dds3ProcessID_t *task) {
     s32 alpha;
-    s32 menuAction;
+    MnuMovieMenuPollResult menuAction;
     MnuMovieMenuSelectionIndex selectedItem;
 
     /* The byte at 0x3C records an input interruption of the movie. */
@@ -350,8 +350,8 @@ KwlnTaskUpdateResult mnuUpdateMovieMenuTask(dds3ProcessID_t *task) {
         mnuUpdateMovieMenuEffects();
         mnuAdvanceMovieMenuIdleAnimation();
         menuAction = mnuPollMovieMenuInputAndTimeout();
-        if (menuAction != -1) {
-            if (menuAction != 1) {
+        if (menuAction != MNU_MOVIE_MENU_POLL_IDLE_TIMEOUT) {
+            if (menuAction != MNU_MOVIE_MENU_POLL_ADVANCE) {
                 mnuDrawMovieMenuBackdrop();
             } else {
                 mnuSelectMenuListCursorByAdvance(0);

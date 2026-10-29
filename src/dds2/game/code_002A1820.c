@@ -905,7 +905,7 @@ extern void mnuDrawMovieMenuSpriteSlot20(u32);
 extern void mnuDrawMovieMenuSpriteSlot21(u32);
 extern u8 mnuGetMoviePlaybackMode(void);
 extern void mnuClearGlobalMenuStateFields(void);
-extern s32 mnuPollMovieMenuInputAndTimeout(void);
+#include "mnu_movie_menu_poll_result.h"
 extern void mnuUpdateTitlePageByMode(void);
 extern void mnuTitleResetSequenceTimers(void);
 extern void mnuDrawTitleSceneForPhase(void);
@@ -932,7 +932,7 @@ extern void fileRestoreSlotFlagsToState(void);
 
 KwlnTaskUpdateResult mnuUpdateTitleMenuTask(dds3ProcessID_t *task) {
     s32 volume;
-    s32 menuAction;
+    MnuMovieMenuPollResult menuAction;
     MnuMovieMenuSelectionIndex selectedItem;
 
     switch (titleWork->state) {
@@ -1182,8 +1182,8 @@ KwlnTaskUpdateResult mnuUpdateTitleMenuTask(dds3ProcessID_t *task) {
     case 26:
         mnuHandleTitleMenuEvent(titleWork->state);
         menuAction = mnuPollMovieMenuInputAndTimeout();
-        if (menuAction != -1) {
-            if (menuAction != 1) {
+        if (menuAction != MNU_MOVIE_MENU_POLL_IDLE_TIMEOUT) {
+            if (menuAction != MNU_MOVIE_MENU_POLL_ADVANCE) {
                 mnuUpdateTitlePageByMode();
             } else {
                 mnuSelectMenuListCursorByAdvance(0);

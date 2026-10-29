@@ -280,7 +280,9 @@ void dds3TitleClearFade(void) {
     state->selectedPage = 0;
 }
 
-s32 mnuPollMovieMenuInputAndTimeout(void) {
+#include "mnu_movie_menu_poll_result.h"
+
+MnuMovieMenuPollResult mnuPollMovieMenuInputAndTimeout(void) {
     MenuTitleState *state = (MenuTitleState *)titleWork;
     switch (state->phase) {
     case MNU_MOVIE_PHASE_OPENING_ANIMATION:
@@ -293,11 +295,11 @@ s32 mnuPollMovieMenuInputAndTimeout(void) {
                 opening->selectedPage = 0;
             }
             mnuSetMovieWorkFlag(&titleWork->movieWork, 0, 1);
-            return 0;
+            return MNU_MOVIE_MENU_POLL_WAITING;
         }
         p2sdPlaySE(8, 127, 63);
         mnuSetMovieWorkFlag(&titleWork->movieWork, 0, 0);
-        return 1;
+        return MNU_MOVIE_MENU_POLL_ADVANCE;
     case MNU_MOVIE_PHASE_FADE_IN:
         if (state->selectedPage < 90) {
             state->selectedPage++;
@@ -307,24 +309,24 @@ s32 mnuPollMovieMenuInputAndTimeout(void) {
         if (mnuIsAnyMenuInputPressed() != 0) {
             p2sdPlaySE(8, 127, 63);
             mnuSetMovieWorkFlag(&titleWork->movieWork, 0, 0);
-            return 1;
+            return MNU_MOVIE_MENU_POLL_ADVANCE;
         }
         state = (MenuTitleState *)titleWork;
         state->sequenceTimer++;
         if (state->sequenceTimer >= 601) {
             state->sequenceTimer = 0;
-            return -1;
+            return MNU_MOVIE_MENU_POLL_IDLE_TIMEOUT;
         }
         break;
     case MNU_MOVIE_PHASE_SELECTION:
         if (state->selectedPage < 0) {
             state->selectedPage++;
         } else {
-            return 1;
+            return MNU_MOVIE_MENU_POLL_ADVANCE;
         }
         break;
     }
-    return 0;
+    return MNU_MOVIE_MENU_POLL_WAITING;
 }
 
 void mnuUpdateTitlePageByMode(void) {
