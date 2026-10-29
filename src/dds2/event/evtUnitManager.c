@@ -1054,12 +1054,12 @@ INCLUDE_RODATA(const s32, "event/evtUnitManager", D_004215E0);
 
 INCLUDE_RODATA(const s32, "event/evtUnitManager", D_004215F0);
 
-s32 evtUnitPrepareVerticalMoveSteps(evtUnitHandle_t *unit) {
+EvtUnitVerticalMoveStepCount evtUnitPrepareVerticalMoveSteps(evtUnitHandle_t *unit) {
     evtUnitHandle_t copy;
     f32 delta[4];
     f32 savedA[4];
     f32 savedB[4];
-    s32 simulatedStepCount = 0;
+    EvtUnitVerticalMoveStepCount simulatedStepCount = 0;
     s32 vectorComponentIndex;
     for (vectorComponentIndex = 0; vectorComponentIndex < 4; vectorComponentIndex++) {
         savedA[vectorComponentIndex] = unit->effObj->inner->position[vectorComponentIndex];

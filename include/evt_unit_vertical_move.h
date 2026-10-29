@@ -3,7 +3,9 @@
 
 #include "evt_unit.h"
 
+typedef s32 EvtUnitVerticalMoveStepCount;
+
 /* Simulate the motion and return the step count stored in unit->stepCount. */
-s32 evtUnitPrepareVerticalMoveSteps(evtUnitHandle_t *unit);
+EvtUnitVerticalMoveStepCount evtUnitPrepareVerticalMoveSteps(evtUnitHandle_t *unit);
 
 #endif /* EVT_UNIT_VERTICAL_MOVE_H */
