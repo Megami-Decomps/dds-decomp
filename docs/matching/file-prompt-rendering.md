@@ -82,3 +82,42 @@ relocation/context checks clean. Integrated validation passed both games' retail
 builds, all 442 tooling tests in 117 batches, and compilation of all 85
 retained-C units (zero failures). The source and notes received independent
 landing review. No original binaries or compiler artifacts are included.
+
+## DDS1 counterpart
+
+DDS1 `fileShowPromptDialog` at `0x0028FB98` is 2,268 bytes. It uses the same
+ordinary direct-call reconstruction, but only prompt modes 1–9, fixed 48-pixel
+bar halves, and the ordinary yes/no labels. It has no difficulty-mode width
+selection. Its title bank was already declared with twenty entries; the change
+restores the native consumed 80-byte stack snapshot rather than correcting its
+bound. All 36 native font calls, including the two answer labels, are retained.
+Separate mode tests and fresh reads after callbacks remain intact.
+
+Unlike the DDS2 implementation, this implementation needs no cross-role scratch
+reuse. `highlightRgb` always means RGB `0x00AEC014`. On the first-selection path
+it is initialized after the second rectangle and consumed by the cursor-color
+OR. On the second-selection path it is initialized before the second rectangle,
+passed as its two actual RGB corners, then consumed by the cursor-color OR.
+Its address never escapes. The alpha read remains after both rectangle calls;
+no program read, call, store or arithmetic operation is added to steer allocation.
+
+This same-role shared local is compiler-sensitive. The qualified complete-owner
+EE GCC 2.96 normal/`-da` pairs are in the private cloud evidence archive
+`compiler-evidence/dds1-prompt/qualification.json`. Each assembly/object pair is
+byte-identical except two temporary source-filename characters. In the baseline
+`16.regmove`, RGB pseudo328 is rematerialized at UID1676 after the second
+rectangle and consumed by OR1678. In the exact source, the genuine shared RGB
+pseudo90 is defined at UID1632 before the second rectangle call1670, and the
+same value is consumed by OR1680 afterward. `20.greg` assigns pseudo90 to s0
+(`90 in 16`); it must survive the actual call because the cursor consumes it.
+This explains the native saved-register/frame difference without a register
+binding, empty asm, fabricated dependency, or claim of original source spelling.
+
+The cleaned landing form removes the unused draft-only rendering wrappers,
+removes the target fallback guard, and makes the existing forward `void(void)`
+declaration unconditional. The complete DDS1 owner has 253 exact functions,
+with owned-data and relocation/context checks clean. Integrated validation passed
+both games' retail checksum and development builds, all 442 tooling tests in
+117 batches, and all 85 retained-C compilation checks (zero failures).
+The cleaned landing form was separately qualified against the reviewed candidate;
+full assembly and object artifacts differ only in temporary filename bytes.
