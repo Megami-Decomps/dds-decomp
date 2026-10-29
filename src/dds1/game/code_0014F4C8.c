@@ -9,13 +9,12 @@
 #include "eff_manager_task.h"
 #include "eff_random.h"
 #include "mnu_title_sound.h"
-
-extern s32 fldGetCurrentSceneSelectionResource(void);
+#include "fld_scene_selection_resource.h"
 
 extern s32 D_0032E4E4[];
 
 u32 fldCmdGetCurrentSceneSelectionResource(void) {
-    s32 selectionResource;
+    FldSceneSelectionResourceId selectionResource;
 
     selectionResource = fldGetCurrentSceneSelectionResource();
     scrSetIntReturnValue(selectionResource);

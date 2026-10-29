@@ -4,6 +4,7 @@
 #include "fld_title_banner_menu.h"
 #include "fld_activation_entry.h"
 #include "fld_scene_record.h"
+#include "fld_scene_selection_resource.h"
 #include "common.h"
 #include "fld_map_slot_auxiliary_flag_selector.h"
 #include "scr_integer_parameter_api.h"
@@ -196,9 +197,6 @@ extern struct evtUnitHandle_t *evtGetUnitHandle(EvtUnitObjectKey worldObjectKey)
 
 
 extern s32 fldFindEffectByName(const char *name);
-
-extern s32 fldGetCurrentSceneSelectionResource(void);
-
 
 extern u8 D_00436208[];
 

@@ -19,6 +19,7 @@
 #include "evt_world.h"
 #include "common.h"
 #include "fld_scene_selection_index.h"
+#include "fld_scene_selection_resource.h"
 #include "fld_spatial_sound_id.h"
 #include "pty_status_query_api.h"
 #include "fld_camera_model_motion_api.h"
@@ -4622,7 +4623,7 @@ s32 fldFindEffectByName(const char *name) {
     return 0;
 }
 
-s32 fldGetCurrentSceneSelectionResource(void) {
+FldSceneSelectionResourceId fldGetCurrentSceneSelectionResource(void) {
     FldSceneSelectionIndex index = fldGetCurrentSceneSelectionId();
 
     if (index < 0) {

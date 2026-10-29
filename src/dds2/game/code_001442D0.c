@@ -22,6 +22,7 @@
 #include "evt_unit_color_transition.h"
 #include "common.h"
 #include "fld_scene_selection_index.h"
+#include "fld_scene_selection_resource.h"
 #include "fld_spatial_sound_id.h"
 #include "pty_status_query_api.h"
 #include "fld_camera_model_motion_api.h"
@@ -312,9 +313,6 @@ extern void fldStartTitle(s32 field, s32 mode, s32 option);
 extern void fldInitializeHuntSparkUnit(evtUnitHandle_t *unit);
 
 extern s32 fldFindEffectByName(const char *name);
-
-extern s32 fldGetCurrentSceneSelectionResource(void);
-
 
 
 extern KwlnTaskUpdateResult fldFieldTaskUpdate(dds3ProcessID_t *task);
@@ -5101,7 +5099,7 @@ s32 fldFindEffectByName(const char *name) {
     return 0;
 }
 
-s32 fldGetCurrentSceneSelectionResource(void) {
+FldSceneSelectionResourceId fldGetCurrentSceneSelectionResource(void) {
     FldSceneSelectionIndex index = fldGetCurrentSceneSelectionId();
     if (index >= 0) {
         return D_0044FFB0[index].resource[1];
