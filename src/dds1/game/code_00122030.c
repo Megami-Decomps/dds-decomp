@@ -1705,7 +1705,7 @@ s32 fldUpdateTravelAndEncounters(void) {
         fldGlobalBase.frameTravelDistance = 0.0f;
         return 0;
     }
-    if (fldGlobalBase.specialEventActive != 0) return 0;
+    if (fldGlobalBase.specialEventActive != FLD_SPECIAL_EVENT_INACTIVE) return 0;
     evtAdvanceSolarClockAndExpireControls(distance);
     phase = evtGetAgeOfMoon16();
     if (fldGlobalBase.consumedFlags & 15) {
@@ -2117,7 +2117,7 @@ KwlnTaskUpdateResult fldProcSequence(dds3ProcessID_t *task) {
     fldPollAreaResourceLoad();
     if (controller->phase == FLD_SEQUENCE_PHASE_INITIALIZE) {
         if (fldGetNextFileLoadState() == FLD_NEXT_FILE_LOAD_PENDING) return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
-        if (fldGlobalBase.specialEventActive == 0 && mnuPollTitleStreamStateLocked() != MNU_STREAM_LOAD_IDLE) {
+        if (fldGlobalBase.specialEventActive == FLD_SPECIAL_EVENT_INACTIVE && mnuPollTitleStreamStateLocked() != MNU_STREAM_LOAD_IDLE) {
             mnuMarkTitleStreamResetPending();
             mnuResetTitleStreamLocked();
             return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
@@ -2142,7 +2142,7 @@ KwlnTaskUpdateResult fldProcSequence(dds3ProcessID_t *task) {
         fldRebuildFieldScene();
         dds3SetActiveScene(dds3GetControlScene());
         fldInitInputPanel();
-        if (fldGlobalBase.specialEventActive == 0) evtSetSolarOverlayFullyVisible();
+        if (fldGlobalBase.specialEventActive == FLD_SPECIAL_EVENT_INACTIVE) evtSetSolarOverlayFullyVisible();
         fldInitAddressProcess();
         if (fldGlobalBase.area >= 200) {
             fldRunDanteGunFlag[11] = 0;
@@ -2189,7 +2189,7 @@ KwlnTaskUpdateResult fldProcSequence(dds3ProcessID_t *task) {
     case FLD_SEQUENCE_PHASE_WAIT_FOR_BGM_ARCHIVE:
         if (fldStepSceneBgmArchive() != FLD_ARCHIVE_LOAD_PENDING) {
             fldGlobalBase.sceneBgmSuppressed = 0;
-            if (fldGlobalBase.specialEventActive == 0) {
+            if (fldGlobalBase.specialEventActive == FLD_SPECIAL_EVENT_INACTIVE) {
                 /* Raw sequence mode 6 maps to EVENT, so this legacy status check is unreachable. */
                 if (fldGetRestoreMode() == FLD_SCENE_STATUS_BATTLE || fldGetRestoreMode() == FLD_SCENE_STATUS_SISETU || fldGetRestoreMode() == 6) {
                     fldStartSceneBgmAlternate();
@@ -2230,7 +2230,7 @@ KwlnTaskUpdateResult fldProcSequence(dds3ProcessID_t *task) {
             break;
         }
         fldFinishDeferredExit();
-        if (fldGlobalBase.specialEventActive != 0) {
+        if (fldGlobalBase.specialEventActive != FLD_SPECIAL_EVENT_INACTIVE) {
             fldUpdateSparkEncounterScene();
             fldMarkStageExplorationCellsAroundPosition(fldGlobalBase.floor, fldGlobalBase.flagStage,
                          fldGlobalBase.x, fldGlobalBase.z, 50.0f);
@@ -2356,7 +2356,7 @@ KwlnTaskUpdateResult fldProcDraw(dds3ProcessID_t *task) {
     }
     fldDrawAutomapWhenReady();
     fldElvDrawFloorNum();
-    if (fldGlobalBase.specialEventActive != 0) {
+    if (fldGlobalBase.specialEventActive != FLD_SPECIAL_EVENT_INACTIVE) {
         fldTickWeatherEffectNodes();
     }
     if (lifecycle->phase >= FLD_SEQUENCE_PHASE_ADVANCE_TO_AREA_ARCHIVE && D_0032E598[0] != 0 &&

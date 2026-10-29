@@ -4798,7 +4798,7 @@ void fldClearObjectEntryHandles(void) {
 void fldInitSparkTable(void) {
     s32 i;
 
-    if (fldGlobalBase.specialEventActive == 0) {
+    if (fldGlobalBase.specialEventActive == FLD_SPECIAL_EVENT_INACTIVE) {
         for (i = 0; i < 64; i++) {
             fldSparkSlots[i].hasVectors = 0;
             fldSparkSlots[i].active = 0;
@@ -5132,7 +5132,7 @@ void func_00150800(void) {
     recordIndex = fldFindResourceRecordIndex(fldGlobalBase.area, fldGlobalBase.floor + 1);
     control = &fldSparkControlState;
     record = &D_00435E18[recordIndex];
-    fldGlobalBase.specialEventActive = 1;
+    fldGlobalBase.specialEventActive = FLD_SPECIAL_EVENT_ACTIVE;
     fldGlobalBase.collectedCount = 0;
     entryCount = record->entryCount;
     duration = record->duration;
@@ -5171,14 +5171,14 @@ extern void fldTogglePlayerModel(void);
 void fldFinishEventFieldState(void) {
     FldAreaWork *work = &fldGlobalBase;
 
-    if (work->specialEventActive != 0) {
+    if (work->specialEventActive != FLD_SPECIAL_EVENT_INACTIVE) {
         D_003899E0[0] = 0;
         fldTogglePlayerModel();
         fldClearObjectEntryHandles();
         fldReleaseWeatherEffects();
         fldStartSceneBgmAlternate();
         fldPreparePlayerSceneCameraTarget();
-        work->specialEventActive = 0;
+        work->specialEventActive = FLD_SPECIAL_EVENT_INACTIVE;
         fldSparkControlState.state.phase = FLD_SPARK_CONTROLLER_PHASE_IDLE;
         fldSparkControlState.state.countdown = 0;
         evtSetSolarOverlayFullyVisible();
@@ -5211,7 +5211,7 @@ void fldUpdateDevilizeEventSequence(void) {
             evtFinishMessageWindowAndNotify();
             fclDestroyMessage();
             fldSparkControlState.state.dialogPhase = FLD_SPARK_DIALOG_PHASE_CANCELLED;
-            fldGlobalBase.specialEventActive = 0;
+            fldGlobalBase.specialEventActive = FLD_SPECIAL_EVENT_INACTIVE;
             evtSetSolarOverlayFullyVisible();
         }
         break;
@@ -5228,7 +5228,7 @@ void fldUpdateDevilizeEventSequence(void) {
                 evtFinishMessageWindowAndNotify();
                 fclDestroyMessage();
                 fldSparkControlState.state.dialogPhase = FLD_SPARK_DIALOG_PHASE_CANCELLED;
-                fldGlobalBase.specialEventActive = 0;
+                fldGlobalBase.specialEventActive = FLD_SPECIAL_EVENT_INACTIVE;
                 evtSetSolarOverlayFullyVisible();
             } else {
                 evtFinishMessageWindowAndNotify();
@@ -5464,7 +5464,7 @@ void fldUpdateSparkEncounterScene(void) {
             D_003899E0[0] = 0;
             fldPreparePlayerSceneCameraTarget();
             fldSparkControlState.state.phase = FLD_SPARK_CONTROLLER_PHASE_IDLE;
-            fldGlobalBase.specialEventActive = 0;
+            fldGlobalBase.specialEventActive = FLD_SPECIAL_EVENT_INACTIVE;
         }
     } else {
         return;
@@ -5488,7 +5488,7 @@ void fldResetEventSceneState(void) {
     fldReleaseWeatherEffects();
     fldPreparePlayerSceneCameraTarget();
     fldGlobalBase.deferredExit = FLD_DEFERRED_EXIT_REQUESTED;
-    fldGlobalBase.specialEventActive = 0;
+    fldGlobalBase.specialEventActive = FLD_SPECIAL_EVENT_INACTIVE;
     fldSparkControlState.state.phase = FLD_SPARK_CONTROLLER_PHASE_IDLE;
     fldGlobalBase.unk138 = 1;
 }
@@ -5504,7 +5504,7 @@ void fldResetAfterEvent(void) {
     fldReleaseWeatherEffects();
     fldStartSceneBgmAlternate();
     fldGlobalBase.deferredExit = FLD_DEFERRED_EXIT_IDLE;
-    fldGlobalBase.specialEventActive = 0;
+    fldGlobalBase.specialEventActive = FLD_SPECIAL_EVENT_INACTIVE;
     fldSparkControlState.state.phase = FLD_SPARK_CONTROLLER_PHASE_IDLE;
     fldGlobalBase.unk138 = 1;
     evtSetSolarOverlayFullyVisible();

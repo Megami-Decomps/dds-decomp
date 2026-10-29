@@ -1702,7 +1702,7 @@ const struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) 
     }
     fldInitializeActorMotionSlots();
     fldGlobalBase.reuseAreaResources = FLD_AREA_RESOURCE_REUSE_DISABLED;
-    if (fldGlobalBase.specialEventActive != 0) {
+    if (fldGlobalBase.specialEventActive != FLD_SPECIAL_EVENT_INACTIVE) {
         fldUpdateSparkSlots();
     }
     return fldCachedRoomF1ResourceAllocation;
@@ -4898,7 +4898,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
         heading += 360.0f;
     }
     fldGlobalBase.targetAngle = fldSnapAngleToCompassPoint(heading);
-    if (fldGlobalBase.specialEventActive != 0 && direction != -1 &&
+    if (fldGlobalBase.specialEventActive != FLD_SPECIAL_EVENT_INACTIVE && direction != -1 &&
         fldIsNearSpark(position[0], position[1], position[2]) != 0) {
         position[0] = fldGlobalBase.x;
         position[1] = fldGlobalBase.y;

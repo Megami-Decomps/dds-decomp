@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "fld_encounter_runtime_api.h"
+#include "fld_special_event_state.h"
 #include "fld_solar_overlay_mode.h"
 #include "fld_scene_timing_state.h"
 
@@ -162,7 +163,7 @@ typedef struct FldAreaWork {
     u8 padF8[4];
     f32 frameTravelDistance;     /* 0xFC: current player displacement length. */
     FldEntryDialogDisposition pendingEntryDialogDisposition;
-    s16 specialEventActive;      /* 0x104: spark/Devilize field event latch */
+    FldSpecialEventState specialEventActive; /* 0x104: Spark/Devilize field event latch. */
     u16 collectedCount;          /* 0x106: spark pickups. */
     s32 score;                   /* 0x108: pickups add 50. */
     f32 unk10C;                  /* 0x10C: cleared when a spark run starts. */

@@ -4722,7 +4722,7 @@ void func_0014C468(void) {
     fldSparkControlState.state.phase = FLD_SPARK_CONTROLLER_PHASE_IDLE;
     fldGlobalBase.score = 0;
     fldSparkControlState.state.countdown = entry->duration;
-    fldGlobalBase.specialEventActive = 1;
+    fldGlobalBase.specialEventActive = FLD_SPECIAL_EVENT_ACTIVE;
     fldSparkControlState.state.dialogPhase = FLD_SPARK_DIALOG_PHASE_ENTRY_PROMPT;
     fldSparkControlState.state.terminated = 0;
     fldSparkControlState.state.animationState = FLD_SPARK_ANIMATION_READY;
@@ -4762,14 +4762,14 @@ extern void evtSetSolarOverlayFullyVisible(void);
 void fldFinishEventFieldState(void) {
     FldAreaWork *state = &fldGlobalBase;
 
-    if (state->specialEventActive != 0) {
+    if (state->specialEventActive != FLD_SPECIAL_EVENT_INACTIVE) {
         D_0032E5C4[0] = 0;
         fldTogglePlayerModel();
         fldClearObjectEntryHandles();
         fldReleaseWeatherEffects();
         fldStartSceneBgmAlternate();
         fldPreparePlayerSceneCameraTarget();
-        state->specialEventActive = 0;
+        state->specialEventActive = FLD_SPECIAL_EVENT_INACTIVE;
         fldSparkControlState.state.phase = FLD_SPARK_CONTROLLER_PHASE_IDLE;
         fldSparkControlState.state.countdown = 0;
         evtSetSolarOverlayFullyVisible();
@@ -4802,7 +4802,7 @@ void fldUpdateSparkMessageSequence(void) {
             evtFinishMessageWindowAndNotify();
             fclDestroyMessage();
             fldSparkControlState.state.dialogPhase = FLD_SPARK_DIALOG_PHASE_CANCELLED;
-            fldGlobalBase.specialEventActive = 0;
+            fldGlobalBase.specialEventActive = FLD_SPECIAL_EVENT_INACTIVE;
             evtSetSolarOverlayFullyVisible();
         }
         break;
@@ -4819,7 +4819,7 @@ void fldUpdateSparkMessageSequence(void) {
                 evtFinishMessageWindowAndNotify();
                 fclDestroyMessage();
                 fldSparkControlState.state.dialogPhase = FLD_SPARK_DIALOG_PHASE_CANCELLED;
-                fldGlobalBase.specialEventActive = 0;
+                fldGlobalBase.specialEventActive = FLD_SPECIAL_EVENT_INACTIVE;
                 evtSetSolarOverlayFullyVisible();
             } else {
                 evtFinishMessageWindowAndNotify();
@@ -5101,7 +5101,7 @@ void fldResetEventSceneState(void) {
     fldReleaseWeatherEffects();
     fldPreparePlayerSceneCameraTarget();
     fldGlobalBase.deferredExit = FLD_DEFERRED_EXIT_REQUESTED;
-    fldGlobalBase.specialEventActive = 0;
+    fldGlobalBase.specialEventActive = FLD_SPECIAL_EVENT_INACTIVE;
     D_003D62A8[0] = 0;
     fldGlobalBase.unk138 = 1;
     evtSetSolarOverlayFullyVisible();
