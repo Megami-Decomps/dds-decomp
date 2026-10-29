@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "fld_area_work.h"
+#include "fld_sequence_scene_mode.h"
 #include "evt_encounter_request_api.h"
 #include "fld_actor_motion_step_result_api.h"
 #include "fld_camp_check_state_api.h"
@@ -1926,9 +1927,9 @@ void fldSubmitSelectedActorWaypointTransition(void) {
         }
         fldSetSceneParam4(&record, stage, room, entry->warpName, entry->sequenceCode, entry->linkKind, entry->linkName);
         if ((u32)(motion - 3) < 2) {
-            record.mode = 5;
+            record.mode = FLD_SEQUENCE_SCENE_MODE_MINI_TITLE_UNLOCK;
         } else {
-            record.mode = 4;
+            record.mode = FLD_SEQUENCE_SCENE_MODE_SISETU;
         }
         D_004361E4 = 0;
         D_004361E8 = 0;
@@ -1986,7 +1987,7 @@ void fldInitializeActorLinkedSequence(s32 mode, s32 index, fldSceneParam_t *sequ
         if (field != 0 && kind != 0) {
             fldSetSceneParamLoad(sequence, field, kind, entry->warpName,
                                         entry->sequenceCode, entry->linkKind, entry->linkName);
-            sequence->mode = 5;
+            sequence->mode = FLD_SEQUENCE_SCENE_MODE_MINI_TITLE_UNLOCK;
             if (fldGlobalBase.sequenceCode != entry->sequenceCode && entry->sequenceCode != 0) {
                 fldGlobalBase.sequenceCode = entry->sequenceCode;
             }
@@ -2075,7 +2076,7 @@ FldDeferredCommandDisposition fldStartDeferredActorTransition(s32 command, u32 p
             D_00435F28 = i + 1;
         }
         fldSetSceneParam4(&record, stagePayload.value, room, entry->warpName, entry->sequenceCode, entry->linkKind, entry->linkName);
-        record.mode = 6;
+        record.mode = FLD_SEQUENCE_SCENE_MODE_EVENT;
         dds3AdminiCallSequence(5, &record, 0xA0, 0);
         return FLD_DEFERRED_COMMAND_CLEAR_PENDING;
     }

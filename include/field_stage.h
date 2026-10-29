@@ -2,6 +2,7 @@
 #define FIELD_STAGE_H
 
 #include "common.h"
+#include "fld_sequence_scene_mode.h"
 
 /* Stage-map entries are keyed by area/stage and store spatial layout in sixteen bytes.
  * The index and pointer lookups intentionally have different scan limits. */
@@ -35,7 +36,7 @@ typedef struct FieldPlayerSceneWork {
     s32 area; /* 0x50: sequence destination area */
     s32 room; /* 0x54: one-based destination room */
     u32 retainCachedAreaResource; /* 0x58: preserves the cached room resource for this transition. */
-    u32 secondaryState;
+    FldSequenceSceneMode secondaryState;
     u16 sequenceCode; /* 0x60: copied from fldSceneParam_t.code */
     s16 sequenceMode; /* 0x62: copied by the sequence initializer */
     s32 cameraLinkMode; /* 0x64: sequence packet link mode */

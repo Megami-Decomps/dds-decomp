@@ -2291,9 +2291,9 @@ void fldSubmitSelectedActorWaypointTransition(void) {
         }
         fldSetSceneParam4(&record, stagePayload[0], room, entry->sequenceName, entry->sequenceCode, entry->linkKind, entry->linkName);
         if ((u32)(motion - 3) < 2) {
-            record.mode = 5;
+            record.mode = FLD_SEQUENCE_SCENE_MODE_MINI_TITLE_UNLOCK;
         } else {
-            record.mode = 4;
+            record.mode = FLD_SEQUENCE_SCENE_MODE_SISETU;
         }
         D_003BAE54 = 0;
         D_003BAE58 = 0;
@@ -2354,7 +2354,7 @@ void fldInitializeActorLinkedSequence(s32 mode, s32 index, fldSceneParam_t *sequ
         if (field != 0 && kind != 0) {
             fldSetSceneParamLoad(sequence, field, kind, entry->sequenceName,
                                         entry->sequenceCode, entry->linkKind, entry->linkName);
-            sequence->mode = 5;
+            sequence->mode = FLD_SEQUENCE_SCENE_MODE_MINI_TITLE_UNLOCK;
             if (fldGlobalBase.sequenceCode != entry->sequenceCode && entry->sequenceCode != 0) {
                 fldGlobalBase.sequenceCode = entry->sequenceCode;
             }

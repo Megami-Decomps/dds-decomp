@@ -720,7 +720,7 @@ void fldSetSceneParam2(fldSceneParam_t *record, s32 stage, s32 kind, const char 
     strcpy(record->name, name);
     record->fldSceneDestinationArea = stage;
     record->retainCachedAreaResource = 1;
-    record->mode = 2;
+    record->mode = FLD_SEQUENCE_SCENE_MODE_INHERIT_PRIMARY;
     record->fldSceneDestinationRoom = kind;
     record->code = 0;
     record->sequenceMode = 0;
@@ -748,7 +748,7 @@ void fldSetSceneParam3(fldSceneParam_t *record, s32 stage, s32 kind, const char 
     strcpy(record->name, name);
     record->fldSceneDestinationArea = stage;
     record->retainCachedAreaResource = 1;
-    record->mode = 3;
+    record->mode = FLD_SEQUENCE_SCENE_MODE_ANA;
     record->fldSceneDestinationRoom = kind;
     record->code = 0;
     record->sequenceMode = 0;
@@ -778,7 +778,7 @@ void fldSetSceneParam4(fldSceneParam_t *record, s32 stage, s32 kind, const char 
     record->fldSceneDestinationRoom = kind;
     record->code = code;
     record->link = link;
-    record->mode = 2;
+    record->mode = FLD_SEQUENCE_SCENE_MODE_INHERIT_PRIMARY;
     record->sequenceMode = 0;
     strcpy(record->detail, subname);
     memset(record->note, 0, sizeof(record->note));
@@ -802,7 +802,7 @@ void fldSetSceneParam5(fldSceneParam_t *record, s32 stage, s32 kind, const char 
     strcpy(record->name, name);
     record->fldSceneDestinationArea = stage;
     record->retainCachedAreaResource = 1;
-    record->mode = 2;
+    record->mode = FLD_SEQUENCE_SCENE_MODE_INHERIT_PRIMARY;
     record->fldSceneDestinationRoom = kind;
     record->code = code;
     record->sequenceMode = 0;
@@ -823,7 +823,7 @@ void fldSetSceneParamLoad(fldSceneParam_t *record, s32 stage, s32 kind, const ch
     record->fldSceneDestinationRoom = kind;
     record->code = code;
     record->link = link;
-    record->mode = 2;
+    record->mode = FLD_SEQUENCE_SCENE_MODE_INHERIT_PRIMARY;
     record->sequenceMode = 0;
     strcpy(record->detail, subname);
     memset(record->note, 0, sizeof(record->note));
@@ -838,16 +838,16 @@ FldSceneStatus fldGetRestoreMode(void) {
     if (sceneWork->primaryState == 1) {
         return FLD_SCENE_STATUS_BATTLE;
     }
-    if (sceneWork->secondaryState == 3) {
+    if (sceneWork->secondaryState == FLD_SEQUENCE_SCENE_MODE_ANA) {
         return FLD_SCENE_STATUS_ANA;
     }
-    if (sceneWork->secondaryState == 4) {
+    if (sceneWork->secondaryState == FLD_SEQUENCE_SCENE_MODE_SISETU) {
         return FLD_SCENE_STATUS_SISETU;
     }
-    if (sceneWork->secondaryState == 5) {
+    if (sceneWork->secondaryState == FLD_SEQUENCE_SCENE_MODE_MINI_TITLE_UNLOCK) {
         return FLD_SCENE_STATUS_MINI_TITLE_UNLOCK;
     }
-    if (sceneWork->secondaryState == 6) {
+    if (sceneWork->secondaryState == FLD_SEQUENCE_SCENE_MODE_EVENT) {
         return FLD_SCENE_STATUS_EVENT;
     }
     return sceneWork->primaryState != 0 ? FLD_SCENE_STATUS_EVENT : FLD_SCENE_STATUS_DEFAULT;
@@ -1004,7 +1004,7 @@ void fldRebuildFieldScene(void) {
                 } else {
                     fldGlobalBase.mode = FLD_CAMERA_MODE_PLAYER_FOLLOW;
                 }
-                if (sceneWork->secondaryState == 3) {
+                if (sceneWork->secondaryState == FLD_SEQUENCE_SCENE_MODE_ANA) {
                     func_0012CED0();
                 } else {
                     fldUpdateFieldCameraViewState();
