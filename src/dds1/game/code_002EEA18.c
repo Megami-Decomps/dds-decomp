@@ -392,10 +392,10 @@ extern SdfStreamState D_003FF340;
 extern u8 D_003FF4C0[];
 extern s32 D_003FF480[];
 extern sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path,
-                                          s32 (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32),
+                                          s32 (*callback)(sdfFileCmdHandle_t *, SdfDevEvent, s32, s32, s32),
                                           void *callbackContext);
 extern s32 sdfFileCmdRequestFileSize(sdfFileCmdHandle_t *state);
-extern s32 sdfFileRpcReadCallback(sdfFileCmdHandle_t *, s32, s32, s32, s32);
+extern s32 sdfFileRpcReadCallback(sdfFileCmdHandle_t *, SdfDevEvent, s32, s32, s32);
 
 /* Queue at most one staging-buffer-sized read; the completion callback advances the byte counts. */
 void sdfFileRpcContinueRead(void) {
@@ -410,7 +410,7 @@ void sdfFileRpcContinueRead(void) {
 
 /* Handle stream replies and DMA-copy read chunks, requesting the next chunk as needed.
  * Uses the shared stream, ignores deviceState/callbackArg, and always returns zero. */
-s32 sdfFileRpcReadCallback(sdfFileCmdHandle_t *deviceState, s32 command, s32 sourceAddress,
+s32 sdfFileRpcReadCallback(sdfFileCmdHandle_t *deviceState, SdfDevEvent command, s32 sourceAddress,
                   s32 byteCount, s32 callbackArg) {
     SdfStreamState *stream = &D_003FF340;
     s32 dmaId;

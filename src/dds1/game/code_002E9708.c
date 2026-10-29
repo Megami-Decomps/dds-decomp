@@ -187,7 +187,7 @@ void sndSendChannelGroupCommand110Duplicate(u8 channel) {
     sdfSndSendSyncCmd(((channel >> 3) & 0xF) | 0x110, 0, 0, 0);
 }
 
-s32 sdfFileRpcCallback(s32 unused, u32 event) {
+s32 sdfFileRpcCallback(s32 unused, SdfDevEvent event) {
     switch (event) {
     case 1:
         break;

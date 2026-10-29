@@ -2,6 +2,7 @@
 #define SDF_MOVIE_STATE_H
 
 #include "common.h"
+#include "sdf_dev_event.h"
 
 struct sdfFileCmdHandle_t;
 struct movieStream_t;
@@ -19,14 +20,11 @@ enum {
     SDF_MOVIE_STATE_STOP_REQUESTED = 7
 };
 
-/* Completion event passed by the device layer to movie callbacks. */
-typedef s32 SdfMovieDeviceEvent;
-
 s32 movieGetStreamSize(
-    struct sdfFileCmdHandle_t *deviceState, SdfMovieDeviceEvent deviceEvent,
+    struct sdfFileCmdHandle_t *deviceState, SdfDevEvent deviceEvent,
     void *data, s32 bytesRead, struct movieStream_t *movie);
 s32 movieReadChunk(
-    struct sdfFileCmdHandle_t *deviceState, SdfMovieDeviceEvent deviceEvent,
+    struct sdfFileCmdHandle_t *deviceState, SdfDevEvent deviceEvent,
     const void *readBuffer, s32 bytesRead, struct movieStream_t *movie);
 
 #endif /* SDF_MOVIE_STATE_H */

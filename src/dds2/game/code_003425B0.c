@@ -198,7 +198,7 @@ void sndSendChannelGroupCommand110Duplicate(u8 channel) {
 
 
 /* Event 5 invalidates the EE cache before waking the waiting sound thread. */
-s32 sdfFileRpcCallback(s32 unused, u32 event) {
+s32 sdfFileRpcCallback(s32 unused, SdfDevEvent event) {
     switch (event) {
     case SDF_DEV_EVENT_READ_REPLY:
         FlushCache(0);

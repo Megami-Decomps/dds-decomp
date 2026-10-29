@@ -1,7 +1,11 @@
 #ifndef SDF_DEV_EVENT_H
 #define SDF_DEV_EVENT_H
 
+#include "common.h"
+
 /* Completion values delivered to device callbacks, separate from requests. */
+typedef s32 SdfDevEvent;
+
 #define SDF_DEV_EVENT_INACTIVE 0
 #define SDF_DEV_EVENT_OPENED 2
 #define SDF_DEV_EVENT_SEEK_REPLY 3

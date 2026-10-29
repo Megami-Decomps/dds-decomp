@@ -131,7 +131,7 @@ extern void sdfFileCmdUnlink(sdfFileCmdHandle_t *state);
 extern void sdfFileCmdDequeue(sdfFileCmdHandle_t *state);
 
 extern sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path,
-                                void (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32), void *callbackContext);
+                                void (*callback)(sdfFileCmdHandle_t *, SdfDevEvent, s32, s32, s32), void *callbackContext);
 
 
 
@@ -171,7 +171,7 @@ extern SdfFileWorkerIndex sdfFileCmdAnalyzeFileName(const char *path, char **out
 extern void sdfFileCmdAllocHandle(sdfFileCmdHandle_t *state);
 
 extern sdfFileCmdHandle_t *sdfFileCmdNewHandle(char *resolvedPath, SdfFileWorkerIndex workerIndex, s32 operation,
-                                void (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32), void *callbackContext);
+                                void (*callback)(sdfFileCmdHandle_t *, SdfDevEvent, s32, s32, s32), void *callbackContext);
 
 extern u8 sdfDev9LoadFlag;
 
@@ -926,7 +926,7 @@ char *sdfFileMakeFilename(const char *path) {
 }
 
 /* Capture seek/size replies, then wake the synchronous command waiter. */
-void sdfFileCallback(sdfFileCmdHandle_t *state, s32 event, s32 unused, s32 value, s32 callbackContext) {
+void sdfFileCallback(sdfFileCmdHandle_t *state, SdfDevEvent event, s32 unused, s32 value, s32 callbackContext) {
     if (event != SDF_DEV_EVENT_SEEK_REPLY) {
         if (event == SDF_DEV_EVENT_SIZE_REPLY) {
             sdfFileLengthWork = value;
@@ -1170,7 +1170,7 @@ INCLUDE_RODATA(const s32, "game/code_002E4720", D_003B4578);
 
 void sdfFileCmdThread(DevWorkerEntry *worker) {
     sdfFileCmdHandle_t *state;
-    void (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32);
+    void (*callback)(sdfFileCmdHandle_t *, SdfDevEvent, s32, s32, s32);
     s32 fileHandle;
     s32 result;
     s32 position;
@@ -1400,7 +1400,7 @@ void sdfFileCmdThread(DevWorkerEntry *worker) {
 /* Worker slot 3 services disc-backed requests through serialized disc operations. */
 void sdfFileCdImageCmdThread(DevWorkerEntry *worker) {
     sdfFileCmdHandle_t *state;
-    void (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32);
+    void (*callback)(sdfFileCmdHandle_t *, SdfDevEvent, s32, s32, s32);
     s32 result;
     s32 transferResult;
     void *readBuffer;
@@ -1625,7 +1625,7 @@ SdfFileWorkerIndex sdfFileCmdAnalyzeFileName(const char *path, char **resolvedPa
 
 /* Allocate a request state and retain the callback's opaque context pointer. */
 sdfFileCmdHandle_t *sdfFileCmdNewHandle(char *resolvedPath, SdfFileWorkerIndex workerIndex, s32 operation,
-                        void (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32), void *callbackContext) {
+                        void (*callback)(sdfFileCmdHandle_t *, SdfDevEvent, s32, s32, s32), void *callbackContext) {
     sdfFileCmdHandle_t *state = (sdfFileCmdHandle_t *)sdfAllocAndClearQuadwords(sizeof(sdfFileCmdHandle_t));
     state->resolvedPath = resolvedPath;
     state->workerIndex = workerIndex;
@@ -1638,7 +1638,7 @@ sdfFileCmdHandle_t *sdfFileCmdNewHandle(char *resolvedPath, SdfFileWorkerIndex w
 }
 
 /* Resolve a path to its worker and enqueue an asynchronous read-only open. */
-sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path, void (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32),
+sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path, void (*callback)(sdfFileCmdHandle_t *, SdfDevEvent, s32, s32, s32),
                         void *callbackContext) {
     char *resolvedPath;
     SdfFileWorkerIndex workerIndex = sdfFileCmdAnalyzeFileName(path, &resolvedPath);
@@ -1653,7 +1653,7 @@ sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path, void (*callback)(sdfFil
 }
 
 /* Enqueue a write open; zero options select the device's default creation options. */
-sdfFileCmdHandle_t *sdfFileCmdWriteOpen(const char *path, void (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32),
+sdfFileCmdHandle_t *sdfFileCmdWriteOpen(const char *path, void (*callback)(sdfFileCmdHandle_t *, SdfDevEvent, s32, s32, s32),
                         void *callbackContext, s32 options) {
     char *resolvedPath;
     SdfFileWorkerIndex workerIndex = sdfFileCmdAnalyzeFileName(path, &resolvedPath);
@@ -1749,7 +1749,7 @@ s32 sdfFileCmdFree(sdfFileCmdHandle_t *state) {
 
 /* Enqueue a one-shot read: negative byte count requests the whole file. */
 sdfFileCmdHandle_t *sdfFileCmdReadFile(const char *path, void *buffer, s32 byteCount,
-                        void (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32), void *callbackContext) {
+                        void (*callback)(sdfFileCmdHandle_t *, SdfDevEvent, s32, s32, s32), void *callbackContext) {
     char *resolvedPath;
     SdfFileWorkerIndex workerIndex = sdfFileCmdAnalyzeFileName(path, &resolvedPath);
     sdfFileCmdHandle_t *state;
@@ -1767,7 +1767,7 @@ sdfFileCmdHandle_t *sdfFileCmdReadFile(const char *path, void *buffer, s32 byteC
 
 /* Enqueue a one-shot write using the supplied buffer, byte count and creation options. */
 sdfFileCmdHandle_t *sdfFileCmdWriteFile(const char *path, void *buffer, s32 byteCount,
-                        void (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32),
+                        void (*callback)(sdfFileCmdHandle_t *, SdfDevEvent, s32, s32, s32),
                         void *callbackContext, s32 options) {
     char *resolvedPath;
     SdfFileWorkerIndex workerIndex = sdfFileCmdAnalyzeFileName(path, &resolvedPath);

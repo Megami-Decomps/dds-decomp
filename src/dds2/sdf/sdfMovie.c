@@ -51,7 +51,7 @@ void movieReadNextChunk(movieStream_t *movie) {
 
 /* Consume device completions and stop requests for the linear stream; always return 0. */
 s32 movieGetStreamSize(
-    sdfFileCmdHandle_t *deviceState, SdfMovieDeviceEvent deviceEvent,
+    sdfFileCmdHandle_t *deviceState, SdfDevEvent deviceEvent,
     void *data, s32 bytesRead, movieStream_t *movie) {
     MovLinearStream *stream;
     s32 restoreInterrupts;
@@ -129,7 +129,7 @@ void movieReadHeaderChunk(movieStream_t *movie) {
 
 /* Process movie-PAC header, block-mask and payload completions; always return 0. */
 s32 movieReadChunk(
-    sdfFileCmdHandle_t *deviceState, SdfMovieDeviceEvent deviceEvent,
+    sdfFileCmdHandle_t *deviceState, SdfDevEvent deviceEvent,
     const void *readBuffer, s32 bytesRead, movieStream_t *movie) {
     MovPacStream *stream;
 
