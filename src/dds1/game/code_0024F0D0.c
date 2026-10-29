@@ -135,7 +135,7 @@ void mnuDrawScaledVariantSpriteByIndex(s32 x, s32 y, s32 z, s32 alpha, s32 place
 
 #define MNU_PARTY_RECORD_BYTES 0x1A4
 
-#define MNU_GAME_PARTY_RECORD_OFFSET ((u32)&((DatGameState *)0)->party)
+#define MNU_GAME_PARTY_RECORD_OFFSET ((u32)&((dds3GlobalWork_t *)0)->party)
 
 #define MNU_PARTY_ORDER_COUNT 32
 

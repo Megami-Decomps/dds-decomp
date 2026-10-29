@@ -172,30 +172,30 @@ typedef struct DatInventory {
 } DatInventory;
 
 /* The field reset constructors prove the 30-byte slot and 64-slot bank. */
-typedef struct DatFieldMapSlot {
+typedef struct fldGbFlags_t {
     union {
         u16 flagBanks[5];
         struct {
-            u16 roomModeFlags;
-            u16 roomObjectModeFlags;
-            u16 roomSceneFlags;
-            u16 mapTargetFlags;
-            u16 alternateMapTargetFlags;
+            u16 modelFlag;
+            u16 animeFlag;
+            u16 atariFlag;
+            u16 modelFlag2;
+            u16 animeFlag2;
         };
     };
-    u8 values[16];
+    u8 animeId2[16];
     union {
         u16 trailingFlagBanks[2];
         struct {
-            u16 auxiliaryFlags;
-            u16 valueFlags;
+            u16 npcFlag;
+            u16 hojiFlag;
         };
     };
-} DatFieldMapSlot;
+} fldGbFlags_t;
 
-typedef struct DatFieldMapBank {
-    DatFieldMapSlot slots[64];
-} DatFieldMapBank;
+typedef struct fldGbTypeBlock_t {
+    fldGbFlags_t flags[64];
+} fldGbTypeBlock_t;
 
 /* The fifteenth reset word is the first word of the following render region. */
 typedef struct DatVrHeader {
@@ -235,7 +235,7 @@ typedef struct DatMantraBitmap {
 #endif
 } DatMantraBitmap;
 
-typedef struct DatGameState {
+typedef struct dds3GlobalWork_t {
     DatStateHeader header;                 /* 0x00000 */
     DatScriptGlobals script;               /* 0x00040 */
     DatModelFlags modelFlags;              /* 0x00840 */
@@ -249,7 +249,7 @@ typedef struct DatGameState {
     f32 conditionalEncounterStepRemainder; /* Residual step carried until it reaches 100.0. */
     u16 conditionalEncounterGauge; /* Randomized progress compared with the selected interval. */
     u8 pad1366[0xA];
-    DatFieldMapBank maps[40];              /* 0x01370 */
+    fldGbTypeBlock_t gb[40];               /* 0x01370 */
     u64 areaFlags[13][64];                 /* 0x13F70 */
     u8 activationFlags[32];                /* 0x15970 */
     DatVrHeader vr;                        /* 0x15990 */
@@ -270,7 +270,7 @@ typedef struct DatGameState {
     f32 conditionalEncounterStepRemainder; /* Residual step carried until it reaches 100.0. */
     u16 conditionalEncounterGauge; /* Randomized progress compared with the selected interval. */
     u8 pad1446[0xA];
-    DatFieldMapBank maps[31];              /* 0x01450 */
+    fldGbTypeBlock_t gb[31];               /* 0x01450 */
     u64 areaFlags[10][64];                 /* 0x0FCD0 */
     u8 activationFlags[32];                /* 0x110D0 */
     DatVrHeader vr;                        /* 0x110F0 */
@@ -291,20 +291,20 @@ typedef struct DatGameState {
     u8 itemBlockedFlags[64];               /* 0x1E7F0 */
     u8 pad1E830[0x10];
 #endif
-} DatGameState;
+} dds3GlobalWork_t;
 
 typedef char DatStateHeaderSizeCheck[sizeof(DatStateHeader) == 0x40 ? 1 : -1];
-typedef char DatFieldMapBankSizeCheck[sizeof(DatFieldMapBank) == 0x780 ? 1 : -1];
+typedef char DatFieldMapBankSizeCheck[sizeof(fldGbTypeBlock_t) == 0x780 ? 1 : -1];
 #ifdef VERSION_DDS1
 typedef char DatPartyRecordSizeCheck[sizeof(datUnitWork_t) == 0x1A4 ? 1 : -1];
-typedef char DatGameStateSizeCheck[sizeof(DatGameState) == 0x33600 ? 1 : -1];
+typedef char DatGameStateSizeCheck[sizeof(dds3GlobalWork_t) == 0x33600 ? 1 : -1];
 #endif
 #ifdef VERSION_DDS2
 typedef char DatPartyRecordSizeCheck[sizeof(datUnitWork_t) == 0x1C4 ? 1 : -1];
 typedef char DatPartyRecordActionSlotOffsetCheck[((u32)&((datUnitWork_t *)0)->actionSlot == 0x1B0) ? 1 : -1];
 typedef char DatPartyRecordAssignedItemIdOffsetCheck[
     ((u32)&((datUnitWork_t *)0)->assignedItemId == 0x1B2) ? 1 : -1];
-typedef char DatGameStateSizeCheck[sizeof(DatGameState) == 0x1E840 ? 1 : -1];
+typedef char DatGameStateSizeCheck[sizeof(dds3GlobalWork_t) == 0x1E840 ? 1 : -1];
 #endif
 
 /* The 0x4C-byte enemy table supplies initial party vitals/stats, skills and
@@ -451,7 +451,7 @@ extern BattleAdjustmentRecord *D_00435E0C;
 
 extern DatBattleSceneRecord *datBattleSceneRecords;
 
-extern DatGameState *DDS3_GBWK;
+extern dds3GlobalWork_t *DDS3_GBWK;
 
 /* Maps one exact channel flag to its stat/element index; unmatched or combined
  * flags return -1 (see the paired datCalc.c lookup switches). */

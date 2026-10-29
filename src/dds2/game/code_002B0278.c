@@ -771,12 +771,12 @@ void mnuCopyPartyEntries(MenuContext *context) {
     PartyMenuData *menuWork = (PartyMenuData *)context->party;
     datUnitWork_t *entryCursor = menuWork->current;
     s32 entryIndex;
-    s32 partyFlagsByteOffset = (s32)&((DatGameState *)0)->party;
+    s32 partyFlagsByteOffset = (s32)&((dds3GlobalWork_t *)0)->party;
     s32 partyCopyByteOffset = 0;
 
     menuWork->activeCount = 0;
     for (entryIndex = 0; entryIndex < MNU_STAFF_PARTY_SLOT_COUNT; entryIndex++) {
-        *entryCursor = *(datUnitWork_t *)(partyCopyByteOffset + (s32)DDS3_GBWK + (s32)&((DatGameState *)0)->party);
+        *entryCursor = *(datUnitWork_t *)(partyCopyByteOffset + (s32)DDS3_GBWK + (s32)&((dds3GlobalWork_t *)0)->party);
         if (((datUnitWork_t *)((s32)DDS3_GBWK + partyFlagsByteOffset))->flags & MNU_STAFF_PARTY_ACTIVE_BIT) {
             menuWork->activeCount = menuWork->activeCount + 1;
         }
@@ -847,7 +847,7 @@ void mnuRestorePartyEntriesAndRefresh(MenuContext *context) {
     }
     backupByteOffset = 0;
     for (entryCounter = MNU_STAFF_PARTY_LAST_SLOT; entryCounter >= 0; entryCounter--) {
-        *(datUnitWork_t *)(backupByteOffset + (s32)DDS3_GBWK + (s32)&((DatGameState *)0)->party) = *(datUnitWork_t *)(backupByteOffset + (s32)menuWork + (s32)&((PartyMenuData *)0)->backup);
+        *(datUnitWork_t *)(backupByteOffset + (s32)DDS3_GBWK + (s32)&((dds3GlobalWork_t *)0)->party) = *(datUnitWork_t *)(backupByteOffset + (s32)menuWork + (s32)&((PartyMenuData *)0)->backup);
         backupByteOffset += sizeof(datUnitWork_t);
     }
     panelWork = &context->partyWindow;
@@ -1673,7 +1673,7 @@ void mnuDrawIconPanelFullFade(u32 x, u32 y, u32 depth, MenuIconState *panel, s32
 s32 mnuDrawSelectedStaffPartyView(dds3ProcessID_t *callback) {
     s32 contextAddress = (s32)dds3GetProcessData(callback);
     MenuContext *context = (MenuContext *)contextAddress;
-    DatGameState *gameState = DDS3_GBWK;
+    dds3GlobalWork_t *gameState = DDS3_GBWK;
     StaffMenuRuntime *menuWork = (StaffMenuRuntime *)context->party;
     s32 partyIndex = context->partyWindow.lists[0]->cursor->index;
     datUnitWork_t *partyEntry = &gameState->party[partyIndex];
@@ -2506,7 +2506,7 @@ void ptySkillMenuHandleSelection(dds3ProcessID_t *callback) {
     s32 skillId;
     s32 partyIndex = context->partyWindow.lists[0]->cursor->index;
     MenuListNode *categoryCursor = menuWork->categoryList->cursor;
-    DatGameState *gameState = DDS3_GBWK;
+    dds3GlobalWork_t *gameState = DDS3_GBWK;
 
     list->stateFlags &= ~MNU_LIST_SELECTION_FLAG;
     partyEntry = &gameState->party[partyIndex];

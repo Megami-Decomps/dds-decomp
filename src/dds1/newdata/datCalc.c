@@ -856,7 +856,7 @@ datUnitWork_t *dds3FindEntry(DatUnitId unitId) {
 
 /* Promote the selected roster entry into the current frontline boundary. */
 PtyFrontlinePromotionResult ptyRebalanceFrontline(DatUnitId unitId) {
-    DatGameState *scanState;
+    dds3GlobalWork_t *scanState;
     datUnitWork_t savedEntry;
     const PtyActiveRosterIndex selectedIndex = dds3FindEntryIndex(unitId);
     s32 frontlineCount;

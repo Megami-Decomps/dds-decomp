@@ -7671,7 +7671,7 @@ s32 btlUpdateAndDrawReserveActorPanels(dds3ProcessID_t *task) {
     i = 0;
     if (reserveCount > 0) {
         do {
-            DatGameState *game = DDS3_GBWK;
+            dds3GlobalWork_t *game = DDS3_GBWK;
             s32 partyIndex = game->partyOrder[i + work->activeCount];
             s16 baseFade;
             u32 color;

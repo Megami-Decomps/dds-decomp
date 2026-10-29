@@ -4355,7 +4355,7 @@ extern const BtlCursorChoices D_004184D8;
 /* Choose a camera preset by marked-party count, actor category and random draw. */
 void btlInitializeRandomCameraCursor(BtlLinkedCommand *action, BtlCamState *state) {
     BtlCursorChoices choices = D_004184D8;
-    DatGameState *game;
+    dds3GlobalWork_t *game;
     s16 markedCount = 0;
     s16 i;
     s16 random;

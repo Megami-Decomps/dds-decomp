@@ -3646,7 +3646,7 @@ void fldResetCameraAndSceneView(void) {
 void fldClearAllAreaFloorFlags(void) {
     u64 *words;
     s32 remaining;
-    DatGameState *block;
+    dds3GlobalWork_t *block;
     s32 blockIndex;
 
     blockIndex = 0;

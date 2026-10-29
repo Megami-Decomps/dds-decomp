@@ -3549,7 +3549,7 @@ caller use `MenuTerminalContext *` and a void return contract.
 The shop transaction at DDS2 `0x00263FB0` borrows the selected row
 through `window->list->cursor->camp`, not an event-object prefix.
 Its full-width value times `MenuTerminalContext.multiplier` determines
-the currency delta; `DatGameState.inventory.counts` consumes only the
+the currency delta; `dds3GlobalWork_t.inventory.counts` consumes only the
 multiplier's low byte. A purchase increments ordinary inventory only
 when the listed-item lookup is negative, but the allowed-ID progress
 test is independent of that lookup. Both purchase and sale restore
@@ -3900,7 +3900,7 @@ memory-read epoch, not an extra use or a synthetic dependency.
 DDS2 `func_00260020` (`0x00260020`, 280 bytes) copies a seven-entry,
 28-byte enable configuration, queries availability modes one and three,
 and enables additional options from the shop's message-set ID and
-`DatGameState.progressTotal`. The query provider takes only the scene
+`dds3GlobalWork_t.progressTotal`. The query provider takes only the scene
 and mode; the remaining caller registers are not extra arguments.
 
 The primary `MenuTerminalContext.unkA0`, `unkA2`, and `unkA4` fields

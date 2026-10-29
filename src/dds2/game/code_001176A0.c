@@ -191,7 +191,7 @@ void evtLoadValueSecondaryVectorIntoVu(dds3Basic_t *node) {
 /* Allocate the runtime state block, zero it and register the "GBWK" tick task. */
 void dds3GlobalWorkInit(void) {
     struct sdfMemHandle_t *mem = sdfMemAllocDirect(0x1E840);
-    DatGameState *state = (void *)sdfMemLock(mem);
+    dds3GlobalWork_t *state = (void *)sdfMemLock(mem);
 
     memset(state, 0, 0x1E840);
     state->header.backingAllocation = mem;
@@ -214,7 +214,7 @@ void dds3GlobalWorkDestroy(void) {
 }
 
 s32 dds3GlobalWorkMainProc(dds3ProcessID_t *task) {
-    DatGameState *runtime;
+    dds3GlobalWork_t *runtime;
 
     runtime = DDS3_GBWK;
     runtime->header.firstTick += 1;
@@ -326,7 +326,7 @@ void sdfRestoreResetSnapshot(void) {
     DatProfileBank *profiles;
     datUnitWork_t *templates;
     void *bytes;
-    DatGameState *state;
+    dds3GlobalWork_t *state;
     u32 i;
 
     if (D_00435DB6) evtBitOn(0xBA0);

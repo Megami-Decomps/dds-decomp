@@ -4092,7 +4092,7 @@ s32 evtAdvanceProgressGateMessage(dds3ProcessID_t *callbackContext) {
 
 /* Select the highest reached reward tier, retiring earlier tier flags first. */
 s32 mnuSelectUnclaimedProgressRewardTier(void) {
-    DatGameState *state = DDS3_GBWK;
+    dds3GlobalWork_t *state = DDS3_GBWK;
     s32 index;
     s32 selected = -1;
     s32 flag;

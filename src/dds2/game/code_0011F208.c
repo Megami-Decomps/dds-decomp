@@ -1729,16 +1729,16 @@ void fldResetFieldMapState(void) {
 
     for (bankIndex = 0; bankIndex < 31; bankIndex++) {
         for (slotIndex = 0; slotIndex < 64; slotIndex++) {
-            DDS3_GBWK->maps[bankIndex].slots[slotIndex].roomModeFlags = 0;
-            DDS3_GBWK->maps[bankIndex].slots[slotIndex].roomObjectModeFlags = 0;
-            DDS3_GBWK->maps[bankIndex].slots[slotIndex].roomSceneFlags = 0;
-            DDS3_GBWK->maps[bankIndex].slots[slotIndex].mapTargetFlags = 0;
-            DDS3_GBWK->maps[bankIndex].slots[slotIndex].alternateMapTargetFlags = 0;
+            DDS3_GBWK->gb[bankIndex].flags[slotIndex].modelFlag = 0;
+            DDS3_GBWK->gb[bankIndex].flags[slotIndex].animeFlag = 0;
+            DDS3_GBWK->gb[bankIndex].flags[slotIndex].atariFlag = 0;
+            DDS3_GBWK->gb[bankIndex].flags[slotIndex].modelFlag2 = 0;
+            DDS3_GBWK->gb[bankIndex].flags[slotIndex].animeFlag2 = 0;
             for (valueIndex = 0; valueIndex < 16; valueIndex++) {
-                DDS3_GBWK->maps[bankIndex].slots[slotIndex].values[valueIndex] = 0xFF;
+                DDS3_GBWK->gb[bankIndex].flags[slotIndex].animeId2[valueIndex] = 0xFF;
             }
-            DDS3_GBWK->maps[bankIndex].slots[slotIndex].auxiliaryFlags = 0;
-            DDS3_GBWK->maps[bankIndex].slots[slotIndex].valueFlags = 0;
+            DDS3_GBWK->gb[bankIndex].flags[slotIndex].npcFlag = 0;
+            DDS3_GBWK->gb[bankIndex].flags[slotIndex].hojiFlag = 0;
         }
     }
 
@@ -1963,9 +1963,9 @@ void fldSetRoomModeFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
         if (enabled) {
-            DDS3_GBWK->maps[mapIndex].slots[slotIndex].roomModeFlags |= 1 << bit;
+            DDS3_GBWK->gb[mapIndex].flags[slotIndex].modelFlag |= 1 << bit;
         } else {
-            DDS3_GBWK->maps[mapIndex].slots[slotIndex].roomModeFlags &= ~(1 << bit);
+            DDS3_GBWK->gb[mapIndex].flags[slotIndex].modelFlag &= ~(1 << bit);
         }
     }
 }
@@ -1973,7 +1973,7 @@ void fldSetRoomModeFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
 u8 fldTestRoomModeFlag(s32 mapId, u32 slotIndex, s32 bit) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        u32 flags = DDS3_GBWK->maps[mapIndex].slots[slotIndex].roomModeFlags;
+        u32 flags = DDS3_GBWK->gb[mapIndex].flags[slotIndex].modelFlag;
         return (flags >> bit) & 1;
     }
     return 0;
@@ -1983,9 +1983,9 @@ void fldSetRoomObjectModeFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
         if (enabled) {
-            DDS3_GBWK->maps[mapIndex].slots[slotIndex].roomObjectModeFlags |= 1 << bit;
+            DDS3_GBWK->gb[mapIndex].flags[slotIndex].animeFlag |= 1 << bit;
         } else {
-            DDS3_GBWK->maps[mapIndex].slots[slotIndex].roomObjectModeFlags &= ~(1 << bit);
+            DDS3_GBWK->gb[mapIndex].flags[slotIndex].animeFlag &= ~(1 << bit);
         }
     }
 }
@@ -1993,7 +1993,7 @@ void fldSetRoomObjectModeFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
 u8 fldTestRoomObjectModeFlag(s32 mapId, u32 slotIndex, s32 bit) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        u32 flags = DDS3_GBWK->maps[mapIndex].slots[slotIndex].roomObjectModeFlags;
+        u32 flags = DDS3_GBWK->gb[mapIndex].flags[slotIndex].animeFlag;
         return (flags >> bit) & 1;
     }
     return 0;
@@ -2003,9 +2003,9 @@ void fldSetRoomSceneFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
         if (enabled) {
-            DDS3_GBWK->maps[mapIndex].slots[slotIndex].roomSceneFlags |= 1 << bit;
+            DDS3_GBWK->gb[mapIndex].flags[slotIndex].atariFlag |= 1 << bit;
         } else {
-            DDS3_GBWK->maps[mapIndex].slots[slotIndex].roomSceneFlags &= ~(1 << bit);
+            DDS3_GBWK->gb[mapIndex].flags[slotIndex].atariFlag &= ~(1 << bit);
         }
     }
 }
@@ -2013,7 +2013,7 @@ void fldSetRoomSceneFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
 u8 fldTestRoomSceneFlag(s32 mapId, u32 slotIndex, s32 bit) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        u32 flags = DDS3_GBWK->maps[mapIndex].slots[slotIndex].roomSceneFlags;
+        u32 flags = DDS3_GBWK->gb[mapIndex].flags[slotIndex].atariFlag;
         return (flags >> bit) & 1;
     }
     return 0;
@@ -2023,9 +2023,9 @@ void fldSetMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
         if (enabled) {
-            DDS3_GBWK->maps[mapIndex].slots[slotIndex].mapTargetFlags |= 1 << bit;
+            DDS3_GBWK->gb[mapIndex].flags[slotIndex].modelFlag2 |= 1 << bit;
         } else {
-            DDS3_GBWK->maps[mapIndex].slots[slotIndex].mapTargetFlags &= ~(1 << bit);
+            DDS3_GBWK->gb[mapIndex].flags[slotIndex].modelFlag2 &= ~(1 << bit);
         }
     }
 }
@@ -2033,7 +2033,7 @@ void fldSetMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
 u8 fldTestMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        u32 flags = DDS3_GBWK->maps[mapIndex].slots[slotIndex].mapTargetFlags;
+        u32 flags = DDS3_GBWK->gb[mapIndex].flags[slotIndex].modelFlag2;
         return (flags >> bit) & 1;
     }
     return 0;
@@ -2043,9 +2043,9 @@ void fldSetAlternateMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
         if (enabled) {
-            DDS3_GBWK->maps[mapIndex].slots[slotIndex].alternateMapTargetFlags |= 1 << bit;
+            DDS3_GBWK->gb[mapIndex].flags[slotIndex].animeFlag2 |= 1 << bit;
         } else {
-            DDS3_GBWK->maps[mapIndex].slots[slotIndex].alternateMapTargetFlags &= ~(1 << bit);
+            DDS3_GBWK->gb[mapIndex].flags[slotIndex].animeFlag2 &= ~(1 << bit);
         }
     }
 }
@@ -2053,7 +2053,7 @@ void fldSetAlternateMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled
 u8 fldTestAlternateMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        u32 flags = DDS3_GBWK->maps[mapIndex].slots[slotIndex].alternateMapTargetFlags;
+        u32 flags = DDS3_GBWK->gb[mapIndex].flags[slotIndex].animeFlag2;
         return (flags >> bit) & 1;
     }
     return 0;
@@ -2063,7 +2063,7 @@ u8 fldTestAlternateMapTargetFlag(s32 mapId, u32 slotIndex, s32 bit) {
 void fldSetMapSlotByte(s32 mapId, u32 slotIndex, s32 valueIndex, s32 byteValue) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        DDS3_GBWK->maps[mapIndex].slots[slotIndex].values[valueIndex] = byteValue;
+        DDS3_GBWK->gb[mapIndex].flags[slotIndex].animeId2[valueIndex] = byteValue;
     }
 }
 
@@ -2072,7 +2072,7 @@ s32 fldGetMapSlotByte(s32 mapId, u32 slotIndex, s32 valueIndex) {
     u8 value = 0;
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        value = DDS3_GBWK->maps[mapIndex].slots[slotIndex].values[valueIndex];
+        value = DDS3_GBWK->gb[mapIndex].flags[slotIndex].animeId2[valueIndex];
     }
     return value == FIELD_MAP_EMPTY_VALUE ? -1 : value;
 }
@@ -2082,9 +2082,9 @@ void fldSetMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex,
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
         if (enabled) {
-            DDS3_GBWK->maps[mapIndex].slots[slotIndex].auxiliaryFlags |= 1 << bit;
+            DDS3_GBWK->gb[mapIndex].flags[slotIndex].npcFlag |= 1 << bit;
         } else {
-            DDS3_GBWK->maps[mapIndex].slots[slotIndex].auxiliaryFlags &= ~(1 << bit);
+            DDS3_GBWK->gb[mapIndex].flags[slotIndex].npcFlag &= ~(1 << bit);
         }
     }
 }
@@ -2093,7 +2093,7 @@ u8 fldTestMapSlotAuxiliaryFlag(s32 mapId, u32 slotIndex,
                                FldMapSlotAuxiliaryFlagSelector bit) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        u32 flags = DDS3_GBWK->maps[mapIndex].slots[slotIndex].auxiliaryFlags;
+        u32 flags = DDS3_GBWK->gb[mapIndex].flags[slotIndex].npcFlag;
         return (flags >> bit) & 1;
     }
     return 0;
@@ -2103,9 +2103,9 @@ void fldSetMapSlotValueFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
         if (enabled) {
-            DDS3_GBWK->maps[mapIndex].slots[slotIndex].valueFlags |= 1 << bit;
+            DDS3_GBWK->gb[mapIndex].flags[slotIndex].hojiFlag |= 1 << bit;
         } else {
-            DDS3_GBWK->maps[mapIndex].slots[slotIndex].valueFlags &= ~(1 << bit);
+            DDS3_GBWK->gb[mapIndex].flags[slotIndex].hojiFlag &= ~(1 << bit);
         }
     }
 }
@@ -2113,7 +2113,7 @@ void fldSetMapSlotValueFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled) {
 u8 fldTestMapSlotValueFlag(s32 mapId, u32 slotIndex, s32 bit) {
     if (mapId < FIELD_MAP_ID_LIMIT) {
         s32 mapIndex = mapId % FIELD_MAP_ID_MODULUS;
-        u32 flags = DDS3_GBWK->maps[mapIndex].slots[slotIndex].valueFlags;
+        u32 flags = DDS3_GBWK->gb[mapIndex].flags[slotIndex].hojiFlag;
         return (flags >> bit) & 1;
     }
     return 0;

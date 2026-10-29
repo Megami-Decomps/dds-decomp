@@ -946,7 +946,7 @@ datUnitWork_t *dds3FindEntry(DatUnitId unitId) {
 }
 
 PtyFrontlinePromotionResult ptyRebalanceFrontline(DatUnitId unitId) {
-    DatGameState *scanState;
+    dds3GlobalWork_t *scanState;
     datUnitWork_t savedEntry;
     PtyActiveRosterIndex selectedIndex;
     s32 scanIndex;
@@ -1120,7 +1120,7 @@ void ptyInitRosterAndClearItem(datUnitWork_t *entry, PtyTemplateInitFlags initFl
     s32 averagePartyLevel = ptyGetRoundedAveragePartyLevel();
     s32 statGains[DAT_BASE_STAT_COUNT];
     s32 statIndex;
-    DatGameState *gameState;
+    dds3GlobalWork_t *gameState;
 
     memcpy(entry, &DDS3_GBWK->templates[1], sizeof(*entry));
     entry->unitId = 2;
@@ -1157,7 +1157,7 @@ void ptyCloneTemplateSevenToRosterUnitThree(datUnitWork_t *entry, PtyTemplateIni
     s32 averagePartyLevel = ptyGetRoundedAveragePartyLevel();
     s32 statGains[DAT_BASE_STAT_COUNT];
     s32 statIndex;
-    DatGameState *gameState;
+    dds3GlobalWork_t *gameState;
 
     memcpy(entry, &DDS3_GBWK->templates[7], sizeof(*entry));
     entry->unitId = 3;
@@ -2541,7 +2541,7 @@ BtlConditionalEncounterRollResult btlAdvanceConditionalEncounterRoll(f32 step, s
 }
 
 void dds3WorkClear(void) {
-    DatGameState *state = DDS3_GBWK;
+    dds3GlobalWork_t *state = DDS3_GBWK;
 
     state->conditionalEncounterStepRemainder = 0;
     state->conditionalEncounterGauge = 0;

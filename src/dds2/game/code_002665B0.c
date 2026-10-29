@@ -386,7 +386,7 @@ s32 mnuTerminalScoreBox(datUnitWork_t *unit) {
 void mnuRefreshThresholdNodeFlags(MenuList *list) {
     MenuListNode *node = list->first;
     if (node != 0) {
-        DatGameState *base = DDS3_GBWK;
+        dds3GlobalWork_t *base = DDS3_GBWK;
         do {
             u32 currency = (u32)base->header.currency;
             if (currency < (u32)node->terminal.requiredAmount) {

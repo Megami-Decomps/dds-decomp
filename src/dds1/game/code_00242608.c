@@ -1594,7 +1594,7 @@ s32 mnuShopGetTransactionLimit(ShopScene *scene) {
     switch (operation) {
     case 1:
     case 2: {
-        DatGameState *globalState = DDS3_GBWK;
+        dds3GlobalWork_t *globalState = DDS3_GBWK;
 
         affordable = globalState->header.currency / price;
         limit = affordable;
@@ -1628,7 +1628,7 @@ s32 mnuShopGetTransactionLimit(ShopScene *scene) {
 }
 
 s32 mnuCampGetAffordablePurchaseCount(ShopScene *context) {
-    DatGameState *globalState = DDS3_GBWK;
+    dds3GlobalWork_t *globalState = DDS3_GBWK;
     MenuWindowContainer *itemObject = context->window;
     struct MenuList *record = itemObject->list;
     CampWindowParams *parameters = &record->cursor->camp;
@@ -1667,7 +1667,7 @@ void mnuCampDisableUnavailableItemEntries(ShopScene *scene) {
     struct MenuListNode *node = scene->window->list->first;
     for (; index < scene->window->list->count; index++) {
         CampWindowParams *parameters = &node->camp;
-        DatGameState *globalState = DDS3_GBWK;
+        dds3GlobalWork_t *globalState = DDS3_GBWK;
         s32 itemId = parameters->id;
         s32 divisor = parameters->price;
         s32 kind = parameters->mode;

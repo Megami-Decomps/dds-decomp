@@ -1835,7 +1835,7 @@ s32 slSaveWriteEnd_saveData(void) {
     return slSaveWriteFile("base.ico", &fileSaveIconData, &fileSaveIconDataSize, fileBeginLabeledSlotWrite, &fileSaveIconRequest);
 }
 
-extern DatGameState *fileMainSaveBlobAddress;
+extern dds3GlobalWork_t *fileMainSaveBlobAddress;
 extern u32 fileMainSaveBlobSize;
 
 s32 fileBuildMainBlobAndWrite(void) {
@@ -1885,7 +1885,7 @@ s32 fileBuildMainBlobAndWrite(void) {
     fileSavePreviewRecords[slot].saveWords.words[1] = header->saveWords.words[1];
     fileSavePreviewRecords[slot].saveWords.words[2] = header->saveWords.words[2];
     fileMainSaveBlobAddress = DDS3_GBWK;
-    fileMainSaveBlobSize = sizeof(DatGameState);
+    fileMainSaveBlobSize = sizeof(dds3GlobalWork_t);
     if (D_00437D08 == 0 || D_00437D08 == 2) {
         return slSaveWriteFile(filename, &fileMainSaveBlobAddress, &fileMainSaveBlobSize,
                                        slSaveWriteEnd_saveData, NULL);
@@ -3240,7 +3240,7 @@ FileMenuOperationResult fileGetSaveLoadResult(void) {
 }
 
 void slSetTmnlID(s32 x, s32 y) {
-    DatGameState *state = DDS3_GBWK;
+    dds3GlobalWork_t *state = DDS3_GBWK;
 
     state->vr.previewX = x;
     state->vr.previewY = y;
@@ -3556,7 +3556,7 @@ s32 fileApplySelectedLoadResult(void) {
         }
     }
     if (fileLoadSelectionWork->hardInitSelected != 0) {
-        DatGameState *state;
+        dds3GlobalWork_t *state;
         u16 startBranchFlag;
         evtBitOn(0x80E);
         state = DDS3_GBWK;
@@ -3744,7 +3744,7 @@ void filePrintAccessoryLoadNotice(void) {
 extern char D_0042B938[];
 
 void fileSaveAndDisplayCurrentMoney(void) {
-    DatGameState *state = DDS3_GBWK;
+    dds3GlobalWork_t *state = DDS3_GBWK;
     u32 money = state->header.savedMoney;
     state->savedCurrency = money;
     printf(D_0042B938, money);
@@ -3812,7 +3812,7 @@ s32 ptyApplyUnlockedUnitStatBonusesOnce(DatUnitId unitId) {
 
 
 void fileCopySaveHeaderNumbers(FileSavePreviewRecord *source) {
-    DatGameState *state = DDS3_GBWK;
+    dds3GlobalWork_t *state = DDS3_GBWK;
 
     state->header.savedMoney = source->money;
     state->header.saveFlags = source->saveWords.words[0];

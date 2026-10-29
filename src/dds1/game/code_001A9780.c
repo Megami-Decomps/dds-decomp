@@ -6483,7 +6483,7 @@ s32 btlUpdateAndDrawReserveActorPanels(dds3ProcessID_t *task) {
     i = 0;
     if (reserveCount > 0) {
         do {
-            DatGameState *game = DDS3_GBWK;
+            dds3GlobalWork_t *game = DDS3_GBWK;
             s32 partyIndex = game->partyOrder[i + work->activeCount];
             s16 baseFade;
             u32 color;
@@ -8891,7 +8891,7 @@ void func_001BE590(BattleSceneObject *object) {
                 }
                 break;
             case 1: {
-                DatGameState *state = DDS3_GBWK;
+                dds3GlobalWork_t *state = DDS3_GBWK;
                 s32 count = state->partyCount;
                 /* Count active members, then convert to available capacity. */
                 s16 capacity = 0;

@@ -1585,7 +1585,7 @@ void btlInsertPartyActorByPriority(BtlUnit *unit, u8 sourceIndex, u8 priority) {
 
 void btlMoveActorOutOfActiveParty(BtlUnit *unit) {
     datUnitWork_t saved;
-    DatGameState *scanState = DDS3_GBWK;
+    dds3GlobalWork_t *scanState = DDS3_GBWK;
     s32 originalIndex;
     s32 index;
 

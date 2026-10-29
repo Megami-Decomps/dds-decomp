@@ -3217,7 +3217,7 @@ FileMenuOperationResult fileGetSaveLoadResult(void) {
 
 
 void slSetTmnlID(s32 x, s32 y) {
-    DatGameState *state = DDS3_GBWK;
+    dds3GlobalWork_t *state = DDS3_GBWK;
 
     state->vr.previewX = x;
     state->vr.previewY = y;
