@@ -199,7 +199,89 @@ void mnuDrawShopItemQuantity(s32 x, s32 y, s32 depth, ShopScene *scene, s32 alph
     }
 }
 
+#ifdef NON_MATCHING
+#include "brs_icon_record.h"
+#include "common.h"
+#include "snd_sequence_volume_pan.h"
+#include "sdf_trig.h"
+#include "dat_state.h"
+#include "mnu_list.h"
+#include "mnu_shop.h"
+#include "itf.h"
+#include "fr_font.h"
+#include "fr_font_draw_glyph.h"
+#include "pty_bullet_item_count_api.h"
+
+extern struct EffectSlotSet *D_003BC520;
+extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, struct EffectSlotSet *, s32, s32);
+
+/* Icon records are s16[4]: [1] sprite slot, [2] x in 1/16 units, [3] y in 1/8 units. */
+extern BrsIconRecord mnuCommonIconPlacements[];
+/* Draws one row of the shop or menu item list: its fade comes from the list's
+ * entry or exit countdown, the cursor row also draws a pulsing highlight (two
+ * end caps and a pulsing marker), and the row icon is chosen from a small table
+ * (a longer table when the extra option is set) and dimmed by half for two
+ * icons when nothing is pending. Upstream: INCLUDE_ASM in game/code_0025DF68;
+ * written from the retail routine. It differs from retail only in register
+ * allocation, scheduling, a folded constant in the highlight row arithmetic
+ * ((icon * 21 + 0x8D) * 8 as icon * 168 + 0x468) and the placement of the two
+ * icon tables, which are initialized locals checked against retail data
+ * (D_003BC4F8 = {0x21,0xD,0xF,0x22,0xE,0x10} as bytes, D_003AFA30 =
+ * {0x21,0x23,0xD,0xF,0x22,0x24,0xE,0x10} as words). */
+void mnuDrawMenuItemListRow(s32 x, s32 y, s32 depth, struct MenuList *list, struct MenuListNode *entry, s32 surface) {
+    s8 normalIcons[6] = {0x21, 0xD, 0xF, 0x22, 0xE, 0x10};
+    MnuShopListContext *context = list->context;
+    struct EffectSlotSet *texture = D_003BC520;
+    s32 mode = context->mode;
+    f32 fade = 1.0f;
+    s32 row = entry->index;
+    s32 icon;
+
+    switch (mode) {
+    case 1:
+        fade = (f32)(context->countdown + row) / ((f32)list->count + 10.0f);
+        if (fade > 1.0f) {
+            fade = 1.0f;
+        }
+        fade = 1.0f - fade;
+        break;
+    case 2:
+        fade = (f32)context->countdown * 0.25f;
+        break;
+    }
+    icon = row;
+    if (list->cursor->index == icon) {
+        f32 pulse;
+
+        context->cursorPulseTicks++;
+        if (context->cursorPulseTicks >= 61) {
+            context->cursorPulseTicks = 0;
+        }
+        pulse = sdfSin(((f32)context->cursorPulseTicks / 60.0f) * 3.1415926f) * fade;
+        effDrawSpriteWithCornerFade(0x3B0, (icon * 21 + 0x8D) * 8, 0, (u32)(fade * 256.0f), 0, texture, 0x22, surface);
+        effDrawSpriteWithCornerFade(0x8B0, (icon * 21 + 0x8D) * 8, 0, (u32)(fade * 256.0f), 0, texture, 0x23, surface);
+        effDrawSpriteWithCornerFade(mnuCommonIconPlacements[10][2] * 16, (mnuCommonIconPlacements[10][3] + icon * 21) * 8, 0,
+                                    (u32)(fade * 256.0f), 0, texture, mnuCommonIconPlacements[10][1], surface);
+        effDrawSpriteWithCornerFade(mnuCommonIconPlacements[10][2] * 16, (mnuCommonIconPlacements[10][3] + icon * 21) * 8, 0,
+                                    (u32)(pulse * 256.0f), 0, texture, mnuCommonIconPlacements[10][1], surface);
+        icon = (s16)context->extraOption != 0 ? icon + 4 : icon + 3;
+    }
+    if (context->extraOption != 0) {
+        s32 expandedIcons[8] = {0x21, 0x23, 0xD, 0xF, 0x22, 0x24, 0xE, 0x10};
+
+        icon = expandedIcons[icon];
+    } else {
+        icon = normalIcons[icon];
+    }
+    if ((u32)(icon - 13) < 2 && context->pendingSelection == 0) {
+        fade *= 0.5f;
+    }
+    effDrawSpriteWithCornerFade(x + mnuCommonIconPlacements[11][2] * 16, y + (mnuCommonIconPlacements[11][3] + row * 21) * 8,
+                                depth, (u32)(fade * 256.0f), 0, texture, mnuCommonIconPlacements[icon][1], surface);
+}
+#else
 INCLUDE_ASM(const s32, "game/code_0025DF68", mnuDrawMenuItemListRow);
+#endif
 
 extern _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, _FRQ *);
 extern char D_003BC500[];
