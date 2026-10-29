@@ -72,6 +72,18 @@
 #include "btl_ai_table.h"
 #include "btl_ui.h"
 #include "btl_target_selection_state_api.h"
+
+#ifdef NON_MATCHING
+extern BtlRuntimeTask *btlCreateCategoryStatDamageTask(BtlUnit *, s32, s32);
+extern BtlRuntimeTask *btlCreateEffectTaskWithSourceParams(const void *, u32);
+extern BtlRuntimeTask *btlCreateFlaggedCommandItemConsumeTask(BtlUnit *, s32);
+extern BtlRuntimeTask *btlCreateMaskedActorEntryUpdateTask(BtlUnit *, BtlOperandEntry *);
+extern BtlRuntimeTask *btlCreateQueuedActorEntrySelectionTask(BtlUnit *, BtlOperandEntry *);
+extern void btlFlagUnitDefeatCandidate(BtlUnit *unit);
+extern BtlRuntimeTask *sndCreateSkillSeTask(const ActiveSoundNode *, u16);
+extern s32 sndLookupResourceType(BtlUnit *actor, s32 resourceIndex);
+extern s32 sndMapResourceType(BtlUnit *actor, s32 resourceIndex);
+#endif
 /* Declared before first use (were implicit int). */
 extern BtlRuntimeTask *btlScheduleRefreshTask(BtlUnit *owner);
 extern BtlRuntimeTask *btlCreateUnitFadeInTask(BtlUnit *owner, u32 value, u32 variant);

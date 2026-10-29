@@ -100,6 +100,12 @@
 #include "eff_random_mod.h"
 #include "kwln_fade_timing.h"
 #include "sdf_model_release_api.h"
+
+#ifdef NON_MATCHING
+extern void effRequestResourceByMode(const char *prefix, const char *name, s32 mode, u32 *outInstance);
+extern s32 effUpdatePartsListEditor(s32 unused);
+extern u8 *sdf2DGetPrimPtr(SdfDrawPacket *packet);
+#endif
 /* Declared before first use (were implicit int). */
 extern s32 btlAimHorizontalDirectionVU(const f32 *origin, const f32 *targetPosition);
 extern void btlInitTintTransitionDefault(u16 soundId);

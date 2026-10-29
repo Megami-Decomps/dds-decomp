@@ -18,6 +18,10 @@
 #include "kwln_task_runner.h"
 #include "btl.h"
 #include "mnu_title_sound.h"
+
+#ifdef NON_MATCHING
+extern void fmRetFontMem(FntNode *node);
+#endif
 /* Declared before first use (were implicit int). */
 extern void evtLipsStopFunction(void);
 extern void frDelFontStyle(s32 slotId);

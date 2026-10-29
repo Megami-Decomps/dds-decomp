@@ -75,6 +75,13 @@
 #include "evt_solar.h"
 #include "btl_sound_release_task.h"
 #include "btl_ai_table.h"
+
+#ifdef NON_MATCHING
+extern BtlRuntimeTask *btlCreateCategoryStatDamageTask(BtlUnit *unit, s32 category, s32 amount);
+extern BtlRuntimeTask *sndCreateSkillSeTask(const ActiveSoundNode *, u16 optionId);
+extern s32 sndLookupResourceType(BtlUnit *actor, s32 resourceIndex);
+extern s32 sndResolveResourceId(BtlUnit *actor, s32 actionRecordIndex);
+#endif
 /* Declared before first use (were implicit int). */
 extern BtlCameraModeIndex btlGetCameraCommandMode(void);
 extern s32 btlGetLoggedIndexedCommandItem(s32 index);

@@ -22,6 +22,10 @@
 #include "sdf_packet_alloc.h"
 #include "sdf_packet_list.h"
 
+#ifdef NON_MATCHING
+#include "sdf_resource.h"
+#endif
+
 /* SdfCommandNode payload forms: owned packet bytes or borrowed commands. */
 enum {
     SDF_COMMAND_NODE_KIND_PACKET_DATA = 1,

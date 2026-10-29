@@ -85,6 +85,10 @@
 #include "kwln_fade_timing.h"
 #include "sdf_asset_packets.h"
 #include "sdf_chunk.h"
+
+#ifdef NON_MATCHING
+extern s32 effUpdatePartsListEditor(s32 unused);
+#endif
 /* Declared before first use (were implicit int). */
 extern void btlBeginSceneLightColorTransition(f32 *lightColor, f32 *ambientColor, s32 frames);
 extern void btlInitTintTransitionDefault(u16 soundId);

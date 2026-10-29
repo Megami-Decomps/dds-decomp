@@ -118,6 +118,11 @@
 #include "btl.h"
 #include "fld_index_pair.h"
 #include "pty_adjust_item_quantity_api.h"
+
+#ifdef NON_MATCHING
+extern const char *fldFindActorEntryByName(const char *name);
+extern const char *fldPickActorTemplateByName(const char *name);
+#endif
 /* Declared before first use (were implicit int). */
 extern void dds3AdminiCallSequence(s32 requestedMode, const void *requestData, u32 dataBytes, s32 markHistory);
 extern void fldMarkStageExplorationBitmapRegion(s32, s32, s32, s32, s32, s32);

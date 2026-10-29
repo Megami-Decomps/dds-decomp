@@ -141,7 +141,8 @@ INCLUDE_ASM(const s32, "module/unit", unfinished);
 `NON_MATCHING` and `SKIP_ASM`, using its compiler and per-unit flags. CI runs
 this check too, so header changes cannot silently break the retained C.
 Non-matching C earns no matching credit; retain the original assembly fallback
-until the C matches.
+until the C matches. Every callee must be declared before use; the retained-C
+check treats implicit function declarations as errors.
 
 `tools/check_unit.py` enforces most of this. `docs/idioms.md` lists the source
 shapes that are confirmed to produce specific retail code sequences. Read it

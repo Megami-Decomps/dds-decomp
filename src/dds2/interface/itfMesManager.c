@@ -43,6 +43,10 @@
 #include "mdl_resource_table.h"
 #include "kwln_task_lifecycle.h"
 
+#ifdef NON_MATCHING
+#include "fr_font_draw_glyph.h"
+#endif
+
 /* Declared before first use (were implicit int). */
 extern s32 GetNumSelectItem(s32 bitCount, u32 remainingMask);
 

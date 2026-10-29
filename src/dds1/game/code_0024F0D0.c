@@ -19,6 +19,12 @@
 #include "mnu_scene_work.h"
 #include "evt_stage_test_api.h"
 
+#ifdef NON_MATCHING
+extern void eglSetOt(u32 surfaceIndex);
+extern void evtSubmitPrimaryAlphaBlendMode(s32 blendMode);
+extern void evtSubmitPrimaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 unusedZte, s32 ztst);
+#endif
+
 enum { MNU_VARIANT_X_OFFSET = 2, MNU_VARIANT_Y_OFFSET, MNU_VARIANT_SPRITE_GROUPS };
 extern EffectSlotSet *mnuMantraSpriteSlots[];
 extern MnuVariantSpritePlacement mnuMantraVariantSpritePlacements[];

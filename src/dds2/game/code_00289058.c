@@ -13,6 +13,10 @@
 #include "dsp_name.h"
 #include "mdl_flag_api.h"
 #include "kwln_fade.h"
+
+#ifdef NON_MATCHING
+extern void evtCopyEntryStringToActiveWindow(s32, const char *);
+#endif
 extern s32 mnuBindMantraMenuSourceRecord(MnuStatusResource *object, MantraMenuSrc *src);
 extern void mnuClearListFlagsOneAndTwo(u32 *flags);
 

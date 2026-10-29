@@ -1,7 +1,11 @@
 """Source scans must see the same fallback branch as the matching build."""
 import unittest
+from pathlib import Path
+import subprocess
+import tempfile
 
 from nonmatching import matching_source
+from check_nonmatching import compile_unit, ROOT
 
 
 class MatchingSourceTests(unittest.TestCase):
@@ -27,6 +31,34 @@ class MatchingSourceTests(unittest.TestCase):
         self.assertNotIn('a();', selected)
         self.assertNotIn('c();', selected)
         self.assertIn('d();', selected)
+
+
+@unittest.skipUnless((ROOT / "tools/compilers/ee-gcc2.96").is_dir(), "ee-gcc not installed")
+class ImplicitDeclarationTests(unittest.TestCase):
+    def test_retained_c_requires_a_declaration_before_use(self):
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "unit.c"
+            output = Path(directory) / "unit.o"
+            source.write_text(
+                '#ifdef NON_MATCHING\n'
+                'int retained(void) { return undeclared(1); }\n'
+                '#else\nint matching(void) { return 0; }\n#endif\n')
+            rejected = compile_unit(source, output, "dds1")
+            self.assertNotEqual(rejected.returncode, 0, rejected.stderr)
+            self.assertIn("implicit declaration", rejected.stderr)
+            # The matching compiler invocation does not select the retained C.
+            normal = subprocess.run([str(ROOT / "tools/cc.sh"), "-DSKIP_ASM",
+                                     str(source), "-o", str(output)],
+                                    cwd=ROOT, capture_output=True, text=True)
+            self.assertEqual(normal.returncode, 0, normal.stderr)
+
+    def test_early_prototype_allows_the_retained_call(self):
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "unit.c"
+            source.write_text('extern int declared(int);\n'
+                              'int retained(void) { return declared(1); }\n')
+            result = compile_unit(source, Path(directory) / "unit.o", "dds1")
+            self.assertEqual(result.returncode, 0, result.stderr)
 
 
 if __name__ == '__main__':

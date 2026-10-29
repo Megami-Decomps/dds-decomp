@@ -37,6 +37,10 @@
 #include "eff_random.h"
 #include "fr_font.h"
 #include "pty_adjust_item_quantity_api.h"
+
+#ifdef NON_MATCHING
+extern void mnuDrawCampGridResourceSlot(s32, s32, s32, struct MenuList *, struct MenuListNode *, s32);
+#endif
 /* Declared before first use (were implicit int). */
 extern void evtStageTestInit(s32 mode);
 extern void evtStageTestStop(void);

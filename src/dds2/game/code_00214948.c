@@ -42,6 +42,11 @@
 #include "mdl.h"
 #include "dds3obj.h"
 #include "mdl_flag_api.h"
+
+#ifdef NON_MATCHING
+extern u32 btlGetAdjustedSlotAffinity(BtlUnit *unit, s32 unused, s32 index);
+extern s32 btlGetLoggedIndexedCommandItem(s32 index);
+#endif
 /* Declared before first use (were implicit int). */
 extern s32 btlHasMarkedEntry14(BtlLinkedCommand *command);
 extern s32 btlHasActiveSubtask(void);

@@ -74,6 +74,10 @@
 #include "fr_font_draw_glyph.h"
 #include "itf.h"
 
+#ifdef NON_MATCHING
+extern void fileShowPromptDialog(void);
+#endif
+
 typedef s32 (*FileMenuContinuationCallback)(void);
 /* Declared before first use (were implicit int). */
 extern void effLoadFlashTextures(void);

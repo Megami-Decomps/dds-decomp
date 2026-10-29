@@ -84,6 +84,11 @@
 #include "btl.h"
 #include "evt_unit_color_transition.h"
 #include "evt_unit.h"
+
+#ifdef NON_MATCHING
+#include "fld_map_slot_auxiliary_flag_selector.h"
+extern u8 fldTestMapSlotAuxiliaryFlag( s32 mapId, u32 slotIndex, FldMapSlotAuxiliaryFlagSelector bit);
+#endif
 /* Declared before first use (were implicit int). */
 extern void dds3WorkClear(void);
 extern void sdfDrawSync(void);
