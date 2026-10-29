@@ -7,12 +7,12 @@
 #include "eff_blur.h"
 #include "sdf_chip.h"
 
-extern void effResourceQuadDraw(EffResourceRectDrawParams *params, sdfTexHandle_t *resource, u8 gsCoordinates);
+extern void dds3EffectFilterDrawTexQuad(EffResourceRectDrawParams *params, sdfTexHandle_t *resource, u8 gsCoordinates);
 
 #include "sdf_packet_alloc.h"
-extern SdfPoolNode D_003253C8;
+extern sdfGrOt_t D_003253C8;
 
-void effResourceQuadDraw(EffResourceRectDrawParams *params, sdfTexHandle_t *resource, u8 gsCoordinates) {
+void dds3EffectFilterDrawTexQuad(EffResourceRectDrawParams *params, sdfTexHandle_t *resource, u8 gsCoordinates) {
     sdfDrawTag_t *list;
     u64 *packet;
     SdfDrawPacket *drawPacket;
@@ -102,7 +102,7 @@ void effResourceRectDrawPixels(EffResourceRectWork *work) {
     work->params.draw.bounds.top = y - extent;
     work->params.draw.bounds.right = x + extent;
     work->params.draw.bounds.bottom = y + extent;
-    effResourceQuadDraw(&work->params.draw, work->texture, 0);
+    dds3EffectFilterDrawTexQuad(&work->params.draw, work->texture, 0);
 }
 
 /* Generate already-scaled GS coordinates; the renderer must not scale again. */
@@ -122,7 +122,7 @@ void effComputeBlurRectBounds(EffResourceRectWork *work) {
     work->params.draw.bounds.right = right;
     work->params.draw.bounds.top = y;
     work->params.draw.bounds.bottom = bottom;
-    effResourceQuadDraw(&work->params.draw, work->texture, 1);
+    dds3EffectFilterDrawTexQuad(&work->params.draw, work->texture, 1);
 }
 
 typedef struct dds3HermitianTrackPoly_tag dds3HermitianTrackPoly_tag;

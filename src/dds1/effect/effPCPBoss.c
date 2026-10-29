@@ -171,7 +171,7 @@ void effPCPCrackDelete(effPCPCrack_t *work) {
 #include "eff_math.h"
 #include "sdf_quaternion.h"
 extern u32 effMagaCylinderCalcColor(u32, u32);
-extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
 extern f32 D_003556B0[4];
 extern void dds3FlashPolyListSetABGR(dds3FlashPolyList_t *, u32);
 extern void dds3FlashPolyListDraw(dds3FlashPolyList_t *);

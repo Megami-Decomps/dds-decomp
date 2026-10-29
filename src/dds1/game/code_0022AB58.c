@@ -40,7 +40,7 @@ void *evtGetDebugProcess(void) {
 
 extern dds3ProcessID_t *scrStartScriptByName(u32, const char *, ScrProcedureIndex);
 
-extern SdfPoolNode D_00325708;
+extern sdfGrOt_t D_00325708;
 
 extern u8 dds3PadButtonState[2][2][16];
 
@@ -120,16 +120,6 @@ void evtChkEndProcess(void) {
     evtFreeStage();
 }
 
-INCLUDE_RODATA(const s32, "game/code_0022AB58", D_003ACD38);
-
-INCLUDE_RODATA(const s32, "game/code_0022AB58", D_003ACD48);
-
-INCLUDE_RODATA(const s32, "game/code_0022AB58", D_003ACD58);
-
-INCLUDE_RODATA(const s32, "game/code_0022AB58", D_003ACD68);
-
-INCLUDE_RODATA(const s32, "game/code_0022AB58", D_003ACD78);
-
 #ifdef NON_MATCHING
 #include "common.h"
 #include "kwln.h"
@@ -141,7 +131,7 @@ INCLUDE_RODATA(const s32, "game/code_0022AB58", D_003ACD78);
 #include "dds3_world_primary.h"
 #include "dds3_node_diagnostic_row.h"
 
-extern SdfPoolNode sdfGrOtTable[];
+extern sdfGrOt_t sdfGrOtTable[];
 extern s8 dds3PadBitTable[32];
 extern s32 dpy;
 extern s32 curbase;
@@ -179,10 +169,10 @@ s32 evtSceneDispProcess(void *task) {
     NodeDiagnosticRow *entry;
     dds3Basic_t *world;
     dds3Basic_t *node;
-    EvtWorldTable *data;
+    evtWorldTable_t *data;
     sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTag_t *background;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
     s32 kindCount;
     s32 selected = 0;
     s32 line;
@@ -201,7 +191,7 @@ s32 evtSceneDispProcess(void *task) {
     } else {
         line = 2;
         kindCount = 0;
-        data = (EvtWorldTable *)world->data;
+        data = (evtWorldTable_t *)world->workdata;
         for (entry = table; entry->kind != 0; entry++) {
             style = 0;
             entry->count = 0;
@@ -350,6 +340,16 @@ s32 evtSceneDispProcess(void *task) {
     return 0;
 }
 #else
+INCLUDE_RODATA(const s32, "game/code_0022AB58", D_003ACD38);
+
+INCLUDE_RODATA(const s32, "game/code_0022AB58", D_003ACD48);
+
+INCLUDE_RODATA(const s32, "game/code_0022AB58", D_003ACD58);
+
+INCLUDE_RODATA(const s32, "game/code_0022AB58", D_003ACD68);
+
+INCLUDE_RODATA(const s32, "game/code_0022AB58", D_003ACD78);
+
 INCLUDE_ASM(const s32, "game/code_0022AB58", evtSceneDispProcess);
 #endif
 

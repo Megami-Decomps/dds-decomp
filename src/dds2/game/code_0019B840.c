@@ -144,7 +144,7 @@ typedef char FrFontSpritePacketViewLayoutCheck[
      (u32)&((FrFontSpritePacketView *)0)->sprite.corners == 0x60) ? 1 : -1];
 
 extern u32 D_00452898[];
-extern SdfPoolNode sdfGrOtTable[];
+extern sdfGrOt_t sdfGrOtTable[];
 
 /* Build and submit an atlas glyph sprite, preserving the two-corner UV order. */
 void frFontDrawAtlasGlyph(s32 x, s32 y, s32 width, s32 height, u8 style,
@@ -152,7 +152,7 @@ void frFontDrawAtlasGlyph(s32 x, s32 y, s32 width, s32 height, u8 style,
     const FrFontAtlas *atlas, s32 surface) {
     FrFontSpritePacketView *packet;
     sdfDrawTag_t *list;
-    SdfPoolNode *drawSurface;
+    sdfGrOt_t *drawSurface;
     u32 reversedColor;
     s32 right, bottom;
     u64 rgbaq;

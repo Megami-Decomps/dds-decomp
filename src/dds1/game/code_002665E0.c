@@ -179,11 +179,11 @@ void brsUpdateResultPortraitFade(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
     }
 }
 #include "sdf.h"
-extern SdfPoolNode sdfGrOtTable[];
+extern sdfGrOt_t sdfGrOtTable[];
 extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);
 extern void eglSetOt(u32 surfaceIndex);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
-extern void btlDrawButtonIconFixed64(SdfPoolNode *, s32, s32, s32, s32, s32, s32, s32);
+extern void btlDrawButtonIconFixed64(sdfGrOt_t *, s32, s32, s32, s32, s32, s32, s32);
 /* The four sprite corner colours start from the shared grey table. */
 typedef struct BrsCornerColors {
     u32 rgba[4];
@@ -658,7 +658,6 @@ void brsUpdateProfileProgressIndicator(s32 screenX, s32 screenY, s32 depth, BrsS
 
 
 extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, struct EffectSlotSet *, s32, s32);
-
 
 INCLUDE_RODATA(const s32, "game/code_002665E0", D_003AFC30);
 

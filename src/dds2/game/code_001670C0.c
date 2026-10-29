@@ -26,8 +26,8 @@ struct BtlUnit;
 extern u8 *sdf2DGetPrimPtr(SdfDrawPacket *packet);
 extern sdfTexHandle_t *dds3GetRenderTexture(void);
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
-extern SdfPoolNode D_0037FB88;
-extern SdfPoolNode D_00380588;
+extern sdfGrOt_t D_0037FB88;
+extern sdfGrOt_t D_00380588;
 
 
 
@@ -280,10 +280,10 @@ extern u32 D_003AAFD0[];
 
 
 /* Allocate and build a VIF vertex packet; optional streams and legacy bounds are unchanged. */
-void *effPkt3DPrimMakePoly(EffPacketParams *params) {
-    s32 parameterCount = params->parameterCount;
-    s32 vertexCount = params->vertexCount;
-    u32 primitive = params->primitive | 0x48;
+void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *params) {
+    s32 parameterCount = params->faceCount;
+    s32 vertexCount = params->pointCount;
+    u32 primitive = params->attr | 0x48;
     u32 mode = 0x60;
     s32 stride = 3;
     s32 overhead = 16;
@@ -298,22 +298,22 @@ void *effPkt3DPrimMakePoly(EffPacketParams *params) {
     u32 countCode;
     u32 *stream2;
 
-    if (params->normals != NULL) {
+    if (params->normal != NULL) {
         mode = 0xE0;
         overhead = 17;
         stride = 6;
     }
-    if (params->texcoords != NULL) {
+    if (params->uv != NULL) {
         mode |= 0x100;
         primitive |= 0x10;
         overhead++;
         stride += 2;
-        if (params->extraTexcoords != NULL) {
+        if (params->multiUv != NULL) {
             primitive |= 0x1000;
             stride += 2;
         }
     }
-    if (params->colors != NULL) {
+    if (params->vertexColor != NULL) {
         mode |= 0x200;
         primitive |= 0x800;
         overhead++;
@@ -321,7 +321,7 @@ void *effPkt3DPrimMakePoly(EffPacketParams *params) {
     }
     allocationSize = (overhead + parameterCount + stride * vertexCount) * 4;
     allocationSize = (allocationSize + 15) & ~15;
-    allocate = params->allocate;
+    allocate = params->allocator;
     if (allocate == NULL) {
         allocate = sdfGrAllocPacketBuff;
     }
@@ -329,12 +329,12 @@ void *effPkt3DPrimMakePoly(EffPacketParams *params) {
 
     *(u64 *)packet = (u64)(u16)((allocationSize >> 4) - 1) | 0x20000000ULL;
     ((u32 *)packet)[2] = 0x6102C000;
-    ((u32 *)packet)[3] = (~params->mask) & 0xFFFF;
+    ((u32 *)packet)[3] = (~params->attrInhibit) & 0xFFFF;
     ((u32 *)packet)[4] = 0x6E01C002;
     ((u32 *)packet)[5] = params->color;
     ((u32 *)packet)[6] = 0x6001C003;
     cursor = (u32 *)packet + 7;
-    *cursor++ = (u32)params->depth;
+    *cursor++ = (u32)params->zBias;
     *cursor++ = 0x04000004;
     *cursor++ = 0x14000000;
     *cursor++ = 0x6D01C000;
@@ -342,16 +342,16 @@ void *effPkt3DPrimMakePoly(EffPacketParams *params) {
     *cursor++ = (primitive & 0xFFFF) | (mode << 16);
     *cursor++ = 0x6E00C001 | ((u32)parameterCount << 16);
 
-    if (params->parameters == NULL) {
+    if (params->faceIndex == NULL) {
         memcpy(cursor, D_003AAFD0, parameterCount * 4);
     } else {
-        memcpy(cursor, params->parameters, parameterCount * 4);
+        memcpy(cursor, params->faceIndex, parameterCount * 4);
     }
     cursor += parameterCount;
     offset = parameterCount + 1;
     countCode = vertexCount << 16;
     *cursor++ = countCode | offset | 0x6800C000;
-    vector = params->positions;
+    vector = params->vertex;
     i = 0;
     do {
         EE_MMI_STORE_VEC3_VALUE(cursor, *vector);
@@ -361,7 +361,7 @@ void *effPkt3DPrimMakePoly(EffPacketParams *params) {
     } while (i != vertexCount);
     offset += vertexCount;
 
-    vector = params->normals;
+    vector = params->normal;
     if (vector != NULL) {
         *cursor++ = countCode | offset | 0x6800C000;
         i = 0;
@@ -373,9 +373,9 @@ void *effPkt3DPrimMakePoly(EffPacketParams *params) {
         } while (i != vertexCount);
         offset += vertexCount;
     }
-    stream = (u32 *)params->texcoords;
+    stream = (u32 *)params->uv;
     if (stream != NULL) {
-        stream2 = params->extraTexcoords;
+        stream2 = params->multiUv;
         if (stream2 == NULL) {
             *cursor++ = countCode | offset | 0x6400C000;
             memcpy(cursor, stream, vertexCount * 8);
@@ -393,7 +393,7 @@ void *effPkt3DPrimMakePoly(EffPacketParams *params) {
         }
         offset += vertexCount;
     }
-    stream = params->colors;
+    stream = params->vertexColor;
     if (stream != NULL) {
         *cursor++ = countCode | offset | 0x6E00C000;
         memcpy(cursor, stream, vertexCount * 4);
@@ -443,9 +443,9 @@ void dds3CrossfadeStart(s32 frames) {
 }
 
 /* Capture the first frame, then draw the held texture with a decreasing alpha. */
-void dds3UpdateCrossfade(void) {
+void dds3CrossfadeRun(void) {
     sdfDrawTag_t *list;
-    SdfDmaNode *reference;
+    sdfGrRefPacketHeader_t *reference;
     u64 *texturePacket;
     u64 *blendPacket;
     void *sprite;
@@ -462,7 +462,7 @@ void dds3UpdateCrossfade(void) {
     if (crossfadeElapsedFrames == 0) {
         list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
-        reference = (SdfDmaNode *)sdfGrAllocPacketBuff(0x20);
+        reference = (sdfGrRefPacketHeader_t *)sdfGrAllocPacketBuff(0x20);
         sdfGrLinkDispFrameTex(list,
             (u32)(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes),
             reference);

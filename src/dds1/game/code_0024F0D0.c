@@ -2260,9 +2260,9 @@ extern void dspRequestMessageWindowModeOne(void);
 extern void mnuDrawMantraSparkScene(MenuSceneMetadata *, s32, s32);
 extern void mnuDrawAnimatedCurrencyCounter(s32, s32, s32, s32, MenuSceneMetadata *, s32);
 extern s32 mnuDrawLoadedProgressPanels(datUnitWork_t *partyRecord, MenuProgressHost *work, s32 context);
-struct SdfPoolNode;
-extern s8 evtStageTestUpdate(struct SdfPoolNode **);
-extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
+struct sdfGrOt_t;
+extern s8 evtStageTestUpdate(struct sdfGrOt_t **);
+extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
 extern void uiDrawGradientColorRect(u32, u32, u32, u32, u32, const u32 *, u32);
 
 /* Update attached visuals and stage completion, then ramp the message-window shade over ten frames.

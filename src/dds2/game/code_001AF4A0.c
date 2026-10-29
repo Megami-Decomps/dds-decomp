@@ -150,7 +150,7 @@ extern s32 btlDoesEnabledStatusMatchCurrentId(datUnitWork_t *, u32);
 
 extern s32 TestMsgMngD_Process(dds3ProcessID_t *task);
 
-extern SdfPoolNode D_003805A8;
+extern sdfGrOt_t D_003805A8;
 
 extern u8 D_003B4D08[];
 
@@ -166,7 +166,7 @@ extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *list, s32 context, s32 mode);
 /* Option IDs index the same signed-byte bank used by the named controls. */
 extern SndPad dds3PadButtonState;
 
-extern SdfPoolNode sdfGrOtTable[];
+extern sdfGrOt_t sdfGrOtTable[];
 
 #define BTL_ENTRY_STATUS_MASK 0x7FFF
 
@@ -174,7 +174,7 @@ extern u32 datComputeSkillBoostedMaxHp(datUnitWork_t *);
 
 extern u32 datComputeSkillBoostedMaxMp(datUnitWork_t *);
 
-extern SdfPoolNode D_00380708;
+extern sdfGrOt_t D_00380708;
 
 
 extern s32 D_00435CBC;
@@ -664,7 +664,7 @@ s32 btlComputeStatusPenaltyFifth(BtlUnit *unit) {
     status = unit->partyRecord.status & 0x7fff;
     amount = 0;
     if ((status == 0x80) || (status == 0x400)) {
-        amount = (s32)-(u32)unit->partyRecord.maxHp / 5;
+        amount = (s32)-(u32)unit->partyRecord.maxhp / 5;
     }
     return amount;
 }

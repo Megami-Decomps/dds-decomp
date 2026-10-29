@@ -91,9 +91,9 @@ typedef dds3Effect_Blur_t BlurSource;
 
 
 struct sdfDrawTag_t;
-struct SdfDmaNode;
+struct sdfGrRefPacketHeader_t;
 
-extern SdfPoolNode D_003803E8;
+extern sdfGrOt_t D_003803E8;
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 #include "sdf_packet_alloc.h"
 extern void sdfBuildFrameRegisterReference(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext);

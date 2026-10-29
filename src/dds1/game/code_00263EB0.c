@@ -339,13 +339,13 @@ void kwlnItemUpdateDisplay(BrsSkillPackageWork *scene) {
         p2sdPlaySE(0x10, 0x7F, 0x3F);
         break;
     case 1:
-        item->hp = item->maxHp;
+        item->hp = item->maxhp;
         item->mp = item->maxMp;
         item->status = 0;
         p2sdPlaySE(0x10, 0x7F, 0x3F);
         break;
     case 2:
-        item->hp = item->maxHp;
+        item->hp = item->maxhp;
         p2sdPlaySE(0x10, 0x7F, 0x3F);
         break;
     case 3:

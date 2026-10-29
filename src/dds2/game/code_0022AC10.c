@@ -181,7 +181,7 @@ extern s8 dds3PadBitTable[32];
 extern void btlReleaseOwnedData(void);
 
 
-extern SdfPoolNode D_00380608;
+extern sdfGrOt_t D_00380608;
 
 extern u8 D_00380860[];
 
@@ -265,7 +265,7 @@ extern void *sdfDevPrintf(s32, s32, s32, s32, const char *, ...);
 
 extern u8 D_00436EF8[];
 
-extern SdfPoolNode kwlnPositionedTextSurface;
+extern sdfGrOt_t kwlnPositionedTextSurface;
 
 extern s32 abs(s32);
 
@@ -909,7 +909,7 @@ s32 btlListHasMarkedFlag(datUnitWork_t **entryList, s32 entryCount) {
 s32 cmpButtonGuideShowDone(datUnitWork_t **entryList, s32 entryCount) {
     s32 entryIndex;
     for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
-        if (entryList[entryIndex]->hp < entryList[entryIndex]->maxHp) {
+        if (entryList[entryIndex]->hp < entryList[entryIndex]->maxhp) {
             return 0;
         }
     }
@@ -1569,14 +1569,14 @@ void btlReleaseOwnedData(void) {
 extern sdfMat_t *sdfMatNew(void);
 extern void LoadIdentity(void);
 extern void SetRotateMatrixAxis_B(const RwV3d *, f32);
-extern void *effPkt3DPrimMakePoly(EffPacketParams *);
+extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *);
 extern sdfMat_t *D_00436D10;
-extern EffPacketParams btlCapturedScreenTileDrawParams;
+extern sdf3DPrimPolyParm_t btlCapturedScreenTileDrawParams;
 extern u32 btlCapturedScreenTilePacketParameters[];
 extern f32 btlCapturedScreenTileVertexOffsets[6][2];
 extern f32 btlCapturedScreenTileNormal[4];
 extern f32 D_00384790[4][4];
-extern SdfPoolNode D_00380708, D_00380628;
+extern sdfGrOt_t D_00380708, D_00380628;
 
 typedef struct BtlTileAlphaPacket {
     SdfGsPacketHeader header;
@@ -1662,10 +1662,10 @@ BtlRuntimeFadeStepResult btlDrawCapturedScreenTileOverlay(
             D_00436D10 = sdfMatNew();
             btlInitLightParams();
             memset(&btlCapturedScreenTileDrawParams, 0, sizeof(btlCapturedScreenTileDrawParams));
-            btlCapturedScreenTileDrawParams.primitive = 0x4000;
-            btlCapturedScreenTileDrawParams.parameters = btlCapturedScreenTilePacketParameters;
-            btlCapturedScreenTileDrawParams.parameterCount = 4;
-            btlCapturedScreenTileDrawParams.vertexCount = 6;
+            btlCapturedScreenTileDrawParams.attr = 0x4000;
+            btlCapturedScreenTileDrawParams.faceIndex = btlCapturedScreenTilePacketParameters;
+            btlCapturedScreenTileDrawParams.faceCount = 4;
+            btlCapturedScreenTileDrawParams.pointCount = 6;
         }
         tiles = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(tiles);
@@ -1677,9 +1677,9 @@ BtlRuntimeFadeStepResult btlDrawCapturedScreenTileOverlay(
         sdfSetAssetPrimaryTextureAddress(D_00436D10, dds3RenderTexture);
         sdf3DPrimLinkMat(tiles, D_00436D10, NULL);
         btlCapturedScreenTileDrawParams.color = 0x80808080;
-        btlCapturedScreenTileDrawParams.positions = (u128 *)positions;
-        btlCapturedScreenTileDrawParams.normals = (u128 *)normals;
-        btlCapturedScreenTileDrawParams.texcoords = coordinates[0];
+        btlCapturedScreenTileDrawParams.vertex = (u128 *)positions;
+        btlCapturedScreenTileDrawParams.normal = (u128 *)normals;
+        btlCapturedScreenTileDrawParams.uv = coordinates[0];
         height = tanf(D_0037F980.camera.fov * 0.5f) * 1000.0f;
         width = height * 1.333333254f;
         packet = (sdfPrimTransPacket_t *)sdfGrAllocPacketBuff(0x40);
@@ -3159,10 +3159,10 @@ void btlApplyDebugEncounterPartySelection(void) {
                     DDS3_GBWK->party[i].flags = (DDS3_GBWK->party[i].flags | 0x1000) & ~2;
                 }
                 DDS3_GBWK->partyOrder[i] = i;
-                DDS3_GBWK->party[i].maxHp = btlComputeSkillAdjustedMaxHp(&DDS3_GBWK->party[i]);
+                DDS3_GBWK->party[i].maxhp = btlComputeSkillAdjustedMaxHp(&DDS3_GBWK->party[i]);
                 DDS3_GBWK->party[i].maxMp = btlComputeSkillAdjustedMaxMp(&DDS3_GBWK->party[i]);
-                if (DDS3_GBWK->party[i].maxHp < DDS3_GBWK->party[i].hp || D_00436F96 != 0) {
-                    DDS3_GBWK->party[i].hp = DDS3_GBWK->party[i].maxHp;
+                if (DDS3_GBWK->party[i].maxhp < DDS3_GBWK->party[i].hp || D_00436F96 != 0) {
+                    DDS3_GBWK->party[i].hp = DDS3_GBWK->party[i].maxhp;
                 }
                 if (DDS3_GBWK->party[i].maxMp < DDS3_GBWK->party[i].mp || D_00436F96 != 0) {
                     DDS3_GBWK->party[i].mp = DDS3_GBWK->party[i].maxMp;

@@ -281,9 +281,9 @@ extern EffRandState effSharedRandomState[];
 extern void btlAdvanceActionSkillCamera(BtlLinkedCommand *);
 extern void btlBuildTargetGroupFramingCameraPose(BtlLinkedCommand *, BtlCamState *);
 struct dds3ModelHandle_t;
-struct SdfPoolNode;
+struct sdfGrOt_t;
 extern void btlDrawUnitTransparencyPasses(void *, void *, s32, u8 *, u32);
-extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
 extern u8 btlUnitTransparencySurfaces[];
 
 
@@ -981,7 +981,7 @@ void btlStartCommandAudioAndSelectedAction(u8 *task) {
             sceneTask->ownerId = unit->owner;
             btlStartTask(sceneTask);
             memset(&block, 0, 0x2C);
-            hp = unit->partyRecord.maxHp;
+            hp = unit->partyRecord.maxhp;
             block.hpDelta = hp / 10;
             mp = unit->partyRecord.maxMp;
             block.mpDelta = mp / 10;
@@ -1892,10 +1892,6 @@ void btlScheduleAttackActionTasks(ActionStateLink *action) {
 void btlEnterSkillActionState(void) {
 }
 
-INCLUDE_RODATA(const s32, "game/code_001D4438", D_00417348);
-
-INCLUDE_RODATA(const s32, "game/code_001D4438", D_00417360);
-
 #ifdef NON_MATCHING
 #include "sdk_ps2.h"
 #include "btl_sound.h"
@@ -2803,6 +2799,10 @@ void func_001D7230(ActionStateLink *actor) {
 
 }
 #else
+INCLUDE_RODATA(const s32, "game/code_001D4438", D_00417348);
+
+INCLUDE_RODATA(const s32, "game/code_001D4438", D_00417360);
+
 INCLUDE_ASM(const s32, "game/code_001D4438", func_001D7230);
 #endif
 

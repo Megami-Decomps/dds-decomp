@@ -1085,7 +1085,7 @@ void evtEventViewerApplyDurationScaledEffectAlpha(EvtRuntimeGroup *group, EvtRun
     }
     elapsed = viewer->curFrame - key->frame;
     if (key->duration >= elapsed) {
-        node = ((EvtViewerObjectData *)viewer->objects[key->p08.sb[0]]->data)->parameterNode;
+        node = ((EvtViewerObjectData *)viewer->objects[key->p08.sb[0]]->workdata)->parameterNode;
         alpha = (s32)((128.0f / key->duration) * elapsed);
         printf("alpha=%d\n", alpha);
         color = ((u32)alpha << 24) | 0x808080;
@@ -1130,7 +1130,7 @@ void evtEventViewerFadeEffectSlot(EvtRuntimeGroup *group, EvtRuntimeChild *key, 
             }
             alpha = (s32)((128.0f / (f32)duration) * (f32)(end - currentFrame));
             return effSetNodeParameterValue(
-                ((EvtViewerObjectData *)viewer->objects[(s8)slot]->data)->parameterNode,
+                ((EvtViewerObjectData *)viewer->objects[(s8)slot]->workdata)->parameterNode,
                 ((u32)alpha << 24) | 0x00808080);
         }
         break;
@@ -1624,9 +1624,9 @@ void evtEventViewerUpdateUnitTransitions(s32 timelineTime, EvtRuntime *viewer) {
     s32 latestTransitionTime;
 
     if (dds3GetActiveScene() != NULL) {
-        worldObject = ((EvtWorldTable *)((dds3Basic_t *)dds3GetActiveScene())->data)->slots[EVT_WORLD_SLOT_UNIT].head;
+        worldObject = ((evtWorldTable_t *)((dds3Basic_t *)dds3GetActiveScene())->workdata)->slots[EVT_WORLD_SLOT_UNIT].head;
         while (worldObject != NULL) {
-            if (((u8 *)worldObject->value) != NULL) {
+            if (((u8 *)worldObject->name) != NULL) {
                 selectedKey = NULL;
                 transitionValue = 0;
                 latestTransitionTime = -1;
@@ -2002,8 +2002,8 @@ extern void evtSetMovieClipPositionClampedToDuration(dds3Basic_t *movie, s32 unu
 /* Clamps each movie object's playback interval using its linked track's first
  * key frame (or track offset), endTime, and the current key's extra parameter. */
 void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer) {
-    EvtWorldTable *worldTable;
-    EvtWorldSlot *worldSlots;
+    evtWorldTable_t *worldTable;
+    evtWorldSlot_t *worldSlots;
     dds3Basic_t *movieObject;
     EvtRuntimeGroup *trackEntry;
     s32 startFrame;
@@ -2011,7 +2011,7 @@ void evtViewerClampMovieTimes(s32 endTime, EvtRuntime *viewer) {
     EvtRuntimeChild *glyph;
 
     if (dds3GetActiveScene() != 0) {
-        worldTable = (EvtWorldTable *)((dds3Basic_t *)dds3GetActiveScene())->data;
+        worldTable = (evtWorldTable_t *)((dds3Basic_t *)dds3GetActiveScene())->workdata;
         if (worldTable != 0) {
             worldSlots = worldTable->slots;
             if (worldSlots != 0) {
@@ -2053,7 +2053,7 @@ extern EvtRuntimeChild *evtViewerFindLatestMatchingMotionKey(EvtRuntimeGroup *gr
 
 void evtViewerSyncModelMotionChannels(s32 frame, dds3Basic_t *object, EvtRuntimeGroup *track,
                    EvtRuntime *viewer, s32 mode) {
-    EffectObjectData *data = object->data;
+    EffectObjectData *data = object->workdata;
     dds3ModelHandle_t *model = (dds3ModelHandle_t *)data->modelHolder->resourceHandle;
     MdlMotionSearchId channel;
 
@@ -2177,7 +2177,7 @@ void evtViewerSyncWorldGroups(s32 position, EvtRuntime *viewer) {
     EvtRuntimeGroup *found;
 
     if (dds3GetActiveScene() != 0) {
-        unitObject = ((EvtWorldTable *)((dds3Basic_t *)dds3GetActiveScene())->data)->slots[EVT_WORLD_SLOT_UNIT].head;
+        unitObject = ((evtWorldTable_t *)((dds3Basic_t *)dds3GetActiveScene())->workdata)->slots[EVT_WORLD_SLOT_UNIT].head;
         while (unitObject != NULL) {
             found = 0;
             for (node = viewer->groups; node != 0; node = node->next) {
@@ -2220,7 +2220,7 @@ void evtViewerApplyGlyphLodChannel(s32 position, EvtRuntime *viewer) {
                     glyph = glyph->next;
                 } while (glyph != NULL);
             }
-            lod = ((dds3ModelHandle_t *)((EffectObjectData *)node->info->data)->modelHolder->resourceHandle)->inner;
+            lod = ((dds3ModelHandle_t *)((EffectObjectData *)node->info->workdata)->modelHolder->resourceHandle)->inner;
             if (best == NULL) {
                 lod->lodIndex = 0;
             } else {
@@ -2263,7 +2263,7 @@ void evtEventViewerAttachIndexedObject(s32 position, EvtRuntime *viewer) {
                     dds3SetRotPoseSet(node->info,
                                             (u128 *)node->savedRotation);
                     dds3GetPosPoseSet(node->info);
-                    SDF_VU0_STOREVECTOR(&node->info->inner->smoothedPosition);
+                    SDF_VU0_STOREVECTOR(&node->info->poseset->smoothedPosition);
                     node->attachmentState = EVT_OBJECT_ATTACHMENT_DETACHED;
                 }
             } else if (best->frame == position) {
@@ -2275,7 +2275,7 @@ void evtEventViewerAttachIndexedObject(s32 position, EvtRuntime *viewer) {
                     dds3SetRotPoseSet(node->info,
                                             (u128 *)node->savedRotation);
                     dds3GetPosPoseSet(node->info);
-                    SDF_VU0_STOREVECTOR(&node->info->inner->smoothedPosition);
+                    SDF_VU0_STOREVECTOR(&node->info->poseset->smoothedPosition);
                     node->attachmentState = EVT_OBJECT_ATTACHMENT_DETACHED;
                 } else {
                     dds3Basic_t *object = dds3SceneBasicSearchName(
@@ -2680,7 +2680,7 @@ enum {
 
 /* Apply the viewer playback mode to unit, motion and movie-object tracks. */
 void evtEventViewerApplyPlaybackMode(s32 playbackMode, u32 frame, EvtRuntime *viewer) {
-    EvtWorldTable *table;
+    evtWorldTable_t *table;
     dds3Basic_t *object;
     EvtRuntimeGroup *track;
     EvtRuntimeGroup *found;
@@ -2693,7 +2693,7 @@ void evtEventViewerApplyPlaybackMode(s32 playbackMode, u32 frame, EvtRuntime *vi
     if (dds3GetActiveScene() == NULL) {
         return;
     }
-    table = ((EvtWorldTable *)((dds3Basic_t *)dds3GetActiveScene())->data);
+    table = ((evtWorldTable_t *)((dds3Basic_t *)dds3GetActiveScene())->workdata);
     object = table->slots[5].head;
     while (object != NULL) {
         track = viewer->groups;
@@ -2712,7 +2712,7 @@ void evtEventViewerApplyPlaybackMode(s32 playbackMode, u32 frame, EvtRuntime *vi
     }
     object = table->slots[6].head;
     while (object != NULL) {
-        motion = ((EffectTransformData *)object->data)->baseControlWorkData->motion;
+        motion = ((EffectTransformData *)object->workdata)->baseControlWorkData->motion;
         if (motion != NULL) {
             if (playbackMode == EVT_VIEWER_PLAYBACK_PAUSED) {
                 sdfMotionSeek(motion, (f32)frame);
@@ -2725,7 +2725,7 @@ void evtEventViewerApplyPlaybackMode(s32 playbackMode, u32 frame, EvtRuntime *vi
     }
     object = table->slots[3].head;
     while (object != NULL) {
-        path = ((Dds3SlotResource *)object->data)->path;
+        path = ((Dds3SlotResource *)object->workdata)->path;
         if (path != NULL) {
             if (playbackMode == EVT_VIEWER_PLAYBACK_PAUSED) {
                 dds3PathBasicPauseOn(&path->counter);
@@ -2950,7 +2950,7 @@ void evtViewerMarkWindowInactive(EvtRuntime *viewer) {
 
 extern EvtWindowShadePacket evtWindowShadePackets[];
 extern u8 D_004372C8[4];
-extern SdfPoolNode D_00380448;
+extern sdfGrOt_t D_00380448;
 
 /* Ramp the message-window shade toward its target and, while visible, queue
  * the translucent shade sprite for the current draw buffer. */
@@ -3846,7 +3846,7 @@ s32 evtEventViewerHandleKeyEditCommand(s32 command, s32 unused, EvtRuntime *view
                         evtViewerPushCommandHistory(16, 180, 120, viewer);
                         break;
                     case 6: {
-                        u32 maximum = sdfGetLodChunkValue(((dds3ModelHandle_t *)((EffectObjectData *)viewer->frameGroup->info->data)->modelHolder->resourceHandle)->inner);
+                        u32 maximum = sdfGetLodChunkValue(((dds3ModelHandle_t *)((EffectObjectData *)viewer->frameGroup->info->workdata)->modelHolder->resourceHandle)->inner);
                         s32 value = key->p0C.sb[0];
                         viewer->valueMax = maximum;
                         viewer->value = value;
@@ -4154,7 +4154,7 @@ s32 evtEventViewerCommitGroupSelection(s32 unused0, s32 unused1, EvtRuntime *vie
         for (; group != NULL; group = group->next) {
             if (group->type == 1) {
                 if (groupIndex == targetGroupIndex) {
-                    nameIndex = evtEventViewerAddName(group->info->value, viewer);
+                    nameIndex = evtEventViewerAddName(group->info->name, viewer);
                     viewer->frameGroup->metadata.extra2 = nameIndex;
                     break;
                 }
@@ -4363,9 +4363,9 @@ s32 evtViewCmdSetObjectTarget(s32 unused0, s32 unused1, EvtRuntime *viewer) {
             if (slot == 3) {
                 continue;
             }
-            object = ((EvtWorldTable *)((dds3Basic_t *)dds3GetActiveScene())->data)->slots[slot].head;
+            object = ((evtWorldTable_t *)((dds3Basic_t *)dds3GetActiveScene())->workdata)->slots[slot].head;
             while (object != NULL) {
-                if (object->value != NULL) {
+                if (object->name != NULL) {
                     count++;
                     if (viewer->groupFirst + viewer->groupCursor == count) {
                         slot = 18;
@@ -4383,7 +4383,7 @@ s32 evtViewCmdSetObjectTarget(s32 unused0, s32 unused1, EvtRuntime *viewer) {
                 if (object == NULL) {
                     entry->p0C.sb[viewer->inputB] = -1;
                 } else {
-                    entry->p0C.sb[viewer->inputB] = evtEventViewerAddName(object->value, viewer);
+                    entry->p0C.sb[viewer->inputB] = evtEventViewerAddName(object->name, viewer);
                 }
             }
         }
@@ -4395,7 +4395,7 @@ s32 evtViewCmdSetObjectTarget(s32 unused0, s32 unused1, EvtRuntime *viewer) {
             if (object == NULL) {
                 entry->p0C.sh[1] = -1;
             } else {
-                entry->p0C.sh[1] = evtEventViewerAddName(object->value, viewer);
+                entry->p0C.sh[1] = evtEventViewerAddName(object->name, viewer);
             }
             break;
         case 9:
@@ -4407,21 +4407,21 @@ s32 evtViewCmdSetObjectTarget(s32 unused0, s32 unused1, EvtRuntime *viewer) {
             if (object == NULL) {
                 entry->p08.sh[0] = -1;
             } else {
-                entry->p08.sh[0] = evtEventViewerAddName(object->value, viewer);
+                entry->p08.sh[0] = evtEventViewerAddName(object->name, viewer);
             }
             break;
         case 18:
             if (object == NULL) {
                 entry->p08.sh[1] = -1;
             } else {
-                entry->p08.sh[1] = evtEventViewerAddName(object->value, viewer);
+                entry->p08.sh[1] = evtEventViewerAddName(object->name, viewer);
             }
             break;
         }
         break;
     case 19:
         if (entry->p08.sb[0] == 7) {
-            entry->p0C.sh[0] = object != NULL ? evtEventViewerAddName(object->value, viewer) : -1;
+            entry->p0C.sh[0] = object != NULL ? evtEventViewerAddName(object->name, viewer) : -1;
         }
         break;
     }

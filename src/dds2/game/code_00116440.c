@@ -16,12 +16,12 @@ dds3Basic_t *dds3AddEventObjectBasic(s32 initialValue, u128 *position, u128 *rot
     obj->key = initialValue;
     dds3SetPosPoseSet(obj, position);
     dds3SetRotPoseSet(obj, rotation);
-    dds3SetRadiusPoseSet(obj->inner);
+    dds3SetRadiusPoseSet(obj->poseset);
     return obj;
 }
 
 dds3ObjectBaseControlWorkData_t *dds3EventObjectBasicGetControlWorkData(const dds3Basic_t *object) {
-    const DdsSlotResourceBlock *block = (const DdsSlotResourceBlock *)object->data;
+    const DdsSlotResourceBlock *block = (const DdsSlotResourceBlock *)object->workdata;
     return block->baseControlWorkData;
 }
 
@@ -32,7 +32,7 @@ u32 lightconstructor(dds3Basic_t *object) {
 
     dds3InitPoseSet(object);
     obj = (EffLightData *)sdfChipAllocDirect(0x7C);
-    object->data = obj;
+    object->workdata = obj;
     obj->baseControlWorkData = dds3CreateSlotResourceState(object);
     dds3ObjectBaseOnFlag(object, 0x62);
     obj->flags = 0;

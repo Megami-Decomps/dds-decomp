@@ -104,7 +104,7 @@ typedef struct datUnitWork_t {
     u16 affinityTableIndex;
     u16 unitId; /* 0x04: DatUnitId key stored at its native 16-bit width. */
     u16 hp;
-    u16 maxHp;
+    u16 maxhp;
     u16 mp;
     u16 maxMp;
     u16 status;

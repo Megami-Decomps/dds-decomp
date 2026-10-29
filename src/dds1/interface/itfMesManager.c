@@ -984,7 +984,7 @@ extern char D_003BB210[];
 extern char D_003BB218[];
 extern char D_003BB220[];
 extern char D_003BB228[];
-extern SdfPoolNode kwlnPositionedTextSurface;
+extern sdfGrOt_t kwlnPositionedTextSurface;
 extern void *sdfDevPrintf(s32, s32, s32, s32, const char *, ...);
 extern ItfMesWindowRec *DebugChangeInstance(ItfMesWindowRec *window);
 extern void DebugMoveWinVert(ItfMesBlkA4 *panel, s32 selectedItem);

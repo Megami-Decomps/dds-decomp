@@ -178,10 +178,10 @@ void brsUpdateResultPortraitFade(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
     }
 }
 
-extern SdfPoolNode sdfGrOtTable[];
+extern sdfGrOt_t sdfGrOtTable[];
 extern void eglSetOt(u32);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
-extern void btlDrawIconAtSize(SdfPoolNode *, s32, s32, s32, s32, s32, s32, s32, s32, u16);
+extern void btlDrawIconAtSize(sdfGrOt_t *, s32, s32, s32, s32, s32, s32, s32, s32, u16);
 
 /* Draw the row's unit icon, then its unavailable overlay when required.
  * Direct indexed animation members preserve separate position/opacity epochs.
@@ -1404,7 +1404,6 @@ s32 mnuCopySoundStreamOnStatusChange(const void *source, u32 words) {
     D_00437A2C ^= 1;
     return 1;
 }
-
 
 INCLUDE_SDATA(const s32, "game/code_0029DF18", D_004379F0);
 

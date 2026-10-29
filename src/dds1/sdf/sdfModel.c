@@ -705,9 +705,9 @@ void sdfModelEvalTm(sdfModelRootNode_t *model) {
 }
 
 /* Store a provider's four draw surfaces and make the second a key-sorted pool. */
-void sdfStoreMessageWordsAndNotifyConsumer(SdfModelDrawSurfaceSet surfaces, struct SdfPoolNode *first,
-                                           struct SdfPoolNode *pool, struct SdfPoolNode *third,
-                                           struct SdfPoolNode *fourth) {
+void sdfStoreMessageWordsAndNotifyConsumer(SdfModelDrawSurfaceSet surfaces, struct sdfGrOt_t *first,
+                                           struct sdfGrOt_t *pool, struct sdfGrOt_t *third,
+                                           struct sdfGrOt_t *fourth) {
     surfaces[3] = fourth;
     surfaces[0] = first;
     surfaces[2] = third;
@@ -771,7 +771,7 @@ extern const struct SdfDmaTagHeader *sdf3DLightDefault;
  * queued. Upstream: INCLUDE_ASM in both games' sdf/sdfModel; written from the
  * retail routine. Its instructions equal retail's apart from register
  * allocation and scheduling. */
-void sdfModelTempPacketLinkOt(SdfPoolNode **surfaces, sdfModelRootNode_t *model) {
+void sdfModelTempPacketLinkOt(sdfGrOt_t **surfaces, sdfModelRootNode_t *model) {
     sdfDrawTag_t *lists[4];
     DevRequest *nodeList;
     s32 nodeIndex;
@@ -904,7 +904,7 @@ void sdfModelTempPacketLinkOt(SdfPoolNode **surfaces, sdfModelRootNode_t *model)
             do {
                 list = lists[j];
                 if (list != NULL) {
-                    SdfPoolNode **slot = surfaces + j;
+                    sdfGrOt_t **slot = surfaces + j;
                     anyPackets = 1;
                     (*slot)->append(*slot, list);
                 }
@@ -926,7 +926,7 @@ extern f32 sdfFaceDivSoften, sdfFaceDivBias;
 extern f32 sdf3DScreenTm[16];
 extern void sdfCoreDrawSetZBias(f32);
 /* Build one per-frame packet list for each visible node resource variant. */
-void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, sdfModelRootNode_t *model) {
+void sdfModelLinkOt(sdfGrOt_t **surfaces, sdfModelRootNode_t *model) {
     SdfGraphBufferIndex bufferIndex;
     s32 nodeIndex;
     u32 modelColor;
@@ -1094,7 +1094,7 @@ void sdfModelBuildNodeResourcePackets(SdfPoolNode **surfaces, sdfModelRootNode_t
         do {
             packets = variantLists[variant];
             if (packets != NULL) {
-                SdfPoolNode **slot = surfaces + variant;
+                sdfGrOt_t **slot = surfaces + variant;
                 (*slot)->append(*slot, packets);
                 appended = 1;
             }

@@ -41,12 +41,12 @@ extern void itfUpdateSoundSelectionTransition(instanceMes_tag *);
 
 extern SndPad dds3PadButtonState;
 
-extern SdfPoolNode sdfGrOtTable[];
+extern sdfGrOt_t sdfGrOtTable[];
 
 extern ItfMesDebugState D_00357D80;
 
 
-extern void itfPnlDraw(itfpanel_t *sprite, SdfPoolNode *surface);
+extern void itfPnlDraw(itfpanel_t *sprite, sdfGrOt_t *surface);
 
 extern void ChangeFontPosition(_FRQ *node, s32 dx, s32 dy);
 
@@ -703,7 +703,7 @@ void itfDrawSelectedSoundRow(instanceMes_tag *panel) {
     s32 expansion;
     s32 rightExpansion;
     s32 verticalExpansion;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
 
     if (selected == -1) {
         return;
@@ -787,7 +787,7 @@ void itfDrawSelectedSoundRow(instanceMes_tag *panel) {
 #include "fr_font_measure.h"
 
 extern ItfMesGlobals itfMesMngManager;
-extern SdfPoolNode sdfGrOtTable[];
+extern sdfGrOt_t sdfGrOtTable[];
 extern void itfDrawSoundSelectorOptionPanel(instanceMes_tag *);
 extern void itfDrawThreePanelBorderBands(DrawVertex *bounds, DrawColorRec *color, u32 tail, s32 borderWidth, sdfDrawTag_t *command);
 
@@ -810,7 +810,7 @@ void itfDrawSoundSelectorOptionPanel(instanceMes_tag *panel) {
     BtlFade *fade = &panel->fade;
     s32 selected = selection->savedIndex;
     sdfDrawTag_t *list;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
     s32 i;
     s32 width;
     s32 left;
@@ -924,7 +924,7 @@ void itfDrawSoundSelectorFadeLayers(instanceMes_tag *panel) {
     BtlFade *fade = &panel->fade;
     sdfDrawTag_t *packet;
     s32 expansion;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
 
     bounds[0] = 0x1AA0;
     bounds[1] = 0xC60;
@@ -993,7 +993,7 @@ void DrawMsgMng_Shutdown(dds3ProcessID_t *task) {
 }
 
 
-extern SdfPoolNode D_00325708;
+extern sdfGrOt_t D_00325708;
 extern s32 D_00358028[];
 extern u8 D_003BB230[5];
 extern u8 D_003BB238[5];
@@ -1161,7 +1161,7 @@ s32 TestMsgMngC_Process(dds3ProcessID_t *task) {
 }
 
 
-extern SdfPoolNode D_003255A8;
+extern sdfGrOt_t D_003255A8;
 
 extern u8 D_00358318[];
 
@@ -1311,7 +1311,7 @@ extern s32 D_003BA910[2];
 extern u8 dds3ScreenBlurFlag;
 extern s16 dds3ScreenBlurAlpha;
 extern s16 dds3ScreenBlurScale;
-extern SdfPoolNode kwlnPositionedTextSurface;
+extern sdfGrOt_t kwlnPositionedTextSurface;
 extern char D_003BB260[];
 extern char D_003BB268[];
 extern char D_003BB270[];

@@ -2095,7 +2095,7 @@ static inline u64 movieVertexWord(s32 x, s32 y, u32 depth) {
  * both games; written from the retail routine. It differs from retail
  * only in register allocation, scheduling, the way the color word is masked,
  * and the handwritten addi that loads 31 for the texture sizes. */
-void sdfMovieQueueFrameSprite(movieStream_t *movie, SdfPoolNode *pool) {
+void sdfMovieQueueFrameSprite(movieStream_t *movie, sdfGrOt_t *pool) {
     u64 *packet;
     sdfDrawTag_t *packetList;
     u32 width;
@@ -2171,11 +2171,11 @@ INCLUDE_ASM(const s32, "game/code_003425B0", sdfMovieQueueFrameSprite);
 
 extern movieStream_t *movieSemaId;
 extern const u8 *movieWaitSema(s32);
-extern void sdfMovieQueueFrameSprite(movieStream_t *, SdfPoolNode *);
+extern void sdfMovieQueueFrameSprite(movieStream_t *, sdfGrOt_t *);
 
 #include "sdf_movie_draw_packet.h"
 
-void sdfMovieDrawFrame(movieStream_t *movie, SdfPoolNode *pool) {
+void sdfMovieDrawFrame(movieStream_t *movie, sdfGrOt_t *pool) {
     SdfMovieDrawPacket *packet;
     sdfDrawTag_t *list;
     u16 width;

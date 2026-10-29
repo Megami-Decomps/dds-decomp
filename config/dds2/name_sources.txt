@@ -862,7 +862,7 @@
 0x0011FD18	dds3PrimDebugTextBox	inferred	SMT3HD name via SLUS_209.11 0x00118608, reloc-identical; was fldDrawRgbEditor
 0x0011FEE8	dds3PrimDebugTextBoxRGB	inferred	SMT3HD name via SLUS_209.11 0x001187D8, unique-masked-hash; was fldDrawPackedRgbEditor
 0x001200E0	dds3NullDrawProc	inferred	SMT3HD name via SLUS_209.11 0x001189D0, shared-hash-in-run; was fldIsUpdateInhibited
-0x001200E8	fldDrawShadowDisc	inferred	confidence=high; matched-C; src/dds2/game/code_0011F208.c:546; Draws a faded circular ground shadow and adjusts its height, radius and draw buffer for field area. twin=0x0011E280 (DDS1). LiteG batch 4.
+0x001200E8	dds3DrawUnitObjectShadow	inferred	Existing descriptive name, shared by audited native identity; was fldDrawShadowDisc.
 0x001204D0	InitOoyTest	inferred	SMT3HD name via SLUS_209.11 0x00118DC0, reloc-identical; was fldTestDrawCreate
 0x00120508	KillOoyTest	inferred	SMT3HD name via SLUS_209.11 0x00118DF8, shared-hash-in-run; was fldTestDrawDestroy
 0x00120528	fldDrawPercentValue	inferred	formats signed percentage values with glyphs 10, 11 and 12; calls fldKanjiDraw
@@ -1244,7 +1244,7 @@
 0x00149E08	fldEnterSceneCamera	inferred	DDS1 func_00145EA0 twin [names_reviewed2.tsv]
 0x00149FE8	fldLoadSceneModelsAndCamera	inferred	DDS1 func_00146080 twin; four fldmix handles instead of two [names_reviewed2.tsv]
 0x0014A228	fldReleaseMenuSlotsAfterWait	inferred	DDS1 001462A8 twin; waits twice for slot readiness then releases menu slots [names_R_FuncNames2.tsv]
-0x0014A250	fldGetSceneReadyFlag	inferred	DDS1 001462D0 twin; returns D_003BAED8, compared to 1 before scene setup [names_R_FuncNames2.tsv]
+0x0014A250	fldAutoMapChkMode	inferred	HD original name, shared by audited native identity; was fldGetSceneReadyFlag.
 0x0014A258	fldUpdateAutomapInput	inferred	confidence=high; Handles automap close/reset controls and 600-unit grid panning, clamps to visible scene bounds and refreshes the overhead camera. DDS1 1462D8 counterpart. [PurC readability b1]
 0x0014A880	fldCenterCameraOnEntry	inferred	DDS1 func_00146900 twin (byte-identical code, different addresses) [names_reviewed2.tsv]
 0x0014A9F0	fldSetSceneLocation	inferred	DDS1 00146A70 twin; writes world, stage and entry into field work [names_R_FuncNames2.tsv]
@@ -1738,7 +1738,7 @@
 0x00167988	effPkt2DAllocF4	inferred	SMT3HD name via SLUS_209.11 0x0016A098, reloc-identical; was effBuildDrawPacketWithFlags
 0x00167A10	effPkt3DPrimMakePoly	inferred	SMT3HD name via SLUS_209.11 0x0016A120, reloc-identical; was effCreateVertexDrawPacket
 0x00167E00	dds3CrossfadeStart	inferred	SMT3HD name via SLUS_209.11 0x0016A510, unique-masked-hash; was dds3StartCrossfade
-0x00167EE8	dds3UpdateCrossfade	inferred	confidence=high; matched-C; Captures first frame, draws held texture with decreasing alpha and ends when current frame reaches duration. Native start/end debug strings explicitly name dds3Crossfade. DDS1 twin0x001602F8 corrected from textured-quad name. Namer1 batch21.
+0x00167EE8	dds3CrossfadeRun	inferred	HD original name, shared by audited native identity; was dds3UpdateCrossfade.
 0x00168280	dds3EndCrossfade	inferred	confidence=high; matched-C; Clears/releases held texture and active state; native rodata says dds3CrossfadeEnd. DDS1 twin0x00160690. Namer1 batch21.
 0x001682B0	sndMixerClone	inferred	Copies source mixer state into a new mixer and initializes it; DDS1 twin. [names_qp9.tsv]
 0x001683F0	sndMixerDestroy	inferred	Destroys an owned clone: deletes linked voices, releases both banks' parameter work, and frees the retained mixer allocation; DDS1 twin.
@@ -2632,7 +2632,7 @@
 0x0018F3C0	effBlurBuildSamplingQuad	inferred	U2
 0x0018F5C0	effBlurDrawFramebufferQuad	inferred	confidence=high; matched-C; src/dds2/game/code_0018F018.c:125:func_0018F5C0; Builds a frame-buffer texture quad packet list with source DMA, sampling, texture-alpha, blend and overlay-sensitive clamp state, then submits the draw packet.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x0018F840	dds3EffectFilter	inferred	SMT3HD name via SLUS_209.11 0x001A2AC8, reloc-identical; was effDrawSolidRectangle
-0x0018F9E8	effResourceQuadDraw	inferred	confidence=high; func_0018F9E8 builds colored quad packets from RGBA, GS ALPHA control and four edges, appending the selected resource; its flag chooses already-scaled versus pixel coordinates.; sources=names_R_Structs54b.tsv; twin=0x00187DB0, input-family pairing. [names_qp10.tsv]
+0x0018F9E8	dds3EffectFilterDrawTexQuad	inferred	Existing descriptive name, shared by audited native identity; was effResourceQuadDraw.
 0x0018FBF8	dds3EffectPartialMultiFilterCreate	inferred	SMT3HD name via SLUS_209.11 0x001A2E28, reloc-identical; was effCloneResourceTemplate
 0x0018FC88	dds3EffectPartialMultiFilterDelete	inferred	SMT3HD name via SLUS_209.11 0x001A2EB8, shared-hash-in-run; was effReleaseResourceTemplate
 0x0018FCA0	effResourceRectDrawPixels	inferred	confidence=high; func_0018FCA0 generates bounds around center offsets 256/224 and calls the quad renderer with coordinate-scaling flag 0.; sources=names_R_Structs54b.tsv; twin=0x00188068, input-family pairing. [names_qp10.tsv]
@@ -8940,7 +8940,7 @@
 0x00331B38	sdfStoreMessageWordsAndNotifyConsumer	inferred	Stores four message words and invokes the consumer with the second word. [names_reviewed17.tsv]
 0x00331B68	sdfModelCheckBounds	inferred	SMT3HD name via SLUS_209.11 0x002B1838, byte-identical; was sdfModelTestTransformedClipVectors
 0x00331C80	sdfModelTempPacketLinkOt	inferred	SMT3HD name via SLUS_209.11 0x002B1950, reloc-identical; was sdfModelBuildVisibleNodePackets
-0x003320E8	sdfModelBuildNodeResourcePackets	inferred	Traverses model nodes and their filtered resource-entry chains, clip-tests node transforms, and builds per-context packet lists for the visible node resources; sets the packet-state bit when packet lists are populated. Called by model update/render paths; paired with DDS1 0x002D9238. [code-quality cleanup, 2026-10-13]
+0x003320E8	sdfModelLinkOt	inferred	HD original name, shared by audited native identity; was sdfModelBuildNodeResourcePackets.
 0x003325C8	sdfModelMorphListCopyStat	inferred	SMT3HD name via SLUS_209.11 0x002B2238, reloc-identical; was sdfModelCopyData
 0x003325F8	sdfModelCopyStat	inferred	SMT3HD name via SLUS_209.11 0x002B2268, reloc-identical; was sdfModelCopyRuntimeState
 0x00332860	sdfModelSetDrawEnv	inferred	SMT3HD name via SLUS_209.11 0x002B24D0, reloc-identical; was sdfInitializeDrawPacketGroups
@@ -11195,3 +11195,6 @@
 0x001179E8	dds3GlobalWorkMainProc	inferred	HD original name; native callback/dispatcher role and paired Nocturne implementation establish identity; was sdfBumpTickCounters.
 0x0011F800	dds3DebugFloatEditEx	inferred	HD original name; native callback/dispatcher role and paired Nocturne implementation establish identity; was fldStepValueByPad.
 0x0010A688	CallCamp	inferred	HD original name; native callback/dispatcher role and paired Nocturne implementation establish identity; was evtCreateCampTasks.
+0x00113AB0	dds3UnitObjectBasicDrawProcedure	inferred	HD original name, shared by audited native identity; was dds3UpdateEffectObjectFollowParameters.
+0x002AA4D8	campCheckExitState	inferred	Existing descriptive name, shared by audited native identity; was mnuAcknowledgeCampState.
+0x0032D340	sdfGrOtClose	inferred	HD original name; native paired ordering-table closure. DDS1 retains its declaration-sensitive exclusion; was sdfFlushPoolNodes.

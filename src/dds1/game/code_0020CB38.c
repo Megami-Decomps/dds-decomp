@@ -253,7 +253,7 @@ void btlUpdateBossUnitScaleTransition(void) {
                         btlSetUnitPosition(unit, position);
                         SDF_VU0_SETSCALE1VECTOR();
                         VU0_SCALE_VF(vf10, unit->scale);
-                        inner = unit->effectObject->inner;
+                        inner = unit->effectObject->poseset;
                         inner->flags = (inner->flags | 1) & ~2;
                         SDF_VU0_STOREVECTOR(inner->scale);
                         mdlSetScale(unit->ext->owner);

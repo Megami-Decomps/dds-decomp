@@ -118,7 +118,7 @@ void effMagaCylinderFreeParts(EffMagatuhiValueWork *work) {
 extern void sdf3DMakeDirectRefPacket(DmaPacketHeader *, u32, s32);
 extern void sdfBillBoardMakeTMPacket(u8 *, const f32 *);
 extern s16 D_003D6670[15][8];
-extern SdfPoolNode *D_00355720[4];
+extern sdfGrOt_t *D_00355720[4];
 /* Fixed-scale form of the SDK's four-word RGBA packing scratch buffer. */
 static inline u32 packMagatuhiTrailColor(void) {
     u32 rgba[4];

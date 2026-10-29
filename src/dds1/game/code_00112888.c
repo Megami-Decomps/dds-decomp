@@ -43,7 +43,7 @@ Dds3BasicCreateResult dds3CreateCameraData(dds3Basic_t *object) {
 
     dds3InitPoseSet(object);
     inner = sdfChipAllocDirect(sizeof(CameraData));
-    object->data = inner;
+    object->workdata = inner;
     objectBase = dds3CreateSlotResourceState(object);
     inner->handle = objectBase;
     dds3ObjectBaseOnFlag(object, 0x62);

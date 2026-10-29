@@ -27,7 +27,7 @@ extern void *effPkt3DPrimMakePoly(EffResourceRenderState *);
 extern f32 effResourceDefaultTrianglePoints[][4];
 extern u32 effResourceDefaultTriangleColors[];
 
-extern SdfPoolNode *effResourceDrawSurfaces[];
+extern sdfGrOt_t *effResourceDrawSurfaces[];
 
 
 /* Create an effect resource work with count entries inline after its header. */

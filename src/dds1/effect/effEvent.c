@@ -136,7 +136,7 @@ extern u8 D_003558D8[];
 extern u8 D_003558A8[];
 extern u8 D_00355948[];
 extern u8 D_00355970[];
-extern SdfPoolNode kwlnPositionedTextSurface;
+extern sdfGrOt_t kwlnPositionedTextSurface;
 #include "sdf_packet_alloc.h"
 
 extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *arg);
@@ -276,7 +276,7 @@ void effDebugPointDraw(f32 *position) {
     s32 pixel[2]; /* written, never read; retail keeps the frame slot */
     s32 x;
     s32 y;
-    SdfPoolNode *scene;
+    sdfGrOt_t *scene;
 
     sdfDrawTagInit(list);
     SDF_VU0_LOADVECTOR(position);
@@ -298,7 +298,7 @@ void effDebugPointDraw2(f32 *position, s32 color) {
     s32 pixel[2]; /* written, never read; retail keeps the frame slot */
     s32 x;
     s32 y;
-    SdfPoolNode *scene;
+    sdfGrOt_t *scene;
 
     sdfDrawTagInit(list);
     SDF_VU0_LOADVECTOR(position);
@@ -325,7 +325,7 @@ void effDebugLineDraw(f32 *from, f32 *to) {
     s32 y0;
     s32 x1;
     s32 y1;
-    SdfPoolNode *scene;
+    sdfGrOt_t *scene;
 
     sdfDrawTagInit(list);
     SDF_VU0_LOADVECTOR(from);
@@ -357,7 +357,7 @@ void effDebugLineDraw2(f32 *from, f32 *to, s32 color) {
     s32 y0;
     s32 x1;
     s32 y1;
-    SdfPoolNode *scene;
+    sdfGrOt_t *scene;
 
     sdfDrawTagInit(list);
     SDF_VU0_LOADVECTOR(from);
@@ -382,7 +382,7 @@ void effDebugLineDraw2(f32 *from, f32 *to, s32 color) {
 /* Submit a formatted native command at biased screen coordinates. */
 void effDebugStringDraw(s32 x, s32 y, s32 commandIndex, s32 format) {
     sdfDrawTag_t *task = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EFF_EVENT_DRAW_LIST_BYTES);
-    SdfPoolNode *scene;
+    sdfGrOt_t *scene;
 
     sdfDrawTagInit(task);
     sdfDrawTagLink(task, (u32)(sdfDevPrintf((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, commandIndex, (const char *)format)));
@@ -390,7 +390,7 @@ void effDebugStringDraw(s32 x, s32 y, s32 commandIndex, s32 format) {
     scene->append(scene, (sdfDrawTag_t *)task);
 }
 
-extern SdfPoolNode sdfGrOtTable[];
+extern sdfGrOt_t sdfGrOtTable[];
 
 void effDebugWireframeSphereDraw(const f32 *center, u32 color, f32 radius) {
     f32 point[4] __attribute__((aligned(16)));
@@ -398,7 +398,7 @@ void effDebugWireframeSphereDraw(const f32 *center, u32 color, f32 radius) {
     f32 vertices[40][4] __attribute__((aligned(16)));
     u32 colors[40];
     sdfDrawTag_t *list;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
     f32 (*out)[4];
     f32 latitude;
     f32 longitude;
@@ -466,8 +466,8 @@ extern sdfMat_t *D_003BB068;
 extern f32 D_003BB06C;
 extern f32 effTriangleVertexScratch[4][4];
 extern u32 D_00355870[4];
-extern SdfPoolNode D_00325028;
-extern void *effPkt3DPrimMakePoly(EffPacketParams *params);
+extern sdfGrOt_t D_00325028;
+extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *params);
 
 extern void sdf3DPrimLinkMat(sdfDrawTag_t *packetList, sdfMat_t *asset, s32 (*allocatePacket)(s32));
 extern void sdf3DPrimLinkTm(sdfDrawTag_t *packetList, s32 (*allocatePacket)(s32));
@@ -475,7 +475,7 @@ extern void sdf3DPrimLinkTm(sdfDrawTag_t *packetList, s32 (*allocatePacket)(s32)
 void effDebugSelectCursorDraw(f32 *position) {
     sdfMat_t *asset = D_003BB068;
     sdfDrawTag_t *list;
-    EffPacketParams packet;
+    sdf3DPrimPolyParm_t packet;
 
     if (asset == NULL) {
         asset = sdfMatNew();
@@ -491,9 +491,9 @@ void effDebugSelectCursorDraw(f32 *position) {
     VU0_ADD_VF31_VF10_XYZ();
     sdf3DPrimLinkTm(list, NULL);
     memset(&packet, 0, 0x2C);
-    packet.primitive = 0x4000;
+    packet.attr = 0x4000;
     effTriangleVertexScratch[2][2] = 0.0f;
-    packet.colors = D_00355870;
+    packet.vertexColor = D_00355870;
     packet.color = 0x80808080;
 
     effTriangleVertexScratch[0][0] = 0.0f;
@@ -505,16 +505,16 @@ void effDebugSelectCursorDraw(f32 *position) {
     effTriangleVertexScratch[2][0] = -15.0f;
     effTriangleVertexScratch[2][1] = -30.0f;
 
-    packet.parameterCount = 1;
-    packet.vertexCount = 3;
-    packet.positions = (u128 *)effTriangleVertexScratch;
-    packet.texcoords = NULL;
+    packet.faceCount = 1;
+    packet.pointCount = 3;
+    packet.vertex = (u128 *)effTriangleVertexScratch;
+    packet.uv = NULL;
     sdf3DPrimLinkMat(list, D_003BB068, NULL);
     sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&packet));
     D_00325028.append(&D_00325028, list);
 }
 
-extern SdfPoolNode sdfGrOtTable[];
+extern sdfGrOt_t sdfGrOtTable[];
 
 /* Draw horizontal rings, vertical sides, and the two sets of cap diameters. */
 void effDebugWireframeCylinderDraw(const f32 *center, u32 color, f32 radius, f32 height) {
@@ -523,7 +523,7 @@ void effDebugWireframeCylinderDraw(const f32 *center, u32 color, f32 radius, f32
     u32 colors[40];
     sdfDrawTag_t *list;
     f32 (*out)[4];
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
     u32 ring;
     u32 segment;
     f32 y;
@@ -642,7 +642,7 @@ void effDebugWireframeCylinderDraw(const f32 *center, u32 color, f32 radius, f32
  * scaling and the distinct shift/multiply forms used by the other draw paths. */
 void effDebugWindowDraw(s32 x, s32 y, s32 width, s32 height, s32 fillColor, s32 borderColor) {
     sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EFF_EVENT_DRAW_LIST_BYTES);
-    SdfPoolNode *scene;
+    sdfGrOt_t *scene;
 
     sdfDrawTagInit(list);
     sdfDrawTagLink(list, (u32)(dds3PrimFrameRect(x * EFF_EVENT_GS_X_SCALE + EFF_EVENT_GS_X_BIAS, y * EFF_EVENT_GS_Y_SCALE + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, width * EFF_EVENT_GS_X_SCALE, height * EFF_EVENT_GS_Y_SCALE, fillColor, borderColor)));
@@ -1649,7 +1649,7 @@ void effEventUpdateBillboardParticles(EffEventBillSet *work) {
 struct DmaPacketHeader;
 extern void sdf3DMakeDirectRefPacket(struct DmaPacketHeader *packet, u32 sourceAddress, s32 payloadBytes);
 extern void sdfBillBoardMakeTMPacket(u8 *packet, const f32 *matrix);
-extern SdfPoolNode D_003252A8;
+extern sdfGrOt_t D_003252A8;
 
 extern sdfTexHandle_t *dds3BillboardGetTex(billHandle_t *effect);
 
@@ -1674,7 +1674,7 @@ void effEVECombParSmokeDraw(EffEventBillSet *work) {
     u8 *geometryPacket;
     sdfDrawTag_t *stateList;
     sdfPrimTransPacket_t *statePacket;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
     primary.count = 0;
     secondary.count = 0;
     primaryList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);

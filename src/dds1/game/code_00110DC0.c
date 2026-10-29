@@ -13,7 +13,7 @@ Dds3SceneMembershipResult dds3SceneBasicExistBasicFromType(
     if (object == NULL || targetNode == 0) {
         return DDS3_SCENE_MEMBERSHIP_ABSENT;
     }
-    node = ((const EvtWorldTable *)object->data)->slots[slotIndex].head;
+    node = ((const evtWorldTable_t *)object->workdata)->slots[slotIndex].head;
     while (node != NULL) {
         if (node == targetNode) {
             return DDS3_SCENE_MEMBERSHIP_PRESENT;
@@ -25,13 +25,13 @@ Dds3SceneMembershipResult dds3SceneBasicExistBasicFromType(
 
 Dds3SceneMembershipResult dds3SceneBasicExistBasic(
     const dds3Basic_t *object, const dds3Basic_t *targetNode) {
-    const EvtWorldSlot *slots;
+    const evtWorldSlot_t *slots;
     s32 i;
 
     if (object == NULL || targetNode == 0) {
         return DDS3_SCENE_MEMBERSHIP_ABSENT;
     }
-    slots = ((const EvtWorldTable *)object->data)->slots;
+    slots = ((const evtWorldTable_t *)object->workdata)->slots;
     for (i = 0; i < 0x12; i++) {
         const dds3Basic_t *node = slots[i].head;
 
@@ -50,7 +50,7 @@ Dds3SceneMembershipResult dds3SceneBasicExistBasic(
 
 void dds3SetMapNo(dds3Basic_t *worldNode, Dds3AreaRoomKey areaRoomKey) {
     if (worldNode != NULL) {
-        ((EvtWorldTable *)worldNode->data)->areaRoomKey = areaRoomKey;
+        ((evtWorldTable_t *)worldNode->workdata)->areaRoomKey = areaRoomKey;
     }
 }
 
@@ -58,7 +58,7 @@ Dds3AreaRoomKey dds3GetMapNo(const dds3Basic_t *worldNode) {
     if (worldNode == NULL) {
         return DDS3_AREA_ROOM_KEY_UNASSIGNED;
     }
-    return ((EvtWorldTable *)worldNode->data)->areaRoomKey;
+    return ((evtWorldTable_t *)worldNode->workdata)->areaRoomKey;
 }
 
 dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *object, s32 slotIndex, const char *name) {
@@ -70,9 +70,9 @@ dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *object, s32 slotIndex,
     if (object == NULL || name == NULL) {
         return NULL;
     }
-    node = ((EvtWorldTable *)object->data)->slots[slotIndex].head;
+    node = ((evtWorldTable_t *)object->workdata)->slots[slotIndex].head;
     while (node != NULL) {
-        s = ((u8 *)node->value);
+        s = ((u8 *)node->name);
         if (s == NULL) {
             node = node->next;
             continue;
@@ -88,7 +88,7 @@ dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *object, s32 slotIndex,
                     return node;
                 }
                 i++;
-            } while (nameBytes[i] == ((u8 *)node->value)[i]);
+            } while (nameBytes[i] == ((u8 *)node->name)[i]);
         }
         node = node->next;
     }
@@ -116,7 +116,7 @@ s32 AreaBasicConstructor(dds3Basic_t *object) {
     u32 i;
 
     indexNodes = sdfChipAllocDirect(8);
-    object->data = indexNodes;
+    object->workdata = indexNodes;
     for (i = 0; i < 2; i++) {
         indexNodes[i] = dds3GetBasicArrayHandle(0);
     }
@@ -127,7 +127,7 @@ void AreaBasicDestructor(dds3Basic_t *object) {
     WorldIndexNode **indexNodes;
     u32 i;
 
-    indexNodes = object->data;
+    indexNodes = object->workdata;
     dds3ForEachBasicArray((dds3BasicArrayHandle_t *)indexNodes[0], CB_ReleaseObjectBasic);
     dds3ForEachBasicArray((dds3BasicArrayHandle_t *)indexNodes[1], CB_ReleaseObjectBasic);
     for (i = 0; i < 2; i++) {
@@ -143,7 +143,7 @@ u32 AreaBasicMainprocuder(void) {
 }
 
 s32 AreaBasicDrawprocuder(dds3Basic_t *object) {
-    WorldIndexNode **indexNodes = object->data;
+    WorldIndexNode **indexNodes = object->workdata;
 
     dds3ForEachBasicArray((dds3BasicArrayHandle_t *)indexNodes[0], CB_BasicDrawProcuder);
     return 1;

@@ -301,7 +301,7 @@ void fldLmapDrawListTree(s32 x, s32 y, s32 z, LmapList *list, s32 channel) {
 
 
 
-extern SdfPoolNode sdfGrOtTable[];
+extern sdfGrOt_t sdfGrOtTable[];
 #include "sdf_packet_alloc.h"
 #include "sdf_bordered_rectangle_packet.h"
 
@@ -310,7 +310,7 @@ void fldLmapSubmitPositionedCommandPacket(s32 x, s32 y, s32 z,
                                           ItfGridTextColorTableIndex colorTableIndex,
                                           const char *command, s32 surfaceIndex) {
     sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
-    SdfPoolNode *drawSurface;
+    sdfGrOt_t *drawSurface;
     SifCommand packetHeader;
 
     sdfDrawTagInit(packetList);
@@ -323,7 +323,7 @@ void fldLmapSubmitPositionedCommandPacket(s32 x, s32 y, s32 z,
 /* Build an untextured rectangle with a separate outline color. */
 void fldLmapSubmitScaledSpritePacket(s32 x, s32 y, s32 z, s32 width, s32 height, s32 fillColor, s32 borderColor, s32 surfaceIndex) {
     sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
-    SdfPoolNode *drawSurface;
+    sdfGrOt_t *drawSurface;
 
     sdfDrawTagInit(packetList);
     sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(x + 0x7000, y + 0x7900, z, width * 16, height * 8, fillColor, borderColor));

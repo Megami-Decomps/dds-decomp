@@ -173,11 +173,11 @@ extern void fldStartLmapTask(s32 mode);
 extern u32 scrHandleCount;
 
 
-extern SdfPoolNode kwlnPositionedTextSurface;
+extern sdfGrOt_t kwlnPositionedTextSurface;
 
 extern s8 D_0037F53B[];
 
-extern void evtDrawHeapUsageOverlay(SdfPoolNode *);
+extern void evtDrawHeapUsageOverlay(sdfGrOt_t *);
 
 typedef struct {
     f32 x;
@@ -210,7 +210,7 @@ typedef struct EvtGsCommand {
     u64 registerId;
 } EvtGsCommand;
 
-extern SdfPoolNode sdfGrOtTable[];
+extern sdfGrOt_t sdfGrOtTable[];
 
 
 
@@ -579,7 +579,7 @@ void evtSubmitPrimaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s3
     command->registerId = EVT_GS_TEST_PRIMARY;
     sdfDrawTagLink(list, (u32)packet);
     {
-        SdfPoolNode *surface = &sdfGrOtTable[egl_OT_Offset];
+        sdfGrOt_t *surface = &sdfGrOtTable[egl_OT_Offset];
         surface->append(surface, list);
     }
 }
@@ -596,7 +596,7 @@ void evtSubmitSecondaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, 
     command->registerId = EVT_GS_TEST_SECONDARY;
     sdfDrawTagLink(list, (u32)packet);
     {
-        SdfPoolNode *surface = &sdfGrOtTable[egl_OT_Offset];
+        sdfGrOt_t *surface = &sdfGrOtTable[egl_OT_Offset];
         surface->append(surface, list);
     }
 }
@@ -642,7 +642,7 @@ void evtSubmitPrimaryAlphaBlendMode(s32 blendMode) {
     command->registerId = EVT_GS_ALPHA_PRIMARY;
     sdfDrawTagLink(list, (u32)packet);
     {
-        SdfPoolNode *surface = &sdfGrOtTable[egl_OT_Offset];
+        sdfGrOt_t *surface = &sdfGrOtTable[egl_OT_Offset];
         surface->append(surface, list);
     }
 }
@@ -659,7 +659,7 @@ void evtSubmitFixedAlphaBlend(s32 fixedAlpha) {
     command->registerId = EVT_GS_ALPHA_PRIMARY;
     sdfDrawTagLink(list, (u32)packet);
     {
-        SdfPoolNode *surface = &sdfGrOtTable[egl_OT_Offset];
+        sdfGrOt_t *surface = &sdfGrOtTable[egl_OT_Offset];
         surface->append(surface, list);
     }
 }
@@ -672,7 +672,7 @@ void evtSubmitPrimaryFramePacket(void) {
     sdfBuildMaskedFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, framePacket, 0);
     sdfDrawTagLinkRefGif(list, (u32)framePacket);
     {
-        SdfPoolNode *surface = &sdfGrOtTable[egl_OT_Offset];
+        sdfGrOt_t *surface = &sdfGrOtTable[egl_OT_Offset];
         surface->append(surface, list);
     }
 }
@@ -685,7 +685,7 @@ void evtSubmitAlternateFramePacket(void) {
     sdfBuildFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, framePacket, 0);
     sdfDrawTagLinkRefGif(list, (u32)framePacket);
     {
-        SdfPoolNode *surface = &sdfGrOtTable[egl_OT_Offset];
+        sdfGrOt_t *surface = &sdfGrOtTable[egl_OT_Offset];
         surface->append(surface, list);
     }
 }
@@ -694,7 +694,7 @@ void evtSubmitTexturedGradientQuad(s32 x, s32 y, s32 width, s32 height,
                    s32 u, s32 v, s32 textureWidth, s32 textureHeight,
                    u32 color0, u32 color1, u32 color2, u32 color3, sdfTexHandle_t *texture) {
     sdfDrawTag_t *list;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
     s32 left, top, right, bottom;
     s32 uLeft, vTop, uRight, vBottom;
 
@@ -727,7 +727,7 @@ void evtSubmitTexturedGradientQuad(s32 x, s32 y, s32 width, s32 height,
 #include "sdf_texture_draw_packet.h"
 
 extern u32 egl_OT_Offset;
-extern SdfPoolNode sdfGrOtTable[];
+extern sdfGrOt_t sdfGrOtTable[];
 
 /* Submit a textured quad with four corner colours to the current draw
  * surface, as evtSubmitTexturedGradientQuad does, but placed by four screen
@@ -746,7 +746,7 @@ void evtSubmitTexturedGradientQuadPoints(f32 topLeftX, f32 topLeftY, f32 topRigh
                                          s32 textureHeight, u32 color0, u32 color1, u32 color2,
                                          u32 color3, sdfTexHandle_t *texture) {
     sdfDrawTag_t *list;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
     s32 uLeft, vTop, uRight, vBottom;
 
     list = dds3FontReqAllocDrawTag();
@@ -778,7 +778,7 @@ void evtSubmitGradientRectAtDepth(s32 x, s32 y, s32 w, s32 h, u32 depth, s32 col
     u64 *dst;
     s32 i;
     s32 *pos;
-    SdfPoolNode *descriptor;
+    sdfGrOt_t *descriptor;
 
     u32 r0 = color0 & 0xFF;
     u32 g0 = (color0 >> 8) & 0xFF;
@@ -848,7 +848,7 @@ void eglLinkTri(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s32 color0, s32 
     SdfDrawPacket *packet;
     u64 *dst;
     s32 i;
-    SdfPoolNode *descriptor;
+    sdfGrOt_t *descriptor;
 
     u32 r0 = color0 & 0xFF;
     u32 g0 = (color0 >> 8) & 0xFF;
@@ -901,12 +901,12 @@ extern u64 D_0037F5A0[]; /* index table; only the first 8 bytes are used */
 
 /* Preserve the native 0,2,3,1 vertex/index order; W components are not initialized here. */
 void eglLinkPoly4(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2, f32 x3, f32 y3, f32 z3, u32 i0, u32 i1, u32 i2, u32 i3) {
-    SdfPrimitiveRequest desc;
+    sdf3DPrimPolyParm_t desc;
     DrawVec4 verts[EVT_QUAD_VERTEX_COUNT];
     s32 indices[EVT_QUAD_VERTEX_COUNT];
     u64 strip[2];
     void *list;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
 
     list = (void *)sdfGrAllocPacketBuff(EVT_PACKET_LIST_BYTES);
     sdfDrawTagInit(list);
@@ -914,11 +914,11 @@ void eglLinkPoly4(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2
     sdf3DPrimLinkMat(list, D_00438DB0, 0);
     memset(&desc, 0, EVT_QUAD_DESCRIPTOR_BYTES);
     desc.color = 0x80808080;
-    desc.stripWordCount = 2;
-    desc.vertexCount = EVT_QUAD_VERTEX_COUNT;
-    desc.positions = &verts[0].x;
-    desc.vertexColors = indices;
-    desc.strip = strip;
+    desc.faceCount = 2;
+    desc.pointCount = EVT_QUAD_VERTEX_COUNT;
+    desc.vertex = &verts[0].x;
+    desc.vertexColor = indices;
+    desc.faceIndex = strip;
     verts[0].x = x0;
     verts[0].y = y0;
     verts[0].z = z0;
@@ -943,14 +943,14 @@ void eglLinkPoly4(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2
 
 /* Submit the same native vertex permutation with rectangular UVs, then queue asset release. */
 void eglLinkTexPoly4(s32 i0, f32 x0, f32 y0, f32 z0, s32 i1, f32 x1, f32 y1, f32 z1, s32 i2, f32 x2, f32 y2, f32 z2, s32 i3, f32 x3, f32 y3, f32 z3, u32 bits, f32 u0, f32 v0, f32 u1, f32 v1) {
-    SdfPrimitiveRequest desc;
+    sdf3DPrimPolyParm_t desc;
     f32 verts[16];
     s32 indices[EVT_QUAD_VERTEX_COUNT];
     u64 strip[2];
     f32 uvs[8];
     void *asset;
     void *list;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
 
     asset = sdfMatNew();
     sdfSetAssetPrimaryTextureAddress(asset, (sdfTexHandle_t *)bits);
@@ -960,12 +960,12 @@ void eglLinkTexPoly4(s32 i0, f32 x0, f32 y0, f32 z0, s32 i1, f32 x1, f32 y1, f32
     sdf3DPrimLinkMat(list, asset, 0);
     memset(&desc, 0, EVT_QUAD_DESCRIPTOR_BYTES);
     desc.color = 0x80808080;
-    desc.stripWordCount = 2;
-    desc.vertexCount = EVT_QUAD_VERTEX_COUNT;
-    desc.positions = verts;
-    desc.vertexColors = indices;
-    desc.strip = strip;
-    desc.coordinates = uvs;
+    desc.faceCount = 2;
+    desc.pointCount = EVT_QUAD_VERTEX_COUNT;
+    desc.vertex = verts;
+    desc.vertexColor = indices;
+    desc.faceIndex = strip;
+    desc.uv = uvs;
     verts[0] = x0;
     verts[1] = y0;
     verts[2] = z0;
@@ -1011,7 +1011,7 @@ void eglLinkLine(f32 x, f32 y, f32 z, f32 u, f32 v, f32 w, u32 first, u32 second
     sdfDrawTagInit(list);
     sdfDrawTagLink(list, (u32)effDebugDrawWireModel(D_0037F5B0, D_0037F5D0, 2, 0x80));
     {
-        SdfPoolNode *surface = &sdfGrOtTable[egl_OT_Offset];
+        sdfGrOt_t *surface = &sdfGrOtTable[egl_OT_Offset];
         surface->append(surface, list);
     }
 }
@@ -1022,7 +1022,7 @@ void eglLinkPrint(s32 x, s32 y, s32 packetArg, s32 drawArg) {
     SifCommand sifParameters;
     void *list;
     void *packet;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
     list = dds3FontReqAllocDrawTag();
     packet = (void *)sdfGrAllocPacketBuff(0x40);
     sdfPrimSetOpaquePacket(packet);
@@ -1418,7 +1418,7 @@ u32 ExitCamp(void) {
 u8 CheckCamp(void) {
     MnuCampStateAcknowledgementResult state;
 
-    state = mnuAcknowledgeCampState();
+    state = campCheckExitState();
     return state == MNU_CAMP_STATE_ACK_NOT_ACTIVE;
 }
 
@@ -1594,7 +1594,7 @@ u32 evtExitCampTaskGroup(void) {
 u8 mnuCheckCampStateAndAcknowledge(void) {
     MnuCampStateAcknowledgementResult state;
 
-    state = mnuAcknowledgeCampState();
+    state = campCheckExitState();
     return state == MNU_CAMP_STATE_ACK_NOT_ACTIVE;
 }
 
@@ -2019,7 +2019,7 @@ extern void sdfDrawHeapMapOverlay(sdfDrawTag_t *packetList, s32 x, s32 y);
 
 /* Format general/chip free-memory statistics into the supplied draw surface.
    Keep the native heap-ratio coordinate calculation and title-specific initial packet. */
-void evtDrawHeapUsageOverlay(SdfPoolNode *surface) {
+void evtDrawHeapUsageOverlay(sdfGrOt_t *surface) {
     SdfGeneralHeapStats generalHeapStats;
     SdfChipHeapStats chipHeapStats;
     char statusText[100];

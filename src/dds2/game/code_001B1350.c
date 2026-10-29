@@ -507,7 +507,7 @@ BtlUnitDefeatByDeltaResult btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *unit, s
 }
 
 BtlQuarterHealthThresholdResult btlIsCurrentValueBelowQuarterThreshold(BtlUnit *unit) {
-    return unit->partyRecord.hp * 100 / unit->partyRecord.maxHp < 26;
+    return unit->partyRecord.hp * 100 / unit->partyRecord.maxhp < 26;
 }
 
 s32 btlWouldUiValueFallBelowQuarter(BtlUnit *unit, s32 delta) {
@@ -515,7 +515,7 @@ s32 btlWouldUiValueFallBelowQuarter(BtlUnit *unit, s32 delta) {
     if (adjustedHp <= 0) {
         return 1;
     }
-    return adjustedHp * 100 / unit->partyRecord.maxHp < 26;
+    return adjustedHp * 100 / unit->partyRecord.maxhp < 26;
 }
 
 s32 btlBothSidesActive(BtlUnit *unit) {

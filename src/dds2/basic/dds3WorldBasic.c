@@ -44,7 +44,7 @@ void dds3DeleteWorld(void) {
 /* Set the primary world node without releasing it; no world is a no-op. */
 void dds3SetActiveScene(dds3Basic_t *primaryWorldNode) {
     if (dds3TheWorld != NULL) {
-        ((WorldInfoSceneNodeView *)dds3TheWorld->data)->activeScene = primaryWorldNode;
+        ((WorldInfoSceneNodeView *)dds3TheWorld->workdata)->activeScene = primaryWorldNode;
     }
 }
 
@@ -56,13 +56,13 @@ dds3Basic_t *dds3GetActiveScene(void) {
     if (world == NULL) {
         return NULL;
     }
-    return ((WorldInfoSceneNodeView *)world->data)->activeScene;
+    return ((WorldInfoSceneNodeView *)world->workdata)->activeScene;
 }
 
 /* Set the secondary world node without releasing it; no world is a no-op. */
 void dds3SetControlScene(dds3Basic_t *secondaryWorldNode) {
     if (dds3TheWorld != NULL) {
-        ((WorldInfoSceneNodeView *)dds3TheWorld->data)->controlScene = secondaryWorldNode;
+        ((WorldInfoSceneNodeView *)dds3TheWorld->workdata)->controlScene = secondaryWorldNode;
     }
 }
 
@@ -74,7 +74,7 @@ dds3Basic_t *dds3GetControlScene(void) {
     if (world == NULL) {
         return NULL;
     }
-    return ((WorldInfoSceneNodeView *)world->data)->controlScene;
+    return ((WorldInfoSceneNodeView *)world->workdata)->controlScene;
 }
 
 /* Create a kind-1 world node and append it at the tail.
@@ -86,7 +86,7 @@ dds3Basic_t *dds3AddScene(void) {
     if (dds3TheWorld == NULL) {
         return NULL;
     }
-    worldInfo = (WorldInfo *)dds3TheWorld->data;
+    worldInfo = (WorldInfo *)dds3TheWorld->workdata;
     worldNode = dds3AllocBasic(DDS3_WORLD_NODE_KIND);
     if (worldNode == NULL) {
         return NULL;
@@ -114,7 +114,7 @@ void dds3DeleteScene(dds3Basic_t *worldNode) {
     if (dds3TheWorld == NULL) {
         return;
     }
-    worldInfo = (WorldInfo *)dds3TheWorld->data;
+    worldInfo = (WorldInfo *)dds3TheWorld->workdata;
     sceneNodeView = (WorldInfoSceneNodeView *)worldInfo;
     if (worldInfo->firstNode == worldNode) {
         worldInfo->firstNode = worldNode->next;
@@ -141,7 +141,7 @@ WorldIndexNode *dds3GetBasicArrayHandle(s32 initialCount) {
     if (dds3TheWorld == NULL) {
         return NULL;
     }
-    worldInfo = (WorldInfo *)dds3TheWorld->data;
+    worldInfo = (WorldInfo *)dds3TheWorld->workdata;
     if (worldInfo->freeEntryCount < initialCount) {
         return NULL;
     }
@@ -178,7 +178,7 @@ void dds3FreeBasicArrayHandle(WorldIndexNode *indexNode) {
     if (dds3TheWorld == NULL) {
         return;
     }
-    worldInfo = (WorldInfo *)dds3TheWorld->data;
+    worldInfo = (WorldInfo *)dds3TheWorld->workdata;
     dds3DeleteAllBasicArray((dds3BasicArrayHandle_t *)indexNode);
     if (indexNode->previous == NULL) {
         worldInfo->firstIndex = indexNode->next;
@@ -213,7 +213,7 @@ void dds3DeleteBasicArray(dds3BasicArrayHandle_t *iterator) {
     if (dds3TheWorld == NULL) {
         return;
     }
-    info = (WorldInfo *)dds3TheWorld->data;
+    info = (WorldInfo *)dds3TheWorld->workdata;
     entries = info->entries;
     previous = entries[iterator->cursorIndex].previousIndex;
     entries[iterator->cursorIndex].value = 0;
@@ -257,7 +257,7 @@ void dds3DeleteAllBasicArray(dds3BasicArrayHandle_t *object) {
     if (dds3TheWorld == NULL) {
         return;
     }
-    world = dds3TheWorld->data;
+    world = dds3TheWorld->workdata;
     entryIndex = object->headIndex;
     while (entryIndex >= 0) {
         world->entries[entryIndex].value = 0;

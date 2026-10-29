@@ -5,17 +5,17 @@
 
 
 CameraEyePositionMode dds3CameraObjectBasicGetMode(dds3Basic_t *camera) {
-    return ((CameraData *)camera->data)->eyeIsRelative;
+    return ((CameraData *)camera->workdata)->eyeIsRelative;
 }
 
 void dds3SetCameraMode(dds3Basic_t *camera, CameraEyePositionMode mode) {
-    if (((CameraData *)camera->data)->eyeIsRelative != mode) {
-        ((CameraData *)camera->data)->eyeIsRelative = mode;
+    if (((CameraData *)camera->workdata)->eyeIsRelative != mode) {
+        ((CameraData *)camera->workdata)->eyeIsRelative = mode;
     }
 }
 
 dds3ObjectBaseControlWorkData_t *dds3UnitObjectBasicGetControlWorkData(dds3Basic_t *object) {
-    return ((EffectObjectData *)object->data)->modelHolder;
+    return ((EffectObjectData *)object->workdata)->modelHolder;
 }
 
 
@@ -33,8 +33,8 @@ dds3Basic_t *dds3AddUnitObjectBasic(s32 worldId, u128 *position, u128 *rotation)
         dds3ObjectBaseCreateMover(obj);
         dds3SetPosPoseSet(obj, position);
         dds3SetRotPoseSet(obj, rotation);
-        dds3SetRadiusPoseSet(obj->inner);
-        data = ((EffectObjectData *)obj->data);
+        dds3SetRadiusPoseSet(obj->poseset);
+        data = ((EffectObjectData *)obj->workdata);
         data->handle = (dds3ObjectBaseControlWorkData_t *)-1;
         data->word04 = 0;
         dds3ObjectBaseSetControlBasicType(

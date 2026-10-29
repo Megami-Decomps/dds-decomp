@@ -116,7 +116,7 @@ struct EffPCPBeamWork;
 extern void effPCPRingPolyExpSetVertex(f32 value, struct EffPCPBeamWork *work);
 extern void SetRotateMatrixY(f32 scale);
 extern void SetRotateMatrixX_B(f32 angle);
-extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
 extern u32 effBTLFieldColorUsesActorSelectors(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
 
@@ -3937,7 +3937,7 @@ void effPCPThunderSphereExpSetScale(EffPCPGrowWork *work, f32 val) {
 }
 
 /* Shared draw-request parameters are cleared before creating a beam. */
-extern EffPacketParams effBeamDrawParams;
+extern sdf3DPrimPolyParm_t effBeamDrawParams;
 
 /* vu0 routine: initialize both transforms with the libvu0 identity primitive. */
 EffPCPBeamNode *dds3RingPolyExpListCreate(u32 segments) {
@@ -3959,7 +3959,7 @@ EffPCPBeamNode *dds3RingPolyExpListCreate(u32 segments) {
     EE_MMI_UNIT_MATRIX(node->localMatrix);
     EE_MMI_UNIT_MATRIX(node->matrix);
     memset(&effBeamDrawParams, 0, sizeof(effBeamDrawParams));
-    effBeamDrawParams.primitive = 0x4000;
+    effBeamDrawParams.attr = 0x4000;
     return node;
 }
 
@@ -3973,16 +3973,16 @@ void dds3RingPolyExpListDelete(EffPCPBeamNode *work) {
 
 
 extern u8 effBeamTriangleIndices[];
-extern SdfPoolNode *effBeamDrawSurfaces[];
+extern sdfGrOt_t *effBeamDrawSurfaces[];
 #include "sdf_packet_alloc.h"
-extern void *effPkt3DPrimMakePoly(EffPacketParams *params);
+extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *params);
 
 /* vu0 routine: compose the beam transform and submit batches of its vertices. */
 void dds3RingPolyExpListDraw(EffPCPBeamNode *node) {
     f32 scaleMatrix[4][4];
     sdfDrawTag_t *list;
     s32 count;
-    SdfPoolNode *entry;
+    sdfGrOt_t *entry;
 
     if (node->vertexCount == 0) {
         return;
@@ -4001,20 +4001,20 @@ void dds3RingPolyExpListDraw(EffPCPBeamNode *node) {
     sdf3DPrimLinkTm(list, 0);
     sdf3DPrimLinkMat(list, node->assetHandle, 0);
     count = node->vertexCount;
-    effBeamDrawParams.colors = node->colors;
-    effBeamDrawParams.positions = (u128 *)node->points;
+    effBeamDrawParams.vertexColor = node->colors;
+    effBeamDrawParams.vertex = (u128 *)node->points;
     effBeamDrawParams.color = node->color;
-    effBeamDrawParams.vertexCount = effBeamDrawParams.parameterCount = 12;
-    effBeamDrawParams.parameters = (u32 *)effBeamTriangleIndices;
+    effBeamDrawParams.pointCount = effBeamDrawParams.faceCount = 12;
+    effBeamDrawParams.faceIndex = (u32 *)effBeamTriangleIndices;
     while (count >= 12) {
         count -= 8;
         sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&effBeamDrawParams));
-        effBeamDrawParams.positions += 8;
-        effBeamDrawParams.colors += 8;
+        effBeamDrawParams.vertex += 8;
+        effBeamDrawParams.vertexColor += 8;
     }
     if (count >= 8) {
-        effBeamDrawParams.parameterCount = 6;
-        effBeamDrawParams.vertexCount = 8;
+        effBeamDrawParams.faceCount = 6;
+        effBeamDrawParams.pointCount = 8;
         sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&effBeamDrawParams));
     }
     entry = effBeamDrawSurfaces[node->drawKind];
@@ -4788,7 +4788,7 @@ void effPcpUpdateStaggeredPulseModels(EffPCPSprayWork *work) {
             SDF_VU0_LOADVECTOR(vec);
             effPCPMakkaUpdateNode(root);
             sdfModelEvalTm(model);
-            sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, kwlnSceneSurfaceSets[10], model);
+            sdfBuildModelPacketsVia(sdfModelLinkOt, kwlnSceneSurfaceSets[10], model);
         }
     }
     work->frame++;

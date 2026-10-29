@@ -611,7 +611,7 @@ extern void fldDrawPoly3(s32 color0, s32 color1, s32 color2,
                                 f32 x2, f32 y2, f32 z2);
 
 /* Filled disc in the field; radius shrinks in the close-up areas. */
-void fldDrawShadowDisc(f32 x, f32 y, f32 z, f32 radius, s32 fade) {
+void dds3DrawUnitObjectShadow(f32 x, f32 y, f32 z, f32 radius, s32 fade) {
     s32 color;
     s32 angle;
     s32 prev;
@@ -695,7 +695,7 @@ s32 fldTestDrawUpdate(dds3ProcessID_t *task) {
     fldDrawCameraColorScrollingGradient();
     fldSkyDrawFilter();
     if (fldRunDanteGunFlag[9] != 0) {
-        if (fldGetSceneReadyFlag() == FLD_SCENE_NOT_READY) {
+        if (fldAutoMapChkMode() == FLD_SCENE_NOT_READY) {
             rsetOtOfs(0x53);
         } else {
             rsetOtOfs(0x5E);
@@ -836,8 +836,6 @@ FldCameraTrackingResult fldEvaluateCameraMoveTracking(void) {
     return FLD_CAMERA_TRACKING_NO_ACTION;
 }
 
-INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FA00);
-
 #ifdef NON_MATCHING
 #include "common.h"
 #include "fld_camera_tracking.h"
@@ -918,6 +916,8 @@ void fldElvDrawFloorNum(void) {
     fldDrawPercentValue(380, 18, shown);
 }
 #else
+INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FA00);
+
 INCLUDE_ASM(const s32, "game/code_0011D3A0", fldElvDrawFloorNum);
 #endif
 
@@ -988,7 +988,7 @@ extern void aDrawBoxF_Direct(s32, s32, s32, s32, u32, u32, u32, u32);
 extern void fldSubmitPrimaryFramePacket(void);
 extern void fldSubmitAlternateFramePacket(void);
 extern void fldPrepareProjectionMatrix(void);
-extern SdfPoolNode sdfGrOtTable[];
+extern sdfGrOt_t sdfGrOtTable[];
 extern u32 rsetFrameMaskOtOffset;
 extern u32 D_003BACEC;
 extern s32 D_003BAB24, D_003BAB28, D_003BAB2C, D_003BAB30;
@@ -1025,19 +1025,19 @@ extern s32 D_0032C608[][3], D_0032C750[][3];
 
 
 /* Submits the accumulated strip request and starts an empty one. */
-static inline void fldFlushShadowStrip(sdfDrawTag_t *list, SdfPrimitiveRequest *request) {
+static inline void fldFlushShadowStrip(sdfDrawTag_t *list, sdf3DPrimPolyParm_t *request) {
     sdfDrawTagLink(list, (u32)sdf3DPrimMakePoly(request));
-    request->stripWordCount = 0;
-    request->vertexCount = 0;
+    request->faceCount = 0;
+    request->pointCount = 0;
 }
 
-static inline SdfPoolNode *fldGetDisplaySurfaceBase(void) {
+static inline sdfGrOt_t *fldGetDisplaySurfaceBase(void) {
     return sdfGrOtTable;
 }
 
 /* Appends a finished packet list to the active display surface. */
 static inline void fldAppendToDisplaySurface(sdfDrawTag_t *list) {
-    SdfPoolNode *surface = &fldGetDisplaySurfaceBase()[rsetFrameMaskOtOffset];
+    sdfGrOt_t *surface = &fldGetDisplaySurfaceBase()[rsetFrameMaskOtOffset];
 
     surface->append(surface, list);
 }
@@ -1060,11 +1060,11 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
     f32 extrusion[4];
     f32 slotExtrusion[18][4];
     f32 viewDirection[4];
-    SdfPrimitiveRequest quadRequest;
+    sdf3DPrimPolyParm_t quadRequest;
     /* Native buffer spans sp+0x230..0x630 in both twins. The two-word
      * quad strip flushes at eight quads, before this sixteen-quad capacity. */
     f32 quadVertices[16 * 4][4];
-    SdfPrimitiveRequest triangleRequest;
+    sdf3DPrimPolyParm_t triangleRequest;
     f32 triangleVertices[16 * 3][4];
     FldShadowStrip triangleStrip;
     FldShadowStrip quadStrip;
@@ -1163,7 +1163,7 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
             }
         }
     } else {
-        data = object->data;
+        data = object->workdata;
         if (data->activeId != -1) {
             if (D_003BAB30 == 0) {
                 if (D_003BAB28 > 20) {
@@ -1178,14 +1178,14 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
                 transition = dds3GetUnitHandleObjectBasic(object);
                 if (sdfModelGetMarkPos(transition->owner->inner, 0)) {
                     SDF_VU0_STOREVECTOR_NOMEM(anchorPosition);
-                    D_003C2E90[0] = anchorPosition[0] - target->inner->position[0];
-                    D_003C2E90[1] = anchorPosition[1] - target->inner->position[1];
-                    D_003C2E90[2] = anchorPosition[2] - target->inner->position[2];
+                    D_003C2E90[0] = anchorPosition[0] - target->poseset->pos[0];
+                    D_003C2E90[1] = anchorPosition[1] - target->poseset->pos[1];
+                    D_003C2E90[2] = anchorPosition[2] - target->poseset->pos[2];
                 } else {
-                    D_003C2E90[0] = fldGlobalBase.x - target->inner->position[0];
+                    D_003C2E90[0] = fldGlobalBase.x - target->poseset->pos[0];
                     /* Retail 0x0011F134..0x0011F15C uses field Z for both Y and Z. */
-                    D_003C2E90[1] = fldGlobalBase.z - target->inner->position[1];
-                    D_003C2E90[2] = fldGlobalBase.z - target->inner->position[2];
+                    D_003C2E90[1] = fldGlobalBase.z - target->poseset->pos[1];
+                    D_003C2E90[2] = fldGlobalBase.z - target->poseset->pos[2];
                 }
                 horizontalDistance = fsqrtf(D_003C2E90[0] * D_003C2E90[0] + D_003C2E90[2] * D_003C2E90[2]);
                 if (D_003C2E90[1] < 0.0f) {
@@ -1508,10 +1508,10 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
             sdf3DPrimLinkResetTm(quadList, NULL);
             sdf3DPrimLinkMat(quadList, (void *)D_003BACEC, NULL);
             memset(&quadRequest, 0, sizeof(quadRequest));
-            quadRequest.positions = quadVertices;
-            quadRequest.strip = quadStrip.words;
-            quadRequest.stripWordCount = 0;
-            quadRequest.vertexCount = 0;
+            quadRequest.vertex = quadVertices;
+            quadRequest.faceIndex = quadStrip.words;
+            quadRequest.faceCount = 0;
+            quadRequest.pointCount = 0;
             if (pass == 0) quadRequest.color = 0x80000000;
             else quadRequest.color = 0;
             triangleList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
@@ -1519,33 +1519,33 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
             sdf3DPrimLinkResetTm(triangleList, NULL);
             sdf3DPrimLinkMat(triangleList, (void *)D_003BACEC, NULL);
             memset(&triangleRequest, 0, sizeof(triangleRequest));
-            triangleRequest.positions = triangleVertices;
-            triangleRequest.strip = triangleStrip.words;
-            triangleRequest.stripWordCount = 0;
-            triangleRequest.vertexCount = 0;
+            triangleRequest.vertex = triangleVertices;
+            triangleRequest.faceIndex = triangleStrip.words;
+            triangleRequest.faceCount = 0;
+            triangleRequest.pointCount = 0;
             if (pass == 0) triangleRequest.color = 0x80000000;
             else triangleRequest.color = 0;
             for (face = 0; face < D_003BAB24; face++) {
                 if (pass == 0) {
-                    f32 (*output)[4] = &triangleVertices[triangleRequest.vertexCount];
+                    f32 (*output)[4] = &triangleVertices[triangleRequest.pointCount];
                     PCP_COPY_VECTOR_UNCLOBBERED(output[0], D_003C2EA0[face][0]);
                     PCP_COPY_VECTOR_UNCLOBBERED(output[1], D_003C2EA0[face][1]);
                     PCP_COPY_VECTOR_UNCLOBBERED(output[2], D_003C2EA0[face][2]);
-                    triangleRequest.stripWordCount++;
-                    triangleRequest.vertexCount += 3;
+                    triangleRequest.faceCount++;
+                    triangleRequest.pointCount += 3;
                 } else {
-                    f32 (*output)[4] = &triangleVertices[triangleRequest.vertexCount];
+                    f32 (*output)[4] = &triangleVertices[triangleRequest.pointCount];
                     PCP_COPY_VECTOR_UNCLOBBERED(output[0], D_003C2EA0[face][2]);
                     PCP_COPY_VECTOR_UNCLOBBERED(output[1], D_003C2EA0[face][1]);
                     PCP_COPY_VECTOR_UNCLOBBERED(output[2], D_003C2EA0[face][0]);
-                    triangleRequest.stripWordCount++;
-                    triangleRequest.vertexCount += 3;
+                    triangleRequest.faceCount++;
+                    triangleRequest.pointCount += 3;
                 }
-                if (triangleRequest.stripWordCount >= 16) {
+                if (triangleRequest.faceCount >= 16) {
                     fldFlushShadowStrip(triangleList, &triangleRequest);
                 }
             }
-            if (triangleRequest.stripWordCount != 0) {
+            if (triangleRequest.faceCount != 0) {
                 fldFlushShadowStrip(triangleList, &triangleRequest);
             }
             fldAppendToDisplaySurface(triangleList);
@@ -1604,48 +1604,48 @@ void fldDrawEffectObjectShadow(dds3Basic_t *object) {
                     {
                         if (D_003C3800[edgeFrom][j][1]) {
                             if (pass == 0) {
-                                f32 (*output)[4] = &quadVertices[quadRequest.vertexCount];
+                                f32 (*output)[4] = &quadVertices[quadRequest.pointCount];
                                 PCP_COPY_VECTOR_UNCLOBBERED(output[0], edgeStart);
                                 PCP_COPY_VECTOR_UNCLOBBERED(output[1], edgeEnd);
                                 PCP_COPY_VECTOR_UNCLOBBERED(output[2], extrudedEnd);
                                 PCP_COPY_VECTOR_UNCLOBBERED(output[3], extrudedStart);
-                                quadRequest.stripWordCount += 2;
-                                quadRequest.vertexCount += 4;
+                                quadRequest.faceCount += 2;
+                                quadRequest.pointCount += 4;
                             } else {
-                                f32 (*output)[4] = &quadVertices[quadRequest.vertexCount];
+                                f32 (*output)[4] = &quadVertices[quadRequest.pointCount];
                                 PCP_COPY_VECTOR_UNCLOBBERED(output[0], edgeStart);
                                 PCP_COPY_VECTOR_UNCLOBBERED(output[1], extrudedStart);
                                 PCP_COPY_VECTOR_UNCLOBBERED(output[2], extrudedEnd);
                                 PCP_COPY_VECTOR_UNCLOBBERED(output[3], edgeEnd);
-                                quadRequest.stripWordCount += 2;
-                                quadRequest.vertexCount += 4;
+                                quadRequest.faceCount += 2;
+                                quadRequest.pointCount += 4;
                             }
                         } else {
                             if (pass == 0) {
-                                f32 (*output)[4] = &quadVertices[quadRequest.vertexCount];
+                                f32 (*output)[4] = &quadVertices[quadRequest.pointCount];
                                 PCP_COPY_VECTOR_UNCLOBBERED(output[0], edgeStart);
                                 PCP_COPY_VECTOR_UNCLOBBERED(output[1], extrudedStart);
                                 PCP_COPY_VECTOR_UNCLOBBERED(output[2], extrudedEnd);
                                 PCP_COPY_VECTOR_UNCLOBBERED(output[3], edgeEnd);
-                                quadRequest.stripWordCount += 2;
-                                quadRequest.vertexCount += 4;
+                                quadRequest.faceCount += 2;
+                                quadRequest.pointCount += 4;
                             } else {
-                                f32 (*output)[4] = &quadVertices[quadRequest.vertexCount];
+                                f32 (*output)[4] = &quadVertices[quadRequest.pointCount];
                                 PCP_COPY_VECTOR_UNCLOBBERED(output[0], edgeStart);
                                 PCP_COPY_VECTOR_UNCLOBBERED(output[1], edgeEnd);
                                 PCP_COPY_VECTOR_UNCLOBBERED(output[2], extrudedEnd);
                                 PCP_COPY_VECTOR_UNCLOBBERED(output[3], extrudedStart);
-                                quadRequest.stripWordCount += 2;
-                                quadRequest.vertexCount += 4;
+                                quadRequest.faceCount += 2;
+                                quadRequest.pointCount += 4;
                             }
                         }
                     }
-                    if (quadRequest.stripWordCount >= 15) {
+                    if (quadRequest.faceCount >= 15) {
                         fldFlushShadowStrip(quadList, &quadRequest);
                     }
                 }
             }
-            if (quadRequest.stripWordCount != 0) {
+            if (quadRequest.faceCount != 0) {
                 fldFlushShadowStrip(quadList, &quadRequest);
             }
             fldAppendToDisplaySurface(quadList);
@@ -1727,7 +1727,7 @@ void fldResetFieldMapState(void) {
 
 extern u32 fldRunDanteGunFlag[];
 void fldResetFieldRuntimeState(FldRuntimeResetMode mode) {
-    FldAreaWork *area = &fldGlobalBase;
+    fldAreaWork_t *area = &fldGlobalBase;
     s32 i;
 
     area->attritionDistance = 100.0f;
@@ -1869,7 +1869,7 @@ extern void fldClearCameraHeadingRequest(void);
 /* Reset the per-area controller work: -1 selections, the attrition step and the
  * adjacent request words, then clear the camera facing/heading requests. */
 void fldInitializeAreaWork(void) {
-    FldAreaWork *area = &fldGlobalBase;
+    fldAreaWork_t *area = &fldGlobalBase;
 
     area->unk2C = 0x10;
     area->unk138 = 0;
@@ -2252,7 +2252,7 @@ void fldMarkStageExplorationCellsAroundPosition(s32 room, s32 stage, f32 x, f32 
     f32 originX;
     f32 originZ;
     FieldStageCoordinate *record;
-    FldAreaWork *area;
+    fldAreaWork_t *area;
     s32 cellX;
     s32 cellZ;
     u32 stageIndex;
@@ -2392,9 +2392,9 @@ INCLUDE_SDATA(const s32, "game/code_0011D3A0", D_003BAB2C);
 
 INCLUDE_SDATA(const s32, "game/code_0011D3A0", D_003BAB30);
 
-INCLUDE_SDATA(dds3Basic_t *, "game/code_0011D3A0", fldPlayerObject);
+INCLUDE_SDATA(const s32, "game/code_0011D3A0", fldPlayerObject);
 
-INCLUDE_SDATA(dds3ModelHandle_t * const, "game/code_0011D3A0", fldPlayerModelContext);
+INCLUDE_SDATA(const s32, "game/code_0011D3A0", fldPlayerModelContext);
 
 INCLUDE_SDATA(const s32, "game/code_0011D3A0", D_003BAB3C);
 
@@ -2402,7 +2402,7 @@ INCLUDE_SDATA(const s32, "game/code_0011D3A0", D_003BAB40);
 
 INCLUDE_SDATA(const s32, "game/code_0011D3A0", D_003BAB50);
 
-INCLUDE_SDATA(struct sdfMemHandle_t * const, "game/code_0011D3A0", fldPlayerModelResource);
+INCLUDE_SDATA(const s32, "game/code_0011D3A0", fldPlayerModelResource);
 
 INCLUDE_SDATA(const s32, "game/code_0011D3A0", D_003BAB58);
 

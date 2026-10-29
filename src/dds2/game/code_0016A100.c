@@ -35,7 +35,7 @@ extern u8 effModelDefaultScale[];
 
 
 
-extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
 
 
 

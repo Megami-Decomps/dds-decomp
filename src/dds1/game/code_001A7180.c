@@ -560,7 +560,7 @@ BtlUnitDefeatByDeltaResult btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *actor, 
 }
 
 BtlQuarterHealthThresholdResult btlIsCurrentValueBelowQuarterThreshold(BtlUnit *object) {
-    return object->partyRecord.hp * 100 / object->partyRecord.maxHp < 25;
+    return object->partyRecord.hp * 100 / object->partyRecord.maxhp < 25;
 }
 
 s32 btlWouldUiValueFallBelowQuarter(BtlUnit *object, s32 delta) {
@@ -568,7 +568,7 @@ s32 btlWouldUiValueFallBelowQuarter(BtlUnit *object, s32 delta) {
     if (value <= 0) {
         return 1;
     }
-    return value * 100 / object->partyRecord.maxHp < 25;
+    return value * 100 / object->partyRecord.maxhp < 25;
 }
 
 s32 btlBothSidesActive(BtlUnit *unit) {
@@ -1223,7 +1223,7 @@ s32 btlAverageMaximumValueForMask(
             if (allowDisabled == 0 || (flags & 0x20) == 0) {
                 if ((actor->partyRecord.flags & partyRecordFlagsMask) != 0) {
                     count++;
-                    sum += actor->partyRecord.maxHp;
+                    sum += actor->partyRecord.maxhp;
                 }
             }
         }

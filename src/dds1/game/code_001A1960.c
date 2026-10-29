@@ -135,7 +135,7 @@ void btlInitializePartyRecordFromEnemy(datUnitWork_t *entry, s32 index) {
         entry->effectData[i] = 0;
     }
     entry->effectDataCount = count;
-    entry->maxHp = datEnemyRecords[index].maxHp;
+    entry->maxhp = datEnemyRecords[index].maxHp;
     entry->hp = datEnemyRecords[index].hp;
     entry->maxMp = datEnemyRecords[index].maxMp;
     entry->mp = datEnemyRecords[index].mp;
@@ -412,19 +412,19 @@ BtlCommandVitalCostAmount btlGetCombinedPartyCommandPower(datUnitWork_t *base, B
     s32 average;
 
     if (first != NULL) {
-        totalMaxHp = first->partyRecord.maxHp;
+        totalMaxHp = first->partyRecord.maxhp;
         count = 1;
     }
     if (second != NULL) {
-        totalMaxHp += second->partyRecord.maxHp;
+        totalMaxHp += second->partyRecord.maxhp;
         count++;
     }
     if (third != NULL) {
-        totalMaxHp += third->partyRecord.maxHp;
+        totalMaxHp += third->partyRecord.maxhp;
         count++;
     }
     average = totalMaxHp / count;
-    snapshot.maxHp = average;
+    snapshot.maxhp = average;
     snapshot.hp = average;
     return btlApplyCommandAbilityMultiplier(&snapshot, commandId);
 }
@@ -442,7 +442,7 @@ BtlCommandUseError btlGetLinkedPartyCommandFailureReason(BtlUnit *base, BtlUnit 
         if ((first->partyRecord.status & 0x2A0E) != 0) {
             return BTL_COMMAND_USE_ERROR_ACTOR_STATE;
         }
-        totalMaxHp = first->partyRecord.maxHp;
+        totalMaxHp = first->partyRecord.maxhp;
         count = 1;
     }
     if (second != NULL) {
@@ -453,7 +453,7 @@ BtlCommandUseError btlGetLinkedPartyCommandFailureReason(BtlUnit *base, BtlUnit 
             return BTL_COMMAND_USE_ERROR_ACTOR_STATE;
         }
         count++;
-        totalMaxHp += second->partyRecord.maxHp;
+        totalMaxHp += second->partyRecord.maxhp;
     }
     if (third != NULL) {
         if ((third->status.flags & 0x100) == 0) {
@@ -463,9 +463,9 @@ BtlCommandUseError btlGetLinkedPartyCommandFailureReason(BtlUnit *base, BtlUnit 
             return BTL_COMMAND_USE_ERROR_ACTOR_STATE;
         }
         count++;
-        totalMaxHp += third->partyRecord.maxHp;
+        totalMaxHp += third->partyRecord.maxhp;
     }
-    snapshot.partyRecord.maxHp = totalMaxHp / count;
+    snapshot.partyRecord.maxhp = totalMaxHp / count;
     return btlGetCommandFailureReason(&snapshot, commandId);
 }
 

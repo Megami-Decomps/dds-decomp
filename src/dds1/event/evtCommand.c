@@ -658,7 +658,7 @@ ScrCommandResult evtCommand_CAM_SEL_FOVY(void) {
         cameraOwner = fldGetPlayerSceneState();
     } else {
         cameraOwner = evtSearchBasic(EFF_WORLD_KIND_CAMERA, scrGetIntPara(0));
-        cameraData = cameraOwner->data;
+        cameraData = cameraOwner->workdata;
         cameraData->fovUpdatePending |= DDS3_CAMERA_UPDATE_FOV_BIT;
     }
     if (cameraOwner == NULL) {
@@ -847,7 +847,7 @@ ScrCommandResult evtCommand_OBJ_PATH_MOVE(void) {
         dds3ObjectBaseCreateMover(unit);
         slotNode = data->slots[DDS3_OBJECT_DATA_SLOT];
     }
-    resource = slotNode->data;
+    resource = slotNode->workdata;
     if (resource->sourceObject == NULL) {
         dds3MoverBasicSetPath(slotNode, target);
         dds3MoverBasicMakePath(slotNode);
@@ -859,16 +859,16 @@ ScrCommandResult evtCommand_OBJ_PATH_MOVE(void) {
     switch (direction) {
     case EVT_PATH_DIRECTION_FORWARD:
         dds3PathBasicControlAlterMode(&path->counter, EVT_PATH_DIRECTION_FORWARD);
-        if (target->value != 0) {
-            roomNumber = fldCommand_GetHojiID(target->value);
+        if (target->name != 0) {
+            roomNumber = fldCommand_GetHojiID(target->name);
             if (roomNumber > 0)
                 fldSetMapSlotValueFlag(fldGlobalBase.area, fldGlobalBase.floor + 1, roomNumber, 1);
         }
         break;
     case EVT_PATH_DIRECTION_REVERSE:
         dds3PathBasicControlAlterMode(&path->counter, EVT_PATH_DIRECTION_REVERSE);
-        if (target->value != 0) {
-            roomNumber = fldCommand_GetHojiID(target->value);
+        if (target->name != 0) {
+            roomNumber = fldCommand_GetHojiID(target->name);
             if (roomNumber > 0)
                 fldSetMapSlotValueFlag(fldGlobalBase.area, fldGlobalBase.floor + 1, roomNumber, 0);
         }
@@ -910,7 +910,7 @@ ScrCommandResult evtCommandReattachObjectPath(void) {
         dds3ObjectBaseCreateMover(unit);
         slotNode = data->slots[DDS3_OBJECT_DATA_SLOT];
     }
-    resource = slotNode->data;
+    resource = slotNode->workdata;
     if (resource->sourceObject == NULL) {
         dds3MoverBasicSetPath(slotNode, target);
         dds3MoverBasicMakePath(slotNode);
@@ -1192,7 +1192,7 @@ ScrCommandResult evtCommand_PATH_RATE(void) {
         }
     }
     evtPathRate(worldNode, scrGetFloatPara(1));
-    roomName = worldNode->value;
+    roomName = worldNode->name;
     if (roomName == 0) {
         return 1;
     }
@@ -1227,7 +1227,7 @@ ScrCommandResult evtCommand_PATH_DIR(void) {
     }
     direction = scrGetIntPara(1);
     evtPathDir(worldNode, direction);
-    roomName = worldNode->value;
+    roomName = worldNode->name;
     if (roomName == 0) {
         return 1;
     }

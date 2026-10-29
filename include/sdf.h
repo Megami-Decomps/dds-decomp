@@ -412,9 +412,9 @@ u64 sdfTexGetClampReg(sdfTexHandle_t *texture);
 
 /* DMA packet list cursors and endpoints (0x20); DDS1/2 game/code_002D33C8/0032C278.c. */
 typedef struct sdfDrawTag_t {
-    struct sdfDrawTag_t *nextList; /* CPU link between lists; first/last are DMA addresses. */
-    u32 first;
-    u32 last;
+    struct sdfDrawTag_t *next; /* CPU link between lists; first/last are DMA addresses. */
+    u32 head;
+    u32 tail;
     u32 unkC;
     u32 firstReferenceSource; /* Optional first DMA reference prefix. */
     u32 secondReferenceSource; /* Optional second DMA reference prefix. */
@@ -424,28 +424,28 @@ typedef struct sdfDrawTag_t {
 
 typedef char SdfListHead_link_layout[
     (sizeof(sdfDrawTag_t) == 0x20 &&
-     (u32)&((sdfDrawTag_t *)0)->nextList == 0 &&
-     (u32)&((sdfDrawTag_t *)0)->first == 4 &&
-     (u32)&((sdfDrawTag_t *)0)->last == 8) ? 1 : -1];
+     (u32)&((sdfDrawTag_t *)0)->next == 0 &&
+     (u32)&((sdfDrawTag_t *)0)->head == 4 &&
+     (u32)&((sdfDrawTag_t *)0)->tail == 8) ? 1 : -1];
 
 /* Draw-surface pool entry (0x20); the SDK initializes and flushes this owner. */
-typedef struct SdfPoolNode {
-    struct SdfPoolNode *next; /* 0x00 */
-    sdfDrawTag_t *first;       /* 0x04 */
-    sdfDrawTag_t *last;        /* 0x08 */
+typedef struct sdfGrOt_t {
+    struct sdfGrOt_t *next; /* 0x00 */
+    sdfDrawTag_t *tagHead;       /* 0x04 */
+    sdfDrawTag_t *tagTail;        /* 0x08 */
     u32 unkC;
-    void (*append)(struct SdfPoolNode *, sdfDrawTag_t *);      /* 0x10 */
-    s32 (*prepend)(struct SdfPoolNode *, s32, sdfDrawTag_t *); /* 0x14 */
+    void (*append)(struct sdfGrOt_t *, sdfDrawTag_t *);      /* 0x10 */
+    s32 (*prepend)(struct sdfGrOt_t *, s32, sdfDrawTag_t *); /* 0x14 */
     u32 unk18;
     u32 unk1C;
-} SdfPoolNode;
+} sdfGrOt_t;
 
-typedef char SdfPoolNode_size_must_be_0x20[(sizeof(SdfPoolNode) == 0x20) ? 1 : -1];
-typedef char SdfPoolNode_owner_layout[
-    ((u32)&((SdfPoolNode *)0)->first == 4 &&
-     (u32)&((SdfPoolNode *)0)->last == 8 &&
-     (u32)&((SdfPoolNode *)0)->append == 0x10 &&
-     (u32)&((SdfPoolNode *)0)->prepend == 0x14) ? 1 : -1];
+typedef char sdfGrOt_t_size_must_be_0x20[(sizeof(sdfGrOt_t) == 0x20) ? 1 : -1];
+typedef char sdfGrOt_t_owner_layout[
+    ((u32)&((sdfGrOt_t *)0)->tagHead == 4 &&
+     (u32)&((sdfGrOt_t *)0)->tagTail == 8 &&
+     (u32)&((sdfGrOt_t *)0)->append == 0x10 &&
+     (u32)&((sdfGrOt_t *)0)->prepend == 0x14) ? 1 : -1];
 
 /* Callback-list hooks also accept the shared task-entry no-op. */
 typedef void (*SdfListCallback)();
@@ -493,20 +493,20 @@ typedef struct SdfDmaSrc {
 
 /* REF tag and VIF commands followed by the trailing chain tag (0x20).
  * The complete trailing quadword is cleared before its NEXT header is patched. */
-typedef struct SdfDmaNode {
+typedef struct sdfGrRefPacketHeader_t {
     u64 dmaTag;
     u64 vifCommands;
     int __attribute__((mode(TI))) nextTag;
-} SdfDmaNode;
+} sdfGrRefPacketHeader_t;
 
-typedef char SdfDmaNode_size_must_be_0x20[
-    sizeof(SdfDmaNode) == 0x20 ? 1 : -1];
-typedef char SdfDmaNode_alignment_must_be_0x10[
-    __alignof__(SdfDmaNode) == 0x10 ? 1 : -1];
-typedef char SdfDmaNode_vifCommands_at_8[
-    ((u32)&((SdfDmaNode *)0)->vifCommands == 8) ? 1 : -1];
-typedef char SdfDmaNode_nextTag_at_0x10[
-    ((u32)&((SdfDmaNode *)0)->nextTag == 0x10) ? 1 : -1];
+typedef char sdfGrRefPacketHeader_t_size_must_be_0x20[
+    sizeof(sdfGrRefPacketHeader_t) == 0x20 ? 1 : -1];
+typedef char sdfGrRefPacketHeader_t_alignment_must_be_0x10[
+    __alignof__(sdfGrRefPacketHeader_t) == 0x10 ? 1 : -1];
+typedef char sdfGrRefPacketHeader_t_vifCommands_at_8[
+    ((u32)&((sdfGrRefPacketHeader_t *)0)->vifCommands == 8) ? 1 : -1];
+typedef char sdfGrRefPacketHeader_t_nextTag_at_0x10[
+    ((u32)&((sdfGrRefPacketHeader_t *)0)->nextTag == 0x10) ? 1 : -1];
 
 /* Resource entry with word at +0xC (0x10); DDS1/2 game/code_002D33C8/0032C278.c. */
 typedef struct SdfResEntry {

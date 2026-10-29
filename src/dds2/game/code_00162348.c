@@ -504,7 +504,7 @@ dds3Polygon_t *dds3PolygonCreate(s32 count, s16 flags, s16 options) {
     record->drawCount = 0;
     memset(&record->request, 0, sizeof(record->request));
     record->request.color = 0x80808080;
-    if (!(options & 1)) record->request.primitive = 0x4000;
+    if (!(options & 1)) record->request.attr = 0x4000;
     asset = sdfMatNew();
     record->asset = asset;
     if (!(options & 2)) sdfMatSetConstant(asset, 1.0f);
@@ -522,20 +522,20 @@ void dds3PolygonDraw(dds3Polygon_t *node) {
     hDrawListTop = node;
 }
 
-extern SdfPoolNode sdfGrOtTable[0x62];
+extern sdfGrOt_t sdfGrOtTable[0x62];
 
-static inline void parAppendDrawSurfacePool(SdfPoolNode *pool, sdfDrawTag_t *packet) {
+static inline void parAppendDrawSurfacePool(sdfGrOt_t *pool, sdfDrawTag_t *packet) {
     pool->append(pool, packet);
 }
 
-extern void *effPkt3DPrimMakePoly(EffPacketParams *);
+extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *);
 
 void dds3PolygonLinkOt(void) {
     dds3Polygon_t *record;
     sdfDrawTag_t *packet;
     s32 remaining;
     s16 flags;
-    SdfPoolNode *priorityPool;
+    sdfGrOt_t *priorityPool;
     record = hDrawListTop;
     if (record != NULL) {
         priorityPool = &sdfGrOtTable[51];
@@ -547,23 +547,23 @@ void dds3PolygonLinkOt(void) {
                 sdf3DPrimLinkMat(packet, record->asset, 0);
                 flags = record->flags;
                 remaining = record->drawCount;
-                record->request.positions = record->positions;
-                record->request.texcoords = record->texcoords[0];
-                record->request.colors = record->colors;
-                record->request.normals = record->normals;
-                record->request.parameterCount = 16;
-                record->request.vertexCount = 48;
+                record->request.vertex = record->positions;
+                record->request.uv = record->texcoords[0];
+                record->request.vertexColor = record->colors;
+                record->request.normal = record->normals;
+                record->request.faceCount = 16;
+                record->request.pointCount = 48;
                 while (remaining >= 48) {
                     sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(&record->request));
-                    record->request.positions += 48;
-                    if (flags & 1) record->request.texcoords += 96;
-                    if (flags & 2) record->request.normals += 48;
+                    record->request.vertex += 48;
+                    if (flags & 1) record->request.uv += 96;
+                    if (flags & 2) record->request.normal += 48;
                     remaining -= 48;
-                    if (flags & 4) record->request.colors += 48;
+                    if (flags & 4) record->request.vertexColor += 48;
                 }
                 if (remaining > 0) {
-                    record->request.parameterCount = remaining / 3;
-                    record->request.vertexCount = remaining;
+                    record->request.faceCount = remaining / 3;
+                    record->request.pointCount = remaining;
                     sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(&record->request));
                 }
                 record->drawCount = 0;
@@ -583,11 +583,11 @@ void dds3PolygonSetTex(dds3Polygon_t *record, sdfTexHandle_t *texture) {
 }
 
 /* Draw parameter block filled per strip by dds3TrackPolyLinkOt. */
-extern EffPacketParams parDrawControl;
+extern sdf3DPrimPolyParm_t parDrawControl;
 
 void dds3TrackPolyInit(void) {
     memset(&parDrawControl, 0, 0x2C);
-    parDrawControl.primitive = 0x4000;
+    parDrawControl.attr = 0x4000;
 }
 
 ParSystem *dds3TrackPolyCreate(s32 count, s32 perCell, s32 groupDivisor, u32 kind) {
@@ -1566,7 +1566,7 @@ extern const u32 D_003AAD10[];
 extern const u32 D_003AAE50[];
 extern const u32 D_003AAD80[];
 extern const u32 D_003AAE00[];
-extern SdfPoolNode *D_003AAF50[];
+extern sdfGrOt_t *D_003AAF50[];
 
 
 /* Batch pending cell systems by topology, then submit the five draw buckets. */
@@ -1598,98 +1598,98 @@ void dds3TrackPolyLinkOt(void) {
         sdf3DPrimLinkMat(list, (sdfMat_t *)system->asset, NULL);
         count = system->cellCount;
         if (system->kind == PAR_CELL_TOPOLOGY_PAIR) {
-            parDrawControl.parameters = D_003AAC90;
+            parDrawControl.faceIndex = D_003AAC90;
             for (i = 0; i < count; i++) {
                 cell = &system->cells[i];
-                parDrawControl.parameterCount = 16;
-                parDrawControl.vertexCount = 18;
+                parDrawControl.faceCount = 16;
+                parDrawControl.pointCount = 18;
                 remaining = cell->vertexCount;
-                parDrawControl.positions = cell->history;
-                parDrawControl.colors = cell->colors;
+                parDrawControl.vertex = cell->history;
+                parDrawControl.vertexColor = cell->colors;
                 parDrawControl.color = cell->color;
                 while (remaining >= 18) {
                     remaining -= 16;
                     sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&parDrawControl));
-                    parDrawControl.positions += 16;
-                    parDrawControl.colors += 16;
+                    parDrawControl.vertex += 16;
+                    parDrawControl.vertexColor += 16;
                 }
                 if (remaining >= 4) {
-                    parDrawControl.parameterCount = remaining - 2;
-                    parDrawControl.vertexCount = remaining;
+                    parDrawControl.faceCount = remaining - 2;
+                    parDrawControl.pointCount = remaining;
                     sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&parDrawControl));
                 }
             }
         } else if (system->kind == PAR_CELL_TOPOLOGY_TRIANGLE) {
-            parDrawControl.parameters = D_003AAD10;
+            parDrawControl.faceIndex = D_003AAD10;
             for (i = 0; i < count; i++) {
                 cell = &system->cells[i];
-                parDrawControl.parameterCount = 16;
-                parDrawControl.vertexCount = 15;
+                parDrawControl.faceCount = 16;
+                parDrawControl.pointCount = 15;
                 remaining = cell->vertexCount;
-                parDrawControl.positions = cell->history;
-                parDrawControl.colors = cell->colors;
+                parDrawControl.vertex = cell->history;
+                parDrawControl.vertexColor = cell->colors;
                 parDrawControl.color = cell->color;
                 while (remaining >= 15) {
                     remaining -= 12;
                     sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&parDrawControl));
-                    parDrawControl.positions += 12;
-                    parDrawControl.colors += 12;
+                    parDrawControl.vertex += 12;
+                    parDrawControl.vertexColor += 12;
                 }
                 if (remaining >= 6) {
-                    parDrawControl.parameterCount = (remaining / 3) * 4 - 4;
-                    parDrawControl.vertexCount = remaining;
+                    parDrawControl.faceCount = (remaining / 3) * 4 - 4;
+                    parDrawControl.pointCount = remaining;
                     sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&parDrawControl));
                 }
             }
         } else if (system->kind == PAR_CELL_TOPOLOGY_FIVE_VECTOR) {
-            parDrawControl.parameters = D_003AAE50;
+            parDrawControl.faceIndex = D_003AAE50;
             for (i = 0; i < count; i++) {
                 cell = &system->cells[i];
-                parDrawControl.parameterCount = 8;
-                parDrawControl.vertexCount = 10;
+                parDrawControl.faceCount = 8;
+                parDrawControl.pointCount = 10;
                 remaining = cell->vertexCount;
-                parDrawControl.positions = cell->history;
-                parDrawControl.colors = cell->colors;
+                parDrawControl.vertex = cell->history;
+                parDrawControl.vertexColor = cell->colors;
                 parDrawControl.color = cell->color;
                 while (remaining >= 10) {
                     remaining -= 5;
                     sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&parDrawControl));
-                    parDrawControl.positions += 5;
-                    parDrawControl.colors += 5;
+                    parDrawControl.vertex += 5;
+                    parDrawControl.vertexColor += 5;
                 }
             }
         } else if (system->kind == PAR_CELL_TOPOLOGY_SIX_VECTOR) {
-            parDrawControl.parameters = D_003AAD80;
+            parDrawControl.faceIndex = D_003AAD80;
             for (i = 0; i < count; i++) {
                 cell = &system->cells[i];
-                parDrawControl.parameterCount = 10;
-                parDrawControl.vertexCount = 12;
+                parDrawControl.faceCount = 10;
+                parDrawControl.pointCount = 12;
                 remaining = cell->vertexCount;
-                parDrawControl.positions = cell->history;
-                parDrawControl.colors = cell->colors;
+                parDrawControl.vertex = cell->history;
+                parDrawControl.vertexColor = cell->colors;
                 parDrawControl.color = cell->color;
                 while (remaining >= 12) {
                     remaining -= 6;
                     sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&parDrawControl));
-                    parDrawControl.positions += 6;
-                    parDrawControl.colors += 6;
+                    parDrawControl.vertex += 6;
+                    parDrawControl.vertexColor += 6;
                 }
             }
         } else {
-            parDrawControl.parameters = D_003AAE00;
+            parDrawControl.faceIndex = D_003AAE00;
             for (i = 0; i < count; i++) {
                 cell = &system->cells[i];
-                parDrawControl.parameterCount = 12;
-                parDrawControl.vertexCount = 16;
+                parDrawControl.faceCount = 12;
+                parDrawControl.pointCount = 16;
                 remaining = cell->vertexCount;
-                parDrawControl.positions = cell->history;
-                parDrawControl.colors = cell->colors;
+                parDrawControl.vertex = cell->history;
+                parDrawControl.vertexColor = cell->colors;
                 parDrawControl.color = cell->color;
                 while (remaining >= 16) {
                     remaining -= 12;
                     sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&parDrawControl));
-                    parDrawControl.positions += 12;
-                    parDrawControl.colors += 12;
+                    parDrawControl.vertex += 12;
+                    parDrawControl.vertexColor += 12;
                 }
             }
         }
@@ -1746,27 +1746,27 @@ void dds3TrianglePolyDelete(ParBlock *block) {
     sdfMemFreeDirect(block->allocation);
 }
 
-void dds3TrianglePolyLinkOt(SdfPoolNode *emitter, ParBlock *cmd) {
+void dds3TrianglePolyLinkOt(sdfGrOt_t *emitter, ParBlock *cmd) {
     sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
-    EffPacketParams state;
+    sdf3DPrimPolyParm_t state;
     s32 remaining;
     sdfDrawTagInit(list);
     sdf3DPrimLinkResetTm(list, 0);
     remaining = cmd->count * 3;
     memset(&state, 0, sizeof(state));
-    state.parameterCount = 0x10;
-    state.vertexCount = 0x30;
-    state.primitive = 0x4000;
-    state.positions = cmd->positions;
-    state.colors = cmd->colors;
+    state.faceCount = 0x10;
+    state.pointCount = 0x30;
+    state.attr = 0x4000;
+    state.vertex = cmd->positions;
+    state.vertexColor = cmd->colors;
     state.color = cmd->color;
     while (remaining >= 0x30) {
         remaining -= 0x30;
         sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&state));
     }
     if (remaining > 0) {
-        parDrawControl.parameterCount = remaining / 3;
-        parDrawControl.vertexCount = remaining;
+        parDrawControl.faceCount = remaining / 3;
+        parDrawControl.pointCount = remaining;
         sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&state));
     }
     parAppendDrawSurfacePool(emitter, list);

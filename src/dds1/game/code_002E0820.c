@@ -1011,12 +1011,12 @@ extern f32 sdfFaceDivBias;
 extern u32 D_00398500[];
 
 /* Serialize the requested VIF attribute streams into one aligned DMA packet. */
-u32 *sdf3DPrimMakePoly(SdfPrimitiveRequest *request) {
-    s32 stripWords = request->stripWordCount;
-    s32 count = request->vertexCount;
+u32 *sdf3DPrimMakePoly(sdf3DPrimPolyParm_t *request) {
+    s32 stripWords = request->faceCount;
+    s32 count = request->pointCount;
     s32 headerWords = 18;
     s32 wordsPerVertex = 3;
-    u32 primitive = request->primitiveFlags | 0x68;
+    u32 primitive = request->attr | 0x68;
     u32 format = 0x60;
     s32 bytes;
     void *(*allocate)(s32);
@@ -1028,22 +1028,22 @@ u32 *sdf3DPrimMakePoly(SdfPrimitiveRequest *request) {
     s32 i;
     u32 countCode;
 
-    if (request->normals != NULL) {
+    if (request->normal != NULL) {
         format = 0xE0;
         headerWords = 19;
         wordsPerVertex = 6;
     }
-    if (request->coordinates != NULL) {
+    if (request->uv != NULL) {
         format |= 0x100;
         primitive |= 0x10;
         headerWords++;
         wordsPerVertex += 2;
-        if (request->secondCoordinates != NULL) {
+        if (request->multiUv != NULL) {
             primitive |= 0x1000;
             wordsPerVertex += 2;
         }
     }
-    if (request->vertexColors != NULL) {
+    if (request->vertexColor != NULL) {
         format |= 0x200;
         primitive |= 0x800;
         headerWords++;
@@ -1051,17 +1051,17 @@ u32 *sdf3DPrimMakePoly(SdfPrimitiveRequest *request) {
     }
     bytes = (headerWords + stripWords + wordsPerVertex * count) * 4;
     bytes = (bytes + 15) & ~15;
-    allocate = request->allocate;
+    allocate = request->allocator;
     if (allocate == NULL) allocate = sdfGrAllocPacketBuff;
     packet = allocate(bytes);
     *(u64 *)packet = (u64)(u16)((bytes >> 4) - 1) | 0x20000000ULL;
     packet[2] = 0x6102C000;
-    packet[3] = (~request->clipMask) & 0xFFFF;
+    packet[3] = (~request->attrInhibit) & 0xFFFF;
     packet[4] = 0x6E01C002;
     packet[5] = request->color;
     packet[6] = 0x6003C003;
     cursor = packet + 7;
-    *cursor++ = (u32)request->depth;
+    *cursor++ = (u32)request->zBias;
     *cursor++ = (u32)sdfFaceDivSoften;
     *cursor++ = (u32)sdfFaceDivBias;
     *cursor++ = 0x04000004;
@@ -1070,16 +1070,16 @@ u32 *sdf3DPrimMakePoly(SdfPrimitiveRequest *request) {
     *cursor++ = (u16)stripWords | ((u32)(u16)count << 16);
     *cursor++ = (primitive & 0xFFFF) | (format << 16);
     *cursor++ = (stripWords << 16) | 0x6E00C001;
-    if (request->strip == NULL) {
+    if (request->faceIndex == NULL) {
         memcpy(cursor, D_00398500, stripWords * 4);
     } else {
-        memcpy(cursor, request->strip, stripWords * 4);
+        memcpy(cursor, request->faceIndex, stripWords * 4);
     }
     cursor += stripWords;
     stripWords++;
     countCode = count << 16;
     *cursor++ = countCode | stripWords | 0x6800C000;
-    vector = request->positions;
+    vector = request->vertex;
     i = 0;
     do {
         EE_MMI_STORE_VEC3_VALUE(cursor, *vector);
@@ -1088,7 +1088,7 @@ u32 *sdf3DPrimMakePoly(SdfPrimitiveRequest *request) {
         i++;
     } while (i != count);
     stripWords += count;
-    vector = request->normals;
+    vector = request->normal;
     if (vector != NULL) {
         *cursor++ = countCode | stripWords | 0x6800C000;
         i = 0;
@@ -1100,9 +1100,9 @@ u32 *sdf3DPrimMakePoly(SdfPrimitiveRequest *request) {
         } while (i != count);
         stripWords += count;
     }
-    coordinates = request->coordinates;
+    coordinates = request->uv;
     if (coordinates != NULL) {
-        secondCoordinates = request->secondCoordinates;
+        secondCoordinates = request->multiUv;
         if (secondCoordinates == NULL) {
             *cursor++ = countCode | stripWords | 0x6400C000;
             memcpy(cursor, coordinates, count * 8);
@@ -1120,9 +1120,9 @@ u32 *sdf3DPrimMakePoly(SdfPrimitiveRequest *request) {
         }
         stripWords += count;
     }
-    if (request->vertexColors != NULL) {
+    if (request->vertexColor != NULL) {
         *cursor++ = countCode | stripWords | 0x6E00C000;
-        memcpy(cursor, request->vertexColors, count * 4);
+        memcpy(cursor, request->vertexColor, count * 4);
         cursor += count;
     }
     *cursor = 0x1400000C;
@@ -1971,7 +1971,7 @@ u32 sdfDevConsColorTable[16] = {
 
 INCLUDE_RODATA(const s32, "game/code_002E0820", D_003B4548);
 
-INCLUDE_SDATA(struct sdfMemHandle_t * const, "game/code_002E0820", D_003BD350);
+INCLUDE_SDATA(const s32, "game/code_002E0820", D_003BD350);
 
 INCLUDE_SDATA(const s32, "game/code_002E0820", sdfFaceDivSoften);
 

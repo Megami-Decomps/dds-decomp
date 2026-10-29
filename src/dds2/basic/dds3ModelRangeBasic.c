@@ -12,7 +12,7 @@ void dds3ModelBasicFreeModel(dds3Basic_t *object) {
     const void *ownedResourceData;
     sdfMemHandle_t *allocation;
 
-    rangeData = object->data;
+    rangeData = object->workdata;
     ownedResourceData = rangeData->ownedResourceData;
     if (ownedResourceData != NULL) {
         allocation = sdfMemGetHandleByPtr(ownedResourceData);

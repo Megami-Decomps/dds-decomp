@@ -14,7 +14,7 @@
 #include "sdf.h"
 extern s8 dds3PadBitTable[0x20];
 extern s8 D_0040B7DB[];
-extern SdfPoolNode sdfGrOtTable[];
+extern sdfGrOt_t sdfGrOtTable[];
 #include "sdf_packet_alloc.h"
 #include "sdf_bordered_rectangle_packet.h"
 extern u8 *sdf2DGetPrimPtr(SdfDrawPacket *packet);
@@ -458,7 +458,7 @@ EffResourceDescriptor *dds3EffectFileListWindowCreate(EffResourceList *list) {
 EffResourceBrowserResult dds3EffectFileListWindowDraw(EffResourceDescriptor *descriptor) {
     EffResourceListNode *visibleEntry;
     sdfDrawTag_t *packetList;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
     s32 drawnRows;
     s32 contentRow;
 
@@ -677,7 +677,7 @@ void dds3EffectListSetTexture(EffResourceDescriptor *work, const char *textureRe
     sdfMemFreeDirect(loadedResource);
 }
 
-extern SdfPoolNode D_003805A8;
+extern sdfGrOt_t D_003805A8;
 
 
 /* Queue the overlay's texture as a quad at its screen position. */

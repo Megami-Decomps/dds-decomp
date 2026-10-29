@@ -340,7 +340,7 @@ extern void fldUpdateCameraViewFromPlayer(void);
 
 /* The kind-4 lookup returns a camera with a separately owned world transform. */
 s32 fldCmdFocusCameraOnObject(void) {
-    FldAreaWork *work;
+    fldAreaWork_t *work;
     dds3Basic_t *obj;
     dds3Basic_t *world = dds3GetControlScene();
 
@@ -350,9 +350,9 @@ s32 fldCmdFocusCameraOnObject(void) {
     }
     work = &fldGlobalBase;
     work->mode = FLD_CAMERA_MODE_OBJECT_FOCUS;
-    work->focusPos[0] = obj->inner->position[0];
-    work->focusPos[1] = obj->inner->position[1];
-    work->focusPos[2] = obj->inner->position[2];
+    work->focusPos[0] = obj->poseset->pos[0];
+    work->focusPos[1] = obj->poseset->pos[1];
+    work->focusPos[2] = obj->poseset->pos[2];
     fldUpdateCameraViewFromPlayer();
     return 1;
 }
@@ -370,7 +370,7 @@ extern void fldClearCameraObjectHighlightFlag();
 extern void fldUpdateFieldCameraViewState();
 
 s32 fldUpdateLookAtSegment(void) {
-    FldAreaWork *cam = &fldGlobalBase;
+    fldAreaWork_t *cam = &fldGlobalBase;
     FldPoint near;
     FldPoint far;
 
@@ -400,7 +400,7 @@ s32 fldCmdSetScenePhaseThree(void) {
 }
 
 s32 fldCmdSetLookAtHeading(void) {
-    FldAreaWork *cam;
+    fldAreaWork_t *cam;
     FldPoint near;
     FldPoint far;
 
@@ -647,7 +647,7 @@ s32 fldCommand_FLD_MODEL_ON(void) {
             dds3SetFirstBasicArray((dds3BasicArrayHandle_t *)list);
             do {
                 node = dds3GetBasicArray((dds3BasicArrayHandle_t *)list);
-                if (((EffectTransformData *)node->data)->roomNumber == (u32)room) {
+                if (((EffectTransformData *)node->workdata)->roomNumber == (u32)room) {
                     switch (mode) {
                     case 0:
                         dds3MatterObjectBasicSetAlpMode(node, 1);
@@ -703,7 +703,7 @@ s32 fldCmdApplyRoomModeGroupOne(void) {
             dds3SetFirstBasicArray((dds3BasicArrayHandle_t *)list);
             do {
                 node = dds3GetBasicArray((dds3BasicArrayHandle_t *)list);
-                if (((EffectTransformData *)node->data)->roomNumber == (u32)room) {
+                if (((EffectTransformData *)node->workdata)->roomNumber == (u32)room) {
                     switch (mode) {
                     case 0:
                         dds3MatterObjectBasicSetAlpMode(node, 2);

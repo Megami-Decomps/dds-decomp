@@ -156,7 +156,7 @@ KwlnTaskUpdateResult evtMotionSeProcess1(dds3ProcessID_t *task) {
     if (motionSeParams->eventId < 600) {
         return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
     }
-    unit = ((EvtMotionSeUnitLink *)motionNode->data)->unit;
+    unit = ((EvtMotionSeUnitLink *)motionNode->workdata)->unit;
     if (unit == NULL) {
         return KWLN_TASK_UPDATE_FINISH_CALLBACK;
     }

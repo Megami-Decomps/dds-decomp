@@ -51,7 +51,7 @@ extern EffectObjectNode *effFloorModelListHead;
 
 extern u32 D_00437E38;
 
-extern SdfPoolNode *D_00437E3C;
+extern sdfGrOt_t *D_00437E3C;
 
 extern struct EffExpandedList *effCreateTextureAnimationSet(u32);
 extern s32 effComputeLightDirectionVU(dds3ModelHandle_t *, SdfLightingPacketStorage *);
@@ -59,7 +59,7 @@ extern s32 effComputeLightDirectionVU(dds3ModelHandle_t *, SdfLightingPacketStor
 extern void effFloorModelListRemove(EffectObjectNode *);
 
 #include "sdf_packet_alloc.h"
-extern SdfPoolNode *kwlnSceneSurfaceSets[13][4];
+extern sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
 extern u64 D_003E9640[];
 
 extern u32 effSharedTextureReferenceCount;
@@ -297,7 +297,7 @@ EffModelOwner *effDuplicateFloorModelOwner(EffModelOwner *source) {
 void effRenderModelOwnerWithGsTests(EffModelOwner *owner) {
     sdfDrawTag_t *list;
     u64 *packet;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
     s32 index;
 
     mdlApplyBroadcastVia(mdlSetColor, owner->model,
@@ -882,10 +882,10 @@ RefObj *effRetainSharedReference(RefObj *obj) {
     return obj;
 }
 
-extern sdfTexHandle_t *sdfGetOrCreateTextureForReference(SdfPoolNode *, RefObj *);
+extern sdfTexHandle_t *sdfGetOrCreateTextureForReference(sdfGrOt_t *, RefObj *);
 #include "sdf_packet_builders.h"
 
-sdfTexHandle_t *sdfGetOrCreateTextureForReference(SdfPoolNode *surface, RefObj *source) {
+sdfTexHandle_t *sdfGetOrCreateTextureForReference(sdfGrOt_t *surface, RefObj *source) {
     sdfDrawTag_t *list;
     u16 width;
     u16 height;
@@ -1053,7 +1053,7 @@ void effSampleAnimSet(const EffExpandedList *set, u32 frame, EffAnimSample *out)
     out->angle = 0.0f;
 }
 
-sdfTexHandle_t *effAssignSampledSegmentReference(const EffExpandedList *set, SdfPoolNode *target,
+sdfTexHandle_t *effAssignSampledSegmentReference(const EffExpandedList *set, sdfGrOt_t *target,
                                                  const EffAnimSample *sample) {
     return sdfGetOrCreateTextureForReference(target, set->handles[sample->segment]);
 }
@@ -1066,6 +1066,6 @@ INCLUDE_SDATA(const s32, "game/code_002DC138", effSharedTextureReferenceCount);
 
 INCLUDE_SDATA(const s32, "game/code_002DC138", D_00437E38);
 
-INCLUDE_SDATA(SdfPoolNode * const, "game/code_002DC138", D_00437E3C);
+INCLUDE_SDATA(const s32, "game/code_002DC138", D_00437E3C);
 
 INCLUDE_SDATA(const s32, "game/code_002DC138", D_00437E40);

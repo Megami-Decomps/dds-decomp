@@ -18,9 +18,9 @@ s32 MoverBasicMainprocuder(dds3Basic_t *moverNode)
     f32 pathVector[4];
     WorldTransformParams transformParams;
     dds3PoseSet_t relativeTransform;
-    Dds3SlotResource *slotResource = moverNode->data;
+    Dds3SlotResource *slotResource = moverNode->workdata;
     dds3Basic_t *targetObject = slotResource->target;
-    dds3PoseSet_t *inner = targetObject->inner;
+    dds3PoseSet_t *inner = targetObject->poseset;
     Dds3MoverUpdate updateCallback;
     CameraData *cameraData;
     f32 fieldOfView;
@@ -31,7 +31,7 @@ s32 MoverBasicMainprocuder(dds3Basic_t *moverNode)
             SDF_VU0_STOREVECTOR(pathVector);
             dds3SetPosPoseSet(targetObject, (u128 *)pathVector);
             if ((targetObject->kindTag >> 24) == EFF_WORLD_KIND_EFFECT_TRANSFORM) {
-                SDF_VU0_COPYVECTOR(&((EffectTransformData *)targetObject->data)->position, pathVector);
+                SDF_VU0_COPYVECTOR(&((EffectTransformData *)targetObject->workdata)->position, pathVector);
             }
         }
         if (slotResource->path->counter.flags & DDS3_PATH_ROTATION_CHANNEL) {
@@ -42,7 +42,7 @@ s32 MoverBasicMainprocuder(dds3Basic_t *moverNode)
         if (slotResource->path->counter.flags & DDS3_PATH_SCALAR_CHANNEL) {
             if ((targetObject->kindTag >> 24) == EFF_WORLD_KIND_CAMERA) {
                 fieldOfView = dds3PathBasicControlGetFovy(slotResource->path);
-                cameraData = targetObject->data;
+                cameraData = targetObject->workdata;
                 cameraData->fieldOfView = fieldOfView;
                 cameraData->fovUpdatePending |= DDS3_CAMERA_UPDATE_FOV_BIT;
             }
@@ -64,7 +64,7 @@ s32 MoverBasicMainprocuder(dds3Basic_t *moverNode)
             if (updateCallback(&relativeTransform, targetObject) == DDS3_MOVER_UPDATE_APPLY_RELATIVE_TRANSFORM) {
                 dds3GetSclPoseSetMCR(targetObject, (u128 *)relativeTransform.scale);
                 dds3AddRotPoseSet(targetObject, (u128 *)&relativeTransform.rotation);
-                dds3GetPosPoseSetMCR(targetObject, (u128 *)relativeTransform.position);
+                dds3GetPosPoseSetMCR(targetObject, (u128 *)relativeTransform.pos);
             }
         }
     }

@@ -105,18 +105,18 @@ extern void mnuRecordSetVector(FileSlotTable *record, const void *src);
 
 
 
-static inline void effSubmitSurfacePacket(SdfPoolNode *surface, sdfDrawTag_t *list) {
+static inline void effSubmitSurfacePacket(sdfGrOt_t *surface, sdfDrawTag_t *list) {
     surface->append(surface, list);
 }
 
 #include "sdf_packet_alloc.h"
-extern void *effPkt3DPrimMakePoly(EffPacketParams *);
+extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *);
 extern u32 D_0037ECB0[];
-extern SdfPoolNode *D_0037ECF0[];
-extern SdfPoolNode *D_0037EE68[];
+extern sdfGrOt_t *D_0037ECF0[];
+extern sdfGrOt_t *D_0037EE68[];
 extern u32 D_0037EB30[];
-extern SdfPoolNode *D_0037EB78[];
-extern SdfPoolNode sdfGrOtTable[];
+extern sdfGrOt_t *D_0037EB78[];
+extern sdfGrOt_t sdfGrOtTable[];
 
 extern char D_003B39C8[]; /* "/tool/effect/ep/" */
 
@@ -219,7 +219,7 @@ extern s32 dds3BillboardGeneralNumber(void);
 extern sdfMat_t *sdfMatNew(void);
 
 
-extern EffPacketParams D_003DC9E0;
+extern sdf3DPrimPolyParm_t D_003DC9E0;
 
 extern EffTrackSet *effCreateTrackSetWithSharedReferences(u32, u32, u32);
 extern void effReleaseResourceRefs(EffTrackSet *);
@@ -703,7 +703,7 @@ extern s32 sdf2DGetPrimPtr(s32 packetAddress);
 extern s32 sdfProjectPointInForwardConeVU(void);
 
 extern EffLensFlareElement effLensFlareSets[][13];
-extern SdfPoolNode D_003255A8;
+extern sdfGrOt_t D_003255A8;
 static inline void effBlendFlareBaseColor(u32 color, const u32 *workColor, f32 *baseColor) {
     eeUnpackRGBAWord(color, 0x3C000000);
     VU0_MOVE_VF_EXTENDED(vf11, vf10);
@@ -4464,13 +4464,13 @@ EffTrackSet *effCreateTrackSet(s32 count, u16 kind) {
     set->handle = sdfMatNew();
     sdfMatSetConstant(set->handle, 1.0f);
     memset(&D_003DC9E0, 0, 0x2C);
-    D_003DC9E0.primitive = 0x4000;
+    D_003DC9E0.attr = 0x4000;
     return set;
 }
 
 extern struct SdfTextureFileHeader *D_003BC96C;
 
-INCLUDE_SDATA(struct sdfMemHandle_t * const, "game/code_0029C530", D_003BC960);
+INCLUDE_SDATA(const s32, "game/code_0029C530", D_003BC960);
 
 INCLUDE_SDATA(const s32, "game/code_0029C530", effFlashTextureHandles);
 
@@ -4554,17 +4554,17 @@ EffTrackSet *effDuplicateResourceRefs(const EffTrackSet *original) {
     return effect;
 }
 
-extern SdfPoolNode *D_0037EAB0[8];
+extern sdfGrOt_t *D_0037EAB0[8];
 extern u32 D_0037E9A0[20];
 extern u32 D_0037E9F0[12];
 extern u32 D_0037EA20[20];
 extern u32 D_0037EA70[16];
-extern sdfTexHandle_t *sdfGetOrCreateTextureForReference(SdfPoolNode *, RefObj *);
+extern sdfTexHandle_t *sdfGetOrCreateTextureForReference(sdfGrOt_t *, RefObj *);
 struct sdfMat_t;
 
 /* Draw track-set positions/colors/UVs; a null matrix selects the identity transform. */
 void effDrawTrackSet(EffTrackSet *track, const Matrix4 *matrix) {
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
     void *list;
     EffGsPacket *packet;
     s32 remaining;
@@ -4630,70 +4630,70 @@ void effDrawTrackSet(EffTrackSet *track, const Matrix4 *matrix) {
     texcoords = (u32 *)track->columns;
     color = track->color;
     remaining = track->rows;
-    D_003DC9E0.colors = colors;
-    D_003DC9E0.positions = positions;
-    D_003DC9E0.texcoords = texcoords;
+    D_003DC9E0.vertexColor = colors;
+    D_003DC9E0.vertex = positions;
+    D_003DC9E0.uv = texcoords;
     D_003DC9E0.color = color;
 
     switch (kind) {
     case 0:
-        D_003DC9E0.parameterCount = 15;
-        D_003DC9E0.vertexCount = 25;
-        D_003DC9E0.parameters = D_0037E9A0;
+        D_003DC9E0.faceCount = 15;
+        D_003DC9E0.pointCount = 25;
+        D_003DC9E0.faceIndex = D_0037E9A0;
         while (remaining >= 25) {
             remaining -= 25;
             sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DC9E0));
-            D_003DC9E0.positions += 25;
-            D_003DC9E0.colors += 25;
+            D_003DC9E0.vertex += 25;
+            D_003DC9E0.vertexColor += 25;
         }
         if (remaining >= 5) {
-            D_003DC9E0.parameterCount = (s16)((remaining / 5) * 3);
-            D_003DC9E0.vertexCount = (s16)remaining;
+            D_003DC9E0.faceCount = (s16)((remaining / 5) * 3);
+            D_003DC9E0.pointCount = (s16)remaining;
             sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DC9E0));
         }
         break;
     case 1:
-        D_003DC9E0.parameterCount = 12;
-        D_003DC9E0.vertexCount = 13;
-        D_003DC9E0.parameters = D_0037E9F0;
+        D_003DC9E0.faceCount = 12;
+        D_003DC9E0.pointCount = 13;
+        D_003DC9E0.faceIndex = D_0037E9F0;
         while (remaining >= 13) {
             remaining -= 13;
             sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DC9E0));
-            D_003DC9E0.positions += 13;
-            D_003DC9E0.colors += 13;
+            D_003DC9E0.vertex += 13;
+            D_003DC9E0.vertexColor += 13;
         }
         break;
     case 2:
-        D_003DC9E0.parameterCount = 16;
-        D_003DC9E0.vertexCount = 32;
-        D_003DC9E0.parameters = D_0037EA20;
+        D_003DC9E0.faceCount = 16;
+        D_003DC9E0.pointCount = 32;
+        D_003DC9E0.faceIndex = D_0037EA20;
         while (remaining >= 32) {
             remaining -= 32;
             sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DC9E0));
-            D_003DC9E0.positions += 32;
-            D_003DC9E0.colors += 32;
+            D_003DC9E0.vertex += 32;
+            D_003DC9E0.vertexColor += 32;
         }
         if (remaining >= 4) {
-            D_003DC9E0.parameterCount = (s16)((remaining / 4) * 2);
-            D_003DC9E0.vertexCount = (s16)remaining;
+            D_003DC9E0.faceCount = (s16)((remaining / 4) * 2);
+            D_003DC9E0.pointCount = (s16)remaining;
             sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DC9E0));
         }
         break;
     case 3:
     case 4:
-        D_003DC9E0.parameterCount = 16;
-        D_003DC9E0.vertexCount = 32;
-        D_003DC9E0.parameters = D_0037EA70;
+        D_003DC9E0.faceCount = 16;
+        D_003DC9E0.pointCount = 32;
+        D_003DC9E0.faceIndex = D_0037EA70;
         while (remaining >= 32) {
             remaining -= 32;
             sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DC9E0));
-            D_003DC9E0.positions += 32;
-            D_003DC9E0.texcoords += 64;
-            D_003DC9E0.colors += 32;
+            D_003DC9E0.vertex += 32;
+            D_003DC9E0.uv += 64;
+            D_003DC9E0.vertexColor += 32;
         }
         if (remaining >= 4) {
-            D_003DC9E0.parameterCount = (s16)((remaining / 4) * 2);
-            D_003DC9E0.vertexCount = (s16)remaining;
+            D_003DC9E0.faceCount = (s16)((remaining / 4) * 2);
+            D_003DC9E0.pointCount = (s16)remaining;
             sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DC9E0));
         }
         break;
@@ -5332,7 +5332,7 @@ void effSetClassWorkScale(EffClassWork *work, float value) {
 }
 
 
-extern EffPacketParams D_003DCA10[];
+extern sdf3DPrimPolyParm_t D_003DCA10[];
 
 EffPointSet *effCreatePointSet4(u32 count) {
     s32 rows = count * 4 + 4;
@@ -5356,7 +5356,7 @@ EffPointSet *effCreatePointSet4(u32 count) {
     set->handle = sdfMatNew();
     sdfMatSetConstant(set->handle, 1.0f);
     memset(D_003DCA10, 0, 0x2C);
-    D_003DCA10[0].primitive = 0x4000;
+    D_003DCA10[0].attr = 0x4000;
     return set;
 }
 
@@ -5395,21 +5395,21 @@ void effDrawFourPointGroups(EffPointSet *set, const Matrix4 *matrix) {
             sdfDrawTagLink(list, (u32)packet);
         }
         remaining = set->rows;
-        D_003DCA10[0].colors = (u32 *)set->tail;
-        D_003DCA10[0].positions = (u128 *)set->buffer;
+        D_003DCA10[0].vertexColor = (u32 *)set->tail;
+        D_003DCA10[0].vertex = (u128 *)set->buffer;
         D_003DCA10[0].color = set->color;
-        D_003DCA10[0].parameterCount = 12;
-        D_003DCA10[0].vertexCount = 12;
-        D_003DCA10[0].parameters = D_0037EB30;
+        D_003DCA10[0].faceCount = 12;
+        D_003DCA10[0].pointCount = 12;
+        D_003DCA10[0].faceIndex = D_0037EB30;
         while (remaining >= 12) {
             remaining -= 8;
             sdfDrawTagLink(list, effPkt3DPrimMakePoly(D_003DCA10));
-            D_003DCA10[0].positions += 8;
-            D_003DCA10[0].colors += 8;
+            D_003DCA10[0].vertex += 8;
+            D_003DCA10[0].vertexColor += 8;
         }
         if (remaining >= 8) {
-            D_003DCA10[0].parameterCount = 6;
-            D_003DCA10[0].vertexCount = remaining;
+            D_003DCA10[0].faceCount = 6;
+            D_003DCA10[0].pointCount = remaining;
             sdfDrawTagLink(list, effPkt3DPrimMakePoly(D_003DCA10));
         }
         if (set->flag == 0) {
@@ -5848,9 +5848,9 @@ extern void effCopyRingFrameVectors(EffSurfaceGridNode *, u128 *, s32);
 extern void effInterpolateSurfaceGridVectors(EffSurfaceGridNode *work, const f32 (*vectors)[4]);
 extern void effBeginMatrixVuDrawPacket(const Matrix4 *);
 extern f32 aViewTarget[4], sdfViewTargetVector[4], aViewDown[4];
-extern SdfPoolNode *effGetPacketSubmissionSurface(s32);
+extern sdfGrOt_t *effGetPacketSubmissionSurface(s32);
 extern void effSubmitIndexedRenderPacket(u32);
-extern void effSubmitGeneratedTexturePacket(SdfPoolNode *, EffGeneratedTextureDescriptor *);
+extern void effSubmitGeneratedTexturePacket(sdfGrOt_t *, EffGeneratedTextureDescriptor *);
 extern void effResetSurfaceGridFrame(EffSurfaceGridNode *);
 struct EffSurfaceTrailHistory;
 extern void effDrawSurfaceTrailHistory(struct EffSurfaceTrailHistory *, u32);
@@ -6145,7 +6145,7 @@ void effDrawSurfaceNode(s32 nodeAddress) {
     case 7: {
         FileSlotTable *record;
         EffExpandedList *holder = node->resourceHolder;
-        SdfPoolNode *surface;
+        sdfGrOt_t *surface;
         s32 cachedSegment;
         nodeScale = node->params.scale;
         cachedSegment = -1;
@@ -6227,9 +6227,9 @@ void effIndexedFloatCallbackDispatch(ValPtr44 *p, float v) {
 }
 
 
-extern EffPacketParams D_003DCA40;
+extern sdf3DPrimPolyParm_t D_003DCA40;
 
-extern EffPacketParams D_003DCA70;
+extern sdf3DPrimPolyParm_t D_003DCA70;
 
 extern u8 D_0037EB90[];
 
@@ -6262,14 +6262,14 @@ EffSurfaceGridNode *effCreateSurfaceGridNode(u32 count, u32 columns) {
     node->field_14 = 0;
     node->material = sdfMatNew();
     sdfMatSetConstant(node->material, 1.0f);
-    memset(&D_003DCA40, 0, sizeof(EffPacketParams));
-    D_003DCA40.primitive = 0x4000;
-    D_003DCA40.parameters = (u32 *)D_0037EB90;
-    memset(&D_003DCA70, 0, sizeof(EffPacketParams));
-    D_003DCA70.primitive = 0x4000;
-    D_003DCA70.parameters = (u32 *)D_0037EBE0;
-    D_003DCA70.parameterCount = 6;
-    D_003DCA70.vertexCount = 8;
+    memset(&D_003DCA40, 0, sizeof(sdf3DPrimPolyParm_t));
+    D_003DCA40.attr = 0x4000;
+    D_003DCA40.faceIndex = (u32 *)D_0037EB90;
+    memset(&D_003DCA70, 0, sizeof(sdf3DPrimPolyParm_t));
+    D_003DCA70.attr = 0x4000;
+    D_003DCA70.faceIndex = (u32 *)D_0037EBE0;
+    D_003DCA70.faceCount = 6;
+    D_003DCA70.pointCount = 8;
     return node;
 }
 
@@ -6466,7 +6466,7 @@ void effDrawSurfaceTrailHistory(EffSurfaceTrailHistory *history, u32 color) {
     s32 wrapped;
     s32 i;
     s32 remaining;
-    EffPacketParams *draw;
+    sdf3DPrimPolyParm_t *draw;
     u32 *colors;
     sdfDrawTag_t *list;
 
@@ -6489,35 +6489,35 @@ void effDrawSurfaceTrailHistory(EffSurfaceTrailHistory *history, u32 color) {
         length[0] = recent;
         length[1] = 0;
     }
-    D_003DCA40.colors = history->colors;
+    D_003DCA40.vertexColor = history->colors;
     for (i = 0; i < 2; i++) {
         draw = &D_003DCA40;
-        draw->positions = history->points + start[i];
+        draw->vertex = history->points + start[i];
         draw->color = color;
-        draw->parameterCount = 16;
+        draw->faceCount = 16;
         remaining = length[i];
-        draw->vertexCount = 15;
+        draw->pointCount = 15;
         while (remaining >= 15) {
             remaining -= 12;
             list = effCurrentRenderPacket;
             sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DCA40));
-            D_003DCA40.positions += 12;
-            D_003DCA40.colors += 12;
+            D_003DCA40.vertex += 12;
+            D_003DCA40.vertexColor += 12;
         }
         if (remaining >= 6) {
-            draw->parameterCount = (remaining / 3) * 4 - 4;
-            draw->vertexCount = remaining;
+            draw->faceCount = (remaining / 3) * 4 - 4;
+            draw->pointCount = remaining;
             list = effCurrentRenderPacket;
             sdfDrawTagLink(list, effPkt3DPrimMakePoly(draw));
-            draw->colors += remaining;
+            draw->vertexColor += remaining;
         }
     }
     colors = history->endColors;
-    D_003DCA70.positions = history->endPoints;
-    colors[0] = D_003DCA40.colors[-2];
-    D_003DCA70.colors = colors;
+    D_003DCA70.vertex = history->endPoints;
+    colors[0] = D_003DCA40.vertexColor[-2];
+    D_003DCA70.vertexColor = colors;
     colors[7] = colors[6] = colors[5] = colors[4] =
-        colors[3] = colors[2] = colors[1] = D_003DCA40.colors[-3];
+        colors[3] = colors[2] = colors[1] = D_003DCA40.vertexColor[-3];
     D_003DCA70.color = color;
     list = effCurrentRenderPacket;
     sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DCA70));
@@ -6539,7 +6539,7 @@ void effSubmitIndexedRenderPacket(u32 index) {
 extern EffQuadWork *effCreateQuadWork(FileJobPayload *job);
 void effDuplicateRenderResourceOwner(EffQuadWork *work, const EffQuadWork *source);
 
-extern EffPacketParams effQuadPacketParams;
+extern sdf3DPrimPolyParm_t effQuadPacketParams;
 extern u32 D_0037EC10[];
 extern u32 D_0037EC20[];
 
@@ -6556,12 +6556,12 @@ EffQuadWork *effCreateQuadWork(FileJobPayload *job) {
     work->reference = NULL;
     work->assetHandle = sdfMatNew();
     sdfMatSetConstant(work->assetHandle, 1.0f);
-    memset(&effQuadPacketParams, 0, sizeof(EffPacketParams));
-    effQuadPacketParams.primitive = 0x4000;
-    effQuadPacketParams.parameters = D_0037EC10;
-    effQuadPacketParams.colors = D_0037EC20;
-    effQuadPacketParams.parameterCount = 2;
-    effQuadPacketParams.vertexCount = 4;
+    memset(&effQuadPacketParams, 0, sizeof(sdf3DPrimPolyParm_t));
+    effQuadPacketParams.attr = 0x4000;
+    effQuadPacketParams.faceIndex = D_0037EC10;
+    effQuadPacketParams.vertexColor = D_0037EC20;
+    effQuadPacketParams.faceCount = 2;
+    effQuadPacketParams.pointCount = 4;
     if (job == NULL) {
         return work;
     }
@@ -6717,10 +6717,10 @@ void effResetRenderResourceKind(EffQuadWork *work) {
 #include "eff_bill_cell_draw_work.h"
 #include "eff_anim.h"
 
-extern void *effPkt3DPrimMakePoly(EffPacketParams *);
-extern EffPacketParams effQuadPacketParams;
+extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *);
+extern sdf3DPrimPolyParm_t effQuadPacketParams;
 
-extern SdfPoolNode *effLayerSurfaces[];
+extern sdfGrOt_t *effLayerSurfaces[];
 /* Per-frame draw of a textured effect quad: samples the color, alpha, size and
  * angle tracks at the current frame, takes the rectangle and texture
  * coordinates from the billboard handle or, without one, from the sampled
@@ -6758,8 +6758,8 @@ void effDrawQuadWork(EffQuadWork *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     sdf3DPrimLinkTm(list, 0);
-    effQuadPacketParams.texcoords = (u32 *)texcoords;
-    effQuadPacketParams.positions = (u128 *)positions;
+    effQuadPacketParams.uv = (u32 *)texcoords;
+    effQuadPacketParams.vertex = (u128 *)positions;
     color = effSampleColorAlphaTracks(&work->source.colorTrack, &work->source.alphaTrack, frame, duration);
     eeUnpackRGBAWord(work->color, 0x3C000000);
     VU0_MOVE_VF(vf11, vf10);
@@ -6837,8 +6837,8 @@ void effDrawQuadWork(EffQuadWork *work) {
     }
     sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&effQuadPacketParams));
     /* Only the call above reads them (see the header). */
-    effQuadPacketParams.texcoords = NULL;
-    effQuadPacketParams.positions = NULL;
+    effQuadPacketParams.uv = NULL;
+    effQuadPacketParams.vertex = NULL;
     if (work->source.noSetup == 0) {
         packet = sdfGrAllocPacketBuff(0x30);
         packet->vifTag = 0x5000000210000000ULL;
@@ -7856,7 +7856,7 @@ void effSetClassResourceMatrixComponent(EffClassWork *work, float value) {
     work->scale = value;
 }
 
-extern EffPacketParams D_003DCAD0[];
+extern sdf3DPrimPolyParm_t D_003DCAD0[];
 
 EffPointSet *effCreatePointSet5(s32 count) {
     s32 rows = count * 5 + 5;
@@ -7880,7 +7880,7 @@ EffPointSet *effCreatePointSet5(s32 count) {
     set->handle = sdfMatNew();
     sdfMatSetConstant(set->handle, 1.0f);
     memset(D_003DCAD0, 0, 0x2C);
-    D_003DCAD0[0].primitive = 0x4000;
+    D_003DCAD0[0].attr = 0x4000;
     return set;
 }
 
@@ -7916,21 +7916,21 @@ void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix) {
             sdfDrawTagLink(list, (u32)packet);
         }
         remaining = set->rows;
-        D_003DCAD0[0].colors = (u32 *)set->tail;
-        D_003DCAD0[0].positions = (u128 *)set->buffer;
+        D_003DCAD0[0].vertexColor = (u32 *)set->tail;
+        D_003DCAD0[0].vertex = (u128 *)set->buffer;
         D_003DCAD0[0].color = set->color;
-        D_003DCAD0[0].parameterCount = 0x10;
-        D_003DCAD0[0].vertexCount = 0xF;
-        D_003DCAD0[0].parameters = D_0037ECB0;
+        D_003DCAD0[0].faceCount = 0x10;
+        D_003DCAD0[0].pointCount = 0xF;
+        D_003DCAD0[0].faceIndex = D_0037ECB0;
         while (remaining >= 0xF) {
             remaining -= 0xA;
             sdfDrawTagLink(list, effPkt3DPrimMakePoly(D_003DCAD0));
-            D_003DCAD0[0].positions += 0xA;
-            D_003DCAD0[0].colors += 0xA;
+            D_003DCAD0[0].vertex += 0xA;
+            D_003DCAD0[0].vertexColor += 0xA;
         }
         if (remaining >= 0xA) {
-            D_003DCAD0[0].parameterCount = 8;
-            D_003DCAD0[0].vertexCount = remaining;
+            D_003DCAD0[0].faceCount = 8;
+            D_003DCAD0[0].pointCount = remaining;
             sdfDrawTagLink(list, effPkt3DPrimMakePoly(D_003DCAD0));
         }
         if (set->flag == 0) {
@@ -9544,7 +9544,7 @@ void effSetBlockResourceMatrixComponent(EffClassWork *work, float value) {
 
 
 
-extern EffPacketParams D_003DCB00;
+extern sdf3DPrimPolyParm_t D_003DCB00;
 
 EffRibbonWork *effCreateRibbonWork(u32 count, u32 repeat) {
     u32 rowStride = repeat * 4 + 4;
@@ -9574,8 +9574,8 @@ EffRibbonWork *effCreateRibbonWork(u32 count, u32 repeat) {
     }
     work->handle = sdfMatNew();
     sdfMatSetConstant(work->handle, 1.0f);
-    memset(&D_003DCB00, 0, sizeof(EffPacketParams));
-    D_003DCB00.primitive = 0x4000;
+    memset(&D_003DCB00, 0, sizeof(sdf3DPrimPolyParm_t));
+    D_003DCB00.attr = 0x4000;
     return work;
 }
 
@@ -9625,7 +9625,7 @@ EffRibbonWork *effCloneRibbonWithSharedResource(EffRibbonWork *source) {
     return node;
 }
 
-extern SdfPoolNode *D_0037ED78[];
+extern sdfGrOt_t *D_0037ED78[];
 static inline void unpackNormalizedColor(u32 color) {
     u32 rgba[4];
     rgba[0] = color;
@@ -9637,7 +9637,7 @@ static inline u32 packNormalizedColor(void) {
     return rgba[0];
 }
 void effDrawRibbon(EffRibbonWork *work, const Matrix4 *matrix) {
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
     void *list;
     EffGsPacket *packet;
     u32 segment;
@@ -9708,26 +9708,26 @@ void effDrawRibbon(EffRibbonWork *work, const Matrix4 *matrix) {
             segmentColor = *colors;
             if (segmentColor & 0xFF000000) {
                 remaining = rowStride;
-                D_003DCB00.colors = (u32 *)extra;
-                D_003DCB00.positions = (u128 *)positions;
-                D_003DCB00.texcoords = (f32 *)uvs;
+                D_003DCB00.vertexColor = (u32 *)extra;
+                D_003DCB00.vertex = (u128 *)positions;
+                D_003DCB00.uv = (f32 *)uvs;
                 unpackNormalizedColor(segmentColor);
                 SDF_VU0_LOADVECTOR_B(baseVector);
                 SDF_VU0_MULVECTOR();
                 D_003DCB00.color = packNormalizedColor();
-                D_003DCB00.parameterCount = 12;
-                D_003DCB00.vertexCount = 12;
-                D_003DCB00.parameters = D_0037EB30;
+                D_003DCB00.faceCount = 12;
+                D_003DCB00.pointCount = 12;
+                D_003DCB00.faceIndex = D_0037EB30;
                 while (remaining >= 12) {
                     remaining -= 8;
                     sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DCB00));
-                    D_003DCB00.positions += 8;
-                    D_003DCB00.colors += 8;
-                    D_003DCB00.texcoords += 16;
+                    D_003DCB00.vertex += 8;
+                    D_003DCB00.vertexColor += 8;
+                    D_003DCB00.uv += 16;
                 }
                 if (remaining >= 8) {
-                    D_003DCB00.parameterCount = 6;
-                    D_003DCB00.vertexCount = remaining;
+                    D_003DCB00.faceCount = 6;
+                    D_003DCB00.pointCount = remaining;
                     sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DCB00));
                 }
             }
@@ -10287,8 +10287,8 @@ void effSynchronizeFileTransform(u8 *work) {
 
 
 
-extern SdfPoolNode *effGetPacketSubmissionSurface(s32);
-void effSubmitCompositeGsPacket(SdfPoolNode *, EffCompositeGsDescriptor *);
+extern sdfGrOt_t *effGetPacketSubmissionSurface(s32);
+void effSubmitCompositeGsPacket(sdfGrOt_t *, EffCompositeGsDescriptor *);
 
 
 /* Draws one frame of a scrolling-texture effect: each live slot samples its
@@ -10312,7 +10312,7 @@ void func_002AF6F8(EffClassWork *work) {
     f32 *position = state->positions;
     FileKeyBlock *keys;
     FileSlot *slot;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
     sdfTexHandle_t *texture;
     s32 duration, i;
     u16 textureWidth, textureHeight;
@@ -10779,7 +10779,7 @@ void effReleaseScalyTextureReference(s32 unused) {
     }
 }
 
-extern EffPacketParams D_003DCB30;
+extern sdf3DPrimPolyParm_t D_003DCB30;
 
 /* Allocate position/UV/color rows and a draw handle using count and repeat. */
 u8 *effAllocateTexturedStripWork(count, repeat)
@@ -10815,8 +10815,8 @@ u32 repeat;
     }
     work->handle = sdfMatNew();
     sdfMatSetConstant(work->handle, 1.0f);
-    memset(&D_003DCB30, 0, sizeof(EffPacketParams));
-    D_003DCB30.primitive = 0x4000;
+    memset(&D_003DCB30, 0, sizeof(sdf3DPrimPolyParm_t));
+    D_003DCB30.attr = 0x4000;
     return (u8 *)work;
 }
 
@@ -10846,7 +10846,7 @@ u32 effAllocateStripFromWorkAndRetainTexture(u8 *work) {
 #include "kwln_frame_draw_buffer.h"
 #include "sdf_gs_header.h"
 
-extern SdfPoolNode *D_0037EE20[];
+extern sdfGrOt_t *D_0037EE20[];
 extern vu8 sdfFrameId;
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 extern void sdfBuildMaskedFrameRegisterReference(const u8 *, SdfDmaReferenceChainPacket *, s32);
@@ -10856,7 +10856,7 @@ void effDrawScalyTexturedStrip(EffStripWork *work, void *matrix) {
     f32 normalizedColor[4];
     s32 baseColor[4];
     u32 packedColor;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
     void *list;
     sdfTexHandle_t *texture;
     SdfAssetEntry *entry;
@@ -10962,10 +10962,10 @@ void effDrawScalyTexturedStrip(EffStripWork *work, void *matrix) {
         if (*colors & 0xFF000000) {
             f32 unit;
             remaining = stride;
-            D_003DCB30.colors = extra;
-            D_003DCB30.positions = positions;
-            D_003DCB30.texcoords = (u32 *)uvsA;
-            D_003DCB30.extraTexcoords = (u32 *)uvsB;
+            D_003DCB30.vertexColor = extra;
+            D_003DCB30.vertex = positions;
+            D_003DCB30.uv = (u32 *)uvsA;
+            D_003DCB30.multiUv = (u32 *)uvsB;
             unit = 1.0f / 128.0f;
             eeUnpackRGBAWordFloat(*colors, unit);
             SDF_VU0_LOADVECTOR_B(normalizedColor);
@@ -10973,20 +10973,20 @@ void effDrawScalyTexturedStrip(EffStripWork *work, void *matrix) {
             unit = 128.0f;
             packedColor = eePackRGBAWord(unit);
             D_003DCB30.color = packedColor;
-            D_003DCB30.parameterCount = 12;
-            D_003DCB30.vertexCount = 12;
-            D_003DCB30.parameters = D_0037EB30;
+            D_003DCB30.faceCount = 12;
+            D_003DCB30.pointCount = 12;
+            D_003DCB30.faceIndex = D_0037EB30;
             while (remaining >= 12) {
                 remaining -= 8;
                 sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DCB30));
-                D_003DCB30.positions += 8;
-                D_003DCB30.colors += 8;
-                D_003DCB30.texcoords += 16;
-                D_003DCB30.extraTexcoords += 16;
+                D_003DCB30.vertex += 8;
+                D_003DCB30.vertexColor += 8;
+                D_003DCB30.uv += 16;
+                D_003DCB30.multiUv += 16;
             }
             if (remaining >= 8) {
-                D_003DCB30.vertexCount = remaining;
-                D_003DCB30.parameterCount = 6;
+                D_003DCB30.pointCount = remaining;
+                D_003DCB30.faceCount = 6;
                 sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DCB30));
             }
         }
@@ -11224,7 +11224,7 @@ void effReleaseParticleList(EffSpanTable *list) {
 
 extern f32 effWorldUpVector[4];
 
-extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
 /* Updates the span geometry of a model-attached particle effect after its model
  * is posed: for each map-position record it appends the model's look-at point
  * to the record's point set and rebuilds the tapered two-edge ribbon around the
@@ -11622,7 +11622,7 @@ void effSetModelResourceScale(EffModelResource *effect, f32 scale) {
     effect->scale = scale;
 }
 
-extern EffPacketParams D_003DCB60[];
+extern sdf3DPrimPolyParm_t D_003DCB60[];
 
 EffPointSet *effCreatePointSet3(s32 count) {
     s32 rows = count * 3 + 3;
@@ -11646,7 +11646,7 @@ EffPointSet *effCreatePointSet3(s32 count) {
     set->handle = sdfMatNew();
     sdfMatSetConstant(set->handle, 1.0f);
     memset(D_003DCB60, 0, 0x2C);
-    D_003DCB60[0].primitive = 0x4000;
+    D_003DCB60[0].attr = 0x4000;
     return set;
 }
 
@@ -11682,21 +11682,21 @@ void effDrawThreePointGroups(EffPointSet *set, Matrix4 *matrix) {
             sdfDrawTagLink(list, (u32)packet);
         }
         remaining = set->rows;
-        D_003DCB60[0].colors = (u32 *)set->tail;
-        D_003DCB60[0].positions = (u128 *)set->buffer;
+        D_003DCB60[0].vertexColor = (u32 *)set->tail;
+        D_003DCB60[0].vertex = (u128 *)set->buffer;
         D_003DCB60[0].color = set->color;
-        D_003DCB60[0].parameterCount = 0x10;
-        D_003DCB60[0].vertexCount = 0xF;
-        D_003DCB60[0].parameters = (u32 *)D_0037EB90;
+        D_003DCB60[0].faceCount = 0x10;
+        D_003DCB60[0].pointCount = 0xF;
+        D_003DCB60[0].faceIndex = (u32 *)D_0037EB90;
         while (remaining >= 0xF) {
             remaining -= 0xC;
             sdfDrawTagLink(list, effPkt3DPrimMakePoly(D_003DCB60));
-            D_003DCB60[0].positions += 0xC;
-            D_003DCB60[0].colors += 0xC;
+            D_003DCB60[0].vertex += 0xC;
+            D_003DCB60[0].vertexColor += 0xC;
         }
         if (remaining >= 6) {
-            D_003DCB60[0].parameterCount = 4;
-            D_003DCB60[0].vertexCount = remaining;
+            D_003DCB60[0].faceCount = 4;
+            D_003DCB60[0].pointCount = remaining;
             sdfDrawTagLink(list, effPkt3DPrimMakePoly(D_003DCB60));
         }
         if (set->flag == 0) {
@@ -12348,7 +12348,7 @@ s32 func_002B3698(EffActiveResource *owner) {
         return;
     }
     camera = dds3GetActiveCameraSceneBasic(dds3GetActiveScene());
-    if (camera == NULL || camera->value == NULL) {
+    if (camera == NULL || camera->name == NULL) {
         return;
     }
     if (owner->frame == 0) {
@@ -12454,7 +12454,7 @@ s32 func_002B3698(EffActiveResource *owner) {
     SDF_VU0_LOADVECTOR_B(actorPosition);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(position);
-    data = camera->data;
+    data = camera->workdata;
     dds3PathBasicControlGetRot(path);
     if (config->actorSelection != 5) {
         SDF_VU0_LOADVECTOR_B_BARRIER(actorRotation);
@@ -12919,7 +12919,7 @@ void effResetParticleStateWord(EffParticleSharedResource *work) {
     work->state = 0;
 }
 
-extern SdfPoolNode D_003255A8;
+extern sdfGrOt_t D_003255A8;
 
 extern void sdfPrimLinkGt4(sdfDrawTag_t *list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 color0, s32 x1, s32 y1, s32 u1, s32 v1, s32 color1, s32 x2, s32 y2, s32 u2, s32 v2, s32 color2, s32 x3, s32 y3, s32 u3, s32 v3, s32 color3, s32 depth, s32 (*alloc)(s32));
 
@@ -12932,7 +12932,7 @@ void effDrawAndAdvanceSharedParticleFrame(EffParticleSharedResource *work) {
     EffAnimSample sample;
     sdfDrawTag_t *list;
     EffGsPacket *packet;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
     f32 size, angle, halfWidth, halfHeight, centerX, centerY, cosine, sine, coordX, coordY;
     u32 color, packed;
 
@@ -13337,270 +13337,6 @@ u32 effGetSelectedFileQueueIndex(void) {
 
 
 extern EffectBlock128 effEditedQueueHeader;
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2D20);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2D30);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2D40);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2D50);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2D60);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2D70);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2D80);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2D90);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2DA0);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2DB0);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2DC0);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2DD0);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2DE0);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2DF0);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2E00);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2E10);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2E20);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2E30);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2E40);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2E50);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2E60);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2E70);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2E80);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2E90);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2EB0);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2ED0);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2EF0);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2F10);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2F30);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2F50);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2F70);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2F90);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2FB0);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2FD0);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2FF0);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3010);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3030);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3050);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3070);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3090);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B30B0);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B30D0);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B30F0);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3110);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3130);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3150);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3170);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3190);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B31B0);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B31D8);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B31F8);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3218);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3238);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3258);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3278);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3298);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B32B8);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B32D8);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B32F8);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3318);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3338);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3358);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3378);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3398);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B33B8);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B33D8);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B33F8);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3418);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3438);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3458);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3478);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3498);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B34B8);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B34D8);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B34F8);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3518);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3538);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3558);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3578);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3598);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B35B8);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B35D8);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B35F8);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3618);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3638);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3658);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3678);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3698);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B36B8);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B36D8);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B36F8);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3718);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3738);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3758);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3778);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3798);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B37B8);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B37C8);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B37D8);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B37E8);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B37F8);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3808);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3818);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3828);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3838);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3848);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3858);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3868);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3878);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3888);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3898);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B38A8);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B38B8);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B38C8);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B38D8);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B38E8);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B38F8);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3908);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3918);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3928);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3938);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3948);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3958);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3968);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3978);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3988);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3998);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B39A8);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B39B8);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B39C8);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B39E0);
-
-INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B39F0);
 
 #ifdef NON_MATCHING
 #include "eff_block128.h"
@@ -14018,6 +13754,270 @@ s32 effUpdatePartsListEditor(s32 unused) {
     return result;
 }
 #else
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2D20);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2D30);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2D40);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2D50);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2D60);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2D70);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2D80);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2D90);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2DA0);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2DB0);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2DC0);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2DD0);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2DE0);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2DF0);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2E00);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2E10);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2E20);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2E30);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2E40);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2E50);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2E60);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2E70);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2E80);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2E90);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2EB0);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2ED0);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2EF0);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2F10);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2F30);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2F50);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2F70);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2F90);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2FB0);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2FD0);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B2FF0);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3010);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3030);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3050);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3070);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3090);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B30B0);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B30D0);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B30F0);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3110);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3130);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3150);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3170);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3190);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B31B0);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B31D8);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B31F8);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3218);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3238);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3258);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3278);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3298);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B32B8);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B32D8);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B32F8);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3318);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3338);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3358);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3378);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3398);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B33B8);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B33D8);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B33F8);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3418);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3438);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3458);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3478);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3498);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B34B8);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B34D8);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B34F8);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3518);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3538);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3558);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3578);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3598);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B35B8);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B35D8);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B35F8);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3618);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3638);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3658);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3678);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3698);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B36B8);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B36D8);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B36F8);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3718);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3738);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3758);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3778);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3798);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B37B8);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B37C8);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B37D8);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B37E8);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B37F8);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3808);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3818);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3828);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3838);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3848);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3858);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3868);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3878);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3888);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3898);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B38A8);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B38B8);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B38C8);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B38D8);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B38E8);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B38F8);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3908);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3918);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3928);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3938);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3948);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3958);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3968);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3978);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3988);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B3998);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B39A8);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B39B8);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B39C8);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B39E0);
+
+INCLUDE_RODATA(const s32, "game/code_0029C530", D_003B39F0);
+
 INCLUDE_ASM(const s32, "game/code_0029C530", effUpdatePartsListEditor);
 #endif
 
@@ -16936,7 +16936,7 @@ INCLUDE_SDATA(const s32, "game/code_0029C530", D_003BC97C);
 
 INCLUDE_SDATA(const s32, "game/code_0029C530", effCurrentRenderPacket);
 
-INCLUDE_SDATA(struct sdfMemHandle_t * const, "game/code_0029C530", D_003BC984);
+INCLUDE_SDATA(const s32, "game/code_0029C530", D_003BC984);
 
 INCLUDE_SDATA(const s32, "game/code_0029C530", effWindTextureHandle);
 
@@ -16944,7 +16944,7 @@ INCLUDE_SDATA(const s32, "game/code_0029C530", effSharedRibbonReferenceCount);
 
 INCLUDE_SDATA(const s32, "game/code_0029C530", D_003BC990);
 
-INCLUDE_SDATA(struct sdfMemHandle_t * const, "game/code_0029C530", D_003BC994);
+INCLUDE_SDATA(const s32, "game/code_0029C530", D_003BC994);
 
 INCLUDE_SDATA(const s32, "game/code_0029C530", effScalyTextureHandle);
 
@@ -17444,13 +17444,13 @@ INCLUDE_SDATA(const s32, "game/code_0029C530", D_003BD10A);
 
 INCLUDE_SDATA(const s32, "game/code_0029C530", D_003BD10B);
 
-INCLUDE_SDATA(struct BtlResourceEntryList * const, "game/code_0029C530", effResourceBankEntries);
+INCLUDE_SDATA(const s32, "game/code_0029C530", effResourceBankEntries);
 
-INCLUDE_SDATA(struct BtlResourceDescriptor * const, "game/code_0029C530", effResourceBankDescriptor);
+INCLUDE_SDATA(const s32, "game/code_0029C530", effResourceBankDescriptor);
 
 INCLUDE_SDATA(const s32, "game/code_0029C530", effFileQueueNameRecord);
 
-INCLUDE_SDATA(struct BtlResourceNameRecord * const, "game/code_0029C530", effQueuedResourceNameRecord);
+INCLUDE_SDATA(const s32, "game/code_0029C530", effQueuedResourceNameRecord);
 
 INCLUDE_SDATA(const s32, "game/code_0029C530", effColorEditRgbMenuOpen);
 

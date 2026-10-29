@@ -987,7 +987,7 @@ extern char D_00436610[];
 extern char D_00436618[];
 extern char D_00436620[];
 extern char D_00436628[];
-extern SdfPoolNode kwlnPositionedTextSurface;
+extern sdfGrOt_t kwlnPositionedTextSurface;
 extern void *sdfDevPrintf(s32, s32, s32, s32, const char *, ...);
 extern ItfMesWindowRec *DebugChangeInstance(ItfMesWindowRec *window);
 extern void DebugMoveWinVert(ItfMesBlkA4 *panel, s32 boundsMode);
@@ -1579,10 +1579,10 @@ extern void SelectItemMove(ItfMesBlk40 *sel, s32 dir);
 
 extern s32 SelectItemDefKey(ItfMesBlk40 *);
 
-extern SdfPoolNode sdfGrOtTable[];
+extern sdfGrOt_t sdfGrOtTable[];
 
 
-extern void itfPnlDraw(itfpanel_t *sprite, SdfPoolNode *surface);
+extern void itfPnlDraw(itfpanel_t *sprite, sdfGrOt_t *surface);
 
 extern void DebugDrawWindowLine(itfpanel_t *sprite);
 
@@ -2232,7 +2232,7 @@ void itfDrawSelectedSoundRow(instanceMes_tag *panel) {
     s32 expansion;
     s32 rightExpansion;
     s32 verticalExpansion;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
 
     if (selected == -1) {
         return;
@@ -2302,7 +2302,7 @@ void itfDrawSelectedSoundRow(instanceMes_tag *panel) {
 #include "fr_font_position.h"
 
 extern ItfMesGlobals itfMesMngManager;
-extern SdfPoolNode sdfGrOtTable[];
+extern sdfGrOt_t sdfGrOtTable[];
 extern DrawColorRec itfSoundSelectorBorderColor;
 extern s32 frFontCountGlyphBands(_FRQ *glyph);
 extern void itfDrawThreePanelBorderBands(DrawVertex *bounds, DrawColorRec *color, u32 tail, s32 borderWidth,
@@ -2324,7 +2324,7 @@ void itfDrawSoundSelectorOptionPanel(instanceMes_tag *panel) {
     BtlFade *fade = &panel->fade;
     s32 selected = selection->savedIndex;
     sdfDrawTag_t *list;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
     s32 i;
     s32 width;
     s32 left;
@@ -2439,7 +2439,7 @@ void itfDrawSoundSelectorFadeLayers(instanceMes_tag *panel) {
     BtlFade *fade = &panel->fade;
     sdfDrawTag_t *packet;
     s32 expansion;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
 
     bounds[0] = 0x1AA0;
     bounds[1] = 0xC60;
@@ -2504,7 +2504,7 @@ void DrawMsgMng_Shutdown(dds3ProcessID_t *task) {
     itfMesMngManager.windowTexture = NULL;
 }
 
-extern SdfPoolNode D_00380708;
+extern sdfGrOt_t D_00380708;
 
 extern s32 D_003B4A18[];
 
@@ -2650,7 +2650,7 @@ extern const s32 D_00414D60[12][4];
 extern s16 D_00438F34;
 extern s32 D_00438F30;
 extern s16 D_00438F38;
-extern SdfPoolNode D_003805A8;
+extern sdfGrOt_t D_003805A8;
 extern const s32 D_00414E20[7][4];
 extern void sdfSubmitGsTestOneRegisterPacket(u64 data, u32 kind);
 extern void sdfSubmitGsAlphaOneRegisterPacket(u32 data, u32 kind);

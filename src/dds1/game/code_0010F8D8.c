@@ -15,14 +15,14 @@ extern u32 dds3ObjectIdCounter;
 
 /* Load the cached VU matrix, or rebuild and cache it when flags bit 1 is clear. */
 void dds3GetTMPoseSet(dds3Basic_t *object) {
-    dds3PoseSet_t *transform = object->inner;
+    dds3PoseSet_t *transform = object->poseset;
     u32 flags = transform->flags;
 
     if (flags & OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID) {
         VU0_LOAD_MATRIX(transform->matrix);
     } else {
         transform->flags = flags | OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
-        dds3MakeMatrix(transform->scale, transform->rotation, transform->position);
+        dds3MakeMatrix(transform->scale, transform->rotation, transform->pos);
         VU0_STORE_MATRIX(transform->matrix);
     }
 }
@@ -34,8 +34,8 @@ s32 dds3ComparePosPoseSet(const dds3PoseSet_t *left, const dds3PoseSet_t *right)
     f32 leftLimit;
     f32 rightLimit;
 
-    SDF_VU0_LOADVECTOR(left->position);
-    SDF_VU0_LOADVECTOR_B(right->position);
+    SDF_VU0_LOADVECTOR(left->pos);
+    SDF_VU0_LOADVECTOR_B(right->pos);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_GETLENGTH(length);
     leftLimit = left->radius;
@@ -50,8 +50,8 @@ s32 dds3ComparePosPoseSet(const dds3PoseSet_t *left, const dds3PoseSet_t *right)
 s32 dds3ComparePosPoseSet2(dds3PoseSet_t *left, dds3PoseSet_t *right) {
     f32 length;
     f32 rightLimit;
-    SDF_VU0_LOADVECTOR(left->position);
-    SDF_VU0_LOADVECTOR_B(right->position);
+    SDF_VU0_LOADVECTOR(left->pos);
+    SDF_VU0_LOADVECTOR_B(right->pos);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_GETLENGTH(length);
     rightLimit = right->radius;
@@ -95,7 +95,7 @@ u32 dds3AllocObjectId(void) {
 
 void dds3SetUnitObjectId(dds3Basic_t *node, const char *objectName) {
     if (node != NULL) {
-        node->value = objectName;
+        node->name = objectName;
     }
 }
 
@@ -104,7 +104,7 @@ u32 dds3GetWorldNodeValue(dds3Basic_t *node) {
 
     worldNodeValue = 0;
     if (node != NULL) {
-        worldNodeValue = (u32)node->value;
+        worldNodeValue = (u32)node->name;
     }
     return worldNodeValue;
 }
@@ -118,7 +118,7 @@ s32 worldconstructor(dds3Basic_t *object) {
     if (entry == NULL) {
         return 0;
     }
-    object->data = entry;
+    object->workdata = entry;
     entry->firstNode = NULL;
     entry->lastNode = NULL;
     entry->activeScene = NULL;
@@ -135,7 +135,7 @@ s32 worldconstructor(dds3Basic_t *object) {
 }
 
 void worlddestructor(dds3Basic_t *object) {
-    WorldInfo *entry = object->data;
+    WorldInfo *entry = object->workdata;
 
     if (entry == NULL) {
         return;
@@ -153,7 +153,7 @@ void worlddestructor(dds3Basic_t *object) {
 }
 
 u32 worldmainprocuder(dds3Basic_t *obj) {
-    WorldInfo *entry = obj->data;
+    WorldInfo *entry = obj->workdata;
     dds3Basic_t *callbackTarget;
 
     callbackTarget = ((WorldInfoSceneNodeView *)entry)->activeScene;
@@ -164,7 +164,7 @@ u32 worldmainprocuder(dds3Basic_t *obj) {
 }
 
 u32 worlddrawprocuder(dds3Basic_t *obj) {
-    WorldInfo *entry = obj->data;
+    WorldInfo *entry = obj->workdata;
     dds3Basic_t *callbackTarget;
 
     callbackTarget = ((WorldInfoSceneNodeView *)entry)->activeScene;
@@ -191,7 +191,7 @@ dds3Basic_t *dds3AddWorld(s32 capacity) {
     }
 
     world = dds3AllocBasic(0);
-    info = world->data;
+    info = world->workdata;
     allocation = sdfMemAllocDirect(capacity * 8);
     info->entryAllocation = allocation;
     info->entries = (WorldValueEntry *)sdfMemLock(allocation);

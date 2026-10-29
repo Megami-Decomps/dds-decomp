@@ -3,5 +3,5 @@
 #include "eff_transform.h"
 
 void dds3PathBasicFreeControl(dds3Basic_t *object) {
-    sdfChipFreeDirect(object->data);
+    sdfChipFreeDirect(object->workdata);
 }

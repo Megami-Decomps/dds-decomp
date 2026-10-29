@@ -280,7 +280,7 @@ extern FileLoadMenuState fileLoadMenuState;
 /* Far scalar: incomplete array forces non-small-data addressing. */
 extern s32 D_003E8008[];
 
-extern SdfPoolNode *effPacketSubmissionSurfaces[6];
+extern sdfGrOt_t *effPacketSubmissionSurfaces[6];
 
 
 extern void sdfVuMatrixToQuaternion(const f32 matrix[4][4]);
@@ -3546,10 +3546,10 @@ s32 fileApplySelectedLoadResult(void) {
         if (activeFlag && ptyApplyUnlockedUnitStatBonusesOnce(DDS3_GBWK->party[i].unitId)) {
             u32 maximumMp;
             u16 restoredHp;
-            DDS3_GBWK->party[i].maxHp =
+            DDS3_GBWK->party[i].maxhp =
                 datComputeSkillBoostedMaxHp(&DDS3_GBWK->party[i]);
             maximumMp = datComputeSkillBoostedMaxMp(&DDS3_GBWK->party[i]);
-            restoredHp = DDS3_GBWK->party[i].maxHp;
+            restoredHp = DDS3_GBWK->party[i].maxhp;
             DDS3_GBWK->party[i].maxMp = maximumMp;
             DDS3_GBWK->party[i].hp = restoredHp;
             DDS3_GBWK->party[i].mp = maximumMp;
@@ -4233,9 +4233,9 @@ INCLUDE_SDATA(const s32, "game/code_002C96D0", slLoadKillFlag);
 
 INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437CD5);
 
-INCLUDE_SDATA(dds3ProcessID_t * const, "game/code_002C96D0", D_00437CD8);
+INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437CD8);
 
-INCLUDE_SDATA(struct FileRequest * const, "game/code_002C96D0", fileSaveIconRequest);
+INCLUDE_SDATA(const s32, "game/code_002C96D0", fileSaveIconRequest);
 
 INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437CE4);
 
@@ -4275,7 +4275,7 @@ INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437D28);
 
 INCLUDE_SDATA(const s32, "game/code_002C96D0", fileSelectedSlotIndex);
 
-INCLUDE_SDATA(const FileMenuStartMode, "game/code_002C96D0", D_00437D30);
+INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437D30);
 
 INCLUDE_SDATA(const s32, "game/code_002C96D0", fileSelectionPending);
 
@@ -4583,7 +4583,7 @@ void fileResetRenderFlags(void) {
     effModelUpdateControlFlags = 0;
 }
 
-SdfPoolNode *effGetPacketSubmissionSurface(s32 index) {
+sdfGrOt_t *effGetPacketSubmissionSurface(s32 index) {
     return effPacketSubmissionSurfaces[index];
 }
 
@@ -6340,7 +6340,7 @@ fileAcquireLoadObjectRecord(EffectSurfaceNode *obj) {
 extern void dds3BillboardDraw(struct billHandle_t *);
 extern void fileReadRecordSecondVector(u8 *, void *);
 extern void fileReadVectorPtr20(u8 *, void *);
-extern void effSubmitGeneratedTexturePacket(SdfPoolNode *, EffGeneratedTextureDescriptor *);
+extern void effSubmitGeneratedTexturePacket(sdfGrOt_t *, EffGeneratedTextureDescriptor *);
 
 void fileDrawLoadObjectSlots(s32 object) {
     EffGeneratedTextureDescriptor params;
@@ -6357,7 +6357,7 @@ void fileDrawLoadObjectSlots(s32 object) {
     FileJobPayload **jobs;
     FileQueue **queues;
     EffExpandedList *animation;
-    SdfPoolNode *textureSink;
+    sdfGrOt_t *textureSink;
     s32 previousSegment;
     s32 count;
     s32 i;

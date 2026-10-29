@@ -374,7 +374,7 @@ s32 btlComputeStatusPenaltyFifth(BtlUnit *object) {
     case 0x80:
     case 0x400:
     case 0x2000:
-        result = -object->partyRecord.maxHp / 5;
+        result = -object->partyRecord.maxhp / 5;
         break;
     }
     return result;

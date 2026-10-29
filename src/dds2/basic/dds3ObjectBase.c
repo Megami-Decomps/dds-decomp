@@ -171,7 +171,7 @@ void dds3ObjectBaseFreeModelHandle(dds3Basic_t *object) {
         if (resourceState != DDS3_OBJECT_RESOURCE_DEV_MOTION) {
             if (resourceState == DDS3_OBJECT_RESOURCE_MODEL_CONTEXT) {
                 mdlFree(dds3ObjectBaseBorrowModelContext(base));
-                data = object->data;
+                data = object->workdata;
                 if (data->transitionWork != NULL) {
                     evtDeleteUnitHandle(data->transitionWork);
                     data->transitionWork = NULL;
@@ -290,18 +290,18 @@ void dds3RebuildObjectModelContext(dds3Basic_t *object, s32 resourceGroup, s32 r
     mdlGetScale(model);
     SDF_VU0_STOREVECTOR(scale);
     dds3SetSclPoseSet(object, (u128 *)scale);
-    SDF_VU0_LOADVECTOR(object->inner->rotation);
+    SDF_VU0_LOADVECTOR(object->poseset->rotation);
     Normalize();
     mdlSetRotate(model);
-    SDF_VU0_LOADVECTOR(object->inner->position);
+    SDF_VU0_LOADVECTOR(object->poseset->pos);
     SDF_VU0_VECTOR_W_SET_ONE();
     mdlSetPosition(model);
     dds3ObjectBaseSetModelContext(base, model);
-    object->inner->radius = model->objectRadius;
+    object->poseset->radius = model->objectRadius;
     base->resourceState = DDS3_OBJECT_RESOURCE_MODEL_CONTEXT;
     base->unk44 = 0;
     {
-        EffectObjectData *data = object->data;
+        EffectObjectData *data = object->workdata;
 
         if (data->transitionWork == NULL) {
             data->transitionWork = evtCreateUnitTransitionWork(object, model);
@@ -390,8 +390,8 @@ extern void evtSubmitPrimaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 d
 extern void evtSubmitPrimaryAlphaBlendMode(s32 blendMode);
 extern void evtSubmitPrimaryFramePacket(void);
 extern void evtSubmitAlternateFramePacket(void);
-struct SdfPoolNode;
-extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
+struct sdfGrOt_t;
+extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
 
 void dds3DrawObjectWithGradientOverlay(dds3Basic_t *object) {
     dds3ObjectBaseControlWorkData_t *base;
@@ -429,10 +429,10 @@ void dds3DrawObjectWithGradientOverlay(dds3Basic_t *object) {
 
 #include "fld_area_work.h"
 extern u8 fldTestRoomObjectModeFlag(s32, u32, s32);
-extern void mdlBlendEntryPitchYawAndUpdate(dds3ModelHandle_t *, struct SdfPoolNode **, s32, f32, f32);
+extern void mdlBlendEntryPitchYawAndUpdate(dds3ModelHandle_t *, struct sdfGrOt_t **, s32, f32, f32);
 extern void sdfModelEvalTm(sdfModelRootNode_t *);
 
-void effObjApplyTransformParameters(struct SdfPoolNode **surfaces, dds3Basic_t *object) {
+void effObjApplyTransformParameters(struct sdfGrOt_t **surfaces, dds3Basic_t *object) {
     dds3ObjectBaseControlWorkData_t *base;
     Dds3ObjectResourceState resourceState;
     struct SdfDmaTagHeader *lighting;
@@ -456,7 +456,7 @@ void effObjApplyTransformParameters(struct SdfPoolNode **surfaces, dds3Basic_t *
             dds3DrawObjectWithGradientOverlay(object);
             return;
         }
-        lighting = (struct SdfDmaTagHeader *)((EffectObjectData *)object->data)->transitionWork->value;
+        lighting = (struct SdfDmaTagHeader *)((EffectObjectData *)object->workdata)->transitionWork->value;
         if (lighting != NULL) {
             dds3ObjectBaseBorrowModelContext(base)->inner->lighting = lighting;
         } else {
@@ -464,8 +464,8 @@ void effObjApplyTransformParameters(struct SdfPoolNode **surfaces, dds3Basic_t *
         }
         if (dds3ObjectBaseCheckFlag(object, 0x2000)) {
             mdlBlendEntryPitchYawAndUpdate(dds3ObjectBaseBorrowModelContext(base), surfaces, base->currentSlot,
-                                           ((EffectObjectData *)object->data)->angle,
-                                           ((EffectObjectData *)object->data)->word34);
+                                           ((EffectObjectData *)object->workdata)->angle,
+                                           ((EffectObjectData *)object->workdata)->word34);
             return;
         }
         if (dds3ObjectBaseCheckFlag(object, 0x10000)) {
@@ -487,7 +487,7 @@ void effObjApplyTransformParameters(struct SdfPoolNode **surfaces, dds3Basic_t *
      * keeps a separate argument load per path (jump2 only merges the tail
      * after the call). */
     if (base->motion != NULL) {
-        roomObjectIndex = ((EffectObjectData *)object->data)->word04;
+        roomObjectIndex = ((EffectObjectData *)object->workdata)->word04;
         if (roomObjectIndex > 0) {
             if (fldTestRoomObjectModeFlag(fldGlobalBase.area, fldGlobalBase.floor + 1, roomObjectIndex) == 0) {
                 switch (base->mode) {
@@ -594,7 +594,7 @@ void effObjApplyTransformParameters(struct SdfPoolNode **surfaces, dds3Basic_t *
         }
     }
     dds3ObjectBaseBorrowDeviceMotionRoot(base)->color = object->color;
-    sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, surfaces,
+    sdfBuildModelPacketsVia(sdfModelLinkOt, surfaces,
                            dds3ObjectBaseBorrowDeviceMotionRoot(base));
 }
 

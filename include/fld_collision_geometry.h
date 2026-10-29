@@ -19,14 +19,14 @@ typedef struct FldCollisionDescriptor {
     s32 faceCount;
     s32 triangleCount;
     f32 (*vertices)[4];
-    FldCollisionFace *faces;
+    fldCollisionFace_t *faces;
     struct FldStopEntry *stopData;
 } FldCollisionDescriptor;
 
 /* Temporary axis-aligned walls own their vertex/face arrays inline. */
 typedef struct FldWallMeshRecord {
     f32 vertices[8][4];
-    FldCollisionFace faces[4];
+    fldCollisionFace_t faces[4];
     FldCollisionDescriptor geometry;
 } FldWallMeshRecord;
 

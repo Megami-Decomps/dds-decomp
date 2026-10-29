@@ -315,7 +315,7 @@ void evtDrawFloatValueEditorRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, Evt
     }
 }
 
-extern SdfPoolNode kwlnPositionedTextSurface;
+extern sdfGrOt_t kwlnPositionedTextSurface;
 extern EvtPad dds3PadButtonState;
 
 extern void evtDrawFloatValueEditorRow();
@@ -1440,11 +1440,11 @@ void evtViewerDrawWorldNodeRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, EvtR
     count = 0;
     for (i = 0; i < 0x12; i++) {
         if (i != EVT_WORLD_SLOT_MOVIE) {
-            for (node = ((EvtWorldTable *)((dds3Basic_t *)dds3GetActiveScene())->data)->slots[i].head; node != NULL; node = node->next) {
-                if (((char *)node->value) != NULL) {
+            for (node = ((evtWorldTable_t *)((dds3Basic_t *)dds3GetActiveScene())->workdata)->slots[i].head; node != NULL; node = node->next) {
+                if (((char *)node->name) != NULL) {
                     count++;
                     if (count == index) {
-                        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_003BC090, ((char *)node->value)));
+                        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_003BC090, ((char *)node->name)));
                         return;
                     }
                 }
@@ -1463,9 +1463,9 @@ s32 evtUpdateWorldNodeListDialog(s32 x, s32 y, EvtRuntime *ctx) {
     list = dds3FontReqAllocDrawTag();
     for (i = 0; i < 0x12; i++) {
         if (i != EVT_WORLD_SLOT_MOVIE) {
-            for (node = ((EvtWorldTable *)((dds3Basic_t *)dds3GetActiveScene())->data)->slots[i].head;
+            for (node = ((evtWorldTable_t *)((dds3Basic_t *)dds3GetActiveScene())->workdata)->slots[i].head;
                  node != NULL; node = node->next) {
-                if (node->value != NULL) {
+                if (node->name != NULL) {
                     count++;
                 }
             }
@@ -1505,7 +1505,7 @@ void evtViewerDrawPendingNodeRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, Ev
     }
     sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0xE, D_003BC240, index));
     if (node != NULL) {
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_003BC248, ((char *)node->value)));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_003BC248, ((char *)node->name)));
     } else {
         sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, "   -----------------------"));
     }
@@ -2167,7 +2167,7 @@ void evtDrawMotionChangeRow(sdfDrawTag_t *list, s32 x, s32 y, s32 row, EvtRuntim
     s32 i;
     s32 count = 0;
     s32 style = 0;
-    dds3ModelHandle_t *model = (dds3ModelHandle_t *)((EffectObjectData *)ctx->frameGroup->info->data)->modelHolder->resourceHandle;
+    dds3ModelHandle_t *model = (dds3ModelHandle_t *)((EffectObjectData *)ctx->frameGroup->info->workdata)->modelHolder->resourceHandle;
     EvtMotionValue packed;
     char *loopNames[] = {D_003BC2A8, D_003BBFF0};
 
@@ -2221,7 +2221,7 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, EvtRuntime *ctx) {
     EvtMotionValue packed;
 
     list = dds3FontReqAllocDrawTag();
-    model = (dds3ModelHandle_t *)((EffectObjectData *)ctx->frameGroup->info->data)->modelHolder->resourceHandle;
+    model = (dds3ModelHandle_t *)((EffectObjectData *)ctx->frameGroup->info->workdata)->modelHolder->resourceHandle;
     evtDrawMenuFrame(list, x, y, 0x14, 0xA, 0, 1, ctx, mnuDrawMotionChangeLabel, evtDrawMotionChangeRow);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
     if (ctx->actionMode != 0x10) {
@@ -2335,7 +2335,7 @@ void evtDrawGroupListRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, EvtRuntime
     for (group = ctx->groups; group != NULL; group = group->next) {
         if (group->type == 1) {
             if (n == index) {
-                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_003BC088, ((char *)group->info->value)));
+                sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_003BC088, ((char *)group->info->name)));
                 return;
             }
             n++;
@@ -4645,7 +4645,7 @@ extern EvtViewerNameIndex mnuCampFindMatchingEntryIndex(PolyMovieWork *, EvtRunt
 
 s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime) {
     char motionName[64];
-    EvtWorldTable *worldTable;
+    evtWorldTable_t *worldTable;
     s32 soundRowsPresent;
     s16 timeiId;
     s32 row;
@@ -4680,12 +4680,12 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
         group->resourceIds.resourceGroup = packageId;
         group->resourceIds.resourceId = partId;
     }
-    worldTable = ((dds3Basic_t *)dds3GetControlScene())->data;
+    worldTable = ((dds3Basic_t *)dds3GetControlScene())->workdata;
     for (node = worldTable->slots[4].head; node != NULL; node = node->next) {
-        if (node->value != 0) {
+        if (node->name != 0) {
             const char *objectName;
             group = evtEventViewerCreateEntry(2, runtime);
-            objectName = (char *)node->value;
+            objectName = (char *)node->name;
             group->info = node;
             group->entryHeader = evtEventViewerAddName(objectName, runtime);
         }
@@ -4710,15 +4710,15 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
                     group->info = modelObject;
                     group->entryHeader = evtEventViewerAddName(names + packages[row].nameIndex * 32, runtime);
                 }
-                group->info->value = runtime->entryName[group->entryHeader];
+                group->info->name = runtime->entryName[group->entryHeader];
                 group->resourceIds.resourceGroup = packageId;
                 group->resourceIds.resourceId = partId;
                 if (evtGetUnitHandle(objectKey)->owner->first != NULL) {
                     mdlSmoothSingleMotion(evtGetUnitHandle(objectKey)->owner, 0, 0, 0.0f, 0.0f);
                 }
                 {
-                    dds3PoseSet_t *transform = group->info->inner;
-                    SDF_VU0_COPYVECTOR(group->savedPosition, transform->position);
+                    dds3PoseSet_t *transform = group->info->poseset;
+                    SDF_VU0_COPYVECTOR(group->savedPosition, transform->pos);
                     SDF_VU0_COPYVECTOR(group->savedRotation, transform->rotation);
                 }
             }
@@ -4765,37 +4765,37 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, EvtRuntime *runtime)
         } while (row < textureCount);
     }
     for (node = worldTable->slots[9].head; node != NULL; node = node->next) {
-        if (node->value != 0) {
+        if (node->name != 0) {
             const char *objectName;
             group = evtEventViewerCreateEntry(9, runtime);
-            objectName = (char *)node->value;
+            objectName = (char *)node->name;
             group->info = node;
             group->entryHeader = evtEventViewerAddName(objectName, runtime);
         }
     }
     runtime->activeEntryIndex = 0;
     for (node = worldTable->slots[16].head; node != NULL; node = node->next) {
-        if (node->value != 0) {
+        if (node->name != 0) {
             for (owner = worldTable->slots[4].head; owner != NULL; owner = owner->next) {
-                if (owner->value != 0) {
-                    sprintf(motionName, "%s_MOTION", (char *)owner->value);
-                    if (strcmp((char *)node->value, motionName) == 0) {
+                if (owner->name != 0) {
+                    sprintf(motionName, "%s_MOTION", (char *)owner->name);
+                    if (strcmp((char *)node->name, motionName) == 0) {
                         evtPathLinkAndMake(node, owner);
                     }
                 }
             }
             for (owner = worldTable->slots[9].head; owner != NULL; owner = owner->next) {
-                if (owner->value != 0) {
-                    sprintf(motionName, "%s_MOTION", (char *)owner->value);
-                    if (strcmp((char *)node->value, motionName) == 0) {
+                if (owner->name != 0) {
+                    sprintf(motionName, "%s_MOTION", (char *)owner->name);
+                    if (strcmp((char *)node->name, motionName) == 0) {
                         evtPathLinkAndMake(node, owner);
                     }
                 }
             }
             for (owner = worldTable->slots[7].head; owner != NULL; owner = owner->next) {
-                if (owner->value != 0) {
-                    sprintf(motionName, "%s_MOTION", (char *)owner->value);
-                    if (strcmp((char *)node->value, motionName) == 0) {
+                if (owner->name != 0) {
+                    sprintf(motionName, "%s_MOTION", (char *)owner->name);
+                    if (strcmp((char *)node->name, motionName) == 0) {
                         evtPathLinkAndMake(node, owner);
                     }
                 }

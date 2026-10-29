@@ -615,7 +615,7 @@ void mdlFreeBlur(dds3ModelHandle_t *ctx) {
 
 
 /* Grow the afterimage list, advance each model, then apply its age and tint. */
-void mdlLinkBlur(dds3ModelHandle_t *ctx, struct SdfPoolNode **surfaces) {
+void mdlLinkBlur(dds3ModelHandle_t *ctx, struct sdfGrOt_t **surfaces) {
     MdlDevList *list = ctx->devList;
     sdfModelRootNode_t *original = ctx->inner;
     MdlDevSlot *slot;
@@ -656,7 +656,7 @@ void mdlLinkBlur(dds3ModelHandle_t *ctx, struct SdfPoolNode **surfaces) {
         SDF_VU0_LOADVECTOR_C(tint);
         color = mdlPackDevSlotColor(remaining - 1, 128.0f);
         model->color = color;
-        sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, surfaces, model);
+        sdfBuildModelPacketsVia(sdfModelLinkOt, surfaces, model);
         slot = slot->next;
     }
 }
@@ -737,12 +737,12 @@ void mdlFree(dds3ModelHandle_t *ctx) {
     sdfChipFreeDirect(ctx);
 }
 
-struct SdfPoolNode;
-extern void mdlLinkBlur(dds3ModelHandle_t *, struct SdfPoolNode **);
+struct sdfGrOt_t;
+extern void mdlLinkBlur(dds3ModelHandle_t *, struct sdfGrOt_t **);
 extern void mdlLinkEffect(dds3ModelHandle_t *, dds3ModelEffectCtrlr_t *);
 
 /* Per-frame update: step the active slot nodes, refresh the transforms, dispatch anchor records. */
-void mdlLink(dds3ModelHandle_t *ctx, struct SdfPoolNode **surfaces) {
+void mdlLink(dds3ModelHandle_t *ctx, struct sdfGrOt_t **surfaces) {
     sdfMotionCtrlr_t **slot = ctx->slots;
     sdfModelRootNode_t *inner;
     dds3ModelEffectCtrlr_t *rec;
@@ -761,7 +761,7 @@ void mdlLink(dds3ModelHandle_t *ctx, struct SdfPoolNode **surfaces) {
     }
     inner = ctx->inner;
     sdfModelEvalTm(inner);
-    sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, surfaces, inner);
+    sdfBuildModelPacketsVia(sdfModelLinkOt, surfaces, inner);
     if (ctx->flags & MDL_SKIP_ANCHORS) {
         return;
     }
@@ -794,7 +794,7 @@ extern void RotateMatrixY(f32 angle);
  * and anchors. For abs(pitch)<25, weight is abs(pitch)/25; otherwise one;
  * -1 skips basis blending. Slot motions/blending precede the skip flags.
  * surfaces is forwarded unchanged to the remaining update routines. */
-void mdlBlendEntryPitchYawAndUpdate(dds3ModelHandle_t *ctx, struct SdfPoolNode **surfaces, s32 entryIndex, f32 pitch, f32 yaw) {
+void mdlBlendEntryPitchYawAndUpdate(dds3ModelHandle_t *ctx, struct sdfGrOt_t **surfaces, s32 entryIndex, f32 pitch, f32 yaw) {
     sdfModelRootNode_t *inner;
     sdfModelNode_t *entry = NULL;
     f32 targetRows[4][4];
@@ -844,7 +844,7 @@ void mdlBlendEntryPitchYawAndUpdate(dds3ModelHandle_t *ctx, struct SdfPoolNode *
     }
     inner = ctx->inner;
     sdfModelEvalTm(inner);
-    sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, surfaces, inner);
+    sdfBuildModelPacketsVia(sdfModelLinkOt, surfaces, inner);
     if (ctx->flags & MDL_SKIP_ANCHORS) {
         return;
     }

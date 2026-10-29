@@ -45,7 +45,7 @@ void effPCPWwSpherePolySetRotateMatrix(PcpScatterPlainInstance *work, void *src)
     VU0_COPY_MATRIX(work->matrix, src);
 }
 
-extern EffPacketParams effScatterDrawParams;
+extern sdf3DPrimPolyParm_t effScatterDrawParams;
 
 /* Allocate the drawable's four streams and initialize its mirrored alpha ramp. */
 dds3WhirlwindPolyList_tag *dds3WhirlwindPolyListCreate(u32 count, u32 pairs) {
@@ -101,8 +101,8 @@ dds3WhirlwindPolyList_tag *dds3WhirlwindPolyListCreate(u32 count, u32 pairs) {
             right -= 2;
         }
     }
-    memset(&effScatterDrawParams, 0, sizeof(EffPacketParams));
-    effScatterDrawParams.primitive = 0x4000;
+    memset(&effScatterDrawParams, 0, sizeof(sdf3DPrimPolyParm_t));
+    effScatterDrawParams.attr = 0x4000;
     return object;
 }
 
@@ -117,9 +117,9 @@ void dds3WhirlwindPolyListDelete(dds3WhirlwindPolyList_tag *object) {
 }
 
 extern u8 effScatterTriangleIndices[];
-extern SdfPoolNode *effScatterDrawSurfaces[];
+extern sdfGrOt_t *effScatterDrawSurfaces[];
 #include "sdf_packet_alloc.h"
-extern void *effPkt3DPrimMakePoly(EffPacketParams *);
+extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *);
 struct sdfMat_t;
 extern f32 *dds3WhirlwindPolyListGetVertex(dds3WhirlwindPolyList_tag *object, s32 particleIndex);
 extern f32 *dds3WhirlwindPolyListGetUV(dds3WhirlwindPolyList_tag *object, s32 particleIndex);
@@ -128,11 +128,11 @@ extern u32 dds3WhirlwindPolyListGetABGR(dds3WhirlwindPolyList_tag *object, s32 p
 void dds3WhirlwindPolyListDraw(dds3WhirlwindPolyList_tag *object) {
     f32 matrix[16] __attribute__((aligned(16)));
     sdfDrawTag_t *packet;
-    EffPacketParams *draw;
+    sdf3DPrimPolyParm_t *draw;
     s32 count;
     s32 remaining;
     s32 particleIndex;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
 
     packet = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packet);
@@ -150,27 +150,27 @@ void dds3WhirlwindPolyListDraw(dds3WhirlwindPolyList_tag *object) {
     }
     sdf3DPrimLinkMat(packet, (sdfMat_t *)object->asset, 0);
     count = (s32)object->particleCount;
-    effScatterDrawParams.parameters = (const u32 *)effScatterTriangleIndices;
+    effScatterDrawParams.faceIndex = (const u32 *)effScatterTriangleIndices;
     for (particleIndex = 0; particleIndex < count; particleIndex++) {
         draw = &effScatterDrawParams;
         remaining = object->vectorsPerParticle;
-        draw->positions = (u128 *)dds3WhirlwindPolyListGetVertex(object, particleIndex);
-        draw->texcoords = dds3WhirlwindPolyListGetUV(object, particleIndex);
-        draw->colors = object->vertexColors;
+        draw->vertex = (u128 *)dds3WhirlwindPolyListGetVertex(object, particleIndex);
+        draw->uv = dds3WhirlwindPolyListGetUV(object, particleIndex);
+        draw->vertexColor = object->vertexColors;
         draw->color = dds3WhirlwindPolyListGetABGR(object, particleIndex);
-        draw->parameterCount = 16;
-        draw->vertexCount = 18;
+        draw->faceCount = 16;
+        draw->pointCount = 18;
         if ((draw->color & 0xFF000000) != 0) {
             while (remaining >= 18) {
                 remaining -= 16;
                 sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(&effScatterDrawParams));
-                effScatterDrawParams.positions += 16;
-                effScatterDrawParams.colors += 16;
-                effScatterDrawParams.texcoords += 32;
+                effScatterDrawParams.vertex += 16;
+                effScatterDrawParams.vertexColor += 16;
+                effScatterDrawParams.uv += 32;
             }
             if (remaining >= 4) {
-                draw->parameterCount = remaining - 2;
-                draw->vertexCount = remaining;
+                draw->faceCount = remaining - 2;
+                draw->pointCount = remaining;
                 sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(draw));
             }
         }

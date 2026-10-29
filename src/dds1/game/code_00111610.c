@@ -23,14 +23,14 @@ extern s32 MoverBasicMainprocuder(dds3Basic_t *object);
 /* Bind the owner, select a 16-byte ring entry, and advance the ten-entry cursor. */
 dds3Basic_t *dds3AddMoverBasic(dds3Basic_t *owner) {
     dds3Basic_t *object = dds3AddSceneBasicData(EFF_WORLD_KIND_SLOT_RING);
-    Dds3SlotResource *resource = object->data;
+    Dds3SlotResource *resource = object->workdata;
     u32 sequence = dds3AllocObjectId();
     s32 slotIndex;
 
     resource->target = owner;
     slotIndex = dds3MoverCount;
     object->key = sequence;
-    object->value = (const char *)&dds3SlotRingEntries[slotIndex];
+    object->name = (const char *)&dds3SlotRingEntries[slotIndex];
     dds3MoverCount = slotIndex + 1;
     dds3MoverCount = dds3MoverCount % DDS3_SLOT_RING_ENTRY_COUNT;
     return object;
@@ -38,7 +38,7 @@ dds3Basic_t *dds3AddMoverBasic(dds3Basic_t *owner) {
 
 /* Install the relative-transform callback used when no path is retained. */
 void dds3MoverBasicSetCallBackPrimaryControl(dds3Basic_t *slotObject, Dds3MoverUpdate update) {
-    Dds3SlotResource *resource = slotObject->data;
+    Dds3SlotResource *resource = slotObject->workdata;
 
     resource->update = update;
 }
@@ -46,7 +46,7 @@ void dds3MoverBasicSetCallBackPrimaryControl(dds3Basic_t *slotObject, Dds3MoverU
 /* Cache the source object address for the next curve-work replacement. */
 /* Cache the source address consumed by the slot's later path replacement. */
 void dds3MoverBasicSetPath(dds3Basic_t *slotObject, dds3Basic_t *sourceObject) {
-    Dds3SlotResource *resource = slotObject->data;
+    Dds3SlotResource *resource = slotObject->workdata;
 
     resource->sourceObject = sourceObject;
 }
@@ -57,7 +57,7 @@ void dds3MoverBasicMakePath(dds3Basic_t *slotObject) {
     Dds3SlotResource *resource;
     dds3PathBasicControl_t *pathWork;
 
-    resource = slotObject->data;
+    resource = slotObject->workdata;
     if (resource->path != 0) {
         dds3DeletePathControl(resource->path);
     }
@@ -70,7 +70,7 @@ void dds3MoverBasicFreePath(dds3Basic_t *slotObject) {
     Dds3SlotResource *resource;
     dds3PathBasicControl_t *pathWork;
 
-    resource = slotObject->data;
+    resource = slotObject->workdata;
     pathWork = resource->path;
     if (pathWork != 0) {
         dds3DeletePathControl(pathWork);
@@ -80,7 +80,7 @@ void dds3MoverBasicFreePath(dds3Basic_t *slotObject) {
 
 /* Return the currently stored curve-work handle. */
 dds3PathBasicControl_t *dds3MoverBasicGetPathControl(dds3Basic_t *slotObject) {
-    Dds3SlotResource *resource = slotObject->data;
+    Dds3SlotResource *resource = slotObject->workdata;
 
     return resource->path;
 }

@@ -75,7 +75,7 @@ dds3Basic_t *evtAddCamera(f32 *pos, f32 *rot) {
 }
 
 void evtEffectLoopControl(dds3Basic_t *owner, s32 nodeFlag) {
-    EffectDependencyState *state = owner->data;
+    EffectDependencyState *state = owner->workdata;
     s32 stateKind = state->state;
     EffNode *node;
 
@@ -106,7 +106,7 @@ EvtStageAnimeControlResult evtStageAnimeControl(s32 modeSelector, s32 modeValue)
         return EVT_STAGE_ANIME_CONTROL_NO_ACTIVE_WORLD;
     }
     requestedMode = modeSelector * 3 + modeValue;
-    for (node = ((EvtWorldTable *)world->data)->slots[6].head; node != NULL; node = node->next) {
+    for (node = ((evtWorldTable_t *)world->workdata)->slots[6].head; node != NULL; node = node->next) {
         dds3ObjectBaseMatterAnimeSpeed(node, requestedMode);
     }
     return EVT_STAGE_ANIME_CONTROL_ACTIVE_WORLD;
@@ -126,7 +126,7 @@ void evtVu0SubVectorXZAxis(f32 *a, f32 *b) {
 void evtGetUnitDirVector(evtUnitHandle_t *unit) {
     f32 v[4];
 
-    SDF_VU0_LOADVECTOR(unit->effObj->inner->rotation);
+    SDF_VU0_LOADVECTOR(unit->effObj->poseset->rotation);
     effMiscQuaternionToMatrixVU();
     SDF_VU0_STORE_ROW2(v);
     v[1] = 0.0f;
@@ -144,7 +144,7 @@ EvtUnitMoveEndResult evtCheckMoveEnd(evtUnitHandle_t *unit) {
     case EVT_UNIT_MOTION_SUBMODE_TARGET_XZ:
     case EVT_UNIT_MOTION_SUBMODE_TARGET_XZ_WITH_VERTICAL_STEP:
     case 2:
-        evtVu0SubVectorXZAxis(unit->targetVector, unit->effObj->inner->position);
+        evtVu0SubVectorXZAxis(unit->targetVector, unit->effObj->poseset->pos);
         SDF_VU0_GETLENGTH(value);
         if (value <= 20.0f) {
             return EVT_UNIT_MOVE_END_REACHED;

@@ -314,7 +314,7 @@ extern FileLoadMenuState fileLoadMenuState;
 /* Far scalar: incomplete array forces non-small-data addressing. */
 extern s32 D_0037D4D0[];
 
-extern SdfPoolNode *effPacketSubmissionSurfaces[6];
+extern sdfGrOt_t *effPacketSubmissionSurfaces[6];
 
 extern char D_003B2668[];
 
@@ -3787,9 +3787,9 @@ INCLUDE_SDATA(const s32, "game/code_0028A150", slLoadKillFlag);
 
 INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC7ED);
 
-INCLUDE_SDATA(dds3ProcessID_t * const, "game/code_0028A150", D_003BC7F0);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC7F0);
 
-INCLUDE_SDATA(struct FileRequest * const, "game/code_0028A150", fileSaveIconRequest);
+INCLUDE_SDATA(const s32, "game/code_0028A150", fileSaveIconRequest);
 
 INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC7FC);
 
@@ -3829,7 +3829,7 @@ INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC840);
 
 INCLUDE_SDATA(const s32, "game/code_0028A150", fileSelectedSlotIndex);
 
-INCLUDE_SDATA(const FileMenuStartMode, "game/code_0028A150", D_003BC848);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC848);
 
 INCLUDE_SDATA(const s32, "game/code_0028A150", fileSelectionPending);
 
@@ -3845,21 +3845,21 @@ INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC860);
 
 INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC864);
 
-INCLUDE_SDATA(struct sdfTexHandle_t *, "game/code_0028A150", D_003BC868);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC868);
 
-INCLUDE_SDATA(struct sdfTexHandle_t *, "game/code_0028A150", D_003BC86C);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC86C);
 
-INCLUDE_SDATA(struct sdfTexHandle_t *, "game/code_0028A150", D_003BC870);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC870);
 
-INCLUDE_SDATA(struct sdfTexHandle_t *, "game/code_0028A150", D_003BC874);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC874);
 
-INCLUDE_SDATA(struct sdfTexHandle_t *, "game/code_0028A150", D_003BC878);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC878);
 
-INCLUDE_SDATA(struct sdfTexHandle_t *, "game/code_0028A150", D_003BC87C);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC87C);
 
-INCLUDE_SDATA(struct sdfTexHandle_t *, "game/code_0028A150", D_003BC880);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC880);
 
-INCLUDE_SDATA(struct sdfTexHandle_t *, "game/code_0028A150", D_003BC884);
+INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC884);
 
 INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC888);
 
@@ -4128,7 +4128,7 @@ void fileResetRenderFlags(void) {
     effModelUpdateControlFlags = 0;
 }
 
-SdfPoolNode *effGetPacketSubmissionSurface(s32 index) {
+sdfGrOt_t *effGetPacketSubmissionSurface(s32 index) {
     return effPacketSubmissionSurfaces[index];
 }
 
@@ -5808,7 +5808,7 @@ void fileAcquireLoadObjectRecord(LoadObj *obj) {
 extern void dds3BillboardDraw(struct billHandle_t *);
 extern void fileReadRecordSecondVector(FileSlotTable *, u128 *);
 extern void fileReadVectorPtr20(FileSlotTable *, u128 *);
-extern void effSubmitGeneratedTexturePacket(SdfPoolNode *, EffGeneratedTextureDescriptor *);
+extern void effSubmitGeneratedTexturePacket(sdfGrOt_t *, EffGeneratedTextureDescriptor *);
 
 void fileDrawLoadObjectSlots(s32 object) {
     LoadObj *obj = (LoadObj *)object;
@@ -5824,7 +5824,7 @@ void fileDrawLoadObjectSlots(s32 object) {
     struct billHandle_t *billboard;
     FileJobPayload **jobs;
     EffExpandedList *animation;
-    SdfPoolNode *textureSink;
+    sdfGrOt_t *textureSink;
     s32 previousSegment;
     s32 count;
     s32 i;

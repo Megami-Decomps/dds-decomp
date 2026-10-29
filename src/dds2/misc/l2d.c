@@ -5,7 +5,7 @@
 #include "sdf_packet_builders.h"
 #include "dds3_owned_node.h"
 
-extern SdfPoolNode D_003805A8;
+extern sdfGrOt_t D_003805A8;
 
 /* Emit one filled rectangle into a fresh packet list. */
 void dds3FontReqDrawBoxLine(const Dds3IntrusiveNode *owner)

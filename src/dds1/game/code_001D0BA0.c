@@ -2390,15 +2390,15 @@ void btlBindActorModel(BtlUnit *unit, u32 kind, u32 id) {
     if (reused == NULL) {
         key = mdlSpawnCameraSlotViewerObject(kind, id);
         unit->effectObject = dds3SearchSceneBasic(dds3GetActiveScene(), key, 5);
-        data = unit->effectObject->data;
+        data = unit->effectObject->workdata;
         unit->ext = data->unit;
         model = unit->ext->owner;
         unit->ext->flags |= 0x200000;
         SDF_VU0_SETSCALE1VECTOR();
         VU0_SCALAR_OP(unit->actorScale, "vmulx.xyzw vf10, vf10, vf2x");
-        unit->effectObject->inner->flags = (unit->effectObject->inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) &
+        unit->effectObject->poseset->flags = (unit->effectObject->poseset->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) &
             ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
-        SDF_VU0_STOREVECTOR(unit->effectObject->inner->scale);
+        SDF_VU0_STOREVECTOR(unit->effectObject->poseset->scale);
         mdlSetScale(model);
         if (unit->actorScale != 1.0f) {
             mdlSetEffectScale(model, unit->actorScale);
@@ -3211,7 +3211,7 @@ extern void sdfModelCopyStat(sdfModelRootNode_t *, const sdfModelRootNode_t *);
 extern u64 btlTransparencySurfaceTestValues[4];
 
 /* Draw the model into four surfaces in three GS TEST passes, then update its anchors. */
-void btlDrawUnitTransparencyPasses(BtlUnit *unit, dds3ModelHandle_t *model, sdfModelRootNode_t *overlay, SdfPoolNode **surfaces, u32 color) {
+void btlDrawUnitTransparencyPasses(BtlUnit *unit, dds3ModelHandle_t *model, sdfModelRootNode_t *overlay, sdfGrOt_t **surfaces, u32 color) {
     sdfDrawTag_t *list;
     u64 *packet;
     dds3ModelEffectCtrlr_t *item;
@@ -3260,7 +3260,7 @@ void btlDrawUnitTransparencyPasses(BtlUnit *unit, dds3ModelHandle_t *model, sdfM
     } else {
         overlay->lighting = NULL;
     }
-    sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, surfaces, overlay);
+    sdfBuildModelPacketsVia(sdfModelLinkOt, surfaces, overlay);
     for (i = 0; i != 4; i++) {
         list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
@@ -3299,9 +3299,9 @@ void btlCreateUnitTransparency(BtlUnit *unit) {
     btlBossDebugPrintf("btl:unit transparency create[%p]\n", unit);
 }
 
-extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
 
-extern SdfPoolNode *btlUnitTransparencySurfaces[];
+extern sdfGrOt_t *btlUnitTransparencySurfaces[];
 
 void btlUpdateUnitTransparency(BtlUnit *unit) {
     u32 flags = unit->status.flags;
@@ -3343,9 +3343,9 @@ void btlUpdateUnitTransparency(BtlUnit *unit) {
 
 extern sdfGrFrameSet_t D_003980E0;
 
-extern SdfPoolNode *btlMirrorSourceTransparencySurfaces[];
+extern sdfGrOt_t *btlMirrorSourceTransparencySurfaces[];
 
-extern SdfPoolNode *btlMirrorTargetTransparencySurfaces[];
+extern sdfGrOt_t *btlMirrorTargetTransparencySurfaces[];
 
 
 /* Draw the unit's transparency model into its mirror's packet buffer, then draw the mirror from it. Either
@@ -4514,7 +4514,7 @@ u32 btlUnitBaseLightTask(BtlUnitBaseLightArgs *work) {
             evtUnitLightOn(ext);
             target = ext->currentTransitionTarget;
             if (target != NULL && (ext->flags & 0x40000)) {
-                info = target->data;
+                info = target->workdata;
                 SDF_VU0_COPYVECTOR(unit->colorStart, info->firstColor);
                 SDF_VU0_COPYVECTOR(unit->colorEnd, info->secondColor);
                 SDF_VU0_COPYVECTOR(unit->lightDirection, info->direction);
@@ -4763,12 +4763,12 @@ BtlRuntimeTask *btlCreateUnitFxVectorRefreshTask(BtlUnit *owner) {
     return task;
 }
 
-INCLUDE_RODATA(const s32, "game/code_001D0BA0", D_003A3CA0);
-
 typedef struct GunLoadArgs {
     BtlUnit *unit;
     struct FileRequest *request;
 } GunLoadArgs;
+
+INCLUDE_RODATA(const s32, "game/code_001D0BA0", D_003A3CA0);
 
 void btlStartGunFinishLoad(GunLoadArgs *taskArgs) {
     char filename[0x70];
@@ -5268,7 +5268,7 @@ void btlApplyUnitEffectScale(BtlUnit *unit) {
         btlInitializeEffectVectorsFromSourceRecords(unit, unit->resourceKind, unit->species);
         SDF_VU0_SETSCALE1VECTOR();
         VU0_SCALAR_OP(unit->actorScale, "vmulx.xyzw vf10, vf10, vf2x");
-        inner = unit->effectObject->inner;
+        inner = unit->effectObject->poseset;
         inner->flags |= OBJECT_TRANSFORM_FLAG_UPDATE_PENDING;
         inner->flags &= ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
         SDF_VU0_STOREVECTOR(inner->scale);
@@ -5740,11 +5740,11 @@ void btlUpdateBattleCameraFrame(void) {
         }
     }
     camera = dds3GetActiveCameraSceneBasic(dds3GetActiveScene());
-    if (camera == NULL || camera->value == NULL) {
+    if (camera == NULL || camera->name == NULL) {
         return;
     }
     flags = scene->cameraCommand.flags;
-    data = camera->data;
+    data = camera->workdata;
     if (flags & 1) {
         if (scene->cameraCommand.state == 0) {
             btlNormalizeActionCameraKeyScales(&scene->cameraCommand);
@@ -5823,12 +5823,12 @@ void btlInitializeWorldCamera(void) {
     if (camera != NULL) {
         dds3SetPosPoseSet(camera, (u128 *)position);
         dds3SetRotPoseSet(camera, (u128 *)btlWorldCameraStartRotation);
-        data = camera->data;
+        data = camera->workdata;
         dds3CameraObjectBasicSetFovy(camera, 0.6981317f);
         data->fovUpdatePending |= DDS3_CAMERA_UPDATE_FOV_BIT;
     }
     camera = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), (u128 *)btlCreatedCameraTarget, (u128 *)btlCreatedCameraRotation);
-    camera->value = (const char *)D_003BB660;
+    camera->name = (const char *)D_003BB660;
     dds3GetRadiusPoseSet(camera, 10.0f);
     dds3ObjectBaseCreateMover(camera);
     dds3ObjectBaseSetPadControl(camera, 0);
@@ -5980,7 +5980,7 @@ void btlRefreshWorldCameraHandle(void) {
                 if (handle->next != NULL) {
                     handle = handle->next;
                 } else {
-                    handle = ((EvtWorldTable *)object->data)->slots[EFF_WORLD_KIND_CAMERA].head;
+                    handle = ((evtWorldTable_t *)object->workdata)->slots[EFF_WORLD_KIND_CAMERA].head;
                 }
                 dds3ReplaceActiveCameraSceneBasic(object, handle);
                 dds3SetScreenFovy(dds3CameraObjectBasicGetFovy(handle));
@@ -6002,10 +6002,10 @@ s32 btlGetWorldObjectDefault(void) {
     if (camera == NULL) {
         return D_003BB668;
     }
-    if (camera->value == 0) {
+    if (camera->name == 0) {
         return D_003BB664;
     }
-    return (s32)camera->value;
+    return (s32)camera->name;
 }
 
 s32 btlIsWorldMotionIdle(void) {
@@ -6018,7 +6018,7 @@ s32 btlIsWorldMotionIdle(void) {
         if (camera == NULL) {
             return 0;
         }
-        return camera->value == 0;
+        return camera->name == 0;
     }
 }
 
@@ -6115,14 +6115,14 @@ void btlDebugPrintWorldTransform(s32 x, s32 y) {
         object = dds3GetActiveCameraSceneBasic(dds3GetActiveScene());
         if (object != 0) {
             btlBossDebugPrintfN(x, y, 0, (s32)D_003A3DF0,
-                                (double)object->inner->position[0],
-                                (double)object->inner->position[1],
-                                (double)object->inner->position[2]);
+                                (double)object->poseset->pos[0],
+                                (double)object->poseset->pos[1],
+                                (double)object->poseset->pos[2]);
             btlBossDebugPrintfN(x, y + 12, 0, (s32)D_003A3E08,
-                                (double)object->inner->rotation[0],
-                                (double)object->inner->rotation[1],
-                                (double)object->inner->rotation[2],
-                                (double)object->inner->rotation[3]);
+                                (double)object->poseset->rotation[0],
+                                (double)object->poseset->rotation[1],
+                                (double)object->poseset->rotation[2],
+                                (double)object->poseset->rotation[3]);
         }
     }
 }

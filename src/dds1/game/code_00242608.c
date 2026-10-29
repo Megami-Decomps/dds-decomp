@@ -463,7 +463,7 @@ extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *packet, s32 table, s32 mode);
 extern s32 mnuCampQuadBounds[4];
 extern s32 mnuCampQuadTexcoords[4];
 extern s32 mnuCampQuadColor[4];
-extern SdfPoolNode D_003255A8;
+extern sdfGrOt_t D_003255A8;
 
 void mnuCampInitDisplayDefaults(CampDisplayDefaults *display) {
     display->x = 0x100;
@@ -924,7 +924,7 @@ void mnuAdvanceShopMenuState(EvtRuntime *scene) {
 }
 
 
-extern SdfPoolNode D_00325708;
+extern sdfGrOt_t D_00325708;
 extern u8 D_00325860[];
 
 void mnuShopCreateDescriptorSurface(EvtRuntime *scene) {

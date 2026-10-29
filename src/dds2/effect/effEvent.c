@@ -279,7 +279,7 @@ EffSegmentedBezierSlot *effGetSlotAt(EffSegmentedBezierArray *table, s32 index) 
     return &table->slots[index];
 }
 
-extern SdfPoolNode kwlnPositionedTextSurface;
+extern sdfGrOt_t kwlnPositionedTextSurface;
 #include "sdf_packet_alloc.h"
 extern u64 *dds3PrimFrameRect(s32, s32, s32, s32, s32, u32, u32);
 
@@ -393,7 +393,7 @@ void effDebugStringDraw(s32 x, s32 y, s32 commandIndex, s32 format) {
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (sdfDrawTag_t *)list);
 }
 
-extern SdfPoolNode sdfGrOtTable[];
+extern sdfGrOt_t sdfGrOtTable[];
 
 void effDebugWireframeSphereDraw(const f32 *center, u32 color, f32 radius) {
     f32 point[4] __attribute__((aligned(16)));
@@ -401,7 +401,7 @@ void effDebugWireframeSphereDraw(const f32 *center, u32 color, f32 radius) {
     f32 vertices[40][4] __attribute__((aligned(16)));
     u32 colors[40];
     sdfDrawTag_t *list;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
     f32 (*out)[4];
     f32 latitude;
     f32 longitude;
@@ -469,8 +469,8 @@ extern sdfMat_t *D_00436458;
 extern f32 D_0043645C;
 extern f32 effTriangleVertexScratch[4][4];
 extern u32 D_003B21A0[4];
-extern SdfPoolNode D_00380028;
-extern void *effPkt3DPrimMakePoly(EffPacketParams *params);
+extern sdfGrOt_t D_00380028;
+extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *params);
 
 extern void sdf3DPrimLinkMat(sdfDrawTag_t *packetList, sdfMat_t *asset, s32 (*allocatePacket)(s32));
 extern void sdf3DPrimLinkTm(sdfDrawTag_t *packetList, s32 (*allocatePacket)(s32));
@@ -478,7 +478,7 @@ extern void sdf3DPrimLinkTm(sdfDrawTag_t *packetList, s32 (*allocatePacket)(s32)
 void effDebugSelectCursorDraw(f32 *position) {
     sdfMat_t *asset = D_00436458;
     sdfDrawTag_t *list;
-    EffPacketParams packet;
+    sdf3DPrimPolyParm_t packet;
 
     if (asset == NULL) {
         asset = sdfMatNew();
@@ -494,9 +494,9 @@ void effDebugSelectCursorDraw(f32 *position) {
     VU0_ADD_VF31_VF10_XYZ();
     sdf3DPrimLinkTm(list, NULL);
     memset(&packet, 0, 0x2C);
-    packet.primitive = 0x4000;
+    packet.attr = 0x4000;
     effTriangleVertexScratch[2][2] = 0.0f;
-    packet.colors = D_003B21A0;
+    packet.vertexColor = D_003B21A0;
     packet.color = 0x80808080;
 
     effTriangleVertexScratch[0][0] = 0.0f;
@@ -508,16 +508,16 @@ void effDebugSelectCursorDraw(f32 *position) {
     effTriangleVertexScratch[2][0] = -15.0f;
     effTriangleVertexScratch[2][1] = -30.0f;
 
-    packet.parameterCount = 1;
-    packet.vertexCount = 3;
-    packet.positions = (u128 *)effTriangleVertexScratch;
-    packet.texcoords = NULL;
+    packet.faceCount = 1;
+    packet.pointCount = 3;
+    packet.vertex = (u128 *)effTriangleVertexScratch;
+    packet.uv = NULL;
     sdf3DPrimLinkMat(list, D_00436458, NULL);
     sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&packet));
     D_00380028.append(&D_00380028, list);
 }
 
-extern SdfPoolNode sdfGrOtTable[];
+extern sdfGrOt_t sdfGrOtTable[];
 
 /* Draw horizontal rings, vertical sides, and the two sets of cap diameters. */
 void effDebugWireframeCylinderDraw(const f32 *center, u32 color, f32 radius, f32 height) {
@@ -526,7 +526,7 @@ void effDebugWireframeCylinderDraw(const f32 *center, u32 color, f32 radius, f32
     u32 colors[40];
     sdfDrawTag_t *list;
     f32 (*out)[4];
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
     u32 ring;
     u32 segment;
     f32 y;
@@ -1601,7 +1601,7 @@ void effEventUpdateBillboardParticles(EffEventBillSet *work) {
 struct DmaPacketHeader;
 extern void sdf3DMakeDirectRefPacket(struct DmaPacketHeader *packet, u32 sourceAddress, s32 payloadBytes);
 extern void sdfBillBoardMakeTMPacket(u8 *packet, const f32 *matrix);
-extern SdfPoolNode D_003802A8;
+extern sdfGrOt_t D_003802A8;
 
 extern sdfTexHandle_t *dds3BillboardGetTex(billHandle_t *effect);
 
@@ -1626,7 +1626,7 @@ void effEVECombParSmokeDraw(EffEventBillSet *work) {
     u8 *geometryPacket;
     sdfDrawTag_t *stateList;
     sdfPrimTransPacket_t *statePacket;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
     primary.count = 0;
     secondary.count = 0;
     primaryList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);

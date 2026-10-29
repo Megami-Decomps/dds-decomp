@@ -1145,12 +1145,12 @@ extern void mnuSetNodeScaleVector(MnuModelNode *node, f32 value);
 extern void mnuSetViewFacingModelNodeRotation(MnuModelNode *node, f32 xAngle, f32 yAngle, f32 zAngle);
 extern void uiDrawUniformColorRect(u32 x, u32 y, u32 z, u32 width, u32 height, u32 color, u32 surfaceIndex);
 extern void mnuBroadcastNodeModelState(MnuModelNode *node, u32 state);
-struct SdfPoolNode;
+struct sdfGrOt_t;
 extern void itfDrawFullExtentWorkPanels(MnuShootingWork *work);
 extern void itfDispatchObjectFadeSequenceMode(MnuShootingWork *work);
 extern void mnuUpdateAndDrawPauseChoiceFade(MnuShootingWork *work);
 extern MnuModelNode *D_00438928;
-extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
 
 s32 mnuDrawAndUpdateShootingScene(MnuShootingWork *work) {
     MenuProgressParameters *origin = mnuGetResourceProgressParameters();
@@ -1744,8 +1744,8 @@ INCLUDE_SDATA(const s32, "game/code_00316E08", D_00438938);
 
 INCLUDE_SDATA(const s32, "game/code_00316E08", dds3SoundSlotPool);
 
-INCLUDE_SDATA(struct dds3Basic_t * const, "game/code_00316E08", D_00438944);
+INCLUDE_SDATA(const s32, "game/code_00316E08", D_00438944);
 
 INCLUDE_SDATA(const s32, "game/code_00316E08", D_00438948);
 
-INCLUDE_SDATA(MenuWorkEntry * const, "game/code_00316E08", D_0043894C);
+INCLUDE_SDATA(const s32, "game/code_00316E08", D_0043894C);

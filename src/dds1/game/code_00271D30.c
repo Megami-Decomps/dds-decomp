@@ -231,7 +231,7 @@ void mnuDestroyCampTasks(void) {
 
 /* Report active camp; acknowledge cleanup only for the exact cleaned-up state.
  * Other non-active states return 0 without being rewritten. */
-MnuCampStateAcknowledgementResult mnuAcknowledgeCampState(void) {
+MnuCampStateAcknowledgementResult campCheckExitState(void) {
     s8 campState = campExitState;
     if (campState == MNU_CAMP_STATE_ACTIVE) {
         return MNU_CAMP_STATE_ACK_ACTIVE;

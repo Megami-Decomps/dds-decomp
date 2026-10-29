@@ -449,8 +449,6 @@ s32 btlRunAiAction(BtlTask *task, s32 id, u32 packed) {
     return 1;
 }
 
-INCLUDE_RODATA(const s32, "game/code_001FF0C8", D_003A5988);
-
 #ifdef NON_MATCHING
 #include "common.h"
 #include "btl_skill_max_api.h"
@@ -627,6 +625,8 @@ s32 btlResolveCommandSlotAndKind(BtlTask *task, s32 id, u16 *slot, s32 *result) 
     return 1;
 }
 #else
+INCLUDE_RODATA(const s32, "game/code_001FF0C8", D_003A5988);
+
 INCLUDE_ASM(const s32, "game/code_001FF0C8", btlResolveCommandSlotAndKind);
 #endif
 
@@ -1183,7 +1183,7 @@ s32 btlIsLowHpActionReady(BtlUnit *unit, s32 unused) {
 
     if (context->lowHpActionHold <= 0) {
         if (currentTime >= actionTime + BTL_LOW_HP_ACTION_DELAY) {
-            if (unit->partyRecord.hp * BTL_HEALTH_RATE_SCALE / unit->partyRecord.maxHp < BTL_LOW_HP_PERCENT_LIMIT) {
+            if (unit->partyRecord.hp * BTL_HEALTH_RATE_SCALE / unit->partyRecord.maxhp < BTL_LOW_HP_PERCENT_LIMIT) {
                 if (btlIsGroup400CountAtMost((s32)unit, BTL_LOW_HP_ENEMY_COUNT_LIMIT) != 0) {
                     bucketRoll = btlRollAiBucket();
                     conditionMet = bucketRoll < BTL_LOW_HP_BUCKET_LIMIT;

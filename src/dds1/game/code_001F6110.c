@@ -1335,11 +1335,11 @@ f32 btlScalarRangeStepQuadratic(BtlScalarRange *state, f32 timeStep) {
 
 extern s32 btlIndexedIconUvOrigins[16];
 struct RefObj;
-extern sdfTexHandle_t *sdfGetOrCreateTextureForReference(struct SdfPoolNode *, struct RefObj *);
+extern sdfTexHandle_t *sdfGetOrCreateTextureForReference(struct sdfGrOt_t *, struct RefObj *);
 #include "sdf_packet_alloc.h"
 
 /* Draw an indexed 64-pixel glyph with independent corner colors. */
-void btlDrawButtonIconFixed64(SdfPoolNode *surface, s32 x, s32 y,
+void btlDrawButtonIconFixed64(sdfGrOt_t *surface, s32 x, s32 y,
                    s32 topLeftColor, s32 topRightColor,
                    s32 bottomLeftColor, s32 bottomRightColor,
                    s32 buttonIndex) {
@@ -1397,7 +1397,7 @@ extern BtnUv D_0035FAA0[];
 
 
 /* Draw a button glyph using its UV pair; screen coordinates are GS fixed-point. */
-void btlDrawButtonIcon(SdfPoolNode *surface, s32 x, s32 y, s32 topLeftColor, s32 topRightColor, s32 bottomLeftColor, s32 bottomRightColor, s32 button) {
+void btlDrawButtonIcon(sdfGrOt_t *surface, s32 x, s32 y, s32 topLeftColor, s32 topRightColor, s32 bottomLeftColor, s32 bottomRightColor, s32 button) {
     BtnUv *uv;
     sdfTexHandle_t *texture;
     sdfDrawTag_t *packet;
@@ -2781,11 +2781,11 @@ void btlUpdateDebugCameraFromPad(void) {
     }
     if (dds3PadBitTable[0] < 0) {
         if ((u8)(D_003BB770 & 1) == 0) {
-            PCP_COPY_VECTOR_UNCLOBBERED(btlDebugCameraPositions[0], camera->inner->position);
-            PCP_COPY_VECTOR_UNCLOBBERED(btlDebugCameraRotations[0], camera->inner->rotation);
+            PCP_COPY_VECTOR_UNCLOBBERED(btlDebugCameraPositions[0], camera->poseset->pos);
+            PCP_COPY_VECTOR_UNCLOBBERED(btlDebugCameraRotations[0], camera->poseset->rotation);
         } else {
-            PCP_COPY_VECTOR_UNCLOBBERED(btlDebugCameraPositions[1], camera->inner->position);
-            PCP_COPY_VECTOR_UNCLOBBERED(btlDebugCameraRotations[1], camera->inner->rotation);
+            PCP_COPY_VECTOR_UNCLOBBERED(btlDebugCameraPositions[1], camera->poseset->pos);
+            PCP_COPY_VECTOR_UNCLOBBERED(btlDebugCameraRotations[1], camera->poseset->rotation);
         }
         D_003BB770 ^= 1;
     } else if (dds3PadBitTable[1] < 0) {
@@ -3288,7 +3288,7 @@ BtlResourceDescriptor *btlCreateResourceDescriptor(BtlResourceEntryList *list) {
 
 extern s8 dds3PadBitTable[0x20];
 extern s8 D_0039862B[];
-extern SdfPoolNode sdfGrOtTable[];
+extern sdfGrOt_t sdfGrOtTable[];
 extern u64 *dds3PrimFrameRect(s32, s32, s32, s32, s32, u32, u32);
 s32 btlFormatSelectedResourceName(BtlResourceDescriptor *, char *);
 void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *, const char *);
@@ -3300,7 +3300,7 @@ extern void * sdfDevPrintf(s32 source, s32 end, s32 argument, s32 index, const c
 s32 btlUpdateAndDrawResourceBrowser(BtlResourceDescriptor *descriptor) {
     BtlResourceEntry *visibleEntry;
     sdfDrawTag_t *packetList;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
     s32 drawnRows;
     s32 topRow;
     s32 contentRow;
@@ -3556,7 +3556,7 @@ void btlDrawResourcePreview(BtlResourceDescriptor *descriptor) {
     void *sprite;
     KwlnSpriteVertex *vertex;
     sdfTexHandle_t *texture;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
 
     if (descriptor->texture != 0) {
         list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);

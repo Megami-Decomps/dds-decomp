@@ -23,7 +23,7 @@ extern void *effPkt3DPrimMakePoly(EffResourceRenderState *);
 extern f32 effResourceDefaultTrianglePoints[][4];
 extern u32 effResourceDefaultTriangleColors[];
 
-extern SdfPoolNode *effResourceDrawSurfaces[];
+extern sdfGrOt_t *effResourceDrawSurfaces[];
 
 void effPCPNeedleSpiralSetColor(EffResourceWork *work, f32 (*normals)[4]) {
     work->normals = normals;

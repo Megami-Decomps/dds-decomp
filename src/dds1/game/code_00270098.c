@@ -31,7 +31,7 @@ extern MnuMovieTransfer movieViewerDebugFlag;
 
 extern s8 dds3PadBitTable[32];
 
-extern SdfPoolNode D_00325708;
+extern sdfGrOt_t D_00325708;
 
 extern char D_003B1AD8[];
 
@@ -315,7 +315,7 @@ extern u8 dds3PadButtonState[2][2][16];
 extern SdfMovieDescriptor mnuMovieViewerDrawDescriptor;
 extern u16 D_003BD3A0[4];
 extern u16 D_003BD8E4;
-extern SdfPoolNode D_003255A8;
+extern sdfGrOt_t D_003255A8;
 extern void mnuStartMovieDrawTaskForResource(const char *fileName, const SdfMovieDescriptor *descriptor);
 
 KwlnTaskUpdateResult mnuMovieViewer(dds3ProcessID_t *task) {

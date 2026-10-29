@@ -464,14 +464,14 @@ void dds3P2APolygonGetResource(EffUnitObject *instance, s32 *modeValues) {
 
 #include "eff_packet_params.h"
 extern u32 D_0034E090[],D_0034E0A0[];
-extern SdfPoolNode *D_0034E0B0[];
-extern void *effPkt3DPrimMakePoly(EffPacketParams *);
+extern sdfGrOt_t *D_0034E0B0[];
+extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *);
 
 extern void sdf3DPrimLinkMat(sdfDrawTag_t *packetList, sdfMat_t *asset, s32 (*allocatePacket)(s32));
 extern void sdf3DPrimLinkTm(sdfDrawTag_t *packetList, s32 (*allocatePacket)(s32));
 
 void dds3P2APolygonDraw(EffUnitObject *instance) {
-    EffPacketParams params;
+    sdf3DPrimPolyParm_t params;
     s32 modeValues[3];
     f32 matrix[4][4];
     f32 positions[4][4];
@@ -480,7 +480,7 @@ void dds3P2APolygonDraw(EffUnitObject *instance) {
     s32 list;
     BillChildPayload *child;
     sdfTexHandle_t *texture;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
     f32 x, y;
     f32 scaleX, scaleY;
     f32 cornerX, cornerY;
@@ -503,14 +503,14 @@ void dds3P2APolygonDraw(EffUnitObject *instance) {
     VU0_LOAD_MATRIX(matrix);
     sdf3DPrimLinkTm((sdfDrawTag_t *)list, 0);
     memset(&params, 0, sizeof(params));
-    params.primitive = 0x4000;
-    params.parameters = D_0034E090;
-    params.positions = (u128 *)positions;
-    params.colors = D_0034E0A0;
-    params.texcoords = &uv[0][0];
+    params.attr = 0x4000;
+    params.faceIndex = D_0034E090;
+    params.vertex = (u128 *)positions;
+    params.vertexColor = D_0034E0A0;
+    params.uv = &uv[0][0];
     params.color = instance->billboard->childParam;
-    params.parameterCount = 2;
-    params.vertexCount = 4;
+    params.faceCount = 2;
+    params.pointCount = 4;
     child = (BillChildPayload *)modeValues[1];
     scaleX = instance->billboard->childScaleX;
     scaleY = instance->billboard->childScaleY;
@@ -562,8 +562,8 @@ void dds3P2APolygonDraw(EffUnitObject *instance) {
         y = child->y * scaleY;
         width = child->halfWidth * scaleX;
         height = child->halfHeight * scaleY;
-        params.primitive |= 0x1000;
-        params.extraTexcoords = (u32 *)secondaryUv;
+        params.attr |= 0x1000;
+        params.multiUv = (u32 *)secondaryUv;
         cosine = sdfCos(instance->billboard->rotationAngle);
         sine = sdfSin(instance->billboard->rotationAngle);
         cornerX = x - width;
@@ -686,7 +686,7 @@ void effDrawGeneratedTextureQuad(sdfDrawTag_t *list, EffGeneratedTextureDescript
 }
 
 /* Allocate/init a packet list, generate its texture payload, then append it to the draw surface. */
-void effSubmitGeneratedTexturePacket(SdfPoolNode *surface, EffGeneratedTextureDescriptor *source) {
+void effSubmitGeneratedTexturePacket(sdfGrOt_t *surface, EffGeneratedTextureDescriptor *source) {
     sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EFF_PACKET_LIST_BYTES);
 
     sdfDrawTagInit(packetList);
@@ -841,7 +841,7 @@ void effDrawCompositeTextureQuad(sdfDrawTag_t *list, EffCompositeGsDescriptor *s
 
 
 /* Allocate/init a packet list, generate its composite GS payload, then append it to the draw surface. */
-void effSubmitCompositeGsPacket(SdfPoolNode *surface, EffCompositeGsDescriptor *source) {
+void effSubmitCompositeGsPacket(sdfGrOt_t *surface, EffCompositeGsDescriptor *source) {
     sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EFF_PACKET_LIST_BYTES);
 
     sdfDrawTagInit(packetList);

@@ -114,7 +114,7 @@ extern movieStream_t mnuMovieDrawContext;
 void mnuRequestIndexedMovieResource(s32 index);
 void movieStop(void);
 
-extern SdfPoolNode D_003803C8;
+extern sdfGrOt_t D_003803C8;
 
 extern dds3ProcessID_t *PlayingNo;
 
@@ -137,8 +137,8 @@ extern void mnuSetMovieWorkFlag(MnuSlideBarPair *, s32, u8);
 
 extern void mnuCallInitWide(s32, s32, s32, s32, s32);
 
-extern void sdfMovieDrawFrame(movieStream_t *, SdfPoolNode *);
-extern void mnuSubmitMovieDrawPacket(movieStream_t *, SdfPoolNode *);
+extern void sdfMovieDrawFrame(movieStream_t *, sdfGrOt_t *);
+extern void mnuSubmitMovieDrawPacket(movieStream_t *, sdfGrOt_t *);
 extern u8 mnuIsAnyMenuInputPressed(void);
 extern void mnuDrawSprite(s32 x, s32 y, s32 depth, s32 alpha, s32 drawMode, s32 spriteIndex,
                           s32 drawContext);
@@ -1728,7 +1728,7 @@ typedef struct MnuMovieDrawPacket {
     SdfGsRegisterWrite vertexExtent;
 } MnuMovieDrawPacket;
 
-void mnuSubmitMovieDrawPacket(movieStream_t *movie, SdfPoolNode *pool) {
+void mnuSubmitMovieDrawPacket(movieStream_t *movie, sdfGrOt_t *pool) {
     MnuMovieDrawPacket *packet;
     sdfDrawTag_t *list;
     u16 width;

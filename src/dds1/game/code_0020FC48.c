@@ -642,7 +642,7 @@ s32 btlListHasMarkedFlag(datUnitWork_t **entryList, s32 entryCount) {
 s32 cmpButtonGuideShowDone(datUnitWork_t **entryList, s32 entryCount) {
     s32 entryIndex;
     for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
-        if (entryList[entryIndex]->hp < entryList[entryIndex]->maxHp) {
+        if (entryList[entryIndex]->hp < entryList[entryIndex]->maxhp) {
             return 0;
         }
     }
@@ -1295,7 +1295,7 @@ void btlDrawScaledFrameBufferQuad(sdfDrawTag_t *list, s32 primitive, s32 color, 
 
     packet = (void *)sdfGrAllocPacketBuff(0x20);
     index = dds3GetFrameID();
-    sdfGrLinkDispFrameTex(list, (u32)(kwlnFrameDrawPacketRecords[index].baseBytes), (SdfDmaNode *)packet);
+    sdfGrLinkDispFrameTex(list, (u32)(kwlnFrameDrawPacketRecords[index].baseBytes), (sdfGrRefPacketHeader_t *)packet);
     halfWidth = 0x1000;
     halfHeight = 0x700;
     xOffset = (s32)((f32)halfWidth * scale);
@@ -1374,7 +1374,7 @@ void btlBuildOverlayQuadPacket(sdfDrawTag_t *list, s32 primitive, s32 color, s32
 #include "sdf_trig.h"
 
 extern sdfTexHandle_t *sdfGetOrCreateTextureForReference(void *, struct RefObj *);
-extern SdfPoolNode D_00325708;
+extern sdfGrOt_t D_00325708;
 extern struct RefObj *D_003D75C0;
 extern void effAppendGouraudTexturedQuadPacket(sdfDrawTag_t *, s32,
                                                s32, s32, f32, f32, s32,
@@ -1755,7 +1755,7 @@ void btlInitFadeColors(void) {
     btlRuntimeState.phase = 0.0f;
 }
 
-extern SdfPoolNode D_00325708;
+extern sdfGrOt_t D_00325708;
 
 extern void btlDrawCapturedScreenTileOverlay(sdfDrawTag_t *, u32, u32, u32, u32, s32);
 
@@ -2322,7 +2322,7 @@ extern void *sdfDevPrintf(s32, s32, s32, s32, const char *, ...);
 
 extern u8 D_003BBAA8[];
 
-extern SdfPoolNode kwlnPositionedTextSurface;
+extern sdfGrOt_t kwlnPositionedTextSurface;
 
 /* Submit formatted indices in one packet list, then draw the text column.
  * Preserve the separate fixed-point and pixel-coordinate arithmetic. */
@@ -3108,13 +3108,13 @@ void btlApplyDebugEncounterPartySelection(void) {
                     (DDS3_GBWK->party[i].flags | 0x1000) & ~2;
             }
             DDS3_GBWK->partyOrder[i] = i;
-            DDS3_GBWK->party[i].maxHp =
+            DDS3_GBWK->party[i].maxhp =
                 btlComputeSkillAdjustedMaxHp(&DDS3_GBWK->party[i]);
             DDS3_GBWK->party[i].maxMp =
                 btlComputeSkillAdjustedMaxMp(&DDS3_GBWK->party[i]);
-            if (DDS3_GBWK->party[i].maxHp < DDS3_GBWK->party[i].hp ||
+            if (DDS3_GBWK->party[i].maxhp < DDS3_GBWK->party[i].hp ||
                 D_003BBB58 != 0) {
-                DDS3_GBWK->party[i].hp = DDS3_GBWK->party[i].maxHp;
+                DDS3_GBWK->party[i].hp = DDS3_GBWK->party[i].maxhp;
             }
             if (DDS3_GBWK->party[i].maxMp < DDS3_GBWK->party[i].mp ||
                 D_003BBB58 != 0) {

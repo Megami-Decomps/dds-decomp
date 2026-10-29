@@ -290,12 +290,6 @@ BtlIndexList *btlBuildActorIndexListAndCount(BtlTask *actor, BtlCommandTargetPol
     return list;
 }
 
-INCLUDE_RODATA(const s32, "game/code_00202178", D_003A5AD0);
-
-INCLUDE_RODATA(const s32, "game/code_00202178", D_003A5B50);
-
-INCLUDE_RODATA(const s32, "game/code_00202178", D_003A5BD0);
-
 #ifdef NON_MATCHING
 #include "btl_motion_transform.h"
 #include "common.h"
@@ -542,6 +536,12 @@ s32 func_00202668(BtlTask *actor, s32 unused) {
     return 1;
 }
 #else
+INCLUDE_RODATA(const s32, "game/code_00202178", D_003A5AD0);
+
+INCLUDE_RODATA(const s32, "game/code_00202178", D_003A5B50);
+
+INCLUDE_RODATA(const s32, "game/code_00202178", D_003A5BD0);
+
 INCLUDE_ASM(const s32, "game/code_00202178", func_00202668);
 #endif
 
@@ -1673,7 +1673,7 @@ void btlSelectSlotEntries(void) {
     for (i = 0; i < 24; i++) {
         activeEntry->effectData[i] = 0;
     }
-    activeEntry->hp = activeEntry->maxHp;
+    activeEntry->hp = activeEntry->maxhp;
 }
 
 void btlRestoreSlotEntriesFromEffect(void) {
@@ -1694,7 +1694,7 @@ void btlRestoreSlotEntriesFromEffect(void) {
         }
     }
     memcpy(activeEntry->effectData, effectState + 5, 0x30);
-    activeEntry->hp = activeEntry->maxHp;
+    activeEntry->hp = activeEntry->maxhp;
 }
 
 void btlInitializeUnitDisplaySpeciesAndFlags(u8 *unit) {
@@ -3827,7 +3827,7 @@ void btlUpdateNidhoggrScaleAndPosition(void) {
 
     SDF_VU0_SETSCALE1VECTOR();
     VU0_SCALAR_OP(currentScale, "vmulx.xyzw vf10, vf10, vf2x");
-    inner = selected->effectObject->inner;
+    inner = selected->effectObject->poseset;
     inner->flags = (inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) &
         ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
     SDF_VU0_STOREVECTOR(inner->scale);
@@ -4150,7 +4150,7 @@ s32 btlSwapRandomBossSelection(void) {
         newUnit->partyRecord.mp = oldUnit->partyRecord.mp;
         newUnit->partyRecord.status = oldUnit->partyRecord.status;
         oldUnit->partyRecord.status = 0;
-        oldUnit->partyRecord.hp = oldUnit->partyRecord.maxHp;
+        oldUnit->partyRecord.hp = oldUnit->partyRecord.maxhp;
         oldUnit->partyRecord.mp = oldUnit->partyRecord.maxMp;
         entry = btlFindUnitByActor(newUnit);
         entry->actionNumber = 1;

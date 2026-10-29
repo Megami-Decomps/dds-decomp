@@ -970,7 +970,7 @@ s32 mnuInitializeStaffPartyScene(dds3ProcessID_t *task) {
     menu->resourceList = mnuCreatePanelSpriteHandles(
         1, (EffectSlotSet *)(u32)context->displayVariant,
         context->panelTarget);
-    if (mnuClassifyQuarterHalfPercent(record->hp, record->maxHp) <
+    if (mnuClassifyQuarterHalfPercent(record->hp, record->maxhp) <
         MNU_QUARTER_HALF_PERCENT_CLASS_BELOW_QUARTER) {
         menu->motionSelection = -1;
     } else {
@@ -1209,9 +1209,9 @@ void mnuDrawProfilePanelAndSprite(datUnitWork_t *entry, s32 unused1, MenuSimpleS
 
 extern void mnuDrawIconPanelFullFade(s32, s32, s32, MenuPanelHandles *, s32);
 extern void mnuUpdateWindowPanelHandleStates(MenuPanelHandles *);
-struct SdfPoolNode;
-extern s8 evtStageTestUpdate(struct SdfPoolNode **);
-extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
+struct sdfGrOt_t;
+extern s8 evtStageTestUpdate(struct sdfGrOt_t **);
+extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
 
 s32 mnuDrawAndStepStaffPartyScene(dds3ProcessID_t *task) {
     CampMenuContext *context = (CampMenuContext *)dds3GetProcessData(task);

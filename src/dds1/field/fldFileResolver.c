@@ -417,7 +417,7 @@ void fldMakeResouceBasicFL1(FldSpawnBatch *batch, u32 batchCount) {
                 dds3GetRadiusPoseSet(spawnedObject, ((WorldTransformSetup *)resource->data)->transform.rotation[1]);
                 dds3SetLightObjectResoruce(spawnedObject, resource->data);
                 if ((u32)fldGlobalBase.area - 200U < 300U) {
-                    ((EffLightData *)spawnedObject->data)->flags |= 8;
+                    ((EffLightData *)spawnedObject->workdata)->flags |= 8;
                     dds3SetUnitObjectId(spawnedObject, "BTL_DEF_LIGHT");
                 }
             }
@@ -695,7 +695,7 @@ extern u32 D_0032E59C[];
 
 extern u32 D_0032E5A8[];
 
-extern SdfPoolNode sdfGrOtTable[];
+extern sdfGrOt_t sdfGrOtTable[];
 
 extern u8 sdfViewMatrix[];
 
@@ -1049,7 +1049,7 @@ void fldSpawnPlacementObjectsFromBatches(FldSpawnBatch *spawnBatch, u32 batchCou
                 }
                 fldCopySpawnTransform(position, rotation, spawnResource->transform);
                 spawnedObject = dds3AddCameraObjectBasicTypeFree(spawnResource->id, (u128 *)position, (u128 *)rotation);
-                ((CameraData *)spawnedObject->data)->fieldOfView = *(f32 *)spawnResource->data;
+                ((CameraData *)spawnedObject->workdata)->fieldOfView = *(f32 *)spawnResource->data;
                 dds3SetUnitObjectId(spawnedObject, spawnResource->name);
             }
             break;
@@ -1243,7 +1243,7 @@ void fldMakeObjectBasic3(void) {
                 dds3ObjectBaseCreateMover(object);
                 slot = (dds3Basic_t *)data->slots[DDS3_OBJECT_DATA_SLOT];
             }
-            resource = (Dds3SlotResource *)slot->data;
+            resource = (Dds3SlotResource *)slot->workdata;
             if (resource->sourceObject == 0) {
                 dds3MoverBasicSetPath(slot, path);
                 dds3MoverBasicMakePath(slot);
@@ -2321,7 +2321,7 @@ void fldDrawInit(void) {
     }
 }
 
-SdfPoolNode *fldDrawGetOt(void) {
+sdfGrOt_t *fldDrawGetOt(void) {
     return &sdfGrOtTable[rsetFrameMaskOtOffset];
 }
 
@@ -2333,7 +2333,7 @@ void DrwSprite2D(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 c
     s32 vbase = v * 16;
     s32 yt = y * 8 + 0x7900;
     sdfDrawTag_t *command;
-    SdfPoolNode *descriptor;
+    sdfGrOt_t *descriptor;
 
     vtx->r = color & 0xFF;
     vtx->g = (color >> 8) & 0xFF;
@@ -2363,7 +2363,7 @@ void DrwSprite2DC(s32 x, s32 y, s32 width, s32 height,
                    s32 u, s32 v, s32 textureWidth, s32 textureHeight,
                    u32 color0, u32 color1, u32 color2, u32 color3, sdfTexHandle_t *texture) {
     sdfDrawTag_t *list;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
     s32 left, top, right, bottom;
     s32 uLeft, vTop, uRight, vBottom;
 
@@ -2400,7 +2400,7 @@ void DrwSprite2DF(f32 x, f32 y, f32 w, f32 h, s32 u, s32 v, s32 uw, s32 vh, s32 
     s32 xl = (s32)(x * 16.0f) + 0x7000;
     s32 yt = (s32)(y * 8.0f) + 0x7900;
     sdfDrawTag_t *command;
-    SdfPoolNode *descriptor;
+    sdfGrOt_t *descriptor;
 
     vtx->r = r;
     vtx->g = g;
@@ -2523,7 +2523,7 @@ void rsetTexa(s32 lower, s32 bits, u64 upper) {
     sdfDrawTag_t *command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     void *packet;
     u64 *entry;
-    SdfPoolNode *descriptor;
+    sdfGrOt_t *descriptor;
 
     sdfDrawTagInit(command);
     packet = (void *)sdfGrAllocPacketBuff(0x30);
@@ -2539,7 +2539,7 @@ void rsetTest(s32 bit0, s32 bit1, s32 bit4, s32 bit12, s32 bit14, s32 bit15, s32
     sdfDrawTag_t *command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     void *packet;
     u64 *data;
-    SdfPoolNode *descriptor;
+    sdfGrOt_t *descriptor;
 
     sdfDrawTagInit(command);
     packet = (void *)sdfGrAllocPacketBuff(0x30);
@@ -2556,7 +2556,7 @@ void rsetAlpha(s32 mode) {
     sdfDrawTag_t *command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     void *packet;
     u64 *data;
-    SdfPoolNode *descriptor;
+    sdfGrOt_t *descriptor;
 
     sdfDrawTagInit(command);
     packet = (void *)sdfGrAllocPacketBuff(0x30);
@@ -2604,7 +2604,7 @@ void aDrawLineStripPrim(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsWord1
     u64 lo;
     u64 hi;
     s32 *pos;
-    SdfPoolNode *descriptor;
+    sdfGrOt_t *descriptor;
     s32 i;
 
     coords[0] = x0 * 16;
@@ -2638,7 +2638,7 @@ void aDrawLineDirect(u32 x0, u32 y0, u32 x1, u32 y1, u32 gsWord0, u32 gsWord1, u
     sdfDrawTag_t *command;
     SdfDrawPacket *packet;
     u64 *dst;
-    SdfPoolNode *descriptor;
+    sdfGrOt_t *descriptor;
     u32 *pos;
     u64 lo;
     u64 hi;
@@ -2678,7 +2678,7 @@ void aDrawBoxF(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1, u32 gsWord2
     u64 lo;
     u64 hi;
     s32 *pos;
-    SdfPoolNode *descriptor;
+    sdfGrOt_t *descriptor;
     s32 i;
 
     coords[0] = x * 16;
@@ -2720,7 +2720,7 @@ void aDrawBoxFZ(s32 x, s32 y, s32 w, s32 h, u32 vertexTag, u32 gsWord0, u32 gsWo
     u64 hi;
     u64 tag;
     s32 *pos;
-    SdfPoolNode *descriptor;
+    sdfGrOt_t *descriptor;
     s32 i;
 
     coords[0] = x * 16;
@@ -2762,7 +2762,7 @@ void aDrawBoxF_Direct(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsWord1, 
     u64 lo;
     u64 hi;
     u32 *pos;
-    SdfPoolNode *descriptor;
+    sdfGrOt_t *descriptor;
     s32 i;
 
     coords[0] = x0;
@@ -2801,7 +2801,7 @@ void aDrawTriG(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, u32 r0, u32 g0, u
     SdfDrawPacket *packet;
     u64 *dst;
     s32 i;
-    SdfPoolNode *descriptor;
+    sdfGrOt_t *descriptor;
 
     coords[0] = x0 * 16;
     coords[1] = y0 * 16;
@@ -2843,7 +2843,7 @@ void fldSubmitGsGradientQuad(s32 x, s32 y, s32 w, s32 h, u32 r0, u32 g0, u32 b0,
     u64 *dst;
     s32 i;
     s32 *pos;
-    SdfPoolNode *descriptor;
+    sdfGrOt_t *descriptor;
 
     coords[0] = x * 16;
     coords[1] = y * 16;
@@ -2891,7 +2891,7 @@ void aDrawBoxGF(u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a1, 
     u64 *dst;
     s32 i;
     s32 *pos;
-    SdfPoolNode *descriptor;
+    sdfGrOt_t *descriptor;
 
     coords[0] = (s32)(x * 16.0f);
     coords[1] = (s32)(y * 8.0f);
@@ -2941,7 +2941,7 @@ void fldSubmitTaggedGsRectangle(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsW
     u64 hi;
     u64 tag;
     s32 *pos;
-    SdfPoolNode *descriptor;
+    sdfGrOt_t *descriptor;
     s32 i;
 
     coords[0] = x * 16;
@@ -2986,7 +2986,7 @@ void drawSprite3D(sdfTexHandle_t *texture, FldMarkerPacket *modelData) {
     DmaPacketHeader *header;
     u8 *packet;
     f32 mat[16];
-    SdfPoolNode *descriptor;
+    sdfGrOt_t *descriptor;
 
     sdfDrawTagInit(command);
     header = (DmaPacketHeader *)sdfGrAllocPacketBuff(0x20);
@@ -3014,7 +3014,7 @@ extern void sdfBuildFrameRegisterReference(const u8 *, SdfDmaReferenceChainPacke
 void fldSubmitPrimaryFramePacket(void) {
     sdfDrawTag_t *command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     SdfDmaReferenceChainPacket *texture;
-    SdfPoolNode *descriptor;
+    sdfGrOt_t *descriptor;
     sdfDrawTagInit(command);
     texture = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
     sdfBuildMaskedFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
@@ -3026,7 +3026,7 @@ void fldSubmitPrimaryFramePacket(void) {
 void fldSubmitAlternateFramePacket(void) {
     sdfDrawTag_t *command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     SdfDmaReferenceChainPacket *texture;
-    SdfPoolNode *descriptor;
+    sdfGrOt_t *descriptor;
     sdfDrawTagInit(command);
     texture = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
     sdfBuildFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
@@ -3042,7 +3042,7 @@ extern u32 D_0032F500[];
 void ooyTestLine3D(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32 w) {
     sdfDrawTag_t *list;
     s32 record;
-    SdfPoolNode *descriptor;
+    sdfGrOt_t *descriptor;
     D_0032F4E0[0][0] = x;
     D_0032F4E0[0][1] = y;
     D_0032F4E0[0][2] = z;
@@ -3063,11 +3063,11 @@ void fldDrawPoly3(s32 color0, s32 color1, s32 color2,
                          f32 x0, f32 y0, f32 z0,
                          f32 x1, f32 y1, f32 z1,
                          f32 x2, f32 y2, f32 z2) {
-    SdfPrimitiveRequest desc;
+    sdf3DPrimPolyParm_t desc;
     f32 verts[12];
     s32 indices[3];
     sdfDrawTag_t *command;
-    SdfPoolNode *descriptor;
+    sdfGrOt_t *descriptor;
 
     command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(command);
@@ -3075,10 +3075,10 @@ void fldDrawPoly3(s32 color0, s32 color1, s32 color2,
     sdf3DPrimLinkMat(command, (sdfMat_t *)D_003BACEC, 0);
     memset(&desc, 0, 0x2C);
     desc.color = 0x80808080;
-    desc.stripWordCount = 1;
-    desc.vertexCount = 3;
-    desc.positions = verts;
-    desc.vertexColors = indices;
+    desc.faceCount = 1;
+    desc.pointCount = 3;
+    desc.vertex = verts;
+    desc.vertexColor = indices;
     verts[0] = x0;
     verts[1] = y0;
     verts[2] = z0;
@@ -3099,12 +3099,12 @@ void fldDrawPoly3(s32 color0, s32 color1, s32 color2,
 /* Submit the field overlay's fixed register state and textured sprite payload. */
 void fldSubmitTexturedOverlaySprite(void) {
     sdfDrawTag_t *list = (sdfDrawTag_t *)sdfPrimAllocDrawTag(NULL);
-    SdfDmaNode *reference = (SdfDmaNode *)sdfGrAllocPacketBuff(0x20);
+    sdfGrRefPacketHeader_t *reference = (sdfGrRefPacketHeader_t *)sdfGrAllocPacketBuff(0x20);
     SdfGsTextureAlphaFlushPacket *texturePacket;
     sdfPrimTransPacket_t *blendPacket;
     void *sprite;
     FldSpriteVertex *vertex;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
 
     sdfGrLinkDispFrameTex(list,
         (u32)(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes), reference);
@@ -3154,12 +3154,12 @@ void fldSubmitTexturedOverlaySprite(void) {
 /* Submit the field overlay's fixed register state and textured sprite payload. */
 void fldSubmitOverlaySpriteWithRenderState(s32 mode) {
     sdfDrawTag_t *list = (sdfDrawTag_t *)sdfPrimAllocDrawTag(NULL);
-    SdfDmaNode *reference = (SdfDmaNode *)sdfGrAllocPacketBuff(0x20);
+    sdfGrRefPacketHeader_t *reference = (sdfGrRefPacketHeader_t *)sdfGrAllocPacketBuff(0x20);
     SdfGsTextureAlphaFlushPacket *texturePacket;
     sdfPrimTransPacket_t *blendPacket;
     void *sprite;
     FldSpriteVertex *vertex;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
 
     sdfGrLinkDispFrameTex(list,
         (u32)(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes), reference);
@@ -3216,12 +3216,12 @@ void fldSubmitOverlaySpriteWithRenderState(s32 mode) {
 /* Submit the field overlay's fixed register state and textured sprite payload. */
 void fldSubmitOverlayStateAndSprite(s32 alpha) {
     sdfDrawTag_t *list = (sdfDrawTag_t *)sdfPrimAllocDrawTag(NULL);
-    SdfDmaNode *reference = (SdfDmaNode *)sdfGrAllocPacketBuff(0x20);
+    sdfGrRefPacketHeader_t *reference = (sdfGrRefPacketHeader_t *)sdfGrAllocPacketBuff(0x20);
     SdfGsTextureAlphaFlushPacket *texturePacket;
     sdfPrimTransPacket_t *blendPacket;
     void *sprite;
     FldSpriteVertex *vertex;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
 
     sdfGrLinkDispFrameTex(list,
         (u32)(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes), reference);
@@ -3358,7 +3358,7 @@ extern sdfGrFrameSet_t D_003980E0;
 void fldDrwZSave(void) {
     if (fldDrwZBuf != 0) {
         sdfDrawTag_t *packet = sdfPrimAllocDrawTag(0);
-        SdfPoolNode *descriptor;
+        sdfGrOt_t *descriptor;
         sdfLinkStoreImage(packet, D_003980E0.buffers[2],
                                 0, 0, 0x200, 0xE0, fldDrwZBuf, 0, 0, 0);
         descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
@@ -3369,7 +3369,7 @@ void fldDrwZSave(void) {
 void fldDrwZLoad(void) {
     if (fldDrwZBuf != 0) {
         sdfDrawTag_t *packet = sdfPrimAllocDrawTag(0);
-        SdfPoolNode *descriptor;
+        sdfGrOt_t *descriptor;
         sdfLinkLoadImage(packet, D_003980E0.buffers[2],
                                   0, 0, 0x200, 0xE0, fldDrwZBuf, 0);
         descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
@@ -3405,9 +3405,9 @@ void initDrawTag(FldQuadState *quad) {
     sdfDrawTagLink(quad->packetList, packet);
 }
 
-extern SdfPoolNode D_00325708;
+extern sdfGrOt_t D_00325708;
 
-extern SdfPoolNode kwlnPositionedTextSurface;
+extern sdfGrOt_t kwlnPositionedTextSurface;
 
 extern void InversMatrix(void);
 
@@ -3637,13 +3637,13 @@ void fldDrawMaruKage(u32 fade, f32 x, f32 y, f32 z, f32 radius) {
 
 void fldSubmitAreaOverlayQuads(s32 alpha, s32 offset) {
     sdfDrawTag_t *list = (sdfDrawTag_t *)sdfPrimAllocDrawTag(NULL);
-    SdfDmaNode *reference = (SdfDmaNode *)sdfGrAllocPacketBuff(0x20);
+    sdfGrRefPacketHeader_t *reference = (sdfGrRefPacketHeader_t *)sdfGrAllocPacketBuff(0x20);
     u64 *texturePacket;
     u64 *blendPacket;
     void *handle;
     FldSpriteVertex *vertex;
     s32 quarter;
-    SdfPoolNode *descriptor;
+    sdfGrOt_t *descriptor;
 
     sdfGrLinkDispFrameTex(list,
         (u32)(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes), reference);
@@ -3782,7 +3782,7 @@ extern f32 fldCamCalcSlopeOffset(f32 x, f32 z, f32 *xs, f32 *ys, f32 *zs);
 
 /* Probe the support surface under the camera's focus and its mirrored heading. */
 void fldProbeCameraSupportSurface(void) {
-    FldAreaWork *cam;
+    fldAreaWork_t *cam;
     f32 xs[4];
     f32 ys[4];
     f32 zs[4];
@@ -3805,9 +3805,9 @@ void fldProbeCameraSupportSurface(void) {
     }
     node = fldMatterTable[index].worldNode;
     if (node != NULL) {
-        offset[0] = node->inner->position[0];
-        offset[1] = node->inner->position[1];
-        offset[2] = node->inner->position[2];
+        offset[0] = node->poseset->pos[0];
+        offset[1] = node->poseset->pos[1];
+        offset[2] = node->poseset->pos[2];
     } else {
         offset[0] = 0.0f;
         offset[1] = 0.0f;
@@ -3844,7 +3844,7 @@ typedef union FldLookAtVector {
 } FldLookAtVector;
 
 void fldUpdateFieldCameraViewState(void) {
-    FldAreaWork *area;
+    fldAreaWork_t *area;
     FldLookAtVector nearPoint;
     FldLookAtVector referencePoint;
     FldLookAtVector farPoint;
@@ -4072,7 +4072,7 @@ void func_0012CED0(void) {
         f32 f[4];
     } nearPoint, referencePoint, farPoint, referenceCopy, farCopy, projectedPoint, playerPosition;
     dds3Basic_t **world = fldGetPlayerSceneStateAddress();
-    FldAreaWork *camera;
+    fldAreaWork_t *camera;
     dds3Basic_t *node;
     f32 previousHeight;
     f32 heightOffset;
@@ -4141,7 +4141,7 @@ INCLUDE_ASM(const s32, "field/fldFileResolver", func_0012CED0);
 #endif
 
 void fldUpdateCameraProjectionEndpoints(void) {
-    FldAreaWork *cam = &fldGlobalBase;
+    fldAreaWork_t *cam = &fldGlobalBase;
     f32 angle;
 
     D_00330650[0] = cam->x - sdfSin(cam->negatedAngle * 3.14f / 180.0f) * 80.0f;
@@ -4520,7 +4520,7 @@ void fldUpdateCameraFollowLinkedObject(void) {
     CameraVector collisionFar;
     CameraVector collisionPoint;
     char text[32];
-    FldAreaWork *area = &fldGlobalBase;
+    fldAreaWork_t *area = &fldGlobalBase;
     u32 *world = fldGetPlayerSceneStateAddress();
     dds3Basic_t *secondary;
     dds3Basic_t *node;
@@ -4558,16 +4558,16 @@ void fldUpdateCameraFollowLinkedObject(void) {
         secondary = dds3GetControlScene();
         node = dds3SceneBasicSearchNameAndType(
             secondary, 4, (const u8 *)D_0032F510[fldCameraFollowRows[area->cameraFollowRowIndex].namedCamera].firstNode);
-        transform = node->inner;
-        firstPoint.f[0] = transform->position[0];
-        firstPoint.f[1] = transform->position[1];
-        firstPoint.f[2] = transform->position[2];
+        transform = node->poseset;
+        firstPoint.f[0] = transform->pos[0];
+        firstPoint.f[1] = transform->pos[1];
+        firstPoint.f[2] = transform->pos[2];
         node = dds3SceneBasicSearchNameAndType(
             secondary, 4, (const u8 *)D_0032F510[fldCameraFollowRows[area->cameraFollowRowIndex].namedCamera].secondNode);
-        transform = node->inner;
-        secondPoint.f[0] = transform->position[0];
-        secondPoint.f[1] = transform->position[1];
-        secondPoint.f[2] = transform->position[2];
+        transform = node->poseset;
+        secondPoint.f[0] = transform->pos[0];
+        secondPoint.f[1] = transform->pos[1];
+        secondPoint.f[2] = transform->pos[2];
         named = &D_0032F510[fldCameraFollowRows[area->cameraFollowRowIndex].namedCamera];
         switch (named->axis) {
         case 0:
@@ -4714,10 +4714,10 @@ void fldCamElvTask(void) {
             D_003BAD1C == FLD_ELV_CAMERA_SCENE_MODE_TRAVEL_DECREASING_FLOOR_INDEX) {
             if (phase < 3.14f) {
                 phase += 0.2f;
-                camera->inner->position[1] = D_003C9220[1] + sdfSin(phase * direction) * 2.5f;
+                camera->poseset->pos[1] = D_003C9220[1] + sdfSin(phase * direction) * 2.5f;
             } else {
                 phase += 0.02f;
-                camera->inner->position[1] = D_003C9220[1] + sdfSin(phase * direction) * 2.0f;
+                camera->poseset->pos[1] = D_003C9220[1] + sdfSin(phase * direction) * 2.0f;
             }
         }
         if (D_003BAD1C == FLD_ELV_CAMERA_SCENE_MODE_ARRIVAL_INCREASING_FLOOR_INDEX ||
@@ -4727,14 +4727,14 @@ void fldCamElvTask(void) {
                 phase -= 1.0f;
             } else if (phase > -3.14f) {
                 phase -= 0.2f;
-                camera->inner->position[1] = D_003C9220[1] + sdfSin(phase * direction) * 2.0f;
+                camera->poseset->pos[1] = D_003C9220[1] + sdfSin(phase * direction) * 2.0f;
             } else {
                 phase -= 0.01f;
             }
             phase -= 11.0f;
         }
         D_003BAD20 = phase;
-        dds3OnPoseSetFlag(camera->inner, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
+        dds3OnPoseSetFlag(camera->poseset, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
     }
 }
 
@@ -4791,7 +4791,7 @@ void fldUpdateCameraProximity(void) {
 }
 
 s32 fldUpdateCameraFollow(void) {
-    FldAreaWork *cam;
+    fldAreaWork_t *cam;
     dds3Basic_t **world = fldGetPlayerSceneStateAddress();
     if (*world != 0 && fldPlayerObject != 0) {
         fldRestoreCameraModelColor();
@@ -5104,7 +5104,7 @@ void fldUpdateCameraTarget(void) {
         f32 f[4];
     } vec;
     f32 cur[3];
-    FldAreaWork *st;
+    fldAreaWork_t *st;
     u128 *dst;
 
     if (fldPlayerObject != 0 &&
@@ -5125,7 +5125,7 @@ void fldUpdateCameraTarget(void) {
             dds3GetPosPoseSet(fldPlayerObject);
             SDF_VU0_STOREVECTOR(&vec);
 ;
-            dst = (u128 *)fldPlayerObject->inner->smoothedPosition;
+            dst = (u128 *)fldPlayerObject->poseset->smoothedPosition;
             SDF_VU0_COPYVECTOR(dst, &vec);
         }
     }
@@ -5166,7 +5166,7 @@ void fldUpdateModeOneCameraPose(void) {
     fldGlobalBase.y = position[1];
     fldGlobalBase.z = position[2];
     if (D_003BAB50 != 0) {
-        dds3OnPoseSetFlag(((dds3Basic_t *)fldPlayerObject)->inner,
+        dds3OnPoseSetFlag(((dds3Basic_t *)fldPlayerObject)->poseset,
                           OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION);
         if (D_003BAB50 != 0) {
             if (fldGlobalBase.cameraSupportHeightDelta > 0.0f) {
@@ -5230,26 +5230,26 @@ void fldUpdateModeOneCameraPose(void) {
         }
         dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
         SDF_VU0_STOREVECTOR_NOMEM(position);
-        PCP_COPY_VECTOR_F32(smoothed, ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition);
+        PCP_COPY_VECTOR_F32(smoothed, ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition);
         if (ffabsf(smoothed[0] - position[0]) < 1.0f) {
-            ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[0] = position[0];
+            ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[0] = position[0];
         } else {
-            ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[0] =
+            ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[0] =
                 smoothed[0] + (position[0] - smoothed[0]) / 3.0f;
         }
         if (ffabsf(smoothed[1] - position[1]) < 1.0f) {
-            ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[1] = position[1];
+            ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[1] = position[1];
         } else {
-            ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[1] =
+            ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[1] =
                 smoothed[1] + (position[1] - smoothed[1]) / 3.0f;
         }
         if (ffabsf(smoothed[2] - position[2]) < 1.0f) {
-            ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[2] = position[2];
+            ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[2] = position[2];
         } else {
-            ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[2] =
+            ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[2] =
                 smoothed[2] + (position[2] - smoothed[2]) / 3.0f;
         }
-        ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[3] = 1.0f;
+        ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[3] = 1.0f;
     }
     difference = fldAngleDifference(fldGlobalBase.angle, fldGlobalBase.modeOneCameraHeadingTarget);
     step = difference / 6.0f;
@@ -5331,7 +5331,7 @@ extern void fldEncountSetFlag(u32 mask);
 
 /* Advance the field transition while the camera model's motion drives completion. */
 FldMovementGateResult fldUpdateFieldTransition(void) {
-    FldAreaWork *work = &fldGlobalBase;
+    fldAreaWork_t *work = &fldGlobalBase;
     dds3ModelHandle_t *model;
     s16 node;
 
@@ -5374,7 +5374,7 @@ FldMovementGateResult fldUpdateFieldTransition(void) {
 }
 
 FldMovementGateResult fldUpdateAreaDamageReaction(void) {
-    FldAreaWork *work = &fldGlobalBase;
+    fldAreaWork_t *work = &fldGlobalBase;
     dds3ModelHandle_t *model;
 
     if (work->areaDamageReactionMovementGate > 0) {
@@ -5606,7 +5606,7 @@ s32 fldUpdateFieldPlayerMovement(void) {
     SDF_VU0_STOREVECTOR_NOMEM(quaternion);
     VU0_LOAD_MATRIX(sdfViewMatrix);
     InversMatrix();
-    dds3OnPoseSetFlag(((dds3Basic_t *)fldPlayerObject)->inner,
+    dds3OnPoseSetFlag(((dds3Basic_t *)fldPlayerObject)->poseset,
                       OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION);
     if (direction != -1 && D_003BAB50 != 0) {
         if (fldGlobalBase.cameraSupportHeightDelta > 0.0f) {
@@ -5697,26 +5697,26 @@ s32 fldUpdateFieldPlayerMovement(void) {
         }
         dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
         SDF_VU0_STOREVECTOR_NOMEM(position);
-        PCP_COPY_VECTOR_F32(smoothed, ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition);
+        PCP_COPY_VECTOR_F32(smoothed, ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition);
         if (ffabsf(smoothed[0] - position[0]) < 1.0f) {
-            ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[0] = position[0];
+            ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[0] = position[0];
         } else {
-            ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[0] =
+            ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[0] =
                 smoothed[0] + (position[0] - smoothed[0]) / 3.0f;
         }
         if (ffabsf(smoothed[1] - position[1]) < 1.0f) {
-            ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[1] = position[1];
+            ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[1] = position[1];
         } else {
-            ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[1] =
+            ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[1] =
                 smoothed[1] + (position[1] - smoothed[1]) / 3.0f;
         }
         if (ffabsf(smoothed[2] - position[2]) < 1.0f) {
-            ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[2] = position[2];
+            ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[2] = position[2];
         } else {
-            ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[2] =
+            ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[2] =
                 smoothed[2] + (position[2] - smoothed[2]) / 3.0f;
         }
-        ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[3] = 1.0f;
+        ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[3] = 1.0f;
     }
     fldHitChkUnitDamage(position);
     difference = fldAngleDifference(fldGlobalBase.angle, heading);
@@ -5859,14 +5859,14 @@ camera_input_done:
     fldGlobalBase.x = position[0];
     fldGlobalBase.y = position[1];
     fldGlobalBase.z = position[2];
-    D_0032F170[0] = ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[0];
-    D_0032F170[1] = ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[1];
-    D_0032F170[2] = ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[2];
-    D_0032F170[3] = ((dds3Basic_t *)fldPlayerObject)->inner->smoothedPosition[3];
-    D_0032F170[4] = ((dds3Basic_t *)fldPlayerObject)->inner->rotation[0];
-    D_0032F170[5] = ((dds3Basic_t *)fldPlayerObject)->inner->rotation[1];
-    D_0032F170[6] = ((dds3Basic_t *)fldPlayerObject)->inner->rotation[2];
-    D_0032F170[7] = ((dds3Basic_t *)fldPlayerObject)->inner->rotation[3];
+    D_0032F170[0] = ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[0];
+    D_0032F170[1] = ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[1];
+    D_0032F170[2] = ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[2];
+    D_0032F170[3] = ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[3];
+    D_0032F170[4] = ((dds3Basic_t *)fldPlayerObject)->poseset->rotation[0];
+    D_0032F170[5] = ((dds3Basic_t *)fldPlayerObject)->poseset->rotation[1];
+    D_0032F170[6] = ((dds3Basic_t *)fldPlayerObject)->poseset->rotation[2];
+    D_0032F170[7] = ((dds3Basic_t *)fldPlayerObject)->poseset->rotation[3];
     return 0;
 }
 
@@ -5877,7 +5877,7 @@ s32 fldUpdateCameraFrame(void) {
     if (fldRunDanteGunFlag[0] != 0) {
         return 0;
     }
-    if (fldGetSceneReadyFlag() != FLD_SCENE_NOT_READY) {
+    if (fldAutoMapChkMode() != FLD_SCENE_NOT_READY) {
         return 0;
     }
     if (fldEncountTestFlag(0x40) == 0) {
@@ -5986,7 +5986,7 @@ s32 fldUpdateCameraObjectPose(void) {
     }
     dds3GetPosPoseSet(fldPlayerObject);
     SDF_VU0_STOREVECTOR_NOMEM(position);
-    inner = fldPlayerObject->inner;
+    inner = fldPlayerObject->poseset;
     SDF_VU0_COPYVECTOR(inner->smoothedPosition, position);
     dds3OffPoseSetFlag(inner, OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION);
     return 0;
@@ -6038,7 +6038,7 @@ void fldClearCameraHeadingRequest(void) {
 /* Camera facing requests share the field-work block. Both request states
  * advance from 1 to 2 when their new angle is installed. */
 void fldQueueCameraXYOverride(f32 targetX, f32 targetZ) {
-    FldAreaWork *work = &fldGlobalBase;
+    fldAreaWork_t *work = &fldGlobalBase;
 
     work->facingPointX = targetX;
     work->facingPointZ = targetZ;
@@ -6046,7 +6046,7 @@ void fldQueueCameraXYOverride(f32 targetX, f32 targetZ) {
 }
 
 void fldQueueCameraHeadingFromVector(f32 x, f32 unusedY, f32 z) {
-    FldAreaWork *work;
+    fldAreaWork_t *work;
     f32 angle;
 
     angle = sdfAtan2(x, z);
@@ -6057,7 +6057,7 @@ void fldQueueCameraHeadingFromVector(f32 x, f32 unusedY, f32 z) {
 }
 
 void fldApplyCameraFacingPoint(void) {
-    FldAreaWork *cameraWork = &fldGlobalBase;
+    fldAreaWork_t *cameraWork = &fldGlobalBase;
 
     if (cameraWork->facingPointState != FLD_CAMERA_TURN_REQUEST_IDLE) {
         f32 deltaX = cameraWork->x - cameraWork->facingPointX;
@@ -6072,7 +6072,7 @@ void fldApplyCameraFacingPoint(void) {
 }
 
 void fldApplyPendingCameraHeading(void) {
-    FldAreaWork *cameraWork = &fldGlobalBase;
+    fldAreaWork_t *cameraWork = &fldGlobalBase;
 
     if (cameraWork->headingState != FLD_CAMERA_TURN_REQUEST_IDLE) {
         cameraWork->headingState = FLD_CAMERA_TURN_REQUEST_TURNING;
@@ -6146,43 +6146,43 @@ void fldUpdateSmoothedCameraPose(void) {
             fldGlobalBase.x = position[0];
             fldGlobalBase.y = position[1];
             fldGlobalBase.z = position[2];
-            dds3OnPoseSetFlag(fldPlayerObject->inner, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
-            dds3OnPoseSetFlag(fldPlayerObject->inner, OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION);
+            dds3OnPoseSetFlag(fldPlayerObject->poseset, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
+            dds3OnPoseSetFlag(fldPlayerObject->poseset, OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION);
             player = fldPlayerObject;
             if (fldGlobalBase.verticalStepDirection != 0) {
-                SDF_VU0_COPYVECTOR(player->inner->smoothedPosition, player->inner->position);
+                SDF_VU0_COPYVECTOR(player->poseset->smoothedPosition, player->poseset->pos);
             } else {
                 fldSetCameraObjectTransitionFlag();
-                PCP_COPY_VECTOR_F32(smoothed, fldPlayerObject->inner->smoothedPosition);
+                PCP_COPY_VECTOR_F32(smoothed, fldPlayerObject->poseset->smoothedPosition);
                 if (ffabsf(smoothed[0] - position[0]) < 1.0f) {
-                    fldPlayerObject->inner->smoothedPosition[0] = position[0];
+                    fldPlayerObject->poseset->smoothedPosition[0] = position[0];
                 } else {
-                    fldPlayerObject->inner->smoothedPosition[0] =
+                    fldPlayerObject->poseset->smoothedPosition[0] =
                         smoothed[0] + (position[0] - smoothed[0]) / 3.0f;
                 }
                 if (ffabsf(smoothed[1] - position[1]) < 1.0f) {
-                    fldPlayerObject->inner->smoothedPosition[1] = position[1];
+                    fldPlayerObject->poseset->smoothedPosition[1] = position[1];
                 } else {
-                    fldPlayerObject->inner->smoothedPosition[1] =
+                    fldPlayerObject->poseset->smoothedPosition[1] =
                         smoothed[1] + (position[1] - smoothed[1]) / 3.0f;
                 }
                 if (ffabsf(smoothed[2] - position[2]) < 1.0f) {
-                    fldPlayerObject->inner->smoothedPosition[2] = position[2];
+                    fldPlayerObject->poseset->smoothedPosition[2] = position[2];
                 } else {
-                    fldPlayerObject->inner->smoothedPosition[2] =
+                    fldPlayerObject->poseset->smoothedPosition[2] =
                         smoothed[2] + (position[2] - smoothed[2]) / 3.0f;
                 }
-                fldPlayerObject->inner->smoothedPosition[3] = 1.0f;
+                fldPlayerObject->poseset->smoothedPosition[3] = 1.0f;
                 player = fldPlayerObject;
             }
-            D_0032F170[0] = player->inner->smoothedPosition[0];
-            D_0032F170[1] = player->inner->smoothedPosition[1];
-            D_0032F170[2] = player->inner->smoothedPosition[2];
-            D_0032F170[3] = player->inner->smoothedPosition[3];
-            D_0032F170[4] = player->inner->rotation[0];
-            D_0032F170[5] = player->inner->rotation[1];
-            D_0032F170[6] = player->inner->rotation[2];
-            D_0032F170[7] = player->inner->rotation[3];
+            D_0032F170[0] = player->poseset->smoothedPosition[0];
+            D_0032F170[1] = player->poseset->smoothedPosition[1];
+            D_0032F170[2] = player->poseset->smoothedPosition[2];
+            D_0032F170[3] = player->poseset->smoothedPosition[3];
+            D_0032F170[4] = player->poseset->rotation[0];
+            D_0032F170[5] = player->poseset->rotation[1];
+            D_0032F170[6] = player->poseset->rotation[2];
+            D_0032F170[7] = player->poseset->rotation[3];
         }
     }
 }
@@ -6289,8 +6289,6 @@ void fldUploadSkyBuffer(const FldSkyBuffer *src) {
     }
 }
 
-INCLUDE_RODATA(const s32, "field/fldFileResolver", D_003A0100);
-
 enum {
     FLD_SKY_FILTER_MODE_PHASE_STEP_0_1_OFFSET_32 = 1,
     FLD_SKY_FILTER_MODE_PHASE_STEP_0_2_OFFSET_32 = 2,
@@ -6299,6 +6297,8 @@ enum {
     FLD_SKY_FILTER_MODE_PHASE_STEP_0_2_OFFSET_48 = 5,
     FLD_SKY_FILTER_MODE_PHASE_STEP_0_05_OFFSET_48 = 6,
 };
+
+INCLUDE_RODATA(const s32, "field/fldFileResolver", D_003A0100);
 
 void fldSkyCalcFilter(void) {
     gFilterAnimeOfsA = 0;
@@ -6346,7 +6346,7 @@ void fldSkyDrawFilter(void) {
     s32 oldR2, oldG2, oldB2, oldA2;
     s32 oldR3, oldG3, oldB3, oldA3;
 
-    if (current == 0 || fldGetSceneReadyFlag() != FLD_SCENE_NOT_READY) {
+    if (current == 0 || fldAutoMapChkMode() != FLD_SCENE_NOT_READY) {
         return;
     }
     currentWeight = D_003BAD90;
@@ -6669,7 +6669,7 @@ extern void fldSetPlayerLighting(s32 duration, f32 redA, f32 greenA, f32 blueA,
 /* Start fading to the sky light set at index. A zero scene command also applies the set to the
  * display state and player lighting using the (clamped) transition duration. */
 void fldApplySkyLightSet(u32 skyLightSetIndex, s32 durationMode) {
-    FldAreaWork *state = &fldGlobalBase;
+    fldAreaWork_t *state = &fldGlobalBase;
     FldLightSet *light;
     f32 vec[4];
     f32 dir[4];
@@ -7611,7 +7611,7 @@ void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation
     f32 (*sourceVertices)[4];
     struct FldStopEntry *stopData;
     s32 trianglesRemaining;
-    FldCollisionFace *face;
+    fldCollisionFace_t *face;
     f32 *planeX;
     f32 *planeY;
     f32 *planeZ;
@@ -7630,7 +7630,7 @@ void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation
     }
     for (pass = 0; pass < 5; pass++) {
         s32 faceCount;
-        FldCollisionFace *firstFace;
+        fldCollisionFace_t *firstFace;
         sourceVertices = geometry->vertices;
         faceCount = geometry->faceCount;
         firstFace = geometry->faces;
@@ -8304,14 +8304,14 @@ void fldHitChkUnitElvOnly(const f32 *input) {
         savedPrevious[1] = previous[1];
         savedPrevious[2] = previous[2];
         if (fldMatterTable[index].worldNode != 0) {
-            transform = fldMatterTable[index].worldNode->inner;
+            transform = fldMatterTable[index].worldNode->poseset;
             relative = 1;
-            position[0] -= transform->position[0];
-            position[1] -= transform->position[1];
-            position[2] -= transform->position[2];
-            previous[0] -= transform->position[0];
-            previous[1] -= transform->position[1];
-            previous[2] -= transform->position[2];
+            position[0] -= transform->pos[0];
+            position[1] -= transform->pos[1];
+            position[2] -= transform->pos[2];
+            previous[0] -= transform->pos[0];
+            previous[1] -= transform->pos[1];
+            previous[2] -= transform->pos[2];
         } else {
             relative = 0;
         }
@@ -8330,21 +8330,21 @@ void fldHitChkUnitElvOnly(const f32 *input) {
                     } else {
                         fldGlobalBase.secondaryMovingMatterIndex = index;
                     }
-                    anchor = fldMatterTable[index].worldNode->inner;
-                    fldMatterTable[index].previousPosition[0] = anchor->position[0];
-                    fldMatterTable[index].previousPosition[1] = anchor->position[1];
-                    fldMatterTable[index].previousPosition[2] = anchor->position[2];
+                    anchor = fldMatterTable[index].worldNode->poseset;
+                    fldMatterTable[index].previousPosition[0] = anchor->pos[0];
+                    fldMatterTable[index].previousPosition[1] = anchor->pos[1];
+                    fldMatterTable[index].previousPosition[2] = anchor->pos[2];
                 }
             }
         }
         if (relative) {
-            transform = fldMatterTable[index].worldNode->inner;
-            position[0] += transform->position[0];
-            position[1] += transform->position[1];
-            position[2] += transform->position[2];
-            previous[0] += transform->position[0];
-            previous[1] += transform->position[1];
-            previous[2] += transform->position[2];
+            transform = fldMatterTable[index].worldNode->poseset;
+            position[0] += transform->pos[0];
+            position[1] += transform->pos[1];
+            position[2] += transform->pos[2];
+            previous[0] += transform->pos[0];
+            previous[1] += transform->pos[1];
+            previous[2] += transform->pos[2];
         }
     }
 }
@@ -8368,13 +8368,13 @@ void fldHitChkUnitElv(f32 *position) {
         if (fldMatterTable[index].worldNode != 0) {
             dds3PoseSet_t *transform;
 
-            transform = fldMatterTable[index].worldNode->inner;
-            movement[0] = transform->position[0] - fldMatterTable[index].previousPosition[0];
-            movement[1] = transform->position[1] - fldMatterTable[index].previousPosition[1];
-            movement[2] = transform->position[2] - fldMatterTable[index].previousPosition[2];
-            fldMatterTable[index].previousPosition[0] = transform->position[0];
-            fldMatterTable[index].previousPosition[1] = transform->position[1];
-            fldMatterTable[index].previousPosition[2] = transform->position[2];
+            transform = fldMatterTable[index].worldNode->poseset;
+            movement[0] = transform->pos[0] - fldMatterTable[index].previousPosition[0];
+            movement[1] = transform->pos[1] - fldMatterTable[index].previousPosition[1];
+            movement[2] = transform->pos[2] - fldMatterTable[index].previousPosition[2];
+            fldMatterTable[index].previousPosition[0] = transform->pos[0];
+            fldMatterTable[index].previousPosition[1] = transform->pos[1];
+            fldMatterTable[index].previousPosition[2] = transform->pos[2];
         }
         if (fldTestRoomSceneFlag(fldGlobalBase.area, fldGlobalBase.floor + 1,
                                fldMatterTable[index].sceneFlag) == 0) {
@@ -8385,13 +8385,13 @@ void fldHitChkUnitElv(f32 *position) {
                 if (fldMatterTable[index].worldNode != 0) {
                     dds3PoseSet_t *transform;
 
-                    transform = fldMatterTable[index].worldNode->inner;
-                    movement[0] += transform->position[0] - fldMatterTable[index].previousPosition[0];
-                    movement[1] += transform->position[1] - fldMatterTable[index].previousPosition[1];
-                    movement[2] += transform->position[2] - fldMatterTable[index].previousPosition[2];
-                    fldMatterTable[index].previousPosition[0] = transform->position[0];
-                    fldMatterTable[index].previousPosition[1] = transform->position[1];
-                    fldMatterTable[index].previousPosition[2] = transform->position[2];
+                    transform = fldMatterTable[index].worldNode->poseset;
+                    movement[0] += transform->pos[0] - fldMatterTable[index].previousPosition[0];
+                    movement[1] += transform->pos[1] - fldMatterTable[index].previousPosition[1];
+                    movement[2] += transform->pos[2] - fldMatterTable[index].previousPosition[2];
+                    fldMatterTable[index].previousPosition[0] = transform->pos[0];
+                    fldMatterTable[index].previousPosition[1] = transform->pos[1];
+                    fldMatterTable[index].previousPosition[2] = transform->pos[2];
                 }
             }
             newPosition[0] = position[0] + movement[0];
@@ -8428,7 +8428,7 @@ void fldHitChkUnitDamage(f32 *position) {
     f32 margin;
     f32 planeDistance;
     f32 classifiedMargin;
-    FldAreaWork *areaState;
+    fldAreaWork_t *areaState;
     FldCollisionAxis selectedAxis;
     s32 pass;
     s32 recordIndex;
@@ -8490,12 +8490,12 @@ void fldHitChkUnitDamage(f32 *position) {
 
                 node = fldMatterTable[recordIndex].worldNode;
                 if (node != 0) {
-                    point[0] = savedPoint[0] - node->inner->position[0];
-                    point[1] = savedPoint[1] - node->inner->position[1];
-                    point[2] = savedPoint[2] - node->inner->position[2];
-                    reference[0] = savedReference[0] - node->inner->position[0];
-                    reference[1] = savedReference[1] - node->inner->position[1];
-                    reference[2] = savedReference[2] - node->inner->position[2];
+                    point[0] = savedPoint[0] - node->poseset->pos[0];
+                    point[1] = savedPoint[1] - node->poseset->pos[1];
+                    point[2] = savedPoint[2] - node->poseset->pos[2];
+                    reference[0] = savedReference[0] - node->poseset->pos[0];
+                    reference[1] = savedReference[1] - node->poseset->pos[1];
+                    reference[2] = savedReference[2] - node->poseset->pos[2];
                 }
 
                 planeDistance = fldVecDot(point, fldMatterTable[recordIndex].normal);
@@ -8706,10 +8706,10 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
         index = fldGlobalBase.primaryMovingMatterIndex;
         support = &fldMatterTable[index];
         if (support->worldNode != 0) {
-            carrier = (support->worldNode)->inner;
-            carried[0] = carrier->position[0] - support->previousPosition[0];
-            carried[1] = carrier->position[1] - support->previousPosition[1] + 10.0f;
-            carried[2] = carrier->position[2] - support->previousPosition[2];
+            carrier = (support->worldNode)->poseset;
+            carried[0] = carrier->pos[0] - support->previousPosition[0];
+            carried[1] = carrier->pos[1] - support->previousPosition[1] + 10.0f;
+            carried[2] = carrier->pos[2] - support->previousPosition[2];
         }
         fldGlobalBase.secondaryMovingMatterIndex = -1;
         fldGlobalBase.primaryMovingMatterIndex = -1;
@@ -8779,13 +8779,13 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
             savedPrevious[1] = previous[1];
             savedPrevious[2] = previous[2];
             if (fldMatterTable[index].worldNode != 0) {
-                transform = (fldMatterTable[index].worldNode)->inner;
-                position[0] -= transform->position[0];
-                position[1] -= transform->position[1];
-                position[2] -= transform->position[2];
-                previous[0] -= transform->position[0];
-                previous[1] -= transform->position[1];
-                previous[2] -= transform->position[2];
+                transform = (fldMatterTable[index].worldNode)->poseset;
+                position[0] -= transform->pos[0];
+                position[1] -= transform->pos[1];
+                position[2] -= transform->pos[2];
+                previous[0] -= transform->pos[0];
+                previous[1] -= transform->pos[1];
+                previous[2] -= transform->pos[2];
                 relative = 1;
             } else {
                 relative = 0;
@@ -8876,13 +8876,13 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
                             position[2] = projected[2] + fldMatterTable[index].normal[2] * clearance;
                             if (clearance == margin) floorRecord = index;
                             if (fldMatterTable[index].worldNode != 0) {
-                                transform = (fldMatterTable[index].worldNode)->inner;
-                                position[0] += transform->position[0];
-                                position[1] += transform->position[1];
-                                position[2] += transform->position[2];
-                                previous[0] += transform->position[0];
-                                previous[1] += transform->position[1];
-                                previous[2] += transform->position[2];
+                                transform = (fldMatterTable[index].worldNode)->poseset;
+                                position[0] += transform->pos[0];
+                                position[1] += transform->pos[1];
+                                position[2] += transform->pos[2];
+                                previous[0] += transform->pos[0];
+                                previous[1] += transform->pos[1];
+                                previous[2] += transform->pos[2];
                                 relative = 0;
                             }
                             fldMatterTable[index].unkCA = 1;
@@ -8898,13 +8898,13 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
                             position[1] = projected[1] + fldMatterTable[index].normal[1] * clearance;
                             position[2] = projected[2] + fldMatterTable[index].normal[2] * clearance;
                             if (fldMatterTable[index].worldNode != 0) {
-                                transform = (fldMatterTable[index].worldNode)->inner;
-                                position[0] += transform->position[0];
-                                position[1] += transform->position[1];
-                                position[2] += transform->position[2];
-                                previous[0] += transform->position[0];
-                                previous[1] += transform->position[1];
-                                previous[2] += transform->position[2];
+                                transform = (fldMatterTable[index].worldNode)->poseset;
+                                position[0] += transform->pos[0];
+                                position[1] += transform->pos[1];
+                                position[2] += transform->pos[2];
+                                previous[0] += transform->pos[0];
+                                previous[1] += transform->pos[1];
+                                previous[2] += transform->pos[2];
                                 relative = 0;
                             }
                             fldMatterTable[index].unkCA = 1;
@@ -8917,13 +8917,13 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
                     }
                 }
                 if (relative) {
-                    transform = (fldMatterTable[index].worldNode)->inner;
-                    position[0] += transform->position[0];
-                    position[1] += transform->position[1];
-                    position[2] += transform->position[2];
-                    previous[0] += transform->position[0];
-                    previous[1] += transform->position[1];
-                    previous[2] += transform->position[2];
+                    transform = (fldMatterTable[index].worldNode)->poseset;
+                    position[0] += transform->pos[0];
+                    position[1] += transform->pos[1];
+                    position[2] += transform->pos[2];
+                    previous[0] += transform->pos[0];
+                    previous[1] += transform->pos[1];
+                    previous[2] += transform->pos[2];
                 }
             }
         }
@@ -9047,13 +9047,13 @@ FldValueRecordIndex fldHitChkCamera(const f32 start[3], const f32 end[3], f32 hi
         }
         if (fldMatterTable[index].worldNode != 0) {
             relative = 1;
-            transform = fldMatterTable[index].worldNode->inner;
-            origin[0] -= transform->position[0];
-            origin[1] -= transform->position[1];
-            origin[2] -= transform->position[2];
-            target[0] -= transform->position[0];
-            target[1] -= transform->position[1];
-            target[2] -= transform->position[2];
+            transform = fldMatterTable[index].worldNode->poseset;
+            origin[0] -= transform->pos[0];
+            origin[1] -= transform->pos[1];
+            origin[2] -= transform->pos[2];
+            target[0] -= transform->pos[0];
+            target[1] -= transform->pos[1];
+            target[2] -= transform->pos[2];
         } else {
             relative = 0;
         }
@@ -9106,13 +9106,13 @@ FldValueRecordIndex fldHitChkCamera(const f32 start[3], const f32 end[3], f32 hi
             }
         }
         if (relative) {
-            transform = fldMatterTable[index].worldNode->inner;
-            origin[0] += transform->position[0];
-            origin[1] += transform->position[1];
-            origin[2] += transform->position[2];
-            target[0] += transform->position[0];
-            target[1] += transform->position[1];
-            target[2] += transform->position[2];
+            transform = fldMatterTable[index].worldNode->poseset;
+            origin[0] += transform->pos[0];
+            origin[1] += transform->pos[1];
+            origin[2] += transform->pos[2];
+            target[0] += transform->pos[0];
+            target[1] += transform->pos[1];
+            target[2] += transform->pos[2];
         }
     }
     hitPoint[0] = origin[0];
@@ -9167,13 +9167,13 @@ FldValueRecordIndex fldHitChkEnemy(const f32 start[3], const f32 end[3], f32 hit
         }
         if (fldMatterTable[index].worldNode != 0) {
             relative = 1;
-            transform = fldMatterTable[index].worldNode->inner;
-            origin[0] -= transform->position[0];
-            origin[1] -= transform->position[1];
-            origin[2] -= transform->position[2];
-            target[0] -= transform->position[0];
-            target[1] -= transform->position[1];
-            target[2] -= transform->position[2];
+            transform = fldMatterTable[index].worldNode->poseset;
+            origin[0] -= transform->pos[0];
+            origin[1] -= transform->pos[1];
+            origin[2] -= transform->pos[2];
+            target[0] -= transform->pos[0];
+            target[1] -= transform->pos[1];
+            target[2] -= transform->pos[2];
         } else {
             relative = 0;
         }
@@ -9220,13 +9220,13 @@ FldValueRecordIndex fldHitChkEnemy(const f32 start[3], const f32 end[3], f32 hit
             }
         }
         if (relative) {
-            transform = fldMatterTable[index].worldNode->inner;
-            origin[0] += transform->position[0];
-            origin[1] += transform->position[1];
-            origin[2] += transform->position[2];
-            target[0] += transform->position[0];
-            target[1] += transform->position[1];
-            target[2] += transform->position[2];
+            transform = fldMatterTable[index].worldNode->poseset;
+            origin[0] += transform->pos[0];
+            origin[1] += transform->pos[1];
+            origin[2] += transform->pos[2];
+            target[0] += transform->pos[0];
+            target[1] += transform->pos[1];
+            target[2] += transform->pos[2];
         }
     }
     hitPoint[0] = origin[0];
@@ -9361,19 +9361,19 @@ INCLUDE_RODATA(const s32, "field/fldFileResolver", D_003A0138);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", fldRoomEventPlacementCount);
 
-INCLUDE_SDATA(struct DevRequest *, "field/fldFileResolver", fldRoomSoundResources);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldRoomSoundResources);
 
-INCLUDE_SDATA(FldTransferChunk *, "field/fldFileResolver", fldRoomF1Chunk);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldRoomF1Chunk);
 
-INCLUDE_SDATA(u8 *, "field/fldFileResolver", fldRoomF1Data);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldRoomF1Data);
 
-INCLUDE_SDATA(FldTransferChunk *, "field/fldFileResolver", fldRoomF2Chunk);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldRoomF2Chunk);
 
-INCLUDE_SDATA(u8 *, "field/fldFileResolver", fldRoomF2Data);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldRoomF2Data);
 
-INCLUDE_SDATA(FldTransferChunk *, "field/fldFileResolver", fldRoomKF2Chunk);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldRoomKF2Chunk);
 
-INCLUDE_SDATA(u8 *, "field/fldFileResolver", fldRoomKF2Data);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldRoomKF2Data);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", gFldFileResetMode);
 
@@ -9389,21 +9389,21 @@ INCLUDE_SDATA(const s32, "field/fldFileResolver", fldFieldPackData);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", D_003BAC4C);
 
-INCLUDE_SDATA(struct sdfMemHandle_t *, "field/fldFileResolver", fldCachedRoomResourceAllocation);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldCachedRoomResourceAllocation);
 
-INCLUDE_SDATA(struct sdfMemHandle_t *, "field/fldFileResolver", fldCachedRoomF1ResourceAllocation);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldCachedRoomF1ResourceAllocation);
 
-INCLUDE_SDATA(struct sdfMemHandle_t *, "field/fldFileResolver", fldCachedRoomF2ResourceAllocation);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldCachedRoomF2ResourceAllocation);
 
-INCLUDE_SDATA(struct sdfMemHandle_t *, "field/fldFileResolver", fldCachedRoomKF2ResourceAllocation);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldCachedRoomKF2ResourceAllocation);
 
-INCLUDE_SDATA(const u8 *, "field/fldFileResolver", fldCachedRoomResourceData);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldCachedRoomResourceData);
 
-INCLUDE_SDATA(const u8 *, "field/fldFileResolver", fldCachedRoomF1ResourceData);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldCachedRoomF1ResourceData);
 
-INCLUDE_SDATA(const u8 *, "field/fldFileResolver", fldCachedRoomF2ResourceData);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldCachedRoomF2ResourceData);
 
-INCLUDE_SDATA(const u8 *, "field/fldFileResolver", fldCachedRoomKF2ResourceData);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldCachedRoomKF2ResourceData);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", fldCachedRoomResourceSize);
 
@@ -9461,7 +9461,7 @@ INCLUDE_SDATA(const s32, "field/fldFileResolver", D_003BAD14);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", D_003BAD18);
 
-INCLUDE_SDATA(const FldElvCameraSceneMode, "field/fldFileResolver", D_003BAD1C);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", D_003BAD1C);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", D_003BAD20);
 
@@ -9495,7 +9495,7 @@ INCLUDE_SDATA(const s32, "field/fldFileResolver", D_003BAD58);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", fldSkyLightSetBuffer);
 
-INCLUDE_SDATA(FldLightSet * const, "field/fldFileResolver", D_003BAD60);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", D_003BAD60);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", fldCameraSettings);
 
@@ -9563,7 +9563,7 @@ INCLUDE_SDATA(const s32, "field/fldFileResolver", fldCameraColorFade);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", fldCameraColorLayerScroll);
 
-INCLUDE_SDATA(FldWallMeshRecord * const, "field/fldFileResolver", fldItemBoxObjBuf);
+INCLUDE_SDATA(const s32, "field/fldFileResolver", fldItemBoxObjBuf);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", D_003BADEC);
 

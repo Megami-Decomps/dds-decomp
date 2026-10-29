@@ -1402,12 +1402,12 @@ f32 btlScalarRangeStepQuadratic(BtlScalarRange *state, f32 timeStep) {
 }
 
 struct RefObj;
-extern sdfTexHandle_t *sdfGetOrCreateTextureForReference(struct SdfPoolNode *, struct RefObj *);
+extern sdfTexHandle_t *sdfGetOrCreateTextureForReference(struct sdfGrOt_t *, struct RefObj *);
 #include "sdf_packet_alloc.h"
 extern s32 btlIndexedIconUvOrigins[];
 
 /* Draw an indexed glyph with independently sized geometry and fixed atlas UVs. */
-void btlDrawIconAtSize(SdfPoolNode *surface, s32 x, s32 y,
+void btlDrawIconAtSize(sdfGrOt_t *surface, s32 x, s32 y,
                       s32 width, s32 height, s32 topLeftColor, s32 topRightColor,
                       s32 bottomLeftColor, s32 bottomRightColor,
                       u16 buttonIndex) {
@@ -1442,7 +1442,7 @@ void btlDrawIconAtSize(SdfPoolNode *surface, s32 x, s32 y,
 
 
 /* Draw a button glyph at the fixed 64-pixel size using the four supplied corner colors. */
-void btlDrawButtonIconFixed64(SdfPoolNode *surface, s32 x, s32 y, s32 topLeftColor, s32 topRightColor, s32 bottomLeftColor, s32 bottomRightColor, s32 button) {
+void btlDrawButtonIconFixed64(sdfGrOt_t *surface, s32 x, s32 y, s32 topLeftColor, s32 topRightColor, s32 bottomLeftColor, s32 bottomRightColor, s32 button) {
     btlDrawIconAtSize(surface, x, y, BTL_BUTTON_ICON_SIZE, BTL_BUTTON_ICON_SIZE, topLeftColor, topRightColor, bottomLeftColor, bottomRightColor, button);
 }
 
@@ -1463,7 +1463,7 @@ extern BtnUv D_003BE198[];
 extern BtnUv D_003BE1A0[];
 
 /* Draw a button glyph using its UV pair; screen coordinates are GS fixed-point. */
-void btlDrawButtonIcon(SdfPoolNode *surface, s32 x, s32 y, s32 topLeftColor, s32 topRightColor, s32 bottomLeftColor, s32 bottomRightColor, s32 button) {
+void btlDrawButtonIcon(sdfGrOt_t *surface, s32 x, s32 y, s32 topLeftColor, s32 topRightColor, s32 bottomLeftColor, s32 bottomRightColor, s32 button) {
     BtnUv *uv;
     sdfTexHandle_t *texture;
     sdfDrawTag_t *packet;
@@ -3089,11 +3089,11 @@ void btlUpdateDebugCameraFromPad(void) {
     }
     if (dds3PadBitTable[0] < 0) {
         if ((u8)(D_00436BA8 & 1) == 0) {
-            PCP_COPY_VECTOR_UNCLOBBERED(btlDebugCameraPositions[0], camera->inner->position);
-            PCP_COPY_VECTOR_UNCLOBBERED(btlDebugCameraRotations[0], camera->inner->rotation);
+            PCP_COPY_VECTOR_UNCLOBBERED(btlDebugCameraPositions[0], camera->poseset->pos);
+            PCP_COPY_VECTOR_UNCLOBBERED(btlDebugCameraRotations[0], camera->poseset->rotation);
         } else {
-            PCP_COPY_VECTOR_UNCLOBBERED(btlDebugCameraPositions[1], camera->inner->position);
-            PCP_COPY_VECTOR_UNCLOBBERED(btlDebugCameraRotations[1], camera->inner->rotation);
+            PCP_COPY_VECTOR_UNCLOBBERED(btlDebugCameraPositions[1], camera->poseset->pos);
+            PCP_COPY_VECTOR_UNCLOBBERED(btlDebugCameraRotations[1], camera->poseset->rotation);
         }
         D_00436BA8 ^= 1;
     } else if (dds3PadBitTable[1] < 0) {
@@ -3584,7 +3584,7 @@ BtlResourceDescriptor *btlCreateResourceDescriptor(BtlResourceEntryList *list) {
 
 extern s8 dds3PadBitTable[0x20];
 extern s8 D_0040B7DB[];
-extern SdfPoolNode sdfGrOtTable[];
+extern sdfGrOt_t sdfGrOtTable[];
 extern u64 *dds3PrimFrameRect(s32, s32, s32, s32, s32, u32, u32);
 s32 btlFormatSelectedResourceName(BtlResourceDescriptor *, char *);
 void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *, const char *);
@@ -3595,7 +3595,7 @@ extern void * sdfDevPrintf(s32 source, s32 end, s32 argument, s32 index, const c
 s32 btlUpdateAndDrawResourceBrowser(BtlResourceDescriptor *descriptor) {
     BtlResourceEntry *visibleEntry;
     sdfDrawTag_t *packetList;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
     s32 drawnRows;
     s32 topRow;
     s32 contentRow;
@@ -3849,7 +3849,7 @@ void btlDrawResourcePreview(BtlResourceDescriptor *descriptor) {
     void *sprite;
     KwlnSpriteVertex *vertex;
     sdfTexHandle_t *texture;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
 
     if (descriptor->texture != 0) {
         list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);

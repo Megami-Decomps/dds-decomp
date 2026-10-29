@@ -1365,7 +1365,7 @@ void btlApplyPartyEntryWeightedDelta(BattleSceneWork *scene) {
                         if (!(DDS3_GBWK->party[i].status & 0x40)) {
                             if (mnuIsTitleEntryAvailable(&DDS3_GBWK->party[i]) == 0) {
                                 datAddHp(&DDS3_GBWK->party[i],
-                                               (s32)((f32)DDS3_GBWK->party[i].maxHp * scale));
+                                               (s32)((f32)DDS3_GBWK->party[i].maxhp * scale));
                             }
                         }
                     }

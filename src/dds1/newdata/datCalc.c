@@ -138,8 +138,8 @@ s32 datAddHp(datUnitWork_t *unit, s32 delta) {
     if ((s32)currentHp < 0) {
         currentHp = 0;
     }
-    if ((s32)unit->maxHp < (s32)currentHp) {
-        currentHp = unit->maxHp;
+    if ((s32)unit->maxhp < (s32)currentHp) {
+        currentHp = unit->maxhp;
     }
     unit->hp = (s16)currentHp;
     return currentHp;
@@ -364,7 +364,7 @@ DatAffinitySelector datFlagToElementIndex(s32 channelFlag) {
 }
 
 DatUnitDyingResult datCheckDying(const datUnitWork_t *unit) {
-    return unit->hp * DAT_PERCENT_SCALE / unit->maxHp < DAT_QUARTER_PERCENT;
+    return unit->hp * DAT_PERCENT_SCALE / unit->maxhp < DAT_QUARTER_PERCENT;
 }
 
 
@@ -716,7 +716,7 @@ void ptyApplySkillRecovery(datUnitWork_t *unit, DatSkillId skillId) {
     switch (skillId) {
     case 0x22B:
         if (recoveryRate > 0.0f) {
-            hpRecovery = (s32)((f32)unit->maxHp * recoveryRate);
+            hpRecovery = (s32)((f32)unit->maxhp * recoveryRate);
             mpRecovery = (s32)((f32)unit->maxMp * recoveryRate);
         }
         break;
@@ -781,7 +781,7 @@ DatCommandBaseCost datCalculateCommandBaseValue(
         if (battler->flags & 0x20) {
             return 0;
         }
-        cost = battler->maxHp * commands[commandId].costPercentage / 100 +
+        cost = battler->maxhp * commands[commandId].costPercentage / 100 +
                 commands[commandId].costBase;
         if (cost <= 0) {
             cost = 1;
@@ -993,7 +993,7 @@ PtyAddUnitResult ptyAddUnit(DatUnitId unitId) {
             ptyRecomputeMaxHpMp(entry);
         }
         ptyRebuildProfileSkills(1, entry);
-        entry->hp = entry->maxHp;
+        entry->hp = entry->maxhp;
         entry->mp = entry->maxMp;
         entry->status = 0;
     } else {
@@ -1354,12 +1354,12 @@ s32 evtPushSecondRosterCurrentHp(void) {
 }
 
 s32 evtPushFirstRosterMaximumHp(void) {
-    scrSetIntReturnValue(((datUnitWork_t *)evtWorkScriptContext.firstArgument.pointer)->maxHp);
+    scrSetIntReturnValue(((datUnitWork_t *)evtWorkScriptContext.firstArgument.pointer)->maxhp);
     return 1;
 }
 
 s32 evtPushSecondRosterMaximumHp(void) {
-    scrSetIntReturnValue(((datUnitWork_t *)evtWorkScriptContext.secondArgument.pointer)->maxHp);
+    scrSetIntReturnValue(((datUnitWork_t *)evtWorkScriptContext.secondArgument.pointer)->maxhp);
     return 1;
 }
 
@@ -2156,7 +2156,7 @@ INCLUDE_SDATA(const s32, "newdata/datCalc", datStatusHelpMessages);
 
 INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAAA8);
 
-INCLUDE_SDATA(BfFlw0Header *, "newdata/datCalc", D_003BAAAC);
+INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAAAC);
 
 INCLUDE_SDATA(const s32, "newdata/datCalc", evtWorkScriptTask);
 

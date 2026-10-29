@@ -43,10 +43,10 @@ void evtFreeStage(void) {
 /* Detach every unit node from the secondary object's per-kind list. */
 void evtFreeAllUnit(void) {
     dds3Basic_t *secondaryObject = (dds3Basic_t *)dds3GetControlScene();
-    EvtWorldTable *worldTable;
+    evtWorldTable_t *worldTable;
 
     if (secondaryObject != NULL) {
-        worldTable = ((EvtWorldTable *)secondaryObject->data);
+        worldTable = ((evtWorldTable_t *)secondaryObject->workdata);
         while (worldTable->slots[EVT_WORLD_SLOT_UNIT].head != NULL) {
             dds3DeleteSceneBasicData(worldTable->slots[EVT_WORLD_SLOT_UNIT].head);
         }

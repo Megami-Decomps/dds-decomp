@@ -508,7 +508,7 @@ s32 evtStopMover(dds3Basic_t *movie, s32 undo, s32 startFrame, s32 endFrame)
     if (elapsedFrames < 0) {
         elapsedFrames = 0;
     }
-    clip = ((PolyMovieState *)movie->data)->clip;
+    clip = ((PolyMovieState *)movie->workdata)->clip;
     if (clip != NULL) {
         duration = (s32)clip->duration;
         if (duration <= elapsedFrames) {
@@ -533,7 +533,7 @@ void evtPolygonMovieClampTime(dds3Basic_t *movie, s32 unused, s32 start, s32 end
     if (elapsedFrames < 0) {
         elapsedFrames = 0;
     }
-    clip = ((PolyMovieState *)movie->data)->clip;
+    clip = ((PolyMovieState *)movie->workdata)->clip;
     if (clip != NULL) {
         if ((s32)clip->duration <= elapsedFrames) {
             elapsedFrames = (s32)clip->duration;

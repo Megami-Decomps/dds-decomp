@@ -724,7 +724,7 @@ s32 btlAverageMaximumValueForMask(
             if (skipDown == 0 || !(flags & 0x20)) {
                 if (unit->partyRecord.flags & partyRecordFlagsMask) {
                     count++;
-                    total += unit->partyRecord.maxHp;
+                    total += unit->partyRecord.maxhp;
                 }
             }
         }
@@ -1360,7 +1360,7 @@ void btlBuildCombinedActorUnit(BtlUnit *dst, BtlUnit *first, BtlUnit *second, Bt
   dst->partyRecord.menuValue = 0xA1;
   dst->partyRecord.hp = 0;
   dst->partyRecord.mp = 0;
-  dst->partyRecord.maxHp = 0;
+  dst->partyRecord.maxhp = 0;
   dst->partyRecord.maxMp = 0;
   for (i = 0; i < 5; i++)
   {
@@ -1399,9 +1399,9 @@ void btlBuildCombinedActorUnit(BtlUnit *dst, BtlUnit *first, BtlUnit *second, Bt
     {
       dst->partyRecord.mp = src->partyRecord.mp;
     }
-    if (dst->partyRecord.maxHp < src->partyRecord.maxHp)
+    if (dst->partyRecord.maxhp < src->partyRecord.maxhp)
     {
-      dst->partyRecord.maxHp = src->partyRecord.maxHp;
+      dst->partyRecord.maxhp = src->partyRecord.maxhp;
     }
     if (dst->partyRecord.maxMp < src->partyRecord.maxMp)
     {
@@ -1458,9 +1458,9 @@ void btlBuildCombinedActorUnit(BtlUnit *dst, BtlUnit *first, BtlUnit *second, Bt
     }
   }
 
-  if (dst->partyRecord.maxHp < dst->partyRecord.hp)
+  if (dst->partyRecord.maxhp < dst->partyRecord.hp)
   {
-    dst->partyRecord.hp = dst->partyRecord.maxHp;
+    dst->partyRecord.hp = dst->partyRecord.maxhp;
   }
   if (dst->partyRecord.maxMp < dst->partyRecord.mp)
   {
@@ -3645,7 +3645,7 @@ s32 btlUpdateAndDrawAnalysisPanel(dds3ProcessID_t *task) {
                         btlDrawPanelIconGroup(1, work->fade);
                     } else {
                         sprintf((char *)text, D_00436820,
-                                      work->unit->partyRecord.hp, work->unit->partyRecord.maxHp);
+                                      work->unit->partyRecord.hp, work->unit->partyRecord.maxhp);
                         btlDrawAnalysisPanelVitalBars(work, 0, work->x, work->y, work->fade);
                         glyph = itfCreateFont2TextGlyph((work->x + xOffset) << 4, (work->y + 17) << 3,
                                              0xFF0000, 0x80808000 | work->fade, (char *)text, 0);
@@ -4101,7 +4101,7 @@ void btlDrawAnalysisPanelVitalBars(BtlAnalysisPanelWork *work, s32 stat, s32 x, 
 
     if (stat == 0) {
         current = work->unit->partyRecord.hp;
-        maximum = work->unit->partyRecord.maxHp;
+        maximum = work->unit->partyRecord.maxhp;
         divisor = (f32)maximum;
         ratio = (f32)current;
     } else {
@@ -4678,8 +4678,6 @@ void btlUpdatePhasePanelAnimation(BattlePhasePanelWork *work) {
     work->fade[2][3] = 0;
 }
 
-INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416428);
-
 #ifdef NON_MATCHING
 #include "common.h"
 #include "dsp_message_window_api.h"
@@ -4776,6 +4774,8 @@ void btlDrawPhaseChangePanelStrips(BattlePhasePanelWork *work) {
     }
 }
 #else
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416428);
+
 INCLUDE_ASM(const s32, "game/code_001B2AF8", btlDrawPhaseChangePanelStrips);
 #endif
 
@@ -5289,8 +5289,6 @@ void btlUpdateAndDrawCommandSelectionHighlight(BattleSceneObject *object, s32 ki
     evtSubmitPrimaryAlphaBlendMode(0);
 }
 
-INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416560);
-
 #ifdef NON_MATCHING
 #include "sdk_ps2.h"
 #include "btl_selection_view.h"
@@ -5574,6 +5572,8 @@ void func_001BDF20(BattleSceneObject *scene, s32 kind) {
                                   btlResourceBlock->resA, 17, 0x53);
 }
 #else
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416560);
+
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001BDF20);
 #endif
 
@@ -5913,12 +5913,6 @@ void btlCreateMessageWindow(void) {
     btlSetTrackedResourceFlag(BTL_TRACKED_RESOURCE_COMMAND_HINT_WINDOW, 1);
 }
 
-INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004165A0);
-
-INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004165B0);
-
-INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004165C0);
-
 #ifdef NON_MATCHING
 #include "sdk_ps2.h"
 #include "btl_selection_view.h"
@@ -6029,6 +6023,12 @@ void btlDrawWindowHelpLine(s32 x, s32 y, u32 unusedColor, u32 childColor, u16 te
     itfSetTextDrawLimit(-1);
 }
 #else
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004165A0);
+
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004165B0);
+
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004165C0);
+
 INCLUDE_ASM(const s32, "game/code_001B2AF8", btlDrawWindowHelpLine);
 #endif
 
@@ -6798,8 +6798,6 @@ s32 func_001C0EF0(void) {
     return 1;
 }
 
-INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416740);
-
 #ifdef NON_MATCHING
 #include "sdk_ps2.h"
 #include "btl_selection_view.h"
@@ -6934,6 +6932,8 @@ s32 func_001C1300(void) {
     return 1;
 }
 #else
+INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416740);
+
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C1300);
 #endif
 
@@ -7274,7 +7274,7 @@ s32 func_001C1F10(dds3ProcessID_t *task) {
             } else {
                 highlight = work->activeEntries[slot].presentation.hpHighlightLevel;
             }
-            color = btlGetVitalTextColor(unit, unit->partyRecord.hp, unit->partyRecord.maxHp, 0);
+            color = btlGetVitalTextColor(unit, unit->partyRecord.hp, unit->partyRecord.maxhp, 0);
             color = ((u32)(baseFade + highlight) << 24) | (color & 0x00FFFFFF);
             if ((u8)work->activeEntries[slot].presentation.hpState - 0x10U < 0x10U) {
                 emphasis = work->activeEntries[slot].presentation.hpHighlightLevel + 0x100;
@@ -7705,7 +7705,7 @@ s32 btlUpdateAndDrawReserveActorPanels(dds3ProcessID_t *task) {
 
             baseFade = work->reserveEntries[i].presentation.fade;
             sprintf(text, D_00436818, unit->partyRecord.hp);
-            color = btlGetVitalTextColor(unit, unit->partyRecord.hp, unit->partyRecord.maxHp, 0);
+            color = btlGetVitalTextColor(unit, unit->partyRecord.hp, unit->partyRecord.maxhp, 0);
             color = ((u32)(baseFade + work->reserveEntries[i].presentation.hpHighlightLevel) << 24) |
                     (color & 0x00FFFFFF);
             func_001B6CA8(work->reserveEntries[i].position[0] + 0x50,
@@ -8798,7 +8798,7 @@ void btlUpdateAndDrawVitalBarPulse(BtlUnit *unit, BattleStatPulse *pulse, s32 x,
 
     if (!(stat & 1)) {
         value = unit->partyRecord.hp;
-        maximum = unit->partyRecord.maxHp;
+        maximum = unit->partyRecord.maxhp;
         xOffset = 57;
         yOffset = 49;
         sprite = 3;
@@ -8910,7 +8910,7 @@ void btlUpdateActorVitalChangeEffects(BtlUnit *unit, BattleActorPanelWork *work,
         alpha = work->activeEntries[slot].presentation.fade < 0x80 ?
             work->activeEntries[slot].presentation.fade : work->activeEntries[slot].presentation.hpEffectFade;
         btlDrawActorVitalGauge(unit, unit->partyRecord.hp, work->activeEntries[slot].presentation.hpTarget,
-                      unit->partyRecord.maxHp, 10,
+                      unit->partyRecord.maxhp, 10,
                       work->activeEntries[slot].position[0] + offsets.hp.x,
                       work->activeEntries[slot].position[1] + offsets.hp.y, alpha, type, 0);
         work->activeEntries[slot].presentation.hpEffectFade -= 8;
@@ -9042,11 +9042,11 @@ typedef struct BattleHudOffsets { s32 values[5][2]; } BattleHudOffsets;
 typedef struct BattleHudSprites { s32 values[5]; } BattleHudSprites;
 extern const BattleHudSprites D_00416920;
 extern const BattlePanelColors D_00416938;
-extern SdfPoolNode D_003805A8;
+extern sdfGrOt_t D_003805A8;
 extern void eglSetOt(u32);
 extern void evtSubmitPrimaryGsTest(s32,s32,s32,s32,s32,s32,s32,s32);
-extern void btlDrawButtonIconFixed64(SdfPoolNode *,s32,s32,s32,s32,s32,s32,s32);
-extern void btlDrawButtonIcon(SdfPoolNode *,s32,s32,s32,s32,s32,s32,s32);
+extern void btlDrawButtonIconFixed64(sdfGrOt_t *,s32,s32,s32,s32,s32,s32,s32);
+extern void btlDrawButtonIcon(sdfGrOt_t *,s32,s32,s32,s32,s32,s32,s32);
 void btlDrawActorPanelEntry(BtlUnit *unit, BattleActorPanelWork *work, s32 slot,
                    s8 bank, s16 alpha, s32 x, s32 y) {
     BattleHudOffsets offsets = {{{10, 43}, {51, 47}, {23, 62}, {54, 49}, {26, 64}}};
@@ -9160,7 +9160,7 @@ void btlDrawActorPanelEntry(BtlUnit *unit, BattleActorPanelWork *work, s32 slot,
             btlResourceBlock->resA, sprites.values[i], 0x53);
     }
     btlDrawActorVitalGauge(unit, unit->partyRecord.hp, unit->partyRecord.hp,
-        unit->partyRecord.maxHp, sprites.values[3],
+        unit->partyRecord.maxhp, sprites.values[3],
         x + offsets.values[3][0], y + offsets.values[3][1], alpha, 0, 0);
     btlDrawActorVitalGauge(unit, unit->partyRecord.mp, unit->partyRecord.mp,
         unit->partyRecord.maxMp, sprites.values[4],
@@ -9254,7 +9254,7 @@ void btlDrawActorVitalGauge(BtlUnit *unit, s32 current, s32 displayed, s32 maxim
 }
 
 
-extern SdfPoolNode D_003805A8;
+extern sdfGrOt_t D_003805A8;
 #include "sdf_packet_alloc.h"
 /* Draw a textured command-panel quad with independently colored corners. */
 s32 btlDrawGouraudTexturedPanelQuad(s32 x0, s32 y0, s32 x1, s32 y1,

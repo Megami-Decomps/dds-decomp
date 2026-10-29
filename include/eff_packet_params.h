@@ -3,20 +3,20 @@
 
 #include "common.h"
 
-typedef struct EffPacketParams {
-    s16 parameterCount;
-    s16 vertexCount;
-    u16 primitive;
-    u16 mask;
+typedef struct sdf3DPrimPolyParm_t {
+    s16 faceCount;
+    s16 pointCount;
+    u16 attr;
+    u16 attrInhibit;
     u32 color;
-    const u32 *parameters;
-    u128 *positions;
-    u128 *normals;
-    f32 *texcoords;
-    u32 *extraTexcoords;
-    u32 *colors;
-    void *(*allocate)(s32);
-    f32 depth;
-} EffPacketParams;
+    const u32 *faceIndex;
+    u128 *vertex;
+    u128 *normal;
+    f32 *uv;
+    u32 *multiUv;
+    u32 *vertexColor;
+    void *(*allocator)(s32);
+    f32 zBias;
+} sdf3DPrimPolyParm_t;
 
 #endif

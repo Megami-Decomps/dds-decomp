@@ -42,7 +42,7 @@ typedef union UiQuadColor {
 typedef char UiQuadColorSizeCheck[sizeof(UiQuadColor) == 0x10 ? 1 : -1];
 
 
-extern SdfPoolNode sdfGrOtTable[];
+extern sdfGrOt_t sdfGrOtTable[];
 extern s32 pbDebugPanel3State;
 extern UiQuadColor itfTestOverlayColor;
 extern u64 *pbAllocPrimPacket(u32, u32, u32, u32, u32, u32, u32);
@@ -76,7 +76,7 @@ typedef char ItfColorPanelWorkSizeCheck[sizeof(ItfColorPanelWork) == 0x10 ? 1 : 
 extern ItfColorPanelWork pbDebugPanel3X;
 extern ItfColorPanelRow itfOverlayColorEditorRows[6];
 extern SndPad dds3PadButtonState;
-extern SdfPoolNode kwlnPositionedTextSurface;
+extern sdfGrOt_t kwlnPositionedTextSurface;
 extern s32 itfTestOverlayPhaseStep;
 extern u8 D_003BB2B4;
 extern char D_003BB2B8[]; /* "FILTER:" */
@@ -241,7 +241,7 @@ void pbDrawRotatedPrim(s32 surfaceIndex) {
     s32 i;
     u8 *component;
     sdfDrawTag_t *list;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
     f32 phase;
 
     phase = (f32)(pbDebugPanel3State % 4096) * (1.0f / 4096.0f);
@@ -815,7 +815,7 @@ u16 btlRefreshUnitMaximumHpAndClampCurrentHp(datUnitWork_t *entryAddress) {
     datUnitWork_t *entry = entryAddress;
     u32 currentHp = btlReadCurrentUnitHp(entry);
     u32 maxHp = btlComputeSkillAdjustedMaxHp(entryAddress);
-    entry->maxHp = maxHp;
+    entry->maxhp = maxHp;
     if (maxHp < currentHp) {
         entry->hp = maxHp;
     }

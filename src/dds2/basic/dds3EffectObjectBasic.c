@@ -69,12 +69,12 @@ extern void dds3FreePoseSet(dds3Basic_t *node);
 void dds3EffectObjectBasicDestructor(dds3Basic_t *obj) {
     EffectDependencyState *data;
 
-    data = obj->data;
+    data = obj->workdata;
     FreeEffectData(data);
     dds3FreePoseSet(obj);
     dds3ObjectBaseFreeControlWorkData(data->objectHandle);
-    sdfChipFreeDirect(obj->data);
-    obj->data = NULL;
+    sdfChipFreeDirect(obj->workdata);
+    obj->workdata = NULL;
 }
 
 #include "dds3_world_primary.h"
@@ -94,7 +94,7 @@ s32 dds3EffectObjectBasicMainProcedure(dds3Basic_t *obj) {
     struct billHandle_t *bill;
     s32 result;
 
-    data = obj->data;
+    data = obj->workdata;
     if ((data->flags & EFF_OBJ_FLAG_OWNER_LINK) != 0) {
         if (dds3SceneBasicExistBasicFromType(dds3GetActiveScene(), data->ownerKind, data->owner) != 0) {
             if ((data->flags & EFF_OBJ_FLAG_OWNER_BILL_ENTRY) != 0) {
@@ -102,12 +102,12 @@ s32 dds3EffectObjectBasicMainProcedure(dds3Basic_t *obj) {
             } else {
                 switch (data->ownerKind) {
                 case 4: case 5: case 6: case 7: case 8: case 9:
-                    SDF_VU0_LOADVECTOR(data->owner->inner->rotation);
+                    SDF_VU0_LOADVECTOR(data->owner->poseset->rotation);
                     SDF_VU0_STOREVECTOR(rotation);
                     effMiscQuaternionToMatrixVU();
                     break;
                 case EFF_OBJ_OWNER_KIND_EXTRA:
-                    SDF_VU0_LOADVECTOR(((EvtWorldSourceTransformPrefix *)data->owner->data)->rotation);
+                    SDF_VU0_LOADVECTOR(((EvtWorldSourceTransformPrefix *)data->owner->workdata)->rotation);
                     SDF_VU0_STOREVECTOR(rotation);
                     effMiscQuaternionToMatrixVU();
                     break;
@@ -127,30 +127,30 @@ s32 dds3EffectObjectBasicMainProcedure(dds3Basic_t *obj) {
             if ((data->flags & EFF_OBJ_FLAG_OWNER_BILL_ENTRY) == 0) {
                 switch (data->ownerKind) {
                 case 4: case 5: case 6: case 7: case 8: case 9:
-                    SDF_VU0_LOADVECTOR_B(data->owner->inner->position);
+                    SDF_VU0_LOADVECTOR_B(data->owner->poseset->pos);
                     SDF_VU0_ADDVECTOR();
                     break;
                 case EFF_OBJ_OWNER_KIND_EXTRA:
-                    SDF_VU0_LOADVECTOR_B(&((EvtWorldSourceTransformPrefix *)data->owner->data)->position);
+                    SDF_VU0_LOADVECTOR_B(&((EvtWorldSourceTransformPrefix *)data->owner->workdata)->position);
                     SDF_VU0_ADDVECTOR();
                     break;
                 }
             }
             SDF_VU0_STOREVECTOR(position);
-            dds3SetRadiusPoseSet(obj->inner);
-            SDF_VU0_STOREVECTOR(obj->inner->position);
+            dds3SetRadiusPoseSet(obj->poseset);
+            SDF_VU0_STOREVECTOR(obj->poseset->pos);
             moved = 1;
-            dds3OffPoseSetFlag(obj->inner, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
+            dds3OffPoseSetFlag(obj->poseset, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
         } else {
             dds3EffectObjectBasicUnlinkObject(obj);
         }
     } else {
-        dds3OffPoseSetFlag(obj->inner, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
-        SDF_VU0_LOADVECTOR(obj->inner->position);
+        dds3OffPoseSetFlag(obj->poseset, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
+        SDF_VU0_LOADVECTOR(obj->poseset->pos);
         SDF_VU0_VECTOR_W_SET_ONE();
         SDF_VU0_STOREVECTOR(position);
-        dds3SetRadiusPoseSet(obj->inner);
-        SDF_VU0_LOADVECTOR(obj->inner->rotation);
+        dds3SetRadiusPoseSet(obj->poseset);
+        SDF_VU0_LOADVECTOR(obj->poseset->rotation);
         Normalize();
         SDF_VU0_STOREVECTOR(rotation);
         moved = 1;
@@ -218,7 +218,7 @@ extern void dds3BillboardDraw(struct billHandle_t *bill);
 s32 dds3EffectObjectBasicDrawProcedure(dds3Basic_t *obj) {
     EffectDependencyState *data;
 
-    data = obj->data;
+    data = obj->workdata;
     dds3EffectObjectBasicCalcFldEx(obj);
     if ((data->flags & 1) == 0) {
         return 1;
@@ -252,7 +252,7 @@ s32 dds3EffectObjectBasicDrawProcedure(dds3Basic_t *obj) {
 
 /* Return the owned object base without validating the object or its data. */
 dds3ObjectBaseControlWorkData_t *dds3EffectObjectBasicGetControlWorkData(dds3Basic_t *object) {
-    return ((EffectDependencyState *)object->data)->objectHandle;
+    return ((EffectDependencyState *)object->workdata)->objectHandle;
 }
 
 dds3Basic_t *dds3AddEffectObjectBasic(u32 worldCounter, const u128 *position, const u128 *rotation) {
@@ -267,8 +267,8 @@ dds3Basic_t *dds3AddEffectObjectBasic(u32 worldCounter, const u128 *position, co
     dds3ObjectBaseCreateMover(obj);
     dds3SetPosPoseSet(obj, (u128 *)position);
     dds3SetRotPoseSet(obj, (u128 *)rotation);
-    dds3SetRadiusPoseSet(obj->inner);
-    data = obj->data;
+    dds3SetRadiusPoseSet(obj->poseset);
+    data = obj->workdata;
     data->flags = 0;
     data->state = EFF_DEPENDENCY_STATE_EMPTY;
     data->handle = NULL;
@@ -300,7 +300,7 @@ dds3Basic_t *AddP2AEffect(bill, vec, extra)
     SDF_VU0_LOADVECTOR(vec);
     SDF_VU0_STOREVECTOR(vector);
     effCopyVector(bill->position, vector);
-    data = obj->data;
+    data = obj->workdata;
     data->handle = bill;
     data->flags = 0;
     data->state = EFF_DEPENDENCY_STATE_BILLBOARD_ANIMATION;
@@ -321,7 +321,7 @@ dds3Basic_t *AddP2AEffect(bill, vec, extra)
 dds3Basic_t *dds3AddP2AEffectObjectBasic3(dds3Basic_t *obj, const u128 *firstVector, s32 secondVectorAddress) {
     struct billHandle_t *bill;
 
-    bill = dds3BillboardCopy((struct billHandle_t *)((EffectDependencyState *)obj->data)->handle);
+    bill = dds3BillboardCopy((struct billHandle_t *)((EffectDependencyState *)obj->workdata)->handle);
     return AddP2AEffect(bill, firstVector, secondVectorAddress);
 }
 /* Create a kind-one indexed bill; the native constructor result is discarded. */
@@ -343,7 +343,7 @@ extern void dds3BillboardSetAnimNumber(billHandle_t *effect, u32 entryIndex);
 
 /* Select the stored bill's kind-one entry; no object/data/bill checks are made. */
 void dds3EffectObjectBasicSetAnmeID(dds3Basic_t *obj, u32 entryIndex) {
-    dds3BillboardSetAnimNumber(((EffectDependencyState *)obj->data)->handle, entryIndex);
+    dds3BillboardSetAnimNumber(((EffectDependencyState *)obj->workdata)->handle, entryIndex);
 }
 
 /* Create a state-three bill effect and attach the first kind-two world node if present.
@@ -367,7 +367,7 @@ dds3Basic_t *AddTMXEffect(bill, firstVector, secondVectorAddress)
     SDF_VU0_LOADVECTOR(firstVector);
     SDF_VU0_STOREVECTOR(copiedVector);
     effCopyVector(((billHandle_t *)bill)->position, copiedVector);
-    data = obj->data;
+    data = obj->workdata;
     data->state = EFF_DEPENDENCY_STATE_BILLBOARD_NODE;
     data->handle = bill;
     data->flags = 0;
@@ -388,7 +388,7 @@ dds3Basic_t *AddTMXEffect(bill, firstVector, secondVectorAddress)
 dds3Basic_t *dds3AddTMXEffectObjectBasic3(dds3Basic_t *obj, const u128 *firstVector, s32 secondVectorAddress) {
     struct billHandle_t *bill;
 
-    bill = dds3BillboardCopy((struct billHandle_t *)((EffectDependencyState *)obj->data)->handle);
+    bill = dds3BillboardCopy((struct billHandle_t *)((EffectDependencyState *)obj->workdata)->handle);
     return AddTMXEffect(bill, firstVector, secondVectorAddress);
 }
 
@@ -430,7 +430,7 @@ dds3Basic_t *effObjCreateWithBoundBill(bill, firstVector, secondVector)
     SDF_VU0_LOADVECTOR(firstVector);
     SDF_VU0_STOREVECTOR(copiedVector);
     effCopyVectorToNodeInstance(bill, copiedVector);
-    data = obj->data;
+    data = obj->workdata;
     data->state = EFF_DEPENDENCY_STATE_BOUND_EFFECT_NODE;
     data->handle = bill;
     data->flags = 0;
@@ -484,7 +484,7 @@ dds3Basic_t *effObjCreateBillboardInWorld(bill, firstVector, secondVector)
     SDF_VU0_LOADVECTOR(firstVector);
     SDF_VU0_STOREVECTOR(copiedVector);
     effCopyVectorToNodeInstance(bill, copiedVector);
-    data = obj->data;
+    data = obj->workdata;
     data->state = EFF_DEPENDENCY_STATE_BOUND_EFFECT_NODE;
     data->handle = bill;
     data->flags = 0;
@@ -531,7 +531,7 @@ dds3Basic_t *AddBEDEffect(source, firstVector, secondVector)
     SDF_VU0_COPYVECTOR(parameters.firstVector, firstVector);
     SDF_VU0_COPYVECTOR(parameters.secondVector, secondVector);
     mixer = effEveBEDCreate(source);
-    data = obj->data;
+    data = obj->workdata;
     data->state = EFF_DEPENDENCY_STATE_EVENT_CUT;
     data->handle = mixer;
     data->flags = 0;
@@ -576,7 +576,7 @@ dds3Basic_t *dds3AddBEDEffectObjectBasic(const char *resourcePath, const u128 *f
 void dds3StartBEDEffectObjectBasic(dds3Basic_t *obj, u32 entryId) {
     EffectDependencyState *data;
 
-    data = obj->data;
+    data = obj->workdata;
     if (data->state != EFF_DEPENDENCY_STATE_EVENT_CUT) {
         return;
     }
@@ -604,8 +604,8 @@ dds3Basic_t *AddESPEffect(const char *name, const u128 *firstVector, void *secon
     if (obj == NULL) {
         return NULL;
     }
-    data = obj->data;
-    params = obj->inner;
+    data = obj->workdata;
+    params = obj->poseset;
     data->state = EFF_DEPENDENCY_STATE_PARAMETERS_READY;
     params->scale[0] = scale;
     params->scale[1] = scale;
@@ -616,7 +616,7 @@ dds3Basic_t *AddESPEffect(const char *name, const u128 *firstVector, void *secon
     data->owner = NULL;
     data->entryId = 0;
     data->ownerKind = 0;
-    obj->value = name;
+    obj->name = name;
     objectHandle = dds3EffectObjectBasicGetControlWorkData(obj);
     objectHandle->resourceState = DDS3_OBJECT_RESOURCE_EFFECT_DEPENDENCY;
     worldNode = dds3GetFirstWorldObjectNodeOfKind2();
@@ -659,7 +659,7 @@ dds3Basic_t *AddMG12Effect(kind, descriptor)
     if (obj == NULL) {
         return NULL;
     }
-    data = obj->data;
+    data = obj->workdata;
     data->flags = 0;
     if (kind == 1) {
         data->state = EFF_DEPENDENCY_STATE_MAGATUHI_TWO_ROWS;
@@ -726,7 +726,7 @@ EffectDependencyState *CheckESP(dds3Basic_t *obj) {
     if (((u8 *)&obj->kindTag)[3] != EFF_OBJ_KIND) {
         return data;
     }
-    data = obj->data;
+    data = obj->workdata;
     if (data->state != EFF_DEPENDENCY_STATE_PARAMETERS_READY) {
         data = NULL;
     }
@@ -738,7 +738,7 @@ EffectParameterPositionReadiness GetESPPos(dds3Basic_t *obj) {
     if (CheckESP(obj) == NULL) {
         return EFFECT_PARAMETER_POSITION_NOT_READY;
     }
-    SDF_VU0_LOADVECTOR(obj->inner->position);
+    SDF_VU0_LOADVECTOR(obj->poseset->pos);
     return EFFECT_PARAMETER_POSITION_READY;
 }
 
@@ -749,7 +749,7 @@ s32 GetESPR(dds3Basic_t *obj) {
     if (CheckESP(obj) == NULL) {
         return 0;
     }
-    parameters = obj->inner;
+    parameters = obj->poseset;
     return (s32)parameters->scale[0];
 }
 
@@ -761,7 +761,7 @@ extern void effMagaRandomize(struct EffNode *node);
 s32 dds3EffectObjectPresetMG12(dds3Basic_t *obj) {
 
     if (((u8 *)&obj->kindTag)[3] == EFF_OBJ_KIND) {
-        EffectDependencyState *data = obj->data;
+        EffectDependencyState *data = obj->workdata;
 
         switch ((s32)data->state) {
         case EFF_DEPENDENCY_STATE_MAGATUHI_TWO_ROWS:
@@ -786,7 +786,7 @@ s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *obj, dds3Basic_t *first, dds3Basic_t
     if (((u8 *)&obj->kindTag)[3] != EFF_OBJ_KIND) {
         return 0;
     }
-    data = obj->data;
+    data = obj->workdata;
     switch (data->state) {
     case EFF_DEPENDENCY_STATE_MAGATUHI_TWO_ROWS:
         parameterRows = data->vector;
@@ -826,12 +826,12 @@ s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *obj, dds3Basic_t *first, dds3Basic_t
 
 /* OR the requested flag bits into slot data; no object/data validation is performed. */
 void dds3EffectObjectBasicStatOn(dds3Basic_t *obj, u32 flags) {
-    ((EffectDependencyState *)obj->data)->flags = ((EffectDependencyState *)obj->data)->flags | flags;
+    ((EffectDependencyState *)obj->workdata)->flags = ((EffectDependencyState *)obj->workdata)->flags | flags;
 }
 
 /* Clear the requested flag bits from the unsigned effect-state mask. */
 void dds3EffectObjectBasicStatOff(dds3Basic_t *obj, u32 flags) {
-    ((EffectDependencyState *)obj->data)->flags = ((EffectDependencyState *)obj->data)->flags & ~flags;
+    ((EffectDependencyState *)obj->workdata)->flags = ((EffectDependencyState *)obj->workdata)->flags & ~flags;
 }
 
 /* Accept owner kinds [4,10) or seventeen, reset link bookkeeping, and return one.
@@ -844,7 +844,7 @@ s32 dds3EffectObjectBasicLinkObject(dds3Basic_t *obj, dds3Basic_t *owner) {
     if (kind < EFF_OBJ_OWNER_KIND_FIRST || (kind >= EFF_OBJ_OWNER_KIND_END && kind != EFF_OBJ_OWNER_KIND_EXTRA)) {
         return 0;
     }
-    data = obj->data;
+    data = obj->workdata;
     data->ownerLocalOffset[2] = 0.0f;
     data->owner = owner;
     data->entryId = 0;
@@ -864,11 +864,11 @@ void dds3EffectObjectBasicGetObjectIndex(dds3Basic_t *obj) {
     dds3ObjectBaseControlWorkData_t *objectBase;
     dds3ModelHandle_t *model;
 
-    data = obj->data;
+    data = obj->workdata;
     if (data->flags & EFF_OBJ_FLAG_OWNER_BILL_ENTRY) {
         owner = data->owner;
         if (((u8 *)&owner->kindTag)[3] == EFF_OBJ_OWNER_BILL_KIND) {
-            objectBase = ((EffectObjectData *)owner->data)->modelHolder;
+            objectBase = ((EffectObjectData *)owner->workdata)->modelHolder;
             if (objectBase->resourceState != DDS3_OBJECT_RESOURCE_MODEL_CONTEXT) {
                 return;
             }
@@ -886,7 +886,7 @@ s32 dds3EffectObjectBasicLinkObjectIndex(dds3Basic_t *obj, dds3Basic_t *owner, s
     if (dds3EffectObjectBasicLinkObject(obj, owner) == 0) {
         return 1;
     }
-    data = obj->data;
+    data = obj->workdata;
     data->entryId = entryId;
     data->flags |= EFF_OBJ_FLAG_OWNER_BILL_ENTRY;
     return 1;

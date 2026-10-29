@@ -17,11 +17,11 @@ extern f32 kwlnDefaultColorVector[4];
 void lightdestructor(dds3Basic_t *light) {
     EffLightData *data;
 
-    data = light->data;
+    data = light->workdata;
     sdfChipFreeDirect(data->buffer);
     dds3ObjectBaseFreeControlWorkData(data->baseControlWorkData);
-    sdfChipFreeDirect(light->data);
-    light->data = NULL;
+    sdfChipFreeDirect(light->workdata);
+    light->workdata = NULL;
     dds3FreePoseSet(light);
 }
 
@@ -31,7 +31,7 @@ s32 lightmainprocedure(dds3Basic_t *lightObject) {
     u32 flags;
 
     memset(sources, 0, sizeof(sources));
-    data = lightObject->data;
+    data = lightObject->workdata;
     flags = data->flags;
     if (flags & EFF_LIGHT_FLAG_UPDATE_COLOR_VECTORS) {
         if (flags & EFF_LIGHT_FLAG_BLEND_COLOR_VECTORS) {

@@ -368,9 +368,9 @@ void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *scene) {
 
 extern void uiDrawUniformColorRect(s32, s32, s32, s32, s32, s32, s32);
 extern void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *);
-struct SdfPoolNode;
-extern s8 evtStageTestUpdate(struct SdfPoolNode **);
-extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
+struct sdfGrOt_t;
+extern s8 evtStageTestUpdate(struct sdfGrOt_t **);
+extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
 
 void mnuDrawStatAssignmentPanel(BrsSkillPackageWork *scene, s32 copyOptions) {
     datUnitWork_t *item = scene->selectedRewardRow->unit;

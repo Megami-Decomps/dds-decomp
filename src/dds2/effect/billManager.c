@@ -151,7 +151,7 @@ void dds3BillboardTagLink(billHandle_t *obj, BillChildPayload *child) {
 
 
 extern BillChildPayload *dds3BillboardTag;
-extern SdfPoolNode *D_003AA960[5];
+extern sdfGrOt_t *D_003AA960[5];
 
 void billFlushPendingChildPackets(void) {
     BillChildPayload *node;
@@ -390,7 +390,7 @@ void dds3MultiBillboardPktLink(BillRenderPair *pair) {
     data[1]->count = 0;
 }
 
-extern SdfPoolNode D_00380228;
+extern sdfGrOt_t D_00380228;
 extern void sdfBuildFrameRegisterReference(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
 
 void billFlushPendingRenderPairs(void) {

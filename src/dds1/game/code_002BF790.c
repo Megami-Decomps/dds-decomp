@@ -36,7 +36,7 @@ typedef struct UiQuadWords {
     u32 unk00[4];
 } UiQuadWords; // 0x10
 
-extern SdfPoolNode sdfGrOtTable[];
+extern sdfGrOt_t sdfGrOtTable[];
 
 
 extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
@@ -562,7 +562,7 @@ void cmpDrawSpriteFlag(u8 enabled, s32 alternate, s32 kind) {
     SdfDrawPacket *packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1));
     u64 *descriptor;
     sdfDrawTag_t *context;
-    SdfPoolNode *entry;
+    sdfGrOt_t *entry;
 
     sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
     descriptor = (u64 *)sdf2DGetPrimPtr(packet);
@@ -587,7 +587,7 @@ void cmpDrawSprite(u64 data, s32 alternate, s32 kind) {
     SdfDrawPacket *packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1));
     u64 *descriptor;
     sdfDrawTag_t *context;
-    SdfPoolNode *entry;
+    sdfGrOt_t *entry;
 
     sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
     descriptor = (u64 *)sdf2DGetPrimPtr(packet);
@@ -612,7 +612,7 @@ void cmpDrawSprite2(s32 data, s32 alternate, s32 kind) {
     SdfDrawPacket *packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1));
     u64 *descriptor;
     sdfDrawTag_t *context;
-    SdfPoolNode *entry;
+    sdfGrOt_t *entry;
 
     sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
     descriptor = (u64 *)sdf2DGetPrimPtr(packet);
@@ -637,7 +637,7 @@ void cmpDrawSpriteIndexed(s32 data, s32 kind) {
     SdfDrawPacket *packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1));
     u64 *descriptor;
     sdfDrawTag_t *context;
-    SdfPoolNode *entry;
+    sdfGrOt_t *entry;
 
     sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
     descriptor = (u64 *)sdf2DGetPrimPtr(packet);
@@ -654,7 +654,7 @@ void cmpDrawSpriteIndexed2(s32 data, s32 kind) {
     SdfDrawPacket *packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1));
     u64 *descriptor;
     sdfDrawTag_t *context;
-    SdfPoolNode *entry;
+    sdfGrOt_t *entry;
 
     sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
     descriptor = (u64 *)sdf2DGetPrimPtr(packet);
@@ -688,7 +688,7 @@ void cmpDrawTriG(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 sur
     SdfDrawPacket *packet;
     GridPackedVertex *vertices;
     sdfDrawTag_t *list;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
 
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(6, 1));
     sdf2DMakePrimPacketHeader(packet, 0x14B, 6, 0x515151, 1);
@@ -728,7 +728,7 @@ void itfDrawColoredRectangle(u32 x, u32 y, u32 z, u32 width, u32 height, const u
     SdfDrawPacket *packet;
     GridPackedVertex *vertices;
     sdfDrawTag_t *list;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
     u64 right, bottom;
 
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(8, 1));
@@ -783,7 +783,7 @@ void cmpDrawBoxLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
     SdfDrawPacket *packet;
     GridPackedVertex *vertices;
     sdfDrawTag_t *list;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
 
     packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(4, 1));
     sdf2DMakePrimPacketHeader(packet, 0x149, 4, 0x5151, 1);
@@ -805,12 +805,12 @@ void cmpDrawBoxLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
 /* vu0 routine: the SDK quadword copies are present at 002C12F0..002C130C. */
 void cmpDraw3DPoly(const f32 *first, const f32 *second, const f32 *third,
                    const u32 *colors, s32 unused, sdfMat_t *asset, s32 surfaceIndex) {
-    SdfPrimitiveRequest request;
+    sdf3DPrimPolyParm_t request;
     u32 vertexColors[3];
     f32 textureCoordinates[3][2];
     f32 positions[3][4];
     sdfDrawTag_t *list;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
     u32 firstColor, secondColor, thirdColor;
 
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(sizeof(sdfDrawTag_t));
@@ -823,16 +823,16 @@ void cmpDraw3DPoly(const f32 *first, const f32 *second, const f32 *third,
     firstColor = colors[0];
     secondColor = colors[1];
     thirdColor = colors[2];
-    request.stripWordCount = 1;
-    request.vertexCount = 3;
+    request.faceCount = 1;
+    request.pointCount = 3;
     request.color = firstColor;
-    request.positions = positions;
-    request.normals = NULL;
-    request.coordinates = NULL;
+    request.vertex = positions;
+    request.normal = NULL;
+    request.uv = NULL;
     vertexColors[0] = firstColor;
     vertexColors[1] = secondColor;
     vertexColors[2] = thirdColor;
-    request.vertexColors = vertexColors;
+    request.vertexColor = vertexColors;
     SDF_VU0_COPYVECTOR(positions[0], first);
     SDF_VU0_COPYVECTOR(positions[1], second);
     SDF_VU0_COPYVECTOR(positions[2], third);
@@ -862,7 +862,7 @@ void uiDrawActiveSurfaceRegion(s32 surfaceIndex) {
     sdfBuildMaskedFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
     sdfDrawTagLinkRefGif(list, (u32)texture);
     {
-        SdfPoolNode *surface = &sdfGrOtTable[surfaceIndex];
+        sdfGrOt_t *surface = &sdfGrOtTable[surfaceIndex];
         surface->append(surface, list);
     }
 }
@@ -875,7 +875,7 @@ void sdfDispatchSurfaceWithPreparedTexturePacket(s32 surfaceIndex) {
     sdfBuildFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
     sdfDrawTagLinkRefGif(list, (u32)texture);
     {
-        SdfPoolNode *surface = &sdfGrOtTable[surfaceIndex];
+        sdfGrOt_t *surface = &sdfGrOtTable[surfaceIndex];
         surface->append(surface, list);
     }
 }

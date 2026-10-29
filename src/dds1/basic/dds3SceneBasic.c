@@ -17,9 +17,9 @@ extern void fldReleaseFieldResources(void);
 /* Release globally owned field resources before clearing their borrowed alias.
  * The scene resource handle/address are released separately. */
 void dds3SceneBasicReleaseFieldResources(dds3Basic_t *worldNode) {
-    EvtWorldTable *worldData;
+    evtWorldTable_t *worldData;
 
-    worldData = (EvtWorldTable *)worldNode->data;
+    worldData = (evtWorldTable_t *)worldNode->workdata;
     fldReleaseFieldResources();
     worldData->fieldResourceHandle = NULL;
 }
@@ -28,11 +28,11 @@ void dds3SceneBasicReleaseFieldResources(dds3Basic_t *worldNode) {
  * before loading, so failure leaves no scene script attached. */
 Dds3SceneScriptAttachResult evtLoadSceneResourceFrom(
     dds3Basic_t *worldNode, const char *resourceName) {
-    EvtWorldTable *worldData;
+    evtWorldTable_t *worldData;
     struct sdfMemHandle_t *resourceHandle;
     u32 resolvedAddress;
 
-    worldData = (EvtWorldTable *)worldNode->data;
+    worldData = (evtWorldTable_t *)worldNode->workdata;
     if (resourceName == NULL) {
         return DDS3_SCENE_SCRIPT_ATTACH_FAILED;
     }
@@ -57,7 +57,7 @@ Dds3SceneScriptAttachResult dds3SceneBasicLoadScriptFile_FromMem(
     dds3Basic_t *worldNode, struct sdfMemHandle_t *resourceHandle) {
     Dds3SceneScriptAttachResult notAttachedStatus = DDS3_SCENE_SCRIPT_ATTACH_FAILED;
     void *resourceAddress;
-    EvtWorldTable *worldData = (EvtWorldTable *)worldNode->data;
+    evtWorldTable_t *worldData = (evtWorldTable_t *)worldNode->workdata;
 
     if (resourceHandle == NULL) {
         return notAttachedStatus;
@@ -77,7 +77,7 @@ Dds3SceneScriptAttachResult dds3SceneBasicLoadScriptFile_FromMem(
 /* Release a stored allocation handle when present, then always clear both
  * handle and resolved address. Safe for an already-cleared resource state. */
 void dds3SceneBasicReleaseScriptFile(dds3Basic_t *worldNode) {
-    EvtWorldTable *worldData = (EvtWorldTable *)worldNode->data;
+    evtWorldTable_t *worldData = (evtWorldTable_t *)worldNode->workdata;
 
     if (worldData->sceneResourceHandle != 0) {
         sdfMemFreeDirect(worldData->sceneResourceHandle);
@@ -90,7 +90,7 @@ void dds3SceneBasicReleaseScriptFile(dds3Basic_t *worldNode) {
  * mutate the scene or release its resource. Retail's beqz/b exit merge stays
  * asm because it has no plain-C shape. */
 dds3ProcessID_t *evtStartSceneResourceTask(const dds3Basic_t *worldNode, const char *taskName) {
-    const EvtWorldTable *worldData = worldNode->data;
+    const evtWorldTable_t *worldData = worldNode->workdata;
     const struct BfFlw0Header *sceneScript = worldData->sceneScript;
     ScrProcedureIndex scriptIndex;
 

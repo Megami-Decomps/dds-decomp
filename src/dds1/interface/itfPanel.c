@@ -68,7 +68,7 @@ void itfPnlSetColor(itfpanel_t *panel, s32 redValue, s32 greenValue, s32 blueVal
 #include "sdf_packet_alloc.h"
 
 /* Build the panel list and append it to the SDK draw-surface pool. */
-void itfPnlDraw(itfpanel_t *panel, SdfPoolNode *packetOwner) {
+void itfPnlDraw(itfpanel_t *panel, sdfGrOt_t *packetOwner) {
     sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(ITF_PANEL_PACKET_LIST_BYTES);
 
     sdfDrawTagInit(packetList);

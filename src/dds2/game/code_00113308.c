@@ -59,15 +59,15 @@ extern void dds3UnitObjectBasicEL_LinkFree(dds3Basic_t *object);
 
 
 u32 dds3GetStatusUnitObjectBasic(dds3Basic_t *object) {
-    return (u32)((EffectObjectData *)object->data)->handle;
+    return (u32)((EffectObjectData *)object->workdata)->handle;
 }
 
 evtUnitHandle_t *dds3GetUnitHandleObjectBasic(dds3Basic_t *object) {
-    return ((EffectObjectData *)object->data)->transitionWork;
+    return ((EffectObjectData *)object->workdata)->transitionWork;
 }
 
 void dds3UnitObjectBasicSetOt(dds3Basic_t *object, s32 value) {
-    ((EffectObjectData *)object->data)->followParameterIndex = value;
+    ((EffectObjectData *)object->workdata)->followParameterIndex = value;
 }
 
 /* Return the signed shortest turn from one degree angle to another.
@@ -101,7 +101,7 @@ extern f32 EulerAngleAxisY(void);
 #define EFFECT_HEADING_RADIANS_TO_DEGREES 57.29577637f
 
 void effObjStepFollowAngleTowardPosition(dds3Basic_t *obj, const f32 *targetPosition) {
-    EffectObjectData *data = obj->data;
+    EffectObjectData *data = obj->workdata;
     f32 position[4];
     f32 currentAngle = data->angle;
     f32 heading;
@@ -148,7 +148,7 @@ void effObjStepFollowAngleTowardPosition(dds3Basic_t *obj, const f32 *targetPosi
 
 
 void effObjStepFollowAngleTowardZero(dds3Basic_t *object) {
-    EffectObjectData *data = object->data;
+    EffectObjectData *data = object->workdata;
     f32 angle;
     f32 value;
     f32 step;
@@ -181,7 +181,7 @@ void effObjStepFollowAngleTowardZero(dds3Basic_t *object) {
 void evtArmEffectObjectPendingValue(dds3Basic_t *object, s32 value) {
     EffectObjectData *data;
 
-    data = object->data;
+    data = object->workdata;
     dds3ObjectBaseOnFlag(object, 0x2000);
     data->pendingTargetKey = value;
     data->angleReturnDelayFrames = 0;
@@ -190,7 +190,7 @@ void evtArmEffectObjectPendingValue(dds3Basic_t *object, s32 value) {
 void evtResetObjectPendingValue(dds3Basic_t *object) {
     EffectObjectData *data;
 
-    data = object->data;
+    data = object->workdata;
     data->angleReturnDelayFrames = 0x1e;
     data->pendingTargetKey = 0;
 }
@@ -202,9 +202,9 @@ s32 effObjInitializeFollowModelData(dds3Basic_t *object) {
 
     dds3InitPoseSet(object);
     work = sdfChipAllocDirect(sizeof(EffectObjectData));
-    object->data = work;
+    object->workdata = work;
     memset(work, 0, sizeof(EffectObjectData));
-    data = object->data;
+    data = object->workdata;
     data->modelHolder = dds3CreateSlotResourceState(object);
     data->transitionWork = NULL;
     data->activeId = -1;
@@ -228,7 +228,7 @@ void dds3UnitObjectBasicDestructor(dds3Basic_t *object) {
 
     dds3UnitObjectBasicEL_LinkFree(object);
     dds3FreePoseSet(object);
-    data = object->data;
+    data = object->workdata;
     if (data->handle != -1) {
         data->handle = -1;
     }
@@ -238,7 +238,7 @@ void dds3UnitObjectBasicDestructor(dds3Basic_t *object) {
     }
     dds3ObjectBaseFreeModelHandle(object);
     dds3ObjectBaseFreeControlWorkData(data->modelHolder);
-    sdfChipFreeDirect(object->data);
+    sdfChipFreeDirect(object->workdata);
 }
 
 typedef struct EffVec4 {
@@ -268,19 +268,19 @@ s32 effUpdateFollowModelTransform(dds3Basic_t *obj) {
     void *model;
     s32 flag;
 
-    data = obj->data;
+    data = obj->workdata;
     flag = 0;
     if (data->transitionWork != 0) {
         dds3BackupPoseSet(&node);
         if (evtUpdateUnitMotion(&node, obj) != EVT_UNIT_MOTION_STEP_NOT_APPLIED) {
             dds3GetSclPoseSetMCR(obj, (u128 *)node.scale);
             dds3AddRotPoseSet(obj, (u128 *)node.rotation);
-            dds3GetPosPoseSetMCR(obj, (u128 *)node.position);
+            dds3GetPosPoseSetMCR(obj, (u128 *)node.pos);
         }
     }
     model = (void *)data->modelHolder->resourceHandle;
-    if (model != NULL && dds3CheckPoseSetFlag(obj->inner, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) == 1) {
-        dds3OffPoseSetFlag(obj->inner, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
+    if (model != NULL && dds3CheckPoseSetFlag(obj->poseset, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) == 1) {
+        dds3OffPoseSetFlag(obj->poseset, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
         if (data->transitionWork != 0) {
             if (data->transitionWork->motionState == EVT_UNIT_MOTION_STATE_IDLE ||
                 data->transitionWork->motionState == EVT_UNIT_MOTION_STATE_VECTOR) {
@@ -292,7 +292,7 @@ s32 effUpdateFollowModelTransform(dds3Basic_t *obj) {
                 flag = 1;
             }
         }
-        SDF_VU0_LOADVECTOR(&obj->inner->scale[0]);
+        SDF_VU0_LOADVECTOR(&obj->poseset->scale[0]);
         if (data->transitionWork != 0 && flag != 0) {
             SDF_VU0_COPYVECTOR_A_TO_B();
             SDF_VU0_LOADIDENTITYVECTOR();
@@ -303,7 +303,7 @@ s32 effUpdateFollowModelTransform(dds3Basic_t *obj) {
             SDF_VU0_ADDVECTOR();
         }
         mdlSetScale(model);
-        SDF_VU0_LOADVECTOR(&obj->inner->rotation[0]);
+        SDF_VU0_LOADVECTOR(&obj->poseset->rotation[0]);
         Normalize();
         if (data->transitionWork != 0 && flag != 0) {
             SDF_VU0_COPYVECTOR_A_TO_B();
@@ -316,15 +316,15 @@ s32 effUpdateFollowModelTransform(dds3Basic_t *obj) {
             effMiscQuatMultiplyVU();
         }
         mdlSetRotate(model);
-        if (dds3CheckPoseSetFlag(obj->inner, OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION)) {
-            SDF_VU0_LOADVECTOR(&obj->inner->smoothedPosition[0]);
+        if (dds3CheckPoseSetFlag(obj->poseset, OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION)) {
+            SDF_VU0_LOADVECTOR(&obj->poseset->smoothedPosition[0]);
             SDF_VU0_VECTOR_W_SET_ONE();
         } else {
-            SDF_VU0_LOADVECTOR(&obj->inner->position[0]);
+            SDF_VU0_LOADVECTOR(&obj->poseset->pos[0]);
             SDF_VU0_VECTOR_W_SET_ONE();
         }
         mdlSetPosition(model);
-        dds3SetRadiusPoseSet(obj->inner);
+        dds3SetRadiusPoseSet(obj->poseset);
     }
     if (!dds3ObjectBaseCheckFlag(obj, 0x100)) {
         dds3UnitObjectBasicEL_Link(obj);
@@ -341,12 +341,12 @@ s32 effUpdateFollowModelTransform(dds3Basic_t *obj) {
     return 1;
 }
 
-extern void effObjApplyTransformParameters(SdfPoolNode **, dds3Basic_t *);
+extern void effObjApplyTransformParameters(sdfGrOt_t **, dds3Basic_t *);
 extern void fldDrawEffectObjectShadow(dds3Basic_t *);
-extern void fldDrawShadowDisc(f32, f32, f32, f32, s32);
-extern SdfPoolNode *kwlnSceneSurfaceSets[13][4];
+extern void dds3DrawUnitObjectShadow(f32, f32, f32, f32, s32);
+extern sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
 
-s32 dds3UpdateEffectObjectFollowParameters(dds3Basic_t *obj) {
+s32 dds3UnitObjectBasicDrawProcedure(dds3Basic_t *obj) {
     f32 vec[4];
     evtUnitHandle_t *target;
     dds3ModelHandle_t *config;
@@ -362,10 +362,10 @@ s32 dds3UpdateEffectObjectFollowParameters(dds3Basic_t *obj) {
     if (dds3ObjectBaseCheckFlag(obj, 0x200) && target != NULL && !(target->owner->flags & MDL_SKIP_TRANSFORMS)) {
         fldDrawEffectObjectShadow(obj);
     }
-    if (((EffectObjectData *)obj->data)->followParameterIndex == -1) {
+    if (((EffectObjectData *)obj->workdata)->followParameterIndex == -1) {
         effObjApplyTransformParameters(kwlnSceneSurfaceSets[0], obj);
     } else {
-        effObjApplyTransformParameters(kwlnSceneSurfaceSets[((EffectObjectData *)obj->data)->followParameterIndex], obj);
+        effObjApplyTransformParameters(kwlnSceneSurfaceSets[((EffectObjectData *)obj->workdata)->followParameterIndex], obj);
     }
     if (!dds3ObjectBaseCheckFlag(obj, 0x400)) {
         return 1;
@@ -385,22 +385,22 @@ s32 dds3UpdateEffectObjectFollowParameters(dds3Basic_t *obj) {
     pickMode = dds3ObjectBaseCheckFlag(obj, 0x8000) != 0;
     if (sdfModelGetMarkPos(target->owner->inner, 0)) {
         SDF_VU0_STOREVECTOR(vec);
-        vec[1] = pickMode == 1 ? target->shadowY : obj->inner->position[1];
-        fldDrawShadowDisc(vec[0], vec[1], vec[2], obj->inner->radius, level);
+        vec[1] = pickMode == 1 ? target->shadowY : obj->poseset->pos[1];
+        dds3DrawUnitObjectShadow(vec[0], vec[1], vec[2], obj->poseset->radius, level);
     } else {
-        if (dds3CheckPoseSetFlag(obj->inner, OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION)) {
-            vec[0] = obj->inner->smoothedPosition[0];
-            vec[1] = obj->inner->smoothedPosition[1];
-            vec[2] = obj->inner->smoothedPosition[2];
+        if (dds3CheckPoseSetFlag(obj->poseset, OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION)) {
+            vec[0] = obj->poseset->smoothedPosition[0];
+            vec[1] = obj->poseset->smoothedPosition[1];
+            vec[2] = obj->poseset->smoothedPosition[2];
         } else {
-            vec[0] = obj->inner->position[0];
-            vec[1] = obj->inner->position[1];
-            vec[2] = obj->inner->position[2];
+            vec[0] = obj->poseset->pos[0];
+            vec[1] = obj->poseset->pos[1];
+            vec[2] = obj->poseset->pos[2];
         }
         if (pickMode == 1) {
             vec[1] = target->shadowY;
         }
-        fldDrawShadowDisc(vec[0], vec[1], vec[2], obj->inner->radius, level);
+        dds3DrawUnitObjectShadow(vec[0], vec[1], vec[2], obj->poseset->radius, level);
     }
     return 1;
 }
@@ -411,7 +411,7 @@ extern void dds3LinkLightObjectToUnitObject(EffectValueObject *value, dds3Basic_
 void dds3UnitObjectBasicEL_LinkFree(dds3Basic_t *object) {
     EffectObjectData *data;
 
-    data = object->data;
+    data = object->workdata;
     if (data->activeId != -1) {
         dds3UnlinkLightObjectFromUnitObject(object, 10);
         data->activeId = 0xffffffff;
@@ -421,7 +421,7 @@ void dds3UnitObjectBasicEL_LinkFree(dds3Basic_t *object) {
 struct WorldIndexNode;
 extern s32 dds3ComparePosPoseSet2(f32 *, f32 *);
 void dds3UnitObjectBasicEL_Link(dds3Basic_t *object) {
-    EffectObjectData *data = object->data;
+    EffectObjectData *data = object->workdata;
     dds3Basic_t *world = dds3GetControlScene();
     struct WorldIndexNode *list;
     EffectValueObject *other;
@@ -443,7 +443,7 @@ void dds3UnitObjectBasicEL_Link(dds3Basic_t *object) {
             other = (EffectValueObject *)dds3GetBasicArray((dds3BasicArrayHandle_t *)list);
             otherData = other->data;
             if (!(otherData->flags & 4) &&
-                dds3ComparePosPoseSet2(((f32 *)object->inner), other->source) == 0 &&
+                dds3ComparePosPoseSet2(((f32 *)object->poseset), other->source) == 0 &&
                 data->activeId == other->valueId) {
                 dds3UnlinkLightObjectFromUnitObject(object, 10);
                 data->activeId = -1;
@@ -461,7 +461,7 @@ void dds3UnitObjectBasicEL_Link(dds3Basic_t *object) {
             other = (EffectValueObject *)dds3GetBasicArray((dds3BasicArrayHandle_t *)list);
             otherData = other->data;
             if (!(otherData->flags & 4) &&
-                dds3ComparePosPoseSet2(((f32 *)object->inner), other->source) != 0) {
+                dds3ComparePosPoseSet2(((f32 *)object->poseset), other->source) != 0) {
                 goto attach_transition;
             }
         } while (dds3SetNextBasicArray((dds3BasicArrayHandle_t *)list) != DDS3_BASIC_ARRAY_CURSOR_EXHAUSTED);
@@ -478,7 +478,7 @@ attach_transition:
 }
 
 dds3ObjectBaseControlWorkData_t *dds3MatterObjectBasicGetControlWorkData(const dds3Basic_t *object) {
-    const EffectTransformData *data = object->data;
+    const EffectTransformData *data = object->workdata;
 
     return data->baseControlWorkData;
 }
@@ -496,11 +496,11 @@ dds3Basic_t *dds3AddMatterObjectBasic(s32 key, f32 *offset, f32 *rotation) {
     dds3ObjectBaseCreateMover(obj);
     dds3SetRotPoseSet(obj, (u128 *)rotation);
     dds3SetPosPoseSet(obj, (u128 *)zero);
-    dds3SetRadiusPoseSet(obj->inner);
-    ((EffectTransformData *)obj->data)->offset[0] = offset[0];
-    ((EffectTransformData *)obj->data)->offset[1] = offset[1];
-    ((EffectTransformData *)obj->data)->offset[2] = offset[2];
-    ((EffectTransformData *)obj->data)->offset[3] = offset[3];
+    dds3SetRadiusPoseSet(obj->poseset);
+    ((EffectTransformData *)obj->workdata)->offset[0] = offset[0];
+    ((EffectTransformData *)obj->workdata)->offset[1] = offset[1];
+    ((EffectTransformData *)obj->workdata)->offset[2] = offset[2];
+    ((EffectTransformData *)obj->workdata)->offset[3] = offset[3];
     return obj;
 }
 
@@ -510,11 +510,11 @@ void dds3DeleteMatterObjectBasic(dds3Basic_t *node) {
 }
 
 void dds3MatterObjectBasicSetOt(dds3Basic_t *object, s32 activeId) {
-    ((EffectTransformData *)object->data)->activeId = activeId;
+    ((EffectTransformData *)object->workdata)->activeId = activeId;
 }
 
 void dds3MatterObjectBasicSetHojiID(dds3Basic_t *object, u32 roomNumber) {
-    ((EffectTransformData *)object->data)->roomNumber = roomNumber;
+    ((EffectTransformData *)object->workdata)->roomNumber = roomNumber;
 }
 
 u32 dds3MatterObjectBasicGetHojiID(u32 id) {
@@ -524,7 +524,7 @@ u32 dds3MatterObjectBasicGetHojiID(u32 id) {
 
     world = dds3GetControlScene();
     node = dds3SearchSceneBasic(world, id, 6);
-    data = (EffectTransformData *)node->data;
+    data = (EffectTransformData *)node->workdata;
     return data->roomNumber;
 }
 
@@ -532,13 +532,13 @@ u32 dds3MatterObjectBasicGetHojiID(u32 id) {
 
 /* Payload word 8 is interpreted by object kind, not always as a pointer. */
 void dds3MatterObjectBasicSetAlpMode(dds3Basic_t *object, u32 value) {
-    u32 *payload = object->data;
+    u32 *payload = object->workdata;
 
     payload[2] = value;
 }
 
 u32 dds3MatterObjectBasicGetAlpMode(const dds3Basic_t *object) {
-    const u32 *payload = object->data;
+    const u32 *payload = object->workdata;
 
     return payload[2];
 }
@@ -553,9 +553,9 @@ s32 dds3MatterObjectBasicConstructor(dds3Basic_t *object) {
 
     dds3InitPoseSet(object);
     work = sdfChipAllocDirect(sizeof(EffectTransformData));
-    object->data = work;
+    object->workdata = work;
     memset(work, 0, sizeof(EffectTransformData));
-    data = object->data;
+    data = object->workdata;
     data->baseControlWorkData = dds3CreateSlotResourceState(object);
     data->roomNumber = 0;
     data->opacityMode = EFFECT_OPACITY_MODE_INITIAL;
@@ -576,7 +576,7 @@ void dds3MatterObjectBasicDestructor(dds3Basic_t *object) {
     EffectTransformData *data;
 
     dds3FreePoseSet(object);
-    data = object->data;
+    data = object->workdata;
     dds3ObjectBaseFreeControlWorkData(data->baseControlWorkData);
     sdfChipFreeDirect(data);
 }
@@ -587,7 +587,7 @@ INCLUDE_RODATA(const s32, "game/code_00113308", D_004128A0);
 INCLUDE_RODATA(const s32, "game/code_00113308", D_004128B0);
 
 s32 effUpdateFadingModelTransform(dds3Basic_t *object) {
-    EffectTransformData *data = object->data;
+    EffectTransformData *data = object->workdata;
     sdfModelRootNode_t *model;
     u32 mode = data->opacityMode;
     s32 alpha;
@@ -706,7 +706,7 @@ s32 effUpdateFadingModelTransform(dds3Basic_t *object) {
 
     model = (sdfModelRootNode_t *)dds3ObjectBaseGetModelHandle(object);
     if (model != NULL) {
-        dds3OffPoseSetFlag(object->inner, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
+        dds3OffPoseSetFlag(object->poseset, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
         dds3GetRotPoseSet(object);
         SDF_VU0_STOREVECTOR(model->rotationQuaternion);
         dds3GetTMPoseSet(object);
@@ -716,15 +716,15 @@ s32 effUpdateFadingModelTransform(dds3Basic_t *object) {
             f32 x = coordinates[0];
             f32 y = coordinates[1];
             f32 z = coordinates[2];
-            inner = object->inner;
-            inner->position[0] = data->offset[0] + data->position[0] + x;
-            inner->position[1] = data->offset[1] + data->position[1] + y;
-            inner->position[2] = data->offset[2] + data->position[2] + z;
+            inner = object->poseset;
+            inner->pos[0] = data->offset[0] + data->position[0] + x;
+            inner->pos[1] = data->offset[1] + data->position[1] + y;
+            inner->pos[2] = data->offset[2] + data->position[2] + z;
         } else {
-            inner = object->inner;
-            inner->position[0] = data->offset[0] + data->position[0];
-            inner->position[1] = data->offset[1] + data->position[1];
-            inner->position[2] = data->offset[2] + data->position[2];
+            inner = object->poseset;
+            inner->pos[0] = data->offset[0] + data->position[0];
+            inner->pos[1] = data->offset[1] + data->position[1];
+            inner->pos[2] = data->offset[2] + data->position[2];
         }
         SDF_VU0_SET_ROW3();
         VU0_STORE_MATRIX(model->matrix);
@@ -747,7 +747,7 @@ s32 effObjSubmitTransformOpacityPasses(dds3Basic_t *object) {
     if (effObjOpacityPassEnabled == 0) {
         return 1;
     }
-    data = object->data;
+    data = object->workdata;
     if (data->activeId == -1) {
         rsetOtOfs(0x27);
         rsetTest(1, 5, 0x60, 1, 0, 0, 1, 2);
@@ -784,12 +784,12 @@ s32 effObjSubmitTransformOpacityPasses(dds3Basic_t *object) {
 
 /* Refresh the object's stored xyz from the source vector. */
 void dds3RefreshStoredVec3(dds3Basic_t *object) {
-    dds3PoseSet_t *source = object->inner;
-    EffectTransformData *destination = object->data;
+    dds3PoseSet_t *source = object->poseset;
+    EffectTransformData *destination = object->workdata;
 
-    destination->offset[0] = source->position[0];
-    destination->offset[1] = source->position[1];
-    destination->offset[2] = source->position[2];
+    destination->offset[0] = source->pos[0];
+    destination->offset[1] = source->pos[1];
+    destination->offset[2] = source->pos[2];
 }
 
 
@@ -856,9 +856,9 @@ s32 dds3EffectObjectBasicConstructor(dds3Basic_t *obj) {
     EffectDependencyState *data;
 
     dds3InitPoseSet(obj);
-    obj->data = sdfChipAllocDirect(0x50);
-    memset(obj->data, 0, 0x50);
-    data = obj->data;
+    obj->workdata = sdfChipAllocDirect(0x50);
+    memset(obj->workdata, 0, 0x50);
+    data = obj->workdata;
     data->objectHandle = dds3CreateSlotResourceState(obj);
     dds3ObjectBaseOnFlag(obj, 0x60);
     return 1;

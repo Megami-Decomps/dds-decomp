@@ -505,12 +505,12 @@ extern s32 gFldInf_WpExit;
 
 #include "fld_title_banner_menu.h"
 
-extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
 
 
 FldTitleBannerResult fldResolvePendingTitleBanner(void) {
     FldTitleBannerMenu *menu;
-    FldAreaWork *area;
+    fldAreaWork_t *area;
 
     if (fldProcCampChk() != FLD_CAMP_CHECK_STATE_ENCOUNTER_FLAG_SET) {
         return FLD_TITLE_BANNER_UNRESOLVED;
@@ -1251,7 +1251,7 @@ void fldAutoMapDrawMdl1(sdfModelRootNode_t *emitter, f32 x, f32 y, f32 z) {
     SDF_VU0_STOREVECTOR(emitter->matrix[3]);
     sdfModelMakeLocalTm(handle);
     sdfModelEvalTm(emitter);
-    sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, kwlnSceneSurfaceSets[11], emitter);
+    sdfBuildModelPacketsVia(sdfModelLinkOt, kwlnSceneSurfaceSets[11], emitter);
 }
 
 extern void DrwSprite2D(s32, s32, s32, s32, s32, s32, s32, s32,
@@ -1350,7 +1350,7 @@ extern FldProjectedSprite D_0039A0E0[];
 
 extern f32 D_00436280;
 extern sdfTexHandle_t *D_00389978;
-extern SdfPoolNode *fldDrawGetOt(void);
+extern sdfGrOt_t *fldDrawGetOt(void);
 /* Draw a minimap icon from the icon table: its textured quad rotated about its
  * anchor, squashed to the map's tilt and placed at the map position, the
  * player's (index 1) pulsing in alpha. DDS1's func_001428C0 with DDS2's
@@ -1369,8 +1369,8 @@ void func_00145A08(s32 index, f32 x, f32 y, f32 rotation) {
     f32 xOffset, yOffset;
     u32 color;
     sdfDrawTag_t *packetList;
-    SdfPoolNode *appendTarget;
-    SdfPoolNode *drawSurface;
+    sdfGrOt_t *appendTarget;
+    sdfGrOt_t *drawSurface;
 
     if (index == 1) {
         color = (u32)(s32)(sdfSin(D_00436280) * 64.0f) << 24;
@@ -1513,7 +1513,7 @@ extern FldProjectedSprite D_0039A0E0[];
 
 extern f32 D_00436284;
 extern sdfTexHandle_t *D_00389978;
-extern SdfPoolNode *fldDrawGetOt(void);
+extern sdfGrOt_t *fldDrawGetOt(void);
 /* Draw a minimap icon from the icon table with an alpha: as func_00145A08,
  * but the alpha is given, and the player's (index 1) pulses it, its pulse
  * scaled by the alpha out of 128 and clamped to a byte. Upstream: INCLUDE_ASM
@@ -1531,8 +1531,8 @@ void func_00145D48(s32 index, s32 alpha, f32 x, f32 y, f32 rotation) {
     f32 xOffset, yOffset;
     u32 color;
     sdfDrawTag_t *packetList;
-    SdfPoolNode *appendTarget;
-    SdfPoolNode *drawSurface;
+    sdfGrOt_t *appendTarget;
+    sdfGrOt_t *drawSurface;
 
     if (index == 1) {
         s32 pulsed = (s32)((u32)(sdfSin(D_00436284) * 64.0f) + 0x80) * alpha / 128;
@@ -2370,7 +2370,7 @@ extern s32 sdfGrAllocPacketBuff(s32);
 extern void sdfDrawTagInit(sdfDrawTag_t *);
 extern SdfTextureDrawPacket *sdf2DLinkTexPacket(sdfDrawTag_t *, sdfTexHandle_t *, s32);
 extern void SetRotateMatrixY(f32);
-extern SdfPoolNode *fldDrawGetOt(void);
+extern sdfGrOt_t *fldDrawGetOt(void);
 extern sdfTexHandle_t *D_0044F7F0[];
 
 extern void sdfPrimLinkFt4(sdfDrawTag_t *list, s32 color, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 x1, s32 y1, s32 u1, s32 v1, s32 x2, s32 y2, s32 u2, s32 v2, s32 x3, s32 y3, s32 u3, s32 v3, s32 depth, s32 (*alloc)(s32));
@@ -2935,7 +2935,7 @@ extern KwlnDrawVectorParams kwlnOverlayFrustumParameters;
  * textures, centre the camera on the floor's entry point and set the
  * scene fog and camera offsets. DDS2 loads four map textures. */
 void func_00149A00(void) {
-    FldAreaWork *cam;
+    fldAreaWork_t *cam;
     f32 focus[4];
     f32 eye[4];
     SdfMathVector4 up;
@@ -3097,7 +3097,7 @@ extern s32 D_00436268;
 /* Enters the field camera state for a fresh scene: releases the resource slots and
  * centers the camera on the scene's entry point. */
 void fldEnterSceneCamera(void) {
-    FldAreaWork *cam = &fldGlobalBase;
+    fldAreaWork_t *cam = &fldGlobalBase;
     f32 focus[4];
     f32 eye[4];
     SdfMathVector4 up;
@@ -3150,7 +3150,7 @@ void fldEnterSceneCamera(void) {
 /* Loads the scene's models into the resource slots, then centers the camera on the
  * scene's entry point. */
 void fldLoadSceneModelsAndCamera(void) {
-    FldAreaWork *cam;
+    fldAreaWork_t *cam;
     const FldSceneRecord *rec;
     f32 focus[4];
     f32 eye[4];
@@ -3209,7 +3209,7 @@ void fldReleaseMenuSlotsAfterWait(void) {
     fldReleaseSceneDevSlotsAndTextures();
 }
 
-FldSceneReadyState fldGetSceneReadyFlag(void) {
+FldSceneReadyState fldAutoMapChkMode(void) {
     return AutoMapSeq;
 }
 
@@ -3223,7 +3223,7 @@ void fldUpdateAutomapInput(void) {
     f32 minX, maxZ, maxX, minZ;
     s32 closeRequested = 0;
 
-    if (fldGetSceneReadyFlag() == FLD_SCENE_NOT_READY) {
+    if (fldAutoMapChkMode() == FLD_SCENE_NOT_READY) {
         return;
     }
     if (D_003899E0[0] != 0) {
@@ -3378,7 +3378,7 @@ void fldUpdateAutomapInput(void) {
 
 /* Re-centers the scene camera on the current scene's entry point. */
 void fldCenterCameraOnEntry(void) {
-    FldAreaWork *cam = &fldGlobalBase;
+    fldAreaWork_t *cam = &fldGlobalBase;
     f32 focus[4];
     f32 eye[4];
     f32 up[4] = {0.0f, 0.0f, -1.0f, 1.0f};
@@ -3838,7 +3838,7 @@ void fldUpdateIndexedResourceEffectPosition(void) {
     memset(position, 0, sizeof(position));
     position[3] = 1.0f;
     if (fldIndexedResourceEffect != 0) {
-        FldAreaWork *state = &fldGlobalBase;
+        fldAreaWork_t *state = &fldGlobalBase;
         position[0] = state->x;
         position[1] = state->y;
         position[2] = state->z;
@@ -4114,7 +4114,7 @@ void fldInitializeHuntSparkUnit(evtUnitHandle_t *unit) {
 
     object = unit->effObj;
     resource = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle(object);
-    SDF_VU0_LOADVECTOR(object->inner->rotation);
+    SDF_VU0_LOADVECTOR(object->poseset->rotation);
     index = D_00389784[0] + 1;
     if (index >= 64) {
         index = 63;
@@ -4929,7 +4929,7 @@ static void placeEffectNode(EffNode *node, f32 *position) {
  * comparison sites retail makes in each branch. */
 void func_0014DEA8(void) {
     f32 position[4];
-    FldAreaWork *area = &fldGlobalBase;
+    fldAreaWork_t *area = &fldGlobalBase;
     s32 i;
 
     memset(position, 0, sizeof(position));
@@ -6075,7 +6075,7 @@ extern void fldTogglePlayerModel(void);
 /* Restores field presentation once an active event finishes, then clears the
  * event latch. An already-cleared latch leaves field resources untouched. */
 void fldFinishEventFieldState(void) {
-    FldAreaWork *work = &fldGlobalBase;
+    fldAreaWork_t *work = &fldGlobalBase;
 
     if (work->specialEventActive != FLD_SPECIAL_EVENT_INACTIVE) {
         D_003899E0[0] = 0;
@@ -6676,7 +6676,7 @@ FieldCoordinateRecord *fldFindMapCell(s16 x, s16 y, s16 z, s16 w) {
 }
 
 void fldCalcTargetDistanceYaw(f32 *distance, f32 *angle) {
-    FldAreaWork *player = &fldGlobalBase;
+    fldAreaWork_t *player = &fldGlobalBase;
     FieldTargetGuideState *target = &fldTargetGuideState;
     f32 dx = player->x - target->position[0];
     f32 dz = player->z - target->position[2];
@@ -7293,29 +7293,29 @@ void fldUpdateTargetGuideEffects(void) {
     dds3SetRotPoseSet(D_00435F1C, (u128 *)rotation);
 
     if (fldTargetGuideState.updateFlags & 0x40) {
-        dds3OnPoseSetFlag(D_00435F1C->inner, 8);
-        PCP_COPY_VECTOR_F32(smoothedPosition, D_00435F1C->inner->smoothedPosition);
+        dds3OnPoseSetFlag(D_00435F1C->poseset, 8);
+        PCP_COPY_VECTOR_F32(smoothedPosition, D_00435F1C->poseset->smoothedPosition);
         if (fabsf(smoothedPosition[0] - position[0]) < 1.0f) {
-            D_00435F1C->inner->smoothedPosition[0] = position[0];
+            D_00435F1C->poseset->smoothedPosition[0] = position[0];
         } else {
-            D_00435F1C->inner->smoothedPosition[0] =
+            D_00435F1C->poseset->smoothedPosition[0] =
                 smoothedPosition[0] + (position[0] - smoothedPosition[0]) / 3.0f;
         }
         if (fabsf(smoothedPosition[1] - position[1]) < 1.0f) {
-            D_00435F1C->inner->smoothedPosition[1] = position[1];
+            D_00435F1C->poseset->smoothedPosition[1] = position[1];
         } else {
-            D_00435F1C->inner->smoothedPosition[1] =
+            D_00435F1C->poseset->smoothedPosition[1] =
                 smoothedPosition[1] + (position[1] - smoothedPosition[1]) / 3.0f;
         }
         if (fabsf(smoothedPosition[2] - position[2]) < 1.0f) {
-            D_00435F1C->inner->smoothedPosition[2] = position[2];
+            D_00435F1C->poseset->smoothedPosition[2] = position[2];
         } else {
-            D_00435F1C->inner->smoothedPosition[2] =
+            D_00435F1C->poseset->smoothedPosition[2] =
                 smoothedPosition[2] + (position[2] - smoothedPosition[2]) / 3.0f;
         }
-        D_00435F1C->inner->smoothedPosition[3] = 1.0f;
+        D_00435F1C->poseset->smoothedPosition[3] = 1.0f;
     } else {
-        dds3OffPoseSetFlag(D_00435F1C->inner, 8);
+        dds3OffPoseSetFlag(D_00435F1C->poseset, 8);
     }
 
     if (fldTargetGuideState.updateFlags & 0x20) {
@@ -7821,9 +7821,9 @@ void fldCreateGrippedUnitMarker(s32 gridX, s32 gridY, s32 slot) {
         scale[0] = 1.0f;
         scale[1] = 0.5f;
         scale[2] = 1.0f;
-        PCP_COPY_VECTOR_F32(object->inner->position, position);
-        PCP_COPY_VECTOR_F32(object->inner->smoothedPosition, position);
-        PCP_COPY_VECTOR_F32(object->inner->rotation, rotation);
+        PCP_COPY_VECTOR_F32(object->poseset->pos, position);
+        PCP_COPY_VECTOR_F32(object->poseset->smoothedPosition, position);
+        PCP_COPY_VECTOR_F32(object->poseset->rotation, rotation);
         dds3SetPosPoseSet(object, (u128 *)position);
         dds3SetRotPoseSet(object, (u128 *)rotation);
         dds3SetSclPoseSet(object, (u128 *)scale);
@@ -7907,8 +7907,8 @@ void fldCreateChaseCameraObject(void) {
     position[1] = 0.0f;
     position[2] = 800.0f;
     object = D_00435F1C;
-    inner = object->inner;
-    PCP_COPY_VECTOR_F32(inner->position, position);
+    inner = object->poseset;
+    PCP_COPY_VECTOR_F32(inner->pos, position);
     PCP_COPY_VECTOR_F32(inner->smoothedPosition, position);
     PCP_COPY_VECTOR_F32(inner->rotation, rotation);
     dds3SetPosPoseSet(object, (u128 *)position);
@@ -8087,7 +8087,7 @@ INCLUDE_SDATA(const s32, "game/code_001442D0", D_004362C4);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", fldNpcModelTable);
 
-INCLUDE_SDATA(struct EffNode * const, "game/code_001442D0", fldAreaDamageEffect);
+INCLUDE_SDATA(const s32, "game/code_001442D0", fldAreaDamageEffect);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", fldAreaDamageEffectPlaced);
 
@@ -8101,13 +8101,13 @@ INCLUDE_SDATA(const s32, "game/code_001442D0", D_004362E0);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_004362E4);
 
-INCLUDE_SDATA(EffNode *, "game/code_001442D0", D_004362E8);
+INCLUDE_SDATA(const s32, "game/code_001442D0", D_004362E8);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_004362EC);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_004362F0);
 
-INCLUDE_SDATA(EffNode *, "game/code_001442D0", D_004362F4);
+INCLUDE_SDATA(const s32, "game/code_001442D0", D_004362F4);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_004362F8);
 
@@ -8131,11 +8131,11 @@ INCLUDE_SDATA(const s32, "game/code_001442D0", D_0043631C);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", fldTakaraCount);
 
-INCLUDE_SDATA(struct sdfMemHandle_t * const, "game/code_001442D0", fldIndexedResourceHandle);
+INCLUDE_SDATA(const s32, "game/code_001442D0", fldIndexedResourceHandle);
 
-INCLUDE_SDATA(EffNodeDescriptor *, "game/code_001442D0", fldIndexedResourceData);
+INCLUDE_SDATA(const s32, "game/code_001442D0", fldIndexedResourceData);
 
-INCLUDE_SDATA(EffNode *, "game/code_001442D0", fldIndexedResourceEffect);
+INCLUDE_SDATA(const s32, "game/code_001442D0", fldIndexedResourceEffect);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_00436330);
 
@@ -8175,19 +8175,19 @@ INCLUDE_SDATA(const s32, "game/code_001442D0", D_00436378);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_0043637C);
 
-INCLUDE_SDATA(struct sdfMemHandle_t * const, "game/code_001442D0", D_00436380);
+INCLUDE_SDATA(const s32, "game/code_001442D0", D_00436380);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_00436384);
 
-INCLUDE_SDATA(EffNode *, "game/code_001442D0", fldDamEffectNode);
+INCLUDE_SDATA(const s32, "game/code_001442D0", fldDamEffectNode);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", fldDamEffectPositioned);
 
-INCLUDE_SDATA(struct sdfMemHandle_t * const, "game/code_001442D0", D_00436390);
+INCLUDE_SDATA(const s32, "game/code_001442D0", D_00436390);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_00436394);
 
-INCLUDE_SDATA(EffNode *, "game/code_001442D0", fldYukEffectNode);
+INCLUDE_SDATA(const s32, "game/code_001442D0", fldYukEffectNode);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", fldYukEffectPositioned);
 
@@ -8213,7 +8213,7 @@ INCLUDE_SDATA(const s32, "game/code_001442D0", D_004363C0);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_004363C2);
 
-INCLUDE_SDATA(struct sdfMemHandle_t * const, "game/code_001442D0", D_004363C4);
+INCLUDE_SDATA(const s32, "game/code_001442D0", D_004363C4);
 
 INCLUDE_SDATA(const s32, "game/code_001442D0", D_004363C8);
 

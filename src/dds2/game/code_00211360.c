@@ -521,8 +521,6 @@ s32 btlExecuteAiTableAction(ActionStateLink *task, u16 id, u32 packed) {
 INCLUDE_ASM(const s32, "game/code_00211360", btlExecuteAiTableAction);
 #endif
 
-INCLUDE_RODATA(const s32, "game/code_00211360", D_00419A88);
-
 #ifdef NON_MATCHING
 #include "common.h"
 #include "btl_skill_max_api.h"
@@ -738,6 +736,8 @@ s32 btlResolveCommandSlotAndKind(ActionStateLink *task, s32 id, u16 *slot, s32 *
     return 1;
 }
 #else
+INCLUDE_RODATA(const s32, "game/code_00211360", D_00419A88);
+
 INCLUDE_ASM(const s32, "game/code_00211360", btlResolveCommandSlotAndKind);
 #endif
 
@@ -1373,7 +1373,7 @@ s32 btlIsLowHpActionReady(BtlUnit *unit, s32 unused) {
     s32 delayPending = btlAverageLevelsForMaskExcludingStatus20(4) < (u32)(actionTime + BTL_LOW_HP_ACTION_DELAY);
 
     if (context->lowHpActionHold <= 0) {
-        if (delayPending == 0 && unit->partyRecord.hp * BTL_HEALTH_RATE_SCALE / unit->partyRecord.maxHp < BTL_LOW_HP_PERCENT_LIMIT && btlIsGroup400CountAtMost(unit, BTL_LOW_HP_ENEMY_COUNT_LIMIT) != 0) {
+        if (delayPending == 0 && unit->partyRecord.hp * BTL_HEALTH_RATE_SCALE / unit->partyRecord.maxhp < BTL_LOW_HP_PERCENT_LIMIT && btlIsGroup400CountAtMost(unit, BTL_LOW_HP_ENEMY_COUNT_LIMIT) != 0) {
             bucketRoll = btlRollAiBucket();
             conditionMet = bucketRoll < BTL_LOW_HP_BUCKET_LIMIT;
         }

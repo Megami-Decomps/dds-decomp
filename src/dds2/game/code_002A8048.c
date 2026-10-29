@@ -41,8 +41,8 @@ extern s8 dds3PadButtonState[64];
 extern SdfMovieDescriptor mnuMovieViewerDrawDescriptor;
 extern u16 D_00438A90[4];
 extern u16 D_00438FF0;
-extern SdfPoolNode D_003805A8;
-extern SdfPoolNode D_00380708;
+extern sdfGrOt_t D_003805A8;
+extern sdfGrOt_t D_00380708;
 extern char D_0042A428[];
 
 extern KwlnTaskUpdateResult mnuMovieViewer(dds3ProcessID_t *task);

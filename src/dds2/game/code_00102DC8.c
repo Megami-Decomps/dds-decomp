@@ -97,7 +97,7 @@ extern s32 distblurovercnt;
 
 extern s32 ripblurovercnt;
 
-extern SdfPoolNode D_00380708;
+extern sdfGrOt_t D_00380708;
 
 extern dds3ProcessID_t *kwlnDebugGraphTask;
 
@@ -112,13 +112,13 @@ extern s8 dds3PadBitTable[32];
 
 extern s32 kwlnSelectIncompleteResourceAtPageIndex(s32);
 
-extern void kwlnDrawTextureViewerFrame(SdfPoolNode *surface, sdfTexHandle_t *image);
+extern void kwlnDrawTextureViewerFrame(sdfGrOt_t *surface, sdfTexHandle_t *image);
 
-extern SdfPoolNode kwlnPositionedTextSurface;
+extern sdfGrOt_t kwlnPositionedTextSurface;
 
 extern s8 D_0037F53B[];
 
-extern void kwlnTextureAttachTask(SdfPoolNode *surface);
+extern void kwlnTextureAttachTask(sdfGrOt_t *surface);
 
 extern s16 kwlnBackgroundFadeFirstRamp;
 
@@ -998,7 +998,7 @@ extern s32 D_00435CB0;
 
 void kwlnDrawTextureAllocationMapBlock(void *packetList, s32 x, s32 y, sdfGsMemSlice_t *block, u8 mode);
 
-void kwlnDrawTextureViewerFrame(SdfPoolNode *surface, sdfTexHandle_t *image) {
+void kwlnDrawTextureViewerFrame(sdfGrOt_t *surface, sdfTexHandle_t *image) {
     sdfDrawTag_t *packetList;
     s32 counter;
     s32 mode;
@@ -1035,7 +1035,7 @@ void kwlnDrawTextureViewerFrame(SdfPoolNode *surface, sdfTexHandle_t *image) {
 
 /* With a nonempty list, invoke its renderer even when input reports exit.
  * The surface owns the packet submission callback; return input status. */
-s32 kwlnSwapActiveResource(SdfPoolNode *surface) {
+s32 kwlnSwapActiveResource(sdfGrOt_t *surface) {
     s32 inputStatus;
 
     if (sdfTexHandleLink == 0) {
@@ -1161,7 +1161,7 @@ void kwlnDrawTextureListDiagnostic(sdfDrawTag_t *packetList, s32 x, s32 y) {
 }
 
 /* Build an allocation-map packet list and submit it through the surface callback. */
-void kwlnTextureAttachTask(SdfPoolNode *surface) {
+void kwlnTextureAttachTask(sdfGrOt_t *surface) {
     sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(KWLN_DIAG_PACKET_LIST_BYTES);
     sdfDrawTagInit(packetList);
     kwlnDrawTextureListDiagnostic(packetList, 0x7180, 0x79C0);
@@ -1642,7 +1642,7 @@ void dds3DrawDistRipOverError(void) {
 extern s16 kwlnBackgroundFadeFirstRamp; /* the background fade's band ramps */
 extern s16 kwlnBackgroundFadeSecondRamp;
 extern u8 kwlnBackgroundFadeOverlayPackets[]; /* the overlay packet, one per draw buffer */
-extern SdfPoolNode sdfGrOtTable[];
+extern sdfGrOt_t sdfGrOtTable[];
 extern s32 kwlnFadeIsBackgroundOverlayActive(void);
 
 #define KWLN_FADE_OVERLAY_SURFACE 92
@@ -1693,7 +1693,7 @@ void kwlnQueueBackgroundFadeOverlayPacket(void) {
     u32 bottom = KWLN_OVERLAY_BOTTOM;
     u64 color;
     sdfDrawTag_t *packets;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
 
     if (overlayAlpha >= KWLN_FADE_MAX_ALPHA) {
         return;

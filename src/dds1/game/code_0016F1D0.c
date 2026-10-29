@@ -57,16 +57,16 @@ extern f32 effPCPFlashPolyRingExpHVertex[];
 
 
 
-extern EffPacketParams effRecordPoolDrawParams[];
+extern sdf3DPrimPolyParm_t effRecordPoolDrawParams[];
 extern u32 effFanPoolTriangleIndices[];
-extern SdfPoolNode *effScaledFanDrawSurfaces[];
-extern SdfPoolNode *effTransformedFanDrawSurfaces[];
-extern SdfPoolNode *effTrianglePoolDrawSurfaces[];
-extern SdfPoolNode *effQuadPoolDrawSurfaces[];
+extern sdfGrOt_t *effScaledFanDrawSurfaces[];
+extern sdfGrOt_t *effTransformedFanDrawSurfaces[];
+extern sdfGrOt_t *effTrianglePoolDrawSurfaces[];
+extern sdfGrOt_t *effQuadPoolDrawSurfaces[];
 extern u32 effQuadPoolTriangleIndices[];
-extern SdfPoolNode D_00325248;
+extern sdfGrOt_t D_00325248;
 #include "sdf_packet_alloc.h"
-extern void *effPkt3DPrimMakePoly(EffPacketParams *);
+extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *);
 
 
 extern dds3FlashPolyList_t *dds3FlashPolyListHCreate(u32 count);
@@ -384,7 +384,7 @@ dds3FlashPolyList_t *dds3FlashPolyListCreate(u32 count) {
     pool->resource = sdfMatNew();
     sdfMatSetConstant(pool->resource, 1.0f);
     memset(effRecordPoolDrawParams, 0, EFF_PACKET_PARAMS_BYTES);
-    effRecordPoolDrawParams->primitive = 0x4000;
+    effRecordPoolDrawParams->attr = 0x4000;
     return pool;
 }
 
@@ -418,22 +418,22 @@ void dds3FlashPolyListDraw(dds3FlashPolyList_t *work)
     sdf3DPrimLinkTm(list, 0);
     sdf3DPrimLinkMat(list, work->resource, 0);
     remaining = work->vertexCount;
-    effRecordPoolDrawParams->colors = (u32 *)work->auxRecordBase;
-    effRecordPoolDrawParams->positions = (u128 *)work->recordBase;
+    effRecordPoolDrawParams->vertexColor = (u32 *)work->auxRecordBase;
+    effRecordPoolDrawParams->vertex = (u128 *)work->recordBase;
     effRecordPoolDrawParams->color = work->color;
-    effRecordPoolDrawParams->parameterCount = EFF_FAN_BATCH_PARAMS;
-    effRecordPoolDrawParams->vertexCount = EFF_FAN_BATCH_VERTICES;
-    effRecordPoolDrawParams->parameters = effFanPoolTriangleIndices;
+    effRecordPoolDrawParams->faceCount = EFF_FAN_BATCH_PARAMS;
+    effRecordPoolDrawParams->pointCount = EFF_FAN_BATCH_VERTICES;
+    effRecordPoolDrawParams->faceIndex = effFanPoolTriangleIndices;
     while (remaining >= EFF_FAN_BATCH_VERTICES) {
         remaining -= EFF_FAN_BATCH_VERTICES;
         sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(effRecordPoolDrawParams));
-        effRecordPoolDrawParams->positions += EFF_FAN_BATCH_VERTICES;
-        effRecordPoolDrawParams->colors += EFF_FAN_BATCH_VERTICES;
+        effRecordPoolDrawParams->vertex += EFF_FAN_BATCH_VERTICES;
+        effRecordPoolDrawParams->vertexColor += EFF_FAN_BATCH_VERTICES;
     }
     if (remaining >= EFF_FAN_VERTEX_COUNT) {
         fanCount = remaining / EFF_FAN_VERTEX_COUNT;
-        effRecordPoolDrawParams->vertexCount = remaining;
-        effRecordPoolDrawParams->parameterCount = fanCount * 3;
+        effRecordPoolDrawParams->pointCount = remaining;
+        effRecordPoolDrawParams->faceCount = fanCount * 3;
         sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(effRecordPoolDrawParams));
     }
     if (work->drawMode < EFF_DIRECT_SURFACE_COUNT) {
@@ -518,7 +518,7 @@ dds3FlashPolyList_t *dds3FlashPolyList2Create(s32 triangleCount) {
     pool->resource = sdfMatNew();
     sdfMatSetConstant(pool->resource, 1.0f);
     memset(effRecordPoolDrawParams, 0, EFF_PACKET_PARAMS_BYTES);
-    effRecordPoolDrawParams->primitive = 0x4000;
+    effRecordPoolDrawParams->attr = 0x4000;
     return pool;
 }
 
@@ -534,7 +534,7 @@ void dds3FlashPolyList2Draw(dds3FlashPolyList_t *pool)
     f32 matrix[EFF_MATRIX_WORD_COUNT];
     sdfDrawTag_t *packet = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EFF_PACKET_LIST_BYTES);
     s32 remainingVertices;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
 
     sdfDrawTagInit(packet);
     EE_MMI_UNIT_MATRIX(matrix);
@@ -548,21 +548,21 @@ void dds3FlashPolyList2Draw(dds3FlashPolyList_t *pool)
     sdf3DPrimLinkTm(packet, 0);
     sdf3DPrimLinkMat(packet, pool->resource, 0);
     remainingVertices = pool->vertexCount;
-    effRecordPoolDrawParams->colors = (u32 *)pool->auxRecordBase;
-    effRecordPoolDrawParams->positions = (u128 *)pool->recordBase;
+    effRecordPoolDrawParams->vertexColor = (u32 *)pool->auxRecordBase;
+    effRecordPoolDrawParams->vertex = (u128 *)pool->recordBase;
     effRecordPoolDrawParams->color = pool->color;
-    effRecordPoolDrawParams->parameterCount = 0x10;
-    effRecordPoolDrawParams->vertexCount = EFF_TRIANGLE_BATCH_VERTICES;
-    effRecordPoolDrawParams->parameters = NULL;
+    effRecordPoolDrawParams->faceCount = 0x10;
+    effRecordPoolDrawParams->pointCount = EFF_TRIANGLE_BATCH_VERTICES;
+    effRecordPoolDrawParams->faceIndex = NULL;
     while (remainingVertices >= EFF_TRIANGLE_BATCH_VERTICES) {
         remainingVertices -= EFF_TRIANGLE_BATCH_VERTICES;
         sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(effRecordPoolDrawParams));
-        effRecordPoolDrawParams->positions += EFF_TRIANGLE_BATCH_VERTICES;
-        effRecordPoolDrawParams->colors += EFF_TRIANGLE_BATCH_VERTICES;
+        effRecordPoolDrawParams->vertex += EFF_TRIANGLE_BATCH_VERTICES;
+        effRecordPoolDrawParams->vertexColor += EFF_TRIANGLE_BATCH_VERTICES;
     }
     if (remainingVertices >= EFF_TRIANGLE_VERTEX_COUNT) {
-        effRecordPoolDrawParams->parameterCount = remainingVertices / EFF_TRIANGLE_VERTEX_COUNT;
-        effRecordPoolDrawParams->vertexCount = remainingVertices;
+        effRecordPoolDrawParams->faceCount = remainingVertices / EFF_TRIANGLE_VERTEX_COUNT;
+        effRecordPoolDrawParams->pointCount = remainingVertices;
         sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(effRecordPoolDrawParams));
     }
     surface = effTrianglePoolDrawSurfaces[pool->drawMode];
@@ -606,7 +606,7 @@ dds3FlashPolyList_t *dds3FlashPolyList3Create(s32 quadCount) {
     pool->resource = sdfMatNew();
     sdfMatSetConstant(pool->resource, 1.0f);
     memset(effRecordPoolDrawParams, 0, EFF_PACKET_PARAMS_BYTES);
-    effRecordPoolDrawParams->primitive = 0x4000;
+    effRecordPoolDrawParams->attr = 0x4000;
     return pool;
 }
 
@@ -622,7 +622,7 @@ void dds3FlashPolyList3Draw(dds3FlashPolyList_t *pool)
     f32 matrix[EFF_MATRIX_WORD_COUNT];
     sdfDrawTag_t *packet = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EFF_PACKET_LIST_BYTES);
     s32 remainingVertices;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
 
     sdfDrawTagInit(packet);
     EE_MMI_UNIT_MATRIX(matrix);
@@ -636,21 +636,21 @@ void dds3FlashPolyList3Draw(dds3FlashPolyList_t *pool)
     sdf3DPrimLinkTm(packet, 0);
     sdf3DPrimLinkMat(packet, pool->resource, 0);
     remainingVertices = pool->vertexCount;
-    effRecordPoolDrawParams->colors = (u32 *)pool->auxRecordBase;
-    effRecordPoolDrawParams->positions = (u128 *)pool->recordBase;
+    effRecordPoolDrawParams->vertexColor = (u32 *)pool->auxRecordBase;
+    effRecordPoolDrawParams->vertex = (u128 *)pool->recordBase;
     effRecordPoolDrawParams->color = pool->color;
-    effRecordPoolDrawParams->parameterCount = 0x10;
-    effRecordPoolDrawParams->vertexCount = EFF_QUAD_BATCH_VERTICES;
-    effRecordPoolDrawParams->parameters = effQuadPoolTriangleIndices;
+    effRecordPoolDrawParams->faceCount = 0x10;
+    effRecordPoolDrawParams->pointCount = EFF_QUAD_BATCH_VERTICES;
+    effRecordPoolDrawParams->faceIndex = effQuadPoolTriangleIndices;
     while (remainingVertices >= EFF_QUAD_BATCH_VERTICES) {
         remainingVertices -= EFF_QUAD_BATCH_VERTICES;
         sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(effRecordPoolDrawParams));
-        effRecordPoolDrawParams->positions += EFF_QUAD_BATCH_VERTICES;
-        effRecordPoolDrawParams->colors += EFF_QUAD_BATCH_VERTICES;
+        effRecordPoolDrawParams->vertex += EFF_QUAD_BATCH_VERTICES;
+        effRecordPoolDrawParams->vertexColor += EFF_QUAD_BATCH_VERTICES;
     }
     if (remainingVertices >= EFF_QUAD_VERTEX_COUNT) {
-        effRecordPoolDrawParams->parameterCount = remainingVertices / EFF_QUAD_VERTEX_COUNT * 2;
-        effRecordPoolDrawParams->vertexCount = remainingVertices;
+        effRecordPoolDrawParams->faceCount = remainingVertices / EFF_QUAD_VERTEX_COUNT * 2;
+        effRecordPoolDrawParams->pointCount = remainingVertices;
         sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(effRecordPoolDrawParams));
     }
     surface = effQuadPoolDrawSurfaces[pool->drawMode];
@@ -700,22 +700,22 @@ void dds3FlashPolyListHDraw(dds3FlashPolyList_t *work)
     sdf3DPrimLinkTm(list, 0);
     sdf3DPrimLinkMat(list, work->resource, 0);
     remaining = work->vertexCount;
-    effRecordPoolDrawParams->colors = (u32 *)work->auxRecordBase;
-    effRecordPoolDrawParams->positions = (u128 *)work->recordBase;
+    effRecordPoolDrawParams->vertexColor = (u32 *)work->auxRecordBase;
+    effRecordPoolDrawParams->vertex = (u128 *)work->recordBase;
     effRecordPoolDrawParams->color = work->color;
-    effRecordPoolDrawParams->parameterCount = EFF_FAN_BATCH_PARAMS;
-    effRecordPoolDrawParams->vertexCount = EFF_FAN_BATCH_VERTICES;
-    effRecordPoolDrawParams->parameters = effFanPoolTriangleIndices;
+    effRecordPoolDrawParams->faceCount = EFF_FAN_BATCH_PARAMS;
+    effRecordPoolDrawParams->pointCount = EFF_FAN_BATCH_VERTICES;
+    effRecordPoolDrawParams->faceIndex = effFanPoolTriangleIndices;
     while (remaining >= EFF_FAN_BATCH_VERTICES) {
         remaining -= EFF_FAN_BATCH_VERTICES;
         sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(effRecordPoolDrawParams));
-        effRecordPoolDrawParams->positions += EFF_FAN_BATCH_VERTICES;
-        effRecordPoolDrawParams->colors += EFF_FAN_BATCH_VERTICES;
+        effRecordPoolDrawParams->vertex += EFF_FAN_BATCH_VERTICES;
+        effRecordPoolDrawParams->vertexColor += EFF_FAN_BATCH_VERTICES;
     }
     if (remaining >= EFF_FAN_VERTEX_COUNT) {
         fanCount = remaining / EFF_FAN_VERTEX_COUNT;
-        effRecordPoolDrawParams->vertexCount = remaining;
-        effRecordPoolDrawParams->parameterCount = fanCount * 3;
+        effRecordPoolDrawParams->pointCount = remaining;
+        effRecordPoolDrawParams->faceCount = fanCount * 3;
         sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(effRecordPoolDrawParams));
     }
     if (work->drawMode < EFF_DIRECT_SURFACE_COUNT) {

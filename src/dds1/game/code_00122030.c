@@ -119,9 +119,9 @@ extern s32 fldElvState;
 
 extern s32 D_0032E4DC[];
 
-extern SdfPoolNode D_00324F88[];
+extern sdfGrOt_t D_00324F88[];
 
-extern SdfPoolNode *kwlnSceneSurfaceSets[13][4];
+extern sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
 
 extern u8 D_00324530[];
 
@@ -987,11 +987,11 @@ void fldRebuildFieldScene(void) {
                 node = dds3SceneBasicSearchNameAndType(dds3GetControlScene(),
                     4, (const u8 *)sceneWork->cameraName);
                 if (node != NULL) {
-                    camera = node->inner;
+                    camera = node->poseset;
                     fldGlobalBase.mode = FLD_CAMERA_MODE_OBJECT_FOCUS;
-                    fldGlobalBase.focusPos[0] = camera->position[0];
-                    fldGlobalBase.focusPos[1] = camera->position[1];
-                    fldGlobalBase.focusPos[2] = camera->position[2];
+                    fldGlobalBase.focusPos[0] = camera->pos[0];
+                    fldGlobalBase.focusPos[1] = camera->pos[1];
+                    fldGlobalBase.focusPos[2] = camera->pos[2];
                     fldUpdateCameraViewFromPlayer();
                 } else {
                     fldGlobalBase.mode = FLD_CAMERA_MODE_PLAYER_FOLLOW;
@@ -1360,8 +1360,8 @@ void fldPreparePlayerAndCameraScene(u128 *transform) {
         dds3RebuildObjectModelContext(fldPlayerObject, 2, D_0032F1DC[0]);
         object = fldPlayerObject;
     } else {
-        dds3PoseSet_t *inner = object->inner;
-        SDF_VU0_COPYVECTOR(inner->position, transform);
+        dds3PoseSet_t *inner = object->poseset;
+        SDF_VU0_COPYVECTOR(inner->pos, transform);
         SDF_VU0_COPYVECTOR(inner->smoothedPosition, transform);
         SDF_VU0_COPYVECTOR(inner->rotation, rotation);
     }
@@ -1506,7 +1506,7 @@ FldSceneCommandState fldGetSceneCommandState(void) {
 /* Latch the area/floor command while enabled and flagged; stop it when either
  * gate clears. Disable passes transition parameter 0; flag removal passes 20. */
 void fldUpdateSceneCommand(void) {
-    FldAreaWork *state = &fldGlobalBase;
+    fldAreaWork_t *state = &fldGlobalBase;
     s32 code;
 
     if (state->commandEnabled == 0) {
@@ -1820,7 +1820,7 @@ FldCampCheckState fldProcCampChk(void) {
     if (D_003BABEC > 0) {
         return FLD_CAMP_CHECK_STATE_HANDOFF_DELAY;
     }
-    if (mnuAcknowledgeCampState() != MNU_CAMP_STATE_ACK_NOT_ACTIVE) {
+    if (campCheckExitState() != MNU_CAMP_STATE_ACK_NOT_ACTIVE) {
         return FLD_CAMP_CHECK_STATE_MENU_ACTIVE;
     }
     return fldEncountTestFlag(0x20) != 0
@@ -1850,7 +1850,7 @@ extern u8 fldAutoMapSeqTestFlag(u32);
 extern s16 D_0032E4D8[];
 
 s32 fldUpdateCampMenuTransition(void) {
-    FldAreaWork *scene;
+    fldAreaWork_t *scene;
     s32 control;
 
     if (D_003BABEC > 0) {
@@ -1887,7 +1887,7 @@ s32 fldUpdateCampMenuTransition(void) {
         return control;
     }
     if (fldAutoMapSeqTestFlag(1) == 1 || fldGetMovementHoldState() != FLD_MOVEMENT_HOLD_CLEAR ||
-        fldGetSceneReadyFlag() != FLD_SCENE_NOT_READY) {
+        fldAutoMapChkMode() != FLD_SCENE_NOT_READY) {
         return 0;
     }
     scene = &fldGlobalBase;
@@ -1911,7 +1911,7 @@ FldSceneTransitionGateResult fldProcAmChk(void) {
     if (D_003BABF0 > 0) {
         return FLD_SCENE_TRANSITION_GATE_HANDOFF_DELAY;
     }
-    return fldGetSceneReadyFlag() != FLD_SCENE_NOT_READY;
+    return fldAutoMapChkMode() != FLD_SCENE_NOT_READY;
 }
 
 struct dds3ObjectBaseControlWorkData_t;
@@ -1924,7 +1924,7 @@ extern void fldMarkStageExplorationCellsAroundPosition(s32, s32, f32, f32, f32);
  * transition or its delayed fade path. All return paths retain zero. */
 s32 fldUpdateNextFloorTransition(void) {
     s32 transitionInput = 0;
-    FldAreaWork *scene;
+    fldAreaWork_t *scene;
 
     if (fldProcCampChk() != FLD_CAMP_CHECK_STATE_ENCOUNTER_FLAG_SET) {
         return 0;
@@ -2297,9 +2297,9 @@ KwlnTaskUpdateResult fldProcSequence(dds3ProcessID_t *task) {
         func_001415F8();
         if (fldRunDanteGunFlag[0] == 0) {
             fldCheckSceneReady();
-            fldGetSceneReadyFlag();
+            fldAutoMapChkMode();
         }
-        if (fldGetSceneReadyFlag() == FLD_SCENE_NOT_READY && fldProcCampChk() == FLD_CAMP_CHECK_STATE_ENCOUNTER_FLAG_SET &&
+        if (fldAutoMapChkMode() == FLD_SCENE_NOT_READY && fldProcCampChk() == FLD_CAMP_CHECK_STATE_ENCOUNTER_FLAG_SET &&
             fldHasKiretaLabelProcess() == 0 && fldProcKiretaChk() == 0 &&
             fldProcHirakenaiChk() == 0) {
             fldFlushQueuedEffectPositions();
@@ -2348,7 +2348,7 @@ KwlnTaskUpdateResult fldProcDraw(dds3ProcessID_t *task) {
     if (fldProcCampChk() == FLD_CAMP_CHECK_STATE_MENU_ACTIVE) {
         return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
     }
-    if (fldGetSceneReadyFlag() == FLD_SCENE_NOT_READY && fldProcCampChk() == FLD_CAMP_CHECK_STATE_ENCOUNTER_FLAG_SET &&
+    if (fldAutoMapChkMode() == FLD_SCENE_NOT_READY && fldProcCampChk() == FLD_CAMP_CHECK_STATE_ENCOUNTER_FLAG_SET &&
         fldIsEventPhaseAtLeastTwo() == 0) {
         func_00149B68();
     }

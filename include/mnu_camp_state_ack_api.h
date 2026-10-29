@@ -10,6 +10,6 @@ enum {
 };
 
 /* Consume CLEANED_UP back to IDLE, then report whether camp remains active. */
-MnuCampStateAcknowledgementResult mnuAcknowledgeCampState(void);
+MnuCampStateAcknowledgementResult campCheckExitState(void);
 
 #endif /* MNU_CAMP_STATE_ACK_API_H */

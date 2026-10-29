@@ -361,7 +361,7 @@ void mnuQueueFontGlyphFromSelectedAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32
  * Preserve DDS2's arithmetic and separate truncations; deficits are not clamped. */
 s32 mnuTerminalScoreBox(datUnitWork_t *unit) {
     f32 missingMp = unit->maxMp - unit->mp;
-    f32 missingHp = unit->maxHp - unit->hp;
+    f32 missingHp = unit->maxhp - unit->hp;
     s32 statusCost = 0;
 
     if (unit->status & 0x400) {
@@ -443,8 +443,8 @@ void mnuDrawTerminalRecoveryListEntry(s32 unused, s32 rowY, s32 depth, MenuList 
     effDrawTextureSlotWithBlendedCornerColors(0x510, rowY + 0x80, depth, scale, 0, host->resourceBank[0],
         portraitCodes[record->unitId - 1] + selected, priority);
     mnuCreateNumberSprite(0xA70, rowY + 0x70, depth, scale, record->hp,
-        mnuGetPanelRatioColor(0, record->hp, record->maxHp), priority);
-    mnuCreateNumberSprite(0xCF0, rowY + 0x70, depth, scale, record->maxHp, 0xA09DC340, priority);
+        mnuGetPanelRatioColor(0, record->hp, record->maxhp), priority);
+    mnuCreateNumberSprite(0xCF0, rowY + 0x70, depth, scale, record->maxhp, 0xA09DC340, priority);
     mnuCreateNumberSprite(0x10B0, rowY + 0x70, depth, scale, record->mp, 0xA09DC380, priority);
     mnuCreateNumberSprite(0x1330, rowY + 0x70, depth, scale, record->maxMp, 0xA09DC340, priority);
     if (scale != 0) {
@@ -470,7 +470,7 @@ MenuTerminalPercentPanelPair *mnuCreateDualPercentPanel(datUnitWork_t *unit, Men
     MenuTerminalPercentPanelPair *panel = sdfChipAllocDirect(sizeof(*panel));
 
     mnuDrawPanelSequenceByRow(&panel->panels[0], 0, 0, 0x1e,
-        mnuPercentOrHundred(unit->hp, unit->maxHp),
+        mnuPercentOrHundred(unit->hp, unit->maxhp),
         host->imageHandles[1]);
     mnuDrawPanelSequenceByRow(&panel->panels[1], 1, 0, 0x1e,
         mnuPercentOrHundred(unit->mp, unit->maxMp),
@@ -1212,7 +1212,7 @@ s32 mnuOpenTerminalPopupForAction(s32 action, s32 context) {
  * No boosted-max calculation or range validation is performed here. */
 void fldSaveSceneOptionsAndClearFlags(datUnitWork_t *option) {
     u16 statusFlags = option->status;
-    u16 maxHp = option->maxHp;
+    u16 maxHp = option->maxhp;
     u16 maxMp = option->maxMp;
     u16 retainedStatus = statusFlags & MNU_RECOVERY_STATUS_KEEP_MASK;
 

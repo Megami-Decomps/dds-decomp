@@ -308,7 +308,7 @@ extern void fldApplyCameraFacingPoint(void);
 
 FldTitleBannerResult fldResolvePendingTitleBanner(void) {
     FldTitleBannerMenu *menu;
-    FldAreaWork *area;
+    fldAreaWork_t *area;
 
     if (fldProcCampChk() != FLD_CAMP_CHECK_STATE_ENCOUNTER_FLAG_SET) {
         return FLD_TITLE_BANNER_UNRESOLVED;
@@ -1072,7 +1072,7 @@ void fldResetSceneResourceTables(void) {
 }
 
 
-extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
 
 
 void fldAutoMapDrawMdl1(sdfModelRootNode_t *emitter, f32 x, f32 y, f32 z) {
@@ -1090,7 +1090,7 @@ void fldAutoMapDrawMdl1(sdfModelRootNode_t *emitter, f32 x, f32 y, f32 z) {
         SDF_VU0_STOREVECTOR(emitter->matrix[3]);
     sdfModelMakeLocalTm(handle);
     sdfModelEvalTm(emitter);
-    sdfBuildModelPacketsVia(sdfModelBuildNodeResourcePackets, kwlnSceneSurfaceSets[11], emitter);
+    sdfBuildModelPacketsVia(sdfModelLinkOt, kwlnSceneSurfaceSets[11], emitter);
 }
 
 extern FldProjectedSprite D_0033EBA0[];
@@ -1186,7 +1186,7 @@ extern FldProjectedSprite D_0033EBA0[];
 
 extern f32 D_003BAEEC;
 extern sdfTexHandle_t *D_003BAF38;
-extern SdfPoolNode *fldDrawGetOt(void);
+extern sdfGrOt_t *fldDrawGetOt(void);
 /* Draw a minimap icon from the icon table: its textured quad rotated about its
  * anchor, squashed to the map's tilt and placed at the map position, the
  * player's (index 1) pulsing in alpha. Upstream: INCLUDE_ASM in
@@ -1203,8 +1203,8 @@ void fldAutoMapDrawIconOfsRF(s32 index, f32 x, f32 y, f32 rotation) {
     f32 xOffset, yOffset;
     u32 color;
     sdfDrawTag_t *packetList;
-    SdfPoolNode *appendTarget;
-    SdfPoolNode *drawSurface;
+    sdfGrOt_t *appendTarget;
+    sdfGrOt_t *drawSurface;
 
     if (index == 1) {
         color = (u32)(s32)(sdfSin(D_003BAEEC) * 64.0f) << 24;
@@ -2517,7 +2517,7 @@ extern SdfMathVector4 D_003A05D8[];
  * map textures, centre the camera on the floor's entry point and set the
  * scene fog and camera offsets. */
 void func_00145B18(void) {
-    FldAreaWork *cam;
+    fldAreaWork_t *cam;
     f32 focus[4];
     f32 eye[4];
     SdfMathVector4 up;
@@ -2640,7 +2640,7 @@ extern void fldApplySkyLightSetToPlayerVU(void);
 /* Enters the field camera state for a fresh scene: releases the title slots and
  * centers the camera on the scene's entry point. */
 void fldEnterSceneCamera(void) {
-    FldAreaWork *cam = &fldGlobalBase;
+    fldAreaWork_t *cam = &fldGlobalBase;
     f32 focus[4];
     f32 eye[4];
     SdfMathVector4 up;
@@ -2697,7 +2697,7 @@ void fldEnterSceneCamera(void) {
 /* Loads the scene's models into the menu slots, then centers the camera on the
  * scene's entry point. */
 void fldLoadSceneModelsAndCamera(void) {
-    FldAreaWork *cam;
+    fldAreaWork_t *cam;
     const FldSceneRecord *rec;
     f32 focus[4];
     f32 eye[4];
@@ -2758,7 +2758,7 @@ void fldReleaseMenuSlotsAfterWait(void) {
     fldReleaseMenuSlots();
 }
 
-FldSceneReadyState fldGetSceneReadyFlag(void) {
+FldSceneReadyState fldAutoMapChkMode(void) {
     return AutoMapSeq;
 }
 
@@ -2772,7 +2772,7 @@ void fldUpdateAutomapInput(void) {
     f32 minX, maxZ, maxX, minZ;
     s32 closeRequested = 0;
 
-    if (fldGetSceneReadyFlag() == FLD_SCENE_NOT_READY) {
+    if (fldAutoMapChkMode() == FLD_SCENE_NOT_READY) {
         return;
     }
     if (D_0032E5C4[0] != 0) {
@@ -2927,7 +2927,7 @@ void fldUpdateAutomapInput(void) {
 
 /* Re-centers the scene camera on the current scene's entry point. */
 void fldCenterCameraOnEntry(void) {
-    FldAreaWork *cam = &fldGlobalBase;
+    fldAreaWork_t *cam = &fldGlobalBase;
     f32 focus[4];
     f32 eye[4];
     f32 up[4] = {0.0f, 0.0f, -1.0f, 1.0f};
@@ -3210,7 +3210,7 @@ extern f32 D_003BAEE8;
 #include "fr_font_text_measure_mode.h"
 extern void fldKanjiDraw(s32 x, s32 y, u32 colors, const u8 *text);
 void fldDrawMapLabelBanner(s32 unused) {
-    FldAreaWork *work;
+    fldAreaWork_t *work;
     s32 mode;
     s32 map;
     FldSecondaryMapLabelRecordIndex secondaryRecord;
@@ -3698,7 +3698,7 @@ void fldInitializeHuntSparkUnit(evtUnitHandle_t *unit) {
 
     object = unit->effObj;
     resource = (dds3ModelHandle_t *)dds3ObjectBaseGetModelHandle(object);
-    SDF_VU0_LOADVECTOR(object->inner->rotation);
+    SDF_VU0_LOADVECTOR(object->poseset->rotation);
     index = D_0032E3C4[0] + 1;
     if (index >= 64) {
         index = 63;
@@ -4287,7 +4287,7 @@ extern void fldSubmitGsGradientQuad(s32, s32, s32, s32, u32, u32, u32, u32,
     u32, u32, u32, u32, u32, u32, u32, u32, u32, u32, u32, u32);
 
 void fldDrawLocationPanel(void) {
-    FldAreaWork *work;
+    fldAreaWork_t *work;
     u32 color;
 
     if (fldGetSparkDialogPhase() != FLD_SPARK_DIALOG_PHASE_IDLE) {
@@ -4461,7 +4461,7 @@ static void placeEffectNode(s32 node, f32 *position) {
  * distance limits directly. */
 void func_00149B68(void) {
     f32 position[4];
-    FldAreaWork *area = &fldGlobalBase;
+    fldAreaWork_t *area = &fldGlobalBase;
     s32 i;
 
     memset(position, 0, sizeof(position));
@@ -5578,7 +5578,7 @@ extern void evtSetSolarOverlayFullyVisible(void);
 /* Restores field presentation once an active event finishes, then clears the
  * event latch. An already-cleared latch leaves field resources untouched. */
 void fldFinishEventFieldState(void) {
-    FldAreaWork *state = &fldGlobalBase;
+    fldAreaWork_t *state = &fldGlobalBase;
 
     if (state->specialEventActive != FLD_SPECIAL_EVENT_INACTIVE) {
         D_0032E5C4[0] = 0;
@@ -5765,7 +5765,7 @@ void fldUpdateSparkEncounterScene(void) {
     FldSparkControllerPhase phase;
     s32 value;
     void *node;
-    FldAreaWork *area;
+    fldAreaWork_t *area;
 
     memset(firstVector, 0, sizeof(firstVector));
     firstVector[3] = 1.0f;
@@ -6055,7 +6055,7 @@ INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF34);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF38);
 
-INCLUDE_SDATA(EffNode *, "game/code_001411F0", D_003BAF3C);
+INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF3C);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF40);
 
@@ -6063,31 +6063,31 @@ INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF44);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF48);
 
-INCLUDE_SDATA(EffNode *, "game/code_001411F0", D_003BAF4C);
+INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF4C);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF50);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF54);
 
-INCLUDE_SDATA(EffNode *, "game/code_001411F0", D_003BAF58);
+INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF58);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF5C);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF60);
 
-INCLUDE_SDATA(EffNode *, "game/code_001411F0", D_003BAF64);
+INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF64);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF68);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF6C);
 
-INCLUDE_SDATA(EffNode *, "game/code_001411F0", D_003BAF70);
+INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF70);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF74);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF78);
 
-INCLUDE_SDATA(EffNode *, "game/code_001411F0", D_003BAF7C);
+INCLUDE_SDATA(const s32, "game/code_001411F0", D_003BAF7C);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", fldTakaraCount);
 
@@ -6129,7 +6129,7 @@ INCLUDE_SDATA(const s32, "game/code_001411F0", fldDamEffectResource);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", fldDamEffectData);
 
-INCLUDE_SDATA(EffNode *, "game/code_001411F0", fldDamEffectNode);
+INCLUDE_SDATA(const s32, "game/code_001411F0", fldDamEffectNode);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", fldDamEffectPositioned);
 
@@ -6137,7 +6137,7 @@ INCLUDE_SDATA(const s32, "game/code_001411F0", fldYukEffectResource);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", fldYukEffectData);
 
-INCLUDE_SDATA(EffNode *, "game/code_001411F0", fldYukEffectNode);
+INCLUDE_SDATA(const s32, "game/code_001411F0", fldYukEffectNode);
 
 INCLUDE_SDATA(const s32, "game/code_001411F0", fldYukEffectPositioned);
 

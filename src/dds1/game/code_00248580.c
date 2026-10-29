@@ -161,7 +161,7 @@ void mnuQueueFontGlyphFromAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32 colors,
  * Preserve DDS1's arithmetic and separate truncations; deficits are not clamped. */
 s32 mnuTerminalScoreBox(datUnitWork_t *unit) {
     f32 missingMp = unit->maxMp - unit->mp;
-    f32 missingHp = unit->maxHp - unit->hp;
+    f32 missingHp = unit->maxhp - unit->hp;
     s32 statusCost = 0;
 
     if (unit->status & 0x400) {
@@ -243,8 +243,8 @@ void mnuDrawTerminalRecoveryListEntry(s32 unused, s32 rowY, s32 depth, struct Me
     effDrawSpriteWithCornerFade(0x500, rowY + 0x80, depth, scale, 0, host->resourceSets[0],
         portraitCodes[record->unitId - 1] + selected, priority);
     mnuCreateNumberSprite(0xA30, rowY + 0x98, depth, scale, record->hp,
-        mnuGetPanelRatioColor(0, record->hp, record->maxHp), priority);
-    mnuCreateNumberSprite(0xC70, rowY + 0x98, depth, scale, record->maxHp, 0xA09DC340, priority);
+        mnuGetPanelRatioColor(0, record->hp, record->maxhp), priority);
+    mnuCreateNumberSprite(0xC70, rowY + 0x98, depth, scale, record->maxhp, 0xA09DC340, priority);
     mnuCreateNumberSprite(0x1070, rowY + 0x98, depth, scale, record->mp, 0xA09DC380, priority);
     mnuCreateNumberSprite(0x12B0, rowY + 0x98, depth, scale, record->maxMp, 0xA09DC340, priority);
     if (scale != 0) {
@@ -271,7 +271,7 @@ void mnuDrawTerminalRecoveryListEntry(s32 unused, s32 rowY, s32 depth, struct Me
 MenuTerminalPercentPanelPair *mnuCreateDualPercentPanel(datUnitWork_t *unit, MenuTerminalWork *host) {
     MenuTerminalPercentPanelPair *panel = sdfChipAllocDirect(sizeof(*panel));
     mnuDrawPanelSequenceByRow((s32)&panel->panels[0], 0, 0, 0x1e,
-        mnuPercentOrHundred(unit->hp, unit->maxHp),
+        mnuPercentOrHundred(unit->hp, unit->maxhp),
         (s32)host->imageHandles[0]);
     mnuDrawPanelSequenceByRow((s32)&panel->panels[1], 1, 0, 0x1e,
         mnuPercentOrHundred(unit->mp, unit->maxMp),
@@ -1080,7 +1080,7 @@ s32 mnuOpenTerminalPopupForAction(s32 action, s32 context) {
  * No boosted-max calculation or range validation is performed here. */
 void fldSaveSceneOptionsAndClearFlags(datUnitWork_t *option) {
     u16 statusFlags = option->status;
-    u16 maxHp = option->maxHp;
+    u16 maxHp = option->maxhp;
     u16 maxMp = option->maxMp;
     u16 retainedStatus = statusFlags & MNU_RECOVERY_STATUS_KEEP_MASK;
 
@@ -2529,7 +2529,7 @@ INCLUDE_SDATA(const s32, "game/code_00248580", mnuTerminalTaskState);
 
 INCLUDE_SDATA(const s32, "game/code_00248580", D_003BC3E1);
 
-INCLUDE_SDATA(dds3ProcessID_t * const, "game/code_00248580", D_003BC3E4);
+INCLUDE_SDATA(const s32, "game/code_00248580", D_003BC3E4);
 
 INCLUDE_SDATA(const s32, "game/code_00248580", mnuNumberSpriteFormat);
 

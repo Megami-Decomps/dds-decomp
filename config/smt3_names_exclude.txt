@@ -3,8 +3,8 @@
 # <version> <address>  # reason
 dds2 0x00243330  # evtGetAgeOfMoon tips btlSortActorMuzzleDirections (game/code_001AF4A0) to CONTEXT
 dds1 0x002286C0  # evtGetAgeOfMoon: keeps the DDS1 twin on the same name as DDS2
-dds2 0x0032D340  # sdfGrOtClose, through its declaration, with the four below
-dds1 0x002D4490  # sdfGrOtClose twin
+dds1 0x002D4490  # sdfGrOtClose: declaration changes full-unit sdfDrawTexturedQuad allocation
+dds2 0x0032D340  # sdfGrOtClose: declaration changes full-unit sdfDrawTexturedQuad allocation
 #
 # These four spellings together change register allocation in sdfDrawTexturedQuad
 # (game/code_002DE248 in DDS2). Reverting any three does not help, so all four

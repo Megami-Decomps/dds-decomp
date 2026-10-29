@@ -15,7 +15,7 @@ enum {
     FLD_NEXT_FILE_LOAD_PENDING = 1
 };
 
-FldSceneReadyState fldGetSceneReadyFlag(void);
+FldSceneReadyState fldAutoMapChkMode(void);
 FldNextFileLoadState fldGetNextFileLoadState(void);
 u32 fldPollAreaResourceLoad(void);
 

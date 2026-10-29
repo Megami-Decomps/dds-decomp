@@ -194,7 +194,7 @@ extern void itfGridSetQuantizedBounds(EffectSlotSet *, s32, s32, s32, s32, s32);
 extern u32 effDestroyResourceSlotSet(EffectSlotSet *);
 extern s32 D_00437CB8;
 extern s32 D_00437CBC;
-extern SdfPoolNode D_00380708;
+extern sdfGrOt_t D_00380708;
 extern s8 dds3PadButtonState[];
 
 extern MnuPartyRowDrawState mnuGetPanelWindowTransitionState(MenuPageWindow *window, s32 mode);
@@ -2648,7 +2648,7 @@ void mnuPopulatePartyPanelSlot(datUnitWork_t *partyRecord, s32 unused, u32 index
     panel->slots[index].level = partyRecord->level;
     panel->slots[index].hp = partyRecord->hp;
     panel->slots[index].mp = partyRecord->mp;
-    panel->slots[index].maxHp = partyRecord->maxHp;
+    panel->slots[index].maxHp = partyRecord->maxhp;
     panel->slots[index].maxMp = partyRecord->maxMp;
     for (i = 0; i < DAT_BASE_STAT_COUNT; i++) {
         panel->slots[index].stats[i] = partyRecord->baseStats[i];
@@ -3017,7 +3017,7 @@ u16 mnuGetAdjustedEntryValue(s32 commandId, datUnitWork_t *actor) {
     u16 entryValue = command->costPercentage;
     u16 flatAddition = command->costBase;
     if (mnuGetRangeEntryKind(commandId & MNU_COMMAND_ID_MASK) == DAT_COMMAND_COST_MODE_HP) {
-        entryValue = flatAddition + actor->maxHp * entryValue / MNU_PERCENT_SCALE;
+        entryValue = flatAddition + actor->maxhp * entryValue / MNU_PERCENT_SCALE;
     }
     return entryValue;
 }
@@ -3434,7 +3434,7 @@ s32 btlItemApplyPermanentBonus(u16 itemId, datUnitWork_t *unit) {
         accepted = 1;
         break;
     case 5:
-        if (unit->maxHp >= 0x3E7 && unit->hp >= unit->maxHp &&
+        if (unit->maxhp >= 0x3E7 && unit->hp >= unit->maxhp &&
             unit->mp >= unit->maxMp) {
             return 2;
         }
@@ -3445,7 +3445,7 @@ s32 btlItemApplyPermanentBonus(u16 itemId, datUnitWork_t *unit) {
         accepted = 1;
         break;
     case 6:
-        if (unit->maxMp >= 0x3E7 && unit->hp >= unit->maxHp &&
+        if (unit->maxMp >= 0x3E7 && unit->hp >= unit->maxhp &&
             unit->mp >= unit->maxMp) {
             return 2;
         }
@@ -3464,7 +3464,7 @@ s32 btlItemApplyPermanentBonus(u16 itemId, datUnitWork_t *unit) {
     }
     if (statIndex >= 0) {
         if (unit->baseStats[statIndex] >= 0x63 &&
-            unit->hp >= unit->maxHp && unit->mp >= unit->maxMp) {
+            unit->hp >= unit->maxhp && unit->mp >= unit->maxMp) {
             return 2;
         }
         unit->baseStats[statIndex] += 2;
@@ -3473,12 +3473,12 @@ s32 btlItemApplyPermanentBonus(u16 itemId, datUnitWork_t *unit) {
         }
     }
 
-    unit->maxHp = datComputeSkillBoostedMaxHp(unit);
+    unit->maxhp = datComputeSkillBoostedMaxHp(unit);
     unit->maxMp = datComputeSkillBoostedMaxMp(unit);
     /* This status bit suppresses both native refill stores. */
     if ((unit->status & 0x4000) == 0) {
         unit->mp = unit->maxMp;
-        unit->hp = unit->maxHp;
+        unit->hp = unit->maxhp;
     }
     return 1;
 }
@@ -3682,8 +3682,8 @@ s32 mnuTryUseFieldSkill(PartyPanel *partyPanel, MenuPageWindow *page, datUnitWor
 s32 mnuComparePartyEntryCostRatio(u32 *left, u32 *right) {
     datUnitWork_t *a = (datUnitWork_t *)*left;
     datUnitWork_t *b = (datUnitWork_t *)*right;
-    s32 leftRatio = (a->hp << 10) / a->maxHp;
-    s32 rightRatio = (b->hp << 10) / b->maxHp;
+    s32 leftRatio = (a->hp << 10) / a->maxhp;
+    s32 rightRatio = (b->hp << 10) / b->maxhp;
     if (a->flags & 2) {
         if (!(b->flags & 2)) {
             return -1;
@@ -3722,7 +3722,7 @@ s32 mnuTryUseBestPartyHealingSkill(PartyPanel *partyPanel, MenuPageWindow *page,
     target = targets;
     for (i = 4; i >= 0; i--, entry++) {
         occupied = entry->flags & 1;
-        if (occupied && entry->hp < entry->maxHp) {
+        if (occupied && entry->hp < entry->maxhp) {
             *target++ = entry;
             count++;
         }
@@ -3756,7 +3756,7 @@ s32 mnuTryUseBestPartyHealingSkill(PartyPanel *partyPanel, MenuPageWindow *page,
         }
         deficit = 0;
         for (i = 0; i < count; i++) {
-            deficit += preview[i].maxHp - preview[i].hp;
+            deficit += preview[i].maxhp - preview[i].hp;
         }
         if (deficit < bestDeficit) {
             bestDeficit = deficit;
@@ -4282,7 +4282,7 @@ void evtStageTestUpdateCamera(void)
     sdf3DSetCamera(&dds3ScreenParam, &sdfViewMatrix);
 }
 
-s8 evtStageTestUpdate(struct SdfPoolNode **surfaces) {
+s8 evtStageTestUpdate(struct sdfGrOt_t **surfaces) {
     s8 result = evtStageTestAdvanceResourceWork();
 
     if (result == EVT_STAGE_TEST_RESOURCE_WORK_PROCESSING) {
@@ -4450,7 +4450,7 @@ s32 evtStageTestHasModelEffect(void) {
 extern s32 D_00437CA4;
 extern const char *D_00437CA0;
 extern char D_00437CA8[];
-extern SdfPoolNode sdfGrOtTable[];
+extern sdfGrOt_t sdfGrOtTable[];
 extern f32 dds3CameraObjectBasicGetFovy(const dds3Basic_t *camera);
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B518);
@@ -4469,7 +4469,7 @@ void evtStageTestDrawCameraTransformDebug(void) {
     const char *caption;
     const char *name;
     sdfDrawTag_t *list;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
 
     if (world == NULL) {
         return;
@@ -4492,7 +4492,7 @@ void evtStageTestDrawCameraTransformDebug(void) {
         if (camera->next != NULL) {
             camera = camera->next;
         } else {
-            camera = ((EvtWorldTable *)world->data)->slots[EVT_WORLD_SLOT_CAMERA].head;
+            camera = ((evtWorldTable_t *)world->workdata)->slots[EVT_WORLD_SLOT_CAMERA].head;
         }
         dds3ReplaceActiveCameraSceneBasic((dds3Basic_t *)dds3GetActiveScene(), camera);
         dds3SetScreenFovy(dds3CameraObjectBasicGetFovy(camera));
@@ -4500,12 +4500,12 @@ void evtStageTestDrawCameraTransformDebug(void) {
         if (camera->previous != NULL) {
             camera = camera->previous;
         } else {
-            camera = ((EvtWorldTable *)world->data)->slots[EVT_WORLD_SLOT_CAMERA].tail;
+            camera = ((evtWorldTable_t *)world->workdata)->slots[EVT_WORLD_SLOT_CAMERA].tail;
         }
         dds3ReplaceActiveCameraSceneBasic((dds3Basic_t *)dds3GetActiveScene(), camera);
         dds3SetScreenFovy(dds3CameraObjectBasicGetFovy(camera));
     }
-    name = camera->value;
+    name = camera->name;
     caption = D_00437CA0;
     if (name != NULL) {
         caption = name;
@@ -4513,13 +4513,13 @@ void evtStageTestDrawCameraTransformDebug(void) {
     list = dds3FontReqAllocDrawTag();
     sdfDrawTagLink(list, (u32)sdfDevPrintf(0x8680, 0x79C0, 0xFF0000, 5, D_00437CA8, caption));
     sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7240, 0x79C0, 0xFF0000, 0, "P:%.2f %.2f %.2f",
-                                                           camera->inner->position[0],
-                                                           camera->inner->position[1],
-                                                           camera->inner->position[2]));
+                                                           camera->poseset->pos[0],
+                                                           camera->poseset->pos[1],
+                                                           camera->poseset->pos[2]));
     sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7240, 0x7A20, 0xFF0000, 0, "R:%.2f %.2f %.2f",
-                                                           camera->inner->rotation[0],
-                                                           camera->inner->rotation[1],
-                                                           camera->inner->rotation[2]));
+                                                           camera->poseset->rotation[0],
+                                                           camera->poseset->rotation[1],
+                                                           camera->poseset->rotation[2]));
     surface = &sdfGrOtTable[96];
     surface->append(surface, list);
     list = dds3FontReqAllocDrawTag();
@@ -4537,7 +4537,7 @@ void *evtCreateBattleStageTestCamera(void) {
     f32 orientation[4] = {0.22f, 0.12f, 0.03f, 1.0f};
     dds3Basic_t *cameraTarget = evtAddCamera(position, orientation);
 
-    cameraTarget->value = D_00437CB0;
+    cameraTarget->name = D_00437CB0;
     return evtStageTestCameraUpdate;
 }
 
@@ -4610,8 +4610,6 @@ FileRequestCleanupResult pacFileHandleFree(request)
 s32 pacFileHandleFree_(void *request) {
     return pacFileHandleFree(request);
 }
-
-
 
 INCLUDE_SDATA(const s32, "game/code_002BE628", D_00437C60);
 

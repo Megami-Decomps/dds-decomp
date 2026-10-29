@@ -2714,7 +2714,7 @@ s32 mdlRequestViewerExitOnce(void) {
     return 0;
 }
 
-extern SdfPoolNode D_00380048; /* sdfGrOtTable[40], a native interior symbol. */
+extern sdfGrOt_t D_00380048; /* sdfGrOtTable[40], a native interior symbol. */
 
 extern f32 D_003C8A00[][4];
 
@@ -2896,8 +2896,8 @@ void mdlDrawMapPositionRecords(dds3ModelHandle_t *resource) {
     }
 }
 
-extern SdfPoolNode D_003805A8;
-extern SdfPoolNode *kwlnSceneSurfaceSets[13][4];
+extern sdfGrOt_t D_003805A8;
+extern sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
 s32 mdlViewerEnd(dds3ProcessID_t *task)
 {
   f32 step = mdlViewerState.viewerScale;
@@ -3171,7 +3171,7 @@ extern SdfLightSources D_0037F770;
 extern f32 kwlnDefaultColorVector[4];
 extern char D_00437138[]; /* ">" in .sdata */
 extern char D_00437140[]; /* "%6.2f" in .sdata */
-extern SdfPoolNode D_00380708;
+extern sdfGrOt_t D_00380708;
 extern void dds3DebugFloatEditEx(f32 *value, u8 *padState, f32 min, f32 max, f32 step, f32 bigStep);
 extern void dds3PrimDebugTextBox(sdfDrawTag_t *packetList, s32 x, s32 y, s32 selected, f32 *values);
 /* Direction-preview packet builder consumes the vector loaded in vf10. */
@@ -3904,7 +3904,7 @@ void evtSetUnitPos(u32 targetKey, u32 sourceKey) {
     if (obj != NULL) {
         src = dds3SearchSceneBasic(dds3GetControlScene(), sourceKey, 0x11);
         if (src != NULL) {
-            sourceTransform = src->data;
+            sourceTransform = src->workdata;
             dds3SetPosPoseSet(obj, (u128 *)&sourceTransform->position);
             SDF_VU0_LOADVECTOR(axis);
             FromRotation(3.14159265f);
@@ -3913,14 +3913,14 @@ void evtSetUnitPos(u32 targetKey, u32 sourceKey) {
             SDF_VU0_STOREVECTOR(axis);
             dds3SetRotPoseSet(obj, (u128 *)axis);
             dds3GetPosPoseSet(obj);
-            SDF_VU0_STOREVECTOR(obj->inner->smoothedPosition);
+            SDF_VU0_STOREVECTOR(obj->poseset->smoothedPosition);
         }
     }
 }
 
-INCLUDE_SDATA(struct sdfMemHandle_t * const, "game/code_00233660", D_00436FAC);
+INCLUDE_SDATA(const s32, "game/code_00233660", D_00436FAC);
 
-INCLUDE_SDATA(struct sdfMemHandle_t * const, "game/code_00233660", D_00436FB0);
+INCLUDE_SDATA(const s32, "game/code_00233660", D_00436FB0);
 
 INCLUDE_SDATA(const s32, "game/code_00233660", D_00436FB8);
 
@@ -4064,4 +4064,4 @@ INCLUDE_SDATA(const s32, "game/code_00233660", D_004371D8);
 
 INCLUDE_SDATA(const s32, "game/code_00233660", D_004371E0);
 
-INCLUDE_SDATA(const EvtScriptEventId, "game/code_00233660", evtPendingEventSelection);
+INCLUDE_SDATA(const s32, "game/code_00233660", evtPendingEventSelection);

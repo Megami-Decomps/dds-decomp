@@ -81,7 +81,7 @@ void CalcCamera(void) {
     dds3SetPosPoseSet(D_00438944, (u128 *)D_0040ABC0);
     camera = D_00438944;
     camera->ops->update(camera);
-    cameraData = (CameraData *)D_00438944->data;
+    cameraData = (CameraData *)D_00438944->workdata;
     SDF_VU0_COPYVECTOR(&cameraData->localUp, D_0040ABB0);
     SDF_VU0_COPYVECTOR(&cameraData->worldUp, D_0040ABB0);
 }

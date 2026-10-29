@@ -379,7 +379,7 @@ void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation
     f32 (*sourceVertices)[4];
     struct FldStopEntry *stopData;
     s32 trianglesRemaining;
-    FldCollisionFace *face;
+    fldCollisionFace_t *face;
     f32 *planeX;
     f32 *planeY;
     f32 *planeZ;
@@ -398,7 +398,7 @@ void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation
     }
     for (pass = 0; pass < 5; pass++) {
         s32 faceCount;
-        FldCollisionFace *firstFace;
+        fldCollisionFace_t *firstFace;
         sourceVertices = geometry->vertices;
         faceCount = geometry->faceCount;
         firstFace = geometry->faces;
@@ -1074,14 +1074,14 @@ void fldHitChkUnitElvOnly(const f32 *input) {
         savedPrevious[1] = previous[1];
         savedPrevious[2] = previous[2];
         if (fldMatterTable[index].worldNode != 0) {
-            transform = fldMatterTable[index].worldNode->inner;
+            transform = fldMatterTable[index].worldNode->poseset;
             relative = 1;
-            position[0] -= transform->position[0];
-            position[1] -= transform->position[1];
-            position[2] -= transform->position[2];
-            previous[0] -= transform->position[0];
-            previous[1] -= transform->position[1];
-            previous[2] -= transform->position[2];
+            position[0] -= transform->pos[0];
+            position[1] -= transform->pos[1];
+            position[2] -= transform->pos[2];
+            previous[0] -= transform->pos[0];
+            previous[1] -= transform->pos[1];
+            previous[2] -= transform->pos[2];
         } else {
             relative = 0;
         }
@@ -1100,21 +1100,21 @@ void fldHitChkUnitElvOnly(const f32 *input) {
                     } else {
                         fldGlobalBase.secondaryMovingMatterIndex = index;
                     }
-                    anchor = fldMatterTable[index].worldNode->inner;
-                    fldMatterTable[index].previousPosition[0] = anchor->position[0];
-                    fldMatterTable[index].previousPosition[1] = anchor->position[1];
-                    fldMatterTable[index].previousPosition[2] = anchor->position[2];
+                    anchor = fldMatterTable[index].worldNode->poseset;
+                    fldMatterTable[index].previousPosition[0] = anchor->pos[0];
+                    fldMatterTable[index].previousPosition[1] = anchor->pos[1];
+                    fldMatterTable[index].previousPosition[2] = anchor->pos[2];
                 }
             }
         }
         if (relative) {
-            transform = fldMatterTable[index].worldNode->inner;
-            position[0] += transform->position[0];
-            position[1] += transform->position[1];
-            position[2] += transform->position[2];
-            previous[0] += transform->position[0];
-            previous[1] += transform->position[1];
-            previous[2] += transform->position[2];
+            transform = fldMatterTable[index].worldNode->poseset;
+            position[0] += transform->pos[0];
+            position[1] += transform->pos[1];
+            position[2] += transform->pos[2];
+            previous[0] += transform->pos[0];
+            previous[1] += transform->pos[1];
+            previous[2] += transform->pos[2];
         }
     }
 }
@@ -1138,13 +1138,13 @@ void fldHitChkUnitElv(f32 *position) {
         if (fldMatterTable[index].worldNode != 0) {
             dds3PoseSet_t *transform;
 
-            transform = fldMatterTable[index].worldNode->inner;
-            movement[0] = transform->position[0] - fldMatterTable[index].previousPosition[0];
-            movement[1] = transform->position[1] - fldMatterTable[index].previousPosition[1];
-            movement[2] = transform->position[2] - fldMatterTable[index].previousPosition[2];
-            fldMatterTable[index].previousPosition[0] = transform->position[0];
-            fldMatterTable[index].previousPosition[1] = transform->position[1];
-            fldMatterTable[index].previousPosition[2] = transform->position[2];
+            transform = fldMatterTable[index].worldNode->poseset;
+            movement[0] = transform->pos[0] - fldMatterTable[index].previousPosition[0];
+            movement[1] = transform->pos[1] - fldMatterTable[index].previousPosition[1];
+            movement[2] = transform->pos[2] - fldMatterTable[index].previousPosition[2];
+            fldMatterTable[index].previousPosition[0] = transform->pos[0];
+            fldMatterTable[index].previousPosition[1] = transform->pos[1];
+            fldMatterTable[index].previousPosition[2] = transform->pos[2];
         }
         if (fldTestRoomSceneFlag(fldGlobalBase.area, fldGlobalBase.floor + 1,
                                fldMatterTable[index].sceneFlag) == 0) {
@@ -1155,13 +1155,13 @@ void fldHitChkUnitElv(f32 *position) {
                 if (fldMatterTable[index].worldNode != 0) {
                     dds3PoseSet_t *transform;
 
-                    transform = fldMatterTable[index].worldNode->inner;
-                    movement[0] += transform->position[0] - fldMatterTable[index].previousPosition[0];
-                    movement[1] += transform->position[1] - fldMatterTable[index].previousPosition[1];
-                    movement[2] += transform->position[2] - fldMatterTable[index].previousPosition[2];
-                    fldMatterTable[index].previousPosition[0] = transform->position[0];
-                    fldMatterTable[index].previousPosition[1] = transform->position[1];
-                    fldMatterTable[index].previousPosition[2] = transform->position[2];
+                    transform = fldMatterTable[index].worldNode->poseset;
+                    movement[0] += transform->pos[0] - fldMatterTable[index].previousPosition[0];
+                    movement[1] += transform->pos[1] - fldMatterTable[index].previousPosition[1];
+                    movement[2] += transform->pos[2] - fldMatterTable[index].previousPosition[2];
+                    fldMatterTable[index].previousPosition[0] = transform->pos[0];
+                    fldMatterTable[index].previousPosition[1] = transform->pos[1];
+                    fldMatterTable[index].previousPosition[2] = transform->pos[2];
                 }
             }
             newPosition[0] = position[0] + movement[0];
@@ -1198,7 +1198,7 @@ void fldHitChkUnitDamage(f32 *position) {
     f32 margin;
     f32 planeDistance;
     f32 classifiedMargin;
-    FldAreaWork *areaState;
+    fldAreaWork_t *areaState;
     FldCollisionAxis selectedAxis;
     s32 pass;
     s32 recordIndex;
@@ -1260,12 +1260,12 @@ void fldHitChkUnitDamage(f32 *position) {
 
                 node = fldMatterTable[recordIndex].worldNode;
                 if (node != 0) {
-                    point[0] = savedPoint[0] - node->inner->position[0];
-                    point[1] = savedPoint[1] - node->inner->position[1];
-                    point[2] = savedPoint[2] - node->inner->position[2];
-                    reference[0] = savedReference[0] - node->inner->position[0];
-                    reference[1] = savedReference[1] - node->inner->position[1];
-                    reference[2] = savedReference[2] - node->inner->position[2];
+                    point[0] = savedPoint[0] - node->poseset->pos[0];
+                    point[1] = savedPoint[1] - node->poseset->pos[1];
+                    point[2] = savedPoint[2] - node->poseset->pos[2];
+                    reference[0] = savedReference[0] - node->poseset->pos[0];
+                    reference[1] = savedReference[1] - node->poseset->pos[1];
+                    reference[2] = savedReference[2] - node->poseset->pos[2];
                 }
 
                 planeDistance = fldVecDot(point, fldMatterTable[recordIndex].normal);
@@ -1290,7 +1290,7 @@ void fldHitChkUnitDamage(f32 *position) {
                             accepted = 1;
                         }
                         if (accepted == 1) {
-                            FldCollisionFace *face = fldMatterTable[recordIndex].face;
+                            fldCollisionFace_t *face = fldMatterTable[recordIndex].face;
                             s32 soundClass = face->sound & 0xF0;
                             if (soundClass == 0x20) {
                                 areaState->terrainAttritionKind = FLD_TERRAIN_ATTRITION_SOUND_CLASS_20;
@@ -1395,10 +1395,10 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
         index = fldGlobalBase.primaryMovingMatterIndex;
         support = &fldMatterTable[index];
         if (support->worldNode != NULL) {
-            carrier = support->worldNode->inner;
-            carried[0] = carrier->position[0] - support->previousPosition[0];
-            carried[1] = carrier->position[1] - support->previousPosition[1] + 10.0f;
-            carried[2] = carrier->position[2] - support->previousPosition[2];
+            carrier = support->worldNode->poseset;
+            carried[0] = carrier->pos[0] - support->previousPosition[0];
+            carried[1] = carrier->pos[1] - support->previousPosition[1] + 10.0f;
+            carried[2] = carrier->pos[2] - support->previousPosition[2];
         }
         fldGlobalBase.secondaryMovingMatterIndex = -1;
         fldGlobalBase.primaryMovingMatterIndex = -1;
@@ -1466,13 +1466,13 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
             savedPrevious[1] = previous[1];
             savedPrevious[2] = previous[2];
             if (fldMatterTable[index].worldNode != NULL) {
-                transform = fldMatterTable[index].worldNode->inner;
-                position[0] -= transform->position[0];
-                position[1] -= transform->position[1];
-                position[2] -= transform->position[2];
-                previous[0] -= transform->position[0];
-                previous[1] -= transform->position[1];
-                previous[2] -= transform->position[2];
+                transform = fldMatterTable[index].worldNode->poseset;
+                position[0] -= transform->pos[0];
+                position[1] -= transform->pos[1];
+                position[2] -= transform->pos[2];
+                previous[0] -= transform->pos[0];
+                previous[1] -= transform->pos[1];
+                previous[2] -= transform->pos[2];
                 relative = 1;
             } else {
                 relative = 0;
@@ -1599,13 +1599,13 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
                                 floorRecord = index;
                             }
                             if (fldMatterTable[index].worldNode != NULL) {
-                                transform = fldMatterTable[index].worldNode->inner;
-                                position[0] += transform->position[0];
-                                position[1] += transform->position[1];
-                                position[2] += transform->position[2];
-                                previous[0] += transform->position[0];
-                                previous[1] += transform->position[1];
-                                previous[2] += transform->position[2];
+                                transform = fldMatterTable[index].worldNode->poseset;
+                                position[0] += transform->pos[0];
+                                position[1] += transform->pos[1];
+                                position[2] += transform->pos[2];
+                                previous[0] += transform->pos[0];
+                                previous[1] += transform->pos[1];
+                                previous[2] += transform->pos[2];
                                 relative = 0;
                             }
                             fldMatterTable[index].unkCA = 1;
@@ -1624,13 +1624,13 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
                             position[1] = projected[1] + fldMatterTable[index].normal[1] * clearance;
                             position[2] = projected[2] + fldMatterTable[index].normal[2] * clearance;
                             if (fldMatterTable[index].worldNode != NULL) {
-                                transform = fldMatterTable[index].worldNode->inner;
-                                position[0] += transform->position[0];
-                                position[1] += transform->position[1];
-                                position[2] += transform->position[2];
-                                previous[0] += transform->position[0];
-                                previous[1] += transform->position[1];
-                                previous[2] += transform->position[2];
+                                transform = fldMatterTable[index].worldNode->poseset;
+                                position[0] += transform->pos[0];
+                                position[1] += transform->pos[1];
+                                position[2] += transform->pos[2];
+                                previous[0] += transform->pos[0];
+                                previous[1] += transform->pos[1];
+                                previous[2] += transform->pos[2];
                                 relative = 0;
                             }
                             fldMatterTable[index].unkCA = 1;
@@ -1643,13 +1643,13 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
                     }
                 }
                 if (relative) {
-                    transform = fldMatterTable[index].worldNode->inner;
-                    position[0] += transform->position[0];
-                    position[1] += transform->position[1];
-                    position[2] += transform->position[2];
-                    previous[0] += transform->position[0];
-                    previous[1] += transform->position[1];
-                    previous[2] += transform->position[2];
+                    transform = fldMatterTable[index].worldNode->poseset;
+                    position[0] += transform->pos[0];
+                    position[1] += transform->pos[1];
+                    position[2] += transform->pos[2];
+                    previous[0] += transform->pos[0];
+                    previous[1] += transform->pos[1];
+                    previous[2] += transform->pos[2];
                 }
             }
         }
@@ -1780,13 +1780,13 @@ FldValueRecordIndex fldHitChkCamera(const f32 start[3], const f32 end[3], f32 hi
         }
         if (fldMatterTable[index].worldNode != 0) {
             relative = 1;
-            transform = fldMatterTable[index].worldNode->inner;
-            origin[0] -= transform->position[0];
-            origin[1] -= transform->position[1];
-            origin[2] -= transform->position[2];
-            target[0] -= transform->position[0];
-            target[1] -= transform->position[1];
-            target[2] -= transform->position[2];
+            transform = fldMatterTable[index].worldNode->poseset;
+            origin[0] -= transform->pos[0];
+            origin[1] -= transform->pos[1];
+            origin[2] -= transform->pos[2];
+            target[0] -= transform->pos[0];
+            target[1] -= transform->pos[1];
+            target[2] -= transform->pos[2];
         } else {
             relative = 0;
         }
@@ -1839,13 +1839,13 @@ FldValueRecordIndex fldHitChkCamera(const f32 start[3], const f32 end[3], f32 hi
             }
         }
         if (relative) {
-            transform = fldMatterTable[index].worldNode->inner;
-            origin[0] += transform->position[0];
-            origin[1] += transform->position[1];
-            origin[2] += transform->position[2];
-            target[0] += transform->position[0];
-            target[1] += transform->position[1];
-            target[2] += transform->position[2];
+            transform = fldMatterTable[index].worldNode->poseset;
+            origin[0] += transform->pos[0];
+            origin[1] += transform->pos[1];
+            origin[2] += transform->pos[2];
+            target[0] += transform->pos[0];
+            target[1] += transform->pos[1];
+            target[2] += transform->pos[2];
         }
     }
     hitPoint[0] = origin[0];
@@ -1900,13 +1900,13 @@ FldValueRecordIndex fldHitChkEnemy(const f32 start[3], const f32 end[3], f32 hit
         }
         if (fldMatterTable[index].worldNode != 0) {
             relative = 1;
-            transform = fldMatterTable[index].worldNode->inner;
-            origin[0] -= transform->position[0];
-            origin[1] -= transform->position[1];
-            origin[2] -= transform->position[2];
-            target[0] -= transform->position[0];
-            target[1] -= transform->position[1];
-            target[2] -= transform->position[2];
+            transform = fldMatterTable[index].worldNode->poseset;
+            origin[0] -= transform->pos[0];
+            origin[1] -= transform->pos[1];
+            origin[2] -= transform->pos[2];
+            target[0] -= transform->pos[0];
+            target[1] -= transform->pos[1];
+            target[2] -= transform->pos[2];
         } else {
             relative = 0;
         }
@@ -1953,13 +1953,13 @@ FldValueRecordIndex fldHitChkEnemy(const f32 start[3], const f32 end[3], f32 hit
             }
         }
         if (relative) {
-            transform = fldMatterTable[index].worldNode->inner;
-            origin[0] += transform->position[0];
-            origin[1] += transform->position[1];
-            origin[2] += transform->position[2];
-            target[0] += transform->position[0];
-            target[1] += transform->position[1];
-            target[2] += transform->position[2];
+            transform = fldMatterTable[index].worldNode->poseset;
+            origin[0] += transform->pos[0];
+            origin[1] += transform->pos[1];
+            origin[2] += transform->pos[2];
+            target[0] += transform->pos[0];
+            target[1] += transform->pos[1];
+            target[2] += transform->pos[2];
         }
     }
     hitPoint[0] = origin[0];
@@ -2091,7 +2091,7 @@ void evtMessageExtraActionNoOp(void) {
 }
 INCLUDE_SDATA(const s32, "game/code_00136EF8", fldCameraColorLayerScroll);
 
-INCLUDE_SDATA(FldWallMeshRecord * const, "game/code_00136EF8", fldItemBoxObjBuf);
+INCLUDE_SDATA(const s32, "game/code_00136EF8", fldItemBoxObjBuf);
 
 INCLUDE_SDATA(const s32, "game/code_00136EF8", D_0043617C);
 
@@ -2101,6 +2101,6 @@ INCLUDE_SDATA(const s32, "game/code_00136EF8", fldValueRecordCount);
 
 INCLUDE_SDATA(const s32, "game/code_00136EF8", D_00436188);
 
-INCLUDE_SDATA(struct sdfMemHandle_t * const, "game/code_00136EF8", fldAuxRecordResource);
+INCLUDE_SDATA(const s32, "game/code_00136EF8", fldAuxRecordResource);
 
-INCLUDE_SDATA(struct sdfMemHandle_t * const, "game/code_00136EF8", fldValueRecordResource);
+INCLUDE_SDATA(const s32, "game/code_00136EF8", fldValueRecordResource);

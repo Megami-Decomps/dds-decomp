@@ -416,7 +416,7 @@ extern void frCreateDrawEnvPacket(FrFontGsPacket *packet);
 
 extern FrFontSystem frFontWork;
 
-extern SdfPoolNode sdfGrOtTable[];
+extern sdfGrOt_t sdfGrOtTable[];
 extern sdfDrawTag_t frFontSetupPacketLists[2];
 extern FrFontGsPacket frFontSetupPackets[2];
 extern sdfDrawTag_t frFontAtlasPacketLists[2];

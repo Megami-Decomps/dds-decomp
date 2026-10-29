@@ -68,8 +68,8 @@ s32 DispBaseData(dds3Basic_t *node, s32 x, s32 y, sdfDrawTag_t *list) {
     sdfDrawTagLink(list, (u32)sdfDevPrintf(labelX,
         (y++ * 6 << 4) + 0x7900, 0xFEFFFF, 0, "ID    : 0x%05X", node->key));
     sdfDrawTagLink(list, (u32)sdfDevPrintf(labelX,
-        (y++ * 6 << 4) + 0x7900, 0xFEFFFF, 0, "NAME  : %s", node->value));
-    transform = node->inner;
+        (y++ * 6 << 4) + 0x7900, 0xFEFFFF, 0, "NAME  : %s", node->name));
+    transform = node->poseset;
     lines = 2;
     if (transform != NULL) {
         y++;
@@ -79,7 +79,7 @@ s32 DispBaseData(dds3Basic_t *node, s32 x, s32 y, sdfDrawTag_t *list) {
         valueX = ((x + 84) << 4) + 0x7000;
         sdfDrawTagLink(list, (u32)sdfDevPrintf(valueX,
             positionY, 0xFEFFFF, 0xE, "%3.2f %3.2f %3.2f",
-            transform->position[0], transform->position[1], transform->position[2]));
+            transform->pos[0], transform->pos[1], transform->pos[2]));
         y += 2;
         rotationY = (y * 6 << 4) + 0x7900;
         sdfDrawTagLink(list, (u32)sdfDevPrintf(labelX,
@@ -121,7 +121,7 @@ u32 DispObjectBaseData(dds3Basic_t *worldNode, s32 x, s32 y, void *list) {
 #include "dds3_world_primary.h"
 #include "dds3_scene_membership.h"
 #include "sdf_packet_alloc.h"
-extern SdfPoolNode D_00325708;
+extern sdfGrOt_t D_00325708;
 extern s8 D_00324543[];
 extern s32 evtSceneDispProcess(void *task);
 
@@ -178,12 +178,12 @@ dds3Basic_t *dds3AllocBasic(u32 kind) {
     node->color = 0x80808080;
     node->word0 = 0;
     node->key = 0;
-    node->value = 0;
+    node->name = 0;
     ops = D_003299C0[kind];
     node->ops = ops;
     node->word14 = 0;
-    node->data = NULL;
-    node->inner = NULL;
+    node->workdata = NULL;
+    node->poseset = NULL;
     node->next = NULL;
     node->previous = NULL;
     node->word28 = 0;
@@ -230,7 +230,7 @@ u8 dds3InitPoseSet(dds3Basic_t *node) {
     if (node == NULL) {
         return 0;
     }
-    if (node->inner != NULL) {
+    if (node->poseset != NULL) {
         return 0;
     }
     inner = sdfChipAllocDirect(sizeof(dds3PoseSet_t));
@@ -240,7 +240,7 @@ u8 dds3InitPoseSet(dds3Basic_t *node) {
     inner->flags = OBJECT_TRANSFORM_FLAG_UPDATE_PENDING;
     dds3BackupPoseSet(inner);
     VU0_STORE_VF(vf0, &inner->unkB0);
-    node->inner = inner;
+    node->poseset = inner;
     inner->unkC8 = 0;
     inner->radius = 0.0f;
     return 1;
@@ -250,10 +250,10 @@ void dds3FreePoseSet(dds3Basic_t *node) {
     dds3PoseSet_t *inner;
 
     if (node != NULL) {
-        inner = node->inner;
+        inner = node->poseset;
         if (inner != NULL) {
             sdfChipFreeDirect(inner);
-            node->inner = NULL;
+            node->poseset = NULL;
         }
     }
 }
@@ -271,7 +271,7 @@ u8 dds3CheckPoseSetFlag(dds3PoseSet_t *node, u32 flags) {
 }
 
 void dds3BackupPoseSet(dds3PoseSet_t *node) {
-    u8 *p40 = (u8 *)&node->position;
+    u8 *p40 = (u8 *)&node->pos;
     u8 *p50;
     u8 *p60;
 
@@ -286,20 +286,20 @@ void dds3BackupPoseSet(dds3PoseSet_t *node) {
 void dds3SetRadiusPoseSet(dds3PoseSet_t *node) {
     SDF_VU0_COPYVECTOR(&node->savedScale, &node->scale);
     SDF_VU0_COPYVECTOR(&node->savedRotation, &node->rotation);
-    SDF_VU0_COPYVECTOR(&node->savedPosition, &node->position);
+    SDF_VU0_COPYVECTOR(&node->savedPosition, &node->pos);
 }
 
 void dds3GetRadiusPoseSet(dds3Basic_t *node, f32 value) {
-    node->inner->radius = value;
+    node->poseset->radius = value;
 }
 
 f32 effObjGetInnerFloat(dds3Basic_t *node) {
-    return node->inner->radius;
+    return node->poseset->radius;
 }
 
 void dds3SetPosPoseSet(dds3Basic_t *node, u128 *vector) {
-    dds3PoseSet_t *inner = node->inner;
-    f32 *dst = inner->position;
+    dds3PoseSet_t *inner = node->poseset;
+    f32 *dst = inner->pos;
 
     inner->flags = (inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) &
         ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
@@ -307,7 +307,7 @@ void dds3SetPosPoseSet(dds3Basic_t *node, u128 *vector) {
 }
 
 void dds3SetRotPoseSet(dds3Basic_t *node, u128 *vector) {
-    dds3PoseSet_t *inner = node->inner;
+    dds3PoseSet_t *inner = node->poseset;
     f32 *dst = inner->rotation;
 
     inner->flags = (inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) &
@@ -316,7 +316,7 @@ void dds3SetRotPoseSet(dds3Basic_t *node, u128 *vector) {
 }
 
 void dds3SetSclPoseSet(dds3Basic_t *node, u128 *vector) {
-    dds3PoseSet_t *inner = node->inner;
+    dds3PoseSet_t *inner = node->poseset;
     f32 *dst = inner->scale;
 
     inner->flags = (inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) &
@@ -325,28 +325,28 @@ void dds3SetSclPoseSet(dds3Basic_t *node, u128 *vector) {
 }
 
 void dds3GetPosPoseSet(dds3Basic_t *node) {
-    u8 *p = (u8 *)&node->inner->position;
+    u8 *p = (u8 *)&node->poseset->pos;
 
     SDF_VU0_LOADVECTOR_BARRIER(p);
     SDF_VU0_VECTOR_W_SET_ONE();
 }
 
 void dds3GetRotPoseSet(dds3Basic_t *node) {
-    u8 *p = (u8 *)&node->inner->rotation;
+    u8 *p = (u8 *)&node->poseset->rotation;
 
     SDF_VU0_LOADVECTOR_BARRIER(p);
     Normalize();
 }
 
 void effObjFetchInnerScale(dds3Basic_t *node) {
-    u8 *p = (u8 *)&node->inner->scale;
+    u8 *p = (u8 *)&node->poseset->scale;
 
     SDF_VU0_LOADVECTOR_BARRIER(p);
 }
 
 void dds3GetPosPoseSetMCR(dds3Basic_t *node, u128 *vector) {
-    dds3PoseSet_t *inner = node->inner;
-    u8 *src = (u8 *)&inner->position;
+    dds3PoseSet_t *inner = node->poseset;
+    u8 *src = (u8 *)&inner->pos;
     u8 *dst;
 
     inner->flags = (inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) &
@@ -358,7 +358,7 @@ void dds3GetPosPoseSetMCR(dds3Basic_t *node, u128 *vector) {
 }
 
 void dds3AddRotPoseSet(dds3Basic_t *node, u128 *vector) {
-    dds3PoseSet_t *inner = node->inner;
+    dds3PoseSet_t *inner = node->poseset;
 
     inner->flags = (inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) &
         ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
@@ -369,7 +369,7 @@ void dds3AddRotPoseSet(dds3Basic_t *node, u128 *vector) {
 }
 
 void dds3GetSclPoseSetMCR(dds3Basic_t *node, u128 *vector) {
-    dds3PoseSet_t *inner = node->inner;
+    dds3PoseSet_t *inner = node->poseset;
     u8 *src = (u8 *)&inner->scale;
     u8 *dst;
 

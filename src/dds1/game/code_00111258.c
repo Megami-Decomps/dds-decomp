@@ -18,7 +18,7 @@ void dds3AreaBasicGetItemArray(dds3Basic_t *worldIndexOwner, dds3Basic_t *node) 
 
 /* Select one of the kind-2 owner's two world index nodes. */
 WorldIndexNode *dds3AreaBasicGetWorldIndexNode(dds3Basic_t *worldIndexOwner, s32 slotIndex) {
-    WorldIndexNode **slot = worldIndexOwner->data;
+    WorldIndexNode **slot = worldIndexOwner->workdata;
 
     slot += slotIndex;
     return *slot;
@@ -68,7 +68,7 @@ dds3Basic_t *dds3GetFirstWorldObjectNodeOfKind2(void) {
 
 
 s32 MoverBasicConstructor(dds3Basic_t *obj) {
-    obj->data = sdfChipAllocDirect(0x10);
-    memset(obj->data, 0, 0x10);
+    obj->workdata = sdfChipAllocDirect(0x10);
+    memset(obj->workdata, 0, 0x10);
     return 1;
 }

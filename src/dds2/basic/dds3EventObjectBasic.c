@@ -16,7 +16,7 @@ void EventObjectBasicDestructor(dds3Basic_t *eventObject) {
     DdsSlotResourceBlock *eventData;
 
     dds3FreePoseSet(eventObject);
-    eventData = eventObject->data;
+    eventData = eventObject->workdata;
     dds3ObjectBaseFreeControlWorkData(eventData->baseControlWorkData);
     sdfChipFreeDirect(eventData);
 }
@@ -25,7 +25,7 @@ void EventObjectBasicDestructor(dds3Basic_t *eventObject) {
 s32 EventObjectBasicMainProcuder(dds3Basic_t *eventObject) {
     dds3PoseSet_t *eventNode;
 
-    eventNode = eventObject->inner;
+    eventNode = eventObject->poseset;
     if (dds3CheckPoseSetFlag(eventNode, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) == 1) {
         dds3OffPoseSetFlag(eventNode, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
         dds3SetRadiusPoseSet(eventNode);

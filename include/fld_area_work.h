@@ -120,7 +120,7 @@ typedef struct FldTextureResource {
 
 /* Shared field controller, camera/motion state and retained map resources.
  * XYZ is followed by saved XYZ history, not a homogeneous fourth component. */
-typedef struct FldAreaWork {
+typedef struct fldAreaWork_t {
     struct dds3Basic_t *taskHandle; /* 0x00: first spawned area basic object */
     const char *fallbackResourceTaskName;
     u8 pad08[4];
@@ -254,59 +254,59 @@ typedef struct FldAreaWork {
     FldResourceBlock mapResources[8]; /* 0x1A8: autmap_1,2,3,5,6,7,8,9 */
     FldTextureResource fieldTextures[4]; /* 0x1E8: d2_fild1..4.tmx */
 #endif
-} FldAreaWork;
+} fldAreaWork_t;
 
-typedef char FldAreaWork_frameTravelDistance_at_FC[((u32)&((FldAreaWork *)0)->frameTravelDistance == 0xFC) ? 1 : -1];
-typedef char FldAreaWork_attritionDistance_at_120[((u32)&((FldAreaWork *)0)->attritionDistance == 0x120) ? 1 : -1];
+typedef char fldAreaWork_t_frameTravelDistance_at_FC[((u32)&((fldAreaWork_t *)0)->frameTravelDistance == 0xFC) ? 1 : -1];
+typedef char fldAreaWork_t_attritionDistance_at_120[((u32)&((fldAreaWork_t *)0)->attritionDistance == 0x120) ? 1 : -1];
 
-extern FldAreaWork fldGlobalBase;
+extern fldAreaWork_t fldGlobalBase;
 
-#define FLD_AREA_OFFSET(member) ((u32)&((FldAreaWork *)0)->member)
+#define FLD_AREA_OFFSET(member) ((u32)&((fldAreaWork_t *)0)->member)
 typedef char FldResourceBlock_size_check[(sizeof(FldResourceBlock) == 8) ? 1 : -1];
 typedef char FldTextureResource_size_check[(sizeof(FldTextureResource) == 0xC) ? 1 : -1];
 typedef char FldResourceBlock_resourceData_offset_check[
     ((u32)&((FldResourceBlock *)0)->resourceData == 0x04) ? 1 : -1];
 typedef char FldTextureResource_resourceData_offset_check[
     ((u32)&((FldTextureResource *)0)->resourceData == 0x04) ? 1 : -1];
-typedef char FldAreaWork_area_offset_check[(FLD_AREA_OFFSET(area) == 0x10) ? 1 : -1];
-typedef char FldAreaWork_defaultEncounterId_offset_check[(FLD_AREA_OFFSET(defaultEncounterId) == 0xDC) ? 1 : -1];
-typedef char FldAreaWork_resourceRequestState_offset_check[(FLD_AREA_OFFSET(resourceRequestState) == 0x78) ? 1 : -1];
-typedef char FldAreaWork_positionPending_offset_check[
+typedef char fldAreaWork_t_area_offset_check[(FLD_AREA_OFFSET(area) == 0x10) ? 1 : -1];
+typedef char fldAreaWork_t_defaultEncounterId_offset_check[(FLD_AREA_OFFSET(defaultEncounterId) == 0xDC) ? 1 : -1];
+typedef char fldAreaWork_t_resourceRequestState_offset_check[(FLD_AREA_OFFSET(resourceRequestState) == 0x78) ? 1 : -1];
+typedef char fldAreaWork_t_positionPending_offset_check[
     (FLD_AREA_OFFSET(positionPending) == 0x84) ? 1 : -1];
-typedef char FldAreaWork_cameraTargetGraceTicks_offset_check[
+typedef char fldAreaWork_t_cameraTargetGraceTicks_offset_check[
     (FLD_AREA_OFFSET(cameraTargetGraceTicks) == 0xE8) ? 1 : -1];
-typedef char FldAreaWork_specialEventActive_offset_check[
+typedef char fldAreaWork_t_specialEventActive_offset_check[
     (FLD_AREA_OFFSET(specialEventActive) == 0x104) ? 1 : -1];
-typedef char FldAreaWork_pendingSceneRequest_offset_check[(FLD_AREA_OFFSET(pendingSceneRequest) == 0x110) ? 1 : -1];
-typedef char FldAreaWork_deferredExit_offset_check[(FLD_AREA_OFFSET(deferredExit) == 0x114) ? 1 : -1];
-typedef char FldAreaWork_flagStage_offset_check[(FLD_AREA_OFFSET(flagStage) == 0xC0) ? 1 : -1];
-typedef char FldAreaWork_playerModelAlternate_offset_check[(FLD_AREA_OFFSET(playerModelAlternate) == 0x118) ? 1 : -1];
-typedef char FldAreaWork_terrainAttritionKind_offset_check[(FLD_AREA_OFFSET(terrainAttritionKind) == 0x11C) ? 1 : -1];
-typedef char FldAreaWork_colorEffectSuppressed_offset_check[(FLD_AREA_OFFSET(colorEffectSuppressed) == 0x12A) ? 1 : -1];
-typedef char FldAreaWork_sceneBgmSuppressed_offset_check[(FLD_AREA_OFFSET(sceneBgmSuppressed) == 0x130) ? 1 : -1];
+typedef char fldAreaWork_t_pendingSceneRequest_offset_check[(FLD_AREA_OFFSET(pendingSceneRequest) == 0x110) ? 1 : -1];
+typedef char fldAreaWork_t_deferredExit_offset_check[(FLD_AREA_OFFSET(deferredExit) == 0x114) ? 1 : -1];
+typedef char fldAreaWork_t_flagStage_offset_check[(FLD_AREA_OFFSET(flagStage) == 0xC0) ? 1 : -1];
+typedef char fldAreaWork_t_playerModelAlternate_offset_check[(FLD_AREA_OFFSET(playerModelAlternate) == 0x118) ? 1 : -1];
+typedef char fldAreaWork_t_terrainAttritionKind_offset_check[(FLD_AREA_OFFSET(terrainAttritionKind) == 0x11C) ? 1 : -1];
+typedef char fldAreaWork_t_colorEffectSuppressed_offset_check[(FLD_AREA_OFFSET(colorEffectSuppressed) == 0x12A) ? 1 : -1];
+typedef char fldAreaWork_t_sceneBgmSuppressed_offset_check[(FLD_AREA_OFFSET(sceneBgmSuppressed) == 0x130) ? 1 : -1];
 #ifdef VERSION_DDS1
-typedef char FldAreaWork_size_check[(sizeof(FldAreaWork) == 0x1BC) ? 1 : -1];
-typedef char FldAreaWork_fieldTransitionMovementGate_offset_check[
+typedef char fldAreaWork_t_size_check[(sizeof(fldAreaWork_t) == 0x1BC) ? 1 : -1];
+typedef char fldAreaWork_t_fieldTransitionMovementGate_offset_check[
     (FLD_AREA_OFFSET(fieldTransitionMovementGate) == 0x17C) ? 1 : -1];
-typedef char FldAreaWork_areaDamageReactionMovementGate_offset_check[
+typedef char fldAreaWork_t_areaDamageReactionMovementGate_offset_check[
     (FLD_AREA_OFFSET(areaDamageReactionMovementGate) == 0x184) ? 1 : -1];
-typedef char FldAreaWork_x_offset_check[(FLD_AREA_OFFSET(x) == 0x140) ? 1 : -1];
-typedef char FldAreaWork_previousCameraModelFrame_offset_check[(FLD_AREA_OFFSET(previousCameraModelFrame) == 0x16C) ? 1 : -1];
-typedef char FldAreaWork_modeOneCameraState_offset_check[
+typedef char fldAreaWork_t_x_offset_check[(FLD_AREA_OFFSET(x) == 0x140) ? 1 : -1];
+typedef char fldAreaWork_t_previousCameraModelFrame_offset_check[(FLD_AREA_OFFSET(previousCameraModelFrame) == 0x16C) ? 1 : -1];
+typedef char fldAreaWork_t_modeOneCameraState_offset_check[
     (FLD_AREA_OFFSET(modeOneCameraState) == 0x178) ? 1 : -1];
-typedef char FldAreaWork_mapResources_offset_check[(FLD_AREA_OFFSET(mapResources) == 0x19C) ? 1 : -1];
+typedef char fldAreaWork_t_mapResources_offset_check[(FLD_AREA_OFFSET(mapResources) == 0x19C) ? 1 : -1];
 #else
-typedef char FldAreaWork_size_check[(sizeof(FldAreaWork) == 0x218) ? 1 : -1];
-typedef char FldAreaWork_fieldTransitionMovementGate_offset_check[
+typedef char fldAreaWork_t_size_check[(sizeof(fldAreaWork_t) == 0x218) ? 1 : -1];
+typedef char fldAreaWork_t_fieldTransitionMovementGate_offset_check[
     (FLD_AREA_OFFSET(fieldTransitionMovementGate) == 0x188) ? 1 : -1];
-typedef char FldAreaWork_areaDamageReactionMovementGate_offset_check[
+typedef char fldAreaWork_t_areaDamageReactionMovementGate_offset_check[
     (FLD_AREA_OFFSET(areaDamageReactionMovementGate) == 0x190) ? 1 : -1];
-typedef char FldAreaWork_x_offset_check[(FLD_AREA_OFFSET(x) == 0x14C) ? 1 : -1];
-typedef char FldAreaWork_previousCameraModelFrame_offset_check[(FLD_AREA_OFFSET(previousCameraModelFrame) == 0x178) ? 1 : -1];
-typedef char FldAreaWork_modeOneCameraState_offset_check[
+typedef char fldAreaWork_t_x_offset_check[(FLD_AREA_OFFSET(x) == 0x14C) ? 1 : -1];
+typedef char fldAreaWork_t_previousCameraModelFrame_offset_check[(FLD_AREA_OFFSET(previousCameraModelFrame) == 0x178) ? 1 : -1];
+typedef char fldAreaWork_t_modeOneCameraState_offset_check[
     (FLD_AREA_OFFSET(modeOneCameraState) == 0x184) ? 1 : -1];
-typedef char FldAreaWork_mapResources_offset_check[(FLD_AREA_OFFSET(mapResources) == 0x1A8) ? 1 : -1];
-typedef char FldAreaWork_fieldTextures_offset_check[(FLD_AREA_OFFSET(fieldTextures) == 0x1E8) ? 1 : -1];
+typedef char fldAreaWork_t_mapResources_offset_check[(FLD_AREA_OFFSET(mapResources) == 0x1A8) ? 1 : -1];
+typedef char fldAreaWork_t_fieldTextures_offset_check[(FLD_AREA_OFFSET(fieldTextures) == 0x1E8) ? 1 : -1];
 #endif
 #undef FLD_AREA_OFFSET
 

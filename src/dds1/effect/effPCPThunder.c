@@ -2814,7 +2814,7 @@ void dds3BezierTrackPolySetVC(EffPcpThunderFragmentResources *history, const u12
 
 
 
-extern SdfPoolNode *dds3BezierTrackPolyParam[];
+extern sdfGrOt_t *dds3BezierTrackPolyParam[];
 #include "sdf_packet_alloc.h"
 extern void *effPkt3DPrimMakePoly(EffThunderDrawParams *);
 
@@ -2831,7 +2831,7 @@ void dds3BezierTrackPolyDraw(EffPcpThunderFragmentResources *history) {
     u32 *colors;
     u32 edgeColor;
     u32 centerColor;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
 
     if (history->activePointCount == 0) {
         return;

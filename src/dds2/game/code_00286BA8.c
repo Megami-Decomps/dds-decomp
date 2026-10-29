@@ -269,8 +269,6 @@ s32 mtrPollResourceLoadTask(void) {
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "game/code_00286BA8", mnuResourceTaskName);
-
 #ifdef NON_MATCHING
 #include "mnu_mantra.h"
 #include "mtr_resource_file.h"
@@ -433,6 +431,8 @@ s32 mtrAdvanceMantraResourceLoadState(MtrResourceLoadState *load, u16 mode) {
     return 0;
 }
 #else
+INCLUDE_RODATA(const s32, "game/code_00286BA8", mnuResourceTaskName);
+
 INCLUDE_ASM(const s32, "game/code_00286BA8", mtrAdvanceMantraResourceLoadState);
 #endif
 
@@ -572,7 +572,7 @@ s32 mtrMantraEquipInit(void) {
     mnuCloseCurrentProfilePanel(work->progressHost);
     memcpy(snapshot, work->list->cursor->items, sizeof(*snapshot));
     work->snapshot.profileId = ((u8 *)selector)[2];
-    evtPrintDeveloperConsoleMessage(D_00426208, work->snapshot.maxHp, work->snapshot.maxMp);
+    evtPrintDeveloperConsoleMessage(D_00426208, work->snapshot.maxhp, work->snapshot.maxMp);
     mnuSetupStaffMenuProfilePage(snapshot, work->progressHost);
     mnuEnsureProfilePanelEffect(snapshot, work->progressHost);
     mnuInitPartyPanelSlots(&work->progressHost->partyPanel);
@@ -836,9 +836,9 @@ extern void mnuDrawMantraSprite(s32 x, s32 y, s32 z, s32 alpha, s32 placementInd
                                 s32 flags, s32 context);
 extern s32 mnuDrawLoadedProgressPanels(datUnitWork_t *resource, MenuProgressHost *host, s32 mode);
 extern void mnuDrawCurrentProfilePanel(s32, s32, s32, MenuProgressHost *, s32);
-struct SdfPoolNode;
-extern s8 evtStageTestUpdate(struct SdfPoolNode **);
-extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
+struct sdfGrOt_t;
+extern s8 evtStageTestUpdate(struct sdfGrOt_t **);
+extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
 
 s32 mtrMantraEquipDraw(void) {
     MnuStatusResource *work = (MnuStatusResource *)sdfGetTaskValueByKey(mnuMantraSelectionResource, SDF_TASK_VALUE_USER_DATA_KEY);

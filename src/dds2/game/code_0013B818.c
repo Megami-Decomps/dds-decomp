@@ -862,11 +862,11 @@ s32 fldTestRoomProbeFacingAndRange(dds3Basic_t *actor, dds3Basic_t *entry) {
             kind = ((FldTaskInfo *)fldRoomResources[i]->data)->shape->kind;
             switch (kind) {
             case FLD_TRIGGER_SHAPE_KIND_SPHERE:
-                source = entry->data;
+                source = entry->workdata;
                 position[0] = source->position.x;
                 position[1] = source->position.y;
                 position[2] = source->position.z;
-                SDF_VU0_LOADVECTOR(actor->inner->rotation);
+                SDF_VU0_LOADVECTOR(actor->poseset->rotation);
                 effMiscQuaternionToMatrixVU();
                 SDF_VU0_STORE_ROW2(dir);
                 dir[1] = 0.0f;
@@ -875,7 +875,7 @@ s32 fldTestRoomProbeFacingAndRange(dds3Basic_t *actor, dds3Basic_t *entry) {
                 VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
                 SDF_VU0_COPYVECTOR_A_TO_C();
                 SDF_VU0_LOADVECTOR(position);
-                SDF_VU0_LOADVECTOR_B(actor->inner->position);
+                SDF_VU0_LOADVECTOR_B(actor->poseset->pos);
                 SDF_VU0_SUBVECTOR();
                 SDF_VU0_STOREVECTOR(dir);
                 dir[1] = 0.0f;
@@ -894,7 +894,7 @@ s32 fldTestRoomProbeFacingAndRange(dds3Basic_t *actor, dds3Basic_t *entry) {
             case FLD_TRIGGER_SHAPE_KIND_PLANE:
                 return fldEveHitTable[i].crossingDirection == kind;
             case FLD_TRIGGER_SHAPE_KIND_BOX:
-                SDF_VU0_LOADVECTOR(actor->inner->rotation);
+                SDF_VU0_LOADVECTOR(actor->poseset->rotation);
                 effMiscQuaternionToMatrixVU();
                 SDF_VU0_STORE_ROW2(dir);
                 dir[1] = 0.0f;
@@ -929,9 +929,9 @@ s32 fldTestRoomProbeFacing(dds3Basic_t *actor, dds3Basic_t *entry) {
             kind = ((FldTaskInfo *)fldRoomResources[i]->data)->shape->kind;
             switch (kind) {
             case FLD_TRIGGER_SHAPE_KIND_SPHERE:
-                source = entry->data;
+                source = entry->workdata;
                 SDF_VU0_COPYVECTOR(position, &source->position);
-                SDF_VU0_LOADVECTOR(actor->inner->rotation);
+                SDF_VU0_LOADVECTOR(actor->poseset->rotation);
                 effMiscQuaternionToMatrixVU();
                 SDF_VU0_STORE_ROW2(dir);
                 dir[1] = 0.0f;
@@ -940,7 +940,7 @@ s32 fldTestRoomProbeFacing(dds3Basic_t *actor, dds3Basic_t *entry) {
                 VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
                 SDF_VU0_COPYVECTOR_A_TO_C();
                 SDF_VU0_LOADVECTOR(position);
-                SDF_VU0_LOADVECTOR_B(actor->inner->position);
+                SDF_VU0_LOADVECTOR_B(actor->poseset->pos);
                 SDF_VU0_SUBVECTOR();
                 SDF_VU0_STOREVECTOR(dir);
                 dir[1] = 0.0f;
@@ -956,7 +956,7 @@ s32 fldTestRoomProbeFacing(dds3Basic_t *actor, dds3Basic_t *entry) {
             case FLD_TRIGGER_SHAPE_KIND_PLANE:
                 return fldEveHitTable[i].crossingDirection == kind;
             case FLD_TRIGGER_SHAPE_KIND_BOX:
-                SDF_VU0_LOADVECTOR(actor->inner->rotation);
+                SDF_VU0_LOADVECTOR(actor->poseset->rotation);
                 effMiscQuaternionToMatrixVU();
                 SDF_VU0_STORE_ROW2(dir);
                 dir[1] = 0.0f;
@@ -984,7 +984,7 @@ s32 fldTestActorRoomProbeCondition(s32 roomIndex, dds3Basic_t *actor, f32 *posit
     kind = ((FldTaskInfo *)fldRoomResources[roomIndex]->data)->shape->kind;
     switch (kind) {
     case FLD_TRIGGER_SHAPE_KIND_SPHERE:
-        SDF_VU0_LOADVECTOR(actor->inner->rotation);
+        SDF_VU0_LOADVECTOR(actor->poseset->rotation);
         effMiscQuaternionToMatrixVU();
         SDF_VU0_STORE_ROW2(dir);
         dir[1] = 0.0f;
@@ -993,7 +993,7 @@ s32 fldTestActorRoomProbeCondition(s32 roomIndex, dds3Basic_t *actor, f32 *posit
         VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
         SDF_VU0_COPYVECTOR_A_TO_C();
         SDF_VU0_LOADVECTOR(position);
-        SDF_VU0_LOADVECTOR_B(actor->inner->position);
+        SDF_VU0_LOADVECTOR_B(actor->poseset->pos);
         SDF_VU0_SUBVECTOR();
         SDF_VU0_STOREVECTOR(dir);
         dir[1] = 0.0f;
@@ -1012,7 +1012,7 @@ s32 fldTestActorRoomProbeCondition(s32 roomIndex, dds3Basic_t *actor, f32 *posit
     case FLD_TRIGGER_SHAPE_KIND_PLANE:
         return fldEveHitTable[roomIndex].crossingDirection == kind;
     case FLD_TRIGGER_SHAPE_KIND_BOX:
-        SDF_VU0_LOADVECTOR(actor->inner->rotation);
+        SDF_VU0_LOADVECTOR(actor->poseset->rotation);
         effMiscQuaternionToMatrixVU();
         SDF_VU0_STORE_ROW2(dir);
         dir[1] = 0.0f;
@@ -1297,9 +1297,9 @@ void fldUpdateRoomTriggers(dds3Basic_t *object) {
     }
     scene = dds3GetControlScene();
     playerSphere.radius = 30.0f;
-    playerSphere.position[0] = object->inner->position[0];
-    playerSphere.position[1] = object->inner->position[1];
-    playerSphere.position[2] = object->inner->position[2];
+    playerSphere.pos[0] = object->poseset->pos[0];
+    playerSphere.pos[1] = object->poseset->pos[1];
+    playerSphere.pos[2] = object->poseset->pos[2];
 
     for (roomIndex = 0; roomIndex < fldEveRngCount; roomIndex++) {
         mapSlot = fldEveHitTable[roomIndex].mapSlot;
@@ -1312,20 +1312,20 @@ void fldUpdateRoomTriggers(dds3Basic_t *object) {
         case 0:
             triggerSphere.radius = ((FldTaskInfo *)resource->data)->shape->sphere.radius;
             source = resource->transform;
-            triggerSphere.position[0] = source[0];
-            triggerSphere.position[1] = source[1];
-            triggerSphere.position[2] = source[2];
+            triggerSphere.pos[0] = source[0];
+            triggerSphere.pos[1] = source[1];
+            triggerSphere.pos[2] = source[2];
             if (dds3ComparePosPoseSet(&playerSphere, &triggerSphere) == 1) {
-                dx = playerSphere.position[0] - triggerSphere.position[0];
-                dy = playerSphere.position[1] - triggerSphere.position[1];
-                dz = playerSphere.position[2] - triggerSphere.position[2];
+                dx = playerSphere.pos[0] - triggerSphere.pos[0];
+                dy = playerSphere.pos[1] - triggerSphere.pos[1];
+                dz = playerSphere.pos[2] - triggerSphere.pos[2];
                 distance = fsqrtf(dx * dx + dy * dy + dz * dz);
                 if (nearestRoom != -1 && !(distance < bestDistance)) {
                     break;
                 }
                 if (fldEveHitTable[roomIndex].mode > 0
                     && fldTestActorRoomProbeCondition(roomIndex, (dds3Basic_t *)fldPlayerObject,
-                                                      triggerSphere.position) == 0) {
+                                                      triggerSphere.pos) == 0) {
                     break;
                 }
                 nearestRoom = roomIndex;
@@ -1415,9 +1415,9 @@ void fldUpdateRoomTriggers(dds3Basic_t *object) {
                 SDF_VU0_COPYVECTOR(corners[i], fldEveHitTable[roomIndex].corner[i]);
             }
             SDF_VU0_COPYVECTOR(vector, fldEveHitTable[roomIndex].center);
-            vector[0] = object->inner->position[0];
-            vector[1] = object->inner->position[1] - 45.0f;
-            vector[2] = object->inner->position[2];
+            vector[0] = object->poseset->pos[0];
+            vector[1] = object->poseset->pos[1] - 45.0f;
+            vector[2] = object->poseset->pos[2];
             vector[3] = 1.0f;
             if (fldRoomContainsPoint(vector, roomIndex) != 0) {
                 if (fldCheckNpcTalk(fldRoomResources[roomIndex]->name) != NULL) {
@@ -2026,7 +2026,7 @@ s32 fldDispatchInteractionAction(s32 messageId, s32 slot) {
         viewIndex = D_0038E2D0.sets[D_004361C8].messages[target - 10].view & 0x7F;
     }
     if (viewIndex != 0) {
-        unit = ((EffectObjectData *)(fldPlayerObject)->data)->transitionWork;
+        unit = ((EffectObjectData *)(fldPlayerObject)->workdata)->transitionWork;
         if (unit != NULL) {
             if (D_0038E2D0.views[viewIndex].player != 0) {
                 fldShowSceneModels();
@@ -2082,7 +2082,7 @@ s32 fldDispatchInteractionAction(s32 messageId, s32 slot) {
             }
         }
         /* The action callbacks can replace the player's transition work. */
-        unit = ((EffectObjectData *)(fldPlayerObject)->data)->transitionWork;
+        unit = ((EffectObjectData *)(fldPlayerObject)->workdata)->transitionWork;
         if (unit != NULL) {
             unit->owner->flags &= ~1;
         }

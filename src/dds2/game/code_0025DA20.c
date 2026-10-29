@@ -198,7 +198,7 @@ extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 mnuCampQuadBounds[4];
 extern s32 mnuCampQuadTexcoords[4];
 extern s32 mnuCampQuadColor[4];
-extern SdfPoolNode sdfGrOtTable[];
+extern sdfGrOt_t sdfGrOtTable[];
 
 
 extern ShopRankPriceRow mnuShopRankPriceRows[];
@@ -789,7 +789,7 @@ void mnuDrawCampScaledTexture(sdfTexHandle_t *texture, CampDisplayDefaults *disp
     s32 variant;
     sdfDrawTag_t *packet;
     s32 surfaceIndex = 0x53;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
 
     mnuCampQuadTexcoords[2] = texture->width << 4;
     mnuCampQuadTexcoords[3] = texture->height << 4;
@@ -1001,7 +1001,7 @@ void mnuAdvanceShopMenuState(EvtRuntime *scene) {
 }
 
 
-extern SdfPoolNode D_00380708;
+extern sdfGrOt_t D_00380708;
 extern u8 D_00380860[];
 
 void mnuShopCreateDescriptorSurface(EvtRuntime *scene) {
@@ -1037,7 +1037,7 @@ void mnuShopSubmitDescriptor(EvtRuntime *scene) {
     }
 }
 
-extern SdfPoolNode D_003805A8;
+extern sdfGrOt_t D_003805A8;
 extern s32 D_003C99F0[4];
 extern s32 D_003C9A00[4];
 extern s32 D_003C9A10[4];

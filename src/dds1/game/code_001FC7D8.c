@@ -38,7 +38,7 @@ extern s32 btlCreateAnalysisPanelTask(BtlUnit *unit, s32 duration);
 extern s32 btlGetRegisteredTaskValueOrDefault(void);
 
 
-extern void fldDrawShadowDisc(f32, f32, f32, f32, s32);
+extern void dds3DrawUnitObjectShadow(f32, f32, f32, f32, s32);
 extern void btlSetCommandPanelFadeMode(s8, s32);
 extern s8 btlHistoryCounter;
 extern BtlAiScratchWork *btlActionScratchWork;
@@ -217,7 +217,7 @@ void btlDrawUnitStatusShadowDisc(BtlUnit *unit) {
         x = position[0];
         y = ownPosition[1];
         z = position[2];
-        fldDrawShadowDisc(x, y, z, radius, alpha);
+        dds3DrawUnitObjectShadow(x, y, z, radius, alpha);
     }
 }
 

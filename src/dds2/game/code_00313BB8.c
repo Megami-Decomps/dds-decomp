@@ -308,7 +308,7 @@ void ptyRebuildProfileSkills(s32 useCurrentProfile, datUnitWork_t *unit) {
         ptyLoadPresetSkillSlots(unit);
         ptyMarkPresetSkillPool(unit);
         ptyRecomputeMaxHpMp(unit);
-        unit->hp = unit->maxHp;
+        unit->hp = unit->maxhp;
         unit->mp = unit->maxMp;
         break;
     case 1:
@@ -366,7 +366,7 @@ void ptyRecomputeMaxVitals(datUnitWork_t *unit, const s32 *statGains) {
         }
     }
 
-    oldMaxHp = unit->maxHp;
+    oldMaxHp = unit->maxhp;
     oldMaxMp = unit->maxMp;
     newMaxHp = datComputeSkillBoostedMaxHp(&adjusted);
     newMaxMp = datComputeSkillBoostedMaxMp(&adjusted);
@@ -374,7 +374,7 @@ void ptyRecomputeMaxVitals(datUnitWork_t *unit, const s32 *statGains) {
     if (oldMaxHp != newMaxHp) {
         u32 adjustedHp;
 
-        unit->maxHp = newMaxHp;
+        unit->maxhp = newMaxHp;
         maximum = (f32)newMaxHp;
         adjustedHp = (u32)((f32)unit->hp *
             (maximum / (f32)oldMaxHp) + 0.49999f);
@@ -395,8 +395,8 @@ void ptyRecomputeMaxVitals(datUnitWork_t *unit, const s32 *statGains) {
     if (unit->hp == 0) {
         unit->hp = 1;
     }
-    if (unit->hp > unit->maxHp) {
-        unit->hp = unit->maxHp;
+    if (unit->hp > unit->maxhp) {
+        unit->hp = unit->maxhp;
     }
     if (unit->mp > unit->maxMp) {
         unit->mp = unit->maxMp;
@@ -1609,7 +1609,7 @@ void sdfUpdateFlagListEntries(SdfFlagListWork *work) {
 }
 
 
-extern SdfPoolNode *D_0040A958[];
+extern sdfGrOt_t *D_0040A958[];
 #include "sdf_packet_alloc.h"
 
 /* Copy vertex pairs, optionally add the view target, and submit the packet list.
@@ -1621,7 +1621,7 @@ void sdfDrawFlagListVertices(SdfFlagListWork *work) {
     u32 vertexIndex;
     struct sdfMemHandle_t *vertexAllocation;
     sdfDrawTag_t *packetList;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
 
     if (work->params.maxFrames != 0 && work->frame >= work->params.maxFrames) {
         return;

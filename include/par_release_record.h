@@ -15,7 +15,7 @@ typedef struct dds3Polygon_t {
     s32 unk08;
     s32 drawCount;
     struct sdfMemHandle_t *allocation;
-    EffPacketParams request;
+    sdf3DPrimPolyParm_t request;
     struct sdfMat_t *asset;
     u128 *positions;
     f32 (*texcoords)[2];

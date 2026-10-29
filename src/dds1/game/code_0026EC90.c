@@ -21,7 +21,7 @@ extern u8 D_0037B8BC[];
 
 extern movieStream_t mnuMovieDrawContext;
 
-extern SdfPoolNode D_003253C8;
+extern sdfGrOt_t D_003253C8;
 
 extern char D_003B1140[]; /* "mnuStaffImageProc" */
 
@@ -40,7 +40,7 @@ extern s32 D_003BC618;
 extern void mnuLoadMovieRollSprite(void);
 extern void mnuInitializeMovieRollEntry(void);
 extern void sdfSetGridScaledDrawBounds(s32 column, s32 row, s32 width, s32 height, u32 drawColor);
-extern void sdfMovieDrawFrame(movieStream_t *, SdfPoolNode *);
+extern void sdfMovieDrawFrame(movieStream_t *, sdfGrOt_t *);
 
 /* Three signed image-relative control points per movie image bank. */
 typedef struct StaffImageCorners {

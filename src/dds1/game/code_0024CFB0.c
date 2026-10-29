@@ -335,8 +335,8 @@ s32 evtCopyWorldObjectEntryValue(const char *objectName, s32 destination) {
                                                   objectName);
     if (source != NULL) {
         destinationNode = (dds3Basic_t *)destination;
-        *(s32 *)((u8 *)destinationNode->data + 0x80) =
-            (s32)((EffLightData *)source->data)->buffer;
+        *(s32 *)((u8 *)destinationNode->workdata + 0x80) =
+            (s32)((EffLightData *)source->workdata)->buffer;
         return 1;
     }
     return 0;

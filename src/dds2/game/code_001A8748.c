@@ -183,7 +183,7 @@ extern s32 btlDoesEnabledStatusMatchCurrentId(datUnitWork_t *, u32);
 
 extern s32 TestMsgMngD_Process(dds3ProcessID_t *task);
 
-extern SdfPoolNode D_003805A8;
+extern sdfGrOt_t D_003805A8;
 
 extern u8 D_003B4D08[];
 
@@ -199,7 +199,7 @@ extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *list, s32 context, s32 mode);
 /* Option IDs index the same signed-byte bank used by the named controls. */
 extern SndPad dds3PadButtonState;
 
-extern SdfPoolNode sdfGrOtTable[];
+extern sdfGrOt_t sdfGrOtTable[];
 
 #define BTL_ENTRY_STATUS_MASK 0x7FFF
 
@@ -207,7 +207,7 @@ extern u32 datComputeSkillBoostedMaxHp(datUnitWork_t *);
 
 extern u32 datComputeSkillBoostedMaxMp(datUnitWork_t *);
 
-extern SdfPoolNode D_00380708;
+extern sdfGrOt_t D_00380708;
 
 
 extern s32 D_00435CBC;
@@ -412,7 +412,7 @@ extern char D_00436680[];
 
 extern char D_00436688[];
 
-extern SdfPoolNode kwlnPositionedTextSurface;
+extern sdfGrOt_t kwlnPositionedTextSurface;
 
 /* Draw the blur settings and handle selection, editing and cancellation. */
 s32 pbDebugPrintPanel2(void) {
@@ -737,7 +737,7 @@ void pbDrawRotatedPrim(s32 surfaceIndex) {
     s32 i;
     u8 *component;
     sdfDrawTag_t *list;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
     f32 phase;
 
     phase = (f32)(pbDebugPanel3State % 4096) * (1.0f / 4096.0f);
@@ -1381,7 +1381,7 @@ u16 btlRefreshUnitMaximumHpAndClampCurrentHp(datUnitWork_t *entryAddress) {
     datUnitWork_t *entry = entryAddress;
     u32 currentHp = btlReadCurrentUnitHp(entry);
     u32 maxHp = btlComputeSkillAdjustedMaxHp(entryAddress);
-    entry->maxHp = maxHp;
+    entry->maxhp = maxHp;
     if (maxHp < currentHp) {
         entry->hp = maxHp;
     }
@@ -1453,7 +1453,7 @@ void btlInitializePartyRecordFromEnemy(datUnitWork_t *entry, s32 index) {
         entry->effectData[i] = 0;
     }
     entry->effectDataCount = count;
-    entry->maxHp = datEnemyRecords[index].maxHp;
+    entry->maxhp = datEnemyRecords[index].maxHp;
     entry->hp = datEnemyRecords[index].hp;
     entry->maxMp = datEnemyRecords[index].maxMp;
     entry->mp = datEnemyRecords[index].mp;
@@ -1756,19 +1756,19 @@ BtlCommandVitalCostAmount btlGetCombinedPartyCommandPower(datUnitWork_t *base, B
     s32 average;
 
     if (first != NULL) {
-        totalMaxHp = first->partyRecord.maxHp;
+        totalMaxHp = first->partyRecord.maxhp;
         count = 1;
     }
     if (second != NULL) {
-        totalMaxHp += second->partyRecord.maxHp;
+        totalMaxHp += second->partyRecord.maxhp;
         count++;
     }
     if (third != NULL) {
-        totalMaxHp += third->partyRecord.maxHp;
+        totalMaxHp += third->partyRecord.maxhp;
         count++;
     }
     average = totalMaxHp / count;
-    snapshot.maxHp = average;
+    snapshot.maxhp = average;
     snapshot.hp = average;
     return btlApplyCommandAbilityMultiplier(&snapshot, commandId);
 }
@@ -1786,7 +1786,7 @@ BtlCommandUseError btlGetPartnerCommandUseError(BtlUnit *base, BtlUnit *first, B
         if ((first->partyRecord.status & 0x2A0E) != 0) {
             return BTL_COMMAND_USE_ERROR_ACTOR_STATE;
         }
-        totalMaxHp = first->partyRecord.maxHp;
+        totalMaxHp = first->partyRecord.maxhp;
         count = 1;
     }
     if (second != NULL) {
@@ -1797,7 +1797,7 @@ BtlCommandUseError btlGetPartnerCommandUseError(BtlUnit *base, BtlUnit *first, B
             return BTL_COMMAND_USE_ERROR_ACTOR_STATE;
         }
         count++;
-        totalMaxHp += second->partyRecord.maxHp;
+        totalMaxHp += second->partyRecord.maxhp;
     }
     if (third != NULL) {
         if ((third->status.flags & 0x100) == 0) {
@@ -1807,9 +1807,9 @@ BtlCommandUseError btlGetPartnerCommandUseError(BtlUnit *base, BtlUnit *first, B
             return BTL_COMMAND_USE_ERROR_ACTOR_STATE;
         }
         count++;
-        totalMaxHp += third->partyRecord.maxHp;
+        totalMaxHp += third->partyRecord.maxhp;
     }
-    snapshot.partyRecord.maxHp = totalMaxHp / count;
+    snapshot.partyRecord.maxhp = totalMaxHp / count;
     return btlGetCommandUseError(&snapshot, commandId);
 }
 

@@ -17,7 +17,7 @@
 /* Clear the kind-7 owner link and entry, preserving every flag except 4 and 8.
  * The caller supplies an existing effect resource; this does not free its owner. */
 void dds3EffectObjectBasicUnlinkObject(dds3Basic_t *owner) {
-    EffectDependencyState *resource = owner->data;
+    EffectDependencyState *resource = owner->workdata;
 
     resource->entryId = 0;
     resource->owner = NULL;
@@ -36,14 +36,14 @@ extern void dds3BillboardSetAnimNumber(struct billHandle_t *billboard, u32 entry
 
 /* Bind a billboard config to the owner's resource, copy the source vector and set up the billboard by config kind. */
 void dds3EffectObjectBasicSetFldEx(dds3Basic_t *owner, BillConfig *config) {
-    EffectDependencyState *resource = owner->data;
-    dds3PoseSet_t *source = owner->inner;
+    EffectDependencyState *resource = owner->workdata;
+    dds3PoseSet_t *source = owner->poseset;
 
     resource->config = config;
-    resource->sourcePosition[0] = source->position[0];
-    resource->sourcePosition[1] = source->position[1];
-    resource->sourcePosition[2] = source->position[2];
-    resource->sourcePosition[3] = source->position[3];
+    resource->sourcePosition[0] = source->pos[0];
+    resource->sourcePosition[1] = source->pos[1];
+    resource->sourcePosition[2] = source->pos[2];
+    resource->sourcePosition[3] = source->pos[3];
     dds3EffectObjectBasicStatOn(owner, 0x10);
     switch (resource->config->kind) {
     case 0:
@@ -74,7 +74,7 @@ extern s32 fldGetMapSlotByte(s32 mapId, u32 slotIndex, s32 valueIndex);
 extern f32 sdfViewTargetVector[4];
 
 void dds3EffectObjectBasicCalcFldEx(dds3Basic_t *object) {
-    EffectDependencyState *resource = object->data;
+    EffectDependencyState *resource = object->workdata;
     BillConfig *config;
     f32 direction[4] __attribute__((aligned(16)));
     f32 normalizedDirection[4] __attribute__((aligned(16)));
@@ -118,11 +118,11 @@ void dds3EffectObjectBasicCalcFldEx(dds3Basic_t *object) {
             dds3PoseSet_t *inner;
 
             value = (f32)projectionDistanceWord;
-            inner = object->inner;
+            inner = object->poseset;
 
-            inner->position[0] = resource->sourcePosition[0] - normalizedDirection[0] * value;
-            inner->position[1] = resource->sourcePosition[1] - normalizedDirection[1] * value;
-            inner->position[2] = resource->sourcePosition[2] - normalizedDirection[2] * value;
+            inner->pos[0] = resource->sourcePosition[0] - normalizedDirection[0] * value;
+            inner->pos[1] = resource->sourcePosition[1] - normalizedDirection[1] * value;
+            inner->pos[2] = resource->sourcePosition[2] - normalizedDirection[2] * value;
         }
     }
 
@@ -182,7 +182,7 @@ Dds3BasicCreateResult EventObjectBasicConstructor(dds3Basic_t *object) {
 
     dds3InitPoseSet(object);
     resource = (DdsSlotResourceBlock *)sdfChipAllocDirect(0x10);
-    object->data = resource;
+    object->workdata = resource;
     handle = dds3CreateSlotResourceState(object);
     resource->baseControlWorkData = handle;
     return DDS3_BASIC_CREATE_ACCEPTED;

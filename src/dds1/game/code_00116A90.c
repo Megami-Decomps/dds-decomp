@@ -17,14 +17,14 @@ typedef struct ActionSub {
 dds3Basic_t *dds3AddModelRangeBasicNew(s32 objectKey, void *resourceData, const f32 *position, const char *objectName) {
     dds3Basic_t *obj = dds3AddSceneBasicData(EFF_WORLD_KIND_ACTION_B);
 
-    obj->value = objectName;
-    ((ActionSub *)obj->data)->unk10 = 0;
+    obj->name = objectName;
+    ((ActionSub *)obj->workdata)->unk10 = 0;
     obj->key = objectKey;
     return obj;
 }
 
 void dds3SetPathBasicSpline(dds3Basic_t *path, u32 value) {
-    ((Dds3PathStatePayload *)path->data)->value = value;
+    ((Dds3PathStatePayload *)path->workdata)->value = value;
 }
 
 u32 dds3SearchSceneBasicWorkData(u32 id) {
@@ -33,20 +33,20 @@ u32 dds3SearchSceneBasicWorkData(u32 id) {
 
     world = dds3GetControlScene();
     path = dds3SearchSceneBasic(world, id, 6);
-    return ((Dds3PathStatePayload *)path->data)->value;
+    return ((Dds3PathStatePayload *)path->workdata)->value;
 }
 
 dds3Basic_t *dds3AddEventBasic(s32 key, const char *resourcePath, const char *name) {
     dds3Basic_t *obj = dds3AddSceneBasicData(EFF_WORLD_KIND_ACTION_D);
 
-    obj->data = (void *)resourcePath;
+    obj->workdata = (void *)resourcePath;
     obj->key = key;
-    obj->value = name;
+    obj->name = name;
     return obj;
 }
 
 const char *dds3EventBasicGetResource(dds3Basic_t *object) {
-    return object->data;
+    return object->workdata;
 }
 
 void dds3PathEvalSpline(u32 *segment, f32 *weight, const Dds3PathKeyframes *keys, f32 frame) {
@@ -70,15 +70,15 @@ dds3Basic_t *dds3AddPathBasic(s32 key, Dds3PathCurveTable *work, const char *nam
     dds3Basic_t *obj = dds3AddSceneBasicData(EFF_WORLD_KIND_ACTION_10);
 
     obj->key = key;
-    obj->value = name;
-    obj->data = work;
+    obj->name = name;
+    obj->workdata = work;
     return obj;
 }
 
 extern EffPrimitiveCurve *dds3AllocSplineHandle(f32 *data, u32 count, s32 mode);
 
 dds3PathBasicControl_t *dds3AllocPathBasicWorkData(dds3Basic_t *object) {
-    Dds3PathCurveTable *table = object->data;
+    Dds3PathCurveTable *table = object->workdata;
     Dds3PathCurveEntry *entry;
     Dds3PathKeyframes *keys;
     dds3PathBasicControl_t *work;

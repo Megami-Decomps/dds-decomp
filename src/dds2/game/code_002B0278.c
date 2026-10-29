@@ -160,9 +160,9 @@ extern u8 frDisableMode(u8);
 
 extern MenuPopupEntry mnuCampPartySelectionReturnPopupEntry[];
 
-extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
 
-extern s8 evtStageTestUpdate(struct SdfPoolNode **);
+extern s8 evtStageTestUpdate(struct sdfGrOt_t **);
 
 extern MenuPopupEntry mnuSkillMenuDetailPopupEntry[];
 
@@ -1088,7 +1088,7 @@ void mnuDrawPartySelectionPreviewPanel(MenuContext *context, MenuPageBar *hpBar,
     }
 
     hpBar->fade = fade;
-    mnuDrawAndAdvanceRatioPanel(0x940, 0xA58, 0, textColor, entry->hp, entry->maxHp, hpBar, 0x53);
+    mnuDrawAndAdvanceRatioPanel(0x940, 0xA58, 0, textColor, entry->hp, entry->maxhp, hpBar, 0x53);
     mpBar->fade = fade;
     mnuDrawAndAdvanceRatioPanel(0x940, 0xAE8, 0, textColor, entry->mp, entry->maxMp, mpBar, 0x53);
 
@@ -1486,7 +1486,7 @@ s32 mnuCreatePanels(dds3ProcessID_t *callback) {
     mnuSetGroupProperties(profile, (EffectSlotSet *)menuContext->displayHandle,
                           menuContext->alternateResources[0], 1, 2);
     party->iconPanel = mnuCreatePanelIconState(4, (s32)menuContext->displayHandle, menuContext->skillPanelResource);
-    if (mnuClassifyQuarterHalfPercent(data->hp, data->maxHp) <
+    if (mnuClassifyQuarterHalfPercent(data->hp, data->maxhp) <
         MNU_QUARTER_HALF_PERCENT_CLASS_BELOW_QUARTER) {
         party->motionSelection = -1;
     } else {

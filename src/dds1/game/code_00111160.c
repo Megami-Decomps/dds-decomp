@@ -21,7 +21,7 @@ dds3Basic_t *dds3AddAreaBasic(s32 key, const char *objectName) {
     dds3Basic_t *obj = dds3AddSceneBasicData(EFF_WORLD_KIND_WORLD_INDEX_OWNER);
 
     obj->key = key;
-    obj->value = objectName;
+    obj->name = objectName;
     return obj;
 }
 

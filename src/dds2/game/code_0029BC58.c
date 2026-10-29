@@ -98,13 +98,13 @@ void mnuTitleApplySequenceState(BrsSkillPackageWork *work) {
         p2sdPlaySE(0x10, 0x7F, 0x3F);
         break;
     case 1:
-        seq->hp = seq->maxHp;
+        seq->hp = seq->maxhp;
         seq->mp = seq->maxMp;
         seq->status = 0;
         p2sdPlaySE(0x10, 0x7F, 0x3F);
         break;
     case 2:
-        seq->hp = seq->maxHp;
+        seq->hp = seq->maxhp;
         p2sdPlaySE(0x10, 0x7F, 0x3F);
         break;
     case 3:

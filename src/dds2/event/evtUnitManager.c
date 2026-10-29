@@ -1,5 +1,5 @@
 #include "sdk_ps2.h"
-struct SdfPoolNode;
+struct sdfGrOt_t;
 struct EffNodeDescriptor;
 
 #include "common.h"
@@ -198,15 +198,15 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
         flags = unit->flags;
         if (flags & EVT_UNIT_FLAG_TARGET_TRANSITION) {
             f32 distance;
-            target = unit->currentTransitionTarget->data;
+            target = unit->currentTransitionTarget->workdata;
             if (unit->previousTransitionTarget) {
-                previous = unit->previousTransitionTarget->data;
+                previous = unit->previousTransitionTarget->workdata;
             }
             if (!sdfModelGetMarkPos(unit->owner->inner, 0)) {
                 mdlGetPosition(unit->owner);
             }
             SDF_VU0_STOREVECTOR_NOMEM(position);
-            SDF_VU0_LOADVECTOR_B(unit->currentTransitionTarget->inner->position);
+            SDF_VU0_LOADVECTOR_B(unit->currentTransitionTarget->poseset->pos);
             SDF_VU0_SUBVECTOR();
             SDF_VU0_STOREVECTOR_NOMEM(targetDirection);
             SDF_VU0_GETLENGTH(distance);
@@ -221,7 +221,7 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
             if (previous) {
                 f32 previousDistance;
                 SDF_VU0_LOADVECTOR(position);
-                SDF_VU0_LOADVECTOR_B(unit->previousTransitionTarget->inner->position);
+                SDF_VU0_LOADVECTOR_B(unit->previousTransitionTarget->poseset->pos);
                 SDF_VU0_SUBVECTOR();
                 SDF_VU0_STOREVECTOR_NOMEM(previousDirection);
                 SDF_VU0_GETLENGTH(previousDistance);
@@ -527,7 +527,7 @@ void GetBaseLightRGB(evtUnitHandle_t *unit) {
     f32 scale;
 
     if (unit->currentTransitionTarget != 0 && (unit->flags & EVT_UNIT_FLAG_TARGET_TRANSITION)) {
-        info = unit->currentTransitionTarget->data;
+        info = unit->currentTransitionTarget->workdata;
         if (info->flags & EVT_TARGET_INFO_FLAG_UNIT_OWNS_VECTOR) {
             ownVector = 1;
         }
@@ -551,7 +551,7 @@ void GetBaseAmbientRGB(evtUnitHandle_t *unit) {
     f32 scale;
 
     if (unit->currentTransitionTarget != 0 && (unit->flags & EVT_UNIT_FLAG_TARGET_TRANSITION)) {
-        info = unit->currentTransitionTarget->data;
+        info = unit->currentTransitionTarget->workdata;
         if (info->flags & EVT_TARGET_INFO_FLAG_UNIT_OWNS_VECTOR) {
             ownVector = 1;
         }
@@ -572,7 +572,7 @@ void GetBaseLightDir(evtUnitHandle_t *unit) {
     s32 ownVector = 0;
 
     if (unit->currentTransitionTarget != 0 && (unit->flags & EVT_UNIT_FLAG_TARGET_TRANSITION)) {
-        if (((EvtTargetInfo *)unit->currentTransitionTarget->data)->flags & EVT_TARGET_INFO_FLAG_UNIT_OWNS_VECTOR) {
+        if (((EvtTargetInfo *)unit->currentTransitionTarget->workdata)->flags & EVT_TARGET_INFO_FLAG_UNIT_OWNS_VECTOR) {
             ownVector = 1;
         }
     }
@@ -777,7 +777,7 @@ evtUnitHandle_t *evtGetUnitHandle(EvtUnitObjectKey worldObjectKey) {
     dds3Basic_t *obj = dds3SearchSceneBasic(dds3GetActiveScene(), worldObjectKey, EFF_WORLD_KIND_FOLLOW_MODEL);
 
     if (obj != NULL) {
-        return ((EffectObjectData *)obj->data)->transitionWork;
+        return ((EffectObjectData *)obj->workdata)->transitionWork;
     }
     return NULL;
 }
@@ -786,7 +786,7 @@ evtUnitHandle_t *evtGetUnitHandle2(dds3Basic_t *unit) {
     if (unit == NULL) {
         return NULL;
     }
-    return ((EffectObjectData *)unit->data)->transitionWork;
+    return ((EffectObjectData *)unit->workdata)->transitionWork;
 }
 
 extern f32 D_004215D0[];
@@ -970,7 +970,7 @@ EvtUnitFacingTargetResult evtRotateUnitTowardTarget(evtUnitHandle_t *unit, f32 *
     evtGetUnitDirVector(unit);
     SDF_VU0_STOREVECTOR(a);
     SDF_VU0_COPYVECTOR_A_TO_C();
-    evtVu0SubVectorXZAxis(dir, unit->effObj->inner->position);
+    evtVu0SubVectorXZAxis(dir, unit->effObj->poseset->pos);
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR_NOMEM(out);
     SDF_VU0_LOADVECTOR_B(b);
@@ -1015,7 +1015,7 @@ EvtUnitFacingTargetResult evtUnitRotationQuat(evtUnitHandle_t *unit, f32 *quat, 
     VU0_SET_VF10_Y_CLEAR_W(0.0f);
     SDF_VU0_NORMALIZE();
     VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
-    SDF_VU0_LOADVECTOR_B(unit->effObj->inner->position);
+    SDF_VU0_LOADVECTOR_B(unit->effObj->poseset->pos);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(v);
     return evtRotateUnitTowardTarget(unit, v, angle);
@@ -1033,7 +1033,7 @@ EvtUnitMotionStepResult evtUnitMoveType0(evtUnitHandle_t *unit) {
     } else {
         SDF_VU0_LOADVECTOR(unit->targetVector);
         obj = unit->effObj;
-        SDF_VU0_LOADVECTOR_B(obj->inner->position);
+        SDF_VU0_LOADVECTOR_B(obj->poseset->pos);
         SDF_VU0_SUBVECTOR();
         SDF_VU0_NORMALIZE();
     }
@@ -1062,8 +1062,8 @@ EvtUnitVerticalMoveStepCount evtUnitPrepareVerticalMoveSteps(evtUnitHandle_t *un
     EvtUnitVerticalMoveStepCount simulatedStepCount = 0;
     s32 vectorComponentIndex;
     for (vectorComponentIndex = 0; vectorComponentIndex < 4; vectorComponentIndex++) {
-        savedA[vectorComponentIndex] = unit->effObj->inner->position[vectorComponentIndex];
-        savedB[vectorComponentIndex] = unit->effObj->inner->rotation[vectorComponentIndex];
+        savedA[vectorComponentIndex] = unit->effObj->poseset->pos[vectorComponentIndex];
+        savedB[vectorComponentIndex] = unit->effObj->poseset->rotation[vectorComponentIndex];
     }
     copy = *unit;
     while (evtCheckMoveEnd(&copy) == EVT_UNIT_MOVE_END_NOT_REACHED) {
@@ -1071,8 +1071,8 @@ EvtUnitVerticalMoveStepCount evtUnitPrepareVerticalMoveSteps(evtUnitHandle_t *un
         evtUnitMoveType0(&copy);
     }
     for (vectorComponentIndex = 0; vectorComponentIndex < 4; vectorComponentIndex++) {
-        unit->effObj->inner->position[vectorComponentIndex] = savedA[vectorComponentIndex];
-        unit->effObj->inner->rotation[vectorComponentIndex] = savedB[vectorComponentIndex];
+        unit->effObj->poseset->pos[vectorComponentIndex] = savedA[vectorComponentIndex];
+        unit->effObj->poseset->rotation[vectorComponentIndex] = savedB[vectorComponentIndex];
     }
     if (simulatedStepCount == 0) {
         printf("ymove frameno = 0\n");
@@ -1081,7 +1081,7 @@ EvtUnitVerticalMoveStepCount evtUnitPrepareVerticalMoveSteps(evtUnitHandle_t *un
         return 0;
     }
     SDF_VU0_LOADVECTOR(unit->targetVector);
-    SDF_VU0_LOADVECTOR_B(unit->effObj->inner->position);
+    SDF_VU0_LOADVECTOR_B(unit->effObj->poseset->pos);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_STOREVECTOR(delta);
     unit->stepCount = simulatedStepCount;
@@ -1231,7 +1231,7 @@ void evtSetUnitRot2(evtUnitHandle_t *work, s32 worldObjectKey, s32 frames) {
 
     worldUnit = dds3SearchSceneBasic(dds3GetControlScene(), worldObjectKey, 0x11);
     if (worldUnit != NULL) {
-        source = worldUnit->data;
+        source = worldUnit->workdata;
         evtSetUnitRot1(work, source->rotation, frames);
         work->linkedUnit = worldUnit;
     }
@@ -1259,7 +1259,7 @@ void evtSetUnitMove2(evtUnitHandle_t *work, s32 motionSubmode, s32 worldObjectKe
 
     worldUnit = dds3SearchSceneBasic(dds3GetControlScene(), worldObjectKey, 0x11);
     if (worldUnit != NULL) {
-        source = worldUnit->data;
+        source = worldUnit->workdata;
         evtSetUnitMove1(work, motionSubmode, &source->position.x, unused, frames, valueB6, callback, unusedLast);
         work->transitionSourceKind = EVT_UNIT_TRANSITION_SOURCE_WORLD_NODE;
         work->linkedUnit = worldUnit;
@@ -1351,7 +1351,7 @@ EvtUnitMotionStepResult evtUpdateUnitMotion(dds3PoseSet_t *unused, dds3Basic_t *
     f32 delta[4];
     EvtUnitMotionStepResult moving = EVT_UNIT_MOTION_STEP_NOT_APPLIED;
     s32 wobble = 0;
-    EffectObjectData *data = object->data;
+    EffectObjectData *data = object->workdata;
     evtUnitHandle_t *unit = data->transitionWork;
     dds3ModelHandle_t *model;
     s32 i;
@@ -1495,7 +1495,7 @@ EvtUnitMotionStepResult evtUpdateUnitMotion(dds3PoseSet_t *unused, dds3Basic_t *
         if (6.2831853f <= unit->wobblePhase) {
             unit->wobblePhase -= 6.2831853f;
         }
-        unit->effObj->inner->flags = (unit->effObj->inner->flags | 1) & ~2;
+        unit->effObj->poseset->flags = (unit->effObj->poseset->flags | 1) & ~2;
     }
     for (i = 1; i < 12; i++) {
         enabled = unit->slotFlags[i] & EVT_UNIT_MOTION_SLOT_ENABLED;
@@ -1854,7 +1854,7 @@ ScrCommandResult evtOpModelLodChg(void) {
         printf("warning!! MODEL_LOD_CHG(int,int) unit pointer null\n");
         return 1;
     }
-    data = unit->data;
+    data = unit->workdata;
     if (data->modelHolder == NULL) {
         printf("warning!! MODEL_LOD_CHG(int,int) workbase pointer null\n");
         return 1;
@@ -2015,10 +2015,10 @@ void evtLipsExecFunction(s32 unitUniqueId, s32 motionId) {
     if (unitUniqueId == 0) {
         return;
     }
-    for (node = ((EvtWorldTable *)((dds3Basic_t *)dds3GetActiveScene())->data)->slots[EVT_WORLD_SLOT_UNIT].head; node != NULL; node = node->next) {
-        model = ((EvtLipsLink *)node->data)->mh->model;
+    for (node = ((evtWorldTable_t *)((dds3Basic_t *)dds3GetActiveScene())->workdata)->slots[EVT_WORLD_SLOT_UNIT].head; node != NULL; node = node->next) {
+        model = ((EvtLipsLink *)node->workdata)->mh->model;
         if (sdfGetUniqueChunkValue(model->inner) == unitUniqueId) {
-            unit = ((EvtLipsLink *)node->data)->unit;
+            unit = ((EvtLipsLink *)node->workdata)->unit;
             break;
         }
     }
@@ -2044,10 +2044,10 @@ void evtLipsStopFunction(void) {
     if (D_004371F0 == 0) {
         return;
     }
-    for (node = ((EvtWorldTable *)((dds3Basic_t *)dds3GetActiveScene())->data)->slots[EVT_WORLD_SLOT_UNIT].head; node != NULL; node = node->next) {
-        model = ((EvtLipsLink *)node->data)->mh->model;
+    for (node = ((evtWorldTable_t *)((dds3Basic_t *)dds3GetActiveScene())->workdata)->slots[EVT_WORLD_SLOT_UNIT].head; node != NULL; node = node->next) {
+        model = ((EvtLipsLink *)node->workdata)->mh->model;
         if (sdfGetUniqueChunkValue(model->inner) == D_004371F0) {
-            unit = ((EvtLipsLink *)node->data)->unit;
+            unit = ((EvtLipsLink *)node->workdata)->unit;
             break;
         }
     }
@@ -2333,7 +2333,7 @@ ScrCommandResult evtOpTurnUnitRelativeToWorldNode(void) {
         return 1;
     }
 
-    sourceTransform = source->data;
+    sourceTransform = source->workdata;
     dds3GetPosPoseSet(actor);
     SDF_VU0_STOREVECTOR(actorPosition);
     SDF_VU0_COPYVECTOR(sourcePosition, &sourceTransform->position);
@@ -2757,7 +2757,7 @@ ScrCommandResult evtCommand_EFFBED_START_EVO(void) {
         modelRecordIndex = scrGetIntPara(2);
         if (modelRecordIndex >= 0) {
             f32 value = evtComputeClampedModelScale(modelRecordIndex);
-            struct effEveBEDCutHandle_t *target = ((EvtModelHeader *)unit->data)->target2C;
+            struct effEveBEDCutHandle_t *target = ((EvtModelHeader *)unit->workdata)->target2C;
             if (target != NULL) {
                 effEveBEDCutSetScale(target, value);
             }
@@ -2901,16 +2901,16 @@ ScrCommandResult evtCommand_EFFECT_POS_XYZ(void) {
     EvtModelHeader *header;
 
     obj = evtSearchBasic(7, scrGetIntPara(0));
-    header = (EvtModelHeader *)obj->data;
+    header = (EvtModelHeader *)obj->workdata;
     if (header->flags & 4) {
         header->positionX = scrGetFloatPara(1);
         header->positionY = scrGetFloatPara(2);
         header->positionZ = scrGetFloatPara(3);
     } else {
-        obj->inner->position[0] = scrGetFloatPara(1);
-        obj->inner->position[1] = scrGetFloatPara(2);
-        obj->inner->position[2] = scrGetFloatPara(3);
-        obj->inner->flags = (obj->inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) & ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
+        obj->poseset->pos[0] = scrGetFloatPara(1);
+        obj->poseset->pos[1] = scrGetFloatPara(2);
+        obj->poseset->pos[2] = scrGetFloatPara(3);
+        obj->poseset->flags = (obj->poseset->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) & ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
     }
     return 1;
 }
@@ -2925,7 +2925,7 @@ ScrCommandResult evtCommand_EFFECT_ROT_XYZ(void) {
     memset(v, 0, 0x10);
     v[3] = 1.0f;
     obj = evtSearchBasic(7, scrGetIntPara(0));
-    if (!(((EvtModelHeader *)obj->data)->flags & 4)) {
+    if (!(((EvtModelHeader *)obj->workdata)->flags & 4)) {
         toRad = 0.017453293f;
         x = scrGetFloatPara(1) * toRad;
         y = scrGetFloatPara(2) * toRad;
@@ -2953,18 +2953,18 @@ ScrCommandResult evtCommand_EFFECT_POS(void) {
     if (source == NULL) {
         return 1;
     }
-    vec = source->data;
-    if (!(((EvtModelHeader *)obj->data)->flags & 4)) {
-        params = obj->inner;
-        params->position[0] = vec->position.x;
-        params->position[1] = vec->position.y;
-        params->position[2] = vec->position.z;
+    vec = source->workdata;
+    if (!(((EvtModelHeader *)obj->workdata)->flags & 4)) {
+        params = obj->poseset;
+        params->pos[0] = vec->position.x;
+        params->pos[1] = vec->position.y;
+        params->pos[2] = vec->position.z;
         params->rotation[0] = vec->rotation[0];
         params->rotation[1] = vec->rotation[1];
         params->rotation[2] = vec->rotation[2];
         params->rotation[3] = vec->rotation[3];
     }
-    obj->inner->flags = (obj->inner->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) & ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
+    obj->poseset->flags = (obj->poseset->flags | OBJECT_TRANSFORM_FLAG_UPDATE_PENDING) & ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
     return 1;
 }
 

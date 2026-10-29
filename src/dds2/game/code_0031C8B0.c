@@ -79,7 +79,7 @@ void itfProjectScreenPointToFixedDepth(f32 *position, s32 screenX, s32 screenY) 
     position[2] = -300.0f;
 }
 
-extern struct SdfPoolNode *kwlnSceneSurfaceSets[13][4];
+extern struct sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
 extern void mnuDeactivateModelNode(MnuModelNode *);
 extern void mnuTranslateNodePrimaryVector(MnuModelNode *, f32, f32, f32);
 

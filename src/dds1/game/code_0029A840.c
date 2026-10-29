@@ -160,7 +160,7 @@ void effModelAnimationStop(EffModelOwner *owner) {
 extern s32 effComputeLightDirectionVU(dds3ModelHandle_t *, SdfLightingPacketStorage *);
 
 #include "sdf_packet_alloc.h"
-extern SdfPoolNode *kwlnSceneSurfaceSets[13][4];
+extern sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
 extern u64 D_0037E5B0[];
 
 /* Attach the owner's lighting buffer when the direction update succeeds. */
@@ -279,7 +279,7 @@ EffModelOwner *effDuplicateFloorModelOwner(EffModelOwner *source) {
 void effRenderModelOwnerWithGsTests(EffModelOwner *owner) {
     sdfDrawTag_t *list;
     u64 *packet;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
     s32 index;
 
     mdlSetColor(owner->model,
@@ -815,7 +815,7 @@ RefObj *effRetainSharedReference(RefObj *obj) {
 /* Native GS dimension SDK calls: 0029C16C/0029C17C.
  * Address normalization before TEX0 packing is also traced in
  * texture_renew_secondary_epoch_probe (parity OK, local-alloc q14/q16). */
-sdfTexHandle_t *sdfGetOrCreateTextureForReference(SdfPoolNode *surface, RefObj *source) {
+sdfTexHandle_t *sdfGetOrCreateTextureForReference(sdfGrOt_t *surface, RefObj *source) {
     sdfDrawTag_t *list;
     u16 width;
     u16 height;
@@ -977,7 +977,7 @@ void effSampleAnimSet(const EffExpandedList *set, u32 frame, EffAnimSample *out)
     out->angle = 0.0f;
 }
 
-sdfTexHandle_t *effAssignSampledSegmentReference(const EffExpandedList *set, SdfPoolNode *target,
+sdfTexHandle_t *effAssignSampledSegmentReference(const EffExpandedList *set, sdfGrOt_t *target,
                                                  const EffAnimSample *sample) {
     return sdfGetOrCreateTextureForReference(target, set->handles[sample->segment]);
 }

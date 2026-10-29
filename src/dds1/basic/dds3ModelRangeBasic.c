@@ -11,7 +11,7 @@ void dds3ModelBasicFreeModel(dds3Basic_t *object) {
     const Dds3ModelRangeDataView *rangeData;
     const void *ownedResourceData;
 
-    rangeData = object->data;
+    rangeData = object->workdata;
     ownedResourceData = rangeData->ownedResourceData;
     if (ownedResourceData != NULL) {
         sdfMemFreeDelayedDirect(sdfMemGetHandleByPtr(ownedResourceData));

@@ -262,7 +262,7 @@ void func_0020EA10(void) {
 
 
 
-extern void fldDrawShadowDisc(f32 x, f32 y, f32 z, f32 radius, s32 fade);
+extern void dds3DrawUnitObjectShadow(f32 x, f32 y, f32 z, f32 radius, s32 fade);
 
 void btlDrawActorGroundDisc(BtlUnit *unit) {
     f32 position[4] __attribute__((aligned(16)));
@@ -316,7 +316,7 @@ void btlDrawActorGroundDisc(BtlUnit *unit) {
         SDF_VU0_LOADVECTOR(actorPosition);
     }
     SDF_VU0_STOREVECTOR(position);
-    fldDrawShadowDisc(position[0], actorPosition[1], position[2], radius, alpha);
+    dds3DrawUnitObjectShadow(position[0], actorPosition[1], position[2], radius, alpha);
 }
 
 /* Requires task bit 6 clear and a matching 0x2A49 status bit.

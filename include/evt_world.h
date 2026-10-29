@@ -83,16 +83,16 @@ struct BfFlw0Header;
 struct dds3ProcessID_t;
 
 /* The object's 18 per-kind intrusive lists. */
-typedef struct EvtWorldSlot {
+typedef struct evtWorldSlot_t {
     s32 count;
     dds3Basic_t *head;
     dds3Basic_t *tail;
-} EvtWorldSlot;
+} evtWorldSlot_t;
 
-typedef struct EvtWorldTable {
+typedef struct evtWorldTable_t {
     Dds3AreaRoomKey areaRoomKey; /* 0x00: (area << 16) + room; unassigned before location setup. */
     struct sdfMemHandle_t *resource; /* 0x04: descriptor owning the slot array */
-    EvtWorldSlot *slots; /* 0x08; valid index range is a caller contract */
+    evtWorldSlot_t *slots; /* 0x08; valid index range is a caller contract */
     dds3Basic_t *cameraObject; /* 0x0C: retained camera world node */
     dds3Basic_t *playerObject; /* 0x10 */
     const struct sdfMemHandle_t *fieldResourceHandle; /* 0x14: borrowed alias; fldReleaseFieldResources owns its release. */
@@ -100,16 +100,16 @@ typedef struct EvtWorldTable {
     const struct BfFlw0Header *sceneScript; /* 0x1C: borrowed resolved FLW0 view used for script lookup. */
     s32 drawEnabled; /* 0x20: controls drawing of kind 2 */
     u8 pad24[0x1C]; /* The SDK constructor allocates 0x40 bytes. */
-} EvtWorldTable;
+} evtWorldTable_t;
 
-typedef char EvtWorldTable_sceneScript_at_0x1C[
-    ((u32)&((EvtWorldTable *)0)->sceneScript == 0x1C) ? 1 : -1];
-typedef char EvtWorldTable_sceneResourceHandle_at_0x18[
-    ((u32)&((EvtWorldTable *)0)->sceneResourceHandle == 0x18) ? 1 : -1];
-typedef char EvtWorldTable_fieldResourceHandle_at_0x14[
-    ((u32)&((EvtWorldTable *)0)->fieldResourceHandle == 0x14) ? 1 : -1];
-typedef char EvtWorldTable_size_must_be_0x40[
-    sizeof(EvtWorldTable) == 0x40 ? 1 : -1];
+typedef char evtWorldTable_t_sceneScript_at_0x1C[
+    ((u32)&((evtWorldTable_t *)0)->sceneScript == 0x1C) ? 1 : -1];
+typedef char evtWorldTable_t_sceneResourceHandle_at_0x18[
+    ((u32)&((evtWorldTable_t *)0)->sceneResourceHandle == 0x18) ? 1 : -1];
+typedef char evtWorldTable_t_fieldResourceHandle_at_0x14[
+    ((u32)&((evtWorldTable_t *)0)->fieldResourceHandle == 0x14) ? 1 : -1];
+typedef char evtWorldTable_t_size_must_be_0x40[
+    sizeof(evtWorldTable_t) == 0x40 ? 1 : -1];
 
 
 /* Preserve the signed-byte drawing gate; only a missing payload is ignored. */

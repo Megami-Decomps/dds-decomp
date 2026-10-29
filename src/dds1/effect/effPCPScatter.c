@@ -1019,12 +1019,12 @@ void effPCPHamaCardScatterSetScale(void)
 
 
 
-extern EffPacketParams effScatterPoolDrawParams[];
+extern sdf3DPrimPolyParm_t effScatterPoolDrawParams[];
 extern u32 effScatterPoolTriangleIndices[];
 extern u32 effScatterPoolTexcoords[];
-extern SdfPoolNode *effScatterPoolDrawSurfaces[];
+extern sdfGrOt_t *effScatterPoolDrawSurfaces[];
 #include "sdf_packet_alloc.h"
-extern void *effPkt3DPrimMakePoly(EffPacketParams *params);
+extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *params);
 
 /* Return the trailing control block after zeroing two record arrays.
  * Signed group arithmetic and allocation sizes are deliberately not validated here. */
@@ -1056,7 +1056,7 @@ PcpScatterPool *dds3ScatterPolyListCreate(s32 groups) {
     pool->drawAsset = sdfMatNew();
     sdfMatSetConstant(pool->drawAsset, 1.0f);
     memset(effScatterPoolDrawParams, 0, EFF_SCATTER_DRAW_TEMPLATE_BYTES);
-    effScatterPoolDrawParams->primitive = 0x4000;
+    effScatterPoolDrawParams->attr = 0x4000;
     return pool;
 }
 
@@ -1075,7 +1075,7 @@ void dds3ScatterPolyListDraw(PcpScatterPool *pool) {
     f32 matrix[16];
     sdfDrawTag_t *packet = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     s32 remainingVertices;
-    SdfPoolNode *surface;
+    sdfGrOt_t *surface;
 
     sdfDrawTagInit(packet);
     EE_MMI_UNIT_MATRIX(matrix);
@@ -1086,27 +1086,27 @@ void dds3ScatterPolyListDraw(PcpScatterPool *pool) {
     sdf3DPrimLinkTm(packet, 0);
     if (pool->sharedResource != NULL) {
         sdfSetAssetPrimaryTextureAddress(pool->drawAsset, pool->sharedResource->textureHandle);
-        effScatterPoolDrawParams->texcoords = (f32 *)effScatterPoolTexcoords;
+        effScatterPoolDrawParams->uv = (f32 *)effScatterPoolTexcoords;
     } else {
-        effScatterPoolDrawParams->texcoords = NULL;
+        effScatterPoolDrawParams->uv = NULL;
     }
     sdf3DPrimLinkMat(packet, pool->drawAsset, 0);
     remainingVertices = pool->secondWordCount;
-    effScatterPoolDrawParams->colors = (u32 *)pool->auxRecordBase;
-    effScatterPoolDrawParams->positions = (u128 *)pool->recordBase;
+    effScatterPoolDrawParams->vertexColor = (u32 *)pool->auxRecordBase;
+    effScatterPoolDrawParams->vertex = (u128 *)pool->recordBase;
     effScatterPoolDrawParams->color = pool->color;
-    effScatterPoolDrawParams->parameterCount = 0x10;
-    effScatterPoolDrawParams->vertexCount = 24;
-    effScatterPoolDrawParams->parameters = effScatterPoolTriangleIndices;
+    effScatterPoolDrawParams->faceCount = 0x10;
+    effScatterPoolDrawParams->pointCount = 24;
+    effScatterPoolDrawParams->faceIndex = effScatterPoolTriangleIndices;
     while (remainingVertices >= 24) {
         remainingVertices -= 24;
         sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(effScatterPoolDrawParams));
-        effScatterPoolDrawParams->positions += 24;
-        effScatterPoolDrawParams->colors += 24;
+        effScatterPoolDrawParams->vertex += 24;
+        effScatterPoolDrawParams->vertexColor += 24;
     }
     if (remainingVertices >= 6) {
-        effScatterPoolDrawParams->parameterCount = remainingVertices / 6 * 4;
-        effScatterPoolDrawParams->vertexCount = remainingVertices;
+        effScatterPoolDrawParams->faceCount = remainingVertices / 6 * 4;
+        effScatterPoolDrawParams->pointCount = remainingVertices;
         sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(effScatterPoolDrawParams));
     }
     surface = effScatterPoolDrawSurfaces[pool->poolMode];

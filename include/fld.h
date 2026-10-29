@@ -130,7 +130,7 @@ typedef char FldActorExplorationRowCountOffset[((u32)&((FldActorEntry *)0)->expl
 
 /* Collision faces are 0x24-byte wire records in the field resource.
  * The room-record builders retain the face and stop-table addresses. */
-typedef struct FldCollisionFace {
+typedef struct fldCollisionFace_t {
     u32 attributes;
     u8 moveFloor;
     u8 sound;
@@ -141,7 +141,7 @@ typedef struct FldCollisionFace {
     s16 encounterType;
     s16 encounter;
     s16 special[2];
-} FldCollisionFace;
+} fldCollisionFace_t;
 
 /* Both room-record builders construct this complete 0xE4-byte owner.
  * Zone classifiers use the bounding-plane prefix of the same record. */
@@ -160,13 +160,13 @@ typedef struct FldValueRecord {
     u16 unkCA;
     s32 id;
     struct dds3Basic_t *worldNode; /* Cached object for this record ID. */
-    FldCollisionFace *face;
+    fldCollisionFace_t *face;
     void *stopData;
     s32 sceneFlag;
     s32 ownerIndex; /* 0xE0: map-slot auxiliary-flag selector; <= 0 bypasses its gate */
 } FldValueRecord;
 
-typedef char FldCollisionFaceSizeCheck[(sizeof(FldCollisionFace) == 0x24) ? 1 : -1];
+typedef char FldCollisionFaceSizeCheck[(sizeof(fldCollisionFace_t) == 0x24) ? 1 : -1];
 typedef char FldValueRecordSizeCheck[(sizeof(FldValueRecord) == 0xE4) ? 1 : -1];
 typedef char FldValueRecord_worldNode_at_D0[
     ((u32)&((FldValueRecord *)0)->worldNode == 0xD0) ? 1 : -1];

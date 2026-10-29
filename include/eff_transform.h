@@ -37,7 +37,7 @@ typedef struct dds3Basic_t dds3Basic_t;
  * VU0 vector transfers and scalar camera reads use the same float vectors. */
 typedef struct dds3PoseSet_t {
     u128 matrix[4];
-    f32 position[4]; /* 0x40: used as the returned inner-position vector. */
+    f32 pos[4]; /* 0x40: used as the returned inner-position vector. */
     f32 rotation[4]; /* 0x50: used as the returned inner-rotation vector. */
     f32 scale[4]; /* 0x60: used as the returned inner-scale vector. */
     f32 smoothedPosition[4];
@@ -78,12 +78,12 @@ typedef char WorldValueIndices_size_must_be_0x08[(sizeof(dds3BasicArrayHandle_t)
 struct dds3Basic_t {
     u32 word0;
     u32 key; /* Kind 2: dds3AddAreaBasic at 00111188. */
-    const char *value; /* Native caption string for named kinds; other kinds keep a scalar here. */
+    const char *name; /* Native caption string for named kinds; other kinds keep a scalar here. */
     u32 kindTag; /* Kind occupies the high byte; constructor clears low 24 bits. */
     EffWorldOps *ops;
     u32 word14;
-    void *data; /* Kind-specific payload; never the separately allocated inner. */
-    dds3PoseSet_t *inner;
+    void *workdata; /* Kind-specific payload; never the separately allocated inner. */
+    dds3PoseSet_t *poseset;
     dds3Basic_t *next;
     dds3Basic_t *previous;
     u32 word28;

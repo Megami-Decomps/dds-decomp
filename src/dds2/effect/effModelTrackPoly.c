@@ -187,7 +187,7 @@ void Eff_HermitianSpline(f32 (*p)[4], f32 t)
     SDF_VU0_MULVECTOR();
     SDF_VU0_ADDVECTOR_A_C();
 }
-extern EffPacketParams effTrackPolyDrawParams;
+extern sdf3DPrimPolyParm_t effTrackPolyDrawParams;
 extern const u32 effTrackPolyTriangleIndices[];
 
 
@@ -211,8 +211,8 @@ dds3HermitianTrackPoly_tag *dds3HermitianTrackPolyCreate(s32 historyLength, s32 
     data->nodeHandle = sdfMatNew();
     sdfMatSetConstant((struct sdfMat_t *)data->nodeHandle, 1.0f);
     memset(&effTrackPolyDrawParams, 0, sizeof(effTrackPolyDrawParams));
-    effTrackPolyDrawParams.primitive = 0x4000;
-    effTrackPolyDrawParams.parameters = effTrackPolyTriangleIndices;
+    effTrackPolyDrawParams.attr = 0x4000;
+    effTrackPolyDrawParams.faceIndex = effTrackPolyTriangleIndices;
     return data;
 }
 
@@ -416,10 +416,10 @@ void dds3HermitianTrackPolySetVertex(dds3HermitianTrackPoly_tag *data, const u12
 
 
 
-extern SdfPoolNode *effTrackPolyDrawSurfaces[];
-extern SdfPoolNode D_00380248;
+extern sdfGrOt_t *effTrackPolyDrawSurfaces[];
+extern sdfGrOt_t D_00380248;
 #include "sdf_packet_alloc.h"
-extern void *effPkt3DPrimMakePoly(EffPacketParams *);
+extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *);
 
 /* Walk at most two ring runs. Each full strip consumes 16 vertices, with
  * two additional vertices overlapping the next strip (18 inputs total). */
@@ -427,7 +427,7 @@ void dds3HermitianTrackPolyDraw(dds3HermitianTrackPoly_tag *data) {
     sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     s32 runStart[4];
     s32 runPointCount[2];
-    EffPacketParams *draw;
+    sdf3DPrimPolyParm_t *draw;
     s32 runIndex;
     s32 pointsRemaining;
     s32 wrappedStartOffset;
@@ -450,25 +450,25 @@ void dds3HermitianTrackPolyDraw(dds3HermitianTrackPoly_tag *data) {
         runPointCount[0] = activePointCount;
         runPointCount[1] = 0;
     }
-    effTrackPolyDrawParams.colors = data->colors;
+    effTrackPolyDrawParams.vertexColor = data->colors;
     for (runIndex = 0; runIndex < 2; runIndex++) {
         draw = &effTrackPolyDrawParams;
-        draw->positions = &data->points[runStart[runIndex]];
+        draw->vertex = &data->points[runStart[runIndex]];
         draw->color = data->color;
-        draw->parameterCount = 0x10;
-        draw->vertexCount = 0x12;
+        draw->faceCount = 0x10;
+        draw->pointCount = 0x12;
         pointsRemaining = runPointCount[runIndex];
         while (pointsRemaining >= 0x12) {
             pointsRemaining -= 0x10;
             sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&effTrackPolyDrawParams));
-            effTrackPolyDrawParams.positions += 0x10;
-            effTrackPolyDrawParams.colors += 0x10;
+            effTrackPolyDrawParams.vertex += 0x10;
+            effTrackPolyDrawParams.vertexColor += 0x10;
         }
         if (pointsRemaining >= 4) {
-            draw->vertexCount = pointsRemaining;
-            draw->parameterCount = pointsRemaining - 2;
+            draw->pointCount = pointsRemaining;
+            draw->faceCount = pointsRemaining - 2;
             sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(draw));
-            draw->colors += pointsRemaining;
+            draw->vertexColor += pointsRemaining;
         }
     }
     if (data->drawTarget < 4) {

@@ -24,7 +24,7 @@ u32 lightdrawprocedure(void) {
 }
 
 dds3ObjectBaseControlWorkData_t *dds3LightObjectBasicGetControlWorkData(dds3Basic_t *object) {
-    return ((EffLightData *)object->data)->baseControlWorkData;
+    return ((EffLightData *)object->workdata)->baseControlWorkData;
 }
 
 
@@ -42,7 +42,7 @@ void dds3DeleteLightObjectBasic(dds3Basic_t *object) {
 }
 
 void dds3LinkSceneLight(dds3Basic_t *lightNode, s32 blendFrames) {
-    EffLightData *lightData = lightNode->data;
+    EffLightData *lightData = lightNode->workdata;
     s32 color1[4];
     s32 color2[4];
     u32 packed1;
@@ -66,26 +66,26 @@ void dds3LinkSceneLight(dds3Basic_t *lightNode, s32 blendFrames) {
 }
 
 void dds3UnlinkSceneLight(dds3Basic_t *object) {
-    EffLightData *data = object->data;
+    EffLightData *data = object->workdata;
 
     data->flags &= ~(EFF_LIGHT_FLAG_UPDATE_COLOR_VECTORS | EFF_LIGHT_FLAG_BLEND_COLOR_VECTORS);
 }
 
 /* Kind-5 effect payloads retain transition work separately from light data. */
 void dds3LinkLightObjectToUnitObject(EffectValueObject *value, dds3Basic_t *effectNode, s32 duration) {
-    EffectObjectData *effectData = effectNode->data;
+    EffectObjectData *effectData = effectNode->workdata;
 
     evtSetUnitValueTransition(effectData->transitionWork, (dds3Basic_t *)value, duration);
 }
 
 void dds3UnlinkLightObjectFromUnitObject(dds3Basic_t *effectNode, s32 duration) {
-    EffectObjectData *effectData = effectNode->data;
+    EffectObjectData *effectData = effectNode->workdata;
 
     evtEndUnitValueTransition((struct evtUnitHandle_t *)effectData->transitionWork, duration);
 }
 /* Load flags, mode and the transform block from a setup record. */
 void dds3SetLightObjectResoruce(dds3Basic_t *worldNode, WorldTransformSetup *setup) {
-    WorldTransformData *transformData = worldNode->data;
+    WorldTransformData *transformData = worldNode->workdata;
 
     transformData->flags = 0;
     if (setup->flags & 1) {
@@ -111,7 +111,7 @@ void dds3SetLightObjectResoruce(dds3Basic_t *worldNode, WorldTransformSetup *set
 
 /* Load rotation, position and scale from a parameter block. */
 void dds3SetLightObjectPathResoruce(dds3Basic_t *worldNode, const WorldTransformParams *params) {
-    WorldTransformData *transformData = worldNode->data;
+    WorldTransformData *transformData = worldNode->workdata;
 
     transformData->rotation[0] = params->rotation[0];
     transformData->rotation[1] = params->rotation[1];
@@ -131,7 +131,7 @@ void dds3SetLightObjectPathResoruce(dds3Basic_t *worldNode, const WorldTransform
 u32 dds3AllocEventBasicWorkData(dds3Basic_t *obj) {
     void *work = sdfChipAllocDirect(0x1C);
 
-    obj->data = work;
+    obj->workdata = work;
     memset(work, 0, 0x1C);
     return 1;
 }

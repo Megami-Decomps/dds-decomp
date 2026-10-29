@@ -159,18 +159,18 @@ void dds3PathBasicLoopOff(SdfFloatCounter *value) {
 dds3Basic_t *dds3AddPointBasic(u32 key, EvtWorldSourceTransformPrefix *source, const char *name) {
     dds3Basic_t *obj = dds3AddSceneBasicData(EFF_WORLD_KIND_TRANSFORM_SOURCE);
 
-    obj->data = source;
+    obj->workdata = source;
     obj->key = key;
-    obj->value = name;
+    obj->name = name;
     return obj;
 }
 
 f32 *dds3GetTransformSourceData(dds3Basic_t *node) {
-    return node->data;
+    return node->workdata;
 }
 
 void *dds3GetWorldNodeData(dds3Basic_t *node) {
-    return node->data;
+    return node->workdata;
 }
 
 /* Load the world node's borrowed data vector into VF10. */
@@ -599,7 +599,7 @@ f32 sdfGetHpBracketScale(datUnitWork_t *unit) {
     if (hp % 10 != 0) {
         hp = hp - hp % 10 + 10;
     }
-    band = hp * 10 / unit->maxHp - 1;
+    band = hp * 10 / unit->maxhp - 1;
     if (band < 0) {
         band = 0;
     }
@@ -628,7 +628,7 @@ s32 sdfCalculateCommandVitalDelta(s32 channel, datUnitWork_t *sourceRecord, datU
     switch (vital) {
     case 1:
         current = item->hp;
-        maximum = item->maxHp;
+        maximum = item->maxhp;
         power = datCommandRecords[channel].hpPower;
         type = datCommandRecords[channel].hpType;
         base = datCommandRecords[channel].hpBase;
@@ -810,7 +810,7 @@ u32 sdfRollActionHit(s32 channel, datUnitWork_t *sourceRecord, datUnitWork_t *pa
     if (flag) {
         datUnitWork_t *actor = packed;
 
-        if (actor->hp * 100 / actor->maxHp >= 25) {
+        if (actor->hp * 100 / actor->maxhp >= 25) {
             mask &= 0xFFFE;
         } else if (!(sourceRecord->flags & 4)) {
             mask &= 0xFFFE;

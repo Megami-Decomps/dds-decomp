@@ -1004,7 +1004,7 @@ void effSelectPresetByKind(u32 mode, u32 value) {
 }
 
 
-extern SdfPoolNode sdfGrOtTable[];
+extern sdfGrOt_t sdfGrOtTable[];
 typedef struct sdfTexHandle_t sdfTexHandle_t;
 typedef struct SdfDrawPacket SdfDrawPacket;
 
@@ -1042,7 +1042,7 @@ void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 depth, s32 width, s32 height,
     s32 right;
     s32 bottom;
     s32 savedCoordinate;
-    SdfPoolNode *drawSurface;
+    sdfGrOt_t *drawSurface;
 
     if (mode == 0) {
         sdfTexSetFilter(texture, 0, 1);
@@ -1151,7 +1151,7 @@ void sdfDrawTexturedQuad(s32 x, s32 y, u32 depth, s32 width, s32 height,
     s32 centerX;
     s32 centerY;
     s32 savedCoordinate;
-    SdfPoolNode *drawSurface;
+    sdfGrOt_t *drawSurface;
 
     if (mode == 0) {
         sdfTexSetFilter(texture, 0, 1);
