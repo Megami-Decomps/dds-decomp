@@ -1037,7 +1037,124 @@ void mnuDrawRatioPanelContents(s32 x, s32 y, s32 depth, u32 color, u32 fade,
     }
 }
 
+#ifdef NON_MATCHING
+#include "dsp_entry_api.h"
+#include "mnu_input.h"
+#include "sdf_packet_list.h"
+#include "itf_draw_grid.h"
+#include "eff_resource_slots.h"
+#include "eff_resource_records.h"
+#include "common.h"
+#include "evt_stage_test_api.h"
+#include "pty_bullet_item_count_api.h"
+#include "sdf_vu_matrix.h"
+#include "kwln_draw_buffer.h"
+#include "snd_sequence_volume_pan.h"
+#include "evt_world_object_api.h"
+#include "evt_stage_model_scale.h"
+#include "ui_color.h"
+#include "btl_stage_task_cleanup.h"
+#include "file_pac.h"
+#include "sdf_motion.h"
+#include "sdf_chip.h"
+#include "fr_font.h"
+#include "sdf_dev_state.h"
+#include "dds3obj.h"
+#include "sdf.h"
+#include "sdf_pac_state.h"
+#include "sdf_projection.h"
+#include "sdf_sif_command.h"
+#include "kwln.h"
+#include "kwln_task_create.h"
+#include "pcp_vu0.h"
+#include "mnu.h"
+#include "mnu_panel_state.h"
+#include "mnu_staff.h"
+#include "eff.h"
+#include "mnu_shop.h"
+#include "mdl.h"
+#include "mdl_asset_request.h"
+#include "dat_state.h"
+#include "evt_stage_test.h"
+#include "dat_command.h"
+#include "eff.h"
+#include "kwln_task_lifecycle.h"
+#include "btl.h"
+#include "dds3_world_primary.h"
+#include "prf_profile_cap.h"
+extern void mnuDrawAlternatingRatioBarEffects(s32 x, s32 y, s32 z, u32 opacity, MenuEffectPair *owner, s32 surface);
+extern void mnuDrawRatioPanelContents(s32 x, s32 y, s32 depth, u32 color, u32 fade, s32 value, s32 total, const MenuEffectPair *style, u32 drawFlags);
+
+extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
+
+/* Draws a ratio bar panel (its numbers, then the bar frame, the filled and
+ * empty sections, the end caps and a marker) at the owner's current opacity,
+ * sizing the filled and empty parts from its quantized span, then fades the
+ * opacity in or out by 0x20 per call, clamped to 0..0x100. Upstream:
+ * INCLUDE_ASM in game/code_00282850; written from the retail routine. It
+ * differs from retail only in register allocation and scheduling: retail spills
+ * y and the visible width to the frame, the compiler here keeps them in
+ * registers and copies one load into a branch- likely delay slot. */
+void mnuDrawAndAdvanceRatioPanel(s32 x, s32 y, s32 z, u32 color, s32 amount,
+                                 s32 divisor, MenuEffectPair *owner, u32 surface) {
+    s32 opacity = owner->opacity;
+    EffectSlotDescription *filledDescription;
+    EffectSlotDescription *emptyDescription;
+    BdWork *filled;
+    BdWork *empty;
+    s32 totalWidth;
+    s32 remainingWidth;
+    s32 visibleWidth;
+    s32 emptyWidth;
+    s32 marker;
+
+    mnuDrawRatioPanelContents(x, y, z, color, opacity, amount, divisor, owner, surface);
+    filledDescription = owner->resourceSets[1]->descriptions;
+    filled = owner->resourceSets[1]->workEntries;
+    totalWidth = filledDescription->colors[2] - filledDescription->colors[0] - 3;
+    remainingWidth = totalWidth - (owner->quantizedSpan * totalWidth) / 100;
+    visibleWidth = totalWidth - remainingWidth;
+    emptyDescription = owner->resourceSets[5]->descriptions;
+    empty = owner->resourceSets[5]->workEntries;
+    filled->parameters[2] = -remainingWidth;
+    filled->geometry.bounds[2] = (visibleWidth + 1) << 4;
+    emptyWidth = emptyDescription->colors[2] - emptyDescription->colors[0] - remainingWidth;
+    empty->parameters[2] = -remainingWidth;
+    empty->geometry.bounds[2] = emptyWidth << 4;
+    effDrawSpriteWithCornerFade(x, y, z, opacity, 1, owner->resourceSets[0], 0, surface);
+    if (amount != 0) {
+        effDrawSpriteWithCornerFade(x, y, z, opacity, 1, owner->resourceSets[4], 0, surface);
+        effDrawSpriteWithCornerFade(x, y, z, opacity, 1, owner->resourceSets[1], 0, surface);
+        if (emptyWidth > 0) {
+            effDrawSpriteWithCornerFade(x + 0x1C0, y, z, opacity, 1, owner->resourceSets[5], 0, surface);
+        }
+        effDrawSpriteWithCornerFade(x - 0x20, y, z, opacity, 1, owner->resourceSets[2], 0, surface);
+        marker = visibleWidth - 2;
+        if (marker < 0) {
+            marker = 0;
+        }
+        effDrawSpriteWithCornerFade(x + ((marker - 2) << 4), y, z, opacity, 1, owner->resourceSets[3], 0, surface);
+        mnuDrawAlternatingRatioBarEffects(x, y, z, opacity, owner, surface);
+    }
+    if (owner->fadeOut == 0) {
+        if (owner->opacity < 0x100) {
+            owner->opacity += 0x20;
+        }
+        if (owner->opacity > 0x100) {
+            owner->opacity = 0x100;
+        }
+    } else {
+        if (owner->opacity > 0) {
+            owner->opacity -= 0x20;
+        }
+        if (owner->opacity < 0) {
+            owner->opacity = 0;
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "game/code_00282850", mnuDrawAndAdvanceRatioPanel);
+#endif
 
 void func_00284880(void) {
 }
