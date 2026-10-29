@@ -117,3 +117,49 @@ The original variable names and source spelling are unknown. Matching bytes
 and a qualified trace demonstrate a reproducible, behavior-preserving source
 form; they do not prove that the original authors wrote this form. Nor does
 physical-register reuse alone justify sharing any other pair of values.
+
+## DDS2 battle preset camera: exact integration (2026-10-29)
+
+The separate battle-camera target `btlBuildPresetCameraPose` at `0x001F5868`
+(`src/dds2/game/code_001EC868.c`) is now exact in
+[`eb2e01d`](https://github.com/Megami-Decomps/dds-decomp/commit/eb2e01d5636e2e61186b9469b7e66e9a9acea95f):
+**19,480 bytes / 4,870 instruction words**, with all **335 owner data pointers**
+and non-relocation data bytes verified. This is not either 1,608-byte field
+player-follow routine documented above. Copper, Obsidian Heron, PiM, BtlSlot
+and PurBoss's earlier reconstruction and investigation remain credited; KiB's
+continuation closes the remaining source and allocation differences.
+
+The integration preserves the current canonical command, pose, cursor and
+`BtlCameraSetupPolicy` owners. The native bank at `D_003B8880` extends to
+`D_003B9600`: `0xD80 / 0x60` proves **36 records**, correcting the previous
+31-record declaration without changing data. The small inline vector-length
+helper expresses the existing VU0 length extraction, not an invented external
+call or ABI. All other functions and support contracts remain intact; only the
+target's newly C-owned data imports change ownership.
+
+Two scoped F21 bindings at existing VU0 scale consumers are explicitly
+**compiler copy-preference aids**, not hardware requirements. Each initialized
+local immediately supplies the real fitted distance, with no intervening call,
+extra arithmetic or artificial consumer. Qualified ordinary/probed compiler
+parity and independent review support the narrow allowance in
+[Matching rules](../CONTRIBUTING.md#matching-rules); they do not justify general
+register steering.
+
+Eye case `0x36` also retains the initialized side predicate after its genuine
+quaternion choice. Its equal correction arms apply one real `-20` adjustment.
+The qualified trace carries the predicate reload through `sched2`; `jump2`
+removes the equal-arm decision and duplicate correction but retains that reload
+and the preceding real offset load, matching retail
+`001F97C0/001F97C4/001F97D0`. This is the explicitly reviewed trace-backed
+source reconstruction allowed by the current policy—not a claimed historical
+copied case or proof of the original spelling.
+
+The exact published source passes **239 matches, zero differences** for its
+complete owner. Both retail images reproduce their original checksums; both
+development images report **zero changed payload words**. Both game-only and
+full-binary reports pass scope checks, and a repeated complete build is a no-op.
+The tooling suite passes **442 tests in 117 batches**; all **87 retained
+non-matching units** compile. Source review confirms the old upstream owner is
+preserved outside the target integration, and the final provenance comments
+leave the entire compiled owner object unchanged. Original source spelling and
+variable names remain unknown.
