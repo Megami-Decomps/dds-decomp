@@ -13,6 +13,7 @@
 #include "eff_resource_list.h"
 #include "eff.h"
 #include "common.h"
+#include "file_menu_start_mode.h"
 #include "evt_active_entry_flag_api.h"
 #include "sdf_delayed_resource_check_api.h"
 #include "mnu_text_entry.h"
@@ -1808,7 +1809,7 @@ u32 evtBeginSelectionExitFade(dds3ProcessID_t *task) {
     return 1;
 }
 extern s32 fileMenuTaskExists(void);
-extern void fileEnterMcPackScene(s32 mode);
+extern void fileEnterMcPackScene(FileMenuStartMode mode);
 extern void slSetTmnlID(s32 x, s32 y);
 
 s32 mnuOpenFileMenuFromTerminal(dds3ProcessID_t *request) {
@@ -1827,7 +1828,7 @@ s32 mnuOpenFileMenuFromTerminal(dds3ProcessID_t *request) {
         sdfDelayedResrcCheck() == 0) {
         mnuReleaseBothVisualResourceTextures((MenuTerminalWork *)context);
         slSetTmnlID(work->mode, work->initState);
-        fileEnterMcPackScene(0);
+        fileEnterMcPackScene(FILE_MENU_START_MODE_LOAD);
         *(s32 *)(context + 0x94) = 1;
     }
     if (work->popupState == 0 && fileMenuTaskExists() == 0 &&

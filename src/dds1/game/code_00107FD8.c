@@ -15,6 +15,7 @@
 #include "sdf_packet_builders.h"
 #include "pcp_vu0.h"
 #include "common.h"
+#include "file_menu_start_mode.h"
 #include "sdf_vu0.h"
 #include "kwln_background_fade_api.h"
 #include "mnu_camp_state_ack_api.h"
@@ -119,7 +120,7 @@ extern s32 checkConfigState(void);
 extern u32 D_003BA730;
 
 extern s32 fileMenuTaskExists(void);
-extern void fileEnterMcPackScene(s32 mode);
+extern void fileEnterMcPackScene(FileMenuStartMode mode);
 
 extern s32 fileMenuOperationSucceeded(void);
 
@@ -1070,7 +1071,7 @@ u32 CheckDebug(void) {
 }
 
 void CallBootMc(void) {
-    fileEnterMcPackScene(3);
+    fileEnterMcPackScene(FILE_MENU_START_MODE_BOOT);
 }
 
 u32 ExitBootMc(void) {
@@ -1112,7 +1113,7 @@ u32 CheckTitle(void) {
 }
 
 void CallLoad(void) {
-    fileEnterMcPackScene(1);
+    fileEnterMcPackScene(FILE_MENU_START_MODE_SLOT_SELECTION);
 }
 
 s32 ExitLoad(void) {
@@ -1147,7 +1148,7 @@ u32 CheckStaff(void) {
 }
 
 void CallEndSave(void) {
-    fileEnterMcPackScene(2);
+    fileEnterMcPackScene(FILE_MENU_START_MODE_NEW_CYCLE);
 }
 
 u32 ExitEndSave(void) {

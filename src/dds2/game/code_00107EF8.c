@@ -8,6 +8,7 @@
 #include "sdf_dev_console_node.h"
 #include "sdf_gs_blend.h"
 #include "common.h"
+#include "file_menu_start_mode.h"
 #include "sdf_vu0.h"
 #include "kwln_background_fade_api.h"
 #include "mnu_camp_state_ack_api.h"
@@ -114,7 +115,7 @@ extern u32 egl_OT_Offset;
 extern s32 fileMenuOperationSucceeded(void);
 
 extern s32 fileMenuTaskExists(void);
-extern void fileStartMemoryCardMenuForMode(s32 mode);
+extern void fileStartMemoryCardMenuForMode(FileMenuStartMode mode);
 
 extern u32 D_00435BB0;
 
@@ -1064,7 +1065,7 @@ u32 CheckDebug(void) {
 }
 
 void CallBootMc(void) {
-    fileStartMemoryCardMenuForMode(3);
+    fileStartMemoryCardMenuForMode(FILE_MENU_START_MODE_BOOT);
 }
 
 u32 ExitBootMc(void) {
@@ -1106,7 +1107,7 @@ u32 CheckTitle(void) {
 }
 
 void CallLoad(void) {
-    fileStartMemoryCardMenuForMode(1);
+    fileStartMemoryCardMenuForMode(FILE_MENU_START_MODE_SLOT_SELECTION);
 }
 
 s32 ExitLoad(void) {
@@ -1141,7 +1142,7 @@ u32 CheckStaff(void) {
 }
 
 void CallEndSave(void) {
-    fileStartMemoryCardMenuForMode(2);
+    fileStartMemoryCardMenuForMode(FILE_MENU_START_MODE_NEW_CYCLE);
 }
 
 u32 ExitEndSave(void) {
@@ -1601,7 +1602,7 @@ void evtOpenFileMenuFromParams(u32 unused, u32 *menuArgs) {
         menuArg = *menuArgs;
     }
     fileMenuWorkCreate(menuArg);
-    fileStartMemoryCardMenuForMode(4);
+    fileStartMemoryCardMenuForMode(FILE_MENU_START_MODE_ORIGINAL_TITLE);
 }
 
 extern void fileReleaseMenuFlowResource();

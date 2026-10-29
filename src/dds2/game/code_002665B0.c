@@ -1,4 +1,5 @@
 #include "sdk_ps2.h"
+#include "file_menu_start_mode.h"
 #include "sdf_delayed_resource_check_api.h"
 #include "dsp_entry_api.h"
 #include "dsp_channel.h"
@@ -2014,7 +2015,7 @@ s32 evtBeginSelectionExitFade(dds3ProcessID_t *task) {
     return 1;
 }
 extern s32 fileMenuTaskExists(void);
-extern void fileStartMemoryCardMenuForMode(s32 mode);
+extern void fileStartMemoryCardMenuForMode(FileMenuStartMode mode);
 extern void slSetTmnlID(s32 x, s32 y);
 
 /* Poll the file task after the dispatch/fade barrier, then restore the menu popup. */
@@ -2032,7 +2033,7 @@ s32 mnuOpenFileMenuFromTerminal(dds3ProcessID_t *request) {
     if (state->fileTaskActive == 0 && sdfDelayedResrcCheck() == 0) {
         mnuReleaseResourceGroupTextureHandles((u32)state);
         slSetTmnlID(state->reduced, state->slot);
-        fileStartMemoryCardMenuForMode(0);
+        fileStartMemoryCardMenuForMode(FILE_MENU_START_MODE_LOAD);
         state->fileTaskActive = 1;
     }
     if (state->popupState == 0 && fileMenuTaskExists() == 0 &&

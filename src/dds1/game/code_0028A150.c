@@ -2,6 +2,7 @@
 #define SDK_SKIP_memset
 #include "sdk_ps2.h"
 #include "common.h"
+#include "file_menu_start_mode.h"
 #include "file_menu_state_result.h"
 #include "file_config_list_node.h"
 #include "file_config_option_api.h"
@@ -375,7 +376,7 @@ extern void fileSetRecordSecondVector(FileSlotTable *record, const void *src);
 
 extern void dds3AdminiCallSequence(s32 kind, const void *data, u32 size, s32 flags);
 
-extern s32 D_003BC848;
+extern FileMenuStartMode D_003BC848;
 
 extern s32 fileSlotScanIndex;
 
@@ -921,7 +922,7 @@ s32 slExitWait(FileMenuContinuationCallback callback) {
 }
 
 s32 slEndingTop(void) {
-    D_003BC848 = 0;
+    D_003BC848 = FILE_MENU_START_MODE_LOAD;
     slSetInfo(0);
     D_003BC854 = 0;
     D_003BC834 = 4;
@@ -1066,7 +1067,8 @@ s32 fileScanSlotStates(void) {
 }
 
 s32 slCancel(void) {
-    if (D_003BC848 == 1 && dds3SearchProcessName(D_003B2658) == NULL) {
+    if (D_003BC848 == FILE_MENU_START_MODE_SLOT_SELECTION &&
+        dds3SearchProcessName(D_003B2658) == NULL) {
         return mcdEnterSelectedFileFlow();
     }
     slSetInfo(0);
@@ -1114,7 +1116,7 @@ s32 fileSlotStatusPoll(void) {
     case FILE_REQ_STATUS_NO_CARD:
         return fileBeginSlotMetadataRefresh();
     case FILE_REQ_STATUS_UNFORMATTED:
-        if (D_003BC848 == 0) {
+        if (D_003BC848 == FILE_MENU_START_MODE_LOAD) {
             fileClearAllSlotFlags();
             slSetInfo(0);
             D_003BC854 = 0;
@@ -1233,7 +1235,7 @@ s32 filePollSlotDetectionAndBranch(void) {
             if (D_003BC824 != 0) {
                 return slEndingExit();
             }
-            if (D_003BC848 == 0) {
+            if (D_003BC848 == FILE_MENU_START_MODE_LOAD) {
                 return slExitWait(&slExit);
             }
             return mcdEnterSelectedFileFlow();
@@ -1259,7 +1261,7 @@ s32 filePollSlotDetectionAndBranch(void) {
             fileReqBegin(fileMemoryCardRequestIndex);
             break;
         case FILE_REQ_STATUS_UNFORMATTED:
-            if (D_003BC848 == 0) {
+            if (D_003BC848 == FILE_MENU_START_MODE_LOAD) {
                 fileClearAllSlotFlags();
                 D_003BC854 = 0;
                 D_003BC834 = 2;
@@ -1394,7 +1396,7 @@ s32 filePollSlotRequestAndResumeFlow(void) {
         case FILE_REQ_STATUS_NO_CARD:
             return fileBeginSlotMetadataRefresh();
         case FILE_REQ_STATUS_UNFORMATTED:
-            if (D_003BC848 == 0) {
+            if (D_003BC848 == FILE_MENU_START_MODE_LOAD) {
                 fileClearAllSlotFlags();
                 slSetInfo(0);
                 D_003BC854 = 0;
@@ -1475,7 +1477,7 @@ s32 fileAdvanceSlotScan(void) {
         fileSlotScanIndex = 0;
         D_003BC804 = 0;
         if (fileCountSelectableFiles() == 0) {
-            if (D_003BC848 != 0) {
+            if (D_003BC848 != FILE_MENU_START_MODE_LOAD) {
                 D_003BC810 = 0;
                 slSetInfo(0);
                 D_003BC854 = 7;
@@ -2310,7 +2312,7 @@ s32 fileSlotBrowserUpdate(void) {
         if (action == 1) {
 
             slSetInfo(0);
-            if (D_003BC848 == 0) {
+            if (D_003BC848 == FILE_MENU_START_MODE_LOAD) {
         fileReqSetSelectedSlot(fileMemoryCardRequestIndex, fileSelectedSlotIndex);
         flags = fileReqGetSlotFlags(fileMemoryCardRequestIndex, fileSelectedSlotIndex);
         if ((flags & FILE_REQ_SLOT_SELECTABLE_SAVE_MASK) ==
@@ -2412,7 +2414,7 @@ s32 fileDrawSlotListAndPreview(s32 work) {
     if (D_003BC818 < 0) {
         D_003BC818++;
     }
-    if (D_003BC848 == 0) {
+    if (D_003BC848 == FILE_MENU_START_MODE_LOAD) {
         evtSubmitTexturedGradientQuad(0x56, 0x33, 0x137, 0x17, 5, 0x1C4, 0x137, 0x17, 0x80808080, 0x80808080, 0x80808080, 0x80808080, D_003BC880);
     } else {
         evtSubmitTexturedGradientQuad(0x56, 0x33, 0x137, 0x17, 5, 0x1DD, 0x137, 0x17, 0x80808080, 0x80808080, 0x80808080, 0x80808080, D_003BC880);
@@ -2658,9 +2660,9 @@ void fileDestroyMemoryCardMenuTask(void);
 void fileInitCursorPulse(void);
 
 /* Load the memory-card pack textures, pick the menu entry state for the
- * requested mode (0 load, 1 slot select, 2 new-game save, else poll) and
+ * requested mode (load, slot select, new-cycle save, or boot) and
  * start the file-menu task with every flow counter cleared. */
-void fileEnterMcPackScene(s32 mode) {
+void fileEnterMcPackScene(FileMenuStartMode mode) {
     FilePacRequest *request;
     PacWork *node;
     u32 index = 0;
@@ -2719,15 +2721,15 @@ void fileEnterMcPackScene(s32 mode) {
     }
     pacFileHandleFree_(request);
     enabled = 1;
-    if (mode == 0) {
+    if (mode == FILE_MENU_START_MODE_LOAD) {
         D_003BC80C = enabled;
         D_003BC824 = 0;
         fileMenuStateHandler = (s32 (*)())fileLoadIconFileAndResetSelection;
-    } else if (mode == 1) {
+    } else if (mode == FILE_MENU_START_MODE_SLOT_SELECTION) {
         D_003BC824 = 0;
         D_003BC80C = enabled;
         fileMenuStateHandler = (s32 (*)())fileResetSlotSelection;
-    } else if (mode == 2) {
+    } else if (mode == FILE_MENU_START_MODE_NEW_CYCLE) {
         D_003BC80C = enabled;
         D_003BC824 = enabled;
         evtBitOn(0xB90);
@@ -3668,7 +3670,7 @@ INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC840);
 
 INCLUDE_SDATA(const s32, "game/code_0028A150", fileSelectedSlotIndex);
 
-INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC848);
+INCLUDE_SDATA(const FileMenuStartMode, "game/code_0028A150", D_003BC848);
 
 INCLUDE_SDATA(const s32, "game/code_0028A150", fileSelectionPending);
 
