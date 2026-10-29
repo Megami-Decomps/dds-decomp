@@ -1,3 +1,4 @@
+#include "btl_motion_selection_result.h"
 #include "sdk_ps2.h"
 #include "dds3_path.h"
 #include "sdf_model_packet_callback.h"
@@ -2646,14 +2647,14 @@ void btlApplyUnitMotionSelection(BtlUnit *unit, u32 index, s32 mode, f32 rate) {
     BtlEffectResource *table;
     BtlRuntimeTask *task;
     dds3ModelHandle_t *model;
-    s32 selected;
+    BtlMotionSelectionResult selected;
     s32 node;
     s32 start;
     s32 end;
     u16 frameCount;
     f32 scale;
     u32 color;
-    s32 (*chooseMotion)(BtlUnit *, s32, s32);
+    BtlMotionSelectionResult (*chooseMotion)(BtlUnit *, s32, s32);
     s32 (*keepRange)(BtlUnit *, s32);
     s32 (*chooseMode)(BtlUnit *, s32, s32);
 
@@ -2692,7 +2693,7 @@ void btlApplyUnitMotionSelection(BtlUnit *unit, u32 index, s32 mode, f32 rate) {
     chooseMotion = work->chooseMotion;
     if (chooseMotion != 0) {
         selected = chooseMotion(unit, index, 0);
-        if (selected == -1) {
+        if (selected == BTL_MOTION_SELECTION_KEEP_CURRENT) {
             return;
         }
         if (index != selected) {
@@ -2800,7 +2801,7 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
     f32 speed;
     u32 color;
     BtlStatusMotionOverrideCallback chooseStatus;
-    s32 (*chooseMotion)(BtlUnit *, s32, s32);
+    BtlMotionSelectionResult (*chooseMotion)(BtlUnit *, s32, s32);
     void (*setMotion)(BtlUnit *, s32, f32);
     s32 (*chooseMode)(BtlUnit *, s32, s32);
 
@@ -2862,7 +2863,7 @@ void btlRefreshUnitMotionSelection(BtlUnit *unit) {
     chooseMotion = work->chooseMotion;
     if (chooseMotion != 0) {
         selected = chooseMotion(unit, index, 1);
-        if (selected == -1) {
+        if (selected == BTL_MOTION_SELECTION_KEEP_CURRENT) {
             return;
         }
         if (index != selected) {
@@ -4679,7 +4680,7 @@ u32 btlAdvanceActorPositionEffectTask(BtlPositionEffectArgs *task) {
     BtlUnit *unit = task->unit;
     s32 flags;
     s32 approved;
-    s32 parameter;
+    BtlMotionSelectionResult parameter;
     f32 amplitude;
     f32 offset;
     f32 velocity;
@@ -4700,7 +4701,7 @@ u32 btlAdvanceActorPositionEffectTask(BtlPositionEffectArgs *task) {
             if (runtime->chooseMotion != NULL) {
                 parameter = runtime->chooseMotion(unit, 13, 0);
             }
-            if (parameter != -1) {
+            if (parameter != BTL_MOTION_SELECTION_KEEP_CURRENT) {
                 btlApplyScaledUnitEffectParameter(unit, parameter, 0, 1.0f);
                 return 1;
             }
@@ -5026,7 +5027,7 @@ void btlUpdateActiveActorModelState(void) {
     BtlState *runtime = (BtlState *)btlGetRuntime();
     BtlUnit *unit;
     BtlActorStatusRecord *status;
-    s32 parameter;
+    BtlMotionSelectionResult parameter;
     s32 frame;
     s32 index;
     f32 pulse;
@@ -5052,7 +5053,7 @@ void btlUpdateActiveActorModelState(void) {
             if (runtime->chooseMotion != NULL) {
                 parameter = runtime->chooseMotion(unit, 1, 0);
             }
-            if (unit->motionId != parameter && parameter != -1) {
+            if (unit->motionId != parameter && parameter != BTL_MOTION_SELECTION_KEEP_CURRENT) {
                 btlApplyScaledUnitEffectParameter(unit, parameter, 0, 1.0f);
             } else {
                 frame = (s32)btlGetUnitModelCurrentFrame(unit);
