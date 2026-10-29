@@ -297,7 +297,7 @@ segments:
       - [0x2388C8, c, game/code_003378C8]
       - [0x23A270, c, hand/vu/sdfVuNodeVertexLighting]
       - [0x23A390, c, game/code_00339390]
-      - [0x23A5A0, asm, hand/vu/sdfVuScratchpadVertexUnpack]
+      - [0x23A5A0, c, hand/vu/sdfVuScratchpadVertexUnpack]
       - [0x23A6D0, c, game/code_003396D0]
       - [0x23DD78, c, sdf/sdfDevCons]  # Nocturne __FILE__
       - [0x23E5D0, c, game/code_0033D5D0]
