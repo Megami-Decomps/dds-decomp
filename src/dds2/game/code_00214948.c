@@ -1,5 +1,6 @@
 #include "btl_motion_transform.h"
 #include "common.h"
+#include "btl_unit_defeat_by_delta_result.h"
 #include "btl_action_state_api.h"
 #include "btl_task.h"
 #include "btl_element_block_query_result.h"
@@ -221,8 +222,6 @@ extern u64 btlStartTask(BtlRuntimeTask *);
 extern void btlCopyUnitCurrentPosition(BtlUnit *, f32 *);
 
 extern void btlSetUnitPosition(BtlUnit *, const f32 *);
-
-extern s32 btlIsUnitDefeatTriggeredByValueDelta(BtlUnit *, s32);
 
 extern s32 btlIsUnitInActorList(const BtlUnit *actor);
 
