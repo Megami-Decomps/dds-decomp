@@ -9116,11 +9116,11 @@
 0x002FBD78	floorf	inferred	newlib sf_floor.c floorf: rounds toward negative infinity by masking the fraction bits; called by __kernel_rem_pio2f. DDS2 twin 0x00356BE0.
 0x002FBE50	scalbnf	inferred	newlib sf_scalbn.c scalbnf: scales a float by a power of two by adjusting its exponent, using copysignf on overflow; called by __kernel_rem_pio2f. DDS2 twin 0x00356CB8.
 0x002FBF18	copysignf	inferred	newlib sf_copysign.c copysignf: combines the magnitude of the first float with the sign of the second; called by scalbnf. DDS2 twin 0x00356DC8.
-0x002FBF58	runAtExitList	inferred	SMT3HD name via SLUS_209.11 0x002D13C8, reloc-identical; was func_002FBF58
-0x002FBFE8	initAtExit	inferred	SMT3HD name via SLUS_209.11 0x002D1458, reloc-identical; was func_002FBFE8
+0x002fbf58	__do_global_dtors	inferred	Native SDK body pairs with the verified GCC helper in Nocturne; was runAtExitList. Existing C ABI unchanged.
+0x002fbfe8	__do_global_ctors	inferred	Native SDK body pairs with the verified GCC helper in Nocturne; was initAtExit. Existing C ABI unchanged.
 0x002FC0A8	__main	inferred	libgcc __main: runs once (a flag word guards it) and tail-calls the global constructor walker; startup calls it before the engine entry. DDS2 twin 0x00356F58.
-0x002FCF50	registerAtExit	inferred	SMT3HD name via SLUS_209.11 0x002D2518, reloc-identical; was func_002FCF50
-0x002FD140	ctime_4	inferred	SMT3HD name via SLUS_209.11 0x002D2708, shared-hash-in-run; was func_002FD140
+0x002fcf50	__register_frame_info	inferred	Native SDK body pairs with the verified GCC helper in Nocturne; was registerAtExit. Existing C ABI unchanged.
+0x002fd140	__deregister_frame	inferred	Native SDK body pairs with the verified GCC helper in Nocturne; was ctime_4. Existing C ABI unchanged.
 0x002FDE48	sdfUnpackFloat	inferred	SMT3HD name via SLUS_209.11 0x002D3410, byte-identical; was func_002FDE48
 0x002FDEA8	sdfPackQuad	inferred	SMT3HD name via SLUS_209.11 0x002D3470, reloc-identical; was func_002FDEA8
 0x002FDFB0	sdfUnpackDouble	inferred	SMT3HD name via SLUS_209.11 0x002D3578, byte-identical; was func_002FDFB0
@@ -10516,3 +10516,10 @@
 0x003FE0C0	sdfSndMap	inferred	SMT3HD data name via SLUS_209.11 0x00593880, 3 agreeing references; was sdfSndMap
 0x003FE250	LastLoad	inferred	SMT3HD data name via SLUS_209.11 0x00593A10, 2 agreeing references; was LastLoad
 0x003FEB00	sdfIpuDecodeThStack	inferred	SMT3HD data name via SLUS_209.11 0x00593F80, 1 agreeing references; was sdfIpuDecodeThStack
+0x002fcfe8	__register_frame_info_table	inferred	Native SDK body pairs with the verified GCC helper in Nocturne; was func_002FCFE8. Existing C ABI unchanged.
+0x002fded8	__pack_df	inferred	Native SDK body pairs with the verified GCC helper in Nocturne; was func_002FDED8. Existing C ABI unchanged.
+0x002fe070	__fpcmp_parts_df	inferred	Native SDK body pairs with the verified GCC helper in Nocturne; was func_002FE070. Existing C ABI unchanged.
+0x002fe748	_cleanup_r	inferred	Native SDK body pairs with the verified GCC helper in Nocturne; was func_002FE748. Existing C ABI unchanged.
+0x00315758	__fixunsdfdi	inferred	Native SDK body pairs with the verified GCC helper in Nocturne; was func_00315758. Existing C ABI unchanged.
+0x003156b0	__floatdidf	inferred	Native SDK body pairs with the verified GCC helper in Nocturne; was func_003156B0. Existing C ABI unchanged.
+0x002fc718	__make_dp	inferred	Native SDK body pairs with the verified GCC helper in Nocturne; was func_002FC718. Existing C ABI unchanged.
