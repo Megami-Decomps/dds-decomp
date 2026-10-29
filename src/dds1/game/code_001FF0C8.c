@@ -1116,10 +1116,12 @@ s32 btlTurnReachedLimit(s32 unused, u32 minimumTurns) {
     return 1;
 }
 
-/* Return true only in phase 2 with no counted turns. */
+#include "btl_preemptive_outcome_result.h"
+
+/* Return true only after a non-preemptive outcome with no counted turns. */
 s32 btlIsReadyWithoutTurns(void) {
     BtlState *battleState = (BtlState *)btlGetRuntime();
-    if (battleState->preemptiveOutcome == 2) {
+    if (battleState->preemptiveOutcome == BTL_PREEMPTIVE_OUTCOME_NOT_PREEMPTIVE) {
         if (battleState->turnCount == 0) {
             return 1;
         }

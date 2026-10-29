@@ -859,12 +859,14 @@ s32 btlCalculateMoneyDropAmount(BtlUnit *actor) {
 }
 
 /* Preserve the native forwarded chance word; the empty provider ignores it. */
+#include "btl_preemptive_outcome_result.h"
+
 extern void btlPreemptiveChanceHook();
 
 extern const char D_004156F8[];
 
-/* Select outcome 1 or 2 using scene overrides and the native preemptive chance roll. */
-s32 btlSelectPreemptiveOutcome(void) {
+/* Select the preemptive outcome using scene overrides and the native chance roll. */
+BtlPreemptiveOutcomeResult btlSelectPreemptiveOutcome(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
     s32 chance;
     f32 ratio;
@@ -873,20 +875,20 @@ s32 btlSelectPreemptiveOutcome(void) {
     if (state->battleFlags & 0x4000) {
         if (state->requestMode == 2 || state->requestMode == 4) {
             if (datBattleSceneRecords[state->battleMode].flags & 2) {
-                return 2;
+                return BTL_PREEMPTIVE_OUTCOME_NOT_PREEMPTIVE;
             }
         }
-        return 1;
+        return BTL_PREEMPTIVE_OUTCOME_PREEMPTIVE;
     }
     if (datBattleSceneRecords[state->battleMode].flags & 4) {
-        return 1;
+        return BTL_PREEMPTIVE_OUTCOME_PREEMPTIVE;
     }
     if (state->encounterKind != 3 &&
         (datBattleSceneRecords[state->battleMode].flags & 2)) {
-        return 2;
+        return BTL_PREEMPTIVE_OUTCOME_NOT_PREEMPTIVE;
     }
     if (state->specialEncounterBlocked) {
-        return 2;
+        return BTL_PREEMPTIVE_OUTCOME_NOT_PREEMPTIVE;
     }
     ratio = 1.0f;
     chance = evtRunContextWithArguments(0x17, evtScriptArgumentFromBits(0),
@@ -913,7 +915,8 @@ s32 btlSelectPreemptiveOutcome(void) {
     }
     btlBossDebugPrintf(D_004156F8, chance, ratio);
     btlPreemptiveChanceHook(chance);
-    return btlRollAiBucket() < chance ? 1 : 2;
+    return btlRollAiBucket() < chance ? BTL_PREEMPTIVE_OUTCOME_PREEMPTIVE
+                                      : BTL_PREEMPTIVE_OUTCOME_NOT_PREEMPTIVE;
 }
 
 /* Select a follow-up encounter from the override, forced scene or adjustment rows. */

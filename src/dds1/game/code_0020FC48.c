@@ -2994,6 +2994,8 @@ INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A72B8);
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A72C8);
 
+#include "btl_preemptive_outcome_result.h"
+
 s32 btlUpdateDebugEncounterSelector(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
     u32 i;
@@ -3004,7 +3006,7 @@ s32 btlUpdateDebugEncounterSelector(void) {
     if (dds3PadBitTable[3] < 0) {
         state->battleFlags = (state->battleFlags & 0xFFFDFE3F) | 0x11000000;
         state->runtimeFlags |= 0x40;
-        D_003BBB20 = 1;
+        D_003BBB20 = BTL_PREEMPTIVE_OUTCOME_PREEMPTIVE;
     }
     if (dds3PadBitTable[13] < 0) {
         D_003BBB0F ^= 1;

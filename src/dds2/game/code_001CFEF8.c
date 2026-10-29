@@ -273,7 +273,7 @@ s32 fldSceneStateStartTileEffect(BtlState *scene) {
 extern void btlReleaseUnitResources(BtlUnit *);
 extern BtlUnit *btlCreateUnit(void);
 extern s32 btlHasSpecialAbilityOrModelFlag(datUnitWork_t *record);
-extern s32 btlSelectPreemptiveOutcome(void);
+#include "btl_preemptive_outcome_result.h"
 extern s8 btlChooseStartVoice(void);
 extern void btlApplyMaskedActorEntryAdjustments(BtlUnit *unit, u32 flags, s16 delta);
 extern void btlClearUnitStatusMask(void);
@@ -398,14 +398,16 @@ void btlInitializeBattleUnits(BtlState *scene) {
         if (scene->initializeUnitEntry != NULL) scene->initializeUnitEntry(unit);
         index++;
     } while (index<9);
-    if (scene->preemptiveOutcome == 0) scene->preemptiveOutcome=btlSelectPreemptiveOutcome();
+    if (scene->preemptiveOutcome == BTL_PREEMPTIVE_OUTCOME_UNSELECTED)
+        scene->preemptiveOutcome = btlSelectPreemptiveOutcome();
     scene->mode=scene->preemptiveOutcome;
     if (!(scene->battleFlags & 0x4000)) {
         s32 voice;
         if (scene->encounterKind) btlClearUnitStatusMask();
         if (scene->encounterKind == 2) scene->commandRestrictFlags &= ~2;
         voice=btlChooseStartVoice();
-        if (voice>=0 && scene->preemptiveOutcome==1) {
+        if (voice>=0 &&
+            scene->preemptiveOutcome==BTL_PREEMPTIVE_OUTCOME_PREEMPTIVE) {
             BtlRuntimeTask *sound=sndCreateAtracEffectLoadTask(voice);
             sound->ownerId=0x8000000000000002ULL;
             btlStartTask(sound);
@@ -1335,7 +1337,7 @@ s32 btlUpdateBattleEnd(BtlState *scene) {
         }
         if (scene->terminalOutcome == BTL_TERMINAL_OUTCOME_SERIAL) {
             task = scene->tasks;
-            scene->preemptiveOutcome = 0;
+            scene->preemptiveOutcome = BTL_PREEMPTIVE_OUTCOME_UNSELECTED;
             scene->terminalOutcome = BTL_TERMINAL_OUTCOME_NONE;
             scene->spawnCount = 0;
             scene->turnCount = 0;

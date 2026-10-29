@@ -235,7 +235,7 @@ typedef struct BtlState {
         };
         u32 cameraActorConfiguration; /* 0x244 */
     };
-    u16 preemptiveOutcome; /* 0x248: selected outcome carried into the battle mode. */
+    u16 preemptiveOutcome; /* 0x248: 0 awaits selection; 1 is preemptive; 2 is not preemptive. */
     u8 encounterKind; /* 0 normal, 2 surprise; DDS2 also uses 3 for Majin. */
     u8 pad24B[1];
     u16 mode; /* 0x24C */
@@ -479,7 +479,7 @@ typedef struct BtlState {
         };
         u32 cameraActorConfiguration; /* 0x268: mode and persistent actor count. */
     };
-    u16 preemptiveOutcome; /* 0x26C: debug override or selected battle outcome. */
+    u16 preemptiveOutcome; /* 0x26C: 0 awaits selection; 1 is preemptive; 2 is not preemptive. */
     u8 encounterKind; /* 0x26E: scene setup selects 0, 2 or 3. */
     u8 pad26F;
     u16 mode; /* 0x270 */
