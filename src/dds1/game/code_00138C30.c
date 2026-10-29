@@ -661,7 +661,482 @@ FldEventDisplayResourceIndex fldEveHit_AddEveData(
     return index;
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "sdk_libc.h"
+#include "fpu.h"
+#include "pcp_vu0.h"
+#include "sdf_vu_matrix.h"
+#include "eff_transform.h"
+#include "fld.h"
+#include "fld_room_state.h"
+#include "fld_trigger_shape.h"
+
+extern void LoadIdentity(void);
+
+
+
+extern s32 fldEveRngCount;
+extern FldRoomState fldEveHitTable[];
+extern FldFileResource *fldRoomResources[];
+
+/* One corner of a trigger's shape: offset rotated by the primary VU0 matrix. */
+static inline void fldRotateTriggerCorner(f32 *offset, f32 *rotated, f32 x, f32 y, f32 z) {
+    offset[0] = x;
+    offset[1] = y;
+    offset[2] = z;
+    VU0_LOAD_VF(vf10, offset);
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_STORE_VF_UNCLOBBERED(vf10, rotated);
+}
+
+/* Register a resource's trigger in the next room slot and return the slot:
+ * the resource in fldRoomResources, and for a plane (kind 1: width on y,
+ * height on x) or a box (kind 2: sizes in y, x, z order) its corners, rotated
+ * by the resource's quaternion and placed at its position, its facing (the
+ * reference (0, 0, 1) rotated, no translation) as the room's center, and its
+ * face planes and limits. A plane's face is plane 0; its four sides follow
+ * (planes 1 to 4) in whichever of the x or z projections its normal is
+ * nearest (axis mode 0 or 2; none for a normal nearest y, axis mode 1), each
+ * turned toward the room's projected center, each side's limit taken at the
+ * edge vertex retail uses (0, 1, 2, then 0). A box's six faces come from its
+ * corners. A sphere (kind 0) gets no geometry. Then the room's sizes, world
+ * key and word 0x11C (slot * 1.3); its entry, save point value, room id and
+ * map-slot gate -1 and its mode 0. Upstream: INCLUDE_ASM in DDS1's
+ * game/code_00138C30 and DDS2's game/code_0013B818. */
+s32 fldRegisterRoomObject(FldFileResource *resource, dds3Basic_t *object) {
+    f32 rotated[8][4] __attribute__((aligned(16)));
+    f32 offset[4] __attribute__((aligned(16)));
+    f32 rotation[4] __attribute__((aligned(16)));
+    f32 reference[4] __attribute__((aligned(16))) = {0.0f, 0.0f, 1.0f, 1.0f};
+    f32 normal[4];
+    f32 vertices[4][4] __attribute__((aligned(16)));
+    f32 edge[3][4];
+    f32 center[4];
+    s32 slot;
+    s32 face;
+    s32 i;
+    s32 result;
+    FldTriggerShape *shape;
+    f32 sizeX, sizeY, sizeZ;
+    f32 positionX, positionY, positionZ;
+    f32 normalX, normalY, normalZ;
+
+    memset(offset, 0, sizeof(offset));
+    offset[3] = 1.0f;
+    memset(rotation, 0, sizeof(rotation));
+    rotation[3] = 1.0f;
+    slot = fldEveRngCount;
+    fldRoomResources[slot] = resource;
+    sizeY = 0.0f;
+    sizeX = 0.0f;
+    sizeZ = 0.0f;
+    shape = ((FldTaskInfo *)resource->data)->shape;
+    switch (shape->kind) {
+    case 1:
+        sizeY = shape->plane.width;
+        sizeX = shape->plane.height;
+        positionX = resource->transform[0];
+        positionY = resource->transform[1];
+        positionZ = resource->transform[2];
+        SDF_VU0_COPYVECTOR(rotation, &resource->transform[4]);
+        LoadIdentity();
+        VU0_LOAD_VF(vf10, rotation);
+        effMiscQuaternionToMatrixVU();
+        fldRotateTriggerCorner(offset, rotated[0], sizeX * 0.5f, -(sizeY * 0.5f), 0.0f);
+        fldRotateTriggerCorner(offset, rotated[1], -(sizeX * 0.5f), -(sizeY * 0.5f), 0.0f);
+        fldRotateTriggerCorner(offset, rotated[2], -(sizeX * 0.5f), sizeY * 0.5f, 0.0f);
+        fldRotateTriggerCorner(offset, rotated[3], sizeX * 0.5f, sizeY * 0.5f, 0.0f);
+        for (i = 0; i < 4; i++) {
+            fldEveHitTable[slot].corner[i][0] = rotated[i][0] + positionX;
+            fldEveHitTable[slot].corner[i][1] = rotated[i][1] + positionY;
+            fldEveHitTable[slot].corner[i][2] = rotated[i][2] + positionZ;
+            fldEveHitTable[slot].corner[i][3] = 1.0f;
+        }
+        VU0_LOAD_VF(vf10, reference);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_STORE_VF_UNCLOBBERED(vf10, fldEveHitTable[slot].center);
+        for (i = 0; i < 4; i++) {
+            SDF_VU0_COPYVECTOR(vertices[i], fldEveHitTable[slot].corner[i]);
+        }
+        fldMakeEveHitPlanes(vertices[0], &normal[0], &normal[1], &normal[2], &normal[3]);
+        for (i = 0; i < 3; i++) {
+            fldEveHitTable[slot].plane[0][i] = normal[i];
+        }
+        fldEveHitTable[slot].plane[0][3] = 0.0f;
+        fldEveHitTable[slot].limit[0] = fldVecDot(fldEveHitTable[slot].plane[0], vertices[0]);
+        normalX = ffabsf(fldEveHitTable[slot].plane[0][0]);
+        normalY = ffabsf(fldEveHitTable[slot].plane[0][1]);
+        normalZ = ffabsf(fldEveHitTable[slot].plane[0][2]);
+        if (normalX > normalY && normalX > normalZ) {
+            fldEveHitTable[slot].probePlaneMode = 0;
+            center[0] = 0.0f;
+            center[1] = (vertices[0][1] + vertices[1][1] + vertices[2][1] + vertices[3][1]) * 0.25f;
+            center[2] = (vertices[0][2] + vertices[1][2] + vertices[2][2] + vertices[3][2]) * 0.25f;
+            /* Side 1: the edge from corner 0 to corner 1; its limit at edge vertex 0. */
+            face = 1;
+            edge[0][0] = 0.0f;
+            edge[0][1] = vertices[0][1];
+            edge[0][2] = vertices[0][2];
+            edge[1][0] = 0.0f;
+            edge[1][1] = vertices[1][1];
+            edge[1][2] = vertices[1][2];
+            edge[2][0] = 10.0f;
+            edge[2][1] = vertices[1][1];
+            edge[2][2] = vertices[1][2];
+            fldMakeEveHitPlanes(edge[0], &normal[0], &normal[1], &normal[2], &normal[3]);
+            fldEveHitTable[slot].plane[face][0] = normal[0];
+            fldEveHitTable[slot].plane[face][1] = normal[1];
+            fldEveHitTable[slot].plane[face][2] = normal[2];
+            fldEveHitTable[slot].limit[face] = fldVecDot(fldEveHitTable[slot].plane[face], edge[0]);
+            if (fldVecDot(center, fldEveHitTable[slot].plane[face])
+                - fldEveHitTable[slot].limit[face] < 0.0f) {
+                fldEveHitTable[slot].plane[face][0] = -normal[0];
+                fldEveHitTable[slot].plane[face][1] = -normal[1];
+                fldEveHitTable[slot].plane[face][2] = -normal[2];
+                fldEveHitTable[slot].limit[face] = fldVecDot(fldEveHitTable[slot].plane[face], edge[0]);
+            }
+            /* Side 2: the edge from corner 1 to corner 2; its limit at edge vertex 1. */
+            face = 2;
+            edge[0][0] = 0.0f;
+            edge[0][1] = vertices[1][1];
+            edge[0][2] = vertices[1][2];
+            edge[1][0] = 0.0f;
+            edge[1][1] = vertices[2][1];
+            edge[1][2] = vertices[2][2];
+            edge[2][0] = 10.0f;
+            edge[2][1] = vertices[2][1];
+            edge[2][2] = vertices[2][2];
+            fldMakeEveHitPlanes(edge[0], &normal[0], &normal[1], &normal[2], &normal[3]);
+            fldEveHitTable[slot].plane[face][0] = normal[0];
+            fldEveHitTable[slot].plane[face][1] = normal[1];
+            fldEveHitTable[slot].plane[face][2] = normal[2];
+            fldEveHitTable[slot].limit[face] = fldVecDot(fldEveHitTable[slot].plane[face], edge[1]);
+            if (fldVecDot(center, fldEveHitTable[slot].plane[face])
+                - fldEveHitTable[slot].limit[face] < 0.0f) {
+                fldEveHitTable[slot].plane[face][0] = -normal[0];
+                fldEveHitTable[slot].plane[face][1] = -normal[1];
+                fldEveHitTable[slot].plane[face][2] = -normal[2];
+                fldEveHitTable[slot].limit[face] = fldVecDot(fldEveHitTable[slot].plane[face], edge[1]);
+            }
+            /* Side 3: the edge from corner 2 to corner 3; its limit at edge vertex 2. */
+            face = 3;
+            edge[0][0] = 0.0f;
+            edge[0][1] = vertices[2][1];
+            edge[0][2] = vertices[2][2];
+            edge[1][0] = 0.0f;
+            edge[1][1] = vertices[3][1];
+            edge[1][2] = vertices[3][2];
+            edge[2][0] = 10.0f;
+            edge[2][1] = vertices[3][1];
+            edge[2][2] = vertices[3][2];
+            fldMakeEveHitPlanes(edge[0], &normal[0], &normal[1], &normal[2], &normal[3]);
+            fldEveHitTable[slot].plane[face][0] = normal[0];
+            fldEveHitTable[slot].plane[face][1] = normal[1];
+            fldEveHitTable[slot].plane[face][2] = normal[2];
+            fldEveHitTable[slot].limit[face] = fldVecDot(fldEveHitTable[slot].plane[face], edge[2]);
+            if (fldVecDot(center, fldEveHitTable[slot].plane[face])
+                - fldEveHitTable[slot].limit[face] < 0.0f) {
+                fldEveHitTable[slot].plane[face][0] = -normal[0];
+                fldEveHitTable[slot].plane[face][1] = -normal[1];
+                fldEveHitTable[slot].plane[face][2] = -normal[2];
+                fldEveHitTable[slot].limit[face] = fldVecDot(fldEveHitTable[slot].plane[face], edge[2]);
+            }
+            /* Side 4: the edge from corner 3 to corner 0; its limit at edge vertex 0. */
+            face = 4;
+            edge[0][0] = 0.0f;
+            edge[0][1] = vertices[3][1];
+            edge[0][2] = vertices[3][2];
+            edge[1][0] = 0.0f;
+            edge[1][1] = vertices[0][1];
+            edge[1][2] = vertices[0][2];
+            edge[2][0] = 10.0f;
+            edge[2][1] = vertices[0][1];
+            edge[2][2] = vertices[0][2];
+            fldMakeEveHitPlanes(edge[0], &normal[0], &normal[1], &normal[2], &normal[3]);
+            fldEveHitTable[slot].plane[face][0] = normal[0];
+            fldEveHitTable[slot].plane[face][1] = normal[1];
+            fldEveHitTable[slot].plane[face][2] = normal[2];
+            fldEveHitTable[slot].limit[face] = fldVecDot(fldEveHitTable[slot].plane[face], edge[0]);
+            if (fldVecDot(center, fldEveHitTable[slot].plane[face])
+                - fldEveHitTable[slot].limit[face] < 0.0f) {
+                fldEveHitTable[slot].plane[face][0] = -normal[0];
+                fldEveHitTable[slot].plane[face][1] = -normal[1];
+                fldEveHitTable[slot].plane[face][2] = -normal[2];
+                fldEveHitTable[slot].limit[face] = fldVecDot(fldEveHitTable[slot].plane[face], edge[0]);
+            }
+        } else if (normalY > normalX && normalY > normalZ) {
+            fldEveHitTable[slot].probePlaneMode = 1;
+        } else {
+            fldEveHitTable[slot].probePlaneMode = 2;
+            center[0] = (vertices[0][0] + vertices[1][0] + vertices[2][0] + vertices[3][0]) * 0.25f;
+            center[1] = (vertices[0][1] + vertices[1][1] + vertices[2][1] + vertices[3][1]) * 0.25f;
+            center[2] = 0.0f;
+            /* Side 1: the edge from corner 0 to corner 1; its limit at edge vertex 0. */
+            face = 1;
+            edge[0][0] = vertices[0][0];
+            edge[0][1] = vertices[0][1];
+            edge[0][2] = 0.0f;
+            edge[1][0] = vertices[1][0];
+            edge[1][1] = vertices[1][1];
+            edge[1][2] = 0.0f;
+            edge[2][0] = vertices[1][0];
+            edge[2][1] = vertices[1][1];
+            edge[2][2] = 10.0f;
+            fldMakeEveHitPlanes(edge[0], &normal[0], &normal[1], &normal[2], &normal[3]);
+            fldEveHitTable[slot].plane[face][0] = normal[0];
+            fldEveHitTable[slot].plane[face][1] = normal[1];
+            fldEveHitTable[slot].plane[face][2] = normal[2];
+            fldEveHitTable[slot].limit[face] = fldVecDot(fldEveHitTable[slot].plane[face], edge[0]);
+            if (fldVecDot(center, fldEveHitTable[slot].plane[face])
+                - fldEveHitTable[slot].limit[face] < 0.0f) {
+                fldEveHitTable[slot].plane[face][0] = -normal[0];
+                fldEveHitTable[slot].plane[face][1] = -normal[1];
+                fldEveHitTable[slot].plane[face][2] = -normal[2];
+                fldEveHitTable[slot].limit[face] = fldVecDot(fldEveHitTable[slot].plane[face], edge[0]);
+            }
+            /* Side 2: the edge from corner 1 to corner 2; its limit at edge vertex 1. */
+            face = 2;
+            edge[0][0] = vertices[1][0];
+            edge[0][1] = vertices[1][1];
+            edge[0][2] = 0.0f;
+            edge[1][0] = vertices[2][0];
+            edge[1][1] = vertices[2][1];
+            edge[1][2] = 0.0f;
+            edge[2][0] = vertices[2][0];
+            edge[2][1] = vertices[2][1];
+            edge[2][2] = 10.0f;
+            fldMakeEveHitPlanes(edge[0], &normal[0], &normal[1], &normal[2], &normal[3]);
+            fldEveHitTable[slot].plane[face][0] = normal[0];
+            fldEveHitTable[slot].plane[face][1] = normal[1];
+            fldEveHitTable[slot].plane[face][2] = normal[2];
+            fldEveHitTable[slot].limit[face] = fldVecDot(fldEveHitTable[slot].plane[face], edge[1]);
+            if (fldVecDot(center, fldEveHitTable[slot].plane[face])
+                - fldEveHitTable[slot].limit[face] < 0.0f) {
+                fldEveHitTable[slot].plane[face][0] = -normal[0];
+                fldEveHitTable[slot].plane[face][1] = -normal[1];
+                fldEveHitTable[slot].plane[face][2] = -normal[2];
+                fldEveHitTable[slot].limit[face] = fldVecDot(fldEveHitTable[slot].plane[face], edge[1]);
+            }
+            /* Side 3: the edge from corner 2 to corner 3; its limit at edge vertex 2. */
+            face = 3;
+            edge[0][0] = vertices[2][0];
+            edge[0][1] = vertices[2][1];
+            edge[0][2] = 0.0f;
+            edge[1][0] = vertices[3][0];
+            edge[1][1] = vertices[3][1];
+            edge[1][2] = 0.0f;
+            edge[2][0] = vertices[3][0];
+            edge[2][1] = vertices[3][1];
+            edge[2][2] = 10.0f;
+            fldMakeEveHitPlanes(edge[0], &normal[0], &normal[1], &normal[2], &normal[3]);
+            fldEveHitTable[slot].plane[face][0] = normal[0];
+            fldEveHitTable[slot].plane[face][1] = normal[1];
+            fldEveHitTable[slot].plane[face][2] = normal[2];
+            fldEveHitTable[slot].limit[face] = fldVecDot(fldEveHitTable[slot].plane[face], edge[2]);
+            if (fldVecDot(center, fldEveHitTable[slot].plane[face])
+                - fldEveHitTable[slot].limit[face] < 0.0f) {
+                fldEveHitTable[slot].plane[face][0] = -normal[0];
+                fldEveHitTable[slot].plane[face][1] = -normal[1];
+                fldEveHitTable[slot].plane[face][2] = -normal[2];
+                fldEveHitTable[slot].limit[face] = fldVecDot(fldEveHitTable[slot].plane[face], edge[2]);
+            }
+            /* Side 4: the edge from corner 3 to corner 0; its limit at edge vertex 0. */
+            face = 4;
+            edge[0][0] = vertices[3][0];
+            edge[0][1] = vertices[3][1];
+            edge[0][2] = 0.0f;
+            edge[1][0] = vertices[0][0];
+            edge[1][1] = vertices[0][1];
+            edge[1][2] = 0.0f;
+            edge[2][0] = vertices[0][0];
+            edge[2][1] = vertices[0][1];
+            edge[2][2] = 10.0f;
+            fldMakeEveHitPlanes(edge[0], &normal[0], &normal[1], &normal[2], &normal[3]);
+            fldEveHitTable[slot].plane[face][0] = normal[0];
+            fldEveHitTable[slot].plane[face][1] = normal[1];
+            fldEveHitTable[slot].plane[face][2] = normal[2];
+            fldEveHitTable[slot].limit[face] = fldVecDot(fldEveHitTable[slot].plane[face], edge[0]);
+            if (fldVecDot(center, fldEveHitTable[slot].plane[face])
+                - fldEveHitTable[slot].limit[face] < 0.0f) {
+                fldEveHitTable[slot].plane[face][0] = -normal[0];
+                fldEveHitTable[slot].plane[face][1] = -normal[1];
+                fldEveHitTable[slot].plane[face][2] = -normal[2];
+                fldEveHitTable[slot].limit[face] = fldVecDot(fldEveHitTable[slot].plane[face], edge[0]);
+            }
+        }
+        break;
+
+    case 2:
+        sizeY = shape->box.size[0];
+        sizeX = shape->box.size[1];
+        sizeZ = shape->box.size[2];
+        positionX = resource->transform[0];
+        positionY = resource->transform[1];
+        positionZ = resource->transform[2];
+        rotation[0] = resource->transform[4];
+        rotation[1] = resource->transform[5];
+        rotation[2] = resource->transform[6];
+        rotation[3] = resource->transform[7];
+        LoadIdentity();
+        VU0_LOAD_VF(vf10, rotation);
+        effMiscQuaternionToMatrixVU();
+        fldRotateTriggerCorner(offset, rotated[0], -(sizeX * 0.5f), -(sizeY * 0.5f), -(sizeZ * 0.5f));
+        fldRotateTriggerCorner(offset, rotated[1], sizeX * 0.5f, -(sizeY * 0.5f), -(sizeZ * 0.5f));
+        fldRotateTriggerCorner(offset, rotated[2], -(sizeX * 0.5f), -(sizeY * 0.5f), sizeZ * 0.5f);
+        fldRotateTriggerCorner(offset, rotated[3], sizeX * 0.5f, -(sizeY * 0.5f), sizeZ * 0.5f);
+        fldRotateTriggerCorner(offset, rotated[4], -(sizeX * 0.5f), sizeY * 0.5f, -(sizeZ * 0.5f));
+        fldRotateTriggerCorner(offset, rotated[5], sizeX * 0.5f, sizeY * 0.5f, -(sizeZ * 0.5f));
+        fldRotateTriggerCorner(offset, rotated[6], -(sizeX * 0.5f), sizeY * 0.5f, sizeZ * 0.5f);
+        fldRotateTriggerCorner(offset, rotated[7], sizeX * 0.5f, sizeY * 0.5f, sizeZ * 0.5f);
+        for (i = 0; i < 8; i++) {
+            fldEveHitTable[slot].corner[i][0] = rotated[i][0] + positionX;
+            fldEveHitTable[slot].corner[i][1] = rotated[i][1] + positionY;
+            fldEveHitTable[slot].corner[i][2] = rotated[i][2] + positionZ;
+            fldEveHitTable[slot].corner[i][3] = 1.0f;
+        }
+        VU0_LOAD_VF(vf10, reference);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_STORE_VF_UNCLOBBERED(vf10, fldEveHitTable[slot].center);
+        /* Face 0: corners 0, 1, 2. */
+        face = 0;
+        vertices[0][0] = fldEveHitTable[slot].corner[0][0];
+        vertices[0][1] = fldEveHitTable[slot].corner[0][1];
+        vertices[0][2] = fldEveHitTable[slot].corner[0][2];
+        vertices[1][0] = fldEveHitTable[slot].corner[1][0];
+        vertices[1][1] = fldEveHitTable[slot].corner[1][1];
+        vertices[1][2] = fldEveHitTable[slot].corner[1][2];
+        vertices[2][0] = fldEveHitTable[slot].corner[2][0];
+        vertices[2][1] = fldEveHitTable[slot].corner[2][1];
+        vertices[2][2] = fldEveHitTable[slot].corner[2][2];
+        vertices[0][3] = 1.0f;
+        vertices[1][3] = 1.0f;
+        vertices[2][3] = 1.0f;
+        fldMakeEveHitPlanes(vertices[0], &normal[0], &normal[1], &normal[2], &normal[3]);
+        for (i = 0; i < 3; i++) {
+            fldEveHitTable[slot].plane[face][i] = normal[i];
+        }
+        fldEveHitTable[slot].plane[face][3] = 0.0f;
+        fldEveHitTable[slot].limit[face] = fldVecDot(fldEveHitTable[slot].plane[face], vertices[0]);
+        /* Face 1: corners 1, 0, 5. */
+        face = 1;
+        vertices[0][0] = fldEveHitTable[slot].corner[1][0];
+        vertices[0][1] = fldEveHitTable[slot].corner[1][1];
+        vertices[0][2] = fldEveHitTable[slot].corner[1][2];
+        vertices[1][0] = fldEveHitTable[slot].corner[0][0];
+        vertices[1][1] = fldEveHitTable[slot].corner[0][1];
+        vertices[1][2] = fldEveHitTable[slot].corner[0][2];
+        vertices[2][0] = fldEveHitTable[slot].corner[5][0];
+        vertices[2][1] = fldEveHitTable[slot].corner[5][1];
+        vertices[2][2] = fldEveHitTable[slot].corner[5][2];
+        vertices[0][3] = 1.0f;
+        vertices[1][3] = 1.0f;
+        vertices[2][3] = 1.0f;
+        fldMakeEveHitPlanes(vertices[0], &normal[0], &normal[1], &normal[2], &normal[3]);
+        for (i = 0; i < 3; i++) {
+            fldEveHitTable[slot].plane[face][i] = normal[i];
+        }
+        fldEveHitTable[slot].plane[face][3] = 0.0f;
+        fldEveHitTable[slot].limit[face] = fldVecDot(fldEveHitTable[slot].plane[face], vertices[0]);
+        /* Face 2: corners 0, 2, 4. */
+        face = 2;
+        vertices[0][0] = fldEveHitTable[slot].corner[0][0];
+        vertices[0][1] = fldEveHitTable[slot].corner[0][1];
+        vertices[0][2] = fldEveHitTable[slot].corner[0][2];
+        vertices[1][0] = fldEveHitTable[slot].corner[2][0];
+        vertices[1][1] = fldEveHitTable[slot].corner[2][1];
+        vertices[1][2] = fldEveHitTable[slot].corner[2][2];
+        vertices[2][0] = fldEveHitTable[slot].corner[4][0];
+        vertices[2][1] = fldEveHitTable[slot].corner[4][1];
+        vertices[2][2] = fldEveHitTable[slot].corner[4][2];
+        vertices[0][3] = 1.0f;
+        vertices[1][3] = 1.0f;
+        vertices[2][3] = 1.0f;
+        fldMakeEveHitPlanes(vertices[0], &normal[0], &normal[1], &normal[2], &normal[3]);
+        for (i = 0; i < 3; i++) {
+            fldEveHitTable[slot].plane[face][i] = normal[i];
+        }
+        fldEveHitTable[slot].plane[face][3] = 0.0f;
+        fldEveHitTable[slot].limit[face] = fldVecDot(fldEveHitTable[slot].plane[face], vertices[0]);
+        /* Face 3: corners 3, 1, 7. */
+        face = 3;
+        vertices[0][0] = fldEveHitTable[slot].corner[3][0];
+        vertices[0][1] = fldEveHitTable[slot].corner[3][1];
+        vertices[0][2] = fldEveHitTable[slot].corner[3][2];
+        vertices[1][0] = fldEveHitTable[slot].corner[1][0];
+        vertices[1][1] = fldEveHitTable[slot].corner[1][1];
+        vertices[1][2] = fldEveHitTable[slot].corner[1][2];
+        vertices[2][0] = fldEveHitTable[slot].corner[7][0];
+        vertices[2][1] = fldEveHitTable[slot].corner[7][1];
+        vertices[2][2] = fldEveHitTable[slot].corner[7][2];
+        vertices[0][3] = 1.0f;
+        vertices[1][3] = 1.0f;
+        vertices[2][3] = 1.0f;
+        fldMakeEveHitPlanes(vertices[0], &normal[0], &normal[1], &normal[2], &normal[3]);
+        for (i = 0; i < 3; i++) {
+            fldEveHitTable[slot].plane[face][i] = normal[i];
+        }
+        fldEveHitTable[slot].plane[face][3] = 0.0f;
+        fldEveHitTable[slot].limit[face] = fldVecDot(fldEveHitTable[slot].plane[face], vertices[0]);
+        /* Face 4: corners 2, 3, 6. */
+        face = 4;
+        vertices[0][0] = fldEveHitTable[slot].corner[2][0];
+        vertices[0][1] = fldEveHitTable[slot].corner[2][1];
+        vertices[0][2] = fldEveHitTable[slot].corner[2][2];
+        vertices[1][0] = fldEveHitTable[slot].corner[3][0];
+        vertices[1][1] = fldEveHitTable[slot].corner[3][1];
+        vertices[1][2] = fldEveHitTable[slot].corner[3][2];
+        vertices[2][0] = fldEveHitTable[slot].corner[6][0];
+        vertices[2][1] = fldEveHitTable[slot].corner[6][1];
+        vertices[2][2] = fldEveHitTable[slot].corner[6][2];
+        vertices[0][3] = 1.0f;
+        vertices[1][3] = 1.0f;
+        vertices[2][3] = 1.0f;
+        fldMakeEveHitPlanes(vertices[0], &normal[0], &normal[1], &normal[2], &normal[3]);
+        for (i = 0; i < 3; i++) {
+            fldEveHitTable[slot].plane[face][i] = normal[i];
+        }
+        fldEveHitTable[slot].plane[face][3] = 0.0f;
+        fldEveHitTable[slot].limit[face] = fldVecDot(fldEveHitTable[slot].plane[face], vertices[0]);
+        /* Face 5: corners 6, 7, 4. */
+        face = 5;
+        vertices[0][0] = fldEveHitTable[slot].corner[6][0];
+        vertices[0][1] = fldEveHitTable[slot].corner[6][1];
+        vertices[0][2] = fldEveHitTable[slot].corner[6][2];
+        vertices[1][0] = fldEveHitTable[slot].corner[7][0];
+        vertices[1][1] = fldEveHitTable[slot].corner[7][1];
+        vertices[1][2] = fldEveHitTable[slot].corner[7][2];
+        vertices[2][0] = fldEveHitTable[slot].corner[4][0];
+        vertices[2][1] = fldEveHitTable[slot].corner[4][1];
+        vertices[2][2] = fldEveHitTable[slot].corner[4][2];
+        vertices[0][3] = 1.0f;
+        vertices[1][3] = 1.0f;
+        vertices[2][3] = 1.0f;
+        fldMakeEveHitPlanes(vertices[0], &normal[0], &normal[1], &normal[2], &normal[3]);
+        for (i = 0; i < 3; i++) {
+            fldEveHitTable[slot].plane[face][i] = normal[i];
+        }
+        fldEveHitTable[slot].plane[face][3] = 0.0f;
+        fldEveHitTable[slot].limit[face] = fldVecDot(fldEveHitTable[slot].plane[face], vertices[0]);
+        break;
+    }
+    fldEveHitTable[slot].sizeX = sizeX;
+    fldEveHitTable[slot].sizeY = sizeY;
+    fldEveHitTable[slot].sizeZ = sizeZ;
+    fldEveHitTable[slot].worldObjectKey = object->key;
+    fldEveHitTable[slot].entryIndex = -1;
+    fldEveHitTable[slot].unk11C = slot * 1.3f;
+    fldEveHitTable[slot].savePointValue = -1;
+    fldEveHitTable[slot].roomId = -1;
+    fldEveHitTable[slot].mapSlot = -1;
+    fldEveHitTable[slot].mode = 0;
+    result = fldEveRngCount;
+    fldEveRngCount++;
+    return result;
+}
+#else
 INCLUDE_ASM(const FldRoomRecordIndex, "game/code_00138C30", fldRegisterRoomObject);
+#endif
 
 /* vu0 routine: actor-facing probe for the world kind-0x11 position payload. */
 s32 fldTestRoomProbeFacingAndRange(dds3Basic_t *actor, dds3Basic_t *entry) {
@@ -889,7 +1364,50 @@ s32 fldRoomContainsPoint(f32 *point, s32 room) {
     return 1;
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "scr.h"
+#include "evt_world.h"
+#include "dds3_world_primary.h"
+#include "fld_room_state.h"
+
+
+extern FldRoomState fldEveHitTable[];
+extern s32 gFldEveRngIdx;
+extern s32 gFldEveRngIdx_N;
+extern s32 gFldEveRngIdx_T;
+extern s32 fldTriggeredSavePointValue;
+
+/* Start a room trigger's named event script unless it is already running,
+ * and record it: its task in the room's task handle, the room as the one
+ * triggered, and by the room's mode the triggered NPC (mode 1) and item box
+ * (mode 2) rooms and the save point's value (mode 3), -1 for the modes it is
+ * not. Returns the task, or -1 when the script was already running.
+ * Upstream: INCLUDE_ASM in DDS1's game/code_00138C30 and DDS2's
+ * game/code_0013B818. */
+s32 fldStartRoomEventTask(const char *name, s32 room) {
+    FldRoomState *record;
+    s32 task;
+
+    if (scrSearchScriptName(name) != NULL) {
+        return -1;
+    }
+    task = evtStartSceneResourceTask(dds3GetActiveScene(), name);
+    record = &fldEveHitTable[room];
+    fldRoomTaskHandles[room] = task;
+    gFldEveRngIdx_T = record->mode == 2 ? room : -1;
+    gFldEveRngIdx_N = record->mode == 1 ? room : -1;
+    gFldEveRngIdx = room;
+    if (record->mode == 3) {
+        fldTriggeredSavePointValue = record->savePointValue;
+    } else {
+        fldTriggeredSavePointValue = -1;
+    }
+    return task;
+}
+#else
 INCLUDE_ASM(const s32, "game/code_00138C30", fldStartRoomEventTask);
+#endif
 
 s32 fldEveHit_ScriptEnd(char *flag, u32 slot) {
     fldRoomTaskHandles[slot] = NULL;
@@ -928,7 +1446,424 @@ s32 fldEveHit_ChkEveHitAfter(void) {
     return 1;
 }
 
+#ifdef NON_MATCHING
+#include "sdf_line_pair_packet_api.h"
+#include "sdf_gs_header.h"
+#include "sdf_pac_reloc.h"
+#include "fld_script_resource.h"
+#include "sdf_packet_header.h"
+#include "eff.h"
+#include "fld_player_scene_state.h"
+#include "fld_marker_packet.h"
+#include "sdf_gs_blend.h"
+#include "common.h"
+#include "fld_stop_entry.h"
+#include "sdf_resource_list_release_api.h"
+#include "kwln_background_fade_api.h"
+#include "fld_scene_ready_api.h"
+#include "fld_scene_record_api.h"
+#include "fld_light_set.h"
+#include "fld_sky_buffer.h"
+#include "fld_sky_gradient_record.h"
+#include "fld_quad_state.h"
+#include "kwln_frame_draw_buffer.h"
+#include "kwln_draw_buffer.h"
+#include "kwln_fade.h"
+#include "mnu_title_stream.h"
+#include "fld_bill_config.h"
+#include "sdf_trig.h"
+#include "fld_area_path.h"
+#include "fld_npc_motion.h"
+#include "fld_npc_palette.h"
+#include "btl_stage_task_cleanup.h"
+#include "mdl_motion_api.h"
+#include "sdf_motion.h"
+#include "fld_resource_resolver.h"
+#include "fld_clear_menu_entries_api.h"
+#include "fld_play_pending_sounds_api.h"
+#include "fld_release_texture_slots_api.h"
+#include "fld_transfer_chunk.h"
+#include "fld_camera_follow_row.h"
+#include "fld.h"
+#include "fld_encounter_runtime_api.h"
+#include "fld_collision_geometry.h"
+#include "fld_scene_request.h"
+#include "fld_spawn_event.h"
+#include "sdf_resource.h"
+#include "dds3obj.h"
+#include "dds3_world_value.h"
+#include "sdf_texture_file.h"
+#include "sdf_texture_primary_buffer_api.h"
+#include "evt_action_object.h"
+#include "sdf_texture_offset_list.h"
+#include "evt_script_model.h"
+#include "sdf_model.h"
+#include "mdl_flag_api.h"
+#include "dds3_world_counter.h"
+#include "sdf_vu_matrix.h"
+#include "dds3_world_secondary.h"
+#include "eff_light.h"
+#include "fld_area_work.h"
+#include "fld_spawn_collision.h"
+#include "evt_world.h"
+#include "evt_world_source_transform.h"
+#include "sdf_chip.h"
+#include "sdf_column_packet_api.h"
+#include "sdf_packet_append.h"
+#include "sdf_packet_builders.h"
+#include "fr_font.h"
+#include "sdf_packet_list.h"
+#include "sdf_dev_state.h"
+#include "fld_waypoint.h"
+#include "fld_inf.h"
+#include "kwln_task_lifecycle.h"
+#include "file_request_api.h"
+#include "file_pac.h"
+#include "fld_packed_resource_kind.h"
+#include "fld_title_banner_menu.h"
+#include "field_stage.h"
+#include "sdf_pac_work.h"
+#include "sdf_primitive_packet_api.h"
+#include "evt_unit.h"
+#include "evt_unit_color_transition.h"
+#include "fpu.h"
+#include "pcp_vu0.h"
+#include "sdf.h"
+#include "sdf_sif_command.h"
+#include "mdl.h"
+#include "scr.h"
+#include "kwln.h"
+#include "kwln_task_create.h"
+#include "dat_state.h"
+#include "dds3_world_primary.h"
+#include "sdf_packet_alloc.h"
+#include "fld_object_slot_api.h"
+#include "fld_placement_data.h"
+#include "fld_resource_name.h"
+#include "eff_object.h"
+#include "dds3_path.h"
+#include "fld_label_cache_api.h"
+#include "fld_sprite_vertex.h"
+#include "fld_room_state.h"
+#include "fld_trigger_shape.h"
+#include "fld_action_row.h"
+#include "mdl_world_object_source_vector_api.h"
+#include "btl.h"
+#include "sdk_libc.h"
+
+extern s32 dds3ComparePosPoseSet(dds3PoseSet_t *left, dds3PoseSet_t *right);
+extern s32 fldEveHit_ScriptEnd(char *flag, u32 slot);
+extern s32 fldProbeRoomPlanes(f32 *direction, s32 roomIndex);
+extern s32 fldRoomContainsPoint(f32 *point, s32 room);
+extern s32 fldTestActorRoomProbeCondition(s32 roomIndex, dds3Basic_t *actor, f32 *position);
+extern u32 fldEveHit_ScriptEnd2(u32 slot);
+extern void fldClearCameraFacingPointRequest(void);
+extern void fldClearCameraHeadingRequest(void);
+extern void fldDbgPrint2D(s32 x, s32 y, const char *format);
+extern void fldQueueCameraHeadingFromVector(f32 x, f32 unusedY, f32 z);
+extern void fldQueueCameraXYOverride(f32 targetX, f32 targetZ);
+extern void rsetOtOfs(u32 displayRow);
+extern void rsetAlpha(s32 mode);
+extern void ooyTestLine3D(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32 w);
+
+extern u8 fldEncountTestFlag(u32);
+
+extern s32 gFldInf_HitIdx;
+extern u32 fldRunDanteGunFlag[];
+
+
+extern s32 gFldEveRngIdx_N;
+extern s32 fldEveRngCount;
+extern FldFileResource *fldRoomResources[];
+extern s32 gFldInf_WpExit;
+extern void rsetTest(s32, s32, s32, s32, s32, s32, s32, s32);
+
+
+extern FldRoomState fldEveHitTable[];
+extern s32 fldActorTaskRoom;
+extern s32 fldEventSetRoom;
+extern s32 fldLabelTaskRoom;
+extern s32 fldLabelTaskSlot;
+extern s32 gFldEveRngIdx;
+extern s32 gFldEveRngIdx_T;
+extern s32 fldEveHitState;
+
+extern s32 fldPickedActorTemplateKind;
+extern const char *fldCheckNpcTalk(const char *eventName);
+extern const char *fldCheckNpcTalk2(const char *eventName);
+extern const char *fldInf_FindTypeEveNpc(const char *eventName);
+
+extern void fldPurgeEveRngProcesses(void);
+
+
+
+/* Each field frame the player can act: test the player against every room
+ * trigger task. Spheres (kind 0) the player overlaps arm the nearest one's
+ * event or related task, and lose their task when left; planes (kind 1) the
+ * player crosses, inside the room, start their scene task or set the crossing
+ * room; boxes (kind 2) containing the player arm actors and tasks or release
+ * them. Then start, switch or end the crossing room's event set, the related
+ * task (moving the camera to it) and the nearby actor's. Upstream: INCLUDE_ASM
+ * in game/code_00138C30; written from the retail routine. Retail and the body
+ * compile to the same calls, branches and constants; the differences are
+ * address forms (the room record's base plus 0x130), stack spills and
+ * branch-likely scheduling (786 aligned words), and the end-of-frame task
+ * switching was read against retail. Retail copies each room's corners to a
+ * stack array nothing reads, and a plane's side planes 1 to 4 one after
+ * another over the vector its normal was drawn from, after the drawing; this
+ * body leaves those dead copies out. */
+void fldUpdateRoomTriggers(dds3Basic_t *object) {
+    dds3PoseSet_t sphereOperands[2];
+    f32 roomCenterScratch[4];
+    f32 probePoint[4];
+    f32 oldPlayerPoint[4];
+    f32 bestDistance = -1.0f;
+    s32 roomCrossing = -1;
+    s32 nearbyRoom = -1;
+    s32 relatedSlot = -1;
+    s32 overlapRoom = -1;
+    dds3Basic_t *scene;
+    s32 roomIndex;
+
+    memset(roomCenterScratch, 0, sizeof(roomCenterScratch));
+    roomCenterScratch[3] = 1.0f;
+    memset(probePoint, 0, sizeof(probePoint));
+    probePoint[3] = 1.0f;
+    memset(oldPlayerPoint, 0, sizeof(oldPlayerPoint));
+    oldPlayerPoint[3] = 1.0f;
+
+    if (fldEveHitState != 0 || fldEncountTestFlag(0x40) == 0) {
+        return;
+    }
+
+    fldClearCameraFacingPointRequest();
+    fldPurgeEveRngProcesses();
+    if (fldRunDanteGunFlag[6] == 1) {
+        rsetOtOfs(0x5E);
+        rsetTest(1, 5, 0x80, 1, 0, 0, 1, 2);
+        rsetAlpha(0);
+    }
+
+    scene = dds3GetControlScene();
+    sphereOperands[0].radius = 30.0f;
+    sphereOperands[0].position[0] = object->inner->position[0];
+    sphereOperands[0].position[1] = object->inner->position[1];
+    sphereOperands[0].position[2] = object->inner->position[2];
+
+    for (roomIndex = 0; roomIndex < fldEveRngCount; roomIndex++) {
+        FldRoomState *room = &fldEveHitTable[roomIndex];
+        FldFileResource *resource;
+        FldTaskInfo *info;
+        f32 *source;
+        s32 slot;
+        s32 mapSlot = room->mapSlot;
+
+        if (mapSlot > 0 && fldTestMapSlotAuxiliaryFlag(fldGlobalBase.area, fldGlobalBase.floor + 1, mapSlot) != 0) {
+            continue;
+        }
+
+        resource = fldRoomResources[roomIndex];
+        info = (FldTaskInfo *)resource->data;
+
+        switch (info->shape->kind) {
+        case 0:
+            source = resource->transform;
+            sphereOperands[1].position[0] = source[0];
+            sphereOperands[1].position[1] = source[1];
+            sphereOperands[1].position[2] = source[2];
+            sphereOperands[1].radius = info->shape->sphere.radius;
+            if (dds3ComparePosPoseSet((u8 *)&sphereOperands[0], (u8 *)&sphereOperands[1]) == 1) {
+                f32 dx = sphereOperands[0].position[0] - sphereOperands[1].position[0];
+                f32 dy = sphereOperands[0].position[1] - sphereOperands[1].position[1];
+                f32 dz = sphereOperands[0].position[2] - sphereOperands[1].position[2];
+                f32 distance = fsqrtf(dx * dx + dy * dy + dz * dz);
+
+                if (overlapRoom == -1 || distance < bestDistance) {
+                    if (room->mode <= 0 || fldTestActorRoomProbeCondition(roomIndex, (dds3Basic_t *)fldPlayerObject, sphereOperands[1].position) != 0) {
+                        overlapRoom = roomIndex;
+                        bestDistance = distance;
+                        relatedSlot = -1;
+                        if (fldCheckNpcTalk2(fldRoomResources[roomIndex]->name) != 0) {
+                            roomCrossing = roomIndex;
+                        } else {
+                            relatedSlot = ((FldTaskInfo *)fldRoomResources[roomIndex]->data)->slot;
+                        }
+                    }
+                }
+            } else {
+                if (fldCheckNpcTalk(fldRoomResources[roomIndex]->name) == 0) {
+                    slot = ((FldTaskInfo *)fldRoomResources[roomIndex]->data)->slot;
+                    if (slot >= 0) {
+                        fldEveHit_ScriptEnd2(roomIndex);
+                    }
+                }
+            }
+            break;
+        case 1:
+            source = resource->transform;
+            {
+                f32 sourceX = source[0];
+                f32 sourceY = source[1];
+                f32 sourceZ = source[2];
+                f32 *normal;
+                f32 *plane;
+                s32 direction = 0;
+                f32 currentDistance;
+                f32 previousDistance;
+
+                SDF_VU0_COPYVECTOR(roomCenterScratch, room->center);
+                normal = roomCenterScratch;
+                if (fldRunDanteGunFlag[6] == 1) {
+                    ooyTestLine3D(0x8010FF10, 0x8010FF10,
+                        sourceX, sourceY, sourceZ,
+                        sourceX + normal[0] * 40.0f,
+                        sourceY + normal[1] * 40.0f,
+                        sourceZ + normal[2] * 40.0f);
+                }
+
+                plane = room->plane[0];
+                probePoint[0] = fldGlobalBase.x;
+                probePoint[1] = fldGlobalBase.y - 45.0f;
+                probePoint[2] = fldGlobalBase.z;
+                oldPlayerPoint[0] = fldGlobalBase.previousX;
+                oldPlayerPoint[1] = fldGlobalBase.previousY - 45.0f;
+                oldPlayerPoint[2] = fldGlobalBase.previousZ;
+                currentDistance = fldVecDot(probePoint, plane) - room->limit[0];
+                previousDistance = fldVecDot(oldPlayerPoint, plane) - room->limit[0];
+                if (currentDistance < 0.0f && previousDistance >= 0.0f) {
+                    direction = -1;
+                } else if (currentDistance >= 0.0f && previousDistance < 0.0f) {
+                    direction = 1;
+                }
+                if (direction != 0) {
+                    if (fldProbeRoomPlanes(probePoint, roomIndex) != -1) {
+                        room->crossingDirection = direction;
+                        if (fldRunDanteGunFlag[8] == 1) {
+                            fldDbgPrint2D(0x40, 0x140, fldRoomResources[roomIndex]->name);
+                        }
+                        if (fldCheckNpcTalk(fldRoomResources[roomIndex]->name) == 0) {
+                            slot = ((FldTaskInfo *)fldRoomResources[roomIndex]->data)->slot;
+                            if (slot >= 0) {
+                                void *task = dds3EventBasicGetResource(dds3SearchSceneBasic(scene, *(u32 *)fldDisplayValues[slot], 0xD));
+                                if (scrSearchScriptName(task) == 0) {
+                                    s32 handle = evtStartSceneResourceTask(dds3GetActiveScene(), task);
+                                    fldRoomTaskHandles[roomIndex] = handle;
+                                    gFldEveRngIdx = roomIndex;
+                                    gFldEveRngIdx_N = (room->mode == 1) ? roomIndex : -1;
+                                    gFldEveRngIdx_T = (room->mode == 2) ? roomIndex : -1;
+                                }
+                            }
+                        } else {
+                            roomCrossing = roomIndex;
+                        }
+                    } else {
+                        room->crossingDirection = 0;
+                    }
+                }
+            }
+            break;
+        case 2:
+            source = resource->transform;
+            {
+                f32 sourceX = source[0];
+                f32 sourceY = source[1];
+                f32 sourceZ = source[2];
+
+                SDF_VU0_COPYVECTOR(roomCenterScratch, room->center);
+                roomCenterScratch[0] = object->inner->position[0];
+                roomCenterScratch[1] = object->inner->position[1] - 45.0f;
+                roomCenterScratch[2] = object->inner->position[2];
+                roomCenterScratch[3] = 1.0f;
+                if (fldRoomContainsPoint(roomCenterScratch, roomIndex) != 0) {
+                    if (fldCheckNpcTalk(fldRoomResources[roomIndex]->name) != 0) {
+                        roomCrossing = roomIndex;
+                    } else if (fldPickActorTemplateByName(fldRoomResources[roomIndex]->name) != 0) {
+                        f32 dx = roomCenterScratch[0] - sourceX;
+                        f32 dy = roomCenterScratch[1] - sourceY;
+                        f32 dz = roomCenterScratch[2] - sourceZ;
+                        f32 distance = fsqrtf(dx * dx + dy * dy + dz * dz);
+
+                        if (overlapRoom == -1 || distance < bestDistance) {
+                            if (fldPickedActorTemplateKind != 0 && fldPickedActorTemplateKind != 3) {
+                                nearbyRoom = roomIndex;
+                                bestDistance = distance;
+                                overlapRoom = roomIndex;
+                                relatedSlot = -1;
+                            } else if (fldTestActorRoomProbeCondition(roomIndex, (dds3Basic_t *)fldPlayerObject, roomCenterScratch) != 0) {
+                                nearbyRoom = roomIndex;
+                                bestDistance = distance;
+                                overlapRoom = roomIndex;
+                                relatedSlot = -1;
+                            }
+                        }
+                    } else {
+                        slot = ((FldTaskInfo *)fldRoomResources[roomIndex]->data)->slot;
+                        if (slot >= 0) {
+                            fldStartRoomEventTask(dds3EventBasicGetResource(dds3SearchSceneBasic(scene, *(u32 *)fldDisplayValues[slot], 0xD)), roomIndex);
+                        }
+                    }
+                } else if (fldCheckNpcTalk(fldRoomResources[roomIndex]->name) == 0) {
+                    if (fldPickActorTemplateByName(fldRoomResources[roomIndex]->name) == 0) {
+                        slot = ((FldTaskInfo *)fldRoomResources[roomIndex]->data)->slot;
+                        if (slot >= 0) {
+                            fldEveHit_ScriptEnd(dds3EventBasicGetResource(dds3SearchSceneBasic(scene, *(u32 *)fldDisplayValues[slot], 0xD)), roomIndex);
+                        }
+                        fldRoomTaskHandles[roomIndex] = 0;
+                    }
+                }
+            }
+            break;
+        }
+    }
+
+    if (roomCrossing != -1) {
+        if (fldLabelTaskRoom != -1) {
+            fldEveHit_ScriptEnd(dds3EventBasicGetResource(dds3SearchSceneBasic(scene, *(u32 *)fldDisplayValues[fldLabelTaskSlot], 0xD)), fldLabelTaskRoom);
+            fldLabelTaskRoom = -1;
+            fldLabelTaskSlot = -1;
+        }
+        if (fldStartRoomEventTask((void *)fldInf_FindTypeEveNpc(fldRoomResources[roomCrossing]->name), roomCrossing) != -1) {
+            fldClearCameraHeadingRequest();
+            gFldInf_HitIdx = roomCrossing;
+            fldEventSetRoom = roomCrossing;
+            gFldInf_WpExit = 0;
+        }
+        nearbyRoom = -1;
+    } else if (relatedSlot >= 0) {
+        if (fldLabelTaskRoom != roomCrossing && fldLabelTaskSlot != relatedSlot) {
+            fldEveHit_ScriptEnd(dds3EventBasicGetResource(dds3SearchSceneBasic(scene, *(u32 *)fldDisplayValues[fldLabelTaskSlot], 0xD)), fldLabelTaskRoom);
+            fldLabelTaskRoom = roomCrossing;
+            fldLabelTaskSlot = roomCrossing;
+        }
+        nearbyRoom = -1;
+        fldStartRoomEventTask(dds3EventBasicGetResource(dds3SearchSceneBasic(scene, *(u32 *)fldDisplayValues[relatedSlot], 0xD)), overlapRoom);
+        fldQueueCameraXYOverride(fldRoomResources[overlapRoom]->transform[0], fldRoomResources[overlapRoom]->transform[2]);
+        fldClearCameraHeadingRequest();
+        fldLabelTaskRoom = overlapRoom;
+        fldLabelTaskSlot = relatedSlot;
+    } else if (fldLabelTaskRoom != roomCrossing) {
+        fldEveHit_ScriptEnd(dds3EventBasicGetResource(dds3SearchSceneBasic(scene, *(u32 *)fldDisplayValues[fldLabelTaskSlot], 0xD)), fldLabelTaskRoom);
+        fldLabelTaskRoom = roomCrossing;
+        fldLabelTaskSlot = roomCrossing;
+    }
+    if (roomCrossing == -1 && fldEventSetRoom != -1) {
+        s32 oldRoom = fldEventSetRoom;
+        fldEveHit_ScriptEnd((char *)fldInf_FindTypeEveNpc(fldRoomResources[oldRoom]->name), oldRoom);
+        fldEventSetRoom = -1;
+    }
+    if (nearbyRoom != -1) {
+        if (fldStartRoomEventTask(fldFindActorEntryByName(fldRoomResources[nearbyRoom]->name), nearbyRoom) != -1) {
+            fldQueueCameraHeadingFromVector(fldEveHitTable[nearbyRoom].center[0], fldEveHitTable[nearbyRoom].center[1], fldEveHitTable[nearbyRoom].center[2]);
+            fldActorTaskRoom = nearbyRoom;
+        }
+    } else if (fldActorTaskRoom != nearbyRoom) {
+        fldEveHit_ScriptEnd((char *)fldPickActorTemplateByName(fldRoomResources[fldActorTaskRoom]->name), fldActorTaskRoom);
+        fldActorTaskRoom = nearbyRoom;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "game/code_00138C30", fldUpdateRoomTriggers);
+#endif
 
 void fldDrawTaskMarkers(void) {
     s32 count = fldEveRngCount;
@@ -1050,7 +1985,71 @@ void fldSpawnRoomTrigger(s32 roomId, f32 x, f32 y, f32 z, f32 radius) {
     fldEveHitTable[roomRecordIndex].entryIndex = -1;
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "fld_action_row.h"
+#include "fld_room_state.h"
+#include "dds3_world_counter.h"
+#include "evt_world_source_transform.h"
+#include "fld_room_resource_api.h"
+
+extern FldRoomState fldEveHitTable[];
+extern FldActionRow fldActionRows[];
+extern s32 fldActionRowCount;
+extern char fldHitProgramName[];
+
+/* Register an NPC's talk trigger in the next action row: a sphere of the
+ * given radius (shape kind 0) whose task info points at the NPC's label
+ * slot, placed at the NPC unrotated and unscaled, its program_hit action
+ * object spawned under a new world key, and its room slot registered
+ * (fldRegisterRoomObject) as mode 1 with the NPC's map-slot gate and
+ * room-effect entry. Returns the room slot. Upstream: INCLUDE_ASM in DDS1's
+ * game/code_00138C30 and DDS2's game/code_0013B818. */
+s32 fldSpawnNpcTrigger(f32 x, f32 y, f32 z, f32 radius, const char *name, s32 labelSlot, s32 mapSlot,
+                       s32 entryIndex) {
+    s32 index = fldActionRowCount;
+    FldActionTransformFields *transform;
+    EvtWorldSourceTransformPrefix *source;
+    dds3Basic_t *object;
+    u32 key;
+    s32 slot;
+
+    fldActionRows[index].prefix.task.shape.radius = radius;
+    fldActionRows[index].prefix.task.shape.kind = 0;
+    fldActionRows[index].prefix.task.info.slot = labelSlot;
+    fldActionRows[index].prefix.task.info.unk0 = 1;
+    fldActionRows[index].prefix.task.info.unk08 = 1;
+    fldActionRows[index].prefix.task.info.shape = &fldActionRows[index].prefix.shape;
+    fldActionRows[index].childResource.data = &fldActionRows[index].prefix.task.info;
+    transform = &fldActionRows[index].transform.fields;
+    transform->position[0] = x;
+    transform->position[1] = y;
+    transform->position[2] = z;
+    transform->position[3] = 1.0f;
+    transform->scale[0] = 1.0f;
+    transform->scale[1] = 1.0f;
+    transform->scale[2] = 1.0f;
+    transform->scale[3] = 1.0f;
+    fldActionRows[index].childResource.transform = transform->position;
+    transform->rotation[0] = 0.0f;
+    transform->rotation[1] = 0.0f;
+    transform->rotation[2] = 0.0f;
+    transform->rotation[3] = 0.0f;
+    key = dds3AllocObjectId();
+    fldActionRows[index].childResource.name = name;
+    fldActionRows[index].childResource.id = key;
+    source = (EvtWorldSourceTransformPrefix *)fldActionRows[index].childResource.transform;
+    object = dds3AddPointBasic(key, source, fldHitProgramName);
+    slot = fldRegisterRoomObject(&fldActionRows[index].childResource, object);
+    fldActionRowCount++;
+    fldEveHitTable[slot].mapSlot = mapSlot;
+    fldEveHitTable[slot].mode = 1;
+    fldEveHitTable[slot].entryIndex = entryIndex;
+    return slot;
+}
+#else
 INCLUDE_ASM(const s32, "game/code_00138C30", fldSpawnNpcTrigger);
+#endif
 
 extern char D_00330790[];
 
@@ -2367,7 +3366,207 @@ void fldInitializeActorLinkedSequence(s32 mode, s32 index, fldSceneParam_t *sequ
     }
 }
 
+#ifdef NON_MATCHING
+#include "sdf_line_pair_packet_api.h"
+#include "sdf_gs_header.h"
+#include "sdf_pac_reloc.h"
+#include "fld_script_resource.h"
+#include "sdf_packet_header.h"
+#include "eff.h"
+#include "fld_player_scene_state.h"
+#include "fld_marker_packet.h"
+#include "sdf_gs_blend.h"
+#include "common.h"
+#include "fld_stop_entry.h"
+#include "sdf_resource_list_release_api.h"
+#include "kwln_background_fade_api.h"
+#include "fld_scene_ready_api.h"
+#include "fld_scene_record_api.h"
+#include "fld_light_set.h"
+#include "fld_sky_buffer.h"
+#include "fld_sky_gradient_record.h"
+#include "fld_quad_state.h"
+#include "kwln_frame_draw_buffer.h"
+#include "kwln_draw_buffer.h"
+#include "kwln_fade.h"
+#include "mnu_title_stream.h"
+#include "fld_bill_config.h"
+#include "sdf_trig.h"
+#include "fld_area_path.h"
+#include "fld_npc_motion.h"
+#include "fld_npc_palette.h"
+#include "btl_stage_task_cleanup.h"
+#include "mdl_motion_api.h"
+#include "sdf_motion.h"
+#include "fld_resource_resolver.h"
+#include "fld_clear_menu_entries_api.h"
+#include "fld_play_pending_sounds_api.h"
+#include "fld_release_texture_slots_api.h"
+#include "fld_transfer_chunk.h"
+#include "fld_camera_follow_row.h"
+#include "fld.h"
+#include "fld_encounter_runtime_api.h"
+#include "fld_collision_geometry.h"
+#include "fld_scene_request.h"
+#include "fld_spawn_event.h"
+#include "sdf_resource.h"
+#include "dds3obj.h"
+#include "dds3_world_value.h"
+#include "sdf_texture_file.h"
+#include "sdf_texture_primary_buffer_api.h"
+#include "evt_action_object.h"
+#include "sdf_texture_offset_list.h"
+#include "evt_script_model.h"
+#include "sdf_model.h"
+#include "mdl_flag_api.h"
+#include "dds3_world_counter.h"
+#include "sdf_vu_matrix.h"
+#include "dds3_world_secondary.h"
+#include "eff_light.h"
+#include "fld_area_work.h"
+#include "fld_spawn_collision.h"
+#include "evt_world.h"
+#include "evt_world_source_transform.h"
+#include "sdf_chip.h"
+#include "sdf_column_packet_api.h"
+#include "sdf_packet_append.h"
+#include "sdf_packet_builders.h"
+#include "fr_font.h"
+#include "sdf_packet_list.h"
+#include "sdf_dev_state.h"
+#include "fld_waypoint.h"
+#include "fld_inf.h"
+#include "kwln_task_lifecycle.h"
+#include "file_request_api.h"
+#include "file_pac.h"
+#include "fld_packed_resource_kind.h"
+#include "fld_title_banner_menu.h"
+#include "field_stage.h"
+#include "sdf_pac_work.h"
+#include "sdf_primitive_packet_api.h"
+#include "evt_unit.h"
+#include "evt_unit_color_transition.h"
+#include "fpu.h"
+#include "pcp_vu0.h"
+#include "sdf.h"
+#include "sdf_sif_command.h"
+#include "mdl.h"
+#include "scr.h"
+#include "kwln.h"
+#include "kwln_task_create.h"
+#include "dat_state.h"
+#include "dds3_world_primary.h"
+#include "sdf_packet_alloc.h"
+#include "fld_object_slot_api.h"
+#include "fld_placement_data.h"
+#include "fld_resource_name.h"
+#include "eff_object.h"
+#include "dds3_path.h"
+#include "fld_label_cache_api.h"
+#include "fld_sprite_vertex.h"
+#include "fld_room_state.h"
+#include "fld_trigger_shape.h"
+#include "fld_action_row.h"
+#include "mdl_world_object_source_vector_api.h"
+#include "sdk_libc.h"
+
+
+extern void fldApplySceneRoomSelection(FldActorEntry *entry);
+extern void fldSetSceneParam4(fldSceneParam_t *record, s32 stage, s32 kind, const char *name, s32 code, s32 link, const char *subname);
+extern void fldMarkStageExplorationBitmapRegion(s32, s32, s32, s32, s32, s32);
+extern void fldSetFlagBit(s32 area, s32 floor, s32 bit);
+
+extern s8 D_0032C9A0[];
+extern u8 D_003BAB3C;
+extern FldWaypointBlock fldActorWaypointRows;
+extern s32 D_003BAB40;
+extern void fldBgmFadeOut(void);
+extern void fldDoorLoad(s32);
+
+/* Run the field's first enabled kind-8 actor transition for a motion: mark its
+ * floor flag and exploration bits, then submit its sequence (or, for variant 1,
+ * the plain field request). Upstream: INCLUDE_ASM in game/code_00138C30;
+ * written from the retail routine; the same, but for one store retail places in
+ * a branch delay slot. */
+void func_0013F100(s32 field, s32 motion) {
+    s32 stagePayload[1];
+    fldSceneParam_t record;
+    s32 room;
+    u32 floorFlags;
+    u32 flags;
+    s32 i;
+    FldActorEntry *entry;
+
+    fldDoorLoad(field);
+    for (i = 0; i < 0x100; i++) {
+        entry = &fldActorWaypointRows.actors[i];
+        if (entry->requiredFlag != 0 && !evtBitCheck(entry->requiredFlag)) {
+            continue;
+        }
+        if (entry->kind != 8) {
+            continue;
+        }
+        if (entry->motion != motion) {
+            continue;
+        }
+        if (entry->variantMode != 0) {
+            continue;
+        }
+        floorFlags = entry->flags64;
+        if (floorFlags & 1) {
+            if (entry->explorationArea == 0) {
+                stagePayload[0] = fldGlobalBase.area;
+            } else {
+                stagePayload[0] = entry->explorationArea;
+            }
+            room = floorFlags >> 2;
+            if (room == 0) {
+                room = fldGlobalBase.floor + 1;
+            }
+            fldSetFlagBit(stagePayload[0], room, entry->floorFlagBit);
+        }
+        flags = entry->flags64;
+        if (flags & 2) {
+            fldMarkStageExplorationBitmapRegion(entry->explorationArea, entry->explorationFloor,
+                                                entry->explorationColumn, entry->explorationRow,
+                                                entry->explorationColumnCount, entry->explorationRowCount);
+        }
+        if (entry->variant == 1) {
+            fldBgmFadeOut();
+            stagePayload[0] = fldGlobalBase.area;
+            dds3AdminiCallSequence(0x1C, stagePayload, sizeof(stagePayload), 0);
+            return;
+        }
+        if (entry->variant == 0) {
+            stagePayload[0] = field;
+        } else {
+            stagePayload[0] = entry->variant;
+        }
+        room = entry->sequenceKind;
+        if (fldGlobalBase.area != stagePayload[0]) {
+            fldBgmFadeOut();
+        }
+        fldApplySceneRoomSelection(entry);
+        if (entry->flags54 != 0) {
+            D_003BAB3C = entry->flags54;
+            strcpy((char *)D_0032C9A0, entry->taskName);
+            D_003BAB40 = i + 1;
+        }
+        if (entry->flags31 & 1) {
+            fldGlobalBase.commandEnabled = 1;
+        } else {
+            fldGlobalBase.commandEnabled = 0;
+        }
+        fldSetSceneParam4(&record, stagePayload[0], room, entry->sequenceName,
+                                         entry->sequenceCode, entry->linkKind, entry->linkName);
+        record.mode = 6;
+        dds3AdminiCallSequence(5, &record, 0xA0, 0);
+        return;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "game/code_00138C30", func_0013F100);
+#endif
 
 void fldDoor_WarpCash(const char *name) {
     FldActorEntry *entry;
