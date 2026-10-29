@@ -20,7 +20,7 @@ extern char fileManagerTaskName[];
 
 extern s32 D_003BC7D8;
 
-extern s32 (*p2sdSmgBuf)(void);
+extern FileManagerQueuedRequestResult (*p2sdSmgBuf)(void);
 KwlnTaskUpdateResult fileManagerProc(dds3ProcessID_t *task);
 
 extern s32 sdfFileCmdRequestFileSize(sdfFileCmdHandle_t *);
@@ -353,7 +353,7 @@ void fileExecCallback(void) {
 extern void fileUnlinkQueue(FileRequest *request);
 
 /* Deliver callbacks queued after PAC input completes. */
-s32 fileManager(void) {
+FileManagerQueuedRequestResult fileManager(void) {
     FileManWork *work = &fileQueueHead;
     u32 pendingReadReplies;
     FilePacRequest **link;
@@ -405,7 +405,8 @@ s32 fileManager(void) {
             link = &request->callbackNext;
         }
     }
-    return work->head != NULL;
+    return work->head != NULL ? FILE_MANAGER_QUEUED_REQUESTS_PENDING
+                              : FILE_MANAGER_QUEUED_REQUESTS_EMPTY;
 }
 
 /* Task callback driving asynchronous file work. */

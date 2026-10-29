@@ -22,7 +22,7 @@ extern s32 D_00437CC0;
 
 extern char fileManagerTaskName[];
 
-extern s32 (*p2sdSmgBuf)(void);
+extern FileManagerQueuedRequestResult (*p2sdSmgBuf)(void);
 extern s32 sdfFileCmdRequestFileSize(sdfFileCmdHandle_t *);
 
 extern void pacRead(FileTransferJob *);
@@ -353,7 +353,7 @@ void fileExecCallback(void) {
 extern void fileUnlinkQueue(FileRequest *request);
 
 /* Deliver callbacks queued after PAC input completes. */
-s32 fileManager(void) {
+FileManagerQueuedRequestResult fileManager(void) {
     FileManWork *work = &fileQueueHead;
     u32 pendingReadReplies;
     FilePacRequest **link;
@@ -405,7 +405,8 @@ s32 fileManager(void) {
             link = &request->callbackNext;
         }
     }
-    return work->head != NULL;
+    return work->head != NULL ? FILE_MANAGER_QUEUED_REQUESTS_PENDING
+                              : FILE_MANAGER_QUEUED_REQUESTS_EMPTY;
 }
 
 /* Task callback driving asynchronous file work. */

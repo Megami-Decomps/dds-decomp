@@ -13,6 +13,7 @@
 #include "mnu_sound_resource_path_api.h"
 #include "snd_midi_state_views.h"
 #include "snd_file_request_state.h"
+#include "file_manager_api.h"
 #define SND_COMMAND_RING_ENTRY_COUNT 32
 #define SND_COMMAND_RING_INDEX_MASK (SND_COMMAND_RING_ENTRY_COUNT - 1)
 #define SND_COMMAND_HEADER_BYTES 0x14
@@ -413,7 +414,7 @@ SndPackedTrackLoadStatus sndFindPackedTrackLoadStatus(s32 packed) {
                                : SND_PACKED_TRACK_LOAD_NOT_PRESENT;
 }
 
-extern s32 (*p2sdSmgBuf)(void);
+extern FileManagerQueuedRequestResult (*p2sdSmgBuf)(void);
 
 /* Make sure the MIDI bank named by the packed track id is resident, loading it if not. */
 void p2sdLoadSMGFile(s32 packed) {
