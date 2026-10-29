@@ -6421,7 +6421,205 @@ extern f32 btlCameraTerminalEye[4];
 
 extern f32 btlCameraTerminalDistance;
 
+#ifdef NON_MATCHING
+#include "sdk_ps2.h"
+#include "btl_vec3.h"
+#include "btl_effect_node.h"
+#include "btl_motion_transform.h"
+#include "btl_camera_cursor.h"
+#include "btl_camera_path_preset.h"
+#include "btl_pair_camera_preset.h"
+#include "btl_camera_parameter_record.h"
+#include "common.h"
+#include "btl_aim_horizontal_direction_clamped_api.h"
+#include "btl_set_actor_effect_parameter_api.h"
+#include "btl_action_camera_preset.h"
+#include "btl_actor_resource_bank_api.h"
+#include "btl_rain_effect_api.h"
+#include "btl_blend_color_api.h"
+#include "mnu_title_stream.h"
+#include "eff_random_mod.h"
+#include "btl_tint_transition.h"
+#include "eff_random.h"
+#include "btl_camera_timed_instruction.h"
+#include "snd_sequence_volume_pan.h"
+#include "fld_area_path.h"
+#include "btl_scene_light_params.h"
+#include "btl_scene_lighting_task_args.h"
+#include "btl_stage_task_cleanup.h"
+#include "mdl_motion_api.h"
+#include "sdf_motion.h"
+#include "sdf_packet_list.h"
+#include "sdf_packet_builders.h"
+#include "btl_effect_position.h"
+#include "sdf_chip.h"
+#include "snd_slot.h"
+#include "btl_task_state.h"
+#include "btl_task_condition.h"
+#include "sdf_resource.h"
+#include "sdf_model.h"
+#include "btl.h"
+#include "sdf_texture_offset_list.h"
+#include "btl_model_record.h"
+#include "btl_command.h"
+#include "btl_camera_pose_api.h"
+#include "btl_state.h"
+#include "btl_task_args.h"
+#include "btl_field_load_task_args.h"
+#include "file_pac.h"
+#include "btl_floor_load_task_args.h"
+#include "btl_sound.h"
+#include "btl_sound_release_task.h"
+#include "actor_effect_task.h"
+#include "eff_field_color.h"
+#include "file.h"
+#include "eff_update_flags.h"
+#include "sdf.h"
+#include "btl_action.h"
+#include "btl_unit_tasks.h"
+#include "dds3obj.h"
+#include "evt_unit.h"
+#include "evt_unit_color_transition.h"
+#include "eff_transform.h"
+#include "eff_object.h"
+#include "mdl.h"
+#include "mdl_asset_request.h"
+#include "file_request_api.h"
+#include "pcp_vu0.h"
+#include "ee_mmi.h"
+#include "fpu.h"
+#include "dat_state.h"
+#include "dat_command.h"
+#include "mdl_flag_api.h"
+#include "dds3_world_counter.h"
+#include "sdf_vu_matrix.h"
+#include "kwln_fade.h"
+#include "kwln_fade_timing.h"
+#include "sdf_debug_api.h"
+#include "btl_sound_handle_node.h"
+#include "sdf_trig.h"
+#include "kwln.h"
+#include "btl_actor_work.h"
+
+extern BtlCameraCursorView btlCameraCursor;
+
+/* start + (end - start) * ratio */
+static inline f32 btlCameraLerp(f32 start, f32 end, f32 ratio) {
+    return (end - start) * ratio + start;
+}
+
+/* Smooth 0..1 ramp over the half-turn angle (degrees, offset by a quarter turn). */
+static inline f32 btlCameraSmoothRamp(u32 angle) {
+    return (sdfSin((f32)((angle + 90) % 360) / 180.0f * 3.1415899f) + 1.0f) * 0.5f;
+}
+
+/* Scale a camera track's four values over a command's start and end
+ * transitions: linear fades, half-cosine ramps (flags 4 and 8), quarter-cosine
+ * ramps scaled by one half (flags 0x10 and 0x20), and a cubic Bezier settle
+ * toward the end of the record using the record's stored values and curve
+ * scales (flag 0x80). Upstream: INCLUDE_ASM in both games (DDS1's
+ * game/code_001DEFE0, DDS2's game/code_001EC868), the same instructions;
+ * written from the retail routine. It differs from retail in register
+ * allocation and scheduling, in reading the camera record's address and flag
+ * byte once instead of recomputing them for each test (the callee writes
+ * neither), in dropping the redundant byte mask on the first flag test, and in
+ * the address form of the cursor frame (btlCameraCursor plus 2, where retail
+ * names the frame's own address). */
+void btlScaleCameraTrackValues(BtlLinkedCommand *command, BtlCamState *pose,
+                   const BtlCameraTimedInstruction *instruction, const s32 *currentIndex,
+                   const BtlCameraParameterRecord *records, f32 *value) {
+    const BtlCameraParameterRecord *record = &records[*currentIndex];
+    f32 t;
+    f32 blend;
+    f32 u;
+    f32 offset;
+    f32 bias;
+    u32 angle;
+    s32 i;
+
+    if (record->transitionFlags & 1) {
+        if ((f32)btlCameraCursor.frame <= instruction->startFrame + record->fadeInDuration) {
+            t = ((f32)btlCameraCursor.frame - instruction->startFrame) / record->fadeInDuration;
+            value[0] *= t;
+            value[1] *= t;
+            value[2] *= t;
+            value[3] *= t;
+        }
+    }
+    if (record->transitionFlags & 2) {
+        if (instruction->startFrame + instruction->duration - record->fadeOutDuration <= (f32)btlCameraCursor.frame) {
+            t = (instruction->startFrame + instruction->duration - (f32)btlCameraCursor.frame) / record->fadeOutDuration;
+            value[0] *= t;
+            value[1] *= t;
+            value[2] *= t;
+            value[3] *= t;
+        }
+    }
+    if (record->transitionFlags & 4) {
+        if ((f32)btlCameraCursor.frame <= instruction->startFrame + record->fadeInDuration) {
+            t = ((f32)btlCameraCursor.frame - instruction->startFrame) / record->fadeInDuration;
+            angle = t * 180.0f + 180.0f;
+            value[0] = btlCameraLerp(0.0f, value[0], btlCameraSmoothRamp(angle));
+            value[1] = btlCameraLerp(0.0f, value[1], btlCameraSmoothRamp(angle));
+            value[2] = btlCameraLerp(0.0f, value[2], btlCameraSmoothRamp(angle));
+            value[3] = btlCameraLerp(0.0f, value[3], btlCameraSmoothRamp(angle));
+        }
+    }
+    if (record->transitionFlags & 8) {
+        if (instruction->startFrame + instruction->duration - record->fadeOutDuration <= (f32)btlCameraCursor.frame) {
+            t = (instruction->startFrame + instruction->duration - (f32)btlCameraCursor.frame) / record->fadeOutDuration;
+            angle = t * 180.0f + 180.0f;
+            value[0] = btlCameraLerp(0.0f, value[0], btlCameraSmoothRamp(angle));
+            value[1] = btlCameraLerp(0.0f, value[1], btlCameraSmoothRamp(angle));
+            value[2] = btlCameraLerp(0.0f, value[2], btlCameraSmoothRamp(angle));
+            value[3] = btlCameraLerp(0.0f, value[3], btlCameraSmoothRamp(angle));
+        }
+    }
+    if (record->transitionFlags & 0x10) {
+        if ((f32)btlCameraCursor.frame <= instruction->startFrame + record->fadeInDuration) {
+            t = ((f32)btlCameraCursor.frame - instruction->startFrame) / record->fadeInDuration;
+            angle = t * 90.0f + 240.0f;
+            value[0] = btlCameraLerp(0.0f, value[0], btlCameraSmoothRamp(angle)) * 0.5f;
+            value[1] = btlCameraLerp(0.0f, value[1], btlCameraSmoothRamp(angle)) * 0.5f;
+            value[2] = btlCameraLerp(0.0f, value[2], btlCameraSmoothRamp(angle)) * 0.5f;
+            value[3] = btlCameraLerp(0.0f, value[3], btlCameraSmoothRamp(angle)) * 0.5f;
+        }
+    }
+    if (record->transitionFlags & 0x20) {
+        if (instruction->startFrame + instruction->duration - record->fadeOutDuration <= (f32)btlCameraCursor.frame) {
+            t = (instruction->startFrame + instruction->duration - (f32)btlCameraCursor.frame) / record->fadeOutDuration;
+            angle = t * 90.0f + 240.0f;
+            value[0] = btlCameraLerp(0.0f, value[0], btlCameraSmoothRamp(angle)) * 0.5f;
+            value[1] = btlCameraLerp(0.0f, value[1], btlCameraSmoothRamp(angle)) * 0.5f;
+            value[2] = btlCameraLerp(0.0f, value[2], btlCameraSmoothRamp(angle)) * 0.5f;
+            value[3] = btlCameraLerp(0.0f, value[3], btlCameraSmoothRamp(angle)) * 0.5f;
+        }
+    }
+    if (record->transitionFlags & 0x80) {
+        if (instruction->startFrame + instruction->duration - record->fadeOutDuration <= (f32)btlCameraCursor.frame) {
+            offset = (f32)btlCameraCursor.frame -
+                     (instruction->startFrame + instruction->duration - record->fadeOutDuration);
+            if (offset == 0.0f) {
+                return;
+            }
+            blend = offset / record->fadeOutDuration;
+            for (i = 0; i < 3; i++) {
+                f32 start = record->value[i];
+
+                if (start != 0.0f) {
+                    bias = start < 0.0f ? -0.0001f : 0.0001f;
+                    u = 1.0f - blend;
+                    value[i] = start * u * u * u + bias * 3.0f * blend * u * u +
+                               start * record->curveScale5C * 3.0f * blend * u +
+                               start * record->curveScale60 * blend * blend * blend;
+                }
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "game/code_001DEFE0", btlScaleCameraTrackValues);
+#endif
 
 void btlApplyScriptCameraTrack(BtlLinkedCommand *command, BtlCamState *pose,
                   const BtlCameraTimedInstruction *instruction, s32 *currentIndex,
@@ -9461,7 +9659,179 @@ void sndFreeResourceLink(SoundResourceLink *node) {
     sdfChipFreeDirect(node);
 }
 
+#ifdef NON_MATCHING
+#include "btl_vec3.h"
+#include "btl_motion_transform.h"
+#include "btl_camera_pose_api.h"
+#include "btl_camera_cursor.h"
+#include "btl_camera_path_preset.h"
+#include "btl_pair_camera_preset.h"
+#include "btl_camera_parameter_record.h"
+#include "common.h"
+#include "btl_action_camera_preset.h"
+#include "btl_actor_resource_bank_api.h"
+#include "btl_rain_effect_api.h"
+#include "btl_blend_color_api.h"
+#include "kwln_fade.h"
+#include "mnu_title_stream.h"
+#include "eff_random_mod.h"
+#include "btl_tint_transition.h"
+#include "eff_random.h"
+#include "btl_camera_timed_instruction.h"
+#include "snd_sequence_volume_pan.h"
+#include "sdf_trig.h"
+#include "fld_area_path.h"
+#include "btl_scene_light_params.h"
+#include "btl_scene_lighting_task_args.h"
+#include "btl_stage_task_cleanup.h"
+#include "mdl_motion_api.h"
+#include "sdf_motion.h"
+#include "sdf_packet_list.h"
+#include "sdf_packet_builders.h"
+#include "btl_effect_position.h"
+#include "sdf_chip.h"
+#include "snd_slot.h"
+#include "kwln.h"
+#include "btl_task_state.h"
+#include "btl_task_condition.h"
+#include "sdf_resource.h"
+#include "sdf_model.h"
+#include "btl.h"
+#include "btl_actor_work.h"
+#include "sdf_texture_offset_list.h"
+#include "btl_state.h"
+#include "btl_model_record.h"
+#include "btl_task_args.h"
+#include "btl_field_load_task_args.h"
+#include "file_pac.h"
+#include "btl_floor_load_task_args.h"
+#include "btl_sound.h"
+#include "btl_sound_release_task.h"
+#include "actor_effect_task.h"
+#include "eff_field_color.h"
+#include "dds3obj.h"
+#include "pcp_vu0.h"
+#include "ee_mmi.h"
+#include "fpu.h"
+#include "dat_state.h"
+#include "evt_unit.h"
+#include "evt_unit_color_transition.h"
+#include "mdl.h"
+#include "mdl_asset_request.h"
+#include "btl_action.h"
+#include "btl_unit_tasks.h"
+#include "sdf.h"
+#include "file.h"
+#include "dat_command.h"
+#include "file_request_api.h"
+#include "mdl_flag_api.h"
+#include "dds3_world_counter.h"
+#include "sdf_vu_matrix.h"
+#include "kwln_fade_timing.h"
+#include "sdf_vu_matrix.h"
+#include "btl_status_style.h"
+extern void btlBlendUnitColor(BtlUnit *unit, u32 color, s32 mode);
+extern s32 btlButtonMaskToIndex(u32 mask);
+extern s32 btlGetEntryFlagsUnlessDisabled(datUnitWork_t *record);
+extern void btlReleaseUnitModelColorResource(BtlUnit *unit, s32 value, f32 scalar);
+extern void btlSetUnitColor(BtlUnit *unit, u32 color, s32 mode);
+
+extern void effBattleUpdate(effBTLCutHandle_t *);
+
+/* Refresh a battle unit's status-effect presentation: when its status bits
+ * changed (or a refresh was requested), release the old status effect, tint the
+ * unit from the style table row for its status, and start that row's voice
+ * effect; every call then lets an active effect follow the unit's overlay color
+ * when the unit's flag 4 is set. Upstream: INCLUDE_ASM in game/code_001DEDB8;
+ * written from the retail routine. It differs from retail in register
+ * allocation and scheduling and in code layout: retail re-evaluates the flag
+ * tests and the style table address in several branches, while the body tests
+ * the forced-style case once and takes the table row once. */
+void func_001F2818(SoundResourceLink *link) {
+    BtlState *runtime = (BtlState *)btlGetRuntime();
+    BtlUnit *unit = link->owner;
+    u32 entryFlags = btlGetEntryFlagsUnlessDisabled(&unit->partyRecord);
+    u32 status = unit->partyRecord.status;
+    u32 unitFlags;
+    s32 forcedStyle;
+    s32 styleIndex;
+    effBTLCutHandle_t *effectHandle;
+
+    if ((status & 0x7FFF) != link->opaque0C || link->refreshRequested != 0) {
+        unitFlags = unit->status.flags;
+        if ((status & 0x7FFF) != 0x4000 || (unitFlags & 0x200) != 0 || (entryFlags & 0x200) != 0) {
+            forcedStyle = (unitFlags & 0x200) != 0 && (status & 0x4000) != 0 && (unitFlags & 0x8000000) != 0;
+            if (forcedStyle) {
+                unit->status.flags = unitFlags & ~8;
+                styleIndex = 15;
+                if ((unitFlags & 2) != 0) {
+                    unit->ext->owner->flags |= 1;
+                }
+            } else {
+                styleIndex = btlButtonMaskToIndex(unit->partyRecord.status);
+            }
+            if (!forcedStyle || link->refreshRequested == 0) {
+                if (link->effectHandle != 0) {
+                    effBTLCutDelete(link->effectHandle);
+                    --link->effect->referenceCount;
+                    sndDeleteSystemEffect(link->effect);
+                    link->effectHandle = 0;
+                    link->effect = 0;
+                    status = unit->partyRecord.status;
+                }
+
+                if ((status & 0x7FFF) != 0 && styleIndex != 0) {
+                    BtlStatusStyleEntry *style = &btlStatusEffectStyles[styleIndex];
+
+                    btlBlendUnitColor(unit, style->color, 8);
+                    btlSetUnitColor(unit, style->color, 8);
+                    if ((unit->status.flags & 2) != 0) {
+                        if (style->modelFlag != 0) {
+                            unit->ext->owner->flags &= ~2;
+                        } else {
+                            unit->ext->owner->flags |= 2;
+                        }
+                    }
+                    if (style->releaseModelColor != 0) {
+                        btlReleaseUnitModelColorResource(unit, style->releaseModelColor, 1.0f);
+                    } else {
+                        btlReleaseUnitModelColorResource(unit, 0x80808080, 0.0f);
+                    }
+                    if (style->effectId != 0) {
+                        link->effect = runtime->resources[style->effectId];
+                        sndCreateSystemEffect(link->effect);
+                        link->effectHandle = effCreateBattleVoiceOwner(link->effect->resourceHandle, 2, unit, 0);
+                        ++link->effect->referenceCount;
+                        link->effectHandle->flags = (link->effectHandle->flags | 1) & ~6;
+                    }
+                } else {
+                    if ((unit->status.flags & 2) != 0) {
+                        unit->ext->owner->flags &= ~2;
+                    }
+                    btlSetUnitColor(unit, 0x80808080, 0);
+                    styleIndex = btlButtonMaskToIndex(link->opaque0C);
+                    if (styleIndex != 0 && btlStatusEffectStyles[styleIndex].releaseModelColor != 0) {
+                        btlReleaseUnitModelColorResource(unit, 0x80808080, 0.0f);
+                    }
+                }
+                link->opaque0C = unit->partyRecord.status;
+            }
+        }
+    }
+    effectHandle = link->effectHandle;
+    if (effectHandle == 0) {
+        link->refreshRequested = 0;
+        return;
+    }
+    if ((unit->status.flags & 4) != 0) {
+        effectHandle->color = (unit->overlayColor & 0xFF000000) | 0x00808080;
+        effBattleUpdate(effectHandle);
+    }
+    link->refreshRequested = 0;
+}
+#else
 INCLUDE_ASM(const s32, "game/code_001DEFE0", func_001F2818);
+#endif
 
 void btlMarkTaskReady(SoundResourceLink *link) {
     link->refreshRequested = 1;
