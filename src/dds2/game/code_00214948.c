@@ -183,9 +183,6 @@ extern s32 btlReadCurrentUnitHp(datUnitWork_t *);
 extern s32 btlReadCurrentUnitMp(datUnitWork_t *);
 
 
-extern s32 btlUnitBlocksElementQuery(BtlUnit *, s32, s32);
-
-
 extern u8 btlTestSelectedItemCategoryMask(BtlUnit *, s32);
 
 extern s32 btlElementToBitIndex(s32 mask, s32 elementIndex);
@@ -1401,7 +1398,8 @@ s32 btlSelectTargetsBlockingElement(ActionStateLink *task, s32 action) {
         u16 picked[12] = {0};
 
         for (i = 0; i < count; i++) {
-            if (btlUnitBlocksElementQuery(btlGetIndexListEntry(list, i), action, 0x200)) {
+            if (btlUnitBlocksElementQuery(btlGetIndexListEntry(list, i), action, 0x200) !=
+                BTL_UNIT_ELEMENT_BLOCK_QUERY_NOT_BLOCKED) {
                 picked[i] = 1;
             }
         }

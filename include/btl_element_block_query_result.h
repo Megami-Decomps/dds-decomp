@@ -20,6 +20,14 @@ typedef s32 BtlElementBlockQueryResult;
 #define BTL_ELEMENT_BLOCK_QUERY_BLOCKED 1 /* Applicable unit blocks the query. */
 #define BTL_ELEMENT_BLOCK_QUERY_NOT_APPLICABLE 2 /* Unit state or group excludes the query. */
 
+/* Result for an individual unit's binary element-block query. */
+typedef s32 BtlUnitElementBlockQueryResult;
+#define BTL_UNIT_ELEMENT_BLOCK_QUERY_NOT_BLOCKED 0
+#define BTL_UNIT_ELEMENT_BLOCK_QUERY_BLOCKED 1
+
+BtlUnitElementBlockQueryResult btlUnitBlocksElementQuery(
+    struct BtlUnit *unit, s32 action, s32 mask);
+
 BtlElementBlockQueryResult btlUnitBlocksElementQueryForGroup(
     struct BtlUnit *unit, s32 action, BtlUnitStatusSideMask sideMask);
 

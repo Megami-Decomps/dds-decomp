@@ -123,7 +123,6 @@ extern s32 btlReadCurrentUnitMp(datUnitWork_t *);
 
 extern s32 btlWouldUiValueFallBelowQuarter(BtlUnit *, s32);
 
-extern s32 btlUnitBlocksElementQuery(BtlUnit *, s32, s32);
 
 extern s32 btlHasEnabledSpecialAbilityForSlot(BtlUnit *, u32);
 
@@ -1071,7 +1070,8 @@ s32 btlSelectTargetsBlockingElement(BtlTask *actor, s32 mask) {
     case 0:
         memset(flags, 0, sizeof(flags));
         for (i = 0; i < count; i++) {
-            if (btlUnitBlocksElementQuery(btlGetIndexListEntry(list, i), mask, 0x200) != 0) {
+            if (btlUnitBlocksElementQuery(btlGetIndexListEntry(list, i), mask, 0x200) !=
+                BTL_UNIT_ELEMENT_BLOCK_QUERY_NOT_BLOCKED) {
                 flags[i] = 1;
             }
         }

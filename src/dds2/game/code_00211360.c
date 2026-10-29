@@ -122,9 +122,6 @@ extern s32 btlAnyUnitHasActionInSlots(s32 mask, s32 action);
 
 extern s32 btlActionMatchesStatMask(s32, s16, s8);
 
-extern s32 btlUnitBlocksElementQuery(BtlUnit *, s32, s32);
-
-
 extern u8 btlTestSelectedItemCategoryMask(BtlUnit *, s32);
 
 extern s32 btlElementToBitIndex(s32 mask, s32 elementIndex);
@@ -1762,7 +1759,8 @@ s32 btlIsHistoryCounterEmpty(void) {
 s32 btlAnyUnitBlocksGroup200Element(s32 unused, s32 action) {
     BtlUnit *battler = ((BattleWork *)btlGetRuntime())->actorList;
     for (; battler != 0; battler = battler->next) {
-        if (btlUnitBlocksElementQuery(battler, action, 0x200)) {
+        if (btlUnitBlocksElementQuery(battler, action, 0x200) !=
+            BTL_UNIT_ELEMENT_BLOCK_QUERY_NOT_BLOCKED) {
             return 1;
         }
     }
@@ -1820,7 +1818,7 @@ s32 btlAnyUnitHasQueuedQuery(s32 unused, s32 id, s32 mask) {
     return 0;
 }
 
-s32 btlUnitBlocksElementQuery(BtlUnit *unit, s32 action, s32 mask) {
+BtlUnitElementBlockQueryResult btlUnitBlocksElementQuery(BtlUnit *unit, s32 action, s32 mask) {
     u32 flags = unit->status.flags;
     BtlCommandHitResult hitResult;
     s32 value;
@@ -1838,20 +1836,20 @@ s32 btlUnitBlocksElementQuery(BtlUnit *unit, s32 action, s32 mask) {
                         value = btlGetUnitElementAffinity(unit, index);
                         if (btlHasEnabledSpecialAbilityForSlot(unit, index) != 0 || (value & 0x20000) ||
                             (hitResult == 0x20000 && btlTestSelectedItemCategoryMask(unit, index) != 0)) {
-                            return 1;
+                            return BTL_UNIT_ELEMENT_BLOCK_QUERY_BLOCKED;
                         }
                     }
-                    return 0;
+                    return BTL_UNIT_ELEMENT_BLOCK_QUERY_NOT_BLOCKED;
                 }
                 value = btlGetUnitElementAffinity(unit, action);
                 if (btlHasEnabledSpecialAbilityForSlot(unit, action) != 0 || (value & 0x20000) ||
                     (hitResult == 0x20000 && btlTestSelectedItemCategoryMask(unit, action) != 0)) {
-                    return 1;
+                    return BTL_UNIT_ELEMENT_BLOCK_QUERY_BLOCKED;
                 }
             }
         }
     }
-    return 0;
+    return BTL_UNIT_ELEMENT_BLOCK_QUERY_NOT_BLOCKED;
 }
 
 /* Query active/cumulative enemy capacity with a null limit-override requester. */
