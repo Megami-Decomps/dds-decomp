@@ -17,6 +17,7 @@
 #include "snd_slot.h"
 #include "btl_task_state.h"
 #include "btl_task_condition.h"
+#include "btl_task_poll_result.h"
 #include "sdf_resource.h"
 #include "sdf_model.h"
 #include "btl.h"
@@ -185,7 +186,7 @@ BtlRuntimeTask *sndCreateEarringTask(void) {
 
 extern char D_00419468[]; /* "/soundat3/%s.at3" */
 
-s32 sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
+BtlTaskPollResult sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
     char path[0x80];
     struct sdfMemHandle_t *resource;
     const void *data;
@@ -205,10 +206,10 @@ s32 sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
         mnuInstallTitleSoundBufferFromData(data, size, D_003E0F60[args->entryIndex].format);
         sdfMemFreeDirect(resource);
         btlBossDebugPrintf("btl:atrac3 SE load end\n");
-        return 1;
+        return BTL_TASK_POLL_END_DELAY;
     }
     args->state++;
-    return 0;
+    return BTL_TASK_POLL_CONTINUE;
 }
 
 BtlRuntimeTask *sndCreateAtracEffectLoadTask(s32 entryIndex) {

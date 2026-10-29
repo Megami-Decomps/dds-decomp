@@ -10915,7 +10915,7 @@ extern char D_003A5340[];
 
 extern char D_003A5358[];
 
-s32 sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
+BtlTaskPollResult sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
     char path[0x80];
     struct sdfMemHandle_t *resource;
     const void *data;
@@ -10936,10 +10936,10 @@ s32 sndPollAtrac3SELoadTask(Atrac3LoadTaskArgs *args) {
         mnuInstallTitleSoundBufferFromData(data, size, D_00377650[args->entryIndex].format);
         sdfMemFreeDirect(resource);
         btlBossDebugPrintf(D_003A5358);
-        return 1;
+        return BTL_TASK_POLL_END_DELAY;
     }
     args->state++;
-    return 0;
+    return BTL_TASK_POLL_CONTINUE;
 }
 
 BtlRuntimeTask *sndCreateAtracEffectLoadTask(u32 entryIndex) {
