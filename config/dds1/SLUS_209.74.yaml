@@ -281,7 +281,7 @@ segments:
       - [0x1DF8C8, c, game/code_002DE8C8]
       - [0x1DF980, c, hand/vu/sdfVuVertexAlphaClamp]
       - [0x1DFA18, c, game/code_002DEA18]
-      - [0x1E13C0, asm, hand/vu/sdfVuNodeVertexLighting]
+      - [0x1E13C0, c, hand/vu/sdfVuNodeVertexLighting]
       - [0x1E14E0, c, game/code_002E04E0]
       - [0x1E16F0, asm, hand/vu/sdfVuScratchpadVertexUnpack]
       - [0x1E1820, c, game/code_002E0820]
