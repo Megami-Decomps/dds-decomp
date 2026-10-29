@@ -2,13 +2,14 @@
 #define BRS_RESULT_COUNTER_H
 
 #include "common.h"
+#include "mnu_result.h"
 
 /* Cross-title completion view, 0x14 bytes before the corresponding
  * BrsProgressAnimation row (see mnu_result.h). Only byte 0 of the two
  * icon-state regions is polled; other bytes stay opaque. */
 typedef struct BrsResultCounterView {
     u8 pad00[0x14];
-    s8 phase;
+    BrsProgressAnimationPhase phase;
     u8 pad15[0x1F];
     s32 remaining;
     u8 pad38[0x14];

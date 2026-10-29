@@ -1084,7 +1084,8 @@ BrsResultCounterCompletionResult brsPollResultCounterCompletion(void) {
     }
     resultWork = (BrsResultWork *)dds3GetProcessData(resultTask);
     for (counterIndex = 0; counterIndex < BRS_RESULT_COUNTER_PAIR_COUNT; counterIndex++) {
-        if (resultWork->levelCounters[counterIndex].phase >= 2) {
+        if (resultWork->levelCounters[counterIndex].phase >=
+            BRS_PROGRESS_ANIMATION_PHASE_COUNTING) {
             if (resultWork->levelCounters[counterIndex].remaining != 0 ||
                 resultWork->levelCounters[counterIndex].progressIconState[0] != 0 ||
                 resultWork->levelCounters[counterIndex].completionIconState[0] != 0) {
@@ -1093,8 +1094,10 @@ BrsResultCounterCompletionResult brsPollResultCounterCompletion(void) {
         } else if (resultWork->levelCounters[counterIndex].remaining != 0) {
             return BRS_RESULT_COUNTER_COMPLETION_PENDING;
         }
-        if (resultWork->profileCounters[counterIndex].phase >= 2) {
-            if (resultWork->profileCounters[counterIndex].phase == 2) {
+        if (resultWork->profileCounters[counterIndex].phase >=
+            BRS_PROGRESS_ANIMATION_PHASE_COUNTING) {
+            if (resultWork->profileCounters[counterIndex].phase ==
+                BRS_PROGRESS_ANIMATION_PHASE_COUNTING) {
                 if (resultWork->profileCounters[counterIndex].remaining != 0) {
                     return BRS_RESULT_COUNTER_COMPLETION_PENDING;
                 }
