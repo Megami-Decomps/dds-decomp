@@ -4680,7 +4680,104 @@ void btlUpdatePhasePanelAnimation(BattlePhasePanelWork *work) {
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416428);
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "dsp_message_window_api.h"
+#include "fr_font_context.h"
+#include "btl_actor_resource_bank_api.h"
+#include "dsp_channel.h"
+#include "mdl_flag_api.h"
+#include "btl_stat_effect_offsets.h"
+#include "btl_command_panel_owner_linkage_skill_api.h"
+#include "btl_effect_active_api.h"
+#include "kwln_task_add_child.h"
+#include "btl_special_ability.h"
+#include "btl_effect_position.h"
+#include "evt_message_window_api.h"
+#include "dsp_entry_api.h"
+#include "eff_random.h"
+#include "sdf_trig.h"
+#include "snd_pad.h"
+#include "sdf_packet_list.h"
+#include "sdf_packet_builders.h"
+#include "sdf_texture_draw_packet.h"
+#include "fr_font_measure.h"
+#include "fr_font.h"
+#include "eff_resource_slots.h"
+#include "sdf_chip.h"
+#include "sdf_resource.h"
+#include "btl_scene_fade.h"
+#include "btl_resource.h"
+#include "pcp_vu0.h"
+#include "btl_ui.h"
+#include "btl_phase_panel_work.h"
+#include "btl_roster_pair.h"
+#include "sdf.h"
+#include "btl.h"
+#include "btl_state.h"
+#include "btl_scene_initializer.h"
+#include "btl_boss_debug_api.h"
+#include "eff.h"
+#include "btl_action.h"
+#include "kwln.h"
+#include "kwln_task_create.h"
+#include "dat_state.h"
+#include "dat_command.h"
+#include "kwln_task_lifecycle.h"
+#include "mdl_flag_api.h"
+#include "btl_start_voice_row.h"
+
+extern BtlResBlock *btlResourceBlock;
+extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
+extern u32 btlSetSlotLowByteClamped(EffectSlotSet *, s32, s32, s32);
+extern void btlScaleEffectSlotSourceBounds(EffectSlotSet *, s32);
+extern void btlDrawPhaseChangePanelStrips(BattlePhasePanelWork *);
+
+/* Draw the three sliding strips of the battle phase-change banner: each strip's
+ * sprite takes its four corner fades from the panel work (the first strip's
+ * first corner is forced bright once the phase is past the opening), its width
+ * follows the gap to the next strip, and from phase 2 on its height is cropped
+ * by the saved offset. Upstream: INCLUDE_ASM in both games (DDS1's
+ * game/code_001A9780, DDS2's game/code_001B2AF8), the same instructions; written
+ * from the retail routine. Retail also copies a 16-byte table of 0x80808080
+ * colors onto the stack and never reads it (every color is written before use);
+ * the body omits that copy. Beyond that it differs from retail in register
+ * allocation, scheduling, the phase range test and in handling strips 0 and 1's
+ * widths in one expression instead of a switch. */
+void btlDrawPhaseChangePanelStrips(BattlePhasePanelWork *work) {
+    s32 firstSlots[3] = {0x1E, 0x1F, 0x20};
+    s32 secondSlots[3] = {0x23, 0x24, 0x25};
+    s32 *slots = work->variant != 0 ? firstSlots : secondSlots;
+    u32 colors[4];
+    s32 i;
+    s32 j;
+
+    if (work->phase >= 5 || work->phase < 0) {
+        return;
+    }
+    for (i = 0; i < 3; i++) {
+        for (j = 0; j < 4; j++) {
+            colors[j] = btlSetSlotLowByteClamped(btlResourceBlock->resC, slots[i], j, work->fade[i][j]);
+            if (work->phase > 0 && j == 0 && i == 0) {
+                colors[j] |= 0xFFFFFF00;
+            }
+        }
+        if (i < 2) {
+            btlResourceBlock->resC->workEntries[slots[i]].geometry.bounds[2] =
+                (work->current[i + 1][0] - work->current[i][0]) << 4;
+        }
+        if (work->phase >= 2) {
+            btlResourceBlock->resC->workEntries[slots[i]].geometry.bounds[3] =
+                (btlResourceBlock->resC->workEntries[slots[i]].sourceHeight - work->saved[i][1]) << 3;
+        }
+        effDrawSpriteWithCornerColors(work->current[i][0] << 4, work->current[i][1] << 3, 0, colors, 0,
+                                      btlResourceBlock->resC, slots[i], 0x53);
+        btlScaleEffectSlotSourceBounds(btlResourceBlock->resC, slots[i]);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "game/code_001B2AF8", btlDrawPhaseChangePanelStrips);
+#endif
 
 extern const s32 D_00436830[];
 extern const s32 D_00436838[];
@@ -5194,7 +5291,291 @@ void btlUpdateAndDrawCommandSelectionHighlight(BattleSceneObject *object, s32 ki
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416560);
 
+#ifdef NON_MATCHING
+#include "sdk_ps2.h"
+#include "btl_selection_view.h"
+#include "btl_analysis_panel_work.h"
+#include "btl_command_hint_work.h"
+#include "btl_guide_panel_work.h"
+#include "btl_panel_transition_work.h"
+#include "btl_registered_panel_work.h"
+#include "btl_command_layout_work.h"
+#include "btl_tutorial_dialog_work.h"
+#include "btl_selection_trail_work.h"
+#include "fld_area_work.h"
+#include "evt_message_window_api.h"
+#include "dsp_entry_api.h"
+#include "sdf_packet_list.h"
+#include "common.h"
+#include "btl_indexed_ui_resource_api.h"
+#include "btl_set_actor_effect_parameter_api.h"
+#include "btl_actor_resource_bank_api.h"
+#include "btl_stat_effect_offsets.h"
+#include "btl_command_panel_owner_linkage_skill_api.h"
+#include "btl_effect_active_api.h"
+#include "kwln_task_add_child.h"
+#include "btl_special_ability.h"
+#include "eff_random.h"
+#include "sdf_trig.h"
+#include "snd_pad.h"
+#include "btl_roster_pair.h"
+#include "fr_font_measure.h"
+#include "eff_resource_slots.h"
+#include "sdf_chip.h"
+#include "kwln.h"
+#include "kwln_task_create.h"
+#include "sdf_resource.h"
+#include "pcp_vu0.h"
+#include "btl_scene_fade.h"
+#include "btl_resource.h"
+#include "eff.h"
+#include "itf.h"
+#include "itf_panel_draw.h"
+#include "btl_state.h"
+#include "btl_scene_initializer.h"
+#include "btl_ui.h"
+#include "btl_phase_panel_work.h"
+#include "sdf.h"
+#include "sdf_projection.h"
+#include "btl_action.h"
+#include "btl_ai_table.h"
+#include "scr.h"
+#include "dat_state.h"
+#include "pty_roster_api.h"
+#include "mnu_result.h"
+#include "dat_command.h"
+#include "sdf_sif_command.h"
+#include "kwln_task_lifecycle.h"
+#include "sdf_packet_builders.h"
+#include "sdf_texture_draw_packet.h"
+#include "btl.h"
+#include "btl_command.h"
+#include "fr_font.h"
+#include "mdl_flag_api.h"
+#include "btl_start_voice_row.h"
+#include "sdf_packet_alloc.h"
+#include "btl_command_affinity_api.h"
+
+extern BattleTrackedTaskWork *btlTrackedTaskHandles;
+extern SceneKindTable *btlCommandSelectionHighlightWork;
+extern u32 btlCommandOptionAnimationWork;
+extern BtlResBlock *btlResourceBlock;
+extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
+
+static inline s32 btlClampScrollFade(s32 value) {
+    return value <= 0 ? 0 : value > 128 ? 128 : value;
+}
+
+/* Per-frame update and draw of the scroll arrows beside the battle command
+ * list: depending on the scene state the four arrow fades ramp in or out, or
+ * the arrows animate through three phases (pulse, bounce, settle); it then
+ * fades the list backdrop and draws the backdrop strips and the up and down
+ * arrows (dimmed when there is nothing to scroll to). Upstream: INCLUDE_ASM in
+ * game/code_001B2AF8; written from the retail routine, with DDS1's
+ * func_001B3300 as a guide (the same routine on DDS2's scene-kind table,
+ * btlCommandSelectionHighlightWork). Retail also copies a 16-byte color table onto the stack and
+ * never reads it; the body omits that copy. It differs from retail in
+ * register allocation, scheduling, the jump table address, and address
+ * arithmetic (retail reloads btlCommandOptionAnimationWork for every access;
+ * the body keeps a pointer to the animation block). Retail reads
+ * backdropFade unsigned (lhu) where the body declares it s16: only its low 16
+ * bits are stored, and the clamp reads it signed, so the bits are equal. */
+void func_001BDF20(BattleSceneObject *scene, s32 kind) {
+    BattleCommandLayoutWork *work = (BattleCommandLayoutWork *)(u32)btlCommandOptionAnimationWork;
+    u32 colors[4];
+    u32 start = btlCommandSelectionHighlightWork->cursor;
+    u32 total = btlCommandSelectionHighlightWork->value[kind];
+    s32 previous = start > 0;
+    s32 next = 0;
+    s32 backdrop;
+    u32 color;
+    s32 i;
+
+    if (start + 4 < total && total > 4) {
+        next = 1;
+    }
+    switch (scene->commandState) {
+    case 1:
+    case 7:
+    case 9:
+        for (i = 0; i < 4; i++) {
+            work->selectedPositions[i] += 16;
+            work->selectedPositions[i] = btlClampScrollFade(work->selectedPositions[i]);
+            work->extents[i >> 1][i & 1] = 350;
+        }
+        break;
+    case 11:
+        for (i = 0; i < 4; i++) {
+            work->selectedPositions[i] -= btlTrackedTaskHandles->status.bytes.fadeStep;
+            work->selectedPositions[i] = btlClampScrollFade(work->selectedPositions[i]);
+            work->extents[i >> 1][i & 1] = 0;
+        }
+        break;
+    case 6:
+    case 8:
+        for (i = 0; i < 4; i++) {
+            work->selectedPositions[i] -= 16;
+            work->selectedPositions[i] = btlClampScrollFade(work->selectedPositions[i]);
+            work->extents[i >> 1][i & 1] = 0;
+        }
+        break;
+    case 2:
+    case 3:
+    case 10:
+        switch (work->phase) {
+        case 0:
+            for (i = 0; i < 4; i++) {
+                work->extents[i >> 1][i & 1] = (work->extents[i >> 1][i & 1] + 10) % 360;
+                work->selectedPositions[i] =
+                    (s32)((sdfSin(((work->extents[i >> 1][i & 1] + 90) % 360) / 180.0f * 3.1415899f) + 1.0f) * 0.5f * 96.0f + 32.0f);
+            }
+            work->fixedDimensions[0][2] = work->dimensions[0][2] << 4;
+            work->fixedDimensions[0][3] = work->dimensions[0][3] << 3;
+            work->fixedDimensions[1][2] = work->dimensions[1][2] << 4;
+            work->fixedDimensions[1][3] = work->dimensions[1][3] << 3;
+            if (work->extents[0][0] >= 350) {
+                work->phase = 1;
+                work->extents[1][0] = 290;
+                work->extents[1][1] = 90;
+                work->extents[0][0] = 290;
+                work->extents[0][1] = 90;
+                work->bounceFrame = 0;
+            }
+            break;
+        case 1:
+            for (i = 0; i < 4; i += 2) {
+                work->extents[i >> 1][i & 1] = (work->extents[i >> 1][i & 1] + 8) % 360;
+                work->selectedPositions[i] =
+                    (s32)((sdfSin(((work->extents[i >> 1][i & 1] + 90) % 360) / 180.0f * 3.1415899f) + 1.0f) * 0.5f * 239.0f + 16.0f);
+            }
+            for (i = 1; i < 4; i += 2) {
+                work->extents[i >> 1][i & 1] = (work->extents[i >> 1][i & 1] + 2) % 360;
+                work->selectedPositions[i] =
+                    (s32)((sdfSin(((work->extents[i >> 1][i & 1] + 90) % 360) / 180.0f * 3.1415899f) + 1.0f) * 0.5f * 255.0f + 0.0f);
+                if (work->extents[i >> 1][i & 1] >= 180) {
+                    work->extents[i >> 1][i & 1] = 180;
+                }
+                if (i == 1) {
+                    work->positions[i >> 1][(i & 1) * 2 + 1]--;
+                } else {
+                    work->bounceFrame++;
+                    if (work->bounceFrame < 3) {
+                        work->positions[i >> 1][(i & 1) * 2 + 1] += work->bounceFrame * work->bounceFrame - 7;
+                    } else if (work->bounceFrame == 3) {
+                        work->positions[i >> 1][(i & 1) * 2 + 1]--;
+                    } else if (work->bounceFrame < 8) {
+                        work->positions[i >> 1][(i & 1) * 2 + 1] += 2;
+                    }
+                }
+                work->fixedDimensions[i >> 1][(i & 1) * 2 + 1] += 48;
+                work->fixedDimensions[i >> 1][(i & 1) * 2 + 1] =
+                    work->fixedDimensions[i >> 1][(i & 1) * 2 + 1] <= (work->dimensions[i >> 1][(i & 1) * 2 + 1] << 3)
+                        ? work->dimensions[i >> 1][(i & 1) * 2 + 1] << 3
+                        : work->fixedDimensions[i >> 1][(i & 1) * 2 + 1] < (work->dimensions[i >> 1][(i & 1) * 2 + 1] << 4) + 3
+                              ? work->fixedDimensions[i >> 1][(i & 1) * 2 + 1]
+                              : (work->dimensions[i >> 1][(i & 1) * 2 + 1] << 4) + 3;
+            }
+            if (work->extents[0][0] >= 350) {
+                work->extents[0][0] = 0;
+                work->phase = 2;
+                work->extents[1][0] = 0;
+            }
+            break;
+        case 2:
+            for (i = 0; i < 4; i++) {
+                work->extents[i >> 1][i & 1] = (work->extents[i >> 1][i & 1] + 8) % 360;
+                work->selectedPositions[i] =
+                    (s32)((sdfSin(((work->extents[i >> 1][i & 1] + 90) % 360) / 180.0f * 3.1415899f) + 1.0f) * 0.5f * 223.0f + 32.0f);
+            }
+            if (work->extents[0][1] >= 180) {
+                work->extents[0][1] = 180;
+            }
+            if (work->extents[1][1] >= 180) {
+                work->extents[1][1] = 180;
+            }
+            if (work->extents[0][0] >= 180) {
+                work->fixedDimensions[1][2] = work->dimensions[0][2] << 4;
+                work->fixedDimensions[1][3] = work->dimensions[0][3] << 3;
+                work->fixedDimensions[0][2] = work->dimensions[0][2] << 4;
+                work->fixedDimensions[0][3] = work->dimensions[0][3] << 3;
+                work->positions[0][3] = 325;
+                work->positions[1][3] = 421;
+                work->phase = 0;
+            }
+            break;
+        }
+        break;
+    }
+
+    switch (scene->commandState) {
+    case 6:
+    case 8:
+        backdrop = work->backdropFade - 32;
+        break;
+    case 11:
+        backdrop = work->backdropFade - btlTrackedTaskHandles->status.bytes.fadeStep;
+        break;
+    default:
+        backdrop = work->backdropFade + 32;
+        break;
+    }
+    work->backdropFade = backdrop;
+    work->backdropFade = btlClampScrollFade(work->backdropFade);
+
+    colors[0] = work->backdropFade | 0x80808000;
+    colors[1] = colors[0];
+    colors[2] = colors[0];
+    colors[3] = colors[0];
+    effDrawSpriteWithCornerColors(0x90, 0xA08, 0, colors, 0, btlResourceBlock->resA, 13, 0x53);
+    effDrawSpriteWithCornerColors(0x90, 0xCF8, 0, colors, 0, btlResourceBlock->resA, 13, 0x53);
+    color = previous ? 0x80808000 : 0x80808070;
+    if (previous) {
+        colors[0] = color | work->selectedPositions[1];
+        colors[1] = colors[0];
+        colors[2] = colors[0];
+        colors[3] = colors[0];
+        btlResourceBlock->resA->workEntries[16].geometry.bounds[2] = work->fixedDimensions[0][2];
+        btlResourceBlock->resA->workEntries[16].geometry.bounds[3] = work->fixedDimensions[0][3];
+        effDrawSpriteWithCornerColors(work->positions[0][2] << 4, work->positions[0][3] << 3, 0, colors, 0,
+                                      btlResourceBlock->resA, 16, 0x53);
+        color |= work->selectedPositions[0];
+    } else if (scene->commandState & 15) {
+        color = 0x80808000;
+    }
+    colors[0] = color;
+    colors[1] = colors[0];
+    colors[2] = colors[0];
+    colors[3] = colors[0];
+    btlResourceBlock->resA->workEntries[16].geometry.bounds[2] = work->fixedDimensions[0][0];
+    btlResourceBlock->resA->workEntries[16].geometry.bounds[3] = work->fixedDimensions[0][1];
+    effDrawSpriteWithCornerColors(work->positions[0][0] << 4, work->positions[0][1] << 3, 0, colors, 0,
+                                  btlResourceBlock->resA, 16, 0x53);
+    color = next ? 0x80808000 : 0x80808070;
+    if (next) {
+        colors[0] = color | work->selectedPositions[3];
+        colors[1] = colors[0];
+        colors[2] = colors[0];
+        colors[3] = colors[0];
+        btlResourceBlock->resA->workEntries[17].geometry.bounds[2] = work->fixedDimensions[1][2];
+        btlResourceBlock->resA->workEntries[17].geometry.bounds[3] = work->fixedDimensions[1][3];
+        effDrawSpriteWithCornerColors(work->positions[1][2] << 4, work->positions[1][3] << 3, 0, colors, 0,
+                                      btlResourceBlock->resA, 17, 0x53);
+        color |= work->selectedPositions[2];
+    } else if (scene->commandState & 15) {
+        color = 0x80808000;
+    }
+    colors[0] = color;
+    colors[1] = colors[0];
+    colors[2] = colors[0];
+    colors[3] = colors[0];
+    btlResourceBlock->resA->workEntries[17].geometry.bounds[2] = work->fixedDimensions[1][0];
+    btlResourceBlock->resA->workEntries[17].geometry.bounds[3] = work->fixedDimensions[1][1];
+    effDrawSpriteWithCornerColors(work->positions[1][0] << 4, work->positions[1][1] << 3, 0, colors, 0,
+                                  btlResourceBlock->resA, 17, 0x53);
+}
+#else
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001BDF20);
+#endif
 
 
 extern const char *D_004367D4;
@@ -5538,7 +5919,118 @@ INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004165B0);
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_004165C0);
 
+#ifdef NON_MATCHING
+#include "sdk_ps2.h"
+#include "btl_selection_view.h"
+#include "btl_analysis_panel_work.h"
+#include "btl_command_hint_work.h"
+#include "btl_guide_panel_work.h"
+#include "btl_panel_transition_work.h"
+#include "btl_registered_panel_work.h"
+#include "btl_command_layout_work.h"
+#include "btl_tutorial_dialog_work.h"
+#include "btl_selection_trail_work.h"
+#include "fld_area_work.h"
+#include "evt_message_window_api.h"
+#include "dsp_entry_api.h"
+#include "sdf_packet_list.h"
+#include "common.h"
+#include "btl_indexed_ui_resource_api.h"
+#include "btl_set_actor_effect_parameter_api.h"
+#include "btl_actor_resource_bank_api.h"
+#include "btl_stat_effect_offsets.h"
+#include "btl_command_panel_owner_linkage_skill_api.h"
+#include "btl_effect_active_api.h"
+#include "kwln_task_add_child.h"
+#include "btl_special_ability.h"
+#include "eff_random.h"
+#include "sdf_trig.h"
+#include "snd_pad.h"
+#include "btl_roster_pair.h"
+#include "fr_font_measure.h"
+#include "eff_resource_slots.h"
+#include "sdf_chip.h"
+#include "kwln.h"
+#include "kwln_task_create.h"
+#include "sdf_resource.h"
+#include "pcp_vu0.h"
+#include "btl_scene_fade.h"
+#include "btl_resource.h"
+#include "eff.h"
+#include "itf.h"
+#include "itf_panel_draw.h"
+#include "btl_state.h"
+#include "btl_scene_initializer.h"
+#include "btl_ui.h"
+#include "btl_phase_panel_work.h"
+#include "sdf.h"
+#include "sdf_projection.h"
+#include "btl_action.h"
+#include "btl_ai_table.h"
+#include "scr.h"
+#include "dat_state.h"
+#include "pty_roster_api.h"
+#include "mnu_result.h"
+#include "dat_command.h"
+#include "sdf_sif_command.h"
+#include "kwln_task_lifecycle.h"
+#include "sdf_packet_builders.h"
+#include "sdf_texture_draw_packet.h"
+#include "btl.h"
+#include "btl_command.h"
+#include "fr_font.h"
+#include "mdl_flag_api.h"
+#include "btl_start_voice_row.h"
+#include "sdf_packet_alloc.h"
+#include "btl_command_affinity_api.h"
+
+extern void itfSetTextDrawLimit(s32 limit);
+extern _FRQ *itfDrawTextWithSelectedFontMode(s32 x, s32 y, s32 depth, s8 fontMode, u16 textId, s32 flags);
+extern u8 *MessageNumSearch(s32 textId, FrFontTextBank *bank, s32 mode);
+extern FrFontTextBank *datCommandHelpMessages; /* the battle hint text bank */
+extern s32 btlHelpLineDrawCount;             /* counts kind-0 lines drawn, wrapping at 30 */
+
+/* Draw one hint text line at a battle window's top-left: kind 0 draws text id
+ * textId in font mode 2 (and counts the line, wrapping at 30), kind 9 in font
+ * mode 1, and any other kind draws that entry of the datCommandHelpMessages text bank;
+ * the glyph chain is then tinted, drawn and queued. Upstream: INCLUDE_ASM in
+ * game/code_001B2AF8; written from the retail routine, with DDS1's
+ * func_001B4D58 as a guide (DDS2's kind 0 has its own font mode and the
+ * counter). Retail also copies three 12-byte rodata tables onto the stack and
+ * never reads them; the body omits those copies. Retail makes the tint, draw
+ * and queue calls in each branch; the body makes them once, after the kinds. */
+void btlDrawWindowHelpLine(s32 x, s32 y, u32 unusedColor, u32 childColor, u16 textId, s16 kind) {
+    _FRQ *glyph;
+
+    itfSetTextDrawLimit(0x13);
+    switch (kind) {
+    case 0:
+        glyph = itfDrawTextWithSelectedFontMode(x << 4, (y + 12) << 3, 0xFF0000, 2, textId, 2);
+        if (glyph != NULL) {
+            btlHelpLineDrawCount++;
+            if (btlHelpLineDrawCount == 30) {
+                btlHelpLineDrawCount = 0;
+            }
+        }
+        break;
+    case 9:
+        glyph = itfDrawTextWithSelectedFontMode(x << 4, (y + 12) << 3, 0xFF0000, 1, textId, 2);
+        break;
+    default:
+        glyph = itfDrawPlainEncodedTextWithByteColors(x << 4, (y + 12) << 3, 0xFF0000, 1, 0, 0, 0x80,
+                                                      MessageNumSearch(kind, datCommandHelpMessages, 0), NULL);
+        break;
+    }
+    if (glyph != NULL) {
+        frSetFontColor(glyph, childColor);
+        frFontDrawGlyphWithSharedFlags(glyph, 1);
+        frDestroyFontRequestAfter(glyph);
+    }
+    itfSetTextDrawLimit(-1);
+}
+#else
 INCLUDE_ASM(const s32, "game/code_001B2AF8", btlDrawWindowHelpLine);
+#endif
 
 extern const BattlePanelColors D_00416620;
 extern u32 btlGetActorCommandClass(BattleSceneObject *,s8);
@@ -6308,7 +6800,142 @@ s32 func_001C0EF0(void) {
 
 INCLUDE_RODATA(const s32, "game/code_001B2AF8", D_00416740);
 
+#ifdef NON_MATCHING
+#include "sdk_ps2.h"
+#include "btl_selection_view.h"
+#include "btl_analysis_panel_work.h"
+#include "btl_command_hint_work.h"
+#include "btl_guide_panel_work.h"
+#include "btl_panel_transition_work.h"
+#include "btl_registered_panel_work.h"
+#include "btl_command_layout_work.h"
+#include "btl_tutorial_dialog_work.h"
+#include "btl_selection_trail_work.h"
+#include "fld_area_work.h"
+#include "evt_message_window_api.h"
+#include "dsp_entry_api.h"
+#include "sdf_packet_list.h"
+#include "common.h"
+#include "btl_indexed_ui_resource_api.h"
+#include "btl_set_actor_effect_parameter_api.h"
+#include "btl_actor_resource_bank_api.h"
+#include "btl_stat_effect_offsets.h"
+#include "btl_command_panel_owner_linkage_skill_api.h"
+#include "btl_effect_active_api.h"
+#include "kwln_task_add_child.h"
+#include "btl_special_ability.h"
+#include "eff_random.h"
+#include "sdf_trig.h"
+#include "snd_pad.h"
+#include "btl_roster_pair.h"
+#include "fr_font_measure.h"
+#include "eff_resource_slots.h"
+#include "sdf_chip.h"
+#include "kwln.h"
+#include "kwln_task_create.h"
+#include "sdf_resource.h"
+#include "pcp_vu0.h"
+#include "btl_scene_fade.h"
+#include "btl_resource.h"
+#include "eff.h"
+#include "itf.h"
+#include "itf_panel_draw.h"
+#include "btl_state.h"
+#include "btl_scene_initializer.h"
+#include "btl_ui.h"
+#include "btl_phase_panel_work.h"
+#include "sdf.h"
+#include "sdf_projection.h"
+#include "btl_action.h"
+#include "btl_ai_table.h"
+#include "scr.h"
+#include "dat_state.h"
+#include "pty_roster_api.h"
+#include "mnu_result.h"
+#include "dat_command.h"
+#include "sdf_sif_command.h"
+#include "kwln_task_lifecycle.h"
+#include "sdf_packet_builders.h"
+#include "sdf_texture_draw_packet.h"
+#include "btl.h"
+#include "btl_command.h"
+#include "fr_font.h"
+#include "mdl_flag_api.h"
+#include "btl_start_voice_row.h"
+#include "sdf_packet_alloc.h"
+#include "btl_command_affinity_api.h"
+
+extern void btlReleaseSelectionTaskBuffer(void);
+extern BattleSelectionWork *btlLinkedSelectionTaskBuffer;
+extern BtlResBlock *btlResourceBlock;
+extern void effDrawSpriteWithCornerColors(s32, s32, s32, u32 *, s32, EffectSlotSet *, s32, s32);
+
+/* Draw the four battle selection rows' highlight sprites at their screen
+ * positions, each faded by its row's fade value (in scene object states 6 and
+ * 8 the second row's top-right and bottom-left corners are darker), or release
+ * the selection task buffer in state 5; nothing unless battle flag 0x200 is
+ * set. Upstream: INCLUDE_ASM in game/code_001B2AF8; written from the retail
+ * routine, with DDS1's func_001B60E8 as a guide (the same routine on DDS2's
+ * BtlState). Retail also copies a 16-byte colour table to the stack and
+ * overwrites all four words before each draw; the body leaves that copy out. */
+s32 func_001C1300(void) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    u32 colors[4];
+    s32 i;
+
+    if ((battle->battleFlags & 0x200) == 0) {
+        return 0;
+    }
+    switch (fldGetSceneObjectState()) {
+    case 1:
+    case 2:
+    case 3:
+    case 7:
+    case 9:
+    case 10:
+    case 11:
+        for (i = 0; i < 4; i++) {
+            u32 color = btlLinkedSelectionTaskBuffer->rowFade[i] | 0x80808000;
+
+            colors[0] = color;
+            colors[1] = color;
+            colors[2] = color;
+            colors[3] = color;
+            effDrawSpriteWithCornerColors(btlLinkedSelectionTaskBuffer->positions[i][0] << 4,
+                                          btlLinkedSelectionTaskBuffer->positions[i][1] << 3,
+                                          0, colors, 0, btlResourceBlock->resA, 0x19, 0x53);
+        }
+        break;
+    case 6:
+    case 8:
+        for (i = 0; i < 4; i++) {
+            s32 fade = btlLinkedSelectionTaskBuffer->rowFade[i];
+            u32 color = fade | 0x80808000;
+            u32 rightColor = color;
+
+            colors[0] = color;
+            colors[2] = color;
+            if (i == 1) {
+                colors[3] = (fade - 0x80) | 0x80808000;
+                rightColor = (btlLinkedSelectionTaskBuffer->rowFade[1] - 0x30) | 0x80808000;
+            } else {
+                colors[3] = color;
+            }
+            colors[1] = rightColor;
+            effDrawSpriteWithCornerColors(btlLinkedSelectionTaskBuffer->positions[i][0] << 4,
+                                          btlLinkedSelectionTaskBuffer->positions[i][1] << 3,
+                                          0, colors, 0, btlResourceBlock->resA, 0x19, 0x53);
+        }
+        break;
+    case 5:
+        btlReleaseSelectionTaskBuffer();
+        break;
+    }
+    return 1;
+}
+#else
 INCLUDE_ASM(const s32, "game/code_001B2AF8", func_001C1300);
+#endif
 
 void btlReleaseSelectionTaskBuffer(void) {
     if (btlGetTrackedResourceFlag(BTL_TRACKED_RESOURCE_SELECTION_BUFFER) != 0) {
