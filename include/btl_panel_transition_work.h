@@ -8,6 +8,11 @@
 #define BTL_PANEL_TRANSITION_STATE_HOLD 1
 #define BTL_PANEL_TRANSITION_STATE_FADE_OUT 2
 
+typedef s8 BtlPanelEntrancePhase;
+
+#define BTL_PANEL_ENTRANCE_PHASE_INITIALIZE_POSITIONS 0
+#define BTL_PANEL_ENTRANCE_PHASE_UPDATE_POSITIONS 1
+
 /* Shared skill-name panel task state in both battle titles. */
 typedef struct BtlPanelTransitionWork {
     dds3ProcessID_t *task;
@@ -22,7 +27,7 @@ typedef struct BtlPanelTransitionWork {
     s16 fade;
     s16 fadeLevels[4];
     BattleSelectionPosition initial[2];
-    s8 phase;
+    BtlPanelEntrancePhase entrancePhase;
     u8 pad39[3];
     BattleSelectionPosition current[2];
 } BtlPanelTransitionWork;
@@ -37,8 +42,8 @@ typedef char BtlPanelTransitionWorkFadeLevelsOffsetCheck[
     ((u32)&((BtlPanelTransitionWork *)0)->fadeLevels == 0x20) ? 1 : -1];
 typedef char BtlPanelTransitionWorkInitialOffsetCheck[
     ((u32)&((BtlPanelTransitionWork *)0)->initial == 0x28) ? 1 : -1];
-typedef char BtlPanelTransitionWorkPhaseOffsetCheck[
-    ((u32)&((BtlPanelTransitionWork *)0)->phase == 0x38) ? 1 : -1];
+typedef char BtlPanelTransitionWorkEntrancePhaseOffsetCheck[
+    ((u32)&((BtlPanelTransitionWork *)0)->entrancePhase == 0x38) ? 1 : -1];
 typedef char BtlPanelTransitionWorkCurrentOffsetCheck[
     ((u32)&((BtlPanelTransitionWork *)0)->current == 0x3C) ? 1 : -1];
 

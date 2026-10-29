@@ -4856,15 +4856,15 @@ void btlUpdatePanelTransitionGradients(BtlPanelTransitionWork *work) {
         *fade += 0x20;
         *fade = *fade <= 0 ? 0 : *fade > 0x80 ? 0x80 : *fade;
     }
-    switch (work->phase) {
-    case 0:
+    switch (work->entrancePhase) {
+    case BTL_PANEL_ENTRANCE_PHASE_INITIALIZE_POSITIONS:
         work->current[0].x = work->initial[0].x + 0x10;
         work->current[0].y = work->initial[0].y;
         work->current[1].x = work->initial[1].x - 0x10;
         work->current[1].y = work->initial[1].y;
-        work->phase++;
+        work->entrancePhase++;
         break;
-    case 1:
+    case BTL_PANEL_ENTRANCE_PHASE_UPDATE_POSITIONS:
         work->current[0].x -= 2;
         work->current[0].x =
             work->current[0].x <= work->width - work->width / 2 + 0x105 ? work->width - work->width / 2 + 0x105 :
