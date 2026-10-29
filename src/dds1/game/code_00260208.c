@@ -1023,7 +1023,7 @@ BrsPrimaryPanelReadyState brsIsPrimaryPanelUpdateReady(void) {
     }
     work = (BrsSkillPackageWork *)dds3GetProcessData(task);
     if (0x100 - work->fadeProgress <= 0 &&
-        brsTaskIsUiUpdateAllowed(work) != 0 &&
+        brsTaskIsUiUpdateAllowed(work) != BRS_UI_UPDATE_NOT_ALLOWED &&
         work->opacityReady == 1) {
         return 1;
     }

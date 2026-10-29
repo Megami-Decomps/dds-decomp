@@ -66,7 +66,7 @@ s32 brsMessageInputStep(dds3ProcessID_t *input) {
     context = (BrsSkillPackageWork *)dds3GetProcessData(input);
     transitionState = &context->transition.state;
     buttons = mnuMapPadMaskToFlags(0x33);
-    if (brsTaskIsUiUpdateAllowed(context) == 0) {
+    if (brsTaskIsUiUpdateAllowed(context) == BRS_UI_UPDATE_NOT_ALLOWED) {
         return 0;
     }
     result = mnuDispatchPopupTransition(&context->transition.data, transitionState, 0, input);
@@ -87,7 +87,7 @@ s32 brsMessageInputStep(dds3ProcessID_t *input) {
 s32 mnuStaffRunPanel1(dds3ProcessID_t *task) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(task);
 
-    if (brsTaskIsUiUpdateAllowed(context) != 0) {
+    if (brsTaskIsUiUpdateAllowed(context) != BRS_UI_UPDATE_NOT_ALLOWED) {
         mnuTitleRenderFadeAndPanels(context);
         return menuSetHandler(context, 1, (void *)task);
     }
@@ -96,7 +96,7 @@ s32 mnuStaffRunPanel1(dds3ProcessID_t *task) {
 s32 mnuStaffRunPanel2(dds3ProcessID_t *task) {
     BrsSkillPackageWork *context = (BrsSkillPackageWork *)dds3GetProcessData(task);
 
-    if (brsTaskIsUiUpdateAllowed(context) != 0) {
+    if (brsTaskIsUiUpdateAllowed(context) != BRS_UI_UPDATE_NOT_ALLOWED) {
         brsDecaySharedAnimCounter(context);
         return menuSetHandler(context, 2, (void *)task);
     }
