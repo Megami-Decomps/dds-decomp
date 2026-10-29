@@ -229,7 +229,192 @@ u32 btlGetAdjustedSlotAffinity(BtlUnit *unit, s32 unused, s32 index) {
     return value;
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "btl_special_ability.h"
+#include "eff_random_mod.h"
+#include "btl_item_drop.h"
+#include "sdf_packet_list.h"
+#include "sdf_packet_builders.h"
+#include "sdf_texture_draw_packet.h"
+#include "fr_font_measure.h"
+#include "fr_font.h"
+#include "eff_resource_slots.h"
+#include "sdf_chip.h"
+#include "sdf_resource.h"
+#include "btl_scene_fade.h"
+#include "btl_resource.h"
+#include "pcp_vu0.h"
+#include "btl_ui.h"
+#include "sdf.h"
+#include "btl.h"
+#include "btl_state.h"
+#include "btl_boss_debug_api.h"
+#include "eff.h"
+#include "btl_action.h"
+#include "btl_ai_table.h"
+#include "kwln.h"
+#include "dat_state.h"
+#include "pty_roster_api.h"
+#include "dat_command.h"
+#include "kwln_task_lifecycle.h"
+#include "sdf_debug_api.h"
+#include "btl_actor_command_selector_value_api.h"
+#include "evt_run_context_api.h"
+extern s32 btlAreUnitStatusAndEntryFlagsClear(BtlUnit *actor);
+extern u32 btlEncodeActorIndexAsSelectionMask(u32 id);
+extern f32 btlGetActorEntryMultiplier(BtlUnit *unit, u32 index, s8 includeCharge);
+extern u32 btlGetAdjustedSlotAffinity(BtlUnit *unit, s32 unused, s32 index);
+extern s32 btlGetEntryFlagsUnlessDisabled(datUnitWork_t *record);
+
+extern s32 btlRollAiBucket(void);
+/* Resolve the result code of a command against one target: an override hook,
+ * battle-wide flags and the target's affinities, ailments and special ability
+ * can force a fixed result code; otherwise it computes a hit chance from the
+ * command's effect type, the actor's hit and the target's escape multipliers
+ * (plus ailment bonuses for status commands), rolls it, and returns 1 on a hit
+ * or 2 or 4 on a miss. Upstream: INCLUDE_ASM in game/code_001A7180; written
+ * from the retail routine. It differs from retail only in register allocation
+ * and scheduling, the addressing of the three debug-print format strings (their
+ * text equals retail's), and how the effect-type test is compiled. */
+s32 btlResolveCommandHitResult(BtlUnit *source, BtlUnit *target, s32 command) {
+    BtlState *runtime = btlGetRuntime();
+    datUnitWork_t *targetRecord = &target->partyRecord;
+    s32 entryFlags;
+    u32 targetFlags;
+    u32 runtimeFlags;
+    s32 attribute;
+    u32 selection;
+    u32 affinity;
+    s32 ailment;
+    s32 chance;
+    f32 hitMultiplier;
+    f32 escapeMultiplier;
+    f32 conditionMultiplier;
+    f32 affinityMultiplier;
+
+    if (runtime->hitResultOverride != NULL) {
+        s32 result = runtime->hitResultOverride(source, target, command);
+
+        if (result != 0) {
+            return result;
+        }
+    }
+    entryFlags = btlGetEntryFlagsUnlessDisabled(targetRecord);
+    targetFlags = target->status.stateFlags;
+    runtimeFlags = runtime->runtimeFlags;
+    if (targetFlags & 0x4000) {
+        entryFlags |= 0x20;
+    }
+    if (runtimeFlags & 0x10) {
+        return 0x20000;
+    }
+    if (runtimeFlags & 8) {
+        return 0x40000;
+    }
+    if ((runtimeFlags & 0x20) && !(targetFlags & 0x200)) {
+        return (entryFlags & 0x20) ? 4 : 2;
+    }
+    if (runtimeFlags & 0x40) {
+        return 1;
+    }
+    attribute = btlGetActorIndexedSignedValue(source, command);
+    selection = btlEncodeActorIndexAsSelectionMask(attribute);
+    if (!(selection & 0x60001)) {
+        affinity = btlGetAdjustedSlotAffinity(target, command, attribute);
+        ailment = target->partyRecord.status;
+        if (!((ailment & 0x7FFF) == 4 && (selection & 6))) {
+            if (affinity & 0x20000) {
+                return 0x20000;
+            }
+            if (affinity & 0x40000) {
+                return 0x40000;
+            }
+            if (affinity & 0x10000) {
+                return 0x10000;
+            }
+            if ((ailment & 8) && btlCheckSpecialAbility(targetRecord, 0x24A)) {
+                return (entryFlags & 0x20) ? 4 : 2;
+            }
+        }
+    }
+    if (datCommandRecords[command].unk30 == 4) {
+        return (target->partyRecord.status & 0x7FFF) == 8 ? 1 : 4;
+    }
+    if (datCommandRecords[command].effectType <= 1 && (target->partyRecord.status & 0x90F)) {
+        return 1;
+    }
+    if (datCommandRecords[command].stat11 >= 100) {
+        return 1;
+    }
+    conditionMultiplier = 1.0f;
+    hitMultiplier = btlGetActorEntryMultiplier(source, 4, 1);
+    escapeMultiplier = btlGetActorEntryMultiplier(target, 2, 1);
+    if ((source->partyRecord.status & 0x7FFF) == 0x100) {
+        conditionMultiplier = 0.25f;
+    }
+    btlBossDebugPrintf("btl:[hit:%f,esc:%f,bat:%f]\n", hitMultiplier, escapeMultiplier, conditionMultiplier);
+    chance = 0;
+    switch (datCommandRecords[command].effectType) {
+    case 0:
+        chance = evtRunContext(3, (s32)&source->partyRecord, (s32)targetRecord, command, 0);
+        break;
+    case 1:
+        chance = evtRunContext(8, (s32)&source->partyRecord, (s32)targetRecord, command, 0);
+        if (datCommandRecords[command].hpType == 8 || datCommandRecords[command].hpType == 10) {
+            affinityMultiplier = (f32)(btlGetAdjustedSlotAffinity(target, command, attribute) & 0xFFFF) / 100.0f;
+            chance = (s32)(chance * affinityMultiplier);
+            btlBossDebugPrintf("btl:PERDMG hit=%d%%[%.3f]\n", chance, affinityMultiplier);
+        }
+        break;
+    case 2:
+        if (!btlAreUnitStatusAndEntryFlagsClear(target)) {
+            return 4;
+        }
+        if ((target->partyRecord.status & 0x7FFF) == 0x800) {
+            return 0x10000;
+        }
+        if (btlGetAdjustedSlotAffinity(target, command, attribute) & 0x100000) {
+            return 4;
+        }
+        chance = evtRunContext(11, (s32)&source->partyRecord, (s32)targetRecord, command, 0);
+        switch (target->partyRecord.status & 0x7FFF) {
+        case 1:
+            chance += 65;
+            break;
+        case 2:
+        case 4:
+        case 8:
+            chance += 30;
+            break;
+        case 0x100:
+            chance += 15;
+            break;
+        }
+        if (target->status.flags & 0x2000000) {
+            chance += 30;
+        }
+        break;
+    }
+    chance = (s32)(chance * hitMultiplier * escapeMultiplier * conditionMultiplier);
+    if (chance < 0) {
+        chance = 0;
+    }
+    btlBossDebugPrintf("btl:hit=%d%%\n", chance);
+    if (target->status.stateFlags & 0x200) {
+        return 1;
+    }
+    if (btlRollAiBucket() < chance) {
+        return 1;
+    }
+    if (datCommandRecords[command].hpType == 8 || datCommandRecords[command].hpType == 10) {
+        return 4;
+    }
+    return (entryFlags & 0x20) ? 4 : 2;
+}
+#else
 INCLUDE_ASM(const s32, "game/code_001A7180", btlResolveCommandHitResult);
+#endif
 
 void func_001A7AD0(void) {
 }
