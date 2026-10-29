@@ -1067,19 +1067,19 @@ u32 brsTaskTryDestroy(void) {
     return 0;
 }
 
-BrsPrimaryPanelReadyState brsIsPrimaryPanelUpdateReady(void) {
+BrsPrimaryPanelOpacityReadyState brsIsPrimaryPanelUpdateReady(void) {
     dds3ProcessID_t *task;
     BrsSkillPackageWork *work;
 
     task = dds3SearchProcessName(mnuStaffPrimaryPanelTaskName);
     if (task == 0) {
-        return 0;
+        return BRS_PRIMARY_PANEL_OPACITY_NOT_READY;
     }
     work = (BrsSkillPackageWork *)dds3GetProcessData(task);
     if (256 - work->fadeProgress <= 0 &&
         brsTaskIsUiUpdateAllowed(work) != BRS_UI_UPDATE_NOT_ALLOWED) {
-        if (work->opacityReady == 1) {
-            return 1;
+        if (work->opacityReady == BRS_PRIMARY_PANEL_OPACITY_READY) {
+            return BRS_PRIMARY_PANEL_OPACITY_READY;
         }
     }
     return work->opacityReady;

@@ -1426,7 +1426,7 @@ void btlApplyPartyEntryWeightedDelta(BtlState *scene) {
 u32 fldStepAreaLoad(BtlState *work) {
     ActionStateLink *node;
     BtlAreaLoadPhase phase;
-    if (brsIsPrimaryPanelUpdateReady() == 1) {
+    if (brsIsPrimaryPanelUpdateReady() == BRS_PRIMARY_PANEL_OPACITY_READY) {
         work->commandRestrictFlags |= 0x20;
         if (work->tasks != 0) {
             for (node = work->tasks; node != 0; node = node->next) {

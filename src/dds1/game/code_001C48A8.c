@@ -1391,7 +1391,7 @@ u32 fldStepAreaLoad(BattleSceneWork *work) {
     BtlTask *node;
     BtlAreaLoadPhase phase;
 
-    if (brsIsPrimaryPanelUpdateReady() == 1) {
+    if (brsIsPrimaryPanelUpdateReady() == BRS_PRIMARY_PANEL_OPACITY_READY) {
         work->subFlags |= 0x20;
         if (work->linkedNodes != 0) {
             for (node = work->linkedNodes; node != 0; node = node->next) {
