@@ -451,7 +451,184 @@ s32 btlRunAiAction(BtlTask *task, s32 id, u32 packed) {
 
 INCLUDE_RODATA(const s32, "game/code_001FF0C8", D_003A5988);
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "btl_skill_max_api.h"
+#include "btl_ai_slot.h"
+#include "sdf_chip.h"
+#include "btl_task_condition.h"
+#include "eff_transform.h"
+#include "btl_state.h"
+#include "btl_command.h"
+#include "btl_model_record.h"
+#include "sdf_draw.h"
+#include "evt_unit.h"
+#include "mdl.h"
+#include "ee_mmi.h"
+#include "pcp_vu0.h"
+#include "btl_action.h"
+#include "btl_ai_table.h"
+#include "btl_ai_scratch.h"
+#include "btl_unit_tasks.h"
+#include "dat_state.h"
+#include "dat_command.h"
+#include "btl_command_partner_output.h"
+#include "btl_command_affinity_api.h"
+#include "btl_command_use_error.h"
+#include "btl_option_skill_api.h"
+
+
+extern s32 btlResolveCommandSlotAndKind(BtlTask *, s32, u16 *, s32 *);
+
+extern s32 btlChooseEligibleSkill(s32 object);
+/* Turn a command id into the slot and result kind a battle task acts on: the
+ * special ids 0x8000 to 0x800C map to fixed slots and kinds (0x800A and 0x800B
+ * pick an eligible skill or a random available option for the unit), ids 0x1000
+ * to 0x6000 select a summon, and ordinary ids go by their command selector
+ * kind, with partner commands also recording their partners in the task;
+ * unavailable choices become slot 0, kind 1. Always returns 1. Upstream:
+ * INCLUDE_ASM in game/code_001FF0C8; written from the retail routine. It
+ * differs from retail only in register allocation and scheduling, jump table
+ * addresses, and branch layout: retail repeats the final stores and reloads the
+ * command selector table in each path, while the body shares them. */
+s32 btlResolveCommandSlotAndKind(BtlTask *task, s32 id, u16 *slot, s32 *result) {
+    BtlCommandPartnerOutput partners;
+    s32 skill;
+    s32 summonSlot;
+
+    id = (u16)id;
+    switch (id) {
+    case 0x8000:
+    case 0x8004:
+        *slot = 0;
+        *result = 1;
+        break;
+    case 0x8001:
+        *slot = 0xC2;
+        *result = 0xB;
+        break;
+    case 0x8002:
+    case 0x8006:
+        *slot = 1;
+        *result = 0xD;
+        break;
+    case 0x8003:
+        *slot = 1;
+        *result = 0xA;
+        break;
+    case 0x8005:
+        *slot = 0;
+        *result = 0xF;
+        break;
+    case 0x8007:
+        *slot = 0;
+        *result = 0xE;
+        break;
+    case 0x8008:
+        *slot = 0x1A0;
+        *result = 2;
+        break;
+    case 0x8009:
+        *slot = 0xE0;
+        *result = 7;
+        break;
+    case 0x800A:
+        if (task->unit->status.flags & 0x1000) {
+            skill = btlChooseEligibleSkill((s32)task->unit);
+            if (skill != -1 && btlGetCommandFailureReason(task->unit, (u16)skill) == 0) {
+                *slot = skill;
+                *result = 2;
+                break;
+            }
+        }
+        *slot = 0;
+        *result = 1;
+        break;
+    case 0x800B:
+        if (btlHasAvailableOption((u32)task->unit) == 0) {
+            *slot = 0;
+            *result = 1;
+        } else {
+            *slot = btlChooseRandomAvailableOption(task->unit);
+            *result = 2;
+        }
+        break;
+    case 0x800C:
+        *slot = 1;
+        *result = 5;
+        break;
+    default:
+        if (id == 0) {
+            *slot = 0;
+            *result = 1;
+            break;
+        }
+        switch (id & 0xF000) {
+        case 0x1000:
+            summonSlot = 0xC3;
+            break;
+        case 0x2000:
+            summonSlot = 0xCB;
+            break;
+        case 0x3000:
+            summonSlot = 0xCC;
+            break;
+        case 0x4000:
+            summonSlot = 0xCD;
+            break;
+        case 0x5000:
+            summonSlot = 0xD3;
+            break;
+        case 0x6000:
+            summonSlot = 0xD5;
+            break;
+        default:
+            summonSlot = 0;
+            break;
+        }
+        if (summonSlot != 0) {
+            *slot = summonSlot;
+            *result = 2;
+            task->indexWork.summonId = id & 0xFFF;
+            break;
+        }
+        switch (datCommandSelectors[id].kind) {
+        case 0:
+        case 2:
+        case 5:
+            *slot = id;
+            *result = 2;
+            break;
+        case 3:
+            *slot = id;
+            *result = 8;
+            break;
+        case 1:
+            *slot = id;
+            *result = 3;
+            if (btlHasRequiredCommandAffinityPartners(task->unit, id) == 0 ||
+                btlResolveCommandAffinityPartners(task->unit, id, &partners) == 0) {
+                *slot = 0;
+                *result = 1;
+                break;
+            }
+            task->indexWork.phase = 3;
+            task->indexWork.companionA = partners.firstPartner;
+            task->indexWork.companionB = partners.secondPartner;
+            task->indexWork.skillId = partners.commandId;
+            break;
+        default:
+            *slot = 0;
+            *result = 1;
+            break;
+        }
+        break;
+    }
+    return 1;
+}
+#else
 INCLUDE_ASM(const s32, "game/code_001FF0C8", btlResolveCommandSlotAndKind);
+#endif
 
 extern s32 btlReadCurrentUnitHp(datUnitWork_t *);
 
