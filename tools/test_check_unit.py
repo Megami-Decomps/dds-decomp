@@ -39,10 +39,80 @@ from check_unit import (
 )
 
 
+class SourceReviewDiagnosticsTests(unittest.TestCase):
+    def test_all_register_spellings_are_reported_locally_and_rejected_globally(self):
+        for spelling in ("asm", "__asm", "__asm__"):
+            declaration = f'register float speed {spelling}("$f1") = realSpeed;'
+            with self.subTest(spelling=spelling):
+                local = check_unit.source_review_diagnostics(f"void f(void) {{ {declaration} }}", "")
+                self.assertFalse(any(fatal for fatal, _ in local))
+                self.assertIn("local register binding", local[0][1])
+                global_ = check_unit.source_review_diagnostics(declaration, "")
+                self.assertTrue(global_[0][0])
+                self.assertIn("global register binding", global_[0][1])
+
+    def test_comments_strings_and_ordinary_registers_do_not_create_hits(self):
+        source = '''
+/* register float speed asm("$f1"); goto *destination; */
+void f(void) {
+    const char *comment = "/*";
+    const char *text = "register float speed asm(\\\"$f1\\\"); goto *destination;";
+    register int genuineScratch;
+    // register float speed __asm__("$f1");
+}
+'''
+        self.assertEqual(check_unit.source_review_diagnostics(source, ""), [])
+
+    def test_quoted_comment_delimiter_does_not_hide_later_computed_goto(self):
+        source = 'void f(void) { const char *text = "/*"; goto *destination; }'
+        diagnostics = check_unit.source_review_diagnostics(source, "")
+        self.assertEqual(len(diagnostics), 1)
+        self.assertTrue(diagnostics[0][0])
+        self.assertIn("computed goto", diagnostics[0][1])
+
+    def test_label_tables_remain_fatal(self):
+        diagnostics = check_unit.source_review_diagnostics(
+            'void f(void) { void *labels[] = { &&one, &&two }; }', "")
+        self.assertEqual(len(diagnostics), 2)
+        self.assertTrue(all(fatal for fatal, _ in diagnostics))
+
+    def test_inactive_nonmatching_draft_does_not_trigger_policy_diagnostics(self):
+        source = '#ifdef NON_MATCHING\nvoid f(void) { goto *p; }\n#else\nvoid f(void) {}\n#endif\n'
+        self.assertEqual(check_unit.source_review_diagnostics(source, ""), [])
+
+    def test_diagnostics_keep_source_line_numbers_after_inactive_drafts(self):
+        source = '#ifdef NON_MATCHING\nvoid f(void) { goto *p; }\n#else\nvoid f(void) { goto *q; }\n#endif\n'
+        diagnostics = check_unit.source_review_diagnostics(source, "")
+        self.assertEqual(diagnostics, [(True, "TRICK line 4: computed goto (write the switch)")])
+
+    def test_empty_regions_are_diagnostics_not_semantic_approvals(self):
+        assembly = '.ent f\n#APP\n# comment only\n\n#NO_APP\njr $ra\n.end f\n'
+        self.assertEqual(check_unit.inline_asm_regions(assembly), {"f": (1, 0)})
+        self.assertEqual(check_unit.inline_asm_share(assembly), {"f": (0, 1)})
+        diagnostics = check_unit.source_review_diagnostics("void f(void) {}", assembly)
+        self.assertEqual(len(diagnostics), 1)
+        self.assertFalse(diagnostics[0][0])
+        self.assertIn("not semantic approval", diagnostics[0][1])
+
+    def test_raw_opcodes_and_directives_cannot_be_called_empty_constraints(self):
+        source = 'void f(void) { register int value asm("$2") = input; }'
+        for body in ('addiu $2,$2,1', '.word 0x24420001', '.byte 1,0,66,36', '.set noreorder'):
+            with self.subTest(body=body):
+                assembly = f'.ent f\n#APP\n{body}\n#NO_APP\njr $ra\n.end f\n'
+                self.assertEqual(check_unit.inline_asm_regions(assembly), {"f": (0, 1)})
+                messages = [message for _, message in check_unit.source_review_diagnostics(source, assembly)]
+                self.assertTrue(any("not covered by the empty-constraint allowance" in message for message in messages))
+                self.assertFalse(any(message.startswith("CONSTRAINT f:") for message in messages))
+
+    def test_regions_are_kept_separate_by_function(self):
+        assembly = '.ent f\n#APP\n#NO_APP\n.end f\n.ent g\n#APP\nnop\n#NO_APP\n.end g\n'
+        self.assertEqual(check_unit.inline_asm_regions(assembly), {"f": (1, 0), "g": (0, 1)})
+
+
 class FocusedFunctionTests(unittest.TestCase):
     def run_checker(self, requested, emitted="target", full_emitted=None, *,
                     code=None, retail_code=None, text_relocs=None, extra_symbols="",
-                    source_text="void target(void) {}\n", retail_functions=()):
+                    source_text="void target(void) {}\n", retail_functions=(), candidate=None, assembly=None):
         """Exercise the CLI with synthetic objects, without invoking a compiler."""
         if code is None:
             code = struct.pack("<II", 0x03E00008, 0)
@@ -67,6 +137,10 @@ class FocusedFunctionTests(unittest.TestCase):
             argv = ["check_unit.py", str(unit)]
             if requested is not None:
                 argv.extend(["--func", requested])
+            if candidate is not None:
+                alternate = root / "candidate.c"
+                alternate.write_text(candidate)
+                argv.extend(["--source", str(alternate)])
             stack.enter_context(patch.object(check_unit, "ROOT", root))
             stack.enter_context(patch.object(check_unit.sys, "argv", argv))
             stack.enter_context(patch("eeas_compat.lit4_range", return_value=(0, 0)))
@@ -83,11 +157,56 @@ class FocusedFunctionTests(unittest.TestCase):
                 return "".join(f"0 {len(code):x} T {name}\n" for name in names.split())
 
             stack.enter_context(patch.object(check_unit, "run", side_effect=object_output))
-            stack.enter_context(patch.object(check_unit.subprocess, "run", return_value=SimpleNamespace(returncode=0, stderr="")))
+            def compile_output(*args, **kwargs):
+                keep = kwargs.get("env", {}).get("DDS_KEEP_S")
+                if keep and assembly is not None:
+                    Path(keep).write_text(assembly)
+                return SimpleNamespace(returncode=0, stderr="")
+
+            stack.enter_context(patch.object(check_unit.subprocess, "run", side_effect=compile_output))
             output = stack.enter_context(contextlib.redirect_stdout(io.StringIO()))
             with self.assertRaises(SystemExit) as stopped:
                 check_unit.main()
             return stopped.exception.code, output.getvalue()
+
+    def test_local_binding_reports_review_without_rejecting_exact_bytes(self):
+        for spelling in ("asm", "__asm", "__asm__"):
+            with self.subTest(spelling=spelling):
+                source = f'void target(void) {{ register float speed {spelling}("$f1") = realSpeed; }}\n'
+                status, report = self.run_checker(None, source_text=source)
+                self.assertEqual(status, 0)
+                self.assertIn("CONSTRAINT line 1: local register binding", report)
+                self.assertIn("not semantic approval", report)
+                self.assertNotIn("TRICK", report)
+
+    def test_constraint_does_not_suppress_instruction_mismatch(self):
+        source = 'void target(void) { register float speed __asm__("$f1") = realSpeed; }\n'
+        status, report = self.run_checker(
+            None, source_text=source, retail_code=struct.pack("<II", 0x03E00008, 1))
+        self.assertEqual(status, 1)
+        self.assertIn("DIFF target", report)
+        self.assertIn("CONSTRAINT", report)
+
+    def test_alternate_source_gets_the_same_policy_scan_as_the_compiler(self):
+        status, report = self.run_checker(None, candidate="void target(void) { goto *destination; }\n")
+        self.assertEqual(status, 1)
+        self.assertIn("TRICK line 1: computed goto", report)
+
+    def test_global_binding_is_not_a_local_constraint(self):
+        source = 'register float speed __asm__("$f1");\nvoid target(void) {}\n'
+        status, report = self.run_checker(None, source_text=source)
+        self.assertEqual(status, 1)
+        self.assertIn("global register binding", report)
+
+    def test_empty_constraint_and_instruction_body_diagnostics_remain_distinct(self):
+        source = 'void target(void) { register float speed asm("$f1") = realSpeed; }\n'
+        assembly = ".ent target\n#APP\n#NO_APP\n#APP\n" + "nop\n" * 8 + "#NO_APP\njr $ra\n.end target\n"
+        status, report = self.run_checker(None, source_text=source, assembly=assembly)
+        self.assertEqual(status, 0)  # ASMBODY remains informational, as before.
+        self.assertIn("CONSTRAINT target: 1 empty inline-asm region", report)
+        self.assertIn("INLINEASM target: 1 nonempty inline-asm region", report)
+        self.assertIn("ASMBODY target: 8 of 9 instructions", report)
+
 
     def test_c_assembler_name_satisfies_native_presence(self):
         status, report = self.run_checker(

@@ -10,14 +10,14 @@ to exactly the retail bytes and passes the rules below. Preserve the observed
 behavior and explain compiler-sensitive choices with evidence. Exact bytes do
 not prove that we recovered the original source spelling or variable names.
 
-- **No fakematches.** Inline asm is allowed only for COP2/VU0 and MMI
-  sequences gcc 2.96 cannot emit from C, under the rules in docs/idioms.md
+- **No fakematches.** Instruction-emitting inline asm is allowed only for
+  COP2/VU0 and MMI sequences gcc 2.96 cannot emit from C, under the rules in docs/idioms.md
   ("Inline asm: COP2 and MMI"): try C first, use the shared macros in
   `include/pcp_vu0.h` and `include/ee_mmi.h`, and keep the asm small inside
   real C. A mostly-asm body needs a `/* libvu0: ... */` or
   `/* vu0 routine: ... */` marker, otherwise check_unit reports `ASMBODY` and
   it stays `INCLUDE_ASM`. The `fsqrtf` helper is in `include/fpu.h`. Not allowed:
-  - register pinning (`register x asm("$n")`)
+  - register bindings outside the localized constraint rules below
   - computed gotos or label tables standing in for a `switch`
   - dummy variables or `volatile` added to steer codegen
   - one-off inline wrappers that exist only to change codegen
@@ -28,6 +28,30 @@ not prove that we recovered the original source spelling or variable names.
     change gives the compiler in the commit message.
     `tools/perm_unit.py` runs the permuter inside the real unit with only
     those kinds of mutations enabled
+- **Localized compiler constraints on real values.** Prefer ordinary C. A small
+  empty inline-asm operand constraint or local register binding may express a
+  documented compiler allocation dependency on an actual initialized value.
+  This includes a binding feeding a real hardware helper, but does not imply
+  that the hardware requires that register. All of these conditions apply:
+  - Identify the real definitions and consumers and the compiler dependency
+    in a source comment or landing note, supported by retail and compiler
+    evidence. Explain why the ordinary form does not suffice. Exact bytes do
+    not establish the original source spelling or a hardware requirement.
+  - Preserve truthful types, value lifetimes, ABI, evaluation and memory
+    effects. Every input must be initialized on every reaching path. Describe
+    outputs/clobbers truthfully; an empty template cannot invent an output.
+    No call may clobber a bound value while it is live.
+  - Keep the constraint localized to the real operation. No global bindings,
+    dummy consumers, artificial lifetime extensions, false qualifiers, fake
+    arithmetic, runtime opcode replay, or `#line` manipulation to steer
+    allocation. The allowance does not authorize general inline assembly.
+  - Independent semantic review is required: checker `CONSTRAINT` notes are
+    review prompts, not approval. For matching-source changes, complete
+    affected owners and owned data must remain exact in every affected game;
+    the normal both-game full retail builds and test requirements still apply.
+  Genuine reusable inline helpers expressing real operations are allowed;
+  one-off wrappers that fabricate effects or only steer codegen are not.
+  This is not an exception to the dead-variable or dead-store ban.
 - **Compiler-trace justification.** When a residual comes from a compiler
   decision (scheduler tie, allocation priority, CSE choice, delay-slot fill),
   a trace of the real cc1 can show the property the source must have, e.g.
@@ -105,7 +129,7 @@ not prove that we recovered the original source spelling or variable names.
     affected owners remain exact in every affected game. The normal complete
     build and test requirements still apply before publication.
   This is reuse of live scalar storage, not an exception to the dead-variable
-  or dead-store ban. It does not permit register pinning, fake arithmetic,
+  or dead-store ban. It does not itself permit register bindings, fake arithmetic,
   dummy uses, false types or qualifiers, unjustified compiler flags, or wrappers
   created solely to steer codegen. The original spelling remains unknown;
   see [player-follow camera](matching/player-follow-camera.md) for an example.
@@ -211,7 +235,12 @@ lines:
 | `STALE` | the unit uses an old `func_` name that symbol_addrs has since renamed; use the new name |
 | `UNDEF` | the C references a name nothing defines (a typo, or the other game's name); relocations compare by address, so only a fresh link would catch it |
 | `NOASM` | an `INCLUDE_ASM` names a function with no assembly file |
-| `TRICK` | computed goto, label table, or pinned register |
+| `TRICK` | computed goto, label table, or global register binding |
+
+`CONSTRAINT` lines identify local register bindings or empty emitted asm regions
+for semantic review under the localized-constraint rules. `INLINEASM` distinguishes
+nonempty regions (including raw directives), which are not empty constraints.
+Neither diagnostic approves a source form or relaxes byte/data checks.
 
 `ASMBODY` lines are informational: they list functions whose body is mostly
 inline asm without a `libvu0`/`vu0 routine` marker, which don't count as C.
