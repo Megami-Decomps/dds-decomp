@@ -1703,7 +1703,7 @@ void fldResetFieldRuntimeState(FldRuntimeResetMode mode) {
     area->deferredExit = FLD_DEFERRED_EXIT_IDLE;
     area->nextFloor = area->nextArea = -1;
     area->commandEnabled = 0;
-    area->sceneBgmSuppressed = 0;
+    area->sceneBgmSuppressed = FLD_SCENE_BGM_ALLOWED;
     area->skipFade = 0;
     area->unk138 = 0;
     area->playerModelVariant = 0;

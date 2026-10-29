@@ -2134,7 +2134,7 @@ KwlnTaskUpdateResult fldProcSequence(dds3ProcessID_t *task) {
     switch (controller->phase) {
     case FLD_SEQUENCE_PHASE_INITIALIZE:
         D_003BABE8 = 0;
-        fldGlobalBase.sceneBgmSuppressed = 1;
+        fldGlobalBase.sceneBgmSuppressed = FLD_SCENE_BGM_SUPPRESSED;
         fldInitializeAreaWork();
         D_003BA8EC = 0x80000000;
         evtEnableMoonCalc();
@@ -2188,7 +2188,7 @@ KwlnTaskUpdateResult fldProcSequence(dds3ProcessID_t *task) {
         break;
     case FLD_SEQUENCE_PHASE_WAIT_FOR_BGM_ARCHIVE:
         if (fldStepSceneBgmArchive() != FLD_ARCHIVE_LOAD_PENDING) {
-            fldGlobalBase.sceneBgmSuppressed = 0;
+            fldGlobalBase.sceneBgmSuppressed = FLD_SCENE_BGM_ALLOWED;
             if (fldGlobalBase.specialEventActive == FLD_SPECIAL_EVENT_INACTIVE) {
                 /* Raw sequence mode 6 maps to EVENT, so this legacy status check is unreachable. */
                 if (fldGetRestoreMode() == FLD_SCENE_STATUS_BATTLE || fldGetRestoreMode() == FLD_SCENE_STATUS_SISETU || fldGetRestoreMode() == 6) {

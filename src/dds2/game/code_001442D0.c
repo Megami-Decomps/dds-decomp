@@ -857,7 +857,7 @@ void fldStartSceneBgm(void) {
                 fldGlobalBase.sequenceCode = idx;
                 handle = fldSceneSoundBase + idx;
             }
-            if (fldGlobalBase.sceneBgmSuppressed != 1) {
+            if (fldGlobalBase.sceneBgmSuppressed != FLD_SCENE_BGM_SUPPRESSED) {
                 if (fldSeLastBgm != handle) {
                     p2sdStopBGM(fldSeLastBgm);
                 }
@@ -896,7 +896,7 @@ void fldStartSceneBgmAlternate(void) {
                 fldGlobalBase.sequenceCode = idx;
                 handle = fldSceneSoundBase + idx;
             }
-            if (fldGlobalBase.sceneBgmSuppressed != 1) {
+            if (fldGlobalBase.sceneBgmSuppressed != FLD_SCENE_BGM_SUPPRESSED) {
                 fldSeLastBgm = handle;
                 p2sdResumeBgm(handle, handle);
             }

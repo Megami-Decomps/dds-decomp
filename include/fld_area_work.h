@@ -4,6 +4,7 @@
 #include "common.h"
 #include "fld_encounter_runtime_api.h"
 #include "fld_special_event_state.h"
+#include "fld_scene_bgm_suppression_state.h"
 #include "fld_solar_overlay_mode.h"
 #include "fld_scene_timing_state.h"
 
@@ -183,7 +184,7 @@ typedef struct FldAreaWork {
     s16 sceneLightSetOverrideIndex; /* 0x128 */
     s16 colorEffectSuppressed;
     s32 commandEnabled;
-    s32 sceneBgmSuppressed;
+    FldSceneBgmSuppressionState sceneBgmSuppressed;
     s32 skipFade;
     s32 unk138;
 #ifdef VERSION_DDS2
