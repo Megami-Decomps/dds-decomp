@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sdf_chip.h"
 #include "dds3obj.h"
+#include "basic.h"
 #include "dds3_basic_array_cursor.h"
 #include "dds3_world_scene_node_view.h"
 #include "dds3_basic_array_search.h"

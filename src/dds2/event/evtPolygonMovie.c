@@ -790,6 +790,7 @@ sdfMemHandle_t *evtAllocMovieWork(PmdHeader **out) {
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "evt_viewer.h"
+#include "event.h"
 #include "kwln.h"
 #include "sdf.h"
 #include "evt_world.h"

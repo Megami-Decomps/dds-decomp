@@ -13,6 +13,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_resource.h"
 #include "evt_viewer.h"
+#include "event.h"
 #include "evt_menu_table_entry_availability.h"
 #include "mnu_camp_option_index_api.h"
 #include "evt_reload_viewer_api.h"

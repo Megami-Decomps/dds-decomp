@@ -21,6 +21,7 @@
 #include "eff_resource_source_lifetime.h"
 #include "sdf_resource.h"
 #include "evt_viewer.h"
+#include "event.h"
 #include "evt_viewer_indexed_condition.h"
 #include "evt_camera_color_track_api.h"
 #include "mnu.h"

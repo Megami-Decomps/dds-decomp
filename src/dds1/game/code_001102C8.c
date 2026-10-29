@@ -4,6 +4,7 @@
 #include "sdf_resource.h"
 #include "fld_area_room_resource_load_api.h"
 #include "dds3obj.h"
+#include "basic.h"
 #include "dds3_basic_array_cursor.h"
 #include "evt_world_object_api.h"
 #include "evt_world.h"

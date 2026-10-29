@@ -3,6 +3,7 @@
 #include "sdf_chip.h"
 #include "sdf_resource.h"
 #include "dds3obj.h"
+#include "basic.h"
 #include "dds3_world_scene_node_view.h"
 #include "dds3_world_value.h"
 #include "pcp_vu0.h"

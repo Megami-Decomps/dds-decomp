@@ -5,6 +5,7 @@
 #include "kwln_task_create.h"
 #include "sdf_chip.h"
 #include "evt_viewer.h"
+#include "event.h"
 #include "evt_solar.h"
 #include "eff.h"
 #include "eff_blur.h"

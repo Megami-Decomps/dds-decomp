@@ -7,6 +7,7 @@
 #include "sdf_chip.h"
 #include "sdf_packet_list.h"
 #include "evt_viewer.h"
+#include "event.h"
 #include "sdf.h"
 #include "sdf_sif_command.h"
 #include "evt_solar.h"

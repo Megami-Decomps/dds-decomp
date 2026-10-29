@@ -18,6 +18,7 @@
 #include "mnu_camp_option_index_api.h"
 #include "sdf_chip.h"
 #include "evt_viewer.h"
+#include "event.h"
 #include "evt_viewer_indexed_condition.h"
 #include "evt_viewer_object_slot_api.h"
 #include "evt_sound_variation.h"

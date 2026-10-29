@@ -7,6 +7,7 @@
 #include "kwln_background_fade_api.h"
 #include "sdf_pad_motor_api.h"
 #include "dds3Admin.h"
+#include "kernel.h"
 #include "kwln_draw_buffer.h"
 #include "eff_random_mod.h"
 #include "eff_random.h"
