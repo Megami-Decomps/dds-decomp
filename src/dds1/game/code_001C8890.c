@@ -821,9 +821,9 @@ void btlMarkSceneTaskAfterReset(BtlTask *task) {
     task->flags |= 0x20;
 }
 
-s32 btlCommandStateSelectB(s32 task) {
+s32 btlCommandStateSelectB(BtlTask *task) {
     if (sndHasActiveActor() == 0) {
-        btlPrepareSavedCommandTargets((BtlTask *)task, &((BtlTask *)task)->indexWork);
+        btlPrepareSavedCommandTargets(task, &task->indexWork);
         if (btlAiCheckStatusRollEligibility(task) != BTL_ACTION_NOT_ELIGIBLE) {
             btlDispatchStateHandler(task, 0xB);
         } else {
