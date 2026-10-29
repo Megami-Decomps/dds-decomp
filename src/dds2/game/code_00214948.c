@@ -197,8 +197,6 @@ extern s32 btlGroup400UnitHasAction(BtlUnit *, s32);
 
 extern s8 D_00438F84;
 
-extern s32 sdfModelGetNodeIndexByName(sdfModelRootNode_t *, const char *);
-
 extern void btlFadeAndTintNamedChunkTree(sdfModelNode_t *, s32);
 
 
@@ -3102,11 +3100,13 @@ void btlFadeAndTintNamedChunkTree(sdfModelNode_t *node, s32 color) {
     }
 }
 
+#include "sdf_model_node_index_api.h"
+
 s8 btlDispatchNamedChunkNode(const char *name) {
     BtlUnit *battler = ((BtlSelectCtrl *)((BattleWork *)btlGetRuntime())->sub)->unit;
     evtUnitHandle_t *resource;
     sdfModelRootNode_t *chunk;
-    s32 index;
+    SdfModelNodeIndex index;
     DevRequest *data;
     sdfModelNode_t **entries;
     sdfModelNode_t *node;
@@ -3119,7 +3119,7 @@ s8 btlDispatchNamedChunkNode(const char *name) {
     resource = battler->ext;
     chunk = resource->owner->inner;
     index = sdfModelGetNodeIndexByName(chunk, name);
-    if (index == -1) {
+    if (index == SDF_MODEL_NODE_INDEX_NOT_FOUND) {
         return 1;
     }
     data = chunk->list;
@@ -3149,8 +3149,8 @@ void btlClearNamedChunkFlags(const char *name) {
     if (battler != 0 && (battler->status.flags & 2) != 0) {
         evtUnitHandle_t *resource = battler->ext;
         sdfModelRootNode_t *chunk = resource->owner->inner;
-        s32 index = sdfModelGetNodeIndexByName(chunk, name);
-        if (index != -1) {
+        SdfModelNodeIndex index = sdfModelGetNodeIndexByName(chunk, name);
+        if (index != SDF_MODEL_NODE_INDEX_NOT_FOUND) {
             DevRequest *data = chunk->list;
             sdfModelNode_t **entries = data->buffer;
             btlResetNamedChunkNodeTree(entries[index]);

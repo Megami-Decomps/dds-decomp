@@ -4,6 +4,7 @@
 #include "sdf_model_packet_callback.h"
 #include "dds3_object_flags.h"
 #include "sdf_model.h"
+#include "sdf_model_node_index_api.h"
 #include "sdf_model_eval_api.h"
 #include "sdf_model_release_api.h"
 #include "evt_gradient_rect.h"
@@ -196,7 +197,6 @@ extern const char dds3PlayerChunkNames[17][20];
 extern const char dds3Pc013ChunkNames[17][20];
 extern const char D_00435D98[];
 extern const char *sdfModelGetNodeName(sdfModelRootNode_t *model, s32 nameId);
-extern s32 sdfModelGetNodeIndexByName(sdfModelRootNode_t *model, const char *name);
 
 const char dds3PlayerModelName[16] = "player_a";
 
@@ -206,7 +206,7 @@ void dds3LoadObjectResourceSlotIds(dds3ObjectBaseControlWorkData_t *base, dds3Mo
     sdfModelRootNode_t *inner;
     s32 family;
     s32 chunkIndex;
-    s32 chunkId;
+    SdfModelNodeIndex chunkId;
     s32 subtype;
     s32 *slot;
     const char (*boneNameRow)[20];

@@ -35,6 +35,7 @@
 #include "btl_command_affinity_api.h"
 #include "btl_model_record.h"
 #include "sdf_draw.h"
+#include "sdf_model_node_index_api.h"
 #include "evt_unit.h"
 #include "mdl.h"
 #include "ee_mmi.h"
@@ -3251,14 +3252,12 @@ void btlFadeAndTintNamedChunkTree(sdfModelNode_t *node, s32 color)
     }
 }
 
-extern s32 sdfModelGetNodeIndexByName(sdfModelRootNode_t *, const char *);
-
 s8 btlDispatchNamedChunkNode(const char *name) {
     u8 *effect = (u8 *)((BtlState *)btlGetRuntime())->effect;
     u8 *unit = *(u8 **)effect;
     dds3ModelHandle_t *model;
     sdfModelRootNode_t *descriptor;
-    s32 index;
+    SdfModelNodeIndex index;
     sdfModelNode_t *selected;
     if (unit == 0) {
         return 1;
@@ -3269,7 +3268,7 @@ s8 btlDispatchNamedChunkNode(const char *name) {
     model = ((BtlUnit *)unit)->ext->owner;
     descriptor = model->inner;
     index = sdfModelGetNodeIndexByName(descriptor, name);
-    if (index == -1) {
+    if (index == SDF_MODEL_NODE_INDEX_NOT_FOUND) {
         return 1;
     }
     selected = ((sdfModelNode_t **)descriptor->list->buffer)[index];

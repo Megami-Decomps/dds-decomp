@@ -16,6 +16,7 @@
 #include "sdf_chip.h"
 #include "sdf.h"
 #include "sdf_model_copy.h"
+#include "sdf_model_node_index_api.h"
 #include "sdf_asset_state.h"
 #include "sdf_pending.h"
 #include "sdf_queued_resource_api.h"
@@ -208,14 +209,14 @@ SdfChunkHeader *sdfChunkFindByTag(const sdfModelRootNode_t *model, s32 tag) {
 }
 
 
-/* Names are followed by a four-byte-aligned ID word; missing chunks/names return -1. */
-s32 sdfModelGetNodeIndexByName(sdfModelRootNode_t *model, const char *name) {
+/* Names are followed by a four-byte-aligned ID word. */
+SdfModelNodeIndex sdfModelGetNodeIndexByName(sdfModelRootNode_t *model, const char *name) {
     SdfChunkHeader *namesChunk = sdfChunkFindByTag(model, SDF_CHUNK_NAMED_IDS);
     u8 *entryName;
     u8 *chunkEnd;
     u32 nameLength;
     if (namesChunk == NULL) {
-        return -1;
+        return SDF_MODEL_NODE_INDEX_NOT_FOUND;
     }
     entryName = (u8 *)namesChunk + 8;
     chunkEnd = (u8 *)namesChunk + namesChunk->size;
@@ -228,7 +229,7 @@ s32 sdfModelGetNodeIndexByName(sdfModelRootNode_t *model, const char *name) {
         }
         entryName = idWord + 4;
     } while (entryName < chunkEnd);
-    return -1;
+    return SDF_MODEL_NODE_INDEX_NOT_FOUND;
 }
 
 extern const char D_00398188[];
