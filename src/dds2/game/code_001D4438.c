@@ -11,6 +11,7 @@
 #include "dds3obj.h"
 #include "eff_random.h"
 #include "btl_motion_transform.h"
+#include "btl_unit_motion_duration_api.h"
 #include "common.h"
 #include "btl_unit_defeat_by_delta_result.h"
 #include "btl_action_state_api.h"
@@ -1426,7 +1427,6 @@ extern BtlRuntimeTask *btlScheduleMoneyPacketTask(BtlUnit *actor, s32 amount);
 extern BtlRuntimeTask *fldCreateSceneGroupAction(ActionStateLink *actorTask, u32 counterAmount, s32 counterMode);
 extern s32 btlGetActionAnimationDelay(BtlUnit *unit, s32 actionId);
 extern BtlRuntimeTask *btlCreateClearActorEntrySelectionTask(BtlUnit *unit);
-extern s32 btlGetUnitMotionDurationFrames(BtlUnit *unit, s32 motionIndex);
 extern BtlRuntimeTask *btlCreateActorPositionEffectTask(BtlUnit *unit);
 extern BtlRuntimeTask *sndCreateClearStateTask(void);
 extern SoundResourceNode *sndCreateResourceNode(struct SoundMixer *sourceMixer);
@@ -1986,7 +1986,6 @@ extern const char D_00417348[];
 extern const char D_00417360[];
 extern s32 btlGetActionAnimationDelay(BtlUnit *unit, s32 actionId);
 extern s32 btlMapActionCode(s32 unused, u32 id);
-extern s32 btlGetUnitMotionDurationFrames(BtlUnit *unit, s32 motionIndex);
 extern s32 btlActionEntryIsEmpty(s32 index, BtlOperandGroup *slot, BtlOperandEntry *entry);
 extern BtlRuntimeTask *btlCreateDeferredActorStatsTask(BtlUnit *unit, BtlOperandEntry *block);
 extern BtlRuntimeTask *btlCreateActorSoundOptionTask(BtlUnit *actor, s32 option);
@@ -2811,7 +2810,6 @@ extern u64 btlAdvanceRuntimeSequenceCounter(void);
 extern s32 btlGetSlotRateKind(BtlUnit *, s32);
 extern s32 btlGetActionAnimationDelay(BtlUnit *, s32);
 extern s32 btlMapActionCode(s32, u32);
-extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 extern BtlRuntimeTask *btlCreateDeferredActorStatsTask(BtlUnit *, BtlOperandEntry *);
 extern BtlRuntimeTask *btlCreateActorSoundOptionTask(BtlUnit *, s32);
 extern BtlRuntimeTask *btlScheduleEpPacketTask(BtlUnit *, s32);
@@ -3426,7 +3424,6 @@ void btlMarkLinkedActorStatusFlag(ActionStateLink *task) {
     task->unit->status.flags |= 0x4000;
 }
 
-extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 extern BtlRuntimeTask *btlScheduleRefreshTask(BtlUnit *unit);
 extern BtlRuntimeTask *btlCreateUnitFadeInTask(BtlUnit *unit, u32 value, u32 variant);
 extern BtlRuntimeTask *btlCreateModelChangeTask(BtlUnit *unit, s32 resourceKind, s32 resourceId, s32 delay, s32 duration, u8 transitionMode);

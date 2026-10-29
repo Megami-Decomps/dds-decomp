@@ -2,6 +2,7 @@
 #include "snd_packed_track_load_status.h"
 #include "btl_vec3.h"
 #include "btl_motion_transform.h"
+#include "btl_unit_motion_duration_api.h"
 #include "btl_camera_pose_api.h"
 #include "btl_camera_snapshots.h"
 #include "btl_camera_cursor.h"
@@ -96,7 +97,6 @@
 #include "btl_camera_setup_policy.h"
 /* Declared before first use (were implicit int). */
 extern s32 btlGetSelectedCommandEffectTint(BtlUnit *unit);
-extern s32 btlGetUnitMotionDurationFrames(BtlUnit *unit, s32 motionIndex);
 extern void effBTLFieldColorResetFlags(void);
 extern void effSweepFloorModelList(void);
 extern void effTickSlotVolumeFade(void);
@@ -681,7 +681,6 @@ extern void btlBuildActorPairFramingCameraPose(BtlLinkedCommand *, BtlCamState *
 
 extern void btlBuildTargetGroupFramingCameraPose(BtlLinkedCommand *, BtlCamState *);
 
-extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 
 /* Build the from pose, then aim the to pose at the unit's muzzle using the pose row
  * for the side of the from view the muzzle lies on. */

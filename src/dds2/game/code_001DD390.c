@@ -3,6 +3,7 @@
 #include "dds3_path.h"
 #include "sdf_model_packet_callback.h"
 #include "btl_motion_transform.h"
+#include "btl_unit_motion_duration_api.h"
 #include "btl_status_motion_override.h"
 #include "btl_reusable_model_api.h"
 #include "btl_actor_transform_parameters.h"
@@ -568,7 +569,6 @@ extern u32 btlEncodeActorIndexAsSelectionMask(u32);
 
 
 
-extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 
 extern s32 btlSelectedEntryHitsElement(BtlUnit *, BtlUnit *, s32);
 
@@ -2982,7 +2982,7 @@ void btlResetUnitModelProgress(BtlUnit *unit) {
     }
 }
 
-s32 btlGetUnitMotionDurationFrames(BtlUnit *unit, s32 motionIndex) {
+BtlUnitMotionDurationFrames btlGetUnitMotionDurationFrames(const BtlUnit *unit, s32 motionIndex) {
     BtlState *state = (BtlState *)btlGetRuntime();
     BtlActorStatusRecord *status = (BtlActorStatusRecord *)
         btlGetActorResourceBankEntry(unit->resourceKind, unit->resourceIndex);

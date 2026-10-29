@@ -3,6 +3,7 @@
 #include "btl_vec3.h"
 #include "btl_effect_node.h"
 #include "btl_motion_transform.h"
+#include "btl_unit_motion_duration_api.h"
 #include "btl_camera_cursor.h"
 #include "btl_camera_path_preset.h"
 #include "btl_pair_camera_preset.h"
@@ -96,7 +97,6 @@
 #include "kwln_fade.h"
 #include "kwln_fade_timing.h"
 /* Declared before first use (were implicit int). */
-extern s32 btlGetUnitMotionDurationFrames(BtlUnit *unit, s32 motionIndex);
 extern void effBTLFieldColorResetFlags(void);
 extern void effSweepFloorModelList(void);
 extern void effTickSlotVolumeFade(void);
@@ -775,7 +775,6 @@ void btlAimEffectPoseAtUnit(u8 *fx) {
 
 extern void btlBuildActorPairFramingCameraPose(BtlLinkedCommand *, BtlCamState *, u8);
 
-extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 
 /* Select one of two actor-relative camera poses from the muzzle's view side. */
 void btlBuildSideSelectedActorCameraBlend(BtlLinkedCommand *action, BtlCamState *to, BtlCamState *from) {

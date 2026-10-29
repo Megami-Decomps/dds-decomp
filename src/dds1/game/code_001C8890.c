@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "evt_run_context_api.h"
 #include "btl_motion_transform.h"
+#include "btl_unit_motion_duration_api.h"
 #include "common.h"
 #include "btl_unit_defeat_by_delta_result.h"
 #include "btl_action_state_api.h"
@@ -946,7 +947,6 @@ extern const char D_003A3658[];
 extern const char D_003A3670[];
 extern s32 btlGetActionAnimationDelay(BtlUnit *, s32);
 extern s32 btlResolveSkillCategory(s32, u32);
-extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 extern BtlRuntimeTask *btlCreateDeferredActorStatsTask(BtlUnit *, BtlOperandEntry *);
 extern BtlRuntimeTask *btlCreateActorSoundOptionTask(BtlUnit *, s32);
 extern BtlRuntimeTask *btlScheduleEpPacketTask(BtlUnit *, s32);
@@ -1511,7 +1511,6 @@ extern const char D_003A3658[];
 extern const char D_003A3670[];
 extern s32 btlGetActionAnimationDelay(BtlUnit *, s32);
 extern s32 btlResolveSkillCategory(s32, u32);
-extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 extern s32 btlActionEntryIsEmpty(s32, BtlOperandGroup *, BtlOperandEntry *);
 
 

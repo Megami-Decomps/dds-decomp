@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "btl_motion_transform.h"
+#include "btl_unit_motion_duration_api.h"
 #include "common.h"
 #include "btl_target_list_builder.h"
 #include "btl_element_block_query_result.h"
@@ -1222,7 +1223,6 @@ void btlFaceLinkedTargetAndFlagDirection(BtlLinkedCommand *command, void *unused
     }
 }
 
-extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
 
 extern f32 btlGetActorEffectScale(BtlTask *);
 

@@ -159,7 +159,7 @@ extern BtlAiScratchWork *btlActionScratchWork;
 
 extern AiSpecies *datEnemyAiRecords;
 
-extern s32 btlGetUnitMotionDurationFrames(BtlUnit *, s32);
+
 
 extern void btlSetEffectCameraKeys(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
@@ -1212,7 +1212,7 @@ s32 btlSelectHighestCurrentMpTarget(ActionStateLink *task, s32 unused) {
 
 /* Keep below this matched target helper; an earlier include perturbs its code. */
 #include "btl_target_list_builder.h"
-
+#include "btl_unit_motion_duration_api.h"
 s32 btlSelectTargetsExcludingActorUnit(ActionStateLink *actor) {
     BtlIndexList *list = btlAllocateIndexList(13);
     u32 mode = 0;
