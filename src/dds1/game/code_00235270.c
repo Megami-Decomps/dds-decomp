@@ -1,6 +1,7 @@
 #include "sdk_ps2.h"
 #include "snd_packed_track_load_status.h"
 #include "common.h"
+#include "evt_viewer_track_file_format.h"
 #include "sdf_delayed_resource_check_api.h"
 #include "sdf_vu0.h"
 #include "snd_track_playback_api.h"
@@ -3960,7 +3961,7 @@ s32 evtIndexGroupTypeTwentyFiveChildren(EvtRuntime *runtime) {
 
 extern s32 evtEventViewerCountEntriesById(s32 id, EvtRuntime *runtime);
 extern s32 evtEventViewerCountEntries(EvtRuntime *runtime);
-extern s32 evtEventViewerSumNodeCounts(s32 mode, EvtRuntime *runtime);
+extern s32 evtEventViewerSumNodeCounts(EvtViewerTrackFileFormat format, EvtRuntime *runtime);
 
 /* Fixed prefix shared by PMD directory streams. */
 typedef struct EvtPmdFilePrefix {
@@ -3978,7 +3979,7 @@ typedef struct EvtPmdFilePrefix {
 typedef char EvtPmdFilePrefix_size_check[sizeof(EvtPmdFilePrefix) == 0x20 ? 1 : -1];
 
 /* Build the directory after assigning each payload its serialized index. */
-void evtViewerWriteTrackDirectory(s32 output, s32 mode, EvtRuntime *runtime) {
+void evtViewerWriteTrackDirectory(s32 output, EvtViewerTrackFileFormat format, EvtRuntime *runtime) {
     EvtPmdFilePrefix header;
     PmdEntry entry;
     s32 directoryCount = 0;
@@ -4016,12 +4017,12 @@ void evtViewerWriteTrackDirectory(s32 output, s32 mode, EvtRuntime *runtime) {
     s32 byteLength;
     s32 i;
 
-    if (mode == 1) {
+    if (format == 1) {
         return;
     }
     id0Count = evtEventViewerCountEntriesById(0, runtime);
     id1Count = evtEventViewerCountEntriesById(1, runtime);
-    nodeCount = evtEventViewerSumNodeCounts(mode, runtime);
+    nodeCount = evtEventViewerSumNodeCounts(format, runtime);
     nodeBytes = nodeCount * 0x2C;
     nameCount = runtime->entryTotal;
     nameBytes = nameCount * 0x20;
@@ -4051,10 +4052,10 @@ void evtViewerWriteTrackDirectory(s32 output, s32 mode, EvtRuntime *runtime) {
     type25Bytes = type25Count * 0x40;
 
     byteLength = 0x20;
-    switch (mode) {
+    switch (format) {
     case 1:
         break;
-    case 2:
+    case EVT_VIEWER_TRACK_FILE_FORMAT_PM2:
         directoryCount = 15;
         payloadOffset = 0x110;
         byteLength = nameBytes + 0x120;
@@ -4072,7 +4073,7 @@ void evtViewerWriteTrackDirectory(s32 output, s32 mode, EvtRuntime *runtime) {
         byteLength += type27Bytes;
         byteLength += type25Bytes;
         break;
-    case 3:
+    case EVT_VIEWER_TRACK_FILE_FORMAT_PM3:
         directoryCount = 1;
         payloadOffset = 0x30;
         byteLength = nodeBytes + payloadOffset;
@@ -4085,7 +4086,7 @@ void evtViewerWriteTrackDirectory(s32 output, s32 mode, EvtRuntime *runtime) {
     header.tag[0] = 'P';
     header.tag[1] = 'M';
     header.tag[2] = 'D';
-    header.tag[3] = mode + '0';
+    header.tag[3] = format + '0';
     header.reserved0C = 0;
     header.count = directoryCount;
     header.kind = 9;
@@ -4100,103 +4101,103 @@ void evtViewerWriteTrackDirectory(s32 output, s32 mode, EvtRuntime *runtime) {
         entry.offset = 0;
         switch (i) {
         case 0:
-            if (mode == 2) {
+            if (format == EVT_VIEWER_TRACK_FILE_FORMAT_PM2) {
                 entry.elementSize = 0x10;
                 entry.value = 1;
             }
             break;
         case 2:
-            if (mode == 1) {
+            if (format == 1) {
                 entry.elementSize = 0x10;
                 entry.value = id0Count;
             }
             break;
         case 3:
-            if (mode == 1) {
+            if (format == 1) {
                 entry.elementSize = 0x20;
                 entry.value = id1Count;
             }
             break;
         case 4:
-            if (mode == 2 || mode == 3) {
+            if (format == EVT_VIEWER_TRACK_FILE_FORMAT_PM2 || format == EVT_VIEWER_TRACK_FILE_FORMAT_PM3) {
                 entry.elementSize = 0x2C;
                 entry.value = nodeCount;
             }
             break;
         case 1:
-            if (mode != 3) {
+            if (format != EVT_VIEWER_TRACK_FILE_FORMAT_PM3) {
                 entry.elementSize = 0x20;
                 entry.value = nameCount;
             }
             break;
         case 5:
-            if (mode == 2) {
+            if (format == EVT_VIEWER_TRACK_FILE_FORMAT_PM2) {
                 entry.elementSize = 0x10;
                 entry.value = id2Count;
             }
             break;
         case 13:
-            if (mode == 2) {
+            if (format == EVT_VIEWER_TRACK_FILE_FORMAT_PM2) {
                 entry.elementSize = 0x30;
                 entry.value = typeACount;
             }
             break;
         case 14:
-            if (mode == 2) {
+            if (format == EVT_VIEWER_TRACK_FILE_FORMAT_PM2) {
                 entry.elementSize = 0x20;
                 entry.value = typeBCount;
             }
             break;
         case 15:
-            if (mode == 2) {
+            if (format == EVT_VIEWER_TRACK_FILE_FORMAT_PM2) {
                 entry.elementSize = 0x28;
                 entry.value = typeDCount;
             }
             break;
         case 16:
-            if (mode == 2) {
+            if (format == EVT_VIEWER_TRACK_FILE_FORMAT_PM2) {
                 entry.elementSize = 0x2C;
                 entry.value = typeECount;
             }
             break;
         case 17:
-            if (mode == 2) {
+            if (format == EVT_VIEWER_TRACK_FILE_FORMAT_PM2) {
                 entry.elementSize = 0x2C;
                 entry.value = typeFCount;
             }
             break;
         case 20:
-            if (mode == 2) {
+            if (format == EVT_VIEWER_TRACK_FILE_FORMAT_PM2) {
                 entry.elementSize = 0x2C;
                 entry.value = type23Count;
             }
             break;
         case 24:
-            if (mode == 2) {
+            if (format == EVT_VIEWER_TRACK_FILE_FORMAT_PM2) {
                 entry.elementSize = 0x28;
                 entry.value = type27Count;
             }
             break;
         case 18:
-            if (mode == 2) {
+            if (format == EVT_VIEWER_TRACK_FILE_FORMAT_PM2) {
                 entry.elementSize = 0x18;
                 entry.value = type16Count;
             }
             break;
         case 19:
-            if (mode == 2) {
+            if (format == EVT_VIEWER_TRACK_FILE_FORMAT_PM2) {
                 entry.elementSize = 0x24;
                 entry.value = type17Count;
             }
             break;
         case 21:
-            if (mode == 2) {
+            if (format == EVT_VIEWER_TRACK_FILE_FORMAT_PM2) {
                 entry.elementSize = 8;
                 entry.value = groupCount;
             }
             break;
         case 25:
-            if (mode == 2) {
+            if (format == EVT_VIEWER_TRACK_FILE_FORMAT_PM2) {
                 entry.elementSize = 0x40;
                 entry.value = type25Count;
             }
@@ -4226,19 +4227,19 @@ void evtWriteRuntimeHeaderValues(s32 output, EvtRuntime *state) {
     evtWriteSerializedBytes(output, buf, 0x10);
 }
 
-/* Filter groups by mode and serialize each child body. Type-8 spans use the
+/* Filter groups by file format and serialize each child body. Type-8 spans use the
  * next start or terminal range halfword, unless their body marker disables them. */
-void evtViewerWriteChildRecords(s32 output, s32 mode, EvtRuntime *runtime) {
+void evtViewerWriteChildRecords(s32 output, EvtViewerTrackFileFormat format, EvtRuntime *runtime) {
     EvtRuntimeGroup *group;
 
     for (group = runtime->groups; group != NULL; group = group->next) {
         EvtRuntimeChild *child = group->children;
 
-        if (mode == 2) {
+        if (format == EVT_VIEWER_TRACK_FILE_FORMAT_PM2) {
             if (group->type == 5 || group->type == 0x13) {
                 continue;
             }
-        } else if (mode == 3) {
+        } else if (format == EVT_VIEWER_TRACK_FILE_FORMAT_PM3) {
             if (group->type != 5 && group->type != 0x13) {
                 continue;
             }
@@ -4492,12 +4493,12 @@ s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
         return 0;
     }
 
-    evtViewerWriteTrackDirectory(pm2, 2, runtime);
+    evtViewerWriteTrackDirectory(pm2, EVT_VIEWER_TRACK_FILE_FORMAT_PM2, runtime);
     for (section = 0; section < 26; section++) {
         switch (section) {
         case 0: evtWriteRuntimeHeaderValues(pm2, runtime); break;
         case 1: evtWriteFixedSizeEntries(pm2, runtime); break;
-        case 4: evtViewerWriteChildRecords(pm2, 2, runtime); break;
+        case 4: evtViewerWriteChildRecords(pm2, EVT_VIEWER_TRACK_FILE_FORMAT_PM2, runtime); break;
         case 5: evtWriteGroupHeader(pm2, runtime); break;
         case 13: evtCopyRuntimeChildPayloadsToBuffer(pm2, runtime); break;
         case 14: evtEmitGroupTypeElevenPayloads(pm2, runtime); break;
@@ -4520,10 +4521,10 @@ s32 evtViewerSaveTrackFiles(s32 mode, EvtRuntime *runtime) {
     }
     sceClose(pm2);
     sceSync(D_003BC358, 0);
-    evtViewerWriteTrackDirectory(pm3, 3, runtime);
+    evtViewerWriteTrackDirectory(pm3, EVT_VIEWER_TRACK_FILE_FORMAT_PM3, runtime);
     for (section = 0; section < 26; section++) {
         if (section == 4) {
-            evtViewerWriteChildRecords(pm3, 3, runtime);
+            evtViewerWriteChildRecords(pm3, EVT_VIEWER_TRACK_FILE_FORMAT_PM3, runtime);
         }
     }
     sceClose(pm3);

@@ -1,5 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
+#include "evt_viewer_track_file_format.h"
 #include "scr_command_result.h"
 #include "sdf_delayed_resource_check_api.h"
 #include "sdf_vu0.h"
@@ -291,18 +292,18 @@ s32 evtEventViewerCountEntries(EvtRuntime *viewer) {
     return entryCount;
 }
 
-/* Sum nodeCount over entries: mode 2 skips ids 5/0x13, mode 3 takes only those. */
-s32 evtEventViewerSumNodeCounts(s32 mode, EvtRuntime *viewer) {
+/* PM2 skips group ids 5/0x13; PM3 serializes only those groups. */
+s32 evtEventViewerSumNodeCounts(EvtViewerTrackFileFormat format, EvtRuntime *viewer) {
     EvtRuntimeGroup *entry;
     s32 total;
 
     total = 0;
     for (entry = viewer->groups; entry != NULL; entry = entry->next) {
-        if (mode == 2) {
+        if (format == EVT_VIEWER_TRACK_FILE_FORMAT_PM2) {
             if (entry->type == 5 || entry->type == 0x13) {
                 continue;
             }
-        } else if (mode == 3) {
+        } else if (format == EVT_VIEWER_TRACK_FILE_FORMAT_PM3) {
             if (entry->type != 5 && entry->type != 0x13) {
                 continue;
             }
