@@ -42,6 +42,7 @@
 #include "eff_curve.h"
 #include "file.h"
 #include "file_selection_api.h"
+#include "file_prompt_reveal_result.h"
 #include "file_request_entry.h"
 #include "file_slot_flags.h"
 #include "file_slot_flags_change_api.h"
@@ -84,7 +85,7 @@ enum { FILE_CONFIG_SET, FILE_CONFIG_FRAME, FILE_CONFIG_X, FILE_CONFIG_Y };
 extern s16 fileConfigSpritePlacements[27][4];
 
 extern s32 D_00437D4C;
-extern s32 fileDrawFileMenuPromptAndCheckDelay(void);
+extern FilePromptRevealResult fileDrawFileMenuPromptAndCheckDelay(void);
 extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, s32, s32, s32, s32);
 
 typedef struct MenuWork {
@@ -607,7 +608,7 @@ s32 slChkWindowOpenDone(void) {
 }
 
 /* Draw the expanding prompt panel and report when its input delay has elapsed. */
-s32 fileDrawFileMenuPromptAndCheckDelay(void) {
+FilePromptRevealResult fileDrawFileMenuPromptAndCheckDelay(void) {
     s32 y;
     s32 height;
     s32 value;
@@ -638,9 +639,9 @@ s32 fileDrawFileMenuPromptAndCheckDelay(void) {
                  (((value << 7) / 100) << 24) | 0xA1000);
     eglSetOt(0x53);
     if (D_00437D48 < 7) {
-        return 0;
+        return FILE_PROMPT_REVEAL_PENDING;
     }
-    return 1;
+    return FILE_PROMPT_REVEAL_READY;
 }
 
 extern s32 D_00437D28;
@@ -3092,7 +3093,7 @@ extern void evtSubmitPrimaryAlphaBlendMode(s32);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, s32, s32, s32, s32);
 
-extern s32 fileDrawFileMenuPromptAndCheckDelay(void);
+extern FilePromptRevealResult fileDrawFileMenuPromptAndCheckDelay(void);
 extern s32 slChkWindowOpenDone(void);
 
 #define FILE_PROMPT_TEXT_COLOR 0x89FEFF80
@@ -3183,42 +3184,42 @@ void fileShowPromptDialog(void) {
         return;
     }
     filePromptSurface();
-    if (D_00437D1C == 1 && fileDrawFileMenuPromptAndCheckDelay()) {
+    if (D_00437D1C == 1 && fileDrawFileMenuPromptAndCheckDelay() == FILE_PROMPT_REVEAL_READY) {
         filePromptLines(86, 114, overwriteFileLines, 3);
     }
-    if (D_00437D1C == 2 && fileDrawFileMenuPromptAndCheckDelay()) {
+    if (D_00437D1C == 2 && fileDrawFileMenuPromptAndCheckDelay() == FILE_PROMPT_REVEAL_READY) {
         filePromptLines(62, 114, unformattedCardLines, 3);
     }
-    if (D_00437D1C == 3 && fileDrawFileMenuPromptAndCheckDelay()) {
+    if (D_00437D1C == 3 && fileDrawFileMenuPromptAndCheckDelay() == FILE_PROMPT_REVEAL_READY) {
         filePromptLine(86, 114, 0, D_0042B770[fileSelectedSlotIndex]);
         filePromptLine(86, 114, 1, D_003E8648);
     }
-    if (D_00437D1C == 4 && fileDrawFileMenuPromptAndCheckDelay()) {
+    if (D_00437D1C == 4 && fileDrawFileMenuPromptAndCheckDelay() == FILE_PROMPT_REVEAL_READY) {
         filePromptLines(86, 114, newCycleLines, 4);
     }
-    if (D_00437D1C == 5 && fileDrawFileMenuPromptAndCheckDelay()) {
+    if (D_00437D1C == 5 && fileDrawFileMenuPromptAndCheckDelay() == FILE_PROMPT_REVEAL_READY) {
         filePromptLines(62, 90, noCardLines, 8);
     }
-    if (D_00437D1C == 6 && fileDrawFileMenuPromptAndCheckDelay()) {
+    if (D_00437D1C == 6 && fileDrawFileMenuPromptAndCheckDelay() == FILE_PROMPT_REVEAL_READY) {
         filePromptLines(62, 90, noSpaceLines, 9);
     }
-    if (D_00437D1C == 7 && fileDrawFileMenuPromptAndCheckDelay()) {
+    if (D_00437D1C == 7 && fileDrawFileMenuPromptAndCheckDelay() == FILE_PROMPT_REVEAL_READY) {
         filePromptLine(86, 114, 0, D_003E8280);
     }
-    if (D_00437D1C == 8 && fileDrawFileMenuPromptAndCheckDelay()) {
+    if (D_00437D1C == 8 && fileDrawFileMenuPromptAndCheckDelay() == FILE_PROMPT_REVEAL_READY) {
         filePromptLine(86, 114, 0, D_003E8738);
     }
-    if (D_00437D1C == 9 && fileDrawFileMenuPromptAndCheckDelay()) {
+    if (D_00437D1C == 9 && fileDrawFileMenuPromptAndCheckDelay() == FILE_PROMPT_REVEAL_READY) {
         filePromptLines(86, 114, overwriteDataLines, 3);
     }
-    if (D_00437D1C == 10 && fileDrawFileMenuPromptAndCheckDelay()) {
+    if (D_00437D1C == 10 && fileDrawFileMenuPromptAndCheckDelay() == FILE_PROMPT_REVEAL_READY) {
         filePromptLines(86, 114, prompt10Lines, 4);
         filePromptLine(86, 114, 5, D_003E8A20);
     }
-    if (D_00437D1C == 11 && fileDrawFileMenuPromptAndCheckDelay()) {
+    if (D_00437D1C == 11 && fileDrawFileMenuPromptAndCheckDelay() == FILE_PROMPT_REVEAL_READY) {
         filePromptLine(86, 114, 0, D_003E8B40);
     }
-    if (D_00437D1C == FILE_PROMPT_DIFFICULTY && fileDrawFileMenuPromptAndCheckDelay()) {
+    if (D_00437D1C == FILE_PROMPT_DIFFICULTY && fileDrawFileMenuPromptAndCheckDelay() == FILE_PROMPT_REVEAL_READY) {
         filePromptLine(86, 114, 0, D_003E8B78);
     }
     if (slChkWindowOpenDone()) {

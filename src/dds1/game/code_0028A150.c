@@ -38,6 +38,7 @@
 #include "eff_curve.h"
 #include "file.h"
 #include "file_selection_api.h"
+#include "file_prompt_reveal_result.h"
 #include "file_request_entry.h"
 #include "file_slot_flags.h"
 #include "file_slot_flags_change_api.h"
@@ -609,7 +610,7 @@ s32 slChkWindowOpenDone(void) {
     return 1;
 }
 
-s32 fileDrawStatusDialogFrame(void) {
+FilePromptRevealResult fileDrawStatusDialogFrame(void) {
     s32 frame;
     s32 y;
     s32 height;
@@ -648,9 +649,9 @@ s32 fileDrawStatusDialogFrame(void) {
                  (((value << 7) / 100) << 24) | 0xA1000);
     eglSetOt(0x53);
     if (D_003BC860 < 7) {
-        return 0;
+        return FILE_PROMPT_REVEAL_PENDING;
     }
-    return 1;
+    return FILE_PROMPT_REVEAL_READY;
 }
 
 extern char fileCheckingCardMessageLine1[];
@@ -3085,7 +3086,7 @@ extern void evtSubmitPrimaryAlphaBlendMode(s32);
 extern void evtSubmitPrimaryGsTest(s32, s32, s32, s32, s32, s32, s32, s32);
 extern void evtSubmitDefaultDepthGradientRect(s32, s32, s32, s32, s32, s32, s32, s32);
 
-extern s32 fileDrawStatusDialogFrame(void);
+extern FilePromptRevealResult fileDrawStatusDialogFrame(void);
 extern s32 slChkWindowOpenDone(void);
 
 #define FILE_PROMPT_TEXT_COLOR 0x89FEFF80
@@ -3168,32 +3169,32 @@ void fileShowPromptDialog(void) {
         return;
     }
     filePromptSurface();
-    if (D_003BC834 == 1 && fileDrawStatusDialogFrame()) {
+    if (D_003BC834 == 1 && fileDrawStatusDialogFrame() == FILE_PROMPT_REVEAL_READY) {
         filePromptLines(86, 114, overwriteFileLines, 3);
     }
-    if (D_003BC834 == 2 && fileDrawStatusDialogFrame()) {
+    if (D_003BC834 == 2 && fileDrawStatusDialogFrame() == FILE_PROMPT_REVEAL_READY) {
         filePromptLines(62, 114, unformattedCardLines, 3);
     }
-    if (D_003BC834 == 3 && fileDrawStatusDialogFrame()) {
+    if (D_003BC834 == 3 && fileDrawStatusDialogFrame() == FILE_PROMPT_REVEAL_READY) {
         filePromptLine(86, 114, 0, D_003B2718[fileSelectedSlotIndex]);
         filePromptLine(86, 114, 1, D_0037DB10);
     }
-    if (D_003BC834 == 4 && fileDrawStatusDialogFrame()) {
+    if (D_003BC834 == 4 && fileDrawStatusDialogFrame() == FILE_PROMPT_REVEAL_READY) {
         filePromptLines(86, 114, newCycleLines, 4);
     }
-    if (D_003BC834 == 5 && fileDrawStatusDialogFrame()) {
+    if (D_003BC834 == 5 && fileDrawStatusDialogFrame() == FILE_PROMPT_REVEAL_READY) {
         filePromptLines(62, 90, noCardLines, 8);
     }
-    if (D_003BC834 == 6 && fileDrawStatusDialogFrame()) {
+    if (D_003BC834 == 6 && fileDrawStatusDialogFrame() == FILE_PROMPT_REVEAL_READY) {
         filePromptLines(62, 90, noSpaceLines, 9);
     }
-    if (D_003BC834 == 7 && fileDrawStatusDialogFrame()) {
+    if (D_003BC834 == 7 && fileDrawStatusDialogFrame() == FILE_PROMPT_REVEAL_READY) {
         filePromptLine(86, 114, 0, D_0037D748);
     }
-    if (D_003BC834 == 8 && fileDrawStatusDialogFrame()) {
+    if (D_003BC834 == 8 && fileDrawStatusDialogFrame() == FILE_PROMPT_REVEAL_READY) {
         filePromptLine(86, 114, 0, D_0037DBF8);
     }
-    if (D_003BC834 == 9 && fileDrawStatusDialogFrame()) {
+    if (D_003BC834 == 9 && fileDrawStatusDialogFrame() == FILE_PROMPT_REVEAL_READY) {
         filePromptLines(86, 114, overwriteDataLines, 3);
     }
     if (slChkWindowOpenDone()) {
