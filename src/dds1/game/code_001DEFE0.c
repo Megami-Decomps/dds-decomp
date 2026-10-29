@@ -32,6 +32,7 @@
 #include "mnu_title_sound_buffer_status.h"
 #include "eff_random_mod.h"
 #include "btl_tint_transition.h"
+#include "btl_task_poll_result.h"
 #include "eff_random.h"
 #include "btl_camera_timed_instruction.h"
 #include "snd_sequence_volume_pan.h"
@@ -8969,15 +8970,15 @@ void sndBeginEffectLoad(EffectLoadArgs *args) {
 
 extern char D_003A4C88[];
 
-s32 sndPollEffectLoad(EffectLoadArgs *args) {
+BtlTaskPollResult sndPollEffectLoad(EffectLoadArgs *args) {
     SoundResourceNode *effect = args->effect;
     struct sdfMemHandle_t *resource;
 
     if (effect->flags & SOUND_RESOURCE_NODE_FLAG_AVAILABLE) {
-        return 1;
+        return BTL_TASK_POLL_END_DELAY;
     }
     if (!pacFileCheckEnd(args->request)) {
-        return 0;
+        return BTL_TASK_POLL_CONTINUE;
     }
     btlBossDebugPrintf(D_003A4C88, args->name);
     resource = fileGetMemHandle(args->request);
@@ -8987,7 +8988,7 @@ s32 sndPollEffectLoad(EffectLoadArgs *args) {
     fileRequestFreeIfComplete(args->request);
     effect->flags = (effect->flags & ~SOUND_RESOURCE_NODE_FLAG_LOAD_PENDING) |
                     SOUND_RESOURCE_NODE_FLAG_AVAILABLE;
-    return 0;
+    return BTL_TASK_POLL_CONTINUE;
 }
 
 BtlRuntimeTask *sndCreateEffectLoadTask(SoundResourceNode *effect, const char *filename) {
