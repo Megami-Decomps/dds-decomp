@@ -1614,7 +1614,86 @@ s32 IpuWriteCommand(void) {
     return decodedBits;
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "eeregs.h"
+#include "sdf.h"
+#include "sdk_libipu.h"
+
+#define SDF_STREAM_QWORD_BYTES 16
+#define SDF_EE_PHYSICAL_MASK 0x0FFFFFFF
+#define SDF_IPU_DMA_START 0x100         /* CHCR STR */
+#define IPU_CTRL_RST 0x40000000
+#define IPU_CMD_BCLR 0x00000000         /* clear the input FIFO, bit pointer 0 */
+#define IPU_CMD_FDEC_BIT32 0x40000020   /* skip the 32-bit start code */
+#define IPU_CMD_IDEC 0x10000000
+#define IPU_IDEC_QSC1 0x00010000
+#define IPU_IDEC_DTD 0x01000000         /* the picture's DCT type is decoded */
+#define SDF_STREAM_HEADER_DT 0x04000000 /* the frame header's DCT-type flag */
+
+extern void sceIpuRestartDMA(void *);
+extern void sdfIpuSetToIpuDma(sdfIpuDecodeCb_t *stream);
+extern s32 IpuWriteCommand(void);
+extern sdfIpuDecodeCb_t *sdfCurrIpuDecodeCb; /* the stream the IPU output DMA serves */
+extern sdfIpuDecodeCb_t *sdfIpuInputStream; /* the stream the IPU input DMA serves */
+extern const u8 sdfIpuAudioModeIdecBits[];          /* per audio mode: IDEC's OFM bit, then its DTE bit */
+
+/* Decode the stream's next frame into its idle frame buffer. The first call
+ * of a playback cycle resets the IPU and its input DMA; every call points the
+ * output DMA at the buffer, skips the frame's start code (after the first
+ * frame), and issues IDEC with the mode's output format and dithering.
+ * Upstream: INCLUDE_ASM in both games; written from the retail routine.
+ * The same register accesses, calls and stores in the same order. */
+s32 sdfIpuDecode(sdfIpuDecodeCb_t *stream) {
+    IpuDmaState *dma = &stream->dma;
+    u8 bufferIndex;
+    s32 header;
+    u32 command;
+    const u8 *modeBits;
+
+    if (stream->ipuCycleInitialized == 0) {
+        u32 dmaEnable;
+
+        stream->ipuCycleInitialized = 1;
+        /* Retail writes D_ENABLER's own address around the channel setup. */
+        dmaEnable = HW_READ(D_ENABLER);
+        HW_WRITE(D_ENABLER, 0x10000);
+        HW_WRITE(D4_CHCR, 1);
+        HW_WRITE(D_ENABLER, dmaEnable);
+        HW_WRITE(IPU_CTRL, IPU_CTRL_RST);
+        sceIpuSync(0, 0);
+        HW_WRITE(IPU_CMD, IPU_CMD_BCLR);
+        sceIpuSync(0, 0);
+        sdfIpuSetToIpuDma(stream);
+        HW_WRITE(IPU_CTRL, 0);
+        sceIpuStopDMA(dma);
+    }
+    bufferIndex = stream->bufferIndex;
+    sdfCurrIpuDecodeCb = stream;
+    sdfIpuInputStream = stream;
+    dma->outputAddress = (u32)stream->frameBuffers[bufferIndex] & SDF_EE_PHYSICAL_MASK;
+    dma->outputQwords = stream->bufferSize / SDF_STREAM_QWORD_BYTES;
+    dma->outputControl = SDF_IPU_DMA_START;
+    stream->bufferIndex = bufferIndex ^ 1;
+    stream->inputFeedEnabled = 1;
+    sceIpuRestartDMA(dma);
+    if (stream->unk65 == 0) {
+        stream->unk65 = 1;
+    } else {
+        HW_WRITE(IPU_CMD, IPU_CMD_FDEC_BIT32);
+        sceIpuSync(0, 0);
+    }
+    header = IpuWriteCommand();
+    HW_WRITE(IPU_CTRL, (header >> 8) & 0xFB0000);
+    modeBits = &sdfIpuAudioModeIdecBits[stream->audioMode * 2];
+    command = ((u32)modeBits[0] << 27) | ((u32)modeBits[1] << 26) | IPU_CMD_IDEC;
+    command |= (header & SDF_STREAM_HEADER_DT) ? (IPU_IDEC_DTD | IPU_IDEC_QSC1) : IPU_IDEC_QSC1;
+    HW_WRITE(IPU_CMD, command);
+    return command & (IPU_IDEC_DTD | IPU_IDEC_QSC1); /* what retail leaves in v0; unused */
+}
+#else
 INCLUDE_ASM(const s32, "game/code_003425B0", sdfIpuDecode);
+#endif
 
 /* Remove and advance the first list item matching the IPU cleanup test. */
 void sdfIpuExecQueue(s32 skipInterruptGuard) {
@@ -1895,7 +1974,57 @@ void sdfPrintTextLine(const char *text) {
     puts(text);
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "sdf.h"
+#include "sdf_movie_stream.h"
+#include "sdk_libkernl.h"
+
+#define MOV_PAC_RING_BYTES 0x10000
+
+extern movieStream_t *movieSemaId;            /* the movie whose PAC stream feeds the sound driver */
+extern s32 movieSemaCount;                /* the frame at which the PAC ring last ran out of room */
+extern s32 movieStreamSema;
+
+/* The sound driver's block allocator for a PAC movie (queued through
+ * p2sdSetPcmCallback): reserve size bytes of the stream's ring, first
+ * from the pending scratch span, then from the ring itself, wrapping at
+ * 64 KB. NULL when the ring is full, after recording the frame that ran out
+ * of room. Upstream: INCLUDE_ASM in both games; written from the retail
+ * routine with upstream's movie types. The same loads, stores and calls in the
+ * same order. */
+const u8 *movieWaitSema(s32 size) {
+    movieStream_t *movie = movieSemaId;
+    MovPacStream *pac = movie->stream.pac;
+    u8 *address;
+
+    WaitSema(movieStreamSema);
+    if (pac->scratchSize > 0) {
+        pac->scratchSize -= size;
+        address = pac->scratch;
+        pac->scratch = address + size;
+    } else {
+        s32 offset = pac->ringOffset;
+
+        address = pac->ringBuffer + offset;
+        if (pac->ringLength < size) {
+            address = NULL;
+            movieSemaCount = movie->soundNode.playbackFrameIndex;
+        } else {
+            pac->ringLength -= size;
+            offset += size;
+            if (offset >= MOV_PAC_RING_BYTES) {
+                offset -= MOV_PAC_RING_BYTES;
+            }
+            pac->ringOffset = offset;
+        }
+    }
+    SignalSema(movieStreamSema);
+    return address;
+}
+#else
 INCLUDE_ASM(const s32, "game/code_003425B0", movieWaitSema);
+#endif
 
 /* Store the stream-frame draw-path mode; movie viewport setup selects 1. */
 void sdfSetStreamFrameDrawMode(u32 value) {
@@ -1910,7 +2039,136 @@ void sdfSetGridScaledDrawBounds(s32 firstStart, s32 secondStart, s32 firstLength
     sdfMovieDrawColor = value;
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "eeregs.h"
+#include "snd_command_packet.h"
+#include "mnu_voice_resource_path_api.h"
+#include "ee_mmi.h"
+#include "sdf_resource.h"
+#include "sdf_packed_resource.h"
+#include "sdf_pac_reloc.h"
+#include "sdf.h"
+#include "sdf_texture_lists.h"
+#include "sdf_draw.h"
+#include "sdf_resource_list_item.h"
+#include "sdf_stream_read.h"
+#include "sdf_dev_event.h"
+#include "sdf_dev_state.h"
+#include "mdl_object_stream.h"
+#include "sdf_texture_offset_list.h"
+#include "sdf_texture_file.h"
+#include "sdf_texture_queue.h"
+#include "sdf_stream_input_dma.h"
+#include "sdf_sound_rpc_records.h"
+#include "snd_midi_state_views.h"
+#include "sdf_movie_stream.h"
+#include "sdf_packet_alloc.h"
+#include "sdf_packet_list.h"
+extern s32 p2sdPlayPcm(u8 channel);
+
+extern s32 sdfMovieDrawLeft;
+extern s32 sdfMovieDrawTop;
+extern s32 sdfMovieDrawRight;
+extern s32 sdfMovieDrawBottom;
+extern u32 sdfMovieDrawColor;
+
+extern movieStream_t *movieSemaId;
+
+
+/* The bit length of x > 0: 31 - plzcw(x). For x = size - 1 it is the size's
+ * exponent rounded up, as TEX0's TW and TH take it. */
+static inline s32 bitLength(s32 x) {
+    s32 leading;
+
+    EE_MMI_PLZCW(leading, x);
+    return 31 - (leading & 0xFF);
+}
+
+static inline u64 movieVertexWord(s32 x, s32 y, u32 depth) {
+    return ((u64)depth << 32) | ((u32)y << 16) | (u32)x;
+}
+
+/* Queue the decoded movie frame as a sprite over the viewport bounds and color
+ * set by sdfSetGridScaledDrawBounds, once playback has begun; with the PAC
+ * stream enabled, start its sound once the ring holds a page. sdfMovieDrawFrame
+ * calls it when the stream-frame draw mode is 1. Upstream: INCLUDE_ASM in
+ * both games; written from the retail routine. It differs from retail
+ * only in register allocation, scheduling, the way the color word is masked,
+ * and the handwritten addi that loads 31 for the texture sizes. */
+void sdfMovieQueueFrameSprite(movieStream_t *movie, SdfPoolNode *pool) {
+    u64 *packet;
+    sdfDrawTag_t *packetList;
+    u32 width;
+    u32 height;
+    s32 heightLog2;
+    s32 widthLog2;
+    u32 pageCount;
+    u64 pageBase;
+    u64 textureWord;
+
+    if (movie->soundNode.playbackPhase < 2) {
+        return;
+    }
+
+    if (movie->pacEnabled != 0 && movie->pad21 == 0 &&
+        movie->stream.pac->ringLength >= 0x1000) {
+        movie->pad21 = 1;
+        movieSemaId = movie;
+        p2sdSetPcmCallback(movieWaitSema);
+        p2sdPlayPcm(movie->packetLimit);
+    }
+
+    packet = (u64 *)(u32)sdfGrAllocPacketBuff(0xC0);
+    packet[0] = 0x0100000BULL;
+    packet[1] = 0x5000000B00000000ULL;
+    packet[2] = 0x10AB40000000800AULL;
+    packet[3] = 0xE;
+    packet[4] = 0x21;
+    packet[5] = 0x14;
+
+    height = movie->soundNode.height;
+    width = movie->soundNode.width;
+    heightLog2 = bitLength(height - 1);
+    widthLog2 = bitLength(width - 1);
+    pageCount = width >> 6;
+    if (pageCount == 0) {
+        pageCount = 1;
+    }
+    pageBase = (u32)movie->soundNode.resourceWord >> 6;
+    textureWord = ((u64)pageCount << 14) | ((u64)heightLog2 << 30) |
+                  (u64)(widthLog2 << 26) | (1ULL << 34);
+    if (movie->soundNode.audioMode != 0) {
+        textureWord |= pageBase;
+        pageBase = 0x200000;
+    }
+    packet[6] = textureWord | pageBase;
+
+    packet[7] = 6;
+    packet[8] = 5;
+    packet[9] = 8;
+    packet[10] = 0x0000004000000080ULL;
+    packet[11] = 0x3B;
+    packet[12] = ((u64)(sdfMovieDrawColor >> 24) << 32) | 0x64;
+    packet[13] = 0x42;
+    packet[14] = (u64)(s64)(s32)(0x80000000U | (sdfMovieDrawColor & 0xFFFFFF));
+    packet[15] = 1;
+    packet[16] = 0;
+    packet[17] = 3;
+    packet[18] = movieVertexWord(sdfMovieDrawLeft, sdfMovieDrawTop, movie->drawZ);
+    packet[19] = 5;
+    packet[20] = (u64)(s64)(s32)((height << 20) | (width << 4));
+    packet[21] = 3;
+    packet[22] = movieVertexWord(sdfMovieDrawRight, sdfMovieDrawBottom, movie->drawZ);
+    packet[23] = 5;
+
+    packetList = sdfPrimAllocDrawTag(NULL);
+    sdfDrawTagLink(packetList, (u32)packet);
+    pool->append(pool, packetList);
+}
+#else
 INCLUDE_ASM(const s32, "game/code_003425B0", sdfMovieQueueFrameSprite);
+#endif
 
 extern movieStream_t *movieSemaId;
 extern const u8 *movieWaitSema(s32);
