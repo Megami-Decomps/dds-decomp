@@ -46,9 +46,9 @@ typedef struct DatScriptGlobals {
     f32 floats[256];
 } DatScriptGlobals;
 
-typedef struct DatModelFlags {
+typedef struct DatEventBits {
     u32 words[128];
-} DatModelFlags;
+} DatEventBits;
 
 /* Solar state and the shared field/command flags occupy +0xA40..+0xA5F. */
 typedef struct DatWorldState {
@@ -238,7 +238,7 @@ typedef struct DatMantraBitmap {
 typedef struct dds3GlobalWork_t {
     DatStateHeader header;                 /* 0x00000 */
     DatScriptGlobals script;               /* 0x00040 */
-    DatModelFlags modelFlags;              /* 0x00840 */
+    DatEventBits EventBit;                 /* 0x00840: 4096 event bits (evtBitCheck) */
     DatWorldState world;                   /* 0x00A40 */
     datUnitWork_t party[5];               /* 0x00A60 */
 #ifdef VERSION_DDS1

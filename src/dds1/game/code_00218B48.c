@@ -3650,7 +3650,7 @@ void evtInitGlobalWork(void) {
 
 void evtBitAllOff(void) {
     s32 i = 0x7f;
-    u32 *word = DDS3_GBWK->modelFlags.words;
+    u32 *word = DDS3_GBWK->EventBit.words;
 
     do {
         i -= 1;
@@ -3674,17 +3674,17 @@ void evtBitAllOff_FieldDebug(void) {
 /* Signed flag indices need a bias before arithmetic right shift divides by 32. */
 void evtBitOn(s32 flag) {
     s32 adjustedFlag = (flag < 0) ? flag + 0x1f : flag;
-    DDS3_GBWK->modelFlags.words[adjustedFlag >> 5] |= 1 << flag;
+    DDS3_GBWK->EventBit.words[adjustedFlag >> 5] |= 1 << flag;
 }
 
 void evtBitOff(s32 flag) {
     s32 adjustedFlag = (flag < 0) ? flag + 0x1f : flag;
-    DDS3_GBWK->modelFlags.words[adjustedFlag >> 5] &= ~(1 << flag);
+    DDS3_GBWK->EventBit.words[adjustedFlag >> 5] &= ~(1 << flag);
 }
 
 EvtBitTestResult evtBitCheck(s32 flag) {
     s32 adjustedFlag = (flag < 0) ? flag + 0x1f : flag;
-    return (((s32)DDS3_GBWK->modelFlags.words[adjustedFlag >> 5] >> flag) & 1);
+    return (((s32)DDS3_GBWK->EventBit.words[adjustedFlag >> 5] >> flag) & 1);
 }
 
 extern s32 D_003BBD80, D_003BBD84, D_003BBD88;
