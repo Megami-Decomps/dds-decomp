@@ -1276,7 +1276,10 @@ s32 btlUpdateBattleEnd(BtlState *scene) {
         btlBossDebugPrintf(D_00417188);
         return 0;
     }
-    if (scene->terminalOutcome == BTL_TERMINAL_OUTCOME_WIN && brsTaskIsUpdateBlocked()) return 0;
+    if (scene->terminalOutcome == BTL_TERMINAL_OUTCOME_WIN &&
+        brsTaskIsUpdateBlocked() != BRS_UI_UPDATE_UNBLOCKED) {
+        return 0;
+    }
 
     if (scene->scriptState == 0xF000003) {
         state = scene->scriptState;
