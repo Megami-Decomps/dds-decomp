@@ -122,7 +122,89 @@ void effDrawTexturedRectBorderStrips(s32 x, s32 y, s32 depth, s32 width, s32 hei
     }
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "ui_color.h"
+#include "eff.h"
+#include "sdf_gs_register_submit_api.h"
+
+extern void effSelectPresetAndDispatch(u32, u32, u32, u32, u32, u32, u32, u32);
+extern EffectSlotSet *effUpdateTimedStates(EffectSlotSet *, u32, void *);
+extern void effDrawTexturedRectBorderStrips(s32 x, s32 y, s32 depth, s32 width, s32 height,
+                                            const u32 *edgeExtents, u8 *edgeColorBytes,
+                                            u32 *textureCoordinates, u32 *sourceCornerColors, u32 kind,
+                                            u32 mode, u32 flip, u32 texture, u32 buffer);
+/* DDS1's, with its corners' aspect mode before the texture. */
+extern void sdfDrawTexturedQuad(s32, s32, s32, s32, s32, const u32 *, const u32 *, u32, f32, u32, u32, u32,
+                                sdfTexHandle_t *, u32);
+
+/* Draw an effect slot's texture at its place, through its preset or as a
+ * bordered quad, and advance its timed states where asked. DDS1's
+ * effDrawTextureSlot (upstream C in game/code_002BEDC8), its quad's aspect
+ * mode whether bit 1 of the flags is clear. Upstream: INCLUDE_ASM in
+ * game/code_003065A0; the same calls and arguments as the retail
+ * routine. As upstream C (DDS1's with that argument) it differs from retail
+ * in register allocation only, 74 of 160 words. */
+void effDrawTextureSlot(s32 x, s32 y, s32 z, u32 *color, s32 flags, EffectSlotSet *set, s32 slotIndex,
+                        void *drawWork, s32 buffer) {
+    s32 colors[4];
+    EffectSlotDescription *description = &set->descriptions[slotIndex];
+    BdWork *draw = drawWork;
+    BdWork *work;
+    u32 texture = (u32)set->textureReferences[description->textureIndex];
+    s32 flip;
+    s32 kind;
+    s32 mode;
+    s32 aspectMode;
+    u32 i;
+
+    if (texture == 0) {
+        return;
+    }
+    work = set->workEntries;
+    work += slotIndex;
+    slotIndex += work->slotOffset;
+    if (!(flags & 0x20)) {
+        sdfSubmitGsTestOneRegisterPacket(0x5101BL, buffer);
+    }
+    if (!(flags & 1)) {
+        x += description->bounds[0] * 16;
+        y += description->bounds[1] * 8;
+    }
+    if (flags & 0x10) {
+        x -= draw->geometry.bounds[0];
+        y -= draw->geometry.bounds[1];
+    } else {
+        x += draw->geometry.bounds[0];
+        y += draw->geometry.bounds[1];
+    }
+    flip = (description->flags & 4) != 0;
+    mode = 16;
+    if (!(flags & 0x40)) {
+        mode = description->presetMode;
+    }
+    aspectMode = (flags & 2) == 0;
+    kind = description->flags & 3;
+    if (description->flags & 8) {
+        effSelectPresetAndDispatch(x, y, z, draw->geometry.bounds[2], draw->geometry.bounds[3], (u32)color, mode,
+                                   buffer);
+    } else {
+        for (i = 0; i < 4; i++) {
+            colors[i] = description->colors[i] + draw->parameters[i];
+        }
+        effDrawTexturedRectBorderStrips(x, y, z, draw->geometry.bounds[2], draw->geometry.bounds[3],
+                                        description->rect, (u8 *)draw->bounds.texture.rect, (u32 *)colors, color,
+                                        kind, mode, flip, texture, buffer);
+        sdfDrawTexturedQuad(x, y, z, draw->geometry.bounds[2], draw->geometry.bounds[3], (const u32 *)colors,
+                            color, kind, draw->geometry.angleDegrees, mode, flip, aspectMode, (sdfTexHandle_t *)texture, buffer);
+    }
+    if (flags & 0x80) {
+        effUpdateTimedStates(set, slotIndex, draw);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "game/code_003065A0", effDrawTextureSlot);
+#endif
 
 void effDrawSpriteWithWorkCornerColors(s32 x, s32 y, s32 z, s32 flags, EffectSlotSet *set, s32 slot, BdWork *entry, s32 layer) {
     effDrawTextureSlot(x, y, z, entry->geometry.cornerColors, flags, set, slot, entry, layer);
