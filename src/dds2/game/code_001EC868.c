@@ -4605,11 +4605,6 @@ void btlUnitGetPosVU(BtlUnit *unit, u8 mode) {
     SDF_VU0_LOADVECTOR_BARRIER(&pos);
 }
 
-INCLUDE_RODATA(const s32, "game/code_001EC868", D_004184D8);
-
-INCLUDE_RODATA(const s32, "game/code_001EC868", D_00418568);
-
-#ifdef NON_MATCHING
 #include "sdk_ps2.h"
 #include "btl_vec3.h"
 #include "btl_effect_node.h"
@@ -4692,7 +4687,7 @@ extern void btlUnitGetPosVU(BtlUnit *, u8);
 extern u32 btlNextScaledRandom(u32);
 extern f32 fabsf(f32);
 extern BtlCameraSetupPolicy D_003B7FE0[8];
-extern BtlCameraSetupPolicy D_003B8880[31];
+extern BtlCameraSetupPolicy D_003B8880[36];
 extern BtlCameraSetupPolicy D_003B83A0[10];
 extern BtlCameraSetupPolicy D_003B87C0[1];
 extern BtlCameraSetupPolicy D_003B8760[1];
@@ -4715,208 +4710,220 @@ extern f32 btlCameraTerminalDirection[4];
 extern f32 btlCameraTerminalEye[4];
 extern f32 btlCameraTerminalDistance;
 
-/* Build a battle camera pose from a preset: select the setup policy by bank
- * and index, take the half field of view from the number of targets, place the
- * focus by the focus policy and the eye by the eye policy, give the pose its
- * distance and direction, and set the camera cursor's terminal point by the
- * terminal policy; debug prints report the policy kinds and the resulting
- * cursor. DDS2's eye kinds 0x36-0x38 and 0x40-0x43 lay the cursor's path
- * (camera and target endpoints) and its distance themselves. Upstream:
- * INCLUDE_ASM in game/code_001EC868; written from the retail routine, with
- * DDS1's btlBuildPresetCameraPose as a guide. Memory accesses and calls are
- * retail's; the immediates differ only in five `lui 0x3C`: the dead high half
- * of btlCameraCursor that ee-gcc leaves before the new eye kinds' shared distance
- * store, the same instruction, which retail's disassembly leaves numeric (it
- * has no low half to pair) and the body's object carries as %hi(btlCameraCursor). */
-void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 bank, s16 index) {
-    f32 focus[4];
-    f32 eye[4];
-    f32 destination[4];
-    f32 direction[4];
-    f32 quaternion[4];
-    f32 actorPoint[4];
-    f32 alternatePoint[4];
-    f32 terminalPoint[4];
-    f32 targetPoint[4];
-    f32 axis[4] = { 1.0f, 0.0f, 1.0f, 0.0f };
-    f32 localScale[4];
-    f32 worldAxis[4];
-    f32 angles[4];
-    BtlCameraSetupPolicy *p;
+static inline f32 btlGetCameraVectorLength(void) {
+    f32 length;
+    SDF_VU0_GETLENGTH(length);
+    return length;
+}
+
+INCLUDE_RODATA(const s32, "game/code_001EC868", D_004184D8);
+
+void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *pose,
+                   s16 mode, s16 selector)
+{
+    f32 position[4];
+    f32 target[4];
+    f32 scratch30[4];
+    f32 offset[4];
+    f32 rotation[4];
+    f32 scratch60[4];
+    f32 scratch70[4];
+    f32 scratch80[4];
+    f32 scratch90[4];
+    f32 mask[4] = {1.0f, 0.0f, 1.0f, 0.0f};
+    f32 scalesB0[4];
+    f32 scalesC0[4];
+    f32 scalesD0[4];
+    s32 comparison = 0;
+    s32 focusKind;
+    s32 queryFlags;
+    f32 distance = 0.0f;
+    f32 halfFov;
+    f32 focusExtent;
+    f32 measuredDistance;
+    f32 adjustedFocusY;
+    f32 cursorDistance;
+    BtlCameraSetupPolicy *preset;
     BtlUnit *unit;
     BtlUnit *otherUnit;
-    s32 mask;
-    s32 focusKind;
-    f32 framingDistance;
-    f32 halfFov;
-    f32 span;
-    f32 measuredDistance;
-    f32 focusY;
-    f32 adjustedFocusY;
-    f32 length;
-    f32 value;
-    s32 sourceId;
-    s32 swapped;
 
-    memset(localScale, 0, sizeof(localScale));
-    localScale[2] = 1.0f;
-    memset(worldAxis, 0, sizeof(worldAxis));
-    worldAxis[2] = 1.0f;
-    memset(angles, 0, sizeof(angles));
-    framingDistance = 0.0f;
-    swapped = 0;
-    switch (bank) {
-    case 0: p = &D_003B7FE0[index]; break;
-    case 1: p = &D_003B8880[index]; break;
-    case 2: p = &D_003B83A0[index]; break;
-    case 3: p = &D_003B87C0[index]; break;
-    case 4: p = &D_003B8760[index]; break;
-    case 5: p = &D_003B82E0[index]; break;
+    memset(scalesB0, 0, sizeof(scalesB0));
+    scalesB0[2] = 1.0f;
+    memset(scalesC0, 0, sizeof(scalesC0));
+    scalesC0[2] = 1.0f;
+    memset(scalesD0, 0, sizeof(scalesD0));
+    switch (mode) {
+    case 0: preset = &D_003B7FE0[selector]; break;
+    case 1: preset = &D_003B8880[selector]; break;
+    case 2: preset = &D_003B83A0[selector]; break;
+    case 3: preset = &D_003B87C0[selector]; break;
+    case 4: preset = &D_003B8760[selector]; break;
+    case 5: preset = &D_003B82E0[selector]; break;
     case 6:
-    default: p = &D_003B8820[index]; break;
+    default: preset = &D_003B8820[selector]; break;
     }
     if ((s32)btlGetIndexListCount(action->targetList) >= 2) {
-        halfFov = p->multipleFov * 0.017453293f * 640.0f / 480.0f * 0.5f;
+        halfFov = preset->multipleFov * 0x1.1df46ap-6f * 640.0f / 480.0f * 0.5f;
     } else {
-        halfFov = p->singleFov * 0.017453293f * 640.0f / 480.0f * 0.5f;
+        halfFov = preset->singleFov * 0x1.1df46ap-6f * 640.0f / 480.0f * 0.5f;
     }
     btlBossDebugPrintf("-----------------------------------------------------\n");
-    btlBossDebugPrintf("Battle CameraCalc State Target[%x] Camera[%x]\n", p->focusPolicy.kind, p->eyePolicy.kind);
+    btlBossDebugPrintf("Battle CameraCalc State Target[%x] Camera[%x]\n",
+                       preset->focusPolicy.kind, preset->eyePolicy.kind);
     btlBossDebugPrintf("-----------------------------------------------------\n");
-    focusKind = p->focusPolicy.kind;
-    switch (focusKind) {
+
+
+
+
+
+
+
+
+focusKind = preset->focusPolicy.kind;
+switch (focusKind) {
     case 0:
     case 2:
     case 3:
-    case 0x14:
-        if (p->focusPolicy.kind == 0x14) {
-            unit = btlFindActorLinkByCategory(action, 1);
-        } else if (p->focusPolicy.kind == 0) {
+    case 0x14: {
+        if (preset->focusPolicy.kind == 0x14) {
+            unit = btlFindActorLinkByCategory(
+                action, 1);
+        } else if (preset->focusPolicy.kind == 0) {
             unit = action->link->unit;
-        } else if (p->focusPolicy.kind == 2) {
+        } else if (preset->focusPolicy.kind == 2) {
             unit = action->linkedA;
         } else {
             unit = action->linkedB;
         }
-        btlUnitGetPosVU(unit, p->focusPolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        span = btlGetUnitCameraClearance(unit, p->focusPolicy.mode,
-                            p->focusPolicy.distance, p->focusPolicy.height);
-        framingDistance = span / tanf(halfFov);
-        btlCopyUnitRotationQuaternion(unit, quaternion);
-        VU0_LOAD_VF(vf10, quaternion);
+        btlUnitGetPosVU(unit, preset->focusPolicy.mode);
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        focusExtent = btlGetUnitCameraClearance(unit, preset->focusPolicy.mode,
+                                 preset->focusPolicy.distance, preset->focusPolicy.height);
+        distance = focusExtent / tanf(halfFov);
+        btlCopyUnitRotationQuaternion(unit, rotation);
+        VU0_LOAD_VF(vf10, rotation);
         effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, axis);
-        localScale[0] = p->focusPolicy.side;
-        VU0_LOAD_VF(vf11, localScale);
+        VU0_LOAD_VF(vf10, mask);
+        scalesB0[0] = preset->focusPolicy.side;
+        VU0_LOAD_VF(vf11, scalesB0);
         VU0_MUL(vf10, vf10, vf11);
         VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, p->focusPolicy.distance);
-        VU0_LOAD_VF(vf11, focus);
+        VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+        VU0_LOAD_VF(vf10, offset);
+        VU0_SCALE_VF(vf10, preset->focusPolicy.distance);
+        VU0_LOAD_VF(vf11, position);
         VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        adjustedFocusY = focus[1];
-        adjustedFocusY += p->focusPolicy.height;
-        focus[1] = adjustedFocusY;
-        VU0_LOAD_VF(vf10, focus);
-        VU0_STORE_VF_UNCLOBBERED(vf10, out->position);
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        adjustedFocusY = position[1];
+        adjustedFocusY += preset->focusPolicy.height;
+        position[1] = adjustedFocusY;
+        VU0_LOAD_VF(vf10, position);
+        VU0_STORE_VF_UNCLOBBERED(vf10, pose->position);
         break;
+    }
 
-    case 0x40: /* between the actor and its first link, the eye 0.7 of the way to the link */
-        btlUnitGetPosVU(action->link->unit, p->focusPolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        btlUnitGetPosVU(action->linkedA, p->focusPolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
-        focus[1] = (focus[1] + terminalPoint[1]) * 0.5f;
-        focus[1] += p->focusPolicy.height;
-        VU0_LOAD_VF(vf10, focus);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.targetFrom);
-        VU0_STORE_VF_UNCLOBBERED(vf10, out->position);
-        terminalPoint[1] = focus[1];
-        VU0_LOAD_VF(vf10, terminalPoint);
-        VU0_LOAD_VF(vf11, focus);
+    case 0x40: {
+        btlUnitGetPosVU(action->link->unit, preset->focusPolicy.mode);
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        btlUnitGetPosVU(action->linkedA, preset->focusPolicy.mode);
+        VU0_STORE_VF_UNCLOBBERED(vf10, scratch80);
+        adjustedFocusY = (position[1] + scratch80[1]) * 0.5f;
+        position[1] = adjustedFocusY;
+        adjustedFocusY += preset->focusPolicy.height;
+        position[1] = adjustedFocusY;
+        VU0_LOAD_VF(vf10, position);
+        VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->targetFrom);
+        VU0_STORE_VF_UNCLOBBERED(vf10, pose->position);
+        scratch80[1] = position[1];
+        VU0_LOAD_VF(vf10, scratch80);
+        VU0_LOAD_VF(vf11, position);
         VU0_SUB(vf10, vf10, vf11);
-        VU0_SCALE_VF(vf10, 0.7f);
-        VU0_LOAD_VF(vf11, focus);
+        VU0_SCALE_VF(vf10, 0x1.666666p-1f);
+        VU0_LOAD_VF(vf11, position);
         VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
-        VU0_LOAD_VF(vf10, terminalPoint);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.targetTo);
+        VU0_STORE_VF_UNCLOBBERED(vf10, scratch80);
+        VU0_LOAD_VF(vf10, scratch80);
+        VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->targetTo);
         break;
+    }
 
-    case 0x41: /* from whichever of the actor and its link lies nearer the target */
-        btlUnitGetPosVU(action->link->unit, p->eyePolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, actorPoint);
-        btlUnitGetPosVU(action->linkedA, p->eyePolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, alternatePoint);
-        swapped = actorPoint[0] <= alternatePoint[0];
-        btlUnitGetPosVU((BtlUnit *)btlGetIndexListEntry(action->targetList, 0), p->eyePolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
-        if (!(alternatePoint[0] <= terminalPoint[0])) {
-            swapped ^= 1;
-        }
-        if (swapped) {
-            VU0_LOAD_VF(vf10, alternatePoint);
-            VU0_STORE_VF_UNCLOBBERED(vf10, focus);
+    case 0x41: {
+        BtlUnit *first = action->link->unit;
+        BtlUnit *third;
+        btlUnitGetPosVU(first, preset->eyePolicy.mode);
+        VU0_STORE_VF_UNCLOBBERED(vf10, scratch60);
+        btlUnitGetPosVU(action->linkedA, preset->eyePolicy.mode);
+        VU0_STORE_VF_UNCLOBBERED(vf10, scratch70);
+        comparison = scratch60[0] <= scratch70[0];
+        third = btlGetIndexListEntry(action->targetList, 0);
+        btlUnitGetPosVU(third, preset->eyePolicy.mode);
+        VU0_STORE_VF_UNCLOBBERED(vf10, scratch80);
+        if (!(scratch70[0] <= scratch80[0])) comparison ^= 1;
+        if (comparison) {
+            VU0_LOAD_VF(vf10, scratch70);
+            VU0_STORE_VF_UNCLOBBERED(vf10, position);
         } else {
-            VU0_LOAD_VF(vf10, actorPoint);
-            VU0_STORE_VF_UNCLOBBERED(vf10, focus);
+            VU0_LOAD_VF(vf10, scratch60);
+            VU0_STORE_VF_UNCLOBBERED(vf10, position);
         }
-        VU0_LOAD_VF(vf10, terminalPoint);
-        VU0_LOAD_VF(vf11, focus);
-        VU0_SUB(vf10, vf10, vf11);
-        VU0_SCALE_VF(vf10, 0.3f);
-        VU0_LOAD_VF(vf11, focus);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.targetFrom);
-        VU0_STORE_VF_UNCLOBBERED(vf10, out->position);
-        VU0_LOAD_VF(vf10, terminalPoint);
-        VU0_LOAD_VF(vf11, focus);
-        VU0_SUB(vf10, vf10, vf11);
-        VU0_SCALE_VF(vf10, 0.1f);
-        VU0_LOAD_VF(vf11, focus);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.targetTo);
-        VU0_LOAD_VF(vf10, btlCameraCursor.targetFrom);
-        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        break;
 
-    case 0x42: /* the first target */
-        btlUnitGetPosVU((BtlUnit *)btlGetIndexListEntry(action->targetList, 0), p->focusPolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.targetFrom);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.targetTo);
-        VU0_STORE_VF_UNCLOBBERED(vf10, out->position);
-        break;
+        VU0_LOAD_VF(vf10, scratch80);
+        VU0_LOAD_VF(vf11, position);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_SCALE_VF(vf10, 0x1.333332p-2f);
+        VU0_LOAD_VF(vf11, position);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->targetFrom);
+        VU0_STORE_VF_UNCLOBBERED(vf10, pose->position);
 
+        VU0_LOAD_VF(vf10, scratch80);
+        VU0_LOAD_VF(vf11, position);
+        VU0_SUB(vf10, vf10, vf11);
+        VU0_SCALE_VF(vf10, 0x1.999998p-4f);
+        VU0_LOAD_VF(vf11, position);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->targetTo);
+        VU0_LOAD_VF(vf10, CURSOR->targetFrom);
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        break;
+    }
+
+    case 0x42: {
+        unit = btlGetIndexListEntry(action->targetList, 0);
+        btlUnitGetPosVU(unit, preset->focusPolicy.mode);
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->targetFrom);
+        VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->targetTo);
+        VU0_STORE_VF_UNCLOBBERED(vf10, pose->position);
+        break;
+    }
+    
     case 0x16:
     case 0x18:
-    case 0x28:
+    case 0x28: {
         switch (focusKind) {
         case 0x16:
             unit = btlFindActiveActorById(0);
             if (unit != NULL) {
-                btlUnitGetPosVU(unit, p->focusPolicy.mode);
-                VU0_STORE_VF_UNCLOBBERED(vf10, focus);
+                btlUnitGetPosVU(unit, preset->focusPolicy.mode);
+                VU0_STORE_VF_UNCLOBBERED(vf10, position);
             } else {
                 unit = btlFindActiveActorById(1);
                 if (unit == NULL) unit = action->link->unit;
-                btlUnitGetPosVU(unit, p->focusPolicy.mode);
-                VU0_STORE_VF_UNCLOBBERED(vf10, focus);
+                btlUnitGetPosVU(unit, preset->focusPolicy.mode);
+                VU0_STORE_VF_UNCLOBBERED(vf10, position);
             }
             break;
         case 0x18:
             unit = btlFindActiveActorById(2);
             if (unit != NULL) {
-                btlUnitGetPosVU(unit, p->focusPolicy.mode);
-                VU0_STORE_VF_UNCLOBBERED(vf10, focus);
+                btlUnitGetPosVU(unit, preset->focusPolicy.mode);
+                VU0_STORE_VF_UNCLOBBERED(vf10, position);
             } else {
                 unit = btlFindActiveActorById(1);
                 if (unit == NULL) unit = action->link->unit;
-                btlUnitGetPosVU(unit, p->focusPolicy.mode);
-                VU0_STORE_VF_UNCLOBBERED(vf10, focus);
+                btlUnitGetPosVU(unit, preset->focusPolicy.mode);
+                VU0_STORE_VF_UNCLOBBERED(vf10, position);
             }
             break;
         default:
@@ -4925,166 +4932,176 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
             } else {
                 unit = action->linkedA;
             }
-            btlUnitGetPosVU(unit, p->focusPolicy.mode);
-            VU0_STORE_VF_UNCLOBBERED(vf10, focus);
+            btlUnitGetPosVU(unit, preset->focusPolicy.mode);
+            VU0_STORE_VF_UNCLOBBERED(vf10, position);
+            break;
         }
-        span = btlGetUnitCameraClearance(unit, p->focusPolicy.mode,
-                            p->focusPolicy.distance, p->focusPolicy.height);
-        framingDistance = span / tanf(halfFov);
-        btlCopyUnitRotationQuaternion(unit, quaternion);
-        VU0_LOAD_VF(vf10, quaternion);
+        focusExtent = btlGetUnitCameraClearance(unit, preset->focusPolicy.mode,
+                                 preset->focusPolicy.distance, preset->focusPolicy.height);
+        distance = focusExtent / tanf(halfFov);
+        btlCopyUnitRotationQuaternion(unit, rotation);
+        VU0_LOAD_VF(vf10, rotation);
         effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, axis);
-        localScale[0] = p->focusPolicy.side;
-        VU0_LOAD_VF(vf11, localScale);
+        VU0_LOAD_VF(vf10, mask);
+        scalesB0[0] = preset->focusPolicy.side;
+        VU0_LOAD_VF(vf11, scalesB0);
         VU0_MUL(vf10, vf10, vf11);
         VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, p->focusPolicy.distance);
-        VU0_LOAD_VF(vf11, focus);
+        VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+        VU0_LOAD_VF(vf10, offset);
+        VU0_SCALE_VF(vf10, preset->focusPolicy.distance);
+        VU0_LOAD_VF(vf11, position);
         VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        adjustedFocusY = focus[1];
-        adjustedFocusY += p->focusPolicy.height;
-        focus[1] = adjustedFocusY;
-        VU0_LOAD_VF(vf10, focus);
-        VU0_STORE_VF_UNCLOBBERED(vf10, out->position);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.targetFrom);
-        worldAxis[0] = p->terminalPolicy.side;
-        VU0_LOAD_VF(vf10, worldAxis);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        if (p->focusPolicy.kind != 0x28) {
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        adjustedFocusY = position[1];
+        adjustedFocusY += preset->focusPolicy.height;
+        position[1] = adjustedFocusY;
+        VU0_LOAD_VF(vf10, position);
+        VU0_STORE_VF_UNCLOBBERED(vf10, pose->position);
+        VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->targetFrom);
+        scalesC0[0] = preset->terminalPolicy.side;
+        VU0_LOAD_VF(vf10, scalesC0);
+        VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+        if (preset->focusPolicy.kind != 0x28) {
             btlMeasureFilteredUnitGroupBounds(0x200, NULL, NULL);
-            VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
+            VU0_STORE_VF_UNCLOBBERED(vf10, scratch80);
         } else {
-            btlBuildProjectedActorPairBoundsVU(0x200, action->link->unit, action->linkedA,
-                          (s8)p->focusPolicy.mode, (s8)p->focusPolicy.mode,
+            btlBuildProjectedActorPairBoundsVU(0x200, action->link->unit,
+                          action->linkedA,
+                          (s8)preset->focusPolicy.mode,
+                          (s8)preset->focusPolicy.mode,
                           NULL, NULL, NULL, NULL);
-            VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
+            VU0_STORE_VF_UNCLOBBERED(vf10, scratch80);
         }
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, p->terminalPolicy.distance);
-        VU0_LOAD_VF(vf11, terminalPoint);
+        VU0_LOAD_VF(vf10, offset);
+        VU0_SCALE_VF(vf10, preset->terminalPolicy.distance);
+        VU0_LOAD_VF(vf11, scratch80);
         VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
-        terminalPoint[1] += p->terminalPolicy.height;
-        VU0_LOAD_VF(vf10, terminalPoint);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.targetTo);
-        break;
-
-    case 5:
-        /* Three fresh owner chains around callback-sensitive queries. */
-        btlUnitGetPosVU(action->targetList->entries[0], p->focusPolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        span = btlGetUnitCameraClearance(action->targetList->entries[0],
-                            p->focusPolicy.mode, 0.0f, 0.0f);
-        framingDistance = span / tanf(halfFov);
-        btlCopyUnitRotationQuaternion(action->targetList->entries[0], quaternion);
-        VU0_LOAD_VF(vf10, quaternion);
-        effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, axis);
-        localScale[0] = p->focusPolicy.side;
-        VU0_LOAD_VF(vf11, localScale);
-        VU0_MUL(vf10, vf10, vf11);
-        VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, p->focusPolicy.distance);
-        VU0_LOAD_VF(vf11, focus);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        adjustedFocusY = focus[1];
-        adjustedFocusY += p->focusPolicy.height;
-        focus[1] = adjustedFocusY;
-        VU0_LOAD_VF(vf10, focus);
-        VU0_STORE_VF_UNCLOBBERED(vf10, out->position);
-        break;
-
-    case 4:
-        worldAxis[0] = p->focusPolicy.side;
-        VU0_LOAD_VF(vf10, worldAxis);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        worldAxis[0] = 0.0f;
-        VU0_MOVE_VF(vf10, vf0);
-        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, p->focusPolicy.distance);
-        VU0_LOAD_VF(vf11, focus);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        adjustedFocusY = focus[1];
-        adjustedFocusY += p->focusPolicy.height;
-        focus[1] = adjustedFocusY;
-        VU0_LOAD_VF(vf10, focus);
-        VU0_STORE_VF_UNCLOBBERED(vf10, out->position);
-        break;
-
-    case 7:
-    case 8:
-        worldAxis[0] = p->focusPolicy.side;
-        VU0_LOAD_VF(vf10, worldAxis);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        if (action->link->unit->status.flags & 0x200) {
-            mask = p->focusPolicy.kind == 8 ? 0x400 : 0x200;
-        } else {
-            mask = p->focusPolicy.kind == 8 ? 0x200 : 0x400;
-        }
-        /* Native passes the KIND byte here, intentionally not the mode. */
-        span = btlMeasureFilteredActorBounds(mask, NULL, NULL, (s8)p->focusPolicy.kind,
-                            NULL, NULL, NULL, NULL);
-        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        framingDistance = span / tanf(halfFov);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, p->focusPolicy.distance);
-        VU0_LOAD_VF(vf11, focus);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        adjustedFocusY = focus[1];
-        adjustedFocusY += p->focusPolicy.height;
-        focus[1] = adjustedFocusY;
-        VU0_LOAD_VF(vf10, focus);
-        VU0_STORE_VF_UNCLOBBERED(vf10, out->position);
-        break;
-
-    case 0x0F: {
-        s32 boundsMask;
-        worldAxis[0] = p->focusPolicy.side;
-        VU0_LOAD_VF(vf10, worldAxis);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        boundsMask = 0x600;
-        btlMeasureFilteredUnitGroupBounds(0x400, NULL, NULL);
-        VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
-        span = btlMeasureBattleSideBoundsWithSeed(boundsMask, NULL, NULL, NULL, NULL,
-                            terminalPoint, 600.0f);
-        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        framingDistance = span / tanf(halfFov);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, p->focusPolicy.distance);
-        VU0_LOAD_VF(vf11, focus);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        adjustedFocusY = focus[1];
-        adjustedFocusY += p->focusPolicy.height;
-        focus[1] = adjustedFocusY;
-        VU0_LOAD_VF(vf10, focus);
-        VU0_STORE_VF_UNCLOBBERED(vf10, out->position);
+        VU0_STORE_VF_UNCLOBBERED(vf10, scratch80);
+        scratch80[1] += preset->terminalPolicy.height;
+        VU0_LOAD_VF(vf10, scratch80);
+        VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->targetTo);
         break;
     }
 
-    case 0x1B:
-    case 0x1D:
+    case 5: {
+        btlUnitGetPosVU(action->targetList->entries[0], preset->focusPolicy.mode);
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        focusExtent = btlGetUnitCameraClearance(action->targetList->entries[0], preset->focusPolicy.mode,
+                                 0.0f, 0.0f);
+        distance = focusExtent / tanf(halfFov);
+        btlCopyUnitRotationQuaternion(action->targetList->entries[0],
+                                     rotation);
+        VU0_LOAD_VF(vf10, rotation);
+        effMiscQuaternionToMatrixVU();
+        VU0_LOAD_VF(vf10, mask);
+        scalesB0[0] = preset->focusPolicy.side;
+        VU0_LOAD_VF(vf11, scalesB0);
+        VU0_MUL(vf10, vf10, vf11);
+        VU0_APPLY_MATRIX(vf10, vf10);
+        VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+        VU0_LOAD_VF(vf10, offset);
+        VU0_SCALE_VF(vf10, preset->focusPolicy.distance);
+        VU0_LOAD_VF(vf11, position);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        adjustedFocusY = position[1];
+        adjustedFocusY += preset->focusPolicy.height;
+        position[1] = adjustedFocusY;
+        VU0_LOAD_VF(vf10, position);
+        VU0_STORE_VF_UNCLOBBERED(vf10, pose->position);
+        break;
+    }
+    case 4:
+        scalesC0[0] = preset->focusPolicy.side;
+        VU0_LOAD_VF(vf10, scalesC0);
+        VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+        scalesC0[0] = 0.0f;
+        VU0_MOVE_VF(vf10, vf0);
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        VU0_LOAD_VF(vf10, offset);
+        VU0_SCALE_VF(vf10, preset->focusPolicy.distance);
+        VU0_LOAD_VF(vf11, position);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        adjustedFocusY = position[1];
+        adjustedFocusY += preset->focusPolicy.height;
+        position[1] = adjustedFocusY;
+        VU0_LOAD_VF(vf10, position);
+        VU0_STORE_VF_UNCLOBBERED(vf10, pose->position);
+        break;
+
+    case 7:
+    case 8: {
+
+        u32 facing;
+        scalesC0[0] = preset->focusPolicy.side;
+        VU0_LOAD_VF(vf10, scalesC0);
+        VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+        facing = action->link->unit->status.flags & 0x200;
+        if (facing) {
+            queryFlags = (preset->focusPolicy.kind == 8) ? 0x400 : 0x200;
+        } else {
+            queryFlags = (preset->focusPolicy.kind == 8) ? 0x200 : 0x400;
+        }
+        focusExtent = btlMeasureFilteredActorBounds(queryFlags, NULL, NULL,
+                                 (s8)preset->focusPolicy.kind,
+                                 NULL, NULL, NULL, NULL);
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        distance = focusExtent / tanf(halfFov);
+        VU0_LOAD_VF(vf10, offset);
+        VU0_SCALE_VF(vf10, preset->focusPolicy.distance);
+        VU0_LOAD_VF(vf11, position);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        adjustedFocusY = position[1];
+        adjustedFocusY += preset->focusPolicy.height;
+        position[1] = adjustedFocusY;
+        VU0_LOAD_VF(vf10, position);
+        VU0_STORE_VF_UNCLOBBERED(vf10, pose->position);
+        break;
+    }
+
+    case 0x0f: {
+
+        s32 boundsMask;
+        scalesC0[0] = preset->focusPolicy.side;
+        VU0_LOAD_VF(vf10, scalesC0);
+        VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+        boundsMask = 0x600;
+        btlMeasureFilteredUnitGroupBounds(0x400, NULL, NULL);
+        VU0_STORE_VF_UNCLOBBERED(vf10, scratch80);
+        focusExtent = btlMeasureBattleSideBoundsWithSeed(boundsMask, NULL, NULL, NULL, NULL,
+                               scratch80, 600.0f);
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        distance = focusExtent / tanf(halfFov);
+        VU0_LOAD_VF(vf10, offset);
+        VU0_SCALE_VF(vf10, preset->focusPolicy.distance);
+        VU0_LOAD_VF(vf11, position);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        adjustedFocusY = position[1];
+        adjustedFocusY += preset->focusPolicy.height;
+        position[1] = adjustedFocusY;
+        VU0_LOAD_VF(vf10, position);
+        VU0_STORE_VF_UNCLOBBERED(vf10, pose->position);
+        break;
+    }
+
+    case 0x1b:
+    case 0x1d:
     case 0x23:
     case 0x25:
     case 0x26:
-    case 0x27:
-        VU0_LOAD_VF(vf10, out->position);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.targetFrom);
+    case 0x27: {
+        f32 baseHeight;
+        VU0_LOAD_VF(vf10, pose->position);
+        VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->targetFrom);
         switch (focusKind) {
         case 0x25:
             unit = action->link->unit;
             break;
-        case 0x1B:
+        case 0x1b:
             unit = action->linkedB;
             break;
         case 0x27:
@@ -5108,1581 +5125,1903 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
             unit = btlGetIndexListEntry(action->targetList, 0);
             break;
         }
-        btlUnitGetPosVU(unit, p->focusPolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
-        span = btlGetUnitCameraClearance(unit, p->focusPolicy.mode,
-                            p->focusPolicy.distance, p->focusPolicy.height);
-        framingDistance = span / tanf(halfFov);
-        btlCopyUnitRotationQuaternion(unit, quaternion);
-        VU0_LOAD_VF(vf10, quaternion);
+        btlUnitGetPosVU(unit, preset->focusPolicy.mode);
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        VU0_STORE_VF_UNCLOBBERED(vf10, scratch80);
+        focusExtent = btlGetUnitCameraClearance(unit, preset->focusPolicy.mode,
+                                 preset->focusPolicy.distance, preset->focusPolicy.height);
+        distance = focusExtent / tanf(halfFov);
+        btlCopyUnitRotationQuaternion(unit, rotation);
+        VU0_LOAD_VF(vf10, rotation);
         effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, axis);
-        localScale[0] = p->focusPolicy.side;
-        VU0_LOAD_VF(vf11, localScale);
+        VU0_LOAD_VF(vf10, mask);
+        scalesB0[0] = preset->focusPolicy.side;
+        VU0_LOAD_VF(vf11, scalesB0);
         VU0_MUL(vf10, vf10, vf11);
         VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        focusY = focus[1];
-        if (p->focusPolicy.kind == 0x1D) {
-            if (focusY <= -225.0f) {
-                focusY = -225.0f;
-                focus[1] = -225.0f;
-                terminalPoint[1] = focusY;
-            }
+        VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+        baseHeight = position[1];
+        if (preset->focusPolicy.kind == 0x1d && baseHeight <= -225.0f) {
+            baseHeight = -225.0f;
+            position[1] = -225.0f;
+            scratch80[1] = -225.0f;
         }
-        VU0_LOAD_VF(vf10, direction);
-        switch (p->focusPolicy.kind) {
-        case 0x1B:
+        VU0_LOAD_VF(vf10, offset);
+        switch (preset->focusPolicy.kind) {
+        case 0x1b:
         case 0x23:
         case 0x25:
         case 0x26:
         case 0x27:
-            VU0_SCALE_VF(vf10, p->focusPolicy.distance);
+            VU0_SCALE_VF(vf10, preset->focusPolicy.distance);
             break;
         default:
-            VU0_SCALE_VF(vf10, span * 0.5f);
+            VU0_SCALE_VF(vf10, focusExtent * 0.5f);
             break;
         }
-        VU0_LOAD_VF(vf11, focus);
+        VU0_LOAD_VF(vf11, position);
         VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        focusY += p->focusPolicy.height;
-        focus[1] = focusY;
-        VU0_LOAD_VF(vf10, focus);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.targetTo);
-        VU0_LOAD_VF(vf10, out->position);
-        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        baseHeight += preset->focusPolicy.height;
+        position[1] = baseHeight;
+        VU0_LOAD_VF(vf10, position);
+        VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->targetTo);
+        VU0_LOAD_VF(vf10, pose->position);
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
         break;
+    }
 
-    case 0x1A:
-    case 0x2C:
-        worldAxis[0] = p->focusPolicy.side;
-        VU0_LOAD_VF(vf10, worldAxis);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        VU0_LOAD_VF(vf10, angles);
-        VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
-        terminalPoint[1] += p->focusPolicy.height;
-        if (p->focusPolicy.kind == 0x2C) {
+    case 0x1a:
+    case 0x2c: {
+
+        scalesC0[0] = preset->focusPolicy.side;
+        VU0_LOAD_VF(vf10, scalesC0);
+        VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+        VU0_LOAD_VF(vf10, scalesD0);
+        VU0_STORE_VF_UNCLOBBERED(vf10, scratch80);
+        scratch80[1] += preset->focusPolicy.height;
+        if (preset->focusPolicy.kind == 0x2c) {
             btlMeasureFilteredUnitGroupBounds(0x400, NULL, NULL);
-            VU0_STORE_VF_UNCLOBBERED(vf10, destination);
-            terminalPoint[0] = destination[0];
+            VU0_STORE_VF_UNCLOBBERED(vf10, scratch30);
+            scratch80[0] = scratch30[0];
         }
-        span = btlMeasureBattleSideBoundsWithSeed(0x400, NULL, NULL, NULL, NULL,
-                            terminalPoint, 600.0f);
-        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        framingDistance = span / tanf(halfFov);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, p->focusPolicy.distance);
-        VU0_LOAD_VF(vf11, focus);
+        focusExtent = btlMeasureBattleSideBoundsWithSeed(0x400, NULL, NULL, NULL, NULL,
+                               scratch80, 600.0f);
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        distance = focusExtent / tanf(halfFov);
+        VU0_LOAD_VF(vf10, offset);
+        VU0_SCALE_VF(vf10, preset->focusPolicy.distance);
+        VU0_LOAD_VF(vf11, position);
         VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        VU0_LOAD_VF(vf10, focus);
-        VU0_STORE_VF_UNCLOBBERED(vf10, out->position);
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        VU0_LOAD_VF(vf10, position);
+        VU0_STORE_VF_UNCLOBBERED(vf10, pose->position);
         break;
+    }
 
     case 0x36:
     case 0x37:
-    case 0x38: /* the actor raised, the eye along its facing; 0x36 offset by the bounds seed */
+    case 0x38: {
         unit = action->link->unit;
-        btlUnitGetPosVU(unit, p->focusPolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        focus[1] += p->focusPolicy.height;
-        VU0_LOAD_VF(vf10, focus);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.targetFrom);
-        VU0_STORE_VF_UNCLOBBERED(vf10, out->position);
-        btlCopyUnitRotationQuaternion(unit, quaternion);
-        VU0_LOAD_VF(vf10, quaternion);
+        btlUnitGetPosVU(unit, preset->focusPolicy.mode);
+        VU0_STORE_VF_UNCLOBBERED(vf10, position);
+        adjustedFocusY = position[1];
+        adjustedFocusY += preset->focusPolicy.height;
+        position[1] = adjustedFocusY;
+        VU0_LOAD_VF(vf10, position);
+        VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->targetFrom);
+        VU0_STORE_VF_UNCLOBBERED(vf10, pose->position);
+        btlCopyUnitRotationQuaternion(unit, rotation);
+        VU0_LOAD_VF(vf10, rotation);
         effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, axis);
-        localScale[0] = p->focusPolicy.side;
-        VU0_LOAD_VF(vf11, localScale);
+        VU0_LOAD_VF(vf10, mask);
+        scalesB0[0] = preset->focusPolicy.side;
+        VU0_LOAD_VF(vf11, scalesB0);
         VU0_MUL(vf10, vf10, vf11);
         VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, p->focusPolicy.distance);
-        VU0_LOAD_VF(vf11, focus);
+        VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+        VU0_LOAD_VF(vf10, offset);
+        VU0_SCALE_VF(vf10, preset->focusPolicy.distance);
+        VU0_LOAD_VF(vf11, position);
         VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
-        terminalPoint[1] += p->focusPolicy.height;
-        if (p->focusPolicy.kind == 0x36) {
-            VU0_LOAD_VF(vf10, terminalPoint);
-            VU0_LOAD_VF(vf11, p->boundsSeed);
+        VU0_STORE_VF_UNCLOBBERED(vf10, scratch80);
+        scratch80[1] += preset->focusPolicy.height;
+        if (preset->focusPolicy.kind == 0x36) {
+            VU0_LOAD_VF(vf10, scratch80);
+            VU0_LOAD_VF(vf11, preset->boundsSeed);
             VU0_ADD(vf10, vf10, vf11);
-            VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
+            VU0_STORE_VF_UNCLOBBERED(vf10, scratch80);
         }
-        VU0_LOAD_VF(vf10, terminalPoint);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.targetTo);
-        break;
-
-    default:
+        VU0_LOAD_VF(vf10, scratch80);
+        VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->targetTo);
         break;
     }
+}
+pose->fov = 0x1.657184p-1f;
+switch(preset->eyePolicy.kind) {
+case 0x00:
+case 0x02:
+case 0x03: {
 
-    /* 001F6834: main eye phase */
-    out->fov = 40.0f * 0.017453293f;
-    switch (p->eyePolicy.kind) {
-    case 0: case 2: case 3: /* 001F6868 */
-        if (p->eyePolicy.kind == 0) unit = action->link->unit;
-        else if (p->eyePolicy.kind == 2) unit = action->linkedA;
-        else unit = action->linkedB;
-        btlUnitGetPosVU(unit, p->eyePolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        btlCopyUnitRotationQuaternion(unit, quaternion);
-        VU0_LOAD_VF(vf10, quaternion);
-        effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, axis);
-        localScale[0] = p->eyePolicy.side;
-        VU0_LOAD_VF(vf11, localScale);
-        VU0_MUL(vf10, vf10, vf11);
-        VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, p->eyePolicy.distance);
-        VU0_LOAD_VF(vf11, eye);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        /* 001F8C88 */
-        eye[1] += p->eyePolicy.height;
-        break;
-
-    case 1: case 0x12: case 0x13: case 0x15: /* 001F6928 */
-        if (p->eyePolicy.kind == 0x15) unit = btlFindActorLinkByCategory(action, 1);
-        else if (p->eyePolicy.kind == 1) unit = action->link->unit;
-        else if (p->eyePolicy.kind == 0x12) unit = action->linkedA;
-        else unit = action->linkedB;
-        btlUnitGetPosVU(unit, p->eyePolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        btlCopyUnitRotationQuaternion(unit, quaternion);
-        VU0_LOAD_VF(vf10, quaternion);
-        effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, axis);
-        localScale[0] = p->eyePolicy.side;
-        VU0_LOAD_VF(vf11, localScale);
-        VU0_MUL(vf10, vf10, vf11);
-        VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, framingDistance + p->eyePolicy.distance);
-        VU0_LOAD_VF(vf11, eye);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        eye[1] += p->eyePolicy.height;
-        VU0_LOAD_VF(vf10, eye);
-        VU0_LOAD_VF(vf11, focus);
-        VU0_SUB(vf10, vf10, vf11);
-        SDF_VU0_GETLENGTH(measuredDistance);
-        SDF_VU0_NORMALIZE();
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        if (measuredDistance < framingDistance + p->eyePolicy.distance)
-            measuredDistance = framingDistance + p->eyePolicy.distance;
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, measuredDistance);
-        VU0_LOAD_VF(vf11, focus);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        break;
-
-    case 0x2F: case 0x32: case 0x33: /* 001F6AB0 */
+    if (preset->eyePolicy.kind == 0) {
         unit = action->link->unit;
-        btlUnitGetPosVU(unit, p->focusPolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        VU0_STORE_VF_UNCLOBBERED(vf10, out->position);
-        span = btlGetUnitCameraClearance(unit, p->focusPolicy.mode, 1.0f, 1.0f);
-        framingDistance = span / tanf(halfFov);
-        if (p->eyePolicy.kind == 0x32) {
-            btlMeasureFilteredActorBounds(0x400, unit, 0, 0, 0, 0, 0, 0);
-            VU0_STORE_VF_UNCLOBBERED(vf10, destination);
-            btlUnitGetPosVU(unit, 0);
-            VU0_STORE_VF_UNCLOBBERED(vf10, actorPoint);
-        } else { /* 001F6B58: fresh link/unit read after the lookup and position calls */
-            btlUnitGetPosVU(btlGetIndexListEntry(action->targetList, 0), 0);
-            VU0_STORE_VF_UNCLOBBERED(vf10, destination);
-            btlUnitGetPosVU(action->link->unit, 1);
-            VU0_STORE_VF_UNCLOBBERED(vf10, actorPoint);
-        }
-        if (destination[0] > actorPoint[0]) { /* 001F6B90 */
-            localScale[0] = p->focusPolicy.side;
-            btlCameraCursor.counter = 0;
-        } else {
-            localScale[0] = -p->focusPolicy.side;
-            btlCameraCursor.counter = 1;
-        }
-        btlCopyUnitRotationQuaternion(unit, quaternion);
-        VU0_LOAD_VF(vf10, quaternion);
-        effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, axis);
-        VU0_LOAD_VF(vf11, localScale);
-        VU0_MUL(vf10, vf10, vf11);
-        VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        VU0_SCALE_VF(vf10, framingDistance + p->focusPolicy.distance);
-        VU0_LOAD_VF(vf11, focus);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        eye[1] += p->focusPolicy.height;
-        VU0_LOAD_VF(vf10, eye);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.cameraFrom);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.pathEnd);
-        if (p->eyePolicy.kind == 0x2F) localScale[0] = p->eyePolicy.side;
-        else if (destination[0] > actorPoint[0]) localScale[0] = p->eyePolicy.side;
-        else localScale[0] = -p->eyePolicy.side;
-        VU0_LOAD_VF(vf10, quaternion);
-        effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, axis);
-        VU0_LOAD_VF(vf11, localScale);
-        VU0_MUL(vf10, vf10, vf11);
-        VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        VU0_SCALE_VF(vf10, framingDistance + p->eyePolicy.distance);
-        VU0_LOAD_VF(vf11, focus);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, destination);
-        destination[1] += p->eyePolicy.height;
-        VU0_LOAD_VF(vf10, destination);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.cameraTo);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.pathStart);
-        break;
+    } else if (preset->eyePolicy.kind == 2) {
+        unit = action->linkedA;
+    } else {
+        unit = action->linkedB;
+    }
 
-    case 0x2E: /* 001F6D38 */
-        unit = btlGetIndexListEntry(action->targetList, 0);
-        btlUnitGetPosVU(unit, p->focusPolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        btlUnitGetPosVU(action->link->unit, p->eyePolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        VU0_STORE_VF_UNCLOBBERED(vf10, destination);
-        if (fabsf(focus[0] - eye[0]) < 100.0f) {
-            if (eye[0] < focus[0]) worldAxis[0] = p->eyePolicy.side;
-            else worldAxis[0] = -p->eyePolicy.side;
-        }
-        span = btlBuildProjectedActorPairBoundsVU(0x600, unit, action->link->unit,
-                            (s8)p->focusPolicy.mode, (s8)p->eyePolicy.mode,
-                            0, 0, 0, 0);
-        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        VU0_STORE_VF_UNCLOBBERED(vf10, out->position);
-        framingDistance = span / tanf(halfFov);
-        framingDistance += p->eyePolicy.distance;
-        worldAxis[2] = -worldAxis[2];
-        VU0_LOAD_VF(vf10, worldAxis);
-        VU0_SCALE_VF(vf10, framingDistance);
-        VU0_LOAD_VF(vf11, focus);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        /* 001F6E44: NOT eye[1] += height; source is saved actor point. */
-        eye[1] = destination[1] + p->eyePolicy.height;
-        VU0_LOAD_VF(vf10, eye);
-        VU0_LOAD_VF(vf11, focus);
-        VU0_SUB(vf10, vf10, vf11);
-        SDF_VU0_NORMALIZE();
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.direction);
-        /* 001F6E94: the unchanged scale value is consumed again. */
-        VU0_SCALE_VF(vf10, framingDistance);
-        VU0_LOAD_VF(vf11, focus);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        /* Deferred reframing uses both signed mode selectors and this half-angle. */
-        btlCameraCursor.targetFrom[0] = (f32)(s8)p->focusPolicy.mode;
-        btlCameraCursor.targetTo[0] = (f32)(s8)p->eyePolicy.mode;
-        btlCameraCursor.fov = halfFov;
-        break;
+    btlUnitGetPosVU(unit, preset->eyePolicy.mode);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    btlCopyUnitRotationQuaternion(unit, rotation);
+    VU0_LOAD_VF(vf10, rotation);
+    effMiscQuaternionToMatrixVU();
 
-    case 0x30: case 0x35: /* 001F6EE8 */
-        unit = btlGetIndexListEntry(action->targetList, 0);
-        btlUnitGetPosVU(unit, p->focusPolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        if (p->eyePolicy.kind == 0x35) {
-            if (action->link->unit->status.flags & 0x1000) {
-                btlUnitGetPosVU(action->linkedA, p->eyePolicy.mode);
-                VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-                VU0_STORE_VF_UNCLOBBERED(vf10, destination);
-                otherUnit = action->linkedA; /* 001F6F54: reload after call */
-            } else {
-                btlUnitGetPosVU(action->link->unit, p->eyePolicy.mode);
-                VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-                VU0_STORE_VF_UNCLOBBERED(vf10, destination);
-                otherUnit = action->link->unit; /* 001F6F98: fresh reload */
-            }
+    
+    VU0_LOAD_VF(vf10, mask);
+    scalesB0[0] = preset->eyePolicy.side;
+    VU0_LOAD_VF(vf11, scalesB0);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, preset->eyePolicy.distance);
+    VU0_LOAD_VF(vf11, target);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    target[1] += preset->eyePolicy.height;
+    break;
+}
+
+
+case 0x01:
+case 0x12:
+case 0x13:
+case 0x15: {
+
+    if (preset->eyePolicy.kind == 0x15) {
+        unit = btlFindActorLinkByCategory(
+            action, 1);
+    } else if (preset->eyePolicy.kind == 1) {
+        unit = action->link->unit;
+    } else if (preset->eyePolicy.kind == 0x12) {
+        unit = action->linkedA;
+    } else {
+        unit = action->linkedB;
+    }
+
+    btlUnitGetPosVU(unit, preset->eyePolicy.mode);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    btlCopyUnitRotationQuaternion(unit, rotation);
+    VU0_LOAD_VF(vf10, rotation);
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, mask);
+    scalesB0[0] = preset->eyePolicy.side;
+    VU0_LOAD_VF(vf11, scalesB0);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, distance + preset->eyePolicy.distance);
+    VU0_LOAD_VF(vf11, target);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+
+    
+    target[1] += preset->eyePolicy.height;
+    VU0_LOAD_VF(vf10, target);
+    VU0_LOAD_VF(vf11, position);
+    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_GETLENGTH(measuredDistance);
+    SDF_VU0_NORMALIZE();
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+    if (measuredDistance < distance + preset->eyePolicy.distance) {
+        measuredDistance = distance + preset->eyePolicy.distance;
+    }
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, measuredDistance);
+    VU0_LOAD_VF(vf11, position);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    break;
+}
+case 0x2f:
+case 0x32:
+case 0x33: {
+
+    f32 lateral;
+    unit = action->link->unit;
+
+    btlUnitGetPosVU(unit, preset->focusPolicy.mode);
+    VU0_STORE_VF_UNCLOBBERED(vf10, position);
+    VU0_STORE_VF_UNCLOBBERED(vf10, pose->position);
+
+    focusExtent = btlGetUnitCameraClearance(unit, preset->focusPolicy.mode, 1.0f, 1.0f);
+    distance = focusExtent / tanf(halfFov);
+
+    if (preset->eyePolicy.kind == 0x32) {
+        btlMeasureFilteredActorBounds(0x400, unit, NULL, 0, NULL, NULL, NULL, NULL);
+        VU0_STORE_VF_UNCLOBBERED(vf10, scratch30);
+        btlUnitGetPosVU(unit, 0);
+        VU0_STORE_VF_UNCLOBBERED(vf10, scratch60);
+    } else {
+        BtlUnit *targetUnit = (BtlUnit *)btlGetIndexListEntry(
+            action->targetList, 0);
+        btlUnitGetPosVU(targetUnit, 0);
+        VU0_STORE_VF_UNCLOBBERED(vf10, scratch30);
+        btlUnitGetPosVU(action->link->unit, 1);
+        VU0_STORE_VF_UNCLOBBERED(vf10, scratch60);
+    }
+
+    if (scratch30[0] > scratch60[0]) {
+        scalesB0[0] = preset->focusPolicy.side;
+        CURSOR->counter = 0;
+    } else {
+        lateral = preset->focusPolicy.side;
+        CURSOR->counter = 1;
+        scalesB0[0] = -lateral;
+    }
+
+    btlCopyUnitRotationQuaternion(unit, rotation);
+    VU0_LOAD_VF(vf10, rotation);
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, mask);
+    VU0_LOAD_VF(vf11, scalesB0);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+    VU0_SCALE_VF(vf10, distance + preset->focusPolicy.distance);
+    VU0_LOAD_VF(vf11, position);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    target[1] += preset->focusPolicy.height;
+    VU0_LOAD_VF(vf10, target);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->cameraFrom);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->pathEnd);
+
+    if (preset->eyePolicy.kind == 0x2f) {
+        scalesB0[0] = preset->eyePolicy.side;
+    } else if (scratch30[0] > scratch60[0]) {
+        scalesB0[0] = preset->eyePolicy.side;
+    } else {
+        scalesB0[0] = -preset->eyePolicy.side;
+    }
+
+    VU0_LOAD_VF(vf10, rotation);
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, mask);
+    VU0_LOAD_VF(vf11, scalesB0);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+    VU0_SCALE_VF(vf10, distance + preset->eyePolicy.distance);
+    VU0_LOAD_VF(vf11, position);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch30);
+    scratch30[1] += preset->eyePolicy.height;
+    VU0_LOAD_VF(vf10, scratch30);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->cameraTo);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->pathStart);
+    break;
+}
+case 0x2E: {
+    f32 span;
+    unit = btlGetIndexListEntry(action->targetList, 0);
+    btlUnitGetPosVU(unit, preset->focusPolicy.mode);
+    VU0_STORE_VF_UNCLOBBERED(vf10, position);
+    btlUnitGetPosVU(action->link->unit, preset->eyePolicy.mode);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch30);
+    if (fabsf(position[0] - target[0]) < 100.0f) {
+        if (target[0] < position[0]) {
+            scalesC0[0] = preset->eyePolicy.side;
         } else {
-            btlUnitGetPosVU(action->link->unit, p->eyePolicy.mode);
-            VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-            VU0_STORE_VF_UNCLOBBERED(vf10, destination);
+            scalesC0[0] = -preset->eyePolicy.side;
+        }
+    }
+    span = btlBuildProjectedActorPairBoundsVU(0x600, unit, action->link->unit,
+                        (s8)preset->focusPolicy.mode, (s8)preset->eyePolicy.mode,
+                        NULL, NULL, NULL, NULL);
+    VU0_STORE_VF_UNCLOBBERED(vf10, position);
+    VU0_STORE_VF_UNCLOBBERED(vf10, pose->position);
+    distance = span / tanf(halfFov);
+    distance += preset->eyePolicy.distance;
+    scalesC0[2] = -scalesC0[2];
+    VU0_LOAD_VF(vf10, scalesC0);
+    VU0_SCALE_VF(vf10, distance);
+    VU0_LOAD_VF(vf11, position);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    target[1] = scratch30[1] + preset->eyePolicy.height;
+    VU0_LOAD_VF(vf10, target);
+    VU0_LOAD_VF(vf11, position);
+    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_NORMALIZE();
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->direction);
+    VU0_SCALE_VF(vf10, distance);
+    VU0_LOAD_VF(vf11, position);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    CURSOR->targetFrom[0] = (f32)(s8)preset->focusPolicy.mode;
+    CURSOR->targetTo[0] = (f32)(s8)preset->eyePolicy.mode;
+    CURSOR->fov = halfFov;
+    break;
+}
+case 0x30:
+case 0x35: {
+    f32 length;
+    unit = btlGetIndexListEntry(action->targetList, 0);
+
+
+    btlUnitGetPosVU(unit, preset->focusPolicy.mode);
+    VU0_STORE_VF_UNCLOBBERED(vf10, position);
+
+    if (preset->eyePolicy.kind == 0x35) {
+        if (action->link->unit->status.flags & 0x1000) {
+            btlUnitGetPosVU(action->linkedA, preset->eyePolicy.mode);
+            VU0_STORE_VF_UNCLOBBERED(vf10, target);
+            VU0_STORE_VF_UNCLOBBERED(vf10, scratch30);
+            otherUnit = action->linkedA;
+        } else {
+            btlUnitGetPosVU(action->link->unit, preset->eyePolicy.mode);
+            VU0_STORE_VF_UNCLOBBERED(vf10, target);
+            VU0_STORE_VF_UNCLOBBERED(vf10, scratch30);
             otherUnit = action->link->unit;
         }
-        if (focus[0] > eye[0]) worldAxis[0] = p->eyePolicy.side;
-        else worldAxis[0] = -p->eyePolicy.side;
-        span = btlBuildProjectedActorPairBoundsVU(0x600, unit, otherUnit,
-                            (s8)p->focusPolicy.mode, (s8)p->eyePolicy.mode,
-                            0, 0, 0, 0);
-        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        VU0_STORE_VF_UNCLOBBERED(vf10, out->position);
-        framingDistance = span / tanf(halfFov);
-        worldAxis[2] = -worldAxis[2];
-        btlCopyUnitRotationQuaternion(otherUnit, quaternion);
-        VU0_LOAD_VF(vf10, quaternion);
-        VU0_NEGATE_XYZ(vf10);
-        effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, axis);
-        VU0_LOAD_VF(vf11, worldAxis);
-        VU0_MUL(vf10, vf10, vf11);
-        VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.direction);
-        if (unit->status.flags & 0x400) measuredDistance = p->eyePolicy.distance;
-        else if (otherUnit->partyRecord.unitId == 4) measuredDistance = p->eyePolicy.distance + 50.0f;
-        else measuredDistance = p->eyePolicy.distance + 25.0f;
-        VU0_LOAD_VF(vf10, btlCameraCursor.direction);
-        VU0_SCALE_VF(vf10, measuredDistance);
-        VU0_LOAD_VF(vf11, destination);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_LOAD_VF(vf11, focus);
-        VU0_SUB(vf10, vf10, vf11);
-        SDF_VU0_GETLENGTH(length);
-        SDF_VU0_NORMALIZE();
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.direction);
-        VU0_SCALE_VF(vf10, framingDistance);
-        VU0_LOAD_VF(vf11, focus);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.pathStart);
-        VU0_LOAD_VF(vf10, btlCameraCursor.direction);
-        VU0_SCALE_VF(vf10, framingDistance - 150.0f);
-        VU0_LOAD_VF(vf11, focus);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.pathEnd);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        btlCameraCursor.distance = framingDistance - 150.0f;
-        break;
-
-    case 0x31: case 0x34: /* 001F71A0 */
-        unit = btlGetIndexListEntry(action->targetList, 0);
-        mask = 0x400;
-        if (!(unit->status.flags & 0x400)) mask = 0x200;
-        if (p->eyePolicy.kind == 0x34) {
-            if (action->link->unit->status.flags & 0x1000) {
-                unit = action->linkedA;
-            } else {
-                unit = action->link->unit;
-            }
-        } else unit = action->link->unit;
-        btlMeasureFilteredActorBounds(mask, unit, 0, (s8)p->eyePolicy.mode, 0, 0, 0, 0);
-        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        btlUnitGetPosVU(unit, p->eyePolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        if (eye[1] + p->eyePolicy.height <= focus[1])
-            eye[1] = eye[1] + p->eyePolicy.height;
-        if (focus[0] > eye[0]) worldAxis[0] = p->eyePolicy.side;
-        else worldAxis[0] = -p->eyePolicy.side;
-        worldAxis[2] = -worldAxis[2];
-        VU0_LOAD_VF(vf10, worldAxis);
-        VU0_SCALE_VF(vf10, p->eyePolicy.distance);
-        VU0_LOAD_VF(vf11, eye);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        span = btlMeasureFilteredActorBounds(mask, unit, 0, (s8)p->eyePolicy.mode, 0, 0, focus, eye);
-        VU0_STORE_VF_UNCLOBBERED(vf10, out->position);
-        measuredDistance = span / tanf(halfFov);
-        VU0_LOAD_VF(vf10, eye);
-        VU0_LOAD_VF(vf11, out->position);
-        VU0_SUB(vf10, vf10, vf11);
-        SDF_VU0_GETLENGTH(length);
-        SDF_VU0_NORMALIZE();
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        VU0_LOAD_VF(vf10, out->position);
-        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, measuredDistance);
-        VU0_LOAD_VF(vf11, focus);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        break;
-
-    case 0x2A: /* 001F7378 */ {
-        s32 centerMask = 0x200;
-        unit = btlGetIndexListEntry(action->targetList, 0);
-        span = btlMeasureSideFilteredActorBounds(0x200, unit, 0, (s8)p->eyePolicy.mode, 0, 0, 0, 0, 0);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        btlUnitGetPosVU(action->link->unit, p->eyePolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, actorPoint);
-        VU0_LOAD_VF(vf11, eye);
-        VU0_SUB(vf10, vf10, vf11);
-        SDF_VU0_GETLENGTH(measuredDistance);
-        SDF_VU0_NORMALIZE();
-        VU0_SCALE_VF(vf10, measuredDistance * 0.7f);
-        VU0_LOAD_VF(vf11, eye);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, destination);
-        btlMeasureFilteredUnitGroupBounds(centerMask, 0, 0);
-        VU0_STORE_VF_UNCLOBBERED(vf10, actorPoint);
-        if (actorPoint[1] - 165.0f <= focus[1]) {
-            if (focus[1] <= -150.0f) destination[1] -= 165.0f;
-            else destination[1] -= 100.0f;
-        }
-        VU0_LOAD_VF(vf10, destination);
-        VU0_LOAD_VF(vf11, focus);
-        VU0_SUB(vf10, vf10, vf11);
-        SDF_VU0_GETLENGTH(length);
-        SDF_VU0_NORMALIZE();
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        VU0_LOAD_VF(vf10, eye);
-        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        VU0_STORE_VF_UNCLOBBERED(vf10, out->position);
-        measuredDistance = span / tanf(halfFov);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, measuredDistance);
-        VU0_LOAD_VF(vf11, eye);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        /* 001F7544: the second target-list lookup/frame call is real. */
-        unit = btlGetIndexListEntry(action->targetList, 0);
-        span = btlMeasureSideFilteredActorBounds(0x200, unit, 0, (s8)p->eyePolicy.mode, 0, 0, 0, 0, 0);
-        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        VU0_STORE_VF_UNCLOBBERED(vf10, out->position);
-        VU0_LOAD_VF(vf10, eye);
-        VU0_LOAD_VF(vf11, focus);
-        VU0_SUB(vf10, vf10, vf11);
-        SDF_VU0_GETLENGTH(length);
-        SDF_VU0_NORMALIZE();
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        measuredDistance = span / tanf(halfFov);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, measuredDistance);
-        VU0_LOAD_VF(vf11, focus);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        break;
+    } else {
+        btlUnitGetPosVU(action->link->unit, preset->eyePolicy.mode);
+        VU0_STORE_VF_UNCLOBBERED(vf10, target);
+        VU0_STORE_VF_UNCLOBBERED(vf10, scratch30);
+        otherUnit = action->link->unit;
     }
 
-    case 0x40: /* 001F7620: behind the actor, then past the midpoint toward its link */
-        printf("BTLLCSET_ACTTOACTG---------------------------\n");
-        unit = action->link->unit;
-        btlUnitGetPosVU(unit, p->eyePolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, actorPoint);
-        span = btlGetUnitCameraClearance(unit, p->eyePolicy.mode, 1.0f, 1.0f);
-        framingDistance = span / tanf(halfFov);
-        btlCopyUnitRotationQuaternion(unit, quaternion);
-        VU0_LOAD_VF(vf10, quaternion);
-        effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, axis);
-        localScale[0] = p->eyePolicy.side;
-        VU0_LOAD_VF(vf11, localScale);
-        VU0_MUL(vf10, vf10, vf11);
-        VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, p->eyePolicy.distance + framingDistance);
-        VU0_LOAD_VF(vf11, actorPoint);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        eye[1] += p->eyePolicy.height;
-        VU0_LOAD_VF(vf10, eye);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.cameraFrom);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.pathEnd);
-        btlUnitGetPosVU(action->linkedA, p->eyePolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, alternatePoint);
-        VU0_LOAD_VF(vf10, actorPoint);
-        VU0_LOAD_VF(vf11, alternatePoint);
-        VU0_SUB(vf10, vf10, vf11);
-        VU0_SCALE_VF(vf10, 0.5f);
-        VU0_LOAD_VF(vf11, alternatePoint); /* the midpoint's add is missing: the store keeps the scaled difference */
-        VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
-        VU0_LOAD_VF(vf10, alternatePoint);
-        VU0_LOAD_VF(vf11, actorPoint);
-        VU0_SUB(vf10, vf10, vf11);
-        VU0_LOAD_VF(vf11, alternatePoint);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
-        VU0_LOAD_VF(vf10, actorPoint);
-        VU0_LOAD_VF(vf11, alternatePoint);
-        VU0_SUB(vf10, vf10, vf11);
-        SDF_VU0_GETLENGTH(measuredDistance);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, measuredDistance);
-        VU0_LOAD_VF(vf11, terminalPoint);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, alternatePoint);
-        span = btlBuildUnitTargetSphereVU(action->linkedA, action->link->unit,
-                                          p->eyePolicy.mode, p->eyePolicy.mode, NULL, 0.0f);
-        VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
-        measuredDistance = span / tanf(halfFov);
-        VU0_LOAD_VF(vf10, alternatePoint);
-        VU0_LOAD_VF(vf11, actorPoint);
-        VU0_SUB(vf10, vf10, vf11);
-        SDF_VU0_NORMALIZE();
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        terminalPoint[1] = eye[1];
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, p->terminalPolicy.distance + measuredDistance);
-        VU0_LOAD_VF(vf11, eye);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
-        terminalPoint[1] = eye[1] + p->terminalPolicy.height;
-        VU0_LOAD_VF(vf10, terminalPoint);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.cameraTo);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.pathStart);
-        VU0_LOAD_VF(vf10, btlCameraCursor.cameraFrom);
-        VU0_LOAD_VF(vf11, btlCameraCursor.cameraTo);
-        VU0_SUB(vf10, vf10, vf11);
-        SDF_VU0_GETLENGTH(btlCameraCursor.distance);
-        break;
+    if (position[0] > target[0]) {
+        scalesC0[0] = preset->eyePolicy.side;
+    } else {
+        scalesC0[0] = -preset->eyePolicy.side;
+    }
 
-    case 0x42: /* 001F7918: over the first target, the height eased within [-500, -50] */
-        btlUnitGetPosVU(action->link->unit, p->eyePolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        unit = btlGetIndexListEntry(action->targetList, 0);
-        btlUnitGetPosVU(unit, p->eyePolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, actorPoint);
-        span = btlGetUnitCameraClearance(unit, p->eyePolicy.mode, 1.0f, 1.0f);
-        framingDistance = span / tanf(halfFov);
-        btlCopyUnitRotationQuaternion(unit, quaternion);
-        VU0_LOAD_VF(vf10, quaternion);
-        effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, axis);
-        localScale[0] = p->eyePolicy.side;
-        VU0_LOAD_VF(vf11, localScale);
-        VU0_MUL(vf10, vf10, vf11);
-        VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        if (p->eyePolicy.distance + framingDistance <= 700.0f) {
-            eye[0] = actorPoint[0];
-        } else {
-            VU0_LOAD_VF(vf10, direction);
-            VU0_SCALE_VF(vf10, p->eyePolicy.distance + framingDistance);
-            VU0_LOAD_VF(vf11, actorPoint);
-            VU0_ADD(vf10, vf10, vf11);
-            VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        }
-        if (-250.0f <= actorPoint[1]) {
-            eye[1] = (-250.0f - actorPoint[1]) * 250.0f / 250.0f + -250.0f;
-            if (eye[1] <= -500.0f) eye[1] = -500.0f;
-        } else {
-            eye[1] = -250.0f - (actorPoint[1] - -250.0f) * 200.0f / 250.0f;
-            if (-50.0f < eye[1]) eye[1] = -50.0f;
-        }
-        VU0_LOAD_VF(vf10, eye);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.cameraFrom);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.pathEnd);
-        VU0_LOAD_VF(vf10, direction);
-        if (framingDistance * 1.5f + p->eyePolicy.distance < 1200.0f) {
-            VU0_SCALE_VF(vf10, framingDistance * 1.5f + p->eyePolicy.distance);
-        } else {
-            VU0_SCALE_VF(vf10, 1200.0f);
-        }
-        VU0_LOAD_VF(vf11, eye);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, actorPoint);
-        VU0_LOAD_VF(vf10, actorPoint);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.cameraTo);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.pathStart);
-        VU0_LOAD_VF(vf10, btlCameraCursor.cameraFrom);
-        VU0_LOAD_VF(vf11, btlCameraCursor.cameraTo);
-        VU0_SUB(vf10, vf10, vf11);
-        SDF_VU0_GETLENGTH(btlCameraCursor.distance);
-        break;
+    focusExtent = btlBuildProjectedActorPairBoundsVU(0x600, unit, otherUnit,
+                           (s8)preset->focusPolicy.mode,
+                           (s8)preset->eyePolicy.mode,
+                           NULL, NULL, NULL, NULL);
+    VU0_STORE_VF_UNCLOBBERED(vf10, position);
+    VU0_STORE_VF_UNCLOBBERED(vf10, pose->position);
+    distance = focusExtent / tanf(halfFov);
 
-    case 0x43: /* 001F7B68: beside the actor-link pair, framed on the first target */
-        btlUnitGetPosVU(action->link->unit, p->eyePolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, actorPoint);
-        btlUnitGetPosVU(action->linkedA, p->eyePolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, alternatePoint);
-        swapped = actorPoint[0] <= alternatePoint[0];
-        btlMeasureFilteredUnitGroupBounds(0x400, 0, 0);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        btlUnitGetPosVU(btlGetIndexListEntry(action->targetList, 0), p->eyePolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
-        if (!(eye[0] < terminalPoint[0])) swapped ^= 1;
-        VU0_LOAD_VF(vf10, actorPoint);
-        VU0_LOAD_VF(vf11, alternatePoint);
-        VU0_SUB(vf10, vf10, vf11);
-        if (swapped) {
-            VU0_SCALE_VF(vf10, -0.1f);
-            VU0_LOAD_VF(vf11, alternatePoint);
+    scalesC0[2] = -scalesC0[2];
+    btlCopyUnitRotationQuaternion(otherUnit, rotation);
+    VU0_LOAD_VF(vf10, rotation);
+    VU0_NEGATE_XYZ(vf10);
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, mask);
+    VU0_LOAD_VF(vf11, scalesC0);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->direction);
+
+    if (unit->status.flags & 0x400) {
+        measuredDistance = preset->eyePolicy.distance;
+    } else if (otherUnit->partyRecord.unitId == 4) {
+        measuredDistance = preset->eyePolicy.distance + 50.0f;
+    } else {
+        measuredDistance = preset->eyePolicy.distance + 25.0f;
+    }
+    VU0_LOAD_VF(vf10, CURSOR->direction);
+    VU0_SCALE_VF(vf10, measuredDistance);
+    VU0_LOAD_VF(vf11, scratch30);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_LOAD_VF(vf11, position);
+    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_GETLENGTH(length);
+    SDF_VU0_NORMALIZE();
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->direction);
+    VU0_SCALE_VF(vf10, distance);
+    VU0_LOAD_VF(vf11, position);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->pathStart);
+
+    VU0_LOAD_VF(vf10, CURSOR->direction);
+    VU0_SCALE_VF(vf10, distance - 150.0f);
+    VU0_LOAD_VF(vf11, position);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->pathEnd);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    CURSOR->distance = distance - 150.0f;
+    break;
+}
+
+case 0x31:
+case 0x34: {
+    f32 bound;
+    f32 length;
+    unit = btlGetIndexListEntry(action->targetList, 0);
+
+
+    queryFlags = (unit->status.flags & 0x400) ? 0x400 : 0x200;
+
+    if (preset->eyePolicy.kind == 0x34) {
+        if (action->link->unit->status.flags & 0x1000) {
             unit = action->linkedA;
         } else {
-            VU0_SCALE_VF(vf10, 0.1f);
-            VU0_LOAD_VF(vf11, actorPoint);
             unit = action->link->unit;
         }
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        eye[1] = -250.0f - terminalPoint[1] * 200.0f / 500.0f;
-        if (eye[1] <= -250.0f) eye[1] = -250.0f;
-        else if (-50.0f < eye[1]) eye[1] = -50.0f;
-        btlCopyUnitRotationQuaternion(unit, quaternion);
-        VU0_LOAD_VF(vf10, quaternion);
-        effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, axis);
-        localScale[0] = p->eyePolicy.side;
-        VU0_LOAD_VF(vf11, localScale);
-        VU0_MUL(vf10, vf10, vf11);
-        VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, -p->eyePolicy.distance);
-        VU0_LOAD_VF(vf11, eye);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        VU0_LOAD_VF(vf10, eye);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.cameraFrom);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.pathEnd);
-        span = btlBuildUnitTargetSphereVU(action->link->unit, action->linkedA,
-                                          p->eyePolicy.mode, p->eyePolicy.mode, NULL, 0.0f);
-        VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
-        span = btlGetUnitTargetDistance(btlGetIndexListEntry(action->targetList, 0),
-                                        p->eyePolicy.mode, terminalPoint, span);
-        VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
-        framingDistance = span / tanf(halfFov);
-        printf("---------------------------------\n");
-        printf("[distance][%f]\n", framingDistance);
-        printf("[target2] [%f %f %f]\n", terminalPoint[0], terminalPoint[1], terminalPoint[2]);
-        printf("---------------------------------\n");
-        VU0_LOAD_VF(vf10, actorPoint);
-        VU0_LOAD_VF(vf11, alternatePoint);
-        VU0_SUB(vf10, vf10, vf11);
-        if (swapped) {
-            VU0_SCALE_VF(vf10, -0.4f);
-            VU0_LOAD_VF(vf11, actorPoint);
-            VU0_ADD(vf10, vf10, vf11);
-        } else {
-            VU0_SCALE_VF(vf10, 0.4f);
-            VU0_LOAD_VF(vf11, alternatePoint);
-            VU0_ADD(vf10, vf10, vf11);
-        }
-        VU0_STORE_VF_UNCLOBBERED(vf10, actorPoint);
-        actorPoint[1] = terminalPoint[1];
-        VU0_LOAD_VF(vf10, actorPoint);
-        VU0_LOAD_VF(vf11, terminalPoint);
-        VU0_SUB(vf10, vf10, vf11);
-        SDF_VU0_NORMALIZE();
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, p->terminalPolicy.distance + framingDistance);
-        VU0_LOAD_VF(vf11, terminalPoint);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
-        terminalPoint[1] = eye[1];
-        VU0_LOAD_VF(vf10, terminalPoint);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.cameraTo);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.pathStart);
-        VU0_LOAD_VF(vf10, btlCameraCursor.cameraFrom);
-        VU0_LOAD_VF(vf11, btlCameraCursor.cameraTo);
-        VU0_SUB(vf10, vf10, vf11);
-        SDF_VU0_GETLENGTH(btlCameraCursor.distance);
-        break;
+    } else {
+        unit = action->link->unit;
+    }
 
-    case 0x41: /* 001F7F38: past the nearer of the actor-link pair, framed on the first target */
-        VU0_LOAD_VF(vf10, actorPoint);
-        VU0_LOAD_VF(vf11, alternatePoint);
-        VU0_SUB(vf10, vf10, vf11);
-        if (swapped) {
-            VU0_SCALE_VF(vf10, -0.7f);
-            VU0_LOAD_VF(vf11, alternatePoint);
-        } else {
-            VU0_SCALE_VF(vf10, 0.7f);
-            VU0_LOAD_VF(vf11, actorPoint);
-        }
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        unit = btlGetIndexListEntry(action->targetList, 0);
-        btlUnitGetPosVU(unit, p->eyePolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
-        span = btlGetUnitCameraClearance(unit, p->eyePolicy.mode, 1.0f, 1.0f);
-        framingDistance = span / tanf(halfFov); /* overwritten below: only the tanf call remains */
-        span = btlMeasureBattleSideBoundsWithSeed(0x204, 0, 0, 0, 0, terminalPoint, span);
-        VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
-        framingDistance = span / tanf(halfFov);
-        printf("[target2] [%f %f %f]\n", terminalPoint[0], terminalPoint[1], terminalPoint[2]);
-        printf("[distance] [%f]\n", framingDistance);
-        VU0_LOAD_VF(vf10, terminalPoint);
-        VU0_STORE_VF_UNCLOBBERED(vf10, targetPoint);
-        targetPoint[1] = eye[1];
-        VU0_LOAD_VF(vf10, eye);
-        VU0_LOAD_VF(vf11, targetPoint);
-        VU0_SUB(vf10, vf10, vf11);
-        SDF_VU0_NORMALIZE();
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, p->eyePolicy.distance + framingDistance);
-        VU0_LOAD_VF(vf11, terminalPoint);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        btlUnitGetPosVU(btlGetIndexListEntry(action->targetList, 0), p->eyePolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, targetPoint);
-        if (-250.0f <= targetPoint[1]) {
-            eye[1] = (-250.0f - targetPoint[1]) * 250.0f / 250.0f + -250.0f;
-            if (eye[1] <= -500.0f) eye[1] = -500.0f;
-        } else {
-            eye[1] = -250.0f - (targetPoint[1] - -250.0f) * 200.0f / 250.0f;
-            if (-50.0f < eye[1]) eye[1] = -50.0f;
-        }
-        VU0_LOAD_VF(vf10, eye);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.cameraFrom);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.pathEnd);
-        if (swapped) {
-            VU0_LOAD_VF(vf10, alternatePoint);
-        } else {
-            VU0_LOAD_VF(vf10, actorPoint);
-        }
-        VU0_LOAD_VF(vf11, terminalPoint);
-        VU0_SUB(vf10, vf10, vf11);
-        SDF_VU0_NORMALIZE();
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, p->terminalPolicy.distance + framingDistance);
-        VU0_LOAD_VF(vf11, terminalPoint);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
-        terminalPoint[1] = eye[1];
-        VU0_LOAD_VF(vf10, terminalPoint);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.cameraTo);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.pathStart);
-        VU0_LOAD_VF(vf10, btlCameraCursor.cameraFrom);
-        VU0_LOAD_VF(vf11, btlCameraCursor.cameraTo);
-        VU0_SUB(vf10, vf10, vf11);
-        SDF_VU0_GETLENGTH(btlCameraCursor.distance);
-        break;
+    btlMeasureFilteredActorBounds(queryFlags, unit, NULL, (s8)preset->eyePolicy.mode,
+                  NULL, NULL, NULL, NULL);
+    VU0_STORE_VF_UNCLOBBERED(vf10, position);
+    btlUnitGetPosVU(unit, preset->eyePolicy.mode);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
 
-    case 0x21: case 0x22: /* 001F82A0 */
-        worldAxis[0] = p->eyePolicy.side;
-        worldAxis[2] = -worldAxis[2];
-        VU0_LOAD_VF(vf10, worldAxis);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        span = btlMeasureFilteredUnitGroupBounds(0x200, 0, 0);
-        measuredDistance = span / tanf(halfFov);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        VU0_STORE_VF_UNCLOBBERED(vf10, actorPoint);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, p->eyePolicy.distance);
-        VU0_LOAD_VF(vf11, eye);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        eye[1] += p->eyePolicy.height;
-        VU0_LOAD_VF(vf10, eye);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.pathEnd);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.cameraFrom);
-        btlCameraCursor.distance = measuredDistance;
-        worldAxis[2] = 1.0f;
-        worldAxis[0] = 0.0f;
-        VU0_LOAD_VF(vf10, worldAxis);
-        VU0_SCALE_VF(vf10, p->eyePolicy.distance + measuredDistance);
-        VU0_LOAD_VF(vf11, actorPoint);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, actorPoint);
-        value = p->eyePolicy.height;
-        value += value * 0.5f;
-        actorPoint[1] += value;
-        VU0_LOAD_VF(vf10, actorPoint);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.cameraTo);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.pathStart);
-        break;
+    bound = target[1] + preset->eyePolicy.height;
+    if (bound <= position[1]) {
+        target[1] = bound;
+    }
+    if (position[0] > target[0]) {
+        scalesC0[0] = preset->eyePolicy.side;
+    } else {
+        scalesC0[0] = -preset->eyePolicy.side;
+    }
+    scalesC0[2] = -scalesC0[2];
 
-    case 0x17: case 0x19: case 0x29: /* 001F8408 */
-        if (p->eyePolicy.kind != 0x29) {
-            worldAxis[0] = p->eyePolicy.side;
-            if (action->linkedA != NULL && (s32)btlCountUnitsByFlags(0x200) < 3) {
-                if (p->eyePolicy.kind == 0x19) {
-                    sourceId = action->link->unit->lookupId;
-                    if (sourceId == 1 || action->linkedA->lookupId == 1) {
-                        if (sourceId == 0 || action->linkedA->lookupId == 0)
-                            worldAxis[0] *= 0.5f;
+    VU0_LOAD_VF(vf10, scalesC0);
+    VU0_SCALE_VF(vf10, preset->eyePolicy.distance);
+    VU0_LOAD_VF(vf11, target);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+
+    focusExtent = btlMeasureFilteredActorBounds(queryFlags, unit, NULL, (s8)preset->eyePolicy.mode,
+                           NULL, NULL, position, target);
+    VU0_STORE_VF_UNCLOBBERED(vf10, pose->position);
+    measuredDistance = focusExtent / tanf(halfFov);
+
+    VU0_LOAD_VF(vf10, target);
+    VU0_LOAD_VF(vf11, pose->position);
+    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_GETLENGTH(length);
+    SDF_VU0_NORMALIZE();
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+    VU0_LOAD_VF(vf10, pose->position);
+    VU0_STORE_VF_UNCLOBBERED(vf10, position);
+
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, measuredDistance);
+    VU0_LOAD_VF(vf11, position);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    break;
+}
+
+
+case 0x2a: {
+    s32 centerMask = 0x200;
+    f32 gapLength;
+    unit = btlGetIndexListEntry(action->targetList, 0);
+
+    focusExtent = btlMeasureSideFilteredActorBounds(0x200, unit, NULL,
+                                (s8)preset->eyePolicy.mode,
+                                NULL, NULL, NULL, NULL, 0);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+
+    btlUnitGetPosVU(action->link->unit, preset->eyePolicy.mode);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch60);
+    VU0_LOAD_VF(vf11, target);
+    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_GETLENGTH(measuredDistance);
+    SDF_VU0_NORMALIZE();
+    VU0_SCALE_VF(vf10, measuredDistance * 0x1.666666p-1f);
+    VU0_LOAD_VF(vf11, target);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch30);
+
+    (void)btlMeasureFilteredUnitGroupBounds(centerMask, NULL, NULL);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch60);
+    if (scratch60[1] - 165.0f <= position[1]) {
+        if (position[1] <= -150.0f) {
+            scratch30[1] -= 165.0f;
+        } else {
+            scratch30[1] -= 100.0f;
+        }
+    }
+
+    VU0_LOAD_VF(vf10, scratch30);
+    VU0_LOAD_VF(vf11, position);
+    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_GETLENGTH(gapLength);
+    SDF_VU0_NORMALIZE();
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+    VU0_LOAD_VF(vf10, target);
+    VU0_STORE_VF_UNCLOBBERED(vf10, position);
+    VU0_STORE_VF_UNCLOBBERED(vf10, pose->position);
+
+    measuredDistance = focusExtent / tanf(halfFov);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, measuredDistance);
+    VU0_LOAD_VF(vf11, target);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+
+    focusExtent = btlMeasureSideFilteredActorBounds(0x200,
+                                btlGetIndexListEntry(action->targetList, 0),
+                                NULL, (s8)preset->eyePolicy.mode,
+                                NULL, NULL, NULL, NULL, 0);
+    VU0_STORE_VF_UNCLOBBERED(vf10, position);
+    VU0_STORE_VF_UNCLOBBERED(vf10, pose->position);
+    VU0_LOAD_VF(vf10, target);
+    VU0_LOAD_VF(vf11, position);
+    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_GETLENGTH(gapLength);
+    SDF_VU0_NORMALIZE();
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+    measuredDistance = focusExtent / tanf(halfFov);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, measuredDistance);
+    VU0_LOAD_VF(vf11, position);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    break;
+}
+case 0x40: {
+
+    printf("BTLLCSET_ACTTOACTG---------------------------\n");
+    unit = action->link->unit;
+    btlUnitGetPosVU(unit, preset->eyePolicy.mode);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch60);
+    focusExtent = btlGetUnitCameraClearance(unit, preset->eyePolicy.mode, 1.0f, 1.0f);
+    distance = focusExtent / tanf(halfFov);
+    btlCopyUnitRotationQuaternion(unit, rotation);
+    VU0_LOAD_VF(vf10, rotation);
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, mask);
+    scalesB0[0] = preset->eyePolicy.side;
+    VU0_LOAD_VF(vf11, scalesB0);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, preset->eyePolicy.distance + distance);
+    VU0_LOAD_VF(vf11, scratch60);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    target[1] += preset->eyePolicy.height;
+    VU0_LOAD_VF(vf10, target);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->cameraFrom);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->pathEnd);
+    btlUnitGetPosVU(action->linkedA, preset->eyePolicy.mode);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch70);
+    VU0_LOAD_VF(vf10, scratch60);
+    VU0_LOAD_VF(vf11, scratch70);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_SCALE_VF(vf10, 0.5f);
+    VU0_LOAD_VF(vf11, scratch70);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch80);
+    VU0_LOAD_VF(vf10, scratch70);
+    VU0_LOAD_VF(vf11, scratch60);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_LOAD_VF(vf11, scratch70);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch80);
+    VU0_LOAD_VF(vf10, scratch60);
+    VU0_LOAD_VF(vf11, scratch70);
+    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_GETLENGTH(measuredDistance);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, measuredDistance);
+    VU0_LOAD_VF(vf11, scratch80);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch70);
+    focusExtent = btlBuildUnitTargetSphereVU(action->linkedA, action->link->unit,
+                          preset->eyePolicy.mode, preset->eyePolicy.mode, NULL, 0.0f);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch80);
+    measuredDistance = focusExtent / tanf(halfFov);
+    VU0_LOAD_VF(vf10, scratch70);
+    VU0_LOAD_VF(vf11, scratch60);
+    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_NORMALIZE();
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+    scratch80[1] = target[1];
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, preset->terminalPolicy.distance + measuredDistance);
+    VU0_LOAD_VF(vf11, target);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch80);
+    scratch80[1] = target[1] + preset->terminalPolicy.height;
+    VU0_LOAD_VF(vf10, scratch80);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->cameraTo);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->pathStart);
+    VU0_LOAD_VF(vf10, CURSOR->cameraFrom);
+    VU0_LOAD_VF(vf11, CURSOR->cameraTo);
+    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_GETLENGTH(cursorDistance);
+    CURSOR->distance = cursorDistance;
+    break;
+}
+case 0x42: {
+
+    f32 y;
+    f32 endpointScale;
+
+    btlUnitGetPosVU(action->link->unit, preset->eyePolicy.mode);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    unit = btlGetIndexListEntry(action->targetList, 0);
+    btlUnitGetPosVU(unit, preset->eyePolicy.mode);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch60);
+    focusExtent = btlGetUnitCameraClearance(unit, preset->eyePolicy.mode, 1.0f, 1.0f);
+    distance = focusExtent / tanf(halfFov);
+
+    btlCopyUnitRotationQuaternion(unit, rotation);
+    VU0_LOAD_VF(vf10, rotation);
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, mask);
+    scalesB0[0] = preset->eyePolicy.side;
+    VU0_LOAD_VF(vf11, scalesB0);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+
+    if (preset->eyePolicy.distance + distance <= 700.0f) {
+        target[0] = scratch60[0];
+    } else {
+        VU0_LOAD_VF(vf10, offset);
+        VU0_SCALE_VF(vf10, preset->eyePolicy.distance + distance);
+        VU0_LOAD_VF(vf11, scratch60);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    }
+
+    
+    y = scratch60[1];
+    if (y >= -250.0f) {
+        target[1] = -250.0f + ((-250.0f - y) * 250.0f / 250.0f);
+        if (target[1] <= -500.0f) target[1] = -500.0f;
+    } else {
+        target[1] = -250.0f - ((y - -250.0f) * 200.0f / 250.0f);
+        if (-50.0f < target[1]) target[1] = -50.0f;
+    }
+    VU0_LOAD_VF(vf10, target);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->cameraFrom);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->pathEnd);
+
+    VU0_LOAD_VF(vf10, offset);
+    endpointScale = distance * 1.5f + preset->eyePolicy.distance;
+    if (endpointScale < 1200.0f) {
+        VU0_SCALE_VF(vf10, endpointScale);
+    } else {
+        VU0_SCALE_VF(vf10, 1200.0f);
+    }
+    VU0_LOAD_VF(vf11, target);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch60);
+    VU0_LOAD_VF(vf10, scratch60);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->cameraTo);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->pathStart);
+    VU0_LOAD_VF(vf10, CURSOR->cameraFrom);
+    VU0_LOAD_VF(vf11, CURSOR->cameraTo);
+    VU0_SUB(vf10, vf10, vf11);
+    cursorDistance = btlGetCameraVectorLength();
+    CURSOR->distance = cursorDistance;
+    break;
+}
+
+case 0x43: {
+
+    f32 y;
+
+    btlUnitGetPosVU(action->link->unit, preset->eyePolicy.mode);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch60);
+    btlUnitGetPosVU(action->linkedA, preset->eyePolicy.mode);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch70);
+    comparison = scratch60[0] <= scratch70[0];
+    btlMeasureFilteredUnitGroupBounds(0x400, NULL, NULL);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    unit = btlGetIndexListEntry(action->targetList, 0);
+    btlUnitGetPosVU(unit, preset->eyePolicy.mode);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch80);
+    if (!(target[0] < scratch80[0])) {
+        comparison ^= 1;
+    }
+
+    VU0_LOAD_VF(vf10, scratch60);
+    VU0_LOAD_VF(vf11, scratch70);
+    VU0_SUB(vf10, vf10, vf11);
+    if (comparison) {
+        VU0_SCALE_VF(vf10, -0x1.999998p-4f);
+        VU0_LOAD_VF(vf11, scratch70);
+        unit = action->linkedA;
+    } else {
+        VU0_SCALE_VF(vf10, 0x1.999998p-4f);
+        VU0_LOAD_VF(vf11, scratch60);
+        unit = action->link->unit;
+    }
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+
+    y = scratch80[1];
+    target[1] = -250.0f - (y * 200.0f / 500.0f);
+    if (target[1] <= -250.0f) {
+        target[1] = -250.0f;
+    } else if (target[1] > -50.0f) {
+        target[1] = -50.0f;
+    }
+    btlCopyUnitRotationQuaternion(unit,
+                                  rotation);
+    VU0_LOAD_VF(vf10, rotation);
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, mask);
+    scalesB0[0] = preset->eyePolicy.side;
+    VU0_LOAD_VF(vf11, scalesB0);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, -preset->eyePolicy.distance);
+    VU0_LOAD_VF(vf11, target);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    VU0_LOAD_VF(vf10, target);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->cameraFrom);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->pathEnd);
+
+    focusExtent = btlBuildUnitTargetSphereVU(action->link->unit, action->linkedA,
+                           preset->eyePolicy.mode, preset->eyePolicy.mode,
+                           NULL, 0.0f);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch80);
+    unit = btlGetIndexListEntry(action->targetList, 0);
+    focusExtent = btlGetUnitTargetDistance(unit, preset->eyePolicy.mode,
+                                    scratch80, focusExtent);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch80);
+    distance = focusExtent / tanf(halfFov);
+
+    printf("---------------------------------\n");
+    printf("[distance][%f]\n", (f64)distance);
+    printf("[target2] [%f %f %f]\n", (f64)scratch80[0],
+                  (f64)scratch80[1], (f64)scratch80[2]);
+    printf("---------------------------------\n");
+
+    VU0_LOAD_VF(vf10, scratch60);
+    VU0_LOAD_VF(vf11, scratch70);
+    VU0_SUB(vf10, vf10, vf11);
+    if (comparison) {
+        VU0_SCALE_VF(vf10, -0x1.999998p-2f);
+        VU0_LOAD_VF(vf11, scratch60);
+        VU0_ADD(vf10, vf10, vf11);
+    } else {
+        VU0_SCALE_VF(vf10, 0x1.999998p-2f);
+        VU0_LOAD_VF(vf11, scratch70);
+        VU0_ADD(vf10, vf10, vf11);
+    }
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch60);
+    scratch60[1] = scratch80[1];
+    VU0_LOAD_VF(vf10, scratch60);
+    VU0_LOAD_VF(vf11, scratch80);
+    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_NORMALIZE();
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, preset->terminalPolicy.distance + distance);
+    VU0_LOAD_VF(vf11, scratch80);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch80);
+    scratch80[1] = target[1];
+    VU0_LOAD_VF(vf10, scratch80);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->cameraTo);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->pathStart);
+    VU0_LOAD_VF(vf10, CURSOR->cameraFrom);
+    VU0_LOAD_VF(vf11, CURSOR->cameraTo);
+    VU0_SUB(vf10, vf10, vf11);
+    cursorDistance = btlGetCameraVectorLength();
+    CURSOR->distance = cursorDistance;
+    break;
+}
+case 0x41: {
+
+    f32 y;
+    f32 height;
+    VU0_LOAD_VF(vf10, scratch60);
+    VU0_LOAD_VF(vf11, scratch70);
+    VU0_SUB(vf10, vf10, vf11);
+    if (comparison) {
+        VU0_SCALE_VF(vf10, -0x1.666666p-1f);
+        VU0_LOAD_VF(vf11, scratch70);
+    } else {
+        VU0_SCALE_VF(vf10, 0x1.666666p-1f);
+        VU0_LOAD_VF(vf11, scratch60);
+    }
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    unit = btlGetIndexListEntry(action->targetList, 0);
+    btlUnitGetPosVU(unit, preset->eyePolicy.mode);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch80);
+    focusExtent = btlGetUnitCameraClearance(unit, preset->eyePolicy.mode, 1.0f, 1.0f);
+    tanf(halfFov);
+    focusExtent = btlMeasureBattleSideBoundsWithSeed(0x204, NULL, NULL, NULL, NULL, scratch80, focusExtent);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch80);
+    distance = focusExtent / tanf(halfFov);
+    printf("[target2] [%f %f %f]\n", (f64)scratch80[0],
+                   (f64)scratch80[1], (f64)scratch80[2]);
+    printf("[distance] [%f]\n", (f64)distance);
+    VU0_LOAD_VF(vf10, scratch80);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch90);
+    scratch90[1] = target[1];
+    VU0_LOAD_VF(vf10, target);
+    VU0_LOAD_VF(vf11, scratch90);
+    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_NORMALIZE();
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, preset->eyePolicy.distance + distance);
+    VU0_LOAD_VF(vf11, scratch80);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    unit = btlGetIndexListEntry(action->targetList, 0);
+    btlUnitGetPosVU(unit, preset->eyePolicy.mode);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch90);
+    y = scratch90[1];
+    if (-250.0f <= y) {
+        height = ((-250.0f - y) * 250.0f) / 250.0f + -250.0f;
+        target[1] = height;
+        if (height <= -500.0f) target[1] = -500.0f;
+    } else {
+        height = -250.0f - ((y - -250.0f) * 200.0f) / 250.0f;
+        target[1] = height;
+        if (-50.0f < height) target[1] = -50.0f;
+    }
+    VU0_LOAD_VF(vf10, target);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->cameraFrom);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->pathEnd);
+    if (comparison) {
+        VU0_LOAD_VF(vf10, scratch70);
+    } else {
+        VU0_LOAD_VF(vf10, scratch60);
+    }
+    VU0_LOAD_VF(vf11, scratch80);
+    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_NORMALIZE();
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, preset->terminalPolicy.distance + distance);
+    VU0_LOAD_VF(vf11, scratch80);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch80);
+    scratch80[1] = target[1];
+    VU0_LOAD_VF(vf10, scratch80);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->cameraTo);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->pathStart);
+    VU0_LOAD_VF(vf10, CURSOR->cameraFrom);
+    VU0_LOAD_VF(vf11, CURSOR->cameraTo);
+    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_GETLENGTH(cursorDistance);
+    CURSOR->distance = cursorDistance;
+    break;
+}
+default: break;
+case 0x21:
+case 0x22: {
+
+    scalesC0[0] = preset->eyePolicy.side;
+    scalesC0[2] = -scalesC0[2];
+    VU0_LOAD_VF(vf10, scalesC0);
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+    focusExtent = btlMeasureFilteredUnitGroupBounds(0x200, NULL, NULL);
+    measuredDistance = focusExtent / tanf(halfFov);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch60);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, preset->eyePolicy.distance);
+    VU0_LOAD_VF(vf11, target);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    target[1] += preset->eyePolicy.height;
+    VU0_LOAD_VF(vf10, target);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->pathEnd);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->cameraFrom);
+    scalesC0[0] = 0.0f;
+    CURSOR->distance = measuredDistance;
+    scalesC0[2] = 1.0f;
+    VU0_LOAD_VF(vf10, scalesC0);
+    SDF_VU0_NORMALIZE();
+    VU0_SCALE_VF(vf10, preset->eyePolicy.distance + measuredDistance);
+    VU0_LOAD_VF(vf11, scratch60);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch60);
+    scratch60[1] += preset->eyePolicy.height + preset->eyePolicy.height * 0.5f;
+    VU0_LOAD_VF(vf10, scratch60);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->cameraTo);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->pathStart);
+    break;
+}
+
+
+case 0x17:
+case 0x19:
+case 0x29: {
+    s32 sourceId;
+    f32 ignoredLength;
+
+    if (preset->eyePolicy.kind != 0x29) {
+        scalesC0[0] = preset->eyePolicy.side;
+        if (action->linkedA != NULL && btlCountUnitsByFlags(0x200) < 3) {
+            if (preset->eyePolicy.kind == 0x19) {
+                sourceId = action->link->unit->lookupId;
+                if (sourceId == 1 || action->linkedA->lookupId == 1) {
+                    if (sourceId == 0 || action->linkedA->lookupId == 0) {
+                        scalesC0[0] *= 0.5f;
                     }
-                } else {
-                    sourceId = action->link->unit->lookupId;
-                    if (sourceId == 1 || action->linkedA->lookupId == 1) {
-                        if (sourceId == 2 || action->linkedA->lookupId == 2)
-                            worldAxis[0] *= 0.5f;
+                }
+            } else {
+                sourceId = action->link->unit->lookupId;
+                if (sourceId == 1 || action->linkedA->lookupId == 1) {
+                    if (sourceId == 2 || action->linkedA->lookupId == 2) {
+                        scalesC0[0] *= 0.5f;
                     }
                 }
             }
-            VU0_LOAD_VF(vf10, worldAxis);
-            VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-            span = btlMeasureFilteredUnitGroupBounds(0x200, 0, 0);
-            measuredDistance = span / tanf(halfFov);
-            VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-            if (action->linkedA != NULL && (s32)btlCountUnitsByFlags(0x200) < 3) {
-                if (action->link->unit->lookupId == 1 || action->linkedA->lookupId == 1)
-                    measuredDistance *= 1.3f;
+        }
+
+        VU0_LOAD_VF(vf10, scalesC0);
+        VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+        focusExtent = btlMeasureFilteredUnitGroupBounds(0x200, NULL, NULL);
+        measuredDistance = focusExtent / tanf(halfFov);
+        VU0_STORE_VF_UNCLOBBERED(vf10, target);
+        if (action->linkedA != NULL && btlCountUnitsByFlags(0x200) < 3) {
+            if (action->link->unit->lookupId == 1 || action->linkedA->lookupId == 1) {
+                measuredDistance *= 0x1.4cccccp+0f;
             }
-        } else { /* 001F8540 */
-            if (action->link->unit->status.flags & 0x1000) {
-                if (action->link->unit->lookupId < action->linkedA->lookupId)
-                    worldAxis[0] = -p->eyePolicy.side;
-                else worldAxis[0] = p->eyePolicy.side;
+        }
+    } else {
+        if ((action->link->unit->status.flags & 0x1000) != 0) {
+            if (action->link->unit->lookupId < action->linkedA->lookupId) {
+                scalesC0[0] = -preset->eyePolicy.side;
             } else {
-                if (action->linkedA->lookupId < action->link->unit->lookupId)
-                    worldAxis[0] = -p->eyePolicy.side;
-                else worldAxis[0] = p->eyePolicy.side;
+                scalesC0[0] = preset->eyePolicy.side;
             }
-            if (action->link->unit->lookupId == 1 || action->linkedA->lookupId == 1)
-                worldAxis[0] *= 0.6f;
-            VU0_LOAD_VF(vf10, worldAxis);
-            VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-            span = btlBuildProjectedActorPairBoundsVU(0x200, action->link->unit, action->linkedA,
-                                (s8)p->eyePolicy.mode, (s8)p->eyePolicy.mode, 0, 0, 0, 0);
-            measuredDistance = span / tanf(halfFov);
-            VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-            /* 001F860C: fresh link/unit/linkedA reads after both calls */
-            if (action->link->unit->lookupId == 1 || action->linkedA->lookupId == 1)
-                measuredDistance *= 1.3f;
-        }
-        /* 001F8638 */
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, p->eyePolicy.distance);
-        VU0_LOAD_VF(vf11, eye);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        eye[1] += p->eyePolicy.height;
-        VU0_LOAD_VF(vf10, eye);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.pathEnd);
-        VU0_LOAD_VF(vf11, btlCameraCursor.targetTo);
-        VU0_SUB(vf10, vf10, vf11);
-        SDF_VU0_GETLENGTH(length);
-        SDF_VU0_NORMALIZE();
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        VU0_SCALE_VF(vf10, measuredDistance);
-        VU0_LOAD_VF(vf11, btlCameraCursor.targetTo);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.pathStart);
-        btlCameraCursor.distance = measuredDistance;
-        break;
-
-    case 0x24: /* 001F8710 */
-        VU0_LOAD_VF(vf10, out->direction);
-        VU0_NEGATE_XYZ(vf10);
-        VU0_SCALE_VF(vf10, out->distance);
-        VU0_LOAD_VF(vf11, out->position);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        btlCameraCursor.targetTo[1] += p->eyePolicy.height;
-        break;
-
-    case 0x1C: /* 001F8758 */
-        VU0_LOAD_VF(vf10, out->direction);
-        VU0_NEGATE_XYZ(vf10);
-        VU0_SCALE_VF(vf10, out->distance);
-        VU0_LOAD_VF(vf11, out->position);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.pathEnd);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.pathStart);
-        break;
-
-    case 0x1E: /* 001F87A8 */
-        VU0_LOAD_VF(vf10, out->direction);
-        VU0_NEGATE_XYZ(vf10);
-        VU0_SCALE_VF(vf10, out->distance);
-        VU0_LOAD_VF(vf11, out->position);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.pathEnd);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.cameraFrom);
-        VU0_LOAD_VF(vf10, btlCameraCursor.cameraFrom);
-        VU0_LOAD_VF(vf11, terminalPoint);
-        VU0_SUB(vf10, vf10, vf11);
-        SDF_VU0_GETLENGTH(measuredDistance);
-        SDF_VU0_NORMALIZE();
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        direction[0] = 0.0f;
-        measuredDistance *= 1.5f;
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, measuredDistance);
-        VU0_LOAD_VF(vf11, btlCameraCursor.cameraFrom);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.cameraTo);
-        if (framingDistance < out->distance) framingDistance = 100.0f;
-        framingDistance *= 0.1f;
-        VU0_LOAD_VF(vf10, out->direction);
-        VU0_NEGATE_XYZ(vf10);
-        VU0_SCALE_VF(vf10, framingDistance);
-        VU0_LOAD_VF(vf11, eye);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.pathStart);
-        btlCameraCursor.distance = framingDistance;
-        break;
-
-    case 4: /* 001F88E8 */
-        worldAxis[0] = p->eyePolicy.side;
-        VU0_LOAD_VF(vf10, worldAxis);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        worldAxis[0] = 0.0f;
-        VU0_MOVE_VF(vf10, vf0);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, p->eyePolicy.distance);
-        VU0_LOAD_VF(vf11, eye);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        eye[1] += p->eyePolicy.height;
-        break;
-
-    case 7: case 8: /* 001F8940 */
-        worldAxis[0] = p->eyePolicy.side;
-        VU0_LOAD_VF(vf10, worldAxis);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        if (action->link->unit->status.flags & 0x200) {
-            if (p->eyePolicy.kind == 8) mask = 0x400;
-            else mask = 0x200;
         } else {
-            if (p->eyePolicy.kind == 8) mask = 0x200;
-            else mask = 0x400;
+            if (action->linkedA->lookupId < action->link->unit->lookupId) {
+                scalesC0[0] = -preset->eyePolicy.side;
+            } else {
+                scalesC0[0] = preset->eyePolicy.side;
+            }
         }
-        btlMeasureFilteredUnitGroupBounds(mask, 0, 0);
-        tanf(halfFov); /* scalar ignored, call exists, vf10 preserved */
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, p->eyePolicy.distance);
-        VU0_LOAD_VF(vf11, eye);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        eye[1] += p->eyePolicy.height;
-        out->fov = 40.0f * 0.017453293f; /* 001F92FC */
-        break;
-
-    case 0xB: case 0xC: /* 001F89E0 */
-        if (btlNextScaledRandom(2) == 0) {
-            btlUnitGetPosVU(btlFindActorLinkByCategory(action, 0), 0);
-            VU0_STORE_VF_UNCLOBBERED(vf10, actorPoint);
-            btlUnitGetPosVU(btlFindActorLinkByCategory(action, 1), 0);
-            VU0_STORE_VF_UNCLOBBERED(vf10, alternatePoint);
-        } else {
-            btlUnitGetPosVU(btlFindActorLinkByCategory(action, 1), 0);
-            VU0_STORE_VF_UNCLOBBERED(vf10, actorPoint);
-            btlUnitGetPosVU(btlFindActorLinkByCategory(action, 2), 0);
-            VU0_STORE_VF_UNCLOBBERED(vf10, alternatePoint);
+        if (action->link->unit->lookupId == 1 || action->linkedA->lookupId == 1) {
+            scalesC0[0] *= 0x1.333332p-1f;
         }
-        VU0_LOAD_VF(vf10, actorPoint);
-        VU0_LOAD_VF(vf11, alternatePoint);
-        VU0_SUB(vf10, vf10, vf11);
-        SDF_VU0_GETLENGTH(measuredDistance);
-        measuredDistance *= 0.5f;
-        SDF_VU0_NORMALIZE();
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, measuredDistance);
-        VU0_LOAD_VF(vf11, alternatePoint);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        eye[1] += p->eyePolicy.height;
-        VU0_LOAD_VF(vf10, focus);
-        VU0_LOAD_VF(vf11, eye);
-        VU0_SUB(vf10, vf10, vf11);
-        SDF_VU0_GETLENGTH(length);
-        SDF_VU0_NORMALIZE();
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        framingDistance += p->eyePolicy.distance;
-        if (framingDistance <= 650.0f) framingDistance = 650.0f;
-        VU0_LOAD_VF(vf10, direction);
-        VU0_NEGATE_XYZ(vf10);
-        VU0_SCALE_VF(vf10, framingDistance);
-        VU0_LOAD_VF(vf11, focus);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        break;
-
-    case 9: case 0xA: /* 001F8BA0 */ {
-        s32 eyeKind;
-        worldAxis[0] = p->eyePolicy.side;
-        VU0_LOAD_VF(vf10, worldAxis);
-        eyeKind = p->eyePolicy.kind;
-        if (eyeKind == 9) {
-            VU0_NEGATE_XYZ(vf10);
+        VU0_LOAD_VF(vf10, scalesC0);
+        VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+        focusExtent = btlBuildProjectedActorPairBoundsVU(0x200, action->link->unit, action->linkedA,
+                                  (s8)preset->eyePolicy.mode,
+                                  (s8)preset->eyePolicy.mode,
+                                  NULL, NULL, NULL, NULL);
+        measuredDistance = focusExtent / tanf(halfFov);
+        VU0_STORE_VF_UNCLOBBERED(vf10, target);
+        if (action->link->unit->lookupId == 1 || action->linkedA->lookupId == 1) {
+            measuredDistance *= 0x1.4cccccp+0f;
         }
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        if (action->link->unit->status.flags & 0x200) {
-            if (eyeKind == 0xA) mask = 0x400;
-            else mask = 0x200;
-        } else {
-            if (eyeKind == 0xA) mask = 0x200;
-            else mask = 0x400;
-        }
-        unit = btlGetIndexListEntry(action->targetList, 0);
-        span = btlMeasureFilteredActorBounds(mask, unit, 0, (s8)p->eyePolicy.mode, 0, 0, 0, 0);
-        measuredDistance = span / tanf(halfFov);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        VU0_LOAD_VF(vf10, eye);
-        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        VU0_STORE_VF_UNCLOBBERED(vf10, out->position);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, measuredDistance);
-        VU0_LOAD_VF(vf11, focus);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        eye[1] += p->eyePolicy.height;
-        break;
     }
 
-    case 0x2D: /* 001F8CA0 */ {
-        f32 actorExtent;
-        unit = action->targetList->entries[0];
-        btlUnitGetPosVU(unit, p->eyePolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        actorExtent = btlGetUnitCameraClearance(unit, p->eyePolicy.mode, 1.0f, 1.0f);
-        framingDistance = actorExtent / tanf(halfFov);
-        VU0_LOAD_VF(vf10, out->position);
-        VU0_STORE_VF_UNCLOBBERED(vf10, destination);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.targetFrom);
-        if (actorExtent >= 200.0f) {
-            destination[0] -= actorExtent * 0.5f;
-            measuredDistance = 150.0f;
-        } else if (actorExtent >= 50.0f) {
-            destination[0] -= actorExtent * 0.75f;
-            measuredDistance = 140.0f;
-        } else {
-            measuredDistance = (50.0f - actorExtent) * 0.1f;
-            if (1.8f <= measuredDistance) measuredDistance = 1.8f;
-            if (measuredDistance <= 1.25f) measuredDistance = 1.25f;
-            destination[0] -= actorExtent * measuredDistance;
-            measuredDistance = 125.0f;
-        }
-        VU0_LOAD_VF(vf10, destination);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.targetTo);
-        btlCopyUnitRotationQuaternion(unit, quaternion);
-        VU0_LOAD_VF(vf10, quaternion);
-        effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, axis);
-        localScale[0] = p->eyePolicy.side;
-        VU0_LOAD_VF(vf11, localScale);
-        VU0_MUL(vf10, vf10, vf11);
-        VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, p->eyePolicy.distance);
-        VU0_LOAD_VF(vf11, eye);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        eye[1] += p->eyePolicy.height;
-        VU0_LOAD_VF(vf11, focus);
-        VU0_LOAD_VF(vf10, eye);
-        VU0_SUB(vf10, vf10, vf11);
-        SDF_VU0_GETLENGTH(length);
-        SDF_VU0_NORMALIZE();
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, (framingDistance + measuredDistance) + 270.0f);
-        VU0_LOAD_VF(vf11, focus);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.pathEnd);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, framingDistance + measuredDistance);
-        VU0_LOAD_VF(vf11, focus);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.pathStart);
-        btlCameraCursor.distance = (framingDistance + measuredDistance) + 270.0f;
-        VU0_LOAD_VF(vf10, out->position);
-        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        break;
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, preset->eyePolicy.distance);
+    VU0_LOAD_VF(vf11, target);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    target[1] += preset->eyePolicy.height;
+    VU0_LOAD_VF(vf10, target);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->pathEnd);
+    VU0_LOAD_VF(vf11, CURSOR->targetTo);
+    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_GETLENGTH(ignoredLength);
+    SDF_VU0_NORMALIZE();
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+    VU0_SCALE_VF(vf10, measuredDistance);
+    VU0_LOAD_VF(vf11, CURSOR->targetTo);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->pathStart);
+    CURSOR->distance = measuredDistance;
+    break;
+}
+
+
+case 0x24:
+    VU0_LOAD_VF(vf10, pose->direction);
+    VU0_NEGATE_XYZ(vf10);
+    VU0_SCALE_VF(vf10, pose->distance);
+    VU0_LOAD_VF(vf11, pose->position);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    CURSOR->targetTo[1] += preset->eyePolicy.height;
+    break;
+
+
+case 0x1c: {
+    
+    VU0_LOAD_VF(vf10, pose->direction);
+    VU0_NEGATE_XYZ(vf10);
+    VU0_SCALE_VF(vf10, pose->distance);
+    VU0_LOAD_VF(vf11, pose->position);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->pathEnd);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->pathStart);
+    break;
+}
+case 0x1e: {
+
+    VU0_LOAD_VF(vf10, pose->direction);
+    VU0_NEGATE_XYZ(vf10);
+    VU0_SCALE_VF(vf10, pose->distance);
+    VU0_LOAD_VF(vf11, pose->position);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->pathEnd);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->cameraFrom);
+
+    VU0_LOAD_VF(vf10, CURSOR->cameraFrom);
+    VU0_LOAD_VF(vf11, scratch80);
+    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_GETLENGTH(measuredDistance);
+    SDF_VU0_NORMALIZE();
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+    offset[0] = 0.0f;
+
+    measuredDistance = measuredDistance * 1.5f;
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, measuredDistance);
+    VU0_LOAD_VF(vf11, CURSOR->cameraFrom);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->cameraTo);
+
+    if (distance < pose->distance) {
+        distance = 100.0f;
+    }
+    distance *= 0x1.999998p-4f;
+    VU0_LOAD_VF(vf10, pose->direction);
+    VU0_NEGATE_XYZ(vf10);
+    VU0_SCALE_VF(vf10, distance);
+    VU0_LOAD_VF(vf11, target);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->pathStart);
+    CURSOR->distance = distance;
+    break;
+}
+
+
+case 0x04: {
+    scalesC0[0] = preset->eyePolicy.side;
+    VU0_LOAD_VF(vf10, scalesC0);
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+    scalesC0[0] = 0.0f;
+    VU0_MOVE_VF(vf10, vf0);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, preset->eyePolicy.distance);
+    VU0_LOAD_VF(vf11, target);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    target[1] += preset->eyePolicy.height;
+    break;
+}
+
+
+case 0x07:
+case 0x08: {
+
+    scalesC0[0] = preset->eyePolicy.side;
+    VU0_LOAD_VF(vf10, scalesC0);
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+
+    if ((action->link->unit->status.flags & 0x200) != 0) {
+        queryFlags = (preset->eyePolicy.kind == 8) ? 0x400 : 0x200;
+    } else {
+        queryFlags = (preset->eyePolicy.kind == 8) ? 0x200 : 0x400;
     }
 
-    case 0x1F: /* 001F8F48 */
-        unit = action->link->unit;
-        if (action->link->indexWork.skillId == 0x1D6) localScale[2] = 0.0f;
-        btlUnitGetPosVU(unit, p->eyePolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        btlCopyUnitRotationQuaternion(unit, quaternion);
-        VU0_LOAD_VF(vf10, quaternion);
-        effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, axis);
-        localScale[0] = p->eyePolicy.side;
-        VU0_LOAD_VF(vf11, localScale);
-        VU0_MUL(vf10, vf10, vf11);
-        VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, p->eyePolicy.distance);
-        VU0_LOAD_VF(vf11, eye);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        eye[1] = p->eyePolicy.height; /* absolute assignment, 001F8FF0 */
-        otherUnit = btlGetIndexListEntry(action->targetList, 0);
-        span = btlBuildProjectedActorPairBoundsVU(0x600, action->link->unit, otherUnit,
-                            (s8)p->eyePolicy.mode, (s8)p->eyePolicy.mode, 0, 0, 0, 0);
-        VU0_STORE_VF_UNCLOBBERED(vf10, destination);
-        measuredDistance = span / tanf(halfFov);
-        if (measuredDistance < 350.0f) measuredDistance = 350.0f;
-        VU0_LOAD_VF(vf10, destination);
-        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        VU0_STORE_VF_UNCLOBBERED(vf10, out->position);
-        VU0_LOAD_VF(vf10, eye);
-        VU0_LOAD_VF(vf11, focus);
-        VU0_SUB(vf10, vf10, vf11);
-        SDF_VU0_GETLENGTH(length);
-        SDF_VU0_NORMALIZE();
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, measuredDistance);
-        VU0_LOAD_VF(vf11, focus);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        break;
+    btlMeasureFilteredUnitGroupBounds(queryFlags, NULL, NULL);
+    tanf(halfFov);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, preset->eyePolicy.distance);
+    VU0_LOAD_VF(vf11, target);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    target[1] += preset->eyePolicy.height;
+    pose->fov = 0x1.657184p-1f;
+    break;
+}
 
-    case 0x10: case 0x11: /* 001F90F0 */
-        worldAxis[0] = p->eyePolicy.side;
-        VU0_LOAD_VF(vf10, worldAxis);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        if (action->link->unit->status.flags & 0x200) {
-            if (p->eyePolicy.kind == 0x11) mask = 0x400;
-            else mask = 0x200;
-        } else {
-            if (p->eyePolicy.kind == 0x10) mask = 0x200;
-            else mask = 0x400;
-        }
-        span = btlMeasureFilteredUnitGroupBounds(mask, 0, 0);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        measuredDistance = span / tanf(halfFov);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, p->eyePolicy.distance);
-        VU0_LOAD_VF(vf11, eye);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        eye[1] += p->eyePolicy.height;
-        VU0_LOAD_VF(vf10, eye);
-        VU0_LOAD_VF(vf11, focus);
-        VU0_SUB(vf10, vf10, vf11);
-        SDF_VU0_GETLENGTH(length);
-        SDF_VU0_NORMALIZE();
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        if (framingDistance < measuredDistance * 0.5f)
-            framingDistance = measuredDistance; /* entire measuredDistance, not half */
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, framingDistance);
-        VU0_LOAD_VF(vf11, focus);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        break;
+case 0x0b:
+case 0x0c: {
+    BtlUnit *unitA;
+    BtlUnit *unitB;
+    f32 targetLength;
 
-    case 0xD: case 0xE: /* 001F9248 */
-        worldAxis[0] = p->eyePolicy.side;
-        VU0_LOAD_VF(vf10, worldAxis);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        if (action->link->unit->status.flags & 0x200) {
-            if (p->eyePolicy.kind == 0xE) mask = 0x400;
-            else mask = 0x200;
-        } else {
-            if (p->eyePolicy.kind == 0xE) mask = 0x200;
-            else mask = 0x400;
-        }
-        span = btlMeasureFilteredUnitGroupBounds(mask, 0, 0);
-        measuredDistance = span / tanf(halfFov);
-        measuredDistance += p->eyePolicy.distance;
-        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        VU0_STORE_VF_UNCLOBBERED(vf10, out->position);
-        VU0_LOAD_VF(vf10, direction);
+    if (btlNextScaledRandom(2) == 0) {
+        unitA = btlFindActorLinkByCategory(
+            action, 0);
+        btlUnitGetPosVU(unitA, 0);
+        VU0_STORE_VF_UNCLOBBERED(vf10, scratch60);
+        unitB = btlFindActorLinkByCategory(
+            action, 1);
+        btlUnitGetPosVU(unitB, 0);
+        VU0_STORE_VF_UNCLOBBERED(vf10, scratch70);
+    } else {
+        unitA = btlFindActorLinkByCategory(
+            action, 1);
+        btlUnitGetPosVU(unitA, 0);
+        VU0_STORE_VF_UNCLOBBERED(vf10, scratch60);
+        unitB = btlFindActorLinkByCategory(
+            action, 2);
+        btlUnitGetPosVU(unitB, 0);
+        VU0_STORE_VF_UNCLOBBERED(vf10, scratch70);
+    }
+
+    VU0_LOAD_VF(vf10, scratch60);
+    VU0_LOAD_VF(vf11, scratch70);
+    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_GETLENGTH(measuredDistance);
+    measuredDistance *= 0.5f;
+    SDF_VU0_NORMALIZE();
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, measuredDistance);
+    VU0_LOAD_VF(vf11, scratch70);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    target[1] += preset->eyePolicy.height;
+
+    VU0_LOAD_VF(vf10, position);
+    VU0_LOAD_VF(vf11, target);
+    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_GETLENGTH(targetLength);
+    SDF_VU0_NORMALIZE();
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+
+    distance += preset->eyePolicy.distance;
+    if (distance <= 650.0f) {
+        distance = 650.0f;
+    }
+    VU0_LOAD_VF(vf10, offset);
+    VU0_NEGATE_XYZ(vf10);
+    VU0_SCALE_VF(vf10, distance);
+    VU0_LOAD_VF(vf11, position);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    break;
+}
+
+
+case 9:
+case 0x0a: {
+    u8 route;
+
+
+    scalesC0[0] = preset->eyePolicy.side;
+    VU0_LOAD_VF(vf10, scalesC0);
+    route = preset->eyePolicy.kind;
+    if (route == 9) {
         VU0_NEGATE_XYZ(vf10);
-        VU0_SCALE_VF(vf10, measuredDistance);
-        VU0_LOAD_VF(vf11, focus);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        eye[1] += p->eyePolicy.height;
-        out->fov = 40.0f * 0.017453293f;
-        break;
+    }
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
 
-    case 0x20: case 0x2B: /* 001F9318 */
-        worldAxis[0] = p->eyePolicy.side;
-        VU0_LOAD_VF(vf10, worldAxis);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        VU0_LOAD_VF(vf10, focus);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, p->eyePolicy.distance);
-        VU0_LOAD_VF(vf11, eye);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        eye[1] += p->eyePolicy.height;
-        VU0_LOAD_VF(vf10, eye);
-        VU0_LOAD_VF(vf11, focus);
-        VU0_SUB(vf10, vf10, vf11);
-        SDF_VU0_GETLENGTH(length);
-        SDF_VU0_NORMALIZE();
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        VU0_LOAD_VF(vf10, p->boundsSeed);
-        VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
-        if (p->eyePolicy.kind == 0x20) {
-            btlMeasureFilteredUnitGroupBounds(0x400, 0, 0);
-            VU0_STORE_VF_UNCLOBBERED(vf10, destination);
-            terminalPoint[0] = destination[0];
+    if (action->link->unit->status.flags & 0x200) {
+        queryFlags = (route == 0x0a) ? 0x400 : 0x200;
+    } else {
+        queryFlags = (route == 0x0a) ? 0x200 : 0x400;
+    }
+    unit = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
+    focusExtent = btlMeasureFilteredActorBounds(queryFlags, unit, NULL,
+                           (s8)preset->eyePolicy.mode,
+                           NULL, NULL, NULL, NULL);
+    measuredDistance = focusExtent / tanf(halfFov);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    VU0_LOAD_VF(vf10, target);
+    VU0_STORE_VF_UNCLOBBERED(vf10, position);
+    VU0_STORE_VF_UNCLOBBERED(vf10, pose->position);
+
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, measuredDistance);
+    VU0_LOAD_VF(vf11, position);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    target[1] += preset->eyePolicy.height;
+    break;
+}
+case 0x2d: {
+    f32 range;
+    f32 targetLength;
+    unit = action->targetList->entries[0];
+
+    btlUnitGetPosVU(unit, preset->eyePolicy.mode);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    range = btlGetUnitCameraClearance(unit, preset->eyePolicy.mode, 1.0f, 1.0f);
+    distance = range / tanf(halfFov);
+
+    VU0_LOAD_VF(vf10, pose->position);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch30);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->targetFrom);
+
+    if (range >= 200.0f) {
+        scratch30[0] -= range * 0.5f;
+        measuredDistance = 150.0f;
+    } else if (range >= 50.0f) {
+        scratch30[0] -= range * 0.75f;
+        measuredDistance = 140.0f;
+    } else {
+        measuredDistance = (50.0f - range) * 0x1.999998p-4f;
+        if (1.8f <= measuredDistance) {
+            measuredDistance = 1.8f;
         }
-        span = btlMeasureBattleSideBoundsWithSeed(0x400, 0, 0, focus, eye, terminalPoint, p->boundsRadius);
-        measuredDistance = span / tanf(halfFov);
-        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        VU0_STORE_VF_UNCLOBBERED(vf10, out->position);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, measuredDistance);
-        VU0_LOAD_VF(vf11, focus);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        break;
+        if (measuredDistance <= 1.25f) {
+            measuredDistance = 1.25f;
+        }
+        scratch30[0] -= range * measuredDistance;
+        measuredDistance = 125.0f;
+    }
+    VU0_LOAD_VF(vf10, scratch30);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->targetTo);
 
-    case 0xF: /* 001F9478 */ {
-        s32 boundsMask;
-        worldAxis[0] = p->eyePolicy.side;
-        VU0_LOAD_VF(vf10, worldAxis);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        btlMeasureFilteredUnitGroupBounds(0x400, 0, 0);
-        VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
-        VU0_LOAD_VF(vf10, angles);
-        VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint); /* the first store is intentionally overwritten */
-        boundsMask = 0x600;
-        btlMeasureBattleSideBoundsWithSeed(boundsMask, 0, 0, 0, 0, terminalPoint, 600.0f);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        tanf(halfFov); /* native ignored scalar */
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, p->eyePolicy.distance);
-        VU0_LOAD_VF(vf11, eye);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        eye[1] += p->eyePolicy.height;
-        span = btlMeasureBattleSideBoundsWithSeed(boundsMask, 0, 0, focus, eye, terminalPoint, 600.0f);
-        VU0_STORE_VF_UNCLOBBERED(vf10, focus);
-        VU0_STORE_VF_UNCLOBBERED(vf10, out->position);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, p->eyePolicy.distance);
-        VU0_LOAD_VF(vf11, eye);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        eye[1] += p->eyePolicy.height;
-        VU0_LOAD_VF(vf10, eye);
-        VU0_LOAD_VF(vf11, focus);
-        VU0_SUB(vf10, vf10, vf11);
-        SDF_VU0_GETLENGTH(length);
-        SDF_VU0_NORMALIZE();
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        measuredDistance = span / tanf(halfFov);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, measuredDistance);
-        VU0_LOAD_VF(vf11, out->position);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        out->fov = 40.0f * 0.017453293f;
-        break;
+    btlCopyUnitRotationQuaternion(unit, rotation);
+    VU0_LOAD_VF(vf10, rotation);
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, mask);
+    scalesB0[0] = preset->eyePolicy.side;
+    VU0_LOAD_VF(vf11, scalesB0);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, preset->eyePolicy.distance);
+    VU0_LOAD_VF(vf11, target);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    target[1] += preset->eyePolicy.height;
+
+    VU0_LOAD_VF(vf11, position);
+    VU0_LOAD_VF(vf10, target);
+    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_GETLENGTH(targetLength);
+    SDF_VU0_NORMALIZE();
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, distance + measuredDistance + 270.0f);
+    VU0_LOAD_VF(vf11, position);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->pathEnd);
+
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, distance + measuredDistance);
+    VU0_LOAD_VF(vf11, position);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->pathStart);
+    CURSOR->distance = distance + measuredDistance + 270.0f;
+
+    VU0_LOAD_VF(vf10, pose->position);
+    VU0_STORE_VF_UNCLOBBERED(vf10, position);
+    break;
+}
+case 0x1F: {
+    BtlUnit *targetUnit;
+
+    f32 rayLength;
+    unit = action->link->unit;
+    if (action->link->indexWork.skillId == 0x1D6) {
+        scalesB0[2] = 0.0f;
+    }
+    btlUnitGetPosVU(unit, preset->eyePolicy.mode);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    btlCopyUnitRotationQuaternion(unit, rotation);
+    VU0_LOAD_VF(vf10, rotation);
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, mask);
+    scalesB0[0] = preset->eyePolicy.side;
+    VU0_LOAD_VF(vf11, scalesB0);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, preset->eyePolicy.distance);
+    VU0_LOAD_VF(vf11, target);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    target[1] = preset->eyePolicy.height;
+    targetUnit = btlGetIndexListEntry(action->targetList, 0);
+    focusExtent = btlBuildProjectedActorPairBoundsVU(0x600, action->link->unit, targetUnit,
+                          (s8)preset->eyePolicy.mode, (s8)preset->eyePolicy.mode,
+                          NULL, NULL, NULL, NULL);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch30);
+    measuredDistance = focusExtent / tanf(halfFov);
+    if (measuredDistance < 350.0f) {
+        measuredDistance = 350.0f;
+    }
+    VU0_LOAD_VF(vf10, scratch30);
+    VU0_STORE_VF_UNCLOBBERED(vf10, position);
+    VU0_STORE_VF_UNCLOBBERED(vf10, pose->position);
+    VU0_LOAD_VF(vf10, target);
+    VU0_LOAD_VF(vf11, position);
+    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_GETLENGTH(rayLength);
+    SDF_VU0_NORMALIZE();
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, measuredDistance);
+    VU0_LOAD_VF(vf11, position);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    break;
+}
+
+
+case 0x10:
+case 0x11: {
+    f32 targetLength;
+
+    scalesC0[0] = preset->eyePolicy.side;
+    VU0_LOAD_VF(vf10, scalesC0);
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+
+    if ((action->link->unit->status.flags & 0x200) != 0) {
+        queryFlags = (preset->eyePolicy.kind == 0x11) ? 0x400 : 0x200;
+    } else {
+        queryFlags = (preset->eyePolicy.kind == 0x10) ? 0x200 : 0x400;
     }
 
-    case 0x36: /* 001F9638: behind the actor, swung 30 degrees from the side the targets are on */
-        unit = action->link->unit;
-        btlUnitGetPosVU(unit, p->eyePolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, actorPoint);
-        span = btlGetUnitCameraClearance(unit, p->eyePolicy.mode, 0.0f, 0.0f);
-        framingDistance = span / tanf(halfFov);
-        btlCopyUnitRotationQuaternion(unit, quaternion);
-        VU0_LOAD_VF(vf10, quaternion);
-        effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, axis);
-        localScale[0] = p->eyePolicy.side;
-        VU0_LOAD_VF(vf11, localScale);
-        VU0_MUL(vf10, vf10, vf11);
-        VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, p->eyePolicy.distance + framingDistance);
-        VU0_LOAD_VF(vf11, actorPoint);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        eye[1] += p->eyePolicy.height;
-        VU0_LOAD_VF(vf10, eye);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.cameraFrom);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.pathEnd);
-        btlMeasureFilteredUnitGroupBounds(0x400, 0, 0);
-        VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
-        if (actorPoint[0] <= terminalPoint[0]) swapped = 0;
-        else swapped = 1;
-        if (swapped) sdfConvertEulerAnglesToQuaternionVU(0.0f, -0.52359874f, 0.0f);
-        else sdfConvertEulerAnglesToQuaternionVU(0.0f, 0.52359874f, 0.0f);
-        effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, direction);
-        VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        VU0_LOAD_VF(vf10, direction);
-        framingDistance += -20.0f;
-        VU0_SCALE_VF(vf10, p->terminalPolicy.distance + framingDistance);
-        VU0_LOAD_VF(vf11, actorPoint);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, actorPoint);
-        actorPoint[1] += p->eyePolicy.height;
-        VU0_LOAD_VF(vf10, actorPoint);
-        VU0_LOAD_VF(vf11, p->boundsSeed);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, actorPoint);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.cameraTo);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.pathStart);
-        VU0_LOAD_VF(vf10, btlCameraCursor.cameraFrom);
-        VU0_LOAD_VF(vf11, btlCameraCursor.cameraTo);
-        VU0_SUB(vf10, vf10, vf11);
-        SDF_VU0_GETLENGTH(btlCameraCursor.distance);
-        break;
+    focusExtent = btlMeasureFilteredUnitGroupBounds(queryFlags, NULL, NULL);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    measuredDistance = focusExtent / tanf(halfFov);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, preset->eyePolicy.distance);
+    VU0_LOAD_VF(vf11, target);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    target[1] += preset->eyePolicy.height;
 
-    case 0x37: /* 001F9878: the actor's facing swung 10 then 35/-20 degrees by the targets' side */
-        unit = action->link->unit;
-        btlUnitGetPosVU(unit, p->eyePolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, actorPoint);
-        span = btlGetUnitCameraClearance(unit, p->eyePolicy.mode, 0.0f, 0.0f);
-        framingDistance = span / tanf(halfFov);
-        btlCopyUnitRotationQuaternion(unit, quaternion);
-        VU0_LOAD_VF(vf10, quaternion);
-        effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, axis);
-        localScale[0] = p->eyePolicy.side;
-        VU0_LOAD_VF(vf11, localScale);
-        VU0_MUL(vf10, vf10, vf11);
-        VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, quaternion);
-        btlUnitGetPosVU(btlGetIndexListEntry(action->targetList, 0), p->eyePolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
-        if (actorPoint[0] <= terminalPoint[0]) swapped = 0;
-        else swapped = 1;
-        if (swapped) sdfConvertEulerAnglesToQuaternionVU(0.0f, -0.17453293f, 0.0f);
-        else sdfConvertEulerAnglesToQuaternionVU(0.0f, 0.17453293f, 0.0f);
-        effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, quaternion);
-        VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, p->eyePolicy.distance + framingDistance);
-        VU0_LOAD_VF(vf11, actorPoint);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        eye[1] += p->eyePolicy.height;
-        VU0_LOAD_VF(vf10, eye);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.cameraFrom);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.pathEnd);
-        btlUnitGetPosVU(btlGetIndexListEntry(action->targetList, 0), p->eyePolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
-        if (actorPoint[0] <= terminalPoint[0]) swapped = 0;
-        else swapped = 1;
-        if (swapped) sdfConvertEulerAnglesToQuaternionVU(0.0f, -0.34906585f, 0.0f);
-        else sdfConvertEulerAnglesToQuaternionVU(0.0f, 0.6108652f, 0.0f);
-        effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, quaternion);
-        VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, p->terminalPolicy.distance + framingDistance);
-        VU0_LOAD_VF(vf11, actorPoint);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, actorPoint);
-        actorPoint[1] += p->eyePolicy.height;
-        VU0_LOAD_VF(vf10, actorPoint);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.cameraTo);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.pathStart);
-        VU0_LOAD_VF(vf10, btlCameraCursor.cameraFrom);
-        VU0_LOAD_VF(vf11, btlCameraCursor.cameraTo);
-        VU0_SUB(vf10, vf10, vf11);
-        SDF_VU0_GETLENGTH(btlCameraCursor.distance);
-        break;
+    VU0_LOAD_VF(vf10, target);
+    VU0_LOAD_VF(vf11, position);
+    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_GETLENGTH(targetLength);
+    SDF_VU0_NORMALIZE();
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+    if (distance < measuredDistance * 0.5f) {
+        distance = measuredDistance;
+    }
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, distance);
+    VU0_LOAD_VF(vf11, position);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    break;
+}
 
-    case 0x38: /* 001F9B28: as 0x37 with 10/-20 then 20/-35 degrees, raised by the terminal height */
-        unit = action->link->unit;
-        btlUnitGetPosVU(unit, p->eyePolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, actorPoint);
-        span = btlGetUnitCameraClearance(unit, p->eyePolicy.mode, 0.0f, 0.0f);
-        framingDistance = span / tanf(halfFov);
-        btlCopyUnitRotationQuaternion(unit, quaternion);
-        VU0_LOAD_VF(vf10, quaternion);
-        effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, axis);
-        localScale[0] = p->eyePolicy.side;
-        VU0_LOAD_VF(vf11, localScale);
-        VU0_MUL(vf10, vf10, vf11);
-        VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, quaternion);
-        btlUnitGetPosVU(btlGetIndexListEntry(action->targetList, 0), p->eyePolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
-        if (actorPoint[0] <= terminalPoint[0]) swapped = 0;
-        else swapped = 1;
-        if (swapped) sdfConvertEulerAnglesToQuaternionVU(0.0f, -0.34906585f, 0.0f);
-        else sdfConvertEulerAnglesToQuaternionVU(0.0f, 0.17453293f, 0.0f);
-        effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, quaternion);
-        VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, p->eyePolicy.distance + framingDistance);
-        VU0_LOAD_VF(vf11, actorPoint);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, eye);
-        eye[1] += p->eyePolicy.height;
-        VU0_LOAD_VF(vf10, eye);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.cameraFrom);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.pathEnd);
-        btlUnitGetPosVU(btlGetIndexListEntry(action->targetList, 0), p->eyePolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, terminalPoint);
-        if (actorPoint[0] <= terminalPoint[0]) swapped = 0;
-        else swapped = 1;
-        if (swapped) sdfConvertEulerAnglesToQuaternionVU(0.0f, -0.6108652f, 0.0f);
-        else sdfConvertEulerAnglesToQuaternionVU(0.0f, 0.34906585f, 0.0f);
-        effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, quaternion);
-        VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, p->terminalPolicy.distance + framingDistance);
-        VU0_LOAD_VF(vf11, actorPoint);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, actorPoint);
-        actorPoint[1] += p->terminalPolicy.height;
-        VU0_LOAD_VF(vf10, actorPoint);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.cameraTo);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.pathStart);
-        VU0_LOAD_VF(vf10, btlCameraCursor.cameraFrom);
-        VU0_LOAD_VF(vf11, btlCameraCursor.cameraTo);
-        VU0_SUB(vf10, vf10, vf11);
-        SDF_VU0_GETLENGTH(btlCameraCursor.distance);
-        break;
 
-    case 5: case 6: case 0x14: case 0x16: case 0x18: case 0x1A: case 0x1B:
-    case 0x1D: case 0x23: case 0x25: case 0x26: case 0x27: case 0x28: case 0x2C:
-    default: /* 001F9DE8, or 001F9DEC for unsigned kind >= 0x44 */
-        break;
+case 0x0d:
+case 0x0e: {
+
+    scalesC0[0] = preset->eyePolicy.side;
+    VU0_LOAD_VF(vf10, scalesC0);
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+
+    if ((action->link->unit->status.flags & 0x200) != 0) {
+        queryFlags = (preset->eyePolicy.kind == 0x0e) ? 0x400 : 0x200;
+    } else {
+        queryFlags = (preset->eyePolicy.kind == 0x0e) ? 0x200 : 0x400;
     }
 
-    /* 001F9DE8 / 001F9DEC / 001F9DF0: common finalizer, no zero-length guard. */
-    VU0_LOAD_VF(vf10, focus);
-    VU0_LOAD_VF(vf11, eye);
+    focusExtent = btlMeasureFilteredUnitGroupBounds(queryFlags, NULL, NULL);
+    measuredDistance = focusExtent / tanf(halfFov);
+    measuredDistance += preset->eyePolicy.distance;
+    VU0_STORE_VF_UNCLOBBERED(vf10, position);
+    VU0_STORE_VF_UNCLOBBERED(vf10, pose->position);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_NEGATE_XYZ(vf10);
+    VU0_SCALE_VF(vf10, measuredDistance);
+    VU0_LOAD_VF(vf11, position);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    target[1] += preset->eyePolicy.height;
+    pose->fov = 0x1.657184p-1f;
+    break;
+}
+
+
+case 0x20:
+case 0x2b: {
+    f32 rayLength;
+    f32 rawLookExtent;
+
+
+    scalesC0[0] = preset->eyePolicy.side;
+    VU0_LOAD_VF(vf10, scalesC0);
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+    VU0_LOAD_VF(vf10, position);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, preset->eyePolicy.distance);
+    VU0_LOAD_VF(vf11, target);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    target[1] += preset->eyePolicy.height;
+
+    VU0_LOAD_VF(vf10, target);
+    VU0_LOAD_VF(vf11, position);
+    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_GETLENGTH(rayLength);
+    SDF_VU0_NORMALIZE();
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+    VU0_LOAD_VF(vf10, preset->boundsSeed);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch80);
+    if (preset->eyePolicy.kind == 0x20) {
+        btlMeasureFilteredUnitGroupBounds(0x400, NULL, NULL);
+        VU0_STORE_VF_UNCLOBBERED(vf10, scratch30);
+        scratch80[0] = scratch30[0];
+    }
+    rawLookExtent = btlMeasureBattleSideBoundsWithSeed(0x400, NULL, NULL, position, target,
+                                  scratch80, preset->boundsRadius);
+    measuredDistance = rawLookExtent / tanf(halfFov);
+    VU0_STORE_VF_UNCLOBBERED(vf10, position);
+    VU0_STORE_VF_UNCLOBBERED(vf10, pose->position);
+    VU0_LOAD_VF(vf10, offset);
+    {
+        /* Compiler copy-preference aid, not a hardware-required register:
+         * ordinary/probed global-allocation tracing qualifies this F21 boundary.
+         * The real measured distance is consumed immediately; no call intervenes. */
+        register f32 fittedPublication __asm__("$f21") = measuredDistance;
+        VU0_SCALE_VF(vf10, fittedPublication);
+    }
+    VU0_LOAD_VF(vf11, position);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    break;
+}
+
+
+case 0x0f: {
+    s32 boundsMask;
+    f32 rawSpan;
+    f32 targetLength;
+
+    scalesC0[0] = preset->eyePolicy.side;
+    VU0_LOAD_VF(vf10, scalesC0);
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+
+    btlMeasureFilteredUnitGroupBounds(0x400, NULL, NULL);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch80);
+    VU0_LOAD_VF(vf10, scalesD0);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch80);
+    boundsMask = 0x600;
+    btlMeasureBattleSideBoundsWithSeed(boundsMask, NULL, NULL, NULL, NULL, scratch80, 600.0f);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    tanf(halfFov);
+
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, preset->eyePolicy.distance);
+    VU0_LOAD_VF(vf11, target);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    target[1] += preset->eyePolicy.height;
+
+    rawSpan = btlMeasureBattleSideBoundsWithSeed(boundsMask, NULL, NULL, position, target, scratch80,
+                         600.0f);
+    VU0_STORE_VF_UNCLOBBERED(vf10, position);
+    VU0_STORE_VF_UNCLOBBERED(vf10, pose->position);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, preset->eyePolicy.distance);
+    VU0_LOAD_VF(vf11, target);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    target[1] += preset->eyePolicy.height;
+
+    VU0_LOAD_VF(vf10, target);
+    VU0_LOAD_VF(vf11, position);
+    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_GETLENGTH(targetLength);
+    SDF_VU0_NORMALIZE();
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+    measuredDistance = rawSpan / tanf(halfFov);
+    VU0_LOAD_VF(vf10, offset);
+    {
+        /* Compiler copy-preference aid, not a hardware-required register:
+         * ordinary/probed global-allocation tracing qualifies this F21 boundary.
+         * The real measured distance is consumed immediately; no call intervenes. */
+        register f32 fittedPublication __asm__("$f21") = measuredDistance;
+        VU0_SCALE_VF(vf10, fittedPublication);
+    }
+    VU0_LOAD_VF(vf11, pose->position);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    pose->fov = 0x1.657184p-1f;
+    break;
+}
+case 0x36: {
+    unit = action->link->unit;
+
+    btlUnitGetPosVU(unit, preset->eyePolicy.mode);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch60);
+    focusExtent = btlGetUnitCameraClearance(unit, preset->eyePolicy.mode, 0.0f, 0.0f);
+    distance = focusExtent / tanf(halfFov);
+
+    btlCopyUnitRotationQuaternion(unit, rotation);
+    VU0_LOAD_VF(vf10, rotation);
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, mask);
+    scalesB0[0] = preset->eyePolicy.side;
+    VU0_LOAD_VF(vf11, scalesB0);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, preset->eyePolicy.distance + distance);
+    VU0_LOAD_VF(vf11, scratch60);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    target[1] += preset->eyePolicy.height;
+    VU0_LOAD_VF(vf10, target);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->cameraFrom);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->pathEnd);
+
+    btlMeasureFilteredUnitGroupBounds(0x400, NULL, NULL);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch80);
+    comparison = 0;
+    if (!(scratch60[0] <= scratch80[0])) {
+        comparison = 1;
+    }
+    if (comparison) {
+        sdfConvertEulerAnglesToQuaternionVU(0.0f, -0x1.0c1522p-1f, 0.0f);
+    } else {
+        sdfConvertEulerAnglesToQuaternionVU(0.0f, 0x1.0c1522p-1f, 0.0f);
+    }
+    effMiscQuaternionToMatrixVU();
+
+    VU0_LOAD_VF(vf10, offset);
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+    VU0_LOAD_VF(vf10, offset);
+    /* The initialized side predicate selects the quaternion above. Both
+     * correction arms apply one real -20 adjustment. Qualified ordinary/probed
+     * cc1 tracing retains the comparison reload through sched2; jump2 removes
+     * the equal-arm decision and duplicate correction but retains the reload
+     * and preceding real offset load (retail 001F97C0/001F97C4/001F97D0).
+     * This is a trace-backed reconstruction, not original-source proof. */
+    if (comparison) {
+        distance += -20.0f;
+    } else {
+        distance += -20.0f;
+    }
+    VU0_SCALE_VF(vf10, preset->terminalPolicy.distance + distance);
+    VU0_LOAD_VF(vf11, scratch60);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch60);
+    scratch60[1] += preset->eyePolicy.height;
+    VU0_LOAD_VF(vf10, scratch60);
+    VU0_LOAD_VF(vf11, preset->boundsSeed);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch60);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->cameraTo);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->pathStart);
+
+    VU0_LOAD_VF(vf10, CURSOR->cameraFrom);
+    VU0_LOAD_VF(vf11, CURSOR->cameraTo);
+    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_GETLENGTH(cursorDistance);
+    CURSOR->distance = cursorDistance;
+    break;
+}
+
+case 0x37: {
+    unit = action->link->unit;
+
+    btlUnitGetPosVU(unit, preset->eyePolicy.mode);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch60);
+    focusExtent = btlGetUnitCameraClearance(unit, preset->eyePolicy.mode, 0.0f, 0.0f);
+    distance = focusExtent / tanf(halfFov);
+
+    btlCopyUnitRotationQuaternion(unit, rotation);
+    VU0_LOAD_VF(vf10, rotation);
+    effMiscQuaternionToMatrixVU();
+
+    VU0_LOAD_VF(vf10, mask);
+    scalesB0[0] = preset->eyePolicy.side;
+    VU0_LOAD_VF(vf11, scalesB0);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+
+    unit = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
+    btlUnitGetPosVU(unit, preset->eyePolicy.mode);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch80);
+    comparison = 0;
+    if (!(scratch60[0] <= scratch80[0])) {
+        comparison = 1;
+    }
+    if (comparison) {
+        sdfConvertEulerAnglesToQuaternionVU(0.0f, -0x1.657184p-3f, 0.0f);
+    } else {
+        sdfConvertEulerAnglesToQuaternionVU(0.0f, 0x1.657184p-3f, 0.0f);
+    }
+    effMiscQuaternionToMatrixVU();
+
+    VU0_LOAD_VF(vf10, rotation);
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, preset->eyePolicy.distance + distance);
+    VU0_LOAD_VF(vf11, scratch60);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    target[1] += preset->eyePolicy.height;
+    VU0_LOAD_VF(vf10, target);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->cameraFrom);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->pathEnd);
+
+    unit = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
+    btlUnitGetPosVU(unit, preset->eyePolicy.mode);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch80);
+    comparison = 0;
+    if (!(scratch60[0] <= scratch80[0])) {
+        comparison = 1;
+    }
+    if (comparison) {
+        sdfConvertEulerAnglesToQuaternionVU(0.0f, -0x1.657184p-2f, 0.0f);
+    } else {
+        sdfConvertEulerAnglesToQuaternionVU(0.0f, 0x1.38c352p-1f, 0.0f);
+    }
+    effMiscQuaternionToMatrixVU();
+
+    VU0_LOAD_VF(vf10, rotation);
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, preset->terminalPolicy.distance + distance);
+    VU0_LOAD_VF(vf11, scratch60);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch60);
+    scratch60[1] += preset->eyePolicy.height;
+    VU0_LOAD_VF(vf10, scratch60);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->cameraTo);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->pathStart);
+
+    VU0_LOAD_VF(vf10, CURSOR->cameraFrom);
+    VU0_LOAD_VF(vf11, CURSOR->cameraTo);
+    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_GETLENGTH(cursorDistance);
+    CURSOR->distance = cursorDistance;
+    break;
+}
+
+case 0x38: {
+    unit = action->link->unit;
+
+    btlUnitGetPosVU(unit, preset->eyePolicy.mode);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch60);
+    focusExtent = btlGetUnitCameraClearance(unit, preset->eyePolicy.mode, 0.0f, 0.0f);
+    distance = focusExtent / tanf(halfFov);
+
+    btlCopyUnitRotationQuaternion(unit, rotation);
+    VU0_LOAD_VF(vf10, rotation);
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, mask);
+    scalesB0[0] = preset->eyePolicy.side;
+    VU0_LOAD_VF(vf11, scalesB0);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_STORE_VF_UNCLOBBERED(vf10, rotation);
+
+    unit = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
+    btlUnitGetPosVU(unit, preset->eyePolicy.mode);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch80);
+    comparison = 0;
+    if (!(scratch60[0] <= scratch80[0])) {
+        comparison = 1;
+    }
+    if (comparison) {
+        sdfConvertEulerAnglesToQuaternionVU(0.0f, -0x1.657184p-2f, 0.0f);
+    } else {
+        sdfConvertEulerAnglesToQuaternionVU(0.0f, 0x1.657184p-3f, 0.0f);
+    }
+    effMiscQuaternionToMatrixVU();
+
+    VU0_LOAD_VF(vf10, rotation);
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, preset->eyePolicy.distance + distance);
+    VU0_LOAD_VF(vf11, scratch60);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, target);
+    target[1] += preset->eyePolicy.height;
+    VU0_LOAD_VF(vf10, target);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->cameraFrom);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->pathEnd);
+
+    unit = (BtlUnit *)btlGetIndexListEntry(action->targetList, 0);
+    btlUnitGetPosVU(unit, preset->eyePolicy.mode);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch80);
+    comparison = 0;
+    if (!(scratch60[0] <= scratch80[0])) {
+        comparison = 1;
+    }
+    if (comparison) {
+        sdfConvertEulerAnglesToQuaternionVU(0.0f, -0x1.38c352p-1f, 0.0f);
+    } else {
+        sdfConvertEulerAnglesToQuaternionVU(0.0f, 0x1.657184p-2f, 0.0f);
+    }
+    effMiscQuaternionToMatrixVU();
+
+    VU0_LOAD_VF(vf10, rotation);
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, preset->terminalPolicy.distance + distance);
+    VU0_LOAD_VF(vf11, scratch60);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch60);
+    scratch60[1] += preset->terminalPolicy.height;
+    VU0_LOAD_VF(vf10, scratch60);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->cameraTo);
+    VU0_STORE_VF_UNCLOBBERED(vf10, CURSOR->pathStart);
+
+    VU0_LOAD_VF(vf10, CURSOR->cameraFrom);
+    VU0_LOAD_VF(vf11, CURSOR->cameraTo);
+    VU0_SUB(vf10, vf10, vf11);
+store_cursor_endpoint_distance:
+    cursorDistance = btlGetCameraVectorLength();
+store_cursor_distance:
+    CURSOR->distance = cursorDistance;
+    break;
+}
+}
+
+{
+    f32 length;
+
+    VU0_LOAD_VF(vf10, position);
+    VU0_LOAD_VF(vf11, target);
     VU0_SUB(vf10, vf10, vf11);
     SDF_VU0_GETLENGTH(length);
-    out->distance = length;
+    pose->distance = length;
     SDF_VU0_NORMALIZE();
-    VU0_STORE_VF_UNCLOBBERED(vf10, out->direction);
-    worldAxis[1] = 0.0f;
-
-    switch (p->terminalPolicy.kind) {
-    case 0: case 2: case 3: /* 001F9E70 */
-        if (p->terminalPolicy.kind == 0) unit = action->link->unit;
-        else if (p->terminalPolicy.kind == 2) unit = action->linkedA;
-        else unit = action->linkedB;
-        btlUnitGetPosVU(unit, p->terminalPolicy.mode);
-        VU0_STORE_VF_UNCLOBBERED(vf10, destination);
-        btlCopyUnitRotationQuaternion(unit, quaternion);
-        VU0_LOAD_VF(vf10, quaternion);
-        effMiscQuaternionToMatrixVU();
-        VU0_LOAD_VF(vf10, axis);
-        localScale[0] = p->terminalPolicy.side;
-        VU0_LOAD_VF(vf11, localScale);
-        VU0_MUL(vf10, vf10, vf11);
-        VU0_APPLY_MATRIX(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, p->terminalPolicy.distance);
-        VU0_LOAD_VF(vf11, destination);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, destination);
-        destination[1] += p->terminalPolicy.height;
-        VU0_LOAD_VF(vf10, eye);
-        VU0_LOAD_VF(vf11, destination);
-        VU0_SUB(vf10, vf10, vf11);
-        SDF_VU0_GETLENGTH(length);
-        btlCameraTerminalDistance = length;
-        SDF_VU0_NORMALIZE();
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalDirection);
-        VU0_LOAD_VF(vf10, eye);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalEye);
-        VU0_LOAD_VF(vf10, destination);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalPoint);
-        break;
-
-    case 4: /* 001F9FC0 */
-        worldAxis[0] = p->terminalPolicy.side;
-        VU0_LOAD_VF(vf10, worldAxis);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        worldAxis[0] = p->terminalPolicy.side; /* repeated native write, 001F9FD8 */
-        VU0_MOVE_VF(vf10, vf0);
-        VU0_STORE_VF_UNCLOBBERED(vf10, destination);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, p->terminalPolicy.distance);
-        VU0_LOAD_VF(vf11, destination);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, destination);
-        destination[1] += p->terminalPolicy.height;
-        VU0_LOAD_VF(vf10, eye);
-        VU0_LOAD_VF(vf11, destination);
-        VU0_SUB(vf10, vf10, vf11);
-        SDF_VU0_GETLENGTH(length);
-        btlCameraTerminalDistance = length;
-        SDF_VU0_NORMALIZE();
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalDirection);
-        VU0_LOAD_VF(vf10, eye);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalEye);
-        VU0_LOAD_VF(vf10, destination);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalPoint);
-        break;
-
-    case 7: case 8: /* 001FA0B8 */
-        worldAxis[0] = p->terminalPolicy.side;
-        VU0_LOAD_VF(vf10, worldAxis);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        if (action->link->unit->status.flags & 0x200) {
-            if (p->terminalPolicy.kind == 8) mask = 0x400;
-            else mask = 0x200;
-        } else {
-            if (p->terminalPolicy.kind == 8) mask = 0x200;
-            else mask = 0x400;
-        }
-        btlMeasureFilteredUnitGroupBounds(mask, 0, 0);
-        tanf(halfFov); /* ignored scalar, vf10 survives */
-        VU0_STORE_VF_UNCLOBBERED(vf10, destination);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, p->terminalPolicy.distance);
-        VU0_LOAD_VF(vf11, destination);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, destination);
-        destination[1] += p->terminalPolicy.height;
-        VU0_LOAD_VF(vf10, eye);
-        VU0_LOAD_VF(vf11, destination);
-        VU0_SUB(vf10, vf10, vf11);
-        SDF_VU0_GETLENGTH(length);
-        btlCameraTerminalDistance = length;
-        SDF_VU0_NORMALIZE();
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalDirection);
-        VU0_LOAD_VF(vf10, eye);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalEye);
-        VU0_LOAD_VF(vf10, destination);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalPoint);
-        break;
-
-    case 0xF: /* 001FA1F0 */
-        worldAxis[0] = p->terminalPolicy.side;
-        VU0_LOAD_VF(vf10, worldAxis);
-        VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        btlMeasureFilteredUnitGroupBounds(0x600, 0, 0);
-        tanf(halfFov); /* ignored scalar, vf10 survives */
-        VU0_STORE_VF_UNCLOBBERED(vf10, destination);
-        VU0_LOAD_VF(vf10, direction);
-        VU0_SCALE_VF(vf10, p->terminalPolicy.distance);
-        VU0_LOAD_VF(vf11, destination);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, destination);
-        destination[1] += p->terminalPolicy.height;
-        VU0_LOAD_VF(vf10, eye);
-        VU0_LOAD_VF(vf11, destination);
-        VU0_SUB(vf10, vf10, vf11);
-        SDF_VU0_GETLENGTH(length);
-        btlCameraTerminalDistance = length;
-        SDF_VU0_NORMALIZE();
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalDirection);
-        VU0_LOAD_VF(vf10, eye);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalEye);
-        VU0_LOAD_VF(vf10, destination);
-        VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalPoint);
-        break;
-
-    case 1: case 5: case 6: case 9: case 0xA: case 0xB: case 0xC: case 0xD: case 0xE:
-    default: /* 001FA2E8, or 001FA2EC for unsigned terminal kind >= 0x10 */
-        break;
-    }
-
-    printf("----------------------------------------------------\n");
-    printf("[ST] [%d]\n", p->focusPolicy.kind);
-    printf("[Target] [%f %f %f][%f %f %f]\n",
-           btlCameraCursor.targetFrom[0], btlCameraCursor.targetFrom[1], btlCameraCursor.targetFrom[2],
-           btlCameraCursor.targetTo[0], btlCameraCursor.targetTo[1], btlCameraCursor.targetTo[2]);
-    printf("[direction][%f %f %f]\n[Camera] [%f %f %f][%f %f %f]\n",
-           direction[0], direction[1], direction[2],
-           btlCameraCursor.cameraFrom[0], btlCameraCursor.cameraFrom[1], btlCameraCursor.cameraFrom[2],
-           btlCameraCursor.cameraTo[0], btlCameraCursor.cameraTo[1], btlCameraCursor.cameraTo[2]);
-    printf("[Distance] [%f]\n", btlCameraCursor.distance);
-    printf("----------------------------------------------------\n");
+    VU0_STORE_VF_UNCLOBBERED(vf10, pose->direction);
 }
-#else
-INCLUDE_ASM(const s32, "game/code_001EC868", btlBuildPresetCameraPose);
-#endif
+scalesC0[1] = 0.0f;
+switch (preset->terminalPolicy.kind) {
+case 0:
+case 2:
+case 3: {
+    if (preset->terminalPolicy.kind == 0) {
+        unit = action->link->unit;
+    } else if (preset->terminalPolicy.kind == 2) {
+        unit = action->linkedA;
+    } else {
+        unit = action->linkedB;
+    }
+    btlUnitGetPosVU(unit, preset->terminalPolicy.mode);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch30);
+    btlCopyUnitRotationQuaternion(unit, rotation);
+    VU0_LOAD_VF(vf10, rotation);
+    effMiscQuaternionToMatrixVU();
+    VU0_LOAD_VF(vf10, mask);
+    scalesB0[0] = preset->terminalPolicy.side;
+    VU0_LOAD_VF(vf11, scalesB0);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_APPLY_MATRIX(vf10, vf10);
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, preset->terminalPolicy.distance);
+    VU0_LOAD_VF(vf11, scratch30);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch30);
+    scratch30[1] += preset->terminalPolicy.height;
+    VU0_LOAD_VF(vf10, target);
+    VU0_LOAD_VF(vf11, scratch30);
+    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_GETLENGTH(btlCameraTerminalDistance);
+    SDF_VU0_NORMALIZE();
+    VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalDirection);
+    VU0_LOAD_VF(vf10, target);
+    VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalEye);
+    VU0_LOAD_VF(vf10, scratch30);
+    VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalPoint);
+    break;
+}
+case 4:
+    scalesC0[0] = preset->terminalPolicy.side;
+    VU0_LOAD_VF(vf10, scalesC0);
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+    scalesC0[0] = preset->terminalPolicy.side;
+    VU0_MOVE_VF(vf10, vf0);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch30);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, preset->terminalPolicy.distance);
+    VU0_LOAD_VF(vf11, scratch30);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch30);
+    scratch30[1] += preset->terminalPolicy.height;
+    VU0_LOAD_VF(vf10, target);
+    VU0_LOAD_VF(vf11, scratch30);
+    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_GETLENGTH(btlCameraTerminalDistance);
+    SDF_VU0_NORMALIZE();
+    VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalDirection);
+    VU0_LOAD_VF(vf10, target);
+    VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalEye);
+    VU0_LOAD_VF(vf10, scratch30);
+    VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalPoint);
+    break;
+case 7:
+case 8: {
+    scalesC0[0] = preset->terminalPolicy.side;
+    VU0_LOAD_VF(vf10, scalesC0);
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+    if (action->link->unit->status.flags & 0x200) {
+        queryFlags = preset->terminalPolicy.kind == 8 ? 0x400 : 0x200;
+    } else {
+        queryFlags = preset->terminalPolicy.kind == 8 ? 0x200 : 0x400;
+    }
+    btlMeasureFilteredUnitGroupBounds(queryFlags, NULL, NULL);
+    tanf(halfFov);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch30);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, preset->terminalPolicy.distance);
+    VU0_LOAD_VF(vf11, scratch30);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch30);
+    scratch30[1] += preset->terminalPolicy.height;
+    VU0_LOAD_VF(vf10, target);
+    VU0_LOAD_VF(vf11, scratch30);
+    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_GETLENGTH(btlCameraTerminalDistance);
+    SDF_VU0_NORMALIZE();
+    VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalDirection);
+    VU0_LOAD_VF(vf10, target);
+    VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalEye);
+    VU0_LOAD_VF(vf10, scratch30);
+    VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalPoint);
+    break;
+}
+case 0xF:
+    scalesC0[0] = preset->terminalPolicy.side;
+    VU0_LOAD_VF(vf10, scalesC0);
+    VU0_STORE_VF_UNCLOBBERED(vf10, offset);
+    btlMeasureFilteredUnitGroupBounds(0x600, NULL, NULL);
+    tanf(halfFov);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch30);
+    VU0_LOAD_VF(vf10, offset);
+    VU0_SCALE_VF(vf10, preset->terminalPolicy.distance);
+    VU0_LOAD_VF(vf11, scratch30);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF_UNCLOBBERED(vf10, scratch30);
+    scratch30[1] += preset->terminalPolicy.height;
+    VU0_LOAD_VF(vf10, target);
+    VU0_LOAD_VF(vf11, scratch30);
+    VU0_SUB(vf10, vf10, vf11);
+    SDF_VU0_GETLENGTH(btlCameraTerminalDistance);
+    SDF_VU0_NORMALIZE();
+    VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalDirection);
+    VU0_LOAD_VF(vf10, target);
+    VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalEye);
+    VU0_LOAD_VF(vf10, scratch30);
+    VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalPoint);
+    break;
+}
+printf("----------------------------------------------------\n");
+printf("[ST] [%d]\n", preset->focusPolicy.kind);
+printf("[Target] [%f %f %f][%f %f %f]\n",
+             (f64)CURSOR->targetFrom[0], (f64)CURSOR->targetFrom[1],
+             (f64)CURSOR->targetFrom[2], (f64)CURSOR->targetTo[0],
+             (f64)CURSOR->targetTo[1], (f64)CURSOR->targetTo[2]);
+printf("[direction][%f %f %f]\n[Camera] [%f %f %f][%f %f %f]\n",
+             (f64)offset[0], (f64)offset[1], (f64)offset[2],
+             (f64)CURSOR->cameraFrom[0], (f64)CURSOR->cameraFrom[1],
+             (f64)CURSOR->cameraFrom[2], (f64)CURSOR->cameraTo[0],
+             (f64)CURSOR->cameraTo[1], (f64)CURSOR->cameraTo[2]);
+printf("[Distance] [%f]\n", (f64)CURSOR->distance);
+printf("----------------------------------------------------\n");
+}
+
 
 /* Public Brass preferred source, preserved by PiM; current-header admission by BigB. */
 extern void btlApplyScriptCameraTrack(BtlLinkedCommand *, BtlCamState *, const BtlCameraTimedInstruction *, s32 *, const BtlCameraParameterRecord *);
@@ -12189,3 +12528,4 @@ INCLUDE_SDATA(const s32, "game/code_001EC868", btlTintTransitionHoldCount);
 INCLUDE_SDATA(const s32, "game/code_001EC868", D_00436AE0);
 
 INCLUDE_SDATA(const s32, "game/code_001EC868", D_00436AE8);
+
