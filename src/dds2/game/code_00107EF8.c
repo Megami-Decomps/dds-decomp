@@ -1888,7 +1888,7 @@ void evtToggleDebugTimeGraphTask(s8 mode) {
 extern u32 D_00435D4C;
 /* Render an allocation span as partial rows and complete heap-map rows. */
 void sdfDrawHeapSpanOverlay(sdfDrawTag_t *packetList, s32 x, s32 y,
-                   u32 heapBase, u32 blockAddress, s32 blockSize, u8 state) {
+                   u32 heapBase, u32 blockAddress, s32 blockSize, u8 blockState) {
     s32 color;
     u32 byteOffset;
     s32 rowIndex;
@@ -1898,14 +1898,14 @@ void sdfDrawHeapSpanOverlay(sdfDrawTag_t *packetList, s32 x, s32 y,
     u32 bytesPerRow;
     u32 bytesPerCell;
 
-    switch (state) {
-    case 0:
+    switch (blockState) {
+    case SDF_MEM_BLOCK_STATE_FREE:
         color = 0x80000000;
         break;
-    case 1:
+    case SDF_MEM_BLOCK_STATE_USED:
         color = 0x80008080;
         break;
-    case 2:
+    case SDF_MEM_BLOCK_STATE_END_SENTINEL:
         color = 0x80000080;
         break;
     default:
@@ -1979,7 +1979,7 @@ void sdfDrawHeapMapOverlay(sdfDrawTag_t *packetList, s32 x, s32 y) {
     do {
         count++;
         entry->address = sdfMemGetPtr(block);
-        entry->state = sdfMemGetType(block);
+        entry->blockState = (u8)sdfMemGetType(block);
         entry->size = sdfMemGetSize(block);
         entry++;
         block = sdfMemGetNext(block);
@@ -1995,7 +1995,7 @@ void sdfDrawHeapMapOverlay(sdfDrawTag_t *packetList, s32 x, s32 y) {
         0x80000000, 0x80806020));
     for (i = 0; i < count; i++) {
         sdfDrawHeapSpanOverlay(packetList, x, y, heapBase, entry->address,
-            entry->size, entry->state);
+            entry->size, entry->blockState);
         entry++;
     }
     markerY = y;

@@ -10,8 +10,6 @@
 #define SDF_CHIP_BLOCK_SHIFT 12
 #define SDF_CHIP_BLOCK_BYTES (1 << SDF_CHIP_BLOCK_SHIFT)
 #define SDF_MEM_ALIGNMENT_MASK 0x7F
-#define SDF_MEM_BLOCK_FREE 0
-#define SDF_MEM_BLOCK_SENTINEL 2
 
 extern u32 D_0045F0FC[];
 
@@ -131,16 +129,16 @@ void sdfMemInit(u32 heapSize) {
     alignedEnd = (heap->base + heapSize) & ~SDF_MEM_ALIGNMENT_MASK;
     heap->head.prev = NULL;
     heap->head.next = freeBlock;
-    heap->head.state = SDF_MEM_BLOCK_SENTINEL;
+    heap->head.state = SDF_MEM_BLOCK_STATE_END_SENTINEL;
     heap->head.referenceCount = -1;
-    heap->tail.state = SDF_MEM_BLOCK_SENTINEL;
+    heap->tail.state = SDF_MEM_BLOCK_STATE_END_SENTINEL;
     heap->tail.referenceCount = -1;
     heap->tail.address = alignedEnd;
     heap->tail.prev = freeBlock;
     heap->tail.next = NULL;
     heap->head.address = alignedStart;
     freeBlock->prev = &heap->head;
-    freeBlock->state = SDF_MEM_BLOCK_FREE;
+    freeBlock->state = SDF_MEM_BLOCK_STATE_FREE;
     freeBlock->next = &heap->tail;
     freeBlock->address = alignedStart;
     freeBlock->referenceCount = 0;
@@ -148,7 +146,7 @@ void sdfMemInit(u32 heapSize) {
     sdfDelayedResrcInitCB(&sdfMemDelayedResrcCB, (SdfPendingEntryCallback)sdfMemFreeDirect);
 }
 
-u16 sdfMemGetType(const sdfMemHandle_t *block) {
+SdfMemBlockState sdfMemGetType(const sdfMemHandle_t *block) {
     return block->state;
 }
 

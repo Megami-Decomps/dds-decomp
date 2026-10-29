@@ -5,9 +5,6 @@
 #include "sdf_general_heap_api.h"
 #include "sdf.h"
 
-#define SDF_HEAP_BLOCK_FREE 0
-#define SDF_HEAP_BLOCK_USED 1
-#define SDF_HEAP_BLOCK_END 2
 #define SDF_HEAP_ALIGNMENT_MASK 0x7F
 
 SdfMemHeap sdfMemCB __attribute__((section(".bss"), aligned(8)));
@@ -18,7 +15,7 @@ extern void (*D_003BD2DC)(s32);
 /* Return the next descriptor unless it is the end marker; used blocks are not filtered. */
 const sdfMemHandle_t *sdfMemGetNext(const sdfMemHandle_t *block) {
     const sdfMemHandle_t *nextBlock = block->next;
-    if (nextBlock->state == SDF_HEAP_BLOCK_END) {
+    if (nextBlock->state == SDF_MEM_BLOCK_STATE_END_SENTINEL) {
         return NULL;
     }
     return nextBlock;
@@ -54,8 +51,8 @@ sdfMemHandle_t *sdfMemAllocDirect(s32 requestedBytes) {
 
     interruptsWereEnabled = DIntr();
     for (block = heap->head.next;; block = block->next) {
-        if (block->state != SDF_HEAP_BLOCK_FREE) {
-            if (block->state == SDF_HEAP_BLOCK_END) {
+        if (block->state != SDF_MEM_BLOCK_STATE_FREE) {
+            if (block->state == SDF_MEM_BLOCK_STATE_END_SENTINEL) {
                 if (interruptsWereEnabled != 0) {
                     EIntr();
                 }
@@ -72,13 +69,13 @@ sdfMemHandle_t *sdfMemAllocDirect(s32 requestedBytes) {
 
                     splitBlock->prev = block;
                     splitBlock->address = block->address + alignedBytes;
-                    splitBlock->state = SDF_HEAP_BLOCK_FREE;
+                    splitBlock->state = SDF_MEM_BLOCK_STATE_FREE;
                     splitBlock->next = block->next;
                     splitBlock->referenceCount = 0;
                     block->next->prev = splitBlock;
                     block->next = splitBlock;
                 }
-                block->state = SDF_HEAP_BLOCK_USED;
+                block->state = SDF_MEM_BLOCK_STATE_USED;
                 if (interruptsWereEnabled != 0) {
                     EIntr();
                 }
@@ -98,8 +95,8 @@ sdfMemHandle_t *sdfMemAllocFromTailDirect(s32 requestedBytes) {
 
     interruptsWereEnabled = DIntr();
     for (block = heap->tail.prev;; block = block->prev) {
-        if (block->state != SDF_HEAP_BLOCK_FREE) {
-            if (block->state == SDF_HEAP_BLOCK_END) {
+        if (block->state != SDF_MEM_BLOCK_STATE_FREE) {
+            if (block->state == SDF_MEM_BLOCK_STATE_END_SENTINEL) {
                 if (interruptsWereEnabled != 0) {
                     EIntr();
                 }
@@ -113,7 +110,7 @@ sdfMemHandle_t *sdfMemAllocFromTailDirect(s32 requestedBytes) {
 
                     splitBlock->prev = block;
                     splitBlock->address = block->address + (availableBytes - alignedBytes);
-                    splitBlock->state = SDF_HEAP_BLOCK_FREE;
+                    splitBlock->state = SDF_MEM_BLOCK_STATE_FREE;
                     splitBlock->next = block->next;
                     splitBlock->referenceCount = 0;
                     block->next->prev = splitBlock;
@@ -121,7 +118,7 @@ sdfMemHandle_t *sdfMemAllocFromTailDirect(s32 requestedBytes) {
                     /* This new upper descriptor becomes the allocation, not the free remainder. */
                     block = splitBlock;
                 }
-                block->state = SDF_HEAP_BLOCK_USED;
+                block->state = SDF_MEM_BLOCK_STATE_USED;
                 if (interruptsWereEnabled != 0) {
                     EIntr();
                 }
@@ -141,8 +138,8 @@ sdfMemHandle_t *sdfMemTryAllocDirect(s32 requestedBytes) {
 
     interruptsWereEnabled = DIntr();
     for (block = heap->head.next;; block = block->next) {
-        if (block->state != SDF_HEAP_BLOCK_FREE) {
-            if (block->state == SDF_HEAP_BLOCK_END) {
+        if (block->state != SDF_MEM_BLOCK_STATE_FREE) {
+            if (block->state == SDF_MEM_BLOCK_STATE_END_SENTINEL) {
                 if (interruptsWereEnabled != 0) {
                     EIntr();
                 }
@@ -157,13 +154,13 @@ sdfMemHandle_t *sdfMemTryAllocDirect(s32 requestedBytes) {
 
                     splitBlock->prev = block;
                     splitBlock->address = block->address + alignedBytes;
-                    splitBlock->state = SDF_HEAP_BLOCK_FREE;
+                    splitBlock->state = SDF_MEM_BLOCK_STATE_FREE;
                     splitBlock->next = block->next;
                     splitBlock->referenceCount = 0;
                     block->next->prev = splitBlock;
                     block->next = splitBlock;
                 }
-                block->state = SDF_HEAP_BLOCK_USED;
+                block->state = SDF_MEM_BLOCK_STATE_USED;
                 if (interruptsWereEnabled != 0) {
                     EIntr();
                 }

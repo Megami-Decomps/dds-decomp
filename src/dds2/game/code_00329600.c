@@ -7,10 +7,7 @@
 #include "sdf_pending.h"
 #include "sdf_named_resource_request_api.h"
 #include "sif_rpc_client_prefix.h"
-
-#define SDF_HEAP_BLOCK_FREE 0
-#define SDF_HEAP_BLOCK_USED 1
-#define SDF_HEAP_BLOCK_END 2
+#include "sdf_mem_block_state.h"
 
 #define SDF_NAMED_REQUEST_OVERHEAD_BYTES 0xC
 #define SDF_RPC_REPLY_ALIGNMENT_MASK 0x3F
@@ -46,7 +43,7 @@ void sdfMemReallocRecord(sdfMemHandle_t *allocation, s32 size) {
     }
     if (currentSize < size) {
         available = nextBlock->next->address - nextBlock->address + currentSize;
-        if (nextBlock->state == SDF_HEAP_BLOCK_FREE && available >= size) {
+        if (nextBlock->state == SDF_MEM_BLOCK_STATE_FREE && available >= size) {
             if (available == size) {
                 nextBlock->next->prev = allocation;
                 allocation->next = nextBlock->next;
@@ -73,14 +70,14 @@ void sdfMemReallocRecord(sdfMemHandle_t *allocation, s32 size) {
             replacement->next->prev = replacement;
             sdfMemFreeDirect(replacement);
         }
-    } else if (nextBlock->state == SDF_HEAP_BLOCK_FREE) {
+    } else if (nextBlock->state == SDF_MEM_BLOCK_STATE_FREE) {
         nextBlock->address = temporaryAddress + size;
     } else {
         temporaryAddress = (s32)sdfChipAllocDirect(0x10);
         ((sdfMemHandle_t *)temporaryAddress)->prev = allocation;
         ((sdfMemHandle_t *)temporaryAddress)->next = nextBlock;
         nextBlock->prev = (sdfMemHandle_t *)temporaryAddress;
-        ((sdfMemHandle_t *)temporaryAddress)->state = SDF_HEAP_BLOCK_FREE;
+        ((sdfMemHandle_t *)temporaryAddress)->state = SDF_MEM_BLOCK_STATE_FREE;
         allocation->next = (sdfMemHandle_t *)temporaryAddress;
         ((sdfMemHandle_t *)temporaryAddress)->referenceCount = 0;
         ((sdfMemHandle_t *)temporaryAddress)->address = allocation->address + size;
@@ -106,15 +103,15 @@ void sdfMemFreeDirect(struct sdfMemHandle_t *allocation) {
     }
     interruptsDisabled = DIntr();
     nextBlock = allocation->next;
-    if (nextBlock->state == SDF_HEAP_BLOCK_FREE) {
+    if (nextBlock->state == SDF_MEM_BLOCK_STATE_FREE) {
         sdfMemFreeMerge(allocation);
         sdfChipFreeDirect(nextBlock);
     }
-    if (allocation->prev->state == SDF_HEAP_BLOCK_FREE) {
+    if (allocation->prev->state == SDF_MEM_BLOCK_STATE_FREE) {
         sdfMemFreeMerge(allocation->prev);
         sdfChipFreeDirect(allocation);
     } else {
-        allocation->state = SDF_HEAP_BLOCK_FREE;
+        allocation->state = SDF_MEM_BLOCK_STATE_FREE;
         allocation->referenceCount = 0;
     }
     if (interruptsDisabled != 0) {
@@ -171,8 +168,8 @@ sdfMemHandle_t *sdfMemGetHandleByPtr(const void *address) {
 
     interruptsDisabled = DIntr();
     for (block = heap->head.next;; block = block->next) {
-        if (block->state != SDF_HEAP_BLOCK_USED) {
-            if (block->state == SDF_HEAP_BLOCK_END) {
+        if (block->state != SDF_MEM_BLOCK_STATE_USED) {
+            if (block->state == SDF_MEM_BLOCK_STATE_END_SENTINEL) {
                 if (interruptsDisabled != 0) {
                     EIntr();
                 }
@@ -196,14 +193,14 @@ void sdfMemGetInfo(SdfGeneralHeapStats *stats) {
     s32 blockCount = 0;
     s32 freeBlockCount = 0;
     s32 blockBytes;
-    u16 state;
+    SdfMemBlockState state;
 
-    for (; block->state != SDF_HEAP_BLOCK_END; block = block->next) {
+    for (; block->state != SDF_MEM_BLOCK_STATE_END_SENTINEL; block = block->next) {
         blockBytes = block->next->address - block->address;
         state = block->state;
         blockCount++;
         totalBytes += blockBytes;
-        if (state == SDF_HEAP_BLOCK_FREE) {
+        if (state == SDF_MEM_BLOCK_STATE_FREE) {
             if (smallestFreeBytes == 0 || blockBytes < smallestFreeBytes) {
                 smallestFreeBytes = blockBytes;
             }
@@ -229,8 +226,8 @@ sdfMemHandle_t *sdfFindGeneralBlockContaining(s32 address) {
 
     for (;; block = nextBlock) {
         nextBlock = block->next;
-        if (block->state != SDF_HEAP_BLOCK_USED) {
-            if (block->state == SDF_HEAP_BLOCK_END) {
+        if (block->state != SDF_MEM_BLOCK_STATE_USED) {
+            if (block->state == SDF_MEM_BLOCK_STATE_END_SENTINEL) {
                 return NULL;
             }
         } else if (address >= block->address && address < nextBlock->address) {
