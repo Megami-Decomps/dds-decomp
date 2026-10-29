@@ -1414,8 +1414,8 @@ void dds3Particle_SparkBuffInit(EffBallisticEmitter *effect, s32 index) {
     s32 frame;
 
     packet += index;
-    switch (effect->mode) {
-    case 0:
+    switch (effect->launchMode) {
+    case EFF_BALLISTIC_LAUNCH_MODE_RING:
         if (effect->randomDir) {
             direction[0] = (dds3GetRandFloatA(effDefaultRandomState) - 0.5f) * 2.0f;
             direction[1] = 0;
@@ -1464,7 +1464,7 @@ void dds3Particle_SparkBuffInit(EffBallisticEmitter *effect, s32 index) {
             packet->f38 = gravity;
         }
         break;
-    case 1:
+    case EFF_BALLISTIC_LAUNCH_MODE_ORIGIN:
         if (effect->randomDir) {
             packet->pos[0] = effect->head.origin[0];
             packet->pos[1] = effect->head.origin[1];
@@ -1491,7 +1491,7 @@ void dds3Particle_SparkBuffInit(EffBallisticEmitter *effect, s32 index) {
             packet->f38 = gravity;
         }
         break;
-    case 2:
+    case EFF_BALLISTIC_LAUNCH_MODE_REVERSE_TRAJECTORY:
         if (effect->randomDir) {
             decay = effect->decayPct / 100.0f + 1.0f;
             EE_MMI_UNIT_MATRIX(effect->head.matrix);
@@ -1552,11 +1552,11 @@ void dds3Particle_SparkBuffInit(EffBallisticEmitter *effect, s32 index) {
  * a source with max_cuid 400-407/434-439 (both titles) — no natural form found. */
 
 /* Scale velocity, add its stored vertical acceleration, and advance position.
- * Only mode zero transforms the displacement through the emitter matrix. */
+ * Only ring launches transform the displacement through the emitter matrix. */
 void dds3Particle_SparkDraw(EffBallisticEmitter *effect) {
     EffPacket *packet = (EffPacket *)effect->head.buffer->records;
     u32 subeffectKind = effect->head.sub.kind;
-    u32 mode;
+    EffBallisticLaunchMode launchMode;
     f32 positionDelta[4];
     f32 velocityScale;
     s32 completedCount;
@@ -1566,8 +1566,8 @@ void dds3Particle_SparkDraw(EffBallisticEmitter *effect) {
     s32 packetIndex;
 
     dds3Particle_EffectInit(&effect->head.sub);
-    mode = effect->mode;
-    if (mode == 0) {
+    launchMode = effect->launchMode;
+    if (launchMode == EFF_BALLISTIC_LAUNCH_MODE_RING) {
         VU0_LOAD_MATRIX(effect->head.matrix);
     }
     velocityScale = effect->decayPct / 100.0f + 1.0f;
@@ -1592,7 +1592,7 @@ void dds3Particle_SparkDraw(EffBallisticEmitter *effect) {
             packet->vel[0] *= velocityScale;
             packet->vel[2] *= velocityScale;
             SDF_VU0_LOADVECTOR(packet->vel);
-            if (mode == 0) {
+            if (launchMode == EFF_BALLISTIC_LAUNCH_MODE_RING) {
                 SDF_VU0_APPLYMATRIX();
             }
             SDF_VU0_STOREVECTOR(positionDelta);
