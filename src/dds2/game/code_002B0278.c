@@ -640,7 +640,66 @@ s32 mnuIsFinalItemIndex(s32 nodeIndex, const MenuList *list) {
 }
 
 extern void mnuDrawPartySelectionListEntry(s32, s32, s32, MenuList *, MenuListNode *, s32);
+#ifdef NON_MATCHING
+#include "common.h"
+#include "sdk_ps2.h"
+#include "itf.h"
+#include "itf_draw_grid.h"
+#include "fr_font.h"
+#include "fr_font_draw_glyph.h"
+#include "mnu.h"
+#include "mnu_list.h"
+
+
+extern _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, _FRQ *);
+
+
+/* One row of the party-selection list: the camp row slot, then for a member
+ * its row band (slot 0x1D of the camp's second base sprite set, the same
+ * whether or not the cursor is on it) and its level; for the final row its
+ * label (the first party title set's slot 2 under the cursor, slot 1
+ * otherwise) between two edge marks (slot 0x1F raised 8 under the cursor,
+ * slot 10 otherwise). The list's context is the camp menu work. */
+void mnuDrawPartySelectionListEntry(s32 x, s32 y, s32 depth, struct MenuList *list, struct MenuListNode *node,
+                                    s32 texture) {
+    MenuStaffContext *context = list->context;
+    u32 level = node->sortKeySecondary;
+    char text[0x10];
+    _FRQ *glyph;
+    s32 posX;
+
+    mnuDrawCampGridResourceSlot(x, y, depth, (s32)list, (u32)node, texture);
+    switch (mnuIsFinalItemIndex(node->index, (s32)list)) {
+    case 0:
+        posX = x + 0x640;
+        y += 0x30;
+        if (list->cursor == node) {
+            itfDrawGridWithResolvedSlot(posX, y, 0, 0, context->resources.baseResources[1], 0x1D, 0x53);
+        } else {
+            itfDrawGridWithResolvedSlot(posX, y, 0, 0, context->resources.baseResources[1], 0x1D, 0x53);
+        }
+        posX = x + 0x7D0;
+        sprintf(text, "%2d", level);
+        glyph = itfCreateFont2TextGlyph(posX, y, 0, 0xA09DC380, text, NULL);
+        frFontDrawGlyphChain(glyph, 1, 0x53);
+        frDestroyFontRequestAfter(glyph);
+        break;
+    case 1:
+        if (list->cursor == node) {
+            itfDrawGridWithResolvedSlot(x + 0x450, y, 0, 0, context->partyTitles[0], 2, 0x53);
+            itfDrawGridWithResolvedSlot(x - 0x20, y - 8, 0, 0, context->resources.baseResources[1], 0x1F, 0x53);
+            itfDrawGridWithResolvedSlot(x + 0x940, y - 8, 0, 0, context->resources.baseResources[1], 0x1F, 0x53);
+        } else {
+            itfDrawGridWithResolvedSlot(x + 0x450, y, 0, 0, context->partyTitles[0], 1, 0x53);
+            itfDrawGridWithResolvedSlot(x + 0x60, y, 0, 0, context->resources.baseResources[1], 10, 0x53);
+            itfDrawGridWithResolvedSlot(x + 0x950, y, 0, 0, context->resources.baseResources[1], 10, 0x53);
+        }
+        break;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "game/code_002B0278", mnuDrawPartySelectionListEntry);
+#endif
 
 extern void mnuCreatePartySelectionWindow(MenuContext *);
 extern char D_00437BE8[];
