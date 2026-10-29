@@ -49,7 +49,7 @@ extern s32 D_0047BE00[];
 extern sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path,
                                           s32 (*callback)(sdfFileCmdHandle_t *, SdfDevEvent, s32, s32, s32),
                                           void *callbackContext);
-extern s32 sdfFileCmdRequestFileSize(sdfFileCmdHandle_t *state);
+extern SdfFileCommandQueueResult sdfFileCmdRequestFileSize(sdfFileCmdHandle_t *state);
 extern s32 sdfFileRpcReadCallback(sdfFileCmdHandle_t *, SdfDevEvent, s32, s32, s32);
 
 

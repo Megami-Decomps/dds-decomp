@@ -23,7 +23,7 @@ extern s32 D_00437CC0;
 extern char fileManagerTaskName[];
 
 extern FileManagerQueuedRequestResult (*p2sdSmgBuf)(void);
-extern s32 sdfFileCmdRequestFileSize(sdfFileCmdHandle_t *);
+extern SdfFileCommandQueueResult sdfFileCmdRequestFileSize(sdfFileCmdHandle_t *);
 
 extern void pacRead(FileTransferJob *);
 

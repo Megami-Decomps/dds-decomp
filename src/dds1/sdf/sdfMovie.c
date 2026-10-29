@@ -9,7 +9,7 @@
 #include "sdf_dev_event.h"
 #include "sdf_dev_state.h"
 
-s32 sdfFileCmdRequestFileSize(sdfFileCmdHandle_t *state);
+SdfFileCommandQueueResult sdfFileCmdRequestFileSize(sdfFileCmdHandle_t *state);
 extern s32 movieStreamSema;
 
 /* Queue up to 0x4000 bytes into the linear ring; state 5 means insufficient room. */

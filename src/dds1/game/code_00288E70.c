@@ -23,7 +23,7 @@ extern s32 D_003BC7D8;
 extern FileManagerQueuedRequestResult (*p2sdSmgBuf)(void);
 KwlnTaskUpdateResult fileManagerProc(dds3ProcessID_t *task);
 
-extern s32 sdfFileCmdRequestFileSize(sdfFileCmdHandle_t *);
+extern SdfFileCommandQueueResult sdfFileCmdRequestFileSize(sdfFileCmdHandle_t *);
 
 extern void pacRead(FileTransferJob *);
 

@@ -6,6 +6,11 @@
 /* Protocol IDs use distinct byte-sized storage codes in sdfFileCmdHandle_t. */
 typedef u8 SdfDevOperationCode;
 typedef s8 SdfDevStateCode;
+/* Queue acceptance is immediate; read, write, and size results arrive later. */
+typedef s32 SdfFileCommandQueueResult;
+
+#define SDF_FILE_COMMAND_QUEUE_RESULT_NOT_QUEUED -1
+#define SDF_FILE_COMMAND_QUEUE_RESULT_QUEUED 0
 
 /* Complete 0x40-byte owner allocated by sdfFileCmdNewHandle. */
 typedef struct sdfFileCmdHandle_t {
@@ -52,10 +57,11 @@ typedef char DevState_callbackContext_offset_must_be_0x3C[
 
 /* Stable state APIs. Callback factories keep caller-specific callback types. */
 sdfFileCmdHandle_t *sdfFileOpen(const char *path);
+SdfFileCommandQueueResult sdfFileCmdRequestFileSize(sdfFileCmdHandle_t *state);
 /* The worker borrows the read destination until the operation completes. */
-s32 sdfFileCmdRead(sdfFileCmdHandle_t *state, void *destination, s32 byteCount);
+SdfFileCommandQueueResult sdfFileCmdRead(sdfFileCmdHandle_t *state, void *destination, s32 byteCount);
 /* The worker borrows the write source until the operation completes. */
-s32 sdfFileCmdWrite(sdfFileCmdHandle_t *state, const void *source, s32 byteCount);
+SdfFileCommandQueueResult sdfFileCmdWrite(sdfFileCmdHandle_t *state, const void *source, s32 byteCount);
 s32 sdfFileCmdFree(sdfFileCmdHandle_t *state);
 s32 sdfFileCmdClearError(sdfFileCmdHandle_t *state);
 s32 sdfFileCmdClose(sdfFileCmdHandle_t *request);

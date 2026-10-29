@@ -23,7 +23,7 @@
 #include "btl.h"
 /* Declared before first use (were implicit int). */
 extern void sceCdInit(s32);
-extern s32 sdfFileCmdRequestFileSize(sdfFileCmdHandle_t *state);
+extern SdfFileCommandQueueResult sdfFileCmdRequestFileSize(sdfFileCmdHandle_t *state);
 /* Original-style implicit int, kept: matched code depends on it: sdfFileCmdSeek. */
 
 #define SDF_DEV_WORKER_COUNT 4
@@ -1680,38 +1680,38 @@ s32 sdfFileCmdSeek(sdfFileCmdHandle_t *state, s32 seekOffset, s32 seekOrigin) {
     return 0;
 }
 
-/* Queue a size query for an active request; return 0, or -1 if inactive. */
-s32 sdfFileCmdRequestFileSize(sdfFileCmdHandle_t *state) {
+/* Queue a size query for an active request and report queue acceptance. */
+SdfFileCommandQueueResult sdfFileCmdRequestFileSize(sdfFileCmdHandle_t *state) {
     if (state->state != SDF_DEV_STATE_ACTIVE) {
-        return -1;
+        return SDF_FILE_COMMAND_QUEUE_RESULT_NOT_QUEUED;
     }
     state->operation = SDF_DEV_OPERATION_GET_SIZE;
     SignalSema(sdfFileDeviceCB[state->workerIndex].semaphore);
-    return 0;
+    return SDF_FILE_COMMAND_QUEUE_RESULT_QUEUED;
 }
 
-/* Queue a byte-counted read; return -1 without changing an inactive request. */
-s32 sdfFileCmdRead(sdfFileCmdHandle_t *state, void *readBuffer, s32 byteCount) {
+/* Queue a byte-counted read and report queue acceptance. */
+SdfFileCommandQueueResult sdfFileCmdRead(sdfFileCmdHandle_t *state, void *readBuffer, s32 byteCount) {
     if (state->state != SDF_DEV_STATE_ACTIVE) {
-        return -1;
+        return SDF_FILE_COMMAND_QUEUE_RESULT_NOT_QUEUED;
     }
     state->requestExtra = byteCount;
     state->operation = SDF_DEV_OPERATION_READ;
     state->requestData = readBuffer;
     SignalSema(sdfFileDeviceCB[state->workerIndex].semaphore);
-    return 0;
+    return SDF_FILE_COMMAND_QUEUE_RESULT_QUEUED;
 }
 
-/* Queue a byte-counted write; return -1 without changing an inactive request. */
-s32 sdfFileCmdWrite(sdfFileCmdHandle_t *state, const void *buffer, s32 byteCount) {
+/* Queue a byte-counted write and report queue acceptance. */
+SdfFileCommandQueueResult sdfFileCmdWrite(sdfFileCmdHandle_t *state, const void *buffer, s32 byteCount) {
     if (state->state != SDF_DEV_STATE_ACTIVE) {
-        return -1;
+        return SDF_FILE_COMMAND_QUEUE_RESULT_NOT_QUEUED;
     }
     state->requestExtra = byteCount;
     state->operation = SDF_DEV_OPERATION_WRITE;
     state->requestData = (void *)buffer;
     SignalSema(sdfFileDeviceCB[state->workerIndex].semaphore);
-    return 0;
+    return SDF_FILE_COMMAND_QUEUE_RESULT_QUEUED;
 }
 
 /* Clear an inactive request's result and return it to the active state. */
