@@ -1631,7 +1631,107 @@ void dds3DrawDistRipOverError(void) {
     }
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "sdf.h"
+#include "sdf_gs_packet.h"
+#include "sdf_packet_list.h"
+#include "kwln_fade_color.h"
+#include "kwln_draw_buffer.h"
+
+extern s16 kwlnBackgroundFadeFirstRamp; /* the background fade's band ramps */
+extern s16 kwlnBackgroundFadeSecondRamp;
+extern u8 kwlnBackgroundFadeOverlayPackets[]; /* the overlay packet, one per draw buffer */
+extern SdfPoolNode sdfGrOtTable[];
+extern s32 kwlnFadeIsBackgroundOverlayActive(void);
+
+#define KWLN_FADE_OVERLAY_SURFACE 92
+#define KWLN_FADE_MAX_ALPHA 0x80
+#define KWLN_GS_PABE 0x49
+#define KWLN_GS_FBA_1 0x4A
+#define KWLN_OVERLAY_TEST 0x31003       /* alpha and depth tests always pass */
+#define KWLN_OVERLAY_ALPHA 0x01         /* (Cd - Cs) * As / 128 + Cs */
+#define KWLN_OVERLAY_DEPTH 0xFEFFFFULL
+#define KWLN_OVERLAY_LEFT 0x7000
+#define KWLN_OVERLAY_RIGHT 0x9000
+#define KWLN_OVERLAY_TOP 0x7900
+#define KWLN_OVERLAY_BOTTOM 0x8700
+
+/* An end tag carrying VIF DIRECT of ten quadwords: four A+D register writes,
+ * then a blended sprite of two vertices. */
+typedef struct KwlnFadeOverlayPacket {
+    SdfGsPacketHeader header;
+    SdfGsRegisterWrite alpha;
+    SdfGsRegisterWrite pabe;
+    SdfGsRegisterWrite fba;
+    SdfGsRegisterWrite test;
+    u64 spriteTag;
+    u64 spriteRegisters;
+    SdfGsRegisterWrite vertices[4];
+} KwlnFadeOverlayPacket;
+
+typedef char KwlnFadeOverlayPacket_size_must_be_0xB0[(sizeof(KwlnFadeOverlayPacket) == 0xB0) ? 1 : -1];
+
+static void kwlnWriteRegister(SdfGsRegisterWrite *write, u64 value, u64 registerId) {
+    write->value = value;
+    write->registerId = registerId;
+}
+
+static u64 kwlnOverlayVertex(u32 x, u32 y) {
+    return (KWLN_OVERLAY_DEPTH << 32) | (u32)(y << 16) | x;
+}
+
+/* While the fade colour has any alpha, cover the screen with it: the sprite
+ * keeps (128 - alpha) / 128 of what is drawn. An active background overlay
+ * narrows it to the rows between its two bands. Upstream: INCLUDE_ASM in
+ * both games; same packet as the retail routine. */
+void kwlnQueueBackgroundFadeOverlayPacket(void) {
+    u32 buffer = dds3GetFrameID();
+    s32 overlayAlpha = KWLN_FADE_MAX_ALPHA - fadergba.a;
+    KwlnFadeOverlayPacket *packet;
+    u32 top = KWLN_OVERLAY_TOP;
+    u32 bottom = KWLN_OVERLAY_BOTTOM;
+    u64 color;
+    sdfDrawTag_t *packets;
+    SdfPoolNode *surface;
+
+    if (overlayAlpha >= KWLN_FADE_MAX_ALPHA) {
+        return;
+    }
+    packet = (KwlnFadeOverlayPacket *)(kwlnBackgroundFadeOverlayPackets + buffer * sizeof(KwlnFadeOverlayPacket));
+    packet->header.dmaTag = 0x7000000A;              /* end, ten quadwords */
+    packet->header.vifCommands = 0x5000000AULL << 32; /* NOP; DIRECT ten quadwords */
+    packet->header.gifTag = 0x1000000000000004ULL;    /* NLOOP 4, NREG 1 */
+    packet->header.gifRegisters = SDF_GIF_REGISTER_AD;
+    kwlnWriteRegister(&packet->alpha, KWLN_OVERLAY_ALPHA, SDF_GS_ALPHA_1);
+    kwlnWriteRegister(&packet->pabe, 0, KWLN_GS_PABE);
+    kwlnWriteRegister(&packet->fba, 0, KWLN_GS_FBA_1);
+    kwlnWriteRegister(&packet->test, KWLN_OVERLAY_TEST, SDF_GS_TEST_1);
+    packet->spriteTag = 0x1023400000008004ULL; /* NLOOP 4, EOP, PRE, PRIM blended sprite, NREG 1 */
+    packet->spriteRegisters = SDF_GIF_REGISTER_AD;
+
+    if (kwlnFadeIsBackgroundOverlayActive()) {
+        top = 0x7A88 - kwlnBackgroundFadeFirstRamp * 8;
+        bottom = 0x8488 + kwlnBackgroundFadeSecondRamp * 8;
+    }
+    /* Retail shifts the alpha in 32 bits, sign-extending a negative one (a
+     * fade alpha above 0x80) over Q; the sprite is untextured, so Q goes
+     * unread, but the packet keeps retail's bits. */
+    color = 0x3F80000000000000ULL /* Q = 1.0 */ | (u64)(s64)(s32)((u32)overlayAlpha << 24) |
+            ((u64)fadergba.b << 16) | ((u64)fadergba.g << 8) | fadergba.r;
+    kwlnWriteRegister(&packet->vertices[0], color, SDF_GS_RGBAQ);
+    kwlnWriteRegister(&packet->vertices[1], kwlnOverlayVertex(KWLN_OVERLAY_LEFT, top), SDF_GS_XYZ2);
+    kwlnWriteRegister(&packet->vertices[2], color, SDF_GS_RGBAQ);
+    kwlnWriteRegister(&packet->vertices[3], kwlnOverlayVertex(KWLN_OVERLAY_RIGHT, bottom), SDF_GS_XYZ2);
+
+    packets = dds3FontReqAllocDrawTag();
+    sdfDrawTagLink(packets, (u32)packet);
+    surface = &sdfGrOtTable[KWLN_FADE_OVERLAY_SURFACE];
+    surface->append(surface, packets);
+}
+#else
 INCLUDE_ASM(const s32, "game/code_00102DC8", kwlnQueueBackgroundFadeOverlayPacket);
+#endif
 
 /* Cancel background direction, zero RGBA and restore the inactive ramp maxima.
  * This reset does not rewrite the background counter or duration. */
