@@ -9681,7 +9681,7 @@ void btlStopRainSoundTransition(void) {
     }
 }
 
-u32 btlPollFieldArchiveLoad(BtlFieldLoadArgs *args) {
+BtlTaskPollResult btlPollFieldArchiveLoad(BtlFieldLoadArgs *args) {
     BtlState *blocks = (BtlState *)btlGetRuntime();
     char directory[0x80];
     char path[0x80];
@@ -9735,14 +9735,14 @@ u32 btlPollFieldArchiveLoad(BtlFieldLoadArgs *args) {
             }
             blocks->battleFlags |= 2;
             btlBossDebugPrintf("btl:field load end[f%03d_%03d]\n", args->stage, args->variant);
-            return 1;
+            return BTL_TASK_POLL_END_DELAY;
         }
     }
     args->frame++;
-    return 0;
+    return BTL_TASK_POLL_CONTINUE;
 }
 
-extern u32 btlPollFieldArchiveLoad(BtlFieldLoadArgs *args);
+extern BtlTaskPollResult btlPollFieldArchiveLoad(BtlFieldLoadArgs *args);
 
 BtlRuntimeTask *fldCreateSceneTileTask(s32 value, s32 option) {
     BtlRuntimeTask *task = btlAllocTask(0x28);
