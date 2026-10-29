@@ -7,8 +7,8 @@
 extern u32 corePktCurrLight;  /* the selected block; its light vector at 0xD0 */
 extern u128 sdfVuObjectBasisCache[3];
 extern u64 sdf3DRefMapParam;
-extern void corePktLerpUVColorChain(VuBlendNode *node);
-extern void corePktEmitTexTrisCtx2(corePktCb_t *work, u64 samplingState, u64 textureState, u64 clampState,
+extern void corePktLerpUVColorChain(sdfCorePacketPointBuff_tag *node);
+extern void corePktEmitTexTrisCtx2(sdfCorePacketCb_t *work, u64 samplingState, u64 textureState, u64 clampState,
                                           u64 alphaState, s32 clearPrimitiveFlags);
 
 /* Light the work's vertex records by their normals and send them: each
@@ -19,16 +19,16 @@ extern void corePktEmitTexTrisCtx2(corePktCb_t *work, u64 samplingState, u64 tex
  * Upstream: hand-written assembly (hand/vu/corePktEmitRefMapPass.s),
  * retail's instructions on the EE interpreter. Retail's 0x30 quadword
  * carries leftover register bits in z and w, which this leaves zero. */
-void corePktEmitRefMapPass(corePktCb_t *work) {
-    u8 *record = (u8 *)work->dmaBase;
-    u16 count = work->param1;
+void corePktEmitRefMapPass(sdfCorePacketCb_t *work) {
+    u8 *record = (u8 *)work->pointBuff;
+    u16 count = work->pointCount;
     const u8 *light = (const u8 *)corePktCurrLight + 0xD0;
-    const u32 nodeColor = *(const u32 *)((const u8 *)work->node + 0x10);
-    const u32 packedColor = work->packedColor;
+    const u32 nodeColor = *(const u32 *)((const u8 *)work->matPacketPtr + 0x10);
+    const u32 packedColor = work->color;
     const u64 scale = 0x3C0000003C000000ULL; /* (1/128, 1/128) */
 
     __asm__ volatile("lqc2 vf10, 0(%0)" : : "r"(light));
-    if ((work->nextParam & 0x800) == 0) {
+    if ((work->packetBits & 0x800) == 0) {
         __asm__ volatile(
             "lqc2 vf24, 0(%0)\n\tlqc2 vf25, 16(%0)\n\tlqc2 vf26, 32(%0)\n\t"
             "vmul.xyz vf24, vf24, vf10\n\tvmul.xyz vf25, vf25, vf10\n\tvmul.xyz vf26, vf26, vf10\n\t"
@@ -49,9 +49,9 @@ void corePktEmitRefMapPass(corePktCb_t *work) {
             "vmulax.x ACC, vf24, vf2x\n\tvmadday.x ACC, vf25, vf2y\n\tvmaddz.x vf5, vf26, vf2z\n\t"
             "sqc2 vf6, 32(%0)\n\tsqc2 vf5, 48(%0)"
             : : "r"(record) : "memory");
-        record += sizeof(VuBlendNode);
+        record += sizeof(sdfCorePacketPointBuff_tag);
     } while (--count != 0);
-    corePktLerpUVColorChain(work->blendList);
+    corePktLerpUVColorChain(work->extPointTop);
     corePktEmitTexTrisCtx2(work, 0, sdf3DRefMapParam, 5, 0x48, 0x20);
 }
 #else

@@ -10,10 +10,10 @@
  * Then each blend node takes its first source's colour. Upstream:
  * hand-written assembly (hand/vu/corePktApplyFaceDivColor.s), retail's
  * instructions per vertex on the EE interpreter. */
-void corePktApplyFaceDivColor(corePktCb_t *work, const u128 *parameters) {
-    u8 *record = (u8 *)work->dmaBase;
-    s16 count = work->param1;
-    VuBlendNode *node;
+void corePktApplyFaceDivColor(sdfCorePacketCb_t *work, const u128 *parameters) {
+    u8 *record = (u8 *)work->pointBuff;
+    s16 count = work->pointCount;
+    sdfCorePacketPointBuff_tag *node;
 
     /* vf12 = 0.5 in every lane. */
     __asm__ volatile(
@@ -26,9 +26,9 @@ void corePktApplyFaceDivColor(corePktCb_t *work, const u128 *parameters) {
             "vmaxx.w vf4, vf3, vf0x\n\tvminiw.w vf5, vf4, vf0w\n\t"
             "vmulaw.xyzw ACC, vf10, vf0w\n\tvmaddw.xyzw vf6, vf11, vf5w\n\tsqc2 vf6, 32(%0)"
             : : "r"(record) : "memory");
-        record += sizeof(VuBlendNode);
+        record += sizeof(sdfCorePacketPointBuff_tag);
     } while (--count != 0);
-    for (node = work->blendList; node != NULL; node = node->next) {
+    for (node = work->extPointTop; node != NULL; node = node->next) {
         *(u128 *)node->color = *(const u128 *)node->sourceA->color;
     }
 }

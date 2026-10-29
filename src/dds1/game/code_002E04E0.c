@@ -25,21 +25,21 @@
 
 
 
-/* Finish the selected node's transformed rows and emit its textured geometry. */ void corePktEmitMultiTexPass(corePktCb_t *work);
+/* Finish the selected node's transformed rows and emit its textured geometry. */ void corePktEmitMultiTexPass(sdfCorePacketCb_t *work);
 
-/* Split ring addressing at position 128; retain the native 96-byte stride. */ void corePktSetupPointBuff(corePktCb_t *work, s32 ringPosition);
+/* Split ring addressing at position 128; retain the native 96-byte stride. */ void corePktSetupPointBuff(sdfCorePacketCb_t *work, s32 ringPosition);
 
-/* Select textured or colored emission; preserve the native no-argument calls. */ void corePktEmitBase(corePktCb_t *work);
+/* Select textured or colored emission; preserve the native no-argument calls. */ void corePktEmitBase(sdfCorePacketCb_t *work);
 
 /* Emit selected geometry, then apply flag callbacks; the first may change flags. */
-void corePktEmitAllPasses(corePktCb_t *work) {
+void corePktEmitAllPasses(sdfCorePacketCb_t *work) {
     u32 selectedFlags;
 
     corePktEmitBase(work);
-    selectedFlags = work->selectedFlags;
+    selectedFlags = work->attrBits;
     if ((selectedFlags & 0x1000) != 0) {
         corePktEmitMultiTexPass(work);
-        selectedFlags = work->selectedFlags;
+        selectedFlags = work->attrBits;
     }
     if ((selectedFlags & 1) != 0) {
         corePktEmitRefMapPass((u32)work);
@@ -47,33 +47,33 @@ void corePktEmitAllPasses(corePktCb_t *work) {
     }
 }
 
-extern void corePktBuildFaceList(corePktCb_t *work);
+extern void corePktBuildFaceList(sdfCorePacketCb_t *work);
 
-extern void corePktBuildBackFaceList(corePktCb_t *work);
+extern void corePktBuildBackFaceList(sdfCorePacketCb_t *work);
 
 extern void corePktRelightBackFaces(u32 base, s32 count);
 
 /* Align the packet to 64 bytes; the optional second pass preserves vf24-vf26. */
-void corePktOpenAndEmit(corePktCb_t *work) {
+void corePktOpenAndEmit(sdfCorePacketCb_t *work) {
     u32 packetStart = sdfGrOpenPacketBuff();
     u32 alignedStart = (packetStart + 0x3F) & ~0x3F;
     u32 ringAddress = ((alignedStart + 0x40) & SDF_DMA_ADDRESS_MASK) | 0x30000000;
-    work->packetStart = packetStart;
-    work->header = alignedStart + 0x30;
-    work->ringStart = (u32 *)ringAddress;
-    work->cursor = (u32 *)ringAddress;
-    if ((work->selectedFlags & 0x4000) != 0) {
+    work->packetOpenPtr = packetStart;
+    work->packetTopPtr = alignedStart + 0x30;
+    work->packetStartPtr = (u32 *)ringAddress;
+    work->packetPtr = (u32 *)ringAddress;
+    if ((work->attrBits & 0x4000) != 0) {
         u8 savedVectors[0x30];
         VU0_STORE_VF_UNCLOBBERED(vf24, savedVectors);
         VU0_STORE_VF_AT_UNCLOBBERED(vf25, 16, savedVectors);
         VU0_STORE_VF_AT_UNCLOBBERED(vf26, 32, savedVectors);
         corePktBuildFaceList(work);
         corePktEmitAllPasses(work);
-        corePktSetupPointBuff(work, work->param1);
+        corePktSetupPointBuff(work, work->pointCount);
         VU0_LOAD_VF(vf24, savedVectors);
         VU0_LOAD_VF_AT(vf25, 16, savedVectors);
         VU0_LOAD_VF_AT(vf26, 32, savedVectors);
-        corePktRelightBackFaces(work->dmaBase, work->param1);
+        corePktRelightBackFaces(work->pointBuff, work->pointCount);
         corePktBuildBackFaceList(work);
         corePktEmitAllPasses(work);
     } else {
@@ -83,7 +83,7 @@ void corePktOpenAndEmit(corePktCb_t *work) {
 }
 
 /* Pad and finalize the packet; inactive or empty work returns NULL. */
-u64 *corePktClosePacket(corePktCb_t *work) {
+u64 *corePktClosePacket(sdfCorePacketCb_t *work) {
     u32 cursor;
     u32 start;
     s32 quadwords;
@@ -91,14 +91,14 @@ u64 *corePktClosePacket(corePktCb_t *work) {
     u64 gifTag;
     u64 *header;
 
-    if (work->packetStart == 0) {
+    if (work->packetOpenPtr == 0) {
         return NULL;
     }
 
-    cursor = (u32)work->cursor;
-    start = (u32)work->ringStart;
+    cursor = (u32)work->packetPtr;
+    start = (u32)work->packetStartPtr;
     if (cursor == start) {
-        sdfGrClosePacketBuff(work->packetStart);
+        sdfGrClosePacketBuff(work->packetOpenPtr);
         return NULL;
     }
 
@@ -114,7 +114,7 @@ u64 *corePktClosePacket(corePktCb_t *work) {
     }
 
     sdfGrClosePacketBuff(cursor & 0x0FFFFFFF);
-    header = (u64 *)work->header;
+    header = (u64 *)work->packetTopPtr;
     descriptor = 0x20000000 | (quadwords & 0xFFFF);
     gifTag = 0x1100000000000000ULL;
     header[0] = descriptor;

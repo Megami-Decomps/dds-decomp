@@ -197,11 +197,11 @@ extern s32 D_003BDA20;
 #define MODEL_VU_INITIALIZE_PLANE(vf) __asm__ volatile ( \
     ".set noreorder\n\tvaddw.xyz " #vf ", vf0, vf0w\n\t" \
     "vsubw.w " #vf ", vf0, vf0w\n\t.set reorder")
-extern void corePktInitCb(corePktCb_t *work, u16 *parameterWords, u32 selectionMask);
+extern void corePktInitCb(sdfCorePacketCb_t *work, u16 *parameterWords, u32 selectionMask);
 extern void corePktSetFaceDivParm(void *out, SdfAssetEntry *entry, u32 packedColor, f32 deltaX, f32 deltaY);
 extern void corePktLoadWorldLightMtx(u8 *matrix);
-extern void corePktOpenAndEmit(corePktCb_t *work);
-extern u32 corePktClosePacket(corePktCb_t *work);
+extern void corePktOpenAndEmit(sdfCorePacketCb_t *work);
+extern u32 corePktClosePacket(sdfCorePacketCb_t *work);
 extern s32 corePktVu0Run(u32 dmaBase, s32 cursor, s32 count, s32 a, s32 b);
 extern void corePktSkinPointsFirst(u32 dmaBase, s32 count, s32 vertices, s32 first, s32 second);
 extern void corePktSkinPointsAccum(u32 dmaBase, s32 count, s32 vertices, s32 first, s32 second);
@@ -226,23 +226,23 @@ extern u128 sdfModelColorTransform[3];
 
 /* Lay out the node coordinates, second coordinates and vertex colours after
  * cursor, as the parameters select, and return the new cursor. */
-static s32 sdfModelLayOutTexturing(corePktCb_t *work, s32 cursor, u32 nextParam, s32 vertexCount) {
+static s32 sdfModelLayOutTexturing(sdfCorePacketCb_t *work, s32 cursor, u32 nextParam, s32 vertexCount) {
     if (nextParam & 0x100) {
-        work->coordinates = (u8 *)cursor;
+        work->uvPtr = (u8 *)cursor;
         cursor = MODEL_ALIGN16(cursor + vertexCount * 8);
-        if (work->flags & 0x1000) {
-            work->secondCoordinates = (u8 *)cursor;
+        if (work->orgAttrBits & 0x1000) {
+            work->uv2Ptr = (u8 *)cursor;
             cursor = MODEL_ALIGN16(cursor + vertexCount * 8);
         }
     }
-    work->vertexColors = (u8 *)cursor;
+    work->vertColPtr = (u8 *)cursor;
     return cursor;
 }
 
 /* The strip indices follow the payload when the parameters select them. */
-static s32 sdfModelLayOutStrip(corePktCb_t *work, s32 cursor, u32 nextParam, s32 stripCount) {
+static s32 sdfModelLayOutStrip(sdfCorePacketCb_t *work, s32 cursor, u32 nextParam, s32 stripCount) {
     if (nextParam & 0x20) {
-        work->strip = (u8 *)cursor;
+        work->facePtr = (u8 *)cursor;
         cursor = MODEL_ALIGN16(cursor + stripCount * 6);
     }
     return cursor;
@@ -272,7 +272,7 @@ static void sdfModelLoadNodeMatrix(u8 *matrix) {
  * microprogram reads only the row, so this writes zero there. */
 u32 sdfCorePacketGen(sdfModelNode_t *node, void *resourceData, s32 nodeMask, s32 color, f32 offsetX,
                                     f32 offsetY, s32 frame, s32 flag) {
-    corePktCb_t work;
+    sdfCorePacketCb_t work;
     u8 *resource = (u8 *)resourceData;
     s32 frameOffset = frame << 7;
     u8 *matrix = (u8 *)node->workspace + frameOffset;
@@ -287,32 +287,32 @@ u32 sdfCorePacketGen(sdfModelNode_t *node, void *resourceData, s32 nodeMask, s32
 
     MODEL_VU_INITIALIZE_PLANE(vf1);
     corePktInitCb(&work, (u16 *)(resource + 0x10), nodeMask);
-    work.depth = flag == 0 ? 1.0f : -1.0f;
-    work.packedColor = color;
-    work.offsetX = offsetX;
-    work.offsetY = offsetY;
+    work.backfaceSign = flag == 0 ? 1.0f : -1.0f;
+    work.color = color;
+    work.fdSoften = offsetX;
+    work.fdBias = offsetY;
     assets = (sdfMat_t **)node->root->resources->buffer;
     asset = assets[*(u16 *)(resource + 6)]->drawEntries[frame];
-    work.node = asset;
-    stripCount = (s16)work.param0; /* lh */
-    vertexCount = work.param1;
-    selected = work.selectedFlags;
-    nextParam = work.nextParam;
-    corePktSetFaceDivParm(sdfModelColorTransform, asset, work.packedColor, offsetX, offsetY);
-    dmaBase = work.dmaBase;
+    work.matPacketPtr = asset;
+    stripCount = (s16)work.faceCount; /* lh */
+    vertexCount = work.pointCount;
+    selected = work.attrBits;
+    nextParam = work.packetBits;
+    corePktSetFaceDivParm(sdfModelColorTransform, asset, work.color, offsetX, offsetY);
+    dmaBase = work.pointBuff;
 
     if (resource[0] == 7 || resource[0] == 8) {
         u128 *vu = MODEL_VU0_MEMORY;
         s32 transferCount, transferStride;
 
         if (resource[0] == 7) {
-            u16 *list = (u16 *)work.payload;
+            u16 *list = (u16 *)work.dataPtr;
             u16 listCount = *list++;
             sdfModelNode_t **nodes = (sdfModelNode_t **)node->root->list->buffer;
             s32 i, k;
 
             cursor = MODEL_ALIGN16((s32)(list + listCount));
-            work.strip = (u8 *)cursor;
+            work.facePtr = (u8 *)cursor;
             cursor = MODEL_ALIGN16(cursor + stripCount * 6);
             for (i = 0; i < 4; i++) {
                 vu[0xDC + i] = ((u128 *)sdf3DScreenTm)[i];
@@ -338,12 +338,12 @@ u32 sdfCorePacketGen(sdfModelNode_t *node, void *resourceData, s32 nodeMask, s32
             s32 i;
 
             sdfModelLoadNodeMatrix(matrix);
-            VU0_STORE_VF(vf28, &work.matrix[0]);
-            VU0_STORE_VF_AT_UNCLOBBERED(vf29, 16, &work.matrix[0]);
-            VU0_STORE_VF_AT_UNCLOBBERED(vf30, 32, &work.matrix[0]);
-            VU0_STORE_VF_AT_UNCLOBBERED(vf31, 48, &work.matrix[0]);
-            cursor = MODEL_ALIGN16((s32)work.payload);
-            work.strip = (u8 *)cursor;
+            VU0_STORE_VF(vf28, &work.tmSave[0]);
+            VU0_STORE_VF_AT_UNCLOBBERED(vf29, 16, &work.tmSave[0]);
+            VU0_STORE_VF_AT_UNCLOBBERED(vf30, 32, &work.tmSave[0]);
+            VU0_STORE_VF_AT_UNCLOBBERED(vf31, 48, &work.tmSave[0]);
+            cursor = MODEL_ALIGN16((s32)work.dataPtr);
+            work.facePtr = (u8 *)cursor;
             cursor = MODEL_ALIGN16(cursor + stripCount * 6);
             for (i = 0; i < 3; i++) {
                 vu[0xE6 + i] = asset->transforms[0].words[i];
@@ -355,14 +355,14 @@ u32 sdfCorePacketGen(sdfModelNode_t *node, void *resourceData, s32 nodeMask, s32
             transferStride = 32;
         }
         cursor = corePktVu0Run(dmaBase, cursor, vertexCount, transferCount, transferStride);
-        if (work.flags & 0x1000) {
-            work.secondCoordinates = (u8 *)cursor;
+        if (work.orgAttrBits & 0x1000) {
+            work.uv2Ptr = (u8 *)cursor;
             cursor = MODEL_ALIGN16(cursor + vertexCount * 8);
         }
-        work.vertexColors = (u8 *)cursor;
+        work.vertColPtr = (u8 *)cursor;
         corePktOpenAndEmit(&work);
     } else if (nextParam & 0x800) {
-        u16 *list = (u16 *)work.payload;
+        u16 *list = (u16 *)work.dataPtr;
         u16 listCount = *list++;
         sdfModelNode_t **nodes = (sdfModelNode_t **)node->root->list->buffer;
         s32 i;
@@ -396,7 +396,7 @@ u32 sdfCorePacketGen(sdfModelNode_t *node, void *resourceData, s32 nodeMask, s32
         VU0_LOAD_VF_AT(vf25, 32, (u128 *)corePktCurrLight);
         VU0_LOAD_VF_AT(vf26, 48, (u128 *)corePktCurrLight);
         if (selected & 0x10) {
-            corePktXfmLightClipUVPB(dmaBase, vertexCount, (s32)work.coordinates, (u8 *)asset + 0x68);
+            corePktXfmLightClipUVPB(dmaBase, vertexCount, (s32)work.uvPtr, (u8 *)asset + 0x68);
         } else {
             corePktXfmLightClipPB(dmaBase, vertexCount);
         }
@@ -410,7 +410,7 @@ u32 sdfCorePacketGen(sdfModelNode_t *node, void *resourceData, s32 nodeMask, s32
         s32 stride;
         s32 i;
 
-        cursor = MODEL_ALIGN16((s32)work.payload);
+        cursor = MODEL_ALIGN16((s32)work.dataPtr);
         if (slots == NULL) {
             return 0;
         }
@@ -447,26 +447,26 @@ u32 sdfCorePacketGen(sdfModelNode_t *node, void *resourceData, s32 nodeMask, s32
         sdfModelLayOutTexturing(&work, cursor, nextParam, vertexCount);
         sdfModelLoadNodeMatrix(matrix);
         if (selected & 0x10) {
-            corePktXfmLightClipUVPB(dmaBase, vertexCount, (s32)work.coordinates, (u8 *)asset + 0x68);
+            corePktXfmLightClipUVPB(dmaBase, vertexCount, (s32)work.uvPtr, (u8 *)asset + 0x68);
         } else {
             corePktXfmLightClipPB(dmaBase, vertexCount);
         }
         corePktOpenAndEmit(&work);
     } else {
-        s32 positions = sdfModelLayOutStrip(&work, MODEL_ALIGN16((s32)work.payload), nextParam, stripCount);
+        s32 positions = sdfModelLayOutStrip(&work, MODEL_ALIGN16((s32)work.dataPtr), nextParam, stripCount);
 
         cursor = MODEL_ALIGN16(positions + vertexCount * 12);
         if (nextParam & 0x80) {
-            work.normals = (u8 *)cursor;
+            work.normalPtr = (u8 *)cursor;
             cursor = MODEL_ALIGN16(cursor + vertexCount * 12);
         }
         sdfModelLayOutTexturing(&work, cursor, nextParam, vertexCount);
         sdfModelLoadNodeMatrix(matrix);
         if (selected & 0x10) {
-            corePktXfmLightClipUV(dmaBase, vertexCount, positions, (s32)work.normals, (s32)work.coordinates,
+            corePktXfmLightClipUV(dmaBase, vertexCount, positions, (s32)work.normalPtr, (s32)work.uvPtr,
                           (u8 *)asset + 0x68);
         } else {
-            corePktXfmLightClip(dmaBase, vertexCount, positions, (s32)work.normals);
+            corePktXfmLightClip(dmaBase, vertexCount, positions, (s32)work.normalPtr);
         }
         corePktOpenAndEmit(&work);
     }

@@ -18,7 +18,7 @@
 #include "sdf_texture_file.h"
 #include "sdf_vu_blend_node.h"
 
-void corePktLerpUVChain(VuBlendNode *node) {
+void corePktLerpUVChain(sdfCorePacketPointBuff_tag *node) {
     while (node != NULL) {
         void *firstSourceRow = node->sourceA;
         void *secondSourceRow = node->sourceB;
@@ -28,7 +28,7 @@ void corePktLerpUVChain(VuBlendNode *node) {
 }
 
 /* vu0 routine: lerp of two source rows (+0x20, +0x30) by the weight at node + 0x4C */
-void corePktLerpUVColorChain(VuBlendNode *node) {
+void corePktLerpUVColorChain(sdfCorePacketPointBuff_tag *node) {
     while (node != NULL) {
         void *firstSourceRow = node->sourceA;
         void *secondSourceRow = node->sourceB;

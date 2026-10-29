@@ -38,38 +38,38 @@ extern const struct SdfDmaTagHeader *corePktCurrLight;
 extern u16 D_00439184;
 
 typedef struct {
-    f32 matrix[4][4];      /* 0x00 */
-    u16 param0;            /* 0x40 */
-    s16 param1;            /* 0x42 */
-    u32 selectedFlags;     /* 0x44 */
-    u32 nextParam;         /* 0x48 */
-    u32 flags;             /* 0x4C */
-    s16 nodeCount;         /* 0x50: geometry references submitted to VU in chunks */
-    s16 selectedTriangleCount; /* 0x52: entries in the rejected-triangle index list */
-    SdfAssetEntry *asset;  /* 0x54 */
-    u32 packedColor;       /* 0x58: packed RGBA word */
-    f32 offsetX;           /* 0x5C */
-    f32 offsetY;           /* 0x60 */
-    u32 ringSrc;           /* 0x64 */
-    VuBlendNode *ringDst;  /* 0x68: next free clipped vertex */
-    VuBlendNode *ringWrap; /* 0x6C: ring restart */
-    u32 ringWrapCount;     /* 0x70 */
-    u32 ringCount;         /* 0x74 */
-    VuBlendNode *blend;    /* 0x78 */
-    VuBlendNode **ringEnd; /* 0x7C: next-link destination */
-    u32 state;             /* 0x80 */
-    u32 header;            /* 0x84 */
-    u8 *dataStart;         /* 0x88 */
-    u8 *cursor;            /* 0x8C */
-    u8 *payload;           /* 0x90 */
-    u8 *strip;             /* 0x94 */
-    u8 *positions;         /* 0x98 */
-    u8 *normals;           /* 0x9C */
-    u8 *coordinates;       /* 0xA0 */
-    u8 *secondCoordinates; /* 0xA4 */
-    u8 *vertexColors;      /* 0xA8 */
-    f32 depth;             /* 0xAC */
-} corePktCb_t;
+    f32 tmSave[4][4];      /* 0x00 */
+    u16 faceCount;            /* 0x40 */
+    s16 pointCount;            /* 0x42 */
+    u32 attrBits;     /* 0x44 */
+    u32 packetBits;         /* 0x48 */
+    u32 orgAttrBits;             /* 0x4C */
+    s16 drawFaceCount;         /* 0x50: geometry references submitted to VU in chunks */
+    s16 backfaceCount; /* 0x52: entries in the rejected-triangle index list */
+    SdfAssetEntry *matPacketPtr;  /* 0x54 */
+    u32 color;       /* 0x58: packed RGBA word */
+    f32 fdSoften;           /* 0x5C */
+    f32 fdBias;           /* 0x60 */
+    u32 pointBuff;           /* 0x64 */
+    sdfCorePacketPointBuff_tag *freePointBuff;  /* 0x68: next free clipped vertex */
+    sdfCorePacketPointBuff_tag *extPointBuff; /* 0x6C: ring restart */
+    u32 freePointCount;     /* 0x70 */
+    u32 extPointCount;         /* 0x74 */
+    sdfCorePacketPointBuff_tag *extPointTop;    /* 0x78 */
+    sdfCorePacketPointBuff_tag **extPointLink; /* 0x7C: next-link destination */
+    u32 packetOpenPtr;             /* 0x80 */
+    u32 packetTopPtr;            /* 0x84 */
+    u8 *packetStartPtr;         /* 0x88 */
+    u8 *packetPtr;            /* 0x8C */
+    u8 *dataPtr;           /* 0x90 */
+    u8 *facePtr;             /* 0x94 */
+    u8 *vertexPtr;         /* 0x98 */
+    u8 *normalPtr;           /* 0x9C */
+    u8 *uvPtr;       /* 0xA0 */
+    u8 *uv2Ptr; /* 0xA4 */
+    u8 *vertColPtr;      /* 0xA8 */
+    f32 backfaceSign;             /* 0xAC */
+} sdfCorePacketCb_t;
 
 typedef struct VuGeomRef {
     u128 *a;
@@ -79,20 +79,20 @@ typedef struct VuGeomRef {
 
 extern VuGeomRef corePktFaceList[];
 
-extern void corePktEmitBase(corePktCb_t *work);
+extern void corePktEmitBase(sdfCorePacketCb_t *work);
 
-void corePktLerpUVChain(VuBlendNode *node);
+void corePktLerpUVChain(sdfCorePacketPointBuff_tag *node);
 
-void corePktSetConstColor(corePktCb_t *work, u32 color) {
+void corePktSetConstColor(sdfCorePacketCb_t *work, u32 color) {
     f32 colorScale = 1.0f / 128.0f;
-    VuBlendNode *node;
+    sdfCorePacketPointBuff_tag *node;
     s32 remaining;
     u128 scaledColor;
 
-    EE_MMI_RGBA_MULTIPLY_VECTOR(scaledColor, work->packedColor, color, colorScale);
+    EE_MMI_RGBA_MULTIPLY_VECTOR(scaledColor, work->color, color, colorScale);
 
-    remaining = work->param1;
-    node = (VuBlendNode *)work->ringSrc;
+    remaining = work->pointCount;
+    node = (sdfCorePacketPointBuff_tag *)work->pointBuff;
     if (remaining != 0) {
         do {
             remaining--;
@@ -101,15 +101,15 @@ void corePktSetConstColor(corePktCb_t *work, u32 color) {
         } while (remaining != 0);
     }
 
-    node = work->blend;
+    node = work->extPointTop;
     while (node != NULL) {
-        VuBlendNode *source = (VuBlendNode *)node->sourceA;
+        sdfCorePacketPointBuff_tag *source = (sdfCorePacketPointBuff_tag *)node->sourceA;
         PCP_COPY_VECTOR_F32(node->color, source->color);
         node = node->next;
     }
 }
 
-void corePktMakeEdgePoint(VuBlendNode *out, VuBlendNode *first, VuBlendNode *second) {
+void corePktMakeEdgePoint(sdfCorePacketPointBuff_tag *out, sdfCorePacketPointBuff_tag *first, sdfCorePacketPointBuff_tag *second) {
     out->sourceA = first;
     out->sourceB = second;
     VU0_INTERPOLATE_CLIP_VERTEX(out, first, second);
@@ -119,45 +119,45 @@ extern u8 corePktSoftenBias;
 extern u16 D_00474210[];
 extern f32 sdf3DEyeOffset[4];
 extern f32 D_00439190;
-static inline VuBlendNode *sdfVuAllocClipNode(corePktCb_t *work) {
-    VuBlendNode *node = work->ringDst;
-    if (--work->ringWrapCount == 0) {
-        work->ringDst = work->ringWrap;
-        work->ringWrapCount = work->ringCount;
+static inline sdfCorePacketPointBuff_tag *sdfVuAllocClipNode(sdfCorePacketCb_t *work) {
+    sdfCorePacketPointBuff_tag *node = work->freePointBuff;
+    if (--work->freePointCount == 0) {
+        work->freePointBuff = work->extPointBuff;
+        work->freePointCount = work->extPointCount;
     } else {
-        work->ringDst = node + 1;
+        work->freePointBuff = node + 1;
     }
-    *work->ringEnd = node;
-    work->ringEnd = &node->next;
+    *work->extPointLink = node;
+    work->extPointLink = &node->next;
     return node;
 }
 /* vu0 routine: native clip-facing test and ordinary triangle fans. */
-void corePktClipFace(corePktCb_t *work) {
+void corePktClipFace(sdfCorePacketCb_t *work) {
     s32 triangleCount;
     s32 i;
     u16 *triangles;
-    VuBlendNode *nodes;
+    sdfCorePacketPointBuff_tag *nodes;
     s32 rejected;
     s32 acceptAll;
     VuGeomRef *out;
     f32 scale;
 
     out = corePktFaceList;
-    triangleCount = (s16)work->param0;
+    triangleCount = (s16)work->faceCount;
     rejected = 0;
-    scale = work->depth;
+    scale = work->backfaceSign;
     acceptAll = corePktSoftenBias;
-    triangles = (u16 *)work->strip;
-    nodes = (VuBlendNode *)work->ringSrc;
+    triangles = (u16 *)work->facePtr;
+    nodes = (sdfCorePacketPointBuff_tag *)work->pointBuff;
     for (i = 0; i != triangleCount; i++) {
         u16 *triangle = triangles;
-        VuBlendNode *a = nodes + triangle[0];
-        VuBlendNode *b = nodes + triangle[1];
-        VuBlendNode *c = nodes + triangle[2];
+        sdfCorePacketPointBuff_tag *a = nodes + triangle[0];
+        sdfCorePacketPointBuff_tag *b = nodes + triangle[1];
+        sdfCorePacketPointBuff_tag *c = nodes + triangle[2];
         u32 bRegion;
         u32 aRegion;
         u32 cRegion;
-        VuBlendNode *d, *e, *f, *g;
+        sdfCorePacketPointBuff_tag *d, *e, *f, *g;
         f32 facing;
         u32 clipA = a->clipFlags;
         u32 clipB = b->clipFlags;
@@ -186,7 +186,7 @@ void corePktClipFace(corePktCb_t *work) {
             continue;
         }
         for (;;) {
-            VuBlendNode *firstVertex;
+            sdfCorePacketPointBuff_tag *firstVertex;
             u32 firstCode;
 
             if (bRegion == cRegion) {
@@ -279,41 +279,41 @@ void corePktClipFace(corePktCb_t *work) {
             cRegion = firstCode;
         }
     }
-    work->selectedTriangleCount = rejected;
-    work->nodeCount = out - corePktFaceList;
-    *work->ringEnd = NULL;
+    work->backfaceCount = rejected;
+    work->drawFaceCount = out - corePktFaceList;
+    *work->extPointLink = NULL;
 }
 
 /* vu0 routine: native clip projection and ordinary triangle fans. */
-void corePktBuildFaceList(corePktCb_t *work) {
+void corePktBuildFaceList(sdfCorePacketCb_t *work) {
     s32 triangleCount;
     u16 *triangles;
-    VuBlendNode *nodes;
+    sdfCorePacketPointBuff_tag *nodes;
     s32 acceptAll;
     VuGeomRef *out;
-    f32 scale = work->depth;
+    f32 scale = work->backfaceSign;
     f32 clipBias = D_00439190;
     const f32 *clipPlane = sdf3DEyeOffset;
     const u8 *projection = (const u8 *)&sdf3DScreenParam;
 
     VU0_SET_CLIP_PLANES(clipBias, clipPlane, projection);
-    if (work->selectedFlags & 0x4000) {
+    if (work->attrBits & 0x4000) {
         corePktClipFace(work);
     }
-    triangleCount = (s16)work->param0;
+    triangleCount = (s16)work->faceCount;
     acceptAll = corePktSoftenBias;
     out = corePktFaceList;
-    triangles = (u16 *)work->strip;
-    nodes = (VuBlendNode *)work->ringSrc;
+    triangles = (u16 *)work->facePtr;
+    nodes = (sdfCorePacketPointBuff_tag *)work->pointBuff;
     for (; triangleCount != 0; triangleCount--) {
         u16 *triangle = triangles;
-        VuBlendNode *a = nodes + triangle[0];
-        VuBlendNode *b = nodes + triangle[1];
-        VuBlendNode *c = nodes + triangle[2];
+        sdfCorePacketPointBuff_tag *a = nodes + triangle[0];
+        sdfCorePacketPointBuff_tag *b = nodes + triangle[1];
+        sdfCorePacketPointBuff_tag *c = nodes + triangle[2];
         u32 bRegion;
         u32 aRegion;
         u32 cRegion;
-        VuBlendNode *d, *e, *f, *g;
+        sdfCorePacketPointBuff_tag *d, *e, *f, *g;
         f32 facing;
         u32 clipA = a->clipFlags;
         u32 clipB = b->clipFlags;
@@ -341,7 +341,7 @@ void corePktBuildFaceList(corePktCb_t *work) {
             continue;
         }
         for (;;) {
-            VuBlendNode *firstVertex;
+            sdfCorePacketPointBuff_tag *firstVertex;
             u32 firstCode;
 
             if (bRegion == cRegion) {
@@ -434,18 +434,18 @@ void corePktBuildFaceList(corePktCb_t *work) {
             cRegion = firstCode;
         }
     }
-    work->nodeCount = out - corePktFaceList;
-    *work->ringEnd = NULL;
+    work->drawFaceCount = out - corePktFaceList;
+    *work->extPointLink = NULL;
 }
 
 
 /* vu0 routine: native projection setup with ordinary C clipping. */
-void corePktBuildBackFaceList(corePktCb_t *work) {
+void corePktBuildBackFaceList(sdfCorePacketCb_t *work) {
     f32 scale = D_00439190;
     s32 remaining;
     u16 *triangles;
     u16 *indices;
-    VuBlendNode *nodes;
+    sdfCorePacketPointBuff_tag *nodes;
     s32 acceptAll;
     VuGeomRef *out;
     const f32 *clipPlane = sdf3DEyeOffset;
@@ -453,20 +453,20 @@ void corePktBuildBackFaceList(corePktCb_t *work) {
 
     VU0_SET_CLIP_PLANES(scale, clipPlane, projection);
     acceptAll = corePktSoftenBias;
-    remaining = work->selectedTriangleCount;
+    remaining = work->backfaceCount;
     indices = D_00474210;
-    triangles = (u16 *)work->strip;
-    nodes = (VuBlendNode *)work->ringSrc;
+    triangles = (u16 *)work->facePtr;
+    nodes = (sdfCorePacketPointBuff_tag *)work->pointBuff;
     out = corePktFaceList;
     for (; remaining != 0; remaining--) {
         u16 *triangle = triangles + *indices++ * 3;
-        VuBlendNode *a = nodes + triangle[0];
-        VuBlendNode *b = nodes + triangle[1];
-        VuBlendNode *c = nodes + triangle[2];
+        sdfCorePacketPointBuff_tag *a = nodes + triangle[0];
+        sdfCorePacketPointBuff_tag *b = nodes + triangle[1];
+        sdfCorePacketPointBuff_tag *c = nodes + triangle[2];
         u32 bRegion = b->region;
         u32 aRegion = a->region;
         u32 cRegion = c->region;
-        VuBlendNode *d, *e, *f, *g;
+        sdfCorePacketPointBuff_tag *d, *e, *f, *g;
 
         if (acceptAll || (aRegion == bRegion && aRegion == cRegion)) {
             out[0].a = (u128 *)a;
@@ -476,7 +476,7 @@ void corePktBuildBackFaceList(corePktCb_t *work) {
             continue;
         }
         for (;;) {
-            VuBlendNode *firstVertex;
+            sdfCorePacketPointBuff_tag *firstVertex;
             u32 firstCode;
 
             if (bRegion == cRegion) {
@@ -569,14 +569,14 @@ void corePktBuildBackFaceList(corePktCb_t *work) {
             cRegion = firstCode;
         }
     }
-    work->nodeCount = out - corePktFaceList;
-    *work->ringEnd = NULL;
+    work->drawFaceCount = out - corePktFaceList;
+    *work->extPointLink = NULL;
 }
 
 void corePktEmitTexTris(work)
-    corePktCb_t *work;
+    sdfCorePacketCb_t *work;
 {
-    s32 remaining = work->nodeCount;
+    s32 remaining = work->drawFaceCount;
     s32 chunk;
     s32 first;
     u32 *out;
@@ -584,7 +584,7 @@ void corePktEmitTexTris(work)
     SdfAssetEntry *asset;
 
     if (remaining != 0) {
-        out = (u32 *)work->cursor;
+        out = (u32 *)work->packetPtr;
         ref = corePktFaceList;
         first = 1;
         do {
@@ -597,7 +597,7 @@ void corePktEmitTexTris(work)
                 *out++ = 0x6501C000;
                 *out++ = 4;
                 *out++ = ((chunk * 9 + 5) << 16) | 0x6C00C001;
-                asset = work->asset;
+                asset = work->matPacketPtr;
                 *(u64 *)out = 0x1000000000000003ULL;
                 out += 2;
                 *(u64 *)out = 0xE;
@@ -640,21 +640,21 @@ void corePktEmitTexTris(work)
             } while (chunk != 0);
             *out++ = 0x14000004;
         } while (remaining != 0);
-        work->cursor = (u8 *)out;
+        work->packetPtr = (u8 *)out;
     }
 }
 
 /* Emit up to 16 triangles per batch; TEX1/TEX0/CLAMP/ALPHA context 2 state
  * precedes the first batch only. clearPrimitiveFlags filters GIF PRIM bits. */
-void corePktEmitTexTrisCtx2(corePktCb_t *work, u64 samplingState, u64 textureState, u64 clampState, u64 alphaState, s32 clearPrimitiveFlags) {
-    s32 remainingTriangles = work->nodeCount;
+void corePktEmitTexTrisCtx2(sdfCorePacketCb_t *work, u64 samplingState, u64 textureState, u64 clampState, u64 alphaState, s32 clearPrimitiveFlags) {
+    s32 remainingTriangles = work->drawFaceCount;
     s32 batchTriangles;
     s32 firstBatch;
     u32 *packetCursor;
     VuGeomRef *triangleRefs;
 
     if (remainingTriangles != 0) {
-        packetCursor = (u32 *)work->cursor;
+        packetCursor = (u32 *)work->packetPtr;
         triangleRefs = corePktFaceList;
         firstBatch = 1;
         do {
@@ -717,22 +717,22 @@ void corePktEmitTexTrisCtx2(corePktCb_t *work, u64 samplingState, u64 textureSta
             } while (batchTriangles != 0);
             *packetCursor++ = SDF_VIF_MSCAL_TRIANGLES;
         } while (remainingTriangles != 0);
-        work->cursor = (u8 *)packetCursor;
+        work->packetPtr = (u8 *)packetCursor;
     }
 }
 
 /* Emit up to 24 colored triangles per batch, copying vertex quadwords 0 and 2.
  * Keep the native K&R declaration and caller convention. */
 void corePktEmitTris(work)
-    corePktCb_t *work;
+    sdfCorePacketCb_t *work;
 {
-    s32 remainingTriangles = work->nodeCount;
+    s32 remainingTriangles = work->drawFaceCount;
     s32 batchTriangles;
     u32 *packetCursor;
     VuGeomRef *triangleRefs;
 
     if (remainingTriangles != 0) {
-        packetCursor = (u32 *)work->cursor;
+        packetCursor = (u32 *)work->packetPtr;
         triangleRefs = corePktFaceList;
         do {
             batchTriangles = remainingTriangles < 0x19 ? remainingTriangles : SDF_VU_COLORED_BATCH_LIMIT;
@@ -760,13 +760,13 @@ void corePktEmitTris(work)
             } while (batchTriangles != 0);
             *packetCursor++ = SDF_VIF_MSCAL_TRIANGLES;
         } while (remainingTriangles != 0);
-        work->cursor = (u8 *)packetCursor;
+        work->packetPtr = (u8 *)packetCursor;
     }
 }
 
 /* Select textured or colored emission. */
-void corePktEmitBase(corePktCb_t *work) {
-    if ((work->selectedFlags & SDF_VU_TEXTURED_FLAG) != 0) {
+void corePktEmitBase(sdfCorePacketCb_t *work) {
+    if ((work->attrBits & SDF_VU_TEXTURED_FLAG) != 0) {
         corePktEmitTexTris(work);
         return;
     }
@@ -774,18 +774,18 @@ void corePktEmitBase(corePktCb_t *work) {
 }
 
 /* Finish the selected node's transformed rows and emit its textured geometry. */
-void corePktApplyFaceDivColor(corePktCb_t *work, const u128 *parameters);
+void corePktApplyFaceDivColor(sdfCorePacketCb_t *work, const u128 *parameters);
 
-void corePktEmitMultiTexPass(corePktCb_t *work) {
+void corePktEmitMultiTexPass(sdfCorePacketCb_t *work) {
     SdfAssetEntry *asset;
     u32 mode;
     u32 secondaryColor;
     u32 primaryStateWordSecond;
 
-    corePktXfmUV((void *)work->ringSrc, work->param1, work->secondCoordinates,
-                  (u8 *)work->asset + 0x80);
-    corePktLerpUVChain(work->blend);
-    asset = work->asset;
+    corePktXfmUV((void *)work->pointBuff, work->pointCount, work->uv2Ptr,
+                  (u8 *)work->matPacketPtr + 0x80);
+    corePktLerpUVChain(work->extPointTop);
+    asset = work->matPacketPtr;
     mode = asset->secondaryMode;
     secondaryColor = asset->secondaryColor;
     primaryStateWordSecond = asset->unk08;
@@ -796,9 +796,9 @@ void corePktEmitMultiTexPass(corePktCb_t *work) {
             if (primaryStateWordSecond != secondaryColor) {
                 u128 parameters[3];
 
-                corePktMakeFaceDivParm((SdfVuColorTransform *)parameters, corePktCurrLight, work->packedColor,
+                corePktMakeFaceDivParm((SdfVuColorTransform *)parameters, corePktCurrLight, work->color,
                               secondaryColor, asset->unk04, asset->unk1C,
-                              asset->x + work->offsetX, asset->y + work->offsetY);
+                              asset->x + work->fdSoften, asset->y + work->fdBias);
                 corePktApplyFaceDivColor(work, parameters);
             }
             break;

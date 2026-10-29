@@ -109,49 +109,49 @@ void sdfVu1Init(void) {
 }
 
 /* Split ring addressing at position 128; retain the native 96-byte stride. */
-void corePktSetupPointBuff(corePktCb_t *work, s32 ringPosition) {
-    VuBlendNode **ringEnd = &work->blendList;
+void corePktSetupPointBuff(sdfCorePacketCb_t *work, s32 ringPosition) {
+    sdfCorePacketPointBuff_tag **ringEnd = &work->extPointTop;
     if (ringPosition < 0x80) {
-        work->dmaCountA = 0x80 - ringPosition;
-        work->dmaAddrB = D_003BDA20;
-        work->dmaAddrA = ringPosition * 96 + 0x70001000;
-        work->dmaCountB = 0x2000;
-        work->dmaBase = 0x70001000;
+        work->freePointCount = 0x80 - ringPosition;
+        work->extPointBuff = D_003BDA20;
+        work->freePointBuff = ringPosition * 96 + 0x70001000;
+        work->extPointCount = 0x2000;
+        work->pointBuff = 0x70001000;
     } else if (ringPosition == 0x80) {
-        work->dmaBase = 0x70001000;
-        work->dmaAddrA = D_003BDA20;
-        work->dmaCountA = 0x2000;
-        work->dmaAddrB = 0;
-        work->dmaCountB = 0;
+        work->pointBuff = 0x70001000;
+        work->freePointBuff = D_003BDA20;
+        work->freePointCount = 0x2000;
+        work->extPointBuff = 0;
+        work->extPointCount = 0;
     } else {
-        work->dmaCountA = 0x80;
-        work->dmaBase = D_003BDA20;
-        work->dmaAddrA = 0x70001000;
-        work->dmaAddrB = D_003BDA20 + ringPosition * 96;
-        work->dmaCountB = 0x2000 - ringPosition;
+        work->freePointCount = 0x80;
+        work->pointBuff = D_003BDA20;
+        work->freePointBuff = 0x70001000;
+        work->extPointBuff = D_003BDA20 + ringPosition * 96;
+        work->extPointCount = 0x2000 - ringPosition;
     }
-    work->dmaEnd = ringEnd;
+    work->extPointLink = ringEnd;
 }
 
 /* Decode four leading halfwords; selectionMask filters flags, not the payload. */
-void corePktInitCb(corePktCb_t *work, u16 *parameterWords, u32 selectionMask) {
+void corePktInitCb(sdfCorePacketCb_t *work, u16 *parameterWords, u32 selectionMask) {
     u8 *payload = (u8 *)(parameterWords + 4);
     u16 ringPosition;
     u16 parameterFlags;
     u16 nextParameter;
     u16 selectedFlags;
-    work->param0 = parameterWords[0];
+    work->faceCount = parameterWords[0];
     ringPosition = parameterWords[1];
-    work->param1 = ringPosition;
+    work->pointCount = ringPosition;
     parameterFlags = parameterWords[2];
     nextParameter = parameterWords[3];
     selectedFlags = parameterFlags & selectionMask;
-    work->flags = parameterFlags;
-    work->nextParam = nextParameter;
-    work->selectedFlags = selectedFlags;
+    work->orgAttrBits = parameterFlags;
+    work->packetBits = nextParameter;
+    work->attrBits = selectedFlags;
     D_003BDA24 = selectedFlags & 0x78;
-    work->payload = payload;
-    work->packetStart = 0;
+    work->dataPtr = payload;
+    work->packetOpenPtr = 0;
     corePktSetupPointBuff(work, ringPosition);
 }
 
