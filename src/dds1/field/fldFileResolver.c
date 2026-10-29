@@ -1891,7 +1891,172 @@ const struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) 
     return fldCachedRoomF1ResourceAllocation;
 }
 
+#ifdef NON_MATCHING
+#include "sdf_line_pair_packet_api.h"
+#include "sdf_gs_header.h"
+#include "sdf_pac_reloc.h"
+#include "fld_script_resource.h"
+#include "sdf_packet_header.h"
+#include "eff.h"
+#include "fld_player_scene_state.h"
+#include "fld_marker_packet.h"
+#include "sdf_gs_blend.h"
+#include "common.h"
+#include "fld_stop_entry.h"
+#include "sdf_resource_list_release_api.h"
+#include "kwln_background_fade_api.h"
+#include "fld_scene_ready_api.h"
+#include "fld_scene_record_api.h"
+#include "fld_light_set.h"
+#include "fld_sky_buffer.h"
+#include "fld_sky_gradient_record.h"
+#include "fld_quad_state.h"
+#include "kwln_frame_draw_buffer.h"
+#include "kwln_draw_buffer.h"
+#include "kwln_fade.h"
+#include "mnu_title_stream.h"
+#include "fld_bill_config.h"
+#include "sdf_trig.h"
+#include "fld_area_path.h"
+#include "fld_npc_motion.h"
+#include "fld_npc_palette.h"
+#include "btl_stage_task_cleanup.h"
+#include "mdl_motion_api.h"
+#include "sdf_motion.h"
+#include "fld_resource_resolver.h"
+#include "fld_clear_menu_entries_api.h"
+#include "fld_play_pending_sounds_api.h"
+#include "fld_release_texture_slots_api.h"
+#include "fld_transfer_chunk.h"
+#include "fld_camera_follow_row.h"
+#include "fld.h"
+#include "fld_encounter_runtime_api.h"
+#include "fld_collision_geometry.h"
+#include "fld_scene_request.h"
+#include "fld_spawn_event.h"
+#include "sdf_resource.h"
+#include "dds3obj.h"
+#include "dds3_world_value.h"
+#include "sdf_texture_file.h"
+#include "sdf_texture_primary_buffer_api.h"
+#include "evt_action_object.h"
+#include "sdf_texture_offset_list.h"
+#include "evt_script_model.h"
+#include "sdf_model.h"
+#include "mdl_flag_api.h"
+#include "dds3_world_counter.h"
+#include "sdf_vu_matrix.h"
+#include "dds3_world_secondary.h"
+#include "eff_light.h"
+#include "fld_area_work.h"
+#include "fld_spawn_collision.h"
+#include "evt_world.h"
+#include "evt_world_source_transform.h"
+#include "sdf_chip.h"
+#include "sdf_column_packet_api.h"
+#include "sdf_packet_append.h"
+#include "sdf_packet_builders.h"
+#include "fr_font.h"
+#include "sdf_packet_list.h"
+#include "sdf_dev_state.h"
+#include "fld_waypoint.h"
+#include "fld_inf.h"
+#include "kwln_task_lifecycle.h"
+#include "file_request_api.h"
+#include "file_pac.h"
+#include "fld_packed_resource_kind.h"
+#include "fld_title_banner_menu.h"
+#include "field_stage.h"
+#include "sdf_pac_work.h"
+#include "sdf_primitive_packet_api.h"
+#include "evt_unit.h"
+#include "evt_unit_color_transition.h"
+#include "fpu.h"
+#include "pcp_vu0.h"
+#include "sdf.h"
+#include "sdf_sif_command.h"
+#include "mdl.h"
+#include "scr.h"
+#include "kwln.h"
+#include "kwln_task_create.h"
+#include "dat_state.h"
+#include "dds3_world_primary.h"
+#include "sdf_packet_alloc.h"
+#include "fld_object_slot_api.h"
+#include "fld_placement_data.h"
+#include "fld_resource_name.h"
+#include "eff_object.h"
+#include "dds3_path.h"
+#include "fld_label_cache_api.h"
+#include "fld_sprite_vertex.h"
+#include "fld_room_state.h"
+#include "fld_trigger_shape.h"
+#include "fld_action_row.h"
+
+extern void fldInitializeAreaWork(void);
+
+
+
+extern u32 gFldFileResetMode;
+extern s32 fldRoomEventPlacementCount;
+extern struct DevRequest *fldRoomSoundResources;
+extern FldTransferChunk *fldRoomF1Chunk; /* the load request's chunk */
+
+extern FldTransferChunk *fldRoomF2Chunk; /* the scene request's chunk */
+
+extern FldTransferChunk *fldRoomKF2Chunk;
+extern struct sdfMemHandle_t *fldCachedRoomResourceAllocation;
+extern struct sdfMemHandle_t *fldCachedRoomF1ResourceAllocation;
+extern struct sdfMemHandle_t *fldCachedRoomF2ResourceAllocation;
+extern struct sdfMemHandle_t *fldCachedRoomKF2ResourceAllocation;
+extern void fldSetSceneLocation(s32 area, s32 floor, s32 stage);
+extern void fldDrwZAlloc(void);
+extern void fldCreateResourceScriptObjects(void);
+
+/* Load an area room from a field request buffer: reset the area work and the
+ * cached room allocations, set the scene location, relocate and process the
+ * buffer's scene request, then relocate and load the files of the load
+ * request (from the alternate buffer when one is given), and create the
+ * resource script objects. Returns the room's F1 resource allocation.
+ * Upstream: INCLUDE_ASM in field/fldFileResolver; written from the retail
+ * routine. The same calls and stores; s0-s3 are allocated differently. */
+const struct sdfMemHandle_t *fldLoadAreaRoomResourcesFromRequest(u32 area, u32 room, u8 *alternateBuffer, u8 *requestBuffer,
+                                        const SdfTextureOffsetListHeader *textureOffsets, u32 unused) {
+    u8 *loadBuffer = alternateBuffer != NULL ? alternateBuffer : requestBuffer;
+    FldTransferChunk *sceneChunk = (FldTransferChunk *)(requestBuffer + 8);
+    FldTransferChunk *loadChunk = (FldTransferChunk *)(loadBuffer + 8);
+
+    fldInitializeAreaWork();
+    gFldFileResetMode = 0;
+    fldRoomEventPlacementCount = 0;
+    fldCachedRoomF1ResourceAllocation = NULL;
+    fldCachedRoomF2ResourceAllocation = NULL;
+    fldCachedRoomKF2ResourceAllocation = NULL;
+    fldCachedRoomResourceAllocation = NULL;
+    fldRoomSoundResources = NULL;
+    fldDrwZAlloc();
+    fldSetSceneLocation(area, room - 1, 0);
+    if (textureOffsets != NULL) {
+        fldRoomSoundResources = sdfTexSetTB(textureOffsets);
+    }
+
+    fldRoomF2Chunk = sceneChunk;
+    fldRoomF2Data = requestBuffer;
+    fldAddressResolver((u8 *)requestBuffer, sceneChunk);
+    fldProcessFieldRequest((FldSceneRequest *)fldGetInfoHeader((s32)sceneChunk));
+
+    fldRoomKF2Chunk = NULL;
+    fldRoomF1Chunk = loadChunk;
+    fldRoomF1Data = loadBuffer;
+    fldAddressResolver(loadBuffer, loadChunk);
+    fldLoadSceneRequestFiles((FldLoadRequest *)fldGetInfoHeader((s32)loadChunk));
+    fldCreateResourceScriptObjects();
+    fldGlobalBase.reuseAreaResources = 0;
+    return fldCachedRoomF1ResourceAllocation;
+}
+#else
 INCLUDE_ASM(const s32, "field/fldFileResolver", fldLoadAreaRoomResourcesFromRequest);
+#endif
 
 extern s32 fldRoomEventPlacementCount;
 
@@ -3777,7 +3942,203 @@ void fldUpdateFieldCameraViewState(void) {
     fldUpdateLookAtSegmentDistance();
 }
 
+#ifdef NON_MATCHING
+#include "sdf_line_pair_packet_api.h"
+#include "sdf_gs_header.h"
+#include "sdf_pac_reloc.h"
+#include "fld_script_resource.h"
+#include "sdf_packet_header.h"
+#include "eff.h"
+#include "fld_player_scene_state.h"
+#include "fld_marker_packet.h"
+#include "sdf_gs_blend.h"
+#include "common.h"
+#include "fld_stop_entry.h"
+#include "sdf_resource_list_release_api.h"
+#include "kwln_background_fade_api.h"
+#include "fld_scene_ready_api.h"
+#include "fld_scene_record_api.h"
+#include "fld_light_set.h"
+#include "fld_sky_buffer.h"
+#include "fld_sky_gradient_record.h"
+#include "fld_quad_state.h"
+#include "kwln_frame_draw_buffer.h"
+#include "kwln_draw_buffer.h"
+#include "kwln_fade.h"
+#include "mnu_title_stream.h"
+#include "fld_bill_config.h"
+#include "sdf_trig.h"
+#include "fld_area_path.h"
+#include "fld_npc_motion.h"
+#include "fld_npc_palette.h"
+#include "btl_stage_task_cleanup.h"
+#include "mdl_motion_api.h"
+#include "sdf_motion.h"
+#include "fld_resource_resolver.h"
+#include "fld_clear_menu_entries_api.h"
+#include "fld_play_pending_sounds_api.h"
+#include "fld_release_texture_slots_api.h"
+#include "fld_transfer_chunk.h"
+#include "fld_camera_follow_row.h"
+#include "fld.h"
+#include "fld_encounter_runtime_api.h"
+#include "fld_collision_geometry.h"
+#include "fld_collision_query_api.h"
+#include "fld_scene_request.h"
+#include "fld_spawn_event.h"
+#include "sdf_resource.h"
+#include "dds3obj.h"
+#include "dds3_world_value.h"
+#include "sdf_texture_file.h"
+#include "sdf_texture_primary_buffer_api.h"
+#include "evt_action_object.h"
+#include "sdf_texture_offset_list.h"
+#include "evt_script_model.h"
+#include "sdf_model.h"
+#include "mdl_flag_api.h"
+#include "dds3_world_counter.h"
+#include "sdf_vu_matrix.h"
+#include "dds3_world_secondary.h"
+#include "eff_light.h"
+#include "fld_area_work.h"
+#include "fld_spawn_collision.h"
+#include "evt_world.h"
+#include "evt_world_source_transform.h"
+#include "sdf_chip.h"
+#include "sdf_column_packet_api.h"
+#include "sdf_packet_append.h"
+#include "sdf_packet_builders.h"
+#include "fr_font.h"
+#include "sdf_packet_list.h"
+#include "sdf_dev_state.h"
+#include "fld_waypoint.h"
+#include "fld_inf.h"
+#include "kwln_task_lifecycle.h"
+#include "file_request_api.h"
+#include "file_pac.h"
+#include "fld_packed_resource_kind.h"
+#include "fld_title_banner_menu.h"
+#include "field_stage.h"
+#include "sdf_pac_work.h"
+#include "sdf_primitive_packet_api.h"
+#include "evt_unit.h"
+#include "evt_unit_color_transition.h"
+#include "fpu.h"
+#include "pcp_vu0.h"
+#include "sdf.h"
+#include "sdf_sif_command.h"
+#include "mdl.h"
+#include "scr.h"
+#include "kwln.h"
+#include "kwln_task_create.h"
+#include "dat_state.h"
+#include "dds3_world_primary.h"
+#include "sdf_packet_alloc.h"
+#include "fld_object_slot_api.h"
+#include "fld_placement_data.h"
+#include "fld_resource_name.h"
+#include "eff_object.h"
+#include "dds3_path.h"
+#include "fld_label_cache_api.h"
+#include "fld_sprite_vertex.h"
+#include "fld_room_state.h"
+#include "fld_trigger_shape.h"
+#include "fld_action_row.h"
+#include "btl.h"
+#include "itf.h"
+#include "fld_index_pair.h"
+extern void fldUpdateLookAtSegmentDistance(void);
+
+extern FldCamRow fldCameraFollowRows[];
+
+extern f32 fldLookAtNearPoint[];
+extern f32 fldCamTarget[];
+
+extern f32 EulerAngleAxisY(void);
+extern f32 D_003BAD10, D_003BAD14, D_003BAD18;
+/* Per-frame field camera follow: sets the camera angle from the player's
+ * reference rotation, tracks the player position, builds the near and far look-
+ * at points around it with the row's height and distance, eases the height
+ * offset toward its target, pulls the far point back along the line to the
+ * field-collision intersection (scaled by the global ratio) and updates the
+ * camera world node and the look-at segment distance. Upstream: INCLUDE_ASM in
+ * field/fldFileResolver; written from the retail routine. It differs from
+ * retail only in float register allocation and in the address of the camera
+ * angle, which retail forms as a raw address (lui 0x33, -0x1aec offset) equal
+ * to fldGlobalBase.angle. */
+void func_0012CED0(void) {
+    union {
+        u128 q;
+        f32 f[4];
+    } nearPoint, referencePoint, farPoint, referenceCopy, farCopy, projectedPoint, playerPosition;
+    dds3Basic_t **world = fldGetPlayerSceneStateAddress();
+    FldAreaWork *camera;
+    dds3Basic_t *node;
+    f32 previousHeight;
+    f32 heightOffset;
+    f32 dx, dy, dz;
+    f32 distance;
+    f32 ratio;
+    f32 scale;
+
+    dds3GetRotPoseSet((dds3Basic_t *)fldPlayerObject);
+    fldGlobalBase.angle = EulerAngleAxisY() * 180.0f / 3.14f;
+    dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
+    VU0_STORE_VF_UNCLOBBERED(vf10, &playerPosition);
+    camera = &fldGlobalBase;
+    camera->previousX = camera->x;
+    camera->previousY = camera->y;
+    camera->previousZ = camera->z;
+    camera->x = playerPosition.f[0];
+    camera->y = playerPosition.f[1];
+    camera->z = playerPosition.f[2];
+
+    nearPoint.f[0] = camera->x - sdfSin((camera->angle + 180.0f) * 3.14f / 180.0f);
+    nearPoint.f[1] = camera->y + fldCameraFollowRows[camera->rowIdx].y;
+    nearPoint.f[2] = camera->z + sdfCos((camera->angle + 180.0f) * 3.14f / 180.0f);
+    farPoint.f[0] = camera->x + sdfSin(camera->negatedAngle * 3.14f / 180.0f) *
+                                    fldCameraFollowRows[camera->rowIdx].dist;
+    farPoint.f[1] = camera->y + fldCameraFollowRows[camera->rowIdx].targetY;
+    farPoint.f[2] = camera->z + sdfCos(camera->negatedAngle * 3.14f / 180.0f) *
+                                    fldCameraFollowRows[camera->rowIdx].dist;
+    PCP_COPY_VECTOR_UNCLOBBERED(fldLookAtNearPoint, nearPoint.f);
+    PCP_COPY_VECTOR_UNCLOBBERED(fldCamTarget, farPoint.f);
+
+    previousHeight = camera->unk60;
+    heightOffset = previousHeight + (camera->cameraSupportHeightOffset - previousHeight) * 0.0625f;
+    camera->unk60 = camera->cameraSupportHeightOffset;
+    farPoint.f[1] += heightOffset;
+    referencePoint.f[0] = camera->x;
+    referencePoint.f[1] = camera->y + fldCameraFollowRows[camera->rowIdx].y;
+    referencePoint.f[2] = camera->z;
+    PCP_COPY_VECTOR_UNCLOBBERED(referenceCopy.f, referencePoint.f);
+    PCP_COPY_VECTOR_UNCLOBBERED(farCopy.f, farPoint.f);
+    fldHitChkCamera(farCopy.f, referenceCopy.f, projectedPoint.f);
+
+    ratio = D_003BAD10 / D_003BAD18;
+    dx = projectedPoint.f[0] - referencePoint.f[0];
+    dy = projectedPoint.f[1] - referencePoint.f[1];
+    dz = projectedPoint.f[2] - referencePoint.f[2];
+    distance = fsqrtf(dx * dx + dy * dy + dz * dz);
+    node = *world;
+    scale = distance * ratio;
+    D_003BAD14 = scale;
+    farPoint.f[1] = referencePoint.f[1] -
+                    (referencePoint.f[1] - projectedPoint.f[1]) / distance * scale;
+    farPoint.f[2] = referencePoint.f[2] -
+                    (referencePoint.f[2] - projectedPoint.f[2]) / distance * scale;
+    farPoint.f[0] = referencePoint.f[0] -
+                    (referencePoint.f[0] - projectedPoint.f[0]) / distance * scale;
+    dds3SetPosPoseSet(node, &farPoint.q);
+    PCP_COPY_VECTOR_UNCLOBBERED(fldLookAtNearPoint, nearPoint.f);
+    PCP_COPY_VECTOR_UNCLOBBERED(fldCamTarget, farPoint.f);
+    node = *world;
+    node->ops->update(node);
+    fldUpdateLookAtSegmentDistance();
+}
+#else
 INCLUDE_ASM(const s32, "field/fldFileResolver", func_0012CED0);
+#endif
 
 void fldUpdateCameraProjectionEndpoints(void) {
     FldAreaWork *cam = &fldGlobalBase;
@@ -4009,7 +4370,306 @@ void fldUpdateCameraViewFromPlayer(void) {
     fldGlobalBase.negatedAngle = GetSphericalPosMove(farPoint[0], farPoint[2], nearPoint[0], nearPoint[2]) + 180.0f;
 }
 
+#ifdef NON_MATCHING
+#include "sdf_line_pair_packet_api.h"
+#include "sdf_gs_header.h"
+#include "sdf_pac_reloc.h"
+#include "fld_script_resource.h"
+#include "sdf_packet_header.h"
+#include "eff.h"
+#include "fld_player_scene_state.h"
+#include "fld_marker_packet.h"
+#include "sdf_gs_blend.h"
+#include "common.h"
+#include "fld_stop_entry.h"
+#include "sdf_resource_list_release_api.h"
+#include "kwln_background_fade_api.h"
+#include "fld_scene_ready_api.h"
+#include "fld_scene_record_api.h"
+#include "fld_light_set.h"
+#include "fld_sky_buffer.h"
+#include "fld_sky_gradient_record.h"
+#include "fld_quad_state.h"
+#include "kwln_frame_draw_buffer.h"
+#include "kwln_draw_buffer.h"
+#include "kwln_fade.h"
+#include "mnu_title_stream.h"
+#include "fld_bill_config.h"
+#include "sdf_trig.h"
+#include "fld_area_path.h"
+#include "fld_npc_motion.h"
+#include "fld_npc_palette.h"
+#include "btl_stage_task_cleanup.h"
+#include "mdl_motion_api.h"
+#include "sdf_motion.h"
+#include "fld_resource_resolver.h"
+#include "fld_clear_menu_entries_api.h"
+#include "fld_play_pending_sounds_api.h"
+#include "fld_release_texture_slots_api.h"
+#include "fld_transfer_chunk.h"
+#include "fld_camera_follow_row.h"
+#include "fld.h"
+#include "fld_encounter_runtime_api.h"
+#include "fld_collision_geometry.h"
+#include "fld_collision_query_api.h"
+#include "fld_scene_request.h"
+#include "fld_spawn_event.h"
+#include "sdf_resource.h"
+#include "dds3obj.h"
+#include "dds3_world_value.h"
+#include "sdf_texture_file.h"
+#include "sdf_texture_primary_buffer_api.h"
+#include "evt_action_object.h"
+#include "sdf_texture_offset_list.h"
+#include "evt_script_model.h"
+#include "sdf_model.h"
+#include "mdl_flag_api.h"
+#include "dds3_world_counter.h"
+#include "sdf_vu_matrix.h"
+#include "dds3_world_secondary.h"
+#include "eff_light.h"
+#include "fld_area_work.h"
+#include "fld_spawn_collision.h"
+#include "evt_world.h"
+#include "evt_world_source_transform.h"
+#include "sdf_chip.h"
+#include "sdf_column_packet_api.h"
+#include "sdf_packet_append.h"
+#include "sdf_packet_builders.h"
+#include "fr_font.h"
+#include "sdf_packet_list.h"
+#include "sdf_dev_state.h"
+#include "fld_waypoint.h"
+#include "fld_inf.h"
+#include "kwln_task_lifecycle.h"
+#include "file_request_api.h"
+#include "file_pac.h"
+#include "fld_packed_resource_kind.h"
+#include "fld_title_banner_menu.h"
+#include "field_stage.h"
+#include "sdf_pac_work.h"
+#include "sdf_primitive_packet_api.h"
+#include "evt_unit.h"
+#include "evt_unit_color_transition.h"
+#include "fpu.h"
+#include "pcp_vu0.h"
+#include "sdf.h"
+#include "sdf_sif_command.h"
+#include "mdl.h"
+#include "scr.h"
+#include "kwln.h"
+#include "kwln_task_create.h"
+#include "dat_state.h"
+#include "dds3_world_primary.h"
+#include "sdf_packet_alloc.h"
+#include "fld_object_slot_api.h"
+#include "fld_placement_data.h"
+#include "fld_resource_name.h"
+#include "eff_object.h"
+#include "dds3_path.h"
+#include "fld_label_cache_api.h"
+#include "fld_sprite_vertex.h"
+#include "fld_room_state.h"
+#include "fld_trigger_shape.h"
+#include "fld_action_row.h"
+#include "btl.h"
+#include "itf.h"
+#include "sdk_libc.h"
+
+extern void fldDbgPrintStr2DC(s32 x, s32 y, s32 packetField, s32 drawValue);
+
+extern FldCamRow fldCameraFollowRows[];
+
+extern f32 fldLookAtNearPoint[];
+extern f32 fldCamTarget[];
+
+extern f32 GetSphericalPosMove(f32 fromX, f32 fromZ, f32 toX, f32 toZ);
+extern void dds3GetTMPoseSet(dds3Basic_t *object);
+
+extern FldNamedCamera D_0032F510[32];
+extern s32 D_0032E590[];
+extern const char D_003A0010[]; /* "CAM:%5d %5d %5d %d" */
+extern const char D_003A0028[]; /* "                      %dp" */
+
+/* A quadword the world API takes, read as four floats. */
+typedef union CameraVector {
+    u128 q;
+    f32 f[4];
+} CameraVector;
+
+/* Place the field camera behind the player: the look-at point eases toward
+ * the player at the row's eye height (half the gap in x and z, an eighth in
+ * y); the eye starts at the area's focus, or, for a named camera row, between
+ * the named node pair by the player's coordinate on its axis. A limited row
+ * keeps the eye's distance within dist and targetY and pulls it in front of
+ * any position zone between eye and look-at point. Then the camera object is
+ * updated, and the area records the distance and the facing angle.
+ * Upstream: INCLUDE_ASM in field/fldFileResolver; written from the retail
+ * routine, on the named FldCamRow and FldNamedCamera types. Retail and the body
+ * compile to the same instructions apart from registers, stack slots,
+ * branch-likely scheduling and the named camera's minimum and maximum addressed
+ * through the row (487 aligned words); the debug readout (D_0032E590[0] == 1)
+ * is kept. */
+void fldUpdateCameraFollowLinkedObject(void) {
+    CameraVector previousFar;
+    CameraVector nearPoint;
+    CameraVector farPoint;
+    CameraVector firstPoint;
+    CameraVector secondPoint;
+    CameraVector collisionNear;
+    CameraVector collisionFar;
+    CameraVector collisionPoint;
+    char text[32];
+    FldAreaWork *area = &fldGlobalBase;
+    u32 *world = fldGetPlayerSceneStateAddress();
+    dds3Basic_t *secondary;
+    dds3Basic_t *node;
+    dds3PoseSet_t *transform;
+    FldNamedCamera *named;
+    f32 maximum = 0.0f;
+    f32 coordinate = 0.0f;
+    f32 minimum = 0.0f;
+    f32 remaining = 0.0f;
+    f32 weight;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    f32 distance;
+    f32 nearLimit;
+    f32 farLimit;
+
+    memset(&firstPoint, 0, sizeof(firstPoint));
+    firstPoint.f[3] = 1.0f;
+    memset(&secondPoint, 0, sizeof(secondPoint));
+    secondPoint.f[3] = 1.0f;
+    nearPoint.f[0] = area->x;
+    nearPoint.f[2] = area->z;
+    nearPoint.f[1] = area->y + fldCameraFollowRows[area->rowIdx].y;
+    nearPoint.f[0] = fldLookAtNearPoint[0] + (nearPoint.f[0] - fldLookAtNearPoint[0]) * 0.5f;
+    nearPoint.f[1] = fldLookAtNearPoint[1] + (nearPoint.f[1] - fldLookAtNearPoint[1]) * 0.125f;
+    nearPoint.f[2] = fldLookAtNearPoint[2] + (nearPoint.f[2] - fldLookAtNearPoint[2]) * 0.5f;
+    dds3CameraObjectBasicSetWorldEye((dds3Basic_t *)*world, &nearPoint.q);
+    dds3GetTMPoseSet((dds3Basic_t *)fldPlayerObject);
+    farPoint.f[0] = area->focusPos[0];
+    farPoint.f[1] = area->focusPos[1];
+    farPoint.f[2] = area->focusPos[2];
+    farPoint.f[3] = 1.0f;
+    if (fldCameraFollowRows[area->rowIdx].flags & FLD_CAM_ROW_NAMED) {
+        secondary = dds3GetControlScene();
+        node = dds3SceneBasicSearchNameAndType(
+            secondary, 4, (const u8 *)D_0032F510[fldCameraFollowRows[area->rowIdx].namedCamera].firstNode);
+        transform = node->inner;
+        firstPoint.f[0] = transform->position[0];
+        firstPoint.f[1] = transform->position[1];
+        firstPoint.f[2] = transform->position[2];
+        node = dds3SceneBasicSearchNameAndType(
+            secondary, 4, (const u8 *)D_0032F510[fldCameraFollowRows[area->rowIdx].namedCamera].secondNode);
+        transform = node->inner;
+        secondPoint.f[0] = transform->position[0];
+        secondPoint.f[1] = transform->position[1];
+        secondPoint.f[2] = transform->position[2];
+        named = &D_0032F510[fldCameraFollowRows[area->rowIdx].namedCamera];
+        switch (named->axis) {
+        case 0:
+            coordinate = area->x;
+            minimum = named->minimum;
+            maximum = named->maximum;
+            break;
+        case 1:
+            coordinate = area->y;
+            minimum = named->minimum;
+            maximum = named->maximum;
+            break;
+        case 2:
+            coordinate = area->z;
+            minimum = named->minimum;
+            maximum = named->maximum;
+            break;
+        }
+        if (coordinate > maximum) {
+            coordinate = maximum;
+        }
+        if (coordinate < minimum) {
+            coordinate = minimum;
+        }
+        weight = (coordinate - maximum) / (minimum - maximum);
+        remaining = 1.0f - weight;
+        farPoint.f[0] = firstPoint.f[0] * weight + secondPoint.f[0] * remaining;
+        farPoint.f[1] = firstPoint.f[1] * weight + secondPoint.f[1] * remaining;
+        farPoint.f[2] = firstPoint.f[2] * weight + secondPoint.f[2] * remaining;
+    }
+    SDF_VU0_COPYVECTOR(&previousFar, &farPoint);
+    if (fldCameraFollowRows[fldGlobalBase.rowIdx].flags & FLD_CAM_ROW_LIMITED) {
+        dx = farPoint.f[0] - nearPoint.f[0];
+        dy = farPoint.f[1] - nearPoint.f[1];
+        dz = farPoint.f[2] - nearPoint.f[2];
+        distance = fsqrtf(dx * dx + dy * dy + dz * dz);
+        nearLimit = fldCameraFollowRows[fldGlobalBase.rowIdx].dist;
+        farLimit = fldCameraFollowRows[fldGlobalBase.rowIdx].targetY;
+        if (farLimit + nearLimit < distance) {
+            dx /= distance;
+            dy /= distance;
+            dz /= distance;
+            farPoint.f[0] = previousFar.f[0] - dx * farLimit;
+            farPoint.f[1] = previousFar.f[1] - dy * farLimit;
+            farPoint.f[2] = previousFar.f[2] - dz * farLimit;
+        } else {
+            dx /= distance;
+            dy /= distance;
+            dz /= distance;
+            farPoint.f[0] = nearPoint.f[0] + dx * nearLimit;
+            farPoint.f[1] = nearPoint.f[1] + dy * nearLimit;
+            farPoint.f[2] = nearPoint.f[2] + dz * nearLimit;
+        }
+        dx = farPoint.f[0] - nearPoint.f[0];
+        dy = farPoint.f[1] - nearPoint.f[1];
+        dz = farPoint.f[2] - nearPoint.f[2];
+        if (distance < fsqrtf(dx * dx + dy * dy + dz * dz)) {
+            farPoint.f[0] = previousFar.f[0];
+            farPoint.f[1] = previousFar.f[1];
+            farPoint.f[2] = previousFar.f[2];
+        }
+    }
+    if (D_0032E590[0] == 1) {
+        dx = previousFar.f[0] - farPoint.f[0];
+        dy = previousFar.f[1] - farPoint.f[1];
+        dz = previousFar.f[2] - farPoint.f[2];
+        sprintf(text, D_003A0010, (s32)farPoint.f[0], (s32)farPoint.f[1], (s32)farPoint.f[2],
+                (s32)fsqrtf(dx * dx + dy * dy + dz * dz));
+        fldDbgPrintStr2DC(180, 300, 0, (s32)text);
+        sprintf(text, D_003A0028, (s32)(remaining * 100.0f));
+        fldDbgPrintStr2DC(180, 312, 0, (s32)text);
+    }
+    if (fldCameraFollowRows[fldGlobalBase.rowIdx].flags & FLD_CAM_ROW_LIMITED) {
+        SDF_VU0_COPYVECTOR(&collisionNear, &nearPoint);
+        SDF_VU0_COPYVECTOR(&collisionFar, &previousFar);
+        if (fldHitChkEnemy(collisionFar.f, collisionNear.f, collisionPoint.f) != -1) {
+            dx = farPoint.f[0] - nearPoint.f[0];
+            dy = farPoint.f[1] - nearPoint.f[1];
+            dz = farPoint.f[2] - nearPoint.f[2];
+            distance = fsqrtf(dx * dx + dy * dy + dz * dz);
+            dx = collisionPoint.f[0] - nearPoint.f[0];
+            dy = collisionPoint.f[1] - nearPoint.f[1];
+            dz = collisionPoint.f[2] - nearPoint.f[2];
+            if (distance < fsqrtf(dx * dx + dy * dy + dz * dz)) {
+                SDF_VU0_COPYVECTOR(&farPoint, &collisionPoint);
+            }
+        }
+    }
+    dds3SetPosPoseSet((dds3Basic_t *)*world, &farPoint.q);
+    SDF_VU0_COPYVECTOR(fldLookAtNearPoint, &nearPoint);
+    SDF_VU0_COPYVECTOR(fldCamTarget, &farPoint);
+    ((dds3Basic_t *)*world)->ops->update((dds3Basic_t *)*world);
+    dx = nearPoint.f[0] - farPoint.f[0];
+    dy = nearPoint.f[1] - farPoint.f[1];
+    dz = nearPoint.f[2] - farPoint.f[2];
+    fldGlobalBase.dist = fsqrtf(dx * dx + dy * dy + dz * dz);
+    fldGlobalBase.negatedAngle =
+        GetSphericalPosMove(farPoint.f[0], farPoint.f[2], nearPoint.f[0], nearPoint.f[2]) + 180.0f;
+}
+#else
 INCLUDE_ASM(const s32, "field/fldFileResolver", fldUpdateCameraFollowLinkedObject);
+#endif
 
 /* Suppress the world object's current entry when it is already selected. */
 dds3Basic_t *fldCamNowEveCamera(void) {
@@ -6647,7 +7307,113 @@ s32 fldComposeFadeColor(s32 fade, s32 color, s32 alpha) {
     return color | (scaled << 24);
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "fld_area_work.h"
+#include "fld.h"
+#include "sdf.h"
+#include "sdf_textured_rect.h"
+
+extern void eglSetOt(u32 surfaceIndex);
+extern void evtSubmitPrimaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 unusedZte,
+                                   s32 ztst);
+extern void evtSubmitPrimaryAlphaBlendMode(s32 blendMode);
+extern s32 fldComposeFadeColor(s32 fade, s32 color, s32 alpha);
+extern u32 fldCameraColorEnabled;
+extern SdfFlagListWork *fldCameraColorEffect;
+extern sdfTexHandle_t *fldRainTextureReference;
+extern FldCameraSetting *fldCameraSettings;
+extern FldCameraSetting fldAppliedCameraSettings[];
+extern s32 fldCameraColorFade;
+extern s32 fldCameraColorLayerScroll;
+extern s32 fldCameraColorLayerScrolls[3];
+
+/* One tile of a colour layer, tile (-1, 0 or 1) tiles below the layer's
+ * scroll: grey, its alpha the layer's, faded by fldComposeFadeColor by the
+ * screen height of its top and of its bottom edge. */
+static inline void fldDrawCameraColorTile(s32 x, s32 tile, s32 width, s32 height, s32 textureSize, s32 *layer) {
+    u32 top = fldComposeFadeColor(fldCameraColorLayerScroll + tile * height, 0x808080, layer[1]);
+    u32 bottom = fldComposeFadeColor(fldCameraColorLayerScroll + tile * height + height, 0x808080, layer[1]);
+
+    evtSubmitTexturedGradientQuad(x, fldCameraColorLayerScroll + tile * height, width, height, 0, 0, textureSize,
+                                  textureSize, top, top, bottom, bottom, fldRainTextureReference);
+}
+
+/* One column of a colour layer at x: a tile above the layer's scroll, the
+ * tile at it, and a tile below. */
+static inline void fldDrawCameraColorColumn(s32 x, s32 width, s32 height, s32 textureSize, s32 *layer) {
+    fldDrawCameraColorTile(x, -1, width, height, textureSize, layer);
+    fldDrawCameraColorTile(x, 0, width, height, textureSize, layer);
+    fldDrawCameraColorTile(x, 1, width, height, textureSize, layer);
+}
+
+/* The camera colour effect's scrolling layers, each frame. Step their fade
+ * (fldCameraColorFade, in percent) toward 0 while the area suppresses the
+ * effect and toward 100 otherwise, and update and draw the colour effect
+ * unless suppressed, when the camera setting enables it and it exists.
+ * Then on surface 0x4F, alpha blended, draw each enabled layer of the
+ * applied camera setting (enabled, alpha, speed, flags): tiles 0x100 square,
+ * or 0x200 when its flags have any of 0xF00, scrolling down at its speed and
+ * across with the camera heading (512 pixels per 180 degrees), in columns at
+ * x and x - 512, and for small tiles also x + 256 and x - 256. Upstream:
+ * INCLUDE_ASM in DDS1's field/fldFileResolver and DDS2's game/code_00136EF8. */
+void fldDrawCameraColorScrollingGradient(void) {
+    s32 *layer;
+    s32 textureSize;
+    s32 size;
+    s32 x;
+    s32 i;
+
+    if (fldCameraColorEnabled == 0) {
+        return;
+    }
+    if (fldGlobalBase.colorEffectSuppressed != 0) {
+        if (fldCameraColorFade > 0) {
+            fldCameraColorFade--;
+        }
+    } else if (fldCameraColorFade < 100) {
+        fldCameraColorFade++;
+    }
+    if (fldGlobalBase.colorEffectSuppressed == 0 && fldCameraSettings->color.enabled != 0 &&
+        fldCameraColorEffect != NULL) {
+        effUpdateAndDrawSelectionEntries(fldCameraColorEffect);
+    }
+
+    /* The heading's place within one 512-pixel period, in [0, 512). */
+    x = (s32)(fldGlobalBase.negatedAngle * 2.8444445f);
+    x = x / 512 * 512 - x;
+    while (x < 0) {
+        x += 512;
+    }
+
+    eglSetOt(0x4F);
+    evtSubmitPrimaryAlphaBlendMode(1);
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    textureSize = fldCameraSettings->unk0;
+    layer = fldAppliedCameraSettings[0].values[0];
+    for (i = 0; i < 3; i++, layer += 4) {
+        if (layer[0] == 0) {
+            continue;
+        }
+        size = (layer[3] & 0xF00) ? 0x200 : 0x100;
+        fldCameraColorLayerScroll = fldCameraColorLayerScrolls[i] + layer[2];
+        fldCameraColorLayerScrolls[i] = fldCameraColorLayerScroll % size;
+        fldCameraColorLayerScroll = fldCameraColorLayerScrolls[i];
+
+        fldDrawCameraColorColumn(x, size, size, textureSize, layer);
+        if (size < 0x200) {
+            fldDrawCameraColorColumn(x + size, size, size, textureSize, layer);
+            fldDrawCameraColorColumn(x - 512, size, size, textureSize, layer);
+            fldDrawCameraColorColumn(x + size - 512, size, size, textureSize, layer);
+        } else {
+            fldDrawCameraColorColumn(x - 512, size, size, textureSize, layer);
+        }
+    }
+    evtSubmitPrimaryAlphaBlendMode(0);
+}
+#else
 INCLUDE_ASM(const s32, "field/fldFileResolver", fldDrawCameraColorScrollingGradient);
+#endif
 
 extern char D_003A0100[];
 
@@ -7763,7 +8529,421 @@ void fldHitChkUnitDamage(f32 *position) {
     }
 }
 
+#ifdef NON_MATCHING
+#include "sdf_line_pair_packet_api.h"
+#include "sdf_gs_header.h"
+#include "sdf_pac_reloc.h"
+#include "fld_script_resource.h"
+#include "sdf_packet_header.h"
+#include "eff.h"
+#include "fld_player_scene_state.h"
+#include "fld_marker_packet.h"
+#include "sdf_gs_blend.h"
+#include "common.h"
+#include "fld_stop_entry.h"
+#include "sdf_resource_list_release_api.h"
+#include "kwln_background_fade_api.h"
+#include "fld_scene_ready_api.h"
+#include "fld_scene_record_api.h"
+#include "fld_light_set.h"
+#include "fld_sky_buffer.h"
+#include "fld_sky_gradient_record.h"
+#include "fld_quad_state.h"
+#include "kwln_frame_draw_buffer.h"
+#include "kwln_draw_buffer.h"
+#include "kwln_fade.h"
+#include "mnu_title_stream.h"
+#include "fld_bill_config.h"
+#include "sdf_trig.h"
+#include "fld_area_path.h"
+#include "fld_npc_motion.h"
+#include "fld_npc_palette.h"
+#include "btl_stage_task_cleanup.h"
+#include "mdl_motion_api.h"
+#include "sdf_motion.h"
+#include "fld_resource_resolver.h"
+#include "fld_clear_menu_entries_api.h"
+#include "fld_play_pending_sounds_api.h"
+#include "fld_release_texture_slots_api.h"
+#include "fld_transfer_chunk.h"
+#include "fld_camera_follow_row.h"
+#include "fld.h"
+#include "fld_encounter_runtime_api.h"
+#include "fld_collision_geometry.h"
+#include "fld_scene_request.h"
+#include "fld_spawn_event.h"
+#include "sdf_resource.h"
+#include "dds3obj.h"
+#include "dds3_world_value.h"
+#include "sdf_texture_file.h"
+#include "sdf_texture_primary_buffer_api.h"
+#include "evt_action_object.h"
+#include "sdf_texture_offset_list.h"
+#include "evt_script_model.h"
+#include "sdf_model.h"
+#include "mdl_flag_api.h"
+#include "dds3_world_counter.h"
+#include "sdf_vu_matrix.h"
+#include "dds3_world_secondary.h"
+#include "eff_light.h"
+#include "fld_area_work.h"
+#include "fld_spawn_collision.h"
+#include "evt_world.h"
+#include "evt_world_source_transform.h"
+#include "sdf_chip.h"
+#include "sdf_column_packet_api.h"
+#include "sdf_packet_append.h"
+#include "sdf_packet_builders.h"
+#include "fr_font.h"
+#include "sdf_packet_list.h"
+#include "sdf_dev_state.h"
+#include "fld_waypoint.h"
+#include "fld_inf.h"
+#include "kwln_task_lifecycle.h"
+#include "file_request_api.h"
+#include "file_pac.h"
+#include "fld_packed_resource_kind.h"
+#include "fld_title_banner_menu.h"
+#include "field_stage.h"
+#include "sdf_pac_work.h"
+#include "sdf_primitive_packet_api.h"
+#include "evt_unit.h"
+#include "evt_unit_color_transition.h"
+#include "fpu.h"
+#include "pcp_vu0.h"
+#include "sdf.h"
+#include "sdf_sif_command.h"
+#include "mdl.h"
+#include "scr.h"
+#include "kwln.h"
+#include "kwln_task_create.h"
+#include "dat_state.h"
+#include "dds3_world_primary.h"
+#include "sdf_packet_alloc.h"
+#include "fld_object_slot_api.h"
+#include "fld_placement_data.h"
+#include "fld_resource_name.h"
+#include "eff_object.h"
+#include "dds3_path.h"
+#include "fld_label_cache_api.h"
+#include "fld_sprite_vertex.h"
+#include "fld_room_state.h"
+#include "fld_trigger_shape.h"
+#include "fld_action_row.h"
+
+extern f32 MATH_VectorLength(const f32 *vector);
+
+
+
+
+extern FldValueRecord *fldMatterTable;
+extern s32 fldValueRecordCount;
+
+extern void fldRefreshAreaStateFromPosition(f32 *);
+extern f32 fldResolvedPosition[3];
+
+
+extern u32 fldRunDanteGunFlag[];
+extern s8 D_0032453B;
+extern void fldAutoMapNameD(s32);
+extern void fldAutoMapNameU(s32);
+extern void fldTransitionSkyLightSet(s32, s32);
+extern void fldApplyPendingSceneValueWithSpeed(s32);
+extern void rsetOtOfs(u32);
+extern void rsetTest(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void rsetAlpha(s32);
+extern void fldSetFlagAndFindRecord(s32);
+
+/* Move the field position toward input against the room's faces: add a moving
+ * support's motion, then in two passes (faces off the major axis of movement
+ * first) apply each face the position is within margin of: map labels,
+ * encounter and sound zones, specials (sky light, colour effect), automap
+ * flags, the support record, and for solid faces a push out along the normal
+ * (floors also set the target). Writes the result to input and fldResolvedPosition.
+ * Upstream: INCLUDE_ASM in field/fldFileResolver; written from the retail
+ * routine. The body compiles to retail's instructions apart from register
+ * allocation, the loop increment's delay-slot copies and majorAxis kept in a
+ * register; its branches were read against retail's (764 aligned words, 630
+ * identical). Like retail, it saves the position before making it relative to a
+ * moving face and never reads the copy, and special faces leave it relative. */
+void fldRefreshAreaStateFromPosition(f32 *input) {
+    f32 position[4];
+    f32 previous[4];
+    f32 projected[4];
+    f32 delta[4];
+    f32 savedPosition[4];
+    f32 savedPrevious[4];
+    f32 absoluteDelta[4];
+    f32 carried[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+    f32 clearance;
+    s32 majorAxis;
+    s32 floorRecord;
+    s32 index;
+    s32 pass;
+    s32 relative;
+    s32 inside;
+    s32 display;
+    s32 pending;
+    f32 margin;
+    f32 distance;
+    f32 absoluteDistance;
+    f32 contactInset;
+    u32 attributes;
+    dds3PoseSet_t *transform;
+
+    pending = -1;
+    floorRecord = -1;
+    display = fldRunDanteGunFlag[6] != 0;
+    fldGlobalBase.unkA0 = -1;
+    fldGlobalBase.overrideSupportRecordIndex = -1;
+    fldGlobalBase.unkA4 = -1;
+    fldAutoMapNameD(-1);
+    fldGlobalBase.unk8C = 0;
+    if (fldGlobalBase.primaryMovingMatterIndex != -1) {
+        FldValueRecord *support;
+        dds3PoseSet_t *carrier;
+
+        index = fldGlobalBase.primaryMovingMatterIndex;
+        support = &fldMatterTable[index];
+        if (support->worldNode != 0) {
+            carrier = (support->worldNode)->inner;
+            carried[0] = carrier->position[0] - support->previousPosition[0];
+            carried[1] = carrier->position[1] - support->previousPosition[1] + 10.0f;
+            carried[2] = carrier->position[2] - support->previousPosition[2];
+        }
+        fldGlobalBase.secondaryMovingMatterIndex = -1;
+        fldGlobalBase.primaryMovingMatterIndex = -1;
+    }
+    fldGlobalBase.secondaryMovingMatterIndex = -1;
+    fldGlobalBase.primaryMovingMatterIndex = -1;
+    if (display) {
+        rsetOtOfs(0x5E);
+        rsetTest(1, 5, 0x80, 1, 0, 0, 1, 2);
+        rsetAlpha(0);
+    }
+    previous[1] = fldResolvedPosition[1];
+    position[1] = input[1] + carried[1] - 35.0f;
+    position[0] = input[0] + carried[0];
+    position[2] = input[2] + carried[2];
+    previous[0] = fldResolvedPosition[0];
+    previous[2] = fldResolvedPosition[2];
+    delta[0] = position[0] - previous[0];
+    delta[1] = position[1] - previous[1];
+    delta[2] = position[2] - previous[2];
+    if (MATH_VectorLength(delta) < 0.09999999404f) {
+        input[0] = previous[0];
+        input[1] = previous[1];
+        input[2] = previous[2];
+        return;
+    }
+    for (index = 0; index < fldValueRecordCount; index++) {
+        fldMatterTable[index].unkCA = 0;
+    }
+    absoluteDelta[0] = ffabsf(position[0] - previous[0]);
+    absoluteDelta[2] = ffabsf(position[2] - previous[2]);
+    majorAxis = 0;
+    fldGlobalBase.unk98 = -1;
+    fldGlobalBase.encounterOverrideId = 0;
+    fldGlobalBase.colorEffectSuppressed = 0;
+    if (!(absoluteDelta[2] < absoluteDelta[0])) {
+        majorAxis = 2;
+    }
+    fldHitChkUnitElvOnly(input);
+    for (pass = 0; pass < 2; pass++) {
+        for (index = 0; index < fldValueRecordCount; index++) {
+            margin = 45.0f;
+            if (fldMatterTable[index].mode != 1) {
+                margin = 60.0f;
+            }
+            if (pass == 0) {
+                if (fldMatterTable[index].mode == majorAxis) {
+                    continue;
+                }
+            } else if (fldMatterTable[index].mode != majorAxis) {
+                continue;
+            }
+            if (fldTestRoomSceneFlag(fldGlobalBase.area,
+                                    fldGlobalBase.floor + 1, fldMatterTable[index].sceneFlag)) {
+                continue;
+            }
+            if (fldMatterTable[index].ownerIndex > 0) {
+                if (fldTestMapSlotAuxiliaryFlag(fldGlobalBase.area,
+                                               fldGlobalBase.floor + 1, fldMatterTable[index].ownerIndex)) {
+                    continue;
+                }
+            }
+            savedPosition[0] = position[0];
+            savedPosition[1] = position[1];
+            savedPosition[2] = position[2];
+            savedPrevious[0] = previous[0];
+            savedPrevious[1] = previous[1];
+            savedPrevious[2] = previous[2];
+            if (fldMatterTable[index].worldNode != 0) {
+                transform = (fldMatterTable[index].worldNode)->inner;
+                position[0] -= transform->position[0];
+                position[1] -= transform->position[1];
+                position[2] -= transform->position[2];
+                previous[0] -= transform->position[0];
+                previous[1] -= transform->position[1];
+                previous[2] -= transform->position[2];
+                relative = 1;
+            } else {
+                relative = 0;
+            }
+            distance = fldVecDot(position, fldMatterTable[index].normal);
+            distance -= fldMatterTable[index].planeConstant;
+            absoluteDistance = ffabsf(distance);
+            attributes = fldMatterTable[index].face->attributes;
+            if (attributes & 0x40) {
+                if (absoluteDistance < margin) {
+                    HitPositionInside2(&clearance, fldMatterTable[index].mode, fldMatterTable[index].count, margin, position, &fldMatterTable[index]);
+                    inside = clearance < 0.0f ? 0 : 1;
+                    if (inside == 1) {
+                        fldAutoMapNameD((fldMatterTable[index].face->moveFloor & 0xF) * 10 + (fldMatterTable[index].face->moveFloor >> 4));
+                    }
+                }
+            } else if (attributes & 0x1000) {
+                if (absoluteDistance < margin) {
+                    HitPositionInside2(&clearance, fldMatterTable[index].mode, fldMatterTable[index].count, margin, position, &fldMatterTable[index]);
+                    inside = clearance < 0.0f ? 0 : 1;
+                    if (inside == 1) {
+                        fldAutoMapNameD(fldMatterTable[index].face->place);
+                    }
+                }
+            } else if (attributes & 0x2000) {
+                if (absoluteDistance < margin) {
+                    HitPositionInside2(&clearance, fldMatterTable[index].mode, fldMatterTable[index].count, margin, position, &fldMatterTable[index]);
+                    inside = clearance < 0.0f ? 0 : 1;
+                    if (inside == 1) {
+                        fldGlobalBase.encounterOverrideId = fldMatterTable[index].face->encounter;
+                    }
+                }
+            } else if (attributes & 0x200) {
+                if (absoluteDistance < margin) {
+                    HitPositionInside2(&clearance, fldMatterTable[index].mode, fldMatterTable[index].count, margin, position, &fldMatterTable[index]);
+                    inside = clearance < 0.0f ? 0 : 1;
+                    if (inside == 1) {
+                        fldGlobalBase.unk8C = fldMatterTable[index].face->sound;
+                        if (fldMatterTable[index].face->sound == 3) fldGlobalBase.unk98 = index;
+                    }
+                }
+            } else if (attributes & 0x8000) {
+                if (absoluteDistance < margin) {
+                    HitPositionInside2(&clearance, fldMatterTable[index].mode, fldMatterTable[index].count, margin, position, &fldMatterTable[index]);
+                    inside = clearance < 0.0f ? 0 : 1;
+                    if (inside == 1) {
+                        switch (fldMatterTable[index].face->special[0]) {
+                        case 1: pending = fldMatterTable[index].face->special[1]; break;
+                        case 2: break;
+                        case 3: fldGlobalBase.unk9C = fldMatterTable[index].vertices[0][1]; break;
+                        case 5: fldGlobalBase.colorEffectSuppressed = 1; break;
+                        }
+                    }
+                }
+            } else if (attributes & 0x400) {
+                continue;
+            } else if (attributes & 0x800) {
+                if (absoluteDistance < margin) {
+                    HitPositionInside2(&clearance, fldMatterTable[index].mode, fldMatterTable[index].count, margin, position, &fldMatterTable[index]);
+                    inside = clearance < 0.0f ? 0 : 1;
+                    if (inside == 1) {
+                        fldSetFlagAndFindRecord(fldMatterTable[index].face->automap[0]);
+                        if (fldMatterTable[index].face->automap[1]) fldAutoMapNameU(fldMatterTable[index].face->automap[1]);
+                    }
+                }
+            } else if (attributes & 0x4000) {
+                continue;
+            } else if (attributes & 0x100) {
+                if (absoluteDistance < margin) {
+                    HitPositionInside2(&clearance, fldMatterTable[index].mode, fldMatterTable[index].count, margin, position, &fldMatterTable[index]);
+                    inside = clearance < 0.0f ? 0 : 1;
+                    if (inside == 1) fldGlobalBase.overrideSupportRecordIndex = index;
+                }
+            } else {
+                if (absoluteDistance < margin) {
+                    HitPositionInside2(&clearance, fldMatterTable[index].mode, fldMatterTable[index].count, margin, position, &fldMatterTable[index]);
+                    contactInset = clearance;
+                    inside = contactInset < 0.0f ? 0 : 1;
+                    if (inside == 1 && !(fldRunDanteGunFlag[0x4C / 4] && D_0032453B)) {
+                        projected[0] = position[0] - fldMatterTable[index].normal[0] * distance;
+                        projected[1] = position[1] - fldMatterTable[index].normal[1] * distance;
+                        projected[2] = position[2] - fldMatterTable[index].normal[2] * distance;
+                        if (fldMatterTable[index].normal[1] < -0.75f) {
+                            fldGlobalBase.unkA4 = index;
+                            if (floorRecord >= 0 && contactInset < absoluteDistance) clearance = absoluteDistance;
+                            position[0] = projected[0] + fldMatterTable[index].normal[0] * clearance;
+                            position[1] = projected[1] + fldMatterTable[index].normal[1] * clearance - 1.0f;
+                            position[2] = projected[2] + fldMatterTable[index].normal[2] * clearance;
+                            if (clearance == margin) floorRecord = index;
+                            if (fldMatterTable[index].worldNode != 0) {
+                                transform = (fldMatterTable[index].worldNode)->inner;
+                                position[0] += transform->position[0];
+                                position[1] += transform->position[1];
+                                position[2] += transform->position[2];
+                                previous[0] += transform->position[0];
+                                previous[1] += transform->position[1];
+                                previous[2] += transform->position[2];
+                                relative = 0;
+                            }
+                            fldMatterTable[index].unkCA = 1;
+                            fldGlobalBase.targetX = position[0];
+                            fldGlobalBase.targetY = position[1];
+                            fldGlobalBase.targetZ = position[2];
+                            fldGlobalBase.positionPending = 1;
+                            fldGlobalBase.unkAC = index;
+                        } else if (!(distance < 0.0f)) {
+                            fldGlobalBase.unkA0 = index;
+                            if (contactInset < absoluteDistance) clearance = absoluteDistance;
+                            position[0] = projected[0] + fldMatterTable[index].normal[0] * clearance;
+                            position[1] = projected[1] + fldMatterTable[index].normal[1] * clearance;
+                            position[2] = projected[2] + fldMatterTable[index].normal[2] * clearance;
+                            if (fldMatterTable[index].worldNode != 0) {
+                                transform = (fldMatterTable[index].worldNode)->inner;
+                                position[0] += transform->position[0];
+                                position[1] += transform->position[1];
+                                position[2] += transform->position[2];
+                                previous[0] += transform->position[0];
+                                previous[1] += transform->position[1];
+                                previous[2] += transform->position[2];
+                                relative = 0;
+                            }
+                            fldMatterTable[index].unkCA = 1;
+                            fldGlobalBase.positionPending = inside;
+                            fldGlobalBase.targetX = position[0];
+                            fldGlobalBase.targetY = position[1];
+                            fldGlobalBase.targetZ = position[2];
+                            fldGlobalBase.unkAC = index;
+                        }
+                    }
+                }
+                if (relative) {
+                    transform = (fldMatterTable[index].worldNode)->inner;
+                    position[0] += transform->position[0];
+                    position[1] += transform->position[1];
+                    position[2] += transform->position[2];
+                    previous[0] += transform->position[0];
+                    previous[1] += transform->position[1];
+                    previous[2] += transform->position[2];
+                }
+            }
+        }
+    }
+    if (pending != -1) fldTransitionSkyLightSet(pending, 5);
+    else fldApplyPendingSceneValueWithSpeed(5);
+    delta[0] = position[0] - previous[0];
+    delta[1] = position[1] - previous[1];
+    delta[2] = position[2] - previous[2];
+    MATH_VectorLength(delta);
+    input[0] = position[0];
+    input[1] = position[1];
+    input[2] = position[2];
+    fldResolvedPosition[0] = position[0];
+    fldResolvedPosition[1] = position[1];
+    fldResolvedPosition[2] = position[2];
+}
+#else
 INCLUDE_ASM(const s32, "field/fldFileResolver", fldRefreshAreaStateFromPosition);
+#endif
 
 void func_00137E90(void) {
 }

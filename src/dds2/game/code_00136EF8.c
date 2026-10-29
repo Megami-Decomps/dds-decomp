@@ -76,7 +76,113 @@ extern s32 D_0043617C;
 
 extern f32 fldVecDot(const f32 *, const f32 *);
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "fld_area_work.h"
+#include "fld.h"
+#include "sdf.h"
+#include "sdf_textured_rect.h"
+
+extern void eglSetOt(u32 surfaceIndex);
+extern void evtSubmitPrimaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 unusedZte,
+                                   s32 ztst);
+extern void evtSubmitPrimaryAlphaBlendMode(s32 blendMode);
+extern s32 fldComposeFadeColor(s32 fade, s32 color, s32 alpha);
+extern u32 fldCameraColorEnabled;
+extern SdfFlagListWork *fldCameraColorEffect;
+extern sdfTexHandle_t *fldRainTextureReference;
+extern FldCameraSetting *fldCameraSettings;
+extern FldCameraSetting fldAppliedCameraSettings[];
+extern s32 fldCameraColorFade;
+extern s32 fldCameraColorLayerScroll;
+extern s32 fldCameraColorLayerScrolls[3];
+
+/* One tile of a colour layer, tile (-1, 0 or 1) tiles below the layer's
+ * scroll: grey, its alpha the layer's, faded by fldComposeFadeColor by the
+ * screen height of its top and of its bottom edge. */
+static inline void fldDrawCameraColorTile(s32 x, s32 tile, s32 width, s32 height, s32 textureSize, s32 *layer) {
+    u32 top = fldComposeFadeColor(fldCameraColorLayerScroll + tile * height, 0x808080, layer[1]);
+    u32 bottom = fldComposeFadeColor(fldCameraColorLayerScroll + tile * height + height, 0x808080, layer[1]);
+
+    evtSubmitTexturedGradientQuad(x, fldCameraColorLayerScroll + tile * height, width, height, 0, 0, textureSize,
+                                  textureSize, top, top, bottom, bottom, fldRainTextureReference);
+}
+
+/* One column of a colour layer at x: a tile above the layer's scroll, the
+ * tile at it, and a tile below. */
+static inline void fldDrawCameraColorColumn(s32 x, s32 width, s32 height, s32 textureSize, s32 *layer) {
+    fldDrawCameraColorTile(x, -1, width, height, textureSize, layer);
+    fldDrawCameraColorTile(x, 0, width, height, textureSize, layer);
+    fldDrawCameraColorTile(x, 1, width, height, textureSize, layer);
+}
+
+/* The camera colour effect's scrolling layers, each frame. Step their fade
+ * (fldCameraColorFade, in percent) toward 0 while the area suppresses the
+ * effect and toward 100 otherwise, and update and draw the colour effect
+ * unless suppressed, when the camera setting enables it and it exists.
+ * Then on surface 0x4F, alpha blended, draw each enabled layer of the
+ * applied camera setting (enabled, alpha, speed, flags): tiles 0x100 square,
+ * or 0x200 when its flags have any of 0xF00, scrolling down at its speed and
+ * across with the camera heading (512 pixels per 180 degrees), in columns at
+ * x and x - 512, and for small tiles also x + 256 and x - 256. Upstream:
+ * INCLUDE_ASM in DDS1's field/fldFileResolver and DDS2's game/code_00136EF8. */
+void fldDrawCameraColorScrollingGradient(void) {
+    s32 *layer;
+    s32 textureSize;
+    s32 size;
+    s32 x;
+    s32 i;
+
+    if (fldCameraColorEnabled == 0) {
+        return;
+    }
+    if (fldGlobalBase.colorEffectSuppressed != 0) {
+        if (fldCameraColorFade > 0) {
+            fldCameraColorFade--;
+        }
+    } else if (fldCameraColorFade < 100) {
+        fldCameraColorFade++;
+    }
+    if (fldGlobalBase.colorEffectSuppressed == 0 && fldCameraSettings->color.enabled != 0 &&
+        fldCameraColorEffect != NULL) {
+        effUpdateAndDrawSelectionEntries(fldCameraColorEffect);
+    }
+
+    /* The heading's place within one 512-pixel period, in [0, 512). */
+    x = (s32)(fldGlobalBase.negatedAngle * 2.8444445f);
+    x = x / 512 * 512 - x;
+    while (x < 0) {
+        x += 512;
+    }
+
+    eglSetOt(0x4F);
+    evtSubmitPrimaryAlphaBlendMode(1);
+    evtSubmitPrimaryGsTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    textureSize = fldCameraSettings->unk0;
+    layer = fldAppliedCameraSettings[0].values[0];
+    for (i = 0; i < 3; i++, layer += 4) {
+        if (layer[0] == 0) {
+            continue;
+        }
+        size = (layer[3] & 0xF00) ? 0x200 : 0x100;
+        fldCameraColorLayerScroll = fldCameraColorLayerScrolls[i] + layer[2];
+        fldCameraColorLayerScrolls[i] = fldCameraColorLayerScroll % size;
+        fldCameraColorLayerScroll = fldCameraColorLayerScrolls[i];
+
+        fldDrawCameraColorColumn(x, size, size, textureSize, layer);
+        if (size < 0x200) {
+            fldDrawCameraColorColumn(x + size, size, size, textureSize, layer);
+            fldDrawCameraColorColumn(x - 512, size, size, textureSize, layer);
+            fldDrawCameraColorColumn(x + size - 512, size, size, textureSize, layer);
+        } else {
+            fldDrawCameraColorColumn(x - 512, size, size, textureSize, layer);
+        }
+    }
+    evtSubmitPrimaryAlphaBlendMode(0);
+}
+#else
 INCLUDE_ASM(const s32, "game/code_00136EF8", fldDrawCameraColorScrollingGradient);
+#endif
 
 void fldInitializeCameraColorResource(void) {
     fldRainTextureResource = sdfDevLoadFileEx(D_00413350, &fldRainTextureData, 0);
@@ -1201,7 +1307,372 @@ void fldHitChkUnitDamage(f32 *position) {
     }
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "fld_area_work.h"
+#include "fld.h"
+#include "fpu.h"
+#include "dds3obj.h"
+
+extern f32 MATH_VectorLength(const f32 *vector);
+
+
+
+
+
+extern void fldAutoMapNameD(s32 labelIndex);
+extern void fldAutoMapNameU(s32 labelIndex);
+extern void fldSetCurrentFloorFlag(s32 flagNumber);
+extern void fldTransitionSkyLightSet(s32 lightSetIndex, s32 mode);
+extern void fldApplyPendingSceneValueWithSpeed(s32 speed);
+extern void rsetOtOfs(u32 displayIndex);
+extern void rsetTest(s32 flag0, s32 flag1, s32 dataOffset, s32 field12, s32 flag14, s32 flag15, s32 unused,
+                               s32 field17);
+extern void rsetAlpha(s32 mode);
+extern FldValueRecord *fldMatterTable;
+extern s32 fldValueRecordCount;
+extern u32 fldRunDanteGunFlag[];
+extern s8 dds3PadButtonState[2][2][16];
+extern f32 fldResolvedPosition[3];
+
+/* Move the field position toward input against the room's collision faces.
+ * Carry it by the motion of a moving support it stood on; stop at the last
+ * resolved position (fldResolvedPosition) when it moves less than 0.1. Else
+ * test each face in two passes (faces off the major axis of movement first,
+ * skipping those a room scene flag or the owner's map slot flag hides) and
+ * apply each face the position lies within its margin of (45, or 60 off the
+ * floor axis): map labels, encounter and sound zones, specials (sky light,
+ * height, colour effect), automap flags, the support record, and for a solid
+ * face (a floor, or a wall met from its front) a push out along its normal,
+ * which becomes the target. Then start the sky light change and write the
+ * result to input and fldResolvedPosition. With fldRunDanteGunFlag[6] set
+ * it first sets up display buffer 0x5E for debug drawing;
+ * fldRunDanteGunFlag[19] with the first pad's button 11 held lets the
+ * position through solid faces. DDS1's routine differs only in FldAreaWork's
+ * layout (its target at 0x158, DDS2's at 0x164).
+ * Retail oddities kept: it copies the position before making it relative to a
+ * moving face and never reads the copy; a special face leaves the position
+ * relative to its moving face; the final movement length is computed and
+ * discarded. Upstream: INCLUDE_ASM in game/code_00136EF8. */
+void fldRefreshAreaStateFromPosition(f32 *input) {
+    f32 position[4];
+    f32 previous[4];
+    f32 projected[4];
+    f32 delta[4];
+    f32 savedPosition[4];
+    f32 savedPrevious[4];
+    f32 absoluteDelta[4];
+    f32 carried[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+    f32 clearance;
+    f32 contactInset;
+    f32 margin;
+    f32 distance;
+    f32 absoluteDistance;
+    s32 majorAxis;
+    s32 floorRecord;
+    s32 pending;
+    s32 index;
+    s32 pass;
+    s32 relative;
+    s32 inside;
+    s32 display;
+    s32 sound;
+    u32 attributes;
+    dds3PoseSet_t *transform;
+
+    pending = -1;
+    floorRecord = -1;
+    display = fldRunDanteGunFlag[6] != 0;
+    fldGlobalBase.unkA0 = -1;
+    fldGlobalBase.overrideSupportRecordIndex = -1;
+    fldGlobalBase.unkA4 = -1;
+    fldAutoMapNameD(-1);
+    fldGlobalBase.unk8C = 0;
+    if (fldGlobalBase.primaryMovingMatterIndex != -1) {
+        FldValueRecord *support;
+        dds3PoseSet_t *carrier;
+
+        index = fldGlobalBase.primaryMovingMatterIndex;
+        support = &fldMatterTable[index];
+        if (support->worldNode != NULL) {
+            carrier = support->worldNode->inner;
+            carried[0] = carrier->position[0] - support->previousPosition[0];
+            carried[1] = carrier->position[1] - support->previousPosition[1] + 10.0f;
+            carried[2] = carrier->position[2] - support->previousPosition[2];
+        }
+        fldGlobalBase.secondaryMovingMatterIndex = -1;
+        fldGlobalBase.primaryMovingMatterIndex = -1;
+    }
+    fldGlobalBase.secondaryMovingMatterIndex = -1;
+    fldGlobalBase.primaryMovingMatterIndex = -1;
+    if (display) {
+        rsetOtOfs(0x5E);
+        rsetTest(1, 5, 0x80, 1, 0, 0, 1, 2);
+        rsetAlpha(0);
+    }
+    position[0] = input[0] + carried[0];
+    position[1] = input[1] + carried[1] - 35.0f;
+    position[2] = input[2] + carried[2];
+    previous[0] = fldResolvedPosition[0];
+    previous[1] = fldResolvedPosition[1];
+    previous[2] = fldResolvedPosition[2];
+    delta[0] = position[0] - previous[0];
+    delta[1] = position[1] - previous[1];
+    delta[2] = position[2] - previous[2];
+    if (MATH_VectorLength(delta) < 0.1f) {
+        input[0] = previous[0];
+        input[1] = previous[1];
+        input[2] = previous[2];
+        return;
+    }
+    for (index = 0; index < fldValueRecordCount; index++) {
+        fldMatterTable[index].unkCA = 0;
+    }
+    absoluteDelta[0] = ffabsf(position[0] - previous[0]);
+    absoluteDelta[2] = ffabsf(position[2] - previous[2]);
+    majorAxis = 0;
+    fldGlobalBase.unk98 = -1;
+    fldGlobalBase.encounterOverrideId = 0;
+    fldGlobalBase.colorEffectSuppressed = 0;
+    if (!(absoluteDelta[2] < absoluteDelta[0])) {
+        majorAxis = 2;
+    }
+    fldHitChkUnitElvOnly(input);
+    for (pass = 0; pass < 2; pass++) {
+        for (index = 0; index < fldValueRecordCount; index++) {
+            margin = 45.0f;
+            if (fldMatterTable[index].mode != 1) {
+                margin = 60.0f;
+            }
+            if (pass == 0) {
+                if (fldMatterTable[index].mode == majorAxis) {
+                    continue;
+                }
+            } else if (fldMatterTable[index].mode != majorAxis) {
+                continue;
+            }
+            if (fldTestRoomSceneFlag(fldGlobalBase.area, fldGlobalBase.floor + 1, fldMatterTable[index].sceneFlag)) {
+                continue;
+            }
+            if (fldMatterTable[index].ownerIndex > 0 &&
+                fldTestMapSlotAuxiliaryFlag(fldGlobalBase.area, fldGlobalBase.floor + 1,
+                                            fldMatterTable[index].ownerIndex)) {
+                continue;
+            }
+            savedPosition[0] = position[0];
+            savedPosition[1] = position[1];
+            savedPosition[2] = position[2];
+            savedPrevious[0] = previous[0];
+            savedPrevious[1] = previous[1];
+            savedPrevious[2] = previous[2];
+            if (fldMatterTable[index].worldNode != NULL) {
+                transform = fldMatterTable[index].worldNode->inner;
+                position[0] -= transform->position[0];
+                position[1] -= transform->position[1];
+                position[2] -= transform->position[2];
+                previous[0] -= transform->position[0];
+                previous[1] -= transform->position[1];
+                previous[2] -= transform->position[2];
+                relative = 1;
+            } else {
+                relative = 0;
+            }
+            distance = fldVecDot(position, fldMatterTable[index].normal);
+            distance -= fldMatterTable[index].planeConstant;
+            absoluteDistance = ffabsf(distance);
+            attributes = fldMatterTable[index].face->attributes;
+            if (attributes & 0x40) {
+                if (absoluteDistance < margin) {
+                    HitPositionInside2(&clearance, fldMatterTable[index].mode,
+                                                        fldMatterTable[index].count, margin, position,
+                                                        &fldMatterTable[index]);
+                    inside = clearance < 0.0f ? 0 : 1;
+                    if (inside == 1) {
+                        fldAutoMapNameD((fldMatterTable[index].face->moveFloor & 0xF) * 10 +
+                                                         (fldMatterTable[index].face->moveFloor >> 4));
+                    }
+                }
+            } else if (attributes & 0x1000) {
+                if (absoluteDistance < margin) {
+                    HitPositionInside2(&clearance, fldMatterTable[index].mode,
+                                                        fldMatterTable[index].count, margin, position,
+                                                        &fldMatterTable[index]);
+                    inside = clearance < 0.0f ? 0 : 1;
+                    if (inside == 1) {
+                        fldAutoMapNameD(fldMatterTable[index].face->place);
+                    }
+                }
+            } else if (attributes & 0x2000) {
+                if (absoluteDistance < margin) {
+                    HitPositionInside2(&clearance, fldMatterTable[index].mode,
+                                                        fldMatterTable[index].count, margin, position,
+                                                        &fldMatterTable[index]);
+                    inside = clearance < 0.0f ? 0 : 1;
+                    if (inside == 1) {
+                        fldGlobalBase.encounterOverrideId = fldMatterTable[index].face->encounter;
+                    }
+                }
+            } else if (attributes & 0x200) {
+                if (absoluteDistance < margin) {
+                    HitPositionInside2(&clearance, fldMatterTable[index].mode,
+                                                        fldMatterTable[index].count, margin, position,
+                                                        &fldMatterTable[index]);
+                    inside = clearance < 0.0f ? 0 : 1;
+                    if (inside == 1) {
+                        sound = fldMatterTable[index].face->sound;
+                        fldGlobalBase.unk8C = sound;
+                        if (sound == 3) {
+                            fldGlobalBase.unk98 = index;
+                        }
+                    }
+                }
+            } else if (attributes & 0x8000) {
+                if (absoluteDistance < margin) {
+                    HitPositionInside2(&clearance, fldMatterTable[index].mode,
+                                                        fldMatterTable[index].count, margin, position,
+                                                        &fldMatterTable[index]);
+                    inside = clearance < 0.0f ? 0 : 1;
+                    if (inside == 1) {
+                        switch (fldMatterTable[index].face->special[0]) {
+                        case 1:
+                            pending = fldMatterTable[index].face->special[1];
+                            break;
+                        case 2:
+                            break;
+                        case 3:
+                            fldGlobalBase.unk9C = fldMatterTable[index].vertices[0][1];
+                            break;
+                        case 5:
+                            fldGlobalBase.colorEffectSuppressed = 1;
+                            break;
+                        }
+                    }
+                }
+            } else if (attributes & 0x400) {
+                continue;
+            } else if (attributes & 0x800) {
+                if (absoluteDistance < margin) {
+                    HitPositionInside2(&clearance, fldMatterTable[index].mode,
+                                                        fldMatterTable[index].count, margin, position,
+                                                        &fldMatterTable[index]);
+                    inside = clearance < 0.0f ? 0 : 1;
+                    if (inside == 1) {
+                        fldSetCurrentFloorFlag(fldMatterTable[index].face->automap[0]);
+                        if (fldMatterTable[index].face->automap[1] != 0) {
+                            fldAutoMapNameU(fldMatterTable[index].face->automap[1]);
+                        }
+                    }
+                }
+            } else if (attributes & 0x4000) {
+                continue;
+            } else if (attributes & 0x100) {
+                if (absoluteDistance < margin) {
+                    HitPositionInside2(&clearance, fldMatterTable[index].mode,
+                                                        fldMatterTable[index].count, margin, position,
+                                                        &fldMatterTable[index]);
+                    inside = clearance < 0.0f ? 0 : 1;
+                    if (inside == 1) {
+                        fldGlobalBase.overrideSupportRecordIndex = index;
+                    }
+                }
+            } else {
+                if (absoluteDistance < margin) {
+                    HitPositionInside2(&clearance, fldMatterTable[index].mode,
+                                                        fldMatterTable[index].count, margin, position,
+                                                        &fldMatterTable[index]);
+                    contactInset = clearance;
+                    inside = contactInset < 0.0f ? 0 : 1;
+                    if (inside == 1 && !(fldRunDanteGunFlag[19] != 0 && dds3PadButtonState[1][0][11] != 0)) {
+                        projected[0] = position[0] - fldMatterTable[index].normal[0] * distance;
+                        projected[1] = position[1] - fldMatterTable[index].normal[1] * distance;
+                        projected[2] = position[2] - fldMatterTable[index].normal[2] * distance;
+                        if (fldMatterTable[index].normal[1] < -0.75f) {
+                            /* A floor: stand on it, a unit below the face. */
+                            fldGlobalBase.unkA4 = index;
+                            if (floorRecord >= 0 && contactInset < absoluteDistance) {
+                                clearance = absoluteDistance;
+                            }
+                            position[0] = projected[0] + fldMatterTable[index].normal[0] * clearance;
+                            position[1] = projected[1] + fldMatterTable[index].normal[1] * clearance - 1.0f;
+                            position[2] = projected[2] + fldMatterTable[index].normal[2] * clearance;
+                            if (clearance == margin) {
+                                floorRecord = index;
+                            }
+                            if (fldMatterTable[index].worldNode != NULL) {
+                                transform = fldMatterTable[index].worldNode->inner;
+                                position[0] += transform->position[0];
+                                position[1] += transform->position[1];
+                                position[2] += transform->position[2];
+                                previous[0] += transform->position[0];
+                                previous[1] += transform->position[1];
+                                previous[2] += transform->position[2];
+                                relative = 0;
+                            }
+                            fldMatterTable[index].unkCA = 1;
+                            fldGlobalBase.targetX = position[0];
+                            fldGlobalBase.targetY = position[1];
+                            fldGlobalBase.targetZ = position[2];
+                            fldGlobalBase.positionPending = 1;
+                            fldGlobalBase.unkAC = index;
+                        } else if (!(distance < 0.0f)) {
+                            /* A wall, approached from its front. */
+                            fldGlobalBase.unkA0 = index;
+                            if (contactInset < absoluteDistance) {
+                                clearance = absoluteDistance;
+                            }
+                            position[0] = projected[0] + fldMatterTable[index].normal[0] * clearance;
+                            position[1] = projected[1] + fldMatterTable[index].normal[1] * clearance;
+                            position[2] = projected[2] + fldMatterTable[index].normal[2] * clearance;
+                            if (fldMatterTable[index].worldNode != NULL) {
+                                transform = fldMatterTable[index].worldNode->inner;
+                                position[0] += transform->position[0];
+                                position[1] += transform->position[1];
+                                position[2] += transform->position[2];
+                                previous[0] += transform->position[0];
+                                previous[1] += transform->position[1];
+                                previous[2] += transform->position[2];
+                                relative = 0;
+                            }
+                            fldMatterTable[index].unkCA = 1;
+                            fldGlobalBase.positionPending = inside;
+                            fldGlobalBase.targetX = position[0];
+                            fldGlobalBase.targetY = position[1];
+                            fldGlobalBase.targetZ = position[2];
+                            fldGlobalBase.unkAC = index;
+                        }
+                    }
+                }
+                if (relative) {
+                    transform = fldMatterTable[index].worldNode->inner;
+                    position[0] += transform->position[0];
+                    position[1] += transform->position[1];
+                    position[2] += transform->position[2];
+                    previous[0] += transform->position[0];
+                    previous[1] += transform->position[1];
+                    previous[2] += transform->position[2];
+                }
+            }
+        }
+    }
+    if (pending != -1) {
+        fldTransitionSkyLightSet(pending, 5);
+    } else {
+        fldApplyPendingSceneValueWithSpeed(5);
+    }
+    delta[0] = position[0] - previous[0];
+    delta[1] = position[1] - previous[1];
+    delta[2] = position[2] - previous[2];
+    MATH_VectorLength(delta);
+    input[0] = position[0];
+    input[1] = position[1];
+    input[2] = position[2];
+    fldResolvedPosition[0] = position[0];
+    fldResolvedPosition[1] = position[1];
+    fldResolvedPosition[2] = position[2];
+}
+#else
 INCLUDE_ASM(const s32, "game/code_00136EF8", fldRefreshAreaStateFromPosition);
+#endif
 
 void func_0013AA78(void) {
 }
