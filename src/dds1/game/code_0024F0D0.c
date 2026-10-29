@@ -1027,7 +1027,122 @@ void mnuScrollSceneViewportToEntry(s32 *xCoordinate, s32 *yCoordinate, u16 index
     }
 }
 
+#ifdef NON_MATCHING
+#include "mnu_variant_sprite_placement.h"
+#include "dsp_entry_api.h"
+#include "dsp_channel.h"
+#include "evt_message_window_api.h"
+#include "dsp_name.h"
+#include "sdf_resource.h"
+#include "mnu.h"
+#include "dat_state.h"
+#include "mnu_profile_progress.h"
+#include "mnu_mantra_grid.h"
+#include "mnu_scene_work.h"
+#include "sdf_task_work.h"
+#include "sdf_chip.h"
+#include "mdl_flag_api.h"
+#include "prf_profile_cap.h"
+#include "prf_requirement_fallback.h"
+#include "common.h"
+#include "sdf_trig.h"
+#include "snd_sequence_volume_pan.h"
+#include "sdk_libc.h"
+extern void mnuScrollSceneViewportToEntry(s32 *xCoordinate, s32 *yCoordinate, u16 index, s32 maximumX, s32 maximumY);
+extern float vecNormalize(float *vector);
+
+extern s32 D_003BC420;
+extern MnuVariantSpritePlacement mnuMantraVariantSpritePlacements[];
+/* Advances the mantra scene view each frame: scrolls the viewport toward the
+ * selected grid entry (with the per-scene horizontal limit from the requirement
+ * flags), moves the scroll cursor and the entry marker toward their targets at
+ * a ramping or fixed speed without overshooting, and records whether the marker
+ * is still moving. Upstream: INCLUDE_ASM in game/code_00250E88; written from
+ * the retail routine. It differs from retail only in register allocation and
+ * scheduling. */
+void mnuAdvanceMantraSceneScroll(MenuSceneWork *work) {
+    SdfGrid *grid = work->gridHandle;
+    MnuMantraGridEntry *entry = (MnuMantraGridEntry *)(u32)grid->cursor->value;
+    s32 maximumX = 0x307;
+    u8 flags = work->boundsFlags;
+    f32 vector[4];
+    s32 position[2];
+    s32 deltaX;
+    s32 deltaY;
+    s32 step;
+    s32 moving = 0;
+
+    if ((flags & MENU_SCENE_REQUIREMENT_GROUP_2_MET) == 0) {
+        maximumX = 0x2C8;
+        if ((flags & MENU_SCENE_REQUIREMENT_GROUP_1_MET) == 0) {
+            maximumX = (flags & MENU_SCENE_REQUIREMENT_GROUP_0_MET) != 0 ? 0x24C : 0x1BE;
+        }
+    }
+    position[0] = work->scrollX;
+    position[1] = work->scrollY;
+    mnuScrollSceneViewportToEntry(&position[0], &position[1], entry->sceneId, maximumX, 0x38E);
+    step = D_003BC420 * 4 + 4;
+    work->scrollX = position[0];
+    if (step >= 0x15) {
+        step = 0x14;
+    }
+    work->scrollY = position[1];
+
+    memset(vector, 0, sizeof(vector));
+    vector[0] = (f32)(position[0] - work->cursorPosition.x);
+    vector[1] = (f32)(position[1] - work->cursorPosition.y);
+    vecNormalize(vector);
+
+    deltaX = position[0] - work->cursorPosition.x;
+    if (deltaX != 0) {
+        work->cursorPosition.x = (s32)((f32)work->cursorPosition.x + vector[0] * (f32)step);
+        if (deltaX * (position[0] - work->cursorPosition.x) < 0) {
+            work->cursorPosition.x = position[0];
+        }
+    }
+    deltaY = position[1] - work->cursorPosition.y;
+    if (deltaY != 0) {
+        work->cursorPosition.y = (s32)((f32)work->cursorPosition.y + vector[1] * (f32)step);
+        if (deltaY * (position[1] - work->cursorPosition.y) < 0) {
+            work->cursorPosition.y = position[1];
+        }
+    }
+
+    entry = (MnuMantraGridEntry *)(u32)grid->cursor->value;
+    position[0] = mnuMantraVariantSpritePlacements[entry->sceneId][2];
+    position[1] = mnuMantraVariantSpritePlacements[entry->sceneId][3];
+    memset(vector, 0, sizeof(vector));
+    vector[0] = (f32)(position[0] - work->entryPosition.x);
+    vector[1] = (f32)(position[1] - work->entryPosition.y);
+    vecNormalize(vector);
+
+    deltaX = position[0] - work->entryPosition.x;
+    if (deltaX != 0) {
+        moving = 1;
+        work->entryPosition.x = (s32)((f32)work->entryPosition.x + vector[0] * 20.0f);
+        if (deltaX * (position[0] - work->entryPosition.x) < 0) {
+            work->entryPosition.x = position[0];
+        }
+    }
+    deltaY = position[1] - work->entryPosition.y;
+    if (deltaY != 0) {
+        moving = 1;
+        work->entryPosition.y = (s32)((f32)work->entryPosition.y + vector[1] * 20.0f);
+        if (deltaY * (position[1] - work->entryPosition.y) < 0) {
+            work->entryPosition.y = position[1];
+        }
+    }
+
+    if (moving != 0) {
+        D_003BC420++;
+    } else {
+        D_003BC420 = 0;
+    }
+    work->cursorMoving = moving;
+}
+#else
 INCLUDE_ASM(const s32, "game/code_0024F0D0", mnuAdvanceMantraSceneScroll);
+#endif
 
 void mnuUpdateMantraSceneScroll(MenuSceneWork *work) {
     MnuMantraGridEntry *entry =
@@ -3249,7 +3364,129 @@ s32 mnuDrawPulsingDisplaySprites(s32 frame, s32 scale, s32 context) {
     return 1;
 }
 
+#ifdef NON_MATCHING
+#include "dsp_entry.h"
+#include "dsp_entry_api.h"
+#include "dsp_name.h"
+#include "common.h"
+#include "sdf_trig.h"
+#include "eff_random.h"
+#include "sdf_chip.h"
+#include "dat_state.h"
+#include "mnu_scene.h"
+#include "mnu_profile_progress.h"
+#include "mnu_mantra_grid.h"
+#include "mnu_scene_work.h"
+#include "mnu_scene_list.h"
+#include "mnu_sprite_placement.h"
+#include "evt_message_window_api.h"
+#include "sdf_task_work.h"
+#include "eff.h"
+extern void itfDspDrawEntryWithLevel(s32 x, s32 y, s32 layer, DspEntry *entry, s32 scale, s32 context);
+extern void mnuDrawDisplayEntrySpriteFromLookup(s32 x, s32 y, s32 layer, DspEntry *entry, s32 scale, s32 context);
+
+extern void mnuDrawPlacedSpriteFromTable(s32 x, s32 y, s32 z, s32 alpha, s32 placementIndex, s32 context);
+extern struct EffectSlotSet *mnuMantraSpriteSlots[];
+
+
+extern EffectSlotSet *mnuMantraSpriteSlots[];
+extern void mnuDrawScaledPlacedSprite(s32, s32, s32, s32, s32, s32, f32, f32);
+/* Advances one display-list node of the mantra scene by a frame: during frames
+ * 0-6 the node's entry fades in, the last node of the list (no next) draws its
+ * entry and then the scaled bracket sprites (opening in frames 0-6, closing in
+ * 7-10), the node draws its kind-specific side sprites in frames 0-6 and a
+ * sine-pulsed sprite in frames 4-8, and the frame counter advances; it returns
+ * 1 once the node is finished (frame 11 or later). Upstream: INCLUDE_ASM in
+ * game/code_00254B30; written from the retail routine. It differs from retail
+ * in register allocation, scheduling and in reading the node's record address
+ * and kind once (retail re-reads them for every call) and testing the next
+ * pointer once, merging the identical kind 1 and kind 2 calls and using range
+ * checks for frame 4 to 8 (the compiler here emits sltiu range tests where
+ * retail has paired compares). */
+s32 itfUpdateDisplayListNode(MnuSceneListNode *node, s32 unused, s32 context) {
+    s32 frame = node->frame;
+    DspEntry *record = (DspEntry *)(u32)node->payload.timedDraw.recordAddress;
+    s32 kind = node->payload.timedDraw.kind;
+    f32 fade;
+
+    if (frame < 7) {
+        s32 fadeAlpha;
+
+        fade = (f32)frame / 6.0f;
+        if (fade > 1.0f) {
+            fade = 1.0f;
+        }
+        fadeAlpha = fade * 128.0f;
+        itfDspDrawEntryWithLevel(0, 0, 0, record, fadeAlpha, context);
+        if (kind == 1 || kind == 2) {
+            mnuDrawDisplayEntrySpriteFromLookup(0, 0, 1, record, fadeAlpha, context);
+        }
+    }
+    if (node->next == NULL) {
+        if (frame >= 7) {
+            itfDspDrawEntryWithLevel(0, 0, 0, record, 128, context);
+            if (kind == 1 || kind == 2) {
+                mnuDrawDisplayEntrySpriteFromLookup(0, 0, 1, record, 128, context);
+            }
+        }
+        if (frame < 7) {
+            BdWork *sprite = &mnuMantraSpriteSlots[mnuMantraCommonSpritePlacements[20].resourceIndex]
+                                  ->workEntries[mnuMantraCommonSpritePlacements[20].spriteIndex];
+            f32 scale;
+            f32 inset;
+            f32 x;
+            f32 y;
+            s32 alpha;
+
+            fade = (f32)frame / 6.0f;
+            scale = 2.0f - fade;
+            inset = fade * 16.0f;
+            x = (f32)(sprite->geometry.bounds[2] >> 5) * (scale - 1.0f);
+            y = (f32)-(sprite->geometry.bounds[3] >> 4) * (scale - 1.0f);
+            alpha = fade * 128.0f;
+            mnuDrawScaledPlacedSprite((inset + -16.0f) - x, y, 1, alpha, 20, context, scale, scale);
+            mnuDrawScaledPlacedSprite((16.0f - inset) - x, y, 1, alpha, 21, context, scale, scale);
+        } else if (frame < 11) {
+            BdWork *sprite = &mnuMantraSpriteSlots[mnuMantraCommonSpritePlacements[20].resourceIndex]
+                                  ->workEntries[mnuMantraCommonSpritePlacements[20].spriteIndex];
+            f32 scale;
+            f32 inset;
+            f32 x;
+            f32 y;
+            s32 alpha;
+
+            fade = (f32)(17 - frame) / 10.0f;
+            scale = 2.0f - fade;
+            inset = fade * 16.0f;
+            x = (f32)(sprite->geometry.bounds[2] >> 5) * (scale - 1.0f);
+            y = (f32)-(sprite->geometry.bounds[3] >> 4) * (scale - 1.0f);
+            alpha = ((f32)(11 - frame) / 5.0f) * 128.0f;
+            mnuDrawScaledPlacedSprite((inset + -16.0f) - x, y, 1, alpha, 20, context, scale, scale);
+            mnuDrawScaledPlacedSprite((16.0f - inset) - x, y, 1, alpha, 21, context, scale, scale);
+        }
+    }
+    if (frame < 7) {
+        fade = (f32)frame / 6.0f;
+        if (kind == 1) {
+            mnuDrawPlacedSpriteFromTable((s32)(fade * -16.0f), 0, 1, (s32)(fade * 96.0f + 32.0f), 24, context);
+        } else if (kind == 2) {
+            mnuDrawPlacedSpriteFromTable((s32)(fade * 16.0f), 0, 1, (s32)(fade * 96.0f + 32.0f), 25, context);
+        }
+    }
+    if (frame >= 4 && frame < 9) {
+        fade = sdfSin(((f32)(frame - 3) / 6.0f) * 3.1415926f);
+        if (kind == 1) {
+            mnuDrawPlacedSpriteFromTable(0, 0, 1, (s32)(fade * 128.0f), 22, context);
+        } else if (kind == 2) {
+            mnuDrawPlacedSpriteFromTable(0, 0, 1, (s32)(fade * 128.0f), 23, context);
+        }
+    }
+    node->frame++;
+    return frame >= 11;
+}
+#else
 INCLUDE_ASM(const s32, "game/code_0024F0D0", itfUpdateDisplayListNode);
+#endif
 
 MnuSceneListNode *mnuAllocateDisplayListNode(void) {
     MnuSceneListNode *node = sdfChipAllocDirect(sizeof(MnuSceneListNode));
@@ -3747,7 +3984,86 @@ void mnuAdvanceWrappingFrame(s32 *frame) {
     }
 }
 
+#ifdef NON_MATCHING
+#include "common.h"
+#include "sdf_task_work.h"
+#include "mnu_profile_progress.h"
+#include "mnu_mantra_grid.h"
+#include "mnu_scene_work.h"
+#include "eff.h"
+
+extern void mnuDrawMantraCursorTrail(s32, s32, s32, s32, MenuSceneWork *, s32);
+
+extern void mnuDrawPlacedSpriteWithFlags(s32, s32, s32, s32, s32, s32, s32);
+extern void mnuDrawScaledPlacedSpriteWithFlags(s32, s32, s32, s32, s32, s32, s32, f32, f32);
+extern EffectSlotSet *mnuMantraSpriteSlots[];
+
+/* Draws the mantra scene's cursor sprite and a trail of its ten most recent
+ * positions: each older position is drawn 80% of the way back to its old place,
+ * scaled up and faded by age, and positions equal to the current one are
+ * skipped; the current cursor sprite is drawn last. Upstream: INCLUDE_ASM in
+ * game/code_00257200; written from the retail routine. It differs from retail
+ * only in register allocation, scheduling, the addressing of the ring entries
+ * and the placement of float and double literals; retail's 0.2 is the double
+ * 0x3FC9999999999999 from D_003AF950 and the float literals 0.8, 0.3 and 0.8
+ * are lit4 words D_003BA2B4, D_003BA2B8 and D_003BA2BC. */
+void mnuDrawMantraCursorTrail(s32 x, s32 y, s32 z, s32 alpha, MenuSceneWork *work, s32 context) {
+    MenuSceneCoordinateRing *ring = &work->coordinateRing;
+    s32 cursorX = work->entryPosition.x - work->cursorPosition.x - 9;
+    s32 cursorY = work->entryPosition.y - work->cursorPosition.y + 0x45;
+    f32 baseAlpha;
+    s32 i;
+
+    mnuDrawPlacedSpriteWithFlags(x + cursorX, y + cursorY, 0, alpha, 0x20, 0x3E, context);
+    ring->coordinates[ring->cursor].x = work->entryPosition.x;
+    ring->coordinates[ring->cursor].y = work->entryPosition.y;
+    ring->cursor++;
+    if (ring->cursor >= 10) {
+        ring->cursor = 0;
+    }
+    baseAlpha = (f32)alpha;
+    for (i = 0; i < 10; i++) {
+        MenuSceneCoordinate *point = &ring->coordinates[i];
+        s32 age;
+        s32 drawX;
+        s32 drawY;
+        f32 fade;
+        f32 expansion;
+        f32 scale;
+        BdWork *sprite;
+
+        if (point->x == work->entryPosition.x && point->y == work->entryPosition.y) {
+            continue;
+        }
+        age = i - ring->cursor;
+        if (age < 0) {
+            age += 10;
+        }
+        fade = (f32)(age - 4) / 5.0f;
+        drawX = point->x - work->cursorPosition.x - 9;
+        drawY = point->y - work->cursorPosition.y + 0x45;
+        drawX = (s32)((f32)cursorX - (f32)(cursorX - drawX) * 0.8f);
+        drawY = (s32)((f32)cursorY - (f32)(cursorY - drawY) * 0.8f);
+        if (fade < 0.0f) {
+            fade = 0.0f;
+        }
+        expansion = -(1.0f - fade) * 0.2;
+        scale = expansion + 1.0f;
+        sprite = &mnuMantraSpriteSlots[mnuMantraCommonSpritePlacements[0x3D].resourceIndex]
+                      ->workEntries[mnuMantraCommonSpritePlacements[0x3D].spriteIndex];
+        mnuDrawScaledPlacedSpriteWithFlags(
+            (s32)((f32)(x + drawX) - (f32)(sprite->geometry.bounds[2] >> 5) * expansion),
+            (s32)((f32)(y + drawY) - (f32)(sprite->geometry.bounds[3] >> 4) * expansion), 0,
+            (s32)(baseAlpha * fade * 0.3f), 0x20, 0x3D, context + 1, scale, scale);
+    }
+    cursorX = work->entryPosition.x - work->cursorPosition.x - 9;
+    cursorY = work->entryPosition.y - work->cursorPosition.y + 0x45;
+    mnuDrawPlacedSpriteWithFlags(x + cursorX, y + cursorY, 0, (s32)(baseAlpha * 0.8f), 0x20, 0x3D,
+                                 context + 1);
+}
+#else
 INCLUDE_ASM(const s32, "game/code_0024F0D0", mnuDrawMantraCursorTrail);
+#endif
 
 
 
