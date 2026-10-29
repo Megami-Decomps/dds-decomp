@@ -67,6 +67,7 @@
 #include "fld_resource_wait_api.h"
 #include "fld_sequence_controller.h"
 #include "file_selection_api.h"
+#include "file_slot_flags_change_api.h"
 #include "fld_player_scene_state.h"
 #include "fld_spark_controller_state.h"
 #include "eff_inner_float_api.h"
@@ -305,8 +306,6 @@ extern s32 fldElvState;
 
 
 extern void sdfResetGameRuntime(s32);
-
-extern s32 fileLoadStateChanged(void);
 
 extern void fileCacheSlotFlagsFromState(void);
 
@@ -760,7 +759,7 @@ void fldPrepareDeferredSceneTransition(void) {
     } else {
         sdfResetGameRuntime(0);
     }
-    if (fileLoadStateChanged() == 0) {
+    if (fileLoadStateChanged() == FILE_SLOT_FLAGS_UNCHANGED) {
         fileCacheSlotFlagsFromState();
     } else {
         fileRestoreSlotFlagsToState();

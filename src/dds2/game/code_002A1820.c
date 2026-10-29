@@ -22,6 +22,7 @@
 #include "kwln_task_lifecycle.h"
 #include "file_request_api.h"
 #include "file_request_end_check_api.h"
+#include "file_slot_flags_change_api.h"
 #include "sdf_thread.h"
 #include "sdf_thread_sleep.h"
 #include "mnu_title_stream.h"
@@ -926,7 +927,6 @@ extern void mnuAdvanceSlideBarValue(SlideBar *, s32);
 extern void mnuAdvanceSlideBar(PickList *, s32);
 extern void mnuDrawAndAdvanceMovieMenuBar(SlideBar *, s32);
 
-extern s32 fileLoadStateChanged(void);
 extern void fileCacheSlotFlagsFromState(void);
 extern void fileRestoreSlotFlagsToState(void);
 
@@ -954,7 +954,7 @@ KwlnTaskUpdateResult mnuUpdateTitleMenuTask(dds3ProcessID_t *task) {
             mnuHandleTitleMenuEvent(titleWork->state);
             titleWork->state = 3;
             if (titleWork->mode == 3) {
-                if (fileLoadStateChanged() == 0) {
+                if (fileLoadStateChanged() == FILE_SLOT_FLAGS_UNCHANGED) {
                     fileCacheSlotFlagsFromState();
                 } else {
                     fileRestoreSlotFlagsToState();
