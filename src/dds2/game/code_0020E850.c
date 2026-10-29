@@ -157,7 +157,104 @@ void btlSetResourceNameLengthLimit(struct BtlResourceNameRecord *record, u32 max
 }
 
 /* Name-record overwrite prompt: uses coordinates, selection, state and both text slices. */
+#ifdef NON_MATCHING
+#include "sdk_ps2.h"
+#include "common.h"
+#include "btl_indexed_ui_resource_api.h"
+#include "btl_set_actor_effect_parameter_api.h"
+#include "btl_actor_resource_bank_api.h"
+#include "btl_effect_position.h"
+#include "eff_offset_if_owner_flag_clear.h"
+#include "btl_command_effect.h"
+#include "btl_ai_slot.h"
+#include "dds3obj.h"
+#include "btl_resource_name.h"
+#include "sdf_chip.h"
+#include "btl_task_state.h"
+#include "btl_task_condition.h"
+#include "btl.h"
+#include "btl_analysis_panel_wait_args.h"
+#include "btl_command.h"
+#include "btl_action.h"
+#include "btl_ai_table.h"
+#include "btl_ai_scratch.h"
+#include "btl_state.h"
+#include "btl_task_args.h"
+#include "evt_unit.h"
+#include "mdl.h"
+#include "eff_transform.h"
+#include "btl_model_record.h"
+#include "pcp_vu0.h"
+#include "dat_command.h"
+#include "btl_boss_debug_api.h"
+#include "eff.h"
+#include "sdk_libkernl.h"
+#include "sdk_libc.h"
+
+extern u8 sdfHddValid;
+extern s8 dds3PadBitTable[0x20];
+extern char *sdfFileGetHostRoot(void);
+extern void btlDebugDrawText(s32 x, s32 y, s32 style, const char *text);
+/* "OK", in the small data of code_00207A38, which shares it: retail names it,
+ * not a literal of this unit's. */
+extern char D_00436C70[];
+
+/* Poll a battle resource-name record's overwrite prompt: when the target file
+ * does not exist it permits the write at once; when it exists it shows the
+ * OVERWRITE OK? prompt, flips the OK/CANCEL choice on two pad buttons, and
+ * returns 1 when OK is chosen with the confirming button, or closes the prompt
+ * when the choice is cancelled. Upstream: INCLUDE_ASM in game/code_0020E850;
+ * written from the retail routine, with DDS1's btlPollResourceNameOverwrite
+ * as a guide (the same routine). The string literals the unit itself holds
+ * ("pfs:", "CANCEL" and the three in its rodata) are the body's literals;
+ * their text equals retail's. */
+u32 btlPollResourceNameOverwrite(struct BtlResourceNameRecord *record, const char *directoryPath) {
+    char path[0xD0];
+    s32 x;
+    s32 y;
+    s32 fd;
+
+    if (sdfHddValid) {
+        sprintf(path, "pfs0:%s%s%s", directoryPath, record->resourceName, record->extension);
+    } else {
+        sprintf(path, "%s%s%s%s", sdfFileGetHostRoot(), directoryPath, record->resourceName, record->extension);
+    }
+    x = record->x;
+    y = record->y;
+    if (record->overwritePromptActive == 0) {
+        fd = sceOpen(path, 1);
+        if (fd < 0) {
+            return 1;
+        }
+        record->selection = 0;
+        record->selectionStatus = 1;
+        record->overwritePromptActive = 1;
+        sceClose(fd);
+        sceSync("pfs:", 0);
+        return 0;
+    }
+    if ((dds3PadBitTable[6] & 2) || (dds3PadBitTable[7] & 2)) {
+        record->selection ^= 1;
+    } else if (dds3PadBitTable[1] < 0) {
+        if (record->selection == 1) {
+            return 1;
+        }
+        record->selectionStatus = 0;
+        record->overwritePromptActive = 0;
+        return 0;
+    } else if (dds3PadBitTable[3] < 0) {
+        record->selectionStatus = 0;
+        record->overwritePromptActive = 0;
+        return 0;
+    }
+    btlDebugDrawText(x + 4, y + 0x1C, 0, "OVERWRITE OK?");
+    btlDebugDrawText(x + 0x2E, y + 0x3A, record->selection == 0 ? 4 : 0, "CANCEL");
+    btlDebugDrawText(x + 0x46, y + 0x46, record->selection == 1 ? 4 : 0, D_00436C70);
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "game/code_0020E850", btlPollResourceNameOverwrite);
+#endif
 
 
 void func_0020EA10(void) {
