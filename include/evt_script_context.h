@@ -4,6 +4,12 @@
 #include "common.h"
 #include "scr_vm_integer.h"
 
+/* The host clears the result-written bit before each script run, preserving
+ * every other context flag; handlers set it when they publish a return value. */
+typedef u16 EvtScriptContextFlags;
+#define EVT_SCRIPT_CONTEXT_RESULT_WRITTEN_FLAG 0x0001
+#define EVT_SCRIPT_CONTEXT_RESULT_RESET_MASK 0xFFFE
+
 /* The caller supplies these context words in integer form, while the data
  * calculation handlers consume them as borrowed pointers. */
 typedef union EvtScriptArgument {
@@ -14,7 +20,7 @@ typedef union EvtScriptArgument {
 typedef char EvtScriptArgumentSizeCheck[(sizeof(EvtScriptArgument) == 4) ? 1 : -1];
 
 typedef struct EvtScriptContext {
-    u16 stateFlags;
+    EvtScriptContextFlags stateFlags;
     u16 opaque02;
     s32 commandIndex;
     EvtScriptArgument firstArgument;

@@ -453,9 +453,7 @@ enum {
     EVT_DEFAULT_STAT_VALUE = 100,
     EVT_ROSTER_DETAIL_KIND = 5,
     EVT_DEFAULT_PARTY_RECORD_FLAGS_MASK = 4,
-    EVT_ALTERNATE_PARTY_RECORD_FLAGS_MASK = 0x20,
-    EVT_RESULT_WRITTEN_FLAG = 1,
-    EVT_RESULT_RESET_MASK = 0xFFFE
+    EVT_ALTERNATE_PARTY_RECORD_FLAGS_MASK = 0x20
 };
 
 enum {
@@ -1756,7 +1754,7 @@ ScrVmInteger evtRunContext(ScrProcedureIndex procedureIndex, s32 firstArgument, 
     evtWorkScriptContext.firstArgument.bits = firstArgument;
     evtWorkScriptContext.secondArgument.bits = secondArgument;
     evtWorkScriptContext.options = options;
-    evtWorkScriptContext.stateFlags &= EVT_RESULT_RESET_MASK;
+    evtWorkScriptContext.stateFlags &= EVT_SCRIPT_CONTEXT_RESULT_RESET_MASK;
     scrRunScript(evtWorkScriptTask);
     return evtWorkScriptContext.returnValue;
 }
@@ -2015,7 +2013,8 @@ s32 evtPushSelectedStatMaximum(void) {
 
 /* Store the script argument as the context result and mark it written. */
 s32 evtStoreScriptParameterResult(void) {
-    u16 stateFlags = evtWorkScriptContext.stateFlags | EVT_RESULT_WRITTEN_FLAG;
+    EvtScriptContextFlags stateFlags = evtWorkScriptContext.stateFlags |
+        EVT_SCRIPT_CONTEXT_RESULT_WRITTEN_FLAG;
 
     evtWorkScriptContext.stateFlags = stateFlags;
     evtWorkScriptContext.returnValue = scrGetIntPara(0);
