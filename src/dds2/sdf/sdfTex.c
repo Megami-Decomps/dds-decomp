@@ -18,21 +18,6 @@ extern sdfGsMemSlice_t * sdfTexAllocClut(s32 type, s32 kind, s32 unused);
 extern sdfGsMemSlice_t * sdfGsMemAllocFromTail(s32 size, s32 allocationMode);
 extern sdfTexHandle_t * sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, sdfGsMemSlice_t *primary, s32 paletteFormat, s32 paletteCount, sdfGsMemSlice_t *secondary);
 
-/* PlayStation 2 GS pixel storage formats used to size indexed palettes. */
-enum {
-    SDF_PSMCT32 = 0x00,
-    SDF_PSMCT24 = 0x01,
-    SDF_PSMCT16 = 0x02,
-    SDF_PSMCT16S = 0x0A,
-    SDF_PSMT8 = 0x13,
-    SDF_PSMT4 = 0x14,
-    SDF_PSMT8H = 0x1B,
-};
-
-
-
-
-
 sdfTexPacket_t *sdfTexMakeGIFPacketSub(sdfTexHandle_t *texture, SdfGsContext context);
 
 extern SdfPendingRequest sdfTexDelayedResrcCB;
@@ -63,8 +48,9 @@ void sdfTexCopyClutData(sdfTexHandle_t *texture, const u8 *source) {
     memcpy(texture->paletteData, source, texture->paletteDataSize);
 }
 
-sdfTexHandle_t *sdfTexAlloc(s32 width, s32 height, u32 format,
-    u32 maxMipLevel, u32 paletteFormat, u32 paletteCount) {
+sdfTexHandle_t *sdfTexAlloc(s32 width, s32 height,
+    SdfGsPixelStorageFormat format, u32 maxMipLevel,
+    SdfGsPixelStorageFormat paletteFormat, u32 paletteCount) {
     s32 indexed = 0;
     s32 bitsPerPixel;
     sdfGsMemSlice_t *secondary;

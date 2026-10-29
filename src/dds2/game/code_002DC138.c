@@ -846,7 +846,7 @@ RefObj *effCreateSharedTextureReference(SdfTextureFileHeader *source) {
     memcpy(texture->pixels, cursor, imageBytes);
 
     if (effSharedTextureReferenceCount == 0) {
-        D_00437E40 = sdfTexAlloc(0x100, 0x100, 0x13, 0, 0, 1);
+        D_00437E40 = sdfTexAlloc(0x100, 0x100, SDF_PSMT8, 0, 0, 1);
         sdfTexMakeGIFPacket(D_00437E40);
     }
     effSharedTextureReferenceCount++;
