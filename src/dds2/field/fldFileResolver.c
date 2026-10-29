@@ -3622,7 +3622,7 @@ void fldProbeCameraSupportSurface(void) {
     if (fldMatterTable == NULL) {
         return;
     }
-    node = fldMatterTable[index].worldNode;
+    node = fldMatterTable[index].matter;
     if (node != NULL) {
         offset[0] = node->poseset->pos[0];
         offset[1] = node->poseset->pos[1];

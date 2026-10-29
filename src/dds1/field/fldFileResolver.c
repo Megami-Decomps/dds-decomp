@@ -3804,7 +3804,7 @@ void fldProbeCameraSupportSurface(void) {
     if (fldMatterTable == NULL) {
         return;
     }
-    node = fldMatterTable[index].worldNode;
+    node = fldMatterTable[index].matter;
     if (node != NULL) {
         offset[0] = node->poseset->pos[0];
         offset[1] = node->poseset->pos[1];
@@ -7557,8 +7557,8 @@ dds3Basic_t *fldFindWorldNodeForRecordId(s32 recordId) {
     if (fldValueRecordCount > 0) {
         collision_s *record = fldMatterTable;
         do {
-            if (record->id == recordId) {
-                return record->worldNode;
+            if (record->resID == recordId) {
+                return record->matter;
             }
             index++;
             record++;
@@ -7572,8 +7572,8 @@ void fldBindWorldNodeToRecordId(s32 recordId, dds3Basic_t *worldNode) {
     s32 index;
 
     for (index = 0; index < fldValueRecordCount; index++) {
-        if (fldMatterTable[index].id == recordId) {
-            fldMatterTable[index].worldNode = worldNode;
+        if (fldMatterTable[index].resID == recordId) {
+            fldMatterTable[index].matter = worldNode;
         }
     }
 }
@@ -7581,7 +7581,7 @@ void fldBindWorldNodeToRecordId(s32 recordId, dds3Basic_t *worldNode) {
 void fldClrCollision(void) {
     s32 index;
     for (index = 0; index < fldValueRecordCount; index++) {
-        fldMatterTable[index].worldNode = 0;
+        fldMatterTable[index].matter = 0;
     }
     fldValueRecordCount = 0;
     fldGlobalBase.unkA0 = -1;
@@ -7685,7 +7685,7 @@ void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation
                     }
                     record->point[i][3] = 1.0f;
                 }
-                record->planeConstant = fldVecDot(record->normal, record->point[0]);
+                record->num = fldVecDot(record->normal, record->point[0]);
                 absX = record->normal[0];
                 absX = ffabsf(absX);
                 absY = ffabsf(record->normal[1]);
@@ -7707,7 +7707,7 @@ void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation
                     if (record->normal[1] <= 0.0f) continue;
                 }
                 if (absY <= absX && absZ <= absX) {
-                    record->mode = FLD_COLLISION_AXIS_X;
+                    record->mode2D = FLD_COLLISION_AXIS_X;
                     runningMinimum = vertices[0][1];
                     minimum[0] = runningMinimum;
                     minimum[1] = vertices[0][2];
@@ -7722,10 +7722,10 @@ void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation
                         if (vertices[i][1] > maximum[0]) maximum[0] = vertices[i][1];
                         if (vertices[i][2] > maximum[1]) maximum[1] = vertices[i][2];
                     }
-                    record->bound[0] = runningMinimum;
-                    record->bound[1] = minimum[1];
-                    record->bound[2] = maximum[0];
-                    record->bound[3] = maximum[1];
+                    record->min[0] = runningMinimum;
+                    record->min[1] = minimum[1];
+                    record->min[2] = maximum[0];
+                    record->min[3] = maximum[1];
                     if (record->numedges == 3) {
                         center[0] = 0.0f;
                         center[1] = (vertices[0][1] + vertices[1][1] + vertices[2][1]) / 3.0f;
@@ -7744,10 +7744,10 @@ void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation
                     edgeTriangle[2][0] = 10.0f;
                     edgeTriangle[2][1] = vertices[1][1];
                     edgeTriangle[2][2] = vertices[1][2];
-                    planeX = &record->plane[0][0];
-                    planeY = &record->plane[0][1];
-                    planeZ = &record->plane[0][2];
-                    limit0 = &record->limit[0];
+                    planeX = &record->e_normal[0][0];
+                    planeY = &record->e_normal[0][1];
+                    planeZ = &record->e_normal[0][2];
+                    limit0 = &record->e_num[0];
                     fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
                                          &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
                     *planeX = capturedPlane[0];
@@ -7769,10 +7769,10 @@ void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation
                     edgeTriangle[2][0] = 10.0f;
                     edgeTriangle[2][1] = vertices[2][1];
                     edgeTriangle[2][2] = vertices[2][2];
-                    planeX = &record->plane[1][0];
-                    planeY = &record->plane[1][1];
-                    planeZ = &record->plane[1][2];
-                    limit1 = &record->limit[1];
+                    planeX = &record->e_normal[1][0];
+                    planeY = &record->e_normal[1][1];
+                    planeZ = &record->e_normal[1][2];
+                    limit1 = &record->e_num[1];
                     fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
                                          &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
                     *planeX = capturedPlane[0];
@@ -7795,10 +7795,10 @@ void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation
                         edgeTriangle[2][0] = 10.0f;
                         edgeTriangle[2][1] = vertices[0][1];
                         edgeTriangle[2][2] = vertices[0][2];
-                        planeX = &record->plane[2][0];
-                        planeY = &record->plane[2][1];
-                        planeZ = &record->plane[2][2];
-                        limit2 = &record->limit[2];
+                        planeX = &record->e_normal[2][0];
+                        planeY = &record->e_normal[2][1];
+                        planeZ = &record->e_normal[2][2];
+                        limit2 = &record->e_num[2];
                         fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
                                              &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
                         *planeX = capturedPlane[0];
@@ -7821,10 +7821,10 @@ void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation
                         edgeTriangle[2][0] = 10.0f;
                         edgeTriangle[2][1] = vertices[3][1];
                         edgeTriangle[2][2] = vertices[3][2];
-                        planeX = &record->plane[2][0];
-                        planeY = &record->plane[2][1];
-                        planeZ = &record->plane[2][2];
-                        limit2 = &record->limit[2];
+                        planeX = &record->e_normal[2][0];
+                        planeY = &record->e_normal[2][1];
+                        planeZ = &record->e_normal[2][2];
+                        limit2 = &record->e_num[2];
                         fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
                                              &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
                         *planeX = capturedPlane[0];
@@ -7846,10 +7846,10 @@ void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation
                         edgeTriangle[2][0] = 10.0f;
                         edgeTriangle[2][1] = vertices[0][1];
                         edgeTriangle[2][2] = vertices[0][2];
-                        planeX = &record->plane[3][0];
-                        planeY = &record->plane[3][1];
-                        planeZ = &record->plane[3][2];
-                        limit3 = &record->limit[3];
+                        planeX = &record->e_normal[3][0];
+                        planeY = &record->e_normal[3][1];
+                        planeZ = &record->e_normal[3][2];
+                        limit3 = &record->e_num[3];
                         fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
                                              &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
                         *planeX = capturedPlane[0];
@@ -7865,7 +7865,7 @@ void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation
                     }
                 }
                 else if (absX <= absY && absZ <= absY) {
-                    record->mode = FLD_COLLISION_AXIS_Y;
+                    record->mode2D = FLD_COLLISION_AXIS_Y;
                     runningMinimum = vertices[0][0];
                     minimum[0] = runningMinimum;
                     minimum[1] = vertices[0][2];
@@ -7880,10 +7880,10 @@ void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation
                         if (vertices[i][0] > maximum[0]) maximum[0] = vertices[i][0];
                         if (vertices[i][2] > maximum[1]) maximum[1] = vertices[i][2];
                     }
-                    record->bound[0] = runningMinimum;
-                    record->bound[1] = minimum[1];
-                    record->bound[2] = maximum[0];
-                    record->bound[3] = maximum[1];
+                    record->min[0] = runningMinimum;
+                    record->min[1] = minimum[1];
+                    record->min[2] = maximum[0];
+                    record->min[3] = maximum[1];
                     if (record->numedges == 3) {
                         center[1] = 0.0f;
                         center[0] = (vertices[0][0] + vertices[1][0] + vertices[2][0]) / 3.0f;
@@ -7902,10 +7902,10 @@ void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation
                     edgeTriangle[2][0] = vertices[1][0];
                     edgeTriangle[2][1] = 10.0f;
                     edgeTriangle[2][2] = vertices[1][2];
-                    planeX = &record->plane[0][0];
-                    planeY = &record->plane[0][1];
-                    planeZ = &record->plane[0][2];
-                    limit0 = &record->limit[0];
+                    planeX = &record->e_normal[0][0];
+                    planeY = &record->e_normal[0][1];
+                    planeZ = &record->e_normal[0][2];
+                    limit0 = &record->e_num[0];
                     fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
                                          &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
                     *planeX = capturedPlane[0];
@@ -7927,10 +7927,10 @@ void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation
                     edgeTriangle[2][0] = vertices[2][0];
                     edgeTriangle[2][1] = 10.0f;
                     edgeTriangle[2][2] = vertices[2][2];
-                    planeX = &record->plane[1][0];
-                    planeY = &record->plane[1][1];
-                    planeZ = &record->plane[1][2];
-                    limit1 = &record->limit[1];
+                    planeX = &record->e_normal[1][0];
+                    planeY = &record->e_normal[1][1];
+                    planeZ = &record->e_normal[1][2];
+                    limit1 = &record->e_num[1];
                     fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
                                          &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
                     *planeX = capturedPlane[0];
@@ -7953,10 +7953,10 @@ void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation
                         edgeTriangle[2][0] = vertices[0][0];
                         edgeTriangle[2][1] = 10.0f;
                         edgeTriangle[2][2] = vertices[0][2];
-                        planeX = &record->plane[2][0];
-                        planeY = &record->plane[2][1];
-                        planeZ = &record->plane[2][2];
-                        limit2 = &record->limit[2];
+                        planeX = &record->e_normal[2][0];
+                        planeY = &record->e_normal[2][1];
+                        planeZ = &record->e_normal[2][2];
+                        limit2 = &record->e_num[2];
                         fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
                                              &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
                         *planeX = capturedPlane[0];
@@ -7979,10 +7979,10 @@ void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation
                         edgeTriangle[2][0] = vertices[3][0];
                         edgeTriangle[2][1] = 10.0f;
                         edgeTriangle[2][2] = vertices[3][2];
-                        planeX = &record->plane[2][0];
-                        planeY = &record->plane[2][1];
-                        planeZ = &record->plane[2][2];
-                        limit2 = &record->limit[2];
+                        planeX = &record->e_normal[2][0];
+                        planeY = &record->e_normal[2][1];
+                        planeZ = &record->e_normal[2][2];
+                        limit2 = &record->e_num[2];
                         fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
                                              &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
                         *planeX = capturedPlane[0];
@@ -8004,10 +8004,10 @@ void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation
                         edgeTriangle[2][0] = vertices[0][0];
                         edgeTriangle[2][1] = 10.0f;
                         edgeTriangle[2][2] = vertices[0][2];
-                        planeX = &record->plane[3][0];
-                        planeY = &record->plane[3][1];
-                        planeZ = &record->plane[3][2];
-                        limit3 = &record->limit[3];
+                        planeX = &record->e_normal[3][0];
+                        planeY = &record->e_normal[3][1];
+                        planeZ = &record->e_normal[3][2];
+                        limit3 = &record->e_num[3];
                         fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
                                              &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
                         *planeX = capturedPlane[0];
@@ -8023,7 +8023,7 @@ void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation
                     }
                 }
                 else {
-                    record->mode = FLD_COLLISION_AXIS_Z;
+                    record->mode2D = FLD_COLLISION_AXIS_Z;
                     runningMinimum = vertices[0][0];
                     minimum[0] = runningMinimum;
                     minimum[1] = vertices[0][1];
@@ -8038,10 +8038,10 @@ void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation
                         if (vertices[i][0] > maximum[0]) maximum[0] = vertices[i][0];
                         if (vertices[i][1] > maximum[1]) maximum[1] = vertices[i][1];
                     }
-                    record->bound[0] = runningMinimum;
-                    record->bound[1] = minimum[1];
-                    record->bound[2] = maximum[0];
-                    record->bound[3] = maximum[1];
+                    record->min[0] = runningMinimum;
+                    record->min[1] = minimum[1];
+                    record->min[2] = maximum[0];
+                    record->min[3] = maximum[1];
                     if (record->numedges == 3) {
                         center[2] = 0.0f;
                         center[0] = (vertices[0][0] + vertices[1][0] + vertices[2][0]) / 3.0f;
@@ -8060,10 +8060,10 @@ void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation
                     edgeTriangle[2][0] = vertices[1][0];
                     edgeTriangle[2][1] = vertices[1][1];
                     edgeTriangle[2][2] = 10.0f;
-                    planeX = &record->plane[0][0];
-                    planeY = &record->plane[0][1];
-                    planeZ = &record->plane[0][2];
-                    limit0 = &record->limit[0];
+                    planeX = &record->e_normal[0][0];
+                    planeY = &record->e_normal[0][1];
+                    planeZ = &record->e_normal[0][2];
+                    limit0 = &record->e_num[0];
                     fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
                                          &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
                     *planeX = capturedPlane[0];
@@ -8085,10 +8085,10 @@ void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation
                     edgeTriangle[2][0] = vertices[2][0];
                     edgeTriangle[2][1] = vertices[2][1];
                     edgeTriangle[2][2] = 10.0f;
-                    planeX = &record->plane[1][0];
-                    planeY = &record->plane[1][1];
-                    planeZ = &record->plane[1][2];
-                    limit1 = &record->limit[1];
+                    planeX = &record->e_normal[1][0];
+                    planeY = &record->e_normal[1][1];
+                    planeZ = &record->e_normal[1][2];
+                    limit1 = &record->e_num[1];
                     fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
                                          &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
                     *planeX = capturedPlane[0];
@@ -8111,10 +8111,10 @@ void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation
                         edgeTriangle[2][0] = vertices[0][0];
                         edgeTriangle[2][1] = vertices[0][1];
                         edgeTriangle[2][2] = 10.0f;
-                        planeX = &record->plane[2][0];
-                        planeY = &record->plane[2][1];
-                        planeZ = &record->plane[2][2];
-                        limit2 = &record->limit[2];
+                        planeX = &record->e_normal[2][0];
+                        planeY = &record->e_normal[2][1];
+                        planeZ = &record->e_normal[2][2];
+                        limit2 = &record->e_num[2];
                         fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
                                              &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
                         *planeX = capturedPlane[0];
@@ -8137,10 +8137,10 @@ void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation
                         edgeTriangle[2][0] = vertices[3][0];
                         edgeTriangle[2][1] = vertices[3][1];
                         edgeTriangle[2][2] = 10.0f;
-                        planeX = &record->plane[2][0];
-                        planeY = &record->plane[2][1];
-                        planeZ = &record->plane[2][2];
-                        limit2 = &record->limit[2];
+                        planeX = &record->e_normal[2][0];
+                        planeY = &record->e_normal[2][1];
+                        planeZ = &record->e_normal[2][2];
+                        limit2 = &record->e_num[2];
                         fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
                                              &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
                         *planeX = capturedPlane[0];
@@ -8162,10 +8162,10 @@ void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation
                         edgeTriangle[2][0] = vertices[0][0];
                         edgeTriangle[2][1] = vertices[0][1];
                         edgeTriangle[2][2] = 10.0f;
-                        planeX = &record->plane[3][0];
-                        planeY = &record->plane[3][1];
-                        planeZ = &record->plane[3][2];
-                        limit3 = &record->limit[3];
+                        planeX = &record->e_normal[3][0];
+                        planeY = &record->e_normal[3][1];
+                        planeZ = &record->e_normal[3][2];
+                        limit3 = &record->e_num[3];
                         fldMakeEveHitPlanes(edgeTriangle[0], &capturedPlane[0],
                                              &capturedPlane[1], &capturedPlane[2], &capturedPlane[3]);
                         *planeX = capturedPlane[0];
@@ -8180,14 +8180,14 @@ void fldMakePlane(const FldCollisionDescriptor *geometry, const f32 *translation
                         }
                     }
                 }
-                record->unkC8 = D_003BADF8;
-                record->id = id;
-                record->worldNode = 0;
+                record->blockID = D_003BADF8;
+                record->resID = id;
+                record->matter = 0;
                 record->pFace = face;
-                record->stopData = stopData;
-                record->sceneFlag = sceneFlag;
-                record->ownerIndex = auxiliaryFlagSelector;
-                record->unkCA = 0;
+                record->pTome = stopData;
+                record->hojiID = sceneFlag;
+                record->npcID = auxiliaryFlagSelector;
+                record->hitflag = 0;
                 fldValueRecordCount++;
             }
         }
@@ -8225,14 +8225,14 @@ s32 HitPositionInside2(f32 *out, FldCollisionAxis axis, s32 count, f32 margin, c
         planar[1] = pos[1];
     }
     for (planeIndex = 0; planeIndex < count; planeIndex++) {
-        dist = fldVecDot(probe, zone->plane[planeIndex]) - zone->limit[planeIndex];
+        dist = fldVecDot(probe, zone->e_normal[planeIndex]) - zone->e_num[planeIndex];
         slack = dist + margin;
         if (slack < 0.0f) {
             *out = -1.0f;
             return -1;
         }
-        if (planar[0] < zone->bound[0] - margin || planar[1] < zone->bound[1] - margin ||
-            zone->bound[2] + margin < planar[0] || zone->bound[3] + margin < planar[1]) {
+        if (planar[0] < zone->min[0] - margin || planar[1] < zone->min[1] - margin ||
+            zone->min[2] + margin < planar[0] || zone->min[3] + margin < planar[1]) {
             *out = -1.0f;
             return -1;
         }
@@ -8289,12 +8289,12 @@ void fldHitChkUnitElvOnly(const f32 *input) {
             continue;
         }
         if (fldTestRoomSceneFlag(fldGlobalBase.area, fldGlobalBase.floor + 1,
-                                 fldMatterTable[index].sceneFlag)) {
+                                 fldMatterTable[index].hojiID)) {
             continue;
         }
-        if (fldMatterTable[index].ownerIndex > 0) {
+        if (fldMatterTable[index].npcID > 0) {
             if (fldTestMapSlotAuxiliaryFlag(fldGlobalBase.area, fldGlobalBase.floor + 1,
-                                            fldMatterTable[index].ownerIndex)) {
+                                            fldMatterTable[index].npcID)) {
                 continue;
             }
         }
@@ -8304,8 +8304,8 @@ void fldHitChkUnitElvOnly(const f32 *input) {
         savedPrevious[0] = previous[0];
         savedPrevious[1] = previous[1];
         savedPrevious[2] = previous[2];
-        if (fldMatterTable[index].worldNode != 0) {
-            transform = fldMatterTable[index].worldNode->poseset;
+        if (fldMatterTable[index].matter != 0) {
+            transform = fldMatterTable[index].matter->poseset;
             relative = 1;
             position[0] -= transform->pos[0];
             position[1] -= transform->pos[1];
@@ -8317,21 +8317,21 @@ void fldHitChkUnitElvOnly(const f32 *input) {
             relative = 0;
         }
         distance = fldVecDot(position, fldMatterTable[index].normal);
-        distance -= fldMatterTable[index].planeConstant;
+        distance -= fldMatterTable[index].num;
         if (ffabsf(distance) < margin) {
             record = &fldMatterTable[index];
-            HitPositionInside2(&clearance, record->mode, record->numedges, 45.0f, position, record);
+            HitPositionInside2(&clearance, record->mode2D, record->numedges, 45.0f, position, record);
             inside = clearance < 0.0f ? 0 : 1;
             if (inside == 1) {
-                if (fldMatterTable[index].worldNode != 0) {
+                if (fldMatterTable[index].matter != 0) {
                     if (fldGlobalBase.primaryMovingMatterIndex == -1 ||
-                        fldMatterTable[fldGlobalBase.primaryMovingMatterIndex].worldNode->key ==
-                            fldMatterTable[index].worldNode->key) {
+                        fldMatterTable[fldGlobalBase.primaryMovingMatterIndex].matter->key ==
+                            fldMatterTable[index].matter->key) {
                         fldGlobalBase.primaryMovingMatterIndex = index;
                     } else {
                         fldGlobalBase.secondaryMovingMatterIndex = index;
                     }
-                    anchor = fldMatterTable[index].worldNode->poseset;
+                    anchor = fldMatterTable[index].matter->poseset;
                     fldMatterTable[index].previousPosition[0] = anchor->pos[0];
                     fldMatterTable[index].previousPosition[1] = anchor->pos[1];
                     fldMatterTable[index].previousPosition[2] = anchor->pos[2];
@@ -8339,7 +8339,7 @@ void fldHitChkUnitElvOnly(const f32 *input) {
             }
         }
         if (relative) {
-            transform = fldMatterTable[index].worldNode->poseset;
+            transform = fldMatterTable[index].matter->poseset;
             position[0] += transform->pos[0];
             position[1] += transform->pos[1];
             position[2] += transform->pos[2];
@@ -8366,10 +8366,10 @@ void fldHitChkUnitElv(f32 *position) {
     }
     index = fldGlobalBase.primaryMovingMatterIndex;
     if (index != -1) {
-        if (fldMatterTable[index].worldNode != 0) {
+        if (fldMatterTable[index].matter != 0) {
             dds3PoseSet_t *transform;
 
-            transform = fldMatterTable[index].worldNode->poseset;
+            transform = fldMatterTable[index].matter->poseset;
             movement[0] = transform->pos[0] - fldMatterTable[index].previousPosition[0];
             movement[1] = transform->pos[1] - fldMatterTable[index].previousPosition[1];
             movement[2] = transform->pos[2] - fldMatterTable[index].previousPosition[2];
@@ -8378,15 +8378,15 @@ void fldHitChkUnitElv(f32 *position) {
             fldMatterTable[index].previousPosition[2] = transform->pos[2];
         }
         if (fldTestRoomSceneFlag(fldGlobalBase.area, fldGlobalBase.floor + 1,
-                               fldMatterTable[index].sceneFlag) == 0) {
+                               fldMatterTable[index].hojiID) == 0) {
             index = fldGlobalBase.secondaryMovingMatterIndex;
             if (index != -1 && fldTestRoomSceneFlag(fldGlobalBase.area,
                         fldGlobalBase.floor + 1,
-                        fldMatterTable[index].sceneFlag) == 0) {
-                if (fldMatterTable[index].worldNode != 0) {
+                        fldMatterTable[index].hojiID) == 0) {
+                if (fldMatterTable[index].matter != 0) {
                     dds3PoseSet_t *transform;
 
-                    transform = fldMatterTable[index].worldNode->poseset;
+                    transform = fldMatterTable[index].matter->poseset;
                     movement[0] += transform->pos[0] - fldMatterTable[index].previousPosition[0];
                     movement[1] += transform->pos[1] - fldMatterTable[index].previousPosition[1];
                     movement[2] += transform->pos[2] - fldMatterTable[index].previousPosition[2];
@@ -8469,16 +8469,16 @@ void fldHitChkUnitDamage(f32 *position) {
             do {
                 dds3Basic_t *node;
 
-                margin = fldMatterTable[recordIndex].mode == FLD_COLLISION_AXIS_Y ? 45.0f : 60.0f;
+                margin = fldMatterTable[recordIndex].mode2D == FLD_COLLISION_AXIS_Y ? 45.0f : 60.0f;
                 if (pass == 0) {
-                    if (fldMatterTable[recordIndex].mode == selectedAxis) {
+                    if (fldMatterTable[recordIndex].mode2D == selectedAxis) {
                         continue;
                     }
-                } else if (fldMatterTable[recordIndex].mode != selectedAxis) {
+                } else if (fldMatterTable[recordIndex].mode2D != selectedAxis) {
                     continue;
                 }
 
-                if (fldTestRoomSceneFlag(areaState->area, areaState->floor + 1, fldMatterTable[recordIndex].sceneFlag) != 0) {
+                if (fldTestRoomSceneFlag(areaState->area, areaState->floor + 1, fldMatterTable[recordIndex].hojiID) != 0) {
                     continue;
                 }
 
@@ -8489,7 +8489,7 @@ void fldHitChkUnitDamage(f32 *position) {
                 savedReference[1] = reference[1];
                 savedReference[2] = reference[2];
 
-                node = fldMatterTable[recordIndex].worldNode;
+                node = fldMatterTable[recordIndex].matter;
                 if (node != 0) {
                     point[0] = savedPoint[0] - node->poseset->pos[0];
                     point[1] = savedPoint[1] - node->poseset->pos[1];
@@ -8502,7 +8502,7 @@ void fldHitChkUnitDamage(f32 *position) {
                 planeDistance = fldVecDot(point, fldMatterTable[recordIndex].normal);
                 {
                     u32 faceAttributes = fldMatterTable[recordIndex].pFace->attributes;
-                    planeDistance = ffabsf(planeDistance - fldMatterTable[recordIndex].planeConstant);
+                    planeDistance = ffabsf(planeDistance - fldMatterTable[recordIndex].num);
                     if ((faceAttributes & 0x4000) == 0) {
                         continue;
                     }
@@ -8513,7 +8513,7 @@ void fldHitChkUnitDamage(f32 *position) {
                         }
                         HitPositionInside2(
                             &classifiedMargin,
-                            fldMatterTable[recordIndex].mode,
+                            fldMatterTable[recordIndex].mode2D,
                             fldMatterTable[recordIndex].numedges,
                             margin, point,
                             &fldMatterTable[recordIndex]);
@@ -8706,8 +8706,8 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
 
         index = fldGlobalBase.primaryMovingMatterIndex;
         support = &fldMatterTable[index];
-        if (support->worldNode != 0) {
-            carrier = (support->worldNode)->poseset;
+        if (support->matter != 0) {
+            carrier = (support->matter)->poseset;
             carried[0] = carrier->pos[0] - support->previousPosition[0];
             carried[1] = carrier->pos[1] - support->previousPosition[1] + 10.0f;
             carried[2] = carrier->pos[2] - support->previousPosition[2];
@@ -8738,7 +8738,7 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
         return;
     }
     for (index = 0; index < fldValueRecordCount; index++) {
-        fldMatterTable[index].unkCA = 0;
+        fldMatterTable[index].hitflag = 0;
     }
     absoluteDelta[0] = ffabsf(position[0] - previous[0]);
     absoluteDelta[2] = ffabsf(position[2] - previous[2]);
@@ -8753,23 +8753,23 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
     for (pass = 0; pass < 2; pass++) {
         for (index = 0; index < fldValueRecordCount; index++) {
             margin = 45.0f;
-            if (fldMatterTable[index].mode != 1) {
+            if (fldMatterTable[index].mode2D != 1) {
                 margin = 60.0f;
             }
             if (pass == 0) {
-                if (fldMatterTable[index].mode == majorAxis) {
+                if (fldMatterTable[index].mode2D == majorAxis) {
                     continue;
                 }
-            } else if (fldMatterTable[index].mode != majorAxis) {
+            } else if (fldMatterTable[index].mode2D != majorAxis) {
                 continue;
             }
             if (fldTestRoomSceneFlag(fldGlobalBase.area,
-                                    fldGlobalBase.floor + 1, fldMatterTable[index].sceneFlag)) {
+                                    fldGlobalBase.floor + 1, fldMatterTable[index].hojiID)) {
                 continue;
             }
-            if (fldMatterTable[index].ownerIndex > 0) {
+            if (fldMatterTable[index].npcID > 0) {
                 if (fldTestMapSlotAuxiliaryFlag(fldGlobalBase.area,
-                                               fldGlobalBase.floor + 1, fldMatterTable[index].ownerIndex)) {
+                                               fldGlobalBase.floor + 1, fldMatterTable[index].npcID)) {
                     continue;
                 }
             }
@@ -8779,8 +8779,8 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
             savedPrevious[0] = previous[0];
             savedPrevious[1] = previous[1];
             savedPrevious[2] = previous[2];
-            if (fldMatterTable[index].worldNode != 0) {
-                transform = (fldMatterTable[index].worldNode)->poseset;
+            if (fldMatterTable[index].matter != 0) {
+                transform = (fldMatterTable[index].matter)->poseset;
                 position[0] -= transform->pos[0];
                 position[1] -= transform->pos[1];
                 position[2] -= transform->pos[2];
@@ -8792,12 +8792,12 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
                 relative = 0;
             }
             distance = fldVecDot(position, fldMatterTable[index].normal);
-            distance -= fldMatterTable[index].planeConstant;
+            distance -= fldMatterTable[index].num;
             absoluteDistance = ffabsf(distance);
             attributes = fldMatterTable[index].pFace->attributes;
             if (attributes & 0x40) {
                 if (absoluteDistance < margin) {
-                    HitPositionInside2(&clearance, fldMatterTable[index].mode, fldMatterTable[index].numedges, margin, position, &fldMatterTable[index]);
+                    HitPositionInside2(&clearance, fldMatterTable[index].mode2D, fldMatterTable[index].numedges, margin, position, &fldMatterTable[index]);
                     inside = clearance < 0.0f ? 0 : 1;
                     if (inside == 1) {
                         fldAutoMapNameD((fldMatterTable[index].pFace->moveFloor & 0xF) * 10 + (fldMatterTable[index].pFace->moveFloor >> 4));
@@ -8805,7 +8805,7 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
                 }
             } else if (attributes & 0x1000) {
                 if (absoluteDistance < margin) {
-                    HitPositionInside2(&clearance, fldMatterTable[index].mode, fldMatterTable[index].numedges, margin, position, &fldMatterTable[index]);
+                    HitPositionInside2(&clearance, fldMatterTable[index].mode2D, fldMatterTable[index].numedges, margin, position, &fldMatterTable[index]);
                     inside = clearance < 0.0f ? 0 : 1;
                     if (inside == 1) {
                         fldAutoMapNameD(fldMatterTable[index].pFace->place);
@@ -8813,7 +8813,7 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
                 }
             } else if (attributes & 0x2000) {
                 if (absoluteDistance < margin) {
-                    HitPositionInside2(&clearance, fldMatterTable[index].mode, fldMatterTable[index].numedges, margin, position, &fldMatterTable[index]);
+                    HitPositionInside2(&clearance, fldMatterTable[index].mode2D, fldMatterTable[index].numedges, margin, position, &fldMatterTable[index]);
                     inside = clearance < 0.0f ? 0 : 1;
                     if (inside == 1) {
                         fldGlobalBase.encounterOverrideId = fldMatterTable[index].pFace->encounter;
@@ -8821,7 +8821,7 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
                 }
             } else if (attributes & 0x200) {
                 if (absoluteDistance < margin) {
-                    HitPositionInside2(&clearance, fldMatterTable[index].mode, fldMatterTable[index].numedges, margin, position, &fldMatterTable[index]);
+                    HitPositionInside2(&clearance, fldMatterTable[index].mode2D, fldMatterTable[index].numedges, margin, position, &fldMatterTable[index]);
                     inside = clearance < 0.0f ? 0 : 1;
                     if (inside == 1) {
                         fldGlobalBase.unk8C = fldMatterTable[index].pFace->sound;
@@ -8830,7 +8830,7 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
                 }
             } else if (attributes & 0x8000) {
                 if (absoluteDistance < margin) {
-                    HitPositionInside2(&clearance, fldMatterTable[index].mode, fldMatterTable[index].numedges, margin, position, &fldMatterTable[index]);
+                    HitPositionInside2(&clearance, fldMatterTable[index].mode2D, fldMatterTable[index].numedges, margin, position, &fldMatterTable[index]);
                     inside = clearance < 0.0f ? 0 : 1;
                     if (inside == 1) {
                         switch (fldMatterTable[index].pFace->special[0]) {
@@ -8845,7 +8845,7 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
                 continue;
             } else if (attributes & 0x800) {
                 if (absoluteDistance < margin) {
-                    HitPositionInside2(&clearance, fldMatterTable[index].mode, fldMatterTable[index].numedges, margin, position, &fldMatterTable[index]);
+                    HitPositionInside2(&clearance, fldMatterTable[index].mode2D, fldMatterTable[index].numedges, margin, position, &fldMatterTable[index]);
                     inside = clearance < 0.0f ? 0 : 1;
                     if (inside == 1) {
                         fldSetFlagAndFindRecord(fldMatterTable[index].pFace->automap[0]);
@@ -8856,13 +8856,13 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
                 continue;
             } else if (attributes & 0x100) {
                 if (absoluteDistance < margin) {
-                    HitPositionInside2(&clearance, fldMatterTable[index].mode, fldMatterTable[index].numedges, margin, position, &fldMatterTable[index]);
+                    HitPositionInside2(&clearance, fldMatterTable[index].mode2D, fldMatterTable[index].numedges, margin, position, &fldMatterTable[index]);
                     inside = clearance < 0.0f ? 0 : 1;
                     if (inside == 1) fldGlobalBase.overrideSupportRecordIndex = index;
                 }
             } else {
                 if (absoluteDistance < margin) {
-                    HitPositionInside2(&clearance, fldMatterTable[index].mode, fldMatterTable[index].numedges, margin, position, &fldMatterTable[index]);
+                    HitPositionInside2(&clearance, fldMatterTable[index].mode2D, fldMatterTable[index].numedges, margin, position, &fldMatterTable[index]);
                     contactInset = clearance;
                     inside = contactInset < 0.0f ? 0 : 1;
                     if (inside == 1 && !(fldRunDanteGunFlag[0x4C / 4] && D_0032453B)) {
@@ -8876,8 +8876,8 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
                             position[1] = projected[1] + fldMatterTable[index].normal[1] * clearance - 1.0f;
                             position[2] = projected[2] + fldMatterTable[index].normal[2] * clearance;
                             if (clearance == margin) floorRecord = index;
-                            if (fldMatterTable[index].worldNode != 0) {
-                                transform = (fldMatterTable[index].worldNode)->poseset;
+                            if (fldMatterTable[index].matter != 0) {
+                                transform = (fldMatterTable[index].matter)->poseset;
                                 position[0] += transform->pos[0];
                                 position[1] += transform->pos[1];
                                 position[2] += transform->pos[2];
@@ -8886,7 +8886,7 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
                                 previous[2] += transform->pos[2];
                                 relative = 0;
                             }
-                            fldMatterTable[index].unkCA = 1;
+                            fldMatterTable[index].hitflag = 1;
                             fldGlobalBase.targetX = position[0];
                             fldGlobalBase.targetY = position[1];
                             fldGlobalBase.targetZ = position[2];
@@ -8898,8 +8898,8 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
                             position[0] = projected[0] + fldMatterTable[index].normal[0] * clearance;
                             position[1] = projected[1] + fldMatterTable[index].normal[1] * clearance;
                             position[2] = projected[2] + fldMatterTable[index].normal[2] * clearance;
-                            if (fldMatterTable[index].worldNode != 0) {
-                                transform = (fldMatterTable[index].worldNode)->poseset;
+                            if (fldMatterTable[index].matter != 0) {
+                                transform = (fldMatterTable[index].matter)->poseset;
                                 position[0] += transform->pos[0];
                                 position[1] += transform->pos[1];
                                 position[2] += transform->pos[2];
@@ -8908,7 +8908,7 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
                                 previous[2] += transform->pos[2];
                                 relative = 0;
                             }
-                            fldMatterTable[index].unkCA = 1;
+                            fldMatterTable[index].hitflag = 1;
                             fldGlobalBase.positionPending = inside;
                             fldGlobalBase.targetX = position[0];
                             fldGlobalBase.targetY = position[1];
@@ -8918,7 +8918,7 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
                     }
                 }
                 if (relative) {
-                    transform = (fldMatterTable[index].worldNode)->poseset;
+                    transform = (fldMatterTable[index].matter)->poseset;
                     position[0] += transform->pos[0];
                     position[1] += transform->pos[1];
                     position[2] += transform->pos[2];
@@ -8987,10 +8987,10 @@ f32 HitPositionInside3(FldCollisionAxis axis, s32 planeCount, f32 margin, const 
         planarPosition[1] = position[1];
     }
     for (planeIndex = 0; planeIndex < planeCount; planeIndex++) {
-        planeDistance = fldVecDot(projectedPosition, zone->plane[planeIndex]) - zone->limit[planeIndex];
+        planeDistance = fldVecDot(projectedPosition, zone->e_normal[planeIndex]) - zone->e_num[planeIndex];
         marginDistance = planeDistance + margin;
-        if (marginDistance < 0.0f || planarPosition[0] < zone->bound[0] - margin || planarPosition[1] < zone->bound[1] - margin ||
-            zone->bound[2] + margin < planarPosition[0] || zone->bound[3] + margin < planarPosition[1]) {
+        if (marginDistance < 0.0f || planarPosition[0] < zone->min[0] - margin || planarPosition[1] < zone->min[1] - margin ||
+            zone->min[2] + margin < planarPosition[0] || zone->min[3] + margin < planarPosition[1]) {
             return -1.0f;
         }
         if (planeDistance < 0.0f) {
@@ -9034,7 +9034,7 @@ FldValueRecordIndex fldHitChkCamera(const f32 start[3], const f32 end[3], f32 hi
     target[1] = end[1];
     target[2] = end[2];
     for (index = 0; index < fldValueRecordCount; index++) {
-        if (fldMatterTable[index].mode == FLD_COLLISION_AXIS_Y) {
+        if (fldMatterTable[index].mode2D == FLD_COLLISION_AXIS_Y) {
             if (!(fldMatterTable[index].pFace->attributes & 0x100)) {
                 continue;
             }
@@ -9043,12 +9043,12 @@ FldValueRecordIndex fldHitChkCamera(const f32 start[3], const f32 end[3], f32 hi
             continue;
         }
         if (fldTestRoomSceneFlag(fldGlobalBase.area, fldGlobalBase.floor + 1,
-                                 fldMatterTable[index].sceneFlag)) {
+                                 fldMatterTable[index].hojiID)) {
             continue;
         }
-        if (fldMatterTable[index].worldNode != 0) {
+        if (fldMatterTable[index].matter != 0) {
             relative = 1;
-            transform = fldMatterTable[index].worldNode->poseset;
+            transform = fldMatterTable[index].matter->poseset;
             origin[0] -= transform->pos[0];
             origin[1] -= transform->pos[1];
             origin[2] -= transform->pos[2];
@@ -9065,9 +9065,9 @@ FldValueRecordIndex fldHitChkCamera(const f32 start[3], const f32 end[3], f32 hi
         probeEnd[1] = target[1];
         probeEnd[2] = target[2];
         startDistance = fldVecDot(probeStart, fldMatterTable[index].normal) -
-                        fldMatterTable[index].planeConstant;
+                        fldMatterTable[index].num;
         endDistance = fldVecDot(probeEnd, fldMatterTable[index].normal) -
-                      fldMatterTable[index].planeConstant;
+                      fldMatterTable[index].num;
         if ((startDistance < 0.0f && 0.0f <= endDistance) || (endDistance < 0.0f && 0.0f <= startDistance)) {
             startDistance = ffabsf(startDistance);
             endDistance = ffabsf(endDistance);
@@ -9082,10 +9082,10 @@ FldValueRecordIndex fldHitChkCamera(const f32 start[3], const f32 end[3], f32 hi
             probeStart[0] += delta[0] * ratio;
             probeStart[1] += delta[1] * ratio;
             probeStart[2] += delta[2] * ratio;
-            clearance = HitPositionInside3(fldMatterTable[index].mode, fldMatterTable[index].numedges, 2.0f, probeStart, &fldMatterTable[index]);
+            clearance = HitPositionInside3(fldMatterTable[index].mode2D, fldMatterTable[index].numedges, 2.0f, probeStart, &fldMatterTable[index]);
             if (0.0f <= clearance) {
                 if (fldMatterTable[index].pFace->attributes & 0x400) {
-                    entry = &((FldStopEntry *)fldMatterTable[index].stopData)
+                    entry = &((FldStopEntry *)fldMatterTable[index].pTome)
                                 [fldMatterTable[index].pFace->stop];
                     dds3MatterObjectBasicSetAlpMode(dds3SceneBasicSearchNameAndType(secondary, 6, entry->name), 4);
                 } else {
@@ -9107,7 +9107,7 @@ FldValueRecordIndex fldHitChkCamera(const f32 start[3], const f32 end[3], f32 hi
             }
         }
         if (relative) {
-            transform = fldMatterTable[index].worldNode->poseset;
+            transform = fldMatterTable[index].matter->poseset;
             origin[0] += transform->pos[0];
             origin[1] += transform->pos[1];
             origin[2] += transform->pos[2];
@@ -9148,7 +9148,7 @@ FldValueRecordIndex fldHitChkEnemy(const f32 start[3], const f32 end[3], f32 hit
     target[1] = end[1];
     target[2] = end[2];
     for (index = 0; index < fldValueRecordCount; index++) {
-        if (fldMatterTable[index].mode == FLD_COLLISION_AXIS_Y) {
+        if (fldMatterTable[index].mode2D == FLD_COLLISION_AXIS_Y) {
             if (!(fldMatterTable[index].pFace->attributes & 0x100)) {
                 continue;
             }
@@ -9157,7 +9157,7 @@ FldValueRecordIndex fldHitChkEnemy(const f32 start[3], const f32 end[3], f32 hit
             continue;
         }
         if (fldTestRoomSceneFlag(fldGlobalBase.area, fldGlobalBase.floor + 1,
-                                 fldMatterTable[index].sceneFlag)) {
+                                 fldMatterTable[index].hojiID)) {
             continue;
         }
         if (!(fldMatterTable[index].pFace->attributes & 0x8000)) {
@@ -9166,9 +9166,9 @@ FldValueRecordIndex fldHitChkEnemy(const f32 start[3], const f32 end[3], f32 hit
         if (fldMatterTable[index].pFace->special[0] != 4) {
             continue;
         }
-        if (fldMatterTable[index].worldNode != 0) {
+        if (fldMatterTable[index].matter != 0) {
             relative = 1;
-            transform = fldMatterTable[index].worldNode->poseset;
+            transform = fldMatterTable[index].matter->poseset;
             origin[0] -= transform->pos[0];
             origin[1] -= transform->pos[1];
             origin[2] -= transform->pos[2];
@@ -9185,9 +9185,9 @@ FldValueRecordIndex fldHitChkEnemy(const f32 start[3], const f32 end[3], f32 hit
         probeEnd[1] = target[1];
         probeEnd[2] = target[2];
         startDistance = fldVecDot(probeStart, fldMatterTable[index].normal) -
-                        fldMatterTable[index].planeConstant;
+                        fldMatterTable[index].num;
         endDistance = fldVecDot(probeEnd, fldMatterTable[index].normal) -
-                      fldMatterTable[index].planeConstant;
+                      fldMatterTable[index].num;
         if ((startDistance < 0.0f && 0.0f <= endDistance) || (endDistance < 0.0f && 0.0f <= startDistance)) {
             startDistance = ffabsf(startDistance);
             endDistance = ffabsf(endDistance);
@@ -9202,7 +9202,7 @@ FldValueRecordIndex fldHitChkEnemy(const f32 start[3], const f32 end[3], f32 hit
             probeStart[0] += delta[0] * ratio;
             probeStart[1] += delta[1] * ratio;
             probeStart[2] += delta[2] * ratio;
-            clearance = HitPositionInside3(fldMatterTable[index].mode, fldMatterTable[index].numedges, 2.0f, probeStart, &fldMatterTable[index]);
+            clearance = HitPositionInside3(fldMatterTable[index].mode2D, fldMatterTable[index].numedges, 2.0f, probeStart, &fldMatterTable[index]);
             if (0.0f <= clearance) {
                 found = index;
                 ratio = (startDistance + clearance) / total;
@@ -9221,7 +9221,7 @@ FldValueRecordIndex fldHitChkEnemy(const f32 start[3], const f32 end[3], f32 hit
             }
         }
         if (relative) {
-            transform = fldMatterTable[index].worldNode->poseset;
+            transform = fldMatterTable[index].matter->poseset;
             origin[0] += transform->pos[0];
             origin[1] += transform->pos[1];
             origin[2] += transform->pos[2];
