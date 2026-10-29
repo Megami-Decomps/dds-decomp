@@ -5,6 +5,7 @@
 #include "fld_encounter_runtime_api.h"
 #include "fld_special_event_state.h"
 #include "fld_scene_bgm_suppression_state.h"
+#include "fld_map_banner_fade_mode.h"
 #include "fld_solar_overlay_mode.h"
 #include "fld_scene_timing_state.h"
 
@@ -152,7 +153,7 @@ typedef struct FldAreaWork {
     s32 secondaryMapLabelSelection; /* -1 means no secondary label selection. */
     FldSolarOverlayMode overlayMode;
     s32 overlayCounter;
-    s32 mapBannerFadeMode;
+    FldMapBannerFadeMode mapBannerFadeMode;
     s32 unkD8;
     s32 defaultEncounterId;      /* 0xDC: selected room encounter; D_0038984C in DDS2. */
     s32 encounterOverrideId;

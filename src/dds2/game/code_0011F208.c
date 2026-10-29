@@ -1693,7 +1693,7 @@ void fldResetFieldRuntimeState(FldRuntimeResetMode mode) {
     area->secondaryMapLabelSelection = -1;
     area->overlayMode = FLD_SOLAR_OVERLAY_MODE_SHOW_MOON;
     area->overlayCounter = 0;
-    area->mapBannerFadeMode = 1;
+    area->mapBannerFadeMode = FLD_MAP_BANNER_FADE_VISIBLE;
     area->unkD8 = -1;
     area->rowIdx = 0;
     area->sequenceCode = 1;
@@ -1853,7 +1853,7 @@ void fldInitializeAreaWork(void) {
     area->cameraTilt = 0.0f;
     area->frameTravelDistance = 0.0f;
     area->nextFloor = -1;
-    area->mapBannerFadeMode = 1;
+    area->mapBannerFadeMode = FLD_MAP_BANNER_FADE_VISIBLE;
     fldRunDanteGunFlag[0] = 0;
     fldRunDanteGunFlag[1] = 0;
     fldRunDanteGunFlag[2] = 0;

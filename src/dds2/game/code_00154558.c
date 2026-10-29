@@ -674,7 +674,7 @@ s32 fldCmdSetSolarOverlayMode(void) {
     fldGlobalBase.overlayMode = mode;
     fldGlobalBase.overlayCounter = 0;
     if (mode < FLD_SOLAR_OVERLAY_MODE_PANEL_HIDDEN) {
-        fldGlobalBase.mapBannerFadeMode = mode;
+        fldGlobalBase.mapBannerFadeMode = (FldMapBannerFadeMode)mode;
     }
     switch (fldGlobalBase.overlayMode) {
     case FLD_SOLAR_OVERLAY_MODE_HIDE_MOON:

@@ -976,7 +976,7 @@ void fldSelectBgmMode(s32 selection) {
             D_00436228 = selection;
         }
         break;
-    case 0:
+    case FLD_MAP_BANNER_FADE_HIDDEN:
         if (D_00436228 != -1) {
             p2sdStopBGM(D_00436228);
             D_00436228 = -1;
@@ -987,7 +987,7 @@ void fldSelectBgmMode(s32 selection) {
         p2sdPlayBGM(volume);
         D_00436228 = volume;
         break;
-    case 2:
+    case FLD_MAP_BANNER_FADE_OUT:
         volume = D_0039A028[0] + 1;
         p2sdPlayBGM(volume);
         D_00436228 = volume;
@@ -3014,7 +3014,7 @@ void fldDrawMapLabelBanner(void) {
             D_0043627C = progress;
         }
         break;
-    case 3:
+    case FLD_MAP_BANNER_FADE_IN:
         progress = D_0043627C;
         if (!(progress < 1.0f)) {
             break;
@@ -3025,7 +3025,7 @@ void fldDrawMapLabelBanner(void) {
             break;
         }
         /* A completed fade-in uses the fully visible state. */
-    case 1:
+    case FLD_MAP_BANNER_FADE_VISIBLE:
         progress = 1.0f;
         D_0043627C = progress;
         break;
