@@ -1,6 +1,9 @@
+#define SDK_SKIP_sceMcSync
 #include "sdk_ps2.h"
+#undef SDK_SKIP_sceMcSync
 #include "common.h"
 #include "mc_poll.h"
+#include "mc_sync_api.h"
 #include "mc_path_api.h"
 #include "mc_file_api.h"
 #include "mc_read_api.h"
@@ -17,8 +20,8 @@
  * Every SDK poll return other than 1 maps to 0, including SDK-level failures. */
 McPollResult sdfMcPollFormat(void) {
     s32 commandId;
-    s32 commandResult;
-    s32 pollResult = sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult);
+    McSyncCommandResult commandResult;
+    McSyncPollStatus pollResult = sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult);
 
     if (pollResult != MC_SYNC_COMPLETE) {
         return MC_POLL_PENDING;
@@ -39,7 +42,7 @@ void sdfMcFuncChdir(McPort port, const char *path) {
  * to -1. Any SDK poll return other than 1 maps to 0; this does not wait. */
 McPollResult sdfMcPollChdir(void) {
     s32 commandId;
-    s32 commandResult;
+    McSyncCommandResult commandResult;
 
     if (sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult) == MC_SYNC_COMPLETE) {
         if (commandResult == MC_SDK_COMMAND_SUCCESS) {
@@ -60,8 +63,8 @@ void sdfMcFuncMkdir(McPort port, const char *path) {
  * -2, all other nonzero statuses to -1; non-complete SDK polls map to 0. */
 McPollResult sdfMcPollMkdir(void) {
     s32 commandId;
-    s32 commandResult;
-    s32 pollResult = sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult);
+    McSyncCommandResult commandResult;
+    McSyncPollStatus pollResult = sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult);
 
     if (pollResult == MC_SYNC_COMPLETE) {
         if (commandResult == MC_SDK_COMMAND_SUCCESS) {
@@ -86,8 +89,8 @@ void sdfMcFuncGetDir(McPort port, const char *path, sceMcTblGetDir *directoryEnt
  * -4 to -2, other negatives to -1; non-complete SDK polls map to 0. */
 McPollResult sdfMcPollGetDir(McDirectoryEntryCount *entryCountOut) {
     s32 commandId;
-    s32 commandResult;
-    s32 pollResult = sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult);
+    McSyncCommandResult commandResult;
+    McSyncPollStatus pollResult = sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult);
 
     if (pollResult == MC_SYNC_COMPLETE) {
         if (commandResult >= MC_SDK_COMMAND_SUCCESS) {
@@ -111,7 +114,7 @@ void sdfMcFuncDelete(McPort port, const char *path) {
 /* Same zero-only completion policy as sdfMcPollChdir; no blocking loop. */
 McPollResult sdfMcPollDelete(void) {
     s32 commandId;
-    s32 commandResult;
+    McSyncCommandResult commandResult;
 
     if (sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult) == MC_SYNC_COMPLETE) {
         if (commandResult == MC_SDK_COMMAND_SUCCESS) {
@@ -132,8 +135,8 @@ void sdfMcFuncOpen(McPort port, const char *path, McOpenMode openMode) {
  * it to fileDescriptorOut only then. Preserve all poll/error translations. */
 McPollResult sdfMcPollOpen(McFileDescriptor *fileDescriptorOut) {
     s32 commandId;
-    s32 commandResult;
-    s32 pollResult = sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult);
+    McSyncCommandResult commandResult;
+    McSyncPollStatus pollResult = sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult);
 
     if (pollResult == MC_SYNC_COMPLETE) {
         if (commandResult >= MC_SDK_COMMAND_SUCCESS) {
@@ -157,7 +160,7 @@ void sdfMcFuncClose(McFileDescriptor fileDescriptor) {
  * zero, -4 maps to -2 and other completed statuses to -1. */
 McPollResult sdfMcPollClose(void) {
     s32 commandId;
-    s32 commandResult;
+    McSyncCommandResult commandResult;
 
     if (sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult) == MC_SYNC_COMPLETE) {
         if (commandResult == MC_SDK_COMMAND_SUCCESS) {
@@ -177,8 +180,8 @@ void sdfMcFuncRead(McFileDescriptor fileDescriptor, void *buffer, s32 size) {
  * returned to a caller output. Non-complete SDK polls map to 0. */
 McPollResult sdfMcPollRead(void) {
     s32 commandId;
-    s32 commandResult;
-    s32 pollResult = sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult);
+    McSyncCommandResult commandResult;
+    McSyncPollStatus pollResult = sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult);
 
     if (pollResult == MC_SYNC_COMPLETE) {
         if (commandResult >= MC_SDK_COMMAND_SUCCESS) {
@@ -202,8 +205,8 @@ void sdfMcFuncWrite(McFileDescriptor fileDescriptor, const void *data, s32 byteC
  * -2 and other negatives become -1. Non-complete SDK polls map to 0. */
 McPollResult sdfMcPollWrite(void) {
     s32 commandId;
-    s32 commandResult;
-    s32 pollResult = sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult);
+    McSyncCommandResult commandResult;
+    McSyncPollStatus pollResult = sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult);
 
     if (pollResult == MC_SYNC_COMPLETE) {
         if (commandResult >= MC_SDK_COMMAND_SUCCESS) {

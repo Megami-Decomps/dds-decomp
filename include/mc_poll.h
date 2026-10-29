@@ -15,7 +15,8 @@ typedef enum McPollResult {
 /* sceMcOpen's nonnegative completion result is used as a file descriptor. */
 typedef s32 McFileDescriptor;
 
-/* sceMcSync returns the entry count for a completed sceMcGetDir request. */
+/* On a completed sceMcGetDir request, sceMcSync writes the actual entry count
+ * to its command-result output; sceMcSync's return value is the poll state. */
 typedef s32 McDirectoryEntryCount;
 
 McPollResult sdfMcPollFormat(void);
