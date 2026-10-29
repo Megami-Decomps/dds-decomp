@@ -2143,11 +2143,11 @@ ScrCommandResult evtCommand_MODEL_EXWAIT(void) {
     return mdlChkMotionEndEx(unit->owner, scrGetIntPara(1)) != MDL_MOTION_END_NOT_TERMINAL;
 }
 
-u32 evtCmdDestroySelectedWorldUnit(void) {
+ScrCommandResult evtCmdDestroySelectedWorldUnit(void) {
     dds3Basic_t *ctx;
     s32 worldObjectKey;
     dds3Basic_t *unit;
-    u32 ret = 1;
+    ScrCommandResult ret = SCR_COMMAND_RESULT_COMPLETE;
 
     ctx = dds3GetActiveScene();
     worldObjectKey = scrGetIntPara(0);
@@ -2156,7 +2156,7 @@ u32 evtCmdDestroySelectedWorldUnit(void) {
         return ret;
     }
     dds3DeleteSceneBasicData(unit);
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 ScrCommandResult evtOpStartUnitTransitionTowardWorldObject(void) {
@@ -2200,12 +2200,12 @@ ScrCommandResult evtCommand_MODEL_MOVE2(void) {
     return 1;
 }
 
-u32 evtScriptSetUnitTableValueAndReset(void) {
+ScrCommandResult evtScriptSetUnitTableValueAndReset(void) {
     evtUnitHandle_t *unit;
 
     unit = evtGetUnitHandle(scrGetIntPara(0));
     if (unit == NULL) {
-        return 1;
+        return SCR_COMMAND_RESULT_COMPLETE;
     }
     {
         s32 tableValueIndex = scrGetIntPara(1);
@@ -2215,7 +2215,7 @@ u32 evtScriptSetUnitTableValueAndReset(void) {
         unit->tableMotionBlendDurationFrames[tableValueIndex] = 0;
         unit->tableMotionFrameStep[tableValueIndex] = 1.0f;
     }
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 /* Store the script-supplied value for the selected event unit. */

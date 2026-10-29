@@ -2086,11 +2086,11 @@ ScrCommandResult evtCommand_MODEL_EXWAIT(void) {
     return mdlChkMotionEndEx(unit->owner, scrGetIntPara(1)) != MDL_MOTION_END_NOT_TERMINAL;
 }
 
-u32 evtCmdDestroySelectedWorldUnit(void) {
+ScrCommandResult evtCmdDestroySelectedWorldUnit(void) {
     dds3Basic_t *ctx;
     s32 worldObjectKey;
     dds3Basic_t *unit;
-    u32 ret = 1;
+    ScrCommandResult ret = SCR_COMMAND_RESULT_COMPLETE;
 
     ctx = dds3GetActiveScene();
     worldObjectKey = scrGetIntPara(0);
@@ -2099,7 +2099,7 @@ u32 evtCmdDestroySelectedWorldUnit(void) {
         return ret;
     }
     dds3DeleteSceneBasicData(unit);
-    return 1;
+    return SCR_COMMAND_RESULT_COMPLETE;
 }
 
 ScrCommandResult evtOpStartUnitTransitionTowardWorldObject(void) {
