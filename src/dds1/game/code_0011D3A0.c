@@ -1787,7 +1787,7 @@ void fldResetFieldRuntimeState(FldRuntimeResetMode mode) {
     area->sceneBgmSuppressed = FLD_SCENE_BGM_ALLOWED;
     area->skipFade = 0;
     area->unk138 = 0;
-    area->playerModelVariant = 0;
+    area->playerModelVariant = FLD_PLAYER_MODEL_VARIANT_STANDARD;
     area->x = 0.0f;
     area->y = 0.0f;
     area->z = 0.0f;

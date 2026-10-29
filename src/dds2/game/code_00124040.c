@@ -1181,20 +1181,20 @@ struct sdfMemHandle_t;
 
 
 void fldLoadPlayerModel(void) {
-    s32 model;
+    FldPlayerModelVariant modelVariant;
 
     if (fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1) &
         FLD_LOCATION_COORDINATE_FLAG_PLAYER_MODEL_VARIANT_2) {
-        model = 2;
+        modelVariant = FLD_PLAYER_MODEL_VARIANT_LOCATION_2;
     } else {
-        model = fldGlobalBase.playerModelAlternate != FLD_PLAYER_MODEL_ALTERNATE_DISABLED;
+        modelVariant = fldGlobalBase.playerModelAlternate != FLD_PLAYER_MODEL_ALTERNATE_DISABLED;
     }
-    if (fldGlobalBase.playerModelVariant != model || fldPlayerModelResource == NULL) {
+    if (fldGlobalBase.playerModelVariant != modelVariant || fldPlayerModelResource == NULL) {
         if (fldPlayerModelResource != NULL) {
             fldUnloadPlayerModel();
         }
-        switch (model) {
-        case 0:
+        switch (modelVariant) {
+        case FLD_PLAYER_MODEL_VARIANT_STANDARD:
             if (evtBitCheck(0x31)) {
                 fldPlayerModelResource = sdfDevLoadFileEx("/model/field/player_13.PB", &D_00435F3C, &D_00435F44);
             } else if (evtBitCheck(0x25)) {
@@ -1209,7 +1209,7 @@ void fldLoadPlayerModel(void) {
                 fldPlayerModelResource = sdfDevLoadFileEx("/model/field/player_a.PB", &D_00435F3C, &D_00435F44);
             }
             break;
-        case 1:
+        case FLD_PLAYER_MODEL_VARIANT_PLAYER_B:
             fldPlayerModelResource = sdfDevLoadFileEx("/model/field/player_b.PB", &D_00435F3C, &D_00435F44);
             break;
         default:
@@ -1228,7 +1228,7 @@ void fldLoadPlayerModel(void) {
             }
             break;
         }
-        fldGlobalBase.playerModelVariant = model;
+        fldGlobalBase.playerModelVariant = modelVariant;
     }
 }
 

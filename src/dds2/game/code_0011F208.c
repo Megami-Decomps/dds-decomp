@@ -1814,7 +1814,7 @@ void fldResetFieldRuntimeState(FldRuntimeResetMode mode) {
     area->targetGuideEnabled = 0;
     area->targetGuideActive = 0;
     area->overlayFadeInFrames = 0;
-    area->playerModelVariant = 0;
+    area->playerModelVariant = FLD_PLAYER_MODEL_VARIANT_STANDARD;
     area->x = 0.0f;
     area->y = 0.0f;
     area->z = 0.0f;

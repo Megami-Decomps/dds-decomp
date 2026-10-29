@@ -46,6 +46,13 @@ enum FldPlayerModelAlternateStateValue {
     FLD_PLAYER_MODEL_ALTERNATE_ENABLED = 1
 };
 
+typedef s32 FldPlayerModelVariant;
+enum FldPlayerModelVariantValue {
+    FLD_PLAYER_MODEL_VARIANT_STANDARD = 0,
+    FLD_PLAYER_MODEL_VARIANT_PLAYER_B = 1,
+    FLD_PLAYER_MODEL_VARIANT_LOCATION_2 = 2
+};
+
 typedef s32 FldAreaResourceReuseState;
 
 enum FldAreaResourceReuseState {
@@ -203,7 +210,7 @@ typedef struct FldAreaWork {
     s32 targetGuideActive;
     s32 overlayFadeInFrames; /* Remaining frames of the 20-frame overlay fade-in. */
 #endif
-    s32 playerModelVariant;      /* 0x13C in DDS1, 0x148 in DDS2 */
+    FldPlayerModelVariant playerModelVariant; /* 0x13C in DDS1, 0x148 in DDS2 */
     f32 x;
     f32 y;
     f32 z;
