@@ -895,7 +895,7 @@ extern u32 mnuQueueUnitPanelSelection(struct MantraDrawPool *pool, s8 value);
 
 void mnuActivatePanelSelection(MnuStatusResource *object, s8 selection) {
     MantraMenuWork *state = &object->menu;
-    if (mnuQueueUnitPanelSelection(object->menu.selectionController, selection) != 0) {
+    if (mnuQueueUnitPanelSelection(object->selectionController, selection) != 0) {
         u32 flags;
         u32 option;
         mnuMoveNodeCursorToTargetIndex(object, selection);
@@ -909,7 +909,7 @@ void mnuActivatePanelSelection(MnuStatusResource *object, s8 selection) {
 
 void mnuSetPanelSelection(MnuStatusResource *object, s8 selection) {
     MantraMenuWork *state = &object->menu;
-    if (mnuQueueUnitPanelSelection(object->menu.selectionController, selection) != 0) {
+    if (mnuQueueUnitPanelSelection(object->selectionController, selection) != 0) {
         mnuMoveNodeCursorToTargetIndex(object, selection);
         state->flags = (state->flags & 0xf0ffffff)
             | ((selection & 0xf) << 24);
@@ -1032,8 +1032,8 @@ void mnuAcquireMantraAndUnlockNeighbors(MnuStatusResource *object, s32 selector,
             }
         }
     }
-    mnuSpawnAlternateMantraSpecialNodeIcon(object->menu.selectionController);
-    mnuSpawnMantraIconWithShortLoop(object->menu.selectionController);
+    mnuSpawnAlternateMantraSpecialNodeIcon(object->selectionController);
+    mnuSpawnMantraIconWithShortLoop(object->selectionController);
     if (changed & 1) {
         mnuStorePanelEntry(0x20004, 5);
     }
@@ -1118,8 +1118,8 @@ void mnuRefreshMantraPanelNeighborStates(MnuStatusResource *object, s32 selector
             }
         }
     }
-    mnuSpawnAlternateMantraSpecialNodeIcon(object->menu.selectionController);
-    mnuSpawnMantraIconWithShortLoop(object->menu.selectionController);
+    mnuSpawnAlternateMantraSpecialNodeIcon(object->selectionController);
+    mnuSpawnMantraIconWithShortLoop(object->selectionController);
     mnuStorePanelEntry(0x20007, 20);
 }
 /* Four-byte spawn records: signed lookup ID, signed slot kind, reserved byte. */
@@ -1302,26 +1302,26 @@ s32 mnuDispatchMantraPanelCommand(MnuStatusResource *object, s32 panelId, s32 ac
         mnuSpawnMantraShortLoopIconAtPosition(
             (s32)((f32)state->defaultSelector->x / 10.0f * 40.0f),
             (s32)((f32)state->defaultSelector->y / 10.0f * 39.0f),
-            object->menu.selectionController);
+            object->selectionController);
         mnuSpawnMantraIconAtPosition(
             (s32)((f32)state->defaultSelector->x / 10.0f * 40.0f),
             (s32)((f32)state->defaultSelector->y / 10.0f * 39.0f),
-            object->menu.selectionController);
+            object->selectionController);
         return 0;
     case 1:
         position = mnuGetMantraPanelPositionRecord((s16)id);
-        mnuSpawnAlternateMantraIconForPanelSoundEntry(object->menu.selectionController);
+        mnuSpawnAlternateMantraIconForPanelSoundEntry(object->selectionController);
         mnuSpawnMantraIconAtPositionWithShortLoop((s32)((f32)position->x / 10.0f * 40.0f),
                      (s32)((f32)position->y / 10.0f * 39.0f),
-                     object->menu.selectionController);
+                     object->selectionController);
         return 0;
     case 2:
-        mnuSpawnMantraIconFadeIn(object->menu.selectionController);
-        mnuSpawnMantraShortLoopIconFadeIn(object->menu.selectionController);
+        mnuSpawnMantraIconFadeIn(object->selectionController);
+        mnuSpawnMantraShortLoopIconFadeIn(object->selectionController);
         return 0;
     case 3:
-        mnuSpawnMantraIconFadeOut(object->menu.selectionController);
-        mnuSpawnMantraShortLoopIconFadeOut(object->menu.selectionController);
+        mnuSpawnMantraIconFadeOut(object->selectionController);
+        mnuSpawnMantraShortLoopIconFadeOut(object->selectionController);
         return 0;
     case 4:
         mnuAcquireMantraAndUnlockNeighbors(object, state->flagBytes[3] & 15, id);
@@ -1343,16 +1343,16 @@ s32 mnuDispatchMantraPanelCommand(MnuStatusResource *object, s32 panelId, s32 ac
                      (flags >> 28) & 1, 0);
         return 0;
     case 9:
-        mnuHideMantraInfo(object->menu.selectionController);
-        mnuHideMantraTitle(object->menu.selectionController);
-        mnuSetMantraBackgroundVariant(object->menu.selectionController, 3);
-        mnuBeginMantraBackgroundMaskFadeOut(object->menu.selectionController);
-        mnuSpawnMantraIconFadeOut(object->menu.selectionController);
-        mnuSpawnMantraShortLoopIconFadeOut(object->menu.selectionController);
+        mnuHideMantraInfo(object->selectionController);
+        mnuHideMantraTitle(object->selectionController);
+        mnuSetMantraBackgroundVariant(object->selectionController, 3);
+        mnuBeginMantraBackgroundMaskFadeOut(object->selectionController);
+        mnuSpawnMantraIconFadeOut(object->selectionController);
+        mnuSpawnMantraShortLoopIconFadeOut(object->selectionController);
         mnuTransitionActivePanelAnimations(state->resource, 1);
         {
             u32 drawFlags = state->drawFlags;
-            struct MantraDrawPool *controller = object->menu.selectionController;
+            struct MantraDrawPool *controller = object->selectionController;
 
             state->drawFlags = (drawFlags & ~1) | ((drawFlags & 1) ^ 1);
             mnuRegisterMantraIconListCDraw(controller, (u32)object);
@@ -1361,18 +1361,18 @@ s32 mnuDispatchMantraPanelCommand(MnuStatusResource *object, s32 panelId, s32 ac
         object->menu.tutorialTransitionFrame = 0;
         break;
     case 10:
-        mnuShowMantraInfo(object->menu.selectionController);
-        mnuShowMantraTitle(object->menu.selectionController);
-        mnuSetMantraBackgroundVariant(object->menu.selectionController, 0);
-        mnuBeginMantraBackgroundMaskFadeIn(object->menu.selectionController);
-        mnuSpawnMantraIconFadeIn(object->menu.selectionController);
-        mnuSpawnMantraShortLoopIconFadeIn(object->menu.selectionController);
+        mnuShowMantraInfo(object->selectionController);
+        mnuShowMantraTitle(object->selectionController);
+        mnuSetMantraBackgroundVariant(object->selectionController, 0);
+        mnuBeginMantraBackgroundMaskFadeIn(object->selectionController);
+        mnuSpawnMantraIconFadeIn(object->selectionController);
+        mnuSpawnMantraShortLoopIconFadeIn(object->selectionController);
         flags = state->flags;
         mnuUpdateMantraSelectionPanelSlots(object, 5, 1, (flags >> 24) & 15,
                      (flags >> 28) & 1, 0);
         {
             u32 drawFlags = state->drawFlags;
-            struct MantraDrawPool *controller = object->menu.selectionController;
+            struct MantraDrawPool *controller = object->selectionController;
 
             state->drawFlags = (drawFlags & ~1) | ((drawFlags & 1) ^ 1);
             mnuBeginMantraIconListExit(controller);
@@ -1385,14 +1385,14 @@ s32 mnuDispatchMantraPanelCommand(MnuStatusResource *object, s32 panelId, s32 ac
         mnuSpawnMantraVariantIconAtPosition(
             (s32)((f32)(position->x * 20) / 10.0f),
             (s32)((f32)(position->y * 20) / 10.0f),
-            object->menu.selectionController);
+            object->selectionController);
         return 0;
     case 12:
         position = mnuGetMantraPanelPositionRecord((s16)id);
         mnuSpawnMantraShortLoopVariantIconAtPosition(
             (s32)((f32)(position->x * 20) / 10.0f),
             (s32)((f32)(position->y * 20) / 10.0f),
-            object->menu.selectionController);
+            object->selectionController);
         return 0;
     case 13:
         mnuSetPanelSelection(object, state->flagBytes[3] & 15);
@@ -1436,11 +1436,11 @@ void mnuInitializeMantraTutorialSelector(MnuStatusResource *object) {
 
     state->defaultSelector = mnuGetMantraPanelPositionRecord(8);
     mnuSpawnMantraShortLoopIconAtPosition((s32)((f32)state->defaultSelector->x / 10.0f * 40.0f),
-        (s32)((f32)state->defaultSelector->y / 10.0f * 39.0f), object->menu.selectionController);
+        (s32)((f32)state->defaultSelector->y / 10.0f * 39.0f), object->selectionController);
     mnuSpawnMantraIconAtPosition((s32)((f32)state->defaultSelector->x / 10.0f * 40.0f),
-        (s32)((f32)state->defaultSelector->y / 10.0f * 39.0f), object->menu.selectionController);
-    mnuSpawnMantraIconFadeIn(object->menu.selectionController);
-    mnuSpawnMantraShortLoopIconFadeIn(object->menu.selectionController);
+        (s32)((f32)state->defaultSelector->y / 10.0f * 39.0f), object->selectionController);
+    mnuSpawnMantraIconFadeIn(object->selectionController);
+    mnuSpawnMantraShortLoopIconFadeIn(object->selectionController);
     state->flags &= ~0x20000000;
 }
 
@@ -1455,8 +1455,8 @@ void itfPositionMantraSelectionController(MnuStatusResource *object) {
     MantraNodePos *record;
 
     record = mnuGetMantraPanelPositionRecord(8);
-    mnuSpawnAlternateMantraIconForPanelSoundEntry(object->menu.selectionController);
-    mnuSpawnMantraIconAtPositionWithShortLoop((s32)((f32)record->x / 10.0f * 40.0f), (s32)((f32)record->y / 10.0f * 39.0f), object->menu.selectionController);
+    mnuSpawnAlternateMantraIconForPanelSoundEntry(object->selectionController);
+    mnuSpawnMantraIconAtPositionWithShortLoop((s32)((f32)record->x / 10.0f * 40.0f), (s32)((f32)record->y / 10.0f * 39.0f), object->selectionController);
 }
 
 extern void itfInstallDefaultMantraSelector(MnuStatusResource *);
@@ -1468,7 +1468,7 @@ void itfInstallDefaultMantraSelector(MnuStatusResource *object) {
     record = mnuGetMantraPanelPositionRecord(0x71);
     state->defaultSelector = record;
     mnuSpawnMantraIconAtPosition((s32)((f32)record->x / 10.0f * 40.0f),
-        (s32)((f32)record->y / 10.0f * 39.0f), object->menu.selectionController);
+        (s32)((f32)record->y / 10.0f * 39.0f), object->selectionController);
 }
 
 s32 mnuRunMantraTutorialFourthSequence(MnuStatusResource *object) {
@@ -1646,18 +1646,18 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
     switch (state->tutorialState) {
     case MTR_TUTORIAL_STATE_CHANGE_TO_NORMAL_OUT:
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_MODE_CHANGE_NORMAL_OUT\n");
-        mnuSetMantraBackgroundVariant(object->menu.selectionController, 2);
-        mnuDisableMantraBackground(object->menu.selectionController);
+        mnuSetMantraBackgroundVariant(object->selectionController, 2);
+        mnuDisableMantraBackground(object->selectionController);
         if (state->drawBits.showOverlay) {
-            mnuHideMantraLimitLine(object->menu.selectionController);
+            mnuHideMantraLimitLine(object->selectionController);
         }
-        mnuBeginMantraBackgroundMaskFadeOut(object->menu.selectionController);
-        mnuToggleMantraTitleVariant(object->menu.selectionController);
-        mnuHideMantraInfo(object->menu.selectionController);
-        mnuHideMantraScrollCursor(object->menu.selectionController);
-        mnuBeginMantraUnitPanelExit(object->menu.selectionController);
-        mnuSpawnMantraIconFadeOut(object->menu.selectionController);
-        mnuSpawnMantraShortLoopIconFadeOut(object->menu.selectionController);
+        mnuBeginMantraBackgroundMaskFadeOut(object->selectionController);
+        mnuToggleMantraTitleVariant(object->selectionController);
+        mnuHideMantraInfo(object->selectionController);
+        mnuHideMantraScrollCursor(object->selectionController);
+        mnuBeginMantraUnitPanelExit(object->selectionController);
+        mnuSpawnMantraIconFadeOut(object->selectionController);
+        mnuSpawnMantraShortLoopIconFadeOut(object->selectionController);
         mnuTransitionActivePanelAnimations(state->resource, 1);
         state->tutorialNextState = MTR_TUTORIAL_STATE_INITIALIZE;
         state->tutorialWaitFrames = 30;
@@ -1665,33 +1665,33 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_MODE_CHANGE_NORMAL_OUT ...->MTR_MSL_TUTORIAL_INIT\n");
         break;
     case MTR_TUTORIAL_STATE_CHANGE_TO_NORMAL_IN:
-        mnuSetMantraBackgroundVariant(object->menu.selectionController, 0);
+        mnuSetMantraBackgroundVariant(object->selectionController, 0);
         if (state->drawBits.showOverlay) {
-            mnuShowMantraLimitLine(object->menu.selectionController);
-            mnuEnableMantraBackground(object->menu.selectionController);
+            mnuShowMantraLimitLine(object->selectionController);
+            mnuEnableMantraBackground(object->selectionController);
         }
-        mnuBeginMantraBackgroundMaskFadeIn(object->menu.selectionController);
-        mnuShowMantraInfo(object->menu.selectionController);
-        mnuShowMantraScrollCursor(object->menu.selectionController);
-        mnuRegisterMantraUnitPanelDraw(object->menu.selectionController, (u32)state->collectedValues);
+        mnuBeginMantraBackgroundMaskFadeIn(object->selectionController);
+        mnuShowMantraInfo(object->selectionController);
+        mnuShowMantraScrollCursor(object->selectionController);
+        mnuRegisterMantraUnitPanelDraw(object->selectionController, (u32)state->collectedValues);
         mnuSpawnMantraPanelsFromSelectedUnitFlags(object, 2, 0);
         position = mnuGetMantraNodePositionRecord(scrGetSelectedScriptEntryId(mnuGetSelectedNodeValue(object)));
         mnuSpawnMantraShortLoopIconAtPosition((s32)((f32)position->x / 10.0f * 40.0f),
-            (s32)((f32)position->y / 10.0f * 39.0f), object->menu.selectionController);
+            (s32)((f32)position->y / 10.0f * 39.0f), object->selectionController);
         state->defaultSelector = state->savedSelector;
         position = state->defaultSelector;
         mnuSpawnMantraIconAtPosition((s32)((f32)position->x / 10.0f * 40.0f),
-            (s32)((f32)position->y / 10.0f * 39.0f), object->menu.selectionController);
+            (s32)((f32)position->y / 10.0f * 39.0f), object->selectionController);
         finished = 1;
         break;
     case MTR_TUTORIAL_STATE_CHANGE_TO_TUTORIAL_OUT:
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_MODE_CHANGE_TUTORIAL_OUT\n");
-        mnuBeginMantraBackgroundMaskFadeOut(object->menu.selectionController);
-        mnuToggleMantraTitleVariant(object->menu.selectionController);
-        mnuHideMantraInfo(object->menu.selectionController);
-        mnuBeginMantraUnitPanelExit(object->menu.selectionController);
-        mnuSpawnMantraIconFadeOut(object->menu.selectionController);
-        mnuSpawnMantraShortLoopIconFadeOut(object->menu.selectionController);
+        mnuBeginMantraBackgroundMaskFadeOut(object->selectionController);
+        mnuToggleMantraTitleVariant(object->selectionController);
+        mnuHideMantraInfo(object->selectionController);
+        mnuBeginMantraUnitPanelExit(object->selectionController);
+        mnuSpawnMantraIconFadeOut(object->selectionController);
+        mnuSpawnMantraShortLoopIconFadeOut(object->selectionController);
         mnuTransitionActivePanelAnimations(state->resource, 1);
         state->tutorialNextState = MTR_TUTORIAL_STATE_EXIT;
         state->tutorialWaitFrames = 30;
@@ -1700,9 +1700,9 @@ s32 mnuUpdateMantraTutorial(MnuStatusResource *object) {
         break;
     case MTR_TUTORIAL_STATE_CHANGE_TO_TUTORIAL_IN:
         evtPrintDeveloperConsoleMessage("MTR_MSL_TUTORIAL_MODE_CHANGE_TUTORIAL_IN\n");
-        mnuBeginMantraBackgroundMaskFadeIn(object->menu.selectionController);
-        mnuShowMantraInfo(object->menu.selectionController);
-        mnuRegisterMantraUnitPanelDraw(object->menu.selectionController, (u32)state->collectedValues);
+        mnuBeginMantraBackgroundMaskFadeIn(object->selectionController);
+        mnuShowMantraInfo(object->selectionController);
+        mnuRegisterMantraUnitPanelDraw(object->selectionController, (u32)state->collectedValues);
         mnuUpdateMantraSelectionPanelSlots(object, 0, 0, 0, 0, 0);
         state->tutorialNextState = MTR_TUTORIAL_STATE_STEP_000_RUN;
         state->tutorialWaitFrames = 30;
@@ -1989,7 +1989,7 @@ s32 mnuUpdateMantraTutorialPanelStatus(MnuStatusResource *object) {
     s32 style;
 
     if ((state->flags >> 29) & 1) {
-        mnuSetMantraInfoDrawPosition(object->menu.selectionController, 0, 1);
+        mnuSetMantraInfoDrawPosition(object->selectionController, 0, 1);
     } else {
         node = mnuGetMantraPanelPositionRecord(state->defaultSelector->id);
         record = mnuFindPanelPositionRecordByScriptId((state->flags >> 24) & 0xF, state->defaultSelector->id);
@@ -2002,7 +2002,7 @@ s32 mnuUpdateMantraTutorialPanelStatus(MnuStatusResource *object) {
         } else {
             style = (record->flags & 2) ? 3 : 2;
         }
-        mnuSetMantraInfoDrawPosition(object->menu.selectionController, object->menu.defaultSelector->id, style);
+        mnuSetMantraInfoDrawPosition(object->selectionController, object->menu.defaultSelector->id, style);
     }
 
     if ((state->flags >> 29) & 1) {
@@ -2035,7 +2035,7 @@ s32 mnuUpdateMantraTutorialPanelStatus(MnuStatusResource *object) {
             status = 1;
         }
     }
-    mnuSetMantraUnitPanelValue(object->menu.selectionController, status);
+    mnuSetMantraUnitPanelValue(object->selectionController, status);
     return 0;
 }
 #else

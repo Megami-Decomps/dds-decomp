@@ -228,7 +228,6 @@ typedef struct MantraMenuWork {
     s8 tutorialTransitionMode; /* 0: hidden, 1: opening, 2: closing, 3: visible. */
     s16 tutorialTransitionFrame; /* Frame within the five-step tutorial fade. */
     MtrEquipState equip;
-    struct MantraDrawPool *selectionController;
 } MantraMenuWork;
 
 /* mnuAllocateMantraResourceWork allocates and clears exactly 0xC08 bytes. The task keeps
@@ -249,11 +248,13 @@ typedef struct MnuStatusResource {
     MtrResourceLoadState resourceLoad;
     MtrSelectionState selection;
     MantraMenuWork menu;
+    struct MantraDrawPool *selectionController; /* owner field at 0xC00, outside menu work */
     u8 padC04[4];
 } MnuStatusResource;
 
 typedef char MnuStatusResource_size[(sizeof(MnuStatusResource) == 0xC08) ? 1 : -1];
-typedef char MantraMenuWork_size[(sizeof(MantraMenuWork) == 0x9C4) ? 1 : -1];
+typedef char MantraSelectionController_offset[((u32)&((MnuStatusResource *)0)->selectionController == 0xC00) ? 1 : -1];
+typedef char MantraMenuWork_size[(sizeof(MantraMenuWork) == 0x9C0) ? 1 : -1];
 typedef char MtrTutorialState_width_check[(sizeof(MtrTutorialState) == 1) ? 1 : -1];
 typedef char MantraTutorialStateOffsetsCheck[
     ((u32)&((MantraMenuWork *)0)->tutorialNextState == 7 &&

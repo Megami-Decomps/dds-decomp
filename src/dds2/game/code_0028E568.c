@@ -565,7 +565,7 @@ void mnuSelectMantraLimitLine(MnuStatusResource *object, u16 id) {
     evtPrintDeveloperConsoleMessage(
         "-----------------------LimitLineSetting!!!!!!!!![%x]\n", flags);
     if (flags != 0) {
-        mnuArmMantraLimitLineFlags(object->menu.selectionController, flags);
+        mnuArmMantraLimitLineFlags(object->selectionController, flags);
     }
 }
 
@@ -597,8 +597,8 @@ void mnuUpdateSelectedMantraLimitLineState(MnuStatusResource *object) {
         }
     }
 
-    mnuQueueMantraLimitLineFlags(menu->menu.selectionController, flags);
-    mnuSetMantraBackgroundSelection(menu->menu.selectionController, flags);
+    mnuQueueMantraLimitLineFlags(menu->selectionController, flags);
+    mnuSetMantraBackgroundSelection(menu->selectionController, flags);
 }
 
 extern s32 prfIsMantraCategoryEnabled(u32 categoryIndex);

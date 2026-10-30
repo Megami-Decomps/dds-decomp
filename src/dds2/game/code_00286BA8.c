@@ -616,12 +616,12 @@ void mtrMantraEquipRelease(s32 key, s32 initResult) {
         position = mnuGetMantraNodePositionRecord((s16)scrGetSelectedScriptEntryId(selectedRecord));
         mnuSpawnMantraIconAtPositionWithShortLoop((s32)(((f32)position->x / 10.0f) * 40.0f),
                       (s32)(((f32)position->y / 10.0f) * 39.0f),
-                      resource->menu.selectionController);
-        mnuSpawnMantraIconAndStorePanelSoundEntry(resource->menu.selectionController);
+                      resource->selectionController);
+        mnuSpawnMantraIconAndStorePanelSoundEntry(resource->selectionController);
         work->navigationState = 0x14;
     } else {
-        mnuSpawnMantraIconFadeIn(resource->menu.selectionController);
-        mnuSpawnMantraShortLoopIconFadeIn(resource->menu.selectionController);
+        mnuSpawnMantraIconFadeIn(resource->selectionController);
+        mnuSpawnMantraShortLoopIconFadeIn(resource->selectionController);
     }
     evtPrintDeveloperConsoleMessage("mtrMantraEquipRelease\n");
 }
@@ -799,16 +799,16 @@ s32 mtrMantraEquipUpdate(void) {
             break;
         }
         evtFinishMessageWindowAndNotify();
-        mnuShowMantraInfo(work->menu.selectionController);
-        mnuShowMantraScrollCursor(work->menu.selectionController);
-        mnuShowMantraUnitPanel(work->menu.selectionController);
-        mnuToggleMantraTitleBlink(work->menu.selectionController);
-        mnuToggleMantraTypeOnePanelMode(work->menu.selectionController);
-        mnuSetMantraBackgroundVariant(work->menu.selectionController, 0);
+        mnuShowMantraInfo(work->selectionController);
+        mnuShowMantraScrollCursor(work->selectionController);
+        mnuShowMantraUnitPanel(work->selectionController);
+        mnuToggleMantraTitleBlink(work->selectionController);
+        mnuToggleMantraTypeOnePanelMode(work->selectionController);
+        mnuSetMantraBackgroundVariant(work->selectionController, 0);
         if (work->menu.drawBits.showOverlay) {
-            mnuShowMantraLimitLine(work->menu.selectionController);
+            mnuShowMantraLimitLine(work->selectionController);
         }
-        mnuKeepMantraBackgroundMaskVisible(work->menu.selectionController);
+        mnuKeepMantraBackgroundMaskVisible(work->selectionController);
         mnuSpawnMantraPanelsFromSelectedUnitFlags(work);
         sdfSetTaskItemMode(mnuMantraSelectionResource, 2,
                            SDF_TASK_ITEM_MODE_PENDING_ACTIVATION);
@@ -846,7 +846,7 @@ s32 mtrMantraEquipDraw(void) {
     s32 value;
 
     dspRequestMessageWindowModeOne();
-    mnuUpdateMantraDrawPool(work->menu.selectionController);
+    mnuUpdateMantraDrawPool(work->selectionController);
     ratio = 0.0f;
     if (work->flags.fadeProgress) {
         if (work->menu.equip.timer < 30) {
