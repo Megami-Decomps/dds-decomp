@@ -6420,7 +6420,6 @@ extern f32 btlCameraTerminalEye[4];
 
 extern f32 btlCameraTerminalDistance;
 
-#ifdef NON_MATCHING
 #include "sdk_ps2.h"
 #include "btl_vec3.h"
 #include "btl_effect_node.h"
@@ -6502,123 +6501,159 @@ extern f32 btlCameraTerminalDistance;
 
 extern BtlCameraCursorView btlCameraCursor;
 
-/* start + (end - start) * ratio */
-static inline f32 btlCameraLerp(f32 start, f32 end, f32 ratio) {
-    return (end - start) * ratio + start;
-}
-
-/* Smooth 0..1 ramp over the half-turn angle (degrees, offset by a quarter turn). */
-static inline f32 btlCameraSmoothRamp(u32 angle) {
-    return (sdfSin((f32)((angle + 90) % 360) / 180.0f * 3.1415899f) + 1.0f) * 0.5f;
-}
-
-/* Scale a camera track's four values over a command's start and end
- * transitions: linear fades, half-cosine ramps (flags 4 and 8), quarter-cosine
- * ramps scaled by one half (flags 0x10 and 0x20), and a cubic Bezier settle
- * toward the end of the record using the record's stored values and curve
- * scales (flag 0x80). Upstream: INCLUDE_ASM in both games (DDS1's
- * game/code_001DEFE0, DDS2's game/code_001EC868), the same instructions;
- * written from the retail routine. It differs from retail in register
- * allocation and scheduling, in reading the camera record's address and flag
- * byte once instead of recomputing them for each test (the callee writes
- * neither), in dropping the redundant byte mask on the first flag test, and in
- * the address form of the cursor frame (btlCameraCursor plus 2, where retail
- * names the frame's own address). */
+/* Scale the four live camera-track components through the record's start/end
+ * envelopes and final cubic settle. The zero endpoints in the sine envelopes
+ * are actual native arithmetic; see docs/compiler-trace-fade.md.
+ * The final flags gate uses the localized allocation reconstruction below. */
 void btlScaleCameraTrackValues(BtlLinkedCommand *command, BtlCamState *pose,
-                   const BtlCameraTimedInstruction *instruction, const s32 *currentIndex,
-                   const BtlCameraParameterRecord *records, f32 *value) {
-    const BtlCameraParameterRecord *record = &records[*currentIndex];
-    f32 t;
-    f32 blend;
-    f32 u;
-    f32 offset;
-    f32 bias;
-    u32 angle;
+                   const BtlCameraTimedInstruction *instruction,
+                   const s32 *currentIndex,
+                   const BtlCameraParameterRecord *records, f32 *output) {
+    f32 scale;
     s32 i;
 
-    if (record->transitionFlags & 1) {
-        if ((f32)btlCameraCursor.frame <= instruction->startFrame + record->fadeInDuration) {
-            t = ((f32)btlCameraCursor.frame - instruction->startFrame) / record->fadeInDuration;
-            value[0] *= t;
-            value[1] *= t;
-            value[2] *= t;
-            value[3] *= t;
+    if ((u8)(records[*currentIndex].transitionFlags & 1)) {
+        f32 duration = records[*currentIndex].fadeInDuration;
+        if ((f32)CURSOR->frame <= instruction->startFrame + duration) {
+            scale = ((f32)CURSOR->frame - instruction->startFrame) / duration;
+            output[0] *= scale;
+            output[1] *= scale;
+            output[2] *= scale;
+            output[3] *= scale;
         }
     }
-    if (record->transitionFlags & 2) {
-        if (instruction->startFrame + instruction->duration - record->fadeOutDuration <= (f32)btlCameraCursor.frame) {
-            t = (instruction->startFrame + instruction->duration - (f32)btlCameraCursor.frame) / record->fadeOutDuration;
-            value[0] *= t;
-            value[1] *= t;
-            value[2] *= t;
-            value[3] *= t;
+    if (records[*currentIndex].transitionFlags & 2) {
+        f32 end = instruction->startFrame + instruction->duration;
+        f32 duration = records[*currentIndex].fadeOutDuration;
+        if (end - duration <= (f32)CURSOR->frame) {
+            scale = (end - (f32)CURSOR->frame) / duration;
+            output[0] *= scale;
+            output[1] *= scale;
+            output[2] *= scale;
+            output[3] *= scale;
         }
     }
-    if (record->transitionFlags & 4) {
-        if ((f32)btlCameraCursor.frame <= instruction->startFrame + record->fadeInDuration) {
-            t = ((f32)btlCameraCursor.frame - instruction->startFrame) / record->fadeInDuration;
-            angle = t * 180.0f + 180.0f;
-            value[0] = btlCameraLerp(0.0f, value[0], btlCameraSmoothRamp(angle));
-            value[1] = btlCameraLerp(0.0f, value[1], btlCameraSmoothRamp(angle));
-            value[2] = btlCameraLerp(0.0f, value[2], btlCameraSmoothRamp(angle));
-            value[3] = btlCameraLerp(0.0f, value[3], btlCameraSmoothRamp(angle));
+    if (records[*currentIndex].transitionFlags & 0x4) {
+        f32 duration = records[*currentIndex].fadeInDuration;
+        if ((f32)CURSOR->frame <= instruction->startFrame + duration) {
+            u32 phase;
+            scale = ((f32)CURSOR->frame - instruction->startFrame) / duration;
+            phase = (u32)(scale * 180.0f + 180.0f) + 90;
+            output[0] = ((output[0] - 0.0f) *
+                ((sdfSin((f32)(phase % 360) / 180.0f * 3.14159f) + 1.0f) *
+                 0.5f) + 0.0f);
+            output[1] = ((output[1] - 0.0f) *
+                ((sdfSin((f32)(phase % 360) / 180.0f * 3.14159f) + 1.0f) *
+                 0.5f) + 0.0f);
+            output[2] = ((output[2] - 0.0f) *
+                ((sdfSin((f32)(phase % 360) / 180.0f * 3.14159f) + 1.0f) *
+                 0.5f) + 0.0f);
+            output[3] = ((output[3] - 0.0f) *
+                ((sdfSin((f32)(phase % 360) / 180.0f * 3.14159f) + 1.0f) *
+                 0.5f) + 0.0f);
         }
     }
-    if (record->transitionFlags & 8) {
-        if (instruction->startFrame + instruction->duration - record->fadeOutDuration <= (f32)btlCameraCursor.frame) {
-            t = (instruction->startFrame + instruction->duration - (f32)btlCameraCursor.frame) / record->fadeOutDuration;
-            angle = t * 180.0f + 180.0f;
-            value[0] = btlCameraLerp(0.0f, value[0], btlCameraSmoothRamp(angle));
-            value[1] = btlCameraLerp(0.0f, value[1], btlCameraSmoothRamp(angle));
-            value[2] = btlCameraLerp(0.0f, value[2], btlCameraSmoothRamp(angle));
-            value[3] = btlCameraLerp(0.0f, value[3], btlCameraSmoothRamp(angle));
+    if (records[*currentIndex].transitionFlags & 0x8) {
+        f32 end = instruction->startFrame + instruction->duration;
+        f32 duration = records[*currentIndex].fadeOutDuration;
+        if (end - duration <= (f32)CURSOR->frame) {
+            u32 phase;
+            scale = (end - (f32)CURSOR->frame) / duration;
+            phase = (u32)(scale * 180.0f + 180.0f) + 90;
+            output[0] = ((output[0] - 0.0f) *
+                ((sdfSin((f32)(phase % 360) / 180.0f * 3.14159f) + 1.0f) *
+                 0.5f) + 0.0f);
+            output[1] = ((output[1] - 0.0f) *
+                ((sdfSin((f32)(phase % 360) / 180.0f * 3.14159f) + 1.0f) *
+                 0.5f) + 0.0f);
+            output[2] = ((output[2] - 0.0f) *
+                ((sdfSin((f32)(phase % 360) / 180.0f * 3.14159f) + 1.0f) *
+                 0.5f) + 0.0f);
+            output[3] = ((output[3] - 0.0f) *
+                ((sdfSin((f32)(phase % 360) / 180.0f * 3.14159f) + 1.0f) *
+                 0.5f) + 0.0f);
         }
     }
-    if (record->transitionFlags & 0x10) {
-        if ((f32)btlCameraCursor.frame <= instruction->startFrame + record->fadeInDuration) {
-            t = ((f32)btlCameraCursor.frame - instruction->startFrame) / record->fadeInDuration;
-            angle = t * 90.0f + 240.0f;
-            value[0] = btlCameraLerp(0.0f, value[0], btlCameraSmoothRamp(angle)) * 0.5f;
-            value[1] = btlCameraLerp(0.0f, value[1], btlCameraSmoothRamp(angle)) * 0.5f;
-            value[2] = btlCameraLerp(0.0f, value[2], btlCameraSmoothRamp(angle)) * 0.5f;
-            value[3] = btlCameraLerp(0.0f, value[3], btlCameraSmoothRamp(angle)) * 0.5f;
+    if (records[*currentIndex].transitionFlags & 0x10) {
+        f32 duration = records[*currentIndex].fadeInDuration;
+        if ((f32)CURSOR->frame <= instruction->startFrame + duration) {
+            u32 phase;
+            scale = ((f32)CURSOR->frame - instruction->startFrame) / duration;
+            phase = (u32)(scale * 90.0f + 240.0f) + 90;
+            output[0] = ((output[0] - 0.0f) *
+                ((sdfSin((f32)(phase % 360) / 180.0f * 3.14159f) + 1.0f) *
+                 0.5f) + 0.0f) * 0.5f;
+            output[1] = ((output[1] - 0.0f) *
+                ((sdfSin((f32)(phase % 360) / 180.0f * 3.14159f) + 1.0f) *
+                 0.5f) + 0.0f) * 0.5f;
+            output[2] = ((output[2] - 0.0f) *
+                ((sdfSin((f32)(phase % 360) / 180.0f * 3.14159f) + 1.0f) *
+                 0.5f) + 0.0f) * 0.5f;
+            output[3] = ((output[3] - 0.0f) *
+                ((sdfSin((f32)(phase % 360) / 180.0f * 3.14159f) + 1.0f) *
+                 0.5f) + 0.0f) * 0.5f;
         }
     }
-    if (record->transitionFlags & 0x20) {
-        if (instruction->startFrame + instruction->duration - record->fadeOutDuration <= (f32)btlCameraCursor.frame) {
-            t = (instruction->startFrame + instruction->duration - (f32)btlCameraCursor.frame) / record->fadeOutDuration;
-            angle = t * 90.0f + 240.0f;
-            value[0] = btlCameraLerp(0.0f, value[0], btlCameraSmoothRamp(angle)) * 0.5f;
-            value[1] = btlCameraLerp(0.0f, value[1], btlCameraSmoothRamp(angle)) * 0.5f;
-            value[2] = btlCameraLerp(0.0f, value[2], btlCameraSmoothRamp(angle)) * 0.5f;
-            value[3] = btlCameraLerp(0.0f, value[3], btlCameraSmoothRamp(angle)) * 0.5f;
+    if (records[*currentIndex].transitionFlags & 0x20) {
+        f32 end = instruction->startFrame + instruction->duration;
+        f32 duration = records[*currentIndex].fadeOutDuration;
+        if (end - duration <= (f32)CURSOR->frame) {
+            u32 phase;
+            scale = (end - (f32)CURSOR->frame) / duration;
+            phase = (u32)(scale * 90.0f + 240.0f) + 90;
+            output[0] = ((output[0] - 0.0f) *
+                ((sdfSin((f32)(phase % 360) / 180.0f * 3.14159f) + 1.0f) *
+                 0.5f) + 0.0f) * 0.5f;
+            output[1] = ((output[1] - 0.0f) *
+                ((sdfSin((f32)(phase % 360) / 180.0f * 3.14159f) + 1.0f) *
+                 0.5f) + 0.0f) * 0.5f;
+            output[2] = ((output[2] - 0.0f) *
+                ((sdfSin((f32)(phase % 360) / 180.0f * 3.14159f) + 1.0f) *
+                 0.5f) + 0.0f) * 0.5f;
+            output[3] = ((output[3] - 0.0f) *
+                ((sdfSin((f32)(phase % 360) / 180.0f * 3.14159f) + 1.0f) *
+                 0.5f) + 0.0f) * 0.5f;
         }
     }
-    if (record->transitionFlags & 0x80) {
-        if (instruction->startFrame + instruction->duration - record->fadeOutDuration <= (f32)btlCameraCursor.frame) {
-            offset = (f32)btlCameraCursor.frame -
-                     (instruction->startFrame + instruction->duration - record->fadeOutDuration);
-            if (offset == 0.0f) {
-                return;
-            }
-            blend = offset / record->fadeOutDuration;
-            for (i = 0; i < 3; i++) {
-                f32 start = record->value[i];
-
-                if (start != 0.0f) {
-                    bias = start < 0.0f ? -0.0001f : 0.0001f;
-                    u = 1.0f - blend;
-                    value[i] = start * u * u * u + bias * 3.0f * blend * u * u +
-                               start * record->curveScale5C * 3.0f * blend * u +
-                               start * record->curveScale60 * blend * blend * blend;
+    {
+    /* Native keeps the loaded byte distinct from its 0x80 mask. The ordinary
+     * form coalesces them, also moving the preceding record-index shift.
+     * These initialized values are consumed immediately by the real mask and
+     * branch; their bound lifetimes end before the cubic calculations, with
+     * no intervening call. Neither binding emits an instruction or changes
+     * memory effects. This is allocation reconstruction, not original spelling;
+     * the paired compiler controls are documented in compiler-trace-fade.md. */
+    register u8 flags __asm__("$3") = records[*currentIndex].transitionFlags;
+    register u32 gate __asm__("$2");
+    gate = flags & 0x80;
+    if (gate) {
+        f32 elapsed;
+        f32 curveProgress;
+        f32 begin = instruction->startFrame + instruction->duration -
+                    records[*currentIndex].fadeOutDuration;
+        if (begin <= (f32)CURSOR->frame) {
+            elapsed = (f32)CURSOR->frame - begin;
+            if (elapsed != 0.0f) {
+                curveProgress = elapsed / records[*currentIndex].fadeOutDuration;
+                for (i = 0; i < 3; i++) {
+                    f32 value = records[*currentIndex].value[i];
+                    if (value != 0.0f) {
+                        f32 bias = value < 0.0f ? -0.0001f : 0.0001f;
+                        f32 remaining = 1.0f - curveProgress;
+                        output[i] = value * remaining * remaining * remaining +
+                            bias * 3.0f * curveProgress * remaining * remaining +
+                            (value * records[*currentIndex].curveScale5C) *
+                                3.0f * curveProgress * remaining +
+                            (value * records[*currentIndex].curveScale60) *
+                                curveProgress * curveProgress * curveProgress;
+                    }
                 }
             }
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "game/code_001DEFE0", btlScaleCameraTrackValues);
-#endif
+}
+
 
 void btlApplyScriptCameraTrack(BtlLinkedCommand *command, BtlCamState *pose,
                   const BtlCameraTimedInstruction *instruction, s32 *currentIndex,

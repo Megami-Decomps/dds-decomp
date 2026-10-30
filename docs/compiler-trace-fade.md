@@ -1,10 +1,11 @@
 # Camera track fades: native interpolation and the allocation frontier
 
-`btlScaleCameraTrackValues` remains nonmatching. The last qualified paired
-reconstruction differs in **five of 904 words**, with unchanged **3,616-byte**
-size in each game. This note explains an admitted source premise and
-qualified compiler observations, not an exact implementation or new matching
-credit. The function remains `INCLUDE_ASM` in production.
+This note preserves the historical five-word allocation frontier for
+`btlScaleCameraTrackValues`: **five of 904 words**, with unchanged
+**3,616-byte** size in each game. The subsequent exact reconstruction uses two
+localized register bindings, documented in
+[the camera-gate allocation audit](compiler-trace-camera-gate.md). The historical
+observations below are not a claim of recovered original source spelling.
 
 | Game | Address | Current owner |
 |---|---|---|
