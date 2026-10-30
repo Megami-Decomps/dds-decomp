@@ -1308,7 +1308,6 @@ void fldHitChkUnitDamage(f32 *position) {
     }
 }
 
-#ifdef NON_MATCHING
 #include "common.h"
 #include "fld_area_work.h"
 #include "fld.h"
@@ -1349,12 +1348,13 @@ extern f32 fldResolvedPosition[3];
  * result to input and fldResolvedPosition. With fldRunDanteGunFlag[6] set
  * it first sets up display buffer 0x5E for debug drawing;
  * fldRunDanteGunFlag[19] with the first pad's button 11 held lets the
- * position through solid faces. DDS1's routine differs only in FldAreaWork's
- * layout (its target at 0x158, DDS2's at 0x164).
+ * position through solid faces. DDS1 has a different FldAreaWork layout and
+ * is qualified separately; do not treat the twins as identical.
  * Retail oddities kept: it copies the position before making it relative to a
  * moving face and never reads the copy; a special face leaves the position
  * relative to its moving face; the final movement length is computed and
- * discarded. Upstream: INCLUDE_ASM in game/code_00136EF8. */
+ * discarded. The small contact-flag bindings reconstruct allocation, not
+ * original-source spelling; see docs/compiler-trace-area-refresh.md. */
 void fldRefreshAreaStateFromPosition(f32 *input) {
     f32 position[4];
     f32 previous[4];
@@ -1364,6 +1364,7 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
     f32 savedPrevious[4];
     f32 absoluteDelta[4];
     f32 carried[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+    f32 proposedX, proposedY, proposedZ;
     f32 clearance;
     f32 contactInset;
     f32 margin;
@@ -1390,37 +1391,43 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
     fldAutoMapNameD(-1);
     fldGlobalBase.unk8C = 0;
     if (fldGlobalBase.primaryMovingMatterIndex != -1) {
-        collision_s *support;
         dds3PoseSet_t *carrier;
 
         index = fldGlobalBase.primaryMovingMatterIndex;
-        support = &fldMatterTable[index];
-        if (support->matter != NULL) {
-            carrier = support->matter->poseset;
-            carried[0] = carrier->pos[0] - support->previousPosition[0];
-            carried[1] = carrier->pos[1] - support->previousPosition[1] + 10.0f;
-            carried[2] = carrier->pos[2] - support->previousPosition[2];
+        if (fldMatterTable[index].matter != NULL) {
+            carrier = fldMatterTable[index].matter->poseset;
+            carried[0] = carrier->pos[0] - fldMatterTable[index].previousPosition[0];
+            carried[1] = carrier->pos[1] - fldMatterTable[index].previousPosition[1] + 10.0f;
+            carried[2] = carrier->pos[2] - fldMatterTable[index].previousPosition[2];
         }
-        fldGlobalBase.secondaryMovingMatterIndex = -1;
         fldGlobalBase.primaryMovingMatterIndex = -1;
+        fldGlobalBase.secondaryMovingMatterIndex = -1;
     }
-    fldGlobalBase.secondaryMovingMatterIndex = -1;
     fldGlobalBase.primaryMovingMatterIndex = -1;
+    fldGlobalBase.secondaryMovingMatterIndex = -1;
     if (display) {
         rsetOtOfs(0x5E);
         rsetTest(1, 5, 0x80, 1, 0, 0, 1, 2);
         rsetAlpha(0);
     }
-    position[0] = input[0] + carried[0];
-    position[1] = input[1] + carried[1] - 35.0f;
-    position[2] = input[2] + carried[2];
     previous[0] = fldResolvedPosition[0];
     previous[1] = fldResolvedPosition[1];
     previous[2] = fldResolvedPosition[2];
+    proposedX = input[0];
+    proposedY = input[1];
+    proposedZ = input[2];
+    proposedX += carried[0];
+    proposedY += carried[1];
+    proposedZ += carried[2];
+    proposedY -= 35.0f;
+    /* Commit carried horizontal coordinates before the adjusted height. */
+    position[0] = proposedX;
+    position[2] = proposedZ;
+    position[1] = proposedY;
     delta[0] = position[0] - previous[0];
     delta[1] = position[1] - previous[1];
     delta[2] = position[2] - previous[2];
-    if (MATH_VectorLength(delta) < 0.1f) {
+    if (MATH_VectorLength(delta) < 0.09999999404f) {
         input[0] = previous[0];
         input[1] = previous[1];
         input[2] = previous[2];
@@ -1429,20 +1436,21 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
     for (index = 0; index < fldValueRecordCount; index++) {
         fldMatterTable[index].hitflag = 0;
     }
+    fldGlobalBase.unk98 = -1;
+    fldGlobalBase.colorEffectSuppressed = 0;
+    fldGlobalBase.encounterOverrideId = 0;
     absoluteDelta[0] = ffabsf(position[0] - previous[0]);
     absoluteDelta[2] = ffabsf(position[2] - previous[2]);
     majorAxis = 0;
-    fldGlobalBase.unk98 = -1;
-    fldGlobalBase.encounterOverrideId = 0;
-    fldGlobalBase.colorEffectSuppressed = 0;
     if (!(absoluteDelta[2] < absoluteDelta[0])) {
         majorAxis = 2;
     }
     fldHitChkUnitElvOnly(input);
     for (pass = 0; pass < 2; pass++) {
         for (index = 0; index < fldValueRecordCount; index++) {
-            margin = 45.0f;
-            if (fldMatterTable[index].mode2D != 1) {
+            if (fldMatterTable[index].mode2D == 1) {
+                margin = 45.0f;
+            } else {
                 margin = 60.0f;
             }
             if (pass == 0) {
@@ -1589,14 +1597,17 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
                         projected[2] = position[2] - fldMatterTable[index].normal[2] * distance;
                         if (fldMatterTable[index].normal[1] < -0.75f) {
                             /* A floor: stand on it, a unit below the face. */
+                            f32 resolvedClearance;
                             fldGlobalBase.unkA4 = index;
                             if (floorRecord >= 0 && contactInset < absoluteDistance) {
                                 clearance = absoluteDistance;
                             }
-                            position[0] = projected[0] + fldMatterTable[index].normal[0] * clearance;
-                            position[1] = projected[1] + fldMatterTable[index].normal[1] * clearance - 1.0f;
-                            position[2] = projected[2] + fldMatterTable[index].normal[2] * clearance;
-                            if (clearance == margin) {
+                            /* One resolved distance owns this vector reconstruction. */
+                            resolvedClearance = clearance;
+                            position[0] = projected[0] + fldMatterTable[index].normal[0] * resolvedClearance;
+                            position[1] = projected[1] + fldMatterTable[index].normal[1] * resolvedClearance - 1.0f;
+                            position[2] = projected[2] + fldMatterTable[index].normal[2] * resolvedClearance;
+                            if (resolvedClearance == margin) {
                                 floorRecord = index;
                             }
                             if (fldMatterTable[index].matter != NULL) {
@@ -1609,7 +1620,17 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
                                 previous[2] += transform->pos[2];
                                 relative = 0;
                             }
-                            fldMatterTable[index].hitflag = 1;
+                            {
+                                /* Keep this real contact-store constant independent of
+                                 * the loop classifier's live 1. Qualified compiler
+                                 * traces otherwise reuse that value instead of the
+                                 * native local definition. No call crosses this
+                                 * binding; the halfword store is its only consumer.
+                                 * Allocation reconstruction, not original spelling.
+                                 * See docs/compiler-trace-area-refresh.md. */
+                                register u32 contactActive __asm__("$2") = 1;
+                                fldMatterTable[index].hitflag = contactActive;
+                            }
                             fldGlobalBase.targetX = position[0];
                             fldGlobalBase.targetY = position[1];
                             fldGlobalBase.targetZ = position[2];
@@ -1617,13 +1638,16 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
                             fldGlobalBase.unkAC = index;
                         } else if (!(distance < 0.0f)) {
                             /* A wall, approached from its front. */
+                            f32 resolvedClearance;
                             fldGlobalBase.unkA0 = index;
                             if (contactInset < absoluteDistance) {
                                 clearance = absoluteDistance;
                             }
-                            position[0] = projected[0] + fldMatterTable[index].normal[0] * clearance;
-                            position[1] = projected[1] + fldMatterTable[index].normal[1] * clearance;
-                            position[2] = projected[2] + fldMatterTable[index].normal[2] * clearance;
+                            /* One resolved distance owns this vector reconstruction. */
+                            resolvedClearance = clearance;
+                            position[0] = projected[0] + fldMatterTable[index].normal[0] * resolvedClearance;
+                            position[1] = projected[1] + fldMatterTable[index].normal[1] * resolvedClearance;
+                            position[2] = projected[2] + fldMatterTable[index].normal[2] * resolvedClearance;
                             if (fldMatterTable[index].matter != NULL) {
                                 transform = fldMatterTable[index].matter->poseset;
                                 position[0] += transform->pos[0];
@@ -1634,7 +1658,17 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
                                 previous[2] += transform->pos[2];
                                 relative = 0;
                             }
-                            fldMatterTable[index].hitflag = 1;
+                            {
+                                /* Keep this real contact-store constant independent of
+                                 * the loop classifier's live 1. Qualified compiler
+                                 * traces otherwise reuse that value instead of the
+                                 * native local definition. No call crosses this
+                                 * binding; the halfword store is its only consumer.
+                                 * Allocation reconstruction, not original spelling.
+                                 * See docs/compiler-trace-area-refresh.md. */
+                                register u32 contactActive __asm__("$2") = 1;
+                                fldMatterTable[index].hitflag = contactActive;
+                            }
                             fldGlobalBase.positionPending = inside;
                             fldGlobalBase.targetX = position[0];
                             fldGlobalBase.targetY = position[1];
@@ -1671,9 +1705,6 @@ void fldRefreshAreaStateFromPosition(f32 *input) {
     fldResolvedPosition[1] = position[1];
     fldResolvedPosition[2] = position[2];
 }
-#else
-INCLUDE_ASM(const s32, "game/code_00136EF8", fldRefreshAreaStateFromPosition);
-#endif
 
 void func_0013AA78(void) {
 }
