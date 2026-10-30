@@ -5920,7 +5920,6 @@ void fldApplyPendingCameraHeading(void) {
 }
 
 /* ASM turning: smooth angle toward targetAngle, clearing both request states on arrival. */
-#ifdef NON_MATCHING
 #include "common.h"
 #include "sdk_libc.h"
 #include "eff.h"
@@ -5948,6 +5947,8 @@ extern void dds3OnPoseSetFlag(dds3PoseSet_t *node, u32 flags);
  * transition flag. Vertical movement bypasses position damping. Upstream:
  * INCLUDE_ASM in field/fldFileResolver; written from the retail routine,
  * after its unit's fldUpdateFieldPlayerMovement. */
+extern const PcpVectorCopyF32 D_004132E0;
+
 void fldUpdateCameraHeadingTransition(void) {
     f32 position[4] __attribute__((aligned(16)));
     f32 smoothed[4] __attribute__((aligned(16)));
@@ -5955,128 +5956,139 @@ void fldUpdateCameraHeadingTransition(void) {
         u128 q;
         f32 f[4];
     } quaternion;
-    PcpVectorCopyF32 axis = {{0.0f, 1.0f, 0.0f, 1.0f}};
     f32 difference;
     f32 step;
     u32 player;
 
     memset(&quaternion, 0, sizeof(quaternion));
     quaternion.f[3] = 1.0f;
-    if (fldPlayerObject == 0) {
-        return;
-    }
-    if (fldGlobalBase.facingPointState == 2 || fldGlobalBase.headingState == 2) {
-        difference = fldAngleDifference(fldGlobalBase.angle, fldGlobalBase.targetAngle);
-        step = difference / 5.0f;
-        if (step < 0.0f) {
-            step = -step;
+    {
+        PcpVectorCopyF32 axis;
+        /* Preserve the native owned-axis copy after quaternion setup. */
+        axis = D_004132E0;
+        if (fldPlayerObject == 0) {
+            return;
         }
-        if (step < 2.0f) {
-            step = 2.0f;
-        }
-        if ((0.0f <= difference && difference <= step) || (difference <= 0.0f && -step <= difference)) {
-            fldGlobalBase.headingState = 0;
-            fldGlobalBase.facingPointState = 0;
-            difference = fldGlobalBase.targetAngle;
-        } else if (difference < 0.0f) {
-            difference = fldGlobalBase.angle - step;
+        if (fldGlobalBase.facingPointState == 2 || fldGlobalBase.headingState == 2) {
+            difference = fldAngleDifference(fldGlobalBase.angle, fldGlobalBase.targetAngle);
+            step = difference / 5.0f;
+            if (step < 0.0f) {
+                step = -step;
+            }
+            if (step < 2.0f) {
+                step = 2.0f;
+            }
+            if ((0.0f <= difference && difference <= step) || (difference <= 0.0f && -step <= difference)) {
+                fldGlobalBase.headingState = 0;
+                fldGlobalBase.facingPointState = 0;
+                difference = fldGlobalBase.targetAngle;
+            } else if (difference < 0.0f) {
+                difference = fldGlobalBase.angle - step;
+            } else {
+                difference = fldGlobalBase.angle + step;
+            }
+            fldGlobalBase.angle = difference;
+            VU0_LOAD_VF(vf10, axis.components);
+            FromRotation(fldGlobalBase.angle * 3.14f / 180.0f);
+            VU0_STORE_VF_UNCLOBBERED(vf10, quaternion.f);
+            dds3SetRotPoseSet((dds3Basic_t *)fldPlayerObject, &quaternion.q);
         } else {
-            difference = fldGlobalBase.angle + step;
-        }
-        fldGlobalBase.angle = difference;
-        VU0_LOAD_VF(vf10, axis.components);
-        FromRotation(fldGlobalBase.angle * 3.14f / 180.0f);
-        VU0_STORE_VF_UNCLOBBERED(vf10, quaternion.f);
-        dds3SetRotPoseSet((dds3Basic_t *)fldPlayerObject, &quaternion.q);
-    } else {
-        f32 angle;
+            f32 angle;
 
-        dds3GetRotPoseSet((dds3Basic_t *)fldPlayerObject);
-        angle = EulerAngleAxisY() * 180.0f / 3.14f;
-        fldGlobalBase.targetAngle = angle;
-        fldGlobalBase.angle = angle;
-    }
+            dds3GetRotPoseSet((dds3Basic_t *)fldPlayerObject);
+            angle = EulerAngleAxisY() * 180.0f / 3.14f;
+            fldGlobalBase.angle = angle;
+            fldGlobalBase.targetAngle = angle;
+        }
 
-    dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
-    VU0_STORE_VF(vf10, position);
-    fldGlobalBase.previousX = fldGlobalBase.x;
-    fldGlobalBase.previousY = fldGlobalBase.y;
-    fldGlobalBase.previousZ = fldGlobalBase.z;
-    fldGlobalBase.x = position[0];
-    fldGlobalBase.y = position[1];
-    fldGlobalBase.z = position[2];
-    dds3OnPoseSetFlag(((dds3Basic_t *)fldPlayerObject)->poseset, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
-    dds3OnPoseSetFlag(((dds3Basic_t *)fldPlayerObject)->poseset, OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION);
-    if (fldSecondarySceneObject != 0) {
-        dds3OnPoseSetFlag(((dds3Basic_t *)fldSecondarySceneObject)->poseset, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
-        dds3OnPoseSetFlag(((dds3Basic_t *)fldSecondarySceneObject)->poseset,
-                           OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION);
-    }
-    player = fldPlayerObject;
-    if (fldGlobalBase.verticalStepDirection != 0) {
-        SDF_VU0_COPYVECTOR(((dds3Basic_t *)player)->poseset->smoothedPosition, ((dds3Basic_t *)player)->poseset->pos);
-    } else {
-        fldMarkPrimaryObjectByPeerPresence();
-        PCP_COPY_VECTOR_F32(smoothed, ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition);
-        if (ffabsf(smoothed[0] - position[0]) < 1.0f) {
-            ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[0] = position[0];
-        } else {
-            ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[0] =
-                smoothed[0] + (position[0] - smoothed[0]) / 3.0f;
+        dds3GetPosPoseSet((dds3Basic_t *)fldPlayerObject);
+        VU0_STORE_VF(vf10, position);
+        fldGlobalBase.previousX = fldGlobalBase.x;
+        fldGlobalBase.previousY = fldGlobalBase.y;
+        fldGlobalBase.previousZ = fldGlobalBase.z;
+        fldGlobalBase.x = position[0];
+        fldGlobalBase.y = position[1];
+        fldGlobalBase.z = position[2];
+        dds3OnPoseSetFlag(((dds3Basic_t *)fldPlayerObject)->poseset, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
+        dds3OnPoseSetFlag(((dds3Basic_t *)fldPlayerObject)->poseset, OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION);
+        if (fldSecondarySceneObject != 0) {
+            dds3OnPoseSetFlag(((dds3Basic_t *)fldSecondarySceneObject)->poseset, OBJECT_TRANSFORM_FLAG_UPDATE_PENDING);
+            dds3OnPoseSetFlag(((dds3Basic_t *)fldSecondarySceneObject)->poseset,
+                               OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION);
         }
-        if (ffabsf(smoothed[1] - position[1]) < 1.0f) {
-            ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[1] = position[1];
-        } else {
-            ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[1] =
-                smoothed[1] + (position[1] - smoothed[1]) / 3.0f;
-        }
-        if (ffabsf(smoothed[2] - position[2]) < 1.0f) {
-            ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[2] = position[2];
-        } else {
-            ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[2] =
-                smoothed[2] + (position[2] - smoothed[2]) / 3.0f;
-        }
-        ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[3] = 1.0f;
         player = fldPlayerObject;
+        if (fldGlobalBase.verticalStepDirection != 0) {
+            SDF_VU0_COPYVECTOR(((dds3Basic_t *)player)->poseset->smoothedPosition, ((dds3Basic_t *)player)->poseset->pos);
+        } else {
+            fldMarkPrimaryObjectByPeerPresence();
+            PCP_COPY_VECTOR_F32(smoothed, ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition);
+            if (ffabsf(smoothed[0] - position[0]) < 1.0f) {
+                ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[0] = position[0];
+            } else {
+                ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[0] =
+                    smoothed[0] + (position[0] - smoothed[0]) / 3.0f;
+            }
+            if (ffabsf(smoothed[1] - position[1]) < 1.0f) {
+                ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[1] = position[1];
+            } else {
+                ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[1] =
+                    smoothed[1] + (position[1] - smoothed[1]) / 3.0f;
+            }
+            if (ffabsf(smoothed[2] - position[2]) < 1.0f) {
+                ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[2] = position[2];
+            } else {
+                ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[2] =
+                    smoothed[2] + (position[2] - smoothed[2]) / 3.0f;
+            }
+            ((dds3Basic_t *)fldPlayerObject)->poseset->smoothedPosition[3] = 1.0f;
+            player = fldPlayerObject;
+        }
+
+        if (fldSecondarySceneObject != 0) {
+            dds3PoseSet_t *source = ((dds3Basic_t *)player)->poseset;
+            dds3PoseSet_t *secondary = ((dds3Basic_t *)fldSecondarySceneObject)->poseset;
+
+            {
+                /* Keep the first real scalar transfer in f1. The ordinary
+                 * form starts local allocation at f0 and reverses the later
+                 * alternating transfer homes (32 differing words). This value
+                 * dies at the immediate store, before either setter call.
+                 * Compiler allocation reconstruction, not a hardware register
+                 * requirement or recovered original-source spelling; see
+                 * docs/compiler-trace-camera-heading-transfer.md. */
+                register f32 smoothedX __asm__("$f1") = source->smoothedPosition[0];
+                secondary->smoothedPosition[0] = smoothedX;
+            }
+            secondary->smoothedPosition[1] = source->smoothedPosition[1];
+            secondary->smoothedPosition[2] = source->smoothedPosition[2];
+            secondary->smoothedPosition[3] = source->smoothedPosition[3];
+            secondary->pos[0] = source->pos[0];
+            secondary->pos[1] = source->pos[1];
+            secondary->pos[2] = source->pos[2];
+            secondary->pos[3] = source->pos[3];
+            secondary->rotation[0] = source->rotation[0];
+            secondary->rotation[1] = source->rotation[1];
+            secondary->rotation[2] = source->rotation[2];
+            secondary->rotation[3] = source->rotation[3];
+            quaternion.f[0] = source->rotation[0];
+            quaternion.f[1] = source->rotation[1];
+            quaternion.f[2] = source->rotation[2];
+            quaternion.f[3] = source->rotation[3];
+            dds3SetPosPoseSet((dds3Basic_t *)fldSecondarySceneObject, (u128 *)position);
+            dds3SetRotPoseSet((dds3Basic_t *)fldSecondarySceneObject, &quaternion.q);
+            player = fldPlayerObject;
+        }
+
+        D_0038A610[0] = ((dds3Basic_t *)player)->poseset->smoothedPosition[0];
+        D_0038A610[1] = ((dds3Basic_t *)player)->poseset->smoothedPosition[1];
+        D_0038A610[2] = ((dds3Basic_t *)player)->poseset->smoothedPosition[2];
+        D_0038A610[3] = ((dds3Basic_t *)player)->poseset->smoothedPosition[3];
+        D_0038A610[4] = ((dds3Basic_t *)player)->poseset->rotation[0];
+        D_0038A610[5] = ((dds3Basic_t *)player)->poseset->rotation[1];
+        D_0038A610[6] = ((dds3Basic_t *)player)->poseset->rotation[2];
+        D_0038A610[7] = ((dds3Basic_t *)player)->poseset->rotation[3];
     }
-
-    if (fldSecondarySceneObject != 0) {
-        dds3PoseSet_t *source = ((dds3Basic_t *)player)->poseset;
-        dds3PoseSet_t *secondary = ((dds3Basic_t *)fldSecondarySceneObject)->poseset;
-
-        secondary->smoothedPosition[0] = source->smoothedPosition[0];
-        secondary->smoothedPosition[1] = source->smoothedPosition[1];
-        secondary->smoothedPosition[2] = source->smoothedPosition[2];
-        secondary->smoothedPosition[3] = source->smoothedPosition[3];
-        secondary->pos[0] = source->pos[0];
-        secondary->pos[1] = source->pos[1];
-        secondary->pos[2] = source->pos[2];
-        secondary->pos[3] = source->pos[3];
-        secondary->rotation[0] = source->rotation[0];
-        secondary->rotation[1] = source->rotation[1];
-        secondary->rotation[2] = source->rotation[2];
-        secondary->rotation[3] = source->rotation[3];
-        quaternion.f[0] = source->rotation[0];
-        quaternion.f[1] = source->rotation[1];
-        quaternion.f[2] = source->rotation[2];
-        quaternion.f[3] = source->rotation[3];
-        dds3SetPosPoseSet((dds3Basic_t *)fldSecondarySceneObject, (u128 *)position);
-        dds3SetRotPoseSet((dds3Basic_t *)fldSecondarySceneObject, &quaternion.q);
-        player = fldPlayerObject;
-    }
-
-    D_0038A610[0] = ((dds3Basic_t *)player)->poseset->smoothedPosition[0];
-    D_0038A610[1] = ((dds3Basic_t *)player)->poseset->smoothedPosition[1];
-    D_0038A610[2] = ((dds3Basic_t *)player)->poseset->smoothedPosition[2];
-    D_0038A610[3] = ((dds3Basic_t *)player)->poseset->smoothedPosition[3];
-    D_0038A610[4] = ((dds3Basic_t *)player)->poseset->rotation[0];
-    D_0038A610[5] = ((dds3Basic_t *)player)->poseset->rotation[1];
-    D_0038A610[6] = ((dds3Basic_t *)player)->poseset->rotation[2];
-    D_0038A610[7] = ((dds3Basic_t *)player)->poseset->rotation[3];
 }
-#else
-INCLUDE_ASM(const s32, "field/fldFileResolver", fldUpdateCameraHeadingTransition);
-#endif
 
 extern SdfFlagListParams fldCameraColorParameters[];
 extern FldCameraSetting *fldCameraSettings;
