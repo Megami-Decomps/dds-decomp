@@ -6841,106 +6841,11 @@ void effResetRenderResourceKind(EffQuadWork *work) {
     work->frame = 0;
 }
 
-#ifdef NON_MATCHING
-#include "eff_gs_packet.h"
-#include "eff_packet_params.h"
-#include "eff_copied_payload.h"
-#include "eff_class_ops.h"
-#include "eff_particle_shared_resource.h"
-#include "eff_camera_create_request.h"
-#include "eff_file_job_request.h"
-#include "eff_emitter_row.h"
-#include "fld.h"
-#include "btl_command.h"
-#include "sdf_quaternion.h"
-#include "btl_motion_transform.h"
-#include "sdf_asset_state.h"
-#include "btl_resource_browser.h"
-#include "sdf_packet_list.h"
-#include "eff_bill.h"
-#include "eff_bill_column_particle.h"
-#include "eff_ribbon_work.h"
-#include "eff_class_work_api.h"
-#include "fld_transfer_chunk.h"
-#include "eff_point_set.h"
-#include "eff_point_set_table.h"
-#include "eff_span_work.h"
-#include "common.h"
-#include "eff_emitter_type.h"
-#include "sdf_vu_rotation_axes.h"
-#include "file_pac.h"
-#include "eff_resource_bank_slot.h"
-#include "eff_matrix4.h"
-#include "eff_active_resource.h"
-#include "eff_update_flags.h"
-#include "eff_frame_asset.h"
-#include "eff_actor_transition_config.h"
-#include "eff_object_node.h"
-#include "eff_random_mod.h"
-#include "sdf_trig.h"
-#include "eff_random.h"
-#include "kwln_fade.h"
-#include "btl_stage_task_cleanup.h"
-#include "dds3obj.h"
-#include "dds3_world_primary.h"
-#include "sdf_packet_append.h"
-#include "sdf_dev_state.h"
-#include "bill_object_api.h"
-#include "sdf_chip.h"
-#include "eff_ref_obj.h"
-#include "sdf_resource.h"
-#include "eff_resource_slots.h"
-#include "dds3_path.h"
-#include "eff_transform.h"
-#include "btl_state.h"
-#include "evt_unit.h"
-#include "evt_unit_color_transition.h"
-#include "eff_blur.h"
-#include "eff_event_draw.h"
-#include "eff_curve.h"
-#include "file.h"
-#include "file_slot.h"
-#include "ee_mmi.h"
-#include "pcp_vu0.h"
-#include "eff_queue.h"
-#include "btl_resource_name.h"
-#include "mdl.h"
-#include "sdf.h"
-#include "sdf_draw.h"
-#include "fpu.h"
-#include "eff.h"
-#include "eff_billboard_work.h"
-#include "eff_resource_list.h"
-#include "file_request_api.h"
-#include "sdf_texture_file.h"
-#include "sdf_vu_matrix.h"
-#include "sdf_vu_matrix_multiply_api.h"
-#include "kwln_fade_timing.h"
-#include "sdf_asset_packets.h"
-#include "sdf_chunk.h"
-#include "sdf_packet_alloc.h"
-#include "eff_bill_cell_draw_work.h"
-#include "eff_anim.h"
-
-extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *);
-extern sdf3DPrimPolyParm_t effQuadPacketParams;
-
 extern sdfGrOt_t *effLayerSurfaces[];
-extern u32 effModelUpdateControlFlags;
 
-/* Per-frame draw of a textured effect quad: samples the color, alpha, size and
- * angle tracks at the current frame, takes the rectangle and texture
- * coordinates from the billboard handle or, without one, from the sampled
- * animation segment, builds the four rotated corners in the XZ plane at the
- * work's position and orientation, and submits the asset, optional GS test
- * setup and restore packets and the vertex draw packet to the surface; then
- * advances the frame unless effect frames are paused (DDS1's always
- * advances). Upstream: INCLUDE_ASM in game/code_002DE248; written from
- * the retail routine. It differs from retail in floating-point register
- * allocation and moves, in the placement of one constant load, and in clearing
- * the shared draw parameters' pointers to its arrays once the draw packet holds
- * copies: retail leaves them pointing into the dead frame, whose place natively
- * differs between builds. */
+/* Sample and submit a rotated four-corner effect quad. The packet builder
+ * consumes the borrowed XYZ and UV arrays synchronously; the emitted position
+ * stream does not include the unused W lanes. */
 void effDrawQuadWork(EffQuadWork *work) {
     BillSnapshot snapshot;
     f32 positions[4][4];
@@ -6949,15 +6854,16 @@ void effDrawQuadWork(EffQuadWork *work) {
     sdfDrawTag_t *list;
     s32 duration, frame;
     u32 color;
-    f32 scale, angle, x, y, halfWidth, halfHeight, cosine, sine;
-    f32 right, bottom, top, left;
-    f32 invHeight, invWidth;
+    f32 scale, angle, x, y, widthWork, heightWork, cosine, sine;
+    f32 cornerX, cornerY;
     EffGsPacket *packet;
-    sdfTexHandle_t *texture;
     s32 width, height;
+
     duration = work->source.duration;
     frame = work->frame;
-    if (frame >= duration) return;
+    if (frame >= duration) {
+        return;
+    }
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     VU0_LOAD_VF(vf10, work->orientation);
@@ -6966,77 +6872,86 @@ void effDrawQuadWork(EffQuadWork *work) {
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
     sdf3DPrimLinkTm(list, 0);
-    effQuadPacketParams.uv = (u32 *)texcoords;
     effQuadPacketParams.vertex = (u128 *)positions;
-    color = effSampleColorAlphaTracks(&work->source.colorTrack, &work->source.alphaTrack, frame, duration);
-    eeUnpackRGBAWord(work->color, 0x3C000000);
-    VU0_MOVE_VF(vf11, vf10);
-    eeUnpackRGBAWord(color, 0x3C000000);
-    VU0_MUL(vf10, vf10, vf11);
-    effQuadPacketParams.color = eePackRGBAWord(128.0f);
-    scale = effSampleScalarCurve(&work->source.sizeTrack.curve, frame, duration) * (work->source.sizeScale * work->scale);
+    effQuadPacketParams.uv = &texcoords[0][0];
+    color = effSampleColorAlphaTracks(&work->source.colorTrack,
+        &work->source.alphaTrack, frame, duration);
+    {
+        u32 unitBits = 0x3C000000;
+        eeUnpackRGBAWord(work->color, unitBits);
+        VU0_MOVE_VF(vf11, vf10);
+        eeUnpackRGBAWord(color, unitBits);
+        VU0_MUL(vf10, vf10, vf11);
+        effQuadPacketParams.color = eePackRGBAWord(128.0f);
+    }
+    scale = effSampleScalarCurve(&work->source.sizeTrack.curve, frame, duration) *
+        (work->source.sizeScale * work->scale);
     angle = effSampleScalarCurve(&work->source.angleTrack.curve, frame, duration);
     if (work->billHandle != NULL) {
         dds3BillboardSetAnimKey(work->billHandle, frame);
         billCopyCurrentRecordToSnapshot(work->billHandle, &snapshot);
     } else {
         effSampleAnimSet(work->reference, frame, &sample);
-        texture = effAssignSampledSegmentReference(work->reference, effLayerSurfaces[work->source.alphaTrack.surfaceIndex], &sample);
-        height = texture->height << 4;
-        width = texture->width << 4;
-        snapshot.texture = texture;
-        snapshot.uv.components[2] = width;
-        snapshot.uv.components[4] = width;
-        snapshot.uv.components[5] = height;
+        snapshot.texture = effAssignSampledSegmentReference(work->reference,
+            effLayerSurfaces[work->source.alphaTrack.surfaceIndex], &sample);
+        width = snapshot.texture->width << 4;
+        height = snapshot.texture->height << 4;
         angle += sample.angle;
-        snapshot.uv.components[7] = height;
         snapshot.uv.components[0] = 0;
         snapshot.uv.components[1] = 0;
+        snapshot.uv.components[2] = width;
         snapshot.uv.components[3] = 0;
+        snapshot.uv.components[4] = width;
+        snapshot.uv.components[5] = height;
         snapshot.uv.components[6] = 0;
+        snapshot.uv.components[7] = height;
         snapshot.x = 0.0f;
         snapshot.y = 0.0f;
-        snapshot.halfHeight = ((s32)(height * sample.scaleY) >> 5) * 0.0625f;
-        snapshot.halfWidth = ((s32)(width * sample.scaleX) >> 5) * 0.0625f;
+        width = (s32)((f32)width * sample.scaleX);
+        height = (s32)((f32)height * sample.scaleY);
+        snapshot.halfHeight = (f32)(height >> 5) * 0.0625f;
+        snapshot.halfWidth = (f32)(width >> 5) * 0.0625f;
     }
-    halfWidth = snapshot.halfWidth * scale;
+    widthWork = snapshot.halfWidth * scale;
     x = snapshot.x * scale;
     y = snapshot.y * scale;
-    halfHeight = snapshot.halfHeight * scale;
+    heightWork = snapshot.halfHeight * scale;
     cosine = sdfCos(angle);
     sine = sdfSin(angle);
-    right = x + halfWidth;
-    bottom = y + halfHeight;
-    top = y - halfHeight;
-    left = x - halfWidth;
-    invHeight = 1.0f / (snapshot.texture->height << 4);
-    invWidth = 1.0f / (snapshot.texture->width << 4);
     positions[0][1] = 0.0f;
     positions[1][1] = 0.0f;
     positions[3][1] = 0.0f;
     positions[2][1] = 0.0f;
-    positions[0][0] = right * cosine - bottom * sine;
-    positions[0][2] = right * sine + bottom * cosine;
-    positions[1][0] = left * cosine - bottom * sine;
-    positions[1][2] = left * sine + bottom * cosine;
-    positions[2][0] = right * cosine - top * sine;
-    positions[2][2] = right * sine + top * cosine;
-    positions[3][0] = left * cosine - top * sine;
-    positions[3][2] = left * sine + top * cosine;
-    texcoords[0][0] = snapshot.uv.components[2] * invWidth;
-    texcoords[0][1] = snapshot.uv.components[3] * invHeight;
-    texcoords[1][0] = snapshot.uv.components[0] * invWidth;
-    texcoords[1][1] = snapshot.uv.components[1] * invHeight;
-    texcoords[2][0] = snapshot.uv.components[4] * invWidth;
-    texcoords[2][1] = snapshot.uv.components[5] * invHeight;
-    texcoords[3][0] = snapshot.uv.components[6] * invWidth;
-    texcoords[3][1] = snapshot.uv.components[7] * invHeight;
+    cornerX = x + widthWork;
+    cornerY = y + heightWork;
+    positions[0][0] = cornerX * cosine - cornerY * sine;
+    positions[0][2] = cornerX * sine + cornerY * cosine;
+    cornerX = x - widthWork;
+    positions[1][0] = cornerX * cosine - cornerY * sine;
+    positions[1][2] = cornerX * sine + cornerY * cosine;
+    cornerY = y - heightWork;
+    positions[3][0] = cornerX * cosine - cornerY * sine;
+    positions[3][2] = cornerX * sine + cornerY * cosine;
+    cornerX = x + widthWork;
+    positions[2][0] = cornerX * cosine - cornerY * sine;
+    positions[2][2] = cornerX * sine + cornerY * cosine;
+    /* Geometry dimensions are finished; normalize the texture rows next. */
+    widthWork = 1.0f / (snapshot.texture->width << 4);
+    heightWork = 1.0f / (snapshot.texture->height << 4);
+    texcoords[1][0] = snapshot.uv.components[0] * widthWork;
+    texcoords[1][1] = snapshot.uv.components[1] * heightWork;
+    texcoords[0][0] = snapshot.uv.components[2] * widthWork;
+    texcoords[0][1] = snapshot.uv.components[3] * heightWork;
+    texcoords[3][0] = snapshot.uv.components[6] * widthWork;
+    texcoords[3][1] = snapshot.uv.components[7] * heightWork;
+    texcoords[2][0] = snapshot.uv.components[4] * widthWork;
+    texcoords[2][1] = snapshot.uv.components[5] * heightWork;
     sdfSetAssetPrimaryTextureAddress(work->assetHandle, snapshot.texture);
     sdf3DPrimLinkMat(list, work->assetHandle, 0);
     if (work->source.noSetup == 0) {
         packet = sdfGrAllocPacketBuff(0x30);
-        packet->vifTag = 0x5000000210000000ULL;
         packet->dmaTag = 2;
+        packet->vifTag = 0x5000000210000000ULL;
         packet->gifTag = 0x1000000000008001ULL;
         packet->registerList = 0xE;
         packet->registerValue = 0x31801;
@@ -7044,27 +6959,22 @@ void effDrawQuadWork(EffQuadWork *work) {
         sdfDrawTagLink(list, (u32)packet);
     }
     sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&effQuadPacketParams));
-    /* Only the call above reads them (see the header). */
-    effQuadPacketParams.uv = NULL;
-    effQuadPacketParams.vertex = NULL;
     if (work->source.noSetup == 0) {
         packet = sdfGrAllocPacketBuff(0x30);
-        packet->vifTag = 0x5000000210000000ULL;
         packet->dmaTag = 2;
+        packet->vifTag = 0x5000000210000000ULL;
         packet->gifTag = 0x1000000000008001ULL;
         packet->registerList = 0xE;
         packet->registerValue = 0x51801;
         packet->registerAddress = 0x47;
         sdfDrawTagLink(list, (u32)packet);
     }
-    effLayerSurfaces[work->source.alphaTrack.surfaceIndex]->append(effLayerSurfaces[work->source.alphaTrack.surfaceIndex], list);
+    effLayerSurfaces[work->source.alphaTrack.surfaceIndex]->append(
+        effLayerSurfaces[work->source.alphaTrack.surfaceIndex], list);
     if (!(effModelUpdateControlFlags & EFF_MODEL_UPDATE_PAUSE_EFFECT_FRAME_ADVANCE)) {
         work->frame++;
     }
 }
-#else
-INCLUDE_ASM(const s32, "game/code_002DE248", effDrawQuadWork);
-#endif
 
 void effCopyRenderResourcePosition(EffQuadWork *work, const f32 *source) {
     SDF_VU0_COPYVECTOR(work->position, source);
