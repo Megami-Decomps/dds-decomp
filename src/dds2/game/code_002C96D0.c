@@ -5105,8 +5105,8 @@ FileJobPayload *fileDuplicateJob(FileJobPayload *request) {
     return job;
 }
 
-/* No return on the path where no command state exists: retail hands back
- * whatever v0 held. */
+/* NULL when the command file does not open: retail's v0 is sdfFileOpen's
+ * null result there. */
 FileJobPayload *fileJobCreateFromCommandState(const char *entry) {
     sdfFileCmdHandle_t *command;
     s32 size;
@@ -5125,6 +5125,7 @@ FileJobPayload *fileJobCreateFromCommandState(const char *entry) {
         sdfMemFreeDirect(allocation);
         return job;
     }
+    return NULL;
 }
 
 u32 fileJobSerializedSize(FileJobPayload *job) {

@@ -13656,7 +13656,10 @@ s32 effUpdatePartsListEditor(s32 unused) {
         previousCursor = capacity - 1;
     }
     previousScale = effFileQueue->scaleMultiplier;
-    effEditorCurrentMenu = (s32)btlDebugMenuSetupNoOp((void *)(u32)effEditorCurrentMenu);
+    btlDebugMenuSetupNoOp((void *)(u32)effEditorCurrentMenu);
+    /* The stub is empty: retail stores the v0 it leaves, the effFileQueue
+     * just loaded for the scale (0x002B6094). */
+    effEditorCurrentMenu = (s32)(u32)effFileQueue;
     if ((EffQueuedFileObject *)(u32)effEditorCurrentMenu == &effQueuePostureMenu) {
         if (((EffQueuedFileObject *)(u32)effEditorCurrentMenu)->flags & 8) {
             changed = 1;

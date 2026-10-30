@@ -3809,6 +3809,7 @@ u32 evtViewerStoreCommandInSelectedField(u32 unused0, u32 unused1, evtViewerInfo
         evtViewerPopHistory(viewer);
         return 0;
     }
+    return 0;
 }
 
 /* Registered viewer-command handler with no action; return 0. */
@@ -3827,6 +3828,7 @@ u32 evtViewerStoreCommandInEntryWord(u32 unused0, u32 unused1, evtViewerInfo_t *
         evtViewerPopHistory(viewer);
         return 0;
     }
+    return 0;
 }
 
 s32 evtEventViewerCommitGroupSelection(s32 unused0, s32 unused1, evtViewerInfo_t *viewer) {
@@ -4139,6 +4141,7 @@ u32 evtViewerClearPendingNodeAndPushHistory(u32 unused0, u32 unused1, evtViewerI
         evtViewerPushCommandHistory(0xa, 0x9c, 0x54, viewer);
         return 0;
     }
+    return 0;
 }
 
 /* Restore default effect parameters for the selected timeline key. */

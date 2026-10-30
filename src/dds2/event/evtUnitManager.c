@@ -1739,8 +1739,10 @@ ScrCommandResult evtCommand_MODEL_BE(void) {
     if (motionSeTask != 0) {
         dds3LinkProcess(evtSearchEventPack(scrGetIntPara(0)), motionSeTask);
     }
-    /* The original success path ends in this void call, without a return. */
-    scrSetIntReturnValue(modelKey);
+    /* Retail's result is the setter's, the context it set the value in
+     * (nonzero, so CodeFunc_Comm takes the command as done); the header
+     * declares it void for this unit's other calls. */
+    return (ScrCommandResult)(u32)((struct scrProcessWork_s *(*)(ScrVmInteger))scrSetIntReturnValue)(modelKey);
 }
 
 ScrCommandResult evtCommand_MODEL_POS(void) {

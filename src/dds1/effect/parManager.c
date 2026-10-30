@@ -657,12 +657,15 @@ u32 dds3ParticleColorBlend(u32 colorA, u32 colorB) {
     return blended[0];
 }
 
-/* Create through the selected dispatch entry and record its index; returns void. */
-void dds3ParticleCreate(s32 dispatchIndex, void *creationData) {
+/* Create through the selected dispatch entry and record its index. The object is the
+ * result of the effect table's create slot, which dds3EffectCreate keeps as its
+ * node's instance. */
+ParObj *dds3ParticleCreate(s32 dispatchIndex, void *creationData) {
     ParObj *createdObject;
 
     createdObject = dds3ParticleFuncTable[dispatchIndex].createOrCopy(creationData);
     createdObject->dispatchIndex = dispatchIndex;
+    return createdObject;
 }
 
 /* Invoke the selected destructor with the existing empty argument list. */
