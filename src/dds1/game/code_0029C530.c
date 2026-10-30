@@ -3637,17 +3637,6 @@ void billReleaseTrailNode(s32 work) {
     sdfMemFreeDirect(((EffBillFrameState *)work)->allocation);
 }
 
-#ifdef NON_MATCHING
-#include "common.h"
-#include "eff_bill.h"
-#include "eff_random.h"
-#include "sdf_trig.h"
-#include "pcp_vu0.h"
-#include "ee_mmi.h"
-
-extern EffRandState effSharedRandomState[];
-extern u8 effOnesVector[];
-
 /* Advances a trail billboard effect's instances by a frame: spawns waiting
  * ones (each length, radius and tilt randomized at its start and end, with a
  * per-frame step between), ages, moves and spins live ones, writes their five
@@ -3655,8 +3644,8 @@ extern u8 effOnesVector[];
  * widened at both ends) and colors with the fade-in and fade-out alpha, and
  * retires expired ones (to wait for a respawn, or to rest). On a burst start
  * an entry takes a random age, which retail passes through a float before
- * storing it. Upstream: INCLUDE_ASM in DDS1's game/code_0029C530 and DDS2's
- * game/code_002DE248, the same routine; written from the retail routine. */
+ * storing it. Both game versions use the same operations and layout.
+ * Side-alpha store placement preserves the native compiler allocation. */
 void billAdvanceTrailInstances(EffClassWork *work) {
     EffBillTrailFrameConfig *config = (EffBillTrailFrameConfig *)work->payload;
     EffBillFrameState *resource;
@@ -3855,23 +3844,25 @@ void billAdvanceTrailInstances(EffClassWork *work) {
             packed = eePackRGBAWord(128.0f);
             /* The far end takes color B with a zero alpha byte; the root's
              * center color A with alpha 0xFF on odd entries and 0x40 on even
-             * ones, and its sides only the fade alpha, of 128 or of 255. */
+             * ones, and its sides only the fade alpha, of 128 or of 255.
+             * Keep each side-alpha pair in its parity branch: those real
+             * pre-merge uses preserve the native allocation and age schedule. */
             if (item & 1) {
                 colors[3] = packed | 0xFF000000;
                 packed = (u32)(scale * 128.0f) << 24;
+                colors[2] = packed;
+                colors[4] = packed;
             } else {
                 colors[3] = packed | 0x40000000;
                 packed = (u32)(scale * 255.0f) << 24;
+                colors[2] = packed;
+                colors[4] = packed;
             }
-            colors[2] = packed;
-            colors[4] = packed;
             entry->age = age + 1;
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "game/code_0029C530", billAdvanceTrailInstances);
-#endif
+
 
 void billUpdateTrailDrawColorAndTransform(u8 *work) {
     u8 *config = ((BillCellDrawWork *)work)->config;
