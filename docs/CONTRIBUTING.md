@@ -127,11 +127,14 @@ not prove that we recovered the original source spelling or variable names.
   This alternative does not allow unrelated dead stores, dummy computations,
   cancelling arithmetic or new side effects. All normal affected-owner,
   owned-data, full-build and test requirements remain unchanged.
-- **Native color initialization in the battle-scroll pair only.** In DDS1
-  `func_001B3300` and DDS2 `func_001BDF20`, ordinary initialization of the real,
-  later-used draw-color array may reproduce the native 16-byte initialization
-  even though every initial value is overwritten before its first read. This
-  is an explicit project exception, not evidence of original source spelling.
+- **Native color initialization in two named battle-panel pairs only.** In
+  DDS1 `func_001B3300` and DDS2 `func_001BDF20` (battle-scroll), and in DDS1
+  `btlDrawPhaseChangePanelStrips` at `0x001B19F8` and DDS2
+  `btlDrawPhaseChangePanelStrips` at `0x001BC618` (phase-change strips), ordinary
+  initialization of the real, later-used draw-color array may reproduce the
+  native 16-byte initialization even though every initial value is overwritten
+  before its first read. This is an explicit project exception for these four
+  functions only, not evidence of original source spelling.
   Independently verify the exact native values, storage, extent and ordering in
   both games, and the overwrite-before-read property on every reaching path.
   Retain qualified ordinary/probed compiler and initializer-removal controls;
