@@ -127,7 +127,18 @@ not prove that we recovered the original source spelling or variable names.
   This alternative does not allow unrelated dead stores, dummy computations,
   cancelling arithmetic or new side effects. All normal affected-owner,
   owned-data, full-build and test requirements remain unchanged.
-- These three are the only exceptions to the dead-variable and dead-store ban.
+- **Native color initialization in the battle-scroll pair only.** In DDS1
+  `func_001B3300` and DDS2 `func_001BDF20`, ordinary initialization of the real,
+  later-used draw-color array may reproduce the native 16-byte initialization
+  even though every initial value is overwritten before its first read. This
+  is an explicit project exception, not evidence of original source spelling.
+  Independently verify the exact native values, storage, extent and ordering in
+  both games, and the overwrite-before-read property on every reaching path.
+  Retain qualified ordinary/probed compiler and initializer-removal controls;
+  all normal semantic, affected-owner/data, both-game build and test gates apply.
+  This permits no extra array, invented consumer, assembly workaround, or other
+  dead initialization or redundant operation. All other rules remain unchanged.
+- These four are the only exceptions to the dead-variable and dead-store ban.
 - **Scratch scalar reuse across disjoint phases.** An ordinary local may hold
   successive values, including values with different semantic roles, when all
   of these hold:
