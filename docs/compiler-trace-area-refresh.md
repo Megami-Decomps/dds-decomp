@@ -12,7 +12,7 @@ The three real area-state resets occur before axis computation, with the source 
 
 Each solid branch captures `resolvedClearance` **after** its actual floor/wall clamp. That one resolved distance is used to reconstruct all three coordinates and, for floors, test the margin. The separately required original contact value is preserved. In the prior qualified RTL, the first multiplication already used promoted clearance pseudo 1137, but the later multiplication reloaded the addressable output after the position-X store. Capturing the resolved geometric quantity avoids that reload without fake aliasing, qualifiers, or a synthetic lifetime. The query's independent return status remains ignored: classification still uses its output clearance, including the original NaN-sensitive comparisons.
 
-The movement threshold is the actual native float `0.09999999404f`, not a rounded `0.1f`. The existing documented native snapshot-store oddities and final unused length calculation are preserved, not introduced by this change. DDS1 has a different layout and is qualified separately; this note does not claim identical twin behavior.
+The movement threshold has native bits `0x3DCCCCCC` (approximately `0.09999999404`). The source spells it `0.09999999404f`; pinned cc1 also emits those same bits for `0.1f` because its decimal float conversion truncates. This spelling is not a semantic correction or evidence of the original source literal. The existing documented native snapshot-store oddities and final unused length calculation are preserved, not introduced by this change. DDS1 has a different layout and is qualified separately; this note does not claim identical twin behavior.
 
 ## Two real contact-store values
 
