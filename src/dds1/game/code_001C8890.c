@@ -4087,7 +4087,7 @@ BtlTask *btlFindUnitByActor(BtlUnit *target) {
     return 0;
 }
 
-extern void btlBossDebugPrintfN(s32, s32, s32, s32, ...);
+extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
 
 extern char D_003BB5E0[];
 
@@ -4108,7 +4108,7 @@ void btlDebugPrintActionOrder(s32 x, s32 y) {
     if ((controller->battleFlags & 4) == 0) {
         return;
     }
-    btlBossDebugPrintfN(x, y, 0, (s32)D_003A37C8);
+    btlBossDebugPrintfN(x, y, 0, D_003A37C8);
     primary = controller->groupPrimary;
     secondary = controller->groupSecondary;
     tertiary = controller->groupTertiary;
@@ -4144,10 +4144,10 @@ void btlDebugPrintActionOrder(s32 x, s32 y) {
             continue;
         }
         if (controller->slots[i].remaining == 100) {
-            btlBossDebugPrintfN(x, y + (i + 1) * 12, color, (s32)D_003BB5E0,
+            btlBossDebugPrintfN(x, y + (i + 1) * 12, color, D_003BB5E0,
                                D_00359B28[task->state].name);
         } else {
-            btlBossDebugPrintfN(x, y + (i + 1) * 12, color, (s32)D_003BB5E8,
+            btlBossDebugPrintfN(x, y + (i + 1) * 12, color, D_003BB5E8,
                                D_00359B28[task->state].name);
         }
     }

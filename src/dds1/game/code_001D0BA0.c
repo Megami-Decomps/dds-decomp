@@ -272,7 +272,7 @@ extern s32 btlCountTasksForOwner(u64);
 extern BtlRuntimeTask *btlCreateSelectedEffectUpdateTask(BtlUnit *);
 
 extern BtlRuntimeTask *btlCreateUnitExitFadeTask(BtlUnit *, BtlUnitExitFadeMode);
-extern void btlBossDebugPrintfN(s32, s32, s32, s32, ...);
+extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
 
 BtlTask *btlFindUnitByActor(BtlUnit *target);
 
@@ -6108,7 +6108,7 @@ extern char D_003A3DF0[];
 
 extern char D_003A3E08[];
 
-extern void btlBossDebugPrintfN(s32, s32, s32, s32, ...);
+extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
 
 void btlDebugPrintWorldTransform(s32 x, s32 y) {
     dds3Basic_t *object;
@@ -6116,11 +6116,11 @@ void btlDebugPrintWorldTransform(s32 x, s32 y) {
     if (((BtlState *)btlGetRuntime())->battleFlags & 2) {
         object = dds3GetActiveCameraSceneBasic(dds3GetActiveScene());
         if (object != 0) {
-            btlBossDebugPrintfN(x, y, 0, (s32)D_003A3DF0,
+            btlBossDebugPrintfN(x, y, 0, D_003A3DF0,
                                 (double)object->poseset->pos[0],
                                 (double)object->poseset->pos[1],
                                 (double)object->poseset->pos[2]);
-            btlBossDebugPrintfN(x, y + 12, 0, (s32)D_003A3E08,
+            btlBossDebugPrintfN(x, y + 12, 0, D_003A3E08,
                                 (double)object->poseset->rotation[0],
                                 (double)object->poseset->rotation[1],
                                 (double)object->poseset->rotation[2],
