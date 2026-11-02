@@ -4,9 +4,9 @@
   "extension_vaddr": "0x00412000",
   "alignment": "0x1000",
   "heap_alignment": "0x80",
-  "expected_replacement_symbols": 167,
-  "expected_shifted_replacement_symbols": 88,
-  "expected_shifted_symbol_relocations": 1394,
+  "expected_replacement_symbols": 184,
+  "expected_shifted_replacement_symbols": 106,
+  "expected_shifted_symbol_relocations": 1429,
   "expected_cross_replacement_relocations": 126,
   "expected_repaired_relocation_words": 0,
   "retail_static_end": "0x0040C5F0",
@@ -123,31 +123,10 @@
       ]
     },
     {
-      "retail_object": "build/dds1/src/dds1/game/code_00289A08.o",
-      "object": "build/dds1/dev/code_00289A08.o",
-      "expected_symbols": 13,
-      "expected_shifted_symbols": 11,
-      "fallback_symbols": [],
-      "retained_sections": [
-        {
-          "section": ".rodata",
-          "size": 0
-        },
-        {
-          "section": ".data",
-          "size": 0
-        },
-        {
-          "section": ".bss",
-          "size": 0
-        }
-      ]
-    },
-    {
-      "retail_object": "build/dds1/src/dds1/game/code_00289D50.o",
-      "object": "build/dds1/dev/code_00289D50.o",
-      "expected_symbols": 1,
-      "expected_shifted_symbols": 0,
+      "retail_object": "build/dds1/src/dds1/mc/mcManager.o",
+      "object": "build/dds1/dev/mcManager.o",
+      "expected_symbols": 31,
+      "expected_shifted_symbols": 29,
       "fallback_symbols": [],
       "retained_sections": [
         {
@@ -393,24 +372,14 @@
       "expected_target_relocations": 26
     },
     {
-      "object": "build/dds1/src/dds1/game/code_00289A08.o",
+      "object": "build/dds1/src/dds1/mc/mcManager.o",
       "section": ".text",
-      "old_size": "0x348",
-      "new_size": "0x368",
+      "old_size": "0x744",
+      "new_size": "0x764",
       "alignment": 8,
       "old_vaddr": "0x00289A08",
-      "expected_relocations": 34,
-      "expected_target_relocations": 86
-    },
-    {
-      "object": "build/dds1/src/dds1/game/code_00289D50.o",
-      "section": ".text",
-      "old_size": "0x18",
-      "new_size": "0x18",
-      "alignment": 8,
-      "old_vaddr": "0x00289D50",
-      "expected_relocations": 1,
-      "expected_target_relocations": 1
+      "expected_relocations": 52,
+      "expected_target_relocations": 121
     },
     {
       "object": "build/dds1/src/dds1/game/code_00288E70.o",

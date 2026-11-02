@@ -157,19 +157,17 @@ unchanged while increasing the appended segment's memory size by exactly
 
 The complete FileManager subsystem is the first stateful replacement. Its
 manager and callback-driver text, read-only strings, and `fileQueueHead`
-state move together. The callback driver is three retail objects per title: the
-head unit (`game/code_00288E70` in DDS1, `game/code_002C83F0` in DDS2), the
-thirteen-function `fileReq*` middle unit (`game/code_00289A08`,
-`game/code_002C8F88`), and the one-function tail (`game/code_00289D50`,
-`game/code_002C92D0`). Each is a separate paired replacement, and the middle
-unit is compiled with the same `-fno-optimize-sibling-calls` as its retail
-object because `dev_cc` receives the per-unit flags from `cflags.txt`. The head
+state move together. The callback driver is two retail objects per title: the
+head unit (`game/code_00288E70` in DDS1, `game/code_002C83F0` in DDS2) and
+`mc/mcManager`, whose first thirteen functions are the card-request part. Each
+is a separate paired replacement. `sdfMcFuncGetInfo` keeps its tail call a
+`jal` by taking a local's address, so `mcManager` needs no extra flag. The head
 unit retains a source-built `0x10` small-data
 section at its retail address: an eight-byte reentrancy guard record followed
 by the eight-byte task name. Both source-recovered leading callbacks rebuild
 their four guard accesses as audited `HI16`/`LO16` relocations under `-G0`.
-Under `-G0` the three driver texts grow from `0xB98`/`0x348`/`0x18` to
-`0xBB4`/`0x368`/`0x18` bytes. The remaining assembly callbacks
+Under `-G0` the two driver texts grow from `0xB98`/`0x744` to
+`0xBB4`/`0x764` bytes. The remaining assembly callbacks
 contain six GP-relative accesses in each title. The retained-section audit
 proves those physical references at the same fallback-function offsets, exact
 retained objects, and an unchanged `_gp` instead of silently splitting the
@@ -195,11 +193,11 @@ references become ordinary relocated address pairs in development, leaving
 zero physical GP references to the moved heap state. The three units retain
 three declared assembly fallbacks per title.
 
-Together the replacements cover 167 DDS1 and 168 DDS2 exported symbols; 88
+Together the replacements cover 184 DDS1 and 185 DDS2 exported symbols; 106
 definitions per title change their relative offsets. The verifier follows
-1,394/1,433 external relocation sites targeting shifted definitions, 126/128
-relocations between replacement objects, and 2,776/2,972 total relocation
-targets into moved content. The moved sections retain 764/780 relocation
+1,429/1,468 external relocation sites targeting shifted definitions, 126/128
+relocations between replacement objects, and 2,810/3,006 total relocation
+targets into moved content. The moved sections retain 781/797 relocation
 entries. All counts are asserted by the version descriptors.
 
 Replacement-owned code and read-only data may change size and contents. A
