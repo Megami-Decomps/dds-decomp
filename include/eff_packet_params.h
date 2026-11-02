@@ -3,6 +3,6 @@
 
 #include "common.h"
 
-#include "libsdf.h"
+#include "sdf_3d_prim_poly_parm.h"
 
 #endif
