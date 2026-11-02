@@ -1,82 +1,132 @@
-#include "sdk_ps2.h"
-#include "sdf_request.h"
+#include "fpu.h"
 #include "common.h"
-#include "sdf_file_existence_api.h"
-#include "sdf_console_packet.h"
-#include "sif_rpc_client_prefix.h"
-#include "sdf_thread_workspace_api.h"
-#include "sdf_alarm.h"
-#include "sdf.h"
-#include "sdf_semaphore_api.h"
-#include "sdf_timer.h"
-#include "sdf_chip.h"
-#include "sdf_heap_api.h"
-#include "sdf_draw.h"
-#include "sdf_packet_alloc.h"
-#include "sdf_sif_command.h"
-#include "sdf_dev_event.h"
-#include "sdf_dev_protocol.h"
-#include "sdf_dev_state.h"
-#include "sdf_dev_path_prefix.h"
-#include "sdf_dev_worker.h"
-#include "sdf_dev_start_load_api.h"
-#include "sdf_disc_file_record.h"
-#include "btl.h"
-#include "sdf_debug_api.h"
+#include "libsdf.h"
+#include "ps2asm.h"
 
-extern void sceDevctl(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
+extern s32 iSignalSema(s32 aSemaId);
 
-extern u8 D_00438B50[];
+enum SdfFileIOCmdStat {
+    SDF_FILE_CMD_STAT_INIT = 0,
+    SDF_FILE_CMD_STAT_DORMANT = 1,
+    SDF_FILE_CMD_STAT_OPEN = 2,
+    SDF_FILE_CMD_STAT_SEEK = 3,
+    SDF_FILE_CMD_STAT_READ = 4,
+    SDF_FILE_CMD_STAT_WRITE = 5,
+    SDF_FILE_CMD_STAT_CLOSE = 6,
+    SDF_FILE_CMD_STAT_SUSPEND = 7,
+    SDF_FILE_CMD_STAT_DONE = 8,
+    SDF_FILE_CMD_STAT_ERROR = 9,
+    SDF_FILE_CMD_STAT_CANCEL = 10
+};
 
-extern u8 D_00438B58[];
+enum SdfFileIOCmd {
+    SDF_FILE_CMD_NONE = 0,
+    SDF_FILE_CMD_READOPEN = 1,
+    SDF_FILE_CMD_WRITEOPEN = 2,
+    SDF_FILE_CMD_SEEK = 3,
+    SDF_FILE_CMD_FILESIZE = 4,
+    SDF_FILE_CMD_READ = 5,
+    SDF_FILE_CMD_WRITE = 6,
+    SDF_FILE_CMD_CLOSE = 7,
+    SDF_FILE_CMD_READFILE = 8,
+    SDF_FILE_CMD_WRITEFILE = 9
+};
 
-extern u8 sdfDev9Ready;
+enum sdf_tex_resource {
+    SDF_TEX_RESOURCE_FREE = 0,
+    SDF_TEX_RESOURCE_FRAME = 1,
+    SDF_TEX_RESOURCE_TEXTURE = 2,
+    SDF_TEX_RESOURCE_CLUT = 3,
+    SDF_TEX_RESOURCE_KNOWN_MODE_COUNT = 4
+};
 
-extern s32 sceSifLoadStartModule(const char *modulePath, s32 flags, void *moduleArguments, s32 *resident);
+enum sdf_stream_output {
+    SDF_STREAM_OUTPUT_RGBA32 = 0,
+    SDF_STREAM_OUTPUT_RGBA16 = 1,
+    SDF_STREAM_OUTPUT_RGBA16_DITHERED = 2
+};
 
-void sdfHddPowerOffTh(s32 semaphore) {
-    s32 status;
+enum sdf_stream_playback {
+    SDF_STREAM_PLAYBACK_INITIAL = 0,
+    SDF_STREAM_PLAYBACK_FIRST_COMPLETION = 1,
+    SDF_STREAM_PLAYBACK_CADENCED = 2
+};
 
-    for (;;) {
-        WaitSema(semaphore);
-        sceDevctl(D_00438B50, 0x5003, 0, 0, 0, 0);
-        sceDevctl(D_00438B58, 0x4806, 0, 0, 0, 0);
-        sceCdPowerOff(&status);
-    }
-}
-
-void sdfHddPowerOffHandler(void *semaphore) {
-    iSignalSema((s32)semaphore);
-}
+extern s32 (*p2sdSmgBuf)(void);
 
 extern u8 sdfHddValid;
 
-extern char sdfDevHddModuleArguments[];
+extern u8 sdfDev9Ready;
 
-extern char sdfDevPfsModuleArguments[];
+#define D_00551990 D_00438B50
+#define D_00551998 D_00438B58
+#define D_005519A0 D_00438B60
+#define D_0058FFC0 D_00477180
+#define D_00529B60 sdfDevHddModuleArguments
+#define D_00529B70 sdfDevPfsModuleArguments
 
-extern char D_00477180[];
+extern char D_00551990[];
 
-extern char D_00438B60[];
+extern char D_00551998[];
+
+extern char D_005519A0[];
+
+extern char D_00529B60[];
+
+extern char D_00529B70[];
+
+extern u8 D_0058FFC0[];
+
+#include "sdk_libc.h"
+
+extern s32 WaitSema(s32 aSemaId);
+
+#include "sdk_libkernl.h"
+
+extern s32 sceCdPowerOff(s32 *result);
 
 extern void sdfDev9LoadModule(void);
 
-extern s32 CreateThreadSimple(void (*entryAddress)(), void *workspace, s32 stackBytes, s32 priority);
+extern s32 sceSifLoadStartModule(const char *path, s32 arglen, char *args, s32 *result);
 
-typedef void (*SdfPowerOffCallback)(void *);
+extern s32 sdfCreateSema(s32 initial, s32 max, s32 option);
 
-extern SdfPowerOffCallback sceCdPOffCallback(SdfPowerOffCallback, void *);
+extern s32 CreateThreadSimple(void *entry, void *stack, s32 stackSize, s32 priority);
+
+typedef void (*cdvdPowerCallback_t)(void *argument);
+extern cdvdPowerCallback_t sceCdPOffCallback(cdvdPowerCallback_t handler, void *argument);
 
 extern s32 sceFsInit(void);
 
-extern s32 sceMount(const char *, const char *, s32, const void *, s32);
+extern s32 sceMount(char *mountPoint, char *device, s32 flag, void *arg, s32 arglen);
 
-/* Load the HDD/PFS dev modules and mount path before enabling PFS debug mode. */
-void sdfHddInit(char *path) {
+void sdfHddPowerOffHandler(void *aArg);
+
+/* DDS has no printf here. */
+void sdfHddPowerOffTh(s32 aSemaId)
+{
+    s32 result;
+
+    for (;;) {
+        WaitSema(aSemaId);
+        sceDevctl(D_00551990, 0x5003, NULL, 0, NULL, 0);
+        sceDevctl(D_00551998, 0x4806, NULL, 0, NULL, 0);
+        sceCdPowerOff(&result);
+    }
+}
+
+void sdfHddPowerOffHandler(void *aArg)
+{
+    iSignalSema((s32)aArg);
+}
+
+/* DDS takes the mount path and has no printf. */
+void sdfHddInit(char *aPath)
+{
     char buffer[0x100];
     s32 resident;
     s32 result;
-    s32 semaphore;
+    s32 sema;
     s32 thread;
 
     sdfHddValid = 0;
@@ -88,23 +138,24 @@ void sdfHddInit(char *path) {
     if (result < 0 || resident != 0) {
         return;
     }
-    result = sceSifLoadStartModule("cdrom0:\\IRX\\HDD.IRX;1", 0xC, sdfDevHddModuleArguments, &resident);
+    result = sceSifLoadStartModule("cdrom0:\\IRX\\HDD.IRX;1", 0xC, D_00529B60, &resident);
     if (result < 0 || resident != 0) {
         return;
     }
-    result = sceSifLoadStartModule("cdrom0:\\IRX\\PFS.IRX;1", 0x12, sdfDevPfsModuleArguments, &resident);
+    result = sceSifLoadStartModule("cdrom0:\\IRX\\PFS.IRX;1", 0x12, D_00529B70, &resident);
     if (result < 0 || resident != 0) {
         return;
     }
-    semaphore = sdfCreateSema(0, 1, 0);
-    thread = CreateThreadSimple(sdfHddPowerOffTh, D_00477180, 0x800, 1);
-    _StartThread(thread, semaphore);
-    sceCdPOffCallback(sdfHddPowerOffHandler, (void *)semaphore);
+    sema = sdfCreateSema(0, 1, 0);
+    thread = CreateThreadSimple(sdfHddPowerOffTh, D_0058FFC0, 0x800, 1);
+    _StartThread(thread, (void *)sema);
+    sceCdPOffCallback(sdfHddPowerOffHandler, (void *)sema);
     sceFsInit();
-    sprintf(buffer, "hdd0:%s,", path);
-    sceMount(D_00438B60, buffer, 0, 0, 0);
+    sprintf(buffer, "hdd0:%s,", aPath);
+    sceMount(D_005519A0, buffer, 0, NULL, 0);
     sdfHddValid = 1;
 }
+
 INCLUDE_SDATA(const s32, "sdf/sdfHdd", D_00438B50);
 
 INCLUDE_SDATA(const s32, "sdf/sdfHdd", D_00438B58);
@@ -114,4 +165,3 @@ INCLUDE_SDATA(const s32, "sdf/sdfHdd", D_00438B60);
 INCLUDE_SDATA(const s32, "sdf/sdfHdd", sdfDev9Ready);
 
 INCLUDE_SDATA(const s32, "sdf/sdfHdd", sdfCdClock);
-
