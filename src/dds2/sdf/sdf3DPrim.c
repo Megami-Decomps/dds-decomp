@@ -43,7 +43,7 @@
 
 #define SDF_VIF_MSCAL_COMMAND 0x14000000
 
-extern u8 D_0040B730[];
+extern u8 sdf3DPrimIdentityTm[];
 
 extern vu8 sdfFrameId;
 
@@ -55,7 +55,7 @@ void sdf3DPrimLinkResetTm(sdfDrawTag_t *packetList,
         allocatePacket = sdfGrAllocPacketBuff;
     }
     referencePacket = (u64 *)allocatePacket(0x20);
-    referencePacket[0] = ((u64)((u32)D_0040B730 & SDF_DMA_ADDRESS_MASK) << 32) | 0x30000008;
+    referencePacket[0] = ((u64)((u32)sdf3DPrimIdentityTm & SDF_DMA_ADDRESS_MASK) << 32) | 0x30000008;
     referencePacket[1] = 0x6C07C000ULL << 32;
     *(u128 *)&referencePacket[2] = 0;
     sdfDrawTagLinkRef(packetList, (u32)referencePacket);
@@ -102,7 +102,7 @@ extern f32 sdfFaceDivSoften;
 
 extern f32 sdfFaceDivBias;
 
-extern u32 D_0040B6B0[];
+extern u32 sdf3DPrimDefaultFaceIndex[];
 
 /* Serialize the requested VIF attribute streams into one aligned DMA packet. */
 u32 *sdf3DPrimMakePoly(sdf3DPrimPolyParm_t *request) {
@@ -165,7 +165,7 @@ u32 *sdf3DPrimMakePoly(sdf3DPrimPolyParm_t *request) {
     *cursor++ = (primitive & 0xFFFF) | (format << 16);
     *cursor++ = (stripWords << 16) | 0x6E00C001;
     if (request->faceIndex == NULL) {
-        memcpy(cursor, D_0040B6B0, stripWords * 4);
+        memcpy(cursor, sdf3DPrimDefaultFaceIndex, stripWords * 4);
     } else {
         memcpy(cursor, request->faceIndex, stripWords * 4);
     }
