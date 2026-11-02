@@ -74,19 +74,19 @@ extern char D_00438B00[]; /* cdrom */
 
 extern u8 D_00438AE0;
 
-extern u8 D_00438B1E;
+extern u8 sdfFileCmdDefaultDevice;
 
 extern sdfFileCmdHandle_t *D_00438B08;
 
-extern sdfFileCmdHandle_t *D_00438B0C;
+extern sdfFileCmdHandle_t *sdfFileCmdFreeList;
 
-extern s16 D_00438B1C;
+extern s16 sdfFileCmdFreeCount;
 
 extern sdfFileCmdHandle_t *D_00438B14;
 
 extern sdfFileCmdHandle_t *D_00438B18;
 
-extern s16 D_00438B10;
+extern s16 sdfFileCmdCount;
 
 extern char D_00438B28[]; /* cdrom0: */
 

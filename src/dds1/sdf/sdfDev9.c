@@ -27,11 +27,11 @@ extern char D_003B4690[]; /* "cdrom0:\\IRX\\DEV9.IRX;1 resident fail.\n", follow
 
 extern u8 sdfFileCmdThreadPrioCheckCounter;
 
-extern u8 D_003BD42E;
+extern u8 sdfFileCmdDefaultDevice;
 
 extern u8 D_003BD3F0;
 
-extern s16 D_003BD420;
+extern s16 sdfFileCmdCount;
 
 extern sdfFileCmdHandle_t *D_003BD424;
 
@@ -79,9 +79,9 @@ extern char D_003BD410[];
 
 extern sdfFileCmdHandle_t *D_003BD418;
 
-extern sdfFileCmdHandle_t *D_003BD41C;
+extern sdfFileCmdHandle_t *sdfFileCmdFreeList;
 
-extern s16 D_003BD42C;
+extern s16 sdfFileCmdFreeCount;
 
 extern char D_003BD438[]; /* cdrom0: */
 

@@ -346,7 +346,7 @@ extern u8 sdfDevReadSectorBuffer[SDF_DEV_DISC_SECTOR_BYTES];
 
 extern void sdfCdImageClose(void);
 
-s32 sdfDevOpenDiscFileAndGetSize(const char *name) {
+s32 sdfCdImageLoadStart(const char *name) {
     s32 result;
     u32 readLocation[4];
     SdfDiscFileRecord *file;

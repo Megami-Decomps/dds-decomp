@@ -246,20 +246,20 @@ void sdfFileSetDefaultSrc(s32 worker) {
     sdfDevSetFallbackDeviceWorker(worker);
 }
 
-extern u8 D_00438B1E;
+extern u8 sdfFileCmdDefaultDevice;
 
 /* Select the worker used when a file path has no explicit device prefix. */
 void sdfDevSetFallbackDeviceWorker(s32 worker) {
-    D_00438B1E = worker;
+    sdfFileCmdDefaultDevice = worker;
 }
 
 extern void sdfFileCmdStartThread(s32 index);
 
 extern sdfFileCmdHandle_t *D_00438B08;
 
-extern sdfFileCmdHandle_t *D_00438B0C;
+extern sdfFileCmdHandle_t *sdfFileCmdFreeList;
 
-extern s16 D_00438B1C;
+extern s16 sdfFileCmdFreeCount;
 
 /* Queue a request on the global list and on its worker's list; wake the worker when its list was empty. */
 void sdfFileCmdAllocHandle(sdfFileCmdHandle_t *state) {
@@ -273,14 +273,14 @@ void sdfFileCmdAllocHandle(sdfFileCmdHandle_t *state) {
     if (worker->threadId < 0) {
         sdfFileCmdStartThread(state->workerIndex);
     }
-    state->previous = D_00438B0C;
-    if (D_00438B0C != NULL) {
-        D_00438B0C->next = state;
+    state->previous = sdfFileCmdFreeList;
+    if (sdfFileCmdFreeList != NULL) {
+        sdfFileCmdFreeList->next = state;
     } else {
         D_00438B08 = state;
     }
     last = worker->last;
-    D_00438B0C = state;
+    sdfFileCmdFreeList = state;
     state->workerPrev = last;
     if (last != NULL) {
         last->workerNext = state;
@@ -289,7 +289,7 @@ void sdfFileCmdAllocHandle(sdfFileCmdHandle_t *state) {
         wake = 1;
     }
     worker->last = state;
-    D_00438B1C += 1;
+    sdfFileCmdFreeCount += 1;
     if (interrupts != 0) {
         EIntr();
     }
@@ -314,5 +314,5 @@ INCLUDE_SDATA(const s32, "sdf/sdfFile", D_00438B00);
 
 INCLUDE_SDATA(const s32, "sdf/sdfFile", D_00438B08);
 
-INCLUDE_SDATA(const s32, "sdf/sdfFile", D_00438B0C);
+INCLUDE_SDATA(const s32, "sdf/sdfFile", sdfFileCmdFreeList);
 

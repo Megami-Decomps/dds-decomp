@@ -49,9 +49,9 @@ extern SdfFileCommandQueueResult sdfFileCmdFileSize(sdfFileCmdHandle_t *state);
 
 extern u8 sdfFileCmdThreadPrioCheckCounter;
 
-extern u8 D_003BD42E;
+extern u8 sdfFileCmdDefaultDevice;
 
-extern s16 D_003BD420;
+extern s16 sdfFileCmdCount;
 
 extern sdfFileCmdHandle_t *D_003BD424;
 
@@ -85,15 +85,15 @@ s32 sdfCdImageGetCurrFileSize(void);
 
 /* Consume up to size disc-file bytes, retaining a partial sector; return the byte count. */ s32 sdfCdImageRead(void *buffer, s32 byteCount);
 
-s32 sdfDevOpenDiscFileAndGetSize(const char *name);
+s32 sdfCdImageLoadStart(const char *name);
 
 extern s32 sdfFileCmdSeek(sdfFileCmdHandle_t *state, s32 seekOffset, s32 seekOrigin);
 
 extern sdfFileCmdHandle_t *D_003BD418;
 
-extern sdfFileCmdHandle_t *D_003BD41C;
+extern sdfFileCmdHandle_t *sdfFileCmdFreeList;
 
-extern s16 D_003BD42C;
+extern s16 sdfFileCmdFreeCount;
 
 void sdfFileCmdStartThread(s32 index);
 
@@ -117,7 +117,7 @@ void sdfFileCmdUnlink(sdfFileCmdHandle_t *state) {
     } else {
         next->previous = prev;
     }
-    D_003BD420 -= 1;
+    sdfFileCmdCount -= 1;
     if (interrupts != 0) {
         EIntr();
     }
@@ -142,7 +142,7 @@ void sdfFileCmdDequeue(sdfFileCmdHandle_t *state) {
         prev->next = next;
     }
     if (next == NULL) {
-        D_003BD41C = prev;
+        sdfFileCmdFreeList = prev;
     } else {
         next->previous = prev;
     }
@@ -167,12 +167,12 @@ void sdfFileCmdDequeue(sdfFileCmdHandle_t *state) {
     }
     D_003BD428 = state;
     state->next = NULL;
-    D_003BD420++;
-    D_003BD42C--;
+    sdfFileCmdCount++;
+    sdfFileCmdFreeCount--;
     if (interrupts != 0) {
         EIntr();
     }
-    if (D_003BD420 >= SDF_DEV_CACHE_EVICTION_THRESHOLD) {
+    if (sdfFileCmdCount >= SDF_DEV_CACHE_EVICTION_THRESHOLD) {
         sdfFileCmdUnlink(D_003BD424);
     }
     if (worker->first != NULL) {
@@ -451,7 +451,7 @@ void sdfFileCdImageCmdThread(DevWorkerEntry *worker) {
         switch (operation) {
         case SDF_DEV_OPERATION_OPEN_READ - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_OPENING;
-            result = sdfDevOpenDiscFileAndGetSize(state->resolvedPath);
+            result = sdfCdImageLoadStart(state->resolvedPath);
             if (result < 0) {
                 sdfFileCmdFinish(state, 0);
                 continue;
@@ -502,7 +502,7 @@ void sdfFileCdImageCmdThread(DevWorkerEntry *worker) {
 
         case SDF_DEV_OPERATION_READ_BUFFER - SDF_DEV_OPERATION_OPEN_READ:
             state->state = SDF_DEV_STATE_OPENING;
-            result = sdfDevOpenDiscFileAndGetSize(state->resolvedPath);
+            result = sdfCdImageLoadStart(state->resolvedPath);
             if (result < 0) {
                 sdfFileCmdFinish(state, 0);
                 continue;
@@ -648,7 +648,7 @@ SdfFileWorkerIndex sdfFileCmdAnalyzeFileName(const char *path, char **resolvedPa
         }
         name = path + prefixLength;
     } else {
-        worker = D_003BD42E;
+        worker = sdfFileCmdDefaultDevice;
         name = path;
     }
     *resolvedPath = sdfFileCmdMakeRealFileName(name, worker);
@@ -885,15 +885,15 @@ void sdfFileCmdStartThread(s32 index) {
         _StartThread(thread, (s32)worker);
     }
 }
-INCLUDE_SDATA(const s32, "sdf/sdfFileIO", D_003BD420);
+INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdCount);
 
 INCLUDE_SDATA(const s32, "sdf/sdfFileIO", D_003BD424);
 
 INCLUDE_SDATA(const s32, "sdf/sdfFileIO", D_003BD428);
 
-INCLUDE_SDATA(const s32, "sdf/sdfFileIO", D_003BD42C);
+INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdFreeCount);
 
-INCLUDE_SDATA(const s32, "sdf/sdfFileIO", D_003BD42E);
+INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdDefaultDevice);
 
 INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdThreadPrioCheckCounter);
 

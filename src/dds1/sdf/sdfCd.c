@@ -341,7 +341,7 @@ SdfDiscFileRecord *sdfCdImageSearchFile(
     return node;
 }
 
-s32 sdfDevOpenDiscFileAndGetSize(const char *name) {
+s32 sdfCdImageLoadStart(const char *name) {
     s32 result;
     u32 readLocation[4];
     SdfDiscFileRecord *file;

@@ -9272,7 +9272,7 @@
 0x0033DD90	sdfDevReadDiscUntilComplete	inferred	Retries disc reads until requested byte count succeeds and advances position. [names_reviewed8.tsv]
 0x0033DE60	sdfDevFindDiscFileRecordByCdromPath	inferred	Converts a cdrom path to ISO form, retries CD file search until available, opens and measures the file, stores its record size, writes the sector output and optional success flag, and returns the shared file record. Caller flow invokes this before continuing disc resource lookup. [DDS2 Binary Ninja HLIL and caller references; paired DDS1 implementation, 2026-10-14]
 0x0033E008	sdfCdImageSearchFile	inferred	SMT3HD name via SLUS_209.11 0x002BD9C8, reloc-identical; was sdfDevFindDiscFileRecordByPath
-0x0033E1C0	sdfDevOpenDiscFileAndGetSize	inferred	Finds the disc file, selects its seek path and returns its byte size. [names_reviewed8.tsv]
+0x0033E1C0	sdfCdImageLoadStart	inferred	SMT3HD name via SLUS_209.11 0x002BDB80, sdfCd twin; was sdfDevOpenDiscFileAndGetSize
 0x0033E248	sdfCdImageRead	inferred	SMT3HD name via SLUS_209.11 0x002BDBD0, reloc-identical; was sdfDevReadDiscFileBytes
 0x0033E490	sdfCdImageClose	inferred	SMT3HD name via SLUS_209.11 0x002BDE18, reloc-identical; was sdfServicePendingOperationUnderSemaphore
 0x0033E4C8	sdfCdImageCheckExist	inferred	SMT3HD name via SLUS_209.11 0x002BDE50, reloc-identical; was sdfPacketExists
@@ -10883,6 +10883,10 @@
 0x00438AC8	sdfDiscRequestPending	inferred	high confidence; src/dds2/game/code_0033D5D0.c sdfDevSignalPendingSemaphore(): if (D_00438AC8 != 0) { Instruction-aligned data counterpart of DDS1 D_003BD3D8 in the matched sdfDevSignalPendingSemaphore() twin. Pending marker cleared after signaling the disc-request semaphore. [names_reviewed26.tsv]
 0x00438AD8	sdfDiscType	inferred	confidence=high; matched_users=src/dds2/game/code_0033D5D0.c:sdfDevWaitForDisc, src/dds2/game/code_0033D5D0.c:sdfInitDeviceSemaphores; Device initialization passes this type to the CD driver; disc-wait logic selects expected CD status from it. Retail address correspondence is independently corroborated by at least two paired functions. [names_qp9.tsv]
 0x00438AE4	sdfFileSemaId	inferred	SMT3HD data name via SLUS_209.11 0x00551924, 9 agreeing references; was sdfFileSemaId
+0x00438B0C	sdfFileCmdFreeList	inferred	SMT3HD name via SLUS_209.11 0x0055194C, sdfFileIO twin; was D_00438B0C
+0x00438B10	sdfFileCmdCount	inferred	SMT3HD name via SLUS_209.11 0x00551950, sdfFileIO twin; was D_00438B10
+0x00438B1C	sdfFileCmdFreeCount	inferred	SMT3HD name via SLUS_209.11 0x0055195C, sdfFileIO twin; was D_00438B1C
+0x00438B1E	sdfFileCmdDefaultDevice	inferred	SMT3HD name via SLUS_209.11 0x0055195E, sdfFileIO twin; was D_00438B1E
 0x00438B1F	sdfFileCmdThreadPrioCheckCounter	inferred	SMT3HD data name via SLUS_209.11 0x0055195F, 3 agreeing references; was sdfFileCmdThreadPrioCheckCounter
 0x00438B20	sdfFileCmdThreadPrio	inferred	SMT3HD data name via SLUS_209.11 0x00551960, 3 agreeing references; was sdfFileCmdThreadPrio
 0x00438B24	sdfFileCmdDefaultCreateMode	inferred	SMT3HD data name via SLUS_209.11 0x00551964, 2 agreeing references; was sdfFileCmdDefaultCreateMode
@@ -11068,7 +11072,7 @@
 0x004391B4	sdfCdImageCurrActive	inferred	SMT3HD data name via SLUS_209.11 0x00552104, 4 agreeing references; was sdfCdImageCurrActive
 0x004391B8	sdfCdImageFd	inferred	SMT3HD data name via SLUS_209.11 0x00552108, 4 agreeing references; was sdfCdImageFd
 0x004391BC	sdfDiscReadPosition	inferred	high confidence; src/dds2/game/code_0033D5D0.c sdfDevReadDiscUntilComplete(): sdfCdStStart(D_004391BC); Instruction-aligned data counterpart of DDS1 D_003BDA5C in the matched sdfDevReadDiscUntilComplete() twin. Current disc request/read position is reused after retry and advanced by the completed read size. [names_reviewed26.tsv]
-0x004391C0	sdfDiscReadMode	inferred	confidence=medium; matched_users=src/dds2/game/code_0033D5D0.c:sdfDevOpenDiscFileAndGetSize, src/dds2/game/code_0033D5D0.c:sdfCdStStart; Disc-file lookup writes this mode and seek setup translates it into the CD read options. Retail address correspondence is independently corroborated by at least two paired functions. [names_qp9.tsv]
+0x004391C0	sdfDiscReadMode	inferred	confidence=medium; matched_users=src/dds2/game/code_0033D5D0.c:sdfCdImageLoadStart, src/dds2/game/code_0033D5D0.c:sdfCdStStart; Disc-file lookup writes this mode and seek setup translates it into the CD read options. Retail address correspondence is independently corroborated by at least two paired functions. [names_qp9.tsv]
 0x004391C4	sdfDiscRequestSemaphore	inferred	high confidence; src/dds2/game/code_0033D5D0.c sdfDevSignalPendingSemaphore(): SignalSema(D_004391C4); Instruction-aligned data counterpart of DDS1 D_003BDA64 in the matched sdfDevSignalPendingSemaphore() twin. Semaphore signaled when a gated disc request is pending. [names_reviewed26.tsv]
 0x004391C8	sdfFileLengthWork	inferred	SMT3HD data name via SLUS_209.11 0x00552114, 2 agreeing references; was sdfFileLengthWork
 0x004391CC	sdfFileSeekWork	inferred	SMT3HD data name via SLUS_209.11 0x00552118, 2 agreeing references; was sdfFileSeekWork

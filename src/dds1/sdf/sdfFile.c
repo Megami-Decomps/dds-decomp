@@ -27,7 +27,7 @@ extern SdfFileCommandQueueResult sdfFileCmdFileSize(sdfFileCmdHandle_t *state);
 
 #define SDF_DEV_REPLY_SEMAPHORE_LIMIT 0x80
 
-extern u8 D_003BD42E;
+extern u8 sdfFileCmdDefaultDevice;
 
 extern u8 D_003BD3F0;
 
@@ -243,14 +243,14 @@ void sdfFileSetDefaultSrc(s32 worker) {
 
 /* Select the worker used when a file path has no explicit device prefix. */
 void sdfDevSetFallbackDeviceWorker(s32 worker) {
-    D_003BD42E = worker;
+    sdfFileCmdDefaultDevice = worker;
 }
 
 extern sdfFileCmdHandle_t *D_003BD418;
 
-extern sdfFileCmdHandle_t *D_003BD41C;
+extern sdfFileCmdHandle_t *sdfFileCmdFreeList;
 
-extern s16 D_003BD42C;
+extern s16 sdfFileCmdFreeCount;
 
 void sdfFileCmdStartThread(s32 index);
 
@@ -266,14 +266,14 @@ void sdfFileCmdAllocHandle(sdfFileCmdHandle_t *state) {
     if (worker->threadId < 0) {
         sdfFileCmdStartThread(state->workerIndex);
     }
-    state->previous = D_003BD41C;
-    if (D_003BD41C != NULL) {
-        D_003BD41C->next = state;
+    state->previous = sdfFileCmdFreeList;
+    if (sdfFileCmdFreeList != NULL) {
+        sdfFileCmdFreeList->next = state;
     } else {
         D_003BD418 = state;
     }
     last = worker->last;
-    D_003BD41C = state;
+    sdfFileCmdFreeList = state;
     state->workerPrev = last;
     if (last != NULL) {
         last->workerNext = state;
@@ -282,7 +282,7 @@ void sdfFileCmdAllocHandle(sdfFileCmdHandle_t *state) {
         wake = 1;
     }
     worker->last = state;
-    D_003BD42C += 1;
+    sdfFileCmdFreeCount += 1;
     if (interrupts != 0) {
         EIntr();
     }
@@ -307,5 +307,5 @@ INCLUDE_SDATA(const s32, "sdf/sdfFile", D_003BD410);
 
 INCLUDE_SDATA(const s32, "sdf/sdfFile", D_003BD418);
 
-INCLUDE_SDATA(const s32, "sdf/sdfFile", D_003BD41C);
+INCLUDE_SDATA(const s32, "sdf/sdfFile", sdfFileCmdFreeList);
 
