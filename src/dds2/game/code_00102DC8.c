@@ -1234,8 +1234,8 @@ extern void eglInit(void);
 /* Select display mode 1, rebuild both projection blocks and reset draw-vector state. */
 void dds3InitDrawEnv(void) {
     sdfGrSetScreen(1);
-    sdfCameraBuildProjection(&dds3ScreenParam.camera);
-    sdfCameraBuildProjection(&D_0037F980.camera);
+    sdf3DMakeScreenParam(&dds3ScreenParam.camera);
+    sdf3DMakeScreenParam(&D_0037F980.camera);
     kwlnInitializeFrameDrawPackets(0);
     kwlnInitializeFrameDrawPackets(1);
     dds3InitZClearDrawTag();
@@ -1267,7 +1267,7 @@ void dds3InitRenderDrawEnv(void) {
     dds3RenderTexId.buffers[0] = D_00435CC4;
     dds3RenderTexId.buffers[1] = 0;
     dds3RenderTexId.buffers[2] = D_0040B290.buffers[2];
-    sdfCameraBuildProjection(&D_0037F7B0.camera);
+    sdf3DMakeScreenParam(&D_0037F7B0.camera);
     for (i = 0; i != 2; i++) {
         sdfDrawTagInit(&D_00380870[i].heldTexture.list);
         sdfGrSetDrawEnv(&D_00380870[i].heldTexture.scene, &dds3RenderTexId, 0);

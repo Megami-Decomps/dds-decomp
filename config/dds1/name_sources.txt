@@ -8649,7 +8649,7 @@
 0x002E15D0	sdf3DSetCamera	inferred	SMT3HD name via SLUS_209.11 0x002B9F28, reloc-identical; was sdfConsCacheTransformedNode
 0x002E1708	sdf3DSetDefaultLight	inferred	SMT3HD name via SLUS_209.11 0x002BA060, shared-hash-in-run; was sdfConsSetDefaultFirstReference
 0x002E1710	sdf3DSetDefaultFog	inferred	SMT3HD name via SLUS_209.11 0x002BA068, shared-hash-in-run; was sdfConsSetDefaultSecondReference
-0x002E1718	sdfCameraBuildProjection	inferred	builds perspective matrix in vf28-31 from near/far/width/height/aspect (or fov), stores it at +0x30 and fills the screen offsets at +0x70..+0x8C [names_M64_EffVu2.tsv]
+0x002E1718	sdf3DMakeScreenParam	inferred	SMT3HD name via SLUS_209.11 0x002BA070, sdf3D twin; was sdfCameraBuildProjection
 0x002E1938	sdf3DMakeLightParallelPacket	inferred	SMT3HD name via SLUS_209.11 0x002BA250, reloc-identical; was sdfBuildLightingPacket
 0x002E1BF0	sdf3DMakeFogPacket	inferred	SMT3HD name via SLUS_209.11 0x002BA508, byte-identical; was sdfConsBuildFrustumPacket
 0x002E1CC8	sdf3DMakeDirectRefPacket	inferred	SMT3HD name via SLUS_209.11 0x002BA5E0, byte-identical; was sdfConsInitDmaPacketHeader
@@ -9354,6 +9354,9 @@
 0x00315BA0	sdfDebugFontTex	inferred	SMT3HD name via SLUS_209.11 0x002E6E50, sdfDevCons reference; was D_00315BA0
 0x003200A0	vu0MicroPacket	inferred	SMT3HD name via SLUS_209.11 0x002F1350, sdfCoreDraw reference; was D_003200A0
 0x00320630	vu1MicroPacket	inferred	SMT3HD name via SLUS_209.11 0x002F18E0, sdfCoreDraw reference; was D_00320630
+0x003241D8	vu1Tex0Slot0	inferred	SMT3HD name via SLUS_209.11 0x002F5488, sdf3D data twin; was D_003241D8
+0x00324214	vu1Tex0Slot1	inferred	SMT3HD name via SLUS_209.11 0x002F54C4, sdf3D data twin; was D_00324214
+0x00324290	vu1Tex0Slot2	inferred	SMT3HD name via SLUS_209.11 0x002F5540, sdf3D data twin; was D_00324290
 0x003243C0	kwlnPadButtonHoldCounters	inferred	confidence=high; Per-button hold durations, incremented while pressed and reset on release; first frame selects the fresh flag, and durations >=8 on even frames select repeat. DDS2 twin 0x0037F3C0; existing u32[4][16], native 0x100-byte allocation and padding unchanged. No import or active ASM reader. [PurD readability data b5; native/matched-C twin; identifier-only]
 0x003244C0	kwlnPadStickHoldCounters	inferred	confidence=high; Per-port/per-stick hold durations, incremented while magnitude >=64 and reset inside the dead zone; first-frame and even-frame repeat flags use the counter. DDS2 twin 0x0037F4C0; existing u32[2][2], native 0x10-byte allocation and padding unchanged. No import or active ASM reader. [PurD readability data b5; native/matched-C twin; identifier-only]
 0x003244D0	dds3PadButtonPrev	inferred	SMT3HD data name via SLUS_209.11 0x002F57D0, 2 agreeing references; was dds3PadButtonPrev
@@ -10228,6 +10231,7 @@
 0x003BD35C	sdfFaceDivBias	inferred	SMT3HD data name via SLUS_209.11 0x005518AC, 8 agreeing references; was sdfFaceDivBias
 0x003BD374	sdf3DLightDefault	inferred	SMT3HD data name via SLUS_209.11 0x005518B0, 2 agreeing references; was sdf3DLightDefault
 0x003BD378	sdf3DFogDefault	inferred	SMT3HD data name via SLUS_209.11 0x005518B4, 2 agreeing references; was sdf3DFogDefault
+0x003BD380	sdf3DSpecularTex	inferred	SMT3HD name via SLUS_209.11 0x005518BC, sdf3D data twin; was D_003BD380
 0x003BD388	sdf3DRefMapParam	inferred	SMT3HD data name via SLUS_209.11 0x005518C0, 2 agreeing references; was sdf3DRefMapParam
 0x003BD398	sdfPadPortSlotPairs	inferred	SMT3HD name via SLUS_209.11 0x005518D0, sdf_PadManager twin; was sdfPadPortSlotPairs
 0x003BD39C	sdfPadManagerMode	inferred	SMT3HD name via SLUS_209.11 0x005518D4, sdf_PadManager twin; was D_003BD39C

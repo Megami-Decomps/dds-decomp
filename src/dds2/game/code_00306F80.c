@@ -645,7 +645,7 @@ extern void sdf3DLinkInitPacket(sdfDrawTag_t *, DmaPacketHeader *);
 void itfInitDoubleBufferedScenePackets(void) {
     s32 i;
 
-    sdfCameraBuildProjection(&dds3ScreenParam.camera);
+    sdf3DMakeScreenParam(&dds3ScreenParam.camera);
     LookAtMatrix(aViewTarget, sdfViewTargetVector, aViewDown);
     VU0_STORE_MATRIX_UNCLOBBERED(&sdfViewMatrix);
     for (i = 0; i < 2; i++) {

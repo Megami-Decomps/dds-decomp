@@ -4263,7 +4263,7 @@ void evtStageTestUpdateCamera(void)
     SDF_VU0_COPYVECTOR(sdfViewTargetVector, evtStageTestViewTargetVector);
     SDF_VU0_COPYVECTOR(aViewTarget, evtStageTestViewEyeVector);
     SDF_VU0_COPYVECTOR(aViewDown, evtStageTestViewUpVector);
-    sdfCameraBuildProjection(&dds3ScreenParam.camera);
+    sdf3DMakeScreenParam(&dds3ScreenParam.camera);
     SDF_VU0_LOADVECTOR(aViewTarget);
     SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
     SDF_VU0_SUBVECTOR();

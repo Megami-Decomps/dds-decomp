@@ -203,7 +203,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
             sdfGrOt_t *sceneNode;
             sdfDrawTag_t *sceneList;
             u64 *sceneFrustum;
-            sdfCameraBuildProjection(&D_003247B0.camera);
+            sdf3DMakeScreenParam(&D_003247B0.camera);
             LookAtMatrix(kwlnHeldTextureTargetVector, kwlnHeldTextureEyeVector, kwlnHeldTextureUpVector);
             VU0_STORE_MATRIX_UNCLOBBERED(&kwlnHeldTextureViewMatrix);
             sdf3DMakeViewportPacket((struct ConsMatrixPacket *)(kwlnHeldTextureMatrixPackets + bufferIndex * KWLN_FRAME_BUFFER_BYTES),
@@ -224,7 +224,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
         u64 *overlayFrustum;
         sdf3DMakeLightParallelPacket((SdfLightingPacketStorage *)(kwlnOverlayLightingPackets + bufferIndex * KWLN_FRAME_BUFFER_BYTES),
             kwlnOverlayLightSources, kwlnOverlayAmbientColor);
-        sdfCameraBuildProjection(&D_00324980.camera);
+        sdf3DMakeScreenParam(&D_00324980.camera);
         LookAtMatrix(D_00324A20, kwlnOverlayEyeVector, kwlnOverlayUpVector);
         VU0_STORE_MATRIX_UNCLOBBERED(&D_00329790);
         sdf3DMakeViewportPacket((struct ConsMatrixPacket *)(kwlnOverlayMatrixPackets + bufferIndex * KWLN_FRAME_BUFFER_BYTES), &D_00324980, &D_00329790);
@@ -239,7 +239,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
         sdf3DMakeLightParallelPacket((SdfLightingPacketStorage *)(kwlnOverlayMatrixPackets - 0x440 + bufferIndex * KWLN_FRAME_BUFFER_BYTES), D_00324770, kwlnDefaultColorVector);
         *(u32 *)(kwlnOverlayMatrixPackets - 0x620 + bufferIndex * KWLN_FRAME_BUFFER_BYTES) = D_003BA8EC;
     }
-    sdfCameraBuildProjection(&dds3ScreenParam.camera);
+    sdf3DMakeScreenParam(&dds3ScreenParam.camera);
     SDF_VU0_LOADVECTOR(aViewTarget);
     SDF_VU0_LOADVECTOR_B(sdfViewTargetVector);
     SDF_VU0_SUBVECTOR();

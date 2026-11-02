@@ -1215,8 +1215,8 @@ void kwlnInitializeFrameDrawPackets(s32 bufferIndex) {
 /* Select display mode 1, rebuild both projection blocks and reset draw-vector state. */
 void dds3InitDrawEnv(void) {
     sdfGrSetScreen(1);
-    sdfCameraBuildProjection(&dds3ScreenParam.camera);
-    sdfCameraBuildProjection(&D_00324980.camera);
+    sdf3DMakeScreenParam(&dds3ScreenParam.camera);
+    sdf3DMakeScreenParam(&D_00324980.camera);
     kwlnInitializeFrameDrawPackets(0);
     kwlnInitializeFrameDrawPackets(1);
     dds3InitZClearDrawTag();
@@ -1247,7 +1247,7 @@ void dds3InitRenderDrawEnv(void) {
     dds3RenderTexId.buffers[0] = D_003BA8F4;
     dds3RenderTexId.buffers[1] = 0;
     dds3RenderTexId.buffers[2] = D_003980E0.buffers[2];
-    sdfCameraBuildProjection(&D_003247B0.camera);
+    sdf3DMakeScreenParam(&D_003247B0.camera);
     for (i = 0; i != 2; i++) {
         sdfDrawTagInit(&D_00325870[i].heldTexture.list);
         sdfGrSetDrawEnv(&D_00325870[i].heldTexture.scene, &dds3RenderTexId, 0);

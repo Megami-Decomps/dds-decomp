@@ -65,7 +65,7 @@ extern const struct SdfDmaTagHeader *sdf3DLightDefault;
 
 extern sdfTexHandle_t *D_003BD37C;
 
-extern sdfTexHandle_t *D_003BD380;
+extern sdfTexHandle_t *sdf3DSpecularTex;
 
 extern sdfTexHandle_t *D_003BD390;
 
@@ -136,7 +136,7 @@ extern f32 D_003BD36C;
 extern f32 D_003BD370;
 
 /* Compose camera projection and screen parameters without reassociating floats. */
-void sdfCameraBuildProjection(SdfCamera *camera) {
+void sdf3DMakeScreenParam(SdfCamera *camera) {
     f32 projectionMatrix[16];
     f32 farZ = camera->farZ;
     f32 nearZ = camera->nearZ;
@@ -369,17 +369,17 @@ void sdf3DInitSpecularTex2(void) {
             value *= power;
         }
     }
-    D_003BD380 = sdfTexSet(&texture->header);
+    sdf3DSpecularTex = sdfTexSet(&texture->header);
     sdfMemFreeDirect(allocation);
 }
 
 extern u64 sdf3DRefMapParam;
 
-extern s32 D_003241D8[];
+extern s32 vu1Tex0Slot0[];
 
-extern s32 D_00324290[];
+extern s32 vu1Tex0Slot2[];
 
-extern s32 D_00324214[];
+extern s32 vu1Tex0Slot1[];
 
 extern u8 D_00317C20[];
 
@@ -391,18 +391,18 @@ extern void sdf3DInitSpecularTex2(void);
 void sdf3DInit(void) {
     s64 textureWord;
     sdf3DInitSpecularTex2();
-    textureWord = sdfTexGetTex0Reg(D_003BD380);
+    textureWord = sdfTexGetTex0Reg(sdf3DSpecularTex);
     sdf3DRefMapParam = textureWord;
-    D_003241D8[0] = textureWord;
-    D_003241D8[1] = textureWord >> 32;
+    vu1Tex0Slot0[0] = textureWord;
+    vu1Tex0Slot0[1] = textureWord >> 32;
     D_003BD37C = sdfTexSetDirect((SdfTextureFileHeader *)D_00317C20);
     textureWord = sdfTexGetTex0Reg(D_003BD37C);
-    D_00324290[0] = textureWord;
-    D_00324290[1] = textureWord >> 32;
+    vu1Tex0Slot2[0] = textureWord;
+    vu1Tex0Slot2[1] = textureWord >> 32;
     D_003BD390 = sdfTexSetDirect((SdfTextureFileHeader *)D_0031BC60);
     textureWord = sdfTexGetTex0Reg(D_003BD390);
-    D_00324214[0] = textureWord;
-    D_00324214[1] = textureWord >> 32;
+    vu1Tex0Slot1[0] = textureWord;
+    vu1Tex0Slot1[1] = textureWord >> 32;
     sdfModelInitSystem();
     sdfMatInitSystem();
 }
@@ -422,7 +422,7 @@ INCLUDE_SDATA(const s32, "sdf/sdf3D", sdf3DFogDefault);
 
 INCLUDE_SDATA(const s32, "sdf/sdf3D", D_003BD37C);
 
-INCLUDE_SDATA(const s32, "sdf/sdf3D", D_003BD380);
+INCLUDE_SDATA(const s32, "sdf/sdf3D", sdf3DSpecularTex);
 
 INCLUDE_SDATA(const s32, "sdf/sdf3D", sdf3DRefMapParam);
 
