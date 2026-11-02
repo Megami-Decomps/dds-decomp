@@ -860,7 +860,7 @@ segments:
             with self.subTest(version=version, section=".bss"):
                 syms = symbols(version)
                 start = syms["fileQueueHead"]
-                end = syms["fileRequestEntries"]
+                end = syms["sdfMcCb"]
                 yaml_text = self.YAML.replace("0x003DC658", hex(start)).replace(
                     "0x003DC698", hex(end)
                 )
