@@ -1,142 +1,89 @@
-#include "sdk_ps2.h"
 #include "common.h"
-#include "sdf_handler_node.h"
-#include "eeregs.h"
-#include "snd_command_packet.h"
-#include "mnu_voice_resource_path_api.h"
-#include "sdf_heap_api.h"
-#include "sdf_packed_resource.h"
-#include "sdf_pac_reloc.h"
-#include "sdf.h"
-#include "sdf_gs_mem_delayed_free_api.h"
-#include "sdf_semaphore_api.h"
-#include "sdf_movie_stream.h"
-#include "sdf_packet_alloc.h"
-#include "sdf_packet_list.h"
-#include "sdf_gs_packet.h"
-#include "sdf_texture_lists.h"
-#include "sdf_draw.h"
-#include "sdf_resource_list_item.h"
-#include "ee_mmi.h"
-#include "sdf_stream_read.h"
-#include "sdf_stream_read_api.h"
-#include "sdf_dev_event.h"
-#include "sdf_dev_state.h"
-#include "mdl_object_stream.h"
-#include "sdf_texture_offset_list.h"
-#include "sdf_texture_file.h"
-#include "sdf_texture_queue.h"
-#include "sdf_stream_input_dma.h"
-#include "sdf_sound_rpc_records.h"
-#include "snd_midi_state_views.h"
-#include "mnu_title_sound.h"
-#include "sdf_movie_draw_packet.h"
-#include "sdf_movie_state.h"
-#include "sdf_chip.h"
-#include "sdf_movie_api.h"
-#include "file_pac.h"
-#include "sdf_pac_callback.h"
+#include "libsdf.h"
+#include "ps2asm.h"
 
-extern u32 p2sdPcmState;
+#include "sdf_movie_types.h"
 
-extern u32 p2sdPcmBusy;
+void puts(const char *aStr);
+s32 sdfFileCmdRead(void *aHandle, void *aBuffer, s32 aLength);
+s32 sdfFileCmdClose(void *aHandle);
+void sdfDummyFunc(void);
+void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
+void sdfChipFreeDirect(void *aPtr);
+void sdfIpuFree(sdfIpuDecodeCb_t *cb);
+s32 p2sdSyncMovie(void);
+void *memcpy(void *a, const void *b, u32 c);
+s32 sdfFileCmdFileSize(void *aHandle);
+s32 sdfFileCmdFree(void *aHandle);
+s32 DIntr(void);
+s32 EIntr(void);
+void *memset(void *a, s32 b, u32 c);
+char *strrchr(const char *aStr, s32 aChar);
+s32 strcasecmp(const char *aLeft, const char *aRight);
+void *sdfChipAllocZeroDirect(s32 aSize);
+sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
+void *sdfMemLock(sdfMemHandle_t *aHandle);
+void *sdfFileCmdReadOpen(const char *aFileName, SdfStreamRead aCallback, sdfMovieCb_t *aUserData);
+void movieAttachDecodeTask(sdfIpuDecodeCb_t *aNode, sdfIpuInitParm_t *aFormat, SdfStreamRead aRead, sdfMovieCb_t *aContext, s32 aResourceWord);
+s32 sdfCreateSema(s32 initCount, s32 maxCount, s32 option);
+s32 WaitSema(s32 sema);
+s32 SignalSema(s32 sema);
+s32 movieReadChunk(void *aHandle, s32 aOp, void *aBuf, s32 aSize, sdfMovieCb_t *stream);
+s32 movieCopyChunk(sdfIpuDecodeCb_t *aNode, sdfMovieCb_t *stream, s32 aOp, void *aBuf, s32 aSize);
+s32 movieParseHeader(sdfIpuDecodeCb_t *aNode, sdfMovieCb_t *stream, s32 aOp, void *aBuf, s32 aSize);
+extern s32 movieStreamSema;
+extern u32 movieSemaCount;
+extern sdfMovieCb_t *movieSemaId;
+#define D_00551B50 D_00438D28
+#define movieDrawMode D_00438D0C
+extern const char D_00551B50[];
 
-extern u32 D_00438D0C;
+#define movie_2C5080 sdfPrintTextLine
+#define release_movieobj2 sdfMovieDrawFrame
 
+extern u32 movieDrawMode;
 extern s32 sdfMovieDrawLeft;
-
 extern s32 sdfMovieDrawTop;
-
 extern s32 sdfMovieDrawRight;
-
 extern s32 sdfMovieDrawBottom;
-
 extern u32 sdfMovieDrawColor;
 
-extern SdfSoundCommand D_00438B84;
-
-extern char sdfGsMemoryTypeFormat[]; /* "%d" */
-
-extern char D_00438BE0[];
-
-extern char D_00438BE8[];
-
-extern char D_00438BF0[];
-
-extern char D_00438BF8[];
-
-extern char D_00438C00[];
-
-extern char D_00438C08[];
-
-extern char D_00438C10[];
-
-extern char D_00438C18[];
-
-extern char D_00438C20[];
-
-extern char D_00438CD0[];
-
-extern char D_00438CD8[];
-
-/* Send opcode 0x120 with the channel's group (bits 3-6) unless a command is * pending; returns nonzero when busy. */ s32 p2sdPlayPcm(u8 channel);
-
-SdfSoundReadCallback p2sdSetPcmCallback(SdfSoundReadCallback callback);
-
-extern u32 D_00438D04;
-
-/* Print a string followed by a newline through libc puts. */
-void sdfPrintTextLine(const char *text) {
-    puts(text);
+void movie_2C5080(const char *aStr)
+{
+    puts(aStr);
 }
 
+/* NON_MATCHING: 21 of 52 words match, one word short (first differing word
+ * at +0x44); the +0x70 arm needs retail's movn, which gcc folds away. */
 #ifdef NON_MATCHING
-#include "common.h"
-#include "sdf.h"
-#include "sdf_movie_stream.h"
-#include "sdk_libkernl.h"
-
-#define MOV_PAC_RING_BYTES 0x10000
-
-extern movieStream_t *movieSemaId;            /* the movie whose PAC stream feeds the sound driver */
-extern s32 movieSemaCount;                /* the frame at which the PAC ring last ran out of room */
-extern s32 movieStreamSema;
-
-/* The sound driver's block allocator for a PAC movie (queued through
- * p2sdSetPcmCallback): reserve size bytes of the stream's ring, first
- * from the pending scratch span, then from the ring itself, wrapping at
- * 64 KB. NULL when the ring is full, after recording the frame that ran out
- * of room. Upstream: INCLUDE_ASM in both games; written from the retail
- * routine with upstream's movie types. The same loads, stores and calls in the
- * same order. */
-const u8 *movieWaitSema(s32 size) {
-    movieStream_t *movie = movieSemaId;
-    MovPacStream *pac = movie->stream.pac;
-    u8 *address;
+u8 *movieWaitSema(s32 aSize)
+{
+    sdfMovieCb_t *mov = movieSemaId;
+    sdfMovieStrmPac_t *obj = mov->readCb.pac;
+    u8 *ptr;
 
     WaitSema(movieStreamSema);
-    if (pac->scratchSize > 0) {
-        pac->scratchSize -= size;
-        address = pac->scratch;
-        pac->scratch = address + size;
+    if (obj->scratchSize > 0) {
+        ptr = obj->scratch;
+        obj->scratchSize -= aSize;
+        obj->scratch = ptr + aSize;
     } else {
-        s32 offset = pac->ringOffset;
-
-        address = pac->ringBuffer + offset;
-        if (pac->ringLength < size) {
-            address = NULL;
-            movieSemaCount = movie->soundNode.playbackFrameIndex;
-        } else {
-            pac->ringLength -= size;
-            offset += size;
-            if (offset >= MOV_PAC_RING_BYTES) {
-                offset -= MOV_PAC_RING_BYTES;
+        ptr = obj->ringBuffer + obj->ringOffset;
+        if (obj->ringLength < aSize) {
+            ptr = NULL;
+            if (movieSemaCount != mov->decodeCb.frame) {
+                movieSemaCount = mov->decodeCb.frame;
             }
-            pac->ringOffset = offset;
+        } else {
+            obj->ringLength -= aSize;
+            obj->ringOffset += aSize;
+            if (obj->ringOffset > 0xFFFF) {
+                obj->ringOffset -= 0x10000;
+            }
         }
     }
     SignalSema(movieStreamSema);
-    return address;
+    return ptr;
 }
 #else
 INCLUDE_ASM(const s32, "sdf/sdfMovie", movieWaitSema);
@@ -144,15 +91,15 @@ INCLUDE_ASM(const s32, "sdf/sdfMovie", movieWaitSema);
 
 /* Store the stream-frame draw-path mode; movie viewport setup selects 1. */
 void sdfSetStreamFrameDrawMode(u32 value) {
-    D_00438D0C = value;
+    movieDrawMode = value;
 }
 
-void sdfSetGridScaledDrawBounds(s32 firstStart, s32 secondStart, s32 firstLength, s32 secondLength, u32 value) {
-    sdfMovieDrawLeft = firstStart * 0x10 + 0x7000;
-    sdfMovieDrawTop = secondStart * 8 + 0x7900;
-    sdfMovieDrawRight = sdfMovieDrawLeft + firstLength * 0x10;
-    sdfMovieDrawBottom = sdfMovieDrawTop + secondLength * 8;
-    sdfMovieDrawColor = value;
+void sdfSetGridScaledDrawBounds(s32 column, s32 row, s32 width, s32 height, u32 mode) {
+    sdfMovieDrawLeft = column * 0x10 + 0x7000;
+    sdfMovieDrawTop = row * 8 + 0x7900;
+    sdfMovieDrawRight = sdfMovieDrawLeft + width * 0x10;
+    sdfMovieDrawBottom = sdfMovieDrawTop + height * 8;
+    sdfMovieDrawColor = mode;
 }
 
 #ifdef NON_MATCHING
@@ -161,7 +108,7 @@ void sdfSetGridScaledDrawBounds(s32 firstStart, s32 secondStart, s32 firstLength
 #include "snd_command_packet.h"
 #include "mnu_voice_resource_path_api.h"
 #include "ee_mmi.h"
-#include "sdf_heap_api.h"
+#include "sdf_resource.h"
 #include "sdf_packed_resource.h"
 #include "sdf_pac_reloc.h"
 #include "sdf.h"
@@ -286,15 +233,35 @@ void sdfMovieQueueFrameSprite(movieStream_t *movie, sdfGrOt_t *pool) {
 INCLUDE_ASM(const s32, "sdf/sdfMovie", sdfMovieQueueFrameSprite);
 #endif
 
-extern movieStream_t *movieSemaId;
+extern void sdfMovieQueueFrameSprite(sdfMovieCb_t *movie, sdfGrOt_t *ot);
 
-extern const u8 *movieWaitSema(s32);
+/* DMA/VIF/GIF header followed by nine real A+D writes for one movie sprite. */
+typedef struct sdfMovieDrawPacket_t {
+    u64 dmaTag;
+    u64 vifCommands;
+    sdfGifTag_t gifTag;
+    sdfGrTagStdReg_t sampling;
+    sdfGrTagStdReg_t texture;
+    sdfGrTagStdReg_t clamp;
+    sdfGrTagStdReg_t textureAlpha;
+    sdfGrTagStdReg_t color;
+    sdfGrTagStdReg_t sourceOrigin;
+    sdfGrTagStdReg_t vertexOrigin;
+    sdfGrTagStdReg_t sourceExtent;
+    sdfGrTagStdReg_t vertexExtent;
+} sdfMovieDrawPacket_t;
 
-extern void sdfMovieQueueFrameSprite(movieStream_t *, sdfGrOt_t *);
+extern u8 *movieWaitSema(s32 size);
+extern s32 sdfGrAllocPacketBuff(s32 size);
+extern sdfDrawTag_t *sdfPrimAllocDrawTag(s32 (*allocator)(s32));
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+extern u32 p2sdSetPcmCallback(u32 callback);
+extern s32 p2sdPlayPcm(u8 channel);
 
-void sdfMovieDrawFrame(movieStream_t *movie, sdfGrOt_t *pool) {
-    SdfMovieDrawPacket *packet;
-    sdfDrawTag_t *list;
+void release_movieobj2(sdfMovieCb_t *obj, sdfGrOt_t *ot)
+{
+    sdfMovieDrawPacket_t *packet;
+    sdfDrawTag_t *tag;
     u16 width;
     u16 height;
     s32 widthLog2;
@@ -302,236 +269,211 @@ void sdfMovieDrawFrame(movieStream_t *movie, sdfGrOt_t *pool) {
     u32 bufferWidth;
     u32 basePointer;
 
-    if (movie->soundNode.playbackPhase < 2) {
+    if (obj->decodeCb.playbackPhase < 2) {
         return;
     }
-    if (D_00438D0C == 1) {
-        sdfMovieQueueFrameSprite(movie, pool);
+    if (movieDrawMode == 1) {
+        sdfMovieQueueFrameSprite(obj, ot);
         return;
     }
-    if (movie->pacEnabled != 0 && movie->pad21 == 0 &&
-        movie->stream.pac->ringLength >= 0x1000) {
-        movie->pad21 = 1;
-        movieSemaId = movie;
-        p2sdSetPcmCallback(movieWaitSema);
-        p2sdPlayPcm(movie->packetLimit);
+    if (obj->sndActive != 0 && obj->sndPlaying == 0 && obj->readCb.pac->ringLength >= 0x1000) {
+        obj->sndPlaying = 1;
+        movieSemaId = obj;
+        p2sdSetPcmCallback((u32)movieWaitSema);
+        p2sdPlayPcm(obj->sndVolume);
     }
 
-    packet = (SdfMovieDrawPacket *)sdfGrAllocPacketBuff(sizeof(SdfMovieDrawPacket));
-    packet->header.dmaTag = 0x100000A;
-    height = movie->soundNode.height;
-    width = movie->soundNode.width;
-    packet->header.vifCommands = 0x5000000A00000000ULL;
-    packet->header.gifTag = 0x108B400000008009ULL;
-    packet->header.gifRegisters = SDF_GIF_REGISTER_AD;
-    packet->sampling.value = 0x21;
-    packet->sampling.registerId = SDF_GS_TEX1_1;
+    packet = (sdfMovieDrawPacket_t *)sdfGrAllocPacketBuff(sizeof(sdfMovieDrawPacket_t));
+    packet->dmaTag = 0x100000A;
+    height = obj->decodeCb.height;
+    width = obj->decodeCb.width;
+    packet->vifCommands = 0x5000000A00000000ULL;
+    packet->gifTag.parm = 0x108B400000008009ULL;
+    packet->gifTag.regs = 0x0E;
+    packet->sampling.data = 0x21;
+    packet->sampling.reg = 0x14;
     heightLog2 = height - 1;
     widthLog2 = width - 1;
     bufferWidth = width >> 6;
-    EE_MMI_BIT_LENGTH(heightLog2);
-    EE_MMI_BIT_LENGTH(widthLog2);
-    basePointer = (u32)movie->soundNode.resourceWord >> 6;
+    heightLog2 = PS2_WORD_BIT_LENGTH(heightLog2);
+    widthLog2 = PS2_WORD_BIT_LENGTH(widthLog2);
+    basePointer = (u32)obj->decodeCb.resourceWord >> 6;
     if (bufferWidth == 0) {
         bufferWidth = 1;
     }
-    packet->texture.value = ((u64)1 << 34) | ((u64)heightLog2 << 30) |
-        (widthLog2 << 26) | (movie->soundNode.audioMode != 0 ? 0x200000 : 0) |
+    packet->texture.data = ((u64)1 << 34) | ((u64)heightLog2 << 30) |
+        (widthLog2 << 26) | (obj->decodeCb.rgbMode != 0 ? 0x200000 : 0) |
         ((u64)bufferWidth << 14) | (u64)basePointer;
-    packet->texture.registerId = SDF_GS_TEX0_1;
-    packet->clamp.value = 5;
-    packet->clamp.registerId = SDF_GS_CLAMP_1;
-    packet->textureAlpha.value = 0x4000000080ULL;
-    packet->textureAlpha.registerId = SDF_GS_TEXA;
-    packet->color.value = (s32)0x80808080;
-    packet->color.registerId = SDF_GS_RGBAQ;
-    packet->sourceOrigin.value = 0;
-    packet->sourceOrigin.registerId = 3;
-    packet->vertexOrigin.value = ((u64)movie->drawZ << 32) |
-        (u32)(movie->drawY << 16) | (u32)movie->drawX;
-    packet->vertexOrigin.registerId = SDF_GS_XYZ2;
-    packet->sourceExtent.value = (height << 20) | (width << 4);
-    packet->sourceExtent.registerId = 3;
-    packet->vertexExtent.value = ((u64)movie->drawZ << 32) |
-        (u32)((movie->drawY + movie->drawHeight) << 16) |
-        (u32)(movie->drawX + movie->drawWidth);
-    packet->vertexExtent.registerId = SDF_GS_XYZ2;
-    list = sdfPrimAllocDrawTag(0);
-    sdfDrawTagLink(list, (u32)packet);
-    pool->append(pool, list);
+    packet->texture.reg = 0x06;
+    packet->clamp.data = 5;
+    packet->clamp.reg = 0x08;
+    packet->textureAlpha.data = 0x4000000080ULL;
+    packet->textureAlpha.reg = 0x3B;
+    packet->color.data = (s32)0x80808080;
+    packet->color.reg = 0x01;
+    packet->sourceOrigin.data = 0;
+    packet->sourceOrigin.reg = 0x03;
+    packet->vertexOrigin.data = ((u64)obj->z << 32) |
+        ((u32)(s16)obj->y << 16) | (u32)(s16)obj->x;
+    packet->vertexOrigin.reg = 0x05;
+    packet->sourceExtent.data = (s32)(((u32)height << 20) | ((u32)width << 4));
+    packet->sourceExtent.reg = 0x03;
+    packet->vertexExtent.data = ((u64)obj->z << 32) |
+        ((u32)((s16)obj->y + (s16)obj->height) << 16) |
+        (u32)((s16)obj->x + (s16)obj->width);
+    packet->vertexExtent.reg = 0x05;
+    tag = sdfPrimAllocDrawTag(NULL);
+    sdfDrawTagLink(tag, (u32)packet);
+    ot->regFunc(ot, tag);
 }
 
-SdfFileCommandQueueResult sdfFileCmdFileSize(sdfFileCmdHandle_t *state);
+void movieReadNextChunk(sdfMovieCb_t *aMov)
+{
+    s32 remaining = aMov->readRemain;
+    sdfMovieStrmLinear_t *stream = aMov->readCb.linear;
+    s32 size;
+    u8 *dst;
+    u8 *next;
 
-extern s32 movieStreamSema;
-
-/* Queue up to 0x4000 bytes into the linear ring; state 5 means insufficient room. */
-void movieReadNextChunk(movieStream_t *movie) {
-    MovLinearStream *stream = movie->stream.linear;
-    s32 remaining = movie->remainingBytes;
-    s32 readSize;
-    u8 *bufferPosition;
-    u8 *streamPosition;
-    u8 *ringStart;
-    u8 *ringEnd;
-    sdfFileCmdHandle_t *deviceState;
-
-    if (remaining == 0) {
-        return;
+    if (remaining != 0) {
+        if (0x20000 - stream->bufferedBytes < 0x4000) {
+            aMov->readStat = 5;
+        } else {
+            aMov->readStat = 4;
+            size = remaining < 0x4001 ? remaining : 0x4000;
+            dst = stream->writeCursor;
+            next = dst + size;
+            if (next >= stream->bufferStart + 0x20000) {
+                next = stream->bufferStart;
+            }
+            stream->writeCursor = next;
+            sdfFileCmdRead(aMov->fileHandle, dst, size);
+        }
     }
-    if (0x20000 - stream->bufferedBytes < 0x4000) {
-        movie->state = SDF_MOVIE_STATE_WAITING_FOR_BUFFER_SPACE;
-        return;
-    }
-
-    movie->state = SDF_MOVIE_STATE_DATA_READ;
-    readSize = 0x4000;
-    if (remaining <= 0x4000) {
-        readSize = remaining;
-    }
-
-    bufferPosition = stream->writeCursor;
-    ringStart = stream->bufferStart;
-    ringEnd = ringStart + 0x20000;
-    deviceState = movie->deviceState;
-    streamPosition = bufferPosition + readSize;
-    if (streamPosition >= ringEnd) {
-        streamPosition = ringStart;
-    }
-    stream->writeCursor = streamPosition;
-    sdfFileCmdRead(deviceState, bufferPosition, readSize);
 }
 
-/* Consume device completions and stop requests for the linear stream; always return 0. */
-s32 movieGetStreamSize(
-    sdfFileCmdHandle_t *deviceState, SdfDevEvent deviceEvent,
-    void *data, s32 bytesRead, movieStream_t *movie) {
-    MovLinearStream *stream;
-    s32 restoreInterrupts;
+s32 movieGetStreamSize(void *aHandle, s32 aOp, void *aBuf, s32 aSize, sdfMovieCb_t *aMov)
+{
+    sdfMovieStrmLinear_t *stream = aMov->readCb.linear;
+    s32 enabled;
 
-    movie->deviceState = deviceState;
-    stream = movie->stream.linear;
-
-    if (movie->stopRequested != 0 &&
-        (movie->state < SDF_MOVIE_STATE_DEVICE_RELEASE_CALLBACK ||
-         movie->state > SDF_MOVIE_STATE_STOP_REQUESTED)) {
-        movie->state = SDF_MOVIE_STATE_STOP_REQUESTED;
-        sdfFileCmdClose(deviceState);
-        return 0;
+    aMov->fileHandle = aHandle;
+    if (aMov->cancel != 0) {
+        if (aMov->readStat != 6 && aMov->readStat != 7) {
+            aMov->readStat = 7;
+            sdfFileCmdClose(aHandle);
+            return 0;
+        }
     }
-
-    switch (movie->state) {
-    case SDF_MOVIE_STATE_INITIAL:
-        if (deviceEvent == SDF_DEV_EVENT_OPENED) {
-            movie->state = SDF_MOVIE_STATE_CONTROL_REQUEST;
-            sdfFileCmdFileSize(deviceState);
+    switch (aMov->readStat) {
+    case 0:
+        if (aOp == 2) {
+            aMov->readStat = 1;
+            sdfFileCmdFileSize(aHandle);
         }
         break;
-    case SDF_MOVIE_STATE_CONTROL_REQUEST:
-        if (deviceEvent == SDF_DEV_EVENT_SIZE_REPLY) {
-            movie->totalBytes = bytesRead;
-            movie->remainingBytes = bytesRead;
-            movieReadNextChunk(movie);
+    case 1:
+        if (aOp == 4) {
+            aMov->fileSize = aSize;
+            aMov->readRemain = aSize;
+            movieReadNextChunk(aMov);
         }
         break;
-    case SDF_MOVIE_STATE_DATA_READ:
-        if (deviceEvent == SDF_DEV_EVENT_READ_REPLY) {
-            restoreInterrupts = DIntr();
-            stream->bufferedBytes += bytesRead;
-            movie->remainingBytes -= bytesRead;
-            if (restoreInterrupts != 0) {
+    case 4:
+        if (aOp == 5) {
+            enabled = DIntr();
+            stream->bufferedBytes += aSize;
+            aMov->readRemain -= aSize;
+            if (enabled != 0) {
                 EIntr();
             }
-            if (movie->remainingBytes == 0) {
-                movie->state = SDF_MOVIE_STATE_STOP_REQUESTED;
-                sdfFileCmdClose(deviceState);
+            if (aMov->readRemain == 0) {
+                aMov->readStat = 7;
+                sdfFileCmdClose(aHandle);
             } else {
-                movieReadNextChunk(movie);
+                movieReadNextChunk(aMov);
             }
         }
         break;
-    case SDF_MOVIE_STATE_STOP_REQUESTED:
-        if (deviceEvent == SDF_DEV_EVENT_CLOSED) {
-            movie->deviceState = NULL;
-            movie->state = SDF_MOVIE_STATE_DEVICE_RELEASE_CALLBACK;
-            sdfFileCmdFree(deviceState);
+    case 7:
+        if (aOp == 7) {
+            aMov->fileHandle = NULL;
+            aMov->readStat = 6;
+            sdfFileCmdFree(aHandle);
         }
         break;
     }
-
     return 0;
 }
 
-/* Queue a movie-PAC block only when both ring-buffer room predicates allow it. */
-void movieReadHeaderChunk(movieStream_t *movie) {
-    MovPacStream *stream;
-    s32 remaining;
+void movieReadHeaderChunk(sdfMovieCb_t *aMov)
+{
+    s32 remaining = aMov->readRemain;
+    sdfMovieStrmPac_t *stream = aMov->readCb.pac;
+    s32 size;
 
-    stream = movie->stream.pac;
-    remaining = movie->remainingBytes;
-    if (remaining == 0) {
-        return;
+    if (remaining != 0) {
+        if (0x10000 - stream->pacBufferedBytes < 0x4000) {
+            aMov->readStat = 5;
+        } else if (0x10000 + (stream->unk6C - stream->ringLength) < 0x4000) {
+            aMov->readStat = 5;
+        } else {
+            aMov->readStat = 4;
+            size = remaining < 0x4001 ? remaining : 0x4000;
+            sdfFileCmdRead(aMov->fileHandle, stream->pacInputBuffer, size);
+        }
     }
-    if ((0x10000 - stream->pacBufferedBytes) < 0x4000 || ((stream->unk6C - stream->ringLength) + 0x10000) < 0x4000) {
-        movie->state = SDF_MOVIE_STATE_WAITING_FOR_BUFFER_SPACE;
-        return;
-    }
-    movie->state = SDF_MOVIE_STATE_DATA_READ;
-    sdfFileCmdRead(movie->deviceState, stream->pacInputBuffer, remaining <= 0x4000 ? remaining : 0x4000);
 }
 
-/* Process movie-PAC header, block-mask and payload completions; always return 0. */
-s32 movieReadChunk(
-    sdfFileCmdHandle_t *deviceState, SdfDevEvent deviceEvent,
-    const void *readBuffer, s32 bytesRead, movieStream_t *movie) {
-    MovPacStream *stream;
+s32 movieReadChunk(void *file, s32 operation, void *readBuffer, s32 bytesRead, sdfMovieCb_t *movie) {
+    sdfMovieStrmPac_t *stream;
 
-    movie->deviceState = deviceState;
-    stream = movie->stream.pac;
+    movie->fileHandle = file;
+    stream = movie->readCb.pac;
 
-    if (movie->stopRequested != 0 &&
-        (movie->state < SDF_MOVIE_STATE_DEVICE_RELEASE_CALLBACK ||
-         movie->state > SDF_MOVIE_STATE_STOP_REQUESTED)) {
-        movie->state = SDF_MOVIE_STATE_STOP_REQUESTED;
-        sdfFileCmdClose(deviceState);
+    if (movie->cancel != 0 &&
+        (movie->readStat < 6 ||
+         movie->readStat > 7)) {
+        movie->readStat = 7;
+        sdfFileCmdClose(file);
         return 0;
     }
 
-    switch (movie->state) {
-    case SDF_MOVIE_STATE_INITIAL:
-        if (deviceEvent == SDF_DEV_EVENT_OPENED) {
-            movie->state = SDF_MOVIE_STATE_CONTROL_REQUEST;
-            sdfFileCmdFileSize(deviceState);
+    switch (movie->readStat) {
+    case 0:
+        if (operation == 2) {
+            movie->readStat = 1;
+            sdfFileCmdFileSize(file);
         }
         break;
-    case SDF_MOVIE_STATE_CONTROL_REQUEST:
-        if (deviceEvent == SDF_DEV_EVENT_SIZE_REPLY) {
-            movie->totalBytes = bytesRead;
-            movie->remainingBytes = bytesRead;
-            movie->state = SDF_MOVIE_STATE_PAC_HEADER_READ;
-            sdfFileCmdRead(deviceState, stream, 0x40);
+    case 1:
+        if (operation == 4) {
+            movie->fileSize = bytesRead;
+            movie->readRemain = bytesRead;
+            movie->readStat = 2;
+            sdfFileCmdRead(file, stream, 0x40);
         }
         break;
-    case SDF_MOVIE_STATE_PAC_HEADER_READ:
-        if (deviceEvent == SDF_DEV_EVENT_READ_REPLY) {
+    case 2:
+        if (operation == 5) {
             s32 payloadBytes = stream->packetBytes - 0x40;
             stream->payloadAllocation = sdfMemAllocDirect(payloadBytes);
             stream->blockMask = (u8 *)sdfMemLock(stream->payloadAllocation);
-            movie->state = SDF_MOVIE_STATE_PAC_MASK_READ;
-            sdfFileCmdRead(deviceState, stream->blockMask, payloadBytes);
-            movie->remainingBytes -= stream->packetBytes;
+            movie->readStat = 3;
+            sdfFileCmdRead(file, stream->blockMask, payloadBytes);
+            movie->readRemain -= stream->packetBytes;
         }
         break;
-    case SDF_MOVIE_STATE_PAC_MASK_READ:
-        if (deviceEvent == SDF_DEV_EVENT_READ_REPLY) {
+    case 3:
+        if (operation == 5) {
             movieReadHeaderChunk(movie);
         }
         break;
-    case SDF_MOVIE_STATE_DATA_READ: {
-        if (deviceEvent == SDF_DEV_EVENT_READ_REPLY) {
-            const u8 *source = readBuffer;
-            s32 blockBytes = stream->blockBytes;
-            s32 blocksRemaining = bytesRead / blockBytes;
+    case 4: {
+        if (operation == 5) {
+            u8 *source = readBuffer;
+            s32 unitSize = stream->blockBytes;
+            s32 blocksRemaining = bytesRead / unitSize;
             do {
                 s32 blockIndex = stream->blockIndex;
                 s32 byteIndex = blockIndex / 8;
@@ -539,21 +481,21 @@ s32 movieReadChunk(
                 s32 blockFlag = 1 << bitIndex;
                 s32 writeOffset;
                 if ((stream->blockMask[byteIndex] & blockFlag) != 0) {
-                    s32 ringLength;
+                    s32 ringFill;
                     s32 wrappedBytes;
 
                     WaitSema(movieStreamSema);
-                    ringLength = stream->ringLength;
-                    writeOffset = stream->ringOffset + ringLength;
+                    ringFill = stream->ringLength;
+                    writeOffset = stream->ringOffset + ringFill;
                     writeOffset += (writeOffset > 0xFFFF) * -0x10000;
-                    wrappedBytes = writeOffset + blockBytes - 0x10000;
+                    wrappedBytes = writeOffset + unitSize - 0x10000;
                     if (wrappedBytes > 0) {
-                        memcpy(stream->ringBuffer + writeOffset, source, blockBytes - wrappedBytes);
-                        memcpy(stream->ringBuffer, source + blockBytes - wrappedBytes, wrappedBytes);
+                        memcpy(stream->ringBuffer + writeOffset, source, unitSize - wrappedBytes);
+                        memcpy(stream->ringBuffer, source + unitSize - wrappedBytes, wrappedBytes);
                     } else {
-                        memcpy(stream->ringBuffer + writeOffset, source, blockBytes);
+                        memcpy(stream->ringBuffer + writeOffset, source, unitSize);
                     }
-                    wrappedBytes = ringLength + blockBytes;
+                    wrappedBytes = ringFill + unitSize;
                     if (wrappedBytes > 0x10000) {
                         stream->ringOffset += wrappedBytes - 0x10000;
                         if (stream->ringOffset > 0xFFFF) {
@@ -569,31 +511,31 @@ s32 movieReadChunk(
 
                     writeOffset = stream->pacReadOffset + stream->pacBufferedBytes;
                     writeOffset += (writeOffset > 0xFFFF) * -0x10000;
-                    memcpy(stream->pacBuffer + writeOffset, source, blockBytes);
-                    stream->pacBufferedBytes += blockBytes;
+                    memcpy(stream->pacBuffer + writeOffset, source, unitSize);
+                    stream->pacBufferedBytes += unitSize;
                     if (restoreInterrupts != 0) {
                         EIntr();
                     }
                 }
-                source += blockBytes;
+                source += unitSize;
                 stream->blockIndex++;
             } while (--blocksRemaining != 0);
 
-            movie->remainingBytes -= bytesRead;
-            if (movie->remainingBytes == 0) {
-                movie->state = SDF_MOVIE_STATE_STOP_REQUESTED;
-                sdfFileCmdClose(deviceState);
+            movie->readRemain -= bytesRead;
+            if (movie->readRemain == 0) {
+                movie->readStat = 7;
+                sdfFileCmdClose(file);
             } else {
                 movieReadHeaderChunk(movie);
             }
         }
         break;
     }
-    case SDF_MOVIE_STATE_STOP_REQUESTED:
-        if (deviceEvent == SDF_DEV_EVENT_CLOSED) {
-            movie->deviceState = NULL;
-            movie->state = SDF_MOVIE_STATE_DEVICE_RELEASE_CALLBACK;
-            sdfFileCmdFree(deviceState);
+    case 7:
+        if (operation == 7) {
+            movie->fileHandle = NULL;
+            movie->readStat = 6;
+            sdfFileCmdFree(file);
         }
         break;
     }
@@ -601,237 +543,244 @@ s32 movieReadChunk(
     return 0;
 }
 
-/* Sound/IPU source operations: report available bytes/EOF, copy data, or resume reads. */
-SdfStreamReadResult movieCopyChunk(sdfIpuDecodeCb_t *unused, movieStream_t *movie, SdfStreamReadOperation operation, void *dataBuffer, s32 byteCount) {
-    MovLinearStream *stream = movie->stream.linear;
+s32 movieCopyChunk(sdfIpuDecodeCb_t *aNode, sdfMovieCb_t *aMov, s32 aOp, void *aBuf, s32 aSize)
+{
+    sdfMovieStrmLinear_t *stream = aMov->readCb.linear;
+    u8 *src;
+    u8 *base;
+    s32 over;
+    s32 first;
 
-    switch (operation) {
-    case SDF_STREAM_READ_QUERY:
-        if (movie->stopRequested != 0) {
-            *(u8 *)dataBuffer = 1;
+    switch (aOp) {
+    case 0:
+        if (aMov->cancel != 0) {
+            *(u8 *)aBuf = 1;
             return 0;
         }
-        if (movie->remainingBytes == 0) {
-            *(u8 *)dataBuffer = 1;
+        if (aMov->readRemain == 0) {
+            *(u8 *)aBuf = 1;
         }
         return stream->bufferedBytes;
-    case SDF_STREAM_READ_COPY:
-        if (movie->stopRequested != 0) {
+    case 1:
+        if (aMov->cancel != 0) {
             return 0;
         }
-        {
-            u8 *readCursor = stream->readCursor;
-            u8 *bufferStart = stream->bufferStart;
-            s32 wrappedBytes = (readCursor - bufferStart) + byteCount - 0x20000;
-
-            if (wrappedBytes >= 0) {
-                s32 firstSpan = byteCount - wrappedBytes;
-                memcpy(dataBuffer, readCursor, firstSpan);
-                if (wrappedBytes > 0) {
-                    memcpy((u8 *)dataBuffer + firstSpan, bufferStart, wrappedBytes);
-                }
-                stream->readCursor = bufferStart + wrappedBytes;
-            } else {
-                memcpy(dataBuffer, readCursor, byteCount);
-                stream->readCursor = readCursor + byteCount;
+        src = stream->readCursor;
+        base = stream->bufferStart;
+        over = (src - base) + aSize - 0x20000;
+        if (over >= 0) {
+            first = aSize - over;
+            memcpy(aBuf, src, first);
+            if (over > 0) {
+                memcpy((u8 *)aBuf + first, base, over);
             }
-            stream->bufferedBytes -= byteCount;
-            return movie->remainingBytes;
+            stream->readCursor = base + over;
+        } else {
+            memcpy(aBuf, src, aSize);
+            stream->readCursor = src + aSize;
         }
-    case SDF_STREAM_READ_RESUME:
-        if (movie->stopRequested != 0) {
+        stream->bufferedBytes -= aSize;
+        return aMov->readRemain;
+    case 2:
+        if (aMov->cancel != 0) {
             return 0;
         }
-        if (movie->state == SDF_MOVIE_STATE_WAITING_FOR_BUFFER_SPACE) {
-            movieReadNextChunk(movie);
+        if (aMov->readStat == 5) {
+            movieReadNextChunk(aMov);
         }
-        break;
+        return 0;
     }
-
     return 0;
 }
 
-/* Sound/IPU source operations for the movie-PAC ring; retain the native copy helper. */
-SdfStreamReadResult movieParseHeader(sdfIpuDecodeCb_t *unused, movieStream_t *movie, SdfStreamReadOperation operation, void *dataBuffer, s32 byteCount) {
-    void movieMemcpy(void *destination, const void *source, u32 byteCount) {
-        memcpy(destination, source, byteCount);
-    }
-    MovPacStream *stream = movie->stream.pac;
+#ifdef NON_MATCHING
+/* clang has no GNU nested functions. The matching build below keeps the
+ * nested form: ee-gcc loads the (unused) static chain pointer before each
+ * call, and lifting the function to file scope drops that load, moving the
+ * retail image. */
+static void movieMemcpy(void *aDst, const void *aSrc, s32 aCount)
+{
+    memcpy(aDst, aSrc, aCount);
+}
+#endif
 
-    switch (operation) {
-    case SDF_STREAM_READ_QUERY:
-        if (movie->stopRequested != 0) {
-            *(u8 *)dataBuffer = 1;
+s32 movieParseHeader(sdfIpuDecodeCb_t *aNode, sdfMovieCb_t *aMov, s32 aOp, void *aBuf, s32 aSize)
+{
+#ifndef NON_MATCHING
+    /* Keep the retail helper symbol while retaining GCC's nested static chain. */
+    auto void movieMemcpy(void *, const void *, s32) FAKEMATCH_ASM_NAME("movieMemcpy");
+    void movieMemcpy(void *aDst, const void *aSrc, s32 aCount)
+    {
+        memcpy(aDst, aSrc, aCount);
+    }
+#endif
+    sdfMovieStrmPac_t *stream = aMov->readCb.pac;
+    u8 *body;
+    s32 off;
+    s32 over;
+    s32 first;
+
+    switch (aOp) {
+    case 0:
+        if (aMov->cancel != 0) {
+            *(u8 *)aBuf = 1;
             return 0;
         }
-        if (movie->remainingBytes == 0) {
-            *(u8 *)dataBuffer = 1;
+        if (aMov->readRemain == 0) {
+            *(u8 *)aBuf = 1;
         }
         return stream->pacBufferedBytes;
-    case SDF_STREAM_READ_COPY:
-        if (movie->stopRequested != 0) {
+    case 1:
+        if (aMov->cancel != 0) {
             return 0;
         }
-        {
-            u8 *bufferStart = stream->pacBuffer;
-            s32 readOffset = stream->pacReadOffset;
-            s32 wrappedBytes = readOffset + byteCount - 0x10000;
-
-            if (wrappedBytes >= 0) {
-                s32 firstSpan = byteCount - wrappedBytes;
-                movieMemcpy(dataBuffer, bufferStart + readOffset, firstSpan);
-                if (wrappedBytes > 0) {
-                    movieMemcpy((u8 *)dataBuffer + firstSpan, bufferStart, wrappedBytes);
-                }
-                stream->pacReadOffset = wrappedBytes;
-            } else {
-                movieMemcpy(dataBuffer, bufferStart + readOffset, byteCount);
-                stream->pacReadOffset = readOffset + byteCount;
+        off = stream->pacReadOffset;
+        body = stream->pacBuffer;
+        over = off + aSize - 0x10000;
+        if (over >= 0) {
+            first = aSize - over;
+            movieMemcpy(aBuf, body + off, first);
+            if (over > 0) {
+                movieMemcpy((u8 *)aBuf + first, body, over);
             }
-            stream->pacBufferedBytes -= byteCount;
-            return movie->remainingBytes;
+            stream->pacReadOffset = over;
+        } else {
+            movieMemcpy(aBuf, body + off, aSize);
+            stream->pacReadOffset = off + aSize;
         }
-    case SDF_STREAM_READ_RESUME:
-        if (movie->stopRequested != 0) {
+        stream->pacBufferedBytes -= aSize;
+        return aMov->readRemain;
+    case 2:
+        if (aMov->cancel != 0) {
             return 0;
         }
-        if (movie->state == SDF_MOVIE_STATE_WAITING_FOR_BUFFER_SPACE) {
-            movieReadHeaderChunk(movie);
+        if (aMov->readStat == 5) {
+            movieReadHeaderChunk(aMov);
         }
-        break;
+        return 0;
     }
-
     return 0;
 }
 
-typedef struct PacAlloc {
-    s32 entryCount;
-    s32 entryIndex;
-    u8 pad8[24];
-    s32 resource;
-} PacAlloc;
+void movieOpenStream(sdfMovieCb_t *stream, sdfMovieInitParm_t *desc, const char *path)
+{
+    sdfIpuInitParm_t fmt;
+    sdfMovieStrmLinear_t *linear;
+    sdfMovieStrmPac_t *pac;
+    char *ext;
+    u8 isPac;
 
-extern sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path, void *callback, void *callbackContext);
-
-extern s32 movieSemaCount;
-
-extern u8 D_00438D28[];
-
-/* Initialize an inline sound/IPU node and the selected linear or movie-PAC stream. */
-void movieOpenStream(movieStream_t *owner, const SdfMovieDescriptor *descriptor, const char *name) {
-    const SdfMovieDescriptor *borrowedDescriptor = descriptor;
-    SoundFormat soundFormat;
-    struct sdfMemHandle_t *allocation;
-    u8 *resource;
-    MovLinearStream *stream;
-    MovPacStream *pacWork;
-    char *extension;
-    s32 isPac;
-
-    memset(owner, 0, 0xB0);
-    owner->active = 1;
-    extension = strrchr(name, '.');
+    memset(stream, 0, sizeof(sdfMovieCb_t));
+    stream->stat = 1;
+    ext = strrchr(path, '.');
     isPac = 0;
-    if (extension != NULL) {
-        isPac = strcasecmp(extension, (const char *)&D_00438D28) == 0;
+    if (ext != NULL) {
+        isPac = strcasecmp(ext, D_00551B50) == 0;
     }
-    owner->isPac = isPac;
-    owner->remainingBytes = 0x7FFFFFFF;
-    owner->drawX = borrowedDescriptor->drawX;
-    owner->drawZ = borrowedDescriptor->drawZ;
-    owner->drawY = borrowedDescriptor->drawY;
-    owner->drawWidth = borrowedDescriptor->drawWidth;
-    owner->drawHeight = borrowedDescriptor->drawHeight;
-    soundFormat.hasAudio = borrowedDescriptor->hasAudio;
-    soundFormat.stereo = borrowedDescriptor->stereo;
-    soundFormat.loopMode = 0;
-    soundFormat.playbackCadenceStep = borrowedDescriptor->playbackCadenceStep;
+    stream->mode = isPac;
+    fmt.loopMode = 0;
+    stream->readRemain = 0x7FFFFFFF;
+    stream->x = desc->x;
+    stream->z = desc->z;
+    stream->y = desc->y;
+    stream->width = desc->width;
+    stream->height = desc->height;
+    fmt.rgbMode = desc->rgbMode;
+    fmt.ditherMode = desc->ditherMode;
+    fmt.fps = desc->fps;
+    if (isPac == 0) {
+        sdfMemHandle_t *handle;
+        u8 *base;
 
-    if (!isPac) {
-        stream = sdfChipAllocZeroDirect(sizeof(*stream));
-        owner->stream.linear = stream;
-        allocation = sdfMemAllocDirect(0x20000);
-        stream->allocation = allocation;
-        {
-            u8 *buffer = (u8 *)sdfMemLock(allocation);
-            stream->bufferStart = buffer;
-            stream->readCursor = buffer;
-            stream->writeCursor = buffer;
+        linear = sdfChipAllocZeroDirect(sizeof(sdfMovieStrmLinear_t));
+        stream->readCb.linear = linear;
+        handle = sdfMemAllocDirect(0x20000);
+        linear->allocation = handle;
+        base = sdfMemLock(handle);
+        linear->bufferStart = base;
+        linear->readCursor = base;
+        linear->writeCursor = base;
+        stream->readStat = 0;
+        stream->fileHandle = sdfFileCmdReadOpen(path, (SdfStreamRead)movieGetStreamSize, stream);
+        movieAttachDecodeTask(&stream->decodeCb, &fmt, movieCopyChunk, stream, desc->resourceWord);
+    } else {
+        sdfMemHandle_t *handle;
+        u8 *base;
+        u8 *ring;
+        u8 *body;
+        u8 *scr;
+        s32 n;
+
+        if (movieStreamSema < 0) {
+            movieStreamSema = sdfCreateSema(1, 1, 0);
         }
-        owner->state = SDF_MOVIE_STATE_INITIAL;
-        owner->deviceState = sdfFileCmdReadOpen(name,
-                                                        (void *)movieGetStreamSize, owner);
-        movieAttachDecodeTask(&owner->soundNode, &soundFormat,
-                                            movieCopyChunk, owner, borrowedDescriptor->source);
+        movieSemaCount = -1;
+        pac = sdfChipAllocZeroDirect(sizeof(sdfMovieStrmPac_t));
+        stream->readCb.pac = pac;
+        handle = sdfMemAllocDirect(0x24000);
+        pac->allocation = handle;
+        base = sdfMemLock(handle);
+        n = 0x20;
+        ring = base + 0x14000;
+        body = base + 0x4000;
+        scr = pac->scratchBuffer;
+        pac->pacBuffer = body;
+        pac->scratch = scr;
+        pac->ringBuffer = ring;
+        pac->scratchSize = n;
+        pac->pacInputBuffer = base;
+        stream->readStat = 0;
+        stream->fileHandle = sdfFileCmdReadOpen(path, (SdfStreamRead)movieReadChunk, stream);
+        stream->sndActive = 1;
+        stream->sndVolume = 0x7F;
+        movieAttachDecodeTask(&stream->decodeCb, &fmt, movieParseHeader, stream, desc->resourceWord);
+    }
+}
+
+void movieCloseStream(sdfMovieCb_t *aMov)
+{
+    u8 state;
+    sdfMovieStrmLinear_t *stream;
+    sdfMovieStrmPac_t *pac;
+
+    if (aMov->stat == 0) {
         return;
     }
-
-    if (movieStreamSema < 0) {
-        movieStreamSema = sdfCreateSema(1, 1, 0);
+    state = aMov->readStat;
+    aMov->cancel = 1;
+    if (state == 5) {
+        aMov->readStat = 7;
+        sdfFileCmdClose(aMov->fileHandle);
+        state = aMov->readStat;
     }
-    movieSemaCount = -1;
-    pacWork = sdfChipAllocZeroDirect(sizeof(*pacWork));
-    owner->stream.pac = pacWork;
-    allocation = sdfMemAllocDirect(0x24000);
-    pacWork->allocation = allocation;
-    resource = (u8 *)sdfMemLock(allocation);
-    pacWork->pacInputBuffer = resource;
-    pacWork->pacBuffer = resource + 0x4000;
-    pacWork->ringBuffer = resource + 0x14000;
-    pacWork->scratchSize = 0x20;
-    pacWork->scratch = pacWork->scratchBuffer;
-    owner->state = SDF_MOVIE_STATE_INITIAL;
-    owner->deviceState = sdfFileCmdReadOpen(name,
-                                                    (void *)movieReadChunk, owner);
-    owner->pacEnabled = 1;
-    owner->packetLimit = 0x7F;
-    movieAttachDecodeTask(&owner->soundNode, &soundFormat,
-                                        movieParseHeader, owner, borrowedDescriptor->source);
-}
-
-/* This no-op also serves as a void(u32) completion callback and ignores its word. */
-extern void sdfDummyFunc();
-
-extern void sdfIpuFree(sdfIpuDecodeCb_t *);
-
-extern void p2sdSyncMovie(void);
-
-/* Wait for active work's release phase, free its owned buffers, then deactivate it. */
-void movieCloseStream(movieStream_t *job) {
-    if (job->active != 0) {
-        job->stopRequested = 1;
-        /* Queue phase 5 as phase 7; phase 6 is the release gate below. */
-        if (job->state == SDF_MOVIE_STATE_WAITING_FOR_BUFFER_SPACE) {
-            job->state = SDF_MOVIE_STATE_STOP_REQUESTED;
-            sdfFileCmdClose(job->deviceState);
-        }
-        while (job->state != SDF_MOVIE_STATE_DEVICE_RELEASE_CALLBACK) {
+    if (state != 6) {
+        do {
             sdfDummyFunc();
-        }
-        if (job->isPac == 0) {
-            MovLinearStream *stream = job->stream.linear;
-            sdfMemFreeDirect(stream->allocation);
-            sdfChipFreeDirect(stream);
-        } else {
-            MovPacStream *stream = job->stream.pac;
-            sdfMemFreeDirect(stream->payloadAllocation);
-            sdfMemFreeDirect(stream->allocation);
-            sdfChipFreeDirect(stream);
-        }
-        sdfIpuFree(&job->soundNode);
-        if (job->pacEnabled != 0) {
-            p2sdSyncMovie();
-        }
-        job->active = 0;
+        } while (aMov->readStat != 6);
     }
+    if (aMov->mode == 0) {
+        stream = aMov->readCb.linear;
+        sdfMemFreeDirect(stream->allocation);
+        sdfChipFreeDirect(stream);
+    } else {
+        pac = aMov->readCb.pac;
+        sdfMemFreeDirect(pac->payloadAllocation);
+        sdfMemFreeDirect(pac->allocation);
+        sdfChipFreeDirect(pac);
+    }
+    sdfIpuFree(&aMov->decodeCb);
+    if (aMov->sndActive != 0) {
+        p2sdSyncMovie();
+    }
+    aMov->stat = 0;
 }
 
-/* Decoder completion requires drained input and no completed output buffers pending. */
-SdfMovieCompletionResult sdfMovieIsFinished(movieStream_t *job) {
-    if (job->soundNode.drained == 0) {
-        return SDF_MOVIE_COMPLETION_INCOMPLETE;
+s32 sdfMovieIsFinished(sdfMovieCb_t *aMov)
+{
+    if (aMov->decodeCb.drained == 0) {
+        return 0;
     }
-    return job->soundNode.completedBufferCount == 0;
+    return aMov->decodeCb.activeBuffCount == 0;
 }
 INCLUDE_SDATA(const s32, "sdf/sdfMovie", movieStreamSema);
 
@@ -850,4 +799,3 @@ INCLUDE_SDATA(const s32, "sdf/sdfMovie", sdfMovieDrawColor);
 INCLUDE_SDATA(const s32, "sdf/sdfMovie", D_00438D24);
 
 INCLUDE_SDATA(const s32, "sdf/sdfMovie", D_00438D28);
-
