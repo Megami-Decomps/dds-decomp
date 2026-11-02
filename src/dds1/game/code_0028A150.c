@@ -33,7 +33,7 @@
 #include "bill_object_api.h"
 #include "eff_resource_slots.h"
 #include "eff_resource_source_lifetime.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf_chip.h"
 #include "eff_curve.h"
 #include "file.h"

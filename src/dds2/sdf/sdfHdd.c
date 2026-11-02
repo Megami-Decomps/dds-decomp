@@ -10,7 +10,7 @@
 #include "sdf_semaphore_api.h"
 #include "sdf_timer.h"
 #include "sdf_chip.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf_draw.h"
 #include "sdf_packet_alloc.h"
 #include "sdf_sif_command.h"

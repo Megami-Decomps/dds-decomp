@@ -25,7 +25,7 @@
 #include "itf_draw_grid.h"
 #include "mnu_staff.h"
 #include "mnu_party_entry_lookup.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "mnu.h"
 #include "mnu_list.h"
 #include "kwln.h"

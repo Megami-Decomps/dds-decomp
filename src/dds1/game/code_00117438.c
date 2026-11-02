@@ -10,7 +10,7 @@
 #include "eff_random_mod.h"
 #include "kwln_task_create.h"
 #include "dds3obj.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "mnu_flag_snapshot.h"
 #include "dds3_path.h"
 #include "eff_transform.h"

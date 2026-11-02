@@ -7,7 +7,7 @@
 #include "sdf_mat4.h"
 #include "dds_nested_resource.h"
 #include "mnu_callback_list.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 
 extern f32 sdfVec3Normalize(f32 *);
 

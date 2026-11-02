@@ -1,6 +1,6 @@
 #include "common.h"
 #include "sdf_packet_list.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "itf.h"
 #include "itf_panel_api.h"
 #include "sdf.h"

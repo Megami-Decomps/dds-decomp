@@ -10,7 +10,7 @@
 #include "sdf_packet_builders.h"
 #include "sdf_chip.h"
 #include "eff_ref_obj.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "eff_anim.h"
 #include "file.h"
 #include "ee_mmi.h"

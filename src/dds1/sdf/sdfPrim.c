@@ -20,7 +20,7 @@
 #include "sdf_packet_slot.h"
 #include "sdf_draw_frame_execution_state.h"
 #include "sdf_chip.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf.h"
 #include "sdf_semaphore_api.h"
 #include "sdf_texture_registry.h"

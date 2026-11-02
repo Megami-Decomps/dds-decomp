@@ -6,7 +6,7 @@
 #include "eff_resource_slots.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf_trig.h"
 #include "mnu.h"
 #include "mnu_movie.h"

@@ -29,7 +29,7 @@
 #include "sdf_packet_append.h"
 #include "eff_thunder_vector.h"
 #include "bill_object_api.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "btl_sound.h"
 #include "eff_blur.h"
 #include "eff_pcp_long_fade_timer.h"

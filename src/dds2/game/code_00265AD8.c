@@ -6,7 +6,7 @@
 #include "kwln.h"
 #include "kwln_fade.h"
 #include "mnu.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "mnu_flag_snapshot.h"
 #include "mnu_event_flag_entries.h"
 #include "mdl_flag_api.h"

@@ -9,7 +9,7 @@
 #include "sdf_asset_create.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "eff.h"
 #include "eff_pcp_ring_block.h"
 #include "eff_math.h"

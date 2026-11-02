@@ -1,7 +1,7 @@
 #include "common.h"
 #include "sdf_chip.h"
 #include "bill_object_api.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf_texture_file.h"
 #include "eff.h"
 #include "eff_node.h"

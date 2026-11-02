@@ -1,7 +1,7 @@
 #include "sdk_ps2.h"
 #include "common.h"
 #include "kwln_background_fade_api.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "kwln.h"
 #include "kwln_task_runner.h"
 #include "kwln_task_create.h"

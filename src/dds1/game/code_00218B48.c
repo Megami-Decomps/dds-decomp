@@ -22,7 +22,7 @@
 #include "file_request_api.h"
 #include "bill_object_api.h"
 #include "sdf_chip.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf.h"
 #include "sdf_texture_registry.h"
 #include "sdf_projection.h"

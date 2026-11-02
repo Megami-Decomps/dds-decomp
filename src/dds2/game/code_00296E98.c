@@ -16,7 +16,7 @@
 #include "kwln.h"
 #include "kwln_task_create.h"
 #include "kwln_fade.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "mnu_result.h"
 #include "brs_ui_update_allowed_api.h"
 #include "mnu_list.h"

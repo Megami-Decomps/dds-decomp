@@ -9,7 +9,7 @@
 #include "sdf_kernel_thread_param.h"
 #include "sdf_thread_workspace_api.h"
 #include "eff_random.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf_vu_matrix.h"
 #include "sdf.h"
 #include "sdf_semaphore_api.h"

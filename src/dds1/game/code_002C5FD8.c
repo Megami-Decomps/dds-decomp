@@ -9,7 +9,7 @@
 #include "sdf_counter_runtime_api.h"
 #include "mnu_list.h"
 #include "sdf_textured_rect.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "fpu.h"
 #include "pcp_vu0.h"
 #include "fld_lmap_task.h"

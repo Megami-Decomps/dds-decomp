@@ -1,7 +1,7 @@
 #include "sdk_ps2.h"
 #include "eff.h"
 #include "common.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "mnu_shooting.h"
 #include "mdl.h"
 #include "mdl_motion_controller_lookup_api.h"

@@ -9,7 +9,7 @@
 #include "file_request_api.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "fld.h"
@@ -788,7 +788,7 @@ sdfMemHandle_t *evtAllocMovieWork(PmdHeader **out) {
 
 #include "common.h"
 #include "sdf_chip.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "evt_viewer.h"
 #include "event.h"
 #include "kwln.h"

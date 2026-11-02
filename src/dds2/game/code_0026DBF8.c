@@ -12,7 +12,7 @@
 #include "btl_stage_task_cleanup.h"
 #include "sdf_chip.h"
 #include "pcp_vu0.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "file_request_api.h"
 #include "mnu_mantra_position_api.h"
 #include "mnu_mantra_model_flag_state.h"

@@ -2,7 +2,7 @@
 #define PAR_TABLE_H
 
 #include "eff.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 
 typedef struct ParSlot {
     u128 *points;

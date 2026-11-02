@@ -8,7 +8,7 @@
 #include "ee_mmi.h"
 #include "sdf_chip.h"
 #include "sdf_chip_range_api.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf.h"
 #include "sdf_gs_mem_delayed_free_api.h"
 #include "sdf_graph_buffer_state.h"

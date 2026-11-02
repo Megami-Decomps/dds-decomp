@@ -2,7 +2,7 @@
 #include "sdf_vu0.h"
 #include "eff_random.h"
 #include "sdf_chip.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "par_draw.h"
 #include "par_kind_api.h"
 #include "par_cell_api.h"

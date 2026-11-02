@@ -9,7 +9,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_column_packet_api.h"
 #include "eff_event_setup.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "ee_mmi.h"
 #include "pcp_vu0.h"
 #include "fpu.h"

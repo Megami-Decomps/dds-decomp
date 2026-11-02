@@ -1,7 +1,7 @@
 #include "common.h"
 #include "dds3_basic_lifecycle.h"
 #include "sdf_chip.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "fld_area_room_resource_load_api.h"
 #include "dds3obj.h"
 #include "basic.h"

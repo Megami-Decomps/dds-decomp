@@ -5,7 +5,7 @@
 #include "kwln_task_runner.h"
 #include "file_pac.h"
 #include "sdf_pac_decode.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "file.h"
 #include "file_request_lifecycle.h"
 #include "file_slot_flags.h"

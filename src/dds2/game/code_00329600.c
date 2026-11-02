@@ -2,7 +2,7 @@
 #include "common.h"
 #include "sdf_timer.h"
 #include "sdf_chip.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf.h"
 #include "sdf_pending.h"
 #include "sdf_named_resource_request_api.h"

@@ -1,6 +1,6 @@
 #include "eff.h"
 #include "common.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "mnu_shooting.h"
 
 void itfDrawModelInstanceImage(ModelInstance *item);

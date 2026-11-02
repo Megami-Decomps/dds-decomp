@@ -6,7 +6,7 @@
 #include "kwln_draw_buffer.h"
 #include "sdf_trig.h"
 #include "kwln_frame_draw_buffer.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf.h"
 #include "eff_blur.h"
 #include "eff_blur_draw_data.h"

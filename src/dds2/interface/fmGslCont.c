@@ -1,7 +1,7 @@
 #include "common.h"
 #include "fr_font.h"
 #include "font_mem_control_api.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 
 /* Release the group's handles once and clear its active-node flag. */
 FntMemControlDestroyResult fmDestroyFontMemControl(void) {

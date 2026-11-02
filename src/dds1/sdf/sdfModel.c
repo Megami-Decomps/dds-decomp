@@ -20,7 +20,7 @@
 #include "sdf_packet_slot.h"
 #include "sdf_draw_frame_execution_state.h"
 #include "sdf_chip.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf.h"
 #include "sdf_semaphore_api.h"
 #include "sdf_texture_registry.h"
@@ -51,7 +51,7 @@
 #include "sdf_key_pool.h"
 #include "sdf_model_command_views.h"
 #ifdef NON_MATCHING
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #endif
 #include "sdf_map_position_api.h"
 #include "sdf_resource_list_release_api.h"

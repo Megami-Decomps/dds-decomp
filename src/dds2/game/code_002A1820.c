@@ -8,7 +8,7 @@
 #include "kwln_background_fade_api.h"
 #include "mnu_result.h"
 #include "sdf_chip.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf.h"
 #include "mnu_movie_playback_api.h"
 #include "sdf_semaphore_api.h"

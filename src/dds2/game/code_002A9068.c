@@ -18,7 +18,7 @@
 #include "kwln.h"
 #include "kwln_task_create.h"
 #include "kwln_fade.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "dat_state.h"
 #include "mnu.h"
 #include "mnu_shop.h"

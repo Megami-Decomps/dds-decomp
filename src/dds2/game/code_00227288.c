@@ -24,7 +24,7 @@
 #include "mdl.h"
 #include "eff_transform.h"
 #include "dat_state.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "mdl_flag_api.h"
 #include "btl_scene_initializer.h"
 #include "pty_frontline_promotion_api.h"

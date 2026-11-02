@@ -17,7 +17,7 @@
 #include "sdf_dev_state.h"
 #include "kwln.h"
 #include "kwln_process_registration.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "fld_waypoint.h"
 #include "fld_elevator_table_selector.h"
 #include "fld_npc_motion.h"

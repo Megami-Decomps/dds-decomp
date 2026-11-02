@@ -6,7 +6,7 @@
 #include "mnu_panel_position_record.h"
 #include "common.h"
 #include "mdl_flag_api.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "mnu.h"
 #include "mnu_list.h"
 

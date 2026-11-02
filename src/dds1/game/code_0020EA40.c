@@ -18,7 +18,7 @@
 #include "btl_action.h"
 #include "dat_state.h"
 #include "ee_mmi.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "btl_scene_initializer.h"
 
 

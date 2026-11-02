@@ -6,7 +6,7 @@
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "sdf_task_work.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "dat_state.h"
 #include "mnu_scene.h"
 #include "mnu_profile_progress.h"

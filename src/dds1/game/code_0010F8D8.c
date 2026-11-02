@@ -1,7 +1,7 @@
 #include "common.h"
 #include "sdf_vu0.h"
 #include "sdf_chip.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "dds3obj.h"
 #include "basic.h"
 #include "dds3_world_scene_node_view.h"

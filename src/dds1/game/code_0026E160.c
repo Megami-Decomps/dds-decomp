@@ -5,7 +5,7 @@
 #include "eff_random.h"
 #include "eff_resource_slots.h"
 #include "eff_resource_source_lifetime.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "mnu.h"
 #include "mnu_movie.h"
 #include "mnu_sprite_resource.h"

@@ -2,7 +2,7 @@
 #include "mnu_list.h"
 #include "kwln_task_state.h"
 #include "evt_world.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "dat_state.h"
 #include "kwln_task_lifecycle.h"
 

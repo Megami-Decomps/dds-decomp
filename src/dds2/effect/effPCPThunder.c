@@ -16,7 +16,7 @@
 #include "sdf_packet_append.h"
 #include "eff_thunder_vector.h"
 #include "par_cell_api.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "btl_sound.h"
 #include "eff.h"
 #include "eff_thunder_particle_records.h"

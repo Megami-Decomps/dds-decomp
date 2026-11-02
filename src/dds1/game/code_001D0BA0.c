@@ -65,7 +65,7 @@
 #include "btl_task_state.h"
 #include "btl_task_poll_result.h"
 #include "btl_task_condition.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf_model.h"
 #include "sdf_model_release_api.h"
 #include "btl.h"

@@ -9,7 +9,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_texture_draw_packet.h"
 #include "sdf_packet_append.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf_primitive.h"
 #include "sdf.h"
 #include "sdf_draw.h"

@@ -4,7 +4,7 @@
 #include "sdf.h"
 #include "sdf_packet_alloc.h"
 #include "sdf_packet_list.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "itf.h"
 #include "itf_mem_node.h"
 #include "kwln.h"

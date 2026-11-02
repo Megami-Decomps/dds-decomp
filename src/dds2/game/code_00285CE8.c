@@ -2,7 +2,7 @@
 #include "common.h"
 #include "sdf_trig.h"
 #include "eff_random.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "dat_state.h"
 #include "mdl_flag_api.h"
 

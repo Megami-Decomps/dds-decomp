@@ -2,7 +2,7 @@
 #include "sdf_vu0.h"
 #include "eff_random.h"
 #include "eff_param.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "eff.h"
 #include "eff_math.h"
 #include "eff_channel.h"

@@ -11,7 +11,7 @@
 #include "pty_profile_record_value.h"
 #include "sdf_vu0.h"
 #include "eff_random.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf_vu_matrix.h"
 #include "file.h"
 #include "sdf.h"

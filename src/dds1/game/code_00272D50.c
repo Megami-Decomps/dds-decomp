@@ -9,7 +9,7 @@
 #include "mnu_ability_target_category.h"
 #include "mnu_staff_item_use_api.h"
 #include "mnu_staff_bullet_list_refresh_api.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "mnu_list.h"
 #include "mnu_shop.h"
 #include "mnu_scroll_panel.h"

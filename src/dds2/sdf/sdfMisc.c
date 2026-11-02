@@ -5,7 +5,7 @@
 #include "ee_mmi.h"
 #include "sdf_trig.h"
 #include "sdf_chip.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf_draw.h"
 #include "sdf_sif_command.h"
 #include "sdf_dev_event.h"

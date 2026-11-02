@@ -5,7 +5,7 @@
 #include "mnu_callback_list.h"
 #include "sdf_sprite_record.h"
 #include "sdf_word_array_record.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 
 extern f32 sdfVec3Normalize(f32 *);
 

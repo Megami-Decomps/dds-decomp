@@ -12,7 +12,7 @@
 #include "itf_option_bit_index_api.h"
 #include "snd_pad.h"
 #include "sdf_packet_list.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf_pac_reloc.h"
 #include "fr_font_temporary_entry_api.h"
 #include "itf_mes_state_api.h"

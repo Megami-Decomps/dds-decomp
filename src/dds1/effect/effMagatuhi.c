@@ -6,7 +6,7 @@
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "eff_math.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 

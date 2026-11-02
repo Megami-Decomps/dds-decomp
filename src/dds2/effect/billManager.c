@@ -10,7 +10,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_compact_vertex_vif_packet.h"
 #include "bill_object_api.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf_texture_file.h"
 #include "ee_mmi.h"
 #include "eff.h"

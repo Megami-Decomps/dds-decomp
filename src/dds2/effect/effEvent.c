@@ -11,7 +11,7 @@
 #include "eff_random.h"
 #include "sdf_chip.h"
 #include "eff_param.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "ee_mmi.h"
 #include "btl_sound.h"
 #include "eff_blur.h"

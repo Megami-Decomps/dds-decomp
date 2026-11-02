@@ -18,7 +18,7 @@
 #include "mnu.h"
 #include "mnu_list.h"
 #include "mnu_terminal_work.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "kwln.h"
 #include "kwln_fade.h"
 #include "dat_state.h"

@@ -13,7 +13,7 @@
 #include "sdf_packet_append.h"
 #include "bill_object_api.h"
 #include "par_cell_api.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "par_draw.h"
 #include "eff_packet_params.h"
 #include "par_kind_api.h"

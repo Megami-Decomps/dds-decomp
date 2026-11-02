@@ -7,7 +7,7 @@
 #include "sdf_chip.h"
 #include "sdf_dev_state.h"
 #include "kwln.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "fld_waypoint.h"
 #include "fld_npc_motion.h"
 #include "fld_inf.h"

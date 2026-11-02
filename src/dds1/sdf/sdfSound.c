@@ -22,7 +22,7 @@
 #include "eeregs.h"
 #include "mnu_voice_resource_path_api.h"
 #include "ee_mmi.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf_packed_resource.h"
 #include "sdf_pac_reloc.h"
 #include "sdf.h"

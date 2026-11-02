@@ -1,7 +1,7 @@
 #include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_chip.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf_movie_api.h"
 #include "sdf_stream_read_api.h"
 #include "sdf_semaphore_api.h"

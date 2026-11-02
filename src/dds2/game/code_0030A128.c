@@ -20,7 +20,7 @@
 #include "kwln.h"
 #include "kwln_task_runner.h"
 #include "kwln_task_create.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf.h"
 #include "itf_grid_text.h"
 #include "itf_grid_text_color_api.h"

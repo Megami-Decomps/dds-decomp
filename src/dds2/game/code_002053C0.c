@@ -18,7 +18,7 @@
 #include "btl_task_state.h"
 #include "btl_task_condition.h"
 #include "btl_task_poll_result.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf_model.h"
 #include "btl.h"
 #include "sdf_texture_offset_list.h"

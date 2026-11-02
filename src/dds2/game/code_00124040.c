@@ -35,7 +35,7 @@
 #include "dds3_path.h"
 #include "dds3_slot1_handler_api.h"
 #include "sdf_dev_state.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "mdl.h"
 #include "field_stage.h"
 #include "eff_blur.h"

@@ -5,7 +5,7 @@
 #include "sdf_quaternion.h"
 #include "sdf_mat4.h"
 #include "fr_font.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "fpu.h"
 #include "pcp_vu0.h"
 typedef struct Vec3 {

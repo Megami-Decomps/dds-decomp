@@ -7,7 +7,7 @@
 #include "eff_random.h"
 #include "sdf_chip.h"
 #include "par_cell_api.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "eff.h"
 #include "eff_param.h"
 #include "eff_pcp_boss.h"

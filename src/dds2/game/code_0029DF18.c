@@ -758,7 +758,7 @@ s32 brsCalcProgressAnimationStep(BrsSkillPackageWork *work, BrsProgressRow *prog
 #include "common.h"
 #include "mnu_result.h"
 #include "sdf_chip.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
 #include "mnu_title_effect.h"

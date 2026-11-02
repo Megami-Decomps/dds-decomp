@@ -4,7 +4,7 @@
 #include "common.h"
 #include "mc_sync_api.h"
 #include "kwln_task_create.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "file.h"
 #include "file_slot_flags.h"
 #include "file_request_entry.h"

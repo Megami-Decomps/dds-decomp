@@ -2,7 +2,7 @@
 #include "common.h"
 #include "sdf_chip.h"
 #include "sdf_chip_range_api.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf.h"
 #include "sdf_chip_page_link_view.h"
 #include "sdf_pending.h"

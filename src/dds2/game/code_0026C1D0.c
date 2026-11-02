@@ -19,7 +19,7 @@
 #include "itf_mes_entry_start_api.h"
 #include "itf_mes_select_def_key_result.h"
 #include "evt_world.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "dat_state.h"
 #include "kwln_task_lifecycle.h"
 #include "sdf_texture_file.h"

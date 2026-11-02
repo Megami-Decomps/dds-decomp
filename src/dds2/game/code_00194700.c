@@ -9,7 +9,7 @@
 #include "sdf_packet_list.h"
 #include "kwln_sprite.h"
 #include "eff_event_setup.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 
 #include "sdf.h"
 extern s8 dds3PadBitTable[0x20];

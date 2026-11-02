@@ -7,7 +7,7 @@
 #include "mnu.h"
 #include "mnu_item_requirement_api.h"
 #include "mnu_shop.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "mnu_staff.h"
 #include "mnu_ability_target_category.h"
 #include "mnu_staff_item_use_api.h"

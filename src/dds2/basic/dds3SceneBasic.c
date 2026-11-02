@@ -1,6 +1,6 @@
 #include "common.h"
 #include "scr.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "dds3obj.h"
 #include "evt_world_object_api.h"
 #include "evt_world.h"

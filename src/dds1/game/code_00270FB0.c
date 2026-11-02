@@ -8,7 +8,7 @@
 #include "itf_draw_grid.h"
 #include "mnu_staff.h"
 #include "kwln.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "dat_state.h"
 #include "mnu.h"
 #include "eff.h"

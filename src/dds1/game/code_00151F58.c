@@ -19,7 +19,7 @@
 #include "bill_object_api.h"
 #include "bill_linked_value.h"
 #include "par_cell_api.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf_gs_packet.h"
 #include "pcp_vu0.h"
 #include "sdf_vu_transform_api.h"

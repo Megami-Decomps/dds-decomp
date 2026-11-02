@@ -1,7 +1,7 @@
 #include "common.h"
 #include "sdf_chip.h"
 #include "par_cell_api.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "ee_mmi.h"
 #include "eff.h"
 #include "eff_node.h"

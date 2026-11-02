@@ -4,7 +4,7 @@
 #include "sdf_mat4.h"
 #include "snd_sequence_volume_pan.h"
 #include "eff_random.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "mnu_work.h"
 #include "file.h"
 #include "eff_update_flags.h"

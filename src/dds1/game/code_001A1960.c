@@ -28,7 +28,7 @@
 #include "fr_font.h"
 #include "eff_resource_slots.h"
 #include "sdf_chip.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "btl_scene_fade.h"
 #include "btl_resource.h"
 #include "pcp_vu0.h"

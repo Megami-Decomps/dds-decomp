@@ -22,7 +22,7 @@
 #include "eff_resource_list.h"
 #include "mnu.h"
 #include "mnu_party_panel_api.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "mnu_staff.h"
 #include "mnu_party_entry_lookup.h"
 #include "kwln.h"

@@ -8,7 +8,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_packet_append.h"
 #include "par_cell_api.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
 #include "ee_mmi.h"

@@ -8,7 +8,7 @@
 #include "kwln_frame_draw_buffer.h"
 #include "sdf_packet_list.h"
 #include "sdf_column_packet_api.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "btl_sound.h"
 #include "eff_param.h"
 #include "kwln_sprite.h"

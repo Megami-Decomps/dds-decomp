@@ -5,7 +5,7 @@
 #include "sdf_trig.h"
 #include "eff_random.h"
 #include "sdf_quaternion.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "eff.h"
 #include "eff_math.h"
 #include "eff_pcp_flash.h"

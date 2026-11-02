@@ -11,7 +11,7 @@
 #include "itf_mes_window.h"
 #include "itf_mes_panel_mode.h"
 #include "sdf_packet_list.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "evt_viewer.h"
 #include "event.h"
 #include "evt_menu_table_entry_availability.h"

@@ -1,5 +1,5 @@
-#ifndef SDF_RESOURCE_H
-#define SDF_RESOURCE_H
+#ifndef SDF_HEAP_API_H
+#define SDF_HEAP_API_H
 
 #include "common.h"
 
@@ -70,4 +70,4 @@ struct sdfMemHandle_t *sdfDevLoadFileEx(
 void sdfMemFreeDelayedDirect(struct sdfMemHandle_t *allocation);
 void sdfChipFreeDelayedDirect(void *memory);
 
-#endif /* SDF_RESOURCE_H */
+#endif /* SDF_HEAP_API_H */

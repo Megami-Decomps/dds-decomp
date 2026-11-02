@@ -4,7 +4,7 @@
 #include "sdf_chip.h"
 #include "kwln.h"
 #include "kwln_task_create.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "scr.h"
 #include "scr_process_task_owner_api.h"
 #include "scr_procedure_start_api.h"

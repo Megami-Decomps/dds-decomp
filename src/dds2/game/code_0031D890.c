@@ -1,6 +1,6 @@
 #include "sdk_ps2.h"
 #include "common.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "mnu_shooting.h"
 #include "sdf.h"
 

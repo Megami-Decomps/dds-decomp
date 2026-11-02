@@ -20,7 +20,7 @@
 #include "mnu_party_menu_data.h"
 #include "brs_level_progress_api.h"
 #include "mnu_panel_state.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "mnu_staff.h"
 #include "mnu_ability_target_category.h"
 #include "mnu_list.h"

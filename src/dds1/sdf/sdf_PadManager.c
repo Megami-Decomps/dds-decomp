@@ -18,7 +18,7 @@
 #include "sdf_packet_list.h"
 #include "sdf_packet_header.h"
 #include "sdf_packet_append.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf_primitive_packet_api.h"
 #include "sdf.h"
 #include "sdf_draw.h"

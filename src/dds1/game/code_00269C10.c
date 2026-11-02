@@ -10,7 +10,7 @@
 #include "dds3obj.h"
 #include "dds3_world_selection.h"
 #include "dds3_world_value.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "kwln.h"
 #include "mnu_title_effect.h"
 #include "file.h"

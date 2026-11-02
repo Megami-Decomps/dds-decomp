@@ -19,7 +19,7 @@
 #include "eff_resource_slots.h"
 #include "eff_mapped_resource_destroy_result.h"
 #include "eff_resource_source_lifetime.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "evt_viewer.h"
 #include "event.h"
 #include "evt_viewer_indexed_condition.h"

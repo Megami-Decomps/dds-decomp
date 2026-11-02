@@ -15,7 +15,7 @@
 #include "kwln.h"
 #include "kwln_task_priority_query.h"
 #include "kwln_task_create.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "pcp_vu0.h"
 #include "dat_state.h"
 #include "btl_state.h"

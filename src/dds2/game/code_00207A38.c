@@ -33,7 +33,7 @@
 #include "btl_resource_browser.h"
 #include "eff_ref_obj.h"
 #include "btl_task_condition.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "bill_object_api.h"
 #include "btl_state.h"
 #include "btl_unit_pose_state.h"

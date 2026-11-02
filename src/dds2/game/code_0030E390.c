@@ -3,7 +3,7 @@
 #include "sdf_vu0.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_vector_latch.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "fpu.h"
 #include "pcp_vu0.h"
 #include "fld_lmap_task.h"

@@ -14,7 +14,7 @@
 #include "kwln.h"
 #include "pty_skill_menu_api.h"
 #include "mnu_list.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "mnu_staff.h"
 #include "fpu.h"
 #include "dat_state.h"

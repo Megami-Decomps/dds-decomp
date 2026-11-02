@@ -1,6 +1,6 @@
 #include "common.h"
 #include "sdf_chip.h"
-#include "sdf_resource.h"
+#include "sdf_heap_api.h"
 #include "sdf.h"
 #include "dds3_model_range.h"
 
