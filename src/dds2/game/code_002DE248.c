@@ -1887,7 +1887,7 @@ void effUpdateScaledBillboardFrame(EffBillboardWork *work) {
     if (work->frame < dds3BillboardGetAnimFrame(work->billboard)) {
         dds3BillboardSetAnimKey2(work->billboard, work->frame);
         VU0_LOAD_VF(vf10, work->rotation);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         VU0_LOAD_VF(vf10, D_0042BC10);
         VU0_ROTATE_VEC(vf10, vf10);
         VU0_STORE_VF(vf10, &dir);
@@ -2183,7 +2183,7 @@ void billUpdateFrameDrawColorAndTransform(BillCellDrawWork *work) {
     out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
     out->flag = ((EffBillFrameHeader *)config)->mode;
     VU0_LOAD_VF(vf10, work->transform);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     VU0_LOAD_VF(vf10, effOnesVector);
     VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALE_MATRIX_ROWS(vf10);
@@ -2472,7 +2472,7 @@ void billUpdateCellDrawColorAndTransform(BillCellDrawWork *work) {
     out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
     out->flag = ((EffBillFrameHeader *)config)->mode;
     VU0_LOAD_VF(vf10, work->transform);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     VU0_LOAD_VF(vf10, effOnesVector);
     VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALE_MATRIX_ROWS(vf10);
@@ -2778,7 +2778,7 @@ void billUpdateParticleDrawColorAndTransform(BillCellDrawWork *work) {
     out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
     out->flag = ((EffBillFrameHeader *)config)->mode;
     VU0_LOAD_VF(vf10, work->transform);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     VU0_LOAD_VF(vf10, effOnesVector);
     VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALE_MATRIX_ROWS(vf10);
@@ -3082,7 +3082,7 @@ void billUpdateAlternatingDrawColorAndTransform(BillCellDrawWork *work) {
     out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
     out->flag = ((EffBillFrameHeader *)config)->mode;
     VU0_LOAD_VF(vf10, work->transform);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     VU0_LOAD_VF(vf10, effOnesVector);
     VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALE_MATRIX_ROWS(vf10);
@@ -3388,7 +3388,7 @@ void billUpdateEmitterDrawColorAndTransform(u8 *work) {
     out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
     out->flag = ((EffBillFrameHeader *)config)->mode;
     VU0_LOAD_VF(vf10, work + 0x10);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     VU0_LOAD_VF(vf10, effOnesVector);
     VU0_SCALAR_OP_CLOBBER(((BillCellDrawWork *)work)->scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALE_MATRIX_ROWS(vf10);
@@ -3724,7 +3724,7 @@ void billUpdateStripDrawColorAndTransform(u8 *work) {
     out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
     out->flag = ((EffBillFrameHeader *)config)->mode;
     VU0_LOAD_VF(vf10, work + 0x10);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     VU0_LOAD_VF(vf10, effOnesVector);
     VU0_SCALAR_OP_CLOBBER(((BillCellDrawWork *)work)->scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALE_MATRIX_ROWS(vf10);
@@ -4031,7 +4031,7 @@ void billUpdateTrailDrawColorAndTransform(u8 *work) {
     out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
     out->flag = ((EffBillFrameHeader *)config)->mode;
     VU0_LOAD_VF(vf10, work + 0x10);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     VU0_LOAD_VF(vf10, effOnesVector);
     VU0_SCALAR_OP_CLOBBER(((BillCellDrawWork *)work)->scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALE_MATRIX_ROWS(vf10);
@@ -4394,7 +4394,7 @@ void billUpdateQuadDrawColorAndTransform(u8 *work) {
     out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
     out->flag = ((EffBillFrameHeader *)config)->mode;
     VU0_LOAD_VF(vf10, work + 0x10);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     VU0_LOAD_VF(vf10, effOnesVector);
     VU0_SCALAR_OP_CLOBBER(((BillCellDrawWork *)work)->scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALE_MATRIX_ROWS(vf10);
@@ -5066,7 +5066,7 @@ void billDrawCellBlendA(BillCellDrawWork *work) {
         out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
         out->flag = ((EffBillOutputHeader *)config)->outputMode;
         VU0_LOAD_VF(vf10, work->transform);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         VU0_LOAD_VF(vf10, effOnesVector);
         VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
         VU0_SCALE_MATRIX_ROWS(vf10);
@@ -5251,7 +5251,7 @@ void billDrawClassUpdatedCellBlend(BillCellDrawWork *work) {
         out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
         out->flag = ((EffBillOutputHeader *)config)->outputMode;
         VU0_LOAD_VF(vf10, work->transform);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         VU0_LOAD_VF(vf10, effOnesVector);
         VU0_SCALAR_OP(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
         VU0_SCALE_MATRIX_ROWS(vf10);
@@ -5424,7 +5424,7 @@ void billDrawCellBlendB(EffClassWork *work) {
         out->type = config->alphaTrack.surfaceIndex;
         out->flag = config->flag;
         VU0_LOAD_VF(vf10, work->vectors.orientation);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         VU0_LOAD_VF(vf10, effOnesVector);
         VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
         VU0_SCALE_MATRIX_ROWS(vf10);
@@ -6102,7 +6102,7 @@ void effDrawSurfaceNode(s32 nodeAddress) {
         fileReadRecordSecondVector((u8 *)record, quaternion);
         fileReadVectorPtr20((u8 *)node->record, translation);
         VU0_LOAD_VF(vf10, quaternion);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         VU0_LOAD_VF(vf10, translation);
         VU0_SET_W_ONE(vf10);
         VU0_MOVE_VF(vf31, vf10);
@@ -6244,7 +6244,7 @@ void effDrawSurfaceNode(s32 nodeAddress) {
             fileReadRecordSecondVector((u8 *)record, quaternion);
             fileReadVectorPtr20((u8 *)node->record, translation);
             VU0_LOAD_VF(vf10, quaternion);
-            effMiscQuaternionToMatrixVU();
+            ToMatrix();
             VU0_LOAD_VF(vf31, translation);
             VU0_STORE_MATRIX(&drawMatrix);
             for (rowIndex = 0; rowIndex < count; rowIndex++, row++) {
@@ -6290,7 +6290,7 @@ void effDrawSurfaceNode(s32 nodeAddress) {
             fileReadRecordSecondVector((u8 *)record, quaternion);
             fileReadVectorPtr20((u8 *)node->record, translation);
             VU0_LOAD_VF(vf10, quaternion);
-            effMiscQuaternionToMatrixVU();
+            ToMatrix();
             VU0_LOAD_VF(vf31, translation);
             VU0_STORE_MATRIX(&drawMatrix);
             for (rowIndex = 0; rowIndex < count; rowIndex++, row++, job++) {
@@ -6337,7 +6337,7 @@ void effDrawSurfaceNode(s32 nodeAddress) {
             fileReadRecordSecondVector((u8 *)record, quaternion);
             fileReadVectorPtr20((u8 *)node->record, translation);
             VU0_LOAD_VF(vf10, quaternion);
-            effMiscQuaternionToMatrixVU();
+            ToMatrix();
             VU0_LOAD_VF(vf31, translation);
             VU0_STORE_MATRIX(&drawMatrix);
             for (rowIndex = 0; rowIndex < count; rowIndex++, row++, queue++) {
@@ -6391,7 +6391,7 @@ void effDrawSurfaceNode(s32 nodeAddress) {
             fileReadRecordSecondVector((u8 *)record, quaternion);
             fileReadVectorPtr20((u8 *)node->record, translation);
             VU0_LOAD_VF(vf10, quaternion);
-            effMiscQuaternionToMatrixVU();
+            ToMatrix();
             VU0_LOAD_VF(vf31, translation);
             VU0_STORE_MATRIX(&drawMatrix);
             for (rowIndex = 0; rowIndex < count; rowIndex++, row++) {
@@ -6970,7 +6970,7 @@ void effDrawQuadWork(EffQuadWork *work) {
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     VU0_LOAD_VF(vf10, work->orientation);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     VU0_LOAD_VF(vf10, work->position);
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
@@ -7232,7 +7232,7 @@ void effUpdateRadialWavePointRows(EffClassWork *work) {
     VU0_SUB(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, view);
     VU0_LOAD_VF(vf10, work->vectors.orientation);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     VU0_LOAD_VF(vf10, effWorldUpVector);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_STORE_VF(vf10, direction);
@@ -7959,7 +7959,7 @@ void effDrawRetainedPointSetRows(EffClassWork *work) {
     VU0_MUL(vf10, vf10, vf11);
     VU0_STORE_VF_UNCLOBBERED(vf10, colorFactor);
     VU0_LOAD_VF(vf10, work->vectors.orientation);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     VU0_LOAD_VF(vf10, effOnesVector);
     VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALE_MATRIX_ROWS(vf10);
@@ -8155,7 +8155,7 @@ void effUpdateLightningPointSetRows(EffClassWork *work) {
     VU0_NEGATE_XYZ(vf10);
     VU0_STORE_VF(vf10, negativeOuterWidth);
     VU0_LOAD_VF(vf10, work->vectors.orientation);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     VU0_LOAD_VF(vf10, effWorldUpVector);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_SCALAR_OP(config->totalLength, "vmulx.xyzw vf10, vf10, vf2x");
@@ -8702,7 +8702,7 @@ void effDrawEffectStrip(EffectStripNode *node) {
         fileReadRecordSecondVector(node->active, rotation);
         fileReadVectorPtr20(node->active, translation);
         VU0_LOAD_VF(vf10, rotation);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         VU0_LOAD_VF(vf10, translation);
         VU0_SET_W_ONE(vf10);
         VU0_MOVE_VF(vf31, vf10);
@@ -9269,7 +9269,7 @@ void effBlendBillboardInstanceColorsAndTransforms(u8 *work) {
     out->surfaceIndex = config->common.header.timed.alphaTrack.surfaceIndex;
     out->drawMode = config->common.drawMode;
     VU0_LOAD_VF(vf10, work + 0x10);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     VU0_LOAD_VF(vf10, effOnesVector);
     VU0_SCALAR_OP_CLOBBER(((BillCellDrawWork *)work)->scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALE_MATRIX_ROWS(vf10);
@@ -9652,7 +9652,7 @@ void effBillBlendCellColorAndUpdateTransform(BillCellDrawWork *work) {
     out->surfaceIndex = config->common.header.timed.alphaTrack.surfaceIndex;
     out->drawMode = config->common.drawMode;
     VU0_LOAD_VF(vf10, work->transform);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     VU0_LOAD_VF(vf10, effOnesVector);
     VU0_SCALAR_OP_CLOBBER(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALE_MATRIX_ROWS(vf10);
@@ -9984,7 +9984,7 @@ void effUpdateCompactRingDrawColorAndTransform(u8 *work) {
     out->surfaceIndex = config->common.header.timed.alphaTrack.surfaceIndex;
     out->drawMode = config->common.drawMode;
     VU0_LOAD_VF(vf10, work + 0x10);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     VU0_LOAD_VF(vf10, effOnesVector);
     VU0_SCALAR_OP_CLOBBER(((BillCellDrawWork *)work)->scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALE_MATRIX_ROWS(vf10);
@@ -10657,7 +10657,7 @@ void effUpdateTintedScaledMesh(BillCellDrawWork *work) {
     ((EffStripWork *)out)->type = ((EffBillFlameConfig *)config)->header.timed.alphaTrack.surfaceIndex;
     ((EffStripWork *)out)->flag = ((EffBillFlameConfig *)config)->meshMode;
     VU0_LOAD_VF(vf10, work->transform);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     VU0_LOAD_VF(vf10, effOnesVector);
     VU0_SCALAR_OP(work->scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALE_MATRIX_ROWS(vf10);
@@ -10915,7 +10915,7 @@ void func_002F2AE8(EffClassWork *work) {
             fileReadRecordSecondVector(state->record, (u128 *)orientation);
             fileReadVectorPtr20(state->record, (u128 *)origin);
             VU0_LOAD_VF(vf10, orientation);
-            effMiscQuaternionToMatrixVU();
+            ToMatrix();
             VU0_LOAD_VF(vf31, origin);
             VU0_STORE_MATRIX(matrix);
             for (i = 0; i < count; i++, slot++, position += 2) {
@@ -11199,7 +11199,7 @@ void effUpdateFadedMeshTransform(BillCellDrawWork *work) {
     ((EffStripWork *)out)->flag = ((EffBillQuantizedConfig *)config)->meshMode;
     scale = effSampleScalarCurve(&((EffBillQuantizedConfig *)config)->scaleCurve, limit, progress) * work->scale;
     VU0_LOAD_VF(vf10, work->transform);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     VU0_LOAD_VF(vf10, effOnesVector);
     VU0_SCALAR_OP(scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALE_MATRIX_ROWS(vf10);
@@ -12018,7 +12018,7 @@ void effDrawParticleSpanPointsAndReferences(EffModelResource *work) {
     EffSpanRecord *record;
 
     VU0_LOAD_VF(vf10, work->orientation);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     VU0_LOAD_VF(vf10, effOnesVector);
     VU0_SCALAR_OP(scale, "vmulx.xyzw vf10, vf10, vf2x");
     VU0_SCALE_MATRIX_ROWS(vf10);
@@ -13036,11 +13036,11 @@ s32 func_002F6D00(EffActiveResource *owner) {
             btlCopyUnitRotationQuaternion(actor, actorRotation);
             VU0_LOAD_VF(vf10, actorRotation);
             VU0_LOAD_VF(vf11, &D_003E9F70);
-            effMiscQuatMultiplyVU();
+            Mult();
             VU0_STORE_VF(vf10, actorRotation);
             break;
         }
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         VU0_LOAD_VF(vf10, position);
         VU0_ROTATE_VEC(vf10, vf10);
     }
@@ -13051,9 +13051,9 @@ s32 func_002F6D00(EffActiveResource *owner) {
     dds3PathBasicControlGetRot(path);
     if (config->actorSelection != 5) {
         VU0_LOAD_VF_MEMORY(vf11, actorRotation);
-        effMiscQuatMultiplyVU();
+        Mult();
     }
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     VU0_LOAD_VF(vf10, &D_003E9130);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_STORE_VF(vf10, eyeOffset);
@@ -13829,7 +13829,7 @@ void effDrawMovingRadialCylinder(EffActiveResource *work) {
     sdfDrawTagLink(list, (u32)gs);
 
     VU0_LOAD_VF(vf10, work->orientation);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     VU0_LOAD_VF(vf11, effWorldUpVector);
     VU0_ROTATE_VEC(vf11, vf11);
     travel = config->travelPerFrame * (f32)(s32)state->unk00;
@@ -14143,7 +14143,7 @@ void effDrawGrowingTexturedStrip(EffActiveResource *work) {
         VU0_STORE_VF_UNCLOBBERED(vf0, orientation);
     }
     VU0_LOAD_VF(vf10, orientation);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     VU0_LOAD_VF(vf10, first);
     VU0_SET_W_ONE(vf10);
     VU0_MOVE_VF(vf31, vf10);
@@ -14910,7 +14910,7 @@ void func_002FAD98(EffectSlotNode80 *node) {
             fileReadRecordSecondVector((u8 *)record, rotation);
             fileReadVectorPtr20((u8 *)node->record, translation);
             VU0_LOAD_VF(vf10, rotation);
-            effMiscQuaternionToMatrixVU();
+            ToMatrix();
             VU0_LOAD_VF(vf31, translation);
             VU0_STORE_MATRIX(matrix);
             for (i = 0; i < count; i++, slot++, direction += 6) {
@@ -14979,7 +14979,7 @@ void func_002FAD98(EffectSlotNode80 *node) {
             fileReadRecordSecondVector((u8 *)record, rotation);
             fileReadVectorPtr20((u8 *)node->record, translation);
             VU0_LOAD_VF(vf10, rotation);
-            effMiscQuaternionToMatrixVU();
+            ToMatrix();
             VU0_LOAD_VF(vf31, translation);
             VU0_STORE_MATRIX(matrix);
             for (i = 0; i < count; i++, slot++, queues++) {
@@ -15456,11 +15456,11 @@ void effMultiplyQuatWithFlag(u8 *work) {
         camAimRotation(work, &rotation);
         VU0_LOAD_VF_MEMORY(vf10, effFileQueue->quat);
         VU0_LOAD_VF_MEMORY(vf11, &rotation);
-        effMiscQuatMultiplyVU();
+        Mult();
     } else {
     VU0_LOAD_VF_MEMORY(vf10, effFileQueue->quat);
     VU0_LOAD_VF_MEMORY(vf11, ((FileJob *)work)->quat);
-        effMiscQuatMultiplyVU();
+        Mult();
     }
 }
 
@@ -17348,11 +17348,11 @@ decreaseRoll:
     VU0_STORE_VF_UNCLOBBERED(vf10, direction);
     if (flags & 2) {
         pitch = -acosf(-direction[1]);
-        sdfConvertEulerAnglesToQuaternionVU(pitch, atan2f(direction[0], direction[2]), 0.0f);
+        FromEuler(pitch, atan2f(direction[0], direction[2]), 0.0f);
         VU0_STORE_VF_UNCLOBBERED(vf10, direction);
-        sdfConvertEulerAnglesToQuaternionVU(0.0f, (f32)(s8)D_0043875A * 0.39269908f, 0.0f);
+        FromEuler(0.0f, (f32)(s8)D_0043875A * 0.39269908f, 0.0f);
         VU0_LOAD_VF(vf11, direction);
-        effMiscQuatMultiplyVU();
+        Mult();
         VU0_STORE_VF(vf10, D_0045C300);
     }
     btlBossDebugPrintfN(8, 48, 0, "H:%2d,D:%2d,R:%2d",
@@ -17421,7 +17421,7 @@ u32 effUpdateCameraSnapshotGuides(EffectStateSnapshot *state, s8 useBattlePositi
     VU0_STORE_VF_UNCLOBBERED(vf10, &scratch.segmentStart);
 
     VU0_LOAD_VF(vf10, state->quat);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     VU0_STORE_MATRIX_UNCLOBBERED(scratch.rotationMatrix);
 
     VU0_LOAD_VF(vf10, &effWorldUpVector);

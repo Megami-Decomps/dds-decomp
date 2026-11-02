@@ -11,7 +11,7 @@ void dds3MakeMatrix(const f32 scale[4],
                                        const f32 rotation[4],
                                        const f32 translation[4]) {
     SDF_VU0_LOADVECTOR(rotation);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     SDF_VU0_LOADVECTOR(scale);
     SDF_VU0_SCALE_XYZ();
     SDF_VU0_LOADVECTOR(translation);

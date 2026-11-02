@@ -1200,8 +1200,8 @@ void effEventUpdateEffectParameters(effEveBEDCutHandle_t *work) {
     list = effect->list;
     SDF_VU0_LOADVECTOR(work->init.orientation);
     SDF_VU0_LOADVECTOR_B(D_00414A00);
-    effMiscQuatMultiplyVU();
-    effMiscQuaternionToMatrixVU();
+    Mult();
+    ToMatrix();
     VU0_STORE_MATRIX_NOCLOBBER(rotationMatrix);
     count = list->count;
     entry = list->entries;
@@ -1378,7 +1378,7 @@ void effEveBEDPartGetPositionPtr(EffEventInit *source, EffectVectorRequest *para
         dir[2] = 1.0f;
         dir[1] = 0.0f;
         SDF_VU0_LOADVECTOR(source->orientation);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         sdfVuLoadSecondaryRotationMatrixY(D_003B2CE8[directionMode]);
         sdfComposeVuMatrixFromRegisters();
         SDF_VU0_LOADVECTOR(dir);

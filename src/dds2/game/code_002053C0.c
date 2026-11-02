@@ -634,7 +634,7 @@ void btlPlaceTripleFormationAroundTarget(ActionStateLink *link, BtlUnit *first, 
             radius = 500.0f;
         }
         SDF_VU0_LOADVECTOR(target->orientation);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         SDF_VU0_LOADVECTOR(D_003E9130);
         SDF_VU0_APPLYMATRIX_XYZ();
         VU0_SCALAR_OP(radius, "vmulx.xyzw vf10, vf10, vf2x");
@@ -695,7 +695,7 @@ void btlPlaceTripleFormationAroundMiddleActor(ActionStateLink *link, BtlUnit *fi
     }
     if (slot[1] != 0) {
         SDF_VU0_LOADVECTOR((u8 *)slot[1] + 0x70);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         SDF_VU0_LOADVECTOR(D_003E9130);
         SDF_VU0_APPLYMATRIX_XYZ();
         SDF_VU0_COPYVECTOR_A_TO_B();

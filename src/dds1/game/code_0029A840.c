@@ -666,7 +666,7 @@ void func_0029B818(EffResourceOwner *owner) {
                 fileQueueSetPosition(*queue, position);
                 sdfVuMatrixToQuaternion(matrix);
                 SDF_VU0_LOADVECTOR_B(D_003B2AC0);
-                effMiscQuatMultiplyVU();
+                Mult();
                 SDF_VU0_STOREVECTOR_NOMEM(rotation);
                 fileQueueSetRotation(*queue, rotation);
                 fileQueueSetScale(*queue, scale * distanceScale);

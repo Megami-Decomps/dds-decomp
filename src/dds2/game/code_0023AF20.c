@@ -127,7 +127,7 @@ void evtGetUnitDirVector(evtUnitHandle_t *unit) {
     f32 v[4];
 
     SDF_VU0_LOADVECTOR(unit->effObj->poseset->rotation);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     SDF_VU0_STORE_ROW2(v);
     v[1] = 0.0f;
     v[3] = 1.0f;

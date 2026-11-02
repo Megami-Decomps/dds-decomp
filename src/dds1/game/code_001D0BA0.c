@@ -3111,11 +3111,11 @@ void btlSetUnitRotation(BtlUnit *object, const f32 rotation[4]) {
     SDF_VU0_LOADVECTOR(rotation);
     if (((u32)object->status.flags & 0x10) != 0) {
         SDF_VU0_LOADVECTOR_B(D_003A3B70);
-        effMiscQuatMultiplyVU();
+        Mult();
     }
     SDF_VU0_STOREVECTOR_NOMEM((u8 *)object + 0x70);
     SDF_VU0_LOADVECTOR_B(D_003A3B70);
-    effMiscQuatMultiplyVU();
+    Mult();
     SDF_VU0_STOREVECTOR_NOMEM(vector);
     if (((u32)object->status.flags & 2) != 0) {
         dds3SetRotPoseSet(object->effectObject, (u128 *)vector);
@@ -3457,7 +3457,7 @@ void btlWarpUnitToMotionReach(BtlUnit *unit, BtlUnit *target, s32 index) {
         SDF_VU0_NORMALIZE();
     } else {
         SDF_VU0_LOADVECTOR(unit->orientation);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         SDF_VU0_LOADVECTOR(D_0037E110);
         SDF_VU0_APPLYMATRIX();
         SDF_VU0_LOADVECTOR_B(bodyPos);
@@ -3466,7 +3466,7 @@ void btlWarpUnitToMotionReach(BtlUnit *unit, BtlUnit *target, s32 index) {
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(world);
     SDF_VU0_LOADVECTOR(unit->orientation);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     SDF_VU0_LOADVECTOR(unit->bodyOffset);
     VU0_SCALAR_OP(unit->scale, "vmulx.xyzw vf10, vf10, vf2x");
     SDF_VU0_APPLYMATRIX();
@@ -3625,7 +3625,7 @@ s32 btlApproachTargetTask(BtlApproachTaskArgs *args) {
     SDF_VU0_SUBVECTOR();
     SDF_VU0_GETLENGTH(dist);
     SDF_VU0_LOADVECTOR(&unit->orientation);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     SDF_VU0_LOADVECTOR(&unit->bodyOffset);
     VU0_SCALAR_OP(unit->scale, "vmulx.xyzw vf10, vf10, vf2x");
     SDF_VU0_APPLYMATRIX();
@@ -5869,7 +5869,7 @@ extern u8 D_0037E110[];
 
 void btlInitMotionTransformFromVectors(BtlCamState *object, const f32 *origin, const f32 *direction) {
     SDF_VU0_LOADVECTOR(direction);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     SDF_VU0_LOADVECTOR(D_0037E110);
     SDF_VU0_APPLYMATRIX_XYZ();
     SDF_VU0_STOREVECTOR(object->direction);

@@ -11,7 +11,7 @@
 extern f32 D_0040B530[4];
 
 /* vu0 routine: vf10 = quaternion product vf10 * vf11 */
-void effMiscQuatMultiplyVU(void)
+void Mult(void)
 {
     VU0_QUAT_MUL_VF10_VF11();
 }
@@ -67,7 +67,7 @@ void FromRotation_B(f32 angle)
 
 /* Persona 4 func_004bceb0 @ 004BCEB0 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
 /* vu0 routine: rotation matrix vf28-vf31 from the quaternion in vf10 */
-void effMiscQuaternionToMatrixVU(void)
+void ToMatrix(void)
 {
     VU0_QUAT_TO_MATRIX_VF10();
 }
@@ -100,7 +100,7 @@ void FromEulerXYZ(f32 x, f32 y, f32 z) {
     SDF_VU0_LOADVECTOR((f32 *)quaternion);
 }
 
-void sdfConvertEulerAnglesToQuaternionVU(f32 x, f32 y, f32 z) {
+void FromEuler(f32 x, f32 y, f32 z) {
     volatile f32 quaternion[4] __attribute__((aligned(16)));
     f32 half;
     f32 cx;
@@ -190,7 +190,7 @@ void LookAt(f32 xOffset, f32 yOffset) {
         quaternion[3] = adjustedZ * s;
         SDF_VU0_LOADVECTOR_B(quaternion);
     }
-    effMiscQuatMultiplyVU();
+    Mult();
 }
 
 /* vu0 routine: blend vf10/vf11 along the shorter quaternion arc into vf10.
@@ -249,7 +249,7 @@ f32 EulerAngleAxisY(void)
 {
     f32 rotatedZ;
     f32 rotatedX;
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     /* PEXEW exchanges words 0 and 2: output 0 is Z, while output 1 is X. */
     SDF_VU0_LOADVECTOR_BARRIER(D_0040B530);
     SDF_VU0_APPLYMATRIX_XYZ();

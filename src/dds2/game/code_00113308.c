@@ -309,11 +309,11 @@ s32 effUpdateFollowModelTransform(dds3Basic_t *obj) {
             SDF_VU0_COPYVECTOR_A_TO_B();
             SDF_VU0_LOADVECTOR(&axis);
             FromRotation(sdfSin(data->transitionWork->wobblePhase) * 0.006f);
-            effMiscQuatMultiplyVU();
+            Mult();
         }
         if (data->word18 & 1) {
             SDF_VU0_LOADVECTOR_B(&D_004128A0);
-            effMiscQuatMultiplyVU();
+            Mult();
         }
         mdlSetRotate(model);
         if (dds3CheckPoseSetFlag(obj->poseset, OBJECT_TRANSFORM_FLAG_USE_SMOOTHED_POSITION)) {

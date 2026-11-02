@@ -4762,10 +4762,10 @@ void effPcpUpdateStaggeredPulseModels(EffPCPSprayWork *work) {
             continue;
         }
         data = effParamWorkGetData(work->handle[i]);
-        sdfConvertEulerAnglesToQuaternionVU(0.0f, work->rotationY[i], 0.0f);
+        FromEuler(0.0f, work->rotationY[i], 0.0f);
         if (effBTLFieldColorUsesActorSelectors() && (((BtlUnit *)effBTLFieldColorGetVariantSelector())->status.flags & 0x400)) {
             SDF_VU0_LOADVECTOR_B(D_003A0EF0);
-            effMiscQuatMultiplyVU();
+            Mult();
         }
         mdlSetRotate(data);
         vec[3] = 0;

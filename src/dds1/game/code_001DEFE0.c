@@ -578,16 +578,16 @@ void btlConfigureBattleCameraAction(BtlLinkedCommand *action, BtlCamState *from,
 
         VU0_LOAD_VF(vf10, poses[pose].fromQuaternion);
         VU0_LOAD_VF(vf11, quaternion);
-        effMiscQuatMultiplyVU();
-        effMiscQuaternionToMatrixVU();
+        Mult();
+        ToMatrix();
         VU0_LOAD_VF(vf10, D_0037E110);
         VU0_ROTATE_VEC(vf10, vf10);
         VU0_STORE_VF(vf10, from->direction);
 
         VU0_LOAD_VF(vf10, poses[pose].toQuaternion);
         VU0_LOAD_VF(vf11, quaternion);
-        effMiscQuatMultiplyVU();
-        effMiscQuaternionToMatrixVU();
+        Mult();
+        ToMatrix();
         VU0_LOAD_VF(vf10, D_0037E110);
         VU0_ROTATE_VEC(vf10, vf10);
         VU0_STORE_VF(vf10, to->direction);
@@ -646,15 +646,15 @@ void btlPrepareRandomizedActionCameraPose(BtlLinkedCommand *action, BtlCamState 
         to->distance = distance * poses[pose][8];
         VU0_LOAD_VF(vf10, poses[pose]);
         VU0_LOAD_VF(vf11, quat);
-        effMiscQuatMultiplyVU();
-        effMiscQuaternionToMatrixVU();
+        Mult();
+        ToMatrix();
         VU0_LOAD_VF(vf10, D_0037E110);
         VU0_ROTATE_VEC(vf10, vf10);
         VU0_STORE_VF(vf10, from->direction);
         VU0_LOAD_VF(vf10, &poses[pose][4]);
         VU0_LOAD_VF(vf11, quat);
-        effMiscQuatMultiplyVU();
-        effMiscQuaternionToMatrixVU();
+        Mult();
+        ToMatrix();
         VU0_LOAD_VF(vf10, D_0037E110);
         VU0_ROTATE_VEC(vf10, vf10);
         VU0_STORE_VF(vf10, to->direction);
@@ -726,8 +726,8 @@ void btlBuildSideSelectedActorCameraBlend(BtlLinkedCommand *action, BtlCamState 
         to->distance = distance * poses[pose].distanceScale;
         VU0_LOAD_VF(vf10, poses[pose].quat);
         VU0_LOAD_VF(vf11, quat);
-        effMiscQuatMultiplyVU();
-        effMiscQuaternionToMatrixVU();
+        Mult();
+        ToMatrix();
         VU0_LOAD_VF(vf10, D_0037E110);
         VU0_ROTATE_VEC(vf10, vf10);
         VU0_STORE_VF(vf10, to->direction);
@@ -877,7 +877,7 @@ void btlSetupCameraPoseAimUnit(BtlLinkedCommand *action, BtlCamState *from, BtlC
     VU0_STORE_VF(vf10, &from->position);
     from->distance = unit->cameraRadius * unit->scale / tanf(fov * 0.5f);
     VU0_LOAD_VF(vf10, quat);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     VU0_LOAD_VF(vf10, D_0037E110);
     VU0_NEGATE_XYZ(vf10);
     VU0_ROTATE_VEC(vf10, vf10);
@@ -957,16 +957,16 @@ void btlBuildRandomTargetCameraStates(BtlLinkedCommand *action, BtlCamState *fro
 
     VU0_LOAD_VF(vf10, presets[selected].frontQuaternion);
     VU0_LOAD_VF(vf11, quaternion);
-    effMiscQuatMultiplyVU();
-    effMiscQuaternionToMatrixVU();
+    Mult();
+    ToMatrix();
     VU0_LOAD_VF(vf10, D_0037E110);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_STORE_VF(vf10, from->direction);
 
     VU0_LOAD_VF(vf10, presets[selected].backQuaternion);
     VU0_LOAD_VF(vf11, quaternion);
-    effMiscQuatMultiplyVU();
-    effMiscQuaternionToMatrixVU();
+    Mult();
+    ToMatrix();
     VU0_LOAD_VF(vf10, D_0037E110);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_STORE_VF(vf10, to->direction);
@@ -1072,18 +1072,18 @@ void btlBuildFilteredGroupCameraPair(BtlLinkedCommand *action, BtlCamState *from
     VU0_LOAD_VF(vf10, presets[selected].frontQuaternion);
     if (mask & 0x400) {
         VU0_LOAD_VF(vf11, D_003A4180);
-        effMiscQuatMultiplyVU();
+        Mult();
     }
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     VU0_LOAD_VF(vf10, D_0037E110);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_STORE_VF(vf10, from->direction);
     VU0_LOAD_VF(vf10, presets[selected].backQuaternion);
     if (mask & 0x400) {
         VU0_LOAD_VF(vf11, D_003A4180);
-        effMiscQuatMultiplyVU();
+        Mult();
     }
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     VU0_LOAD_VF(vf10, D_0037E110);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_STORE_VF(vf10, to->direction);
@@ -1933,9 +1933,9 @@ void btlBuildRandomizedActionCameraPosePair(BtlLinkedCommand *action, BtlCamStat
     VU0_LOAD_VF(vf10, poses[pose].fromQuat);
     if (groups & 0x400) {
         VU0_LOAD_VF(vf11, D_003A4310);
-        effMiscQuatMultiplyVU();
+        Mult();
     }
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     VU0_LOAD_VF(vf10, D_0037E110);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_STORE_VF(vf10, direction);
@@ -1944,9 +1944,9 @@ void btlBuildRandomizedActionCameraPosePair(BtlLinkedCommand *action, BtlCamStat
     VU0_LOAD_VF(vf10, poses[pose].toQuat);
     if (groups & 0x400) {
         VU0_LOAD_VF(vf11, D_003A4310);
-        effMiscQuatMultiplyVU();
+        Mult();
     }
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     VU0_LOAD_VF(vf10, D_0037E110);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_STORE_VF(vf10, direction);
@@ -2267,7 +2267,7 @@ void btlFrameCommandTargetGroups(BtlLinkedCommand *action) {
     } else {
         VU0_LOAD_VF(vf10, D_003A43F0);
     }
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     VU0_LOAD_VF(vf10, D_0037E110);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_STORE_VF(vf10, action->camera.direction);
@@ -3059,7 +3059,7 @@ void btlFrameEarliestAnimatedUnitCameraPair(BtlLinkedCommand *action, BtlCamStat
     earliest = selected->reach * selected->scale;
     from->distance = (earliest + earliest) / tanf(halfFov * 1.3333333f);
     VU0_LOAD_VF(vf10, presets[pose].front);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     VU0_LOAD_VF(vf10, D_0037E110);
     if (selected->status.flags & 0x400) {
         VU0_NEGATE_XYZ(vf10);
@@ -3071,7 +3071,7 @@ void btlFrameEarliestAnimatedUnitCameraPair(BtlLinkedCommand *action, BtlCamStat
     VU0_LERP_VF10(0.7f);
     VU0_STORE_VF(vf10, to->position);
     VU0_LOAD_VF(vf10, presets[pose].back);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     VU0_LOAD_VF(vf10, D_0037E110);
     if (selected->status.flags & 0x400) {
         VU0_NEGATE_XYZ(vf10);
@@ -3148,7 +3148,7 @@ void btlStepUnitHeightFramedCamera(BtlLinkedCommand *action) {
             SDF_VU0_NORMALIZE();
             VU0_STORE_VF_UNCLOBBERED(vf10, direction);
             VU0_LOAD_VF(vf10, D_00359EE0);
-            effMiscQuaternionToMatrixVU();
+            ToMatrix();
             VU0_LOAD_VF(vf10, direction);
             VU0_ROTATE_VEC(vf10, vf10);
             VU0_STORE_VF_UNCLOBBERED(vf10, from->direction);
@@ -3241,16 +3241,16 @@ void btlBuildRandomDefeatCandidateCameraPair(BtlLinkedCommand *action, BtlCamSta
 
     VU0_LOAD_VF(vf10, poses[pose].fromQuaternion);
     VU0_LOAD_VF(vf11, quaternion);
-    effMiscQuatMultiplyVU();
-    effMiscQuaternionToMatrixVU();
+    Mult();
+    ToMatrix();
     VU0_LOAD_VF(vf10, D_0037E110);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_STORE_VF(vf10, from->direction);
 
     VU0_LOAD_VF(vf10, poses[pose].toQuaternion);
     VU0_LOAD_VF(vf11, quaternion);
-    effMiscQuatMultiplyVU();
-    effMiscQuaternionToMatrixVU();
+    Mult();
+    ToMatrix();
     VU0_LOAD_VF(vf10, D_0037E110);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_STORE_VF(vf10, to->direction);
@@ -4113,7 +4113,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         framingDistance = span / tanf(halfFov);
         btlCopyUnitRotationQuaternion(unit, quaternion);
         VU0_LOAD_VF(vf10, quaternion);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         VU0_LOAD_VF(vf10, axis);
         localScale[0] = p->focusPolicy.side;
         VU0_LOAD_VF(vf11, localScale);
@@ -4172,7 +4172,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         framingDistance = span / tanf(halfFov);
         btlCopyUnitRotationQuaternion(unit, quaternion);
         VU0_LOAD_VF(vf10, quaternion);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         VU0_LOAD_VF(vf10, axis);
         localScale[0] = p->focusPolicy.side;
         VU0_LOAD_VF(vf11, localScale);
@@ -4221,7 +4221,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         framingDistance = span / tanf(halfFov);
         btlCopyUnitRotationQuaternion(action->targetList->entries[0], quaternion);
         VU0_LOAD_VF(vf10, quaternion);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         VU0_LOAD_VF(vf10, axis);
         localScale[0] = p->focusPolicy.side;
         VU0_LOAD_VF(vf11, localScale);
@@ -4355,7 +4355,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         framingDistance = span / tanf(halfFov);
         btlCopyUnitRotationQuaternion(unit, quaternion);
         VU0_LOAD_VF(vf10, quaternion);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         VU0_LOAD_VF(vf10, axis);
         localScale[0] = p->focusPolicy.side;
         VU0_LOAD_VF(vf11, localScale);
@@ -4435,7 +4435,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_STORE_VF_UNCLOBBERED(vf10, eye);
         btlCopyUnitRotationQuaternion(unit, quaternion);
         VU0_LOAD_VF(vf10, quaternion);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         VU0_LOAD_VF(vf10, axis);
         localScale[0] = p->eyePolicy.side;
         VU0_LOAD_VF(vf11, localScale);
@@ -4460,7 +4460,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_STORE_VF_UNCLOBBERED(vf10, eye);
         btlCopyUnitRotationQuaternion(unit, quaternion);
         VU0_LOAD_VF(vf10, quaternion);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         VU0_LOAD_VF(vf10, axis);
         localScale[0] = p->eyePolicy.side;
         VU0_LOAD_VF(vf11, localScale);
@@ -4515,7 +4515,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         }
         btlCopyUnitRotationQuaternion(unit, quaternion);
         VU0_LOAD_VF(vf10, quaternion);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         VU0_LOAD_VF(vf10, axis);
         VU0_LOAD_VF(vf11, localScale);
         VU0_MUL(vf10, vf10, vf11);
@@ -4533,7 +4533,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         else if (destination[0] > actorPoint[0]) localScale[0] = p->eyePolicy.side;
         else localScale[0] = -p->eyePolicy.side;
         VU0_LOAD_VF(vf10, quaternion);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         VU0_LOAD_VF(vf10, axis);
         VU0_LOAD_VF(vf11, localScale);
         VU0_MUL(vf10, vf10, vf11);
@@ -4625,7 +4625,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         btlCopyUnitRotationQuaternion(otherUnit, quaternion);
         VU0_LOAD_VF(vf10, quaternion);
         VU0_NEGATE_XYZ(vf10);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         VU0_LOAD_VF(vf10, axis);
         VU0_LOAD_VF(vf11, worldAxis);
         VU0_MUL(vf10, vf10, vf11);
@@ -5051,7 +5051,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraCursor.targetTo);
         btlCopyUnitRotationQuaternion(unit, quaternion);
         VU0_LOAD_VF(vf10, quaternion);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         VU0_LOAD_VF(vf10, axis);
         localScale[0] = p->eyePolicy.side;
         VU0_LOAD_VF(vf11, localScale);
@@ -5094,7 +5094,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_STORE_VF_UNCLOBBERED(vf10, eye);
         btlCopyUnitRotationQuaternion(unit, quaternion);
         VU0_LOAD_VF(vf10, quaternion);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         VU0_LOAD_VF(vf10, axis);
         localScale[0] = p->eyePolicy.side;
         VU0_LOAD_VF(vf11, localScale);
@@ -5296,7 +5296,7 @@ void btlBuildPresetCameraPose(BtlLinkedCommand *action, BtlCamState *out, s16 ba
         VU0_STORE_VF_UNCLOBBERED(vf10, destination);
         btlCopyUnitRotationQuaternion(unit, quaternion);
         VU0_LOAD_VF(vf10, quaternion);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         VU0_LOAD_VF(vf10, axis);
         localScale[0] = p->terminalPolicy.side;
         VU0_LOAD_VF(vf11, localScale);
@@ -5750,7 +5750,7 @@ void btlApplyTimedCameraInstruction(BtlLinkedCommand *action, BtlCamState *pose,
                     VU0_STORE_VF_UNCLOBBERED(vf10, actorPosition);
                     btlCopyUnitRotationQuaternion(unit, quaternion);
                     VU0_LOAD_VF(vf10, quaternion);
-                    effMiscQuaternionToMatrixVU();
+                    ToMatrix();
                     VU0_LOAD_VF(vf10, forward);
                     VU0_APPLY_MATRIX(vf10, vf10);
                     VU0_SCALE_VF(vf10, 1.0f);
@@ -6783,8 +6783,8 @@ void btlApplyScriptCameraTrack(BtlLinkedCommand *command, BtlCamState *pose,
                 case 5:
                     if (command->flags & 0x200) value[0] = -value[0];
                     if (value[0] != 0.0f && 0.0f <= btlCameraTerminalDirection[2]) value[1] = -value[1];
-                    sdfConvertEulerAnglesToQuaternionVU(value[1], value[0], value[2]);
-                    effMiscQuaternionToMatrixVU();
+                    FromEuler(value[1], value[0], value[2]);
+                    ToMatrix();
                     VU0_LOAD_VF(vf10, btlCameraTerminalDirection);
                     VU0_APPLY_MATRIX(vf10, vf10);
                     VU0_STORE_VF_UNCLOBBERED(vf10, btlCameraTerminalDirection);
@@ -7890,7 +7890,7 @@ void btlInitTargetCursorAndFacing(BtlLinkedCommand *action, BtlCamState *state) 
         VU0_STORE_VF_UNCLOBBERED(vf10, position);
         btlCopyUnitRotationQuaternion(unit, quaternion);
         VU0_LOAD_VF(vf10, quaternion);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         VU0_LOAD_VF(vf10, offset);
         VU0_APPLY_MATRIX(vf10, vf10);
         VU0_SCALAR_OP(1.0f, "vmulx.xyzw vf10, vf10, vf2x");
@@ -11361,7 +11361,7 @@ void btlPlaceTripleFormationAroundTarget(BtlTask *link, BtlUnit *first, BtlUnit 
             radius = 500.0f;
         }
         VU0_LOAD_VF(vf10, (u8 *)target + 0x70);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         VU0_LOAD_VF(vf10, D_0037E110);
         VU0_ROTATE_VEC(vf10, vf10);
         VU0_SCALAR_OP(radius, "vmulx.xyzw vf10, vf10, vf2x");
@@ -11409,7 +11409,7 @@ void btlPlaceTripleFormationAroundMiddleActor(BtlTask *link, BtlUnit *first, Btl
     slot[first->battleSideSlotIndex] = first;
     slot[second->battleSideSlotIndex] = second;
     VU0_LOAD_VF(vf10, &slot[1]->orientation);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     VU0_LOAD_VF(vf10, D_0037E110);
     VU0_ROTATE_VEC(vf10, vf10);
     VU0_MOVE_VF(vf11, vf10);

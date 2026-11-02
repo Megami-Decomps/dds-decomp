@@ -3174,11 +3174,11 @@ void btlSetUnitRotation(BtlUnit *unit, const f32 quat[4]) {
         SDF_VU0_LOADVECTOR(quat);
         if (unit->status.flags & 0x10) {
             SDF_VU0_LOADVECTOR_B(D_004179E0);
-            effMiscQuatMultiplyVU();
+            Mult();
         }
         SDF_VU0_STOREVECTOR_NOMEM(unit->orientation);
         SDF_VU0_LOADVECTOR_B(D_004179E0);
-        effMiscQuatMultiplyVU();
+        Mult();
         SDF_VU0_STOREVECTOR_NOMEM(result);
         if (unit->status.flags & 2) {
             dds3SetRotPoseSet(unit->effectObject, (u128 *)result);
@@ -3533,7 +3533,7 @@ void btlWarpUnitToMotionReach(BtlUnit *unit, BtlUnit *target, s32 index) {
         SDF_VU0_NORMALIZE();
     } else {
         SDF_VU0_LOADVECTOR(unit->orientation);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         SDF_VU0_LOADVECTOR(D_003E9130);
         SDF_VU0_APPLYMATRIX();
         SDF_VU0_LOADVECTOR_B(bodyPos);
@@ -3542,7 +3542,7 @@ void btlWarpUnitToMotionReach(BtlUnit *unit, BtlUnit *target, s32 index) {
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(world);
     SDF_VU0_LOADVECTOR(unit->orientation);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     SDF_VU0_LOADVECTOR(unit->bodyOffset);
     VU0_SCALAR_OP(unit->scale, "vmulx.xyzw vf10, vf10, vf2x");
     SDF_VU0_APPLYMATRIX();
@@ -3702,7 +3702,7 @@ s32 btlApproachTargetTask(BtlApproachTaskArgs *args) {
     SDF_VU0_SUBVECTOR();
     SDF_VU0_GETLENGTH(dist);
     SDF_VU0_LOADVECTOR(unit->orientation);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     SDF_VU0_LOADVECTOR(unit->bodyOffset);
     VU0_SCALAR_OP(unit->scale, "vmulx.xyzw vf10, vf10, vf2x");
     SDF_VU0_APPLYMATRIX();
@@ -5911,7 +5911,7 @@ void btlUpdateBattleCameraFrame(void) {
         }
         if (flags & 0x80000) {
             SDF_VU0_LOADVECTOR(scene->cameraCommand.rotation);
-            effMiscQuaternionToMatrixVU();
+            ToMatrix();
             SDF_VU0_LOADVECTOR(scene->cameraCommand.camera.position);
             SDF_VU0_APPLYMATRIX_XYZ();
             SDF_VU0_LOADVECTOR_B(scene->cameraCommand.translation);
@@ -6010,7 +6010,7 @@ void btlSetMotionTransformFieldOfView(BtlCamState *object, f32 fovRadians) {
 
 void btlInitMotionTransformFromVectors(BtlCamState *object, const f32 *origin, const f32 *direction) {
     SDF_VU0_LOADVECTOR(direction);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     SDF_VU0_LOADVECTOR(D_003E9130);
     SDF_VU0_APPLYMATRIX_XYZ();
     SDF_VU0_STOREVECTOR(object->direction);

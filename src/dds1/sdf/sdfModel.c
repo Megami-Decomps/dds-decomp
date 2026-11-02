@@ -762,7 +762,7 @@ void sdfModelLinkDrawPacket(sdfModelNode_t *node, const u32 *commandList,
 /* Build the local rotation basis and append its translation as the fourth row. */
 void sdfModelMakeLocalTm(sdfModelNode_t *node) {
     SDF_VU0_LOADVECTOR(node->quaternion);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     SDF_VU0_LOAD_ROW3(node->translation);
     VU0_STORE_MATRIX(node->localMatrix);
 }
@@ -771,7 +771,7 @@ void sdfModelMakeLocalTm(sdfModelNode_t *node) {
 void sdfModelNodeBaseSet(sdfModelNode_t *node, const SdfItem *item) {
     node->sourceData = item;
     node->nodeId = item->nodeId;
-    sdfConvertEulerAnglesToQuaternionVU(item->rotationX, item->rotationY, item->rotationZ);
+    FromEuler(item->rotationX, item->rotationY, item->rotationZ);
     SDF_VU0_STOREVECTOR(node->quaternion);
     SDF_VU0_COPYVECTOR(node->translation, &item->translation);
     SDF_VU0_COPYVECTOR(node->scale, &item->scale);

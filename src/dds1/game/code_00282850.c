@@ -2836,7 +2836,7 @@ void mnuApplyModelCamera(dds3ModelHandle_t *model) {
 void evtStageTestApplyEntryRotation(dds3ModelHandle_t *model) {
     StageTestEntry *stageEntry = (StageTestEntry *)(evtStageTestState.queue.slot[0].entryIndex * EVT_STAGE_ENTRY_BYTES + (s32)evtStageTestState.entries);
 
-    sdfConvertEulerAnglesToQuaternionVU(stageEntry->rotation[0] * 3.14159265f / 180.0f, stageEntry->rotation[1] * 3.14159265f / 180.0f,
+    FromEuler(stageEntry->rotation[0] * 3.14159265f / 180.0f, stageEntry->rotation[1] * 3.14159265f / 180.0f,
                   stageEntry->rotation[2] * 3.14159265f / 180.0f);
     mdlSetRotate(model);
 }

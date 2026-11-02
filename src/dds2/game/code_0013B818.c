@@ -449,7 +449,7 @@ FldRoomRecordIndex fldRegisterRoomObject(
         SDF_VU0_COPYVECTOR(rotation, &resource->transform[4]);
         LoadIdentity();
         VU0_LOAD_VF(vf10, rotation);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         fldRotateTriggerCorner(offset, rotated[0], sizeX * 0.5f, -(sizeY * 0.5f), 0.0f);
         fldRotateTriggerCorner(offset, rotated[1], -(sizeX * 0.5f), -(sizeY * 0.5f), 0.0f);
         fldRotateTriggerCorner(offset, rotated[2], -(sizeX * 0.5f), sizeY * 0.5f, 0.0f);
@@ -687,7 +687,7 @@ FldRoomRecordIndex fldRegisterRoomObject(
         rotation[3] = resource->transform[7];
         LoadIdentity();
         VU0_LOAD_VF(vf10, rotation);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         fldRotateTriggerCorner(offset, rotated[0], -(sizeX * 0.5f), -(sizeY * 0.5f), -(sizeZ * 0.5f));
         fldRotateTriggerCorner(offset, rotated[1], sizeX * 0.5f, -(sizeY * 0.5f), -(sizeZ * 0.5f));
         fldRotateTriggerCorner(offset, rotated[2], -(sizeX * 0.5f), -(sizeY * 0.5f), sizeZ * 0.5f);
@@ -868,7 +868,7 @@ s32 fldTestRoomProbeFacingAndRange(dds3Basic_t *actor, dds3Basic_t *entry) {
                 position[1] = source->position.y;
                 position[2] = source->position.z;
                 SDF_VU0_LOADVECTOR(actor->poseset->rotation);
-                effMiscQuaternionToMatrixVU();
+                ToMatrix();
                 SDF_VU0_STORE_ROW2(dir);
                 dir[1] = 0.0f;
                 SDF_VU0_LOADVECTOR(dir);
@@ -896,7 +896,7 @@ s32 fldTestRoomProbeFacingAndRange(dds3Basic_t *actor, dds3Basic_t *entry) {
                 return fldEveHitTable[i].crossingDirection == kind;
             case FLD_TRIGGER_SHAPE_KIND_BOX:
                 SDF_VU0_LOADVECTOR(actor->poseset->rotation);
-                effMiscQuaternionToMatrixVU();
+                ToMatrix();
                 SDF_VU0_STORE_ROW2(dir);
                 dir[1] = 0.0f;
                 SDF_VU0_LOADVECTOR(dir);
@@ -933,7 +933,7 @@ s32 fldTestRoomProbeFacing(dds3Basic_t *actor, dds3Basic_t *entry) {
                 source = entry->workdata;
                 SDF_VU0_COPYVECTOR(position, &source->position);
                 SDF_VU0_LOADVECTOR(actor->poseset->rotation);
-                effMiscQuaternionToMatrixVU();
+                ToMatrix();
                 SDF_VU0_STORE_ROW2(dir);
                 dir[1] = 0.0f;
                 SDF_VU0_LOADVECTOR(dir);
@@ -958,7 +958,7 @@ s32 fldTestRoomProbeFacing(dds3Basic_t *actor, dds3Basic_t *entry) {
                 return fldEveHitTable[i].crossingDirection == kind;
             case FLD_TRIGGER_SHAPE_KIND_BOX:
                 SDF_VU0_LOADVECTOR(actor->poseset->rotation);
-                effMiscQuaternionToMatrixVU();
+                ToMatrix();
                 SDF_VU0_STORE_ROW2(dir);
                 dir[1] = 0.0f;
                 SDF_VU0_LOADVECTOR(dir);
@@ -986,7 +986,7 @@ s32 fldTestActorRoomProbeCondition(s32 roomIndex, dds3Basic_t *actor, f32 *posit
     switch (kind) {
     case FLD_TRIGGER_SHAPE_KIND_SPHERE:
         SDF_VU0_LOADVECTOR(actor->poseset->rotation);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         SDF_VU0_STORE_ROW2(dir);
         dir[1] = 0.0f;
         SDF_VU0_LOADVECTOR(dir);
@@ -1014,7 +1014,7 @@ s32 fldTestActorRoomProbeCondition(s32 roomIndex, dds3Basic_t *actor, f32 *posit
         return fldEveHitTable[roomIndex].crossingDirection == kind;
     case FLD_TRIGGER_SHAPE_KIND_BOX:
         SDF_VU0_LOADVECTOR(actor->poseset->rotation);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         SDF_VU0_STORE_ROW2(dir);
         dir[1] = 0.0f;
         SDF_VU0_LOADVECTOR(dir);

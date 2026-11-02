@@ -127,7 +127,7 @@ void effBattleComputeTargetPosition(BtlUnit *unit, EffectVectorRequest *request)
             dir[2] = 1.0f;
             dir[1] = 0;
             SDF_VU0_LOADVECTOR(unit->orientation);
-            effMiscQuaternionToMatrixVU();
+            ToMatrix();
             sdfVuLoadSecondaryRotationMatrixY(effBTL_Ptr_D[directionMode]);
             sdfComposeVuMatrixFromRegisters();
             SDF_VU0_LOADVECTOR(dir);

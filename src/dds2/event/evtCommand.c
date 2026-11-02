@@ -758,10 +758,10 @@ ScrCommandResult evtCommand_CAM_ROT_XYZ(void) {
     }
     degreesToRadians = 0.017453293f;
     pitch = scrGetFloatPara(1) * degreesToRadians;
-    sdfConvertEulerAnglesToQuaternionVU(pitch, scrGetFloatPara(2) * degreesToRadians, 0.0f);
+    FromEuler(pitch, scrGetFloatPara(2) * degreesToRadians, 0.0f);
     SDF_VU0_COPYVECTOR_A_TO_B();
-    sdfConvertEulerAnglesToQuaternionVU(0.0f, 0.0f, scrGetFloatPara(3) * degreesToRadians);
-    effMiscQuatMultiplyVU();
+    FromEuler(0.0f, 0.0f, scrGetFloatPara(3) * degreesToRadians);
+    Mult();
     SDF_VU0_STOREVECTOR(quaternion);
     dds3SetRotPoseSet(cameraObject, (u128 *)quaternion);
     return 1;

@@ -1030,7 +1030,7 @@ void mdlSetRotate(dds3ModelHandle_t *ctx) {
 
     rotationQuaternion = ctx->inner->rotationQuaternion;
     SDF_VU0_STOREVECTOR(rotationQuaternion);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     basisRow0 = ctx->inner->matrix[0];
     SDF_VU0_STORE_ROW0(basisRow0);
     basisRow1 = ctx->inner->matrix[1];

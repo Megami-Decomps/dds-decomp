@@ -141,7 +141,7 @@ u32 effBTLCutGetAllPartColor(u32 elapsed, u32 duration)
 #include "eff_battle_color_keyframe.h"
 extern f32 D_004144A0[4]; extern f32 D_004144B0[4]; extern f32 D_004144C0[4];
 extern BtlSpecialEntryObjectClass btlClassifySpecialEntryObject(BtlUnit *entry);
-extern void effMiscQuatMultiplyVU(void); extern void effMiscQuaternionToMatrixVU(void);
+extern void Mult(void); extern void ToMatrix(void);
 extern void sdfComposeVuMatrixFromRegisters(void);
 extern void effBTLPartGetPositionPtr(BtlUnit *owner, EffectVectorRequest *request, u128 *out);
 extern void effBTLPartGetRotateMatrixPtr(EffectVectorRequest *request, u128 *out);
@@ -206,16 +206,16 @@ void effBattleUpdate(effBTLCutHandle_t *work) {
 
         SDF_VU0_LOADVECTOR(unit->orientation);
         SDF_VU0_LOADVECTOR_B(D_004144A0);
-        effMiscQuatMultiplyVU();
-        effMiscQuaternionToMatrixVU();
+        Mult();
+        ToMatrix();
         VU0_STORE_MATRIX(baseMatrix);
 
         overrideOwner = (BtlUnit *)effBTLFieldColorGetOverrideSelector();
         if (overrideOwner != NULL) {
             SDF_VU0_LOADVECTOR(overrideOwner->orientation);
             SDF_VU0_LOADVECTOR_B(D_004144A0);
-            effMiscQuatMultiplyVU();
-            effMiscQuaternionToMatrixVU();
+            Mult();
+            ToMatrix();
             VU0_STORE_MATRIX(overrideMatrix);
         } else {
             EE_MMI_UNIT_MATRIX(overrideMatrix);
@@ -225,8 +225,8 @@ void effBattleUpdate(effBTLCutHandle_t *work) {
         if (finalOwner != NULL) {
             SDF_VU0_LOADVECTOR(finalOwner->orientation);
             SDF_VU0_LOADVECTOR_B(D_004144A0);
-            effMiscQuatMultiplyVU();
-            effMiscQuaternionToMatrixVU();
+            Mult();
+            ToMatrix();
             VU0_STORE_MATRIX(finalMatrix);
         } else {
             EE_MMI_UNIT_MATRIX(finalMatrix);
@@ -234,17 +234,17 @@ void effBattleUpdate(effBTLCutHandle_t *work) {
 
         if ((unit->status.flags & 0x200) != 0) {
             SDF_VU0_LOADVECTOR(D_004144B0);
-            effMiscQuaternionToMatrixVU();
+            ToMatrix();
             VU0_STORE_MATRIX(alternateMatrix);
             SDF_VU0_LOADVECTOR(D_004144C0);
-            effMiscQuaternionToMatrixVU();
+            ToMatrix();
             VU0_STORE_MATRIX(oppositeMatrix);
         } else {
             SDF_VU0_LOADVECTOR(D_004144C0);
-            effMiscQuaternionToMatrixVU();
+            ToMatrix();
             VU0_STORE_MATRIX(alternateMatrix);
             SDF_VU0_LOADVECTOR(D_004144B0);
-            effMiscQuaternionToMatrixVU();
+            ToMatrix();
             VU0_STORE_MATRIX(oppositeMatrix);
         }
 

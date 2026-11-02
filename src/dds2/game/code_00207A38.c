@@ -363,7 +363,7 @@ void btlUnitGetMuzzlePosVU(BtlUnit *unit) {
     btlGetUnitWorldPos(unit, pos);
     pos[2] += unit->positionZOffset;
     SDF_VU0_LOADVECTOR(unit->orientation);;
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     SDF_VU0_LOADVECTOR(unit->bodyOffset);;
     VU0_SET_VF2X(unit->scale);
     VU0_MUL_VF2X(vf10, vf10);
@@ -378,7 +378,7 @@ void btlUnitGetBodyPosVU(const BtlUnit *unit) {
     btlGetUnitWorldPos((BtlUnit *)unit, pos);
     pos[2] += unit->positionZOffset;
     SDF_VU0_LOADVECTOR(unit->orientation);;
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     SDF_VU0_LOADVECTOR(unit->muzzleOffset);;
     VU0_SET_VF2X(unit->scale);
     VU0_MUL_VF2X(vf10, vf10);
@@ -396,7 +396,7 @@ void btlUnitGetEffectPosVU(BtlUnit *unit) {
     dds3GetPosPoseSet(unit->effectObject);
     SDF_VU0_STOREVECTOR(pos);
     SDF_VU0_LOADVECTOR(unit->orientation);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     SDF_VU0_LOADVECTOR(unit->bodyOffset);
     VU0_SET_VF2X(unit->scale);
     VU0_MUL_VF2X(vf10, vf10);
@@ -992,7 +992,7 @@ BtlUnit *btlSelectUnitAtExtremeX(BtlUnit *reference, BtlIndexList *list) {
         /* The indexed DDS2 path uses the vector at 0x40 and scale at 0x50,
          * unlike the ordinary muzzle accessor's 0x70/0x80 fields. */
         SDF_VU0_LOADVECTOR(unit->rotation);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         SDF_VU0_LOADVECTOR(unit->bodyOffset);
         VU0_SET_VF2X(unit->actorScale);
         VU0_MUL_VF2X(vf10, vf10);
@@ -1183,7 +1183,7 @@ BtlHorizontalAimResult btlAimHorizontalDirectionVU(const f32 *origin, const f32 
     delta[0] = targetPosition[0] - origin[0];
     delta[2] = targetPosition[2] - origin[2];
     if (delta[0] != 0.0f || delta[2] != 0.0f) {
-        sdfConvertEulerAnglesToQuaternionVU(0.0f, atan2f(delta[0], delta[2]), 0.0f);
+        FromEuler(0.0f, atan2f(delta[0], delta[2]), 0.0f);
         return BTL_HORIZONTAL_AIM_DIRECTION_BUILT;
     }
     VU0_LOAD_VF($vf10, &btlHorizontalAimIdentityQuaternion);
@@ -1209,7 +1209,7 @@ s32 btlAimHorizontalDirectionClampedVU(const f32 *origin, const f32 *targetPosit
         } else {
             x = -ffabsf(x);
         }
-        sdfConvertEulerAnglesToQuaternionVU(0.0f, atan2f(x, delta[2]), 0.0f);
+        FromEuler(0.0f, atan2f(x, delta[2]), 0.0f);
         return 1;
     }
     return 0;

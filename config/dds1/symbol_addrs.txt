@@ -23,7 +23,6 @@ D_003BC268 = 0x003BC268; // type:u8
 // Names ported from Persona 4: P4's matched C recompiles byte-identical here (docs/p4-transfer.md)
 dds3GetProcessRunTime = 0x00101A60; // type:func size:0x8
 scrCommand_SCR_EXISTS = 0x0010EEA8; // type:func size:0x48
-effMiscQuatMultiplyVU = 0x002E7C20; // type:func size:0x2C
 // The main loop thread's tracked-thread node, after the frame parity word
 kwlnMainLoopThreadNode = 0x003BD688; // size:0x8
 // Saved DebugTimeGrph task handle.
@@ -7470,15 +7469,16 @@ sdfAtan2 = 0x002E79F0; // type:func
 sdfAsin = 0x002E7AA8; // type:func
 sdfAcos = 0x002E7B20; // type:func
 sdfClipAngleValuePI = 0x002E7BA8; // type:func
+Mult = 0x002E7C20; // type:func size:0x2C
 Inverse = 0x002E7C50; // type:func  // dds2 0x00340AF8
 Normalize = 0x002E7C80; // type:func size:0x24
 effMiscQuatLengthSqVU = 0x002E7CA8; // type:func
 SDF_QUAT_INNERPRODUCT = 0x002E7CD0; // type:func
 FromRotation = 0x002E7CF8; // type:func  // dds2 0x00340BA0
 FromRotation_B = 0x002E7D48; // type:func
-effMiscQuaternionToMatrixVU = 0x002E7D98; // type:func
+ToMatrix = 0x002E7D98; // type:func
 FromEulerXYZ = 0x002E7E08; // type:func  // dds2 0x00340CB0
-sdfConvertEulerAnglesToQuaternionVU = 0x002E7F20; // type:func
+FromEuler = 0x002E7F20; // type:func
 LookAt = 0x002E8038; // type:func
 Slerp = 0x002E8180; // type:func
 Lerp = 0x002E8278; // type:func

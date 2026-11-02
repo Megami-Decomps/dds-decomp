@@ -5324,7 +5324,7 @@ void fileQueueUpdate(FileQueue *queue)
         if (job->xformFlags & 0x18) {
             camFollowOffsetVec(job, pos);
             SDF_VU0_LOADVECTOR(queue->quat);
-            effMiscQuaternionToMatrixVU();
+            ToMatrix();
             SDF_VU0_LOADVECTOR(queue->position);
             SDF_VU0_LOADVECTOR_B(queue->offset);
             SDF_VU0_ADDVECTOR();
@@ -5411,7 +5411,7 @@ void fileQueueSetPosition(FileQueue *queue, const f32 vec[4])
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(base);
     SDF_VU0_LOADVECTOR(queue->quat);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     VU0_STORE_MATRIX(rot);
     scale = queue->scale * queue->scaleMultiplier;
     for (job = queue->first; job != NULL; job = job->next) {
@@ -5440,14 +5440,14 @@ void fileQueueSetRotation(FileQueue *queue, const f32 rot[4])
     SDF_VU0_LOADVECTOR(rot);
     SDF_VU0_STOREVECTOR(queue->quat);
     SDF_VU0_STOREVECTOR(quat);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     SDF_VU0_LOADVECTOR(queue->axis);
     SDF_VU0_APPLYMATRIX_XYZ();
     SDF_VU0_STOREVECTOR(queue->offset);
     for (job = queue->first; job != NULL; job = job->next) {
         SDF_VU0_LOADVECTOR(job->quat);
         SDF_VU0_LOADVECTOR_B(quat);
-        effMiscQuatMultiplyVU();
+        Mult();
         SDF_VU0_STOREVECTOR_NOMEM(pos);
         fileJobInvokeRotationCallback((FileJobPayload *)job->id, pos);
     }
@@ -6034,11 +6034,11 @@ void camAimRotation(CamAim *obj, void *dst)
     if ((flags & 0x40) == 0) {
         pitch = -acosf(-v[1]);
     }
-    sdfConvertEulerAnglesToQuaternionVU(pitch, atan2f(v[0], v[2]), 0.0f);
+    FromEuler(pitch, atan2f(v[0], v[2]), 0.0f);
     if (obj->flags & 0x40) {
         SDF_VU0_COPYVECTOR_A_TO_B();
         SDF_VU0_LOADVECTOR(obj->quat);
-        effMiscQuatMultiplyVU();
+        Mult();
     }
     SDF_VU0_STOREVECTOR(dst);
 }
@@ -6406,7 +6406,7 @@ void fileDrawLoadObjectSlots(s32 object) {
                 fileReadRecordSecondVector((u8 *)obj->record, orientation);
                 fileReadVectorPtr20((u8 *)obj->record, origin);
                 SDF_VU0_LOADVECTOR(orientation);
-                effMiscQuaternionToMatrixVU();
+                ToMatrix();
                 SDF_VU0_LOAD_ROW3(origin);
                 VU0_STORE_MATRIX(matrix);
                 for (i = 0; i < count; i++, slot++) {
@@ -6454,7 +6454,7 @@ void fileDrawLoadObjectSlots(s32 object) {
                 fileReadRecordSecondVector((u8 *)obj->record, orientation);
                 fileReadVectorPtr20((u8 *)obj->record, origin);
                 SDF_VU0_LOADVECTOR(orientation);
-                effMiscQuaternionToMatrixVU();
+                ToMatrix();
                 SDF_VU0_LOAD_ROW3(origin);
                 VU0_STORE_MATRIX(matrix);
                 for (i = 0; i < count; i++, slot++, jobs++) {
@@ -6502,7 +6502,7 @@ void fileDrawLoadObjectSlots(s32 object) {
                 fileReadRecordSecondVector((u8 *)obj->record, orientation);
                 fileReadVectorPtr20((u8 *)obj->record, origin);
                 SDF_VU0_LOADVECTOR(orientation);
-                effMiscQuaternionToMatrixVU();
+                ToMatrix();
                 SDF_VU0_LOAD_ROW3(origin);
                 VU0_STORE_MATRIX(matrix);
                 for (i = 0; i < count; i++, slot++, queues++) {
@@ -6570,7 +6570,7 @@ void fileDrawLoadObjectSlots(s32 object) {
                 fileReadRecordSecondVector((u8 *)obj->record, orientation);
                 fileReadVectorPtr20((u8 *)obj->record, origin);
                 SDF_VU0_LOADVECTOR(orientation);
-                effMiscQuaternionToMatrixVU();
+                ToMatrix();
                 SDF_VU0_LOAD_ROW3(origin);
                 VU0_STORE_MATRIX(matrix);
                 for (i = 0; i < count; i++, slot++) {
@@ -7101,7 +7101,7 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
         speedDecrease = keys->emitter.wave.axialDeceleration;
         radiusVector[3] = 0.0f;
         SDF_VU0_LOADVECTOR(keys->orientation);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         if (duration != 0 && (s32)record->references >= duration) {
             toSpawn = 0;
             prewarm = 0;
@@ -7661,7 +7661,7 @@ void effUpdateCircularEmitterSlots(FileSlotTable *record) {
                                 position[2] = sdfSin(motion->initialPhase) * motion->radius;
                                 if (localSpace == 0) {
                                     SDF_VU0_LOADVECTOR(initialOrientation);
-                                    effMiscQuaternionToMatrixVU();
+                                    ToMatrix();
                                     SDF_VU0_LOADVECTOR(position);
                                     SDF_VU0_APPLYMATRIX_XYZ();
                                     SDF_VU0_LOADVECTOR_B(origin);
@@ -7697,7 +7697,7 @@ void effUpdateCircularEmitterSlots(FileSlotTable *record) {
                             orientation[2] = motion->orientation[2];
                             orientation[3] = motion->orientation[3];
                             SDF_VU0_LOADVECTOR(orientation);
-                            effMiscQuaternionToMatrixVU();
+                            ToMatrix();
                             SDF_VU0_LOADVECTOR(position);
                             SDF_VU0_APPLYMATRIX_XYZ();
                             SDF_VU0_STOREVECTOR(position);
@@ -8013,7 +8013,7 @@ void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
         acceleration = keys->emitter.directed.acceleration;
         delta[3] = 0.0f;
         SDF_VU0_LOADVECTOR(keys->orientation);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         if (duration != 0 && (s32)record->references >= duration) {
             toSpawn = 0;
             prewarm = 0;
@@ -8227,7 +8227,7 @@ void effUpdateSectorEmitterSlots(FileSlotTable *record) {
         acceleration = keys->emitter.sector.acceleration;
         delta[3] = 0.0f;
         SDF_VU0_LOADVECTOR(keys->orientation);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         if (duration != 0 && (s32)record->references >= duration) {
             toSpawn = 0;
             prewarm = 0;
@@ -8511,7 +8511,7 @@ void effUpdateCurveEmitterSlots(FileSlotTable *record) {
         start[1] = keys->emitter.curve.start[1];
         start[2] = keys->emitter.curve.start[2];
         SDF_VU0_LOADVECTOR(keys->orientation);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         if (duration != 0 && (s32)record->references >= duration) {
             prewarm = 0;
             toSpawn = 0;

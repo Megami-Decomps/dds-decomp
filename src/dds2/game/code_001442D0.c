@@ -4296,7 +4296,7 @@ void func_0014C2B8(s32 key, f32 *orientation, f32 x, f32 y, f32 z,
         SDF_VU0_LOADVECTOR(axis);
         FromRotation(3.14159265f);
         SDF_VU0_LOADVECTOR_B(orientation);
-        effMiscQuatMultiplyVU();
+        Mult();
         /* Audited SDK-style store: the complete output goes directly to opaque
          * constructor calls, with no scalar C readback or loop reuse. */
         SDF_VU0_STOREVECTOR_NOMEM(rotation);
@@ -4407,7 +4407,7 @@ void func_0014C9B0(u32 id, f32 *rotation, f32 x, f32 y, f32 z) {
             FromRotation(3.1415926f);
         }
         SDF_VU0_LOADVECTOR_B(rotation);
-        effMiscQuatMultiplyVU();
+        Mult();
         SDF_VU0_STOREVECTOR_NOMEM(resultRotation);
         object = dds3AddUnitObjectBasic(dds3AllocObjectId(), (u128 *)position, (u128 *)resultRotation);
         dds3SetUnitObjectId(object, "TAKARA_UNIT");
@@ -4608,7 +4608,7 @@ void func_0014D380(s32 kind, u32 id, f32 *rotation, f32 x, f32 y, f32 z) {
         SDF_VU0_LOADVECTOR(axis);
         FromRotation(3.1415926f);
         SDF_VU0_LOADVECTOR_B(rotation);
-        effMiscQuatMultiplyVU();
+        Mult();
         SDF_VU0_STOREVECTOR_NOMEM(resultRotation);
         object = dds3AddUnitObjectBasic(dds3AllocObjectId(), (u128 *)position, (u128 *)resultRotation);
         if (kind == 0) {
@@ -7894,7 +7894,7 @@ void fldCreateChaseCameraObject(void) {
     SDF_VU0_LOADVECTOR(axis);
     FromRotation(3.14159265f);
     SDF_VU0_LOADVECTOR_B(rotation);
-    effMiscQuatMultiplyVU();
+    Mult();
     /* The SDK store is followed by opaque consumers, with no scalar readback. */
     SDF_VU0_STOREVECTOR_NOMEM(rotation);
     D_00435F1C = dds3AddUnitObjectBasic(dds3AllocObjectId(), (u128 *)position, (u128 *)rotation);

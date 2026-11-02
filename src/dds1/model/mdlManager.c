@@ -1009,7 +1009,7 @@ void mdlGetRotate(dds3ModelHandle_t *ctx) {
  * then store the resulting basis rows from vf28-vf30. No C argument supplies vf10. */
 void mdlSetRotate(dds3ModelHandle_t *ctx) {
     SDF_VU0_STOREVECTOR(ctx->inner->rotationQuaternion);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     SDF_VU0_STORE_ROW0(ctx->inner->matrix[0]);
     SDF_VU0_STORE_ROW1(ctx->inner->matrix[1]);
     SDF_VU0_STORE_ROW2(ctx->inner->matrix[2]);

@@ -758,7 +758,7 @@ functions use trampolines and are a different case.
   `game/code_00335EE8`/`code_00336768`.
   The rule is general: a stack scratch vector or matrix that only VU0 `lqc2`
   asm reads, through its address, is `volatile` in the original. The
-  Euler-to-quaternion converters (`sdfConvertEulerAnglesToQuaternionVU`,
+  Euler-to-quaternion converters (`FromEuler`,
   `FromEulerXYZ`, both games) match only with a
   `volatile f32 quaternion[4]`: the plain array lets the scheduler reorder the
   four component stores. If retail stores a scratch vector strictly in program

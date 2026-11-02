@@ -276,7 +276,7 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
         SDF_VU0_COPYVECTOR_A_TO_B();
         SDF_VU0_LOADVECTOR(identity);
         Lerp(factor);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         SDF_VU0_LOADVECTOR(unit->vec20);
         SDF_VU0_APPLYMATRIX();
         SDF_VU0_STOREVECTOR_NOMEM(unit->vec40);
@@ -307,7 +307,7 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
         SDF_VU0_COPYVECTOR_A_TO_B();
         SDF_VU0_LOADVECTOR(identity);
         Lerp(factor);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         SDF_VU0_LOADVECTOR(unit->vec40);
         SDF_VU0_APPLYMATRIX();
         SDF_VU0_STOREVECTOR_NOMEM(blendedDirection);
@@ -319,7 +319,7 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
             SDF_VU0_COPYVECTOR_A_TO_B();
             SDF_VU0_LOADVECTOR(identity);
             Lerp(factor);
-            effMiscQuaternionToMatrixVU();
+            ToMatrix();
             SDF_VU0_LOADVECTOR(unit->vec40);
             SDF_VU0_APPLYMATRIX();
             SDF_VU0_STOREVECTOR_NOMEM(oldDirection);
@@ -328,7 +328,7 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
             SDF_VU0_COPYVECTOR_A_TO_B();
             SDF_VU0_LOADVECTOR(identity);
             Lerp(transition);
-            effMiscQuaternionToMatrixVU();
+            ToMatrix();
             SDF_VU0_LOADVECTOR(oldDirection);
             SDF_VU0_APPLYMATRIX();
         }
@@ -993,7 +993,7 @@ EvtUnitFacingTargetResult evtUnitRotationQuat(evtUnitHandle_t *unit, f32 *quat, 
     f32 v[4];
 
     SDF_VU0_LOADVECTOR(quat);
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     SDF_VU0_GET_ROW2();
     VU0_SET_VF10_Y_CLEAR_W(0.0f);
     SDF_VU0_NORMALIZE();
@@ -1085,8 +1085,8 @@ EvtUnitMotionStepResult evtUnitMoveTypePathTrace(evtUnitHandle_t *unit) {
     if (unit->flags & EVT_UNIT_FLAG_USE_PATH_ROTATION) {
         dds3PathBasicControlGetRot(unit->pathControl);
         SDF_VU0_COPYVECTOR_A_TO_B();
-        sdfConvertEulerAnglesToQuaternionVU(0.0f, 3.14159265f, 0.0f);
-        effMiscQuatMultiplyVU();
+        FromEuler(0.0f, 3.14159265f, 0.0f);
+        Mult();
         VU0_STORE_VF($vf10, v);
         dds3SetRotPoseSet(unit->effObj, (u128 *)v);
     }
@@ -1867,10 +1867,10 @@ ScrCommandResult evtCommand_MODEL_ROT_XYZ(void) {
     toRad = 0.017453293f;
     x = scrGetFloatPara(1) * toRad;
     y = scrGetFloatPara(2) * toRad;
-    sdfConvertEulerAnglesToQuaternionVU(x, y, 0.0f);
+    FromEuler(x, y, 0.0f);
     SDF_VU0_COPYVECTOR_A_TO_B();
-    sdfConvertEulerAnglesToQuaternionVU(0.0f, 0.0f, scrGetFloatPara(3) * toRad);
-    effMiscQuatMultiplyVU();
+    FromEuler(0.0f, 0.0f, scrGetFloatPara(3) * toRad);
+    Mult();
     VU0_STORE_VF($vf10, v);
     dds3SetRotPoseSet(unit, (u128 *)v);
     return 1;
@@ -2298,7 +2298,7 @@ ScrCommandResult evtOpTurnUnitRelativeToWorldNode(void) {
     }
     targetAngle -= (angleDelta + angleDelta) / 3.0f;
 
-    sdfConvertEulerAnglesToQuaternionVU(0.0f, targetAngle * 0.017453293f, 0.0f);
+    FromEuler(0.0f, targetAngle * 0.017453293f, 0.0f);
     /* First write to this output vector; the SDK store touches only it. */
     SDF_VU0_STOREVECTOR_NOMEM(rotation);
 
@@ -2351,7 +2351,7 @@ ScrCommandResult evtOpRestoreUnitReferenceAngle(void) {
 
     dds3GetRotPoseSet(actor);
     referenceAngle = -(EulerAngleAxisY() * 57.29577637f);
-    sdfConvertEulerAnglesToQuaternionVU(0.0f, unit->cachedReferenceAngleDegrees * 0.017453293f, 0.0f);
+    FromEuler(0.0f, unit->cachedReferenceAngleDegrees * 0.017453293f, 0.0f);
     /* This is the first write to the vector supplied to the transition. */
     SDF_VU0_STOREVECTOR_NOMEM(rotation);
 
@@ -2876,10 +2876,10 @@ ScrCommandResult evtCommand_EFFECT_ROT_XYZ(void) {
         toRad = 0.017453293f;
         x = scrGetFloatPara(1) * toRad;
         y = scrGetFloatPara(2) * toRad;
-        sdfConvertEulerAnglesToQuaternionVU(x, y, 0.0f);
+        FromEuler(x, y, 0.0f);
         SDF_VU0_COPYVECTOR_A_TO_B();
-        sdfConvertEulerAnglesToQuaternionVU(0.0f, 0.0f, scrGetFloatPara(3) * toRad);
-        effMiscQuatMultiplyVU();
+        FromEuler(0.0f, 0.0f, scrGetFloatPara(3) * toRad);
+        Mult();
         VU0_STORE_VF($vf10, v);
         dds3SetRotPoseSet(obj, (u128 *)v);
     }

@@ -59,7 +59,7 @@ The retail SHA-1 still matches.
 | `func_001F60E8` | 0x28 | `func_001789d0` | `game/code_001F60E8.c` |
 | `func_0029A810` | 0x30 | `func_00492e30` | `game/code_0029A810.c` |
 | `func_002DD8B8`, `func_002DDC50` | 0x2C, 0x48 | effMisc.c (VU0 asm) | `game/code_002DD8B8.c` |
-| `effMiscQuatMultiplyVU`, `Normalize`, `func_002E7D98` | | effMisc.c (VU0 asm) | `game/code_002E7C20.c` |
+| `Mult`, `Normalize`, `func_002E7D98` | | effMisc.c (VU0 asm) | `game/code_002E7C20.c` |
 | `dds3GetRandA` 0x2E8340 | 0x54 | effMisc.c | `game/code_002E7C20.c` |
 
 P4's global names were replaced by the DDS symbols at the same relocation

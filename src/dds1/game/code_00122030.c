@@ -975,7 +975,7 @@ void fldRebuildFieldScene(void) {
             SDF_VU0_LOADVECTOR(axis);
             FromRotation(3.14159265f);
             SDF_VU0_LOADVECTOR_B(transform + 4);
-            effMiscQuatMultiplyVU();
+            Mult();
             SDF_VU0_STOREVECTOR(transform + 4);
         }
         fldPreparePlayerAndCameraScene((u128 *)transform);
@@ -1132,12 +1132,12 @@ void fldTogglePlayerModel(void) {
         SDF_VU0_LOADVECTOR(&axis);
         FromRotation(3.1415926f);
         SDF_VU0_LOADVECTOR_B(&sceneWork->rotation);
-        effMiscQuatMultiplyVU();
+        Mult();
         SDF_VU0_STOREVECTOR_NOMEM(&sceneWork->rotation);
         SDF_VU0_LOADVECTOR(&axis);
         FromRotation(3.1415926f);
         SDF_VU0_LOADVECTOR_B(&sceneWork->rotation);
-        effMiscQuatMultiplyVU();
+        Mult();
         SDF_VU0_STOREVECTOR_NOMEM(work);
     }
     fldPlayerObject = dds3AddUnitObjectBasic(dds3AllocObjectId(), &sceneWork->position, (u128 *)work);
@@ -1345,7 +1345,7 @@ void fldPreparePlayerAndCameraScene(u128 *transform) {
     rotation = transform + 1;
     FromRotation(3.1415926f);
     SDF_VU0_LOADVECTOR_B(rotation);
-    effMiscQuatMultiplyVU();
+    Mult();
     SDF_VU0_STOREVECTOR(&quaternion);
     object = fldPlayerObject;
     if (object == 0) {

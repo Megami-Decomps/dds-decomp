@@ -115,12 +115,12 @@ s32 dds3EffectObjectBasicMainProcedure(dds3Basic_t *obj) {
                 case 4: case 5: case 6: case 7: case 8: case 9:
                     SDF_VU0_LOADVECTOR(data->owner->poseset->rotation);
                     SDF_VU0_STOREVECTOR(rotation);
-                    effMiscQuaternionToMatrixVU();
+                    ToMatrix();
                     break;
                 case EFF_OBJ_OWNER_KIND_EXTRA:
                     SDF_VU0_LOADVECTOR(((EvtWorldSourceTransformPrefix *)data->owner->workdata)->rotation);
                     SDF_VU0_STOREVECTOR(rotation);
-                    effMiscQuaternionToMatrixVU();
+                    ToMatrix();
                     break;
                 default:
                     SDF_VU0_LOADIDENTITY();
@@ -172,7 +172,7 @@ s32 dds3EffectObjectBasicMainProcedure(dds3Basic_t *obj) {
         if (node != NULL && moved) {
             effCopyVectorToNodeInstance(node, position);
             SDF_VU0_LOADVECTOR(rotation);
-            effMiscQuaternionToMatrixVU();
+            ToMatrix();
             VU0_STORE_MATRIX(matrix);
             effApplyNodeTransformMatrix(node, matrix);
         }

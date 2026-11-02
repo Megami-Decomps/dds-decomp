@@ -8971,7 +8971,7 @@ void btlRestoreLinkedEffectUnitPose(BtlUnit *source) {
 
         SDF_VU0_LOADVECTOR(source->rotation);
         SDF_VU0_LOADVECTOR_B(D_0041B4D0);
-        effMiscQuatMultiplyVU();
+        Mult();
         SDF_VU0_STOREVECTOR_NOMEM(rotation);
         dds3SetRotPoseSet(effect->linked.actor->effectObject, (u128 *)rotation);
     }

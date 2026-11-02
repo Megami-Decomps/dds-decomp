@@ -477,11 +477,11 @@ void sdfMotCLBK_modelLinerRotXYZSeek(SdfMotionDrawBinding *binding, f32 frame) {
     SDF_VU0_LOADVECTOR_UNALIGN_B(keyInterval.secondKey);
     VU0_LERP_VF10_CLEAR_W(keyInterval.weight);
     SDF_VU0_STOREVECTOR((f32 *)angles);
-    sdfConvertEulerAnglesToQuaternionVU(angles[0], angles[1], angles[2]);
+    FromEuler(angles[0], angles[1], angles[2]);
     drawNode = binding->node;
     SDF_VU0_STOREVECTOR(drawNode->quaternion);
     matrix = drawNode->localMatrix;
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     SDF_VU0_STORE_ROW0_NOMEM(matrix[0]);
     SDF_VU0_STORE_ROW1_NOMEM(matrix[1]);
     SDF_VU0_STORE_ROW2_NOMEM(matrix[2]);
@@ -499,14 +499,14 @@ void sdfMotCLBK_modelLinerRotXYZBlendSeek(SdfMotionDrawBinding *binding, f32 fra
     SDF_VU0_LOADVECTOR_UNALIGN_B(keyInterval.secondKey);
     VU0_LERP_VF10_CLEAR_W(keyInterval.weight);
     SDF_VU0_STOREVECTOR((f32 *)angles);
-    sdfConvertEulerAnglesToQuaternionVU(angles[0], angles[1], angles[2]);
+    FromEuler(angles[0], angles[1], angles[2]);
     SDF_VU0_COPYVECTOR_A_TO_B();
     SDF_VU0_LOADVECTOR(binding->capturedVector);
     Lerp(blendWeight);
     drawNode = binding->node;
     SDF_VU0_STOREVECTOR(drawNode->quaternion);
     matrix = drawNode->localMatrix;
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     SDF_VU0_STORE_ROW0_NOMEM(matrix[0]);
     SDF_VU0_STORE_ROW1_NOMEM(matrix[1]);
     SDF_VU0_STORE_ROW2_NOMEM(matrix[2]);
@@ -568,7 +568,7 @@ void sdfMotCLBK_modelLerpRotQuatSeek(SdfMotionDrawBinding *binding, f32 frame) {
     drawNode = binding->node;
     SDF_VU0_STOREVECTOR_NOMEM(drawNode->quaternion);
     matrix = drawNode->localMatrix;
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     SDF_VU0_STORE_ROW0_NOMEM(matrix[0]);
     SDF_VU0_STORE_ROW1_NOMEM(matrix[1]);
     SDF_VU0_STORE_ROW2_NOMEM(matrix[2]);
@@ -593,7 +593,7 @@ void sdfMotCLBK_modelLerpRotQuatBlendSeek(SdfMotionDrawBinding *binding, f32 fra
     Lerp(blendWeight);
     SDF_VU0_STOREVECTOR_NOMEM(drawNode->quaternion);
     matrix = drawNode->localMatrix;
-    effMiscQuaternionToMatrixVU();
+    ToMatrix();
     SDF_VU0_STORE_ROW0_NOMEM(matrix[0]);
     SDF_VU0_STORE_ROW1_NOMEM(matrix[1]);
     SDF_VU0_STORE_ROW2_NOMEM(matrix[2]);

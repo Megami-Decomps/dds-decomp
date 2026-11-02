@@ -1820,38 +1820,38 @@ void mdlUpdateViewerCameraFromPad(void) {
         if (dds3PadBitTable[5] != 0) {
             EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix + 1);
             FromRotation_B(speed);
-            effMiscQuatMultiplyVU();
+            Mult();
             rotated = 1;
         } else if (dds3PadBitTable[4] != 0) {
             EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix + 1);
             FromRotation_B(-speed);
-            effMiscQuatMultiplyVU();
+            Mult();
             rotated = 1;
         }
         if (dds3PadBitTable[6] != 0) {
             EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix);
             FromRotation_B(speed);
-            effMiscQuatMultiplyVU();
+            Mult();
             rotated = 1;
         } else if (dds3PadBitTable[7] != 0) {
             EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix);
             FromRotation_B(-speed);
-            effMiscQuatMultiplyVU();
+            Mult();
             rotated = 1;
         }
         if (dds3PadBitTable[8] != 0) {
             EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix + 2);
             FromRotation_B(speed);
-            effMiscQuatMultiplyVU();
+            Mult();
             rotated = 1;
         } else if (dds3PadBitTable[9] != 0) {
             EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfViewMatrix + 2);
             FromRotation_B(-speed);
-            effMiscQuatMultiplyVU();
+            Mult();
             rotated = 1;
         }
         if (rotated) {
-            effMiscQuaternionToMatrixVU();
+            ToMatrix();
             SDF_VU0_LOADVECTOR(&D_00453630);
             SDF_VU0_LOADVECTOR_B(&D_00453620);
             SDF_VU0_SUBVECTOR();
@@ -1913,7 +1913,7 @@ void mdlUpdateViewerSelectedModelFromPad(void) {
             return;
         }
         FromRotation_B(angle);
-        effMiscQuatMultiplyVU();
+        Mult();
         mdlSetRotate(mdlViewerState.resources[0]);
     } else if (mdlViewerState.labelIndexB == 0) {
         speed = 1.25f;
@@ -1958,29 +1958,29 @@ void mdlUpdateViewerSelectedModelFromPad(void) {
         if (dds3PadBitTable[5] != 0) {
             SDF_VU0_LOADVECTOR_B(D_0040B540);
             FromRotation_B(speed);
-            effMiscQuatMultiplyVU();
+            Mult();
         } else if (dds3PadBitTable[4] != 0) {
             SDF_VU0_LOADVECTOR_B(D_0040B540);
             FromRotation_B(-speed);
-            effMiscQuatMultiplyVU();
+            Mult();
         }
         if (dds3PadBitTable[6] != 0) {
             SDF_VU0_LOADVECTOR_B(D_0040B530);
             FromRotation_B(speed);
-            effMiscQuatMultiplyVU();
+            Mult();
         } else if (dds3PadBitTable[7] != 0) {
             SDF_VU0_LOADVECTOR_B(D_0040B530);
             FromRotation_B(-speed);
-            effMiscQuatMultiplyVU();
+            Mult();
         }
         if (dds3PadBitTable[9] != 0) {
             SDF_VU0_LOADVECTOR_B(D_0040B550);
             FromRotation_B(speed);
-            effMiscQuatMultiplyVU();
+            Mult();
         } else if (dds3PadBitTable[8] != 0) {
             SDF_VU0_LOADVECTOR_B(D_0040B550);
             FromRotation_B(-speed);
-            effMiscQuatMultiplyVU();
+            Mult();
         }
         mdlSetRotate(mdlViewerState.resources[0]);
     }
@@ -3185,7 +3185,7 @@ void mdlSetDebugMatrix(MdlLightEditorState *context, f32 *position)
     if (context->pad->stepUpA != 0) {
         SDF_VU0_LOADVECTOR_MTXCOL(sdfViewMatrix + 1);
         FromRotation(2.0f * 3.14159265f / 180.0f);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         SDF_VU0_LOADVECTOR(position);
         SDF_VU0_APPLYMATRIX_XYZ1();
         SDF_VU0_VECTOR_W_SET_ONE();
@@ -3193,7 +3193,7 @@ void mdlSetDebugMatrix(MdlLightEditorState *context, f32 *position)
     } else if (context->pad->stepDownA != 0) {
         SDF_VU0_LOADVECTOR_MTXCOL(sdfViewMatrix + 1);
         FromRotation(-2.0f * 3.14159265f / 180.0f);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         SDF_VU0_LOADVECTOR(position);
         SDF_VU0_APPLYMATRIX_XYZ1();
         SDF_VU0_VECTOR_W_SET_ONE();
@@ -3202,7 +3202,7 @@ void mdlSetDebugMatrix(MdlLightEditorState *context, f32 *position)
     if (context->pad->stepUpB != 0) {
         SDF_VU0_LOADVECTOR_MTXCOL(sdfViewMatrix);
         FromRotation(-2.0f * 3.14159265f / 180.0f);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         SDF_VU0_LOADVECTOR(position);
         SDF_VU0_APPLYMATRIX_XYZ1();
         SDF_VU0_VECTOR_W_SET_ONE();
@@ -3210,7 +3210,7 @@ void mdlSetDebugMatrix(MdlLightEditorState *context, f32 *position)
     } else if (context->pad->stepDownB != 0) {
         SDF_VU0_LOADVECTOR_MTXCOL(sdfViewMatrix);
         FromRotation(2.0f * 3.14159265f / 180.0f);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         SDF_VU0_LOADVECTOR(position);
         SDF_VU0_APPLYMATRIX_XYZ1();
         SDF_VU0_VECTOR_W_SET_ONE();
@@ -3909,7 +3909,7 @@ void evtSetUnitPos(u32 targetKey, u32 sourceKey) {
             SDF_VU0_LOADVECTOR(axis);
             FromRotation(3.14159265f);
             SDF_VU0_LOADVECTOR_B(sourceTransform->rotation);
-            effMiscQuatMultiplyVU();
+            Mult();
             SDF_VU0_STOREVECTOR(axis);
             dds3SetRotPoseSet(obj, (u128 *)axis);
             dds3GetPosPoseSet(obj);

@@ -2680,7 +2680,7 @@ void effThunderUpdateCurveGroup(EffPcpThunderGroup *group) {
                 place.color = color;
                 delta[0] = start[0] - place.payload[0];
                 delta[2] = start[2] - place.payload[2];
-                sdfConvertEulerAnglesToQuaternionVU(0.0f, sdfAtan2(delta[0], delta[2]), 0.0f);
+                FromEuler(0.0f, sdfAtan2(delta[0], delta[2]), 0.0f);
                 SDF_VU0_STOREVECTOR_NOMEM(&place.payload[4]);
                 effEveBEDCutSetParams(slot->eventNode, &place);
                 effEventUpdateEffectParameters(slot->eventNode);

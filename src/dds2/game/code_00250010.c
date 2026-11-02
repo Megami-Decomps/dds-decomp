@@ -2492,7 +2492,7 @@ void evtRotateViewerPositionFromPad(f32 *position)
     if (dds3PadButtonState.incOne != 0) {
         SDF_VU0_LOADVECTOR_MTXCOL(sdfViewMatrix + 1);
         FromRotation(2.0f * 3.14159265f / 180.0f);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         SDF_VU0_LOADVECTOR(position);
         SDF_VU0_APPLYMATRIX_XYZ1();
         SDF_VU0_VECTOR_W_SET_ONE();
@@ -2500,7 +2500,7 @@ void evtRotateViewerPositionFromPad(f32 *position)
     } else if (dds3PadButtonState.decOne != 0) {
         SDF_VU0_LOADVECTOR_MTXCOL(sdfViewMatrix + 1);
         FromRotation(-2.0f * 3.14159265f / 180.0f);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         SDF_VU0_LOADVECTOR(position);
         SDF_VU0_APPLYMATRIX_XYZ1();
         SDF_VU0_VECTOR_W_SET_ONE();
@@ -2509,7 +2509,7 @@ void evtRotateViewerPositionFromPad(f32 *position)
     if (dds3PadButtonState.incTen != 0) {
         SDF_VU0_LOADVECTOR_MTXCOL(sdfViewMatrix);
         FromRotation(-2.0f * 3.14159265f / 180.0f);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         SDF_VU0_LOADVECTOR(position);
         SDF_VU0_APPLYMATRIX_XYZ1();
         SDF_VU0_VECTOR_W_SET_ONE();
@@ -2517,7 +2517,7 @@ void evtRotateViewerPositionFromPad(f32 *position)
     } else if (dds3PadButtonState.decTen != 0) {
         SDF_VU0_LOADVECTOR_MTXCOL(sdfViewMatrix);
         FromRotation(2.0f * 3.14159265f / 180.0f);
-        effMiscQuaternionToMatrixVU();
+        ToMatrix();
         SDF_VU0_LOADVECTOR(position);
         SDF_VU0_APPLYMATRIX_XYZ1();
         SDF_VU0_VECTOR_W_SET_ONE();

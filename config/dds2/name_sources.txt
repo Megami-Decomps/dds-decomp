@@ -9340,14 +9340,15 @@
 0x00340950	sdfAsin	inferred	SMT3HD name via SLUS_209.11 0x002C0310, reloc-identical; was sdfAsinTable
 0x003409C8	sdfAcos	inferred	SMT3HD name via SLUS_209.11 0x002C0388, reloc-identical; was sdfAcosTable
 0x00340A50	sdfClipAngleValuePI	inferred	SMT3HD name via SLUS_209.11 0x002C0410, reloc-identical; was sdfWrapAngle
+0x00340AC8	Mult	inferred	SMT3HD name via SLUS_209.11 0x002C0488, sdfQuat twin; was effMiscQuatMultiplyVU
 0x00340AF8	Inverse	inferred	SMT3HD name via SLUS_209.11 0x002C04B8, byte-identical; was effMiscInvertQuaternionVU
 0x00340B28	Normalize	inferred	SMT3HD name via SLUS_209.11 0x002C04E8, byte-identical; was effMiscNormalizeVU
 0x00340B78	SDF_QUAT_INNERPRODUCT	inferred	SMT3HD name via SLUS_209.11 0x002C0538, byte-identical; was effMiscQuaternionDotVU
 0x00340BA0	FromRotation	inferred	SMT3HD name via SLUS_209.11 0x002C0560, reloc-identical; was effMiscAxisAngleToQuaternionVU
 0x00340BF0	FromRotation_B	inferred	SMT3HD name via SLUS_209.11 0x002C05B0, reloc-identical; was effMiscAxisAngleToQuaternionVf11
-0x00340C40	effMiscQuaternionToMatrixVU	inferred	VU operations expand quaternion vf10 into vf28-vf31 rotation matrix; high confidence.
+0x00340C40	ToMatrix	inferred	SMT3HD name via SLUS_209.11 0x002C0600, sdfQuat twin; was effMiscQuaternionToMatrixVU
 0x00340CB0	FromEulerXYZ	inferred	SMT3HD name via SLUS_209.11 0x002C0670, reloc-identical; was sdfConvertWrappedEulerAnglesToQuaternionVU
-0x00340DC8	sdfConvertEulerAnglesToQuaternionVU	inferred	Converts three Euler-angle inputs into a quaternion in VU registers.
+0x00340DC8	FromEuler	inferred	SMT3HD name via SLUS_209.11 0x002C0788, sdfQuat twin; was sdfConvertEulerAnglesToQuaternionVU
 0x00340EE0	LookAt	inferred	SMT3HD name via SLUS_209.11 0x002C08A0, unique-masked-hash; was func_00340EE0
 0x00341028	Slerp	inferred	SMT3HD name via SLUS_209.11 0x002C09E8, reloc-identical; was effMiscSlerpQuaternionVu
 0x00341120	Lerp	inferred	SMT3HD name via SLUS_209.11 0x002C0AE0, reloc-identical; was effMiscQuaternionNlerpVU

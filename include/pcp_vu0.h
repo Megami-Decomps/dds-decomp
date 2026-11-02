@@ -359,7 +359,7 @@ typedef struct {
     ".set reorder\n" \
     : : "f" (c), "f" (s) : "$2", "$3")
 /* vf10 = quaternion product vf10 * vf11 (x,y,z then w, each with the
- * negated-product fixup retail emits). DDS1 effMiscQuatMultiplyVU /
+ * negated-product fixup retail emits). DDS1 Mult /
  * DDS2 code_00340AC8. */
 #define VU0_QUAT_MUL_VF10_VF11() __asm__ volatile ( \
     ".set noreorder\n\t" \
@@ -777,7 +777,7 @@ typedef struct {
     "vmulq.xyzw vf10, vf2, Q\n\t.set reorder")
 
 /* Convert vf10's quaternion to the primary rotation-matrix bank.
- * Shared COP2 sequence in both games' effMiscQuaternionToMatrixVU. */
+ * Shared COP2 sequence in both games' ToMatrix. */
 #define VU0_QUAT_TO_MATRIX_VF10() __asm__ volatile ( \
     ".set noreorder\n\t" \
     "vaddw.xyz vf1, vf0, vf0w\n\tvadd.xyzw vf2, vf10, vf10\n\t" \

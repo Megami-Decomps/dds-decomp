@@ -442,7 +442,7 @@ void dds3SceneLightUpdateFirst(void) {
                 SDF_VU0_VECTOR_W_SET_ONE();
                 SDF_VU0_LOADVECTOR_B(&D_003C2BF0[i]);
                 Lerp(ratio);
-                effMiscQuaternionToMatrixVU();
+                ToMatrix();
                 SDF_VU0_LOADVECTOR(&D_003C2BC0[i]);
                 SDF_VU0_APPLYMATRIX();
                 SDF_VU0_STOREVECTOR_NOMEM(D_00324770[i] + 4);

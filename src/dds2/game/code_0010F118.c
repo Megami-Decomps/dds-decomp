@@ -355,7 +355,7 @@ void dds3AddRotPoseSet(dds3Basic_t *node, u128 *vector) {
         ~OBJECT_TRANSFORM_FLAG_MATRIX_CACHE_VALID;
     VU0_LOAD_VF($vf10, &inner->rotation);
     VU0_LOAD_VF($vf11, vector);
-    effMiscQuatMultiplyVU();
+    Mult();
     VU0_STORE_VF($vf10, &inner->rotation);
 }
 
