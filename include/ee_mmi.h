@@ -471,7 +471,7 @@ static inline u32 eePackRGBAWord(f32 unit) {
 #define EE_STORE_ZERO_QUAD(p, off) __asm__ volatile ( \
     "sq $0, " #off "(%0)" : : "r" (p) : "memory")
 
-/* Palette tint blend used by both games' sdfTexBlendPaletteToTintedIntensityVU.
+/* Palette tint blend used by both games' sdfTexSetClutColor.
  * vf2x holds the blend amount and vf3.xyz the tint normalized by 255.
  * The loop primitives preserve source alpha in vf6w. Scalar C cannot emit
  * PEXTLB/PEXTLH, VITOF0, the VU accumulator blend, or PPAC5. These are the

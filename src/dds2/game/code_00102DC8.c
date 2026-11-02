@@ -1285,7 +1285,7 @@ extern u16 D_00435CCE;
 extern void dds3FreeRenderTexture(void);
 extern void dds3InitRenderDrawEnv(void);
 extern sdfGsMemSlice_t *sdfGsAllocFrameBuff(s32 width, s32 height, s32 format);
-extern sdfTexHandle_t *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, sdfGsMemSlice_t *primary, s32 paletteFormat, s32 paletteCount, sdfGsMemSlice_t *secondary);
+extern sdfTexHandle_t *sdfTexNew(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, sdfGsMemSlice_t *primary, s32 paletteFormat, s32 paletteCount, sdfGsMemSlice_t *secondary);
 /* Replace the held texture with a width x height image buffer; return 1 on success.
  * A texture-creation failure does not roll back the already allocated image buffer. */
 s32 dds3AllocRenderTexture(u16 width, u16 height, f32 aspect) {
@@ -1301,7 +1301,7 @@ s32 dds3AllocRenderTexture(u16 width, u16 height, f32 aspect) {
     if (D_00435CC4 == 0) {
         return 0;
     }
-    texture = sdfTexCreateResourceWithReference(width, height, 0, 0, D_00435CC4, 0, 0, 0);
+    texture = sdfTexNew(width, height, 0, 0, D_00435CC4, 0, 0, 0);
     if (texture == 0) {
         return 0;
     }

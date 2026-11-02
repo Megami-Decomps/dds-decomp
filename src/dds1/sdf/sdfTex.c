@@ -306,7 +306,7 @@ void sdfTexLink(sdfTexHandle_t *texture) {
     sdfTexHandleLink = texture;
 }
 
-sdfTexHandle_t *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, sdfGsMemSlice_t *primary, s32 paletteFormat, s32 paletteCount, sdfGsMemSlice_t *secondary) {
+sdfTexHandle_t *sdfTexNew(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, sdfGsMemSlice_t *primary, s32 paletteFormat, s32 paletteCount, sdfGsMemSlice_t *secondary) {
     sdfTexHandle_t *tex = sdfChipAllocZeroDirect(sizeof(sdfTexHandle_t));
     SdfTexRef *ref = sdfChipAllocZeroDirect(sizeof(SdfTexRef));
 
@@ -329,7 +329,7 @@ extern sdfGsMemSlice_t *sdfTexAllocClut(s32, s32, s32);
 
 extern void sdfTexMakeGIFPacket(sdfTexHandle_t *);
 
-sdfTexHandle_t *sdfTexClone(sdfTexHandle_t *source) {
+sdfTexHandle_t *sdfTexDup(sdfTexHandle_t *source) {
     sdfTexHandle_t *texture;
     SdfTexRef *reference;
     sdfTexHandle_t *original;
@@ -406,7 +406,7 @@ extern sdfGsMemSlice_t * sdfTexAllocClut(s32 type, s32 kind, s32 unused);
 
 extern sdfGsMemSlice_t * sdfGsMemAllocFromTail(s32 size, s32 allocationMode);
 
-extern sdfTexHandle_t * sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, sdfGsMemSlice_t *primary, s32 paletteFormat, s32 paletteCount, sdfGsMemSlice_t *secondary);
+extern sdfTexHandle_t * sdfTexNew(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, sdfGsMemSlice_t *primary, s32 paletteFormat, s32 paletteCount, sdfGsMemSlice_t *secondary);
 
 sdfTexPacket_t *sdfTexMakeGIFPacketSub(sdfTexHandle_t *texture, SdfGsContext context);
 
@@ -488,7 +488,7 @@ sdfTexHandle_t *sdfTexAlloc(s32 width, s32 height,
     primary->width = width;
     primary->height = height;
     primary->format = format;
-    return sdfTexCreateResourceWithReference(width, height, format, maxMipLevel,
+    return sdfTexNew(width, height, format, maxMipLevel,
         primary, paletteFormat, paletteCount, secondary);
 }
 
@@ -654,7 +654,7 @@ void sdfTexRebuildPacket(sdfTexHandle_t *texture) {
     }
 }
 
-sdfTexHandle_t *sdfTexCreateFromFileHeader(const SdfTextureFileHeader *header,
+sdfTexHandle_t *sdfTexSetEx(const SdfTextureFileHeader *header,
                                            SdfTextureUploadOwnership uploadOwnership) {
     sdfTexHandle_t *texture;
     const u8 *pixels;
@@ -707,12 +707,12 @@ sdfTexHandle_t *sdfTexCreateFromFileHeader(const SdfTextureFileHeader *header,
 
 /* Build the texture and packet using queue-owned copies of the input pixels. */
 sdfTexHandle_t *sdfTexSet(const SdfTextureFileHeader *header) {
-    return sdfTexCreateFromFileHeader(header, SDF_TEXTURE_UPLOAD_COPY);
+    return sdfTexSetEx(header, SDF_TEXTURE_UPLOAD_COPY);
 }
 
 /* Build the texture and packet while borrowing input pixels through transfer. */
 sdfTexHandle_t *sdfTexSetDirect(const SdfTextureFileHeader *header) {
-    return sdfTexCreateFromFileHeader(header, SDF_TEXTURE_UPLOAD_BORROW);
+    return sdfTexSetEx(header, SDF_TEXTURE_UPLOAD_BORROW);
 }
 
 /* Build weighted-RGB intensity bytes from retained palette color data. */
@@ -763,7 +763,7 @@ extern void sdfTexSetMonoClut(sdfTexHandle_t *texture);
 extern void sdfTexClutToGs(sdfTexHandle_t *texture);
 
 /* vu0 routine: blend clone-source palette RGB toward intensity-scaled tint, preserving alpha. */
-void sdfTexBlendPaletteToTintedIntensityVU(sdfTexHandle_t *texture, s32 tint, f32 amount) {
+void sdfTexSetClutColor(sdfTexHandle_t *texture, s32 tint, f32 amount) {
     sdfTexHandle_t *source = texture->reference->cloneSource;
     u32 count;
     u8 *intensity;

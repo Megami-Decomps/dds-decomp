@@ -131,9 +131,9 @@ extern void sdfMatSetUvwParm(SdfDrawTransform *, const SdfSubParam *);
 
 extern u16 D_00398198[];
 
-extern sdfTexHandle_t *sdfTexClone(sdfTexHandle_t *);
+extern sdfTexHandle_t *sdfTexDup(sdfTexHandle_t *);
 
-extern void sdfTexBlendPaletteToTintedIntensityVU(sdfTexHandle_t *, s32, f32);
+extern void sdfTexSetClutColor(sdfTexHandle_t *, s32, f32);
 
 extern void sdfMatListCopyStat(DevRequest *, const DevRequest *);
 
@@ -198,7 +198,7 @@ DevRequest *sdfTexListDup(DevRequest *source) {
     clone = sdfTexListNew(itemCount);
     for (itemIndex = 0; itemIndex < itemCount; itemIndex++) {
         ((sdfTexHandle_t **)clone->buffer)[itemIndex] =
-            sdfTexClone(((sdfTexHandle_t **)source->buffer)[itemIndex]);
+            sdfTexDup(((sdfTexHandle_t **)source->buffer)[itemIndex]);
     }
     clone->usedCount = itemCount;
     return clone;
@@ -217,7 +217,7 @@ void sdfTexListSetClutColor(DevRequest *list, s32 tint, f32 amount) {
         sdfTexHandle_t *texture = ((sdfTexHandle_t **)list->buffer)[itemIndex];
 
         if (texture->paletteCount != 0) {
-            sdfTexBlendPaletteToTintedIntensityVU(texture, tint, amount);
+            sdfTexSetClutColor(texture, tint, amount);
         }
     }
 }

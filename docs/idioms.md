@@ -1597,7 +1597,7 @@ transfers its bits to a GPR; it does not convert the float to an integer.
 in a GPR, pass the actual float value through that constraint rather than
 introducing a separate C integer temporary with an `mfc1` output block.
 
-The distinction closed DDS2 `sdfTexBlendPaletteToTintedIntensityVU`, the 400-byte texture palette
+The distinction closed DDS2 `sdfTexSetClutColor`, the 400-byte texture palette
 blender. Explicit transfer outputs created GPR quantities whose expanded
 local-allocation intervals occupied `$3` and `$4`, moving the subsequent CLUT
 branch operand to `$5`. Direct float inputs remained float pseudos through
@@ -10871,7 +10871,7 @@ batch's owned allocations. `sdfImageSetDmacHandler` is the registered
 wakeup callback and retains the native -1 result. `sdfGsMemCheckLinkConsistence`
 only walks the two endpoints; it neither changes the heads nor returns a node.
 
-`sdfTexBlendPaletteToTintedIntensityVU` blends cloned palette RGB toward
+`sdfTexSetClutColor` blends cloned palette RGB toward
 intensity-scaled tint, preserving alpha, then queues secondary upload.
 The retained intensity map uses RGB weights 77, 150 and 29. The existing
 VU0 operands, accumulation order and both CLUT-format loops are unchanged.

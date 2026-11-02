@@ -104,7 +104,7 @@ void sdfAssetCopyTextureState(sdfMat_t *, SdfAssetEntry *);
 
 void sdfMatUpdatePacketMultiTex(sdfMat_t *, SdfAssetEntry *);
 
-void sdfTexBlendPaletteToTintedIntensityVU(sdfTexHandle_t *texture, s32 tint, f32 amount);
+void sdfTexSetClutColor(sdfTexHandle_t *texture, s32 tint, f32 amount);
 
 void sdfTexReleaseReferenceViaHandler(sdfTexHandle_t *texture);
 
@@ -437,7 +437,7 @@ void sdfTexListSetCapacity(DevRequest *list, s32 newCount, s32 applyReduction) {
     sdfDevResizeBufferedRequest(list, newCount);
 }
 
-extern sdfTexHandle_t *sdfTexClone(sdfTexHandle_t *);
+extern sdfTexHandle_t *sdfTexDup(sdfTexHandle_t *);
 /* Clone every texture reference into a new buffered list; null sources return null. */
 DevRequest *sdfTexListDup(DevRequest *source) {
     s32 itemCount;
@@ -451,7 +451,7 @@ DevRequest *sdfTexListDup(DevRequest *source) {
     clone = sdfTexListNew(itemCount);
     for (itemIndex = 0; itemIndex < itemCount; itemIndex++) {
         ((sdfTexHandle_t **)clone->buffer)[itemIndex] =
-            sdfTexClone(((sdfTexHandle_t **)source->buffer)[itemIndex]);
+            sdfTexDup(((sdfTexHandle_t **)source->buffer)[itemIndex]);
     }
     clone->usedCount = itemCount;
     return clone;
@@ -470,7 +470,7 @@ void sdfTexListSetClutColor(DevRequest *list, s32 tint, f32 amount) {
         sdfTexHandle_t *texture = ((sdfTexHandle_t **)list->buffer)[itemIndex];
 
         if (texture->paletteCount != 0) {
-            sdfTexBlendPaletteToTintedIntensityVU(texture, tint, amount);
+            sdfTexSetClutColor(texture, tint, amount);
         }
     }
 }

@@ -8788,8 +8788,8 @@
 0x0032B500	sdfTexTransCLUT	inferred	SMT3HD name via SLUS_209.11 0x002AB2B0, reloc-identical; was sdfTexSubmitPixelsForFormat
 0x0032B558	sdfTexClutToGs	inferred	SMT3HD name via SLUS_209.11 0x002AB308, reloc-identical; was sdfTexUploadSecondaryResource
 0x0032B5B0	sdfTexLink	inferred	SMT3HD name via SLUS_209.11 0x002AB360, reloc-identical; was sdfTexListInsert
-0x0032B5D8	sdfTexCreateResourceWithReference	inferred	Allocates a texture and reference, attaches resource pointers and links it. [names_reviewed8.tsv]
-0x0032B6B0	sdfTexClone	inferred	Copies an sdfTexHandle_t descriptor, creates clone-reference state, resets transient buffers and rebuilds texture storage.
+0x0032B5D8	sdfTexNew	inferred	SMT3HD name via SLUS_209.11 0x002AB388, sdfTex twin; was sdfTexCreateResourceWithReference
+0x0032B6B0	sdfTexDup	inferred	SMT3HD name via SLUS_209.11 0x002AB448, sdfTex twin; was sdfTexClone
 0x0032B800	sdfTexAllocClut	inferred	SMT3HD name via SLUS_209.11 0x002AB580, reloc-identical; was sdfTexAllocHead
 0x0032B8D8	sdfTexGetClutDataSize	inferred	SMT3HD name via SLUS_209.11 0x002AB658, byte-identical; was sdfTexGetPaletteByteSize
 0x0032B908	sdfTexAllocClutBuff	inferred	SMT3HD name via SLUS_209.11 0x002AB688, reloc-identical; was sdfTexAllocatePaletteData
@@ -8801,11 +8801,11 @@
 0x0032BE00	sdfTexMakeGIFPacket	inferred	SMT3HD name via SLUS_209.11 0x002ABB18, reloc-identical; was sdfTexCreateFirstPacket
 0x0032BE30	sdfTexMakeGIFPacketCtx2	inferred	SMT3HD name via SLUS_209.11 0x002ABB48, reloc-identical; was sdfTexCreateSecondPacket
 0x0032BE60	sdfTexRebuildPacket	inferred	SMT3HD name via SLUS_209.11 0x002ABB78, reloc-identical; was sdfTexRefreshResourcePackets
-0x0032BF78	sdfTexCreateFromFileHeader	inferred	readability/matching review (QP16)
+0x0032BF78	sdfTexSetEx	inferred	SMT3HD name via SLUS_209.11 0x002ABC90, sdfTex twin; was sdfTexCreateFromFileHeader
 0x0032C138	sdfTexSet	inferred	SMT3HD name via SLUS_209.11 0x002ABE08, shared-hash-in-run; was sdfTexAcquireResourceTexture
 0x0032C150	sdfTexSetDirect	inferred	SMT3HD name via SLUS_209.11 0x002ABE20, shared-hash-in-run; was sdfTexAcquireAlternateResourceTexture
 0x0032C168	sdfTexSetMonoClut	inferred	SMT3HD name via SLUS_209.11 0x002ABE38, reloc-identical; was sdfTexBuildIntensityMap
-0x0032C278	sdfTexBlendPaletteToTintedIntensityVU	inferred	VU0 blends clone-source palette RGB toward normalized tint times weighted source intensity, preserves alpha and queues secondary upload; DDS1 twin 0x002D33C8. [Namer1 batch 34, high]
+0x0032C278	sdfTexSetClutColor	inferred	SMT3HD name via SLUS_209.11 0x002ABF48, sdfTex twin; was sdfTexBlendPaletteToTintedIntensityVU
 0x0032C408	sdfTexSearch	inferred	SMT3HD name via SLUS_209.11 0x002AC0D8, reloc-identical; was sdfFindTextureByResourceKey
 0x0032C448	sdfTexInit	inferred	SMT3HD name via SLUS_209.11 0x002AC118, shared-hash-in-run; was sdfRegisterTextureReleaseRequestHandler
 0x0032C468	sdfSetStoreImage	inferred	SMT3HD name via SLUS_209.11 0x002AC138, reloc-identical; was sdfBuildResourceTransferPacket
