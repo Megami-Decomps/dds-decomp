@@ -1,55 +1,66 @@
-#include "sdk_ps2.h"
 #include "common.h"
-#include "eeregs.h"
-#include "sdf_timer.h"
-#include "sdf_texture_queue.h"
-#include "sdf_image_upload.h"
-#include "sdf_thread.h"
-#include "ee_mmi.h"
-#include "sdf_chip.h"
-#include "sdf_chip_range_api.h"
-#include "sdf_heap_api.h"
-#include "sdf.h"
-#include "sdf_gs_mem_delayed_free_api.h"
-#include "sdf_graph_buffer_state.h"
-#include "sdf_display_thread_state.h"
-#include "sdf_draw_frame_execution_state.h"
-#include "sdf_semaphore_api.h"
-#include "sdf_texture_primary_buffer_api.h"
-#include "sdf_texture_submit.h"
-#include "sdf_texture_lists.h"
-#include "sdf_texture_registry.h"
-#include "sdf_pending.h"
-#include "sdf_texture_release.h"
-#include "sdf_image_packets.h"
-#include "sdf_tex_copy_image_data_api.h"
-#include "sdf_vu_transform_api.h"
-#include "sdf_handler_node.h"
+#include "libsdf.h"
+#include "ps2asm.h"
 
-/* GS pixel-storage modes, using the same private names as sdfTex.c. */
-enum {
-    SDF_PSMCT32 = 0x0, SDF_PSMCT24 = 0x1, SDF_PSMCT16 = 0x2,
-    SDF_PSMCT16S = 0xA, SDF_PSMT8 = 0x13, SDF_PSMT4 = 0x14,
-    SDF_PSMT8H = 0x1B, SDF_PSMT4HL = 0x24, SDF_PSMT4HH = 0x2C,
-    SDF_PSMZ32 = 0x30, SDF_PSMZ24 = 0x31, SDF_PSMZ16 = 0x32,
+extern void sdfDelayedResrcEntry(sdfDelayedResrcCB_t *aCB, void *aItem);
+
+/* GS pixel storage modes, the values of sdfGsMemSlice_t.pixelFormat. */
+enum sdf_psm
+{
+    SDF_PSMCT32 = 0x00,
+    SDF_PSMCT24 = 0x01,
+    SDF_PSMCT16 = 0x02,
+    SDF_PSMCT16S = 0x0A,
+    SDF_PSMT8 = 0x13,
+    SDF_PSMT4 = 0x14,
+    SDF_PSMT8H = 0x1B,
+    SDF_PSMT4HL = 0x24,
+    SDF_PSMT4HH = 0x2C,
+    SDF_PSMZ32 = 0x30,
+    SDF_PSMZ24 = 0x31,
+    SDF_PSMZ16 = 0x32,
     SDF_PSMZ16S = 0x3A
 };
 
-extern sdfGsMemSlice_t *gsMemHandleLinkTail;
+extern s32 DIntr(void);
+
+extern void EIntr(void);
+
+extern void *sdfChipAllocDirect(u32 aSize);
+
+extern void sdfChipFreeDirect(void *aPtr);
+
+extern void sdfDelayedResrcInitCB(sdfDelayedResrcCB_t *aCB, sdfDelayedResrcFreeFunc aFreeFunc);
 
 extern sdfGsMemSlice_t *gsMemHandleLinkHead;
 
-extern SdfPendingRequest gsMemDelayedResrcCB;
+extern sdfGsMemSlice_t *gsMemHandleLinkTail;
 
-extern void (*sdfGrCaptureTarget)(u8 *);
+extern sdfDelayedResrcCB_t gsMemDelayedResrcCB;
 
-extern void (*sdfGsErrorHandler)(s32 size, s32 allocationMode);
+extern void (*sdfGsErrorHandler)(s32 size, s32 type);
 
-struct sdfGsMemSlice_t *sdfGsMemAllocFromHead(s32 size, s32 allocationMode);
+/* sdfImageSetPacket_tag.freeMode: which heap owns the uploaded pixels. */
+enum SdfImageSetMem
+{
+    SDF_IMAGESET_MEM_IGNORE = 0,
+    SDF_IMAGESET_MEM_HANDLE = 1,
+    SDF_IMAGESET_MEM_CHIP = 2
+};
 
-/* Storage depth for supported formats: listed 24-bit/high-plane modes use 32 bits; unlisted is zero. */
-s32 sdfGsMemGetBitCount(u32 format) {
-    switch (format) {
+s32 sdfGsMemGetBitCount(u32 aFormat);
+
+sdfGsMemSlice_t *sdfGsMemAllocFromHead(s32 aSize, s32 aType);
+
+sdfGsMemSlice_t *sdfGsMemAllocFromTail(s32 aSize, s32 aType);
+
+s32 sdfGsMemCheckMerge(sdfGsMemSlice_t *aHandle);
+
+void sdfGsMemFree(sdfGsMemSlice_t *aHandle);
+
+s32 sdfGsMemGetBitCount(u32 aFormat)
+{
+    switch (aFormat) {
     case SDF_PSMCT32:
     case SDF_PSMCT24:
     case SDF_PSMT8H:
@@ -72,9 +83,9 @@ s32 sdfGsMemGetBitCount(u32 format) {
     }
 }
 
-/* Transfer pixel depth, including indexed high-plane and depth formats; unlisted values return zero. */
-s32 sdfGetTexelBitCount(u32 format) {
-    switch (format) {
+s32 sdfGetTexelBitCount(u32 aFormat)
+{
+    switch (aFormat) {
     case SDF_PSMCT32:
     case SDF_PSMZ32:
         return 0x20;
@@ -98,205 +109,207 @@ s32 sdfGetTexelBitCount(u32 format) {
     }
 }
 
-s32 sdfGsMemCheckHandle(sdfTexHandle_t *target) {
+s32 sdfGsMemCheckHandle(sdfGsMemSlice_t *aHandle) {
     sdfGsMemSlice_t *node = gsMemHandleLinkHead;
 
     if (node == NULL) {
         return 0;
     }
     do {
-        if (node == (void *)target) {
+        if (node == (void *)aHandle) {
             return 1;
         }
-        node = node->prev;
+        node = node->next;
     } while (node != NULL);
     return 0;
 }
 
-sdfGsMemSlice_t *sdfGsMemAllocFromHead(s32 size, s32 allocationMode) {
-    sdfGsMemSlice_t *block;
-    sdfGsMemSlice_t *allocated;
-    s32 interruptsEnabled;
+sdfGsMemSlice_t *sdfGsMemAllocFromHead(s32 aSize, s32 aType)
+{
+    sdfGsMemSlice_t *slice;
+    sdfGsMemSlice_t *alloc;
+    s32 reenable;
 
-    interruptsEnabled = DIntr();
-    for (block = gsMemHandleLinkHead;; block = block->prev) {
-        if (block == NULL) {
-            if (interruptsEnabled != 0) {
+    reenable = DIntr();
+    for (slice = gsMemHandleLinkHead;; slice = slice->next) {
+        if (slice == NULL) {
+            if (reenable != 0) {
                 EIntr();
             }
             if (sdfGsErrorHandler != NULL) {
-                sdfGsErrorHandler(size, allocationMode);
+                sdfGsErrorHandler(aSize, aType);
             }
         }
-        if (block->allocationMode != 0 || block->size < size) {
+        if (slice->type != 0 || slice->size < aSize) {
             continue;
         }
-        if (block->size == size) {
-            block->allocationMode = allocationMode;
-            if (interruptsEnabled != 0) {
+        if (slice->size == aSize) {
+            slice->type = aType;
+            if (reenable != 0) {
                 EIntr();
             }
-            return block;
+            return slice;
         }
-        allocated = sdfChipAllocDirect(sizeof(*allocated));
-        allocated->next = block->next;
-        if (allocated->next == NULL) {
-            gsMemHandleLinkHead = allocated;
+        alloc = sdfChipAllocDirect(sizeof(*alloc));
+        alloc->prev = slice->prev;
+        if (alloc->prev == NULL) {
+            gsMemHandleLinkHead = alloc;
         } else {
-            block->next->prev = allocated;
+            slice->prev->next = alloc;
         }
-        allocated->allocationMode = allocationMode;
-        block->next = allocated;
-        allocated->word = block->word;
-        allocated->size = size;
-        allocated->prev = block;
-        block->word += size;
-        block->size -= size;
-        if (interruptsEnabled != 0) {
+        alloc->type = aType;
+        slice->prev = alloc;
+        alloc->addr = slice->addr;
+        alloc->size = aSize;
+        alloc->next = slice;
+        slice->addr += aSize;
+        slice->size -= aSize;
+        if (reenable != 0) {
             EIntr();
         }
-        return allocated;
+        return alloc;
     }
 }
 
-sdfGsMemSlice_t *sdfGsMemAllocFromTail(s32 size, s32 allocationMode) {
-    sdfGsMemSlice_t *block;
-    sdfGsMemSlice_t *allocated;
-    s32 interruptsEnabled;
+sdfGsMemSlice_t *sdfGsMemAllocFromTail(s32 aSize, s32 aType)
+{
+    sdfGsMemSlice_t *slice;
+    sdfGsMemSlice_t *alloc;
+    s32 reenable;
 
-    interruptsEnabled = DIntr();
-    for (block = gsMemHandleLinkTail;; block = block->next) {
-        if (block == NULL) {
-            if (interruptsEnabled != 0) {
+    reenable = DIntr();
+    for (slice = gsMemHandleLinkTail;; slice = slice->prev) {
+        if (slice == NULL) {
+            if (reenable != 0) {
                 EIntr();
             }
             if (sdfGsErrorHandler != NULL) {
-                sdfGsErrorHandler(size, allocationMode);
+                sdfGsErrorHandler(aSize, aType);
             }
         }
-        if (block->allocationMode != 0 || block->size < size) {
+        if (slice->type != 0 || slice->size < aSize) {
             continue;
         }
-        if (block->size == size) {
-            block->allocationMode = allocationMode;
-            if (interruptsEnabled != 0) {
+        if (slice->size == aSize) {
+            slice->type = aType;
+            if (reenable != 0) {
                 EIntr();
             }
-            return block;
+            return slice;
         }
-        allocated = sdfChipAllocDirect(sizeof(*allocated));
-        allocated->prev = block->prev;
-        if (allocated->prev == NULL) {
-            gsMemHandleLinkTail = allocated;
+        alloc = sdfChipAllocDirect(sizeof(*alloc));
+        alloc->next = slice->next;
+        if (alloc->next == NULL) {
+            gsMemHandleLinkTail = alloc;
         } else {
-            block->prev->next = allocated;
+            slice->next->prev = alloc;
         }
-        allocated->allocationMode = allocationMode;
-        block->prev = allocated;
-        allocated->word = block->word + (block->size - size);
-        allocated->size = size;
-        allocated->next = block;
-        block->size -= size;
-        if (interruptsEnabled != 0) {
+        alloc->type = aType;
+        slice->next = alloc;
+        alloc->addr = slice->addr + (slice->size - aSize);
+        alloc->size = aSize;
+        alloc->prev = slice;
+        slice->size -= aSize;
+        if (reenable != 0) {
             EIntr();
         }
-        return allocated;
+        return alloc;
     }
 }
 
-/* Convert storage bits to 32-bit VRAM words before selecting an allocation direction. */
-sdfGsMemSlice_t *sdfGsMemAllocRect(s32 width, s32 height, s32 format, s32 allocationMode, s32 useFirstAllocator) {
-    s32 storageBitsPerPixel = sdfGsMemGetBitCount(format);
-    s32 sizeWords = (width * height * storageBitsPerPixel) >> 5;
-    sdfGsMemSlice_t *textureBlock;
+sdfGsMemSlice_t *sdfGsMemAllocRect(s32 aWidth, s32 aHeight, s32 aFormat, s32 aType, s32 aFromHead)
+{
+    s32 bitCount = sdfGsMemGetBitCount(aFormat);
+    s32 words = (aWidth * aHeight * bitCount) >> 5;
+    sdfGsMemSlice_t *slice;
 
-    if (useFirstAllocator != 0) {
-        textureBlock = sdfGsMemAllocFromHead(sizeWords, allocationMode);
+    if (aFromHead != 0) {
+        slice = sdfGsMemAllocFromHead(words, aType);
     } else {
-        textureBlock = sdfGsMemAllocFromTail(sizeWords, allocationMode);
+        slice = sdfGsMemAllocFromTail(words, aType);
     }
-    textureBlock->width = width;
-    textureBlock->height = height;
-    textureBlock->format = format;
-    return textureBlock;
+    slice->w = aWidth;
+    slice->h = aHeight;
+    slice->pixelFormat = aFormat;
+    return slice;
 }
 
-/* Absorb the previous free range into block; return one when its record is released. */
-s32 sdfGsMemCheckMerge(sdfGsMemSlice_t *block) {
-    sdfGsMemSlice_t *previousBlock = block->prev;
+s32 sdfGsMemCheckMerge(sdfGsMemSlice_t *aHandle)
+{
+    sdfGsMemSlice_t *below = aHandle->next;
 
-    if (previousBlock == NULL || previousBlock->allocationMode != 0) {
+    if (below == NULL || below->type != 0) {
         return 0;
     }
-    block->size += previousBlock->size;
-    if ((block->prev = previousBlock->prev) != NULL) {
-        previousBlock->prev->next = block;
+    aHandle->size += below->size;
+    if ((aHandle->next = below->next) != NULL) {
+        below->next->prev = aHandle;
     } else {
-        gsMemHandleLinkTail = block;
+        gsMemHandleLinkTail = aHandle;
     }
-    sdfChipFreeDirect((sdfTexHandle_t *)previousBlock);
+    sdfChipFreeDirect(below);
     return 1;
 }
 
-/* Walk both list endpoints without returning them or changing either list head. */
 void sdfGsMemCheckLinkConsistence(void) {
     sdfGsMemSlice_t *node;
 
     node = gsMemHandleLinkHead;
-    while (node->prev != NULL) {
-        node = node->prev;
-    }
-    node = gsMemHandleLinkTail;
     while (node->next != NULL) {
         node = node->next;
     }
+    node = gsMemHandleLinkTail;
+    while (node->prev != NULL) {
+        node = node->prev;
+    }
 }
 
-/* Mark a range free and coalesce its neighbors while interrupts are masked. */
-void sdfGsMemFree(sdfGsMemSlice_t *textureBlock) {
-    s32 restoreInterrupts;
+void sdfGsMemFree(sdfGsMemSlice_t *aHandle)
+{
+    s32 reenable;
 
-    if (textureBlock == NULL) {
+    if (aHandle == NULL) {
         return;
     }
-    restoreInterrupts = DIntr();
-    textureBlock->allocationMode = 0;
-    sdfGsMemCheckMerge(textureBlock);
-    if (textureBlock->next != NULL) {
-        if (textureBlock->next->allocationMode == 0) {
-            sdfGsMemCheckMerge(textureBlock->next);
+    reenable = DIntr();
+    aHandle->type = 0;
+    sdfGsMemCheckMerge(aHandle);
+    if (aHandle->prev != NULL) {
+        if (aHandle->prev->type == 0) {
+            sdfGsMemCheckMerge(aHandle->prev);
         }
     }
-    if (restoreInterrupts != 0) {
+    if (reenable != 0) {
         EIntr();
     }
 }
 
-void sdfGsMemFreeDelayed(sdfGsMemSlice_t *texture) {
-    sdfDelayedResrcEntry(&gsMemDelayedResrcCB, texture);
+void sdfGsMemFreeDelayed(sdfGsMemSlice_t *aHandle) {
+    sdfDelayedResrcEntry(&gsMemDelayedResrcCB, aHandle);
 }
 
-void sdfGsMemInit(void) {
-    sdfGsMemSlice_t *head;
+void sdfGsMemInit(void)
+{
+    sdfGsMemSlice_t *slice;
 
-    head = sdfChipAllocDirect(sizeof(sdfGsMemSlice_t));
-    head->size = 0x100000;
-    head->next = NULL;
-    head->prev = NULL;
-    head->allocationMode = 0;
-    head->word = 0;
-    gsMemHandleLinkHead = head;
-    gsMemHandleLinkTail = head;
-    sdfDelayedResrcInitCB(&gsMemDelayedResrcCB, (SdfPendingEntryCallback)sdfGsMemFree);
+    slice = sdfChipAllocDirect(sizeof(sdfGsMemSlice_t));
+    slice->size = 0x100000;
+    slice->prev = NULL;
+    slice->next = NULL;
+    slice->type = 0;
+    slice->addr = 0;
+    gsMemHandleLinkHead = slice;
+    gsMemHandleLinkTail = slice;
+    sdfDelayedResrcInitCB(&gsMemDelayedResrcCB, sdfGsMemFree);
 }
 
-/* Align the storage rows, pack 16-bit formats two pixels per word, then allocate whole GS pages. */
-sdfGsMemSlice_t *sdfGsAllocFrameBuff(s32 width, s32 height, s32 format) {
-    s32 rowWidth = (width + 0x3F) & -0x40;
-    s32 rowCount = (height + 0x1F) & -0x20;
-    sdfGsMemSlice_t *textureBlock;
+sdfGsMemSlice_t *sdfGsAllocFrameBuff(s32 aW, s32 aH, s32 aPixelFormat)
+{
+    s32 rowWidth = (aW + 0x3F) & -0x40;
+    s32 rowCount = (aH + 0x1F) & -0x20;
+    sdfGsMemSlice_t *slice;
 
-    switch (format) {
+    switch (aPixelFormat) {
     case SDF_PSMCT16:
     case SDF_PSMCT16S:
     case SDF_PSMZ16:
@@ -309,11 +322,11 @@ sdfGsMemSlice_t *sdfGsAllocFrameBuff(s32 width, s32 height, s32 format) {
     case SDF_PSMZ24:
         break;
     }
-    textureBlock = sdfGsMemAllocFromHead((rowWidth * rowCount + 0x7FF) & -0x800, 1);
-    textureBlock->width = width;
-    textureBlock->height = height;
-    textureBlock->format = format;
-    return textureBlock;
+    slice = sdfGsMemAllocFromHead((rowWidth * rowCount + 0x7FF) & -0x800, 1);
+    slice->w = aW;
+    slice->h = aH;
+    slice->pixelFormat = aPixelFormat;
+    return slice;
 }
 
 sdfGsMemSlice_t *sdfGsMemGetLinkHead(void) {
