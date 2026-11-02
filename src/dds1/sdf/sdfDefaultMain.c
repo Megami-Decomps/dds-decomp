@@ -1,93 +1,82 @@
-#include "sdk_ps2.h"
 #include "common.h"
-#include "sdf_vu0.h"
-#include "sdf_column_packet_api.h"
-#include "kwln_draw_buffer.h"
-#include "kwln_frame_draw_buffer.h"
-#include "sdf_packet_list.h"
-#include "sdf_draw_packet_groups.h"
-#include "kwln_frame_draw_bank.h"
-#include "kwln_sprite.h"
-#include "dds3Admin.h"
-#include "sdf_linked_packet.h"
-#include "sdf_dev_start_load_api.h"
-#include "kwln.h"
-#include "kwln_task_flags.h"
-#include "sdf.h"
-#include "sdf_pad_mode_api.h"
-#include "sdf_thread.h"
-#include "sdf_thread_sleep.h"
-#include "sdf_projection.h"
-#include "sdf_draw.h"
-#include "pcp_vu0.h"
-#include "sdf_packet_alloc.h"
-#include "sdf_message.h"
+#include "basic.h"
+#include "kernel.h"
+#include "libsdf.h"
 
-typedef struct SdfThreadNode SdfThreadNode;
+#define D_0054E8BC D_003BA83C
+#define D_00552310 D_003BDC90
+#define D_00551B88 kwlnMainLoopThreadNode
+#define dds3KernelMain kwlnRunMainLoop
 
-extern void __main(void);
-
-extern void sdfCdInit(void);
-
-extern s32 sceSifSyncIop(void);
-
-extern void sceCdInit(s32);
-
-extern void sceCdMmode(u32);
-
-extern void LoadMcModules(const char *prefix, s32 moduleGroup);
-
-extern void dds3InitSubsystems(u32 heapSize, u32 initialHeapSize, u32 packetBufferBytes);
-
-extern void sdfFileSetHostRoot(const char *path);
-
-extern void sdfFileSetDefaultSrc(s32 worker);
-
-extern void sdfFileCmdStartThread(s32 index);
-
-extern void SdfIopInit(const char *modulePath, const char *optionalModulePath);
-
-extern void sdfStartFileRpcServer(void);
-
-extern void kwlnRunMainLoop(void);
-
-extern char D_0039DF28[]; /* "cdrom0:\IRX\IOPRP255.IMG;1" */
-
-extern char D_0039DF48[]; /* "cdrom0:\IRX\SIO2MAN.IRX;1" */
-
-extern char D_0039DF68[]; /* "cdrom0:\IRX\PADMAN.IRX;1" */
-
-extern char D_0039DF88[]; /* "\DDS3.IMG;1" */
-
-extern char D_0039DF98[]; /* "cdrom0:\DDS3.DDT;1" */
-
-extern char D_0039DFB0[]; /* "cdrom0:\IRX" */
-
-extern char D_0039DFC0[]; /* "../../../dds3data" */
-
-extern char D_0039DFD8[]; /* "cdrom0:\USERIRX\SDFIOP.IRX;1" */
-
-extern char D_0039DFF8[]; /* "cdrom0:\IRX\MSIFRPC.IRX;1" */
-
-extern const s32 D_003BA83C;
+extern u32 D_0054E8BC;
 
 extern u32 sdfCdTrayMode;
 
 extern u8 sdfPadManagerMode;
 
-extern SdfThreadNode kwlnMainLoopThreadNode;
+extern sdfThCB_t D_00551B88;
 
-extern u8 D_003BDC90[];
+extern u8 D_00552310[];
 
-s32 sdfDefaultMain(void) asm("main");
+extern void __main(void);
 
-s32 sdfDefaultMain(void) {
+extern void sceSifInitRpc(s32 mode);
+
+extern s32 sceSifInitIopHeap(void);
+
+extern s32 sdfCdInit(void);
+
+extern s32 sceSifRebootIop(const char *image);
+
+extern s32 sceSifSyncIop(void);
+
+extern s32 sceSifLoadFileReset(void);
+
+extern void sceFsReset(void);
+
+extern s32 sceCdInit(s32 aMode);
+
+extern s32 sceCdMmode(s32 aMode);
+
+extern void sdfCdImageInit(const char *imageFile, const char *dirFile);
+
+extern s32 sceSifLoadModule(const char *path, s32 argSize, const char *args);
+
+extern void LoadMcModules(const char *prefix, s32 moduleGroup);
+
+extern void dds3InitSubsystems(u32 heapSize, u32 initialHeapSize, u32 packetBufferBytes);
+
+extern void sdfPadChangeMode(s32 aPadNum, u8 mode);
+
+extern void sdfFileSetHostRoot(char *aRootPath);
+
+extern void sdfFileSetDefaultSrc(s32 aType);
+
+extern void sdfFileCmdStartThread(s32 deviceType);
+
+extern void SdfIopInit(const char *driverPath, const char *modulePath);
+
+extern void sdfStartFileRpcServer(void);
+
+
+extern void sdfSetMainThreadPriority(void);
+
+extern void dds3KernelMain(void);
+
+/* Named around `main` so cc1 does not emit the __main call it adds to a
+   function of that name. */
+s32 sdfDefaultMain(void) FAKEMATCH_ASM_NAME("main");
+
+/* DDS loads the pad drivers before the disc image; DDS1 boots another IOP
+   image and the packet buffer differs per game. */
+s32 sdfDefaultMain(void)
+{
     __main();
     sceSifInitRpc(0);
     sceSifInitIopHeap();
-    sdfCdTrayMode = D_003BA83C;
+    sdfCdTrayMode = D_0054E8BC;
     sdfCdInit();
-    while (sceSifRebootIop(D_0039DF28) == 0) {
+    while (sceSifRebootIop("cdrom0:\\IRX\\IOPRP255.IMG;1") == 0) {
     }
     while (sceSifSyncIop() == 0) {
     }
@@ -96,47 +85,28 @@ s32 sdfDefaultMain(void) {
     sceSifLoadFileReset();
     sceFsReset();
     sceCdInit(0);
-    sceCdMmode(D_003BA83C);
-    while (sceSifLoadModule(D_0039DF48, 0, 0) < 0) {
+    sceCdMmode(D_0054E8BC);
+    while (sceSifLoadModule("cdrom0:\\IRX\\SIO2MAN.IRX;1", 0, NULL) < 0) {
     }
-    while (sceSifLoadModule(D_0039DF68, 0, 0) < 0) {
+    while (sceSifLoadModule("cdrom0:\\IRX\\PADMAN.IRX;1", 0, NULL) < 0) {
     }
-    sdfCdImageInit(D_0039DF88, D_0039DF98);
-    LoadMcModules(D_0039DFB0, 1);
+    sdfCdImageInit("\\DDS3.IMG;1", "cdrom0:\\DDS3.DDT;1");
+    LoadMcModules("cdrom0:\\IRX", 1);
     dds3InitSubsystems(0x17C0000, 0x200000, 0x380000);
     sdfPadManagerMode = 1;
-    sdfPadChangeMode(0, SDF_PAD_MODE_DUALSHOCK_LOCKED);
-    sdfPadChangeMode(1, SDF_PAD_MODE_DUALSHOCK_LOCKED);
-    sdfFileSetHostRoot(D_0039DFC0);
+    sdfPadChangeMode(0, 3);
+    sdfPadChangeMode(1, 3);
+    sdfFileSetHostRoot("../../../dds3data");
     sdfFileSetDefaultSrc(3);
     sdfFileCmdStartThread(3);
     sdfFileCmdStartThread(0);
-    SdfIopInit(D_0039DFD8, D_0039DFF8);
+    SdfIopInit("cdrom0:\\USERIRX\\SDFIOP.IRX;1", "cdrom0:\\IRX\\MSIFRPC.IRX;1");
     sdfStartFileRpcServer();
-    sdfStartThreadAndWait(&kwlnMainLoopThreadNode, kwlnRunMainLoop, D_003BDC90, 0x4000, 0x60, 0);
+    sdfStartThreadAndWait(&D_00551B88, dds3KernelMain, D_00552310, 0x4000, 0x60, 0);
     sdfSetMainThreadPriority();
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "sdf/sdfDefaultMain", D_0039DF28);
-
-INCLUDE_RODATA(const s32, "sdf/sdfDefaultMain", D_0039DF48);
-
-INCLUDE_RODATA(const s32, "sdf/sdfDefaultMain", D_0039DF68);
-
-INCLUDE_RODATA(const s32, "sdf/sdfDefaultMain", D_0039DF88);
-
-INCLUDE_RODATA(const s32, "sdf/sdfDefaultMain", D_0039DF98);
-
-INCLUDE_RODATA(const s32, "sdf/sdfDefaultMain", D_0039DFB0);
-
-INCLUDE_RODATA(const s32, "sdf/sdfDefaultMain", D_0039DFC0);
-
-INCLUDE_RODATA(const s32, "sdf/sdfDefaultMain", D_0039DFD8);
-
-INCLUDE_RODATA(const s32, "sdf/sdfDefaultMain", D_0039DFF8);
-
 INCLUDE_RODATA(const s32, "sdf/sdfDefaultMain", D_0039E018);
 
 INCLUDE_SDATA(const s32, "sdf/sdfDefaultMain", D_003BA83C);
-
