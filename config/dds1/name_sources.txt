@@ -6864,37 +6864,37 @@
 0x002897A0	fileManager	inferred	SMT3HD name via SLUS_209.11 0x002976C0, reloc-identical; was fileManUpdate
 0x00289950	fileManagerProc	inferred	SMT3HD name via SLUS_209.11 0x00297870, shared-hash-in-run; was fileMan
 0x00289970	fileSysInit	inferred	SMT3HD name via SLUS_209.11 0x00297890, reloc-identical; was fileManInit
-0x00289A08	fileReqInit	inferred	initializes one file request entry via libmc helper
-0x00289A58	fileReqBegin	inferred	sets current request index and initializes that entry
-0x00289AA0	fileReqPoll	inferred	polls one request via libmc status call, advances its state machine
-0x00289B98	fileReqGetStatus	inferred	Returns the request's status byte at offset 0x11, switched over by memory-card file request polling.
-0x00289BC0	fileReqGetSize	inferred	returns entry size field shifted to bytes
-0x00289BE8	fileReqIsSlotMetadataDirty	inferred	Reads the request's slot metadata flag at offset 0x12, checked before rebuilding save-slot metadata.
-0x00289C10	fileReqClearSlotMetadataDirty	inferred	Clears the request's slot metadata dirty byte at offset 0x12.
-0x00289C38	fileReqMarkSlotMetadataDirty	inferred	Sets the slot metadata flag at offset 0x12 before directory updates and metadata clearing.
-0x00289C68	fileReqClearSlotFlags	inferred	Clears one selected slot's flag word in the 25-word-per-request array.
-0x00289C98	fileReqSetSlotFlags	inferred	ORs a supplied mask into the selected save slot's request flag word.
-0x00289CD0	fileReqGetSlotFlags	inferred	Returns the selected save slot's flag word, used by memory-card directory and save-slot scanning.
-0x00289D00	fileReqGetSelectedSlot	inferred	Returns the signed selected save slot at request offset 0x13, used to format save directory names.
-0x00289D28	fileReqSetSelectedSlot	inferred	Stores the selected save slot byte at request offset 0x13.
+0x00289A08	sdfMcFuncGetInfo	inferred	SMT3HD name via SLUS_209.11 0x0029B0A8, mcManager twin; was fileReqInit
+0x00289A58	sdfMcRegetInfo	inferred	SMT3HD name via SLUS_209.11 0x0029B0E8, mcManager twin; was fileReqBegin
+0x00289AA0	sdfMcFuncGetInfo1	inferred	SMT3HD name via SLUS_209.11 0x0029B128, mcManager twin; was fileReqPoll
+0x00289B98	sdfMcGetFileInfoReady	inferred	SMT3HD name via SLUS_209.11 0x0029B218, mcManager twin; was fileReqGetStatus
+0x00289BC0	sdfMcGetFreeBytes	inferred	SMT3HD name via SLUS_209.11 0x0029B238, mcManager twin; was fileReqGetSize
+0x00289BE8	sdfMcGetStatus	inferred	SMT3HD name via SLUS_209.11 0x0029B258, mcManager twin; was fileReqIsSlotMetadataDirty
+0x00289C10	sdfMcClearCardStat	inferred	SMT3HD name via SLUS_209.11 0x0029B278, mcManager twin; was fileReqClearSlotMetadataDirty
+0x00289C38	sdfMcSetCardStat	inferred	SMT3HD name via SLUS_209.11 0x0029B298, mcManager twin; was fileReqMarkSlotMetadataDirty
+0x00289C68	sdfMcClearSlotFlags	inferred	SMT3HD name via SLUS_209.11 0x0029B2C0, mcManager twin; was fileReqClearSlotFlags
+0x00289C98	sdfMcSetSlotFlags	inferred	SMT3HD name via SLUS_209.11 0x0029B2E8, mcManager twin; was fileReqSetSlotFlags
+0x00289CD0	sdfMcGetSlotFlags	inferred	SMT3HD name via SLUS_209.11 0x0029B318, mcManager twin; was fileReqGetSlotFlags
+0x00289D00	sdfMcGetSlotIndex	inferred	SMT3HD name via SLUS_209.11 0x0029B340, mcManager twin; was fileReqGetSelectedSlot
+0x00289D28	sdfMcSetSlotIndex	inferred	SMT3HD name via SLUS_209.11 0x0029B360, mcManager twin; was fileReqSetSelectedSlot
 0x00289D50	sdfMcFuncFormat	inferred	SMT3HD name via SLUS_209.11 0x0029B380, shared-hash-in-run; was fileReqStartCardDetection
-0x00289D68	sdfMcPollFormat	inferred	SMT3HD function via SLUS_209.11 0x0029B398, reloc-identical; was mcPollStrictSuccess; locally renamed from sdfMcFuncFormat1 because it performs one nonblocking sceMcSync poll
+0x00289D68	sdfMcFuncFormat1	inferred	SMT3HD name via SLUS_209.11 0x0029B398, mcManager twin; was sdfMcPollFormat
 0x00289DA8	sdfMcFuncChdir	inferred	SMT3HD name via SLUS_209.11 0x0029B3D8, reloc-identical; was mcChangeCurrentDirectory
-0x00289DC8	sdfMcPollChdir	inferred	SMT3HD function via SLUS_209.11 0x0029B3F8, shared-hash-in-run; was mcPollSyncResult; locally renamed from sdfMcFuncChdir1 because it performs one nonblocking sceMcSync poll
+0x00289DC8	sdfMcFuncChdir1	inferred	SMT3HD name via SLUS_209.11 0x0029B3F8, mcManager twin; was sdfMcPollChdir
 0x00289E18	sdfMcFuncMkdir	inferred	SMT3HD name via SLUS_209.11 0x0029B448, shared-hash-in-run; was mcMakeDirectory
-0x00289E38	sdfMcPollMkdir	inferred	SMT3HD function via SLUS_209.11 0x0029B468, reloc-identical; was mcPollWithExtendedErrors; locally renamed from sdfMcFuncMkdir1 because it performs one nonblocking sceMcSync poll
+0x00289E38	sdfMcFuncMkdir1	inferred	SMT3HD name via SLUS_209.11 0x0029B468, mcManager twin; was sdfMcPollMkdir
 0x00289E80	sdfMcFuncGetDir	inferred	SMT3HD name via SLUS_209.11 0x0029B4B0, reloc-identical; was mcReadDirectoryEntries
-0x00289EB0	sdfMcPollGetDir	inferred	SMT3HD function via SLUS_209.11 0x0029B4E0, shared-hash-in-run; was mcPollNonnegativeResult; locally renamed from sdfMcFuncGetDir1 because it performs one nonblocking sceMcSync poll
+0x00289EB0	sdfMcFuncGetDir1	inferred	SMT3HD name via SLUS_209.11 0x0029B4E0, mcManager twin; was sdfMcPollGetDir
 0x00289F10	sdfMcFuncDelete	inferred	SMT3HD name via SLUS_209.11 0x0029B540, shared-hash-in-run; was mcDeleteFilePath
-0x00289F30	sdfMcPollDelete	inferred	SMT3HD function via SLUS_209.11 0x0029B560, shared-hash-in-run; was mcPollNormalizedCommandStatus; locally renamed from sdfMcFuncDelete1 because it performs one nonblocking sceMcSync poll
+0x00289F30	sdfMcFuncDelete1	inferred	SMT3HD name via SLUS_209.11 0x0029B560, mcManager twin; was sdfMcPollDelete
 0x00289F80	sdfMcFuncOpen	inferred	SMT3HD name via SLUS_209.11 0x0029B5B0, reloc-identical; was mcOpenFilePath
-0x00289FA8	sdfMcPollOpen	inferred	SMT3HD function via SLUS_209.11 0x0029B5D8, shared-hash-in-run; was mcPollCommandStatusWithResult; locally renamed from sdfMcFuncOpen1 because it performs one nonblocking sceMcSync poll
+0x00289FA8	sdfMcFuncOpen1	inferred	SMT3HD name via SLUS_209.11 0x0029B5D8, mcManager twin; was sdfMcPollOpen
 0x0028A008	sdfMcFuncClose	inferred	SMT3HD name via SLUS_209.11 0x0029B638, shared-hash-in-run; was mcCloseOpenFile
-0x0028A020	sdfMcPollClose	inferred	SMT3HD function via SLUS_209.11 0x0029B650, shared-hash-in-run; was mcPollZeroCommandResult; locally renamed from sdfMcFuncClose1 because it performs one nonblocking sceMcSync poll
+0x0028A020	sdfMcFuncClose1	inferred	SMT3HD name via SLUS_209.11 0x0029B650, mcManager twin; was sdfMcPollClose
 0x0028A070	sdfMcFuncRead	inferred	SMT3HD name via SLUS_209.11 0x0029B6A0, shared-hash-in-run; was mcReadOpenFile
-0x0028A088	sdfMcPollRead	inferred	SMT3HD function via SLUS_209.11 0x0029B6B8, shared-hash-in-run; was mcPollCompletionStatus; locally renamed from sdfMcFuncRead1 because it performs one nonblocking sceMcSync poll
+0x0028A088	sdfMcFuncRead1	inferred	SMT3HD name via SLUS_209.11 0x0029B6B8, mcManager twin; was sdfMcPollRead
 0x0028A0E0	sdfMcFuncWrite	inferred	SMT3HD name via SLUS_209.11 0x0029B710, shared-hash-in-run; was mcBeginWrite
-0x0028A0F8	sdfMcPollWrite	inferred	SMT3HD function via SLUS_209.11 0x0029B728, shared-hash-in-run; was mcPollWriteCompletion; locally renamed from sdfMcFuncWrite1 because it performs one nonblocking sceMcSync poll
+0x0028A0F8	sdfMcFuncWrite1	inferred	SMT3HD name via SLUS_209.11 0x0029B728, mcManager twin; was sdfMcPollWrite
 0x0028A150	slKillLoadProcess	inferred	SMT3HD name via SLUS_209.11 0x0029B780, reloc-identical; was fileDestroyMenuTask
 0x0028A180	fileMenuTaskIsAlive	inferred	returns D_003BC7EC, the flag set while the file-menu task runs (cleared by slKillLoadProcess)
 0x0028A190	mcFormatSaveFilename	inferred	mc save/load memory-card workflow in game/code_0028A0E0.c
@@ -6913,7 +6913,7 @@
 0x0028A7A8	fileShowStatusDialog	inferred	legacy FileMenu_ShowStatusDialogByCode: file/memory-card manager in game/code_0028A0E0
 0x0028AB30	slSetInfo	inferred	SMT3HD name via SLUS_209.11 0x00152D00, reloc-identical; was fileSetMenuFlowState
 0x0028AB48	fileShowFlowDialog	inferred	readability/matching review (QP16)
-0x0028AE68	fileClearAllSlotFlags	inferred	marks the (selected) request's slot metadata dirty and clears slot flags 0..9 -- the same body as DDS2 func_002CA638, which calls fileReqSetSelectedSlot's request D_00437CD0
+0x0028AE68	fileClearAllSlotFlags	inferred	marks the (selected) request's slot metadata dirty and clears slot flags 0..9 -- the same body as DDS2 func_002CA638, which calls sdfMcSetSlotIndex's request D_00437CD0
 0x0028AF00	slHeadLoad	inferred	SMT3HD name via SLUS_209.11 0x00153010, reloc-identical; was fileBeginSlotOpen
 0x0028AFE0	fileReadSlotPreviewBegin	inferred	legacy Save_ReadSlotPreview_Begin: file/memory-card manager in game/code_0028A0E0
 0x0028B058	slHeadLoadProc_readFile	inferred	SMT3HD name via SLUS_209.11 0x00153168, reloc-identical; was fileReadSlotPreviewWait
@@ -10366,7 +10366,7 @@
 0x003BD8D0	mnuTitleStreamSemaphore	inferred	high confidence; src/dds1/game/code_00268AB8.c mnuCreateTitleStreamThread(): D_003BD8D0 = sdfCreateSema(1, 0xff, 0); Semaphore protects title-stream updates and status reads/writes. [names_reviewed26.tsv]
 0x003BD8D4	mnuTitleStreamFileRequest	inferred	confidence=high; mnuStoreTaskResult retains fileLoad result here; mnuCompleteTitleStreamFileLoad polls readiness and obtains the loaded resource handle, data and byte size from it. Same role in DDS2 at 0x00438FEC. Existing declarations, views, storage and data bytes retained; no source-owned data import or active INCLUDE_ASM consumer. [Namer1 readability b83; paired matched-C data consumers]
 0x003BD8E0	mnuTitleCameraObject	inferred	high confidence; src/dds1/game/code_00268AB8.c mnuCreateTitleCameraWorldEntry(): D_003BD8E0 = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), (f32 *)mnuTitleCameraPosition, (f32 *)mnuTitleCameraRotation); World camera object created with the retail title_camera callback label. [names_reviewed26.tsv]
-0x003BD8E8	fileActiveCardDetectionRequestIndex	inferred	confidence=high; fileReqBegin saves the selected request index; fileReqPoll uses it to select FileReqEntry, interpret sceMcSync card type/format status and retry fileReqInit. Existing s32 storage retained, distinct from the menu request index. [Namer1 readability b95; matched-consumer and native-data evidence; names_reviewed]
+0x003BD8E8	sdfMcInfo	inferred	SMT3HD name via SLUS_209.11 0x00552030, mcManager twin; was fileActiveCardDetectionRequestIndex
 0x003BD8EC	fileMenuConvertedTextGlyph	inferred	confidence=high; mnuDrawAndStoreTextGlyphHandle saves itfCreateConvertedTextGlyph result, then draws with shared flags and queues the same _FRQ pointer in both games. Native object extent0x4; same role in DDS2 at0x00439004. Identifier-only; existing types,widths,bounds,casts,arithmetic,storage and per-game layouts retained; no source import or native ASM root/interior consumer. [Namer1 readability b88; matched-C/native-data evidence]
 0x003BD8F0	fileMenuStringGlyph	inferred	confidence=high; mcdCreateFontDrawHandle saves frFontBuildGlyphChain(const char*) result, sets spacing/position/colors, draws layer0x56 and queues the same pointer; separate from converted-text glyph. Native object extent0x4; same role in DDS2 at0x0043900C. Identifier-only; existing types,widths,bounds,casts,arithmetic,storage and per-game layouts retained; no source import or native ASM root/interior consumer. [Namer1 readability b88; matched-C/native-data evidence]
 0x003BD8F4	fileMainSaveBlobAddress	inferred	confidence=high; fileBuildMainBlobAndWrite stores DDS3_GBWK in this address word and passes its address to slSaveWriteFile. Preserve DDS1 u32 versus DDS2 dds3GlobalWork_t* declarations and existing casts. Same role in DDS2 at 0x00439010. Identifier-only: preserve all original declarations, widths, bounds, casts, storage, bytes and control flow. No source-owned import or native ASM root/interior consumer. [Namer1 readability data b90; matched-C/native-twin evidence]
@@ -10553,8 +10553,8 @@
 0x003DC5C8	mnuCampResourceHandles	inferred	confidence=high; DDS1 synchronous load/resolve/release consumers own7 EffectSlotSet* slots. Adopt the existing DDS2 name mnuCampResourceHandles, whose analogous bank has2 slots; do not change either count or ownership behavior. [Namer1 readability b96; matched/native resource and movie-data evidence; names_reviewed]
 0x003DC5E8	evtStageTestState	inferred	confidence=high; src/dds1/game/code_00282850.c:D_003DC5E8; type=StageTestState; refs=evtStageTestSetModelScalingEnabled,evtStageTestGetActiveModel; Shared stage-test model, scaling flag, slots and pending effect state accessed by stage-test APIs. [names_qp9.tsv]
 0x003DC658	fileQueueHead	inferred	SMT3HD data name via SLUS_209.11 0x00575618, 13 agreeing references; was fileQueueHead
-0x003DC698	fileRequestEntries	inferred	confidence=high; src/dds1/game/code_00288E70.c:D_003DC698; type=FileReqEntry[]; refs=fileReqBegin,fileReqGetStatus; Request-indexed records expose status, byte size, selected slot and metadata-dirty flags. [names_qp9.tsv]
-0x003DC6AC	fileRequestSlotFlags	inferred	confidence=high; data D_003DC6AC; matched-C-users=3; src/dds1/game/code_00288E70.c:160:fileReqClearSlotFlags; src/dds1/game/code_00288E70.c:165:fileReqSetSlotFlags; src/dds1/game/code_00288E70.c:170:fileReqGetSlotFlags; Per-request slot flag words are cleared, ORed and returned by file request slot APIs; data-twin=D_00457F7C, supported by 3 independently paired matched functions.; retail-data-start=asm/dds1/data/bss.bss.s:1479.; seed-placeholder=D_003DC6AC; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
+0x003DC698	sdfMcCb	inferred	SMT3HD name via SLUS_209.11 0x00575658, mcManager twin; was fileRequestEntries
+0x003DC6AC	fileRequestSlotFlags	inferred	confidence=high; data D_003DC6AC; matched-C-users=3; src/dds1/game/code_00288E70.c:160:sdfMcClearSlotFlags; src/dds1/game/code_00288E70.c:165:sdfMcSetSlotFlags; src/dds1/game/code_00288E70.c:170:sdfMcGetSlotFlags; Per-request slot flag words are cleared, ORed and returned by file request slot APIs; data-twin=D_00457F7C, supported by 3 independently paired matched functions.; retail-data-start=asm/dds1/data/bss.bss.s:1479.; seed-placeholder=D_003DC6AC; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
 0x003DC780	fileDirectoryEntryScratch	inferred	confidence=high; Native64-byte BSS scratch passed by both matched slChooseData_getCardInfo2/AltBegin to sdfMcFuncGetDir with entryLimit1; canonical provider forwards it as sceMcGetDir argument6. Separate from preview records; retain existingu8[] storage and no newSDKcast. [Namer1 readability b100; matched/native staff, camp and save-preview evidence; names_reviewed]
 0x003DC7C0	fileSlotDisplayStates	inferred	ten active save-slot scan/display state words in this sixteen-word backing region
 0x003DC800	fileSavePreviewRecords	inferred	ten 0x30-byte serialized save-preview records

@@ -14,29 +14,29 @@
 #include "sdf_dev_event.h"
 #include "sdf_dev_state.h"
 
-extern s32 fileActiveCardDetectionRequestIndex;
+extern s32 sdfMcInfo;
 
 s32 sceMcGetInfo(s32 requestIndex, s32 arg1, void *cardTypeOut, void *sizeKiBOut, void *formattedOut);
 
 
 /* This unit builds with -fno-optimize-sibling-calls (config/dds1/cflags.txt), so
  * the card-info query stays jal + epilogue. */
-void fileReqInit(s32 request) {
-    FileReqEntry *entry = &fileRequestEntries[request];
+void sdfMcFuncGetInfo(s32 request) {
+    FileReqEntry *entry = &sdfMcCb[request];
     sceMcGetInfo(request, 0, &entry->cardType, &entry->sizeKiB, &entry->formatted);
 }
 
 /* Select and reinitialize one file request, then clear its +0x10 byte. */
-void fileReqBegin(s32 request) {
-    fileActiveCardDetectionRequestIndex = request;
-    fileReqInit(request);
-    fileRequestEntries[request].requestRetryCount = 0;
+void sdfMcRegetInfo(s32 request) {
+    sdfMcInfo = request;
+    sdfMcFuncGetInfo(request);
+    sdfMcCb[request].requestRetryCount = 0;
 }
 
 /* Keep the zero-status tail distinct and the ready path after retry work;
  * see docs/idioms.md, "Trace-justified switch tails: fileReqPoll". */
-FileReqPollResult fileReqPoll(void) {
-    FileReqEntry *entry = &fileRequestEntries[fileActiveCardDetectionRequestIndex];
+FileReqPollResult sdfMcFuncGetInfo1(void) {
+    FileReqEntry *entry = &sdfMcCb[sdfMcInfo];
     s32 commandId;
     McSyncCommandResult commandResult;
     McSyncPollStatus pollStatus = sceMcSync(1, &commandId, &commandResult);
@@ -59,7 +59,7 @@ FileReqPollResult fileReqPoll(void) {
                 retries = entry->requestRetryCount;
                 if (retries < 5) {
                     entry->requestRetryCount = retries + 1;
-                    fileReqInit(fileActiveCardDetectionRequestIndex);
+                    sdfMcFuncGetInfo(sdfMcInfo);
                     return FILE_REQ_POLL_PENDING;
                 }
                 entry->status = FILE_REQ_STATUS_UNFORMATTED;
@@ -80,45 +80,45 @@ FileReqPollResult fileReqPoll(void) {
     return FILE_REQ_POLL_PENDING;
 }
 
-FileReqStatus fileReqGetStatus(s32 request) {
-    return fileRequestEntries[request].status;
+FileReqStatus sdfMcGetFileInfoReady(s32 request) {
+    return sdfMcCb[request].status;
 }
 
-s32 fileReqGetSize(s32 request) {
-    return fileRequestEntries[request].sizeKiB << 10;
+s32 sdfMcGetFreeBytes(s32 request) {
+    return sdfMcCb[request].sizeKiB << 10;
 }
 
-u8 fileReqIsSlotMetadataDirty(s32 request) {
-    return fileRequestEntries[request].slotMetadataDirty;
+u8 sdfMcGetStatus(s32 request) {
+    return sdfMcCb[request].slotMetadataDirty;
 }
 
-void fileReqClearSlotMetadataDirty(s32 request) {
-    fileRequestEntries[request].slotMetadataDirty = 0;
+void sdfMcClearCardStat(s32 request) {
+    sdfMcCb[request].slotMetadataDirty = 0;
 }
 
-void fileReqMarkSlotMetadataDirty(s32 request) {
-    fileRequestEntries[request].slotMetadataDirty = 1;
+void sdfMcSetCardStat(s32 request) {
+    sdfMcCb[request].slotMetadataDirty = 1;
 }
 
-void fileReqClearSlotFlags(s32 request, s32 slot) {
+void sdfMcClearSlotFlags(s32 request, s32 slot) {
     slot += request * FILE_REQ_WORDS_PER_ENTRY;
     fileRequestSlotFlags[slot] = 0;
 }
 
-void fileReqSetSlotFlags(s32 request, s32 slot, s32 mask) {
+void sdfMcSetSlotFlags(s32 request, s32 slot, s32 mask) {
     slot += request * FILE_REQ_WORDS_PER_ENTRY;
     fileRequestSlotFlags[slot] |= mask;
 }
 
-u32 fileReqGetSlotFlags(s32 request, s32 slot) {
+u32 sdfMcGetSlotFlags(s32 request, s32 slot) {
     slot += request * FILE_REQ_WORDS_PER_ENTRY;
     return fileRequestSlotFlags[slot];
 }
 
-s8 fileReqGetSelectedSlot(s32 request) {
-    return fileRequestEntries[request].selectedSlot;
+s8 sdfMcGetSlotIndex(s32 request) {
+    return sdfMcCb[request].selectedSlot;
 }
 
-void fileReqSetSelectedSlot(s32 request, s32 selectedSlot) {
-    fileRequestEntries[request].selectedSlot = selectedSlot;
+void sdfMcSetSlotIndex(s32 request, s32 selectedSlot) {
+    sdfMcCb[request].selectedSlot = selectedSlot;
 }

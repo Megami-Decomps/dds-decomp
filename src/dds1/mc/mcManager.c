@@ -18,7 +18,7 @@
 
 /* Return 1 only for completed status zero, -1 for other completed statuses.
  * Every SDK poll return other than 1 maps to 0, including SDK-level failures. */
-McPollResult sdfMcPollFormat(void) {
+McPollResult sdfMcFuncFormat1(void) {
     s32 commandId;
     McSyncCommandResult commandResult;
     McSyncPollStatus pollResult = sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult);
@@ -41,7 +41,7 @@ void sdfMcFuncChdir(McPort port, const char *path) {
 
 /* Accept only completed status zero; translate -4 to -2 and other statuses
  * to -1. Any SDK poll return other than 1 maps to 0; this does not wait. */
-McPollResult sdfMcPollChdir(void) {
+McPollResult sdfMcFuncChdir1(void) {
     s32 commandId;
     McSyncCommandResult commandResult;
 
@@ -62,7 +62,7 @@ void sdfMcFuncMkdir(McPort port, const char *path) {
 
 /* Accept only completed status zero. Completed statuses below -10 map to
  * -2, all other nonzero statuses to -1; non-complete SDK polls map to 0. */
-McPollResult sdfMcPollMkdir(void) {
+McPollResult sdfMcFuncMkdir1(void) {
     s32 commandId;
     McSyncCommandResult commandResult;
     McSyncPollStatus pollResult = sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult);
@@ -88,7 +88,7 @@ void sdfMcFuncGetDir(McPort port, const char *path, sceMcTblGetDir *directoryEnt
 /* Accept any completed nonnegative entry count and write it to entryCountOut,
  * which must be valid on success and stays untouched otherwise. Translate
  * -4 to -2, other negatives to -1; non-complete SDK polls map to 0. */
-McPollResult sdfMcPollGetDir(McDirectoryEntryCount *entryCountOut) {
+McPollResult sdfMcFuncGetDir1(McDirectoryEntryCount *entryCountOut) {
     s32 commandId;
     McSyncCommandResult commandResult;
     McSyncPollStatus pollResult = sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult);
@@ -112,8 +112,8 @@ void sdfMcFuncDelete(McPort port, const char *path) {
     sceMcDelete(port, MC_CARD_SLOT, path);
 }
 
-/* Same zero-only completion policy as sdfMcPollChdir; no blocking loop. */
-McPollResult sdfMcPollDelete(void) {
+/* Same zero-only completion policy as sdfMcFuncChdir1; no blocking loop. */
+McPollResult sdfMcFuncDelete1(void) {
     s32 commandId;
     McSyncCommandResult commandResult;
 
@@ -134,7 +134,7 @@ void sdfMcFuncOpen(McPort port, const char *path, McOpenMode openMode) {
 
 /* Accept any completed nonnegative open result as a file descriptor and write
  * it to fileDescriptorOut only then. Preserve all poll/error translations. */
-McPollResult sdfMcPollOpen(McFileDescriptor *fileDescriptorOut) {
+McPollResult sdfMcFuncOpen1(McFileDescriptor *fileDescriptorOut) {
     s32 commandId;
     McSyncCommandResult commandResult;
     McSyncPollStatus pollResult = sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult);
@@ -159,7 +159,7 @@ void sdfMcFuncClose(McFileDescriptor fileDescriptor) {
 
 /* Despite its name, poll once rather than waiting; success requires status
  * zero, -4 maps to -2 and other completed statuses to -1. */
-McPollResult sdfMcPollClose(void) {
+McPollResult sdfMcFuncClose1(void) {
     s32 commandId;
     McSyncCommandResult commandResult;
 
@@ -179,7 +179,7 @@ void sdfMcFuncRead(McFileDescriptor fileDescriptor, void *buffer, s32 size) {
 
 /* Any completed nonnegative status succeeds, but the SDK status is not
  * returned to a caller output. Non-complete SDK polls map to 0. */
-McPollResult sdfMcPollRead(void) {
+McPollResult sdfMcFuncRead1(void) {
     s32 commandId;
     McSyncCommandResult commandResult;
     McSyncPollStatus pollResult = sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult);
@@ -204,7 +204,7 @@ void sdfMcFuncWrite(McFileDescriptor fileDescriptor, const void *data, s32 byteC
 
 /* Poll once: any completed nonnegative write status returns 1; -4 becomes
  * -2 and other negatives become -1. Non-complete SDK polls map to 0. */
-McPollResult sdfMcPollWrite(void) {
+McPollResult sdfMcFuncWrite1(void) {
     s32 commandId;
     McSyncCommandResult commandResult;
     McSyncPollStatus pollResult = sceMcSync(MC_SYNC_POLL_MODE, &commandId, &commandResult);

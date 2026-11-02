@@ -9504,7 +9504,7 @@ fourth lane too. The neighboring empty/zero-return functions remain
 unnamed: these callback tables do not establish a distinct role for
 every dormant entrypoint.
 
-## Trace-justified switch tails: fileReqPoll
+## Trace-justified switch tails: sdfMcFuncGetInfo1
 
 The 248-byte twins at DDS1 `0x00289AA0` and DDS2 `0x002C9020` use
 the primary `FileReqEntry` and the default `-O2 -G8` configuration.
@@ -9526,7 +9526,7 @@ The deciding property is twofold:
   leaves an extra branch; returning directly from it also disturbs allocation.
 
 Both original whole units gate at 23 matches, zero differences with
-`fileReqInit` still in assembly. Poll also matches in the private no-sibling
+`sdfMcFuncGetInfo` still in assembly. Poll also matches in the private no-sibling
 envelope, but is **not** flag-sensitive: it provides no second independent
 site for changing that envelope's compiler flags.
 
@@ -14472,7 +14472,7 @@ VF10 by the wave-emitter update, with its original VU0 operations retained.
 
 `fileManagerTaskName` is the C-owned eight-byte `fileManagerProc` task-name object,
 not an imported small-data blob. Keep its existing `.sdata` placement and
-array bound. `fileActiveCardDetectionRequestIndex` selects the request entry
+array bound. `sdfMcInfo` selects the request entry
 used by the manager's card synchronization/type/format polling and retry;
 it is distinct from the file-menu request index.
 
