@@ -113,5 +113,5 @@ INCLUDE_SDATA(const s32, "sdf/sdfHdd", D_00438B60);
 
 INCLUDE_SDATA(const s32, "sdf/sdfHdd", D_00438B68);
 
-INCLUDE_SDATA(const s32, "sdf/sdfHdd", D_00438B70);
+INCLUDE_SDATA(const s32, "sdf/sdfHdd", sdfCdClock);
 

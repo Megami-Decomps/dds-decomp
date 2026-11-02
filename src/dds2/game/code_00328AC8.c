@@ -28,14 +28,14 @@ void sdfUnlinkAndDeleteCurrentThread(void) {
 }
 
 extern s32 sdfVblankSema;
-extern u8 D_00438B70;
+extern u8 sdfCdClock;
 
 /* Wake the worker only for its registered event; the byte counter never underflows. */
 s32 VblankIntcHandler(s32 eventId) {
     if (eventId == SDF_THREAD_COMPLETION_EVENT) {
         iWakeupThread(sdfVblankSema);
-        if (D_00438B70 != 0) {
-            D_00438B70--;
+        if (sdfCdClock != 0) {
+            sdfCdClock--;
         }
     }
     return 0;

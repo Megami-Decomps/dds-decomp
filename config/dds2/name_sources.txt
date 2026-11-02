@@ -10436,6 +10436,7 @@
 0x0040BA10	sdfFileDeviceCB	inferred	SMT3HD data name via SLUS_209.11 0x00529B00, 4 agreeing references; was sdfFileDeviceCB
 0x0040BA70	sdfDevHddModuleArguments	inferred	confidence=high; HDD.IRX load consumes exactly0xC bytes: embedded-NUL argv -o,18,-n,32. Retail16-byte window is identical across games including four zero alignment bytes; existing char[] kept. Same role in DDS1 at 0x003988C0. Preserve prior Cedar data-ownership credit; no new function/data-ownership credit. [PurC5 readability data b8; matched-C/native-twin evidence; identifier-only]
 0x0040BA80	sdfDevPfsModuleArguments	inferred	confidence=high; PFS.IRX load consumes exactly0x12 bytes: embedded-NUL argv -m,18,-o,10,-n,64. Retail32-byte window identical across games with zero tail; do not turn this blob into one formatted string. Same role in DDS1 at 0x003988D0. Preserve prior Cedar data-ownership credit; no new function/data-ownership credit. [PurC5 readability data b8; matched-C/native-twin evidence; identifier-only]
+0x0040BAE8	sdfDefaultRandCB	inferred	SMT3HD data name via SLUS_209.11 0x00529BD8, sdfRandomize twin reference; was sdfDefaultRandCB
 0x0040BBF8	sdfIpuAudioModeIdecBits	inferred	Per stream audio mode, IDEC's OFM bit then its DTE bit, which sdfIpuDecode sets. DDS1 twin 0x00398A48.
 0x0040D9A0	ipuDefaultQuantizerMatrices	inferred	libipu: the intra and non-intra quantizer matrices sceIpuInit loads; read by its routines. DDS1 twin 0x0039A820.
 0x0040D9F0	ipuDefaultVqClut	inferred	libipu: the VQ colour lookup table sceIpuInit loads; read by its routines. DDS1 twin 0x0039A870.
@@ -10870,6 +10871,7 @@
 0x00438B24	sdfFileCmdDefaultCreateMode	inferred	SMT3HD data name via SLUS_209.11 0x00551964, 2 agreeing references; was sdfFileCmdDefaultCreateMode
 0x00438B66	sdfHddValid	inferred	SMT3HD data name via SLUS_209.11 0x005519A6, 6 agreeing references; was sdfHddValid
 0x00438B67	sdfDev9LoadFlag	inferred	SMT3HD data name via SLUS_209.11 0x005519A7, 2 agreeing references; was sdfDev9LoadFlag
+0x00438B70	sdfCdClock	inferred	SMT3HD data name via SLUS_209.11 0x005519B0, sdfGetCdClock twin references; was sdfCdClock
 0x00438B80	p2sdSmgHandle	inferred	SMT3HD data name via SLUS_209.11 0x005519C0, 4 agreeing references; was p2sdSmgHandle
 0x00438B88	p2sdPcmState	inferred	SMT3HD data name via SLUS_209.11 0x005519C8, 4 agreeing references; was p2sdPcmState
 0x00438B8C	p2sdPcmBusy	inferred	SMT3HD data name via SLUS_209.11 0x005519CC, 5 agreeing references; was p2sdPcmBusy

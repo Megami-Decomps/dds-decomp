@@ -8,7 +8,7 @@
 
 #define EFF_QUAT_SLERP_DOT_LIMIT 0.99899996f
 
-extern EffRandState D_0040BAE8;
+extern EffRandState sdfDefaultRandCB;
 
 /* Persona 4 effMiscQuatMultiplyVU @ 004BCE50 (src/Graphics/Effect/effMisc.c), recompiled unchanged */
 
@@ -277,7 +277,7 @@ u32 dds3GetRandA(EffRandState* state)
     u32 rand;
     if (state == ((void*)0))
     {
-        state = &D_0040BAE8;
+        state = &sdfDefaultRandCB;
     }
     x0 = state->words[0];
     x1 = state->words[1];
