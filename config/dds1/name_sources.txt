@@ -8438,7 +8438,7 @@
 0x002DA438	sdfSetAssetPrimaryTextureAddress	inferred	Stores a texture-address word in the primary texture field and marks primary state dirty.
 0x002DA450	sdfMatAllocTexUvwParm	inferred	SMT3HD name via SLUS_209.11 0x002B2F08, reloc-identical; was sdfSubParamCreate
 0x002DA490	sdfMatGetTexUvwParm	inferred	SMT3HD name via SLUS_209.11 0x002B2F48, reloc-identical; was sdfEnsurePrimaryTextSubParam
-0x002DA4C8	sdfSetPrimaryTextScalars	inferred	Stores five scalar values in the primary text subparameter and marks it dirty. [names_reviewed8.tsv]
+0x002DA4C8	sdfMatSetTexUvw	inferred	SMT3HD name via SLUS_209.11 0x002B2F80, sdfMat twin; was sdfSetPrimaryTextScalars
 0x002DA548	sdfMatSetTexUvwByPtr	inferred	SMT3HD name via SLUS_209.11 0x002B3000, reloc-identical; was sdfCopyPrimaryTextScalars
 0x002DA5B0	sdfMatSetMultiDiffuse	inferred	SMT3HD name via SLUS_209.11 0x002B3068, byte-identical; was sdfSetAssetSecondaryColor
 0x002DA5C8	sdfMatSetMultiMethod	inferred	SMT3HD name via SLUS_209.11 0x002B3080, byte-identical; was sdfSetAssetSecondaryMode
@@ -8452,7 +8452,7 @@
 0x002DAA00	sdfMatFree	inferred	SMT3HD name via SLUS_209.11 0x002B34B8, reloc-identical; was sdfAssetRelease
 0x002DAA68	sdfMatFreeDelayed	inferred	SMT3HD name via SLUS_209.11 0x002B3520, shared-hash-in-run; was sdfQueueAssetRelease
 0x002DAAA0	sdfMatMakePacket	inferred	SMT3HD name via SLUS_209.11 0x002B3558, byte-identical; was sdfInitAssetDrawEntryReferenceNode
-0x002DAAE0	sdfAssetCopyTextureState	inferred	Copies resource and texture state into a selected asset entry
+0x002DAAE0	sdfMatUpdatePacketBasic	inferred	SMT3HD name via SLUS_209.11 0x002B3598, sdfMat twin; was sdfAssetCopyTextureState
 0x002DAB80	sdfMatSetUvwParm	inferred	SMT3HD name via SLUS_209.11 0x002B3620, reloc-identical; was sdfBuildSubParameterTransform
 0x002DAC68	sdfMatUpdatePacketUvwParm	inferred	SMT3HD name via SLUS_209.11 0x002B3708, reloc-identical; was sdfCopyAssetPrimarySubParameter
 0x002DAC88	sdfMatUpdatePacketMultiTex	inferred	SMT3HD name via SLUS_209.11 0x002B3728, reloc-identical; was sdfApplyAssetSecondaryEntry
@@ -10206,7 +10206,7 @@
 0x003BD340	sdfDrawFrameCount	inferred	SMT3HD name via SLUS_209.11 0x00551898, sdfDraw reference; was D_003BD340
 0x003BD344	corePktSoftenBias	inferred	SMT3HD data name via SLUS_209.11 0x0055189C, 7 agreeing references; was corePktSoftenBias
 0x003BD348	sdfMatAllocCount	inferred	SMT3HD data name via SLUS_209.11 0x005518A0, 4 agreeing references; was sdfMatAllocCount
-0x003BD34C	sdfForcedAssetTextureMode	inferred	confidence=high; matched_users=src/dds1/game/code_002D9748.c:sdfApplyAssetEntryChangesWithForcedTexture, src/dds1/game/code_002D9748.c:sdfAssetCopyTextureState; Nonzero mode forces texture entry copying; mode one replaces the texture-state word with zero. [names_qp9.tsv]
+0x003BD34C	sdfForcedAssetTextureMode	inferred	confidence=high; matched_users=src/dds1/game/code_002D9748.c:sdfApplyAssetEntryChangesWithForcedTexture, src/dds1/game/code_002D9748.c:sdfMatUpdatePacketBasic; Nonzero mode forces texture entry copying; mode one replaces the texture-state word with zero. [names_qp9.tsv]
 0x003BD350	sdfCoreDrawBuffHandle	inferred	SMT3HD name via SLUS_209.11 0x005518A4, sdfCoreDraw reference; was D_003BD350
 0x003BD358	sdfFaceDivSoften	inferred	SMT3HD data name via SLUS_209.11 0x005518A8, 8 agreeing references; was sdfFaceDivSoften
 0x003BD35C	sdfFaceDivBias	inferred	SMT3HD data name via SLUS_209.11 0x005518AC, 8 agreeing references; was sdfFaceDivBias

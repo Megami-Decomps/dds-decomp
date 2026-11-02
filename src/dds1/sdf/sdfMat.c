@@ -121,7 +121,7 @@ const u8 *sdfMatSet(sdfMat_t *, const DevRequest *, const u8 *);
 
 void sdfMatListAdd(DevRequest *, sdfMat_t *);
 
-void sdfAssetCopyTextureState(sdfMat_t *, SdfAssetEntry *);
+void sdfMatUpdatePacketBasic(sdfMat_t *, SdfAssetEntry *);
 
 void sdfMatUpdatePacketMultiTex(sdfMat_t *, SdfAssetEntry *);
 
@@ -323,7 +323,7 @@ SdfSubParam *sdfMatGetTexUvwParm(sdfMat_t *asset) {
 }
 
 /* Store the five primary scalars in order and dirty both draw entries. */
-void sdfSetPrimaryTextScalars(sdfMat_t *asset, f32 centerOffsetX, f32 centerOffsetY,
+void sdfMatSetTexUvw(sdfMat_t *asset, f32 centerOffsetX, f32 centerOffsetY,
                               f32 basisScaleX, f32 basisScaleY, f32 rotationInput) {
     f32 *scalarValues = sdfMatGetTexUvwParm(asset)->scalar.values;
     scalarValues[0] = centerOffsetX;
@@ -456,7 +456,7 @@ const u8 *sdfMatSet(sdfMat_t *asset, const DevRequest *resourceLookup,
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
     if (parameterFlags & SDF_PARAM_PRIMARY_SCALARS_PRESENT) {
-        sdfSetPrimaryTextScalars(asset, ((const f32 *)parameterCursor)[0], ((const f32 *)parameterCursor)[1], ((const f32 *)parameterCursor)[2], ((const f32 *)parameterCursor)[3], ((const f32 *)parameterCursor)[4]);
+        sdfMatSetTexUvw(asset, ((const f32 *)parameterCursor)[0], ((const f32 *)parameterCursor)[1], ((const f32 *)parameterCursor)[2], ((const f32 *)parameterCursor)[3], ((const f32 *)parameterCursor)[4]);
         parameterCursor += SDF_PARAM_SCALAR_BLOCK_BYTES;
     }
     if (parameterFlags & SDF_PARAM_SECONDARY_COLOR_PRESENT) {
@@ -524,7 +524,7 @@ SdfDmaTagHeader *sdfMatMakePacket(sdfMat_t *asset, SdfDmaTagHeader *tag, s32 fra
 }
 
 /* Copy primary words and optional GS texture state; one refresh mode zeros the third state word. */
-void sdfAssetCopyTextureState(sdfMat_t *asset, SdfAssetEntry *entry) {
+void sdfMatUpdatePacketBasic(sdfMat_t *asset, SdfAssetEntry *entry) {
     sdfTexHandle_t *texture;
     entry->unk04 = asset->primaryStateWordFirst;
     entry->unk1C = asset->primaryStateFloat;
@@ -621,7 +621,7 @@ void sdfMatUpdatePacket(sdfMat_t *asset, s32 entryIndex) {
     u8 dirtyFlags = asset->dirtyFlags;
     SdfAssetEntry *drawEntry = asset->drawEntries[entryIndex];
     if ((dirtyFlags >> entryIndex) & SDF_ASSET_PRIMARY_STATE_BIT) {
-        sdfAssetCopyTextureState(asset, drawEntry);
+        sdfMatUpdatePacketBasic(asset, drawEntry);
     }
     if (dirtyFlags & (SDF_ASSET_PRIMARY_SCALARS_BIT << entryIndex)) {
         sdfMatUpdatePacketUvwParm(asset, drawEntry);
@@ -642,9 +642,9 @@ void sdfApplyAssetEntryChangesWithForcedTexture(sdfMat_t *asset, s32 entryIndex)
     SdfAssetEntry *drawEntry = asset->drawEntries[entryIndex];
 
     if ((dirtyFlags >> entryIndex) & SDF_ASSET_PRIMARY_STATE_BIT) {
-        sdfAssetCopyTextureState(asset, drawEntry);
+        sdfMatUpdatePacketBasic(asset, drawEntry);
     } else if (sdfForcedAssetTextureMode != SDF_FORCED_ASSET_TEXTURE_MODE_NORMAL) {
-        sdfAssetCopyTextureState(asset, drawEntry);
+        sdfMatUpdatePacketBasic(asset, drawEntry);
     }
     if (dirtyFlags & (SDF_ASSET_PRIMARY_SCALARS_BIT << entryIndex)) {
         sdfMatUpdatePacketUvwParm(asset, drawEntry);
