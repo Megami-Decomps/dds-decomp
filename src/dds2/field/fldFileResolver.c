@@ -1527,7 +1527,7 @@ extern void fldInitializeMenuResources(void);
 extern void fldUpdateSparkSlots(void);
 extern void fldMakeObjectBasic3(void);
 extern void fldInitializeActorMotionSlots(void);
-extern struct DevRequest *sndLoadNamedOffsetResourceList(const char *name);
+extern struct DevRequest *sdfDevLoadTexList(const char *name);
 extern char D_00436028[];
 extern char D_00436030[];
 extern char D_00436038[];
@@ -1648,7 +1648,7 @@ const struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) 
         fldCachedRoomResourceAllocation = fldCopyCachedRoomResourceIfLocationMatches(&roomOffsets, area, room);
         if (fldCachedRoomResourceAllocation == NULL) {
             sprintf(path, D_00436028, resourceName);
-            fldRoomSoundResources = sndLoadNamedOffsetResourceList(path);
+            fldRoomSoundResources = sdfDevLoadTexList(path);
         } else {
             fldRoomSoundResources = sdfTexSetTB(roomOffsets);
             sdfMemFreeDelayedDirect(fldCachedRoomResourceAllocation);

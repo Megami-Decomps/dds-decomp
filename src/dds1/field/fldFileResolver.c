@@ -1707,7 +1707,7 @@ extern void fldMakeObjectBasic3(void);
 
 extern void fldInitializeActorMotionSlots(void);
 
-extern DevRequest *sndLoadNamedOffsetResourceList(const char *name);
+extern DevRequest *sdfDevLoadTexList(const char *name);
 
 extern char D_003BAC98[];
 
@@ -1831,7 +1831,7 @@ const struct sdfMemHandle_t *fldLoadAreaRoomResources(const char *resourceName) 
         fldCachedRoomResourceAllocation = fldCopyCachedRoomResourceIfLocationMatches(&roomOffsets, area, room);
         if (fldCachedRoomResourceAllocation == NULL) {
             sprintf(path, D_003BAC98, resourceName);
-            fldRoomSoundResources = sndLoadNamedOffsetResourceList(path);
+            fldRoomSoundResources = sdfDevLoadTexList(path);
         } else {
             fldRoomSoundResources = sdfTexSetTB(roomOffsets);
             sdfMemFreeDelayedDirect(fldCachedRoomResourceAllocation);

@@ -24,7 +24,7 @@ u8 *sdfFixupModelBinary(SdfPackedRelocationHeader *resource);
 u8 *sdfFixupMotionBinary(SdfPackedRelocationHeader *resource);
 
 struct sdfMemHandle_t;
-struct sdfMemHandle_t *sdfLoadPackedResourceWithRelocatedPayload(const char *name, u8 **outPayloadAddress);
-struct sdfMemHandle_t *sdfReadPackedResourceAndRelocateHeader(const char *name, u8 **outPayloadAddress);
+struct sdfMemHandle_t *sdfDevLoadModel(const char *name, u8 **outPayloadAddress);
+struct sdfMemHandle_t *sdfDevLoadMotion(const char *name, u8 **outPayloadAddress);
 
 #endif /* SDF_PACKED_RESOURCE_H */

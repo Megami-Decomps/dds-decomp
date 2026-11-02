@@ -57,7 +57,7 @@ sdfMemHandle_t *sdfDevLoadFileEx(const char *name, u32 *outAddress, u32 *outSize
     return sdfDevLoadFile(name, outAddress, outSize, 0);
 }
 
-sdfTexHandle_t *sdfLoadNamedResourceAndReleaseLookupHandle(const char *name) {
+sdfTexHandle_t *sdfDevLoadTex(const char *name) {
     sdfMemHandle_t *buffer;
     sdfTexHandle_t *result;
     u32 info[4];
@@ -87,7 +87,7 @@ DevRequest *sdfTexSetTB(const SdfTextureOffsetListHeader *resource) {
     return handle;
 }
 
-DevRequest *sndLoadNamedOffsetResourceList(const char *name) {
+DevRequest *sdfDevLoadTexList(const char *name) {
     sdfMemHandle_t *buffer;
     DevRequest *result;
     u32 info[4];
@@ -108,7 +108,7 @@ u8 *sdfFixupModelBinary(SdfPackedRelocationHeader *resource) {
 }
 
 /* Return the retained allocation handle and publish the relocated payload address. */
-sdfMemHandle_t *sdfLoadPackedResourceWithRelocatedPayload(const char *name, u8 **outPayload) {
+sdfMemHandle_t *sdfDevLoadModel(const char *name, u8 **outPayload) {
     u32 info[4];
     sdfMemHandle_t *buffer = sdfDevLoadFileEx(name, info, 0);
     *outPayload = sdfFixupModelBinary((SdfPackedRelocationHeader *)(u32)info[0]);
@@ -125,7 +125,7 @@ u8 *sdfFixupMotionBinary(SdfPackedRelocationHeader *resource) {
 }
 
 /* Return the retained allocation handle and publish the relocated payload address. */
-sdfMemHandle_t *sdfReadPackedResourceAndRelocateHeader(const char *name, u8 **outPayload) {
+sdfMemHandle_t *sdfDevLoadMotion(const char *name, u8 **outPayload) {
     u32 info[4];
     sdfMemHandle_t *buffer = sdfDevLoadFileEx(name, info, 0);
     *outPayload = sdfFixupMotionBinary((SdfPackedRelocationHeader *)(u32)info[0]);

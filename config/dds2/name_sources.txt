@@ -9428,13 +9428,13 @@
 0x00343D60	sdfDumpChipMemory	inferred	SMT3HD name via SLUS_209.11 0x002C35A8, reloc-identical; was sdfPrintChipHeapInfo
 0x00343E18	sdfDevLoadFile	inferred	SMT3HD name via SLUS_209.11 0x002C3660, reloc-identical; was sdfDevReadResourceWithExtraSpace
 0x00343ED0	sdfDevLoadFileEx	inferred	SMT3HD name via SLUS_209.11 0x002C3718, shared-hash-in-run; was sdfReadNamedResource
-0x00343EE8	sdfLoadNamedResourceAndReleaseLookupHandle	inferred	Looks up named resource data, resolves its resource address and releases the lookup handle. [names_reviewed10.tsv]
+0x00343EE8	sdfDevLoadTex	inferred	SMT3HD name via SLUS_209.11 0x002C3730, sdfDevFile twin; was sdfLoadNamedResourceAndReleaseLookupHandle
 0x00343F38	sdfTexSetTB	inferred	SMT3HD name via SLUS_209.11 0x002C3798, reloc-identical; was sndBuildResourceHandleListFromOffsets
-0x00343FC0	sndLoadNamedOffsetResourceList	inferred	Looks up named data, builds a sound resource list and releases the lookup handle. [names_reviewed10.tsv]
+0x00343FC0	sdfDevLoadTexList	inferred	SMT3HD name via SLUS_209.11 0x002C3820, sdfDevFile twin; was sndLoadNamedOffsetResourceList
 0x00344010	sdfFixupModelBinary	inferred	SMT3HD name via SLUS_209.11 0x002C3888, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfRelocatePackedResourcePayload
-0x00344050	sdfLoadPackedResourceWithRelocatedPayload	inferred	Loads a named resource, relocates its payload and returns both handles. [names_reviewed14.tsv]
+0x00344050	sdfDevLoadModel	inferred	SMT3HD name via SLUS_209.11 0x002C38C8, sdfDevFile twin; was sdfLoadPackedResourceWithRelocatedPayload
 0x00344098	sdfFixupMotionBinary	inferred	SMT3HD name via SLUS_209.11 0x002C3928, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfRelocatePackedResourceWordsFromHeader
-0x003440D8	sdfReadPackedResourceAndRelocateHeader	inferred	Loads a packed resource and writes its relocated header word to the output. [names_reviewed21.tsv]
+0x003440D8	sdfDevLoadMotion	inferred	SMT3HD name via SLUS_209.11 0x002C3968, sdfDevFile twin; was sdfReadPackedResourceAndRelocateHeader
 0x00344120	sdfAddressResolver	inferred	SMT3HD name via SLUS_209.11 0x002C39C8, byte-identical; was sdfRelocatePackedResourceWords
 0x00344208	sdfIpuDetachQueue	inferred	SMT3HD name via SLUS_209.11 0x002C3AB0, reloc-identical; was sdfStreamNodeUnlink
 0x00344298	sdfIpuAttachQueue	inferred	SMT3HD name via SLUS_209.11 0x002C3B40, reloc-identical; was sdfStreamNodeAppend
