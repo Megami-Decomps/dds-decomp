@@ -1,216 +1,251 @@
-#include "sdk_ps2.h"
-#include "sdf_line_pair_packet_api.h"
 #include "common.h"
-#include "sdf_vu0.h"
-#include "sdf_vu_matrix.h"
-#include "sdf_thread_workspace_api.h"
-#include "sdf_timer.h"
-#include "sdf_chip.h"
-#include "sdf.h"
-#include "sdf_semaphore_api.h"
-#include "pcp_vu0.h"
-#include "sdf_draw.h"
-#include "sdf_projection.h"
-#include "ee_mmi.h"
-#include "sdf_texture_file.h"
-#include "sdf_named_resource_request_api.h"
-#include "sce_io.h"
-#include "sdf_dev_state.h"
-#include "sdf_dev_event.h"
-#include "sdf_pac_state.h"
-#include "sdf_pac_decoder.h"
-#include "sdf_pac_work.h"
-#include "sdf_key_pool.h"
-#include "sdf_packet_alloc.h"
-#include "sdf_stream_state.h"
+#include "ps2asm.h"
+#include "sdf_types.h"
 
-/* PAC command high bits choose the decoder operation; low five bits encode length.
- * Values at or above 0xE0 are reserved except for the 0xFF end marker. */
+enum sdfDecomp_enum {
+    SDF_DECOMP_STAT_END = 0,
+    SDF_DECOMP_STAT_IDLE = 1,
+    SDF_DECOMP_STAT_DIREC_LENG0 = 2,
+    SDF_DECOMP_STAT_DIREC_LENG1 = 3,
+    SDF_DECOMP_STAT_DIREC = 4,
+    SDF_DECOMP_STAT_DEC_NORMAL = 5,
+    SDF_DECOMP_STAT_DEC_RLE = 6,
+    SDF_DECOMP_STAT_DEC_SD_STEP0 = 7,
+    SDF_DECOMP_STAT_DEC_SD_STEP1 = 8,
+    SDF_DECOMP_STAT_DEC_SD_STEP2 = 9,
+    SDF_DECOMP_STAT_DEC_WORD = 10
+};
+enum sdfDecomp_enum2 {
+    SDF_DECOMP_DIRECTIVE_NORMAL = 0x00,
+    SDF_DECOMP_DIRECTIVE_ZERO = 0x20,
+    SDF_DECOMP_DIRECTIVE_RLE = 0x40,
+    SDF_DECOMP_DIRECTIVE_SD = 0x60,
+    SDF_DECOMP_DIRECTIVE_SD2 = 0x80,
+    SDF_DECOMP_DIRECTIVE_WORD = 0xA0,
+    SDF_DECOMP_DIRECTIVE_CMD = 0xE0
+};
+enum sdfDecomp_enum3 {
+    SDF_DECOMP_CMD_END = 0xFF
+};
+/* No IDB members: the two fields a directive byte splits into. */
 enum {
-    SDF_DECODE_COMMAND_CLASS_MASK = 0xE0,
-    SDF_DECODE_COMMAND_LENGTH_MASK = 0x1F,
-    SDF_DECODE_COMMAND_END_MARKER = 0xFF,
-    SDF_DECODE_COMMAND_RESERVED_MIN = 0xE0,
-    SDF_DECODE_COMMAND_COPY_LITERAL = 0x00,
-    SDF_DECODE_COMMAND_ZERO_FILL = 0x20,
-    SDF_DECODE_COMMAND_REPEAT_BYTE = 0x40,
-    SDF_DECODE_COMMAND_COPY_SHORT_BACKREFERENCE = 0x60,
-    SDF_DECODE_COMMAND_COPY_LONG_BACKREFERENCE = 0x80,
-    SDF_DECODE_COMMAND_EXPAND_BYTES = 0xA0
+    SDF_DECOMP_DIRECTIVE_MASK = 0xE0,
+    SDF_DECOMP_LENGTH_MASK = 0x1F
 };
 
-extern s32 D_003BDAC0;
+struct sdfDecompCb_t;
 
-extern const u8 *D_003FF300[16];
+/* Load matrix into the VU0 scratch bank and postmultiply the primary bank. */
+void MultMatrixRev(const void *aMatrix);
 
-/* Incrementally decode the PAC byte stream, preserving partial commands when
- * the caller's input chunk ends. */
-SdfPacDecoderResult sdfDecomp(SdfPacDecoder *decoder, const u8 *input, s32 inputBytes) {
+#define D_00594780 D_003FF300
+#define D_00552170 D_003BDAC0
+
+extern const u8 *D_00594780[16];
+
+/* DDS has no symbol for the face list parameters, at sdf3DScreenParam + 0x70. */
+extern u8 sdf3DScreenParam[];
+#define sdfDrawFaceListParam ((f32 (*)[4])(sdf3DScreenParam + 0x70))
+
+extern u8 sdf3DScreenTm[];
+
+/* Incremental decoder access view shared by both providers. The backing
+ * decoder block is allocated as 0x20 bytes; only this 0x14-byte prefix is
+ * described here, and its trailing allocation bytes remain unknown. */
+typedef struct sdfDecompCb_t {
+    u8 stat;             /* 0x00 */
+    u8 direc;           /* 0x01 */
+    u16 direcLeng;     /* 0x02 */
+    u8 *dstPtr;           /* 0x04 */
+    const u8 *srcPtr;      /* 0x08 */
+    s32 srcRemain;       /* 0x0C */
+    u8 sdOfs;        /* 0x10 */
+    u8 pad11[3];          /* 0x11: opaque */
+} sdfDecompCb_t;
+
+/* Read the active packet cursor or restore it at a quadword boundary. */
+s32 sdfGrOpenPacketBuff(void);
+
+void sdfGrClosePacketBuff(s32 aBuffPtr);
+
+extern s32 D_00552170;
+
+extern void *memcpy(void *, const void *, unsigned int);
+
+s32 sdfDecomp(sdfDecompCb_t *cb, const u8 *src, s32 length);
+
+void sdfDecompInit(sdfDecompCb_t *cb, u8 *dst);
+
+sdfGrPacketHeader_t *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags);
+
+sdfGrPacketHeader_t *effDebugDrawWireModel(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags);
+
+sdfGrPacketHeader_t *sdfDrawRotatedModel(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags);
+
+s32 sdfDecomp(sdfDecompCb_t *cb, const u8 *src, s32 length) {
     s32 count;
     s32 offset;
     u8 *output;
-    u8 *shortBackrefSource;
     u32 sourceAddress;
 
-    if (decoder->state == SDF_DECODE_COMPLETE) {
+    if (cb->stat == 0) {
         return 1;
     }
 
-    D_003BDAC0 = 0;
-    output = decoder->output;
-    if (inputBytes > 0) {
+    D_00552170 = 0;
+    output = cb->dstPtr;
+    if (length > 0) {
         do {
-            switch (decoder->state) {
-                case SDF_DECODE_READ_COMMAND: {
+            switch (cb->stat) {
+                case SDF_DECOMP_STAT_IDLE: {
                     u8 command;
                     s32 commandBytes;
-                    s32 historyIndex = D_003BDAC0;
+                    s32 historyIndex = D_00552170;
 
-                    inputBytes--;
-                    D_003FF300[historyIndex] = input;
-                    D_003BDAC0 = (historyIndex + 1) & 0xF;
-                    command = *input++;
-                    if (command >= SDF_DECODE_COMMAND_RESERVED_MIN) {
-                        if (command == SDF_DECODE_COMMAND_END_MARKER) {
-                            decoder->output = output;
-                            decoder->input = input;
-                            decoder->remainingInputBytes = inputBytes;
-                            decoder->state = SDF_DECODE_COMPLETE;
-                            return SDF_PAC_DECODE_COMPLETE;
+                    length--;
+                    D_00594780[historyIndex] = src;
+                    D_00552170 = (historyIndex + 1) & 0xF;
+                    command = *src++;
+                    if (command >= SDF_DECOMP_DIRECTIVE_CMD) {
+                        if (command == SDF_DECOMP_CMD_END) {
+                            cb->dstPtr = output;
+                            cb->srcPtr = src;
+                            cb->srcRemain = length;
+                            cb->stat = 0;
+                            return 1;
                         }
                     } else {
-                        decoder->command = command & SDF_DECODE_COMMAND_CLASS_MASK;
-                        commandBytes = command & SDF_DECODE_COMMAND_LENGTH_MASK;
+                        cb->direc = command & SDF_DECOMP_DIRECTIVE_MASK;
+                        commandBytes = command & SDF_DECOMP_LENGTH_MASK;
                         if (commandBytes == 0) {
-                            decoder->state = SDF_DECODE_READ_COUNT_LOW;
+                            cb->stat = SDF_DECOMP_STAT_DIREC_LENG0;
                         } else {
-                            decoder->pendingBytes = commandBytes;
-                            decoder->state = SDF_DECODE_DISPATCH;
+                            cb->direcLeng = commandBytes;
+                            cb->stat = SDF_DECOMP_STAT_DIREC;
                         }
                     }
                     break;
                 }
-                case SDF_DECODE_READ_COUNT_LOW:
-                    decoder->pendingBytes = *input++;
-                    inputBytes--;
-                    decoder->state = SDF_DECODE_READ_COUNT_HIGH;
+                case SDF_DECOMP_STAT_DIREC_LENG0:
+                    cb->direcLeng = *src++;
+                    length--;
+                    cb->stat = SDF_DECOMP_STAT_DIREC_LENG1;
                     break;
-                case SDF_DECODE_READ_COUNT_HIGH:
-                    decoder->pendingBytes |= *input++ << 8;
-                    inputBytes--;
-                    decoder->state = SDF_DECODE_DISPATCH;
+                case SDF_DECOMP_STAT_DIREC_LENG1:
+                    cb->direcLeng |= *src++ << 8;
+                    length--;
+                    cb->stat = SDF_DECOMP_STAT_DIREC;
                     break;
-                case SDF_DECODE_DISPATCH:
-                    switch (decoder->command) {
-                    case SDF_DECODE_COMMAND_COPY_LITERAL:
-                        decoder->state = SDF_DECODE_COPY_LITERAL;
+                case SDF_DECOMP_STAT_DIREC:
+                    switch (cb->direc) {
+                    case SDF_DECOMP_DIRECTIVE_NORMAL:
+                        cb->stat = SDF_DECOMP_STAT_DEC_NORMAL;
                         break;
-                    case SDF_DECODE_COMMAND_ZERO_FILL:
-                        count = decoder->pendingBytes;
+                    case SDF_DECOMP_DIRECTIVE_ZERO:
+                        count = cb->direcLeng;
                         memset(output, 0, count);
                         output += count;
-                        decoder->state = SDF_DECODE_READ_COMMAND;
+                        cb->stat = SDF_DECOMP_STAT_IDLE;
                         break;
-                    case SDF_DECODE_COMMAND_REPEAT_BYTE:
-                        decoder->state = SDF_DECODE_FILL_BYTE;
+                    case SDF_DECOMP_DIRECTIVE_RLE:
+                        cb->stat = SDF_DECOMP_STAT_DEC_RLE;
                         break;
-                    case SDF_DECODE_COMMAND_COPY_SHORT_BACKREFERENCE:
-                        decoder->state = SDF_DECODE_COPY_SHORT_BACKREF;
+                    case SDF_DECOMP_DIRECTIVE_SD:
+                        cb->stat = SDF_DECOMP_STAT_DEC_SD_STEP0;
                         break;
-                    case SDF_DECODE_COMMAND_COPY_LONG_BACKREFERENCE:
-                        decoder->state = SDF_DECODE_READ_BACKREF_LOW;
+                    case SDF_DECOMP_DIRECTIVE_SD2:
+                        cb->stat = SDF_DECOMP_STAT_DEC_SD_STEP1;
                         break;
-                    case SDF_DECODE_COMMAND_EXPAND_BYTES:
-                        decoder->state = SDF_DECODE_EXPAND_BYTES;
+                    case SDF_DECOMP_DIRECTIVE_WORD:
+                        cb->stat = SDF_DECOMP_STAT_DEC_WORD;
                         break;
                     }
                     break;
-                case SDF_DECODE_COPY_LITERAL:
-                    count = decoder->pendingBytes;
-                    if (inputBytes < count) {
-                        count = inputBytes;
+                case SDF_DECOMP_STAT_DEC_NORMAL:
+                    count = cb->direcLeng;
+                    if (length < count) {
+                        count = length;
                     }
-                    memcpy(output, input, count);
+                    memcpy(output, src, count);
                     output += count;
-                    input += count;
-                    inputBytes -= count;
-                    decoder->pendingBytes -= count;
-                    if (decoder->pendingBytes == 0) {
-                        decoder->state = SDF_DECODE_READ_COMMAND;
+                    src += count;
+                    length -= count;
+                    cb->direcLeng -= count;
+                    if (cb->direcLeng == 0) {
+                        cb->stat = SDF_DECOMP_STAT_IDLE;
                     }
                     break;
-                case SDF_DECODE_FILL_BYTE:
-                    count = decoder->pendingBytes;
-                    memset(output, *input++, count);
+                case SDF_DECOMP_STAT_DEC_RLE:
+                    count = cb->direcLeng;
+                    memset(output, *src++, count);
                     output += count;
-                    inputBytes--;
-                    decoder->state = SDF_DECODE_READ_COMMAND;
+                    length--;
+                    cb->stat = SDF_DECOMP_STAT_IDLE;
                     break;
-                case SDF_DECODE_COPY_SHORT_BACKREF:
-                    shortBackrefSource = output - *input++;
-                    count = decoder->pendingBytes;
-                    inputBytes--;
-                    do {
-                        *output++ = *shortBackrefSource++;
-                    } while (--count != 0);
-                    decoder->state = SDF_DECODE_READ_COMMAND;
-                    break;
-                case SDF_DECODE_READ_BACKREF_LOW:
-                    decoder->backrefLow = *input++;
-                    inputBytes--;
-                    if (inputBytes == 0) {
-                        decoder->state = SDF_DECODE_READ_BACKREF_HIGH;
-                        break;
-                    }
-                    /* fallthrough */
-                case SDF_DECODE_READ_BACKREF_HIGH: {
-                    s32 combinedOffset;
-
-                    offset = *input++ << 8;
-                    sourceAddress = decoder->backrefLow;
-                    inputBytes--;
-                    combinedOffset = sourceAddress | offset;
-                    sourceAddress = (u32)(output - combinedOffset);
-                    count = decoder->pendingBytes;
+                case SDF_DECOMP_STAT_DEC_SD_STEP0:
+                    sourceAddress = (u32)(output - *src++);
+                    count = cb->direcLeng;
+                    length--;
                     do {
                         *output++ = *(u8 *)sourceAddress++;
                     } while (--count != 0);
-                    decoder->state = SDF_DECODE_READ_COMMAND;
+                    cb->stat = SDF_DECOMP_STAT_IDLE;
+                    break;
+                case SDF_DECOMP_STAT_DEC_SD_STEP1:
+                    cb->sdOfs = *src++;
+                    length--;
+                    if (length == 0) {
+                        cb->stat = SDF_DECOMP_STAT_DEC_SD_STEP2;
+                        break;
+                    }
+                    /* fallthrough */
+                case SDF_DECOMP_STAT_DEC_SD_STEP2: {
+                    s32 combinedOffset;
+
+                    offset = *src++ << 8;
+                    sourceAddress = cb->sdOfs;
+                    length--;
+                    combinedOffset = sourceAddress | offset;
+                    sourceAddress = (u32)(output - combinedOffset);
+                    count = cb->direcLeng;
+                    do {
+                        *output++ = *(u8 *)sourceAddress++;
+                    } while (--count != 0);
+                    cb->stat = SDF_DECOMP_STAT_IDLE;
                     break;
                 }
-                case SDF_DECODE_EXPAND_BYTES:
-                    count = decoder->pendingBytes;
-                    if (inputBytes < count) {
-                        count = inputBytes;
-                        inputBytes = 0;
-                        decoder->pendingBytes -= count;
+                case SDF_DECOMP_STAT_DEC_WORD:
+                    count = cb->direcLeng;
+                    if (length < count) {
+                        count = length;
+                        length = 0;
+                        cb->direcLeng -= count;
                     } else {
-                        decoder->pendingBytes = 0;
-                        decoder->state = SDF_DECODE_READ_COMMAND;
-                        inputBytes -= count;
+                        cb->direcLeng = 0;
+                        cb->stat = SDF_DECOMP_STAT_IDLE;
+                        length -= count;
                     }
                     do {
-                        *output++ = *input++;
+                        *output++ = *src++;
                         *output++ = 0;
                     } while (--count != 0);
                     break;
             }
-        } while (inputBytes > 0);
+        } while (length > 0);
     }
-    decoder->input = input;
-    decoder->remainingInputBytes = inputBytes;
-    decoder->output = output;
-    return SDF_PAC_DECODE_INCOMPLETE;
+    cb->srcPtr = src;
+    cb->srcRemain = length;
+    cb->dstPtr = output;
+    return 0;
 }
 
-void sdfDecompInit(SdfPacDecoder *decoder, u8 *output) {
-    decoder->output = output;
-    decoder->state = SDF_DECODE_READ_COMMAND;
+void sdfDecompInit(sdfDecompCb_t *cb, u8 *dst) {
+    cb->dstPtr = dst;
+    cb->stat = 1;
 }
 
-/* vu0 routine: clip homogeneous line pairs and build a coloured GS packet. */
-SdfPacket *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
-    SdfPacket *packet;
+sdfGrPacketHeader_t *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
+    sdfGrPacketHeader_t *packet;
     f32 (*viewport)[4];
     u128 *cursor;
     s32 i;
@@ -221,11 +256,11 @@ SdfPacket *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *colors, s3
     u32 secondClip;
     u32 quadwordCount;
 
-    packet = (SdfPacket *)sdfGrOpenPacketBuff();
+    packet = (sdfGrPacketHeader_t *)sdfGrOpenPacketBuff();
     cursor = (u128 *)(packet + 1);
-    viewport = (f32 (*)[4])&sdf3DScreenParam.camera.halfWidth;
-    VU0_LOAD_VF_AT(vf14, 0x0, viewport);
-    VU0_LOAD_VF_AT(vf15, 0x10, viewport);
+    viewport = sdfDrawFaceListParam;
+    VU0_LOAD_VF14(viewport);
+    VU0_LOAD_VF15_AT16(viewport);
     emitted = 0;
     for (i = 0; i < vertexCount; i += 2) {
         SDF_VU0_LOADVECTOR(vertices[i]);
@@ -303,33 +338,29 @@ SdfPacket *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *colors, s3
                 continue;
             }
         }
-        VU0_PROJECT_COLORED_SEGMENT(vf10, vf11, vf8, vf9, vf14, vf15);
-        VU0_STORE_VF_AT_UNCLOBBERED(vf8, 0x0, cursor);
-        VU0_STORE_VF_AT_UNCLOBBERED(vf10, 0x10, cursor);
-        VU0_STORE_VF_AT_UNCLOBBERED(vf9, 0x20, cursor);
-        VU0_STORE_VF_AT_UNCLOBBERED(vf11, 0x30, cursor);
+        VU0_PROJECT_COLORED_SEGMENT();
+        VU0_STORE_VF8_AT0(cursor);
+        VU0_STORE_VF10_AT16(cursor);
+        VU0_STORE_VF9_AT32(cursor);
+        VU0_STORE_VF11_AT48(cursor);
         cursor += 4;
         emitted += 2;
     }
     sdfGrClosePacketBuff((s32)cursor & 0x0FFFFFFF);
     quadwordCount = emitted * 2 + 1;
-    packet->unk0 = (quadwordCount & 0xFFFF) | 0x20000000;
-    packet->unk8 = ((u64)(quadwordCount | 0x50000000) << 32) | 0x10000000;
-    packet->unk10 = emitted | ((u64)(primitiveFlags | 9) << 47) | 0x2000400000008000ULL;
-    packet->unk18 = 0x41;
+    packet->dmaWords.tag = (quadwordCount & 0xFFFF) | 0x20000000;
+    packet->dmaWords.vif = ((u64)(quadwordCount | 0x50000000) << 32) | 0x10000000;
+    packet->giftag.parm = emitted | ((u64)(primitiveFlags | 9) << 47) | 0x2000400000008000ULL;
+    packet->giftag.regs = 0x41;
     return packet;
 }
 
-extern u8 sdf3DScreenTm[];
-
-/* vu0 routine: render line pairs using the cached composed matrix. */
-SdfPacket *effDebugDrawWireModel(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
-    VU0_LOAD_MATRIX(sdf3DScreenTm);
+sdfGrPacketHeader_t *effDebugDrawWireModel(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
+    SDF_VU0_LOADMATRIX(sdf3DScreenTm);
     return sdfDrawModelWithMatrix(vertices, colors, vertexCount, primitiveFlags);
 }
 
-/* vu0 routine: compose the current matrix with the cached transform, then render line pairs. */
-SdfPacket *sdfDrawRotatedModel(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
-    MultMatrixRev((const struct Matrix4 *)sdf3DScreenTm);
+sdfGrPacketHeader_t *sdfDrawRotatedModel(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
+    MultMatrixRev(sdf3DScreenTm);
     return sdfDrawModelWithMatrix(vertices, colors, vertexCount, primitiveFlags);
 }
