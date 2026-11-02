@@ -60,6 +60,27 @@ def write_text_if_changed(path, text):
         path.write_text(text)
 
 
+MACRO_ALIAS = re.compile(r"^[ \t]*#[ \t]*define[ \t]+(\w+)[ \t]+(\w+)[ \t]*$", re.M)
+
+
+def macro_aliases(text):
+    """Map each name to the object-like macros a unit defines as it (`#define D_X name`)."""
+    aliases = {}
+    for alias, name in MACRO_ALIAS.findall(text):
+        aliases.setdefault(name, []).append(alias)
+    return aliases
+
+
+def defined_name(name, aliases):
+    """The symbol a C definition of `name` emits, through the unit's macro aliases."""
+    return next((target for target, names in aliases.items() if name in names), name)
+
+
+def names_symbol(code, sym, aliases):
+    """Whether C code names `sym`, directly or through one of its macro aliases."""
+    return any(re.search(rf"\b{n}\b", code) for n in (sym, *aliases.get(sym, ())))
+
+
 def place(version):
     names = {n: int(a, 16) for n, a in ROW.findall((ROOT / "config" / version / "symbol_addrs.txt").read_text())}
     added = 0
@@ -95,10 +116,11 @@ def place(version):
         mine = {s for _, s in syms}
         active = matching_source(text)
         aliases = function_aliases(active)
+        macros = macro_aliases(active)
         # What the C emits itself: defined variables, and literals its functions write.
         anchors = []
         for m in DATA_DEF.finditer(active):
-            n = m.group(1)
+            n = defined_name(m.group(1), macros)
             addr = names.get(n, int(n[2:], 16) if re.fullmatch(r"D_[0-9A-F]{8}", n) else None)
             if addr is not None and any(a == addr for a, _ in syms):
                 anchors.append((addr, m.start(), n))
@@ -123,7 +145,7 @@ def place(version):
                     sym in mine
                     and sym not in still_asm
                     and sym not in written_symbols
-                    and not re.search(rf"\b{sym}\b", code)
+                    and not names_symbol(code, sym, macros)
                 ):
                     anchors.append((addr_of[sym], m.start(), sym))
         compiled = {s for _, _, s in anchors}
