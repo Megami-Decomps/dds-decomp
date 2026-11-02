@@ -4898,14 +4898,14 @@ distinct from the complete primary actor-status record above.
 ## GS graphics transfer-worker control
 
 DDS2 `0032A230` uses the separate control bytes `D_00438A1C` and
-`D_00438A1D`, not `sdfGrDrawBusy` or the `gsMemDelayedResrcCB`
+`sdfDrawSyncFlag`, not `sdfGrDrawBusy` or the `gsMemDelayedResrcCB`
 object. The transfer drain rechecks `D_00438A1C` after `SleepThread`;
-`sdfDrawSync` polls volatile `D_00438A1D`. Keep both control bytes
+`sdfDrawSync` polls volatile `sdfDrawSyncFlag`. Keep both control bytes
 volatile, clear the active byte before testing the reset byte, and retain
 the existing volatile GS image-upload semaphore contract.
 
 DDS1 `002D1380` has the same protocol with `D_003BD32C` and
-`D_003BD32D`. Retail `002D51B0`/`002D5218`/`002D5258` repeatedly
+`sdfDrawSyncFlag`. Retail `002D51B0`/`002D5218`/`002D5258` repeatedly
 checks the reset byte while polling hardware; `002D52DC`/`002D5338`
 reloads it after sleeping, and `sdfDrawSync` polls the active byte
 at `002D54B0`. These real shared controls justify the volatile byte

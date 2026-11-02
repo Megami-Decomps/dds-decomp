@@ -790,7 +790,7 @@ void movieOpenStream(movieStream_t *owner, const SdfMovieDescriptor *descriptor,
 }
 
 /* This no-op also serves as a void(u32) completion callback and ignores its word. */
-extern void sdfCreateSemaphoreFromOptions();
+extern void sdfDummyFunc();
 
 extern void sdfIpuFree(sdfIpuDecodeCb_t *);
 
@@ -806,7 +806,7 @@ void movieCloseStream(movieStream_t *job) {
             sdfFileCmdClose(job->deviceState);
         }
         while (job->state != SDF_MOVIE_STATE_DEVICE_RELEASE_CALLBACK) {
-            sdfCreateSemaphoreFromOptions();
+            sdfDummyFunc();
         }
         if (job->isPac == 0) {
             MovLinearStream *stream = job->stream.linear;

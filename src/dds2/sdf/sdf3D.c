@@ -63,7 +63,7 @@ extern const struct SdfDmaTagHeader *sdf3DLightDefault;
 
 extern u32 sdf3DFogDefault;
 
-extern u8 D_0037B610[];
+extern u8 vu1MicroPacket[];
 
 extern void sdf3DInitSpecularTex2(void);
 
@@ -94,7 +94,7 @@ void sdf3DMakeViewportPacket(SdfVuBonePacket *packet, SdfProjectionRecord *node,
     packet->reservedWord = 0;
     VU0_LOAD_MATRIX(transformMatrix);
     VU0_STORE_MATRIX(packet->matrixA);
-    sdfPostmultiplyVuMatrixFromMemory((const struct Matrix4 *)node->camera.matrix);
+    MultMatrixRev((const struct Matrix4 *)node->camera.matrix);
     VU0_STORE_MATRIX(packet->matrixB);
     SDF_VU0_LOADVECTOR(&node->camera.halfWidth);
         SDF_VU0_STOREVECTOR_NOMEM(packet->vecA);
@@ -121,7 +121,7 @@ extern u8 sdf3DEyeOffset[];
 void sdf3DSetCamera(const SdfProjectionRecord *node, const Matrix4 *transformMatrix) {
     VU0_LOAD_MATRIX(transformMatrix);
     VU0_STORE_MATRIX(sdfCameraTm);
-    sdfPostmultiplyVuMatrixFromMemory((const struct Matrix4 *)node->camera.matrix);
+    MultMatrixRev((const struct Matrix4 *)node->camera.matrix);
         SDF_VU0_LOADVECTOR(node->inverseOrigin);
     VU0_STORE_MATRIX(sdf3DScreenTm);
     SDF_VU0_APPLYMATRIX_XYZ1();
@@ -345,8 +345,8 @@ extern u8 D_0037F330[];
 
 /* Append the second fixed program block as a DMA reference packet. */
 void sdf3DLinkInitPacket(sdfDrawTag_t *packetList, DmaPacketHeader *packet) {
-    packet->address = (u32)D_0037B610 & SDF_DMA_ADDRESS_MASK;
-    packet->quadwords = (D_0037F330 - D_0037B610) >> SDF_DMA_QWORD_SHIFT;
+    packet->address = (u32)vu1MicroPacket & SDF_DMA_ADDRESS_MASK;
+    packet->quadwords = (D_0037F330 - vu1MicroPacket) >> SDF_DMA_QWORD_SHIFT;
     packet->tag = 0;
     packet->command = 0;
     packet->unknown10 = 0;

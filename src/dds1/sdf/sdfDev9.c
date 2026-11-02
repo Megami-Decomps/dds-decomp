@@ -61,7 +61,7 @@ extern u8 D_003BD478;
 
 extern s32 sceSifLoadStartModule(const char *modulePath, s32 flags, void *moduleArguments, s32 *resident);
 
-extern s8 D_003BD3C8;
+extern s8 sdfPrintIopFlag;
 
 extern char D_003BD3D0[];
 

@@ -56,7 +56,7 @@ typedef struct Bytes7 {
 
 extern Bytes7 D_00438AF0[];
 
-extern s8 D_00438AB8;
+extern s8 sdfPrintIopFlag;
 
 extern char D_00438AC0[];
 

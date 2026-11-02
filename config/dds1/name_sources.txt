@@ -8113,7 +8113,7 @@
 0x002CF3F0	sdfSetFlagListAlphaSurfaceIndex	inferred	Stores the supplied value in SdfFlagListWork.params.alpha.surfaceIndex; paired setter uses same field in DDS2.
 0x002CF420	sdfEnableFlagListViewTargetRelativeMode	inferred	Sets the flag-list coordinate mode used by local-map and title-camera setup. With this mode enabled, generated vertices subtract the view target and the draw path adds it back before submission. [provider and setup/shutdown caller dataflow, 2026-10-13]
 0x002CF430	sdfDisableFlagListViewTargetRelativeMode	inferred	Clears the flag-list coordinate mode during local-map shutdown and title-camera shutdown; the draw path then consumes stored vertices without adding the view target. [provider and setup/shutdown caller dataflow, 2026-10-13]
-0x002CF438	sdfCreateSemaphoreFromOptions	inferred	Populates semaphore initial count, option and maximum before calling the SDK CreateSema. [names_reviewed22.tsv]
+0x002CF438	sdfDummyFunc	inferred	SMT3HD name via SLUS_209.11 0x002A8078, empty function movieCloseStream calls; was sdfCreateSemaphoreFromOptions
 0x002CF440	sdfCreateSema	inferred	SMT3HD name via SLUS_209.11 0x002A8080, reloc-identical; was sdfCreateSemaphore
 0x002CF468	CreateThreadSimple	inferred	SMT3HD name via SLUS_209.11 0x002A80A8, reloc-identical; was sdfCreateThread
 0x002CF4E0	sdfCreateThreadWithStack	inferred	SMT3HD name via SLUS_209.11 0x002A8120, reloc-identical; was sdfCreateThreadWithAllocatedWorkspace
@@ -8122,7 +8122,7 @@
 0x002CF5C0	sdfFreeAutoDelayed	inferred	SMT3HD name via SLUS_209.11 0x002A8200, reloc-identical; was sdfReleaseChipOrRetainedResource
 0x002CF618	sdfFreeMemorySlotFromEitherHeap	inferred	Nulls a pointer slot before freeing its contents through the matching heap.
 0x002CF670	FatalError	inferred	SMT3HD name via SLUS_209.11 0x002A82B0, byte-identical; was sdfPanicHaltPrintf
-0x002CF6D0	sdfAddHandler	evidence	its message "sdfAddHandler : unknown type %d"
+0x002CF6D0	DmacAddHandler	inferred	SMT3HD name via SLUS_209.11 0x002A8310, sdfIpu call; was sdfAddHandler
 0x002CF7B8	sdfIpuRemoveHandler	inferred	SMT3HD name via SLUS_209.11 0x002A83F8, reloc-identical; was sdfRemoveHandler
 0x002CF898	sdfDrainPendingHandlers	inferred	Repeatedly dispatches the pending-handler head until no pending handler remains.
 0x002CF8C8	sdfAlarmWakeup	inferred	SMT3HD name via SLUS_209.11 0x002A8508, reloc-identical; was sdfWakeAlarmThread
@@ -8148,7 +8148,7 @@
 0x002CFF68	sdfChipAllocZeroDirect	inferred	SMT3HD name via SLUS_209.11 0x002A8BA8, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfAllocAndClearQuadwords
 0x002CFF98	sdfChipFreeDirect	inferred	Retires block from slot, updates owner links or free list with interrupts preserved. [names_reviewed6.tsv]
 0x002D00B8	sdfChipFreeDelayedDirect	inferred	SMT3HD name via SLUS_209.11 0x002A8CF8, shared-hash-in-run; was sdfQueuePendingChipRelease
-0x002D00D8	sdfChipIsInRange	inferred	Tests whether an address lies in [sdfChipPageTop, sdfChipPageEnd); SMT3HD equivalent sdfChipCheck at SLUS_209.11 0x002A8D18 is reloc-identical.
+0x002D00D8	sdfChipCheck	inferred	SMT3HD name via SLUS_209.11 0x002A8D18, reloc-identical sdfImageSet call; was sdfChipIsInRange
 0x002D00F8	sdfChipInit	inferred	SMT3HD name via SLUS_209.11 0x002A8D38, reloc-identical; was sdfInitChipHeap
 0x002D01F0	sdfChipGetInfo	inferred	SMT3HD name via SLUS_209.11 0x002A8E30, reloc-identical; was sdfGetChipHeapStats
 0x002D02C0	sdfMemInit	inferred	SMT3HD name via SLUS_209.11 0x002A8F00, reloc-identical; was sdfInitGeneralHeap
@@ -8272,7 +8272,7 @@
 0x002D3FF8	sdfGrClosePacketBuff	inferred	SMT3HD name via SLUS_209.11 0x002ACB78, reloc-identical; was sdfSetPacketCursorAligned
 0x002D4010	sdfDrawTagInit	inferred	SMT3HD name via SLUS_209.11 0x002ACB90, byte-identical; was sdfInitPacketList
 0x002D4038	sdfDrawTagLink	inferred	SMT3HD name via SLUS_209.11 0x002ACBB8, byte-identical; was sdfAppendPacket
-0x002D4070	sdfAppendPacketRange	inferred	Links a packet at the list end but records a separately supplied end pointer.
+0x002D4070	sdfDrawTagLink2	inferred	SMT3HD name via SLUS_209.11 0x002ACBF0, sdfGsMemIO call; was sdfAppendPacketRange
 0x002D40A8	sdfDrawTagLinkRef	inferred	SMT3HD name via SLUS_209.11 0x002ACC28, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfAppendReferencePacket
 0x002D40E8	sdfDrawTagLinkRefGif	inferred	SMT3HD name via SLUS_209.11 0x002ACC68, byte-identical; was sdfAppendDmaTagToList
 0x002D4120	sdfDrawTagLinkCall	inferred	SMT3HD name via SLUS_209.11 0x002ACCA0, byte-identical; was sdfAppendCallPacket
@@ -8586,7 +8586,7 @@
 0x002DDC98	MultMatrixNoArg_C	inferred	SMT3HD name via SLUS_209.11 0x002B65F0, byte-identical; was sdfVuMultiplyPrimaryByScratch
 0x002DDCF0	MultMatrixRevNoArg_C	inferred	SMT3HD name via SLUS_209.11 0x002B6648, byte-identical; was sdfVuMultiplyScratchByPrimary
 0x002DDD38	MultMatrix	inferred	SMT3HD name via SLUS_209.11 0x002B6690, shared-hash-in-run; was sdfPremultiplyVuMatrixFromMemory
-0x002DDD60	sdfPostmultiplyVuMatrixFromMemory	inferred	Loads matrix into vf24–27; callee computes current vf28–31 times loaded matrix. [names_reviewed18.tsv]
+0x002DDD60	MultMatrixRev	inferred	SMT3HD name via SLUS_209.11 0x002B66B8, sdf_Decomp call; was sdfPostmultiplyVuMatrixFromMemory
 0x002DDD88	ApplyMatrix	inferred	SMT3HD name via SLUS_209.11 0x002B66E0, byte-identical; was sdfVuTransformVector
 0x002DDDA8	InnerProduct	inferred	SMT3HD name via SLUS_209.11 0x002B6700, byte-identical; was sdfVuDot3
 0x002DDDD0	OuterProduct	inferred	SMT3HD name via SLUS_209.11 0x002B6728, byte-identical; was sdfVuCross3
@@ -9219,8 +9219,8 @@
 0x00308B28	isnan	inferred	SMT3HD name via SLUS_209.11 0x002DB630, byte-identical; was func_00308B28
 0x00309FA0	_calloc_r	inferred	SMT3HD name via SLUS_209.11 0x002DB840, reloc-identical; was func_00309FA0
 0x0030A680	RFU008	inferred	SMT3HD name via SLUS_209.11 0x002DBB00, byte-identical; was RFU008_ResumeT3IntrDispatch
-0x0030A710	AddIntcHandler2	inferred	libkernl AddIntcHandler2: kernel call 0x10 with the handler argument as a fourth parameter; sdfAddHandler registers INTC handlers through it, passing four arguments. DDS2 twin 0x00365990.
-0x0030A740	AddDmacHandler2	inferred	libkernl AddDmacHandler2: kernel call 0x12 with the handler argument as a fourth parameter; sdfAddHandler and the image upload worker register DMAC handlers through it, passing four arguments. DDS2 twin 0x003659C0.
+0x0030A710	AddIntcHandler2	inferred	libkernl AddIntcHandler2: kernel call 0x10 with the handler argument as a fourth parameter; DmacAddHandler registers INTC handlers through it, passing four arguments. DDS2 twin 0x00365990.
+0x0030A740	AddDmacHandler2	inferred	libkernl AddDmacHandler2: kernel call 0x12 with the handler argument as a fourth parameter; DmacAddHandler and the image upload worker register DMAC handlers through it, passing four arguments. DDS2 twin 0x003659C0.
 0x0030AEA0	sceResetttyinit	inferred	SMT3HD name via SLUS_209.11 0x002DC320, shared-hash-in-run; was func_0030AEA0
 0x0030B0E0	open	inferred	SMT3HD name via SLUS_209.11 0x002DC560, shared-hash-in-run; was func_0030B0E0
 0x0030B108	close	inferred	SMT3HD name via SLUS_209.11 0x002DC588, shared-hash-in-run; was func_0030B108
@@ -9349,6 +9349,9 @@
 0x00315758	__fixunsdfdi	inferred	Native SDK body pairs with the verified GCC helper in Nocturne; was func_00315758. Existing C ABI unchanged.
 0x00315A28	litodp	inferred	Fam-3
 0x00315AE0	dptoli	inferred	SMT3HD name via SLUS_209.11 0x002D1C40, reloc-identical; was func_00315AE0
+0x00315BA0	sdfDebugFontTex	inferred	SMT3HD name via SLUS_209.11 0x002E6E50, sdfDevCons reference; was D_00315BA0
+0x003200A0	vu0MicroPacket	inferred	SMT3HD name via SLUS_209.11 0x002F1350, sdfCoreDraw reference; was D_003200A0
+0x00320630	vu1MicroPacket	inferred	SMT3HD name via SLUS_209.11 0x002F18E0, sdfCoreDraw reference; was D_00320630
 0x003243C0	kwlnPadButtonHoldCounters	inferred	confidence=high; Per-button hold durations, incremented while pressed and reset on release; first frame selects the fresh flag, and durations >=8 on even frames select repeat. DDS2 twin 0x0037F3C0; existing u32[4][16], native 0x100-byte allocation and padding unchanged. No import or active ASM reader. [PurD readability data b5; native/matched-C twin; identifier-only]
 0x003244C0	kwlnPadStickHoldCounters	inferred	confidence=high; Per-port/per-stick hold durations, incremented while magnitude >=64 and reset inside the dead zone; first-frame and even-frame repeat flags use the counter. DDS2 twin 0x0037F4C0; existing u32[2][2], native 0x10-byte allocation and padding unchanged. No import or active ASM reader. [PurD readability data b5; native/matched-C twin; identifier-only]
 0x003244D0	dds3PadButtonPrev	inferred	SMT3HD data name via SLUS_209.11 0x002F57D0, 2 agreeing references; was dds3PadButtonPrev
@@ -10180,6 +10183,7 @@
 0x003BD2FC	dds3GsThreadId	inferred	SMT3HD data name via SLUS_209.11 0x00551854, 4 agreeing references; was dds3GsThreadId
 0x003BD300	sdfDispFrameId	inferred	SMT3HD data name via SLUS_209.11 0x00551858, 4 agreeing references; was sdfDispFrameId
 0x003BD302	sdfGrDrawBusy	inferred	SMT3HD data name via SLUS_209.11 0x0055185A, 3 agreeing references; was sdfGrDrawBusy
+0x003BD304	sdfGsErrorHandler	inferred	SMT3HD name via SLUS_209.11 0x0055185C, sdfGsMemory reference; was D_003BD304
 0x003BD308	sdfTexHandleLink	inferred	SMT3HD data name via SLUS_209.11 0x00551860, 3 agreeing references; was sdfTexHandleLink
 0x003BD30C	sdfDelayedResrcSemaId	inferred	SMT3HD data name via SLUS_209.11 0x00551864, 6 agreeing references; was sdfDelayedResrcSemaId
 0x003BD310	sdfGrPacketBuffHandle	inferred	SMT3HD data name via SLUS_209.11 0x00551868, 3 agreeing references; was sdfGrPacketBuffHandle
@@ -10188,15 +10192,19 @@
 0x003BD320	sdfGrPacketBuffPtr	inferred	SMT3HD data name via SLUS_209.11 0x00551878, 6 agreeing references; was sdfGrPacketBuffPtr
 0x003BD324	sdfGrPacketBuffLimit	inferred	SMT3HD data name via SLUS_209.11 0x0055187C, 2 agreeing references; was sdfGrPacketBuffLimit
 0x003BD32C	sdfDrawFrameFlag	inferred	SMT3HD data name via SLUS_209.11 0x00551884, 8 agreeing references; was sdfDrawFrameFlag
+0x003BD32D	sdfDrawSyncFlag	inferred	SMT3HD name via SLUS_209.11 0x00551885, sdfDraw reference; was D_003BD32D
 0x003BD330	sdfGrFrameComplete	inferred	Set when sdfGrDrawFrame finishes a frame; the main loop clears it. DDS2 twin 0x00438A20.
 0x003BD331	sdfGrDrawFrameId	inferred	SMT3HD data name via SLUS_209.11 0x00551889, 3 agreeing references; was sdfGrDrawFrameId
 0x003BD332	sdfGrBufferSlotIndex	inferred	The buffer slot the frame being drawn uses, the opposite of the shown field. DDS2 twin 0x00438A22.
 0x003BD333	sdfReqDrawDelayCount	inferred	SMT3HD data name via SLUS_209.11 0x0055188B, 3 agreeing references; was sdfReqDrawDelayCount
+0x003BD334	sdfReqDrawDelaySleepCount	inferred	SMT3HD name via SLUS_209.11 0x0055188C, sdfDraw reference; was D_003BD334
 0x003BD338	sdfDrawReqQueueIndex	inferred	SMT3HD data name via SLUS_209.11 0x00551890, 5 agreeing references; was sdfDrawReqQueueIndex
 0x003BD33C	sdfGrDrawFrameTagHead	inferred	SMT3HD data name via SLUS_209.11 0x00551894, 1 agreeing references; was sdfGrDrawFrameTagHead
+0x003BD340	sdfDrawFrameCount	inferred	SMT3HD name via SLUS_209.11 0x00551898, sdfDraw reference; was D_003BD340
 0x003BD344	corePktSoftenBias	inferred	SMT3HD data name via SLUS_209.11 0x0055189C, 7 agreeing references; was corePktSoftenBias
 0x003BD348	sdfMatAllocCount	inferred	SMT3HD data name via SLUS_209.11 0x005518A0, 4 agreeing references; was sdfMatAllocCount
 0x003BD34C	sdfForcedAssetTextureMode	inferred	confidence=high; matched_users=src/dds1/game/code_002D9748.c:sdfApplyAssetEntryChangesWithForcedTexture, src/dds1/game/code_002D9748.c:sdfAssetCopyTextureState; Nonzero mode forces texture entry copying; mode one replaces the texture-state word with zero. [names_qp9.tsv]
+0x003BD350	sdfCoreDrawBuffHandle	inferred	SMT3HD name via SLUS_209.11 0x005518A4, sdfCoreDraw reference; was D_003BD350
 0x003BD358	sdfFaceDivSoften	inferred	SMT3HD data name via SLUS_209.11 0x005518A8, 8 agreeing references; was sdfFaceDivSoften
 0x003BD35C	sdfFaceDivBias	inferred	SMT3HD data name via SLUS_209.11 0x005518AC, 8 agreeing references; was sdfFaceDivBias
 0x003BD374	sdf3DLightDefault	inferred	SMT3HD data name via SLUS_209.11 0x005518B0, 2 agreeing references; was sdf3DLightDefault
@@ -10204,6 +10212,9 @@
 0x003BD388	sdf3DRefMapParam	inferred	SMT3HD data name via SLUS_209.11 0x005518C0, 2 agreeing references; was sdf3DRefMapParam
 0x003BD398	sdfPadPortSlotPairs	inferred	confidence=high; src/dds1/game/code_002DDC98.c:sdfPadInitManager; Port/slot pair array used when opening configured controller ports. [names_qp9.tsv]
 0x003BD3A8	sdfPadAnalogSticks	inferred	high confidence; src/dds1/game/code_002DDC98.c sdfPadBuildButtonStates(): memcpy(&D_003BD3A8[i * 4], entry->stick, 4); Four analog-stick bytes copied from each pad-port record into the shared pad state.
+0x003BD3C0	devConsTop	inferred	SMT3HD name via SLUS_209.11 0x005518F8, sdfDevCons reference; was D_003BD3C0
+0x003BD3C4	alreadyInitDevCons	inferred	SMT3HD name via SLUS_209.11 0x005518FC, sdfDevCons reference; was D_003BD3C4
+0x003BD3C8	sdfPrintIopFlag	inferred	SMT3HD name via SLUS_209.11 0x00551900, sdfPrint reference; was D_003BD3C8
 0x003BD3D8	sdfDiscRequestPending	inferred	high confidence; src/dds1/game/code_002E4720.c sdfDevSignalPendingSemaphore(): if (D_003BD3D8 != 0) { Pending marker cleared after signaling the disc-request semaphore. [names_reviewed26.tsv]
 0x003BD3E8	sdfDiscType	inferred	confidence=high; matched_users=src/dds1/game/code_002E4720.c:sdfDevWaitForDisc, src/dds1/game/code_002E4720.c:sdfInitDeviceSemaphores; Device initialization passes this type to the CD driver; disc-wait logic selects expected CD status from it. [names_qp9.tsv]
 0x003BD3F4	sdfFileSemaId	inferred	SMT3HD data name via SLUS_209.11 0x00551924, 9 agreeing references; was sdfFileSemaId
@@ -10372,7 +10383,10 @@
 0x003BDA08	sdfModelDelayedResrcCB	inferred	SMT3HD data name via SLUS_209.11 0x005520B8, 2 agreeing references; was sdfModelDelayedResrcCB
 0x003BDA10	sdfMatDelayedResrcCB	inferred	SMT3HD data name via SLUS_209.11 0x005520C0, 2 agreeing references; was sdfMatDelayedResrcCB
 0x003BDA18	sdfMatDelayedResrcCB2	inferred	SMT3HD data name via SLUS_209.11 0x005520C8, 2 agreeing references; was sdfMatDelayedResrcCB2
+0x003BDA20	corePktPointBuff	inferred	SMT3HD name via SLUS_209.11 0x005520D0, sdfCoreDraw reference; was D_003BDA20
 0x003BDA28	corePktCurrLight	inferred	SMT3HD data name via SLUS_209.11 0x005520D8, 9 agreeing references; was corePktCurrLight
+0x003BDA2C	corePktCurrFog	inferred	SMT3HD name via SLUS_209.11 0x005520DC, sdfCoreDraw reference; was D_003BDA2C
+0x003BDA30	corePktZBias	inferred	SMT3HD name via SLUS_209.11 0x005520E0, sdfCoreDraw reference; was D_003BDA30
 0x003BDA34	sdfDebugFontHandle	inferred	SMT3HD data name via SLUS_209.11 0x005520E4, 4 agreeing references; was sdfDebugFontHandle
 0x003BDA38	dds3ImgPath	inferred	SMT3HD data name via SLUS_209.11 0x005520E8, 1 agreeing references; was dds3ImgPath
 0x003BDA48	sdfCdImageCurrFile	inferred	SMT3HD data name via SLUS_209.11 0x005520F8, 3 agreeing references; was sdfCdImageCurrFile
@@ -10390,10 +10404,13 @@
 0x003BDA88	sdfSndCmdBuf	inferred	SMT3HD data name via SLUS_209.11 0x00552138, 2 agreeing references; was sdfSndCmdBuf
 0x003BDA90	sifRpcServerSema	inferred	SMT3HD data name via SLUS_209.11 0x00552140, 6 agreeing references; was sifRpcServerSema
 0x003BDA98	sdfIpuTaskLink	inferred	SMT3HD data name via SLUS_209.11 0x00552148, 2 agreeing references; was sdfIpuTaskLink
+0x003BDA9C	sdfFromIpuDmacHandlerHandle	inferred	SMT3HD name via SLUS_209.11 0x0055214C, sdfIpu reference; was D_003BDA9C
+0x003BDAA0	sdfToIpuDmacHandlerHandle	inferred	SMT3HD name via SLUS_209.11 0x00552150, sdfIpu reference; was D_003BDAA0
 0x003BDAA4	sdfCurrIpuDecodeCb	inferred	SMT3HD data name via SLUS_209.11 0x00552154, 7 agreeing references; was sdfCurrIpuDecodeCb
 0x003BDAA8	sdfIpuInputStream	inferred	The stream frame node the IPU input DMA serves. DDS2 twin 0x00439208.
 0x003BDAAC	sdfIpuQueueHead	inferred	SMT3HD data name via SLUS_209.11 0x0055215C, 4 agreeing references; was sdfIpuQueueHead
 0x003BDAB0	sdfIpuQueueTail	inferred	SMT3HD data name via SLUS_209.11 0x00552160, 3 agreeing references; was sdfIpuQueueTail
+0x003BDAB4	sdfIpuDecodeThId	inferred	SMT3HD name via SLUS_209.11 0x00552164, sdfIpu reference; was D_003BDAB4
 0x003BDAB8	movieSemaId	inferred	SMT3HD data name via SLUS_209.11 0x00552168, 1 agreeing references; was movieSemaId
 0x003BDABC	movieSemaCount	inferred	SMT3HD data name via SLUS_209.11 0x0055216C, 3 agreeing references; was movieSemaCount
 0x003BDC48	dds3ProcessTreeDepth	inferred	SMT3HD data name via SLUS_209.11 0x005522C8, 2 agreeing references; was dds3ProcessTreeDepth
@@ -10515,6 +10532,7 @@
 0x003EB848	sdfImageSetCb	inferred	SMT3HD data name via SLUS_209.11 0x00581018, 5 agreeing references; was sdfImageSetCb
 0x003EB860	corePktFaceList	inferred	The node packet's face list: three vertex pointers a triangle, filled by corePktBuildFaceList and corePktBuildBackFaceList, which leave the count in the packet work's nodeCount; 4096 triangles (0xC000 bytes), the rejected triangles' index list after it.
 0x003F9860	sdfModelColorTransform	inferred	the SdfVuColorTransform sdfCorePacketGen builds through corePktSetFaceDivParm; the lighting kernels load its three quadwords as vf19..vf21. DDS2 twin 0x00476210.
+0x003F9890	corePktFogParm	inferred	SMT3HD name via SLUS_209.11 0x0058F060, sdfCoreDraw reference; was D_003F9890
 0x003F98A0	sdfVuObjectBasisCache	inferred	the three basis vectors corePktLoadWorldLightMtx caches (VU0_ROTATE_BASIS_AND_CACHE); corePktEmitRefMapPass reads them. DDS2 twin 0x00476250.
 0x003F9900	sdfPadPortBuffers	inferred	confidence=high; src/dds1/game/code_002DDC98.c:sdfPadInitManager; Per-port buffers passed to scePadPortOpen at 0x100-byte intervals. [names_qp9.tsv]
 0x003F9B00	sdfPadCb	inferred	SMT3HD data name via SLUS_209.11 0x0058F2C0, 2 agreeing references; was sdfPadCb

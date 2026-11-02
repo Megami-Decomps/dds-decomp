@@ -65,15 +65,15 @@ extern u32 sdf3DFogDefault;
 
 extern struct sdfTexHandle_t *sdfDebugFontHandle;
 
-extern u32 D_00438AB4;
+extern u32 alreadyInitDevCons;
 
-extern u8 D_00370B80[];
+extern u8 sdfDebugFontTex[];
 
 extern u32 sdfDevConsFontUvTable[];
 
-extern sdfDevConsCB_tag *D_00438AB0;
+extern sdfDevConsCB_tag *devConsTop;
 
-extern sdfMemHandle_t *D_00438A40;
+extern sdfMemHandle_t *sdfCoreDrawBuffHandle;
 
 extern sdfTexHandle_t *D_00438A6C;
 
@@ -107,9 +107,9 @@ extern u8 D_00438A8C;
 
 /* Acquire and cache the shared console texture on first use. */
 void sdfDevConsInit(void) {
-    if (D_00438AB4 == 0) {
-        D_00438AB4 = 1;
-        sdfDebugFontHandle = sdfTexSet((SdfTextureFileHeader *)(D_00370B80));
+    if (alreadyInitDevCons == 0) {
+        alreadyInitDevCons = 1;
+        sdfDebugFontHandle = sdfTexSet((SdfTextureFileHeader *)(sdfDebugFontTex));
     }
 }
 
@@ -126,14 +126,14 @@ u32 *sdfDevConsGetFontUvTable(void) {
 
 /* Append to the next-linked list and move its stored tail to this node. */
 void sdfDevConsLinkToTop(sdfDevConsCB_tag *node) {
-    sdfDevConsCB_tag *previousTail = D_00438AB0;
+    sdfDevConsCB_tag *previousTail = devConsTop;
 
     node->next = NULL;
     node->previousNode = previousTail;
     if (previousTail != NULL) {
         previousTail->next = node;
     }
-    D_00438AB0 = node;
+    devConsTop = node;
 }
 
 /* Unlink this node, moving the stored tail when its next link is NULL. */
@@ -145,7 +145,7 @@ void sdfDevConsUnlink(node)
     if (nextNode != NULL) {
         nextNode->previousNode = previousNode;
     } else {
-        D_00438AB0 = previousNode;
+        devConsTop = previousNode;
     }
     if (previousNode != NULL) {
         previousNode->next = nextNode;
@@ -530,9 +530,9 @@ void sdfDevConsDrawAll(void) {
     sdfDevConsDrawCB_t packetBuffers;
     sdfDevConsCB_tag *console;
 
-    if (D_00438AB0 != NULL) {
+    if (devConsTop != NULL) {
         sdfDevConsDrawInit(&packetBuffers, storage.data, 0x1000);
-        for (console = D_00438AB0; console != NULL; console = console->previousNode) {
+        for (console = devConsTop; console != NULL; console = console->previousNode) {
             sdfDevConsDraw(console, &packetBuffers);
         }
         sdfDevConsDrawFlush(&packetBuffers);
@@ -645,7 +645,7 @@ void sdfDevSetPrintCB(SifCommand *packet, s32 source, s32 end, s32 argument, s32
     packet->argument = argument;
     sdfPktSetCmd(packet, index);
 }
-INCLUDE_SDATA(const s32, "sdf/sdfDevCons", D_00438AB0);
+INCLUDE_SDATA(const s32, "sdf/sdfDevCons", devConsTop);
 
-INCLUDE_SDATA(const s32, "sdf/sdfDevCons", D_00438AB4);
+INCLUDE_SDATA(const s32, "sdf/sdfDevCons", alreadyInitDevCons);
 

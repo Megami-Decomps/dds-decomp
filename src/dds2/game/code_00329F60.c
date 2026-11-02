@@ -42,7 +42,7 @@ extern u8 *sdfGrCaptureReq;
 
 extern void (*sdfGrCaptureTarget)(u8 *);
 
-extern void (*D_004389F4)(s32 size, s32 allocationMode);
+extern void (*sdfGsErrorHandler)(s32 size, s32 allocationMode);
 
 extern SdfGraphBufferState sdfDispFrameId[2];
 
@@ -154,13 +154,13 @@ extern s8 reqGsReset;
 
 extern volatile s32 dds3GsSema;
 
-extern volatile SdfDrawFrameExecutionState D_00438A1D;
+extern volatile SdfDrawFrameExecutionState sdfDrawSyncFlag;
 
 extern volatile u8 sdfDrawFrameFlag;
 
 extern u16 D_00438A1E;
 
-extern SdfHandlerNode *sdfAddHandler(SdfHandlerKind, s32, SdfHandlerCallback, s32, s32);
+extern SdfHandlerNode *DmacAddHandler(SdfHandlerKind, s32, SdfHandlerCallback, s32, s32);
 
 extern void sdfGrMakeFrameSet(sdfGrFrameSet_t *);
 
@@ -174,7 +174,7 @@ void sdfDrawThread(void) {
     u32 startTicks;
 
     sdfDispThreadFlag = SDF_DISPLAY_THREAD_STARTUP;
-    sdfAddHandler(SDF_HANDLER_KIND_DMA, 1, sdfDrawThIntHandler, -1, 0);
+    DmacAddHandler(SDF_HANDLER_KIND_DMA, 1, sdfDrawThIntHandler, -1, 0);
     EnableDmac(1);
     for (;;) {
         CancelWakeupThread(GetThreadId());
@@ -190,9 +190,9 @@ void sdfDrawThread(void) {
             reqGsReset = 0;
             sdfGrGsReset();
         }
-        D_00438A1D = SDF_DRAW_FRAME_IN_PROGRESS;
+        sdfDrawSyncFlag = SDF_DRAW_FRAME_IN_PROGRESS;
         sdfGrDrawFrame();
-        D_00438A1D = SDF_DRAW_FRAME_IDLE;
+        sdfDrawSyncFlag = SDF_DRAW_FRAME_IDLE;
         if (sdfDrawFrameFlag != 0) {
             /* Preserve the controller enable state while stopping VIF1. */
             u32 enabledChannels = HW_READ(D_ENABLER);

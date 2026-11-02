@@ -88,7 +88,7 @@ extern u8 *sdfGrCaptureReq;
 
 extern void (*sdfGrCaptureTarget)(u8 *);
 
-extern void (*D_003BD304)(s32 size, s32 allocationMode);
+extern void (*sdfGsErrorHandler)(s32 size, s32 allocationMode);
 
 struct sdfGsMemSlice_t *sdfGsMemAllocFromHead(s32 size, s32 allocationMode);
 

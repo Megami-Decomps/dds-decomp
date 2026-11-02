@@ -39,7 +39,7 @@ extern SdfTextureQueue sdfImageSetCb;
 
 extern void (*sdfGrCaptureTarget)(u8 *);
 
-extern void (*D_003BD304)(s32 size, s32 allocationMode);
+extern void (*sdfGsErrorHandler)(s32 size, s32 allocationMode);
 
 struct sdfGsMemSlice_t *sdfGsMemAllocFromHead(s32 size, s32 allocationMode);
 
@@ -202,7 +202,7 @@ void sdfImageSetChainReleaseMem(void *address) {
 
     if (address != NULL) {
         entry = sdfChipAllocZeroDirect(sizeof(SdfTexReleaseEntry));
-        if (sdfChipIsInRange(address) != SDF_CHIP_ADDRESS_OUTSIDE_RANGE) {
+        if (sdfChipCheck(address) != SDF_CHIP_ADDRESS_OUTSIDE_RANGE) {
             entry->chipMemory = address;
             entry->releaseMode = SDF_TEX_RELEASE_CHIP_ADDRESS;
         } else {

@@ -66,7 +66,7 @@ typedef struct {
     f32 backfaceSign;             /* 0xAC */
 } sdfCorePacketCb_t;
 
-extern s32 D_00439180;
+extern s32 corePktPointBuff;
 
 /* vu0 routine: vf28-vf31 = vf20-vf23 * vf28-vf31 (4x4 product) */
 void MultMatrixNoArg_C(void) {
@@ -86,7 +86,7 @@ void MultMatrix(const f32 *matrix) {
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
-void sdfPostmultiplyVuMatrixFromMemory(const struct Matrix4 *matrix) {
+void MultMatrixRev(const struct Matrix4 *matrix) {
     SDF_VU0_LOADMATRIX_B(matrix);
     MultMatrixRevNoArg();
 }
@@ -146,21 +146,21 @@ void corePktSetupPointBuff(sdfCorePacketCb_t *work, s32 ringPosition) {
     sdfCorePacketPointBuff_tag **ringEnd = &work->extPointTop;
     if (ringPosition < 0x80) {
         work->freePointCount = 0x80 - ringPosition;
-        work->extPointBuff = D_00439180;
+        work->extPointBuff = corePktPointBuff;
         work->freePointBuff = 0x70001000 + ringPosition * 0x60;
         work->extPointCount = 0x2000;
         work->pointBuff = 0x70001000;
     } else if (ringPosition == 0x80) {
         work->pointBuff = 0x70001000;
-        work->freePointBuff = D_00439180;
+        work->freePointBuff = corePktPointBuff;
         work->freePointCount = 0x2000;
         work->extPointBuff = 0;
         work->extPointCount = 0;
     } else {
-        work->pointBuff = D_00439180;
+        work->pointBuff = corePktPointBuff;
         work->freePointBuff = 0x70001000;
         work->freePointCount = 0x80;
-        work->extPointBuff = D_00439180 + ringPosition * 0x60;
+        work->extPointBuff = corePktPointBuff + ringPosition * 0x60;
         work->extPointCount = 0x2000 - ringPosition;
     }
     work->extPointLink = ringEnd;

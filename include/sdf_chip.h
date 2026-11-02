@@ -6,6 +6,6 @@
 void sdfChipFreeDirect(void *memory);
 void *sdfChipAllocDirect(s32 size);
 void *sdfChipAllocZeroDirect(s32 size);
-s32 sdfChipCheck(s32 address);
+s32 sdfChipCheck(const void *address);
 
 #endif /* SDF_CHIP_H */

@@ -2284,7 +2284,7 @@ void fldPoint3To2(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
     f32 result[4];
 
     VU0_LOAD_MATRIX_MEMORY(sdfViewMatrix);
-    sdfPostmultiplyVuMatrixFromMemory((const struct Matrix4 *)sdfProjectionMatrix);
+    MultMatrixRev((const struct Matrix4 *)sdfProjectionMatrix);
     SDF_VU0_COPYMATRIX_A_TO_B();
     SDF_VU0_LOADVECTOR_BARRIER(vec);
     SDF_VU0_APPLYMATRIX_XYZ1();
@@ -2303,7 +2303,7 @@ void fldPoint3To2H(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
     f32 result[4];
 
     VU0_LOAD_MATRIX_MEMORY(D_00384790);
-    sdfPostmultiplyVuMatrixFromMemory((const struct Matrix4 *)D_0037F9B0);
+    MultMatrixRev((const struct Matrix4 *)D_0037F9B0);
     SDF_VU0_COPYMATRIX_A_TO_B();
     SDF_VU0_LOADVECTOR_BARRIER(vec);
     SDF_VU0_APPLYMATRIX_XYZ1();
@@ -2321,7 +2321,7 @@ void fldPrepareProjectionMatrix(void) {
     u8 *matrix;
     VU0_LOAD_MATRIX_MEMORY(sdfViewMatrix);
     matrix = sdfProjectionMatrix;
-    sdfPostmultiplyVuMatrixFromMemory((const struct Matrix4 *)matrix);
+    MultMatrixRev((const struct Matrix4 *)matrix);
     SDF_VU0_COPYMATRIX_A_TO_B();
     matrix += 0x40;
     SDF_VU0_LOADVECTOR_B_BARRIER(matrix);

@@ -449,7 +449,7 @@ char *mdlSetFileName(char *dst, const char *src) {
 extern u32 mdlManagerWork;
 extern dds3ModelResrc_t *mdlWaitLoadEnd(s32 group, s32 id);
 extern const char D_00436FA8[];
-extern void sdfCreateSemaphoreFromOptions(u32 callbackArg);
+extern void sdfDummyFunc(u32 callbackArg);
 extern void TbLoadCallback(struct FileRequest *, MdlLoadRequest *);
 extern s32 mdlFileLoad(s32 group, s32 id, MdlRegistrationMode registrationMode,
                                      const char *requestPath,
@@ -493,7 +493,7 @@ MdlAssetRequestResult mdlPrepare(
         mdlSetFileName(pathBuffer, path->path);
         mdlFileLoad(group, id, MDL_REGISTRATION_OWNS_GROUP_RESOURCES |
                               MDL_MOTION_REGISTRATION_CREATE_ON_MODEL_LOAD, pathBuffer,
-                                  sdfCreateSemaphoreFromOptions, 0);
+                                  sdfDummyFunc, 0);
     } else {
         request = sdfChipAllocZeroDirect(sizeof(MdlLoadRequest));
         mdlLoadRequestSetRegistrationMode(
@@ -1091,7 +1091,7 @@ void mdlSetEffectScale(dds3ModelHandle_t *ctx, f32 amount) {
 void mdlGetScreenOffset(dds3ModelHandle_t *ctx, const f32 point[4])
 {
     VU0_LOAD_MATRIX(sdfViewMatrix);
-    sdfPostmultiplyVuMatrixFromMemory((const struct Matrix4 *)sdfProjectionMatrix);
+    MultMatrixRev((const struct Matrix4 *)sdfProjectionMatrix);
     VU0_MOVE_VF(vf24, vf28);
     VU0_MOVE_VF(vf25, vf29);
     VU0_MOVE_VF(vf26, vf30);
@@ -1121,8 +1121,8 @@ void mdlProjectPoints(dds3ModelHandle_t *ctx, const f32 (*inputPoints)[4], f32 (
     VU0_LOAD_MATRIX(ctx->inner->matrix);
     SDF_VU0_LOADVECTOR(ctx->inner->scaleVector);
     SDF_VU0_SCALE_XYZ();
-    sdfPostmultiplyVuMatrixFromMemory((const struct Matrix4 *)sdfViewMatrix);
-    sdfPostmultiplyVuMatrixFromMemory((const struct Matrix4 *)sdfProjectionMatrix);
+    MultMatrixRev((const struct Matrix4 *)sdfViewMatrix);
+    MultMatrixRev((const struct Matrix4 *)sdfProjectionMatrix);
     for (pointIndex = 0; pointIndex < pointCount; pointIndex++) {
         SDF_VU0_LOADVECTOR(inputPoints[pointIndex]);
         SDF_VU0_APPLYMATRIX_XYZ1();

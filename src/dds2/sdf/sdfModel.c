@@ -69,13 +69,13 @@
 #include "sdf_asset_create.h"
 
 /* Polled in a spin-wait below; its writer is outside this C unit. */
-extern volatile SdfDrawFrameExecutionState D_00438A1D;
+extern volatile SdfDrawFrameExecutionState sdfDrawSyncFlag;
 
 extern struct sdfMemHandle_t *sdfGrPacketBuffHandle;
 
-extern u16 D_00438A24;
+extern u16 sdfReqDrawDelaySleepCount;
 
-extern s32 D_00438A30;
+extern s32 sdfDrawFrameCount;
 
 extern s32 sdfDelayedResrcSemaId;
 
@@ -650,7 +650,7 @@ void sdfModelLinkShapedDrawPacket(sdfModelNode_t *node, SdfShapedCommand *comman
         packet++;
     } while (++i != itemCount);
     *(u128 *)packet = 0;
-    sdfAppendPacketRange(list, packetStart, (u32)packet);
+    sdfDrawTagLink2(list, packetStart, (u32)packet);
 }
 #else
 INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelLinkShapedDrawPacket);
@@ -1124,7 +1124,7 @@ void sdfModelTempPacketLinkOt(sdfGrOt_t **surfaces, sdfModelRootNode_t *model) {
             if (node->flags & 0x11) continue;
             matrix = node->worldMatrix;
             VU0_LOAD_MATRIX(matrix);
-            sdfPostmultiplyVuMatrixFromMemory(sdf3DScreenTm);
+            MultMatrixRev(sdf3DScreenTm);
             if (node->boundsCorners != NULL && sdfModelCheckBounds(node->boundsCorners) != 0) continue;
             VU0_MOVE_VF(vf10, vf31);
             SDF_VU0_GETVECTOR_W(depth);
@@ -1164,7 +1164,7 @@ void sdfModelTempPacketLinkOt(sdfGrOt_t **surfaces, sdfModelRootNode_t *model) {
                         *(u64 *)((u8 *)statePacket + 0x98) = unpack;
                         *(f32 *)((u8 *)statePacket + 0xB0) = soften;
                         *(f32 *)((u8 *)statePacket + 0xB4) = bias;
-                        sdfAppendPacketRange(list, (u32)statePacket, (u32)statePacket + 0x90);
+                        sdfDrawTagLink2(list, (u32)statePacket, (u32)statePacket + 0x90);
                     }
                     command = (SdfIndexedCommandView *)*group++;
                     if (command != NULL) {
@@ -1181,7 +1181,7 @@ void sdfModelTempPacketLinkOt(sdfGrOt_t **surfaces, sdfModelRootNode_t *model) {
                                 payload++;
                                 ((SdfModelPacket *)payload)->dmaTag.bits = 0x20000000;
                                 ((SdfModelPacket *)payload)->vifCodes.bits = 0;
-                                sdfAppendPacketRange(list, (u32)packet, (u32)payload);
+                                sdfDrawTagLink2(list, (u32)packet, (u32)payload);
                             }
                             command = (SdfIndexedCommandView *)*group++;
                         } while (command != NULL);
@@ -1298,7 +1298,7 @@ void sdfModelLinkOt(sdfGrOt_t **surfaces, sdfModelRootNode_t *model) {
         }
 
         VU0_LOAD_MATRIX(node->worldMatrix);
-        sdfPostmultiplyVuMatrixFromMemory((const struct Matrix4 *)sdf3DScreenTm);
+        MultMatrixRev((const struct Matrix4 *)sdf3DScreenTm);
         if (node->boundsCorners != NULL &&
             sdfModelCheckBounds(node->boundsCorners) != 0) {
             continue;
@@ -1604,7 +1604,7 @@ void sdfModelMakeMarkPosMatrix(sdfModelRootNode_t *model, SdfMapPositionRecord *
     SDF_VU0_SET_ROW0();
     SDF_VU0_LOAD_ROW3(&record->position);
     SDF_VU0_MATRIX_ROW3_W_SET_ONE();
-    sdfPostmultiplyVuMatrixFromMemory((const struct Matrix4 *)drawNode->worldMatrix);
+    MultMatrixRev((const struct Matrix4 *)drawNode->worldMatrix);
 }
 
 /* vu0 routine: transform the map-record position by its draw-node matrix;

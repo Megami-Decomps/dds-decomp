@@ -105,7 +105,7 @@ void sdfLinkStoreImage(sdfDrawTag_t *list, sdfGsMemSlice_t *source, s32 sourceX,
     packetAddress = allocate(0xf0);
     sdfSetStoreImage((SdfResourcePacket *)packetAddress, source,
         sourceX, sourceY, width, height, resourceAddress, arg7, arg8);
-    sdfAppendPacketRange(list, packetAddress, packetAddress + 0xc0);
+    sdfDrawTagLink2(list, packetAddress, packetAddress + 0xc0);
 }
 
 void sdfLinkStoreFrameImagePredraw(SdfPatchableResourcePacket *packet, s32 entryIndex) {
@@ -130,7 +130,7 @@ void sdfLinkStoreFrameImage(sdfDrawTag_t *list, sdfPreDrawTag_t *linkedList, s32
         D_003980E0.buffers[0], sourceX, sourceY, width, height,
         resourceAddress, arg7, arg8);
     sdfPreDrawTagLink(linkedList, &packet->link);
-    sdfAppendPacketRange(list, (u32)&packet->resourcePacket,
+    sdfDrawTagLink2(list, (u32)&packet->resourcePacket,
         (u32)packet + SDF_PATCHABLE_PACKET_TAIL_OFFSET);
 }
 
@@ -172,5 +172,5 @@ void sdfLinkLoadImage(sdfDrawTag_t *list, sdfGsMemSlice_t *source,
     packetAddress = allocatePacket(SDF_DESCRIPTOR_PACKET_BYTES);
     sdfSetLoadImage((SdfDescriptorPacket *)packetAddress, source,
                   destinationX, destinationY, width, height, sourceAddress);
-    sdfAppendPacketRange(list, packetAddress, packetAddress + SDF_DESCRIPTOR_PACKET_TAIL_OFFSET);
+    sdfDrawTagLink2(list, packetAddress, packetAddress + SDF_DESCRIPTOR_PACKET_TAIL_OFFSET);
 }

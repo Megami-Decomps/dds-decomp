@@ -62,7 +62,7 @@ void sdfPrintRpcThread(void) {
 
 extern SifRpcClientContextView sdfDevRpcClient;
 
-extern s8 D_00438AB8;
+extern s8 sdfPrintIopFlag;
 
 extern char D_00438AC0[];
 
@@ -75,7 +75,7 @@ void sdfStartDevRpcServerAndBindClient(void) {
     _StartThread(sdfCreateThreadWithStack(sdfPrintRpcThread, SDF_DEV_RPC_THREAD_STACK_BYTES, SDF_DEV_RPC_THREAD_PRIORITY), 0);
     while (sceSifMBindRpc(&sdfDevRpcClient.client, SDF_DEV_RPC_CLIENT_ID, 0) >= 0) {
         if (sdfDevRpcClient.client.server != NULL) {
-            D_00438AB8 = 1;
+            sdfPrintIopFlag = 1;
             break;
         }
         waitStart = sdfGetRunTimeCountBase();
@@ -90,7 +90,7 @@ void sdfPuts(const char *text) {
     u8 *alignedBuffer;
     s32 length;
 
-    if (D_00438AB8 != 0) {
+    if (sdfPrintIopFlag != 0) {
         length = strlen(text);
         if (length != 0) {
             alignedBuffer = (u8 *)(((u32)&buffer[0x3F]) & ~0x3F);
@@ -112,7 +112,7 @@ s32 sdfPrintf(const char *fmt, ...) {
     sdfPuts(buffer);
     return length;
 }
-INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00438AB8);
+INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfPrintIopFlag);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_00438AC0);
 

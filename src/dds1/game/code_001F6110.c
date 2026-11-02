@@ -243,7 +243,7 @@ BtlProjectedScreenPointResult btlProjectForwardPositionToScreen(BtlProjectedScre
     VU0_MOVE_VF(vf30, vf26);
     VU0_MOVE_VF(vf31, vf27);
     projection = sdfProjectionMatrix;
-    sdfPostmultiplyVuMatrixFromMemory((const struct Matrix4 *)projection);
+    MultMatrixRev((const struct Matrix4 *)projection);
     SDF_VU0_APPLYMATRIX_XYZ1();
     SDF_VU0_PERSVECTOR();
     projection += 16;
@@ -287,7 +287,7 @@ s32 nbClipEffectNum(s32 screenPosition[4]) {
     VU0_MOVE_VF(vf30, vf26);
     VU0_MOVE_VF(vf31, vf27);
     projectionData = sdfProjectionMatrix;
-    sdfPostmultiplyVuMatrixFromMemory((const struct Matrix4 *)projectionData);
+    MultMatrixRev((const struct Matrix4 *)projectionData);
     SDF_VU0_APPLYMATRIX_XYZ1();
     SDF_VU0_PERSVECTOR();
     projectionData += 16;

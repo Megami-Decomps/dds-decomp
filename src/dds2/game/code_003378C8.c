@@ -118,7 +118,7 @@ void corePktMakeEdgePoint(sdfCorePacketPointBuff_tag *out, sdfCorePacketPointBuf
 extern u8 corePktSoftenBias;
 extern u16 D_00474210[];
 extern f32 sdf3DEyeOffset[4];
-extern f32 D_00439190;
+extern f32 corePktZBias;
 static inline sdfCorePacketPointBuff_tag *sdfVuAllocClipNode(sdfCorePacketCb_t *work) {
     sdfCorePacketPointBuff_tag *node = work->freePointBuff;
     if (--work->freePointCount == 0) {
@@ -292,7 +292,7 @@ void corePktBuildFaceList(sdfCorePacketCb_t *work) {
     s32 acceptAll;
     VuGeomRef *out;
     f32 scale = work->backfaceSign;
-    f32 clipBias = D_00439190;
+    f32 clipBias = corePktZBias;
     const f32 *clipPlane = sdf3DEyeOffset;
     const u8 *projection = (const u8 *)&sdf3DScreenParam;
 
@@ -441,7 +441,7 @@ void corePktBuildFaceList(sdfCorePacketCb_t *work) {
 
 /* vu0 routine: native projection setup with ordinary C clipping. */
 void corePktBuildBackFaceList(sdfCorePacketCb_t *work) {
-    f32 scale = D_00439190;
+    f32 scale = corePktZBias;
     s32 remaining;
     u16 *triangles;
     u16 *indices;

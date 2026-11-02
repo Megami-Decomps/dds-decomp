@@ -94,13 +94,13 @@ extern sdfIpuDecodeCb_t *sdfIpuInputStream;
 
 extern s32 D_003BDA94;
 
-extern s32 D_003BDAB4;
+extern s32 sdfIpuDecodeThId;
 
 extern void sdfIpuSetDecodeParams(sdfIpuDecodeCb_t *node, SoundFormat *format, u8 *sourceAddress, s32 sourceSize);
 
-extern SdfHandlerNode *D_003BDA9C;
+extern SdfHandlerNode *sdfFromIpuDmacHandlerHandle;
 
-extern SdfHandlerNode *D_003BDAA0;
+extern SdfHandlerNode *sdfToIpuDmacHandlerHandle;
 
 extern void sdfIpuRemoveHandler(SdfHandlerNode *target);
 
@@ -700,7 +700,7 @@ void sdfIpuDecodeThread(void) {
 }
 
 s32 sdfIpuFromDmacHandler(void) {
-    iWakeupThread(D_003BDAB4);
+    iWakeupThread(sdfIpuDecodeThId);
     EE_ENABLE_INTERRUPTS_SYNC();
     return 0;
 }
@@ -860,7 +860,7 @@ void movieAttachDecodeTask(sdfIpuDecodeCb_t *node, SoundFormat *format, SdfStrea
     sdfIpuAttachTask(node);
 }
 
-extern SdfHandlerNode *sdfAddHandler(SdfHandlerKind, s32, SdfHandlerCallback, s32, s32);
+extern SdfHandlerNode *DmacAddHandler(SdfHandlerKind, s32, SdfHandlerCallback, s32, s32);
 
 extern s32 CreateThreadSimple(void (*entryAddress)(), void *workspace, s32 stackBytes, s32 priority);
 
@@ -875,24 +875,24 @@ void sdfIpuInit(void) {
     HW_WRITE(IPU_CMD, 0x90000000);
     sdfIpuTaskLink = 0;
     sdfCurrIpuDecodeCb = NULL;
-    D_003BDA9C = sdfAddHandler(SDF_HANDLER_KIND_DMA, 3, sdfIpuFromDmacHandler, -1, 0);
+    sdfFromIpuDmacHandlerHandle = DmacAddHandler(SDF_HANDLER_KIND_DMA, 3, sdfIpuFromDmacHandler, -1, 0);
     EnableDmac(3);
-    D_003BDAA0 = sdfAddHandler(SDF_HANDLER_KIND_DMA, 4, sdfIpuToDmacHandler, -1, 0);
+    sdfToIpuDmacHandlerHandle = DmacAddHandler(SDF_HANDLER_KIND_DMA, 4, sdfIpuToDmacHandler, -1, 0);
     EnableDmac(4);
     thread = CreateThreadSimple(sdfIpuDecodeThread, sdfIpuDecodeThStack, 0x800, 0x46);
-    D_003BDAB4 = thread;
+    sdfIpuDecodeThId = thread;
     _StartThread(thread, 0);
 }
 
 s32 sdfIpuClose(void) {
-    if (D_003BDA9C != 0) {
-        sdfIpuRemoveHandler(D_003BDA9C);
-        D_003BDA9C = 0;
+    if (sdfFromIpuDmacHandlerHandle != 0) {
+        sdfIpuRemoveHandler(sdfFromIpuDmacHandlerHandle);
+        sdfFromIpuDmacHandlerHandle = 0;
     }
     DisableDmac(3);
-    if (D_003BDAA0 != 0) {
-        sdfIpuRemoveHandler(D_003BDAA0);
-        D_003BDAA0 = 0;
+    if (sdfToIpuDmacHandlerHandle != 0) {
+        sdfIpuRemoveHandler(sdfToIpuDmacHandlerHandle);
+        sdfToIpuDmacHandlerHandle = 0;
     }
     return DisableDmac(4);
 }

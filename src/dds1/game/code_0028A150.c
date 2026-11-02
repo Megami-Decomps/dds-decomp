@@ -4141,7 +4141,7 @@ void mnuProjectViewPoint(void) {
     u8 *matrix;
     VU0_LOAD_MATRIX(sdfViewMatrix);
     matrix = sdfProjectionMatrix;
-    sdfPostmultiplyVuMatrixFromMemory((const struct Matrix4 *)matrix);
+    MultMatrixRev((const struct Matrix4 *)matrix);
     SDF_VU0_APPLYMATRIX_XYZ1();
     SDF_VU0_PERSVECTOR();
     matrix += 0x40;
@@ -4180,7 +4180,7 @@ s32 sdfProjectPointInForwardConeVU(void) {
     VU0_MOVE_VF(vf30, vf26);
     VU0_MOVE_VF(vf31, vf27);
     projection = sdfProjectionMatrix;
-    sdfPostmultiplyVuMatrixFromMemory((const struct Matrix4 *)projection);
+    MultMatrixRev((const struct Matrix4 *)projection);
     SDF_VU0_APPLYMATRIX_XYZ1();
     SDF_VU0_PERSVECTOR();
     projection += 16;
@@ -6232,7 +6232,7 @@ void fileSampleKeyTracks(FileSlot *out, FileKeyBlock *block, s32 frame, f32 *tar
     VU0_MOVE_VF(vf22, vf30);
     VU0_MOVE_VF(vf23, vf31);
     VU0_LOAD_MATRIX(sdfViewMatrix);
-    sdfPostmultiplyVuMatrixFromMemory((const struct Matrix4 *)sdfProjectionMatrix);
+    MultMatrixRev((const struct Matrix4 *)sdfProjectionMatrix);
     SDF_VU0_LOADVECTOR(out->pos);
     SDF_VU0_APPLYMATRIX_XYZ1();
     SDF_VU0_PERSVECTOR();

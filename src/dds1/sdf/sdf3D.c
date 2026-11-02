@@ -71,7 +71,7 @@ extern sdfTexHandle_t *D_003BD390;
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */ void MultMatrix(const f32 *matrix);
 
-extern u8 D_00320630[];
+extern u8 vu1MicroPacket[];
 
 /* Emit two matrices and three vectors; also cache the inverse origin in node. */
 void sdf3DMakeViewportPacket(ConsMatrixPacket *packet, SdfProjectionRecord *node, const Matrix4 *transformMatrix) {
@@ -80,7 +80,7 @@ void sdf3DMakeViewportPacket(ConsMatrixPacket *packet, SdfProjectionRecord *node
     packet->reservedWord = 0;
     VU0_LOAD_MATRIX(transformMatrix);
     VU0_STORE_MATRIX(packet->matrixA);
-    sdfPostmultiplyVuMatrixFromMemory((const struct Matrix4 *)node->camera.matrix);
+    MultMatrixRev((const struct Matrix4 *)node->camera.matrix);
     VU0_STORE_MATRIX(packet->matrixB);
     SDF_VU0_LOADVECTOR_BARRIER(&node->camera.halfWidth);
     SDF_VU0_STOREVECTOR(packet->vecA);
@@ -107,7 +107,7 @@ extern u8 sdf3DEyeOffset[];
 void sdf3DSetCamera(const SdfProjectionRecord *node, const Matrix4 *transformMatrix) {
     VU0_LOAD_MATRIX(transformMatrix);
     VU0_STORE_MATRIX(sdfCameraTm);
-    sdfPostmultiplyVuMatrixFromMemory((const struct Matrix4 *)node->camera.matrix);
+    MultMatrixRev((const struct Matrix4 *)node->camera.matrix);
     SDF_VU0_LOADVECTOR_BARRIER(node->inverseOrigin);
     VU0_STORE_MATRIX(sdf3DScreenTm);
     SDF_VU0_APPLYMATRIX_XYZ1();
@@ -332,8 +332,8 @@ extern u8 D_00324350[];
 
 /* Append the second fixed program block as a DMA reference packet. */
 void sdf3DLinkInitPacket(sdfDrawTag_t *packetList, DmaPacketHeader *packet) {
-    packet->address = (u32)D_00320630 & SDF_DMA_ADDRESS_MASK;
-    packet->quadwords = (D_00324350 - D_00320630) >> SDF_DMA_QWORD_SHIFT;
+    packet->address = (u32)vu1MicroPacket & SDF_DMA_ADDRESS_MASK;
+    packet->quadwords = (D_00324350 - vu1MicroPacket) >> SDF_DMA_QWORD_SHIFT;
     packet->tag = 0;
     packet->command = 0;
     packet->unknown10 = 0;

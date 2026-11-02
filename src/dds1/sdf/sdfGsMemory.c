@@ -43,7 +43,7 @@ extern SdfPendingRequest gsMemDelayedResrcCB;
 
 extern void (*sdfGrCaptureTarget)(u8 *);
 
-extern void (*D_003BD304)(s32 size, s32 allocationMode);
+extern void (*sdfGsErrorHandler)(s32 size, s32 allocationMode);
 
 struct sdfGsMemSlice_t *sdfGsMemAllocFromHead(s32 size, s32 allocationMode);
 
@@ -124,8 +124,8 @@ sdfGsMemSlice_t *sdfGsMemAllocFromHead(s32 size, s32 allocationMode) {
             if (interruptsEnabled != 0) {
                 EIntr();
             }
-            if (D_003BD304 != NULL) {
-                D_003BD304(size, allocationMode);
+            if (sdfGsErrorHandler != NULL) {
+                sdfGsErrorHandler(size, allocationMode);
             }
         }
         if (block->allocationMode != 0 || block->size < size) {
@@ -170,8 +170,8 @@ sdfGsMemSlice_t *sdfGsMemAllocFromTail(s32 size, s32 allocationMode) {
             if (interruptsEnabled != 0) {
                 EIntr();
             }
-            if (D_003BD304 != NULL) {
-                D_003BD304(size, allocationMode);
+            if (sdfGsErrorHandler != NULL) {
+                sdfGsErrorHandler(size, allocationMode);
             }
         }
         if (block->allocationMode != 0 || block->size < size) {
@@ -324,5 +324,5 @@ sdfGsMemSlice_t *sdfGsMemGetLinkTail(void) {
     return gsMemHandleLinkTail;
 }
 
-INCLUDE_SDATA(const s32, "sdf/sdfGsMemory", D_003BD304);
+INCLUDE_SDATA(const s32, "sdf/sdfGsMemory", sdfGsErrorHandler);
 

@@ -24,7 +24,7 @@ void *sdfAllocAuto(s32 size) {
 
 void sdfFreeAuto(void *allocation) {
     if (allocation != NULL) {
-        if (sdfChipIsInRange(allocation) != SDF_CHIP_ADDRESS_OUTSIDE_RANGE) {
+        if (sdfChipCheck(allocation) != SDF_CHIP_ADDRESS_OUTSIDE_RANGE) {
             sdfChipFreeDirect(allocation);
             return;
         }
@@ -35,7 +35,7 @@ void sdfFreeAuto(void *allocation) {
 
 void sdfFreeAutoDelayed(void *allocation) {
     if (allocation != NULL) {
-        if (sdfChipIsInRange(allocation) != SDF_CHIP_ADDRESS_OUTSIDE_RANGE) {
+        if (sdfChipCheck(allocation) != SDF_CHIP_ADDRESS_OUTSIDE_RANGE) {
             sdfChipFreeDelayedDirect(allocation);
             return;
         }
@@ -48,7 +48,7 @@ void sdfFreeMemorySlotFromEitherHeap(void **slot) {
     void *allocation = *slot;
     if (allocation != NULL) {
         *slot = NULL;
-        if (sdfChipIsInRange(allocation) != SDF_CHIP_ADDRESS_OUTSIDE_RANGE) {
+        if (sdfChipCheck(allocation) != SDF_CHIP_ADDRESS_OUTSIDE_RANGE) {
             sdfChipFreeDirect(allocation);
             return;
         }
@@ -66,7 +66,7 @@ extern void FatalError(const char *format, ...) __attribute__((noreturn));
 extern s32 AddIntcHandler2(s32, s32, s32, s32);
 extern s32 AddDmacHandler2(s32, s32, s32, s32);
 
-SdfHandlerNode *sdfAddHandler(SdfHandlerKind kind, s32 channel, SdfHandlerCallback handler, s32 arg, s32 next) {
+SdfHandlerNode *DmacAddHandler(SdfHandlerKind kind, s32 channel, SdfHandlerCallback handler, s32 arg, s32 next) {
     SdfHandlerNode *node;
     s32 id;
 

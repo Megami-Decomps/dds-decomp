@@ -43,17 +43,17 @@
 
 extern const struct SdfDmaTagHeader *corePktCurrLight;
 
-extern u32 D_0043918C;
+extern u32 corePktCurrFog;
 
-extern f32 D_00439190;
+extern f32 corePktZBias;
 
-extern u8 D_0037B080[];
+extern u8 vu0MicroPacket[];
 
-extern u8 D_0037B610[];
+extern u8 vu1MicroPacket[];
 
-extern sdfMemHandle_t *D_00438A40;
+extern sdfMemHandle_t *sdfCoreDrawBuffHandle;
 
-extern s32 D_00439180;
+extern s32 corePktPointBuff;
 
 #ifdef NON_MATCHING
 #include "sdf_gs_header.h"
@@ -153,7 +153,7 @@ static s32 sdfModelLayOutStrip(sdfCorePacketCb_t *work, s32 cursor, u32 nextPara
  * rotate the object basis. */
 static void sdfModelLoadNodeMatrix(u8 *matrix) {
     VU0_LOAD_MATRIX(matrix);
-    sdfPostmultiplyVuMatrixFromMemory(sdf3DScreenTm);
+    MultMatrixRev(sdf3DScreenTm);
     corePktLoadWorldLightMtx(matrix);
 }
 
@@ -395,36 +395,36 @@ void sdfCoreDrawSetLight(const struct SdfDmaTagHeader *lightingPacket) {
     corePktCurrLight = lightingPacket;
 }
 
-extern u8 D_00476240[];
+extern u8 corePktFogParm[];
 
 /* Cache the object's vector only when its address changes, not its contents. */
 void sdfCoreDrawSetFog(const SdfLightingPacketStorage *sourcePacket) {
-    if (D_0043918C != (u32)sourcePacket) {
-        D_0043918C = (u32)sourcePacket;
-        SDF_VU0_COPYVECTOR(D_00476240, sourcePacket->normal[0]);
+    if (corePktCurrFog != (u32)sourcePacket) {
+        corePktCurrFog = (u32)sourcePacket;
+        SDF_VU0_COPYVECTOR(corePktFogParm, sourcePacket->normal[0]);
     }
 }
 
 void sdfCoreDrawSetZBias(f32 scale) {
-    D_00439190 = scale;
+    corePktZBias = scale;
 }
 
 void sdfVuClearTransformCache(void) {
     corePktCurrLight = 0;
-    D_0043918C = 0;
+    corePktCurrFog = 0;
 }
 
 /* Upload the VIF0 program synchronously, then replace the ring workspace. */
 void sdfCoreDrawInit(s32 workspaceBytes) {
     u32 *dmaChannel = sceDmaGetChan(0);
     HW_WRITE(dmaChannel, HW_READ(dmaChannel) & ~SDF_DMA_CHCR_TTE);
-    sceDmaSendN(dmaChannel, D_0037B080, (D_0037B610 - D_0037B080) >> SDF_DMA_QWORD_SHIFT);
+    sceDmaSendN(dmaChannel, vu0MicroPacket, (vu1MicroPacket - vu0MicroPacket) >> SDF_DMA_QWORD_SHIFT);
     sceDmaSync(dmaChannel, 0, 0);
-    sdfMemFreeHandleDirect(&D_00438A40);
-    D_00438A40 = sdfMemAllocDirect(workspaceBytes);
-    D_00439180 = sdfMemLock(D_00438A40);
+    sdfMemFreeHandleDirect(&sdfCoreDrawBuffHandle);
+    sdfCoreDrawBuffHandle = sdfMemAllocDirect(workspaceBytes);
+    corePktPointBuff = sdfMemLock(sdfCoreDrawBuffHandle);
 }
-INCLUDE_SDATA(const s32, "sdf/sdfCoreDraw", D_00438A40);
+INCLUDE_SDATA(const s32, "sdf/sdfCoreDraw", sdfCoreDrawBuffHandle);
 
 INCLUDE_SDATA(const s32, "sdf/sdfCoreDraw", sdfFaceDivSoften);
 

@@ -32,7 +32,7 @@
 #include "mnu_title_sound.h"
 #include "sdf_movie_draw_packet.h"
 
-extern s32 D_00439214;
+extern s32 sdfIpuDecodeThId;
 
 #define SDF_STREAM_NODE_BYTES 0x8C
 
@@ -692,7 +692,7 @@ void sdfIpuDecodeThread(void) {
 }
 
 s32 sdfIpuFromDmacHandler(void) {
-    iWakeupThread(D_00439214);
+    iWakeupThread(sdfIpuDecodeThId);
     EE_ENABLE_INTERRUPTS_SYNC();
     return 0;
 }
@@ -854,13 +854,13 @@ void movieAttachDecodeTask(sdfIpuDecodeCb_t *node, SoundFormat *format, SdfStrea
     sdfIpuAttachTask(node);
 }
 
-extern SdfHandlerNode *D_004391FC;
+extern SdfHandlerNode *sdfFromIpuDmacHandlerHandle;
 
-extern SdfHandlerNode *D_00439200;
+extern SdfHandlerNode *sdfToIpuDmacHandlerHandle;
 
 extern u8 sdfIpuDecodeThStack[];
 
-extern SdfHandlerNode *sdfAddHandler(SdfHandlerKind kind, s32 index, SdfHandlerCallback handler, s32 argument, s32 option);
+extern SdfHandlerNode *DmacAddHandler(SdfHandlerKind kind, s32 index, SdfHandlerCallback handler, s32 argument, s32 option);
 
 extern s32 CreateThreadSimple(void (*entryAddress)(), void *workspace, s32 stackBytes, s32 priority);
 
@@ -871,26 +871,26 @@ void sdfIpuInit(void) {
     HW_WRITE(IPU_CMD, 0x90000000);
     sdfIpuTaskLink = 0;
     sdfCurrIpuDecodeCb = NULL;
-    D_004391FC = sdfAddHandler(SDF_HANDLER_KIND_DMA, 3, sdfIpuFromDmacHandler, -1, 0);
+    sdfFromIpuDmacHandlerHandle = DmacAddHandler(SDF_HANDLER_KIND_DMA, 3, sdfIpuFromDmacHandler, -1, 0);
     EnableDmac(3);
-    D_00439200 = sdfAddHandler(SDF_HANDLER_KIND_DMA, 4, sdfIpuToDmacHandler, -1, 0);
+    sdfToIpuDmacHandlerHandle = DmacAddHandler(SDF_HANDLER_KIND_DMA, 4, sdfIpuToDmacHandler, -1, 0);
     EnableDmac(4);
-    D_00439214 = CreateThreadSimple(sdfIpuDecodeThread, sdfIpuDecodeThStack, 0x800, 0x46);
-    _StartThread(D_00439214, 0);
+    sdfIpuDecodeThId = CreateThreadSimple(sdfIpuDecodeThread, sdfIpuDecodeThStack, 0x800, 0x46);
+    _StartThread(sdfIpuDecodeThId, 0);
 }
 
 extern void sdfIpuRemoveHandler(SdfHandlerNode *target);
 
 /* Remove both IPU handlers and forward the final completion-source disable result. */
 s32 sdfIpuClose(void) {
-    if (D_004391FC != 0) {
-        sdfIpuRemoveHandler(D_004391FC);
-        D_004391FC = 0;
+    if (sdfFromIpuDmacHandlerHandle != 0) {
+        sdfIpuRemoveHandler(sdfFromIpuDmacHandlerHandle);
+        sdfFromIpuDmacHandlerHandle = 0;
     }
     DisableDmac(3);
-    if (D_00439200 != 0) {
-        sdfIpuRemoveHandler(D_00439200);
-        D_00439200 = 0;
+    if (sdfToIpuDmacHandlerHandle != 0) {
+        sdfIpuRemoveHandler(sdfToIpuDmacHandlerHandle);
+        sdfToIpuDmacHandlerHandle = 0;
     }
     return DisableDmac(4);
 }

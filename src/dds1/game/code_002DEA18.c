@@ -243,7 +243,7 @@ void corePktClipFace(sdfCorePacketCb_t *work) {
     *work->extPointLink = NULL;
 }
 
-extern f32 D_003BDA30;
+extern f32 corePktZBias;
 extern f32 sdf3DEyeOffset[4];
 /* vu0 routine: native clip-plane setup and ordinary triangle fans. */
 void corePktBuildFaceList(sdfCorePacketCb_t *work) {
@@ -253,7 +253,7 @@ void corePktBuildFaceList(sdfCorePacketCb_t *work) {
     s32 acceptAll;
     u128 *(*out)[3];
     f32 scale = work->backfaceSign;
-    f32 clipBias = D_003BDA30;
+    f32 clipBias = corePktZBias;
     const f32 *clipPlane = sdf3DEyeOffset;
     const u8 *projection = (const u8 *)&sdf3DScreenParam;
 
@@ -401,7 +401,7 @@ void corePktBuildFaceList(sdfCorePacketCb_t *work) {
 
 void corePktBuildBackFaceList(sdfCorePacketCb_t *work) {
     /* DDS1 node region uses the tail byte at +0x50. */
-    f32 scale = D_003BDA30;
+    f32 scale = corePktZBias;
     s32 remaining;
     u16 *triangles;
     u16 *indices;

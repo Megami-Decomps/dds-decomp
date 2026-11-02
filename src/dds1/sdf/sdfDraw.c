@@ -94,9 +94,9 @@ extern void sdfWaitVblank(s32 requestedSleepCount);
 
 #define SDF_GRAPH_DEPTH_BUFFER_INDEX 2
 
-extern u16 D_003BD334;
+extern u16 sdfReqDrawDelaySleepCount;
 
-extern s32 D_003BD340;
+extern s32 sdfDrawFrameCount;
 
 extern s8 sdfDrawImageTrans;
 
@@ -141,7 +141,7 @@ void sdfDrawTagLink(sdfDrawTag_t *list, u32 packet) {
 }
 
 /* Append a DMA range, keeping its start and trailing tag addresses distinct. */
-void sdfAppendPacketRange(sdfDrawTag_t *list, u32 packetAddress, u32 rangeTailAddress) {
+void sdfDrawTagLink2(sdfDrawTag_t *list, u32 packetAddress, u32 rangeTailAddress) {
     s32 previousTailAddress;
 
     previousTailAddress = list->tail;
@@ -672,7 +672,7 @@ void sdfGrReqDraw(sdfDrawTag_t *list, SdfPacketChain *chain) {
 
     while (sdfReqDrawDelayCount != 0) {
     }
-    D_003BD334 = sdfGetRunTimeCount(start);
+    sdfReqDrawDelaySleepCount = sdfGetRunTimeCount(start);
     interrupts = DIntr();
     index = sdfDrawReqQueueIndex + 1;
     if (index == 3) {
@@ -694,7 +694,7 @@ void sdfGrReqDraw(sdfDrawTag_t *list, SdfPacketChain *chain) {
     }
     sdfDrawReqQueueIndex = index;
     sdfDrawImageTrans = 1;
-    D_003BD340++;
+    sdfDrawFrameCount++;
     if (interrupts != 0) {
         EIntr();
     }
@@ -871,14 +871,14 @@ void sdfGrDrawFrame(void) {
 INCLUDE_ASM(const s32, "sdf/sdfDraw", sdfGrDrawFrame);
 #endif
 
-extern volatile SdfDrawFrameExecutionState D_003BD32D;
+extern volatile SdfDrawFrameExecutionState sdfDrawSyncFlag;
 
 /* Wait for frame execution to finish, then sleep until the active slot is empty or ready. */
 void sdfDrawSync(void) {
     SdfPacketSlot *table = sdfGrDrawState;
 
     for (;;) {
-        while (D_003BD32D != SDF_DRAW_FRAME_IDLE) {
+        while (sdfDrawSyncFlag != SDF_DRAW_FRAME_IDLE) {
         }
         if (table[sdfDrawReqQueueIndex].packetList == NULL) {
             break;
@@ -891,7 +891,7 @@ void sdfDrawSync(void) {
 }
 INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfDrawFrameFlag);
 
-INCLUDE_SDATA(const s32, "sdf/sdfDraw", D_003BD32D);
+INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfDrawSyncFlag);
 
 INCLUDE_SDATA(const s32, "sdf/sdfDraw", D_003BD32E);
 
@@ -903,11 +903,11 @@ INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfGrBufferSlotIndex);
 
 INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfReqDrawDelayCount);
 
-INCLUDE_SDATA(const s32, "sdf/sdfDraw", D_003BD334);
+INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfReqDrawDelaySleepCount);
 
 INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfDrawReqQueueIndex);
 
 INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfGrDrawFrameTagHead);
 
-INCLUDE_SDATA(const s32, "sdf/sdfDraw", D_003BD340);
+INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfDrawFrameCount);
 

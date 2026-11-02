@@ -228,7 +228,7 @@ typedef struct KwlnResourceNode {
     s32 *ready;
 } KwlnResourceNode;
 
-extern s32 D_003BD3C8;
+extern s32 sdfPrintIopFlag;
 
 
 extern s32 evtDrawResourceCountDebugTask(dds3ProcessID_t *task);

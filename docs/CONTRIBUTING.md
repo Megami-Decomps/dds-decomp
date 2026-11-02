@@ -304,7 +304,7 @@ Other diff tools:
 
 Neither game ships symbols, so nearly every function and variable name here
 was chosen by contributors. Names follow Atlus's convention: a lowercase
-module prefix plus CamelCase, e.g. `sdfAddHandler` or `btlResetRuntime`.
+module prefix plus CamelCase, e.g. `DmacAddHandler` or `btlResetRuntime`.
 `config/<v>/name_sources.txt` marks each name as `evidence` (the binary names
 the function in its own debug text) or `inferred` (our choice). Treat
 `inferred` names as descriptions, not original symbols.
@@ -325,7 +325,7 @@ writes a curated row in `config/<v>/symbol_addrs.txt`, records provenance in
 the units you renamed in (`CONTEXT`).
 
 - Names follow the Atlus convention: a lowercase module prefix plus CamelCase
-  (`sdfAddHandler`, `btlResetRuntime`), with no numbers or clone letters.
+  (`DmacAddHandler`, `btlResetRuntime`), with no numbers or clone letters.
 - `evidence` is only for a name the binary carries for that function itself,
   e.g. in its own debug message. Everything else, including names from the
   Persona 3/4 decomps and task labels, is `inferred`.

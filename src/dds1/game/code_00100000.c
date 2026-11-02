@@ -225,7 +225,7 @@ extern s16 D_003BA728;
 extern u16 D_003BA72A;
 extern FldFileIoPriorityState D_003BA734;
 extern u16 D_003BD32E;
-extern u16 D_003BD334;
+extern u16 sdfReqDrawDelaySleepCount;
 extern u16 dds3VblanksPerFrame;
 extern void sdfWaitVblank(s32 count);
 extern void sdfGrReqDrawDelay(s32);
@@ -254,7 +254,7 @@ void kwlnRunMainLoop(void) {
                 break;
             }
             D_003BA700++;
-            D_003BA728 = sdfGetRunTimeCount(startTick) - D_003BD334;
+            D_003BA728 = sdfGetRunTimeCount(startTick) - sdfReqDrawDelaySleepCount;
             D_003BD680 ^= 1;
             D_003BA72A = D_003BD32E;
         } else if (D_003BA710 > 0) {

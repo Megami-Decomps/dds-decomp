@@ -12,7 +12,7 @@ struct sdfDrawTag_t *dds3FontReqAllocDrawTag(void);
 void sdfDrawTagInit(struct sdfDrawTag_t *list);
 
 void sdfDrawTagLink(struct sdfDrawTag_t *list, u32 packetAddress);
-void sdfAppendPacketRange(struct sdfDrawTag_t *list, u32 packetAddress,
+void sdfDrawTagLink2(struct sdfDrawTag_t *list, u32 packetAddress,
                           u32 rangeTailAddress);
 void sdfDrawTagLinkRef(struct sdfDrawTag_t *list, u32 packetAddress);
 void sdfDrawTagLinkCall(struct sdfDrawTag_t *list, u32 packetAddress);

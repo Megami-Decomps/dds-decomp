@@ -74,7 +74,7 @@ void sdfChipFreeDelayedDirect(void *memory) {
     sdfDelayedResrcEntry(&dds3CleanupList, memory);
 }
 
-SdfChipAddressRangeResult sdfChipIsInRange(const void *address) {
+SdfChipAddressRangeResult sdfChipCheck(const void *address) {
     /* Keep the original signed EE address comparison after accepting a pointer. */
     s32 addressWord = (s32)address;
     SdfChipAddressRangeResult inRange;
