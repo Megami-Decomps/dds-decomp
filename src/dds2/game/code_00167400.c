@@ -11,7 +11,6 @@
 #include "btl_sound.h"
 #include "eff_param.h"
 #include "kwln_sprite.h"
-
 #include "pcp_vu0.h"
 #include "sdf_vu_matrix.h"
 #include "ee_mmi.h"
@@ -20,16 +19,21 @@
 #include "eff_dispatch_state.h"
 #include "eff_offset_triangle.h"
 #include "eff_packet_params.h"
+#include "sdf_packet_alloc.h"
+#include "kwln_texture_reference_flag_api.h"
+#include "sdf_debug_api.h"
 
 struct BtlUnit;
 
 extern u8 *sdf2DGetPrimPtr(SdfDrawPacket *packet);
+
 extern sdfTexHandle_t *dds3GetRenderTexture(void);
+
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
+
 extern sdfGrOt_t D_0037FB88;
+
 extern sdfGrOt_t D_00380588;
-
-
 
 /* Node restarts and scales: retail leaves the dispatch state in a0 (and the
  * factor in f12) for them. */
@@ -37,142 +41,39 @@ extern void (*D_003AAFB0[])(EffectDispatchState *);
 
 extern void (*D_003AAFC0[])(f32, EffectDispatchState *);
 
-extern BillDispatch dds3SpPolyTable[];
-
-#include "sdf_packet_alloc.h"
 extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
+
 extern void effBTLPartDelete(SoundMixer *);
+
 extern void dds3EndCrossfade(void);
+
 extern const char D_00414430[];
+
 extern s32 dds3AllocRenderTexture(u16 width, u16 height, f32 value);
-#include "kwln_texture_reference_flag_api.h"
+
 extern void dds3RenderTextureOFF(void);
+
 extern void dds3FreeRenderTexture(void);
-#include "sdf_debug_api.h"
-extern f32 D_003AAEB0[4];
+
 extern f32 kwlnHeldTextureTargetVector[];
+
 extern f32 kwlnHeldTextureEyeVector[];
+
 extern u8 D_00380870[];
+
 extern s32 D_00435CD0;
+
 #define crossfadeActive D_00436408
+
 #define crossfadeElapsedFrames D_0043640C
+
 #define crossfadeDurationFrames D_00436410
+
 extern s8 crossfadeActive;
+
 extern u32 crossfadeElapsedFrames;
+
 extern u32 crossfadeDurationFrames;
-
-
-
-
-
-
-void *dds3SpPolyCreate(s32 index, void *arg) {
-    EffectDispatchState *effect = dds3SpPolyTable[index].func(arg);
-
-    effect->handler = index;
-    effect->valueB2 = 1;
-    return effect;
-}
-
-void *dds3SpPolyCopy(EffectDispatchState *effect) {
-    EffectDispatchState *result = dds3SpPolyTable[effect->handler].func(effect);
-
-    result->handler = effect->handler;
-    result->valueB2 = 1;
-    return result;
-}
-
-/* Invoke the selected dispatch record's destructor; the handler index is unchecked. */
-void dds3SpPolyDelete(EffectDispatchState *effect) {
-    dds3SpPolyTable[effect->handler].destroy(effect);
-}
-
-/* Invoke the update column of the selected constructor/update/destructor record. */
-void dds3SpPolyDraw(EffectDispatchState *effect) {
-    dds3SpPolyTable[effect->handler].callback(effect);
-}
-
-void dds3SpPolyReset(EffectDispatchState *effect) {
-    D_003AAFB0[effect->handler](effect);
-    effect->valueB2 = 1;
-}
-
-void dds3SpPolySetScale(EffectDispatchState *effect, f32 factor) {
-    D_003AAFC0[effect->handler](factor, effect);
-    dds3SpPolyReset(effect);
-}
-
-u16 dds3SpPolyGetState(EffectDispatchState *effect) {
-    return effect->valueB2;
-}
-
-void dds3SpPolySetPosition(void *dst, void *src) {
-    SDF_VU0_COPYVECTOR(dst, src);
-}
-
-/* vu0 routine: effect->composedMatrix = matrix * effect->sourceMatrix via MultMatrixNoArg */
-void dds3SpPolySetRotateMatrix(EffectDispatchState *effect, void *matrix) {
-    VU0_LOAD_MATRIX(matrix);
-    SDF_VU0_LOADMATRIX_B(effect->sourceMatrix);
-    MultMatrixNoArg();
-    VU0_STORE_MATRIX(effect->composedMatrix);
-}
-
-/* Set the packed color consumed by the dispatched polygon work. */
-void dds3SpPolySetRGBA(EffectDispatchState *effect, u32 value) {
-    effect->value60 = value;
-}
-
-/* A value staged with no pending work is immediately mirrored to the active slot. */
-void dds3SpPolySetLoop(BillWork *work, u8 value) {
-    if (work->pendingCount == 0) {
-        work->stagedValue = value;
-    }
-    work->currentValue = value;
-}
-
-u8 dds3SpPolyGetLoop(EffectDispatchState *effect) {
-    return effect->value64;
-}
-
-void dds3PolygonSetColor(EffectDispatchState *effect, u32 value) {
-    effect->value1C = value;
-}
-
-/* Append position, position+(0,5,0), position+(0,5,5), with optional normals/color. */
-void dds3PolygonTriangleSet(EffOffsetTriangleView *work, const f32 *position) {
-    s32 count = work->count;
-    f32 point[4] __attribute__((aligned(16)));
-    f32 (*positions)[4];
-    u16 flags;
-
-    SDF_VU0_COPYVECTOR(point, position);
-    positions = (f32 (*)[4])(((u32)count << 4) + (u32)work->positions);
-    SDF_VU0_COPYVECTOR(positions[0], point);
-    point[1] += 5.0f;
-    SDF_VU0_COPYVECTOR(positions[1], point);
-    point[2] += 5.0f;
-    SDF_VU0_COPYVECTOR(positions[2], point);
-    flags = work->flags;
-    if (flags & 2) {
-        f32 (*normals)[4] = (f32 (*)[4])(((u32)count << 4) + (u32)work->normals);
-        SDF_VU0_COPYVECTOR(normals[0], D_003AAEB0);
-        SDF_VU0_COPYVECTOR(normals[1], D_003AAEB0);
-        SDF_VU0_COPYVECTOR(normals[2], D_003AAEB0);
-    }
-    if (flags & 4) {
-        u32 *colors = (u32 *)(((u32)count << 2) + (u32)work->colors);
-        colors[0] = 0x80000080;
-        colors[1] = 0x80000080;
-        colors[2] = 0x80000080;
-        count = work->count;
-    }
-    work->count = count + 3;
-}
-
-void dds3TrackPolyColorSet(ParSystem *system, s32 cellIndex, u32 color) {
-    system->cells[cellIndex].color = color;
-}
 
 BlurPacketQuad *effPkt2DGetPrimPtr(SdfDrawPacket *packet) {
     return (BlurPacketQuad *)(packet + 1);
@@ -275,9 +176,7 @@ u64 *effPkt2DAllocF4(u32 flags) {
     return packet;
 }
 
-
 extern u32 D_003AAFD0[];
-
 
 /* Allocate and build a VIF vertex packet; optional streams and legacy bounds are unchanged. */
 void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *params) {
@@ -405,7 +304,6 @@ void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *params) {
     }
     return packet;
 }
-
 
 void dds3CrossfadeStart(s32 frames) {
     u8 *entry;
@@ -609,7 +507,7 @@ extern f32 effGetActorScaleForParameterWork(struct BtlUnit *unit);
  * the optional unit-scale callback) and count it as active. */
 extern void * sdfChipAllocDirect(s32 size);
 
-INCLUDE_RODATA(const s32, "game/code_001670C0", D_00414430);
+INCLUDE_RODATA(const s32, "game/code_00167400", D_00414430);
 
 effBTLCutHandle_t *effCreateBattleVoiceOwner(SoundMixer *mixer, EffBattleVoiceKind kind, struct BtlUnit *owner, s32 value) {
     EffBattleEntryList *bank;
@@ -679,11 +577,11 @@ effBTLCutHandle_t *effCreateBattleVoiceOwner(SoundMixer *mixer, EffBattleVoiceKi
     return effect;
 }
 
-INCLUDE_RODATA(const s32, "game/code_001670C0", D_00414478);
+INCLUDE_RODATA(const s32, "game/code_00167400", D_00414478);
 
-INCLUDE_SDATA(const s32, "game/code_001670C0", D_00436408);
+INCLUDE_SDATA(const s32, "game/code_00167400", D_00436408);
 
-INCLUDE_SDATA(const s32, "game/code_001670C0", D_0043640C);
+INCLUDE_SDATA(const s32, "game/code_00167400", D_0043640C);
 
-INCLUDE_SDATA(const s32, "game/code_001670C0", D_00436410);
+INCLUDE_SDATA(const s32, "game/code_00167400", D_00436410);
 

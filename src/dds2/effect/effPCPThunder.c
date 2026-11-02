@@ -2883,28 +2883,3 @@ void dds3BezierTrackPolyDraw(EffPcpThunderFragmentResources *history) {
     surface = dds3BezierTrackPolyParam[history->surfaceIndex];
     surface->append(surface, list);
 }
-
-extern dds3FlashPolyList_t *dds3FlashPolyList2Create(s32 count);
-
-/* Clone the 0x30-byte parameter block, create the record pool and clear every particle's age. */
-PcpFlashTrianglePulseWork *effPCPFlashPolySphere2Create(PcpFlashTrianglePulseParams *params)
-{
-    sdfMemHandle_t *handle = sdfMemAllocDirect(params->particleCount * sizeof(PcpFlashPulseParticle) + sizeof(PcpFlashTrianglePulseWork));
-    PcpFlashTrianglePulseWork *work = (PcpFlashTrianglePulseWork *)sdfMemLock(handle);
-    dds3FlashPolyList_t *record;
-    u32 i;
-
-    memcpy(work, params, 0x30);
-    work->parts = (PcpFlashPulseParticle *)(work + 1);
-    work->tintColor = 0x80808080;
-    work->allocationHandle = handle;
-    work->renderScale = 1.0f;
-    work->updateCount = 0;
-    record = dds3FlashPolyList2Create(work->particleCount);
-    work->resourceHandle = record;
-    record->drawMode = work->drawMode;
-    for (i = 0; i < work->particleCount; i++) {
-        work->parts[i].age = 0;
-    }
-    return work;
-}

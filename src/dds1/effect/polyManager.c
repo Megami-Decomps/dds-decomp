@@ -1,21 +1,1421 @@
-/* Keeps its own declaration of the functions below (see sdk_libc.h note). */
-#define SDK_SKIP_memcpy
 #include "sdk_ps2.h"
 #include "common.h"
 #include "sdf_vu0.h"
-#include "sdf_vu_rotation_axes.h"
-#include "sdf_trig.h"
+#include "par_release_record.h"
+#include "par_vertex_colors.h"
 #include "eff_random.h"
+#include "sdf_asset_state.h"
+#include "sdf_asset_create.h"
 #include "sdf_chip.h"
+#include "sdf_packet_list.h"
+#include "sdf_packet_append.h"
+#include "bill_object_api.h"
 #include "par_cell_api.h"
 #include "sdf_heap_api.h"
+#include "par_draw.h"
+#include "eff_packet_params.h"
+#include "par_kind_api.h"
+#include "par_kind_resource.h"
+#include "par_table.h"
+#include "par_draw_block.h"
+#include "par_emitter_desc.h"
+#include "par_object_client_view.h"
+#include "eff.h"
+#include "par_dispatch_api.h"
+#include "eff_track_poly_list.h"
+#include "eff_matrix4.h"
 #include "pcp_vu0.h"
+#include "ee_mmi.h"
+#include "sdf_packet_alloc.h"
+#include "sdf_vu_rotation_axes.h"
+#include "sdf_trig.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_vu_matrix_multiply_api.h"
-#include "ee_mmi.h"
-#include "eff.h"
 #include "poly_ring_variants.h"
 #include "poly_node.h"
+#include "sdf_packet_header.h"
+#include "bill_work.h"
+#include "eff_blur.h"
+#include "kwln_draw_buffer.h"
+#include "kwln_frame_draw_buffer.h"
+#include "sdf_column_packet_api.h"
+#include "btl_sound.h"
+#include "eff_param.h"
+#include "kwln_sprite.h"
+#include "eff_dispatch_state.h"
+#include "eff_offset_triangle.h"
+#include "kwln_texture_reference_flag_api.h"
+#include "sdf_debug_api.h"
+
+extern ParSystem *D_003BB014;
+
+extern dds3Polygon_t *hDrawListTop;
+
+struct sdfDrawTag_t;
+
+extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *);
+
+extern void (*D_0034E5E0[])(ParSystem *, u32, u32);
+
+extern void *memcpy(void *dst, void *src, u32 n);
+
+extern void dds3SpPoly_Ring_Old_BuffInit();
+
+extern void dds3TrackPolyInit();
+
+extern u8 D_003D64B0[];
+
+extern sdf3DPrimPolyParm_t parDrawControl;
+
+extern void dds3TrackPolySet2(ParSystem *, s32, const u128 *);
+
+extern f32 D_0034E590[];
+
+extern f32 D_0034E5B0[];
+
+extern f32 D_0034E5C0[];
+
+extern f32 D_0034E5D0[];
+
+extern void dds3TrackPolyVCRefresh_ParType2(ParSystem *system, s32 cellIndex);
+
+void dds3PolygonManagerInit(void) {
+    hDrawListTop = 0;
+    dds3TrackPolyInit();
+    sdfRandomizeByTime((EffRandState *)&D_003D64B0);
+}
+
+/* Particle-system startup hook; the empty retail body matches the DDS2 twin. */
+void dds3PolygonManagerExit(void) {
+}
+
+dds3Polygon_t *dds3PolygonCreate(s32 count, s16 flags, s16 options) {
+    s32 vertexCount;
+    s32 bytes;
+    struct sdfMemHandle_t *allocation;
+    u8 *buffer;
+    dds3Polygon_t *record;
+    struct sdfMat_t *asset;
+
+    if (flags & 8) vertexCount = count + 2;
+    else vertexCount = count * 3;
+    bytes = vertexCount * sizeof(u128);
+    if (flags & 1) bytes += vertexCount * sizeof(record->texcoords[0]);
+    if (flags & 2) bytes += vertexCount * sizeof(u128);
+    if (flags & 4) bytes += vertexCount * sizeof(u32);
+    allocation = sdfMemAllocDirect(bytes + sizeof(*record));
+    buffer = (u8 *)sdfMemLock(allocation);
+    record = (dds3Polygon_t *)(buffer + bytes);
+    memset(record, 0, sizeof(*record));
+    record->positions = (u128 *)buffer;
+    /* Allocation and layout reuse one byte extent; qualified cc1probe:
+     * sandbox_ClusterX/ctor_reentry_F4_probe/decisions.log:16561-16660.
+     * The saved span ties allocation at 1250, below vertex count at 3500;
+     * a separate span instead has priority 3846 and takes the count's home. */
+    bytes = vertexCount * sizeof(u128);
+    buffer += bytes;
+    if (flags & 1) {
+        record->texcoords = (f32 (*)[2])buffer;
+        buffer += vertexCount * sizeof(record->texcoords[0]);
+    }
+    if (flags & 2) record->normals = (u128 *)buffer;
+    if (flags & 4) record->colors = (u32 *)buffer;
+    record->flags = flags;
+    record->capacity = vertexCount;
+    record->allocation = allocation;
+    record->drawCount = 0;
+    memset(&record->request, 0, sizeof(record->request));
+    record->request.color = 0x80808080;
+    if (!(options & 1)) record->request.attr = 0x4000;
+    asset = sdfMatNew();
+    record->asset = asset;
+    if (!(options & 2)) sdfMatSetConstant(asset, 1.0f);
+    return record;
+}
+
+void dds3PolygonDelete(dds3Polygon_t *record) {
+    record->flags = 1;
+    sdfMatFreeDelayed(record->asset);
+    sdfMemFreeDirect(record->allocation);
+}
+
+void dds3PolygonDraw(dds3Polygon_t *node) {
+    node->next = hDrawListTop;
+    hDrawListTop = node;
+}
+
+extern sdfGrOt_t sdfGrOtTable[0x62];
+
+static inline void parAppendDrawSurfacePool(sdfGrOt_t *pool, sdfDrawTag_t *packet) {
+    pool->append(pool, packet);
+}
+
+void dds3PolygonLinkOt(void) {
+    dds3Polygon_t *record;
+    sdfDrawTag_t *packet;
+    s32 remaining;
+    s16 flags;
+    sdfGrOt_t *priorityPool;
+    record = hDrawListTop;
+    if (record != NULL) {
+        priorityPool = &sdfGrOtTable[51];
+        do {
+            if (record->drawCount != 0 && record->flags != 1) {
+                packet = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+                sdfDrawTagInit(packet);
+                sdf3DPrimLinkResetTm(packet, 0);
+                sdf3DPrimLinkMat(packet, record->asset, 0);
+                flags = record->flags;
+                remaining = record->drawCount;
+                record->request.vertex = record->positions;
+                record->request.uv = record->texcoords[0];
+                record->request.vertexColor = record->colors;
+                record->request.normal = record->normals;
+                record->request.faceCount = 16;
+                record->request.pointCount = 48;
+                while (remaining >= 48) {
+                    sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(&record->request));
+                    record->request.vertex += 48;
+                    if (flags & 1) record->request.uv += 96;
+                    if (flags & 2) record->request.normal += 48;
+                    remaining -= 48;
+                    if (flags & 4) record->request.vertexColor += 48;
+                }
+                if (remaining > 0) {
+                    record->request.faceCount = remaining / 3;
+                    record->request.pointCount = remaining;
+                    sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(&record->request));
+                }
+                record->drawCount = 0;
+                if (flags & 0x10) parAppendDrawSurfacePool(priorityPool, packet);
+                else if (flags & 0x20) parAppendDrawSurfacePool(&sdfGrOtTable[55], packet);
+                else parAppendDrawSurfacePool(&sdfGrOtTable[39], packet);
+            }
+            record = record->next;
+        } while (record != NULL);
+    }
+    hDrawListTop = NULL;
+}
+
+/* Replace the record asset's primary texture and dirty its draw state. */
+void dds3PolygonSetTex(dds3Polygon_t *record, sdfTexHandle_t *texture) {
+    sdfSetAssetPrimaryTextureAddress(record->asset, texture);
+}
+
+void dds3TrackPolyInit(void) {
+    memset(&parDrawControl, 0, 0x2C);
+    parDrawControl.attr = 0x4000;
+}
+
+ParSystem *dds3TrackPolyCreate(s32 count, s32 perCell, s32 groupDivisor, u32 kind) {
+    s32 total;
+    struct sdfMemHandle_t *allocation;
+    s32 base;
+    s32 cellsSize;
+    ParSystem *system;
+    s32 i;
+
+    if (kind == PAR_CELL_TOPOLOGY_FIVE_VECTOR) {
+        perCell = perCell * 5 + 5;
+    } else if (kind == PAR_CELL_TOPOLOGY_FOUR_VECTOR) {
+        perCell = perCell * 4 + 4;
+    } else if (kind == PAR_CELL_TOPOLOGY_SIX_VECTOR) {
+        perCell = perCell * 6 + 6;
+    } else {
+        perCell = perCell * 2;
+        if (groupDivisor != 0) {
+            if (perCell % groupDivisor != 0) {
+                perCell = perCell / groupDivisor + 2;
+            } else {
+                perCell = perCell / groupDivisor;
+            }
+        }
+        perCell &= ~1;
+        perCell += 2;
+        if (kind == PAR_CELL_TOPOLOGY_TRIANGLE) {
+            perCell += perCell >> 1;
+        }
+    }
+    total = count * perCell;
+    cellsSize = (total + count) * 0x14;
+    allocation = sdfMemAllocDirect(cellsSize + 0x2C);
+    base = sdfMemLock(allocation);
+    system = (ParSystem *)(base + cellsSize);
+    memset(system, 0, 0x2C);
+    system->vertices = (u128 *)base;
+    base += total * 0x10;
+    system->colors = (u32 *)base;
+    base += total * 4;
+    system->cells = (ParCell *)base;
+    for (i = 0; i < count; i++) {
+        ParCell *cell = (ParCell *)(i * sizeof(ParCell) + (s32)system->cells);
+        cell->history = (u128 *)((u8 *)system->vertices + i * perCell * 0x10);
+        cell->colors = system->colors + i * perCell;
+        dds3TrackPolyListInit(system, i);
+    }
+    system->asset = sdfMatNew();
+    sdfMatSetConstant(system->asset, 1.0f);
+    system->kind = kind;
+    system->cellCount = count;
+    system->bucket = 2;
+    system->vertexWordCount = perCell;
+    system->groupDivisor = groupDivisor;
+    system->allocation = allocation;
+    system->next = 0;
+    system->unk28 = 0;
+    return system;
+}
+
+void dds3TrackPolyDelete(ParSystem *system) {
+    sdfMatFreeDelayed(system->asset);
+    sdfMemFreeDirect(system->allocation);
+}
+
+void dds3TrackPolyListInit(ParSystem *system, s32 cellIndex) {
+    ParCell *cell = (ParCell *)(cellIndex * 20 + (u32)system->cells);
+
+    cell->color = 0x80808080;
+    cell->historyAdvanceCountdown = 0;
+    cell->vertexCount = 0;
+}
+
+void dds3TrackPolyDraw(ParSystem *node) {
+    node->next = D_003BB014;
+    D_003BB014 = node;
+}
+
+void dds3TrackPolySet(ParSystem *system, s32 cellIndex, const u128 *vertices) {
+    ParCell *cell = &system->cells[cellIndex];
+    u128 *vertex;
+    s32 shiftCount;
+    s32 i;
+
+    if (cell->historyAdvanceCountdown == 0) {
+        shiftCount = system->vertexWordCount - 2;
+        vertex = cell->history + shiftCount;
+        for (i = 0; i < shiftCount; i++) {
+            vertex--;
+            SDF_VU0_COPYVECTOR(vertex + 2, vertex);
+        }
+        cell->historyAdvanceCountdown = system->groupDivisor;
+        if (cell->vertexCount < shiftCount + 2) {
+            cell->vertexCount += 2;
+        }
+    } else {
+        cell->historyAdvanceCountdown--;
+        vertex = cell->history;
+    }
+    SDF_VU0_COPYVECTOR(vertex, vertices);
+    SDF_VU0_COPYVECTOR(vertex + 1, vertices + 1);
+}
+
+void dds3TrackPolyMove(ParSystem *system, s32 cellIndex, const u128 *delta) {
+    ParCell *cell = system->cells + cellIndex;
+    s32 count = system->vertexWordCount;
+    u128 *vertex = cell->history;
+    s32 i;
+    SDF_VU0_LOADVECTOR_B_BARRIER(delta);
+    if (count > 0) {
+        i = count;
+        do {
+            SDF_VU0_LOADVECTOR(vertex);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR(vertex);
+            i--;
+            vertex++;
+        } while (i != 0);
+    }
+}
+
+void dds3TrackPolySet2(ParSystem *system, s32 cellIndex, const u128 *vertices) {
+    ParCell *cell = &system->cells[cellIndex];
+    u128 *vertex;
+    s32 shiftCount;
+    s32 i;
+
+    if (cell->historyAdvanceCountdown == 0) {
+        shiftCount = system->vertexWordCount - 3;
+        vertex = cell->history + shiftCount;
+        for (i = 0; i < shiftCount; i++) {
+            vertex--;
+            SDF_VU0_COPYVECTOR(vertex + 3, vertex);
+        }
+        cell->historyAdvanceCountdown = system->groupDivisor;
+        if (cell->vertexCount < shiftCount + 3) {
+            cell->vertexCount += 3;
+        }
+    } else {
+        cell->historyAdvanceCountdown--;
+        vertex = cell->history;
+    }
+    SDF_VU0_COPYVECTOR(vertex, vertices);
+    SDF_VU0_COPYVECTOR(vertex + 1, vertices + 1);
+    SDF_VU0_COPYVECTOR(vertex + 2, vertices + 2);
+}
+
+void dds3TrackPolyMove2(ParSystem *system, s32 cellIndex, const u128 *delta) {
+    ParCell *cell = system->cells + cellIndex;
+    s32 count = cell->vertexCount / 3;
+    u128 *vertex = cell->history;
+    s32 i;
+    SDF_VU0_LOADVECTOR_B(delta);
+    if (count > 0) {
+        i = count;
+        do {
+            SDF_VU0_LOADVECTOR(vertex);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR(vertex);
+            SDF_VU0_LOADVECTOR(vertex + 1);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR(vertex + 1);
+            SDF_VU0_LOADVECTOR(vertex + 2);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR(vertex + 2);
+            i--;
+            vertex += 3;
+        } while (i != 0);
+    }
+}
+
+void dds3TrackPolyVCRefresh_ParType1(ParSystem *system, s32 cellIndex) {
+    u32 count = system->cells[cellIndex].vertexCount >> 1;
+    u32 *vertex = system->cells[cellIndex].colors;
+    u32 word = vertex[0];
+    u32 i;
+    s32 alpha[4];
+    s32 start[4];
+    s32 out[4];
+    u32 packed;
+    if (count >= 2) {
+        alpha[0] = word & 0xFF000000;
+        EE_MMI_RGBA_UNPACK(alpha, 1.0f / 128.0f);
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        SDF_VU0_LOADVECTOR(D_0034E590);
+        VU0_LERP_VF10(1.0f / count);
+        SDF_VU0_COPYVECTOR_A_TO_C();
+        start[0] = word;
+        EE_MMI_RGBA_UNPACK(start, 1.0f / 128.0f);
+        for (i = 0; i < count; i++) {
+            SDF_VU0_COPYVECTOR_A_TO_B();
+            EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
+            out[0] = packed;
+            vertex[0] = packed;
+            vertex[1] = packed;
+            SDF_VU0_SUBVECTOR_B_C();
+            SDF_VU0_COPYVECTOR_B_TO_A();
+            vertex += 2;
+        }
+    }
+}
+
+extern f32 D_0034E5A0[4];
+
+/* Fade one triangle cell's middle and edge colors toward transparent along its history. */
+void dds3TrackPolyVCRefresh_ParType2(ParSystem *system, s32 cellIndex) {
+    u32 count = system->cells[cellIndex].vertexCount / 3;
+    ParTriangleVertexColors *vertex;
+    u32 middleWord;
+    u32 edgeWord;
+    f32 cur0[4];
+    f32 cur1[4];
+    f32 step0[4];
+    f32 step1[4];
+    s32 alpha0[4];
+    s32 alpha1[4];
+    s32 col0[4];
+    s32 col1[4];
+    s32 out0[4];
+    s32 out1[4];
+    u32 j;
+    u32 packedMiddle;
+    u32 packedEdge;
+
+    if (count >= 2) {
+        vertex = (ParTriangleVertexColors *)system->cells[cellIndex].colors;
+        middleWord = vertex->middle;
+        edgeWord = vertex->edge0;
+        alpha0[0] = middleWord & 0xFF000000;
+        EE_MMI_RGBA_UNPACK(alpha0, 1.0f / 128.0f);
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        SDF_VU0_LOADVECTOR(D_0034E5A0);
+        VU0_LERP_VF10(1.0f / count);
+        SDF_VU0_STOREVECTOR(step0);
+        alpha1[0] = edgeWord & 0xFF000000;
+        EE_MMI_RGBA_UNPACK(alpha1, 1.0f / 128.0f);
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        SDF_VU0_LOADVECTOR(D_0034E5A0);
+        VU0_LERP_VF10(1.0f / count);
+        SDF_VU0_STOREVECTOR_NOMEM(step1);
+        col0[0] = middleWord;
+        EE_MMI_RGBA_UNPACK(col0, 1.0f / 128.0f);
+        SDF_VU0_STOREVECTOR_NOMEM(cur0);
+        col1[0] = edgeWord;
+        EE_MMI_RGBA_UNPACK(col1, 1.0f / 128.0f);
+        SDF_VU0_STOREVECTOR_NOMEM(cur1);
+        for (j = 0; j < count; j++) {
+            SDF_VU0_LOADVECTOR(cur0);
+            SDF_VU0_COPYVECTOR_A_TO_B();
+            EE_MMI_RGBA_PACK_UNIT(packedMiddle, 128.0f);
+            out0[0] = packedMiddle;
+            vertex->middle = packedMiddle;
+            SDF_VU0_LOADVECTOR_C(step0);
+            SDF_VU0_SUBVECTOR_B_C();
+            SDF_VU0_STOREVECTOR_B(cur0);
+            SDF_VU0_LOADVECTOR(cur1);
+            SDF_VU0_COPYVECTOR_A_TO_B();
+            EE_MMI_RGBA_PACK_UNIT(packedEdge, 128.0f);
+            out1[0] = packedEdge;
+            vertex->edge0 = packedEdge;
+            vertex->edge1 = packedEdge;
+            SDF_VU0_LOADVECTOR_C(step1);
+            SDF_VU0_SUBVECTOR_B_C();
+            SDF_VU0_STOREVECTOR_B(cur1);
+            vertex++;
+        }
+    }
+}
+
+void dds3TrackPolyVCSet_Normal(ParSystem *system, u32 firstColor, u32 secondColor) {
+    s32 perCell = system->vertexWordCount >> 1;
+    s32 cellCount = system->cellCount;
+    s32 cellIndex;
+
+    for (cellIndex = 0; cellIndex < cellCount; cellIndex++) {
+        u32 *vertices = system->cells[cellIndex].colors;
+        s32 i;
+
+        for (i = 0; i < perCell; i++) {
+            vertices[0] = firstColor;
+            vertices[1] = secondColor;
+            vertices += 2;
+        }
+    }
+}
+
+void dds3TrackPolyVCSet_Acute(ParSystem *system, u32 color) {
+    u32 perCell = system->vertexWordCount >> 1;
+    u32 count = system->cellCount;
+    u32 i;
+    u32 j;
+    u8 *cell;
+    u32 *vertex;
+    s32 alpha[4];
+    s32 start[4];
+    s32 out[4];
+    u32 packed;
+    alpha[0] = color & 0xFF000000;
+    EE_MMI_RGBA_UNPACK(alpha, 1.0f / 128.0f);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    SDF_VU0_LOADVECTOR(D_0034E5B0);
+    VU0_LERP_VF10(1.0f / perCell);
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    i = 0;
+    if (count != 0) {
+        cell = (u8 *)system->cells + 4;
+        do {
+            vertex = *(u32 **)cell;
+            start[0] = color;
+            EE_MMI_RGBA_UNPACK(start, 1.0f / 128.0f);
+            for (j = 0; j < perCell; j++) {
+                SDF_VU0_COPYVECTOR_A_TO_B();
+                EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
+                out[0] = packed;
+                vertex[0] = packed;
+                vertex[1] = packed;
+                SDF_VU0_SUBVECTOR_B_C();
+                SDF_VU0_COPYVECTOR_B_TO_A();
+                vertex += 2;
+            }
+            i++;
+            cell += 0x14;
+        } while (i < count);
+    }
+}
+
+void dds3TrackPolyVCSet_AcuteW(ParSystem *system, u32 color) {
+    u32 words = system->vertexWordCount;
+    u32 count = system->cellCount;
+    u32 quarter = words >> 2;
+    u32 i;
+    u32 j;
+    u8 *cell;
+    u32 *vertex;
+    s32 alpha[4];
+    s32 start[4];
+    s32 rise[4];
+    s32 fall[4];
+    u32 base;
+    u32 odd;
+    u32 packed;
+    alpha[0] = color & 0xFF000000;
+    EE_MMI_RGBA_UNPACK(alpha, 1.0f / 128.0f);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    SDF_VU0_LOADVECTOR(D_0034E5C0);
+    VU0_LERP_VF10(1.0f / quarter);
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    i = 0;
+    if (count != 0) {
+        base = color & 0xFFFFFF;
+        odd = (words >> 1) & 1;
+        cell = (u8 *)system->cells + 4;
+        do {
+            vertex = *(u32 **)cell;
+            start[0] = base;
+            EE_MMI_RGBA_UNPACK(start, 1.0f / 128.0f);
+            for (j = 0; j < quarter; j++) {
+                SDF_VU0_COPYVECTOR_A_TO_B();
+                EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
+                rise[0] = packed;
+                vertex[0] = packed;
+                vertex[1] = packed;
+                SDF_VU0_ADDVECTOR_B_C();
+                SDF_VU0_COPYVECTOR_B_TO_A();
+                vertex += 2;
+            }
+            if (odd) {
+                vertex[0] = color;
+                vertex[1] = color;
+                vertex += 2;
+            }
+            for (j = 0; j < quarter; j++) {
+                SDF_VU0_COPYVECTOR_A_TO_B();
+                EE_MMI_RGBA_PACK_UNIT(packed, 128.0f);
+                fall[0] = packed;
+                vertex[0] = packed;
+                vertex[1] = packed;
+                SDF_VU0_SUBVECTOR_B_C();
+                SDF_VU0_COPYVECTOR_B_TO_A();
+                vertex += 2;
+            }
+            i++;
+            cell += 0x14;
+        } while (i < count);
+    }
+}
+
+void dds3TrackPolyVCSet2_Normal(ParSystem *system, s32 middleWord, s32 edgeWord) {
+    s32 words = system->vertexWordCount;
+    s32 count = system->cellCount;
+    s32 perCell = words / 3;
+    s32 i;
+    s32 j;
+    u8 *cell;
+    ParTriangleVertexColors *vertex;
+    if (count > 0) {
+        i = count;
+        cell = (u8 *)system->cells + 4;
+        do {
+            vertex = *(ParTriangleVertexColors **)cell;
+            if (perCell > 0) {
+                j = perCell;
+                do {
+                    j--;
+                    vertex->middle = middleWord;
+                    vertex->edge1 = edgeWord;
+                    vertex->edge0 = edgeWord;
+                    vertex++;
+                } while (j != 0);
+            }
+            i--;
+            cell += 0x14;
+        } while (i != 0);
+    }
+}
+
+void dds3TrackPolyVCSet2_Acute(ParSystem *system, u32 middleWord, u32 edgeWord) {
+    f32 cur0[4];
+    f32 cur1[4];
+    f32 step0[4];
+    f32 step1[4];
+    s32 alpha0[4];
+    s32 alpha1[4];
+    s32 col0[4];
+    s32 col1[4];
+    s32 out0[4];
+    s32 out1[4];
+    s32 groups = 3;
+    u32 perCell = system->vertexWordCount / groups;
+    u32 count = system->cellCount;
+    u32 i;
+    u32 j;
+    u8 *cell;
+    ParTriangleVertexColors *vertex;
+    u32 packedMiddle;
+    u32 packedEdge;
+    alpha0[0] = middleWord & 0xFF000000;
+    EE_MMI_RGBA_UNPACK(alpha0, 1.0f / 128.0f);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    SDF_VU0_LOADVECTOR(D_0034E5D0);
+    VU0_LERP_VF10(1.0f / perCell);
+    SDF_VU0_STOREVECTOR(step0);
+    alpha1[0] = edgeWord & 0xFF000000;
+    EE_MMI_RGBA_UNPACK(alpha1, 1.0f / 128.0f);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    SDF_VU0_LOADVECTOR(D_0034E5D0);
+    VU0_LERP_VF10(1.0f / perCell);
+    SDF_VU0_STOREVECTOR(step1);
+    i = 0;
+    if (count != 0) {
+        cell = (u8 *)system->cells + 4;
+        do {
+            vertex = *(ParTriangleVertexColors **)cell;
+            col0[0] = middleWord;
+            EE_MMI_RGBA_UNPACK(col0, 1.0f / 128.0f);
+            SDF_VU0_STOREVECTOR(cur0);
+            col1[0] = edgeWord;
+            EE_MMI_RGBA_UNPACK(col1, 1.0f / 128.0f);
+            SDF_VU0_STOREVECTOR(cur1);
+            for (j = 0; j < perCell; j++) {
+                SDF_VU0_LOADVECTOR(cur0);
+                SDF_VU0_COPYVECTOR_A_TO_B();
+                EE_MMI_RGBA_PACK_UNIT(packedMiddle, 128.0f);
+                out0[0] = packedMiddle;
+                vertex->middle = packedMiddle;
+                SDF_VU0_LOADVECTOR_C(step0);
+                SDF_VU0_SUBVECTOR_B_C();
+                SDF_VU0_STOREVECTOR_B(cur0);
+                SDF_VU0_LOADVECTOR(cur1);
+                SDF_VU0_COPYVECTOR_A_TO_B();
+                EE_MMI_RGBA_PACK_UNIT(packedEdge, 128.0f);
+                out1[0] = packedEdge;
+                vertex->edge0 = packedEdge;
+                vertex->edge1 = packedEdge;
+                SDF_VU0_LOADVECTOR_C(step1);
+                SDF_VU0_SUBVECTOR_B_C();
+                SDF_VU0_STOREVECTOR_B(cur1);
+                vertex++;
+            }
+            i++;
+            cell += 0x14;
+        } while (i < count);
+    }
+}
+
+void dds3TrackPolyVCSet2_AcuteW(ParSystem *system, u32 middleWord, u32 edgeWord) {
+    s32 words = system->vertexWordCount;
+    s32 count = system->cellCount;
+    u32 middleAlpha = middleWord & 0xFF000000;
+    u32 edgeAlpha = edgeWord & 0xFF000000;
+    s32 halfCount = (words / 3) >> 1;
+    u32 middleStep = middleAlpha / halfCount;
+    u32 edgeStep = edgeAlpha / halfCount;
+    u32 middle;
+    u32 edge;
+    s32 i;
+    s32 j;
+    u8 *cell;
+    ParTriangleVertexColors *vertex;
+
+    middleWord &= 0xFFFFFF;
+    edgeWord &= 0xFFFFFF;
+    if (count > 0) {
+        i = count;
+        cell = (u8 *)system->cells + 4;
+        do {
+            vertex = *(ParTriangleVertexColors **)cell;
+            middle = 0;
+            edge = 0;
+            for (j = 0; j < halfCount; j++, vertex++) {
+                vertex->middle = middleWord | (middle & 0xFF000000);
+                vertex->edge0 = vertex->edge1 = edgeWord | (edge & 0xFF000000);
+                middle += middleStep;
+                edge += edgeStep;
+            }
+            middle = middleAlpha;
+            edge = edgeAlpha;
+            for (j = 0; j < halfCount; j++, vertex++) {
+                middle -= middleStep;
+                edge -= edgeStep;
+                vertex->middle = middleWord | (middle & 0xFF000000);
+                vertex->edge0 = vertex->edge1 = edgeWord | (edge & 0xFF000000);
+            }
+            i--;
+            cell += 0x14;
+        } while (i != 0);
+    }
+}
+
+void dds3TrackPolyVC3Set_Normal(ParSystem *system, s32 centerWord, s32 middleWord, s32 edgeWord) {
+    s32 words = system->vertexWordCount;
+    s32 count = system->cellCount;
+    s32 perCell = words / 6;
+    s32 i;
+    s32 j;
+    u8 *cell;
+    u8 *vertex;
+    if (count > 0) {
+        i = count;
+        cell = (u8 *)system->cells + 4;
+        do {
+            vertex = *(u8 **)cell;
+            if (perCell > 0) {
+                j = perCell;
+                do {
+                    j--;
+                    ((ParStripVertexColors *)vertex)->edge0 = edgeWord;
+                    ((ParStripVertexColors *)vertex)->middle0 = middleWord;
+                    ((ParStripVertexColors *)vertex)->center0 = centerWord;
+                    ((ParStripVertexColors *)vertex)->center1 = centerWord;
+                    ((ParStripVertexColors *)vertex)->middle1 = middleWord;
+                    ((ParStripVertexColors *)vertex)->edge1 = edgeWord;
+                    vertex += 0x18;
+                } while (j != 0);
+            }
+            i--;
+            cell += 0x14;
+        } while (i != 0);
+    }
+}
+
+/* Fade the three strip colors toward transparent across each cell. */
+void dds3TrackPolyVC3Set_Acute(ParSystem *system, u32 centerWord, u32 middleWord, u32 edgeWord)
+{
+    s32 words = system->vertexWordCount;
+    s32 count = system->cellCount;
+    u32 centerAlpha = centerWord & 0xFF000000;
+    u32 middleAlpha = middleWord & 0xFF000000;
+    u32 edgeAlpha = edgeWord & 0xFF000000;
+    s32 perCell = words / 6;
+    u32 centerStep = centerAlpha / perCell;
+    u32 middleStep = middleAlpha / perCell;
+    u32 edgeStep = edgeAlpha / perCell;
+    u32 center;
+    u32 middle;
+    u32 edge;
+    s32 i;
+    s32 j;
+    u8 *cell;
+    ParStripVertexColors *vertex;
+
+    centerWord &= 0xFFFFFF;
+    middleWord &= 0xFFFFFF;
+    edgeWord &= 0xFFFFFF;
+    if (count > 0) {
+        i = count;
+        cell = (u8 *)system->cells + 4;
+        do {
+            vertex = *(ParStripVertexColors **)cell;
+            center = centerAlpha;
+            middle = middleAlpha;
+            edge = edgeAlpha;
+            for (j = 0; j < perCell; j++, vertex++) {
+                center -= centerStep;
+                middle -= middleStep;
+                edge -= edgeStep;
+                vertex->edge0 = edgeWord | (edge & 0xFF000000);
+                vertex->middle0 = middleWord | (middle & 0xFF000000);
+                vertex->center0 = centerWord | (center & 0xFF000000);
+                vertex->center1 = centerWord | (center & 0xFF000000);
+                vertex->middle1 = middleWord | (middle & 0xFF000000);
+                vertex->edge1 = edgeWord | (edge & 0xFF000000);
+            }
+            i--;
+            cell += 0x14;
+        } while (i != 0);
+    }
+}
+
+/* Raise then lower the three alphas across the two halves of each strip cell. */
+void dds3TrackPolyVC3Set_AcuteW(ParSystem *system, u32 centerWord, u32 middleWord, u32 edgeWord)
+{
+    s32 words = system->vertexWordCount;
+    s32 count = system->cellCount;
+    u32 centerAlpha = centerWord & 0xFF000000;
+    u32 middleAlpha = middleWord & 0xFF000000;
+    u32 edgeAlpha = edgeWord & 0xFF000000;
+    s32 half = (words / 6) >> 1;
+    u32 centerStep = centerAlpha / half;
+    u32 middleStep = middleAlpha / half;
+    u32 edgeStep = edgeAlpha / half;
+    u32 center;
+    u32 middle;
+    u32 edge;
+    s32 i;
+    s32 j;
+    u8 *cell;
+    ParStripVertexColors *vertex;
+
+    centerWord &= 0xFFFFFF;
+    middleWord &= 0xFFFFFF;
+    edgeWord &= 0xFFFFFF;
+    if (count > 0) {
+        i = count;
+        cell = (u8 *)system->cells + 4;
+        do {
+            vertex = *(ParStripVertexColors **)cell;
+            center = 0;
+            middle = 0;
+            edge = 0;
+            for (j = 0; j < half; j++, vertex++) {
+                vertex->edge0 = edgeWord | (edge & 0xFF000000);
+                vertex->middle0 = middleWord | (middle & 0xFF000000);
+                vertex->center0 = centerWord | (center & 0xFF000000);
+                vertex->center1 = centerWord | (center & 0xFF000000);
+                vertex->middle1 = middleWord | (middle & 0xFF000000);
+                vertex->edge1 = edgeWord | (edge & 0xFF000000);
+                center += centerStep;
+                middle += middleStep;
+                edge += edgeStep;
+            }
+            center = centerAlpha;
+            middle = middleAlpha;
+            edge = edgeAlpha;
+            for (j = 0; j < half; j++, vertex++) {
+                center -= centerStep;
+                middle -= middleStep;
+                edge -= edgeStep;
+                vertex->edge0 = edgeWord | (edge & 0xFF000000);
+                vertex->middle0 = middleWord | (middle & 0xFF000000);
+                vertex->center0 = centerWord | (center & 0xFF000000);
+                vertex->center1 = centerWord | (center & 0xFF000000);
+                vertex->middle1 = middleWord | (middle & 0xFF000000);
+                vertex->edge1 = edgeWord | (edge & 0xFF000000);
+            }
+            i--;
+            cell += 0x14;
+        } while (i != 0);
+    }
+}
+
+void dds3TrackPolyVCSet4_Normal(ParSystem *system, u32 firstColor, u32 secondColor) {
+    s32 perCell = system->vertexWordCount >> 2;
+    s32 cellCount = system->cellCount;
+
+    s32 cellIndex;
+
+    for (cellIndex = 0; cellIndex < cellCount; cellIndex++) {
+        u32 *vertices = system->cells[cellIndex].colors;
+        s32 i;
+
+        for (i = 0; i < perCell; i++) {
+            vertices[2] = firstColor;
+            vertices[1] = firstColor;
+            vertices[3] = secondColor;
+            vertices[0] = secondColor;
+            vertices += 4;
+        }
+    }
+}
+
+/* Keep middle/edge RGB while ramping vertex alpha down to zero in each cell. */
+void dds3TrackPolyVCSet4_Acute(ParSystem *system, u32 middleWord, u32 edgeWord) {
+    s32 perCell = system->vertexWordCount >> 2;
+    s32 count = system->cellCount;
+    u32 middleAlpha = middleWord & 0xFF000000;
+    u32 edgeAlpha = edgeWord & 0xFF000000;
+    u32 middleStep = middleAlpha / perCell;
+    u32 edgeStep = edgeAlpha / perCell;
+    u32 middle;
+    u32 edge;
+    s32 i;
+    s32 j;
+    u8 *cell;
+    ParQuadVertexColors *vertex;
+
+    middleWord &= 0xFFFFFF;
+    edgeWord &= 0xFFFFFF;
+    if (count > 0) {
+        i = count;
+        cell = (u8 *)system->cells + 4;
+        do {
+            vertex = *(ParQuadVertexColors **)cell;
+            middle = middleAlpha;
+            edge = edgeAlpha;
+            for (j = 0; j < perCell; j++, vertex++) {
+                middle -= middleStep;
+                edge -= edgeStep;
+                vertex->middle1 = middleWord | (middle & 0xFF000000);
+                vertex->edge1 = edgeWord | (edge & 0xFF000000);
+                vertex->middle0 = middleWord | (middle & 0xFF000000);
+                vertex->edge0 = edgeWord | (edge & 0xFF000000);
+            }
+            i--;
+            cell += 0x14;
+        } while (i != 0);
+    }
+}
+
+/* Keep middle/edge RGB while ramping alpha up and down around the cell midpoint. */
+void dds3TrackPolyVCSet4_AcuteW(ParSystem *system, u32 middleWord, u32 edgeWord) {
+    s32 words = system->vertexWordCount;
+    s32 count = system->cellCount;
+    u32 middleAlpha = middleWord & 0xFF000000;
+    u32 edgeAlpha = edgeWord & 0xFF000000;
+    s32 halfCount = (words >> 2) >> 1;
+    u32 middleStep = middleAlpha / halfCount;
+    u32 edgeStep = edgeAlpha / halfCount;
+    u32 middle;
+    u32 edge;
+    s32 i;
+    s32 j;
+    u8 *cell;
+    ParQuadVertexColors *vertex;
+
+    middleWord &= 0xFFFFFF;
+    edgeWord &= 0xFFFFFF;
+    if (count > 0) {
+        i = count;
+        cell = (u8 *)system->cells + 4;
+        do {
+            vertex = *(ParQuadVertexColors **)cell;
+            middle = 0;
+            edge = 0;
+            for (j = 0; j < halfCount; j++, vertex++) {
+                vertex->middle1 = middleWord | (middle & 0xFF000000);
+                vertex->edge1 = edgeWord | (edge & 0xFF000000);
+                vertex->middle0 = middleWord | (middle & 0xFF000000);
+                vertex->edge0 = edgeWord | (edge & 0xFF000000);
+                middle += middleStep;
+                edge += edgeStep;
+            }
+            middle = middleAlpha;
+            edge = edgeAlpha;
+            for (j = 0; j < halfCount; j++, vertex++) {
+                middle -= middleStep;
+                edge -= edgeStep;
+                vertex->middle1 = middleWord | (middle & 0xFF000000);
+                vertex->edge1 = edgeWord | (edge & 0xFF000000);
+                vertex->middle0 = middleWord | (middle & 0xFF000000);
+                vertex->edge0 = edgeWord | (edge & 0xFF000000);
+            }
+            i--;
+            cell += 0x14;
+        } while (i != 0);
+    }
+}
+
+void dds3TrackPolyVC5Set_Normal(ParSystem *system, s32 centerWord, s32 middleWord, s32 edgeWord) {
+    s32 words = system->vertexWordCount;
+    s32 count = system->cellCount;
+    s32 perCell = words / 5;
+    s32 i;
+    s32 j;
+    u8 *cell;
+    u8 *vertex;
+    if (count > 0) {
+        i = count;
+        cell = (u8 *)system->cells + 4;
+        do {
+            vertex = *(u8 **)cell;
+            if (perCell > 0) {
+                j = perCell;
+                do {
+                    j--;
+                    ((ParSymmetricVertexColors *)vertex)->edge0 = edgeWord;
+                    ((ParSymmetricVertexColors *)vertex)->middle0 = middleWord;
+                    ((ParSymmetricVertexColors *)vertex)->center = centerWord;
+                    ((ParSymmetricVertexColors *)vertex)->middle1 = middleWord;
+                    ((ParSymmetricVertexColors *)vertex)->edge1 = edgeWord;
+                    vertex += 0x14;
+                } while (j != 0);
+            }
+            i--;
+            cell += 0x14;
+        } while (i != 0);
+    }
+}
+
+/* Fade the three symmetric colors toward transparent across each cell. */
+void dds3TrackPolyVC5Set_Acute(ParSystem *system, u32 centerWord, u32 middleWord, u32 edgeWord)
+{
+    s32 words = system->vertexWordCount;
+    s32 count = system->cellCount;
+    u32 centerAlpha = centerWord & 0xFF000000;
+    u32 middleAlpha = middleWord & 0xFF000000;
+    u32 edgeAlpha = edgeWord & 0xFF000000;
+    s32 perCell = words / 5;
+    u32 centerStep = centerAlpha / perCell;
+    u32 middleStep = middleAlpha / perCell;
+    u32 edgeStep = edgeAlpha / perCell;
+    u32 center;
+    u32 middle;
+    u32 edge;
+    s32 i;
+    s32 j;
+    u8 *cell;
+    ParSymmetricVertexColors *vertex;
+
+    centerWord &= 0xFFFFFF;
+    middleWord &= 0xFFFFFF;
+    edgeWord &= 0xFFFFFF;
+    if (count > 0) {
+        i = count;
+        cell = (u8 *)system->cells + 4;
+        do {
+            vertex = *(ParSymmetricVertexColors **)cell;
+            center = centerAlpha;
+            middle = middleAlpha;
+            edge = edgeAlpha;
+            for (j = 0; j < perCell; j++, vertex++) {
+                center -= centerStep;
+                middle -= middleStep;
+                edge -= edgeStep;
+                vertex->edge0 = edgeWord | (edge & 0xFF000000);
+                vertex->middle0 = middleWord | (middle & 0xFF000000);
+                vertex->center = centerWord | (center & 0xFF000000);
+                vertex->middle1 = middleWord | (middle & 0xFF000000);
+                vertex->edge1 = edgeWord | (edge & 0xFF000000);
+            }
+            i--;
+            cell += 0x14;
+        } while (i != 0);
+    }
+}
+
+/* Increase each symmetric color's alpha from zero across the cell. */
+void dds3TrackPolyVC5Set_AcuteR(ParSystem *system, u32 centerWord, u32 middleWord, u32 edgeWord)
+{
+    s32 words = system->vertexWordCount;
+    s32 count = system->cellCount;
+    u32 centerAlpha = centerWord & 0xFF000000;
+    u32 middleAlpha = middleWord & 0xFF000000;
+    u32 edgeAlpha = edgeWord & 0xFF000000;
+    s32 perCell = words / 5;
+    u32 centerStep = centerAlpha / perCell;
+    u32 middleStep = middleAlpha / perCell;
+    u32 edgeStep = edgeAlpha / perCell;
+    u32 center;
+    u32 middle;
+    u32 edge;
+    s32 i;
+    s32 j;
+    u8 *cell;
+    ParSymmetricVertexColors *vertex;
+
+    centerWord &= 0xFFFFFF;
+    middleWord &= 0xFFFFFF;
+    edgeWord &= 0xFFFFFF;
+    if (count > 0) {
+        i = count;
+        cell = (u8 *)system->cells + 4;
+        do {
+            vertex = *(ParSymmetricVertexColors **)cell;
+            center = 0;
+            middle = 0;
+            edge = 0;
+            for (j = 0; j < perCell; j++, vertex++) {
+                center += centerStep;
+                middle += middleStep;
+                edge += edgeStep;
+                vertex->edge0 = edgeWord | (edge & 0xFF000000);
+                vertex->middle0 = middleWord | (middle & 0xFF000000);
+                vertex->center = centerWord | (center & 0xFF000000);
+                vertex->middle1 = middleWord | (middle & 0xFF000000);
+                vertex->edge1 = edgeWord | (edge & 0xFF000000);
+            }
+            i--;
+            cell += 0x14;
+        } while (i != 0);
+    }
+}
+
+/* Raise then lower the three alphas across the two halves of each cell. */
+void dds3TrackPolyVC5Set_AcuteW(ParSystem *system, u32 centerWord, u32 middleWord, u32 edgeWord)
+{
+    s32 words = system->vertexWordCount;
+    s32 count = system->cellCount;
+    u32 centerAlpha = centerWord & 0xFF000000;
+    u32 middleAlpha = middleWord & 0xFF000000;
+    u32 edgeAlpha = edgeWord & 0xFF000000;
+    s32 half = (words / 5) >> 1;
+    u32 centerStep = centerAlpha / half;
+    u32 middleStep = middleAlpha / half;
+    u32 edgeStep = edgeAlpha / half;
+    u32 center;
+    u32 middle;
+    u32 edge;
+    s32 i;
+    s32 j;
+    u8 *cell;
+    ParSymmetricVertexColors *vertex;
+
+    centerWord &= 0xFFFFFF;
+    middleWord &= 0xFFFFFF;
+    edgeWord &= 0xFFFFFF;
+    if (count > 0) {
+        i = count;
+        cell = (u8 *)system->cells + 4;
+        do {
+            vertex = *(ParSymmetricVertexColors **)cell;
+            center = 0;
+            middle = 0;
+            edge = 0;
+            for (j = 0; j < half; j++, vertex++) {
+                vertex->edge0 = edgeWord | (edge & 0xFF000000);
+                vertex->middle0 = middleWord | (middle & 0xFF000000);
+                vertex->center = centerWord | (center & 0xFF000000);
+                vertex->middle1 = middleWord | (middle & 0xFF000000);
+                vertex->edge1 = edgeWord | (edge & 0xFF000000);
+                center += centerStep;
+                middle += middleStep;
+                edge += edgeStep;
+            }
+            center = centerAlpha;
+            middle = middleAlpha;
+            edge = edgeAlpha;
+            for (j = 0; j < half; j++, vertex++) {
+                center -= centerStep;
+                middle -= middleStep;
+                edge -= edgeStep;
+                vertex->edge0 = edgeWord | (edge & 0xFF000000);
+                vertex->middle0 = middleWord | (middle & 0xFF000000);
+                vertex->center = centerWord | (center & 0xFF000000);
+                vertex->middle1 = middleWord | (middle & 0xFF000000);
+                vertex->edge1 = edgeWord | (edge & 0xFF000000);
+            }
+            i--;
+            cell += 0x14;
+        } while (i != 0);
+    }
+}
+
+void dds3TrackPolySetMode(ParSystem *system, u16 bucket) {
+    system->bucket = bucket;
+}
+
+void dds3TrackPolyVCSet(ParSystem *system, s32 sub, u32 colorWordA, u32 colorWordB) {
+    u16 id = system->kind;
+
+    D_0034E5E0[id * 3 + sub](system, colorWordA, colorWordB);
+}
+
+extern const u32 D_0034E360[];
+
+extern const u32 D_0034E3E0[];
+
+extern const u32 D_0034E520[];
+
+extern const u32 D_0034E450[];
+
+extern const u32 D_0034E4D0[];
+
+extern sdfGrOt_t *D_0034E620[];
+
+/* Batch pending cell systems by topology, then submit the five draw buckets. */
+void dds3TrackPolyLinkOt(void) {
+    sdfDrawTag_t *lists[5];
+    sdfDrawTag_t **slot;
+    sdfDrawTag_t *list;
+    sdfDrawTag_t *specialList;
+    s32 count;
+    s32 i;
+    s32 remaining;
+    ParSystem *system;
+    ParCell *cell;
+    u64 *packet;
+
+    if (D_003BB014 == NULL) {
+        return;
+    }
+    memset(lists, 0, sizeof(lists));
+    for (system = D_003BB014; system != NULL; system = system->next) {
+        slot = &lists[system->bucket];
+        list = *slot;
+        if (list == 0) {
+            *slot = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+            sdfDrawTagInit(*slot);
+            sdf3DPrimLinkResetTm(*slot, NULL);
+            list = *slot;
+        }
+        sdf3DPrimLinkMat(list, (sdfMat_t *)system->asset, NULL);
+        count = system->cellCount;
+        if (system->kind == PAR_CELL_TOPOLOGY_PAIR) {
+            parDrawControl.faceIndex = D_0034E360;
+            for (i = 0; i < count; i++) {
+                cell = &system->cells[i];
+                parDrawControl.faceCount = 16;
+                parDrawControl.pointCount = 18;
+                remaining = cell->vertexCount;
+                parDrawControl.vertex = cell->history;
+                parDrawControl.vertexColor = cell->colors;
+                parDrawControl.color = cell->color;
+                while (remaining >= 18) {
+                    remaining -= 16;
+                    sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&parDrawControl));
+                    parDrawControl.vertex += 16;
+                    parDrawControl.vertexColor += 16;
+                }
+                if (remaining >= 4) {
+                    parDrawControl.faceCount = remaining - 2;
+                    parDrawControl.pointCount = remaining;
+                    sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&parDrawControl));
+                }
+            }
+        } else if (system->kind == PAR_CELL_TOPOLOGY_TRIANGLE) {
+            parDrawControl.faceIndex = D_0034E3E0;
+            for (i = 0; i < count; i++) {
+                cell = &system->cells[i];
+                parDrawControl.faceCount = 16;
+                parDrawControl.pointCount = 15;
+                remaining = cell->vertexCount;
+                parDrawControl.vertex = cell->history;
+                parDrawControl.vertexColor = cell->colors;
+                parDrawControl.color = cell->color;
+                while (remaining >= 15) {
+                    remaining -= 12;
+                    sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&parDrawControl));
+                    parDrawControl.vertex += 12;
+                    parDrawControl.vertexColor += 12;
+                }
+                if (remaining >= 6) {
+                    parDrawControl.faceCount = (remaining / 3) * 4 - 4;
+                    parDrawControl.pointCount = remaining;
+                    sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&parDrawControl));
+                }
+            }
+        } else if (system->kind == PAR_CELL_TOPOLOGY_FIVE_VECTOR) {
+            parDrawControl.faceIndex = D_0034E520;
+            for (i = 0; i < count; i++) {
+                cell = &system->cells[i];
+                parDrawControl.faceCount = 8;
+                parDrawControl.pointCount = 10;
+                remaining = cell->vertexCount;
+                parDrawControl.vertex = cell->history;
+                parDrawControl.vertexColor = cell->colors;
+                parDrawControl.color = cell->color;
+                while (remaining >= 10) {
+                    remaining -= 5;
+                    sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&parDrawControl));
+                    parDrawControl.vertex += 5;
+                    parDrawControl.vertexColor += 5;
+                }
+            }
+        } else if (system->kind == PAR_CELL_TOPOLOGY_SIX_VECTOR) {
+            parDrawControl.faceIndex = D_0034E450;
+            for (i = 0; i < count; i++) {
+                cell = &system->cells[i];
+                parDrawControl.faceCount = 10;
+                parDrawControl.pointCount = 12;
+                remaining = cell->vertexCount;
+                parDrawControl.vertex = cell->history;
+                parDrawControl.vertexColor = cell->colors;
+                parDrawControl.color = cell->color;
+                while (remaining >= 12) {
+                    remaining -= 6;
+                    sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&parDrawControl));
+                    parDrawControl.vertex += 6;
+                    parDrawControl.vertexColor += 6;
+                }
+            }
+        } else {
+            parDrawControl.faceIndex = D_0034E4D0;
+            for (i = 0; i < count; i++) {
+                cell = &system->cells[i];
+                parDrawControl.faceCount = 12;
+                parDrawControl.pointCount = 16;
+                remaining = cell->vertexCount;
+                parDrawControl.vertex = cell->history;
+                parDrawControl.vertexColor = cell->colors;
+                parDrawControl.color = cell->color;
+                while (remaining >= 16) {
+                    remaining -= 12;
+                    sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&parDrawControl));
+                    parDrawControl.vertex += 12;
+                    parDrawControl.vertexColor += 12;
+                }
+            }
+        }
+    }
+    for (i = 0; i < 4; i++) {
+        if (lists[i] != 0) {
+            parAppendDrawSurfacePool(D_0034E620[i], lists[i]);
+        }
+    }
+    if (lists[4] != 0) {
+        specialList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+        sdfDrawTagInit(specialList);
+        packet = (u64 *)sdfGrAllocPacketBuff(0x30);
+        packet[0] = 2;
+        packet[1] = 0x5000000210000000ULL;
+        packet[2] = 0x1000000000008001ULL;
+        packet[3] = 0xE;
+        packet[4] = 0x8000000026ULL;
+        packet[5] = 0x42;
+        sdfDrawTagLink(specialList, (u32)packet);
+        parAppendDrawSurfacePool(&sdfGrOtTable[56], specialList);
+        packet = (u64 *)sdfGrAllocPacketBuff(0x30);
+        packet[0] = 2;
+        packet[1] = 0x5000000210000000ULL;
+        packet[2] = 0x1000000000008001ULL;
+        packet[3] = 0xE;
+        packet[4] = 0x42;
+        packet[5] = 0x42;
+        sdfDrawTagLink(lists[4], (u32)packet);
+        parAppendDrawSurfacePool(&sdfGrOtTable[56], lists[4]);
+    }
+    D_003BB014 = NULL;
+}
+
+ParBlock *dds3TrianglePolyCreate(s32 count) {
+    s32 points = count * 3;
+    s32 colorBytes = points * 4;
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect((colorBytes + points) * 4 + 0x18);
+    u8 *base = (u8 *)sdfMemLock(allocation);
+    u8 *vertices = base + points * 16;
+    ParBlock *block = (ParBlock *)(vertices + colorBytes);
+    block->color = 0x80808080;
+    block->count = count;
+    block->colors = (u32 *)vertices;
+    block->allocation = allocation;
+    block->positions = (u128 *)base;
+    block->asset = sdfMatNew();
+    sdfMatSetConstant(block->asset, 1.0f);
+    return block;
+}
+
+void dds3TrianglePolyDelete(ParBlock *block) {
+    sdfMatFreeDelayed(block->asset);
+    sdfMemFreeDirect(block->allocation);
+}
+
+void dds3TrianglePolyLinkOt(sdfGrOt_t *emitter, ParBlock *cmd) {
+    sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdf3DPrimPolyParm_t state;
+    s32 remaining;
+    sdfDrawTagInit(list);
+    sdf3DPrimLinkResetTm(list, 0);
+    remaining = cmd->count * 3;
+    memset(&state, 0, sizeof(state));
+    state.faceCount = 0x10;
+    state.pointCount = 0x30;
+    state.attr = 0x4000;
+    state.vertex = cmd->positions;
+    state.vertexColor = cmd->colors;
+    state.color = cmd->color;
+    while (remaining >= 0x30) {
+        remaining -= 0x30;
+        sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&state));
+    }
+    if (remaining > 0) {
+        parDrawControl.faceCount = remaining / 3;
+        parDrawControl.pointCount = remaining;
+        sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&state));
+    }
+    parAppendDrawSurfacePool(emitter, list);
+}
+
+ParEmitDesc *dds3SpPoly_Ring_Old_Create(ParEmitDesc *src) {
+    ParEmitDesc *desc = sdfChipAllocDirect(src->count * 4 + 0xF0);
+
+    memset(desc, 0, 0xF0);
+    memcpy(desc, src, src->headerSize);
+    memcpy(&desc->cells, (u8 *)src + src->headerSize, sizeof(desc->cells));
+    desc->headerSize = 0xC0;
+    desc->cells.cellWords = (u32 *)(desc + 1);
+    if (desc->cells.verticesPerCell < 3) {
+        desc->cells.verticesPerCell = 3;
+    }
+    desc->cells.cellSystem = dds3TrackPolyCreate(desc->count, desc->cells.verticesPerCell, 1, PAR_CELL_TOPOLOGY_PAIR);
+    dds3TrackPolyVCSet(desc->cells.cellSystem, 0,
+                   *(u32 *)((u8 *)&desc->cells + 0x14),
+                   *(u32 *)((u8 *)&desc->cells + 0x18));
+    dds3SpPoly_Ring_Old_BuffInit(desc);
+    return desc;
+}
+
+/* Keeps its own declaration of the functions below (see sdk_libc.h note). */
+
+#define SDK_SKIP_memcpy
 
 enum {
     POLY_INACTIVE_ENTRY_AGE = -0xFFFFFF,
@@ -24,11 +1424,16 @@ enum {
 };
 
 void dds3SpPoly_Ring_Old_Calc(PolyNode *node);
+
 void dds3SpPoly_Ring_Old_New(PolyNode *node, s32 cellIndex);
+
 void dds3SpPoly_Ring_Old_Move(PolyNode *node, s32 cellIndex);
-extern void memcpy(void *dst, const void *src, s32 size);
+
+
 void dds3SpPoly_RingAllBuffInit(PolyBand *band);
+
 void dds3SpPoly_SphereRingAllBuffInit(PolyArc *arc);
+
 void dds3SpPoly_RollRingAllBuffInit(PolyRotatingBand *rotatingBand);
 
 /* Release the cell system, then the basic node itself. */
@@ -203,6 +1608,7 @@ void dds3SpPoly_Ring_Old_Move(PolyNode *node, s32 cellIndex) {
 }
 
 extern f32 polyTimedTintEndColor[4];
+
 extern f32 polyTimedTintStartColor[4];
 
 /* Blend two constant colour vectors by elapsed/duration (1 once elapsed reaches duration) and tint the result with the packed colour. */
@@ -277,9 +1683,7 @@ void dds3SpPoly_RingAllBuffInit(PolyBand *band) {
     }
 }
 
-
 void polyBandLayoutRing(PolyBand *band, s32 index, f32 radius);
-
 
 extern EffRandState effDefaultRandomState[];
 
@@ -538,7 +1942,6 @@ void dds3SpPoly_SphereRingBuffInit(PolyArc *arc, s32 recordIndex) {
     record->radius = arc->radius * (dds3GetRandFloatA(effDefaultRandomState) * spread + (1.0f - spread));
 }
 
-
 /* Lay an arc ring's inner and outer point rows at the projected radius and
  * radial offset for this record's age. */
 void dds3SpPoly_SphereRingMove(PolyArc *arc, s32 recordIndex) {
@@ -721,7 +2124,6 @@ void dds3SpPoly_RollRingAllBuffInit(PolyRotatingBand *rotatingBand) {
     }
 }
 
-
 /* Randomize record `index`: jittered start and end radii, radius step, start angle (degrees to radians) and the phase within its delay group. */
 void dds3SpPoly_RollRingBuffInit(PolyRotatingBand *spawner, u32 index) {
     PolyRotatingBandRecord *record = spawner->records;
@@ -736,7 +2138,6 @@ void dds3SpPoly_RollRingBuffInit(PolyRotatingBand *spawner, u32 index) {
     record->rotationXRadians = spawner->rotationXDegrees * 0.017453292f;
     record->rotationYRadians = 6.2831852f / (f32)spawner->spawnDelayGroupSize * (f32)(index % spawner->spawnDelayGroupSize);
 }
-
 
 /* Build the paired ring using current radius/rotation, then retain their next-step values. */
 void dds3SpPoly_RollRingMove(PolyRotatingBand *rotatingBand, s32 index)
@@ -793,6 +2194,7 @@ void dds3SpPoly_RollRingMove(PolyRotatingBand *rotatingBand, s32 index)
     SDF_VU0_COPYVECTOR(out, first);
     SDF_VU0_COPYVECTOR(out + 4, first + 4);
 }
+
 /* Scale the rotating band's initial and target radii. */
 void dds3SpPoly_RollRingSetScale(f32 scale, PolyRotatingBand *rotatingBand) {
     rotatingBand->initialRadius = rotatingBand->initialRadius * scale;
@@ -893,3 +2295,125 @@ void dds3SpPoly_RollRingSetEndless(PolyRotatingBand *rotatingBand) {
         } while (i < count);
     }
 }
+
+extern BillDispatch dds3SpPolyTable[];
+
+/* Node restarts and scales: retail leaves the dispatch state in a0 (and the
+ * factor in f12) for them. */
+extern void (*D_0034E680[])(EffectDispatchState *);
+
+extern void (*D_0034E690[])(f32, EffectDispatchState *);
+
+void *dds3SpPolyCreate(s32 index, void *arg) {
+    EffectDispatchState *effect = dds3SpPolyTable[index].func(arg);
+
+    effect->handler = index;
+    effect->valueB2 = 1;
+    return effect;
+}
+
+void *dds3SpPolyCopy(EffectDispatchState *effect) {
+    EffectDispatchState *result = dds3SpPolyTable[effect->handler].func(effect);
+
+    result->handler = effect->handler;
+    result->valueB2 = 1;
+    return result;
+}
+
+/* Invoke the selected dispatch record's destructor; the handler index is unchecked. */
+void dds3SpPolyDelete(EffectDispatchState *effect) {
+    dds3SpPolyTable[effect->handler].destroy(effect);
+}
+
+/* Invoke the update column of the selected constructor/update/destructor record. */
+void dds3SpPolyDraw(EffectDispatchState *effect) {
+    dds3SpPolyTable[effect->handler].callback(effect);
+}
+
+void dds3SpPolyReset(EffectDispatchState *effect) {
+    D_0034E680[effect->handler](effect);
+    effect->valueB2 = 1;
+}
+
+void dds3SpPolySetScale(EffectDispatchState *effect, f32 factor) {
+    D_0034E690[effect->handler](factor, effect);
+    dds3SpPolyReset(effect);
+}
+
+u16 dds3SpPolyGetState(BillWork *work) {
+    return work->queuedCount;
+}
+
+void dds3SpPolySetPosition(void *dst, void *src) {
+    SDF_VU0_COPYVECTOR(dst, src);
+}
+
+/* vu0 routine: effect->composedMatrix = matrix * effect->sourceMatrix via MultMatrixNoArg */
+void dds3SpPolySetRotateMatrix(EffectDispatchState *effect, void *matrix) {
+    VU0_LOAD_MATRIX(matrix);
+    SDF_VU0_LOADMATRIX_B(effect->sourceMatrix);
+    MultMatrixNoArg();
+    VU0_STORE_MATRIX(effect->composedMatrix);
+}
+
+/* Set the packed color consumed by the dispatched polygon work. */
+void dds3SpPolySetRGBA(EffectDispatchState *effect, u32 value) {
+    effect->value60 = value;
+}
+
+/* A value staged with no pending work is immediately mirrored to the active slot. */
+void dds3SpPolySetLoop(BillWork *work, u8 value) {
+    if (work->pendingCount == 0) {
+        work->stagedValue = value;
+    }
+    work->currentValue = value;
+}
+
+u8 dds3SpPolyGetLoop(BillWork *work) {
+    return work->currentValue;
+}
+
+void dds3PolygonSetColor(EffectDispatchState *effect, u32 value) {
+    effect->value1C = value;
+}
+
+extern f32 D_0034E580[4];
+
+/* Append position, position+(0,5,0), position+(0,5,5), with optional normals/color. */
+void dds3PolygonTriangleSet(EffOffsetTriangleView *work, const f32 *position) {
+    s32 count = work->count;
+    f32 point[4] __attribute__((aligned(16)));
+    f32 (*positions)[4];
+    u16 flags;
+
+    SDF_VU0_COPYVECTOR(point, position);
+    positions = (f32 (*)[4])(((u32)count << 4) + (u32)work->positions);
+    SDF_VU0_COPYVECTOR(positions[0], point);
+    point[1] += 5.0f;
+    SDF_VU0_COPYVECTOR(positions[1], point);
+    point[2] += 5.0f;
+    SDF_VU0_COPYVECTOR(positions[2], point);
+    flags = work->flags;
+    if (flags & 2) {
+        f32 (*normals)[4] = (f32 (*)[4])(((u32)count << 4) + (u32)work->normals);
+        SDF_VU0_COPYVECTOR(normals[0], D_0034E580);
+        SDF_VU0_COPYVECTOR(normals[1], D_0034E580);
+        SDF_VU0_COPYVECTOR(normals[2], D_0034E580);
+    }
+    if (flags & 4) {
+        u32 *colors = (u32 *)(((u32)count << 2) + (u32)work->colors);
+        colors[0] = 0x80000080;
+        colors[1] = 0x80000080;
+        colors[2] = 0x80000080;
+        count = work->count;
+    }
+    work->count = count + 3;
+}
+
+void dds3TrackPolyColorSet(ParSystem *system, s32 cellIndex, u32 color) {
+    system->cells[cellIndex].color = color;
+}
+INCLUDE_SDATA(const s32, "effect/polyManager", hDrawListTop);
+
+INCLUDE_SDATA(const s32, "effect/polyManager", D_003BB014);
+

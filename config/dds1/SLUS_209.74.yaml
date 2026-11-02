@@ -123,19 +123,18 @@ segments:
       - [0x50EB0, c, game/code_0014FEB0]
       - [0x512B0, c, effect/billManager]  # Nocturne __FILE__
       - [0x52F58, c, game/code_00151F58]
-      - [0x59F68, c, effect/parManager]  # Nocturne __FILE__
-      - [0x5B758, c, game/code_0015A758]
-      - [0x5E9E0, c, effect/polyManager]  # Nocturne __FILE__
-      - [0x604D0, c, game/code_0015F4D0]
+      - [0x54680, c, effect/parManager]  # Nocturne __FILE__
+      - [0x5C228, c, effect/polyManager]  # Nocturne __FILE__
+      - [0x60810, c, game/code_0015F810]
       - [0x61B00, c, effect/effBattle]  # Nocturne __FILE__
       - [0x62838, c, game/code_00161838]
       - [0x62AA0, c, effect/effBattleMisc]  # Nocturne __FILE__
       - [0x634D0, c, game/code_001624D0]
+      - [0x63970, c, effect/effPart]
+      - [0x642E0, c, game/code_001632E0]
       - [0x644A0, c, effect/effPCPThunder]  # Nocturne __FILE__
-      - [0x6B1A8, c, effect/effPCPFlash]  # Nocturne __FILE__
-      - [0x701D0, c, game/code_0016F1D0]
-      - [0x71B88, c, effect/effPCPScatter]  # Nocturne __FILE__
-      - [0x76B00, c, game/code_00175B00]
+      - [0x6B088, c, effect/effPCPFlash]  # Nocturne __FILE__
+      - [0x718A0, c, effect/effPCPScatter]  # Nocturne __FILE__
       - [0x770F8, c, effect/effPCPNeedle]  # Nocturne __FILE__
       - [0x78120, c, effect/effPCPMisc]  # Nocturne __FILE__
       - [0x85420, c, game/code_00184420]
@@ -362,8 +361,8 @@ segments:
       - [0x2A1A28, .rodata, effect/effManager]
       - [0x2A1A78, .rodata, game/code_0014FEB0]
       - [0x2A1C10, .rodata, effect/billManager]
-      - [0x2A1CC0, .rodata, game/code_0015A758]
-      - [0x2A1D58, .rodata, game/code_0015F4D0]
+      - [0x2A1CC0, .rodata, effect/parManager]
+      - [0x2A1D58, .rodata, game/code_0015F810]
       - [0x2A1DE0, .rodata, effect/effBattle]
       - [0x2A1E60, .rodata, game/code_00161838]
       - [0x2A1E90, .rodata, effect/effBattleMisc]
@@ -477,16 +476,13 @@ segments:
       - [0x2B9FC4, .lit4, game/code_0014D110]
       - [0x2B9FD4, .lit4, effect/effManager]
       - [0x2B9FE0, .lit4, game/code_0014FEB0]
-      - [0x2B9FE8, .lit4, game/code_00151F58]
-      - [0x2BA05C, .lit4, effect/parManager]
-      - [0x2BA064, .lit4, game/code_0015A758]
+      - [0x2B9FE8, .lit4, effect/parManager]
       - [0x2BA06C, .lit4, effect/polyManager]
       - [0x2BA090, .lit4, game/code_00161838]
       - [0x2BA0A4, .lit4, effect/effBattleMisc]
       - [0x2BA0B0, .lit4, game/code_001624D0]
       - [0x2BA0B4, .lit4, effect/effPCPThunder]
       - [0x2BA16C, .lit4, effect/effPCPFlash]
-      - [0x2BA1C0, .lit4, game/code_0016F1D0]
       - [0x2BA1C8, .lit4, effect/effPCPScatter]
       - [0x2BA1F4, .lit4, effect/effPCPNeedle]
       - [0x2BA1FC, .lit4, effect/effPCPMisc]
@@ -579,11 +575,11 @@ segments:
       - [0x2BBE78, .sdata, game/code_001411F0]
       - [0x2BBFF8, .sdata, game/code_0014D110]
       - [0x2BC008, .sdata, game/code_0014F4C8]
-      - [0x2BC010, .sdata, game/code_0015A758]
-      - [0x2BC018, .sdata, game/code_0015F4D0]
+      - [0x2BC010, .sdata, effect/polyManager]
+      - [0x2BC018, .sdata, game/code_0015F810]
       - [0x2BC024, .sdata, effect/effBattle]
       - [0x2BC028, .sdata, game/code_00161838]
-      - [0x2BC044, .sdata, game/code_001624D0]
+      - [0x2BC044, .sdata, effect/effPart]
       - [0x2BC048, .sdata, effect/effPCPMisc]
       - [0x2BC050, .sdata, game/code_0018CAC8]
       - [0x2BC068, .sdata, effect/effEvent]
