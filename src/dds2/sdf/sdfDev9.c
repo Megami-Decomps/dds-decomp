@@ -36,7 +36,7 @@ extern u8 D_00438B50[];
 
 extern u8 D_00438B58[];
 
-extern u32 sdfDiscType;
+extern u32 sdfCdTrayMode;
 
 extern u16 sdfFileCmdDefaultCreateMode;
 

@@ -266,7 +266,7 @@ s32 SdfIopFileRpc(const char *name, s32 dataSize, const void *data, s32 *outSize
 }
 
 /* Load the optional module first, then the required one; bind retries wait in timer ticks. */
-void sdfLoadModulesAndBindNamedResourceRpc(const char *modulePath, const char *optionalModulePath) {
+void SdfIopInit(const char *modulePath, const char *optionalModulePath) {
     s32 retryStartTick;
 
     if (optionalModulePath != NULL) {

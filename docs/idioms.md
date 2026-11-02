@@ -11484,7 +11484,7 @@ that the node itself is freed.
 
 `sdfGetRunTimeCountBase` reads EE timer0 count at `0x10000000`. The existing callers'
 signed and unsigned declarations remain unchanged. Its timing use also supports
-`sdfLoadModulesAndBindNamedResourceRpc`: optional/required IOP module loading
+`SdfIopInit`: optional/required IOP module loading
 followed by retries of the named-resource RPC binding.
 
 `corePktClosePacket` pads active nonempty work, updates its cursor, writes

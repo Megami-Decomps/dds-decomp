@@ -60,7 +60,7 @@ extern void FatalError(const char *format, ...) __attribute__((noreturn));
 
 extern void sceCdMmode(u32 arg0);
 
-extern u32 sdfDiscType;
+extern u32 sdfCdTrayMode;
 
 extern void sdfDelayThread(s32);
 
@@ -104,7 +104,7 @@ void sdfDevWaitForDisc(void) {
         sdfDelayThread(100);
         sceCdDiskReady(0);
         status = sceCdGetDiskType();
-        if (sdfDiscType == 2) {
+        if (sdfCdTrayMode == 2) {
             if (status != 20) {
                 continue;
             }
@@ -510,12 +510,12 @@ void sdfCdImageInit(const char *discFileName, const char *preloadFileName) {
     sceCdStInit(0x50, 5, (iopHeapAddress + SDF_DEV_IOP_ALIGNMENT_BIAS) & SDF_DEV_IOP_ALIGNMENT_MASK);
 }
 
-void sdfInitDeviceSemaphores(void) {
+void sdfCdInit(void) {
     sdfCdImageFd = sdfCreateSema(1, 0xff, 0);
     sdfDiscRequestSemaphore = sdfCreateSema(0, 0xff, 0);
     sdfDiscRequestPending = 0;
     sceCdInit(0);
-    sceCdMmode(sdfDiscType);
+    sceCdMmode(sdfCdTrayMode);
 }
 
 /* Service queued host-file requests for one device worker. */
@@ -526,5 +526,5 @@ INCLUDE_SDATA(const s32, "sdf/sdfCd", sdfDiscRequestPending);
 
 INCLUDE_SDATA(const s32, "sdf/sdfCd", D_003BD3E0);
 
-INCLUDE_SDATA(const s32, "sdf/sdfCd", sdfDiscType);
+INCLUDE_SDATA(const s32, "sdf/sdfCd", sdfCdTrayMode);
 

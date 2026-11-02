@@ -27,7 +27,7 @@ typedef struct SdfThreadNode SdfThreadNode;
 
 extern void __main(void);
 
-extern void sdfInitDeviceSemaphores(void);
+extern void sdfCdInit(void);
 
 extern s32 sceSifSyncIop(void);
 
@@ -45,7 +45,7 @@ extern void sdfFileSetDefaultSrc(s8 worker);
 
 extern void sdfFileCmdStartThread(s32 index);
 
-extern void sdfLoadModulesAndBindNamedResourceRpc(const char *modulePath, const char *optionalModulePath);
+extern void SdfIopInit(const char *modulePath, const char *optionalModulePath);
 
 extern void sdfStartFileRpcServer(void);
 
@@ -71,7 +71,7 @@ extern const char D_00411178[];
 
 extern const s32 D_00435C0C;
 
-extern u32 sdfDiscType;
+extern u32 sdfCdTrayMode;
 
 extern u8 sdfPadManagerMode;
 
@@ -85,8 +85,8 @@ s32 sdfDefaultMain(void) {
     __main();
     sceSifInitRpc(0);
     sceSifInitIopHeap();
-    sdfDiscType = D_00435C0C;
-    sdfInitDeviceSemaphores();
+    sdfCdTrayMode = D_00435C0C;
+    sdfCdInit();
     while (sceSifRebootIop(D_004110A8) == 0) {
     }
     while (sceSifSyncIop() == 0) {
@@ -111,7 +111,7 @@ s32 sdfDefaultMain(void) {
     sdfFileSetDefaultSrc(3);
     sdfFileCmdStartThread(3);
     sdfFileCmdStartThread(0);
-    sdfLoadModulesAndBindNamedResourceRpc(D_00411158, D_00411178);
+    SdfIopInit(D_00411158, D_00411178);
     sdfStartFileRpcServer();
     sdfStartThreadAndWait(&kwlnMainLoopThreadNode, kwlnRunMainLoop, D_00439410, 0x4000, 0x60, 0);
     sdfSetMainThreadPriority();

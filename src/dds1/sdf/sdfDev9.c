@@ -47,7 +47,7 @@ extern char sdfFileHostRootPath[];
 
 extern u8 sdfPfsPathPrefix[];
 
-extern u32 sdfDiscType;
+extern u32 sdfCdTrayMode;
 
 extern u8 D_003BD460[];
 
