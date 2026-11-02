@@ -47,7 +47,7 @@ extern void sceCdInit(s32);
 
 #define SDF_DEV_IOP_ALIGNMENT_MASK -16
 
-extern u32 D_004391A4;
+extern u32 sdfCdImageDirData;
 
 extern s32 sdfDiscRequestPending;
 
@@ -73,16 +73,16 @@ extern void FatalError(const char *format, ...) __attribute__((noreturn));
 
 extern char D_0042E288[];
 
-extern u32 D_0043919C;
+extern u32 sdfCdImageFileName;
 
-extern u32 D_004391A0;
+extern u32 dds3ImgLsn;
 
 extern void sceCdStInit(s32, s32, s32);
 
 extern void sdfCdImageLoadDir(const char *fileName);
 
 u32 sdfCdImageGetDirData(void) {
-    return D_004391A4;
+    return sdfCdImageDirData;
 }
 
 void sdfDevWaitForDisc(void) {
@@ -290,7 +290,7 @@ SdfDiscFileRecord *sdfCdImageSearchFile(
     if (memcmp(path, D_00438AD0, 5) == 0) {
         return sdfDevFindDiscFileRecordByCdromPath(path, readLocationOut, readModeOut);
     }
-    base = D_004391A4;
+    base = sdfCdImageDirData;
     node = (SdfDiscFileRecord *)base;
     segment = path;
     do {
@@ -329,14 +329,14 @@ SdfDiscFileRecord *sdfCdImageSearchFile(
         }
         segment = cursor;
     } while (*cursor != 0);
-    *readLocationOut = D_004391A0 + node->dataOffset;
+    *readLocationOut = dds3ImgLsn + node->dataOffset;
     if (readModeOut != 0) {
         *readModeOut = SDF_DISC_READ_MODE_INDEXED_IMAGE;
     }
     return node;
 }
 
-extern s32 D_004391AC;
+extern s32 sdfCdImageCurrRemain;
 
 extern s32 sdfCdImageCurrActive;
 
@@ -354,7 +354,7 @@ s32 sdfCdImageLoadStart(const char *name) {
     file = sdfCdImageSearchFile(name, readLocation, &sdfDiscReadMode);
     result = -1;
     if (file != 0) {
-        D_004391AC = file->sizeOrNegativeChildCount;
+        sdfCdImageCurrRemain = file->sizeOrNegativeChildCount;
         sdfCdImageCurrFile = file;
         sdfCdImageCurrActive = 0;
         if (name[1] == 0x76 || name[1] == 0x56) {
@@ -369,7 +369,7 @@ s32 sdfCdImageLoadStart(const char *name) {
 
 /* Consume up to size disc-file bytes, retaining a partial sector; return the byte count. */
 s32 sdfCdImageRead(void *buffer, s32 byteCount) {
-    s32 available = D_004391AC;
+    s32 available = sdfCdImageCurrRemain;
     u8 *destination = buffer;
     s32 bytes;
     s32 transferBytes;
@@ -427,8 +427,8 @@ s32 sdfCdImageRead(void *buffer, s32 byteCount) {
             }
         }
     }
-    D_004391AC = available - byteCount;
-    if (D_004391AC == 0) {
+    sdfCdImageCurrRemain = available - byteCount;
+    if (sdfCdImageCurrRemain == 0) {
         sdfCdImageClose();
     }
     return byteCount;
@@ -481,7 +481,7 @@ void sdfCdImageLoadDir(const char *fileName) {
     fileBytes = sceLseek(fileHandle, 0, SDF_DEV_SEEK_END);
     sceLseek(fileHandle, 0, SDF_DEV_SEEK_START);
     bufferAddress = malloc(fileBytes);
-    D_004391A4 = bufferAddress;
+    sdfCdImageDirData = bufferAddress;
     sceRead(fileHandle, bufferAddress, fileBytes);
     sceClose(fileHandle);
 }
@@ -496,9 +496,9 @@ void sdfCdImageInit(const char *discFileName, const char *preloadFileName) {
     if (sceCdSearchFile(discFileRecord, (s32)discFileName) == 0) {
         FatalError(D_0042E288, discFileName);
     }
-    D_004391A0 = discFileRecord[0];
+    dds3ImgLsn = discFileRecord[0];
     iopHeapAddress = sceSifAllocIopHeap(SDF_DEV_IOP_BUFFER_BYTES);
-    D_0043919C = iopHeapAddress;
+    sdfCdImageFileName = iopHeapAddress;
     sceCdStInit(0x50, 5, (iopHeapAddress + SDF_DEV_IOP_ALIGNMENT_BIAS) & SDF_DEV_IOP_ALIGNMENT_MASK);
 }
 

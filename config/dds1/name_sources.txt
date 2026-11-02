@@ -10419,7 +10419,11 @@
 0x003BDA30	corePktZBias	inferred	SMT3HD name via SLUS_209.11 0x005520E0, sdfCoreDraw reference; was D_003BDA30
 0x003BDA34	sdfDebugFontHandle	inferred	SMT3HD data name via SLUS_209.11 0x005520E4, 4 agreeing references; was sdfDebugFontHandle
 0x003BDA38	dds3ImgPath	inferred	SMT3HD data name via SLUS_209.11 0x005520E8, 1 agreeing references; was dds3ImgPath
+0x003BDA3C	sdfCdImageFileName	inferred	SMT3HD name via SLUS_209.11 0x005520EC, sdfCd data twin; was D_003BDA3C
+0x003BDA40	dds3ImgLsn	inferred	SMT3HD name via SLUS_209.11 0x005520F0, sdfCd data twin; was D_003BDA40
+0x003BDA44	sdfCdImageDirData	inferred	SMT3HD name via SLUS_209.11 0x005520F4, sdfCd data twin; was D_003BDA44
 0x003BDA48	sdfCdImageCurrFile	inferred	SMT3HD data name via SLUS_209.11 0x005520F8, 3 agreeing references; was sdfCdImageCurrFile
+0x003BDA4C	sdfCdImageCurrRemain	inferred	SMT3HD name via SLUS_209.11 0x005520FC, sdfCd data twin; was D_003BDA4C
 0x003BDA50	sdfCdImageOffset	inferred	SMT3HD data name via SLUS_209.11 0x00552100, 4 agreeing references; was sdfCdImageOffset
 0x003BDA54	sdfCdImageCurrActive	inferred	SMT3HD data name via SLUS_209.11 0x00552104, 4 agreeing references; was sdfCdImageCurrActive
 0x003BDA58	sdfCdImageFd	inferred	SMT3HD data name via SLUS_209.11 0x00552108, 4 agreeing references; was sdfCdImageFd
