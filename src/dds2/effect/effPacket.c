@@ -23,8 +23,6 @@
 #include "kwln_texture_reference_flag_api.h"
 #include "sdf_debug_api.h"
 
-struct BtlUnit;
-
 extern u8 *sdf2DGetPrimPtr(SdfDrawPacket *packet);
 
 extern sdfTexHandle_t *dds3GetRenderTexture(void);
@@ -42,8 +40,6 @@ extern void (*D_003AAFB0[])(EffectDispatchState *);
 extern void (*D_003AAFC0[])(f32, EffectDispatchState *);
 
 extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
-
-extern void effBTLPartDelete(SoundMixer *);
 
 extern void dds3EndCrossfade(void);
 
@@ -441,147 +437,11 @@ void dds3EndCrossfade(void) {
     printf(D_00414430);
 }
 
-extern void effBTLPartCreate(SoundMixer *dst, SoundMixer *src);
+INCLUDE_RODATA(const s32, "effect/effPacket", D_00414430);
 
-/* Clone a mixer: copy its banks, rebuild the voice state from the original and start with no voices. */
-SoundMixer *sndMixerClone(SoundMixer *src) {
-    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(sizeof(SoundMixer));
-    SoundMixer *mixer = (void *)sdfMemLock(allocation);
+INCLUDE_SDATA(const s32, "effect/effPacket", D_00436408);
 
-    mixer->resource = allocation;
-    memcpy(mixer, src, 0xC38);
-    effBTLPartCreate(mixer, src);
-    mixer->activeVoiceCount = 0;
-    mixer->voiceList = NULL;
-    return mixer;
-}
+INCLUDE_SDATA(const s32, "effect/effPacket", D_0043640C);
 
-void sndMixerDestroy(SoundMixer *mixer) {
-    effBTLCutHandle_t *voice = mixer->voiceList;
-    effBTLCutHandle_t *next;
-
-    while (voice != NULL) {
-        next = voice->next;
-        effBTLCutDelete(voice);
-        voice = next;
-    }
-    effBTLPartDelete(mixer);
-    sdfMemFreeDirect(mixer->resource);
-}
-
-s32 effBTLGetMotionChangeFrame(const SoundMixer *mixer, EffBattleVoiceKind kind) {
-    int bank = kind >= 2;
-    return mixer->banks[bank].list.callbackFrame;
-}
-
-s32 effBTLGetCutEndFrame(const SoundMixer *mixer, EffBattleVoiceKind kind) {
-    int bank = kind >= 2;
-    return mixer->banks[bank].list.triggerFrame;
-}
-
-s32 effBTLGetDrawEndFrame(const SoundMixer *mixer, EffBattleVoiceKind kind) {
-    int bank = kind >= 2;
-    if (kind == 2) {
-        return mixer->banks[bank].list.triggerFrame;
-    }
-    return mixer->banks[bank].list.colorRampEndFrame;
-}
-
-void effBTLCutListRelease(effBTLCutHandle_t *voice) {
-    effBTLCutHandle_t **link = &voice->state->voiceList;
-    effBTLCutHandle_t *cur;
-
-    while ((cur = *link) != NULL) {
-        if (cur == voice) {
-            *link = cur->next;
-            return;
-        }
-        link = &cur->next;
-    }
-}
-
-extern f32 effGetActorScaleForParameterWork(struct BtlUnit *unit);
-
-/* Create a voice on the mixer bank selected by kind (0/1: first bank, 2+:
- * second): link it into the mixer, duplicate each parameter row's work (with
- * the optional unit-scale callback) and count it as active. */
-extern void * sdfChipAllocDirect(s32 size);
-
-INCLUDE_RODATA(const s32, "game/code_00167400", D_00414430);
-
-effBTLCutHandle_t *effCreateBattleVoiceOwner(SoundMixer *mixer, EffBattleVoiceKind kind, struct BtlUnit *owner, s32 value) {
-    EffBattleEntryList *bank;
-    EffBattleEntryList *parameters;
-    effBTLCutHandle_t *effect;
-    EffBattleEntry *entry;
-    struct effPartHandle_t **workSlot;
-    s32 remaining;
-    u16 entryCount;
-    u32 callbackEnabled;
-
-    effect = sdfChipAllocDirect(sizeof(effBTLCutHandle_t));
-    memset(effect, 0, sizeof(effBTLCutHandle_t));
-    effect->color = 0x80808080;
-
-    {
-        EffBattleEntryList *upper = &mixer->banks[1].list;
-        EffBattleEntryList *lower = &mixer->banks[0].list;
-
-        bank = kind < 2 ? lower : upper;
-    }
-    effect->next = mixer->voiceList;
-    effect->flags = 0xE;
-    effect->triggerFrame = bank->triggerFrame;
-    mixer->voiceList = effect;
-    effect->state = mixer;
-    effect->kind = kind;
-    effect->list = bank;
-    if (kind == 2) {
-        effect->colorRampEndFrame = bank->triggerFrame;
-    } else {
-        effect->colorRampEndFrame = bank->colorRampEndFrame;
-    }
-    effect->unk20 = value;
-    effect->owner = owner;
-
-    parameters = effect->list;
-    entry = parameters->entries;
-    workSlot = effect->parameterWorks;
-    entryCount = parameters->count;
-    callbackEnabled = parameters->actorScaleEnabled;
-    if (entryCount != 0) {
-        remaining = entryCount;
-        do {
-            if (entry->parameterKind != EFF_BATTLE_PARAMETER_KIND_NO_WORK) {
-                *workSlot = dds3EffectPartCopy(entry->value.work);
-                if (callbackEnabled != 0 && owner != NULL &&
-                    (entry->aimParams.kind == 0 || entry->aimParams.kind == 4)) {
-                    f32 scale = effGetActorScaleForParameterWork((struct BtlUnit *)effect->owner);
-                    dds3EffectPartSetScale(*workSlot, scale);
-                }
-            } else {
-                *workSlot = NULL;
-            }
-
-            workSlot++;
-            entry++;
-            remaining--;
-        } while (remaining != 0);
-    }
-
-    effect->currentFrame = 0;
-    printf("effBTL:cut %d handle create(%p)[%d]\n",
-                  effect->kind, effect->state,
-                  effect->state->activeVoiceCount);
-    effect->state->activeVoiceCount++;
-    return effect;
-}
-
-INCLUDE_RODATA(const s32, "game/code_00167400", D_00414478);
-
-INCLUDE_SDATA(const s32, "game/code_00167400", D_00436408);
-
-INCLUDE_SDATA(const s32, "game/code_00167400", D_0043640C);
-
-INCLUDE_SDATA(const s32, "game/code_00167400", D_00436410);
+INCLUDE_SDATA(const s32, "effect/effPacket", D_00436410);
 

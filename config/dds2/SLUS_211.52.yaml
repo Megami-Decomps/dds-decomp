@@ -125,7 +125,8 @@ segments:
       - [0x5AB48, c, game/code_00159B48]
       - [0x5C270, c, effect/parManager]  # Nocturne __FILE__
       - [0x63E18, c, effect/polyManager]  # Nocturne __FILE__
-      - [0x68400, c, game/code_00167400]
+      - [0x68400, c, effect/effPacket]  # Nocturne __FILE__
+      - [0x692B0, c, game/code_001682B0]
       - [0x696F0, c, effect/effBattle]  # Nocturne __FILE__
       - [0x6A418, c, game/code_00169418]
       - [0x6A6D0, c, effect/effBattleMisc]  # Nocturne __FILE__
@@ -148,8 +149,10 @@ segments:
       - [0x91FF8, c, effect/effMagatuhi]  # Nocturne __FILE__
       - [0x95700, c, game/code_00194700]
       - [0x96810, c, effect/effMath]  # Nocturne __FILE__
-      - [0x96E50, c, effect/effEvent]  # Nocturne __FILE__ (TU starts at 0x96E50: func_00198340 needs func_00197D50 compiled earlier)
-      - [0x9B0C0, c, game/code_0019A0C0]
+      - [0x96E50, c, effect/effDebug]  # Nocturne __FILE__
+      - [0x97FD8, c, effect/effEvent]  # Nocturne __FILE__
+      - [0x9B900, c, effect/effSpline]  # Nocturne __FILE__
+      - [0x9C538, c, game/code_0019B538]
       - [0x9C7A8, c, interface/fmGslCont]  # Nocturne __FILE__
       - [0x9C840, c, game/code_0019B840]
       - [0x9D2A8, c, interface/frFont]  # Nocturne __FILE__
@@ -375,7 +378,8 @@ segments:
       - [0x315118, .rodata, game/code_00157A50]
       - [0x3152D0, .rodata, effect/billManager]
       - [0x315380, .rodata, effect/parManager]
-      - [0x315418, .rodata, game/code_00167400]
+      - [0x315418, .rodata, effect/effPacket]
+      - [0x315450, .rodata, game/code_001682B0]
       - [0x3154A0, .rodata, effect/effBattle]
       - [0x315520, .rodata, game/code_00169418]
       - [0x3155B0, .rodata, effect/effBattleMisc]
@@ -513,8 +517,9 @@ segments:
       - [0x3344E8, .lit4, game/code_00190D10]
       - [0x3344F0, .lit4, effect/effMagatuhi]
       - [0x334524, .lit4, effect/effMath]
-      - [0x33452C, .lit4, effect/effEvent]
-      - [0x33455C, .lit4, game/code_0019A0C0]
+      - [0x33452C, .lit4, effect/effDebug]
+      - [0x334550, .lit4, effect/effEvent]
+      - [0x33455C, .lit4, effect/effSpline]
       - [0x334564, .lit4, interface/frFont]
       - [0x334568, .lit4, game/code_001A8748]
       - [0x334594, .lit4, game/code_001AF4A0]
@@ -603,13 +608,14 @@ segments:
       - [0x337208, .sdata, game/code_001442D0]
       - [0x3373E8, .sdata, game/code_00154558]
       - [0x337400, .sdata, effect/polyManager]
-      - [0x337408, .sdata, game/code_00167400]
+      - [0x337408, .sdata, effect/effPacket]
       - [0x337414, .sdata, game/code_00169418]
       - [0x337434, .sdata, effect/effPart]
       - [0x337438, .sdata, effect/effPCPMisc]
       - [0x337440, .sdata, game/code_00194700]
-      - [0x337458, .sdata, effect/effEvent]
-      - [0x337540, .sdata, game/code_0019A0C0]
+      - [0x337458, .sdata, effect/effDebug]
+      - [0x337460, .sdata, effect/effEvent]
+      - [0x337540, .sdata, game/code_0019B538]
       - [0x337550, .sdata, interface/frFont]
       - [0x337584, .sdata, game/code_0019E138]  # D_00436580 is frFont's: code_0019E138 reaches it with lui/addiu, not gp_rel
       - [0x3375A8, .sdata, game/code_001A1B08]

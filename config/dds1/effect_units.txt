@@ -1,7 +1,8 @@
 # SMT3 effect/ unit boundaries in dds1, input to tools/resplit.py (from sdf-decomp tools/twins.py).
 0x00153680 effect/parManager
 0x0015B228 effect/polyManager
-0x0015F810 -
+0x0015F810 effect/effPacket
+0x001606C0 -
 0x00162970 effect/effPart
 0x001632E0 -
 0x0016A088 effect/effPCPFlash
@@ -10,4 +11,7 @@
 0x00177120 effect/effPCPMisc
 0x00184420 -
 0x0018DBD8 effect/effMath
-0x0018E218 -
+0x0018E218 effect/effDebug
+0x0018F3A0 effect/effEvent
+0x00192CC8 effect/effSpline
+0x00193900 -
