@@ -1,196 +1,119 @@
-#include "sdk_ps2.h"
-#include "sdf_gs_header.h"
-#include "eeregs.h"
 #include "common.h"
-#include "sdf_vu0.h"
-#include "sdf_vu_matrix.h"
-#include "sdf_pad_entry.h"
-#include "sdf_pad_index.h"
-#include "sdf_pad_mode_api.h"
-#include "sdf_pad_motor_api.h"
-#include "sdf_cons_matrix_packet.h"
-#include "sdf_dma_packet_header.h"
-#include "kwln.h"
-#include "sdf_asset_packets.h"
-#include "sdf_asset_state.h"
-#include "sdf_vu_lighting.h"
-#include "sdf_chip.h"
-#include "sdf_packet_list.h"
-#include "sdf_packet_header.h"
-#include "sdf_packet_append.h"
-#include "sdf_heap_api.h"
-#include "sdf_primitive_packet_api.h"
-#include "sdf.h"
-#include "sdf_draw.h"
-#include "sdf_request.h"
-#include "sdf_model.h"
-#include "sdf_projection.h"
-#include "pcp_vu0.h"
-#include "sdf_vu_transform_api.h"
-#include "ee_mmi.h"
-#include "fpu.h"
-#include "sdf_texture_file.h"
-#include "sdf_column_packet_api.h"
-#include "sdf_lookup_texture.h"
-#include "sdf_compact_vertex_vif_packet.h"
-#include "sdf_dev_console_node.h"
-#include "btl.h"
-#include "sdf_packet_alloc.h"
-#include "sdf_dev_cons.h"
-#include "sdf_dev_cons_stack_packets.h"
-#include "sdf_console_packet.h"
-#include "sdf_file_existence_api.h"
-#include "sif_rpc_client_prefix.h"
-#include "sdf_semaphore_api.h"
-#include "sdf_timer.h"
-#include "sdf_sif_command.h"
-#include "sdf_dev_event.h"
-#include "sdf_dev_protocol.h"
-#include "sdf_dev_state.h"
-#include "sdf_dev_path_prefix.h"
-#include "sdf_dev_worker.h"
-#include "sdf_thread_workspace_api.h"
-#include "sdf_dev_start_load_api.h"
-#include "sdf_disc_file_record.h"
-#include "sdf_debug_api.h"
+#include "eeregs.h"
+#include "sdfDevCons.h"
+#include "libsdf.h"
 
-#define SDF_CONSOLE_CELL_BYTES 2
+#include "ps2asm.h"
+typedef struct sdfDevConsCB_tag
+{
+    struct sdfDevConsCB_tag *prev;
+    struct sdfDevConsCB_tag *next;
+    u16 x;
+    u16 y;
+    s16 w;
+    s16 h;
+    s16 locX;
+    s16 locY;
+    u8 mode;
+    u8 pad;
+    u8 attr;
+    u8 tabwidth;
+    sdfMemHandle_t *bufferHandle;
+    u8 *bufferPtr;
+} sdfDevConsCB_tag;
 
-extern struct sdfTexHandle_t *sdfDebugFontHandle;
+typedef struct sdfDevConsDrawCB_t
+{
+    u8 *cur;
+    u8 *start;
+    u8 *tag;
+    u32 *dmaCh;
+    u8 *buf[2];
+    s32 buffSize;
+    u16 dblBuffId;
+    u16 stepY;
+} sdfDevConsDrawCB_t;
 
-extern u32 sdf3DFogDefault;
+/* SMT3 DrawAll and the DDS1 twin reserve this same 0x1040-byte stack
+ * allocation: only the central 0x1000 bytes are passed as DMA storage. */
+typedef struct
+{
+    u8 opaquePrefix[0x30];
+    u8 data[0x1000];
+    u8 opaqueSuffix[0x10];
+} sdfDevConsStackPackets_t;
 
-extern const struct SdfDmaTagHeader *sdf3DLightDefault;
+/* The four print-control words are signed XYZ and packed RGBA when drawing. */
+typedef struct
+{
+    s32 x;
+    s32 y;
+    s32 z;
+    u32 attr;
+} sdfDevPrintCB_t;
 
-extern sdfDevConsCB_tag *devConsTop;
+typedef struct
+{
+    u16 quadwordCount;
+    u8 reserved02;
+    u8 tagKind;
+    u32 nextAddress;
+    u32 vifNop;
+    u32 vifDirect;
+    u64 setupTag;
+    u64 setupRegisters;
+    u64 textureClamp;
+    u64 textureClampRegister;
+    u64 textureFilter;
+    u64 textureFilterRegister;
+    u64 textureState;
+    u64 textureStateRegister;
+    u64 glyphTag;
+    u64 glyphRegisters;
+} sdfDevConsPacketHeader_t;
 
-extern u32 alreadyInitDevCons;
+typedef struct
+{
+    u64 color;
+    u64 firstUv;
+    u64 firstPosition;
+    u64 secondUv;
+    u64 secondPosition;
+} sdfDevConsGlyph_t;
 
+extern s32 sceDmaSync(void *channel, s32 mode, s32 timeout);
+extern void sceDmaSendN(void *channel, void *address, s32 quadwords);
+extern s32 sceGsSyncPath(s32 mode, s32 timeout);
+extern void *sceDmaGetChan(s32 channel);
+extern u64 sdfTexGetTex0Reg(sdfTexHandle_t *aHandle);
+extern void *sdfGrOpenPacketBuff(void);
+extern void sdfGrClosePacketBuff(s32 aBuffPtr);
+void sdfDevConsDrawBG(sdfDevConsCB_tag *aHndl, sdfDevConsDrawCB_t *aCB);
+
+extern void sdfDevConsDrawInit(sdfDevConsDrawCB_t *aCB, void *aPacketBuffer, s32 aBufferSize);
+extern void sdfDevConsDraw(sdfDevConsCB_tag *aHndl, sdfDevConsDrawCB_t *aBuf);
+extern void sdfDevConsDrawFlush(sdfDevConsDrawCB_t *aCB);
+
+extern void *memset(void *a, s32 b, u32 c);
+extern void *memmove(void *a, const void *b, u32 c);
+extern s32 vsprintf(char *buf, const char *fmt, void *args);
+
+extern void *sdfChipAllocDirect(s32 aSize);
+extern void sdfChipFreeDirect(void *aPtr);
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
+extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
+extern void *sdfMemLock(sdfMemHandle_t *aHandle);
+extern sdfTexHandle_t *sdfTexSet(void *aTex);
+
+extern sdfTexHandle_t *sdfDebugFontHandle;
+extern s32 alreadyInitDevCons;
 extern u8 sdfDebugFontTex[];
-
 extern u32 sdfDevConsFontUvTable[];
 
-extern sdfTexHandle_t *D_003BD37C;
+extern sdfDevConsCB_tag *devConsTop;
+extern u32 sdfDevConsColorTable[];
 
-extern sdfTexHandle_t *D_003BD380;
-
-extern sdfTexHandle_t *D_003BD390;
-
-extern struct sdfMemHandle_t *sdfCoreDrawBuffHandle;
-
-extern s8 D_003BD360;
-
-extern f32 D_003BD364;
-
-extern f32 D_003BD368;
-
-extern f32 D_003BD36C;
-
-extern f32 D_003BD370;
-
-extern u64 sdf3DRefMapParam;
-
-extern f32 sdfFaceDivSoften;
-
-extern f32 sdfFaceDivBias;
-
-extern u16 D_003BD3A0[4];
-
-extern u8 sdfPadAnalogSticks[8];
-
-extern u8 sdfPadPortSlotPairs[4];
-
-extern u8 D_003BD39C;
-
-/* Acquire and cache the shared console texture on first use. */
-void sdfDevConsInit(void) {
-    if (alreadyInitDevCons == 0) {
-        alreadyInitDevCons = 1;
-        sdfDebugFontHandle = sdfTexSet((SdfTextureFileHeader *)(sdfDebugFontTex));
-    }
-}
-
-/* Ensure initialization and return the cached console texture. */
-struct sdfTexHandle_t *sdfDevConsGetFontHandle(void) {
-    sdfDevConsInit();
-    return sdfDebugFontHandle;
-}
-
-/* Return the packed glyph-UV table indexed by character minus 0x20. */
-u32 *sdfDevConsGetFontUvTable(void) {
-    return sdfDevConsFontUvTable;
-}
-
-/* Append to the next-linked list and move its stored tail to this node. */
-void sdfDevConsLinkToTop(sdfDevConsCB_tag *node) {
-    sdfDevConsCB_tag *previousTail = devConsTop;
-
-    node->next = NULL;
-    node->previousNode = previousTail;
-    if (previousTail != NULL) {
-        previousTail->next = node;
-    }
-    devConsTop = node;
-}
-
-/* Unlink this node, moving the stored tail when its next link is NULL. */
-void sdfDevConsUnlink(sdfDevConsCB_tag *node) {
-    sdfDevConsCB_tag *nextNode = node->next;
-    sdfDevConsCB_tag *previousNode = node->previousNode;
-
-    if (nextNode != NULL) {
-        nextNode->previousNode = previousNode;
-    } else {
-        devConsTop = previousNode;
-    }
-    if (previousNode != NULL) {
-        previousNode->next = nextNode;
-    }
-}
-
-/* Unlink the console, release its cell-buffer allocation, then free the node. */
-void sdfDevConsClose(sdfDevConsCB_tag *node) {
-    sdfDevConsUnlink(node);
-    sdfMemFreeDirect(node->bufferAllocation);
-    sdfChipFreeDirect(node);
-}
-
-/* Reset both cursor coordinates and clear the two-byte character-cell grid. */
-void sdfDevConsClearInside(sdfDevConsCB_tag *node) {
-    node->cursorColumn = 0;
-    node->cursorRow = 0;
-    memset(node->cells, 0, node->columns * node->rows * SDF_CONSOLE_CELL_BYTES);
-}
-
-/* Reset a console through the existing clear operation. */
-void sdfDevConsClear(sdfDevConsCB_tag *node) {
-    sdfDevConsClearInside(node);
-}
-
-/* Allocate a two-byte character grid and link it for cleanup.
- * Allocation uses the supplied dimensions; clearing uses their stored s16
- * values. Dimensions and the two opaque halfword inputs are not validated. */
-sdfDevConsCB_tag *sdfDevConsOpen(u32 screenOriginX, u32 screenOriginY, s32 columns, s32 rows) {
-    sdfDevConsCB_tag *node;
-    struct sdfMemHandle_t *bufferAllocation;
-
-    sdfDevConsInit();
-    node = sdfChipAllocDirect(sizeof(sdfDevConsCB_tag));
-    node->screenOriginX = screenOriginX;
-    node->screenOriginY = screenOriginY;
-    node->columns = columns;
-    node->rows = rows;
-    node->tabWidth = 8;
-    node->controlByte = 0;
-    node->textAttribute = 0;
-    bufferAllocation = sdfMemAllocDirect((columns * rows) * SDF_CONSOLE_CELL_BYTES);
-    node->bufferAllocation = bufferAllocation;
-    node->cells = (u8 *)sdfMemLock(bufferAllocation);
-    sdfDevConsClearInside(node);
-    sdfDevConsLinkToTop(node);
-    return node;
-}
-
+/* DDS defines both tables in this unit. */
 /* Packed console glyph UVs for characters 0x20 through 0x7F. */
 u32 sdfDevConsFontUvTable[96] __attribute__((aligned(8))) = {
     0x00000000, 0x000000C0, 0x00000180, 0x00000240, 0x00000300, 0x000003C0, 0x00000480, 0x00000540,
@@ -215,204 +138,259 @@ u32 sdfDevConsColorTable[16] = {
     0x80004000, 0x80404000, 0x80004040, 0x00000000,
 };
 
-#define SDF_DEVCONS_CELL_BYTES 2
+extern void *sdfDevVprintf(u32 *aCB, const char *aStr, void *LegacyParamArray);
+void sdfDevSetPrintCB(u32 *aCB, u32 aX, u32 aY, u32 aZ, s32 aAttr);
 
-#define SDF_DEVCONS_TEXT_BUFFER_BYTES 0x200
+void sdfDevConsInit(void)
+{
+    if (!alreadyInitDevCons) {
+        alreadyInitDevCons = 1;
+        sdfDebugFontHandle = sdfTexSet(sdfDebugFontTex);
+    }
+}
 
-#define SDF_DEVCONS_NONEMPTY_SHIFT 3
+sdfTexHandle_t *sdfDevConsGetFontHandle(void)
+{
+    sdfDevConsInit();
+    return sdfDebugFontHandle;
+}
 
-#define SDF_DEVCONS_GIF_TAG_BYTES 0x10
+s16 *sdfDevConsGetFontUvTable(void)
+{
+    return (s16 *)sdfDevConsFontUvTable;
+}
 
-#define SDF_DMA_QWORD_SHIFT 4
+void sdfDevConsLinkToTop(sdfDevConsCB_tag *aHndl)
+{
+    sdfDevConsCB_tag *top;
 
-#define SDF_DMA_CHCR_TTE 0x40
+    top = devConsTop;
+    aHndl->prev = NULL;
+    aHndl->next = top;
+    if (top) {
+        top->prev = aHndl;
+    }
+    devConsTop = aHndl;
+}
 
-#define SDF_DMA_ADDRESS_MASK 0x0FFFFFFF
+void sdfDevConsUnlink(sdfDevConsCB_tag *aHndl)
+{
+    sdfDevConsCB_tag *prev;
+    sdfDevConsCB_tag *next;
 
-void sdfDevConsPutInside(sdfDevConsCB_tag *console, s32 character, s32 attribute);
-
-void sdfDevConsTagClose(sdfDevConsDrawCB_t *packetBuffers);
-
-void sdfDevConsDrawFlush(sdfDevConsDrawCB_t *packetBuffers);
-
-void sdfDevConsDrawBG(sdfDevConsCB_tag *console, sdfDevConsDrawCB_t *packetBuffers);
-
-void sdfDevConsDraw(sdfDevConsCB_tag *console, sdfDevConsDrawCB_t *packetBuffers);
-
-void sdfDevConsDrawInit(sdfDevConsDrawCB_t *packetBuffers, u8 *storageBase, s32 storageCapacityBytes);
-
-struct sdfTexHandle_t;
-
-extern u32 sdfDevConsColorTable[];
-
-/* Scroll only at the last row; otherwise advance it. Always reset the column. */
-void sdfDevConsNewLine(sdfDevConsCB_tag *console) {
-    if (console->cursorRow == console->rows - 1) {
-        s32 rowBytes = console->columns * SDF_DEVCONS_CELL_BYTES;
-        s32 copyBytes = rowBytes * console->cursorRow;
-        if (console->cursorRow > 0) {
-            memmove(console->cells, console->cells + rowBytes, copyBytes);
-        }
-        memset(console->cells + copyBytes, 0, rowBytes);
+    prev = aHndl->prev;
+    next = aHndl->next;
+    if (prev) {
+        prev->next = next;
     } else {
-        console->cursorRow = (u16)console->cursorRow + 1;
+        devConsTop = next;
     }
-    console->cursorColumn = 0;
+    if (next) {
+        next->prev = prev;
+    }
 }
 
-/* Store one character/attribute cell, interpreting cursor controls and row wrap. */
-void sdfDevConsPutInside(sdfDevConsCB_tag *console, s32 character, s32 attribute) {
-    s32 tabCellsRemaining;
-    s32 cursorColumnRemainder;
-    s32 tabWidth;
-    s32 offset;
+void sdfDevConsClose(sdfDevConsCB_tag *aHndl)
+{
+    sdfDevConsUnlink(aHndl);
+    sdfMemFreeDirect(aHndl->bufferHandle);
+    sdfChipFreeDirect(aHndl);
+}
 
-    switch (character) {
-    case 9:
-        offset = (console->cursorRow * console->columns + console->cursorColumn) * SDF_DEVCONS_CELL_BYTES;
-        tabWidth = console->tabWidth;
-        cursorColumnRemainder = console->cursorColumn % tabWidth;
-        tabCellsRemaining = cursorColumnRemainder ? cursorColumnRemainder : tabWidth;
+void sdfDevConsClearInside(sdfDevConsCB_tag *aHndl)
+{
+    aHndl->locX = 0;
+    aHndl->locY = 0;
+    memset(aHndl->bufferPtr, 0, aHndl->w * aHndl->h * 2);
+}
+
+void sdfDevConsClear(sdfDevConsCB_tag *aHndl)
+{
+    sdfDevConsClearInside(aHndl);
+}
+
+sdfDevConsCB_tag *sdfDevConsOpen(s32 aX, s32 aY, s32 aW, s32 aH)
+{
+    sdfDevConsCB_tag *hndl;
+
+    sdfDevConsInit();
+    hndl = sdfChipAllocDirect(sizeof(sdfDevConsCB_tag));
+    hndl->x = aX;
+    hndl->y = aY;
+    hndl->w = aW;
+    hndl->h = aH;
+    hndl->tabwidth = 8;
+    hndl->mode = 0;
+    hndl->attr = 0;
+    hndl->bufferHandle = sdfMemAllocDirect(aW * aH * 2);
+    hndl->bufferPtr = sdfMemLock(hndl->bufferHandle);
+    sdfDevConsClearInside(hndl);
+    sdfDevConsLinkToTop(hndl);
+    return hndl;
+}
+
+void sdfDevConsNewLine(sdfDevConsCB_tag *aHndl)
+{
+    s32 lineSize;
+    s32 size;
+
+    if (aHndl->locY == aHndl->h - 1) {
+        lineSize = aHndl->w * 2;
+        size = lineSize * aHndl->locY;
+        if (aHndl->locY > 0) {
+            memmove(aHndl->bufferPtr, aHndl->bufferPtr + lineSize, size);
+        }
+        memset(aHndl->bufferPtr + size, 0, lineSize);
+    } else {
+        aHndl->locY++;
+    }
+    aHndl->locX = 0;
+}
+
+void sdfDevConsPutInside(sdfDevConsCB_tag *aHndl, s32 aChar, s32 aAttr)
+{
+    s32 cnt;
+    s32 off;
+
+    switch (aChar) {
+    case '\t':
+        off = (aHndl->locY * aHndl->w + aHndl->locX) * 2;
+        cnt = aHndl->locX % aHndl->tabwidth;
+        if (cnt == 0) {
+            cnt = aHndl->tabwidth;
+        }
         do {
-            console->cells[offset] = 0;
-            console->cells[offset + 1] = attribute;
-            offset += SDF_DEVCONS_CELL_BYTES;
-            console->cursorColumn = (u16)console->cursorColumn + 1;
-            if (console->cursorColumn == console->columns) {
-                sdfDevConsNewLine(console);
-                break;
+            aHndl->bufferPtr[off] = 0;
+            aHndl->bufferPtr[off + 1] = aAttr;
+            off += 2;
+            aHndl->locX++;
+            if (aHndl->locX == aHndl->w) {
+                sdfDevConsNewLine(aHndl);
+                return;
             }
-        } while (--tabCellsRemaining != 0);
-        break;
-    case 10:
-        sdfDevConsNewLine(console);
+        } while (--cnt);
         return;
-    case 13:
-        console->cursorColumn = 0;
-        break;
-    default:
-        if (character == 0x20) {
-            character = 0;
-        } else if ((u32)character - 0x20U >= 0x60U) {
-            character = 0x7F;
-        }
-        offset = (console->cursorRow * console->columns + console->cursorColumn) * SDF_DEVCONS_CELL_BYTES;
-        console->cells[offset] = character;
-        console->cells[offset + 1] = attribute;
-        console->cursorColumn = (u16)console->cursorColumn + 1;
-        if (console->cursorColumn == console->columns) {
-            sdfDevConsNewLine(console);
-        }
-        break;
+    case '\n':
+        sdfDevConsNewLine(aHndl);
+        return;
+    case '\r':
+        aHndl->locX = 0;
+        return;
+    }
+
+    if (aChar == ' ') {
+        aChar = 0;
+    } else if (aChar < ' ' || aChar > 0x7F) {
+        aChar = 0x7F;
+    }
+    off = (aHndl->locY * aHndl->w + aHndl->locX) * 2;
+    aHndl->bufferPtr[off] = aChar;
+    aHndl->bufferPtr[off + 1] = aAttr;
+    aHndl->locX++;
+    if (aHndl->locX == aHndl->w) {
+        sdfDevConsNewLine(aHndl);
     }
 }
 
-/* Forward a character and explicit attribute to the console renderer. */
-void sdfDevConsPut(sdfDevConsCB_tag *console, s32 character, s32 attribute) {
-    sdfDevConsPutInside(console, character, attribute);
+void sdfDevConsPut(sdfDevConsCB_tag *aHndl, s32 aChar, s32 aAttr)
+{
+    sdfDevConsPutInside(aHndl, aChar, aAttr);
 }
 
-/* Return the emitted character count. The formatter receives no buffer limit. */
-s32 sdfDevConsPrintf(sdfDevConsCB_tag *console, const char *format, ...) {
-    char textBuffer[SDF_DEVCONS_TEXT_BUFFER_BYTES];
-    __builtin_va_list arguments;
-    char *textCursor;
-    s32 characterCount = 0;
-    s32 character;
-    __builtin_stdarg_start(arguments, format);
-    vsprintf(textBuffer, format, arguments);
-    character = textBuffer[0];
-    if (character != 0) {
+s32 sdfDevConsPrintf(sdfDevConsCB_tag *aHndl, const char *aFmt, ...)
+{
+    char buf[0x200];
+    __builtin_va_list args;
+    s32 count = 0;
+    s32 ch;
+
+    __builtin_stdarg_start(args, aFmt);
+    vsprintf(buf, aFmt, args);
+    ch = buf[0];
+    if (ch != 0) {
         do {
-            characterCount++;
-            sdfDevConsPutInside(console, character, console->textAttribute);
-            textCursor = textBuffer + characterCount;
-            character = *textCursor;
-        } while (character != 0);
+            count++;
+            sdfDevConsPutInside(aHndl, ch, aHndl->attr);
+            ch = buf[count];
+        } while (ch != 0);
     }
-    return characterCount;
+    return count;
 }
 
-/* Set the next cell coordinates without clamping them to the grid. */
-void sdfDevConsLocate(sdfDevConsCB_tag *console, s16 column, s16 row) {
-    console->cursorColumn = column;
-    console->cursorRow = row;
+void sdfDevConsLocate(sdfDevConsCB_tag *aHndl, s32 aX, s32 aY)
+{
+    aHndl->locX = aX;
+    aHndl->locY = aY;
 }
 
-/* Select the attribute passed to each subsequently printed character. */
-void sdfDevConsAttribute(sdfDevConsCB_tag *console, u8 attribute) {
-    console->textAttribute = attribute;
+void sdfDevConsAttribute(sdfDevConsCB_tag *aHndl, s32 aAttr)
+{
+    aHndl->attr = aAttr;
 }
 
-/* Read or write the console control byte at offset 0x14. */
-u8 sdfDevConsGetMode(sdfDevConsCB_tag *console) {
-    return console->controlByte;
+s32 sdfDevConsGetMode(sdfDevConsCB_tag *aHndl)
+{
+    return aHndl->mode;
 }
 
-/* Store the control byte unchanged; its individual bits are not decoded here. */
-void sdfDevConsSetMode(sdfDevConsCB_tag *console, u8 controlByte) {
-    console->controlByte = controlByte;
+void sdfDevConsSetMode(sdfDevConsCB_tag *aHndl, s32 aMode)
+{
+    aHndl->mode = aMode;
 }
 
-/* Close the ordered register-list tag in the console's uncached DMA buffer.
- * Five eight-byte register values form one sprite; pad an odd value count. */
-void sdfDevConsTagClose(sdfDevConsDrawCB_t *buffers) {
-    u8 *cursor = buffers->writeCursor;
-    vu64 *tag = (vu64 *)buffers->currentTag;
-    s32 registerCount = ((cursor - buffers->currentTag) >> 3) - 2;
+void sdfDevConsTagClose(sdfDevConsDrawCB_t *aCB)
+{
+    u8 *cur = aCB->cur;
+    volatile u64 *tag = (volatile u64 *)aCB->tag;
+    s32 regCount = ((cur - aCB->tag) >> 3) - 2;
 
-    if (registerCount != 0) {
-        if (registerCount & 1) {
-            cursor += 8;
+    if (regCount != 0) {
+        if (regCount & 1) {
+            cur += 8;
         }
-        registerCount /= 5;
-        buffers->currentTag = cursor;
-        buffers->writeCursor = buffers->currentTag + SDF_DEVCONS_GIF_TAG_BYTES;
-        tag[0] = (s64)registerCount | 0x5400000000008000ULL;
+        regCount /= 5;
+        aCB->tag = cur;
+        aCB->cur = cur + 0x10;
+        tag[0] = (s64)regCount | 0x5400000000008000ULL;
         tag[1] = 0x53531;
     }
 }
 
-/* Finalize the current GIF tag and submit completed packets, then rotate buffers.
- * Keep the eight-byte pending-data test distinct from the quadword DMA count.
- */
-void sdfDevConsDrawFlush(sdfDevConsDrawCB_t *packetBuffers) {
+void sdfDevConsDrawFlush(sdfDevConsDrawCB_t *aCB) {
     s32 packetBytes;
-    vu32 *channelRegisters;
+    u32 *channelRegisters;
     u32 nextBufferIndex;
 
-    sdfDevConsTagClose(packetBuffers);
-    packetBytes = packetBuffers->currentTag - packetBuffers->packetStart;
-    if ((packetBytes >> SDF_DEVCONS_NONEMPTY_SHIFT) != 0) {
-        channelRegisters = packetBuffers->dmaChannel;
-        sceDmaSync((void *)channelRegisters, 0, 0);
-        HW_WRITE(channelRegisters, HW_READ(channelRegisters) | SDF_DMA_CHCR_TTE); /* CHCR bit 6: tag-transfer enable */
-        EE_SYNC();
-        sceDmaSendN((void *)channelRegisters, (void *)((u32)packetBuffers->packetStart & SDF_DMA_ADDRESS_MASK), packetBytes >> SDF_DMA_QWORD_SHIFT);
-        nextBufferIndex = packetBuffers->activeBufferIndex ^ 1;
-        packetBuffers->activeBufferIndex = nextBufferIndex;
-        packetBuffers->currentTag = (u8 *)packetBuffers->bufferAddresses[nextBufferIndex];
-        packetBuffers->writeCursor = packetBuffers->currentTag + SDF_DEVCONS_GIF_TAG_BYTES;
-        packetBuffers->packetStart = packetBuffers->currentTag;
+    sdfDevConsTagClose(aCB);
+    packetBytes = aCB->tag - aCB->start;
+    if ((packetBytes >> 3) != 0) {
+        channelRegisters = aCB->dmaCh;
+        sceDmaSync(channelRegisters, 0, 0);
+        HW_WRITE((volatile u32 *)channelRegisters, HW_READ((volatile u32 *)channelRegisters) | 0x40); /* CHCR bit 6: tag-transfer enable */
+        EE_SYNC_BARRIER();
+        sceDmaSendN(channelRegisters, (void *)((u32)aCB->start & 0x0FFFFFFF), packetBytes >> 4);
+        nextBufferIndex = aCB->dblBuffId ^ 1;
+        aCB->dblBuffId = nextBufferIndex;
+        aCB->tag = (u8 *)aCB->buf[nextBufferIndex];
+        aCB->cur = aCB->tag + 0x10;
+        aCB->start = aCB->tag;
         sceGsSyncPath(0, 0);
     }
 }
 
-/* Append the console background sprite, then reserve the next glyph tag.
- * Packed coordinates wrap as words before their zero-extended packet writes. */
-void sdfDevConsDrawBG(sdfDevConsCB_tag *console, sdfDevConsDrawCB_t *packetBuffers) {
+void sdfDevConsDrawBG(sdfDevConsCB_tag *aHndl, sdfDevConsDrawCB_t *aCB) {
     vu64 *packet;
     u32 origin;
     u32 extent;
 
-    sdfDevConsTagClose(packetBuffers);
-    if (packetBuffers->bufferBytes < packetBuffers->currentTag - packetBuffers->packetStart + 0x80) {
-        sdfDevConsDrawFlush(packetBuffers);
+    sdfDevConsTagClose(aCB);
+    if (aCB->buffSize < aCB->tag - aCB->start + 0x80) {
+        sdfDevConsDrawFlush(aCB);
     }
-    packet = (vu64 *)packetBuffers->currentTag;
-    origin = (u16)(console->screenOriginX - 0x30) | ((u32)console->screenOriginY << 16);
-    extent = (u16)(console->columns * 3 * 0x40 + 0x70) | ((u32)(console->rows * packetBuffers->rowStep) << 16);
-    if (console->controlByte & 4) {
+    packet = (vu64 *)aCB->tag;
+    origin = (u16)(aHndl->x - 0x30) | ((u32)aHndl->y << 16);
+    extent = (u16)(aHndl->w * 3 * 0x40 + 0x70) | ((u32)(aHndl->h * aCB->stepY) << 16);
+    if (aHndl->mode & 4) {
         origin += 0xFFD00000;
         extent += 0x700000;
     } else {
@@ -426,15 +404,13 @@ void sdfDevConsDrawBG(sdfDevConsCB_tag *console, sdfDevConsDrawCB_t *packetBuffe
     packet[4] = origin;
     packet[5] = origin + extent;
     packet[6] = 0x156;
-    packetBuffers->currentTag = (u8 *)packet + 0x40;
-    packetBuffers->writeCursor = packetBuffers->currentTag + SDF_DEVCONS_GIF_TAG_BYTES;
+    aCB->tag = (u8 *)packet + 0x40;
+    aCB->cur = aCB->tag + 0x10;
 }
 
-/* Emit five register values per visible cell, advancing packed coordinates.
- * The native do-loops have no zero-dimension guard. */
 void sdfDevConsDraw(sdfDevConsCB_tag *console, sdfDevConsDrawCB_t *buffers) {
     u8 *cells;
-    volatile SdfConsoleGlyph *writeCursor;
+    vu64 *writeCursor;
     u8 *packetStart;
     s32 row;
     s32 column;
@@ -446,67 +422,65 @@ void sdfDevConsDraw(sdfDevConsCB_tag *console, sdfDevConsDrawCB_t *buffers) {
     u64 glyph;
     u64 color;
 
-    if ((u8)(console->controlByte & 1)) {
+    if ((u8)(console->mode & 1)) {
         return;
     }
-    buffers->rowStep = (console->controlByte & 4) ? 0xC0 : 0x60;
-    if (console->controlByte & 2) {
+    buffers->stepY = (console->mode & 4) ? 0xC0 : 0x60;
+    if (console->mode & 2) {
         sdfDevConsDrawBG(console, buffers);
     }
-    cellStep = ((u32)buffers->rowStep << 16) | 0xC0;
+    cellStep = ((u32)buffers->stepY << 16) | 0xC0;
     row = 0;
-    writeCursor = (volatile SdfConsoleGlyph *)buffers->writeCursor;
-    packetStart = buffers->packetStart;
-    cells = console->cells;
-    y = console->screenOriginY;
+    writeCursor = (vu64 *)buffers->cur;
+    packetStart = buffers->start;
+    cells = console->bufferPtr;
+    y = console->y;
     do {
-        top = (u32)console->screenOriginX | ((u32)y << 16);
+        top = (u32)console->x | ((u32)y << 16);
         column = 0;
         do {
             character = cells[0];
             attribute = cells[1];
             cells += 2;
             if (character >= 0x20) {
-                if (buffers->bufferBytes < (u8 *)writeCursor - packetStart + 0x50) {
-                    buffers->writeCursor = (u8 *)writeCursor;
+                if (buffers->buffSize < (u8 *)writeCursor - packetStart + 0x50) {
+                    buffers->cur = (u8 *)writeCursor;
                     sdfDevConsDrawFlush(buffers);
-                    writeCursor = (volatile SdfConsoleGlyph *)buffers->writeCursor;
-                    packetStart = buffers->packetStart;
+                    writeCursor = (vu64 *)buffers->cur;
+                    packetStart = buffers->start;
                 }
                 glyph = sdfDevConsFontUvTable[character - 0x20];
                 color = sdfDevConsColorTable[attribute];
-                writeCursor->color = color;
-                writeCursor->firstUv = glyph;
-                writeCursor->firstPosition = top;
-                writeCursor->secondUv = glyph + 0xC000C0;
-                writeCursor->secondPosition = top + cellStep;
-                writeCursor++;
+                writeCursor[0] = color;
+                writeCursor[1] = glyph;
+                writeCursor[2] = top;
+                writeCursor[3] = glyph + 0xC000C0;
+                writeCursor[4] = top + cellStep;
+                writeCursor += 5;
             }
             column++;
             top += 0xC0;
-        } while (column != console->columns);
+        } while (column != console->w);
         row++;
-        y += buffers->rowStep;
-    } while (row != console->rows);
-    buffers->writeCursor = (u8 *)writeCursor;
+        y += buffers->stepY;
+    } while (row != console->h);
+    buffers->cur = (u8 *)writeCursor;
 }
 
-/* Initialize both uncached packet buffers and complete the GS setup packet.
- * Reserve the first glyph tag only after the setup values have been written. */
-void sdfDevConsDrawInit(sdfDevConsDrawCB_t *packetBuffers, u8 *storageBase, s32 storageCapacityBytes) {
+void sdfDevConsDrawInit(sdfDevConsDrawCB_t *aCB, void *aPacketBuffer, s32 aBufferSize) {
     u32 ringAddress;
     u8 *ring;
     vu64 *packet;
     u64 textureState;
-    s32 halfBufferBytes = storageCapacityBytes >> 1;
+    s32 halfBufferBytes = aBufferSize >> 1;
 
-    ringAddress = ((u32)storageBase & SDF_DMA_ADDRESS_MASK) | 0x30000000;
+    ringAddress = EE_UNCACHED_RING((u32)aPacketBuffer & 0x0FFFFFFF);
     ring = (u8 *)ringAddress;
-    packetBuffers->bufferBytes = halfBufferBytes;
-    packetBuffers->bufferAddresses[0] = ring;
-    packetBuffers->bufferAddresses[1] = ring + halfBufferBytes;
-    packetBuffers->packetStart = ring;
-    packetBuffers->activeBufferIndex = 0;
+    aCB->buffSize = halfBufferBytes;
+    aCB->buf[0] = ring;
+    aCB->buf[1] = ring + halfBufferBytes;
+    aCB->start = ring;
+    aCB->dblBuffId = 0;
     textureState = sdfTexGetTex0Reg(sdfDebugFontHandle);
     packet = (vu64 *)ring;
     packet[0] = 0x10AB400000008005ULL;
@@ -521,44 +495,32 @@ void sdfDevConsDrawInit(sdfDevConsDrawCB_t *packetBuffers, u8 *storageBase, s32 
     packet[9] = 0x14;
     packet[10] = textureState;
     packet[11] = 6;
-    packetBuffers->currentTag = ring + 0x60;
-    packetBuffers->writeCursor = packetBuffers->currentTag + SDF_DEVCONS_GIF_TAG_BYTES;
-    packetBuffers->dmaChannel = sceDmaGetChan(2);
+    aCB->tag = ring + 0x60;
+    aCB->cur = aCB->tag + 0x10;
+    aCB->dmaCh = sceDmaGetChan(2);
 }
 
-/* Render every console in the global chain into a stack packet buffer and submit it. */
 void sdfDevConsDrawAll(void) {
-    DevConsStackPackets storage;
+    sdfDevConsStackPackets_t storage;
     sdfDevConsDrawCB_t packetBuffers;
     sdfDevConsCB_tag *console;
 
     if (devConsTop != NULL) {
         sdfDevConsDrawInit(&packetBuffers, storage.data, 0x1000);
-        for (console = devConsTop; console != NULL; console = console->previousNode) {
+        for (console = devConsTop; console != NULL; console = console->next) {
             sdfDevConsDraw(console, &packetBuffers);
         }
         sdfDevConsDrawFlush(&packetBuffers);
     }
 }
 
-/* SifCommand is the complete 0x10-byte input value. Console rendering uses
- * source/end as x/y storage, argument as depth bits, and command as RGBA.
- * Its RPC source/end interpretation remains unchanged. */
-extern void *sdfDevVprintf(SifCommand *input, const char *format, void *args);
-
-extern void sdfDevConsInit(void);
-
-extern u32 sdfDevConsFontUvTable[96];
-
-/* Cached handle for the developer console's font texture. */
-extern struct sdfTexHandle_t *sdfDebugFontHandle;
-
-void *sdfDevVprintf(SifCommand *input, const char *format, void *arguments) {
+void *sdfDevVprintf(u32 *aCB, const char *aStr, void *LegacyParamArray) {
+    sdfDevPrintCB_t *input = (sdfDevPrintCB_t *)aCB;
     char text[0x200];
     s32 formattedCount;
     u8 *start;
     u8 *cursor;
-    SdfConsolePacketHeader *header;
+    sdfDevConsPacketHeader_t *header;
     u8 *textCursor;
     s32 character;
     s32 glyphCount;
@@ -567,23 +529,23 @@ void *sdfDevVprintf(SifCommand *input, const char *format, void *arguments) {
     s32 quadwordCount;
 
     sdfDevConsInit();
-    formattedCount = vsprintf(text, format, arguments);
+    formattedCount = vsprintf(text, aStr, LegacyParamArray);
     start = (u8 *)sdfGrOpenPacketBuff();
     if (formattedCount == 0) {
-        *(u128 *)start = 0;
+        QUAD_ZERO(*(u128 *)start);
         cursor = start + 0x10;
     } else {
-        header = (SdfConsolePacketHeader *)start;
+        header = (sdfDevConsPacketHeader_t *)start;
         cursor = start + sizeof(*header);
         glyphCount = 0;
         /* This dual-use command carries x, y, depth and RGBA in its four words. */
-        position = (u32)((u16)input->source | ((u32)(u16)input->end << 16)) |
-                   ((u64)(u32)input->argument << 32);
-        color = input->command;
+        position = (u32)((u16)input->x | ((u32)(u16)input->y << 16)) |
+                   ((u64)(u32)input->z << 32);
+        color = input->attr;
         textCursor = (u8 *)text;
         while ((character = *textCursor++) != 0) {
             if (character >= 0x20) {
-                SdfConsoleGlyph *glyph = (SdfConsoleGlyph *)cursor;
+                sdfDevConsGlyph_t *glyph = (sdfDevConsGlyph_t *)cursor;
                 u32 uv = sdfDevConsFontUvTable[character - 0x20];
 
                 glyph->color = color;
@@ -602,7 +564,7 @@ void *sdfDevVprintf(SifCommand *input, const char *format, void *arguments) {
             cursor += sizeof(u64);
         }
         quadwordCount = ((s32)(cursor - start) >> 4) - 1;
-        input->source = (u16)position;
+        input->x = (u16)position;
         header->quadwordCount = quadwordCount;
         header->vifNop = 0;
         header->vifDirect = 0x50000000 | quadwordCount;
@@ -621,32 +583,39 @@ void *sdfDevVprintf(SifCommand *input, const char *format, void *arguments) {
     return start;
 }
 
-void *sdfDevPrintfEx(SifCommand *packet, const char *format, ...) {
+void *sdfDevPrintfEx(u32 *aCB, const char *aStr, ...)
+{
     __builtin_va_list args;
 
-    __builtin_stdarg_start(args, format);
-    return sdfDevVprintf(packet, format, args);
+    __builtin_stdarg_start(args, aStr);
+    return sdfDevVprintf(aCB, aStr, args);
 }
 
-void *sdfDevPrintf(s32 source, s32 end, s32 argument, s32 index, const char *fmt, ...) {
-    SifCommand packet;
+void *sdfDevPrintf(u32 aX, u32 aY, u32 aZ, s32 aAttr, const char *aStr, ...)
+{
+    u32 cb[4];
     __builtin_va_list args;
 
-    sdfDevSetPrintCB(&packet, source, end, argument, index);
-    __builtin_stdarg_start(args, fmt);
-    return sdfDevVprintf(&packet, fmt, args);
+    sdfDevSetPrintCB(cb, aX, aY, aZ, aAttr);
+    __builtin_stdarg_start(args, aStr);
+    return sdfDevVprintf(cb, aStr, args);
 }
 
-void sdfPktSetCmd(SifCommand *packet, s32 index) {
-    packet->command = sdfDevConsColorTable[index];
+#define func_002BD300 sdfPktSetCmd
+
+void func_002BD300(u32 *aCB, s32 aMode)
+{
+    aCB[3] = sdfDevConsColorTable[aMode];
 }
 
-void sdfDevSetPrintCB(SifCommand *packet, s32 source, s32 end, s32 argument, s32 index) {
-    packet->source = source;
-    packet->end = end;
-    packet->argument = argument;
-    sdfPktSetCmd(packet, index);
+void sdfDevSetPrintCB(u32 *aCB, u32 aX, u32 aY, u32 aZ, s32 aAttr)
+{
+    aCB[0] = aX;
+    aCB[1] = aY;
+    aCB[2] = aZ;
+    func_002BD300(aCB, aAttr);
 }
+
 INCLUDE_SDATA(const s32, "sdf/sdfDevCons", devConsTop);
 
 INCLUDE_SDATA(const s32, "sdf/sdfDevCons", alreadyInitDevCons);

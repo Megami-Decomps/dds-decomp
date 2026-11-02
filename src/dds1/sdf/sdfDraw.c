@@ -1,48 +1,128 @@
-#include "sdk_ps2.h"
-#include "ee_mmi.h"
-#include "sdf_scene_packet.h"
-#include "sdf_gs_gouraud_textured.h"
-#include "sdf_gs_scene_state.h"
-#include "sdf_gs_textured_shapes.h"
-#include "sdf_request.h"
-#include "sdf_gs_context.h"
-#include "sdf_gs_gouraud_shapes.h"
-#include "sdf_gs_header.h"
-#include "sdf_gs_geometry.h"
-#include "sdf_texture_flush.h"
-#include "sdf_tex_lifetime.h"
-#include "sdf_gs_blend.h"
 #include "common.h"
-#include "sdf_delayed_resource_check_api.h"
-#include "sdf_vu0.h"
-#include "sdf_timer.h"
-#include "sdf_packet_list.h"
-#include "sdf_packet_slot.h"
-#include "sdf_draw_frame_execution_state.h"
-#include "sdf_chip.h"
-#include "sdf_heap_api.h"
-#include "sdf.h"
-#include "sdf_semaphore_api.h"
-#include "sdf_texture_registry.h"
-#include "sdf_image_packets.h"
-#include "sdf_pending.h"
-#include "sdf_queued_resource_api.h"
-#include "sdf_linked_packet.h"
-#include "sdf_packet_builders.h"
-#include "sdf_gs_flat_shapes.h"
-#include "sdf_gs_packet.h"
-#include "pcp_vu0.h"
-#include "sdf_draw.h"
-#include "sdf_model.h"
-#include "sdf_dev_slot_api.h"
-#include "sdf_dma_tag.h"
-#include "sdf_packet_alloc.h"
+#include "eeregs.h"
+#include "libdma.h"
+#include "sdfGsMemIO.h"
+#include "sdf_types.h"
+#include "sdf_resource.h"
 
-extern void sdfWaitVblank(s32 requestedSleepCount);
+/* Register selectors carried by GIF A+D writes in the two GS contexts. */
+enum {
+    SDF_GS_PRIM = 0x00,
+    SDF_GS_RGBAQ = 0x01,
+    SDF_GS_XYZ2 = 0x05,
+    SDF_GS_TEX0_1 = 0x06,
+    SDF_GS_TEX0_2 = 0x07,
+    SDF_GS_CLAMP_1 = 0x08,
+    SDF_GS_CLAMP_2 = 0x09,
+    SDF_GIF_REGISTER_AD = 0x0E,
+    SDF_GS_TEX1_1 = 0x14,
+    SDF_GS_TEX1_2 = 0x15,
+    SDF_GS_XYOFFSET_1 = 0x18,
+    SDF_GS_XYOFFSET_2 = 0x19,
+    SDF_GS_PRMODECONT = 0x1A,
+    SDF_GS_TEXA = 0x3B,
+    SDF_GS_TEXFLUSH = 0x3F,
+    SDF_GS_SCISSOR_1 = 0x40,
+    SDF_GS_SCISSOR_2 = 0x41,
+    SDF_GS_ALPHA_1 = 0x42,
+    SDF_GS_ALPHA_2 = 0x43,
+    SDF_GS_DTHE = 0x45,
+    SDF_GS_COLCLAMP = 0x46,
+    SDF_GS_TEST_1 = 0x47,
+    SDF_GS_TEST_2 = 0x48,
+    SDF_GS_FRAME_1 = 0x4C,
+    SDF_GS_FRAME_2 = 0x4D,
+    SDF_GS_ZBUF_1 = 0x4E,
+    SDF_GS_ZBUF_2 = 0x4F,
+    SDF_GS_BITBLTBUF = 0x50,
+    SDF_GS_TRXPOS = 0x51,
+    SDF_GS_TRXREG = 0x52,
+    SDF_GS_TRXDIR = 0x53
+};
+/* Values written to the PRIM and TEST registers by the centered-bounds packet. */
+enum {
+    SDF_GS_PRIMITIVE_SPRITE = 0x06,
+    SDF_GS_CENTERED_VIEW_BOUNDS_TEST = 0x30003
+};
 
-#define SDF_DMA_TAG_NEXT_BYTE 0x20
+extern u8 sdfFrameId;
 
 #define SDF_DMA_TAG_REF_BYTE 0x30
+
+#define SDF_DMA_CNT_ONE_WORD 0x10000001
+
+#define SDF_VIF_DIRECT_ONE_FLUSHE 0x5000000110000000ULL
+
+#define SDF_GIF_PACKED_AD_BITS 0x1000000000008000ULL
+
+#define SDF_VIF_DIRECT_ONE_NOP 0x5000000100000000ULL
+
+#define SDF_GS_DEFAULT_TEXA 0x4000000080ULL
+
+#define SDF_GS_SCENE_TEST 0x517FB
+
+#define SDF_TEXTURE_SCENE_PAYLOAD_QWORDS 0x15
+
+#define SDF_GRAPH_DEPTH_BUFFER_INDEX 2
+
+#define D_0055188A sdfGrBufferSlotIndex
+
+extern u8 D_0055188A;
+
+extern u16 sdfReqDrawDelaySleepCount;
+
+extern u32 sdfDrawFrameCount;
+
+extern u8 sdfDrawImageTrans;
+
+extern volatile u8 sdfDrawSyncFlag;
+
+extern u32 sdfGetRunTimeCountBase(void);
+
+extern u32 sdfGetRunTimeCount(u32 aBaseTime);
+
+extern void sdfWaitVblank(s32 count);
+
+struct sdfPrimTransElem_t;
+
+struct sdfGrRefPacketHeader_t;
+
+struct sdfPreDrawHook_t;
+
+struct sdfGrDrawFramePacket_t;
+
+struct sdfGrClearPacket_t;
+
+struct sdfGrRefGifPacketHeader_t;
+
+struct sdfGrDrawFrame_t;
+
+
+struct sdfGrDrawEnv_t;
+
+struct sdfGsMemSlice_t;
+
+struct sdfGrFrameSet_t;
+
+struct sdfDrawTag_t;
+
+struct sdfGrOt_t;
+
+struct sdfGrFramePacket_t;
+
+struct SdfDmaTag;
+
+struct sdfDrawReqRec_t;
+
+struct sdfPreDrawTag_t;
+
+struct sdfPreDrawChain_t;
+
+/* The frame worker passes the node and queued buffer index. The registered
+ * handlers project the node into their distinct complete packet owners. */
+typedef void (*SdfPacketPatchCallback)();
+
+#define SDF_DMA_TAG_NEXT_BYTE 0x20
 
 #define SDF_DMA_TAG_CALL_BYTE 0x50
 
@@ -70,291 +150,510 @@ extern void sdfWaitVblank(s32 requestedSleepCount);
 
 #define SDF_GIF_EOP_BIT 0x8000
 
-#define SDF_DMA_CNT_ONE_WORD 0x10000001
-
-#define SDF_VIF_DIRECT_ONE_FLUSHE 0x5000000110000000ULL
-
-#define SDF_GIF_PACKED_AD_BITS 0x1000000000008000ULL
-
-#define SDF_VIF_DIRECT_ONE_NOP 0x5000000100000000ULL
-
 #define SDF_GS_CENTER_BIAS 0x1000
 
 #define SDF_GS_FIELD_OFFSET_STEP 8
 
-#define SDF_GS_DEFAULT_TEXA 0x4000000080ULL
-
 #define SDF_GS_DEFAULT_ALPHA 0x44
-
-#define SDF_GS_SCENE_TEST 0x517FB
 
 #define SDF_SCENE_DRAW_PAYLOAD_QWORDS 5
 
-#define SDF_TEXTURE_SCENE_PAYLOAD_QWORDS 0x15
-
-#define SDF_GRAPH_DEPTH_BUFFER_INDEX 2
-
-extern u16 sdfReqDrawDelaySleepCount;
-
-extern s32 sdfDrawFrameCount;
-
-extern s8 sdfDrawImageTrans;
-
-extern vu8 sdfFrameId;
-
-extern sdfGrRefPacketHeader_t *sdfGrNewExPacket(SdfDmaTag *sourceTag);
-
 extern volatile s8 sdfReqDrawDelayCount;
+
+/* TEST and ALPHA form the two A+D writes shared by the blend builders. */
+typedef struct sdfPrimTransElem_t {
+    sdfGrTagStdReg_t test;
+    sdfGrTagStdReg_t alpha;
+} sdfPrimTransElem_t;
+
+/* REF tag and VIF commands followed by the trailing chain tag (0x20).
+ * The complete trailing quadword is cleared before its NEXT header is patched. */
+typedef struct sdfGrRefPacketHeader_t {
+    u64 dmaTag;
+    u64 vifCommands;
+    s128 nextTag;
+} sdfGrRefPacketHeader_t;
+
+/* Pre-draw hook: the engine's record continues with two option words, which
+ * each owner reads under its own name. */
+typedef struct sdfPreDrawHook_t {
+    struct sdfPreDrawHook_t *next;
+    SdfPacketPatchCallback predrawFunc;
+} sdfPreDrawHook_t;
+
+/* Four A+D writes define one GS drawing context, without a DMA/GIF header. */
+typedef struct sdfGrDrawFramePacket_t {
+    sdfGrTagStdReg_t frame;
+    sdfGrTagStdReg_t zbuf;
+    sdfGrTagStdReg_t xyoffset;
+    sdfGrTagStdReg_t scissor;
+} sdfGrDrawFramePacket_t;
+
+/* A+D writes that draw the centered viewport bounds as a sprite. */
+typedef struct sdfGrClearPacket_t {
+    sdfGrTagStdReg_t test;
+    sdfGrTagStdReg_t primitive;
+    sdfGrTagStdReg_t rgbaq;
+    sdfGrTagStdReg_t xyz2[2];
+} sdfGrClearPacket_t;
+
+/* Shared A+D state for GS primitive modes, color clamping, dithering and TEXA. */
+typedef struct sdfGrRefGifPacketHeader_t {
+    sdfGrTagStdReg_t dmatag;
+    sdfGrTagStdReg_t giftag;
+    sdfGrTagStdReg_t reftag;
+    sdfGrTagStdReg_t linktag;
+} sdfGrRefGifPacketHeader_t;
+
+/* Accessed output span of the common scene-context builder. */
+typedef struct sdfGrDrawFrame_t {
+    sdfGrPacketHeader_t header;
+    sdfGrDrawFramePacket_t packet;
+} sdfGrDrawFrame_t;
+
+/* Complete DMA/GIF owner used by scene builders and held-texture draw banks. */
+typedef struct sdfGrDrawEnv_t {
+    sdfGrPacketHeader_t header;
+    sdfGrRefGifPacketHeader_t defParm;
+    sdfGrDrawFramePacket_t frame1;
+    sdfGrDrawFramePacket_t frame2;
+    sdfGrClearPacket_t clear;
+    sdfGrTagStdReg_t test1;
+    sdfGrTagStdReg_t alpha1;
+    sdfGrTagStdReg_t test2;
+    sdfGrTagStdReg_t alpha2;
+} sdfGrDrawEnv_t;
+
+
+/* Graph target: two color buffers followed by the auxiliary/depth buffer (0x14). */
+typedef struct sdfGrFrameSet_t {
+    s16 width;
+    s16 h;
+    s16 height;
+    u8 bufferFormat;
+    u8 auxiliaryFormat;
+    sdfGsMemSlice_t *buffers[3];
+} sdfGrFrameSet_t;
+
+
+/* Draw-surface pool entry (0x20); the SDK initializes and flushes this owner. */
+typedef struct sdfGrOt_t {
+    struct sdfGrOt_t *next; /* 0x00 */
+    sdfDrawTag_t *tagHead;     /* 0x04 */
+    sdfDrawTag_t *tagTail;     /* 0x08 */
+    u32 noSortTag;
+    void (*regFunc)(struct sdfGrOt_t *, sdfDrawTag_t *);          /* 0x10 */
+    s32 (*callbackFunc)(struct sdfGrOt_t *, s32, sdfDrawTag_t *); /* 0x14 */
+    u32 data;
+    u32 pad;
+} sdfGrOt_t;
+
+/* Frame/depth builder state: one DMA/GIF header and two A+D register writes. */
+typedef struct sdfGrFramePacket_t {
+    u8 pad00[4];
+    void (*prepare)(struct sdfGrFramePacket_t *, s32 bufferIndex);
+    u8 pad08[8];
+    sdfGrPacketHeader_t packetHeader;
+    sdfGrTagStdReg_t frame;
+    sdfGrTagStdReg_t zbuff;
+    sdfGrFrameSet_t *frameSet;
+    u32 frameMask;
+    s32 zbuffMask;
+    s32 context;
+} sdfGrFramePacket_t;
+
+/* Packet-list code views the same 16-byte row as QWC/ID/ADDR/VIF commands. */
+typedef struct SdfDmaTag {
+    u16 quadwordCount;
+    u8 pad02;
+    u8 kind;
+    u32 address;
+    u64 vifCommands;
+} QWORD_ALIGNED SdfDmaTag;
+
+void sdfDrawTagLink2(struct sdfDrawTag_t *aTag, u32 aHeadPacket,
+                          u32 aTailPacket);
+
+void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, u32 aPacket);
+
+/* One 0x10-byte entry in the three-slot frame packet submission ring. */
+typedef struct sdfDrawReqRec_t {
+    struct sdfDrawTag_t *drawTag;
+    sdfPreDrawHook_t *preDraw;
+    u8 drawCount;
+    u8 queuedBufferIndex;
+    u8 bufferIndex;
+    u8 bufferSlotIndex;
+    u8 pad0C[4];
+} sdfDrawReqRec_t;
+
+/* Complete linked-packet list, distinct from the 0x20-byte DMA list head. */
+typedef struct sdfPreDrawTag_t {
+    u32 next;
+    sdfPreDrawHook_t *head;
+    sdfPreDrawHook_t *tail;
+    u32 pad;
+} sdfPreDrawTag_t;
+
+/* Frame submission joins these 0x10-byte linked owners through head/tail. */
+typedef struct sdfPreDrawChain_t {
+    sdfPreDrawTag_t *tagHead;
+    sdfPreDrawTag_t *tail;
+} sdfPreDrawChain_t;
+
+typedef struct sdfTexPacket_t {
+    sdfGifTag_t giftag;
+    sdfGrTagStdReg_t tex1;
+    sdfGrTagStdReg_t tex0;
+    sdfGrTagStdReg_t clamp;
+} sdfTexPacket_t;
+
+/* Linked draw environment, including its two frame-mask writes and textures. */
+typedef struct sdfGrStdDrawEnv_t {
+    sdfPreDrawHook_t link;
+    sdfGrFrameSet_t *view;
+    u8 unk0C[4];
+    sdfGrPacketHeader_t header;
+    sdfGrRefGifPacketHeader_t defParm;
+    sdfGrDrawFramePacket_t frame1;
+    sdfGrDrawFramePacket_t frame2;
+    sdfGrClearPacket_t clear;
+    sdfGrTagStdReg_t test1;
+    sdfGrTagStdReg_t alpha1;
+    sdfGrTagStdReg_t test2;
+    sdfGrTagStdReg_t alpha2;
+    sdfGrTagStdReg_t frameContextOne;
+    sdfGrTagStdReg_t frameContextTwo;
+    sdfTexPacket_t texturePackets[2];
+} sdfGrStdDrawEnv_t;
+
+void sdfGrStdDrawEnvPredraw(sdfGrStdDrawEnv_t *aPre, s32 aEvenOdd);
+
+void sdfGrSetRefGifPacket(sdfGrRefGifPacketHeader_t *aPacket, u32 aRegs, s32 aNumRegs);
+
+void sdfGrSetDrawDefParmPacket(sdfGrRefGifPacketHeader_t *aDef);
+
+extern s32 EIntr(void);
+
+extern s32 DIntr(void);
 
 extern s32 sdfDrawReqQueueIndex;
 
-extern SdfPacketSlot sdfGrDrawState[];
+extern sdfDrawReqRec_t sdfGrDrawState[];
 
-/* Hand the oldest pending slot to the worker, shift the slot list down and * refill the last slot with the newly detached queue. */ void sdfDelayedResrcProc(void);
+typedef struct effDebugPolyParams_t {
+    s16 parameterCount;
+    s16 vertexCount;
+    u16 primitive;
+    u16 mask;
+    u32 color;
+    const u32 *parameters;
+    u128 *positions;
+    u128 *normals;
+    f32 *texcoords;
+    u32 *extraTexcoords;
+    u32 *colors;
+    void *(*allocate)(s32);
+    f32 depth;
+} effDebugPolyParams_t;
 
-s32 sdfGrAllocPacketBuff(s32 size);
+s32 sdfGrAllocPacketBuff(s32 aSize);
 
-void sdfDrawTagInit(sdfDrawTag_t *list) {
-    list->unkC = 0xFFFF;
-    list->next = NULL;
-    list->head = 0;
-    list->tail = 0;
-    list->firstReferenceSource = 0;
-    list->secondReferenceSource = 0;
-    list->unk18 = 0;
-    list->unk1C = 0;
+void sdfDrawTagInit(sdfDrawTag_t *a);
+
+void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
+
+void sdfDrawTagLinkRefGif(sdfDrawTag_t *aTag, u32 aPacket);
+
+void sdfDrawTagLinkCall(sdfDrawTag_t *aTag, u32 aPacket);
+
+void sdfGrOtFuncLinkToHead(sdfGrOt_t *aOt, sdfDrawTag_t *aTag);
+
+void sdfGrOtNormalReg(sdfGrOt_t *aOt, sdfDrawTag_t *aTag);
+
+s32 sdfGrOtNormalCallback(sdfGrOt_t *aOt, s32 aFunc, sdfDrawTag_t *aData);
+
+void sdfGrOtInit(sdfGrOt_t *aOt, s32 aNumOt);
+
+sdfGrRefPacketHeader_t *sdfGrNewExPacket(SdfDmaTag *ex);
+
+SdfDmaTag *sdfGrAddExPacket(SdfDmaTag *p, SdfDmaTag *ex);
+
+void sdfGrJoinDrawTag(sdfDrawTag_t *aFore, sdfDrawTag_t *aBack);
+
+void sdfGrInitExPacket(sdfDrawTag_t *p);
+
+/* DDS keeps its own name: the shorter one shifts DDS1 code_001DEFE0. */
+#define sdfGrOtClose sdfFlushPoolNodes
+sdfDrawTag_t *sdfGrOtClose(sdfGrOt_t *aOt);
+
+void sdfPreDrawTagLink(sdfPreDrawTag_t *aTag, sdfPreDrawHook_t *aHook);
+
+void sdfPreDrawChainLink(sdfPreDrawChain_t *aChain, sdfPreDrawTag_t *aTag);
+
+void sdfGrSetRegsPacketHeader(sdfGrPacketHeader_t *header, s32 payloadQwords);
+
+void sdfGrSetDrawFramePacket(sdfGrDrawFramePacket_t *aFrame, s32 aFrameAddr, s32 aW, s32 aH,
+                  s32 aPixelFormat, s32 aZBuffAddr, s32 aZBuffFormat,
+                  s32 aHalfOffset, s32 aContext);
+
+void sdfGrSetClearPacket(sdfGrClearPacket_t *aClear, s32 aW, s32 aH, s32 aPixelFormat, s32 aZBuffFormat);
+
+void sdfGrSetDrawFrame(sdfGrDrawFrame_t *aFrame, s32 aFrameAddr, s32 aW, s32 aH,
+                           s32 aPixelFormat, s32 aZBuffAddr, s32 aZBuffFormat, s32 aContext);
+
+void sdfGrLinkStdDrawEnv(sdfDrawTag_t *aTag, sdfPreDrawTag_t *aPreDrawTag, sdfPreDrawHook_t *aEnv);
+
+void sdfGrLinkDispFrameTex(sdfDrawTag_t *aTag, u32 aEnv, sdfGrRefPacketHeader_t *aPkt);
+
+void sdfGrLinkDrawFrameTex(sdfDrawTag_t *aTag, u32 aEnv, sdfGrRefPacketHeader_t *aPkt);
+
+void sdfGrFramePacketPredraw(sdfGrFramePacket_t *aPre, s32 aEvenOdd);
+
+void sdfGrSetFramePacket(sdfGrFramePacket_t *aFrame, sdfGrFrameSet_t *aFrameSet, u32 aFrameMask, s32 aZBuffMask, s32 aContext);
+
+void sdfGrReqDrawDelay(s32 count);
+
+void sdfGrInitDraw(void);
+
+void sdfDrawTagInit(sdfDrawTag_t *a) {
+    a->z = 0xFFFF;
+    a->next = NULL;
+    a->head = 0;
+    a->tail = 0;
+    a->lightPacket = 0;
+    a->fogPacket = 0;
+    a->texPacket[0] = 0;
+    a->texPacket[1] = 0;
 }
 
-/* Chain a DMA packet by rewriting the previous packet's tag to NEXT. */
-void sdfDrawTagLink(sdfDrawTag_t *list, u32 packet) {
+void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket) {
     s32 last;
 
-    last = list->tail;
+    last = aTag->tail;
     if (last == 0) {
-        list->head = packet;
+        aTag->head = aPacket;
     }
     else {
         ((SdfDmaTag *)last)->kind = SDF_DMA_TAG_NEXT_BYTE;
-        ((SdfDmaTag *)last)->address = packet & SDF_DMA_ADDRESS_MASK;
+        ((SdfDmaTag *)last)->address = aPacket & SDF_DMA_ADDRESS_MASK;
     }
-    list->tail = packet;
+    aTag->tail = aPacket;
 }
 
-/* Append a DMA range, keeping its start and trailing tag addresses distinct. */
-void sdfDrawTagLink2(sdfDrawTag_t *list, u32 packetAddress, u32 rangeTailAddress) {
+void sdfDrawTagLink2(sdfDrawTag_t *aTag, u32 aHeadPacket, u32 aTailPacket) {
     s32 previousTailAddress;
 
-    previousTailAddress = list->tail;
+    previousTailAddress = aTag->tail;
     if (previousTailAddress == 0) {
-        list->head = packetAddress;
+        aTag->head = aHeadPacket;
     }
     else {
         ((SdfDmaTag *)previousTailAddress)->kind = SDF_DMA_TAG_NEXT_BYTE;
-        ((SdfDmaTag *)previousTailAddress)->address = packetAddress & SDF_DMA_ADDRESS_MASK;
+        ((SdfDmaTag *)previousTailAddress)->address = aHeadPacket & SDF_DMA_ADDRESS_MASK;
     }
-    list->tail = rangeTailAddress;
+    aTag->tail = aTailPacket;
 }
 
-/* REF packets carry an extra quadword after the DMA tag. */
-void sdfDrawTagLinkRef(sdfDrawTag_t *list, u32 packetAddress) {
+void sdfDrawTagLinkRef(sdfDrawTag_t *aTag, u32 aPacket) {
     s32 previousTailAddress;
 
-    ((SdfDmaTag *)packetAddress)->kind = SDF_DMA_TAG_REF_BYTE;
-    previousTailAddress = list->tail;
+    ((SdfDmaTag *)aPacket)->kind = SDF_DMA_TAG_REF_BYTE;
+    previousTailAddress = aTag->tail;
     if (previousTailAddress == 0) {
-        list->head = packetAddress;
+        aTag->head = aPacket;
     }
     else {
         ((SdfDmaTag *)previousTailAddress)->kind = SDF_DMA_TAG_NEXT_BYTE;
-        ((SdfDmaTag *)previousTailAddress)->address = packetAddress & SDF_DMA_ADDRESS_MASK;
+        ((SdfDmaTag *)previousTailAddress)->address = aPacket & SDF_DMA_ADDRESS_MASK;
     }
-    list->tail = packetAddress + SDF_QWORD_BYTES;
+    aTag->tail = aPacket + SDF_QWORD_BYTES;
 }
 
-/* Append a DMA packet whose trailing tag is three quadwords after its start. */
-void sdfDrawTagLinkRefGif(sdfDrawTag_t *list, u32 packetAddress) {
+void sdfDrawTagLinkRefGif(sdfDrawTag_t *aTag, u32 aPacket) {
     s32 previousTailAddress;
 
-    previousTailAddress = list->tail;
+    previousTailAddress = aTag->tail;
     if (previousTailAddress == 0) {
-        list->head = packetAddress;
+        aTag->head = aPacket;
     }
     else {
         ((SdfDmaTag *)previousTailAddress)->kind = SDF_DMA_TAG_NEXT_BYTE;
-        ((SdfDmaTag *)previousTailAddress)->address = packetAddress & SDF_DMA_ADDRESS_MASK;
+        ((SdfDmaTag *)previousTailAddress)->address = aPacket & SDF_DMA_ADDRESS_MASK;
     }
-    list->tail = packetAddress + SDF_DMA_EXTENDED_TAIL_OFFSET;
+    aTag->tail = aPacket + SDF_DMA_EXTENDED_TAIL_OFFSET;
 }
 
-/* CALL packets likewise end one quadword after their tag. */
-void sdfDrawTagLinkCall(sdfDrawTag_t *list, u32 packetAddress) {
+void sdfDrawTagLinkCall(sdfDrawTag_t *aTag, u32 aPacket) {
     s32 previousTailAddress;
 
-    ((SdfDmaTag *)packetAddress)->kind = SDF_DMA_TAG_CALL_BYTE;
-    previousTailAddress = list->tail;
+    ((SdfDmaTag *)aPacket)->kind = SDF_DMA_TAG_CALL_BYTE;
+    previousTailAddress = aTag->tail;
     if (previousTailAddress == 0) {
-        list->head = packetAddress;
+        aTag->head = aPacket;
     }
     else {
         ((SdfDmaTag *)previousTailAddress)->kind = SDF_DMA_TAG_NEXT_BYTE;
-        ((SdfDmaTag *)previousTailAddress)->address = packetAddress & SDF_DMA_ADDRESS_MASK;
+        ((SdfDmaTag *)previousTailAddress)->address = aPacket & SDF_DMA_ADDRESS_MASK;
     }
-    list->tail = packetAddress + SDF_QWORD_BYTES;
+    aTag->tail = aPacket + SDF_QWORD_BYTES;
 }
 
-/* Prepend a nonempty packet list, connecting its DMA tail to the former first list. */
-void sdfGrOtFuncLinkToHead(sdfGrOt_t *destinationList, sdfDrawTag_t *incomingList) {
+void sdfGrOtFuncLinkToHead(sdfGrOt_t *aOt, sdfDrawTag_t *aTag) {
     sdfDrawTag_t *firstList;
 
-    if (incomingList->tail == 0) {
+    if (aTag->tail == 0) {
         return;
     }
-    firstList = destinationList->tagHead;
+    firstList = aOt->tagHead;
     if (firstList == NULL) {
-        destinationList->tagTail = incomingList;
+        aOt->tagTail = aTag;
     } else {
-        sdfGrJoinDrawTag(incomingList, firstList);
+        sdfGrJoinDrawTag(aTag, firstList);
     }
-    incomingList->next = firstList;
-    destinationList->tagHead = incomingList;
+    aTag->next = firstList;
+    aOt->tagHead = aTag;
 }
 
-void sdfGrOtNormalReg(sdfGrOt_t *list, sdfDrawTag_t *item) {
+void sdfGrOtNormalReg(sdfGrOt_t *aOt, sdfDrawTag_t *aTag) {
     sdfDrawTag_t *last;
 
-    if (item->head != 0) {
-        last = list->tagTail;
+    if (aTag->head != 0) {
+        last = aOt->tagTail;
         if (last == NULL) {
-            list->tagHead = item;
+            aOt->tagHead = aTag;
         }
         else {
-            last->next = item;
-            sdfGrJoinDrawTag(last, item);
+            last->next = aTag;
+            sdfGrJoinDrawTag(last, aTag);
         }
-        list->tagTail = item;
+        aOt->tagTail = aTag;
     }
 }
 
-s32 sdfGrOtNormalCallback(sdfGrOt_t *list, s32 mode, sdfDrawTag_t *packet) {
-    if (mode == 1) {
-        sdfGrOtFuncLinkToHead(list, packet);
+s32 sdfGrOtNormalCallback(sdfGrOt_t *aOt, s32 aFunc, sdfDrawTag_t *aData) {
+    if (aFunc == 1) {
+        sdfGrOtFuncLinkToHead(aOt, aData);
     }
 }
 
-extern void sdfGrOtInit(sdfGrOt_t *, s32);
+void sdfGrOtInit(sdfGrOt_t *aOt, s32 aNumOt) {
+    sdfGrOt_t *node = aOt;
+    sdfGrOt_t *next;
+    s32 remaining = aNumOt - 1;
 
-/* Initialize and link count pool nodes, terminating the last; count must be at least one. */
-void sdfGrOtInit(sdfGrOt_t *nodes, s32 count) {
-    sdfGrOt_t *node = nodes;
-
-    for (;;) {
-        node->append = sdfGrOtNormalReg;
-        node->prepend = sdfGrOtNormalCallback;
-        node->tagHead = 0;
-        node->tagTail = 0;
-        node->unkC = 0;
-        node->unk18 = 0;
-        if (--count == 0) {
-            node->next = NULL;
-            break;
-        }
-        node->next = node + 1;
-        node++;
+    node->regFunc = sdfGrOtNormalReg;
+    node->callbackFunc = sdfGrOtNormalCallback;
+    node->tagHead = 0;
+    node->tagTail = 0;
+    node->noSortTag = 0;
+    node->data = 0;
+    if (remaining == 0) {
+        node->next = NULL;
+        return;
     }
+link:
+    next = node + 1;
+    remaining--;
+    node->next = next;
+    node = next;
+    next->regFunc = sdfGrOtNormalReg;
+    next->callbackFunc = sdfGrOtNormalCallback;
+    next->tagHead = 0;
+    next->tagTail = 0;
+    next->noSortTag = 0;
+    next->data = 0;
+    if (remaining != 0) {
+        goto link;
+    }
+    node->next = NULL;
 }
 
-/* Make a REF DMA node for the payload following the source tag. */
-sdfGrRefPacketHeader_t *sdfGrNewExPacket(SdfDmaTag *sourceTag) {
+sdfGrRefPacketHeader_t *sdfGrNewExPacket(SdfDmaTag *ex) {
     sdfGrRefPacketHeader_t *referenceNode = (sdfGrRefPacketHeader_t *)sdfGrAllocPacketBuff(SDF_DMA_REFERENCE_NODE_BYTES);
-    u64 dmaHeader = sourceTag->quadwordCount;
-    u32 payloadAddress = ((u32)sourceTag + SDF_QWORD_BYTES) & SDF_DMA_ADDRESS_MASK;
+    u64 dmaHeader = ex->quadwordCount;
+    u32 payloadAddress = ((u32)ex + SDF_QWORD_BYTES) & SDF_DMA_ADDRESS_MASK;
     s64 packedAddress = (s64)payloadAddress << 32;
 
     dmaHeader |= SDF_DMA_TAG_REF_WORD;
     dmaHeader |= packedAddress;
     referenceNode->dmaTag = dmaHeader;
-    referenceNode->nextTag = 0;
-    referenceNode->vifCommands = sourceTag->vifCommands;
+    QUAD_ZERO(referenceNode->nextTag);
+    referenceNode->vifCommands = ex->vifCommands;
     return referenceNode;
 }
 
-/* Patch the prior NEXT tag to chain in a reference to source's payload. */
-SdfDmaTag *sdfGrAddExPacket(SdfDmaTag *previousTag, SdfDmaTag *sourceTag) {
+SdfDmaTag *sdfGrAddExPacket(SdfDmaTag *p, SdfDmaTag *ex) {
     sdfGrRefPacketHeader_t *referenceNode;
 
-    referenceNode = sdfGrNewExPacket(sourceTag);
-    previousTag->kind = SDF_DMA_TAG_NEXT_BYTE;
-    previousTag->address = (u32)referenceNode & SDF_DMA_ADDRESS_MASK;
+    referenceNode = sdfGrNewExPacket(ex);
+    p->kind = SDF_DMA_TAG_NEXT_BYTE;
+    p->address = (u32)referenceNode & SDF_DMA_ADDRESS_MASK;
     return (SdfDmaTag *)((u32)referenceNode + SDF_QWORD_BYTES);
 }
 
-/* Insert differing nonzero reference sources before linking the incoming DMA chain.
- * Zero incoming sources inherit prior state; the locals cover both source slots. */
-void sdfGrJoinDrawTag(sdfDrawTag_t *previousList, sdfDrawTag_t *incomingList) {
-    SdfDmaTag *tailTag = (SdfDmaTag *)previousList->tail;
+void sdfGrJoinDrawTag(sdfDrawTag_t *aFore, sdfDrawTag_t *aBack) {
+    SdfDmaTag *tailTag = (SdfDmaTag *)aFore->tail;
     u32 previousSource;
     u32 incomingSource;
 
-    previousSource = previousList->firstReferenceSource;
-    incomingSource = incomingList->firstReferenceSource;
+    previousSource = aFore->lightPacket;
+    incomingSource = aBack->lightPacket;
     if (previousSource != incomingSource) {
         if (incomingSource != 0) {
             tailTag = sdfGrAddExPacket(tailTag, (SdfDmaTag *)incomingSource);
         } else {
-            incomingList->firstReferenceSource = previousSource;
+            aBack->lightPacket = previousSource;
         }
     }
-    previousSource = previousList->secondReferenceSource;
-    incomingSource = incomingList->secondReferenceSource;
+    previousSource = aFore->fogPacket;
+    incomingSource = aBack->fogPacket;
     if (previousSource != incomingSource) {
         if (incomingSource != 0) {
             tailTag = sdfGrAddExPacket(tailTag, (SdfDmaTag *)incomingSource);
         } else {
-            incomingList->secondReferenceSource = previousSource;
+            aBack->fogPacket = previousSource;
         }
     }
     tailTag->kind = SDF_DMA_TAG_NEXT_BYTE;
-    tailTag->address = incomingList->head & SDF_DMA_ADDRESS_MASK;
+    tailTag->address = aBack->head & SDF_DMA_ADDRESS_MASK;
 }
 
-/* Prepend the second reference, then the first: first, second, payload.
- * Patch only the NEXT header's low doubleword; its VIF half stays zero. */
-void sdfGrInitExPacket(sdfDrawTag_t *list) {
+void sdfGrInitExPacket(sdfDrawTag_t *p) {
     sdfGrRefPacketHeader_t *referenceNode;
     u32 priorHeadAddress;
     u32 sourceTagAddress;
 
-    sourceTagAddress = list->secondReferenceSource;
+    sourceTagAddress = p->fogPacket;
     if (sourceTagAddress != 0) {
         referenceNode = sdfGrNewExPacket((SdfDmaTag *)sourceTagAddress);
-        priorHeadAddress = list->head & SDF_DMA_ADDRESS_MASK;
-        list->head = (u32)referenceNode;
+        priorHeadAddress = p->head & SDF_DMA_ADDRESS_MASK;
+        p->head = (u32)referenceNode;
         *(u64 *)&referenceNode->nextTag = ((s64)priorHeadAddress << 32) | SDF_DMA_TAG_NEXT_WORD;
     }
-    sourceTagAddress = list->firstReferenceSource;
+    sourceTagAddress = p->lightPacket;
     if (sourceTagAddress != 0) {
         referenceNode = sdfGrNewExPacket((SdfDmaTag *)sourceTagAddress);
-        priorHeadAddress = list->head & SDF_DMA_ADDRESS_MASK;
-        list->head = (u32)referenceNode;
+        priorHeadAddress = p->head & SDF_DMA_ADDRESS_MASK;
+        p->head = (u32)referenceNode;
         *(u64 *)&referenceNode->nextTag = ((s64)priorHeadAddress << 32) | SDF_DMA_TAG_NEXT_WORD;
     }
 }
 
-/* Flush every pool entry, chain the packet lists together and terminate the last. */
-sdfDrawTag_t *sdfFlushPoolNodes(sdfGrOt_t *node) {
+sdfDrawTag_t *sdfGrOtClose(sdfGrOt_t *aOt) {
     sdfDrawTag_t *tail = NULL;
     sdfDrawTag_t *head = NULL;
 
-    for (; node != NULL; node = node->next) {
-        node->prepend(node, 0, NULL);
-        if (node->tagHead != 0) {
+    for (; aOt != NULL; aOt = aOt->next) {
+        aOt->callbackFunc(aOt, 0, NULL);
+        if (aOt->tagHead != 0) {
             if (head != 0) {
-                sdfGrJoinDrawTag(tail, node->tagHead);
+                sdfGrJoinDrawTag(tail, aOt->tagHead);
             } else {
-                head = node->tagHead;
+                head = aOt->tagHead;
                 sdfGrInitExPacket(head);
             }
-            tail = node->tagTail;
+            tail = aOt->tagTail;
         }
     }
     if (tail != NULL) {
@@ -364,67 +663,63 @@ sdfDrawTag_t *sdfFlushPoolNodes(sdfGrOt_t *node) {
     return head;
 }
 
-void sdfPreDrawTagInit(sdfPreDrawTag_t *list) {
-    list->unk0 = 0;
-    list->first = 0;
-    list->last = 0;
-    list->unkC = 0;
+void sdfPreDrawTagInit(sdfPreDrawTag_t *aTag) {
+    aTag->next = 0;
+    aTag->head = 0;
+    aTag->tail = 0;
+    aTag->pad = 0;
 }
 
-void sdfPreDrawTagLink(sdfPreDrawTag_t *list, SdfPacketPatchLink *node) {
-    if (list->last == 0) {
-        list->first = node;
+void sdfPreDrawTagLink(sdfPreDrawTag_t *aTag, sdfPreDrawHook_t *aHook) {
+    if (aTag->tail == 0) {
+        aTag->head = aHook;
     }
     else {
-        list->last->next = node;
+        aTag->tail->next = aHook;
     }
-    list->last = node;
-    node->next = NULL;
+    aTag->tail = aHook;
+    aHook->next = NULL;
 }
 
-void sdfPreDrawChainInit(SdfPacketChain *chain) {
-    chain->head = NULL;
-    chain->tail = NULL;
+void sdfPreDrawChainInit(sdfPreDrawChain_t *aChain) {
+    aChain->tagHead = NULL;
+    aChain->tail = NULL;
 }
 
-void sdfPreDrawChainLink(SdfPacketChain *chain, sdfPreDrawTag_t *node) {
-    if (chain->tail == NULL) {
-        chain->head = node;
+void sdfPreDrawChainLink(sdfPreDrawChain_t *aChain, sdfPreDrawTag_t *aTag) {
+    if (aChain->tail == NULL) {
+        aChain->tagHead = aTag;
     }
     else {
-        chain->tail->last->next = node->last;
+        aChain->tail->tail->next = aTag->tail;
     }
-    chain->tail = node;
+    aChain->tail = aTag;
 }
 
-/* Encode the packed A+D payload count and its DMA/VIF transfer length. */
-void sdfGrSetRegsPacketHeader(SdfGsPacketHeader *header, s32 payloadQwords) {
+void sdfGrSetRegsPacketHeader(sdfGrPacketHeader_t *header, s32 payloadQwords) {
     s64 dmaQwords;
 
     dmaQwords = payloadQwords + 1;
-    header->vifCommands = (((dmaQwords | SDF_VIF_DIRECT_WORD) << 32) | SDF_VIF_FLUSHE_WORD);
-    header->gifTag = (payloadQwords | (((s64)SDF_GIF_ONE_REGISTER_WORD << 32) | SDF_GIF_EOP_BIT));
-    header->dmaTag = dmaQwords;
-    header->gifRegisters = SDF_GIF_REGISTER_AD;
+    header->dmaWords.vif = (((dmaQwords | SDF_VIF_DIRECT_WORD) << 32) | SDF_VIF_FLUSHE_WORD);
+    header->giftag.parm = (payloadQwords | (((s64)SDF_GIF_ONE_REGISTER_WORD << 32) | SDF_GIF_EOP_BIT));
+    header->dmaWords.tag = dmaQwords;
+    header->giftag.regs = SDF_GIF_REGISTER_AD;
 }
 
-/* Emit a GIF header, a REF tag with masked count/address, and the trailing NEXT tag. */
-void sdfGrSetRefGifPacket(SdfDmaReferenceChainPacket *packet, u32 sourceAddress, s32 qwordCount) {
-    packet->header.dmaTag = SDF_DMA_CNT_ONE_WORD;
-    packet->header.vifCommands = SDF_VIF_DIRECT_ONE_FLUSHE;
-    packet->header.gifTag = (u64)qwordCount | SDF_GIF_PACKED_AD_BITS;
-    packet->header.gifRegisters = SDF_GIF_REGISTER_AD;
-    packet->referenceTag = (u32)((qwordCount & SDF_DMA_QWC_MASK) | SDF_DMA_TAG_REF_WORD) | ((u64)(sourceAddress & SDF_DMA_ADDRESS_MASK) << 32);
-    packet->referenceVifCommands = SDF_VIF_DIRECT_ONE_NOP;
-    packet->nextTag = SDF_DMA_TAG_NEXT_WORD;
-    packet->zeroTailWord = 0;
+void sdfGrSetRefGifPacket(sdfGrRefGifPacketHeader_t *aPacket, u32 aRegs, s32 aNumRegs) {
+    aPacket->dmatag.data = SDF_DMA_CNT_ONE_WORD;
+    aPacket->dmatag.reg = SDF_VIF_DIRECT_ONE_FLUSHE;
+    aPacket->giftag.data = (u64)aNumRegs | SDF_GIF_PACKED_AD_BITS;
+    aPacket->giftag.reg = SDF_GIF_REGISTER_AD;
+    aPacket->reftag.data = (u32)((aNumRegs & SDF_DMA_QWC_MASK) | SDF_DMA_TAG_REF_WORD) | ((u64)(aRegs & SDF_DMA_ADDRESS_MASK) << 32);
+    aPacket->reftag.reg = SDF_VIF_DIRECT_ONE_NOP;
+    aPacket->linktag.data = SDF_DMA_TAG_NEXT_WORD;
+    aPacket->linktag.reg = 0;
 }
 
-/* Emit FRAME/ZBUF/XYOFFSET/SCISSOR A+D pairs for the selected GS context.
- * Register IDs are separate from their values; fieldOffset adds a half-pixel Y step. */
-void sdfGrSetDrawFramePacket(SdfGsContextRegisters *packet, s32 frameAddress, s32 width, s32 height,
-                  s32 frameFormat, s32 depthAddress, s32 depthFormat,
-                  s32 fieldOffset, SdfGsContext context) {
+void sdfGrSetDrawFramePacket(sdfGrDrawFramePacket_t *aFrame, s32 aFrameAddr, s32 aW, s32 aH,
+                  s32 aPixelFormat, s32 aZBuffAddr, s32 aZBuffFormat,
+                  s32 aHalfOffset, s32 aContext) {
     s64 frameRegisterId;
     s64 depthRegisterId;
     s64 offsetRegisterId;
@@ -432,7 +727,7 @@ void sdfGrSetDrawFramePacket(SdfGsContextRegisters *packet, s32 frameAddress, s3
     s32 xOffset;
     s32 yOffset;
 
-    if (context == SDF_GS_CONTEXT_1) {
+    if (aContext == 0) {
         frameRegisterId = SDF_GS_FRAME_1;
         depthRegisterId = SDF_GS_ZBUF_1;
         offsetRegisterId = SDF_GS_XYOFFSET_1;
@@ -443,61 +738,55 @@ void sdfGrSetDrawFramePacket(SdfGsContextRegisters *packet, s32 frameAddress, s3
         offsetRegisterId = SDF_GS_XYOFFSET_2;
         scissorRegisterId = SDF_GS_SCISSOR_2;
     }
-    packet->scissor.registerId = scissorRegisterId;
-    yOffset = (SDF_GS_CENTER_BIAS - height) << 3;
-    xOffset = (SDF_GS_CENTER_BIAS - width) << 3;
-    packet->frame.value = (s64)(frameFormat << 24) | (s64)(((width + 63) >> 6) << 16) | (s64)(frameAddress >> 11);
-    if (fieldOffset != 0) {
+    aFrame->scissor.reg = scissorRegisterId;
+    yOffset = (SDF_GS_CENTER_BIAS - aH) << 3;
+    xOffset = (SDF_GS_CENTER_BIAS - aW) << 3;
+    aFrame->frame.data = (s64)(aPixelFormat << 24) | (s64)(((aW + 63) >> 6) << 16) | (s64)(aFrameAddr >> 11);
+    if (aHalfOffset != 0) {
         yOffset += SDF_GS_FIELD_OFFSET_STEP;
     }
-    packet->frame.registerId = frameRegisterId;
-    packet->zbuf.value = (s64)(depthFormat << 24) | (s64)(depthAddress >> 11);
-    packet->zbuf.registerId = depthRegisterId;
-    packet->xyoffset.registerId = offsetRegisterId;
-    packet->scissor.value = ((s64)(height - 1) << 48) | ((s64)(width - 1) << 16);
-    packet->xyoffset.value = xOffset | ((s64)yOffset << 32);
+    aFrame->frame.reg = frameRegisterId;
+    aFrame->zbuf.data = (s64)(aZBuffFormat << 24) | (s64)(aZBuffAddr >> 11);
+    aFrame->zbuf.reg = depthRegisterId;
+    aFrame->xyoffset.reg = offsetRegisterId;
+    aFrame->scissor.data = ((s64)(aH - 1) << 48) | ((s64)(aW - 1) << 16);
+    aFrame->xyoffset.data = xOffset | ((s64)yOffset << 32);
 }
 
-/* Encode centered viewport bounds in GS coordinate words; the last two arguments are unused. */
-void sdfGrSetClearPacket(SdfGsCenteredBoundsRegisters *packet, s32 width, s32 height, s32 unused0, s32 unused1) {
-    u32 lowerBounds = ((SDF_GS_CENTER_BIAS - height) << 19) | ((SDF_GS_CENTER_BIAS - width) << 3);
-    u32 upperBounds = ((height + SDF_GS_CENTER_BIAS) << 19) | ((width + SDF_GS_CENTER_BIAS) << 3);
+void sdfGrSetClearPacket(sdfGrClearPacket_t *aClear, s32 aW, s32 aH, s32 aPixelFormat, s32 aZBuffFormat) {
+    u32 lowerBounds = ((SDF_GS_CENTER_BIAS - aH) << 19) | ((SDF_GS_CENTER_BIAS - aW) << 3);
+    u32 upperBounds = ((aH + SDF_GS_CENTER_BIAS) << 19) | ((aW + SDF_GS_CENTER_BIAS) << 3);
 
-    packet->primitive.registerId = SDF_GS_PRIM;
-    packet->xyz2[0].registerId = SDF_GS_XYZ2;
-    packet->test.value = SDF_GS_CENTERED_VIEW_BOUNDS_TEST;
-    packet->test.registerId = SDF_GS_TEST_1;
-    packet->primitive.value = SDF_GS_PRIMITIVE_SPRITE;
-    packet->rgbaq.value = (u64)0xFE00 << 46;
-    packet->rgbaq.registerId = SDF_GS_RGBAQ;
-    packet->xyz2[0].value = lowerBounds;
-    packet->xyz2[1].value = upperBounds;
-    packet->xyz2[1].registerId = SDF_GS_XYZ2;
+    aClear->primitive.reg = SDF_GS_PRIM;
+    aClear->xyz2[0].reg = SDF_GS_XYZ2;
+    aClear->test.data = SDF_GS_CENTERED_VIEW_BOUNDS_TEST;
+    aClear->test.reg = SDF_GS_TEST_1;
+    aClear->primitive.data = SDF_GS_PRIMITIVE_SPRITE;
+    aClear->rgbaq.data = (u64)0xFE00 << 46;
+    aClear->rgbaq.reg = SDF_GS_RGBAQ;
+    aClear->xyz2[0].data = lowerBounds;
+    aClear->xyz2[1].data = upperBounds;
+    aClear->xyz2[1].reg = SDF_GS_XYZ2;
 }
 
-/* Seed PRMODECONT, COLCLAMP, DTHE and TEXA drawing registers. */
-void sdfGrSetDrawDefParmPacket(SdfGsDrawDefaultsRegisters *packet) {
-    packet->prmodecont.value = 1;
-    packet->prmodecont.registerId = SDF_GS_PRMODECONT;
-    packet->colclamp.value = 1;
-    packet->colclamp.registerId = SDF_GS_COLCLAMP;
-    packet->dthe.value = 0;
-    packet->dthe.registerId = SDF_GS_DTHE;
-    packet->texa.value = SDF_GS_DEFAULT_TEXA;
-    packet->texa.registerId = SDF_GS_TEXA;
+void sdfGrSetDrawDefParmPacket(sdfGrRefGifPacketHeader_t *aDef) {
+    aDef->dmatag.data = 1;
+    aDef->dmatag.reg = SDF_GS_PRMODECONT;
+    aDef->giftag.data = 1;
+    aDef->giftag.reg = SDF_GS_COLCLAMP;
+    aDef->reftag.data = 0;
+    aDef->reftag.reg = SDF_GS_DTHE;
+    aDef->linktag.data = SDF_GS_DEFAULT_TEXA;
+    aDef->linktag.reg = SDF_GS_TEXA;
 }
 
-/* Build the common header and FRAME/ZBUF/XYOFFSET/SCISSOR state for one GS context. */
-void sdfGrSetDrawFrame(SdfGsContextPacket *packet, s32 frameAddress, s32 width, s32 height,
-                           s32 frameFormat, s32 depthAddress, s32 depthFormat, SdfGsContext context) {
-    sdfGrSetRegsPacketHeader(&packet->header, SDF_SCENE_DRAW_PAYLOAD_QWORDS);
-    sdfGrSetDrawFramePacket(&packet->registers, frameAddress, width, height, frameFormat, depthAddress, depthFormat, 0, context);
+void sdfGrSetDrawFrame(sdfGrDrawFrame_t *aFrame, s32 aFrameAddr, s32 aW, s32 aH,
+                           s32 aPixelFormat, s32 aZBuffAddr, s32 aZBuffFormat, s32 aContext) {
+    sdfGrSetRegsPacketHeader(&aFrame->header, SDF_SCENE_DRAW_PAYLOAD_QWORDS);
+    sdfGrSetDrawFramePacket(&aFrame->packet, aFrameAddr, aW, aH, aPixelFormat, aZBuffAddr, aZBuffFormat, 0, aContext);
 }
 
-extern u8 sdfGrBufferSlotIndex;
-
-/* Build both GS drawing contexts from the selected frame buffer and shared depth buffer. */
-void sdfGrSetDrawEnv(SdfSceneDrawPacket *packet, sdfGrFrameSet_t *view, s32 bufferIndex) {
+void sdfGrSetDrawEnv(sdfGrDrawEnv_t *aEnv, sdfGrFrameSet_t *aFrameSet, s32 aEvenOdd) {
     s32 frameAddress;
     s32 depthAddress;
     s32 width;
@@ -505,140 +794,124 @@ void sdfGrSetDrawEnv(SdfSceneDrawPacket *packet, sdfGrFrameSet_t *view, s32 buff
     s32 frameFormat;
     s32 depthFormat;
 
-    sdfGrSetRegsPacketHeader(&packet->header, SDF_TEXTURE_SCENE_PAYLOAD_QWORDS);
-    frameAddress = view->buffers[bufferIndex]->word;
-    depthAddress = view->buffers[SDF_GRAPH_DEPTH_BUFFER_INDEX]->word;
-    width = view->width;
-    frameFormat = view->bufferFormat;
-    height = view->height;
-    depthFormat = view->auxiliaryFormat;
-    sdfGrSetDrawFramePacket(&packet->contextOne, frameAddress, width, height, frameFormat, depthAddress, depthFormat, sdfGrBufferSlotIndex, SDF_GS_CONTEXT_1);
-    sdfGrSetDrawFramePacket(&packet->contextTwo, frameAddress, width, height, frameFormat, depthAddress, depthFormat, sdfGrBufferSlotIndex, SDF_GS_CONTEXT_2);
-    sdfGrSetClearPacket(&packet->centeredBounds, view->width, view->height, view->bufferFormat, view->auxiliaryFormat);
-    packet->blendState.contextOne.test.value = SDF_GS_SCENE_TEST;
-    packet->blendState.contextOne.test.registerId = SDF_GS_TEST_1;
-    packet->blendState.contextOne.alpha.value = SDF_GS_DEFAULT_ALPHA;
-    packet->blendState.contextOne.alpha.registerId = SDF_GS_ALPHA_1;
-    packet->blendState.contextTwo.test.value = SDF_GS_SCENE_TEST;
-    packet->blendState.contextTwo.test.registerId = SDF_GS_TEST_2;
-    packet->blendState.contextTwo.alpha.value = SDF_GS_DEFAULT_ALPHA;
-    packet->blendState.contextTwo.alpha.registerId = SDF_GS_ALPHA_2;
-    sdfGrSetDrawDefParmPacket(&packet->drawDefaults);
+    sdfGrSetRegsPacketHeader(&aEnv->header, SDF_TEXTURE_SCENE_PAYLOAD_QWORDS);
+    frameAddress = aFrameSet->buffers[aEvenOdd]->addr;
+    depthAddress = aFrameSet->buffers[SDF_GRAPH_DEPTH_BUFFER_INDEX]->addr;
+    width = aFrameSet->width;
+    frameFormat = aFrameSet->bufferFormat;
+    height = aFrameSet->height;
+    depthFormat = aFrameSet->auxiliaryFormat;
+    sdfGrSetDrawFramePacket(&aEnv->frame1, frameAddress, width, height, frameFormat, depthAddress, depthFormat, D_0055188A, 0);
+    sdfGrSetDrawFramePacket(&aEnv->frame2, frameAddress, width, height, frameFormat, depthAddress, depthFormat, D_0055188A, 1);
+    sdfGrSetClearPacket(&aEnv->clear, aFrameSet->width, aFrameSet->height, aFrameSet->bufferFormat, aFrameSet->auxiliaryFormat);
+    aEnv->test1.data = SDF_GS_SCENE_TEST;
+    aEnv->test1.reg = SDF_GS_TEST_1;
+    aEnv->alpha1.data = SDF_GS_DEFAULT_ALPHA;
+    aEnv->alpha1.reg = SDF_GS_ALPHA_1;
+    aEnv->test2.data = SDF_GS_SCENE_TEST;
+    aEnv->test2.reg = SDF_GS_TEST_2;
+    aEnv->alpha2.data = SDF_GS_DEFAULT_ALPHA;
+    aEnv->alpha2.reg = SDF_GS_ALPHA_2;
+    sdfGrSetDrawDefParmPacket(&aEnv->defParm);
 }
 
+extern void sdfTexSetPacket(sdfTexPacket_t *packet, s32 width, s32 height, s32 gsAddr,
+                            s32 pixelFormat, s32 clutAddr, s32 clutFormat, s32 colorComp,
+                            s32 mipmapCount, s32 mipmapParm, s32 wrapMode, s32 context);
+
 #ifdef NON_MATCHING
-#include "common.h"
-#include "sdf.h"
-#include "sdf_gs_packet.h"
-#include "sdf_scene_packet.h"
-#include "sdf_tex_packet.h"
-
-extern u8 sdfGrBufferSlotIndex;
-
-#define SDF_GRAPH_DEPTH_BUFFER 2 /* the view's buffers: two colour, then depth */
-#define SDF_FRAME_MASK_ALPHA 0x00FFFFFF00000000LL /* FBMSK: keep destination alpha */
-
-/* Point a scene node's packets at the view's colour buffer for this frame:
- * both contexts' frame, depth and scissor; FRAME_1 and FRAME_2 writing colour
- * only; and textures of this colour buffer and the other one. Upstream:
- * INCLUDE_ASM in both games; written from the retail routine. It
- * differs from retail in four words of scheduling; the calls, arguments and
- * stores are the same. */
-void sdfGrStdDrawEnvPredraw(SdfSceneNode *node, s32 bufferIndex) {
-    sdfGrFrameSet_t *view = node->view;
-    s32 frameAddress = view->buffers[bufferIndex]->word;
-    s16 width = view->width;
-    s32 depthAddress = view->buffers[SDF_GRAPH_DEPTH_BUFFER]->word;
-    s32 frameFormat = view->bufferFormat;
+/* 86 of 110 words; first differs at +0x88, where the scheduler issues the
+ * height argument copy before the pixel-format one. The whole body is one
+ * basic block, so the remaining 24 words are that one tie cascading. */
+void sdfGrStdDrawEnvPredraw(sdfGrStdDrawEnv_t *env, s32 evenOdd)
+{
+    sdfGrFrameSet_t *view = env->view;
+    s32 width = view->width;
     s32 height = view->height;
+    s32 frameAddress = view->buffers[evenOdd]->addr;
+    s32 depthAddress = view->buffers[2]->addr;
+    s32 frameFormat = view->bufferFormat;
     s32 depthFormat = view->auxiliaryFormat;
     s64 frame;
 
-    sdfGrSetDrawFramePacket(&node->contextOne, frameAddress, width, height, frameFormat, depthAddress,
-                                    depthFormat, sdfGrBufferSlotIndex, SDF_GS_CONTEXT_1);
-    sdfGrSetDrawFramePacket(&node->contextTwo, frameAddress, width, height, frameFormat, depthAddress,
-                                    depthFormat, sdfGrBufferSlotIndex, SDF_GS_CONTEXT_2);
-    /* FRAME: FBP in 2048-word pages, FBW in 64-pixel units, PSM. */
-    frame = (s64)(frameFormat << 24) | (s64)(frameAddress >> 11) | (s64)((width >> 6) << 16) |
-            SDF_FRAME_MASK_ALPHA;
-    node->frameContextOne.registerId = SDF_GS_FRAME_1;
-    node->frameContextOne.value = frame;
-    node->frameContextTwo.registerId = SDF_GS_FRAME_2;
-    node->frameContextTwo.value = frame;
-    if (frameFormat == 0) {
-        frameFormat = 1; /* a PSMCT32 buffer is sampled as PSMCT24 */
-    }
-    sdfTexSetPacket(&node->texturePackets[1], width, height, frameAddress, frameFormat, 0, 0, 1, 0, 0, 5,
-                               SDF_GS_CONTEXT_1);
-    sdfTexSetPacket(&node->texturePackets[0], width, height, view->buffers[bufferIndex ^ 1]->word,
-                               frameFormat, 0, 0, 1, 0, 0, 5, SDF_GS_CONTEXT_1);
+    sdfGrSetDrawFramePacket(&env->frame1, frameAddress, width, height, frameFormat,
+                            depthAddress, depthFormat, D_0055188A, 0);
+    sdfGrSetDrawFramePacket(&env->frame2, frameAddress, width, height, frameFormat,
+                            depthAddress, depthFormat, D_0055188A, 1);
+    frame = (s64)(s32)((u32)(frameAddress >> 11) | ((u32)frameFormat << 24) |
+                       ((u32)(width >> 6) << 16)) | 0x00FFFFFF00000000ULL;
+    env->frameContextOne.data = frame;
+    env->frameContextOne.reg = SDF_GS_FRAME_1;
+    env->frameContextTwo.data = frame;
+    env->frameContextTwo.reg = SDF_GS_FRAME_2;
+    if (frameFormat == 0) frameFormat = 1;
+    sdfTexSetPacket(&env->texturePackets[1], width, height, frameAddress, frameFormat,
+                    0, 0, 1, 0, 0, 5, 0);
+    sdfTexSetPacket(&env->texturePackets[0], width, height, view->buffers[evenOdd ^ 1]->addr,
+                    frameFormat, 0, 0, 1, 0, 0, 5, 0);
 }
 #else
 INCLUDE_ASM(const s32, "sdf/sdfDraw", sdfGrStdDrawEnvPredraw);
 #endif
 
-/* Retain the render-target view and initialize the scene callback and fixed drawing state. */
-void sdfGrSetStdDrawEnv(SdfSceneNode *node, sdfGrFrameSet_t *view) {
-    sdfGrSetRegsPacketHeader(&node->header, SDF_TEXTURE_SCENE_PAYLOAD_QWORDS);
-    node->view = view;
-    node->link.patch = sdfGrStdDrawEnvPredraw;
-    sdfGrSetClearPacket(&node->centeredBounds, view->width, view->height, view->bufferFormat, view->auxiliaryFormat);
-    node->blendState.contextOne.test.value = SDF_GS_SCENE_TEST;
-    node->blendState.contextOne.test.registerId = SDF_GS_TEST_1;
-    node->blendState.contextOne.alpha.value = SDF_GS_DEFAULT_ALPHA;
-    node->blendState.contextOne.alpha.registerId = SDF_GS_ALPHA_1;
-    node->blendState.contextTwo.test.value = SDF_GS_SCENE_TEST;
-    node->blendState.contextTwo.test.registerId = SDF_GS_TEST_2;
-    node->blendState.contextTwo.alpha.value = SDF_GS_DEFAULT_ALPHA;
-    node->blendState.contextTwo.alpha.registerId = SDF_GS_ALPHA_2;
-    sdfGrSetDrawDefParmPacket(&node->drawDefaults);
+void sdfGrSetStdDrawEnv(sdfGrStdDrawEnv_t *aEnv, sdfGrFrameSet_t *aFrameSet) {
+    sdfGrSetRegsPacketHeader(&aEnv->header, SDF_TEXTURE_SCENE_PAYLOAD_QWORDS);
+    aEnv->view = aFrameSet;
+    aEnv->link.predrawFunc = sdfGrStdDrawEnvPredraw;
+    sdfGrSetClearPacket(&aEnv->clear, aFrameSet->width, aFrameSet->height, aFrameSet->bufferFormat, aFrameSet->auxiliaryFormat);
+    aEnv->test1.data = SDF_GS_SCENE_TEST;
+    aEnv->test1.reg = SDF_GS_TEST_1;
+    aEnv->alpha1.data = SDF_GS_DEFAULT_ALPHA;
+    aEnv->alpha1.reg = SDF_GS_ALPHA_1;
+    aEnv->test2.data = SDF_GS_SCENE_TEST;
+    aEnv->test2.reg = SDF_GS_TEST_2;
+    aEnv->alpha2.data = SDF_GS_DEFAULT_ALPHA;
+    aEnv->alpha2.reg = SDF_GS_ALPHA_2;
+    sdfGrSetDrawDefParmPacket(&aEnv->defParm);
 }
 
-/* Link the metadata node separately from the DMA payload one quadword later. */
-void sdfGrLinkStdDrawEnv(sdfDrawTag_t *dmaList, sdfPreDrawTag_t *linkedList, SdfPacketPatchLink *linkedNode) {
-    sdfPreDrawTagLink(linkedList, linkedNode);
-    sdfDrawTagLink(dmaList, (s32)linkedNode + SDF_QWORD_BYTES);
+void sdfGrLinkStdDrawEnv(sdfDrawTag_t *aTag, sdfPreDrawTag_t *aPreDrawTag, sdfPreDrawHook_t *aEnv) {
+    sdfPreDrawTagLink(aPreDrawTag, aEnv);
+    sdfDrawTagLink(aTag, (s32)aEnv + SDF_QWORD_BYTES);
 }
 
-/* Reference the masked FRAME write (FBMSK 0x00FFFFFF); zero selects GS context one, otherwise two. */
-void sdfGrSetFrameMaskRGB(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext) {
-    if (gsContext == 0) {
-        sdfGrSetRefGifPacket(packet, (u32)(source + 0x180), 1);
+void sdfGrSetFrameMaskRGB(const u8 *aEnv, sdfGrRefGifPacketHeader_t *aHdr, s32 aContext) {
+    if (aContext == 0) {
+        sdfGrSetRefGifPacket(aHdr, (u32)(aEnv + 0x180), 1);
         return;
     }
-    sdfGrSetRefGifPacket(packet, (u32)(source + 400), 1);
+    sdfGrSetRefGifPacket(aHdr, (u32)(aEnv + 400), 1);
 }
 
-/* Reference the unmasked FRAME write; zero selects GS context one, otherwise two. */
-void sdfGrSetFrameMaskReset(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext) {
-    if (gsContext == 0) {
-        sdfGrSetRefGifPacket(packet, (u32)(source + 0x70), 1);
+void sdfGrSetFrameMaskReset(const u8 *aEnv, sdfGrRefGifPacketHeader_t *aHdr, s32 aContext) {
+    if (aContext == 0) {
+        sdfGrSetRefGifPacket(aHdr, (u32)(aEnv + 0x70), 1);
         return;
     }
-    sdfGrSetRefGifPacket(packet, (u32)(source + 0xb0), 1);
+    sdfGrSetRefGifPacket(aHdr, (u32)(aEnv + 0xb0), 1);
 }
 
-void sdfGrLinkDispFrameTex(sdfDrawTag_t *list, u32 source, sdfGrRefPacketHeader_t *node) {
-    node->vifCommands = (((u64)0x50000004 << 16) | 0x1000) << 16;
-    node->dmaTag = ((u64)((source + 0x1a0) & 0xfffffff) << 32) | 0x30000004;
-    node->nextTag = 0;
-    sdfDrawTagLinkRef(list, (u32)node);
+void sdfGrLinkDispFrameTex(sdfDrawTag_t *aTag, u32 aEnv, sdfGrRefPacketHeader_t *aPkt) {
+    aPkt->vifCommands = (((u64)0x50000004 << 16) | 0x1000) << 16;
+    aPkt->dmaTag = ((u64)((aEnv + 0x1a0) & 0xfffffff) << 32) | 0x30000004;
+    QUAD_ZERO(aPkt->nextTag);
+    sdfDrawTagLinkRef(aTag, (u32)aPkt);
 }
 
-void sdfGrLinkDrawFrameTex(sdfDrawTag_t *list, u32 source, sdfGrRefPacketHeader_t *node) {
-    node->vifCommands = (((u64)0x50000004 << 16) | 0x1000) << 16;
-    node->dmaTag = ((u64)((source + 0x1e0) & 0xfffffff) << 32) | 0x30000004;
-    node->nextTag = 0;
-    sdfDrawTagLinkRef(list, (u32)node);
+void sdfGrLinkDrawFrameTex(sdfDrawTag_t *aTag, u32 aEnv, sdfGrRefPacketHeader_t *aPkt) {
+    aPkt->vifCommands = (((u64)0x50000004 << 16) | 0x1000) << 16;
+    aPkt->dmaTag = ((u64)((aEnv + 0x1e0) & 0xfffffff) << 32) | 0x30000004;
+    QUAD_ZERO(aPkt->nextTag);
+    sdfDrawTagLinkRef(aTag, (u32)aPkt);
 }
 
-void sdfGrFramePacketPredraw(SdfPacketBuilder *packet, s32 bufferIndex) {
-    sdfGrFrameSet_t *view = packet->source;
+void sdfGrFramePacketPredraw(sdfGrFramePacket_t *aPre, s32 aEvenOdd) {
+    sdfGrFrameSet_t *view = aPre->frameSet;
     u64 frameRegister;
     u64 depthRegister;
     s16 widthPages;
 
-    if (packet->mode == 0) {
+    if (aPre->context == 0) {
         frameRegister = 0x4C;
         depthRegister = 0x4E;
     } else {
@@ -646,29 +919,29 @@ void sdfGrFramePacketPredraw(SdfPacketBuilder *packet, s32 bufferIndex) {
         depthRegister = 0x4F;
     }
     widthPages = (view->width + 63) >> 6;
-    packet->frame.value = ((u64)packet->frameMask << 32) |
-        (u64)(view->buffers[bufferIndex]->word >> 11) |
+    aPre->frame.data = ((u64)aPre->frameMask << 32) |
+        (u64)(view->buffers[aEvenOdd]->addr >> 11) |
         ((s64)(view->bufferFormat << 24) | ((s64)widthPages << 16));
-    packet->frame.registerId = frameRegister;
-    packet->zbuf.value = (s64)(view->auxiliaryFormat << 24) |
-        (u64)(view->buffers[2]->word >> 11);
-    packet->zbuf.registerId = depthRegister;
+    aPre->frame.reg = frameRegister;
+    aPre->zbuff.data = (s64)(view->auxiliaryFormat << 24) |
+        (u64)(view->buffers[2]->addr >> 11);
+    aPre->zbuff.reg = depthRegister;
 }
 
-void sdfGrSetFramePacket(SdfPacketBuilder *packet, sdfGrFrameSet_t *source, u32 frameMask, s32 region, s32 mode) {
-    sdfGrSetRegsPacketHeader(&packet->packetHeader, 2);
-    packet->mode = mode;
-    packet->source = source;
-    packet->frameMask = frameMask;
-    packet->region = region;
-    packet->prepare = sdfGrFramePacketPredraw;
+void sdfGrSetFramePacket(sdfGrFramePacket_t *aFrame, sdfGrFrameSet_t *aFrameSet, u32 aFrameMask, s32 aZBuffMask, s32 aContext) {
+    sdfGrSetRegsPacketHeader(&aFrame->packetHeader, 2);
+    aFrame->context = aContext;
+    aFrame->frameSet = aFrameSet;
+    aFrame->frameMask = aFrameMask;
+    aFrame->zbuffMask = aZBuffMask;
+    aFrame->prepare = sdfGrFramePacketPredraw;
 }
 
-void sdfGrReqDraw(sdfDrawTag_t *list, SdfPacketChain *chain) {
+void sdfGrReqDraw(sdfDrawTag_t *aTag, sdfPreDrawChain_t *aPreDraw) {
     u32 start = sdfGetRunTimeCountBase();
     s32 interrupts;
     s32 index;
-    SdfPacketSlot *slot;
+    sdfDrawReqRec_t *slot;
 
     while (sdfReqDrawDelayCount != 0) {
     }
@@ -679,15 +952,15 @@ void sdfGrReqDraw(sdfDrawTag_t *list, SdfPacketChain *chain) {
         index = 0;
     }
     slot = &sdfGrDrawState[index];
-    slot->packetList = NULL;
-    slot->callbackHead = NULL;
-    slot->slotUpdatePhase = 0;
-    if (list != NULL && list->tail != 0) {
-        slot->packetList = list;
-        if (chain != NULL) {
-            slot->callbackHead = chain->head->first;
-            if (slot->callbackHead != NULL) {
-                chain->tail->last->next = NULL;
+    slot->drawTag = NULL;
+    slot->preDraw = NULL;
+    slot->drawCount = 0;
+    if (aTag != NULL && aTag->tail != 0) {
+        slot->drawTag = aTag;
+        if (aPreDraw != NULL) {
+            slot->preDraw = aPreDraw->tagHead->head;
+            if (slot->preDraw != NULL) {
+                aPreDraw->tail->tail->next = NULL;
             }
         }
         slot->queuedBufferIndex = sdfFrameId;
@@ -700,195 +973,178 @@ void sdfGrReqDraw(sdfDrawTag_t *list, SdfPacketChain *chain) {
     }
 }
 
-void sdfGrReqDrawDelay(s32 value) {
-    sdfReqDrawDelayCount = (value < 0) ? 0 : value;
+void sdfGrReqDrawDelay(s32 count) {
+    sdfReqDrawDelayCount = (count < 0) ? 0 : count;
 }
 
 void sdfGrInitDraw(void) {
     sdfReqDrawDelayCount = 0;
-    sdfGrDrawState[0].packetList = NULL;
+    sdfGrDrawState[0].drawTag = NULL;
     sdfDrawReqQueueIndex = 0;
 }
 
-#ifdef NON_MATCHING
-#include "common.h"
-#include "eeregs.h"
-#include "sdf.h"
-#include "sdf_packet_patch.h"
-#include "sdf_packet_slot.h"
-#include "sdk_libkernl.h"
-#include "sdk_libdma.h"
+/* The draw worker publishes this to the kernel process, which clears it. */
+#define D_00551888 sdfGrFrameComplete
 
-extern SdfPacketSlot sdfGrDrawState[];
-extern s32 sdfDrawReqQueueIndex;
-extern s32 dds3GsThreadId;
-extern u8 sdfGrDrawFirstFlag;
-extern u8 sdfFrameEvenOdd;
-extern s8 sdfGrFrameComplete;
-extern u8 sdfGrDrawFrameId;
-extern u8 sdfGrBufferSlotIndex;
-extern u32 sdfGrDrawFrameTagHead;
-extern s8 sdfDrawImageTrans;
-extern volatile u8 sdfDispThreadFlag;
+extern volatile u8 D_00551888;
+
 extern volatile u8 sdfDrawFrameFlag;
-
-extern void sdfDeliverDrawStart(s32 oldBuffer, s32 nextBuffer);
-extern void sdfDeliverDrawEnd(s32 updateSingleSlot, s32 bufferIndex, s32 slotIndex);
+extern volatile u8 sdfDispThreadFlag;
+extern u8 sdfFrameEvenOdd;
+extern u8 sdfGrDrawFrameId;
+extern u8 sdfGrDrawFirstFlag;
+extern u32 sdfGrDrawFrameTagHead;
+extern s32 dds3GsThreadId;
+extern s32 SignalSema(s32 sema);
+extern s32 SleepThread(void);
+extern void FlushCache(s32 mode);
+extern sceDmaChan *sceDmaGetChan(u32 channel);
+extern void sceDmaSend(sceDmaChan *channel, void *tag);
+extern void sceDmaRecvN(sceDmaChan *channel, void *data, u32 qwc);
+extern u64 sceGsGetIMR(void);
+extern u64 sceGsPutIMR(u64 mask);
+extern void sdfDeliverDrawStart(s32 frameId, s32 bufferId);
+extern void sdfDeliverDrawEnd(s32 mode, s32 frameId, s32 halfOffset);
 extern void sdfImageSetTrans(void);
 extern void sdfDevConsDrawAll(void);
 extern void sdfDelayedResrcProc(void);
-extern void sceDmaRecvN(void *channel, void *destination, s32 quadwords);
-extern u64 sceGsGetIMR(void);
-extern u64 sceGsPutIMR(u64 imr);
 
-#define CHCR_STR 0x100
-#define CHCR_TIE_TTE 0xC0
-#define GS_CSR_FINISH 2
-#define GS_IMR_FINISH_MASK 0x200
+void sdfGrDrawFrame(void)
+{
+    sdfDrawReqRec_t *request;
+    sdfDrawTag_t *drawTag;
+    sdfPreDrawHook_t *hook;
+    sceDmaChan *channel;
+    sdfStoreTransfer_t *transfer;
+    u32 mask, resumeAddress, address;
+    u8 bufferSlot, frameId, firstFlag, drawCount;
+    s32 remaining, count;
 
-/* The data the chain points at when it pauses for a readback: a transfer of
- * GS memory into EE RAM, then an optional end call before the chain resumes.
- * The end function is a code address held in a word. */
-typedef struct SdfGsReadback {
-    s32 quadwordCount;
-    u32 destination;
-    u32 endFunction;
-    u32 endArgument;
-} SdfGsReadback;
-
-/* The chain paused at an interrupting tag. Let the GS finish drawing, then
- * read the requested GS memory into EE RAM over VIF1 and resume the chain
- * where it paused. Returns 0 if the worker is told to stop. */
-static s32 sdfServeGsReadback(void *channel) {
-    u32 imr = (u32)sceGsGetIMR();
-    SdfGsReadback *readback;
-    u32 resume;
-    u32 destination;
-    s32 remaining;
-    s32 count;
-
-    sceGsPutIMR(imr | GS_IMR_FINISH_MASK);
-    HW_WRITE(GS_CSR, GS_CSR_FINISH);
-    HW_WRITE(D1_CHCR, HW_READ(D1_CHCR) | CHCR_STR);
-    SleepThread();
-    while (!(HW_READ(GS_CSR) & GS_CSR_FINISH)) {
-        if (sdfDrawFrameFlag) {
-            sceGsPutIMR(imr);
-            return 0;
+    for (;;) {
+        request = &sdfGrDrawState[sdfDrawReqQueueIndex];
+        drawTag = request->drawTag;
+        if (drawTag == NULL) {
+            SignalSema(dds3GsThreadId);
+            break;
         }
-    }
-    HW_WRITE(GS_CSR, 0);
-    sceGsPutIMR(imr);
-    HW_WRITE(D1_CHCR, HW_READ(D1_CHCR) | CHCR_STR);
-    SleepThread();
-
-    resume = HW_READ(D1_TADR);
-    readback = (SdfGsReadback *)HW_READ(D1_MADR);
-    while (HW_READ(VIF1_STAT) & 3) {
-        if (sdfDrawFrameFlag) return 0;
-    }
-    while (HW_READ(GIF_STAT) & 0x80) {
-        if (sdfDrawFrameFlag) return 0;
-    }
-    HW_WRITE(GIF_CTRL, 8);            /* PSE: pause the GIF */
-    HW_WRITE(VIF1_STAT, 0x800000);    /* FDR: the VIF1 FIFO reads from the GS */
-    HW_WRITE(GS_BUSDIR, 1);
-    HW_WRITE(GIF_CTRL, 0);
-    remaining = readback->quadwordCount;
-    destination = readback->destination;
-    while (remaining > 0) {
-        count = remaining > 0xF000 ? 0xF000 : remaining;
-        sceDmaRecvN(channel, (void *)destination, count);
-        remaining -= count;
-        SleepThread();
-        destination += count * 16;
-        if (sdfDrawFrameFlag) break;
-    }
-    HW_WRITE(VIF1_STAT, 0);
-    HW_WRITE(GS_BUSDIR, 0);
-    HW_WRITE(D1_CHCR, HW_READ(D1_CHCR) & ~1);
-    if (sdfDrawFrameFlag) return 0;
-    if (readback->endFunction != 0) {
-        ((void (*)(u32, u32))readback->endFunction)(readback->endArgument, resume);
-    }
-    sceDmaSend(channel, (void *)resume);
-    return 1;
-}
-
-/* Send the current slot's frame to the GS over VIF1 DMA, serving the GS
- * readbacks its chain requests, then commit the slot's buffers. Upstream:
- * INCLUDE_ASM in both games; same register and call sequence as the
- * retail routine. */
-void sdfGrDrawFrame(void) {
-    SdfPacketSlot *slot = &sdfGrDrawState[sdfDrawReqQueueIndex];
-    struct sdfDrawTag_t *packets = slot->packetList;
-    SdfPacketPatchLink *link;
-    void *channel;
-
-    if (packets == NULL || slot->slotUpdatePhase == 2) {
-        SignalSema(dds3GsThreadId);
-    } else {
-        sdfGrBufferSlotIndex = (slot->slotUpdatePhase != 0 ? slot->bufferSlotIndex : sdfFrameEvenOdd) ^ 1;
-        slot->bufferSlotIndex = sdfGrBufferSlotIndex;
-        slot->bufferIndex = sdfGrDrawFrameId;
-        sdfDeliverDrawStart(sdfGrDrawFrameId, slot->queuedBufferIndex);
+        if (request->drawCount == 2) {
+            SignalSema(dds3GsThreadId);
+            break;
+        }
+        if (request->drawCount == 0) {
+            bufferSlot = sdfFrameEvenOdd ^ 1;
+            request->bufferSlotIndex = bufferSlot;
+            D_0055188A = bufferSlot;
+        } else {
+            bufferSlot = request->bufferSlotIndex ^ 1;
+            request->bufferSlotIndex = bufferSlot;
+            D_0055188A = bufferSlot;
+        }
+        request->bufferIndex = sdfGrDrawFrameId;
+        sdfDeliverDrawStart(request->bufferIndex, request->queuedBufferIndex);
         SignalSema(dds3GsThreadId);
         if (sdfDrawImageTrans != 0) {
             sdfDrawImageTrans = 0;
             sdfImageSetTrans();
         }
-        for (link = slot->callbackHead; link != NULL; link = link->next) {
-            link->patch(link, slot->bufferIndex);
+        for (hook = request->preDraw; hook != NULL; hook = hook->next) {
+            hook->predrawFunc(hook, request->bufferIndex);
         }
-
         FlushCache(0);
         channel = sceDmaGetChan(1);
-        HW_WRITE(D1_CHCR, HW_READ(D1_CHCR) | CHCR_TIE_TTE);
+        HW_FIELD_OR(channel->chcr, 0xC0);
         sdfDispThreadFlag = 3;
-        sceDmaSend(channel, (void *)(packets->head & 0x0FFFFFFF));
-        sdfGrDrawFrameTagHead = packets->head;
+        sceDmaSend(channel, (void *)(drawTag->head & SDF_DMA_ADDRESS_MASK));
+        sdfGrDrawFrameTagHead = drawTag->head;
         for (;;) {
             SleepThread();
-            if (sdfDrawFrameFlag) return;
-            /* The chain stops at its end tag, or pauses at an interrupting one. */
-            if (((HW_READ(D1_CHCR) >> 16) & 0x7000) == 0x7000) break;
-            if (!sdfServeGsReadback(channel)) return;
+            if (sdfDrawFrameFlag != 0) return;
+            if (((HW_FIELD_READ(channel->chcr) >> 16) & 0x7000) == 0x7000) {
+                break;
+            }
+            mask = (u32)sceGsGetIMR();
+            sceGsPutIMR(mask | 0x200);
+            HW_WRITE(GS_CSR, 2);
+            HW_FIELD_OR(channel->chcr, 0x100);
+            SleepThread();
+            if ((HW_READ(GS_CSR) & 2) == 0) {
+                do {
+                    if (sdfDrawFrameFlag != 0) {
+                        sceGsPutIMR(mask);
+                        return;
+                    }
+                } while ((HW_READ(GS_CSR) & 2) == 0);
+            }
+            HW_WRITE(GS_CSR, 0);
+            sceGsPutIMR(mask);
+            HW_FIELD_OR(channel->chcr, 0x100);
+            SleepThread();
+            resumeAddress = HW_FIELD_READ(channel->tadr);
+            transfer = (sdfStoreTransfer_t *)HW_FIELD_READ(channel->madr);
+            while ((HW_READ(VIF1_STAT) & 3) != 0) {
+                if (sdfDrawFrameFlag != 0) return;
+            }
+            while ((HW_READ(GIF_STAT) & 0x80) != 0) {
+                if (sdfDrawFrameFlag != 0) return;
+            }
+            HW_WRITE(GIF_CTRL, 8);
+            HW_WRITE(VIF1_STAT, 0x800000);
+            HW_WRITE(GS_BUSDIR, 1);
+            HW_WRITE(GIF_CTRL, 0);
+            remaining = transfer->length;
+            address = transfer->address;
+            while (remaining > 0) {
+                count = remaining;
+                if (count > 0xF000) {
+                    count = 0xF000;
+                }
+                remaining -= count;
+                sceDmaRecvN(channel, (void *)address, count);
+                SleepThread();
+                if (sdfDrawFrameFlag != 0) break;
+                address += count * 16;
+            }
+            HW_WRITE(VIF1_STAT, 0);
+            HW_WRITE(GS_BUSDIR, 0);
+            HW_FIELD_AND(channel->chcr, ~1);
+            if (sdfDrawFrameFlag != 0) return;
+            if (transfer->callback != NULL) transfer->callback(transfer->callbackParameter);
+            sceDmaSend(channel, (void *)resumeAddress);
         }
-        while (HW_READ(VIF1_STAT) & 3) {
+        while ((HW_READ(VIF1_STAT) & 3) != 0) {
         }
-        while (HW_READ(GIF_STAT) & 0x180) {
+        while ((HW_READ(GIF_STAT) & 0x180) != 0) {
         }
-        sdfDeliverDrawEnd(slot->slotUpdatePhase, slot->bufferIndex, slot->bufferSlotIndex);
+        sdfDeliverDrawEnd(request->drawCount, request->bufferIndex, request->bufferSlotIndex);
+        drawCount = request->drawCount;
+        frameId = sdfGrDrawFrameId;
         sdfGrDrawFirstFlag = 1;
-        slot->slotUpdatePhase++;
-        sdfGrDrawFrameId ^= 1;
+        request->drawCount = drawCount + 1;
+        sdfGrDrawFrameId = frameId ^ 1;
+        break;
     }
-    sdfGrFrameComplete = 1;
-    if (sdfGrDrawFirstFlag) sdfDevConsDrawAll();
+    firstFlag = sdfGrDrawFirstFlag;
+    D_00551888 = 1;
+    if (firstFlag != 0) sdfDevConsDrawAll();
     sdfDelayedResrcProc();
 }
-#else
-INCLUDE_ASM(const s32, "sdf/sdfDraw", sdfGrDrawFrame);
-#endif
 
-extern volatile SdfDrawFrameExecutionState sdfDrawSyncFlag;
-
-/* Wait for frame execution to finish, then sleep until the active slot is empty or ready. */
 void sdfDrawSync(void) {
-    SdfPacketSlot *table = sdfGrDrawState;
+    sdfDrawReqRec_t *table = sdfGrDrawState;
 
     for (;;) {
-        while (sdfDrawSyncFlag != SDF_DRAW_FRAME_IDLE) {
+        while (sdfDrawSyncFlag != 0) {
         }
-        if (table[sdfDrawReqQueueIndex].packetList == NULL) {
+        if (table[sdfDrawReqQueueIndex].drawTag == NULL) {
             break;
         }
-        if (table[sdfDrawReqQueueIndex].slotUpdatePhase >= 2) {
+        if (table[sdfDrawReqQueueIndex].drawCount >= 2) {
             break;
         }
         sdfWaitVblank(0);
     }
 }
+
 INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfDrawFrameFlag);
 
 INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfDrawSyncFlag);
@@ -910,4 +1166,3 @@ INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfDrawReqQueueIndex);
 INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfGrDrawFrameTagHead);
 
 INCLUDE_SDATA(const s32, "sdf/sdfDraw", sdfDrawFrameCount);
-
