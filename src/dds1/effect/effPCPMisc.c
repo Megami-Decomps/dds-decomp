@@ -2662,8 +2662,8 @@ void effPcpUpdateOrbitingAimNode(EffPCPSpanWork *work) {
     }
     if (node != 0) {
         VU0_LOAD_MATRIX(work);
-        sdfVuLoadSecondaryRotationMatrixY(work->angle);
-        sdfComposeVuMatrixFromRegisters();
+        SetRotateMatrixY_B(work->angle);
+        MultMatrixNoArg();
         aim[0] = aim[1] = 0.0f;
         aim[2] = 1.0f;
         SDF_VU0_LOADVECTOR(aim);
@@ -2703,7 +2703,7 @@ void effPCPBreathSetColor(EffPCPSpanWork *work, u32 val) {
 void effPCPBreathSetRotateMatrix(void *dst, void *src) {
     SetRotateMatrixY(3.1415927f);
     SDF_VU0_LOADMATRIX_B(src);
-    sdfComposeVuMatrixFromRegisters();
+    MultMatrixNoArg();
     VU0_STORE_MATRIX(dst);
 }
 
@@ -3384,7 +3384,7 @@ void effPCPBufuIceDraw(EffPCPSpinWork *work) {
     dds3EffectPartSetColor(handle, work->color);
     SetRotateMatrixY(work->angle);
     SDF_VU0_LOADMATRIX_B(work->matrix);
-    sdfComposeVuMatrixFromRegisters();
+    MultMatrixNoArg();
     VU0_STORE_MATRIX(mtx);
     dds3EffectPartSetRotateMatrix(handle, mtx);
     dds3EffectPartDraw(handle);
@@ -3458,7 +3458,7 @@ void effPCPBufuraIceDraw(EffPCPSpinWork *work) {
     dds3EffectPartSetColor(handle[1], work->color);
     SetRotateMatrixY(work->angle);
     SDF_VU0_LOADMATRIX_B(work->matrix);
-    sdfComposeVuMatrixFromRegisters();
+    MultMatrixNoArg();
     VU0_STORE_MATRIX_UNCLOBBERED(mtx);
     dds3EffectPartSetRotateMatrix(handle[0], mtx);
     dds3EffectPartSetRotateMatrix(handle[1], mtx);
@@ -3534,7 +3534,7 @@ void effPCPBufudnIceDraw(EffPCPSpinWork *work) {
     dds3EffectPartSetColor(handle[1], work->color);
     SetRotateMatrixY(work->angle);
     SDF_VU0_LOADMATRIX_B(work->matrix);
-    sdfComposeVuMatrixFromRegisters();
+    MultMatrixNoArg();
     VU0_STORE_MATRIX_UNCLOBBERED(mtx);
     dds3EffectPartSetRotateMatrix(handle[0], mtx);
     dds3EffectPartSetRotateMatrix(handle[1], mtx);
@@ -3993,11 +3993,11 @@ void dds3RingPolyExpListDraw(EffPCPBeamNode *node) {
     scaleMatrix[2][2] = scaleMatrix[1][1] = scaleMatrix[0][0] = node->scale;
     VU0_LOAD_MATRIX(node->localMatrix);
     SDF_VU0_LOADMATRIX_B(node->matrix);
-    sdfComposeVuMatrixFromRegisters();
+    MultMatrixNoArg();
     SDF_VU0_LOADVECTOR(&node->position);
     VU0_ADD_VF31_VF10_XYZ();
     SDF_VU0_LOADMATRIX_B(scaleMatrix);
-    sdfComposeVuMatrixFromRegisters();
+    MultMatrixNoArg();
     sdf3DPrimLinkTm(list, 0);
     sdf3DPrimLinkMat(list, node->assetHandle, 0);
     count = node->vertexCount;
@@ -4194,7 +4194,7 @@ void effPCPRingPolyExpSetRotateMatrix(EffPCPBeamWork *work, void *src) {
 void effPCPRingPolyExpSetDirection(EffPCPBeamWork *work, void *src) {
     VU0_LOAD_MATRIX(src);
     SetRotateMatrixX_B(1.5707963f);
-    sdfComposeVuMatrixFromRegisters();
+    MultMatrixNoArg();
     VU0_STORE_MATRIX(work->node);
 }
 
@@ -4230,7 +4230,7 @@ void effPCPRingPolyExp2SetVertex(EffPCPBeamLargeWork *work, f32 radius) {
         ReverseMatrix();
     } else {
         SetRotateMatrixZ(work->rotationA);
-        sdfVuLoadSecondaryRotationMatrixY(work->rotationB);
+        SetRotateMatrixY_B(work->rotationB);
         MultMatrixRevNoArg();
         work->rotationB += work->rotationStep;
         work->rotationStep *= work->head.rotationDecay;

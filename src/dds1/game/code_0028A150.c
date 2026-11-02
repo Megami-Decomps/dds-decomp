@@ -7260,7 +7260,7 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
                             motion->orientationAngle = (dds3GetRandFloatA(&effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
                             motion->tiltAngle = (dds3GetRandFloatA(&effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
                             SetRotateMatrixX(motion->orientationAngle);
-                            sdfVuLoadSecondaryRotationMatrixY(motion->tiltAngle);
+                            SetRotateMatrixY_B(motion->tiltAngle);
                             MultMatrixRevNoArg();
                             direction[0] = sdfCos(motion->initialPhase) * initialRadius;
                             direction[1] = 0.0f;
@@ -7331,7 +7331,7 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
                         motion->radius += motion->radiusStep;
                         phase = (motion->angularSpeed + angularAcceleration * age * 0.5f) * age + motion->initialPhase;
                         SetRotateMatrixX(motion->orientationAngle);
-                        sdfVuLoadSecondaryRotationMatrixY(motion->tiltAngle);
+                        SetRotateMatrixY_B(motion->tiltAngle);
                         MultMatrixRevNoArg();
                         radius = motion->radius;
                         direction[0] = sdfCos(phase) * radius;

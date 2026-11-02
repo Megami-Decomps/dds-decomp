@@ -142,7 +142,7 @@ u32 effBTLCutGetAllPartColor(u32 elapsed, u32 duration)
 extern f32 D_004144A0[4]; extern f32 D_004144B0[4]; extern f32 D_004144C0[4];
 extern BtlSpecialEntryObjectClass btlClassifySpecialEntryObject(BtlUnit *entry);
 extern void Mult(void); extern void ToMatrix(void);
-extern void sdfComposeVuMatrixFromRegisters(void);
+extern void MultMatrixNoArg(void);
 extern void effBTLPartGetPositionPtr(BtlUnit *owner, EffectVectorRequest *request, u128 *out);
 extern void effBTLPartGetRotateMatrixPtr(EffectVectorRequest *request, u128 *out);
 extern f32 effBattleMiscQueryScalar(const BtlUnit *unit, const EffectVectorRequest *request);
@@ -329,7 +329,7 @@ void effBattleUpdate(effBTLCutHandle_t *work) {
                 case 5:
                     effBTLModelGetMarkMatrix2(unit, entry->aimParams.count);
                     SDF_VU0_LOADMATRIX_B(baseMatrix);
-                    sdfComposeVuMatrixFromRegisters();
+                    MultMatrixNoArg();
                     VU0_STORE_MATRIX_UNCLOBBERED(matrixOutput);
                     dds3EffectPartSetRotateMatrix(work->parameterWorks[entryIndex], matrixOutput);
                     break;

@@ -148,7 +148,7 @@ void dds3WhirlwindPolyListDraw(dds3WhirlwindPolyList_tag *object) {
     object->matrix[14] = object->origin[2];
     VU0_LOAD_MATRIX(object->matrix);
     SDF_VU0_LOADMATRIX_B(matrix);
-    sdfComposeVuMatrixFromRegisters();
+    MultMatrixNoArg();
     sdf3DPrimLinkTm(packet, 0);
     if (object->sharedResource != NULL) {
         sdfSetAssetPrimaryTextureAddress((struct sdfMat_t *)object->asset,

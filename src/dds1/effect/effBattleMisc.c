@@ -128,8 +128,8 @@ void effBattleComputeTargetPosition(BtlUnit *unit, EffectVectorRequest *request)
             dir[1] = 0;
             SDF_VU0_LOADVECTOR(unit->orientation);
             ToMatrix();
-            sdfVuLoadSecondaryRotationMatrixY(effBTL_Ptr_D[directionMode]);
-            sdfComposeVuMatrixFromRegisters();
+            SetRotateMatrixY_B(effBTL_Ptr_D[directionMode]);
+            MultMatrixNoArg();
             SDF_VU0_LOADVECTOR(dir);
             SDF_VU0_APPLYMATRIX_XYZ();
             SDF_VU0_STOREVECTOR(dir);
@@ -354,7 +354,7 @@ void effBTLPartGetRotateMatrixPtr(EffectVectorRequest *request, u128 *out) {
             angle = effBTL_Ptr_D[request->directionMode];
         }
         SetRotateMatrixX(tilt);
-        sdfVuLoadSecondaryRotationMatrixY(angle);
+        SetRotateMatrixY_B(angle);
         MultMatrixRevNoArg();
     }
     VU0_STORE_MATRIX(out);

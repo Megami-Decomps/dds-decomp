@@ -724,8 +724,8 @@ void func_002DD448(EffResourceOwner *owner) {
                         VU0_SCALE_VF(vf10, 1.0f / (scale * distanceScale));
                         SDF_VU0_SCALE_XYZ();
                     }
-                    sdfVuLoadSecondaryRotationMatrixY(3.14159265f);
-                    sdfComposeVuMatrixFromRegisters();
+                    SetRotateMatrixY_B(3.14159265f);
+                    MultMatrixNoArg();
                     VU0_STORE_MATRIX(matrix);
                     fileQueueSetPosition(*queue, position);
                     sdfVuMatrixToQuaternion(matrix);

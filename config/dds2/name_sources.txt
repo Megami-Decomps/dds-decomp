@@ -9126,14 +9126,14 @@
 0x00336638	StoreRotateMatrixAxis	inferred	SMT3HD name via SLUS_209.11 0x002B60E0, reloc-identical; was sdfBuildRotationMatrixFromAxisAngle
 0x00336768	SetRotateMatrixAxis	inferred	SMT3HD name via SLUS_209.11 0x002B6210, reloc-identical; was sdfBuildVuRotationFromAxisAngle
 0x00336798	SetRotateMatrixX_B	inferred	SMT3HD name via SLUS_209.11 0x002B6240, reloc-identical; was sdfVuLoadSecondaryRotationMatrixX
-0x00336818	sdfVuLoadSecondaryRotationMatrixY	inferred	Builds and loads the Y-axis rotation matrix into secondary VU0 registers vf24-vf27; the XYZ composition helper supplies the Y component and multiplies this bank into the primary matrix. Ring callers pass tilt angles. Paired DDS1 helper: 0x002DD968. [retail assembly and caller context, 2026-10-13]
+0x00336818	SetRotateMatrixY_B	inferred	SMT3HD name via SLUS_209.11 0x002B62C0, sdfVu0 twin; was sdfVuLoadSecondaryRotationMatrixY
 0x00336898	SetRotateMatrixZ_B	inferred	SMT3HD name via SLUS_209.11 0x002B6340, reloc-identical; was sdfVuLoadSecondaryRotationMatrixZ
 0x00336918	SetRotateMatrixAxis_B	inferred	SMT3HD name via SLUS_209.11 0x002B63C0, reloc-identical; was sdfVuLoadRotationMatrixFromAxisAngle
 0x00336948	RotateMatrixX	inferred	SMT3HD name via SLUS_209.11 0x002B63F0, reloc-identical; was sdfRotateVuMatrixAboutX
 0x003369A8	RotateMatrixY	inferred	SMT3HD name via SLUS_209.11 0x002B6450, reloc-identical; was sdfRotateVuMatrixAboutY
 0x00336A08	RotateMatrixZ	inferred	SMT3HD name via SLUS_209.11 0x002B64B0, reloc-identical; was sdfRotateVuMatrixAboutZ
 0x00336A68	SetRotateMatrixXYZ	inferred	SMT3HD name via SLUS_209.11 0x002B6510, reloc-identical; was vu0RotMatrixXYZFromVec3
-0x00336AA8	sdfComposeVuMatrixFromRegisters	inferred	Transforms four VU basis vectors and stores them in the destination matrix registers. [names_reviewed10.tsv]
+0x00336AA8	MultMatrixNoArg	inferred	SMT3HD name via SLUS_209.11 0x002B6550, sdfVu0 twin; was sdfComposeVuMatrixFromRegisters
 0x00336B00	MultMatrixRevNoArg	inferred	SMT3HD name via SLUS_209.11 0x002B65A8, byte-identical; was sdfMultiplyVuMatrixInPlace
 0x00336B48	MultMatrixNoArg_C	inferred	SMT3HD name via SLUS_209.11 0x002B65F0, byte-identical; was sdfVuMultiplyPrimaryByScratch
 0x00336BA0	MultMatrixRevNoArg_C	inferred	SMT3HD name via SLUS_209.11 0x002B6648, byte-identical; was sdfVuMultiplyScratchByPrimary

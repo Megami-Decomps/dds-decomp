@@ -1280,7 +1280,7 @@ void effPCPWhirlwindPolyPartInit(PcpScatterInstanceA *work, s32 index)
     ring->tiltSpeed = work->params.initialTiltSpeed;
     ring->rise = work->params.initialRise;
     SetRotateMatrixX(ring->orientationAngle);
-    sdfVuLoadSecondaryRotationMatrixY(ring->tiltAngle);
+    SetRotateMatrixY_B(ring->tiltAngle);
     MultMatrixRevNoArg();
     v = (f32)work->params.vSpan;
     u = 0.0f;
@@ -1331,7 +1331,7 @@ void effPCPWhirlwindPolyPartMove(PcpScatterInstanceA *work, s32 index)
     angle = ring->angle;
     step = ring->angleStep;
     SetRotateMatrixX(ring->orientationAngle);
-    sdfVuLoadSecondaryRotationMatrixY(ring->tiltAngle);
+    SetRotateMatrixY_B(ring->tiltAngle);
     MultMatrixRevNoArg();
     ring->tiltAngle += ring->tiltSpeed;
     ring->tiltSpeed *= work->params.tiltDamping;
@@ -1431,7 +1431,7 @@ void effPCPWhirlwindPolySetColor(PcpScatterInstanceA *work, u32 color) {
 void effPCPWhirlwindPolySetRotateMatrix(PcpScatterInstanceA *work, void *source) {
     VU0_LOAD_MATRIX(source);
     SDF_VU0_LOADMATRIX_B(work->params.matrix);
-    sdfComposeVuMatrixFromRegisters();
+    MultMatrixNoArg();
     VU0_STORE_MATRIX(work);
 }
 
@@ -1554,7 +1554,7 @@ void effPCPWhirlwind2PolyPartInit(PcpScatterInstanceB *work, s32 index)
     ring->tiltSpeed = work->params.initialTiltSpeed;
     ring->rise = work->params.initialRise;
     SetRotateMatrixX(ring->orientationAngle);
-    sdfVuLoadSecondaryRotationMatrixY(ring->tiltAngle);
+    SetRotateMatrixY_B(ring->tiltAngle);
     MultMatrixRevNoArg();
     v = (f32)work->params.vSpan;
     u = 0.0f;
@@ -1605,7 +1605,7 @@ void effPCPWhirlwind2PolyPartMove(PcpScatterInstanceB *work, s32 index)
     angle = ring->angle;
     step = ring->angleStep;
     SetRotateMatrixX(ring->orientationAngle);
-    sdfVuLoadSecondaryRotationMatrixY(ring->tiltAngle);
+    SetRotateMatrixY_B(ring->tiltAngle);
     MultMatrixRevNoArg();
     ring->tiltAngle += ring->tiltSpeed;
     ring->tiltSpeed *= work->params.tiltDamping;
@@ -1725,7 +1725,7 @@ void effPCPWhirlwind2PolySetColor(PcpScatterInstanceB *work, u32 color) {
 void effPCPWhirlwind2PolySetRotateMatrix(PcpScatterInstanceB *work, void *source) {
     VU0_LOAD_MATRIX(source);
     SDF_VU0_LOADMATRIX_B(work->params.matrix);
-    sdfComposeVuMatrixFromRegisters();
+    MultMatrixNoArg();
     VU0_STORE_MATRIX(work);
 }
 
@@ -1844,7 +1844,7 @@ void effPCPWhirlwind3PolyPartInit(PcpScatterInstanceC *work, s32 index)
     ring->tiltSpeed = work->params.initialTiltSpeed;
     ring->rise = work->params.initialRise;
     SetRotateMatrixX(ring->orientationAngle);
-    sdfVuLoadSecondaryRotationMatrixY(ring->tiltAngle);
+    SetRotateMatrixY_B(ring->tiltAngle);
     MultMatrixRevNoArg();
     v = (f32)work->params.vSpan;
     u = 0.0f;
@@ -1895,7 +1895,7 @@ void effPCPWhirlwind3PolyPartMove(PcpScatterInstanceC *work, s32 index)
     angle = ring->angle;
     step = ring->angleStep;
     SetRotateMatrixX(ring->orientationAngle);
-    sdfVuLoadSecondaryRotationMatrixY(ring->tiltAngle);
+    SetRotateMatrixY_B(ring->tiltAngle);
     MultMatrixRevNoArg();
     ring->tiltAngle += ring->tiltSpeed;
     ring->tiltSpeed *= work->params.tiltDamping;
@@ -2022,7 +2022,7 @@ void effPCPWhirlwind3PolySetColor(PcpScatterInstanceC *work, u32 color) {
 void effPCPWhirlwind3PolySetRotateMatrix(PcpScatterInstanceC *work, void *source) {
     VU0_LOAD_MATRIX(source);
     SDF_VU0_LOADMATRIX_B(work->params.matrix);
-    sdfComposeVuMatrixFromRegisters();
+    MultMatrixNoArg();
     VU0_STORE_MATRIX(work);
 }
 

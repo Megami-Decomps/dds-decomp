@@ -7757,7 +7757,7 @@ void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
             }
             entry->pitch = (dds3GetRandFloatA(effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
             SetRotateMatrixX(entry->yaw);
-            sdfVuLoadSecondaryRotationMatrixY(entry->pitch);
+            SetRotateMatrixY_B(entry->pitch);
             MultMatrixRevNoArg();
             phase = entry->phase;
             position[0] = sdfCos(phase) * radius;
@@ -7820,7 +7820,7 @@ void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
                 phase = phase + entry->phase;
                 curve = bendStep * (curveSample * 0.7f + (1.0f - 0.7f));
                 SetRotateMatrixX(entry->yaw);
-                sdfVuLoadSecondaryRotationMatrixY(entry->pitch);
+                SetRotateMatrixY_B(entry->pitch);
                 MultMatrixRevNoArg();
                 position[0] = sdfCos(phase) * radius;
                 position[1] = 0;
@@ -9905,7 +9905,7 @@ void effUpdateBillSpiral(EffClassWork *work) {
                 }
                 height = particle->height;
                 SetRotateMatrixX(particle->tiltX);
-                sdfVuLoadSecondaryRotationMatrixY(particle->tiltY);
+                SetRotateMatrixY_B(particle->tiltY);
                 MultMatrixRevNoArg();
                 pos[0] = sdfCos(angle);
                 pos[1] = 0.0f;

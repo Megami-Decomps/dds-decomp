@@ -495,7 +495,7 @@ void dds3P2APolygonDraw(EffUnitObject *instance) {
     sdfDrawTagInit((sdfDrawTag_t *)list);
     VU0_LOAD_MATRIX(instance->transform);
     SDF_VU0_LOADMATRIX_B(instance->localMatrix);
-    sdfComposeVuMatrixFromRegisters();
+    MultMatrixNoArg();
     VU0_STORE_MATRIX_UNCLOBBERED(matrix);
     matrix[3][0] = instance->billboard->position[0];
     matrix[3][1] = instance->billboard->position[1];

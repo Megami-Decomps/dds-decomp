@@ -82,7 +82,7 @@ void MultMatrixRevNoArg_C(void) {
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 void MultMatrix(const f32 *matrix) {
     SDF_VU0_LOADMATRIX_B(matrix);
-    sdfComposeVuMatrixFromRegisters();
+    MultMatrixNoArg();
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */

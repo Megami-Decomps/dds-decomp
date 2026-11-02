@@ -1736,7 +1736,7 @@ BtlRuntimeFadeStepResult btlDrawCapturedScreenTileOverlay(
                         axis[2] = btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].direction[2];
                         SetRotateMatrixAxis_B((RwV3d *)axis,
                             btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].rotationAngle);
-                        sdfComposeVuMatrixFromRegisters();
+                        MultMatrixNoArg();
                         btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].rotationAngle +=
                             btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].rotationSpeed;
                         btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].displacement +=

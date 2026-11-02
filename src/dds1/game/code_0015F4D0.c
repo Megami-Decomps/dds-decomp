@@ -98,11 +98,11 @@ void dds3SpPolySetPosition(void *dst, void *src) {
     SDF_VU0_COPYVECTOR(dst, src);
 }
 
-/* vu0 routine: effect->composedMatrix = matrix * effect->sourceMatrix via sdfComposeVuMatrixFromRegisters */
+/* vu0 routine: effect->composedMatrix = matrix * effect->sourceMatrix via MultMatrixNoArg */
 void dds3SpPolySetRotateMatrix(EffectDispatchState *effect, void *matrix) {
     VU0_LOAD_MATRIX(matrix);
     SDF_VU0_LOADMATRIX_B(effect->sourceMatrix);
-    sdfComposeVuMatrixFromRegisters();
+    MultMatrixNoArg();
     VU0_STORE_MATRIX(effect->composedMatrix);
 }
 

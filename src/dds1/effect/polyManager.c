@@ -758,7 +758,7 @@ void dds3SpPoly_RollRingMove(PolyRotatingBand *rotatingBand, s32 index)
     out = (f32 *)entry->history;
     pairs = strip->vertexWordCount >> 1;
     SetRotateMatrixX(rec->rotationXRadians);
-    sdfVuLoadSecondaryRotationMatrixY(rec->rotationYRadians);
+    SetRotateMatrixY_B(rec->rotationYRadians);
     MultMatrixRevNoArg();
     rec->rotationYRadians += rotatingBand->rotationStepDegrees * (3.14159265f / 180.0f);
     value = rec->radius;

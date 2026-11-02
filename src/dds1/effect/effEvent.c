@@ -451,7 +451,7 @@ void effDebugWireframeSphereDraw(const f32 *center, u32 color, f32 radius) {
         }
         SetRotateMatrixX(1.5707963f);
         VU0_LOAD_MATRIX_B_F32(matrix);
-        sdfComposeVuMatrixFromRegisters();
+        MultMatrixNoArg();
         VU0_STORE_MATRIX_UNCLOBBERED(matrix);
     }
     surface = &sdfGrOtTable[55];
@@ -1271,7 +1271,7 @@ void effEventUpdateEffectParameters(effEveBEDCutHandle_t *work) {
                 if (entry->aimParams.kind == 5) {
                     sdfModelGetMarkPosMatrix(model, entry->aimParams.count);
                     SDF_VU0_LOADMATRIX_B(rotationMatrix);
-                    sdfComposeVuMatrixFromRegisters();
+                    MultMatrixNoArg();
                     VU0_STORE_MATRIX_NOCLOBBER(matrix);
                     dds3EffectPartSetRotateMatrix(effect->parameterWorks[entryIndex], matrix);
                 } else {
@@ -1427,8 +1427,8 @@ void effEveBEDPartGetPositionPtr(EffEventInit *source, EffectVectorRequest *para
         dir[1] = 0.0f;
         SDF_VU0_LOADVECTOR(source->orientation);
         ToMatrix();
-        sdfVuLoadSecondaryRotationMatrixY(D_003563B8[directionMode]);
-        sdfComposeVuMatrixFromRegisters();
+        SetRotateMatrixY_B(D_003563B8[directionMode]);
+        MultMatrixNoArg();
         SDF_VU0_LOADVECTOR(dir);
         SDF_VU0_VECTOR_W_SET_ZERO();
         SDF_VU0_APPLYMATRIX();

@@ -224,7 +224,7 @@ void SetRotateMatrixX_B(f32 angle) {
     SDF_VU0_LOADMATRIX_B((f32 *)m);
 }
 
-void sdfVuLoadSecondaryRotationMatrixY(f32 angle) {
+void SetRotateMatrixY_B(f32 angle) {
     volatile f32 m[4][4] __attribute__((aligned(16)));
     f32 c = cosf(angle);
     f32 s = sinf(angle);
@@ -291,14 +291,14 @@ void RotateMatrixZ(f32 angle)
 void SetRotateMatrixXYZ(const RwV3d *rot)
 {
     SetRotateMatrixX(rot->x);
-    sdfVuLoadSecondaryRotationMatrixY(rot->y);
+    SetRotateMatrixY_B(rot->y);
     MultMatrixRevNoArg();
     SetRotateMatrixZ_B(rot->z);
     MultMatrixRevNoArg();
 }
 
 /* vu0 routine: vf28-vf31 = vf24-vf27 * vf28-vf31 (4x4 product) */
-void sdfComposeVuMatrixFromRegisters(void)
+void MultMatrixNoArg(void)
 {
     VU0_APPLY_MATRIX(vf2, vf24);
     VU0_APPLY_MATRIX(vf3, vf25);
@@ -330,7 +330,7 @@ void MultMatrixRevNoArg_C(void) {
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */
 void MultMatrix(const f32 *matrix) {
     SDF_VU0_LOADMATRIX_B(matrix);
-    sdfComposeVuMatrixFromRegisters();
+    MultMatrixNoArg();
 }
 
 /* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */

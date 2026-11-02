@@ -4261,8 +4261,8 @@ u8 btlSetLinkedDefeatCameraPresetA(BtlLinkedCommand *command, BtlCamState *camer
         switch (kind) {
         case 0:
             SetRotateMatrixX(-0.13089969f);
-            sdfVuLoadSecondaryRotationMatrixY(0.13089969f);
-            sdfComposeVuMatrixFromRegisters();
+            SetRotateMatrixY_B(0.13089969f);
+            MultMatrixNoArg();
             break;
         case 1:
             SetRotateMatrixX(-0.13089969f);
@@ -4270,8 +4270,8 @@ u8 btlSetLinkedDefeatCameraPresetA(BtlLinkedCommand *command, BtlCamState *camer
         case 2:
             angle = -0.13089969f;
             SetRotateMatrixX(angle);
-            sdfVuLoadSecondaryRotationMatrixY(angle);
-            sdfComposeVuMatrixFromRegisters();
+            SetRotateMatrixY_B(angle);
+            MultMatrixNoArg();
             break;
         }
         /* vu0 routine: rotate the camera direction by the prepared matrix. */
@@ -7000,8 +7000,8 @@ u8 btlSetBrahmanPartyCameraPreset(BtlLinkedCommand *command, BtlCamState *camera
             switch (cameraPreset) {
             case 0:
                 SetRotateMatrixX(-0.13089969f);
-                sdfVuLoadSecondaryRotationMatrixY(0.13089969f);
-                sdfComposeVuMatrixFromRegisters();
+                SetRotateMatrixY_B(0.13089969f);
+                MultMatrixNoArg();
                 break;
             case 1:
                 SetRotateMatrixX(-0.13089969f);
@@ -7009,8 +7009,8 @@ u8 btlSetBrahmanPartyCameraPreset(BtlLinkedCommand *command, BtlCamState *camera
             case 2: {
                 f32 angle = -0.13089969f;
                 SetRotateMatrixX(angle);
-                sdfVuLoadSecondaryRotationMatrixY(angle);
-                sdfComposeVuMatrixFromRegisters();
+                SetRotateMatrixY_B(angle);
+                MultMatrixNoArg();
                 break;
             }
             }
@@ -7838,8 +7838,8 @@ u8 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *camer
         switch (kind) {
         case 0:
             SetRotateMatrixX(-0.13089969f);
-            sdfVuLoadSecondaryRotationMatrixY(0.13089969f);
-            sdfComposeVuMatrixFromRegisters();
+            SetRotateMatrixY_B(0.13089969f);
+            MultMatrixNoArg();
             break;
         case 1:
             SetRotateMatrixX(-0.13089969f);
@@ -7847,8 +7847,8 @@ u8 btlSetLinkedDefeatCameraPresetB(BtlLinkedCommand *command, BtlCamState *camer
         case 2:
             angle = -0.13089969f;
             SetRotateMatrixX(angle);
-            sdfVuLoadSecondaryRotationMatrixY(angle);
-            sdfComposeVuMatrixFromRegisters();
+            SetRotateMatrixY_B(angle);
+            MultMatrixNoArg();
             break;
         }
         /* vu0 routine: rotate the camera direction by the prepared matrix. */
@@ -8252,8 +8252,8 @@ u8 btlSetSpecialDefeatCameraPreset(BtlLinkedCommand *command, BtlCamState *camer
         switch (kind) {
         case 0:
             SetRotateMatrixX(-0.13089969f);
-            sdfVuLoadSecondaryRotationMatrixY(0.13089969f);
-            sdfComposeVuMatrixFromRegisters();
+            SetRotateMatrixY_B(0.13089969f);
+            MultMatrixNoArg();
             break;
         case 1:
             SetRotateMatrixX(-0.13089969f);
@@ -8261,8 +8261,8 @@ u8 btlSetSpecialDefeatCameraPreset(BtlLinkedCommand *command, BtlCamState *camer
         case 2:
             angle = -0.13089969f;
             SetRotateMatrixX(angle);
-            sdfVuLoadSecondaryRotationMatrixY(angle);
-            sdfComposeVuMatrixFromRegisters();
+            SetRotateMatrixY_B(angle);
+            MultMatrixNoArg();
             break;
         }
         /* vu0 routine: rotate the camera direction by the prepared matrix. */

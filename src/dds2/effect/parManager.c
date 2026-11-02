@@ -767,6 +767,6 @@ void dds3ParticleSetPosition(void *destination, void *source) {
 void dds3ParticleSetRotateMatrix(ParObj *effect, const Matrix4 *matrix) {
     VU0_LOAD_MATRIX(matrix);
     SDF_VU0_LOADMATRIX_B(effect->sourceMatrix);
-    sdfComposeVuMatrixFromRegisters();
+    MultMatrixNoArg();
     VU0_STORE_MATRIX(effect->matrix);
 }
