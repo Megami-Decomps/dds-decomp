@@ -9262,7 +9262,7 @@
 0x0033D8B0	sdfDevSetPrintCB	inferred	SMT3HD name via SLUS_209.11 0x002BD318, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfPktInit
 0x0033D8D8	sdfPrintRpcFunc	inferred	SMT3HD name via SLUS_209.11 0x002BD340, reloc-identical; was sdfRpcBufHandler
 0x0033D930	sdfPrintRpcThread	inferred	SMT3HD name via SLUS_209.11 0x002BD398, reloc-identical; was sdfDevStartRpcServer
-0x0033D990	sdfStartDevRpcServerAndBindClient	inferred	QP8: DDS2 twin takes the DDS1 name
+0x0033D990	sdfPrintIopInit	inferred	SMT3HD name via SLUS_209.11 0x002BD3F8, sdfPrint twin; DDS body omits the bind-failure printf; was sdfStartDevRpcServerAndBindClient
 0x0033DA30	sdfPuts	inferred	SMT3HD name via SLUS_209.11 0x002BD4A8, reloc-identical; was sdfDevPrintText
 0x0033DAD8	sdfPrintf	inferred	SMT3HD name via SLUS_209.11 0x002BD550, reloc-identical; was sdfPrintFormattedDevMessage
 0x0033DB58	sdfCdImageGetDirData	inferred	SMT3HD name via SLUS_209.11 0x002BD5D0, shared-hash-in-run; was sdfDevGetLoadedFileAddress

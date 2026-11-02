@@ -70,7 +70,7 @@ extern char D_003BD3D0[];
 extern s32 scePrintf(const char *, ...);
 
 /* Start the RPC server thread and bind to the remote service, polling every 4 timer ticks. */
-void sdfStartDevRpcServerAndBindClient(void) {
+void sdfPrintIopInit(void) {
     s32 waitStart;
 
     _StartThread(sdfCreateThreadWithStack(sdfPrintRpcThread, SDF_DEV_RPC_THREAD_STACK_BYTES, SDF_DEV_RPC_THREAD_PRIORITY), 0);

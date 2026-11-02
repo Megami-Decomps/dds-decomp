@@ -8712,7 +8712,7 @@
 0x002E4A00	sdfDevSetPrintCB	inferred	SMT3HD name via SLUS_209.11 0x002BD318, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfPktInit
 0x002E4A28	sdfPrintRpcFunc	inferred	SMT3HD name via SLUS_209.11 0x002BD340, reloc-identical; was sdfRpcBufHandler
 0x002E4A80	sdfPrintRpcThread	inferred	SMT3HD name via SLUS_209.11 0x002BD398, reloc-identical; was sdfDevStartRpcServer
-0x002E4AE0	sdfStartDevRpcServerAndBindClient	inferred	Starts the development RPC server thread, polls sceSifMBindRpc until its client has a remote server, then marks the client bound. [names_reviewed18.tsv]
+0x002E4AE0	sdfPrintIopInit	inferred	SMT3HD name via SLUS_209.11 0x002BD3F8, sdfPrint twin; DDS body omits the bind-failure printf; was sdfStartDevRpcServerAndBindClient
 0x002E4B80	sdfPuts	inferred	SMT3HD name via SLUS_209.11 0x002BD4A8, reloc-identical; was sdfDevPrintText
 0x002E4C28	sdfPrintf	inferred	SMT3HD name via SLUS_209.11 0x002BD550, reloc-identical; was sdfPrintFormattedDevMessage
 0x002E4CA8	sdfCdImageGetDirData	inferred	SMT3HD name via SLUS_209.11 0x002BD5D0, shared-hash-in-run; was sdfDevGetLoadedFileAddress
