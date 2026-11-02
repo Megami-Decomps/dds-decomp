@@ -157,17 +157,17 @@ unchanged while increasing the appended segment's memory size by exactly
 
 The complete FileManager subsystem is the first stateful replacement. Its
 manager and callback-driver text, read-only strings, and `fileQueueHead`
-state move together. The callback driver is two retail objects per title: the
-head unit (`game/code_00288E70` in DDS1, `game/code_002C83F0` in DDS2) and
+state move together. The callback driver is two retail objects per title:
+`file/fileManager`, which holds the callbacks as SMT3's unit does, and
 `mc/mcManager`, whose first thirteen functions are the card-request part. Each
 is a separate paired replacement. `sdfMcFuncGetInfo` keeps its tail call a
-`jal` by taking a local's address, so `mcManager` needs no extra flag. The head
-unit retains a source-built `0x10` small-data
+`jal` by taking a local's address, so `mcManager` needs no extra flag. `fileManager`
+retains a source-built `0x10` small-data
 section at its retail address: an eight-byte reentrancy guard record followed
 by the eight-byte task name. Both source-recovered leading callbacks rebuild
 their four guard accesses as audited `HI16`/`LO16` relocations under `-G0`.
-Under `-G0` the two driver texts grow from `0xB98`/`0x744` to
-`0xBB4`/`0x764` bytes. The remaining assembly callbacks
+Under `-G0` fileManager's text grows by `0x1C` bytes (`0x12E0` to `0x12FC` in
+DDS1, `0x1300` to `0x131C` in DDS2) and mcManager's from `0x744` to `0x764`. The remaining assembly callbacks
 contain six GP-relative accesses in each title. The retained-section audit
 proves those physical references at the same fallback-function offsets, exact
 retained objects, and an unchanged `_gp` instead of silently splitting the
@@ -202,11 +202,11 @@ replaced in either title: under `-G0` cc1 still addresses the unit's own
 `.sdata` definitions through `$gp`, and the retained-section audit rejects
 those accesses as changed GP-reference signatures.
 
-Together the replacements cover 188 DDS1 and 207 DDS2 exported symbols; 125
+Together the replacements cover 190 DDS1 and 209 DDS2 exported symbols; 125
 and 132 definitions change their relative offsets. The verifier follows
-2,014/2,875 external relocation sites targeting shifted definitions, 92/118
-relocations between replacement objects, and 2,562/3,538 total relocation
-targets into moved content. The moved sections retain 802/873 relocation
+2,014/2,873 external relocation sites targeting shifted definitions, 62/90
+relocations between replacement objects, and 2,576/3,557 total relocation
+targets into moved content. The moved sections retain 808/878 relocation
 entries. All counts are asserted by the version descriptors.
 
 Replacement-owned code and read-only data may change size and contents. A

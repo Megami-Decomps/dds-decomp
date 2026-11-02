@@ -240,8 +240,7 @@ segments:
       - [0x17CF00, c, game/code_0027BF00]
       - [0x1828B8, c, game/code_002818B8]
       - [0x183850, c, game/code_00282850]
-      - [0x1897A0, c, file/fileManager]  # Nocturne __FILE__
-      - [0x189E70, c, game/code_00288E70]
+      - [0x189728, c, file/fileManager]  # Nocturne __FILE__
       - [0x18AA08, c, mc/mcManager]  # Nocturne __FILE__
       - [0x18B150, c, game/code_0028A150]
       - [0x19B810, c, game/code_0029A810]  # P4 transfer
@@ -440,7 +439,7 @@ segments:
       - [0x2B3358, .rodata, game/code_0027BF00]
       - [0x2B33C8, .rodata, game/code_002818B8]
       - [0x2B3410, .rodata, game/code_00282850]
-      - [0x2B3620, .rodata, game/code_00288E70]
+      - [0x2B3620, .rodata, file/fileManager]
       - [0x2B3640, .rodata, game/code_0028A150]
       - [0x2B3AA0, .rodata, game/code_0029A840]
       - [0x2B3AD0, .rodata, game/code_0029C530]
@@ -642,7 +641,7 @@ segments:
       - [0x2BD718, .sdata, game/code_0027BF00]
       - [0x2BD750, .sdata, game/code_002818B8]
       - [0x2BD778, .sdata, game/code_00282850]
-      - [0x2BD7D8, .sdata, game/code_00288E70]
+      - [0x2BD7D8, .sdata, file/fileManager]
       - [0x2BD7E8, .sdata, game/code_0028A150]
       - [0x2BD944, .sdata, game/code_0029A840]
       - [0x2BD960, .sdata, game/code_0029C530]

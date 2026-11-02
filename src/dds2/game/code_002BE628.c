@@ -65,18 +65,29 @@
 #include "fld_scene_command_state_api.h"
 #include "itf_draw_grid.h"
 #include "prf_profile_cap.h"
+#include "sdf_packet_alloc.h"
+#include "fr_font_draw_glyph.h"
+
 /* Declared before first use (were implicit int). */
 extern s32 datAddHp(datUnitWork_t *unit, s32 delta);
+
 extern s32 datAddMp(datUnitWork_t *unit, s32 delta);
+
 extern void evtCopyEntryStringToActiveWindow(s32 slotIndex, const char *sourceText);
+
 extern void evtFreeStage(void);
+
 extern void fldActivatePendingSceneCommand(void);
+
 extern s32 itfGridLookupValueOrDefault(EffectSlotSet *resource, s32 resourceIndex);
+
 extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *resource, s32 resourceIndex, s32 x, s32 y, s32 width, s32 height);
+
 extern void kwlnDebugGraphSetEnabled(s8 enabled);
+
 extern s32 sdfApplyCommandResults(s32 channel, datUnitWork_t *sourceRecord, datUnitWork_t *item);
+
 extern void sndDestroyFileQueueWrapper(struct SoundHandleNode *node);
-/* Original-style implicit int, kept: matched code depends on it: qsort, sndCreateSystemEffectHandle. */
 
 extern void mnuSetGroupPair(struct MenuPanelItem *, u32, u32);
 
@@ -85,65 +96,97 @@ extern void itfGridStorePosition(MenuGridSlot *, EffectSlotSet *, s32);
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32, EffectSlotSet *, s32, s32);
 
 #define MNU_PANEL_ITEM_COUNT 5
+
 #define MNU_PANEL_STATE_BYTES 0x8C
+
 #define MNU_PANEL_GROUP_BYTES 0x2C
+
 #define MNU_SPRITE_STATE_BYTES 0x20
+
 #define MNU_SIMPLE_SPRITE_BYTES 0x20
+
 #define MNU_PANEL_ITEM_BYTES 0xAC
+
 #define MNU_PROFILE_PANEL_BYTES 0x48
+
 #define MNU_TRANSITION_LIMIT 0x100
+
 #define MNU_TRANSITION_STEP 8
+
 #define MNU_GRADIENT_FADE_STEP 0x20
+
 #define MNU_PROFILE_PHASE_PERIOD 0x200
+
 #define MNU_PROFILE_PHASE_STEP 1
+
 #define MNU_PANEL_TEXTURE_COUNT 7
+
 #define MNU_POPUP_STATE_BYTES 0x4c
+
 #define MNU_POPUP_ENTRY_MARK_BITS 0x60000
+
 #define MNU_PARTY_SLOT_COUNT 5
+
 #define MNU_INPUT_PRIORITY_BIT 1
+
 #define MNU_PAD_TRIGGER_BIT 2
+
 #define MNU_COMMAND_RECORD_BYTES 0x38
+
 #define MNU_COMMAND_ID_MASK 0xFFFF
+
 #define MNU_PERCENT_SCALE 100
+
 #define MNU_COMMAND_USE_STATUS_BOUNDARY 0x220
+
 #define MNU_RATIO_QUARTER_PERCENT 25
+
 #define MNU_RATIO_HALF_PERCENT 50
 
 #define EVT_STAGE_ENTRY_INDEX_MASK 0xFFFF
+
 #define EVT_STAGE_ENTRY_BYTES 60
+
 #define EVT_STAGE_MODEL_RECORD_BYTES 624
+
 #define EVT_STAGE_COLUMN_VALUE_COUNT 8
+
 #define EVT_STAGE_MOTION_SUPPRESS_FALLBACK 1
+
 #define EVT_STAGE_DEFAULT_BLEND_FRAMES 15.0f
+
 #define EVT_STAGE_PROJECTION_BIAS 2048.0f
+
 #define EVT_STAGE_DEFAULT_TARGET_Z -400.0f
+
 #define EVT_STAGE_SCREEN_WORK_BYTES 0x20
+
 #define EVT_STAGE_USE_ENTRY_MOTION 0xffffffffffffffff
 
 extern s32 D_00437C9C;
 
 extern void mnuInitializeQueuedCommandEffect(MenuQueuedCommand *entry);
+
 extern void mnuInitRandomLineEffect(MenuQueuedCommand *entry);
 
 extern s32 mnuLookupRangeEntry(u16);
 
 extern void ptyRecomputeMaxHpMp(datUnitWork_t *);
 
-
 extern EvtStageTestResourceWorkResult evtStageTestAdvanceResourceWork(void);
 
-
-
-
-
-
 extern s8 D_003E7970[];
+
 extern u8 D_003E7978[];
 
 extern void evtStageTestApplyInitialMotion(s32 initialMotionIndex);
+
 extern void evtStageTestQueueMotionSegment(u32, f32, f32);
+
 extern void evtStageTestCreateModelEffect(s32);
+
 extern void evtStageTestUpdateCamera(void);
+
 extern void btlUpdateJobPositionFromModel(struct SoundHandleNode *node);
 
 extern void evtStageTestStop(void);
@@ -151,7 +194,6 @@ extern void evtStageTestStop(void);
 extern f32 evtStageTestViewEyeVector[4];
 
 extern f32 evtStageTestViewTargetVector[4];
-
 
 extern void mnuInitializePanelItemGridSlots(MenuPanelItem *, EffectSlotSet *, s32);
 
@@ -163,13 +205,7 @@ extern u16 mnuSkillCategoryRangeUpperBounds[];
 
 extern s8 mnuSkillCategoryRangeBoundWordIndices[];
 
-
-
-
-
 extern void evtStageTestAdvanceMotionQueue(void);
-
-
 
 extern dds3Basic_t *evtAddCamera(f32 *pos, f32 *rot);
 
@@ -177,27 +213,26 @@ extern char D_00437CB0[];
 
 extern void mnuFreePanelItemWork(MenuPanelItem *);
 
-
-
-
 extern u16 D_003E78D8[];
 
 extern StageTestState evtStageTestState;
 
-
 extern char D_0042B610[];
 
-
-#include "sdf_packet_alloc.h"
-
 extern void itfGridSetQuantizedBounds(EffectSlotSet *, s32, s32, s32, s32, s32);
+
 extern u32 effDestroyResourceSlotSet(EffectSlotSet *);
+
 extern s32 D_00437CB8;
+
 extern s32 D_00437CBC;
+
 extern sdfGrOt_t D_00380708;
+
 extern s8 dds3PadButtonState[];
 
 extern MnuPartyRowDrawState mnuGetPanelWindowTransitionState(MenuPageWindow *window, s32 mode);
+
 extern void mnuBlendPanelSlots(EffectSlotSet *dst, EffectSlotSet *src, s32 amount);
 
 /* Draw the window surface; while the window is in selection state 1, blend its second resource in. */
@@ -214,11 +249,7 @@ void mnuDrawPanelWindowSurface(s32 x, s32 y, s32 z, MenuPageWindow *window, s32 
     effDrawTextureSlotWithBlendedCornerColors(x, y, z, alpha, 1, resource, 0, surface);
 }
 
-
-
-
 typedef struct MenuList MenuList;
-
 
 /* Give both complete commands in each page the same draw resource. */
 void mnuSetPanelSlotValues(MenuPageWindow *menu, struct EffectSlotSet *resourceSet) {
@@ -234,6 +265,7 @@ void mnuSetPanelSlotValues(MenuPageWindow *menu, struct EffectSlotSet *resourceS
 }
 
 extern s32 D_0042B048[];
+
 extern s32 D_0042B098[];
 
 void mnuInitializeQueuedCommandEffect(MenuQueuedCommand *entry) {
@@ -333,7 +365,6 @@ void mnuInitializeQueuedCommandEffect(MenuQueuedCommand *entry) {
     }
 }
 
-
 /* Initialize both particle arrays for a queued menu command. */
 void mnuInitRandomLineEffect(MenuQueuedCommand *entry) {
     enum {
@@ -383,7 +414,6 @@ void mnuInitializeQueuedMenuCommand(MenuQueuedCommand *entry) {
     entry->lowPhaseDecayStep = 5;
     entry->keepActive = 0;
 }
-
 
 /* Queue in the least-valued command bank; use bank zero if neither value
  * is below 0x200. Retail has no explicit return: its last call is a plain jal. */
@@ -463,6 +493,7 @@ typedef struct MenuQueuedRenderContext {
     MenuPoint origin;
     MenuPoint extent;
 } MenuQueuedRenderContext;
+
 typedef char MenuQueuedRenderContext_size_check[
     sizeof(MenuQueuedRenderContext) == 0x18 ? 1 : -1];
 
@@ -641,7 +672,9 @@ void mnuDrawQueuedCommandLineEffect(s32 x, s32 y, s32 z, MenuQueuedCommand *comm
 typedef struct MenuCommandScatterLayout {
     MenuPoint points[7];
 } MenuCommandScatterLayout;
+
 extern const MenuCommandScatterLayout D_0042B0D0;
+
 typedef char MenuCommandScatterLayout_size_check[
     sizeof(MenuCommandScatterLayout) == 0x38 ? 1 : -1];
 
@@ -673,10 +706,12 @@ void mnuDrawQueuedCommandScatterEffect(s32 unusedX, s32 unusedY, s32 unusedDepth
     }
 }
 
-
 extern void sdfSubmitGsAlphaOneRegisterPacket(s32, s32);
+
 extern void func_002BF000(s32, s32, s32, MenuQueuedCommand *, MenuQueuedRenderContext *, s32);
+
 extern void mnuDrawQueuedCommandLineEffect(s32, s32, s32, MenuQueuedCommand *, MenuQueuedRenderContext *, s32);
+
 extern void mnuDrawPartyStatusValuePanel(s32, s32, s32, MenuPageWindow *, s32, s32, s32, s32);
 
 /* Advance and draw a page's two queued commands. An active command first waits
@@ -729,20 +764,32 @@ void mnuUpdateAndDrawPartyCommandQueue(s32 x, s32 y, s32 z, MenuQueuedCommand *c
     }
 }
 
-#include "fr_font_draw_glyph.h"
 extern const s32 D_0042B108[];
+
 extern const s32 D_0042B118[];
+
 extern const s32 D_00437C60[];
+
 extern char D_00437C68[];
+
 extern void mnuDrawMenuPageSpriteLayers(s32, s32, s32, MenuPageSlot *, s32, s32, s32);
+
 extern void mnuDrawPartyCommandPage(s32, s32, s32, s32, MenuSprites *, s32);
+
 extern void mnuDrawPartyProfileAndExpOverlay(s32, s32, s32, MenuPageSlot *, s32, u32, s32);
+
 extern s32 mnuClearWindowPendingFlagAfterSelection();
+
 extern void uiDrawActiveSurfaceRegion(s32);
+
 extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
+
 extern struct _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct _FRQ *);
+
 u32 mnuGetPanelRatioColor(s32, s32, s32);
+
 void mnuDrawAndAdvanceRatioPanel(s32, s32, s32, u32, s32, s32, MenuPageBar *, u32);
+
 void mnuDrawPartyMemberCommandPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
                                     s32 panelIndex, s32 surface) {
     char text[16];
@@ -871,20 +918,24 @@ INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B0D0);
 const s32 D_0042B108[4] = { 48, 296, 336, 208 };
 
 extern const s32 D_0042B130[4];
+
 extern const s32 D_0042B140[4];
+
 extern const s32 D_00437C70[];
+
 extern char D_00437C68[]; /* "%2d", shared with mnuDrawPartyMemberCommandPanel. */
+
 extern void mnuUpdateAndDrawPartyCommandQueue(s32, s32, s32, MenuQueuedCommand *, MenuQueuedRenderContext *, s32);
+
 /* Both native page renderers also forward the surface word; the
  * selection helper consumes only its first five arguments. */
 extern s32 mnuClearWindowPendingFlagAfterSelection();
-extern void uiDrawActiveSurfaceRegion(s32);
-extern void sdfDispatchSurfaceWithPreparedTexturePacket(s32);
+
 typedef struct _FRQ _FRQ;
+
 extern _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, _FRQ *);
+
 extern s32 frFontDrawGlyphChain(_FRQ *, s8, u32);
-u32 mnuGetPanelRatioColor(s32, s32, s32);
-void mnuDrawAndAdvanceRatioPanel(s32, s32, s32, u32, s32, s32, MenuPageBar *, u32);
 
 /* Draw one party page: queued commands, level text, selection and HP/MP bars. */
 void mnuDrawPartyMemberStatusPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
@@ -974,9 +1025,8 @@ void mnuDrawPartyMemberStatusPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     }
 }
 
-
-
 extern void mnuDrawPartyMemberCommandPanel(s32, s32, s32, MenuPageWindow *, s32, s32);
+
 extern void mnuDrawPartyMemberStatusPanel(s32, s32, s32, MenuPageWindow *, s32, s32);
 
 void mnuDispatchListPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu, s32 panelIndex, s32 surface) {
@@ -1098,7 +1148,6 @@ void mnuDrawPanelListDefault(s32 x, s32 y, s32 depth, MenuPageWindow *window, s3
     mnuDrawListPanels(x, y, depth, 0, window, surface);
 }
 
-
 typedef struct MenuPanelState {
     MenuPanelStatePrefix common;
     MenuGridSlot backgroundSlot; /* 0x20 */
@@ -1117,6 +1166,7 @@ typedef struct MenuPanelState {
 } MenuPanelState;
 
 typedef char MenuPanelStateSizeCheck[(sizeof(MenuPanelState) == MNU_PANEL_STATE_BYTES) ? 1 : -1];
+
 typedef char MenuPanelStateResourceHandleOffsetCheck[((u32)&((MenuPanelState *)0)->resourceHandle == 0x88) ? 1 : -1];
 
 /* Allocate a zeroed native panel state with the requested dimensions. */
@@ -1186,6 +1236,7 @@ void mnuSetPanelState(MenuPanelState *panel,
 }
 
 extern void mnuDrawIconState(u32, u32, u32, u32, struct MenuIconState *, u32, u32);
+
 extern void mnuUpdateWindowPanelHandleStatesKindFourFive(struct MenuIconState *);
 
 void mnuDrawPanelState(s32 x, s32 y, s32 depth, MenuPanelState *panel, s32 drawArg) {
@@ -1233,7 +1284,6 @@ void mnuDrawPanelState(s32 x, s32 y, s32 depth, MenuPanelState *panel, s32 drawA
     mnuUpdateWindowPanelHandleStatesKindFourFive(panel->resourceHandle);
 }
 
-
 extern MenuPanelItem *mnuCreatePanelItem(void);
 
 extern void mnuInitializePanelGroupGridSlots(MenuPanelItem *, EffectSlotSet *,
@@ -1242,7 +1292,9 @@ extern void mnuInitializePanelGroupGridSlots(MenuPanelItem *, EffectSlotSet *,
 extern void mnuClearPanelGroupSelection(MenuPanelGroup *);
 
 extern void mnuSetPanelItemSelection(MenuPanelItem *, s32);
+
 extern void mnuSetPanelItemOption(MenuPanelItem *, u32);
+
 extern void mnuStorePanelItemValue(MenuPanelItem *, u32);
 
 /* Create the five panel items owned by this group and clear its selection. */
@@ -1632,7 +1684,6 @@ void mnuDrawPartyProfilePanelContents(s32 x, s32 y, s32 depth, datUnitWork_t *ac
 INCLUDE_ASM(const s32, "game/code_002BE628", mnuDrawPartyProfilePanelContents);
 #endif
 
-
 void mnuResetGradientFadeColor(MenuGradientFade *state, s32 color) {
     state->color = color;
     state->active = 0;
@@ -1854,10 +1905,8 @@ u32 mnuGetPanelRatioColor(s32 useDefault, s32 amount, s32 divisor) {
     return color;
 }
 
-typedef struct _FRQ _FRQ;
 extern char D_00437C88[];
-extern _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, _FRQ *);
-extern s32 frFontDrawGlyphChain(_FRQ *, s8, u32);
+
 #ifdef NON_MATCHING
 #include "common.h"
 #include "sdk_ps2.h"
@@ -1907,6 +1956,7 @@ INCLUDE_ASM(const s32, "game/code_002BE628", mnuDrawRatioPanelContents);
 #endif
 
 extern void mnuDrawRatioPanelContents(s32, s32, s32, u32, u32, s32, s32, MenuPageBar *, u32);
+
 extern void mnuDrawAndSwapPageBarEffect(s32, s32, s32, u32, MenuPageBar *, u32);
 
 void mnuDrawAndAdvanceRatioPanel(s32 x, s32 y, s32 depth, u32 color, s32 value,
@@ -1946,7 +1996,6 @@ void mnuDrawAndAdvanceRatioPanel(s32 x, s32 y, s32 depth, u32 color, s32 value,
         }
     }
 }
-
 
 /* Allocate a zeroed native panel item and initialize its three default values. */
 MenuPanelItem *mnuCreatePanelItem(void) {
@@ -2238,7 +2287,6 @@ void mnuDrawAndAdvancePanelItem(s32 x, s32 y, s32 depth, s32 mode, u32 textMode,
     }
 }
 
-
 void mnuSetProfilePanelValues(MenuProfilePanel *panel, s32 capValue, s32 progressValue) {
     panel->capValue = capValue;
     panel->option = progressValue;
@@ -2449,7 +2497,6 @@ void mnuDrawAndAdvanceProfilePanel(s32 x, s32 y, s32 z, MenuProfilePanel *panel,
     panel->phase = phase - MNU_PROFILE_PHASE_PERIOD;
 }
 
-
 /* Clear the complete native popup-transition state, including saved entry addresses. */
 void mnuClearPanelTransitionState(MenuPopupState *state) {
     memset(state, 0, MNU_POPUP_STATE_BYTES);
@@ -2595,7 +2642,6 @@ s32 mnuDispatchPopupTransition(MenuPopupState *work, s32 *entrySlot, s32 mode,
     }
     return result;
 }
-
 
 /* Compare the popup state's current entry address, not an entry payload value. */
 u8 mnuIsPopupEntryValue(s32 stateAddress, s32 entryAddress) {
@@ -2922,7 +2968,6 @@ void mnuPlayInputSoundKind(s32 inputFlags, s8 soundKind) {
 void mnuPlayDefaultInputSounds(u32 inputFlags) {
     mnuPlayInputSoundKind(inputFlags, 0);
 }
-
 
 /* Find the first occupied slot with the same table ID; zero also serves as no-match. */
 s32 mnuFindMatchingPartyEntryIndex(const datUnitWork_t *borrowedEntry) {
@@ -3269,7 +3314,6 @@ u8 mnuIsHighRangeItemId(s32 id) {
     return id < 0x100;
 }
 
-
 extern u16 mnuGetPartyEntryMenuValue(datUnitWork_t *);
 
 /* Count inventory plus one for every matching slot value, without an occupancy test.
@@ -3390,8 +3434,8 @@ s32 sndPlayPartyItemSe(u32 id, s32 soundMode) {
     return 0;
 }
 
-
 extern u32 datComputeSkillBoostedMaxHp(datUnitWork_t *);
+
 extern u32 datComputeSkillBoostedMaxMp(datUnitWork_t *);
 
 /* Apply a permanent stat/capacity item and refill eligible vitals.
@@ -3491,12 +3535,19 @@ s32 ptyChooseFirstAvailableRosterId(void) {
 }
 
 extern s32 fldEsutoMaChk(void);
+
 extern void fldEsutoMaStart(void);
+
 extern s32 fldRiberaMaChk(void);
+
 extern void fldRiberaMaStart(void);
+
 extern s32 fldRifutoMaChk(void);
+
 extern void fldRifutoMaStart(void);
+
 extern u8 *datUnitNames;
+
 s32 func_002C5A28(MenuPageWindow *page, u16 ability, struct datUnitWork_t *target,
                   struct datUnitWork_t *selected) {
     s32 result = btlItemApplyPermanentBonus(ability, selected);
@@ -3697,7 +3748,6 @@ s32 mnuComparePartyEntryCostRatio(u32 *left, u32 *right) {
 }
 
 extern const u16 D_0042B518[];
-
 
 s32 mnuTryUseBestPartyHealingSkill(PartyPanel *partyPanel, MenuPageWindow *page,
                                    datUnitWork_t *caster, s32 commit) {
@@ -3915,21 +3965,37 @@ void evtStageTestCopyEntryRotation(s32 encodedIndex, f32 *rotation) {
 }
 
 extern f32 evtStageTestViewUpVector[4];
+
 extern f32 sdfViewTargetVector[4];
+
 extern f32 aViewTarget[4];
+
 extern f32 aViewDown[4];
+
 extern u8 sdfViewShakeVector[];
+
 extern Matrix4 sdfViewMatrix;
+
 extern u8 D_003820F0[];
+
 extern u8 D_0042B528[];
+
 extern u8 D_0042B538[];
+
 extern u8 D_0042B548[];
+
 extern u8 D_0042B558[];
+
 extern void dds3SetSoftenBias(s32 frames, f32 first, f32 second);
+
 extern void dds3SetLightColor(s32 blendFrames, s32 lightIndex, const f32 *color);
+
 extern void dds3SetLightDir(s32 blendFrames, s32 lightIndex, const f32 *direction);
+
 extern void dds3SetAmbientColor(s32 mode, f32 *color);
+
 extern void dds3SetFogColor(s32 mode, f32 *color);
+
 extern void dds3SetFogPara(s32 mode, f32 x, f32 y, f32 z, f32 w);
 
 /* Restore color targets, projection settings and the stage viewer's view vectors. */
@@ -4168,7 +4234,6 @@ void evtStageTestApplyInitialMotion(s32 initialMotionIndex) {
     }
 }
 
-
 extern u8 *D_00435DF0;
 
 /* Store uniform model scale through vf10 and return it; useTable selects the model-record factor. */
@@ -4212,7 +4277,6 @@ void cmpResetStatusModelPos(void) {
     ((MenuWorkPosition *)evtStageTestViewEyeVector)->z = 0;
 }
 
-
 /* Apply the active entry's model position and scale-dependent view depth.
  * Retain the post-call entry rereads and subtraction-based scaling expressions. */
 void mnuApplyModelCamera(dds3ModelHandle_t *model) {
@@ -4249,7 +4313,6 @@ void evtStageTestApplyEntryRotation(dds3ModelHandle_t *model) {
                   stageEntry->rotation[2] * 3.14159265f / 180.0f);
     mdlSetRotate(model);
 }
-
 
 /* vu0 routine: copies the stage-test camera vectors into the view work area, builds the look-at basis for eye 600 units along the view direction, and hands the matrix to the model packet at the current slot */
 void evtStageTestUpdateCamera(void)
@@ -4414,6 +4477,7 @@ void evtStageTestAdvanceMotionQueue(void) {
 }
 
 struct SoundHandleNode;
+
 extern struct SoundHandleNode * sndCreateSystemEffectHandle(struct dds3ModelHandle_t *actor, s32 index);
 
 /* Replace the attached model effect with the native fixed request; argument is unused. */
@@ -4448,9 +4512,13 @@ s32 evtStageTestHasModelEffect(void) {
 }
 
 extern s32 D_00437CA4;
+
 extern const char *D_00437CA0;
+
 extern char D_00437CA8[];
+
 extern sdfGrOt_t sdfGrOtTable[];
+
 extern f32 dds3CameraObjectBasicGetFovy(const dds3Basic_t *camera);
 
 INCLUDE_RODATA(const s32, "game/code_002BE628", D_0042B518);
@@ -4582,33 +4650,10 @@ void evtBattleStageTestStopTask(void) {
     kwlnDebugGraphSetEnabled(0);
 }
 
-
 /* Enable the debug graph and create the battle-stage selector task with its cleanup callback. */
 void btlCreateStageTestTask(void) {
     kwlnDebugGraphSetEnabled(1);
     dds3StartProcess(D_0042B610, 0x2B0C, 1, 1, evtBattleStageTestScreen, evtDestroyBattleStageTestWorldNode, 0);
-}
-
-/* Release the device state, packet nodes, copied name, and wrapper only after
- * the device lifecycle closes; otherwise retain the pending request. */
-FileRequestCleanupResult pacFileHandleFree(request)
-    FilePacRequest *request;
-{
-    if (request->state == FILE_REQUEST_STATE_COMPLETE) {
-        sdfFileCmdHandle_t *deviceRequest = request->deviceRequest;
-        if (deviceRequest != NULL) {
-            sdfFileCmdFree(deviceRequest);
-        }
-        sdfPacFree(&request->packet);
-        sdfChipFreeDirect(request->name);
-        sdfChipFreeDirect((void *)request);
-        return FILE_REQUEST_CLEANUP_FREED;
-    }
-    return FILE_REQUEST_CLEANUP_PENDING;
-}
-
-s32 pacFileHandleFree_(void *request) {
-    return pacFileHandleFree(request);
 }
 
 INCLUDE_SDATA(const s32, "game/code_002BE628", D_00437C60);
@@ -4642,3 +4687,4 @@ INCLUDE_SDATA(const s32, "game/code_002BE628", D_00437CB0);
 INCLUDE_SDATA(const s32, "game/code_002BE628", D_00437CB8);
 
 INCLUDE_SDATA(const s32, "game/code_002BE628", D_00437CBC);
+

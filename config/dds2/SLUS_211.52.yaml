@@ -239,8 +239,7 @@ segments:
       - [0x1B9FC8, c, game/code_002B8FC8]
       - [0x1BE5C8, c, game/code_002BD5C8]
       - [0x1BF628, c, game/code_002BE628]
-      - [0x1C8D00, c, file/fileManager]  # Nocturne __FILE__
-      - [0x1C93F0, c, game/code_002C83F0]
+      - [0x1C8C88, c, file/fileManager]  # Nocturne __FILE__
       - [0x1C9F88, c, mc/mcManager]  # Nocturne __FILE__
       - [0x1CA6D0, c, game/code_002C96D0]
       - [0x1DD108, c, game/code_002DC108]  # mirrors dds1 game/code_0029A810 (tools/shared_funcs.py)
@@ -451,7 +450,6 @@ segments:
       - [0x32C000, .rodata, game/code_002BD5C8]
       - [0x32C0D0, .rodata, game/code_002BE628]
       - [0x32C628, .rodata, file/fileManager]
-      - [0x32C648, .rodata, game/code_002C83F0]
       - [0x32C660, .rodata, game/code_002C96D0]
       - [0x32CBB0, .rodata, game/code_002DC138]
       - [0x32CBD0, .rodata, game/code_002DE248]
@@ -667,7 +665,7 @@ segments:
       - [0x338BE0, .sdata, game/code_002B0278]
       - [0x338C38, .sdata, game/code_002BD5C8]
       - [0x338C58, .sdata, game/code_002BE628]
-      - [0x338CC0, .sdata, game/code_002C83F0]
+      - [0x338CC0, .sdata, file/fileManager]
       - [0x338CD0, .sdata, game/code_002C96D0]
       - [0x338E2C, .sdata, game/code_002DC138]
       - [0x338E48, .sdata, game/code_002DE248]
