@@ -1,30 +1,318 @@
 #include "sdk_ps2.h"
+#include "ee_mmi.h"
+#include "sdf_scene_packet.h"
+#include "sdf_gs_gouraud_textured.h"
+#include "sdf_gs_scene_state.h"
+#include "sdf_gs_textured_shapes.h"
+#include "sdf_request.h"
+#include "sdf_gs_context.h"
+#include "sdf_gs_gouraud_shapes.h"
+#include "sdf_gs_header.h"
+#include "sdf_gs_geometry.h"
+#include "sdf_texture_flush.h"
+#include "sdf_tex_lifetime.h"
+#include "sdf_gs_blend.h"
 #include "common.h"
+#include "sdf_delayed_resource_check_api.h"
 #include "sdf_vu0.h"
+#include "sdf_timer.h"
+#include "sdf_packet_list.h"
+#include "sdf_packet_slot.h"
+#include "sdf_draw_frame_execution_state.h"
+#include "sdf_chip.h"
+#include "sdf_resource.h"
+#include "sdf.h"
+#include "sdf_semaphore_api.h"
+#include "sdf_texture_registry.h"
+#include "sdf_image_packets.h"
+#include "sdf_pending.h"
+#include "sdf_queued_resource_api.h"
+#include "sdf_linked_packet.h"
+#include "sdf_packet_builders.h"
+#include "sdf_gs_flat_shapes.h"
+#include "sdf_gs_packet.h"
+#include "pcp_vu0.h"
+#include "sdf_draw.h"
+#include "sdf_model.h"
+#include "sdf_dev_slot_api.h"
+#include "sdf_dma_tag.h"
+#include "sdf_packet_alloc.h"
 #include "sdf_model_packet_callback.h"
 #include "sdf_measure_command.h"
 #include "sdf_asset_packets.h"
-#include "sdf_dma_tag.h"
 #include "sdf_vu_lighting.h"
-#include "sdf_chip.h"
-#include "sdf_model.h"
 #include "sdf_model_eval_api.h"
 #include "sdf_material_asset_list.h"
 #include "sdf_forced_asset_texture_mode.h"
-#include "pcp_vu0.h"
-#include "sdf_draw.h"
 #include "sdf_model_copy.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_vu_matrix_multiply_api.h"
 #include "sdf_message.h"
 #include "sdf_key_pool.h"
 #include "sdf_model_command_views.h"
-#include "sdf_packet_alloc.h"
-#include "sdf_packet_list.h"
-
 #ifdef NON_MATCHING
 #include "sdf_resource.h"
 #endif
+#include "sdf_map_position_api.h"
+#include "sdf_resource_list_release_api.h"
+#include "sdf_trig.h"
+#include "sdf_model_scalars.h"
+#include "sdf_unique_chunk_value_api.h"
+#include "sdf_model_node_index_api.h"
+#include "sdf_asset_state.h"
+#include "sdf_resource_list_item.h"
+#include "sdf_chunk.h"
+#include "sdf_draw_packet_groups.h"
+#include "sdf_model_surface_set.h"
+#include "sdf_motion.h"
+#include "sdf_motion_node_api.h"
+#include "sdf_asset_create.h"
+
+extern u16 D_003BD334;
+
+extern s32 D_003BD340;
+
+extern s32 sdfGrPacketBuffSize;
+
+extern s32 sdfPacketBuffers[2];
+
+extern s32 sdfGrPacketBuffPtr;
+
+extern s32 sdfGrPacketBuffLimit;
+
+extern s32 sdfDelayedResrcSemaId;
+
+extern SdfPendingRequest sdfModelDelayedResrcCB;
+
+extern volatile s8 sdfReqDrawDelayCount;
+
+extern s32 sdfDrawReqQueueIndex;
+
+void sdfModelRootFreeResrc(sdfModelRootNode_t *owner);
+
+/* Queue an entry on the owner's pending node, adding a node or buffer chunk as needed. */ void sdfDelayedResrcEntry(SdfPendingRequest *owner, void *entry);
+
+/* Register a completion callback, creating the shared semaphore on first use. */ void sdfDelayedResrcInitCB(SdfPendingRequest *request, SdfPendingEntryCallback callback);
+
+extern struct sdfMemHandle_t *sdfGrPacketBuffHandle;
+
+extern u8 sdfGrBufferSlotIndex;
+
+extern volatile SdfDrawFrameExecutionState D_003BD32D;
+
+void sdfModelInitSystem(void) {
+    sdfDelayedResrcInitCB(&sdfModelDelayedResrcCB, (SdfPendingEntryCallback)sdfModelRootFreeResrc);
+}
+
+sdfModelNode_t *sdfModelNodeNew(void) {
+    sdfModelNode_t *node = sdfAllocAndClearQuadwords(sizeof(sdfModelNode_t));
+
+    node->color = 0x80808080;
+    node->drawFlagMask = 0xFFFF;
+    node->previous = node;
+    node->next = node;
+    VU0_STORE_VF($vf0, node->quaternion);
+    VU0_STORE_VF($vf0, node->translation);
+    VU0_SET_ONES_XYZ($vf10);
+    VU0_STORE_VF($vf10, node->scale);
+    EE_MMI_UNIT_MATRIX(node->localMatrix);
+    return node;
+}
+
+/* Return the root's workspace, allocating it on first use. */
+u8 *sdfModelAllocTmPacket(sdfModelNode_t *root) {
+    u8 *workspace = root->workspace;
+
+    if (workspace == NULL) {
+        workspace = (u8 *)sdfChipAllocDirect(0x100);
+        root->workspace = workspace;
+    }
+    return workspace;
+}
+
+/* Release allocations in both free-node lists; the stored head pointers are not cleared. */
+void sdfModelPacketFree(sdfModelNode_t *root) {
+    SdfCommandNode **listCursor = root->lists;
+    s32 listIndex = 0;
+    s32 listCount = 2;
+    do {
+        SdfCommandNode *node = *listCursor;
+        while (node != NULL) {
+            SdfCommandNode *next = node->next;
+            if (node->allocation != NULL) {
+                sdfMemFreeDirect(node->allocation);
+            } else {
+                sdfChipFreeDirect(node);
+            }
+            node = next;
+        }
+        listIndex++;
+        listCursor++;
+    } while (listIndex != listCount);
+}
+
+void sdfModelNodeFree(sdfModelNode_t *root) {
+    sdfModelPacketFree(root);
+    sdfChipFreeDirect(root->workspace);
+    root->workspace = NULL;
+    sdfChipFreeDirect(root);
+}
+
+/* Allocate a model root and seed its unit matrix, identity rotation quaternion, unit scale and colour. */
+sdfModelRootNode_t *sdfModelRootNew(void) {
+    sdfModelRootNode_t *slot;
+
+    slot = sdfAllocAndClearQuadwords(sizeof(sdfModelRootNode_t));
+    slot->list = sdfDevCreateBufferedRequest(0, 4, 0x20);
+    EE_MMI_UNIT_MATRIX(slot->matrix);
+    VU0_STORE_VF(vf0, slot->rotationQuaternion);
+    SDF_VU0_SETSCALE1VECTOR();
+    SDF_VU0_STOREVECTOR(slot->scaleVector);
+    slot->drawFlags = -1;
+    slot->color = 0x80808080;
+    return slot;
+}
+
+/* Release each element root, then the buffered request and its owner allocation. */
+void sdfModelRootFreeResrc(sdfModelRootNode_t *owner) {
+    s32 elementIndex;
+    for (elementIndex = 0; elementIndex < owner->list->usedCount; elementIndex++) {
+        sdfModelNodeFree(((sdfModelNode_t **)owner->list->buffer)[elementIndex]);
+    }
+    sdfItemArrayFree(owner->list);
+    sdfChipFreeDirect(owner);
+}
+
+void sdfModelRootFree(sdfModelRootNode_t *slot,
+                      SdfModelRootCleanupPolicy rootCleanupPolicy,
+                      SdfModelMaterialResourceReleasePolicy materialResourcePolicy) {
+    if (slot == NULL) {
+        return;
+    }
+    if (materialResourcePolicy != 0) {
+        sdfMatListFreeResrc(slot->resources, SDF_MAT_LIST_DEFER_FULL_RELEASE);
+    }
+    if (slot->slotPairs != NULL) {
+        sdfItemArrayFree(slot->slotPairs);
+    }
+    if (rootCleanupPolicy != 0) {
+        sdfDelayedResrcEntry(&sdfModelDelayedResrcCB, slot);
+    } else {
+        sdfItemArrayFree(slot->list);
+        sdfChipFreeDirect(slot);
+    }
+}
+
+void sdfModelAllocNodeList(sdfModelRootNode_t *model, s32 count) {
+    sdfDevResizeBufferedRequest(model->list, count);
+}
+
+/* Store the preorder hierarchy traversal in the element array; capacity is the caller's responsibility. */
+void sdfModelMakeNodeList(sdfModelRootNode_t *hierarchy) {
+    sdfModelNode_t **nodeArray = hierarchy->list->buffer;
+    sdfModelNode_t *currentNode = hierarchy->rootNode;
+    sdfModelNode_t **output;
+
+    if (currentNode != NULL) {
+        output = nodeArray;
+        do {
+            *output++ = currentNode;
+            if (currentNode->children != NULL) {
+                currentNode = currentNode->children;
+            } else {
+                do {
+                    sdfModelNode_t *nextSibling = currentNode->next;
+                    if (nextSibling != NULL) {
+                        currentNode = nextSibling;
+                        break;
+                    }
+                    currentNode = currentNode->parent;
+                } while (currentNode != NULL);
+            }
+        } while (currentNode != NULL);
+    }
+}
+
+void sdfModelNodeSetParent(sdfModelNode_t *node, sdfModelNode_t *owner);
+
+/* Grow the buffered root's node array if needed, then attach the new node.
+ * Fetch the element buffer after growth because its allocation can move. */
+void sdfModelNodeAdd(sdfModelRootNode_t *list, sdfModelNode_t *owner, sdfModelNode_t *node) {
+    s16 usedCount;
+    sdfModelNode_t **elements;
+    DevRequest *request;
+    s32 newCount;
+
+    request = list->list;
+    usedCount = request->usedCount;
+    newCount = usedCount + 1;
+    if ((s16)request->capacity < newCount) {
+        sdfItemArrayGrow(request);
+        request = list->list;
+    }
+    elements = request->buffer;
+    node->root = list;
+    request->usedCount = newCount;
+    elements[usedCount] = node;
+    sdfModelNodeSetParent(node, owner);
+}
+
+void sdfModelNodeUnlink(sdfModelNode_t *node) {
+    sdfModelNode_t *owner = node->parent;
+    if (owner == NULL) {
+        sdfModelRootNode_t *root = node->root;
+        if (root->rootNode == node) {
+            root->rootNode = NULL;
+        }
+        return;
+    }
+    {
+        sdfModelNode_t *next = node->next;
+        sdfModelNode_t *previous = node->previous;
+        if (next != node) {
+            next->previous = previous;
+            previous->next = next;
+            if (owner->children == node) {
+                owner->children = next;
+            }
+            node->previous = node;
+            node->next = node;
+            return;
+        }
+        if (owner->children == node) {
+            owner->children = NULL;
+        }
+    }
+}
+
+void sdfModelNodeSetParent(sdfModelNode_t *node, sdfModelNode_t *owner) {
+    if (owner == NULL) {
+        sdfModelRootNode_t *root = node->root;
+        sdfModelNode_t *first = root->rootNode;
+        if (first != node) {
+            root->rootNode = node;
+            if (first != NULL) {
+                node->children = first;
+                first->parent = node;
+            }
+            node->parent = NULL;
+        }
+    } else if (node->parent != owner) {
+        sdfModelNode_t *first;
+        sdfModelNodeUnlink(node);
+        first = owner->children;
+        if (first == NULL) {
+            owner->children = node;
+        } else {
+            sdfModelNode_t *previous = first->previous;
+            node->previous = previous;
+            previous->next = node;
+            first->previous = node;
+            node->next = first;
+        }
+        node->parent = owner;
+    }
+}
 
 /* SdfCommandNode payload forms: owned packet bytes or borrowed commands. */
 enum {
@@ -35,18 +323,16 @@ enum {
 
 /* Declared before first use (were implicit int). */
 extern void sdfMatListUpdatePacket(DevRequest *list, s32 entryIndex);
+
 extern void sdfResourceListApplyEntryChanges(DevRequest *list, s32 entryIndex);
+
 extern void sdfCoreDrawSetFog(const SdfLightingPacketStorage *sourcePacket);
+
 extern void sdfCoreDrawSetLight(const struct SdfDmaTagHeader *lightingPacket);
 
 void sdfModelMakeLocalTm(sdfModelNode_t *node);
+
 void sdfModelNodeBaseSet(sdfModelNode_t *node, const SdfItem *item);
-
-
-
-
-
-
 
 extern vu8 sdfFrameId;
 
@@ -387,6 +673,7 @@ SdfCommandNode *sdfModelNewPacketHeader(sdfModelNode_t *drawNode, s32 packetSele
 }
 
 struct sdfMemHandle_t;
+
 extern struct sdfMemHandle_t * sdfMemAllocDirect(s32 requestedBytes);
 
 /* The list head slot is declared `void **` (generic list storage), not `SdfCommandNode **`: its alias set must
@@ -535,7 +822,6 @@ void sdfModelNodeSetShape(sdfModelNode_t *node, const u32 *commandList, s32 pack
     }
 }
 
-
 /* Allocate `count` zeroed two-pair slot entries and attach them to the model. */
 void sdfModelMakeMorphList(sdfModelRootNode_t *model, s32 count) {
     DevRequest *buf;
@@ -558,8 +844,11 @@ void sdfModelMakeMorphList(sdfModelRootNode_t *model, s32 count) {
 }
 
 sdfModelNode_t *sdfModelNodeNew(void);
+
 sdfModelRootNode_t *sdfModelRootNew(void);
+
 void sdfModelAllocNodeList(sdfModelRootNode_t *model, s32 count);
+
 void sdfModelNodeAdd(sdfModelRootNode_t *list, sdfModelNode_t *owner, sdfModelNode_t *node);
 
 /* Build the buffered model, parse its asset records and create one draw node per
@@ -918,13 +1207,18 @@ void sdfModelTempPacketLinkOt(sdfGrOt_t **surfaces, sdfModelRootNode_t *model) {
 INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelTempPacketLinkOt);
 #endif
 
-#include "sdf.h"
 extern u8 corePktSoftenBias;
+
 extern const struct SdfDmaTagHeader *sdf3DLightDefault;
+
 extern void *sdf3DFogDefault;
+
 extern f32 sdfFaceDivSoften, sdfFaceDivBias;
+
 extern f32 sdf3DScreenTm[16];
+
 extern void sdfCoreDrawSetZBias(f32);
+
 /* Build one per-frame packet list for each visible node resource variant. */
 void sdfModelLinkOt(sdfGrOt_t **surfaces, sdfModelRootNode_t *model) {
     SdfGraphBufferIndex bufferIndex;
@@ -1119,3 +1413,290 @@ void sdfModelMorphListCopyStat(DevRequest *destination, const DevRequest *source
         memcpy(destination->buffer, source->buffer, count * 16);
     }
 }
+
+#define SDF_CHUNK_NAMED_IDS 0x4D4E444E
+
+extern f32 sdfFaceDivSoften;
+
+extern f32 sdfFaceDivBias;
+
+extern void sdfMatListCopyStat(DevRequest *, const DevRequest *);
+
+void sdfModelCopyStat(sdfModelRootNode_t *destination, const sdfModelRootNode_t *source) {
+    sdfModelNode_t **destinationNodes;
+    const sdfModelNode_t * const *sourceNodes;
+    s32 count;
+    s32 buffer;
+    s32 i;
+
+    sdfMatListCopyStat(destination->resources, source->resources);
+    sdfModelMorphListCopyStat(destination->slotPairs, source->slotPairs);
+    destination->flags = source->flags;
+    destination->drawFlags = source->drawFlags;
+    destination->color = source->color;
+    VU0_LOAD_MATRIX(source->matrix);
+    VU0_STORE_MATRIX(destination->matrix);
+    SDF_VU0_COPYVECTOR(destination->rotationQuaternion, source->rotationQuaternion);
+    SDF_VU0_COPYVECTOR(destination->scaleVector, source->scaleVector);
+    buffer = (s8)sdfFrameId;
+    destination->lighting = source->lighting;
+    destination->scalarOverrideFirst = source->scalarOverrideFirst;
+    destination->secondaryLighting = source->secondaryLighting;
+    destination->scalarOverrideSecond = source->scalarOverrideSecond;
+    count = destination->list->usedCount;
+    destinationNodes = destination->list->buffer;
+    sourceNodes = (const sdfModelNode_t * const *)source->list->buffer;
+    i = 0;
+    if (count > 0) {
+        s32 bufferOffset = buffer * 0x80;
+        for (; i < count; i++) {
+            sdfModelNode_t *destinationNode = destinationNodes[i];
+            const sdfModelNode_t *sourceNode = sourceNodes[i];
+
+            destinationNode->flags = sourceNode->flags;
+            destinationNode->color = sourceNode->color;
+            destinationNode->drawFlagMask = sourceNode->drawFlagMask;
+            SDF_VU0_COPYVECTOR(destinationNode->quaternion, sourceNode->quaternion);
+            SDF_VU0_COPYVECTOR(destinationNode->translation, sourceNode->translation);
+            SDF_VU0_COPYVECTOR(destinationNode->scale, sourceNode->scale);
+            VU0_LOAD_MATRIX(sourceNode->localMatrix);
+            VU0_STORE_MATRIX(destinationNode->localMatrix);
+            VU0_LOAD_MATRIX(sourceNode->worldMatrix);
+            VU0_STORE_MATRIX(destinationNode->worldMatrix);
+            if (destinationNode->workspace != 0) {
+                memcpy((u8 *)destinationNode->workspace + bufferOffset,
+                       (u8 *)sourceNode->workspace + bufferOffset, 0x80);
+            }
+        }
+    }
+}
+
+/* Initialize one draw-group record of a frame draw bank. */
+void sdfModelSetDrawEnv(SdfDrawPacketGroups *ctx) {
+    SdfDrawPacketGroup *packet = ctx->groups;
+    s32 i;
+
+    sdfPrimSetOpaquePacket(&ctx->groups[0].packet.blend);
+    sdfPrimSetSemiTransPacket(&ctx->groups[1].packet.blend);
+    sdfPrimSetAddTransPacket(&ctx->groups[2].packet.blend);
+    sdfPrimSetSubTransPacket(&ctx->groups[3].packet.blend);
+    for (i = 0; i != 4; i++) {
+        /* Replace only the first VIF word; preserve the builder's DIRECT word. */
+        packet->packet.dma.firstVifCode = 0x11000000;
+        sdfDrawTagInit(&packet->list);
+        sdfDrawTagLink(&packet->list, (u32)&packet->packet.blend);
+        packet++;
+    }
+    sdfDrawTagInit(&ctx->syncList);
+    ctx->syncPacketWords[0] = 0;
+    ctx->syncPacketWords[1] = 0x13000000;
+    sdfDrawTagLink(&ctx->syncList, (u32)&ctx->syncPacketWords[0]);
+}
+
+/* Submit the four draw lists, then the trailing list to the fourth owner. */
+void sdfModelDrawEnvLinkOt(SdfModelDrawSurfaceSet owners, SdfDrawPacketGroups *packets) {
+    s32 i;
+
+    for (i = 0; i != 4; i++) {
+        owners[i]->prepend(owners[i], 1, &packets->groups[i].list);
+    }
+    owners[3]->append(owners[3], &packets->syncList);
+}
+
+/* Follow chunk byte extents until the requested ID or the zero-ID terminator is reached. */
+SdfChunkHeader *sdfChunkFindById(SdfChunkHeader *chunk, s32 chunkId) {
+    u32 currentId;
+
+    if (chunk == NULL) {
+        return NULL;
+    }
+    currentId = chunk->id;
+    while (currentId != 0) {
+        if (currentId == chunkId) {
+            return chunk;
+        }
+        chunk = (SdfChunkHeader *)((u8 *)chunk + chunk->size);
+        currentId = chunk->id;
+    }
+    return NULL;
+}
+
+SdfChunkHeader *sdfChunkFindByTag(const sdfModelRootNode_t *model, s32 tag) {
+    return sdfChunkFindById(model->chunkTable, tag);
+}
+
+/* Names are followed by a four-byte-aligned ID word. */
+SdfModelNodeIndex sdfModelGetNodeIndexByName(sdfModelRootNode_t *model, const char *name) {
+    SdfChunkHeader *namesChunk = sdfChunkFindByTag(model, SDF_CHUNK_NAMED_IDS);
+    u8 *entryName;
+    u8 *chunkEnd;
+    u32 nameLength;
+    if (namesChunk == NULL) {
+        return SDF_MODEL_NODE_INDEX_NOT_FOUND;
+    }
+    entryName = (u8 *)namesChunk + 8;
+    chunkEnd = (u8 *)namesChunk + namesChunk->size;
+    nameLength = strlen(name);
+    do {
+        u32 entryNameLength = strlen((char *)entryName);
+        u8 *idWord = (u8 *)(((u32)(entryName + entryNameLength + 4)) & ~3U);
+        if (entryNameLength == nameLength && memcmp(entryName, name, nameLength) == 0) {
+            return *(s32 *)idWord;
+        }
+        entryName = idWord + 4;
+    } while (entryName < chunkEnd);
+    return SDF_MODEL_NODE_INDEX_NOT_FOUND;
+}
+
+extern const char D_00398188[];
+
+const char *sdfModelGetNodeName(sdfModelRootNode_t *model, s32 nameId) {
+    SdfChunkHeader *chunk = sdfChunkFindByTag(model, SDF_CHUNK_NAMED_IDS);
+    const u8 *name;
+    const u8 *end;
+    if (chunk == NULL) {
+        return D_00398188;
+    }
+    name = (const u8 *)(chunk + 1);
+    end = (const u8 *)chunk + chunk->size;
+    do {
+        const u8 *cursor = name;
+        const s32 *id;
+        while (*cursor++ != 0) {
+        }
+        id = (const s32 *)(((u32)cursor + 3) & ~3U);
+        if (*id == nameId) {
+            return (const char *)name;
+        }
+        name = (const u8 *)(id + 1);
+        if (name >= end) {
+            return D_00398188;
+        }
+    } while (1);
+}
+
+u32 sdfModelGetMarkPosCount(const sdfModelRootNode_t *model) {
+    const SdfChunkHeader *chunk = sdfChunkFindByTag(model, SDF_CHUNK_MAP_POSITIONS);
+    if (chunk != NULL) {
+        return (chunk->size - 0x10) >> 6;
+    }
+    return 0;
+}
+
+/* vu0 routine: build basis rows in vf28-vf31 from the map record, then
+ * postmultiply using its draw-node matrix. */
+void sdfModelMakeMarkPosMatrix(sdfModelRootNode_t *model, SdfMapPositionRecord *record) {
+    sdfModelNode_t *drawNode = sdfModelSearchNode(model, record->nodeId);
+    u8 *vector;
+
+    vector = (u8 *)&record->up;
+    SDF_VU0_LOADVECTOR(vector);
+    SDF_VU0_SET_ROW2();
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    vector = (u8 *)&record->direction;
+    SDF_VU0_LOADVECTOR(vector);
+    SDF_VU0_NEGVECTOR_XYZ();
+    SDF_VU0_SET_ROW1();
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_SET_ROW0();
+    SDF_VU0_LOAD_ROW3(&record->position);
+    SDF_VU0_MATRIX_ROW3_W_SET_ONE();
+    sdfPostmultiplyVuMatrixFromMemory((const struct Matrix4 *)drawNode->worldMatrix);
+}
+
+/* vu0 routine: transform the map-record position by its draw-node matrix;
+ * the transformed position is left in vf10. */
+void sdfModelMakeMarkPos(sdfModelRootNode_t *model, SdfMapPositionRecord *record) {
+    sdfModelNode_t *drawNode = sdfModelSearchNode(model, record->nodeId);
+
+    VU0_LOAD_MATRIX(drawNode->worldMatrix);
+    SDF_VU0_LOADVECTOR(&record->position);
+    SDF_VU0_APPLYMATRIX_XYZ1();
+}
+
+/* Search the fixed-size map-position records within the chunk's declared byte extent. */
+SdfMapPositionRecord *sdfModelSearchMarkPosData(sdfModelRootNode_t *model, s32 recordId) {
+    SdfChunkHeader *positionsChunk = sdfChunkFindByTag(model, SDF_CHUNK_MAP_POSITIONS);
+    SdfMapPositionChunkPrefix *positions;
+    SdfMapPositionRecord *record;
+    u8 *chunkEnd;
+    if (positionsChunk == NULL) {
+        return NULL;
+    }
+    positions = (SdfMapPositionChunkPrefix *)positionsChunk;
+    record = (SdfMapPositionRecord *)(positions + 1);
+    chunkEnd = (u8 *)positionsChunk + positionsChunk->size;
+    while ((u8 *)record < chunkEnd) {
+        if (record->id == recordId) {
+            return record;
+        }
+        record++;
+    }
+    return NULL;
+}
+
+SdfMapPositionLookupResult sdfModelGetMarkPosMatrix(sdfModelRootNode_t *model, s32 mapRecordId) {
+    SdfMapPositionRecord *resource = sdfModelSearchMarkPosData(model, mapRecordId);
+    if (resource != NULL) {
+        sdfModelMakeMarkPosMatrix(model, resource);
+        return SDF_MAP_POSITION_LOOKUP_FOUND;
+    }
+    return SDF_MAP_POSITION_LOOKUP_NOT_FOUND;
+}
+
+SdfMapPositionLookupResult sdfModelGetMarkPos(sdfModelRootNode_t *model, s32 mapRecordId) {
+    SdfMapPositionRecord *resource = sdfModelSearchMarkPosData(model, mapRecordId);
+    if (resource != NULL) {
+        sdfModelMakeMarkPos(model, resource);
+        return SDF_MAP_POSITION_LOOKUP_FOUND;
+    }
+    return SDF_MAP_POSITION_LOOKUP_NOT_FOUND;
+}
+
+u32 sdfGetUniqueChunkValue(const sdfModelRootNode_t *model) {
+    const SdfChunkHeader *chunk = sdfChunkFindByTag(model, SDF_CHUNK_UNIQUE_VALUE);
+    if (chunk != NULL) {
+        return *(const u32 *)((const u8 *)chunk + sizeof(*chunk));
+    }
+    return 0;
+}
+
+u32 sdfGetLodChunkValue(sdfModelRootNode_t *model) {
+    SdfChunkHeader *chunk = sdfChunkFindByTag(model, SDF_CHUNK_LOD_VALUE);
+    if (chunk != NULL) {
+        return *(u32 *)((u8 *)chunk + sizeof(*chunk));
+    }
+    return 0;
+}
+
+/* Store the override pair and select it instead of the shared defaults. */
+void sdfModelSetFaceDivParm(sdfModelRootNode_t *model, f32 first, f32 second) {
+    model->scalarOverrideFirst = first;
+    model->scalarOverrideSecond = second;
+    model->flags = model->flags | SDF_MODEL_USE_SCALAR_OVERRIDES;
+}
+
+/* Clear only the pair-override selection bit. */
+void sdfModelResetFaceDivParm(sdfModelRootNode_t *model) {
+    model->flags = model->flags & ~SDF_MODEL_USE_SCALAR_OVERRIDES;
+}
+
+/* Return the first override value when selected, otherwise its shared default. */
+f32 sdfModelGetFaceDivSoften(sdfModelRootNode_t *model) {
+    if ((model->flags & SDF_MODEL_USE_SCALAR_OVERRIDES) != 0) {
+        return model->scalarOverrideFirst;
+    }
+    return sdfFaceDivSoften;
+}
+
+/* Return the second override value when selected, otherwise its shared default. */
+f32 sdfModelGetFaceDivBias(sdfModelRootNode_t *model) {
+    if ((model->flags & SDF_MODEL_USE_SCALAR_OVERRIDES) != 0) {
+        return model->scalarOverrideSecond;
+    }
+    return sdfFaceDivBias;
+}
+
+INCLUDE_SDATA(const s32, "sdf/sdfModel", corePktSoftenBias);
+

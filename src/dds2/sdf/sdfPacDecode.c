@@ -2,9 +2,17 @@
 #include "common.h"
 #include "sdf_chip.h"
 #include "sdf_resource.h"
+#include "sdf_movie_api.h"
+#include "sdf_stream_read_api.h"
+#include "sdf_semaphore_api.h"
+#include "file_pac.h"
+#include "sdf_pac_callback.h"
+#include "sdf_movie_stream.h"
+#include "sdf_movie_state.h"
+#include "sdf_dev_state.h"
+#include "mdl_object_stream.h"
 #include "sdf.h"
 #include "sdf_pac_packet.h"
-#include "sdf_pac_callback.h"
 #include "sdf_pac_state.h"
 #include "sdf_pac_decode.h"
 #include "sdf_pac_work.h"
@@ -12,6 +20,155 @@
 #include "sdf_resource_list_item.h"
 #include "sdf_texture_file.h"
 #include "sdf_pac_decoder.h"
+#include "sdf_line_pair_packet_api.h"
+#include "sdf_vu0.h"
+#include "sdf_vu_matrix.h"
+#include "sdf_thread_workspace_api.h"
+#include "sdf_timer.h"
+#include "pcp_vu0.h"
+#include "sdf_draw.h"
+#include "sdf_projection.h"
+#include "ee_mmi.h"
+#include "sdf_named_resource_request_api.h"
+#include "sce_io.h"
+#include "sdf_dev_event.h"
+#include "sdf_key_pool.h"
+#include "sdf_packet_alloc.h"
+#include "sdf_stream_state.h"
+
+enum {
+    PAC_HEADER_BYTES = 0x10,
+    PAC_EXTENSION_BYTES_MASK = 0xF0,
+    PAC_ALIGNMENT_BYTES = 0x40,
+    PAC_ALIGNMENT_MASK = 0x3F,
+    PAC_PHASE_FINISHED = -1,
+    PAC_INITIAL_PACKET_COUNTER = -1,
+    PAC_STATE_USE_PACKET_MEMORY = 1,
+    PAC_STATE_ALLOCATE_HIGH = 2
+};
+
+typedef struct PacAlloc {
+    s32 entryCount;
+    s32 entryIndex;
+    u8 pad8[24];
+    s32 resource;
+} PacAlloc;
+
+extern u8 D_00438D28[];
+
+/* Start the packet counter at -1 and select a custom or built-in packet callback. */
+void sdfPacInit(PacState *packet, void *callbackAddress) {
+    memset(packet, 0, sizeof(*packet));
+    packet->packetCounter = PAC_INITIAL_PACKET_COUNTER;
+    if (callbackAddress != NULL) {
+        packet->packetCallback = (s32 (*)())callbackAddress;
+    } else {
+        packet->packetCallback = sdfPacStdCallback;
+    }
+}
+
+/* Retain packet-owned payload memory rather than allocating a separate resource. */
+void sdfPacSetStay(PacState *state) {
+    state->flags = state->flags | PAC_STATE_USE_PACKET_MEMORY;
+}
+
+/* Select the high-address allocator for packet payload resources. */
+void sdfPacSetFromTail(PacState *state) {
+    state->flags = state->flags | PAC_STATE_ALLOCATE_HIGH;
+}
+
+/* Advance the queue cursor before returning each node to the chip allocator. */
+void sdfPacFree(PacState *state) {
+    PacWork *cursor = state->queueHead;
+    PacWork *current = cursor;
+
+    while (cursor != NULL) {
+        cursor = cursor->next;
+        sdfChipFreeDirect(current);
+        current = cursor;
+    }
+}
+
+/* Mark the signed PAC state as finished. */
+void sdfPacMarkPhaseFinished(s8 *phase) {
+    *phase = PAC_PHASE_FINISHED;
+}
+
+/* Consume byteCount bytes without bounds checks, updating the cursor and both counters. */
+void sdfPacUseSrc(PacState *state, s32 byteCount) {
+    state->inputCursor = state->inputCursor + byteCount;
+    state->inputAvailable = state->inputAvailable - byteCount;
+    state->consumedBytes = state->consumedBytes + byteCount;
+}
+
+/* Align the stream, then report a packet header and its payload byte count to the callback. */
+void sdfPacAdvanceCallbackBoundary(PacState *state) {
+    SdfPacStreamPacketHeader *inputHeader;
+    u32 alignmentOffset;
+    u32 packetBytes;
+    u32 headerBytes;
+    u32 payloadBytes;
+    SdfPacPacketCallbackResult (*packetCallback)();
+    SdfPacPacketCallbackResult callbackResult;
+
+    alignmentOffset = state->consumedBytes & PAC_ALIGNMENT_MASK;
+    if (alignmentOffset != 0) {
+        state->phase = 1;
+        state->pendingBytes = PAC_ALIGNMENT_BYTES - alignmentOffset;
+        return;
+    }
+    inputHeader = (SdfPacStreamPacketHeader *)state->inputCursor;
+    /* Advance only the fixed header; retain its original address for the callback. */
+    sdfPacUseSrc(state, PAC_HEADER_BYTES);
+    packetBytes = inputHeader->packetByteCount;
+    state->packetCounter++;
+    /* The high nibble encodes extension bytes, not a bit offset. */
+    headerBytes = (inputHeader->flags & PAC_EXTENSION_BYTES_MASK) + PAC_HEADER_BYTES;
+    payloadBytes = packetBytes - headerBytes;
+    state->pendingBytes = payloadBytes;
+    packetCallback = state->packetCallback;
+    callbackResult = packetCallback(state, SDF_PAC_CALLBACK_EVENT_PACKET_HEADER, inputHeader, payloadBytes);
+    if (callbackResult == SDF_PAC_CALLBACK_FINISHED) {
+        sdfPacMarkPhaseFinished(&state->phase);
+        return;
+    }
+    if (callbackResult == SDF_PAC_CALLBACK_ALIGN) {
+        state->phase = 1;
+        state->pendingBytes = (state->pendingBytes + PAC_ALIGNMENT_MASK) & ~PAC_ALIGNMENT_MASK;
+    } else {
+        state->phase = 2;
+    }
+}
+
+/* Notify completion: FINISHED stops decoding; DROP_TAIL releases the queue tail. */
+void sdfDecodePacNodeAndAdvanceTail(PacState *state) {
+    SdfPacPacketCallbackResult callbackResult;
+    PacWork *tailPacket;
+    PacWork *scanPacket;
+    PacWork *nextPacket;
+
+    callbackResult = state->packetCallback(state, SDF_PAC_CALLBACK_EVENT_PACKET_COMPLETE, state->queueTail->packet);
+    if (callbackResult == SDF_PAC_CALLBACK_FINISHED) {
+        sdfPacMarkPhaseFinished(&state->phase);
+        return;
+    }
+    if (callbackResult == SDF_PAC_CALLBACK_DROP_TAIL) {
+        tailPacket = state->queueTail;
+        scanPacket = state->queueHead;
+        if (scanPacket == tailPacket) {
+            state->queueTail = NULL;
+            state->queueHead = NULL;
+        } else {
+            while ((nextPacket = scanPacket->next) != tailPacket) {
+                scanPacket = nextPacket;
+            }
+            /* The multi-item path clears the link without reassigning queueTail here. */
+            scanPacket->next = NULL;
+        }
+        sdfChipFreeDirect(tailPacket);
+    }
+    state->phase = 0;
+}
 
 enum {
     PAC_COMMAND_PAYLOAD = 1,
@@ -22,14 +179,8 @@ enum {
     PAC_COMMAND_END = 0xFF,
     PAC_ENCODING_RAW = 0,
     PAC_ENCODING_COMPRESSED = 1,
-    PAC_HEADER_BYTES = 0x10,
-    PAC_EXTENSION_BYTES_MASK = 0xF0,
-    PAC_ENCODING_MASK = 0xF,
-    PAC_STATE_USE_PACKET_MEMORY = 1,
-    PAC_STATE_ALLOCATE_HIGH = 2
+    PAC_ENCODING_MASK = 0xF
 };
-
-
 
 void sdfPacMemDecoderInit(PacState *state, SdfPacStreamPacketHeader *packet);
 
@@ -47,11 +198,6 @@ void sdfPacModelDecoderEndFunc(PacState *state);
 
 void sdfPacMotionDecoderEndFunc(PacState *state);
 
-
-
-
-
-
 void sdfPacTmxDecoderInitFunc(PacState *state, SdfPacStreamPacketHeader *packet, PacBuf *buffer);
 
 void sdfPacTmxDecoderEndFunc(PacState *state);
@@ -59,11 +205,6 @@ void sdfPacTmxDecoderEndFunc(PacState *state);
 void sdfPacAdvanceAllocationEntry(PacState *state);
 
 void sdfPacResetOutputToAllocationEntry(PacState *state);
-
-
-
-
-
 
 extern void sdfPacAdvanceCallbackBoundary(PacState *state);
 
@@ -470,4 +611,33 @@ void sdfPacSkipAllocationEntryBytes(PacState *state) {
         }
     }
     sdfPacResetOutputToAllocationEntry(state);
+}
+
+extern DevRequest *sdfTexListNew(s32 count);
+
+/* Read the entry count word, size the list for it and arm the skip handler. */
+void sdfPacTexListDecoder0(PacState *state) {
+    u32 count;
+    PacListAllocation *allocation;
+    PacWork *work;
+
+    if (state->inputAvailable != 0) {
+        /* The aligned packet count is read with native lw semantics. */
+        count = *(const u32 *)state->inputCursor;
+        sdfPacUseSrc(state, 4);
+        allocation = state->slot.list;
+        work = state->queueTail;
+        allocation->entryCount = count;
+        allocation->entryIndex = 0;
+        work->resourceHandle = sdfTexListNew(count);
+        state->pendingBytes = ((count * 4 + 0x53) & -0x40) - 0x14;
+        state->onInput = sdfPacSkipAllocationEntryBytes;
+    }
+}
+
+void sdfPacTexListDecoderInit(PacState *state,
+                                SdfPacStreamPacketHeader *packet) {
+    sdfPacNewResrc(state, packet);
+    state->slot.list = sdfChipAllocDirect(sizeof(PacListAllocation));
+    state->onInput = sdfPacTexListDecoder0;
 }

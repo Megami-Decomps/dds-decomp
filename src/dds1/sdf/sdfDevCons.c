@@ -1,30 +1,248 @@
 #include "sdk_ps2.h"
-#include "common.h"
+#include "sdf_gs_header.h"
 #include "eeregs.h"
+#include "common.h"
+#include "sdf_vu0.h"
+#include "sdf_vu_matrix.h"
+#include "sdf_pad_entry.h"
+#include "sdf_pad_index.h"
+#include "sdf_pad_mode_api.h"
+#include "sdf_pad_motor_api.h"
+#include "sdf_cons_matrix_packet.h"
+#include "sdf_dma_packet_header.h"
+#include "kwln.h"
+#include "sdf_asset_packets.h"
+#include "sdf_asset_state.h"
+#include "sdf_vu_lighting.h"
+#include "sdf_chip.h"
+#include "sdf_packet_list.h"
+#include "sdf_packet_header.h"
+#include "sdf_packet_append.h"
+#include "sdf_resource.h"
+#include "sdf_primitive_packet_api.h"
 #include "sdf.h"
+#include "sdf_draw.h"
+#include "sdf_request.h"
+#include "sdf_model.h"
+#include "sdf_projection.h"
+#include "pcp_vu0.h"
+#include "sdf_vu_transform_api.h"
+#include "ee_mmi.h"
+#include "fpu.h"
+#include "sdf_texture_file.h"
+#include "sdf_column_packet_api.h"
+#include "sdf_lookup_texture.h"
+#include "sdf_compact_vertex_vif_packet.h"
+#include "sdf_dev_console_node.h"
+#include "btl.h"
+#include "sdf_packet_alloc.h"
 #include "sdf_dev_cons.h"
 #include "sdf_dev_cons_stack_packets.h"
 #include "sdf_console_packet.h"
-#include "ee_mmi.h"
+#include "sdf_file_existence_api.h"
+#include "sif_rpc_client_prefix.h"
+#include "sdf_semaphore_api.h"
+#include "sdf_timer.h"
+#include "sdf_sif_command.h"
+#include "sdf_dev_event.h"
+#include "sdf_dev_protocol.h"
+#include "sdf_dev_state.h"
+#include "sdf_dev_path_prefix.h"
+#include "sdf_dev_worker.h"
+#include "sdf_thread_workspace_api.h"
+#include "sdf_dev_start_load_api.h"
+#include "sdf_disc_file_record.h"
+#include "sdf_debug_api.h"
+
+#define SDF_CONSOLE_CELL_BYTES 2
+
+extern struct sdfTexHandle_t *sdfDebugFontHandle;
+
+extern u32 sdf3DFogDefault;
+
+extern const struct SdfDmaTagHeader *sdf3DLightDefault;
+
+extern sdfDevConsCB_tag *D_003BD3C0;
+
+extern u32 D_003BD3C4;
+
+extern u8 D_00315BA0[];
+
+extern u32 sdfDevConsFontUvTable[];
+
+extern sdfTexHandle_t *D_003BD37C;
+
+extern sdfTexHandle_t *D_003BD380;
+
+extern sdfTexHandle_t *D_003BD390;
+
+extern struct sdfMemHandle_t *D_003BD350;
+
+extern s8 D_003BD360;
+
+extern f32 D_003BD364;
+
+extern f32 D_003BD368;
+
+extern f32 D_003BD36C;
+
+extern f32 D_003BD370;
+
+extern u64 sdf3DRefMapParam;
+
+extern f32 sdfFaceDivSoften;
+
+extern f32 sdfFaceDivBias;
+
+extern u16 D_003BD3A0[4];
+
+extern u8 sdfPadAnalogSticks[8];
+
+extern u8 sdfPadPortSlotPairs[4];
+
+extern u8 D_003BD39C;
+
+/* Acquire and cache the shared console texture on first use. */
+void sdfDevConsInit(void) {
+    if (D_003BD3C4 == 0) {
+        D_003BD3C4 = 1;
+        sdfDebugFontHandle = sdfTexSet((SdfTextureFileHeader *)(D_00315BA0));
+    }
+}
+
+/* Ensure initialization and return the cached console texture. */
+struct sdfTexHandle_t *sdfDevConsGetFontHandle(void) {
+    sdfDevConsInit();
+    return sdfDebugFontHandle;
+}
+
+/* Return the packed glyph-UV table indexed by character minus 0x20. */
+u32 *sdfDevConsGetFontUvTable(void) {
+    return sdfDevConsFontUvTable;
+}
+
+/* Append to the next-linked list and move its stored tail to this node. */
+void sdfDevConsLinkToTop(sdfDevConsCB_tag *node) {
+    sdfDevConsCB_tag *previousTail = D_003BD3C0;
+
+    node->next = NULL;
+    node->previousNode = previousTail;
+    if (previousTail != NULL) {
+        previousTail->next = node;
+    }
+    D_003BD3C0 = node;
+}
+
+/* Unlink this node, moving the stored tail when its next link is NULL. */
+void sdfDevConsUnlink(sdfDevConsCB_tag *node) {
+    sdfDevConsCB_tag *nextNode = node->next;
+    sdfDevConsCB_tag *previousNode = node->previousNode;
+
+    if (nextNode != NULL) {
+        nextNode->previousNode = previousNode;
+    } else {
+        D_003BD3C0 = previousNode;
+    }
+    if (previousNode != NULL) {
+        previousNode->next = nextNode;
+    }
+}
+
+/* Unlink the console, release its cell-buffer allocation, then free the node. */
+void sdfDevConsClose(sdfDevConsCB_tag *node) {
+    sdfDevConsUnlink(node);
+    sdfMemFreeDirect(node->bufferAllocation);
+    sdfChipFreeDirect(node);
+}
+
+/* Reset both cursor coordinates and clear the two-byte character-cell grid. */
+void sdfDevConsClearInside(sdfDevConsCB_tag *node) {
+    node->cursorColumn = 0;
+    node->cursorRow = 0;
+    memset(node->cells, 0, node->columns * node->rows * SDF_CONSOLE_CELL_BYTES);
+}
+
+/* Reset a console through the existing clear operation. */
+void sdfDevConsClear(sdfDevConsCB_tag *node) {
+    sdfDevConsClearInside(node);
+}
+
+/* Allocate a two-byte character grid and link it for cleanup.
+ * Allocation uses the supplied dimensions; clearing uses their stored s16
+ * values. Dimensions and the two opaque halfword inputs are not validated. */
+sdfDevConsCB_tag *sdfDevConsOpen(u32 screenOriginX, u32 screenOriginY, s32 columns, s32 rows) {
+    sdfDevConsCB_tag *node;
+    struct sdfMemHandle_t *bufferAllocation;
+
+    sdfDevConsInit();
+    node = sdfChipAllocDirect(sizeof(sdfDevConsCB_tag));
+    node->screenOriginX = screenOriginX;
+    node->screenOriginY = screenOriginY;
+    node->columns = columns;
+    node->rows = rows;
+    node->tabWidth = 8;
+    node->controlByte = 0;
+    node->textAttribute = 0;
+    bufferAllocation = sdfMemAllocDirect((columns * rows) * SDF_CONSOLE_CELL_BYTES);
+    node->bufferAllocation = bufferAllocation;
+    node->cells = (u8 *)sdfMemLock(bufferAllocation);
+    sdfDevConsClearInside(node);
+    sdfDevConsLinkToTop(node);
+    return node;
+}
+
+/* Packed console glyph UVs for characters 0x20 through 0x7F. */
+u32 sdfDevConsFontUvTable[96] __attribute__((aligned(8))) = {
+    0x00000000, 0x000000C0, 0x00000180, 0x00000240, 0x00000300, 0x000003C0, 0x00000480, 0x00000540,
+    0x00000600, 0x000006C0, 0x00C00000, 0x00C000C0, 0x00C00180, 0x00C00240, 0x00C00300, 0x00C003C0,
+    0x00C00480, 0x00C00540, 0x00C00600, 0x00C006C0, 0x01800000, 0x018000C0, 0x01800180, 0x01800240,
+    0x01800300, 0x018003C0, 0x01800480, 0x01800540, 0x01800600, 0x018006C0, 0x02400000, 0x024000C0,
+    0x02400180, 0x02400240, 0x02400300, 0x024003C0, 0x02400480, 0x02400540, 0x02400600, 0x024006C0,
+    0x03000000, 0x030000C0, 0x03000180, 0x03000240, 0x03000300, 0x030003C0, 0x03000480, 0x03000540,
+    0x03000600, 0x030006C0, 0x03C00000, 0x03C000C0, 0x03C00180, 0x03C00240, 0x03C00300, 0x03C003C0,
+    0x03C00480, 0x03C00540, 0x03C00600, 0x03C006C0, 0x04800000, 0x048000C0, 0x04800180, 0x04800240,
+    0x04800300, 0x048003C0, 0x04800480, 0x04800540, 0x04800600, 0x048006C0, 0x05400000, 0x054000C0,
+    0x05400180, 0x05400240, 0x05400300, 0x054003C0, 0x05400480, 0x05400540, 0x05400600, 0x054006C0,
+    0x06000000, 0x060000C0, 0x06000180, 0x06000240, 0x06000300, 0x060003C0, 0x06000480, 0x06000540,
+    0x06000600, 0x060006C0, 0x06C00000, 0x06C000C0, 0x06C00180, 0x06C00240, 0x06C00300, 0x06C003C0,
+};
+
+/* Mutable colors used by the device console and packet command setter. */
+u32 sdfDevConsColorTable[16] = {
+    0x80808080, 0x80800000, 0x80000080, 0x80800080,
+    0x80008000, 0x80808000, 0x80008080, 0x80606060,
+    0x80202020, 0x80400000, 0x80000040, 0x80400040,
+    0x80004000, 0x80404000, 0x80004040, 0x00000000,
+};
 
 #define SDF_DEVCONS_CELL_BYTES 2
+
 #define SDF_DEVCONS_TEXT_BUFFER_BYTES 0x200
+
 #define SDF_DEVCONS_NONEMPTY_SHIFT 3
+
 #define SDF_DEVCONS_GIF_TAG_BYTES 0x10
+
 #define SDF_DMA_QWORD_SHIFT 4
+
 #define SDF_DMA_CHCR_TTE 0x40
+
 #define SDF_DMA_ADDRESS_MASK 0x0FFFFFFF
 
 void sdfDevConsPutInside(sdfDevConsCB_tag *console, s32 character, s32 attribute);
+
 void sdfDevConsTagClose(sdfDevConsDrawCB_t *packetBuffers);
+
 void sdfDevConsDrawFlush(sdfDevConsDrawCB_t *packetBuffers);
+
 void sdfDevConsDrawBG(sdfDevConsCB_tag *console, sdfDevConsDrawCB_t *packetBuffers);
+
 void sdfDevConsDraw(sdfDevConsCB_tag *console, sdfDevConsDrawCB_t *packetBuffers);
+
 void sdfDevConsDrawInit(sdfDevConsDrawCB_t *packetBuffers, u8 *storageBase, s32 storageCapacityBytes);
+
 struct sdfTexHandle_t;
-extern struct sdfTexHandle_t *sdfDebugFontHandle;
-extern sdfDevConsCB_tag *D_003BD3C0;
-extern u32 sdfDevConsFontUvTable[];
+
 extern u32 sdfDevConsColorTable[];
 
 /* Scroll only at the last row; otherwise advance it. Always reset the column. */
@@ -322,3 +540,114 @@ void sdfDevConsDrawAll(void) {
         sdfDevConsDrawFlush(&packetBuffers);
     }
 }
+
+/* SifCommand is the complete 0x10-byte input value. Console rendering uses
+ * source/end as x/y storage, argument as depth bits, and command as RGBA.
+ * Its RPC source/end interpretation remains unchanged. */
+extern void *sdfDevVprintf(SifCommand *input, const char *format, void *args);
+
+extern void sdfDevConsInit(void);
+
+extern u32 sdfDevConsFontUvTable[96];
+
+/* Cached handle for the developer console's font texture. */
+extern struct sdfTexHandle_t *sdfDebugFontHandle;
+
+void *sdfDevVprintf(SifCommand *input, const char *format, void *arguments) {
+    char text[0x200];
+    s32 formattedCount;
+    u8 *start;
+    u8 *cursor;
+    SdfConsolePacketHeader *header;
+    u8 *textCursor;
+    s32 character;
+    s32 glyphCount;
+    u32 color;
+    u64 position;
+    s32 quadwordCount;
+
+    sdfDevConsInit();
+    formattedCount = vsprintf(text, format, arguments);
+    start = (u8 *)sdfGrOpenPacketBuff();
+    if (formattedCount == 0) {
+        *(u128 *)start = 0;
+        cursor = start + 0x10;
+    } else {
+        header = (SdfConsolePacketHeader *)start;
+        cursor = start + sizeof(*header);
+        glyphCount = 0;
+        /* This dual-use command carries x, y, depth and RGBA in its four words. */
+        position = (u32)((u16)input->source | ((u32)(u16)input->end << 16)) |
+                   ((u64)(u32)input->argument << 32);
+        color = input->command;
+        textCursor = (u8 *)text;
+        while ((character = *textCursor++) != 0) {
+            if (character >= 0x20) {
+                SdfConsoleGlyph *glyph = (SdfConsoleGlyph *)cursor;
+                u32 uv = sdfDevConsFontUvTable[character - 0x20];
+
+                glyph->color = color;
+                glyph->firstUv = uv;
+                glyph->firstPosition = position;
+                glyph->secondUv = (u32)(uv + 0x00C000C0);
+                glyph->secondPosition = position + 0x006000C0;
+                cursor += sizeof(*glyph);
+                glyphCount++;
+            }
+            /* Control bytes consume the same horizontal advance as glyphs. */
+            position += 0xC0;
+        }
+        if (glyphCount & 1) {
+            *(u64 *)cursor = 0;
+            cursor += sizeof(u64);
+        }
+        quadwordCount = ((s32)(cursor - start) >> 4) - 1;
+        input->source = (u16)position;
+        header->quadwordCount = quadwordCount;
+        header->vifNop = 0;
+        header->vifDirect = 0x50000000 | quadwordCount;
+        header->setupTag = 0x10AB400000000003ULL;
+        header->setupRegisters = 0xEEE;
+        header->textureClamp = 0;
+        header->textureClampRegister = 8;
+        header->textureFilter = 1;
+        header->textureFilterRegister = 0x14;
+        header->textureState = sdfTexGetTex0Reg(sdfDebugFontHandle);
+        header->textureStateRegister = 6;
+        header->glyphTag = 0x5400000000008000ULL | glyphCount;
+        header->glyphRegisters = 0x53531;
+    }
+    sdfGrClosePacketBuff((s32)cursor);
+    return start;
+}
+
+void *sdfDevPrintfEx(SifCommand *packet, const char *format, ...) {
+    __builtin_va_list args;
+
+    __builtin_stdarg_start(args, format);
+    return sdfDevVprintf(packet, format, args);
+}
+
+void *sdfDevPrintf(s32 source, s32 end, s32 argument, s32 index, const char *fmt, ...) {
+    SifCommand packet;
+    __builtin_va_list args;
+
+    sdfPktInit(&packet, source, end, argument, index);
+    __builtin_stdarg_start(args, fmt);
+    return sdfDevVprintf(&packet, fmt, args);
+}
+
+void sdfPktSetCmd(SifCommand *packet, s32 index) {
+    packet->command = sdfDevConsColorTable[index];
+}
+
+void sdfPktInit(SifCommand *packet, s32 source, s32 end, s32 argument, s32 index) {
+    packet->source = source;
+    packet->end = end;
+    packet->argument = argument;
+    sdfPktSetCmd(packet, index);
+}
+INCLUDE_SDATA(const s32, "sdf/sdfDevCons", D_003BD3C0);
+
+INCLUDE_SDATA(const s32, "sdf/sdfDevCons", D_003BD3C4);
+

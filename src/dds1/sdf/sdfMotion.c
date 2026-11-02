@@ -1,37 +1,92 @@
+#include "sdk_ps2.h"
 #include "sdf_request.h"
+#include "sdf_gs_blend.h"
 #include "common.h"
+#include "sdf_map_position_api.h"
 #include "sdf_vu0.h"
-#include "sdf_asset_state.h"
+#include "sdf_resource_list_release_api.h"
+#include "sdf_vu_matrix.h"
+#include "sdf_trig.h"
+#include "sdf_asset_packets.h"
+#include "sdf_dma_tag.h"
+#include "sdf_model_scalars.h"
+#include "sdf_forced_asset_texture_mode.h"
+#include "sdf_unique_chunk_value_api.h"
+#include "sdf_packet_list.h"
 #include "sdf_chip.h"
-#include "pcp_vu0.h"
-#include "ee_mmi.h"
 #include "sdf.h"
+#include "sdf_model_copy.h"
+#include "sdf_model_node_index_api.h"
+#include "sdf_asset_state.h"
+#include "sdf_pending.h"
+#include "sdf_queued_resource_api.h"
+#include "pcp_vu0.h"
 #include "sdf_draw.h"
+#include "sdf_resource_list_item.h"
+#include "sdf_chunk.h"
+#include "sdf_draw_packet_groups.h"
+#include "sdf_model_surface_set.h"
+#include "sdf_motion.h"
+#include "sdf_motion_node_api.h"
+#include "sdf_material_asset_list.h"
+#include "sdf_asset_create.h"
+#include "ee_mmi.h"
 #include "sdf_motion_loop.h"
 #include "sdf_motion_next_result.h"
-#include "sdf_motion_node_api.h"
 #include "sdf_motion_bindings.h"
-#include "sdf_vu_matrix.h"
 #include "eff_quaternion_nlerp.h"
+#include "sdf_vu_rotation_axes.h"
+#include "sdf_quaternion.h"
+#include "rw_matrix.h"
+#include "sdf_vu_transform_api.h"
+
+extern SdfForcedAssetTextureMode sdfForcedAssetTextureMode;
+
+extern s32 sdfMatAllocCount;
+
+extern SdfMotionBindingFactory D_003981A8[];
+
+/* The high halfword selects the handler, which receives the complete command word unchanged. */
+struct SdfMotionBindingHead *sdfMotionNodeNew(sdfMotionCtrlr_t *motion, u32 commandWord, s32 targetIndex) {
+    return D_003981A8[commandWord >> 16](motion, commandWord, targetIndex);
+}
 
 f32 sdfMotInterpolateKeyFloat(const SdfMotionKeyInterval *interval);
+
 u32 sdfMotInterpolateKeyColor(const SdfMotionKeyInterval *interval);
+
 extern SdfMotionBindingFactory D_003981B8[];
+
 extern SdfMotionBindingFactory D_00398248[];
+
 extern SdfMotionBindingDispatch D_003981D0;
+
 extern SdfMotionBindingDispatch D_003981E8;
+
 extern SdfMotionBindingDispatch D_00398200;
+
 extern SdfMotionBindingDispatch D_00398218;
+
 extern SdfMotionBindingDispatch D_00398230;
+
 extern SdfMotionBindingDispatch D_00398270;
+
 extern SdfMotionBindingDispatch D_00398288;
+
 extern SdfMotionBindingDispatch D_003982A0;
+
 extern SdfMotionBindingDispatch D_003982B8;
+
 extern SdfMotionBindingDispatch D_003982D0;
+
 extern SdfMotionBindingDispatch D_003982E8;
+
 extern SdfMotionBindingDispatch D_00398300;
+
 extern SdfMotionBindingDispatch D_00398318;
+
 extern SdfMotionBindingDispatch D_00398330;
+
 extern SdfMotionBindingDispatch D_00398348;
 
 /* Release the allocation retained by this motion binding. */
@@ -44,7 +99,6 @@ void sdfMotionNodeBaseInit(SdfMotionBindingHead *binding, sdfMotionCtrlr_t *moti
     binding->dispatch = dispatch;
     binding->motion = motion;
 }
-
 
 sdfMotionCtrlr_t *sdfMotionCtrlrNew(sdfModelRootNode_t *model, MotionTable *table) {
     sdfMotionCtrlr_t *motion;
@@ -72,7 +126,6 @@ sdfMotionCtrlr_t *sdfMotionCtrlrNew(sdfModelRootNode_t *model, MotionTable *tabl
     motion->frameStep = 1.0f;
     return motion;
 }
-
 
 /* Unlinks the node from its owner's list, notifies each request callback, then frees the request and the node. */
 void sdfMotionCtrlrFree(sdfMotionCtrlr_t *node)
@@ -146,11 +199,11 @@ void sdfMotionChangeBlend(sdfMotionCtrlr_t *motion, s32 motionIndex, SdfMotionLo
         bindingData += ((const SdfMotionKeyTrack *)bindingData)->nextTrackOffsetBytes;
     }
 }
+
 /* Select a motion with no lead-in and no blend duration. */
 void sdfMotionChange(sdfMotionCtrlr_t *motion, s32 motionIndex, SdfMotionLoopMode loopMode) {
     sdfMotionChangeBlend(motion, motionIndex, loopMode, 0.0f, 0.0f);
 }
-
 
 void sdfMotionSeek(sdfMotionCtrlr_t *motion, f32 frame) {
     s32 i;
@@ -228,6 +281,7 @@ SdfMotionNextResult sdfMotionNext(sdfMotionCtrlr_t *motion) {
     }
     return result;
 }
+
 /* State 6 parks motion processing, retaining the previous state to resume. */
 void sdfMotionPause(sdfMotionCtrlr_t *motion) {
     SdfMotionState previousState;
@@ -910,4 +964,150 @@ void sdfMotCLBK_matMultiUvw2BlendSeek(SdfMotionIndexedTextBinding *binding, f32 
 
     sdfMotGetKey((const SdfMotionKeyBinding *)binding, &keyInterval, frame);
     sdfMatSetMultiTexUvwByPtr(binding->target, (const f32 *)keyInterval.firstKey);
+}
+
+extern SdfMotionBindingFactory sdfMotionCommandHandlers[];
+
+extern SdfMotionBindingDispatch sdfMotMorphTable;
+
+/* Direct secondary-text sampling has an intentionally empty capturePrevious callback. */
+void sdfMotCLBK_matMultiUvw2InitBlend(void) {
+}
+
+SdfMotionBindingHead *sdfMotGenMorphNode(sdfMotionCtrlr_t *motion, u32 command, s32 targetIndex) {
+    return sdfMotionCommandHandlers[(u16)command](motion, command, targetIndex);
+}
+
+/* Bind the selected pair of model slot indices and weights. */
+void sdfMotGenMorphInit(SdfMotionSlotPairBinding *destination,
+                                 sdfMotionCtrlr_t *motion, SdfMotionBindingDispatch *dispatch, s32 entryIndex) {
+    sdfMotionNodeBaseInit((SdfMotionBindingHead *)&destination->keys,
+                            motion, dispatch);
+    destination->current = &((SdfSlotEntry *)motion->owner->slotPairs->buffer)[entryIndex];
+}
+
+SdfMotionBindingHead *sdfMotGenMorph(sdfMotionCtrlr_t *motion,
+                                      u32 unused, s32 entryIndex) {
+    SdfMotionSlotPairBinding *entry = sdfChipAllocDirect(sizeof(SdfMotionSlotPairBinding));
+
+    sdfMotGenMorphInit(entry, motion, &sdfMotMorphTable, entryIndex);
+    return (SdfMotionBindingHead *)entry;
+}
+
+/* Sample the supplied frame and interpolate, retaining separate keys when IDs differ. */
+void sdfMotCLBK_morphSeek(SdfMotionSlotPairBinding *motion, f32 frame) {
+    SdfMotionKeyInterval sample;
+    SdfSlotPair *out;
+    s32 firstId;
+    s32 secondId;
+    f32 firstValue;
+    f32 secondValue;
+    f32 weight;
+    f32 inverse;
+
+    sdfMotGetKey(&motion->keys, &sample, frame);
+    firstId = ((const SdfSlotPair *)sample.firstKey)->index;
+    secondId = ((const SdfSlotPair *)sample.secondKey)->index;
+    firstValue = ((const SdfSlotPair *)sample.firstKey)->weight;
+    secondValue = ((const SdfSlotPair *)sample.secondKey)->weight;
+    weight = sample.weight;
+    inverse = 1.0f - weight;
+    out = motion->current->pair;
+    if (firstId == secondId) {
+        out[0].index = firstId;
+        out[0].weight = firstValue * inverse + secondValue * weight;
+        out[1].index = secondId;
+        out[1].weight = 0;
+    } else {
+        out[0].index = firstId;
+        out[0].weight = firstValue * inverse;
+        out[1].index = secondId;
+        out[1].weight = secondValue * weight;
+    }
+}
+
+/* Blend sampled and retained weights, keeping at most two model slots. */
+void sdfMotCLBK_morphBlendSeek(SdfMotionSlotPairBinding *motion, f32 frame, f32 amount) {
+    SdfMotionKeyInterval sample;
+    SdfSlotEntry *current;
+    SdfSlotPair *previous;
+    u32 count;
+    s32 previousPairIndex;
+    s32 firstId;
+    s32 secondId;
+    f32 firstValue;
+    f32 secondValue;
+    f32 contributionWeight;
+    f32 secondWeight;
+
+    sdfMotGetKey(&motion->keys, &sample, frame);
+    firstId = ((const SdfSlotPair *)sample.firstKey)->index;
+    secondId = ((const SdfSlotPair *)sample.secondKey)->index;
+    firstValue = ((const SdfSlotPair *)sample.firstKey)->weight;
+    secondValue = ((const SdfSlotPair *)sample.secondKey)->weight;
+    secondWeight = sample.weight;
+    {
+        const f32 sampleComplement = 1.0f - secondWeight;
+        contributionWeight = sampleComplement * amount;
+    }
+    secondWeight *= amount;
+    current = motion->current;
+
+    if (firstId == secondId) {
+        current->pair[0].index = secondId;
+        current->pair[0].weight = firstValue * contributionWeight + secondValue * secondWeight;
+        count = 1;
+    } else {
+        current->pair[0].index = firstId;
+        current->pair[0].weight = firstValue * contributionWeight;
+        current->pair[1].index = secondId;
+        current->pair[1].weight = secondValue * secondWeight;
+        count = 2;
+    }
+
+    contributionWeight = 1.0f - amount;
+    for (previous = motion->previous.pair, previousPairIndex = 0;
+         previousPairIndex < 2; previousPairIndex++, previous++) {
+        f32 previousContributionWeight = previous->weight * contributionWeight;
+
+        if (!(previousContributionWeight <= 1.0e-6f)) {
+            s32 id = previous->index;
+
+            if (count == 1) {
+                if (current->pair[0].index == id) {
+                    current->pair[0].weight += previousContributionWeight;
+                } else {
+                    current->pair[1].index = id;
+                    current->pair[1].weight = previousContributionWeight;
+                    count = 2;
+                }
+            } else if (current->pair[0].index == id) {
+                current->pair[0].weight += previousContributionWeight;
+            } else if (current->pair[1].index == id) {
+                current->pair[1].weight += previousContributionWeight;
+            } else if (current->pair[0].weight < current->pair[1].weight) {
+                if (current->pair[0].weight < previousContributionWeight) {
+                    current->pair[0].index = id;
+                    current->pair[0].weight = previousContributionWeight;
+                }
+            } else {
+                if (current->pair[1].weight < previousContributionWeight) {
+                    current->pair[1].index = id;
+                    current->pair[1].weight = previousContributionWeight;
+                }
+            }
+        }
+
+    }
+
+    if (count == 1) {
+        current->pair[1].index = 0;
+        current->pair[1].weight = 0.0f;
+    }
+
+}
+
+/* Preserve the complete current pair for the next weighted transition. */
+void sdfMotCLBK_morphInitBlend(SdfMotionSlotPairBinding *motion) {
+    motion->previous = *motion->current;
 }

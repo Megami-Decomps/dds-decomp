@@ -1,27 +1,416 @@
+#include "sdk_ps2.h"
 #include "common.h"
+#include "eeregs.h"
+#include "sdf_timer.h"
+#include "sdf_texture_queue.h"
+#include "sdf_image_upload.h"
+#include "sdf_thread.h"
+#include "ee_mmi.h"
 #include "sdf_chip.h"
+#include "sdf_chip_range_api.h"
 #include "sdf_resource.h"
-
-#include "sdf_texture_file.h"
 #include "sdf.h"
+#include "sdf_gs_mem_delayed_free_api.h"
+#include "sdf_graph_buffer_state.h"
+#include "sdf_display_thread_state.h"
+#include "sdf_draw_frame_execution_state.h"
+#include "sdf_semaphore_api.h"
+#include "sdf_texture_primary_buffer_api.h"
 #include "sdf_texture_submit.h"
+#include "sdf_texture_lists.h"
 #include "sdf_texture_registry.h"
+#include "sdf_pending.h"
+#include "sdf_texture_release.h"
+#include "sdf_image_packets.h"
+#include "sdf_tex_copy_image_data_api.h"
+#include "sdf_vu_transform_api.h"
+#include "sdf_handler_node.h"
+#include "sdf_texture_file.h"
 #include "sdf_tex_lifetime.h"
 #include "sdf_tex_create.h"
 #include "sdf_tex_packet.h"
-#include "sdf_pending.h"
-#include "sdf_tex_copy_image_data_api.h"
-#include "ee_mmi.h"
 #include "btl.h"
+#include "sdf_scene_packet.h"
+#include "sdf_gs_gouraud_textured.h"
+#include "sdf_gs_scene_state.h"
+#include "sdf_gs_textured_shapes.h"
+#include "sdf_request.h"
+#include "sdf_gs_context.h"
+#include "sdf_gs_gouraud_shapes.h"
+#include "sdf_gs_header.h"
+#include "sdf_gs_geometry.h"
+#include "sdf_texture_flush.h"
+#include "sdf_gs_blend.h"
+#include "sdf_delayed_resource_check_api.h"
+#include "sdf_vu0.h"
+#include "sdf_packet_list.h"
+#include "sdf_packet_slot.h"
+#include "sdf_queued_resource_api.h"
+#include "sdf_linked_packet.h"
+#include "sdf_packet_builders.h"
+#include "sdf_gs_flat_shapes.h"
+#include "sdf_gs_packet.h"
+#include "pcp_vu0.h"
+#include "sdf_draw.h"
+#include "sdf_model.h"
+#include "sdf_dev_slot_api.h"
+#include "sdf_dma_tag.h"
+#include "sdf_packet_alloc.h"
+
+/* GS pixel-storage modes, using the same private names as sdfTex.c. */
+enum { SDF_PSMT4HL = 0x24, SDF_PSMT4HH = 0x2C,
+    SDF_PSMZ32 = 0x30, SDF_PSMZ24 = 0x31, SDF_PSMZ16 = 0x32,
+    SDF_PSMZ16S = 0x3A
+
+};
+
+#define SDF_GIF_LOOP_COUNT_MASK 0x7FFF
+
+#define SDF_QWORD_BYTE_SHIFT 4
+
+#define SDF_TEX_FILTER_MASK 0x1E0
+
+#define SDF_MAG_FILTER_SHIFT 5
+
+#define SDF_MIN_FILTER_SHIFT 6
+
+#define SDF_UPLOAD_CHIP_MAX_BYTES 0x400
+
+extern SdfGraphBufferState sdfDispFrameId[2];
+
+/* Busy-buffer index is published by the slot setters and polled below;
+ * volatile prevents the wait loop from reusing an earlier read. */
+extern volatile SdfGraphBufferState sdfGrDrawBusy;
+
+extern u8 sdfGrCaptureBuff;
+
+extern u8 *sdfGrCaptureReq;
+
+extern void (*sdfGrCaptureTarget)(u8 *);
+
+extern void (*D_003BD304)(s32 size, s32 allocationMode);
+
+struct sdfGsMemSlice_t *sdfGsMemAllocFromHead(s32 size, s32 allocationMode);
+
+void sdfTexMakeGIFPacketCtx2(sdfTexHandle_t *texture);
+
+void sdfTexRebuildPacket(sdfTexHandle_t *texture);
+
+extern volatile SdfDisplayThreadState sdfDispThreadFlag;
+
+extern s32 dds3GsThreadId;
+
+sdfGsMemSlice_t *sdfGsMemAllocFromHead(s32 size, s32 allocationMode);
+
+sdfGsMemSlice_t *sdfGsMemAllocFromTail(s32 size, s32 allocationMode);
+
+/* Transfer size in 16-byte quadwords; low bits of a partial quadword are discarded. */ s32 sdfImageDataSize(u32 format, s32 width, s32 height);
+
+/* Queue chunked GS image DMA and its pixel/allocation ownership metadata under the semaphore. */ void sdfImageSetReq(const SdfImageUploadRequest *request);
+
+const sdfTexPacket_t *sdfTexGetPacket(const sdfTexHandle_t *texture) {
+    return texture->primaryBuffer;
+}
+
+/* Size in bytes of a packed primary texture buffer: only the low 15 bits
+ * contribute to its 16-byte block count. */
+s32 sdfTexGetPacketLength(const sdfTexHandle_t *texture) {
+    const sdfTexPacket_t *buffer = texture->primaryBuffer;
+
+    if (buffer == NULL) {
+        return 0;
+    }
+    return ((buffer->gifTagWord & SDF_GIF_LOOP_COUNT_MASK) + 1) << SDF_QWORD_BYTE_SHIFT;
+}
+
+const sdfTexPacket_t *sdfTexGetPacketCtx2(sdfTexHandle_t *texture) {
+    sdfTexPacket_t *buf;
+
+    buf = texture->secondaryBuffer;
+    if (buf == NULL) {
+        sdfTexMakeGIFPacketCtx2(texture);
+        buf = texture->secondaryBuffer;
+    }
+    return buf;
+}
+
+/* Mirror the primary-buffer size calculation for the secondary buffer. */
+s32 sdfTexGetPacketCtx2Length(const sdfTexHandle_t *texture) {
+    const sdfTexPacket_t *buffer = texture->secondaryBuffer;
+
+    if (buffer == NULL) {
+        return 0;
+    }
+    return ((buffer->gifTagWord & SDF_GIF_LOOP_COUNT_MASK) + 1) << SDF_QWORD_BYTE_SHIFT;
+}
+
+u8 sdfTexGetCLUTCount(sdfTexHandle_t *texture) {
+    return texture->paletteCount;
+}
+
+u32 sdfTexGetCLUTAddr(sdfTexHandle_t *texture) {
+    u32 word;
+
+    word = 0;
+    if (texture->secondaryResource != NULL) {
+        word = texture->secondaryResource->word;
+    }
+    return word;
+}
+
+u32 sdfTexGetPixelAddr(sdfTexHandle_t *texture) {
+    return texture->primaryResource->word;
+}
+
+/* Color-format pixel depth; every unlisted format falls through to four bits. */
+s32 sdfTexGetPixelBitCount(u32 format) {
+    switch (format) {
+    case SDF_PSMCT32:
+        return 0x20;
+    case SDF_PSMCT24:
+        return 0x18;
+    case SDF_PSMCT16:
+    case SDF_PSMCT16S:
+        return 0x10;
+    case SDF_PSMT8:
+    case SDF_PSMT8H:
+        return 8;
+    default:
+        return 4;
+    }
+}
+
+/* Storage-depth subset for indexed and 16-bit color formats; all other values return 32. */
+s32 sdfTexGetTexelBitCount(s32 format) {
+    s32 storageBitsPerPixel;
+
+    switch (format) {
+    case SDF_PSMT8:
+        storageBitsPerPixel = 8;
+        break;
+    case SDF_PSMT4:
+        storageBitsPerPixel = 4;
+        break;
+    case SDF_PSMCT16:
+    case SDF_PSMCT16S:
+        storageBitsPerPixel = 16;
+        break;
+    default:
+        storageBitsPerPixel = 32;
+        break;
+    }
+    return storageBitsPerPixel;
+}
+
+u64 sdfTexGetTex0Reg(sdfTexHandle_t *texture) {
+    return texture->primaryBuffer->textureState;
+}
+
+u64 sdfTexGetTex1Reg(sdfTexHandle_t *texture) {
+    return texture->primaryBuffer->samplingState;
+}
+
+u64 sdfTexGetClampReg(sdfTexHandle_t *texture) {
+    return texture->primaryBuffer->clampState;
+}
+
+/* Clear TEX1 MMAG/MMIN and OR in the supplied filters; input values are not masked. */
+void sdfTexSetFilter(sdfTexHandle_t *texture, s32 magFilter, s32 minFilter) {
+    sdfTexPacket_t *buffer;
+
+    buffer = texture->primaryBuffer;
+    buffer->samplingState = (buffer->samplingState & ~SDF_TEX_FILTER_MASK) | (magFilter << SDF_MAG_FILTER_SHIFT) | (minFilter << SDF_MIN_FILTER_SHIFT);
+}
+
+/* Create the secondary packet if absent, then update TEX1 filters without masking input values. */
+void sdfTexSetFilterCtx2(sdfTexHandle_t *texture, s32 magFilter, s32 minFilter) {
+    sdfTexPacket_t *buffer = texture->secondaryBuffer;
+
+    if (buffer == NULL) {
+        sdfTexMakeGIFPacketCtx2(texture);
+        buffer = texture->secondaryBuffer;
+    }
+    buffer->samplingState = (buffer->samplingState & ~SDF_TEX_FILTER_MASK) | (magFilter << SDF_MAG_FILTER_SHIFT) | (minFilter << SDF_MIN_FILTER_SHIFT);
+}
+
+void sdfTexSetWrapMode(sdfTexHandle_t *texture, SdfTextureClampMode mode) {
+    texture->clampMode = mode;
+    sdfTexRebuildPacket(texture);
+}
+
+/* Borrow pixels or copy them to the selected heap; return the source cursor after the transfer bytes. */
+const u8 *sdfTexTransData(u32 destination, s32 width, s32 height, u32 format,
+                    const u8 *pixels,
+                    SdfTextureUploadOwnership borrowPixels) {
+    SdfImageUploadRequest request;
+    s32 imageBytes = sdfImageDataSize(format, width, height) * 16;
+
+    if (borrowPixels == SDF_TEXTURE_UPLOAD_COPY) {
+        if (imageBytes > SDF_UPLOAD_CHIP_MAX_BYTES) {
+            request.allocation = sdfMemAllocDirect(imageBytes);
+            request.pixels = (void *)sdfMemLock(request.allocation);
+            request.allocationMode = SDF_UPLOAD_GENERAL_HEAP;
+        } else {
+            request.pixels = sdfChipAllocDirect(imageBytes);
+            request.allocationMode = SDF_UPLOAD_CHIP_HEAP;
+        }
+        memcpy(request.pixels, pixels, imageBytes);
+    } else {
+        /* The deferred queue keeps this address for DMA; BORROW mode never frees it. */
+        request.pixels = (u8 *)pixels;
+        request.allocationMode = SDF_UPLOAD_BORROWED;
+    }
+    request.format = format;
+    request.destination = destination;
+    request.bufferWidth = width;
+    request.width = width;
+    request.height = height;
+    request.x = 0;
+    request.y = 0;
+    sdfImageSetReq(&request);
+    return pixels + imageBytes;
+}
+
+/* Upload the CLUT as 16x16 for 8-bit indexed formats, otherwise 8x2; forward pixel ownership. */
+const u8 *sdfTexTransCLUT(sdfTexHandle_t *texture, u32 destination,
+                    const u8 *pixels,
+                    SdfTextureUploadOwnership borrowPixels) {
+    s32 paletteWidth;
+    s32 paletteHeight;
+
+    if (texture->pixelFormat == SDF_PSMT8 || texture->pixelFormat == SDF_PSMT8H) {
+        paletteWidth = 0x10;
+        paletteHeight = 0x10;
+    } else {
+        paletteWidth = 8;
+        paletteHeight = 2;
+    }
+    return sdfTexTransData(destination, paletteWidth, paletteHeight, texture->clutFormat, pixels, borrowPixels);
+}
+
+void sdfTexClutToGs(sdfTexHandle_t *tex) {
+    if (tex->secondaryResource != NULL) {
+        sdfTexTransCLUT(tex, sdfTexGetCLUTAddr(tex), tex->paletteData,
+                        SDF_TEXTURE_UPLOAD_COPY);
+    }
+}
+
+void sdfTexLink(sdfTexHandle_t *texture) {
+    texture->next = NULL;
+    if (sdfTexHandleLink != NULL) {
+        texture->prev = sdfTexHandleLink;
+        sdfTexHandleLink->next = texture;
+    } else {
+        texture->prev = NULL;
+    }
+    sdfTexHandleLink = texture;
+}
+
+sdfTexHandle_t *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, sdfGsMemSlice_t *primary, s32 paletteFormat, s32 paletteCount, sdfGsMemSlice_t *secondary) {
+    sdfTexHandle_t *tex = sdfAllocAndClearQuadwords(sizeof(sdfTexHandle_t));
+    SdfTexRef *ref = sdfAllocAndClearQuadwords(sizeof(SdfTexRef));
+
+    ref->refCount = 1;
+    tex->paletteCount = paletteCount;
+    tex->clutFormat = paletteFormat;
+    tex->width = x;
+    tex->height = y;
+    tex->pixelFormat = pixelFormat;
+    tex->maxMipLevel = maxMipLevel;
+    tex->secondaryResource = secondary;
+    tex->primaryResource = primary;
+    tex->reference = ref;
+    sdfTexLink(tex);
+    tex->unk38 = 0x80808080;
+    return tex;
+}
+
+extern sdfGsMemSlice_t *sdfTexAllocClut(s32, s32, s32);
+
+extern void sdfTexMakeGIFPacket(sdfTexHandle_t *);
+
+sdfTexHandle_t *sdfTexClone(sdfTexHandle_t *source) {
+    sdfTexHandle_t *texture;
+    SdfTexRef *reference;
+    sdfTexHandle_t *original;
+
+    texture = sdfChipAllocDirect(sizeof(*texture));
+    *texture = *source;
+    reference = sdfAllocAndClearQuadwords(sizeof(*reference));
+    original = reference->cloneSource;
+    reference->refCount = 1;
+    texture->reference = reference;
+    if (original == NULL) {
+        original = source;
+        reference->cloneSource = original;
+    }
+    texture->primaryBuffer = NULL;
+    texture->secondaryBuffer = NULL;
+    texture->paletteData = NULL;
+    texture->intensityMap = NULL;
+    sdfTexLink(texture);
+    if (texture->secondaryResource != NULL) {
+        texture->secondaryResource = sdfTexAllocClut(
+            texture->pixelFormat, texture->clutFormat, texture->paletteCount);
+        sdfTexAllocClutBuff(texture);
+        sdfTexCopyClutData(texture, original->paletteData);
+        texture->unk38 = 0x80808080;
+    }
+    sdfTexMakeGIFPacket(texture);
+    sdfTexClutToGs(texture);
+    return texture;
+}
+
+/* Allocate a texture head for a 0x20-byte (kind 0) or 0x10-byte (kind 2/10) unit; types 19/27 use unit*8 bytes and 0x20 rows, 20/36/44 use 0x40 bytes and 8 rows. */
+sdfGsMemSlice_t *sdfTexAllocClut(s32 type, s32 kind, s32 unused) {
+    sdfGsMemSlice_t *head = NULL;
+    s32 unit;
+    s32 size;
+    s16 height;
+
+    switch (kind) {
+    case 0:
+        unit = 0x20;
+        break;
+    case 2:
+    case 10:
+        unit = 0x10;
+        break;
+    default:
+        return NULL;
+    }
+    switch (type) {
+    case 19:
+    case 27:
+        size = unit * 8;
+        height = 0x20;
+        break;
+    case 20:
+    case 36:
+    case 44:
+        size = 0x40;
+        height = 8;
+        break;
+    default:
+        return head;
+    }
+    head = sdfGsMemAllocFromTail(size, SDF_TEX_RESOURCE_CLUT);
+    head->width = 8;
+    head->height = height;
+    head->format = kind;
+    return head;
+}
+
 /* Declared before first use (were implicit int). */
 extern sdfGsMemSlice_t * sdfTexAllocClut(s32 type, s32 kind, s32 unused);
+
 extern sdfGsMemSlice_t * sdfGsMemAllocFromTail(s32 size, s32 allocationMode);
+
 extern sdfTexHandle_t * sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, sdfGsMemSlice_t *primary, s32 paletteFormat, s32 paletteCount, sdfGsMemSlice_t *secondary);
 
 sdfTexPacket_t *sdfTexMakeGIFPacketSub(sdfTexHandle_t *texture, SdfGsContext context);
 
 extern SdfPendingRequest sdfTexDelayedResrcCB;
-
 
 /* Return palette bytes: 8-bit indices use 256 colors, other indices 16. */
 s32 __attribute__((const)) sdfTexGetClutDataSize(s32 textureFormat, s32 paletteFormat, s32 paletteCount) {
@@ -368,3 +757,79 @@ void sdfTexSetMonoClut(sdfTexHandle_t *texture) {
         output++;
     } while (paletteColorCount != 0);
 }
+
+extern void sdfTexSetMonoClut(sdfTexHandle_t *texture);
+
+extern void sdfTexClutToGs(sdfTexHandle_t *texture);
+
+/* vu0 routine: blend clone-source palette RGB toward intensity-scaled tint, preserving alpha. */
+void sdfTexBlendPaletteToTintedIntensityVU(sdfTexHandle_t *texture, s32 tint, f32 amount) {
+    sdfTexHandle_t *source = texture->reference->cloneSource;
+    u32 count;
+    u8 *intensity;
+
+    intensity = source->intensityMap;
+    if (intensity == NULL) {
+        sdfTexSetMonoClut(source);
+        intensity = source->intensityMap;
+    }
+
+    /* Move the FPU scalars into VU0, then broadcast tint and its scale. */
+    EE_MMI_PALETTE_TINT_SETUP(amount, tint, 1.0f / 255.0f);
+
+    if (texture->clutFormat == 0) {
+        u32 *sourcePalette = (u32 *)source->paletteData;
+        u32 *destinationPalette = (u32 *)texture->paletteData;
+        count = (u32)texture->paletteDataSize >> 2;
+        do {
+            u32 value = *intensity;
+            u32 color = *sourcePalette;
+
+            EE_MMI_PALETTE_TINT_RGBA(value, color);
+            count--;
+            *destinationPalette = value;
+            sourcePalette++;
+            intensity++;
+            destinationPalette++;
+        } while (count != 0);
+    } else {
+        u16 *sourcePalette;
+        u16 *destinationPalette;
+        u32 fiveBitExpandMask = 0x070707;
+        count = (u32)texture->paletteDataSize >> 1;
+        sourcePalette = (u16 *)source->paletteData;
+        destinationPalette = (u16 *)texture->paletteData;
+        do {
+            u32 value = *intensity;
+            u16 color = *sourcePalette;
+
+            EE_MMI_PALETTE_TINT_RGB5(color, value, fiveBitExpandMask);
+            count--;
+            *destinationPalette = color;
+            sourcePalette++;
+            intensity++;
+            destinationPalette++;
+        } while (count != 0);
+    }
+    sdfTexClutToGs(texture);
+}
+
+/* Borrow a matching live texture by key without changing its reference count. */
+sdfTexHandle_t *sdfTexSearch(s32 resourceKey) {
+    sdfTexHandle_t *texture = sdfTexHandleLink;
+
+    while (texture != NULL) {
+        if (texture->resourceKey == resourceKey) {
+            return texture;
+        }
+        texture = texture->prev;
+    }
+    return NULL;
+}
+
+void sdfTexInit(void) {
+    sdfDelayedResrcInitCB(&sdfTexDelayedResrcCB, (SdfPendingEntryCallback)sdfTexDestroy);
+}
+
+INCLUDE_SDATA(const s32, "sdf/sdfTex", sdfTexHandleLink);
+
