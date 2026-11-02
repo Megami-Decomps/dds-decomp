@@ -6,7 +6,6 @@
 #define D_0054E8BC D_003BA83C
 #define D_00552310 D_003BDC90
 #define D_00551B88 kwlnMainLoopThreadNode
-#define dds3KernelMain kwlnRunMainLoop
 
 extern u32 D_0054E8BC;
 
@@ -110,3 +109,4 @@ s32 sdfDefaultMain(void)
 INCLUDE_RODATA(const s32, "sdf/sdfDefaultMain", D_0039E018);
 
 INCLUDE_SDATA(const s32, "sdf/sdfDefaultMain", D_003BA83C);
+
