@@ -1,12 +1,93 @@
-#include "dat_state.h"
 #include "common.h"
+#include "kwln.h"
+#include "dat_state.h"
 #include "scr.h"
+#include "scr_process_task_owner_api.h"
+#include "scr_trace_result.h"
+#include "kwln_task_runner.h"
 #include "scr_command_result.h"
 #include "scr_binary_operator.h"
-#include "scr_trace_result.h"
 #include "scr_string_parameter_api.h"
 #include "scr_arg_read.h"
 #include "scr_integer_parameter_api.h"
+#include "scr_command_timer_api.h"
+#include "scr_program_counter_api.h"
+#include "scr_current_process_user_data_api.h"
+#include "mdl_flag_api.h"
+
+void PushInt(scrProcessWork_s *script, ScrVmInteger integerValue) {
+    script->stackTypes[script->sp] = SCR_STACK_TYPE_INTEGER;
+    script->stackValues[script->sp].integer = integerValue;
+    script->sp = script->sp + 1;
+}
+
+void PushFloat(scrProcessWork_s *script, f32 floatValue) {
+    script->stackTypes[script->sp] = SCR_STACK_TYPE_FLOAT;
+    script->stackValues[script->sp].floating = floatValue;
+    script->sp = script->sp + 1;
+}
+
+void PushStr(scrProcessWork_s *script, const char *string) {
+    script->stackTypes[script->sp] = SCR_STACK_TYPE_STRING;
+    script->stackValues[script->sp].string = string;
+    script->sp = script->sp + 1;
+}
+
+void PushRet(scrProcessWork_s *script, ScrProgramCounter returnAddress) {
+    script->stackTypes[script->sp] = SCR_STACK_TYPE_RETURN_ADDRESS;
+    script->stackValues[script->sp].returnAddress = returnAddress;
+    script->sp = script->sp + 1;
+}
+
+
+ScrVmInteger PopInt(scrProcessWork_s *script) {
+    ScrStackDepth stackDepth = script->sp;
+
+    script->sp = stackDepth - 1;
+    switch (script->stackTypes[stackDepth - 1]) {
+    case SCR_STACK_TYPE_INTEGER:
+        return script->stackValues[script->sp].integer;
+    case SCR_STACK_TYPE_RETURN_ADDRESS:
+        return script->stackValues[script->sp].returnAddress;
+    case SCR_STACK_TYPE_FLOAT:
+        return script->stackValues[script->sp].floating;
+    case SCR_STACK_TYPE_INTEGER_REFERENCE:
+        return DDS3_GBWK->script.ints[script->stackValues[script->sp].globalIntegerIndex];
+    case SCR_STACK_TYPE_FLOAT_REFERENCE:
+        return DDS3_GBWK->script.floats[script->stackValues[script->sp].globalFloatIndex];
+    }
+    return 0;
+}
+
+f32 PopFloat(scrProcessWork_s *script) {
+    ScrStackDepth stackDepth = script->sp;
+
+    script->sp = stackDepth - 1;
+    switch (script->stackTypes[stackDepth - 1]) {
+    case SCR_STACK_TYPE_INTEGER:
+        return (f32)script->stackValues[script->sp].integer;
+    case SCR_STACK_TYPE_RETURN_ADDRESS:
+        return 0.0f;
+    case SCR_STACK_TYPE_FLOAT:
+        return script->stackValues[script->sp].floating;
+    case SCR_STACK_TYPE_INTEGER_REFERENCE:
+        return (f32)DDS3_GBWK->script.ints[script->stackValues[script->sp].globalIntegerIndex];
+    case SCR_STACK_TYPE_FLOAT_REFERENCE:
+        return DDS3_GBWK->script.floats[script->stackValues[script->sp].globalFloatIndex];
+    }
+    return 0.0f;
+}
+
+/* Push the word following the opcode, then advance past its operand. */
+u32 CodeFunc_PushI(scrProcessWork_s *script) {
+    s32 operandPc;
+
+    operandPc = script->pc + 1;
+    script->pc = operandPc;
+    PushInt(script, script->instructions[operandPc].iOperand);
+    script->pc = script->pc + 1;
+    return 1;
+}
 
 extern const ScrCommand D_0039E288[];
 extern ScrOpcodeHandlerResult (*codefunc[])(scrProcessWork_s *scr);
@@ -168,12 +249,19 @@ ScrOpcodeHandlerResult CodeFunc_Goto(scrProcessWork_s *scr)
 }
 
 extern s32 CodeFunc_2Operation_i1;
+
 extern s32 CodeFunc_2Operation_i2;
+
 extern s32 CodeFunc_2Operation_ri;
+
 extern f32 CodeFunc_2Operation_f1;
+
 extern f32 CodeFunc_2Operation_f2;
+
 extern f32 CodeFunc_2Operation_rf;
+
 extern s32 CodeFunc_2Operation_t1;
+
 extern s32 CodeFunc_2Operation_t2;
 
 void CodeFunc_2Operation(scrProcessWork_s *scr, ScrBinaryOperator operatorCode)
@@ -579,6 +667,7 @@ const char *scrGetStrPara(ScrCommandParameterIndex parameterIndex)
  * context's return slot. The tag goes through the context as read on entry,
  * the value through nowpwork read again, since the byte store may
  * have changed it as far as C knows; retail reads it twice. */
+
 #define SCR_SET_RETURN_VALUE(scr, type, member, value)                   \
     do {                                                                 \
         (scr)->stackTypes[SCR_STACK_RETURN_VALUE_SLOT] = (type);          \
@@ -600,4 +689,40 @@ scrProcessWork_s *scrSetFloatReturnValue(f32 retVal)
     scrProcessWork_s *scr = nowpwork;
     SCR_SET_RETURN_VALUE(scr, SCR_STACK_TYPE_FLOAT, floating, retVal);
     return scr;
+}
+
+ScrProgramCounter scrGetProcedureCodeAddress(ScrProcedureIndex procedureIndex) {
+    return nowpwork->procedures[procedureIndex].addr;
+}
+
+ScrProgramCounter scrGetLabelCodeAddress(ScrLabelIndex labelIndex) {
+    return nowpwork->labels[labelIndex].addr;
+}
+
+ScrProgramCounter scrGetCodePointer(void) {
+    return nowpwork->pc;
+}
+
+void scrSetCodePointer(ScrProgramCounter programCounter) {
+    nowpwork->pc = programCounter;
+}
+
+u32 scrGetScriptTimer(void) {
+    return nowpwork->timer;
+}
+
+ScrCommandYieldCount scrGetCommandTimer(void) {
+    return nowpwork->cmdTimer;
+}
+
+ItfMesWindowIndex scrGetMessageHandle(void) {
+    return nowpwork->messageWindowIndex;
+}
+
+scrProcessWork_s *scrGetScriptHandle(void) {
+    return nowpwork;
+}
+
+void *scrGetCurrentProcessUserData(void) {
+    return nowpwork->userData;
 }

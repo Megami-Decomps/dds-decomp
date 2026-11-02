@@ -1,0 +1,6 @@
+# SMT3 script/ unit boundaries in dds1, input to tools/resplit.py (from sdf-decomp tools/twins.py runs --prefix script/).
+# scrCommonCommand keeps its current end; SMT3's scrParameterCommand has no twins here.
+0x0010BB28 script/scrScriptProcess
+0x0010C120 script/scrTraceCode
+0x0010D6B8 script/scrCommonCommand
+0x0010EEF0 -

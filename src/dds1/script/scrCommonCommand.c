@@ -1,8 +1,14 @@
+#include "common.h"
+#include "scr_integer_parameter_api.h"
+#include "scr_integer_return_value_api.h"
+#include "scr_command_timer_api.h"
+#include "scr.h"
+#include "scr_program_counter_api.h"
+#include "scr_current_process_user_data_api.h"
+#include "mdl_flag_api.h"
 #include "dat_state.h"
 #include "dat_currency_requirement_api.h"
-#include "common.h"
 #include "sdf_vu0.h"
-#include "scr_integer_return_value_api.h"
 #include "kwln_background_fade_api.h"
 #include "eff_random_mod.h"
 #include "fpu.h"
@@ -11,43 +17,99 @@
 #include "kwln_process_registration.h"
 #include "scr_process_handle_api.h"
 #include "pcp_vu0.h"
-#include "scr.h"
-#include "scr_program_counter_api.h"
 #include "scr_instruction_stream_api.h"
 #include "scr_command_result.h"
-#include "scr_command_timer_api.h"
 #include "scr_string_parameter_api.h"
 #include "scr_arg_read.h"
-#include "scr_integer_parameter_api.h"
 #include "kwln_task_lifecycle.h"
 #include "kwln_fade.h"
 #include "eff_event_draw.h"
 #include "pty_adjust_item_quantity_api.h"
+
+extern s8 D_00398629[];
+
+ScrCommandYieldCount scrGetCommandTimer(void);
+
+ScrCommandResult scrCommand_KEY(void) {
+    if (scrGetCommandTimer() == 0) {
+        return 0;
+    }
+    if (D_00398629[0] < 0) {
+        return 1;
+    }
+    return 0;
+}
+
+/* Evaluate a script-supplied model flag and push the test result. */
+ScrCommandResult scrCommand_BIT_CHK(void) {
+    s32 value;
+
+    value = scrGetIntPara(0);
+    value = evtBitCheck(value);
+    scrSetIntReturnValue(value);
+    return 1;
+}
+
+ScrCommandResult scrCommand_BIT_ON(void) {
+    s32 flagId;
+
+    flagId = scrGetIntPara(0);
+    evtBitOn(flagId);
+    return 1;
+}
+
+ScrCommandResult scrCommand_BIT_OFF(void) {
+    s32 flagId;
+
+    flagId = scrGetIntPara(0);
+    evtBitOff(flagId);
+    return 1;
+}
+
 void dds3SetDistBlurPara(s32 filterCount, s32 size, s32 delaySpread, f32 angleStep,
                           f32 uvDisplacementAngleDegrees, f32 uvDisplacementAmplitude,
                           s32 gsAlphaControl);
+
 void dds3SetRipBlurPara(s32 count, f32 phaseStep, f32 spacing,
                           f32 uvDisplacementAngleDegrees, f32 uvDisplacementAmplitude,
                           f32 angleStep, s32 gsAlphaControl);
 
 void dds3SetSoftenBias(s32 frames, f32 firstTarget, f32 secondTarget);
+
 void dds3SetFogColor(s32 blendFrames, f32 *color);
+
 void dds3SetMultiBlurPara(f32 rotation, f32 scale, u32 gsAlphaControl);
+
 void dds3SetLightColor(s32 blendFrames, s32 lightIndex, const f32 *color);
+
 void dds3SetAmbientColor(s32 blendFrames, f32 *color);
+
 void dds3SetLightDir(s32 blendFrames, s32 lightIndex, const f32 *direction);
+
 void dds3SetBlur2Para(f32 rotation, f32 scale, u32 gsAlphaControl);
+
 void dds3SetFilter2Para(u32 gsAlphaControl);
+
 void dds3SetMFilterPara(u32 gsAlphaControl);
+
 void dds3SetScreenFovy(f32 fieldOfView);
+
 void dds3SetFogPara(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
+
 s32 fptodp(void);
+
 extern s8 dds3PadBitTable[];
+
 extern char D_0039F4D8[];
+
 extern char D_0039F4E8[];
+
 extern const char scrSceneLightDirectionZeroWarning[];
+
 extern char D_0039F530[];
+
 extern char D_0039F550[];
+
 extern char D_0039F570[];
 
 static inline ScrProcessHandle scrGetProcessHandlePara(s32 parameterIndex)
@@ -216,7 +278,6 @@ ScrCommandResult scrCommand_SET_FOVY(void)
     dds3SetScreenFovy(fovy);
     return SCR_COMMAND_RESULT_COMPLETE;
 }
-
 
 ScrCommandResult bfWaitCbCreateTask(void)
 {
@@ -439,7 +500,6 @@ ScrCommandResult scrCommand_MUL_BLUR_PARA(void) {
     dds3SetMultiBlurPara(rotation, scale, gsAlphaControl);
     return SCR_COMMAND_RESULT_COMPLETE;
 }
-
 
 extern void dds3SetMultiBlurRGBA(u32 rgba);
 
@@ -703,7 +763,6 @@ ScrCommandResult scrCommand_BLUR2_PARA(void)
     return SCR_COMMAND_RESULT_COMPLETE;
 }
 
-
 extern void dds3SetBlur2RGBA(u32 rgba);
 
 ScrCommandResult scrCommand_BLUR2_RGBA(void)
@@ -917,8 +976,11 @@ ScrCommandResult scrCommandResetDrawEffects(void)
 }
 
 extern void fldSetFadeTarget(s32 area, s32 targetMode, s32 duration);
+
 extern void fldSkySetAlphaOfs(u32 alpha);
+
 extern void fldSkySetAlpha(u32 drawState);
+
 extern void fldSetFilterAnime(u32 mode);
 
 ScrCommandResult scrCommandResetFieldEffects(void)
@@ -948,7 +1010,6 @@ ScrCommandResult scrCommandIsProcessControlFlagClear(void)
 {
     return DDS3_GBWK->script.ints[SCR_PROCESS_CONTROL_FLAG_REGISTER] == 0;
 }
-
 
 ScrCommandResult scrCommandAdjustItemQuantity(void)
 {
@@ -985,3 +1046,4 @@ ScrCommandResult scrCommand_SCR_EXISTS(void)
 INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_0039F550);
 
 INCLUDE_RODATA(const s32, "script/scrCommonCommand", D_0039F570);
+

@@ -73,10 +73,8 @@ segments:
       - [0x73B8, c, kernel/dds3KernelDraw]  # Nocturne __FILE__
       - [0x8EF8, c, game/code_00107EF8]
       - [0xCD50, c, script/scrScriptProcess]  # Nocturne __FILE__
-      - [0xD250, c, game/code_0010C250]
-      - [0xD618, c, script/scrTraceCode]  # Nocturne __FILE__
-      - [0xE848, c, game/code_0010D848]
-      - [0xE990, c, script/scrCommonCommand]  # Nocturne __FILE__ + P4 transfer
+      - [0xD348, c, script/scrTraceCode]  # Nocturne __FILE__
+      - [0xE8E0, c, script/scrCommonCommand]  # Nocturne __FILE__ + P4 transfer
       - [0x10118, c, game/code_0010F118]
       - [0x10AA8, c, basic/dds3Basic]  # Nocturne __FILE__
       - [0x10B00, c, game/code_0010FB00]
@@ -358,8 +356,7 @@ segments:
       - [0x3121B0, .rodata, game/code_00102DC8]
       - [0x312320, .rodata, game/code_00107EF8]
       - [0x3123F8, .rodata, script/scrScriptProcess]
-      - [0x313510, .rodata, game/code_0010C250]
-      - [0x313550, .rodata, script/scrTraceCode]
+      - [0x313510, .rodata, script/scrTraceCode]
       - [0x313648, .rodata, script/scrCommonCommand]
       - [0x313710, .rodata, game/code_0010F118]
       - [0x313790, .rodata, game/code_00111838]

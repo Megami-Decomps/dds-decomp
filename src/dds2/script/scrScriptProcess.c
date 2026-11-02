@@ -5,7 +5,6 @@
 #include "kwln.h"
 #include "kwln_task_create.h"
 #include "sdf_heap_api.h"
-
 #include "scr.h"
 #include "scr_process_task_owner_api.h"
 #include "scr_procedure_start_api.h"
@@ -14,12 +13,10 @@
 #include "bf_flw0_header.h"
 #include "sdf.h"
 #include "kwln_task_lifecycle.h"
-
-
-
+#include "scr_trace_result.h"
+#include "kwln_task_runner.h"
 
 scrProcessWork_s *fldFlowParse(const BfFlw0Header *header, ScrProcedureIndex procedureIndex);
-
 
 /* Load a script resource, create its VM process and retain its resource handle. */
 scrProcessWork_s *scrLoadScriptFile(const char *path, ScrProcedureIndex procedureIndex)
@@ -96,7 +93,9 @@ scrProcessWork_s *scrCreateProcessAtFirstProcedure(const BfFlw0Header *header, c
 }
 
 extern void evtPrintDeveloperConsoleMessage(const char *fmt, ...);
+
 extern void itfMesMngRelease(ItfMesWindowIndex window);
+
 extern void scrUnlinkHandle(scrProcessWork_s *process);
 
 /* Release the process's VM buffers, resource and named-list allocation. */
@@ -117,8 +116,6 @@ void scrProcDestroyTask(scrProcessWork_s *process) {
     scrUnlinkHandle(process);
     sdfChipFreeDirect(process);
 }
-
-
 
 /* Walk the script-name table, releasing each node's task or process. */
 void scrDestroyAllNamedProcesses(void)
@@ -215,4 +212,1131 @@ ScrProcedureIndex scrSearchProcedureName(const BfFlw0Header *header, const char 
     return SCR_PROCEDURE_INDEX_NOT_FOUND;
 }
 
-INCLUDE_RODATA(const s32, "script/scrScriptProcess", D_00411408);
+void scrSetUserData(dds3ProcessID_t *task, void *userData) {
+    scrProcessWork_s *context;
+
+    context = (scrProcessWork_s *)dds3GetProcessData(task);
+    context->userData = userData;
+}
+
+void *scrGetUserData(dds3ProcessID_t *task) {
+    scrProcessWork_s *context;
+
+    context = (scrProcessWork_s *)dds3GetProcessData(task);
+    return context->userData;
+}
+
+void scrScriptShutdown(dds3ProcessID_t *task) {
+    ScrProcessTaskOwner context = scrProcessTaskOwnerFromUserValue(dds3GetProcessData(task));
+    if (context != NULL) {
+        scrProcDestroyTask(context);
+    }
+    dds3SetProcessData(task, 0);
+}
+
+void scrRunScript(scrProcessWork_s *context) {
+    scrTraceCode(context);
+}
+
+KwlnTaskUpdateResult scrScriptProcess(dds3ProcessID_t *task) {
+    ScrProcessTaskOwner context = scrProcessTaskOwnerFromUserValue(dds3GetProcessData(task));
+
+    switch (scrTraceCode(context)) {
+    case 0:
+        return KWLN_TASK_UPDATE_FINISH_CALLBACK;
+    case SCR_TRACE_RESULT_FINISHED:
+        return KWLN_TASK_UPDATE_FINISH_CALLBACK;
+    case SCR_TRACE_RESULT_YIELDED:
+    default:
+        return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
+    }
+}
+
+ScrCommandResult itfMesMngMessage(void);
+ScrCommandResult itfMesMngOpenWindow(void);
+ScrCommandResult itfMesMngCloseWindow(void);
+ScrCommandResult itfMesMngSelect(void);
+ScrCommandResult itfMesMngOpenSelectWindow(void);
+ScrCommandResult itfMesMngCloseSelectWindow(void);
+ScrCommandResult itfMesMngMaskSelect(void);
+ScrCommandResult scrCommand_BIT_CHK(void);
+ScrCommandResult scrCommand_BIT_ON(void);
+ScrCommandResult scrCommand_BIT_OFF(void);
+ScrCommandResult scrCommand_RND(void);
+ScrCommandResult sndOpSetTrackDefaultVolumePan(void);
+ScrCommandResult sndOpStartTrackFromScript(void);
+ScrCommandResult scrCommand_SYNC(void);
+ScrCommandResult scrCommand_WAIT(void);
+ScrCommandResult bfWaitCbScreenFadeA(void);
+ScrCommandResult bfWaitCbScreenFadeB(void);
+ScrCommandResult scrCommand_SEL_JMP(void);
+ScrCommandResult evtCommandAddEffectUnitToWorld(void);
+ScrCommandResult evtCommand_CAM_PATH_MOVE(void);
+ScrCommandResult evtCommand_SET_SKY(void);
+ScrCommandResult evtCommand_MODEL_DSP(void);
+ScrCommandResult evtCmdDestroySelectedWorldUnit(void);
+ScrCommandResult evtOpStartUnitTransitionTowardWorldObject(void);
+ScrCommandResult evtOpDeprecatedModelMotion(void);
+ScrCommandResult evtCommand_CAM_SEL_FOVY(void);
+ScrCommandResult scrCommand_PAD_ACT(void);
+ScrCommandResult evtCommand_MODEL_SCL_XYZ(void);
+ScrCommandResult scrCommand_SCR_EXISTS(void);
+ScrCommandResult btlScriptSelectWeightedEntry(void);
+ScrCommandResult scrCommandFadeBackgroundOut(void);
+ScrCommandResult scrCommandFadeBackgroundIn(void);
+ScrCommandResult btlScriptSetChoiceFlag(void);
+ScrCommandResult evtCommandStartPolygonMovie(void);
+ScrCommandResult evtCommandClearPolygonMovieFlag(void);
+ScrCommandResult evtCommand_FIELD_CLS_STOP(void);
+ScrCommandResult scrCommandPrintInteger(void);
+ScrCommandResult evtCommand_GET_MOON(void);
+ScrCommandResult evtCommand_UNIT_CLS(void);
+ScrCommandResult evtCommand_GET_MOON16(void);
+ScrCommandResult evtCommand_RESTORE_BATTLE(void);
+ScrCommandResult evtCommand_UNIT_CLS_STOP(void);
+ScrCommandResult evtCommand_TEX_LOAD(void);
+ScrCommandResult evtCommand_TEX_ON(void);
+ScrCommandResult evtCommand_TEX_OFF(void);
+ScrCommandResult evtCommand_TEX_CLS(void);
+ScrCommandResult evtCommandSignalAdminAtTimerZero(void);
+ScrCommandResult btlScriptSetBattleCommand(void);
+ScrCommandResult btlScriptSelectEmptyCommand(void);
+ScrCommandResult btlScriptSelectFixedCommand(void);
+ScrCommandResult btlScriptSelectModeDValueOne(void);
+ScrCommandResult btlScriptSelectActionEntry(void);
+ScrCommandResult btlScriptChooseActionTargets(void);
+ScrCommandResult btlScriptPickLowestHpTarget(void);
+ScrCommandResult btlScriptPickTargetWithStatusMask(void);
+ScrCommandResult btlScriptFilterTargetsByUnitId(void);
+ScrCommandResult btlCmdReportUnsupportedEvent(void);
+ScrCommandResult btlCmdReturnPartyActionPresence(void);
+ScrCommandResult btlCmdReturnEnemyActionPresence(void);
+ScrCommandResult btlScriptSetBattleWorkParameter(void);
+ScrCommandResult btlScriptChooseActionTargetsDuplicate(void);
+ScrCommandResult btlCmdRunWeightedAiSelection(void);
+ScrCommandResult btlScriptClearSceneTransition(void);
+ScrCommandResult btlScriptBeginSceneTransition(void);
+ScrCommandResult itfMesMng_SEL_SELNO(void);
+ScrCommandResult scrCommand_BLUR2_ON(void);
+ScrCommandResult scrCommand_BLUR2_OFF(void);
+ScrCommandResult scrCommandResetDrawEffects(void);
+ScrCommandResult evtCommand_MODEL_EXWAIT(void);
+ScrCommandResult sndOpSendTitleAudioCommand(void);
+ScrCommandResult evtCommand_RTRN_TITLE(void);
+ScrCommandResult scrCommand_SOFTEN_BIAS(void);
+ScrCommandResult evtCommand_SET_SKY_A(void);
+ScrCommandResult evtCommand_MODEL_WAIT(void);
+ScrCommandResult evtCommand_MODEL_POS(void);
+ScrCommandResult evtCommand_MODEL_WAIT_MOT(void);
+ScrCommandResult evtCommand_MODEL_MOVE_MOT(void);
+ScrCommandResult evtCommand_FIELD_DSP(void);
+ScrCommandResult evtCommand_FIELD_CLS(void);
+ScrCommandResult itfCamp(void);
+ScrCommandResult mnuScriptRequestMovieByIndex(void);
+ScrCommandResult mnuScriptStopMovieAndResetDraw(void);
+ScrCommandResult mnuUpdateMovieDrawShutdownCountdown(void);
+ScrCommandResult scrCommand_PAD_TRIG(void);
+ScrCommandResult scrCommand_PAD_PRESS(void);
+ScrCommandResult evtCommand_CAM_PATH_WAIT(void);
+ScrCommandResult evtCommand_MODEL_ROT(void);
+ScrCommandResult evtOpTurnUnitRelativeToWorldNode(void);
+ScrCommandResult evtOpRestoreUnitReferenceAngle(void);
+ScrCommandResult evtCommand_CALL_SAVE(void);
+ScrCommandResult evtPushRosterOrGlobalCounterValue(void);
+ScrCommandResult btlCmdSetContextFlagOne(void);
+ScrCommandResult btlCmdRememberUpperActorTripleCheck(void);
+ScrCommandResult evtCommand_CALL_FIELD(void);
+ScrCommandResult fldCmdQueryActorEntrySceneStatus(void);
+ScrCommandResult fldCmdTestActorEntryCondition(void);
+ScrCommandResult fldCommand_PAD_DISABLE(void);
+ScrCommandResult fldCommand_PAD_ENABLE(void);
+ScrCommandResult mnuOpenTitleMenuDefaultMode(void);
+ScrCommandResult evtCommand_MOON_START(void);
+ScrCommandResult evtCommand_MOON_STOP(void);
+ScrCommandResult evtCommand_CHG_MOON(void);
+ScrCommandResult evtCommand_CALL_EVENT(void);
+ScrCommandResult evtCommandSubmitEvent(void);
+ScrCommandResult evtCommand_MODEL_PLAYER(void);
+ScrCommandResult evtCommand_MODEL_ON(void);
+ScrCommandResult evtCommand_MODEL_OFF(void);
+ScrCommandResult evtCommand_OBJ_PATH_MOVE(void);
+ScrCommandResult evtCommand_OBJ_PATH_WAIT(void);
+ScrCommandResult scrCommand_SET_FOVY(void);
+ScrCommandResult fldCommand_ENCOUNT_ON(void);
+ScrCommandResult fldCommand_ENCOUNT_OFF(void);
+ScrCommandResult scrCommandAdjustItemQuantity(void);
+ScrCommandResult itfMesMngSetVarScr(void);
+ScrCommandResult scrCommandPrintString(void);
+ScrCommandResult evtOpSetUnitParams5(void);
+ScrCommandResult evtCommand_MODEL_WAIT_HOKAN(void);
+ScrCommandResult evtCommand_CAM_CREATE(void);
+ScrCommandResult evtCommand_CAM_CLS(void);
+ScrCommandResult evtCommand_CAM_POS_XYZ(void);
+ScrCommandResult evtCommand_CAM_ROT_XYZ(void);
+ScrCommandResult evtCommand_MODEL_POS_XYZ(void);
+ScrCommandResult evtCommand_MODEL_ROT_XYZ(void);
+ScrCommandResult btlNbScriptCheckActorFlag(void);
+ScrCommandResult btlCmdStoreBossHealthCheckChoice(void);
+ScrCommandResult btlScriptPickLowestHpRatioTarget(void);
+ScrCommandResult btlCmdStoreEnemyCountCheckChoice(void);
+ScrCommandResult btlCmdStorePartyCountCheckChoice(void);
+ScrCommandResult btlCmdStoreActorActionMaskChoice(void);
+ScrCommandResult btlCmdStoreEnemyActionMaskChoice(void);
+ScrCommandResult btlCmdStorePartyActionMaskChoice(void);
+ScrCommandResult btlCmdRememberAllLowerActionBits(void);
+ScrCommandResult btlCmdRememberLowerUnitMode(void);
+ScrCommandResult btlCmdRememberOtherUpperUnitMode(void);
+ScrCommandResult btlCmdRememberLowerEntryCondition(void);
+ScrCommandResult btlCmdRememberUpperEntryCondition(void);
+ScrCommandResult btlAiCheckBa(void);
+ScrCommandResult btlCmdReturnPartyElementQueryCheck(void);
+ScrCommandResult btlCmdReturnEnemyElementQueryCheck(void);
+ScrCommandResult evtCommand_MODEL_MOVE2(void);
+ScrCommandResult btlCmdRememberActorActionGate(void);
+ScrCommandResult evtCommand_LOAD_SOUND_E(void);
+ScrCommandResult evtCommand_BGM_PLAY_E(void);
+ScrCommandResult evtOpcodeSetBgmVolumePan(void);
+ScrCommandResult evtCommand_FADEOUT_E(void);
+ScrCommandResult evtCommand_BGM_VOL_DOWN(void);
+ScrCommandResult evtCommand_BGM_VOL_UP(void);
+ScrCommandResult itfMesMngIgnoreConfig(void);
+ScrCommandResult evtCommand_SEARCH_ID(void);
+ScrCommandResult evtOpSetUnitParams6(void);
+ScrCommandResult evtScriptSetUnitTableValueAndReset(void);
+ScrCommandResult evtCommand_CALL_NEXT(void);
+ScrCommandResult evtCommand_CALL_FIELD2(void);
+ScrCommandResult scrCommandResetFieldEffects(void);
+ScrCommandResult evtCommand_EFFECT_LOAD(void);
+ScrCommandResult evtCommand_EFFECT_CLS(void);
+ScrCommandResult evtCommand_EFFECT_POS_XYZ(void);
+ScrCommandResult evtCommand_EFFECT_POS(void);
+ScrCommandResult evtCommand_EFFECT_ON(void);
+ScrCommandResult evtCommand_EFFECT_OFF(void);
+ScrCommandResult evtCommand_EFFECT_LINK(void);
+ScrCommandResult evtCommand_EFFECT_LINK2(void);
+ScrCommandResult evtCommand_EFFECT_UNLINK(void);
+ScrCommandResult fldCmdFocusCameraOnObject(void);
+ScrCommandResult fldUpdateLookAtSegment(void);
+ScrCommandResult bfWaitCbCreateTask(void);
+ScrCommandResult scrCommand_SCR_KILL(void);
+ScrCommandResult scrCommand_SCR_WAIT(void);
+ScrCommandResult scrCommand_SCR_STAT(void);
+ScrCommandResult scrCommand_SCR_TIME(void);
+ScrCommandResult evtCommand_PMV_RUN(void);
+ScrCommandResult scrCommand_QUAKE_ON(void);
+ScrCommandResult scrCommand_QUAKE_OFF(void);
+ScrCommandResult evtCommand_MODEL_LIGHT_OFF(void);
+ScrCommandResult evtCommand_MODEL_LIGHT_ON(void);
+ScrCommandResult evtCommand_MODEL_LIGHT_RGB(void);
+ScrCommandResult evtCommand_MODEL_LIGHT_DIR(void);
+ScrCommandResult evtCommand_MODEL_LIGHT_WAIT(void);
+ScrCommandResult evtCommand_MODEL_RGB(void);
+ScrCommandResult evtCommand_MODEL_A(void);
+ScrCommandResult scrCommand_SCENE_LIGHT_RGB(void);
+ScrCommandResult scrCommand_SCENE_LIGHT_DIR(void);
+ScrCommandResult scrCommand_SCENE_AMBIENT(void);
+ScrCommandResult evtCommand_PATH_STOP(void);
+ScrCommandResult evtCommand_PATH_START(void);
+ScrCommandResult evtCommand_PATH_RATE(void);
+ScrCommandResult evtCommand_PATH_DIR(void);
+ScrCommandResult scrCommand_SCENE_FOG_RGB(void);
+ScrCommandResult scrCommand_SCENE_FOG_PARA(void);
+ScrCommandResult scrCommand_BLUR(void);
+ScrCommandResult func_00154F20(void);
+ScrCommandResult fldCmdFreeDisplayObjects(void);
+ScrCommandResult fldCmdSetScenePhaseThree(void);
+ScrCommandResult fldCmdSetLookAtHeading(void);
+ScrCommandResult fldCommand_CAM_SEL_PHOKAN(void);
+ScrCommandResult fldCmdSetSolarOverlayMode(void);
+ScrCommandResult evtCommand_MODEL_LIGHT_LINK(void);
+ScrCommandResult evtCommand_MODEL_LIGHT_UNLINK(void);
+ScrCommandResult evtCommand_LIGHT_PATH_MOVE(void);
+ScrCommandResult evtCommand_LIGHT_PATH_WAIT(void);
+ScrCommandResult evtCommand_LOAD_BE(void);
+ScrCommandResult evtCommand_MODEL_BE(void);
+ScrCommandResult evtCommand_FIELD_BE(void);
+ScrCommandResult evtCommand_EFFECT_BE(void);
+ScrCommandResult evtCommand_TEX_BE(void);
+ScrCommandResult evtCommand_EFFBED_LOAD(void);
+ScrCommandResult evtCommand_EFFBED_START(void);
+ScrCommandResult evtCommand_EFFECT_ROT_XYZ(void);
+ScrCommandResult evtCommand_EFFBED_BE(void);
+ScrCommandResult evtCommand_EFFECT_PATH_MOVE(void);
+ScrCommandResult evtCommand_EFFECT_PATH_WAIT(void);
+ScrCommandResult evtCommand_EFFMG1_LOAD(void);
+ScrCommandResult evtCommand_EFFMG1_BE(void);
+ScrCommandResult evtCommand_EFFMG2_LOAD(void);
+ScrCommandResult evtCommand_EFFMG2_BE(void);
+ScrCommandResult evtCommand_EFFMG1_POS(void);
+ScrCommandResult evtCommand_EFFMG2_POS(void);
+ScrCommandResult evtCommandStartBgmWithFade(void);
+ScrCommandResult evtCommand_CAM_ROT_Q(void);
+ScrCommandResult evtCommand_FIELD_ANIME_START(void);
+ScrCommandResult evtCommand_FIELD_ANIME_STOP(void);
+ScrCommandResult evtCommand_MODEL_SHADOW_ON2(void);
+ScrCommandResult btlCmdRememberCounterLimit(void);
+ScrCommandResult btlCmdStoreCounterReachedLimitChoice(void);
+ScrCommandResult btlScriptReturnTurnCount(void);
+ScrCommandResult btlScriptSelectDirect(void);
+ScrCommandResult btlScriptSelectByKind(void);
+ScrCommandResult evtCommand_EFFMG2_PRESET(void);
+ScrCommandResult btlCmdReportUnsupportedTaikyo(void);
+ScrCommandResult btlCmdReportUnsupportedAllTaikyo(void);
+ScrCommandResult btlResetCommandContextAndSetStateFlag(void);
+ScrCommandResult btlScriptPickLowestHpBlockTarget(void);
+ScrCommandResult evtCommand_PATH_LOOP_ON(void);
+ScrCommandResult evtCommand_PATH_LOOP_OFF(void);
+ScrCommandResult scrCommand_MUL_BLUR_PARA(void);
+ScrCommandResult scrCommand_MUL_BLUR_RGBA(void);
+ScrCommandResult scrCommand_MUL_BLUR_AREA(void);
+ScrCommandResult scrCommand_MUL_BLUR_ON(void);
+ScrCommandResult scrCommand_MUL_BLUR_OFF(void);
+ScrCommandResult scrCommand_DIST_BLUR_PARA(void);
+ScrCommandResult scrCommand_DIST_BLUR_RGBA(void);
+ScrCommandResult scrCommand_DIST_BLUR_AREA(void);
+ScrCommandResult scrCommand_DIST_BLUR_ON(void);
+ScrCommandResult scrCommand_DIST_BLUR_OFF(void);
+ScrCommandResult btlCmdCameraMove(void);
+ScrCommandResult btlCmdReportUnsupportedCameraOrigin(void);
+ScrCommandResult btlEnableCommandStateFlag(void);
+ScrCommandResult evtCommand_READ_BE(void);
+ScrCommandResult evtCommand_CHK_BE(void);
+ScrCommandResult evtCommand_DEL_BE(void);
+ScrCommandResult btlScriptQueueActorCommandSound(void);
+ScrCommandResult btlCmdReportUnsupportedCameraTwoShot(void);
+ScrCommandResult btlCmdReportUnsupportedCameraBougai(void);
+ScrCommandResult fldCommand_FLD_CHK_BTL(void);
+ScrCommandResult fldCommand_FLD_CHK_ANA(void);
+ScrCommandResult fldCommand_FLD_CHK_SISETU(void);
+ScrCommandResult evtCommand_CALL_FIELD3(void);
+ScrCommandResult fldCommand_FLD_KANKYO(void);
+ScrCommandResult fldCommand_FLD_FILTER(void);
+ScrCommandResult fldCommand_FLD_MODEL_ON(void);
+ScrCommandResult fldCmdApplyRoomModeGroupOne(void);
+ScrCommandResult fldCommand_FLD_ANIME_ON(void);
+ScrCommandResult fldCommand_FLD_ANIME_OFF(void);
+ScrCommandResult fldCommand_FLD_ATARI_ON(void);
+ScrCommandResult fldCmdSetSceneBitsBarrierRoom(void);
+ScrCommandResult fldCommand_FLD_MODEL_ON2(void);
+ScrCommandResult fldCommand_FLD_MODEL_OFF2(void);
+ScrCommandResult fldCommand_FLD_ANIME_ON2(void);
+ScrCommandResult fldCommand_FLD_ANIME_OFF2(void);
+ScrCommandResult fldCommand_FLD_ANIME_ID2(void);
+ScrCommandResult fldOpClearRoomStateFlags(void);
+ScrCommandResult fldOpSetRoomStateFlags(void);
+ScrCommandResult fldCmdSetSceneBitsValue(void);
+ScrCommandResult fldCommand_FLD_MAP_ON(void);
+ScrCommandResult fldCommand_FLD_MAP_OFF(void);
+ScrCommandResult fldCommand_SET_CAMTBL(void);
+ScrCommandResult fldCmdPushSceneParam(void);
+ScrCommandResult fldCommand_FLD_SET_TAKARA_OPEN(void);
+ScrCommandResult fldCommand_FLD_CHK_TAKARA_OPEN(void);
+ScrCommandResult itfMesMngSetMesPositionScript(void);
+ScrCommandResult itfMesMngSetMesPosDefault(void);
+ScrCommandResult itfMesMngValidateNext(void);
+ScrCommandResult evtCommandSubmitScalarAdminRequest(void);
+ScrCommandResult movCheckStartupSoundState(void);
+ScrCommandResult sndOpResetTitleStreamAfterFileIdle(void);
+ScrCommandResult evtOpSetActiveEntryFlag(void);
+ScrCommandResult evtOpReadDisplayValue(void);
+ScrCommandResult mnuResetTitlePlaybackCommands(void);
+ScrCommandResult mnuAdvanceTitleStreamFromScript(void);
+ScrCommandResult mnuIsTitleStreamIdle(void);
+ScrCommandResult btlCommandReportLinkedActionScene(void);
+ScrCommandResult evtCommand_MODEL_SHADOW_ON(void);
+ScrCommandResult evtCommand_MODEL_SHADOW_OFF(void);
+ScrCommandResult evtCommand_BOKASI_ON(void);
+ScrCommandResult evtCommand_BOKASI_OFF(void);
+ScrCommandResult scrCommand_MUL_BLUR_SWAP(void);
+ScrCommandResult scrCommand_DIST_BLUR_SWAP(void);
+ScrCommandResult scrCommand_BLUR2_PARA(void);
+ScrCommandResult scrCommand_BLUR2_RGBA(void);
+ScrCommandResult scrCommand_BLUR2_AREA(void);
+ScrCommandResult scrCommand_BLUR2_SWAP(void);
+ScrCommandResult scrCommand_FILTER2_PARA(void);
+ScrCommandResult scrCommand_FILTER2_RGBA(void);
+ScrCommandResult scrCommand_FILTER2_SWAP(void);
+ScrCommandResult scrCommand_FILTER2_ON(void);
+ScrCommandResult scrCommand_FILTER2_OFF(void);
+ScrCommandResult scrCommand_MFILTER_PARA(void);
+ScrCommandResult scrCommand_MFILTER_RGBA(void);
+ScrCommandResult scrCommand_MFILTER_AREA(void);
+ScrCommandResult scrCommand_MFILTER_SWAP(void);
+ScrCommandResult scrCommand_MFILTER_ON(void);
+ScrCommandResult scrCommand_MFILTER_OFF(void);
+ScrCommandResult evtCommand_BGM_TRANS_E(void);
+ScrCommandResult scrCommandAddPartyCurrency(void);
+ScrCommandResult ptyScriptApplyEventPenalty(void);
+ScrCommandResult itfMesMngWindowType(void);
+ScrCommandResult itfMesMngSelectDefKey(void);
+ScrCommandResult ptyScriptRestoreEntireParty(void);
+ScrCommandResult btlCmdSelectChoiceSlot2Code0C(void);
+ScrCommandResult btlCmdRememberPartyHighHpChoice(void);
+ScrCommandResult scrCmdSetEntryFlagsInBothStores(void);
+ScrCommandResult btlCmdReturnQueuedSpecialAction(void);
+ScrCommandResult scrCommand_RIP_BLUR_ON(void);
+ScrCommandResult scrCommand_RIP_BLUR_OFF(void);
+ScrCommandResult scrCommand_RIP_BLUR_PARA(void);
+ScrCommandResult scrCommand_RIP_BLUR_RGBA(void);
+ScrCommandResult scrCommand_RIP_BLUR_AREA(void);
+ScrCommandResult scrCommand_RIP_BLUR_SWAP(void);
+ScrCommandResult evtOpcodeRefreshTaskData(void);
+ScrCommandResult evtOpcodeInitializeEffectSoundChannel(void);
+ScrCommandResult evtCommand_EFFECT_PRESET(void);
+ScrCommandResult btlCmdStoreActorMpCheckChoice(void);
+ScrCommandResult btlScriptReturnContextSignedByte(void);
+ScrCommandResult btlAiGetAllKoudo(void);
+ScrCommandResult btlScriptReturnActorLevel(void);
+ScrCommandResult btlCommandGetGroupSlotAuxValue(void);
+ScrCommandResult btlCommandAddOneItem(void);
+ScrCommandResult btlCmdReturnExtendedStatusCheck(void);
+ScrCommandResult btlScriptFlagAllUnitsDefeatCandidates(void);
+ScrCommandResult btlScriptFlagPlayerDefeatCandidates(void);
+ScrCommandResult btlScriptFlagEnemyDefeatCandidates(void);
+ScrCommandResult btlScriptReturnActorUnitParameter(void);
+ScrCommandResult evtCommand_CALL_STAFF(void);
+ScrCommandResult scrCmdHasEnoughOwnedMantras(void);
+ScrCommandResult btlScriptSelectModeAValueOne(void);
+ScrCommandResult btlScriptReturnOneBasedAiBucket(void);
+ScrCommandResult btlScriptPickLowestLevelTarget(void);
+ScrCommandResult ptyScriptGetRosterStat(void);
+ScrCommandResult btlAiGetFurea(void);
+ScrCommandResult evtCommand_CALL_ENDSAVE(void);
+ScrCommandResult evtCommand_KUTI(void);
+ScrCommandResult itfMesMngWindowTypeAlpha(void);
+ScrCommandResult btlCommandGetScriptReturnHookValue(void);
+ScrCommandResult evtPushLevelRelativeStatGradeScale(void);
+ScrCommandResult evtCommand_KUTISET(void);
+ScrCommandResult evtCommand_CALL_BATTLE2(void);
+ScrCommandResult evtCommand_EFFBED_BE_EVO(void);
+ScrCommandResult evtCommand_EFFBED_START_EVO(void);
+ScrCommandResult btlCmdReturnLowHpActionReadiness(void);
+ScrCommandResult evtCommandSetDrawFlagWhileWaiting(void);
+ScrCommandResult mnuCanDrawMovie(void);
+ScrCommandResult evtStoreScriptParameterResult(void);
+ScrCommandResult evtPushFirstRosterLevel(void);
+ScrCommandResult evtPushSecondRosterLevel(void);
+ScrCommandResult evtPushFirstRosterStatEligibility(void);
+ScrCommandResult evtPushSecondRosterStatEligibility(void);
+ScrCommandResult evtPushSelectedStatOrRosterLowValue(void);
+ScrCommandResult evtPushSelectedScaledStat(void);
+ScrCommandResult evtSelectScriptStatValue(void);
+ScrCommandResult evtPushSelectedTotalOrRosterHighValue(void);
+ScrCommandResult evtPushEntryFlagBitInverted(void);
+ScrCommandResult evtPushFirstRosterSelectedStat(void);
+ScrCommandResult evtPushSecondRosterSelectedStat(void);
+ScrCommandResult evtPushFirstRosterOptionStat(void);
+ScrCommandResult evtPushSecondRosterOptionStat(void);
+ScrCommandResult evtRollRandomScale(void);
+ScrCommandResult evtPushScriptContextResult(void);
+ScrCommandResult evtPushSelectedStatMaximum(void);
+ScrCommandResult scrGetBattleAverageActorStatForGroup(void);
+ScrCommandResult evtPushAvailableChoiceRatio(void);
+ScrCommandResult evtPushAvailableFloatValue(void);
+ScrCommandResult evtPushAvailableIntegerValue(void);
+ScrCommandResult evtPushFirstRosterCurrentHp(void);
+ScrCommandResult evtPushSecondRosterCurrentHp(void);
+ScrCommandResult evtPushFirstRosterMaximumHp(void);
+ScrCommandResult evtPushSecondRosterMaximumHp(void);
+ScrCommandResult evtCommandReattachObjectPath(void);
+ScrCommandResult evtPushLevelMaxHpGrowth(void);
+ScrCommandResult evtPushLevelMaxMpGrowth(void);
+ScrCommandResult evtSelectStatGrade(void);
+ScrCommandResult evtPushLevelValueA(void);
+ScrCommandResult evtPushLevelValueB(void);
+ScrCommandResult evtRollFlagDependentResultCode(void);
+ScrCommandResult evtPushSelectedStatGrade(void);
+ScrCommandResult evtPushLevelValueCCommand18D(void);
+ScrCommandResult evtPushLevelValueCCommand18E(void);
+ScrCommandResult ptyScriptCheckOrRebalanceFrontline(void);
+ScrCommandResult ptyScriptAddUnitAndReturnResult(void);
+ScrCommandResult ptyScriptRemoveUnitAndReturnResult(void);
+ScrCommandResult itfMesScriptStartEntryAndWait(void);
+ScrCommandResult ptyScriptAddUnitWithFlagsAndReturnResult(void);
+ScrCommandResult ptyScriptRemoveUnitWithFlagsAndReturnResult(void);
+ScrCommandResult evtPushRosterBaseValue(void);
+ScrCommandResult btlCmdReturnActorEligibility(void);
+ScrCommandResult btlCommandSelectEventAction(void);
+ScrCommandResult btlCommandWaitEventSoundDeadline(void);
+ScrCommandResult btlCmdReportEnemySpawnCapacity(void);
+ScrCommandResult btlCmdRememberLowerElementAccess(void);
+ScrCommandResult btlCmdRememberUpperElementAccess(void);
+ScrCommandResult btlCmdRememberLowerElementExclusion(void);
+ScrCommandResult btlCmdRememberUpperElementExclusion(void);
+ScrCommandResult btlCmdRememberUpperActionAvailability(void);
+ScrCommandResult btlCmdRememberActorEntryCondition(void);
+ScrCommandResult btlCmdRememberNonLowerStatFlag(void);
+ScrCommandResult btlOpStartSelectedUnitModelChange(void);
+ScrCommandResult btlCmdReturnReadyWithoutTurnsCheck(void);
+ScrCommandResult btlCmdRememberContextSecondaryFlag(void);
+ScrCommandResult btlAreModelChangeTasksFinished(void);
+ScrCommandResult evtSelectFineStatGrade(void);
+ScrCommandResult btlScriptBuiltin422NoOp(void);
+ScrCommandResult btlCmdStoreDefaultUnitActionChoice(void);
+ScrCommandResult btlCmdStoreAlternateUnitActionChoice(void);
+ScrCommandResult btlCmdStorePartyEntryCheckChoice(void);
+ScrCommandResult btlCmdStoreInversePartyEntryChoice(void);
+ScrCommandResult btlCmdRememberUpperEntryCodeMatch(void);
+ScrCommandResult btlCmdRememberUpperEntryCodeInverse(void);
+ScrCommandResult btlCmdRememberUpperSelectedElement(void);
+ScrCommandResult btlCmdRememberLowerMissingStatus(void);
+ScrCommandResult btlScriptPickUnlinkedPartyTarget(void);
+ScrCommandResult btlScriptAppendActorToTargets(void);
+ScrCommandResult btlScriptPickTargetExcludingActor(void);
+ScrCommandResult btlCommandPlayUnitMotion(void);
+ScrCommandResult btlScriptBuiltin435NoOp(void);
+ScrCommandResult btlScriptReturnUnitHpRatioPercent(void);
+ScrCommandResult btlScriptBuiltin437NoOp(void);
+ScrCommandResult btlScriptReturnEffectActive(void);
+ScrCommandResult btlCmdReturnBattlePhase(void);
+ScrCommandResult btlCmdRememberLowerEntryCodeMismatch(void);
+ScrCommandResult btlCmdRememberUpperEntryCodeMismatch(void);
+ScrCommandResult btlScriptPickTargetWithoutStatusMask(void);
+ScrCommandResult btlCmdRememberPartyQueuedActionCategory(void);
+ScrCommandResult btlCmdTestEffectActor(void);
+ScrCommandResult btlScriptReturnEffectValue(void);
+ScrCommandResult btlScriptReturnSceneSlotCount(void);
+ScrCommandResult btlCmdReturnPartyMissingFlagCheck(void);
+ScrCommandResult btlCmdReturnPartyHeldFlagCheck(void);
+ScrCommandResult btlScriptPickLinkedPartyTarget(void);
+ScrCommandResult btlScriptBuiltin450NoOp(void);
+ScrCommandResult btlScriptBuiltin451NoOp(void);
+ScrCommandResult btlScriptAddEffectActorTarget(void);
+ScrCommandResult btlScriptReturnGlobalDebugValue(void);
+ScrCommandResult btlCmdRememberLowerElementBlock(void);
+ScrCommandResult btlScriptPickElementBlockTarget(void);
+ScrCommandResult btlCmdRememberUpperQueuedQuery(void);
+ScrCommandResult btlCmdRememberLowerQueuedQuery(void);
+ScrCommandResult btlScriptSetActorUnitParameter(void);
+ScrCommandResult btlScriptPickHighestMpTarget(void);
+ScrCommandResult btlScriptPickElementCheckedTarget(void);
+ScrCommandResult btlCmdReportPartyEmptyMp(void);
+ScrCommandResult btlCommandSetSequenceVolumePan(void);
+ScrCommandResult btlCommandReportSpecialEnemyLink(void);
+ScrCommandResult evtPushEntryIndexedStatOption(void);
+ScrCommandResult btlCmdClearSpecialEnemyFlags(void);
+ScrCommandResult scrGetBattleAverageMaximumValueForGroup(void);
+ScrCommandResult scrGetBattleAverageCurrentValueForGroup(void);
+ScrCommandResult btlScriptQueueUnboundCommandSound(void);
+ScrCommandResult btlScriptSetCameraBlendStart(void);
+ScrCommandResult btlScriptSetCameraBlendEnd(void);
+ScrCommandResult btlCmdCameraMoveBlend(void);
+ScrCommandResult btlScriptReturnActiveSubtaskPresence(void);
+ScrCommandResult btlCmdGetSubtaskTargetMode(void);
+ScrCommandResult btlScriptCmdSelectTargetsByMode(void);
+ScrCommandResult btlScriptReturnMarkedCommandRequestedState(void);
+ScrCommandResult btlScriptAppendSelectedOrCurrentTarget(void);
+ScrCommandResult btlScriptSelectShadowSkill(void);
+ScrCommandResult btlScriptReturnMarkedActionSceneActive(void);
+ScrCommandResult evtCallShooting(void);
+ScrCommandResult evtOpQueueWorldObjectPendingValue(void);
+ScrCommandResult evtOpClearWorldObjectPendingValue(void);
+ScrCommandResult evtOpModelLodChg(void);
+ScrCommandResult itfCommandSelectOptionWithFade(void);
+ScrCommandResult itfPanelAcquireHold(void);
+ScrCommandResult itfCommandQueueHeldPanelEntry(void);
+ScrCommandResult itfStepHeldPanelMessages(void);
+ScrCommandResult scrCommandClearProcessControlFlag(void);
+ScrCommandResult scrCommandSetProcessControlFlag(void);
+ScrCommandResult btlScriptSetBossStatSelector(void);
+ScrCommandResult btlCmdSpawnEffectTaskForSelectedUnit(void);
+ScrCommandResult btlCommandChooseRandomUnflaggedGroupSlot(void);
+ScrCommandResult btlCmdGetIndexedBattleStateValue(void);
+ScrCommandResult btlCommandCountModelFlags(void);
+ScrCommandResult fldCommandStartTitle(void);
+ScrCommandResult fldCommand_FLD_GET_KIRETA(void);
+ScrCommandResult fldCmdRollMirroredSolarThreshold(void);
+ScrCommandResult fldCommand_FLD_MSE_PLAY2(void);
+ScrCommandResult fldCommand_FLD_MSE_STOP2(void);
+ScrCommandResult fldCommand_SET_NPC_CAMERA(void);
+ScrCommandResult fldCmdMarkBitmapRegion(void);
+ScrCommandResult fldCommand_FLD_MODEL_DANTE(void);
+ScrCommandResult fldCmdSetTargetGuideEnabled(void);
+ScrCommandResult fldCmdSetTargetGuideMode(void);
+ScrCommandResult fldCmdGetActorStat1(void);
+ScrCommandResult fldCommand_FLD_WARP_HASIGO_GETTBL(void);
+ScrCommandResult fldCmdApplyNumericRoomModeGroupZero(void);
+ScrCommandResult fldCmdApplyNumericRoomModeGroupOne(void);
+ScrCommandResult fldCmdGetCurrentSceneSelectionResource(void);
+ScrCommandResult fldCommandFindEffectByName(void);
+ScrCommandResult fldCommand_FLD_WARP_ELV_GETTBL(void);
+ScrCommandResult fldCommand_FLD_WARP_ELV_EXIT(void);
+ScrCommandResult fldCmdSetCurrentTaskScene(void);
+ScrCommandResult func_001569E0(void);
+ScrCommandResult fldCommand_FLD_WARP_RUN_START(void);
+ScrCommandResult fldCommand_FLD_INF_NEXT(void);
+ScrCommandResult fldCommand_FLD_INF_GET(void);
+ScrCommandResult fldCommand_FLD_INF_GETPANEL(void);
+ScrCommandResult fldCmdGetActorStat0(void);
+ScrCommandResult fldCommand_FLD_ELV_FLOORSTART(void);
+ScrCommandResult fldCommand_FLD_ELV_FLOOREND(void);
+ScrCommandResult fldCommand_FLD_ELV_ENDCHK(void);
+ScrCommandResult fldCommand_FLD_WARP_GET_DOOR(void);
+ScrCommandResult fldCommand_FLD_EXIT_CAMERA(void);
+ScrCommandResult fldCommand_FLD_INF_GOWAP(void);
+ScrCommandResult fldCmdExecuteSceneAction(void);
+ScrCommandResult fldCmdStartSceneBgm(void);
+ScrCommandResult fldCmdStartSceneBgmAlternate(void);
+ScrCommandResult fldCmdStopCurrentBgm(void);
+ScrCommandResult fldCmdPlayCurrentBgmSound(void);
+ScrCommandResult fldCommandPlaySeVolumePan(void);
+ScrCommandResult fldCommandPlaySe(void);
+ScrCommandResult fldCmdReleaseCurrentBgm(void);
+ScrCommandResult fldCommandLoadArchive(void);
+ScrCommandResult fldCmdForceTargetGuideUpdate(void);
+ScrCommandResult fldCommand_FLD_WARP_GET_WARPEFF(void);
+ScrCommandResult fldCmdResetAfterEvent(void);
+ScrCommandResult fldCmdQueryAlternateActorEntrySceneStatus(void);
+ScrCommandResult fldCommand_FLD_SET_ENCOUNT(void);
+ScrCommandResult fldCommand_ACT_WIN_DSP3(void);
+ScrCommandResult fldCmdInitializeHuntSparkUnit(void);
+ScrCommandResult fldCmdSetStateFlag(void);
+
+const ScrCommand D_00411408[] = {
+    { itfMesMngMessage, 1 },
+    { itfMesMngOpenWindow, 0 },
+    { itfMesMngCloseWindow, 0 },
+    { itfMesMngSelect, 1 },
+    { itfMesMngOpenSelectWindow, 0 },
+    { itfMesMngCloseSelectWindow, 0 },
+    { itfMesMngMaskSelect, 1 },
+    { scrCommand_BIT_CHK, 1 },
+    { scrCommand_BIT_ON, 1 },
+    { scrCommand_BIT_OFF, 1 },
+    { scrCommand_RND, 1 },
+    { sndOpSetTrackDefaultVolumePan, 1 },
+    { sndOpStartTrackFromScript, 1 },
+    { scrCommand_SYNC, 0 },
+    { scrCommand_WAIT, 1 },
+    { bfWaitCbScreenFadeA, 2 },
+    { bfWaitCbScreenFadeB, 2 },
+    { scrCommand_SEL_JMP, 8 },
+    { evtCommandAddEffectUnitToWorld, 1 },
+    { evtCommand_CAM_PATH_MOVE, 2 },
+    { evtCommand_SET_SKY, 3 },
+    { evtCommand_MODEL_DSP, 2 },
+    { evtCmdDestroySelectedWorldUnit, 1 },
+    { evtOpStartUnitTransitionTowardWorldObject, 5 },
+    { evtOpDeprecatedModelMotion, 4 },
+    { evtCommand_CAM_SEL_FOVY, 1 },
+    { scrCommand_PAD_ACT, 3 },
+    { evtCommand_MODEL_SCL_XYZ, 4 },
+    { scrCommand_SCR_EXISTS, 1 },
+    { btlScriptSelectWeightedEntry, 1 },
+    { scrCommandFadeBackgroundOut, 1 },
+    { scrCommandFadeBackgroundIn, 1 },
+    { btlScriptSetChoiceFlag, 2 },
+    { evtCommandStartPolygonMovie, 2 },
+    { evtCommandClearPolygonMovieFlag, 1 },
+    { evtCommand_FIELD_CLS_STOP, 0 },
+    { scrCommandPrintInteger, 1 },
+    { evtCommand_GET_MOON, 0 },
+    { evtCommand_UNIT_CLS, 0 },
+    { evtCommand_GET_MOON16, 0 },
+    { evtCommand_RESTORE_BATTLE, 2 },
+    { evtCommand_UNIT_CLS_STOP, 0 },
+    { evtCommand_TEX_LOAD, 1 },
+    { evtCommand_TEX_ON, 1 },
+    { evtCommand_TEX_OFF, 1 },
+    { evtCommand_TEX_CLS, 1 },
+    { evtCommandSignalAdminAtTimerZero, 0 },
+    { btlScriptSetBattleCommand, 1 },
+    { btlScriptSelectEmptyCommand, 0 },
+    { btlScriptSelectFixedCommand, 0 },
+    { btlScriptSelectModeDValueOne, 0 },
+    { btlScriptSelectActionEntry, 1 },
+    { btlScriptChooseActionTargets, 0 },
+    { btlScriptPickLowestHpTarget, 0 },
+    { btlScriptPickTargetWithStatusMask, 1 },
+    { btlScriptFilterTargetsByUnitId, 1 },
+    { btlCmdReportUnsupportedEvent, 1 },
+    { btlCmdReturnPartyActionPresence, 1 },
+    { btlCmdReturnEnemyActionPresence, 1 },
+    { btlScriptSetBattleWorkParameter, 1 },
+    { btlScriptChooseActionTargetsDuplicate, 0 },
+    { btlCmdRunWeightedAiSelection, 0 },
+    { btlScriptClearSceneTransition, 0 },
+    { btlScriptBeginSceneTransition, 0 },
+    { itfMesMng_SEL_SELNO, 1 },
+    { scrCommand_BLUR2_ON, 1 },
+    { scrCommand_BLUR2_OFF, 1 },
+    { scrCommandResetDrawEffects, 0 },
+    { evtCommand_MODEL_EXWAIT, 2 },
+    { sndOpSendTitleAudioCommand, 0 },
+    { evtCommand_RTRN_TITLE, 0 },
+    { scrCommand_SOFTEN_BIAS, 3 },
+    { evtCommand_SET_SKY_A, 2 },
+    { evtCommand_MODEL_WAIT, 1 },
+    { evtCommand_MODEL_POS, 2 },
+    { evtCommand_MODEL_WAIT_MOT, 2 },
+    { evtCommand_MODEL_MOVE_MOT, 2 },
+    { evtCommand_FIELD_DSP, 2 },
+    { evtCommand_FIELD_CLS, 0 },
+    { itfCamp, 0 },
+    { mnuScriptRequestMovieByIndex, 1 },
+    { mnuScriptStopMovieAndResetDraw, 0 },
+    { mnuUpdateMovieDrawShutdownCountdown, 0 },
+    { scrCommand_PAD_TRIG, 1 },
+    { scrCommand_PAD_PRESS, 1 },
+    { evtCommand_CAM_PATH_WAIT, 1 },
+    { evtCommand_MODEL_ROT, 3 },
+    { evtOpTurnUnitRelativeToWorldNode, 3 },
+    { evtOpRestoreUnitReferenceAngle, 2 },
+    { evtCommand_CALL_SAVE, 2 },
+    { evtPushRosterOrGlobalCounterValue, 0 },
+    { btlCmdSetContextFlagOne, 0 },
+    { btlCmdRememberUpperActorTripleCheck, 1 },
+    { evtCommand_CALL_FIELD, 3 },
+    { fldCmdQueryActorEntrySceneStatus, 1 },
+    { fldCmdTestActorEntryCondition, 1 },
+    { fldCommand_PAD_DISABLE, 0 },
+    { fldCommand_PAD_ENABLE, 0 },
+    { mnuOpenTitleMenuDefaultMode, 0 },
+    { evtCommand_MOON_START, 0 },
+    { evtCommand_MOON_STOP, 0 },
+    { evtCommand_CHG_MOON, 1 },
+    { evtCommand_CALL_EVENT, 1 },
+    { evtCommandSubmitEvent, 1 },
+    { evtCommand_MODEL_PLAYER, 0 },
+    { evtCommand_MODEL_ON, 1 },
+    { evtCommand_MODEL_OFF, 1 },
+    { evtCommand_OBJ_PATH_MOVE, 3 },
+    { evtCommand_OBJ_PATH_WAIT, 1 },
+    { scrCommand_SET_FOVY, 1 },
+    { fldCommand_ENCOUNT_ON, 0 },
+    { fldCommand_ENCOUNT_OFF, 0 },
+    { scrCommandAdjustItemQuantity, 2 },
+    { itfMesMngSetVarScr, 3 },
+    { scrCommandPrintString, 1 },
+    { evtOpSetUnitParams5, 5 },
+    { evtCommand_MODEL_WAIT_HOKAN, 3 },
+    { evtCommand_CAM_CREATE, 0 },
+    { evtCommand_CAM_CLS, 1 },
+    { evtCommand_CAM_POS_XYZ, 4 },
+    { evtCommand_CAM_ROT_XYZ, 4 },
+    { evtCommand_MODEL_POS_XYZ, 4 },
+    { evtCommand_MODEL_ROT_XYZ, 4 },
+    { btlNbScriptCheckActorFlag, 1 },
+    { btlCmdStoreBossHealthCheckChoice, 1 },
+    { btlScriptPickLowestHpRatioTarget, 0 },
+    { btlCmdStoreEnemyCountCheckChoice, 1 },
+    { btlCmdStorePartyCountCheckChoice, 1 },
+    { btlCmdStoreActorActionMaskChoice, 1 },
+    { btlCmdStoreEnemyActionMaskChoice, 1 },
+    { btlCmdStorePartyActionMaskChoice, 1 },
+    { btlCmdRememberAllLowerActionBits, 1 },
+    { btlCmdRememberLowerUnitMode, 1 },
+    { btlCmdRememberOtherUpperUnitMode, 1 },
+    { btlCmdRememberLowerEntryCondition, 1 },
+    { btlCmdRememberUpperEntryCondition, 1 },
+    { btlAiCheckBa, 0 },
+    { btlCmdReturnPartyElementQueryCheck, 1 },
+    { btlCmdReturnEnemyElementQueryCheck, 1 },
+    { evtCommand_MODEL_MOVE2, 7 },
+    { btlCmdRememberActorActionGate, 0 },
+    { evtCommand_LOAD_SOUND_E, 1 },
+    { evtCommand_BGM_PLAY_E, 2 },
+    { evtOpcodeSetBgmVolumePan, 2 },
+    { evtCommand_FADEOUT_E, 2 },
+    { evtCommand_BGM_VOL_DOWN, 0 },
+    { evtCommand_BGM_VOL_UP, 0 },
+    { itfMesMngIgnoreConfig, 1 },
+    { evtCommand_SEARCH_ID, 1 },
+    { evtOpSetUnitParams6, 6 },
+    { evtScriptSetUnitTableValueAndReset, 3 },
+    { evtCommand_CALL_NEXT, 3 },
+    { evtCommand_CALL_FIELD2, 2 },
+    { scrCommandResetFieldEffects, 0 },
+    { evtCommand_EFFECT_LOAD, 1 },
+    { evtCommand_EFFECT_CLS, 1 },
+    { evtCommand_EFFECT_POS_XYZ, 4 },
+    { evtCommand_EFFECT_POS, 2 },
+    { evtCommand_EFFECT_ON, 1 },
+    { evtCommand_EFFECT_OFF, 1 },
+    { evtCommand_EFFECT_LINK, 2 },
+    { evtCommand_EFFECT_LINK2, 3 },
+    { evtCommand_EFFECT_UNLINK, 1 },
+    { fldCmdFocusCameraOnObject, 1 },
+    { fldUpdateLookAtSegment, 0 },
+    { bfWaitCbCreateTask, 2 },
+    { scrCommand_SCR_KILL, 1 },
+    { scrCommand_SCR_WAIT, 1 },
+    { scrCommand_SCR_STAT, 1 },
+    { scrCommand_SCR_TIME, 1 },
+    { evtCommand_PMV_RUN, 2 },
+    { scrCommand_QUAKE_ON, 2 },
+    { scrCommand_QUAKE_OFF, 0 },
+    { evtCommand_MODEL_LIGHT_OFF, 2 },
+    { evtCommand_MODEL_LIGHT_ON, 1 },
+    { evtCommand_MODEL_LIGHT_RGB, 8 },
+    { evtCommand_MODEL_LIGHT_DIR, 5 },
+    { evtCommand_MODEL_LIGHT_WAIT, 1 },
+    { evtCommand_MODEL_RGB, 5 },
+    { evtCommand_MODEL_A, 3 },
+    { scrCommand_SCENE_LIGHT_RGB, 4 },
+    { scrCommand_SCENE_LIGHT_DIR, 4 },
+    { scrCommand_SCENE_AMBIENT, 4 },
+    { evtCommand_PATH_STOP, 1 },
+    { evtCommand_PATH_START, 1 },
+    { evtCommand_PATH_RATE, 2 },
+    { evtCommand_PATH_DIR, 2 },
+    { scrCommand_SCENE_FOG_RGB, 4 },
+    { scrCommand_SCENE_FOG_PARA, 5 },
+    { scrCommand_BLUR, 3 },
+    { func_00154F20, 2 },
+    { fldCmdFreeDisplayObjects, 0 },
+    { fldCmdSetScenePhaseThree, 0 },
+    { fldCmdSetLookAtHeading, 1 },
+    { fldCommand_CAM_SEL_PHOKAN, 2 },
+    { fldCmdSetSolarOverlayMode, 1 },
+    { evtCommand_MODEL_LIGHT_LINK, 3 },
+    { evtCommand_MODEL_LIGHT_UNLINK, 2 },
+    { evtCommand_LIGHT_PATH_MOVE, 2 },
+    { evtCommand_LIGHT_PATH_WAIT, 1 },
+    { evtCommand_LOAD_BE, 1 },
+    { evtCommand_MODEL_BE, 2 },
+    { evtCommand_FIELD_BE, 2 },
+    { evtCommand_EFFECT_BE, 2 },
+    { evtCommand_TEX_BE, 2 },
+    { evtCommand_EFFBED_LOAD, 1 },
+    { evtCommand_EFFBED_START, 2 },
+    { evtCommand_EFFECT_ROT_XYZ, 4 },
+    { evtCommand_EFFBED_BE, 2 },
+    { evtCommand_EFFECT_PATH_MOVE, 2 },
+    { evtCommand_EFFECT_PATH_WAIT, 1 },
+    { evtCommand_EFFMG1_LOAD, 1 },
+    { evtCommand_EFFMG1_BE, 2 },
+    { evtCommand_EFFMG2_LOAD, 1 },
+    { evtCommand_EFFMG2_BE, 2 },
+    { evtCommand_EFFMG1_POS, 3 },
+    { evtCommand_EFFMG2_POS, 5 },
+    { evtCommandStartBgmWithFade, 2 },
+    { evtCommand_CAM_ROT_Q, 5 },
+    { evtCommand_FIELD_ANIME_START, 1 },
+    { evtCommand_FIELD_ANIME_STOP, 1 },
+    { evtCommand_MODEL_SHADOW_ON2, 1 },
+    { btlCmdRememberCounterLimit, 1 },
+    { btlCmdStoreCounterReachedLimitChoice, 1 },
+    { btlScriptReturnTurnCount, 0 },
+    { btlScriptSelectDirect, 1 },
+    { btlScriptSelectByKind, 2 },
+    { evtCommand_EFFMG2_PRESET, 1 },
+    { btlCmdReportUnsupportedTaikyo, 0 },
+    { btlCmdReportUnsupportedAllTaikyo, 0 },
+    { btlResetCommandContextAndSetStateFlag, 0 },
+    { btlScriptPickLowestHpBlockTarget, 1 },
+    { evtCommand_PATH_LOOP_ON, 1 },
+    { evtCommand_PATH_LOOP_OFF, 1 },
+    { scrCommand_MUL_BLUR_PARA, 3 },
+    { scrCommand_MUL_BLUR_RGBA, 4 },
+    { scrCommand_MUL_BLUR_AREA, 3 },
+    { scrCommand_MUL_BLUR_ON, 1 },
+    { scrCommand_MUL_BLUR_OFF, 1 },
+    { scrCommand_DIST_BLUR_PARA, 7 },
+    { scrCommand_DIST_BLUR_RGBA, 4 },
+    { scrCommand_DIST_BLUR_AREA, 3 },
+    { scrCommand_DIST_BLUR_ON, 1 },
+    { scrCommand_DIST_BLUR_OFF, 1 },
+    { btlCmdCameraMove, 7 },
+    { btlCmdReportUnsupportedCameraOrigin, 0 },
+    { btlEnableCommandStateFlag, 0 },
+    { evtCommand_READ_BE, 1 },
+    { evtCommand_CHK_BE, 1 },
+    { evtCommand_DEL_BE, 1 },
+    { btlScriptQueueActorCommandSound, 0 },
+    { btlCmdReportUnsupportedCameraTwoShot, 0 },
+    { btlCmdReportUnsupportedCameraBougai, 0 },
+    { fldCommand_FLD_CHK_BTL, 0 },
+    { fldCommand_FLD_CHK_ANA, 0 },
+    { fldCommand_FLD_CHK_SISETU, 0 },
+    { evtCommand_CALL_FIELD3, 2 },
+    { fldCommand_FLD_KANKYO, 2 },
+    { fldCommand_FLD_FILTER, 4 },
+    { fldCommand_FLD_MODEL_ON, 4 },
+    { fldCmdApplyRoomModeGroupOne, 4 },
+    { fldCommand_FLD_ANIME_ON, 4 },
+    { fldCommand_FLD_ANIME_OFF, 4 },
+    { fldCommand_FLD_ATARI_ON, 3 },
+    { fldCmdSetSceneBitsBarrierRoom, 3 },
+    { fldCommand_FLD_MODEL_ON2, 3 },
+    { fldCommand_FLD_MODEL_OFF2, 3 },
+    { fldCommand_FLD_ANIME_ON2, 3 },
+    { fldCommand_FLD_ANIME_OFF2, 3 },
+    { fldCommand_FLD_ANIME_ID2, 4 },
+    { fldOpClearRoomStateFlags, 3 },
+    { fldOpSetRoomStateFlags, 3 },
+    { fldCmdSetSceneBitsValue, 4 },
+    { fldCommand_FLD_MAP_ON, 3 },
+    { fldCommand_FLD_MAP_OFF, 3 },
+    { fldCommand_SET_CAMTBL, 1 },
+    { fldCmdPushSceneParam, 1 },
+    { fldCommand_FLD_SET_TAKARA_OPEN, 0 },
+    { fldCommand_FLD_CHK_TAKARA_OPEN, 0 },
+    { itfMesMngSetMesPositionScript, 2 },
+    { itfMesMngSetMesPosDefault, 0 },
+    { itfMesMngValidateNext, 1 },
+    { evtCommandSubmitScalarAdminRequest, 1 },
+    { movCheckStartupSoundState, 1 },
+    { sndOpResetTitleStreamAfterFileIdle, 0 },
+    { evtOpSetActiveEntryFlag, 1 },
+    { evtOpReadDisplayValue, 1 },
+    { mnuResetTitlePlaybackCommands, 0 },
+    { mnuAdvanceTitleStreamFromScript, 0 },
+    { mnuIsTitleStreamIdle, 0 },
+    { btlCommandReportLinkedActionScene, 0 },
+    { evtCommand_MODEL_SHADOW_ON, 1 },
+    { evtCommand_MODEL_SHADOW_OFF, 1 },
+    { evtCommand_BOKASI_ON, 0 },
+    { evtCommand_BOKASI_OFF, 0 },
+    { scrCommand_MUL_BLUR_SWAP, 1 },
+    { scrCommand_DIST_BLUR_SWAP, 1 },
+    { scrCommand_BLUR2_PARA, 3 },
+    { scrCommand_BLUR2_RGBA, 4 },
+    { scrCommand_BLUR2_AREA, 2 },
+    { scrCommand_BLUR2_SWAP, 1 },
+    { scrCommand_FILTER2_PARA, 1 },
+    { scrCommand_FILTER2_RGBA, 4 },
+    { scrCommand_FILTER2_SWAP, 1 },
+    { scrCommand_FILTER2_ON, 1 },
+    { scrCommand_FILTER2_OFF, 1 },
+    { scrCommand_MFILTER_PARA, 1 },
+    { scrCommand_MFILTER_RGBA, 4 },
+    { scrCommand_MFILTER_AREA, 3 },
+    { scrCommand_MFILTER_SWAP, 1 },
+    { scrCommand_MFILTER_ON, 1 },
+    { scrCommand_MFILTER_OFF, 1 },
+    { evtCommand_BGM_TRANS_E, 2 },
+    { scrCommandAddPartyCurrency, 1 },
+    { ptyScriptApplyEventPenalty, 1 },
+    { itfMesMngWindowType, 1 },
+    { itfMesMngSelectDefKey, 2 },
+    { ptyScriptRestoreEntireParty, 0 },
+    { btlCmdSelectChoiceSlot2Code0C, 1 },
+    { btlCmdRememberPartyHighHpChoice, 1 },
+    { scrCmdSetEntryFlagsInBothStores, 2 },
+    { btlCmdReturnQueuedSpecialAction, 0 },
+    { scrCommand_RIP_BLUR_ON, 1 },
+    { scrCommand_RIP_BLUR_OFF, 1 },
+    { scrCommand_RIP_BLUR_PARA, 7 },
+    { scrCommand_RIP_BLUR_RGBA, 4 },
+    { scrCommand_RIP_BLUR_AREA, 3 },
+    { scrCommand_RIP_BLUR_SWAP, 1 },
+    { evtOpcodeRefreshTaskData, 2 },
+    { evtOpcodeInitializeEffectSoundChannel, 0 },
+    { evtCommand_EFFECT_PRESET, 1 },
+    { btlCmdStoreActorMpCheckChoice, 1 },
+    { btlScriptReturnContextSignedByte, 0 },
+    { btlAiGetAllKoudo, 0 },
+    { btlScriptReturnActorLevel, 0 },
+    { btlCommandGetGroupSlotAuxValue, 1 },
+    { btlCommandAddOneItem, 1 },
+    { btlCmdReturnExtendedStatusCheck, 1 },
+    { NULL, 0 },
+    { btlScriptFlagAllUnitsDefeatCandidates, 0 },
+    { btlScriptFlagPlayerDefeatCandidates, 0 },
+    { btlScriptFlagEnemyDefeatCandidates, 0 },
+    { btlScriptReturnActorUnitParameter, 0 },
+    { evtCommand_CALL_STAFF, 0 },
+    { scrCmdHasEnoughOwnedMantras, 0 },
+    { btlScriptSelectModeAValueOne, 0 },
+    { btlScriptReturnOneBasedAiBucket, 0 },
+    { btlScriptPickLowestLevelTarget, 0 },
+    { ptyScriptGetRosterStat, 1 },
+    { btlAiGetFurea, 0 },
+    { evtCommand_CALL_ENDSAVE, 0 },
+    { evtCommand_KUTI, 3 },
+    { itfMesMngWindowTypeAlpha, 2 },
+    { btlCommandGetScriptReturnHookValue, 0 },
+    { evtPushLevelRelativeStatGradeScale, 0 },
+    { NULL, 0 },
+    { NULL, 0 },
+    { evtCommand_KUTISET, 3 },
+    { evtCommand_CALL_BATTLE2, 1 },
+    { evtCommand_EFFBED_BE_EVO, 3 },
+    { evtCommand_EFFBED_START_EVO, 3 },
+    { btlCmdReturnLowHpActionReadiness, 0 },
+    { evtCommandSetDrawFlagWhileWaiting, 1 },
+    { mnuCanDrawMovie, 0 },
+    { evtStoreScriptParameterResult, 1 },
+    { evtPushFirstRosterLevel, 0 },
+    { evtPushSecondRosterLevel, 0 },
+    { evtPushFirstRosterStatEligibility, 1 },
+    { evtPushSecondRosterStatEligibility, 1 },
+    { evtPushSelectedStatOrRosterLowValue, 0 },
+    { evtPushSelectedScaledStat, 0 },
+    { evtSelectScriptStatValue, 0 },
+    { evtPushSelectedTotalOrRosterHighValue, 0 },
+    { evtPushEntryFlagBitInverted, 0 },
+    { evtPushFirstRosterSelectedStat, 0 },
+    { evtPushSecondRosterSelectedStat, 0 },
+    { evtPushFirstRosterOptionStat, 0 },
+    { evtPushSecondRosterOptionStat, 0 },
+    { evtRollRandomScale, 1 },
+    { evtPushScriptContextResult, 0 },
+    { evtPushSelectedStatMaximum, 0 },
+    { scrGetBattleAverageActorStatForGroup, 1 },
+    { evtPushAvailableChoiceRatio, 2 },
+    { evtPushAvailableFloatValue, 0 },
+    { evtPushAvailableIntegerValue, 0 },
+    { evtPushFirstRosterCurrentHp, 0 },
+    { evtPushSecondRosterCurrentHp, 0 },
+    { evtPushFirstRosterMaximumHp, 0 },
+    { evtPushSecondRosterMaximumHp, 0 },
+    { evtCommandReattachObjectPath, 3 },
+    { evtPushLevelMaxHpGrowth, 0 },
+    { evtPushLevelMaxMpGrowth, 0 },
+    { evtSelectStatGrade, 0 },
+    { evtPushLevelValueA, 0 },
+    { evtPushLevelValueB, 0 },
+    { evtRollFlagDependentResultCode, 0 },
+    { evtPushSelectedStatGrade, 0 },
+    { evtPushLevelValueCCommand18D, 0 },
+    { evtPushLevelValueCCommand18E, 0 },
+    { ptyScriptCheckOrRebalanceFrontline, 2 },
+    { ptyScriptAddUnitAndReturnResult, 1 },
+    { ptyScriptRemoveUnitAndReturnResult, 1 },
+    { itfMesScriptStartEntryAndWait, 1 },
+    { ptyScriptAddUnitWithFlagsAndReturnResult, 2 },
+    { ptyScriptRemoveUnitWithFlagsAndReturnResult, 2 },
+    { evtPushRosterBaseValue, 0 },
+    { btlCmdReturnActorEligibility, 0 },
+    { btlCommandSelectEventAction, 3 },
+    { btlCommandWaitEventSoundDeadline, 2 },
+    { btlCmdReportEnemySpawnCapacity, 0 },
+    { btlCmdRememberLowerElementAccess, 1 },
+    { btlCmdRememberUpperElementAccess, 1 },
+    { btlCmdRememberLowerElementExclusion, 1 },
+    { btlCmdRememberUpperElementExclusion, 1 },
+    { btlCmdRememberUpperActionAvailability, 1 },
+    { btlCmdRememberActorEntryCondition, 1 },
+    { btlCmdRememberNonLowerStatFlag, 0 },
+    { btlOpStartSelectedUnitModelChange, 4 },
+    { btlCmdReturnReadyWithoutTurnsCheck, 0 },
+    { btlCmdRememberContextSecondaryFlag, 0 },
+    { btlAreModelChangeTasksFinished, 0 },
+    { evtSelectFineStatGrade, 0 },
+    { btlScriptBuiltin422NoOp, 0 },
+    { btlCmdStoreDefaultUnitActionChoice, 1 },
+    { btlCmdStoreAlternateUnitActionChoice, 1 },
+    { btlCmdStorePartyEntryCheckChoice, 1 },
+    { btlCmdStoreInversePartyEntryChoice, 1 },
+    { btlCmdRememberUpperEntryCodeMatch, 1 },
+    { btlCmdRememberUpperEntryCodeInverse, 1 },
+    { btlCmdRememberUpperSelectedElement, 1 },
+    { btlCmdRememberLowerMissingStatus, 0 },
+    { btlScriptPickUnlinkedPartyTarget, 0 },
+    { btlScriptAppendActorToTargets, 0 },
+    { btlScriptPickTargetExcludingActor, 0 },
+    { btlCommandPlayUnitMotion, 3 },
+    { btlScriptBuiltin435NoOp, 0 },
+    { btlScriptReturnUnitHpRatioPercent, 3 },
+    { btlScriptBuiltin437NoOp, 0 },
+    { btlScriptReturnEffectActive, 0 },
+    { btlCmdReturnBattlePhase, 0 },
+    { btlCmdRememberLowerEntryCodeMismatch, 1 },
+    { btlCmdRememberUpperEntryCodeMismatch, 1 },
+    { btlScriptPickTargetWithoutStatusMask, 1 },
+    { btlCmdRememberPartyQueuedActionCategory, 1 },
+    { btlCmdTestEffectActor, 0 },
+    { btlScriptReturnEffectValue, 0 },
+    { btlScriptReturnSceneSlotCount, 0 },
+    { btlCmdReturnPartyMissingFlagCheck, 0 },
+    { btlCmdReturnPartyHeldFlagCheck, 0 },
+    { btlScriptPickLinkedPartyTarget, 0 },
+    { btlScriptBuiltin450NoOp, 0 },
+    { btlScriptBuiltin451NoOp, 0 },
+    { btlScriptAddEffectActorTarget, 0 },
+    { btlScriptReturnGlobalDebugValue, 0 },
+    { btlCmdRememberLowerElementBlock, 1 },
+    { btlScriptPickElementBlockTarget, 1 },
+    { btlCmdRememberUpperQueuedQuery, 1 },
+    { btlCmdRememberLowerQueuedQuery, 1 },
+    { btlScriptSetActorUnitParameter, 1 },
+    { btlScriptPickHighestMpTarget, 0 },
+    { btlScriptPickElementCheckedTarget, 1 },
+    { btlCmdReportPartyEmptyMp, 0 },
+    { btlCommandSetSequenceVolumePan, 1 },
+    { btlCommandReportSpecialEnemyLink, 0 },
+    { evtPushEntryIndexedStatOption, 0 },
+    { btlCmdClearSpecialEnemyFlags, 0 },
+    { scrGetBattleAverageMaximumValueForGroup, 1 },
+    { scrGetBattleAverageCurrentValueForGroup, 1 },
+    { btlScriptQueueUnboundCommandSound, 0 },
+    { btlScriptSetCameraBlendStart, 7 },
+    { btlScriptSetCameraBlendEnd, 7 },
+    { btlCmdCameraMoveBlend, 2 },
+    { btlScriptReturnActiveSubtaskPresence, 0 },
+    { btlCmdGetSubtaskTargetMode, 0 },
+    { btlScriptCmdSelectTargetsByMode, 1 },
+    { btlScriptReturnMarkedCommandRequestedState, 0 },
+    { btlScriptAppendSelectedOrCurrentTarget, 0 },
+    { btlScriptSelectShadowSkill, 0 },
+    { btlScriptReturnMarkedActionSceneActive, 0 },
+    { evtCallShooting, 0 },
+    { evtOpQueueWorldObjectPendingValue, 2 },
+    { evtOpClearWorldObjectPendingValue, 1 },
+    { evtOpModelLodChg, 2 },
+    { itfCommandSelectOptionWithFade, 1 },
+    { itfPanelAcquireHold, 0 },
+    { itfCommandQueueHeldPanelEntry, 3 },
+    { itfStepHeldPanelMessages, 0 },
+    { scrCommandClearProcessControlFlag, 0 },
+    { scrCommandSetProcessControlFlag, 0 },
+    { btlScriptSetBossStatSelector, 1 },
+    { btlCmdSpawnEffectTaskForSelectedUnit, 3 },
+    { btlCommandChooseRandomUnflaggedGroupSlot, 1 },
+    { btlCmdGetIndexedBattleStateValue, 1 },
+    { btlCommandCountModelFlags, 0 },
+    { NULL, 0 },
+    { NULL, 0 },
+    { fldCommandStartTitle, 2 },
+    { fldCommand_FLD_GET_KIRETA, 1 },
+    { fldCmdRollMirroredSolarThreshold, 0 },
+    { fldCommand_FLD_MSE_PLAY2, 2 },
+    { fldCommand_FLD_MSE_STOP2, 2 },
+    { fldCommand_SET_NPC_CAMERA, 1 },
+    { fldCmdMarkBitmapRegion, 5 },
+    { fldCommand_FLD_MODEL_DANTE, 0 },
+    { fldCmdSetTargetGuideEnabled, 1 },
+    { fldCmdSetTargetGuideMode, 1 },
+    { fldCmdGetActorStat1, 1 },
+    { fldCommand_FLD_WARP_HASIGO_GETTBL, 1 },
+    { fldCmdApplyNumericRoomModeGroupZero, 4 },
+    { fldCmdApplyNumericRoomModeGroupOne, 4 },
+    { fldCmdGetCurrentSceneSelectionResource, 0 },
+    { fldCommandFindEffectByName, 1 },
+    { fldCommand_FLD_WARP_ELV_GETTBL, 1 },
+    { fldCommand_FLD_WARP_ELV_EXIT, 1 },
+    { fldCmdSetCurrentTaskScene, 0 },
+    { func_001569E0, 0 },
+    { fldCommand_FLD_WARP_RUN_START, 0 },
+    { fldCommand_FLD_INF_NEXT, 2 },
+    { fldCommand_FLD_INF_GET, 2 },
+    { fldCommand_FLD_INF_GETPANEL, 0 },
+    { fldCmdGetActorStat0, 1 },
+    { fldCommand_FLD_ELV_FLOORSTART, 2 },
+    { fldCommand_FLD_ELV_FLOOREND, 0 },
+    { fldCommand_FLD_ELV_ENDCHK, 0 },
+    { fldCommand_FLD_WARP_GET_DOOR, 1 },
+    { fldCommand_FLD_EXIT_CAMERA, 0 },
+    { fldCommand_FLD_INF_GOWAP, 0 },
+    { fldCmdExecuteSceneAction, 1 },
+    { fldCmdStartSceneBgm, 1 },
+    { fldCmdStartSceneBgmAlternate, 1 },
+    { fldCmdStopCurrentBgm, 0 },
+    { fldCmdPlayCurrentBgmSound, 0 },
+    { fldCommandPlaySeVolumePan, 1 },
+    { fldCommandPlaySe, 1 },
+    { fldCmdReleaseCurrentBgm, 0 },
+    { fldCommandLoadArchive, 1 },
+    { fldCmdForceTargetGuideUpdate, 0 },
+    { fldCommand_FLD_WARP_GET_WARPEFF, 0 },
+    { fldCmdResetAfterEvent, 0 },
+    { fldCmdQueryAlternateActorEntrySceneStatus, 1 },
+    { fldCommand_FLD_SET_ENCOUNT, 1 },
+    { fldCommand_ACT_WIN_DSP3, 1 },
+    { fldCmdInitializeHuntSparkUnit, 1 },
+    { fldCmdSetStateFlag, 0 },
+    { NULL, 0 },
+};
+

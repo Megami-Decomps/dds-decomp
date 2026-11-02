@@ -4,10 +4,10 @@
   "extension_vaddr": "0x00412000",
   "alignment": "0x1000",
   "heap_alignment": "0x80",
-  "expected_replacement_symbols": 190,
-  "expected_shifted_replacement_symbols": 125,
-  "expected_shifted_symbol_relocations": 2014,
-  "expected_cross_replacement_relocations": 62,
+  "expected_replacement_symbols": 214,
+  "expected_shifted_replacement_symbols": 143,
+  "expected_shifted_symbol_relocations": 2158,
+  "expected_cross_replacement_relocations": 36,
   "expected_repaired_relocation_words": 0,
   "retail_static_end": "0x0040C5F0",
   "bss_end_assertions": [
@@ -27,10 +27,11 @@
   ],
   "replacements": [
     {
-      "retail_object": "build/dds1/src/dds1/game/code_0010C028.o",
-      "object": "build/dds1/dev/code_0010C028.o",
-      "expected_symbols": 12,
-      "expected_shifted_symbols": 2,
+      "retail_object": "build/dds1/src/dds1/script/scrScriptProcess.o",
+      "object": "build/dds1/dev/scrScriptProcess.o",
+      "expected_symbols": 20,
+      "expected_shifted_symbols": 6,
+      "fallback_symbols": [],
       "retained_sections": [
         {
           "section": ".data",
@@ -45,8 +46,8 @@
     {
       "retail_object": "build/dds1/src/dds1/script/scrTraceCode.o",
       "object": "build/dds1/dev/scrTraceCode.o",
-      "expected_symbols": 41,
-      "expected_shifted_symbols": 38,
+      "expected_symbols": 57,
+      "expected_shifted_symbols": 52,
       "fallback_symbols": [],
       "retained_sections": [
         {
@@ -203,36 +204,36 @@
   ],
   "moves": [
     {
-      "object": "build/dds1/src/dds1/game/code_0010C028.o",
+      "object": "build/dds1/src/dds1/script/scrScriptProcess.o",
       "section": ".text",
-      "old_size": "0x3C8",
+      "old_size": "0x5F8",
       "alignment": 8,
-      "old_vaddr": "0x0010C028",
-      "expected_relocations": 21
+      "old_vaddr": "0x0010BB28",
+      "expected_relocations": 44
     },
     {
-      "object": "build/dds1/src/dds1/game/code_0010C028.o",
+      "object": "build/dds1/src/dds1/script/scrScriptProcess.o",
       "section": ".rodata",
-      "old_size": "0x34",
+      "old_size": "0x1118",
+      "alignment": 8,
+      "old_vaddr": "0x0039E278",
+      "expected_relocations": 504
+    },
+    {
+      "object": "build/dds1/src/dds1/script/scrTraceCode.o",
+      "section": ".text",
+      "old_size": "0x1594",
+      "alignment": 8,
+      "old_vaddr": "0x0010C120",
+      "expected_relocations": 269
+    },
+    {
+      "object": "build/dds1/src/dds1/script/scrTraceCode.o",
+      "section": ".rodata",
+      "old_size": "0x134",
       "alignment": 16,
       "old_vaddr": "0x0039F390",
-      "expected_relocations": 10
-    },
-    {
-      "object": "build/dds1/src/dds1/script/scrTraceCode.o",
-      "section": ".text",
-      "old_size": "0x1230",
-      "alignment": 8,
-      "old_vaddr": "0x0010C3F0",
-      "expected_relocations": 238
-    },
-    {
-      "object": "build/dds1/src/dds1/script/scrTraceCode.o",
-      "section": ".rodata",
-      "old_size": "0xF4",
-      "alignment": 16,
-      "old_vaddr": "0x0039F3D0",
-      "expected_relocations": 49
+      "expected_relocations": 59
     },
     {
       "object": "build/dds1/src/dds1/game/code_0011CEB8.o",

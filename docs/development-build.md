@@ -44,7 +44,8 @@ the following hold:
 - every `R_MIPS_GPREL16` addend is resolved against one unique `_gp`, which
   must be identical in the retail and development links;
 - direct jumps, word-aligned absolute addresses, and common MIPS address
-  constructions do not still refer to the abandoned slot;
+  constructions do not still refer to the abandoned slot (a `LUI` pairs with
+  later uses of its register up to the next instruction that writes it);
 - the appended `PT_LOAD` does not overlap an existing segment and fits in an
   unused program-header slot;
 - file-backed moves come from file-backed input sections, while NOBITS moves
@@ -132,11 +133,13 @@ placing any of them in the retail link.
 These are relocatable development builds, not general mod loaders. DDS1
 replaces nine source objects and DDS2 ten, then each links one development
 entry object.
-The first smaller replacement is compiled separately with `-G0`: its `.text`
-is `0x3D0` bytes rather than the retail `0x3C8`, so two later function
-definitions move by eight bytes. The mixed-source replacement grows from
-`0x1230` to `0x1280` bytes of text while preserving its two assembly fallbacks
-exactly.
+The first two replacements are the script VM, `script/scrScriptProcess` and
+`script/scrTraceCode`, at SMT3's unit boundaries. Compiled with `-G0`,
+scrScriptProcess's text grows from `0x5F8` to `0x600` bytes and
+scrTraceCode's from `0x1594` to `0x1720`. scrScriptProcess's `0x1118` bytes
+of read-only data are mostly the script command table, typed source in each
+title, which moves with the text: its entries point at commands in other
+replaced objects, so it could not stay at its retail address.
 
 The third replacement recovers an eight-byte writable font-node callback table
 as typed source and moves it with the code that reads and initializes it. Its
@@ -202,11 +205,11 @@ replaced in either title: under `-G0` cc1 still addresses the unit's own
 `.sdata` definitions through `$gp`, and the retained-section audit rejects
 those accesses as changed GP-reference signatures.
 
-Together the replacements cover 190 DDS1 and 209 DDS2 exported symbols; 125
-and 132 definitions change their relative offsets. The verifier follows
-2,014/2,873 external relocation sites targeting shifted definitions, 62/90
-relocations between replacement objects, and 2,576/3,557 total relocation
-targets into moved content. The moved sections retain 808/878 relocation
+Together the replacements cover 214 DDS1 and 233 DDS2 exported symbols; 143
+and 150 definitions change their relative offsets. The verifier follows
+2,158/3,029 external relocation sites targeting shifted definitions, 36/68
+relocations between replacement objects, and 2,758/3,753 total relocation
+targets into moved content. The moved sections retain 1,366/1,471 relocation
 entries. All counts are asserted by the version descriptors.
 
 Replacement-owned code and read-only data may change size and contents. A
