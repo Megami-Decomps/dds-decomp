@@ -1,0 +1,4 @@
+# SMT3 model/ unit boundaries in dds1, input to tools/resplit.py (from sdf-decomp tools/twins.py runs --prefix model/).
+0x002166A8 model/mdlManager
+0x002192C0 model/mdlEffect
+0x0021F4B8 -

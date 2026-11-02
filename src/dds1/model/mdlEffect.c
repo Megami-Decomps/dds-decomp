@@ -42,7 +42,6 @@
 #include "dds3_world_counter.h"
 #include "evt_unit_object_key.h"
 #include "sdf_vu_matrix.h"
-
 #include "pcp_vu0.h"
 #include "ee_mmi.h"
 #include "dat_state.h"
@@ -60,25 +59,35 @@
 #include "kwln_task_lifecycle.h"
 #include "mdl_object_stream.h"
 #include "dds3obj.h"
+#include "sdf_gs_header.h"
+#include "mdl_option_state.h"
+#include "dds3_world_secondary.h"
 
 #define MDL_VIEWER_RESOURCE_SLOTS 12
-#define MDL_VIEWER_TABLE_SLOT 5
-#define MDL_VIEWER_LABEL_COUNT 3
-#define MDL_VIEWER_HEADER_BYTES 8
-#define MDL_VIEWER_NAME_TABLE_BYTES 0xC
-#define MDL_RECORD_LIST_HEADER_BYTES 8
-#define MDL_RECORD_END_KIND 0xFFFF
-#define MDL_MARK_COLOR_COUNT 4
-#define MDL_COLOR_CHANNEL_COUNT 4
-#define MDL_COLOR_BYTE_MASK 0xFF
-#define MDL_COLOR_BYTE_BITS 8
-#define MDL_MARK_LAST_FIELD 0x16
-#define MDL_MARK_COLOR_FIRST_FIELD 7
-#define MDL_PAD_REPEAT_FLAG 2
-#define MDL_PART_SLOT_BYTES 0x10
-#define MDL_PART_VALUE_SIZE_THRESHOLD 0x11
-#define MDL_MAP_POSITION_TAG 0x534F504D
 
+#define MDL_RECORD_LIST_HEADER_BYTES 8
+
+#define MDL_RECORD_END_KIND 0xFFFF
+
+#define MDL_MARK_COLOR_COUNT 4
+
+#define MDL_COLOR_CHANNEL_COUNT 4
+
+#define MDL_COLOR_BYTE_MASK 0xFF
+
+#define MDL_COLOR_BYTE_BITS 8
+
+#define MDL_MARK_LAST_FIELD 0x16
+
+#define MDL_MARK_COLOR_FIRST_FIELD 7
+
+#define MDL_PAD_REPEAT_FLAG 2
+
+#define MDL_PART_SLOT_BYTES 0x10
+
+#define MDL_PART_VALUE_SIZE_THRESHOLD 0x11
+
+#define MDL_MAP_POSITION_TAG 0x534F504D
 
 typedef enum MdlViewerRecordKind {
     MDL_VIEWER_RECORD_KIND_BILLBOARD_PART = 1,
@@ -144,23 +153,7 @@ typedef struct MdlViewState {
     dds3ModelHandle_t *resources[MDL_VIEWER_RESOURCE_SLOTS]; /* 0x90 */
     sdfDrawTag_t *packetList; /* 0xC0: drawing packet destination */
 } MdlViewState;
-typedef char MdlViewState_selectedTaskIndex_offset_check[
-    ((u32)&((MdlViewState *)0)->selectedTaskIndex == 0x14) ? 1 : -1];
-typedef char MdlViewState_selectedResourceId_offset_check[
-    ((u32)&((MdlViewState *)0)->selectedResourceId == 0x1E) ? 1 : -1];
-typedef char MdlViewState_selectedResourceGroup_offset_check[
-    ((u32)&((MdlViewState *)0)->selectedResourceGroup == 0x1C) ? 1 : -1];
-typedef char MdlViewState_size_check[sizeof(MdlViewState) == 0xD0 ? 1 : -1];
-typedef char MdlViewState_exitCleanupStarted_offset_check[
-    ((u32)&((MdlViewState *)0)->exitCleanupStarted == 0x08) ? 1 : -1];
-typedef char MdlViewState_workspaceSetupPhase_offset_check[
-    ((u32)&((MdlViewState *)0)->workspaceSetupPhase == 0x48) ? 1 : -1];
-typedef char MdlViewState_assetDisplayMode_offset_check[
-    ((u32)&((MdlViewState *)0)->assetDisplayMode == 0x0F) ? 1 : -1];
-typedef char MdlViewState_selectionCursor_offset_check[
-    ((u32)&((MdlViewState *)0)->selectionCursor == 0x20) ? 1 : -1];
-typedef char MdlViewState_settingsCursor_offset_check[
-    ((u32)&((MdlViewState *)0)->settingsCursor == 0x3C) ? 1 : -1];
+
 typedef struct MdlPadState {
     u8 pad00;
     s8 confirm;
@@ -187,7 +180,6 @@ static inline s8 mdlGetViewerDisplayMode(MdlViewState *state) {
 }
 
 extern MdlCtrlState mdlDebugScaleWork;
-
 
 extern s8 D_003D7A60[];
 
@@ -230,21 +222,15 @@ void dds3PrimDebugTextBoxRGB(void *, s32, s32, s32, u32, s32);
 
 s32 mdlUpdateViewerCursor(s16 *, s32);
 
-
-
-
-
 void mdlUpdateViewerSelectedModelFromPad(void);
 
 void mdlDrawViewerSelectionLabel(void);
 
-
-
 void sdfIpuSetOutputTex(sdfIpuDecodeCb_t *, const SdfStreamParams *, u8 *, s32, sdfTexHandle_t *);
+
 void sdfIpuFree(sdfIpuDecodeCb_t *);
+
 void mdlCleanupViewerTasksAndResources(void);
-
-
 
 extern u32 D_003BA8EC;
 
@@ -252,287 +238,11 @@ extern void kwlnDebugGraphSetEnabled(s8 mode);
 
 extern s32 dds3DebugColorEditEx(u32 *color, s32 channel, s8 *pad);
 
-
 extern s8 dds3PadButtonState[64];
 
-
-
-
-extern MdlResourceTable D_00365858[];
-
-extern MdlResourceTable D_00367900[];
-
-extern struct sdfMemHandle_t *D_003BBB6C;
-
-extern struct sdfMemHandle_t *D_003BBB70;
-
-/* Load a viewer package; flag 2 enables the extra request-preparation step. */
-void mdlPackDecode(s32 first, s32 second, s32 flags, const u8 *packageData, s32 packageSize) {
-    PacState request;
-
-    sdfPacInit(&request, 0);
-    if (flags & 2) {
-        sdfPacSetStay(&request);
-    }
-    sdfPacDecode(&request, packageData, packageSize);
-    mdlPackSet(request.queueHead, first, second, flags);
-    sdfPacFree(&request);
-}
-
-/* Release the chip-cell allocation itself, not a pointer-to-pointer wrapper. */
-void mdlFreeFileItem(void *memory) {
-    sdfChipFreeDirect(memory);
-}
-
-/* Release the three copied filename paths, then their tables and backing allocations. */
-void mdlReleaseHddFileList(void) {
-    MdlResourcePath *slotEntry;
-    s32 entryCount;
-    s32 entryIndex;
-
-    entryCount = D_00365858[MDL_VIEWER_TABLE_SLOT].count;
-    if (entryCount > 0) {
-        slotEntry = D_00365858[MDL_VIEWER_TABLE_SLOT].entries;
-        entryIndex = 0;
-        do {
-            entryIndex++;
-            sdfChipFreeDirect((void *)slotEntry->path);
-            sdfChipFreeDirect((void *)slotEntry->resourceListPath);
-            sdfChipFreeDirect((void *)slotEntry->motionPath);
-            slotEntry++;
-        } while (entryIndex < entryCount);
-    }
-    D_00367900[MDL_VIEWER_TABLE_SLOT].entries = NULL;
-    D_00367900[MDL_VIEWER_TABLE_SLOT].count = 0;
-    D_00365858[MDL_VIEWER_TABLE_SLOT].entries = NULL;
-    D_00365858[MDL_VIEWER_TABLE_SLOT].count = 0;
-    sdfMemFreeHandleDirect(&D_003BBB6C);
-    sdfMemFreeHandleDirect(&D_003BBB70);
-}
-
-
-extern MdlResourceSelection *D_003BD880;
-extern MdlResourcePath *D_003BD884;
-
-/* Copy the model, resource-list and motion filenames into the viewer's path table. */
-void mdlMakeHddFileListDummy(void) {
-    s32 sourceIndex;
-    const char *sourceText;
-    char *copiedText;
-
-    mdlReleaseHddFileList();
-    D_003BBB6C = sdfMemAllocDirect(MDL_VIEWER_HEADER_BYTES);
-    D_003BD880 = (MdlResourceSelection *)sdfMemLock(D_003BBB6C);
-    D_003BD880->pathTable = 5;
-    D_003BD880->pathIndex = 0;
-    D_003BD880->unk4 = 0x1000;
-    D_003BD880->unk6 = 0x3E8;
-    D_003BBB70 = sdfMemAllocDirect(MDL_VIEWER_NAME_TABLE_BYTES);
-    D_003BD884 = (MdlResourcePath *)sdfMemLock(D_003BBB70);
-    for (sourceIndex = 0; sourceIndex != MDL_VIEWER_LABEL_COUNT; sourceIndex++) {
-        switch (sourceIndex) {
-        case 0:
-            sourceText = ((MdlResourcePath *)D_00365858[0].entries)->path;
-            break;
-        case 1:
-            sourceText = ((MdlResourcePath *)D_00365858[0].entries)->resourceListPath;
-            break;
-        default:
-            sourceText = ((MdlResourcePath *)D_00365858[0].entries)->motionPath;
-            break;
-        }
-        if (sourceText != NULL) {
-            copiedText = sdfChipAllocDirect(strlen(sourceText) + 1);
-            strcpy(copiedText, sourceText);
-            switch (sourceIndex) {
-            case 0:
-                D_003BD884->path = copiedText;
-                break;
-            case 1:
-                D_003BD884->resourceListPath = copiedText;
-                break;
-            case 2:
-                D_003BD884->motionPath = copiedText;
-                break;
-            }
-        }
-    }
-    D_00367900[MDL_VIEWER_TABLE_SLOT].entries = D_003BD880;
-    D_00367900[MDL_VIEWER_TABLE_SLOT].count = 1;
-    D_00365858[MDL_VIEWER_TABLE_SLOT].entries = D_003BD884;
-    D_00365858[MDL_VIEWER_TABLE_SLOT].count = 1;
-}
-
-/* File-I/O directory record: native stat prefix, filename and private words. */
-typedef struct {
-    u32 mode;
-    u8 stat[0x3C];
-    char name[0x100];
-    u32 privateWords[2];
-} DebugDirectoryEntry;
-
-/* One debug model base name and the .?B variants found for it (MB/PB, TB, AB). */
-typedef struct DebugModelFile {
-    struct DebugModelFile *next;
-    char name[47];
-    u8 available[3];
-    s8 extension[3][2];
-} DebugModelFile;
-
-/* Five-character device prefix copied in front of each work-file path. */
-typedef struct {
-    char text[5];
-} DebugWorkPrefix;
-
-/* newlib's character-class table: one EOF slot, then one entry per byte value. */
-extern const char _ctype_[];
-#define _L 02
-#define islower(c) ((_ctype_ + 1)[(unsigned)(c)] & _L)
-
-extern DebugModelFile *D_003BD87C;
-extern const char D_003ABA68[];
-extern DebugWorkPrefix D_003BBB78[];
 extern u8 sdfHddValid;
 
-static inline s32 debugFileUpper(s32 c) {
-    return islower(c) ? c - 'a' + 'A' : c;
-}
-
-
-void mdlMakeHddFileList(void) {
-    DebugDirectoryEntry directory;
-    s32 index;
-    s32 count;
-    s32 handle;
-    s32 length;
-    s32 end;
-    DebugModelFile *next;
-    DebugModelFile *file;
-    DebugModelFile **link;
-
-    if (sdfHddValid && (handle = sceDopen(D_003ABA68)) >= 0) {
-        mdlReleaseHddFileList();
-        while ((length = sceDread(handle, &directory)) > 0) {
-            if ((directory.mode & 0xF000) != 0x1000 && length >= 4 && length < 49) {
-                s32 kind = -1;
-
-                if (directory.name[length - 3] == '.' &&
-                    (s8)debugFileUpper(directory.name[length - 1]) == 'B') {
-                    s32 ext = directory.name[length - 2];
-
-                    if (islower(ext)) {
-                        ext -= 'a' - 'A';
-                    }
-                    switch (ext) {
-                    case 'A':
-                        kind = 2;
-                        break;
-                    case 'T':
-                        kind = 1;
-                        break;
-                    case 'M':
-                    case 'P':
-                        kind = 0;
-                        break;
-                    }
-                    if (kind >= 0) {
-                        file = D_003BD87C;
-                        while (file != NULL && memcmp(file->name, directory.name, length - 2) != 0) {
-                            file = file->next;
-                        }
-                        if (file == NULL) {
-                            file = sdfChipAllocDirect(sizeof(*file));
-                            memset(file, 0, sizeof(*file));
-                            memcpy(file->name, directory.name, length - 2);
-                            file->name[length - 2] = 0;
-                            file->next = D_003BD87C;
-                            D_003BD87C = file;
-                        }
-                        file->available[kind] = 1;
-                        file->extension[kind][0] = directory.name[length - 2];
-                        file->extension[kind][1] = directory.name[length - 1];
-                    }
-                }
-            }
-        }
-        count = 0;
-        sceDclose(handle);
-        link = &D_003BD87C;
-        next = D_003BD87C;
-        while (next != NULL) {
-            file = next;
-            next = file->next;
-            if (!file->available[0]) {
-                *link = next;
-                mdlFreeFileItem(file);
-            } else {
-                if (debugFileUpper(file->extension[0][0]) == 'P') {
-                    file->available[1] = 0;
-                    file->available[2] = 0;
-                }
-                link = &file->next;
-                count++;
-            }
-        }
-        if (count != 0) {
-            index = 0;
-            D_003BBB6C = sdfMemAllocDirect(count * sizeof(MdlResourceSelection));
-            D_003BD880 = sdfMemLock(D_003BBB6C);
-            D_003BBB70 = sdfMemAllocDirect(count * sizeof(MdlResourcePath));
-            D_003BD884 = sdfMemLock(D_003BBB70);
-            memset(D_003BD884, 0, count * sizeof(MdlResourcePath));
-            file = D_003BD87C;
-            while (file != NULL) {
-                const char *name = file->name;
-                s32 kind;
-
-                D_003BD880[index].pathTable = 5;
-                D_003BD880[index].pathIndex = index;
-                D_003BD880[index].unk4 = 0x1000;
-                D_003BD880[index].unk6 = 1000;
-                length = strlen(name);
-                end = length + 5;
-                for (kind = 0; kind != 3; kind++) {
-                    if (file->available[kind]) {
-                        char *path = sdfChipAllocDirect(length + 8);
-
-                        *(DebugWorkPrefix *)path = D_003BBB78[0];
-                        memcpy(path + 5, name, length);
-                        path[end] = file->extension[kind][0];
-                        path[end + 1] = file->extension[kind][1];
-                        path[end + 2] = 0;
-                        switch (kind) {
-                        case 0:
-                            D_003BD884[index].path = path;
-                            break;
-                        case 1:
-                            D_003BD884[index].resourceListPath = path;
-                            break;
-                        case 2:
-                            D_003BD884[index].motionPath = path;
-                            break;
-                        }
-                    }
-                }
-                file = file->next;
-                index++;
-            }
-            D_00367900[MDL_VIEWER_TABLE_SLOT].entries = D_003BD880;
-            D_00367900[MDL_VIEWER_TABLE_SLOT].count = count;
-            D_00365858[MDL_VIEWER_TABLE_SLOT].entries = D_003BD884;
-            D_00365858[MDL_VIEWER_TABLE_SLOT].count = count;
-            return;
-        }
-    }
-    mdlMakeHddFileListDummy();
-}
-
-
 s32 mdlPibGetChunkItemCount(MdlRecord *listHeader);
-
-
-
-
 
 /* Read the model record's payload word without advancing its relative link. */
 u32 mdlPibGetVersion(MdlRecord *record) {
@@ -616,21 +326,22 @@ u16 mdlPibGetMotionCount(const MdlRecord *record) {
 }
 
 extern char D_003ABA80[], D_003ABA90[], D_003ABAA0[], D_003ABAB0[], D_003ABAC0[], D_003ABAD0[];
+
 extern char D_003BBB80[], D_003BBB88[];
 
 /* Append the kind-dependent record summary at the requested text position and style. */
 /* Append a kind-specific record description at the supplied packet coordinates/style. */
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABA80);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABA80);
 
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABA90);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABA90);
 
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABAA0);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABAA0);
 
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABAB0);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABAB0);
 
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABAC0);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABAC0);
 
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABAD0);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABAD0);
 
 void mdlPibDrawEffectInfo(sdfDrawTag_t *packetList, s32 x, s32 y, s32 depth, s32 textStyle, MdlRecord *record) {
     if (record->kind >= MDL_VIEWER_RECORD_KIND_BILLBOARD_PART &&
@@ -793,7 +504,6 @@ void mdlCreateEffectResrc_D3P(DevRequest *partList, EffNodeDescriptor *descripto
     partList->usedCount += 1;
 }
 
-
 void mdlCreateEffectResrc_IPU(DevRequest *list, u8 *sourceAddress, sdfMemHandle_t *backingAllocation, s32 sourceSize) {
     MdlObj *node = sdfChipAllocZeroDirect(sizeof(*node));
     MdlPartEntry *entry = &((MdlPartEntry *)list->buffer)[list->usedCount];
@@ -823,7 +533,6 @@ void mdlStartEffectResrc_IPU(MdlObj *obj, sdfTexHandle_t *resource, const SdfStr
     }
 }
 
-
 DevRequest *mdlEffectResrcListNew(u32 request) {
     return sdfItemArrayNew(request, 0x10, 4);
 }
@@ -851,8 +560,6 @@ void mdlEffectResrcListFree(DevRequest *partList) {
         sdfItemArrayFree(partList);
     }
 }
-
-
 
 /* Prepend a cleared, typed resource item to the owner's list. */
 dds3ModelEffectCtrlr_t *mdlCreateEffectCtrlr(
@@ -952,7 +659,6 @@ void mdlCreateEffect_BLUR(dds3ModelHandle_t *owner, const MdlRecord *record) {
                   record->payload.stream.selectorB,
                   record->parameter.word, record->tail.word10);
 }
-
 
 /* Claim an unused object only after its data resource resolves, retaining record flags and deferred-init parameters. */
 void mdlCreateEffect_IPU(dds3ModelHandle_t *owner, const MdlRecord *entryRecord,
@@ -1067,7 +773,6 @@ void mdlStopEffect(dds3ModelHandle_t *owner, MdlMotionSlotIndex motionSlotIndex)
 
 extern u8 sdfViewTargetVector[];
 
-
 /* vu0 routine: positionOut = p + normalize(p - sdfViewTargetVector) * scale, p = transformed node position. */
 void mdlEffect_P2A_D3P_GetPos(sdfModelRootNode_t *model, dds3ModelEffectCtrlr_t *anchorRecord, f32 *positionOut) {
     SdfMapPositionRecord *mapPosition = anchorRecord->payload.part.mapPositionRecord;
@@ -1088,9 +793,6 @@ void mdlEffect_P2A_D3P_GetPos(sdfModelRootNode_t *model, dds3ModelEffectCtrlr_t 
 }
 
 extern void dds3BillboardDraw(billHandle_t *billboard);
-
-
-
 
 /* Update anchored billboard/effect positions, tracked polygons, or deferred object initialization by type. */
 void mdlLinkEffect(dds3ModelHandle_t *owner, dds3ModelEffectCtrlr_t *anchorRecord) {
@@ -1269,7 +971,6 @@ s32 mdlUpdateViewerCursorWithPageStep(s16 *cursor, s32 entryCount, s32 pageStep)
     return 0;
 }
 
-
 void mdlLoadViewerResourceAndResetCursors(void) {
     dds3ModelHandle_t *resource = mdlLoad(mdlViewerState.resourceGroup, mdlViewerState.resourceId);
 
@@ -1295,7 +996,6 @@ extern MdlEyeVec D_003D7B20;
 extern MdlEyeVec D_003D7B30;
 
 extern u128 D_003D7B40;
-
 
 extern MdlEyeVec D_00367A10;
 
@@ -1339,6 +1039,7 @@ void mdlRotateViewList(void) {
 }
 
 extern const char *D_003679D0[];
+
 extern char D_003BBC20[];
 
 /* Draw the MODE header and current or saved viewer mode label. */
@@ -1357,8 +1058,6 @@ void mdlDrawViewerModeLabel(void) {
     }
     sdfDrawTagLink(mdlViewerState.packetList, (u32)(sdfDevPrintfEx(&packet, D_003679D0[phase])));
 }
-
-extern const char *D_003679D0[];
 
 /* Draw the phase-zero option list in two columns, with cursor/blink styling. */
 void mdlDrawViewerOptionLabels(void) {
@@ -1393,8 +1092,6 @@ void mdlDrawViewerOptionLabels(void) {
         label++;
     } while (i != 13);
 }
-
-
 
 void mdlDrawViewerModelAndMotionSummary(void) {
     SifCommand packet;
@@ -1463,49 +1160,51 @@ void mdlAddPlainViewerEntryForSelectedNode(void) {
 }
 
 extern u32 mdlGetNumOfMajor(void);
+
 extern u32 mdlGetNumOfMinor(s32 tableIndex);
+
 extern void mdlMakeHddFileList(void);
+
 extern void mdlFreeViewResources(void);
-extern u8 sdfHddValid;
 
 /* Step the viewer's selected row, then apply that row's pending resource or
  * entry selection when the confirm buttons are pressed. */
 /* Handle resource, node and motion selection, including load/confirm input. */
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABBB0);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABBB0);
 
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABBC0);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABBC0);
 
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABBD0);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABBD0);
 
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABBE0);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABBE0);
 
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABBF0);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABBF0);
 
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABC00);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABC00);
 
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABC10);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABC10);
 
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABC20);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABC20);
 
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABC30);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABC30);
 
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABC40);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABC40);
 
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABC50);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABC50);
 
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABC60);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABC60);
 
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABC70);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABC70);
 
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABC80);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABC80);
 
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABC98);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABC98);
 
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABCB0);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABCB0);
 
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABCC8);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABCC8);
 
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABCD8);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABCD8);
 
 void mdlHandleViewerAssetSelection(void) {
     s32 pageStep;
@@ -1599,14 +1298,20 @@ void mdlHandleViewerAssetSelection(void) {
 }
 
 extern char D_003BBC30[];
-extern char D_003BBC38[];
-extern char D_003BBC40[];
-extern char D_003BBC48[];
-extern char D_003BBC50[];
-extern char D_003BBC58[];
-extern char D_003BBC60[];
-extern char D_003BBC68[];
 
+extern char D_003BBC38[];
+
+extern char D_003BBC40[];
+
+extern char D_003BBC48[];
+
+extern char D_003BBC50[];
+
+extern char D_003BBC58[];
+
+extern char D_003BBC60[];
+
+extern char D_003BBC68[];
 
 extern void mdlGetFilebase(s32 selectionListIndex, s32 selectionIndex, char *destination, s32 capacity);
 
@@ -1718,7 +1423,6 @@ void mdlDrawViewerAssetSelection(void) {
     }
 }
 
-
 u32 mdlRunViewerAssetSelectionTask(void) {
     mdlHandleViewerAssetSelection();
     mdlDrawViewerAssetSelection();
@@ -1726,6 +1430,7 @@ u32 mdlRunViewerAssetSelectionTask(void) {
 }
 
 extern void FromRotation_B(f32 angle);
+
 extern f32 sdfViewMatrix[];
 
 /* vu0 routine: move the viewer camera or orbit it about the look-at point. */
@@ -1839,8 +1544,6 @@ void mdlUpdateViewerCameraFromPad(void) {
 
 extern const char *D_00367B10[];
 
-
-
 void mdlDrawViewerIndexedLabelOverlay(void) {
     mdlAppendViewerRectToDrawList(0x8A10, 0x7948, 0xFF007F, 0x4E0, 0x90, 0);
     sdfDrawTagLink(mdlViewerState.packetList, (u32)(sdfDevPrintf(0x8A40, 0x7960, 0xFF0080, 0, D_00367B10[mdlViewerState.labelIndexA])));
@@ -1853,7 +1556,9 @@ u32 mdlRunViewerIndexedLabelTask(void) {
 }
 
 extern f32 sdfUnitXVector[4];
+
 extern f32 D_00398390[4];
+
 extern f32 D_003983A0[4];
 
 /* vu0 routine: edit the viewer transform with translation or quaternion steps. */
@@ -2054,11 +1759,17 @@ u32 mdlUpdateViewerScaleTask(void) {
 }
 
 extern s8 D_00398629[];
+
 extern u8 D_003BD888;
+
 extern s8 D_003BD360;
+
 extern f32 D_003BD364;
+
 extern f32 D_003BD368;
+
 extern f32 D_003BD36C;
+
 extern f32 D_003BD370;
 
 /* Final workspace publication: see docs/idioms.md, "Publishing viewer workspace". */
@@ -2206,8 +1917,6 @@ void mdlDrawViewerResourceMenu(void) {
     }
 }
 
-
-
 u32 mdlRunViewerResourceMenuTask(void) {
     mdlApplyViewerResourceMenuAction();
     mdlDrawViewerResourceMenu();
@@ -2221,8 +1930,6 @@ typedef struct MdlCountNode {
     u8 pad06[6];
     sdfTexHandle_t **textures;
 } MdlCountNode;
-
-
 
 void mdlHandleViewerNodeCursorInput(void) {
     MdlCountNode *firstNode = mdlViewerState.resources[0]->inner->assetData;
@@ -2239,7 +1946,6 @@ void mdlHandleViewerNodeCursorInput(void) {
 extern char D_003ABDA8[];
 
 extern char D_003BBC88[];
-
 
 void mdlDrawViewerTexturePreview(void) {
     s32 index = 0;
@@ -2291,17 +1997,17 @@ u32 mdlUpdateViewerNodeCursorTask(void) {
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABD58);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABD58);
 
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABD68);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABD68);
 
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABD78);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABD78);
 
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABD88);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABD88);
 
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABD98);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABD98);
 
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABDA8);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABDA8);
 
 s32 mdlIsDebugTimeGraph(void) {
     return dds3SearchProcessName("DebugTimeGrph") != 0;
@@ -2377,25 +2083,31 @@ void mdlUpdateViewerSettingsInput(void) {
 }
 
 extern const s32 D_00367B38[];
+
 extern const char *D_00367B60[];
+
 extern const char *D_00367B70[];
+
 extern char D_003BBC90[];
+
 extern char D_003BBC98[];
+
 extern char D_003BBCA0[];
+
 extern char D_003BBCA8[];
 
 /* Draw viewer toggles, time-graph status and the background-color/config controls. */
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABE18);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABE18);
 
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABE30);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABE30);
 
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABE48);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABE48);
 
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABE60);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABE60);
 
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABE70);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABE70);
 
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABE80);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABE80);
 
 void mdlDrawViewerSettings(void) {
     /* The native prologue fills and then indexes these three status bytes
@@ -2546,7 +2258,9 @@ void mdlUpdateViewerMarkEditorInput(void) {
 }
 
 extern const char D_003ABEB0[];
+
 extern const char D_003BBCB0[];
+
 void mdlDrawViewerEffectRecordList(void) {
     MdlViewState *state = &mdlViewerState;
     dds3ModelHandle_t *resource;
@@ -2705,8 +2419,6 @@ extern f32 D_00367B80[][4];
 
 extern u32 D_00367BE0[];
 
-
-
 /* Submit the intermediate packet with an identity basis in phases 2 and 3. */
 void mdlSubmitViewerIntermediateDrawPacket(void) {
     sdfDrawTag_t *packetList;
@@ -2762,12 +2474,16 @@ void mdlRestartViewerPhaseTask(void) {
     dds3LinkProcess(mdlViewerState.unk00, mdlViewerState.viewerTask);
 }
 
-#include "sdf_gs_header.h"
 extern s8 D_00398636[];
+
 extern s8 D_00324532[];
+
 extern u8 aViewTarget[];
+
 extern u8 aViewDown[];
+
 extern u32 sdfGetLodChunkValue(sdfModelRootNode_t *);
+
 extern s32 sdfGrAllocPacketBuff(s32 size);
 
 s32 mdlViewer(dds3ProcessID_t *task) {
@@ -2867,7 +2583,9 @@ void mdlDrawMapPositionRecords(dds3ModelHandle_t *resource) {
 }
 
 extern sdfGrOt_t D_003255A8;
+
 extern sdfGrOt_t *kwlnSceneSurfaceSets[13][4];
+
 s32 mdlViewerEnd(dds3ProcessID_t *task)
 {
   f32 step = mdlViewerState.viewerScale;
@@ -2941,17 +2659,20 @@ s32 mdlViewerEnd(dds3ProcessID_t *task)
   return 0;
 }
 
-
 extern char D_00367AF8[];
+
 extern char D_003BBCC0[]; /* "%x" */
+
 extern char D_003BBCC8[]; /* "fovy=" */
+
 extern char D_003BBCD0[]; /* "%f" */
+
 extern char D_003BBCD8[]; /* "fog=" */
+
 extern KwlnDrawVectorParams kwlnDrawVector;
 
-
 /* Read the viewer's config text file: bg-color=, eye-position=, target-position=, fovy=, fog= lines. */
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABEB0);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABEB0);
 
 void mdlLoadViewerPresentationConfig(void) {
     struct FileRequest *fileRequest;
@@ -3024,6 +2745,7 @@ void mdlLoadViewerPresentationConfig(void) {
 }
 
 const char D_003ABF18[0x60] __attribute__((aligned(8))) = "bg-color=%06x\neye-position=%f,%f,%f\ntarget-position=%f,%f,%f\nfovy=%f\nfog=%d,%f,%d,%f,%06x\n";
+
 void mdlSaveViewerPresentationConfig(void) {
     char buffer[0x130];
     s32 size;
@@ -3040,9 +2762,10 @@ void mdlSaveViewerPresentationConfig(void) {
     fileRequestFreeIfComplete((struct FileRequest *)request);
 }
 
-extern void mdlMakeHddFileList(void);
 extern s32 fclEncycFreeEntries(const char *);
+
 extern MdlEyeVec D_00367CD0;
+
 extern MdlEyeVec D_003246C0;
 
 /* Load viewer config/resources, initialize view state and recreate the viewer tasks. */
@@ -3084,7 +2807,6 @@ void mdlInitializeViewerTasksAndResources(void) {
     mdlRestartViewerPhaseTask();
 }
 
-
 /* Clear each occupied resource slot before destroying its context; retain the native scan form. */
 void mdlFreeViewResources(void) {
     s32 resourceIndex;
@@ -3096,7 +2818,6 @@ void mdlFreeViewResources(void) {
         }
     }
 }
-
 
 extern void fclEncycAllocEntry(const char *name, s32, s32, s32);
 
@@ -3114,16 +2835,27 @@ void mdlCleanupViewerTasksAndResources(void) {
 }
 
 extern MdlLightEditorState D_00367D30;
+
 extern MdlOptionLabel D_00367CE0[4];
+
 extern u16 D_00367D10[16];
+
 extern s8 D_00324520[16];
+
 extern SdfLightSources D_00324770;
+
 extern f32 kwlnDefaultColorVector[4];
+
 extern char D_003BBCF8[]; /* ">" in .sdata */
+
 extern char D_003BBD00[]; /* "%6.2f" in .sdata */
+
 extern sdfGrOt_t D_00325708;
+
 extern void dds3DebugFloatEditEx(f32 *value, u8 *padState, f32 min, f32 max, f32 step, f32 bigStep);
+
 extern void dds3PrimDebugTextBox(void *packetList, s32 x, s32 y, s32 selected, f32 *values);
+
 /* Direction-preview packet builder consumes the vector loaded in vf10. */
 extern void *dds3PrimLine3D(s32, s32, s32, s32);
 
@@ -3300,7 +3032,6 @@ s32 mdlDebugPrintEffectScale(dds3ProcessID_t *task) {
     return 0;
 }
 
-
 void mdlDebugTextBox(s32 first, s32 second, s32 color, s32 variant) {
     s32 packedColor = color & 0xffffff;
 
@@ -3407,7 +3138,9 @@ void mdlGetDebugEntry(s32 valueEditIndex) {
 }
 
 extern MdlOptionLabel D_00367D48;
+
 extern char D_003BBD38[];
+
 extern s8 D_00398638[16];
 
 /* Edit the draw-vector target: four numeric rows and three packed-colour channels. */
@@ -3498,20 +3231,27 @@ s32 mdlDebugPrintEffectScale2(dds3ProcessID_t *task) {
     return 0;
 }
 
-#include "mdl_option_state.h"
-
 extern MdlOptionState D_003D7B60;
-extern s8 D_00398638[16];
+
 extern MdlOptionLabel D_00367DB8[4];
+
 extern u16 D_00367DE8[4] __attribute__((section(".data")));
+
 extern f32 sdfFaceDivSoften;
+
 extern f32 sdfFaceDivBias;
+
 /* The selector occupies byte zero of its aligned small-data allocation. */
 extern u8 corePktSoftenBias __attribute__((section(".sdata")));
+
 extern const char D_003BBD58[];
+
 extern const char D_003BBD60[];
+
 extern const char D_003BBD68[];
+
 extern const char D_003BBD70[];
+
 extern const char D_003BBD78[];
 
 /* Update/draw the FACE-DIV soften, bias and divide controls; return zero. */
@@ -3633,391 +3373,141 @@ s32 soften_bias_Process(dds3ProcessID_t *task) {
     return 0;
 }
 
-
-
-
-extern void evtDisableMoonCalc(void);
-extern void evtDisableMoonDraw(void);
-extern void evtSetAgeOfMoon(s32 phase);
-
-void evtInitGlobalWork(void) {
-    evtBitAllOff();
-    evtSetAgeOfMoon(0);
-    evtDisableMoonDraw();
-    evtDisableMoonCalc();
-}
-
-
-void evtBitAllOff(void) {
-    s32 i = 0x7f;
-    u32 *word = DDS3_GBWK->EventBit.words;
-
-    do {
-        i -= 1;
-        *word = 0;
-        word += 1;
-    } while (i >= 0);
-}
-
-
-void evtBitAllOff_FieldDebug(void) {
-    s32 i = 0;
-    do {
-        evtBitOff(i++);
-    } while (i < 0xC00);
-    i = 0xD00;
-    do {
-        evtBitOff(i++);
-    } while (i < 0x1000);
-}
-
-/* Signed flag indices need a bias before arithmetic right shift divides by 32. */
-void evtBitOn(s32 flag) {
-    s32 adjustedFlag = (flag < 0) ? flag + 0x1f : flag;
-    DDS3_GBWK->EventBit.words[adjustedFlag >> 5] |= 1 << flag;
-}
-
-void evtBitOff(s32 flag) {
-    s32 adjustedFlag = (flag < 0) ? flag + 0x1f : flag;
-    DDS3_GBWK->EventBit.words[adjustedFlag >> 5] &= ~(1 << flag);
-}
-
-EvtBitTestResult evtBitCheck(s32 flag) {
-    s32 adjustedFlag = (flag < 0) ? flag + 0x1f : flag;
-    return (((s32)DDS3_GBWK->EventBit.words[adjustedFlag >> 5] >> flag) & 1);
-}
-
-extern s32 D_003BBD80, D_003BBD84, D_003BBD88;
-extern char D_003BBD90[], D_003BBD98[], D_003BBDA0[];
-extern s32 dds3SelectMenu(s32, s32, s32, s32, s32,
-    s32 *, s32 *, s32 *, s32 *);
-
 /* Draw and toggle model-flag bits; return -1 on cursor exit, otherwise 0. */
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABF78);
-
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABF88);
-
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABF98);
-
-INCLUDE_RODATA(const s32, "game/code_00218B48", D_003ABFA8);
-
-s32 dds3BitEditorProcess(void) {
-    char glyph[2];
-    sdfDrawTag_t *packets;
-    s32 column, row, style, result;
-    s32 cellWidth = 0xC0, cellHeight = 0x60;
-
-    /* Native 0021F664..74 copies this space/NUL template as one block;
-     * see docs/idioms.md, "Bit-editor glyph template block copy". */
-    memcpy(glyph, D_003BBD90, sizeof(glyph));
-    packets = (sdfDrawTag_t *)sdfGrAllocPacketBuff(sizeof(*packets));
-    sdfDrawTagInit(packets);
-    dds3ConsPanelTagLink(packets, 50, 50, 23, 20);
-    sdfDrawTagLink(packets, (u32)sdfDevPrintf(
-        0x7320, 0x7A90, 0xFF0000, 0, "BitEditor"));
-    if (evtBitCheck((D_003BBD80 + D_003BBD88) * 16 + D_003BBD84)) {
-        sdfDrawTagLink(packets, (u32)sdfDevPrintf(
-            0x7AA0, 0x7A90, 0xFF0000, 7, "%04X = ON",
-            (D_003BBD80 + D_003BBD88) * 16 + D_003BBD84));
-    } else {
-        sdfDrawTagLink(packets, (u32)sdfDevPrintf(
-            0x7AA0, 0x7A90, 0xFF0000, 7, "%04X = OFF",
-            (D_003BBD80 + D_003BBD88) * 16 + D_003BBD84));
-    }
-    for (column = 0; column < 16; column++) {
-        style = D_003BBD84 == column ? 14 : 7;
-        sdfDrawTagLink(packets, (u32)sdfDevPrintf(
-            0x7320 + (column + 6) * cellWidth, 0x7A90 + cellHeight * 2,
-            0xFF0000, style, D_003BBD98, column));
-    }
-    for (row = 0; row < 16; row++) {
-        style = D_003BBD88 == row ? 14 : 7;
-        sdfDrawTagLink(packets, (u32)sdfDevPrintf(
-            0x73E0, 0x7A90 + (row + 3) * cellHeight, 0xFF0000,
-            style, D_003BBDA0, (D_003BBD80 + row) * 16));
-        for (column = 0; column < 16; column++) {
-            if (evtBitCheck((D_003BBD80 + row) * 16 + column)) {
-                glyph[0] = 'O';
-                style = D_003BBD84 == column || D_003BBD88 == row ? 6 : 0;
-            } else {
-                glyph[0] = '+';
-                style = D_003BBD84 == column || D_003BBD88 == row ? 14 : 8;
-            }
-            if (D_003BBD84 == column && D_003BBD88 == row) {
-                style = 4;
-            }
-            sdfDrawTagLink(packets, (u32)sdfDevPrintf(
-                0x7320 + (column + 6) * cellWidth,
-                0x7A90 + (row + 3) * cellHeight, 0xFF0000, style, glyph));
-        }
-    }
-    D_00325708.append(&D_00325708, packets);
-    if ((dds3PadBitTable[24] & 2) && D_003BBD80 > 0) {
-        D_003BBD80 -= 16;
-        if (D_003BBD80 < 0) D_003BBD80 = 0;
-    }
-    if (dds3PadBitTable[26] & 2) {
-        if (D_003BBD80 + 16 < 256) {
-            if (D_003BBD80 + 32 > 256) D_003BBD80 = 240;
-            else D_003BBD80 += 16;
-        }
-    }
-    result = dds3SelectMenu(1, 16, 256, 16, 16, NULL,
-        &D_003BBD80, &D_003BBD84, &D_003BBD88);
-    if (result == -1) return -1;
-    if (result == 1) {
-        if (evtBitCheck((D_003BBD80 + D_003BBD88) * 16 + D_003BBD84)) {
-            evtBitOff((D_003BBD80 + D_003BBD88) * 16 + D_003BBD84);
-        } else {
-            evtBitOn((D_003BBD80 + D_003BBD88) * 16 + D_003BBD84);
-        }
-    }
-    return 0;
-}
-
-
-extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32 counter, u128 *position, u128 *rotation);
-
-
-extern void dds3ObjectBaseCreateMover(dds3Basic_t *object);
-#include "dds3_world_secondary.h"
-
-void evtSetTestCamera(void) {
-    f32 position[4] = { 0.0f, -100.0f, -600.0f, 0.0f };
-    f32 rotation[4];
-    dds3Basic_t *object;
-
-    memset(rotation, 0, 0x10);
-    rotation[3] = 1.0f;
-    object = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), (u128 *)position, (u128 *)rotation);
-    dds3GetRadiusPoseSet((dds3Basic_t *)object, 10.0f);
-    dds3ObjectBaseCreateMover(object);
-    dds3ReplaceActiveCameraSceneBasic(dds3GetControlScene(), (dds3Basic_t *)object);
-    dds3ObjectBaseSetPadControl(object, 0);
-}
-
-extern void dds3RebuildObjectModelContext(dds3Basic_t *object, s32, s32);
-
-extern dds3Basic_t *dds3AddUnitObjectBasic(s32 counter, u128 *position, u128 *rotation);
-
-
-s32 mdlSpawnCameraSlotViewerObject(s32 slotKind, s32 resource) {
-    f32 position[4];
-    f32 rotation[4];
-    s32 counter;
-    dds3Basic_t *object;
-
-    memset(position, 0, 0x10);
-    position[3] = 1.0f;
-    memset(rotation, 0, 0x10);
-    rotation[3] = 1.0f;
-    counter = dds3AllocObjectId();
-    object = dds3AddUnitObjectBasic(counter, (u128 *)position, (u128 *)rotation);
-    dds3ObjectBaseOnFlag(object, 0x20);
-    dds3GetRadiusPoseSet(object, 10.0f);
-    dds3RebuildObjectModelContext(object, slotKind, resource);
-    if (((s32 *)dds3ObjectBaseGetModelHandle(object))[7] != 0) {
-        mdlLoopMotion((void *)dds3ObjectBaseGetModelHandle(object), 0, 0);
-    }
-    dds3ObjectBaseSetPadControl(object, 0);
-    return counter;
-}
 
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABF78);
 
-extern s32 dds3ObjectBaseRegistArea(dds3Basic_t *object);
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABF88);
 
-EvtUnitObjectKey evtLoadUnit(s32 slotKind, s32 resource) {
-    f32 position[4];
-    f32 rotation[4];
-    EvtUnitObjectKey counter;
-    dds3Basic_t *object;
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABF98);
 
-    memset(position, 0, 0x10);
-    position[3] = 1.0f;
-    memset(rotation, 0, 0x10);
-    rotation[3] = 1.0f;
-    counter = dds3AllocObjectId();
-    object = dds3AddUnitObjectBasic(counter, (u128 *)position, (u128 *)rotation);
-    dds3ObjectBaseOnFlag(object, 0x20);
-    dds3GetRadiusPoseSet(object, 10.0f);
-    dds3RebuildObjectModelContext(object, slotKind, resource);
-    mdlLoopMotion((void *)dds3ObjectBaseGetModelHandle(object), 0, 0);
-    dds3ObjectBaseSetControlBasic(object, dds3SearchSceneBasic(dds3GetControlScene(), 0x10000, 2));
-    dds3ObjectBaseRegistArea(object);
-    dds3ObjectBaseSetPadControl(object, 0);
-    dds3ObjectBaseOnFlag(object, 0x400);
-    return counter;
-}
+INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABFA8);
 
-void evtSetUnitPos(u32 targetKey, u32 sourceKey) {
-    f32 quaternion[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
-    dds3Basic_t *target;
-    dds3Basic_t *source;
-    EvtWorldSourceTransformPrefix *sourceTransform;
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBB80);
 
-    target = dds3SearchSceneBasic(dds3GetControlScene(), targetKey, 5);
-    if (target != NULL) {
-        source = dds3SearchSceneBasic(dds3GetControlScene(), sourceKey, 0x11);
-        if (source != NULL) {
-            sourceTransform = source->workdata;
-            dds3SetPosPoseSet(target, (u128 *)&sourceTransform->position);
-                        SDF_VU0_LOADVECTOR(quaternion);
-            FromRotation(3.14159265f);
-                        SDF_VU0_LOADVECTOR_B(sourceTransform->rotation);
-            Mult();
-                        SDF_VU0_STOREVECTOR(quaternion);
-            dds3SetRotPoseSet(target, (u128 *)quaternion);
-            dds3GetPosPoseSet(target);
-            SDF_VU0_STOREVECTOR(target->poseset->smoothedPosition);
-        }
-    }
-}
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBB88);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBB6C);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBB90);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBB70);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBB98);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBB78);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBBA0);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBB80);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBBA8);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBB88);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBBB0);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBB90);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBBB8);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBB98);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBBC0);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBBA0);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBBC8);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBBA8);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBBD0);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBBB0);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBBD8);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBBB8);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBBE0);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBBC0);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBBE8);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBBC8);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBBF0);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBBD0);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBBF8);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBBD8);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBC00);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBBE0);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBC08);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBBE8);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBC10);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBBF0);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBC18);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBBF8);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBC20);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBC00);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBC28);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBC08);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBC30);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBC10);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBC38);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBC18);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBC40);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBC20);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBC48);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBC28);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBC50);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBC30);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBC58);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBC38);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBC60);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBC40);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBC68);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBC48);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBC70);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBC50);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBC78);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBC58);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBC80);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBC60);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBC88);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBC68);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBC90);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBC70);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBC98);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBC78);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBCA0);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBC80);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBCA8);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBC88);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBCB0);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBC90);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBCB8);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBC98);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBCC0);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBCA0);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBCC8);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBCA8);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBCD0);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBCB0);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBCD8);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBCB8);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBCE0);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBCC0);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBCE8);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBCC8);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBCF0);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBCD0);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBCF8);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBCD8);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBD00);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBCE0);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBD08);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBCE8);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBD10);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBCF0);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBD18);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBCF8);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBD20);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBD00);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBD28);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBD08);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBD30);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBD10);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBD38);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBD18);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBD40);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBD20);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBD48);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBD28);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBD50);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBD30);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBD58);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBD38);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBD60);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBD40);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBD68);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBD48);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBD70);
 
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBD50);
-
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBD58);
-
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBD60);
-
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBD68);
-
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBD70);
-
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBD78);
-
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBD80);
-
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBD84);
-
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBD88);
-
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBD90);
-
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBD98);
-
-INCLUDE_SDATA(const s32, "game/code_00218B48", D_003BBDA0);
-
-INCLUDE_SDATA(const s32, "game/code_00218B48", evtPendingEventSelection);
+INCLUDE_SDATA(const s32, "model/mdlEffect", D_003BBD78);
 

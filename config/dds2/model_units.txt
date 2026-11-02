@@ -1,0 +1,5 @@
+# SMT3 model/ unit boundaries in dds2, input to tools/resplit.py (from sdf-decomp tools/twins.py runs --prefix model/).
+# mdlSetViewerSlotResourceHandles (0x00233DD8, DDS2 only) edits mdlManager's model file table and ends mdlManager.
+0x002311C0 model/mdlManager
+0x00233E30 model/mdlEffect
+0x0023A028 -

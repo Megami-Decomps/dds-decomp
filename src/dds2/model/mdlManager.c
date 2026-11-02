@@ -59,6 +59,49 @@
 #include "mdl_done_job.h"
 #include "sdf_vu_matrix.h"
 #include "sdf_vu_matrix_multiply_api.h"
+#include "sdf_texture_offset_list.h"
+#include "sdf_packed_resource.h"
+#include "sdf_pac_work.h"
+#include "sdf_line_pair_packet_api.h"
+#include "dds3_path.h"
+#include "sdf_request.h"
+#include "kwln.h"
+#include "kwln_task_create.h"
+#include "sdf_bordered_rectangle_packet.h"
+#include "sdf_file_existence_api.h"
+#include "dds3_object_flags.h"
+#include "mdl_option_label.h"
+#include "eff_inner_float_api.h"
+#include "mdl_light_editor_state.h"
+#include "dds3_admin_control_api.h"
+#include "kwln_task_add_child.h"
+#include "bill_object_api.h"
+#include "sdf_texture_registry.h"
+#include "mdl_part_entry.h"
+#include "mdl_track_poly_record.h"
+#include "mdl_mark_params.h"
+#include "fld_integer_editor_api.h"
+#include "mdl_flag_api.h"
+#include "mdl_world_object_source_vector_api.h"
+#include "dds3_world_counter.h"
+#include "evt_unit_object_key.h"
+#include "sdf_draw.h"
+#include "sdf_chunk.h"
+#include "sdf_pac_state.h"
+#include "eff.h"
+#include "eff_node_descriptor.h"
+#include "eff_node.h"
+#include "sdf_sif_command.h"
+#include "eff_transform.h"
+#include "evt_world_source_transform.h"
+#include "evt_script_event_id.h"
+#include "file.h"
+#include "kwln_task_lifecycle.h"
+#include "mdl_object_stream.h"
+#include "dds3obj.h"
+#include "dds3_world_secondary.h"
+#include "sdf_gs_header.h"
+#include "mdl_option_state.h"
 
 #define BTL_GROUP_COUNT 8
 
@@ -70,9 +113,7 @@ extern dds3ModelResrc_t *mdlResrcMajorList[];
 
 extern BattleGroupIdEntry *mdlLoadingMajorList[];
 
-
 extern void mdlEffectResrcListFree(DevRequest *);
-
 
 /* Create the model-job semaphore and clear both lists for all eight groups. */
 void mdlInitManager(void) {
@@ -254,17 +295,6 @@ sdfMotionCtrlr_t *mdlCreateMotion(dds3ModelHandle_t *owner, MdlMotionSearchId se
     return object;
 }
 
-#include "common.h"
-#include "sdf_chip.h"
-#include "file_request_api.h"
-#include "sdf_heap_api.h"
-#include "pcp_vu0.h"
-#include "mdl.h"
-#include "sdf_texture_offset_list.h"
-
-
-extern u32 mdlManagerWork;
-
 void mdlFreeMotionCtrlr(dds3ModelHandle_t *ctx, sdfMotionCtrlr_t *node) {
     if (ctx->slots[node->slotIndex] == node) {
         ctx->slots[node->slotIndex] = NULL;
@@ -283,8 +313,6 @@ void mdlFreeMotion(dds3ModelHandle_t *ctx, MdlMotionSearchId searchId) {
         node = node->next;
     }
 }
-
-
 
 /* Release the grouped resource record and matching motions for `searchId`. */
 void mdlUnRegistResrcMotion(dds3ModelResrc_t *owner, MdlMotionSearchId searchId) {
@@ -333,7 +361,6 @@ void mdlRegistMotion(s32 group, s32 id, MdlRegistrationMode registrationMode, s3
     }
 }
 
-
 /* Register a model set from the assembled load payload; this descriptor is read-only input. */
 void mdlRegistModelSet(s32 group, s32 id, MdlRegistrationMode registrationMode,
                        const MdlLoadPayload *setup) {
@@ -358,7 +385,6 @@ dds3ModelResrc_t *mdlWaitLoadEnd(s32 group, s32 id) {
     return mdlSearchResrc(group, id);
 }
 
-
 void TbMbAbLoadEnd(MdlLoadRequest *request) {
     mdlRegistModelSet(request->group, request->id,
                       mdlLoadRequestGetRegistrationMode(request), &request->payload);
@@ -379,14 +405,6 @@ void TbLoadCallback(struct FileRequest *resource, MdlLoadRequest *destination) {
     fileRequestFreeIfComplete(resource);
 }
 
-#include "common.h"
-#include "sdf_chip.h"
-#include "sdf_packed_resource.h"
-#include "sdf_pac_work.h"
-#include "pcp_vu0.h"
-#include "mdl.h"
-#include "file_request_api.h"
-
 extern u8 sdfViewMatrix[];
 
 extern u8 sdfProjectionMatrix[];
@@ -395,12 +413,9 @@ extern u8 D_0037F650[];
 
 extern u8 D_0037F660[];
 
-
-
-
 extern MdlResourceTable D_003C86B0[];
-extern MdlResourceTable D_003C6588[];
 
+extern MdlResourceTable D_003C6588[];
 
 /* 8-byte prefix copied from D_003BBB60 by mdlSetFileName. */
 typedef struct Hdr8 {
@@ -409,10 +424,8 @@ typedef struct Hdr8 {
 
 extern u8 D_00436FA0[];
 
-
 void mdlMotion(dds3ModelHandle_t *ctx, MdlMotionSearchId searchId, s32 motionIndex, SdfMotionLoopMode loopMode,
                                      f32 blendLeadFrames, f32 blendDurationFrames);
-
 
 extern void TbMbAbLoadEnd(MdlLoadRequest *);
 
@@ -447,10 +460,15 @@ char *mdlSetFileName(char *dst, const char *src) {
 
 /* The nonblocking API returns 0/-1 status or a ready group address word. */
 extern u32 mdlManagerWork;
+
 extern dds3ModelResrc_t *mdlWaitLoadEnd(s32 group, s32 id);
+
 extern const char D_00436FA8[];
+
 extern void sdfDummyFunc(u32 callbackArg);
+
 extern void TbLoadCallback(struct FileRequest *, MdlLoadRequest *);
+
 extern s32 mdlFileLoad(s32 group, s32 id, MdlRegistrationMode registrationMode,
                                      const char *requestPath,
                                      void (*onComplete)(u32), u32 callbackArg);
@@ -523,7 +541,6 @@ MdlAssetRequestResult mdlPrepare(
     }
     return MDL_ASSET_REQUEST_QUEUED;
 }
-
 
 /* Blocking requests return the ready group through the SDK address-word API. */
 dds3ModelResrc_t *mdlLoadPrepare(u32 group, u32 id) {
@@ -613,7 +630,6 @@ void mdlFreeBlur(dds3ModelHandle_t *ctx) {
     }
 }
 
-
 /* Grow the afterimage list, advance each model, then apply its age and tint. */
 void mdlLinkBlur(dds3ModelHandle_t *ctx, struct sdfGrOt_t **surfaces) {
     MdlDevList *list = ctx->devList;
@@ -662,6 +678,7 @@ void mdlLinkBlur(dds3ModelHandle_t *ctx, struct sdfGrOt_t **surfaces) {
 }
 
 extern DevRequest *sdfTexListDup(DevRequest *list);
+
 extern sdfMotionCtrlr_t *mdlCreateMotion(dds3ModelHandle_t *owner, MdlMotionSearchId searchId);
 
 /* Instantiate a model context from the group's resource list and item list, then
@@ -709,9 +726,7 @@ dds3ModelHandle_t *mdlLoad(u32 group, u32 id) {
     return ctx;
 }
 
-
 extern void mdlFreeEffect(dds3ModelEffectCtrlr_t *);
-
 
 /* Destroy motions, resources, device slots and the context itself. sdfMotionCtrlr_t
  * destruction must unlink inner->motionList; save each resource's next link before
@@ -738,7 +753,9 @@ void mdlFree(dds3ModelHandle_t *ctx) {
 }
 
 struct sdfGrOt_t;
+
 extern void mdlLinkBlur(dds3ModelHandle_t *, struct sdfGrOt_t **);
+
 extern void mdlLinkEffect(dds3ModelHandle_t *, dds3ModelEffectCtrlr_t *);
 
 /* Per-frame update: step the active slot nodes, refresh the transforms, dispatch anchor records. */
@@ -780,14 +797,21 @@ void mdlLink(dds3ModelHandle_t *ctx, struct sdfGrOt_t **surfaces) {
 }
 
 extern void LoadIdentity(void);
+
 extern void RotateMatrixX(f32 angle);
+
 extern void RotateMatrixY(f32 angle);
 
 #define MDL_MOTION_SLOT_COUNT 4
+
 #define MDL_NO_BLEND_ENTRY (-1)
+
 #define MDL_RADIANS_PER_DEGREE 0.017453293f
+
 #define MDL_FULL_BLEND_PITCH 25.0f
+
 #define MDL_ENTRY_ENABLED 1
+
 #define MDL_PRIMARY_MOTION_SLOT 0
 
 /* Blend the selected basis towards pitch/yaw (degrees), then update transforms
@@ -875,7 +899,6 @@ void mdlEnableAllEntries(dds3ModelHandle_t *ctx) {
     }
 }
 
-extern sdfMotionCtrlr_t *mdlCreateMotion(dds3ModelHandle_t *owner, MdlMotionSearchId searchId);
 /* Select the first matching searchId, or create it, and make it current in its
  * signed slot index. Allocation success/slot bounds are assumed. Slot zero
  * also becomes ctx->first; id and motionIndex narrow into the current pair. */
@@ -1019,7 +1042,6 @@ void mdlGetRotate(dds3ModelHandle_t *ctx) {
     SDF_VU0_LOADVECTOR_BARRIER(rotationQuaternion);
 }
 
-
 /* vu0 routine: consume vf10 as a quaternion, preserve it in the model,
  * then store the resulting basis rows from vf28-vf30. No C argument supplies vf10. */
 void mdlSetRotate(dds3ModelHandle_t *ctx) {
@@ -1109,6 +1131,7 @@ void mdlGetScreenOffset(dds3ModelHandle_t *ctx, const f32 point[4])
 }
 
 #define MDL_PROJECTION_SCALE_OFFSET 0x40
+
 #define MDL_PROJECTION_BIAS_OFFSET 0x50
 
 /* vu0 routine: project pointCount borrowed input vectors using the stored
@@ -1198,7 +1221,6 @@ void mdlSetClutColor(dds3ModelHandle_t *ctx, s32 tint, f32 amount) {
     sdfTexListSetClutColor(ctx->inner->assetData, tint, amount);
 }
 
-
 /* Copy a resource path's basename without its extension into destination. */
 void mdlGetFilebase(s32 selectionListIndex, s32 selectionIndex, char *destination, s32 capacity) {
     MdlResourceSelection *selection;
@@ -1249,8 +1271,8 @@ void mdlGetFilebase(s32 selectionListIndex, s32 selectionIndex, char *destinatio
     destination[copyLength] = '\0';
 }
 
-
 #define MDL_PART_PACKET_COMMAND 1
+
 #define MDL_PART_INFO_TAG 0x30424950
 
 /* A part-info packet has command 1 and the PIB0 tag in its inline packet header. */
@@ -1265,13 +1287,13 @@ MdlPartInfoPacketResult mdlIsPartInfoPacket(const PacWork *packetWork) {
     return isPartInfoPacket;
 }
 
-
-
 extern PacWork *mdlPackSetOld(PacWork *work, s32 group, s32 id, MdlRegistrationMode registrationMode);
-struct EffNodeDescriptor;
-extern DevRequest *mdlEffectResrcListNew(u32 count);
-extern void mdlCreateEffectResrc_D3P(DevRequest *list, struct EffNodeDescriptor *descriptor);
 
+struct EffNodeDescriptor;
+
+extern DevRequest *mdlEffectResrcListNew(u32 count);
+
+extern void mdlCreateEffectResrc_D3P(DevRequest *list, struct EffNodeDescriptor *descriptor);
 
 /* Generic transports preserve the queue/payload alias relationship; see
  * docs/idioms.md, "Pointer transport aliasing: queued model packets". */
@@ -1327,8 +1349,8 @@ PacWork *mdlPackSetOld(PacWork *work, s32 group, s32 id, MdlRegistrationMode reg
     return work;
 }
 
-
 extern u32 mdlPibGetVersion(MdlRecord *record);
+
 extern void mdlCreateEffectResrc_IPU(DevRequest *list, u8 *sourceAddress, struct sdfMemHandle_t *allocation, s32 size);
 
 /* Apply the group's counted parts and entity slots; return the next packet. */
@@ -1420,15 +1442,12 @@ PacWork *mdlPackSet(PacWork *packetWork, s32 group, s32 id, MdlRegistrationMode 
     return packetWork;
 }
 
-
 /* Clean up the retained dispatch request, then release its completion job. */
 void mdlFileCbFree(MdlDoneJob *ownerBlock) {
     pacFileHandleFree_(ownerBlock->owner);
     sdfChipFreeDirect(ownerBlock);
 }
 
-
-extern u32 mdlManagerWork;
 /* Apply the completed load and remove its group id under the semaphore.
  * A non-NULL callback is invoked before owner/job cleanup; without a callback,
  * this function leaves cleanup to the request path. */
@@ -1444,9 +1463,6 @@ void mdlFileLoadCallback(FilePacRequest *requestOwner, MdlDoneJob *completionJob
         mdlFileCbFree(completionJob);
     }
 }
-
-
-
 
 extern void mdlFileLoadCallback(FilePacRequest *, MdlDoneJob *);
 
@@ -1474,7 +1490,312 @@ s32 mdlFileLoad(s32 group, s32 id, MdlRegistrationMode registrationMode, const c
     return 0;
 }
 
+#define MDL_VIEWER_TABLE_SLOT 5
+
+#define MDL_VIEWER_LABEL_COUNT 3
+
+#define MDL_VIEWER_HEADER_BYTES 8
+
+#define MDL_VIEWER_NAME_TABLE_BYTES 0xC
+
+typedef enum MdlViewerRecordKind {
+    MDL_VIEWER_RECORD_KIND_BILLBOARD_PART = 1,
+    MDL_VIEWER_RECORD_KIND_EFFECT_PART = 2,
+    MDL_VIEWER_RECORD_KIND_TRACK_POLY = 3,
+    MDL_VIEWER_RECORD_KIND_STREAM = 4,
+    MDL_VIEWER_RECORD_KIND_OBJECT_PART = 5
+} MdlViewerRecordKind;
+
+/* Load a viewer package; flag 2 enables the extra request-preparation step. */
+void mdlPackDecode(s32 first, s32 second, s32 flags, const u8 *packageData, s32 packageSize) {
+    PacState request;
+
+    sdfPacInit(&request, 0);
+    if (flags & 2) {
+        sdfPacSetStay(&request);
+    }
+    sdfPacDecode(&request, packageData, packageSize);
+    mdlPackSet(request.queueHead, first, second, flags);
+    sdfPacFree(&request);
+}
+
+/* Release the chip-cell allocation itself, not a pointer-to-pointer wrapper. */
+void mdlFreeFileItem(void *memory) {
+    sdfChipFreeDirect(memory);
+}
+
+extern struct sdfMemHandle_t *D_00436FAC;
+
+extern struct sdfMemHandle_t *D_00436FB0;
+
+/* Release the three copied filename paths, then their tables and backing allocations. */
+void mdlReleaseHddFileList(void) {
+    MdlResourcePath *slotEntry;
+    s32 entryCount;
+    s32 entryIndex;
+
+    entryCount = D_003C6588[MDL_VIEWER_TABLE_SLOT].count;
+    if (entryCount > 0) {
+        slotEntry = D_003C6588[MDL_VIEWER_TABLE_SLOT].entries;
+        entryIndex = 0;
+        do {
+            entryIndex++;
+            sdfChipFreeDirect((void *)slotEntry->path);
+            sdfChipFreeDirect((void *)slotEntry->resourceListPath);
+            sdfChipFreeDirect((void *)slotEntry->motionPath);
+            slotEntry++;
+        } while (entryIndex < entryCount);
+    }
+    D_003C86B0[MDL_VIEWER_TABLE_SLOT].entries = NULL;
+    D_003C86B0[MDL_VIEWER_TABLE_SLOT].count = 0;
+    D_003C6588[MDL_VIEWER_TABLE_SLOT].entries = NULL;
+    D_003C6588[MDL_VIEWER_TABLE_SLOT].count = 0;
+    sdfMemFreeHandleDirect(&D_00436FAC);
+    sdfMemFreeHandleDirect(&D_00436FB0);
+}
+
+extern MdlResourceSelection *D_00438F98;
+
+extern MdlResourcePath *D_00438F9C;
+
+/* Copy the model, resource-list and motion filenames into the viewer's path table. */
+void mdlMakeHddFileListDummy(void) {
+    s32 sourceIndex;
+    const char *sourceText;
+    char *copiedText;
+
+    mdlReleaseHddFileList();
+    D_00436FAC = sdfMemAllocDirect(MDL_VIEWER_HEADER_BYTES);
+    D_00438F98 = (MdlResourceSelection *)sdfMemLock(D_00436FAC);
+    D_00438F98->pathTable = 5;
+    D_00438F98->pathIndex = 0;
+    D_00438F98->unk4 = 0x1000;
+    D_00438F98->unk6 = 0x3E8;
+    D_00436FB0 = sdfMemAllocDirect(MDL_VIEWER_NAME_TABLE_BYTES);
+    D_00438F9C = (MdlResourcePath *)sdfMemLock(D_00436FB0);
+    for (sourceIndex = 0; sourceIndex != MDL_VIEWER_LABEL_COUNT; sourceIndex++) {
+        switch (sourceIndex) {
+        case 0:
+            sourceText = ((MdlResourcePath *)D_003C6588[0].entries)->path;
+            break;
+        case 1:
+            sourceText = ((MdlResourcePath *)D_003C6588[0].entries)->resourceListPath;
+            break;
+        default:
+            sourceText = ((MdlResourcePath *)D_003C6588[0].entries)->motionPath;
+            break;
+        }
+        if (sourceText != NULL) {
+            copiedText = sdfChipAllocDirect(strlen(sourceText) + 1);
+            strcpy(copiedText, sourceText);
+            switch (sourceIndex) {
+            case 0:
+                D_00438F9C->path = copiedText;
+                break;
+            case 1:
+                D_00438F9C->resourceListPath = copiedText;
+                break;
+            case 2:
+                D_00438F9C->motionPath = copiedText;
+                break;
+            }
+        }
+    }
+    D_003C86B0[MDL_VIEWER_TABLE_SLOT].entries = D_00438F98;
+    D_003C86B0[MDL_VIEWER_TABLE_SLOT].count = 1;
+    D_003C6588[MDL_VIEWER_TABLE_SLOT].entries = D_00438F9C;
+    D_003C6588[MDL_VIEWER_TABLE_SLOT].count = 1;
+}
+
+/* File-I/O directory record: native stat prefix, filename and private words. */
+typedef struct {
+    u32 mode;
+    u8 stat[0x3C];
+    char name[0x100];
+    u32 privateWords[2];
+} DebugDirectoryEntry;
+
+/* One debug model base name and the .?B variants found for it (MB/PB, TB, AB). */
+typedef struct DebugModelFile {
+    struct DebugModelFile *next;
+    char name[47];
+    u8 available[3];
+    s8 extension[3][2];
+} DebugModelFile;
+
+/* Five-character device prefix copied in front of each work-file path. */
+typedef struct {
+    char text[5];
+} DebugWorkPrefix;
+
+/* newlib's character-class table: one EOF slot, then one entry per byte value. */
+extern const char _ctype_[];
+
+#define _L 02
+
+#define islower(c) ((_ctype_ + 1)[(unsigned)(c)] & _L)
+
+extern DebugModelFile *D_00438F94;
+
+extern const char D_00420FD8[];
+
+extern DebugWorkPrefix D_00436FB8[];
+
+extern u8 sdfHddValid;
+
+static inline s32 debugFileUpper(s32 c) {
+    return islower(c) ? c - 'a' + 'A' : c;
+}
+
+void mdlMakeHddFileList(void) {
+    DebugDirectoryEntry directory;
+    s32 index;
+    s32 count;
+    s32 handle;
+    s32 length;
+    s32 end;
+    DebugModelFile *next;
+    DebugModelFile *file;
+    DebugModelFile **link;
+
+    if (sdfHddValid && (handle = sceDopen(D_00420FD8)) >= 0) {
+        mdlReleaseHddFileList();
+        while ((length = sceDread(handle, &directory)) > 0) {
+            if ((directory.mode & 0xF000) != 0x1000 && length >= 4 && length < 49) {
+                s32 kind = -1;
+
+                if (directory.name[length - 3] == '.' &&
+                    (s8)debugFileUpper(directory.name[length - 1]) == 'B') {
+                    s32 ext = directory.name[length - 2];
+
+                    if (islower(ext)) {
+                        ext -= 'a' - 'A';
+                    }
+                    switch (ext) {
+                    case 'A':
+                        kind = 2;
+                        break;
+                    case 'T':
+                        kind = 1;
+                        break;
+                    case 'M':
+                    case 'P':
+                        kind = 0;
+                        break;
+                    }
+                    if (kind >= 0) {
+                        file = D_00438F94;
+                        while (file != NULL && memcmp(file->name, directory.name, length - 2) != 0) {
+                            file = file->next;
+                        }
+                        if (file == NULL) {
+                            file = sdfChipAllocDirect(sizeof(*file));
+                            memset(file, 0, sizeof(*file));
+                            memcpy(file->name, directory.name, length - 2);
+                            file->name[length - 2] = 0;
+                            file->next = D_00438F94;
+                            D_00438F94 = file;
+                        }
+                        file->available[kind] = 1;
+                        file->extension[kind][0] = directory.name[length - 2];
+                        file->extension[kind][1] = directory.name[length - 1];
+                    }
+                }
+            }
+        }
+        count = 0;
+        sceDclose(handle);
+        link = &D_00438F94;
+        next = D_00438F94;
+        while (next != NULL) {
+            file = next;
+            next = file->next;
+            if (!file->available[0]) {
+                *link = next;
+                mdlFreeFileItem(file);
+            } else {
+                if (debugFileUpper(file->extension[0][0]) == 'P') {
+                    file->available[1] = 0;
+                    file->available[2] = 0;
+                }
+                link = &file->next;
+                count++;
+            }
+        }
+        if (count != 0) {
+            index = 0;
+            D_00436FAC = sdfMemAllocDirect(count * sizeof(MdlResourceSelection));
+            D_00438F98 = sdfMemLock(D_00436FAC);
+            D_00436FB0 = sdfMemAllocDirect(count * sizeof(MdlResourcePath));
+            D_00438F9C = sdfMemLock(D_00436FB0);
+            memset(D_00438F9C, 0, count * sizeof(MdlResourcePath));
+            file = D_00438F94;
+            while (file != NULL) {
+                const char *name = file->name;
+                s32 kind;
+
+                D_00438F98[index].pathTable = 5;
+                D_00438F98[index].pathIndex = index;
+                D_00438F98[index].unk4 = 0x1000;
+                D_00438F98[index].unk6 = 1000;
+                length = strlen(name);
+                end = length + 5;
+                for (kind = 0; kind != 3; kind++) {
+                    if (file->available[kind]) {
+                        char *path = sdfChipAllocDirect(length + 8);
+
+                        *(DebugWorkPrefix *)path = D_00436FB8[0];
+                        memcpy(path + 5, name, length);
+                        path[end] = file->extension[kind][0];
+                        path[end + 1] = file->extension[kind][1];
+                        path[end + 2] = 0;
+                        switch (kind) {
+                        case 0:
+                            D_00438F9C[index].path = path;
+                            break;
+                        case 1:
+                            D_00438F9C[index].resourceListPath = path;
+                            break;
+                        case 2:
+                            D_00438F9C[index].motionPath = path;
+                            break;
+                        }
+                    }
+                }
+                file = file->next;
+                index++;
+            }
+            D_003C86B0[MDL_VIEWER_TABLE_SLOT].entries = D_00438F98;
+            D_003C86B0[MDL_VIEWER_TABLE_SLOT].count = count;
+            D_003C6588[MDL_VIEWER_TABLE_SLOT].entries = D_00438F9C;
+            D_003C6588[MDL_VIEWER_TABLE_SLOT].count = count;
+            return;
+        }
+    }
+    mdlMakeHddFileListDummy();
+}
+
+s32 mdlSetViewerSlotResourceHandles(s32 table, s32 slot, const char *resourceListPath, const char *path, const char *motionPath) {
+    MdlResourcePath *entries = D_003C6588[table].entries;
+
+    if (entries == NULL) {
+        return 0;
+    }
+    if (slot >= D_003C6588[table].count) {
+        return 0;
+    }
+    entries[slot].resourceListPath = resourceListPath;
+    entries[slot].path = path;
+    entries[slot].motionPath = motionPath;
+    return 1;
+}
 INCLUDE_SDATA(const s32, "model/mdlManager", D_00436FA0);
 
 INCLUDE_SDATA(const s32, "model/mdlManager", D_00436FA8);
+
+INCLUDE_SDATA(const s32, "model/mdlManager", D_00436FAC);
+
+INCLUDE_SDATA(const s32, "model/mdlManager", D_00436FB0);
+
+INCLUDE_SDATA(const s32, "model/mdlManager", D_00436FB8);
 
