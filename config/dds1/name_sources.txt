@@ -10227,6 +10227,7 @@
 0x003BD434	sdfFileCmdDefaultCreateMode	inferred	SMT3HD data name via SLUS_209.11 0x00551964, 2 agreeing references; was sdfFileCmdDefaultCreateMode
 0x003BD476	sdfHddValid	inferred	SMT3HD data name via SLUS_209.11 0x005519A6, 6 agreeing references; was sdfHddValid
 0x003BD477	sdfDev9LoadFlag	inferred	SMT3HD data name via SLUS_209.11 0x005519A7, 2 agreeing references; was sdfDev9LoadFlag
+0x003BD478	sdfDev9Ready	inferred	SMT3HD name via SLUS_209.11 0x005519A8, sdfHdd twin; was D_003BD478
 0x003BD480	sdfCdClock	inferred	SMT3HD data name via SLUS_209.11 0x005519B0, sdfGetCdClock twin references; was sdfCdClock
 0x003BD490	p2sdSmgHandle	inferred	SMT3HD data name via SLUS_209.11 0x005519C0, 4 agreeing references; was p2sdSmgHandle
 0x003BD498	p2sdPcmState	inferred	SMT3HD data name via SLUS_209.11 0x005519C8, 4 agreeing references; was p2sdPcmState

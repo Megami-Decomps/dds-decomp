@@ -8796,6 +8796,7 @@ sdfFileCmdThreadPrio = 0x00438B20;
 sdfFileCmdDefaultCreateMode = 0x00438B24;
 sdfHddValid = 0x00438B66;
 sdfDev9LoadFlag = 0x00438B67; // dds1 0x003BD477
+sdfDev9Ready = 0x00438B68;
 sdfCdClock = 0x00438B70;
 p2sdSmgHandle = 0x00438B80;
 p2sdPcmState = 0x00438B88;

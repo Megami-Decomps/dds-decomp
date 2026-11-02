@@ -29,7 +29,7 @@ extern u8 D_003BD460[];
 
 extern u8 D_003BD468[];
 
-extern u8 D_003BD478;
+extern u8 sdfDev9Ready;
 
 extern s32 sceSifLoadStartModule(const char *modulePath, s32 flags, void *moduleArguments, s32 *resident);
 
@@ -80,7 +80,7 @@ void sdfHddInit(char *path) {
 
     sdfHddValid = 0;
     sdfDev9LoadModule();
-    if (D_003BD478 == 0) {
+    if (sdfDev9Ready == 0) {
         return;
     }
     result = sceSifLoadStartModule("cdrom0:\\IRX\\ATAD.IRX;1", 0, NULL, &resident);
@@ -110,7 +110,7 @@ INCLUDE_SDATA(const s32, "sdf/sdfHdd", D_003BD468);
 
 INCLUDE_SDATA(const s32, "sdf/sdfHdd", D_003BD470);
 
-INCLUDE_SDATA(const s32, "sdf/sdfHdd", D_003BD478);
+INCLUDE_SDATA(const s32, "sdf/sdfHdd", sdfDev9Ready);
 
 INCLUDE_SDATA(const s32, "sdf/sdfHdd", sdfCdClock);
 

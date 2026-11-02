@@ -57,7 +57,7 @@ extern u16 sdfFileCmdDefaultCreateMode;
 
 extern u8 sdfDev9LoadFlag;
 
-extern u8 D_003BD478;
+extern u8 sdfDev9Ready;
 
 extern s32 sceSifLoadStartModule(const char *modulePath, s32 flags, void *moduleArguments, s32 *resident);
 
@@ -100,7 +100,7 @@ extern void sdfDev9LoadModule(void);
 void sdfDev9LoadModule(void) {
     s32 resident;
     if (sdfDev9LoadFlag == 0) {
-        D_003BD478 = 0;
+        sdfDev9Ready = 0;
         if (sceSifLoadStartModule("cdrom0:\\IRX\\DEV9.IRX;1", 0, NULL, &resident) < 0) {
             printf("cdrom0:\\IRX\\DEV9.IRX;1 could't load.\n");
             return;
@@ -109,7 +109,7 @@ void sdfDev9LoadModule(void) {
             printf(D_003B4690);
             return;
         }
-        D_003BD478 = 1;
+        sdfDev9Ready = 1;
         sdfDev9LoadFlag = 1;
     }
 }
