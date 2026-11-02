@@ -8716,11 +8716,11 @@
 0x002E4B80	sdfPuts	inferred	SMT3HD name via SLUS_209.11 0x002BD4A8, reloc-identical; was sdfDevPrintText
 0x002E4C28	sdfPrintf	inferred	SMT3HD name via SLUS_209.11 0x002BD550, reloc-identical; was sdfPrintFormattedDevMessage
 0x002E4CA8	sdfCdImageGetDirData	inferred	SMT3HD name via SLUS_209.11 0x002BD5D0, shared-hash-in-run; was sdfDevGetLoadedFileAddress
-0x002E4CB0	sdfDevWaitForDisc	inferred	polls disc status until sceCdSearchFile succeeds
+0x002E4CB0	sdfCdWaitTrayClose	inferred	SMT3HD name via SLUS_209.11 0x002BD5D8, sdfCd twin, SMT3HD name; was sdfDevWaitForDisc
 0x002E4D48	sdfCdStStart	inferred	SMT3HD name via SLUS_209.11 0x002BD6A0, reloc-identical; was sdfDevSeekDiscRequest
 0x002E4E20	sdfDevSeekDiscWithRequestGate	inferred	Marks request pending and waits on an additional request gate before synchronized disc seek. [names_reviewed8.tsv]
-0x002E4EE0	sdfDevReadDiscUntilComplete	inferred	Retries disc reads until requested byte count succeeds and advances position. [names_reviewed8.tsv]
-0x002E4FB0	sdfDevFindDiscFileRecordByCdromPath	inferred	Converts a cdrom path to ISO form, retries CD file search until available, opens and measures the file, stores its record size, writes the sector output and optional success flag, and returns the shared file record. Caller flow uses the record for packet existence and size queries. [DDS1 Binary Ninja HLIL and caller references; paired DDS2 implementation, 2026-10-14]
+0x002E4EE0	sdfCdStRead	inferred	SMT3HD name via SLUS_209.11 0x002BD750, sdfCd twin, SMT3HD name; was sdfDevReadDiscUntilComplete
+0x002E4FB0	sdfCdImageSearchFileDirect	inferred	SMT3HD name via SLUS_209.11 0x002BD838, sdfCd twin, SMT3HD name; was sdfDevFindDiscFileRecordByCdromPath
 0x002E5158	sdfCdImageSearchFile	inferred	SMT3HD name via SLUS_209.11 0x002BD9C8, reloc-identical; was sdfDevFindDiscFileRecordByPath
 0x002E5310	sdfCdImageLoadStart	inferred	SMT3HD name via SLUS_209.11 0x002BDB80, sdfCd twin; was sdfDevOpenDiscFileAndGetSize
 0x002E5398	sdfCdImageRead	inferred	SMT3HD name via SLUS_209.11 0x002BDBD0, reloc-identical; was sdfDevReadDiscFileBytes
@@ -10427,7 +10427,7 @@
 0x003BDA50	sdfCdImageOffset	inferred	SMT3HD data name via SLUS_209.11 0x00552100, 4 agreeing references; was sdfCdImageOffset
 0x003BDA54	sdfCdImageCurrActive	inferred	SMT3HD data name via SLUS_209.11 0x00552104, 4 agreeing references; was sdfCdImageCurrActive
 0x003BDA58	sdfCdImageFd	inferred	SMT3HD data name via SLUS_209.11 0x00552108, 4 agreeing references; was sdfCdImageFd
-0x003BDA5C	sdfDiscReadPosition	inferred	high confidence; src/dds1/game/code_002E4720.c sdfDevReadDiscUntilComplete(): sdfCdStStart(D_003BDA5C); Current disc request/read position is reused after retry and advanced by the completed read size. [names_reviewed26.tsv]
+0x003BDA5C	sdfDiscReadPosition	inferred	high confidence; src/dds1/game/code_002E4720.c sdfCdStRead(): sdfCdStStart(D_003BDA5C); Current disc request/read position is reused after retry and advanced by the completed read size. [names_reviewed26.tsv]
 0x003BDA60	sdfDiscReadMode	inferred	confidence=medium; matched_users=src/dds1/game/code_002E4720.c:sdfCdImageLoadStart, src/dds1/game/code_002E4720.c:sdfCdStStart; Disc-file lookup writes this mode and seek setup translates it into the CD read options. [names_qp9.tsv]
 0x003BDA64	sdfDiscRequestSemaphore	inferred	high confidence; src/dds1/game/code_002E4720.c sdfDevSignalPendingSemaphore(): SignalSema(D_003BDA64); Semaphore signaled when a gated disc request is pending. [names_reviewed26.tsv]
 0x003BDA68	sdfFileLengthWork	inferred	SMT3HD data name via SLUS_209.11 0x00552114, 2 agreeing references; was sdfFileLengthWork
@@ -10573,6 +10573,7 @@
 0x003F9B00	sdfPadCb	inferred	SMT3HD data name via SLUS_209.11 0x0058F2C0, 2 agreeing references; was sdfPadCb
 0x003F9B50	sdfDevRpcClient	inferred	confidence=high; Dev RPC startup binds this existing SifRpcClientContextView.client and formatted output passes this context to the transport. Keep complete current owner and client prefix. Same role in DDS2 at 0x004764D0. Preserve prior Cedar data-ownership credit; no new function/data-ownership credit. [PurC5 readability data b8; matched-C/native-twin evidence; identifier-only]
 0x003F9B90	sdfPrintRpcBuff	inferred	SMT3HD data name via SLUS_209.11 0x0058F350, 1 agreeing references; was sdfPrintRpcBuff
+0x003F9FC0	sdfCdImageSearchFileDirect_ent	inferred	SMT3HD name via SLUS_209.11 0x0058F780, sdfCd data twin, the record sdfCdImageSearchFileDirect returns; was D_003F9FC0
 0x003FA000	sdfDevReadSectorBuffer	inferred	confidence=high; Buffered disc reads fetch one native0x800-byte sector here and copy partial sectors while retaining cursor/count state. Existing byte array bound and all transfer behavior remain. Same role in DDS2 at 0x00476980. Preserve prior Cedar data-ownership credit; no new function/data-ownership credit. [PurC5 readability data b8; matched-C/native-twin evidence; identifier-only]
 0x003FB000	sndCommandThreadParameters	inferred	confidence=high; Sound startup fills entry, stack, stackSize0x1000, priority0x42 and gp, then passes this0x30 SdfKernelThreadParam to CreateThread. Opaque descriptor bytes stay untouched. Same role in DDS2 at 0x00477980. No source-owned import or native ASM root/interior reference. [PurC5 readability data b7; matched-C/native-twin evidence; identifier-only]
 0x003FB030	sndCachedListenerState	inferred	confidence=high; p2sdSetStandPos compares all six scaled integer values, sends command0x160 on change and copies the local state into this cache. Existing opaque two-word prefix and32-byte copy remain. Same role in DDS2 at 0x004779B0. No source-owned import or native ASM root/interior reference. [PurC5 readability data b7; matched-C/native-twin evidence; identifier-only]

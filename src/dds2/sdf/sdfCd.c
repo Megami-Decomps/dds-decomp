@@ -59,7 +59,7 @@ extern u32 sdfCdImageFd;
 
 extern u32 sdfCdTrayMode;
 
-void sdfDevWaitForDisc(void);
+void sdfCdWaitTrayClose(void);
 
 extern s32 dds3ImgPath;
 
@@ -85,7 +85,7 @@ u32 sdfCdImageGetDirData(void) {
     return sdfCdImageDirData;
 }
 
-void sdfDevWaitForDisc(void) {
+void sdfCdWaitTrayClose(void) {
     u8 file[0x30];
     s32 status;
     WaitSema(sdfCdImageFd);
@@ -133,7 +133,7 @@ void sdfCdStStart(s32 request) {
             break;
         }
         if (sceCdStatus() == 1) {
-            sdfDevWaitForDisc();
+            sdfCdWaitTrayClose();
         } else {
             sdfDelayThread(100);
         }
@@ -170,7 +170,7 @@ void sdfDevSeekDiscWithRequestGate(s32 request) {
             break;
         }
         if (sceCdStatus() == 1) {
-            sdfDevWaitForDisc();
+            sdfCdWaitTrayClose();
         } else {
             sdfDelayThread(100);
         }
@@ -180,7 +180,7 @@ void sdfDevSeekDiscWithRequestGate(s32 request) {
 
 extern s32 sceCdStRead(s32 size, s32 buffer, s32 count, s32 *status);
 
-void sdfDevReadDiscUntilComplete(s32 size, void *buffer) {
+void sdfCdStRead(s32 size, void *buffer) {
     s32 status;
     s32 result;
 
@@ -192,7 +192,7 @@ void sdfDevReadDiscUntilComplete(s32 size, void *buffer) {
             break;
         }
         if (sceCdStatus() == 1) {
-            sdfDevWaitForDisc();
+            sdfCdWaitTrayClose();
             sdfCdStStart(sdfDiscReadPosition);
         } else {
             WaitSema(sdfCdImageFd);
@@ -204,12 +204,12 @@ void sdfDevReadDiscUntilComplete(s32 size, void *buffer) {
     sdfDiscReadPosition += size;
 }
 
-extern SdfDiscFileRecord D_00476940;
+extern SdfDiscFileRecord sdfCdImageSearchFileDirect_ent;
 
 /* Look up a "cdrom" path through the CD file system: convert it to an ISO
  * name ("\\" separators, upper case, ";1" version), retry the search until
  * the disc answers, and record the file's size in the shared record. */
-SdfDiscFileRecord *sdfDevFindDiscFileRecordByCdromPath(
+SdfDiscFileRecord *sdfCdImageSearchFileDirect(
     const char *path, u32 *readLocationOut, SdfDiscReadMode *readModeOut) {
     u32 file[9];
     char normalizedPath[256];
@@ -245,7 +245,7 @@ SdfDiscFileRecord *sdfDevFindDiscFileRecordByCdromPath(
                 SignalSema(sdfCdImageFd);
                 continue;
             }
-            D_00476940.sizeOrNegativeChildCount = sceLseek(fd, 0, 2);
+            sdfCdImageSearchFileDirect_ent.sizeOrNegativeChildCount = sceLseek(fd, 0, 2);
             sceClose(fd);
             SignalSema(sdfCdImageFd);
             break;
@@ -253,7 +253,7 @@ SdfDiscFileRecord *sdfDevFindDiscFileRecordByCdromPath(
         status = sceCdStatus();
         SignalSema(sdfCdImageFd);
         if (status == 1) {
-            sdfDevWaitForDisc();
+            sdfCdWaitTrayClose();
         } else {
             sdfDelayThread(100);
         }
@@ -262,7 +262,7 @@ SdfDiscFileRecord *sdfDevFindDiscFileRecordByCdromPath(
     if (readModeOut != 0) {
         *readModeOut = SDF_DISC_READ_MODE_CDROM_STREAM;
     }
-    return &D_00476940;
+    return &sdfCdImageSearchFileDirect_ent;
 }
 
 extern char D_00438AD0[]; /* cdrom */
@@ -288,7 +288,7 @@ SdfDiscFileRecord *sdfCdImageSearchFile(
     s32 order;
 
     if (memcmp(path, D_00438AD0, 5) == 0) {
-        return sdfDevFindDiscFileRecordByCdromPath(path, readLocationOut, readModeOut);
+        return sdfCdImageSearchFileDirect(path, readLocationOut, readModeOut);
     }
     base = sdfCdImageDirData;
     node = (SdfDiscFileRecord *)base;
@@ -404,23 +404,23 @@ s32 sdfCdImageRead(void *buffer, s32 byteCount) {
             t = transferBytes - t * SDF_DEV_DISC_SECTOR_BYTES;
             transferBytes -= t;
             if (transferBytes > 0) {
-                sdfDevReadDiscUntilComplete(transferBytes >> SDF_DEV_DISC_SECTOR_SHIFT, destination);
+                sdfCdStRead(transferBytes >> SDF_DEV_DISC_SECTOR_SHIFT, destination);
             }
             if (t > 0) {
-                sdfDevReadDiscUntilComplete(1, sdfDevReadSectorBuffer);
+                sdfCdStRead(1, sdfDevReadSectorBuffer);
                 memcpy(destination + transferBytes, sdfDevReadSectorBuffer, t);
                 sdfCdImageOffset = sdfDevReadSectorBuffer + t;
                 sdfCdImageCurrActive = SDF_DEV_DISC_SECTOR_BYTES - t;
             }
         } else {
             while (transferBytes >= SDF_DEV_DISC_SECTOR_BYTES) {
-                sdfDevReadDiscUntilComplete(1, sdfDevReadSectorBuffer);
+                sdfCdStRead(1, sdfDevReadSectorBuffer);
                 memcpy(destination, sdfDevReadSectorBuffer, SDF_DEV_DISC_SECTOR_BYTES);
                 transferBytes -= SDF_DEV_DISC_SECTOR_BYTES;
                 destination += SDF_DEV_DISC_SECTOR_BYTES;
             }
             if (transferBytes > 0) {
-                sdfDevReadDiscUntilComplete(1, sdfDevReadSectorBuffer);
+                sdfCdStRead(1, sdfDevReadSectorBuffer);
                 memcpy(destination, sdfDevReadSectorBuffer, transferBytes);
                 sdfCdImageOffset = sdfDevReadSectorBuffer + transferBytes;
                 sdfCdImageCurrActive = SDF_DEV_DISC_SECTOR_BYTES - transferBytes;
