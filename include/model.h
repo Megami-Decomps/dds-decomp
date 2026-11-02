@@ -98,7 +98,7 @@ struct sdfModelMorphList_t
     sdfModelMorph_t *items;
 };
 
-/* One loaded model. sdfModelRootNew allocates 152 bytes; the HD build's
+/* One loaded model. sdfModelRootNew allocates 152 bytes (156 in DDS); the HD build's
  * modelobj, oData, effpos_type and reversePB past zBias do not exist here. */
 struct sdfModelRootNode_t
 {
@@ -121,6 +121,8 @@ struct sdfModelRootNode_t
     f32 faceDivBias;
     void *extraData; /* the file's material def block, per sdfModelMakeRoot */
     f32 zBias;
+    u8 lod; /* sdfModelLinkOt draws only packets whose otIndex high nibble equals it */
+    u8 pad99[3];
 };
 
 /* One joint. sdfModelNodeNew allocates 256 bytes; prev and next are the
@@ -294,6 +296,9 @@ enum SDF_MODEL_FLAG_e
     SDF_MODEL_FLAG_EARLY_SETUP = 4,       /* set by sdfModelMakeEarly */
     SDF_MODEL_FLAG_REVERSE_FACE = 8,
     SDF_MODEL_FLAG_DREW = 16              /* set if anything reached a table */
+    ,
+    SDF_MODEL_FLAG_FORCE_TEX_NO_SPECULAR = 0x20, /* sdfSetForcedAssetTextureMode(1) */
+    SDF_MODEL_FLAG_FORCE_TEX = 0x40              /* sdfSetForcedAssetTextureMode(2) */
 };
 
 /* sdfModelNode_t.flags. Either hidden bit suppresses the node; sdfModelLinkOt
