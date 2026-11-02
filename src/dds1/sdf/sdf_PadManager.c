@@ -261,7 +261,7 @@ extern u8 sdfPadButtonPressure[0x18];
 /* Emit held bit 0, press/repeat trigger bit 1, and new-press bit 7 per button.
  * Changes arm a 15-tick deadline; repeats set it to current tick + lateness + 4,
  * retaining the original extra delay when a deadline is missed. */
-void sdfPadBuildButtonStates(void) {
+void sdfPadWork(void) {
     s32 currentTick = sdfVblankFlag;
     SdfPadIndex padIndex;
     s32 buttonIndex;
@@ -329,7 +329,7 @@ extern u8 sdfPadPortSlotPairs[4];
 
 extern u8 sdfPadPortBuffers[];
 
-extern u8 D_003BD39C;
+extern u8 sdfPadManagerMode;
 
 extern s32 scePadInit(s32);
 
@@ -358,12 +358,12 @@ void sdfPadInitManager(void) {
     memset(dds3PadBitTable, 0, SDF_PAD_BUTTON_STATE_BYTES);
     memset(sdfPadAnalogSticks, SDF_PAD_STICK_CENTER, SDF_PAD_STICK_STATE_BYTES);
     memset(sdfPadButtonPressure, 0, SDF_PAD_PRESSURE_STATE_BYTES);
-    D_003BD39C = 0;
+    sdfPadManagerMode = 0;
 }
 
 INCLUDE_RODATA(const s32, "sdf/sdf_PadManager", D_003B4548);
 
-INCLUDE_SDATA(const s32, "sdf/sdf_PadManager", D_003BD39C);
+INCLUDE_SDATA(const s32, "sdf/sdf_PadManager", sdfPadManagerMode);
 
 INCLUDE_SDATA(const s32, "sdf/sdf_PadManager", D_003BD3A0);
 

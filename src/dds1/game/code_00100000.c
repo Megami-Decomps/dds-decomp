@@ -229,7 +229,7 @@ extern u16 sdfReqDrawDelaySleepCount;
 extern u16 dds3VblanksPerFrame;
 extern void sdfWaitVblank(s32 count);
 extern void sdfGrReqDrawDelay(s32);
-extern void sdfPadBuildButtonStates(void);
+extern void sdfPadWork(void);
 extern void sdfFileCmdThreadSetLoPrio(void);
 extern void sdfFileCmdThreadSetHiPrio(void);
 
@@ -243,7 +243,7 @@ void kwlnRunMainLoop(void) {
     while (D_003BA708 == 0) {
         sdfWaitVblank(dds3VblanksPerFrame);
         sdfGrReqDrawDelay(dds3VblanksPerFrame - 1);
-        sdfPadBuildButtonStates();
+        sdfPadWork();
         if (D_003BA734 != FLD_FILE_IO_PRIORITY_HIGH) {
             sdfFileCmdThreadSetLoPrio();
         }

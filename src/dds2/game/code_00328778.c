@@ -12,7 +12,7 @@ extern s32 CreateThreadSimple(void (*entryAddress)(), void *workspace, s32 stack
 
 
 
-extern u8 D_00438A8C;
+extern u8 sdfPadManagerMode;
 
 extern void (*sdfTickCallback)(void);
 
@@ -20,7 +20,7 @@ extern void sdfWaitVblank(s32 count);
 
 extern void sdfPadManager(void);
 
-extern void sdfPadBuildButtonStates(void);
+extern void sdfPadWork(void);
 
 extern void sdfFileCmdThreadCheckPrio(void);
 
@@ -71,8 +71,8 @@ void sdfSystemThreadProc(void) {
     for (;;) {
         sdfWaitVblank(1);
         sdfPadManager();
-        if (!D_00438A8C) {
-            sdfPadBuildButtonStates();
+        if (!sdfPadManagerMode) {
+            sdfPadWork();
         }
         sdfFileCmdThreadCheckPrio();
         if (sdfTickCallback != NULL) {

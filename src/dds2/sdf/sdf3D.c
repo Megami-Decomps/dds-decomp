@@ -427,5 +427,5 @@ INCLUDE_SDATA(const s32, "sdf/sdf3D", sdf3DRefMapParam);
 
 INCLUDE_SDATA(const s32, "sdf/sdf3D", D_00438A80);
 
-INCLUDE_SDATA(const s32, "sdf/sdf3D", D_00438A88);
+INCLUDE_SDATA(const s32, "sdf/sdf3D", sdfPadPortSlotPairs);
 

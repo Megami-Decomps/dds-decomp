@@ -252,7 +252,7 @@ extern u16 D_00438A90[4];
 
 extern u8 sdfPadAnalogSticks[8];
 
-extern u16 D_0040B7B0[16];
+extern u16 sdfPadButtonMasks[16];
 
 extern s8 dds3PadBitTable[0x20];
 
@@ -261,7 +261,7 @@ extern u8 sdfPadButtonPressure[0x18];
 /* Emit held bit 0, press/repeat trigger bit 1, and new-press bit 7 per button.
  * Changes arm a 15-tick deadline; repeats set it to current tick + lateness + 4,
  * retaining the original extra delay when a deadline is missed. */
-void sdfPadBuildButtonStates(void) {
+void sdfPadWork(void) {
     s32 currentTick = sdfVblankFlag;
     SdfPadIndex padIndex;
     s32 buttonIndex;
@@ -288,7 +288,7 @@ void sdfPadBuildButtonStates(void) {
             }
         }
         for (buttonIndex = 0; buttonIndex != SDF_PAD_BUTTON_COUNT; buttonIndex++) {
-            s32 buttonMask = D_0040B7B0[buttonIndex];
+            s32 buttonMask = sdfPadButtonMasks[buttonIndex];
             s32 buttonState = (heldButtons & buttonMask) != 0;
             if (triggerMask & buttonMask) {
                 buttonState |= SDF_PAD_BUTTON_TRIGGER_BIT;
@@ -325,11 +325,11 @@ void sdfPadSetAct(SdfPadIndex padIndex, s32 smallMotor, s32 largeMotor) {
     sdfPadCb[padIndex].largeMotor = largeMotor & SDF_PAD_MOTOR_VALUE_MASK;
 }
 
-extern u8 D_00438A88[4];
+extern u8 sdfPadPortSlotPairs[4];
 
 extern u8 sdfPadPortBuffers[];
 
-extern u8 D_00438A8C;
+extern u8 sdfPadManagerMode;
 
 extern s32 scePadInit(s32);
 
@@ -339,8 +339,8 @@ void sdfPadInitManager(void) {
 
     scePadInit(0);
     for (padIndex = 0; padIndex != SDF_PAD_COUNT; padIndex++) {
-        s32 port = D_00438A88[padIndex * 2];
-        s32 slot = D_00438A88[padIndex * 2 + 1];
+        s32 port = sdfPadPortSlotPairs[padIndex * 2];
+        s32 slot = sdfPadPortSlotPairs[padIndex * 2 + 1];
         SdfPadEntry *entry;
 
         scePadPortOpen(port, slot, &sdfPadPortBuffers[padIndex * SDF_PAD_PORT_BUFFER_BYTES]);
@@ -358,12 +358,12 @@ void sdfPadInitManager(void) {
     memset(dds3PadBitTable, 0, SDF_PAD_BUTTON_STATE_BYTES);
     memset(sdfPadAnalogSticks, SDF_PAD_STICK_CENTER, SDF_PAD_STICK_STATE_BYTES);
     memset(sdfPadButtonPressure, 0, SDF_PAD_PRESSURE_STATE_BYTES);
-    D_00438A8C = 0;
+    sdfPadManagerMode = 0;
 }
 
 INCLUDE_RODATA(const s32, "sdf/sdf_PadManager", D_0042E258);
 
-INCLUDE_SDATA(const s32, "sdf/sdf_PadManager", D_00438A8C);
+INCLUDE_SDATA(const s32, "sdf/sdf_PadManager", sdfPadManagerMode);
 
 INCLUDE_SDATA(const s32, "sdf/sdf_PadManager", D_00438A90);
 

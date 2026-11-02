@@ -7,7 +7,7 @@
 #include "sdf_alarm.h"
 #include "sdf_thread.h"
 
-extern u8 D_003BD39C;
+extern u8 sdfPadManagerMode;
 
 /* Workspace bytes passed to the console DMA setup allocation. */
 s32 D_003BD2D0 __attribute__((section(".sdata"), aligned(8))) = 0x100000;
@@ -17,7 +17,7 @@ extern void sdfWaitVblank(s32 count);
 
 extern void sdfPadManager(void);
 
-extern void sdfPadBuildButtonStates(void);
+extern void sdfPadWork(void);
 
 extern void sdfFileCmdThreadCheckPrio(void);
 
@@ -75,8 +75,8 @@ void sdfSystemThreadProc(void) {
     for (;;) {
         sdfWaitVblank(1);
         sdfPadManager();
-        if (!D_003BD39C) {
-            sdfPadBuildButtonStates();
+        if (!sdfPadManagerMode) {
+            sdfPadWork();
         }
         sdfFileCmdThreadCheckPrio();
         if (sdfTickCallback != NULL) {

@@ -9228,7 +9228,7 @@
 0x0033C240	sdfMultiBillBoardVcMakeN	inferred	SMT3HD name via SLUS_209.11 0x002BBCA8, reloc-identical; was sdfBuildWideVertexVifPacket
 0x0033C478	sdfPadControl	inferred	SMT3HD name via SLUS_209.11 0x002BBEE0, reloc-identical; was sdfPadUpdatePort
 0x0033C820	sdfPadManager	inferred	SMT3HD name via SLUS_209.11 0x002BC288, reloc-identical; was sdfPadUpdatePorts
-0x0033C878	sdfPadBuildButtonStates	inferred	Exactly matches first-game sdfPadBuildButtonStates: tracks two controller ports, 15-tick first repeat, four-tick repeats, new-press flag.
+0x0033C878	sdfPadWork	inferred	SMT3HD name via SLUS_209.11 0x002BC2E0, sdf_PadManager twin; was sdfPadBuildButtonStates
 0x0033C9F0	sdfPadChangeMode	inferred	SMT3HD name via SLUS_209.11 0x002BC458, shared-hash-in-run; was sdfPadRequestMode
 0x0033CA10	sdfPadSetAct0	inferred	SMT3HD name via SLUS_209.11 0x002BC478, reloc-identical; was sdfPadSetSmallMotor
 0x0033CA30	sdfPadSetAct1	inferred	SMT3HD name via SLUS_209.11 0x002BC498, reloc-identical; was sdfPadSetLargeMotor
@@ -10435,6 +10435,7 @@
 0x0040B6A0	sdf3DEyeOffset	inferred	The eye offset sdf3DSetCamera stores after the screen matrix: the record's inverse origin transformed by it. Named the original name, from Nocturne HD's sdf3D.c (sdf3DSetCamera's stores in order)
 0x0040B6B0	sdf3DPrimDefaultFaceIndex	inferred	SMT3HD data name via SLUS_209.11 0x005297A0, sdf3DPrimMakePoly twin reference; was sdf3DPrimDefaultFaceIndex
 0x0040B730	sdf3DPrimIdentityTm	inferred	SMT3HD data name via SLUS_209.11 0x00529820, sdf3DPrimLinkResetTm twin reference; was sdf3DPrimIdentityTm
+0x0040B7B0	sdfPadButtonMasks	inferred	DDS1 sdfPadButtonMasks twin (0x00398600); was D_0040B7B0
 0x0040B7D0	sdfPadCb_0	inferred	SMT3HD data name via SLUS_209.11 0x005298C0, 1 agreeing references; was sdfPadCb_0
 0x0040B7D8	dds3PadBitTable	inferred	SMT3HD data name via SLUS_209.11 0x005298C8, 22 agreeing references; was dds3PadBitTable
 0x0040B7F8	sdfPadButtonPressure	inferred	high confidence; src/dds2/game/code_00336B48.c sdfPadInitManager(): memset(D_0040B7F8, 0, 0x18); Instruction-aligned data counterpart of DDS1 D_00398648 in the matched sdfPadInitManager() twin. Twelve pressure bytes copied from each pad-port record into the shared pad state.
@@ -10876,6 +10877,8 @@
 0x00438A64	sdf3DLightDefault	inferred	SMT3HD data name via SLUS_209.11 0x005518B0, 2 agreeing references; was sdf3DLightDefault
 0x00438A68	sdf3DFogDefault	inferred	SMT3HD data name via SLUS_209.11 0x005518B4, 2 agreeing references; was sdf3DFogDefault
 0x00438A78	sdf3DRefMapParam	inferred	SMT3HD data name via SLUS_209.11 0x005518C0, 2 agreeing references; was sdf3DRefMapParam
+0x00438A88	sdfPadPortSlotPairs	inferred	SMT3HD name via SLUS_209.11 0x005518D0, sdf_PadManager twin; was D_00438A88
+0x00438A8C	sdfPadManagerMode	inferred	SMT3HD name via SLUS_209.11 0x005518D4, sdf_PadManager twin; was D_00438A8C
 0x00438A98	sdfPadAnalogSticks	inferred	high confidence; src/dds2/game/code_00336B48.c sdfPadInitManager(): memset(D_00438A98, 0x80, 8); Instruction-aligned data counterpart of DDS1 D_003BD3A8 in the matched sdfPadInitManager() twin. Four analog-stick bytes copied from each pad-port record into the shared pad state.
 0x00438AB0	devConsTop	inferred	SMT3HD name via SLUS_209.11 0x005518F8, sdfDevCons reference; was D_00438AB0
 0x00438AB4	alreadyInitDevCons	inferred	SMT3HD name via SLUS_209.11 0x005518FC, sdfDevCons reference; was D_00438AB4

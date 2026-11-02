@@ -73,7 +73,7 @@ extern const s32 D_003BA83C;
 
 extern u32 sdfDiscType;
 
-extern u8 D_003BD39C;
+extern u8 sdfPadManagerMode;
 
 extern SdfThreadNode kwlnMainLoopThreadNode;
 
@@ -104,7 +104,7 @@ s32 sdfDefaultMain(void) {
     sdfCdImageInit(D_0039DF88, D_0039DF98);
     LoadMcModules(D_0039DFB0, 1);
     dds3InitSubsystems(0x17C0000, 0x200000, 0x380000);
-    D_003BD39C = 1;
+    sdfPadManagerMode = 1;
     sdfPadChangeMode(0, SDF_PAD_MODE_DUALSHOCK_LOCKED);
     sdfPadChangeMode(1, SDF_PAD_MODE_DUALSHOCK_LOCKED);
     sdfFileSetHostRoot(D_0039DFC0);

@@ -8676,7 +8676,7 @@
 0x002E3390	sdfMultiBillBoardVcMakeN	inferred	SMT3HD name via SLUS_209.11 0x002BBCA8, reloc-identical; was sdfBuildWideVertexVifPacket
 0x002E35C8	sdfPadControl	inferred	SMT3HD name via SLUS_209.11 0x002BBEE0, reloc-identical; was sdfPadUpdatePort
 0x002E3970	sdfPadManager	inferred	SMT3HD name via SLUS_209.11 0x002BC288, reloc-identical; was sdfPadUpdatePorts
-0x002E39C8	sdfPadBuildButtonStates	inferred	Generates held, repeat and new-press flags for both controller ports.
+0x002E39C8	sdfPadWork	inferred	SMT3HD name via SLUS_209.11 0x002BC2E0, sdf_PadManager twin; was sdfPadBuildButtonStates
 0x002E3B40	sdfPadChangeMode	inferred	SMT3HD name via SLUS_209.11 0x002BC458, shared-hash-in-run; was sdfPadRequestMode
 0x002E3B60	sdfPadSetAct0	inferred	SMT3HD name via SLUS_209.11 0x002BC478, reloc-identical; was sdfPadSetSmallMotor
 0x002E3B80	sdfPadSetAct1	inferred	SMT3HD name via SLUS_209.11 0x002BC498, reloc-identical; was sdfPadSetLargeMotor
@@ -9809,10 +9809,10 @@
 0x003984F0	sdf3DEyeOffset	inferred	The eye offset sdf3DSetCamera stores after the screen matrix: the record's inverse origin transformed by it. Named the original name, from Nocturne HD's sdf3D.c (sdf3DSetCamera's stores in order)
 0x00398500	sdf3DPrimDefaultFaceIndex	inferred	SMT3HD data name via SLUS_209.11 0x005297A0, sdf3DPrimMakePoly twin reference; was sdf3DPrimDefaultFaceIndex
 0x00398580	sdf3DPrimIdentityTm	inferred	SMT3HD data name via SLUS_209.11 0x00529820, sdf3DPrimLinkResetTm twin reference; was sdf3DPrimIdentityTm
-0x00398600	sdfPadButtonMasks	inferred	confidence=high; src/dds1/game/code_002DDC98.c:sdfPadBuildButtonStates; Per-button mask table used to build controller button state. [names_qp9.tsv]
+0x00398600	sdfPadButtonMasks	inferred	confidence=high; src/dds1/game/code_002DDC98.c:sdfPadWork; Per-button mask table used to build controller button state. [names_qp9.tsv]
 0x00398620	sdfPadCb_0	inferred	SMT3HD data name via SLUS_209.11 0x005298C0, 1 agreeing references; was sdfPadCb_0
 0x00398628	dds3PadBitTable	inferred	SMT3HD data name via SLUS_209.11 0x005298C8, 22 agreeing references; was dds3PadBitTable
-0x00398648	sdfPadButtonPressure	inferred	high confidence; src/dds1/game/code_002DDC98.c sdfPadBuildButtonStates(): memcpy(&D_00398648[i * 12], entry->pressure, 12); Twelve pressure bytes copied from each pad-port record into the shared pad state.
+0x00398648	sdfPadButtonPressure	inferred	high confidence; src/dds1/game/code_002DDC98.c sdfPadWork(): memcpy(&D_00398648[i * 12], entry->pressure, 12); Twelve pressure bytes copied from each pad-port record into the shared pad state.
 0x00398660	sdfDevConsFontUvTable	inferred	SMT3HD data name via SLUS_209.11 0x00529900, 3 agreeing references; was sdfDevConsFontUvTable
 0x003987E0	sdfDevConsColorTable	inferred	SMT3HD data name via SLUS_209.11 0x00529A80, 1 agreeing references; was sdfDevConsColorTable
 0x00398820	sdfFileHostRootPath	inferred	SMT3HD data name via SLUS_209.11 0x00529AC0, 3 agreeing references; was sdfFileHostRootPath
@@ -10213,8 +10213,9 @@
 0x003BD374	sdf3DLightDefault	inferred	SMT3HD data name via SLUS_209.11 0x005518B0, 2 agreeing references; was sdf3DLightDefault
 0x003BD378	sdf3DFogDefault	inferred	SMT3HD data name via SLUS_209.11 0x005518B4, 2 agreeing references; was sdf3DFogDefault
 0x003BD388	sdf3DRefMapParam	inferred	SMT3HD data name via SLUS_209.11 0x005518C0, 2 agreeing references; was sdf3DRefMapParam
-0x003BD398	sdfPadPortSlotPairs	inferred	confidence=high; src/dds1/game/code_002DDC98.c:sdfPadInitManager; Port/slot pair array used when opening configured controller ports. [names_qp9.tsv]
-0x003BD3A8	sdfPadAnalogSticks	inferred	high confidence; src/dds1/game/code_002DDC98.c sdfPadBuildButtonStates(): memcpy(&D_003BD3A8[i * 4], entry->stick, 4); Four analog-stick bytes copied from each pad-port record into the shared pad state.
+0x003BD398	sdfPadPortSlotPairs	inferred	SMT3HD name via SLUS_209.11 0x005518D0, sdf_PadManager twin; was sdfPadPortSlotPairs
+0x003BD39C	sdfPadManagerMode	inferred	SMT3HD name via SLUS_209.11 0x005518D4, sdf_PadManager twin; was D_003BD39C
+0x003BD3A8	sdfPadAnalogSticks	inferred	high confidence; src/dds1/game/code_002DDC98.c sdfPadWork(): memcpy(&D_003BD3A8[i * 4], entry->stick, 4); Four analog-stick bytes copied from each pad-port record into the shared pad state.
 0x003BD3C0	devConsTop	inferred	SMT3HD name via SLUS_209.11 0x005518F8, sdfDevCons reference; was D_003BD3C0
 0x003BD3C4	alreadyInitDevCons	inferred	SMT3HD name via SLUS_209.11 0x005518FC, sdfDevCons reference; was D_003BD3C4
 0x003BD3C8	sdfPrintIopFlag	inferred	SMT3HD name via SLUS_209.11 0x00551900, sdfPrint reference; was D_003BD3C8

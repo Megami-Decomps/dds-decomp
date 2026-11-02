@@ -6,7 +6,6 @@ _start = 0x00100008; // type:func
 _ctype_ = 0x00431AD0; // type:u8 size:0x101
 // $gp-relative byte spimdisasm leaves unsymbolized (emits an absolute %lo that encodes wrong)
 // Pad port table in .sdata (pad init reads it as its own 4-byte object)
-D_00438A88 = 0x00438A88; // type:u32
 // func_00254678's three-byte table {7,12,5} inside D_004376C8's sdata blob
 D_004376D0 = 0x004376D0; // type:u8
 // func_00100A28's copy sources/destinations inside D_00435C31's/D_00435C42's sdata blobs
@@ -7642,7 +7641,7 @@ sdfMultiBillBoardVcGetPacketSize = 0x0033C218; // type:func  // dds1 0x002E3368
 sdfMultiBillBoardVcMakeN = 0x0033C240; // type:func
 sdfPadControl = 0x0033C478; // type:func
 sdfPadManager = 0x0033C820; // type:func
-sdfPadBuildButtonStates = 0x0033C878; // type:func
+sdfPadWork = 0x0033C878; // type:func
 sdfPadChangeMode = 0x0033C9F0; // type:func
 sdfPadSetAct0 = 0x0033CA10; // type:func
 sdfPadSetAct1 = 0x0033CA30; // type:func
@@ -8393,6 +8392,7 @@ sdfCameraTm = 0x0040B660; // type:f32 size:0x40
 sdf3DEyeOffset = 0x0040B6A0; // type:f32 size:0x10
 sdf3DPrimDefaultFaceIndex = 0x0040B6B0;
 sdf3DPrimIdentityTm = 0x0040B730;
+sdfPadButtonMasks = 0x0040B7B0;
 sdfPadCb_0 = 0x0040B7D0; // dds1 0x00398620
 dds3PadBitTable = 0x0040B7D8; // dds1 0x00398628
 sdfPadButtonPressure = 0x0040B7F8;
@@ -8785,6 +8785,8 @@ sdfFaceDivBias = 0x00438A4C; // type:f32
 sdf3DLightDefault = 0x00438A64; // type:u32
 sdf3DFogDefault = 0x00438A68; // type:u32
 sdf3DRefMapParam = 0x00438A78; // type:u32 size:0x8
+sdfPadPortSlotPairs = 0x00438A88; // type:u32
+sdfPadManagerMode = 0x00438A8C;
 sdfPadAnalogSticks = 0x00438A98;
 devConsTop = 0x00438AB0;
 alreadyInitDevCons = 0x00438AB4;
