@@ -43,11 +43,18 @@ typedef struct sdfGsMemSlice_t
     s32 pixelFormat;
 } sdfGsMemSlice_t;
 
+/* DDS counts a texture's references; a duplicate's origin owns the pixels. */
+typedef struct sdfTexRef_t
+{
+    struct sdfTexHandle_t *origin;
+    s32 refCount;
+} sdfTexRef_t;
+
 typedef struct sdfTexHandle_t
 {
     struct sdfTexHandle_t *prev;
     struct sdfTexHandle_t *next;
-    struct sdfTexHandle_t *origin; /* unconfirmed */
+    sdfTexRef_t *ref;
     s16 width;
     s16 height;
     sdfGsMemSlice_t *pixelGsHandle;
