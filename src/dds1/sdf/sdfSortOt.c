@@ -1,28 +1,5 @@
-#include "sdk_ps2.h"
-#include "sdf_line_pair_packet_api.h"
 #include "common.h"
-#include "sdf_vu0.h"
-#include "sdf_vu_matrix.h"
-#include "sdf_thread_workspace_api.h"
-#include "sdf_timer.h"
-#include "sdf_chip.h"
-#include "sdf.h"
-#include "sdf_semaphore_api.h"
-#include "pcp_vu0.h"
-#include "sdf_draw.h"
-#include "sdf_projection.h"
-#include "ee_mmi.h"
-#include "sdf_texture_file.h"
-#include "sdf_named_resource_request_api.h"
-#include "sce_io.h"
-#include "sdf_dev_state.h"
-#include "sdf_dev_event.h"
-#include "sdf_pac_state.h"
-#include "sdf_pac_decoder.h"
-#include "sdf_pac_work.h"
-#include "sdf_key_pool.h"
-#include "sdf_packet_alloc.h"
-#include "sdf_stream_state.h"
+#include "ps2asm.h"
 
 enum {
     SDF_TMX_MAGIC = 0x30584D54,
@@ -37,9 +14,369 @@ enum {
     SDF_POOL_PUSH_FREE = 1
 };
 
-/* Rebalance a right-heavy parent using its heavy child; return the new subtree root. */
-sdfSortOtNode_tag *sdfSortOtAvlRotateLR(sdfSortOtNode_tag *heavyChild, sdfSortOtNode_tag *parent) {
-    sdfSortOtNode_tag *childRoot = heavyChild;
+
+struct sdfDrawTag_t;
+
+struct sdfSortOtNode_tag;
+
+struct sdfGrOt_t;
+
+#define SDF_POOL_FREE_KIND 0xFFFF
+
+#define SDK_SKIP_SleepThread
+#include "sdk_libkernl.h"
+
+extern void SleepThread(void);
+
+extern s32 sceSifLoadModule(const char *, s32, const char *);
+
+extern char *strcpy(char *, const char *);
+
+extern char *strcat(char *, const char *);
+
+extern void sceMcInit(void);
+
+extern void sdfGrJoinDrawTag(void *aFore, void *aBack);
+
+/* Pool release logic tests the packet head address and kind at 0xC;
+ * bytes at 0x8 remain opaque. The float-key tree insertion helper reads the
+ * same +0xC word through sdfDrawTag_t. DDS1/2 game/code_002EEA18/003478C0.c. */
+typedef struct sdfDrawTag_t {
+    struct sdfDrawTag_t *next; /* 0x00: also the replaced item in the key tree */
+    s32 head;                  /* 0x04: first DMA packet address. */
+    u8 tail[4];                /* 0x08 */
+    f32 z;                     /* 0x0C: the sort key; the pool reads its bits */
+} sdfDrawTag_t;
+
+typedef struct sdfSortOtNode_tag {
+    struct sdfSortOtNode_tag *right; /* 0x00 */
+    struct sdfSortOtNode_tag *left;  /* 0x04 */
+    struct sdfDrawTag_t *tag;  /* 0x08 */
+    s32 balance;                  /* 0x0C */
+} sdfSortOtNode_tag;
+
+/* A key-sorted draw-surface pool: a draw tag whose append and prepend
+ * callbacks release a node into the pool and update its free list. */
+typedef struct sdfGrOt_t {
+    void *next;                                                /* 0x00: the pool entry's link */
+    sdfDrawTag_t *tagHead;                                     /* 0x04: first node in the emitted chain */
+    sdfDrawTag_t *tagTail;                                     /* 0x08: last node in the emitted chain */
+    sdfDrawTag_t *noSortTag;                                   /* 0x0C: the free list */
+    void (*regFunc)(struct sdfGrOt_t *, sdfDrawTag_t *);       /* 0x10 */
+    void (*callbackFunc)(struct sdfGrOt_t *, s32, sdfDrawTag_t *); /* 0x14 */
+    sdfSortOtNode_tag *data[1];                                /* 0x18: first key-tree root; the allocation continues */
+} sdfGrOt_t;
+
+/* Reserve size bytes from the active packet buffer, rounded up to 16 bytes.
+ * Returns the prior cursor as a 32-bit address; the buffer owns this storage. */
+s32 sdfGrAllocPacketBuff(s32 aSize);
+
+extern s32 WaitSema(s32);
+
+extern void FlushCache(s32);
+
+extern s32 SignalSema(s32);
+
+extern s32 sceSifDmaStat(s32);
+
+extern s32 GetThreadId(void);
+
+extern void *memcpy(void *, const void *, unsigned int);
+
+sdfSortOtNode_tag *sdfSortOtAvlRotateLR(sdfSortOtNode_tag *node, sdfSortOtNode_tag *parent);
+
+sdfSortOtNode_tag *sdfSortOtAvlRotateRL(sdfSortOtNode_tag *node, sdfSortOtNode_tag *parent);
+
+void sdfSortOtAvlCheckBalance(sdfSortOtNode_tag **stack, s32 stack_depth, sdfSortOtNode_tag *node,
+                   sdfSortOtNode_tag **root_p);
+
+void sdfSortOtAvlRegist(sdfSortOtNode_tag **root_p, sdfDrawTag_t *tag);
+
+void sdfGrSortOtReg(sdfGrOt_t *aOt, sdfDrawTag_t *aTag);
+
+void sdfGrSortOtFixup(void *tag, sdfDrawTag_t **head_p, sdfDrawTag_t **tail_p);
+
+void sdfGrSortOtTraverse(sdfSortOtNode_tag *node, sdfDrawTag_t **head_p, sdfDrawTag_t **tail_p);
+
+void sdfGrSortOtSetup(sdfGrOt_t *aOt);
+
+void sdfGrSortOtCallback(sdfGrOt_t *aOt, s32 aFunc, sdfDrawTag_t *aData);
+
+typedef struct _reent _reent;
+
+typedef __builtin_va_list va_list;
+
+typedef struct __sbuf {
+    u8 *_base;
+    s32 _size;
+} __sbuf;
+
+typedef struct __sFILE {
+    u8 *_p;
+    s32 _r;
+    s32 _w;
+    s16 _flags;
+    s16 _file;
+    __sbuf _bf;
+    s32 _lbfsize;
+    void *_cookie;
+    s32 (*_read)(void *cookie, char *buf, s32 n);
+    s32 (*_write)(void *cookie, const char *buf, s32 n);
+    long (*_seek)(void *cookie, s32 offset, s32 whence);
+    s32 (*_close)(void *cookie);
+    __sbuf _ub;
+    u8 *_up;
+    s32 _ur;
+    u8 _ubuf[3];
+    u8 _nbuf[1];
+    __sbuf _lb;
+    s32 _blksize;
+    s32 _offset;
+    _reent *_data;
+} FILE;
+
+typedef struct __siov {
+    void *iov_base;
+    u32 iov_len;
+} __siov;
+
+typedef struct __suio {
+    __siov *uio_iov;
+    s32 uio_iovcnt;
+    s32 uio_resid;
+} __suio;
+
+typedef struct _Bigint {
+    struct _Bigint *next;
+    s32 k;
+    s32 maxwds;
+    s32 sign;
+    s32 wds;
+    u32 x[1];
+} _Bigint;
+
+typedef struct _glue {
+    struct _glue *next;
+    s32 niobs;
+    FILE *iobs;
+} _glue;
+
+/* libgcc frame-dwarf2.c's object list node. __register_frame_info stores the
+ * FDE base and clears the rest; __register_frame allocates one of these. */
+typedef struct object {
+    void *pc_begin;
+    void *pc_end;
+    void *fde_begin;
+    void *fde_array;
+    void *count;
+    struct object *next;
+} object;
+
+/* libgcc's fde_vector, as add_fdes fills it. */
+typedef struct fde_vector {
+    u32 **array;
+    s32 count;
+} fde_vector;
+
+typedef struct _atexit {
+    struct _atexit *_next;
+    s32 _ind;
+    void (*_fns[32])(void);
+} _atexit;
+
+struct _reent {
+    s32 _errno;
+    FILE *_stdin;
+    FILE *_stdout;
+    FILE *_stderr;
+    s32 _inc;
+    char _emergency[25];
+    s32 _current_category;
+    const char *_current_locale;
+    s32 __sdidinit;
+    void (*__cleanup)(struct _reent *r);
+    _Bigint *_result;
+    s32 _result_k;
+    _Bigint *_p5s;
+    _Bigint **_freelist;
+    u8 _unused[0xF8];
+    _atexit *_atexit;
+    _atexit _atexit0;
+    void (**_sig_func)(s32 sig);
+    struct _glue __sglue;
+    FILE __sf[3];
+};
+
+extern _reent *_impure_ptr __attribute__((section(".data")));
+
+extern s32 _puts_r(_reent *r, const char *s);
+
+extern s32 _raise_r(_reent *r, s32 sig);
+
+extern void *_signal_r(_reent *r, s32 sig, void *handler);
+
+extern s32 _setlocale_r(_reent *r, s32 category, const char *locale);
+
+extern void *func_002DA308(_reent *r);
+
+extern void _cleanup_r(_reent *r);
+
+extern s32 fflush(void *fp);
+
+extern s32 _fwalk(_reent *r, s32 (*func)(void *));
+
+extern s32 libc_2DC670(void);
+
+extern long _strtol_r(_reent *r, const char *s, char **end, s32 base);
+
+extern long strtol(const char *s, char **end, s32 base);
+
+extern s32 raise(s32 sig);
+
+extern void func_001001C8(s32 code) __attribute__((noreturn));
+
+extern u8 D_0054B8D8[] __attribute__((section(".data")));
+
+extern s32 D_00552178 __attribute__((section(".data")));
+
+extern s32 D_0052C28C __attribute__((section(".data")));
+
+extern s32 D_0052C288 __attribute__((section(".data")));
+
+extern s32 D_0052C378 __attribute__((section(".data")));
+
+extern s32 _init_signal_r(_reent *r);
+
+extern void gcc2_compiled__2(FILE *fp, s32 flags, s32 file, _reent *data);
+
+extern _glue *__sfmoreglue(_reent *r, s32 n);
+
+extern s32 __sigtramp_r(_reent *r, s32 sig);
+
+extern void *__deregister_frame_info(void *fn);
+
+extern void free(void *ptr);
+
+extern void *malloc(u32 size);
+
+extern void __malloc_lock(_reent *r);
+
+extern void __malloc_unlock(_reent *r);
+
+extern void *_malloc_r(_reent *r, u32 size);
+
+extern void _free_r(_reent *r, void *ptr);
+
+extern s32 SignalSema(s32 sema);
+
+extern void *sbrk(s32 incr);
+
+extern s32 close(s32 fd);
+
+extern _Bigint *_Balloc(_reent *r, s32 k);
+
+extern s32 __register_frame_info(void *fn, void *entry);
+
+extern s32 __register_frame_info_table(void *fn, void *entry);
+
+extern s32 write(s32 fd, const void *buf, s32 count);
+
+extern s32 read(s32 fd, void *buf, s32 count);
+
+extern long lseek(s32 fd, s32 offset, s32 whence);
+
+extern s32 fstat(s32 fd, void *buf);
+
+extern s32 kill(s32 pid, s32 sig);
+
+extern long _read_r(_reent *r, s32 fd, char *buf, s32 n);
+
+extern long _write_r(_reent *r, s32 fd, const char *buf, s32 n);
+
+extern long _lseek_r(_reent *r, s32 fd, s32 offset, s32 whence);
+
+extern s32 __sfvwrite(FILE *fp, __suio *uio);
+
+extern s32 __sread(void *cookie, char *buf, s32 n);
+
+extern s32 __swrite(void *cookie, const char *buf, s32 n);
+
+extern long __sseek(void *cookie, s32 offset, s32 whence);
+
+extern s32 __sclose(void *cookie);
+
+extern s32 GetThreadId(void);
+
+extern s32 WaitSema(s32 sema);
+
+extern s32 vfprintf(FILE *fp, const char *fmt, va_list ap);
+
+extern void *memset(void *a, s32 b, u32 c);
+
+extern void *_calloc_r(_reent *r, u32 n, u32 size);
+
+extern const double D_0054B930[];
+
+extern void abort(void);
+
+extern s32 __do_global_ctors(void);
+
+extern s32 atexit(void (*fn)(void));
+
+extern void (**D_0052BB28)(void) __attribute__((section(".data")));
+
+extern s32 D_0052BB2C __attribute__((section(".data")));
+
+extern s32 D_0052C37C __attribute__((section(".data")));
+
+extern u8 D_0052D940[] __attribute__((section(".data")));
+
+extern void (*D_002F5600[])(void) __attribute__((section(".data")));
+
+extern s32 D_0059AD58 __attribute__((section(".data")));
+
+extern object *D_0059AD60 __attribute__((section(".data")));
+
+typedef struct fp_number_type {
+    s32 class;
+    s32 sign;
+    s32 normal_exp;
+    u32 fraction;
+} fp_number_type;
+
+extern void sdfUnpackFloat(const void *x, fp_number_type *u);
+
+extern f32 sdfPackFloat(const fp_number_type *u);
+
+extern long __make_dp(s32 kind, s32 sign, s32 exp, long mant);
+
+#define va_start(ap, last) __builtin_stdarg_start((ap), last)
+
+extern s32 func_002D6678(_reent *r, FILE *fp, const char *fmt, va_list ap);
+
+typedef union f32_bits {
+    f32 f;
+    u32 u;
+} f32_bits;
+
+/* The same record from the double-precision build of fp-bit.c. */
+typedef struct fp_number_type_df {
+    s32 class;
+    s32 sign;
+    s32 normal_exp;
+    long fraction;
+} fp_number_type_df;
+
+extern long __pack_df(const fp_number_type_df *u);
+
+extern void sdfUnpackDouble(const double *x, fp_number_type_df *u);
+
+extern fp_number_type_df *libc_2D1590(const fp_number_type_df *a, const fp_number_type_df *b, fp_number_type_df *r);
+
+extern long __fpcmp_parts_df(const fp_number_type_df *a, const fp_number_type_df *b);
+
+sdfSortOtNode_tag *sdfSortOtAvlRotateLR(sdfSortOtNode_tag *node, sdfSortOtNode_tag *parent) {
+    sdfSortOtNode_tag *childRoot = node;
     sdfSortOtNode_tag *pivot;
 
     if (childRoot->balance < 0) {
@@ -66,9 +403,8 @@ sdfSortOtNode_tag *sdfSortOtAvlRotateLR(sdfSortOtNode_tag *heavyChild, sdfSortOt
     return pivot;
 }
 
-/* Rebalance a left-heavy parent using its heavy child; return the new subtree root. */
-sdfSortOtNode_tag *sdfSortOtAvlRotateRL(sdfSortOtNode_tag *heavyChild, sdfSortOtNode_tag *parent) {
-    sdfSortOtNode_tag *childRoot = heavyChild;
+sdfSortOtNode_tag *sdfSortOtAvlRotateRL(sdfSortOtNode_tag *node, sdfSortOtNode_tag *parent) {
+    sdfSortOtNode_tag *childRoot = node;
     sdfSortOtNode_tag *pivot;
 
     if (childRoot->balance > 0) {
@@ -95,17 +431,16 @@ sdfSortOtNode_tag *sdfSortOtAvlRotateRL(sdfSortOtNode_tag *heavyChild, sdfSortOt
     return pivot;
 }
 
-/* Walk the insertion path upward, updating balance flags and reconnecting a rotated subtree. */
-void sdfSortOtAvlCheckBalance(sdfSortOtNode_tag **path, s32 depth, sdfSortOtNode_tag *child,
-                   sdfSortOtNode_tag **root) {
+void sdfSortOtAvlCheckBalance(sdfSortOtNode_tag **stack, s32 stack_depth, sdfSortOtNode_tag *node,
+                   sdfSortOtNode_tag **root_p) {
     sdfSortOtNode_tag *parent;
     sdfSortOtNode_tag *replacement = NULL;
     s32 balance;
 
-    if (depth > 0) {
+    if (stack_depth > 0) {
         do {
-            parent = path[--depth];
-            if (child == parent->right) {
+            parent = stack[--stack_depth];
+            if (node == parent->right) {
                 balance = ++parent->balance;
             } else {
                 balance = --parent->balance;
@@ -114,142 +449,135 @@ void sdfSortOtAvlCheckBalance(sdfSortOtNode_tag **path, s32 depth, sdfSortOtNode
                 return;
             }
             if (balance > 1) {
-                replacement = sdfSortOtAvlRotateLR(child, parent);
+                replacement = sdfSortOtAvlRotateLR(node, parent);
                 break;
             }
             if (balance < -1) {
-                replacement = sdfSortOtAvlRotateRL(child, parent);
+                replacement = sdfSortOtAvlRotateRL(node, parent);
                 break;
             }
-            child = parent;
-        } while (depth > 0);
+            node = parent;
+        } while (stack_depth > 0);
     }
-    if (depth > 0) {
-        sdfSortOtNode_tag *ancestor = path[--depth];
+    if (stack_depth > 0) {
+        sdfSortOtNode_tag *ancestor = stack[--stack_depth];
         if (ancestor->right == parent) {
             ancestor->right = replacement;
         } else {
             ancestor->left = replacement;
         }
     } else if (replacement != NULL) {
-        *root = replacement;
+        *root_p = replacement;
     }
 }
 
-/* Insert `item` into the key-ordered tree; an equal key swaps the item in place. */
-void sdfSortOtAvlRegist(sdfSortOtNode_tag **tree, SdfKeyPoolNode *item) {
+void sdfSortOtAvlRegist(sdfSortOtNode_tag **root_p, sdfDrawTag_t *tag) {
     sdfSortOtNode_tag *path[SDF_KEY_TREE_PATH_LIMIT];
     s32 depth = 0;
-    sdfSortOtNode_tag **link = tree;
-    sdfSortOtNode_tag *cur = *tree;
+    sdfSortOtNode_tag **link = root_p;
+    sdfSortOtNode_tag *cur = *root_p;
     sdfSortOtNode_tag *node;
-    f32 key = item->key;
+    f32 key = tag->z;
 
     while (cur != NULL) {
-        f32 currentKey = cur->item->key;
-
-        if (key == currentKey) {
-            item->next = cur->item;
-            cur->item = item;
+        if (key == cur->tag->z) {
+            tag->next = cur->tag;
+            cur->tag = tag;
             return;
         }
         path[depth] = cur;
         depth++;
-        if (currentKey < key) {
+        if (cur->tag->z < key) {
             link = &cur->right;
         } else {
             link = &cur->left;
         }
         cur = *link;
     }
-    item->next = NULL;
+    tag->next = NULL;
     node = sdfGrAllocPacketBuff(0x10);
     node->right = NULL;
     node->left = NULL;
-    node->item = item;
+    node->tag = tag;
     *link = node;
     node->balance = 0;
     if (depth != 0) {
-        sdfSortOtAvlCheckBalance(path, depth, node, tree);
+        sdfSortOtAvlCheckBalance(path, depth, node, root_p);
     }
 }
 
-void sdfGrSortOtReg(SdfPool *pool, SdfKeyPoolNode *node) {
-    if (node->packetHeadAddress != 0) {
-        if (node->kind == SDF_POOL_FREE_KIND) {
-            node->next = pool->freeHead;
-            pool->freeHead = node;
+void sdfGrSortOtReg(sdfGrOt_t *aOt, sdfDrawTag_t *aTag) {
+    if (aTag->head != 0) {
+        if (*(s32 *)&aTag->z == SDF_POOL_FREE_KIND) {
+            aTag->next = aOt->noSortTag;
+            aOt->noSortTag = aTag;
         } else {
-            sdfSortOtAvlRegist(pool->keyTree, node);
+            /* The key tree views the pool node's +0xC word as its float key. */
+            sdfSortOtAvlRegist(aOt->data, aTag);
         }
     }
 }
 
-extern void sdfGrJoinDrawTag(void *left, void *right);
+void sdfGrSortOtFixup(void *tag, sdfDrawTag_t **head_p, sdfDrawTag_t **tail_p) {
+    sdfDrawTag_t *current;
+    sdfDrawTag_t *next;
 
-/* Append a pool-node chain after the list's tail, or make it the head of an empty list, then advance the tail to the chain's last node. */
-void sdfGrSortOtFixup(void *first, SdfKeyPoolNode **head, SdfKeyPoolNode **tail) {
-    SdfKeyPoolNode *current;
-    SdfKeyPoolNode *next;
-
-    if (first != NULL) {
-        if (*tail == NULL) {
-            *head = first;
+    if (tag != NULL) {
+        if (*tail_p == NULL) {
+            *head_p = tag;
         } else {
-            sdfGrJoinDrawTag(*tail, first);
+            sdfGrJoinDrawTag(*tail_p, tag);
         }
-        current = first;
+        current = tag;
         while ((next = current->next) != NULL) {
             sdfGrJoinDrawTag(current, next);
             current = next;
         }
-        *tail = current;
+        *tail_p = current;
     }
 }
 
-/* Append items in descending key order (right, item, left). The starting node must be non-null. */
-void sdfGrSortOtTraverse(sdfSortOtNode_tag *node, SdfKeyPoolNode **head, SdfKeyPoolNode **tail) {
+void sdfGrSortOtTraverse(sdfSortOtNode_tag *node, sdfDrawTag_t **head_p, sdfDrawTag_t **tail_p) {
     sdfSortOtNode_tag *next;
 
     do {
         if (node->right != NULL) {
-            sdfGrSortOtTraverse(node->right, head, tail);
+            sdfGrSortOtTraverse(node->right, head_p, tail_p);
         }
-        sdfGrSortOtFixup(node->item, head, tail);
+        sdfGrSortOtFixup(node->tag, head_p, tail_p);
         next = node->left;
         node = next;
     } while (next != NULL);
 }
 
-/* Rebuild the pool's chain: collect the free list's chain, then append every key tree node's chain, and store the resulting head and tail. */
-void sdfGrSortOtSetup(SdfPool *pool) {
-    SdfKeyPoolNode *head = NULL;
-    SdfKeyPoolNode *tail = NULL;
+void sdfGrSortOtSetup(sdfGrOt_t *aOt) {
+    sdfDrawTag_t *head = NULL;
+    sdfDrawTag_t *tail = NULL;
 
-    sdfGrSortOtFixup(pool->freeHead, &head, &tail);
-    if (pool->keyTree[0] != NULL) {
-        sdfGrSortOtTraverse(pool->keyTree[0], &head, &tail);
+    sdfGrSortOtFixup(aOt->noSortTag, &head, &tail);
+    if (aOt->data[0] != NULL) {
+        sdfGrSortOtTraverse(aOt->data[0], &head, &tail);
     }
-    pool->head = head;
-    pool->tail = tail;
+    aOt->tagHead = head;
+    aOt->tagTail = tail;
 }
 
-void sdfGrSortOtCallback(SdfPool *pool, s32 mode, SdfKeyPoolNode *freeNode) {
-    switch (mode) {
+void sdfGrSortOtCallback(sdfGrOt_t *aOt, s32 aFunc, sdfDrawTag_t *aData) {
+    switch (aFunc) {
     case SDF_POOL_REBUILD_CHAIN:
-        sdfGrSortOtSetup(pool);
+        sdfGrSortOtSetup(aOt);
         break;
     case SDF_POOL_PUSH_FREE:
-        if (freeNode->packetHeadAddress != 0) {
-            freeNode->next = pool->freeHead;
-            pool->freeHead = freeNode;
+        if (aData->head != 0) {
+            aData->next = aOt->noSortTag;
+            aOt->noSortTag = aData;
         }
         break;
     }
 }
 
-void sdfModelSetOtCallbacks(SdfPool *pool) {
-    pool->release = sdfGrSortOtReg;
-    pool->update = sdfGrSortOtCallback;
+void sdfModelSetOtCallbacks(sdfGrOt_t *aOt) {
+    aOt->regFunc = sdfGrSortOtReg;
+    aOt->callbackFunc = sdfGrSortOtCallback;
 }
 
