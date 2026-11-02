@@ -147,7 +147,7 @@ segments:
       - [0x8A0D8, c, game/code_001890D8]
       - [0x8A3C0, c, effect/effMagatuhi]  # Nocturne __FILE__
       - [0x8DAC8, c, game/code_0018CAC8]
-      - [0x8EF90, c, effect/effMath]  # Nocturne __FILE__
+      - [0x8EBD8, c, effect/effMath]  # Nocturne __FILE__
       - [0x8F218, c, effect/effEvent]  # Nocturne __FILE__ (TU starts at 0x8F218: func_00190708 needs func_00190118 compiled earlier)
       - [0x93488, c, game/code_00192488]
       - [0x94B70, c, interface/fmGslCont]  # Nocturne __FILE__
@@ -493,8 +493,7 @@ segments:
       - [0x2BA324, .lit4, game/code_00187DB0]
       - [0x2BA32C, .lit4, game/code_001890D8]
       - [0x2BA334, .lit4, effect/effMagatuhi]
-      - [0x2BA368, .lit4, game/code_0018CAC8]
-      - [0x2BA36C, .lit4, effect/effMath]
+      - [0x2BA368, .lit4, effect/effMath]
       - [0x2BA370, .lit4, effect/effEvent]
       - [0x2BA3A0, .lit4, game/code_00192488]
       - [0x2BA3A8, .lit4, game/code_0019DB88]

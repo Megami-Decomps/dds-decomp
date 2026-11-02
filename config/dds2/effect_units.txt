@@ -9,3 +9,5 @@
 0x0017DD50 effect/effPCPNeedle
 0x0017ED78 effect/effPCPMisc
 0x0018C078 -
+0x00195810 effect/effMath
+0x00195E50 -
