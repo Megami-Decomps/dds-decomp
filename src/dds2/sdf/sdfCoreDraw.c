@@ -1,386 +1,315 @@
-#include "sdk_ps2.h"
-#include "sdf_gs_header.h"
-#include "eeregs.h"
 #include "common.h"
-#include "sdf_vu0.h"
-#include "sdf_vu_matrix.h"
-#include "sdf_pad_entry.h"
-#include "sdf_pad_index.h"
-#include "sdf_pad_mode_api.h"
-#include "sdf_pad_motor_api.h"
-#include "sdf_cons_matrix_packet.h"
-#include "sdf_dma_packet_header.h"
-#include "kwln.h"
-#include "sdf_asset_packets.h"
-#include "sdf_asset_state.h"
-#include "sdf_vu_lighting.h"
-#include "sdf_chip.h"
-#include "sdf_packet_list.h"
-#include "sdf_packet_header.h"
-#include "sdf_packet_append.h"
-#include "sdf_heap_api.h"
-#include "sdf_primitive_packet_api.h"
-#include "sdf.h"
-#include "sdf_draw.h"
-#include "sdf_request.h"
-#include "sdf_model.h"
-#include "sdf_projection.h"
-#include "pcp_vu0.h"
-#include "sdf_vu_transform_api.h"
-#include "ee_mmi.h"
-#include "fpu.h"
-#include "sdf_texture_file.h"
-#include "sdf_column_packet_api.h"
-#include "sdf_lookup_texture.h"
-#include "sdf_compact_vertex_vif_packet.h"
-#include "sdf_dev_console_node.h"
-#include "btl.h"
-#include "sdf_packet_alloc.h"
+#include "eeregs.h"
+#include "ps2asm.h"
+#include "model.h"
+#include "draw3d.h"
 
 #define SDF_DMA_QWORD_SHIFT 4
-
 #define SDF_DMA_CHCR_TTE 0x40
 
-extern const struct SdfDmaTagHeader *corePktCurrLight;
-
-extern u32 corePktCurrFog;
-
+extern u32 corePktCurrLight;
 extern f32 corePktZBias;
-
+extern u32 corePktCurrFog;
+extern u128 corePktFogParm;
 extern u8 vu0MicroPacket[];
-
 extern u8 vu1MicroPacket[];
-
+extern s32 corePktPointBuff;
 extern sdfMemHandle_t *sdfCoreDrawBuffHandle;
 
-extern s32 corePktPointBuff;
+extern s32 sceDmaSync(void *, s32, s32);
+extern void *sceDmaGetChan(s32);
+extern void sceDmaSendN(void *, void *, s32);
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
+extern void sdfMemFreeHandleDirect(sdfMemHandle_t **handle);
+extern void *sdfMemLock(sdfMemHandle_t *handle);
+extern u8 *sdfModelAllocTmPacket(sdfModelNode_t *node);
 
+/* NON_MATCHING: 70 of 583 words match, first difference at +0x18. The frame,
+ * stack slots, block layout and seven of the nine callee-saved roles are
+ * retail's; node and packetData hold each other's register. */
 #ifdef NON_MATCHING
-#include "sdf_gs_header.h"
-#include "eeregs.h"
-#include "common.h"
-#include "sdf_vu_matrix.h"
-#include "sdf_pad_entry.h"
-#include "sdf_pad_mode_api.h"
-#include "sdf_cons_matrix_packet.h"
-#include "sdf_dma_packet_header.h"
-#include "kwln.h"
-#include "sdf_asset_packets.h"
-#include "sdf_asset_state.h"
-#include "sdf_vu_lighting.h"
-#include "sdf_chip.h"
-#include "sdf_packet_list.h"
-#include "sdf_packet_header.h"
-#include "sdf_packet_append.h"
-#include "sdf_heap_api.h"
-#include "sdf_primitive_packet_api.h"
-#include "sdf_primitive_packet_api.h"
-#include "sdf.h"
-#include "sdf_draw.h"
-#include "sdf_request.h"
-#include "sdf_model.h"
-#include "sdf_projection.h"
-#include "pcp_vu0.h"
-#include "sdf_vu_transform_api.h"
-#include "ee_mmi.h"
-#include "fpu.h"
-#include "sdf_texture_file.h"
-#include "sdf_column_packet_api.h"
-#include "sdf_lookup_texture.h"
-#include "sdf_compact_vertex_vif_packet.h"
-#include "sdf_dev_console_node.h"
-#include "sdf_packet_alloc.h"
-#include "sdfCorePacketCb_t.h"
+typedef struct sdfCorePacketPointBuff_tag sdfCorePacketPointBuff_tag;
+typedef struct sdfCorePacketFaceDivParm_t sdfCorePacketFaceDivParm_t;
+#define CORE_ALIGN16(p) ((u8 *)(((u32)(p) + 15) & ~15))
+extern sdfCorePacketFaceDivParm_t corePktFaceDivParm;
+extern sdfMatrix4_t sdf3DScreenTm;
+extern u128 coreLightConst1, coreLightConst2;
+void MultMatrixRev(void *matrix);
+void corePktInitCb(corePktCb_t *cb, u16 *header, u32 attrMask);
+void corePktSetFaceDivParm(sdfCorePacketFaceDivParm_t *, sdfMatPacket_t *, u32, f32, f32);
+void corePktLoadWorldLightMtx(void *matrix);
+u8 *corePktVu0Run(sdfCorePacketPointBuff_tag *dst, const void *src, s32 count, s32 offset, s32 stride);
+void corePktOpenAndEmit(corePktCb_t *cb);
+u64 *corePktClosePacket(corePktCb_t *cb);
+void corePktSkinPointsFirst(sdfCorePacketPointBuff_tag *, s32, const f32 *, const f32 *, const u32 *);
+void corePktSkinPointsAccum(sdfCorePacketPointBuff_tag *, s32, const f32 *, const f32 *, const u32 *);
+void corePktSkinVertFirst(sdfCorePacketPointBuff_tag *, s32, const f32 *, const f32 *, const u32 *);
+void corePktSkinVertAccum(sdfCorePacketPointBuff_tag *, s32, const f32 *, const f32 *, const u32 *);
+void corePktNormalizeNorms(sdfCorePacketPointBuff_tag *, s32);
+void corePktLoadVerts(u8 *, s32, const u32 *);
+void corePktLoadVertsNorms(sdfCorePacketPointBuff_tag *, s32, const u32 *, const u32 *);
+void corePktMorphVerts(sdfCorePacketPointBuff_tag *, s32, const u32 *, f32);
+void corePktMorphVertsNorms(sdfCorePacketPointBuff_tag *, s32, const u32 *, const u32 *, f32);
+void corePktXfmLightClip(sdfCorePacketPointBuff_tag *, s32, const u32 *, const u32 *);
+void corePktXfmLightClipUV(sdfCorePacketPointBuff_tag *, s32, const u32 *, const u32 *, const f32 *, const f32 *);
+void corePktXfmLightClipPB(sdfCorePacketPointBuff_tag *, s32);
+void corePktXfmLightClipUVPB(sdfCorePacketPointBuff_tag *, s32, const f32 *, const f32 *);
 
 
-
-/* vf1 = (1, 1, 1, -1) from vf0 = (0, 0, 0, 1). */
-#define MODEL_VU_INITIALIZE_PLANE(vf) __asm__ volatile ( \
-    ".set noreorder\n\tvaddw.xyz " #vf ", vf0, vf0w\n\t" \
-    "vsubw.w " #vf ", vf0, vf0w\n\t.set reorder")
-extern void corePktInitCb(sdfCorePacketCb_t *work, u16 *parameterWords, u32 selectionMask);
-extern void corePktSetFaceDivParm(void *out, SdfAssetEntry *entry, u32 packedColor, f32 deltaX, f32 deltaY);
-extern void corePktLoadWorldLightMtx(u8 *matrix);
-extern void corePktOpenAndEmit(sdfCorePacketCb_t *work);
-extern u32 corePktClosePacket(sdfCorePacketCb_t *work);
-extern s32 corePktVu0Run(u32 dmaBase, s32 cursor, s32 count, s32 a, s32 b);
-extern void corePktSkinPointsFirst(u32 dmaBase, s32 count, s32 vertices, s32 first, s32 second);
-extern void corePktSkinPointsAccum(u32 dmaBase, s32 count, s32 vertices, s32 first, s32 second);
-extern void corePktSkinVertFirst(u32 dmaBase, s32 count, s32 vertices, s32 first, s32 second);
-extern void corePktSkinVertAccum(u32 dmaBase, s32 count, s32 vertices, s32 first, s32 second);
-extern void corePktLoadVerts(u32 dmaBase, s32 count, s32 first);
-extern void corePktLoadVertsNorms(u32 dmaBase, s32 count, s32 first, s32 second);
-extern void corePktMorphVertsNorms(u32 dmaBase, s32 count, s32 first, s32 second, f32 weight);
-extern void corePktMorphVerts(u32 dmaBase, s32 count, s32 first, f32 weight);
-extern void corePktNormalizeNorms(u32 dmaBase, s32 count);
-extern void corePktXfmLightClip(u32 dmaBase, s32 count, s32 positions, s32 normals);
-extern void corePktXfmLightClipPB(u32 dmaBase, s32 count);
-extern void corePktXfmLightClipUV(u32 dmaBase, s32 count, s32 positions, s32 normals, s32 coordinates, void *transform);
-extern void corePktXfmLightClipUVPB(u32 dmaBase, s32 count, s32 coordinates, void *transform);
-extern u8 sdf3DScreenTm[];
-extern u128 sdfModelColorTransform[3];
-
-#define MODEL_ALIGN16(x) (((x) + 0xF) & ~0xF)
-
-/* VU0 data memory, which the skinning microprogram reads (in quadwords). */
-#define MODEL_VU0_MEMORY ((u128 *)0x11004000)
-
-/* Lay out the node coordinates, second coordinates and vertex colours after
- * cursor, as the parameters select, and return the new cursor. */
-static s32 sdfModelLayOutTexturing(sdfCorePacketCb_t *work, s32 cursor, u32 nextParam, s32 vertexCount) {
-    if (nextParam & 0x100) {
-        work->uvPtr = (u8 *)cursor;
-        cursor = MODEL_ALIGN16(cursor + vertexCount * 8);
-        if (work->orgAttrBits & 0x1000) {
-            work->uv2Ptr = (u8 *)cursor;
-            cursor = MODEL_ALIGN16(cursor + vertexCount * 8);
-        }
-    }
-    work->vertColPtr = (u8 *)cursor;
-    return cursor;
-}
-
-/* The strip indices follow the payload when the parameters select them. */
-static s32 sdfModelLayOutStrip(sdfCorePacketCb_t *work, s32 cursor, u32 nextParam, s32 stripCount) {
-    if (nextParam & 0x20) {
-        work->facePtr = (u8 *)cursor;
-        cursor = MODEL_ALIGN16(cursor + stripCount * 6);
-    }
-    return cursor;
-}
-
-/* Load the node's frame matrix into vf28..vf31, times the view matrix, and
- * rotate the object basis. */
-static void sdfModelLoadNodeMatrix(u8 *matrix) {
-    VU0_LOAD_MATRIX(matrix);
-    MultMatrixRev(sdf3DScreenTm);
-    corePktLoadWorldLightMtx(matrix);
-}
-
-/* Build a kind-3 model command's VU packet for one frame. The resource's
- * kind and parameter word choose how the vertices reach the VU:
- * - kinds 7 and 8 upload matrices and the node's transform to VU0 data
- *   memory for its skinning microprogram (kind 7 with every listed node's
- *   frame workspace, kind 8 with the node's own matrix);
- * - parameter 0x800 blends listed nodes' vertices (with normals for 0x80);
- * - parameter 0x1000 blends a slot pair's two weighted targets;
- * - otherwise the node's own positions (and normals) are used.
- * Then texture coordinates and colours, and the packet is finalized.
- * Upstream: INCLUDE_ASM in DDS1's game/code_002E0820 and DDS2's
- * game/code_003396D0; written from the retail routine and checked path by
- * path. Retail fills each 64-bit transform row's quadword
- * with an ld, leaving the upper half as whatever the register held; the
- * microprogram reads only the row, so this writes zero there. */
-u32 sdfCorePacketGen(sdfModelNode_t *node, void *resourceData, s32 nodeMask, s32 color, f32 offsetX,
-                                    f32 offsetY, s32 frame, s32 flag) {
-    sdfCorePacketCb_t work;
-    u8 *resource = (u8 *)resourceData;
+/* Native driver for generated, skinned and morphing model packets. */
+void *sdfCorePacketGen(sdfModelNode_t *node, void *packetData, u32 attrMask,
+                       u32 color, f32 soften, f32 bias, s32 frame, s32 reverse)
+{
+    corePktCb_t cb;
+    sdfCorePacket_t *packet = packetData;
     s32 frameOffset = frame << 7;
-    u8 *matrix = (u8 *)node->workspace + frameOffset;
-    sdfMat_t **assets;
-    SdfAssetEntry *asset;
-    u32 selected;
-    u32 nextParam;
-    s32 stripCount;
-    s32 vertexCount;
-    u32 dmaBase;
-    s32 cursor;
+    u8 *matrixPacket = (u8 *)node->tmPacket + frameOffset;
+    s32 faceCount, pointCount, packetBits;
+    sdfCorePacketPointBuff_tag *points;
+    u8 *cursor;
+    volatile u128 *vu;
+    u8 *vertices;
+    u32 savedAttrBits;
+    sdfMatPacket_t *matPacket2;
 
-    MODEL_VU_INITIALIZE_PLANE(vf1);
-    corePktInitCb(&work, (u16 *)(resource + 0x10), nodeMask);
-    work.backfaceSign = flag == 0 ? 1.0f : -1.0f;
-    work.color = color;
-    work.fdSoften = offsetX;
-    work.fdBias = offsetY;
-    assets = (sdfMat_t **)node->root->resources->buffer;
-    asset = assets[*(u16 *)(resource + 6)]->drawEntries[frame];
-    work.matPacketPtr = asset;
-    stripCount = (s16)work.faceCount; /* lh */
-    vertexCount = work.pointCount;
-    selected = work.attrBits;
-    nextParam = work.packetBits;
-    corePktSetFaceDivParm(sdfModelColorTransform, asset, work.color, offsetX, offsetY);
-    dmaBase = work.pointBuff;
+    VU0_VF1_ONES_XYZ_ZERO_W();
+    corePktInitCb(&cb, (u16 *)&packet->prim, attrMask);
+    if (reverse == 0) {
+        cb.backfaceSign = 1.0f;
+    } else {
+        cb.backfaceSign = -1.0f;
+    }
+    cb.color = color;
+    cb.fdSoften = soften;
+    cb.fdBias = bias;
+    cb.matPacketPtr = node->root->matList->items[packet->header.matIndex]->packet[frame];
+    matPacket2 = cb.matPacketPtr;
+    savedAttrBits = cb.attrBits;
+    faceCount = cb.faceCount;
+    pointCount = cb.pointCount;
+    packetBits = cb.packetBits;
+    points = cb.pointBuff;
+    corePktSetFaceDivParm(&corePktFaceDivParm, cb.matPacketPtr, color, soften, bias);
 
-    if (resource[0] == 7 || resource[0] == 8) {
-        u128 *vu = MODEL_VU0_MEMORY;
-        s32 transferCount, transferStride;
-
-        if (resource[0] == 7) {
-            u16 *list = (u16 *)work.dataPtr;
-            u16 listCount = *list++;
-            sdfModelNode_t **nodes = (sdfModelNode_t **)node->root->list->buffer;
-            s32 i, k;
-
-            cursor = MODEL_ALIGN16((s32)(list + listCount));
-            work.facePtr = (u8 *)cursor;
-            cursor = MODEL_ALIGN16(cursor + stripCount * 6);
-            for (i = 0; i < 4; i++) {
-                vu[0xDC + i] = ((u128 *)sdf3DScreenTm)[i];
-            }
-            for (i = 0; i < 3; i++) {
-                vu[0xE0 + i] = ((u128 *)corePktCurrLight)[1 + i];
-            }
-            for (i = 0; i < 3; i++) {
-                vu[0xE6 + i] = asset->transforms[0].words[i];
-            }
-            for (i = 0; i < listCount; i++) {
-                u128 *source = (u128 *)((u8 *)nodes[list[i]]->workspace + frameOffset);
-                for (k = 0; k < 7; k++) {
-                    vu[0xC0 + i * 7 + k] = source[k];
-                }
-            }
-            for (i = 0; i < 3; i++) {
-                vu[0xE3 + i] = sdfModelColorTransform[i];
-            }
-            transferCount = listCount * 12 + 20;
-            transferStride = listCount * 28 + 8;
-        } else {
-            s32 i;
-
-            sdfModelLoadNodeMatrix(matrix);
-            VU0_STORE_VF(vf28, &work.tmSave[0]);
-            VU0_STORE_VF_AT_UNCLOBBERED(vf29, 16, &work.tmSave[0]);
-            VU0_STORE_VF_AT_UNCLOBBERED(vf30, 32, &work.tmSave[0]);
-            VU0_STORE_VF_AT_UNCLOBBERED(vf31, 48, &work.tmSave[0]);
-            cursor = MODEL_ALIGN16((s32)work.dataPtr);
-            work.facePtr = (u8 *)cursor;
-            cursor = MODEL_ALIGN16(cursor + stripCount * 6);
-            for (i = 0; i < 3; i++) {
-                vu[0xE6 + i] = asset->transforms[0].words[i];
-            }
-            for (i = 0; i < 3; i++) {
-                vu[0xE3 + i] = sdfModelColorTransform[i];
-            }
-            transferCount = 28;
-            transferStride = 32;
-        }
-        cursor = corePktVu0Run(dmaBase, cursor, vertexCount, transferCount, transferStride);
-        if (work.orgAttrBits & 0x1000) {
-            work.uv2Ptr = (u8 *)cursor;
-            cursor = MODEL_ALIGN16(cursor + vertexCount * 8);
-        }
-        work.vertColPtr = (u8 *)cursor;
-        corePktOpenAndEmit(&work);
-    } else if (nextParam & 0x800) {
-        u16 *list = (u16 *)work.dataPtr;
-        u16 listCount = *list++;
-        sdfModelNode_t **nodes = (sdfModelNode_t **)node->root->list->buffer;
+    if (packet->header.packetType == 7) {
+        u16 *indices = cb.dataPtr;
+        u32 count = *indices++;
+        sdfModelNode_t **nodes = node->root->nodeList->items;
+        volatile u128 *destination;
         s32 i;
+        cursor = CORE_ALIGN16(indices + count);
+        cb.facePtr = cursor;
+        cursor = CORE_ALIGN16(cursor + faceCount * 6);
+        vu = SDF_VU0_DATA_MEMORY;
+        vu[0xDC] = ((const u128 *)&sdf3DScreenTm)[0];
+        vu[0xDD] = ((const u128 *)&sdf3DScreenTm)[1];
+        vu[0xDE] = ((const u128 *)&sdf3DScreenTm)[2];
+        vu[0xDF] = ((const u128 *)&sdf3DScreenTm)[3];
+        vu[0xE0] = ((const u128 *)corePktCurrLight)[1];
+        vu[0xE1] = ((const u128 *)corePktCurrLight)[2];
+        vu[0xE2] = ((const u128 *)corePktCurrLight)[3];
+        PS2_STORE_QUAD_GPR(&vu[0xE6], matPacket2->texTm.q[0]);
+        PS2_STORE_QUAD_GPR(&vu[0xE7], matPacket2->texTm.q[1]);
+        PS2_STORE_QUAD_GPR(&vu[0xE8], matPacket2->texTm.q[2]);
+        destination = vu + 0xC0;
+        for (i = 0; i != count; i++) {
+            const u128 *source = (const u128 *)((u8 *)nodes[*indices++]->tmPacket + frameOffset);
+            destination[0] = source[0];
+            destination[1] = source[1];
+            destination[2] = source[2];
+            destination[3] = source[3];
+            destination[4] = source[4];
+            destination[5] = source[5];
+            destination[6] = source[6];
+            destination += 7;
+        }
+        vu[0xE3] = ((const u128 *)&corePktFaceDivParm)[0];
+        vu[0xE4] = ((const u128 *)&corePktFaceDivParm)[1];
+        vu[0xE5] = ((const u128 *)&corePktFaceDivParm)[2];
+        cursor = corePktVu0Run(points, cursor, pointCount, count * 12 + 0x14,
+                               count * 28 + 8);
+    } else if (packet->header.packetType == 8) {
+        SDF_VU0_LOADMATRIX(matrixPacket);
+        MultMatrixRev(&sdf3DScreenTm);
+        corePktLoadWorldLightMtx(matrixPacket);
+        SDF_VU0_STOREMATRIX(&cb.tmSave);
+        cursor = CORE_ALIGN16(cb.dataPtr);
+        cb.facePtr = cursor;
+        cursor = CORE_ALIGN16(cursor + faceCount * 6);
+        vu = SDF_VU0_DATA_MEMORY;
+        PS2_STORE_QUAD_GPR(&vu[0xE6], matPacket2->texTm.q[0]);
+        PS2_STORE_QUAD_GPR(&vu[0xE7], matPacket2->texTm.q[1]);
+        PS2_STORE_QUAD_GPR(&vu[0xE8], matPacket2->texTm.q[2]);
+        vu[0xE3] = ((const u128 *)&corePktFaceDivParm)[0];
+        vu[0xE4] = coreLightConst1;
+        vu[0xE5] = coreLightConst2;
+        cursor = corePktVu0Run(points, cursor, pointCount, 0x1C, 0x20);
+    } else {
+        goto ordinaryGeometry;
+    }
 
-        cursor = sdfModelLayOutStrip(&work, MODEL_ALIGN16((s32)(list + listCount)), nextParam, stripCount);
-        for (i = 0; i < listCount; i++) {
-            s32 positions = cursor;
-            s32 normals = MODEL_ALIGN16(positions + vertexCount * 16);
-            s32 vertices = (s32)((u8 *)nodes[list[i]]->workspace + frameOffset);
+    if (cb.orgAttrBits & SDF_ATTRBIT_MULTITEX) {
+        cb.uv2Ptr = cursor;
+        cursor = CORE_ALIGN16(cursor + pointCount * 8);
+    }
+    cb.vertColPtr = cursor;
+    corePktOpenAndEmit(&cb);
+    return corePktClosePacket(&cb);
 
-            cursor = normals;
-            if (nextParam & 0x80) {
-                cursor = MODEL_ALIGN16(normals + vertexCount * 12);
+ordinaryGeometry:
+    if (packetBits & SDF_PACKETBIT_BLENDVERT) {
+        u16 *indices = cb.dataPtr;
+        u32 count = *indices++;
+        sdfModelNode_t **nodes = node->root->nodeList->items;
+        s32 i;
+        cursor = CORE_ALIGN16(indices + count);
+        if (packetBits & SDF_PACKETBIT_FACE) {
+            cb.facePtr = cursor;
+            cursor = CORE_ALIGN16(cursor + faceCount * 6);
+        }
+        for (i = 0; i != count; i++) {
+            u8 *normalData;
+            u8 *transform;
+            vertices = cursor;
+            cursor = CORE_ALIGN16(cursor + pointCount * 16);
+            normalData = cursor;
+            transform = (u8 *)nodes[*indices++]->tmPacket + frameOffset;
+            if (packetBits & SDF_PACKETBIT_NORMAL) {
+                cursor = CORE_ALIGN16(cursor + pointCount * 12);
                 if (i == 0) {
-                    corePktSkinPointsFirst(dmaBase, vertexCount, vertices, positions, normals);
+                    corePktSkinPointsFirst(points, pointCount, (const f32 *)transform,
+                                           (const f32 *)vertices, (const u32 *)normalData);
                 } else {
-                    corePktSkinPointsAccum(dmaBase, vertexCount, vertices, positions, normals);
+                    corePktSkinPointsAccum(points, pointCount, (const f32 *)transform,
+                                           (const f32 *)vertices, (const u32 *)normalData);
                 }
             } else if (i == 0) {
-                corePktSkinVertFirst(dmaBase, vertexCount, vertices, positions, normals);
+                corePktSkinVertFirst(points, pointCount, (const f32 *)transform,
+                                     (const f32 *)vertices, (const u32 *)normalData);
             } else {
-                corePktSkinVertAccum(dmaBase, vertexCount, vertices, positions, normals);
+                corePktSkinVertAccum(points, pointCount, (const f32 *)transform,
+                                     (const f32 *)vertices, (const u32 *)normalData);
             }
         }
-        if (nextParam & 0x80) {
-            corePktNormalizeNorms(dmaBase, vertexCount);
+        if (packetBits & SDF_PACKETBIT_NORMAL) corePktNormalizeNorms(points, pointCount);
+        if (packetBits & SDF_PACKETBIT_ST) {
+            cb.uvPtr = cursor;
+            cursor = CORE_ALIGN16(cursor + pointCount * 8);
+            if (cb.orgAttrBits & SDF_ATTRBIT_MULTITEX) {
+                cb.uv2Ptr = cursor;
+                cursor = CORE_ALIGN16(cursor + pointCount * 8);
+            }
         }
-        sdfModelLayOutTexturing(&work, cursor, nextParam, vertexCount);
-        VU0_LOAD_MATRIX(sdf3DScreenTm);
-        VU0_LOAD_VF_AT(vf24, 16, (u128 *)corePktCurrLight);
-        VU0_LOAD_VF_AT(vf25, 32, (u128 *)corePktCurrLight);
-        VU0_LOAD_VF_AT(vf26, 48, (u128 *)corePktCurrLight);
-        if (selected & 0x10) {
-            corePktXfmLightClipUVPB(dmaBase, vertexCount, (s32)work.uvPtr, (u8 *)asset + 0x68);
-        } else {
-            corePktXfmLightClipPB(dmaBase, vertexCount);
+        cb.vertColPtr = cursor;
+        SDF_VU0_LOADMATRIX(&sdf3DScreenTm);
+        VU0_LOAD_VF24_VF25_VF26_AT16(corePktCurrLight);
+    } else if (packetBits & SDF_PACKETBIT_BLENDGRP) {
+        u32 blendCount = packet->header.extData[0];
+        u32 entry = blendCount >> 16;
+        sdfModelMorphList_t *morphs = node->root->morphList;
+        sdfModelMorph_t *morph;
+        s32 normals = packetBits & SDF_PACKETBIT_NORMAL;
+        s32 stride, i;
+        blendCount &= 0xFFFF;
+        cursor = CORE_ALIGN16(cb.dataPtr);
+        if (morphs == NULL) return NULL;
+        if (packetBits & SDF_PACKETBIT_FACE) {
+            cb.facePtr = cursor;
+            cursor = CORE_ALIGN16(cursor + faceCount * 6);
         }
-        corePktOpenAndEmit(&work);
-    } else if (nextParam & 0x1000) {
-        u32 targets = *(u32 *)(resource + 8);
-        s32 slot = targets >> 16;
-        s32 targetCount = targets & 0xFFFF;
-        DevRequest *slots = node->root->slotPairs;
-        u8 *pair;
-        s32 stride;
-        s32 i;
-
-        cursor = MODEL_ALIGN16((s32)work.dataPtr);
-        if (slots == NULL) {
-            return 0;
-        }
-        cursor = sdfModelLayOutStrip(&work, cursor, nextParam, stripCount);
-        if (slot >= slots->usedCount) {
-            return 0;
-        }
-        pair = (u8 *)slots->buffer + slot * 16; /* two (target index, weight) entries */
-        stride = MODEL_ALIGN16(vertexCount * 12);
-        if (nextParam & 0x80) {
-            corePktLoadVertsNorms(dmaBase, vertexCount, cursor, MODEL_ALIGN16(cursor + vertexCount * 12));
+        if ((s32)entry >= morphs->count) return NULL;
+        morph = morphs->items + entry;
+        stride = (pointCount * 12 + 15) & ~15;
+        if (normals) {
+            corePktLoadVertsNorms(points, pointCount, (const u32 *)cursor,
+                                 (const u32 *)CORE_ALIGN16(cursor + pointCount * 12));
             stride *= 2;
         } else {
-            corePktLoadVerts(dmaBase, vertexCount, cursor);
+            corePktLoadVerts((u8 *)points, pointCount, (const u32 *)cursor);
         }
-        for (i = 0; i < 2; i++) {
-            s32 index = ((s32 *)pair)[i * 2];
-            f32 weight = ((f32 *)pair)[i * 2 + 1];
-
-            if (weight > 0.000001f && index < targetCount) {
-                s32 target = cursor + index * stride + stride;
-
-                if (nextParam & 0x80) {
-                    corePktMorphVertsNorms(dmaBase, vertexCount, target, MODEL_ALIGN16(target + vertexCount * 12), weight);
-                } else {
-                    corePktMorphVerts(dmaBase, vertexCount, target, weight);
+        for (i = 0; i != 2; i++) {
+            f32 weight = morph->target[i].blend;
+            if (SDF_CORE_MORPH_EPSILON < weight) {
+                s32 target = morph->target[i].targetId;
+                if (target < (s32)blendCount) {
+                    u8 *delta = cursor + (target + 1) * stride;
+                    if (normals) {
+                        corePktMorphVertsNorms(points, pointCount, (const u32 *)delta,
+                                              (const u32 *)CORE_ALIGN16(delta + pointCount * 12), weight);
+                    } else {
+                        corePktMorphVerts(points, pointCount, (const u32 *)delta, weight);
+                    }
                 }
             }
         }
-        cursor += stride * targetCount;
-        if (nextParam & 0x80) {
-            corePktNormalizeNorms(dmaBase, vertexCount);
+        cursor += stride * blendCount;
+        if (normals) corePktNormalizeNorms(points, pointCount);
+        if (packetBits & SDF_PACKETBIT_ST) {
+            cb.uvPtr = cursor;
+            cursor = CORE_ALIGN16(cursor + pointCount * 8);
+            if (cb.orgAttrBits & SDF_ATTRBIT_MULTITEX) {
+                cb.uv2Ptr = cursor;
+                cursor = CORE_ALIGN16(cursor + pointCount * 8);
+            }
         }
-        sdfModelLayOutTexturing(&work, cursor, nextParam, vertexCount);
-        sdfModelLoadNodeMatrix(matrix);
-        if (selected & 0x10) {
-            corePktXfmLightClipUVPB(dmaBase, vertexCount, (s32)work.uvPtr, (u8 *)asset + 0x68);
-        } else {
-            corePktXfmLightClipPB(dmaBase, vertexCount);
-        }
-        corePktOpenAndEmit(&work);
+        cb.vertColPtr = cursor;
+        SDF_VU0_LOADMATRIX(matrixPacket);
+        MultMatrixRev(&sdf3DScreenTm);
+        corePktLoadWorldLightMtx(matrixPacket);
     } else {
-        s32 positions = sdfModelLayOutStrip(&work, MODEL_ALIGN16((s32)work.dataPtr), nextParam, stripCount);
-
-        cursor = MODEL_ALIGN16(positions + vertexCount * 12);
-        if (nextParam & 0x80) {
-            work.normalPtr = (u8 *)cursor;
-            cursor = MODEL_ALIGN16(cursor + vertexCount * 12);
-        }
-        sdfModelLayOutTexturing(&work, cursor, nextParam, vertexCount);
-        sdfModelLoadNodeMatrix(matrix);
-        if (selected & 0x10) {
-            corePktXfmLightClipUV(dmaBase, vertexCount, positions, (s32)work.normalPtr, (s32)work.uvPtr,
-                          (u8 *)asset + 0x68);
-        } else {
-            corePktXfmLightClip(dmaBase, vertexCount, positions, (s32)work.normalPtr);
-        }
-        corePktOpenAndEmit(&work);
+        goto plainGeometry;
     }
-    return corePktClosePacket(&work);
+
+    if (savedAttrBits & SDF_ATTRBIT_TEXMAP) {
+        corePktXfmLightClipUVPB(points, pointCount, cb.uvPtr, matPacket2->texTm.m);
+    } else {
+        corePktXfmLightClipPB(points, pointCount);
+    }
+    corePktOpenAndEmit(&cb);
+    return corePktClosePacket(&cb);
+
+plainGeometry:
+    cursor = CORE_ALIGN16(cb.dataPtr);
+    if (packetBits & SDF_PACKETBIT_FACE) {
+        cb.facePtr = cursor;
+        cursor = CORE_ALIGN16(cursor + faceCount * 6);
+    }
+    vertices = cursor;
+    cursor = CORE_ALIGN16(cursor + pointCount * 12);
+    if (packetBits & SDF_PACKETBIT_NORMAL) {
+        cb.normalPtr = cursor;
+        cursor = CORE_ALIGN16(cursor + pointCount * 12);
+    }
+    if (packetBits & SDF_PACKETBIT_ST) {
+        cb.uvPtr = cursor;
+        cursor = CORE_ALIGN16(cursor + pointCount * 8);
+        if (cb.orgAttrBits & SDF_ATTRBIT_MULTITEX) {
+            cb.uv2Ptr = cursor;
+            cursor = CORE_ALIGN16(cursor + pointCount * 8);
+        }
+    }
+    cb.vertColPtr = cursor;
+    SDF_VU0_LOADMATRIX(matrixPacket);
+    MultMatrixRev(&sdf3DScreenTm);
+    corePktLoadWorldLightMtx(matrixPacket);
+    if (savedAttrBits & SDF_ATTRBIT_TEXMAP) {
+        corePktXfmLightClipUV(points, pointCount, (const u32 *)vertices,
+                             cb.normalPtr, cb.uvPtr, matPacket2->texTm.m);
+    } else {
+        corePktXfmLightClip(points, pointCount, (const u32 *)vertices, cb.normalPtr);
+    }
+    corePktOpenAndEmit(&cb);
+    return corePktClosePacket(&cb);
 }
+#undef CORE_ALIGN16
 #else
 INCLUDE_ASM(const s32, "sdf/sdfCoreDraw", sdfCorePacketGen);
 #endif
 
-void sdfCoreDrawScanOneSkinNodes(sdfModelRootNode_t *model, SdfObjectRefCommand *source) {
-    sdfModelNode_t **objects = model->list->buffer;
-    u16 *indices = &source->count;
-    if ((source->flags & 0x800) != 0) {
+void sdfCoreDrawScanOneSkinNodes(sdfModelRootNode_t *root, sdfCorePacket_t *p) {
+    sdfModelNode_t **objects = root->nodeList->items;
+    u16 *indices = (u16 *)(p + 1);
+    if ((p->prim.packetBits & SDF_PACKETBIT_BLENDVERT) != 0) {
         s32 count = *indices;
         if (count != 0) {
             indices++;
@@ -391,22 +320,19 @@ void sdfCoreDrawScanOneSkinNodes(sdfModelRootNode_t *model, SdfObjectRefCommand 
     }
 }
 
-void sdfCoreDrawSetLight(const struct SdfDmaTagHeader *lightingPacket) {
-    corePktCurrLight = lightingPacket;
+void sdfCoreDrawSetLight(u8 *light) {
+    corePktCurrLight = (u32)light;
 }
 
-extern u8 corePktFogParm[];
-
-/* Cache the object's vector only when its address changes, not its contents. */
-void sdfCoreDrawSetFog(const SdfLightingPacketStorage *sourcePacket) {
-    if (corePktCurrFog != (u32)sourcePacket) {
-        corePktCurrFog = (u32)sourcePacket;
-        SDF_VU0_COPYVECTOR(corePktFogParm, sourcePacket->normal[0]);
+void sdfCoreDrawSetFog(u8 *fog) {
+    if (corePktCurrFog != (u32)fog) {
+        corePktCurrFog = (u32)fog;
+        SDF_VU0_COPYVECTOR(&corePktFogParm, fog + 0x10);
     }
 }
 
-void sdfCoreDrawSetZBias(f32 scale) {
-    corePktZBias = scale;
+void sdfCoreDrawSetZBias(f32 z) {
+    corePktZBias = z;
 }
 
 void sdfCoreDrawReset(void) {
@@ -414,19 +340,18 @@ void sdfCoreDrawReset(void) {
     corePktCurrFog = 0;
 }
 
-/* Upload the VIF0 program synchronously, then replace the ring workspace. */
-void sdfCoreDrawInit(s32 workspaceBytes) {
+void sdfCoreDrawInit(s32 buffSize) {
     u32 *dmaChannel = sceDmaGetChan(0);
     HW_WRITE(dmaChannel, HW_READ(dmaChannel) & ~SDF_DMA_CHCR_TTE);
     sceDmaSendN(dmaChannel, vu0MicroPacket, (vu1MicroPacket - vu0MicroPacket) >> SDF_DMA_QWORD_SHIFT);
     sceDmaSync(dmaChannel, 0, 0);
     sdfMemFreeHandleDirect(&sdfCoreDrawBuffHandle);
-    sdfCoreDrawBuffHandle = sdfMemAllocDirect(workspaceBytes);
-    corePktPointBuff = sdfMemLock(sdfCoreDrawBuffHandle);
+    sdfCoreDrawBuffHandle = sdfMemAllocDirect(buffSize);
+    corePktPointBuff = (u32)sdfMemLock(sdfCoreDrawBuffHandle);
 }
+
 INCLUDE_SDATA(const s32, "sdf/sdfCoreDraw", sdfCoreDrawBuffHandle);
 
 INCLUDE_SDATA(const s32, "sdf/sdfCoreDraw", sdfFaceDivSoften);
 
 INCLUDE_SDATA(const s32, "sdf/sdfCoreDraw", sdfFaceDivBias);
-
