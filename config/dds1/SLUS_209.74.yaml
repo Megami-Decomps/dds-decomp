@@ -461,7 +461,7 @@ segments:
       - [0x2B54D0, .rodata, sdf/sdfModel]
       - [0x2B5510, .rodata, sdf/sdfMotion]
       - [0x2B5530, .rodata, sdf/sdf_PadManager]
-      - [0x2B5560, .rodata, sdf/sdfCd]
+      - [0x2B5548, .rodata, sdf/sdfCd]
       - [0x2B5590, .rodata, sdf/sdfFileIO]
       - [0x2B55F8, .rodata, sdf/sdfHdd]
       - [0x2B5650, .rodata, sdf/sdfDev9]

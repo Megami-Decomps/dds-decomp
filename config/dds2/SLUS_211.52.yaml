@@ -480,7 +480,7 @@ segments:
       - [0x32F1E0, .rodata, sdf/sdfModel]
       - [0x32F220, .rodata, sdf/sdfMotion]
       - [0x32F240, .rodata, sdf/sdf_PadManager]
-      - [0x32F270, .rodata, sdf/sdfCd]
+      - [0x32F258, .rodata, sdf/sdfCd]
       - [0x32F2A0, .rodata, sdf/sdfFileIO]
       - [0x32F308, .rodata, sdf/sdfHdd]
       - [0x32F360, .rodata, sdf/sdfDev9]
