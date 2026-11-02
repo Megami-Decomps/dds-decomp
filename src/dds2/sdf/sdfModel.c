@@ -163,7 +163,7 @@ sdfModelRootNode_t *sdfModelRootNew(void) {
     sdfModelRootNode_t *slot;
 
     slot = sdfChipAllocZeroDirect(sizeof(sdfModelRootNode_t));
-    slot->list = sdfDevCreateBufferedRequest(0, 4, 0x20);
+    slot->list = sdfItemArrayNew(0, 4, 0x20);
     EE_MMI_UNIT_MATRIX(slot->matrix);
     VU0_STORE_VF(vf0, slot->rotationQuaternion);
     SDF_VU0_SETSCALE1VECTOR();
@@ -830,7 +830,7 @@ void sdfModelMakeMorphList(sdfModelRootNode_t *model, s32 count) {
     s32 pairIndex;
 
     if (count > 0) {
-        buf = sdfDevCreateBufferedRequest(count, 0x10, 1);
+        buf = sdfItemArrayNew(count, 0x10, 1);
         model->slotPairs = buf;
         entries = buf->buffer;
         for (slotIndex = 0; slotIndex != count; slotIndex++) {

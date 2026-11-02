@@ -16,7 +16,7 @@
 extern void sdfMemReallocRecord(struct sdfMemHandle_t *allocation, s32 size);
 
 /* Allocate element storage with a fixed element stride and growth increment. */
-DevRequest *sdfDevCreateBufferedRequest(s32 elementCount, s32 elementStride, s32 growthStep) {
+DevRequest *sdfItemArrayNew(s32 elementCount, s32 elementStride, s32 growthStep) {
     DevRequest *request = sdfChipAllocDirect(sizeof(*request));
 
     request->growStep = growthStep;

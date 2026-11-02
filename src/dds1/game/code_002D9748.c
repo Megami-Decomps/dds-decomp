@@ -390,7 +390,7 @@ void sdfSetForcedAssetTextureMode(SdfForcedAssetTextureMode mode) {
 
 /* Create a four-byte-item buffer with growth in groups of four slots. */
 DevRequest *sdfTexListNew(s32 capacity) {
-    return sdfDevCreateBufferedRequest(capacity, SDF_RESOURCE_LIST_ITEM_BYTES, SDF_RESOURCE_LIST_GROWTH);
+    return sdfItemArrayNew(capacity, SDF_RESOURCE_LIST_ITEM_BYTES, SDF_RESOURCE_LIST_GROWTH);
 }
 
 /* Optionally release item references before destroying the buffered list; null lists are ignored. */
@@ -474,7 +474,7 @@ void sdfMatInitSystem(void) {
 }
 
 DevRequest *sdfMatListNew(s32 capacity) {
-    return sdfDevCreateBufferedRequest(capacity, 4, 8);
+    return sdfItemArrayNew(capacity, 4, 8);
 }
 
 /* Release every asset, then destroy its buffered list. */

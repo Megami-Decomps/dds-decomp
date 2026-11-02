@@ -113,7 +113,7 @@ sdfMotionCtrlr_t *sdfMotionCtrlrNew(sdfModelRootNode_t *model, MotionTable *tabl
     model->motionList = motion;
     motion->owner = model;
     motion->motionTable = table;
-    request = sdfDevCreateBufferedRequest(commandCount, 4, 8);
+    request = sdfItemArrayNew(commandCount, 4, 8);
     motion->request = request;
     request->usedCount = commandCount;
     for (commandIndex = 0, command = motion->motionTable->commands;

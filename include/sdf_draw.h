@@ -73,7 +73,7 @@ typedef struct DevRequest {
 
 typedef char DevRequest_size_must_be_0x10[(sizeof(DevRequest) == 0x10) ? 1 : -1];
 
-DevRequest *sdfDevCreateBufferedRequest(s32 count, s32 stride, s32 growStep);
+DevRequest *sdfItemArrayNew(s32 count, s32 stride, s32 growStep);
 
 /* Command-list node: allocation owns the node and trailing command data.
  * A null descriptor identifies a separately chip-allocated node. */

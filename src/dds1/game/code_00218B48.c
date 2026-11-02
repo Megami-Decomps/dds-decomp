@@ -825,7 +825,7 @@ void mdlStartEffectResrc_IPU(MdlObj *obj, sdfTexHandle_t *resource, const SdfStr
 
 
 DevRequest *mdlEffectResrcListNew(u32 request) {
-    return sdfDevCreateBufferedRequest(request, 0x10, 4);
+    return sdfItemArrayNew(request, 0x10, 4);
 }
 
 /* Destroy each part according to its stored kind, then release the owning request. */

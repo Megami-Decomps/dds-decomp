@@ -9332,6 +9332,7 @@
 0x00340328	sdfZeroMemQuad	inferred	SMT3HD name via SLUS_209.11 0x002BFCE8, shared-hash-in-run; was sdfClearQuadwords
 0x003403A0	sdfStrdupChip	inferred	SMT3HD name via SLUS_209.11 0x002BFD60, reloc-identical; was sdfStrDup
 0x00340410	sdfBcdToDecimal	inferred	SMT3HD name via SLUS_209.11 0x002BFDD0, byte-identical; was sdfBcdStrToInt
+0x00340498	sdfItemArrayNew	inferred	SMT3HD name via SLUS_209.11 0x002BFE58, sdfMisc twin; was sdfDevCreateBufferedRequest
 0x00340528	sdfItemArrayFree	inferred	SMT3HD name via SLUS_209.11 0x002BFEE8, shared-hash-in-run; was sdfDestroyDevRequest
 0x00340558	sdfItemArrayGrow	inferred	SMT3HD name via SLUS_209.11 0x002BFF18, reloc-identical; was sdfDevBufferedRequestGrow
 0x003405D8	sdfDevResizeBufferedRequest	inferred	Allocates, frees or resizes a buffered request to a supplied count. [names_reviewed8.tsv]
