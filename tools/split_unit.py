@@ -38,7 +38,7 @@ from shared_funcs import DEF, TOKENS, blocks, declared_name  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 VERSIONS = json.loads((ROOT / "config/versions.json").read_text())
-INCLUDE = re.compile(r'INCLUDE_(ASM|RODATA)\(const s32, "([^"]+)", (\w+)\);')
+INCLUDE = re.compile(r'INCLUDE_(ASM|RODATA)\([^,]+, "([^"]+)", (\w+)\);')
 ROW = re.compile(r"^(\w+) = 0x([0-9A-Fa-f]+);", re.M)
 
 
@@ -50,6 +50,13 @@ def retail_references(version, unit):
         return {}
     return {m.group(1): set(TOKENS.findall(m.group(2)))
             for m in re.finditer(r"^glabel (\w+)\n(.*?)^endlabel \1", path.read_text(), re.M | re.S)}
+
+
+def enumerators(d):
+    """Constants an enum definition introduces; a part may use them without the type name."""
+    code = re.sub(r"/\*.*?\*/|//[^\n]*", "", d, flags=re.S)
+    m = re.match(r"\s*(?:typedef\s+)?enum\b[^{]*\{(.*)\}", code, re.S)
+    return set(re.findall(r"(\w+)\s*(?:=[^,]*)?(?:,|$)", m.group(1).strip())) if m else set()
 
 
 def prototype(b):
@@ -154,7 +161,7 @@ def split_source(text, names, start, end, unit, refs=None):
             while changed:
                 changed = False
                 for i, d in enumerate(pool):
-                    if i not in chosen and (declared_name(d) in used or d in orphan_types):
+                    if i not in chosen and (declared_name(d) in used or enumerators(d) & used or d in orphan_types):
                         chosen.add(i)
                         used |= set(TOKENS.findall(d))
                         changed = True
