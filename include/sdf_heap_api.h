@@ -48,10 +48,10 @@ s32 sdfMemGetSize(const struct sdfMemHandle_t *block);
 void *sdfAllocAuto(s32 size);
 /* Release the sdfAllocAuto base in its source heap; interior pointers are
  * invalid. */
-void sdfFreeAuto(void *data);
+s32 sdfFreeAuto(void *data);
 /* Queue release of the sdfAllocAuto base in its source heap; interior pointers
  * are invalid. */
-void sdfFreeAutoDelayed(void *data);
+s32 sdfFreeAutoDelayed(void *data);
 
 void *sdfMemLock(struct sdfMemHandle_t *allocation);
 void sdfMemUnlock(struct sdfMemHandle_t *allocation);

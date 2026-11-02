@@ -1,5 +1,3 @@
-/* Keeps its own declaration of the functions below (see sdk_libc.h note). */
-#define SDK_SKIP_memset
 #include "sdk_ps2.h"
 #include "sdf_line_pair_packet_api.h"
 #include "dsp_name.h"
@@ -31,55 +29,86 @@
 #include "pty_preset_record.h"
 #include "prf_profile_parameters.h"
 #include "prf_current_record_view.h"
+#include "sdf_packet_alloc.h"
+
 /* Declared before first use (were implicit int). */
 extern u16 prfGetSkillAtIndex(u16 profileId, u32 skillIndex);
+
 extern s32 scrSetFlag(datUnitWork_t *work, u16 flagId);
 
 #define SCR_FLAG_ID_MASK 0xFFFF
+
 #define SCR_FLAG_SLOT_INDEX_MASK 7
+
 #define SCR_FLAG_WORD_INDEX_SHIFT 3
+
 #define SCR_FLAG_SLOT_BIT_SHIFT 2
+
 #define SCR_FLAG_PRIMARY_BIT 1U
+
 #define SCR_SKILL_STATE_TWO_BIT 2U
+
 #define SCR_FLAG_SECONDARY_BIT 4U
+
 #define SCR_SECONDARY_FLAG_COUNT 0x260
+
 #define SCR_GLOBAL_FLAG_FIRST_ID 0x1AB
+
 #define SCR_GLOBAL_FLAG_END_ID 0x200
-/* Adding this bias in a u16 subtracts the first ID by wrapping. */
+
 #define SCR_GLOBAL_FLAG_WRAP_BIAS 0xFE55
+
 #define SCR_GLOBAL_FLAG_WORD_SHIFT 5
+
 #define SCR_GLOBAL_FLAG_BIT_MASK 31
+
 #define PTY_SKILL_SLOT_COUNT 24
+
 #define PRF_SKILL_LIST_FLAGGED 4
 
 #define PTY_PRESET_SKILL_SLOT_COUNT 8
+
 #define PTY_PRESET_POOL_SKILL_COUNT 40
-/* Observed gate for the post-mark call; its gameplay meaning is not established. */
+
 #define PTY_PRESET_POOL_EXTRA_GATE 0xB90
-#define PTY_PROFILE_UNIT_LAST_INDEX 4
+
 #define PTY_PROFILE_UNIT_ID_COUNT 0x10
+
 #define PTY_PROFILE_UNIT_OCCUPIED_BIT 1
+
 #define PRF_REQUIRED_PROFILE_COUNT 8
+
 #define PRF_FALLBACK_GROUP_COUNT 4
+
 #define PRF_FALLBACK_FLAG_COUNT 2
+
 #define PRF_REQUIREMENT_RULES_BIT 4
+
 #define PRF_REQUIREMENT_EXCLUSION_BIT 1
+
 #define SCR_PAIRED_OUTPUT_BYTES 8
+
 #define SDF_FLAG_LIST_VALUE_SHIFT 3
+
 #define SDF_FLAG_LIST_RESET_MARK 0xFFFFFFFF
+
 #define SDF_FLAG_LIST_ENTRY_VERTEX_BYTES 32
+
 #define SDF_FLAG_LIST_VERTICES_PER_ENTRY 2
+
 #define SDF_FLAG_LIST_PACKET_BYTES 0x20
+
 #define SDF_FLAG_SLOT_TABLE_SHIFT 7
+
 #define SDF_FLAG_SLOT_COUNT 16
 
 extern void memset(void *dst, s32 value, s32 size);
+
 extern PtyPresetRecord D_00393A80[];
+
 extern void ptyMergeStockSkills(datUnitWork_t *);
 
 extern void (*sdfTickCallback)(void);
-
-extern s32 CreateThreadSimple(void (*entryAddress)(), void *workspace, s32 stackBytes, s32 priority);
 
 extern u32 D_003BD2C8;
 
@@ -87,27 +116,34 @@ extern u32 prfIsRequirementExcluded(u16);
 
 extern DatProfileRecord *ptyGetProfileRecord(const datUnitWork_t *, u16);
 
-
 extern FrFontTextBank frFontColoredGlyphResource;
 
 typedef struct Entry24W {
     u32 v0;            // 0x00
     u8 pad_0x04[0x14]; // 0x04
 } Entry24W; 
+
 extern PrfFallbackItemRequirement D_00393220[];
 
 extern Entry24W D_00393234[];
 
 extern SdkFileStream *fopen(const char *, const char *);
-extern s32 fprintf(SdkFileStream *, const char *, ...);
-extern void fclose(SdkFileStream *);
-extern char sdfDebugLogAppendMode[];
-extern char sdfDebugLogPairFormat[];
-extern _FRQ *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
-extern s32 frFontDrawGlyphChain(_FRQ *, s8, u32);
-extern s32 ptyTestPrimaryProfileFlag(datUnitWork_t *, u16);
-s32 ptyGetCurrentProfileId(const datUnitWork_t *);
 
+extern s32 fprintf(SdkFileStream *, const char *, ...);
+
+extern void fclose(SdkFileStream *);
+
+extern char sdfDebugLogAppendMode[];
+
+extern char sdfDebugLogPairFormat[];
+
+extern _FRQ *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
+
+extern s32 frFontDrawGlyphChain(_FRQ *, s8, u32);
+
+extern s32 ptyTestPrimaryProfileFlag(datUnitWork_t *, u16);
+
+s32 ptyGetCurrentProfileId(const datUnitWork_t *);
 
 extern void ptyRecomputeMaxVitals(datUnitWork_t *, const s32 *);
 
@@ -125,7 +161,9 @@ void ptyClearProfileRecords(void) {
 }
 
 s8 scrSelectOperandIndex(datUnitWork_t *unit, s32 profileId);
+
 extern void ptySetSecondaryProfileFlag(datUnitWork_t *, u16);
+
 PtyProfileRecordValue ptyAddProfilePoints(datUnitWork_t *unit, s32 increment);
 
 /* Pick the highest preset stage whose required profiles all sit at their cap, then apply that stage's script. */
@@ -254,9 +292,13 @@ void ptyMarkPresetSkillPool(datUnitWork_t *unit) {
 }
 
 extern void ptyRecomputeMaxHpMp(datUnitWork_t *);
+
 extern s32 prfBuildRawSkillList(u16, PrfSkillList *);
+
 extern s32 scrSetFlag(datUnitWork_t *, u16);
+
 extern void scrSetSecondaryScriptFlag(datUnitWork_t *, u16);
+
 extern void scrClearAllSecondaryScriptFlags(datUnitWork_t *);
 
 /* Rebuild skill flags from the preset (no current profile) or from the current profile. */
@@ -310,6 +352,7 @@ void ptyRebuildAllProfiles(void) {
 }
 
 extern u32 datComputeSkillBoostedMaxHp(datUnitWork_t *unit);
+
 extern u32 datComputeSkillBoostedMaxMp(datUnitWork_t *unit);
 
 /* Recompute effective maxima from the profile plus optional stat gains, then
@@ -401,7 +444,6 @@ void prfCopyMantraNamePart(u16 scriptId, s32 namePartMode, char *destination) {
         break;
     }
 }
-
 
 extern u8 *D_0037CDF8 __attribute__((section(".data")));
 
@@ -718,6 +760,7 @@ s32 ptyHasSkill(datUnitWork_t *unit, s32 skillId) {
 }
 
 extern s32 scrFindSlot(datUnitWork_t *unit, u16 skillId);
+
 extern s32 scrRemoveSlot(datUnitWork_t *unit, u16 skillId);
 
 void ptyRemoveProfileSkills(datUnitWork_t *unit, u16 profileId) {
@@ -854,7 +897,6 @@ void scrClearPairedEntryOutput(u32 unused0, u32 unused1, u32 output) {
 u8 ptyIsCurrentProfileId(datUnitWork_t *operand, u32 profileId) {
     return operand->profileId == (profileId & 0xffff);
 }
-
 
 s32 prfBuildRawSkillList(u16 profile, PrfSkillList *output) {
     PrfSkillList list;
@@ -1129,6 +1171,7 @@ typedef struct PrfFallbackGroup {
 } PrfFallbackGroup;
 
 extern PrfFallbackGroup D_003931B0[];
+
 /* A zero evaluator return selects its result; otherwise test the fallback flags.
  * Missing fallback IDs succeed, as do entries with no nonzero flag requirements. */
 s32 prfReqCheckWithFallback(datUnitWork_t *operand, u16 requirementId) {
@@ -1232,7 +1275,6 @@ FrFontTextBank *frFontGetColoredGlyphResource(void) {
     return &frFontColoredGlyphResource;
 }
 
-
 /* Reset each entry's timer to free, then clear both colour words per entry. */
 void sdfResetFlagListEntries(SdfFlagListWork *work) {
     u32 entryCount;
@@ -1251,7 +1293,6 @@ void sdfResetFlagListEntries(SdfFlagListWork *work) {
     }
     memset(work->colors, 0, entryCount << SDF_FLAG_LIST_VALUE_SHIFT);
 }
-
 
 SdfFlagListWork *sdfCreateFlagListWork(const SdfFlagListParams *source) {
     u32 count;
@@ -1287,7 +1328,9 @@ void sdfReleaseFlagListResource(SdfFlagListWork *work) {
 }
 
 extern f32 sdfViewTargetVector[4];
+
 extern f32 sdfAtan(f32 ratio);
+
 extern EffRandState effSharedRandomState[];
 
 /* Advance the drop list: respawn a random number of free drops around the camera, move live drops along their
@@ -1429,9 +1472,7 @@ void sdfUpdateFlagListEntries(SdfFlagListWork *work) {
     work->frame++;
 }
 
-
 extern sdfGrOt_t *D_00398098[];
-#include "sdf_packet_alloc.h"
 
 /* Copy vertex pairs, optionally add the view target, and submit the packet list.
  * count is reused first as an entry count and then as a vertex count. */
@@ -1510,50 +1551,9 @@ void sdfEnableFlagListViewTargetRelativeMode(void) {
 void sdfDisableFlagListViewTargetRelativeMode(void) {
     D_003BD2C8 = 0;
 }
-
-void sdfDummyFunc(u32 callbackArg) {
-}
-
-s32 sdfCreateSema(u32 initial, u32 option, u32 maximum) {
-    struct {
-        u32 attr;
-        u32 option;
-        u32 initial;
-        u32 reserved[2];
-        u32 maximum;
-    } sema;
-
-    sema.initial = initial;
-    sema.option = option;
-    sema.maximum = maximum;
-    return CreateSema(&sema);
-}
-
-extern void *_gp;
-
-/* Create a kernel thread from a zeroed descriptor that uses the caller's
- * workspace as its stack and the program's GP. */
-s32 CreateThreadSimple(void (*entryAddress)(), void *workspace, s32 stackBytes, s32 priority) {
-    SdfKernelThreadParam param;
-
-    memset(&param, 0, sizeof(param));
-    param.entry = (void (*)(void))entryAddress;
-    param.stack = workspace;
-    param.stackSize = stackBytes;
-    param.priority = priority;
-    param.gp = &_gp;
-    return CreateThread(&param);
-}
-
-s32 sdfCreateThreadWithStack(void (*entryAddress)(), s32 stackBytes, s32 priority) {
-    void *workspace;
-
-    workspace = sdfAllocAuto(stackBytes);
-    return CreateThreadSimple(entryAddress, workspace, stackBytes, priority);
-}
-
 INCLUDE_SDATA(const s32, "game/code_002CC750", sdfDebugLogAppendMode);
 
 INCLUDE_SDATA(const s32, "game/code_002CC750", sdfDebugLogPairFormat);
 
 INCLUDE_SDATA(const s32, "game/code_002CC750", D_003BD2C8);
+

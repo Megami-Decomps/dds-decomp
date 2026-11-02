@@ -3,9 +3,9 @@
 The `dds1-dev` and `dds2-dev` targets build separate executables whose layouts
 can grow without weakening the byte-identical retail builds. Each target
 recompiles and replaces selected code, read-only data, and initialized
-small-data sections from thirteen paired source objects, and moves three
-source-owned zero-initialized state objects. The replacements retain ten
-declared assembly fallback functions in DDS1 and nine in DDS2. The targets also link
+small-data sections from nine source objects in DDS1 and ten in DDS2, and
+moves three source-owned zero-initialized state objects in DDS1 and five in
+DDS2. No replacement declares an assembly fallback function. The targets also link
 development-only C code and data into an appended loadable segment:
 
 ```sh
@@ -129,8 +129,8 @@ placing any of them in the retail link.
 
 ## Current scope
 
-These are relocatable development builds, not general mod loaders. Each
-version replaces thirteen paired source objects, then links one development
+These are relocatable development builds, not general mod loaders. DDS1
+replaces nine source objects and DDS2 ten, then each links one development
 entry object.
 The first smaller replacement is compiled separately with `-G0`: its `.text`
 is `0x3D0` bytes rather than the retail `0x3C8`, so two later function
@@ -173,31 +173,40 @@ proves those physical references at the same fallback-function offsets, exact
 retained objects, and an unchanged `_gp` instead of silently splitting the
 live state.
 
-The paired SDF thread registry is a moved small-BSS state. Three source
-units per title own and consume its semaphore and linked-list head. Their
-retail text totals `0x698` bytes; the development text grows to `0x728` in DDS1
-and `0x730` in DDS2. All 15 retail GP-relative accesses to the eight-byte
-registry become 23 audited HI16/LO16 relocation records, and no physical GP
-reference remains to either the moved state or its abandoned retail range.
-The adjacent tick callback state stays at its retail address with exact bytes,
-symbols, and access signatures.
+The SDF thread registry is a moved small-BSS state. `sdf/sdfSystem` owns and
+consumes its semaphore and linked-list head. Its retail text is `0x948` bytes
+and grows to `0xA00` in development. All 15 retail GP-relative accesses to the
+eight-byte registry become 23 audited HI16/LO16 relocation records, and no
+physical GP reference remains to either the moved state or its abandoned
+retail range. The unit keeps its `.sdata` at the retail address (`0x10` bytes
+and four symbols in DDS1, `0x4` and one in DDS2), the tick callback state
+included, with exact bytes, symbols, and access signatures. Its read-only
+string moves with the text.
 
-The paired general SDF heap is another complete mutable lifecycle. Three
-source units per title move `0xD88` bytes of retail text, growing to `0xDA8`,
-along with the source-owned `0x28`-byte NOBITS heap root. Its two embedded
+The general SDF heap is another complete mutable lifecycle. `sdf/sdfMemory`
+and `sdf/sdfIop` move `0xB70` bytes of retail text, growing to `0xB80`, along
+with the source-owned `0x28`-byte NOBITS heap root. Its two embedded
 sentinels, base, and size have one canonical typed owner. Eight address
 materializations into that root become 16 audited target relocation records;
-the abandoned range has no surviving reference. Each leading unit retains an
-exact `0xC` `.sdata` island containing three symbols. Its three retail GP
-references become ordinary relocated address pairs in development, leaving
-zero physical GP references to the moved heap state. The three units retain
-three declared assembly fallbacks per title.
+the abandoned range has no surviving reference. `sdfMemory` retains an exact
+`0xC` `.sdata` island containing three symbols. Its retail GP references (six
+in DDS1, three in DDS2) become ordinary relocated address pairs in
+development, leaving zero physical GP references to the moved heap state.
 
-Together the replacements cover 184 DDS1 and 185 DDS2 exported symbols; 106
-definitions per title change their relative offsets. The verifier follows
-1,429/1,468 external relocation sites targeting shifted definitions, 126/128
-relocations between replacement objects, and 2,810/3,006 total relocation
-targets into moved content. The moved sections retain 781/797 relocation
+In DDS2 `sdf/sdfChip` is also replaced: `0x540` bytes of text grow to `0x590`,
+and its `0x20`-byte small-BSS and `0x58`-byte BSS state move with it. DDS1
+keeps `sdfChip` at its retail address: its text spans `0x002D0000`, a value a
+retail data table holds at `0x0036965C`, and the stale-reference scan rejects
+any moved range containing a word the image stores. `sdf/sdfGraph` is not
+replaced in either title: under `-G0` cc1 still addresses the unit's own
+`.sdata` definitions through `$gp`, and the retained-section audit rejects
+those accesses as changed GP-reference signatures.
+
+Together the replacements cover 188 DDS1 and 207 DDS2 exported symbols; 125
+and 132 definitions change their relative offsets. The verifier follows
+2,014/2,875 external relocation sites targeting shifted definitions, 92/118
+relocations between replacement objects, and 2,562/3,538 total relocation
+targets into moved content. The moved sections retain 802/873 relocation
 entries. All counts are asserted by the version descriptors.
 
 Replacement-owned code and read-only data may change size and contents. A

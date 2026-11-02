@@ -11,7 +11,6 @@ game/code_002BEDC8  -fno-optimize-sibling-calls  # 5 jal+epilogue tail calls, no
 game/code_002C2620  -fno-optimize-sibling-calls  # 8 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py)
 game/code_002C3868  -fno-optimize-sibling-calls  # 5 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py); flag_probe: 2 parked candidates match only with it
 game/code_0026E160  -fno-optimize-sibling-calls  # 4 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py); flag_probe: parked func_0026E160,func_0026E5A0 match only with it
-game/code_002CF530  -fno-optimize-sibling-calls  # 4 jal+epilogue tail calls, no j to a function; sibcalls on both sides (find_nosibcall.py); flag_probe: parked func_002CF570,func_002CF5C0,func_002CF618 match only with it
 game/code_0025A680  -fno-optimize-sibling-calls  # Retains the original code_00259498 suffix policy; mnuReleaseOptionalDrawAllocation (0x25B7B0) matches only without sibling calls
 game/code_0026AF30  -fno-optimize-sibling-calls  # mnuMovieShutdownA jal+nop tail between sibcall functions mnuCreateTitleCameraWorldEntry (0x26AEC8) and func_0026B050 (ends in j dds3StartProcess); natural types match only with the option
 game/code_0026B160  -fno-optimize-sibling-calls  # func_0026B1C0/mnuOpenTitleMenuForMode jal+epilogue tails between sibcall functions func_0026B050 and mnuRestartRuntimeAfterViewer; -O1 refuted (func_0026B160 3/24, func_0026B1C0 4/12)

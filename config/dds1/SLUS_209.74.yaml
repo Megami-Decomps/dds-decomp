@@ -259,16 +259,11 @@ segments:
       - [0x1C8EC8, c, game/code_002C7EC8]
       - [0x1CA7E8, c, game/code_002C97E8]
       - [0x1CD750, c, game/code_002CC750]
-      - [0x1D0530, c, game/code_002CF530]
-      - [0x1D08C8, c, game/code_002CF8C8]
-      - [0x1D0BB0, c, sdf/sdfThread]  # Nocturne __FILE__
-      - [0x1D0C18, c, game/code_002CFC18]
-      - [0x1D0F68, c, sdf/sdfChip]  # Nocturne __FILE__
-      - [0x1D10F8, c, game/code_002D00F8]
-      - [0x1D1390, c, sdf/sdfMemory]  # Nocturne __FILE__
-      - [0x1D1750, c, game/code_002D0750]
-      - [0x1D1E88, c, sdf/sdfGraph]  # Nocturne __FILE__
-      - [0x1D20B0, c, game/code_002D10B0]
+      - [0x1D0438, c, sdf/sdfSystem]  # SMT3 unit (sdf-decomp tools/twins.py runs)
+      - [0x1D0D80, c, sdf/sdfChip]  # SMT3 unit (sdf-decomp tools/twins.py runs)
+      - [0x1D12C0, c, sdf/sdfMemory]  # SMT3 unit (sdf-decomp tools/twins.py runs)
+      - [0x1D1D70, c, sdf/sdfIop]  # SMT3 unit (sdf-decomp tools/twins.py runs)
+      - [0x1D1E30, c, sdf/sdfGraph]  # SMT3 unit (sdf-decomp tools/twins.py runs)
       - [0x1D26F0, c, sdf/sdfGsMemory]  # SMT3 unit (sdf-decomp tools/twins.py runs)
       - [0x1D2D20, c, sdf/sdfImageSet]  # SMT3 unit (sdf-decomp tools/twins.py runs)
       - [0x1D3300, c, sdf/sdfTex]  # SMT3 unit (sdf-decomp tools/twins.py runs)
@@ -452,7 +447,7 @@ segments:
       - [0x2B4D80, .rodata, game/code_002C5FD8]
       - [0x2B4EE0, .rodata, game/code_002C97E8]
       - [0x2B4F10, .rodata, game/code_002CC750]
-      - [0x2B4FA0, .rodata, game/code_002CF530]
+      - [0x2B4FA0, .rodata, sdf/sdfSystem]
       - [0x2B4FD0, .rodata, sdf/sdfGsMemory]
       - [0x2B52A0, .rodata, sdf/sdfImageSet]
       - [0x2B5390, .rodata, sdf/sdfTex]
@@ -652,12 +647,9 @@ segments:
       - [0x2BE280, .sdata, game/code_002C5FD8]
       - [0x2BE288, .sdata, game/code_002C97E8]
       - [0x2BE2B8, .sdata, game/code_002CC750]
-      - [0x2BE2CC, .sdata, game/code_002CF530]
-      - [0x2BE2D0, .sdata, game/code_002CF8C8]
-      - [0x2BE2D8, .sdata, game/code_002CFC18]
-      - [0x2BE2DC, .sdata, game/code_002D00F8]
+      - [0x2BE2CC, .sdata, sdf/sdfSystem]
+      - [0x2BE2DC, .sdata, sdf/sdfMemory]
       - [0x2BE2E8, .sdata, sdf/sdfGraph]
-      - [0x2BE2F0, .sdata, game/code_002D10B0]
       - [0x2BE304, .sdata, sdf/sdfGsMemory]
       - [0x2BE308, .sdata, sdf/sdfTex]
       - [0x2BE30C, .sdata, sdf/sdfDelayedResrc]
@@ -678,8 +670,8 @@ segments:
       - [0x2BE490, .sdata, sdf/sdfSound]
       - [0x2BE614, .sdata, sdf/sdfIpu]
       - [0x2BE618, .sdata, sdf/sdfMovie]
-      - { start: 0x2BE63C, type: sbss, vram: 0x3BD680, name: sbss_before_sdfThread }
-      - { start: 0x2BE63C, type: .sbss, vram: 0x3BD998, name: sdf/sdfThread }
+      - { start: 0x2BE63C, type: sbss, vram: 0x3BD680, name: sbss_before_sdfSystem }
+      - { start: 0x2BE63C, type: .sbss, vram: 0x3BD998, name: sdf/sdfSystem }
       - { start: 0x2BE63C, type: sbss, vram: 0x3BD9A0, name: sbss_before_sdfChip }
       - { start: 0x2BE63C, type: .sbss, vram: 0x3BD9A8, name: sdf/sdfChip }
       - { start: 0x2BE63C, type: sbss, vram: 0x3BD9C8, name: sbss_after_sdfChip }

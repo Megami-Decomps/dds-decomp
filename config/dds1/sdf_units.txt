@@ -3,8 +3,11 @@
 # named after it, by the SMT3 function in the same slot (sdf-decomp docs/handoff-dds.md).
 0x00101BD8 sdf/sdfDefaultMain
 0x00101D60 -
-# sdfSystem, sdfChip, sdfMemory, sdfIop and sdfGraph (0x002CF438-0x002D16F0) are not
-# listed: config/dds1/devbuild.json replaces and moves the objects there.
+0x002CF438 sdf/sdfSystem
+0x002CFD80 sdf/sdfChip
+0x002D02C0 sdf/sdfMemory
+0x002D0D70 sdf/sdfIop  # sdfLoadModulesAndBindNamedResourceRpc, SMT3's SdfIopInit
+0x002D0E30 sdf/sdfGraph
 0x002D16F0 sdf/sdfGsMemory
 0x002D1D20 sdf/sdfImageSet
 0x002D2300 sdf/sdfTex
