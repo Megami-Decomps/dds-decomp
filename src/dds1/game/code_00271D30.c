@@ -352,3 +352,4 @@ void mnuDrawCampScreenDefault(dds3ProcessID_t *task) {
 INCLUDE_RODATA(const s32, "game/code_00271D30", D_003B2100);
 
 INCLUDE_SDATA(const s32, "game/code_00271D30", D_003BC6C0);
+

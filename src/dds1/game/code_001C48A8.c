@@ -2260,3 +2260,4 @@ void btlBindActorTaskAndSelectActionNumber(BtlTask *task, BtlUnit *actorAddress)
 INCLUDE_RODATA(const s32, "game/code_001C48A8", D_003A35A8);
 
 INCLUDE_RODATA(const s32, "game/code_001C48A8", D_003A35B8);
+

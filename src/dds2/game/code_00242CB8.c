@@ -511,3 +511,4 @@ INCLUDE_SDATA(const s32, "game/code_00242CB8", D_004371FC);
 INCLUDE_SDATA(const s32, "game/code_00242CB8", moonprocess_id);
 
 INCLUDE_SDATA(const s32, "game/code_00242CB8", D_00437208);
+

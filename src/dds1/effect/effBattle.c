@@ -502,3 +502,4 @@ void effBTLPartDelete(SoundMixer *mixer) {
 }
 
 INCLUDE_SDATA(const s32, "effect/effBattle", effFieldColorFlags);
+

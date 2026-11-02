@@ -487,3 +487,4 @@ s32 brsProcessNextPrimaryReward(dds3ProcessID_t *task) {
 }
 
 INCLUDE_SDATA(const s32, "game/code_00299D58", D_004379B0);
+

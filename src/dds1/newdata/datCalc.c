@@ -2167,3 +2167,4 @@ INCLUDE_SDATA(const s32, "newdata/datCalc", btlSelectedConditionalEncounterIndex
 INCLUDE_SDATA(const s32, "newdata/datCalc", btlSelectedConditionalEncounterResult);
 
 INCLUDE_SDATA(const s32, "newdata/datCalc", D_003BAAC4);
+

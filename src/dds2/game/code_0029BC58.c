@@ -439,3 +439,4 @@ const s32 D_004284E0[9][3] __attribute__((aligned(8))) = {
 INCLUDE_SDATA(const s32, "game/code_0029BC58", D_004379C0);
 
 INCLUDE_SDATA(const s32, "game/code_0029BC58", D_004379C8);
+

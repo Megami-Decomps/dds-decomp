@@ -246,3 +246,4 @@ void dds3AdminiNeoShutdown(dds3ProcessID_t *task) {
 }
 
 INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", dds3AdminTaskName);
+

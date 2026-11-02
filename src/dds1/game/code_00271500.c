@@ -311,3 +311,4 @@ MenuWindowContainer *mnuCreateFilteredStaffEntryWindow(void *const *entries, s32
 INCLUDE_RODATA(const s32, "game/code_00271500", mnuCampDrawTaskName);
 
 INCLUDE_RODATA(const s32, "game/code_00271500", mnuCampOwnerTaskName);
+

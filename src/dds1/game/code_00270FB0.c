@@ -233,3 +233,4 @@ INCLUDE_SDATA(const s32, "game/code_00270FB0", campExitState);
 INCLUDE_SDATA(const s32, "game/code_00270FB0", D_003BC6B5);
 
 INCLUDE_SDATA(const s32, "game/code_00270FB0", mnuCampInputTaskName);
+

@@ -900,3 +900,4 @@ INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_0039F8E8);
 INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_0039F900);
 
 INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_0039F918);
+

@@ -600,3 +600,4 @@ INCLUDE_SDATA(const s32, "game/code_0026C1D0", D_00437890);
 INCLUDE_SDATA(const s32, "game/code_0026C1D0", mnuMantraNodePositionTable);
 
 INCLUDE_SDATA(const s32, "game/code_0026C1D0", mnuMantraPanelPositionTable);
+

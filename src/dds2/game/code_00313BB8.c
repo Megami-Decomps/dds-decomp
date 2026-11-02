@@ -1668,3 +1668,4 @@ INCLUDE_SDATA(const s32, "game/code_00313BB8", sdfDebugLogAppendMode);
 INCLUDE_SDATA(const s32, "game/code_00313BB8", sdfDebugLogPairFormat);
 
 INCLUDE_SDATA(const s32, "game/code_00313BB8", D_00438918);
+

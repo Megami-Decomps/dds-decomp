@@ -1218,3 +1218,4 @@ INCLUDE_RODATA(const s32, "game/code_002A9068", D_0042AC70);
 INCLUDE_SDATA(const s32, "game/code_002A9068", mnuCampInputTaskName);
 
 INCLUDE_SDATA(const s32, "game/code_002A9068", D_00437B80);
+

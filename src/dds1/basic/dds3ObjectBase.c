@@ -640,3 +640,4 @@ dds3PathBasicControl_t *dds3ObjectBaseGetPathControl(dds3Basic_t *object) {
 }
 
 INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", D_003BA9C8);
+

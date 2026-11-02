@@ -2973,3 +2973,4 @@ ScrCommandResult evtCommand_EFFECT_POS(void) {
 INCLUDE_SDATA(const s32, "event/evtUnitManager", evtWindowMotionUnit);
 
 INCLUDE_SDATA(const s32, "event/evtUnitManager", D_004371F0);
+

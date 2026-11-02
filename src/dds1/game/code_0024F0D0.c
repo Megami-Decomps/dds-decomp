@@ -4931,3 +4931,4 @@ void mnuDrawMantraGridEntryIndicators(s32 x, s32 y, s32 depth, s32 alpha,
 }
 
 INCLUDE_RODATA(const s32, "game/code_0024F0D0", D_003AF9B8);
+

@@ -2481,3 +2481,4 @@ INCLUDE_SDATA(const s32, "game/code_0011F208", D_00435F8C);
 INCLUDE_SDATA(const s32, "game/code_0011F208", fldEncountFlags);
 
 INCLUDE_SDATA(const s32, "game/code_0011F208", D_00435F98);
+

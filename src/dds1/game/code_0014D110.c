@@ -1256,3 +1256,4 @@ u32 fldCommand_FLD_ELV_ENDCHK(void) {
 INCLUDE_SDATA(const s32, "game/code_0014D110", fldRoomNameSentinel);
 
 INCLUDE_SDATA(const s32, "game/code_0014D110", D_003BB000);
+

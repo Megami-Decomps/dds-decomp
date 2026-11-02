@@ -992,3 +992,4 @@ void LoadTexture(EvtPictureWork *pictureWork, const char *path) {
 INCLUDE_RODATA(const s32, "event/evtPolygonMovie", D_003ADDB0);
 
 INCLUDE_SDATA(const s32, "event/evtPolygonMovie", D_003BBF78);
+

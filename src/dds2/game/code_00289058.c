@@ -2460,3 +2460,4 @@ void mnuSpawnMantraMapPanels(MnuStatusResource *object, u16 nodeId, u16 panelX) 
 INCLUDE_SDATA(const s32, "game/code_00289058", D_00437930);
 
 INCLUDE_SDATA(const s32, "game/code_00289058", D_00437938);
+

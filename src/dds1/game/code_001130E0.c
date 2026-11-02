@@ -839,3 +839,4 @@ typedef char EvtUnitShadowLevelOffsetCheck[
     ((u32)&((evtUnitHandle_t *)0)->shadowLevel == 0xD3) ? 1 : -1];
 
 INCLUDE_SDATA(const s32, "game/code_001130E0", effObjOpacityPassEnabled);
+

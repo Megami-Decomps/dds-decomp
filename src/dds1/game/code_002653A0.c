@@ -578,3 +578,4 @@ void brsDrawActiveUnitProgressRows(s32 x, s32 y, s32 z, s32 alpha, BrsActiveProg
 }
 
 INCLUDE_RODATA(const s32, "game/code_002653A0", D_003AFBA0);
+

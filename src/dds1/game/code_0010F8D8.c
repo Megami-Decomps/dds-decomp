@@ -221,3 +221,4 @@ dds3Basic_t *dds3AddWorld(s32 capacity) {
 INCLUDE_SDATA(const s32, "game/code_0010F8D8", dds3ObjectIdCounter);
 
 INCLUDE_SDATA(const s32, "game/code_0010F8D8", dds3TheWorld);
+

@@ -4579,3 +4579,4 @@ INCLUDE_SDATA(const s32, "event/evtEventViewer", D_003BBF60);
 INCLUDE_SDATA(const s32, "event/evtEventViewer", D_003BBF68);
 
 INCLUDE_SDATA(const s32, "event/evtEventViewer", D_003BBF70);
+

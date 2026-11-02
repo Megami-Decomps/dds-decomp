@@ -1217,3 +1217,4 @@ char mnuMantraUnitLevelTextFormat[] __attribute__((section(".sdata"))) = "%2d";
 MenuMantraRecord *mnuMantraPublishedSourceRecords __attribute__((section(".sdata"))) = NULL;
 
 INCLUDE_RODATA(const s32, "game/code_00286BA8", D_004262B0);
+

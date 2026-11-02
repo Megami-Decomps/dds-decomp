@@ -233,3 +233,4 @@ void dds3CameraObjectBasicGetTgtCam(dds3Basic_t *obj, f32 *worldEyeOut, f32 *tar
 INCLUDE_RODATA(const s32, "basic/dds3CameraObjectBasic", D_0039F6F8);
 
 INCLUDE_RODATA(const s32, "basic/dds3CameraObjectBasic", D_0039F708);
+

@@ -633,3 +633,4 @@ void btlReleaseBossData(void) {
 INCLUDE_RODATA(const s32, "game/code_0020EA40", D_003A66C0);
 
 INCLUDE_RODATA(const s32, "game/code_0020EA40", D_003A66D8);
+

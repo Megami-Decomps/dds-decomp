@@ -649,3 +649,4 @@ SdfGridSeekResult sdfGridSeekLastNode(GridTextWidget *widget) {
 }
 
 INCLUDE_RODATA(const s32, "game/code_002C1588", fldLocalMapTaskName);
+

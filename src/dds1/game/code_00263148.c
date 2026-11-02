@@ -480,3 +480,4 @@ void mnuRefreshPartyUnitVitalsPanels(datUnitWork_t *unit, BrsSkillPackageWork *m
 }
 
 INCLUDE_SDATA(const s32, "game/code_00263148", D_003BC550);
+

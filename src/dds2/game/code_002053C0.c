@@ -1360,3 +1360,4 @@ BtlRuntimeTask *btlCreateLinkageFormationTask(ActionStateLink *link, BtlUnit *fi
 }
 
 INCLUDE_RODATA(const s32, "game/code_002053C0", D_00419540);
+

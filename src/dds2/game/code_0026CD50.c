@@ -527,3 +527,4 @@ void scrClearPartyProfileEntryBit15(datUnitWork_t *context, u8 entry) {
 }
 
 INCLUDE_RODATA(const s32, "game/code_0026CD50", D_00425098);
+

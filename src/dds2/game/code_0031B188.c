@@ -769,3 +769,4 @@ void mnuSetModelNodeBroadcastAlpha(void) {
 INCLUDE_RODATA(const s32, "game/code_0031B188", D_0042DAE8);
 
 INCLUDE_SDATA(const s32, "game/code_0031B188", D_00438950);
+

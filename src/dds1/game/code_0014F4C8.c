@@ -150,3 +150,4 @@ void fldCreateFieldEffectTask(void) {
 }
 
 INCLUDE_SDATA(const s32, "game/code_0014F4C8", D_003BB008);
+

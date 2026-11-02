@@ -1981,3 +1981,4 @@ INCLUDE_SDATA(const s32, "game/code_00102DC8", distblurovercnt);
 INCLUDE_SDATA(const s32, "game/code_00102DC8", ripblurovercnt);
 
 INCLUDE_SDATA(const s32, "game/code_00102DC8", D_00435D10);
+

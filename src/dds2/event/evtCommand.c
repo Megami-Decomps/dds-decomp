@@ -1285,3 +1285,4 @@ INCLUDE_RODATA(const s32, "event/evtCommand", D_00421F68);
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421FB0);
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421FC8);
+

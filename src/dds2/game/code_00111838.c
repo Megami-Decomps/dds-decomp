@@ -147,3 +147,4 @@ dds3ObjectBaseControlWorkData_t *dds3CreateSlotResourceState(dds3Basic_t *owner)
 }
 
 INCLUDE_SDATA(const s32, "game/code_00111838", dds3MoverCount);
+

@@ -42,3 +42,4 @@ void fldInputPanelSetMessage(s32 choice) {
 }
 
 INCLUDE_SDATA(const s32, "field/fldPanel", inputpanel_id);
+

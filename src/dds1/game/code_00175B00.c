@@ -15,7 +15,7 @@
 #include "eff.h"
 #include "eff_scatter_draw.h"
 #include "eff_pcp_scatter_rings.h"
-
+#include "sdf_packet_alloc.h"
 
 /* The four setter callbacks belong to the flat-ring effect's 0x13C-byte
  * instance, not to the drawable used by the resource helpers below. */
@@ -23,6 +23,7 @@ extern PcpScatterRes *dds3ScatterPolyListTexResourceCopy(PcpScatterRes *);
 
 extern PcpScatterRes *dds3ScatterPolyListTexResourceCreate(
     const struct SdfTextureFileHeader *textureHeader);
+
 extern void dds3ScatterPolyListTexResourceDelete(PcpScatterRes *);
 
 /* Copy the flat effect's source vector; the renderer reads the embedded copy. */
@@ -120,11 +121,15 @@ void dds3WhirlwindPolyListDelete(dds3WhirlwindPolyList_tag *object) {
 }
 
 extern u8 effScatterTriangleIndices[];
+
 extern sdfGrOt_t *effScatterDrawSurfaces[];
-#include "sdf_packet_alloc.h"
+
 extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *);
+
 extern f32 *dds3WhirlwindPolyListGetVertex(dds3WhirlwindPolyList_tag *object, s32 particleIndex);
+
 extern f32 *dds3WhirlwindPolyListGetUV(dds3WhirlwindPolyList_tag *object, s32 particleIndex);
+
 struct sdfMat_t;
 
 extern u32 dds3WhirlwindPolyListGetABGR(dds3WhirlwindPolyList_tag *object, s32 particleIndex);
@@ -220,45 +225,4 @@ u32 dds3WhirlwindPolyListGetABGR(dds3WhirlwindPolyList_tag *object, s32 particle
 void dds3WhirlwindPolyListSetRotateMatrix(dds3WhirlwindPolyList_tag *object, const f32 sourceMatrix[16]) {
     VU0_LOAD_MATRIX(sourceMatrix);
     VU0_STORE_MATRIX(object->matrix);
-}
-
-extern EffRandState effDefaultRandomState[];
-
-/* effPCPNeedleSpiralCreate */
-EffPCPNeedleWork *effPCPNeedleSpiralCreate(EffPCPNeedleParams *params) {
-    sdfMemHandle_t *allocation = sdfMemAllocDirect(params->count * sizeof(EffPCPNeedleSlot) + sizeof(EffPCPNeedleWork));
-    EffPCPNeedleWork *work = (EffPCPNeedleWork *)sdfMemLock(allocation);
-    u32 slotIndex;
-    EffResourceWork *resource;
-    u32 count, delayRange;
-    EffPCPNeedleSlot *slot;
-    f32 radiusBase, radiusJitter;
-
-    work->slots = (EffPCPNeedleSlot *)(work + 1);
-    work->params = *params;
-    work->allocationHandle = allocation;
-    work->count = params->count;
-    work->color = 0x80808080;
-    work->system = 0;
-    resource = dds3NeedleModelCreate(params->count);
-    resource->mode = params->mode;
-    work->resource = resource;
-    effBuildRadialFanStreams(resource, params->fanSegments, params->centerColor,
-                            params->outerColor, params->radiusScale, params->viewOffset);
-    work->system = dds3TrackPolyCreate(work->count, work->params.unk54, 0, PAR_CELL_TOPOLOGY_PAIR);
-    dds3TrackPolyVCSet(work->system, 1, work->params.unk58, work->params.unk58);
-    dds3TrackPolySetMode(work->system, (u16)work->params.mode);
-    count = work->count;
-    delayRange = params->randomDelayRange;
-    slot = work->slots;
-    if (delayRange == 0) delayRange = 1;
-    radiusBase = work->params.radiusBase;
-    radiusJitter = work->params.radiusJitter;
-    for (slotIndex = 0; slotIndex < count; slotIndex++, slot++) {
-        slot->angle = dds3GetRandFloatA(effDefaultRandomState) * EFFECT_RING_FULL_TURN;
-        slot->radius = radiusBase * (dds3GetRandFloatA(effDefaultRandomState) * radiusJitter + (1.0f - radiusJitter));
-        slot->age = -(dds3GetRandA((EffRandState *)effDefaultRandomState) % delayRange);
-        dds3NeedleModelSetColor(work->resource, slotIndex, 0x808080);
-    }
-    return work;
 }

@@ -136,9 +136,8 @@ segments:
       - [0x701D0, c, game/code_0016F1D0]
       - [0x71B88, c, effect/effPCPScatter]  # Nocturne __FILE__
       - [0x76B00, c, game/code_00175B00]
-      - [0x773B8, c, effect/effPCPNeedle]  # Nocturne __FILE__
-      - [0x77A28, c, game/code_00176A28]
-      - [0x78190, c, effect/effPCPMisc]  # Nocturne __FILE__
+      - [0x770F8, c, effect/effPCPNeedle]  # Nocturne __FILE__
+      - [0x78120, c, effect/effPCPMisc]  # Nocturne __FILE__
       - [0x85420, c, game/code_00184420]
       - [0x85538, c, effect/effPCPBoss]  # Nocturne __FILE__
       - [0x86E18, c, game/code_00185E18]
@@ -489,8 +488,7 @@ segments:
       - [0x2BA16C, .lit4, effect/effPCPFlash]
       - [0x2BA1C0, .lit4, game/code_0016F1D0]
       - [0x2BA1C8, .lit4, effect/effPCPScatter]
-      - [0x2BA1F4, .lit4, game/code_00175B00]
-      - [0x2BA1F8, .lit4, game/code_00176A28]
+      - [0x2BA1F4, .lit4, effect/effPCPNeedle]
       - [0x2BA1FC, .lit4, effect/effPCPMisc]
       - [0x2BA308, .lit4, effect/effPCPBoss]
       - [0x2BA30C, .lit4, game/code_00185E18]

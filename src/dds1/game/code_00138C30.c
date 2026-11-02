@@ -4591,3 +4591,4 @@ INCLUDE_SDATA(const s32, "game/code_00138C30", D_003BAE68);
 INCLUDE_SDATA(const s32, "game/code_00138C30", fldPickedActorTemplateKind);
 
 INCLUDE_SDATA(const s32, "game/code_00138C30", addressprocess_id);
+

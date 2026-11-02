@@ -2105,3 +2105,4 @@ INCLUDE_SDATA(const s32, "game/code_00136EF8", D_00436188);
 INCLUDE_SDATA(const s32, "game/code_00136EF8", fldAuxRecordResource);
 
 INCLUDE_SDATA(const s32, "game/code_00136EF8", fldValueRecordResource);
+

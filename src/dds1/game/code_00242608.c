@@ -3406,3 +3406,4 @@ const char mnuTerminalSpriteDirectory[] __attribute__((aligned(8))) = "/facility
 INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3D0);
 
 INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3D8);
+

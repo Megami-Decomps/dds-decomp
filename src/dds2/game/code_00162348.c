@@ -1794,3 +1794,4 @@ ParEmitDesc *dds3SpPoly_Ring_Old_Create(ParEmitDesc *src) {
 INCLUDE_SDATA(const s32, "game/code_00162348", hDrawListTop);
 
 INCLUDE_SDATA(const s32, "game/code_00162348", D_00436404);
+

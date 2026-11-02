@@ -378,3 +378,4 @@ s32 evtCopyWorldObjectEntryValue(const char *objectName, s32 dst) {
 }
 
 INCLUDE_RODATA(const s32, "game/code_0026B6A8", D_00425018);
+

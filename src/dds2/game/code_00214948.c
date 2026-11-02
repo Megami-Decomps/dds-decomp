@@ -525,22 +525,6 @@ BtlIndexList *btlBuildActorIndexListAndCount(ActionStateLink *actor, BtlCommandT
     return indexList;
 }
 
-INCLUDE_RODATA(const s32, "game/code_00214948", D_00419C80);
-
-INCLUDE_RODATA(const s32, "game/code_00214948", D_00419CB0);
-
-INCLUDE_RODATA(const s32, "game/code_00214948", D_00419CD8);
-
-INCLUDE_RODATA(const s32, "game/code_00214948", D_00419D00);
-
-INCLUDE_RODATA(const s32, "game/code_00214948", D_00419D20);
-
-INCLUDE_RODATA(const s32, "game/code_00214948", D_00419DA0);
-
-INCLUDE_RODATA(const s32, "game/code_00214948", D_00419E20);
-
-INCLUDE_RODATA(const s32, "game/code_00214948", D_00419EA0);
-
 #ifdef NON_MATCHING
 #include "btl_motion_transform.h"
 #include "common.h"
@@ -809,6 +793,22 @@ s32 func_002152D8(ActionStateLink *actor, s32 unused) {
     return 1;
 }
 #else
+INCLUDE_RODATA(const s32, "game/code_00214948", D_00419C80);
+
+INCLUDE_RODATA(const s32, "game/code_00214948", D_00419CB0);
+
+INCLUDE_RODATA(const s32, "game/code_00214948", D_00419CD8);
+
+INCLUDE_RODATA(const s32, "game/code_00214948", D_00419D00);
+
+INCLUDE_RODATA(const s32, "game/code_00214948", D_00419D20);
+
+INCLUDE_RODATA(const s32, "game/code_00214948", D_00419DA0);
+
+INCLUDE_RODATA(const s32, "game/code_00214948", D_00419E20);
+
+INCLUDE_RODATA(const s32, "game/code_00214948", D_00419EA0);
+
 INCLUDE_ASM(const s32, "game/code_00214948", func_002152D8);
 #endif
 
@@ -9228,3 +9228,4 @@ INCLUDE_SDATA(const s32, "game/code_00214948", D_00436CE0);
 INCLUDE_SDATA(const s32, "game/code_00214948", D_00436CE8);
 
 INCLUDE_SDATA(const s32, "game/code_00214948", D_00436CF0);
+
