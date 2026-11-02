@@ -60,7 +60,7 @@ extern s32 evtDrawFrameListColumnHeadings(sdfDrawTag_t *list, s32 x, s32 y, evtV
 
 extern void evtWriteSerializedBytes(s32 output, void *data, s32 size);
 
-extern SndPackedTrackLoadStatus sndFindPackedTrackLoadStatus(s32 sequence);
+extern SndPackedTrackLoadStatus p2sdLoadCheckMidi(s32 sequence);
 extern void p2sdLoadSMGFile(s32 sequence);
 extern KwlnTaskUpdateResult evtUpdateFrameVariableTask(dds3ProcessID_t *task);
 extern void dds3EffectObjectBasicStatOn(dds3Basic_t *object, u32 flags);
@@ -5558,7 +5558,7 @@ EvtEventBgmReadiness evtCheckEventBgmLoaded(s32 eventId) {
     if ((u32)(eventId - 0x258) >= 0x100) {
         return EVT_EVENT_BGM_READY;
     }
-    return sndFindPackedTrackLoadStatus(evtGetSoundIndex(eventId, 0)) == SND_PACKED_TRACK_LOAD_RESIDENT
+    return p2sdLoadCheckMidi(evtGetSoundIndex(eventId, 0)) == SND_PACKED_TRACK_LOAD_RESIDENT
         ? EVT_EVENT_BGM_READY
         : EVT_EVENT_BGM_NOT_READY;
 }

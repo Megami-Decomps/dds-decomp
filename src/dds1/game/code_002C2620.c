@@ -58,7 +58,7 @@ extern s32 fldStartAndPollLocalMapTrack(void);
 extern void fldInitializeLocalMapScene(void);
 extern s32 fldUpdateLocalMapController(void);
 extern void fldDrawLocalMapOverlay(void);
-extern SndPackedTrackLoadStatus sndFindPackedTrackLoadStatus(s32);
+extern SndPackedTrackLoadStatus p2sdLoadCheckMidi(s32);
 extern void p2sdLoadSMGFile(s32);
 extern s32 fldLocalMapTrackState;
 
@@ -449,14 +449,14 @@ void fldShutdownLmapResources(void) {
 
 s32 fldStartAndPollLocalMapTrack(void) {
     if (fldLocalMapTrackState == 1) {
-        if (sndFindPackedTrackLoadStatus(0x400000) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
+        if (p2sdLoadCheckMidi(0x400000) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
             p2sdLoadSMGFile(0x400000);
             fldLocalMapTrackState = 2;
         } else {
             fldLocalMapTrackState = 0xFF;
         }
     } else if (fldLocalMapTrackState == 2) {
-        if (sndFindPackedTrackLoadStatus(0x400000) == SND_PACKED_TRACK_LOAD_RESIDENT) {
+        if (p2sdLoadCheckMidi(0x400000) == SND_PACKED_TRACK_LOAD_RESIDENT) {
             fldLocalMapTrackState = 0xFF;
         }
     }

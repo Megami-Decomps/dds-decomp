@@ -70,7 +70,7 @@
 extern void dds3WorkClear(void);
 
 extern void p2sdLoadSMGFile(s32 packed);
-extern SndPackedTrackLoadStatus sndFindPackedTrackLoadStatus(s32 packed);
+extern SndPackedTrackLoadStatus p2sdLoadCheckMidi(s32 packed);
 
 #define BTL_COMMAND_RECORD_BYTES 0x38
 
@@ -323,7 +323,7 @@ void btlRequestSceneEventResources(void) {
     dds3LinkProcess(battleState->scriptOwner, eventTask);
     battleState->sequenceHandle =
         ((battleState->eventPackId - BTL_EVENT_SEQUENCE_ID_BIAS) << 16) + BTL_EVENT_SEQUENCE_BASE;
-    if (sndFindPackedTrackLoadStatus(battleState->sequenceHandle) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
+    if (p2sdLoadCheckMidi(battleState->sequenceHandle) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
         p2sdLoadSMGFile(battleState->sequenceHandle);
         btlBossDebugPrintf(D_003A6788, battleState->sequenceHandle);
     }
@@ -337,7 +337,7 @@ BtlEventSequenceTaskAvailability btlIsEventSequenceTaskReady(void) {
     if (battle->eventPackId == BTL_EVENT_PACK_ID_NONE) {
         return BTL_EVENT_SEQUENCE_TASK_READY;
     }
-    if (sndFindPackedTrackLoadStatus(battle->sequenceHandle) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
+    if (p2sdLoadCheckMidi(battle->sequenceHandle) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
         btlBossDebugPrintf(D_003A67A0);
         return BTL_EVENT_SEQUENCE_TASK_NOT_READY;
     }
@@ -550,7 +550,7 @@ extern char D_003A6848[];
 s32 btlCommandSetSequenceVolumePan(void) {
     BtlState *battleState = (BtlState *)btlGetRuntime();
     s32 sequenceOffset = scrGetIntPara(0);
-    if (sndFindPackedTrackLoadStatus(battleState->sequenceHandle) != SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
+    if (p2sdLoadCheckMidi(battleState->sequenceHandle) != SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
         p2sdPlaySE(battleState->sequenceHandle + sequenceOffset, BTL_EVENT_SEQUENCE_VOLUME, BTL_EVENT_SEQUENCE_PAN);
         btlBossDebugPrintf(D_003A6848, battleState->sequenceHandle + sequenceOffset);
     }

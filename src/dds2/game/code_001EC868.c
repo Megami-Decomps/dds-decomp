@@ -181,7 +181,7 @@ extern u32 dds3DrawFlag;
 
 
 
-extern SndPackedTrackLoadStatus sndFindPackedTrackLoadStatus(u32);
+extern SndPackedTrackLoadStatus p2sdLoadCheckMidi(u32);
 
 extern s64 btlForceSceneLightingRestore(SceneLightRestoreArgs *);
 
@@ -11872,7 +11872,7 @@ void btlAdvanceTitleStateWithAudioCleanupTask(void) {
 }
 
 s32 sndLoadAndPlayStationedSe(u32 soundId) {
-    SndPackedTrackLoadStatus status = sndFindPackedTrackLoadStatus(soundId);
+    SndPackedTrackLoadStatus status = p2sdLoadCheckMidi(soundId);
     if (status != SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
         sndSetStationedSeVolume(soundId);
         return 1;
@@ -11921,7 +11921,7 @@ s32 sndPlaySkillSeTask(SkillSeTaskArgs *args) {
         return 1;
     }
     work->skillSeLoadFrame = 0;
-    if (sndFindPackedTrackLoadStatus(args->packedTrackPosition) != SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
+    if (p2sdLoadCheckMidi(args->packedTrackPosition) != SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
         switch (args->optionId) {
         case 1:
             value = args->packedTrackPosition;
@@ -11980,7 +11980,7 @@ s32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *request) {
             request->resourceAllocation = fileGetMemHandle(request->request);
             size = fileGetLoadSize(request->request);
             data = sdfMemLock(request->resourceAllocation);
-            if (sndFindPackedTrackLoadStatus(node->packedTrackPosition) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
+            if (p2sdLoadCheckMidi(node->packedTrackPosition) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
                 p2sdSetPcmBuffer(data, size);
                 node->flags |= SOUND_FILE_STATE_SPU_LOAD_PENDING;
                 btlBossDebugPrintf("btl:sound SPU load start[%X][size:%d]\n", (u16)(node->packedTrackPosition >> 16), size);
@@ -11988,7 +11988,7 @@ s32 sndPollMotSeFileAndSpu(SoundFileTaskArgs *request) {
             node->flags = (node->flags & ~SOUND_FILE_STATE_REQUEST_PENDING) |
                           SOUND_FILE_STATE_SOURCE_REQUEST_RESOLVED;
         }
-    } else if (sndFindPackedTrackLoadStatus(node->packedTrackPosition) != SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
+    } else if (p2sdLoadCheckMidi(node->packedTrackPosition) != SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
         btlBossDebugPrintf("btl:sound SPU load end[%X]\n", (u16)(node->packedTrackPosition >> 16));
         sdfMemFreeDirect(request->resourceAllocation);
         fileRequestFreeIfComplete(request->request);
@@ -12415,7 +12415,7 @@ void btlResetMotionSoundFrameCounters(void) {
 extern char D_00419408[]; /* "btl:sound load BSE SMG\n" */
 
 void sndLoadBattleBank(void) {
-    if (sndFindPackedTrackLoadStatus(0x10000) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
+    if (p2sdLoadCheckMidi(0x10000) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
         p2sdLoadSMGFile(0x10000);
         btlBossDebugPrintf(D_00419408);
     }
@@ -12424,7 +12424,7 @@ void sndLoadBattleBank(void) {
 u8 sndIsBattleBankLoaded(void) {
     SndPackedTrackLoadStatus status;
 
-    status = sndFindPackedTrackLoadStatus(0x10000);
+    status = p2sdLoadCheckMidi(0x10000);
     return status != SND_PACKED_TRACK_LOAD_NOT_PRESENT;
 }
 
@@ -12474,7 +12474,7 @@ void btlUpdateMotionSoundLoading(void) {
     tracksReady = 1;
     for (owner = state->soundSlotOwners; owner != NULL; owner = owner->next) {
         if (owner->flags & SOUND_SLOT_TRACK_LOADING) {
-            SndPackedTrackLoadStatus status = sndFindPackedTrackLoadStatus(owner->work.pendingPackedTrackPosition);
+            SndPackedTrackLoadStatus status = p2sdLoadCheckMidi(owner->work.pendingPackedTrackPosition);
 
             if (status != SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
                 u32 flags = owner->flags;

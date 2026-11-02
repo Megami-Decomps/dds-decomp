@@ -11640,7 +11640,7 @@ segment. That native quirk remains explicit and unchanged.
 `dds3FlashPolyListSetABGR` and `dds3FlashPolyListSetScale` are the five-position
 fan pool setters, separate from the triple-vertex pool's existing generic
 setters. `sdfGetCdClock` preserves its 20-tick cache gate, three return
-cases and month-as-year input quirk. `sndTryDispatchQueuedCommand` attempts one
+cases and month-as-year input quirk. `sdfSndCmdTrans` attempts one
 ring send: zero means accepted, one means empty or rejected. Its producer and
 worker loops retain their opposite continuation conditions.
 `sdfSndLoadSQFile` forwards `strlen` bytes with command bit 0x80,

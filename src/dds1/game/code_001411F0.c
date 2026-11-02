@@ -815,14 +815,14 @@ void fldPrepareSceneBgmArchive(void) {
     fldBgmReloadStep = FLD_ARCHIVE_LOAD_PHASE_CHECK;
 }
 
-extern SndPackedTrackLoadStatus sndFindPackedTrackLoadStatus(s32);
+extern SndPackedTrackLoadStatus p2sdLoadCheckMidi(s32);
 
 extern void p2sdLoadSMGFile(s32);
 
 FldArchiveLoadResult fldStepSceneBgmArchive(void) {
     switch (fldBgmReloadStep) {
     case FLD_ARCHIVE_LOAD_PHASE_CHECK:
-        if (sndFindPackedTrackLoadStatus(MidiNo) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
+        if (p2sdLoadCheckMidi(MidiNo) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
             p2sdLoadSMGFile(MidiNo);
             fldBgmReloadStep = fldBgmReloadStep + 1;
         } else {
@@ -830,7 +830,7 @@ FldArchiveLoadResult fldStepSceneBgmArchive(void) {
         }
         break;
     case FLD_ARCHIVE_LOAD_PHASE_WAIT:
-        if (sndFindPackedTrackLoadStatus(MidiNo) == SND_PACKED_TRACK_LOAD_RESIDENT) {
+        if (p2sdLoadCheckMidi(MidiNo) == SND_PACKED_TRACK_LOAD_RESIDENT) {
             fldBgmReloadStep = fldBgmReloadStep + 1;
         }
         break;
@@ -847,7 +847,7 @@ FldArchivePendingState fldGetArchiveLoadPending(void) {
 
 FldArchiveLoadResult fldPollArchiveLoad(s32 archiveId) {
     s32 name = 0x30000000 + (archiveId << 16);
-    SndPackedTrackLoadStatus result = sndFindPackedTrackLoadStatus(name);
+    SndPackedTrackLoadStatus result = p2sdLoadCheckMidi(name);
     if (result == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
         p2sdLoadSMGFile(name);
         fldArchiveLoadPending = FLD_ARCHIVE_PENDING_ACTIVE;
@@ -875,7 +875,7 @@ void fldResetArchiveLoadPhase(void) {
 FldArchiveLoadResult fldStepArchiveLoad(void) {
     switch (fldFixedArchiveLoadPhase) {
     case FLD_ARCHIVE_LOAD_PHASE_CHECK:
-        if (sndFindPackedTrackLoadStatus(0x670000) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
+        if (p2sdLoadCheckMidi(0x670000) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
             p2sdLoadSMGFile(0x670000);
             fldFixedArchiveLoadPhase = fldFixedArchiveLoadPhase + 1;
         } else {
@@ -883,7 +883,7 @@ FldArchiveLoadResult fldStepArchiveLoad(void) {
         }
         break;
     case FLD_ARCHIVE_LOAD_PHASE_WAIT:
-        if (sndFindPackedTrackLoadStatus(0x670000) == SND_PACKED_TRACK_LOAD_RESIDENT) {
+        if (p2sdLoadCheckMidi(0x670000) == SND_PACKED_TRACK_LOAD_RESIDENT) {
             fldFixedArchiveLoadPhase = fldFixedArchiveLoadPhase + 1;
         }
         break;

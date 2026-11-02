@@ -132,7 +132,7 @@ extern s32 evtDrawFrameListColumnHeadings(sdfDrawTag_t *list, s32 x, s32 y, evtV
 
 extern void p2sdLoadSMGFile(s32 sound);
 
-extern SndPackedTrackLoadStatus sndFindPackedTrackLoadStatus(s32 sound);
+extern SndPackedTrackLoadStatus p2sdLoadCheckMidi(s32 sound);
 
 
 #include "sdf_debug_api.h"
@@ -5644,7 +5644,7 @@ EvtEventBgmReadiness evtCheckEventBgmLoaded(s32 eventId) {
     if ((u32)(eventId - 0x258) >= 0x100) {
         return EVT_EVENT_BGM_READY;
     }
-    return sndFindPackedTrackLoadStatus(evtGetSoundIndex(eventId, 0)) == SND_PACKED_TRACK_LOAD_RESIDENT
+    return p2sdLoadCheckMidi(evtGetSoundIndex(eventId, 0)) == SND_PACKED_TRACK_LOAD_RESIDENT
         ? EVT_EVENT_BGM_READY
         : EVT_EVENT_BGM_NOT_READY;
 }

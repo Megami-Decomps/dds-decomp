@@ -285,7 +285,7 @@ extern void effRequestResourceByMode(const char *prefix, const char *name, s32 m
 extern void mnuStartMantraSpriteLoad(void);
 extern s32 mnuHasMantraSpriteTaskFinished(void);
 extern void mnuMergeMantraSpriteSlots(u32 *values);
-extern s32 sndFindPackedTrackLoadStatus(s32 packed);
+extern s32 p2sdLoadCheckMidi(s32 packed);
 extern void p2sdLoadSMGFile(s32 packed);
 extern void mnuLoadMantraPanelPositionTable(u32 resourceId);
 
@@ -345,7 +345,7 @@ s32 mtrAdvanceMantraResourceLoadState(MtrResourceLoadState *load, u16 mode) {
             mnuStartMantraSpriteLoad();
             break;
         case 4:
-            if (sndFindPackedTrackLoadStatus(files[load->entryIndex].argument) == 0) {
+            if (p2sdLoadCheckMidi(files[load->entryIndex].argument) == 0) {
                 p2sdLoadSMGFile(files[load->entryIndex].argument);
             } else {
                 load->state = 4;
@@ -378,7 +378,7 @@ s32 mtrAdvanceMantraResourceLoadState(MtrResourceLoadState *load, u16 mode) {
             }
             break;
         case 4:
-            if (sndFindPackedTrackLoadStatus(files[load->entryIndex].argument) == 1) {
+            if (p2sdLoadCheckMidi(files[load->entryIndex].argument) == 1) {
                 load->state = 4;
             }
             break;

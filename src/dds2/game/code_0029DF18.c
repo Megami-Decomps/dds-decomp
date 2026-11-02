@@ -1155,7 +1155,7 @@ extern s16 D_00438FCC;
 
 extern s32 D_00437A1C;
 
-extern void sndInitializeIopSoundSystem(char *, s32, const s32 *, s32);
+extern void sdfSndInit(char *, s32, const s32 *, s32);
 
 extern void p2sdLoadSMGFile(s32);
 
@@ -1169,7 +1169,7 @@ void mnuInitializeTitleAudioAndEffects(void) {
         return;
     }
     D_004379FC = 1;
-    sndInitializeIopSoundSystem(D_003E0B30, 4, D_003E0B50, 4);
+    sdfSndInit(D_003E0B30, 4, D_003E0B50, 4);
     p2sdLoadSMGFile(D_003D9D60[0]);
     D_00437A18 = 4;
     D_00438FCC = -1;

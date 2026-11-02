@@ -411,7 +411,7 @@ extern char D_0041B6D8[]; /* "btl:event BE load[e%03d]\n" */
 extern char D_0041B6F8[]; /* "btl:event SMG free[%X]\n" */
 
 extern char D_0041B710[]; /* "btl:BSE free\n" */
-extern SndPackedTrackLoadStatus sndFindPackedTrackLoadStatus(s32);
+extern SndPackedTrackLoadStatus p2sdLoadCheckMidi(s32);
 extern void p2sdLoadSMGFile(s32);
 
 extern void sndReleaseMidiTrack(s32);
@@ -453,11 +453,11 @@ void btlRequestSceneEventResources(void) {
     btlBossDebugPrintf(D_0041B6D8, battleState->eventPackId);
     dds3LinkProcess(battleState->scriptOwner, eventTask);
     battleState->sequenceHandle = BTL_EVENT_SEQUENCE_BASE + ((battleState->eventPackId - BTL_EVENT_SEQUENCE_ID_BIAS) << 16);
-    if (sndFindPackedTrackLoadStatus(battleState->sequenceHandle) != SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
+    if (p2sdLoadCheckMidi(battleState->sequenceHandle) != SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
         sndReleaseMidiTrack(battleState->sequenceHandle);
         btlBossDebugPrintf(D_0041B6F8, battleState->sequenceHandle);
     }
-    if (sndFindPackedTrackLoadStatus(0x10000) != SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
+    if (p2sdLoadCheckMidi(0x10000) != SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
         sndReleaseMidiTrack(0x10000);
         btlBossDebugPrintf(D_0041B710);
     }
@@ -480,14 +480,14 @@ BtlEventSequenceTaskAvailability btlIsEventSequenceTaskReady(void) {
         return BTL_EVENT_SEQUENCE_TASK_READY;
     }
     if (battle->eventFlags & 4) {
-        if (sndFindPackedTrackLoadStatus(battle->sequenceHandle) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
+        if (p2sdLoadCheckMidi(battle->sequenceHandle) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
             p2sdLoadSMGFile(battle->sequenceHandle);
             battle->eventFlags &= ~4;
             btlBossDebugPrintf("btl:event SMG load[%X]\n", battle->sequenceHandle);
         }
         return BTL_EVENT_SEQUENCE_TASK_NOT_READY;
     }
-    if (sndFindPackedTrackLoadStatus(battle->sequenceHandle) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
+    if (p2sdLoadCheckMidi(battle->sequenceHandle) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
         p2sdLoadSMGFile(battle->sequenceHandle);
         btlBossDebugPrintf("btl:SMG load wait\n");
         return BTL_EVENT_SEQUENCE_TASK_NOT_READY;
@@ -686,7 +686,7 @@ s32 btlCommandPlayUnitMotion(void) {
 s32 btlCommandSetSequenceVolumePan(void) {
     BtlState *battleState = (BtlState *)btlGetRuntime();
     s32 sequenceOffset = scrGetIntPara(0);
-    if (sndFindPackedTrackLoadStatus(battleState->sequenceHandle) != SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
+    if (p2sdLoadCheckMidi(battleState->sequenceHandle) != SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
         p2sdPlaySE(battleState->sequenceHandle + sequenceOffset, BTL_EVENT_SEQUENCE_VOLUME, BTL_EVENT_SEQUENCE_PAN);
         btlBossDebugPrintf(D_0041B7E0, battleState->sequenceHandle + sequenceOffset);
     }

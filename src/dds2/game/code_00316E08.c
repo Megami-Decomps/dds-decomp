@@ -249,7 +249,7 @@ const char D_0042D6B8[] __attribute__((aligned(8))) = "%s ... OK!! \n";
 const char D_0042D6C8[] __attribute__((aligned(8))) = "FileHandle Free... OK!! \n";
 
 /* The native wrapper tail-forwards the request through its legacy ABI. */
-extern SndPackedTrackLoadStatus sndFindPackedTrackLoadStatus(s32 sound);
+extern SndPackedTrackLoadStatus p2sdLoadCheckMidi(s32 sound);
 extern void p2sdLoadSMGFile(s32 sound);
 extern void effRequestResourceByMode(const char *prefix, const char *name,
                                      s32 mode, u32 *outInstance);
@@ -300,7 +300,7 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
             }
             break;
         case 2: {
-            SndPackedTrackLoadStatus status = sndFindPackedTrackLoadStatus(
+            SndPackedTrackLoadStatus status = p2sdLoadCheckMidi(
                 D_0040A970[work->packageEntryIndex].value);
             if (status == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
                 p2sdLoadSMGFile(D_0040A970[work->packageEntryIndex].value);
@@ -357,7 +357,7 @@ s32 mnuAdvanceShootingPackageLoad(u8 *workBytes) {
             }
             break;
         case 2:
-            if (sndFindPackedTrackLoadStatus(D_0040A970[work->packageEntryIndex].value) == SND_PACKED_TRACK_LOAD_RESIDENT) {
+            if (p2sdLoadCheckMidi(D_0040A970[work->packageEntryIndex].value) == SND_PACKED_TRACK_LOAD_RESIDENT) {
                 work->packageLoadState = MNU_SHOOTING_PACKAGE_LOAD_PROCESS_ENTRY;
             }
             break;

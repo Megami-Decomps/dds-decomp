@@ -411,7 +411,7 @@ typedef struct SoundSceneEntry {
     u8 pad26[2];
 } SoundSceneEntry;
 
-extern SndPackedTrackLoadStatus sndFindPackedTrackLoadStatus(u32);
+extern SndPackedTrackLoadStatus p2sdLoadCheckMidi(u32);
 
 
 extern s64 btlForceSceneLightingRestore(SceneLightRestoreArgs *);

@@ -423,7 +423,7 @@ extern s32 MidiNo;
 
 extern FldArchiveLoadPhase fldBgmReloadStep;
 
-extern SndPackedTrackLoadStatus sndFindPackedTrackLoadStatus(s32);
+extern SndPackedTrackLoadStatus p2sdLoadCheckMidi(s32);
 
 extern void p2sdLoadSMGFile(s32);
 
@@ -1015,7 +1015,7 @@ void fldPrepareSceneBgmArchive(void) {
 FldArchiveLoadResult fldStepSceneBgmArchive(void) {
     switch (fldBgmReloadStep) {
     case FLD_ARCHIVE_LOAD_PHASE_CHECK:
-        if (sndFindPackedTrackLoadStatus(MidiNo) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
+        if (p2sdLoadCheckMidi(MidiNo) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
             p2sdLoadSMGFile(MidiNo);
             fldBgmReloadStep = fldBgmReloadStep + 1;
         } else {
@@ -1023,7 +1023,7 @@ FldArchiveLoadResult fldStepSceneBgmArchive(void) {
         }
         break;
     case FLD_ARCHIVE_LOAD_PHASE_WAIT:
-        if (sndFindPackedTrackLoadStatus(MidiNo) == SND_PACKED_TRACK_LOAD_RESIDENT) {
+        if (p2sdLoadCheckMidi(MidiNo) == SND_PACKED_TRACK_LOAD_RESIDENT) {
             fldBgmReloadStep = fldBgmReloadStep + 1;
         }
         break;
@@ -1040,7 +1040,7 @@ FldArchivePendingState fldGetArchiveLoadPending(void) {
 
 FldArchiveLoadResult fldPollArchiveLoad(s32 archiveId) {
     s32 name = 0x30000000 + (archiveId << 16);
-    SndPackedTrackLoadStatus result = sndFindPackedTrackLoadStatus(name);
+    SndPackedTrackLoadStatus result = p2sdLoadCheckMidi(name);
     if (result == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
         p2sdLoadSMGFile(name);
         fldArchiveLoadPending = FLD_ARCHIVE_PENDING_ACTIVE;
@@ -1068,7 +1068,7 @@ void fldResetArchiveLoadPhase(void) {
 FldArchiveLoadResult fldStepArchiveLoad(void) {
     switch (fldFixedArchiveLoadPhase) {
     case FLD_ARCHIVE_LOAD_PHASE_CHECK:
-        if (sndFindPackedTrackLoadStatus(0x680000) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
+        if (p2sdLoadCheckMidi(0x680000) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
             p2sdLoadSMGFile(0x680000);
             fldFixedArchiveLoadPhase = fldFixedArchiveLoadPhase + 1;
         } else {
@@ -1076,7 +1076,7 @@ FldArchiveLoadResult fldStepArchiveLoad(void) {
         }
         break;
     case FLD_ARCHIVE_LOAD_PHASE_WAIT:
-        if (sndFindPackedTrackLoadStatus(0x680000) == SND_PACKED_TRACK_LOAD_RESIDENT) {
+        if (p2sdLoadCheckMidi(0x680000) == SND_PACKED_TRACK_LOAD_RESIDENT) {
             fldFixedArchiveLoadPhase = fldFixedArchiveLoadPhase + 1;
         }
         break;
@@ -1095,7 +1095,7 @@ void fldResetSecondaryArchiveLoadPhase(void) {
 FldArchiveLoadResult fldStepSecondaryArchiveLoad(void) {
     switch (D_0043623C) {
     case 0:
-        if (sndFindPackedTrackLoadStatus(0x690000) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
+        if (p2sdLoadCheckMidi(0x690000) == SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
             p2sdLoadSMGFile(0x690000);
             D_0043623C = D_0043623C + 1;
         } else {
@@ -1103,7 +1103,7 @@ FldArchiveLoadResult fldStepSecondaryArchiveLoad(void) {
         }
         break;
     case 1:
-        if (sndFindPackedTrackLoadStatus(0x690000) == SND_PACKED_TRACK_LOAD_RESIDENT) {
+        if (p2sdLoadCheckMidi(0x690000) == SND_PACKED_TRACK_LOAD_RESIDENT) {
             D_0043623C = D_0043623C + 1;
         }
         break;

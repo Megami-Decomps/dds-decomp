@@ -51,7 +51,7 @@
 
 extern s8 sdfSndBurstReqMode;
 
-u32 sndReserveIopWorkMemory(s32 size) {
+u32 sdfSndIopAlloc(s32 size) {
     return (u32)sceSifAllocIopHeap(size);
 }
 
@@ -62,7 +62,7 @@ extern vu16 sdfSndCmdIndex;
 
 extern vu16 sdfSndCmdTailIndex;
 
-SndQueuedCommandDispatchResult sndTryDispatchQueuedCommand(void) {
+SndQueuedCommandDispatchResult sdfSndCmdTrans(void) {
     s32 readIndex = (s16)sdfSndCmdIndex;
     SndRingPacket *packet;
 
@@ -83,7 +83,7 @@ void sdfSndCmdIFThread(void) {
         do {
             SleepThread();
         } while (sdfSndBurstReqMode != 0);
-        while (sndTryDispatchQueuedCommand() == SND_QUEUED_COMMAND_DISPATCH_RESULT_SENT) {
+        while (sdfSndCmdTrans() == SND_QUEUED_COMMAND_DISPATCH_RESULT_SENT) {
         }
     }
 }
@@ -104,7 +104,7 @@ extern s32 CreateThreadSimple(void (*entryAddress)(), void *workspace, s32 stack
 
 extern void SifRpcServerThreadProc(void);
 
-s32 sndStartIopCommandAndRpcWorkers(void) {
+s32 sdfSndInitCmdIF(void) {
     s32 threadId;
 
     while (sceSifGetSreg(31) == 0) {
@@ -154,17 +154,17 @@ void p2sdLoadSMGFile(s32 trackId);
 /* Sound command work block: header, 16 channels/buffers, 13 track slots (see code_002E9140). */
 extern SndWork sdfSndMap;
 
-extern u32 sndReserveIopWorkMemory(s32 size);
+extern u32 sdfSndIopAlloc(s32 size);
 
 extern s32 D_003BDA8C;
 
-extern s32 sndStartIopCommandAndRpcWorkers(void);
+extern s32 sdfSndInitCmdIF(void);
 
 extern void sdfSndTransToIOP(s32, const void *, s32);
 
 extern SndRingPacket sndCommandRing[SND_COMMAND_RING_ENTRY_COUNT];
 
-extern u32 D_003BD4A0;
+extern u32 sdfSndSendCmd_cmd_id;
 
 /* The worker consumes entries while this producer publishes and polls cursors. */
 extern vu16 sdfSndCmdIndex;
@@ -175,8 +175,8 @@ u32 sdfSndSendCmd(u32 command, u32 channel, const void *packet, s32 payloadBytes
     SndRingPacket *entry;
     u32 transferQuadwords;
 
-    if (++D_003BD4A0 == 0) {
-        D_003BD4A0 = 1;
+    if (++sdfSndSendCmd_cmd_id == 0) {
+        sdfSndSendCmd_cmd_id = 1;
     }
     nextWriteIndex = ((s16)sdfSndCmdTailIndex + 1) & SND_COMMAND_RING_INDEX_MASK;
     if (nextWriteIndex == (s16)sdfSndCmdIndex) {
@@ -188,7 +188,7 @@ u32 sdfSndSendCmd(u32 command, u32 channel, const void *packet, s32 payloadBytes
         return 0;
     }
     entry = &sndCommandRing[(s16)sdfSndCmdTailIndex];
-    entry->sequence = D_003BD4A0;
+    entry->sequence = sdfSndSendCmd_cmd_id;
     if (payloadBytes != 0) {
         memcpy(entry->payload, packet, payloadBytes);
     }
@@ -200,12 +200,12 @@ u32 sdfSndSendCmd(u32 command, u32 channel, const void *packet, s32 payloadBytes
                      (transferQuadwords << SND_COMMAND_LENGTH_SHIFT);
     sdfSndCmdTailIndex = nextWriteIndex;
     if (sdfSndBurstReqMode != 0) {
-        while (sndTryDispatchQueuedCommand() != SND_QUEUED_COMMAND_DISPATCH_RESULT_SENT) {
+        while (sdfSndCmdTrans() != SND_QUEUED_COMMAND_DISPATCH_RESULT_SENT) {
         }
     } else {
         WakeupThread(sdfSndCmdBuf);
     }
-    return D_003BD4A0;
+    return sdfSndSendCmd_cmd_id;
 }
 
 /* Ignore the post-queue sequence; this native entry does not wait or update state. */
@@ -247,7 +247,7 @@ void sdfSndTransToIOP(s32 destination, const void *source, s32 size) {
 extern u8 sdfHddValid;
 
 /* Load the sound modules; debug PFS may override only the SDF sound manager. */
-void sndLoadIopSoundModules(void) {
+void sdfSndLoadIRXModules(void) {
     SceIoStat info;
     char *module;
 
@@ -265,7 +265,7 @@ void sndLoadIopSoundModules(void) {
     SdfIopFileRpc(module, 0, NULL, NULL);
 }
 
-void sndInitializeChannelAndTrackState(char *unused, s32 header) {
+void sdfSndVoiceMapInit(char *unused, s32 header) {
     SndChannel *channel;
     s32 i;
 
@@ -280,7 +280,7 @@ void sndInitializeChannelAndTrackState(char *unused, s32 header) {
         channel->unkC = 0;
         channel++;
     }
-    sdfSndMap.channels[0].iopWorkAddress = sndReserveIopWorkMemory(0x21600);
+    sdfSndMap.channels[0].iopWorkAddress = sdfSndIopAlloc(0x21600);
     sdfSndMap.opaque200 = 0;
     sdfSndMap.opaque204 = 0;
     for (i = 0; i < SND_TRACK_SLOT_COUNT; i++) {
@@ -291,7 +291,7 @@ void sndInitializeChannelAndTrackState(char *unused, s32 header) {
 }
 
 /* Allocate one aligned IOP block and distribute its address among active buffers. */
-void sndAllocateAlignedIopBuffers(const s32 *bufferSizes, s32 bufferCount) {
+void sdfSndSeqMapInit(const s32 *bufferSizes, s32 bufferCount) {
     SndIopBuffer *buffer;
     s32 totalBytes;
     s32 alignedBytes;
@@ -314,7 +314,7 @@ void sndAllocateAlignedIopBuffers(const s32 *bufferSizes, s32 bufferCount) {
         sdfSndMap.buffers[bufferIndex].size = 0;
         sdfSndMap.buffers[bufferIndex].iopAddress = 0;
     }
-    iopAddress = sndReserveIopWorkMemory(totalBytes);
+    iopAddress = sdfSndIopAlloc(totalBytes);
     bufferIndex = 0;
     do {
         sdfSndMap.buffers[bufferIndex].iopAddress = iopAddress;
@@ -323,16 +323,16 @@ void sndAllocateAlignedIopBuffers(const s32 *bufferSizes, s32 bufferCount) {
     } while (bufferIndex != bufferCount);
 }
 
-void sndInitializeIopSoundSystem(char *unused, s32 header, const s32 *bufferSizes, s32 bufferCount) {
+void sdfSndInit(char *unused, s32 header, const s32 *bufferSizes, s32 bufferCount) {
     sdfSndBurstReqMode = 1;
-    sndLoadIopSoundModules();
+    sdfSndLoadIRXModules();
     sceSifInitIopHeap();
-    sndStartIopCommandAndRpcWorkers();
-    sdfSndMap.iopBufferAddress = sndReserveIopWorkMemory(0x4000);
+    sdfSndInitCmdIF();
+    sdfSndMap.iopBufferAddress = sdfSndIopAlloc(0x4000);
     sdfSndMap.iopBufferBytes = 0x4000;
-    sndInitializeChannelAndTrackState(unused, header);
-    sndAllocateAlignedIopBuffers(bufferSizes, bufferCount);
-    D_003BDA8C = sndReserveIopWorkMemory(0x8D0);
+    sdfSndVoiceMapInit(unused, header);
+    sdfSndSeqMapInit(bufferSizes, bufferCount);
+    D_003BDA8C = sdfSndIopAlloc(0x8D0);
     sdfSndMap.eeWorkAddress = &sdfSndMap;
     sdfSndMap.eeWorkByteCount = 0x8D0;
     sdfSndTransToIOP(D_003BDA8C, &sdfSndMap, 0x8D0);
@@ -458,7 +458,7 @@ void p2sdPlaySeDeg(s32 trackId, f32 angle, f32 distance) {
     p2sdPlaySE(trackId, (s32)(volume * 127.0f), pan);
 }
 
-extern SndPackedTrackLoadStatus sndFindPackedTrackLoadStatus(s32 packedTrack);
+extern SndPackedTrackLoadStatus p2sdLoadCheckMidi(s32 packedTrack);
 
 extern s32 p2sdSmgHandle;
 
@@ -518,7 +518,7 @@ void p2sdSetStandPos(f32 firstPointX, f32 firstPointY, f32 firstPointZ,
 }
 
 /* Prefer a resident slot, then report the single bank request tracked as pending. */
-SndPackedTrackLoadStatus sndFindPackedTrackLoadStatus(s32 packed) {
+SndPackedTrackLoadStatus p2sdLoadCheckMidi(s32 packed) {
     SndWork *work = &sdfSndMap;
     s32 id = packed >> 16;
     SndTrackSlot *slot;
@@ -542,7 +542,7 @@ extern FileManagerQueuedRequestResult (*p2sdSmgBuf)(void);
 void p2sdLoadSMGFile(s32 packed) {
     char name[0x10];
     char path[0x100];
-    SndPackedTrackLoadStatus status = sndFindPackedTrackLoadStatus(packed);
+    SndPackedTrackLoadStatus status = p2sdLoadCheckMidi(packed);
     s32 id;
 
     switch (status) {
@@ -562,7 +562,7 @@ void p2sdLoadSMGFile(s32 packed) {
             if (p2sdSmgBuf != NULL) {
                 p2sdSmgBuf();
             }
-        } while (sndFindPackedTrackLoadStatus(packed) != SND_PACKED_TRACK_LOAD_RESIDENT);
+        } while (p2sdLoadCheckMidi(packed) != SND_PACKED_TRACK_LOAD_RESIDENT);
         break;
     }
 }
@@ -607,7 +607,7 @@ u32 sndSendChannelGroupCommand150(u8 channel) {
 
 void sndReleaseMidiTrack(s32 id) {
     u32 packet[4];
-    if (sndFindPackedTrackLoadStatus(id) != SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
+    if (p2sdLoadCheckMidi(id) != SND_PACKED_TRACK_LOAD_NOT_PRESENT) {
         packet[0] = id;
         sdfSndSendSyncCmd(0xB0, 0, packet, 0x10);
         id >>= 16;
@@ -698,7 +698,7 @@ extern char D_00398948[];
 
 extern s32 sifRpcServerSema;
 
-extern u32 D_003FEAC0[16];
+extern u32 sdfFileRpcQueue[16];
 
 extern s32 sdfPrintf(const char *fmt, ...);
 
@@ -712,9 +712,9 @@ extern char D_003B48E0[];
 
 extern char D_003B4900[];
 
-extern char *D_00398968[];
+extern char *sdfDmaTagNameTable[];
 
-extern SdfSoundCommand D_003BD494;
+extern SdfSoundCommand p2sdPcmCallback;
 
 void p2sdBgmVolDown(void) {
     sdfSndSendCmd(0x180, 0, 0, 0);
@@ -763,7 +763,7 @@ SdfSoundReadCallback p2sdSetPcmCallback(SdfSoundReadCallback callback) {
     if (p2sdPcmBusy != 0) {
         return NULL;
     }
-    D_003BD494.read = callback;
+    p2sdPcmCallback.read = callback;
     return callback;
 }
 
@@ -815,13 +815,13 @@ s32 sdfFileRpcCallback(s32 unused, SdfDevEvent event) {
     return 0;
 }
 
-extern SdfSoundRpcRequest *D_003BDA74;
+extern SdfSoundRpcRequest *sdfFileRpcResult;
 
-extern s32 D_003BDA78;
+extern s32 sdfFileRpcCmdState;
 
-extern sdfFileCmdHandle_t *D_003BDA7C;
+extern sdfFileCmdHandle_t *sdfFileRpcArg;
 
-extern SdfSoundResidentBuffer D_003FEA98;
+extern SdfSoundResidentBuffer p2sdPcmBuffer;
 
 extern sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path, void *callback, void *callbackContext);
 
@@ -833,93 +833,93 @@ u32 *sdfFileRpcHandleCmd(u32 command, SdfSoundRpcRequest *request) {
     case SDF_SOUND_RPC_OPEN_VOICE_FILE: {
         sdfFileCmdHandle_t *state;
         if (D_00398948[0] == 0) {
-            D_003FEAC0[0] = 0;
+            sdfFileRpcQueue[0] = 0;
             break;
         }
         p2sdPcmState = MNU_TITLE_SOUND_BUSY;
         mnuBuildVoiceResourcePath(path, D_00398948);
         state = sdfFileCmdReadOpen(path, sdfFileRpcCallback, 0);
-        D_003BDA7C = state;
+        sdfFileRpcArg = state;
         if (state != NULL) {
             WaitSema(sifRpcServerSema);
-            state = D_003BDA7C;
+            state = sdfFileRpcArg;
             if (state->result != 0) {
                 sdfFileCmdClearError(state);
-                sdfFileCmdFree(D_003BDA7C);
-                D_003BDA7C = NULL;
+                sdfFileCmdFree(sdfFileRpcArg);
+                sdfFileRpcArg = NULL;
                 state = NULL;
             }
         }
-        D_003FEAC0[0] = (u32)state;
+        sdfFileRpcQueue[0] = (u32)state;
         break;
     }
     case SDF_SOUND_RPC_READ_VOICE_FILE: {
         sdfMemHandle_t *allocation;
         void *buffer;
-        D_003BDA74 = request;
+        sdfFileRpcResult = request;
         allocation = sdfMemAllocDirect(request->byteCount);
         buffer = (void *)sdfMemLock(allocation);
         if (buffer != NULL) {
-            sdfFileCmdRead(D_003BDA7C, buffer, D_003BDA74->byteCount);
+            sdfFileCmdRead(sdfFileRpcArg, buffer, sdfFileRpcResult->byteCount);
             WaitSema(sifRpcServerSema);
-            sdfSndTransToIOP(D_003BDA74->destination, buffer, D_003BDA74->byteCount);
+            sdfSndTransToIOP(sdfFileRpcResult->destination, buffer, sdfFileRpcResult->byteCount);
             sdfMemFreeDirect(allocation);
-            D_003FEAC0[0] = D_003BDA74->byteCount;
+            sdfFileRpcQueue[0] = sdfFileRpcResult->byteCount;
         } else {
-            D_003FEAC0[0] = 0;
+            sdfFileRpcQueue[0] = 0;
         }
         break;
     }
     case SDF_SOUND_RPC_CLOSE_VOICE_FILE:
-        sdfFileCmdClose(D_003BDA7C);
+        sdfFileCmdClose(sdfFileRpcArg);
         WaitSema(sifRpcServerSema);
-        sdfFileCmdFree(D_003BDA7C);
-        D_003BDA7C = NULL;
+        sdfFileCmdFree(sdfFileRpcArg);
+        sdfFileRpcArg = NULL;
         p2sdPcmState = MNU_TITLE_SOUND_IDLE;
-        D_003FEAC0[0] = 0;
+        sdfFileRpcQueue[0] = 0;
         break;
     case SDF_SOUND_RPC_RESET_RESIDENT_BUFFER_OFFSET:
-        D_003BDA78 = 0;
-        D_003FEAC0[0] = 0;
+        sdfFileRpcCmdState = 0;
+        sdfFileRpcQueue[0] = 0;
         break;
     case SDF_SOUND_RPC_READ_RESIDENT_BUFFER: {
         s32 bytes;
-        D_003BDA74 = request;
-        sdfSndTransToIOP(request->destination, D_003FEA98.data + D_003BDA78, request->byteCount);
-        bytes = D_003BDA74->byteCount;
-        D_003FEAC0[0] = bytes;
-        D_003BDA78 += bytes;
+        sdfFileRpcResult = request;
+        sdfSndTransToIOP(request->destination, p2sdPcmBuffer.data + sdfFileRpcCmdState, request->byteCount);
+        bytes = sdfFileRpcResult->byteCount;
+        sdfFileRpcQueue[0] = bytes;
+        sdfFileRpcCmdState += bytes;
         break;
     }
     case 5:
-        D_003FEAC0[0] = 0;
+        sdfFileRpcQueue[0] = 0;
         break;
     case SDF_SOUND_RPC_GET_PCM_CALLBACK_WORD: {
-        u32 word = D_003BD494.word;
+        u32 word = p2sdPcmCallback.word;
         if (word != 0) {
             p2sdPcmBusy = 1;
         }
-        D_003FEAC0[0] = word;
+        sdfFileRpcQueue[0] = word;
         break;
     }
     case SDF_SOUND_RPC_READ_PCM_CALLBACK_BUFFER: {
         const u8 *buffer;
-        D_003BDA74 = request;
-        buffer = D_003BD494.read(request->byteCount);
+        sdfFileRpcResult = request;
+        buffer = p2sdPcmCallback.read(request->byteCount);
         if (buffer != NULL) {
-            sdfSndTransToIOP(D_003BDA74->destination, buffer, D_003BDA74->byteCount);
-            D_003FEAC0[0] = D_003BDA74->byteCount;
+            sdfSndTransToIOP(sdfFileRpcResult->destination, buffer, sdfFileRpcResult->byteCount);
+            sdfFileRpcQueue[0] = sdfFileRpcResult->byteCount;
         } else {
-            D_003FEAC0[0] = -1;
+            sdfFileRpcQueue[0] = -1;
         }
         break;
     }
     case SDF_SOUND_RPC_CLEAR_PCM_CALLBACK_BUSY:
         p2sdPcmBusy = 0;
-        D_003FEAC0[0] = 0;
+        sdfFileRpcQueue[0] = 0;
         break;
     }
-    return D_003FEAC0;
+    return sdfFileRpcQueue;
 }
 
 void SifRpcServerThreadProc(void) {
@@ -932,7 +932,7 @@ void SifRpcServerThreadProc(void) {
         }
     }
     sceSifSetRpcQueue(queue, GetThreadId());
-    sceSifRegisterRpc(server, 0x54524E53, sdfFileRpcHandleCmd, D_003FEAC0, 0, 0, queue);
+    sceSifRegisterRpc(server, 0x54524E53, sdfFileRpcHandleCmd, sdfFileRpcQueue, 0, 0, queue);
     sceSifRpcLoop(queue);
 }
 
@@ -1151,7 +1151,7 @@ extern char D_003BD508[];
 
 extern char D_003BD510[];
 
-extern char D_003BD518[];
+extern char sdfDumpLineBuf[];
 
 extern char D_003BD520[];
 
@@ -1176,12 +1176,12 @@ void sdfDumpHexLine(const u8 *data, s32 size) {
         column++;
         if (column == 0x10) {
             column = 0;
-            sdfPrintf(D_003BD518);
+            sdfPrintf(sdfDumpLineBuf);
         }
         size--;
     }
     if (column == 0) {
-        sdfPrintf(D_003BD518);
+        sdfPrintf(sdfDumpLineBuf);
     } else {
         sdfPrintf(D_003BD520);
     }
@@ -1219,7 +1219,7 @@ void sdfDumpDmaChain(SdfDmaTag *src) {
         tagAddress = cursor->address;
         tagType = (tag >> 28) & 7;
         tagCount = tag & 0xFFFF;
-        sdfPrintf(D_003B48B8, cursor, D_00398968[tagType], tag, tagAddress, ((u32 *)cursor)[2], ((u32 *)cursor)[3]);
+        sdfPrintf(D_003B48B8, cursor, sdfDmaTagNameTable[tagType], tag, tagAddress, ((u32 *)cursor)[2], ((u32 *)cursor)[3]);
         cursor++;
         switch (tagType) {
         case 0:
@@ -1321,7 +1321,7 @@ void sdfGrFlushOtChain(u32 sourceAddress) {
                 tagId = (tag >> 28) & 7;
                 qwc = tag & 0xFFFF;
                 sdfPrintf("\n%08X [DMA %s] : %08X %08X\n",
-                                           cursor, D_00398968[tagId], tag, tagAddress);
+                                           cursor, sdfDmaTagNameTable[tagId], tag, tagAddress);
                 wordCursor = ((u32 *)cursor) + 2;
                 cursor++;
                 wordsLeft = 2;
@@ -1533,11 +1533,11 @@ void sdfGrFlushOtChain(u32 sourceAddress) {
                 sdfPrintf(D_003BD5E8, value);
                 if (directRow == 4) {
                     directRow = 0;
-                    sdfPrintf(D_003BD518);
+                    sdfPrintf(sdfDumpLineBuf);
                 }
                 if (--n == 0) {
                     if (directRow != 0) {
-                        sdfPrintf(D_003BD518);
+                        sdfPrintf(sdfDumpLineBuf);
                     }
                     dataMode = 0;
                 }
@@ -1655,17 +1655,17 @@ void sdfDumpChipMemory(void) {
         first = limit + 1;
         limit *= 2;
     } while (i != 7);
-    sdfPrintf(D_003BD518, first);
+    sdfPrintf(sdfDumpLineBuf, first);
 }
 INCLUDE_SDATA(const s32, "sdf/sdfSound", p2sdSmgHandle);
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", D_003BD494);
+INCLUDE_SDATA(const s32, "sdf/sdfSound", p2sdPcmCallback);
 
 INCLUDE_SDATA(const s32, "sdf/sdfSound", p2sdPcmState);
 
 INCLUDE_SDATA(const s32, "sdf/sdfSound", p2sdPcmBusy);
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", D_003BD4A0);
+INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfSndSendCmd_cmd_id);
 
 INCLUDE_SDATA(const s32, "sdf/sdfSound", D_003BD4A4);
 
@@ -1697,7 +1697,7 @@ INCLUDE_SDATA(const s32, "sdf/sdfSound", D_003BD508);
 
 INCLUDE_SDATA(const s32, "sdf/sdfSound", D_003BD510);
 
-INCLUDE_SDATA(const s32, "sdf/sdfSound", D_003BD518);
+INCLUDE_SDATA(const s32, "sdf/sdfSound", sdfDumpLineBuf);
 
 INCLUDE_SDATA(const s32, "sdf/sdfSound", D_003BD520);
 
