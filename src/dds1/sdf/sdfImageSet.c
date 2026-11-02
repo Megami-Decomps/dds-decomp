@@ -1,293 +1,364 @@
-#include "sdk_ps2.h"
 #include "common.h"
 #include "eeregs.h"
-#include "sdf_timer.h"
-#include "sdf_texture_queue.h"
-#include "sdf_image_upload.h"
-#include "sdf_thread.h"
-#include "ee_mmi.h"
-#include "sdf_chip.h"
-#include "sdf_chip_range_api.h"
-#include "sdf_heap_api.h"
-#include "sdf.h"
-#include "sdf_gs_mem_delayed_free_api.h"
-#include "sdf_graph_buffer_state.h"
-#include "sdf_display_thread_state.h"
-#include "sdf_draw_frame_execution_state.h"
-#include "sdf_semaphore_api.h"
-#include "sdf_texture_primary_buffer_api.h"
-#include "sdf_texture_submit.h"
-#include "sdf_texture_lists.h"
-#include "sdf_texture_registry.h"
-#include "sdf_pending.h"
-#include "sdf_texture_release.h"
-#include "sdf_image_packets.h"
-#include "sdf_tex_copy_image_data_api.h"
-#include "sdf_vu_transform_api.h"
-#include "sdf_handler_node.h"
+#include "libsdf.h"
+#include "ps2asm.h"
 
-/* GS pixel-storage modes, using the same private names as sdfTex.c. */
-enum {
-    SDF_PSMCT32 = 0x0, SDF_PSMCT24 = 0x1, SDF_PSMCT16 = 0x2,
-    SDF_PSMCT16S = 0xA, SDF_PSMT8 = 0x13, SDF_PSMT4 = 0x14,
-    SDF_PSMT8H = 0x1B, SDF_PSMT4HL = 0x24, SDF_PSMT4HH = 0x2C,
-    SDF_PSMZ32 = 0x30, SDF_PSMZ24 = 0x31, SDF_PSMZ16 = 0x32,
+/* GS pixel storage modes, the values of sdfGsMemSlice_t.pixelFormat. */
+enum sdf_psm
+{
+    SDF_PSMCT32 = 0x00,
+    SDF_PSMCT24 = 0x01,
+    SDF_PSMCT16 = 0x02,
+    SDF_PSMCT16S = 0x0A,
+    SDF_PSMT8 = 0x13,
+    SDF_PSMT4 = 0x14,
+    SDF_PSMT8H = 0x1B,
+    SDF_PSMT4HL = 0x24,
+    SDF_PSMT4HH = 0x2C,
+    SDF_PSMZ32 = 0x30,
+    SDF_PSMZ24 = 0x31,
+    SDF_PSMZ16 = 0x32,
     SDF_PSMZ16S = 0x3A
 };
 
-extern SdfTextureQueue sdfImageSetCb;
+extern void *sdfChipAllocDirect(u32 aSize);
 
-extern void (*sdfGrCaptureTarget)(u8 *);
+extern void sdfChipFreeDirect(void *aPtr);
 
-extern void (*sdfGsErrorHandler)(s32 size, s32 allocationMode);
+extern s32 iWakeupThread(s32 threadId);
 
-struct sdfGsMemSlice_t *sdfGsMemAllocFromHead(s32 size, s32 allocationMode);
+extern void (*sdfGsErrorHandler)(s32 size, s32 type);
 
-sdfGsMemSlice_t *sdfGsMemAllocFromHead(s32 size, s32 allocationMode);
+/* sdfImageSetPacket_tag.freeMode: which heap owns the uploaded pixels. */
+enum SdfImageSetMem
+{
+    SDF_IMAGESET_MEM_IGNORE = 0,
+    SDF_IMAGESET_MEM_HANDLE = 1,
+    SDF_IMAGESET_MEM_CHIP = 2
+};
 
-/* Transfer size in 16-byte quadwords; low bits of a partial quadword are discarded. */
-s32 sdfImageDataSize(u32 format, s32 width, s32 height) {
-    s32 transferBitsPerPixel;
+typedef struct sdfImageSetRelease
+{
+    struct sdfImageSetRelease *next;
+    void *chip;
+    sdfMemHandle_t *memHandle;
+    u8 freeMode;
+} sdfImageSetPacket_tag;
+
+/* Terminal DMA tag of a queued upload packet. Linking the next packet writes
+ * its address into tag and clears the two VIF codes behind it. */
+typedef struct sdfImageSetTag
+{
+    u64 tag;
+    u64 vifCodes;
+} sdfImageSetTag_t;
+
+typedef struct sdfImageSetCB
+{
+    s32 semaId;
+    sdfImageSetPacket_tag *packetHead;
+    sdfImageSetPacket_tag *packetTail;
+    u32 tagHead;
+    sdfImageSetTag_t *tagTail;
+} sdfImageSetCb_t;
+
+typedef struct sdfImageSetReqParam
+{
+    void *data;
+    sdfMemHandle_t *memHandle;
+    u8 freeMode;
+    u8 pixelFormat;
+    u16 bufferWidth;
+    u32 addr;
+    u16 x;
+    u16 y;
+    u16 w;
+    u16 h;
+} sdfImageSetReqParam_t;
+
+extern s32 WaitSema(s32 semaId);
+
+extern s32 SignalSema(s32 semaId);
+
+extern s32 sdfCreateSema(s32 initCount, s32 maxCount, s32 option);
+
+extern void *sdfChipAllocZeroDirect(u32 aSize);
+
+extern s32 sdfChipCheck(void *aPtr);
+
+extern sdfMemHandle_t *sdfMemGetHandleByPtr(void *aPtr);
+
+extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
+
+extern s32 GetThreadId(void);
+
+#define SDK_SKIP_SleepThread
+#include "sdk_libkernl.h"
+
+extern s32 RemoveDmacHandler(s32 channel, s32 handlerId);
+
+extern void *sceDmaGetChan(s32 channel);
+
+extern s32 sceDmaSend(void *chan, void *packet);
+
+extern void FlushCache(s32 mode);
+
+extern void SleepThread(void);
+
+extern sdfImageSetCb_t sdfImageSetCb;
+
+#define D_005293A0 D_00398100
+
+extern u64 D_005293A0[];
+
+s32 sdfImageDataSize(u32 format, s32 width, s32 height);
+
+s32 sdfImageSetDmacHandler(s32 channel, s32 threadId);
+
+void sdfImageSetClearCb(sdfImageSetCb_t *cb);
+
+s32 sdfImageDataSize(u32 format, s32 width, s32 height)
+{
+    s32 bitCount;
 
     switch (format) {
     case SDF_PSMCT24:
     case SDF_PSMZ24:
-        transferBitsPerPixel = 0x18;
+        bitCount = 0x18;
         break;
     case SDF_PSMCT16:
     case SDF_PSMCT16S:
     case SDF_PSMZ16:
     case SDF_PSMZ16S:
-        transferBitsPerPixel = 0x10;
+        bitCount = 0x10;
         break;
     case SDF_PSMT8:
     case SDF_PSMT8H:
-        transferBitsPerPixel = 8;
+        bitCount = 8;
         break;
     case SDF_PSMT4:
     case SDF_PSMT4HL:
     case SDF_PSMT4HH:
-        transferBitsPerPixel = 4;
+        bitCount = 4;
         break;
     default:
-        transferBitsPerPixel = 0x20;
+        bitCount = 0x20;
         break;
     }
-    return (transferBitsPerPixel * width * height) >> 7;
+    return (bitCount * width * height) >> 7;
 }
 
-/* Queue chunked GS image DMA and its pixel/allocation ownership metadata under the semaphore. */
-void sdfImageSetReq(const SdfImageUploadRequest *request) {
-    SdfTextureQueue *queue = &sdfImageSetCb;
-    SdfTextureReleaseHead *releaseEntry;
-    SdfTextureDmaTail *oldTail;
-    SdfImageTransferPacket *setup;
+void sdfImageSetReq(sdfImageSetReqParam_t *parm)
+{
+    sdfImageSetCb_t *cb = &sdfImageSetCb;
+    sdfImageSetPacket_tag *release;
+    sdfImageSetTag_t *tagTail;
+    u64 *setup;
     u64 *packet;
-    void *allocation;
-    u32 format;
-    u16 width;
-    u16 height;
+    void *buf;
+    u32 pixelFormat;
+    u16 w;
+    u16 h;
     u16 bufferWidth;
-    s32 qwordCount;
-    s32 allocationBlocks;
+    s32 qwc;
+    s32 blocks;
     s32 remaining;
-    s32 bufferWidthUnits;
-    s32 isLast;
-    u32 sourceAddress;
-    u64 formatAndDestination;
-    u64 coordinates;
-    u64 dimensions;
+    s32 widthUnits;
+    s32 last;
+    u32 src;
+    u64 formatAndAddr;
+    u64 coords;
+    u64 size;
 
-    format = request->format;
-    width = request->width;
-    height = request->height;
-    bufferWidth = request->bufferWidth;
-    bufferWidthUnits = bufferWidth >> 6;
-    if (bufferWidthUnits == 0) {
-        bufferWidthUnits = 1;
+    pixelFormat = parm->pixelFormat;
+    w = parm->w;
+    h = parm->h;
+    bufferWidth = parm->bufferWidth;
+    widthUnits = bufferWidth >> 6;
+    if (widthUnits == 0) {
+        widthUnits = 1;
     }
 
-    qwordCount = sdfImageDataSize(format, width, height);
-    allocationBlocks = (qwordCount + 0x7FEF) / 0x7FF0;
-    allocation = sdfChipAllocDirect(allocationBlocks * 0x30 + 0x80);
-    releaseEntry = (SdfTextureReleaseHead *)allocation;
-    releaseEntry->next = NULL;
-    releaseEntry->chipMemory = request->pixels;
-    releaseEntry->allocation = request->allocation;
-    releaseEntry->releaseMode = request->allocationMode;
+    qwc = sdfImageDataSize(pixelFormat, w, h);
+    blocks = (qwc + 0x7FEF) / 0x7FF0;
+    buf = sdfChipAllocDirect(blocks * 0x30 + 0x80);
+    release = (sdfImageSetPacket_tag *)buf;
+    release->next = NULL;
+    release->chip = parm->data;
+    release->memHandle = parm->memHandle;
+    release->freeMode = parm->freeMode;
 
-    setup = (SdfImageTransferPacket *)((u8 *)allocation + sizeof(SdfTextureReleaseHead));
-    packet = (u64 *)((u8 *)allocation + 0x70);
-    formatAndDestination = ((u64)format << 56) |
-                          ((u64)bufferWidthUnits << 48) |
-                          ((u64)(request->destination >> 6) << 32);
-    coordinates = ((u64)request->y << 48) | ((u64)request->x << 32);
-    dimensions = ((u64)height << 32) | width;
+    setup = (u64 *)((u8 *)buf + 0x10);
+    packet = (u64 *)((u8 *)buf + 0x70);
+    formatAndAddr = ((u64)pixelFormat << 56) | ((u64)widthUnits << 48) | ((u64)(parm->addr >> 6) << 32);
+    coords = ((u64)parm->y << 48) | ((u64)parm->x << 32);
+    size = ((u64)h << 32) | w;
 
-    setup->header.dmaTag = 0x0000000010000005ULL;
-    setup->header.vifCommands = 0x5000000500000000ULL;
-    setup->header.gifTag = 0x1000000000000004ULL;
-    setup->header.gifRegisters = SDF_GIF_REGISTER_AD;
-    setup->transfer.bitbltbuf.value = formatAndDestination;
-    setup->transfer.bitbltbuf.registerId = SDF_GS_BITBLTBUF;
-    setup->transfer.trxpos.value = coordinates;
-    setup->transfer.trxpos.registerId = SDF_GS_TRXPOS;
-    setup->transfer.trxreg.value = dimensions;
-    setup->transfer.trxreg.registerId = SDF_GS_TRXREG;
-    setup->transfer.trxdir.value = 0;
-    setup->transfer.trxdir.registerId = SDF_GS_TRXDIR;
+    setup[0] = 0x0000000010000005ULL;
+    setup[1] = 0x5000000500000000ULL;
+    setup[2] = 0x1000000000000004ULL;
+    setup[3] = 0x000000000000000EULL;
+    setup[4] = formatAndAddr;
+    setup[5] = 0x50ULL;
+    setup[6] = coords;
+    setup[7] = 0x51ULL;
+    setup[8] = size;
+    setup[9] = 0x52ULL;
+    setup[10] = 0;
+    setup[11] = 0x53ULL;
 
-    sourceAddress = (u32)request->pixels & 0x0FFFFFFF;
-    remaining = qwordCount;
-    isLast = 0;
+    src = (u32)parm->data & 0x0FFFFFFF;
+    remaining = qwc;
+    last = 0;
     do {
         s32 chunk = 0x7FF0;
 
         if (remaining < 0x7FF1) {
             chunk = remaining;
-            isLast = 1;
+            last = 1;
         }
 
         packet[0] = 0x0000000010000001ULL;
         packet[1] = 0x5000000100000000ULL;
-        packet[2] = ((u64)chunk | ((u64)isLast << 15)) | 0x0800000000000000ULL;
-        packet[4] = ((u32)chunk & 0xFFFF) | 0x30000000ULL | ((u64)sourceAddress << 32);
+        packet[2] = ((u64)chunk | ((u64)last << 15)) | 0x0800000000000000ULL;
+        packet[4] = ((u32)chunk & 0xFFFF) | 0x30000000ULL | ((u64)src << 32);
         packet[5] = ((u64)((u32)chunk | 0x51000000)) << 32;
 
-        sourceAddress += (u32)chunk << 4;
+        src += (u32)chunk << 4;
         remaining -= chunk;
         packet += 6;
-    } while (isLast == 0);
+    } while (last == 0);
 
-    WaitSema(queue->semaphoreId);
+    WaitSema(cb->semaId);
 
-    if (queue->releaseTail != NULL) {
-        queue->releaseTail->next = releaseEntry;
+    if (cb->packetTail != NULL) {
+        cb->packetTail->next = release;
     } else {
-        queue->releaseHead = releaseEntry;
+        cb->packetHead = release;
     }
-    queue->releaseTail = releaseEntry;
+    cb->packetTail = release;
 
-    setup = (SdfImageTransferPacket *)((u32)setup & 0x0FFFFFFF);
-    oldTail = queue->packetTail;
-    if (oldTail != NULL) {
-        oldTail->vifCodes = 0;
-        oldTail->tag = ((u64)(u32)setup << 32) | 0x20000000ULL;
+    setup = (u64 *)((u32)setup & 0x0FFFFFFF);
+    tagTail = cb->tagTail;
+    if (tagTail != NULL) {
+        tagTail->vifCodes = 0;
+        tagTail->tag = ((u64)(u32)setup << 32) | 0x20000000ULL;
     } else {
-        queue->dmaPacketHeadAddress = (u32)setup;
+        cb->tagHead = (u32)setup;
     }
-    queue->packetTail = (SdfTextureDmaTail *)packet;
-    SignalSema(queue->semaphoreId);
+    cb->tagTail = (sdfImageSetTag_t *)packet;
+    SignalSema(cb->semaId);
 }
 
-void sdfImageSetChainTag(SdfDmaAddress packetAddress, SdfTextureDmaTail *packet) {
-    SdfTextureQueue *obj = &sdfImageSetCb;
-    SdfTextureDmaTail *last;
+void sdfImageSetChainTag(u32 head, sdfImageSetTag_t *tail)
+{
+    sdfImageSetCb_t *cb = &sdfImageSetCb;
+    sdfImageSetTag_t *last;
 
-    WaitSema(obj->semaphoreId);
-    last = obj->packetTail;
+    WaitSema(cb->semaId);
+    last = cb->tagTail;
     if (last != NULL) {
         last->vifCodes = 0;
-        last->tag = ((u64)(packetAddress & 0x0FFFFFFF) << 32) | 0x20000000;
+        last->tag = ((u64)(head & 0x0FFFFFFF) << 32) | 0x20000000;
     } else {
-        obj->dmaPacketHeadAddress = packetAddress;
+        cb->tagHead = head;
     }
-    obj->packetTail = packet;
-    SignalSema(obj->semaphoreId);
+    cb->tagTail = tail;
+    SignalSema(cb->semaId);
 }
 
-void sdfImageSetChainReleaseMem(void *address) {
-    SdfTextureQueue *obj = &sdfImageSetCb;
-    SdfTextureReleaseHead *entry;
+void sdfImageSetChainReleaseMem(s32 p)
+{
+    sdfImageSetCb_t *cb = &sdfImageSetCb;
+    sdfImageSetPacket_tag *release;
 
-    if (address != NULL) {
-        entry = sdfChipAllocZeroDirect(sizeof(SdfTexReleaseEntry));
-        if (sdfChipCheck(address) != SDF_CHIP_ADDRESS_OUTSIDE_RANGE) {
-            entry->chipMemory = address;
-            entry->releaseMode = SDF_TEX_RELEASE_CHIP_ADDRESS;
+    if (p != 0) {
+        release = sdfChipAllocZeroDirect(0xA0);
+        if (sdfChipCheck((void *)p) != 0) {
+            release->chip = (void *)p;
+            release->freeMode = SDF_IMAGESET_MEM_CHIP;
         } else {
-            entry->releaseMode = SDF_TEX_RELEASE_GENERAL_ALLOCATION;
-            entry->allocation = sdfMemGetHandleByPtr(address);
+            release->freeMode = SDF_IMAGESET_MEM_HANDLE;
+            release->memHandle = sdfMemGetHandleByPtr((void *)p);
         }
-        WaitSema(obj->semaphoreId);
-        if (obj->releaseTail != NULL) {
-            obj->releaseTail->next = entry;
+        WaitSema(cb->semaId);
+        if (cb->packetTail != NULL) {
+            cb->packetTail->next = release;
         } else {
-            obj->releaseHead = entry;
+            cb->packetHead = release;
         }
-        obj->releaseTail = entry;
-        SignalSema(obj->semaphoreId);
+        cb->packetTail = release;
+        SignalSema(cb->semaId);
     }
 }
 
-void sdfImageSetClearCb(SdfTextureQueue *semaphore) {
-    semaphore->releaseHead = NULL;
-    semaphore->releaseTail = NULL;
-    semaphore->dmaPacketHeadAddress = 0;
-    semaphore->packetTail = NULL;
+void sdfImageSetClearCb(sdfImageSetCb_t *cb)
+{
+    cb->packetHead = NULL;
+    cb->packetTail = NULL;
+    cb->tagHead = 0;
+    cb->tagTail = NULL;
 }
 
-/* DMA-completion callback for the image-upload waiter; the channel argument is unused. Returns -1. */
-s32 sdfImageSetDmacHandler(s32 channel, s32 threadId) {
+s32 sdfImageSetDmacHandler(s32 channel, s32 threadId)
+{
     iWakeupThread(threadId);
-    EE_ENABLE_INTERRUPTS_SYNC();
+    EE_SYNC_EI();
     return -1;
 }
 
-extern s32 AddDmacHandler2(s32 channel, s32 handler, s32 arg, s32 threadId);
+void sdfImageSetTrans(void)
+{
+    sdfImageSetCb_t *cb = &sdfImageSetCb;
+    sdfImageSetPacket_tag *release;
+    sdfImageSetTag_t *tagTail;
+    u32 dmaAddr;
 
-extern u8 D_00398100[];
+    WaitSema(cb->semaId);
+    release = cb->packetHead;
+    dmaAddr = cb->tagHead;
+    tagTail = cb->tagTail;
+    sdfImageSetClearCb(cb);
+    SignalSema(cb->semaId);
 
-/* Detach one queued batch, wait for its DMA, then release its owned source and packet allocations. */
-void sdfImageSetTrans(void) {
-    SdfTextureQueue *work = &sdfImageSetCb;
-    SdfTextureReleaseHead *entry;
-    SdfTextureDmaTail *packet;
-    SdfDmaAddress dmaPacketAddress;
-
-    WaitSema(work->semaphoreId);
-    entry = work->releaseHead;
-    dmaPacketAddress = work->dmaPacketHeadAddress;
-    packet = work->packetTail;
-    sdfImageSetClearCb(work);
-    SignalSema(work->semaphoreId);
-
-    if (dmaPacketAddress != 0) {
+    if (dmaAddr != 0) {
         s32 threadId = GetThreadId();
-        s32 handlerId = AddDmacHandler2(1, (s32)sdfImageSetDmacHandler, 0, threadId);
-        u64 tag = ((u64)((u32)D_00398100 & 0x0FFFFFFF) << 32) | 0x20000000;
-        u32 *channel;
+        s32 handlerId = AddDmacHandler2(1, (s32 (*)(s32, void *, void *))sdfImageSetDmacHandler, 0, (void *)threadId);
+        u64 tag = ((u64)((u32)D_005293A0 & 0x0FFFFFFF) << 32) | 0x20000000;
+        u32 *chan;
 
-        packet->vifCodes = 0;
-        packet->tag = tag;
-        channel = (u32 *)sceDmaGetChan(1);
-        HW_WRITE(channel, HW_READ(channel) | 0x40);
+        tagTail->vifCodes = 0;
+        tagTail->tag = tag;
+        chan = sceDmaGetChan(1);
+        HW_WRITE(chan, HW_READ(chan) | 0x40);
         FlushCache(0);
-        sceDmaSend((void *)channel, (void *)dmaPacketAddress);
+        sceDmaSend(chan, (void *)dmaAddr);
         SleepThread();
         RemoveDmacHandler(1, handlerId);
     }
 
-    while (entry != NULL) {
-        SdfTextureReleaseHead *next = entry->next;
+    while (release != NULL) {
+        sdfImageSetPacket_tag *next = release->next;
 
-        switch (entry->releaseMode) {
-        case SDF_TEX_RELEASE_GENERAL_ALLOCATION:
-            sdfMemFreeDirect(entry->allocation);
+        switch (release->freeMode) {
+        case SDF_IMAGESET_MEM_HANDLE:
+            sdfMemFreeDirect(release->memHandle);
             break;
-        case SDF_TEX_RELEASE_CHIP_ADDRESS:
-            sdfChipFreeDirect(entry->chipMemory);
+        case SDF_IMAGESET_MEM_CHIP:
+            sdfChipFreeDirect(release->chip);
             break;
         }
-        sdfChipFreeDirect(entry);
-        entry = next;
+        sdfChipFreeDirect(release);
+        release = next;
     }
 }
 
-void sdfImageSetInit(void) {
-    SdfTextureQueue *obj;
+void sdfImageSetInit(void)
+{
+    sdfImageSetCb_t *cb;
 
-    obj = &sdfImageSetCb;
-    obj->semaphoreId = sdfCreateSema(1, 0x7F, 0);
-    sdfImageSetClearCb(obj);
+    cb = &sdfImageSetCb;
+    cb->semaId = sdfCreateSema(1, 0x7F, 0);
+    sdfImageSetClearCb(cb);
 }
+
