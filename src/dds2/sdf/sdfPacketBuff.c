@@ -1,44 +1,8 @@
-#include "sdk_ps2.h"
-#include "ee_mmi.h"
-#include "sdf_scene_packet.h"
-#include "sdf_gs_gouraud_textured.h"
-#include "sdf_gs_scene_state.h"
-#include "sdf_gs_textured_shapes.h"
-#include "sdf_request.h"
-#include "sdf_gs_context.h"
-#include "sdf_gs_gouraud_shapes.h"
-#include "sdf_gs_header.h"
-#include "sdf_gs_geometry.h"
-#include "sdf_texture_flush.h"
-#include "sdf_tex_lifetime.h"
-#include "sdf_gs_blend.h"
 #include "common.h"
-#include "sdf_delayed_resource_check_api.h"
-#include "sdf_vu0.h"
-#include "sdf_timer.h"
-#include "sdf_packet_list.h"
-#include "sdf_packet_slot.h"
-#include "sdf_draw_frame_execution_state.h"
-#include "sdf_chip.h"
-#include "sdf_heap_api.h"
-#include "pcp_vu0.h"
-#include "sdf.h"
-#include "sdf_semaphore_api.h"
-#include "sdf_texture_registry.h"
-#include "sdf_image_packets.h"
-#include "sdf_pending.h"
-#include "sdf_queued_resource_api.h"
-#include "sdf_linked_packet.h"
-#include "sdf_packet_builders.h"
-#include "sdf_gs_flat_shapes.h"
-#include "sdf_gs_packet.h"
-#include "sdf_draw.h"
-#include "sdf_model.h"
-#include "sdf_dev_slot_api.h"
-#include "sdf_dma_tag.h"
-#include "sdf_packet_alloc.h"
+#include "sdf_types.h"
+#include "sdf_resource.h"
 
-extern struct sdfMemHandle_t *sdfGrPacketBuffHandle;
+struct sdfMemHandle_t;
 
 #define SDF_QWORD_ALIGNMENT_MASK 0xF
 
@@ -46,57 +10,86 @@ extern struct sdfMemHandle_t *sdfGrPacketBuffHandle;
 
 #define SDF_PACKET_BUFFER_COUNT 2
 
+void sdfMemFreeDirect(struct sdfMemHandle_t *aHandle);
+
+extern struct sdfMemHandle_t *sdfGrPacketBuffHandle;
+
+
+u32 sdfMemLock(struct sdfMemHandle_t *aHandle);
+
 extern s32 sdfGrPacketBuffSize;
 
-extern u32 sdfPacketBuffers[2];
+/* DDS names the buffer pair; SMT3 has no name for it yet. */
+#define D_00551870 sdfPacketBuffers
+extern s32 D_00551870[2];
 
 extern s32 sdfGrPacketBuffPtr;
 
 extern s32 sdfGrPacketBuffLimit;
 
-/* Replace both packet buffers with one allocation, rounding each half to 128 bytes. */
-void sdfGrMakePacketBuff(s32 bufferBytes) {
-    s32 allocationAddress;
+typedef struct effDebugPolyParams_t {
+    s16 parameterCount;
+    s16 vertexCount;
+    u16 primitive;
+    u16 mask;
+    u32 color;
+    const u32 *parameters;
+    u128 *positions;
+    u128 *normals;
+    f32 *texcoords;
+    u32 *extraTexcoords;
+    u32 *colors;
+    void *(*allocate)(s32);
+    f32 depth;
+} effDebugPolyParams_t;
 
+void sdfGrMakePacketBuff(s32 aPacketBuffSize);
+
+void sdfGrSetupPacketBuff(s32 aFrameId);
+
+s32 sdfGrAllocPacketBuff(s32 aSize);
+
+void sdfGrClosePacketBuff(s32 aBuffPtr);
+
+void sdfGrMakePacketBuff(s32 aPacketBuffSize) {
+    s32 allocationAddress;
     if (sdfGrPacketBuffHandle != 0) {
         sdfMemFreeDirect(sdfGrPacketBuffHandle);
         sdfGrPacketBuffHandle = 0;
     }
-    bufferBytes = (bufferBytes + SDF_PACKET_BUFFER_ALIGNMENT_MASK) & ~SDF_PACKET_BUFFER_ALIGNMENT_MASK;
-    sdfGrPacketBuffSize = bufferBytes;
-    sdfGrPacketBuffHandle = sdfMemAllocDirect(bufferBytes * SDF_PACKET_BUFFER_COUNT);
+    aPacketBuffSize = (aPacketBuffSize + SDF_PACKET_BUFFER_ALIGNMENT_MASK) & ~SDF_PACKET_BUFFER_ALIGNMENT_MASK;
+    sdfGrPacketBuffSize = aPacketBuffSize;
+    sdfGrPacketBuffHandle = sdfMemAllocDirect(aPacketBuffSize * SDF_PACKET_BUFFER_COUNT);
     allocationAddress = sdfMemLock(sdfGrPacketBuffHandle);
-    sdfPacketBuffers[0] = allocationAddress;
-    sdfPacketBuffers[1] = allocationAddress + bufferBytes;
+    D_00551870[0] = allocationAddress;
+    D_00551870[1] = allocationAddress + aPacketBuffSize;
 }
 
-/* Select one half and expose its bounds to the packet allocator. */
-void sdfGrSetupPacketBuff(s32 bufferIndex) {
-    sdfGrPacketBuffPtr = sdfPacketBuffers[bufferIndex];
-    sdfGrPacketBuffLimit = sdfPacketBuffers[bufferIndex] + sdfGrPacketBuffSize;
+void sdfGrSetupPacketBuff(s32 aFrameId) {
+    sdfGrPacketBuffPtr = D_00551870[aFrameId];
+    sdfGrPacketBuffLimit = D_00551870[aFrameId] + sdfGrPacketBuffSize;
 }
 
 s32 sdfGrGetPacketBuffRemain(void) {
     return sdfGrPacketBuffLimit - sdfGrPacketBuffPtr;
 }
 
-/* Reserve packet space at a 16-byte boundary, returning the old cursor. */
-s32 sdfGrAllocPacketBuff(s32 size) {
-    s32 address;
+s32 sdfGrAllocPacketBuff(s32 aSize) {
+    s32 packet;
 
-    address = sdfGrPacketBuffPtr;
-    sdfGrPacketBuffPtr = sdfGrPacketBuffPtr + ((size + 0xfU) & 0xfffffff0);
-    return address;
+    packet = sdfGrPacketBuffPtr;
+    sdfGrPacketBuffPtr = sdfGrPacketBuffPtr + ((aSize + 0xfU) & 0xfffffff0);
+    return packet;
 }
 
 s32 sdfGrOpenPacketBuff(void) {
     return sdfGrPacketBuffPtr;
 }
 
-/* Round a supplied byte address upward to the next quadword boundary. */
-void sdfGrClosePacketBuff(s32 cursorAddress) {
-    sdfGrPacketBuffPtr = (cursorAddress + SDF_QWORD_ALIGNMENT_MASK) & ~SDF_QWORD_ALIGNMENT_MASK;
+void sdfGrClosePacketBuff(s32 aBuffPtr) {
+    sdfGrPacketBuffPtr = (aBuffPtr + SDF_QWORD_ALIGNMENT_MASK) & ~SDF_QWORD_ALIGNMENT_MASK;
 }
+
 INCLUDE_SDATA(const s32, "sdf/sdfPacketBuff", sdfGrPacketBuffHandle);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPacketBuff", sdfGrPacketBuffSize);
@@ -106,4 +99,3 @@ INCLUDE_SDATA(const s32, "sdf/sdfPacketBuff", sdfPacketBuffers);
 INCLUDE_SDATA(const s32, "sdf/sdfPacketBuff", sdfGrPacketBuffPtr);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPacketBuff", sdfGrPacketBuffLimit);
-

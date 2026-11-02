@@ -1,131 +1,158 @@
-#include "sdk_ps2.h"
-#include "ee_mmi.h"
-#include "sdf_scene_packet.h"
-#include "sdf_gs_gouraud_textured.h"
-#include "sdf_gs_scene_state.h"
-#include "sdf_gs_textured_shapes.h"
-#include "sdf_request.h"
-#include "sdf_gs_context.h"
-#include "sdf_gs_gouraud_shapes.h"
-#include "sdf_gs_header.h"
-#include "sdf_gs_geometry.h"
-#include "sdf_texture_flush.h"
-#include "sdf_tex_lifetime.h"
-#include "sdf_gs_blend.h"
 #include "common.h"
-#include "sdf_delayed_resource_check_api.h"
-#include "sdf_vu0.h"
-#include "sdf_timer.h"
-#include "sdf_packet_list.h"
-#include "sdf_packet_slot.h"
-#include "sdf_draw_frame_execution_state.h"
-#include "sdf_chip.h"
-#include "sdf_heap_api.h"
-#include "sdf.h"
-#include "sdf_semaphore_api.h"
-#include "sdf_texture_registry.h"
-#include "sdf_image_packets.h"
-#include "sdf_pending.h"
-#include "sdf_queued_resource_api.h"
-#include "sdf_linked_packet.h"
-#include "sdf_packet_builders.h"
-#include "sdf_gs_flat_shapes.h"
-#include "sdf_gs_packet.h"
-#include "pcp_vu0.h"
-#include "sdf_draw.h"
-#include "sdf_model.h"
-#include "sdf_dev_slot_api.h"
-#include "sdf_dma_tag.h"
-#include "sdf_packet_alloc.h"
-
-#define SDF_PENDING_SLOT_COUNT 2
+#include "sdf_types.h"
 
 #define SDF_PENDING_LAST_SLOT 1
 
-extern SdfPendingNode *sdfDelayedResrcLink;
+struct sdfDelayedResrcCB_t;
+
+struct sdfDelayedResrcItems_t;
+
+typedef struct sdfDelayedResrcChunk_t sdfDelayedResrcChunk_t;
+
+/* Deferred handlers share one address-word argument at the native dispatch
+ * boundary, while their C consumers interpret that word as different owners. */
+typedef void (*SdfPendingCallback)();
+
+void sdfChipFreeDirect(void *aPtr);
+
+#define SDF_PENDING_BUFFER_CAPACITY 0x3F
+
+#define SDF_PENDING_SLOT_COUNT 2
 
 extern s8 sdfDelayedResrcFlag;
 
-extern SdfPendingNode *sdfPendingQueueSlots[2];
+/* Interrupt-synchronized deferred callback owner (0x08). */
+typedef struct sdfDelayedResrcCB_t {
+    SdfPendingCallback freeFuncPtr;
+    sdfDelayedResrcChunk_t *chunk;
+} sdfDelayedResrcCB_t;
 
-extern u8 sdfDelayedResrcCheckFunc(void);
+/* A queued batch links its next chunk before 63 deferred owner addresses. */
+typedef struct sdfDelayedResrcItems_t {
+    struct sdfDelayedResrcItems_t *next;
+    void *items[SDF_PENDING_BUFFER_CAPACITY];
+} sdfDelayedResrcItems_t;
+
+extern sdfDelayedResrcChunk_t *sdfDelayedResrcLink;
+
+void *sdfChipAllocDirect(s32 aSize);
+
+extern s32 EIntr(void);
+
+/* DDS names the pending slots; SMT3 has no name for them yet. */
+#define D_005520A8 sdfPendingQueueSlots
+extern s32 D_005520A8[2];
+
+extern s32 DIntr(void);
 
 extern s32 sdfDelayedResrcSemaId;
 
-/* Register a completion callback, creating the shared semaphore on first use. */
-void sdfDelayedResrcInitCB(SdfPendingRequest *request, SdfPendingEntryCallback callback) {
+extern s32 sdfCreateSema(u32, u32, u32);
+
+typedef struct effDebugPolyParams_t {
+    s16 parameterCount;
+    s16 vertexCount;
+    u16 primitive;
+    u16 mask;
+    u32 color;
+    const u32 *parameters;
+    u128 *positions;
+    u128 *normals;
+    f32 *texcoords;
+    u32 *extraTexcoords;
+    u32 *colors;
+    void *(*allocate)(s32);
+    f32 depth;
+} effDebugPolyParams_t;
+
+struct sdfDelayedResrcChunk_t {
+    sdfDelayedResrcChunk_t *next;
+    sdfDelayedResrcCB_t *owner;
+    sdfDelayedResrcItems_t *items;
+    s32 itemsFreeCount;
+};
+
+void sdfDelayedResrcInitCB(sdfDelayedResrcCB_t *aCB, SdfPendingCallback aFreeFunc);
+
+void sdfDelayedResrcEntry(sdfDelayedResrcCB_t *aCB, void *aItem);
+
+sdfDelayedResrcChunk_t *sdfDelayedResrcClose(void);
+
+void sdfDelayedResrcRelease(sdfDelayedResrcChunk_t *aChunk);
+
+u64 sdfDelayedResrcCheckFunc(void);
+
+u64 sdfDelayedResrcCheck(void);
+
+void sdfDelayedResrcInitCB(sdfDelayedResrcCB_t *aCB, SdfPendingCallback aFreeFunc) {
     if (sdfDelayedResrcSemaId < 0) {
         sdfDelayedResrcSemaId = sdfCreateSema(1, 0x7f, 0);
     }
-    request->handler = (SdfPendingCallback)callback;
-    request->pending = NULL;
+    aCB->freeFuncPtr = aFreeFunc;
+    aCB->chunk = NULL;
 }
 
-/* Queue an entry on the owner's pending node, adding a node or buffer chunk as needed. */
-void sdfDelayedResrcEntry(SdfPendingRequest *owner, void *entry) {
-    SdfPendingNode *pendingNode;
-    SdfPendingBuffer *entryBuffer;
-    SdfPendingBufferFreeEntryCount freeEntries;
+void sdfDelayedResrcEntry(sdfDelayedResrcCB_t *aCB, void *aItem) {
+    sdfDelayedResrcChunk_t *pendingNode;
+    sdfDelayedResrcItems_t *entryBuffer;
+    s32 freeEntries;
 
-    if (entry != NULL) {
+    if (aItem != NULL) {
         WaitSema(sdfDelayedResrcSemaId);
-        pendingNode = owner->pending;
+        pendingNode = aCB->chunk;
         if (pendingNode == NULL) {
-            pendingNode = (SdfPendingNode *)sdfChipAllocDirect(sizeof(SdfPendingNode));
-            pendingNode->freeEntryCount = 0;
+            pendingNode = (sdfDelayedResrcChunk_t *)sdfChipAllocDirect(sizeof(sdfDelayedResrcChunk_t));
+            pendingNode->itemsFreeCount = 0;
             pendingNode->next = sdfDelayedResrcLink;
-            pendingNode->buffer = NULL;
-            pendingNode->owner = owner;
-            owner->pending = pendingNode;
+            pendingNode->items = NULL;
+            pendingNode->owner = aCB;
+            aCB->chunk = pendingNode;
             sdfDelayedResrcLink = pendingNode;
         }
-        freeEntries = pendingNode->freeEntryCount;
-        entryBuffer = pendingNode->buffer;
+        freeEntries = pendingNode->itemsFreeCount;
+        entryBuffer = pendingNode->items;
         if (freeEntries == 0) {
-            SdfPendingBuffer *newBuffer = (SdfPendingBuffer *)sdfChipAllocDirect(sizeof(SdfPendingBuffer));
+            sdfDelayedResrcItems_t *newBuffer = (sdfDelayedResrcItems_t *)sdfChipAllocDirect(sizeof(sdfDelayedResrcItems_t));
             newBuffer->next = entryBuffer;
-            pendingNode->buffer = newBuffer;
+            pendingNode->items = newBuffer;
             entryBuffer = newBuffer;
             freeEntries = SDF_PENDING_BUFFER_CAPACITY;
         }
-        entryBuffer->entry[SDF_PENDING_BUFFER_CAPACITY - freeEntries] = entry;
-        pendingNode->freeEntryCount = freeEntries - 1;
+        entryBuffer->items[SDF_PENDING_BUFFER_CAPACITY - freeEntries] = aItem;
+        pendingNode->itemsFreeCount = freeEntries - 1;
         SignalSema(sdfDelayedResrcSemaId);
     }
 }
 
-/* Detach the pending chain and clear each callback owner's pending node. */
-SdfPendingNode *sdfDelayedResrcClose(void) {
-    SdfPendingNode *head = sdfDelayedResrcLink;
-    SdfPendingNode *node;
+sdfDelayedResrcChunk_t *sdfDelayedResrcClose(void) {
+    sdfDelayedResrcChunk_t *head = sdfDelayedResrcLink;
+    sdfDelayedResrcChunk_t *node;
 
     sdfDelayedResrcLink = NULL;
     for (node = head; node != NULL; node = node->next) {
-        node->owner->pending = NULL;
+        node->owner->chunk = NULL;
     }
     return head;
 }
 
-/* Flush the newest buffer's populated entries first, then older full buffers.
- * Invoke the owner's handler in entry order within each buffer before freeing it. */
-void sdfDelayedResrcRelease(SdfPendingNode *pendingNode) {
-    SdfPendingNode *nextPendingNode;
-    SdfPendingBuffer *entryBuffer;
-    SdfPendingBuffer *nextEntryBuffer;
+void sdfDelayedResrcRelease(sdfDelayedResrcChunk_t *aChunk) {
+    sdfDelayedResrcChunk_t *nextPendingNode;
+    sdfDelayedResrcItems_t *entryBuffer;
+    sdfDelayedResrcItems_t *nextEntryBuffer;
     SdfPendingCallback entryHandler;
     s32 entryCount;
     s32 entryIndex;
 
-    if (pendingNode != NULL) {
+    if (aChunk != NULL) {
         do {
-            entryCount = SDF_PENDING_BUFFER_CAPACITY - pendingNode->freeEntryCount;
-            entryHandler = pendingNode->owner->handler;
-            entryBuffer = pendingNode->buffer;
+            entryCount = SDF_PENDING_BUFFER_CAPACITY - aChunk->itemsFreeCount;
+            entryHandler = aChunk->owner->freeFuncPtr;
+            entryBuffer = aChunk->items;
             if (entryBuffer != NULL) {
                 do {
                     entryIndex = 0;
                     do {
-                        entryHandler(entryBuffer->entry[entryIndex]);
+                        entryHandler(entryBuffer->items[entryIndex]);
                         entryIndex++;
                     } while (entryIndex < entryCount);
                     nextEntryBuffer = entryBuffer->next;
@@ -134,33 +161,30 @@ void sdfDelayedResrcRelease(SdfPendingNode *pendingNode) {
                     entryCount = SDF_PENDING_BUFFER_CAPACITY;
                 } while (entryBuffer != NULL);
             }
-            nextPendingNode = pendingNode->next;
-            sdfChipFreeDirect(pendingNode);
-            pendingNode = nextPendingNode;
-        } while (pendingNode != NULL);
+            nextPendingNode = aChunk->next;
+            sdfChipFreeDirect(aChunk);
+            aChunk = nextPendingNode;
+        } while (aChunk != NULL);
     }
 }
 
-/* Hand the oldest pending slot to the worker, shift the slot list down and
- * refill the last slot with the newly detached queue. */
 void sdfDelayedResrcProc(void) {
     u32 slotIndex;
 
     sdfDelayedResrcFlag = 1;
     WaitSema(sdfDelayedResrcSemaId);
-    sdfDelayedResrcRelease(sdfPendingQueueSlots[0]);
+    sdfDelayedResrcRelease((sdfDelayedResrcChunk_t *)D_005520A8[0]);
     for (slotIndex = 0; slotIndex < SDF_PENDING_LAST_SLOT; slotIndex++) {
-        sdfPendingQueueSlots[slotIndex] = sdfPendingQueueSlots[slotIndex + 1];
+        D_005520A8[slotIndex] = D_005520A8[slotIndex + 1];
     }
-    sdfPendingQueueSlots[SDF_PENDING_LAST_SLOT] = sdfDelayedResrcClose();
+    D_005520A8[SDF_PENDING_LAST_SLOT] = (s32)sdfDelayedResrcClose();
     SignalSema(sdfDelayedResrcSemaId);
     sdfDelayedResrcFlag = 0;
 }
 
-/* Return one for an active rotation, a queued chain, or either delayed slot. */
-u8 sdfDelayedResrcCheckFunc(void) {
+u64 sdfDelayedResrcCheckFunc(void) {
     u32 slotIndex;
-    SdfPendingNode **slotCursor;
+    s32 *slotCursor;
     if (sdfDelayedResrcFlag != 0) {
         return 1;
     }
@@ -168,9 +192,9 @@ u8 sdfDelayedResrcCheckFunc(void) {
         return 1;
     }
     slotIndex = 0;
-    slotCursor = sdfPendingQueueSlots;
+    slotCursor = D_005520A8;
     do {
-        if (*slotCursor != NULL) {
+        if (*slotCursor != 0) {
             return 1;
         }
         slotCursor++;
@@ -179,17 +203,16 @@ u8 sdfDelayedResrcCheckFunc(void) {
     return 0;
 }
 
-SdfDelayedResourceCheckResult sdfDelayedResrcCheck(void) {
-    s32 interruptState;
-    u8 hasPendingWork;
+u64 sdfDelayedResrcCheck(void) {
+    s64 interruptState;
+    u64 pendingWork;
 
     interruptState = DIntr();
-    hasPendingWork = sdfDelayedResrcCheckFunc();
+    pendingWork = sdfDelayedResrcCheckFunc();
     if (interruptState != 0) {
         EIntr();
     }
-    return hasPendingWork;
+    return pendingWork;
 }
 
 INCLUDE_SDATA(const s32, "sdf/sdfDelayedResrc", sdfDelayedResrcSemaId);
-
