@@ -1,41 +1,7 @@
-#include "sdk_ps2.h"
-#include "sdf_gs_header.h"
-#include "eeregs.h"
 #include "common.h"
-#include "sdf_vu0.h"
-#include "sdf_vu_matrix.h"
-#include "sdf_pad_entry.h"
-#include "sdf_pad_index.h"
-#include "sdf_pad_mode_api.h"
-#include "sdf_pad_motor_api.h"
-#include "sdf_cons_matrix_packet.h"
-#include "sdf_dma_packet_header.h"
-#include "kwln.h"
-#include "sdf_asset_packets.h"
-#include "sdf_asset_state.h"
-#include "sdf_vu_lighting.h"
-#include "sdf_chip.h"
-#include "sdf_packet_list.h"
-#include "sdf_packet_header.h"
-#include "sdf_packet_append.h"
-#include "sdf_heap_api.h"
-#include "sdf_primitive_packet_api.h"
-#include "sdf.h"
-#include "sdf_draw.h"
-#include "sdf_request.h"
-#include "sdf_model.h"
-#include "sdf_projection.h"
-#include "pcp_vu0.h"
-#include "sdf_vu_transform_api.h"
-#include "ee_mmi.h"
-#include "fpu.h"
-#include "sdf_texture_file.h"
-#include "sdf_column_packet_api.h"
-#include "sdf_lookup_texture.h"
-#include "sdf_compact_vertex_vif_packet.h"
-#include "sdf_dev_console_node.h"
-#include "btl.h"
-#include "sdf_packet_alloc.h"
+#include "ps2asm.h"
+#include "billboard.h"
+#include "sdf_lighting.h"
 
 #define SDF_DMA_QWORD_SHIFT 4
 
@@ -47,68 +13,98 @@
 
 #define SDF_VIF_MSCAL_VERTICES 0x14000008
 
-void sdfBillBoardMakeTMPacket(u8 *packet, const f32 *matrix) {
-    *(u16 *)packet = 2;
-    *(u32 *)(packet + 8) = 0x6403C000;
-    *(f32 *)(packet + 12) = matrix[0];
-    *(f32 *)(packet + 16) = matrix[1];
-    *(f32 *)(packet + 20) = matrix[4];
-    *(f32 *)(packet + 24) = matrix[5];
-    *(f32 *)(packet + 28) = matrix[12];
-    *(f32 *)(packet + 32) = matrix[13];
-    *(u32 *)(packet + 36) = 0x04000000;
-    *(u32 *)(packet + 40) = 0x14000008;
-    memset(packet + 0x2C, 0, 12);
+/* Reserve size bytes from the active packet buffer, rounded up to 16 bytes.
+ * Returns the prior cursor as a 32-bit address; the buffer owns this storage. */
+s32 sdfGrAllocPacketBuff(s32 aSize);
+
+s32 sdfBillBoardGetPacketSize(s32 aNum);
+
+extern void *memcpy(void *, const void *, unsigned int);
+
+void sdfBillBoardMakeTMPacket(u8 *aPacket, const f32 *aTM);
+
+void sdfBillBoardMake1(u8 *aPacket, const f32 *aCenter, u32 aColor, const void *aUVList,
+                                   const f32 *aXYOffsetList);
+
+u32 *sdfBillBoardMakeN(const u128 *aCenter, const void *aColor, const void *aUVList, const void *aXYOffsetList, s32 aNum, void *(*aAllocator)(s32));
+
+void sdfMultiBillBoardMake1(u8 *aPacket, const f32 *aCenter, u32 aColor0, u32 aColor1,
+                   const void *aUVList0, const void *aUVList1, const f32 *aXYOffsetList);
+
+u32 sdfMultiBillBoardGetPacketSize(s32 aNum);
+
+u32 *sdfMultiBillBoardMakeN(u128 *aCenter, void *aColor, void *aUVList, void *aXYOffsetList, s32 aNum, void *(*aAllocator)(s32));
+
+u32 sdfBillBoardVcMakeN(const u128 *aCenter, const void *aColor,
+                  const void *aUVList, const void *aXYOffsetList,
+                  s32 aNum, void *(*aAllocator)(s32));
+
+void sdfMultiBillBoardVcMake1(u8 *aPacket, const f32 *aCenter, const void *aColor, const void *aUVList0,
+                   const void *aUVList1, const void *aXYOffsetList);
+
+u32 sdfMultiBillBoardVcGetPacketSize(s32 aNum);
+
+u32 sdfMultiBillBoardVcMakeN(u128 *aCenter, void *aColor, void *aUVList, void *aXYOffsetList, s32 aNum, void *(*aAllocator)(s32));
+
+void sdfBillBoardMakeTMPacket(u8 *aPacket, const f32 *aTM) {
+    sdfBillBoardTMPacket_t *p = (sdfBillBoardTMPacket_t *)aPacket;
+
+    p->dma_qwc = 2;
+    p->vif_unpack = 0x6403C000;
+    p->tm[0] = aTM[0];
+    p->tm[1] = aTM[1];
+    p->tm[2] = aTM[4];
+    p->tm[3] = aTM[5];
+    p->tm[4] = aTM[12];
+    p->tm[5] = aTM[13];
+    p->vif_itop = 0x04000000;
+    p->vif_mscal = SDF_VIF_MSCAL_VERTICES;
+    memset(p->pad, 0, sizeof(p->pad));
 }
 
-/* Build a one-vertex textured-quad VIF packet: the position, color, the four
- * UV corners (copied as unaligned words) and the eight quad corner coordinates. */
-struct BillTextureQuad;
+void sdfBillBoardMake1(u8 *aPacket, const f32 *aCenter, u32 aColor, const void *aUVList,
+                                   const f32 *aXYOffsetList) {
+    sdfBillBoard1Packet_t *p = (sdfBillBoard1Packet_t *)aPacket;
 
-void sdfBillBoardMake1(u8 *packet, const f32 *position, u32 color,
-                                   const struct BillTextureQuad *uv,
-                                   const f32 *quad) {
-    *(u16 *)packet = 7;
-    *(u32 *)(packet + 8) = 0x6C01C000;
-    *(u32 *)(packet + 12) = 1;
-    *(u32 *)(packet + 16) = 0xA0000000;
-    *(u32 *)(packet + 20) = 0x43434310;
-    *(u32 *)(packet + 24) = 0x43;
-    *(u32 *)(packet + 28) = 0x6001C001;
-    *(u32 *)(packet + 32) = 0x155;
-    *(u32 *)(packet + 36) = 0x6801C002;
-    *(f32 *)(packet + 40) = position[0];
-    *(f32 *)(packet + 44) = position[1];
-    *(f32 *)(packet + 48) = position[2];
-    *(u32 *)(packet + 52) = 0x6E01C003;
-    *(u32 *)(packet + 56) = color;
-    *(u32 *)(packet + 60) = 0x6504C004;
-    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 64), (const u8 *)uv);
-    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 68), (const u8 *)uv + 4);
-    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 72), (const u8 *)uv + 8);
-    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 76), (const u8 *)uv + 12);
-    *(u32 *)(packet + 80) = 0x6404C008;
-    *(f32 *)(packet + 84) = quad[0];
-    *(f32 *)(packet + 88) = quad[1];
-    *(f32 *)(packet + 92) = quad[2];
-    *(f32 *)(packet + 96) = quad[3];
-    *(f32 *)(packet + 100) = quad[4];
-    *(f32 *)(packet + 104) = quad[5];
-    *(f32 *)(packet + 108) = quad[6];
-    *(f32 *)(packet + 112) = quad[7];
-    *(u32 *)(packet + 116) = 0x04000002;
-    *(u32 *)(packet + 120) = 0x14000008;
-    *(u32 *)(packet + 124) = 0;
+    p->dma_qwc = 7;
+    p->vif_unpack1 = 0x6C01C000;
+    p->count = 1;
+    p->giftag_h = 0xA0000000;
+    p->giftag_reg_l = 0x43434310;
+    p->giftag_reg_h = 0x43;
+    p->vif_unpack2 = 0x6001C001;
+    p->prim = 0x155;
+    p->vif_unpack3 = 0x6801C002;
+    p->center[0] = aCenter[0];
+    p->center[1] = aCenter[1];
+    p->center[2] = aCenter[2];
+    p->vif_unpack4 = 0x6E01C003;
+    p->color = aColor;
+    p->vif_unpack5 = 0x6504C004;
+    EE_LOAD_UNALIGNED_WORD(p->uv[0], (const u8 *)aUVList);
+    EE_LOAD_UNALIGNED_WORD(p->uv[1], (const u8 *)aUVList + 4);
+    EE_LOAD_UNALIGNED_WORD(p->uv[2], (const u8 *)aUVList + 8);
+    EE_LOAD_UNALIGNED_WORD(p->uv[3], (const u8 *)aUVList + 12);
+    p->vif_unpack6 = 0x6404C008;
+    p->xyOffset[0] = aXYOffsetList[0];
+    p->xyOffset[1] = aXYOffsetList[1];
+    p->xyOffset[2] = aXYOffsetList[2];
+    p->xyOffset[3] = aXYOffsetList[3];
+    p->xyOffset[4] = aXYOffsetList[4];
+    p->xyOffset[5] = aXYOffsetList[5];
+    p->xyOffset[6] = aXYOffsetList[6];
+    p->xyOffset[7] = aXYOffsetList[7];
+    p->vif_itop = SDF_VIF_ITOP_COMPACT_VERTEX;
+    p->vif_mscal = SDF_VIF_MSCAL_VERTICES;
+    p->pad = 0;
 }
 
-s32 sdfBillBoardGetPacketSize(s32 count) {
-    return count * 0x40 + 0x40;
+s32 sdfBillBoardGetPacketSize(s32 aNum) {
+    return (aNum << 6) + 0x40;
 }
 
-/* Build XYZ and attribute VIF streams; inputs are copied into the allocated
- * packet, and vertexCount must be positive. */
 /* vu0 routine: pack aligned positions into the VIF three-word stream. */
-u32 *sdfBillBoardMakeN(const u128 *positions, const u32 *packedColors, const void *uvCorners, const f32 *cornerOffsets, s32 vertexCount, void *(*allocatePacket)(s32)) {
+u32 *sdfBillBoardMakeN(const u128 *aCenter, const void *aColor, const void *aUVList, const void *aXYOffsetList, s32 aNum, void *(*aAllocator)(s32)) {
     s32 packetBytes;
     u32 *packet;
     u32 *cursor;
@@ -117,48 +113,48 @@ u32 *sdfBillBoardMakeN(const u128 *positions, const u32 *packedColors, const voi
     s32 n;
     s32 vertexIndex;
 
-    packetBytes = sdfBillBoardGetPacketSize(vertexCount);
-    if (allocatePacket == NULL) {
+    packetBytes = sdfBillBoardGetPacketSize(aNum);
+    if (aAllocator == NULL) {
         cursor = (u32 *)sdfGrAllocPacketBuff(packetBytes);
     } else {
-        cursor = allocatePacket(packetBytes);
+        cursor = aAllocator(packetBytes);
     }
     packet = cursor;
     packet[0] = (packetBytes >> SDF_DMA_QWORD_SHIFT) - 1;
     packet[1] = 0;
     packet[2] = 0x6C01C000;
-    packet[3] = vertexCount;
+    packet[3] = aNum;
     packet[4] = 0xA0000000;
     packet[5] = 0x43434310;
     packet[6] = 0x43;
     packet[7] = 0x6001C001;
     packet[8] = 0x155;
-    packet[9] = (vertexCount << 16) | 0x6800C002;
+    packet[9] = (aNum << 16) | 0x6800C002;
     cursor = packet + 10;
     vertexIndex = 0;
     do {
-        EE_MMI_STORE_VEC3_VALUE(cursor, positions[vertexIndex]);
+        MMI_STORE_VEC3_VALUE(cursor, aCenter[vertexIndex]);
         cursor += 3;
         vertexIndex++;
-    } while (vertexIndex != vertexCount);
-    n = vertexCount;
+    } while (vertexIndex != aNum);
+    n = aNum;
     unpackCode = n << 16;
-    vuAddress = vertexCount + 2;
+    vuAddress = aNum + 2;
     *cursor++ = unpackCode | vuAddress | 0x6E00C000;
-    memcpy(cursor, packedColors, n * 4);
+    memcpy(cursor, aColor, n * 4);
     cursor += n;
     vuAddress += n;
-    n = vertexCount * 4;
+    n = aNum * 4;
     unpackCode = n << 16;
     *cursor++ = unpackCode | vuAddress | 0x6500C000;
     vuAddress += n;
     unpackCode |= vuAddress;
-    memcpy(cursor, uvCorners, n * 4);
+    memcpy(cursor, aUVList, n * 4);
     cursor += n;
     n *= 8;
     unpackCode |= 0x6400C000;
     *cursor++ = unpackCode;
-    memcpy(cursor, cornerOffsets, n);
+    memcpy(cursor, aXYOffsetList, n);
     cursor = (u32 *)((u8 *)cursor + n);
     cursor[0] = SDF_VIF_ITOP_COMPACT_VERTEX;
     cursor[1] = SDF_VIF_MSCAL_VERTICES;
@@ -169,54 +165,52 @@ u32 *sdfBillBoardMakeN(const u128 *positions, const u32 *packedColors, const voi
     return packet;
 }
 
-/* Build a one-vertex VIF packet for a two-texture quad: the position, both
- * colors, the interleaved primary/secondary UV corners (copied as unaligned
- * words) and the eight quad corner coordinates. */
-void sdfMultiBillBoardMake1(u8 *packet, const f32 *position, u32 primaryColor, u32 secondaryColor,
-                   const void *primaryUv, const void *secondaryUv, const f32 *quad) {
-    *(u16 *)packet = 8;
-    *(u32 *)(packet + 8) = 0x6C01C000;
-    *(u32 *)(packet + 12) = 1;
-    *(u32 *)(packet + 16) = 0xA0000000;
-    *(u32 *)(packet + 20) = 0x43434310;
-    *(u32 *)(packet + 24) = 0x43;
-    *(u32 *)(packet + 28) = 0x6001C001;
-    *(u32 *)(packet + 32) = 0x155;
-    *(u32 *)(packet + 36) = 0x6801C002;
-    *(f32 *)(packet + 40) = position[0];
-    *(f32 *)(packet + 44) = position[1];
-    *(f32 *)(packet + 48) = position[2];
-    *(u32 *)(packet + 52) = 0x6E02C003;
-    *(u32 *)(packet + 56) = primaryColor;
-    *(u32 *)(packet + 60) = secondaryColor;
-    *(u32 *)(packet + 64) = 0x6D04C005;
-    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 68), (const u8 *)primaryUv);
-    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 72), (const u8 *)secondaryUv);
-    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 76), (const u8 *)primaryUv + 4);
-    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 80), (const u8 *)secondaryUv + 4);
-    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 84), (const u8 *)primaryUv + 8);
-    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 88), (const u8 *)secondaryUv + 8);
-    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 92), (const u8 *)primaryUv + 12);
-    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 96), (const u8 *)secondaryUv + 12);
-    *(u32 *)(packet + 100) = 0x6404C009;
-    *(f32 *)(packet + 104) = quad[0];
-    *(f32 *)(packet + 108) = quad[1];
-    *(f32 *)(packet + 112) = quad[2];
-    *(f32 *)(packet + 116) = quad[3];
-    *(f32 *)(packet + 120) = quad[4];
-    *(f32 *)(packet + 124) = quad[5];
-    *(f32 *)(packet + 128) = quad[6];
-    *(f32 *)(packet + 132) = quad[7];
-    *(u32 *)(packet + 136) = 0x04000004;
-    *(u32 *)(packet + 140) = 0x14000008;
+void sdfMultiBillBoardMake1(u8 *aPacket, const f32 *aCenter, u32 aColor0, u32 aColor1,
+                   const void *aUVList0, const void *aUVList1, const f32 *aXYOffsetList) {
+    sdfMultiBillBoard1Packet_t *p = (sdfMultiBillBoard1Packet_t *)aPacket;
+
+    p->dma_qwc = 8;
+    p->vif_unpack1 = 0x6C01C000;
+    p->count = 1;
+    p->giftag_h = 0xA0000000;
+    p->giftag_reg_l = 0x43434310;
+    p->giftag_reg_h = 0x43;
+    p->vif_unpack2 = 0x6001C001;
+    p->prim = 0x155;
+    p->vif_unpack3 = 0x6801C002;
+    p->center[0] = aCenter[0];
+    p->center[1] = aCenter[1];
+    p->center[2] = aCenter[2];
+    p->vif_unpack4 = 0x6E02C003;
+    p->color[0] = aColor0;
+    p->color[1] = aColor1;
+    p->vif_unpack5 = 0x6D04C005;
+    EE_LOAD_UNALIGNED_WORD(p->uv[0], (const u8 *)aUVList0);
+    EE_LOAD_UNALIGNED_WORD(p->uv[1], (const u8 *)aUVList1);
+    EE_LOAD_UNALIGNED_WORD(p->uv[2], (const u8 *)aUVList0 + 4);
+    EE_LOAD_UNALIGNED_WORD(p->uv[3], (const u8 *)aUVList1 + 4);
+    EE_LOAD_UNALIGNED_WORD(p->uv[4], (const u8 *)aUVList0 + 8);
+    EE_LOAD_UNALIGNED_WORD(p->uv[5], (const u8 *)aUVList1 + 8);
+    EE_LOAD_UNALIGNED_WORD(p->uv[6], (const u8 *)aUVList0 + 12);
+    EE_LOAD_UNALIGNED_WORD(p->uv[7], (const u8 *)aUVList1 + 12);
+    p->vif_unpack6 = 0x6404C009;
+    p->xyOffset[0] = aXYOffsetList[0];
+    p->xyOffset[1] = aXYOffsetList[1];
+    p->xyOffset[2] = aXYOffsetList[2];
+    p->xyOffset[3] = aXYOffsetList[3];
+    p->xyOffset[4] = aXYOffsetList[4];
+    p->xyOffset[5] = aXYOffsetList[5];
+    p->xyOffset[6] = aXYOffsetList[6];
+    p->xyOffset[7] = aXYOffsetList[7];
+    p->vif_itop = 0x04000004;
+    p->vif_mscal = SDF_VIF_MSCAL_VERTICES;
 }
 
-u32 sdfMultiBillBoardGetPacketSize(s32 count) {
-    return (count * 0x54 + 0x4bU) & 0xfffffff0;
+u32 sdfMultiBillBoardGetPacketSize(s32 aNum) {
+    return (aNum * 0x54 + 0x4bU) & 0xfffffff0;
 }
 
-/* Build a quad packet from paired colors and per-corner UV sets. */
-u32 *sdfMultiBillBoardMakeN(u128 *positions, void *attributes, void *halfAttributes, void *wordAttributes, s32 count, void *(*alloc)(s32)) {
+u32 *sdfMultiBillBoardMakeN(u128 *aCenter, void *aColor, void *aUVList, void *aXYOffsetList, s32 aNum, void *(*aAllocator)(s32)) {
     s32 bytes;
     u32 *packet;
     u32 *cursor;
@@ -225,45 +219,45 @@ u32 *sdfMultiBillBoardMakeN(u128 *positions, void *attributes, void *halfAttribu
     s32 n;
     s32 i;
 
-    bytes = sdfMultiBillBoardGetPacketSize(count);
-    if (alloc == NULL) {
+    bytes = sdfMultiBillBoardGetPacketSize(aNum);
+    if (aAllocator == NULL) {
         cursor = (u32 *)sdfGrAllocPacketBuff(bytes);
     } else {
-        cursor = alloc(bytes);
+        cursor = aAllocator(bytes);
     }
     packet = cursor;
     packet[0] = (bytes >> 4) - 1;
     packet[1] = 0;
     packet[2] = 0x6C01C000;
-    packet[3] = count;
+    packet[3] = aNum;
     packet[4] = 0xA0000000;
     packet[5] = 0x43434310;
     packet[6] = 0x43;
     packet[7] = 0x6001C001;
     packet[8] = 0x155;
-    packet[9] = (count << 16) | 0x6800C002;
+    packet[9] = (aNum << 16) | 0x6800C002;
     cursor = packet + 10;
     i = 0;
     do {
-        EE_MMI_STORE_VEC3_VALUE(cursor, positions[i]);
+        MMI_STORE_VEC3_VALUE(cursor, aCenter[i]);
         cursor += 3;
         i++;
-    } while (i != count);
-    n = count * 2;
-    index = count + 2;
+    } while (i != aNum);
+    n = aNum * 2;
+    index = aNum + 2;
     *cursor++ = (n << 16) | index | 0x6E00C000;
-    memcpy(cursor, attributes, n * 4);
+    memcpy(cursor, aColor, n * 4);
     cursor += n;
     index += n;
-    n = count * 4;
+    n = aNum * 4;
     code = n << 16;
     *cursor++ = code | index | 0x6D00C000;
-    memcpy(cursor, halfAttributes, n * 8);
+    memcpy(cursor, aUVList, n * 8);
     cursor += n * 2;
     index += n;
     code |= index;
     *cursor++ = code | 0x6400C000;
-    memcpy(cursor, wordAttributes, n * 8);
+    memcpy(cursor, aXYOffsetList, n * 8);
     cursor += n * 2;
     cursor[0] = 0x04000004;
     cursor[1] = 0x14000008;
@@ -274,56 +268,54 @@ u32 *sdfMultiBillBoardMakeN(u128 *positions, void *attributes, void *halfAttribu
     return packet;
 }
 
-/* Build a one-vertex textured-quad VIF packet with four corner colors: the
- * position, colors, UV corners (copied as unaligned words) and the eight quad
- * corner coordinates. */
-void sdfBillBoardVcMake1(u8 *packet, const f32 *position, const u32 *colors, const struct BillTextureQuad *uv, const f32 *quad) {
-    *(u16 *)packet = 8;
-    *(u32 *)(packet + 8) = 0x6C01C000;
-    *(u32 *)(packet + 12) = 1;
-    *(u32 *)(packet + 16) = 0xD0000000;
-    *(u32 *)(packet + 20) = 0x34134130;
-    *(u32 *)(packet + 24) = 0x41341;
-    *(u32 *)(packet + 28) = 0x6001C001;
-    *(u32 *)(packet + 32) = 0x155;
-    *(u32 *)(packet + 36) = 0x6801C002;
-    *(f32 *)(packet + 40) = position[0];
-    *(f32 *)(packet + 44) = position[1];
-    *(f32 *)(packet + 48) = position[2];
-    *(u32 *)(packet + 52) = 0x6E04C003;
-    *(u32 *)(packet + 56) = colors[0];
-    *(u32 *)(packet + 60) = colors[1];
-    *(u32 *)(packet + 64) = colors[2];
-    *(u32 *)(packet + 68) = colors[3];
-    *(u32 *)(packet + 72) = 0x6504C007;
-    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 76), (const u8 *)uv);
-    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 80), (const u8 *)uv + 4);
-    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 84), (const u8 *)uv + 8);
-    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 88), (const u8 *)uv + 12);
-    *(u32 *)(packet + 92) = 0x6404C00B;
-    *(f32 *)(packet + 96) = quad[0];
-    *(f32 *)(packet + 100) = quad[1];
-    *(f32 *)(packet + 104) = quad[2];
-    *(f32 *)(packet + 108) = quad[3];
-    *(f32 *)(packet + 112) = quad[4];
-    *(f32 *)(packet + 116) = quad[5];
-    *(f32 *)(packet + 120) = quad[6];
-    *(f32 *)(packet + 124) = quad[7];
-    *(u32 *)(packet + 128) = 0x04000006;
-    *(u32 *)(packet + 132) = 0x14000008;
-    *(u32 *)(packet + 136) = 0;
-    *(u32 *)(packet + 140) = 0;
+void sdfBillBoardVcMake1(u8 *aPacket, const f32 *aCenter, const u32 *aColor, const void *aUVList,
+                   const f32 *aXYOffsetList) {
+    sdfBillBoardVc1Packet_t *p = (sdfBillBoardVc1Packet_t *)aPacket;
+
+    p->dma_qwc = 8;
+    p->vif_unpack1 = 0x6C01C000;
+    p->count = 1;
+    p->giftag_h = 0xD0000000;
+    p->giftag_reg_l = 0x34134130;
+    p->giftag_reg_h = 0x41341;
+    p->vif_unpack2 = 0x6001C001;
+    p->prim = 0x155;
+    p->vif_unpack3 = 0x6801C002;
+    p->center[0] = aCenter[0];
+    p->center[1] = aCenter[1];
+    p->center[2] = aCenter[2];
+    p->vif_unpack4 = 0x6E04C003;
+    p->color[0] = aColor[0];
+    p->color[1] = aColor[1];
+    p->color[2] = aColor[2];
+    p->color[3] = aColor[3];
+    p->vif_unpack5 = 0x6504C007;
+    EE_LOAD_UNALIGNED_WORD(p->uv[0], (const u8 *)aUVList);
+    EE_LOAD_UNALIGNED_WORD(p->uv[1], (const u8 *)aUVList + 4);
+    EE_LOAD_UNALIGNED_WORD(p->uv[2], (const u8 *)aUVList + 8);
+    EE_LOAD_UNALIGNED_WORD(p->uv[3], (const u8 *)aUVList + 12);
+    p->vif_unpack6 = 0x6404C00B;
+    p->xyOffset[0] = aXYOffsetList[0];
+    p->xyOffset[1] = aXYOffsetList[1];
+    p->xyOffset[2] = aXYOffsetList[2];
+    p->xyOffset[3] = aXYOffsetList[3];
+    p->xyOffset[4] = aXYOffsetList[4];
+    p->xyOffset[5] = aXYOffsetList[5];
+    p->xyOffset[6] = aXYOffsetList[6];
+    p->xyOffset[7] = aXYOffsetList[7];
+    p->vif_itop = 0x04000006;
+    p->vif_mscal = SDF_VIF_MSCAL_VERTICES;
+    p->pad[0] = 0;
+    p->pad[1] = 0;
 }
 
-/* Preserve the native 76-byte-record formula and 16-byte alignment rounding. */
-u32 sdfBillBoardVcGetPacketSize(s32 count) {
-    return (count * 0x4c + 0x4bU) & 0xfffffff0;
+u32 sdfBillBoardVcGetPacketSize(s32 aNum) {
+    return (aNum * 0x4c + 0x4bU) & 0xfffffff0;
 }
 
-/* Build a quad packet with four corner colors, UV pairs and XY offset pairs. */
-u32 *sdfBillBoardVcMakeN(const u128 *positions, const void *attributes,
-                  const void *halfAttributes, const void *wordAttributes,
-                  s32 count, void *(*alloc)(s32)) {
+u32 sdfBillBoardVcMakeN(const u128 *aCenter, const void *aColor,
+                  const void *aUVList, const void *aXYOffsetList,
+                  s32 aNum, void *(*aAllocator)(s32)) {
     s32 bytes;
     u32 *packet;
     u32 *cursor;
@@ -332,46 +324,46 @@ u32 *sdfBillBoardVcMakeN(const u128 *positions, const void *attributes,
     s32 n;
     s32 i;
 
-    bytes = sdfBillBoardGetPacketSize(count);
-    if (alloc == NULL) {
+    bytes = sdfBillBoardGetPacketSize(aNum);
+    if (aAllocator == NULL) {
         cursor = (u32 *)sdfGrAllocPacketBuff(bytes);
     } else {
-        cursor = alloc(bytes);
+        cursor = aAllocator(bytes);
     }
     packet = cursor;
     packet[0] = (bytes >> 4) - 1;
     packet[1] = 0;
     packet[2] = 0x6C01C000;
-    packet[3] = count;
+    packet[3] = aNum;
     packet[4] = 0xD0000000;
     packet[5] = 0x34134130;
     packet[6] = 0x41341;
     packet[7] = 0x6001C001;
     packet[8] = 0x155;
-    packet[9] = (count << 16) | 0x6800C002;
+    packet[9] = (aNum << 16) | 0x6800C002;
 
     cursor = packet + 10;
     i = 0;
     do {
-        EE_MMI_STORE_VEC3_VALUE(cursor, positions[i]);
+        MMI_STORE_VEC3_VALUE(cursor, aCenter[i]);
         cursor += 3;
         i++;
-    } while (i != count);
+    } while (i != aNum);
 
-    code = count << 18;
-    index = count + 2;
-    n = count * 4;
+    code = aNum << 18;
+    index = aNum + 2;
+    n = aNum * 4;
     *cursor++ = code | index | 0x6E00C000;
-    memcpy(cursor, attributes, n * 4);
+    memcpy(cursor, aColor, n * 4);
     cursor += n;
     index += n;
     *cursor++ = code | index | 0x6500C000;
-    memcpy(cursor, halfAttributes, n * 4);
+    memcpy(cursor, aUVList, n * 4);
     cursor += n;
     index += n;
-    n = count * 8;
+    n = aNum * 8;
     *cursor++ = code | index | 0x6400C000;
-    memcpy(cursor, wordAttributes, n * 4);
+    memcpy(cursor, aXYOffsetList, n * 4);
     cursor += n;
     cursor[0] = 0x04000006;
     cursor[1] = 0x14000008;
@@ -379,53 +371,50 @@ u32 *sdfBillBoardVcMakeN(const u128 *positions, const void *attributes,
     while (((u32)cursor & 0xF) != 0) {
         *cursor++ = 0;
     }
-    return packet;
+    return (u32)packet;
 }
 
-/* Build a one-vertex VIF packet for a two-texture quad with eight colors: the
- * position, colors, interleaved primary/secondary UV corners (copied as
- * unaligned words) and the eight quad corner coordinates. */
-void sdfMultiBillBoardVcMake1(u8 *packet, const f32 *position, const void *colors, const void *primaryUv,
-                   const void *secondaryUv, const void *quad) {
-    *(u16 *)packet = 10;
-    *(u32 *)(packet + 8) = 0x6C01C000;
-    *(u32 *)(packet + 12) = 1;
-    *(u32 *)(packet + 16) = 0xD0000000;
-    *(u32 *)(packet + 20) = 0x34134130;
-    *(u32 *)(packet + 24) = 0x41341;
-    *(u32 *)(packet + 28) = 0x6001C001;
-    *(u32 *)(packet + 32) = 0x15D;
-    *(u32 *)(packet + 36) = 0x6801C002;
-    *(f32 *)(packet + 40) = position[0];
-    *(f32 *)(packet + 44) = position[1];
-    *(f32 *)(packet + 48) = position[2];
-    *(u32 *)(packet + 52) = 0x6E08C003;
-    memcpy(packet + 56, colors, 32);
-    *(u32 *)(packet + 88) = 0x6D04C00B;
-    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 92), (const u8 *)primaryUv);
-    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 96), (const u8 *)secondaryUv);
-    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 100), (const u8 *)primaryUv + 4);
-    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 104), (const u8 *)secondaryUv + 4);
-    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 108), (const u8 *)primaryUv + 8);
-    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 112), (const u8 *)secondaryUv + 8);
-    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 116), (const u8 *)primaryUv + 12);
-    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 120), (const u8 *)secondaryUv + 12);
-    *(u32 *)(packet + 124) = 0x6404C00F;
-    memcpy(packet + 128, quad, 32);
-    *(u32 *)(packet + 160) = 0x04000008;
-    *(u32 *)(packet + 164) = 0x14000008;
-    *(u32 *)(packet + 168) = 0;
-    *(u32 *)(packet + 172) = 0;
+void sdfMultiBillBoardVcMake1(u8 *aPacket, const f32 *aCenter, const void *aColor, const void *aUVList0,
+                   const void *aUVList1, const void *aXYOffsetList) {
+    sdfMultiBillBoardVc1Packet_t *p = (sdfMultiBillBoardVc1Packet_t *)aPacket;
+
+    p->dma_qwc = 10;
+    p->vif_unpack1 = 0x6C01C000;
+    p->count = 1;
+    p->giftag_h = 0xD0000000;
+    p->giftag_reg_l = 0x34134130;
+    p->giftag_reg_h = 0x41341;
+    p->vif_unpack2 = 0x6001C001;
+    p->prim = 0x15D;
+    p->vif_unpack3 = 0x6801C002;
+    p->center[0] = aCenter[0];
+    p->center[1] = aCenter[1];
+    p->center[2] = aCenter[2];
+    p->vif_unpack4 = 0x6E08C003;
+    memcpy(aPacket + 56, aColor, 32);
+    p->vif_unpack5 = 0x6D04C00B;
+    EE_LOAD_UNALIGNED_WORD(p->uv[0], (const u8 *)aUVList0);
+    EE_LOAD_UNALIGNED_WORD(p->uv[1], (const u8 *)aUVList1);
+    EE_LOAD_UNALIGNED_WORD(p->uv[2], (const u8 *)aUVList0 + 4);
+    EE_LOAD_UNALIGNED_WORD(p->uv[3], (const u8 *)aUVList1 + 4);
+    EE_LOAD_UNALIGNED_WORD(p->uv[4], (const u8 *)aUVList0 + 8);
+    EE_LOAD_UNALIGNED_WORD(p->uv[5], (const u8 *)aUVList1 + 8);
+    EE_LOAD_UNALIGNED_WORD(p->uv[6], (const u8 *)aUVList0 + 12);
+    EE_LOAD_UNALIGNED_WORD(p->uv[7], (const u8 *)aUVList1 + 12);
+    p->vif_unpack6 = 0x6404C00F;
+    memcpy(aPacket + 128, aXYOffsetList, 32);
+    p->vif_itop = 0x04000008;
+    p->vif_mscal = SDF_VIF_MSCAL_VERTICES;
+    p->pad[0] = 0;
+    p->pad[1] = 0;
 }
 
-u32 sdfMultiBillBoardVcGetPacketSize(s32 count) {
-    return (count * 0x6c + 0x4bU) & 0xfffffff0;
+u32 sdfMultiBillBoardVcGetPacketSize(s32 aNum) {
+    return (aNum * 0x6c + 0x4bU) & 0xfffffff0;
 }
 
-/* Build the wider attribute VIF stream; return the packet address.
- * vertexCount must be positive; preserve the native copy lengths and n reuse. */
 /* vu0 routine: pack aligned positions into the VIF three-word stream. */
-u32 *sdfMultiBillBoardVcMakeN(u128 *positions, void *byteAttributes, void *halfAttributes, void *wordAttributes, s32 vertexCount, void *(*allocatePacket)(s32)) {
+u32 sdfMultiBillBoardVcMakeN(u128 *aCenter, void *aColor, void *aUVList, void *aXYOffsetList, s32 aNum, void *(*aAllocator)(s32)) {
     s32 packetBytes;
     u32 *packet;
     u32 *cursor;
@@ -434,45 +423,45 @@ u32 *sdfMultiBillBoardVcMakeN(u128 *positions, void *byteAttributes, void *halfA
     s32 n;
     s32 vertexIndex;
 
-    packetBytes = sdfMultiBillBoardVcGetPacketSize(vertexCount);
-    if (allocatePacket == NULL) {
+    packetBytes = sdfMultiBillBoardVcGetPacketSize(aNum);
+    if (aAllocator == NULL) {
         cursor = (u32 *)sdfGrAllocPacketBuff(packetBytes);
     } else {
-        cursor = allocatePacket(packetBytes);
+        cursor = aAllocator(packetBytes);
     }
     packet = cursor;
     packet[0] = (packetBytes >> SDF_DMA_QWORD_SHIFT) - 1;
     packet[1] = 0;
     packet[2] = 0x6C01C000;
-    packet[3] = vertexCount;
+    packet[3] = aNum;
     packet[4] = 0xD0000000;
     packet[5] = 0x34134130;
     packet[6] = 0x41341;
     packet[7] = 0x6001C001;
     packet[8] = 0x15D;
-    packet[9] = (vertexCount << 16) | 0x6800C002;
+    packet[9] = (aNum << 16) | 0x6800C002;
     cursor = packet + 10;
     vertexIndex = 0;
     do {
-        EE_MMI_STORE_VEC3_VALUE(cursor, positions[vertexIndex]);
+        MMI_STORE_VEC3_VALUE(cursor, aCenter[vertexIndex]);
         cursor += 3;
         vertexIndex++;
-    } while (vertexIndex != vertexCount);
-    n = vertexCount * 8;
-    vuAddress = vertexCount + 2;
+    } while (vertexIndex != aNum);
+    n = aNum * 8;
+    vuAddress = aNum + 2;
     *cursor++ = (n << 16) | vuAddress | 0x6E00C000;
-    memcpy(cursor, byteAttributes, n * 4);
+    memcpy(cursor, aColor, n * 4);
     cursor += n;
     vuAddress += n;
-    n = vertexCount * 4;
+    n = aNum * 4;
     unpackCode = n << 16;
     *cursor++ = unpackCode | vuAddress | 0x6D00C000;
-    memcpy(cursor, halfAttributes, n * 8);
+    memcpy(cursor, aUVList, n * 8);
     cursor += n * 2;
     vuAddress += n;
     unpackCode |= vuAddress;
     *cursor++ = unpackCode | 0x6400C000;
-    memcpy(cursor, wordAttributes, n * 8);
+    memcpy(cursor, aXYOffsetList, n * 8);
     cursor += n * 2;
     cursor[0] = SDF_VIF_ITOP_WIDE_VERTEX;
     cursor[1] = SDF_VIF_MSCAL_VERTICES;
@@ -480,5 +469,5 @@ u32 *sdfMultiBillBoardVcMakeN(u128 *positions, void *byteAttributes, void *halfA
     while (((u32)cursor & SDF_QWORD_ALIGNMENT_MASK) != 0) {
         *cursor++ = 0;
     }
-    return packet;
+    return (u32)packet;
 }
