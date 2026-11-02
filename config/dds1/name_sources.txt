@@ -10,7 +10,7 @@
 0x00100588	dds3SlowOff	inferred	SMT3HD name via SLUS_209.11 0x00100488, reloc-identical; was kwlnResetFrameControl
 0x001005B0	dds3SoftResetOn	inferred	SMT3HD name via SLUS_209.11 0x001004B0, shared-hash-in-run; was fileClearMemoryCardOperationActive
 0x001005B8	dds3SoftResetOff	inferred	SMT3HD name via SLUS_209.11 0x001004B8, shared-hash-in-run; was fileSetMemoryCardOperationActive
-0x001005C8	kwlnRunMainLoop	inferred	confidence=high; matched-C; src/dds1/game/code_00100000.c:207; Runs input and scheduler updates until the exit flag, then loads the exit executable.; twin=0x001004B0 (DDS2).
+0x001005C8	dds3KernelMain	inferred	SMT3HD name via SLUS_209.11 0x001004C8, kernel main loop twin; was kwlnRunMainLoop
 0x001006E0	DeleteProcessList	inferred	SMT3HD name via SLUS_209.11 0x001005E8, reloc-identical; was kwlnTaskRemoveFromStateQueue
 0x00100858	AddProcessList	inferred	SMT3HD name via SLUS_209.11 0x00100760, reloc-identical; was kwlnTaskInsertIntoOrderedStateQueue
 0x00100A98	StartProcess	inferred	SMT3HD name via SLUS_209.11 0x001009A0, reloc-identical; was kwlnTaskActivate

@@ -9,6 +9,7 @@
 0x00100470	dds3SlowOff	inferred	SMT3HD name via SLUS_209.11 0x00100488, reloc-identical; was kwlnResetFrameControl
 0x00100498	dds3SoftResetOn	inferred	SMT3HD name via SLUS_209.11 0x001004B0, shared-hash-in-run; was fileClearMemoryCardOperationActive
 0x001004A0	dds3SoftResetOff	inferred	SMT3HD name via SLUS_209.11 0x001004B8, shared-hash-in-run; was fileSetMemoryCardOperationActive
+0x001004B0	dds3KernelMain	inferred	SMT3HD name via SLUS_209.11 0x001004C8, kernel main loop twin; was kwlnRunMainLoop
 0x001005C8	DeleteProcessList	inferred	SMT3HD name via SLUS_209.11 0x001005E8, reloc-identical; was kwlnTaskRemoveFromStateQueue
 0x00100740	AddProcessList	inferred	SMT3HD name via SLUS_209.11 0x00100760, reloc-identical; was kwlnTaskInsertIntoOrderedStateQueue
 0x00100980	StartProcess	inferred	SMT3HD name via SLUS_209.11 0x001009A0, reloc-identical; was kwlnTaskActivate

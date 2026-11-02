@@ -235,7 +235,7 @@ extern void sdfFileCmdThreadSetHiPrio(void);
 
 extern KwlnProcessMainResult dds3ProcessMain(void);
 
-void kwlnRunMainLoop(void) {
+void dds3KernelMain(void) {
     u32 startTick;
 
     kwlnInitializeRuntime();
