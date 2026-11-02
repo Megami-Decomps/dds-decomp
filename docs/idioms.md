@@ -15417,7 +15417,7 @@ exactly (86 units, 4655 C functions). The complete manifest and receipts are
 ## Runtime startup does not return the admin request's scratch register
 
 `kwlnInitializeRuntime` is a `void` initializer in both games. Its only caller,
-`kwlnRunMainLoop`, ignores the result; retail ends the initializer with a sibling
+`dds3KernelMain`, ignores the result; retail ends the initializer with a sibling
 jump to the administrative request API and never reads that API's `$v0`.
 A decompiler's `return dds3AdminiCallSequence(...)` is not evidence that either
 function has a returned status contract. Keep the existing truthful `void`
