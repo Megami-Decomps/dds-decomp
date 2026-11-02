@@ -9549,7 +9549,7 @@ it does not introduce a new staging form or change either interface.
 
 `sdfPuts` selects the bound IOP print RPC or local `%s` printing.
 `sdfCdImageRead` retains partial-sector bytes while consuming the
-current disc file, and `sdfDevInitializeHddPfsDebugMode` preserves the native
+current disc file, and `sdfHddInit` preserves the native
 module-loading, power-off setup and mount sequence, including early returns
 and the unchecked mount result.
 

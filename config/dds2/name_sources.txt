@@ -9324,8 +9324,9 @@
 0x0033FF40	sdfFileCmdThreadSetHiPrio	inferred	SMT3HD name via SLUS_209.11 0x002BF898, reloc-identical; was sdfFileCmdThreadSetLoPrio
 0x0033FF58	sdfFileCmdThreadCheckPrio	inferred	Device-worker command API and matching signatures/order. AnalyzeFileName explicitly tests colon, classifies devices 0/1/2/3, strips prefixes of lengths 7/6/5/6 and calls MakeRealFileName; native movie path exceptions differ from HD string predicates.
 0x0033FF98	sdfFileCmdStartThread	inferred	QP8: DDS2 twin takes the DDS1 name
+0x00340048	sdfHddPowerOffTh	inferred	SMT3HD name via SLUS_209.11 0x002BF9A0, sdfHdd twin; was sdfPowerOffLoop
 0x003400B8	sdfHddPowerOffHandler	inferred	SMT3HD name via SLUS_209.11 0x002BFA20, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfPowerOffInterruptCallback
-0x003400D0	sdfDevInitializeHddPfsDebugMode	inferred	confidence=high; matched-C; Resets PFS debug mode, loads dev/ATAD/HDD/PFS modules, sets power-off semaphore/thread/callback, mounts hdd0 path at native pfs0 and enables debug mode. DDS1 twin 002E7228. Namer1 batch 17.
+0x003400D0	sdfHddInit	inferred	SMT3HD name via SLUS_209.11 0x002BFA38, sdfHdd twin; was sdfDevInitializeHddPfsDebugMode
 0x00340218	sdfDev9LoadModule	inferred	SMT3HD name via SLUS_209.11 0x002BFBD8, reloc-identical; was sdfLoadDevModule
 0x00340328	sdfZeroMemQuad	inferred	SMT3HD name via SLUS_209.11 0x002BFCE8, shared-hash-in-run; was sdfClearQuadwords
 0x003403A0	sdfStrdupChip	inferred	SMT3HD name via SLUS_209.11 0x002BFD60, reloc-identical; was sdfStrDup

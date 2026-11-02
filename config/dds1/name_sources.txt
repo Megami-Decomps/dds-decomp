@@ -8775,9 +8775,9 @@
 0x002E7098	sdfFileCmdThreadSetHiPrio	inferred	SMT3HD name via SLUS_209.11 0x002BF898, reloc-identical; was sdfFileCmdThreadSetLoPrio
 0x002E70B0	sdfFileCmdThreadCheckPrio	inferred	Counts down the priority override and restores device thread priorities on expiration.
 0x002E70F0	sdfFileCmdStartThread	inferred	Creates the selected worker semaphore and starts its thread only when its handle is not already running; worker slot three has an alternate entry point. [names_reviewed18.tsv]
-0x002E71A0	sdfPowerOffLoop	inferred	infinite loop: WaitSema, two 3110C8 RPCs (0x5003/0x4806), sceCdPowerOff with stack status word
+0x002E71A0	sdfHddPowerOffTh	inferred	SMT3HD name via SLUS_209.11 0x002BF9A0, sdfHdd twin; was sdfPowerOffLoop
 0x002E7210	sdfHddPowerOffHandler	inferred	SMT3HD name via SLUS_209.11 0x002BFA20, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfPowerOffInterruptCallback
-0x002E7228	sdfDevInitializeHddPfsDebugMode	inferred	confidence=high; matched-C; Resets PFS debug mode, loads dev/ATAD/HDD/PFS modules, sets power-off semaphore/thread/callback, mounts hdd0 path at native pfs0 and enables debug mode. DDS2 twin 003400D0. Namer1 batch 17.
+0x002E7228	sdfHddInit	inferred	SMT3HD name via SLUS_209.11 0x002BFA38, sdfHdd twin; was sdfDevInitializeHddPfsDebugMode
 0x002E7370	sdfDev9LoadModule	inferred	SMT3HD name via SLUS_209.11 0x002BFBD8, reloc-identical; was sdfLoadDevModule
 0x002E7480	sdfZeroMemQuad	inferred	SMT3HD name via SLUS_209.11 0x002BFCE8, shared-hash-in-run; was sdfClearQuadwords
 0x002E74F8	sdfStrdupChip	inferred	SMT3HD name via SLUS_209.11 0x002BFD60, reloc-identical; was sdfStrDup

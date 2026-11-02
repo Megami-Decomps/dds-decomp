@@ -34,7 +34,7 @@ extern u8 D_00438B68;
 
 extern s32 sceSifLoadStartModule(const char *modulePath, s32 flags, void *moduleArguments, s32 *resident);
 
-void sdfPowerOffLoop(s32 semaphore) {
+void sdfHddPowerOffTh(s32 semaphore) {
     s32 status;
 
     for (;;) {
@@ -72,7 +72,7 @@ extern s32 sceFsInit(void);
 extern s32 sceMount(const char *, const char *, s32, const void *, s32);
 
 /* Load the HDD/PFS dev modules and mount path before enabling PFS debug mode. */
-void sdfDevInitializeHddPfsDebugMode(char *path) {
+void sdfHddInit(char *path) {
     char buffer[0x100];
     s32 resident;
     s32 result;
@@ -97,7 +97,7 @@ void sdfDevInitializeHddPfsDebugMode(char *path) {
         return;
     }
     semaphore = sdfCreateSema(0, 1, 0);
-    thread = CreateThreadSimple(sdfPowerOffLoop, D_00477180, 0x800, 1);
+    thread = CreateThreadSimple(sdfHddPowerOffTh, D_00477180, 0x800, 1);
     _StartThread(thread, semaphore);
     sceCdPOffCallback(sdfHddPowerOffHandler, (void *)semaphore);
     sceFsInit();
