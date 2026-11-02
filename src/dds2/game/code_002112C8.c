@@ -29,7 +29,7 @@ void btlRunWeightedAiAction(ActionStateLink *task, s32 rowIndex) {
     u16 speciesId;
     s32 slotIndex;
 
-    btlActionScratchWork = sdfAllocAndClearQuadwords(sizeof(BtlAiScratchWork));
+    btlActionScratchWork = sdfChipAllocZeroDirect(sizeof(BtlAiScratchWork));
     speciesId = task->unit->partyRecord.unitId;
     slotIndex = btlPickWeightedAiSlot(task->unit, speciesId, rowIndex);
     btlExecuteAiTableAction(task, datEnemyAiRecords[speciesId].slot[rowIndex][slotIndex].actionId, datEnemyAiRecords[speciesId].slot[rowIndex][slotIndex].packedAction);

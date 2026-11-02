@@ -160,7 +160,7 @@ void sdfAppendPacketRange(sdfDrawTag_t *list, u32 packetAddress, u32 rangeTailAd
 }
 
 /* Tag the new packet as REF and chain it into the DMA list. */
-void sdfAppendReferencePacket(sdfDrawTag_t *list, u32 packetAddress) {
+void sdfDrawTagLinkRef(sdfDrawTag_t *list, u32 packetAddress) {
     s32 previousTailAddress;
 
     ((SdfDmaTag *)packetAddress)->kind = SDF_DMA_TAG_REF_BYTE;
@@ -605,7 +605,7 @@ void sdfGrLinkStdDrawEnv(sdfDrawTag_t *dmaList, sdfPreDrawTag_t *linkedList, Sdf
 }
 
 /* Reference the masked FRAME write (FBMSK 0x00FFFFFF); zero selects GS context one, otherwise two. */
-void sdfBuildMaskedFrameRegisterReference(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext) {
+void sdfGrSetFrameMaskRGB(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext) {
     if (gsContext == 0) {
         sdfGrSetRefGifPacket(packet, (u32)(source + 0x180), 1);
         return;
@@ -614,7 +614,7 @@ void sdfBuildMaskedFrameRegisterReference(const u8 *source, SdfDmaReferenceChain
 }
 
 /* Reference the unmasked FRAME write; zero selects GS context one, otherwise two. */
-void sdfBuildFrameRegisterReference(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext) {
+void sdfGrSetFrameMaskReset(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext) {
     if (gsContext == 0) {
         sdfGrSetRefGifPacket(packet, (u32)(source + 0x70), 1);
         return;
@@ -626,14 +626,14 @@ void sdfGrLinkDispFrameTex(sdfDrawTag_t *list, u32 source, sdfGrRefPacketHeader_
     node->vifCommands = (((u64)0x50000004 << 16) | 0x1000) << 16;
     node->dmaTag = ((u64)((source + 0x1a0) & 0xfffffff) << 32) | 0x30000004;
     node->nextTag = 0;
-    sdfAppendReferencePacket(list, (u32)node);
+    sdfDrawTagLinkRef(list, (u32)node);
 }
 
 void sdfGrLinkDrawFrameTex(sdfDrawTag_t *list, u32 source, sdfGrRefPacketHeader_t *node) {
     node->vifCommands = (((u64)0x50000004 << 16) | 0x1000) << 16;
     node->dmaTag = ((u64)((source + 0x1E0) & 0xfffffff) << 32) | 0x30000004;
     node->nextTag = 0;
-    sdfAppendReferencePacket(list, (u32)node);
+    sdfDrawTagLinkRef(list, (u32)node);
 }
 
 void sdfGrFramePacketPredraw(SdfPacketBuilder *packet, s32 bufferIndex) {

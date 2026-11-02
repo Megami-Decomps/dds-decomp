@@ -44,7 +44,7 @@ void sdfPowerOffLoop(s32 semaphore) {
     }
 }
 
-void sdfPowerOffInterruptCallback(void *semaphore) {
+void sdfHddPowerOffHandler(void *semaphore) {
     iSignalSema((s32)semaphore);
 }
 
@@ -98,7 +98,7 @@ void sdfDevInitializeHddPfsDebugMode(char *path) {
     semaphore = sdfCreateSema(0, 1, 0);
     thread = CreateThreadSimple(sdfPowerOffLoop, D_003FA800, 0x800, 1);
     _StartThread(thread, semaphore);
-    sceCdPOffCallback(sdfPowerOffInterruptCallback, (void *)semaphore);
+    sceCdPOffCallback(sdfHddPowerOffHandler, (void *)semaphore);
     sceFsInit();
     sprintf(buffer, "hdd0:%s,", path);
     sceMount(D_003BD470, buffer, 0, 0, 0);

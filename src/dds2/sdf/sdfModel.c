@@ -106,7 +106,7 @@ void sdfModelInitSystem(void) {
 }
 
 sdfModelNode_t *sdfModelNodeNew(void) {
-    sdfModelNode_t *node = sdfAllocAndClearQuadwords(sizeof(*node));
+    sdfModelNode_t *node = sdfChipAllocZeroDirect(sizeof(*node));
 
     node->color = 0x80808080;
     node->drawFlagMask = 0xFFFF;
@@ -162,7 +162,7 @@ void sdfModelNodeFree(sdfModelNode_t *root) {
 sdfModelRootNode_t *sdfModelRootNew(void) {
     sdfModelRootNode_t *slot;
 
-    slot = sdfAllocAndClearQuadwords(sizeof(sdfModelRootNode_t));
+    slot = sdfChipAllocZeroDirect(sizeof(sdfModelRootNode_t));
     slot->list = sdfDevCreateBufferedRequest(0, 4, 0x20);
     EE_MMI_UNIT_MATRIX(slot->matrix);
     VU0_STORE_VF(vf0, slot->rotationQuaternion);
@@ -994,7 +994,7 @@ void sdfModelEvalTm(sdfModelRootNode_t *model) {
 }
 
 /* Store a provider's four draw surfaces and make the second a key-sorted pool. */
-void sdfStoreMessageWordsAndNotifyConsumer(SdfModelDrawSurfaceSet surfaces, struct sdfGrOt_t *first,
+void sdfModelOtInit(SdfModelDrawSurfaceSet surfaces, struct sdfGrOt_t *first,
                                            struct sdfGrOt_t *pool, struct sdfGrOt_t *third,
                                            struct sdfGrOt_t *fourth) {
     surfaces[3] = fourth;
@@ -1349,7 +1349,7 @@ void sdfModelLinkOt(sdfGrOt_t **surfaces, sdfModelRootNode_t *model) {
                 lightingPacket->secondScalar = secondScalar;
                 lightingPacket->finalCommand = 0x04000004;
                 lightingPacket->finalAddress = 0x14000000;
-                sdfAppendReferencePacket(packets, (u32)lightingPacket);
+                sdfDrawTagLinkRef(packets, (u32)lightingPacket);
             }
 
             switch (entry->kind) {
@@ -1523,13 +1523,13 @@ SdfChunkHeader *sdfChunkFindById(SdfChunkHeader *chunk, s32 chunkId) {
     return NULL;
 }
 
-SdfChunkHeader *sdfChunkFindByTag(const sdfModelRootNode_t *model, s32 tag) {
+SdfChunkHeader *sdfModelGetExtraChunk(const sdfModelRootNode_t *model, s32 tag) {
     return sdfChunkFindById(model->chunkTable, tag);
 }
 
 /* Names are followed by a four-byte-aligned ID word. */
 SdfModelNodeIndex sdfModelGetNodeIndexByName(sdfModelRootNode_t *model, const char *name) {
-    SdfChunkHeader *namesChunk = sdfChunkFindByTag(model, SDF_CHUNK_NAMED_IDS);
+    SdfChunkHeader *namesChunk = sdfModelGetExtraChunk(model, SDF_CHUNK_NAMED_IDS);
     u8 *entryName;
     u8 *chunkEnd;
     u32 nameLength;
@@ -1553,7 +1553,7 @@ SdfModelNodeIndex sdfModelGetNodeIndexByName(sdfModelRootNode_t *model, const ch
 extern const char D_0040B338[];
 
 const char *sdfModelGetNodeName(sdfModelRootNode_t *model, s32 nameId) {
-    SdfChunkHeader *chunk = sdfChunkFindByTag(model, SDF_CHUNK_NAMED_IDS);
+    SdfChunkHeader *chunk = sdfModelGetExtraChunk(model, SDF_CHUNK_NAMED_IDS);
     const u8 *name;
     const u8 *end;
     if (chunk == NULL) {
@@ -1578,7 +1578,7 @@ const char *sdfModelGetNodeName(sdfModelRootNode_t *model, s32 nameId) {
 }
 
 u32 sdfModelGetMarkPosCount(const sdfModelRootNode_t *model) {
-    const SdfChunkHeader *chunk = sdfChunkFindByTag(model, SDF_CHUNK_MAP_POSITIONS);
+    const SdfChunkHeader *chunk = sdfModelGetExtraChunk(model, SDF_CHUNK_MAP_POSITIONS);
     if (chunk != NULL) {
         return (chunk->size - 0x10) >> 6;
     }
@@ -1619,7 +1619,7 @@ void sdfModelMakeMarkPos(sdfModelRootNode_t *model, SdfMapPositionRecord *record
 
 /* Search the fixed-size map-position records within the chunk's declared byte extent. */
 SdfMapPositionRecord *sdfModelSearchMarkPosData(sdfModelRootNode_t *model, s32 recordId) {
-    SdfChunkHeader *positionsChunk = sdfChunkFindByTag(model, SDF_CHUNK_MAP_POSITIONS);
+    SdfChunkHeader *positionsChunk = sdfModelGetExtraChunk(model, SDF_CHUNK_MAP_POSITIONS);
     SdfMapPositionChunkPrefix *positions;
     SdfMapPositionRecord *record;
     u8 *chunkEnd;
@@ -1657,7 +1657,7 @@ SdfMapPositionLookupResult sdfModelGetMarkPos(sdfModelRootNode_t *model, s32 map
 }
 
 u32 sdfGetUniqueChunkValue(const sdfModelRootNode_t *model) {
-    const SdfChunkHeader *chunk = sdfChunkFindByTag(model, SDF_CHUNK_UNIQUE_VALUE);
+    const SdfChunkHeader *chunk = sdfModelGetExtraChunk(model, SDF_CHUNK_UNIQUE_VALUE);
     if (chunk != NULL) {
         return *(const u32 *)((const u8 *)chunk + sizeof(*chunk));
     }
@@ -1665,7 +1665,7 @@ u32 sdfGetUniqueChunkValue(const sdfModelRootNode_t *model) {
 }
 
 u32 sdfGetLodChunkValue(sdfModelRootNode_t *model) {
-    SdfChunkHeader *chunk = sdfChunkFindByTag(model, SDF_CHUNK_LOD_VALUE);
+    SdfChunkHeader *chunk = sdfModelGetExtraChunk(model, SDF_CHUNK_LOD_VALUE);
     if (chunk != NULL) {
         return *(u32 *)((u8 *)chunk + sizeof(*chunk));
     }

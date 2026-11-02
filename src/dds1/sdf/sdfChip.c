@@ -19,7 +19,7 @@ SdfChipClassTable sdfChipCB __attribute__((section(".bss"), aligned(8)));
 
 void sdfChipAllocNextPage(sdfChipCB_tag *sizeClass);
 
-void *sdfAllocAndClearQuadwords(s32 size) {
+void *sdfChipAllocZeroDirect(s32 size) {
     return sdfZeroMemQuad(sdfChipAllocDirect(size), (size + 15) >> 4);
 }
 

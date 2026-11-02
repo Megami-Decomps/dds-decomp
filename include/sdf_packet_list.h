@@ -14,7 +14,7 @@ void sdfDrawTagInit(struct sdfDrawTag_t *list);
 void sdfDrawTagLink(struct sdfDrawTag_t *list, u32 packetAddress);
 void sdfAppendPacketRange(struct sdfDrawTag_t *list, u32 packetAddress,
                           u32 rangeTailAddress);
-void sdfAppendReferencePacket(struct sdfDrawTag_t *list, u32 packetAddress);
+void sdfDrawTagLinkRef(struct sdfDrawTag_t *list, u32 packetAddress);
 void sdfDrawTagLinkCall(struct sdfDrawTag_t *list, u32 packetAddress);
 void sdfDrawTagLinkRefGif(struct sdfDrawTag_t *list, u32 packetAddress);
 void sdfGrLinkDispFrameTex(struct sdfDrawTag_t *list, u32 source,

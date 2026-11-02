@@ -211,14 +211,14 @@ SdfChunkHeader *sdfChunkFindById(SdfChunkHeader *chunk, s32 chunkId) {
     return NULL;
 }
 
-SdfChunkHeader *sdfChunkFindByTag(const sdfModelRootNode_t *model, s32 tag) {
+SdfChunkHeader *sdfModelGetExtraChunk(const sdfModelRootNode_t *model, s32 tag) {
     return sdfChunkFindById(model->chunkTable, tag);
 }
 
 
 /* Names are followed by a four-byte-aligned ID word. */
 SdfModelNodeIndex sdfModelGetNodeIndexByName(sdfModelRootNode_t *model, const char *name) {
-    SdfChunkHeader *namesChunk = sdfChunkFindByTag(model, SDF_CHUNK_NAMED_IDS);
+    SdfChunkHeader *namesChunk = sdfModelGetExtraChunk(model, SDF_CHUNK_NAMED_IDS);
     u8 *entryName;
     u8 *chunkEnd;
     u32 nameLength;
@@ -242,7 +242,7 @@ SdfModelNodeIndex sdfModelGetNodeIndexByName(sdfModelRootNode_t *model, const ch
 extern const char D_0040B338[];
 
 const char *sdfModelGetNodeName(sdfModelRootNode_t *model, s32 nameId) {
-    SdfChunkHeader *chunk = sdfChunkFindByTag(model, SDF_CHUNK_NAMED_IDS);
+    SdfChunkHeader *chunk = sdfModelGetExtraChunk(model, SDF_CHUNK_NAMED_IDS);
     const u8 *name;
     const u8 *end;
     if (chunk == NULL) {
@@ -267,7 +267,7 @@ const char *sdfModelGetNodeName(sdfModelRootNode_t *model, s32 nameId) {
 }
 
 u32 sdfModelGetMarkPosCount(const sdfModelRootNode_t *model) {
-    const SdfChunkHeader *chunk = sdfChunkFindByTag(model, SDF_CHUNK_MAP_POSITIONS);
+    const SdfChunkHeader *chunk = sdfModelGetExtraChunk(model, SDF_CHUNK_MAP_POSITIONS);
     if (chunk != NULL) {
         return (chunk->size - 0x10) >> 6;
     }
@@ -308,7 +308,7 @@ void sdfModelMakeMarkPos(sdfModelRootNode_t *model, SdfMapPositionRecord *record
 
 /* Search the fixed-size map-position records within the chunk's declared byte extent. */
 SdfMapPositionRecord *sdfModelSearchMarkPosData(sdfModelRootNode_t *model, s32 recordId) {
-    SdfChunkHeader *positionsChunk = sdfChunkFindByTag(model, SDF_CHUNK_MAP_POSITIONS);
+    SdfChunkHeader *positionsChunk = sdfModelGetExtraChunk(model, SDF_CHUNK_MAP_POSITIONS);
     SdfMapPositionChunkPrefix *positions;
     SdfMapPositionRecord *record;
     u8 *chunkEnd;
@@ -346,7 +346,7 @@ SdfMapPositionLookupResult sdfModelGetMarkPos(sdfModelRootNode_t *model, s32 map
 }
 
 u32 sdfGetUniqueChunkValue(const sdfModelRootNode_t *model) {
-    const SdfChunkHeader *chunk = sdfChunkFindByTag(model, SDF_CHUNK_UNIQUE_VALUE);
+    const SdfChunkHeader *chunk = sdfModelGetExtraChunk(model, SDF_CHUNK_UNIQUE_VALUE);
     if (chunk != NULL) {
         return *(const u32 *)((const u8 *)chunk + sizeof(*chunk));
     }
@@ -354,7 +354,7 @@ u32 sdfGetUniqueChunkValue(const sdfModelRootNode_t *model) {
 }
 
 u32 sdfGetLodChunkValue(sdfModelRootNode_t *model) {
-    SdfChunkHeader *chunk = sdfChunkFindByTag(model, SDF_CHUNK_LOD_VALUE);
+    SdfChunkHeader *chunk = sdfModelGetExtraChunk(model, SDF_CHUNK_LOD_VALUE);
     if (chunk != NULL) {
         return *(u32 *)((u8 *)chunk + sizeof(*chunk));
     }
@@ -663,7 +663,7 @@ sdfMat_t *sdfMatNew(void) {
     s32 entryIndex;
 
     sdfMatAllocCount++;
-    asset = sdfAllocAndClearQuadwords(SDF_ASSET_BYTES);
+    asset = sdfChipAllocZeroDirect(SDF_ASSET_BYTES);
     asset->dirtyFlags = SDF_ASSET_ALL_STATE_DIRTY;
     for (entryIndex = 0; entryIndex != SDF_ASSET_ENTRY_COUNT; entryIndex++) {
         entryWords = sdfChipAllocDirect(SDF_ASSET_DRAW_ENTRY_BYTES);
@@ -998,6 +998,3 @@ struct SdfMotionBindingHead *sdfMotionNodeNew(sdfMotionCtrlr_t *motion, u32 comm
     return D_0040B358[commandWord >> 16](motion, commandWord, targetIndex);
 }
 
-INCLUDE_SDATA(const s32, "game/code_003325F8", sdfMatAllocCount);
-
-INCLUDE_SDATA(const s32, "game/code_003325F8", sdfForcedAssetTextureMode);

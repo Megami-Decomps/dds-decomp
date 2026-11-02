@@ -1686,13 +1686,13 @@ void effEVECombParSmokeDraw(EffEventBillSet *work) {
     textureBuffer = sdfTexGetPacket(primaryTexture);
     textureBytes = sdfTexGetPacketLength(primaryTexture);
     sdf3DMakeDirectRefPacket(texturePacket, (u32)textureBuffer, textureBytes);
-    sdfAppendReferencePacket(primaryList, (u32)texturePacket);
+    sdfDrawTagLinkRef(primaryList, (u32)texturePacket);
     secondaryTexture = dds3BillboardGetTex(D_003BB148);
     texturePacket = (struct DmaPacketHeader *)sdfGrAllocPacketBuff(0x20);
     textureBuffer = sdfTexGetPacket(secondaryTexture);
     textureBytes = sdfTexGetPacketLength(secondaryTexture);
     sdf3DMakeDirectRefPacket(texturePacket, (u32)textureBuffer, textureBytes);
-    sdfAppendReferencePacket(secondaryList, (u32)texturePacket);
+    sdfDrawTagLinkRef(secondaryList, (u32)texturePacket);
     EE_MMI_UNIT_MATRIX(matrix);
     geometryPacket = (u8 *)sdfGrAllocPacketBuff(0x38);
     sdfBillBoardMakeTMPacket(geometryPacket, matrix[0]);
@@ -2074,3 +2074,4 @@ INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB144);
 INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB148);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_003BB14C);
+

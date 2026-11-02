@@ -984,7 +984,7 @@ BtlPartyCommandUseGateResult btlCheckPartyCommandCounterEligibility(s32 commandI
 
 /* Allocate a cache entry with one reference and insert it at the list head. */
 BattleModelEntry *btlCreateModelEntry(void) {
-    BattleModelEntry *cacheEntry = sdfAllocAndClearQuadwords(sizeof(BattleModelEntry));
+    BattleModelEntry *cacheEntry = sdfChipAllocZeroDirect(sizeof(BattleModelEntry));
     BtlState *battleState;
     BattleModelEntry *previousHead;
     cacheEntry->refCount = 1;
@@ -1465,9 +1465,9 @@ INCLUDE_ASM(const s32, "game/code_0020FC48", btlDrawWindOverlaySweep);
 
 extern u32 effGetWindTextureHandle(void);
 
-extern void sdfBuildMaskedFrameRegisterReference(const u8 *, SdfDmaReferenceChainPacket *, s32);
+extern void sdfGrSetFrameMaskRGB(const u8 *, SdfDmaReferenceChainPacket *, s32);
 
-extern void sdfBuildFrameRegisterReference(const u8 *, SdfDmaReferenceChainPacket *, s32);
+extern void sdfGrSetFrameMaskReset(const u8 *, SdfDmaReferenceChainPacket *, s32);
 
 extern u32 btlMulColor(u32, u32);
 
@@ -1484,7 +1484,7 @@ void btlDrawWindOverlay(sdfDrawTag_t *list, u32 color, s32 depth) {
         btlCopyPaletteLowByteToAlpha((s32 *)btlRuntimeState.resource->palette);
     }
     tag = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
-    sdfBuildMaskedFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, tag, 1);
+    sdfGrSetFrameMaskRGB(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, tag, 1);
     sdfDrawTagLinkRefGif(list, (u32)tag);
     registers = (SdfPacket *)sdfGrAllocPacketBuff(0x40);
     registers[0].unk0 = 3;
@@ -1519,7 +1519,7 @@ void btlDrawWindOverlay(sdfDrawTag_t *list, u32 color, s32 depth) {
         btlRuntimeState.phaseSpeed = -0.02f;
     }
     tag = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
-    sdfBuildFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, tag, 1);
+    sdfGrSetFrameMaskReset(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, tag, 1);
     sdfDrawTagLinkRefGif(list, (u32)tag);
 }
 
@@ -2940,6 +2940,8 @@ extern void btlDebugMenuAfterRecordNoOp(void);
 extern void btlApplyDebugEncounterPartySelection(void);
 /* Preview/select a debug encounter or pack; return one when it can launch. */
 /* Keep the native snapshot/save/restore order around the debug window calls. */
+#include "btl_preemptive_outcome_result.h"
+
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A7128);
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A7138);
@@ -2993,8 +2995,6 @@ INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A72A8);
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A72B8);
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003A72C8);
-
-#include "btl_preemptive_outcome_result.h"
 
 s32 btlUpdateDebugEncounterSelector(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
@@ -4966,3 +4966,4 @@ INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003ABA38);
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003ABA50);
 
 INCLUDE_RODATA(const s32, "game/code_0020FC48", D_003ABA68);
+

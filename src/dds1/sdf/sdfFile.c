@@ -23,7 +23,7 @@
 #include "btl.h"
 #include "sdf_debug_api.h"
 
-extern SdfFileCommandQueueResult sdfFileCmdRequestFileSize(sdfFileCmdHandle_t *state);
+extern SdfFileCommandQueueResult sdfFileCmdFileSize(sdfFileCmdHandle_t *state);
 
 #define SDF_DEV_REPLY_SEMAPHORE_LIMIT 0x80
 
@@ -203,7 +203,7 @@ void sdfFileRead(sdfFileCmdHandle_t *state, void *buffer, s32 byteCount) {
 }
 
 u32 sdfFileLength(sdfFileCmdHandle_t *state) {
-    sdfFileCmdRequestFileSize(state);
+    sdfFileCmdFileSize(state);
     WaitSema(sdfFileSemaId);
     return sdfFileLengthWork;
 }

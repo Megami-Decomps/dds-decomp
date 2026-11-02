@@ -402,7 +402,7 @@ sdfMat_t *sdfMatNew(void) {
     s32 entryIndex;
 
     sdfMatAllocCount++;
-    asset = sdfAllocAndClearQuadwords(SDF_ASSET_BYTES);
+    asset = sdfChipAllocZeroDirect(SDF_ASSET_BYTES);
     asset->dirtyFlags = SDF_ASSET_ALL_STATE_DIRTY;
     for (entryIndex = 0; entryIndex != SDF_ASSET_ENTRY_COUNT; entryIndex++) {
         entryWords = sdfChipAllocDirect(SDF_ASSET_DRAW_ENTRY_BYTES);

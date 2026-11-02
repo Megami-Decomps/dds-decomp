@@ -829,7 +829,7 @@ void sdfAdvanceStreamPlayback(s32 cadence) {
     sdfIpuExecQueue(0);
 }
 
-void sdfSoundInitAndAppendNode(sdfIpuDecodeCb_t *node, SoundFormat *format, u8 *source, s32 size, s32 resourceWord) {
+void sdfIpuStartDecodeTask(sdfIpuDecodeCb_t *node, SoundFormat *format, u8 *source, s32 size, s32 resourceWord) {
     sdfIpuSetDecodeParams(node, format, source, size);
     node->resourceWord = resourceWord;
     sdfIpuAttachTask(node);
@@ -845,10 +845,10 @@ void sdfIpuSetOutputTex(sdfIpuDecodeCb_t *node, const SdfStreamParams *params, u
         streamParams.hasAudio = 1;
         break;
     }
-    sdfSoundInitAndAppendNode(node, &streamParams, source, size, sdfTexGetPixelAddr(resource));
+    sdfIpuStartDecodeTask(node, &streamParams, source, size, sdfTexGetPixelAddr(resource));
 }
 
-void sdfSoundInitFormattedAndAppendNode(sdfIpuDecodeCb_t *node, SoundFormat *format, SdfStreamReadCallback read, movieStream_t *readContext, s32 resourceWord) {
+void movieAttachDecodeTask(sdfIpuDecodeCb_t *node, SoundFormat *format, SdfStreamReadCallback read, movieStream_t *readContext, s32 resourceWord) {
     sdfIpuStrmDecodeInit(node, format, read, readContext);
     node->resourceWord = resourceWord;
     sdfIpuAttachTask(node);

@@ -307,8 +307,8 @@ void sdfTexLink(sdfTexHandle_t *texture) {
 }
 
 sdfTexHandle_t *sdfTexCreateResourceWithReference(s32 x, s32 y, s32 pixelFormat, s32 maxMipLevel, sdfGsMemSlice_t *primary, s32 paletteFormat, s32 paletteCount, sdfGsMemSlice_t *secondary) {
-    sdfTexHandle_t *tex = sdfAllocAndClearQuadwords(sizeof(sdfTexHandle_t));
-    SdfTexRef *ref = sdfAllocAndClearQuadwords(sizeof(SdfTexRef));
+    sdfTexHandle_t *tex = sdfChipAllocZeroDirect(sizeof(sdfTexHandle_t));
+    SdfTexRef *ref = sdfChipAllocZeroDirect(sizeof(SdfTexRef));
 
     ref->refCount = 1;
     tex->paletteCount = paletteCount;
@@ -336,7 +336,7 @@ sdfTexHandle_t *sdfTexClone(sdfTexHandle_t *source) {
 
     texture = sdfChipAllocDirect(sizeof(*texture));
     *texture = *source;
-    reference = sdfAllocAndClearQuadwords(sizeof(*reference));
+    reference = sdfChipAllocZeroDirect(sizeof(*reference));
     original = reference->cloneSource;
     reference->refCount = 1;
     texture->reference = reference;

@@ -1234,7 +1234,7 @@ BtlPartyCommandUseGateResult btlCheckSelectedPartyCommandEligibility(s32 command
 
 /* Allocate a cache entry with one reference and insert it at the list head. */
 BattleModelEntry *btlCreateModelEntry(void) {
-    BattleModelEntry *cacheEntry = sdfAllocAndClearQuadwords(sizeof(BattleModelEntry));
+    BattleModelEntry *cacheEntry = sdfChipAllocZeroDirect(sizeof(BattleModelEntry));
     BtlStateModelCacheView *battleState;
     BattleModelEntry *previousHead;
     cacheEntry->refCount = 1;
@@ -2976,6 +2976,8 @@ extern void btlApplyDebugEncounterPartySelection(void);
 /* Edit encounter settings, preview party/enemy names, and launch the test. */
 /* Preview/select a debug encounter or pack; return one when it can launch. */
 /* Keep the native snapshot/save/restore order around the debug window calls. */
+#include "btl_preemptive_outcome_result.h"
+
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041C118);
 
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041C128);
@@ -3033,8 +3035,6 @@ INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041C2B8);
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041C2C8);
 
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_0041C2D8);
-
-#include "btl_preemptive_outcome_result.h"
 
 s32 btlUpdateDebugEncounterSelector(void) {
     BtlState *state = (BtlState *)btlGetRuntime();
@@ -5115,3 +5115,4 @@ INCLUDE_RODATA(const s32, "game/code_0022AC10", D_00420FA8);
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_00420FC0);
 
 INCLUDE_RODATA(const s32, "game/code_0022AC10", D_00420FD8);
+

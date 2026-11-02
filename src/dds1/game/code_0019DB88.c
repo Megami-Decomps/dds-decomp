@@ -1216,7 +1216,7 @@ s32 pbDebugPrintPanel(void) {
     sdfDrawTagLink(list,
                     (u32)dds3PrimFrameRect(0x8500, 0x79C0, 0xFEFFFF,
                                   0xA80, 0x120, 0x60000000, 0x40806020));
-    sdfPktInit(&packet, 0x85C0, 0x7A20, 0xFF0000, 0);
+    sdfDevSetPrintCB(&packet, 0x85C0, 0x7A20, 0xFF0000, 0);
     sdfDrawTagLink(list,
                     (u32)sdfDevPrintfEx(&packet, "FOVY: %6.2f",
                         dds3ScreenParam.camera.fov * radiansToDegrees));
@@ -1331,13 +1331,13 @@ s32 pbDebugPrintPanel2(void) {
     list = dds3FontReqAllocDrawTag();
     sdfDrawTagLink(list,
         (u32)dds3PrimFrameRect(0x8290, 0x79A8, 0xFEFFFF, 0xC60, 0x1B0, 0x60000000, 0x40806020));
-    sdfPktInit(&packet, 0x82C0, 0x79C0, 0xFF0000, 0);
+    sdfDevSetPrintCB(&packet, 0x82C0, 0x79C0, 0xFF0000, 0);
     sdfDrawTagLink(list, (u32)sdfDevPrintfEx(&packet,
         "BLUR:        %s", dds3ScreenBlurFlag ? D_003BB260 : D_003BB268));
 
     y = 0x7A20;
     if (D_003D73D0.editing == 0) {
-        sdfPktInit(&packet, 0x82C0, D_003D73D0.selection * 0x60 + 0x7A20, 0xFF0000, 0);
+        sdfDevSetPrintCB(&packet, 0x82C0, D_003D73D0.selection * 0x60 + 0x7A20, 0xFF0000, 0);
         D_003D73D0.blink++;
         if (D_003D73D0.blink < 32 || (D_003D73D0.blink & 31) < 18) {
             sdfDrawTagLink(list, (u32)sdfDevPrintfEx(&packet, D_003BB270));
@@ -1345,14 +1345,14 @@ s32 pbDebugPrintPanel2(void) {
     }
 
     for (row = 0; row != 3; row++) {
-        sdfPktInit(&packet, 0x82C0, y, 0xFF0000, 0);
+        sdfDevSetPrintCB(&packet, 0x82C0, y, 0xFF0000, 0);
         sdfDrawTagLink(list,
             (u32)sdfDevPrintfEx(&packet, D_003BB278, D_00358348[row]));
         highlight = 0;
         if (D_003D73D0.editing != 0 && row == D_003D73D0.selection) {
             highlight = 6;
         }
-        sdfPktInit(&packet, 0x8800, y, 0xFF0000, highlight);
+        sdfDevSetPrintCB(&packet, 0x8800, y, 0xFF0000, highlight);
         switch (row) {
         case 0:
             sdfDrawTagLink(list,
@@ -1497,3 +1497,4 @@ INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB2A0);
 INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB2A8);
 
 INCLUDE_SDATA(const s32, "game/code_0019DB88", D_003BB2B0);
+

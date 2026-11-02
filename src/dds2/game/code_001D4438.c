@@ -4793,7 +4793,7 @@ INCLUDE_RODATA(const s32, "game/code_001D4438", D_00417538);
 INCLUDE_RODATA(const s32, "game/code_001D4438", D_00417548);
 
 ActionStateLink *btlCreateActionSeq(void) {
-    ActionStateLink *seq = sdfAllocAndClearQuadwords(0x180);
+    ActionStateLink *seq = sdfChipAllocZeroDirect(0x180);
     BtlState *work;
     seq->actionNumber = 1;
     btlInitBattleIndexWork(&seq->indexWork);
@@ -4987,3 +4987,4 @@ INCLUDE_SDATA(const s32, "game/code_001D4438", D_00436A10);
 INCLUDE_SDATA(const s32, "game/code_001D4438", D_00436A18);
 
 INCLUDE_SDATA(const s32, "game/code_001D4438", btlDeferredTaskTail);
+

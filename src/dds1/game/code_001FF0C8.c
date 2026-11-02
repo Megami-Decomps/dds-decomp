@@ -151,7 +151,7 @@ void btlSelectAndRunModeAiAction(BtlTask *task, u32 mode) {
         break;
     }
     datEnemyAiRecords[0] = D_00360640[table];
-    work = sdfAllocAndClearQuadwords(sizeof(BtlAiScratchWork));
+    work = sdfChipAllocZeroDirect(sizeof(BtlAiScratchWork));
     unit = task->unit;
     btlActionScratchWork = work;
     work->actor = task;
@@ -1644,3 +1644,4 @@ INCLUDE_RODATA(const s32, "game/code_001FF0C8", btlElementMasks);
 INCLUDE_RODATA(const s32, "game/code_001FF0C8", D_003A5A80);
 
 INCLUDE_RODATA(const s32, "game/code_001FF0C8", D_003A5AA8);
+

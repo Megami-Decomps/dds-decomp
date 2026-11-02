@@ -299,7 +299,7 @@ s32 pbDebugPrintPanel(void) {
     sdfDrawTagLink(list,
                     (u32)dds3PrimFrameRect(0x8500, 0x79C0, 0xFEFFFF,
                                        0xA80, 0x120, 0x60000000, 0x40806020));
-    sdfPktInit(&packet, 0x85C0, 0x7A20, 0xFF0000, 0);
+    sdfDevSetPrintCB(&packet, 0x85C0, 0x7A20, 0xFF0000, 0);
     sdfDrawTagLink(list,
                     (u32)sdfDevPrintfEx(&packet, "FOVY: %6.2f",
                         dds3ScreenParam.camera.fov * radiansToDegrees));
@@ -426,13 +426,13 @@ s32 pbDebugPrintPanel2(void) {
     list = dds3FontReqAllocDrawTag();
     sdfDrawTagLink(list,
         (u32)dds3PrimFrameRect(0x8290, 0x79A8, 0xFEFFFF, 0xC60, 0x1B0, 0x60000000, 0x40806020));
-    sdfPktInit(&packet, 0x82C0, 0x79C0, 0xFF0000, 0);
+    sdfDevSetPrintCB(&packet, 0x82C0, 0x79C0, 0xFF0000, 0);
     sdfDrawTagLink(list, (u32)sdfDevPrintfEx(&packet,
         "BLUR:        %s", dds3ScreenBlurFlag ? D_00436660 : D_00436668));
 
     y = 0x7A20;
     if (D_00452E80.editing == 0) {
-        sdfPktInit(&packet, 0x82C0, D_00452E80.selection * 0x60 + 0x7A20, 0xFF0000, 0);
+        sdfDevSetPrintCB(&packet, 0x82C0, D_00452E80.selection * 0x60 + 0x7A20, 0xFF0000, 0);
         D_00452E80.blink++;
         if (D_00452E80.blink < 32 || (D_00452E80.blink & 31) < 18) {
             sdfDrawTagLink(list, (u32)sdfDevPrintfEx(&packet, D_00436670));
@@ -440,14 +440,14 @@ s32 pbDebugPrintPanel2(void) {
     }
 
     for (row = 0; row != 3; row++) {
-        sdfPktInit(&packet, 0x82C0, y, 0xFF0000, 0);
+        sdfDevSetPrintCB(&packet, 0x82C0, y, 0xFF0000, 0);
         sdfDrawTagLink(list,
             (u32)sdfDevPrintfEx(&packet, D_00436678, D_003B4D38[row]));
         highlight = 0;
         if (D_00452E80.editing != 0 && row == D_00452E80.selection) {
             highlight = 6;
         }
-        sdfPktInit(&packet, 0x8800, y, 0xFF0000, highlight);
+        sdfDevSetPrintCB(&packet, 0x8800, y, 0xFF0000, highlight);
         switch (row) {
         case 0:
             sdfDrawTagLink(list,
@@ -595,24 +595,24 @@ s32 pbDebugPrintPanel3(void) {
     list = dds3FontReqAllocDrawTag();
     sdfDrawTagLink(list,
         (u32)dds3PrimFrameRect(0x8950, 0x79A8, 0xFEFFFF, 0x5A0, 0x210, 0x60000000, 0x40806020));
-    sdfPktInit(&packet, 0x8980, 0x79C0, 0xFF0000, 0);
+    sdfDevSetPrintCB(&packet, 0x8980, 0x79C0, 0xFF0000, 0);
     sdfDrawTagLink(list, (u32)sdfDevPrintfEx(&packet, D_004366B8));
     if (pbDebugPanel3X.editing == 0) {
-        sdfPktInit(&packet, 0x8980, pbDebugPanel3X.selection * 0x60 + 0x7A20, 0xFF0000, 0);
+        sdfDevSetPrintCB(&packet, 0x8980, pbDebugPanel3X.selection * 0x60 + 0x7A20, 0xFF0000, 0);
         pbDebugPanel3X.blink++;
         if (pbDebugPanel3X.blink < 32 || (pbDebugPanel3X.blink & 31) < 18) {
             sdfDrawTagLink(list, (u32)sdfDevPrintfEx(&packet, D_004366C0));
         }
     }
     for (row = 0; row != 4; row++) {
-        sdfPktInit(&packet, 0x8980, y, 0xFF0000, itfOverlayColorEditorRows[row].highlight);
+        sdfDevSetPrintCB(&packet, 0x8980, y, 0xFF0000, itfOverlayColorEditorRows[row].highlight);
         sdfDrawTagLink(list,
             (u32)sdfDevPrintfEx(&packet, D_004366C8, itfOverlayColorEditorRows[row].title));
         highlight = 0;
         if (pbDebugPanel3X.editing != 0 && row == pbDebugPanel3X.selection) {
             highlight = 6;
         }
-        sdfPktInit(&packet, 0x8C80, y, 0xFF0000, highlight);
+        sdfDevSetPrintCB(&packet, 0x8C80, y, 0xFF0000, highlight);
         if (row < 4) {
             sdfDrawTagLink(list,
                 (u32)sdfDevPrintfEx(&packet, D_004366D0, itfTestOverlayColor.channels[row]));

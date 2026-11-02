@@ -129,7 +129,7 @@ extern const sdfTexPacket_t * sdfTexGetPacket(const sdfTexHandle_t *texture);
 extern s32 sdfGrAllocPacketBuff(s32 size);
 extern s32 sdfTexGetPacketLength(const sdfTexHandle_t *texture);
 extern void sdfDrawTagLink(sdfDrawTag_t *list, u32 packet);
-extern void sdfAppendReferencePacket(sdfDrawTag_t *list, u32 packetAddress);
+extern void sdfDrawTagLinkRef(sdfDrawTag_t *list, u32 packetAddress);
 extern void sdfDrawTagInit(sdfDrawTag_t *list);
 
 void effSwordTrackDrawTex(EffMagatuhiValueWork *work) {
@@ -165,7 +165,7 @@ void effSwordTrackDrawTex(EffMagatuhiValueWork *work) {
     sdf3DMakeDirectRefPacket((DmaPacketHeader *)packet,
         (u32)sdfTexGetPacket(work->texture),
         sdfTexGetPacketLength((sdfTexHandle_t *)work->texture));
-    sdfAppendReferencePacket(list, packet);
+    sdfDrawTagLinkRef(list, packet);
     EE_MMI_UNIT_MATRIX(matrix);
     historyOffset = 0;
     packet = sdfGrAllocPacketBuff(0x38);

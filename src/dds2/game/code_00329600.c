@@ -220,7 +220,7 @@ void sdfMemGetInfo(SdfGeneralHeapStats *stats) {
 }
 
 /* Find the used heap block that contains `address`; NULL when the end marker is reached. */
-sdfMemHandle_t *sdfFindGeneralBlockContaining(s32 address) {
+sdfMemHandle_t *sdfMemSearchHandle(s32 address) {
     sdfMemHandle_t *block = sdfMemCB.head.next;
     sdfMemHandle_t *nextBlock;
 

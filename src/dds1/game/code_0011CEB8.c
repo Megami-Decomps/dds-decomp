@@ -150,7 +150,7 @@ Dds3FontNode *dds3CreateFontNode(s32 x, s32 y, const char *text) {
         x = (0x200 - glyph->advance) * 8;
     }
     frSetDrawPosition(glyph, x, y);
-    node = sdfAllocAndClearQuadwords(sizeof(*node));
+    node = sdfChipAllocZeroDirect(sizeof(*node));
     node->glyph = glyph;
     dds3FontReqListAdd(&node->owner, &dds3FontNodeVTable);
     return node;

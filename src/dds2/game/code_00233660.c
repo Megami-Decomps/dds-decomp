@@ -855,7 +855,7 @@ void mdlCreateEffectResrc_D3P(DevRequest *partList, EffNodeDescriptor *descripto
 }
 
 void mdlCreateEffectResrc_IPU(DevRequest *list, u8 *sourceAddress, sdfMemHandle_t *backingAllocation, s32 sourceSize) {
-    MdlObj *node = sdfAllocAndClearQuadwords(sizeof(*node));
+    MdlObj *node = sdfChipAllocZeroDirect(sizeof(*node));
     MdlPartEntry *entry = &((MdlPartEntry *)list->buffer)[list->usedCount];
 
     node->sourceSize = sourceSize;
@@ -915,7 +915,7 @@ void mdlEffectResrcListFree(DevRequest *partList) {
 /* Prepend a cleared, typed resource item to the owner's list. */
 dds3ModelEffectCtrlr_t *mdlCreateEffectCtrlr(
     dds3ModelHandle_t *owner, MdlResourceKind resourceKind, MdlMotionSlotIndex motionSlotIndex) {
-    dds3ModelEffectCtrlr_t *item = sdfAllocAndClearQuadwords(sizeof(dds3ModelEffectCtrlr_t));
+    dds3ModelEffectCtrlr_t *item = sdfChipAllocZeroDirect(sizeof(dds3ModelEffectCtrlr_t));
     dds3ModelEffectCtrlr_t *previousHead = owner->resourceItems;
     item->type = resourceKind;
     item->next = previousHead;
@@ -1379,7 +1379,7 @@ void mdlDrawViewerModeLabel(void) {
     s32 phase;
 
     mdlAppendViewerRectToDrawList(0x7150, 0x7948, 0xFF0080, 0xBA0, 0x90, 0);
-    sdfPktInit(&packet, 0x7180, 0x7960, 0xFF0080, 0);
+    sdfDevSetPrintCB(&packet, 0x7180, 0x7960, 0xFF0080, 0);
     sdfDrawTagLink(mdlViewerState.packetList, (u32)(sdfDevPrintfEx(&packet, D_00437060)));
     phase = mdlViewerState.taskPhase;
     if (phase == 0) {
@@ -1434,7 +1434,7 @@ void mdlDrawViewerModelAndMotionSummary(void) {
     void *formatted;
 
     mdlAppendViewerRectToDrawList(0x7E10, 0x8608, 0xFF0080, 0xEA0, 0x90, 0);
-    sdfPktInit(&packet, 0x7E40, 0x8620, 0xFF0080, 0);
+    sdfDevSetPrintCB(&packet, 0x7E40, 0x8620, 0xFF0080, 0);
 
     if ((displayMode = mdlGetViewerDisplayMode(&mdlViewerState)) == 0) {
         format = D_00421208;
@@ -1671,7 +1671,7 @@ void mdlDrawViewerAssetSelection(void) {
                                              basename);
     sdfDrawTagLink(mdlViewerState.packetList, (u32)formatted);
 
-    sdfPktInit(&packet, 0x8440, panelTop + mdlViewerState.selectedNodeId * 0x60,
+    sdfDevSetPrintCB(&packet, 0x8440, panelTop + mdlViewerState.selectedNodeId * 0x60,
                0xFF0080, mdlViewerState.selectionHighlightPhase < 0x14 && mdlViewerState.selectionCursor == 0 ? 4 : 0);
     formatted = sdfDevPrintfEx(&packet, D_00437070, mdlViewerState.selectedResourceGroup + 0x30);
     sdfDrawTagLink(mdlViewerState.packetList, (u32)formatted);
@@ -2230,7 +2230,7 @@ void mdlDrawViewerResourceMenu(void) {
         } else {
             style = enabled ? 0 : 8;
         }
-        sdfPktInit(&packet, 0x85C0, 0x7960 + row * 0x60, 0xFF0080, style);
+        sdfDevSetPrintCB(&packet, 0x85C0, 0x7960 + row * 0x60, 0xFF0080, style);
         sdfDrawTagLink(mdlViewerState.packetList,
             (u32)sdfDevPrintfEx(&packet, D_003C88D0[row]));
     }
@@ -2882,7 +2882,7 @@ void mdlDrawMapPositionRecords(dds3ModelHandle_t *resource) {
         s32 recordIndex = 0;
         sdfDrawTag_t *packetList = dds3FontReqAllocDrawTag();
         SdfMapPositionRecord *recordCursor = (SdfMapPositionRecord *)(
-            (SdfMapPositionChunkPrefix *)sdfChunkFindByTag(resource->inner, MDL_MAP_POSITION_TAG) + 1);
+            (SdfMapPositionChunkPrefix *)sdfModelGetExtraChunk(resource->inner, MDL_MAP_POSITION_TAG) + 1);
 
         do {
             SdfMapPositionRecord *currentRecord = recordCursor;
@@ -4065,3 +4065,4 @@ INCLUDE_SDATA(const s32, "game/code_00233660", D_004371D8);
 INCLUDE_SDATA(const s32, "game/code_00233660", D_004371E0);
 
 INCLUDE_SDATA(const s32, "game/code_00233660", evtPendingEventSelection);
+

@@ -3616,7 +3616,7 @@ void mnuEnableCampBadgeFade(u32 *flags) {
 }
 
 MenuList *mnuCreateListState(u32 owner, u32 visibleCount, s32 rowSpacing) {
-    MenuList *node = (MenuList *)sdfAllocAndClearQuadwords(sizeof(*node));
+    MenuList *node = (MenuList *)sdfChipAllocZeroDirect(sizeof(*node));
     node->id = owner;
     node->visibleCount = visibleCount;
     node->rowStep = rowSpacing * 8;
@@ -3665,7 +3665,7 @@ MenuListNode *mnuListAppendNode(list, text)
     MenuList *list;
     const void *text;
 {
-    MenuListNode *node = sdfAllocAndClearQuadwords(sizeof(*node));
+    MenuListNode *node = sdfChipAllocZeroDirect(sizeof(*node));
     s32 index = list->count;
     MenuListNode *last;
 
@@ -3737,7 +3737,7 @@ MenuListNode *mnuInsertListNodeRelativeToAnchor(MenuList *list, MenuListNode *an
         return node;
     }
 
-    node = sdfAllocAndClearQuadwords(sizeof(MenuListNode));
+    node = sdfChipAllocZeroDirect(sizeof(MenuListNode));
     node->text = text;
     if (options & MNU_LIST_INSERT_AFTER_ANCHOR) {
         node->prev = anchor;
@@ -4500,3 +4500,4 @@ INCLUDE_SDATA(const s32, "game/code_002B0278", D_00437C20);
 INCLUDE_SDATA(const s32, "game/code_002B0278", D_00437C28);
 
 INCLUDE_SDATA(const s32, "game/code_002B0278", D_00437C30);
+

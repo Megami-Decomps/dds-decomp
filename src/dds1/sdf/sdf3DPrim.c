@@ -56,7 +56,7 @@ void sdf3DPrimLinkResetTm(sdfDrawTag_t *packetList,
     referencePacket[0] = ((u64)((u32)D_00398580 & SDF_DMA_ADDRESS_MASK) << 32) | 0x30000008;
     referencePacket[1] = 0x6C07C000ULL << 32;
     *(u128 *)&referencePacket[2] = 0;
-    sdfAppendReferencePacket(packetList, (u32)referencePacket);
+    sdfDrawTagLinkRef(packetList, (u32)referencePacket);
 }
 
 /* vu0 routine: store the resident matrix and inverse-column-length scaled rows, then VIF ITOP/MSCAL. */
@@ -95,7 +95,7 @@ void sdf3DPrimLinkMat(sdfDrawTag_t *packetList, sdfMat_t *asset,
     referencePacket = (u64 *)allocatePacket(0x20);
     sdfMatMakePacket(asset, (struct SdfDmaTagHeader *)referencePacket, (s8)sdfFrameId);
     *(u128 *)&referencePacket[2] = 0;
-    sdfAppendReferencePacket(packetList, (u32)referencePacket);
+    sdfDrawTagLinkRef(packetList, (u32)referencePacket);
 }
 
 extern f32 sdfFaceDivSoften;

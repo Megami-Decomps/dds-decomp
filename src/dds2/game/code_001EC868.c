@@ -11173,7 +11173,7 @@ s32 sndHasActiveActor(void) {
 
 /* Allocate a cleared resource node and prepend it to the runtime's resource list. */
 SoundResourceNode *sndAllocResourceNode(void) {
-    SoundResourceNode *node = sdfAllocAndClearQuadwords(sizeof(*node));
+    SoundResourceNode *node = sdfChipAllocZeroDirect(sizeof(*node));
     BtlState *work;
     node->referenceCount = 0;
     node->activeCount = 0;
@@ -11326,7 +11326,7 @@ s32 btlButtonMaskToIndex(u32 mask) {
 }
 
 SoundResourceLink *sndAllocResourceLink(BtlUnit *owner) {
-    SoundResourceLink *link = sdfAllocAndClearQuadwords(sizeof(SoundResourceLink));
+    SoundResourceLink *link = sdfChipAllocZeroDirect(sizeof(SoundResourceLink));
     link->owner = owner;
     link->effectHandle = 0;
     link->opaque0C = 0;
@@ -11528,7 +11528,7 @@ void btlMarkTaskReady(SoundResourceLink *resource) {
 }
 
 SoundLink *sndAllocLink(BtlUnit *owner) {
-    SoundLink *link = sdfAllocAndClearQuadwords(sizeof(*link));
+    SoundLink *link = sdfChipAllocZeroDirect(sizeof(*link));
     link->owner = owner;
     link->effectHandle = 0;
     link->commandEffectId = 0;
@@ -11776,7 +11776,7 @@ void btlCreateIndexedSoundResourceNode(s32 slotIndex, SoundMixer *source) {
 #include "btl_sound_handle_node.h"
 
 SoundHandleNode *sndCreateSystemEffectHandle(struct dds3ModelHandle_t *actor, s32 index) {
-    SoundHandleNode *node = sdfAllocAndClearQuadwords(sizeof(*node));
+    SoundHandleNode *node = sdfChipAllocZeroDirect(sizeof(*node));
     BattleSoundArchiveEntry *entry = &D_003BDE18[index];
     node->actor = actor;
     node->queue = fileCloneQueueEntries(entry->archiveData);
@@ -12087,7 +12087,7 @@ s32 sndResolveResourceId(BtlUnit *actor, s32 actionRecordIndex) {
 
 /* Allocate a cleared active-sound node and prepend it to its independent list. */
 ActiveSoundNode *sndAllocListNode(void) {
-    ActiveSoundNode *node = sdfAllocAndClearQuadwords(sizeof(*node));
+    ActiveSoundNode *node = sdfChipAllocZeroDirect(sizeof(*node));
     BtlState *work = (BtlState *)btlGetRuntime();
     node->previous = 0;
     if (work->soundList != 0) {
@@ -12213,7 +12213,7 @@ SoundSlotOwner *sndAcquireSlotOwner(s32 category, s32 id) {
         owner->work.refCount++;
         return owner;
     }
-    owner = sdfAllocAndClearQuadwords(0x108);
+    owner = sdfChipAllocZeroDirect(0x108);
     owner->category = category;
     owner->work.id = id;
     owner->work.refCount = 1;

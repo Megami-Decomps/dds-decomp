@@ -24,7 +24,7 @@
 #include "btl.h"
 #include "sdf_debug_api.h"
 
-extern SdfFileCommandQueueResult sdfFileCmdRequestFileSize(sdfFileCmdHandle_t *state);
+extern SdfFileCommandQueueResult sdfFileCmdFileSize(sdfFileCmdHandle_t *state);
 
 #define SDF_DEV_WORKER_COUNT 4
 
@@ -656,7 +656,7 @@ SdfFileWorkerIndex sdfFileCmdAnalyzeFileName(const char *path, char **resolvedPa
 /* Allocate a request state and retain the callback's opaque context pointer. */
 sdfFileCmdHandle_t *sdfFileCmdNewHandle(char *resolvedPath, SdfFileWorkerIndex workerIndex, s32 operation,
                         void (*callback)(sdfFileCmdHandle_t *, SdfDevEvent, s32, s32, s32), void *callbackContext) {
-    sdfFileCmdHandle_t *state = (sdfFileCmdHandle_t *)sdfAllocAndClearQuadwords(SDF_DEV_STATE_BYTES);
+    sdfFileCmdHandle_t *state = (sdfFileCmdHandle_t *)sdfChipAllocZeroDirect(SDF_DEV_STATE_BYTES);
     state->resolvedPath = resolvedPath;
     state->workerIndex = workerIndex;
     state->operation = operation;
@@ -711,7 +711,7 @@ s32 sdfFileCmdSeek(sdfFileCmdHandle_t *state, s32 seekOffset, s32 seekOrigin) {
 }
 
 /* Queue a size query for an active request and report queue acceptance. */
-SdfFileCommandQueueResult sdfFileCmdRequestFileSize(sdfFileCmdHandle_t *state) {
+SdfFileCommandQueueResult sdfFileCmdFileSize(sdfFileCmdHandle_t *state) {
     if (state->state != SDF_DEV_STATE_ACTIVE) {
         return SDF_FILE_COMMAND_QUEUE_RESULT_NOT_QUEUED;
     }

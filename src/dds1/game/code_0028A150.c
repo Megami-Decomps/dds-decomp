@@ -5561,7 +5561,7 @@ void camAimRotation(CamAim *obj, void *dst)
 }
 
 LoadObj *fileLoadObjectCreate(void *owner) {
-    LoadObj *obj = sdfAllocAndClearQuadwords(sizeof(LoadObj));
+    LoadObj *obj = sdfChipAllocZeroDirect(sizeof(LoadObj));
     obj->owner = owner;
     obj->color = 0x80808080;
     obj->scale = 1.0f;
@@ -7685,3 +7685,4 @@ INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC930);
 INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC938);
 
 INCLUDE_SDATA(const s32, "game/code_0028A150", D_003BC940);
+

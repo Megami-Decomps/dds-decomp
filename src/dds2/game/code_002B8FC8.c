@@ -854,7 +854,7 @@ void mnuCallInitWide(s32 x, s32 y, s32 depth, s32 menu, s32 drawArg) {
 /* Allocate a zeroed window and its list; the last two arguments configure list rows. */
 MenuWindowContainer *mnuCreateWindowContainer(s32 id, s32 width, s32 height,
                                                 s32 visibleCount, s32 rowSpacing) {
-    MenuWindowContainer *window = (MenuWindowContainer *)sdfAllocAndClearQuadwords(MNU_WINDOW_CONTAINER_BYTES);
+    MenuWindowContainer *window = (MenuWindowContainer *)sdfChipAllocZeroDirect(MNU_WINDOW_CONTAINER_BYTES);
     MenuList *list;
     window->width = width;
     window->height = height;
@@ -1186,7 +1186,7 @@ MenuIconState *mnuCreatePanelIconState(u32 mode, s32 resource, s32 material) {
     s32 index;
     s32 first;
 
-    panel = sdfAllocAndClearQuadwords(sizeof(MenuIconState));
+    panel = sdfChipAllocZeroDirect(sizeof(MenuIconState));
     panel->kind = mode;
     switch (mode) {
     case 0:
@@ -1558,7 +1558,7 @@ void mnuSortItems(MenuList *menu, s32 keyIndex, s32 ascending) {
 void mnuAllocateListEntries(s32 *list) {
     u32 slotIndex;
     for (slotIndex = 0; slotIndex < MNU_FADING_SLOT_COUNT; slotIndex++) {
-        list[slotIndex + 1] = sdfAllocAndClearQuadwords(MNU_FADING_SLOT_BYTES);
+        list[slotIndex + 1] = sdfChipAllocZeroDirect(MNU_FADING_SLOT_BYTES);
     }
 }
 

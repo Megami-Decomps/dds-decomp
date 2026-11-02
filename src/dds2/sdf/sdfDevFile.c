@@ -99,7 +99,7 @@ DevRequest *sndLoadNamedOffsetResourceList(const char *name) {
 }
 
 /* Relocate words in the payload and return its address. */
-u8 *sdfRelocatePackedResourcePayload(SdfPackedRelocationHeader *resource) {
+u8 *sdfFixupModelBinary(SdfPackedRelocationHeader *resource) {
     u8 *payload = (u8 *)resource + SDF_PACKED_RESOURCE_HEADER_BYTES;
 
     sdfAddressResolver((s32 *)payload, (u32)payload,
@@ -111,12 +111,12 @@ u8 *sdfRelocatePackedResourcePayload(SdfPackedRelocationHeader *resource) {
 sdfMemHandle_t *sdfLoadPackedResourceWithRelocatedPayload(const char *name, u8 **outPayload) {
     u32 info[4];
     sdfMemHandle_t *buffer = sdfDevLoadFileEx(name, info, 0);
-    *outPayload = sdfRelocatePackedResourcePayload((SdfPackedRelocationHeader *)(u32)info[0]);
+    *outPayload = sdfFixupModelBinary((SdfPackedRelocationHeader *)(u32)info[0]);
     return buffer;
 }
 
 /* This entry point uses the same payload-relative relocation table. */
-u8 *sdfRelocatePackedResourceWordsFromHeader(SdfPackedRelocationHeader *resource) {
+u8 *sdfFixupMotionBinary(SdfPackedRelocationHeader *resource) {
     u8 *payload = (u8 *)resource + SDF_PACKED_RESOURCE_HEADER_BYTES;
 
     sdfAddressResolver((s32 *)payload, (u32)payload,
@@ -128,6 +128,6 @@ u8 *sdfRelocatePackedResourceWordsFromHeader(SdfPackedRelocationHeader *resource
 sdfMemHandle_t *sdfReadPackedResourceAndRelocateHeader(const char *name, u8 **outPayload) {
     u32 info[4];
     sdfMemHandle_t *buffer = sdfDevLoadFileEx(name, info, 0);
-    *outPayload = sdfRelocatePackedResourceWordsFromHeader((SdfPackedRelocationHeader *)(u32)info[0]);
+    *outPayload = sdfFixupMotionBinary((SdfPackedRelocationHeader *)(u32)info[0]);
     return buffer;
 }

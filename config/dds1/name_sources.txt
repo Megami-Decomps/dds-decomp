@@ -902,7 +902,9 @@
 0x0011D6B0	dds3PrimLine3D	inferred	SMT3HD name via SLUS_209.11 0x00117E08, unique-masked-hash; was func_0011D6B0
 0x0011D998	dds3DebugFloatEditEx	inferred	HD original name; native callback/dispatcher role and paired Nocturne implementation establish identity; was fldStepValueByPad.
 0x0011DAA0	dds3DebugFloatEdit	inferred	SMT3HD name via SLUS_209.11 0x001181F8, shared-hash-in-run; was fldStepValueByCurrentPad
+0x0011DAC0	dds3DebugIntEditEx	inferred	HD original name; native callback/dispatcher role and paired Nocturne implementation establish identity; was fldStepIntByPad.
 0x0011DC50	dds3DebugIntEdit	inferred	SMT3HD name via SLUS_209.11 0x001183A8, reloc-identical; was fldAdjustIntegerUsingMainPad
+0x0011DC70	dds3DebugColorEditEx	inferred	HD original name; native callback/dispatcher role and paired Nocturne implementation establish identity; was fldStepColorChannelByPad.
 0x0011DE00	dds3DebugColorEdit	inferred	SMT3HD name via SLUS_209.11 0x00118558, reloc-identical; was fldStepColorChannelByCurrentPad
 0x0011DE20	dds3MenuStepValue	inferred	SMT3HD name via SLUS_209.11 0x00118578, reloc-identical; was fldFormatSecondsText
 0x0011DEB0	dds3PrimDebugTextBox	inferred	SMT3HD name via SLUS_209.11 0x00118608, reloc-identical; was fldDrawRgbEditor
@@ -8143,7 +8145,7 @@
 0x002CFDF0	sdfChipAllocPageGrow	inferred	SMT3HD name via SLUS_209.11 0x002A8A30, reloc-identical; was sdfAllocFreshChipCell
 0x002CFE70	sdfChipAllocNewPage	inferred	SMT3HD name via SLUS_209.11 0x002A8AB0, reloc-identical; was sdfAllocFromNewChipPage
 0x002CFEB8	sdfChipAllocDirect	inferred	confidence=high; matched-C; src/dds1/game/code_002CFC18.c:173:func_002CFEB8; Allocates a byte-sized block from power-of-two size classes through cursor slots while preserving interrupt state; widely used core allocator.; source=fresh-R_Names31-QP13 [names_qp13.tsv]
-0x002CFF68	sdfAllocAndClearQuadwords	inferred	Allocates requested bytes and zeroes rounded-up quadwords. [names_reviewed6.tsv]
+0x002CFF68	sdfChipAllocZeroDirect	inferred	SMT3HD name via SLUS_209.11 0x002A8BA8, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfAllocAndClearQuadwords
 0x002CFF98	sdfChipFreeDirect	inferred	Retires block from slot, updates owner links or free list with interrupts preserved. [names_reviewed6.tsv]
 0x002D00B8	sdfChipFreeDelayedDirect	inferred	SMT3HD name via SLUS_209.11 0x002A8CF8, shared-hash-in-run; was sdfQueuePendingChipRelease
 0x002D00D8	sdfChipIsInRange	inferred	Tests whether an address lies in [sdfChipPageTop, sdfChipPageEnd); SMT3HD equivalent sdfChipCheck at SLUS_209.11 0x002A8D18 is reloc-identical.
@@ -8157,7 +8159,7 @@
 0x002D03F0	sdfMemGetPtr	inferred	SMT3HD name via SLUS_209.11 0x002A9030, shared-hash-in-run; was sdfMemoryGetBlockAddress
 0x002D03F8	sdfMemAllocDirect	inferred	confidence=high; matched-C; src/dds1/sdf/sdfMemory.c:51:func_002D03F8; Performs first-fit general-heap allocation with one-hundred-twenty-eight-byte rounding and block splitting; invokes the exhaustion hook at the end marker.; source=names_pending_main.tsv:127 [names_qp11.tsv]
 0x002D0518	sdfMemAllocFromTailDirect	inferred	SMT3HD name via SLUS_209.11 0x002A9158, reloc-identical; was sdfAllocGeneralBlockHigh
-0x002D0648	sdfMemTryAllocDirect	inferred	First-fit general-heap allocation returns NULL at the end marker without invoking the out-of-memory hook.
+0x002D0648	sdfMemAlloc2Direct	inferred	SMT3HD name via SLUS_209.11 0x002A9288, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfMemTryAllocDirect
 0x002D0750	sdfMemReallocRecord	inferred	SMT3HD name via SLUS_209.11 0x002A9390, reloc-identical; was sdfResizeResourceAllocation
 0x002D0900	sdfMemFreeMerge	inferred	SMT3HD name via SLUS_209.11 0x002A9540, byte-identical; was sdfSkipNextListNode
 0x002D0918	sdfMemFreeDirect	inferred	confidence=high; matched-C; src/dds1/game/code_002D0750.c:28:func_002D0918; Releases an allocation under the interrupt lock: coalesces adjacent unused blocks or marks the released block unused and clears its reference count; restores interrupts only when previously enabled.; source=fresh-R_Names31-today [names_qp11.tsv]
@@ -8168,7 +8170,7 @@
 0x002D0A60	sdfMemUnlock	inferred	Decrements the allocation reference count unless it is already zero. [names_reviewed8.tsv]
 0x002D0A80	sdfMemGetHandleByPtr	inferred	SMT3HD name via SLUS_209.11 0x002A96C0, reloc-identical; was sdfFindGeneralBlockByAddress
 0x002D0B50	sdfMemGetInfo	inferred	SMT3HD name via SLUS_209.11 0x002A9790, reloc-identical; was sdfGetGeneralHeapStats
-0x002D0BF8	sdfFindGeneralBlockContaining	inferred	confidence=high; matched-C; src/dds1/game/code_002D0750.c:130:func_002D0BF8; Returns the used general-heap block containing the supplied address in its half-open range, or NULL when the end marker is reached.; source=names_pending_main.tsv:131 [names_qp11.tsv]
+0x002D0BF8	sdfMemSearchHandle	inferred	SMT3HD name via SLUS_209.11 0x002A9838, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfFindGeneralBlockContaining
 0x002D0C68	SdfIopFileRpc	inferred	SMT3HD name via SLUS_209.11 0x002A98A8, reloc-identical; was sdfSendNamedResourceRequest
 0x002D0D70	sdfLoadModulesAndBindNamedResourceRpc	inferred	confidence=high; loads optional then required IOP modules and retries named-resource RPC binding with timer waits; DDS2 twin 0x00329C20. [Namer1 naming batch 43]
 0x002D0E30	sdfGrSetFrameSetMode	inferred	Selects the display-mode row, initializes its dimensions and formats, and optionally clears the buffer pointers.
@@ -8185,14 +8187,14 @@
 0x002D1380	sdfDrawThread	inferred	SMT3HD name via SLUS_209.11 0x002A9FF8, reloc-identical; was sdfRunGraphicsTransferWorker
 0x002D14C8	sdfServiceGraphicsBuffers	inferred	R_Names32
 0x002D1590	sdfGrInit	inferred	SMT3HD name via SLUS_209.11 0x002AA1F0, reloc-identical; was sdfInitializeGraphicsWorkers
-0x002D1698	sdfWaitAndSelectBuffer	inferred	spins on vsync flag D_003BD302 then selects the double buffer
+0x002D1698	sdfGrInitNewFrame	inferred	SMT3HD name via SLUS_209.11 0x002AA2F8, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfWaitAndSelectBuffer
 0x002D16F0	sdfGsMemGetBitCount	inferred	SMT3HD name via SLUS_209.11 0x002AA350, reloc-identical; was sdfFormatBitsPerPixelA
 0x002D1740	sdfGetTexelBitCount	inferred	SMT3HD name via SLUS_209.11 0x002AA3A0, reloc-identical; was sdfFormatBitsPerPixelB
 0x002D1798	sdfGsMemCheckHandle	inferred	SMT3HD name via SLUS_209.11 0x002AA3F8, reloc-identical; was sdfTexListContains
 0x002D17D8	sdfGsMemAllocFromHead	inferred	SMT3HD name via SLUS_209.11 0x002AA438, reloc-identical; was sdfTexAllocHeadLow
 0x002D18F8	sdfGsMemAllocFromTail	inferred	SMT3HD name via SLUS_209.11 0x002AA558, reloc-identical; was sdfTexAllocHeadHigh
 0x002D1A18	sdfGsMemAllocRect	inferred	SMT3HD name via SLUS_209.11 0x002AA678, reloc-identical; was sdfTexAllocateHeadForDimensions
-0x002D1AB8	sdfGsMemAbsorbFreePredecessor	inferred	code_002D10B0.c and code_00329F60.c absorb the immediately preceding free range into the supplied range and release its record; prior names: sdfGsMemCheckMerge and sdfCoalesceUnusedTextureBlocks
+0x002D1AB8	sdfGsMemCheckMerge	inferred	SMT3HD name via SLUS_209.11 0x002AA718, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfGsMemAbsorbFreePredecessor
 0x002D1B28	sdfGsMemCheckLinkConsistence	inferred	SMT3HD name via SLUS_209.11 0x002AA788, reloc-identical; was sdfWalkTextureListEndpoints
 0x002D1B90	sdfGsMemFree	inferred	SMT3HD name via SLUS_209.11 0x002AA7F0, reloc-identical; was sdfUpdateTextureHeadsWithInterruptsMasked
 0x002D1C08	sdfGsMemFreeDelayed	inferred	SMT3HD name via SLUS_209.11 0x002AA868, shared-hash-in-run; was sdfTexQueuePendingWork
@@ -8271,6 +8273,7 @@
 0x002D4010	sdfDrawTagInit	inferred	SMT3HD name via SLUS_209.11 0x002ACB90, byte-identical; was sdfInitPacketList
 0x002D4038	sdfDrawTagLink	inferred	SMT3HD name via SLUS_209.11 0x002ACBB8, byte-identical; was sdfAppendPacket
 0x002D4070	sdfAppendPacketRange	inferred	Links a packet at the list end but records a separately supplied end pointer.
+0x002D40A8	sdfDrawTagLinkRef	inferred	SMT3HD name via SLUS_209.11 0x002ACC28, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfAppendReferencePacket
 0x002D40E8	sdfDrawTagLinkRefGif	inferred	SMT3HD name via SLUS_209.11 0x002ACC68, byte-identical; was sdfAppendDmaTagToList
 0x002D4120	sdfDrawTagLinkCall	inferred	SMT3HD name via SLUS_209.11 0x002ACCA0, byte-identical; was sdfAppendCallPacket
 0x002D4160	sdfGrOtFuncLinkToHead	inferred	SMT3HD name via SLUS_209.11 0x002ACCE0, reloc-identical; was sdfPrependPacketList
@@ -8296,8 +8299,8 @@
 0x002D49E8	sdfGrStdDrawEnvPredraw	inferred	SMT3HD name via SLUS_209.11 0x002AD568, reloc-identical; was sdfRefreshSceneNodePackets
 0x002D4BA0	sdfGrSetStdDrawEnv	inferred	sets view box, draw packet and GS register words [names_M37_SmallSweep6.tsv]
 0x002D4C40	sdfGrLinkStdDrawEnv	inferred	SMT3HD name via SLUS_209.11 0x002AD7C0, reloc-identical; was sdfAppendLinkedPacketPayload
-0x002D4C80	sdfBuildMaskedFrameRegisterReference	inferred	Reference FRAME_1/2 at scene+0x180/0x190; native refresh writes FBMSK 0x00FFFFFF and register IDs there. DDS2 twin 0x0032DB30. [Namer1 batch 34, high]
-0x002D4CC8	sdfBuildFrameRegisterReference	inferred	Reference unmasked FRAME_1/2 at scene+0x70/0xB0, established by context layout and frame/depth builder; DDS2 twin 0x0032DB78. [Namer1 batch 34, high]
+0x002D4C80	sdfGrSetFrameMaskRGB	inferred	SMT3HD name via SLUS_209.11 0x002AD800, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfBuildMaskedFrameRegisterReference
+0x002D4CC8	sdfGrSetFrameMaskReset	inferred	SMT3HD name via SLUS_209.11 0x002AD848, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfBuildFrameRegisterReference
 0x002D4D10	sdfGrLinkDispFrameTex	inferred	SMT3HD name via SLUS_209.11 0x002AD890, reloc-identical; was sdfAppendDmaPrimary
 0x002D4D70	sdfGrLinkDrawFrameTex	inferred	SMT3HD name via SLUS_209.11 0x002AD8F0, reloc-identical; was sdfAppendDmaSecondary
 0x002D4DD0	sdfGrFramePacketPredraw	inferred	Packet-builder callback selects FRAME/ZBUF context registers and writes packed frame/depth values for the selected graph buffer.
@@ -8390,7 +8393,7 @@
 0x002D8B20	sdfModelEvalNode	inferred	SMT3HD name via SLUS_209.11 0x002B16A0, reloc-identical; was sdfModelUpdateDrawNodeTransforms
 0x002D8C00	sdfModelEvalTm2	inferred	SMT3HD name via SLUS_209.11 0x002B1780, reloc-identical; was sdfModelUpdateRootTransforms
 0x002D8C68	sdfModelEvalTm	inferred	SMT3HD name via SLUS_209.11 0x002B17E8, reloc-identical; was sdfModelUpdateCurrentFrameTransforms
-0x002D8C88	sdfStoreMessageWordsAndNotifyConsumer	inferred	Stores four message words and invokes the consumer with the second word. [names_reviewed17.tsv]
+0x002D8C88	sdfModelOtInit	inferred	SMT3HD name via SLUS_209.11 0x002B1808, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfStoreMessageWordsAndNotifyConsumer
 0x002D8CB8	sdfModelCheckBounds	inferred	SMT3HD name via SLUS_209.11 0x002B1838, byte-identical; was sdfModelTestTransformedClipVectors
 0x002D8DD0	sdfModelTempPacketLinkOt	inferred	SMT3HD name via SLUS_209.11 0x002B1950, reloc-identical; was sdfModelBuildVisibleNodePackets
 0x002D9238	sdfModelLinkOt	inferred	HD original name, shared by audited native identity; was sdfModelBuildNodeResourcePackets.
@@ -8399,7 +8402,7 @@
 0x002D99B0	sdfModelSetDrawEnv	inferred	SMT3HD name via SLUS_209.11 0x002B24D0, reloc-identical; was sdfInitializeDrawPacketGroups
 0x002D9A70	sdfModelDrawEnvLinkOt	inferred	SMT3HD name via SLUS_209.11 0x002B2590, byte-identical; was sdfSubmitDrawPacketGroups
 0x002D9B08	sdfChunkFindById	inferred	searches chunk list for entry id, returns entry or NULL
-0x002D9B50	sdfChunkFindByTag	inferred	finds chunk entry by tag via owner's unk90 chunk
+0x002D9B50	sdfModelGetExtraChunk	inferred	SMT3HD name via SLUS_209.11 0x002B2670, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfChunkFindByTag
 0x002D9B68	sdfModelGetNodeIndexByName	inferred	SMT3HD name via SLUS_209.11 0x002B2688, reloc-identical; was sdfNamedChunkFindId
 0x002D9C28	sdfModelGetNodeName	inferred	SMT3HD name via SLUS_209.11 0x002B2748, reloc-identical; was sdfNamedChunkGetNameById
 0x002D9CC8	sdfModelGetMarkPosCount	inferred	SMT3HD name via SLUS_209.11 0x002B27E8, reloc-identical; was sdfCountMapPositionRecords
@@ -8706,7 +8709,7 @@
 0x002E4908	sdfDevPrintfEx	inferred	SMT3HD name via SLUS_209.11 0x002BD220, shared-hash-in-run; was sdfFormatSifPacket
 0x002E4960	sdfDevPrintf	inferred	SMT3HD name via SLUS_209.11 0x002BD278, reloc-identical; was sdfCreateFormattedSifCommand
 0x002E49E8	sdfPktSetCmd	inferred	sets packet +0xC from sdfDevConsColorTable table by index
-0x002E4A00	sdfPktInit	inferred	inits 4-word SIF command packet fields then table lookup for +0xC via 49E8
+0x002E4A00	sdfDevSetPrintCB	inferred	SMT3HD name via SLUS_209.11 0x002BD318, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfPktInit
 0x002E4A28	sdfPrintRpcFunc	inferred	SMT3HD name via SLUS_209.11 0x002BD340, reloc-identical; was sdfRpcBufHandler
 0x002E4A80	sdfPrintRpcThread	inferred	SMT3HD name via SLUS_209.11 0x002BD398, reloc-identical; was sdfDevStartRpcServer
 0x002E4AE0	sdfStartDevRpcServerAndBindClient	inferred	Starts the development RPC server thread, polls sceSifMBindRpc until its client has a remote server, then marks the client bound. [names_reviewed18.tsv]
@@ -8759,7 +8762,7 @@
 0x002E6BA8	sdfFileCmdReadOpen	inferred	resolves resource, creates mode-one sdfFileCmdHandle_t and submits it
 0x002E6C10	sdfFileCmdWriteOpen	inferred	resolves resource and creates a mode-two sdfFileCmdHandle_t with default option
 0x002E6C90	sdfFileCmdSeek	inferred	Sets operation three and signals the selected device worker semaphore when the state is active.
-0x002E6CF0	sdfFileCmdRequestFileSize	inferred	Queues the file-size control opcode on an active worker state. [names_reviewed8.tsv]
+0x002E6CF0	sdfFileCmdFileSize	inferred	SMT3HD name via SLUS_209.11 0x002BF4F0, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfFileCmdRequestFileSize
 0x002E6D48	sdfFileCmdRead	inferred	dev request operation 5 with data+extra
 0x002E6DA8	sdfFileCmdWrite	inferred	dev request operation 6 with data+extra
 0x002E6E08	sdfFileCmdClearError	inferred	Byte-identical dds2 twin 0x0033FCB0; Changes a device state from 9 to 7 and clears its previous result; other device operations require state 7. [names_conflicts.tsv]
@@ -8773,7 +8776,7 @@
 0x002E70B0	sdfFileCmdThreadCheckPrio	inferred	Counts down the priority override and restores device thread priorities on expiration.
 0x002E70F0	sdfFileCmdStartThread	inferred	Creates the selected worker semaphore and starts its thread only when its handle is not already running; worker slot three has an alternate entry point. [names_reviewed18.tsv]
 0x002E71A0	sdfPowerOffLoop	inferred	infinite loop: WaitSema, two 3110C8 RPCs (0x5003/0x4806), sceCdPowerOff with stack status word
-0x002E7210	sdfPowerOffInterruptCallback	inferred	confidence=high; matched-C; src/dds1/game/code_002E4720.c:1000:func_002E7210; Interrupt-safe semaphore callback registered alongside the power-off thread; wakes its semaphore without performing shutdown in interrupt context.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
+0x002E7210	sdfHddPowerOffHandler	inferred	SMT3HD name via SLUS_209.11 0x002BFA20, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfPowerOffInterruptCallback
 0x002E7228	sdfDevInitializeHddPfsDebugMode	inferred	confidence=high; matched-C; Resets PFS debug mode, loads dev/ATAD/HDD/PFS modules, sets power-off semaphore/thread/callback, mounts hdd0 path at native pfs0 and enables debug mode. DDS2 twin 003400D0. Namer1 batch 17.
 0x002E7370	sdfDev9LoadModule	inferred	SMT3HD name via SLUS_209.11 0x002BFBD8, reloc-identical; was sdfLoadDevModule
 0x002E7480	sdfZeroMemQuad	inferred	SMT3HD name via SLUS_209.11 0x002BFCE8, shared-hash-in-run; was sdfClearQuadwords
@@ -8834,7 +8837,7 @@
 0x002E8EE8	sdfSndLoadBDFile	inferred	SMT3HD name via SLUS_209.11 0x002C1848, reloc-identical; was sndSubmitTextCommandPayloadWithCommandBits60
 0x002E8F30	sdfSndLoadSQFile	inferred	SMT3HD name via SLUS_209.11 0x002C1890, reloc-identical; was sndSubmitTextCommandPayloadWithCommandBits80
 0x002E8F78	p2sdPlaySE	inferred	SMT3HD name via SLUS_209.11 0x002C18D8, reloc-identical; was sndSetSequenceVolumePan
-0x002E8FD8	sndSetSpatialSequenceVolumePan	inferred	Normalizes the listener-relative angle, derives sequence pan and angle-based volume, attenuates for distance above one, then sends both through p2sdPlaySE; DDS1/DDS2 paired implementation.
+0x002E8FD8	p2sdPlaySeDeg	inferred	SMT3HD name via SLUS_209.11 0x002C1938, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sndSetSpatialSequenceVolumePan
 0x002E9140	p2sdPlaySe3DEx	inferred	SMT3HD name via SLUS_209.11 0x002C1AA0, reloc-identical; was sndSendSpatialPosition
 0x002E9198	p2sdSetStandPos	inferred	SMT3HD name via SLUS_209.11 0x002C1AF8, unique-masked-hash; was sndUpdateScaledListenerState
 0x002E92C0	sndFindPackedTrackLoadStatus	inferred	confidence=high; src/dds1/game/code_002E9140.c:func_002E92C0; Synchronizes sound state, searches track slots by the packed high-word id, and distinguishes a loaded slot from the pending id. [names_qp9.tsv]
@@ -8883,9 +8886,9 @@
 0x002EB040	sdfLoadNamedResourceAndReleaseLookupHandle	inferred	Looks up named resource data, resolves its resource address and releases the lookup handle. [names_reviewed10.tsv]
 0x002EB090	sdfTexSetTB	inferred	SMT3HD name via SLUS_209.11 0x002C3798, reloc-identical; was sndBuildResourceHandleListFromOffsets
 0x002EB118	sndLoadNamedOffsetResourceList	inferred	Looks up named data, builds a sound resource list and releases the lookup handle. [names_reviewed10.tsv]
-0x002EB168	sdfRelocatePackedResourcePayload	inferred	Skips the packed header, applies relocation words and returns the payload pointer. [names_reviewed14.tsv]
+0x002EB168	sdfFixupModelBinary	inferred	SMT3HD name via SLUS_209.11 0x002C3888, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfRelocatePackedResourcePayload
 0x002EB1A8	sdfLoadPackedResourceWithRelocatedPayload	inferred	Loads a named resource, relocates its payload and returns both handles. [names_reviewed14.tsv]
-0x002EB1F0	sdfRelocatePackedResourceWordsFromHeader	inferred	Reads packed relocation range from the resource header and relocates its payload. [names_reviewed17.tsv]
+0x002EB1F0	sdfFixupMotionBinary	inferred	SMT3HD name via SLUS_209.11 0x002C3928, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfRelocatePackedResourceWordsFromHeader
 0x002EB278	sdfAddressResolver	inferred	SMT3HD name via SLUS_209.11 0x002C39C8, byte-identical; was sdfRelocatePackedResourceWords
 0x002EB360	sdfIpuDetachQueue	inferred	SMT3HD name via SLUS_209.11 0x002C3AB0, reloc-identical; was sdfStreamNodeUnlink
 0x002EB3F0	sdfIpuAttachQueue	inferred	SMT3HD name via SLUS_209.11 0x002C3B40, reloc-identical; was sdfStreamNodeAppend
@@ -8913,9 +8916,9 @@
 0x002EC4D8	sdfIpuFinishActiveFrame	inferred	SMT3HD name via SLUS_209.11 0x002C4C28, reloc-identical; was sdfAdvanceBufferedPlayback
 0x002EC560	sdfIpuSetChainTag	inferred	SMT3HD name via SLUS_209.11 0x002C4CB0, reloc-identical; was sdfSubmitBufferedPlayback
 0x002EC5E0	sdfAdvanceStreamPlayback	inferred	Called by the movie scheduler with a cadence; retries deferred input DMA, submits buffered frames on phase transitions, advances playback cadence, and refills active feeds.
-0x002EC748	sdfSoundInitAndAppendNode	inferred	Initializes a sound node, stores the caller value, and appends it to the active-node list.
+0x002EC748	sdfIpuStartDecodeTask	inferred	SMT3HD name via SLUS_209.11 0x002C4E78, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfSoundInitAndAppendNode
 0x002EC780	sdfIpuSetOutputTex	inferred	SMT3HD name via SLUS_209.11 0x002C4EB0, reloc-identical; was sdfStreamCreateWithParams
-0x002EC818	sdfSoundInitFormattedAndAppendNode	inferred	Initializes a formatted sound node, stores the caller value, and appends it to the active-node list.
+0x002EC818	movieAttachDecodeTask	inferred	SMT3HD name via SLUS_209.11 0x002C4F48, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfSoundInitFormattedAndAppendNode
 0x002EC850	sdfIpuInit	inferred	SMT3HD name via SLUS_209.11 0x002C4F80, reloc-identical; was sdfSoundInitIpuStream
 0x002EC900	sdfIpuClose	inferred	SMT3HD name via SLUS_209.11 0x002C5030, reloc-identical; was sdfSoundShutdownIpuStreamHandlers
 0x002EC950	sdfPrintTextLine	inferred	confidence=high; Native incoming-a0 forwarding to libc puts003004E8; strlen/string-plus-newline I/O vectors and newline byte0A at003B7AA0 prove output. Zero-formal void signature retained; twin=0x003457F8. Namer1 batch46.
@@ -8940,8 +8943,8 @@
 0x002EDC50	sdfPacFree	inferred	SMT3HD name via SLUS_209.11 0x002C60A8, reloc-identical; was sdfPacReleasePacketQueueNodes
 0x002EDC88	sdfPacMarkPhaseFinished	inferred	Native writes byte -1 through the supplied phase address.
 0x002EDC98	sdfPacUseSrc	inferred	SMT3HD name via SLUS_209.11 0x002C60F0, byte-identical; was sdfPacAdvanceInput
-0x002EDCC0	sdfPacAdvanceCallbackBoundary	inferred	confidence=high; src/dds1/game/code_002ED8D0.c:func_002EDCC0; Handles 64-byte consumption boundaries, advances input, invokes the callback, and updates activity/remainder according to callback results. [names_qp9.tsv]
-0x002EDD98	sdfDecodePacNodeAndAdvanceTail	inferred	Reads the next PAC node, links it into decoder tail, and processes read completion codes. [names_reviewed21.tsv]
+0x002EDCC0	sdfPacNewBlock	inferred	SMT3HD name via SLUS_209.11 0x002C6118, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfPacAdvanceCallbackBoundary
+0x002EDD98	sdfPacEndBlock	inferred	SMT3HD name via SLUS_209.11 0x002C61F0, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfDecodePacNodeAndAdvanceTail
 0x002EDE48	sdfPacDecode	inferred	SMT3HD name via SLUS_209.11 0x002C62A0, reloc-identical; was sdfPacFeedInput
 0x002EDF60	sdfPacNewResrc	inferred	SMT3HD name via SLUS_209.11 0x002C63B8, reloc-identical; was sdfPacEnqueuePacket
 0x002EDFE8	sdfPacFreeResrc	inferred	SMT3HD name via SLUS_209.11 0x002C6440, reloc-identical; was sdfPacRemovePacket
@@ -8964,8 +8967,8 @@
 0x002EE868	sdfPacTmxDecoderInit	inferred	SMT3HD name via SLUS_209.11 0x002C6CC0, reloc-identical; was sdfPacStartAllocationList
 0x002EE8C0	sdfPacTexListDecoderTmxHeaderEndFunc	inferred	SMT3HD name via SLUS_209.11 0x002C6D18, reloc-identical; was sdfPacStartNextAllocationEntry
 0x002EE900	sdfPacResetOutputToAllocationEntry	inferred	sdf/sdfPacDecode: resets outputCursor to allocation+0x10, pendingBytes to 0x10 and installs the onInput/onComplete callbacks [names_L14_MidUnits.tsv]
-0x002EE930	sdfPacAdvanceAllocationEntry	inferred	Associates the queued packet resource with the current allocation value, advances its entry index, and frees it at the final entry.
-0x002EE9A8	sdfPacSkipAllocationEntryBytes	inferred	Consumes pending input before requesting another allocation entry.
+0x002EE930	sdfPacTexListDecoderTmxBodyEndFunc	inferred	SMT3HD name via SLUS_209.11 0x002C6D88, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfPacAdvanceAllocationEntry
+0x002EE9A8	sdfPacTexListDecoder1	inferred	SMT3HD name via SLUS_209.11 0x002C6E00, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfPacSkipAllocationEntryBytes
 0x002EEA18	sdfPacTexListDecoder0	inferred	SMT3HD name via SLUS_209.11 0x002C6E70, reloc-identical; was sdfPacReadListAllocationCount
 0x002EEAA0	sdfPacTexListDecoderInit	inferred	SMT3HD name via SLUS_209.11 0x002C6EF8, reloc-identical; was sdfQueueAndResetPacketWork
 0x002EEAE0	sdfDecomp	inferred	SMT3HD name via SLUS_209.11 0x002C6F38, reloc-identical; was sdfPacDecodeInputChunk
@@ -9025,7 +9028,7 @@
 0x002F3120	sceCdInitEeCB	inferred	SMT3HD name via SLUS_209.11 0x002CB578, reloc-identical; was func_002F3120
 0x002F3298	cmd_sem_init	inferred	SMT3HD name via SLUS_209.11 0x002CB6F0, reloc-identical; was func_002F3298
 0x002F3330	cdvd_exit	inferred	SMT3HD name via SLUS_209.11 0x002CB788, reloc-identical; was func_002F3330
-0x002F33C8	sceCdPOffCallback	inferred	libcdvd sceCdPOffCallback: stores the power-off callback and its argument with interrupts disabled and returns the previous callback; the disc layer installs sdfPowerOffInterruptCallback through it. DDS2 twin 0x0034C270.
+0x002F33C8	sceCdPOffCallback	inferred	libcdvd sceCdPOffCallback: stores the power-off callback and its argument with interrupts disabled and returns the previous callback; the disc layer installs sdfHddPowerOffHandler through it. DDS2 twin 0x0034C270.
 0x002F3440	_sceCd_Poff_Intr	inferred	SMT3HD name via SLUS_209.11 0x002CB898, reloc-identical; was func_002F3440
 0x002F3480	PowerOffCB	inferred	SMT3HD name via SLUS_209.11 0x002CB8D8, reloc-identical; was func_002F3480
 0x002F34F8	sceCdLayerSearchFile	inferred	SMT3HD name via SLUS_209.11 0x002CB950, unique-masked-hash; was func_002F34F8
@@ -9119,11 +9122,15 @@
 0x002fbf58	__do_global_dtors	inferred	Native SDK body pairs with the verified GCC helper in Nocturne; was runAtExitList. Existing C ABI unchanged.
 0x002fbfe8	__do_global_ctors	inferred	Native SDK body pairs with the verified GCC helper in Nocturne; was initAtExit. Existing C ABI unchanged.
 0x002FC0A8	__main	inferred	libgcc __main: runs once (a flag word guards it) and tail-calls the global constructor walker; startup calls it before the engine entry. DDS2 twin 0x00356F58.
+0x002fc718	__make_dp	inferred	Native SDK body pairs with the verified GCC helper in Nocturne; was func_002FC718. Existing C ABI unchanged.
 0x002fcf50	__register_frame_info	inferred	Native SDK body pairs with the verified GCC helper in Nocturne; was registerAtExit. Existing C ABI unchanged.
+0x002fcfe8	__register_frame_info_table	inferred	Native SDK body pairs with the verified GCC helper in Nocturne; was func_002FCFE8. Existing C ABI unchanged.
 0x002fd140	__deregister_frame	inferred	Native SDK body pairs with the verified GCC helper in Nocturne; was ctime_4. Existing C ABI unchanged.
 0x002FDE48	sdfUnpackFloat	inferred	SMT3HD name via SLUS_209.11 0x002D3410, byte-identical; was func_002FDE48
 0x002FDEA8	sdfPackQuad	inferred	SMT3HD name via SLUS_209.11 0x002D3470, reloc-identical; was func_002FDEA8
+0x002fded8	__pack_df	inferred	Native SDK body pairs with the verified GCC helper in Nocturne; was func_002FDED8. Existing C ABI unchanged.
 0x002FDFB0	sdfUnpackDouble	inferred	SMT3HD name via SLUS_209.11 0x002D3578, byte-identical; was func_002FDFB0
+0x002fe070	__fpcmp_parts_df	inferred	Native SDK body pairs with the verified GCC helper in Nocturne; was func_002FE070. Existing C ABI unchanged.
 0x002FE190	sdfPackFloat	inferred	SMT3HD name via SLUS_209.11 0x002D3758, byte-identical; was func_002FE190
 0x002FE248	abort	inferred	newlib abort: raises signal 6 and then leaves through _exit with status 1. DDS2 twin 0x00359390.
 0x002FE260	__assert	inferred	newlib __assert(file, line, expr): prints 'assertion "%s" failed: file "%s", line %d' to stderr through fiprintf, then calls abort; at3decDecodeSpectrum asserts through it. DDS2 twin 0x003593A8.
@@ -9133,6 +9140,7 @@
 0x002FE460	fflush	inferred	SMT3HD name via SLUS_209.11 0x002D95E0, reloc-identical; was func_002FE460
 0x002FE5D8	__sfmoreglue	inferred	SMT3HD name via SLUS_209.11 0x002D9758, reloc-identical; was func_002FE5D8
 0x002FE650	__sfp	inferred	SMT3HD name via SLUS_209.11 0x002D97D0, reloc-identical; was func_002FE650
+0x002fe748	_cleanup_r	inferred	Native SDK body pairs with the verified GCC helper in Nocturne; was func_002FE748. Existing C ABI unchanged.
 0x002FE788	__sinit	inferred	SMT3HD name via SLUS_209.11 0x002D9908, reloc-identical; was func_002FE788
 0x002FE818	fiprintf	inferred	newlib fiprintf: variadic wrapper that builds the argument list and calls vfiprintf; __assert prints through it. DDS2 twin 0x00359960.
 0x002FE950	fopen	inferred	newlib fopen: supplies the global reentrancy structure and tail-calls _fopen_r with the path and mode; the debug log writer opens debug.log through it. DDS2 twin 0x00359A98.
@@ -9337,6 +9345,8 @@
 0x00313848	_SetTLBEntry	inferred	SMT3HD name via SLUS_209.11 0x002E4CB0, shared-hash-in-run; was RFU086_WaitEvnetFlag
 0x00313858	iPutTLBEntry	inferred	SMT3HD name via SLUS_209.11 0x002E4CC0, reloc-identical; was SetTLBEntry
 0x00313928	InitTLB32MB	inferred	SMT3HD name via SLUS_209.11 0x002E4D90, unique-masked-hash; was func_00313928
+0x003156b0	__floatdidf	inferred	Native SDK body pairs with the verified GCC helper in Nocturne; was func_003156B0. Existing C ABI unchanged.
+0x00315758	__fixunsdfdi	inferred	Native SDK body pairs with the verified GCC helper in Nocturne; was func_00315758. Existing C ABI unchanged.
 0x00315A28	litodp	inferred	Fam-3
 0x00315AE0	dptoli	inferred	SMT3HD name via SLUS_209.11 0x002D1C40, reloc-identical; was func_00315AE0
 0x003243C0	kwlnPadButtonHoldCounters	inferred	confidence=high; Per-button hold durations, incremented while pressed and reset on release; first frame selects the fresh flag, and durations >=8 on even frames select repeat. DDS2 twin 0x0037F3C0; existing u32[4][16], native 0x100-byte allocation and padding unchanged. No import or active ASM reader. [PurD readability data b5; native/matched-C twin; identifier-only]
@@ -10068,7 +10078,7 @@
 0x003BB3C8	btlMahenPanelTaskNameRef	inferred	confidence=high; matched_users=src/dds1/game/code_001A1960.c:btlIsNamedBattleTaskRegistered, src/dds1/game/code_001A1960.c:func_001AD1F8; Initialized pointer targets native bpnl_mahen_nm; registration and exit operations look up that task. [names_qp9.tsv]
 0x003BB3CC	btlAnalyzPanelTaskNameRef	inferred	confidence=high; matched_users=src/dds1/game/code_001A1960.c:btlGetRegisteredTaskValueOrDefault, src/dds1/game/code_001A1960.c:func_001AD428; Initialized pointer targets native bpnl_analyz_nm; value and exit operations look up that task; native tag is retained. [names_qp9.tsv]
 0x003BB3D8	btlTrackedTaskHandles	inferred	high confidence; src/dds1/game/code_001A1960.c btlGetTrackedTaskHandle(): temp_v0 = D_003BB3D8 + arg0 * 4; Base address of the indexed battle task-handle table accessed with four-byte strides. [names_reviewed26.tsv]
-0x003BB3E0	btlCommandPanelWork	inferred	high confidence; src/dds1/game/code_001A1960.c btlInitializeCommandPanelSlotTables(): D_003BB3E0 = (u32)sdfAllocAndClearQuadwords(0xCC); Allocated command-panel work contains actor class selection and two slot tables. [names_reviewed26.tsv]
+0x003BB3E0	btlCommandPanelWork	inferred	high confidence; src/dds1/game/code_001A1960.c btlInitializeCommandPanelSlotTables(): D_003BB3E0 = (u32)sdfChipAllocZeroDirect(0xCC); Allocated command-panel work contains actor class selection and two slot tables. [names_reviewed26.tsv]
 0x003BB3E5	btlResourceBlockLoaded	inferred	confidence=high; matched_users=src/dds1/game/code_001A1960.c:btlLoadResourceBlock, src/dds1/game/code_001A1960.c:btlReleaseResourceBlock; Load/release operations use this byte to guard creation/destruction of the shared resource block. [names_qp9.tsv]
 0x003BB3E8	btlResourceBlock	inferred	confidence=high; matched_users=src/dds1/game/code_001A1960.c:btlLoadResourceBlock, src/dds1/game/code_001A1960.c:btlReleaseResourceBlock; Pointer to the named three-resource block loaded into battle work and subsequently destroyed/cleared. [names_qp9.tsv]
 0x003BB5EC	btlDeferredTaskTail	inferred	high confidence; src/dds1/game/code_001A1960.c btlSweepFinishedTasks(): if (D_003BB5EC != 0) { Tail used to append finished battle tasks to the deferred-destruction chain. [names_reviewed26.tsv]
@@ -10516,12 +10526,3 @@
 0x003FE0C0	sdfSndMap	inferred	SMT3HD data name via SLUS_209.11 0x00593880, 3 agreeing references; was sdfSndMap
 0x003FE250	LastLoad	inferred	SMT3HD data name via SLUS_209.11 0x00593A10, 2 agreeing references; was LastLoad
 0x003FEB00	sdfIpuDecodeThStack	inferred	SMT3HD data name via SLUS_209.11 0x00593F80, 1 agreeing references; was sdfIpuDecodeThStack
-0x002fcfe8	__register_frame_info_table	inferred	Native SDK body pairs with the verified GCC helper in Nocturne; was func_002FCFE8. Existing C ABI unchanged.
-0x002fded8	__pack_df	inferred	Native SDK body pairs with the verified GCC helper in Nocturne; was func_002FDED8. Existing C ABI unchanged.
-0x002fe070	__fpcmp_parts_df	inferred	Native SDK body pairs with the verified GCC helper in Nocturne; was func_002FE070. Existing C ABI unchanged.
-0x002fe748	_cleanup_r	inferred	Native SDK body pairs with the verified GCC helper in Nocturne; was func_002FE748. Existing C ABI unchanged.
-0x00315758	__fixunsdfdi	inferred	Native SDK body pairs with the verified GCC helper in Nocturne; was func_00315758. Existing C ABI unchanged.
-0x003156b0	__floatdidf	inferred	Native SDK body pairs with the verified GCC helper in Nocturne; was func_003156B0. Existing C ABI unchanged.
-0x002fc718	__make_dp	inferred	Native SDK body pairs with the verified GCC helper in Nocturne; was func_002FC718. Existing C ABI unchanged.
-0x0011DAC0	dds3DebugIntEditEx	inferred	HD original name; native callback/dispatcher role and paired Nocturne implementation establish identity; was fldStepIntByPad.
-0x0011DC70	dds3DebugColorEditEx	inferred	HD original name; native callback/dispatcher role and paired Nocturne implementation establish identity; was fldStepColorChannelByPad.

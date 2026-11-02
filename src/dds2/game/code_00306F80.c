@@ -66,7 +66,7 @@ extern void effDrawSpriteWithWorkCornerColors(s32, s32, s32, s32, EffectSlotSet 
 
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 
-extern void sdfBuildMaskedFrameRegisterReference(const u8 *, SdfDmaReferenceChainPacket *, s32);
+extern void sdfGrSetFrameMaskRGB(const u8 *, SdfDmaReferenceChainPacket *, s32);
 
 
 /* Resolve the indexed render entry before applying position, depth, and draw flags. */
@@ -957,7 +957,7 @@ void uiDrawActiveSurfaceRegion(s32 surfaceIndex) {
     SdfDmaReferenceChainPacket *texture;
     sdfDrawTagInit(list);
     texture = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
-    sdfBuildMaskedFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
+    sdfGrSetFrameMaskRGB(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
     sdfDrawTagLinkRefGif(list, (u32)texture);
     {
         sdfGrOt_t *surface = &sdfGrOtTable[surfaceIndex];
@@ -965,7 +965,7 @@ void uiDrawActiveSurfaceRegion(s32 surfaceIndex) {
     }
 }
 
-extern void sdfBuildFrameRegisterReference(const u8 *, SdfDmaReferenceChainPacket *, s32);
+extern void sdfGrSetFrameMaskReset(const u8 *, SdfDmaReferenceChainPacket *, s32);
 
 void sdfDispatchSurfaceWithPreparedTexturePacket(surfaceIndex)
     s32 surfaceIndex;
@@ -974,7 +974,7 @@ void sdfDispatchSurfaceWithPreparedTexturePacket(surfaceIndex)
     SdfDmaReferenceChainPacket *texture;
     sdfDrawTagInit(list);
     texture = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
-    sdfBuildFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
+    sdfGrSetFrameMaskReset(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
     sdfDrawTagLinkRefGif(list, (u32)texture);
     {
         sdfGrOt_t *surface = &sdfGrOtTable[surfaceIndex];

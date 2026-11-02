@@ -98,8 +98,8 @@ void effDestroyModelContext(dds3ModelHandle_t *model) {
 }
 
 EffModelOwner *effCreateModelOwner(FileJobPayload *source) {
-    EffModelOwner *owner = sdfAllocAndClearQuadwords(sizeof(EffModelOwner));
-    owner->ownedBuffer = sdfAllocAndClearQuadwords(sizeof(*owner->ownedBuffer));
+    EffModelOwner *owner = sdfChipAllocZeroDirect(sizeof(EffModelOwner));
+    owner->ownedBuffer = sdfChipAllocZeroDirect(sizeof(*owner->ownedBuffer));
     if (source != NULL) {
         void *data;
         u32 scaleBits;
@@ -345,7 +345,7 @@ void effMarkFloorModelForUpdate(EffModelOwner *work) {
 
 
 void effFloorModelListPush(EffModelOwner *obj) {
-    EffectObjectNode *entry = sdfAllocAndClearQuadwords(sizeof(EffectObjectNode));
+    EffectObjectNode *entry = sdfChipAllocZeroDirect(sizeof(EffectObjectNode));
 
     entry->object = obj;
     entry->prev = NULL;
@@ -997,3 +997,4 @@ INCLUDE_SDATA(const s32, "game/code_0029A840", D_003BC950);
 INCLUDE_SDATA(const s32, "game/code_0029A840", D_003BC954);
 
 INCLUDE_SDATA(const s32, "game/code_0029A840", D_003BC958);
+

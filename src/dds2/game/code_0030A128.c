@@ -305,7 +305,7 @@ void fldLmapSubmitPositionedCommandPacket(s32 x, s32 y, s32 z,
     SifCommand packetHeader;
 
     sdfDrawTagInit(packetList);
-    sdfPktInit(&packetHeader, x + 0x7000, y + 0x7900, z, colorTableIndex);
+    sdfDevSetPrintCB(&packetHeader, x + 0x7000, y + 0x7900, z, colorTableIndex);
     sdfDrawTagLink(packetList, (u32)sdfDevPrintfEx(&packetHeader, command));
     drawSurface = &sdfGrOtTable[surfaceIndex];
     drawSurface->append(drawSurface, packetList);
@@ -904,3 +904,4 @@ INCLUDE_SDATA(const s32, "game/code_0030A128", D_004388A8);
 INCLUDE_SDATA(const s32, "game/code_0030A128", D_004388AC);
 
 INCLUDE_SDATA(const s32, "game/code_0030A128", D_004388B0);
+

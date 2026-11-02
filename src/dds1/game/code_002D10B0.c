@@ -305,7 +305,7 @@ extern vu8 sdfFrameId;
 extern void sdfGrSetupPacketBuff(s32 bufferIndex);
 
 /* Wait until the other buffer is no longer busy before selecting it. */
-void sdfWaitAndSelectBuffer(void) {
+void sdfGrInitNewFrame(void) {
     s8 nextBuffer = sdfFrameId ^ 1;
 
     /* Do not select a buffer while its index is the busy-buffer status. */

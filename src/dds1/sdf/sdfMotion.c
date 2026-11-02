@@ -107,7 +107,7 @@ sdfMotionCtrlr_t *sdfMotionCtrlrNew(sdfModelRootNode_t *model, MotionTable *tabl
     s32 commandIndex;
     u16 commandCount;
 
-    motion = sdfAllocAndClearQuadwords(sizeof(sdfMotionCtrlr_t));
+    motion = sdfChipAllocZeroDirect(sizeof(sdfMotionCtrlr_t));
     motion->next = model->motionList;
     commandCount = table->commandCount;
     model->motionList = motion;

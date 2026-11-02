@@ -132,7 +132,7 @@ struct FileRequest *pacLoadEx(const char *requestName,
                               FilePacResourceAllocationMode allocationMode,
                               void *packetCallbackAddress, u32 onComplete,
                               u32 userData) {
-    FileRequest *request = sdfAllocAndClearQuadwords(sizeof(FileRequest));
+    FileRequest *request = sdfChipAllocZeroDirect(sizeof(FileRequest));
 
     sdfPacInit(&request->packet, packetCallbackAddress);
     if (allocationMode != FILE_PAC_RESOURCE_ALLOCATION_DEFAULT) {
@@ -157,7 +157,7 @@ void pacLoadUseTail(const char *requestName) {
  * callbackAddress is the queue callback; userData is its context, not another
  * callback. Preserve the existing integer-address parameter representations. */
 struct FileRequest *fileLoadEx(const char *requestName, u32 allocationMode, u32 callbackAddress, u32 userData) {
-    FileRequest *request = sdfAllocAndClearQuadwords(FILE_REQUEST_HEADER_BYTES);
+    FileRequest *request = sdfChipAllocZeroDirect(FILE_REQUEST_HEADER_BYTES);
 
     request->allocationMode = allocationMode;
     fileLinkQueue(request, FILE_REQUEST_KIND_FILE_LOAD, requestName,
@@ -250,7 +250,7 @@ void fileSyncAll(void) {
 /* Create a file-save request with the caller's source buffer and byte count.
  * Its address is stored in the existing value word at +0x24. */
 FileRequest *fileSaveEx(const char *requestName, const void *sourceData, s32 sourceByteCount, s32 callbackAddress, s32 userDataAddress) {
-    FileRequest *request = sdfAllocAndClearQuadwords(FILE_REQUEST_HEADER_BYTES);
+    FileRequest *request = sdfChipAllocZeroDirect(FILE_REQUEST_HEADER_BYTES);
 
     request->retainedAddress = (u8 *)sourceData;
     request->transferAddress = (u8 *)sourceData;

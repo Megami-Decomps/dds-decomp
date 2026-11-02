@@ -363,7 +363,7 @@ void sdfMovieDrawFrame(movieStream_t *movie, sdfGrOt_t *pool) {
     pool->append(pool, list);
 }
 
-SdfFileCommandQueueResult sdfFileCmdRequestFileSize(sdfFileCmdHandle_t *state);
+SdfFileCommandQueueResult sdfFileCmdFileSize(sdfFileCmdHandle_t *state);
 
 extern s32 movieStreamSema;
 
@@ -426,7 +426,7 @@ s32 movieGetStreamSize(
     case SDF_MOVIE_STATE_INITIAL:
         if (deviceEvent == SDF_DEV_EVENT_OPENED) {
             movie->state = SDF_MOVIE_STATE_CONTROL_REQUEST;
-            sdfFileCmdRequestFileSize(deviceState);
+            sdfFileCmdFileSize(deviceState);
         }
         break;
     case SDF_MOVIE_STATE_CONTROL_REQUEST:
@@ -503,7 +503,7 @@ s32 movieReadChunk(
     case SDF_MOVIE_STATE_INITIAL:
         if (deviceEvent == SDF_DEV_EVENT_OPENED) {
             movie->state = SDF_MOVIE_STATE_CONTROL_REQUEST;
-            sdfFileCmdRequestFileSize(deviceState);
+            sdfFileCmdFileSize(deviceState);
         }
         break;
     case SDF_MOVIE_STATE_CONTROL_REQUEST:
@@ -749,7 +749,7 @@ void movieOpenStream(movieStream_t *owner, const SdfMovieDescriptor *descriptor,
     soundFormat.playbackCadenceStep = borrowedDescriptor->playbackCadenceStep;
 
     if (!isPac) {
-        stream = sdfAllocAndClearQuadwords(sizeof(MovLinearStream));
+        stream = sdfChipAllocZeroDirect(sizeof(MovLinearStream));
         owner->stream.linear = stream;
         allocation = sdfMemAllocDirect(0x20000);
         stream->allocation = allocation;
@@ -762,7 +762,7 @@ void movieOpenStream(movieStream_t *owner, const SdfMovieDescriptor *descriptor,
         owner->state = SDF_MOVIE_STATE_INITIAL;
         owner->deviceState = sdfFileCmdReadOpen(name,
                                                         (void *)movieGetStreamSize, owner);
-        sdfSoundInitFormattedAndAppendNode(&owner->soundNode, &soundFormat,
+        movieAttachDecodeTask(&owner->soundNode, &soundFormat,
                                             movieCopyChunk, owner, borrowedDescriptor->source);
         return;
     }
@@ -771,7 +771,7 @@ void movieOpenStream(movieStream_t *owner, const SdfMovieDescriptor *descriptor,
         movieStreamSema = sdfCreateSema(1, 1, 0);
     }
     movieSemaCount = -1;
-    pacWork = sdfAllocAndClearQuadwords(sizeof(MovPacStream));
+    pacWork = sdfChipAllocZeroDirect(sizeof(MovPacStream));
     owner->stream.pac = pacWork;
     allocation = sdfMemAllocDirect(0x24000);
     pacWork->allocation = allocation;
@@ -788,7 +788,7 @@ void movieOpenStream(movieStream_t *owner, const SdfMovieDescriptor *descriptor,
                                                     (void *)movieReadChunk, owner);
     owner->pacEnabled = 1;
     owner->packetLimit = 0x7F;
-    sdfSoundInitFormattedAndAppendNode(&owner->soundNode, &soundFormat,
+    movieAttachDecodeTask(&owner->soundNode, &soundFormat,
                                         movieParseHeader, owner, borrowedDescriptor->source);
 }
 

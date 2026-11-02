@@ -1596,7 +1596,7 @@ void effSetKindRectangleTexture(EffKindWork *work, sdfTexHandle_t *value) {
 EffKindWork *effAllocateKindWork(u16 kind, u8 *source) {
     u32 headerSize = 0x30;
     u32 size = D_003E9810[kind].payloadSize;
-    EffKindWork *work = sdfAllocAndClearQuadwords(size + headerSize);
+    EffKindWork *work = sdfChipAllocZeroDirect(size + headerSize);
 
     work->kind = kind;
     work->target = 0;
@@ -1696,7 +1696,7 @@ void effSetKindWorkMatrixComponent(EffKindWork *work, float value) {
 EffKindWork *effAllocateAlternateKindWork(u16 kind, u8 *source) {
     u32 headerSize = 0x30;
     u32 size = D_003E98A0[kind].payloadSize;
-    EffKindWork *work = sdfAllocAndClearQuadwords(size + headerSize);
+    EffKindWork *work = sdfChipAllocZeroDirect(size + headerSize);
 
     work->kind = kind;
     work->target = 0;
@@ -1797,7 +1797,7 @@ void effSetAlternateKindScale(EffKindWork *object, f32 scale) {
 
 
 EffKindAssetHolder *effCreateResourceHolderFromSelectedKind(s32 *source, u16 kind) {
-    EffKindAssetHolder *object = sdfAllocAndClearQuadwords(sizeof(*object));
+    EffKindAssetHolder *object = sdfChipAllocZeroDirect(sizeof(*object));
     object->kind = kind;
     object->references = 1;
     switch (kind) {
@@ -5636,7 +5636,7 @@ void effDrawFourPointGroups(EffPointSet *set, const Matrix4 *matrix) {
 }
 
 EffectSurfaceNode *effCreateSurfaceNode(u32 count) {
-    EffectSurfaceNode *node = sdfAllocAndClearQuadwords(sizeof(EffectSurfaceNode));
+    EffectSurfaceNode *node = sdfChipAllocZeroDirect(sizeof(EffectSurfaceNode));
     node->handleCount = count;
     node->color = 0x80808080;
     node->opacity = 1.0f;
@@ -8575,7 +8575,7 @@ void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix) {
 }
 
 EffectStripNode *effCreateStripNode(u32 percent) {
-    EffectStripNode *node = sdfAllocAndClearQuadwords(sizeof(EffectStripNode));
+    EffectStripNode *node = sdfChipAllocZeroDirect(sizeof(EffectStripNode));
     node->percent = percent;
     node->color = 0x80808080;
     node->opacity = 1.0f;
@@ -11375,12 +11375,12 @@ extern vu8 sdfFrameId;
 extern u8 kwlnFrameDrawPacketRecords[];
 extern s32 dds3GetFrameID(void);
 extern void sdfMatUpdatePacket(sdfMat_t *, s32);
-extern void sdfAppendReferencePacket(sdfDrawTag_t *, u32);
+extern void sdfDrawTagLinkRef(sdfDrawTag_t *, u32);
 extern void sdfDrawTagLinkRefGif(sdfDrawTag_t *, u32);
 struct SdfDmaReferenceChainPacket;
-extern void sdfBuildMaskedFrameRegisterReference(
+extern void sdfGrSetFrameMaskRGB(
     const u8 *source, struct SdfDmaReferenceChainPacket *packet, s32 gsContext);
-extern void sdfBuildFrameRegisterReference(
+extern void sdfGrSetFrameMaskReset(
     const u8 *source, struct SdfDmaReferenceChainPacket *packet, s32 gsContext);
 
 void effDrawScalyTexturedStrip(u8 *owner, void *matrix) {
@@ -11460,9 +11460,9 @@ void effDrawScalyTexturedStrip(u8 *owner, void *matrix) {
     sdfMatMakePacket((sdfMat_t *)work->handle, (SdfDmaTagHeader *)referencePacket,
                                        (s8)sdfFrameId);
     referencePacket[1] = 0;
-    sdfAppendReferencePacket(list, (u32)referencePacket);
+    sdfDrawTagLinkRef(list, (u32)referencePacket);
     dmaPacket = sdfGrAllocPacketBuff(0x40);
-    sdfBuildMaskedFrameRegisterReference(
+    sdfGrSetFrameMaskRGB(
         kwlnFrameDrawPacketRecords + dds3GetFrameID() * 0x1F40,
         (struct SdfDmaReferenceChainPacket *)dmaPacket, 0);
     sdfDrawTagLinkRefGif(list, (u32)dmaPacket);
@@ -11531,7 +11531,7 @@ void effDrawScalyTexturedStrip(u8 *owner, void *matrix) {
         colors++;
     }
     dmaPacket = sdfGrAllocPacketBuff(0x40);
-    sdfBuildFrameRegisterReference(
+    sdfGrSetFrameMaskReset(
         kwlnFrameDrawPacketRecords + dds3GetFrameID() * 0x1F40,
         (struct SdfDmaReferenceChainPacket *)dmaPacket, 0);
     sdfDrawTagLinkRefGif(list, (u32)dmaPacket);
@@ -13729,7 +13729,7 @@ void effApplyModelTransform(EffActiveResource *work) {
 extern sdfMat_t *sdfMatNew(void);
 
 EffDrawableAssetWork *effCreateDrawableAssetWithDefaultOpacity() {
-    EffDrawableAssetWork *work = (EffDrawableAssetWork *)sdfAllocAndClearQuadwords(sizeof(*work));
+    EffDrawableAssetWork *work = (EffDrawableAssetWork *)sdfChipAllocZeroDirect(sizeof(*work));
     sdfMat_t *asset;
     work->state = 0;
     asset = sdfMatNew();
@@ -14595,7 +14595,7 @@ void effSetRotationFromAcceleratedFrameAngle(u8 *work, f32 *params, s32 frame) {
 }
 
 EffectSlotNode80 *effAllocateActiveEffectSlotNode(u32 count) {
-    EffectSlotNode80 *node = sdfAllocAndClearQuadwords(sizeof(EffectSlotNode80));
+    EffectSlotNode80 *node = sdfChipAllocZeroDirect(sizeof(EffectSlotNode80));
     node->count = count;
     node->color = 0x80808080;
     node->opacity = 1.0f;
@@ -15136,7 +15136,7 @@ EffSharedEffectWork *effCreateSharedEffectResourceWork(FileJobPayload *source) {
         work->resource->data = NULL;
         work->resource->lastProcessedKernelCount = dds3GetKernelCount();
         work->resource->references = 1;
-        work->resource->data = sdfAllocAndClearQuadwords(0xE0);
+        work->resource->data = sdfChipAllocZeroDirect(0xE0);
         secondary = fileResolveSecondaryBuffer(source);
         work->resource->allocation = sdfMemAllocDirect(source->secondary.size);
         work->resource->entriesSize = source->secondary.size;
@@ -21287,3 +21287,4 @@ INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438850);
 INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438858);
 
 INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438860);
+

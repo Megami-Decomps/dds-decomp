@@ -23,7 +23,7 @@ extern s32 D_003BC7D8;
 extern FileManagerQueuedRequestResult (*p2sdSmgBuf)(void);
 KwlnTaskUpdateResult fileManagerProc(dds3ProcessID_t *task);
 
-extern SdfFileCommandQueueResult sdfFileCmdRequestFileSize(sdfFileCmdHandle_t *);
+extern SdfFileCommandQueueResult sdfFileCmdFileSize(sdfFileCmdHandle_t *);
 
 extern void pacRead(FileTransferJob *);
 
@@ -48,7 +48,7 @@ s32 pacLoadCallback(sdfFileCmdHandle_t *deviceRequest, SdfDevEvent event, s32 un
     case SDF_DEV_EVENT_OPENED:
         job->deviceRequest = deviceRequest;
         job->state = FILE_REQUEST_LIFECYCLE_OPENED;
-        sdfFileCmdRequestFileSize(deviceRequest);
+        sdfFileCmdFileSize(deviceRequest);
         break;
     case SDF_DEV_EVENT_SIZE_REPLY:
         job->transferBytes = byteCount;
@@ -119,7 +119,7 @@ s32 fileLoadCallback(sdfFileCmdHandle_t *deviceRequest, SdfDevEvent event, s32 u
     case SDF_DEV_EVENT_OPENED:
         job->deviceRequest = deviceRequest;
         job->state = FILE_REQUEST_LIFECYCLE_OPENED;
-        sdfFileCmdRequestFileSize(deviceRequest);
+        sdfFileCmdFileSize(deviceRequest);
         break;
     case SDF_DEV_EVENT_SIZE_REPLY: {
         struct sdfMemHandle_t *allocationHandle;
@@ -127,7 +127,7 @@ s32 fileLoadCallback(sdfFileCmdHandle_t *deviceRequest, SdfDevEvent event, s32 u
         job->transferBytes = byteCount;
         job->totalBytes = byteCount;
         if (job->allocationMode == 0) {
-            allocationHandle = sdfMemTryAllocDirect(byteCount);
+            allocationHandle = sdfMemAlloc2Direct(byteCount);
             job->allocationHandle = allocationHandle;
             if (allocationHandle == NULL) {
                 job->retryCount = 10;
@@ -291,7 +291,7 @@ void fileExecQueue(void) {
             job->deviceRequest = sdfFileCmdReadOpen(job->name, fileLoadCallback, job);
             break;
         case FILE_REQUEST_LIFECYCLE_ALLOCATION_RETRY:
-            job->allocationHandle = sdfMemTryAllocDirect(job->totalBytes);
+            job->allocationHandle = sdfMemAlloc2Direct(job->totalBytes);
             if (job->allocationHandle == NULL) {
                 sdfPrintf("alloc retry for %s\n",
                                             job->deviceRequest->resolvedPath);

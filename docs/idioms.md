@@ -2020,7 +2020,7 @@ The SDK's float-key-pool payload is the separate 16-byte `SdfKeyPoolNode`;
 do not conflate its kind at `+0x0C` with the 32-byte callback owner.
 
 The message initializer is a distinct native SDK protocol boundary.
-`sdfStoreMessageWordsAndNotifyConsumer` transports four 32-bit words;
+`sdfModelOtInit` transports four 32-bit words;
 field setup passes physical entries 34, 40, 42 and 41. Its work word selects
 entry 40, where `sdfModelSetOtCallbacks` installs
 `sdfGrSortOtReg(SdfPool *, SdfKeyPoolNode *)` and
@@ -2557,7 +2557,7 @@ computed with `tools/ee_gcc_allocations.py`. Natural source shapes that flip it:
     independent control with that call still declared `void` remains exact:
     the initializer return is the decisive change.
     A currently matching `void` C definition is not conclusive negative evidence.
-    Both games' `sdfAllocAndClearQuadwords` actually forward the buffer returned
+    Both games' `sdfChipAllocZeroDirect` actually forward the buffer returned
     by `sdfZeroMemQuad`; both formatted-packet wrappers return the cursor
     saved by their assembly helper and consumed by real packet-append callers.
     Giving those producers genuine `void *` results preserves **4 match, 0 differ**
@@ -7376,7 +7376,7 @@ the list returned by `sdfPrimAllocDrawTag` as `sdfDrawTag_t *` too.
 `sdf3DLinkInitPacket` receives that CPU list owner as
 its first argument and a `DmaPacketHeader *` as its second argument.
 Only the second argument is converted to the genuine packet-address
-word submitted to `sdfAppendReferencePacket`. Neither the software
+word submitted to `sdfDrawTagLinkRef`. Neither the software
 list wrappers nor their callers need an integer-to-pointer round trip.
 Keep encoded program addresses, DMA tag words, and allocator/range
 address-word interfaces unchanged.
@@ -7446,8 +7446,8 @@ The owner migration leaves both 600-byte creator bodies byte-exact.
 
 ## DMA formatter output buffers are CPU pointers
 
-Both games' `sdfBuildMaskedFrameRegisterReference` /
-`sdfBuildFrameRegisterReference` build reference-chain tags in a caller-provided
+Both games' `sdfGrSetFrameMaskRGB` /
+`sdfGrSetFrameMaskReset` build reference-chain tags in a caller-provided
 `SdfDmaReferenceChainPacket *`. Their first argument is different:
 it remains the SDK source-address word, with the native
 offsets added before `sdfGrSetRefGifPacket` encodes it. All C
@@ -10878,8 +10878,8 @@ VU0 operands, accumulation order and both CLUT-format loops are unchanged.
 `sdfGrOtInit` initializes adjacent pool entries and links them;
 the native positive-count requirement and existing control flow remain intact.
 
-`sdfBuildMaskedFrameRegisterReference` references the FRAME write at scene
-offset 0x180 or 0x190; `sdfBuildFrameRegisterReference` references the ordinary
+`sdfGrSetFrameMaskRGB` references the FRAME write at scene
+offset 0x180 or 0x190; `sdfGrSetFrameMaskReset` references the ordinary
 context FRAME write at 0x70 or 0xB0. In both APIs, zero selects GS context one
 and all other values select context two. The native `sdfGrStdDrawEnvPredraw`
 stores register IDs FRAME_1/2 at 0x188/0x198 and ORs the alternate values with

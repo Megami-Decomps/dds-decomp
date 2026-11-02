@@ -8,7 +8,7 @@ struct SoundFormat;
 void sdfIpuStrmDecodeInit(
     struct sdfIpuDecodeCb_t *node, struct SoundFormat *format,
     SdfStreamReadCallback read, struct movieStream_t *readContext);
-void sdfSoundInitFormattedAndAppendNode(
+void movieAttachDecodeTask(
     struct sdfIpuDecodeCb_t *node, struct SoundFormat *format,
     SdfStreamReadCallback read, struct movieStream_t *readContext,
     s32 resource);

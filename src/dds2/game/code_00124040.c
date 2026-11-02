@@ -1791,7 +1791,7 @@ u8 fldEsutoMaChk(void) {
 }
 
 void fldConfigureRenderCleanupMessage(void) {
-    sdfStoreMessageWordsAndNotifyConsumer(kwlnSceneSurfaceSets[7], &D_0037FF88[0], &D_0037FF88[6], &D_0037FF88[8], &D_0037FF88[7]);
+    sdfModelOtInit(kwlnSceneSurfaceSets[7], &D_0037FF88[0], &D_0037FF88[6], &D_0037FF88[8], &D_0037FF88[7]);
 }
 
 enum {
@@ -2679,3 +2679,4 @@ typedef char FieldSequenceRecord_retainCachedAreaResource_offset_check[
 INCLUDE_RODATA(const s32, "game/code_00124040", D_00412FD0);
 
 INCLUDE_RODATA(const s32, "game/code_00124040", D_00412FE0);
+

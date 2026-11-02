@@ -661,7 +661,7 @@ void evtSubmitFixedAlphaBlend(s32 fixedAlpha) {
 
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 
-extern void sdfBuildMaskedFrameRegisterReference(const u8 *, SdfDmaReferenceChainPacket *, s32);
+extern void sdfGrSetFrameMaskRGB(const u8 *, SdfDmaReferenceChainPacket *, s32);
 
 
 void evtSubmitPrimaryFramePacket(void) {
@@ -669,7 +669,7 @@ void evtSubmitPrimaryFramePacket(void) {
     SdfDmaReferenceChainPacket *framePacket;
     sdfDrawTagInit(list);
     framePacket = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(EVT_FRAME_REFERENCE_PACKET_BYTES);
-    sdfBuildMaskedFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, framePacket, 0);
+    sdfGrSetFrameMaskRGB(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, framePacket, 0);
     sdfDrawTagLinkRefGif(list, (u32)framePacket);
     {
         sdfGrOt_t *surface = &sdfGrOtTable[egl_OT_Offset];
@@ -677,14 +677,14 @@ void evtSubmitPrimaryFramePacket(void) {
     }
 }
 
-extern void sdfBuildFrameRegisterReference(const u8 *, SdfDmaReferenceChainPacket *, s32);
+extern void sdfGrSetFrameMaskReset(const u8 *, SdfDmaReferenceChainPacket *, s32);
 
 void evtSubmitAlternateFramePacket(void) {
     sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EVT_PACKET_LIST_BYTES);
     SdfDmaReferenceChainPacket *framePacket;
     sdfDrawTagInit(list);
     framePacket = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(EVT_FRAME_REFERENCE_PACKET_BYTES);
-    sdfBuildFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, framePacket, 0);
+    sdfGrSetFrameMaskReset(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, framePacket, 0);
     sdfDrawTagLinkRefGif(list, (u32)framePacket);
     {
         sdfGrOt_t *surface = &sdfGrOtTable[egl_OT_Offset];
@@ -984,7 +984,7 @@ void eglLinkPrint(s32 x, s32 y, s32 packetArg, s32 drawArg) {
     packet = (void *)sdfGrAllocPacketBuff(0x40);
     sdfPrimSetOpaquePacket(packet);
     sdfDrawTagLink(list, (u32)(packet));
-    sdfPktInit(&sifParameters, x * 16 + 0x7000, y * 8 + 0x7900, 0x0FFFFF80, packetArg);
+    sdfDevSetPrintCB(&sifParameters, x * 16 + 0x7000, y * 8 + 0x7900, 0x0FFFFF80, packetArg);
     sdfDrawTagLink(list, (u32)(sdfDevPrintfEx(&sifParameters, (const char *)drawArg)));
     surface = &kwlnPositionedTextSurface;
     surface->append(surface, list);
@@ -1007,7 +1007,7 @@ s32 evtSelStateCreate(s32 countLimit, s16 frames, s32 firstValue, s32 secondValu
     if (evtSelectionStateActive != 0) {
         evtSelStateDestroy();
     }
-    selectionState = sdfAllocAndClearQuadwords(EVT_SELECTION_ALLOCATION_BYTES);
+    selectionState = sdfChipAllocZeroDirect(EVT_SELECTION_ALLOCATION_BYTES);
     evtSelectionState = selectionState;
     if (countLimit == 0) {
         selectionState->limit = EVT_SEL_STATE_UNBOUNDED_LIMIT;
@@ -2180,3 +2180,4 @@ INCLUDE_SDATA(const s32, "game/code_00107FD8", scrHandleCount);
 INCLUDE_SDATA(const s32, "game/code_00107FD8", scrHandleFirst);
 
 INCLUDE_SDATA(const s32, "game/code_00107FD8", scrHandleLast);
+

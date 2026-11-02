@@ -888,7 +888,7 @@ void btlInitializeCommandPanelSlotTables(void) {
     BattleCmdPanelSlotTable tableB = D_003A1FC0;
     s32 i;
 
-    btlCommandPanelWork = sdfAllocAndClearQuadwords(0xCC);
+    btlCommandPanelWork = sdfChipAllocZeroDirect(0xCC);
     btlCommandPanelWork->state = BTL_COMMAND_PANEL_STATE_ENTERING;
     btlCommandPanelWork->classIndex = 0;
     btlCommandPanelWork->labelEntry = btlGetActorIdForClass(btlCommandPanelWork->classIndex);
@@ -1904,7 +1904,7 @@ s32 btlCreateMahenPanelTask(const MesWindowConfig *config) {
     if (btlHasRegisteredAphNamePanelTask() != 0) {
         dds3KillProcess(btlGetTrackedProcess(BTL_TRACKED_PROCESS_APH_NAME_PANEL), 0);
     }
-    work = sdfAllocAndClearQuadwords(sizeof(*work));
+    work = sdfChipAllocZeroDirect(sizeof(*work));
     work->config = *config;
     work->state = 0;
     for (i = 0; i < 9; i++) {
@@ -1975,7 +1975,7 @@ s32 btlCreateAnalysisPanelTask(BtlUnit *unit, s32 duration) {
     if (btlHasRegisteredAphNamePanelTask() != 0) {
         dds3KillProcess(btlGetTrackedProcess(BTL_TRACKED_PROCESS_APH_NAME_PANEL), 0);
     }
-    data = sdfAllocAndClearQuadwords(sizeof(*data));
+    data = sdfChipAllocZeroDirect(sizeof(*data));
     data->transitionState = BTL_ANALYSIS_PANEL_TRANSITION_ENTERING;
     data->page = 0;
     data->x = -20;
@@ -2052,7 +2052,7 @@ s32 btlCreateGuidePanelTask(s32 windowIndex, s32 entryIndex) {
     if (btlIsNamedBattleTaskRegistered() != 0) {
         dds3KillProcess(btlGetTrackedProcess(BTL_TRACKED_PROCESS_MAHEN_PANEL), 0);
     }
-    data = sdfAllocAndClearQuadwords(sizeof(*data));
+    data = sdfChipAllocZeroDirect(sizeof(*data));
     data->state = BTL_GUIDE_PANEL_STATE_FADE_IN;
     data->unk1C = 0x18;
     data->y = 0x60;
@@ -2168,7 +2168,7 @@ s32 btlCreatePhaseChangePanelTask(s32 variant) {
         battle->battleFlags |= 0x200;
     }
     btlTrackedTaskHandles->phaseGate = 0;
-    work = sdfAllocAndClearQuadwords(sizeof(*work));
+    work = sdfChipAllocZeroDirect(sizeof(*work));
     if (variant == 0) {
         work->variant = 0;
         points = &firstPoints;
@@ -2230,7 +2230,7 @@ s32 btlCreateSkillNamePanel(const u8 *text) {
     if (btlIsNamedBattleTaskRegistered() != 0) {
         dds3KillProcess(btlGetTrackedProcess(BTL_TRACKED_PROCESS_MAHEN_PANEL), 0);
     }
-    work = sdfAllocAndClearQuadwords(sizeof(*work));
+    work = sdfChipAllocZeroDirect(sizeof(*work));
     work->text = text;
     work->frames = 30;
     work->fade = 0;
@@ -2293,7 +2293,7 @@ s32 btlReplaceDialogTasksAndQueueMessage(s32 windowIndex, s32 entryIndex) {
     if (btlHasRegisteredAphNamePanelTask() != 0) {
         dds3KillProcess(task, 0);
     }
-    data = (MsgQueueTaskData *)sdfAllocAndClearQuadwords(0x40);
+    data = (MsgQueueTaskData *)sdfChipAllocZeroDirect(0x40);
     if (btlHasRegisteredSkillNamePanelTask() != 0) {
         dds3KillProcess(btlGetTrackedProcess(BTL_TRACKED_PROCESS_SKILL_NAME_PANEL), 0);
     }
@@ -3513,7 +3513,7 @@ extern void btlReleaseRegisteredChildTaskWork(dds3ProcessID_t *);
 
 void btlStartRegisteredChildTask(void) {
     s32 context = (s32)(u32)btlGetRuntime();
-    u32 data = (u32)sdfAllocAndClearQuadwords(sizeof(BattleRegisteredPanelWork));
+    u32 data = (u32)sdfChipAllocZeroDirect(sizeof(BattleRegisteredPanelWork));
     dds3ProcessID_t *task = dds3StartProcess(D_003BB3C0, 0x2B0E, 1, 1, btlUpdateRegisteredPanelTask, btlReleaseRegisteredChildTaskWork, data);
     dds3LinkProcess((dds3ProcessID_t *)*(u32 *)(context + 0x29C), task);
     btlSetTrackedProcess(BTL_TRACKED_PROCESS_REGISTERED_ACTOR_PANEL_CHILD, task);
@@ -4171,8 +4171,8 @@ void btlInitializeCommandOptionState(BattleSceneObject *object) {
     s32 extent;
 
     memcpy(initialRows, D_003A2998, sizeof(initialRows));
-    btlCommandSelectionHighlightWork = sdfAllocAndClearQuadwords(0x38);
-    work = sdfAllocAndClearQuadwords(sizeof(BattleCommandLayoutWork));
+    btlCommandSelectionHighlightWork = sdfChipAllocZeroDirect(0x38);
+    work = sdfChipAllocZeroDirect(sizeof(BattleCommandLayoutWork));
     extent = 180;
     btlCommandOptionAnimationWork = (u32)work;
     slot = &btlResourceBlock->resA->workEntries[0x10];
@@ -4649,7 +4649,7 @@ void btlCreateSelectionTrailTask(s32 unused, s32 previousRow, s32 targetRow) {
     if (task != NULL) {
         dds3KillProcess(task, 0);
     }
-    work = sdfAllocAndClearQuadwords(sizeof(*work));
+    work = sdfChipAllocZeroDirect(sizeof(*work));
     if (previousRow < targetRow) {
         distance = (targetRow - previousRow) * 23;
         work->direction = 1;
@@ -4963,7 +4963,7 @@ void btlReleaseDialogTaskData(dds3ProcessID_t *task) {
 void btlCreateMessageWindow(void) {
     BtlCommandHintWork *window;
     btlGetRuntime();
-    window = sdfAllocAndClearQuadwords(0x40);
+    window = sdfChipAllocZeroDirect(0x40);
     D_003BB3DC = window;
     window->unk10 = 0x14;
     window->colors[0] = 0x1800080;
@@ -5527,7 +5527,7 @@ void btlInitializeSelectionWork(void) {
     s16 *state;
     s32 i;
     memcpy(initial, btlSoundSlotDefaults, sizeof(initial));
-    allocated = sdfAllocAndClearQuadwords(0x30);
+    allocated = sdfChipAllocZeroDirect(0x30);
     btlLinkedSelectionTaskBuffer = allocated;
     state = allocated->rowFade;
     source = (u32 *)initial;
@@ -9270,7 +9270,7 @@ void btlOpenBattleCommandPanel(BtlTask *task) {
 
     if (dds3SearchProcessName(btlCommandPanelTaskNameRef) == 0) {
         scene = (BtlState *)btlGetRuntime();
-        object = sdfAllocAndClearQuadwords(sizeof(*object));
+        object = sdfChipAllocZeroDirect(sizeof(*object));
         fldInitializeSceneObject(object, task);
         handle = dds3StartProcess(btlCommandPanelTaskNameRef, 0x2B0E, 1, 1,
                                btlUpdateBattleSceneCommands, btlReleaseCommandPanelTask, (u32)object);
@@ -9288,7 +9288,7 @@ void btlOpenBattleCommandPanel(BtlTask *task) {
                 scene->battleFlags &= ~0x100000;
                 handle = dds3StartProcess(D_003BB3D4, 0x2B0E, 1, 1,
                                        btlUpdateCommandNoticeTask, btlReleaseWindowTask,
-                                       (u32)sdfAllocAndClearQuadwords(0x18));
+                                       (u32)sdfChipAllocZeroDirect(0x18));
                 dds3LinkProcess(scene->scriptOwner, handle);
                 btlSetTrackedProcess(BTL_TRACKED_PROCESS_TUTORIAL_COMMAND_NOTICE, handle);
                 fclDestroyMessage();
@@ -9300,7 +9300,7 @@ void btlOpenBattleCommandPanel(BtlTask *task) {
                 scene->battleFlags &= ~0x100000;
                 handle = dds3StartProcess(D_003BB3D0, 0x2B0E, 1, 1,
                                        btlUpdateLinkageNoticeTask, btlFinishTrackedBattleTaskAndCloseWindow,
-                                       (u32)sdfAllocAndClearQuadwords(0x18));
+                                       (u32)sdfChipAllocZeroDirect(0x18));
                 dds3LinkProcess(scene->scriptOwner, handle);
                 btlSetTrackedProcess(BTL_TRACKED_PROCESS_LINKAGE_NOTICE, handle);
                 fclDestroyMessage();
@@ -9967,7 +9967,7 @@ SceneAiWork *btlCreateTargetSelectionWork(BtlTask *source) {
     BtlState *battle;
 
     battle = (BtlState *)btlGetRuntime();
-    work = (SceneAiWork *)sdfAllocAndClearQuadwords(sizeof(SceneAiWork));
+    work = (SceneAiWork *)sdfChipAllocZeroDirect(sizeof(SceneAiWork));
     object = (BattleSceneObject *)dds3GetProcessData(
         dds3SearchProcessName(btlCommandPanelTaskNameRef));
     work->eligibleTargets = btlAllocateIndexList(0xD);
@@ -11109,11 +11109,11 @@ void btlAllocatePanelTaskWork(void) {
     do {
         btlGetRuntime();
     } while (0);
-    btlTrackedTaskHandles = sdfAllocAndClearQuadwords(0x58);
+    btlTrackedTaskHandles = sdfChipAllocZeroDirect(0x58);
     memset(btlTrackedTaskHandles, 0, 0x38);
-    D_003BD83C = sdfAllocAndClearQuadwords(0xD8);
-    D_003BD840[0] = sdfAllocAndClearQuadwords(0x274);
-    D_003BD840[1] = sdfAllocAndClearQuadwords(0x274);
+    D_003BD83C = sdfChipAllocZeroDirect(0xD8);
+    D_003BD840[0] = sdfChipAllocZeroDirect(0x274);
+    D_003BD840[1] = sdfChipAllocZeroDirect(0x274);
 }
 
 static inline void btlDestroyTrackedTaskIfPresent(BtlTrackedProcessSlot slot) {
@@ -11259,3 +11259,4 @@ INCLUDE_SDATA(const s32, "game/code_001A9780", D_003BB5C8);
 INCLUDE_SDATA(const s32, "game/code_001A9780", D_003BB5D0);
 
 INCLUDE_SDATA(const s32, "game/code_001A9780", D_003BB5D8);
+

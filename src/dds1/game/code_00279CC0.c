@@ -711,7 +711,7 @@ void mnuDrawBackdrop(MenuAssets *assets, s32 option) {
 
 
 MenuList *mnuCreateListState(s32 id, s32 visibleCount, s32 rowSpacing) {
-    MenuList *item = (MenuList *)sdfAllocAndClearQuadwords(sizeof(MenuList));
+    MenuList *item = (MenuList *)sdfChipAllocZeroDirect(sizeof(MenuList));
     item->id = id;
     item->visibleCount = visibleCount;
     item->rowStep = rowSpacing * 8;
@@ -762,7 +762,7 @@ MenuListNode *mnuListAppendNode(list, text)
     MenuList *list;
     const void *text;
 {
-    MenuListNode *node = sdfAllocAndClearQuadwords(sizeof(MenuListNode));
+    MenuListNode *node = sdfChipAllocZeroDirect(sizeof(MenuListNode));
     s32 index = list->count;
     MenuListNode *last;
 
@@ -832,7 +832,7 @@ MenuListNode *mnuInsertListNodeRelativeToAnchor(MenuList *list, MenuListNode *an
         return node;
     }
 
-    node = sdfAllocAndClearQuadwords(sizeof(MenuListNode));
+    node = sdfChipAllocZeroDirect(sizeof(MenuListNode));
     node->text = text;
     if (options & MNU_LIST_INSERT_AFTER_ANCHOR) {
         node->prev = anchor;
@@ -1215,3 +1215,4 @@ u32 mnuTestListFlagTwo(u32 *flags) {
 INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2330);
 
 INCLUDE_RODATA(const s32, "game/code_00279CC0", D_003B2348);
+

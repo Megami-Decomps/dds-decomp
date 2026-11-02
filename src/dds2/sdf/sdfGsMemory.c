@@ -36,7 +36,7 @@ enum {
     SDF_PSMZ16S = 0x3A
 };
 
-s32 sdfGsMemAbsorbFreePredecessor(sdfGsMemSlice_t *block);
+s32 sdfGsMemCheckMerge(sdfGsMemSlice_t *block);
 
 extern void (*sdfGrCaptureTarget)(u8 *);
 
@@ -227,7 +227,7 @@ sdfGsMemSlice_t *sdfGsMemAllocRect(s32 width, s32 height, s32 format, s32 alloca
 }
 
 /* Absorb the previous free range into block; return one when its record is released. */
-s32 sdfGsMemAbsorbFreePredecessor(sdfGsMemSlice_t *block) {
+s32 sdfGsMemCheckMerge(sdfGsMemSlice_t *block) {
     sdfGsMemSlice_t *previousBlock = block->prev;
 
     if (previousBlock != NULL) {
@@ -272,10 +272,10 @@ void sdfGsMemFree(sdfGsMemSlice_t *textureBlock) {
     }
     restoreInterrupts = DIntr();
     textureBlock->allocationMode = 0;
-    sdfGsMemAbsorbFreePredecessor(textureBlock);
+    sdfGsMemCheckMerge(textureBlock);
     nextBlock = textureBlock->next;
     if (nextBlock != NULL && nextBlock->allocationMode == 0) {
-        sdfGsMemAbsorbFreePredecessor(nextBlock);
+        sdfGsMemCheckMerge(nextBlock);
     }
     if (restoreInterrupts != 0) {
         EIntr();

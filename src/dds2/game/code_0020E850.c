@@ -1378,7 +1378,7 @@ s32 btlRandomInclusiveRange(s32 lower, s32 upper) {
 }
 
 s32 btlAllocAndCheck(ActionStateLink *task) {
-    BtlAiScratchWork *work = sdfAllocAndClearQuadwords(sizeof(BtlAiScratchWork));
+    BtlAiScratchWork *work = sdfChipAllocZeroDirect(sizeof(BtlAiScratchWork));
     BtlUnit *actor = task->unit;
 
     btlActionScratchWork = work;
@@ -1421,7 +1421,7 @@ void btlResetBattleHistoryCounters(void) {
 }
 
 s32 btlDispatchPackedActionWithScratch(BtlAiScratchActor actorTask, BtlUnit *owner, s32 mask) {
-    BtlAiScratchWork *work = sdfAllocAndClearQuadwords(sizeof(BtlAiScratchWork));
+    BtlAiScratchWork *work = sdfChipAllocZeroDirect(sizeof(BtlAiScratchWork));
     s32 result;
 
     btlActionScratchWork = work;
@@ -1449,7 +1449,7 @@ extern void btlSelectTierMatrixAiRoute(BtlUnit *unit, s32 species, s32 *row, s32
 
 /* Choose a row and a weighted slot of the unit's species AI table and run that action. */
 s32 btlRunRandomWeightedAiTableAction(ActionStateLink *task) {
-    BtlAiScratchWork *work = sdfAllocAndClearQuadwords(sizeof(BtlAiScratchWork));
+    BtlAiScratchWork *work = sdfChipAllocZeroDirect(sizeof(BtlAiScratchWork));
     BtlUnit *unit;
     u16 species;
     s32 row;
@@ -1608,3 +1608,4 @@ INCLUDE_SDATA(const s32, "game/code_0020E850", btlRandomState);
 INCLUDE_SDATA(const s32, "game/code_0020E850", btlPreviousAiCandidateBucket);
 
 INCLUDE_SDATA(const s32, "game/code_0020E850", btlActionScratchWork);
+

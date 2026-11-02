@@ -6046,7 +6046,7 @@ void camAimRotation(CamAim *obj, void *dst)
 
 
 EffectSurfaceNode *fileCreateSurfaceLoaderState(s32 capacity) {
-    EffectSurfaceNode *rec = (EffectSurfaceNode *)sdfAllocAndClearQuadwords(sizeof(EffectSurfaceNode));
+    EffectSurfaceNode *rec = (EffectSurfaceNode *)sdfChipAllocZeroDirect(sizeof(EffectSurfaceNode));
     u32 color = 0x80808080;
 
     rec->handleCount = capacity;
@@ -8847,3 +8847,4 @@ INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437E18);
 INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437E20);
 
 INCLUDE_SDATA(const s32, "game/code_002C96D0", D_00437E28);
+

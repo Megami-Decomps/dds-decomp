@@ -24,7 +24,7 @@ extern Dds3IntrusiveNodeCallbacks D_003BAAD8;
 
 /* Allocate a rectangle record and register it with its owner list. */
 Dds3L2dRectangle *dds3FontReqAddBox(s32 left, s32 top, s32 depth, s32 width, s32 height, s32 color) {
-    Dds3L2dRectangle *rect = sdfAllocAndClearQuadwords(sizeof(Dds3L2dRectangle));
+    Dds3L2dRectangle *rect = sdfChipAllocZeroDirect(sizeof(Dds3L2dRectangle));
 
     rect->left = left;
     rect->top = top;
@@ -37,3 +37,4 @@ Dds3L2dRectangle *dds3FontReqAddBox(s32 left, s32 top, s32 depth, s32 width, s32
 }
 
 INCLUDE_SDATA(const s32, "misc/l2d", D_003BAAD8);
+

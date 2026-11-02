@@ -632,7 +632,7 @@ void *sdfDevPrintf(s32 source, s32 end, s32 argument, s32 index, const char *fmt
     SifCommand packet;
     __builtin_va_list args;
 
-    sdfPktInit(&packet, source, end, argument, index);
+    sdfDevSetPrintCB(&packet, source, end, argument, index);
     __builtin_stdarg_start(args, fmt);
     return sdfDevVprintf(&packet, fmt, args);
 }
@@ -641,7 +641,7 @@ void sdfPktSetCmd(SifCommand *packet, s32 index) {
     packet->command = sdfDevConsColorTable[index];
 }
 
-void sdfPktInit(SifCommand *packet, s32 source, s32 end, s32 argument, s32 index) {
+void sdfDevSetPrintCB(SifCommand *packet, s32 source, s32 end, s32 argument, s32 index) {
     packet->source = source;
     packet->end = end;
     packet->argument = argument;

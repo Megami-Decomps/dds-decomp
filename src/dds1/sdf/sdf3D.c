@@ -339,7 +339,7 @@ void sdf3DLinkInitPacket(sdfDrawTag_t *packetList, DmaPacketHeader *packet) {
     packet->unknown10 = 0;
     packet->unknown18 = 0;
     packet->unknown1C = 0;
-    sdfAppendReferencePacket(packetList, (u32)packet);
+    sdfDrawTagLinkRef(packetList, (u32)packet);
 }
 
 extern void sdfTmxSetHeader(SdfTextureFileHeader *, s32, s32, s32, s32, s32);

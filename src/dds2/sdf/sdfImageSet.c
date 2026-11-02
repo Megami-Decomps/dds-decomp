@@ -197,7 +197,7 @@ void sdfImageSetChainReleaseMem(void *address) {
     SdfTextureReleaseHead *entry;
 
     if (address != NULL) {
-        entry = sdfAllocAndClearQuadwords(sizeof(SdfTexReleaseEntry));
+        entry = sdfChipAllocZeroDirect(sizeof(SdfTexReleaseEntry));
         if (sdfChipIsInRange(address) != SDF_CHIP_ADDRESS_OUTSIDE_RANGE) {
             entry->chipMemory = address;
             entry->releaseMode = SDF_TEX_RELEASE_CHIP_ADDRESS;

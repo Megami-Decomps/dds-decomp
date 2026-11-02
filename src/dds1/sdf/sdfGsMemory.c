@@ -222,7 +222,7 @@ sdfGsMemSlice_t *sdfGsMemAllocRect(s32 width, s32 height, s32 format, s32 alloca
 }
 
 /* Absorb the previous free range into block; return one when its record is released. */
-s32 sdfGsMemAbsorbFreePredecessor(sdfGsMemSlice_t *block) {
+s32 sdfGsMemCheckMerge(sdfGsMemSlice_t *block) {
     sdfGsMemSlice_t *previousBlock = block->prev;
 
     if (previousBlock == NULL || previousBlock->allocationMode != 0) {
@@ -261,10 +261,10 @@ void sdfGsMemFree(sdfGsMemSlice_t *textureBlock) {
     }
     restoreInterrupts = DIntr();
     textureBlock->allocationMode = 0;
-    sdfGsMemAbsorbFreePredecessor(textureBlock);
+    sdfGsMemCheckMerge(textureBlock);
     if (textureBlock->next != NULL) {
         if (textureBlock->next->allocationMode == 0) {
-            sdfGsMemAbsorbFreePredecessor(textureBlock->next);
+            sdfGsMemCheckMerge(textureBlock->next);
         }
     }
     if (restoreInterrupts != 0) {

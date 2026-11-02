@@ -429,7 +429,7 @@ void p2sdPlaySE(s32 trackId, s32 volume, s32 pan) {
 }
 
 /* Map a wrapped listener-relative angle and distance onto sequence volume/pan. */
-void sndSetSpatialSequenceVolumePan(s32 trackId, f32 angle, f32 distance) {
+void p2sdPlaySeDeg(s32 trackId, f32 angle, f32 distance) {
     s32 degrees = (s32)angle % 360;
     s32 side = 1;
     s32 pan;

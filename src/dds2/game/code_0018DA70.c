@@ -96,7 +96,7 @@ struct sdfGrRefPacketHeader_t;
 extern sdfGrOt_t D_003803E8;
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 #include "sdf_packet_alloc.h"
-extern void sdfBuildFrameRegisterReference(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
+extern void sdfGrSetFrameMaskReset(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
 
 extern u32 dds3NullDrawProc(void);
 
@@ -299,7 +299,7 @@ void effDrawBlurRectangle(const dds3Effect_Blur_t *source)
     }
 }
 
-extern void sdfBuildMaskedFrameRegisterReference(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
+extern void sdfGrSetFrameMaskRGB(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
 
 void effAppendBlurRenderState(struct sdfDrawTag_t *list, s32 blendControl, sdfTexHandle_t *resource)
 {
@@ -309,7 +309,7 @@ void effAppendBlurRenderState(struct sdfDrawTag_t *list, s32 blendControl, sdfTe
     void *tag;
 
     framePacket = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
-    sdfBuildMaskedFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, framePacket, 1);
+    sdfGrSetFrameMaskRGB(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, framePacket, 1);
     sdfDrawTagLinkRefGif(list, (u32)framePacket);
 
     blendPacket = (u64 *)sdfGrAllocPacketBuff(0x40);
@@ -392,7 +392,7 @@ void effAppendBlurRectanglePackets(struct sdfDrawTag_t *list, const BlurSource *
 void effDrawBlurListWithFramePacket(struct sdfDrawTag_t *list) {
     SdfDmaReferenceChainPacket *packet = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
 
-    sdfBuildFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, packet, 1);
+    sdfGrSetFrameMaskReset(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, packet, 1);
     sdfDrawTagLinkRefGif(list, (u32)packet);
     D_003803E8.append(&D_003803E8, list);
 }

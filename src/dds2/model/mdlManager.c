@@ -420,7 +420,7 @@ extern void TbMbAbLoadEnd(MdlLoadRequest *);
  * entry. Execute the group job now only when no motion load is pending. */
 void MbLoadCallback(struct FileRequest *resource, MdlLoadRequest *request) {
     request->payload.requestAllocation = fileGetMemHandle(resource);
-    request->payload.itemList = (struct sdfModelDef_t *)sdfRelocatePackedResourcePayload(
+    request->payload.itemList = (struct sdfModelDef_t *)sdfFixupModelBinary(
         (SdfPackedRelocationHeader *)fileGetLoadPtr(resource));
     fileRequestFreeIfComplete(resource);
     if (request->awaitingMotionLoad == 0) {
@@ -432,7 +432,7 @@ void MbLoadCallback(struct FileRequest *resource, MdlLoadRequest *request) {
  * the group job. This callback completes the additional file request. */
 void AbLoadCallback(struct FileRequest *resource, MdlLoadRequest *request) {
     request->payload.motionResource = fileGetMemHandle(resource);
-    request->payload.motionTable = (struct MotionTable *)sdfRelocatePackedResourceWordsFromHeader(
+    request->payload.motionTable = (struct MotionTable *)sdfFixupMotionBinary(
         (SdfPackedRelocationHeader *)fileGetLoadPtr(resource));
     fileRequestFreeIfComplete(resource);
     TbMbAbLoadEnd(request);
@@ -495,7 +495,7 @@ MdlAssetRequestResult mdlPrepare(
                               MDL_MOTION_REGISTRATION_CREATE_ON_MODEL_LOAD, pathBuffer,
                                   sdfCreateSemaphoreFromOptions, 0);
     } else {
-        request = sdfAllocAndClearQuadwords(sizeof(MdlLoadRequest));
+        request = sdfChipAllocZeroDirect(sizeof(MdlLoadRequest));
         mdlLoadRequestSetRegistrationMode(
             request, MDL_REGISTRATION_OWNS_GROUP_RESOURCES |
                          MDL_MOTION_REGISTRATION_CREATE_ON_MODEL_LOAD);
@@ -570,7 +570,7 @@ void mdlSetBlur(dds3ModelHandle_t *ctx, MdlBlurSpawnInterval spawnInterval,
 
     mdlFreeBlur(ctx);
     if (snapshotCapacity > 0) {
-        deviceList = sdfAllocAndClearQuadwords(sizeof(MdlDevList));
+        deviceList = sdfChipAllocZeroDirect(sizeof(MdlDevList));
         deviceList->growStep = 1;
         ctx->devList = deviceList;
         deviceList->usedCount = snapshotCapacity;
@@ -668,7 +668,7 @@ extern sdfMotionCtrlr_t *mdlCreateMotion(dds3ModelHandle_t *owner, MdlMotionSear
  * start every populated slot's motion owner. */
 dds3ModelHandle_t *mdlLoad(u32 group, u32 id) {
     dds3ModelResrc_t *node = mdlLoadPrepare(group, id);
-    dds3ModelHandle_t *ctx = sdfAllocAndClearQuadwords(sizeof(dds3ModelHandle_t));
+    dds3ModelHandle_t *ctx = sdfChipAllocZeroDirect(sizeof(dds3ModelHandle_t));
     dds3ModelHandle_t *head;
     sdfModelRootNode_t *inner;
     f32 modelScale;
@@ -1455,7 +1455,7 @@ extern void mdlFileLoadCallback(FilePacRequest *, MdlDoneJob *);
  * here; otherwise the completion callback path owns cleanup. Always return zero.
  * Preserve the generic callback and user-data word parameters. */
 s32 mdlFileLoad(s32 group, s32 id, MdlRegistrationMode registrationMode, const char *requestPath, void (*onComplete)(u32), u32 callbackArg) {
-    MdlDoneJob *completionJob = sdfAllocAndClearQuadwords(MDL_DONE_JOB_BYTES);
+    MdlDoneJob *completionJob = sdfChipAllocZeroDirect(MDL_DONE_JOB_BYTES);
     FilePacRequest *requestSlot;
 
     completionJob->group = group;
@@ -1477,3 +1477,4 @@ s32 mdlFileLoad(s32 group, s32 id, MdlRegistrationMode registrationMode, const c
 INCLUDE_SDATA(const s32, "model/mdlManager", D_00436FA0);
 
 INCLUDE_SDATA(const s32, "model/mdlManager", D_00436FA8);
+

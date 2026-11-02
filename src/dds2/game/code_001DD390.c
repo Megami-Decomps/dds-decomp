@@ -2156,7 +2156,7 @@ u8 btlEvalTaskCondition(BtlTaskCondition *condition, s32 currentCount) {
 
 /* Append a cleared task; positive size exposes argument bytes after the header. */
 BtlRuntimeTask *btlAllocTask(s32 size) {
-    BtlRuntimeTask *task = sdfAllocAndClearQuadwords(size + 0x70);
+    BtlRuntimeTask *task = sdfChipAllocZeroDirect(size + 0x70);
     BtlState *work;
     if (size > 0) {
         task->args = task + 1;
@@ -5305,7 +5305,7 @@ BtlUnit *btlFindUnitByModeFlagged(s32 unitId) {
 
 /* Allocate a native header followed by capacity pointer entries. */
 BtlIndexList *btlAllocateIndexList(s32 capacity) {
-    BtlIndexList *list = sdfAllocAndClearQuadwords(capacity * 4 + 12);
+    BtlIndexList *list = sdfChipAllocZeroDirect(capacity * 4 + 12);
     list->capacity = capacity;
     list->entries = (struct BtlUnit **)(list + 1);
     list->count = 0;
@@ -6394,3 +6394,4 @@ INCLUDE_SDATA(const s32, "game/code_001DD390", D_00436A98);
 INCLUDE_SDATA(const s32, "game/code_001DD390", D_00436A9C);
 
 INCLUDE_SDATA(const s32, "game/code_001DD390", D_00436AA0);
+

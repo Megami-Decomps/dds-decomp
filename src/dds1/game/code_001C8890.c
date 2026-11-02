@@ -1426,12 +1426,6 @@ void btlScheduleAttackActionTasks(BtlTask *action) {
 void btlEnterSkillActionState(void) {
 }
 
-INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3648);
-
-INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3658);
-
-INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3670);
-
 #ifdef NON_MATCHING
 #include "btl_motion_transform.h"
 #include "common.h"
@@ -2301,6 +2295,12 @@ void func_001CB410(BtlTask *actor) {
 
 }
 #else
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3648);
+
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3658);
+
+INCLUDE_RODATA(const s32, "game/code_001C8890", D_003A3670);
+
 INCLUDE_ASM(const s32, "game/code_001C8890", func_001CB410);
 #endif
 
@@ -4011,7 +4011,7 @@ void btlDispatchStateHandler(void *object, BtlActionStateIndex index) {
 extern char D_003A3788[]; /* "btl:action seq create[%p]\n" */
 
 BtlTask *btlCreateActionSeq(void) {
-    BtlTask *sequence = sdfAllocAndClearQuadwords(sizeof(*sequence));
+    BtlTask *sequence = sdfChipAllocZeroDirect(sizeof(*sequence));
     BtlState *context;
     BtlTask *head;
 
@@ -4173,3 +4173,4 @@ INCLUDE_SDATA(const s32, "game/code_001C8890", D_003BB5E0);
 INCLUDE_SDATA(const s32, "game/code_001C8890", D_003BB5E8);
 
 INCLUDE_SDATA(const s32, "game/code_001C8890", btlDeferredTaskTail);
+

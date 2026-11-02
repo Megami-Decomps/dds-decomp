@@ -1617,7 +1617,7 @@ u8 fldEsutoMaChk(void) {
 }
 
 void fldConfigureRenderCleanupMessage(void) {
-    sdfStoreMessageWordsAndNotifyConsumer(kwlnSceneSurfaceSets[7], &D_00324F88[0], &D_00324F88[6], &D_00324F88[8], &D_00324F88[7]);
+    sdfModelOtInit(kwlnSceneSurfaceSets[7], &D_00324F88[0], &D_00324F88[6], &D_00324F88[8], &D_00324F88[7]);
 }
 
 #include "fld_encounter_roll_entry.h"
@@ -2548,3 +2548,4 @@ typedef char FieldSequenceRecord_retainCachedAreaResource_offset_check[
 INCLUDE_RODATA(const s32, "game/code_00122030", D_0039FD30);
 
 INCLUDE_RODATA(const s32, "game/code_00122030", D_0039FD40);
+

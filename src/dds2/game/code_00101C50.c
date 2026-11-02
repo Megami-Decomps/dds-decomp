@@ -37,7 +37,7 @@ extern u8 D_00380860[];
 
 extern KwlnFrameDrawBank D_00380870[2];
 
-extern void sdfWaitAndSelectBuffer(void);
+extern void sdfGrInitNewFrame(void);
 
 extern void sdfGrOtInit(sdfGrOt_t *, s32);
 
@@ -101,7 +101,7 @@ s32 dds3FirstProcess(dds3ProcessID_t *task) {
     SdfDrawPacketGroups *packetGroups;
     sdfGrOt_t *drawSink;
 
-    sdfWaitAndSelectBuffer();
+    sdfGrInitNewFrame();
     sdfGrOtInit(sdfGrOtTable, KWLN_FRAME_POOL_NODE_COUNT);
     sdfPreDrawChainInit((SdfPacketChain *)D_00380860);
     kwlnInitializeFrameDrawPackets(bufferIndex);
@@ -272,30 +272,30 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
         sdfPreDrawChainLink((SdfPacketChain *)D_00380860,
             (sdfPreDrawTag_t *)(D_003820F0 - 0x230 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
         providerSurfaces = &sdfGrOtTable[7];
-        sdfStoreMessageWordsAndNotifyConsumer(kwlnSceneSurfaceSets[0], &providerSurfaces[32], &providerSurfaces[33],
+        sdfModelOtInit(kwlnSceneSurfaceSets[0], &providerSurfaces[32], &providerSurfaces[33],
                                               &providerSurfaces[48], &providerSurfaces[49]);
         fldConfigureRenderCleanupMessage();
-        sdfStoreMessageWordsAndNotifyConsumer(kwlnSceneSurfaceSets[8], &providerSurfaces[55], &providerSurfaces[56],
+        sdfModelOtInit(kwlnSceneSurfaceSets[8], &providerSurfaces[55], &providerSurfaces[56],
                                               &providerSurfaces[57], &providerSurfaces[58]);
-        sdfStoreMessageWordsAndNotifyConsumer(kwlnSceneSurfaceSets[9], &providerSurfaces[67], &providerSurfaces[68],
+        sdfModelOtInit(kwlnSceneSurfaceSets[9], &providerSurfaces[67], &providerSurfaces[68],
                                               &providerSurfaces[69], &providerSurfaces[70]);
-        sdfStoreMessageWordsAndNotifyConsumer(kwlnSceneSurfaceSets[1], &providerSurfaces[1], &providerSurfaces[2],
+        sdfModelOtInit(kwlnSceneSurfaceSets[1], &providerSurfaces[1], &providerSurfaces[2],
                                               &providerSurfaces[3], &providerSurfaces[4]);
-        sdfStoreMessageWordsAndNotifyConsumer(kwlnSceneSurfaceSets[2], &providerSurfaces[6], &providerSurfaces[7],
+        sdfModelOtInit(kwlnSceneSurfaceSets[2], &providerSurfaces[6], &providerSurfaces[7],
                                               &providerSurfaces[8], &providerSurfaces[9]);
-        sdfStoreMessageWordsAndNotifyConsumer(kwlnSceneSurfaceSets[3], &providerSurfaces[11], &providerSurfaces[12],
+        sdfModelOtInit(kwlnSceneSurfaceSets[3], &providerSurfaces[11], &providerSurfaces[12],
                                               &providerSurfaces[13], &providerSurfaces[14]);
-        sdfStoreMessageWordsAndNotifyConsumer(kwlnSceneSurfaceSets[4], &providerSurfaces[16], &providerSurfaces[17],
+        sdfModelOtInit(kwlnSceneSurfaceSets[4], &providerSurfaces[16], &providerSurfaces[17],
                                               &providerSurfaces[18], &providerSurfaces[19]);
-        sdfStoreMessageWordsAndNotifyConsumer(kwlnSceneSurfaceSets[5], &providerSurfaces[21], &providerSurfaces[22],
+        sdfModelOtInit(kwlnSceneSurfaceSets[5], &providerSurfaces[21], &providerSurfaces[22],
                                               &providerSurfaces[23], &providerSurfaces[24]);
-        sdfStoreMessageWordsAndNotifyConsumer(kwlnSceneSurfaceSets[6], &providerSurfaces[37], &providerSurfaces[38],
+        sdfModelOtInit(kwlnSceneSurfaceSets[6], &providerSurfaces[37], &providerSurfaces[38],
                                               &providerSurfaces[39], &providerSurfaces[40]);
-        sdfStoreMessageWordsAndNotifyConsumer(kwlnSceneSurfaceSets[10], &providerSurfaces[42], &providerSurfaces[43],
+        sdfModelOtInit(kwlnSceneSurfaceSets[10], &providerSurfaces[42], &providerSurfaces[43],
                                               &providerSurfaces[46], &providerSurfaces[47]);
-        sdfStoreMessageWordsAndNotifyConsumer(kwlnSceneSurfaceSets[11], &providerSurfaces[79], &providerSurfaces[80],
+        sdfModelOtInit(kwlnSceneSurfaceSets[11], &providerSurfaces[79], &providerSurfaces[80],
                                               &providerSurfaces[81], &providerSurfaces[82]);
-        sdfStoreMessageWordsAndNotifyConsumer(kwlnSceneSurfaceSets[12], &providerSurfaces[-5], &providerSurfaces[-4],
+        sdfModelOtInit(kwlnSceneSurfaceSets[12], &providerSurfaces[-5], &providerSurfaces[-4],
                                               &providerSurfaces[-3], &providerSurfaces[-2]);
         sdf3DSetDefaultLight((const struct SdfDmaTagHeader *)(D_003820F0 + bufferIndex * 0x1F40 + 0xD0));
         sdf3DSetDefaultFog((u32)viewFrustum);

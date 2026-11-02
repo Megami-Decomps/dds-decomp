@@ -276,7 +276,7 @@ extern MenuPanelPositionTable2 D_003B23A0;
 
 /* Allocate a zeroed window and its list; the last two arguments configure list rows. */
 MenuWindowContainer *mnuCreateWindowContainer(s32 id, s32 width, s32 height, s32 visibleCount, s32 rowSpacing) {
-    MenuWindowContainer *window = (MenuWindowContainer *)sdfAllocAndClearQuadwords(sizeof(MenuWindowContainer));
+    MenuWindowContainer *window = (MenuWindowContainer *)sdfChipAllocZeroDirect(sizeof(MenuWindowContainer));
     MenuList *list;
     window->width = width;
     window->height = height;
@@ -722,7 +722,7 @@ extern MenuPanelSlotIndices D_003B2368;
 MenuPanelHandles *mnuCreatePanelSpriteHandles(u32 panelKind, EffectSlotSet *resource,
                                              EffMappedResource *target) {
     MenuPanelSlotIndices indices = D_003B2368;
-    MenuPanelHandles *panel = (MenuPanelHandles *)sdfAllocAndClearQuadwords(sizeof(MenuPanelHandles));
+    MenuPanelHandles *panel = (MenuPanelHandles *)sdfChipAllocZeroDirect(sizeof(MenuPanelHandles));
     s32 i;
 
     panel->panelKind = panelKind;
@@ -1091,7 +1091,7 @@ void mnuSortItems(MenuList *menu, s32 keyIndex, s32 ascending) {
 void mnuAllocateListEntries(s32 *list) {
     u32 slotIndex;
     for (slotIndex = 0; slotIndex < MNU_FADING_SLOT_COUNT; slotIndex++) {
-        list[slotIndex + 1] = sdfAllocAndClearQuadwords(MNU_FADING_SLOT_BYTES);
+        list[slotIndex + 1] = sdfChipAllocZeroDirect(MNU_FADING_SLOT_BYTES);
     }
 }
 

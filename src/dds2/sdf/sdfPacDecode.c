@@ -102,7 +102,7 @@ void sdfPacUseSrc(PacState *state, s32 byteCount) {
 }
 
 /* Align the stream, then report a packet header and its payload byte count to the callback. */
-void sdfPacAdvanceCallbackBoundary(PacState *state) {
+void sdfPacNewBlock(PacState *state) {
     SdfPacStreamPacketHeader *inputHeader;
     u32 alignmentOffset;
     u32 packetBytes;
@@ -141,7 +141,7 @@ void sdfPacAdvanceCallbackBoundary(PacState *state) {
 }
 
 /* Notify completion: FINISHED stops decoding; DROP_TAIL releases the queue tail. */
-void sdfDecodePacNodeAndAdvanceTail(PacState *state) {
+void sdfPacEndBlock(PacState *state) {
     SdfPacPacketCallbackResult callbackResult;
     PacWork *tailPacket;
     PacWork *scanPacket;
@@ -192,7 +192,7 @@ void sdfPacTmxDecoderInit(PacState *state, SdfPacStreamPacketHeader *packet);
 
 void sdfPacMemDecoderFuncInit(PacState *state, SdfPacStreamPacketHeader *packet);
 
-void sdfDecodePacNodeAndAdvanceTail(PacState *state);
+void sdfPacEndBlock(PacState *state);
 
 void sdfPacModelDecoderEndFunc(PacState *state);
 
@@ -202,11 +202,11 @@ void sdfPacTmxDecoderInitFunc(PacState *state, SdfPacStreamPacketHeader *packet,
 
 void sdfPacTmxDecoderEndFunc(PacState *state);
 
-void sdfPacAdvanceAllocationEntry(PacState *state);
+void sdfPacTexListDecoderTmxBodyEndFunc(PacState *state);
 
 void sdfPacResetOutputToAllocationEntry(PacState *state);
 
-extern void sdfPacAdvanceCallbackBoundary(PacState *state);
+extern void sdfPacNewBlock(PacState *state);
 
 /* Feed one input span through packet-boundary, skip, and decoder phases. */
 SdfPacPhase sdfPacDecode(PacState *state, const u8 *input, s32 inputByteCount) {
@@ -219,7 +219,7 @@ SdfPacPhase sdfPacDecode(PacState *state, const u8 *input, s32 inputByteCount) {
         case SDF_PAC_PHASE_COMPLETE:
             return SDF_PAC_PHASE_COMPLETE;
         case SDF_PAC_PHASE_CALLBACK_BOUNDARY:
-            sdfPacAdvanceCallbackBoundary(state);
+            sdfPacNewBlock(state);
             break;
         case SDF_PAC_PHASE_SKIP_BYTES:
             consumeBytes = state->pendingBytes;
@@ -243,7 +243,7 @@ SdfPacPhase sdfPacDecode(PacState *state, const u8 *input, s32 inputByteCount) {
 /* Queue a private copy of the packet header and any extension bytes. */
 PacWork *sdfPacNewResrc(PacState *state, const SdfPacStreamPacketHeader *packet) {
     s32 extensionBytes = packet->flags & PAC_EXTENSION_BYTES_MASK;
-    PacWork *node = sdfAllocAndClearQuadwords(extensionBytes + sizeof(PacWork) + PAC_HEADER_BYTES);
+    PacWork *node = sdfChipAllocZeroDirect(extensionBytes + sizeof(PacWork) + PAC_HEADER_BYTES);
     node->owner = state;
     memcpy(node->packet, packet, extensionBytes + PAC_HEADER_BYTES);
     if (state->queueTail == NULL) {
@@ -408,7 +408,7 @@ void sdfPacMemDecoderFuncInit(PacState *state, SdfPacStreamPacketHeader *packet)
 /* Begin a regular payload; completion is the normal packet finalizer. */
 void sdfPacMemDecoderInit(PacState *state, SdfPacStreamPacketHeader *packet) {
     sdfPacMemDecoderFuncInit(state, packet);
-    state->onComplete = sdfDecodePacNodeAndAdvanceTail;
+    state->onComplete = sdfPacEndBlock;
 }
 
 /* Apply the relocation record at the front of the queued payload. */
@@ -422,7 +422,7 @@ void sdfPacModelDecoderEndFunc(PacState *state) {
         sdfAddressResolver((s32 *)payload, (u32)payload, payload + record->tableOffset, tableBytes);
         record->tableBytes = 0;
     }
-    sdfDecodePacNodeAndAdvanceTail(state);
+    sdfPacEndBlock(state);
 }
 
 /* Begin a payload that must be relocated before normal finalization. */
@@ -442,7 +442,7 @@ void sdfPacMotionDecoderEndFunc(PacState *state) {
         sdfAddressResolver((s32 *)payload, (u32)payload, payload + record->tableOffset, tableBytes);
         record->tableBytes = 0;
     }
-    sdfDecodePacNodeAndAdvanceTail(state);
+    sdfPacEndBlock(state);
 }
 
 /* Begin the second relocation-command variant. */
@@ -549,7 +549,7 @@ void sdfPacTmxDecoderInitFunc(PacState *state, SdfPacStreamPacketHeader *packet,
 void sdfPacTmxDecoderEndFunc(PacState *state) {
     state->queueTail->resourceHandle = state->slot.resource->texture;
     sdfChipFreeDirect(state->slot.resource);
-    sdfDecodePacNodeAndAdvanceTail(state);
+    sdfPacEndBlock(state);
 }
 
 /* Allocate decoder state for a complete resource packet. */
@@ -566,7 +566,7 @@ void sdfPacTmxDecoderInit(PacState *state, SdfPacStreamPacketHeader *packet) {
 /* Start the next allocation entry at its inline descriptor. */
 void sdfPacTexListDecoderTmxHeaderEndFunc(PacState *state) {
     sdfPacTmxDecoderInitFunc(state, &state->slot.list->entry, &state->slot.list->buffer);
-    state->onComplete = sdfPacAdvanceAllocationEntry;
+    state->onComplete = sdfPacTexListDecoderTmxBodyEndFunc;
 }
 
 /* Reset the output cursor to the current allocation entry and hook the copy
@@ -579,7 +579,7 @@ void sdfPacResetOutputToAllocationEntry(PacState *state) {
 }
 
 /* Advance the entry index and complete or request the next entry. */
-void sdfPacAdvanceAllocationEntry(PacState *state) {
+void sdfPacTexListDecoderTmxBodyEndFunc(PacState *state) {
     PacListAllocation *allocation = state->slot.list;
     /* Transfer the decoded texture's acquired reference into the resource list. */
     sdfTexListAdd(PAC_WORK_TEXTURE_LIST(state->queueTail), allocation->buffer.texture);
@@ -588,7 +588,7 @@ void sdfPacAdvanceAllocationEntry(PacState *state) {
         allocation->entryIndex = nextIndex;
         if (nextIndex == allocation->entryCount) {
             sdfChipFreeDirect(allocation);
-            sdfDecodePacNodeAndAdvanceTail(state);
+            sdfPacEndBlock(state);
         } else {
             sdfPacResetOutputToAllocationEntry(state);
         }
@@ -597,7 +597,7 @@ void sdfPacAdvanceAllocationEntry(PacState *state) {
 
 /* Discard pending input until the next allocation entry can start; check the
    boundary even when no bytes are consumed. */
-void sdfPacSkipAllocationEntryBytes(PacState *state) {
+void sdfPacTexListDecoder1(PacState *state) {
     s32 skipBytes = state->inputAvailable;
     if (state->pendingBytes < skipBytes) {
         skipBytes = state->pendingBytes;
@@ -631,7 +631,7 @@ void sdfPacTexListDecoder0(PacState *state) {
         allocation->entryIndex = 0;
         work->resourceHandle = sdfTexListNew(count);
         state->pendingBytes = ((count * 4 + 0x53) & -0x40) - 0x14;
-        state->onInput = sdfPacSkipAllocationEntryBytes;
+        state->onInput = sdfPacTexListDecoder1;
     }
 }
 

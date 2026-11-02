@@ -101,24 +101,24 @@ s32 pbDebugPrintPanel3(void) {
     list = dds3FontReqAllocDrawTag();
     sdfDrawTagLink(list,
         (u32)dds3PrimFrameRect(0x8950, 0x79A8, 0xFEFFFF, 0x5A0, 0x210, 0x60000000, 0x40806020));
-    sdfPktInit(&packet, 0x8980, 0x79C0, 0xFF0000, 0);
+    sdfDevSetPrintCB(&packet, 0x8980, 0x79C0, 0xFF0000, 0);
     sdfDrawTagLink(list, (u32)sdfDevPrintfEx(&packet, D_003BB2B8));
     if (pbDebugPanel3X.editing == 0) {
-        sdfPktInit(&packet, 0x8980, pbDebugPanel3X.selection * 0x60 + 0x7A20, 0xFF0000, 0);
+        sdfDevSetPrintCB(&packet, 0x8980, pbDebugPanel3X.selection * 0x60 + 0x7A20, 0xFF0000, 0);
         pbDebugPanel3X.blink++;
         if (pbDebugPanel3X.blink < 32 || (pbDebugPanel3X.blink & 31) < 18) {
             sdfDrawTagLink(list, (u32)sdfDevPrintfEx(&packet, D_003BB2C0));
         }
     }
     for (row = 0; row != 4; row++) {
-        sdfPktInit(&packet, 0x8980, y, 0xFF0000, itfOverlayColorEditorRows[row].highlight);
+        sdfDevSetPrintCB(&packet, 0x8980, y, 0xFF0000, itfOverlayColorEditorRows[row].highlight);
         sdfDrawTagLink(list,
             (u32)sdfDevPrintfEx(&packet, D_003BB2C8, itfOverlayColorEditorRows[row].title));
         highlight = 0;
         if (pbDebugPanel3X.editing != 0 && row == pbDebugPanel3X.selection) {
             highlight = 6;
         }
-        sdfPktInit(&packet, 0x8C80, y, 0xFF0000, highlight);
+        sdfDevSetPrintCB(&packet, 0x8C80, y, 0xFF0000, highlight);
         if (row < 4) {
             sdfDrawTagLink(list,
                 (u32)sdfDevPrintfEx(&packet, D_003BB2D0, itfTestOverlayColor.channels[row]));
@@ -917,3 +917,4 @@ INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB388);
 INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB390);
 
 INCLUDE_SDATA(const s32, "game/code_001A04C0", D_003BB398);
+

@@ -59,7 +59,7 @@ extern sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path,
                                           s32 (*callback)(sdfFileCmdHandle_t *, SdfDevEvent, s32, s32, s32),
                                           void *callbackContext);
 
-extern SdfFileCommandQueueResult sdfFileCmdRequestFileSize(sdfFileCmdHandle_t *state);
+extern SdfFileCommandQueueResult sdfFileCmdFileSize(sdfFileCmdHandle_t *state);
 
 extern s32 sdfFileRpcReadCallback(sdfFileCmdHandle_t *, SdfDevEvent, s32, s32, s32);
 
@@ -153,7 +153,7 @@ s32 *sdfFileRpcHandler(u32 command, s32 request) {
         D_003FF480[0] = (s32)deviceState;
         break;
     case SDF_STREAM_COMMAND_CONTROL:
-        sdfFileCmdRequestFileSize(state->deviceState);
+        sdfFileCmdFileSize(state->deviceState);
         WaitSema(state->semaphore);
         D_003FF480[0] = state->readResult;
         break;

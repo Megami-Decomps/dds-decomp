@@ -597,10 +597,10 @@ extern u8 *sdf2DGetPrimPtr(SdfDrawPacket *packet);
 
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
 
-extern void sdfBuildMaskedFrameRegisterReference(const u8 *, SdfDmaReferenceChainPacket *, s32);
+extern void sdfGrSetFrameMaskRGB(const u8 *, SdfDmaReferenceChainPacket *, s32);
 
 
-extern void sdfBuildFrameRegisterReference(const u8 *, SdfDmaReferenceChainPacket *, s32);
+extern void sdfGrSetFrameMaskReset(const u8 *, SdfDmaReferenceChainPacket *, s32);
 
 extern f32 D_0038A980[][4];
 
@@ -2815,7 +2815,7 @@ void drawSprite3D(sdfTexHandle_t *texture, FldMarkerPacket *modelData) {
     sdfDrawTagInit(command);
     header = (DmaPacketHeader *)sdfGrAllocPacketBuff(0x20);
     sdf3DMakeDirectRefPacket(header, (u32)sdfTexGetPacket(texture), sdfTexGetPacketLength(texture));
-    sdfAppendReferencePacket(command, (u32)header);
+    sdfDrawTagLinkRef(command, (u32)header);
     SetRotateMatrixZ(modelData->scale);
     VU0_STORE_MATRIX(mat);
     packet = (u8 *)sdfGrAllocPacketBuff(0x38);
@@ -2834,7 +2834,7 @@ void fldSubmitPrimaryFramePacket(void) {
     sdfGrOt_t *descriptor;
     sdfDrawTagInit(command);
     texture = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
-    sdfBuildMaskedFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
+    sdfGrSetFrameMaskRGB(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
     sdfDrawTagLinkRefGif(command, (u32)texture);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
     descriptor->append(descriptor, command);
@@ -2846,7 +2846,7 @@ void fldSubmitAlternateFramePacket(void) {
     sdfGrOt_t *descriptor;
     sdfDrawTagInit(command);
     texture = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
-    sdfBuildFrameRegisterReference(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
+    sdfGrSetFrameMaskReset(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, texture, 0);
     sdfDrawTagLinkRefGif(command, (u32)texture);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
     descriptor->append(descriptor, command);
@@ -3260,7 +3260,7 @@ void fldDbgPrint3D(f32 x, f32 y, f32 z, s32 drawValue) {
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     initDrawTag(&quad);
-    sdfPktInit(&packet, (s32)screenX * 16, (s32)screenY * 16, quad.drawDepth, 1);
+    sdfDevSetPrintCB(&packet, (s32)screenX * 16, (s32)screenY * 16, quad.drawDepth, 1);
     sdfDrawTagLink(quad.packetList,
                     (u32)sdfDevPrintfEx(&packet, D_00436070, drawValue));
     LF(&quad);
@@ -3282,7 +3282,7 @@ void fldDbgPrint2D(s32 x, s32 y, const char *format) {
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7D;
     initDrawTag(&quad);
-    sdfPktInit(&packet, quad.rowX + x, quad.rowY + y, quad.drawDepth, 0);
+    sdfDevSetPrintCB(&packet, quad.rowX + x, quad.rowY + y, quad.drawDepth, 0);
     sdfDrawTagLink(quad.packetList, (u32)sdfDevPrintfEx(&packet, format));
     LF(&quad);
     kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, quad.packetList);
@@ -3303,7 +3303,7 @@ void fldDbgPrint2DC(s32 x, s32 y, s32 packetField, s32 drawValue) {
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     initDrawTag(&quad);
-    sdfPktInit(&packet, quad.rowX + x, quad.rowY + y, quad.drawDepth, packetField);
+    sdfDevSetPrintCB(&packet, quad.rowX + x, quad.rowY + y, quad.drawDepth, packetField);
     sdfDrawTagLink(quad.packetList, (u32)sdfDevPrintfEx(&packet, (const char *)drawValue));
     LF(&quad);
     D_00380708.append(&D_00380708, quad.packetList);
@@ -3324,7 +3324,7 @@ void fldDbgPrintNum2D(s32 x, s32 y, s32 drawValue) {
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     initDrawTag(&quad);
-    sdfPktInit(&packet, quad.rowX + x * 16, quad.rowY + y * 8, quad.drawDepth, 0);
+    sdfDevSetPrintCB(&packet, quad.rowX + x * 16, quad.rowY + y * 8, quad.drawDepth, 0);
     sdfDrawTagLink(quad.packetList, (u32)sdfDevPrintfEx(&packet, D_00436070, drawValue));
     LF(&quad);
     D_00380708.append(&D_00380708, quad.packetList);
@@ -3345,7 +3345,7 @@ void fldDbgPrintNum2DH(s32 x, s32 y, s32 drawValue) {
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     initDrawTag(&quad);
-    sdfPktInit(&packet, quad.rowX + x * 16, quad.rowY + y * 8, quad.drawDepth, 0);
+    sdfDevSetPrintCB(&packet, quad.rowX + x * 16, quad.rowY + y * 8, quad.drawDepth, 0);
     sdfDrawTagLink(quad.packetList, (u32)sdfDevPrintfEx(&packet, D_00436078, drawValue));
     LF(&quad);
     D_00380708.append(&D_00380708, quad.packetList);
@@ -3366,7 +3366,7 @@ void fldDbgPrintStr2D(s32 x, s32 y, s32 drawValue) {
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     initDrawTag(&quad);
-    sdfPktInit(&packet, quad.rowX + x * 16, quad.rowY + y * 8, quad.drawDepth, 0);
+    sdfDevSetPrintCB(&packet, quad.rowX + x * 16, quad.rowY + y * 8, quad.drawDepth, 0);
     sdfDrawTagLink(quad.packetList, (u32)sdfDevPrintfEx(&packet, (const char *)drawValue));
     LF(&quad);
     D_00380708.append(&D_00380708, quad.packetList);
@@ -3387,7 +3387,7 @@ void fldDbgPrintStr2DC(s32 x, s32 y, s32 packetField, s32 drawValue) {
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     initDrawTag(&quad);
-    sdfPktInit(&packet, quad.rowX + x * 16, quad.rowY + y * 8, quad.drawDepth, packetField);
+    sdfDevSetPrintCB(&packet, quad.rowX + x * 16, quad.rowY + y * 8, quad.drawDepth, packetField);
     sdfDrawTagLink(quad.packetList, (u32)sdfDevPrintfEx(&packet, (const char *)drawValue));
     LF(&quad);
     D_00380708.append(&D_00380708, quad.packetList);
@@ -3408,7 +3408,7 @@ void fldDbgPrintStr2DCF(s32 packetField, s32 drawValue, f32 x, f32 y) {
     quad.unk8 = 0x1A40;
     quad.unk10 = 0x0FFFFF7F;
     initDrawTag(&quad);
-    sdfPktInit(&packet, quad.rowX + (s32)(x * 16.0f), quad.rowY + (s32)(y * 8.0f), quad.drawDepth, packetField);
+    sdfDevSetPrintCB(&packet, quad.rowX + (s32)(x * 16.0f), quad.rowY + (s32)(y * 8.0f), quad.drawDepth, packetField);
     sdfDrawTagLink(quad.packetList, (u32)sdfDevPrintfEx(&packet, (const char *)drawValue));
     LF(&quad);
     D_00380708.append(&D_00380708, quad.packetList);
@@ -6934,3 +6934,4 @@ INCLUDE_SDATA(const s32, "field/fldFileResolver", D_0043615C);
 INCLUDE_SDATA(const s32, "field/fldFileResolver", D_00436160);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", D_00436164);
+

@@ -9486,7 +9486,7 @@ s32 sndHasActiveActor(void) {
 
 /* Allocate a cleared resource node and prepend it to the runtime's resource list. */
 SoundResourceNode *sndAllocResourceNode(void) {
-    SoundResourceNode *node = sdfAllocAndClearQuadwords(sizeof(SoundResourceNode));
+    SoundResourceNode *node = sdfChipAllocZeroDirect(sizeof(SoundResourceNode));
     BtlActorWork *state;
     SoundResourceNode *first;
     node->referenceCount = 0;
@@ -9641,7 +9641,7 @@ s32 btlButtonMaskToIndex(u32 mask) {
 }
 
 SoundResourceLink *sndAllocResourceLink(BtlUnit *owner) {
-    SoundResourceLink *node = sdfAllocAndClearQuadwords(sizeof(SoundResourceLink));
+    SoundResourceLink *node = sdfChipAllocZeroDirect(sizeof(SoundResourceLink));
     node->owner = owner;
     node->effectHandle = 0;
     node->opaque0C = 0;
@@ -9837,7 +9837,7 @@ void btlMarkTaskReady(SoundResourceLink *link) {
 }
 
 SoundLink *sndAllocLink(BtlUnit *owner) {
-    SoundLink *node = sdfAllocAndClearQuadwords(sizeof(SoundLink));
+    SoundLink *node = sdfChipAllocZeroDirect(sizeof(SoundLink));
     node->owner = owner;
     node->effectHandle = 0;
     node->commandEffectId = 0;
@@ -10026,7 +10026,7 @@ void btlCreateIndexedSoundResourceNode(s32 slotIndex, SoundMixer *source) {
 #include "btl_sound_handle_node.h"
 
 SoundHandleNode *sndCreateSystemEffectHandle(struct dds3ModelHandle_t *actor, s32 index) {
-    SoundHandleNode *node = sdfAllocAndClearQuadwords(sizeof(SoundHandleNode));
+    SoundHandleNode *node = sdfChipAllocZeroDirect(sizeof(SoundHandleNode));
     BattleSoundArchiveEntry *entry = &D_0035F748[index];
     node->actor = actor;
     node->queue = fileCloneQueueEntries(entry->archiveData);
@@ -10429,7 +10429,7 @@ s32 sndMapResourceType(BtlUnit *actor, s32 resourceIndex) {
 
 /* Allocate a cleared active-sound node and prepend it to its independent list. */
 ActiveSoundNode *sndAllocListNode(void) {
-    ActiveSoundNode *node = sdfAllocAndClearQuadwords(sizeof(ActiveSoundNode));
+    ActiveSoundNode *node = sdfChipAllocZeroDirect(sizeof(ActiveSoundNode));
     BtlActorWork *state = (BtlActorWork *)btlGetRuntime();
     ActiveSoundNode *first;
 
@@ -10563,7 +10563,7 @@ SoundSlotOwner *sndAcquireSlotOwner(s32 category, s32 id) {
         node->work.refCount++;
         return node;
     }
-    node = sdfAllocAndClearQuadwords(sizeof(SoundSlotOwner));
+    node = sdfChipAllocZeroDirect(sizeof(SoundSlotOwner));
     node->category = category;
     node->work.id = id;
     node->work.refCount = 1;
@@ -11739,3 +11739,4 @@ INCLUDE_SDATA(const s32, "game/code_001DEFE0", D_003BB6A0);
 INCLUDE_SDATA(const s32, "game/code_001DEFE0", D_003BB6A8);
 
 INCLUDE_SDATA(const s32, "game/code_001DEFE0", D_003BB6B0);
+
