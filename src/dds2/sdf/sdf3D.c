@@ -1,49 +1,141 @@
-#include "sdk_ps2.h"
-#include "sdf_gs_header.h"
-#include "eeregs.h"
 #include "common.h"
-#include "sdf_vu0.h"
-#include "sdf_vu_matrix.h"
-#include "sdf_pad_entry.h"
-#include "sdf_pad_index.h"
-#include "sdf_pad_mode_api.h"
-#include "sdf_pad_motor_api.h"
-#include "sdf_cons_matrix_packet.h"
-#include "sdf_dma_packet_header.h"
-#include "kwln.h"
-#include "sdf_asset_packets.h"
-#include "sdf_asset_state.h"
-#include "sdf_vu_lighting.h"
-#include "sdf_chip.h"
-#include "sdf_packet_list.h"
-#include "sdf_packet_header.h"
-#include "sdf_packet_append.h"
-#include "sdf_heap_api.h"
-#include "sdf_primitive_packet_api.h"
-#include "sdf.h"
-#include "sdf_draw.h"
-#include "sdf_request.h"
-#include "sdf_model.h"
-#include "sdf_projection.h"
-#include "pcp_vu0.h"
-#include "sdf_vu_transform_api.h"
-#include "ee_mmi.h"
+#include "libsdf.h"
 #include "fpu.h"
-#include "sdf_texture_file.h"
-#include "sdf_column_packet_api.h"
-#include "sdf_lookup_texture.h"
-#include "sdf_compact_vertex_vif_packet.h"
-#include "sdf_dev_console_node.h"
-#include "btl.h"
-#include "sdf_packet_alloc.h"
+#include "ps2asm.h"
+#include "sdf_lighting.h"
+#include "libsdf.h"
+#include "sdf_resource.h"
 
-extern void DiagMatrix(void);
+#define D_002E8ED0 D_00372C00
+#define D_002ECF10 D_00376C40
+#define D_002F5600 D_0037F330
+#define D_00529630 D_0040B540
+#define D_005518B8 D_00438A6C
+#define D_005518C8 D_00438A80
 
-#define SDF_DMA_QWORD_SHIFT 4
+/* Register selectors carried by GIF A+D writes in the two GS contexts. */
+enum {
+    SDF_GS_PRIM = 0x00,
+    SDF_GS_RGBAQ = 0x01,
+    SDF_GS_XYZ2 = 0x05,
+    SDF_GS_TEX0_1 = 0x06,
+    SDF_GS_TEX0_2 = 0x07,
+    SDF_GS_CLAMP_1 = 0x08,
+    SDF_GS_CLAMP_2 = 0x09,
+    SDF_GIF_REGISTER_AD = 0x0E,
+    SDF_GS_TEX1_1 = 0x14,
+    SDF_GS_TEX1_2 = 0x15,
+    SDF_GS_XYOFFSET_1 = 0x18,
+    SDF_GS_XYOFFSET_2 = 0x19,
+    SDF_GS_PRMODECONT = 0x1A,
+    SDF_GS_TEXA = 0x3B,
+    SDF_GS_TEXFLUSH = 0x3F,
+    SDF_GS_SCISSOR_1 = 0x40,
+    SDF_GS_SCISSOR_2 = 0x41,
+    SDF_GS_ALPHA_1 = 0x42,
+    SDF_GS_ALPHA_2 = 0x43,
+    SDF_GS_DTHE = 0x45,
+    SDF_GS_COLCLAMP = 0x46,
+    SDF_GS_TEST_1 = 0x47,
+    SDF_GS_TEST_2 = 0x48,
+    SDF_GS_FRAME_1 = 0x4C,
+    SDF_GS_FRAME_2 = 0x4D,
+    SDF_GS_ZBUF_1 = 0x4E,
+    SDF_GS_ZBUF_2 = 0x4F,
+    SDF_GS_BITBLTBUF = 0x50,
+    SDF_GS_TRXPOS = 0x51,
+    SDF_GS_TRXREG = 0x52,
+    SDF_GS_TRXDIR = 0x53
+};
+
+
+struct sdfDrawTag_t;
+
+struct sdf3DFogParam_t;
+
+
+struct sdf3DViewportPacket_t;
+
+struct DmaPacketHeader;
+
+struct sdf3DFogPacket_t;
+
+struct sdf3DScreenParam_t;
+
+struct sdfTexPacket_t;
+
+struct sdfGsMemSlice_t;
+
+struct sdfTexHandle_t;
+
+struct sdfMemHandle_t;
+
+struct TMX_HEADER_t;
+
+
+/* Serialized byte consumed by the GS texture-state packet builder. */
+typedef u8 SdfTextureClampMode;
+
+
+/* Shared fog/depth state consumed by sdf3DMakeFogPacket (0x14).
+ * The viewer config serializes fogMax, fogNear, fogMin, fogFar, color;
+ * timeline payloads store fogMin before fogMax instead. */
+typedef struct sdf3DFogParam_t {
+    f32 fogMax;   /* 0x00: minimum fog range. */
+    f32 fogMin;   /* 0x04: maximum fog range. */
+    f32 fogNear;  /* 0x08: near depth used in the projection coefficients. */
+    f32 fogFar;   /* 0x0C: far depth used in the projection coefficients. */
+    u32 color;    /* 0x10: packed GS FOGCOL value. */
+} sdf3DFogParam_t;
+
+/* Native 0x90-byte camera/viewport owner shared by both projection builders. */
+/* Shared 0xD0 VIF packet: two stored matrices, three vector slots, and trailer. */
+typedef struct sdf3DViewportPacket_t {
+    u16 quadwords;        /* 0x00 */
+    u8 unknown02[6];      /* 0x02 */
+    u32 reservedWord;     /* 0x08 */
+    u32 command;          /* 0x0C */
+    u8 matrixA[0x40];     /* 0x10 */
+    u8 matrixB[0x40];     /* 0x50 */
+    u8 vecA[0x10];        /* 0x90 */
+    u8 vecB[0x10];        /* 0xA0 */
+    u8 vecC[0x10];        /* 0xB0 */
+    u32 stmodCommand;     /* 0xC0 */
+    u32 mscalCommand;     /* 0xC4 */
+    u32 unknownC8;        /* 0xC8 */
+    u32 unknownCC;        /* 0xCC */
+} QWORD_ALIGNED sdf3DViewportPacket_t;
+
+/* Shared 0x20-byte DMA/VIF reference header. Unrecovered bytes stay opaque. */
+typedef struct DmaPacketHeader {
+    u16 quadwords; /* 0x00 */
+    u8 pad02[2]; /* 0x02 */
+    u32 address; /* 0x04 */
+    u32 tag; /* 0x08 */
+    u32 command; /* 0x0C */
+    u16 unknown10; /* 0x10 */
+    u8 opaque12[6]; /* 0x12 */
+    u32 unknown18; /* 0x18 */
+    u32 unknown1C; /* 0x1C */
+} QWORD_ALIGNED DmaPacketHeader;
+
+/* Bind resource and asset release queues to their matching destruction callbacks. */
+void sdfMatInitSystem(void);
+
+/* Initialize the buffered object-list release queue with its object destructor. */
+void sdfModelInitSystem(void);
+
+extern u32 sdf3DLightDefault;
+
+extern u32 sdf3DFogDefault;
+
+extern f32 sdf3DEyeOffset[4];
+
+extern u8 sdf3DScreenParam[];
 
 #define SDF_DMA_ADDRESS_MASK 0x0FFFFFFF
 
-#define SDF_GIF_REGISTER_AD 0xE
+#define SDF_DMA_QWORD_SHIFT 4
 
 #define SDF_GS_FOGCOL_REGISTER 0x3D
 
@@ -55,21 +147,99 @@ extern void DiagMatrix(void);
 
 #define SDF_VIF_MSCAL_COMMAND 0x14000000
 
-#define SDF_CAMERA_USE_FOV_FLAG 2
-
-#define SDF_CAMERA_HALF_HEIGHT_FLAG 1
-
-extern const struct SdfDmaTagHeader *sdf3DLightDefault;
-
-extern u32 sdf3DFogDefault;
-
 extern u8 vu1MicroPacket[];
 
-extern void sdf3DInitSpecularTex2(void);
+extern u8 sdf3DScreenTm[];
 
-extern u8 D_00372C00[];
+extern u8 sdfCameraTm[];
 
-extern u8 D_00376C40[];
+/* DMA/VIF prefix, left/right projection terms, then a one-register GIF write
+ * and the VU execution command. */
+typedef struct sdf3DFogPacket_t {
+    u64 dmaTag;
+    u64 vifUnpackCode;
+    f32 right;
+    f32 left;
+    f32 mid;
+    f32 scale;
+    u64 gifTag;
+    u64 gifRegister;
+    u64 registerValue;
+    u64 fogColorRegister;
+    u32 mscalCommand;
+    u32 reservedA;
+    u32 reservedB;
+    u32 reservedC;
+} sdf3DFogPacket_t;
+
+extern u8 D_002F5600[];
+
+extern u64 sdf3DRefMapParam;
+
+extern u8 D_002E8ED0[];
+
+extern u8 D_002ECF10[];
+
+/* The camera, as sdf3DMakeScreenParam derives it: twelve inputs, then the
+ * matrix and the clip-to-screen mapping it computes. cameraPos is the inverted
+ * camera origin sdf3DMakeViewportPacket caches here. Same record as
+ * draw3d.h's. */
+typedef struct sdf3DScreenParam_t {
+    u32 flags; /* sdf_3d_screen_flag */
+    f32 aspect;
+    f32 projDist;
+    f32 fovy;
+    f32 ox;
+    f32 oy;
+    f32 width;
+    f32 height;
+    f32 zMin;
+    f32 zMax;
+    f32 nearClip;
+    f32 farClip;
+    u8 TM[0x40];   /* 0x30 */
+    f32 scale[4];  /* 0x70 */
+    f32 trans[4];  /* 0x80 */
+    f32 cameraPos[4]; /* 0x90 */
+} sdf3DScreenParam_t;
+
+void sdfDrawTagLinkRef(struct sdfDrawTag_t *aTag, u32 aPacket);
+
+
+
+
+
+/* Return packed 64-bit TEX0, TEX1, and CLAMP states from the primary GS packet. */
+u64 sdfTexGetTex0Reg(sdfTexHandle_t *aHandle);
+
+
+u32 sdfMemLock(struct sdfMemHandle_t *aHandle);
+
+void sdfMemFreeDirect(struct sdfMemHandle_t *aHandle);
+
+
+/* Acquire a texture from a serialized texture-file header. */
+struct sdfTexHandle_t *sdfTexSet(const TMX_HEADER_t *aTex);
+
+struct sdfTexHandle_t *sdfTexSetDirect(const TMX_HEADER_t *aTex);
+
+/* Generated 128x64 grayscale power lookup texture: a serialized texture
+ * header, 256 RGBA palette words, then the full 64x128 index image. */
+/* The specular falloff table sdf3DInitSpecularTex2 generates and hands to
+ * sdfTexSet: a TMX header, the 256-entry CLUT, and 64 rows of 128 exponents. */
+typedef struct sdf3DSpecularTexImage_t {
+    TMX_HEADER_t header; /* 0x0000 */
+    u32 palette[256];            /* 0x0040 */
+    u8 indices[64][128];         /* 0x0440 */
+} sdf3DSpecularTexImage_t;
+
+extern sdfTexHandle_t *D_005518B8;
+
+extern sdfTexHandle_t *sdf3DSpecularTex;
+
+extern sdfTexHandle_t *D_005518C8;
+
+extern void sdfTmxSetHeader(TMX_HEADER_t *, s32, s32, s32, s32, s32);
 
 extern s32 vu1Tex0Slot0[];
 
@@ -77,194 +247,201 @@ extern s32 vu1Tex0Slot2[];
 
 extern s32 vu1Tex0Slot1[];
 
-extern sdfTexHandle_t *D_00438A6C;
+extern void *memcpy(void *, const void *, unsigned int);
 
-extern sdfTexHandle_t *sdf3DSpecularTex;
+void ReverseMatrix(void);
 
-extern u64 sdf3DRefMapParam;
+void MultMatrixRev(const void *aMatrix);
 
-extern sdfTexHandle_t *D_00438A80;
+void sdf3DMakeViewportPacket(sdf3DViewportPacket_t *aPacket, sdf3DScreenParam_t *aParam, void *aCamera);
 
-/* VU0 macro math via inline asm (plain C cannot emit COP2 macro insns) */ void MultMatrix(const f32 *matrix);
+void sdf3DSetCamera(sdf3DScreenParam_t *aParam, void *aCamera);
 
-/* Emit two matrices and three vectors; also cache the inverse origin in node. */
-void sdf3DMakeViewportPacket(SdfVuBonePacket *packet, SdfProjectionRecord *node, const Matrix4 *transformMatrix) {
-    packet->quadwords = 0xC;
-    packet->command = 0x6C0BC000;
-    packet->reservedWord = 0;
-    VU0_LOAD_MATRIX(transformMatrix);
-    VU0_STORE_MATRIX(packet->matrixA);
-    MultMatrixRev((const struct Matrix4 *)node->camera.matrix);
-    VU0_STORE_MATRIX(packet->matrixB);
-    SDF_VU0_LOADVECTOR(&node->camera.halfWidth);
-        SDF_VU0_STOREVECTOR_NOMEM(packet->vecA);
-    SDF_VU0_LOADVECTOR(&node->camera.originX);
-        SDF_VU0_STOREVECTOR_NOMEM(packet->vecB);
-    VU0_LOAD_MATRIX(transformMatrix);
+void sdf3DMakeFogPacket(sdf3DFogPacket_t *aPacket, sdf3DFogParam_t *aParam);
+
+void sdf3DMakeDirectRefPacket(DmaPacketHeader *aPacket, u32 aData, s32 aLeng);
+
+void sdf3DLinkInitPacket(sdfDrawTag_t *aTag, DmaPacketHeader *aPacket);
+
+void sdf3DInitSpecularTex2(void);
+
+void sdf3DInit(void);
+
+void sdf3DMakeViewportPacket(sdf3DViewportPacket_t *aPacket, sdf3DScreenParam_t *aParam, void *aCamera) {
+    aPacket->quadwords = 0xC;
+    aPacket->command = 0x6C0BC000;
+    aPacket->reservedWord = 0;
+    SDF_VU0_LOADMATRIX(aCamera);
+    SDF_VU0_STOREMATRIX(aPacket->matrixA);
+    MultMatrixRev(aParam->TM);
+    SDF_VU0_STOREMATRIX(aPacket->matrixB);
+    SDF_VU0_LOADVECTOR(aParam->scale);
+    SDF_VU0_STOREVECTOR(aPacket->vecA);
+    SDF_VU0_LOADVECTOR(aParam->trans);
+    SDF_VU0_STOREVECTOR(aPacket->vecB);
+    SDF_VU0_LOADMATRIX(aCamera);
     ReverseMatrix();
     SDF_VU0_GET_ROW3();
-        SDF_VU0_STOREVECTOR_NOMEM(packet->vecC);
-        SDF_VU0_STOREVECTOR_NOMEM(node->inverseOrigin);
-    packet->mscalCommand = SDF_VIF_MSCAL_COMMAND;
-    packet->stmodCommand = SDF_VIF_ITOP_MATRIX;
-    packet->unknownC8 = 0;
-    packet->unknownCC = 0;
+    SDF_VU0_STOREVECTOR(aPacket->vecC);
+    SDF_VU0_STOREVECTOR(aParam->cameraPos);
+    aPacket->stmodCommand = SDF_VIF_ITOP_MATRIX;
+    aPacket->mscalCommand = SDF_VIF_MSCAL_COMMAND;
+    aPacket->unknownC8 = 0;
+    aPacket->unknownCC = 0;
 }
 
-extern u8 sdf3DScreenTm[];
-
-extern u8 sdfCameraTm[];
-
-extern u8 sdf3DEyeOffset[];
-
-/* Cache node data, its composed transform, and the transformed cached origin. */
-void sdf3DSetCamera(const SdfProjectionRecord *node, const Matrix4 *transformMatrix) {
-    VU0_LOAD_MATRIX(transformMatrix);
-    VU0_STORE_MATRIX(sdfCameraTm);
-    MultMatrixRev((const struct Matrix4 *)node->camera.matrix);
-        SDF_VU0_LOADVECTOR(node->inverseOrigin);
-    VU0_STORE_MATRIX(sdf3DScreenTm);
+void sdf3DSetCamera(sdf3DScreenParam_t *aParam, void *aCamera) {
+    SDF_VU0_LOADMATRIX(aCamera);
+    SDF_VU0_STOREMATRIX(sdfCameraTm);
+    MultMatrixRev(aParam->TM);
+    SDF_VU0_LOADVECTOR(aParam->cameraPos);
+    SDF_VU0_STOREMATRIX(sdf3DScreenTm);
     SDF_VU0_APPLYMATRIX_XYZ1();
-        SDF_VU0_STOREVECTOR_NOMEM(sdf3DEyeOffset);
-    sdf3DScreenParam = *node;
+    SDF_VU0_STOREVECTOR(sdf3DEyeOffset);
+    memcpy(sdf3DScreenParam, aParam, sizeof(*aParam));
 }
 
-/* Set the first DMA reference fallback used when a model has no override. */
-void sdf3DSetDefaultLight(const struct SdfDmaTagHeader *lightingPacket) {
-    sdf3DLightDefault = lightingPacket;
+void sdf3DSetDefaultLight(u8 *aLight) {
+    sdf3DLightDefault = (u32)aLight;
 }
 
-/* Set the second DMA reference fallback used when a model has no override. */
-void sdf3DSetDefaultFog(u32 referenceSource) {
-    sdf3DFogDefault = referenceSource;
+void sdf3DSetDefaultFog(u8 *aFog) {
+    sdf3DFogDefault = (u32)aFog;
 }
 
-extern s8 D_00438A50;
+extern f32 tanf(f32 angle);
+extern void MultMatrix(const void *matrix);
 
-extern f32 D_00438A54;
+#define sdf3DScreenAdjust D_00438A50
+#define sdf3DScreenAdjustScaleX D_00438A54
+#define sdf3DScreenAdjustScaleY D_00438A58
+#define sdf3DScreenAdjustOffsetX D_00438A5C
+#define sdf3DScreenAdjustOffsetY D_00438A60
+/* Nonzero scales and offsets every screen sdf3DMakeScreenParam builds. */
+extern s8 sdf3DScreenAdjust;
+extern f32 sdf3DScreenAdjustScaleX;
+extern f32 sdf3DScreenAdjustScaleY;
+extern f32 sdf3DScreenAdjustOffsetX;
+extern f32 sdf3DScreenAdjustOffsetY;
 
-extern f32 D_00438A58;
-
-extern f32 D_00438A5C;
-
-extern f32 D_00438A60;
-
-/* Compose camera projection and screen parameters without reassociating floats. */
-void sdf3DMakeScreenParam(SdfCamera *camera) {
-    f32 projectionMatrix[16];
-    f32 farZ = camera->farZ;
-    f32 nearZ = camera->nearZ;
+/* vu0 routine: compose the perspective matrix and clip-to-screen mapping. */
+void sdf3DMakeScreenParam(sdf3DScreenParam_t *camera)
+{
+    f32 projectionMatrix[16] __attribute__((aligned(16)));
+    f32 farZ = camera->farClip;
+    f32 nearZ = camera->nearClip;
     f32 depthRange = farZ - nearZ;
     f32 halfWidth = camera->width * 0.5f;
     f32 halfHeight = camera->height * 0.5f;
     f32 projectionScale;
     f32 centerY;
 
-    EE_MMI_UNIT_MATRIX(projectionMatrix);
+    SDF_MMI_STORE_UNIT_MATRIX(projectionMatrix);
     projectionMatrix[0] = 1.0f / (halfWidth * camera->aspect);
     projectionMatrix[5] = 1.0f / halfHeight;
     projectionMatrix[10] = farZ * nearZ * 2.0f / depthRange;
     projectionMatrix[14] = -(nearZ + farZ) / depthRange;
-    VU0_LOAD_MATRIX(projectionMatrix);
-    EE_MMI_UNIT_MATRIX(projectionMatrix);
-    if (camera->flags & SDF_CAMERA_USE_FOV_FLAG) {
-        projectionScale = camera->height / (tanf(camera->fov * 0.5f) * 2.0f);
+    SDF_VU0_LOADMATRIX(projectionMatrix);
+    SDF_MMI_STORE_UNIT_MATRIX(projectionMatrix);
+    if (camera->flags & 2) {
+        projectionScale = camera->height / (tanf(camera->fovy * 0.5f) * 2.0f);
     } else {
-        projectionScale = camera->scale;
+        projectionScale = camera->projDist;
     }
     projectionMatrix[5] = projectionMatrix[0] = projectionScale;
     projectionMatrix[10] = 0;
     projectionMatrix[15] = 0;
     projectionMatrix[14] = projectionMatrix[11] = 1.0f;
     MultMatrix(projectionMatrix);
-    VU0_STORE_MATRIX(camera->matrix);
-    camera->halfWidth = halfWidth;
-    centerY = (camera->bottom - camera->top) * 0.5f;
-    if (camera->flags & SDF_CAMERA_HALF_HEIGHT_FLAG) {
-        camera->halfHeight = halfHeight * 0.5f;
+    SDF_VU0_STOREMATRIX(camera->TM);
+    camera->scale[0] = halfWidth;
+    centerY = (camera->zMax - camera->zMin) * 0.5f;
+    if (camera->flags & 1) {
+        camera->scale[1] = halfHeight * 0.5f;
     } else {
-        camera->halfHeight = halfHeight;
+        camera->scale[1] = halfHeight;
     }
-    camera->centerY = centerY;
-    camera->one = 1.0f;
-    camera->originX = camera->offsetX;
-    camera->originY = camera->offsetY;
-    camera->bottomY = centerY + camera->top;
-    camera->zero = 0;
-    if (D_00438A50 != 0) {
-        camera->halfWidth *= D_00438A54;
-        camera->halfHeight *= D_00438A58;
-        camera->originX += D_00438A5C;
-        camera->originY += D_00438A60;
+    camera->scale[2] = centerY;
+    camera->scale[3] = 1.0f;
+    camera->trans[0] = camera->ox;
+    camera->trans[1] = camera->oy;
+    camera->trans[2] = centerY + camera->zMin;
+    camera->trans[3] = 0;
+    if (sdf3DScreenAdjust != 0) {
+        camera->scale[0] *= sdf3DScreenAdjustScaleX;
+        camera->scale[1] *= sdf3DScreenAdjustScaleY;
+        camera->trans[0] += sdf3DScreenAdjustOffsetX;
+        camera->trans[1] += sdf3DScreenAdjustOffsetY;
     }
 }
 
-extern u8 D_0040B540[]; /* fallback up vector */
 
-/* Pack up to three directional lights and the ambient color for VU1: light
- * directions as columns (negated, unit length), colors and their sum, and a
- * basis built from the first light's direction. The axis scratch is volatile:
- * retail keeps its stores in source order. */
-void sdf3DMakeLightParallelPacket(SdfLightingPacketStorage *packet,
-                                  SdfLightSources sources,
-                                  const f32 *ambient) {
+extern f32 D_00529630[];
+extern void DiagMatrix(void);
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
+extern void *memset(void *dst, s32 value, u32 size);
+
+/* vu0 routine: parallel-light packet and lighting basis construction */
+void sdf3DMakeLightParallelPacket(sdf3DLightParallelPacket_t *aPacket, sdf3DLight_t **aLights, sdfVector4_t *aAmbient) {
     f32 direction[4] __attribute__((aligned(16)));
+    /* VU0 lqc2 reads this scratch through its address, like the DDS rotation
+     * loaders and Euler-to-quaternion routines; volatile preserves its stores. */
     volatile f32 axis[4] __attribute__((aligned(16)));
-    const f32 (*first)[4];
+    sdf3DLight_t *first;
     s32 i;
 
-    packet->quadwordCount = 13;
-    packet->flushCode = 0x10000000;
-    packet->unpackCode = 0x6C0D4398;
-    SDF_VU0_LOADVECTOR_B(ambient);
-    SDF_VU0_STOREVECTOR_B(packet->ambient);
+    aPacket->dmatag.qwc = 13;
+    aPacket->dmatag.dat0 = 0x10000000;
+    aPacket->dmatag.dat1 = 0x6C0D4398;
+    SDF_VU0_LOADVECTOR_B(aAmbient);
+    SDF_VU0_STOREVECTOR_B(&aPacket->color[3]);
     first = NULL;
     for (i = 0; i < 3; i++) {
-        const f32 (*light)[4] = sources[i];
+        sdf3DLight_t *light = aLights[i];
 
         if (light == NULL) {
-            packet->normal[0][i] = 0.0f;
-            packet->normal[1][i] = 0.0f;
-            packet->normal[2][i] = 0.0f;
-            packet->color[i][0] = 0.0f;
-            packet->color[i][1] = 0.0f;
-            packet->color[i][2] = 0.0f;
-            packet->color[i][3] = 0.0f;
+            aPacket->normalComponents[0][i] = 0.0f;
+            aPacket->normalComponents[1][i] = 0.0f;
+            aPacket->normalComponents[2][i] = 0.0f;
+            aPacket->color[i].x = 0.0f;
+            aPacket->color[i].y = 0.0f;
+            aPacket->color[i].z = 0.0f;
+            aPacket->color[i].w = 0.0f;
         } else {
             if (first == NULL) {
                 first = light;
             }
-            SDF_VU0_LOADVECTOR(light[1]);
+            SDF_VU0_LOADVECTOR(&light->v);
             SDF_VU0_NORMALIZE();
-            VU0_SCALE_VF(vf10, -1.0f);
+            SDF_VU0_SCALEVECTOR_BITS(-1.0f);
             SDF_VU0_STOREVECTOR(direction);
-            packet->normal[0][i] = direction[0];
-            packet->normal[1][i] = direction[1];
-            packet->normal[2][i] = direction[2];
-            SDF_VU0_LOADVECTOR(light[0]);
-            VU0_ADD(vf11, vf11, vf10);
-            SDF_VU0_STOREVECTOR(packet->color[i]);
+            aPacket->normalComponents[0][i] = direction[0];
+            aPacket->normalComponents[1][i] = direction[1];
+            aPacket->normalComponents[2][i] = direction[2];
+            SDF_VU0_LOADVECTOR(&light->color);
+            SDF_VU0_ADDVECTOR_B_A();
+            SDF_VU0_STOREVECTOR(&aPacket->color[i]);
         }
     }
-    SDF_VU0_COPYVECTOR(packet->normal[3], packet->color[0]);
-    SDF_VU0_STOREVECTOR_B(packet->combinedColor);
+    SDF_VU0_COPYVECTOR_F32(&aPacket->colorBase, &aPacket->color[0]);
+    SDF_VU0_STOREVECTOR_B(&aPacket->color[4]);
     if (first == NULL) {
-        EE_MMI_UNIT_MATRIX(packet->basis);
+        SDF_MMI_STORE_UNIT_MATRIX(&aPacket->TM);
         return;
     }
-    SDF_VU0_LOADVECTOR(first[1]);
+    SDF_VU0_LOADVECTOR(&first->v);
     SDF_VU0_NORMALIZE();
     SDF_VU0_VECTOR_W_SET_ZERO();
     SDF_VU0_SET_ROW2();
-    SDF_VU0_STOREVECTOR(axis);
+    SDF_VU0_STOREVECTOR_F32(axis);
     if (ffabsf(axis[0]) < 0.000001f && ffabsf(axis[2]) < 0.000001f) {
         axis[0] = -axis[1];
         axis[1] = 0.0f;
         axis[2] = 0.0f;
         axis[3] = 0.0f;
-        SDF_VU0_LOADVECTOR_B(axis);
+        SDF_VU0_LOADVECTOR_B_F32(axis);
     } else {
-        SDF_VU0_LOADVECTOR_B(D_0040B540);
+        SDF_VU0_LOADVECTOR_B(D_00529630);
     }
     SDF_VU0_OUTERPRODUCT();
     SDF_VU0_NORMALIZE();
@@ -277,96 +454,73 @@ void sdf3DMakeLightParallelPacket(SdfLightingPacketStorage *packet,
     SDF_VU0_SET_ROW1();
     SDF_VU0_RESET_ROW3();
     DiagMatrix();
-    SDF_VU0_LOADVECTOR(first[1]);
+    SDF_VU0_LOADVECTOR(&first->v);
     SDF_VU0_NORMALIZE();
-    EE_MMI_LOAD_MATRIX_COLUMN(vf11, sdfCameraTm + 8);
+    SDF_VU0_LOADVECTOR_B_MTXCOL(sdfCameraTm + 8);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_NEGVECTOR_XYZ();
     SDF_VU0_NORMALIZE();
     SDF_VU0_SET_ROW3();
-    VU0_STORE_MATRIX(packet->basis);
+    SDF_VU0_STOREMATRIX(&aPacket->TM);
 }
 
-/* DMA/VIF prefix, projection range terms, then a one-register GIF write
- * and the VU execution command. */
-typedef struct SdfProjPacket {
-    u64 dmaTag;
-    u64 vifUnpackCode;
-    f32 rangeMax;
-    f32 rangeMin;
-    f32 offset;
-    f32 scale;
-    u64 gifTag;
-    u64 gifRegister;
-    u64 registerValue;
-    u64 fogColorRegister;
-    u32 mscalCommand;
-    u32 reservedA;
-    u32 reservedB;
-    u32 reservedC;
-} SdfProjPacket;
-
-/* Emit projection depth coefficients and a GS FOGCOL A+D write. */
-void sdf3DMakeFogPacket(SdfProjPacket *packet, KwlnDrawVectorParams *projectionParams) {
-    f32 rangeMax = projectionParams->fogFar;
-    f32 rangeMin = projectionParams->fogNear;
-    f32 nearZ = projectionParams->depthNear;
-    f32 farZ = projectionParams->depthFar;
-    u32 fogColor = projectionParams->fogColor;
-    packet->dmaTag = 0x20000004;
-    packet->vifUnpackCode = 0x6C03C00013000000ULL;
-    packet->rangeMax = rangeMax;
-    packet->rangeMin = rangeMin;
-    packet->offset = (((rangeMax - rangeMin) * (farZ + nearZ)) / (farZ - nearZ) + (rangeMax + rangeMin)) * 0.5f;
-    packet->scale = ((farZ * nearZ) * (rangeMin - rangeMax)) / (farZ - nearZ);
-    packet->gifTag = 0x1000000000008001ULL;
-    packet->gifRegister = SDF_GIF_REGISTER_AD;
-    packet->registerValue = fogColor;
-    packet->fogColorRegister = SDF_GS_FOGCOL_REGISTER;
-    packet->mscalCommand = 0x14000014;
-    packet->reservedA = 0;
-    packet->reservedB = 0;
-    packet->reservedC = 0;
+void sdf3DMakeFogPacket(sdf3DFogPacket_t *aPacket, sdf3DFogParam_t *aParam) {
+    f32 rangeMax = aParam->fogMin;
+    f32 rangeMin = aParam->fogMax;
+    f32 nearZ = aParam->fogNear;
+    f32 farZ = aParam->fogFar;
+    f32 depthRange = farZ - nearZ;
+    s32 fogColor = aParam->color;
+    aPacket->dmaTag = 0x20000004;
+    aPacket->vifUnpackCode = 0x6C03C00013000000ULL;
+    aPacket->gifTag = 0x1000000000008001ULL;
+    aPacket->gifRegister = SDF_GIF_REGISTER_AD;
+    aPacket->registerValue = (u32)fogColor;
+    aPacket->fogColorRegister = SDF_GS_FOGCOL_REGISTER;
+    aPacket->mscalCommand = 0x14000014;
+    aPacket->reservedC = 0;
+    aPacket->right = rangeMax;
+    aPacket->left = rangeMin;
+    aPacket->reservedA = 0;
+    aPacket->reservedB = 0;
+    aPacket->mid = (((rangeMax - rangeMin) * (farZ + nearZ)) / depthRange + (rangeMax + rangeMin)) * 0.5f;
+    aPacket->scale = ((farZ * nearZ) * (rangeMin - rangeMax)) / depthRange;
 }
 
-/* Round payloadBytes up to quadwords and pair FLUSHA with VIF DIRECT. */
-void sdf3DMakeDirectRefPacket(DmaPacketHeader *packet, u32 sourceAddress, s32 payloadBytes) {
-    s32 quadwordCount = (payloadBytes + 15) >> SDF_DMA_QWORD_SHIFT;
-    packet->quadwords = quadwordCount;
-    packet->address = sourceAddress & SDF_DMA_ADDRESS_MASK;
-    packet->tag = SDF_VIF_FLUSHA_COMMAND;
-    packet->command = quadwordCount | SDF_VIF_DIRECT_COMMAND;
-    packet->unknown10 = 0;
-    packet->unknown18 = 0;
-    packet->unknown1C = 0;
+void sdf3DMakeDirectRefPacket(DmaPacketHeader *aPacket, u32 aData, s32 aLeng) {
+    s32 quadwordCount = (aLeng + 15) >> SDF_DMA_QWORD_SHIFT;
+    aPacket->quadwords = quadwordCount;
+    aPacket->address = aData & SDF_DMA_ADDRESS_MASK;
+    aPacket->tag = SDF_VIF_FLUSHA_COMMAND;
+    aPacket->command = quadwordCount | SDF_VIF_DIRECT_COMMAND;
+    aPacket->unknown10 = 0;
+    aPacket->unknown18 = 0;
+    aPacket->unknown1C = 0;
 }
 
-extern u8 D_0037F330[];
-
-/* Append the second fixed program block as a DMA reference packet. */
-void sdf3DLinkInitPacket(sdfDrawTag_t *packetList, DmaPacketHeader *packet) {
-    packet->address = (u32)vu1MicroPacket & SDF_DMA_ADDRESS_MASK;
-    packet->quadwords = (D_0037F330 - vu1MicroPacket) >> SDF_DMA_QWORD_SHIFT;
-    packet->tag = 0;
-    packet->command = 0;
-    packet->unknown10 = 0;
-    packet->unknown18 = 0;
-    packet->unknown1C = 0;
-    sdfDrawTagLinkRef(packetList, (u32)packet);
+void sdf3DLinkInitPacket(sdfDrawTag_t *aTag, DmaPacketHeader *aPacket) {
+    aPacket->address = (u32)vu1MicroPacket & SDF_DMA_ADDRESS_MASK;
+    aPacket->quadwords = (D_002F5600 - vu1MicroPacket) >> SDF_DMA_QWORD_SHIFT;
+    aPacket->tag = 0;
+    aPacket->command = 0;
+    aPacket->unknown10 = 0;
+    aPacket->unknown18 = 0;
+    aPacket->unknown1C = 0;
+    sdfDrawTagLinkRef(aTag, (u32)aPacket);
 }
 
-extern void sdfTmxSetHeader(SdfTextureFileHeader *, s32, s32, s32, s32, s32);
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
+extern void *memset(void *dst, s32 value, u32 size);
 
-/* Acquire a 128x64 grayscale power lookup texture; release its temporary image. */
 void sdf3DInitSpecularTex2(void) {
     struct sdfMemHandle_t *allocation = sdfMemAllocDirect(0x2440);
-    SdfGeneratedLookupTexture *texture = sdfMemLock(allocation);
+    sdf3DSpecularTexImage_t *texture = (sdf3DSpecularTexImage_t *)(u32)sdfMemLock(allocation);
     s32 i;
     s32 j;
 
     sdfTmxSetHeader(&texture->header, 0x80, 0x40, 0x13, 1, 0);
-    texture->header.byteCount = 0x2440;
-    texture->header.clampMode = 5;
+    texture->header.fileSize = 0x2440;
+    texture->header.texWrapMode = 5;
     /* The physical CLUT slot j decodes to the logical intensity i. */
     for (j = 0; j != 0x100; j++) {
         i = ((j & 8) << 1) | ((j & 0x10) >> 1) | (j & ~0x18);
@@ -386,25 +540,25 @@ void sdf3DInitSpecularTex2(void) {
     sdfMemFreeDirect(allocation);
 }
 
-/* Acquire texture resources, split their TEX0 words, and initialize queues. */
 void sdf3DInit(void) {
-    u64 textureWord;
+    s64 textureWord;
     sdf3DInitSpecularTex2();
     textureWord = sdfTexGetTex0Reg(sdf3DSpecularTex);
-    vu1Tex0Slot0[0] = textureWord;
     sdf3DRefMapParam = textureWord;
+    vu1Tex0Slot0[0] = textureWord;
     vu1Tex0Slot0[1] = textureWord >> 32;
-    D_00438A6C = sdfTexSetDirect((SdfTextureFileHeader *)D_00372C00);
-    textureWord = sdfTexGetTex0Reg(D_00438A6C);
+    D_005518B8 = sdfTexSetDirect((TMX_HEADER_t *)D_002E8ED0);
+    textureWord = sdfTexGetTex0Reg(D_005518B8);
     vu1Tex0Slot2[0] = textureWord;
     vu1Tex0Slot2[1] = textureWord >> 32;
-    D_00438A80 = sdfTexSetDirect((SdfTextureFileHeader *)D_00376C40);
-    textureWord = sdfTexGetTex0Reg(D_00438A80);
+    D_005518C8 = sdfTexSetDirect((TMX_HEADER_t *)D_002ECF10);
+    textureWord = sdfTexGetTex0Reg(D_005518C8);
     vu1Tex0Slot1[0] = textureWord;
     vu1Tex0Slot1[1] = textureWord >> 32;
     sdfModelInitSystem();
     sdfMatInitSystem();
 }
+
 INCLUDE_SDATA(const s32, "sdf/sdf3D", D_00438A50);
 
 INCLUDE_SDATA(const s32, "sdf/sdf3D", D_00438A54);
@@ -428,4 +582,3 @@ INCLUDE_SDATA(const s32, "sdf/sdf3D", sdf3DRefMapParam);
 INCLUDE_SDATA(const s32, "sdf/sdf3D", D_00438A80);
 
 INCLUDE_SDATA(const s32, "sdf/sdf3D", sdfPadPortSlotPairs);
-
