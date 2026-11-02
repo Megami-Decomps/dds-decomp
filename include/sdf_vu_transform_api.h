@@ -6,6 +6,6 @@
 void ReverseMatrix(void);
 
 /* Invalidate the selected-matrix and cached-object-vector address keys. */
-void sdfVuClearTransformCache(void);
+void sdfCoreDrawReset(void);
 
 #endif /* SDF_VU_TRANSFORM_API_H */

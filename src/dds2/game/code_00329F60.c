@@ -310,7 +310,7 @@ void sdfGrInitNewFrame(void) {
     }
     sdfFrameId = nextBuffer;
     sdfGrSetupPacketBuff((s8)sdfFrameId);
-    sdfVuClearTransformCache();
+    sdfCoreDrawReset();
 }
 INCLUDE_SDATA(const s32, "game/code_00329F60", sdfGrCaptureBuff);
 

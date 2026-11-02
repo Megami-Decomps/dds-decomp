@@ -9187,7 +9187,7 @@
 0x0033A090	sdfCoreDrawSetLight	inferred	SMT3HD name via SLUS_209.11 0x002B9B38, shared-hash-in-run; was sdfVuSelectTransformMatrix
 0x0033A098	sdfCoreDrawSetFog	inferred	SMT3HD name via SLUS_209.11 0x002B9B40, reloc-identical; was sdfVuCacheObjectVector
 0x0033A0C0	sdfCoreDrawSetZBias	inferred	SMT3HD name via SLUS_209.11 0x002B9B68, shared-hash-in-run; was sdfVuSetGlobalScale
-0x0033A0C8	sdfVuClearTransformCache	inferred	Clears cached transform matrix and object pointers. [names_reviewed8.tsv]
+0x0033A0C8	sdfCoreDrawReset	inferred	SMT3HD name via SLUS_209.11 0x002B9B70, identical body, sdfCoreDraw twin; was sdfVuClearTransformCache
 0x0033A0D8	sdfCoreDrawInit	inferred	SMT3HD name via SLUS_209.11 0x002B9B80, reloc-identical; was sdfConsUploadDmaProgram
 0x0033A170	sdf2DGetTexPacketSize	inferred	SMT3HD name via SLUS_209.11 0x002B9C18, shared-hash-in-run; was sdfConsGetTextureDrawPacketSize
 0x0033A178	sdf2DMakeTexPacket	inferred	SMT3HD name via SLUS_209.11 0x002B9C20, reloc-identical; was sdfConsInitTextureDrawPacket

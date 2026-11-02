@@ -409,7 +409,7 @@ void sdfCoreDrawSetZBias(f32 scale) {
     corePktZBias = scale;
 }
 
-void sdfVuClearTransformCache(void) {
+void sdfCoreDrawReset(void) {
     corePktCurrLight = 0;
     corePktCurrFog = 0;
 }
