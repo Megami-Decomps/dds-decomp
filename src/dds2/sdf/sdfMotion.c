@@ -53,39 +53,39 @@ struct SdfMotionBindingHead *sdfMotionNodeNew(sdfMotionCtrlr_t *motion, u32 comm
 
 f32 sdfMotInterpolateKeyFloat(const SdfMotionKeyInterval *interval);
 
-extern SdfMotionBindingFactory D_0040B368[];
+extern SdfMotionBindingFactory sdfMotGenNodeDef[];
 
-extern SdfMotionBindingFactory D_0040B3F8[];
+extern SdfMotionBindingFactory sdfMotGenMatTable[];
 
-extern SdfMotionBindingDispatch D_0040B420;
+extern SdfMotionBindingDispatch sdfMotMatDiffuseTable;
 
-extern SdfMotionBindingDispatch D_0040B438;
+extern SdfMotionBindingDispatch sdfMotMatAmbientTable;
 
-extern SdfMotionBindingDispatch D_0040B450;
+extern SdfMotionBindingDispatch sdfMotMatSpecularTable;
 
-extern SdfMotionBindingDispatch D_0040B468;
+extern SdfMotionBindingDispatch sdfMotMatRefMapTable;
 
-extern SdfMotionBindingDispatch D_0040B480;
+extern SdfMotionBindingDispatch sdfMotMatConstantTable;
 
-extern SdfMotionBindingDispatch D_0040B498;
+extern SdfMotionBindingDispatch sdfMotMatUvwTable;
 
-extern SdfMotionBindingDispatch D_0040B4B0;
+extern SdfMotionBindingDispatch sdfMotMatMultiUvwTable;
 
-extern SdfMotionBindingDispatch D_0040B4C8;
+extern SdfMotionBindingDispatch sdfMotMatMultiDiffuseTable;
 
-extern SdfMotionBindingDispatch D_0040B4E0;
+extern SdfMotionBindingDispatch sdfMotMatUvw2Table;
 
-extern SdfMotionBindingDispatch D_0040B4F8;
+extern SdfMotionBindingDispatch sdfMotMatMultiUvw2Table;
 
 extern SdfMotionBindingDispatch D_0040B380;
 
-extern SdfMotionBindingDispatch D_0040B398;
+extern SdfMotionBindingDispatch sdfMotModelLinerRotXYZTable;
 
-extern SdfMotionBindingDispatch D_0040B3B0;
+extern SdfMotionBindingDispatch sdfMotModelLinerScaleTable;
 
-extern SdfMotionBindingDispatch D_0040B3C8;
+extern SdfMotionBindingDispatch sdfMotModelLerpRotQuatTable;
 
-extern SdfMotionBindingDispatch D_0040B3E0;
+extern SdfMotionBindingDispatch sdfMotModelVisibleTable;
 
 /* Release the allocation retained by this motion binding. */
 void sdfMotionNodeFree(SdfMotionBindingHead *binding) {
@@ -411,7 +411,7 @@ void sdfMotInterpolateKeyUvw(const SdfMotionKeyInterval *src, f32 *dst) {
 }
 
 SdfMotionBindingHead *sdfMotGenNode(sdfMotionCtrlr_t *motion, u32 selector, s32 targetIndex) {
-    return D_0040B368[(u16)selector](motion, selector, targetIndex);
+    return sdfMotGenNodeDef[(u16)selector](motion, selector, targetIndex);
 }
 
 void sdfMotGenModelInit(SdfMotionDrawTargetBinding *binding, sdfMotionCtrlr_t *motion,
@@ -459,7 +459,7 @@ SdfMotionBindingHead *sdfMotGenModelLinerRotXYZ(sdfMotionCtrlr_t *motion, u32 un
     SdfMotionDrawBinding *binding;
 
     binding = sdfChipAllocDirect(0x20);
-    sdfMotGenModelInit((SdfMotionDrawTargetBinding *)binding, motion, &D_0040B398, nodeIndex);
+    sdfMotGenModelInit((SdfMotionDrawTargetBinding *)binding, motion, &sdfMotModelLinerRotXYZTable, nodeIndex);
     return (SdfMotionBindingHead *)binding;
 }
 
@@ -516,7 +516,7 @@ SdfMotionBindingHead *sdfMotGenModelLinerScale(sdfMotionCtrlr_t *motion, u32 unu
     SdfMotionDrawBinding *binding;
 
     binding = sdfChipAllocDirect(0x20);
-    sdfMotGenModelInit((SdfMotionDrawTargetBinding *)binding, motion, &D_0040B3B0, nodeIndex);
+    sdfMotGenModelInit((SdfMotionDrawTargetBinding *)binding, motion, &sdfMotModelLinerScaleTable, nodeIndex);
     return (SdfMotionBindingHead *)binding;
 }
 
@@ -548,7 +548,7 @@ SdfMotionBindingHead *sdfMotGenModelLerpRotQuat(sdfMotionCtrlr_t *motion, u32 un
     SdfMotionDrawBinding *binding;
 
     binding = sdfChipAllocDirect(0x20);
-    sdfMotGenModelInit((SdfMotionDrawTargetBinding *)binding, motion, &D_0040B3C8, nodeIndex);
+    sdfMotGenModelInit((SdfMotionDrawTargetBinding *)binding, motion, &sdfMotModelLerpRotQuatTable, nodeIndex);
     return (SdfMotionBindingHead *)binding;
 }
 
@@ -603,7 +603,7 @@ SdfMotionBindingHead *sdfMotGenModelVisible(sdfMotionCtrlr_t *motion, u32 unused
     SdfMotionKeyFlagBinding *binding;
 
     binding = sdfChipAllocDirect(0x14);
-    sdfMotGenModelInit((SdfMotionDrawTargetBinding *)binding, motion, &D_0040B3E0, nodeIndex);
+    sdfMotGenModelInit((SdfMotionDrawTargetBinding *)binding, motion, &sdfMotModelVisibleTable, nodeIndex);
     return (SdfMotionBindingHead *)binding;
 }
 
@@ -651,7 +651,7 @@ void sdfMotCLBK_modelScaleInitBlend(SdfMotionDrawBinding *binding) {
 }
 
 SdfMotionBindingHead *sdfMotGenMatNode(sdfMotionCtrlr_t *motion, u32 selector, s32 targetIndex) {
-    return D_0040B3F8[(u16)selector](motion, selector, targetIndex);
+    return sdfMotGenMatTable[(u16)selector](motion, selector, targetIndex);
 }
 
 void sdfMotGenMatInit(SdfMotionIndexedBinding *binding, sdfMotionCtrlr_t *motion,
@@ -664,7 +664,7 @@ SdfMotionBindingHead *sdfMotGenMatDiffuse(sdfMotionCtrlr_t *motion, u32 unused, 
     SdfMotionIndexedValueBinding *binding;
 
     binding = sdfChipAllocDirect(0x14);
-    sdfMotGenMatInit((SdfMotionIndexedBinding *)binding, motion, &D_0040B420, options);
+    sdfMotGenMatInit((SdfMotionIndexedBinding *)binding, motion, &sdfMotMatDiffuseTable, options);
     return (SdfMotionBindingHead *)binding;
 }
 
@@ -694,7 +694,7 @@ SdfMotionBindingHead *sdfMotGenMatAmbient(sdfMotionCtrlr_t *motion, u32 unused, 
     SdfMotionIndexedValueBinding *binding;
 
     binding = sdfChipAllocDirect(0x14);
-    sdfMotGenMatInit((SdfMotionIndexedBinding *)binding, motion, &D_0040B438, options);
+    sdfMotGenMatInit((SdfMotionIndexedBinding *)binding, motion, &sdfMotMatAmbientTable, options);
     return (SdfMotionBindingHead *)binding;
 }
 
@@ -724,7 +724,7 @@ SdfMotionBindingHead *sdfMotGenMatSpecular(sdfMotionCtrlr_t *motion, u32 unused,
     SdfMotionIndexedValueBinding *binding;
 
     binding = sdfChipAllocDirect(0x14);
-    sdfMotGenMatInit((SdfMotionIndexedBinding *)binding, motion, &D_0040B450, options);
+    sdfMotGenMatInit((SdfMotionIndexedBinding *)binding, motion, &sdfMotMatSpecularTable, options);
     return (SdfMotionBindingHead *)binding;
 }
 
@@ -754,7 +754,7 @@ SdfMotionBindingHead *sdfMotGenMatRefMap(sdfMotionCtrlr_t *motion, u32 unused, s
     SdfMotionIndexedValueBinding *binding;
 
     binding = sdfChipAllocDirect(0x14);
-    sdfMotGenMatInit((SdfMotionIndexedBinding *)binding, motion, &D_0040B468, options);
+    sdfMotGenMatInit((SdfMotionIndexedBinding *)binding, motion, &sdfMotMatRefMapTable, options);
     return (SdfMotionBindingHead *)binding;
 }
 
@@ -784,7 +784,7 @@ SdfMotionBindingHead *sdfMotGenMatConstant(sdfMotionCtrlr_t *motion, u32 unused,
     SdfMotionIndexedValueBinding *binding;
 
     binding = sdfChipAllocDirect(0x14);
-    sdfMotGenMatInit((SdfMotionIndexedBinding *)binding, motion, &D_0040B480, options);
+    sdfMotGenMatInit((SdfMotionIndexedBinding *)binding, motion, &sdfMotMatConstantTable, options);
     return (SdfMotionBindingHead *)binding;
 }
 
@@ -811,7 +811,7 @@ SdfMotionBindingHead *sdfMotGenMatUvw(sdfMotionCtrlr_t *motion, u32 unused, s32 
     SdfMotionIndexedTextBinding *binding;
 
     binding = sdfChipAllocDirect(0x24);
-    sdfMotGenMatInit((SdfMotionIndexedBinding *)binding, motion, &D_0040B498, options);
+    sdfMotGenMatInit((SdfMotionIndexedBinding *)binding, motion, &sdfMotMatUvwTable, options);
     return (SdfMotionBindingHead *)binding;
 }
 
@@ -847,7 +847,7 @@ SdfMotionBindingHead *sdfMotGenMatMultiUvw(sdfMotionCtrlr_t *motion, u32 unused,
     SdfMotionIndexedTextBinding *binding;
 
     binding = sdfChipAllocDirect(0x24);
-    sdfMotGenMatInit((SdfMotionIndexedBinding *)binding, motion, &D_0040B4B0, options);
+    sdfMotGenMatInit((SdfMotionIndexedBinding *)binding, motion, &sdfMotMatMultiUvwTable, options);
     return (SdfMotionBindingHead *)binding;
 }
 
@@ -884,7 +884,7 @@ SdfMotionBindingHead *sdfMotGenMatMultiDiffuse(sdfMotionCtrlr_t *motion, u32 unu
     SdfMotionIndexedValueBinding *binding;
 
     binding = sdfChipAllocDirect(0x14);
-    sdfMotGenMatInit((SdfMotionIndexedBinding *)binding, motion, &D_0040B4C8, options);
+    sdfMotGenMatInit((SdfMotionIndexedBinding *)binding, motion, &sdfMotMatMultiDiffuseTable, options);
     return (SdfMotionBindingHead *)binding;
 }
 
@@ -914,7 +914,7 @@ SdfMotionBindingHead *sdfMotGenMatUvw2(sdfMotionCtrlr_t *motion, u32 unused, s32
     SdfMotionIndexedTextBinding *binding;
 
     binding = sdfChipAllocDirect(0x24);
-    sdfMotGenMatInit((SdfMotionIndexedBinding *)binding, motion, &D_0040B4E0, options);
+    sdfMotGenMatInit((SdfMotionIndexedBinding *)binding, motion, &sdfMotMatUvw2Table, options);
     return (SdfMotionBindingHead *)binding;
 }
 
@@ -941,7 +941,7 @@ SdfMotionBindingHead *sdfMotGenMatMultiUvw2(sdfMotionCtrlr_t *motion, u32 unused
     SdfMotionIndexedTextBinding *binding;
 
     binding = sdfChipAllocDirect(0x24);
-    sdfMotGenMatInit((SdfMotionIndexedBinding *)binding, motion, &D_0040B4F8, options);
+    sdfMotGenMatInit((SdfMotionIndexedBinding *)binding, motion, &sdfMotMatMultiUvw2Table, options);
     return (SdfMotionBindingHead *)binding;
 }
 

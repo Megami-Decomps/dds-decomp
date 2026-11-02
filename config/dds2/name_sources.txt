@@ -10430,6 +10430,22 @@
 0x0040B260	sdfGrFrameModes	inferred	SMT3HD data name via SLUS_209.11 0x00529358, 1 agreeing references; was sdfGrFrameModes
 0x0040B298	sdfPacketResourceEntries	inferred	confidence=high; src/dds2/game/code_0032C278.c:D_0040B298; type=sdfGsMemSlice_t*[]; refs=sdfLinkStoreFrameImagePredraw,sdfPrimFrameMovePredraw; Indexed texture resources supply the VRAM word offset for patching the low resource-address bits of draw packets. [names_qp9.tsv]
 0x0040B308	sdfGrDrawState	inferred	SMT3HD data name via SLUS_209.11 0x005293F8, 4 agreeing references; was sdfGrDrawState
+0x0040B368	sdfMotGenNodeDef	inferred	SMT3HD name via SLUS_209.11 0x00529458, sdfMotion data twin; was D_0040B368
+0x0040B398	sdfMotModelLinerRotXYZTable	inferred	SMT3HD name via SLUS_209.11 0x00529488, sdfMotion data twin; was D_0040B398
+0x0040B3B0	sdfMotModelLinerScaleTable	inferred	SMT3HD name via SLUS_209.11 0x005294A0, sdfMotion data twin; was D_0040B3B0
+0x0040B3C8	sdfMotModelLerpRotQuatTable	inferred	SMT3HD name via SLUS_209.11 0x005294B8, sdfMotion data twin; was D_0040B3C8
+0x0040B3E0	sdfMotModelVisibleTable	inferred	SMT3HD name via SLUS_209.11 0x005294D0, sdfMotion data twin; was D_0040B3E0
+0x0040B3F8	sdfMotGenMatTable	inferred	SMT3HD name via SLUS_209.11 0x005294E8, sdfMotion data twin; was D_0040B3F8
+0x0040B420	sdfMotMatDiffuseTable	inferred	SMT3HD name via SLUS_209.11 0x00529510, sdfMotion data twin; was D_0040B420
+0x0040B438	sdfMotMatAmbientTable	inferred	SMT3HD name via SLUS_209.11 0x00529528, sdfMotion data twin; was D_0040B438
+0x0040B450	sdfMotMatSpecularTable	inferred	SMT3HD name via SLUS_209.11 0x00529540, sdfMotion data twin; was D_0040B450
+0x0040B468	sdfMotMatRefMapTable	inferred	SMT3HD name via SLUS_209.11 0x00529558, sdfMotion data twin; was D_0040B468
+0x0040B480	sdfMotMatConstantTable	inferred	SMT3HD name via SLUS_209.11 0x00529570, sdfMotion data twin; was D_0040B480
+0x0040B498	sdfMotMatUvwTable	inferred	SMT3HD name via SLUS_209.11 0x00529588, sdfMotion data twin; was D_0040B498
+0x0040B4B0	sdfMotMatMultiUvwTable	inferred	SMT3HD name via SLUS_209.11 0x005295A0, sdfMotion data twin; was D_0040B4B0
+0x0040B4C8	sdfMotMatMultiDiffuseTable	inferred	SMT3HD name via SLUS_209.11 0x005295B8, sdfMotion data twin; was D_0040B4C8
+0x0040B4E0	sdfMotMatUvw2Table	inferred	SMT3HD name via SLUS_209.11 0x005295D0, sdfMotion data twin; was D_0040B4E0
+0x0040B4F8	sdfMotMatMultiUvw2Table	inferred	SMT3HD name via SLUS_209.11 0x005295E8, sdfMotion data twin; was D_0040B4F8
 0x0040B510	sdfMotionCommandHandlers	inferred	confidence=high; sdfMotGenMorphNode indexes this function-pointer bank by (u16)command. Native two words are sdfMotGenMorph and NULL; existing unchecked dispatch and prototype remain. Same role in DDS1 at 0x00398360. Preserve all types, declarations, bounds, data and control flow. [PurC5 readability data b6; native/matched-C twin evidence; identifier-only]
 0x0040B518	sdfMotMorphTable	inferred	SMT3HD data name via SLUS_209.11 0x00529608, 1 agreeing references; was sdfMotMorphTable
 0x0040B580	sdf3DScreenParam	inferred	The screen parameters sdf3DSetCamera copies whole (an SdfProjectionRecord, 0xA0 bytes). Named the original name, from Nocturne HD's sdf3D.c (sdf3DSetCamera's stores in order)
