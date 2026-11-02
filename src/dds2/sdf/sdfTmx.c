@@ -37,11 +37,11 @@ enum {
     SDF_POOL_PUSH_FREE = 1
 };
 
-extern SdfStreamState D_0047BCC0;
+extern SdfStreamState sdfFileRpcState;
 
 extern u8 D_0047BE40[];
 
-extern s32 D_0047BE00[];
+extern s32 sdfFileRpcBuf[];
 
 extern sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path,
                                           s32 (*callback)(sdfFileCmdHandle_t *, SdfDevEvent, s32, s32, s32),
@@ -51,7 +51,7 @@ extern SdfFileCommandQueueResult sdfFileCmdFileSize(sdfFileCmdHandle_t *state);
 
 extern s32 sdfFileRpcReadCallback(sdfFileCmdHandle_t *, SdfDevEvent, s32, s32, s32);
 
-extern s32 D_00439224;
+extern s32 sdfFileRpcThreadId;
 
 /* Initialize a zeroed TMX0 header with the caller's palette metadata. */
 void sdfTmxSetHeader(SdfTextureFileHeader *header, s32 width, s32 height, s32 depth, s32 paletteCount, s32 clutFormat) {
@@ -67,19 +67,19 @@ void sdfTmxSetHeader(SdfTextureFileHeader *header, s32 width, s32 height, s32 de
 
 /* Queue at most one staging-buffer-sized read; the completion callback advances the byte counts. */
 void sdfFileRpcContinueRead(void) {
-    s32 chunkBytes = D_0047BCC0.remainingBytes;
+    s32 chunkBytes = sdfFileRpcState.remainingBytes;
 
     if (chunkBytes > SDF_STREAM_CHUNK_BYTES) {
         chunkBytes = SDF_STREAM_CHUNK_BYTES;
     }
-    sdfFileCmdRead(D_0047BCC0.deviceState, D_0047BE40, chunkBytes);
+    sdfFileCmdRead(sdfFileRpcState.deviceState, D_0047BE40, chunkBytes);
 }
 
 /* Handle stream replies and DMA-copy read chunks, requesting the next chunk as needed.
  * Uses the shared stream, ignores deviceState/callbackArg, and always returns zero. */
 s32 sdfFileRpcReadCallback(sdfFileCmdHandle_t *deviceState, SdfDevEvent command, s32 sourceAddress,
                   s32 byteCount, s32 callbackArg) {
-    SdfStreamState *stream = &D_0047BCC0;
+    SdfStreamState *stream = &sdfFileRpcState;
     s32 dmaId;
     s32 timer;
 
@@ -135,7 +135,7 @@ s32 sdfFileRpcReadCallback(sdfFileCmdHandle_t *deviceState, SdfDevEvent command,
  * request is a scalar argument except for a read command, which carries a read-request address.
  * An unrecognized command leaves the shared reply unchanged. */
 s32 *sdfFileRpcHandler(u32 command, s32 request) {
-    SdfStreamState *state = &D_0047BCC0;
+    SdfStreamState *state = &sdfFileRpcState;
     sdfFileCmdHandle_t *deviceState;
     switch (command) {
     case SDF_STREAM_COMMAND_CREATE_STATE:
@@ -152,12 +152,12 @@ s32 *sdfFileRpcHandler(u32 command, s32 request) {
         } else {
             deviceState = 0;
         }
-        D_0047BE00[0] = (s32)deviceState;
+        sdfFileRpcBuf[0] = (s32)deviceState;
         break;
     case SDF_STREAM_COMMAND_CONTROL:
         sdfFileCmdFileSize(state->deviceState);
         WaitSema(state->semaphore);
-        D_0047BE00[0] = state->readResult;
+        sdfFileRpcBuf[0] = state->readResult;
         break;
     case SDF_STREAM_COMMAND_READ:
         state->remainingBytes = ((SdfStreamReadRequest *)request)->byteCount;
@@ -165,17 +165,17 @@ s32 *sdfFileRpcHandler(u32 command, s32 request) {
         state->destination = (u8 *)((SdfStreamReadRequest *)request)->destinationAddress;
         sdfFileRpcContinueRead();
         WaitSema(state->semaphore);
-        D_0047BE00[0] = state->transferredBytes;
+        sdfFileRpcBuf[0] = state->transferredBytes;
         break;
     case SDF_STREAM_COMMAND_RELEASE_STATE:
         sdfFileCmdClose(state->deviceState);
         WaitSema(state->semaphore);
         sdfFileCmdFree(state->deviceState);
         state->deviceState = 0;
-        D_0047BE00[0] = 0;
+        sdfFileRpcBuf[0] = 0;
         break;
     }
-    return D_0047BE00;
+    return sdfFileRpcBuf;
 }
 
 extern u8 sdfHddValid;
@@ -184,7 +184,7 @@ extern u8 D_0047BD00[];
 
 /* Load SDFIOPFL, wake the creator, and serve the registered stream RPC commands. */
 void SdfFileRpcServerThreadProc(void) {
-    SdfStreamState *state = &D_0047BCC0;
+    SdfStreamState *state = &sdfFileRpcState;
     SceIoStat info;
     u8 queue[0x20];
     u8 server[0x50];
@@ -201,7 +201,7 @@ void SdfFileRpcServerThreadProc(void) {
         module = "pfs0:/userirx/sdfiopfl.irx";
     }
     SdfIopFileRpc(module, 0, NULL, NULL);
-    WakeupThread(D_00439224);
+    WakeupThread(sdfFileRpcThreadId);
     sceSifRpcLoop(queue);
 }
 
@@ -210,16 +210,16 @@ void sdfStartFileRpcServer(void) {
     s32 workerId = sdfCreateThreadWithStack(SdfFileRpcServerThreadProc, 0x1000, 0x4C);
 
     _StartThread(workerId, 0);
-    D_00439224 = GetThreadId();
+    sdfFileRpcThreadId = GetThreadId();
     SleepThread();
 }
 
-extern char *D_0040BE00[];
+extern char *mcModuleNames[];
 
 /* Load the selected pair of IOP module paths from prefix; loader results are not checked. */
 void LoadMcModules(const char *prefix, s32 moduleGroup) {
     char path[0x100];
-    char **moduleNames = &D_0040BE00[moduleGroup * SDF_IOP_MODULES_PER_GROUP];
+    char **moduleNames = &mcModuleNames[moduleGroup * SDF_IOP_MODULES_PER_GROUP];
     s32 moduleIndex;
 
     for (moduleIndex = 0; moduleIndex != SDF_IOP_MODULES_PER_GROUP; moduleIndex++) {

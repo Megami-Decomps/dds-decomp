@@ -10445,6 +10445,7 @@
 0x0040BA80	sdfDevPfsModuleArguments	inferred	confidence=high; PFS.IRX load consumes exactly0x12 bytes: embedded-NUL argv -m,18,-o,10,-n,64. Retail32-byte window identical across games with zero tail; do not turn this blob into one formatted string. Same role in DDS1 at 0x003988D0. Preserve prior Cedar data-ownership credit; no new function/data-ownership credit. [PurC5 readability data b8; matched-C/native-twin evidence; identifier-only]
 0x0040BAE8	sdfDefaultRandCB	inferred	SMT3HD data name via SLUS_209.11 0x00529BD8, sdfRandomize twin reference; was sdfDefaultRandCB
 0x0040BBF8	sdfIpuAudioModeIdecBits	inferred	Per stream audio mode, IDEC's OFM bit then its DTE bit, which sdfIpuDecode sets. DDS1 twin 0x00398A48.
+0x0040BE00	mcModuleNames	inferred	SMT3HD name via SLUS_209.11 0x00529F00, sdfTmx twin; was D_0040BE00
 0x0040D9A0	ipuDefaultQuantizerMatrices	inferred	libipu: the intra and non-intra quantizer matrices sceIpuInit loads; read by its routines. DDS1 twin 0x0039A820.
 0x0040D9F0	ipuDefaultVqClut	inferred	libipu: the VQ colour lookup table sceIpuInit loads; read by its routines. DDS1 twin 0x0039A870.
 0x0040E650	at3decImdctTwiddles	inferred	libat3dec: 128 x 4 words, the butterfly twiddles of the 256-point inverse transform; read by its routines. DDS1 twin 0x0039B4D0.
@@ -11084,6 +11085,7 @@
 0x00439214	sdfIpuDecodeThId	inferred	SMT3HD name via SLUS_209.11 0x00552164, sdfIpu reference; was D_00439214
 0x00439218	movieSemaId	inferred	SMT3HD data name via SLUS_209.11 0x00552168, 1 agreeing references; was movieSemaId
 0x0043921C	movieSemaCount	inferred	SMT3HD data name via SLUS_209.11 0x0055216C, 3 agreeing references; was movieSemaCount
+0x00439224	sdfFileRpcThreadId	inferred	SMT3HD name via SLUS_209.11 0x00552174, sdfTmx twin; was D_00439224
 0x004393C8	dds3ProcessTreeDepth	inferred	SMT3HD data name via SLUS_209.11 0x005522C8, 2 agreeing references; was dds3ProcessTreeDepth
 0x0043DC90	key2	inferred	SMT3HD data name via SLUS_209.11 0x00556B90, 2 agreeing references; was key2
 0x0043DCC0	kwlnFilterBlurFrameParameters	inferred	confidence=high; Per-update workspace filled by transition blending or target-copy plus alpha fade, then passed to real effect-copy and enable/disable providers. DDS1 twin0x003C2540. Native allocation0x30 including padding retained; existingEffBlurScatterParams unchanged. No import or active ASM consumer. [PurD readability data b3; native/matched-C twin; identifier-only]
@@ -11226,3 +11228,5 @@
 0x0047AA40	sdfSndMap	inferred	SMT3HD data name via SLUS_209.11 0x00593880, 3 agreeing references; was sdfSndMap
 0x0047ABD0	LastLoad	inferred	SMT3HD data name via SLUS_209.11 0x00593A10, 2 agreeing references; was LastLoad
 0x0047B480	sdfIpuDecodeThStack	inferred	SMT3HD data name via SLUS_209.11 0x00593F80, 1 agreeing references; was sdfIpuDecodeThStack
+0x0047BCC0	sdfFileRpcState	inferred	SMT3HD name via SLUS_209.11 0x005947C0, sdfTmx twin; was D_0047BCC0
+0x0047BE00	sdfFileRpcBuf	inferred	SMT3HD name via SLUS_209.11 0x00594900, sdfTmx twin; was D_0047BE00
