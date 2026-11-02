@@ -1,50 +1,92 @@
-#include "sdk_ps2.h"
-#include "sdf_request.h"
+#include "fpu.h"
 #include "common.h"
-#include "sdf_file_existence_api.h"
-#include "sdf_console_packet.h"
-#include "sif_rpc_client_prefix.h"
-#include "sdf.h"
-#include "sdf_semaphore_api.h"
-#include "sdf_timer.h"
-#include "sdf_chip.h"
-#include "sdf_heap_api.h"
-#include "sdf_draw.h"
-#include "sdf_packet_alloc.h"
-#include "sdf_sif_command.h"
-#include "sdf_dev_event.h"
-#include "sdf_dev_protocol.h"
-#include "sdf_dev_state.h"
-#include "sdf_dev_path_prefix.h"
-#include "sdf_dev_worker.h"
-#include "sdf_thread_workspace_api.h"
-#include "sdf_dev_start_load_api.h"
-#include "sdf_disc_file_record.h"
-#include "btl.h"
-#include "sdf_debug_api.h"
+#include "libsdf.h"
+#include "ps2asm.h"
 
-#define SDF_DEV_RPC_QUEUE_BYTES 0x20
+s32 strlen(const char *aStr);
 
-#define SDF_DEV_RPC_SERVER_BYTES 0x50
+typedef struct sifRpcClientDataPrefix_t {
+    u8 opaque00[0x24];
+    void *server;
+} sifRpcClientDataPrefix_t;
 
-#define SDF_DEV_RPC_SERVER_ID 0x32647270
+typedef struct sifRpcClientContextView_t {
+    sifRpcClientDataPrefix_t client;
+    u8 opaque28[8];
+} sifRpcClientContextView_t;
 
-#define SDF_DEV_RPC_CLIENT_ID 0x646E7270
+typedef void (*sifMRpcEnd_t)(void *argument);
 
-#define SDF_DEV_RPC_THREAD_STACK_BYTES 0x1000
+enum SdfFileIOCmdStat {
+    SDF_FILE_CMD_STAT_INIT = 0,
+    SDF_FILE_CMD_STAT_DORMANT = 1,
+    SDF_FILE_CMD_STAT_OPEN = 2,
+    SDF_FILE_CMD_STAT_SEEK = 3,
+    SDF_FILE_CMD_STAT_READ = 4,
+    SDF_FILE_CMD_STAT_WRITE = 5,
+    SDF_FILE_CMD_STAT_CLOSE = 6,
+    SDF_FILE_CMD_STAT_SUSPEND = 7,
+    SDF_FILE_CMD_STAT_DONE = 8,
+    SDF_FILE_CMD_STAT_ERROR = 9,
+    SDF_FILE_CMD_STAT_CANCEL = 10
+};
 
-#define SDF_DEV_RPC_THREAD_PRIORITY 0x4C
+enum SdfFileIOCmd {
+    SDF_FILE_CMD_NONE = 0,
+    SDF_FILE_CMD_READOPEN = 1,
+    SDF_FILE_CMD_WRITEOPEN = 2,
+    SDF_FILE_CMD_SEEK = 3,
+    SDF_FILE_CMD_FILESIZE = 4,
+    SDF_FILE_CMD_READ = 5,
+    SDF_FILE_CMD_WRITE = 6,
+    SDF_FILE_CMD_CLOSE = 7,
+    SDF_FILE_CMD_READFILE = 8,
+    SDF_FILE_CMD_WRITEFILE = 9
+};
 
-#define SDF_DEV_RPC_BIND_POLL_TICKS 4
+enum sdf_tex_resource {
+    SDF_TEX_RESOURCE_FREE = 0,
+    SDF_TEX_RESOURCE_FRAME = 1,
+    SDF_TEX_RESOURCE_TEXTURE = 2,
+    SDF_TEX_RESOURCE_CLUT = 3,
+    SDF_TEX_RESOURCE_KNOWN_MODE_COUNT = 4
+};
 
-extern u8 sdfPrintRpcBuff[];
+enum sdf_stream_output {
+    SDF_STREAM_OUTPUT_RGBA32 = 0,
+    SDF_STREAM_OUTPUT_RGBA16 = 1,
+    SDF_STREAM_OUTPUT_RGBA16_DITHERED = 2
+};
 
-extern void sdfPuts(const char *text);
+enum sdf_stream_playback {
+    SDF_STREAM_PLAYBACK_INITIAL = 0,
+    SDF_STREAM_PLAYBACK_FIRST_COMPLETION = 1,
+    SDF_STREAM_PLAYBACK_CADENCED = 2
+};
+
+extern void *memcpy(void *, const void *, unsigned int);
+
+#include "sdk_libmrpc.h"
+
+#define D_0058F310 sdfDevRpcClient
+
+extern sifRpcClientContextView_t D_0058F310;
+
+extern s8 sdfPrintIopFlag;
+
+#define D_00551908 D_003BD3D0
+
+extern char D_00551908[];
+
+extern s32 scePrintf(const char *, ...);
+
+extern s32 vsprintf(char *destination, const char *format, void *args);
+
+extern s32 (*p2sdSmgBuf)(void);
 
 /* Copy a positive source/end span into the RPC reply buffer; otherwise return NULL. */
-void *sdfPrintRpcFunc(s32 unused, SifCommand *packet) {
+void *sdfPrintRpcFunc(s32 unused, sifCommand_t *packet) {
     s32 copyBytes = packet->end - packet->source;
-
     if (copyBytes > 0) {
         memcpy(packet, (void *)packet->source, copyBytes);
         return packet;
@@ -52,68 +94,113 @@ void *sdfPrintRpcFunc(s32 unused, SifCommand *packet) {
     return NULL;
 }
 
-/* Register the EE-side buffer service and run its RPC queue on the current thread. */
-void sdfPrintRpcThread(void) {
-    u8 rpcQueue[SDF_DEV_RPC_QUEUE_BYTES];
-    u8 rpcServer[SDF_DEV_RPC_SERVER_BYTES];
-    sceSifSetRpcQueue(rpcQueue, GetThreadId());
-    sceSifRegisterRpc(rpcServer, SDF_DEV_RPC_SERVER_ID, sdfPrintRpcFunc, sdfPrintRpcBuff, 0, 0, rpcQueue);
-    sceSifRpcLoop(rpcQueue);
+void sdfPrintRpcThread();
+
+typedef struct sifPrintRpcServerData_t sifPrintRpcServerData_t;
+typedef struct sifRpcDataQueue_t {
+    s32 threadId;
+    s32 active;
+    sifPrintRpcServerData_t *serverList;
+    sifPrintRpcServerData_t *request;
+    s32 requestState;
+    struct sifRpcDataQueue_t *next;
+} __attribute__((aligned(16))) sifRpcDataQueue_t;
+
+struct sifPrintRpcServerData_t {
+    s32 serviceId;
+    void *(*handler)(s32, sifCommand_t *);
+    void *buffer;
+    u32 opaque0C;
+    s32 bufferSize;
+    void *callback;
+    u8 opaque18[0x20];
+    sifPrintRpcServerData_t *next;
+    sifPrintRpcServerData_t *nextRequest;
+    sifRpcDataQueue_t *queue;
+};
+
+typedef char sifRpcDataQueue_size_must_be_0x20[
+    sizeof(sifRpcDataQueue_t) == 0x20 ? 1 : -1];
+typedef char sifPrintRpcServerData_size_must_be_0x44[
+    sizeof(sifPrintRpcServerData_t) == 0x44 ? 1 : -1];
+
+extern void *sdfPrintRpcFunc(s32 unused, sifCommand_t *packet);
+extern s32 GetThreadId(void);
+extern s32 sceSifSetRpcQueue(sifRpcDataQueue_t *queue, s32 threadId);
+#define SDK_SKIP_sceSifSetRpcQueue
+#define SDK_SKIP_sceSifRpcLoop
+typedef void *(*sceSifRpcFunc)(s32 function, void *request, s32 size);
+#include "sdk_libkernl.h"
+
+extern void sceSifRpcLoop(sifRpcDataQueue_t *queue);
+extern u8 sdfPrintRpcBuff[];
+
+void sdfPrintRpcThread(void)
+{
+    sifRpcDataQueue_t queue;
+    sifPrintRpcServerData_t server;
+
+    sceSifSetRpcQueue(&queue, GetThreadId());
+    sceSifRegisterRpc((struct sifRpcServerData_t *)&server, 0x32647270, (sceSifRpcFunc)sdfPrintRpcFunc, sdfPrintRpcBuff, 0, NULL, (struct sifRpcDataQueue_t *)&queue);
+    sceSifRpcLoop(&queue);
 }
 
-extern SifRpcClientContextView sdfDevRpcClient;
 
-extern s8 sdfPrintIopFlag;
+extern char D_005495C8[];
 
-extern char D_003BD3D0[];
+#include "sdk_libc.h"
 
-extern s32 scePrintf(const char *, ...);
+extern s32 sdfCreateThreadWithStack(void (*entryAddress)(), s32 stackBytes, s32 priority);
 
-/* Start the RPC server thread and bind to the remote service, polling every 4 timer ticks. */
-void sdfPrintIopInit(void) {
-    s32 waitStart;
+extern s32 sdfGetRunTimeCountBase(void);
 
-    _StartThread(sdfCreateThreadWithStack(sdfPrintRpcThread, SDF_DEV_RPC_THREAD_STACK_BYTES, SDF_DEV_RPC_THREAD_PRIORITY), 0);
-    while (sceSifMBindRpc(&sdfDevRpcClient.client, SDF_DEV_RPC_CLIENT_ID, 0) >= 0) {
-        if (sdfDevRpcClient.client.server != NULL) {
+extern s32 sdfGetRunTimeCount(s32 aBaseTime);
+
+extern s32 sceSifMBindRpc(sifRpcClientDataPrefix_t *client, s32 number, s32 mode);
+
+/* DDS retries the bind after a failure instead of printing and returning. */
+void sdfPrintIopInit(void)
+{
+    s32 startTicks;
+
+    _StartThread(sdfCreateThreadWithStack(sdfPrintRpcThread, 0x1000, 0x4C), 0);
+    while (sceSifMBindRpc(&D_0058F310.client, 0x646E7270, 0) >= 0) {
+        if (D_0058F310.client.server != NULL) {
             sdfPrintIopFlag = 1;
             break;
         }
-        waitStart = sdfGetRunTimeCountBase();
-        while ((s32)sdfGetRunTimeCount(waitStart) < SDF_DEV_RPC_BIND_POLL_TICKS) {
+        startTicks = sdfGetRunTimeCountBase();
+        while (sdfGetRunTimeCount(startTicks) < 4) {
         }
     }
 }
 
 /* Print text through the bound IOP dev client, or locally when it is unbound. */
-void sdfPuts(const char *text) {
+void sdfPuts(const char *str) {
     u8 buffer[0x13F];
     u8 *alignedBuffer;
     s32 length;
-
     if (sdfPrintIopFlag != 0) {
-        length = strlen(text);
+        length = strlen(str);
         if (length != 0) {
             alignedBuffer = (u8 *)(((u32)&buffer[0x3F]) & ~0x3F);
-            memcpy(alignedBuffer, text, length);
-            sceSifMCallRpc(&sdfDevRpcClient.client, 0x7D1, 0, alignedBuffer, length, NULL, 0, NULL, NULL);
+            memcpy(alignedBuffer, str, length);
+            sceSifMCallRpc((sceSifMClientData *)&D_0058F310.client, 0x7D1, 0, alignedBuffer, length, NULL, 0, NULL, NULL);
         }
     } else {
-        scePrintf(D_003BD3D0, text);
+        scePrintf(D_00551908, str);
     }
 }
 
-s32 sdfPrintf(const char *fmt, ...) {
+s32 sdfPrintf(const char *str, ...) {
     char buffer[0x100];
     __builtin_va_list args;
     s32 length;
-
-    __builtin_stdarg_start(args, fmt);
-    length = vsprintf(buffer, fmt, args);
+    __builtin_stdarg_start(args, str);
+    length = vsprintf(buffer, str, args);
     sdfPuts(buffer);
     return length;
 }
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", sdfPrintIopFlag);
 
 INCLUDE_SDATA(const s32, "sdf/sdfPrint", D_003BD3D0);
-
