@@ -29,7 +29,7 @@ extern SdfFileCommandQueueResult sdfFileCmdFileSize(sdfFileCmdHandle_t *state);
 
 extern u8 sdfFileCmdDefaultDevice;
 
-extern u8 D_003BD3F0;
+extern u8 sdfFileDefaultSrcType;
 
 extern u32 sdfFileSeekWork;
 
@@ -37,7 +37,7 @@ extern u32 sdfFileLengthWork;
 
 extern s32 sdfFileSemaId;
 
-extern void sdfDevSetFallbackDeviceWorker(s32 worker);
+extern void sdfFileCmdSetDefaultDevice(s32 worker);
 
 extern char sdfFileHostRootPath[];
 
@@ -143,7 +143,7 @@ char *sdfFileMakeFilename(const char *path) {
     } else if (sdfFileChkHddFile(path)) {
         sdfFileSetHddFilename(result, path);
     } else {
-        switch (D_003BD3F0) {
+        switch (sdfFileDefaultSrcType) {
         case 0: sdfFileSetCdFilename(result, path); break;
         case 2: sdfFileSetHddFilename(result, path); break;
         case 1: sdfFileSetHostFilename(result, path); break;
@@ -237,12 +237,12 @@ char *sdfFileGetHostRoot(void) {
 
 /* Select the default path-construction worker and the no-prefix fallback worker. */
 void sdfFileSetDefaultSrc(s32 worker) {
-    D_003BD3F0 = worker;
-    sdfDevSetFallbackDeviceWorker(worker);
+    sdfFileDefaultSrcType = worker;
+    sdfFileCmdSetDefaultDevice(worker);
 }
 
 /* Select the worker used when a file path has no explicit device prefix. */
-void sdfDevSetFallbackDeviceWorker(s32 worker) {
+void sdfFileCmdSetDefaultDevice(s32 worker) {
     sdfFileCmdDefaultDevice = worker;
 }
 
@@ -293,7 +293,7 @@ void sdfFileCmdAllocHandle(sdfFileCmdHandle_t *state) {
 
 /* Writable device directory; its suffix is replaced by the path setter. */
 char sdfFileHostRootPath[64] = "host0:";
-INCLUDE_SDATA(const s32, "sdf/sdfFile", D_003BD3F0);
+INCLUDE_SDATA(const s32, "sdf/sdfFile", sdfFileDefaultSrcType);
 
 INCLUDE_SDATA(const s32, "sdf/sdfFile", sdfFileSemaId);
 

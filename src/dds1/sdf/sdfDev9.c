@@ -29,7 +29,7 @@ extern u8 sdfFileCmdThreadPrioCheckCounter;
 
 extern u8 sdfFileCmdDefaultDevice;
 
-extern u8 D_003BD3F0;
+extern u8 sdfFileDefaultSrcType;
 
 extern s16 sdfFileCmdCount;
 

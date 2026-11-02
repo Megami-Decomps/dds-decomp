@@ -9536,7 +9536,7 @@ The device units expose two distinct worker selections. The default worker
 chooses the disc/host/PFS path builder in `sdfFileMakeFilename`; the
 fallback worker is read by the native file-path classifier only when the
 input lacks a colon. `sdfFileSetDefaultSrc` sets both, while
-`sdfDevSetFallbackDeviceWorker` changes the latter independently.
+`sdfFileCmdSetDefaultDevice` changes the latter independently.
 `sdfFileCmdMakeRealFileName` builds cdrom0/host0/pfs0 paths or copies worker-three
 input; unsupported workers return NULL. The normalized-path allocation stays
 0x80 bytes. Existing fixed-size buffers, length assumptions and copy forms

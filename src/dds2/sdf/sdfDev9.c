@@ -72,7 +72,7 @@ extern Bytes6 sdfPfsPathPrefix[];
 
 extern char D_00438B00[]; /* cdrom */
 
-extern u8 D_00438AE0;
+extern u8 sdfFileDefaultSrcType;
 
 extern u8 sdfFileCmdDefaultDevice;
 

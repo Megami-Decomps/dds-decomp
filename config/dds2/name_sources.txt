@@ -9297,7 +9297,7 @@
 0x0033EB80	sdfFileSetHostRoot	inferred	SMT3HD name via SLUS_209.11 0x002BE4F0, reloc-identical; was sdfDevSetCurrentDirectory
 0x0033EC18	sdfFileGetHostRoot	inferred	SMT3HD name via SLUS_209.11 0x002BE588, shared-hash-in-run; was sdfDevGetPathBuffer
 0x0033EC28	sdfFileSetDefaultSrc	inferred	SMT3HD name via SLUS_209.11 0x002BE598, reloc-identical; was sdfDevSetDefaultDeviceWorker
-0x0033EC40	sdfDevSetFallbackDeviceWorker	inferred	confidence=high; matched-C; Stores byte selected by native path classifier 0033F898 when no colon is present; classifier passes it to worker-path allocator. DDS1 twin 002E5D98. Namer1 batch 17.
+0x0033EC40	sdfFileCmdSetDefaultDevice	inferred	SMT3HD name via SLUS_209.11 0x002BE5B0, sdfFile twin; was sdfDevSetFallbackDeviceWorker
 0x0033EC48	sdfFileCmdAllocHandle	inferred	SMT3HD name via SLUS_209.11 0x002BE5B8, reloc-identical; was sdfFileCmdEntry
 0x0033ED38	sdfFileCmdUnlink	inferred	Unlinks a dev state from its doubly linked list and frees its resource. [names_reviewed8.tsv]
 0x0033EDB0	sdfFileCmdDequeue	inferred	SMT3HD name via SLUS_209.11 0x002BE720, reloc-identical; was sdfFileCmdEnding
@@ -9306,7 +9306,7 @@
 0x0033EF58	sdfFileCmdThread	inferred	Device-worker command API and matching signatures/order. AnalyzeFileName explicitly tests colon, classifies devices 0/1/2/3, strips prefixes of lengths 7/6/5/6 and calls MakeRealFileName; native movie path exceptions differ from HD string predicates.
 0x0033F3E0	sdfFileCdImageCmdThread	inferred	slot 3 worker services disc-backed open, size, read, seek, write and close requests; dispatch in sdfFileCmdStartThread selects this alternate entry point. Twin: 0x002E6538 (DDS1). [retail-matched C behavior and paired worker dispatch, 2026-10-14]
 0x0033F650	sdfFileCmdMakeRealFileName	inferred	confidence=high; matched-C; Allocates cdrom0/host0/pfs0 path by worker, copies worker3 input, returns NULL for unsupported worker; classifier selects worker and consumes result. DDS1 twin 002E67A8. Namer1 batch 17.
-0x0033F898	sdfFileCmdAnalyzeFileName	inferred	Parses device prefixes, selects and allocates the worker path, and returns the worker class; four asynchronous request constructors reject negative results. Paired DDS1 0x002E5D98; corroborated by sdfDevSetFallbackDeviceWorker provenance and allocator call.
+0x0033F898	sdfFileCmdAnalyzeFileName	inferred	Parses device prefixes, selects and allocates the worker path, and returns the worker class; four asynchronous request constructors reject negative results. Paired DDS1 0x002E5D98; corroborated by sdfFileCmdSetDefaultDevice provenance and allocator call.
 0x0033F9D0	sdfFileCmdNewHandle	inferred	allocates 0x40 sdfFileCmdHandle_t with worker/op/callback
 0x0033FA50	sdfFileCmdReadOpen	inferred	Device-worker command API and matching signatures/order. AnalyzeFileName explicitly tests colon, classifies devices 0/1/2/3, strips prefixes of lengths 7/6/5/6 and calls MakeRealFileName; native movie path exceptions differ from HD string predicates.
 0x0033FAB8	sdfFileCmdWriteOpen	inferred	Device-worker command API and matching signatures/order. AnalyzeFileName explicitly tests colon, classifies devices 0/1/2/3, strips prefixes of lengths 7/6/5/6 and calls MakeRealFileName; native movie path exceptions differ from HD string predicates.
@@ -10882,6 +10882,7 @@
 0x00438AB8	sdfPrintIopFlag	inferred	SMT3HD name via SLUS_209.11 0x00551900, sdfPrint reference; was D_00438AB8
 0x00438AC8	sdfDiscRequestPending	inferred	high confidence; src/dds2/game/code_0033D5D0.c sdfDevSignalPendingSemaphore(): if (D_00438AC8 != 0) { Instruction-aligned data counterpart of DDS1 D_003BD3D8 in the matched sdfDevSignalPendingSemaphore() twin. Pending marker cleared after signaling the disc-request semaphore. [names_reviewed26.tsv]
 0x00438AD8	sdfDiscType	inferred	confidence=high; matched_users=src/dds2/game/code_0033D5D0.c:sdfDevWaitForDisc, src/dds2/game/code_0033D5D0.c:sdfInitDeviceSemaphores; Device initialization passes this type to the CD driver; disc-wait logic selects expected CD status from it. Retail address correspondence is independently corroborated by at least two paired functions. [names_qp9.tsv]
+0x00438AE0	sdfFileDefaultSrcType	inferred	SMT3HD name via SLUS_209.11 0x00551920, sdfFile twin; was D_00438AE0
 0x00438AE4	sdfFileSemaId	inferred	SMT3HD data name via SLUS_209.11 0x00551924, 9 agreeing references; was sdfFileSemaId
 0x00438B0C	sdfFileCmdFreeList	inferred	SMT3HD name via SLUS_209.11 0x0055194C, sdfFileIO twin; was D_00438B0C
 0x00438B10	sdfFileCmdCount	inferred	SMT3HD name via SLUS_209.11 0x00551950, sdfFileIO twin; was D_00438B10
