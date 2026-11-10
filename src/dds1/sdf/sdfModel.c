@@ -4,8 +4,6 @@
 #include "draw.h"
 #include "ps2asm.h"
 
-#define func_002BFF98 sdfDevResizeBufferedRequest
-#define func_002B2628 sdfChunkFindById
 #include "eeregs.h"
 
 /* Audited SDK COP2/MMI operations: ee-gcc cannot express packed
@@ -35,7 +33,7 @@ extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 extern sdfItemArray_t *sdfItemArrayNew(s32 aInitCapa, s32 aElemSize, s32 aGrowStep);
 extern void sdfItemArrayFree(void *aArray);
 extern void sdfItemArrayGrow(void *aArray);
-extern void func_002BFF98(void *aArray, s32 aCount);
+extern void sdfDevResizeBufferedRequest(void *aArray, s32 aCount);
 
 extern void sdfDelayedResrcInitCB(sdfDelayedResrcCB_t *aCB, sdfDelayedResrcFreeFunc aFreeFunc);
 extern void sdfDelayedResrcEntry(sdfDelayedResrcCB_t *aCB, void *aItem);
@@ -58,7 +56,7 @@ extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 extern void *sdfMemLock(sdfMemHandle_t *aHandle);
 extern void sdfCoreDrawScanOneSkinNodes(sdfModelRootNode_t *root, void *p);
 
-extern void *func_002B2628(void *aData, u32 aTag);
+extern void *sdfChunkFindById(void *aData, u32 aTag);
 extern void sdfModelEvalTm2(sdfModelRootNode_t *aRoot, s32 aFrameId);
 extern void sdfModelLinkDrawPacket(sdfModelNode_t *aNode, void *aShape, s32 aOtIndex, s32 aIndexFrom,
                                    s32 aId);
@@ -242,7 +240,7 @@ void sdfModelRootFree(sdfModelRootNode_t *aRoot, s32 aReleaseNodes, s32 aRelease
 
 void sdfModelAllocNodeList(sdfModelRootNode_t *aRoot, s32 aLeng)
 {
-    func_002BFF98(aRoot->nodeList, aLeng);
+    sdfDevResizeBufferedRequest(aRoot->nodeList, aLeng);
 }
 
 void sdfModelMakeNodeList(sdfModelRootNode_t *aRoot) {
@@ -1415,7 +1413,7 @@ void sdfModelDrawEnvLinkOt(sdfGrOt_t **aOt, sdfModelDrawEnv_t *aEnv)
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))aOt[3]->regFunc)(aOt[3], &aEnv->term.drawTag);
 }
 
-void *func_002B2628(void *data, u32 chunkId) {
+void *sdfChunkFindById(void *data, u32 chunkId) {
     sdfModelChunkHeader_t *chunk = data;
     u32 currentId;
 
@@ -1435,7 +1433,7 @@ void *func_002B2628(void *data, u32 chunkId) {
 
 void *sdfModelGetExtraChunk(sdfModelRootNode_t *aRoot, u32 aChunkId)
 {
-    return func_002B2628(aRoot->extraData, aChunkId);
+    return sdfChunkFindById(aRoot->extraData, aChunkId);
 }
 
 #ifdef NON_MATCHING

@@ -89,14 +89,13 @@ void sdfMemUnlock(sdfMemHandle_t *aHandle);
 
 void sdfMemReallocRecord(sdfMemHandle_t *aHandle, s32 aSize);
 
-#define func_002BFF98 sdfDevResizeBufferedRequest
 
-void func_002BFF98(sdfItemArray_t *aArray, s32 aCapacity);
+void sdfDevResizeBufferedRequest(sdfItemArray_t *aArray, s32 aCapacity);
 
 void sdfItemArrayGrow(sdfItemArray_t *aArray)
 {
     if (aArray->memHandle == NULL) {
-        func_002BFF98(aArray, aArray->growStep);
+        sdfDevResizeBufferedRequest(aArray, aArray->growStep);
         return;
     }
     sdfMemUnlock(aArray->memHandle);
@@ -105,7 +104,7 @@ void sdfItemArrayGrow(sdfItemArray_t *aArray)
     aArray->items = EE_ADDR_AS(void *, sdfMemLock(aArray->memHandle));
 }
 
-void func_002BFF98(sdfItemArray_t *aArray, s32 aCapacity)
+void sdfDevResizeBufferedRequest(sdfItemArray_t *aArray, s32 aCapacity)
 {
     if (aArray->memHandle == NULL) {
         if (aCapacity > 0) {

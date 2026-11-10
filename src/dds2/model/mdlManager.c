@@ -5,7 +5,6 @@
 #include "ps2asm.h"
 #include "sdfFrame.h"
 
-#define mdl_1DD9C0 mdlProjectPoints
 
 #define MDL_GROUP_COUNT 8
 
@@ -1313,7 +1312,7 @@ void mdlGetScreenOffset(mdlObj_t *aHandle, void *aOfs)
 }
 
 /* vu0 routine: project an array of points and store their screen coordinates. */
-void mdl_1DD9C0(mdlObj_t *ctx, f32 (*inputPoints)[4], f32 (*outputPoints)[4], s32 pointCount)
+void mdlProjectPoints(mdlObj_t *ctx, f32 (*inputPoints)[4], f32 (*outputPoints)[4], s32 pointCount)
 {
     s32 pointIndex;
 

@@ -36,7 +36,6 @@ extern u32 movieSemaCount;
 extern sdfMovieCb_t *movieSemaId;
 extern const char sdfMovieIpsExt[];
 
-#define movie_2C5080 sdfPrintTextLine
 
 extern u32 movieDrawMode;
 extern s32 sdfMovieDrawLeft;
@@ -45,7 +44,7 @@ extern s32 sdfMovieDrawRight;
 extern s32 sdfMovieDrawBottom;
 extern u32 sdfMovieDrawColor;
 
-void movie_2C5080(const char *aStr)
+void sdfPrintTextLine(const char *aStr)
 {
     puts(aStr);
 }

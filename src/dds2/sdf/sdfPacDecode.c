@@ -47,11 +47,9 @@ void sdfPacTexListDecoder1(sdfPacDecodeCb_t *cb);
 void sdfPacTexListDecoder0(sdfPacDecodeCb_t *cb);
 void sdfPacTexListDecoderInit(sdfPacDecodeCb_t *cb, sdfPacStdBlockHeader_t *hdr);
 
-#define func_002C60E0 sdfPacMarkPhaseFinished
-#define func_002C6D58 sdfPacResetOutputToAllocationEntry
 
-void func_002C60E0(sdfPacDecodeCb_t *aState);
-void func_002C6D58(sdfPacDecodeCb_t *aState);
+void sdfPacMarkPhaseFinished(sdfPacDecodeCb_t *aState);
+void sdfPacResetOutputToAllocationEntry(sdfPacDecodeCb_t *aState);
 void sdfPacTexListDecoderTmxHeaderEndFunc(sdfPacDecodeCb_t *cb);
 extern void sdfTexListAdd(sdfItemArray_t *aList, sdfTexHandle_t *aTexHandle);
 
@@ -88,7 +86,7 @@ void sdfPacFree(sdfPacDecodeCb_t *cb)
     }
 }
 
-void func_002C60E0(sdfPacDecodeCb_t *aState)
+void sdfPacMarkPhaseFinished(sdfPacDecodeCb_t *aState)
 {
     aState->stat = -1;
 }
@@ -126,7 +124,7 @@ void sdfPacNewBlock(sdfPacDecodeCb_t *cb)
     callback = (s32 (*)())cb->callback;
     result = callback(cb, 0, packet, payloadBytes);
     if (result == 1) {
-        func_002C60E0(cb);
+        sdfPacMarkPhaseFinished(cb);
         return;
     }
     if (result == 2) {
@@ -146,7 +144,7 @@ void sdfPacEndBlock(sdfPacDecodeCb_t *cb)
 
     result = cb->callback(cb, 1, (sdfPacStdBlockHeader_t *)cb->resrcTail->header);
     if (result == 1) {
-        func_002C60E0(cb);
+        sdfPacMarkPhaseFinished(cb);
         return;
     }
     if (result == 4) {
@@ -522,7 +520,7 @@ void sdfPacTexListDecoderTmxHeaderEndFunc(sdfPacDecodeCb_t *cb)
     cb->onEnd = sdfPacTexListDecoderTmxBodyEndFunc;
 }
 
-void func_002C6D58(sdfPacDecodeCb_t *aState)
+void sdfPacResetOutputToAllocationEntry(sdfPacDecodeCb_t *aState)
 {
     aState->dst = (u8 *)&aState->slot.list->currHeader;
     aState->rest = 0x10;
@@ -543,7 +541,7 @@ void sdfPacTexListDecoderTmxBodyEndFunc(sdfPacDecodeCb_t *cb)
             sdfChipFreeDirect(list);
             sdfPacEndBlock(cb);
         } else {
-            func_002C6D58(cb);
+            sdfPacResetOutputToAllocationEntry(cb);
         }
     }
 }
@@ -564,7 +562,7 @@ void sdfPacTexListDecoder1(sdfPacDecodeCb_t *cb)
             return;
         }
     }
-    func_002C6D58(cb);
+    sdfPacResetOutputToAllocationEntry(cb);
 }
 
 void sdfPacTexListDecoder0(sdfPacDecodeCb_t *cb)
