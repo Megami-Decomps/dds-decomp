@@ -10928,7 +10928,7 @@ void effDrawScalyTexturedStrip(EffStripWork *work, void *matrix) {
     referencePacket = sdfGrAllocPacketBuff(0x20);
     sdfMatMakePacket((sdfMat_t *)work->handle, (SdfDmaTagHeader *)referencePacket,
                                        (s8)sdfFrameId);
-    referencePacket[1] = 0;
+    QUAD_ZERO(referencePacket[1]);
     sdfDrawTagLinkRef(list, (u32)referencePacket);
     dmaPacket = sdfGrAllocPacketBuff(0x40);
     sdfGrSetFrameMaskRGB(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, dmaPacket, 0);
