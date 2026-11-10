@@ -164,6 +164,10 @@ extern s32 sceCdReadClock(sdfCdClock_t *);
 extern u8 sdfCdClock;
 
 /* DDS defines the clock cache in this unit. */
+INCLUDE_SDATA(const s32, "sdf/sdfRand", sdfCdClock);
+
+SDATA_PAD(7);
+
 sdfClock_t sdfCdClockCache = {0};
 
 extern s32 (*p2sdSmgBuf)(void);
