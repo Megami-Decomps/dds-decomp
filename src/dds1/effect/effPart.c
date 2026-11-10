@@ -4,18 +4,11 @@
 #include "effPCPData.h"
 #include "ps2asm.h"
 
-/* DDS's names for the same objects. */
-#define D_0031DDD0 effPartPCPDataTable
-#define D_0031DF60 effPartModelPosInit
-#define D_0031DF70 effPartModelRotInit
-#define D_0031DF80 effPartModelScaleInit
-#define D_0054F1E4 effPartModelSerial
+extern sdfVector4_t effPartModelPosInit;
 
-extern u128 D_0031DF60;
+extern sdfVector4_t effPartModelRotInit;
 
-extern u128 D_0031DF70;
-
-extern u128 D_0031DF80;
+extern sdfVector4_t effPartModelScaleInit;
 
 typedef struct
 {
@@ -61,7 +54,7 @@ extern dds3EffectFunc_t dds3EffectFuncTable[7];
 extern void *kwlnSceneSurfaceSets[13][4];
 #define D_002F69B8 kwlnSceneSurfaceSets[10]
 
-extern u16 D_0054F1E4;
+extern u16 effPartModelSerial;
 
 extern s32 effBTLCutCount;
 
@@ -73,7 +66,7 @@ typedef struct
     u8 data[1];
 } dds3EffectPartModelData_t;
 
-void *dds3BillboardCreate(s32 kind, u32 data);
+void *dds3BillboardCreate(s32 kind, addr_t data);
 
 void mdlPackDecode(s32 major, s32 minor, s32 regFlags, const u8 *buff, s32 leng);
 
@@ -83,7 +76,7 @@ void mdlFree(mdlObj_t *aHandle);
 
 extern dds3EffectFunc_t EffectPCPFuncTable[];
 
-extern void **D_0031DDD0[];
+extern void **effPartPCPDataTable[];
 
 void *sdfChipAllocDirect(s32 aSize);
 
@@ -111,7 +104,7 @@ extern s8 effBTLFieldColorOn;
 
 extern s8 D_0054F0F1;
 
-extern s32 D_0054F0F4;
+extern const char *D_0054F0F4;
 
 extern u8 effBTLDebugCameraAllEdit;
 
@@ -119,11 +112,11 @@ extern u8 effBTLDebugCameraAllTable;
 
 extern u8 D_0054F1C3;
 
-extern s32 D_0054F130;
+extern s32 effBTLPartyIndex;
 
-extern s8 D_0054F134;
+extern s8 effBTLUnitLightOn;
 
-extern char D_0054F100[];
+extern char effBedDirName[];
 
 void *dds3EffectPartGetHandle(effPartHandle_t *hEffPart);
 
@@ -242,11 +235,11 @@ void dds3EffectPartBillboardScale(void *hBillboard, f32 scale)
 
 void dds3EffectPartModelInit(mdlObj_t *hModel)
 {
-    SDF_VU0_LOADVECTOR(&D_0031DF60);
+    SDF_VU0_LOADVECTOR(&effPartModelPosInit);
     mdlSetPosition(hModel);
-    SDF_VU0_LOADVECTOR(&D_0031DF70);
+    SDF_VU0_LOADVECTOR(&effPartModelRotInit);
     mdlSetRotate(hModel);
-    SDF_VU0_LOADVECTOR(&D_0031DF80);
+    SDF_VU0_LOADVECTOR(&effPartModelScaleInit);
     mdlSetScale(hModel);
     mdlSetColor(hModel, 0x80808080);
     if (hModel->first != NULL) {
@@ -260,10 +253,10 @@ mdlObj_t *dds3EffectPartModelCreate(dds3EffectPartModelData_t *pData)
 {
     mdlObj_t *hModel;
 
-    mdlPackDecode(7, D_0054F1E4, 0x101, pData->data, pData->size);
-    hModel = mdlLoad(7, D_0054F1E4);
+    mdlPackDecode(7, effPartModelSerial, 0x101, pData->data, pData->size);
+    hModel = mdlLoad(7, effPartModelSerial);
     dds3EffectPartModelInit(hModel);
-    D_0054F1E4++;
+    effPartModelSerial++;
     return hModel;
 }
 
@@ -329,7 +322,7 @@ dds3EffectPCP_t *dds3EffectPCPCreate(dds3EffectPCPData_t *hPCPData)
     hPCP->kateg = dds3EffectPCPDataGetKateg(hPCPData);
     hPCP->param = dds3EffectPCPDataGetParam(hPCPData);
     if (EffectPCPFuncTable[hPCP->kateg].copy == NULL) {
-        hPCP->pHandle = EffectPCPFuncTable[hPCP->kateg].create(D_0031DDD0[hPCP->kateg][hPCP->param]);
+        hPCP->pHandle = EffectPCPFuncTable[hPCP->kateg].create(effPartPCPDataTable[hPCP->kateg][hPCP->param]);
     } else {
         hPCP->pHandle = EffectPCPFuncTable[hPCP->kateg].create(hPCPData);
     }
@@ -355,7 +348,7 @@ dds3EffectPCP_t *dds3EffectPCPCopy(dds3EffectPCP_t *hPCPSrc)
     hPCP->kateg = hPCPSrc->kateg;
     hPCP->param = hPCPSrc->param;
     if (EffectPCPFuncTable[hPCP->kateg].copy == NULL) {
-        hPCP->pHandle = EffectPCPFuncTable[hPCP->kateg].create(D_0031DDD0[hPCP->kateg][hPCP->param]);
+        hPCP->pHandle = EffectPCPFuncTable[hPCP->kateg].create(effPartPCPDataTable[hPCP->kateg][hPCP->param]);
     } else {
         hPCP->pHandle = EffectPCPFuncTable[hPCP->kateg].copy(hPCPSrc->pHandle);
     }
