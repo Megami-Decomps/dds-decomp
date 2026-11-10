@@ -11056,6 +11056,14 @@
 0x00438B90	sdfSndSendCmd_cmd_id	inferred	SMT3HD name via SLUS_209.11 0x005519D0, sdfSound data twin; was D_00438B90
 0x00438B94	sdfSifRpcThreadId	inferred	SMT3HD name via SLUS_209.11 0x005519D4, sdf/sdfSound SMT3 rename; was D_00438B94
 0x00438B98	p2sdSmgBuf	inferred	SMT3HD data name via SLUS_209.11 0x005519D8, 2 agreeing references; was p2sdSmgBuf
+0x00438BA0	sdfDmaTagEndName	inferred	SMT3HD name via SLUS_209.11 0x005519E0, string in the DMA tag/VIF unpack name tables or GS memory dump; was D_00438BA0
+0x00438BA8	sdfDmaTagRetName	inferred	SMT3HD name via SLUS_209.11 0x005519E8, string in the DMA tag/VIF unpack name tables or GS memory dump; was D_00438BA8
+0x00438BB0	sdfDmaTagCallName	inferred	SMT3HD name via SLUS_209.11 0x005519F0, string in the DMA tag/VIF unpack name tables or GS memory dump; was D_00438BB0
+0x00438BB8	sdfDmaTagRefsName	inferred	SMT3HD name via SLUS_209.11 0x005519F8, string in the DMA tag/VIF unpack name tables or GS memory dump; was D_00438BB8
+0x00438BC0	sdfDmaTagRefName	inferred	SMT3HD name via SLUS_209.11 0x00551A00, string in the DMA tag/VIF unpack name tables or GS memory dump; was D_00438BC0
+0x00438BC8	sdfDmaTagNextName	inferred	SMT3HD name via SLUS_209.11 0x00551A08, string in the DMA tag/VIF unpack name tables or GS memory dump; was D_00438BC8
+0x00438BD0	sdfDmaTagCntName	inferred	SMT3HD name via SLUS_209.11 0x00551A10, string in the DMA tag/VIF unpack name tables or GS memory dump; was D_00438BD0
+0x00438BD8	sdfDmaTagRefeName	inferred	SMT3HD name via SLUS_209.11 0x00551A18, string in the DMA tag/VIF unpack name tables or GS memory dump; was D_00438BD8
 0x00438BE0	sdfDumpAddrFmt	inferred	SMT3HD name via SLUS_209.11 0x00551A20, sdf/sdfSound SMT3 rename; was D_00438BE0
 0x00438BE8	sdfDumpPadStr	inferred	SMT3HD name via SLUS_209.11 0x00551A28, sdf/sdfSound SMT3 rename; was D_00438BE8
 0x00438BF0	sdfDumpMidGapStr	inferred	SMT3HD name via SLUS_209.11 0x00551A30, sdf/sdfSound SMT3 rename; was D_00438BF0
@@ -11065,8 +11073,33 @@
 0x00438C10	sdfDumpEndStr	inferred	SMT3HD name via SLUS_209.11 0x00551A50, sdf/sdfSound SMT3 rename; was D_00438C10
 0x00438C18	sdfVifMaskedName	inferred	SMT3HD name via SLUS_209.11 0x00551A58, sdf/sdfSound SMT3 rename; was D_00438C18
 0x00438C20	sdfVifXferOkName	inferred	SMT3HD name via SLUS_209.11 0x00551A60, sdf/sdfSound SMT3 rename; was D_00438C20
+0x00438C28	sdfVifUnpackV4_5Name	inferred	SMT3HD name via SLUS_209.11 0x00551A68, string in the DMA tag/VIF unpack name tables or GS memory dump; was D_00438C28
+0x00438C30	sdfVifUnpackV4_8Name	inferred	SMT3HD name via SLUS_209.11 0x00551A70, string in the DMA tag/VIF unpack name tables or GS memory dump; was D_00438C30
+0x00438C38	sdfVifUnpackV4_16Name	inferred	SMT3HD name via SLUS_209.11 0x00551A78, string in the DMA tag/VIF unpack name tables or GS memory dump; was D_00438C38
+0x00438C40	sdfVifUnpackV4_32Name	inferred	SMT3HD name via SLUS_209.11 0x00551A80, string in the DMA tag/VIF unpack name tables or GS memory dump; was D_00438C40
+0x00438C48	sdfVifUnpackV3_8Name	inferred	SMT3HD name via SLUS_209.11 0x00551A88, string in the DMA tag/VIF unpack name tables or GS memory dump; was D_00438C48
+0x00438C50	sdfVifUnpackV3_16Name	inferred	SMT3HD name via SLUS_209.11 0x00551A90, string in the DMA tag/VIF unpack name tables or GS memory dump; was D_00438C50
+0x00438C58	sdfVifUnpackV3_32Name	inferred	SMT3HD name via SLUS_209.11 0x00551A98, string in the DMA tag/VIF unpack name tables or GS memory dump; was D_00438C58
+0x00438C60	sdfVifUnpackV2_8Name	inferred	SMT3HD name via SLUS_209.11 0x00551AA0, string in the DMA tag/VIF unpack name tables or GS memory dump; was D_00438C60
+0x00438C68	sdfVifUnpackV2_16Name	inferred	SMT3HD name via SLUS_209.11 0x00551AA8, string in the DMA tag/VIF unpack name tables or GS memory dump; was D_00438C68
+0x00438C70	sdfVifUnpackV2_32Name	inferred	SMT3HD name via SLUS_209.11 0x00551AB0, string in the DMA tag/VIF unpack name tables or GS memory dump; was D_00438C70
+0x00438C78	sdfVifUnpackS_8Name	inferred	SMT3HD name via SLUS_209.11 0x00551AB8, string in the DMA tag/VIF unpack name tables or GS memory dump; was D_00438C78
+0x00438C80	sdfVifUnpackS_16Name	inferred	SMT3HD name via SLUS_209.11 0x00551AC0, string in the DMA tag/VIF unpack name tables or GS memory dump; was D_00438C80
+0x00438C88	sdfVifUnpackS_32Name	inferred	SMT3HD name via SLUS_209.11 0x00551AC8, string in the DMA tag/VIF unpack name tables or GS memory dump; was D_00438C88
+0x00438C90	sdfVifFlagsMruName	inferred	SMT3HD name via SLUS_209.11 0x00551AD0, string in the DMA tag/VIF unpack name tables or GS memory dump; was D_00438C90
+0x00438C98	sdfVifFlagsRuName	inferred	SMT3HD name via SLUS_209.11 0x00551AD8, string in the DMA tag/VIF unpack name tables or GS memory dump; was D_00438C98
+0x00438CA0	sdfVifFlagsMrName	inferred	SMT3HD name via SLUS_209.11 0x00551AE0, string in the DMA tag/VIF unpack name tables or GS memory dump; was D_00438CA0
+0x00438CA8	sdfVifFlagsRName	inferred	SMT3HD name via SLUS_209.11 0x00551AE8, string in the DMA tag/VIF unpack name tables or GS memory dump; was D_00438CA8
+0x00438CB0	sdfVifFlagsMuName	inferred	SMT3HD name via SLUS_209.11 0x00551AF0, string in the DMA tag/VIF unpack name tables or GS memory dump; was D_00438CB0
+0x00438CB8	sdfVifFlagsUName	inferred	SMT3HD name via SLUS_209.11 0x00551AF8, string in the DMA tag/VIF unpack name tables or GS memory dump; was D_00438CB8
+0x00438CC0	sdfVifFlagsMName	inferred	SMT3HD name via SLUS_209.11 0x00551B00, string in the DMA tag/VIF unpack name tables or GS memory dump; was D_00438CC0
+0x00438CC8	sdfVifFlagsNoneName	inferred	SMT3HD name via SLUS_209.11 0x00551B08, string in the DMA tag/VIF unpack name tables or GS memory dump; was D_00438CC8
 0x00438CD0	sdfDumpIndentStr	inferred	SMT3HD name via SLUS_209.11 0x00551B10, sdf/sdfSound SMT3 rename; was D_00438CD0
 0x00438CD8	sdfDumpWordFmt	inferred	SMT3HD name via SLUS_209.11 0x00551B18, sdf/sdfSound SMT3 rename; was D_00438CD8
+0x00438CE0	sdfGsMemClutName	inferred	SMT3HD name via SLUS_209.11 0x00551B20, string in the DMA tag/VIF unpack name tables or GS memory dump; was D_00438CE0
+0x00438CE8	sdfGsMemTexName	inferred	SMT3HD name via SLUS_209.11 0x00551B28, string in the DMA tag/VIF unpack name tables or GS memory dump; was D_00438CE8
+0x00438CF0	sdfGsMemFrameName	inferred	SMT3HD name via SLUS_209.11 0x00551B30, string in the DMA tag/VIF unpack name tables or GS memory dump; was D_00438CF0
+0x00438CF8	sdfGsMemFreeName	inferred	SMT3HD name via SLUS_209.11 0x00551B38, string in the DMA tag/VIF unpack name tables or GS memory dump; was D_00438CF8
 0x00438D00	sdfGsMemTypeFmt	inferred	SMT3HD name via SLUS_209.11 0x00551B40, sdf/sdfSound SMT3 rename; was sdfGsMemoryTypeFormat
 0x00438D04	sdfIpuPaused	inferred	SMT3HD name via SLUS_209.11 ?, sdf/sdfIpu DDS-only data, name from its use; was D_00438D04
 0x00438D08	movieStreamSema	inferred	SMT3HD data name via SLUS_209.11 0x00551B48, 6 agreeing references; was movieStreamSema
