@@ -380,7 +380,6 @@ void sdfGrJoinDrawTag(sdfDrawTag_t *aFore, sdfDrawTag_t *aBack);
 void sdfGrInitExPacket(sdfDrawTag_t *p);
 
 /* DDS keeps its own name: the shorter one shifts DDS1 code_001DEFE0. */
-#define sdfGrOtClose sdfFlushPoolNodes
 sdfDrawTag_t *sdfGrOtClose(sdfGrOt_t *aOt);
 
 void sdfPreDrawTagLink(sdfPreDrawTag_t *aTag, sdfPreDrawHook_t *aHook);

@@ -408,7 +408,7 @@ s32 texLoad(const char *name, MapResource *record) {
 
 u32 texRelease(struct sdfTexHandle_t **texture) {
     if (*texture != 0) {
-        sdfTexReleaseReferenceViaHandler(*texture);
+        sdfTexFreeDelayed(*texture);
         *texture = 0;
     }
     return 1;

@@ -988,7 +988,7 @@ void DrawMsgMng_Shutdown(dds3ProcessID_t *task) {
         node = node->next;
         DestructFlow(window);
     }
-    sdfTexReleaseReferenceViaHandler(itfMesMngManager.windowTexture);
+    sdfTexFreeDelayed(itfMesMngManager.windowTexture);
     itfMesMngManager.windowTexture = NULL;
 }
 
@@ -1143,7 +1143,7 @@ void itfDebugMesMngInitialize(void) {
 
 void TestMsgReloadTexture(void) {
     if (sndTestMessageTexture != 0) {
-        sdfTexReleaseReferenceViaHandler(sndTestMessageTexture);
+        sdfTexFreeDelayed(sndTestMessageTexture);
         sndTestMessageTexture = 0;
     }
     sndTestMessageResourceIndex = (sndTestMessageResourceIndex + 1) & 3;

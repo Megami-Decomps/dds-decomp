@@ -2580,10 +2580,10 @@ extern void frSetFontDrawOT(u32);
 
 void fldReleaseTitleSlots(void) {
     if (D_003D40A0[2] != 0) {
-        sdfTexReleaseReferenceViaHandler(D_003D40A0[2]);
+        sdfTexFreeDelayed(D_003D40A0[2]);
     }
     if (D_003D40A0[3] != 0) {
-        sdfTexReleaseReferenceViaHandler(D_003D40A0[3]);
+        sdfTexFreeDelayed(D_003D40A0[3]);
     }
     D_003D40A0[2] = 0;
     D_003D40A0[3] = 0;
@@ -2616,11 +2616,11 @@ void fldReleaseMenuSlots(void) {
         D_003D40B0[i].z = 0.0f;
     }
     if (D_003D40A0[0] != 0) {
-        sdfTexReleaseReferenceViaHandler(D_003D40A0[0]);
+        sdfTexFreeDelayed(D_003D40A0[0]);
     }
     D_003D40A0[0] = 0;
     if (D_003D40A0[1] != 0) {
-        sdfTexReleaseReferenceViaHandler(D_003D40A0[1]);
+        sdfTexFreeDelayed(D_003D40A0[1]);
     }
     D_003D40A0[1] = 0;
     while (sdfDelayedResrcCheck() != 0) {
@@ -3611,15 +3611,15 @@ extern EffNode *D_003BAF64;
 
 void fldReleaseResourceHandles(void) {
     if (D_003BAF30 != 0) {
-        sdfTexReleaseReferenceViaHandler(D_003BAF30);
+        sdfTexFreeDelayed(D_003BAF30);
         D_003BAF30 = 0;
     }
     if (D_003BAF34 != 0) {
-        sdfTexReleaseReferenceViaHandler(D_003BAF34);
+        sdfTexFreeDelayed(D_003BAF34);
         D_003BAF34 = 0;
     }
     if (D_003BAF38 != 0) {
-        sdfTexReleaseReferenceViaHandler(D_003BAF38);
+        sdfTexFreeDelayed(D_003BAF38);
         D_003BAF38 = 0;
     }
     if (D_003BAF4C != 0) {
@@ -4761,7 +4761,7 @@ KwlnTaskUpdateResult fldTitle(dds3ProcessID_t *task) {
 
 void fldReleaseTitleTextureReference(dds3ProcessID_t *task) {
     if (D_003BAFB4 != 0) {
-        sdfTexReleaseReferenceViaHandler(D_003BAFB4);
+        sdfTexFreeDelayed(D_003BAFB4);
         D_003BAFB4 = 0;
     }
 }
@@ -4973,7 +4973,7 @@ s32 fldTitleMini(dds3ProcessID_t *task) {
 
 void fldReleaseTitleMiniTexture(dds3ProcessID_t *task) {
     if (D_003BAFC4 != 0) {
-        sdfTexReleaseReferenceViaHandler(D_003BAFC4);
+        sdfTexFreeDelayed(D_003BAFC4);
         D_003BAFC4 = 0;
     }
 }
@@ -5108,7 +5108,7 @@ void fldLoadWeatherEffects(void) {
 
 void fldReleaseWeatherEffects(void) {
     if (fldWeatherLimitTexture != 0) {
-        sdfTexReleaseReferenceViaHandler(fldWeatherLimitTexture);
+        sdfTexFreeDelayed(fldWeatherLimitTexture);
         fldWeatherLimitTexture = 0;
     }
     dds3EffectDelete(fldDamEffectNode);

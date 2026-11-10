@@ -42,7 +42,7 @@ void evtPictureShutdown(dds3ProcessID_t *task) {
 
     picture = (EvtPictureWork *)dds3GetProcessData(task);
     if (picture->texture != 0) {
-        sdfTexReleaseReferenceViaHandler(picture->texture);
+        sdfTexFreeDelayed(picture->texture);
         picture->texture = 0;
     }
     sdfChipFreeDirect(picture);

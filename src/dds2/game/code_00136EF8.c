@@ -204,7 +204,7 @@ void fldDrawCameraColorLayerPass(void) {
 void fldReleaseCameraColorEffect(void) {
     fldCameraColorEnabled = 0;
     if (fldRainTextureReference != 0) {
-        sdfTexReleaseReferenceViaHandler(fldRainTextureReference);
+        sdfTexFreeDelayed(fldRainTextureReference);
         fldRainTextureReference = 0;
     }
     if (fldCameraColorEffect != 0) {

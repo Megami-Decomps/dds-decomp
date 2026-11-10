@@ -3,8 +3,6 @@
 
 #include "ps2asm.h"
 
-#define sdfTexFree sdfTexDestroy
-#define sdfTexFreeDelayed sdfTexReleaseReferenceViaHandler
 extern sdfTexHandle_t *sdfTexHandleLink;
 extern sdfDelayedResrcCB_t sdfTexDelayedResrcCB;
 

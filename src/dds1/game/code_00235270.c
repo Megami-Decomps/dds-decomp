@@ -5691,7 +5691,7 @@ void evtRefreshTaskEffectTexture(EvtPackEventId eventId, EvtPackSecondaryResourc
     if (address != 0) {
         sdfTexHandle_t *old = data->effect72;
         if (old != 0) {
-            sdfTexReleaseReferenceViaHandler(old);
+            sdfTexFreeDelayed(old);
             data->effect72 = 0;
         }
         texture = sdfTexSet((SdfTextureFileHeader *)(address));

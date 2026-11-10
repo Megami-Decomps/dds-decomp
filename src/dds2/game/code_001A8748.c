@@ -232,7 +232,7 @@ void itfDebugMesMngInitialize(void) {
 
 void TestMsgReloadTexture(void) {
     if (sndTestMessageTexture != 0) {
-        sdfTexReleaseReferenceViaHandler(sndTestMessageTexture);
+        sdfTexFreeDelayed(sndTestMessageTexture);
         sndTestMessageTexture = 0;
     }
     sndTestMessageResourceIndex = (sndTestMessageResourceIndex + 1) & 3;

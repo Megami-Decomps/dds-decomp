@@ -7,8 +7,6 @@
 
 /* DDS's names for the same objects. */
 #define dds3EffectBase effDefaultRandomState
-#define sdfMatSetTex sdfSetAssetPrimaryTextureAddress
-#define sdfTexFreeDelayed sdfTexReleaseReferenceViaHandler
 
 struct effDebugPolyParams_t;
 struct effRandState_t;

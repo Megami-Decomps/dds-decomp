@@ -590,7 +590,7 @@ void dds3EffectFileListWindowDelete(EffResourceDescriptor *work) {
     sdfTexHandle_t *texture = work->textureHandle;
 
     if (texture != NULL) {
-        sdfTexReleaseReferenceViaHandler(texture);
+        sdfTexFreeDelayed(texture);
         work->textureHandle = NULL;
     }
     sdfChipFreeDirect(work);
@@ -643,7 +643,7 @@ void dds3EffectListSetTexture(EffResourceDescriptor *work, const char *textureRe
     u32 resourceWords[4];
 
     if (work->textureHandle != NULL) {
-        sdfTexReleaseReferenceViaHandler(work->textureHandle);
+        sdfTexFreeDelayed(work->textureHandle);
         work->textureHandle = NULL;
     }
     loadedResource = sdfDevLoadFileEx(textureResource, resourceWords, 0);

@@ -1816,7 +1816,7 @@ void effKindAssetReferenceRelease(EffKindAssetHolder *object) {
     object->references--;
     if (object->references == 0) {
         if (object->kind != 4) {
-            sdfTexReleaseReferenceViaHandler(object->resource);
+            sdfTexFreeDelayed(object->resource);
         }
         sdfChipFreeDirect(object);
     }
@@ -4769,7 +4769,7 @@ void effDrawTrackSet(EffTrackSet *track, const Matrix4 *matrix) {
         } else {
             texture = sdfGetOrCreateTextureForReference(surface, reference);
         }
-        sdfSetAssetPrimaryTextureAddress(track->handle, texture);
+        sdfMatSetTex(track->handle, texture);
     }
     sdf3DPrimLinkMat(list, track->handle, 0);
 
@@ -7042,7 +7042,7 @@ void effDrawQuadWork(EffQuadWork *work) {
     texcoords[2][1] = snapshot.uv.components[5] * invHeight;
     texcoords[3][0] = snapshot.uv.components[6] * invWidth;
     texcoords[3][1] = snapshot.uv.components[7] * invHeight;
-    sdfSetAssetPrimaryTextureAddress(work->assetHandle, snapshot.texture);
+    sdfMatSetTex(work->assetHandle, snapshot.texture);
     sdf3DPrimLinkMat(list, work->assetHandle, 0);
     if (work->source.noSetup == 0) {
         packet = sdfGrAllocPacketBuff(0x30);
@@ -10227,7 +10227,7 @@ void effDrawRibbon(EffRibbonWork *work, const Matrix4 *matrix) {
     } else {
         texture = sdfGetOrCreateTextureForReference(surface, work->resource);
     }
-    sdfSetAssetPrimaryTextureAddress(work->handle, texture);
+    sdfMatSetTex(work->handle, texture);
     sdf3DPrimLinkMat(list, work->handle, 0);
     if (work->drawMode == 0) {
         packet = (EffGsPacket *)sdfGrAllocPacketBuff(0x30);
@@ -11448,7 +11448,7 @@ void effDrawScalyTexturedStrip(u8 *owner, void *matrix) {
     }
     sdf3DPrimLinkTm(list, 0);
     texture = sdfGetOrCreateTextureForReference(surface, (RefObj *)effSharedScalyStripResource);
-    sdfSetAssetPrimaryTextureAddress((sdfMat_t *)work->handle, texture);
+    sdfMatSetTex((sdfMat_t *)work->handle, texture);
     sdfMatSetMultiTex((sdfMat_t *)work->handle, texture);
     sdfMatSetMultiMethod((sdfMat_t *)work->handle, mode);
     row = 0;
@@ -14201,7 +14201,7 @@ void effDrawGrowingTexturedStrip(EffActiveResource *work) {
     D_004584C0.color = blendedColor[0];
     dds3BillboardSetAnimKey(resource->billboard, frame);
     billCopyCurrentRecordToSnapshot(resource->billboard, &snapshot);
-    sdfSetAssetPrimaryTextureAddress(resource->asset, snapshot.texture);
+    sdfMatSetTex(resource->asset, snapshot.texture);
     sdf3DPrimLinkMat(packet, resource->asset, 0);
     sdfDrawTagLink(packet, effPkt3DPrimMakePoly(&D_004584C0));
     surface = D_003EA000[config->alphaTrack.surfaceIndex];

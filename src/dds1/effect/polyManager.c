@@ -6,7 +6,6 @@
 /* DDS's names for the same objects. */
 #define dds3EffectBase effDefaultRandomState
 #define func_00168A50 polyBandLayoutRing
-#define sdfMatSetTex sdfSetAssetPrimaryTextureAddress
 
 typedef struct
 {

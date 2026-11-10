@@ -146,7 +146,7 @@ BillChildPayload *BillboardLoadTex(SdfTextureFileHeader *resource) {
 void effReleaseSharedTextureRecord(BillChildPayload *entry) {
     entry->refCount--;
     if (entry->refCount == 0) {
-        sdfTexReleaseReferenceViaHandler(entry->texture);
+        sdfTexFreeDelayed(entry->texture);
         sdfMemFreeDirect(entry->allocation);
     }
 }

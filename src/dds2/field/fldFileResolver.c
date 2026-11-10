@@ -6127,7 +6127,7 @@ void fldLoadSkyResource(s32 area) {
 
 void fldReleaseSkyResources(void) {
     if (fldRainTextureReference != 0) {
-        sdfTexReleaseReferenceViaHandler(fldRainTextureReference);
+        sdfTexFreeDelayed(fldRainTextureReference);
         fldRainTextureReference = 0;
     }
     if (fldRainTextureResource != NULL) {

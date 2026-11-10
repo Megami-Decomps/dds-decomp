@@ -1153,7 +1153,7 @@ void effUpdateTarget(EffKindWork *work, sdfTexHandle_t *target) {
     sdfTexHandle_t *previous = work->target;
     if (previous != 0 && previous != target) {
         if (work->sourceKind != 4) {
-            sdfTexReleaseReferenceViaHandler(previous);
+            sdfTexFreeDelayed(previous);
         }
         work->target = target;
     }
@@ -1230,7 +1230,7 @@ void effTextureReferenceRelease(EffKindWork *work, sdfTexHandle_t *target) {
     sdfTexHandle_t *previous = work->target;
     if (previous != 0 && previous != target) {
         if (work->sourceKind != 4) {
-            sdfTexReleaseReferenceViaHandler(previous);
+            sdfTexFreeDelayed(previous);
         }
         work->target = target;
     }
@@ -1307,7 +1307,7 @@ void effReplaceKindLinkedTarget(EffKindWork *work, sdfTexHandle_t *target) {
     sdfTexHandle_t *previous = work->target;
     if (previous != 0 && previous != target) {
         if (work->sourceKind != 4) {
-            sdfTexReleaseReferenceViaHandler(previous);
+            sdfTexFreeDelayed(previous);
         }
         work->target = target;
     }
@@ -1466,7 +1466,7 @@ void effReplaceLinkedKindWorkTarget(EffKindWork *work, sdfTexHandle_t *target) {
     sdfTexHandle_t *previous = work->target;
     if (previous != 0 && previous != target) {
         if (work->sourceKind != 4) {
-            sdfTexReleaseReferenceViaHandler(previous);
+            sdfTexFreeDelayed(previous);
         }
         work->target = target;
     }
@@ -1536,7 +1536,7 @@ void effReleaseLinkedTarget(EffKindWork *work) {
         D_0037E770[work->kind].destroy(handle);
     }
     if (work->target != 0 && work->sourceKind != 4) {
-        sdfTexReleaseReferenceViaHandler(work->target);
+        sdfTexFreeDelayed(work->target);
     }
     sdfChipFreeDirect(work);
 }
@@ -1631,7 +1631,7 @@ void effReleaseAlternateKindWork(EffKindWork *work) {
         D_0037E7E8[work->kind].destroy(handle);
     }
     if (work->target != 0 && work->sourceKind != 4) {
-        sdfTexReleaseReferenceViaHandler(work->target);
+        sdfTexFreeDelayed(work->target);
     }
     sdfChipFreeDirect(work);
 }
@@ -4609,7 +4609,7 @@ void effDrawTrackSet(EffTrackSet *track, const Matrix4 *matrix) {
         } else {
             texture = sdfGetOrCreateTextureForReference(surface, reference);
         }
-        sdfSetAssetPrimaryTextureAddress(track->handle, texture);
+        sdfMatSetTex(track->handle, texture);
     }
     sdf3DPrimLinkMat(list, track->handle, 0);
 
@@ -6823,7 +6823,7 @@ void effDrawQuadWork(EffQuadWork *work) {
     texcoords[2][1] = snapshot.uv.components[5] * invHeight;
     texcoords[3][0] = snapshot.uv.components[6] * invWidth;
     texcoords[3][1] = snapshot.uv.components[7] * invHeight;
-    sdfSetAssetPrimaryTextureAddress(work->assetHandle, snapshot.texture);
+    sdfMatSetTex(work->assetHandle, snapshot.texture);
     sdf3DPrimLinkMat(list, work->assetHandle, 0);
     if (work->source.noSetup == 0) {
         packet = sdfGrAllocPacketBuff(0x30);
@@ -9677,7 +9677,7 @@ void effDrawRibbon(EffRibbonWork *work, const Matrix4 *matrix) {
     } else {
         texture = sdfGetOrCreateTextureForReference(surface, work->resource);
     }
-    sdfSetAssetPrimaryTextureAddress(work->handle, texture);
+    sdfMatSetTex(work->handle, texture);
     sdf3DPrimLinkMat(list, work->handle, 0);
     if (work->drawMode == 0) {
         packet = (EffGsPacket *)sdfGrAllocPacketBuff(0x30);
@@ -10914,7 +10914,7 @@ void effDrawScalyTexturedStrip(EffStripWork *work, void *matrix) {
     }
     sdf3DPrimLinkTm(list, 0);
     texture = sdfGetOrCreateTextureForReference(surface, (RefObj *)effSharedScalyStripResource);
-    sdfSetAssetPrimaryTextureAddress((sdfMat_t *)work->handle, texture);
+    sdfMatSetTex((sdfMat_t *)work->handle, texture);
     sdfMatSetMultiTex((sdfMat_t *)work->handle, texture);
     sdfMatSetMultiMethod((sdfMat_t *)work->handle, mode);
     row = 0;

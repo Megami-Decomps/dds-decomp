@@ -3468,7 +3468,7 @@ s32 btlUpdateAndDrawResourceBrowser(BtlResourceDescriptor *descriptor) {
 void btlDestroyResourceDescriptor(BtlResourceDescriptor *descriptor) {
     sdfTexHandle_t *texture = descriptor->texture;
     if (texture != NULL && descriptor->textureCategory == BTL_RESOURCE_ENTRY_CATEGORY_TMX) {
-        sdfTexReleaseReferenceViaHandler(texture);
+        sdfTexFreeDelayed(texture);
     }
     sdfChipFreeDirect(descriptor);
 }
@@ -3529,7 +3529,7 @@ void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *descriptor, const ch
     sdfTexHandle_t *texture = descriptor->texture;
     struct sdfMemHandle_t *allocation;
     if (texture != NULL && descriptor->textureCategory == BTL_RESOURCE_ENTRY_CATEGORY_TMX) {
-        sdfTexReleaseReferenceViaHandler(texture);
+        sdfTexFreeDelayed(texture);
         descriptor->texture = 0;
     }
     allocation = sdfDevLoadFileEx(resourceName, &loadedResource, 0);
@@ -3541,7 +3541,7 @@ void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *descriptor, const ch
 void btlReplaceResourceHandle(BtlResourceDescriptor *descriptor, void *textureResource) {
     sdfTexHandle_t *texture = descriptor->texture;
     if (texture != NULL && descriptor->textureCategory == BTL_RESOURCE_ENTRY_CATEGORY_TMX) {
-        sdfTexReleaseReferenceViaHandler(texture);
+        sdfTexFreeDelayed(texture);
         descriptor->texture = 0;
     }
     descriptor->texture = sdfTexSet((SdfTextureFileHeader *)(textureResource));

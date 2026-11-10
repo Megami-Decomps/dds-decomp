@@ -7211,7 +7211,7 @@
 0x0029D450	effCreateFixedSlotBlurWorkFromFadeOutput	inferred	The ASM callee allocates blur work with a fixed slot count, copies fade output and initializes each slot. [names_reviewed20.tsv]
 0x0029D468	effReleaseFixedSlotBlurWork	inferred	Releases the resource owned by the fixed-slot blur work variant. [names_reviewed20.tsv]
 0x0029D480	effUpdateFadeMapA	inferred	same blend plus vf10 position mapping (x-0x800, (y-0x800)<<1) [names_M60_EffMid.tsv]
-0x0029D650	effTextureReferenceRelease	inferred	calls sdfTexReleaseReferenceViaHandler [names_R_FuncNames7.tsv]
+0x0029D650	effTextureReferenceRelease	inferred	calls sdfTexFreeDelayed [names_R_FuncNames7.tsv]
 0x0029D6B0	effCreateVariableSlotBlurWorkFromFadeOutput	inferred	Clones fade output into blur work with an allocated number of slots taken from its source count. [names_reviewed20.tsv]
 0x0029D6C8	effReleaseVariableSlotBlurWork	inferred	Releases the resource owned by the source-count-dependent blur slot variant. [names_reviewed20.tsv]
 0x0029D6E0	effUpdateFadeMapB	inferred	twin of func_0029D480 with a wider output record [names_M60_EffMid.tsv]
@@ -8238,9 +8238,9 @@
 0x002D2A58	sdfTexAllocClutBuff	inferred	SMT3HD name via SLUS_209.11 0x002AB688, reloc-identical; was sdfTexAllocatePaletteData
 0x002D2A98	sdfTexCopyClutData	inferred	SMT3HD name via SLUS_209.11 0x002AB6C8, reloc-identical; was sdfTexCopyImageData
 0x002D2AB8	sdfTexAlloc	inferred	SMT3HD name via SLUS_209.11 0x002AB6E8, reloc-identical; was sdfTexCreateWithAllocatedResources
-0x002D2C30	sdfTexDestroy	inferred	Unlinks the texture and frees its GPU resources, buffers, reference, and record without changing its reference count.
+0x002D2C30	sdfTexFree	inferred	SMT3HD name via SLUS_209.11 0x002AB860, SMT3 name (was sdfTexDestroy); was sdfTexDestroy
 0x002D2CB8	sdfTexReleaseReference	inferred	Decrements the texture reference count and releases its texture when it reaches zero.
-0x002D2D00	sdfTexReleaseReferenceViaHandler	inferred	Decrements the texture refcount and passes the final reference to func_002D3C30.
+0x002D2D00	sdfTexFreeDelayed	inferred	SMT3HD name via SLUS_209.11 0x002AB8F0, SMT3 name (was sdfTexReleaseReferenceViaHandler); was sdfTexReleaseReferenceViaHandler
 0x002D2D48	sdfTexSetPacket	inferred	SMT3HD name via SLUS_209.11 0x002AB910, byte-identical; was sdfBuildTextureStatePacket
 0x002D2EB0	sdfTexMakeGIFPacketSub	inferred	SMT3HD name via SLUS_209.11 0x002ABA78, reloc-identical; was sdfTexCreateResourcePacket
 0x002D2F50	sdfTexMakeGIFPacket	inferred	SMT3HD name via SLUS_209.11 0x002ABB18, reloc-identical; was sdfTexCreateFirstPacket
@@ -8286,7 +8286,7 @@
 0x002D4320	sdfGrAddExPacket	inferred	SMT3HD name via SLUS_209.11 0x002ACEA0, reloc-identical; was sdfLinkReferenceDmaNode
 0x002D4368	sdfGrJoinDrawTag	inferred	SMT3HD name via SLUS_209.11 0x002ACEE8, reloc-identical; was sdfConnectPacketLists
 0x002D43F8	sdfGrInitExPacket	inferred	SMT3HD name via SLUS_209.11 0x002ACF78, reloc-identical; was sdfChainReferenceNodes
-0x002D4490	sdfFlushPoolNodes	inferred	chains packet lists of pool nodes and terminates the tail [names_M37_SmallSweep6.tsv]
+0x002D4490	sdfGrOtClose	inferred	SMT3HD name via SLUS_209.11 0x002AD010, SMT3 name (was sdfFlushPoolNodes); was sdfFlushPoolNodes
 0x002D4540	sdfPreDrawTagInit	inferred	SMT3HD name via SLUS_209.11 0x002AD0C0, byte-identical; was sdfClearLinkedPacketList
 0x002D4558	sdfPreDrawTagLink	inferred	SMT3HD name via SLUS_209.11 0x002AD0D8, byte-identical; was sdfAppendLinkedPacketNode
 0x002D4578	sdfPreDrawChainInit	inferred	SMT3HD name via SLUS_209.11 0x002AD0F8, shared-hash-in-run; was sdfClearPacketChain
@@ -8435,9 +8435,9 @@
 0x002DA3C0	sdfMatSetAmbient	inferred	SMT3HD name via SLUS_209.11 0x002B2E78, byte-identical; was sdfSetPrimaryStateWordFirst
 0x002DA3D8	sdfMatSetDiffuse	inferred	SMT3HD name via SLUS_209.11 0x002B2E90, byte-identical; was sdfSetPrimaryStateWordSecond
 0x002DA3F0	sdfMatSetSpecular	inferred	SMT3HD name via SLUS_209.11 0x002B2EA8, byte-identical; was sdfSetPrimaryStateWordThird
-0x002DA408	sdfSetPrimaryStateWordFourth	inferred	Stores the fourth primary-state raw word at sdfMat_t+0x28 and marks the primary state dirty.
+0x002DA408	sdfMatSetRefMap	inferred	SMT3HD name via SLUS_209.11 0x002B2EC0, SMT3 name (was sdfSetPrimaryStateWordFourth); was sdfSetPrimaryStateWordFourth
 0x002DA420	sdfMatSetConstant	inferred	SMT3HD name via SLUS_209.11 0x002B2ED8, byte-identical; was sdfSetPrimaryStateFloat
-0x002DA438	sdfSetAssetPrimaryTextureAddress	inferred	Stores a texture-address word in the primary texture field and marks primary state dirty.
+0x002DA438	sdfMatSetTex	inferred	SMT3HD name via SLUS_209.11 0x002B2EF0, SMT3 name (was sdfSetAssetPrimaryTextureAddress); was sdfSetAssetPrimaryTextureAddress
 0x002DA450	sdfMatAllocTexUvwParm	inferred	SMT3HD name via SLUS_209.11 0x002B2F08, reloc-identical; was sdfSubParamCreate
 0x002DA490	sdfMatGetTexUvwParm	inferred	SMT3HD name via SLUS_209.11 0x002B2F48, reloc-identical; was sdfEnsurePrimaryTextSubParam
 0x002DA4C8	sdfMatSetTexUvw	inferred	SMT3HD name via SLUS_209.11 0x002B2F80, sdfMat twin; was sdfSetPrimaryTextScalars

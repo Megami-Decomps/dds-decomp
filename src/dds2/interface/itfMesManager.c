@@ -2500,7 +2500,7 @@ void DrawMsgMng_Shutdown(dds3ProcessID_t *task) {
         node = node->next;
         DestructFlow(message);
     }
-    sdfTexReleaseReferenceViaHandler(itfMesMngManager.windowTexture);
+    sdfTexFreeDelayed(itfMesMngManager.windowTexture);
     itfMesMngManager.windowTexture = NULL;
 }
 

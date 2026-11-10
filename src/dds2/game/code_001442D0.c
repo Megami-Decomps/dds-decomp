@@ -2997,16 +2997,16 @@ void func_00149A00(void) {
 
 void fldReleaseResourceSlots(void) {
     if (D_0044F7F0[1] != 0) {
-        sdfTexReleaseReferenceViaHandler(D_0044F7F0[1]);
+        sdfTexFreeDelayed(D_0044F7F0[1]);
     }
     if (D_0044F7F0[2] != 0) {
-        sdfTexReleaseReferenceViaHandler(D_0044F7F0[2]);
+        sdfTexFreeDelayed(D_0044F7F0[2]);
     }
     if (D_0044F7F0[3] != 0) {
-        sdfTexReleaseReferenceViaHandler(D_0044F7F0[3]);
+        sdfTexFreeDelayed(D_0044F7F0[3]);
     }
     if (D_0044F7F0[6] != 0) {
-        sdfTexReleaseReferenceViaHandler(D_0044F7F0[6]);
+        sdfTexFreeDelayed(D_0044F7F0[6]);
     }
     D_0044F7F0[1] = 0;
     D_0044F7F0[2] = 0;
@@ -3037,16 +3037,16 @@ void fldReleaseSceneDevSlotsAndTextures(void) {
         D_0044F818[i].z = 0.0f;
     }
     if (D_0044F7F0[5] != 0) {
-        sdfTexReleaseReferenceViaHandler(D_0044F7F0[5]);
+        sdfTexFreeDelayed(D_0044F7F0[5]);
     }
     if (D_0044F7F0[7] != 0) {
-        sdfTexReleaseReferenceViaHandler(D_0044F7F0[7]);
+        sdfTexFreeDelayed(D_0044F7F0[7]);
     }
     if (D_0044F7F0[8] != 0) {
-        sdfTexReleaseReferenceViaHandler(D_0044F7F0[8]);
+        sdfTexFreeDelayed(D_0044F7F0[8]);
     }
     if (D_0044F7F0[9] != 0) {
-        sdfTexReleaseReferenceViaHandler(D_0044F7F0[9]);
+        sdfTexFreeDelayed(D_0044F7F0[9]);
     }
     D_0044F7F0[5] = 0;
     D_0044F7F0[7] = 0;
@@ -4026,19 +4026,19 @@ extern struct EffNode *fldAreaDamageEffect;
  * is cleared immediately so repeated cleanup does not release it twice. */
 void fldFreeSceneResources(void) {
     if (fldGlobalBase.fieldTextures[0].texture != 0) {
-        sdfTexReleaseReferenceViaHandler(fldGlobalBase.fieldTextures[0].texture);
+        sdfTexFreeDelayed(fldGlobalBase.fieldTextures[0].texture);
         fldGlobalBase.fieldTextures[0].texture = 0;
     }
     if (fldGlobalBase.fieldTextures[1].texture != 0) {
-        sdfTexReleaseReferenceViaHandler(fldGlobalBase.fieldTextures[1].texture);
+        sdfTexFreeDelayed(fldGlobalBase.fieldTextures[1].texture);
         fldGlobalBase.fieldTextures[1].texture = 0;
     }
     if (fldGlobalBase.fieldTextures[2].texture != 0) {
-        sdfTexReleaseReferenceViaHandler(fldGlobalBase.fieldTextures[2].texture);
+        sdfTexFreeDelayed(fldGlobalBase.fieldTextures[2].texture);
         fldGlobalBase.fieldTextures[2].texture = 0;
     }
     if (fldGlobalBase.fieldTextures[3].texture != 0) {
-        sdfTexReleaseReferenceViaHandler(fldGlobalBase.fieldTextures[3].texture);
+        sdfTexFreeDelayed(fldGlobalBase.fieldTextures[3].texture);
         fldGlobalBase.fieldTextures[3].texture = 0;
     }
     if (D_004362DC != 0) {
@@ -5235,11 +5235,11 @@ KwlnTaskUpdateResult fldTitleTaskUpdate(dds3ProcessID_t *task) {
 
 void fldReleaseTitleTextures(dds3ProcessID_t *task) {
     if (D_00436368 != 0) {
-        sdfTexReleaseReferenceViaHandler(D_00436368);
+        sdfTexFreeDelayed(D_00436368);
         D_00436368 = 0;
     }
     if (D_0043636C != 0) {
-        sdfTexReleaseReferenceViaHandler(D_0043636C);
+        sdfTexFreeDelayed(D_0043636C);
         D_0043636C = 0;
     }
 }
@@ -5381,7 +5381,7 @@ s32 fldTitleMini(dds3ProcessID_t *task) {
 
 void fldReleaseTitleMiniTexture(dds3ProcessID_t *task) {
     if (D_0043637C != 0) {
-        sdfTexReleaseReferenceViaHandler(D_0043637C);
+        sdfTexFreeDelayed(D_0043637C);
         D_0043637C = 0;
     }
 }
@@ -5552,15 +5552,15 @@ void fldLoadWeatherEffects(void) {
 
 void fldReleaseWeatherEffects(void) {
     if (D_004363AC != 0) {
-        sdfTexReleaseReferenceViaHandler(D_004363AC);
+        sdfTexFreeDelayed(D_004363AC);
         D_004363AC = 0;
     }
     if (D_004363B0 != 0) {
-        sdfTexReleaseReferenceViaHandler(D_004363B0);
+        sdfTexFreeDelayed(D_004363B0);
         D_004363B0 = 0;
     }
     if (D_004363B4 != 0) {
-        sdfTexReleaseReferenceViaHandler(D_004363B4);
+        sdfTexFreeDelayed(D_004363B4);
         D_004363B4 = 0;
     }
     dds3EffectDelete(fldDamEffectNode);

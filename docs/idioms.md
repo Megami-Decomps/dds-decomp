@@ -5677,7 +5677,7 @@ The packet header's register list is `0x5151` (RGBAQ/XYZ2 twice).
 Its local constructor prototype follows the C provider's `SdfDrawPacket *`
 and `s64` register-list contract. Encoded allocator addresses convert to
 packet/list pointers at SDK boundaries. The final pool-node-to-list-head
-callback conversion reuses `sdfFlushPoolNodes`' shared first/last prefix;
+callback conversion reuses `sdfGrOtClose`' shared first/last prefix;
 embedding the list header in the pool node remains a dedicated SDK type debt.
 
 ## DDS2 progress-icon fields belong to the existing row

@@ -6145,7 +6145,7 @@ void fldLoadSkyResource(s32 area) {
 
 void fldReleaseSkyResources(void) {
     if (fldRainTextureReference != 0) {
-        sdfTexReleaseReferenceViaHandler(fldRainTextureReference);
+        sdfTexFreeDelayed(fldRainTextureReference);
         fldRainTextureReference = 0;
     }
     if (fldRainTextureResource != 0) {
@@ -7318,7 +7318,7 @@ void fldDrawCameraColorLayerPass(void) {
 void fldReleaseCameraColorEffect(void) {
     fldCameraColorEnabled = 0;
     if (fldRainTextureReference != 0) {
-        sdfTexReleaseReferenceViaHandler(fldRainTextureReference);
+        sdfTexFreeDelayed(fldRainTextureReference);
         fldRainTextureReference = 0;
     }
     if (fldCameraColorEffect != 0) {

@@ -541,7 +541,7 @@ void dds3P2APolygonDraw(EffInstance *instance) {
     uv[2][1] = child->uv.components[7] * height;
     uv[3][0] = child->uv.components[4] * width;
     uv[3][1] = child->uv.components[5] * height;
-    sdfSetAssetPrimaryTextureAddress(instance->material, texture);
+    sdfMatSetTex(instance->material, texture);
     switch ((u32)modeValues[0]) {
     case 2:
     case 3:

@@ -454,7 +454,7 @@ s32 dds3DrawProcess(dds3ProcessID_t *task) {
         sdfDrawTagLink(packetList, (u32)spritePacket);
         D_00325708.append(&D_00325708, packetList);
     }
-    poolHead = sdfFlushPoolNodes(sdfGrOtTable);
+    poolHead = sdfGrOtClose(sdfGrOtTable);
     D_003BA844 = poolHead;
     if (D_003BA7FC != 0) {
         sdfGrFlushOtChain(poolHead->head);

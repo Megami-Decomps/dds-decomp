@@ -403,7 +403,7 @@ void sdfTexListFree(DevRequest *list, SdfTexListItemReferencePolicy itemReferenc
     if (itemReferencePolicy != SDF_TEX_LIST_KEEP_REFERENCES) {
         itemCount = list->usedCount;
         for (itemIndex = 0; itemIndex < itemCount; itemIndex++) {
-            sdfTexReleaseReferenceViaHandler(((sdfTexHandle_t **)list->buffer)[itemIndex]);
+            sdfTexFreeDelayed(((sdfTexHandle_t **)list->buffer)[itemIndex]);
         }
     }
     sdfItemArrayFree(list);
@@ -529,7 +529,7 @@ void sdfMatSetSpecular(sdfMat_t *asset, u32 stateWord) {
 }
 
 /* Store raw bits in the fourth primary-state word, without float conversion. */
-void sdfSetPrimaryStateWordFourth(sdfMat_t *asset, u32 bits) {
+void sdfMatSetRefMap(sdfMat_t *asset, u32 bits) {
     asset->primaryStateWordFourth = bits;
     asset->dirtyFlags |= SDF_ASSET_PRIMARY_STATE_DIRTY;
 }
@@ -541,7 +541,7 @@ void sdfMatSetConstant(sdfMat_t *asset, f32 value) {
 }
 
 /* Store the primary texture address as raw bits and dirty both draw entries. */
-void sdfSetAssetPrimaryTextureAddress(sdfMat_t *asset, sdfTexHandle_t *texture) {
+void sdfMatSetTex(sdfMat_t *asset, sdfTexHandle_t *texture) {
     asset->texture = texture;
     asset->dirtyFlags |= SDF_ASSET_PRIMARY_STATE_DIRTY;
 }
@@ -697,7 +697,7 @@ const u8 *sdfMatSet(sdfMat_t *asset, const DevRequest *resourceLookup,
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
     if (parameterFlags & SDF_PARAM_PRIMARY_TEXTURE_PRESENT) {
-        sdfSetAssetPrimaryTextureAddress(asset,
+        sdfMatSetTex(asset,
             (sdfTexHandle_t *)((const u32 *)resourceLookup->buffer)[*(const u16 *)parameterCursor]);
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
@@ -725,7 +725,7 @@ const u8 *sdfMatSet(sdfMat_t *asset, const DevRequest *resourceLookup,
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
     if (parameterFlags & SDF_PARAM_PRIMARY_WORD_FOURTH_PRESENT) {
-        sdfSetPrimaryStateWordFourth(asset, *(const u32 *)parameterCursor);
+        sdfMatSetRefMap(asset, *(const u32 *)parameterCursor);
         parameterCursor += SDF_PARAM_WORD_BYTES;
     }
     if (parameterFlags & SDF_PARAM_PRIMARY_FLOAT_PRESENT) {

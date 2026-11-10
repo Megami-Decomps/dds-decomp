@@ -393,7 +393,7 @@ typedef char SdfTex_clampMode_offset_must_be_0x1F[
  * that final release for deferred processing. Neither function consumes more
  * than the single reference represented by the supplied pointer. */
 void sdfTexReleaseReference(sdfTexHandle_t *texture);
-void sdfTexReleaseReferenceViaHandler(sdfTexHandle_t *texture);
+void sdfTexFreeDelayed(sdfTexHandle_t *texture);
 
 /* Texture resource accessors and palette helpers shared by both title providers. */
 u8 sdfTexGetCLUTCount(sdfTexHandle_t *texture);

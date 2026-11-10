@@ -5,7 +5,6 @@
 #include "model.h"
 #include "motion.h"
 
-#define sdfMatSetRefMap sdfSetPrimaryStateWordFourth
 
 typedef struct
 {

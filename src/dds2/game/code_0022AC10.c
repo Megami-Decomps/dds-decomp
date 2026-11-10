@@ -1676,7 +1676,7 @@ BtlRuntimeFadeStepResult btlDrawCapturedScreenTileOverlay(
         waveRadius = 640.0f;
         sdf3DPrimLinkTm(tiles, NULL);
         dds3RenderTexture->primaryBuffer->clampState = 0x37C00000008ULL;
-        sdfSetAssetPrimaryTextureAddress(D_00436D10, dds3RenderTexture);
+        sdfMatSetTex(D_00436D10, dds3RenderTexture);
         sdf3DPrimLinkMat(tiles, D_00436D10, NULL);
         btlCapturedScreenTileDrawParams.color = 0x80808080;
         btlCapturedScreenTileDrawParams.vertex = (u128 *)positions;

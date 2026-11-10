@@ -294,19 +294,19 @@ void evtDestroyEventPackTask(dds3ProcessID_t *task) {
     if (packState != NULL) {
         if (packState->effect72 != 0) {
             Eve_DistortionBlurSetDefTex();
-            sdfTexReleaseReferenceViaHandler(packState->effect72);
+            sdfTexFreeDelayed(packState->effect72);
         }
         if (packState->effect71 != 0) {
             Eve_PartialMultiBlurSetDefTex();
-            sdfTexReleaseReferenceViaHandler(packState->effect71);
+            sdfTexFreeDelayed(packState->effect71);
         }
         if (packState->effect76 != 0) {
             Eve_RippleBlurSetDefTex();
-            sdfTexReleaseReferenceViaHandler(packState->effect76);
+            sdfTexFreeDelayed(packState->effect76);
         }
         if (packState->effect75 != 0) {
             Eve_PartialMultiFilterSetDefTex();
-            sdfTexReleaseReferenceViaHandler(packState->effect75);
+            sdfTexFreeDelayed(packState->effect75);
         }
         if (packState->pendingRequest != NULL) {
             fileRequestFreeIfComplete(packState->pendingRequest);

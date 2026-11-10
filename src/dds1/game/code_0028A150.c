@@ -2798,41 +2798,41 @@ void fileReleaseMenuResources(void) {
             texture = *slot;
             i--;
             if (texture != 0) {
-                sdfTexReleaseReferenceViaHandler(texture);
+                sdfTexFreeDelayed(texture);
                 *slot = 0;
             }
             slot++;
         } while (i >= 0);
         if (D_003BC884 != 0) {
-            sdfTexReleaseReferenceViaHandler(D_003BC884);
+            sdfTexFreeDelayed(D_003BC884);
             D_003BC884 = 0;
         }
         if (D_003BC880 != 0) {
-            sdfTexReleaseReferenceViaHandler(D_003BC880);
+            sdfTexFreeDelayed(D_003BC880);
             D_003BC880 = 0;
         }
         if (D_003BC87C != 0) {
-            sdfTexReleaseReferenceViaHandler(D_003BC87C);
+            sdfTexFreeDelayed(D_003BC87C);
             D_003BC87C = 0;
         }
         if (D_003BC878 != 0) {
-            sdfTexReleaseReferenceViaHandler(D_003BC878);
+            sdfTexFreeDelayed(D_003BC878);
             D_003BC878 = 0;
         }
         if (D_003BC874 != 0) {
-            sdfTexReleaseReferenceViaHandler(D_003BC874);
+            sdfTexFreeDelayed(D_003BC874);
             D_003BC874 = 0;
         }
         if (D_003BC870 != 0) {
-            sdfTexReleaseReferenceViaHandler(D_003BC870);
+            sdfTexFreeDelayed(D_003BC870);
             D_003BC870 = 0;
         }
         if (D_003BC86C != 0) {
-            sdfTexReleaseReferenceViaHandler(D_003BC86C);
+            sdfTexFreeDelayed(D_003BC86C);
             D_003BC86C = 0;
         }
         if (D_003BC868 != 0) {
-            sdfTexReleaseReferenceViaHandler(D_003BC868);
+            sdfTexFreeDelayed(D_003BC868);
             D_003BC868 = 0;
         }
         world = dds3GetActiveScene();

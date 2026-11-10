@@ -2,9 +2,6 @@
 #include "libsdf.h"
 
 #define func_002BFF98 sdfDevResizeBufferedRequest
-#define sdfTexFreeDelayed sdfTexReleaseReferenceViaHandler
-#define sdfMatSetRefMap sdfSetPrimaryStateWordFourth
-#define sdfMatSetTex sdfSetAssetPrimaryTextureAddress
 #include "eeregs.h"
 
 extern void *sdfChipAllocDirect(s32 aSize);

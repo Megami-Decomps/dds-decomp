@@ -2793,41 +2793,41 @@ void fileReleaseMenuResources(void) {
             handle = *slot;
             i--;
             if (handle != 0) {
-                sdfTexReleaseReferenceViaHandler((sdfTexHandle_t *)handle);
+                sdfTexFreeDelayed((sdfTexHandle_t *)handle);
                 *slot = 0;
             }
             slot++;
         } while (i >= 0);
         if (D_00437D78 != 0) {
-            sdfTexReleaseReferenceViaHandler((sdfTexHandle_t *)D_00437D78);
+            sdfTexFreeDelayed((sdfTexHandle_t *)D_00437D78);
             D_00437D78 = 0;
         }
         if (D_00437D74 != 0) {
-            sdfTexReleaseReferenceViaHandler((sdfTexHandle_t *)D_00437D74);
+            sdfTexFreeDelayed((sdfTexHandle_t *)D_00437D74);
             D_00437D74 = 0;
         }
         if (D_00437D70 != 0) {
-            sdfTexReleaseReferenceViaHandler((sdfTexHandle_t *)D_00437D70);
+            sdfTexFreeDelayed((sdfTexHandle_t *)D_00437D70);
             D_00437D70 = 0;
         }
         if (D_00437D6C != 0) {
-            sdfTexReleaseReferenceViaHandler((sdfTexHandle_t *)D_00437D6C);
+            sdfTexFreeDelayed((sdfTexHandle_t *)D_00437D6C);
             D_00437D6C = 0;
         }
         if (D_00437D68 != 0) {
-            sdfTexReleaseReferenceViaHandler((sdfTexHandle_t *)D_00437D68);
+            sdfTexFreeDelayed((sdfTexHandle_t *)D_00437D68);
             D_00437D68 = 0;
         }
         if (D_00437D64 != 0) {
-            sdfTexReleaseReferenceViaHandler((sdfTexHandle_t *)D_00437D64);
+            sdfTexFreeDelayed((sdfTexHandle_t *)D_00437D64);
             D_00437D64 = 0;
         }
         if (D_00437D60 != 0) {
-            sdfTexReleaseReferenceViaHandler((sdfTexHandle_t *)D_00437D60);
+            sdfTexFreeDelayed((sdfTexHandle_t *)D_00437D60);
             D_00437D60 = 0;
         }
         if (D_00437D5C != 0) {
-            sdfTexReleaseReferenceViaHandler((sdfTexHandle_t *)D_00437D5C);
+            sdfTexFreeDelayed((sdfTexHandle_t *)D_00437D5C);
             D_00437D5C = 0;
         }
         if (D_00437D54 != 0) {

@@ -7536,7 +7536,7 @@
 0x002E0368	effSetAlternateKindColor	inferred	High: writes the packed color field of the alternate kind-table header. [names_qp9.tsv]
 0x002E0370	effSetAlternateKindScale	inferred	High: writes the scalar scale field of the alternate kind-table header. [names_qp9.tsv]
 0x002E0378	effCreateResourceHolderFromSelectedKind	inferred	Allocates a kind-tagged holder and derives its resource from the selected source type. [names_reviewed16.tsv]
-0x002E0400	effKindAssetReferenceRelease	inferred	body calls sdfTexReleaseReferenceViaHandler [names_R_FuncNames7.tsv]
+0x002E0400	effKindAssetReferenceRelease	inferred	body calls sdfTexFreeDelayed [names_R_FuncNames7.tsv]
 0x002E0460	effRetainKindSecondaryAsset	inferred	Increments the secondary asset's reference count and returns the same object. [names_reviewed5.tsv]
 0x002E0478	effCreateBillboardWork	inferred	Allocates and zeroes 0x68-byte billboard state, initializes scale/color and VU0 origin, optionally attaches sprite data and indexed bill resource.
 0x002E0528	effBillboardWorkRelease	inferred	body calls dds3BillboardDelete [names_R_FuncNames7.tsv]
@@ -8815,7 +8815,8 @@
 0x0032B908	sdfTexAllocClutBuff	inferred	SMT3HD name via SLUS_209.11 0x002AB688, reloc-identical; was sdfTexAllocatePaletteData
 0x0032B948	sdfTexCopyClutData	inferred	SMT3HD name via SLUS_209.11 0x002AB6C8, reloc-identical; was sdfTexCopyImageData
 0x0032B968	sdfTexAlloc	inferred	SMT3HD name via SLUS_209.11 0x002AB6E8, reloc-identical; was sdfTexCreateWithAllocatedResources
-0x0032BBB0	sdfTexReleaseReferenceViaHandler	inferred	Decrements the texture refcount and passes the final reference to func_0032CAE0.
+0x0032BAE0	sdfTexFree	inferred	SMT3HD name via SLUS_209.11 0x002AB860, SMT3 name (was sdfTexDestroy); was sdfTexDestroy
+0x0032BBB0	sdfTexFreeDelayed	inferred	SMT3HD name via SLUS_209.11 0x002AB8F0, SMT3 name (was sdfTexReleaseReferenceViaHandler); was sdfTexReleaseReferenceViaHandler
 0x0032BBF8	sdfTexSetPacket	inferred	SMT3HD name via SLUS_209.11 0x002AB910, byte-identical; was sdfBuildTextureStatePacket
 0x0032BD60	sdfTexMakeGIFPacketSub	inferred	SMT3HD name via SLUS_209.11 0x002ABA78, reloc-identical; was sdfTexCreateResourcePacket
 0x0032BE00	sdfTexMakeGIFPacket	inferred	SMT3HD name via SLUS_209.11 0x002ABB18, reloc-identical; was sdfTexCreateFirstPacket
@@ -8861,7 +8862,7 @@
 0x0032D1D0	sdfGrAddExPacket	inferred	SMT3HD name via SLUS_209.11 0x002ACEA0, reloc-identical; was sdfLinkReferenceDmaNode
 0x0032D218	sdfGrJoinDrawTag	inferred	SMT3HD name via SLUS_209.11 0x002ACEE8, reloc-identical; was sdfConnectPacketLists
 0x0032D2A8	sdfGrInitExPacket	inferred	SMT3HD name via SLUS_209.11 0x002ACF78, reloc-identical; was sdfChainReferenceNodes
-0x0032D340	sdfGrOtClose	inferred	HD original name; native paired ordering-table closure. DDS1 retains its declaration-sensitive exclusion; was sdfFlushPoolNodes.
+0x0032D340	sdfGrOtClose	inferred	SMT3HD name via SLUS_209.11 0x002AD010, SMT3 name (was sdfFlushPoolNodes); was sdfFlushPoolNodes
 0x0032D3F0	sdfPreDrawTagInit	inferred	SMT3HD name via SLUS_209.11 0x002AD0C0, byte-identical; was sdfClearLinkedPacketList
 0x0032D408	sdfPreDrawTagLink	inferred	SMT3HD name via SLUS_209.11 0x002AD0D8, byte-identical; was sdfAppendLinkedPacketNode
 0x0032D428	sdfPreDrawChainInit	inferred	SMT3HD name via SLUS_209.11 0x002AD0F8, shared-hash-in-run; was sdfClearPacketChain
@@ -9007,9 +9008,9 @@
 0x00333270	sdfMatSetAmbient	inferred	SMT3HD name via SLUS_209.11 0x002B2E78, byte-identical; was sdfSetPrimaryStateWordFirst
 0x00333288	sdfMatSetDiffuse	inferred	SMT3HD name via SLUS_209.11 0x002B2E90, byte-identical; was sdfSetPrimaryStateWordSecond
 0x003332A0	sdfMatSetSpecular	inferred	SMT3HD name via SLUS_209.11 0x002B2EA8, byte-identical; was sdfSetPrimaryStateWordThird
-0x003332B8	sdfSetPrimaryStateWordFourth	inferred	Stores the fourth primary-state raw word at sdfMat_t+0x28 and marks the primary state dirty.
+0x003332B8	sdfMatSetRefMap	inferred	SMT3HD name via SLUS_209.11 0x002B2EC0, SMT3 name (was sdfSetPrimaryStateWordFourth); was sdfSetPrimaryStateWordFourth
 0x003332D0	sdfMatSetConstant	inferred	SMT3HD name via SLUS_209.11 0x002B2ED8, byte-identical; was sdfSetPrimaryStateFloat
-0x003332E8	sdfSetAssetPrimaryTextureAddress	inferred	Stores a texture-address word in the primary texture field and marks primary state dirty.
+0x003332E8	sdfMatSetTex	inferred	SMT3HD name via SLUS_209.11 0x002B2EF0, SMT3 name (was sdfSetAssetPrimaryTextureAddress); was sdfSetAssetPrimaryTextureAddress
 0x00333300	sdfMatAllocTexUvwParm	inferred	SMT3HD name via SLUS_209.11 0x002B2F08, reloc-identical; was sdfSubParamCreate
 0x00333340	sdfMatGetTexUvwParm	inferred	SMT3HD name via SLUS_209.11 0x002B2F48, reloc-identical; was sdfEnsurePrimaryTextSubParam
 0x00333378	sdfMatSetTexUvw	inferred	SMT3HD name via SLUS_209.11 0x002B2F80, sdfMat twin; was sdfSetPrimaryTextScalars

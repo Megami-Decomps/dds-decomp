@@ -907,7 +907,7 @@ void eglLinkTexPoly4(s32 i0, f32 x0, f32 y0, f32 z0, s32 i1, f32 x1, f32 y1, f32
     sdfGrOt_t *surface;
 
     asset = sdfMatNew();
-    sdfSetAssetPrimaryTextureAddress(asset, (sdfTexHandle_t *)bits);
+    sdfMatSetTex(asset, (sdfTexHandle_t *)bits);
     list = (void *)sdfGrAllocPacketBuff(EVT_PACKET_LIST_BYTES);
     sdfDrawTagInit(list);
     sdf3DPrimLinkResetTm(list, 0);
