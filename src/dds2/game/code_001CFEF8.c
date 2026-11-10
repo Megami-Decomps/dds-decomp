@@ -1242,7 +1242,7 @@ extern void btlResetActorEntryState(void);
 extern void mnuQueueTitleSoundStreamEntry(s32 soundEntryIndex);
 extern void mnuResetTitleStreamLocked(void);
 extern void p2sdStopAllBgm(void);
-extern void sndQueueNoPayloadCommand210(void);
+extern void sdfSndQueueNoPayloadCommand210(void);
 
 s32 btlUpdateBattleEnd(BtlState *scene) {
     s32 state;
@@ -1326,13 +1326,13 @@ s32 btlUpdateBattleEnd(BtlState *scene) {
         if (scene->terminalOutcome != BTL_TERMINAL_OUTCOME_SERIAL) btlAdvanceTitleState();
         if (scene->terminalOutcome == BTL_TERMINAL_OUTCOME_WIN) {
             if (!(scene->endFlags & 1)) {
-                sndQueueNoPayloadCommand210();
+                sdfSndQueueNoPayloadCommand210();
                 p2sdStopAllBgm();
                 sndLoadAndPlayStationedSe(0x1C);
                 scene->endFlags |= 1;
             }
         } else {
-            sndQueueNoPayloadCommand210();
+            sdfSndQueueNoPayloadCommand210();
             p2sdStopAllBgm();
         }
         if (scene->terminalOutcome == BTL_TERMINAL_OUTCOME_SERIAL) {

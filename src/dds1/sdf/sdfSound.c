@@ -14,12 +14,6 @@ typedef void *(*sceSifRpcFunc)(s32 function, void *request, s32 size);
 
 #define SND_VOICE_IOP_BYTES 0x21600
 
-#define p2sd_2C1788 sndQueueNoPayloadCommand210
-#define p2sd_2C17D8 sndDispatchCommandWithoutPayload
-#define p2sd_2C1D78 sndSendFilenameCommand
-#define p2sd_2C1E10 sndSendChannelControlCommand
-#define p2sd_2C1E40 sndSendChannelGroupCommand140
-#define func_002C1E70 sndSendChannelGroupCommand150
 #define p2sd_2C1EA0 sndReleaseMidiTrack
 #define p2sd_2C1EF8 sndGetTrackBalanceFirstComponent
 #define p2sd_2C1F10 sndGetTrackBalanceSecondComponent
@@ -28,10 +22,8 @@ typedef void *(*sceSifRpcFunc)(s32 function, void *request, s32 size);
 #define p2sd_2C1F60 sndGetTrackSlotTable
 #define p2sd_2C1F70 sndGetMidiStateWordPair
 #define p2sd_2C1F90 sndCopyGroupedMidiStateBytes
-#define p2sd_2C21A8 sndSendChannelGroupCommand110
 #define p2sd_2C21D8 sdfSoundSetChannelCount
 #define p2sd_2C2280 sdfSoundGetCommandStatus
-#define p2sd_2C22B0 sndSendChannelGroupCommand110Duplicate
 #define sdf_2C2618 sdfSoundSetTableEntry
 #define sdf_2C27F8 sdfSoundGetTableEntry
 
@@ -658,7 +650,7 @@ s32 p2sdStopAllBgm(void)
     return sdfSndSendCmd(0x1A0, 0, 0, 0);
 }
 
-s32 p2sd_2C1788(void)
+s32 sdfSndQueueNoPayloadCommand210(void)
 {
     return sdfSndSendCmd(0x210, 0, 0, 0);
 }
@@ -668,7 +660,7 @@ s32 p2sdStopAllSe(void)
     return sdfSndSendCmd(0x40, 0, 0, 0);
 }
 
-s32 p2sd_2C17D8(s32 aSeId)
+s32 sdfSndDispatchCommandWithoutPayload(s32 aSeId)
 {
     return sdfSndSendCmd(aSeId | 0x50, 0, 0, 0);
 }
@@ -806,7 +798,7 @@ void p2sdLoadSMGFile(s32 MidiNo) {
     }
 }
 
-u64 p2sd_2C1D78(const char *aName)
+u64 sdfSndSendFilenameCommand(const char *aName)
 {
     return sdfSndSendSyncCmd(0xA0, 0, (void *)aName, strlen(aName));
 }
@@ -824,17 +816,17 @@ void p2sdSetPcmBuffer(saddr_t data, s32 size) {
     p2sdSmgHandle = -1;
 }
 
-u64 p2sd_2C1E10(s32 aCh)
+u64 sdfSndSendChannelControlCommand(s32 aCh)
 {
     return sdfSndSendSyncCmd((aCh & 0xF) | 0x1C0, 0, NULL, 0);
 }
 
-u64 p2sd_2C1E40(u8 aCh)
+u64 sdfSndSendChannelGroupCommand140(u8 aCh)
 {
     return sdfSndSendSyncCmd(((aCh >> 3) & 0xF) | 0x140, 0, NULL, 0);
 }
 
-u64 func_002C1E70(u8 aCh)
+u64 sdfSndSendChannelGroupCommand150(u8 aCh)
 {
     return sdfSndSendSyncCmd(((aCh >> 3) & 0xF) | 0x150, 0, NULL, 0);
 }
@@ -956,7 +948,7 @@ s32 p2sdSyncSound(void)
     return sdfSndSendSyncCmd(0x100, 0, 0, 0);
 }
 
-void p2sd_2C21A8(u8 channel) {
+void sdfSndSendChannelGroupCommand110(u8 channel) {
     sdfSndSendSyncCmd(((channel >> 3) & 0xF) | 0x110, 0, 0, 0);
 }
 
@@ -1002,7 +994,7 @@ s32 p2sdSyncMovie(void)
 }
 
 /* Separate native copy of the command-0x110 channel-group sender. */
-void p2sd_2C22B0(u8 channel) {
+void sdfSndSendChannelGroupCommand110Duplicate(u8 channel) {
     sdfSndSendSyncCmd(((channel >> 3) & 0xF) | 0x110, 0, 0, 0);
 }
 

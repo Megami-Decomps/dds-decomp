@@ -352,8 +352,8 @@ earlier carries `REG_EH_REGION 0`, which turns `func_002E9450`'s
 has one flag set. Under the default flags the whole 40-function extent
 matches with two ordinary changes:
 
-- the four `jal; ld $31` tails (`sndSendFilenameCommand`,
-  `sndSendChannelControlCommand`, `sndSendChannelGroupCommand140/150`) go
+- the four `jal; ld $31` tails (`sdfSndSendFilenameCommand`,
+  `sdfSndSendChannelControlCommand`, `sdfSndSendChannelGroupCommand140/150`) go
   through `static inline u32 sndSendCommand(u32 command, const void *packet,
   u32 size) { return sdfSndSendSyncCmd(command, 0, packet, size); }` and
   are `u32` functions returning it. A `void` caller or a `void` helper still
@@ -802,8 +802,8 @@ functions use trampolines and are a different case.
   `u64` parameter gives the same `dsrl` but then needs `dsll32/dsra32` before a
   `u32` argument, and a 64-bit `or` with an immediate becomes `li` + `or`;
   `u32`/`s32` give `srl`/`sra`. `void f(u8 channel) { snd(((channel >> 3) & 0xF) |
-  0x110, 0, 0, 0); }` matches (DDS1 `sndSendChannelGroupCommand110`/`sndSendChannelGroupCommand110Duplicate`/
-  `sndSendChannelGroupCommand140`/`sndSendChannelGroupCommand150`, with the same
+  0x110, 0, 0, 0); }` matches (DDS1 `sdfSndSendChannelGroupCommand110`/`sdfSndSendChannelGroupCommand110Duplicate`/
+  `sdfSndSendChannelGroupCommand140`/`sdfSndSendChannelGroupCommand150`, with the same
   three named commands in DDS2).
 - Preserve a 32-bit packet field's unsigned width when storing it through a
   wider lvalue. `u32 descriptor = 0x20000000 | (quadwords & 0xFFFF);` followed
@@ -12431,7 +12431,7 @@ claiming a callback is unregistered.
 
 `sdfSndSyncCmd` receives the sequence immediately after queuing
 in `sdfSndSendSyncCmd`, then does nothing. It does not wait, synchronize
-or update state. `sndSendChannelGroupCommand110Duplicate` is a separate
+or update state. `sdfSndSendChannelGroupCommand110Duplicate` is a separate
 native copy of the command-`0x110` sender, not a new command kind.
 
 `dds3LoadOwnedSpriteRecordList` and its `Duplicate` entry use the same

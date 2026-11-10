@@ -120,7 +120,7 @@ extern s32 sndIsCommandBusySigned(void);
 /* Original-style implicit int, kept: matched code depends on it: dds3EffectFilter. */
 
 extern void p2sdStopAllBgm(void);
-extern void sndQueueNoPayloadCommand210(void);
+extern void sdfSndQueueNoPayloadCommand210(void);
 extern f32 D_00359EE0[4];
 
 
@@ -10118,7 +10118,7 @@ void btlAdvanceTitleState(void) {
 
 void btlAdvanceTitleStateWithAudioCleanup(void) {
     mnuAdvanceTitleStateUnderSemaphore();
-    sndQueueNoPayloadCommand210();
+    sdfSndQueueNoPayloadCommand210();
     p2sdStopAllBgm();
 }
 

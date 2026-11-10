@@ -120,7 +120,7 @@ extern s32 p2sdLoadPcmFile(const char *name, u8 channel);
 extern void p2sdLoadSMGFile(s32 packed);
 extern s32 sndIsCommandBusySigned(void);
 extern void p2sdStopAllBgm(void);
-extern void sndQueueNoPayloadCommand210(void);
+extern void sdfSndQueueNoPayloadCommand210(void);
 /* Original-style implicit int, kept: matched code depends on it: btlStartTask, dds3EffectFilter. */
 
 extern f32 D_003B6DC0[4];
@@ -11859,7 +11859,7 @@ void btlAdvanceTitleState(void) {
 
 void btlAdvanceTitleStateWithAudioCleanup(void) {
     mnuAdvanceTitleStateUnderSemaphore();
-    sndQueueNoPayloadCommand210();
+    sdfSndQueueNoPayloadCommand210();
     p2sdStopAllBgm();
 }
 

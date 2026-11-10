@@ -9403,9 +9403,9 @@
 0x00341C30	p2sdResumeBgm	inferred	SMT3HD name via SLUS_209.11 0x002C16E8, reloc-identical; was sndStartTrackAlternate
 0x00341C78	p2sdStopSe	inferred	SMT3HD name via SLUS_209.11 0x002C1730, shared-hash-in-run; was sndQueueSoundId
 0x00341CA8	p2sdStopAllBgm	inferred	SMT3HD name via SLUS_209.11 0x002C1760, reloc-identical; was sndQueueNoPayloadCommand1A0
-0x00341CD0	sndQueueNoPayloadCommand210	inferred	Queues command 0x210 with zero arguments, no payload, and length zero. The matching DDS1 helper has the same packet call; the DDS2 caller uses it during title-state audio cleanup. [DDS1/DDS2 provider and caller analysis, 2026-10-13]
+0x00341CD0	sdfSndQueueNoPayloadCommand210	inferred	SMT3HD name via SLUS_209.11 0x002C1788, SMT3 sdfSound prefix (was sndQueueNoPayloadCommand210); was sndQueueNoPayloadCommand210
 0x00341CF8	p2sdStopAllSe	inferred	SMT3HD name via SLUS_209.11 0x002C17B0, reloc-identical; was sndQueueNoPayloadCommand40
-0x00341D20	sndDispatchCommandWithoutPayload	inferred	OR caller command with 0x50 and dispatch with null payload and zero length.
+0x00341D20	sdfSndDispatchCommandWithoutPayload	inferred	SMT3HD name via SLUS_209.11 0x002C17D8, SMT3 sdfSound prefix (was sndDispatchCommandWithoutPayload); was sndDispatchCommandWithoutPayload
 0x00341D48	sdfSndLoadHDFile	inferred	SMT3HD name via SLUS_209.11 0x002C1800, reloc-identical; was sndSubmitTextCommandPayload
 0x00341D90	sdfSndLoadBDFile	inferred	SMT3HD name via SLUS_209.11 0x002C1848, reloc-identical; was sndSubmitTextCommandPayloadWithCommandBits60
 0x00341DD8	sdfSndLoadSQFile	inferred	SMT3HD name via SLUS_209.11 0x002C1890, reloc-identical; was sndSubmitTextCommandPayloadWithCommandBits80
@@ -9415,11 +9415,11 @@
 0x00342040	p2sdSetStandPos	inferred	SMT3HD name via SLUS_209.11 0x002C1AF8, unique-masked-hash; was sndUpdateScaledListenerState
 0x00342168	p2sdLoadCheckMidi	inferred	SMT3HD name via SLUS_209.11 0x002C1C20, sdfSound twin, SMT3HD name; was sndFindPackedTrackLoadStatus
 0x003421E8	p2sdLoadSMGFile	inferred	SMT3HD name via SLUS_209.11 0x002C1CA0, reloc-identical; was sndEnsureMidiBankResident
-0x003422C0	sndSendFilenameCommand	inferred	Byte-identical DDS1 counterpart: Sends the filename and its byte length in a sound command packet.
+0x003422C0	sdfSndSendFilenameCommand	inferred	SMT3HD name via SLUS_209.11 0x002C1D78, SMT3 sdfSound prefix (was sndSendFilenameCommand); was sndSendFilenameCommand
 0x003422F8	p2sdSetPcmBuffer	inferred	SMT3HD name via SLUS_209.11 0x002C1DB0, reloc-identical; was func_003422F8
-0x00342358	sndSendChannelControlCommand	inferred	Packs the caller-selected sound channel into a channel-control command. [names_reviewed19.tsv]
-0x00342388	sndSendChannelGroupCommand140	inferred	Extracts the channel group from bits 3–6 of the u8 channel, combines it with command 0x140, and sends an empty sound command packet. [code-quality cleanup, 2026-10-13]
-0x003423B8	sndSendChannelGroupCommand150	inferred	Extracts the channel group from bits 3–6 of the u8 channel, combines it with command 0x150, and sends an empty sound command packet. [code-quality cleanup, 2026-10-13]
+0x00342358	sdfSndSendChannelControlCommand	inferred	SMT3HD name via SLUS_209.11 0x002C1E10, SMT3 sdfSound prefix (was sndSendChannelControlCommand); was sndSendChannelControlCommand
+0x00342388	sdfSndSendChannelGroupCommand140	inferred	SMT3HD name via SLUS_209.11 0x002C1E40, SMT3 sdfSound prefix (was sndSendChannelGroupCommand140); was sndSendChannelGroupCommand140
+0x003423B8	sdfSndSendChannelGroupCommand150	inferred	SMT3HD name via SLUS_209.11 0x002C1E70, SMT3 sdfSound prefix (was sndSendChannelGroupCommand150); was sndSendChannelGroupCommand150
 0x00342440	sndGetTrackBalanceFirstComponent	inferred	Returns raw byte 0x4 from the indexed LastLoad record; the sibling getter returns byte 0x5. No callers currently have recovered C names, so the two component roles remain positional.
 0x00342458	sndGetTrackBalanceSecondComponent	inferred	Returns raw byte 0x5 from the indexed LastLoad record; the sibling getter returns byte 0x4. No callers currently have recovered C names, so the two component roles remain positional.
 0x00342470	sndGetNonnegativeEntryBalance	inferred	Returns the nonnegative difference between two sound-system entry counters; agrees with established DDS1 name. [names_reviewed17.tsv]
@@ -9435,12 +9435,12 @@
 0x00342630	p2sdLoadPcmFile	inferred	SMT3HD name via SLUS_209.11 0x002C2120, reloc-identical; was sdfSoundSendNamedCommand
 0x00342688	p2sdGetPcmState	inferred	SMT3HD name via SLUS_209.11 0x002C2178, shared-hash-in-run; was sdfSoundIsCommandBusy
 0x00342690	p2sdSyncSound	inferred	SMT3HD name via SLUS_209.11 0x002C2180, shared-hash-in-run; was sdfSoundStopNamedPlayback
-0x003426B8	sndSendChannelGroupCommand110	inferred	Extracts the channel group from bits 3–6 of the u8 channel, combines it with command 0x110, and sends an empty sound command packet. Paired with DDS1 0x002E9810. [code-quality cleanup, 2026-10-13]
+0x003426B8	sdfSndSendChannelGroupCommand110	inferred	SMT3HD name via SLUS_209.11 0x002C21A8, SMT3 sdfSound prefix (was sndSendChannelGroupCommand110); was sndSendChannelGroupCommand110
 0x00342728	p2sdSetPcmCallback	inferred	SMT3HD name via SLUS_209.11 0x002C2218, reloc-identical; was sdfSoundTryQueueCommand
 0x00342748	p2sdPlayPcm	inferred	SMT3HD name via SLUS_209.11 0x002C2238, reloc-identical; was sndTrySendChannelGroupCommand120
 0x00342790	sdfSoundGetCommandStatus	inferred	Returns the sound command status stored at D_00438B8C.
 0x00342798	p2sdSyncMovie	inferred	SMT3HD name via SLUS_209.11 0x002C2288, shared-hash-in-run; was sdfSoundStopMoviePlayback
-0x003427C0	sndSendChannelGroupCommand110Duplicate	inferred	confidence=high; Identical to named command110 sender: ((channel>>3)&15)|0x110 with zero channel/payload/size. Twin002E9918; no registry/direct caller reference. [Namer1 b69-70]
+0x003427C0	sdfSndSendChannelGroupCommand110Duplicate	inferred	SMT3HD name via SLUS_209.11 0x002C22B0, SMT3 sdfSound prefix (was sndSendChannelGroupCommand110Duplicate); was sndSendChannelGroupCommand110Duplicate
 0x003427F0	sdfFileRpcCallback	inferred	SMT3HD name via SLUS_209.11 0x002C22E0, reloc-identical; was sdfSoundHandleRpcEvent
 0x00342848	sdfFileRpcHandleCmd	inferred	SMT3HD name via SLUS_209.11 0x002C2338, reloc-identical; was sdfSoundHandleRpcRequest
 0x00342A90	SifRpcServerThreadProc	inferred	SMT3HD name via SLUS_209.11 0x002C2580, reloc-identical; was sdfSoundStartRpcServer
