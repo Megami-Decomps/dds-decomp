@@ -10656,4 +10656,6 @@
 0x003FEB00	sdfIpuDecodeThStack	inferred	SMT3HD data name via SLUS_209.11 0x00593F80, 1 agreeing references; was sdfIpuDecodeThStack
 0x003FF300	sdfDecompHistory	inferred	SMT3HD name via SLUS_209.11 0x00594780, sdf/sdf_Decomp SMT3 rename; was D_003FF300
 0x003FF340	sdfFileRpcState	inferred	SMT3HD name via SLUS_209.11 0x005947C0, sdfTmx twin; was D_003FF340
+0x003FF380	sdfFileRpcRecvBuf	inferred	SMT3HD name via SLUS_209.11 0x00594800, sdf/sdfTmx SMT3 rename; was D_003FF380
 0x003FF480	sdfFileRpcBuf	inferred	SMT3HD name via SLUS_209.11 0x00594900, sdfTmx twin; was D_003FF480
+0x003FF4C0	sdfFileRpcReadBuf	inferred	SMT3HD name via SLUS_209.11 0x00594940, sdf/sdfTmx SMT3 rename; was D_003FF4C0

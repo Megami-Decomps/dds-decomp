@@ -57,8 +57,8 @@ enum SdfFileIOCmdClbk {
     SDF_FILE_CMD_CLBK_FREE = 9
 };
 
-#define D_00594940 D_0047BE40
-#define D_00594800 D_0047BD00
+#define D_00594940 sdfFileRpcReadBuf
+#define D_00594800 sdfFileRpcRecvBuf
 
 extern u8 D_00594940[];
 

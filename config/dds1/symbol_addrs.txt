@@ -8885,7 +8885,9 @@ sdfFileRpcQueue = 0x003FEAC0;
 sdfIpuDecodeThStack = 0x003FEB00;
 sdfDecompHistory = 0x003FF300;
 sdfFileRpcState = 0x003FF340;
+sdfFileRpcRecvBuf = 0x003FF380;
 sdfFileRpcBuf = 0x003FF480;
+sdfFileRpcReadBuf = 0x003FF4C0;
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)
 dds3EndingProcess = 0x00100F68; // type:func  // dds2 0x00100E50
 dds3GetProcessCount = 0x001011C0; // type:func  // dds2 0x001010A8
