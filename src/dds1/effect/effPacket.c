@@ -37,9 +37,9 @@ extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
 
 /* Node restarts and scales: retail leaves the dispatch state in a0 (and the
  * factor in f12) for them. */
-extern void (*D_0034E680[])(EffectDispatchState *);
+extern void (*dds3SpPolyResetTable[])(EffectDispatchState *);
 
-extern void (*D_0034E690[])(f32, EffectDispatchState *);
+extern void (*dds3SpPolySetScaleTable[])(f32, EffectDispatchState *);
 
 extern void dds3EndCrossfade(void);
 

@@ -3,24 +3,24 @@
 #include "ps2asm.h"
 
 /* DDS's names for the same objects. */
-#define D_00317650 polyTimedTintEndColor
-#define D_00317660 polyTimedTintStartColor
-#define D_005698B0 parDrawControl
+#define D_00317650 dds3SpPolyColorTo
+#define D_00317660 dds3SpPolyColorFrom
+#define D_005698B0 dds3PolygonPrimParm
 #define dds3EffectBase effDefaultRandomState
 #define func_00168A50 polyBandLayoutRing
 #define sdfMatSetTex sdfSetAssetPrimaryTextureAddress
-#define D_00317380 D_003AAC90
-#define D_00317400 D_003AAD10
-#define D_00317470 D_003AAD80
-#define D_003174F0 D_003AAE00
-#define D_00317540 D_003AAE50
-#define D_003175B0 D_003AAEC0
-#define D_003175D0 D_003AAEE0
-#define D_003175E0 D_003AAEF0
-#define D_00317640 D_003AAF50
-#define D_003176A0 D_003AAFB0
-#define D_003176B0 D_003AAFC0
-#define D_005698A0 D_00451F50
+#define D_00317380 dds3TrackPolyPairFaceIndex
+#define D_00317400 dds3TrackPolyTriangleFaceIndex
+#define D_00317470 dds3TrackPolySixVectorFaceIndex
+#define D_003174F0 dds3TrackPolyDefaultFaceIndex
+#define D_00317540 dds3TrackPolyFiveVectorFaceIndex
+#define D_003175B0 dds3TrackPolyVCType1Param
+#define D_003175D0 dds3TrackPolyVCSetAcuteParam
+#define D_003175E0 dds3TrackPolyVCSetAcuteWParam
+#define D_00317640 dds3TrackPolyOtTable
+#define D_003176A0 dds3SpPolyResetTable
+#define D_003176B0 dds3SpPolySetScaleTable
+#define D_005698A0 dds3PolygonRandState
 #define VCSetFunc D_003AAF10
 #define dds3PolygonTriangleParam D_003AAEB0
 #define dds3TrackPolyTag D_00436404

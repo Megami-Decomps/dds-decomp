@@ -10025,9 +10025,20 @@
 0x003AA970	billPairFacingReferenceAxis	inferred	confidence=high; Reference vector used in the corresponding cameraFacingMode==1 paired-quad path. Same role in DDS1 at 0x0034E040. Existing declarations, data bits, bounds and native VU operations remain; no imported/ASM-referenced root. No new function/data-ownership credit. [PurC5 readability data b12; matched pending-list/draw lifecycle and native-bank evidence; identifier-only]
 0x003AA980	billPairFacingScale	inferred	confidence=high; Mutable paired-stream facing scale vector, Y updated before geometry matrix row scaling. Same role in DDS1 at 0x0034E050. Existing declarations, data bits, bounds and native VU operations remain; no imported/ASM-referenced root. No new function/data-ownership credit. [PurC5 readability data b12; matched pending-list/draw lifecycle and native-bank evidence; identifier-only]
 0x003AAB80	dds3ParticleFuncTable	inferred	SMT3HD data name via SLUS_209.11 0x00317270, 5 agreeing references; was dds3ParticleFuncTable
-0x003AAF60	polyTimedTintEndColor	inferred	confidence=high; constant f32[4] end colour vector blended by polyTimed tint. Identifier-only; twin 0x0034E630 in DDS1. [PurC data b15; matched-C evidence]
-0x003AAF70	polyTimedTintStartColor	inferred	confidence=high; constant f32[4] start colour vector blended by polyTimed tint. Identifier-only; twin 0x0034E640 in DDS1. [PurC data b15; matched-C evidence]
+0x003AAC90	dds3TrackPolyPairFaceIndex	inferred	SMT3HD name via SLUS_209.11 0x317380, effect/polyManager SMT3 rename; was D_003AAC90
+0x003AAD10	dds3TrackPolyTriangleFaceIndex	inferred	SMT3HD name via SLUS_209.11 0x00317400, effect/polyManager SMT3 rename; was D_003AAD10
+0x003AAD80	dds3TrackPolySixVectorFaceIndex	inferred	SMT3HD name via SLUS_209.11 0x00317470, effect/polyManager SMT3 rename; was D_003AAD80
+0x003AAE00	dds3TrackPolyDefaultFaceIndex	inferred	SMT3HD name via SLUS_209.11 0x003174F0, effect/polyManager SMT3 rename; was D_003AAE00
+0x003AAE50	dds3TrackPolyFiveVectorFaceIndex	inferred	SMT3HD name via SLUS_209.11 0x00317540, effect/polyManager SMT3 rename; was D_003AAE50
+0x003AAEC0	dds3TrackPolyVCType1Param	inferred	SMT3HD name via SLUS_209.11 0x003175B0, effect/polyManager SMT3 rename; was D_003AAEC0
+0x003AAEE0	dds3TrackPolyVCSetAcuteParam	inferred	SMT3HD name via SLUS_209.11 0x003175D0, effect/polyManager SMT3 rename; was D_003AAEE0
+0x003AAEF0	dds3TrackPolyVCSetAcuteWParam	inferred	SMT3HD name via SLUS_209.11 0x003175E0, effect/polyManager SMT3 rename; was D_003AAEF0
+0x003AAF50	dds3TrackPolyOtTable	inferred	SMT3HD name via SLUS_209.11 0x00317640, effect/polyManager SMT3 rename; was D_003AAF50
+0x003AAF60	dds3SpPolyColorTo	inferred	SMT3HD name via SLUS_209.11 0x00317650, effect/polyManager SMT3 rename; was polyTimedTintEndColor
+0x003AAF70	dds3SpPolyColorFrom	inferred	SMT3HD name via SLUS_209.11 0x00317660, effect/polyManager SMT3 rename; was polyTimedTintStartColor
 0x003AAF80	dds3SpPolyTable	inferred	SMT3HD data name via SLUS_209.11 0x00317670, 2 agreeing references; was dds3SpPolyTable
+0x003AAFB0	dds3SpPolyResetTable	inferred	SMT3HD name via SLUS_209.11 0x3176A0, effect/polyManager SMT3 rename; was D_003AAFB0
+0x003AAFC0	dds3SpPolySetScaleTable	inferred	SMT3HD name via SLUS_209.11 0x003176B0, effect/polyManager SMT3 rename; was D_003AAFC0
 0x003AB050	effBattleTransitionDurations	inferred	confidence=high; The getter is consumed only as start/endDuration in matched unit color and color/direction command providers, where it subtracts from endFrame and controls transition windows. Native four u32 choices(0,5,15,30) identical; existing unsized u32[] and getter name retained. Same role in DDS1 at 0x0034E720. No source-owned import or native ASM root/interior reference. [PurC5 readability data b5; matched-C/native-twin evidence; identifier-only]
 0x003AF1C0	effBattleAnchorHeightFactors	inferred	confidence=high; Matched target and part-position providers multiply the anchor-kind entry by unit halfHeight or250. Native six-float table is(-1,0,1,1.5,0,0), identical between titles; existing unsized f32[] retained. Same role in DDS1 at 0x00352890. No source-owned import or native ASM root/interior reference. [PurC5 readability data b3; matched-C/native-twin evidence; identifier-only]
 0x003AF1D8	effBTL_Ptr_D	inferred	SMT3HD data name via SLUS_209.11 0x0031B9A8, 1 agreeing references; was effBTL_Ptr_D
@@ -11267,7 +11278,8 @@
 0x00451F20	effEmitterDelayRandomState	inferred	confidence=high; src/dds2/game/code_00159B48.c:D_00451F20; type=PRNG state storage (s32[]); refs=dds3Particle_SmokeBuffInit,dds3Particle_SphereSpiralBuffInit; Seeded from the clock and consumed by multiple emitter spawn paths to choose negative starting ages. [names_qp9.tsv]
 0x00451F30	parLook	inferred	SMT3HD data name via SLUS_209.11 0x00569880, 6 agreeing references; was parLook
 0x00451F40	parTrack_w	inferred	SMT3HD data name via SLUS_209.11 0x00569890, 6 agreeing references; was parTrack_w
-0x00451F60	parDrawControl	inferred	confidence=high; matched_users=src/dds2/game/code_00162348.c:dds3TrackPolyInit, src/dds2/game/code_00162348.c:dds3TrianglePolyLinkOt; Particle control initialization clears this record; cell-draw packet submission writes its remainder counts. [names_qp9.tsv]
+0x00451F50	dds3PolygonRandState	inferred	SMT3HD name via SLUS_209.11 0x005698A0, effect/polyManager SMT3 rename; was D_00451F50
+0x00451F60	dds3PolygonPrimParm	inferred	SMT3HD name via SLUS_209.11 0x005698B0, effect/polyManager SMT3 rename; was parDrawControl
 0x00451F90	dds3BezierVertexCount	inferred	SMT3HD data name via SLUS_209.11 0x0056AC98, 3 agreeing references; was dds3BezierVertexCount
 0x00451FC0	dds3BezierTrackPolyVertex	inferred	SMT3HD data name via SLUS_209.11 0x0056ACC8, 2 agreeing references; was dds3BezierTrackPolyVertex
 0x00451FF0	effRecordPoolDrawParams	inferred	confidence=high; The same existing EffPacketParams[] record is cleared by fan/triangle/quad pool constructors, then filled with colors/positions/modulation, counts and the appropriate index bank by all four pool render paths. Native BSS extent0x30 and native0x2C clear retained; no new bound or owner view. Same role in DDS1 at 0x003D6550. No source-owned import or native ASM root/interior reference. [PurC5 readability data b4; matched-C/native-twin evidence; identifier-only]

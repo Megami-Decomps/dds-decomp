@@ -27,9 +27,9 @@ struct BtlUnit;
 
 /* Node restarts and scales: retail leaves the dispatch state in a0 (and the
  * factor in f12) for them. */
-extern void (*D_0034E680[])(EffectDispatchState *);
+extern void (*dds3SpPolyResetTable[])(EffectDispatchState *);
 
-extern void (*D_0034E690[])(f32, EffectDispatchState *);
+extern void (*dds3SpPolySetScaleTable[])(f32, EffectDispatchState *);
 
 extern void effBTLPartDelete(SoundMixer *);
 

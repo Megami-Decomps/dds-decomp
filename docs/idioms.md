@@ -9818,7 +9818,7 @@ ages and clear cell history/vertex counts. `dds3SpPoly_Ring_Old_New` emits
 origin/radial-point pairs and duplicates the first pair to close the fan;
 it is not a two-radius strip.
 
-`dds3SpPoly_RingDraw`, `dds3SpPoly_SphereRingDraw` and `polyUpdateRotatingBandCells`
+`dds3SpPoly_RingDraw`, `dds3SpPoly_SphereRingDraw` and `dds3SpPoly_RollRingDraw`
 advance their records, update geometry and queue the cell system. Arc records
 are seeded by `dds3SpPoly_SphereRingAllBuffInit` and reset individually by
 `dds3SpPoly_SphereRingBuffInit`; rotating-band ages are seeded by
