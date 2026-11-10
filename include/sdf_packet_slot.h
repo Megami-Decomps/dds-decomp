@@ -7,7 +7,7 @@
 /* One 0x10-byte entry in the three-slot frame packet submission ring. */
 typedef struct SdfPacketSlot {
     struct sdfDrawTag_t *packetList;
-    SdfPacketPatchLink *callbackHead;
+    sdfPreDrawHook_t *callbackHead;
     u8 slotUpdatePhase;
     u8 queuedBufferIndex;
     u8 bufferIndex;

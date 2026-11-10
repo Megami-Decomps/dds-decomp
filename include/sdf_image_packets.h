@@ -92,14 +92,9 @@ typedef char SdfDescriptorPacket_flush_tag_offset_must_be_0x80[
 
 /* Metadata node plus the extended local-to-local image-copy payload (0x70). */
 typedef struct SdfGraphCopyPacket {
-    SdfPacketPatchLink link;
-    u32 resourceIndexXor; /* Selects the source resource for the queued buffer. */
-    u32 unk0C;
+    sdfPreDrawHook_t worker; /* option0 selects the source resource for the buffer */
     SdfImageTransferPacket draw;
 } SdfGraphCopyPacket;
-
-typedef char SdfGraphCopyPacket_resourceIndexXor_at_8[
-    ((u32)&((SdfGraphCopyPacket *)0)->resourceIndexXor == 8) ? 1 : -1];
 
 typedef char SdfGraphCopyPacket_size_must_be_0x70[
     (sizeof(SdfGraphCopyPacket) == 0x70) ? 1 : -1];
@@ -110,9 +105,7 @@ typedef char SdfGraphCopyPacket_transfer_offset_must_be_0x30[
 
 /* Metadata node followed by the resource-transfer payload (0x100). */
 typedef struct SdfPatchableResourcePacket {
-    SdfPacketPatchLink link;
-    u32 unk08;
-    u32 unk0C;
+    sdfPreDrawHook_t worker;
     SdfResourcePacket resourcePacket;
 } SdfPatchableResourcePacket;
 
