@@ -41,7 +41,7 @@ typedef struct sdfFileCmdHandle_t {
     s32 errorCode;
     s32 currentOffset;
     u8 remainder[4];
-    void (*callback)(struct sdfFileCmdHandle_t *, s32, s32, s32, s32);
+    void (*callback)(struct sdfFileCmdHandle_t *, s32, saddr_t, s32, s32);
     s32 userData;
 } sdfFileCmdHandle_t;
 
@@ -133,7 +133,7 @@ void *sdfDevLoadFile(const char *name, u32 *outData, u32 *outSize, s32 extra) {
     s32 size = sdfFileLength(state);
     sdfMemHandle_t *handle = sdfMemAllocDirect(size + extra);
     u32 address = sdfMemLock(handle);
-    sdfFileRead(state, (void *)address, size);
+    sdfFileRead(state, EE_ADDR_AS(void *, address), size);
     sdfFileClose(state);
     if (outData != NULL) {
         *outData = address;
@@ -157,7 +157,7 @@ sdfTexHandle_t *sdfDevLoadTex(const char *aFilename) {
     sdfTexHandle_t *texture;
 
     allocation = sdfDevLoadFileEx(aFilename, &dataAddress, 0);
-    texture = sdfTexSet((void *)dataAddress);
+    texture = sdfTexSet(EE_ADDR_AS(void *, dataAddress));
     sdfMemFreeDirect(allocation);
     return texture;
 }
@@ -185,7 +185,7 @@ sdfItemArray_t *sdfDevLoadTexList(const char *aFilename) {
     sdfItemArray_t *texture;
 
     allocation = sdfDevLoadFileEx(aFilename, &dataAddress, 0);
-    texture = sdfTexSetTB((void *)dataAddress);
+    texture = sdfTexSetTB(EE_ADDR_AS(void *, dataAddress));
     sdfMemFreeDirect(allocation);
     return texture;
 }
@@ -203,7 +203,7 @@ void *sdfDevLoadModel(const char *aFilename, void **aOutBody) {
     sdfMemHandle_t *allocation;
 
     allocation = sdfDevLoadFileEx(aFilename, &dataAddress, 0);
-    *aOutBody = sdfFixupModelBinary((sdfBinaryHeader_t *)dataAddress);
+    *aOutBody = sdfFixupModelBinary(EE_ADDR_AS(sdfBinaryHeader_t *, dataAddress));
     return allocation;
 }
 
@@ -220,7 +220,7 @@ void *sdfDevLoadMotion(const char *aFilename, void **aOutBody) {
     sdfMemHandle_t *allocation;
 
     allocation = sdfDevLoadFileEx(aFilename, &dataAddress, 0);
-    *aOutBody = sdfFixupMotionBinary((sdfBinaryHeader_t *)dataAddress);
+    *aOutBody = sdfFixupMotionBinary(EE_ADDR_AS(sdfBinaryHeader_t *, dataAddress));
     return allocation;
 }
 
