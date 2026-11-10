@@ -5,7 +5,6 @@
 
 /* DDS's names for the same objects. */
 #define dds3EffectBase effDefaultRandomState
-#define func_00168A50 polyBandLayoutRing
 
 typedef struct
 {
@@ -310,7 +309,7 @@ extern void MultMatrixRevNoArg(void);
 extern void MultMatrixNoArg(void);
 extern void dds3SpPoly_RingBuffInit(dds3SpPoly_Ring_t3 *pRing, s32 number);
 /* Separate geometry builder reached by the initializer's native tail call. */
-extern void func_00168A50(dds3SpPoly_Ring_t3 *ring, s32 number, f32 radius);
+extern void polyBandLayoutRing(dds3SpPoly_Ring_t3 *ring, s32 number, f32 radius);
 
 dds3SpPolyOldDesc_t *dds3SpPoly_Ring_Old_Create(dds3SpPolyOldDesc_t *src);
 void dds3SpPoly_Ring_Old_Delete(dds3SpPoly_Ring_Old_t3 *hData);
@@ -1854,10 +1853,10 @@ void dds3SpPoly_RingBuffInit(dds3SpPoly_Ring_t3 *ring, s32 number)
     } else {
         record->spread_s = endRadius - radius;
     }
-    func_00168A50(ring, number, radius);
+    polyBandLayoutRing(ring, number, radius);
 }
 
-void func_00168A50(dds3SpPoly_Ring_t3 *ring, s32 number, f32 radius)
+void polyBandLayoutRing(dds3SpPoly_Ring_t3 *ring, s32 number, f32 radius)
 {
     dds3TrackPoly_t *strip = ring->hTrackPoly;
     dds3TrackPolyList_t *entry = &strip->trackList[number];

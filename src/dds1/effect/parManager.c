@@ -8,10 +8,6 @@
 /* DDS's names for the same objects. */
 #define ParRand effEmitterDelayRandomState
 #define dds3EffectBase effDefaultRandomState
-#define func_001621A0 effScaleSingleParticleTemplate
-#define func_001621C8 effCloneSingleParticleTemplate
-#define func_00162248 effFreeSingleParticleTemplate
-#define func_00162270 effInitParticleRecord
 
 /* Particle emitters, history ribbons and billboard dispatch, reconstructed from
  * the shared DDS engine and checked against SLUS_209.11. All emitter views
@@ -790,7 +786,7 @@ void dds3TrackPolySet(parSystem_t *hTrackPoly, s32 number, const u128 *pV);
 void dds3TrackPolySet2(parSystem_t *hTrackPoly, s32 number, const u128 *pV);
 void Eff_ModelTrackPolyListVertexSet(effTrackPolyList_t *hMTPolyList, s32 index, const u128 *pVertex);
 void Eff_ModelTrackPolyListColorSet(effTrackPolyList_t *hMTPolyList, s32 index, u32 abgr);
-void func_00162270(effParticleOverlay_t *effect);
+void effInitParticleRecord(effParticleOverlay_t *effect);
 
 /* Both draw paths submit the resource owned by the selected particle kind. */
 static __inline__ void SubmitKindDrawing(dds3Particle_Effect_t *kind) {
@@ -2623,16 +2619,16 @@ void dds3Particle_SphereAtomDraw(effTemplatePacketList_t *hData) {
 }
 
 void dds3Particle_SpiralRandomize(effParticleOverlay_t *effect) {
-    func_00162270(effect);
+    effInitParticleRecord(effect);
 }
 
-void func_001621A0(effEmitterHead_t *head, f32 factor) {
+void effScaleSingleParticleTemplate(effEmitterHead_t *head, f32 factor) {
     head->scale[0] *= factor;
     head->scale[1] *= factor;
     head->scale[2] *= factor;
 }
 
-effEmitterHead_t *func_001621C8(effEmitterHead_t *source) {
+effEmitterHead_t *effCloneSingleParticleTemplate(effEmitterHead_t *source) {
     effEmitterHead_t *clone = sdfChipAllocDirect(0x150);
     /* This variant has no appended tail; retail retains the template-tail copy. */
     s32 tailBytes = 0;
@@ -2646,12 +2642,12 @@ effEmitterHead_t *func_001621C8(effEmitterHead_t *source) {
     return clone;
 }
 
-void func_00162248(effEmitterHead_t *object) {
+void effFreeSingleParticleTemplate(effEmitterHead_t *object) {
     dds3Particle_BasicDelete(object);
     sdfChipFreeDirect(object);
 }
 
-void func_00162270(effParticleOverlay_t *effect) {
+void effInitParticleRecord(effParticleOverlay_t *effect) {
     effParticleRecord_t *record = (effParticleRecord_t *)effect->buffer->pPhysics;
     f32 jitter;
 
@@ -2680,7 +2676,7 @@ void dds3Particle_SpiralBlendColor(effParticleOverlay_t *effect) {
     u32 baseColor;
 
     if (frame == 0) {
-        func_00162270(effect);
+        effInitParticleRecord(effect);
         frame = record->frame;
     }
     record->frame = frame + 1;
