@@ -14337,16 +14337,16 @@ all original declarations, casts, draw coordinates and state tests.
 
 ## Record-pool and scatter packet banks
 
-`effRecordPoolDrawParams` is shared by the fan, triangle and quad pool paths;
+`effPCPFlashPolyParams` is shared by the fan, triangle and quad pool paths;
 retain its existing array declaration and each native 0x2C reset. The fan
-and quad renderers choose `effFanPoolTriangleIndices` and
-`effQuadPoolTriangleIndices`, respectively. Both full banks hold eighteen
+and quad renderers choose `effPCPFlashFanIndices` and
+`effPCPFlashQuadIndices`, respectively. Both full banks hold eighteen
 packed triangle words: six five-point fans or nine quads, rather than just
 the fifteen or sixteen triangles consumed by one full draw batch.
 
-The direct-submission banks remain distinct: `effScaledFanDrawSurfaces`,
-`effTrianglePoolDrawSurfaces`, `effQuadPoolDrawSurfaces` and
-`effTransformedFanDrawSurfaces`. Preserve the two null tail cells in the
+The direct-submission banks remain distinct: `effPCPFlashFanSurfaces`,
+`effPCPFlashTriangleSurfaces`, `effPCPFlashQuadSurfaces` and
+`effPCPFlashFanHSurfaces`. Preserve the two null tail cells in the
 triangle and transformed-fan banks and the existing separate state/drawing
 lists for non-direct fan modes. Do not rename their shared pool-node pointees.
 

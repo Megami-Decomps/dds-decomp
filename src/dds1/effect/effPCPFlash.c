@@ -5,13 +5,13 @@
 #include "sdf_types.h"
 
 /* DDS's names for the same objects. */
-#define D_0031F1E0 effFanPoolTriangleIndices
-#define D_0031F228 effScaledFanDrawSurfaces
-#define D_0031F238 effTrianglePoolDrawSurfaces
-#define D_0031F250 effQuadPoolTriangleIndices
-#define D_0031F298 effQuadPoolDrawSurfaces
-#define D_0031F2A8 effTransformedFanDrawSurfaces
-#define D_0056ACF8 effRecordPoolDrawParams
+#define D_0031F1E0 effPCPFlashFanIndices
+#define D_0031F228 effPCPFlashFanSurfaces
+#define D_0031F238 effPCPFlashTriangleSurfaces
+#define D_0031F250 effPCPFlashQuadIndices
+#define D_0031F298 effPCPFlashQuadSurfaces
+#define D_0031F2A8 effPCPFlashFanHSurfaces
+#define D_0056ACF8 effPCPFlashPolyParams
 #define aViewEye sdfViewTargetVector
 #define dds3EffectBase effDefaultRandomState
 
