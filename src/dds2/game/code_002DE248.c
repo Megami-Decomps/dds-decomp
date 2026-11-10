@@ -8898,7 +8898,6 @@ void effReleaseRingFadeTable(s32 work) {
     sdfMemFreeDirect(state->allocation);
 }
 
-#ifdef NON_MATCHING
 #include "common.h"
 #include "eff_bill.h"
 #include "eff_ribbon_work.h"
@@ -8913,12 +8912,17 @@ extern EffRandState effSharedRandomState[];
  * with randomized radius, climb, flare, spin, width, sweep and height (all at
  * once with random ages on the first frame when the burst flag is set),
  * retires particles at the end of their life, and for live particles rebuilds
- * the ribbon rows (four vertices per segment flaring and twisting around the
- * axis, with texture rows scrolling by the rise) and samples the emitter color
- * and alpha tracks. As in retail, the row center's and the radial's w lanes
- * are never written, so the vertices' w lanes carry stack contents. Upstream:
- * INCLUDE_ASM in game/code_002DE248. The same routine as DDS1's func_002ABDE0
- * (game/code_0029C530), so an engine twin once both are named alike. */
+ * the ribbon rows and samples the emitter color and alpha tracks. As in retail,
+ * the center and radial temporaries initialize XYZ only; their W lanes are
+ * never written before the VU loads. */
+/* The two short-lived inputs below reproduce the native local-allocation
+ * dependency: the previous climb is loaded in f3 and the actual angular-speed
+ * increment is formed in f2 before its half-step use. Both values are freshly
+ * initialized and die at the immediately following arithmetic consumer, before
+ * any call. The resulting climb and angle remain ordinary locals. Qualified
+ * stock compiler/removal traces distinguish these input lifetimes from the
+ * ordinary result pseudos and show why both bindings are needed. This is a
+ * compiler reconstruction, not original spelling or a hardware requirement. */
 void func_002EF1C0(EffClassWork *work) {
     EffBillVortexConfig *config = (EffBillVortexConfig *)work->payload;
     u32 frame = work->frame;
@@ -8937,6 +8941,7 @@ void func_002EF1C0(EffClassWork *work) {
     f32 height;
     f32 segmentCountFloat;
     f32 flareCenter;
+    f32 ageAsFloat;
     EffBillFrameState *state;
     EffRibbonWork *ribbon;
     EffBillEmitterEntry *entry;
@@ -8988,6 +8993,7 @@ void func_002EF1C0(EffClassWork *work) {
                 f32 climbStart;
                 f32 radiusStep;
                 f32 climbStep;
+                f32 climbOrigin;
 
                 randomValue = dds3GetRandFloatA(effSharedRandomState);
                 variation = randomValue * config->common.radiusStartJitter +
@@ -8997,20 +9003,22 @@ void func_002EF1C0(EffClassWork *work) {
                 randomValue = dds3GetRandFloatA(effSharedRandomState);
                 variation = randomValue * config->common.radiusEndJitter +
                             (1.0f - config->common.radiusEndJitter);
-                radiusStep =
-                    (config->common.radiusEnd * variation - radiusStart) / (f32)life;
+                randomValue = config->common.radiusEnd * variation;
+                radiusStep = (randomValue - radiusStart) / (f32)life;
                 entry->radius = radiusStart;
                 entry->radiusStep = radiusStep;
 
                 randomValue = dds3GetRandFloatA(effSharedRandomState);
+                climbOrigin = -config->climbStart;
                 variation = randomValue * config->climbStartJitter +
                             (1.0f - config->climbStartJitter);
-                climbStart = -config->climbStart * variation;
+                climbStart = climbOrigin * variation;
 
                 randomValue = dds3GetRandFloatA(effSharedRandomState);
                 variation = randomValue * config->climbEndJitter +
                             (1.0f - config->climbEndJitter);
-                climbStep = (-config->climbEnd * variation - climbStart) / (f32)life;
+                randomValue = -config->climbEnd * variation;
+                climbStep = (randomValue - climbStart) / (f32)life;
                 entry->vertical.vortex.climb = climbStart;
                 entry->vertical.vortex.climbStep = climbStep;
 
@@ -9045,11 +9053,11 @@ void func_002EF1C0(EffClassWork *work) {
 
                 if (initialBurst != 0) {
                     u32 randomAge = dds3GetRandA(effSharedRandomState) % life;
-                    f32 ageAsFloat = (f32)(s32)randomAge;
 
+                    ageAsFloat = (f32)(s32)randomAge;
                     entry->timer = randomAge;
-                    entry->radius += entry->radiusStep * ageAsFloat;
                     entry->vertical.vortex.climb += entry->vertical.vortex.climbStep * ageAsFloat;
+                    entry->radius += entry->radiusStep * ageAsFloat;
                 } else {
                     entry->timer = 0;
                 }
@@ -9059,15 +9067,16 @@ void func_002EF1C0(EffClassWork *work) {
             *colors = 0;
             entry->timer = respawn ? (u32)-1 : (u32)-2;
         } else {
-            f32 ageAsFloat = (f32)(s32)age;
             f32 spin = entry->spin;
             f32 rowHeight = 0.0f;
-            f32 climb = entry->vertical.vortex.climb + entry->vertical.vortex.climbStep;
+            register f32 previousClimb __asm__("$f3") = entry->vertical.vortex.climb;
+            f32 climb = previousClimb + entry->vertical.vortex.climbStep;
             f32 radius = entry->radius + entry->radiusStep;
             f32 phase = entry->angle;
             f32 quarterWidth = entry->width * 0.25f;
             f32 climbStep;
             f32 angle;
+            register f32 spinIncrement __asm__("$f2");
             f32 twistStep;
             f32 flare;
             f32 oldV;
@@ -9075,10 +9084,13 @@ void func_002EF1C0(EffClassWork *work) {
             f32 radial[4];
             u32 row;
 
+            ageAsFloat = (f32)(s32)age;
             entry->vertical.vortex.climb = climb;
             climbStep = climb / segmentCountFloat;
             entry->radius = radius;
-            angle = (spin + spinAccel * ageAsFloat * 0.5f) * ageAsFloat + phase;
+            spinIncrement = spinAccel * ageAsFloat;
+            angle = (spin + spinIncrement * 0.5f) * ageAsFloat;
+            angle += phase;
             twistStep = (0.0f <= spin ? entry->geometry.vortex.sweep :
                          -entry->geometry.vortex.sweep) / segmentCountFloat;
             radial[1] = climbStep;
@@ -9127,12 +9139,15 @@ void func_002EF1C0(EffClassWork *work) {
                 uvs += 8;
             }
 
-            *colors = effSampleColorAlphaTracks(&config->common.header.emitterColorTrack,
-                                                &config->common.header.emitterAlphaTrack,
-                                                (s32)age, (s32)life);
-            entry->timer++;
-            entry->geometry.vortex.height += rise;
-            colors++;
+            {
+                u32 color = effSampleColorAlphaTracks(&config->common.header.emitterColorTrack,
+                                                     &config->common.header.emitterAlphaTrack,
+                                                     (s32)age, (s32)life);
+                f32 currentHeight = entry->geometry.vortex.height;
+                *colors++ = color;
+                entry->timer++;
+                entry->geometry.vortex.height = currentHeight + rise;
+            }
             continue;
         }
 
@@ -9141,9 +9156,6 @@ void func_002EF1C0(EffClassWork *work) {
         uvs += rowStride * 2;
     }
 }
-#else
-INCLUDE_ASM(const s32, "game/code_002DE248", func_002EF1C0);
-#endif
 
 void effBlendBillboardInstanceColorsAndTransforms(u8 *work) {
     EffBillVortexConfig *config = (EffBillVortexConfig *)((BillCellDrawWork *)work)->config;
