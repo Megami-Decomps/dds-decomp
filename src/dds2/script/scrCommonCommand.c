@@ -3,9 +3,10 @@
 #include "kernel.h"
 #include "scr.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
 
 
-static inline f32 ffabsf(f32 x)
+static inline f32 scrFabsf(f32 x)
 {
     f32 r;
     r = sdfFabs(x);
@@ -183,7 +184,7 @@ s32 scrCommand_WAIT(void)
     {
         return 1;
     }
-    if (scrGetCommandTimer() < scrGetIntPara(0))
+    if (scrGetCommandTimer() < SDF_FRAMES(scrGetIntPara(0)))
     {
         return 0;
     }
@@ -343,10 +344,10 @@ s32 scrCommand_SCR_RUN(void)
     {
         return 1;
     }
-    scrSetIntReturnValue((s32)scrRunScriptEx(work->ProcessID->priority + scrGetIntPara(1),
+    scrSetIntReturnValue(EE_ADDR_S(scrRunScriptEx(work->ProcessID->priority + scrGetIntPara(1),
                                         work->Header, work->TypeTable, work->ProcTable,
                                         work->LabelTable, work->Code, work->MessageData,
-                                        work->StringData, startProc));
+                                        work->StringData, startProc)));
     return 1;
 }
 
@@ -355,22 +356,22 @@ s32 scrCommand_SCR_KILL(void)
     s32 taskHandle;
 
     taskHandle = scrGetIntPara(0);
-    if (dds3ExistProcess((dds3ProcessID_t *)taskHandle) == 0)
+    if (dds3ExistProcess(EE_ADDR_AS(dds3ProcessID_t *, taskHandle)) == 0)
     {
         return 1;
     }
-    dds3KillProcess((dds3ProcessID_t *)taskHandle, 1);
+    dds3KillProcess(EE_ADDR_AS(dds3ProcessID_t *, taskHandle), 1);
     return 1;
 }
 
 s32 scrCommand_SCR_WAIT(void)
 {
-    return dds3ExistProcess((dds3ProcessID_t *)scrGetIntPara(0)) == 0;
+    return dds3ExistProcess(EE_ADDR_AS(dds3ProcessID_t *, scrGetIntPara(0))) == 0;
 }
 
 s32 scrCommand_SCR_STAT(void)
 {
-    if (dds3ExistProcess((dds3ProcessID_t *)scrGetIntPara(0)) != 0)
+    if (dds3ExistProcess(EE_ADDR_AS(dds3ProcessID_t *, scrGetIntPara(0))) != 0)
     {
         scrSetIntReturnValue(1);
     }
@@ -385,14 +386,14 @@ s32 scrCommand_SCR_TIME(void)
 {
     dds3ProcessID_t *id;
 
-    id = (dds3ProcessID_t *)scrGetIntPara(0);
+    id = EE_ADDR_AS(dds3ProcessID_t *, scrGetIntPara(0));
     if (dds3ExistProcess(id) == 0)
     {
         scrSetIntReturnValue(0);
     }
     else
     {
-        scrSetIntReturnValue(dds3GetProcessRunTime(id));
+        scrSetIntReturnValue(SDF_FRAME_TICK(dds3GetProcessRunTime(id)));
     }
     return 1;
 }
@@ -440,7 +441,7 @@ s32 scrCommand_SCENE_LIGHT_DIR(void)
     dir.y = scrGetFloatPara(2);
     dir.z = scrGetFloatPara(3);
     dir.w = 0;
-    if (ffabsf(dir.x) <= 0.01f && ffabsf(dir.y) <= 0.01f && ffabsf(dir.z) <= 0.01f)
+    if (scrFabsf(dir.x) <= 0.01f && scrFabsf(dir.y) <= 0.01f && scrFabsf(dir.z) <= 0.01f)
     {
         datDebugPrintf("WARNING: SCENE_LIGHT_DIR length zero\n");
         return 1;
