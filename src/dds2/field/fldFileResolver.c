@@ -612,7 +612,7 @@ extern u32 D_0038A9A0[];
 
 
 
-extern sdfGrFrameSet_t D_0040B290;
+extern sdfGrFrameSet_t sdfGrFrameSet;
 
 
 
@@ -3194,7 +3194,7 @@ void fldDrwZSave(void) {
     if (fldDrwZBuf != 0) {
         sdfDrawTag_t *packet = sdfPrimAllocDrawTag(0);
         sdfGrOt_t *descriptor;
-        sdfLinkStoreImage(packet, D_0040B290.buffers[2],
+        sdfLinkStoreImage(packet, sdfGrFrameSet.buffers[2],
                                 0, 0, 0x200, 0xE0, (s32)(u32)fldDrwZBuf, 0, 0, 0);
         descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
         descriptor->append(descriptor, packet);
@@ -3205,7 +3205,7 @@ void fldDrwZLoad(void) {
     if (fldDrwZBuf != 0) {
         sdfDrawTag_t *packet = sdfPrimAllocDrawTag(0);
         sdfGrOt_t *descriptor;
-        sdfLinkLoadImage(packet, D_0040B290.buffers[2],
+        sdfLinkLoadImage(packet, sdfGrFrameSet.buffers[2],
                                   0, 0, 0x200, 0xE0, (s32)(u32)fldDrwZBuf, 0);
         descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
         descriptor->append(descriptor, packet);

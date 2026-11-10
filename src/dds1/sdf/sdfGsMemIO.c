@@ -109,7 +109,7 @@ typedef struct sdfPreDrawTag_t {
     u32 pad;
 } sdfPreDrawTag_t;
 
-#define D_00529388 D_003980E0
+#define D_00529388 sdfGrFrameSet
 
 extern sdfGrFrameSet_t D_00529388;
 

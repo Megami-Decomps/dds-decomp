@@ -8132,6 +8132,7 @@ ptyPresetSkillSlots = 0x00393AE0;
 ptyPresetPoolSkills = 0x00393AF0;
 frFontColoredGlyphResource = 0x00394680;
 sdfGrFrameModes = 0x003980B0;
+sdfGrFrameSet = 0x003980E0;
 sdfPacketResourceEntries = 0x003980E8;
 sdfGrDrawState = 0x00398158;
 sdfMotGenNodeTable = 0x003981A8;

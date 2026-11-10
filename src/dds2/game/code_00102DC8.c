@@ -1184,7 +1184,7 @@ typedef char KwlnFrameDrawBank_size_check[sizeof(KwlnFrameDrawBank) == 0x1F40 ? 
 
 extern KwlnFrameDrawBank D_00380870[2];
 extern u32 D_00435CBC;
-extern sdfGrFrameSet_t D_0040B290;
+extern sdfGrFrameSet_t sdfGrFrameSet;
 extern SdfLightSources D_0037F770;
 extern f32 kwlnDefaultColorVector[4];
 extern Matrix4 sdfViewMatrix;
@@ -1200,13 +1200,13 @@ void kwlnInitializeFrameDrawPackets(s32 bufferIndex) {
                                         &D_00380870[bufferIndex].programReference);
     sdfDrawTagInit(&D_00380870[bufferIndex].sceneList);
     sdfPreDrawTagInit(&D_00380870[bufferIndex].linkedList);
-    sdfGrSetStdDrawEnv(&D_00380870[bufferIndex].scene, &D_0040B290);
+    sdfGrSetStdDrawEnv(&D_00380870[bufferIndex].scene, &sdfGrFrameSet);
     /* Set the RGBAQ color word while retaining its floating-point Q word. */
     *(u32 *)&D_00380870[bufferIndex].scene.centeredBounds.rgbaq.value = D_00435CBC;
     if (dds3DrawFlag & 0x10000000) {
         sdfGrSetClearPacket(&D_00380870[bufferIndex].scene.centeredBounds, 0, 0,
-                                         D_0040B290.bufferFormat,
-                                         D_0040B290.auxiliaryFormat);
+                                         sdfGrFrameSet.bufferFormat,
+                                         sdfGrFrameSet.auxiliaryFormat);
         dds3DrawFlag &= 0xEFFFFFFF;
     }
     sdfGrLinkStdDrawEnv(&D_00380870[bufferIndex].sceneList,
@@ -1266,7 +1266,7 @@ void dds3InitRenderDrawEnv(void) {
     dds3RenderTexId.auxiliaryFormat = 0x30;
     dds3RenderTexId.buffers[0] = D_00435CC4;
     dds3RenderTexId.buffers[1] = 0;
-    dds3RenderTexId.buffers[2] = D_0040B290.buffers[2];
+    dds3RenderTexId.buffers[2] = sdfGrFrameSet.buffers[2];
     sdf3DMakeScreenParam(&D_0037F7B0.camera);
     for (i = 0; i != 2; i++) {
         sdfDrawTagInit(&D_00380870[i].heldTexture.list);

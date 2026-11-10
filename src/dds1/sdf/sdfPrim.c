@@ -441,7 +441,7 @@ extern s32 sdfDelayedResrcSemaId;
 
 extern s32 sdfDrawReqQueueIndex;
 
-#define D_00529388 D_003980E0
+#define D_00529388 sdfGrFrameSet
 
 extern sdfGrFrameSet_t D_00529388;
 

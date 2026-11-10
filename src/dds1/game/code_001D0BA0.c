@@ -3343,7 +3343,7 @@ void btlUpdateUnitTransparency(BtlUnit *unit) {
     }
 }
 
-extern sdfGrFrameSet_t D_003980E0;
+extern sdfGrFrameSet_t sdfGrFrameSet;
 
 extern sdfGrOt_t *btlMirrorSourceTransparencySurfaces[];
 
@@ -3365,7 +3365,7 @@ void btlDrawUnitMirrorTransparency(BtlUnit *unit) {
     }
     unit->mirror->transparencyBuffer = sdfGrAllocPacketBuff(0x70000);
     list = sdfPrimAllocDrawTag(0);
-    sdfLinkStoreImage(list, D_003980E0.buffers[2],
+    sdfLinkStoreImage(list, sdfGrFrameSet.buffers[2],
                             0, 0, 0x200, 0xE0, unit->mirror->transparencyBuffer, 0, 0, 0);
     btlMirrorSourceTransparencySurfaces[0]->append(btlMirrorSourceTransparencySurfaces[0], list);
     info = unit->ext->owner;
@@ -3382,7 +3382,7 @@ void btlDrawUnitMirrorTransparency(BtlUnit *unit) {
         return;
     }
     list = sdfPrimAllocDrawTag(0);
-    sdfLinkLoadImage(list, D_003980E0.buffers[2],
+    sdfLinkLoadImage(list, sdfGrFrameSet.buffers[2],
                               0, 0, 0x200, 0xE0, unit->mirror->transparencyBuffer, 0);
     btlMirrorTargetTransparencySurfaces[0]->append(btlMirrorTargetTransparencySurfaces[0], list);
     btlDrawUnitTransparencyPasses(unit->mirror, info, unit->mirror->transparencyModel, btlMirrorTargetTransparencySurfaces, unit->mirror->overlayColor);

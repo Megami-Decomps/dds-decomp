@@ -67,7 +67,7 @@ extern s32 sdfDrawThreadId;
 
 #define SDF_GS_FRAMEBUFFER_PAGE_SHIFT 11
 
-extern sdfGrFrameSet_t D_003980E0;
+extern sdfGrFrameSet_t sdfGrFrameSet;
 
 extern u8 sdfGrScreenMode;
 
@@ -75,7 +75,7 @@ extern s8 reqMakeFrameBuff;
 
 void sdfGrSetScreen(s32 displayModeIndex) {
     sdfGrScreenMode = (u8)displayModeIndex;
-    sdfGrSetFrameSetMode(&D_003980E0, displayModeIndex, 0);
+    sdfGrSetFrameSetMode(&sdfGrFrameSet, displayModeIndex, 0);
     reqMakeFrameBuff = 1;
 }
 
@@ -108,11 +108,11 @@ extern SdfDisplayEnvView sdfDisplayEnvironment;
 
 /* Select the indexed image buffer for display; the index and pointer are unchecked. */
 void sdfGrSetDisp(SdfGraphBufferIndex bufferIndex) {
-    sdfGsMemSlice_t *displayBuffer = D_003980E0.buffers[bufferIndex];
+    sdfGsMemSlice_t *displayBuffer = sdfGrFrameSet.buffers[bufferIndex];
 
     /* Initialize the environment through its uncached main-RAM alias. */
     sceGsSetDefDispEnv((void *)(((u32)&sdfDisplayEnvironment & SDF_GRAPH_CPU_ADDRESS_MASK) | SDF_GRAPH_UNCACHED_ALIAS),
-                      0, D_003980E0.width, D_003980E0.height, 0, 0);
+                      0, sdfGrFrameSet.width, sdfGrFrameSet.height, 0, 0);
     /* VRAM offsets are in 32-bit words; FBP counts 2048-word (8 KiB) pages. */
     sdfDisplayEnvironment.framebufferPage = displayBuffer->word >> SDF_GS_FRAMEBUFFER_PAGE_SHIFT;
     sceGsPutDispEnv(&sdfDisplayEnvironment);
@@ -212,9 +212,9 @@ void sdfGrCapture(void) {
     u8 *destination;
 
     if (sdfGrCaptureBuff) {
-        width = D_003980E0.width;
-        height = D_003980E0.height;
-        format = D_003980E0.bufferFormat;
+        width = sdfGrFrameSet.width;
+        height = sdfGrFrameSet.height;
+        format = sdfGrFrameSet.bufferFormat;
         pixelBytes = 4;
         if (format == SDF_PSMCT16) {
             pixelBytes = 2;
@@ -226,7 +226,7 @@ void sdfGrCapture(void) {
         pixels = (u8 *)sdfMemLock(allocation);
         sceGsSetDefStoreImage(
             (sceGsStoreImage *)(((u32)&sdfGsCaptureStoreImage & 0x0FFFFFFF) | 0x20000000),
-            D_003980E0.buffers[SDF_GRAPH_BUFFER_1]->word >> 6,
+            sdfGrFrameSet.buffers[SDF_GRAPH_BUFFER_1]->word >> 6,
             width / 64, format, 0, 0, width, height);
         sceGsExecStoreImage(&sdfGsCaptureStoreImage, pixels);
         sceGsSyncPath(0, 0);
@@ -240,7 +240,7 @@ void sdfGrCapture(void) {
         } while (--rows != 0);
         sceGsSetDefStoreImage(
             (sceGsStoreImage *)(((u32)&sdfGsCaptureStoreImage & 0x0FFFFFFF) | 0x20000000),
-            D_003980E0.buffers[SDF_GRAPH_BUFFER_0]->word >> 6,
+            sdfGrFrameSet.buffers[SDF_GRAPH_BUFFER_0]->word >> 6,
             width / 64, format, 0, 0, width, height);
         sceGsExecStoreImage(&sdfGsCaptureStoreImage, pixels);
         sceGsSyncPath(0, 0);
@@ -317,7 +317,7 @@ void sdfDrawThread(void) {
         WaitSema(dds3GsSema);
         if (reqMakeFrameBuff != 0) {
             reqMakeFrameBuff = 0;
-            sdfGrMakeFrameSet(&D_003980E0);
+            sdfGrMakeFrameSet(&sdfGrFrameSet);
         }
         if (reqGsReset != 0) {
             reqGsReset = 0;
@@ -404,7 +404,7 @@ extern void sdfTexInit(void);
 /* Reset GS/buffer state and start graphics workers; packetBufferBytes sizes each packet-buffer half. */
 void sdfGrInit(s32 packetBufferBytes) {
     s32 thread;
-    sdfGrFrameSet_t *graph = &D_003980E0;
+    sdfGrFrameSet_t *graph = &sdfGrFrameSet;
 
     sceGsResetPath();
     sdfGrScreenMode = 1;

@@ -8411,6 +8411,7 @@ fldLocalMapTextureResource = 0x00401270;
 fldLocalMapNameTextures = 0x00401280;
 frFontColoredGlyphResource = 0x00405CA8;
 sdfGrFrameModes = 0x0040B260;
+sdfGrFrameSet = 0x0040B290;
 sdfPacketResourceEntries = 0x0040B298;
 sdfGrDrawState = 0x0040B308;
 sdfMotGenNodeTable = 0x0040B358;
