@@ -5,20 +5,9 @@
 #include "sdf_dma_tag.h"
 #include "sdf_motion.h"
 #include "sdf_lighting.h"
+#include "libsdf.h"
 
 struct SdfChunkHeader;
-
-/* Four quadwords: colour, direction, position and the falloff parameters. */
-typedef struct sdf3DLight_t
-{
-    sdfVector4_t color;
-    sdfVector4_t v;
-    sdfVector4_t p;
-    f32 param[4];
-} sdf3DLight_t;
-
-void sdf3DMakeLightParallelPacket(struct sdf3DLightParallelPacket_t *packet,
-                                  sdf3DLight_t **lights, sdfVector4_t *ambient);
 
 /* Buffered SDK storage: live entries are distinct from allocated capacity. */
 struct sdfMemHandle_t;

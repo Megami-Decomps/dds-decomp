@@ -2,7 +2,7 @@
 #define SDF_IMAGE_PACKETS_H
 
 #include "sdf.h"
-#include "sdf_packet_patch.h"
+#include "libsdf.h"
 #include "sdf_gs_packet.h"
 
 /* The four A+D writes controlling a GS image transfer. */

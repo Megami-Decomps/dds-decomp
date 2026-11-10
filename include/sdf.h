@@ -2,8 +2,7 @@
 #define SDF_H
 
 #include "common.h"
-#include "sdf_resource.h"
-#include "sdf_types.h"
+#include "libsdf.h"
 #include "sdf_list_node.h"
 #include "sdf_gs_packet.h"
 #include "sdf_texture_clamp.h"
@@ -93,22 +92,6 @@ extern SdfBattleParameters *datBattleParameters;
 typedef struct SdfQuad {
     u32 word[4];
 } SdfQuad;
-
-/* Texture buffer GPU command words (0x40); DDS1/2 game/code_002D10B0/00329F60.c. */
-typedef struct sdfTexPacket_t {
-    sdfGifTag_t giftag;
-    sdfGrTagStdReg_t tex1;
-    sdfGrTagStdReg_t tex0;
-    sdfGrTagStdReg_t clamp;
-} sdfTexPacket_t;
-
-typedef char SdfTexBuf_size_must_be_0x40[(sizeof(sdfTexPacket_t) == 0x40) ? 1 : -1];
-typedef char SdfTexBuf_registers_offset_must_be_8[
-    ((u32)&((sdfTexPacket_t *)0)->giftag.regs == 8) ? 1 : -1];
-typedef char SdfTexBuf_sampling_register_offset_must_be_0x18[
-    ((u32)&((sdfTexPacket_t *)0)->tex1.reg == 0x18) ? 1 : -1];
-typedef char SdfTexBuf_texture_register_offset_must_be_0x28[
-    ((u32)&((sdfTexPacket_t *)0)->tex0.reg == 0x28) ? 1 : -1];
 
 /* Known sdfGsMemSlice_t allocation categories. Unknown u32 values are preserved. */
 enum SdfTexResourceAllocationMode {
@@ -356,18 +339,6 @@ u64 sdfTexGetClampReg(sdfTexHandle_t *texture);
 /* Semaphore ID and attached work pointers (0x14); DDS1/2 game/code_002D10B0/00329F60.c. */
 
 
-/* Draw-surface pool entry (0x20); the SDK initializes and flushes this owner. */
-typedef struct sdfGrOt_t {
-    struct sdfGrOt_t *next; /* 0x00 */
-    sdfDrawTag_t *tagHead;       /* 0x04 */
-    sdfDrawTag_t *tagTail;        /* 0x08 */
-    sdfDrawTag_t *noSortTag; /* name unconfirmed; sdfGrOtInit zeroes it */
-    void (*regFunc)(struct sdfGrOt_t *, sdfDrawTag_t *);      /* 0x10 */
-    void *callbackFunc;
-    void *data; /* name unconfirmed; sdfGrOtInit zeroes it */
-    u32 pad;
-} sdfGrOt_t;
-
 typedef char sdfGrOt_t_size_must_be_0x20[(sizeof(sdfGrOt_t) == 0x20) ? 1 : -1];
 typedef char sdfGrOt_t_owner_layout[
     ((u32)&((sdfGrOt_t *)0)->tagHead == 4 &&
@@ -418,14 +389,6 @@ typedef struct SdfDmaSrc {
     u8 pad2[6];
     u64 vifCommands;
 } SdfDmaSrc;
-
-/* REF tag and VIF commands followed by the trailing chain tag (0x20).
- * The complete trailing quadword is cleared before its NEXT header is patched. */
-typedef struct sdfGrRefPacketHeader_t {
-    u64 dmaTag;
-    u64 vifCommands;
-    s128 nextTag;
-} sdfGrRefPacketHeader_t;
 
 typedef char sdfGrRefPacketHeader_t_size_must_be_0x20[
     sizeof(sdfGrRefPacketHeader_t) == 0x20 ? 1 : -1];
@@ -497,47 +460,7 @@ typedef union SdfSubParam {
 typedef char SdfSubParam_size_must_be_0x18[
     (sizeof(SdfSubParam) == 0x18) ? 1 : -1];
 
-/* A texture coordinate transform in a material packet. sdfMatSetUvwParm fills
- * it either as six floats or, for the identity case, as three quadword halves. */
-typedef union
-{
-    f32 m[6];
-    u64 q[3];
-} sdfMatTexTm_t;
-
-/* The VIF packet a material keeps per context: the GS registers
- * sdfMatUpdatePacketBasic copies out of the texture handle, interleaved with
- * the VIF codes that upload them. sdfMatNew allocates 0xA0 for it and writes
- * VIF codes at 0x98 and 0x9C, which is the tail sdfhook's 128-byte version
- * does not model. */
-typedef struct sdfMatPacket_t
-{
-    u32 vifcode0;
-    u32 ambient;
-    u32 diffuse;
-    u32 mtexDiffuse;
-    u32 specularColor;
-    u32 refmapColor;
-    u32 vifcode1;
-    f32 constant;
-    u32 mtexAlpha;
-    u32 mtexAlgo;
-    f32 fdBias;
-    f32 fdSoften;
-    u32 pad;
-    u32 vifcode2;
-    u64 tex1Data;
-    u64 tex0Data;
-    u64 clampData;
-    u64 mtexTex1Data;
-    u64 mtexTex0Data;
-    u64 mtexClampData;
-    /* sdfMatSetUvwParm writes one transform per texture: a 2x2 then an offset. */
-    sdfMatTexTm_t texTm;
-    sdfMatTexTm_t mtexTexTm;
-    u32 cmd_call_spec;
-    u32 cmd_call_kind;
-} sdfMatPacket_t;
+/* Layout checks on libsdf.h's material types. */
 
 typedef char sdfMatPacket_t_ambient_at_0x04[
     ((u32)&((sdfMatPacket_t *)0)->ambient == 0x04) ? 1 : -1];

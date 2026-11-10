@@ -2,17 +2,9 @@
 #define SDF_LINKED_PACKET_H
 
 #include "common.h"
-#include "sdf_packet_patch.h"
+#include "libsdf.h"
 
 struct sdfDrawTag_t;
-
-/* Complete linked-packet list, distinct from the 0x20-byte DMA list head. */
-typedef struct sdfPreDrawTag_t {
-    struct sdfPreDrawTag_t *next;
-    sdfPreDrawHook_t *head;
-    sdfPreDrawHook_t *tail;
-    u32 pad;
-} sdfPreDrawTag_t;
 
 /* Frame submission joins these 0x10-byte linked owners through head/tail. */
 typedef struct SdfPacketChain {

@@ -2,7 +2,7 @@
 #define SDF_PACKET_SLOT_H
 
 #include "sdf_packet_list.h"
-#include "sdf_packet_patch.h"
+#include "libsdf.h"
 
 /* One 0x10-byte entry in the three-slot frame packet submission ring. */
 typedef struct SdfPacketSlot {

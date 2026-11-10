@@ -2,7 +2,7 @@
 #define SDF_SCENE_PACKET_H
 
 #include "sdf.h"
-#include "sdf_packet_patch.h"
+#include "libsdf.h"
 #include "sdf_gs_context.h"
 #include "sdf_gs_scene_state.h"
 
