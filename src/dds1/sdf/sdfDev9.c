@@ -33,9 +33,9 @@ extern u8 sdfFileDefaultSrcType;
 
 extern s16 sdfFileCmdCount;
 
-extern sdfFileCmdHandle_t *D_003BD424;
+extern sdfFileCmdHandle_t *sdfFileCmdCacheHead;
 
-extern sdfFileCmdHandle_t *D_003BD428;
+extern sdfFileCmdHandle_t *sdfFileCmdCacheTail;
 
 extern s32 sdfFileCmdThreadPrio;
 
@@ -83,15 +83,15 @@ extern sdfFileCmdHandle_t *sdfFileCmdFreeList;
 
 extern s16 sdfFileCmdFreeCount;
 
-extern char D_003BD438[]; /* cdrom0: */
+extern char sdfFileCmdCdromPrefix[]; /* cdrom0: */
 
-extern char D_003BD440[]; /* host0: */
+extern char sdfFileCmdHostPrefix[]; /* host0: */
 
-extern char D_003BD448[]; /* pfs0: */
+extern char sdfFileCmdPfsPrefix[]; /* pfs0: */
 
-extern char D_003BD450[]; /* /movie/ */
+extern char sdfFileCmdMoviePath[]; /* /movie/ */
 
-extern char D_003BD458[]; /* cdimg: */
+extern char sdfFileCmdCdimgPrefix[]; /* cdimg: */
 
 extern char D_003BD470[];
 

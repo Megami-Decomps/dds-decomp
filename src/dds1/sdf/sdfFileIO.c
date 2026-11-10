@@ -138,13 +138,13 @@ extern void EIntr(void);
 extern void sdfChipFreeDirect(void *aPtr);
 
 #define D_00551948 sdfFileCmdActiveHead
-#define D_00551954 D_003BD424
-#define D_00551958 D_003BD428
-#define D_00551968 D_003BD438
-#define D_00551970 D_003BD440
-#define D_00551978 D_003BD448
-#define D_00551980 D_003BD450
-#define D_00551988 D_003BD458
+#define D_00551954 sdfFileCmdCacheHead
+#define D_00551958 sdfFileCmdCacheTail
+#define D_00551968 sdfFileCmdCdromPrefix
+#define D_00551970 sdfFileCmdHostPrefix
+#define D_00551978 sdfFileCmdPfsPrefix
+#define D_00551980 sdfFileCmdMoviePath
+#define D_00551988 sdfFileCmdCdimgPrefix
 
 extern sdfFileCmdHandle_t *D_00551948;
 
@@ -963,9 +963,9 @@ void sdfFileCmdStartThread(s32 deviceType) {
 
 INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdCount);
 
-INCLUDE_SDATA(const s32, "sdf/sdfFileIO", D_003BD424);
+INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdCacheHead);
 
-INCLUDE_SDATA(const s32, "sdf/sdfFileIO", D_003BD428);
+INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdCacheTail);
 
 INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdFreeCount);
 
@@ -977,12 +977,12 @@ INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdThreadPrio);
 
 INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdDefaultCreateMode);
 
-INCLUDE_SDATA(const s32, "sdf/sdfFileIO", D_003BD438);
+INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdCdromPrefix);
 
-INCLUDE_SDATA(const s32, "sdf/sdfFileIO", D_003BD440);
+INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdHostPrefix);
 
-INCLUDE_SDATA(const s32, "sdf/sdfFileIO", D_003BD448);
+INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdPfsPrefix);
 
-INCLUDE_SDATA(const s32, "sdf/sdfFileIO", D_003BD450);
+INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdMoviePath);
 
-INCLUDE_SDATA(const s32, "sdf/sdfFileIO", D_003BD458);
+INCLUDE_SDATA(const s32, "sdf/sdfFileIO", sdfFileCmdCdimgPrefix);

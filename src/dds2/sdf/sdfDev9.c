@@ -82,21 +82,21 @@ extern sdfFileCmdHandle_t *sdfFileCmdFreeList;
 
 extern s16 sdfFileCmdFreeCount;
 
-extern sdfFileCmdHandle_t *D_00438B14;
+extern sdfFileCmdHandle_t *sdfFileCmdCacheHead;
 
-extern sdfFileCmdHandle_t *D_00438B18;
+extern sdfFileCmdHandle_t *sdfFileCmdCacheTail;
 
 extern s16 sdfFileCmdCount;
 
-extern char D_00438B28[]; /* cdrom0: */
+extern char sdfFileCmdCdromPrefix[]; /* cdrom0: */
 
-extern char D_00438B30[]; /* host0: */
+extern char sdfFileCmdHostPrefix[]; /* host0: */
 
-extern char D_00438B38[]; /* pfs0: */
+extern char sdfFileCmdPfsPrefix[]; /* pfs0: */
 
-extern char D_00438B40[]; /* /movie/ */
+extern char sdfFileCmdMoviePath[]; /* /movie/ */
 
-extern char D_00438B48[]; /* cdimg: */
+extern char sdfFileCmdCdimgPrefix[]; /* cdimg: */
 
 extern char D_00438B60[];
 

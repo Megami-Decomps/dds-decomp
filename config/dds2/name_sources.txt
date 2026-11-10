@@ -10943,11 +10943,18 @@
 0x00438B08	sdfFileCmdActiveHead	inferred	SMT3HD name via SLUS_209.11 0x00551948, sdf/sdfFile SMT3 rename; was D_00438B08
 0x00438B0C	sdfFileCmdFreeList	inferred	SMT3HD name via SLUS_209.11 0x0055194C, sdfFileIO twin; was D_00438B0C
 0x00438B10	sdfFileCmdCount	inferred	SMT3HD name via SLUS_209.11 0x00551950, sdfFileIO twin; was D_00438B10
+0x00438B14	sdfFileCmdCacheHead	inferred	SMT3HD name via SLUS_209.11 0x00551954, sdf/sdfFileIO SMT3 rename; was D_00438B14
+0x00438B18	sdfFileCmdCacheTail	inferred	SMT3HD name via SLUS_209.11 0x00551958, sdf/sdfFileIO SMT3 rename; was D_00438B18
 0x00438B1C	sdfFileCmdFreeCount	inferred	SMT3HD name via SLUS_209.11 0x0055195C, sdfFileIO twin; was D_00438B1C
 0x00438B1E	sdfFileCmdDefaultDevice	inferred	SMT3HD name via SLUS_209.11 0x0055195E, sdfFileIO twin; was D_00438B1E
 0x00438B1F	sdfFileCmdThreadPrioCheckCounter	inferred	SMT3HD data name via SLUS_209.11 0x0055195F, 3 agreeing references; was sdfFileCmdThreadPrioCheckCounter
 0x00438B20	sdfFileCmdThreadPrio	inferred	SMT3HD data name via SLUS_209.11 0x00551960, 3 agreeing references; was sdfFileCmdThreadPrio
 0x00438B24	sdfFileCmdDefaultCreateMode	inferred	SMT3HD data name via SLUS_209.11 0x00551964, 2 agreeing references; was sdfFileCmdDefaultCreateMode
+0x00438B28	sdfFileCmdCdromPrefix	inferred	SMT3HD name via SLUS_209.11 0x00551968, sdf/sdfFileIO SMT3 rename; was D_00438B28
+0x00438B30	sdfFileCmdHostPrefix	inferred	SMT3HD name via SLUS_209.11 0x00551970, sdf/sdfFileIO SMT3 rename; was D_00438B30
+0x00438B38	sdfFileCmdPfsPrefix	inferred	SMT3HD name via SLUS_209.11 0x00551978, sdf/sdfFileIO SMT3 rename; was D_00438B38
+0x00438B40	sdfFileCmdMoviePath	inferred	SMT3HD name via SLUS_209.11 0x00551980, sdf/sdfFileIO SMT3 rename; was D_00438B40
+0x00438B48	sdfFileCmdCdimgPrefix	inferred	SMT3HD name via SLUS_209.11 0x00551988, sdf/sdfFileIO SMT3 rename; was D_00438B48
 0x00438B66	sdfHddValid	inferred	SMT3HD data name via SLUS_209.11 0x005519A6, 6 agreeing references; was sdfHddValid
 0x00438B67	sdfDev9LoadFlag	inferred	SMT3HD data name via SLUS_209.11 0x005519A7, 2 agreeing references; was sdfDev9LoadFlag
 0x00438B68	sdfDev9Ready	inferred	SMT3HD name via SLUS_209.11 0x005519A8, sdfHdd twin; was D_00438B68
