@@ -1189,8 +1189,8 @@ extern sdf3DLight_t *dds3LightParam[3];
 extern f32 dds3AmbientColor[4];
 extern Matrix4 sdfViewMatrix;
 extern Matrix4 D_00384790;
-extern sdf3DLight_t *kwlnOverlayLightSources[3];
-extern f32 kwlnOverlayAmbientColor[4];
+extern sdf3DLight_t *dds3LightParam2[3];
+extern f32 dds3AmbientColor2[4];
 extern void sdf3DLinkInitPacket(sdfDrawTag_t *, DmaPacketHeader *);
 
 /* Initialize the selected frame bank's program, scene and overlay packet chains. */
@@ -1221,7 +1221,7 @@ void dds3InitializeFrameDrawPackets(s32 bufferIndex) {
     sdfDrawTagInit(&dds3DrawEnv[bufferIndex].thirdList);
     sdf3DMakeViewportPacket(&dds3DrawEnv[bufferIndex].thirdMatrix, &D_0037F980, &D_00384790);
     sdfDrawTagLink(&dds3DrawEnv[bufferIndex].thirdList, (u32)&dds3DrawEnv[bufferIndex].thirdMatrix);
-    sdf3DMakeLightParallelPacket(&dds3DrawEnv[bufferIndex].overlayLightPacket, kwlnOverlayLightSources, kwlnOverlayAmbientColor);
+    sdf3DMakeLightParallelPacket(&dds3DrawEnv[bufferIndex].overlayLightPacket, dds3LightParam2, dds3AmbientColor2);
     sdfDrawTagLink(&dds3DrawEnv[bufferIndex].thirdList, (u32)&dds3DrawEnv[bufferIndex].overlayLightPacket);
 }
 

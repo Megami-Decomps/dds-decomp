@@ -2484,7 +2484,7 @@ INCLUDE_ASM(const s32, "game/code_001411F0", func_00144D30);
 
 extern void fldAllIconDel(s32 index, f32 *x, f32 *z);
 
-extern sdf3DFogParam_t kwlnOverlayFrustumParameters;
+extern sdf3DFogParam_t dds3FogParam2;
 
 
 
@@ -2564,11 +2564,11 @@ void func_00145B18(void) {
     SDF_VU0_COPYVECTOR(&fldAutoMapEye, eye);
     SDF_VU0_COPYVECTOR(&D_00324A20, focus);
     SDF_VU0_COPYVECTOR(&fldAutoMapUp, &up);
-    kwlnOverlayFrustumParameters.fogMax = 255.0f;
-    kwlnOverlayFrustumParameters.fogNear = 1000.0f;
-    kwlnOverlayFrustumParameters.fogMin = 255.0f;
-    kwlnOverlayFrustumParameters.fogFar = 20000.0f;
-    kwlnOverlayFrustumParameters.color = 0x108010;
+    dds3FogParam2.fogMax = 255.0f;
+    dds3FogParam2.fogNear = 1000.0f;
+    dds3FogParam2.fogMin = 255.0f;
+    dds3FogParam2.fogFar = 20000.0f;
+    dds3FogParam2.color = 0x108010;
     D_00324980.camera.offsetX = 2048.0f;
     D_00324980.camera.offsetY = 2048.0f;
     dds3FogParamMain.fogMax = 255.0f;
@@ -2686,11 +2686,11 @@ void fldEnterSceneCamera(void) {
     SDF_VU0_COPYVECTOR(&fldAutoMapEye, eye);
     SDF_VU0_COPYVECTOR(&D_00324A20, focus);
     SDF_VU0_COPYVECTOR(&fldAutoMapUp, &up);
-    kwlnOverlayFrustumParameters.fogMax = 255.0f;
-    kwlnOverlayFrustumParameters.fogNear = 1000.0f;
-    kwlnOverlayFrustumParameters.fogMin = 255.0f;
-    kwlnOverlayFrustumParameters.fogFar = 20000.0f;
-    kwlnOverlayFrustumParameters.color = 0x108010;
+    dds3FogParam2.fogMax = 255.0f;
+    dds3FogParam2.fogNear = 1000.0f;
+    dds3FogParam2.fogMin = 255.0f;
+    dds3FogParam2.fogFar = 20000.0f;
+    dds3FogParam2.color = 0x108010;
     D_00324980.camera.offsetX = 2244.0f;
     D_00324980.camera.offsetY = 2118.0f;
 }
@@ -2744,11 +2744,11 @@ void fldLoadSceneModelsAndCamera(void) {
     SDF_VU0_COPYVECTOR(&fldAutoMapEye, eye);
     SDF_VU0_COPYVECTOR(&D_00324A20, focus);
     SDF_VU0_COPYVECTOR(&fldAutoMapUp, &up);
-    kwlnOverlayFrustumParameters.fogMax = 255.0f;
-    kwlnOverlayFrustumParameters.fogNear = 1000.0f;
-    kwlnOverlayFrustumParameters.fogMin = 255.0f;
-    kwlnOverlayFrustumParameters.fogFar = 20000.0f;
-    kwlnOverlayFrustumParameters.color = 0x108010;
+    dds3FogParam2.fogMax = 255.0f;
+    dds3FogParam2.fogNear = 1000.0f;
+    dds3FogParam2.fogMin = 255.0f;
+    dds3FogParam2.fogFar = 20000.0f;
+    dds3FogParam2.color = 0x108010;
     D_00324980.camera.offsetX = 2244.0f;
     D_00324980.camera.offsetY = 2118.0f;
 }
@@ -2916,11 +2916,11 @@ void fldUpdateAutomapInput(void) {
     SDF_VU0_COPYVECTOR(&fldAutoMapEye, eye);
     SDF_VU0_COPYVECTOR(&D_00324A20, focus);
     SDF_VU0_COPYVECTOR(&fldAutoMapUp, up);
-    kwlnOverlayFrustumParameters.fogMax = 255.0f;
-    kwlnOverlayFrustumParameters.fogNear = 1000.0f;
-    kwlnOverlayFrustumParameters.fogMin = 255.0f;
-    kwlnOverlayFrustumParameters.fogFar = 20000.0f;
-    kwlnOverlayFrustumParameters.color = 0x808080;
+    dds3FogParam2.fogMax = 255.0f;
+    dds3FogParam2.fogNear = 1000.0f;
+    dds3FogParam2.fogMin = 255.0f;
+    dds3FogParam2.fogFar = 20000.0f;
+    dds3FogParam2.color = 0x808080;
     SDF_VU0_COPYVECTOR(aViewEye, eye);
     SDF_VU0_COPYVECTOR(aViewTarget, focus);
     SDF_VU0_COPYVECTOR(aViewDown, up);
@@ -2955,11 +2955,11 @@ void fldCenterCameraOnEntry(void) {
     SDF_VU0_COPYVECTOR(&fldAutoMapEye, eye);
     SDF_VU0_COPYVECTOR(&D_00324A20, focus);
     SDF_VU0_COPYVECTOR(&fldAutoMapUp, up);
-    kwlnOverlayFrustumParameters.fogMax = 255.0f;
-    kwlnOverlayFrustumParameters.fogNear = 1000.0f;
-    kwlnOverlayFrustumParameters.fogMin = 255.0f;
-    kwlnOverlayFrustumParameters.fogFar = 20000.0f;
-    kwlnOverlayFrustumParameters.color = 0x808080;
+    dds3FogParam2.fogMax = 255.0f;
+    dds3FogParam2.fogNear = 1000.0f;
+    dds3FogParam2.fogMin = 255.0f;
+    dds3FogParam2.fogFar = 20000.0f;
+    dds3FogParam2.color = 0x808080;
 }
 
 /* Stores the area, floor/room and third location selection, and selects the

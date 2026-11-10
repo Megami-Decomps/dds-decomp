@@ -162,7 +162,7 @@ extern BtlLightParams D_0037FA90;
 
 extern BtlLightParams D_0037FAD0;
 
-extern BtlLightParams kwlnOverlayAmbientColor;
+extern BtlLightParams dds3AmbientColor2;
 extern s32 btlCountTasksByKind(u16);
 
 
@@ -1513,9 +1513,9 @@ void btlInitLightParams(void) {
     D_0037FAD0.unk10 = 0;
     D_0037FAD0.unk14 = 0;
     D_0037FAD0.unk18 = 0;
-    kwlnOverlayAmbientColor.r = 1.15f;
-    kwlnOverlayAmbientColor.g = 1.15f;
-    kwlnOverlayAmbientColor.b = 1.15f;
+    dds3AmbientColor2.r = 1.15f;
+    dds3AmbientColor2.g = 1.15f;
+    dds3AmbientColor2.b = 1.15f;
 }
 
 extern EffRandState effSharedRandomState[];

@@ -11759,9 +11759,9 @@ mnuShopSolarPhaseSalePrices = 0x0036A260;
 
 
 effBossLookAtReferenceAxis = 0x003556C0;
-kwlnOverlayLightSources = 0x00324B10;
-kwlnOverlayAmbientColor = 0x00324B20;
-kwlnOverlayFrustumParameters = 0x00324B30;
+dds3LightParam2 = 0x00324B10;
+dds3AmbientColor2 = 0x00324B20;
+dds3FogParam2 = 0x00324B30;
 btlBuildActorPairFramingCameraPose = 0x001E1288; // type:func
 btlBuildTargetGroupFramingCameraPose = 0x001E16C0; // type:func
 effTexturedBlurSetupParameters = 0x00355AF8;

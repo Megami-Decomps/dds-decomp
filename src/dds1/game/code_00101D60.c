@@ -136,13 +136,13 @@ extern u8 D_003270F0[];
 
 extern sdf3DLight_t *dds3RenderLightParallel[3];
 
-extern sdf3DLight_t *kwlnOverlayLightSources[3];
+extern sdf3DLight_t *dds3LightParam2[3];
 
 extern sdf3DLight_t *dds3LightParam[3];
 
 extern f32 dds3RenderAmbientColor[4];
 
-extern f32 kwlnOverlayAmbientColor[4];
+extern f32 dds3AmbientColor2[4];
 
 extern f32 dds3AmbientColor[4];
 
@@ -150,7 +150,7 @@ extern f32 dds3RenderTargetVector[4], dds3RenderEyeVector[4], effPCPBossTexRect[
 
 extern f32 D_00324A20[4], fldAutoMapEye[4], fldAutoMapUp[4];
 
-extern sdf3DFogParam_t dds3RenderFogParam, kwlnOverlayFrustumParameters, dds3FogParamMain;
+extern sdf3DFogParam_t dds3RenderFogParam, dds3FogParam2, dds3FogParamMain;
 
 extern Matrix4 dds3RenderViewportMatrix;
 
@@ -224,7 +224,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
         sdfDrawTag_t *overlayList;
         u64 *overlayFrustum;
         sdf3DMakeLightParallelPacket((sdf3DLightParallelPacket_t *)(dds3OverlayLightingPackets + bufferIndex * DDS3_FRAME_BUFFER_BYTES),
-            kwlnOverlayLightSources, kwlnOverlayAmbientColor);
+            dds3LightParam2, dds3AmbientColor2);
         sdf3DMakeScreenParam(&D_00324980.camera);
         LookAtMatrix(D_00324A20, fldAutoMapEye, fldAutoMapUp);
         VU0_STORE_MATRIX_UNCLOBBERED(&D_00329790);
@@ -233,7 +233,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
         overlayNode->regFunc(overlayNode, (sdfDrawTag_t *)(dds3OverlayMatrixPackets - 0x20 + bufferIndex * DDS3_FRAME_BUFFER_BYTES));
         overlayList = dds3FontReqAllocDrawTag();
         overlayFrustum = (u64 *)sdfGrAllocPacketBuff(0x50);
-        sdf3DMakeFogPacket((struct ConsFrustumPacket *)overlayFrustum, &kwlnOverlayFrustumParameters);
+        sdf3DMakeFogPacket((struct ConsFrustumPacket *)overlayFrustum, &dds3FogParam2);
         sdfDrawTagLink(overlayList, (u32)overlayFrustum);
         overlayNode->regFunc(overlayNode, overlayList);
 
