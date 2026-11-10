@@ -4,13 +4,13 @@
 #include "sdf_resource.h"
 
 /* DDS's names for the same objects. */
-#define D_0031F2C0 effScatterPoolTriangleIndices
-#define D_0031F310 effScatterPoolTexcoords
-#define D_0031F3D0 effScatterPoolDrawSurfaces
+#define D_0031F2C0 effPCPScatterParams
+#define D_0031F310 effPCPScatterTexcoords
+#define D_0031F3D0 effPCPScatterSurfaceByPool
 #define D_0031F3E0 effScatterTriangleIndices
-#define D_0031F440 effScatterDrawSurfaces
-#define D_0056AD28 effScatterPoolDrawParams
-#define D_0056AD58 effScatterDrawParams
+#define D_0031F440 effPCPScatterSurfaceByQueue
+#define D_0056AD28 effPCPScatterDrawParams
+#define D_0056AD58 effDebugPoly
 #define dds3EffectBase effDefaultRandomState
 #define sdfMatSetTex sdfSetAssetPrimaryTextureAddress
 #define sdfTexFreeDelayed sdfTexReleaseReferenceViaHandler

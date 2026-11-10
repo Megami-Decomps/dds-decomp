@@ -14354,8 +14354,8 @@ lists for non-direct fan modes. Do not rename their shared pool-node pointees.
 The ring builder writes XYZ before the quadword load and normalization; its
 untouched W is not a reason to replace the record with a local or constant.
 
-The scatter object has separate `effScatterDrawParams`,
-`effScatterTriangleIndices` and `effScatterDrawSurfaces`. Its full index bank
+The scatter object has separate `effDebugPoly`,
+`effScatterTriangleIndices` and `effPCPScatterSurfaceByQueue`. Its full index bank
 contains twenty-four triangles over thirteen vertex pairs, though one full
 batch submits only sixteen triangles over eighteen vertices. Retain the
 byte-array view, all remaining index words and the four surface pointers.
@@ -14825,7 +14825,7 @@ declaration in billManager and s32 zero-store carrier declaration in the
 initialization unit are retained. `billPendingRenderPairList` is the
 corresponding intrusive paired-stream head. No lifecycle or owner changes.
 
-`effScatterPoolDrawParams` is the native 0x30-byte shared draw descriptor.
+`effPCPScatterDrawParams` is the native 0x30-byte shared draw descriptor.
 The index bank has twenty native packed triangle words: the full path uses
 sixteen for twenty-four vertices; the remaining four words stay present.
 The texture-coordinate bank retains all forty-eight words (192 bytes),
