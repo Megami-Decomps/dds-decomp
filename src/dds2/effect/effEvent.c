@@ -127,9 +127,9 @@ extern void dds3EffectFilter(dds3Effect_Filter_t *arg);
 
 extern sdfGrOt_t sdfGrOtTable[];
 
-extern sdfMat_t *D_00436458;
+extern sdfMat_t *effDebugSelectCursorMat;
 
-extern f32 D_0043645C;
+extern f32 effDebugSelectCursorAngle;
 
 void Eve_BlurON(void) {
     Eve_BlurShow = 1;

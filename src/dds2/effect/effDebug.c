@@ -12,10 +12,10 @@
 #define func_001AC3D8 effEvaluateSlotBezierPosition
 #define func_001AC4C8 effInitSlotTail
 #define func_001AC4F0 effGetSlotAt
-#define D_0056B050 effTriangleVertexScratch
-#define D_003201C0 D_003B21A0
-#define D_0054F270 D_00436458
-#define D_0054F274 D_0043645C
+#define D_0056B050 effDebugTriPositions
+#define D_003201C0 effDebugTriColors
+#define D_0054F270 effDebugSelectCursorMat
+#define D_0054F274 effDebugSelectCursorAngle
 
 /* The debug overlay's OT slots; DDS has more slots before them. */
 #define EFF_DEBUG_WIRE_OT 55
@@ -553,7 +553,7 @@ void effDebugWindowDraw(s32 x, s32 y, s32 width, s32 height, s32 fillColor, s32 
     ((void (*)(sdfGrOt_t *, void *))scene->regFunc)(scene, list);
 }
 
-INCLUDE_SDATA(const s32, "effect/effDebug", D_00436458);
+INCLUDE_SDATA(const s32, "effect/effDebug", effDebugSelectCursorMat);
 
-INCLUDE_SDATA(const s32, "effect/effDebug", D_0043645C);
+INCLUDE_SDATA(const s32, "effect/effDebug", effDebugSelectCursorAngle);
 
