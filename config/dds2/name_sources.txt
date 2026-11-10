@@ -2994,7 +2994,7 @@
 0x0019E910	itfGetTextLipsMotionId	inferred	Returns the second value stored by encoded-text control 0xF416; itfMesBuildEntryGlyph passes it as the motion number to evtLipsExecFunction. DDS1 twin 0x00196BE0. [Namer1 batch 40]
 0x0019E918	frDumpFontTexture	inferred	SMT3HD name via SLUS_209.11 0x001C9248, reloc-identical; was frFontSubmitAtlasSetupPackets
 0x0019EC00	itfSkipEncodedTextOpcode	inferred	DDS1 0x00196ED0 name alignment: advances one encoded control without executing it, returns stop/voice markers, and otherwise skips the declared payload span. Keeps game-specific switch cases. [Namer1 batch 40]
-0x0019EDC0	itfScanEncodedTextControls	inferred	Inferred from the current C implementation in game/code_0019E138.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0019EDC0	itfScanEncodedTextControls	inferred	Inferred from the current C implementation in interface/frFont.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x0019EF38	frwGetStaffFontFRQ	inferred	SMT3HD name via SLUS_209.11 0x001C9EB8, reloc-identical; was frFontBuildColoredGlyphWithSharedFlags
 0x0019F048	frwLoadStaffFont	inferred	SMT3HD name via SLUS_209.11 0x001C9FC8, reloc-identical; was mnuLoadStaffFonts
 0x0019F078	frwFreeStaffFont	inferred	SMT3HD name via SLUS_209.11 0x001C9FF8, reloc-identical; was mnuUnloadStaffFonts
@@ -3013,9 +3013,9 @@
 0x0019FA08	itfDrawBankTextWithSegmentCounter	inferred	confidence=high; cycles a segment counter every30 calls but draws the full bank stream, optionally centered; copied segment is intentionally not submitted; sequel-only variant. [Namer1 naming batch45]
 0x0019FC38	itfDrawBankTextWithLayoutFlags	inferred	readability/matching review (QP16)
 0x0019FE00	itfDrawTextWithSelectedFontMode	inferred	Draws a text ID with the resource chosen by font mode. [names_reviewed8.tsv]
-0x0019FEF8	itfDrawUnderscoreTextSegment	inferred	confidence=high; matched-C; src/dds2/game/code_0019E138.c:433:func_0019FEF8; Extracts the requested underscore-delimited segment into a 0x200-byte local buffer and passes it to the text renderer; returns zero for overlong input or no selected segment.; source=names_pending_main.tsv:140 [names_qp12_apply.tsv]
+0x0019FEF8	itfDrawUnderscoreTextSegment	inferred	confidence=high; matched-C; src/dds2/interface/frWrap.c:459:func_0019FEF8; Extracts the requested underscore-delimited segment into a 0x200-byte local buffer and passes it to the text renderer; returns zero for overlong input or no selected segment.; source=names_pending_main.tsv:140 [names_qp12_apply.tsv]
 0x001A0038	itfReturnZero	inferred	Returns literal zero; no direct C/assembly callers or registration found. Paired with DDS1 0x00198008.
-0x001A0050	itfReturnThirdCallbackValue	inferred	high confidence; src/dds2/game/code_0019E138.c func_001A0050: Ignores the first two callback arguments and returns the third unchanged. [names_reviewed25.tsv]
+0x001A0050	itfReturnThirdCallbackValue	inferred	high confidence; src/dds2/interface/frWrap.c func_001A0050: Ignores the first two callback arguments and returns the third unchanged. [names_reviewed25.tsv]
 0x001A0058	itfGetLastDecodedByteCount	inferred	Returns the global byte count written by frDecodeFontRow; existing DDS2 signed return remains unchanged. DDS1 twin 0x00198028. [Namer1 batch 40]
 0x001A0060	frGetFontHeader	inferred	SMT3HD name via SLUS_209.11 0x001CA9C0, shared-hash-in-run; was itfReturnPackedResourceBase
 0x001A0068	frGetFontImagePtrs	inferred	SMT3HD name via SLUS_209.11 0x001CA9C8, byte-identical; was itfSplitRelativeSegments
@@ -3028,9 +3028,9 @@
 0x001A02F0	nbLoadDeadMoonTex	inferred	SMT3HD name via SLUS_209.11 0x001E9528, reloc-identical; was itfLoadBackgroundSprite
 0x001A0338	itfReleaseBackgroundSpriteTexture	inferred	Releases the retained background sprite texture reference. [names_reviewed8.tsv]
 0x001A0350	itfDrawBackgroundSprite	inferred	If cached bg00.tmx sprite exists, fills a neutral-gray rectangle at its width and height.
-0x001A03D8	itfStartFontTestScene	inferred	Loads interface backdrop and starts a task with literal test_font name and font-test teardown callback. [names_reviewed19.tsv]
-0x001A0438	itfReleaseFontTestTaskResources	inferred	Advances fading font glyphs and releases the background sprite. [names_reviewed8.tsv]
-0x001A0458	itfDrawBackgroundAndGetTaskReadyMask	inferred	Draws background then returns 0xFFFFFFFF only when registered task state equals three; first-game twin 00198428.
+0x001A03D8	frTestFontInit	inferred	SMT3HD name via SLUS_209.11 0x1CAD00, SMT3 interface/frTestFont name; same role: starts the test_font process and test.bf script; was itfStartFontTestScene
+0x001A0438	test_font_Shutdown	inferred	SMT3HD name via SLUS_209.11 0x1CAD68, SMT3 interface/frTestFont name; test_font's shutdown callback, destroys frTestFontHandle; was itfReleaseFontTestTaskResources
+0x001A0458	test_font_Process	inferred	SMT3HD name via SLUS_209.11 0x1CAE50, SMT3 interface/frTestFont name; test_font's process callback; was itfDrawBackgroundAndGetTaskReadyMask
 0x001A0490	itfMiscLinkInitialize	inferred	SMT3HD name via SLUS_209.11 0x001CAE58, byte-identical; was itfInitPool
 0x001A04F0	itfMiscLinkTake	inferred	SMT3HD name via SLUS_209.11 0x001CAEB8, byte-identical; was itfAcquirePoolNode
 0x001A0558	itfMiscLinkGive	inferred	SMT3HD name via SLUS_209.11 0x001CAF20, byte-identical; was itfReleasePoolNode
@@ -3093,7 +3093,7 @@
 0x001A2E88	itfMesMngSetPhase	inferred	SMT3HD name via SLUS_209.11 0x001CD3E8, shared-hash-in-run; was itfPanelSetStatus
 0x001A2EA8	itfPanelAcquireHold	inferred	DDS1 twin 0019AE78 [names_M33_SmallSweep2.tsv]
 0x001A2F08	itfPanelReleaseHold	inferred	DDS1 twin 0019AED8 [names_M33_SmallSweep2.tsv]
-0x001A2F60	itfCommandQueueHeldPanelEntry	inferred	src/dds2/game/code_001A1B08.c func_001A2F60: Reads three script integers into held panel queue, ignoring absent hold or full queue. Twin of DDS1 func_0019AF30. [names_reviewed24.tsv]
+0x001A2F60	itfCommandQueueHeldPanelEntry	inferred	src/dds2/interface/itfMesManager.c func_001A2F60: Reads three script integers into held panel queue, ignoring absent hold or full queue. Twin of DDS1 func_0019AF30. [names_reviewed24.tsv]
 0x001A3008	itfStepHeldPanelMessages	inferred	DDS1 twin 0x0019AFD8; starts queued panel entries on matching frames, closes entries at deadlines, and releases the held panel after the final deadline.
 0x001A3138	itfMesMngSelect	inferred	SMT3HD name via SLUS_209.11 0x001CD408, reloc-identical; was itfMesScriptWaitForOptionSelection
 0x001A31E0	itfCommandSelectOptionWithFade	inferred	readability/matching review (QP16)
@@ -10177,7 +10177,7 @@
 0x003B43F8	itfPanelLayoutCallbacks	inferred	confidence=high; Kind-indexed callback bank invoked after setting or advancing itfpanel_t corners/renderValue. The advance path forwards the four updated corners, while the set path forwards payload alone; existing unprototyped function pointers retained. Same role in DDS1 at 0x00357A00. Preserve declarations, bounds, types, data and control flow. No source-owned import or current native ASM root/interior reference. [PurC5 readability data b2; matched-C/native-twin evidence; identifier-only]
 0x003B4420	CreateColorTable	inferred	SMT3HD data name via SLUS_209.11 0x00326450, 1 agreeing references; was CreateColorTable
 0x003B4448	DrawTable	inferred	SMT3HD data name via SLUS_209.11 0x00326478, 1 agreeing references; was DrawTable
-0x003B4780	itfHeldPanelCursor	inferred	confidence=high; matched_users=src/dds2/game/code_001A1B08.c:itfCommandQueueHeldPanelEntry, src/dds2/game/code_001A1B08.c:itfPanelAcquireHold; Panel hold captures the active window and initializes this cursor; held-entry commands append cursor items. Retail address correspondence is independently corroborated by at least two paired functions. [names_qp9.tsv]
+0x003B4780	itfHeldPanelCursor	inferred	confidence=high; matched_users=src/dds2/interface/itfMesManager.c:itfCommandQueueHeldPanelEntry, src/dds2/interface/itfMesManager.c:itfPanelAcquireHold; Panel hold captures the active window and initializes this cursor; held-entry commands append cursor items. Retail address correspondence is independently corroborated by at least two paired functions. [names_qp9.tsv]
 0x003B49D8	itfSoundSelectorBorderColor	inferred	The sound selector option panel's border colour (DrawColorRec 0x3D, 5, 0, 0x4D), for itfDrawThreePanelBorderBands. DDS1 twin 0x00357FE8.
 0x003B4D50	itfOverlayColorEditorRows	inferred	battle overlay color/phase data renamed from D_003B4D50; referenced from the battle overlay unit code_001A04C0.c.
 0x003B4D80	itfTestOverlayColor	inferred	battle overlay color/phase data renamed from D_003B4D80; referenced from the battle overlay unit code_001A04C0.c.
@@ -10874,7 +10874,9 @@
 0x00436560	itfTextLipsMotionId	inferred	confidence=high; sdfMotionCtrlr_t id returned by itfGetTextLipsMotionId and written by the encoded-text 0xF416 lips command from itfReadEncodedTextLead. Twin 0x003BB170. [PurD readability data; identifier-only]
 0x00436564	gModeFlag	inferred	SMT3HD data name via SLUS_209.11 0x0054F41C, 5 agreeing references; was gModeFlag
 0x00436568	gFontDrawOT	inferred	SMT3HD data name via SLUS_209.11 0x0054F420, 1 agreeing references; was gFontDrawOT
-0x00436590	itfFontTestScriptTask	inferred	confidence=high; src/dds2/game/code_0019E138.c:D_00436590; type=u32 task handle; refs=itfStartFontTestScene,itfDrawBackgroundAndGetTaskReadyMask; Stores the font-test BF process task and is used to query task readiness in the test draw loop. [names_qp9.tsv]
+0x00436580	frWrapEmptyString	inferred	SMT3HD name via SLUS_209.11 0x54F448, SMT3 interface/frWrap name; the empty seed string the number-font builders link; was D_00436580
+0x0043658C	frTestFontHandle	inferred	SMT3HD name via SLUS_209.11 0x54F45C, SMT3 name; the font request test_font_Shutdown destroys; was D_0043658C
+0x00436590	itfFontTestScriptTask	inferred	confidence=high; src/dds2/game/code_0019E138.c:D_00436590; type=u32 task handle; refs=frTestFontInit,test_font_Process; Stores the font-test BF process task and is used to query task readiness in the test draw loop. [names_qp9.tsv]
 0x004365E8	itfMessageFlags	inferred	confidence=high; matched_users=src/dds2/interface/itfMesManager.c:itfMesClearFlags, src/dds2/interface/itfMesManager.c:itfMesSetFlags; Message flag setter/clearer update this shared bitmask. Retail address correspondence is independently corroborated by at least two paired functions. [names_qp9.tsv]
 0x00436640	sndTestMessageResourceIndex	inferred	confidence=high; matched_users=src/dds2/game/code_001A8748.c:TestMsgReloadTexture, src/dds2/game/code_001A8748.c:TestMsgMngD_Process; Resource cycling advances this index modulo four; drawing skips its no-texture entry. Retail address correspondence is independently corroborated by at least two paired functions. [names_qp9.tsv]
 0x00436644	sndTestMessageTexture	inferred	confidence=high; matched_users=src/dds2/game/code_001A8748.c:TestMsgReloadTexture, src/dds2/game/code_001A8748.c:TestMsgMngD_Process; Sound-test message resource cycling loads/releases this texture; the test-message draw task consumes it. Retail address correspondence is independently corroborated by at least two paired functions. [names_qp9.tsv]
@@ -11239,7 +11241,7 @@
 0x00438F10	hEve_PartialMultiBlur	inferred	SMT3HD data name via SLUS_209.11 0x00551DEC, 5 agreeing references; was hEve_PartialMultiBlur
 0x00438F14	hEve_PartialMultiFilter	inferred	SMT3HD data name via SLUS_209.11 0x00551DF0, 5 agreeing references; was hEve_PartialMultiFilter
 0x00438F18	hEve_RippleBlur	inferred	SMT3HD data name via SLUS_209.11 0x00551DF4, 5 agreeing references; was hEve_RippleBlur
-0x00438F24	itfBackgroundSpriteTexture	inferred	confidence=high; matched_users=src/dds2/game/code_0019E138.c:itfDrawBackgroundSprite, src/dds2/game/code_0019E138.c:itfReleaseBackgroundSpriteTexture; Background drawing consumes this shared sprite texture; release drops its texture reference. Retail address correspondence is independently corroborated by at least two paired functions. [names_qp9.tsv]
+0x00438F24	itfBackgroundSpriteTexture	inferred	confidence=high; matched_users=src/dds2/interface/frWrap.c:itfDrawBackgroundSprite, src/dds2/interface/frWrap.c:itfReleaseBackgroundSpriteTexture; Background drawing consumes this shared sprite texture; release drops its texture reference. Retail address correspondence is independently corroborated by at least two paired functions. [names_qp9.tsv]
 0x00438F3C	pbDebugPanel3State	inferred	SMT3HD data name via SLUS_209.11 0x00551EA4, 6 agreeing references; was pbDebugPanel3State
 0x00438F40	itfTestOverlayPhaseStep	inferred	battle overlay color/phase data renamed from D_00438F40; referenced from the battle overlay unit code_001A04C0.c.
 0x00438F48	btlLinkedSelectionTaskBuffer	inferred	confidence=high; matched_users=src/dds2/game/code_001B2AF8.c:btlAreLinkedSceneCountersAtThreshold, src/dds2/game/code_001B2AF8.c:btlHasHighPriorityState; Shared selection-task allocation is tested for linked-scene counter completion and released with that task. Retail address correspondence is independently corroborated by at least two paired functions. [names_qp9.tsv]

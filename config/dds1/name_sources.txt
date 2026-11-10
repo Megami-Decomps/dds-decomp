@@ -3050,29 +3050,29 @@
 0x001963E0	frFontCheckPendingGlyphState	inferred	checks glyph pending state and clears flag when children vanish [names_reviewed5.tsv]
 0x00196450	frMessageReturnCode	inferred	SMT3HD name via SLUS_209.11 0x001C8730, reloc-identical; was frFontAdvanceContextCursor
 0x00196478	itfReadEncodedTextLead	inferred	Reads and decodes the first byte of a two-byte text code, advancing by two.
-0x001964A0	itfReadEncodedCode	inferred	itf interface rendering and text in game/code_00196478.c
+0x001964A0	itfReadEncodedCode	inferred	itf interface rendering and text in interface/frFont.c
 0x001964F8	itfProcessEncodedTextControl	inferred	Combine the already consumed control lead with its next byte, apply context/voice/wait/stop controls and advance the encoded-text cursor; return whether stream processing stops.
 0x001968C0	itfBuildGlyphChainFromEncodedStream	inferred	Consume encoded bytes from the context cursor, dispatch controls and line advances, append glyphs with the current font/options, apply pending updates and return the glyph chain.
 0x00196AB0	MessageRequest	inferred	SMT3HD name via SLUS_209.11 0x001C9108, reloc-identical; was itfDrawDefaultColorText
 0x00196AE8	MessageRequestEx	inferred	SMT3HD name via SLUS_209.11 0x001C9140, reloc-identical; was itfDrawCustomColorText
 0x00196B30	MessageRequestEx2	inferred	SMT3HD name via SLUS_209.11 0x001C9188, reloc-identical; was itfDrawEncodedTextStream
-0x00196B88	itfDrawColor	inferred	itf interface rendering and text in game/code_00196478.c
+0x00196B88	itfDrawColor	inferred	itf interface rendering and text in interface/frFont.c
 0x00196BB0	frGetMessageResult	inferred	SMT3HD name via SLUS_209.11 0x001C9220, shared-hash-in-run; was itfTestTextInterfaceMask
 0x00196BC0	frSetVariableRequest	inferred	SMT3HD name via SLUS_209.11 0x001C9230, reloc-identical; was itfSetIndexedTextSlot
 0x00196BD8	itfGetTextLipsUnitId	inferred	Returns the first value stored by encoded-text control 0xF416; itfMesBuildEntryGlyph passes it as the unique-unit identifier to evtLipsExecFunction. DDS2 twin 0x0019E908. [Namer1 batch 40]
 0x00196BE0	itfGetTextLipsMotionId	inferred	Returns the second value stored by encoded-text control 0xF416; itfMesBuildEntryGlyph passes it as the motion number to evtLipsExecFunction. DDS2 twin 0x0019E910. [Namer1 batch 40]
 0x00196BE8	frDumpFontTexture	inferred	SMT3HD name via SLUS_209.11 0x001C9248, reloc-identical; was frFontSubmitAtlasSetupPackets
-0x00196ED0	itfSkipEncodedTextOpcode	inferred	Inferred from the current C implementation in game/code_00196478.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
-0x00197068	itfScanEncodedTextControls	inferred	Inferred from the current C implementation in game/code_00196478.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00196ED0	itfSkipEncodedTextOpcode	inferred	Inferred from the current C implementation in interface/frFont.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00197068	itfScanEncodedTextControls	inferred	Inferred from the current C implementation in interface/frFont.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00197190	itfInitTextDrawArgs	inferred	fills TextDrawArgs with defaults and forwards to itfScanEncodedTextControls
-0x001971E0	frFontGetSlotCellWidth	inferred	confidence=high; matched-C; src/dds1/game/code_00196478.c:238:func_001971E0; confidence=high; matched-C; src/dds1/game/code_00196478.c:238:func_001971E0; Returns the selected font-resource record cell width; interface/frFont.c identifies this halfword as cellWidth and supplies it to the cached glyph item constructor. Semantic twin has the same record stride and member access.; twin=dds2:0x0019B870; source=names_R_Names36.tsv:1 [names_qp11.tsv]
-0x00197200	frFontGetSlotCellHeight	inferred	confidence=high; matched-C; src/dds1/game/code_00196478.c:242:func_00197200; confidence=high; matched-C; src/dds1/game/code_00196478.c:242:func_00197200; Returns the selected font-resource record cell height; interface/frFont.c identifies this halfword as cellHeight and supplies it to the cached glyph item constructor. Semantic twin has the same record stride and member access.; twin=dds2:0x0019B890; source=names_R_Names36.tsv:2 [names_qp11.tsv]
+0x001971E0	frFontGetSlotCellWidth	inferred	confidence=high; matched-C; src/dds1/interface/frFont.c:2272:func_001971E0; confidence=high; matched-C; src/dds1/interface/frFont.c:2272:func_001971E0; Returns the selected font-resource record cell width; interface/frFont.c identifies this halfword as cellWidth and supplies it to the cached glyph item constructor. Semantic twin has the same record stride and member access.; twin=dds2:0x0019B870; source=names_R_Names36.tsv:1 [names_qp11.tsv]
+0x00197200	frFontGetSlotCellHeight	inferred	confidence=high; matched-C; src/dds1/interface/frFont.c:2277:func_00197200; confidence=high; matched-C; src/dds1/interface/frFont.c:2277:func_00197200; Returns the selected font-resource record cell height; interface/frFont.c identifies this halfword as cellHeight and supplies it to the cached glyph item constructor. Semantic twin has the same record stride and member access.; twin=dds2:0x0019B890; source=names_R_Names36.tsv:2 [names_qp11.tsv]
 0x00197220	itfSetTextDrawLimit	inferred	Stores the text render limit or its default when nonpositive. [names_reviewed8.tsv]
 0x00197238	frwGetStaffFontFRQ	inferred	SMT3HD name via SLUS_209.11 0x001C9EB8, reloc-identical; was frFontBuildColoredGlyphWithSharedFlags
 0x00197348	frwLoadStaffFont	inferred	SMT3HD name via SLUS_209.11 0x001C9FC8, reloc-identical; was mnuLoadStaffFonts
 0x00197378	frwFreeStaffFont	inferred	SMT3HD name via SLUS_209.11 0x001C9FF8, reloc-identical; was mnuUnloadStaffFonts
-0x00197398	itfDecodeGlyph	inferred	itf interface rendering and text in game/code_00196478.c
-0x001973E8	itfConvertText	inferred	itf interface rendering and text in game/code_00196478.c
+0x00197398	itfDecodeGlyph	inferred	itf interface rendering and text in interface/frWrap.c
+0x001973E8	itfConvertText	inferred	itf interface rendering and text in interface/frWrap.c
 0x001974B8	itfAttachGlyph16x18	inferred	Builds a glyph with 0x10 by 0x12 cell, sets color and flags and links it to its parent; sequel twin 0019F1B8.
 0x00197580	frwGetFontEx	inferred	SMT3HD name via SLUS_209.11 0x001CA0D0, reloc-identical; was itfAppendTextGlyphChain
 0x00197708	frwGetSmallFontFRQ	inferred	SMT3HD name via SLUS_209.11 0x001CA258, reloc-identical; was frFontCreateMeasuredFlaggedGlyph
@@ -3084,7 +3084,7 @@
 0x00197B78	itfAttachGlyph12x16	inferred	Builds a glyph with 0x0C by 0x10 cell, applies child colors and links it to its parent; sequel twin 0019F878.
 0x00197C40	itfDrawBankTextWithLayoutFlags	inferred	readability/matching review (QP16)
 0x00197E08	itfDrawTextWithSelectedFontMode	inferred	Draws a text ID with the resource chosen by font mode. [names_reviewed8.tsv]
-0x00197EC8	itfDrawUnderscoreTextSegment	inferred	confidence=high; matched-C; src/dds1/game/code_00196478.c:396:func_00197EC8; Extracts the requested underscore-delimited segment into a 0x200-byte local buffer and passes it to the text renderer; returns zero for overlong input or no selected segment.; source=names_pending_main.tsv:135 [names_qp12_apply.tsv]
+0x00197EC8	itfDrawUnderscoreTextSegment	inferred	confidence=high; matched-C; src/dds1/interface/frWrap.c:348:func_00197EC8; Extracts the requested underscore-delimited segment into a 0x200-byte local buffer and passes it to the text renderer; returns zero for overlong input or no selected segment.; source=names_pending_main.tsv:135 [names_qp12_apply.tsv]
 0x00198008	itfReturnZero	inferred	Returns literal zero; no direct C/assembly callers or registration found. Paired with DDS2 0x001A0038.
 0x00198020	itfReturnThirdCallbackValue	inferred	Ignores the first two callback arguments and returns the third unchanged; matches the DDS2 helper at 0x001A0050.
 0x00198028	itfGetLastDecodedByteCount	inferred	Returns the signed byte count written by frDecodeFontRow, matching its producer and DDS2 twin 0x001A0058. [Namer1 batch 40]
@@ -3099,8 +3099,9 @@
 0x001982C0	nbLoadDeadMoonTex	inferred	SMT3HD name via SLUS_209.11 0x001E9528, reloc-identical; was itfLoadBackgroundSprite
 0x00198308	itfReleaseBackgroundSpriteTexture	inferred	Releases the retained background sprite texture reference. [names_reviewed8.tsv]
 0x00198320	itfDrawBackgroundSprite	inferred	If cached bg00.tmx sprite exists, fills a neutral-gray rectangle at its width and height.
-0x00198408	itfReleaseFontTestTaskResources	inferred	Advances fading font glyphs and releases the background sprite. [names_reviewed8.tsv]
-0x00198428	itfDrawBackgroundAndGetTaskReadyMask	inferred	Draws background then returns 0xFFFFFFFF only when registered task state equals three; sequel twin 001A0458.
+0x001983A8	frTestFontInit	inferred	SMT3HD name via SLUS_209.11 0x1CAD00, SMT3 interface/frTestFont name; same role: starts the test_font process and test.bf script; was itfStartFontTestScene
+0x00198408	test_font_Shutdown	inferred	SMT3HD name via SLUS_209.11 0x1CAD68, SMT3 interface/frTestFont name; test_font's shutdown callback, destroys frTestFontHandle; was itfReleaseFontTestTaskResources
+0x00198428	test_font_Process	inferred	SMT3HD name via SLUS_209.11 0x1CAE50, SMT3 interface/frTestFont name; test_font's process callback; was itfDrawBackgroundAndGetTaskReadyMask
 0x00198460	itfMiscLinkInitialize	inferred	SMT3HD name via SLUS_209.11 0x001CAE58, byte-identical; was itfInitPool
 0x001984C0	itfMiscLinkTake	inferred	SMT3HD name via SLUS_209.11 0x001CAEB8, byte-identical; was itfAcquirePoolNode
 0x00198528	itfMiscLinkGive	inferred	SMT3HD name via SLUS_209.11 0x001CAF20, byte-identical; was itfReleasePoolNode
@@ -3163,8 +3164,8 @@
 0x0019AE58	itfMesMngSetPhase	inferred	SMT3HD name via SLUS_209.11 0x001CD3E8, shared-hash-in-run; was itfPanelSetStatus
 0x0019AE78	itfPanelAcquireHold	inferred	stores scrGetMessageHandle() into D_00357D90 and calls func_0019C968(window, 3, 0); DDS2 001A2EA8 [names_M33_SmallSweep2.tsv]
 0x0019AED8	itfPanelReleaseHold	inferred	closes the held message window (itfMesMngRequestMessageRelease) and resets D_00357D90 (window/counter = -1/0); DDS2 001A2F08 [names_M33_SmallSweep2.tsv]
-0x0019AF30	itfCommandQueueHeldPanelEntry	inferred	src/dds1/game/code_00199AD8.c func_0019AF30: Reads three script integers into held panel queue, ignoring absent hold or full queue. [names_reviewed24.tsv]
-0x0019AFD8	itfStepHeldPanelMessages	inferred	Inferred from the current C implementation in game/code_00199AD8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0019AF30	itfCommandQueueHeldPanelEntry	inferred	src/dds1/interface/itfMesManager.c func_0019AF30: Reads three script integers into held panel queue, ignoring absent hold or full queue. [names_reviewed24.tsv]
+0x0019AFD8	itfStepHeldPanelMessages	inferred	Inferred from the current C implementation in interface/itfMesManager.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x0019B108	itfMesMngSelect	inferred	SMT3HD name via SLUS_209.11 0x001CD408, reloc-identical; was itfMesScriptWaitForOptionSelection
 0x0019B1B0	itfCommandSelectOptionWithFade	inferred	readability/matching review (QP16)
 0x0019B2E0	itfMesMngGetSelPhase	inferred	SMT3HD name via SLUS_209.11 0x001CD4B0, shared-hash-in-run; was itfPanelGetPairFirst
@@ -9573,14 +9574,14 @@
 0x00356470	gFontBaseWidth	inferred	SMT3HD data name via SLUS_209.11 0x00326060, 1 agreeing references; was gFontBaseWidth
 0x00356478	frFontClutTable	inferred	SMT3HD data name via SLUS_209.11 0x00326068, 1 agreeing references; was frFontClutTable
 0x003565F8	frFontLoaded	inferred	SMT3HD data name via SLUS_209.11 0x003261E8, 1 agreeing references; was frFontLoaded
-0x00356620	itfGlyphDecodeTable	inferred	confidence=high; src/dds1/game/code_00196478.c:itfDecodeGlyph; Lookup table returned by indexed glyph decoding. [names_qp9.tsv]
+0x00356620	itfGlyphDecodeTable	inferred	confidence=high; src/dds1/interface/frWrap.c:itfDecodeGlyph; Lookup table returned by indexed glyph decoding. [names_qp9.tsv]
 0x00357A00	itfPanelLayoutCallbacks	inferred	confidence=high; Kind-indexed callback bank invoked after setting or advancing itfpanel_t corners/renderValue. The advance path forwards the four updated corners, while the set path forwards payload alone; existing unprototyped function pointers retained. Same role in DDS2 at 0x003B43F8. Preserve declarations, bounds, types, data and control flow. No source-owned import or current native ASM root/interior reference. [PurC5 readability data b2; matched-C/native-twin evidence; identifier-only]
 0x00357A28	CreateColorTable	inferred	SMT3HD data name via SLUS_209.11 0x00326450, 1 agreeing references; was CreateColorTable
 0x00357A50	DrawTable	inferred	SMT3HD data name via SLUS_209.11 0x00326478, 1 agreeing references; was DrawTable
-0x00357AF0	itfPanelColorTemplates	inferred	confidence=high; src/dds1/game/code_00199AD8.c:CreateColorMesWin; Six color/alpha vectors scaled into panel storage by the supplied RGBA components. [names_qp9.tsv]
-0x00357B90	itfPanelGradientColorTemplate	inferred	confidence=high; src/dds1/game/code_00199AD8.c:CreateColorPlain; Single vector scaled with the requested gradient RGBA values. [names_qp9.tsv]
-0x00357BA0	itfPanelGradientColorPair	inferred	confidence=high; src/dds1/game/code_00199AD8.c:CreateColorPlain; Two gradient vectors scaled with requested RGB and fixed alpha 0x80. [names_qp9.tsv]
-0x00357D90	itfHeldPanelCursor	inferred	confidence=high; matched_users=src/dds1/game/code_00199AD8.c:itfCommandQueueHeldPanelEntry, src/dds1/game/code_00199AD8.c:itfPanelAcquireHold; Panel hold captures the active window and initializes this cursor; held-entry commands append cursor items. [names_qp9.tsv]
+0x00357AF0	itfPanelColorTemplates	inferred	confidence=high; src/dds1/interface/itfPanel.c:CreateColorMesWin; Six color/alpha vectors scaled into panel storage by the supplied RGBA components. [names_qp9.tsv]
+0x00357B90	itfPanelGradientColorTemplate	inferred	confidence=high; src/dds1/interface/itfPanel.c:CreateColorPlain; Single vector scaled with the requested gradient RGBA values. [names_qp9.tsv]
+0x00357BA0	itfPanelGradientColorPair	inferred	confidence=high; src/dds1/interface/itfPanel.c:CreateColorPlain; Two gradient vectors scaled with requested RGB and fixed alpha 0x80. [names_qp9.tsv]
+0x00357D90	itfHeldPanelCursor	inferred	confidence=high; matched_users=src/dds1/interface/itfMesManager.c:itfCommandQueueHeldPanelEntry, src/dds1/interface/itfMesManager.c:itfPanelAcquireHold; Panel hold captures the active window and initializes this cursor; held-entry commands append cursor items. [names_qp9.tsv]
 0x00357FE8	itfSoundSelectorBorderColor	inferred	The sound selector option panel's border colour (DrawColorRec 0x3D, 5, 0, 0x4D), for itfDrawThreePanelBorderBands. DDS2 twin 0x003B49D8.
 0x00358360	itfOverlayColorEditorRows	inferred	battle overlay color/phase data renamed from D_00358360; referenced from the battle overlay unit code_001A04C0.c.
 0x00358390	itfTestOverlayColor	inferred	battle overlay color/phase data renamed from D_00358390; referenced from the battle overlay unit code_001A04C0.c.
@@ -10191,7 +10192,9 @@
 0x003BB170	itfTextLipsMotionId	inferred	confidence=high; sdfMotionCtrlr_t id returned by itfGetTextLipsMotionId and written by the encoded-text 0xF416 lips command from itfReadEncodedTextLead. Twin 0x00436560. [PurD readability data; identifier-only]
 0x003BB174	gModeFlag	inferred	SMT3HD data name via SLUS_209.11 0x0054F41C, 5 agreeing references; was gModeFlag
 0x003BB178	gFontDrawOT	inferred	SMT3HD data name via SLUS_209.11 0x0054F420, 1 agreeing references; was gFontDrawOT
-0x003BB190	itfFontTestScriptTask	inferred	confidence=high; src/dds1/game/code_00196478.c:D_003BB190; type=u32 task handle; refs=itfStartFontTestScene,itfDrawBackgroundAndGetTaskReadyMask; Stores the font-test BF process task and is used to query task readiness in the test draw loop. [names_qp9.tsv]
+0x003BB188	frWrapEmptyString	inferred	SMT3HD name via SLUS_209.11 0x54F448, SMT3 interface/frWrap name; the empty seed string the number-font builders link; was D_003BB188
+0x003BB18C	frTestFontHandle	inferred	SMT3HD name via SLUS_209.11 0x54F45C, SMT3 name; the font request test_font_Shutdown destroys; was D_003BB18C
+0x003BB190	itfFontTestScriptTask	inferred	confidence=high; src/dds1/game/code_00196478.c:D_003BB190; type=u32 task handle; refs=frTestFontInit,test_font_Process; Stores the font-test BF process task and is used to query task readiness in the test draw loop. [names_qp9.tsv]
 0x003BB1E8	itfMessageFlags	inferred	confidence=high; matched_users=src/dds1/interface/itfMesManager.c:itfMesClearFlags, src/dds1/interface/itfMesManager.c:itfMesSetFlags; Message flag setter/clearer update this shared bitmask. [names_qp9.tsv]
 0x003BB240	sndTestMessageResourceIndex	inferred	confidence=high; matched_users=src/dds1/game/code_0019DB88.c:TestMsgReloadTexture, src/dds1/game/code_0019DB88.c:TestMsgMngD_Process; Resource cycling advances this index modulo four; drawing skips its no-texture entry. [names_qp9.tsv]
 0x003BB244	sndTestMessageTexture	inferred	confidence=high; matched_users=src/dds1/game/code_0019DB88.c:TestMsgReloadTexture, src/dds1/game/code_0019DB88.c:TestMsgMngD_Process; Sound-test message resource cycling loads/releases this texture; the test-message draw task consumes it. [names_qp9.tsv]
@@ -10537,7 +10540,7 @@
 0x003BD808	hEve_PartialMultiBlur	inferred	SMT3HD data name via SLUS_209.11 0x00551DEC, 5 agreeing references; was hEve_PartialMultiBlur
 0x003BD80C	hEve_PartialMultiFilter	inferred	SMT3HD data name via SLUS_209.11 0x00551DF0, 5 agreeing references; was hEve_PartialMultiFilter
 0x003BD810	hEve_RippleBlur	inferred	SMT3HD data name via SLUS_209.11 0x00551DF4, 5 agreeing references; was hEve_RippleBlur
-0x003BD81C	itfBackgroundSpriteTexture	inferred	confidence=high; matched_users=src/dds1/game/code_00196478.c:itfDrawBackgroundSprite, src/dds1/game/code_00196478.c:itfReleaseBackgroundSpriteTexture; Background drawing consumes this shared sprite texture; release drops its texture reference. [names_qp9.tsv]
+0x003BD81C	itfBackgroundSpriteTexture	inferred	confidence=high; matched_users=src/dds1/interface/frWrap.c:itfDrawBackgroundSprite, src/dds1/interface/frWrap.c:itfReleaseBackgroundSpriteTexture; Background drawing consumes this shared sprite texture; release drops its texture reference. [names_qp9.tsv]
 0x003BD824	pbDebugPanel3State	inferred	SMT3HD data name via SLUS_209.11 0x00551EA4, 6 agreeing references; was pbDebugPanel3State
 0x003BD828	itfTestOverlayPhaseStep	inferred	battle overlay color/phase data renamed from D_003BD828; referenced from the battle overlay unit code_001A04C0.c.
 0x003BD830	btlLinkedSelectionTaskBuffer	inferred	confidence=high; matched_users=src/dds1/game/code_001A1960.c:btlAreLinkedSceneCountersAtThreshold, src/dds1/game/code_001A1960.c:btlReleaseSelectionTaskBuffer; Shared selection-task allocation is tested for linked-scene counter completion and released with that task. [names_qp9.tsv]

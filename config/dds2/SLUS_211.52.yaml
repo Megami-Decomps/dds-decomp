@@ -148,10 +148,11 @@ segments:
       - [0x9B900, c, effect/effSpline]  # Nocturne __FILE__
       - [0x9C538, c, interface/fmGslCont]  # Nocturne __FILE__; SMT3 unit start
       - [0x9C870, c, interface/frFont]  # Nocturne __FILE__; SMT3 unit start
-      - [0x9F138, c, game/code_0019E138]
-      - [0xA2930, c, interface/itfPanel]  # Nocturne __FILE__
-      - [0xA2B08, c, game/code_001A1B08]
-      - [0xA4370, c, interface/itfMesManager]  # Nocturne __FILE__ + P4 transfer
+      - [0x9FF38, c, interface/frWrap]  # SMT3 unit start
+      - [0xA13D8, c, interface/frTestFont]  # SMT3 unit start
+      - [0xA1490, c, interface/itfMisc]  # SMT3 unit start
+      - [0xA2858, c, interface/itfPanel]  # SMT3 unit start
+      - [0xA3D80, c, interface/itfMesManager]  # SMT3 unit start
       - [0xA9748, c, game/code_001A8748]  # preceding message protocol belongs to itfMesManager
       - [0xB04A0, c, game/code_001AF4A0]
       - [0xB2350, c, game/code_001B1350]
@@ -384,7 +385,9 @@ segments:
       - [0x315650, .rodata, game/code_00194700]
       - [0x315A00, .rodata, effect/effEvent]
       - [0x315A50, .rodata, interface/frFont]
-      - [0x315BD0, .rodata, game/code_0019E138]
+      - [0x315BD0, .rodata, interface/frWrap]
+      - [0x315C18, .rodata, interface/frTestFont]
+      - [0x315C50, .rodata, interface/itfMisc]
       - [0x315C70, .rodata, interface/itfMesManager]
       - [0x315E90, .rodata, game/code_001A8748]
       - [0x316390, .rodata, game/code_001AF4A0]
@@ -615,8 +618,10 @@ segments:
       - [0x337460, .sdata, effect/effEvent]
       - [0x337540, .sdata, interface/fmGslCont]
       - [0x337550, .sdata, interface/frFont]
-      - [0x337584, .sdata, game/code_0019E138]  # D_00436580 is frFont's: code_0019E138 reaches it with lui/addiu, not gp_rel
-      - [0x3375A8, .sdata, game/code_001A1B08]
+      - [0x337580, .sdata, interface/frWrap]
+      - [0x33758C, .sdata, interface/frTestFont]
+      - [0x337598, .sdata, interface/itfMisc]
+      - [0x3375A8, .sdata, interface/itfPanel]
       - [0x3375E8, .sdata, interface/itfMesManager]
       - [0x337630, .sdata, game/code_001B2AF8]
       - [0x3378C8, .sdata, game/code_001CFEF8]

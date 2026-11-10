@@ -1,14 +1,25 @@
-#include "sdk_ps2.h"
-#include "common.h"
+#include "mnu.h"
 #include "scr_integer_parameter_api.h"
 #include "scr_command_parameter_index.h"
+#include "scr_integer_return_value_api.h"
+#include "scr_command_timer_api.h"
+#include "sdf_packet_list.h"
+#include "itf.h"
+#include "itf_mes_window.h"
+#include "itf_mes_panel_mode.h"
 #include "itf_mes_entry_start_api.h"
+#include "sdf.h"
+#include "itf_panel_draw.h"
+#include "itf_text_vector.h"
+#include "itf_panel_api.h"
+#include "itf_panel_layouts.h"
+#include "itf_held_panel_message_step.h"
+#include "sdk_ps2.h"
+#include "common.h"
 #include "itf_mes_voice_cue_result.h"
 #include "itf_mes_select_def_key_result.h"
-#include "itf.h"
 #include "itf_message_manager_task.h"
 #include "itf_option_bit_index_api.h"
-#include "sdf_packet_list.h"
 #include "sdf_heap_api.h"
 #include "sdf_pac_reloc.h"
 #include "fr_font_temporary_entry_api.h"
@@ -16,19 +27,20 @@
 #include "itf_mes_state_api.h"
 #include "itf_text_slots_api.h"
 #include "fr_font_glyph_chain_count.h"
-#include "itf_mes_window.h"
-#include "itf_mes_panel_mode.h"
-#include "itf_panel_api.h"
 #include "kernel.h"
 #include "dds3_task_create.h"
 
+#define ITF_PANEL_MESSAGE_FADE_TICKS 30
+#define ITF_PANEL_MESSAGE_EXIT_TICKS 10
+extern ItfMesWindowIndex scrGetMessageHandle(void);
+extern void itfMesBuildOptionList(ItfMesWindowIndex window, ItfMesEntryIndex entryIndex);
+extern void itfMesMngRequestSelectRelease(s32 window);
+extern void itfMesMngRequestMessageRelease(s32 window, s32 releasePrimaryBlock);
+#include "sdf_packet_alloc.h"
+extern PanelHold itfHeldPanelCursor;
+#include "sdf_packet_alloc.h"
 
 typedef mesflow_tag ItfMesWindowRec;
-
-
-
-
-
 
 extern ItfMesSlot pinst[];
 
@@ -43,7 +55,6 @@ ItfMesWindowIndex scrGetMessageHandle(void);
 void fldNoopWithMode(s32 mode);
 
 void itfMesMngSetMesPosition(ItfMesWindowIndex window, s32 x, s32 y);
-
 
 void itfMesMngRequestMessageRelease(ItfMesWindowIndex window, ItfMesMessageReleaseMode releaseMode);
 
@@ -64,15 +75,12 @@ void itfMesSetTextSlotFromValue(ItfMesWindowIndex window, s32 slotIndex, s32 val
 
 void frFontCenterGlyphChainAt(s32 x, s32 y, _FRQ *glyphChain);
 
-
-
 extern u32 itfGetTextLipsUnitId(void);
 extern u32 itfGetTextLipsMotionId(void);
 
 void ChangeZBuffer(_FRQ *glyph, s32 renderValue);
 
 _FRQ *GetLastLinkFontHandle(_FRQ *glyph);
-
 
 void CommitVarTable(u8 **table);
 
@@ -115,6 +123,235 @@ void OpenCheckSpeakerWindow(instanceMes_tag *panel);
 #define ITF_MES_STRING_COPY_ROUND_BIAS 4
 #define ITF_MES_BINARY_COPY_ROUND_BIAS 5
 #define ITF_MES_COPY_ALIGN_MASK 3
+
+/* Poll/start an entry: one ends the command, zero keeps waiting.
+   A negative signed status is consumed by clearing it; positive status keeps waiting. */
+s32 itfMesMngMessage(void) {
+    ItfMesWindowIndex window = scrGetMessageHandle();
+    instanceMes_tag *record;
+    ItfMesEntryBlock *entryState;
+    s32 entryIndex;
+    s8 status;
+
+    if (window < 0) {
+        return 1;
+    }
+    record = pinst[window].mes;
+    entryIndex = scrGetIntPara(0);
+    entryState = &record->entryBlock;
+    status = entryState->textState;
+    if (status == 0) {
+        if (itfMesStartEntry(window, entryIndex, 0) == ITF_MES_ENTRY_START_EMPTY_TABLE) {
+            return 1;
+        }
+    } else if (status < 0) {
+        entryState->textState = 0;
+        return 1;
+    }
+    return 0;
+}
+
+/* Forward this record's layout sprite address and the supplied value; index is unchecked. */
+void itfMesMngSetOffsetY1(s32 windowIndex, s32 topDelta) {
+    itfPnlSetPositionOffset(pinst[windowIndex].mes->blkA4.sprite, 0, topDelta, 0, 0, 0);
+}
+
+/* Return the signed byte entry status; this is separate from the option-block s16 status. */
+s8 itfMesMngGetPhase(s32 windowIndex) {
+    return pinst[windowIndex].mes->entryBlock.textState;
+}
+
+/* Store the signed byte entry status; index and payload pointer are trusted. */
+void itfMesMngSetPhase(s32 windowIndex, s8 status) {
+    pinst[windowIndex].mes->entryBlock.textState = status;
+}
+
+/* Capture the script window, reset its held queue, and switch to page three.
+   Invalid windows still return the native command-complete value of one. */
+s32 itfPanelAcquireHold(void) {
+    PanelHold *hold;
+    ItfMesWindowIndex window;
+
+    window = scrGetMessageHandle();
+    if (window < 0) {
+        return 1;
+    }
+    hold = &itfHeldPanelCursor;
+    hold->window = window;
+    hold->unk4 = -1;
+    hold->entryEndFrame = -1;
+    hold->queuedCount = 0;
+    itfMesMngChangeWindowType(window, ITF_MES_PANEL_MODE_NO_SPRITE_TRANSITION, 0);
+    return 1;
+}
+
+/* Clean up the active held window and reset its queue; an inactive hold is a no-op. */
+s32 itfPanelReleaseHold(void) {
+    PanelHold *hold = &itfHeldPanelCursor;
+
+    if (hold->window < 0) {
+        return 1;
+    }
+    itfMesMngRequestMessageRelease(hold->window, 1);
+    hold->window = -1;
+    hold->unk4 = -1;
+    hold->entryEndFrame = -1;
+    hold->queuedCount = 0;
+    return 1;
+}
+
+/* Queue script words in native second/first/third field order; first and third narrow to s16.
+   Inactive/full queues are ignored with status one; negative queuedCount is not checked. */
+s32 itfCommandQueueHeldPanelEntry(void) {
+    PanelHold *cursor = &itfHeldPanelCursor;
+    s32 first;
+    s32 second;
+    s32 third;
+
+    if (cursor->window < 0) {
+        return 1;
+    }
+    if (cursor->queuedCount >= ITF_PANEL_HOLD_CAPACITY) {
+        return 1;
+    }
+    first = scrGetIntPara(0);
+    second = scrGetIntPara(1);
+    third = scrGetIntPara(2);
+    cursor->items[cursor->queuedCount].second = first;
+    cursor->items[cursor->queuedCount].first = second;
+    cursor->items[cursor->queuedCount].third = third;
+    cursor->queuedCount++;
+    return 1;
+}
+
+ItfHeldPanelMessageStepResult itfStepHeldPanelMessages(void) {
+    s32 frame;
+    s32 latest = -1;
+    s32 i;
+
+    if (itfHeldPanelCursor.window < 0) {
+        return ITF_HELD_PANEL_MESSAGES_COMPLETE;
+    }
+    frame = scrGetCommandTimer();
+    if (itfHeldPanelCursor.queuedCount == 0) {
+        return ITF_HELD_PANEL_MESSAGES_COMPLETE;
+    }
+    for (i = 0; i < itfHeldPanelCursor.queuedCount; i++) {
+        s32 start = itfHeldPanelCursor.items[i].first;
+
+        if (start >= latest) {
+            latest = start;
+        }
+        if (start == frame) {
+            s16 entry = itfHeldPanelCursor.items[i].second;
+            s32 deadline = frame + itfHeldPanelCursor.items[i].third;
+
+            itfMesStartEntry(itfHeldPanelCursor.window, entry, 0);
+            itfHeldPanelCursor.unk4 = entry;
+            itfHeldPanelCursor.entryEndFrame = deadline;
+        }
+    }
+    if (frame == itfHeldPanelCursor.entryEndFrame) {
+        itfMesMngRequestMessageRelease(itfHeldPanelCursor.window, 1);
+        itfHeldPanelCursor.unk4 = itfHeldPanelCursor.entryEndFrame = -1;
+    }
+    if (frame >= latest && frame >= itfHeldPanelCursor.entryEndFrame) {
+        itfPanelReleaseHold();
+        return ITF_HELD_PANEL_MESSAGES_COMPLETE;
+    }
+    return ITF_HELD_PANEL_MESSAGES_PENDING;
+}
+
+s32 itfMesMngSelect(void) {
+    ItfMesWindowIndex window;
+    s32 entry;
+    instanceMes_tag *record;
+    ItfMesBlk40 *options;
+
+    window = scrGetMessageHandle();
+    if (window < 0) {
+        return 1;
+    }
+    record = pinst[window].mes;
+    entry = scrGetIntPara(0);
+    options = &record->blk40;
+    if (options->selectionState == 0) {
+        itfMesBuildOptionList(window, entry);
+    } else if (options->selectionState < 0) {
+        options->selectionState = 0;
+        scrSetIntReturnValue(options->selectedIndex);
+        itfMesMngRequestSelectRelease(window);
+        return 1;
+    }
+    return 0;
+}
+
+extern void dds3SetFilter2Para(u32);
+extern void dds3SetFilter2RGBA(u32);
+extern void dds3Filter2On(s32);
+extern void dds3Filter2Off(s32);
+extern s32 D_003BD820;
+
+/* Configure the fade on timer zero, wait thirty ticks, then consume a negative option status.
+   Keep both timer reads: setup tests a second read, while later comparisons use the cached one. */
+s32 itfCommandSelectOptionWithFade(void) {
+    ItfMesWindowIndex window;
+    s32 elapsedTicks;
+    s32 entryIndex;
+    instanceMes_tag *record;
+    ItfMesBlk40 *options;
+
+    window = scrGetMessageHandle();
+    if (window < 0) {
+        return 1;
+    }
+    elapsedTicks = scrGetCommandTimer();
+    if (scrGetCommandTimer() == 0) {
+        dds3SetFilter2Para(0x44);
+        dds3SetFilter2RGBA(0x5E1C1C1C);
+        dds3Filter2On(ITF_PANEL_MESSAGE_FADE_TICKS);
+        D_003BD820 = -1;
+        return 0;
+    }
+    if (elapsedTicks < ITF_PANEL_MESSAGE_FADE_TICKS) {
+        return 0;
+    }
+    if (elapsedTicks == ITF_PANEL_MESSAGE_FADE_TICKS) {
+        itfMesMngChangeWindowType(window, ITF_MES_PANEL_MODE_NO_SPRITE_TRANSITION, 0);
+    } else if (D_003BD820 == -1) {
+        record = pinst[window].mes;
+        entryIndex = scrGetIntPara(0);
+        options = &record->blk40;
+        if (options->selectionState == 0) {
+            itfMesBuildOptionList(window, entryIndex);
+        } else if (options->selectionState < 0) {
+            options->selectionState = 0;
+            scrSetIntReturnValue(options->selectedIndex);
+            itfMesMngRequestSelectRelease(window);
+            dds3Filter2Off(ITF_PANEL_MESSAGE_EXIT_TICKS);
+            D_003BD820 = 0;
+            return 1;
+        }
+    }
+    return 0;
+}
+
+/* Return the option-block signed status word, not the separate entry status byte;
+ * its callers read the sign-extended halfword as a word. */
+s32 itfMesMngGetSelPhase(s32 windowIndex) {
+    return pinst[windowIndex].mes->blk40.selectionState;
+}
+
+/* Store the option-block signed status word without validating the slot. */
+void itfMesMngSetSelPhase(s32 windowIndex, s16 status) {
+    pinst[windowIndex].mes->blk40.selectionState = status;
+}
+
+/* Return the same signed word forwarded as the script result when an option completes;
+ * its callers read the sign-extended halfword as a word. */
+s32 itfMesMngGetSelectNo(s32 windowIndex) {
+    return pinst[windowIndex].mes->blk40.selectedIndex;
+}
 
 /* Store the script's panel mask; a negative script window is a no-op. Return 1. */
 s32 itfMesMngMaskSelect(void) {
@@ -974,8 +1211,6 @@ u16 itfMesMngGetStatManager(void) {
     return itfMesMngManager.flags;
 }
 
-
-
 extern s8 dds3PadButtonState[];
 extern char *D_00357FA0[];
 extern char *D_003BB200[2];
@@ -990,6 +1225,7 @@ extern ItfMesWindowRec *DebugChangeInstance(ItfMesWindowRec *window);
 extern void DebugMoveWinVert(ItfMesBlkA4 *panel, s32 selectedItem);
 
 /* Run and draw the interactive message-layout inspector. */
+
 INCLUDE_RODATA(const s32, "interface/itfMesManager", D_003A1480);
 
 INCLUDE_RODATA(const s32, "interface/itfMesManager", D_003A1490);

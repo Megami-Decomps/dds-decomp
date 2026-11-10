@@ -19,6 +19,57 @@
 #include "dds3_task_runner.h"
 #include "btl.h"
 #include "mnu_title_sound.h"
+#include "scr.h"
+#include "itf_bit_range.h"
+#include "dds3_admin_control_api.h"
+#include "itf_text_vector.h"
+#include "itf_text_slots_api.h"
+#include "sdf_packet_header.h"
+#include "itf_gs_state_packet.h"
+#include "fr_font.h"
+#include "kernel.h"
+#include "dds3_task_create.h"
+#include "dds3_task_state.h"
+#include "dds3_task_state_query.h"
+#include "itf_panel_api.h"
+#include "fr_font_glyph_chain_count.h"
+#include "sdf.h"
+#include "itf_panel_draw.h"
+#include "sdf_texture_file.h"
+#include "fr_font.h"
+
+/* Declared before first use (were implicit int). */
+extern _FRQ * frDestroyFontRequest(_FRQ *glyph);
+extern void frDelFontStyle(s32 slotId);
+/* Original-style implicit int, kept: matched code depends on it: itfDrawTexturedSpriteRect. */
+
+#define ITF_BYTE_MASK 0xFF
+
+#include "sdf_debug_api.h"
+
+extern void frFontCheckPendingGlyphState(FrFontCtx *);
+extern void frMessageReturnCode(FrFontCtx *);
+extern void frFontAppendIndexedTextToGlyphChain(u8, FrFontCtx *);
+extern u8 gModeFlag;
+extern void mnuSetTitleVoicePrefixIndex(s32);
+extern void mnuPlayTitleVoiceFile(char *);
+extern s32 mnuGetTitleEffectFrameCounter(void);
+
+extern _FRQ *frCombineFontRequest(_FRQ *, _FRQ *);
+extern _FRQ *frFontLinkGlyph(_FRQ *, _FRQ *, s32);
+
+extern void frEnableMode(s32 value);
+
+extern u8 frDisableMode(u8 value);
+
+extern s32 frDefaultFontHandle;
+
+extern u32 itfTextLipsMotionId;
+
+extern u32 itfTextLipsUnitId;
+void frFontEnsureSlotLoaded(s32 id, const char *path);
+
+extern s32 itfScanEncodedTextControls(FrFontCtx *args);
 
 #ifdef NON_MATCHING
 extern void fmRetFontMem(FntNode *node);
@@ -1704,6 +1755,535 @@ u32 itfTextLipsMotionId __attribute__((section(".sdata"))) = 0;
 u8 gModeFlag __attribute__((section(".sdata"))) = 0x16;
 
 u32 gFontDrawOT __attribute__((section(".sdata"))) = 0x54;
+
+/* Subtract one modulo 256 from the first byte, then advance over the whole pair. */
+u32 itfReadEncodedTextLead(FrFontCtx *args) {
+    s32 *position = &args->encodedTextOffset;
+    const u8 *byte = args->encodedText + *position;
+    u32 value = *byte;
+
+    *position += 2;
+    return (value + ITF_BYTE_MASK) & ITF_BYTE_MASK;
+}
+
+/* Decode a little-endian pair; encoded high byte 0xFF is the zero escape.
+ * Neither reader checks the input length. */
+u32 itfReadEncodedCode(FrFontCtx *args) {
+    const u8 *bytes = args->encodedText;
+    u32 first;
+    u32 second;
+
+    first = (bytes[args->encodedTextOffset++] + ITF_BYTE_MASK) & ITF_BYTE_MASK;
+    second = bytes[args->encodedTextOffset++];
+    if (second == ITF_BYTE_MASK) {
+        second = 0;
+    } else {
+        second = (second + ITF_BYTE_MASK) & ITF_BYTE_MASK;
+    }
+    return (second << 8) | first;
+}
+
+extern u32 D_003BB15C;
+
+extern FrFontSystem frFontWork;
+
+s32 itfProcessEncodedTextControl(s32 code, FrFontCtx *stream) {
+    s32 *position = &stream->encodedTextOffset;
+    const u8 *bytes = stream->encodedText;
+    s32 payloadWords = code & 0xF;
+    s32 payloadPosition = *position;
+
+    code = (code << 8) | bytes[payloadPosition++];
+    *position = payloadPosition;
+    switch (code) {
+    case 0xF206:
+        stream->fontIndex = bytes[payloadPosition] - 1;
+        *position = payloadPosition + 2;
+        break;
+    case 0xF202:
+        stream->firstOption = bytes[payloadPosition] - 1;
+        *position = payloadPosition + 2;
+        break;
+    case 0xF209:
+        stream->secondOption = bytes[payloadPosition] - 1;
+        *position = payloadPosition + 2;
+        break;
+    case 0xF207:
+        stream->contextEncodedByte = bytes[payloadPosition] - 1;
+        *position = payloadPosition + 2;
+        break;
+    case 0xF203:
+        if (frFontIndexedTextSlots[bytes[*position] - 1] != 0) {
+            frFontCheckPendingGlyphState(stream);
+            frFontAppendIndexedTextToGlyphChain((u8)(stream->encodedText[*position] - 1), stream);
+        }
+        *position += 2;
+        break;
+    case 0xF20E:
+        *position = payloadPosition + 1;
+        break;
+    case 0xF10F:
+        if (!(gModeFlag & 4)) {
+            /* Retail 0x00196730 b .L00196774: advanceLine is also entered by
+             * fall-through from the beql at 0x0019676C. */
+            goto advanceLine;
+        }
+        break;
+    case 0xF110:
+        D_003BB15C |= 2;
+        return 1;
+    case 0xF111:
+        if (!(gModeFlag & 8)) {
+            /* Retail 0x00196750 beqz .L00196768: checkAutomaticLine has one entry
+             * and falls into the shared advanceLine call at 0x00196774. */
+            goto checkAutomaticLine;
+        }
+        /* This flagged form requests the same stop as opcode F104. */
+    case 0xF104:
+        D_003BB15C |= 1;
+        return 1;
+
+checkAutomaticLine:
+        if (!(gModeFlag & 0x20)) {
+            break;
+        }
+advanceLine:
+        frMessageReturnCode(stream);
+        break;
+    case 0xF112:
+        D_003BB15C |= 4;
+        break;
+    case 0xF413:
+        mnuSetTitleVoicePrefixIndex(itfReadEncodedTextLead(stream));
+        mnuPlayTitleVoiceFile((char *)itfReadEncodedCode(stream));
+        break;
+    case ITF_GLYPH_CONTROL_WAIT_FRAMES:
+        if (stream->glyphChain->pendingLipsStopCode != 0) {
+            stream->glyphChain->skipLipsStopWait = 1;
+        }
+        stream->glyphChain->timedControlCode = code;
+        stream->glyphChain->remainingWaitFrames = itfReadEncodedCode(stream);
+        break;
+    case ITF_GLYPH_CONTROL_WAIT_FRAME_OR_SOUND:
+        if (stream->glyphChain->pendingLipsStopCode != 0) {
+            stream->glyphChain->skipLipsStopWait = 1;
+        }
+        stream->glyphChain->timedControlCode = code;
+        stream->glyphChain->remainingWaitFrames = itfReadEncodedCode(stream);
+        if (stream->glyphChain->remainingWaitFrames != ITF_GLYPH_WAIT_FOR_SOUND_SENTINEL) {
+            s32 frame = mnuGetTitleEffectFrameCounter();
+            stream->glyphChain->remainingWaitFrames -= frame;
+        }
+        if (stream->glyphChain->remainingWaitFrames < 0) {
+            stream->glyphChain->remainingWaitFrames = 0;
+        }
+        break;
+    case 0xF416:
+        itfTextLipsUnitId = itfReadEncodedTextLead(stream);
+        itfTextLipsMotionId = itfReadEncodedTextLead(stream);
+        D_003BB15C |= 8;
+        break;
+    case ITF_GLYPH_CONTROL_STOP_LIPS:
+        stream->glyphChain->pendingLipsStopCode = code;
+        break;
+    case 0xF20A:
+    case 0xF20B:
+    case 0xF20C:
+    case 0xF20D:
+        break;
+    default:
+        stream->encodedTextOffset += (payloadWords - 1) << 1;
+        break;
+    }
+    if (stream->pendingCreate == 0) {
+        stream->pendingCreate = 1;
+    }
+    return 0;
+}
+
+extern s8 frFontEncodedTextGlyphSpacing;
+
+extern _FRQ * frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, _FRQ *existingGlyph);
+
+_FRQ *itfBuildGlyphChainFromEncodedStream(FrFontCtx *stream) {
+    u8 encodedText[3];
+    s32 value;
+    const u8 *bytes = stream->encodedText;
+
+    if ((bytes[0] & 0xF0) != 0xF0 && bytes[1] == 8) {
+        stream->encodedTextOffset += 4;
+    }
+    D_003BB15C &= ~1;
+    D_003BB15C &= ~2;
+    D_003BB15C &= ~4;
+    D_003BB15C &= ~8;
+    frEnableMode(1);
+    frDisableMode(2);
+    bytes = stream->encodedText;
+    for (;;) {
+        value = bytes[stream->encodedTextOffset++];
+        if (value == 0) {
+            break;
+        }
+        if ((value & 0xF0) == 0xF0) {
+            if (itfProcessEncodedTextControl(value, stream)) {
+                break;
+            }
+        } else if (value == 10) {
+            if (!(gModeFlag & 4)) {
+                continue;
+            }
+            frMessageReturnCode(stream);
+        } else {
+            frFontCheckPendingGlyphState(stream);
+            if (value < 0x80) {
+                encodedText[0] = value;
+                encodedText[1] = 0;
+                stream->glyphChain = frFontBuildGlyphChain((const char *)encodedText, stream->fontIndex,
+                    stream->firstOption, stream->secondOption, stream->glyphChain);
+            } else {
+                value = (value << 8) | stream->encodedText[stream->encodedTextOffset++];
+                if (value <= 0xC07F) {
+                    encodedText[0] = (u32)value >> 8;
+                    encodedText[1] = value;
+                    encodedText[2] = 0;
+                    stream->glyphChain = frFontBuildGlyphChain((const char *)encodedText, stream->fontIndex,
+                        stream->firstOption, stream->secondOption, stream->glyphChain);
+                } else {
+                    value -= 0x4000;
+                    encodedText[0] = (u32)value >> 8;
+                    encodedText[1] = value;
+                    encodedText[2] = 0;
+                    stream->glyphChain = frFontBuildGlyphChain((const char *)encodedText, 8,
+                        stream->firstOption, stream->secondOption, stream->glyphChain);
+                }
+            }
+            frSetFontSpace(stream->glyphChain, frFontEncodedTextGlyphSpacing);
+            frSetPriority(stream->glyphChain, stream->z);
+        }
+        bytes = stream->encodedText;
+    }
+    frDisableMode(1);
+    frEnableMode(2);
+    return stream->glyphChain;
+}
+
+_FRQ *MessageRequest(s32 x, s32 y, const u8 *encodedText, _FRQ *sub) {
+    return MessageRequestEx2(x, y, 0, 0, 0, 0, 0x80, encodedText, sub);
+}
+
+_FRQ *MessageRequestEx(s32 x, s32 y, s32 channel0, s32 channel1, s32 channel2, s32 channel3, const u8 *encodedText, _FRQ *sub) {
+    return MessageRequestEx2(x, y, 0, channel0 & 0xFF, channel1 & 0xFF, channel2 & 0xFF, channel3 & 0xFF, encodedText, sub);
+}
+
+extern _FRQ *itfBuildGlyphChainFromEncodedStream(FrFontCtx *);
+
+_FRQ *MessageRequestEx2(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, const u8 *encodedText, _FRQ *sub) {
+    FrFontCtx args;
+
+    args.x = x;
+    args.y = y;
+    args.z = depth << 4;
+    args.fontIndex = channel0;
+    args.firstOption = channel1;
+    args.secondOption = channel2;
+    args.contextEncodedByte = channel3;
+    args.encodedText = encodedText;
+    args.glyphChain = sub;
+    args.encodedTextOffset = 0;
+    args.pendingCreate = 1;
+    args.pendingPosition = 1;
+    return itfBuildGlyphChainFromEncodedStream(&args);
+}
+
+_FRQ *itfDrawColor(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1,
+                   s32 channel2, s32 channel3, const u8 *encodedText, _FRQ *unusedSub) {
+    return MessageRequestEx2(x, y, depth, channel0 & 0xff, channel1 & 0xff,
+                  channel2 & 0xff, channel3 & 0xff, encodedText, 0);
+}
+
+u32 frGetMessageResult(u32 mask) {
+    return D_003BB15C & mask;
+}
+
+/* Store a replacement-text byte pointer in the font's indexed table. */
+void frSetVariableRequest(s32 slotIndex, const u8 *encodedText) {
+    frFontIndexedTextSlots[slotIndex] = (u32)encodedText;
+}
+
+/* Return the unit identifier saved by text lip-sync control 0xF416. */
+u32 itfGetTextLipsUnitId(void) {
+    return itfTextLipsUnitId;
+}
+
+/* Return the motion number saved by text lip-sync control 0xF416. */
+u32 itfGetTextLipsMotionId(void) {
+    return itfTextLipsMotionId;
+}
+
+#ifdef NON_MATCHING
+#include "common.h"
+#include "itf_bit_range.h"
+#include "dds3_admin_control_api.h"
+#include "itf_text_vector.h"
+#include "itf_text_slots_api.h"
+#include "fr_font_text_slots.h"
+#include "sdf_packet_list.h"
+#include "sdf_packet_header.h"
+#include "itf_gs_state_packet.h"
+#include "fr_font.h"
+#include "kernel.h"
+#include "dds3_task_create.h"
+#include "dds3_task_state.h"
+#include "sdf_heap_api.h"
+#include "itf.h"
+#include "fr_font_glyph_chain_count.h"
+#include "itf_mem_node.h"
+#include "itf_resource_segments.h"
+#include "sdf.h"
+#include "itf_panel_draw.h"
+#include "sdf_texture_file.h"
+#include "btl.h"
+#include "fr_font.h"
+#include "sdf_debug_api.h"
+#include "fr_font_atlas_packet.h"
+#include "dds3_draw_buffer.h"
+extern void frCreateDrawEnvPacket(FrFontGsPacket *packet);
+
+extern FrFontSystem frFontWork;
+
+extern sdfGrOt_t sdfGrOtTable[];
+extern sdfDrawTag_t frFontSetupPacketLists[2];
+extern FrFontGsPacket frFontSetupPackets[2];
+extern sdfDrawTag_t frFontAtlasPacketLists[2];
+extern FrFontAtlasPacket frDumpFontTexturePacket[2];
+
+#define FR_FONT_ATLAS_SURFACE 83 /* the draw surface the atlas is submitted through */
+
+/* Draws the whole glyph atlas as a textured four-corner strip at a screen
+ * position and submits it, with the GS setup packet, through the current draw
+ * buffer's packet lists. The matching
+ * build uses INCLUDE_ASM; this is written from the retail routine. It differs from retail only in register allocation
+ * and in stack spills of intermediate values. */
+void frDumpFontTexture(s32 x, s32 y, s32 depth) {
+    FrFontAtlasPacket *packet;
+    FrFontGsPacket *setup;
+    FrFontAtlasDraw *draw;
+    s32 x1;
+    s32 y1;
+    s32 u1;
+    s32 v1;
+    u8 buffer;
+
+    buffer = dds3GetFrameID();
+    x = (x << 4) + 0x7000;
+    y = (y << 3) + 0x7900;
+    x1 = x + (frFontWork.atlas.width << 4);
+    y1 = y + (frFontWork.atlas.height << 3);
+    u1 = frFontWork.atlas.width << 4;
+    v1 = frFontWork.atlas.height << 4;
+
+    packet = &frDumpFontTexturePacket[buffer];
+    setup = &frFontSetupPackets[buffer];
+    draw = &packet->draw;
+    packet->dma.words[0] = 0x70000010;
+    packet->dma.words[1] = 0;
+    packet->dma.words[2] = 0;
+    packet->dma.words[3] = 0x50000010;
+    draw->gifTag = 0x10AE40000000800FULL;
+    draw->gifRegisters = 0xE;
+    draw->tex0.value = (u64)frFontWork.atlas.bufferBase |
+                       ((u64)frFontWork.atlas.bufferWidth << 14) | (0x14ULL << 20) |
+                       ((u64)frFontWork.atlas.widthExponent << 26) |
+                       ((u64)frFontWork.atlas.heightExponent << 30) | (1ULL << 34) |
+                       ((u64)frFontWork.imageBuffers[0] << 37) | (4ULL << 61);
+    draw->tex0.reg = 6;
+    draw->tex1.value = 0x60;
+    draw->tex1.reg = 0x14;
+    draw->clamp.value = 5;
+    draw->clamp.reg = 8;
+
+    draw->corners[0].uv.value = (u64)u1 | ((u64)v1 << 16);
+    draw->corners[0].uv.reg = 3;
+    draw->corners[0].rgbaq.value = 0x3F800000FFFFFFFFULL;
+    draw->corners[0].rgbaq.reg = 1;
+    draw->corners[0].xyz.value = (u64)x1 | ((u64)y1 << 16) | ((u64)depth << 32);
+    draw->corners[0].xyz.reg = 4;
+    draw->corners[1].uv.value = (u64)v1 << 16;
+    draw->corners[1].uv.reg = 3;
+    draw->corners[1].rgbaq.value = 0x3F800000FFFFFFFFULL;
+    draw->corners[1].rgbaq.reg = 1;
+    draw->corners[1].xyz.value = (u64)x | ((u64)y1 << 16) | ((u64)depth << 32);
+    draw->corners[1].xyz.reg = 4;
+    draw->corners[2].uv.value = (u64)u1;
+    draw->corners[2].uv.reg = 3;
+    draw->corners[2].rgbaq.value = 0x3F800000FFFFFFFFULL;
+    draw->corners[2].rgbaq.reg = 1;
+    draw->corners[2].xyz.value = (u64)x1 | ((u64)y << 16) | ((u64)depth << 32);
+    draw->corners[2].xyz.reg = 4;
+    draw->corners[3].uv.value = 0;
+    draw->corners[3].uv.reg = 3;
+    draw->corners[3].rgbaq.value = 0x3F800000FFFFFFFFULL;
+    draw->corners[3].rgbaq.reg = 1;
+    draw->corners[3].xyz.value = (u64)x | ((u64)y << 16) | ((u64)depth << 32);
+    draw->corners[3].xyz.reg = 4;
+
+    frCreateDrawEnvPacket(setup);
+    sdfDrawTagInit(&frFontSetupPacketLists[buffer]);
+    sdfDrawTagLink(&frFontSetupPacketLists[buffer], (u32)setup);
+    sdfGrOtTable[FR_FONT_ATLAS_SURFACE].regFunc(&sdfGrOtTable[FR_FONT_ATLAS_SURFACE],
+                                                   &frFontSetupPacketLists[buffer]);
+    sdfDrawTagInit(&frFontAtlasPacketLists[buffer]);
+    sdfDrawTagLink(&frFontAtlasPacketLists[buffer], (u32)packet);
+    sdfGrOtTable[FR_FONT_ATLAS_SURFACE].regFunc(&sdfGrOtTable[FR_FONT_ATLAS_SURFACE],
+                                                   &frFontAtlasPacketLists[buffer]);
+}
+#else
+INCLUDE_ASM(const s32, "interface/frFont", frDumpFontTexture);
+#endif
+
+s32 itfSkipEncodedTextOpcode(s32 code, FrFontCtx *stream) {
+    s32 *position = &stream->encodedTextOffset;
+    const u8 *bytes = stream->encodedText;
+    s32 payloadWords = code & 0xF;
+    s32 payloadPosition = *position;
+
+    code = (code << 8) | bytes[payloadPosition++];
+    *position = payloadPosition;
+    switch (code) {
+    case 0xF20E:
+        *position = payloadPosition + 1;
+        break;
+    case 0xF413:
+        *position = payloadPosition + 4;
+        return 2;
+    case 0xF206:
+        *position = payloadPosition + 2;
+        break;
+    case 0xF202:
+        *position = payloadPosition + 2;
+        break;
+    case 0xF209:
+        *position = payloadPosition + 2;
+        break;
+    case 0xF207:
+        *position = payloadPosition + 2;
+        break;
+    case 0xF203:
+        *position = payloadPosition + 2;
+        break;
+    case 0xF214:
+        *position = payloadPosition + 2;
+        break;
+    case 0xF215:
+        *position = payloadPosition + 2;
+        break;
+    case 0xF416:
+        *position = payloadPosition + 4;
+        break;
+    case 0xF10F:
+        break;
+    case 0xF110:
+        return 1;
+    case 0xF111:
+    case 0xF112:
+        break;
+    case 0xF104:
+        return 1;
+    case 0xF117:
+        break;
+    case 0xF20A:
+    case 0xF20B:
+    case 0xF20C:
+    case 0xF20D:
+        break;
+    default:
+        stream->encodedTextOffset += (payloadWords - 1) << 1;
+        break;
+    }
+    return 0;
+}
+
+s32 itfScanEncodedTextControls(FrFontCtx *stream) {
+    u8 encodedText[3];
+    s32 value;
+    const u8 *bytes = stream->encodedText;
+
+    if ((bytes[0] & 0xF0) != 0xF0 && bytes[1] == 8) {
+        stream->encodedTextOffset += 4;
+    }
+    bytes = stream->encodedText;
+    for (;;) {
+        value = bytes[stream->encodedTextOffset++];
+        if (value == 0) {
+            break;
+        }
+        if ((value & 0xF0) == 0xF0) {
+            s32 result = itfSkipEncodedTextOpcode(value, stream);
+
+            if (result == 1) {
+                break;
+            }
+            if (result == 2) {
+                return 1;
+            }
+        } else if (value == 10) {
+            continue;
+        } else if (value < 0x80) {
+            encodedText[0] = value;
+            encodedText[1] = 0;
+        } else {
+            value = (value << 8) | stream->encodedText[stream->encodedTextOffset++];
+            if (value <= 0xC07F) {
+                encodedText[0] = (u32)value >> 8;
+                encodedText[1] = value;
+                encodedText[2] = 0;
+            } else {
+                value -= 0x4000;
+                encodedText[0] = (u32)value >> 8;
+                encodedText[1] = value;
+                encodedText[2] = 0;
+            }
+        }
+        bytes = stream->encodedText;
+    }
+    return 0;
+}
+
+s32 itfInitTextDrawArgs(const u8 *encodedText, _FRQ *sub) {
+    FrFontCtx args;
+
+    args.x = 0;
+    args.y = 0;
+    args.z = 0;
+    args.fontIndex = 0;
+    args.firstOption = 0;
+    args.secondOption = 0;
+    args.contextEncodedByte = 0;
+    args.encodedText = encodedText;
+    args.glyphChain = sub;
+    args.encodedTextOffset = 0;
+    args.pendingCreate = 1;
+    args.pendingPosition = 1;
+    return itfScanEncodedTextControls(&args);
+}
+
+/* Return the selected resource header's cell width; index is unchecked. */
+u16 frFontGetSlotCellWidth(s32 slotIndex) {
+    return frFontWork.entries[slotIndex].resourceHeader->cellWidth;
+}
+
+/* Return the selected resource header's cell height; index is unchecked. */
+u16 frFontGetSlotCellHeight(s32 slotIndex) {
+    return frFontWork.entries[slotIndex].resourceHeader->cellHeight;
+}
+
+void itfSetTextDrawLimit(s32 limit) {
+    if (limit < 1) {
+        limit = 0x14;
+    }
+    frDefaultFontHandle = limit;
+}
 
 INCLUDE_SDATA(const s32, "interface/frFont", D_003BB17C);
 

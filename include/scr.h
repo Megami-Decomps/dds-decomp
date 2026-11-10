@@ -27,7 +27,7 @@ typedef struct scrCommandTable_t scrCommandTable_t;
 typedef struct scrProcessWork_s scrProcessWork_s;
 
 dds3ProcessID_t *scrStartScriptProcess(s32 priority, scrProcessWork_s *work);
-/* DDS returns the process: code_00196478 and code_0019E138 use it. */
+/* DDS returns the process: frTestFont uses it. */
 dds3ProcessID_t *scrStartScriptByName(s32 priority, char *name, s32 messageHandle);
 dds3ProcessID_t *scrStartScript2(s32 priority, void *data, s32 startproc);
 

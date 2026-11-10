@@ -40,7 +40,7 @@ extern void fldStopLmapTask(void);
 extern void fldStopSceneTasks(void);
 extern void itfInitializeAdminInterfaceNoop(void);
 extern void itfShutdownAdminInterfaceNoop(void);
-extern void itfStartFontTestScene(void);
+extern void frTestFontInit(void);
 extern void mnuCampDestroyPanelTasks(void);
 extern void dds3ConfigProcessEnd(void);
 extern void mnuCreateCampTasks(void);
@@ -575,7 +575,7 @@ u32 CheckBillboardTest(void) {
 }
 
 void CallFontTest(void) {
-    itfStartFontTestScene();
+    frTestFontInit();
 }
 
 /* Admin mode 25 destroy callback: no work, zero transition result. */

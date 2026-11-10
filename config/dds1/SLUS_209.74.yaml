@@ -148,10 +148,11 @@ segments:
       - [0x93CC8, c, effect/effSpline]  # Nocturne __FILE__
       - [0x94900, c, interface/fmGslCont]  # Nocturne __FILE__; SMT3 unit start
       - [0x94C38, c, interface/frFont]  # Nocturne __FILE__; SMT3 unit start
-      - [0x97478, c, game/code_00196478]
-      - [0x9A900, c, interface/itfPanel]  # Nocturne __FILE__
-      - [0x9AAD8, c, game/code_00199AD8]
-      - [0x9C340, c, interface/itfMesManager]  # Nocturne __FILE__ + P4 transfer
+      - [0x98238, c, interface/frWrap]  # SMT3 unit start
+      - [0x993A8, c, interface/frTestFont]  # SMT3 unit start
+      - [0x99460, c, interface/itfMisc]  # SMT3 unit start
+      - [0x9A828, c, interface/itfPanel]  # SMT3 unit start
+      - [0x9BD50, c, interface/itfMesManager]  # SMT3 unit start
       - [0x9EB88, c, game/code_0019DB88]
       - [0xA14C0, c, game/code_001A04C0]
       - [0xA2960, c, game/code_001A1960]
@@ -370,7 +371,9 @@ segments:
       - [0x2A1F30, .rodata, game/code_0018CAC8]
       - [0x2A22E0, .rodata, effect/effEvent]
       - [0x2A2330, .rodata, interface/frFont]
-      - [0x2A2370, .rodata, game/code_00196478]
+      - [0x2A2370, .rodata, interface/frWrap]
+      - [0x2A23B8, .rodata, interface/frTestFont]
+      - [0x2A23F0, .rodata, interface/itfMisc]
       - [0x2A2410, .rodata, interface/itfMesManager]
       - [0x2A24F0, .rodata, game/code_0019DB88]
       - [0x2A2598, .rodata, game/code_001A04C0]
@@ -586,8 +589,10 @@ segments:
       - [0x2BC070, .sdata, effect/effEvent]
       - [0x2BC150, .sdata, interface/fmGslCont]
       - [0x2BC160, .sdata, interface/frFont]
-      - [0x2BC188, .sdata, game/code_00196478]
-      - [0x2BC1A8, .sdata, game/code_00199AD8]
+      - [0x2BC188, .sdata, interface/frWrap]
+      - [0x2BC18C, .sdata, interface/frTestFont]
+      - [0x2BC198, .sdata, interface/itfMisc]
+      - [0x2BC1A8, .sdata, interface/itfPanel]
       - [0x2BC1E8, .sdata, interface/itfMesManager]
       - [0x2BC230, .sdata, game/code_0019DB88]
       - [0x2BC2B4, .sdata, game/code_001A04C0]
