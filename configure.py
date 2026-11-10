@@ -224,6 +224,7 @@ def run_splat(version: str, yaml: Path, force: bool, capture: bool = False) -> s
     run([sys.executable, "tools/include_rodata.py", version])
     run([sys.executable, "tools/include_sdata.py", version])
     align_bss(ROOT / "build" / version / f"{VERSIONS[version]['serial']}.ld")
+    align_data_splits(version, ROOT / "build" / version / f"{VERSIONS[version]['serial']}.ld")
     provide_data_symbols(version)
     restore_unchanged_timestamps(snapshot)
     stamp.parent.mkdir(parents=True, exist_ok=True)
@@ -276,6 +277,22 @@ def align_bss(ld_script: Path) -> None:
     for sym in ("main_SBSS_START", "main_BSS_START"):
         text = re.sub(rf"^(\s*)({sym} = \.;)", r"\1. = ALIGN(128);\n\1\2", text, count=1, flags=re.M)
     ld_script.write_text(text)
+
+
+DATA_SPLIT = re.compile(r"^(\s*)(\w+ = \.;\n\s*build/\S+/asm/\S+/data/(\S+)\.data\.o\(\.data\);)", re.M)
+
+
+def align_data_splits(version: str, ld_script: Path) -> None:
+    """A .data split that starts on a 16-byte boundary in retail follows a C
+    object whose .data may end short of it; give it the 16-byte start an
+    ee-gcc object's quadword data would have."""
+    def align(m):
+        asm = ROOT / "asm" / version / "data" / f"{m.group(3)}.data.s"
+        first = re.search(r"/\* [0-9A-F]+ ([0-9A-F]{8}) ", asm.read_text()) if asm.exists() else None
+        if first and int(first.group(1), 16) % 16 == 0:
+            return f"{m.group(1)}. = ALIGN(16);\n{m.group(1)}{m.group(2)}"
+        return m.group(0)
+    ld_script.write_text(DATA_SPLIT.sub(align, ld_script.read_text()))
 
 
 def provide_symbol_aliases(version: str) -> None:
