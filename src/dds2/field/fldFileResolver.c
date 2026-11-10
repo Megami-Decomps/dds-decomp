@@ -3758,39 +3758,7 @@ void fldInitializeCameraViewFromPlayer(void) {
     fldUpdateLookAtSegmentDistance();
 }
 
-#ifdef NON_MATCHING
-#include "common.h"
-#include "eff.h"
-#include "dds3obj.h"
-#include "fld.h"
-#include "fld_area_work.h"
-#include "fld_camera_follow_row.h"
-#include "fld_collision_query_api.h"
-#include "fld_player_scene_state.h"
-#include "pcp_vu0.h"
-#include "sdf_trig.h"
-#include "fpu.h"
-
-extern void fldUpdateLookAtSegmentDistance(void);
-
-extern FldCamRow fldCameraFollowRows[];
-
-extern f32 fldLookAtNearPoint[];
-extern f32 fldCamTarget[];
-
-extern f32 EulerAngleAxisY(void);
-extern f32 D_004360A0, D_004360A4, D_004360A8;
-/* Per-frame field camera follow: sets the camera angle from the player's
- * reference rotation, tracks the player position, builds the near and far look-
- * at points around it with the row's height and distance, eases the height
- * offset toward its target, pulls the far point back along the line to the
- * field-collision intersection (scaled by the global ratio) and updates the
- * camera world node and the look-at segment distance. Upstream: INCLUDE_ASM in
- * field/fldFileResolver; written from the retail routine. DDS1's
- * func_0012CED0 with DDS2's names: the routines differ in their data's
- * addresses and the fields' offsets alone. Checked against retail
- * (scripts/bodies/check.sh): the same memory accesses, calls and immediates;
- * the same float operations, in other registers. */
+/* Follow the player with the field camera and pull the far point back to the collision hit. */
 void func_0012F400(void) {
     union {
         u128 q;
@@ -3801,7 +3769,8 @@ void func_0012F400(void) {
     dds3Basic_t *node;
     f32 previousHeight;
     f32 heightOffset;
-    f32 dx, dy, dz;
+    f32 dx, dy;
+    f32 backX, backY, backZ;
     f32 distance;
     f32 ratio;
     f32 scale;
@@ -3843,17 +3812,21 @@ void func_0012F400(void) {
     ratio = D_004360A0 / D_004360A8;
     dx = projectedPoint.f[0] - referencePoint.f[0];
     dy = projectedPoint.f[1] - referencePoint.f[1];
-    dz = projectedPoint.f[2] - referencePoint.f[2];
-    distance = fsqrtf(dx * dx + dy * dy + dz * dz);
+    backX = referencePoint.f[0] - projectedPoint.f[0];
+    backY = referencePoint.f[1] - projectedPoint.f[1];
+    backZ = referencePoint.f[2] - projectedPoint.f[2];
+    {
+        /* Allocation aid on the real z delta, not a hardware register (see landing note). */
+        register f32 dz __asm__("$f1") = projectedPoint.f[2] - referencePoint.f[2];
+
+        distance = fsqrtf(dx * dx + dy * dy + dz * dz);
+    }
     node = *world;
     scale = distance * ratio;
     D_004360A4 = scale;
-    farPoint.f[1] = referencePoint.f[1] -
-                    (referencePoint.f[1] - projectedPoint.f[1]) / distance * scale;
-    farPoint.f[2] = referencePoint.f[2] -
-                    (referencePoint.f[2] - projectedPoint.f[2]) / distance * scale;
-    farPoint.f[0] = referencePoint.f[0] -
-                    (referencePoint.f[0] - projectedPoint.f[0]) / distance * scale;
+    farPoint.f[1] = referencePoint.f[1] - backY / distance * scale;
+    farPoint.f[2] = referencePoint.f[2] - backZ / distance * scale;
+    farPoint.f[0] = referencePoint.f[0] - backX / distance * scale;
     dds3SetPosPoseSet(node, &farPoint.q);
     PCP_COPY_VECTOR_UNCLOBBERED(fldLookAtNearPoint, nearPoint.f);
     PCP_COPY_VECTOR_UNCLOBBERED(fldCamTarget, farPoint.f);
@@ -3861,9 +3834,6 @@ void func_0012F400(void) {
     node->ops->update(node);
     fldUpdateLookAtSegmentDistance();
 }
-#else
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_0012F400);
-#endif
 
 void fldUpdateCameraProjectionEndpoints(void) {
     fldAreaWork_t *cam = &fldGlobalBase;

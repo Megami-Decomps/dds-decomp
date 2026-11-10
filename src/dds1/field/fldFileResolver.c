@@ -3943,130 +3943,7 @@ void fldUpdateFieldCameraViewState(void) {
     fldUpdateLookAtSegmentDistance();
 }
 
-#ifdef NON_MATCHING
-#include "sdf_line_pair_packet_api.h"
-#include "sdf_gs_header.h"
-#include "sdf_pac_reloc.h"
-#include "fld_script_resource.h"
-#include "sdf_packet_header.h"
-#include "eff.h"
-#include "fld_player_scene_state.h"
-#include "fld_marker_packet.h"
-#include "sdf_gs_blend.h"
-#include "common.h"
-#include "fld_stop_entry.h"
-#include "sdf_resource_list_release_api.h"
-#include "kwln_background_fade_api.h"
-#include "fld_scene_ready_api.h"
-#include "fld_scene_record_api.h"
-#include "fld_light_set.h"
-#include "fld_sky_buffer.h"
-#include "fld_sky_gradient_record.h"
-#include "fld_quad_state.h"
-#include "kwln_frame_draw_buffer.h"
-#include "kwln_draw_buffer.h"
-#include "kwln_fade.h"
-#include "mnu_title_stream.h"
-#include "fld_bill_config.h"
-#include "sdf_trig.h"
-#include "fld_area_path.h"
-#include "fld_npc_motion.h"
-#include "fld_npc_palette.h"
-#include "btl_stage_task_cleanup.h"
-#include "mdl_motion_api.h"
-#include "sdf_motion.h"
-#include "fld_resource_resolver.h"
-#include "fld_clear_menu_entries_api.h"
-#include "fld_play_pending_sounds_api.h"
-#include "fld_release_texture_slots_api.h"
-#include "fld_transfer_chunk.h"
-#include "fld_camera_follow_row.h"
-#include "fld.h"
-#include "fld_encounter_runtime_api.h"
-#include "fld_collision_geometry.h"
-#include "fld_collision_query_api.h"
-#include "fld_scene_request.h"
-#include "fld_spawn_event.h"
-#include "sdf_resource.h"
-#include "dds3obj.h"
-#include "dds3_world_value.h"
-#include "sdf_texture_file.h"
-#include "sdf_texture_primary_buffer_api.h"
-#include "evt_action_object.h"
-#include "sdf_texture_offset_list.h"
-#include "evt_script_model.h"
-#include "sdf_model.h"
-#include "mdl_flag_api.h"
-#include "dds3_world_counter.h"
-#include "sdf_vu_matrix.h"
-#include "dds3_world_secondary.h"
-#include "eff_light.h"
-#include "fld_area_work.h"
-#include "fld_spawn_collision.h"
-#include "evt_world.h"
-#include "evt_world_source_transform.h"
-#include "sdf_chip.h"
-#include "sdf_column_packet_api.h"
-#include "sdf_packet_append.h"
-#include "sdf_packet_builders.h"
-#include "fr_font.h"
-#include "sdf_packet_list.h"
-#include "sdf_dev_state.h"
-#include "fld_waypoint.h"
-#include "fld_inf.h"
-#include "kwln_task_lifecycle.h"
-#include "file_request_api.h"
-#include "file_pac.h"
-#include "fld_packed_resource_kind.h"
-#include "fld_title_banner_menu.h"
-#include "field_stage.h"
-#include "sdf_pac_work.h"
-#include "sdf_primitive_packet_api.h"
-#include "evt_unit.h"
-#include "evt_unit_color_transition.h"
-#include "fpu.h"
-#include "pcp_vu0.h"
-#include "sdf.h"
-#include "sdf_sif_command.h"
-#include "mdl.h"
-#include "scr.h"
-#include "kwln.h"
-#include "kwln_task_create.h"
-#include "dat_state.h"
-#include "dds3_world_primary.h"
-#include "sdf_packet_alloc.h"
-#include "fld_object_slot_api.h"
-#include "fld_placement_data.h"
-#include "fld_resource_name.h"
-#include "eff_object.h"
-#include "dds3_path.h"
-#include "fld_label_cache_api.h"
-#include "fld_sprite_vertex.h"
-#include "fld_room_state.h"
-#include "fld_trigger_shape.h"
-#include "fld_action_row.h"
-#include "btl.h"
-#include "itf.h"
-#include "fld_index_pair.h"
-extern void fldUpdateLookAtSegmentDistance(void);
-
-extern FldCamRow fldCameraFollowRows[];
-
-extern f32 fldLookAtNearPoint[];
-extern f32 fldCamTarget[];
-
-extern f32 EulerAngleAxisY(void);
-extern f32 D_003BAD10, D_003BAD14, D_003BAD18;
-/* Per-frame field camera follow: sets the camera angle from the player's
- * reference rotation, tracks the player position, builds the near and far look-
- * at points around it with the row's height and distance, eases the height
- * offset toward its target, pulls the far point back along the line to the
- * field-collision intersection (scaled by the global ratio) and updates the
- * camera world node and the look-at segment distance. Upstream: INCLUDE_ASM in
- * field/fldFileResolver; written from the retail routine. It differs from
- * retail only in float register allocation and in the address of the camera
- * angle, which retail forms as a raw address (lui 0x33, -0x1aec offset) equal
- * to fldGlobalBase.angle. */
+/* Follow the player with the field camera and pull the far point back to the collision hit. */
 void func_0012CED0(void) {
     union {
         u128 q;
@@ -4077,7 +3954,8 @@ void func_0012CED0(void) {
     dds3Basic_t *node;
     f32 previousHeight;
     f32 heightOffset;
-    f32 dx, dy, dz;
+    f32 dx, dy;
+    f32 backX, backY, backZ;
     f32 distance;
     f32 ratio;
     f32 scale;
@@ -4119,17 +3997,21 @@ void func_0012CED0(void) {
     ratio = D_003BAD10 / D_003BAD18;
     dx = projectedPoint.f[0] - referencePoint.f[0];
     dy = projectedPoint.f[1] - referencePoint.f[1];
-    dz = projectedPoint.f[2] - referencePoint.f[2];
-    distance = fsqrtf(dx * dx + dy * dy + dz * dz);
+    backX = referencePoint.f[0] - projectedPoint.f[0];
+    backY = referencePoint.f[1] - projectedPoint.f[1];
+    backZ = referencePoint.f[2] - projectedPoint.f[2];
+    {
+        /* Allocation aid on the real z delta, not a hardware register (see landing note). */
+        register f32 dz __asm__("$f1") = projectedPoint.f[2] - referencePoint.f[2];
+
+        distance = fsqrtf(dx * dx + dy * dy + dz * dz);
+    }
     node = *world;
     scale = distance * ratio;
     D_003BAD14 = scale;
-    farPoint.f[1] = referencePoint.f[1] -
-                    (referencePoint.f[1] - projectedPoint.f[1]) / distance * scale;
-    farPoint.f[2] = referencePoint.f[2] -
-                    (referencePoint.f[2] - projectedPoint.f[2]) / distance * scale;
-    farPoint.f[0] = referencePoint.f[0] -
-                    (referencePoint.f[0] - projectedPoint.f[0]) / distance * scale;
+    farPoint.f[1] = referencePoint.f[1] - backY / distance * scale;
+    farPoint.f[2] = referencePoint.f[2] - backZ / distance * scale;
+    farPoint.f[0] = referencePoint.f[0] - backX / distance * scale;
     dds3SetPosPoseSet(node, &farPoint.q);
     PCP_COPY_VECTOR_UNCLOBBERED(fldLookAtNearPoint, nearPoint.f);
     PCP_COPY_VECTOR_UNCLOBBERED(fldCamTarget, farPoint.f);
@@ -4137,9 +4019,6 @@ void func_0012CED0(void) {
     node->ops->update(node);
     fldUpdateLookAtSegmentDistance();
 }
-#else
-INCLUDE_ASM(const s32, "field/fldFileResolver", func_0012CED0);
-#endif
 
 void fldUpdateCameraProjectionEndpoints(void) {
     fldAreaWork_t *cam = &fldGlobalBase;
