@@ -1,103 +1,24 @@
-#include "sdk_ps2.h"
-#include "scr.h"
 #include "common.h"
-#include "sdf_file_existence_api.h"
-#include "mdl_flag_api.h"
-#include "kernel.h"
 #include "dds3_task_create.h"
-#include "sdf_packet_list.h"
-#include "sdf.h"
-#include "sdf_sif_command.h"
 #include "dds3_task_lifecycle.h"
-#include "sdf_packet_alloc.h"
 
 extern void scrAllReleaseScript(void);
 
-extern s32 dpy;
+extern char D_004221D8[]; /* "EventTest" */
 
-s32 EventDebugProcess1(dds3ProcessID_t *task);
-
-extern u32 D_003BA8EC;
-
-extern char D_003ACD18[]; /* "EventTest" */
+extern char D_004221E8[]; /* "PolygonMovie" */
 
 void evtFreeStage(void);
+
+extern u32 D_00435CBC;
+
+extern s32 dpy;
 
 void evtDebugPrintCamera(void) {
 }
 
-/* After launching a test script, keep the test task idle and return 0. */
+/* Retail test-task update is idle from creation; return 0 each tick. */
 s32 evtDebugCameraStep(dds3ProcessID_t *task) {
-    evtDebugPrintCamera();
-    return 0;
-}
-
-/* Return the same update callback installed by evtInitEventTest. */
-void *evtGetDebugProcess(void) {
-    return (void *)EventDebugProcess1;
-}
-
-
-
-extern sdfGrOt_t D_00325708;
-
-extern u8 dds3PadButtonState[2][2][16];
-
-extern s32 D_003BBDEC;
-
-INCLUDE_RODATA(const s32, "game/code_0022AB58", D_003ACC58);
-
-s32 EventDebugProcess1(dds3ProcessID_t *task) {
-    char path[0x40];
-    sdfDrawTag_t *list;
-
-    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
-    sdfDrawTagInit(list);
-    dds3ConsPanelTagLink(list, 0x84, 0x54, 0x15, 10);
-    sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7840, 0x7BA0, 0xFEFFFF, 0, "Event Debug"));
-    sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7A80, 0x7C60, 0xFEFFFF, 6, "E%03d.BF", D_003BBDEC));
-    sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7900, 0x7D20, 0xFEFFFF, 0, "L,R  = EVENT SELECT"));
-    sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7900, 0x7D80, 0xFEFFFF, 0, "RR   = ENTER"));
-    sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7900, 0x7DE0, 0xFEFFFF, 0, "RU   = SET E500"));
-    sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7900, 0x7E40, 0xFEFFFF, 0, "RL   = SET E600"));
-    sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7900, 0x7EA0, 0xFEFFFF, 0, "RD   = RESET FLAG"));
-    sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7900, 0x7F00, 0xFEFFFF, 0, "L1R1 = +-100"));
-    D_00325708.regFunc(&D_00325708, list);
-
-    if ((s8)dds3PadButtonState[1][0][1] < 0) {
-        sprintf(path, "/event/e%03d/e%03d/scr/e%03d.bf",
-                      D_003BBDEC - D_003BBDEC % 10, D_003BBDEC, D_003BBDEC);
-        if (sdfFileCheckExist(path) != SDF_FILE_NOT_FOUND) {
-            D_003BA8EC = 0x80000000;
-            scrStartScriptByName(0x3EB, path, 0);
-            return (s32)evtDebugCameraStep;
-        }
-    }
-    if ((s8)dds3PadButtonState[1][0][3] < 0) {
-        evtBitAllOff();
-        return (s32)evtGetDebugProcess;
-    }
-    if (dds3PadButtonState[1][0][5] & 2) {
-        D_003BBDEC++;
-    }
-    if ((dds3PadButtonState[1][0][4] & 2) && D_003BBDEC > 500) {
-        D_003BBDEC--;
-    }
-    if ((s8)dds3PadButtonState[1][0][2] < 0) {
-        D_003BBDEC = 500;
-    }
-    if ((s8)dds3PadButtonState[1][0][0] < 0) {
-        D_003BBDEC = 600;
-    }
-    if ((dds3PadButtonState[1][0][8] & 2) && D_003BBDEC > 500) {
-        D_003BBDEC -= 100;
-        if (D_003BBDEC < 500) {
-            D_003BBDEC = 500;
-        }
-    }
-    if (dds3PadButtonState[1][0][10] & 2) {
-        D_003BBDEC += 100;
-    }
     return 0;
 }
 
@@ -107,21 +28,18 @@ void EventDebugShutdown(dds3ProcessID_t *task) {
 }
 
 void evtInitEventTest(void) {
-    D_003BA8EC = 0x80000000;
-    dds3StartProcess(D_003ACD18, 0x2AF9, 1, 1, EventDebugProcess1, EventDebugShutdown, 0);
+    D_00435CBC = 0x80000000;
+    dds3StartProcess(D_004221D8, 0x2AF9, 1, 1, evtDebugCameraStep, EventDebugShutdown, 0);
 }
 
-INCLUDE_RODATA(const s32, "game/code_0022AB58", D_003ACD18);
-
 void evtChkEndProcess(void) {
-    dds3KillProcessName(D_003ACD18, 1);
-    dds3KillProcessName("PolygonMovie", 0);
+    dds3KillProcessName(D_004221D8, 1);
+    dds3KillProcessName(D_004221E8, 0);
     evtFreeStage();
 }
 
 #ifdef NON_MATCHING
 #include "common.h"
-#include "kernel.h"
 #include "sdf.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_alloc.h"
@@ -151,8 +69,8 @@ extern s32 dds3DebugBasic(void *task);
  * kind's nodes, then opens the selected node in dds3DebugBasic (returned as
  * the next handler); cancel leaves the nodes, else ends the task (-1). With
  * nothing selected it resets the selection and returns 0. Upstream:
- * INCLUDE_ASM in game/code_0022AB58 (DDS1) and game/code_00245810 (DDS2),
- * whose routines are the same; written from the retail routine. Kept from
+ * INCLUDE_ASM in event/evtDebug in both games, whose
+ * routines are the same; written from the retail routine. Kept from
  * retail: stepping between kinds scrolls by the kind's wrapped lines (rows),
  * or one line when it has none, so past a kind that wraps the scroll falls a
  * line short. */
@@ -339,60 +257,55 @@ s32 evtSceneDispProcess(void *task) {
     return 0;
 }
 #else
-INCLUDE_RODATA(const s32, "game/code_0022AB58", D_003ACD38);
 
-INCLUDE_RODATA(const s32, "game/code_0022AB58", D_003ACD48);
+INCLUDE_RODATA(const s32, "event/evtDebug", D_004221C8);
 
-INCLUDE_RODATA(const s32, "game/code_0022AB58", D_003ACD58);
+INCLUDE_RODATA(const s32, "event/evtDebug", D_004221D8);
 
-INCLUDE_RODATA(const s32, "game/code_0022AB58", D_003ACD68);
+INCLUDE_RODATA(const s32, "event/evtDebug", D_004221E8);
 
-INCLUDE_RODATA(const s32, "game/code_0022AB58", D_003ACD78);
-
-INCLUDE_ASM(const s32, "game/code_0022AB58", evtSceneDispProcess);
+INCLUDE_ASM(const s32, "event/evtDebug", evtSceneDispProcess);
 #endif
 
-void func_0022B618(void) {
+void func_00245F80(void) {
     dpy = 0;
 }
 
-INCLUDE_SDATA(const s32, "game/code_0022AB58", D_003BBDE0);
+INCLUDE_SDATA(const s32, "event/evtDebug", D_00437220);
 
-INCLUDE_SDATA(const s32, "game/code_0022AB58", D_003BBDEC);
+INCLUDE_SDATA(const s32, "event/evtDebug", dpy);
 
-INCLUDE_SDATA(const s32, "game/code_0022AB58", dpy);
+INCLUDE_SDATA(const s32, "event/evtDebug", curbase);
 
-INCLUDE_SDATA(const s32, "game/code_0022AB58", curbase);
+INCLUDE_SDATA(const s32, "event/evtDebug", curpoint);
 
-INCLUDE_SDATA(const s32, "game/code_0022AB58", curpoint);
+INCLUDE_SDATA(const s32, "event/evtDebug", D_00437238);
 
-INCLUDE_SDATA(const s32, "game/code_0022AB58", D_003BBE00);
+INCLUDE_SDATA(const s32, "event/evtDebug", D_00437240);
 
-INCLUDE_SDATA(const s32, "game/code_0022AB58", D_003BBE08);
+INCLUDE_SDATA(const s32, "event/evtDebug", D_00437248);
 
-INCLUDE_SDATA(const s32, "game/code_0022AB58", D_003BBE10);
+INCLUDE_SDATA(const s32, "event/evtDebug", D_00437250);
 
-INCLUDE_SDATA(const s32, "game/code_0022AB58", D_003BBE18);
+INCLUDE_SDATA(const s32, "event/evtDebug", D_00437258);
 
-INCLUDE_SDATA(const s32, "game/code_0022AB58", D_003BBE20);
+INCLUDE_SDATA(const s32, "event/evtDebug", D_00437260);
 
-INCLUDE_SDATA(const s32, "game/code_0022AB58", D_003BBE28);
+INCLUDE_SDATA(const s32, "event/evtDebug", D_00437268);
 
-INCLUDE_SDATA(const s32, "game/code_0022AB58", D_003BBE30);
+INCLUDE_SDATA(const s32, "event/evtDebug", D_00437270);
 
-INCLUDE_SDATA(const s32, "game/code_0022AB58", D_003BBE38);
+INCLUDE_SDATA(const s32, "event/evtDebug", D_00437278);
 
-INCLUDE_SDATA(const s32, "game/code_0022AB58", D_003BBE40);
+INCLUDE_SDATA(const s32, "event/evtDebug", D_00437280);
 
-INCLUDE_SDATA(const s32, "game/code_0022AB58", D_003BBE48);
+INCLUDE_SDATA(const s32, "event/evtDebug", D_00437288);
 
-INCLUDE_SDATA(const s32, "game/code_0022AB58", D_003BBE50);
+INCLUDE_SDATA(const s32, "event/evtDebug", D_00437290);
 
-INCLUDE_SDATA(const s32, "game/code_0022AB58", D_003BBE58);
+INCLUDE_SDATA(const s32, "event/evtDebug", D_00437298);
 
-INCLUDE_SDATA(const s32, "game/code_0022AB58", D_003BBE60);
+INCLUDE_SDATA(const s32, "event/evtDebug", D_004372A0);
 
-INCLUDE_SDATA(const s32, "game/code_0022AB58", D_003BBE68);
-
-INCLUDE_SDATA(const s32, "game/code_0022AB58", D_003BBE70);
+INCLUDE_SDATA(const s32, "event/evtDebug", D_004372A8);
 

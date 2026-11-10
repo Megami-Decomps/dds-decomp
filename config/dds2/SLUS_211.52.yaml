@@ -182,12 +182,11 @@ segments:
       - [0x13B5E8, c, event/evtStage]  # Nocturne __FILE__
       - [0x13C148, c, event/evtUnitManager]  # Nocturne __FILE__
       - [0x141D20, c, event/evtCommand]  # Nocturne __FILE__
-      - [0x143CB8, c, game/code_00242CB8]
+      - [0x144330, c, event/evtMoon]
       - [0x1447F0, c, game/code_002437F0]
       - [0x145F00, c, game/code_00244F00]
-      - [0x146810, c, game/code_00245810]  # Nocturne HD's evtDebug.c; no __FILE__ names it
-      - [0x146F88, c, game/code_00245F88]
-      - [0x1477A0, c, event/evtEventViewer]  # Nocturne __FILE__
+      - [0x146810, c, event/evtDebug]  # Nocturne HD's evtDebug.c; no __FILE__ names it
+      - [0x146F88, c, event/evtEventViewer]  # Nocturne __FILE__
       - [0x14ED20, c, event/evtPolygonMovie]  # Nocturne __FILE__
       - [0x150EF0, c, event/evtPicture]  # Nocturne __FILE__
       - [0x151010, c, game/code_00250010]
@@ -417,11 +416,9 @@ segments:
       - [0x322558, .rodata, event/evtStage]
       - [0x3225D0, .rodata, event/evtUnitManager]
       - [0x322BC0, .rodata, event/evtCommand]
-      - [0x322FE8, .rodata, game/code_00242CB8]
       - [0x3230E8, .rodata, game/code_002437F0]
-      - [0x3231C8, .rodata, game/code_00245810]
-      - [0x323320, .rodata, game/code_00245F88]
-      - [0x3233B0, .rodata, event/evtEventViewer]
+      - [0x3231C8, .rodata, event/evtDebug]
+      - [0x323320, .rodata, event/evtEventViewer]
       - [0x3240E0, .rodata, event/evtPolygonMovie]
       - [0x324380, .rodata, game/code_00250010]
       - [0x325830, .rodata, event/evtEventPack]
@@ -544,11 +541,10 @@ segments:
       - [0x3363C0, .lit4, event/evtStage]
       - [0x3363D0, .lit4, event/evtUnitManager]
       - [0x33641C, .lit4, event/evtCommand]
-      - [0x336420, .lit4, game/code_00242CB8]
+      - [0x336420, .lit4, event/evtMoon]
       - [0x33642C, .lit4, game/code_002437F0]
       - [0x33645C, .lit4, game/code_00244F00]
-      - [0x336478, .lit4, game/code_00245F88]
-      - [0x33647C, .lit4, event/evtEventViewer]
+      - [0x336478, .lit4, event/evtEventViewer]
       - [0x33648C, .lit4, game/code_00250010]
       - [0x3364F0, .lit4, game/code_0025DA20]
       - [0x33650C, .lit4, game/code_002665B0]
@@ -645,9 +641,9 @@ segments:
       - [0x337FC0, .sdata, model/mdlEffect]
       - [0x3381C0, .sdata, event/evtBitEditor]
       - [0x3381EC, .sdata, event/evtUnitManager]
-      - [0x3381F8, .sdata, game/code_00242CB8]
+      - [0x3381F8, .sdata, event/evtMoon]
       - [0x338210, .sdata, game/code_002437F0]
-      - [0x338220, .sdata, game/code_00245810]
+      - [0x338220, .sdata, event/evtDebug]
       - [0x3382B0, .sdata, event/evtEventViewer]
       - [0x3383B8, .sdata, event/evtPolygonMovie]
       - [0x3383C0, .sdata, game/code_00250010]

@@ -1,14 +1,20 @@
 #include "sdk_ps2.h"
+#include "mnu_camp_display.h"
 #include "common.h"
+#include "draw3d.h"
+#include "dds3_task_create.h"
+#include "sdf_chip.h"
+#include "eff_event_draw.h"
+#include "eff_event_work_api.h"
+#include "dds3_task_lifecycle.h"
+#include "btl.h"
 #include "evt_viewer_track_file_format.h"
 #include "scr_command_result.h"
 #include "sdf_delayed_resource_check_api.h"
 #include "ps2asm.h"
-#include "sdf_dma_tag.h"
 #include "evt_window_shade_packet.h"
 #include "evt_camera_color_track_api.h"
 #include "dds3_background_fade_api.h"
-#include "sdf_float_counter.h"
 #include "dds3_path.h"
 #include "dds3_task_add_child.h"
 #include "mnu_title_stream.h"
@@ -16,17 +22,12 @@
 #include "mnu_movie_playback_api.h"
 #include "mnu_camp_font_api.h"
 #include "mnu_camp_option_index_api.h"
-#include "sdf_chip.h"
-#include "evt_viewer.h"
-#include "event.h"
 #include "evt_viewer_indexed_condition.h"
 #include "evt_viewer_object_slot_api.h"
 #include "evt_sound_variation.h"
 #include "evt_reload_viewer_api.h"
 #include "evt_reset_unit_vector_slots_api.h"
-#include "dds3obj.h"
 #include "dds3_object_control_slot.h"
-#include "evt_world.h"
 #include "mdl_motion_api.h"
 #include "mdl_world_object_source_vector_api.h"
 #include "sdf_motion_loop.h"
@@ -34,33 +35,21 @@
 #include "itf_mes_entry_start_api.h"
 #include "itf_mes_voice_cue_result.h"
 #include "sdf_heap_api.h"
-#include "kernel.h"
-#include "draw3d.h"
 #include "dds3_fade.h"
 #include "dds3_fade_timing.h"
-#include "sdf.h"
-#include "sdf_draw.h"
 #include "evt_unit.h"
 #include "evt_unit_vector_slot.h"
-#include "eff_transform.h"
-#include "eff_blur.h"
-#include "eff_event_draw.h"
-#include "dat_state.h"
-#include "eff.h"
 #include "eff_node.h"
 #include "eff_object.h"
 #include "eff_object_dispatch_api.h"
 #include "mdl.h"
 #include "mdl_motion_controller_lookup_api.h"
-#include "evt_polygon_movie.h"
 #include "evt_viewer_group_record.h"
 #include "evt_sky_alpha_animation_status.h"
-#include "dds3_task_lifecycle.h"
 #include "file_request_api.h"
-
-#include "dds3_task_create.h"
 #include "itf.h"
 #include "sdf_packet_list.h"
+
 /* Declared before first use (were implicit int). */
 extern dds3ProcessID_t *evtInitSky(void);
 extern s32 mnuGetSelectedTableValue(evtViewerInfo_t *runtime);
@@ -68,14 +57,10 @@ extern s32 mnuGetSelectedTableValue(evtViewerInfo_t *runtime);
 
 /* Node queued on an entry, linked through +0x30/+0x34, owning a buffer. */
 
-
 /* Event-viewer entries are linked at +0x7C/+0x80 and keyed by id. */
-
 
 /* Table of 0x20-byte (group, type) records at +0x34, counted at +0x38. */
 /* The name table and entry list have the same offsets in both games. */
-
-
 
 void UnlinkFrameInfo(EvtRuntimeGroup *entry, EvtRuntimeChild *node);
 void Eve_PartialMultiBlurSetDefTex(void);
@@ -91,6 +76,282 @@ void evtEventViewerFreeSlot(s32 index, evtViewerInfo_t *viewer);
 void DelBED(EvtRuntimeChild *node);
 
 extern EvtRuntimeChild *evtAddFrameInfo(EvtRuntimeGroup *group, s32 frame, evtViewerInfo_t *viewer);
+
+/* Insert after existing equal keys, keeping ascending order and incrementing count. */
+void LinkFrameInfo(EvtRuntimeGroup *list, EvtRuntimeChild *insertedNode) {
+    EvtRuntimeChild *cursor = list->children;
+
+    if (cursor == 0) {
+        list->children = insertedNode;
+        list->lastChild = insertedNode;
+        insertedNode->next = 0;
+        insertedNode->prev = 0;
+    } else {
+        while (cursor != 0) {
+            if (insertedNode->frame < cursor->frame) {
+                if (cursor->prev == 0) {
+                    list->children = insertedNode;
+                    cursor->prev = insertedNode;
+                    insertedNode->next = cursor;
+                    insertedNode->prev = 0;
+                } else {
+                    cursor->prev->next = insertedNode;
+                    insertedNode->prev = cursor->prev;
+                    insertedNode->next = cursor;
+                    cursor->prev = insertedNode;
+                }
+                break;
+            }
+            cursor = cursor->next;
+        }
+        if (cursor == 0) {
+            EvtRuntimeChild *tailNode = list->lastChild;
+            tailNode->next = insertedNode;
+            insertedNode->prev = list->lastChild;
+            insertedNode->next = 0;
+            list->lastChild = insertedNode;
+        }
+    }
+    list->childCount++;
+}
+
+/* Unlink an attached node, clear its links, and decrement the owning list's count. */
+void UnlinkFrameInfo(EvtRuntimeGroup *list, EvtRuntimeChild *removedNode) {
+    EvtRuntimeChild *nextNode = removedNode->next;
+    EvtRuntimeChild *previousNode = removedNode->prev;
+    if (previousNode == 0) {
+        list->children = nextNode;
+    } else {
+        previousNode->next = nextNode;
+    }
+    {
+        EvtRuntimeChild *previousNeighbor = removedNode->prev;
+        EvtRuntimeChild *nextNeighbor = removedNode->next;
+        if (nextNeighbor == 0) {
+            list->lastChild = previousNeighbor;
+        } else {
+            nextNeighbor->prev = previousNeighbor;
+        }
+    }
+    {
+        s32 nodeCount = list->childCount;
+        removedNode->prev = 0;
+        removedNode->next = 0;
+        list->childCount = nodeCount - 1;
+    }
+}
+
+/* Walk the linked list and reinsert the first out-of-order successor. */
+void SortFrameInfo(EvtRuntimeGroup *list) {
+    if (list != 0) {
+        EvtRuntimeChild *anchorNode = list->children;
+        while (anchorNode != 0) {
+            EvtRuntimeChild *resumeNode = anchorNode->next;
+            EvtRuntimeChild *candidateNode = resumeNode;
+            while (candidateNode != 0) {
+                if (candidateNode->frame < anchorNode->frame) {
+                    UnlinkFrameInfo(list, candidateNode);
+                    LinkFrameInfo(list, candidateNode);
+                    /* Resume from the relocated node's new successor, not its old one. */
+                    resumeNode = candidateNode->next;
+                    break;
+                }
+                candidateNode = candidateNode->next;
+            }
+            anchorNode = resumeNode;
+        }
+    }
+}
+
+extern EvtViewerNameIndex evtEventViewerAddName(const char *, evtViewerInfo_t *);
+extern void mnuSampleCampPanelVisualTrack(evtViewerInfo_t *runtime, EvtRuntimeGroup *group, s32 frame,
+                                          f32 (*outVectors)[4], f32 *outValueA, f32 *outValueB);
+extern void mnuSampleCampDisplayTrack(evtViewerInfo_t *viewer, EvtRuntimeGroup *track, s32 value,
+                                      CampDisplayDefaults *display);
+extern void mnuSampleCampListLayoutTrack(evtViewerInfo_t *viewer, EvtRuntimeGroup *track, EvtBlendKey *out);
+extern sdf3DFogParam_t dds3FogState;
+
+/* Capture kind-specific defaults before adding a new key to its track. */
+EvtRuntimeChild *evtAddFrameInfo(EvtRuntimeGroup *group, s32 frame, evtViewerInfo_t *viewer) {
+    CampDisplayDefaults display;
+    EvtBlendKey layout;
+    f32 first, second;
+    f32 (*vectors)[4] = NULL;
+    EvtRuntimeChild *key;
+
+    switch (group->type) {
+    case 10:
+        vectors = sdfChipAllocDirect(0x30);
+        mnuSampleCampPanelVisualTrack(viewer, group, frame, vectors, &first, &second);
+        break;
+    case 24:
+        mnuSampleCampDisplayTrack(viewer, viewer->frameGroup, viewer->nowframe, &display);
+        break;
+    case 25:
+        mnuSampleCampListLayoutTrack(viewer, viewer->frameGroup, &layout);
+        break;
+    }
+    key = sdfChipAllocDirect(sizeof(*key));
+    memset(key, 0, sizeof(*key));
+    key->frame = frame;
+    key->serializedValue = -1;
+    LinkFrameInfo(group, key);
+
+    switch (group->type) {
+    case 2:
+        key->p08.f = 0.5235987306f;
+        key->serializedValue = evtEventViewerAddName(viewer->entryName[group->entryHeader], viewer);
+        break;
+    case 1:
+        key->serializedValue = evtEventViewerAddName(viewer->entryName[group->entryHeader], viewer);
+        key->p08.sb[0] = 0;
+        key->p0C.sb[2] = 1;
+        key->p0C.sb[3] = 20;
+        break;
+    case 18:
+        key->serializedValue = evtEventViewerAddName(viewer->entryName[group->entryHeader], viewer);
+        key->p08.h[0] = 0;
+        key->p08.h[1] = -1;
+        key->p08.sb[0] = 0;
+        break;
+    case 20: case 21:
+        key->serializedValue = evtEventViewerAddName(viewer->entryName[group->entryHeader], viewer);
+        key->p08.sb[0] = -1;
+        key->p08.sb[1] = 0;
+        key->p08.h[1] = 0;
+        key->p0C.sb[0] = -1;
+        key->p0C.sb[1] = -1;
+        key->p0C.sb[2] = -1;
+        key->p0C.sb[3] = -1;
+        key->p10.h[0] = 0;
+        break;
+    case 3: case 26:
+        key->serializedValue = evtEventViewerAddName(viewer->entryName[group->entryHeader], viewer);
+        key->p08.sb[0] = -1;
+        key->p08.h[1] = 0;
+        key->p0C.sb[0] = 0;
+        key->p0C.sb[1] = -1;
+        key->p0C.h[1] = -1;
+        key->p10.h[0] = 0;
+        break;
+    case 9:
+        key->serializedValue = evtEventViewerAddName(viewer->entryName[group->entryHeader], viewer);
+        key->p08.h[0] = -1;
+        key->p08.h[1] = 1;
+        break;
+    case 12:
+        key->p08.h[0] = 1;
+        key->p08.h[1] = 128;
+        key->p0C.i = 0;
+        break;
+    case 22:
+        key->p08.h[0] = 1;
+        break;
+    case 10:
+        key->p08.f = first;
+        key->payload = vectors;
+        key->p0C.f = second;
+        key->p10.h[0] = (u16)group->setterId;
+        key->serializedValue = 0;
+        break;
+    case 11: {
+        EvtViewerDrawPayload *draw = sdfChipAllocDirect(sizeof(*draw));
+        draw->parameters.vec[0] = dds3FogState.fogMin;
+        draw->parameters.color = dds3FogState.color;
+        key->payload = draw;
+        draw->parameters.vec[1] = dds3FogState.fogMax;
+        draw->parameters.vec[2] = dds3FogState.fogNear;
+        draw->parameters.vec[3] = dds3FogState.fogFar;
+        key->p08.h[0] = 1;
+        break;
+    }
+    case 13: {
+        void *payload = sdfChipAllocDirect(0x28);
+        key->payload = payload;
+        memcpy(payload, effGetLoadDescA(), 0x28);
+        key->p08.h[0] = 1;
+        break;
+    }
+    case 14: {
+        void *payload = sdfChipAllocDirect(0x2C);
+        key->payload = payload;
+        memcpy(payload, &Eve_PartialMultiBlurGetParams()->body, sizeof(dds3Effect_PartialMultiBlurParam_t));
+        key->p08.h[0] = 1;
+        key->p10.h[0] = 0;
+        break;
+    }
+    case 15: {
+        void *payload = sdfChipAllocDirect(0x2C);
+        key->payload = payload;
+        memcpy(payload, &Eve_DistortionBlurGetParams()->params, sizeof(dds3Effect_DistortionBlurParam_t));
+        key->p08.h[0] = 1;
+        break;
+    }
+    case 23: {
+        void *payload = sdfChipAllocDirect(0x2C);
+        key->payload = payload;
+        memcpy(payload, Eve_RippleBlurGetParams(), 0x2C);
+        key->p08.h[0] = 1;
+        break;
+    }
+    case 27: {
+        void *payload = sdfChipAllocDirect(0x28);
+        key->payload = payload;
+        memcpy(payload, effGetCh73Params(), 0x28);
+        key->p08.h[0] = 1;
+        break;
+    }
+    case 16: {
+        void *payload = sdfChipAllocDirect(0x18);
+        key->payload = payload;
+        memcpy(payload, Eve_FilterGetParams(), 0x18);
+        key->p08.h[0] = 1;
+        break;
+    }
+    case 17: {
+        void *payload = sdfChipAllocDirect(0x24);
+        key->payload = payload;
+        memcpy(payload, Eve_PartialMultiFilterGetParams(), 0x24);
+        key->p08.h[0] = 1;
+        break;
+    }
+    case 24:
+        key->serializedValue = evtEventViewerAddName(viewer->entryName[group->entryHeader], viewer);
+        key->p08.sb[0] = display.enabled;
+        key->p08.sb[1] = display.variant;
+        key->p0C.h[0] = display.x;
+        key->p0C.h[1] = display.y;
+        key->p10.sb[0] = display.color[0];
+        key->p10.sb[1] = display.color[1];
+        key->p10.sb[2] = display.color[2];
+        key->p10.sb[3] = display.color[3];
+        key->p14.f = display.scaleX;
+        key->p18.f = display.scaleY;
+        key->p1C.sb[0] = display.preserveAlpha;
+        break;
+    case 25: {
+        EvtCameraColorPayload *payload = sdfChipAllocDirect(0x40);
+        s32 i;
+        key->payload = payload;
+        payload->parameters.x = layout.x;
+        payload->parameters.w[0] = layout.w[0];
+        payload->parameters.w[1] = layout.w[1];
+        payload->parameters.w[2] = layout.w[2];
+        payload->parameters.w[3] = layout.w[3];
+        payload->parameters.flagWord = layout.flagWord;
+        for (i = 0; i < 3; i++) {
+            payload->parameters.y[i] = layout.y[i];
+            payload->parameters.z[i] = layout.z[i];
+        }
+        break;
+    }
+    case 0: case 4: case 5: case 6: case 7: case 8: case 19:
+    case 28: case 29: case 30: case 31: case 32:
+    default:
+        break;
+    }
+    return key;
+}
 
 EvtRuntimeChild *AddFrameInfo2(EvtRuntimeGroup *group, s32 frame, evtViewerInfo_t *viewer) {
     return evtAddFrameInfo(group, frame, viewer);
@@ -428,7 +689,6 @@ EvtViewerNameIndex evtEventViewerAddName(const char *name, evtViewerInfo_t *view
     return newNameIndex;
 }
 
-
 /* Look up a named kind-7 effect object by index. */
 dds3Basic_t *evtEventViewerGetNameObject(EvtViewerNameIndex index, evtViewerInfo_t *viewer) {
     if (index < 0) {
@@ -490,7 +750,6 @@ void evtViewerBindNamedOwner(dds3Basic_t *effectObject, EvtViewerNameIndex owner
         break;
     }
 }
-
 
 extern void dds3EffectObjectBasicStatOn(dds3Basic_t *obj, u32 flags);
 struct SoundMixer;
@@ -666,7 +925,6 @@ void evtViewerApplyParameterKeyTracks(evtViewerInfo_t *viewer) {
     }
 }
 
-
 extern sdf3DFogParam_t dds3FogState;
 extern u128 *dds3LightParam[];
 extern u128 dds3AmbientColor[];
@@ -676,7 +934,6 @@ extern dds3Effect_PartialMultiBlurParam_t *effEventGetBlurTemplateSetupParams(vo
 extern dds3Effect_DistortionBlurParam_t *effEventGetScatterBlurSetupParams(void);
 extern dds3Effect_RippleBlurParam_t *rblurGetParam(void);
 extern dds3Effect_PartialMultiFilterParam_t *mfilterGetParam(void);
-
 
 void evtEventViewerApplyEffectToggles(evtViewerInfo_t *viewer) {
     if (viewer->blurRectangleEnabled != 0) {
@@ -755,6 +1012,7 @@ extern void datDebugPrintf(const char *format, ...);
 extern char D_004224A8[];
 
 /* Apply one timeline key to its effect, audio, message, or fade channel. */
+
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_004224A8);
 
 void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key, s32 currentFrame, s32 unused,
@@ -956,17 +1214,12 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
     }
 }
 
-
-
-
 extern u16 D_004372B0;
 extern u16 D_004372B2;
 extern u8 D_00423050[];
 extern s32 evtViewerSaveTrackFiles(s32 mode, evtViewerInfo_t *runtime);
 extern f32 dds3CameraObjectBasicGetFovy(const dds3Basic_t *camera);
 extern void dds3SetScreenFovy(f32 fieldOfView);
-
-
 
 extern u8 evtViewerHasUpdateFlag(evtViewerInfo_t *);
 extern void evtEventViewerApplyEffectToggles(evtViewerInfo_t *viewer);
@@ -986,8 +1239,6 @@ extern void Eve_DistortionBlurSetTex(sdfTexHandle_t *sourceHandle);
 extern void Eve_PartialMultiFilterSetTex(sdfTexHandle_t *texture);
 extern void Eve_RippleBlurSetTex(sdfTexHandle_t *sourceHandle);
 
-
-
 void evtApplyViewerTimelineFrame(s32 time, evtViewerInfo_t *viewer);
 
 void evtViewerPushCommandHistory(s32 actionMode, s32 first, s32 second, evtViewerInfo_t *viewer);
@@ -995,7 +1246,6 @@ void evtViewerPushCommandHistory(s32 actionMode, s32 first, s32 second, evtViewe
 /* Task user values are words; viewer callbacks decode the stored address. */
 
 dds3TaskUpdateResult_t evtViewerUpdateFrame(dds3ProcessID_t *task);
-
 
 dds3ProcessID_t *evtInitFrameVar(void);
 
@@ -1023,21 +1273,15 @@ typedef struct EvtViewerObjectData {
     struct EffNode *parameterNode;
 } EvtViewerObjectData;
 
-
 /* Handles retained by the viewer and by its owning task context. */
 
-
 /* Script-command parameter slots are interpreted according to track kind. */
-
 
 u16 evtViewerPopHistory(evtViewerInfo_t *viewer);
 
 extern char evtViewerTaskName[]; /* "EventViewer" */
 
-
-
 /* Each timeline parameter word's scalar format is selected by the track kind. */
-
 
 /* Linked timeline track. Saved vectors and the attachment latch are used by
  * kind-1 world-object tracks; the vectors keep their original embedded layout. */
@@ -1049,7 +1293,6 @@ typedef struct CampDisplayDefaults CampDisplayDefaults;
 extern void mnuBlendCampDisplayFields(EvtRuntimeChild *from, EvtRuntimeChild *to, CampDisplayDefaults *display, f32 ratio);
 extern void mnuDrawCampScaledTexture(sdfTexHandle_t *texture, CampDisplayDefaults *display);
 
-
 /* Timeline payloads store fogFar before fogNear. */
 extern sdf3DFogParam_t dds3FogState;
 extern u128 *dds3LightParam[];
@@ -1060,7 +1303,6 @@ extern dds3Effect_PartialMultiBlurParam_t *effEventGetBlurTemplateSetupParams(vo
 extern dds3Effect_DistortionBlurParam_t *effEventGetScatterBlurSetupParams(void);
 extern dds3Effect_RippleBlurParam_t *rblurGetParam(void);
 extern dds3Effect_PartialMultiFilterParam_t *mfilterGetParam(void);
-
 
 #include "sdf_debug_api.h"
 
@@ -1140,7 +1382,6 @@ void evtEventViewerFadeEffectSlot(EvtRuntimeGroup *group, EvtRuntimeChild *key, 
         break;
     }
 }
-#include "evt_blend_vec_color.h"
 extern EvtRuntimeGroup *D_004372B8;
 extern f32 D_00453960[3][4];
 extern EvtBlendVecColor D_00453990;
@@ -1610,7 +1851,6 @@ void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *group, EvtRuntimeChild *
     }
 }
 
-
 extern void evtUnlinkLightObjectBasic(evtUnitHandle_t *unit, s32 duration);
 
 /* At timelineTime, selects each named unit's latest kind-9 transition key and starts,
@@ -1963,8 +2203,6 @@ void evtApplyViewerTimelineFrame(s32 time, evtViewerInfo_t *viewer) {
     }
 }
 
-
-
 /* Returns the nearest kind-2 key at/before the current frame, or NULL.
  * Equal-distance ties retain the first key visited. */
 EvtRuntimeChild *evtViewFindGlyphAtOrBefore(evtViewerInfo_t *viewer) {
@@ -1998,7 +2236,6 @@ EvtRuntimeChild *evtViewFindGlyphAtOrBefore(evtViewerInfo_t *viewer) {
 }
 
 extern void evtSetMovieClipPositionClampedToDuration(dds3Basic_t *movie, s32 unused, s32 start, s32 end, s32 offset);
-
 
 /* Clamps each movie object's playback interval using its linked track's first
  * key frame (or track offset), endTime, and the current key's extra parameter. */
@@ -2235,7 +2472,6 @@ void evtViewerApplyGlyphLodChannel(s32 position, evtViewerInfo_t *viewer) {
     }
 }
 
-
 /* At an exact kind-7 key frame, attaches the indexed world object. Index -1
  * restores the saved vectors; losing the active key restores them once too. */
 void evtEventViewerAttachIndexedObject(s32 position, evtViewerInfo_t *viewer) {
@@ -2382,7 +2618,6 @@ u8 evtViewerHasUpdateFlag(evtViewerInfo_t *viewer) {
     return (flags & 0x10) > 0;
 }
 
-
 /* Fades the viewer's background colour over its update countdown. */
 void evtEventViewerFadeBackground(evtViewerInfo_t *viewer) {
     s32 fade = 0;
@@ -2508,50 +2743,7 @@ s32 evtViewerUpdateTimedAction(evtViewerInfo_t *viewer) {
 
 #ifdef NON_MATCHING
 #include "common.h"
-#include "sdf_dma_tag.h"
-#include "evt_window_shade_packet.h"
-#include "evt_camera_color_track_api.h"
-#include "dds3_background_fade_api.h"
-#include "dds3_task_add_child.h"
-#include "mnu_title_stream.h"
-#include "mnu_camp_font_api.h"
-#include "dds3_draw_buffer.h"
-#include "mdl_motion_api.h"
-#include "mdl_world_object_source_vector_api.h"
-#include "sdf_motion.h"
-#include "itf_mes_window.h"
-#include "sdf_heap_api.h"
-#include "evt_viewer.h"
-#include "evt_reload_viewer_api.h"
-#include "evt_reset_unit_vector_slots_api.h"
-#include "kernel.h"
-#include "dds3_fade.h"
-#include "dds3_fade_timing.h"
-#include "dds3_task_create.h"
-#include "sdf.h"
-#include "sdf_draw.h"
-#include "dds3obj.h"
-#include "evt_world.h"
-#include "evt_unit.h"
-#include "eff_transform.h"
-#include "eff_blur.h"
-#include "eff_event_draw.h"
-#include "dat_state.h"
-#include "eff.h"
-#include "eff_object.h"
-#include "eff_object_dispatch_api.h"
-#include "mdl.h"
-#include "evt_polygon_movie.h"
-#include "evt_viewer_group_record.h"
-#include "dds3_task_lifecycle.h"
-#include "file_request_api.h"
-#include "eff_dependency.h"
-#include "eff_node.h"
 #include "common.h"
-#include "sdf_chip.h"
-#include "evt_viewer.h"
-#include "dds3obj.h"
-#include "evt_world.h"
 
 #define EVT_TRACK_SHOP 31 /* the viewer's shop flag track */
 
@@ -2672,7 +2864,6 @@ EvtRuntimeChild *evtViewerFindLatestMatchingMotionKey(EvtRuntimeGroup *group, s3
     return best;
 }
 
-
 enum {
     EVT_VIEWER_PLAYBACK_PAUSED = 0,
     EVT_VIEWER_PLAYBACK_RUNNING = 1,
@@ -2775,7 +2966,6 @@ updateMovie:
         track = track->next;
     }
 }
-
 
 /* Dispatch one of two viewer modes based on its lowest flag bit. */
 void evtViewerDispatchFlagMode(evtViewerInfo_t *viewer) {
@@ -2915,7 +3105,6 @@ void evtUpdateViewerMessageWindow(evtViewerInfo_t *viewer) {
     }
     evtViewerUpdateWindowShadeFade(viewer);
 }
-
 
 void evtViewerCleanupMessageWindow(evtViewerInfo_t *viewer) {
     PolyMovieWork *v0;
@@ -3102,7 +3291,6 @@ s32 evtEventViewerOpenInputMenu(s32 arg0, s32 arg1, evtViewerInfo_t *viewer) {
     return 0;
 }
 
-
 /* Commit viewer menu selections and apply typed edits to the current timeline key. */
 s32 evtViewerApplyCommandSelection(s32 unused0, s32 mode, evtViewerInfo_t *viewer) {
     s32 changedRange = 0;
@@ -3265,7 +3453,6 @@ s32 evtViewerApplyCommandSelection(s32 unused0, s32 mode, evtViewerInfo_t *viewe
     }
     return changedRange != 0 ? -1 : 0;
 }
-
 
 u32 evtViewerPushMode5CommandHistory(u32 unused0, u32 unused1, evtViewerInfo_t *viewer) {
     evtViewerPushCommandHistory(5, 0x90, 0x48, viewer);
@@ -4245,7 +4432,6 @@ s32 evtViewCmdResolveSlot(s32 operation, void *argument, evtViewerInfo_t *viewer
     return 0;
 }
 
-
 /* Copy the selected slot descriptor and numeric value into the script entry. */
 s32 evtViewCmdSetSlot(s32 unused0, s32 unused1, evtViewerInfo_t *viewer) {
     EvtRuntimeChild *entry = evtEventViewerGetPendingNode(viewer);
@@ -4283,53 +4469,7 @@ s32 evtViewCmdSelectMode(s32 unused0, s32 unused1, evtViewerInfo_t *viewer) {
 
 #ifdef NON_MATCHING
 #include "common.h"
-#include "sdf_dma_tag.h"
-#include "evt_window_shade_packet.h"
-#include "evt_camera_color_track_api.h"
-#include "dds3_background_fade_api.h"
-#include "dds3_task_add_child.h"
-#include "mnu_title_stream.h"
-#include "mnu_camp_font_api.h"
-#include "dds3_draw_buffer.h"
-#include "mdl_motion_api.h"
-#include "mdl_world_object_source_vector_api.h"
-#include "sdf_motion.h"
-#include "itf_mes_window.h"
-#include "sdf_heap_api.h"
-#include "evt_viewer.h"
-#include "evt_reload_viewer_api.h"
-#include "evt_reset_unit_vector_slots_api.h"
-#include "kernel.h"
-#include "dds3_fade.h"
-#include "dds3_fade_timing.h"
-#include "dds3_task_create.h"
-#include "sdf.h"
-#include "sdf_draw.h"
-#include "dds3obj.h"
-#include "evt_world.h"
-#include "evt_unit.h"
-#include "eff_transform.h"
-#include "eff_blur.h"
-#include "eff_event_draw.h"
-#include "dat_state.h"
-#include "eff.h"
-#include "eff_object.h"
-#include "eff_object_dispatch_api.h"
-#include "mdl.h"
-#include "evt_polygon_movie.h"
-#include "evt_viewer_group_record.h"
-#include "dds3_task_lifecycle.h"
-#include "file_request_api.h"
-#include "eff_dependency.h"
-#include "eff_node.h"
-#include "itf.h"
-#include "sdf_packet_list.h"
 #include "common.h"
-#include "sdf_chip.h"
-#include "evt_viewer.h"
-#include "dds3obj.h"
-#include "evt_world.h"
-#include "dds3_world_primary.h"
 extern void evtApplyViewerTimelineFrame(s32 time, evtViewerInfo_t *viewer);
 extern s32 evtEventViewerAddName(const char *name, evtViewerInfo_t *viewer);
 extern u16 evtViewerPopHistory(evtViewerInfo_t *viewer);
@@ -4445,6 +4585,7 @@ u32 evtViewerClearPendingNodeAndPushHistory(u32 unused0, u32 unused1, evtViewerI
 }
 
 /* Restore default effect parameters for the selected timeline key. */
+
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_00423050);
 
 s32 evtEventViewerCopyEffectSetupPayload(s32 unused0, s32 unused1, evtViewerInfo_t *viewer) {
@@ -4503,7 +4644,6 @@ s32 evtEventViewerCopyEffectSetupPayload(s32 unused0, s32 unused1, evtViewerInfo
     evtViewerPopHistory(viewer);
     return 0;
 }
-
 
 /* Hand control back to the frame update whether or not the task still owns a viewer. */
 dds3TaskUpdateResult_t evtViewerPickNextHandler(dds3ProcessID_t *task) {
@@ -4779,7 +4919,6 @@ void evtViewerCreateTaskWithSky(void) {
 void evtEventViewerDestroyTask(void) {
     dds3KillProcessName(evtViewerTaskName, 1);
 }
-
 
 void evtEventViewerPollMovieResources(PolyMovieWork *assets) {
 

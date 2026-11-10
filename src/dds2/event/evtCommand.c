@@ -16,26 +16,43 @@
 #include "evt_polygon_movie_flags_api.h"
 #include "fld_resource_resolver.h"
 #include "dds3_path.h"
-#include "dds3obj.h"
 #include "dds3_object_control_slot.h"
 #include "dds3_world_selection.h"
 #include "eff_dependency.h"
 #include "eff_object.h"
 #include "fld_player_scene_state.h"
 #include "eff_inner_float_api.h"
-#include "kernel.h"
 #include "evt_task.h"
-#include "evt_world.h"
 #include "evt_path_direction.h"
-#include "evt_event_pack.h"
 #include "scr.h"
-#include "scr_command_result.h"
 #include "scr_command_timer_api.h"
 #include "scr_process_handle_api.h"
 #include "scr_string_parameter_api.h"
 #include "scr_arg_read.h"
 #include "evt_solar.h"
 #include "dds3_world_counter.h"
+#include "dat_state.h"
+#include "dds3_process_registration.h"
+#include "evt_picture.h"
+#include "evt_event_bgm_readiness.h"
+#include "evt_sound_variation.h"
+
+extern void fldSetFadeTarget(s32 area, s32 targetMode, s32 duration);
+extern void evtSetSkyAlpha(s32 duration, s32 target);
+
+extern u32 dds3DrawFlag;
+
+extern char D_00422050[];
+
+#include "sdf_debug_api.h"
+void datDebugPrintf(const char *fmt, ...);
+extern char D_00422030[];
+extern char D_00421FE8[];
+EvtPackedSoundTrackId evtLoadEventBgm(s32 id);
+EvtEventBgmReadiness evtCheckEventBgmLoaded(s32 id);
+
+extern dds3Basic_t *evtSearchBasic(s32 worldKind, s32 worldObjectKey);
+extern EvtPathStatus evtCheckPathStat(dds3Basic_t *object);
 
 /* Fixed dispatch payload sizes used by admin-sequence requests. */
 enum {
@@ -56,22 +73,15 @@ s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *obj, dds3Basic_t *first,
                                      dds3Basic_t *fourth);
 s32 dds3EffectObjectBasicLinkObjectIndex(dds3Basic_t *obj, dds3Basic_t *owner, s32 entryId);
 
-
-
 void dds3AdminiCallSequence(s32 command, const void *payload, u32 payloadSize, s32 mode);
-
-#include "sdf_debug_api.h"
 
 void scrAllReleaseScript(void);
 
 void fldBgmStop(void);
 
-
-
 void fldPauseBgm(void);
 
 void fldBgmFadeOut(void);
-
 
 void fldSetSceneParam2(fldSceneParam_t *record, s32 stage, s32 kind, const char *name);
 
@@ -90,9 +100,7 @@ void evtFreeStage(void);
 
 extern u32 dds3DrawFlag;
 
-
 void dds3RefreshStoredVec3(dds3Basic_t *object);
-
 
 void evtPathLoop(dds3Basic_t *unit, s32 enabled);
 
@@ -100,15 +108,9 @@ void evtEffectLoopControl(dds3Basic_t *unit, s32 flag);
 
 void dds3EffectObjectBasicStatOn(dds3Basic_t *unit, u32 flag);
 
-
-
-
 extern char D_00421ED8[]; /* "BE ok! (%d)\n" */
 
 extern char D_00421F08[];
-
-
-
 
 extern char D_00421F68[];
 
@@ -121,8 +123,6 @@ void evtPathRate(dds3Basic_t *unit, f32 value);
 s32 fldCommand_GetHojiID(const char *name);
 
 void fldSetMapSlotValueFlag(s32 mapId, u32 slotIndex, s32 bit, s32 enabled);
-
-
 
 void evtPathDir(dds3Basic_t *worldNode, EvtPathDirection direction);
 
@@ -312,8 +312,6 @@ ScrCommandResult evtCommand_EFFECT_PATH_WAIT(void) {
         return SCR_COMMAND_RESULT_PENDING;
     }
 }
-
-
 
 /* Store the key in the VM return slot. The callback result only records
  * command completion. */
@@ -663,7 +661,6 @@ ScrCommandResult evtCommand_CAM_PATH_MOVE(void) {
     return 1;
 }
 
-
 ScrCommandResult evtCommand_CAM_PATH_WAIT(void) {
     dds3Basic_t *cameraOwner;
     EvtPathStatus scaleStatus;
@@ -785,7 +782,6 @@ ScrCommandResult evtCommand_CAM_ROT_Q(void) {
     dds3SetRotPoseSet(cameraObject, (u128 *)quaternion);
     return 1;
 }
-
 
 extern void dds3MoverBasicMakePath(dds3Basic_t *object);
 extern char D_00421E58[], D_00421E68[], D_00421E78[];
@@ -1008,6 +1004,7 @@ ScrCommandResult evtCommand_LOAD_BE(void) {
 
 /* Start the camp task only if no task with this ID exists yet.
  * A missing VM context completes without creating a task. */
+
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421ED8);
 
 ScrCommandResult evtCommand_READ_BE(void) {
@@ -1279,9 +1276,288 @@ ScrCommandResult evtCommand_LIGHT_PATH_MOVE(void) {
     return 1;
 }
 
+ScrCommandResult evtCommand_LIGHT_PATH_WAIT(void) {
+    EvtPathStatus status = evtCheckPathStat(
+        evtSearchBasic(EFF_WORLD_KIND_LIGHT, scrGetIntPara(0)));
+
+    switch (status) {
+    case EVT_PATH_STATUS_AT_ENDPOINT:
+        return SCR_COMMAND_RESULT_COMPLETE;
+    case EVT_PATH_STATUS_IN_PROGRESS:
+        return SCR_COMMAND_RESULT_PENDING;
+    case EVT_PATH_STATUS_INVALID:
+        return SCR_COMMAND_RESULT_COMPLETE;
+    default:
+        return SCR_COMMAND_RESULT_PENDING;
+    }
+}
+
+u32 evtCommand_TEX_BE(void) {
+    scrProcessWork_s *work;
+    EvtPackEventId eventId;
+    struct sdfTexHandle_t *entry;
+    dds3ProcessID_t *task;
+
+    work = scrGetScriptHandle();
+    if (work == NULL) {
+        return 1;
+    }
+    if (work->ProcessID == NULL) {
+        printf(D_00421FE8);
+        return 1;
+    }
+    eventId = scrGetIntPara(0);
+    entry = evtGetEventPackResourceAddress(eventId, scrGetIntPara(1));
+    if (entry == 0) {
+        datDebugPrintf(D_00422030, scrGetIntPara(1));
+        return 1;
+    }
+    task = evtStartPictureProcess(0x2AFE, entry);
+    dds3LinkProcess(work->ProcessID, task);
+    scrSetIntReturnValue(scrProcessHandleToVmInteger(task));
+    return 1;
+}
+
+u32 evtCommand_TEX_LOAD(void) {
+    scrProcessWork_s *work;
+    dds3ProcessID_t *childTask;
+
+    work = scrGetScriptHandle();
+    if (work == NULL) {
+        return 1;
+    }
+    if (work->ProcessID == NULL) {
+        printf(D_00422050);
+        return 1;
+    }
+    childTask = evtStartPictureProcess2(0x2afe, scrGetStrPara(0));
+    dds3LinkProcess(work->ProcessID, childTask);
+    scrSetIntReturnValue(scrProcessHandleToVmInteger(childTask));
+    return 1;
+}
+
+u32 evtCommand_TEX_ON(void) {
+    dds3ProcessID_t *task;
+    dds3ProcessRegistrationResult_t registered;
+
+    task = scrVmIntegerToProcessHandle(scrGetIntPara(0));
+    registered = dds3ExistProcess(task);
+    if (registered != DDS3_PROCESS_NOT_REGISTERED) {
+        evtPictureDrawOn(task);
+    }
+    return 1;
+}
+
+u32 evtCommand_TEX_OFF(void) {
+    dds3ProcessID_t *task;
+    dds3ProcessRegistrationResult_t registered;
+
+    task = scrVmIntegerToProcessHandle(scrGetIntPara(0));
+    registered = dds3ExistProcess(task);
+    if (registered != DDS3_PROCESS_NOT_REGISTERED) {
+        evtPictureDrawOff(task);
+    }
+    return 1;
+}
+
+extern void evtKillPictureProcess(dds3ProcessID_t *task);
+
+u32 evtCommand_TEX_CLS(void) {
+    dds3ProcessID_t *task;
+    dds3ProcessRegistrationResult_t registered;
+
+    task = scrVmIntegerToProcessHandle(scrGetIntPara(0));
+    registered = dds3ExistProcess(task);
+    if (registered != DDS3_PROCESS_NOT_REGISTERED) {
+        evtKillPictureProcess(task);
+    }
+    return 1;
+}
+
+extern void fldSkySetAlpha(u32 drawState);
+extern void fldSetFilterAnime(u32 mode);
+
+u32 evtCommand_SET_SKY(void) {
+    s32 area;
+    s32 target;
+    s32 duration;
+
+    fldSetFilterAnime(0);
+    fldSkySetAlpha(0x80);
+    area = scrGetIntPara(0);
+    target = scrGetIntPara(1);
+    duration = scrGetIntPara(2);
+    fldSetFadeTarget(area, target, duration);
+    return 1;
+}
+
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421F68);
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421FB0);
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_00421FC8);
+
+INCLUDE_RODATA(const s32, "event/evtCommand", D_00421FE8);
+
+INCLUDE_RODATA(const s32, "event/evtCommand", D_00422030);
+
+INCLUDE_RODATA(const s32, "event/evtCommand", D_00422050);
+
+u32 evtCommand_SET_SKY_A(void) {
+    s32 alpha;
+
+    alpha = scrGetIntPara(1);
+    if (alpha < -255) {
+        datDebugPrintf("warning : SET_SKY_A alpha < -255\n");
+        alpha = -255;
+    }
+    if (alpha > 255) {
+        datDebugPrintf("warning : SET_SKY_A alpha > 255\n");
+        alpha = 255;
+    }
+    evtSetSkyAlpha(scrGetIntPara(0), alpha);
+    return 1;
+}
+
+extern void evtSetBokasi(u32 enabled);
+
+u32 evtCommand_BOKASI_ON(void) {
+    evtSetBokasi(1);
+    return 1;
+}
+
+u32 evtCommand_BOKASI_OFF(void) {
+    evtSetBokasi(0);
+    return 1;
+}
+
+u32 evtCommand_LOAD_SOUND_E(void) {
+    s32 eventId;
+
+    /* One parameter call per arm; retail has two call sites and sharing one changes the code. */
+    if (scrGetCommandTimer() == 0) {
+        evtLoadEventBgm(scrGetIntPara(0));
+    } else {
+        eventId = scrGetIntPara(0);
+        if (evtCheckEventBgmLoaded(eventId) != EVT_EVENT_BGM_NOT_READY) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+extern EvtPackedSoundTrackId evtPlayEventBgm(s32 eventId, EvtSoundVariation variation);
+
+u32 evtCommand_BGM_PLAY_E(void) {
+    s32 eventId;
+    EvtSoundVariation variation;
+
+    eventId = scrGetIntPara(0);
+    variation = scrGetIntPara(1);
+    evtPlayEventBgm(eventId, variation);
+    return 1;
+}
+
+extern void evtTransEventBgm(s32 eventId, EvtSoundVariation variation);
+
+u32 evtCommand_BGM_TRANS_E(void) {
+    s32 eventId;
+    EvtSoundVariation variation;
+
+    eventId = scrGetIntPara(0);
+    variation = scrGetIntPara(1);
+    evtTransEventBgm(eventId, variation);
+    return 1;
+}
+
+extern EvtPackedSoundTrackId evtStopEventBgm(s32 eventId, EvtSoundVariation variation);
+
+u32 evtCommand_FADEOUT_E(void) {
+    s32 eventId;
+    EvtSoundVariation variation;
+
+    eventId = scrGetIntPara(0);
+    variation = scrGetIntPara(1);
+    evtStopEventBgm(eventId, variation);
+    return 1;
+}
+
+extern void p2sdBgmVolDown(void);
+
+u32 evtCommand_BGM_VOL_DOWN(void) {
+    p2sdBgmVolDown();
+    return 1;
+}
+
+extern void p2sdBgmVolUp(void);
+
+u32 evtCommand_BGM_VOL_UP(void) {
+    p2sdBgmVolUp();
+    return 1;
+}
+
+extern EvtPackedSoundTrackId evtPlaySe(s32 eventId, EvtSoundVariation variation);
+
+u32 evtCommand_SE_PLAY_E(void) {
+    s32 eventId;
+    EvtSoundVariation variation;
+
+    eventId = scrGetIntPara(0);
+    variation = scrGetIntPara(1);
+    evtPlaySe(eventId, variation);
+    return 1;
+}
+
+extern EvtPackedSoundTrackId evtStartBgmBySoundIdAndFade(
+    s32 eventId, EvtSoundVariation variation);
+
+u32 evtCommandStartBgmWithFade(void) {
+    s32 eventId;
+    EvtSoundVariation variation;
+
+    eventId = scrGetIntPara(0);
+    variation = scrGetIntPara(1);
+    evtStartBgmBySoundIdAndFade(eventId, variation);
+    return 1;
+}
+
+extern void evtRefreshTaskEffectTexture(EvtPackEventId eventId, EvtPackSecondaryResourceId key);
+
+u32 evtOpcodeRefreshTaskData(void) {
+    EvtPackEventId eventId;
+    EvtPackSecondaryResourceId key;
+
+    eventId = scrGetIntPara(0);
+    key = scrGetIntPara(1);
+    evtRefreshTaskEffectTexture(eventId, key);
+    return 1;
+}
+
+extern void Eve_DistortionBlurSetDefTex(void);
+
+u32 evtOpcodeInitializeEffectSoundChannel(void) {
+    Eve_DistortionBlurSetDefTex();
+    return 1;
+}
+
+u32 evtCommandSetDrawFlagWhileWaiting(void) {
+    if (scrGetIntPara(0) <= 0) {
+        dds3DrawFlag |= 0x2000000;
+        return 1;
+    }
+    if ((s32)scrGetCommandTimer() < scrGetIntPara(0)) {
+        dds3DrawFlag |= 0x2000000;
+        return 0;
+    }
+    return 1;
+}
+
+void evtClearSolarOverlayControl(void) {
+    DDS3_GBWK->world.overlayFlag = 0;
+}
+
+/* Reset the field-transition expiry counter at world offset 0xA4C. */
+void evtResetFieldTransitionCounter(void) {
+    DDS3_GBWK->world.fieldTransitionCycleCount = 0;
+}
 

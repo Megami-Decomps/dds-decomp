@@ -5245,8 +5245,8 @@
 0x002433E8	evtDisableMoonDraw	inferred	SMT3HD name via SLUS_209.11 0x001E9A38, reloc-identical; was evtSetSolarOverlayFullyTransparent
 0x00243400	evtEnableMoonDraw2	inferred	SMT3HD name via SLUS_209.11 0x001E9A50, reloc-identical; was evtEnableSolarOverlayAlpha
 0x00243418	evtDisableMoonDraw2	inferred	SMT3HD name via SLUS_209.11 0x001E9A68, reloc-identical; was evtDisableSolarOverlayAlpha
-0x00243430	evtUpdateSolarOverlayFade	inferred	src/dds1/game/code_00228058.c func_002287C0: Steps and clamps solar-overlay alpha toward flag-selected endpoint and submits overlay. [names_reviewed24.tsv]
-0x00243568	evtAdvanceSolarClockAndExpireControls	inferred	Inferred from the current C implementation in game/code_00242CB8.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00243430	evtUpdateSolarOverlayFade	inferred	src/dds2/event/evtMoon.c func_002287C0: Steps and clamps solar-overlay alpha toward flag-selected endpoint and submits overlay. [names_reviewed24.tsv]
+0x00243568	evtAdvanceSolarClockAndExpireControls	inferred	Inferred from the current C implementation in event/evtMoon.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x002436A8	evtCreateSolarOverlayWork	inferred	Byte-identical DDS1 counterpart: Allocates solar overlay visual work, loads its noise sprite and installs it on the owner.
 0x00243740	evtEnsureSolarOverlayTaskAndResetPhase	inferred	Creates guarded solar-overlay task, enables solar clock and resets transparency, phase and world overlay state. [names_reviewed19.tsv]
 0x002438F0	evtPrepareSolarOverlayTestState	inferred	confidence=high; matched-C; src/dds2/game/code_002437F0.c:85:func_002438F0; Configures GS alpha/test state around a zero-color full-screen solar-overlay rectangle, then installs the final test state.; source=fresh-R_Names31-QP13 [names_qp13.tsv]

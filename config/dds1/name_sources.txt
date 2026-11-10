@@ -5220,7 +5220,7 @@
 0x00228778	evtDisableMoonDraw	inferred	SMT3HD name via SLUS_209.11 0x001E9A38, reloc-identical; was evtSetSolarOverlayFullyTransparent
 0x00228790	evtEnableMoonDraw2	inferred	SMT3HD name via SLUS_209.11 0x001E9A50, reloc-identical; was evtEnableSolarOverlayAlpha
 0x002287A8	evtDisableMoonDraw2	inferred	SMT3HD name via SLUS_209.11 0x001E9A68, reloc-identical; was evtDisableSolarOverlayAlpha
-0x002287C0	evtUpdateSolarOverlayFade	inferred	src/dds1/game/code_00228058.c func_002287C0: Steps and clamps solar-overlay alpha toward flag-selected endpoint and submits overlay. [names_reviewed24.tsv]
+0x002287C0	evtUpdateSolarOverlayFade	inferred	src/dds1/event/evtMoon.c func_002287C0: Steps and clamps solar-overlay alpha toward flag-selected endpoint and submits overlay. [names_reviewed24.tsv]
 0x00228930	evtAdvanceSolarClockAndExpireControls	inferred	Paired DDS1 implementation of DDS2 0x00243568: advances enabled solar phase by player travel distance, resets after 4500 units, and expires field-control flags on phase rollover; fldUpdateTravelAndEncounters passes measured movement distance and consumes the resulting flags.
 0x00228A00	evtCreateSolarOverlayWork	inferred	Allocates solar overlay visual work, loads its noise sprite and installs it on the owner.
 0x00228A58	evtFreeSolarOverlayWork	inferred	Releases the solar noise sprite, frees overlay work and clears the task ID.
