@@ -1,6 +1,10 @@
 #ifndef SCR_H
 #define SCR_H
 
+/* The FLW0 script interpreter: the loaded file's tables, and the per-procedure
+ * work block scrTraceCode steps through.
+ * See include/README.md for how the layouts were verified. */
+
 #include "common.h"
 #include "kwln.h"
 #include "scr_trace_result.h"
@@ -13,66 +17,23 @@
 #include "scr_vm_integer.h"
 #include "itf_mes_window_index.h"
 
-struct ItfMesSub;
-
-typedef s32 ScrProgramCounter;
-typedef s32 ScrGlobalIntegerIndex;
-typedef s32 ScrGlobalFloatIndex;
-/* Zero-based signed halfword selectors for the VM's per-process local arrays. */
-typedef s16 ScrLocalIntegerIndex;
-typedef s16 ScrLocalFloatIndex;
-typedef s32 ScrStackDepth;
-typedef s32 ScrStackValueIndex;
-
-#define SCR_STACK_STORAGE_SLOT_COUNT 28
-#define SCR_STACK_RETURN_VALUE_SLOT 27
-
-/* One stack slot, tagged by the matching scrProcessWork_s.StackType byte. */
-typedef union scrStackData_u scrStackData_u;
-union scrStackData_u
-{
-    s32 i;
-    f32 f;
-    struct
-    {
-        s16 s0;
-        s16 s1;
-    } s;
-    struct
-    {
-        u8 c0;
-        u8 c1;
-        u8 c2;
-        u8 c3;
-    } c;
-};
-
-
-/* One bytecode word: s0 is the opcode, s1 its operand, and the other members
- * read the same four bytes as an immediate. */
-typedef union scrCode_u scrCode_u;
-union scrCode_u
-{
-    s32 i;
-    f32 f;
-    struct
-    {
-        s16 s0;
-        s16 s1;
-    } s;
-    struct
-    {
-        u8 c0;
-        u8 c1;
-        u8 c2;
-        u8 c3;
-    } c;
-};
-
 typedef struct scrHeader_t scrHeader_t;
 typedef struct scrTypeTable_t scrTypeTable_t;
 typedef struct scrProcTable_t scrProcTable_t;
 typedef struct scrLabelTable_t scrLabelTable_t;
+typedef union scrCode_u scrCode_u;
+typedef union scrStackData_u scrStackData_u;
+typedef struct scrCommandTable_t scrCommandTable_t;
+typedef struct scrProcessWork_s scrProcessWork_s;
+
+dds3ProcessID_t *scrStartScriptProcess(s32 priority, scrProcessWork_s *work);
+/* DDS returns the process: code_00196478 and code_0019E138 use it. */
+dds3ProcessID_t *scrStartScriptByName(s32 priority, char *name, s32 messageHandle);
+dds3ProcessID_t *scrStartScript2(s32 priority, void *data, s32 startproc);
+
+/* A command handler pops its own arguments with scrGetIntPara and friends and
+ * returns non-zero to advance past the instruction. */
+typedef s32 (*scrCommandFunc_t)(void);
 
 /* File header. MagicCode is "FLW0" compared as a word, so it is four bytes
  * inline, not a pointer. The type table starts right after, at +32. */
@@ -115,7 +76,52 @@ struct scrLabelTable_t
     s32 Reserve1;
 };
 
-typedef struct scrProcessWork_s scrProcessWork_s;
+/* One bytecode word: s0 is the opcode, s1 its operand, and the other members
+ * read the same four bytes as an immediate. */
+union scrCode_u
+{
+    s32 i;
+    f32 f;
+    struct
+    {
+        s16 s0;
+        s16 s1;
+    } s;
+    struct
+    {
+        u8 c0;
+        u8 c1;
+        u8 c2;
+        u8 c3;
+    } c;
+};
+
+/* One stack slot, tagged by the matching scrProcessWork_s.StackType byte. */
+union scrStackData_u
+{
+    s32 i;
+    f32 f;
+    struct
+    {
+        s16 s0;
+        s16 s1;
+    } s;
+    struct
+    {
+        u8 c0;
+        u8 c1;
+        u8 c2;
+        u8 c3;
+    } c;
+};
+
+/* CodeFunc_Comm dispatches on the opcode's operand and then drops paranum
+ * slots off the stack. */
+struct scrCommandTable_t
+{
+    scrCommandFunc_t comm;
+    s32 paranum;
+};
 
 /* One running procedure. Slot 27 of the two stack arrays is the return value:
  * scrSetIntReturnValue writes StackData[27] and tags StackType[27]. */
@@ -145,55 +151,6 @@ struct scrProcessWork_s
     scrProcessWork_s *next;
     void *data;
 };
-
-extern scrProcessWork_s *nowpwork;
-extern scrProcessWork_s *scrHandleFirst;
-extern scrProcessWork_s *scrHandleLast;
-
-scrProcessWork_s *scrGetScriptHandle(void);
-scrProcessWork_s *scrSearchScriptName(const char *name);
-void *scrGetUserData(dds3ProcessID_t *task);
-void scrSetUserData(dds3ProcessID_t *task, void *actor);
-void scrScriptShutdown(dds3ProcessID_t *task);
-void scrRunScript(scrProcessWork_s *context);
-KwlnTaskUpdateResult scrScriptProcess(dds3ProcessID_t *task);
-ScrTraceResult scrTraceCode(scrProcessWork_s *context);
-void scrProcDestroyTask(scrProcessWork_s *process);
-scrProcessWork_s *scrCreateTaskWithDefaultOption(const struct scrHeader_t *header);
-void PushInt(scrProcessWork_s *script, ScrVmInteger value);
-void PushFloat(scrProcessWork_s *script, f32 value);
-void PushStr(scrProcessWork_s *script, const char *value);
-void PushRet(scrProcessWork_s *script, ScrProgramCounter returnAddress);
-ScrVmInteger PopInt(scrProcessWork_s *script);
-f32 PopFloat(scrProcessWork_s *script);
-/* Return the procedure-table index for an exact name match, or NOT_FOUND. */
-ScrProcedureIndex scrSearchProcedureName(const scrHeader_t *header, const char *name);
-/* Command callback plus operand count (0x8); DDS1 script/scrTraceCode.c. */
-typedef struct ScrCommand {
-    ScrCommandResult (*func)(void);
-    ScrCommandParameterCount paramCount;
-} ScrCommand;
-
-/* Script integer register 210 (dds3GlobalWork_t +0x388): set/clear by the process-control script commands. */
-#define SCR_PROCESS_CONTROL_FLAG_REGISTER ((ScrGlobalIntegerIndex)210)
-
-/* XYZ float plus integer W operand (0x10); DDS1/2 script/scrCommonCommand.c. */
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-    s32 w;
-} ScrVecW;
-
-/* Four-float vector operand (0x10); DDS1/2 script/scrCommonCommand.c. */
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-    f32 w;
-} ScrVec4;
-
-/* ScrVmOperand is intentionally local: DDS1's +0x04 is u16, DDS2's is u8. */
 
 /* scrTypeTable_t.Type: which section of the file the entry describes. */
 enum scr_datatype
@@ -258,4 +215,72 @@ enum code_type
     CODE_TYPE_PUSHSTR = 34,
     CODE_TYPE_MAX = 35
 };
+
+/* What a codefunc returns to scrTraceCode. */
+enum code_ret
+{
+    CODE_RET_END = 0,
+    CODE_RET_NEXT = 1,
+    CODE_RET_SYNC = 2
+};
+
+enum scr_result
+{
+    SCR_RESULT_ERROR = 0,
+    SCR_RESULT_CONTINUE = 1,
+    SCR_RESULT_END = 2
+};
+
+/* DDS1/2 additions with no SMT3 counterpart in this header. */
+struct ItfMesSub;
+
+typedef s32 ScrProgramCounter;
+typedef s32 ScrGlobalIntegerIndex;
+typedef s32 ScrGlobalFloatIndex;
+typedef s32 ScrStackDepth;
+typedef s32 ScrStackValueIndex;
+
+#define SCR_STACK_RETURN_VALUE_SLOT 27
+
+extern scrProcessWork_s *nowpwork;
+extern scrProcessWork_s *scrHandleFirst;
+extern scrProcessWork_s *scrHandleLast;
+
+scrProcessWork_s *scrGetScriptHandle(void);
+scrProcessWork_s *scrSearchScriptName(const char *name);
+void *scrGetUserData(dds3ProcessID_t *task);
+void scrSetUserData(dds3ProcessID_t *task, void *actor);
+void scrScriptShutdown(dds3ProcessID_t *task);
+void scrRunScript(scrProcessWork_s *context);
+KwlnTaskUpdateResult scrScriptProcess(dds3ProcessID_t *task);
+ScrTraceResult scrTraceCode(scrProcessWork_s *context);
+void scrProcDestroyTask(scrProcessWork_s *process);
+scrProcessWork_s *scrCreateTaskWithDefaultOption(const struct scrHeader_t *header);
+void PushInt(scrProcessWork_s *script, ScrVmInteger value);
+void PushFloat(scrProcessWork_s *script, f32 value);
+void PushStr(scrProcessWork_s *script, const char *value);
+void PushRet(scrProcessWork_s *script, ScrProgramCounter returnAddress);
+ScrVmInteger PopInt(scrProcessWork_s *script);
+f32 PopFloat(scrProcessWork_s *script);
+/* Return the procedure-table index for an exact name match, or NOT_FOUND. */
+ScrProcedureIndex scrSearchProcedureName(const scrHeader_t *header, const char *name);
+/* Script integer register 210 (dds3GlobalWork_t +0x388): set/clear by the process-control script commands. */
+#define SCR_PROCESS_CONTROL_FLAG_REGISTER ((ScrGlobalIntegerIndex)210)
+
+/* XYZ float plus integer W operand (0x10); DDS1/2 script/scrCommonCommand.c. */
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+    s32 w;
+} ScrVecW;
+
+/* Four-float vector operand (0x10); DDS1/2 script/scrCommonCommand.c. */
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 w;
+} ScrVec4;
+
 #endif /* SCR_H */

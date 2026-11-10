@@ -38,7 +38,6 @@ void *evtGetDebugProcess(void) {
 }
 
 
-extern dds3ProcessID_t *scrStartScriptByName(u32, const char *, ScrProcedureIndex);
 
 extern sdfGrOt_t D_00325708;
 

@@ -22,7 +22,6 @@ ScrProcedureIndex btlFindScriptResource(const char *name) {
     return scrSearchProcedureName((const scrHeader_t *)battle->scriptHandle, path);
 }
 
-extern dds3ProcessID_t *scrStartScript2(u32 priority, const scrHeader_t *script, ScrProcedureIndex procedureIndex);
 
 /* Start the requested skill script as a child of the battle owner task.
  * The new task uses the owner's scheduler priority minus one. */

@@ -91,7 +91,7 @@ u32 CodeFunc_PushI(scrProcessWork_s *script) {
 
 extern ScrOpcodeHandlerResult (*codefunc[])(scrProcessWork_s *scr);
 
-extern const ScrCommand D_00411408[];
+extern const scrCommandTable_t D_00411408[];
 ScrOpcodeHandlerResult CodeFunc_PushIS(scrProcessWork_s *scr) {
     PushInt(scr, scr->Code[scr->CP].s.s1);
     scr->CP++;
@@ -186,11 +186,11 @@ ScrOpcodeHandlerResult CodeFunc_Comm(scrProcessWork_s *scr) {
     ScrCommandResult commandResult;
 
     nowpwork = scr;
-    commandResult = D_00411408[commandIndex].func();
+    commandResult = D_00411408[commandIndex].comm();
     if (commandResult == SCR_COMMAND_RESULT_PENDING) {
         return SCR_OPCODE_HANDLER_RESULT_YIELDED;
     }
-    scr->SP -= D_00411408[commandIndex].paramCount;
+    scr->SP -= D_00411408[commandIndex].paranum;
     if (programCounter == scr->CP) {
         scr->CP = programCounter + 1;
     }

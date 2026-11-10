@@ -89,7 +89,7 @@ u32 CodeFunc_PushI(scrProcessWork_s *script) {
     return 1;
 }
 
-extern const ScrCommand D_0039E288[];
+extern const scrCommandTable_t D_0039E288[];
 extern ScrOpcodeHandlerResult (*codefunc[])(scrProcessWork_s *scr);
 
 void CodeFunc_2Operation(scrProcessWork_s *scr, ScrBinaryOperator operatorCode);
@@ -199,11 +199,11 @@ ScrOpcodeHandlerResult CodeFunc_Comm(scrProcessWork_s *scr)
     ScrCommandResult commandResult;
 
     nowpwork = scr;
-    commandResult = D_0039E288[commandIndex].func();
+    commandResult = D_0039E288[commandIndex].comm();
     if (commandResult == SCR_COMMAND_RESULT_PENDING) {
         return SCR_OPCODE_HANDLER_RESULT_YIELDED;
     }
-    scr->SP -= D_0039E288[commandIndex].paramCount;
+    scr->SP -= D_0039E288[commandIndex].paranum;
     if (commandPc == scr->CP) {
         scr->CP = commandPc + 1;
     }

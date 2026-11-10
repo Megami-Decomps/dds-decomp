@@ -132,7 +132,6 @@ s32 fclScriptForcedEnd(dds3ProcessID_t *task) {
     }
 }
 
-extern dds3ProcessID_t *scrStartScript2(u32 priority, const scrHeader_t *script, ScrProcedureIndex procedureIndex);
 
 void evtClearActiveFlag(s32 flagIndex);
 

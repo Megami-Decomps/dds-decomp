@@ -39,7 +39,7 @@ scrProcessWork_s *scrLoadScriptFile(const char *path, ScrProcedureIndex procedur
     return process;
 }
 
-dds3ProcessID_t *scrStartScriptProcess(u32 priority, ScrProcessTaskOwner process)
+dds3ProcessID_t *scrStartScriptProcess(s32 priority, scrProcessWork_s *process)
 {
     dds3ProcessID_t *task;
     task = dds3StartProcess(process->ProcTable[process->StartProc].Name,
@@ -60,7 +60,7 @@ void scrClearProcessGlobals(void)
     }
 }
 
-dds3ProcessID_t *scrStartScriptByName(u32 priority, const char *path, ScrProcedureIndex procedureIndex)
+dds3ProcessID_t *scrStartScriptByName(s32 priority, char *path, s32 procedureIndex)
 {
     return scrStartScriptProcess(priority, scrLoadScriptFile(path, procedureIndex));
 }
@@ -69,7 +69,7 @@ scrProcessWork_s *scrCreateProcessWithDefaultOption(const char *path) {
     return scrLoadScriptFile(path, 0);
 }
 
-dds3ProcessID_t *scrStartScript2(u32 priority, const scrHeader_t *script, ScrProcedureIndex procedureIndex)
+dds3ProcessID_t *scrStartScript2(s32 priority, void *script, s32 procedureIndex)
 {
     return scrStartScriptProcess(priority, fldFlowParse(script, procedureIndex));
 }
@@ -792,7 +792,7 @@ ScrCommandResult fldCommand_ACT_WIN_DSP3(void);
 ScrCommandResult fldCmdInitializeHuntSparkUnit(void);
 ScrCommandResult fldCmdSetStateFlag(void);
 
-const ScrCommand D_00411408[] = {
+const scrCommandTable_t D_00411408[] = {
     { itfMesMngMessage, 1 },
     { itfMesMngOpenWindow, 0 },
     { itfMesMngCloseWindow, 0 },

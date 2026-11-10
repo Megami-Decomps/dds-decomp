@@ -2993,7 +2993,6 @@ u32 btlScriptReturnOneBasedAiBucket(void) {
     return 1;
 }
 
-extern dds3ProcessID_t *scrStartScript2(u32 priority, const scrHeader_t *script, ScrProcedureIndex procedureIndex);
 extern void itfMesSetTextSlotFromValue(s32, s32, s32, s32);
 
 void btlBindActorSlot(ActionStateLink *aiTask, s32 option) {

@@ -10,7 +10,6 @@
 
 struct sdfMemHandle_t;
 
-extern dds3ProcessID_t *scrStartScript2(u32 priority, const scrHeader_t *script, ScrProcedureIndex procedureIndex);
 
 extern void fldReleaseFieldResources(void);
 

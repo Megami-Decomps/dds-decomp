@@ -2692,7 +2692,6 @@ u32 btlCmdClearSpecialEnemyFlags(void) {
 extern u8 *D_003BAAA8;
 extern void itfMesSetTextSlotFromValue(s32, s32, s32, s32);
 
-extern dds3ProcessID_t *scrStartScript2(u32 priority, const scrHeader_t *script, ScrProcedureIndex procedureIndex);
 
 void btlBindActorSlot(BtlTask *task, s32 taskArg) {
     BtlState *state = (BtlState *)btlGetRuntime();

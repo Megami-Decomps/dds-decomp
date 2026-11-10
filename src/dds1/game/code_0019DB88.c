@@ -1122,7 +1122,6 @@ extern char D_003A1500[]; /* "TestMsgMngD" */
 
 extern s32 D_003BA8EC;
 
-extern dds3ProcessID_t *scrStartScript2(u32 priority, const scrHeader_t *script, ScrProcedureIndex procedureIndex);
 
 
 extern void TestMsgReloadTexture(void);
