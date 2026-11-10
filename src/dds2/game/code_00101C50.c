@@ -133,11 +133,11 @@ extern u8 kwlnOverlayMatrixPackets[];
 
 extern u8 D_003820F0[];
 
-extern SdfLightSources kwlnHeldTextureLightSources;
+extern sdf3DLight_t *kwlnHeldTextureLightSources[3];
 
-extern SdfLightSources kwlnOverlayLightSources;
+extern sdf3DLight_t *kwlnOverlayLightSources[3];
 
-extern SdfLightSources D_0037F770;
+extern sdf3DLight_t *D_0037F770[3];
 
 extern f32 kwlnHeldTextureAmbientColor[4];
 

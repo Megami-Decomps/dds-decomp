@@ -406,7 +406,7 @@ extern u128 D_004584B0[];
 
 extern u128 D_00458470[];
 
-extern SdfLightSources D_003E9F50;
+extern sdf3DLight_t *D_003E9F50[3];
 extern u8 btlIsRuntimeAllocated(void);
 
 extern dds3ModelHandle_t *effLoadViewerModelWithVUState(void *modelData, u32 modelDataSize);
@@ -15350,7 +15350,7 @@ void func_002FB998(EffSharedEffectWork *work) {
     }
     sdfModelCopyStat((sdfModelRootNode_t *)work->resource->deviceSlot, work->resource->model->inner);
     if (effComputeLightDirectionVU(work->resource->model, work->resource->data)) {
-        ((sdfModelRootNode_t *)work->resource->deviceSlot)->lighting = (struct SdfDmaTagHeader *)work->resource->data;
+        ((sdfModelRootNode_t *)work->resource->deviceSlot)->lighting = work->resource->data;
     } else {
         ((sdfModelRootNode_t *)work->resource->deviceSlot)->lighting = NULL;
     }

@@ -8,16 +8,17 @@
 
 struct SdfChunkHeader;
 
-/* Three optional SDK light sources; each points to color and direction vec4.
- * The callee advances through three pointer words, not scalar slot metadata. */
-typedef f32 (*SdfLightSources[3])[4];
+/* Four quadwords: colour, direction, position and the falloff parameters. */
+typedef struct sdf3DLight_t
+{
+    sdfVector4_t color;
+    sdfVector4_t v;
+    sdfVector4_t p;
+    f32 param[4];
+} sdf3DLight_t;
 
-typedef char SdfLightSources_size_must_be_0xC[(sizeof(SdfLightSources) == 0xC) ? 1 : -1];
-
-/* Light vectors and ambient are read-only inputs; packet is the writable output. */
-void sdf3DMakeLightParallelPacket(sdf3DLightParallelPacket_t *packet,
-                                  SdfLightSources sources,
-                                  const f32 *ambient);
+void sdf3DMakeLightParallelPacket(struct sdf3DLightParallelPacket_t *packet,
+                                  sdf3DLight_t **lights, sdfVector4_t *ambient);
 
 /* Buffered SDK storage: live entries are distinct from allocated capacity. */
 struct sdfMemHandle_t;

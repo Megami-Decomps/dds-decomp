@@ -583,7 +583,7 @@ extern void evtApplyMatchingUnitSlotEndpoints(evtUnitHandle_t *unit);
 void evtRefreshUnitEndpointWork(evtUnitHandle_t *unit) {
     f32 ends[4][4];
     f32 color[4];
-    SdfLightSources desc = { ends, 0, 0 };
+    sdf3DLight_t *desc[3] = { (sdf3DLight_t *)ends, 0, 0 };
     u32 packed0[4];
     u32 packed1[4];
     f32 scale0;
@@ -1563,7 +1563,7 @@ EvtUnitVectorSlotLookupResult evtCopyUnitVectorSlotEndpoint(evtUnitHandle_t *uni
 void evtApplyMatchingUnitSlotEndpoints(evtUnitHandle_t *unit) {
     f32 ends[4][4];
     f32 color[4];
-    SdfLightSources desc = { ends, 0, 0 };
+    sdf3DLight_t *desc[3] = { (sdf3DLight_t *)ends, 0, 0 };
     s32 found = -1;
     s32 i;
 

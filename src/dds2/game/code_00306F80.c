@@ -633,7 +633,7 @@ extern DmaPacketHeader D_0045C3C0[2];
 extern sdfDrawTag_t D_0045C400[2];
 extern sdf3DLightParallelPacket_t D_0045C440[2];
 extern ConsMatrixPacket D_0045C600[2];
-extern SdfLightSources D_0037F770;
+extern sdf3DLight_t *D_0037F770[3];
 extern f32 kwlnDefaultColorVector[4];
 extern Matrix4 sdfViewMatrix;
 extern f32 aViewTarget[4];

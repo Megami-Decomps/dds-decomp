@@ -1165,11 +1165,11 @@ s32 kwlnEnsureDefaultResource(void) {
 extern KwlnFrameDrawBank dds3DrawEnv[2];
 extern u32 D_003BA8EC;
 extern sdfGrFrameSet_t sdfGrFrameSet;
-extern SdfLightSources D_00324770;
+extern sdf3DLight_t *D_00324770[3];
 extern f32 kwlnDefaultColorVector[4];
 extern Matrix4 sdfViewMatrix;
 extern Matrix4 D_00329790;
-extern SdfLightSources kwlnOverlayLightSources;
+extern sdf3DLight_t *kwlnOverlayLightSources[3];
 extern f32 kwlnOverlayAmbientColor[4];
 extern void sdf3DLinkInitPacket(sdfDrawTag_t *, DmaPacketHeader *);
 
@@ -1231,7 +1231,7 @@ extern sdfGrFrameSet_t dds3RenderTexId;
 extern u16 D_003BA8FC;
 extern u16 D_003BA8FE;
 extern u32 dds3RenderDrawEnv;
-extern SdfLightSources kwlnHeldTextureLightSources;
+extern sdf3DLight_t *kwlnHeldTextureLightSources[3];
 extern f32 kwlnHeldTextureAmbientColor[4];
 extern Matrix4 kwlnHeldTextureViewMatrix;
 

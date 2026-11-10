@@ -523,7 +523,7 @@ extern sdf3DLightParallelPacket_t D_003DFB70[2];
 
 extern ConsMatrixPacket D_003DFD30[2];
 
-extern SdfLightSources D_00324770;
+extern sdf3DLight_t *D_00324770[3];
 
 extern f32 kwlnDefaultColorVector[4];
 

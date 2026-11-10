@@ -26,7 +26,7 @@ void lightdestructor(dds3Basic_t *light) {
 }
 
 s32 lightmainprocedure(dds3Basic_t *lightObject) {
-    SdfLightSources sources;
+    sdf3DLight_t *sources[3];
     EffLightData *data;
     u32 flags;
 
@@ -80,7 +80,7 @@ s32 lightmainprocedure(dds3Basic_t *lightObject) {
         SDF_VU0_STOREVECTOR(D_0037F770[0]);
         SDF_VU0_STOREVECTOR_B(kwlnDefaultColorVector);
     }
-    sources[0] = data->sourceVectors.vectors;
+    sources[0] = (sdf3DLight_t *)data->sourceVectors.vectors;
     sdf3DMakeLightParallelPacket(data->buffer, sources, data->ambientColor);
     return 1;
 }

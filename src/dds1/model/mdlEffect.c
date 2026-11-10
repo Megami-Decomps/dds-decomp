@@ -2842,7 +2842,7 @@ extern u16 D_00367D10[16];
 
 extern s8 D_00324520[16];
 
-extern SdfLightSources D_00324770;
+extern sdf3DLight_t *D_00324770[3];
 
 extern f32 kwlnDefaultColorVector[4];
 

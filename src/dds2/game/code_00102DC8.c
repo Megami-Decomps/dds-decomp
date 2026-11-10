@@ -1185,11 +1185,11 @@ typedef char KwlnFrameDrawBank_size_check[sizeof(KwlnFrameDrawBank) == 0x1F40 ? 
 extern KwlnFrameDrawBank dds3DrawEnv[2];
 extern u32 D_00435CBC;
 extern sdfGrFrameSet_t sdfGrFrameSet;
-extern SdfLightSources D_0037F770;
+extern sdf3DLight_t *D_0037F770[3];
 extern f32 kwlnDefaultColorVector[4];
 extern Matrix4 sdfViewMatrix;
 extern Matrix4 D_00384790;
-extern SdfLightSources kwlnOverlayLightSources;
+extern sdf3DLight_t *kwlnOverlayLightSources[3];
 extern f32 kwlnOverlayAmbientColor[4];
 extern void sdf3DLinkInitPacket(sdfDrawTag_t *, DmaPacketHeader *);
 
@@ -1251,7 +1251,7 @@ extern sdfGrFrameSet_t dds3RenderTexId;
 extern u16 D_00435CCC;
 extern u16 D_00435CCE;
 extern u32 dds3RenderDrawEnv;
-extern SdfLightSources kwlnHeldTextureLightSources;
+extern sdf3DLight_t *kwlnHeldTextureLightSources[3];
 extern f32 kwlnHeldTextureAmbientColor[4];
 extern Matrix4 kwlnHeldTextureViewMatrix;
 

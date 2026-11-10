@@ -19,7 +19,7 @@ typedef struct KwlnFrameDrawBank {
     sdfPreDrawTag_t linkedList;       /* 0x1650 */
     SdfSceneNode scene;                  /* 0x1660 */
     ConsMatrixPacket sceneMatrix;         /* 0x1880 */
-    u8 scenePacketStorage[0xE0];          /* 0x1950: opaque packet storage */
+    sdf3DLightParallelPacket_t scenePacketStorage; /* 0x1950 */
     KwlnTextureBank heldTexture;          /* 0x1A30: the held texture's packets */
     sdfDrawTag_t thirdList;               /* 0x1D70 */
     ConsMatrixPacket thirdMatrix;        /* 0x1D90 */

@@ -12107,7 +12107,7 @@ extern u128 D_003DCBE0[];
 
 extern u128 D_003DCBA0[];
 
-extern SdfLightSources D_0037EE80;
+extern sdf3DLight_t *D_0037EE80[3];
 
 
 s32 effComputeLightDirectionVU(dds3ModelHandle_t *vector, sdf3DLightParallelPacket_t *target) {
