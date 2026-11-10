@@ -718,3 +718,59 @@ void btlRaisePartyRecordStatusValue(datUnitWork_t *item, u32 minimumValue) {
 
 INCLUDE_RODATA(const s32, "game/code_001A9910", D_004150B0);
 
+INCLUDE_SDATA(const s32, "game/code_001A9910", D_004366E0);
+
+INCLUDE_SDATA(const s32, "game/code_001A9910", btlRuntime);
+
+INCLUDE_SDATA(const s32, "game/code_001A9910", D_004366E8);
+
+INCLUDE_SDATA(const s32, "game/code_001A9910", D_004366F0);
+
+INCLUDE_SDATA(const s32, "game/code_001A9910", D_004366F8);
+
+INCLUDE_SDATA(const s32, "game/code_001A9910", D_00436700);
+
+INCLUDE_SDATA(const s32, "game/code_001A9910", D_00436708);
+
+INCLUDE_SDATA(const s32, "game/code_001A9910", D_00436710);
+
+INCLUDE_SDATA(const s32, "game/code_001A9910", D_00436718);
+
+INCLUDE_SDATA(const s32, "game/code_001A9910", D_00436720);
+
+INCLUDE_SDATA(const s32, "game/code_001A9910", D_00436728);
+
+INCLUDE_SDATA(const s32, "game/code_001A9910", D_00436730);
+
+INCLUDE_SDATA(const s32, "game/code_001A9910", D_00436738);
+
+INCLUDE_SDATA(const s32, "game/code_001A9910", D_00436740);
+
+INCLUDE_SDATA(const s32, "game/code_001A9910", D_00436748);
+
+INCLUDE_SDATA(const s32, "game/code_001A9910", D_00436750);
+
+INCLUDE_SDATA(const s32, "game/code_001A9910", D_00436758);
+
+INCLUDE_SDATA(const s32, "game/code_001A9910", D_00436760);
+
+INCLUDE_SDATA(const s32, "game/code_001A9910", D_00436768);
+
+INCLUDE_SDATA(const s32, "game/code_001A9910", D_00436770);
+
+INCLUDE_SDATA(const s32, "game/code_001A9910", D_00436778);
+
+INCLUDE_SDATA(const s32, "game/code_001A9910", D_00436780);
+
+INCLUDE_SDATA(const s32, "game/code_001A9910", D_00436788);
+
+INCLUDE_SDATA(const s32, "game/code_001A9910", D_00436790);
+
+INCLUDE_SDATA(const s32, "game/code_001A9910", D_00436798);
+
+INCLUDE_SDATA(const s32, "game/code_001A9910", D_004367A0);
+
+INCLUDE_SDATA(const s32, "game/code_001A9910", D_004367A8);
+
+INCLUDE_SDATA(const s32, "game/code_001A9910", D_004367B0);
+
