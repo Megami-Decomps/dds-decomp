@@ -58,24 +58,17 @@ extern u8 sdfHddValid;
 
 extern u8 sdfDev9Ready;
 
-#define D_00551990 sdfHddDevPfs
-#define D_00551998 sdfHddDevHdd
-#define D_005519A0 sdfHddMountPoint
-#define D_0058FFC0 sdfHddPowerOffStack
-#define D_00529B60 sdfHddIrxArgs
-#define D_00529B70 sdfHddPfsIrxArgs
+extern char sdfHddDevPfs[];
 
-extern char D_00551990[];
+extern char sdfHddDevHdd[];
 
-extern char D_00551998[];
+extern char sdfHddMountPoint[];
 
-extern char D_005519A0[];
+extern char sdfHddIrxArgs[];
 
-extern char D_00529B60[];
+extern char sdfHddPfsIrxArgs[];
 
-extern char D_00529B70[];
-
-extern u8 D_0058FFC0[];
+extern u8 sdfHddPowerOffStack[];
 
 #include "sdk_libc.h"
 
@@ -109,15 +102,15 @@ void sdfHddPowerOffTh(s32 aSemaId)
 
     for (;;) {
         WaitSema(aSemaId);
-        sceDevctl(D_00551990, 0x5003, NULL, 0, NULL, 0);
-        sceDevctl(D_00551998, 0x4806, NULL, 0, NULL, 0);
+        sceDevctl(sdfHddDevPfs, 0x5003, NULL, 0, NULL, 0);
+        sceDevctl(sdfHddDevHdd, 0x4806, NULL, 0, NULL, 0);
         sceCdPowerOff(&result);
     }
 }
 
 void sdfHddPowerOffHandler(void *aArg)
 {
-    iSignalSema((s32)aArg);
+    iSignalSema(EE_ADDR_S(aArg));
 }
 
 /* DDS takes the mount path and has no printf. */
@@ -138,21 +131,21 @@ void sdfHddInit(char *aPath)
     if (result < 0 || resident != 0) {
         return;
     }
-    result = sceSifLoadStartModule("cdrom0:\\IRX\\HDD.IRX;1", 0xC, D_00529B60, &resident);
+    result = sceSifLoadStartModule("cdrom0:\\IRX\\HDD.IRX;1", 0xC, sdfHddIrxArgs, &resident);
     if (result < 0 || resident != 0) {
         return;
     }
-    result = sceSifLoadStartModule("cdrom0:\\IRX\\PFS.IRX;1", 0x12, D_00529B70, &resident);
+    result = sceSifLoadStartModule("cdrom0:\\IRX\\PFS.IRX;1", 0x12, sdfHddPfsIrxArgs, &resident);
     if (result < 0 || resident != 0) {
         return;
     }
     sema = sdfCreateSema(0, 1, 0);
-    thread = CreateThreadSimple(sdfHddPowerOffTh, D_0058FFC0, 0x800, 1);
+    thread = CreateThreadSimple(sdfHddPowerOffTh, sdfHddPowerOffStack, 0x800, 1);
     _StartThread(thread, (void *)sema);
     sceCdPOffCallback(sdfHddPowerOffHandler, (void *)sema);
     sceFsInit();
     sprintf(buffer, "hdd0:%s,", aPath);
-    sceMount(D_005519A0, buffer, 0, NULL, 0);
+    sceMount(sdfHddMountPoint, buffer, 0, NULL, 0);
     sdfHddValid = 1;
 }
 
@@ -165,3 +158,4 @@ INCLUDE_SDATA(const s32, "sdf/sdfHdd", sdfHddMountPoint);
 INCLUDE_SDATA(const s32, "sdf/sdfHdd", sdfDev9Ready);
 
 INCLUDE_SDATA(const s32, "sdf/sdfHdd", sdfCdClock);
+
