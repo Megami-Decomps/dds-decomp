@@ -593,7 +593,7 @@ typedef char sdfMat_t_fdSoften_at_0x44[
     ((u32)&((sdfMat_t *)0)->fdSoften == 0x44) ? 1 : -1];
 
 extern s32 sdfThreadSema;
-extern SdfThreadNode *sdfVblankThreadId;
+extern sdfThCB_t *sdfVblankThreadId;
 
 /* Embedded end sentinels and backing-span metadata for the general heap (0x28). */
 typedef struct SdfMemHeap {

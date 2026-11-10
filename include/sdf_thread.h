@@ -3,17 +3,17 @@
 
 #include "common.h"
 
-/* Linked registry node stored in the title's tracked-thread table (0x8). */
-typedef struct SdfThreadNode {
-    struct SdfThreadNode *next; /* 0x00 */
-    s32 threadId;               /* 0x04 */
-} SdfThreadNode;
+/* SDK thread registration node shared by graph and system management. */
+typedef struct sdfThCB_t
+{
+    struct sdfThCB_t *next;
+    s32 thId;
+} sdfThCB_t;
 
 /* The tracked list stores the actual node returned by a thread-ID lookup. */
-SdfThreadNode *sdfFindThreadNode(s32 threadId);
+sdfThCB_t *sdfFindThreadNode(s32 threadId);
 
-/* Register a thread node, then start its entry function on the supplied stack. */
-void sdfStartThreadAndWait(SdfThreadNode *node, void (*entry)(void),
-                           void *stack, s64 stackSize, s32 priority, s32 arg);
+void sdfStartThreadAndWait(sdfThCB_t *thread, void (*entry)(void), void *stack,
+                           s64 stackSize, s32 priority, s32 argument);
 
 #endif /* SDF_THREAD_H */
