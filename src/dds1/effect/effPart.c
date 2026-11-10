@@ -104,7 +104,7 @@ extern s8 effBTLFieldColorOn;
 
 extern s8 D_0054F0F1;
 
-extern const char *D_0054F0F4;
+extern const char *effBTLJyocyuEffFilePath;
 
 extern u8 effBTLDebugCameraAllEdit;
 

@@ -429,7 +429,7 @@ void dds3PolygonDraw(dds3Polygon_t *hPolygon) {
 }
 
 extern sdfGrOt_t sdfGrOtTable[85];
-SYMBOL_AT(sdfGrOt_t, D_002F64B8, sdfGrOtTable, 0x700);
+SYMBOL_AT(sdfGrOt_t, effPolyOt, sdfGrOtTable, 0x700);
 
 static inline void parAppendDrawSurfacePool(sdfGrOt_t *pool, sdfDrawTag_t *packet) {
     pool->regFunc(pool, packet);
@@ -1516,7 +1516,7 @@ void dds3TrackPolyLinkOt(void) {
         packet[4] = 0x8000000026ULL;
         packet[5] = 0x42;
         sdfDrawTagLink(specialList, EE_ADDR(packet));
-        D_002F64B8.regFunc(&D_002F64B8, specialList);
+        effPolyOt.regFunc(&effPolyOt, specialList);
         packet = EE_ADDR_AS(u64 *, sdfGrAllocPacketBuff(0x30));
         packet[0] = 2;
         packet[1] = 0x5000000210000000ULL;
@@ -1525,7 +1525,7 @@ void dds3TrackPolyLinkOt(void) {
         packet[4] = 0x42;
         packet[5] = 0x42;
         sdfDrawTagLink(lists[4], EE_ADDR(packet));
-        D_002F64B8.regFunc(&D_002F64B8, lists[4]);
+        effPolyOt.regFunc(&effPolyOt, lists[4]);
     }
     dds3TrackPolyTag = NULL;
 }

@@ -417,7 +417,8 @@ void dds3HermitianTrackPolySetVertex(dds3HermitianTrackPoly_tag *data, const u12
 
 
 extern sdfGrOt_t *effTrackPolyDrawSurfaces[];
-extern sdfGrOt_t D_00380248;
+extern sdfGrOt_t sdfGrOtTable[];
+SYMBOL_AT(sdfGrOt_t, effPolyOt, sdfGrOtTable, 0x700);
 #include "sdf_packet_alloc.h"
 extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *);
 
@@ -484,7 +485,7 @@ void dds3HermitianTrackPolyDraw(dds3HermitianTrackPoly_tag *data) {
         packet[4] = 6;
         packet[5] = 0x42;
         sdfDrawTagLink(list2, (u32)packet);
-        D_00380248.regFunc(&D_00380248, list2);
+        effPolyOt.regFunc(&effPolyOt, list2);
         packet = (u64 *)sdfGrAllocPacketBuff(0x30);
         packet[0] = 2;
         packet[1] = ((u64)0x50000002 << 16 | 0x1000) << 16;
@@ -493,6 +494,6 @@ void dds3HermitianTrackPolyDraw(dds3HermitianTrackPoly_tag *data) {
         packet[4] = 0x42;
         packet[5] = 0x42;
         sdfDrawTagLink(list, (u32)packet);
-        D_00380248.regFunc(&D_00380248, list);
+        effPolyOt.regFunc(&effPolyOt, list);
     }
 }
