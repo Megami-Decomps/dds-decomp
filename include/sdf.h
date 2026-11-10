@@ -413,13 +413,12 @@ u64 sdfTexGetClampReg(sdfTexHandle_t *texture);
 /* DMA packet list cursors and endpoints (0x20); DDS1/2 game/code_002D33C8/0032C278.c. */
 typedef struct sdfDrawTag_t {
     struct sdfDrawTag_t *next; /* CPU link between lists; first/last are DMA addresses. */
-    u32 head;
-    u32 tail;
-    u32 unkC;
-    u32 firstReferenceSource; /* Optional first DMA reference prefix. */
-    u32 secondReferenceSource; /* Optional second DMA reference prefix. */
-    u32 unk18;
-    u32 unk1C;
+    addr_t head;
+    addr_t tail;
+    u32 z;
+    addr_t lightPacket; /* Optional first DMA reference prefix. */
+    addr_t fogPacket;   /* Optional second DMA reference prefix. */
+    addr_t texPacket[2];
 } sdfDrawTag_t;
 
 typedef char SdfListHead_link_layout[
