@@ -141,6 +141,10 @@ extern s8 D_003BC9AC;
 
 extern f32 D_003BC9A8;
 
+static inline void effSubmitSurfacePacket(sdfGrOt_t *surface, sdfDrawTag_t *list) {
+    surface->regFunc(surface, list);
+}
+
 extern char D_003BD080[];
 
 extern s32 sprintf(char *, const char *, ...);
@@ -1040,7 +1044,6 @@ void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 depth, s32 width, s32 height,
     s32 right;
     s32 bottom;
     s32 savedCoordinate;
-    sdfGrOt_t *drawSurface;
 
     if (mode == 0) {
         sdfTexSetFilter(texture, 0, 1);
@@ -1089,8 +1092,7 @@ void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 depth, s32 width, s32 height,
     sdfDrawTagInit(packetList);
     sdf2DLinkTexPacket(packetList, texture, SDF_GS_CONTEXT_1);
     sdfDrawTagLink(packetList, (u32)packet);
-    drawSurface = &sdfGrOtTable[surfaceId];
-    drawSurface->regFunc(drawSurface, packetList);
+    effSubmitSurfacePacket(&sdfGrOtTable[surfaceId], packetList);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, surfaceId);
 }
 
@@ -1149,7 +1151,6 @@ void sdfDrawTexturedQuad(s32 x, s32 y, u32 depth, s32 width, s32 height,
     s32 centerX;
     s32 centerY;
     s32 savedCoordinate;
-    sdfGrOt_t *drawSurface;
 
     if (mode == 0) {
         sdfTexSetFilter(texture, 0, 1);
@@ -1244,8 +1245,7 @@ void sdfDrawTexturedQuad(s32 x, s32 y, u32 depth, s32 width, s32 height,
     sdfDrawTagInit(packetList);
     sdf2DLinkTexPacket(packetList, texture, SDF_GS_CONTEXT_1);
     sdfDrawTagLink(packetList, (u32)packet);
-    drawSurface = &sdfGrOtTable[surfaceId];
-    drawSurface->regFunc(drawSurface, packetList);
+    effSubmitSurfacePacket(&sdfGrOtTable[surfaceId], packetList);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, surfaceId);
 }
 
