@@ -1,11 +1,11 @@
 #include "common.h"
 #include "draw3d.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
 
 /* DDS's names for the same objects. */
 #define D_002F5C20 kwlnHeldTextureTargetVector
 #define D_002F5C30 kwlnHeldTextureEyeVector
-#define D_003176C0 effPktDefaultFaceIndex
 #define dds3CrossfadeEndMessage D_003A0D70
 
 /* DDS keeps the end message as data: its rodata block has 8 more bytes than
@@ -18,8 +18,8 @@ extern u32 dds3CrossfadeFrame;
 extern u32 dds3CrossfadeFrameMax;
 extern sdfGrOt_t sdfGrOtTable[];
 extern void sdfDrawTagInit(sdfDrawTag_t *a);
-extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
-extern void sdfGrLinkDispFrameTex(sdfDrawTag_t *aTag, u32 aEnv, void *aPkt);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
+extern void sdfGrLinkDispFrameTex(sdfDrawTag_t *aTag, addr_t aEnv, void *aPkt);
 extern void sdf2DLinkTexPacket(sdfDrawTag_t *aTag, sdfTexHandle_t *aTexHndl, s32 aCtx);
 extern void *sdf2DAllocSprite(s32 aNumOfSpr);
 extern void *sdf2DGetPrimPtr(void *aPacketPtr);
@@ -31,13 +31,13 @@ extern f32 D_002F5C30[];
 extern void dds3CrossfadeEnd(void);
 extern s32 dds3AllocRenderTexture(u16 sx, u16 sy, f32 aspect);
 extern s32 dds3RenderTextureON(void);
-extern u32 D_003176C0[];
+extern u32 effPktDefaultFaceIndex[];
 extern s32 sdf2DGetPrimPacketSize(s32 aNumOfRegs, s32 aNumOfPrim);
 extern void *sdfGrAllocPacketBuff(s32 aSize);
 extern sdfGrPacketHeader_t *sdf2DMakePrimPacketHeader(sdfGrPacketHeader_t *aPacketPtr, s32 aPrimReg, s32 aNumOfRegs, s64 aGifRegs, s32 aNumOfPrim);
 extern void dds3RenderTextureOFF(void);
 extern void dds3FreeRenderTexture(void);
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, size_t c);
 #include "sdk_libc.h"
 
 void *effPkt2DGetPrimPtr(void *pPkt) {
@@ -205,7 +205,7 @@ void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *aParm) {
     *cursor++ = 0x6E00C001 | ((u32)parameterCount << 16);
 
     if (aParm->faceIndex == NULL) {
-        memcpy(cursor, D_003176C0, parameterCount * 4);
+        memcpy(cursor, effPktDefaultFaceIndex, parameterCount * 4);
     } else {
         memcpy(cursor, aParm->faceIndex, parameterCount * 4);
     }
@@ -262,7 +262,7 @@ void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *aParm) {
         cursor += vertexCount;
     }
     *cursor = 0x1400000C;
-    while ((u32)++cursor & 15) {
+    while (EE_ADDR(++cursor) & 15) {
         *cursor = 0;
     }
     return packet;
@@ -271,11 +271,9 @@ void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *aParm) {
 /* The render draw env's clear sprite, 0x1800 into each 0x1BE0 draw bank (DDS:
  * 0x1B60 into 0x1F40): both XYZ corners go to the GS coordinate bias, which
  * clears nothing. */
-#define EFF_PACKET_DRAW_BANK_HEAD 0x1660
-
 typedef struct
 {
-    u8 unk0000[EFF_PACKET_DRAW_BANK_HEAD];
+    u8 unk0000[0x1660];
     u8 frameMaskSource[0x500];
     u64 clearXyzA;
     u64 unk1808;
@@ -331,13 +329,11 @@ void dds3CrossfadeStart(s32 frame)
         dds3DrawEnv[i].clearXyzA = 0x80008000;
         dds3DrawEnv[i].clearXyzB = 0x80008000;
     }
-    dds3CrossfadeFrameMax = frame;
+    dds3CrossfadeFrameMax = SDF_FRAMES(frame);
     dds3CrossfadeRunFlag = 1;
     dds3CrossfadeFrame = 0;
     printf("dds3CrossfadeStart\n");
 }
-
-#define EFF_PACKET_CROSSFADE_OT 82
 
 void dds3CrossfadeRun(void)
 {
@@ -362,7 +358,7 @@ void dds3CrossfadeRun(void)
         sdfDrawTagInit(list);
         reference = (void *)sdfGrAllocPacketBuff(0x20);
         frame = dds3GetFrameID();
-        sdfGrLinkDispFrameTex(list, (u32)dds3DrawEnv[frame].frameMaskSource, reference);
+        sdfGrLinkDispFrameTex(list, EE_ADDR(dds3DrawEnv[frame].frameMaskSource), reference);
         {
             u64 *packet = (u64 *)sdfGrAllocPacketBuff(0x40);
 
@@ -374,7 +370,7 @@ void dds3CrossfadeRun(void)
             packet[5] = 0x3B;
             packet[6] = 0;
             packet[7] = 0x3F;
-            sdfDrawTagLink(list, (u32)packet);
+            sdfDrawTagLink(list, EE_ADDR(packet));
         }
         {
             u64 *packet = (u64 *)sdfGrAllocPacketBuff(0x40);
@@ -387,7 +383,7 @@ void dds3CrossfadeRun(void)
             packet[5] = 0x47;
             packet[6] = 0x44;
             packet[7] = 0x42;
-            sdfDrawTagLink(list, (u32)packet);
+            sdfDrawTagLink(list, EE_ADDR(packet));
         }
         sprite = sdf2DAllocSprite(1);
         vertex = (effPacketSpriteVertex_t *)sdf2DGetPrimPtr(sprite);
@@ -407,7 +403,7 @@ void dds3CrossfadeRun(void)
         vertex->corner[1].y = 0x86F8;
         vertex->corner[1].mask = 0xFF0000;
         vertex->corner[1].flag = 0;
-        sdfDrawTagLink(list, (u32)sprite);
+        sdfDrawTagLink(list, EE_ADDR(sprite));
         {
             sdfGrOt_t *ot = &sdfGrOtTable[2];
 
@@ -439,9 +435,9 @@ void dds3CrossfadeRun(void)
     vertex->corner[1].y = 0x8700;
     vertex->corner[1].mask = 0xFF0000;
     vertex->corner[1].flag = 0;
-    sdfDrawTagLink(list, (u32)sprite);
+    sdfDrawTagLink(list, EE_ADDR(sprite));
     {
-        sdfGrOt_t *ot = &sdfGrOtTable[EFF_PACKET_CROSSFADE_OT];
+        sdfGrOt_t *ot = &sdfGrOtTable[82];
 
         ot->regFunc(ot, list);
     }
