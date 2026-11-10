@@ -1,18 +1,15 @@
 #include "common.h"
+#include "sdf_types.h"
 #include "effPCPData.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
 
 /* DDS's names for the same objects. */
-#define D_0031F460 dds3NeedleModelDefaultPoints
-#define D_0031F520 dds3NeedleModelDefaultColors
-#define D_0031F550 dds3NeedleModelDrawSurfaces
-#define D_0056AD88 dds3NeedleModelPrimParam
 #define aViewEye sdfViewTargetVector
 #define dds3EffectBase effDefaultRandomState
 #define effBTLModelGetSphereCenter btlUnitGetMuzzlePosVU
 #define effBTLSkillCheckRun effBTLFieldColorUsesActorSelectors
 #define effBTLSkillGetInvokeFormation effBTLFieldColorGetOriginalSelector
-#define D_0031F450 dds3NeedleModelUpVector
 
 
 /* One needle instance: position plus the colour the draw loop stamps. */
@@ -61,14 +58,14 @@ typedef struct effDrawSurface_t
     void (*append)(struct effDrawSurface_t *surface, void *packet);
 } effDrawSurface_t;
 
-extern effPrimParam_t D_0056AD88;   /* effPkt3DPrimMakePoly parameter block */
-extern f32 D_0031F460[][4];         /* default triangle points */
-extern u32 D_0031F520[];            /* default triangle colours */
-extern effDrawSurface_t *D_0031F550[];
+extern effPrimParam_t dds3NeedleModelPrimParam;   /* effPkt3DPrimMakePoly parameter block */
+extern f32 dds3NeedleModelDefaultPoints[][4];         /* default triangle points */
+extern u32 dds3NeedleModelDefaultColors[];            /* default triangle colours */
+extern effDrawSurface_t *dds3NeedleModelDrawSurfaces[];
 
 extern void *sdfGrAllocPacketBuff(s32 aSize);
 extern void sdfDrawTagInit(void *a);
-extern void sdfDrawTagLink(void *aTag, u32 aPacket);
+extern void sdfDrawTagLink(void *aTag, addr_t aPacket);
 extern void sdf3DPrimLinkMat(void *aTag, void *aMat, s32 aAllocator);
 extern void sdf3DPrimLinkTm(void *aTag, s32 aAllocator);
 extern void *effPkt3DPrimMakePoly(effPrimParam_t *aParm);
@@ -129,12 +126,12 @@ typedef struct effPCPNeedleSpiral_tag {
 #define PAR_CELL_TOPOLOGY_PAIR 0
 #define EFFECT_RING_FULL_TURN 6.2831853f
 extern effRandState_t dds3EffectBase[];
-extern f32 aViewTarget[4], aViewEye[4], D_0031F450[4];
+extern f32 aViewTarget[4], aViewEye[4], dds3NeedleModelUpVector[4];
 extern void *sdfMemAllocDirect(u32 aSize);
 extern void *sdfMemLock(void *aHandle);
 extern void *sdfMatNew(void);
 extern void sdfMatSetConstant(void *aMat, f32 aRatio);
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, size_t c);
 extern u32 dds3GetRandA(effRandState_t *name);
 extern f32 dds3GetRandFloatA(effRandState_t *name);
 extern u32 effBTLSkillCheckRun(void);
@@ -149,10 +146,10 @@ extern u32 effColorBlend(u32 abgr0, u32 abgr1, f32 rate);
 extern trackPolySystem_t *dds3TrackPolyCreate(s32 number, s32 face, s32 rec, u32 type);
 extern void dds3TrackPolyDelete(trackPolySystem_t *hTrackPoly);
 extern void dds3TrackPolySetMode(trackPolySystem_t *hTrackPoly, u16 mode);
-extern void dds3TrackPolyVCSet(u32 hTrackPoly, s32 type, s32 abgr_in, s32 abgr_out);
+extern void dds3TrackPolyVCSet(addr_t hTrackPoly, s32 type, s32 abgr_in, s32 abgr_out);
 extern void dds3TrackPolySet(trackPolySystem_t *hTrackPoly, s32 number, const u128 *pV);
 extern void dds3TrackPolyVCRefresh_ParType1(trackPolySystem_t *hTrackPoly, s32 index);
-extern void dds3TrackPolyColorSet(u32 hTrackPoly, s32 number, u32 color);
+extern void dds3TrackPolyColorSet(addr_t hTrackPoly, s32 number, u32 color);
 extern void dds3TrackPolyListInit(trackPolySystem_t *hTrackPoly, s32 number);
 extern void dds3TrackPolyDraw(trackPolySystem_t *system);
 effPCPNeedleSpiral_tag *effPCPNeedleSpiralCreate(effPCPNeedleSpiralParam_t *pParam);
@@ -187,10 +184,10 @@ effPCPNeedleSpiral_tag *effPCPNeedleSpiralCreate(effPCPNeedleSpiralParam_t *pPar
     dds3NeedleModelVNCListCreate(resource, pParam->n_split, pParam->centerColor,
                             pParam->outerColor, pParam->radiusScale, pParam->viewOffset);
     work->hTrackPoly = dds3TrackPolyCreate(work->number, work->param.t_length, 0, PAR_CELL_TOPOLOGY_PAIR);
-    dds3TrackPolyVCSet((u32)work->hTrackPoly, 1, work->param.t_abgr, work->param.t_abgr);
+    dds3TrackPolyVCSet(EE_ADDR(work->hTrackPoly), 1, work->param.t_abgr, work->param.t_abgr);
     dds3TrackPolySetMode(work->hTrackPoly, (u16)work->param.mode);
     count = work->number;
-    delayRange = pParam->timing;
+    delayRange = SDF_FRAMES(pParam->timing);
     slot = work->pPart;
     if (delayRange == 0) delayRange = 1;
     radiusBase = work->param.radius;
@@ -222,13 +219,13 @@ effPCPNeedleSpiral_tag *effPCPNeedleSpiralCopy(effPCPNeedleSpiralParam_t *work) 
 }
 
 void effPCPNeedleSpiralDraw(effPCPNeedleSpiral_tag *hData) {
-    f32 position[4];
-    f32 axis[4];
-    f32 vertices[2][4];
-    f32 resourcePosition[4];
-    f32 viewDirection[4];
-    f32 width[4];
-    f32 viewOffset[4];
+    sdfVector4_t position;
+    sdfVector4_t axis;
+    sdfVector4_t vertices[2];
+    sdfVector4_t resourcePosition;
+    sdfVector4_t viewDirection;
+    sdfVector4_t width;
+    sdfVector4_t viewOffset;
     effPCPNeedleSpiralPart_tag *slot;
     s32 fadeIn;
     u32 count;
@@ -246,47 +243,47 @@ void effPCPNeedleSpiralDraw(effPCPNeedleSpiral_tag *hData) {
     s32 fadeOut;
 
     value = hData->param.width;
-    width[0] = value;
-    width[1] = value;
-    width[2] = value;
+    width.x = value;
+    width.y = value;
+    width.z = value;
     SDF_VU0_LOADVECTOR(aViewTarget);
     SDF_VU0_LOADVECTOR_B(aViewEye);
     SDF_VU0_SUBVECTOR();
-    SDF_VU0_STOREVECTOR_NOMEM(viewDirection);
+    SDF_VU0_STOREVECTOR_NOMEM(&viewDirection);
     value = -hData->param.viewOffset * 0.75f;
-    viewOffset[0] = value;
-    viewOffset[1] = value;
-    viewOffset[2] = value;
+    viewOffset.x = value;
+    viewOffset.y = value;
+    viewOffset.z = value;
 
     if (effBTLSkillCheckRun() != 0) {
-        effBTLModelGetSphereCenter((struct BtlUnit *)effBTLSkillGetInvokeFormation());
-        SDF_VU0_STOREVECTOR_NOMEM(position);
-        LookAtMatrix(hData->param.position, position, D_0031F450);
+        effBTLModelGetSphereCenter(EE_ADDR_AS(struct BtlUnit *, effBTLSkillGetInvokeFormation()));
+        SDF_VU0_STOREVECTOR_NOMEM(&position);
+        LookAtMatrix(hData->param.position, &position.x, dds3NeedleModelUpVector);
         ReverseMatrix();
         SDF_VU0_STOREMATRIX_NOMEM(hData->hNModel->matrix);
     } else {
         SDF_VU0_LOADMATRIX(hData->hNModel->matrix);
     }
 
-    axis[0] = 0.0f;
-    axis[2] = 1.0f;
-    axis[1] = 0.0f;
-    SDF_VU0_LOADVECTOR(axis);
+    axis.x = 0.0f;
+    axis.z = 1.0f;
+    axis.y = 0.0f;
+    SDF_VU0_LOADVECTOR(&axis);
     SDF_VU0_APPLYMATRIX_XYZ();
-    SDF_VU0_STOREVECTOR_NOMEM(axis);
-    SDF_VU0_LOADVECTOR_B(viewOffset);
+    SDF_VU0_STOREVECTOR_NOMEM(&axis);
+    SDF_VU0_LOADVECTOR_B(&viewOffset);
     SDF_VU0_MULVECTOR();
-    SDF_VU0_STOREVECTOR_NOMEM(viewOffset);
+    SDF_VU0_STOREVECTOR_NOMEM(&viewOffset);
 
     count = hData->number;
     i = 0;
     slot = hData->pPart;
     speed = hData->param.speed;
     acceleration = hData->param.accele;
-    duration = hData->param.life;
-    fadeIn = hData->param.fade_in;
-    fadeOut = hData->param.fade_out;
-    angleStep = hData->param.roll_s;
+    duration = SDF_FRAMES(hData->param.life);
+    fadeIn = SDF_FRAMES(hData->param.fade_in);
+    fadeOut = SDF_FRAMES(hData->param.fade_out);
+    angleStep = SDF_FRAME_STEP(hData->param.roll_s);
     baseColor = hData->abgr;
     if (count != 0) {
         do {
@@ -294,50 +291,50 @@ void effPCPNeedleSpiralDraw(effPCPNeedleSpiral_tag *hData) {
             if (age == 0) {
                 SDF_VU0_LOADMATRIX(hData->hNModel->matrix);
                 radius = (u32)slot->radius;
-                position[0] = sdfCos(slot->radian) * radius;
-                position[1] = sdfSin(slot->radian) * radius;
-                position[2] = 0.0f;
-                SDF_VU0_LOADVECTOR(position);
+                position.x = sdfCos(slot->radian) * radius;
+                position.y = sdfSin(slot->radian) * radius;
+                position.z = 0.0f;
+                SDF_VU0_LOADVECTOR(&position);
                 SDF_VU0_APPLYMATRIX_XYZ();
-                SDF_VU0_STOREVECTOR_NOMEM(position);
-                slot->pos[0] = position[0];
-                slot->pos[1] = position[1];
-                slot->pos[2] = position[2];
-                dds3NeedleModelSetPosition(hData->hNModel, i, position);
+                SDF_VU0_STOREVECTOR_NOMEM(&position);
+                slot->pos[0] = position.x;
+                slot->pos[1] = position.y;
+                slot->pos[2] = position.z;
+                dds3NeedleModelSetPosition(hData->hNModel, i, &position.x);
             }
 
             if (age >= 0 && age <= duration) {
-                dds3NeedleModelGetPosition(hData->hNModel, i, resourcePosition);
-                SDF_VU0_LOADVECTOR(viewOffset);
-                SDF_VU0_LOADVECTOR_B(resourcePosition);
+                dds3NeedleModelGetPosition(hData->hNModel, i, &resourcePosition.x);
+                SDF_VU0_LOADVECTOR(&viewOffset);
+                SDF_VU0_LOADVECTOR_B(&resourcePosition);
                 SDF_VU0_ADDVECTOR();
-                SDF_VU0_STOREVECTOR_NOMEM(resourcePosition);
+                SDF_VU0_STOREVECTOR_NOMEM(&resourcePosition);
 
-                position[0] = slot->pos[0];
-                position[1] = slot->pos[1];
-                position[2] = slot->pos[2];
-                SetRotateMatrixAxis(slot->radian, (const effAxis_t *)axis);
+                position.x = slot->pos[0];
+                position.y = slot->pos[1];
+                position.z = slot->pos[2];
+                SetRotateMatrixAxis(slot->radian, (const effAxis_t *)&axis);
                 slot->radian += angleStep;
-                SDF_VU0_LOADVECTOR(position);
+                SDF_VU0_LOADVECTOR(&position);
                 SDF_VU0_APPLYMATRIX_XYZ();
-                SDF_VU0_STOREVECTOR_NOMEM(position);
+                SDF_VU0_STOREVECTOR_NOMEM(&position);
 
                 {
-                    f32 elapsed = (f32)slot->frame;
+                    f32 elapsed = SDF_FRAME_STEP((f32)slot->frame);
                     f32 halfAcceleration = acceleration * 0.5f;
                     f32 distance = speed * elapsed + halfAcceleration * elapsed * elapsed;
 
-                    elapsed = (f32)duration;
+                    elapsed = SDF_FRAME_STEP((f32)duration);
                     distance -= speed * elapsed + halfAcceleration * elapsed * elapsed;
-                    position[0] += axis[0] * distance;
-                    position[1] += axis[1] * distance;
-                    position[2] += axis[2] * distance;
+                    position.x += axis.x * distance;
+                    position.y += axis.y * distance;
+                    position.z += axis.z * distance;
                 }
-                SDF_VU0_LOADVECTOR(position);
+                SDF_VU0_LOADVECTOR(&position);
                 SDF_VU0_LOADVECTOR_B(hData->param.position);
                 SDF_VU0_ADDVECTOR();
-                SDF_VU0_STOREVECTOR_NOMEM(position);
-                dds3NeedleModelSetPosition(hData->hNModel, i, position);
+                SDF_VU0_STOREVECTOR_NOMEM(&position);
+                dds3NeedleModelSetPosition(hData->hNModel, i, &position.x);
 
                 if (age < fadeIn && fadeIn != 0) {
                     t = (f32)age / (f32)fadeIn;
@@ -351,32 +348,32 @@ void effPCPNeedleSpiralDraw(effPCPNeedleSpiral_tag *hData) {
                 dds3NeedleModelSetColor(hData->hNModel, i, color);
 
                 if (age > 0) {
-                    SDF_VU0_LOADVECTOR(viewOffset);
-                    SDF_VU0_LOADVECTOR_B(position);
+                    SDF_VU0_LOADVECTOR(&viewOffset);
+                    SDF_VU0_LOADVECTOR_B(&position);
                     SDF_VU0_ADDVECTOR();
                     SDF_VU0_COPYVECTOR_A_TO_C();
-                    SDF_VU0_LOADVECTOR(resourcePosition);
+                    SDF_VU0_LOADVECTOR(&resourcePosition);
                     SDF_VU0_COPYVECTOR_C_TO_B();
                     SDF_VU0_SUBVECTOR();
-                    SDF_VU0_LOADVECTOR_B(viewDirection);
+                    SDF_VU0_LOADVECTOR_B(&viewDirection);
                     SDF_VU0_OUTERPRODUCT();
                     SDF_VU0_NORMALIZE();
-                    SDF_VU0_LOADVECTOR_B(width);
+                    SDF_VU0_LOADVECTOR_B(&width);
                     SDF_VU0_MULVECTOR();
                     SDF_VU0_SWAPVECTOR_A_C();
                     SDF_VU0_COPYVECTOR_A_TO_B();
                     SDF_VU0_ADDVECTOR_A_C();
-                    SDF_VU0_STOREVECTOR_NOMEM(vertices[0]);
+                    SDF_VU0_STOREVECTOR_NOMEM(&vertices[0]);
                     SDF_VU0_COPYVECTOR_C_TO_A();
                     SDF_VU0_SUBVECTOR_B_A();
-                    SDF_VU0_STOREVECTOR_B_NOMEM(vertices[1]);
+                    SDF_VU0_STOREVECTOR_B_NOMEM(&vertices[1]);
                     dds3TrackPolySet(hData->hTrackPoly, i, (const u128 *)vertices);
                     dds3TrackPolyVCRefresh_ParType1(hData->hTrackPoly, i);
-                    dds3TrackPolyColorSet((u32)hData->hTrackPoly, i, (color & 0xFF000000) | 0x808080);
+                    dds3TrackPolyColorSet(EE_ADDR(hData->hTrackPoly), i, (color & 0xFF000000) | 0x808080);
                 }
             } else {
                 dds3NeedleModelSetColor(hData->hNModel, i, 0);
-                dds3TrackPolyColorSet((u32)hData->hTrackPoly, i, 0);
+                dds3TrackPolyColorSet(EE_ADDR(hData->hTrackPoly), i, 0);
                 dds3TrackPolyListInit(hData->hTrackPoly, i);
             }
             slot->frame++;
@@ -422,8 +419,8 @@ dds3NeedleModel_tag *dds3NeedleModelCreate(u32 number)
     for (entryIndex = 0; entryIndex < number; entryIndex++, entry++) {
         entry->abgr = 0x80808080;
     }
-    memset(&D_0056AD88, 0, sizeof(D_0056AD88));
-    D_0056AD88.primitive = 0x4000;
+    memset(&dds3NeedleModelPrimParam, 0, sizeof(dds3NeedleModelPrimParam));
+    dds3NeedleModelPrimParam.primitive = 0x4000;
     return work;
 }
 
@@ -454,7 +451,7 @@ void dds3NeedleModelDraw(dds3NeedleModel_tag *hNModel)
     SDF_VU0_LOADMATRIX_B(hNModel->matrix);
     MultMatrixNoArg();
     SDF_VU0_STOREMATRIX(matrix);
-    D_0056AD88.parameters = NULL;
+    dds3NeedleModelPrimParam.parameters = NULL;
     entry = hNModel->pPart;
     for (entryIndex = 0; entryIndex < hNModel->number; entryIndex++, entry++) {
         perPrim = 3;
@@ -465,37 +462,37 @@ void dds3NeedleModelDraw(dds3NeedleModel_tag *hNModel)
         sdf3DPrimLinkTm(packet, 0);
         if (hNModel->hVNMem == NULL) {
             remaining = 12;
-            D_0056AD88.colors = D_0031F520;
-            D_0056AD88.positions = D_0031F460;
-            D_0056AD88.normals = NULL;
+            dds3NeedleModelPrimParam.colors = dds3NeedleModelDefaultColors;
+            dds3NeedleModelPrimParam.positions = dds3NeedleModelDefaultPoints;
+            dds3NeedleModelPrimParam.normals = NULL;
         } else {
-            D_0056AD88.positions = hNModel->positions;
-            D_0056AD88.colors = hNModel->pVC;
-            D_0056AD88.normals = hNModel->normals;
+            dds3NeedleModelPrimParam.positions = hNModel->positions;
+            dds3NeedleModelPrimParam.colors = hNModel->pVC;
+            dds3NeedleModelPrimParam.normals = hNModel->normals;
             remaining = hNModel->point;
         }
-        D_0056AD88.color = entry->abgr;
-        D_0056AD88.primCount = 16;
-        D_0056AD88.vertexCount = 48;
+        dds3NeedleModelPrimParam.color = entry->abgr;
+        dds3NeedleModelPrimParam.primCount = 16;
+        dds3NeedleModelPrimParam.vertexCount = 48;
         while (remaining >= 48) {
-            sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(&D_0056AD88));
+            sdfDrawTagLink(packet, EE_ADDR(effPkt3DPrimMakePoly(&dds3NeedleModelPrimParam)));
             if (hNModel->hVNMem == NULL) {
-                D_0056AD88.colors += 48;
-                D_0056AD88.positions += 48;
+                dds3NeedleModelPrimParam.colors += 48;
+                dds3NeedleModelPrimParam.positions += 48;
             } else {
-                D_0056AD88.colors += 48;
-                D_0056AD88.positions += 48;
-                D_0056AD88.normals += 48;
+                dds3NeedleModelPrimParam.colors += 48;
+                dds3NeedleModelPrimParam.positions += 48;
+                dds3NeedleModelPrimParam.normals += 48;
             }
             remaining -= 48;
         }
         if (remaining >= 3) {
-            D_0056AD88.primCount = remaining / perPrim;
-            D_0056AD88.vertexCount = remaining;
-            sdfDrawTagLink(packet, (u32)effPkt3DPrimMakePoly(&D_0056AD88));
+            dds3NeedleModelPrimParam.primCount = remaining / perPrim;
+            dds3NeedleModelPrimParam.vertexCount = remaining;
+            sdfDrawTagLink(packet, EE_ADDR(effPkt3DPrimMakePoly(&dds3NeedleModelPrimParam)));
         }
     }
-    D_0031F550[hNModel->blend]->append(D_0031F550[hNModel->blend], packet);
+    dds3NeedleModelDrawSurfaces[hNModel->blend]->append(dds3NeedleModelDrawSurfaces[hNModel->blend], packet);
 }
 
 #include "sdk_libc.h"
@@ -576,7 +573,7 @@ void dds3NeedleModelVNCListDelete(dds3NeedleModel_tag *hNModel)
 
 void dds3NeedleModelSetPosition(dds3NeedleModel_tag *hNModel, s32 index, f32 *pPos)
 {
-    f32 *dst = (f32 *)(index * sizeof(dds3NeedleModelPart_tag) + (s32)hNModel->pPart);
+    f32 *dst = (f32 *)(index * sizeof(dds3NeedleModelPart_tag) + EE_ADDR_S(hNModel->pPart));
 
     dst[0] = pPos[0];
     dst[1] = pPos[1];
@@ -585,7 +582,7 @@ void dds3NeedleModelSetPosition(dds3NeedleModel_tag *hNModel, s32 index, f32 *pP
 
 void dds3NeedleModelGetPosition(dds3NeedleModel_tag *hNModel, s32 index, f32 *pPos)
 {
-    f32 *src = (f32 *)(index * sizeof(dds3NeedleModelPart_tag) + (s32)hNModel->pPart);
+    f32 *src = (f32 *)(index * sizeof(dds3NeedleModelPart_tag) + EE_ADDR_S(hNModel->pPart));
 
     pPos[0] = src[0];
     pPos[1] = src[1];
