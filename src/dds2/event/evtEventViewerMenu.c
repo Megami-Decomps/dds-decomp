@@ -96,7 +96,7 @@ extern char D_00437498[];
 
 /* Draw a framed debug menu: the optional header returns how many rows it used, the row callback fills the rest,
  * and blinking scroll markers appear above/below when entries precede `first` or follow the last drawn one. */
-void evtDrawMenuFrame(sdfDrawTag_t *list, s32 x, s32 y, s32 width, s32 rows, s32 first, s32 total, void *callbackContext,
+void evtMenuDisp(sdfDrawTag_t *list, s32 x, s32 y, s32 width, s32 rows, s32 first, s32 total, void *callbackContext,
                    EvtMenuHeaderFn header, EvtMenuRowFn row) {
     s32 i = 0;
     s32 textX;
@@ -185,7 +185,7 @@ s32 evtViewerFloatValueUpdate(s32 x, s32 y, evtViewerInfo_t *ctx) {
     f32 step;
 
     list = dds3FontReqAllocDrawTag();
-    evtDrawMenuFrame(list, x, y, 0x16, 9, 0, 1, ctx, evtAppendValueChangeDebugLabel, evtDrawFloatValueEditorRow);
+    evtMenuDisp(list, x, y, 0x16, 9, 0, 1, ctx, evtAppendValueChangeDebugLabel, evtDrawFloatValueEditorRow);
     sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
     if (ctx->actionMode != 8) {
         return 0;
@@ -252,7 +252,7 @@ s32 evtUpdateValueChangeDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
     s32 step;
 
     list = dds3FontReqAllocDrawTag();
-    evtDrawMenuFrame(list, x, y, 0x16, 9, 0, 1, ctx, evtDrawValueChangeNoticeRow, evtDrawValueChangeInstructionRow);
+    evtMenuDisp(list, x, y, 0x16, 9, 0, 1, ctx, evtDrawValueChangeNoticeRow, evtDrawValueChangeInstructionRow);
     sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
     if (ctx->actionMode != 7) {
         return 0;
@@ -329,7 +329,7 @@ s32 evtViewerFrameChangeUpdate(s32 x, s32 y, evtViewerInfo_t *ctx) {
     s32 step;
 
     list = dds3FontReqAllocDrawTag();
-    evtDrawMenuFrame(list, x, y, 0x16, 0xB, 0, 1, ctx, evtFrameChangeHead, evtViewerDrawFrameChangeRow);
+    evtMenuDisp(list, x, y, 0x16, 0xB, 0, 1, ctx, evtFrameChangeHead, evtViewerDrawFrameChangeRow);
     sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
     if (ctx->actionMode != 6) {
         return 0;
@@ -429,7 +429,7 @@ s32 mnuDrawInfoWindowA(s32 x, s32 y, evtViewerInfo_t *ctx) {
     sdfDrawTag_t *list;
 
     list = dds3FontReqAllocDrawTag();
-    evtDrawMenuFrame(list, x, y, 0xF, 0xB, 0, 0xB, ctx, NULL, evtDrawProjectCommandRow);
+    evtMenuDisp(list, x, y, 0xF, 0xB, 0, 0xB, ctx, NULL, evtDrawProjectCommandRow);
     sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
     if (ctx->actionMode != 1) {
         return 0;
@@ -483,7 +483,7 @@ s32 evtUpdateTextSelectionDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
             width = 6;
         }
     }
-    evtDrawMenuFrame(list, x, y, width, ctx->itemCount + 3, 0, ctx->itemCount, ctx, evtDrawStringEntry, evtDrawSelectableTextRow);
+    evtMenuDisp(list, x, y, width, ctx->itemCount + 3, 0, ctx->itemCount, ctx, evtDrawStringEntry, evtDrawSelectableTextRow);
     sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
     if (ctx->actionMode != 2) {
         return 0;
@@ -531,7 +531,7 @@ s32 evtEditMovieToolName(s32 x, s32 y, evtViewerInfo_t *ctx) {
     s32 key;
 
     list = dds3FontReqAllocDrawTag();
-    evtDrawMenuFrame(list, x, y, 14, 6, 0, 4, ctx,
+    evtMenuDisp(list, x, y, 14, 6, 0, 4, ctx,
                      evtDrawInputValueRow, evtDrawKeyboardRow);
     sdfDebugGrOt.regFunc(&sdfDebugGrOt,
                                     list);
@@ -628,7 +628,7 @@ s32 evtUpdateEventCutSelectDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
     u32 num;
 
     list = dds3FontReqAllocDrawTag();
-    evtDrawMenuFrame(list, x, y, 0x12, 0xB, 0, 8, ctx, evtDrawEventFileNameRow, evtDrawEventCutSelectRow);
+    evtMenuDisp(list, x, y, 0x12, 0xB, 0, 8, ctx, evtDrawEventFileNameRow, evtDrawEventCutSelectRow);
     sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
     if (ctx->actionMode != 9) {
         return 0;
@@ -802,7 +802,7 @@ s32 evtUpdateEntrySelectionDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
     s32 shown;
 
     list = dds3FontReqAllocDrawTag();
-    evtDrawMenuFrame(list, x, y, 8, 0x1D, ctx->entryFirst, ctx->entryCount, ctx, NULL, evtDrawEntrySelectionRow);
+    evtMenuDisp(list, x, y, 8, 0x1D, ctx->entryFirst, ctx->entryCount, ctx, NULL, evtDrawEntrySelectionRow);
     sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
     if (ctx->actionMode != 4) {
         return 0;
@@ -1311,7 +1311,7 @@ s32 evtUpdateFrameListDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
         return -1;
     }
     list = dds3FontReqAllocDrawTag();
-    evtDrawMenuFrame(list, x, y, 39, 21, ctx->frameCursor,
+    evtMenuDisp(list, x, y, 39, 21, ctx->frameCursor,
                  group->childCount + 1, ctx, evtDrawFrameListColumnHeadings, (EvtMenuRowFn)evtFrameListItem);
     sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
     if (ctx->actionMode != 5) {
@@ -1400,7 +1400,7 @@ s32 evtUpdateWorldNodeListDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
         }
     }
     count++;
-    evtDrawMenuFrame(list, x, y, 0x1A, 0x17, ctx->groupFirst, count, ctx,
+    evtMenuDisp(list, x, y, 0x1A, 0x17, ctx->groupFirst, count, ctx,
                      NULL, evtViewerDrawWorldNodeRow);
     sdfDebugGrOt.regFunc(&sdfDebugGrOt,
                                     list);
@@ -1458,7 +1458,7 @@ s32 mnuDrawInfoWindowB(s32 x, s32 y, evtViewerInfo_t *ctx) {
     default:
         return -1;
     }
-    evtDrawMenuFrame(list, x, y, 0x1C, rows, 0, rows, ctx, NULL, evtViewerDrawPendingNodeRow);
+    evtMenuDisp(list, x, y, 0x1C, rows, 0, rows, ctx, NULL, evtViewerDrawPendingNodeRow);
     sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
     if (ctx->actionMode != 0xC) {
         return 0;
@@ -1570,7 +1570,7 @@ s32 evtUpdateMessageValueDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
     s32 handle;
 
     list = dds3FontReqAllocDrawTag();
-    evtDrawMenuFrame(list, x, y, 0x18, 0xA, 0, 1, ctx, mnuDrawMessageMenuLabel, evtDrawMessageDataRow);
+    evtMenuDisp(list, x, y, 0x18, 0xA, 0, 1, ctx, mnuDrawMessageMenuLabel, evtDrawMessageDataRow);
     sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
     if (ctx->actionMode != 0xD) {
         return 0;
@@ -1669,7 +1669,7 @@ s32 evtUpdateComparisonValueDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
     s32 delta;
 
     list = dds3FontReqAllocDrawTag();
-    evtDrawMenuFrame(list, x, y, 0x18, 0xA, 0, 1, ctx, mnuDrawCutFlagLabel, evtDrawComparisonValueRow);
+    evtMenuDisp(list, x, y, 0x18, 0xA, 0, 1, ctx, mnuDrawCutFlagLabel, evtDrawComparisonValueRow);
     sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
     if (ctx->actionMode != 0xE) {
         return 0;
@@ -1797,7 +1797,7 @@ s32 evtUpdateGroupPropertyDialog(s32 x, s32 y, evtViewerInfo_t *runtime) {
     if (D_003C9730[group->type].columnCount == 0) {
         return 0;
     }
-    evtDrawMenuFrame(packets, x, y, 28, 3, 0, 1, runtime, NULL, evtDrawGroupPropertyTable);
+    evtMenuDisp(packets, x, y, 28, 3, 0, 1, runtime, NULL, evtDrawGroupPropertyTable);
     sdfDebugGrOt.regFunc(&sdfDebugGrOt, packets);
     if (runtime->actionMode != 15) {
         return 0;
@@ -2156,7 +2156,7 @@ s32 evtUpdateMotionChangeRow(s32 x, s32 y, evtViewerInfo_t *ctx) {
 
     list = dds3FontReqAllocDrawTag();
     model = (dds3ModelHandle_t *)((EffectObjectData *)ctx->frameGroup->info->workdata)->modelHolder->resourceHandle;
-    evtDrawMenuFrame(list, x, y, 0x14, 0xA, 0, 1, ctx, mnuDrawMotionChangeLabel, evtDrawMotionChangeRow);
+    evtMenuDisp(list, x, y, 0x14, 0xA, 0, 1, ctx, mnuDrawMotionChangeLabel, evtDrawMotionChangeRow);
     sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
     if (ctx->actionMode != 0x10) {
         return 0;
@@ -2290,7 +2290,7 @@ s32 evtUpdateGroupListDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
     }
     count += 3;
     packets = dds3FontReqAllocDrawTag();
-    evtDrawMenuFrame(packets, x, y, 20, 15, ctx->groupFirst, count, ctx, NULL, evtDrawGroupListRow);
+    evtMenuDisp(packets, x, y, 20, 15, ctx->groupFirst, count, ctx, NULL, evtDrawGroupListRow);
     sdfDebugGrOt.regFunc(&sdfDebugGrOt, packets);
     if (ctx->actionMode != 17) {
         return 0;
@@ -2301,7 +2301,7 @@ s32 evtUpdateGroupListDialog(s32 x, s32 y, evtViewerInfo_t *ctx) {
     return dds3SelectMenu(0, 1, count, 1, shown, 0, &ctx->groupFirst, 0, &ctx->groupCursor);
 }
 
-/* Empty RGB-editor row renderer passed to evtDrawMenuFrame. */
+/* Empty RGB-editor row renderer passed to evtMenuDisp. */
 void evtNoOpRGBEditorRow(sdfDrawTag_t *list, s32 x, s32 y, s32 index, void *context) {
 }
 
@@ -2392,7 +2392,7 @@ s32 evtUpdateLightAndBackgroundEditor(s32 x, s32 y, evtViewerInfo_t *runtime) {
     list = dds3FontReqAllocDrawTag();
     x = (s32)((u32)x + (u32)runtime->lightPanelOffset);
 
-    evtDrawMenuFrame(list, (s32)((u32)x + 0x64u), y, 0xD, 0x10, 0, 1, (u8 *)runtime,
+    evtMenuDisp(list, (s32)((u32)x + 0x64u), y, 0xD, 0x10, 0, 1, (u8 *)runtime,
                      NULL, evtNoOpRGBEditorRow);
     sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
 
@@ -2621,7 +2621,7 @@ s32 evtDrawAndHandleXYSlotVectorEditor(s32 x, s32 y, evtViewerInfo_t *runtime) {
 
     group = runtime->frameGroup;
     list = dds3FontReqAllocDrawTag();
-    evtDrawMenuFrame(list, x + runtime->horizontalOffset + 0x60, y,
+    evtMenuDisp(list, x + runtime->horizontalOffset + 0x60, y,
                      0xF, 6, 0, 1, runtime, NULL, evtNoOpXYSlotVectorEditorRow);
     sdfDebugGrOt.regFunc(&sdfDebugGrOt,
                                      list);
@@ -2824,7 +2824,7 @@ s32 mnuDrawTimedPrompt(s32 x, s32 y, evtViewerInfo_t *ctx) {
     sdfDrawTag_t *list;
 
     list = dds3FontReqAllocDrawTag();
-    evtDrawMenuFrame(list, x, y, 0x19, 2, 0, 1, ctx, NULL, evtDrawOptionalPromptText);
+    evtMenuDisp(list, x, y, 0x19, 2, 0, 1, ctx, NULL, evtDrawOptionalPromptText);
     sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
     if (ctx->actionMode != 0x14) {
         return 0;
@@ -2902,7 +2902,7 @@ s32 evtViewerDrawGroupWindow(s32 x, s32 y, evtViewerInfo_t *ctx) {
     }
     count += 2;
     packets = dds3FontReqAllocDrawTag();
-    evtDrawMenuFrame(packets, x, y, 20, 15, ctx->groupFirst, count, ctx, NULL, evtViewerDrawGroupRow);
+    evtMenuDisp(packets, x, y, 20, 15, ctx->groupFirst, count, ctx, NULL, evtViewerDrawGroupRow);
     sdfDebugGrOt.regFunc(&sdfDebugGrOt, packets);
     if (ctx->actionMode != 21) {
         return 0;
@@ -2951,7 +2951,7 @@ s32 evtViewerEditShadowProperties(s32 x, s32 y, evtViewerInfo_t *ctx) {
     s32 lastRow = 0;
     s32 lastMode = 0;
 
-    evtDrawMenuFrame(list, x, y, 0x16, 6, 0, 0, ctx, 0, evtViewerDrawShadowConfigRow);
+    evtMenuDisp(list, x, y, 0x16, 6, 0, 0, ctx, 0, evtViewerDrawShadowConfigRow);
     sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
     if (ctx->actionMode != 0x16) {
         return 0;

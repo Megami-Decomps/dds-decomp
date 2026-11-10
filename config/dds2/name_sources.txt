@@ -5393,11 +5393,11 @@
 0x00250228	evtSkyShutdown	inferred	SMT3HD name via SLUS_209.11 0x001F4660, shared-hash-in-run; was evtResetSkyTaskFlags
 0x00250238	evtExitSky	inferred	SMT3HD name via SLUS_209.11 0x001F4670, reloc-identical; was evtDestroySkyTask
 0x00250278	evtInitSky	inferred	SMT3HD name via SLUS_209.11 0x001F46B0, reloc-identical; was evtCreateSkyTask
-0x002502E0	evtUpdateFrameVariableTask	inferred	game/code_00250010: FrameVar task update; calls func_00101958 on the handle at arg0+0x44 and returns 0 [names_L14_MidUnits.tsv]
+0x002502E0	FrameVarProcess	inferred	SMT3HD name via SLUS_209.11 0x001F4718, SMT3 name; was evtUpdateFrameVariableTask
 0x00250300	evtInitFrameVar	inferred	SMT3HD name via SLUS_209.11 0x001F4AF0, reloc-identical; was evtCreateFrameVariableTask
-0x00250338	evtDrawMenuFrame	inferred	TaskPurist
+0x00250338	evtMenuDisp	inferred	SMT3HD name via SLUS_209.11 0x001F4B28, SMT3 name; was evtDrawMenuFrame
 0x00250508	evtAppendValueChangeDebugLabel	inferred	Appends the literal VALUE CHANGE. via the formatted SIF command to the caller packet list. [names_reviewed19.tsv]
-0x00250558	evtDrawFloatValueEditorRow	inferred	DDS1 twin at 0x002357B8; renders the current float and value-editor key instructions through the callback passed to evtDrawMenuFrame. [DDS2/DDS1 source analysis, 2026-10-13]
+0x00250558	evtDrawFloatValueEditorRow	inferred	DDS1 twin at 0x002357B8; renders the current float and value-editor key instructions through the callback passed to evtMenuDisp. [DDS2/DDS1 source analysis, 2026-10-13]
 0x00250718	evtViewerFloatValueUpdate	inferred	unified with DDS1 twin (was evtDrawFloatValueEntry)
 0x002508D0	evtDrawValueChangeInstructionRow	inferred	Draws configured value and directional adjustment instructions by row selection. [names_reviewed7.tsv]
 0x00250A08	evtUpdateValueChangeDialog	inferred	Draws value editor, reads action controls and adjusts displayed value by one or ten. [names_reviewed7.tsv]
@@ -5430,10 +5430,10 @@
 0x00254F80	evtUpdateMotionChangeRow	inferred	Updates the motion-change row state; DDS1 twin. [names_qp9.tsv]
 0x00255360	evtDrawGroupListRow	inferred	DDS1 twin 0x0023A4B0 [names_M95_Event.tsv]
 0x00255538	evtUpdateGroupListDialog	inferred	Inferred from the current C implementation in event/evtEventViewerMenu.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
-0x00255648	evtNoOpRGBEditorRow	inferred	confidence=high; RGB editor native00255864..98 materializes this callback and stores it at SP+8 for evtDrawMenuFrame's row argument. It draws nothing; evtDrawMenuFrame supplies list,x,y,index,data to row callbacks. DDS1 twin0x0023A798 is installed identically at0023A9B4..E8. Existing void-formal DDS2 and five-argument DDS1 definitions retained. [Namer1 readability b81; native behavior and registered debug hooks]
+0x00255648	evtNoOpRGBEditorRow	inferred	confidence=high; RGB editor native00255864..98 materializes this callback and stores it at SP+8 for evtMenuDisp's row argument. It draws nothing; evtMenuDisp supplies list,x,y,index,data to row callbacks. DDS1 twin0x0023A798 is installed identically at0023A9B4..E8. Existing void-formal DDS2 and five-argument DDS1 definitions retained. [Namer1 readability b81; native behavior and registered debug hooks]
 0x00255650	evtRotateViewerPositionFromPad	inferred	Rotates the event-viewer position by the pad-selected camera-axis steps. Exact DDS1 pair: 0x0023A7A0. [LiteH b29]
 0x00255818	evtUpdateLightAndBackgroundEditor	inferred	Paired DDS1 editor draws light/background controls, handles mode and value input, then applies or restores selected light color, direction, background and slot vectors. The provider body supplies the behavior evidence; no direct C caller is named.
-0x002560A8	evtNoOpXYSlotVectorEditorRow	inferred	Empty row callback passed to evtDrawMenuFrame by evtDrawAndHandleXYSlotVectorEditor; the editor draws its values directly. DDS1 twin at 0x0023B1F8.
+0x002560A8	evtNoOpXYSlotVectorEditorRow	inferred	Empty row callback passed to evtMenuDisp by evtDrawAndHandleXYSlotVectorEditor; the editor draws its values directly. DDS1 twin at 0x0023B1F8.
 0x002560B0	evtDrawAndHandleXYSlotVectorEditor	inferred	confidence=high; src/dds2/event/evtEventViewerMenu.c:2614; Paired implementation draws and handles X/Y slot-vector edits through evtSetSlotVector, uses evtNoOpXYSlotVectorEditorRow for the frame's blank row, and restores saved values on cancel. DDS1 twin 0x0023B200.
 0x002566F8	evtDrawOptionalPromptText	inferred	Draws first or second optional prompt string according to row kind. [names_reviewed7.tsv]
 0x002569D0	evtViewerDrawGroupWindow	inferred	Light1d2
@@ -5489,7 +5489,7 @@
 0x0025CF70	evtSearchEventPack	inferred	SMT3HD name via SLUS_209.11 0x001FA1C8, reloc-identical; was evtFindTaskById
 0x0025CF98	evtGetEventPackStat	inferred	SMT3HD name via SLUS_209.11 0x001FA1F0, reloc-identical; was evtGetEventPackLoadedState
 0x0025CFD0	evtGetPackProcessData	inferred	SMT3HD name via SLUS_209.11 0x001FA228, reloc-identical; was evtGetEventPackLoadState
-0x0025D008	evtGetEventPackResourceAddress	inferred	Returns a borrowed address into a complete event pack entry selected by secondary resource ID; consumers interpret it according to the resource kind. SMT3HD name via SLUS_209.11 0x001FA260, reloc-identical; was evtFindTaskResourceEntryByKey.
+0x0025D008	evtGetResorceData	inferred	SMT3HD name via SLUS_209.11 0x001FA260, SMT3 name; was evtGetEventPackResourceAddress
 0x0025D0B8	evtRefreshTaskEffectTexture	inferred	DDS1 twin: replaces the event task's retained effect texture when the keyed resource is present, updates channel 72, and stores the replacement at task-data +0x38.
 0x0025D140	evtSpawnResourceObject	inferred	DDS1 twin 0x00241D28 [names_M95_Event.tsv]
 0x0025D230	evtInitMotionSeProcess	inferred	SMT3HD name via SLUS_209.11 0x001FA488, reloc-identical; was evtCreateModelFromPackResource
@@ -10062,6 +10062,7 @@
 0x003931A0	fldActorWaypointRows	inferred	confidence=high; src/dds2/game/code_00136EF8.c:D_003931A0; type=FldS16Row[]; refs=fldDoor_GetElvTbl,fldDoorLoad; Loaded from the field WAP file, copied as a table and queried for the selected actor waypoint row. [names_qp9.tsv]
 0x003932A0	fldDoorTable	inferred	SMT3HD data name via SLUS_209.11 0x003030F0, 2 agreeing references; was fldDoorTable
 0x00399FF0	fldStageSoundBaseTable	inferred	confidence=high; data D_00399FF0; matched-C-users=4; src/dds2/game/code_001442D0.c:615:fldPlayPendingSounds; src/dds2/game/code_001442D0.c:697:fldStartSceneBgm; src/dds2/game/code_001442D0.c:736:fldStartSceneBgmAlternate; src/dds2/game/code_001442D0.c:853:fldPrepareSceneBgmArchive; Stage-indexed base is added to queued sound IDs and resolved scene BGM IDs; data-twin=D_0033EAB0, supported by 2 independently paired matched functions.; retail-data-start=asm/dds2/data/data.data.s:35922.; seed-placeholder=D_00399FF0; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
+0x0039A028	fldSceneBgmTrackTable	inferred	MIDI bank ids << 16, read by the bgm mode switch; SMT3 twin D_0030A2D8 (fldSe.c case 2) named the same
 0x003A8E30	fldEffectTextureLoadHandles	inferred	confidence=high; data D_003A8E30; matched-C-users=2; src/dds2/game/code_001442D0.c:1679:fldLoadFieldEffectTextureSlots; src/dds2/game/code_001442D0.c:1691:fldReleaseTextureSlots; Field texture loads return these handles; release queues nonzero handles and clears slots; data-twin=D_0034C870, supported by 2 independently paired matched functions.; retail-data-start=asm/dds2/data/data.data.s:54951.; seed-placeholder=D_003A8E30; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
 0x003A8E40	fldEffectTextureData	inferred	confidence=high; data D_003A8E40; matched-C-users=2; src/dds2/game/code_001442D0.c:1679:fldLoadFieldEffectTextureSlots; src/dds2/game/code_001442D0.c:1691:fldReleaseTextureSlots; Field effect texture loader writes resource data addresses; effect creation consumes them and cleanup clears them; data-twin=D_0034C880, supported by 2 independently paired matched functions.; retail-data-start=asm/dds2/data/data.data.s:54960.; seed-placeholder=D_003A8E40; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
 0x003A8E50	fldEffectTextureNodes	inferred	confidence=high; data D_003A8E50; matched-C-users=2; src/dds2/game/code_001442D0.c:1679:fldLoadFieldEffectTextureSlots; src/dds2/game/code_001442D0.c:1691:fldReleaseTextureSlots; Field effect load creates node handles; texture release destroys and clears those nodes; data-twin=D_0034C890, supported by 2 independently paired matched functions.; retail-data-start=asm/dds2/data/data.data.s:54969.; seed-placeholder=D_003A8E50; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
@@ -10597,6 +10598,16 @@
 0x0040F5C8	fileioLibraryVersion	inferred	The EE FILEIO library's version ("2500" here): the library's open compares the IOP FILEIO's reply at 0x00486FA8 with it, or with "....", and refuses a mismatch. DDS1 twin 0x0039C448.
 0x0040F5D0	sbrkBreak	inferred	The heap's current end that sbrk moves (Sony's sbrk: checked against EndOfHeap with interrupts off), initialized to the end of the loaded image; newlib's allocator grows and trims through it. DDS1 twin 0x0039C450.
 0x0040F6A4	frameObjectSema	inferred	SMT3HD name via SLUS_209.11 0x0052C37C, semaphore around frameObjectList; was D_0040F6A4
+0x0040F6A8	execPs2Payload	inferred	SMT3 twin execPs2Payload (libkernl.c InitExecPS2 copies it to 0x80074000); was D_0040F6A8
+0x0040FE50	execEntryPairs	inferred	SMT3 twin execEntryPairs; was D_0040FE50
+0x0040FE68	setArgEntryPairs	inferred	SMT3 twin setArgEntryPairs; was D_0040FE68
+0x0040FE70	alarmPayload	inferred	SMT3 twin alarmPayload; was D_0040FE70
+0x004105B0	alarmSmallPayload	inferred	SMT3 twin alarmSmallPayload; was D_004105B0
+0x004105D8	alarmEntryPairs	inferred	SMT3 twin alarmEntryPairs; was D_004105D8
+0x00410618	TLBFunctionsImage	inferred	SMT3 twin TLBFunctionsImage; was D_00410618
+0x00410948	tlbHandler	inferred	SMT3 twin tlbHandler; was D_00410948
+0x00410990	execArgumentBlock	inferred	SMT3 twin execArgumentBlock; was D_00410990
+0x00410998	tlbEntryPairs	inferred	SMT3 twin tlbEntryPairs; was D_00410998
 0x00410C68	__EH_FRAME_BEGIN__	inferred	SMT3HD name via SLUS_209.11 0x0052D940, start of .eh_frame; was D_00410C68
 0x00410C6C	sdfAsinTable	inferred	SMT3HD name via SLUS_209.11 0x0052D944, sdfMath asin table; was sdfNormalizedAsinSamples
 0x00411408	scrCommandTable	inferred	SMT3HD name via SLUS_209.11 0x0052E350, script/scrScriptProcess SMT3 rename; was D_00411408
@@ -11555,14 +11566,3 @@
 0x00483540	ctorFrameObject	inferred	SMT3HD name via SLUS_209.11 0x0059AD40, __do_global_ctors static object; was D_00483540
 0x00483558	mainCtorsDone	inferred	SMT3HD name via SLUS_209.11 0x0059AD58, __main static flag; was D_00483558
 0x00483560	frameObjectList	inferred	SMT3HD name via SLUS_209.11 0x0059AD60, __register_frame_info object list head; was D_00483560
-0x0039A028	fldSceneBgmTrackTable	inferred	MIDI bank ids << 16, read by the bgm mode switch; SMT3 twin D_0030A2D8 (fldSe.c case 2) named the same
-0x0040F6A8	execPs2Payload	inferred	SMT3 twin execPs2Payload (libkernl.c InitExecPS2 copies it to 0x80074000); was D_0040F6A8
-0x0040FE50	execEntryPairs	inferred	SMT3 twin execEntryPairs; was D_0040FE50
-0x0040FE68	setArgEntryPairs	inferred	SMT3 twin setArgEntryPairs; was D_0040FE68
-0x0040FE70	alarmPayload	inferred	SMT3 twin alarmPayload; was D_0040FE70
-0x004105B0	alarmSmallPayload	inferred	SMT3 twin alarmSmallPayload; was D_004105B0
-0x004105D8	alarmEntryPairs	inferred	SMT3 twin alarmEntryPairs; was D_004105D8
-0x00410618	TLBFunctionsImage	inferred	SMT3 twin TLBFunctionsImage; was D_00410618
-0x00410948	tlbHandler	inferred	SMT3 twin tlbHandler; was D_00410948
-0x00410990	execArgumentBlock	inferred	SMT3 twin execArgumentBlock; was D_00410990
-0x00410998	tlbEntryPairs	inferred	SMT3 twin tlbEntryPairs; was D_00410998

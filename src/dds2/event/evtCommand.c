@@ -1307,7 +1307,7 @@ u32 evtCommand_TEX_BE(void) {
         return 1;
     }
     eventId = scrGetIntPara(0);
-    entry = evtGetEventPackResourceAddress(eventId, scrGetIntPara(1));
+    entry = evtGetResorceData(eventId, scrGetIntPara(1));
     if (entry == 0) {
         datDebugPrintf(D_00422030, scrGetIntPara(1));
         return 1;

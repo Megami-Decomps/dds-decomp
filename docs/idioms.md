@@ -13812,7 +13812,7 @@ grid, pages through the flag bank, and toggles its selection with
 described above.
 
 The RGB editors install `evtNoOpRGBEditorRow` in the final row-callback
-argument of `evtDrawMenuFrame`. Native DDS1 0023A9B4..E8 and DDS2
+argument of `evtMenuDisp`. Native DDS1 0023A9B4..E8 and DDS2
 00255864..98 materialize the callback and store it at SP+8 before the call.
 The frame helper invokes rows with list, X, Y, row index, and context.
 These empty registered renderers are not unreferenced stubs, and are

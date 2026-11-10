@@ -37,7 +37,7 @@ extern s32 dds3SelectMenu(s32 padSet, s32 secondaryCount, s32 primaryCount, s32 
                                   s32 *secondaryCursor, s32 *primaryCursor);
 
 /* Frame-variable task update: polls the parent task's user value each frame. */
-dds3TaskUpdateResult_t evtUpdateFrameVariableTask(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t FrameVarProcess(dds3ProcessID_t *task) {
     u8 unused[16]; /* retail frame 0x20: unused local storage */
 
     dds3GetProcessData(task->parent);
@@ -47,7 +47,7 @@ dds3TaskUpdateResult_t evtUpdateFrameVariableTask(dds3ProcessID_t *task) {
 extern char D_00423380[]; /* "FrameVar" */
 
 dds3ProcessID_t *evtInitFrameVar(void) {
-    return dds3StartProcess(D_00423380, 0x2AF9, 1, 1, evtUpdateFrameVariableTask, 0, 0);
+    return dds3StartProcess(D_00423380, 0x2AF9, 1, 1, FrameVarProcess, 0, 0);
 }
 
 INCLUDE_RODATA(const s32, "event/evtEventViewerFrameVar", D_00423380);

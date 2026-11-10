@@ -2608,7 +2608,7 @@ ScrCommandResult evtCommand_EFFECT_BE(void) {
     memset(secondVector, 0, sizeof(secondVector));
     eventId = scrGetIntPara(0);
     key = scrGetIntPara(1);
-    descriptor = evtGetEventPackResourceAddress(eventId, key);
+    descriptor = evtGetResorceData(eventId, key);
     if (descriptor == NULL) {
         key = scrGetIntPara(1);
         datDebugPrintf(D_003AC4E8, key);
@@ -2687,7 +2687,7 @@ ScrCommandResult evtCommand_EFFBED_BE(void) {
     memset(scale, 0, sizeof(scale));
     eventId = scrGetIntPara(0);
     key = scrGetIntPara(1);
-    resource = evtGetEventPackResourceAddress(eventId, key);
+    resource = evtGetResorceData(eventId, key);
     if (resource == NULL) {
         key = scrGetIntPara(1);
         datDebugPrintf("EFFBED_BE not fount RID = %d\n", key);
@@ -2797,7 +2797,7 @@ ScrCommandResult evtCommand_EFFMG1_BE(void) {
 
     eventId = scrGetIntPara(0);
     key = scrGetIntPara(1);
-    descriptor = evtGetEventPackResourceAddress(eventId, key);
+    descriptor = evtGetResorceData(eventId, key);
     if (descriptor == NULL) {
         key = scrGetIntPara(1);
         datDebugPrintf("EFFMG1_BE not fount RID = %d\n", key);
@@ -2841,7 +2841,7 @@ ScrCommandResult evtCommand_EFFMG2_BE(void) {
 
     eventId = scrGetIntPara(0);
     key = scrGetIntPara(1);
-    descriptor = evtGetEventPackResourceAddress(eventId, key);
+    descriptor = evtGetResorceData(eventId, key);
     if (descriptor == NULL) {
         key = scrGetIntPara(1);
         datDebugPrintf("EFFMG2_BE not fount RID = %d\n", key);

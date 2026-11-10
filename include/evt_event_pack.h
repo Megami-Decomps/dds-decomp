@@ -133,7 +133,7 @@ EvtPackLoadStatus evtGetEventPackStat(EvtPackEventId eventId);
 
 /* Find an entry by secondaryResourceId in a complete pack and return its
  * borrowed payload address; resource kinds stay opaque. */
-void *evtGetEventPackResourceAddress(EvtPackEventId eventId,
+void *evtGetResorceData(EvtPackEventId eventId,
                                      EvtPackSecondaryResourceId secondaryResourceId);
 
 #endif /* EVT_EVENT_PACK_H */
