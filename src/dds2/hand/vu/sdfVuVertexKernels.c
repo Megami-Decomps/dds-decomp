@@ -16,11 +16,11 @@
  *
  * Callers set vf1 = (1, 1, 1, -1) and the object basis rows vf24..vf26 (and
  * vf28..vf31 where a kernel does not load them); the lighting kernels load
- * the model's colour transform, sdfModelColorTransform, as vf19..vf21 and
+ * the model's colour transform, corePktFaceDivParm, as vf19..vf21 and
  * scale the rows' w by its first row.
  */
 
-extern u128 sdfModelColorTransform[3];
+extern u128 corePktFaceDivParm[3];
 
 #define SDF_VU_VERTEX_BYTES 0x60
 
@@ -44,7 +44,7 @@ static void sdfVuLoadLight(void) {
     __asm__ volatile(
         "lqc2 vf19, 0(%0)\n\tlqc2 vf20, 16(%0)\n\tlqc2 vf21, 32(%0)\n\t"
         "vmulx.w vf24, vf19, vf24x\n\tvmulx.w vf25, vf19, vf25x\n\tvmulx.w vf26, vf19, vf26x"
-        : : "r"(sdfModelColorTransform));
+        : : "r"(corePktFaceDivParm));
 }
 
 /* vf16..vf18 = a texture transform's three 64-bit rows. */

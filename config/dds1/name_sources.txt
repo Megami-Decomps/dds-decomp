@@ -10751,7 +10751,7 @@
 0x003EB848	sdfImageSetCb	inferred	SMT3HD data name via SLUS_209.11 0x00581018, 5 agreeing references; was sdfImageSetCb
 0x003EB860	corePktFaceList	inferred	The node packet's face list: three vertex pointers a triangle, filled by corePktBuildFaceList and corePktBuildBackFaceList, which leave the count in the packet work's nodeCount; 4096 triangles (0xC000 bytes), the rejected triangles' index list after it.
 0x003F7860	corePktBackFaceList	inferred	SMT3HD name via SLUS_209.11 0x0058D030, sdf/sdfVu1 SMT3 rename; was D_003F7860
-0x003F9860	sdfModelColorTransform	inferred	the SdfVuColorTransform sdfCorePacketGen builds through corePktSetFaceDivParm; the lighting kernels load its three quadwords as vf19..vf21. DDS2 twin 0x00476210.
+0x003F9860	corePktFaceDivParm	inferred	SMT3HD name via SLUS_209.11 0x0058F030 (corePktSetFaceDivParm target); the SdfVuColorTransform sdfCorePacketGen builds through corePktSetFaceDivParm; the lighting kernels load its three quadwords as vf19..vf21. DDS2 twin 0x00476210.
 0x003F9890	corePktFogParm	inferred	SMT3HD name via SLUS_209.11 0x0058F060, sdfCoreDraw reference; was D_003F9890
 0x003F98A0	corePktWorldLightMtxCache	inferred	SMT3HD name via SLUS_209.11 0x0058F070, sdf/sdfVu1 SMT3 rename; was sdfVuObjectBasisCache
 0x003F9900	sdfPadPortBuffers	inferred	confidence=high; src/dds1/game/code_002DDC98.c:sdfPadInitManager; Per-port buffers passed to scePadPortOpen at 0x100-byte intervals. [names_qp9.tsv]
