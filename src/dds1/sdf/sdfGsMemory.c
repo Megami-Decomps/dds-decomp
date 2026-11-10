@@ -139,6 +139,10 @@ sdfGsMemSlice_t *sdfGsMemAllocFromHead(s32 aSize, s32 aType)
             if (sdfGsErrorHandler != NULL) {
                 sdfGsErrorHandler(aSize, aType);
             }
+#ifdef FIX_BUGS
+            /* BUG: if the handler returns or is NULL, retail reads slice->type through NULL. */
+            return NULL;
+#endif
         }
         if (slice->type != 0 || slice->size < aSize) {
             continue;
@@ -186,6 +190,10 @@ sdfGsMemSlice_t *sdfGsMemAllocFromTail(s32 aSize, s32 aType)
             if (sdfGsErrorHandler != NULL) {
                 sdfGsErrorHandler(aSize, aType);
             }
+#ifdef FIX_BUGS
+            /* BUG: if the handler returns or is NULL, retail reads slice->type through NULL. */
+            return NULL;
+#endif
         }
         if (slice->type != 0 || slice->size < aSize) {
             continue;
