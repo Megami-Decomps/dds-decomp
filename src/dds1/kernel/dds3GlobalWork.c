@@ -41,7 +41,6 @@ extern scrHeader_t *D_003BAAAC;
 /* The 0x20 flag selects base enemy vitals instead of the party script path. */
 #define SDF_UNIT_ENEMY 0x20
 
-
 extern DatEnemyRecord *datEnemyRecords;
 
 extern u32 sdfRollActionHit(s32 channel, datUnitWork_t *sourceRecord, datUnitWork_t *packed);
@@ -61,120 +60,6 @@ extern void sdfRestoreResetSnapshot(void);
 
 s32 sdfDispatchUnitScriptDefault5(u32 unitIndex, datUnitWork_t *sourceRecord,
     datUnitWork_t *targetRecord, u8 mode);
-
-/* Linearly interpolated curve sample at `time`; 0 when no curve is active. */
-f32 dds3PathBasicControlGetFovy(dds3PathBasicControl_t *user) {
-    u32 index;
-    f32 fraction;
-    Dds3PathKeyframes *curve;
-    f32 *values;
-
-    if (user->counter.flags & DDS3_PATH_SCALAR_CHANNEL) {
-        curve = user->scalarKeys;
-        dds3PathEvalSpline(&index, &fraction, curve, user->counter.time);
-        values = curve->data.scalar;
-        return values[index] * (1.0f - fraction) + values[index + 1] * fraction;
-    }
-    return 0.0f;
-}
-
-#define SDF_FLOAT_COUNTER_FROZEN_FLAG 0x00000008
-#define SDF_FLOAT_COUNTER_WRAP_FLAG 0x00000020
-
-/* Step the counter by one; return zero when a non-looping endpoint is reached. */
-s32 dds3PathBasicControlStep(SdfFloatCounter *counter) {
-    s32 result = SDF_FLOAT_COUNTER_STEP_CONTINUES;
-
-    if (counter->flags & SDF_FLOAT_COUNTER_FROZEN_FLAG) {
-        return SDF_FLOAT_COUNTER_STEP_CONTINUES;
-    }
-    if (counter->direction == 0) {
-        if (counter->duration > counter->time) {
-            counter->time = counter->time + 1.0f;
-        } else if (counter->flags & SDF_FLOAT_COUNTER_WRAP_FLAG) {
-            counter->time = 0.0f;
-        } else {
-            result = SDF_FLOAT_COUNTER_STEP_FINISHED;
-        }
-    } else if (counter->direction == 1) {
-        if (counter->time > 0.0f) {
-            counter->time = counter->time - 1.0f;
-        } else if (counter->flags & SDF_FLOAT_COUNTER_WRAP_FLAG) {
-            counter->time = counter->duration;
-        } else {
-            result = SDF_FLOAT_COUNTER_STEP_FINISHED;
-        }
-    }
-    return result;
-}
-
-void dds3PathBasicControlAlterMode(SdfFloatCounter *counter, u32 direction) {
-    counter->direction = direction;
-}
-
-u32 dds3PathBasicControlGetMode(const SdfFloatCounter *counter) {
-    return counter->direction;
-}
-
-void dds3PathBasicControlSetRatio(SdfFloatCounter *value, float multiplier) {
-    value->time = multiplier * value->duration;
-}
-
-float dds3PathBasicControlGetRatio(const SdfFloatCounter *value) {
-    return value->time / value->duration;
-}
-
-void dds3PathBasicPauseOn(SdfFloatCounter *value) {
-    value->flags = value->flags | SDF_FLOAT_COUNTER_FROZEN_FLAG;
-}
-
-void dds3PathBasicPauseOff(SdfFloatCounter *value) {
-    value->flags = value->flags & ~SDF_FLOAT_COUNTER_FROZEN_FLAG;
-}
-
-void dds3PathBasicLoopOn(SdfFloatCounter *value) {
-    value->flags = value->flags | SDF_FLOAT_COUNTER_WRAP_FLAG;
-}
-
-void dds3PathBasicLoopOff(SdfFloatCounter *value) {
-    value->flags = value->flags & ~SDF_FLOAT_COUNTER_WRAP_FLAG;
-}
-
-
-
-dds3Basic_t *dds3AddPointBasic(u32 key, EvtWorldSourceTransformPrefix *source, const char *name) {
-    dds3Basic_t *obj = dds3AddSceneBasicData(EFF_WORLD_KIND_TRANSFORM_SOURCE);
-
-    obj->workdata = source;
-    obj->key = key;
-    obj->name = name;
-    return obj;
-}
-
-f32 *dds3GetTransformSourceData(dds3Basic_t *node) {
-    return node->workdata;
-}
-
-void *dds3GetWorldNodeData(dds3Basic_t *node) {
-    return node->workdata;
-}
-
-/* Load the world node's borrowed data vector into VF10. */
-void evtLoadValueVectorIntoVu(dds3Basic_t *node) {
-    void *vec = dds3GetWorldNodeData(node);
-
-    SDF_VU0_LOADVECTOR_BARRIER(vec);
-
-}
-
-/* Same, from the second quadword in the borrowed vector. */
-void evtLoadValueSecondaryVectorIntoVu(dds3Basic_t *node) {
-    void *vec = (void *)((u8 *)dds3GetWorldNodeData(node) + 0x10);
-
-    SDF_VU0_LOADVECTOR_BARRIER(vec);
-
-}
-
 
 /* Allocate the 0x33600 game-state block, retain its scene allocation, zero it
  * and register the "GBWK" tick task that owns it. */
@@ -254,7 +139,6 @@ extern sdfMemHandle_t *D_003BD79C;
 extern u32 D_003BD7A0;
 extern void ptySaveActiveUnitsToStock(void);
 extern void mnuCollectFlagArray(u8 *flags);
-
 
 /* Preserve carried flags and progress before the full runtime reset. */
 void sdfSaveResetSnapshot(void) {
@@ -467,7 +351,6 @@ void sdfReloadChannelSegments(SdfChannel *table) {
 
 extern SdfChannel D_0032A6F0[];
 
-
 void sdfResetChannels(void) {
     u32 i;
 
@@ -477,7 +360,6 @@ void sdfResetChannels(void) {
     }
     evtInitializeWorkScriptTask();
 }
-
 
 /* Enemy vitals use a 76-byte base table; party vitals come from a script,
  * a unit-specific bonus, and a maximum of 999. */
@@ -585,7 +467,6 @@ s32 sdfDispatchSubCmd(u32 unitIndex, datUnitWork_t *sourceRecord,
     datUnitWork_t *targetRecord, u32 mode) {
     return evtRunCommandContext7(unitIndex, sourceRecord, targetRecord, (u8)mode);
 }
-
 
 s32 sdfCalculateCommandVitalDelta(s32 channel, datUnitWork_t *sourceRecord, datUnitWork_t *item, u32 mode, u8 vital) {
     s32 healing;
@@ -907,27 +788,26 @@ void sdfRaisePackedChannelValue(datUnitWork_t *item, u32 minimumValue) {
     }
 }
 
-INCLUDE_RODATA(const s32, "game/code_00117438", D_0039F980);
+INCLUDE_RODATA(const s32, "kernel/dds3GlobalWork", D_0039F980);
 
-INCLUDE_SDATA(const s32, "game/code_00117438", sdfRuntimeTaskName);
+INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", sdfRuntimeTaskName);
 
-INCLUDE_SDATA(const s32, "game/code_00117438", D_003BA9E8);
+INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", D_003BA9E8);
 
-INCLUDE_SDATA(const s32, "game/code_00117438", D_003BA9E9);
+INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", D_003BA9E9);
 
-INCLUDE_SDATA(const s32, "game/code_00117438", D_003BA9EA);
+INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", D_003BA9EA);
 
-INCLUDE_SDATA(const s32, "game/code_00117438", D_003BA9EC);
+INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", D_003BA9EC);
 
-INCLUDE_SDATA(const s32, "game/code_00117438", D_003BA9F0);
+INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", D_003BA9F0);
 
-INCLUDE_SDATA(const s32, "game/code_00117438", D_003BA9F4);
+INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", D_003BA9F4);
 
-INCLUDE_SDATA(const s32, "game/code_00117438", D_003BA9F8);
+INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", D_003BA9F8);
 
-INCLUDE_SDATA(const s32, "game/code_00117438", D_003BA9F9);
+INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", D_003BA9F9);
 
-INCLUDE_SDATA(const s32, "game/code_00117438", DDS3_GBWK);
+INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", DDS3_GBWK);
 
-INCLUDE_SDATA(const s32, "game/code_00117438", D_003BAA04);
-
+INCLUDE_SDATA(const s32, "kernel/dds3GlobalWork", D_003BAA04);

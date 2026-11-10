@@ -365,3 +365,4 @@ void dds3RefreshStoredVec3(dds3Basic_t *object) {
 }
 
 INCLUDE_SDATA(const s32, "basic/dds3MatterObjectBasic", effObjOpacityPassEnabled);
+

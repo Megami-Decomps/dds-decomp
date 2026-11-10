@@ -88,12 +88,13 @@ segments:
       - [0x153D8, c, basic/dds3EffectObjectBasic]  # Nocturne __FILE__; SMT3 unit boundary
       - [0x170F8, c, basic/dds3EventObjectBasic]  # Nocturne __FILE__
       - [0x17260, c, basic/dds3LightObjectBasic]  # Nocturne __FILE__
-      - [0x17860, c, basic/dds3ModelBasic]  # Nocturne __FILE__
-      - [0x17878, c, game/code_00116878]
-      - [0x17A50, c, basic/dds3ModelRangeBasic]  # Nocturne __FILE__
-      - [0x17A90, c, game/code_00116A90]
-      - [0x17F08, c, basic/dds3PathBasic]  # Nocturne __FILE__
-      - [0x18438, c, game/code_00117438]
+      - [0x17860, c, game/code_00116860]  # SMT3 code_00115D38
+      - [0x17878, c, basic/dds3ModelBasic]  # Nocturne __FILE__; SMT3 unit boundary
+      - [0x17A10, c, basic/dds3ModelRangeBasic]  # Nocturne __FILE__; SMT3 unit boundary
+      - [0x17B28, c, basic/dds3EventBasic]  # SMT3 unit boundary
+      - [0x17B80, c, basic/dds3PathBasic]  # Nocturne __FILE__; SMT3 unit boundary
+      - [0x185F8, c, basic/dds3PointBasic]  # SMT3 unit boundary
+      - [0x186A0, c, kernel/dds3GlobalWork]  # SMT3 unit boundary
       - [0x1A098, c, newdata/datCalc]  # Nocturne __FILE__
       - [0x1DE88, c, game/code_0011CE88]  # P4 transfer
       - [0x1DEB8, c, game/code_0011CEB8]
@@ -339,7 +340,7 @@ segments:
       - [0x2A0720, .rodata, basic/dds3UnitObjectBasic]
       - [0x2A0740, .rodata, basic/dds3MatterObjectBasic]
       - [0x2A0770, .rodata, basic/dds3EffectObjectBasic]
-      - [0x2A0930, .rodata, game/code_00117438]
+      - [0x2A0930, .rodata, kernel/dds3GlobalWork]
       - [0x2A09A0, .rodata, game/code_0011D3A0]
       - [0x2A0B60, .rodata, game/code_00122030]
       - [0x2A0D50, .rodata, field/fldFileResolver]
@@ -556,7 +557,7 @@ segments:
       - [0x2BB9C0, .sdata, basic/dds3MoverBasic]
       - [0x2BB9C8, .sdata, basic/dds3ObjectBase]
       - [0x2BB9D0, .sdata, basic/dds3MatterObjectBasic]
-      - [0x2BB9E0, .sdata, game/code_00117438]
+      - [0x2BB9E0, .sdata, kernel/dds3GlobalWork]
       - [0x2BBA08, .sdata, newdata/datCalc]
       - [0x2BBAD0, .sdata, game/code_0011CEB8]
       - [0x2BBAD8, .sdata, misc/l2d]

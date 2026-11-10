@@ -88,12 +88,13 @@ segments:
       - [0x15640, c, basic/dds3EffectObjectBasic]  # Nocturne __FILE__; SMT3 unit boundary
       - [0x17360, c, basic/dds3EventObjectBasic]  # Nocturne __FILE__
       - [0x174C8, c, basic/dds3LightObjectBasic]  # Nocturne __FILE__
-      - [0x17AC8, c, basic/dds3ModelBasic]  # Nocturne __FILE__
-      - [0x17AE0, c, game/code_00116AE0]
-      - [0x17CB8, c, basic/dds3ModelRangeBasic]  # Nocturne __FILE__
-      - [0x17CF8, c, game/code_00116CF8]
-      - [0x18170, c, basic/dds3PathBasic]  # Nocturne __FILE__
-      - [0x186A0, c, game/code_001176A0]
+      - [0x17AC8, c, game/code_00116AC8]  # SMT3 code_00115D38
+      - [0x17AE0, c, basic/dds3ModelBasic]  # Nocturne __FILE__; SMT3 unit boundary
+      - [0x17C78, c, basic/dds3ModelRangeBasic]  # Nocturne __FILE__; SMT3 unit boundary
+      - [0x17D90, c, basic/dds3EventBasic]  # SMT3 unit boundary
+      - [0x17DE8, c, basic/dds3PathBasic]  # Nocturne __FILE__; SMT3 unit boundary
+      - [0x18860, c, basic/dds3PointBasic]  # SMT3 unit boundary
+      - [0x18908, c, kernel/dds3GlobalWork]  # SMT3 unit boundary
       - [0x1A7A8, c, newdata/datCalc]  # Nocturne __FILE__
       - [0x1FC60, c, game/code_0011EC60]  # mirrors dds1 game/code_0011CE88 (tools/shared_funcs.py)
       - [0x1FC90, c, game/code_0011EC90]
@@ -354,7 +355,7 @@ segments:
       - [0x3138A0, .rodata, basic/dds3UnitObjectBasic]
       - [0x3138C0, .rodata, basic/dds3MatterObjectBasic]
       - [0x3138F0, .rodata, basic/dds3EffectObjectBasic]
-      - [0x313AB0, .rodata, game/code_001176A0]
+      - [0x313AB0, .rodata, kernel/dds3GlobalWork]
       - [0x313B30, .rodata, game/code_0011F208]
       - [0x313CF0, .rodata, game/code_00124040]
       - [0x313FF0, .rodata, field/fldFileResolver]
@@ -585,7 +586,7 @@ segments:
       - [0x336D90, .sdata, basic/dds3MoverBasic]
       - [0x336D98, .sdata, basic/dds3ObjectBase]
       - [0x336DA0, .sdata, basic/dds3MatterObjectBasic]
-      - [0x336DB0, .sdata, game/code_001176A0]
+      - [0x336DB0, .sdata, kernel/dds3GlobalWork]
       - [0x336DD8, .sdata, newdata/datCalc]
       - [0x336EA8, .sdata, game/code_0011EC90]
       - [0x336EB0, .sdata, misc/l2d]

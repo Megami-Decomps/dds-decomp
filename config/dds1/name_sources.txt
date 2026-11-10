@@ -754,27 +754,27 @@
 0x00117808	sdfRuntimeTaskTeardownHook	inferred	confidence=medium; Empty GBWK teardown hook called immediately after hierarchy destruction and before backing-allocation release. DDS2 00117A80 has the same role and body. [Namer1 b63]
 0x00117810	sdfSaveResetSnapshot	inferred	Fam
 0x00117C48	sdfRestoreResetSnapshot	inferred	Restores saved runtime data after sdfResetGameRuntime clears the game state; restores flags, ticks, mantra/profile/template data, and world slot flags. Paired with DDS2 0x00118008.
-0x00118020	sdfResetGameRuntime	inferred	confidence=high; matched-C; src/dds1/game/code_00117438.c:292:func_00118020; Resets game runtime ticks, process globals, viewer/solar state and party profiles; a full reset preserves the backing allocation, clears game-state storage and restores saved runtime data. Peer-released and whole-unit matched.; source=names_M143.tsv:22 [names_qp13.tsv]
+0x00118020	sdfResetGameRuntime	inferred	confidence=high; matched-C; src/dds1/kernel/dds3GlobalWork.c:259:func_00118020; Resets game runtime ticks, process globals, viewer/solar state and party profiles; a full reset preserves the backing allocation, clears game-state storage and restores saved runtime data. Peer-released and whole-unit matched.; source=names_M143.tsv:22 [names_qp13.tsv]
 0x001180F8	evtInitializeWorkScriptTask	inferred	Recreates the event work script task and clears its event context after sdfResetChannels reloads channel segments.
-0x00118110	sdfFirePendingCallback	inferred	sdf system, device, DMA, or task infrastructure in game/code_00117438.c
+0x00118110	sdfFirePendingCallback	inferred	sdf system, device, DMA, or task infrastructure in kernel/dds3GlobalWork.c
 0x00118140	scrIsCurrentWorkTask	inferred	Compares the current script work-task scrProcessWork_s pointer against the expected process pointer. [names_reviewed10.tsv]
 0x00118170	sdfLoadChannelFileSegment	inferred	Replaces a destination block with one length-prefixed channel-file payload and returns its 16-byte-aligned span for cursor advancement.
-0x00118210	sdfReloadChannelSegments	inferred	Inferred from the current C implementation in game/code_00117438.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x00118210	sdfReloadChannelSegments	inferred	Inferred from the current C implementation in kernel/dds3GlobalWork.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x00118310	sdfResetChannels	inferred	resets the 8 channel entries
 0x00118368	ptyComputeMaxHp	inferred	enemy base max HP, or HP script result capped at 999 for party units
 0x00118408	ptyComputeMaxMp	inferred	MP counterpart of ptyComputeMaxHp
 0x001184A8	sdfDispatchUnitScriptDefault5	inferred	Dispatches scripts by runtime mode and flags, selecting script 5 on the default branch.
-0x00118558	sdfDispatchCmd	inferred	sdf system, device, DMA, or task infrastructure in game/code_00117438.c
+0x00118558	sdfDispatchCmd	inferred	sdf system, device, DMA, or task infrastructure in kernel/dds3GlobalWork.c
 0x00118570	sdfDispatchUnitScriptDefault9	inferred	Same runtime-mode dispatch as 001184A8 but uses script 9 on the default branch.
 0x00118620	evtRunCommandContext10	inferred	Invokes the command script's fixed event context 10 with the supplied script arguments and unit index.
 0x00118648	evtRunCommandContext7	inferred	Invokes the command script's fixed event context 7 with the supplied script arguments and unit index.
-0x00118670	sdfDispatchSubCmd	inferred	sdf system, device, DMA, or task infrastructure in game/code_00117438.c
+0x00118670	sdfDispatchSubCmd	inferred	sdf system, device, DMA, or task infrastructure in kernel/dds3GlobalWork.c
 0x00118688	sdfCalculateCommandVitalDelta	inferred	Computes the signed HP/MP delta from command power, base, vital type and effect handlers; DDS2 twin 0x00118D60.
 0x001189A0	sdfRollActionHit	inferred	Resolves a randomized roll/action result against packed value state. [names_qp9.tsv]
 0x00118DD8	sdfQueryChannelBits	inferred	returns active channel bits masked by packed flags
 0x00118E38	sdfApplyCommandResults	inferred	readability/matching review (QP16)
 0x00119000	sdfSetPackedValuePreservingFlag	inferred	Replaces the low fifteen bits of a packed halfword while preserving its high flag bit.
-0x00119018	sdfRaisePackedChannelValue	inferred	src/dds1/game/code_00117438.c func_00119018: Raises packed low-fifteen-bit value preserving status; selected thresholds rerandomize entry. [names_reviewed24.tsv]
+0x00119018	sdfRaisePackedChannelValue	inferred	src/dds1/kernel/dds3GlobalWork.c func_00119018: Raises packed low-fifteen-bit value preserving status; selected thresholds rerandomize entry. [names_reviewed24.tsv]
 0x00119098	datResetBadStat	inferred	SMT3HD name via SLUS_209.11 0x00243C10, byte-identical; was datClearUnitStatusBits
 0x001190B0	datComputeSkillBoostedMaxHp	inferred	confidence=high; matched-C; src/dds1/newdata/datCalc.c:39:func_001190B0; F2; source=names_pending_main.tsv:95; review=Adds skill-dependent 10/20/30 percent HP bonuses and caps normal units at 999. [names_qp11.tsv]
 0x001191B0	datComputeSkillBoostedMaxMp	inferred	confidence=high; matched-C; src/dds1/newdata/datCalc.c:59:func_001191B0; F2; source=names_pending_main.tsv:96; review=Adds skill-dependent 10/20/30 percent MP bonuses and caps normal units at 999. [names_qp11.tsv]

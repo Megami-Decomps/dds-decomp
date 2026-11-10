@@ -1,7 +1,65 @@
+#include "sdk_ps2.h"
 #include "common.h"
+#include "sdf_motion_loop.h"
 #include "sdf_chip.h"
+#include "dds3obj.h"
+#include "sdf_model.h"
 #include "eff_transform.h"
+#include "sdf_draw.h"
+#include "evt_script_model.h"
+#include "evt_script_model_api.h"
 
-void dds3PathBasicFreeControl(dds3Basic_t *object) {
-    sdfChipFreeDirect(object->workdata);
+/* Instantiate a script object of kind 10 and fill in its parameters. */
+dds3Basic_t *dds3AddModelBasic(s32 key, sdfModelDef_t *itemList, MotionTable *motionTable, dds3Basic_t *fallbackModelObject, const char *name) {
+    dds3Basic_t *object = dds3AddSceneBasicData(EFF_WORLD_KIND_SCRIPT_OBJECT);
+    EvtScriptModelWork *work = object->workdata;
+
+    work->motionTable = motionTable;
+    object->key = key;
+    object->name = name;
+    work->fallbackModelObject = fallbackModelObject;
+    work->itemList = itemList;
+    work->loadedModelResource = NULL;
+    return object;
+}
+
+/* Create a script object with its loaded resource already supplied. */
+dds3Basic_t *dds3AddModelBasic2(s32 key, sdfModelDef_t *itemList, MotionTable *motionTable, DevRequest *loadedModelResource, const char *name) {
+    dds3Basic_t *object = dds3AddSceneBasicData(EFF_WORLD_KIND_SCRIPT_OBJECT);
+    EvtScriptModelWork *work = object->workdata;
+
+    object->key = key;
+    work->loadedModelResource = loadedModelResource;
+    work->itemList = itemList;
+    work->motionTable = motionTable;
+    object->name = name;
+    return object;
+}
+
+/* Create the model from the loaded resource, or from the fallback. */
+sdfModelRootNode_t *dds3ModelBasicMakeModel(const dds3Basic_t *object) {
+    const EvtScriptModelWork *work = (const EvtScriptModelWork *)object->workdata;
+    sdfModelRootNode_t *model;
+
+    if (work->loadedModelResource != NULL) {
+        model = sdfModelMake(work->loadedModelResource, work->itemList);
+    } else {
+        model = sdfModelMake(work->fallbackModelObject->workdata, work->itemList);
+    }
+    return model;
+}
+
+sdfMotionCtrlr_t *dds3ModelBasicSetMotion(const dds3Basic_t *object, sdfModelRootNode_t *owner) {
+    sdfMotionCtrlr_t *motion = NULL;
+    const EvtScriptModelWork *work;
+
+    if (owner == NULL) {
+        return NULL;
+    }
+    work = object->workdata;
+    if (work->motionTable != NULL) {
+        motion = sdfMotionCtrlrNew(owner, work->motionTable);
+        sdfMotionChange(motion, 0, SDF_MOTION_LOOP_ENABLED);
+    }
+    return motion;
 }
