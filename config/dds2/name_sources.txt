@@ -2990,7 +2990,7 @@
 0x0019DD48	frFontCenterGlyphChainAt	inferred	Centers each glyph line around x and shifts the chain to y; message and UI callers supply target coordinates and a glyph chain. [native implementation and paired caller context, 2026-10-13]
 0x0019DE70	MessageNumSearch	inferred	SMT3HD name via SLUS_209.11 0x001C8498, byte-identical; was frFontGetEncodedTextData
 0x0019DEE0	frFontAppendIndexedTextToGlyphChain	inferred	Looks up the indexed registered text, appends its two-byte glyph codes to the current chain, and applies mode-change context plus configured spacing; DDS1 counterpart is 0x00196220.
-0x0019E0A0	frFontCheckPendingGlyphState	inferred	checks glyph pending state and clears flag when children vanish [names_reviewed5.tsv]
+0x0019E0A0	frCreateNewHandle	inferred	SMT3HD name via SLUS_209.11 001C86A0, SMT3 frCreateNewHandle is DDS frFontCheckPendingGlyphState with frFontCreateContext inlined; was frFontCheckPendingGlyphState
 0x0019E110	frMessageReturnCode	inferred	SMT3HD name via SLUS_209.11 0x001C8730, reloc-identical; was frFontAdvanceContextCursor
 0x0019E138	itfReadEncodedTextLead	inferred	Reads the encoded first byte from the current text-stream offset and advances the position by two, mirroring DDS1.
 0x0019E1B8	itfProcessEncodedTextControl	inferred	Combine the already consumed control lead with its next byte, apply context/voice/wait/stop controls and advance the encoded-text cursor; return whether stream processing stops.

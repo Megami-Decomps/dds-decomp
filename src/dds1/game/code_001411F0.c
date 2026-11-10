@@ -4981,8 +4981,6 @@ INCLUDE_RODATA(const s32, "game/code_001411F0", fldTitleTaskName);
 
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0810);
 
-INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0824);
-
 INCLUDE_RODATA(const s32, "game/code_001411F0", D_003A0828);
 
 void fldStartMiniTitleForUnlock(s32 id) {

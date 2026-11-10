@@ -47,7 +47,7 @@ extern void frDelFontStyle(s32 slotId);
 
 #include "sdf_debug_api.h"
 
-extern void frFontCheckPendingGlyphState(FrFontCtx *);
+extern void frCreateNewHandle(FrFontCtx *);
 extern void frMessageReturnCode(FrFontCtx *);
 extern void frFontAppendIndexedTextToGlyphChain(u8, FrFontCtx *);
 extern u8 gModeFlag;
@@ -91,7 +91,7 @@ extern u8 D_003BB180[];
 
 extern s32 frDefaultFontHandle;
 
-void frFontCreateContext();
+void frFontCreateContext(FrFontCtx *ctx);
 
 extern s32 frEraseEffect(_FRQ *glyph);
 
@@ -1697,12 +1697,8 @@ void frFontAppendIndexedTextToGlyphChain(u8 fontIndex, FrFontCtx *ctx) {
 }
 
 /* Append the shared-text child context, apply its cached encoded byte and clear
- * the pending-create flag. Preserve the old-style implicit-argument interface. */
-/* Old-style definition: callers invoke it without arguments and rely on $a0. */
-void frFontCreateContext(ctx)
-    FrFontCtx *ctx;
-
-{
+ * the pending-create flag. */
+void frFontCreateContext(FrFontCtx *ctx) {
     _FRQ *childGlyph = frLinkFontString((const char *)&D_003BB180, 0, ctx->firstOption, ctx->secondOption, ctx->glyphChain);
 
     ctx->glyphChain = childGlyph;
@@ -1712,7 +1708,7 @@ void frFontCreateContext(ctx)
 
 /* Cancel creation for an empty child, process pending creation, then process
  * the independent pair refresh. The refresh phase has no NULL-child guard. */
-void frFontCheckPendingGlyphState(FrFontCtx *ctx) {
+void frCreateNewHandle(FrFontCtx *ctx) {
     s8 pending;
 
     if (ctx->glyphChain == NULL) {
@@ -1726,7 +1722,12 @@ void frFontCheckPendingGlyphState(FrFontCtx *ctx) {
     if (pending == 0) {
         pending = ctx->pendingPosition;
     } else {
-        frFontCreateContext();
+#ifdef NON_MATCHING
+        frFontCreateContext(ctx);
+#else
+        /* Retail passes nothing and leaves ctx in $a0 from entry. */
+        ((void (*)())frFontCreateContext)();
+#endif
         pending = ctx->pendingPosition;
     }
     if (pending != 0) {
@@ -1814,7 +1815,7 @@ s32 itfProcessEncodedTextControl(s32 code, FrFontCtx *stream) {
         break;
     case 0xF203:
         if (frFontIndexedTextSlots[bytes[*position] - 1] != 0) {
-            frFontCheckPendingGlyphState(stream);
+            frCreateNewHandle(stream);
             frFontAppendIndexedTextToGlyphChain((u8)(stream->encodedText[*position] - 1), stream);
         }
         *position += 2;
@@ -1935,7 +1936,7 @@ _FRQ *itfBuildGlyphChainFromEncodedStream(FrFontCtx *stream) {
             }
             frMessageReturnCode(stream);
         } else {
-            frFontCheckPendingGlyphState(stream);
+            frCreateNewHandle(stream);
             if (value < 0x80) {
                 encodedText[0] = value;
                 encodedText[1] = 0;
