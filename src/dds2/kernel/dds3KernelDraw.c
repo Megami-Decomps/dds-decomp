@@ -3,7 +3,7 @@
 #include "dds3_draw_light_binding.h"
 #include "sdf_vu0.h"
 #include "kernel.h"
-#include "kwln.h"
+#include "draw3d.h"
 #include "gs_packet.h"
 #include "pcp_vu0.h"
 #include "eff_blur.h"
@@ -109,7 +109,7 @@ extern u16 blur2max;
 
 extern u128 kwlnDefaultColorVector;
 
-extern KwlnDrawVectorParams kwlnDrawVector;
+extern sdf3DFogParam_t kwlnDrawVector;
 
 #define DDS3_DRAW_VECTOR_PARAM_BYTES 0x14
 #define DDS3_DRAW_ALPHA_CHANNEL 3
@@ -128,7 +128,7 @@ void dds3SetAmbient(const u128 *source) {
 
 
 /* Copy the five-word draw vector parameter body without interpreting or retaining it. */
-void dds3SetFog(const KwlnDrawVectorParams *source) {
+void dds3SetFog(const sdf3DFogParam_t *source) {
     memcpy(&kwlnDrawVector, source, DDS3_DRAW_VECTOR_PARAM_BYTES);
 }
 

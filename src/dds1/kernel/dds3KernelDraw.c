@@ -3,7 +3,7 @@
 #include "dds3_draw_light_binding.h"
 #include "sdf_vu0.h"
 #include "kernel.h"
-#include "kwln.h"
+#include "draw3d.h"
 #include "gs_packet.h"
 #include "pcp_vu0.h"
 #include "eff_blur.h"
@@ -39,7 +39,7 @@ extern dds3Effect_RippleBlurParam_t ripblurtarget __attribute__((aligned(8)));
 extern dds3Effect_DistortionBlurParam_t dds3DistBlurBuf;
 extern dds3Effect_RippleBlurParam_t dds3RipBlurBuf __attribute__((aligned(8)));
 extern u128 kwlnDefaultColorVector;
-extern KwlnDrawVectorParams kwlnDrawVector;
+extern sdf3DFogParam_t kwlnDrawVector;
 extern u16 filter2abase;
 extern u16 filter2now;
 extern u16 filter2atarget;
@@ -89,7 +89,7 @@ void dds3SetAmbient(const u128 *source) {
 
 
 /* Copy the five-word draw vector parameter body without interpreting or retaining it. */
-void dds3SetFog(const KwlnDrawVectorParams *source) {
+void dds3SetFog(const sdf3DFogParam_t *source) {
     memcpy(&kwlnDrawVector, source, DDS3_DRAW_VECTOR_PARAM_BYTES);
 }
 

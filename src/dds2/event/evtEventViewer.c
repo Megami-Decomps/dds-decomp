@@ -35,7 +35,7 @@
 #include "itf_mes_voice_cue_result.h"
 #include "sdf_heap_api.h"
 #include "kernel.h"
-#include "kwln.h"
+#include "draw3d.h"
 #include "dds3_fade.h"
 #include "dds3_fade_timing.h"
 #include "sdf.h"
@@ -668,7 +668,7 @@ void evtViewerApplyParameterKeyTracks(evtViewerInfo_t *viewer) {
 }
 
 
-extern KwlnDrawVectorParams kwlnDrawVector;
+extern sdf3DFogParam_t kwlnDrawVector;
 extern u128 *D_0037F770[];
 extern u128 kwlnDefaultColorVector[];
 extern f32 sdfFaceDivSoften;
@@ -1052,7 +1052,7 @@ extern void mnuDrawCampScaledTexture(sdfTexHandle_t *texture, CampDisplayDefault
 
 
 /* Timeline payloads store fogFar before fogNear. */
-extern KwlnDrawVectorParams kwlnDrawVector;
+extern sdf3DFogParam_t kwlnDrawVector;
 extern u128 *D_0037F770[];
 extern u128 kwlnDefaultColorVector[];
 extern f32 sdfFaceDivSoften;

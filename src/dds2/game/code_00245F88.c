@@ -2,7 +2,7 @@
 #include "mnu_camp_display.h"
 #include "common.h"
 #include "kernel.h"
-#include "kwln.h"
+#include "draw3d.h"
 #include "dds3_task_create.h"
 #include "sdf_chip.h"
 #include "evt_viewer.h"
@@ -107,7 +107,7 @@ extern void mnuSampleCampPanelVisualTrack(evtViewerInfo_t *runtime, EvtRuntimeGr
 extern void mnuSampleCampDisplayTrack(evtViewerInfo_t *viewer, EvtRuntimeGroup *track, s32 value,
                                       CampDisplayDefaults *display);
 extern void mnuSampleCampListLayoutTrack(evtViewerInfo_t *viewer, EvtRuntimeGroup *track, EvtBlendKey *out);
-extern KwlnDrawVectorParams kwlnDrawVector;
+extern sdf3DFogParam_t kwlnDrawVector;
 
 /* Capture kind-specific defaults before adding a new key to its track. */
 EvtRuntimeChild *evtCreateViewerTimelineKey(EvtRuntimeGroup *group, s32 frame, evtViewerInfo_t *viewer) {

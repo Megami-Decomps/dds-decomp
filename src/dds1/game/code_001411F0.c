@@ -72,7 +72,7 @@
 #include "eff_create_node_from_parameter.h"
 #include "eff_node_descriptor.h"
 #include "kernel.h"
-#include "kwln.h"
+#include "draw3d.h"
 #include "dds3_task_runner.h"
 #include "dds3_task_create.h"
 #include "dds3_task_lifecycle.h"
@@ -2484,7 +2484,7 @@ INCLUDE_ASM(const s32, "game/code_001411F0", func_00144D30);
 
 extern void fldAllIconDel(s32 index, f32 *x, f32 *z);
 
-extern KwlnDrawVectorParams kwlnOverlayFrustumParameters;
+extern sdf3DFogParam_t kwlnOverlayFrustumParameters;
 
 
 
@@ -2511,7 +2511,7 @@ extern s32 D_003BAED4;
 extern u8 fldAutoMapSeqTestFlag(u32 mask);
 extern void fldAutoMapSeqSetFlag(u32);
 extern void evtDisableMoonDraw(void);
-extern KwlnDrawVectorParams kwlnDrawVector;
+extern sdf3DFogParam_t kwlnDrawVector;
 extern SdfMathVector4 D_003A05D8[];
 
 /* Enter the field scene once: hide the world object, load the scene's two

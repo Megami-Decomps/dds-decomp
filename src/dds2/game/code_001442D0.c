@@ -56,7 +56,7 @@
 #include "sdf_chip.h"
 #include "sdf_dev_state.h"
 #include "kernel.h"
-#include "kwln.h"
+#include "draw3d.h"
 #include "dds3_task_runner.h"
 #include "dds3_task_create.h"
 #include "sdf_heap_api.h"
@@ -2919,7 +2919,7 @@ INCLUDE_ASM(const s32, "game/code_001442D0", func_00148A98);
 extern u8 fldAutoMapSeqTestFlag(u32);
 extern void fldAutoMapSeqSetFlag(u32);
 extern void evtDisableMoonDraw(void);
-extern KwlnDrawVectorParams kwlnDrawVector;
+extern sdf3DFogParam_t kwlnDrawVector;
 extern SdfMathVector4 D_00413788[];
 extern s32 D_00436268;
 extern s32 D_00436264;
@@ -2928,7 +2928,7 @@ extern s32 D_0043625C;
 extern s32 D_00436258;
 extern u128 fldAutoMapEye;
 extern u128 fldAutoMapUp;
-extern KwlnDrawVectorParams kwlnOverlayFrustumParameters;
+extern sdf3DFogParam_t kwlnOverlayFrustumParameters;
 
 /* Enter the field scene once: hide the world object, load the scene's map
  * textures, centre the camera on the floor's entry point and set the
@@ -3061,7 +3061,7 @@ void fldReleaseSceneDevSlotsAndTextures(void) {
 
 extern void fldAllIconDel(s32 index, f32 *x, f32 *z);
 
-extern KwlnDrawVectorParams kwlnOverlayFrustumParameters;
+extern sdf3DFogParam_t kwlnOverlayFrustumParameters;
 
 
 

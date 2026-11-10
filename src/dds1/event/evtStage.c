@@ -17,7 +17,7 @@
 #include "dds3_task_queue_query.h"
 #include "dds3_task_state.h"
 #include "kernel.h"
-#include "kwln.h"
+#include "draw3d.h"
 #include "dds3_draw_light_binding.h"
 #include "sdf_texture_offset_list.h"
 
@@ -34,11 +34,11 @@ extern void dds3SceneBasicMakeScene_FromMemory(dds3Basic_t *object, u32 area, u3
                                                        const SdfTextureOffsetListHeader *textureOffsets, u32 flags);
 extern void evtSetTestCamera(void);
 extern void dds3SetScreenFovy(f32 fieldOfView);
-extern void dds3SetFog(const KwlnDrawVectorParams *source);
+extern void dds3SetFog(const sdf3DFogParam_t *source);
 extern void dds3SetAmbient(const u128 *source);
 extern const char evtStageResourcePathFormat[0x10];
 extern f32 D_00367DF0[];
-extern KwlnDrawVectorParams D_00367EB0[];
+extern sdf3DFogParam_t D_00367EB0[];
 extern char D_00367ED0[];
 
 void evtFreeStage(void)

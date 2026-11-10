@@ -33,7 +33,7 @@
 #include "sdf_primitive_packet_api.h"
 
 #include "kernel.h"
-#include "kwln.h"
+#include "draw3d.h"
 #include "dds3_task_priority_query.h"
 #include "dds3_task_create.h"
 #include "sdf.h"
@@ -190,7 +190,7 @@ typedef struct EvtDrawState {
     f32 value1C;
 } EvtDrawState;
 
-extern KwlnDrawVectorParams kwlnDrawVector;
+extern sdf3DFogParam_t kwlnDrawVector;
 
 extern DrawVec4 D_003C2C20;
 

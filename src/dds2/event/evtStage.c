@@ -17,7 +17,7 @@
 #include "dds3_task_queue_query.h"
 #include "dds3_task_state.h"
 #include "kernel.h"
-#include "kwln.h"
+#include "draw3d.h"
 #include "dds3_draw_light_binding.h"
 #include "sdf_texture_offset_list.h"
 
@@ -55,12 +55,12 @@ void evtFreeAllUnit(void) {
 }
 
 extern f32 D_003C8BA0[];
-extern KwlnDrawVectorParams D_003C8C60[];
+extern sdf3DFogParam_t D_003C8C60[];
 extern char D_003C8C80[];
 extern dds3Basic_t *dds3AddScene(void);
 extern void evtSetTestCamera(void);
 extern void dds3SetScreenFovy(f32 fieldOfView);
-extern void dds3SetFog(const KwlnDrawVectorParams *source);
+extern void dds3SetFog(const sdf3DFogParam_t *source);
 extern void dds3SetAmbient(const u128 *source);
 
 s32 evtLoadArea(s32 area, s32 room)

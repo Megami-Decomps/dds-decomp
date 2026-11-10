@@ -10,7 +10,7 @@
 #include "dds3_effect_sprite.h"
 #include "dds3Admin.h"
 #include "kernel.h"
-#include "kwln.h"
+#include "draw3d.h"
 #include "dds3_task_flags.h"
 #include "sdf.h"
 #include "sdf_pad_mode_api.h"
@@ -150,7 +150,7 @@ extern f32 dds3RenderTargetVector[4], dds3RenderEyeVector[4], effPCPBossTexRect[
 
 extern f32 D_0037FA20[4], fldAutoMapEye[4], fldAutoMapUp[4];
 
-extern KwlnDrawVectorParams dds3RenderFogParam, kwlnOverlayFrustumParameters, kwlnDrawVector;
+extern sdf3DFogParam_t dds3RenderFogParam, kwlnOverlayFrustumParameters, kwlnDrawVector;
 
 extern Matrix4 dds3RenderViewportMatrix;
 
@@ -172,7 +172,7 @@ extern void dds3SceneLightUpdateFirst(void);
 
 extern void fldConfigureRenderCleanupMessage(void);
 
-extern void sdf3DMakeFogPacket(struct ConsFrustumPacket *, KwlnDrawVectorParams *);
+extern void sdf3DMakeFogPacket(struct ConsFrustumPacket *, sdf3DFogParam_t *);
 
 extern void sdf3DSetDefaultLight(const struct SdfDmaTagHeader *lightingPacket);
 

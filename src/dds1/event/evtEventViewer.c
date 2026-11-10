@@ -32,7 +32,7 @@
 #include "evt_reload_viewer_api.h"
 #include "evt_reset_unit_vector_slots_api.h"
 #include "kernel.h"
-#include "kwln.h"
+#include "draw3d.h"
 #include "dds3_fade.h"
 #include "dds3_fade_timing.h"
 #include "dds3_task_create.h"
@@ -760,7 +760,7 @@ void evtViewerApplyParameterKeyTracks(evtViewerInfo_t *viewer) {
 }
 
 
-extern KwlnDrawVectorParams kwlnDrawVector;
+extern sdf3DFogParam_t kwlnDrawVector;
 extern u128 *D_00324770[];
 extern u128 kwlnDefaultColorVector[];
 extern f32 sdfFaceDivSoften;

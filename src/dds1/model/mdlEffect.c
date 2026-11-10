@@ -4,7 +4,7 @@
 #include "dds3_admin_control_api.h"
 #include "sdf_request.h"
 #include "kernel.h"
-#include "kwln.h"
+#include "draw3d.h"
 #include "dds3_task_create.h"
 #include "sdf_packet_list.h"
 #include "sdf_packet_builders.h"
@@ -2670,7 +2670,7 @@ extern char D_003BBCD0[]; /* "%f" */
 
 extern char D_003BBCD8[]; /* "fog=" */
 
-extern KwlnDrawVectorParams kwlnDrawVector;
+extern sdf3DFogParam_t kwlnDrawVector;
 
 /* Read the viewer's config text file: bg-color=, eye-position=, target-position=, fovy=, fog= lines. */
 INCLUDE_RODATA(const s32, "model/mdlEffect", D_003ABEB0);
