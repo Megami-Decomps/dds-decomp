@@ -48,12 +48,11 @@
 #include "btl.h"
 #include "fr_font.h"
 #include "mnu_staff.h"
+#include "pty_bullet_item_count_api.h"
 /* Declared before first use (were implicit int). */
 extern void fldDrawCameraColorLayerPass(void);
 /* Original-style implicit int, kept: matched code depends on it: evtViewerCleanupMessageWindow. */
 
-#define CAMP_TASK_NAME_BYTES 0x20
-#define CAMP_TASK_DATA_BYTES 0x48
 #define CAMP_TIMELINE_WRAP_FRAME 10
 #define CAMP_TRACK_FIRST_OFFSET_TYPE 0x12
 #define CAMP_CAMERA_COLOR_TRACK_TYPE 0x19
@@ -84,7 +83,6 @@ extern void fldDrawCameraColorLayerPass(void);
 #define CAMP_PARTY_SCAN_LAST 4
 #define CAMP_PARTY_ACTIVE_FLAG 1
 
-
 extern void evtLoadResourcePair(const char *, EvtResourcePair *);
 extern s32 mnuCampGetShopPriceStage();
 extern struct EffectSlotSet *D_003BC520;
@@ -92,12 +90,7 @@ extern void mnuUnpackNibbleFields(EvtRuntimeChild *key, s32 *lowBitsOut, s32 *hi
 
 extern u8 D_00368C40[];
 
-#include "pty_bullet_item_count_api.h"
-
 extern s8 D_003BC39C;
-
-
-
 
 extern char D_003BC3A0[]; /* "camp" */
 
@@ -109,80 +102,6 @@ extern f32 mnuShopSavedFirstTransformVector[];
 extern s32 mnuShopRestoreMiddleVector;
 extern EvtPackedSoundTrackId evtStopEventBgm(s32 eventId, EvtSoundVariation variation);
 extern s32 mnuShopPrimarySpriteNames[];
-
-#define CAMP_TASK_PRIORITY 0x3EC
-
-
-/* Schedule the camp task only if no task currently owns this event ID. */
-dds3ProcessID_t *evtLoadEventPack(EvtPackEventId eventId) {
-    char taskName[CAMP_TASK_NAME_BYTES];
-    EvtPackLoadState *taskData;
-    dds3ProcessID_t *task;
-
-    task = evtSearchEventPack(eventId);
-    if (task == 0) {
-        evtMakeEventPackName(eventId, taskName);
-        taskData = sdfChipAllocDirect(sizeof(EvtPackLoadState));
-        memset(taskData, 0, CAMP_TASK_DATA_BYTES);
-        taskData->eventId = eventId;
-        taskData->loadPhase = EVT_PACK_LOAD_NOT_STARTED;
-        task = dds3StartProcess(taskName, CAMP_TASK_PRIORITY, 1, 1, evtTickPackLoad, evtDestroyEventPackTask, (u32)taskData);
-    }
-    return task;
-}
-
-void evtKillEventPack(EvtPackEventId eventId) {
-    dds3ProcessID_t *taskHandle;
-
-    taskHandle = evtSearchEventPack(eventId);
-    if (taskHandle != 0) {
-        dds3KillProcess(taskHandle, 0);
-        return;
-    }
-}
-
-/* Drain every camp task at the scheduler priority used during creation. */
-void mnuCampDestroyAllTasks(void) {
-    dds3ProcessID_t *task;
-
-    while (task = dds3SearchProcessPriority(CAMP_TASK_PRIORITY), task != NULL) {
-        dds3KillProcess(task, 0);
-    }
-}
-
-
-/* Timeline keys carry type-dependent payloads as well as their common links. */
-
-
-/* The same track owns its key list, name/value state and next-track link. */
-
-
-
-
-/* Event-viewer timeline data and the camp/shop state that owns those tracks. */
-
-
-
-/* Shift the selected track's frames; values exactly at the upper limit are kept. */
-void mnuShopScrollList(evtViewerInfo_t *scene, s32 delta) {
-    EvtRuntimeGroup *track = scene->frameGroup;
-    EvtRuntimeChild *key;
-    s32 absoluteFrame;
-
-    if (track == NULL) {
-        return;
-    }
-    for (key = track->children; key != NULL; key = key->next) {
-        absoluteFrame = key->frame + track->metadata.value + delta;
-        if (absoluteFrame < track->metadata.value) {
-            key->frame = 0;
-        } else if (scene->headerThird < absoluteFrame) {
-            key->frame = (u16)scene->headerThird - (u16)track->metadata.value - 1;
-        } else {
-            key->frame = key->frame + delta;
-        }
-    }
-}
 
 /* Shift qualifying keys and their supported payload offsets. Preserve the
  * incoming base/offset/ubase arguments when no key overwrites them: the native
@@ -457,8 +376,6 @@ void mnuSampleCampPanelVisualTrack(evtViewerInfo_t *runtime, EvtRuntimeGroup *gr
     }
 }
 
-
-
 #include "sdf_packet_alloc.h"
 extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *packet, s32 table, s32 mode);
 extern s32 mnuCampQuadBounds[4];
@@ -508,7 +425,6 @@ void mnuSampleCampDisplayTrack(evtViewerInfo_t *viewer, EvtRuntimeGroup *track, 
     }
     mnuBlendCampDisplayFields(lowerKey, upperKey, display, ratio);
 }
-
 
 void mnuInitializeCampListLayoutDefaults(EvtBlendKey *layout) {
     layout->w[0] = 0x96;
@@ -815,7 +731,6 @@ void evtApplyCameraColorTrackAtFrame(evtViewerInfo_t *scene) {
     fldApplyCameraColorKeyWords(scene, &blendedParameters);
 }
 
-
 /* The genuine three-row typed candidate remains non-matching. */
 void fldApplyCameraColorKeyWords(evtViewerInfo_t *viewer, const EvtBlendKey *source) {
     FldCameraSetting setting;
@@ -923,7 +838,6 @@ void mnuAdvanceShopMenuState(evtViewerInfo_t *scene) {
         break;
     }
 }
-
 
 SYMBOL_AT(sdfGrOt_t, D_00325708, sdfGrOtTable, 0xBC0);
 extern u8 D_00325860[];
@@ -1141,8 +1055,6 @@ void mnuReleaseCampSceneRegisteredIds(evtViewerInfo_t *scene) {
     scene->registeredCount = 0;
 }
 
-
-
 void mnuInitializeShopStatusBatches(ShopScene *scene) {
     struct EffMappedResource *batchHandle;
     EffMappedRecord *batchGraphics;
@@ -1177,7 +1089,7 @@ EffMappedResourceDestroyResult mnuShopReleaseSceneObjects(ShopScene *scene) {
     return destroyResult;
 }
 
-INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF3D0);
+INCLUDE_RODATA(const s32, "game/code_00242780", D_003AF3D0);
 
 void mnuShopLoadSpriteAssets(ShopScene *scene) {
     struct EffectSlotSet **resource = &scene->spriteResource;
@@ -1192,7 +1104,6 @@ void mnuReleaseShopSceneSpriteResources(ShopScene *scene) {
         effDestroyResourceSlotSet(*resource++);
     }
 }
-
 
 MnuShopPendingSelection mnuShopHasPendingSelection(ShopScene *unused) {
     u8 *flags = DDS3_GBWK->inventory.counts;
@@ -1216,8 +1127,6 @@ MnuShopPendingSelection mnuShopHasPendingSelection(ShopScene *unused) {
     return hasPendingSelection;
 }
 
-
-
 extern void mnuDrawMenuItemListRow();
 
 MenuWindowContainer *mnuCreateShopListWindow(const void *unused, s32 count, ShopScene *settings) {
@@ -1240,7 +1149,6 @@ MenuWindowContainer *mnuCreateShopListWindow(const void *unused, s32 count, Shop
     buffer->extraOption = settings->extraOption;
     return window;
 }
-
 
 void mnuShopInitializeOptionList(ShopScene *scene) {
     scene->ownedWindows[0] = mnuCreateShopListWindow(D_00368C40, 3, scene);
@@ -1322,8 +1230,6 @@ s32 mnuShopHasExtraOption(ShopScene *scene) {
     }
     return 0;
 }
-
-
 
 extern void mnuDestroyWindowContainer(MenuWindowContainer *window);
 
@@ -1494,7 +1400,6 @@ s32 mnuCampRunPanel0(dds3ProcessID_t *request) {
     return menuRunPanel((void *)state, 0, request);
 }
 
-
 s32 mnuCampRunPanel1(dds3ProcessID_t *request) {
     s32 state = dds3GetProcessData(request);
     return menuRunPanel((void *)state, 1, request);
@@ -1504,7 +1409,6 @@ s32 mnuCampRunPanel2(dds3ProcessID_t *request) {
     s32 state = dds3GetProcessData(request);
     return menuRunPanel((void *)state, 2, request);
 }
-
 
 s32 mnuCampGetSourceItemPrice(s32 entryIndex, s32 source, s32 halfPrice) {
     u32 rowIndex;
@@ -1695,7 +1599,6 @@ void mnuCampDisableUnavailableItemEntries(ShopScene *scene) {
     }
 }
 
-
 s32 mnuCampClampSceneCounter(s32 delta, ShopScene *scene) {
     s32 limit = mnuShopGetTransactionLimit(scene);
     s32 sum = scene->counter + delta;
@@ -1714,7 +1617,6 @@ s32 mnuCampClampSceneCounter(s32 delta, ShopScene *scene) {
     }
     return current;
 }
-
 
 extern char (*D_003BAA74)[17];
 extern char (*D_003BAA84)[25];
@@ -1779,7 +1681,6 @@ s32 mnuBuildShopStandardCatalogList(ShopScene *scene) {
     mnuSelectFirstListNode(scene->window->list);
     return 0;
 }
-
 
 extern void mnuDrawCampItemListRow(
     s32 x, s32 y, s32 z, struct MenuList *list, struct MenuListNode *node, s32 mode
@@ -2022,7 +1923,6 @@ s32 mnuBuildCampItemList(ShopScene *scene) {
 
 extern struct frFontHandle_t *itfDrawBankTextWithLayoutFlags(s32, s32, s32, s32, s32, s32);
 
-
 extern s32 frDrawFontOt(struct frFontHandle_t *, s8, u32);
 void mnuQueueCampTextGlyphWithChildColor(s32 fontValue, s32 enabled, s32 unused2, s32 unused3, s32 fontArg, s32 flags) {
     struct frFontHandle_t *handle;
@@ -2081,9 +1981,6 @@ extern MenuPopupEntry mnuShopCatalogPopupEntries[];
 extern MenuPopupEntry mnuShopFilteredCatalogPopupEntries[];
 extern MenuPopupEntry mnuShopSaleCommandPopupEntries[];
 
-
-
-
 extern void mnuDrawShopPanelWithPulsingIcon(s32, s32, s32, ShopScene *, s32, s32);
 extern void mnuDrawIconTriple(s32, s32, s32, s32, s32, s32);
 extern void mnuDrawIfActive(s32, s32, s32, MenuWindowContainer *, s32);
@@ -2106,7 +2003,6 @@ extern void mnuClearWindowListSelectionFlags(MenuWindowContainer *);
 extern void mnuPlayInputSound(s32, s32, u32 *);
 extern MenuPopupEntry mnuShopQuantityPopupEntry[];
 extern void mnuSelectLastListNode(struct MenuList *);
-
 
 /* Wait until both the keyword fade and the dispatch callback are idle. */
 s32 evtIsFadeDispatchIdle(void) {
@@ -2166,9 +2062,9 @@ s32 evtAdvancePhaseOne(dds3ProcessID_t *task) {
 extern s32 mnuTickCommandPhase(ShopScene *);
 extern MenuPopupEntry mnuShopReturnDelayPopupEntry[];
 
-INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF418);
+INCLUDE_RODATA(const s32, "game/code_00242780", D_003AF418);
 
-INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF428);
+INCLUDE_RODATA(const s32, "game/code_00242780", D_003AF428);
 
 s32 mnuShopPollCommandSelection(dds3ProcessID_t *task) {
     s32 allowed = 1;
@@ -2407,7 +2303,6 @@ s32 evtSelectStateActionB(dds3ProcessID_t *task) {
     ((ShopScene *)stateAddress)->substate = 0;
     return 1;
 }
-
 
 /* Poll the dispatch slot, then process command phases and mapped input flags. */
 s32 mnuShopPollFilteredCommandSelection(dds3ProcessID_t *task) {
@@ -2760,19 +2655,19 @@ extern void evtCopyEntryStringToActiveWindow(s32 window, const char *text);
 
 /* Format the buy/sell price in the message window; sells over the currency cap use the overflow message. */
 
-INCLUDE_SDATA(const s32, "game/code_00242608", mnuShopRestoreMiddleVector);
+INCLUDE_SDATA(const s32, "game/code_00242780", mnuShopRestoreMiddleVector);
 
-INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC388);
+INCLUDE_SDATA(const s32, "game/code_00242780", D_003BC388);
 
-INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC390);
+INCLUDE_SDATA(const s32, "game/code_00242780", D_003BC390);
 
-INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC398);
+INCLUDE_SDATA(const s32, "game/code_00242780", D_003BC398);
 
-INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC39C);
+INCLUDE_SDATA(const s32, "game/code_00242780", D_003BC39C);
 
-INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3A0);
+INCLUDE_SDATA(const s32, "game/code_00242780", D_003BC3A0);
 
-INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3A8);
+INCLUDE_SDATA(const s32, "game/code_00242780", D_003BC3A8);
 
 s32 mnuShopBeginTransactionMessage(dds3ProcessID_t *task) {
     ShopScene *scene = (ShopScene *)dds3GetProcessData(task);
@@ -2847,9 +2742,9 @@ extern u32 mnuShopCommitMode1PurchaseNoOp(u32);
 
 /* Apply the selected buy/sell operation, then restore the row's displayed price. */
 
-INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3B8);
+INCLUDE_SDATA(const s32, "game/code_00242780", D_003BC3B8);
 
-INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3C0);
+INCLUDE_SDATA(const s32, "game/code_00242780", D_003BC3C0);
 
 s32 mnuApplyShopSelectionTransaction(dds3ProcessID_t *task) {
     ShopScene *scene;
@@ -2889,7 +2784,6 @@ s32 mnuApplyShopSelectionTransaction(dds3ProcessID_t *task) {
         return 1;
     }
 }
-
 
 extern s32 D_003BC3D0[];
 extern s8 evtGetCapturedWindowPanelValue(void);
@@ -2941,7 +2835,6 @@ s32 evtDispatchShopSelectionAction(dds3ProcessID_t *task) {
     return 0;
 }
 
-
 s32 evtRedrawShopSceneSelection(dds3ProcessID_t *task) {
     ShopScene *state = (ShopScene *)dds3GetProcessData(task);
     s32 selectedIndex;
@@ -2992,7 +2885,6 @@ s32 evtPlayDispatchModeCue(dds3ProcessID_t *task) {
     }
     return 1;
 }
-
 
 extern MenuPopupEntry mnuShopCommandPopupEntries[];
 
@@ -3097,7 +2989,7 @@ extern const char D_003AF528[];
 extern void p2sdLoadSMGFile(s32);
 extern void p2sdPlayBGMFade(s32);
 
-INCLUDE_RODATA(const s32, "game/code_00242608", D_003AF528);
+INCLUDE_RODATA(const s32, "game/code_00242780", D_003AF528);
 
 s32 mnuTickShopMessageSequence(dds3ProcessID_t *task) {
     ShopScene *state = (ShopScene *)dds3GetProcessData(task);
@@ -3226,7 +3118,6 @@ s32 mnuTickShopMessageSequence(dds3ProcessID_t *task) {
     return result;
 }
 
-
 s32 evtRefreshDispatchStart(dds3ProcessID_t *callbackContext) {
     s32 stateAddress = dds3GetProcessData(callbackContext);
     s32 progressTicks = ((ShopScene *)stateAddress)->progressTicks;
@@ -3282,7 +3173,6 @@ s32 evtUpdateMainTaskPopupEntry(dds3ProcessID_t *task) {
     result = 0;
     return result;
 }
-
 
 /* Select the primary entry action with opaque callback data, not a callback address. */
 s32 evtDispatchStart(dds3ProcessID_t *callbackContext) {
@@ -3405,7 +3295,7 @@ const char mnuTerminalKarmaBackgroundSpriteName[] __attribute__((aligned(8))) = 
 const char mnuTerminalKarma01SpriteName[] __attribute__((aligned(8))) = "karma_01.spr";
 const char mnuTerminalSpriteDirectory[] __attribute__((aligned(8))) = "/facility/spr/terminal/";
 
-INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3D0);
+INCLUDE_SDATA(const s32, "game/code_00242780", D_003BC3D0);
 
-INCLUDE_SDATA(const s32, "game/code_00242608", D_003BC3D8);
+INCLUDE_SDATA(const s32, "game/code_00242780", D_003BC3D8);
 

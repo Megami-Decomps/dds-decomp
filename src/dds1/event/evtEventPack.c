@@ -13,16 +13,15 @@
 #include "fld_file_addr_reset_mode.h"
 #include "evt_event_pack_task.h"
 #include "dds3_world_primary.h"
-#include "snd_packed_track_load_status.h"
 #include "evt_viewer.h"
-#include "evt_sky_alpha_animation_status.h"
 #include "eff_event.h"
 #include "evt_effect_scale_object.h"
 #include "sdf_texture_file.h"
 #include "btl.h"
 #include "sdf_debug_api.h"
-
-/* Declared before first use (were implicit int). */
+#include "dds3_task_priority_query.h"
+#include "mnu.h"
+#include "dds3_task_lifecycle.h"
 
 extern void dds3EffectObjectBasicStatOn(dds3Basic_t *object, u32 flags);
 struct SoundMixer;
@@ -378,7 +377,7 @@ void evtCheckEventScriptLoaded(EvtPackLoadState *state) {
     }
 }
 
-dds3TaskUpdateResult_t evtTickPackLoad(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t evtCheckScriptDone(dds3ProcessID_t *task) {
     EvtPackLoadState *packState = (EvtPackLoadState *)dds3GetProcessData(task);
 
     switch (packState->loadPhase) {
@@ -403,7 +402,7 @@ extern void Eve_RippleBlurSetDefTex(void);
 extern void Eve_PartialMultiFilterSetDefTex(void);
 /* Release the event task's owned handles, then free its state.
  * File I/O is waited on even when the user-value handle is zero. */
-void evtDestroyEventPackTask(dds3ProcessID_t *task) {
+void evtWaitEventPackLoad(dds3ProcessID_t *task) {
     EvtPackLoadState *packState = (EvtPackLoadState *)dds3GetProcessData(task);
 
     fileSyncAll();
@@ -438,6 +437,66 @@ void evtDestroyEventPackTask(dds3ProcessID_t *task) {
         }
     }
     sdfChipFreeDirect(packState);
+}
+
+#define CAMP_TASK_DATA_BYTES 0x48
+
+/* Schedule the event-pack process only if it does not already exist. */
+dds3ProcessID_t *evtLoadEventPack(EvtPackEventId eventId) {
+    char taskName[0x20];
+    EvtPackLoadState *taskData;
+    dds3ProcessID_t *task;
+
+    task = evtSearchEventPack(eventId);
+    if (task == 0) {
+        evtMakeEventPackName(eventId, taskName);
+        taskData = sdfChipAllocDirect(sizeof(EvtPackLoadState));
+        memset(taskData, 0, CAMP_TASK_DATA_BYTES);
+        taskData->eventId = eventId;
+        taskData->loadPhase = EVT_PACK_LOAD_NOT_STARTED;
+        task = dds3StartProcess(taskName, CAMP_TASK_PRIORITY, 1, 1, evtCheckScriptDone, evtWaitEventPackLoad, (u32)taskData);
+    }
+    return task;
+}
+
+void evtKillEventPack(EvtPackEventId eventId) {
+    dds3ProcessID_t *taskHandle;
+
+    taskHandle = evtSearchEventPack(eventId);
+    if (taskHandle != 0) {
+        dds3KillProcess(taskHandle, 0);
+        return;
+    }
+}
+
+/* Drain every event-pack process at the priority used during creation. */
+void evtKillAllEventPack(void) {
+    dds3ProcessID_t *task;
+
+    while (task = dds3SearchProcessPriority(CAMP_TASK_PRIORITY), task != NULL) {
+        dds3KillProcess(task, 0);
+    }
+}
+
+/* Shift the selected track's frames; values exactly at the upper limit are kept. */
+void mnuShopScrollList(evtViewerInfo_t *scene, s32 delta) {
+    EvtRuntimeGroup *track = scene->frameGroup;
+    EvtRuntimeChild *key;
+    s32 absoluteFrame;
+
+    if (track == NULL) {
+        return;
+    }
+    for (key = track->children; key != NULL; key = key->next) {
+        absoluteFrame = key->frame + track->metadata.value + delta;
+        if (absoluteFrame < track->metadata.value) {
+            key->frame = 0;
+        } else if (scene->headerThird < absoluteFrame) {
+            key->frame = (u16)scene->headerThird - (u16)track->metadata.value - 1;
+        } else {
+            key->frame = key->frame + delta;
+        }
+    }
 }
 
 INCLUDE_SDATA(const s32, "event/evtEventPack", evtMotionSeWork);
