@@ -81,7 +81,7 @@ extern s32 sceSifDmaStat(s32);
 
 extern s32 GetThreadId(void);
 
-extern void *memcpy(void *, const void *, unsigned int);
+extern void *memcpy(void *, const void *, size_t);
 
 sdfSortOtNode_tag *sdfSortOtAvlRotateLR(sdfSortOtNode_tag *node, sdfSortOtNode_tag *parent);
 
@@ -235,15 +235,15 @@ extern s32 raise(s32 sig);
 
 extern void func_001001C8(s32 code) __attribute__((noreturn));
 
-extern u8 D_0054B8D8[] __attribute__((section(".data")));
+extern u8 localeconvData[] __attribute__((section(".data")));
 
 extern s32 D_00552178 __attribute__((section(".data")));
 
-extern s32 D_0052C28C __attribute__((section(".data")));
+extern s32 mallocLockCount __attribute__((section(".data")));
 
-extern s32 D_0052C288 __attribute__((section(".data")));
+extern s32 mallocLockOwner __attribute__((section(".data")));
 
-extern s32 D_0052C378 __attribute__((section(".data")));
+extern s32 mallocSema __attribute__((section(".data")));
 
 extern s32 _init_signal_r(_reent *r);
 
@@ -257,7 +257,7 @@ extern void *__deregister_frame_info(void *fn);
 
 extern void free(void *ptr);
 
-extern void *malloc(u32 size);
+extern void *malloc(size_t size);
 
 extern void __malloc_lock(_reent *r);
 
@@ -275,7 +275,7 @@ extern s32 close(s32 fd);
 
 extern _Bigint *_Balloc(_reent *r, s32 k);
 
-extern s32 __register_frame_info(void *fn, void *entry);
+extern void __register_frame_info(void *fn, void *entry);
 
 extern s32 __register_frame_info_table(void *fn, void *entry);
 
@@ -311,15 +311,15 @@ extern s32 WaitSema(s32 sema);
 
 extern s32 vfprintf(FILE *fp, const char *fmt, va_list ap);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, size_t c);
 
 extern void *_calloc_r(_reent *r, u32 n, u32 size);
 
-extern const double D_0054B930[];
+extern const double pow10Table[];
 
 extern void abort(void);
 
-extern s32 __do_global_ctors(void);
+extern void __do_global_ctors(void);
 
 extern s32 atexit(void (*fn)(void));
 
@@ -348,7 +348,7 @@ extern void sdfUnpackFloat(const void *x, fp_number_type *u);
 
 extern f32 sdfPackFloat(const fp_number_type *u);
 
-extern long __make_dp(s32 kind, s32 sign, s32 exp, long mant);
+extern f64 __make_dp(s32 kind, s32 sign, s32 exp, s64 mant);
 
 #define va_start(ap, last) __builtin_stdarg_start((ap), last)
 
@@ -367,7 +367,7 @@ typedef struct fp_number_type_df {
     long fraction;
 } fp_number_type_df;
 
-extern long __pack_df(const fp_number_type_df *u);
+extern f64 __pack_df(const fp_number_type_df *u);
 
 extern void sdfUnpackDouble(const double *x, fp_number_type_df *u);
 
@@ -495,7 +495,7 @@ void sdfSortOtAvlRegist(sdfSortOtNode_tag **root_p, sdfDrawTag_t *tag) {
         cur = *link;
     }
     tag->next = NULL;
-    node = sdfGrAllocPacketBuff(0x10);
+    node = EE_ADDR_PTR(sdfGrAllocPacketBuff(0x10));
     node->right = NULL;
     node->left = NULL;
     node->tag = tag;
