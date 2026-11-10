@@ -5,7 +5,7 @@
 #include "sdfCorePacketCb_t.h"
 
 extern u32 corePktCurrLight;  /* the selected block; its light vector at 0xD0 */
-extern u128 sdfVuObjectBasisCache[3];
+extern u128 corePktWorldLightMtxCache[3];
 extern u64 sdf3DRefMapParam;
 extern void corePktLerpUVColorChain(sdfCorePacketPointBuff_tag *node);
 extern void corePktEmitTexTrisCtx2(sdfCorePacketCb_t *work, u64 samplingState, u64 textureState, u64 clampState,
@@ -14,7 +14,7 @@ extern void corePktEmitTexTrisCtx2(sdfCorePacketCb_t *work, u64 samplingState, u
 /* Light the work's vertex records by their normals and send them: each
  * record's colour is the node colour times the packed colour (both /128),
  * and its 0x30 quadword holds the normal's dot with the light (through the
- * rows of sdfVuObjectBasisCache, or the light itself with parameter 0x800) and the
+ * rows of corePktWorldLightMtxCache, or the light itself with parameter 0x800) and the
  * node alpha / 128. Then the blend nodes, and the chunked transfer.
  * Upstream: hand-written assembly (hand/vu/corePktEmitRefMapPass.s),
  * retail's instructions on the EE interpreter. Retail's 0x30 quadword
@@ -34,7 +34,7 @@ void corePktEmitRefMapPass(sdfCorePacketCb_t *work) {
             "vmul.xyz vf24, vf24, vf10\n\tvmul.xyz vf25, vf25, vf10\n\tvmul.xyz vf26, vf26, vf10\n\t"
             "vaddy.x vf24, vf24, vf24y\n\tvaddy.x vf25, vf25, vf25y\n\tvaddy.x vf26, vf26, vf26y\n\t"
             "vaddz.x vf24, vf24, vf24z\n\tvaddz.x vf25, vf25, vf25z\n\tvaddz.x vf26, vf26, vf26z"
-            : : "r"(sdfVuObjectBasisCache));
+            : : "r"(corePktWorldLightMtxCache));
     } else {
         __asm__ volatile("vaddx.x vf24, vf0, vf10x\n\tvaddy.x vf25, vf0, vf10y\n\tvaddz.x vf26, vf0, vf10z");
     }

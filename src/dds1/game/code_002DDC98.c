@@ -26,9 +26,9 @@
 
 extern const struct SdfDmaTagHeader *corePktCurrLight;
 
-extern u8 sdfVuObjectBasisCache[];
+extern u8 corePktWorldLightMtxCache[];
 
-extern u16 D_003BDA24;
+extern u16 corePktPrimBase;
 
 extern s32 corePktPointBuff;
 
@@ -149,7 +149,7 @@ void corePktInitCb(sdfCorePacketCb_t *work, u16 *parameterWords, u32 selectionMa
     work->orgAttrBits = parameterFlags;
     work->packetBits = nextParameter;
     work->attrBits = selectedFlags;
-    D_003BDA24 = selectedFlags & 0x78;
+    corePktPrimBase = selectedFlags & 0x78;
     work->dataPtr = payload;
     work->packetOpenPtr = 0;
     corePktSetupPointBuff(work, ringPosition);
@@ -159,7 +159,7 @@ void corePktInitCb(sdfCorePacketCb_t *work, u16 *parameterWords, u32 selectionMa
 /* vu0 routine: rotate the basis at vectors+0x40 into vf24-vf26 and cache the original vectors. */
 void corePktLoadWorldLightMtx(void *vectors) {
     const struct SdfDmaTagHeader *m = corePktCurrLight;
-    VU0_ROTATE_BASIS_AND_CACHE(vectors, m, sdfVuObjectBasisCache);
+    VU0_ROTATE_BASIS_AND_CACHE(vectors, m, corePktWorldLightMtxCache);
 }
 
 /* vu0 routine: modulate and clamp packed colors against the reference rows. */

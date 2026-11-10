@@ -11215,6 +11215,7 @@
 0x00439170	sdfMatDelayedResrcCB	inferred	SMT3HD data name via SLUS_209.11 0x005520C0, 2 agreeing references; was sdfMatDelayedResrcCB
 0x00439178	sdfMatDelayedResrcCB2	inferred	SMT3HD data name via SLUS_209.11 0x005520C8, 2 agreeing references; was sdfMatDelayedResrcCB2
 0x00439180	corePktPointBuff	inferred	SMT3HD name via SLUS_209.11 0x005520D0, sdfCoreDraw reference; was D_00439180
+0x00439184	corePktPrimBase	inferred	SMT3HD name via SLUS_209.11 0x005520D4, sdf/sdfVu1 SMT3 rename; was D_00439184
 0x00439188	corePktCurrLight	inferred	SMT3HD data name via SLUS_209.11 0x005520D8, 9 agreeing references; was corePktCurrLight
 0x0043918C	corePktCurrFog	inferred	SMT3HD name via SLUS_209.11 0x005520DC, sdfCoreDraw reference; was D_0043918C
 0x00439190	corePktZBias	inferred	SMT3HD name via SLUS_209.11 0x005520E0, sdfCoreDraw reference; was D_00439190
@@ -11386,9 +11387,10 @@
 0x004681D0	sdfGrDispEnv	inferred	SMT3HD name via SLUS_209.11 0x00580FF0, sdf/sdfGraph SMT3 rename; was sdfDisplayEnvironment
 0x004681F8	sdfImageSetCb	inferred	SMT3HD data name via SLUS_209.11 0x00581018, 5 agreeing references; was sdfImageSetCb
 0x00468210	corePktFaceList	inferred	The node packet's face list: three vertex pointers a triangle, filled by corePktBuildFaceList and corePktBuildBackFaceList, which leave the count in the packet work's nodeCount; 4096 triangles (0xC000 bytes), the rejected triangles' index list after it.
+0x00474210	corePktBackFaceList	inferred	SMT3HD name via SLUS_209.11 0x0058D030, sdf/sdfVu1 SMT3 rename; was D_00474210
 0x00476210	sdfModelColorTransform	inferred	the SdfVuColorTransform sdfCorePacketGen builds through corePktSetFaceDivParm; the lighting kernels load its three quadwords as vf19..vf21. DDS1 twin 0x003F9860.
 0x00476240	corePktFogParm	inferred	SMT3HD name via SLUS_209.11 0x0058F060, sdfCoreDraw reference; was D_00476240
-0x00476250	sdfVuObjectBasisCache	inferred	the three basis vectors corePktLoadWorldLightMtx caches (VU0_ROTATE_BASIS_AND_CACHE); corePktEmitRefMapPass reads them. DDS1 twin 0x003F98A0.
+0x00476250	corePktWorldLightMtxCache	inferred	SMT3HD name via SLUS_209.11 0x0058F070, sdf/sdfVu1 SMT3 rename; was sdfVuObjectBasisCache
 0x00476480	sdfPadCb	inferred	SMT3HD data name via SLUS_209.11 0x0058F2C0, 2 agreeing references; was sdfPadCb
 0x004764D0	sdfPrintRpcClient	inferred	SMT3HD name via SLUS_209.11 0x0058F310, sdf/sdfPrint SMT3 rename; was sdfDevRpcClient
 0x00476510	sdfPrintRpcBuff	inferred	SMT3HD data name via SLUS_209.11 0x0058F350, 1 agreeing references; was sdfPrintRpcBuff
