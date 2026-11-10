@@ -1,146 +1,130 @@
-#include "sdk_ps2.h"
-#include "sdf_line_pair_packet_api.h"
-#include "sdf_projection.h"
-#include "sdf_compact_vertex_vif_packet.h"
-#include "bill_object_api.h"
-#include "sdf_packet_list.h"
 #include "common.h"
-#include "sdf_map_position_api.h"
-#include "sdf_vu0.h"
-#include "sdf_vu_rotation_axes.h"
-#include "sdf_sif_command.h"
-#include "sdf_trig.h"
-#include "eff_random.h"
-#include "sdf_chip.h"
-#include "eff_param.h"
-#include "sdf_heap_api.h"
-#include "ee_mmi.h"
-#include "btl_sound.h"
-#include "eff_blur.h"
-#include "eff_rectangle_blur_api.h"
-#include "eff_event_draw.h"
-#include "eff.h"
-#include "eff_resource_rect_api.h"
-#include "eff_math.h"
-#include "eff_channel.h"
-#include "eff_event.h"
-#include "eff_event_work_api.h"
-#include "eff_event_sound.h"
-#include "eff_event_setup.h"
-#include "eff_event_setup_readiness.h"
-#include "eff_event_bill.h"
-#include "eff_event_bill_batch.h"
-#include "pcp_vu0.h"
-#include "sdf_vu_transform_api.h"
-#include "sdf_texture_primary_buffer_api.h"
-#include "sdf_vu_matrix.h"
-#include "sdf_gs_blend.h"
-#include "sdf_packet_alloc.h"
-#include "eff_packet_params.h"
-#include "sdf_asset_create.h"
-#include "sdf_asset_state.h"
-#include "evt_unit.h"
-#include "mdl.h"
+#include "sdfDevCons.h"
+#include "libsdf.h"
+#include "ps2asm.h"
 
-#define EFF_EVENT_VECTOR_COMPONENTS 4
+#include "effect.h"
 
-#define EFF_EVENT_BEZIER_WEIGHT_COUNT 4
+/* DDS's names for the same objects. */
+#define dds3_1AC0A8 effCreateSlotArray
+#define dds3_1AC138 effReleaseSlotArrayAllocation
+#define func_001AC150 effStepActiveBezierSlot
+#define func_001AC3D8 effEvaluateSlotBezierPosition
+#define func_001AC4C8 effInitSlotTail
+#define func_001AC4F0 effGetSlotAt
+#define D_0056B050 effTriangleVertexScratch
+#define D_003201C0 D_00355870
+#define D_0054F270 D_003BB068
+#define D_0054F274 D_003BB06C
 
-#define EFF_EVENT_BEZIER_SLOT_BYTES 0x60
+/* The debug overlay's OT slots; DDS has more slots before them. */
+#define EFF_DEBUG_WIRE_OT 55
+#define EFF_DEBUG_TEXT_OT 96
 
-#define EFF_EVENT_SLOT_HEADER_BYTES 0xC
+/* Screen pixel pair in the debug overlay's own 1/16 pixel grid. */
+typedef struct
+{
+    s32 x;
+    s32 y;
+} effDebugPoint_t;
 
-#define EFF_EVENT_CURVE_POINT_STRIDE 3
+extern sdfGrOt_t sdfGrOtTable[85];
 
-#define EFF_EVENT_CURVE_FINISHED_INDEX 7
+extern void *sdfGrAllocPacketBuff(s32 aSize);
+extern void sdfDrawTagInit(void *a);
+extern void sdfDrawTagLink(void *aTag, void *aPacket);
+extern void effScreenOffset(void);
+extern void *dds3PrimFrameRect(s32 aX, s32 aY, s32 aZ, s32 aW, s32 aH, u32 aBgCol, u32 aFrameCol);
+extern void *dds3PrimLine(s32 aX0, s32 aY0, s32 aZ0, u32 aColor0, s32 aX1, s32 aY1, s32 aZ1, u32 aColor1, s32 aMode);
 
-#define EFF_EVENT_CURVE_DEFAULT_STEP 0.05f
 
-#define EFF_EVENT_CURVE_MIDDLE_FACTOR 3.0f
+sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
+void *sdfMemLock(sdfMemHandle_t *aHandle);
+void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
+/* SDK matrix-bank helpers used by the wire sphere's second pass. */
+typedef struct
+{
+    f32 rows[4][4];
+} effDebugMatrix_t;
 
-#define EFF_EVENT_DRAW_LIST_BYTES 0x20
+typedef struct
+{
+    s16 parameterCount;
+    s16 vertexCount;
+    u16 primitive;
+    u16 mask;
+    u32 color;
+    const u32 *parameters;
+    u128 *positions;
+    u128 *normals;
+    f32 *texcoords;
+    u32 *extraTexcoords;
+    u32 *colors;
+    void *(*allocate)(s32);
+    f32 depth;
+} effDebugPolyParams_t;
 
-#define EFF_EVENT_PROJECTED_X_BIAS 0x700
-
-#define EFF_EVENT_PROJECTED_Y_BIAS 0xF20
-
-#define EFF_EVENT_PROJECTED_Y_SCALE 2
-
-#define EFF_EVENT_GS_X_BIAS 0x7000
-
-#define EFF_EVENT_GS_Y_BIAS 0x7900
-
-#define EFF_EVENT_GS_X_SHIFT 4
-
-#define EFF_EVENT_GS_Y_SHIFT 3
-
-#define EFF_EVENT_GS_X_SCALE 0x10
-
-#define EFF_EVENT_GS_Y_SCALE 8
-
-#define EFF_EVENT_OVERLAY_DEPTH 0xFF0000
-
-#define EFF_EVENT_MARKER_WIDTH 0x20 /* GS coordinate units, not pixels. */
-
-#define EFF_EVENT_MARKER_HEIGHT 0x10 /* GS coordinate units, not pixels. */
-
-#define EFF_EVENT_MARKER_COLOR 0x60008080
-
-/* The event curve array stores segmented slots, separate from effMath's cubic slots. */
-typedef struct EffSegmentedBezierArray {
-    EffSegmentedBezierSlot *slots;
-    u32 slotCount;
-    struct sdfMemHandle_t *allocation;
-} EffSegmentedBezierArray;
-
-extern sdfGrOt_t kwlnPositionedTextSurface;
+extern sdfMat_t *D_0054F270;
+extern f32 D_0054F274;
+extern f32 D_0056B050[4][4];
+extern u32 D_003201C0[4];
+f32 sdfCos(f32 aRadius);
+f32 sdfSin(f32 aRadius);
+void SetRotateMatrixX(f32 aAngle);
+void SetRotateMatrixY(f32 aAngle);
+void MultMatrixNoArg(void);
+void *effDebugDrawWireModel(f32 (*positions)[4], u32 *colors, u32 count, u32 mode);
+sdfMat_t *sdfMatNew(void);
+void sdfMatSetConstant(sdfMat_t *aMat, f32 aRatio);
+void sdf3DPrimLinkTm(void *aTag, void *aAllocator);
+void sdf3DPrimLinkMat(void *aTag, sdfMat_t *aMat, void *aAllocator);
+void *memset(void *a, s32 b, u32 c);
+void *effPkt3DPrimMakePoly(effDebugPolyParams_t *aParm);
 
 /* Allocate contiguous slots followed by their count and allocation handle. */
-EffSegmentedBezierArray *effCreateSlotArray(u32 count) {
-    s32 slotBytes = count * EFF_EVENT_BEZIER_SLOT_BYTES;
-    sdfMemHandle_t *allocation = sdfMemAllocDirect(slotBytes + EFF_EVENT_SLOT_HEADER_BYTES);
-    EffSegmentedBezierSlot *slot = (EffSegmentedBezierSlot *)sdfMemLock(allocation);
-    EffSegmentedBezierArray *table = (EffSegmentedBezierArray *)((u8 *)slot + slotBytes);
+effArrHdr_t *dds3_1AC0A8(u32 count) {
+    s32 slotBytes = count * 0x60;
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(slotBytes + 0xC);
+    effBezierCurve_t *slot = (effBezierCurve_t *)sdfMemLock(allocation);
+    effArrHdr_t *table = (effArrHdr_t *)((u8 *)slot + slotBytes);
     u32 index = 0;
     table->allocation = allocation;
     table->slots = slot;
-    table->slotCount = count;
+    table->count = count; /* The shared array header's slot count. */
     if (count != 0) {
         do {
             index++;
             slot->pointIndex = 0;
             slot->t = 0;
-            slot->parameterStep = EFF_EVENT_CURVE_DEFAULT_STEP;
+            slot->parameterStep = 0.05f;
             slot++;
         } while (index < count);
     }
     return table;
 }
 
-/* Release the allocation handle stored after the contiguous slot array. */
-void effReleaseSlotArrayAllocation(EffSegmentedBezierArray *header) {
+void dds3_1AC138(effArrHdr_t *header) {
     sdfMemFreeDirect(header->allocation);
 }
 
-/* Return 0 before evaluation only for the point-index sentinel 7. Overflow t
- * clamps to 1 and advances the index by three; there is no general bounds check. */
-s32 effStepActiveBezierSlot(EffSegmentedBezierArray *table, s32 index, f32 *out) {
-    EffSegmentedBezierSlot *slot = &table->slots[index];
+/* Point-index sentinel 7 stops evaluation; otherwise sample before clamping t and advancing three controls. */
+s32 func_001AC150(effArrHdr_t *table, s32 index, f32 *out) {
+    effBezierCurve_t *slot = &((effBezierCurve_t *)table->slots)[index];
     u32 pointIndex = slot->pointIndex;
-    f32 weights[EFF_EVENT_BEZIER_WEIGHT_COUNT];
+    f32 weights[4];
     f32 t;
     f32 u;
-    EffBezierPoint *controlPoints;
+    effBezierPoint_t *controlPoints;
 
-    if (pointIndex == EFF_EVENT_CURVE_FINISHED_INDEX) {
+    if (pointIndex == 7) {
         return 0;
     }
     t = slot->t;
     u = 1.0f - t;
     controlPoints = &slot->controlPoints[pointIndex];
     weights[0] = u * u * u;
-    weights[1] = t * (u * u) * EFF_EVENT_CURVE_MIDDLE_FACTOR;
-    weights[2] = t * t * u * EFF_EVENT_CURVE_MIDDLE_FACTOR;
+    weights[1] = t * (u * u) * 3.0f;
+    weights[2] = t * t * u * 3.0f;
     weights[3] = t * t * t;
     out[0] = controlPoints[0].x * weights[0] + controlPoints[1].x * weights[1] + controlPoints[2].x * weights[2] + controlPoints[3].x * weights[3];
     out[1] = controlPoints[0].y * weights[0] + controlPoints[1].y * weights[1] + controlPoints[2].y * weights[2] + controlPoints[3].y * weights[3];
@@ -149,25 +133,24 @@ s32 effStepActiveBezierSlot(EffSegmentedBezierArray *table, s32 index, f32 *out)
     t += slot->parameterStep;
     if (t > 1.0f) {
         t = 1.0f;
-        pointIndex += EFF_EVENT_CURVE_POINT_STRIDE;
+        pointIndex += 3;
     }
     slot->t = t;
     slot->pointIndex = pointIndex;
     return 1;
 }
 
-/* Evaluate at the entry t before advancing. The first segment carries excess t;
- * the second stores t = 1 and returns 0 after producing output at the entry t. */
-s32 effPCPBezierEval(EffSegmentedBezierSlot *slot, f32 *out) {
-    f32 weights[EFF_EVENT_BEZIER_WEIGHT_COUNT];
+/* Carry excess t across the first segment; the second finishes after sampling its entry t. */
+s32 effPCPBezierEval(effBezierCurve_t *slot, f32 *out) {
+    f32 weights[4];
     u32 pointIndex = slot->pointIndex;
     f32 t = slot->t;
-    EffBezierPoint *controlPoints = &slot->controlPoints[pointIndex];
+    effBezierPoint_t *controlPoints = &slot->controlPoints[pointIndex];
     f32 u = 1.0f - t;
 
     weights[0] = u * u * u;
-    weights[1] = t * (u * u) * EFF_EVENT_CURVE_MIDDLE_FACTOR;
-    weights[2] = t * t * u * EFF_EVENT_CURVE_MIDDLE_FACTOR;
+    weights[1] = t * (u * u) * 3.0f;
+    weights[2] = t * t * u * 3.0f;
     weights[3] = t * t * t;
     out[0] = controlPoints[0].x * weights[0] + controlPoints[1].x * weights[1] + controlPoints[2].x * weights[2] + controlPoints[3].x * weights[3];
     out[1] = controlPoints[0].y * weights[0] + controlPoints[1].y * weights[1] + controlPoints[2].y * weights[2] + controlPoints[3].y * weights[3];
@@ -175,9 +158,9 @@ s32 effPCPBezierEval(EffSegmentedBezierSlot *slot, f32 *out) {
     out[3] = 1.0f;
     t += slot->parameterStep;
     if (t > 1.0f) {
-        if (pointIndex < EFF_EVENT_CURVE_POINT_STRIDE) {
+        if (pointIndex < 3) {
             t -= 1.0f;
-            pointIndex += EFF_EVENT_CURVE_POINT_STRIDE;
+            pointIndex += 3;
         } else {
             slot->t = 1.0f;
             return 0;
@@ -188,17 +171,16 @@ s32 effPCPBezierEval(EffSegmentedBezierSlot *slot, f32 *out) {
     return 1;
 }
 
-/* Evaluate four control points starting at pointIndex into xyz with w = 1;
- * unlike the stepping paths, this does not update t or the point index. */
-void effEvaluateSlotBezierPosition(EffSegmentedBezierSlot *slot, f32 *out) {
-    EffBezierPoint *controlPoints = &slot->controlPoints[slot->pointIndex];
+/* Evaluate without changing progress; write homogeneous W = 1. */
+void func_001AC3D8(effBezierCurve_t *slot, f32 *out) {
+    effBezierPoint_t *controlPoints = &slot->controlPoints[slot->pointIndex];
     f32 t = slot->t;
     f32 u = 1.0f - t;
-    f32 w[EFF_EVENT_BEZIER_WEIGHT_COUNT];
+    f32 w[4];
 
     w[0] = u * u * u;
-    w[1] = t * (u * u) * EFF_EVENT_CURVE_MIDDLE_FACTOR;
-    w[2] = t * t * u * EFF_EVENT_CURVE_MIDDLE_FACTOR;
+    w[1] = t * (u * u) * 3.0f;
+    w[2] = t * t * u * 3.0f;
     w[3] = t * t * t;
 
     out[0] = controlPoints[0].x * w[0] + controlPoints[1].x * w[1] + controlPoints[2].x * w[2] + controlPoints[3].x * w[3];
@@ -207,144 +189,128 @@ void effEvaluateSlotBezierPosition(EffSegmentedBezierSlot *slot, f32 *out) {
     out[3] = 1.0f;
 }
 
-/* Reset only curve progress and its default step; retain all control points. */
-void effInitSlotTail(EffSegmentedBezierArray *table, s32 index) {
-    EffSegmentedBezierSlot *slot = &table->slots[index];
+/* Reset progress and its default step, retaining the control points. */
+void func_001AC4C8(effArrHdr_t *table, s32 index) {
+    effBezierCurve_t *slot = &((effBezierCurve_t *)table->slots)[index];
 
-    slot->parameterStep = EFF_EVENT_CURVE_DEFAULT_STEP;
+    slot->parameterStep = 0.05f;
     slot->pointIndex = slot->t = 0;
 }
 
-/* Return the selected slot; index bounds remain the caller's responsibility. */
-EffSegmentedBezierSlot *effGetSlotAt(EffSegmentedBezierArray *table, s32 index) {
-    return &table->slots[index];
+effBezierCurve_t *func_001AC4F0(effArrHdr_t *table, s32 index) {
+    return &((effBezierCurve_t *)table->slots)[index];
 }
 
-extern u64 *dds3PrimFrameRect(s32, s32, s32, s32, s32, u32, u32);
+/* vu0 routine: project a world point and frame it */
+void effDebugPointDraw(sdfVector4_t *pPos)
+{
+    sdfVector4_t screen;
+    effDebugPoint_t point;
+    void *tag;
+    sdfGrOt_t *ot;
 
-/* Project a point and draw a filled/bordered marker with 0x20/0x10 GS-unit extents. */
-void effDebugPointDraw(f32 *position) {
-    sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EFF_EVENT_DRAW_LIST_BYTES);
-    f32 screen[EFF_EVENT_VECTOR_COMPONENTS];
-    s32 pixel[2]; /* written, never read; retail keeps the frame slot */
-    s32 x;
-    s32 y;
-    sdfGrOt_t *scene;
-
-    sdfDrawTagInit(list);
-    SDF_VU0_LOADVECTOR(position);
+    tag = sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    SDF_VU0_LOADVECTOR(pPos);
     effScreenOffset();
-    SDF_VU0_STOREVECTOR(screen);
-    x = (s32)screen[0] - EFF_EVENT_PROJECTED_X_BIAS;
-    y = (s32)screen[1] * EFF_EVENT_PROJECTED_Y_SCALE - EFF_EVENT_PROJECTED_Y_BIAS;
-    pixel[0] = x;
-    pixel[1] = y;
-    sdfDrawTagLink(list, (u32)(dds3PrimFrameRect((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_WIDTH, EFF_EVENT_MARKER_HEIGHT, EFF_EVENT_MARKER_COLOR, EFF_EVENT_MARKER_COLOR)));
-    scene = &kwlnPositionedTextSurface;
-    scene->append(scene, (sdfDrawTag_t *)list);
+    SDF_VU0_STOREVECTOR_MEMOPS(screen);
+    point.x = (s32)screen.x - 0x700;
+    point.y = ((s32)screen.y << 1) - 0xF20;
+    sdfDrawTagLink(tag, dds3PrimFrameRect(point.x * 16 + 0x7000, point.y * 8 + 0x7900,
+                                          0xFF0000, 0x20, 0x10, 0x60008080, 0x60008080));
+    ot = &sdfGrOtTable[EFF_DEBUG_TEXT_OT];
+    ((void (*)(sdfGrOt_t *, void *))ot->regFunc)(ot, tag);
 }
 
-/* Project a point and use color for both the marker's fill and border. */
-void effDebugPointDraw2(f32 *position, s32 color) {
-    sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EFF_EVENT_DRAW_LIST_BYTES);
-    f32 screen[EFF_EVENT_VECTOR_COMPONENTS];
-    s32 pixel[2]; /* written, never read; retail keeps the frame slot */
-    s32 x;
-    s32 y;
-    sdfGrOt_t *scene;
+/* vu0 routine: project a world point and frame it in a given mode */
+void effDebugPointDraw2(sdfVector4_t *pPos, u32 color)
+{
+    sdfVector4_t screen;
+    effDebugPoint_t point;
+    void *tag;
+    sdfGrOt_t *ot;
 
-    sdfDrawTagInit(list);
-    SDF_VU0_LOADVECTOR(position);
+    tag = sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    SDF_VU0_LOADVECTOR(pPos);
     effScreenOffset();
-    SDF_VU0_STOREVECTOR(screen);
-    x = (s32)screen[0] - EFF_EVENT_PROJECTED_X_BIAS;
-    y = (s32)screen[1] * EFF_EVENT_PROJECTED_Y_SCALE - EFF_EVENT_PROJECTED_Y_BIAS;
-    pixel[0] = x;
-    pixel[1] = y;
-    sdfDrawTagLink(list, (u32)(dds3PrimFrameRect((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_WIDTH, EFF_EVENT_MARKER_HEIGHT, color, color)));
-    scene = &kwlnPositionedTextSurface;
-    scene->append(scene, (sdfDrawTag_t *)list);
+    SDF_VU0_STOREVECTOR_MEMOPS(screen);
+    point.x = (s32)screen.x - 0x700;
+    point.y = ((s32)screen.y << 1) - 0xF20;
+    sdfDrawTagLink(tag, dds3PrimFrameRect(point.x * 16 + 0x7000, point.y * 8 + 0x7900,
+                                          0xFF0000, 0x20, 0x10, color, color));
+    ot = &sdfGrOtTable[EFF_DEBUG_TEXT_OT];
+    ((void (*)(sdfGrOt_t *, void *))ot->regFunc)(ot, tag);
 }
 
-extern u64 *dds3PrimLine(s32 x0, s32 y0, s32 z0, s32 color0, s32 x1, s32 y1, s32 z1, s32 color1, s32 flags);
+/* vu0 routine: project two world points and draw the line */
+void effDebugLineDraw(sdfVector4_t *pPos0, sdfVector4_t *pPos1)
+{
+    sdfVector4_t screen[2];
+    effDebugPoint_t point[2];
+    void *tag;
+    sdfGrOt_t *ot;
 
-/* Draw a GS line between two projected points, using the fixed marker color. */
-void effDebugLineDraw(f32 *from, f32 *to) {
-    sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EFF_EVENT_DRAW_LIST_BYTES);
-    f32 start[EFF_EVENT_VECTOR_COMPONENTS];
-    f32 end[EFF_EVENT_VECTOR_COMPONENTS];
-    s32 pixel[4]; /* written, never read; retail keeps the frame slot */
-    s32 x0;
-    s32 y0;
-    s32 x1;
-    s32 y1;
-    sdfGrOt_t *scene;
+    tag = sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    SDF_VU0_LOADVECTOR(pPos0);
+    effScreenOffset();
+    SDF_VU0_STOREVECTOR(&screen[0]);
+    SDF_VU0_LOADVECTOR(pPos1);
+    effScreenOffset();
+    SDF_VU0_STOREVECTOR(&screen[1]);
+    point[0].x = (s32)screen[0].x - 0x700;
+    point[0].y = ((s32)screen[0].y << 1) - 0xF20;
+    point[1].x = (s32)screen[1].x - 0x700;
+    point[1].y = ((s32)screen[1].y << 1) - 0xF20;
+    sdfDrawTagLink(tag, dds3PrimLine(point[0].x * 16 + 0x7000, point[0].y * 8 + 0x7900,
+                                     0xFF0000, 0x60008080,
+                                     point[1].x * 16 + 0x7000, point[1].y * 8 + 0x7900,
+                                     0xFF0000, 0x60008080, 0));
+    ot = &sdfGrOtTable[EFF_DEBUG_TEXT_OT];
+    ((void (*)(sdfGrOt_t *, void *))ot->regFunc)(ot, tag);
+}
 
-    sdfDrawTagInit(list);
+/* vu0 routine: project two world points and draw the line in a given mode */
+void effDebugLineDraw2(sdfVector4_t *from, sdfVector4_t *to, u32 mode)
+{
+    sdfVector4_t screen[2];
+    effDebugPoint_t point[2];
+    void *tag;
+    sdfGrOt_t *ot;
+
+    tag = sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
     SDF_VU0_LOADVECTOR(from);
     effScreenOffset();
-    SDF_VU0_STOREVECTOR(start);
+    SDF_VU0_STOREVECTOR(&screen[0]);
     SDF_VU0_LOADVECTOR(to);
     effScreenOffset();
-    SDF_VU0_STOREVECTOR(end);
-    x0 = (s32)start[0] - EFF_EVENT_PROJECTED_X_BIAS;
-    y0 = (s32)start[1] * EFF_EVENT_PROJECTED_Y_SCALE - EFF_EVENT_PROJECTED_Y_BIAS;
-    x1 = (s32)end[0] - EFF_EVENT_PROJECTED_X_BIAS;
-    y1 = (s32)end[1] * EFF_EVENT_PROJECTED_Y_SCALE - EFF_EVENT_PROJECTED_Y_BIAS;
-    pixel[0] = x0;
-    pixel[1] = y0;
-    pixel[2] = x1;
-    pixel[3] = y1;
-    sdfDrawTagLink(list, (u32)(dds3PrimLine((x0 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y0 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_COLOR, (x1 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y1 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, EFF_EVENT_MARKER_COLOR, 0)));
-    scene = &kwlnPositionedTextSurface;
-    scene->append(scene, (sdfDrawTag_t *)list);
+    SDF_VU0_STOREVECTOR(&screen[1]);
+    point[0].x = (s32)screen[0].x - 0x700;
+    point[0].y = ((s32)screen[0].y << 1) - 0xF20;
+    point[1].x = (s32)screen[1].x - 0x700;
+    point[1].y = ((s32)screen[1].y << 1) - 0xF20;
+    sdfDrawTagLink(tag, dds3PrimLine(point[0].x * 16 + 0x7000, point[0].y * 8 + 0x7900,
+                                     0xFF0000, mode,
+                                     point[1].x * 16 + 0x7000, point[1].y * 8 + 0x7900,
+                                     0xFF0000, mode, 0));
+    ot = &sdfGrOtTable[EFF_DEBUG_TEXT_OT];
+    ((void (*)(sdfGrOt_t *, void *))ot->regFunc)(ot, tag);
 }
 
-/* Draw a GS line between two projected points, using color at both vertices. */
-void effDebugLineDraw2(f32 *from, f32 *to, s32 color) {
-    sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EFF_EVENT_DRAW_LIST_BYTES);
-    f32 start[EFF_EVENT_VECTOR_COMPONENTS];
-    f32 end[EFF_EVENT_VECTOR_COMPONENTS];
-    s32 pixel[4]; /* written, never read; retail keeps the frame slot */
-    s32 x0;
-    s32 y0;
-    s32 x1;
-    s32 y1;
-    sdfGrOt_t *scene;
-
-    sdfDrawTagInit(list);
-    SDF_VU0_LOADVECTOR(from);
-    effScreenOffset();
-    SDF_VU0_STOREVECTOR(start);
-    SDF_VU0_LOADVECTOR(to);
-    effScreenOffset();
-    SDF_VU0_STOREVECTOR(end);
-    x0 = (s32)start[0] - EFF_EVENT_PROJECTED_X_BIAS;
-    y0 = (s32)start[1] * EFF_EVENT_PROJECTED_Y_SCALE - EFF_EVENT_PROJECTED_Y_BIAS;
-    x1 = (s32)end[0] - EFF_EVENT_PROJECTED_X_BIAS;
-    y1 = (s32)end[1] * EFF_EVENT_PROJECTED_Y_SCALE - EFF_EVENT_PROJECTED_Y_BIAS;
-    pixel[0] = x0;
-    pixel[1] = y0;
-    pixel[2] = x1;
-    pixel[3] = y1;
-    sdfDrawTagLink(list, (u32)(dds3PrimLine((x0 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y0 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, color, (x1 << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y1 << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, color, 0)));
-    scene = &kwlnPositionedTextSurface;
-    scene->append(scene, (sdfDrawTag_t *)list);
-}
-
-/* Submit a formatted native command at biased screen coordinates. */
-void effDebugStringDraw(s32 x, s32 y, s32 commandIndex, s32 format) {
-    sdfDrawTag_t *task = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EFF_EVENT_DRAW_LIST_BYTES);
+/* Submit formatted text at biased GS coordinates. */
+void effDebugStringDraw(s32 x, s32 y, s32 commandIndex, const char *format) {
+    sdfDrawTag_t *task = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfGrOt_t *scene;
 
     sdfDrawTagInit(task);
-    sdfDrawTagLink(task, (u32)(sdfDevPrintf((x << EFF_EVENT_GS_X_SHIFT) + EFF_EVENT_GS_X_BIAS, (y << EFF_EVENT_GS_Y_SHIFT) + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, commandIndex, (const char *)format)));
-    scene = &kwlnPositionedTextSurface;
-    scene->append(scene, (sdfDrawTag_t *)task);
+    sdfDrawTagLink(task, (sdfDevPrintf((x << 4) + 0x7000, (y << 3) + 0x7900, 0xFF0000, commandIndex, format)));
+    scene = &sdfGrOtTable[EFF_DEBUG_TEXT_OT];
+    ((void (*)(sdfGrOt_t *, void *))scene->regFunc)(scene, task);
 }
 
-extern sdfGrOt_t sdfGrOtTable[];
-
+/* vu0 routine: build two perpendicular sets of wire rings. */
 void effDebugWireframeSphereDraw(const f32 *center, u32 color, f32 radius) {
     f32 point[4] __attribute__((aligned(16)));
     f32 matrix[4][4] __attribute__((aligned(16)));
@@ -367,7 +333,7 @@ void effDebugWireframeSphereDraw(const f32 *center, u32 color, f32 radius) {
         colors[ring++] = color;
     } while (ring < 40);
 
-    EE_MMI_UNIT_MATRIX(matrix);
+    SDF_VU0_STOREIDENTITY(matrix);
     for (pass = 0; pass < 2; pass++) {
         latitude = 0.0f;
         for (ring = 0; ring < 14; ring++) {
@@ -376,100 +342,87 @@ void effDebugWireframeSphereDraw(const f32 *center, u32 color, f32 radius) {
             longitude = 0.0f;
             ringY = radius * sdfCos(latitude);
             ringRadius = radius * sdfSin(latitude);
-            VU0_LOAD_MATRIX(matrix);
-            SDF_VU0_LOADVECTOR_B(center);
+            SDF_VU0_LOADMATRIX(matrix);
+            SDF_VU0_LOADVECTOR_B( center);
             point[0] = ringRadius;
             point[1] = ringY;
             point[2] = 0.0f;
-            SDF_VU0_LOADVECTOR(point);
+            SDF_VU0_LOADVECTOR( point);
             SDF_VU0_VECTOR_W_SET_ZERO();
             SDF_VU0_APPLYMATRIX();
             SDF_VU0_ADDVECTOR();
 
             for (segment = 0; segment < 20; segment++) {
-                SDF_VU0_STOREVECTOR(*out);
+                SDF_VU0_STOREVECTOR( *out);
                 out++;
                 longitude += 0.31415924429893494f;
                 point[0] = sdfCos(longitude) * ringRadius;
                 point[1] = ringY;
                 point[2] = sdfSin(longitude) * ringRadius;
-                SDF_VU0_LOADVECTOR(point);
+                SDF_VU0_LOADVECTOR( point);
                 SDF_VU0_VECTOR_W_SET_ZERO();
                 SDF_VU0_APPLYMATRIX();
                 SDF_VU0_ADDVECTOR();
-                SDF_VU0_STOREVECTOR(*out);
+                SDF_VU0_STOREVECTOR( *out);
                 out++;
             }
-            sdfDrawTagLink(list, (u32)effDebugDrawWireModel(vertices, colors, 40, 0x80));
+            sdfDrawTagLink(list, effDebugDrawWireModel(vertices, colors, 40, 0x80));
         }
         SetRotateMatrixX(1.5707963f);
-        VU0_LOAD_MATRIX_B_F32(matrix);
+        SDF_VU0_LOADMATRIX_B_MEMOPS(matrix);
         MultMatrixNoArg();
-        VU0_STORE_MATRIX_UNCLOBBERED(matrix);
+        SDF_VU0_STOREMATRIX_NOMEM(matrix);
     }
-    surface = &sdfGrOtTable[55];
-    surface->append(surface, list);
+    surface = &sdfGrOtTable[EFF_DEBUG_WIRE_OT];
+    ((void (*)(sdfGrOt_t *, void *))surface->regFunc)(surface, list);
 }
 
-extern sdfMat_t *D_003BB068;
-
-extern f32 D_003BB06C;
-
-extern f32 effTriangleVertexScratch[4][4];
-
-extern u32 D_00355870[4];
-
-extern sdfGrOt_t D_00325028;
-
-extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *params);
-
-extern void sdf3DPrimLinkMat(sdfDrawTag_t *packetList, sdfMat_t *asset, s32 (*allocatePacket)(s32));
-
-extern void sdf3DPrimLinkTm(sdfDrawTag_t *packetList, s32 (*allocatePacket)(s32));
-
+/* vu0 routine: build and submit the debug geometry. */
 void effDebugSelectCursorDraw(f32 *position) {
-    sdfMat_t *asset = D_003BB068;
+    sdfMat_t *asset = D_0054F270;
     sdfDrawTag_t *list;
-    sdf3DPrimPolyParm_t packet;
+    effDebugPolyParams_t packet;
+    sdfGrOt_t *surface;
 
     if (asset == NULL) {
         asset = sdfMatNew();
-        D_003BB068 = asset;
+        D_0054F270 = asset;
         sdfMatSetConstant(asset, 1.0f);
     }
 
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
-    SetRotateMatrixY(D_003BB06C);
-    D_003BB06C += 0.10471974313259125f;
-    SDF_VU0_LOADVECTOR(position);
+    SetRotateMatrixY(D_0054F274);
+    D_0054F274 += 0.10471974313259125f;
+    SDF_VU0_LOADVECTOR( position);
     VU0_ADD_VF31_VF10_XYZ();
     sdf3DPrimLinkTm(list, NULL);
     memset(&packet, 0, 0x2C);
-    packet.attr = 0x4000;
-    effTriangleVertexScratch[2][2] = 0.0f;
-    packet.vertexColor = D_00355870;
+    packet.primitive = 0x4000;
+    D_0056B050[2][2] = 0.0f;
+    packet.colors = D_003201C0;
     packet.color = 0x80808080;
 
-    effTriangleVertexScratch[0][0] = 0.0f;
-    effTriangleVertexScratch[0][1] = 0.0f;
-    effTriangleVertexScratch[0][2] = 0.0f;
-    effTriangleVertexScratch[1][0] = 15.0f;
-    effTriangleVertexScratch[1][1] = -30.0f;
-    effTriangleVertexScratch[1][2] = 0.0f;
-    effTriangleVertexScratch[2][0] = -15.0f;
-    effTriangleVertexScratch[2][1] = -30.0f;
+    D_0056B050[0][0] = 0.0f;
+    D_0056B050[0][1] = 0.0f;
+    D_0056B050[0][2] = 0.0f;
+    D_0056B050[1][0] = 15.0f;
+    D_0056B050[1][1] = -30.0f;
+    D_0056B050[1][2] = 0.0f;
+    D_0056B050[2][0] = -15.0f;
+    D_0056B050[2][1] = -30.0f;
 
-    packet.faceCount = 1;
-    packet.pointCount = 3;
-    packet.vertex = (u128 *)effTriangleVertexScratch;
-    packet.uv = NULL;
-    sdf3DPrimLinkMat(list, D_003BB068, NULL);
-    sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&packet));
-    D_00325028.append(&D_00325028, list);
+    packet.parameterCount = 1;
+    packet.vertexCount = 3;
+    packet.positions = (u128 *)D_0056B050;
+    packet.texcoords = NULL;
+    sdf3DPrimLinkMat(list, D_0054F270, NULL);
+    sdfDrawTagLink(list, effPkt3DPrimMakePoly(&packet));
+    surface = &sdfGrOtTable[39];
+    ((void (*)(sdfGrOt_t *, void *))surface->regFunc)(surface, list);
 }
 
-/* Draw horizontal rings, vertical sides, and the two sets of cap diameters. */
+/* vu0 routine: build and submit the debug geometry. */
 void effDebugWireframeCylinderDraw(const f32 *center, u32 color, f32 radius, f32 height) {
     f32 point[4]; /* The line provider consumes xyz; preserve the untouched w lane. */
     f32 vertices[40][4];
@@ -499,107 +452,107 @@ void effDebugWireframeCylinderDraw(const f32 *center, u32 color, f32 radius, f32
         point[0] = radius;
         point[1] = y;
         point[2] = 0.0f;
-        SDF_VU0_LOADVECTOR_B(center);
-        SDF_VU0_LOADVECTOR(point);
+        SDF_VU0_LOADVECTOR_B( center);
+        SDF_VU0_LOADVECTOR( point);
         SDF_VU0_ADDVECTOR();
         for (segment = 0; segment < 20; segment++) {
-            SDF_VU0_STOREVECTOR(*out);
+            SDF_VU0_STOREVECTOR( *out);
             out++;
             angle += angleStep;
             point[0] = sdfCos(angle) * radius;
             point[1] = y;
             point[2] = sdfSin(angle) * radius;
-            SDF_VU0_LOADVECTOR(point);
+            SDF_VU0_LOADVECTOR( point);
             SDF_VU0_ADDVECTOR();
-            SDF_VU0_STOREVECTOR(*out);
+            SDF_VU0_STOREVECTOR( *out);
             out++;
         }
-        sdfDrawTagLink(list, (u32)effDebugDrawWireModel(vertices, colors, 40, 0x80));
+        sdfDrawTagLink(list, effDebugDrawWireModel(vertices, colors, 40, 0x80));
         y += heightStep;
     }
 
     out = vertices;
-    SDF_VU0_LOADVECTOR_B(center);
+    SDF_VU0_LOADVECTOR_B( center);
     angle = 0.0f;
     for (segment = 0; segment < 20; segment++) {
         point[0] = sdfCos(angle) * radius;
         point[1] = -height * 0.5f;
         point[2] = sdfSin(angle) * radius;
-        SDF_VU0_LOADVECTOR(point);
+        SDF_VU0_LOADVECTOR( point);
         SDF_VU0_ADDVECTOR();
-        SDF_VU0_STOREVECTOR(*out);
+        SDF_VU0_STOREVECTOR( *out);
         out++;
         point[0] = sdfCos(angle) * radius;
         point[1] = height * 0.5f;
         point[2] = sdfSin(angle) * radius;
-        SDF_VU0_LOADVECTOR(point);
+        SDF_VU0_LOADVECTOR( point);
         SDF_VU0_ADDVECTOR();
-        SDF_VU0_STOREVECTOR(*out);
+        SDF_VU0_STOREVECTOR( *out);
         out++;
         angle += angleStep;
     }
-    sdfDrawTagLink(list, (u32)effDebugDrawWireModel(vertices, colors, 40, 0x80));
+    sdfDrawTagLink(list, effDebugDrawWireModel(vertices, colors, 40, 0x80));
 
     out = vertices;
-    SDF_VU0_LOADVECTOR_B(center);
+    SDF_VU0_LOADVECTOR_B( center);
     angle = 0.0f;
     for (segment = 0; segment < 10; segment++) {
         point[0] = sdfCos(angle) * radius;
         point[1] = -height * 0.5f;
         point[2] = sdfSin(angle) * radius;
-        SDF_VU0_LOADVECTOR(point);
+        SDF_VU0_LOADVECTOR( point);
         SDF_VU0_ADDVECTOR();
-        SDF_VU0_STOREVECTOR(*out);
+        SDF_VU0_STOREVECTOR( *out);
         out++;
         oppositeAngle = angle + 3.1415926f;
         point[0] = sdfCos(oppositeAngle) * radius;
         point[1] = -height * 0.5f;
         point[2] = sdfSin(oppositeAngle) * radius;
-        SDF_VU0_LOADVECTOR(point);
+        SDF_VU0_LOADVECTOR( point);
         SDF_VU0_ADDVECTOR();
-        SDF_VU0_STOREVECTOR(*out);
+        SDF_VU0_STOREVECTOR( *out);
         out++;
         angle += angleStep;
     }
-    sdfDrawTagLink(list, (u32)effDebugDrawWireModel(vertices, colors, 20, 0x80));
+    sdfDrawTagLink(list, effDebugDrawWireModel(vertices, colors, 20, 0x80));
 
     out = vertices;
-    SDF_VU0_LOADVECTOR_B(center);
+    SDF_VU0_LOADVECTOR_B( center);
     angle = 0.0f;
     for (segment = 0; segment < 10; segment++) {
         point[0] = sdfCos(angle) * radius;
         point[1] = height * 0.5f;
         point[2] = sdfSin(angle) * radius;
-        SDF_VU0_LOADVECTOR(point);
+        SDF_VU0_LOADVECTOR( point);
         SDF_VU0_ADDVECTOR();
-        SDF_VU0_STOREVECTOR(*out);
+        SDF_VU0_STOREVECTOR( *out);
         out++;
         oppositeAngle = angle + 3.1415926f;
         point[0] = sdfCos(oppositeAngle) * radius;
         point[1] = height * 0.5f;
         point[2] = sdfSin(oppositeAngle) * radius;
-        SDF_VU0_LOADVECTOR(point);
+        SDF_VU0_LOADVECTOR( point);
         SDF_VU0_ADDVECTOR();
-        SDF_VU0_STOREVECTOR(*out);
+        SDF_VU0_STOREVECTOR( *out);
         out++;
         angle += angleStep;
     }
-    sdfDrawTagLink(list, (u32)effDebugDrawWireModel(vertices, colors, 20, 0x80));
-    surface = &sdfGrOtTable[55];
-    surface->append(surface, list);
+    sdfDrawTagLink(list, effDebugDrawWireModel(vertices, colors, 20, 0x80));
+    surface = &sdfGrOtTable[EFF_DEBUG_WIRE_OT];
+    ((void (*)(sdfGrOt_t *, void *))surface->regFunc)(surface, list);
 }
 
-/* Submit a filled rectangle and its line-strip border. Keep native width/height
- * scaling and the distinct shift/multiply forms used by the other draw paths. */
+/* Submit the filled rectangle and border using native horizontal/vertical coordinate scales. */
 void effDebugWindowDraw(s32 x, s32 y, s32 width, s32 height, s32 fillColor, s32 borderColor) {
-    sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(EFF_EVENT_DRAW_LIST_BYTES);
+    sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfGrOt_t *scene;
 
     sdfDrawTagInit(list);
-    sdfDrawTagLink(list, (u32)(dds3PrimFrameRect(x * EFF_EVENT_GS_X_SCALE + EFF_EVENT_GS_X_BIAS, y * EFF_EVENT_GS_Y_SCALE + EFF_EVENT_GS_Y_BIAS, EFF_EVENT_OVERLAY_DEPTH, width * EFF_EVENT_GS_X_SCALE, height * EFF_EVENT_GS_Y_SCALE, fillColor, borderColor)));
-    scene = &kwlnPositionedTextSurface;
-    scene->append(scene, (sdfDrawTag_t *)list);
+    sdfDrawTagLink(list, (dds3PrimFrameRect(x * 0x10 + 0x7000, y * 8 + 0x7900, 0xFF0000, width * 0x10, height * 8, fillColor, borderColor)));
+    scene = &sdfGrOtTable[EFF_DEBUG_TEXT_OT];
+    ((void (*)(sdfGrOt_t *, void *))scene->regFunc)(scene, list);
 }
+
 INCLUDE_SDATA(const s32, "effect/effDebug", D_003BB068);
 
 INCLUDE_SDATA(const s32, "effect/effDebug", D_003BB06C);
