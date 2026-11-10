@@ -112,12 +112,14 @@ Two such arms (`if (k == 1) f(a); else if (k == 2) f(a);`) therefore keep a
 
 Retail shows the shape where arm 1 sets up its own arguments and then `b`s to
 arm 2's single `jal`: only the call (plus whatever follows it) was merged, so
-retail's arm 2 does not end in the call. Something real follows the call
-before the join label (DDS2 `mnuDrawMantraSelectionTransitionNode`: a dead
-`lw $2,16($17)` of `node->next`, the operand of a branch that `jump2` deleted
-after life analysis). A `||`-merged condition is not the retail shape there: it
-removes 12 words. No natural source statement that produces the trailing read
-has been found.
+retail's arm 2 does not end in the call. Something follows the call before the
+join label. DDS2 `mnuDrawMantraSelectionTransitionNode` retains a trailing
+`node->next` read from the copied shape of DDS1's live bracket animation. The
+corresponding guarded frame-ratio calculations die in `13.life`; their guards
+survive allocation and `27.jump2` and disappear in `29.dbr`, leaving the
+native read and early completion test. This uses the narrowly documented
+copied-shape dead-code exception, not an arbitrary dummy read or calculation.
+See [the qualified reconstruction](matching/mantra-selection-transition.md).
 
 ### Which arm hosts a cross-jumped tail
 

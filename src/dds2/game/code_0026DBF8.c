@@ -776,7 +776,7 @@ void mnuDrawMantraCostIconOffset(u32 unusedX, u32 unusedY, u32 depth, u32 record
 }
 
 extern s32 mnuDrawMantraSelectionTransitionNode(s32 x, s32 y, s32 depth, MantraDisplayNode *node, s32 nodeIndex, s32 drawArg);
-#ifdef NON_MATCHING
+
 #include "sdf_trig.h"
 #include "mnu_mantra_draw.h"
 
@@ -797,7 +797,6 @@ s32 mnuDrawMantraSelectionTransitionNode(s32 x, s32 y, s32 depth, MantraDisplayN
     s32 frame = node->frame;
     s32 fade;
     f32 ratio;
-    f32 wave;
 
     if (frame < 7) {
         ratio = (f32)frame / 6.0f;
@@ -820,6 +819,19 @@ s32 mnuDrawMantraSelectionTransitionNode(s32 x, s32 y, s32 depth, MantraDisplayN
             mnuDrawMantraCostIcon(x, y, depth, node->toValue, 0x80, drawArg);
         }
     }
+    /* DDS2 retains the next-node read and frame < 11 comparison from the
+     * shape of DDS1's live bracket phase. These two copied frame ratios are
+     * dead before the later phases: life deletes the arithmetic, and reorg
+     * removes their guards after allocation while retaining those residuals.
+     * This is a copied-shape reconstruction, not recovered original source.
+     * See docs/matching/mantra-selection-transition.md. */
+    if (node->next == NULL) {
+        if (frame < 7) {
+            ratio = (f32)frame / 6.0f;
+        } else if (frame < 11) {
+            ratio = (f32)(17 - frame) / 10.0f;
+        }
+    }
     if (frame < 7) {
         ratio = (f32)frame / 6.0f;
         if (node->transitionKind == 1) {
@@ -832,11 +844,14 @@ s32 mnuDrawMantraSelectionTransitionNode(s32 x, s32 y, s32 depth, MantraDisplayN
     }
     if (frame >= 4) {
         if (frame < 9) {
-            wave = sdfSin((f32)(frame - 3) / 6.0f * 3.14159265f);
+            /* Reuse the phase ratio for the sine input and then its amplitude;
+             * each value is consumed before the next assignment. */
+            ratio = (f32)(frame - 3) / 6.0f;
+            ratio = sdfSin(ratio * 3.14159265f);
             if (node->transitionKind == 1) {
-                mnuDrawMantraSprite(x, y, depth, (s32)(wave * 128.0f), 0x26, 0, drawArg);
+                mnuDrawMantraSprite(x, y, depth, (s32)(ratio * 128.0f), 0x26, 0, drawArg);
             } else if (node->transitionKind == 2) {
-                mnuDrawMantraSprite(x, y, depth, (s32)(wave * 128.0f), 0x28, 0, drawArg);
+                mnuDrawMantraSprite(x, y, depth, (s32)(ratio * 128.0f), 0x28, 0, drawArg);
             }
         }
     }
@@ -846,9 +861,7 @@ s32 mnuDrawMantraSelectionTransitionNode(s32 x, s32 y, s32 depth, MantraDisplayN
     }
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "game/code_0026DBF8", mnuDrawMantraSelectionTransitionNode);
-#endif
+
 
 MantraDisplayNode *mnuAllocateDisplayListNode(void) {
     MantraDisplayNode *node = (MantraDisplayNode *)sdfChipAllocDirect(sizeof(MantraDisplayNode));
