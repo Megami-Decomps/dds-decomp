@@ -11161,11 +11161,12 @@
 0x004391E4	sdfSndCmdTailIndex	inferred	SMT3HD data name via SLUS_209.11 0x00552134, 3 agreeing references; was sdfSndCmdTailIndex
 0x004391E8	sdfSndCmdBuf	inferred	SMT3HD data name via SLUS_209.11 0x00552138, 2 agreeing references; was sdfSndCmdBuf
 0x004391F0	sifRpcServerSema	inferred	SMT3HD data name via SLUS_209.11 0x00552140, 6 agreeing references; was sifRpcServerSema
+0x004391F4	sdfIpuDoneFrame	inferred	SMT3HD name via SLUS_209.11 0x00552144, sdf/sdfIpu SMT3 rename; was D_004391F4
 0x004391F8	sdfIpuTaskLink	inferred	SMT3HD data name via SLUS_209.11 0x00552148, 2 agreeing references; was sdfIpuTaskLink
 0x004391FC	sdfFromIpuDmacHandlerHandle	inferred	SMT3HD name via SLUS_209.11 0x0055214C, sdfIpu reference; was D_004391FC
 0x00439200	sdfToIpuDmacHandlerHandle	inferred	SMT3HD name via SLUS_209.11 0x00552150, sdfIpu reference; was D_00439200
 0x00439204	sdfCurrIpuDecodeCb	inferred	SMT3HD data name via SLUS_209.11 0x00552154, 7 agreeing references; was sdfCurrIpuDecodeCb
-0x00439208	sdfIpuInputStream	inferred	The stream frame node the IPU input DMA serves. DDS1 twin 0x003BDAA8.
+0x00439208	sdfIpuPendingCb	inferred	SMT3HD name via SLUS_209.11 0x00552158, sdf/sdfIpu SMT3 rename; was sdfIpuInputStream
 0x0043920C	sdfIpuQueueHead	inferred	SMT3HD data name via SLUS_209.11 0x0055215C, 4 agreeing references; was sdfIpuQueueHead
 0x00439210	sdfIpuQueueTail	inferred	SMT3HD data name via SLUS_209.11 0x00552160, 3 agreeing references; was sdfIpuQueueTail
 0x00439214	sdfIpuDecodeThId	inferred	SMT3HD name via SLUS_209.11 0x00552164, sdfIpu reference; was D_00439214

@@ -242,7 +242,7 @@ extern void sdfImageSetChainReleaseMem(s32);
 
 extern void sdfGsMemFreeDelayed(sdfGsMemSlice_t *aHandle);
 
-#define D_00552158 sdfIpuInputStream
+#define D_00552158 sdfIpuPendingCb
 /* DDS keeps its own name: the shorter one shifts DDS1 code_001DEFE0. */
 #define sdfIpuRunDecode sdfAdvanceStreamPlayback
 extern sdfIpuDecodeCb_t *D_00552158;
@@ -256,7 +256,7 @@ extern s32 sdfIpuDecodeThId;
 
 extern s32 iWakeupThread(s32 threadId);
 
-#define D_00552144 D_004391F4
+#define D_00552144 sdfIpuDoneFrame
 extern s32 D_00552144;
 
 u32 sdfTexGetPixelAddr(sdfTexHandle_t *aHandle);
