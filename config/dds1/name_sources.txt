@@ -391,10 +391,10 @@
 0x0010D768	scrCommand_RND	inferred	SMT3HD name via SLUS_209.11 0x0010B908, reloc-identical; was scrCommandStoreRandomCondition
 0x0010D7A0	scrCommand_SYNC	inferred	SMT3HD name via SLUS_209.11 0x0010B940, shared-hash-in-run; was scrCommandWaitForTimerStart
 0x0010D7C0	scrCommand_WAIT	inferred	SMT3HD name via SLUS_209.11 0x0010B960, reloc-identical; was scrCommandWaitForTimerLimit
-0x0010D808	scrCommandPrintInteger	inferred	prints integer script parameter with PUT diagnostic [names_reviewed5.tsv]
-0x0010D838	scrCommandPrintString	inferred	prints string script parameter via diagnostic formatter [names_reviewed5.tsv]
-0x0010D868	bfWaitCbScreenFadeA	inferred	legacy BFWaitCb_ScreenFadeModeA: wait callback for screen-fade mode A
-0x0010D908	bfWaitCbScreenFadeB	inferred	legacy BFWaitCb_ScreenFadeModeB: wait callback for screen-fade mode B
+0x0010D808	scrCommand_PUT	inferred	SMT3HD name via SLUS_209.11 0x0010B9A8, script/scrCommonCommand SMT3 rename; was scrCommandPrintInteger
+0x0010D838	scrCommand_PUTS	inferred	SMT3HD name via SLUS_209.11 0x0010B9F0, script/scrCommonCommand SMT3 rename; was scrCommandPrintString
+0x0010D868	scrCommand_FADE_IN	inferred	SMT3HD name via SLUS_209.11 0x0010BA38, script/scrCommonCommand SMT3 rename; was bfWaitCbScreenFadeA
+0x0010D908	scrCommand_FADE_OUT	inferred	SMT3HD name via SLUS_209.11 0x0010BAD8, script/scrCommonCommand SMT3 rename; was bfWaitCbScreenFadeB
 0x0010D9A8	scrCommandFadeBackgroundOut	inferred	starts background fade-out at timer zero [names_reviewed5.tsv]
 0x0010D9E8	scrCommandFadeBackgroundIn	inferred	starts background fade-in at timer zero [names_reviewed5.tsv]
 0x0010DA28	scrCommand_SEL_JMP	inferred	SMT3HD name via SLUS_209.11 0x0010BB78, reloc-identical; was scrCommandJumpToIndexedLabel
@@ -402,7 +402,7 @@
 0x0010DAB8	scrCommand_PAD_PRESS	inferred	SMT3HD name via SLUS_209.11 0x0010BC08, reloc-identical; was scrCommandTestIndexedCodeBit
 0x0010DAF0	scrCommand_PAD_ACT	inferred	SMT3HD name via SLUS_209.11 0x0010BC40, reloc-identical; was scrCommandStartPadMotor
 0x0010DB48	scrCommand_SET_FOVY	inferred	SMT3HD name via SLUS_209.11 0x0010BC98, reloc-identical; was scrCommandSetCameraFov
-0x0010DBD0	bfWaitCbCreateTask	inferred	legacy BFWaitCb_CreateTaskFromSectionIndex: creates a BF task from a context section slot + index
+0x0010DBD0	scrCommand_SCR_RUN	inferred	SMT3HD name via SLUS_209.11 0x0010BD20, script/scrCommonCommand SMT3 rename; was bfWaitCbCreateTask
 0x0010DC80	scrCommand_SCR_KILL	inferred	SMT3HD name via SLUS_209.11 0x0010BDE0, reloc-identical; was scrCommandDestroyRegisteredTask
 0x0010DCC8	scrCommand_SCR_WAIT	inferred	SMT3HD name via SLUS_209.11 0x0010BE28, reloc-identical; was scrCommandWaitForTaskRemoval
 0x0010DCF0	scrCommand_SCR_STAT	inferred	SMT3HD name via SLUS_209.11 0x0010BE50, shared-hash-in-run; was scrCommandStoreTaskPresence
@@ -451,8 +451,8 @@
 0x0010ECF0	scrCommand_MFILTER_SWAP	inferred	SMT3HD name via SLUS_209.11 0x0010CE50, shared-hash-in-run; was scrCmdSetTexturedSquareTransitionMode
 0x0010ED18	scrCommand_MFILTER_ON	inferred	SMT3HD name via SLUS_209.11 0x0010CE78, shared-hash-in-run; was scrCmdBeginTexturedSquareActivation
 0x0010ED40	scrCommand_MFILTER_OFF	inferred	SMT3HD name via SLUS_209.11 0x0010CEA0, shared-hash-in-run; was scrCmdBeginTexturedSquareDeactivation
-0x0010ED68	scrCommandResetDrawEffects	inferred	clears draw transitions and effect enable flags [names_reviewed5.tsv]
-0x0010EDB8	scrCommandResetFieldEffects	inferred	disables draw effects and resets field sway and fade [names_reviewed5.tsv]
+0x0010ED68	scrCommand_BLUR_ALLOFF	inferred	SMT3HD name via SLUS_209.11 0x0010CEC8, script/scrCommonCommand SMT3 rename; was scrCommandResetDrawEffects
+0x0010EDB8	scrCommand_FILTER_ALLOFF	inferred	SMT3HD name via SLUS_209.11 0x0010CF10, script/scrCommonCommand SMT3 rename; was scrCommandResetFieldEffects
 0x0010EE08	scrCommandClearProcessControlFlag	inferred	Writes zero to the script process control word used by the subsequent test command. [names_reviewed6.tsv]
 0x0010EE18	scrCommandSetProcessControlFlag	inferred	Writes one to the same script process control word read by the adjacent test command. [names_reviewed6.tsv]
 0x0010EE30	scrCommandIsProcessControlFlagClear	inferred	Tests whether the shared script process control word equals zero. [names_reviewed6.tsv]

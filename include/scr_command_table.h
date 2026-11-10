@@ -21,8 +21,8 @@ s32 sndOpSetTrackDefaultVolumePan(void);
 s32 sndOpStartTrackFromScript(void);
 s32 scrCommand_SYNC(void);
 s32 scrCommand_WAIT(void);
-s32 bfWaitCbScreenFadeA(void);
-s32 bfWaitCbScreenFadeB(void);
+s32 scrCommand_FADE_IN(void);
+s32 scrCommand_FADE_OUT(void);
 s32 scrCommand_SEL_JMP(void);
 s32 evtCommandAddEffectUnitToWorld(void);
 s32 evtCommand_CAM_PATH_MOVE(void);
@@ -40,7 +40,7 @@ s32 scrCommandFadeBackgroundIn(void);
 s32 evtCommandStartPolygonMovie(void);
 s32 evtCommandClearPolygonMovieFlag(void);
 s32 evtCommand_FIELD_CLS_STOP(void);
-s32 scrCommandPrintInteger(void);
+s32 scrCommand_PUT(void);
 s32 evtCommand_GET_MOON(void);
 s32 evtCommand_UNIT_CLS(void);
 s32 evtCommand_GET_MOON16(void);
@@ -71,7 +71,7 @@ s32 btlScriptBeginSceneTransition(void);
 s32 itfMesMng_SEL_SELNO(void);
 s32 scrCommand_BLUR2_ON(void);
 s32 scrCommand_BLUR2_OFF(void);
-s32 scrCommandResetDrawEffects(void);
+s32 scrCommand_BLUR_ALLOFF(void);
 s32 evtCommand_MODEL_EXWAIT(void);
 s32 sndOpSendTitleAudioCommand(void);
 s32 evtCommand_RTRN_TITLE(void);
@@ -115,7 +115,7 @@ s32 fldCommand_ENCOUNT_ON(void);
 s32 fldCommand_ENCOUNT_OFF(void);
 s32 scrCommandAdjustItemQuantity(void);
 s32 itfMesMngSetVarScr(void);
-s32 scrCommandPrintString(void);
+s32 scrCommand_PUTS(void);
 s32 evtOpSetUnitParams5(void);
 s32 evtCommand_MODEL_WAIT_HOKAN(void);
 s32 evtCommand_CAM_CREATE(void);
@@ -154,7 +154,7 @@ s32 evtOpSetUnitParams6(void);
 s32 evtCommand_MODEL_WAIT_EXMOT(void);
 s32 evtCommand_CALL_NEXT(void);
 s32 evtCommand_CALL_FIELD2(void);
-s32 scrCommandResetFieldEffects(void);
+s32 scrCommand_FILTER_ALLOFF(void);
 s32 evtCommand_EFFECT_LOAD(void);
 s32 evtCommand_EFFECT_CLS(void);
 s32 evtCommand_EFFECT_POS_XYZ(void);
@@ -166,7 +166,7 @@ s32 evtCommand_EFFECT_LINK2(void);
 s32 evtCommand_EFFECT_UNLINK(void);
 s32 fldCmdFocusCameraOnObject(void);
 s32 fldUpdateLookAtSegment(void);
-s32 bfWaitCbCreateTask(void);
+s32 scrCommand_SCR_RUN(void);
 s32 scrCommand_SCR_KILL(void);
 s32 scrCommand_SCR_WAIT(void);
 s32 scrCommand_SCR_STAT(void);
@@ -527,8 +527,8 @@ s32 fldCmdSetStateFlag(void);
     { sndOpStartTrackFromScript, 1 },                 \
     { scrCommand_SYNC, 0 },                           \
     { scrCommand_WAIT, 1 },                           \
-    { bfWaitCbScreenFadeA, 2 },                       \
-    { bfWaitCbScreenFadeB, 2 },                       \
+    { scrCommand_FADE_IN, 2 },                       \
+    { scrCommand_FADE_OUT, 2 },                       \
     { scrCommand_SEL_JMP, 8 },                        \
     { evtCommandAddEffectUnitToWorld, 1 },            \
     { evtCommand_CAM_PATH_MOVE, 2 },                  \
@@ -548,7 +548,7 @@ s32 fldCmdSetStateFlag(void);
     { evtCommandStartPolygonMovie, 2 },               \
     { evtCommandClearPolygonMovieFlag, 1 },           \
     { evtCommand_FIELD_CLS_STOP, 0 },                 \
-    { scrCommandPrintInteger, 1 },                    \
+    { scrCommand_PUT, 1 },                    \
     { evtCommand_GET_MOON, 0 },                       \
     { evtCommand_UNIT_CLS, 0 },                       \
     { evtCommand_GET_MOON16, 0 },                     \
@@ -579,7 +579,7 @@ s32 fldCmdSetStateFlag(void);
     { itfMesMng_SEL_SELNO, 1 },                       \
     { scrCommand_BLUR2_ON, 1 },                       \
     { scrCommand_BLUR2_OFF, 1 },                      \
-    { scrCommandResetDrawEffects, 0 },                \
+    { scrCommand_BLUR_ALLOFF, 0 },                \
     { evtCommand_MODEL_EXWAIT, 2 },                   \
     { sndOpSendTitleAudioCommand, 0 },                \
     { evtCommand_RTRN_TITLE, 0 },                     \
@@ -626,7 +626,7 @@ s32 fldCmdSetStateFlag(void);
     { fldCommand_ENCOUNT_OFF, 0 },                    \
     { scrCommandAdjustItemQuantity, 2 },              \
     { itfMesMngSetVarScr, 3 },                        \
-    { scrCommandPrintString, 1 },                     \
+    { scrCommand_PUTS, 1 },                     \
     { evtOpSetUnitParams5, 5 },                       \
     { evtCommand_MODEL_WAIT_HOKAN, 3 },               \
     { evtCommand_CAM_CREATE, 0 },                     \
@@ -665,7 +665,7 @@ s32 fldCmdSetStateFlag(void);
     { evtCommand_MODEL_WAIT_EXMOT, 3 },               \
     { evtCommand_CALL_NEXT, 3 },                      \
     { evtCommand_CALL_FIELD2, 2 },                    \
-    { scrCommandResetFieldEffects, 0 },               \
+    { scrCommand_FILTER_ALLOFF, 0 },               \
     { evtCommand_EFFECT_LOAD, 1 },                    \
     { evtCommand_EFFECT_CLS, 1 },                     \
     { evtCommand_EFFECT_POS_XYZ, 4 },                 \
@@ -677,7 +677,7 @@ s32 fldCmdSetStateFlag(void);
     { evtCommand_EFFECT_UNLINK, 1 },                  \
     { fldCmdFocusCameraOnObject, 1 },                 \
     { fldUpdateLookAtSegment, 0 },                    \
-    { bfWaitCbCreateTask, 2 },                        \
+    { scrCommand_SCR_RUN, 2 },                        \
     { scrCommand_SCR_KILL, 1 },                       \
     { scrCommand_SCR_WAIT, 1 },                       \
     { scrCommand_SCR_STAT, 1 },                       \
@@ -1073,8 +1073,8 @@ s32 sndOpSetTrackDefaultVolumePan(void);
 s32 sndOpStartTrackFromScript(void);
 s32 scrCommand_SYNC(void);
 s32 scrCommand_WAIT(void);
-s32 bfWaitCbScreenFadeA(void);
-s32 bfWaitCbScreenFadeB(void);
+s32 scrCommand_FADE_IN(void);
+s32 scrCommand_FADE_OUT(void);
 s32 scrCommand_SEL_JMP(void);
 s32 evtCommandAddEffectUnitToWorld(void);
 s32 evtCommand_CAM_PATH_MOVE(void);
@@ -1094,7 +1094,7 @@ s32 btlScriptSetChoiceFlag(void);
 s32 evtCommandStartPolygonMovie(void);
 s32 evtCommandClearPolygonMovieFlag(void);
 s32 evtCommand_FIELD_CLS_STOP(void);
-s32 scrCommandPrintInteger(void);
+s32 scrCommand_PUT(void);
 s32 evtCommand_GET_MOON(void);
 s32 evtCommand_UNIT_CLS(void);
 s32 evtCommand_GET_MOON16(void);
@@ -1125,7 +1125,7 @@ s32 btlScriptBeginSceneTransition(void);
 s32 itfMesMng_SEL_SELNO(void);
 s32 scrCommand_BLUR2_ON(void);
 s32 scrCommand_BLUR2_OFF(void);
-s32 scrCommandResetDrawEffects(void);
+s32 scrCommand_BLUR_ALLOFF(void);
 s32 evtCommand_MODEL_EXWAIT(void);
 s32 sndOpSendTitleAudioCommand(void);
 s32 evtCommand_RTRN_TITLE(void);
@@ -1172,7 +1172,7 @@ s32 fldCommand_ENCOUNT_ON(void);
 s32 fldCommand_ENCOUNT_OFF(void);
 s32 scrCommandAdjustItemQuantity(void);
 s32 itfMesMngSetVarScr(void);
-s32 scrCommandPrintString(void);
+s32 scrCommand_PUTS(void);
 s32 evtOpSetUnitParams5(void);
 s32 evtCommand_MODEL_WAIT_HOKAN(void);
 s32 evtCommand_CAM_CREATE(void);
@@ -1211,7 +1211,7 @@ s32 evtOpSetUnitParams6(void);
 s32 evtScriptSetUnitTableValueAndReset(void);
 s32 evtCommand_CALL_NEXT(void);
 s32 evtCommand_CALL_FIELD2(void);
-s32 scrCommandResetFieldEffects(void);
+s32 scrCommand_FILTER_ALLOFF(void);
 s32 evtCommand_EFFECT_LOAD(void);
 s32 evtCommand_EFFECT_CLS(void);
 s32 evtCommand_EFFECT_POS_XYZ(void);
@@ -1223,7 +1223,7 @@ s32 evtCommand_EFFECT_LINK2(void);
 s32 evtCommand_EFFECT_UNLINK(void);
 s32 fldCmdFocusCameraOnObject(void);
 s32 fldUpdateLookAtSegment(void);
-s32 bfWaitCbCreateTask(void);
+s32 scrCommand_SCR_RUN(void);
 s32 scrCommand_SCR_KILL(void);
 s32 scrCommand_SCR_WAIT(void);
 s32 scrCommand_SCR_STAT(void);
@@ -1614,8 +1614,8 @@ s32 fldCmdSetStateFlag(void);
     { sndOpStartTrackFromScript, 1 },                   \
     { scrCommand_SYNC, 0 },                             \
     { scrCommand_WAIT, 1 },                             \
-    { bfWaitCbScreenFadeA, 2 },                         \
-    { bfWaitCbScreenFadeB, 2 },                         \
+    { scrCommand_FADE_IN, 2 },                         \
+    { scrCommand_FADE_OUT, 2 },                         \
     { scrCommand_SEL_JMP, 8 },                          \
     { evtCommandAddEffectUnitToWorld, 1 },              \
     { evtCommand_CAM_PATH_MOVE, 2 },                    \
@@ -1635,7 +1635,7 @@ s32 fldCmdSetStateFlag(void);
     { evtCommandStartPolygonMovie, 2 },                 \
     { evtCommandClearPolygonMovieFlag, 1 },             \
     { evtCommand_FIELD_CLS_STOP, 0 },                   \
-    { scrCommandPrintInteger, 1 },                      \
+    { scrCommand_PUT, 1 },                      \
     { evtCommand_GET_MOON, 0 },                         \
     { evtCommand_UNIT_CLS, 0 },                         \
     { evtCommand_GET_MOON16, 0 },                       \
@@ -1666,7 +1666,7 @@ s32 fldCmdSetStateFlag(void);
     { itfMesMng_SEL_SELNO, 1 },                         \
     { scrCommand_BLUR2_ON, 1 },                         \
     { scrCommand_BLUR2_OFF, 1 },                        \
-    { scrCommandResetDrawEffects, 0 },                  \
+    { scrCommand_BLUR_ALLOFF, 0 },                  \
     { evtCommand_MODEL_EXWAIT, 2 },                     \
     { sndOpSendTitleAudioCommand, 0 },                  \
     { evtCommand_RTRN_TITLE, 0 },                       \
@@ -1713,7 +1713,7 @@ s32 fldCmdSetStateFlag(void);
     { fldCommand_ENCOUNT_OFF, 0 },                      \
     { scrCommandAdjustItemQuantity, 2 },                \
     { itfMesMngSetVarScr, 3 },                          \
-    { scrCommandPrintString, 1 },                       \
+    { scrCommand_PUTS, 1 },                       \
     { evtOpSetUnitParams5, 5 },                         \
     { evtCommand_MODEL_WAIT_HOKAN, 3 },                 \
     { evtCommand_CAM_CREATE, 0 },                       \
@@ -1752,7 +1752,7 @@ s32 fldCmdSetStateFlag(void);
     { evtScriptSetUnitTableValueAndReset, 3 },          \
     { evtCommand_CALL_NEXT, 3 },                        \
     { evtCommand_CALL_FIELD2, 2 },                      \
-    { scrCommandResetFieldEffects, 0 },                 \
+    { scrCommand_FILTER_ALLOFF, 0 },                 \
     { evtCommand_EFFECT_LOAD, 1 },                      \
     { evtCommand_EFFECT_CLS, 1 },                       \
     { evtCommand_EFFECT_POS_XYZ, 4 },                   \
@@ -1764,7 +1764,7 @@ s32 fldCmdSetStateFlag(void);
     { evtCommand_EFFECT_UNLINK, 1 },                    \
     { fldCmdFocusCameraOnObject, 1 },                   \
     { fldUpdateLookAtSegment, 0 },                      \
-    { bfWaitCbCreateTask, 2 },                          \
+    { scrCommand_SCR_RUN, 2 },                          \
     { scrCommand_SCR_KILL, 1 },                         \
     { scrCommand_SCR_WAIT, 1 },                         \
     { scrCommand_SCR_STAT, 1 },                         \
