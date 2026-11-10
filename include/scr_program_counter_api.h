@@ -5,9 +5,9 @@
 
 typedef s32 ScrLabelIndex;
 
-ScrProgramCounter scrGetProcedureCodeAddress(ScrProcedureIndex procedureIndex);
-ScrProgramCounter scrGetLabelCodeAddress(ScrLabelIndex labelIndex);
-ScrProgramCounter scrGetCodePointer(void);
-void scrSetCodePointer(ScrProgramCounter programCounter);
+s32 scrGetProcedureCodeAddress(ScrProcedureIndex procedureIndex);
+s32 scrGetLabelCodeAddress(ScrLabelIndex labelIndex);
+s32 scrGetCodePointer(void);
+void scrSetCodePointer(s32 programCounter);
 
 #endif /* DDS_SCR_PROGRAM_COUNTER_API_H */

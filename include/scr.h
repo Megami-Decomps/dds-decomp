@@ -234,53 +234,20 @@ enum scr_result
 /* DDS1/2 additions with no SMT3 counterpart in this header. */
 struct ItfMesSub;
 
-typedef s32 ScrProgramCounter;
-typedef s32 ScrGlobalIntegerIndex;
-typedef s32 ScrGlobalFloatIndex;
-typedef s32 ScrStackDepth;
-typedef s32 ScrStackValueIndex;
-
 #define SCR_STACK_RETURN_VALUE_SLOT 27
 
-extern scrProcessWork_s *nowpwork;
 extern scrProcessWork_s *scrHandleFirst;
 extern scrProcessWork_s *scrHandleLast;
 
 scrProcessWork_s *scrGetScriptHandle(void);
 scrProcessWork_s *scrSearchScriptName(char *scriptname);
-void *scrGetUserData(dds3ProcessID_t *id);
 void scrSetUserData(dds3ProcessID_t *id, void *p);
-void scrScriptShutdown(dds3ProcessID_t *id);
 s32 scrRunScript(scrProcessWork_s *h);
 s32 scrScriptProcess(dds3ProcessID_t *id);
 s32 scrTraceCode(scrProcessWork_s *pwork);
 void scrPrintProcedureEnd(scrProcessWork_s *pw);
 scrProcessWork_s *scrCreateTaskWithDefaultOption(void *data);
-void PushInt(scrProcessWork_s *pwork, s32 data);
-void PushFloat(scrProcessWork_s *pw, f32 value);
-void PushStr(scrProcessWork_s *pwork, u8 *data);
-void PushRet(scrProcessWork_s *pwork, s32 cp);
-s32 PopInt(scrProcessWork_s *pwork);
-f32 PopFloat(scrProcessWork_s *pwork);
 /* Return the procedure-table index for an exact name match, or NOT_FOUND. */
 s32 scrSearchProcedureName(void *scrdata, char *procname);
-/* Script integer register 210 (dds3GlobalWork_t +0x388): set/clear by the process-control script commands. */
-#define SCR_PROCESS_CONTROL_FLAG_REGISTER ((ScrGlobalIntegerIndex)210)
-
-/* XYZ float plus integer W operand (0x10); DDS1/2 script/scrCommonCommand.c. */
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-    s32 w;
-} ScrVecW;
-
-/* Four-float vector operand (0x10); DDS1/2 script/scrCommonCommand.c. */
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-    f32 w;
-} ScrVec4;
 
 #endif /* SCR_H */
