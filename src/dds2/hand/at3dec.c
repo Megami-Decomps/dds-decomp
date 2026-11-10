@@ -27,6 +27,12 @@ typedef struct at3decGainPoint_t
 
 #define AT3DEC_HISTORY 46 /* samples of QMF history kept after the 1024 outputs */
 
+/* The QMF history words carried from the end of a band to its start. */
+typedef struct at3decHistory_t
+{
+    s32 w[23];
+} at3decHistory_t;
+
 typedef struct at3decChannel_t
 {
     s32 band[4][0x198];               /* 0x0000: per QMF band: 23 words of history, then samples */
@@ -121,14 +127,19 @@ void at3decInitDefaults(s32 nch, s32 format, s32 unit, at3decWork_t *w);
 
 /* mode: 0, 1 and 5 up stereo (2 x 0xC0 bytes), 2 joint stereo (2 x 0x60),
  * 3 mono 0xC0, 4 mono 0x60. */
-#ifdef NON_MATCHING
 void at3decReset(at3decState_t *state)
 {
+    at3decWork_t *w;
     s32 nch;
     s32 format;
     s32 unit;
 
     switch (state->mode) {
+    case 1:
+        nch = 2;
+        format = 2;
+        unit = 0xC0;
+        break;
     case 2:
         nch = 2;
         format = 0x12;
@@ -150,52 +161,53 @@ void at3decReset(at3decState_t *state)
         unit = 0xC0;
         break;
     }
-    memset(state->work, 0, 0x68CA);
-    at3decInitDefaults(nch, format, unit, state->work);
+    w = state->work;
+    memset(w, 0, 0x68CA);
+    at3decInitDefaults(nch, format, unit, w);
 }
-#else
-INCLUDE_ASM(const s32, "hand/at3dec", at3decReset);
-#endif
 
 /* Modes 1 and 2 write 4 x (256 left, 256 right) samples; the others write
  * the first channel's 1024. Returns 0, or -1 for a bad frame. */
-#ifdef NON_MATCHING
 s32 at3decDecodeFrame(at3decState_t *state)
 {
     at3decWork_t *w = state->work;
-    s16 *out = state->pcm;
-    s16 *left;
-    s16 *right;
+    s32 right;
+    s16 *out;
+    s16 *out2;
+    s16 *l;
+    s16 *r;
     s32 i;
+    s32 k;
 
     w->atten = state->atten;
     w->stream = state->stream;
+    right = state->mode - 1 < 2;
     if (at3decDecodeChannels(w) == -1) {
         return -1;
     }
+    k = 0;
+    out = state->pcm;
+    out2 = out + 256;
     if (state->mode - 1 < 2) {
-        left = w->chan[0].pcm;
-        right = w->chan[1].pcm;
-        for (i = 0; i < 4; i++) {
-            at3decCopyBlock(left, out);
-            at3decCopyBlock(right, out + 0x100);
-            left += 0x100;
-            right += 0x100;
-            out += 0x200;
+        l = w->chan[0].pcm;
+        r = w->chan[right].pcm;
+        for (i = 4; i != 0; i--) {
+            at3decCopyBlock(l, out);
+            l += 256;
+            out += 512;
+            at3decCopyBlock(r, out2);
+            out2 += 512;
+            r += 256;
         }
     } else {
-        left = w->chan[0].pcm;
-        for (i = 0; i < 4; i++) {
-            at3decCopyBlock(left, out);
-            left += 0x100;
-            out += 0x100;
+        for (i = 4; i != 0; i--) {
+            at3decCopyBlock(w->chan[0].pcm + k, out);
+            k += 256;
+            out += 256;
         }
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "hand/at3dec", at3decDecodeFrame);
-#endif
 
 /* Per band, the 2x2 weights are interpolated over the first 8 samples from
  * the previous frame's to this frame's. */
@@ -472,47 +484,45 @@ INCLUDE_ASM(const s32, "hand/at3dec", at3decApplyGainControl);
 /* QMF synthesis of the four band buffers into the 1024 output samples:
  * sum and difference of bands 0/1 and 3/2, the two half-band filters, then
  * the 8-output FIR in place. */
-#ifdef NON_MATCHING
 void at3decSynthesizeQmf(at3decChannel_t *chan)
 {
-    s16 buf[0x460] __attribute__((aligned(16)));
-    s16 *diff = buf;
-    s16 *sum = buf + 0x230;
-    s16 *out;
-    s16 *p;
+    s16 buf[0x460];
+    s16 *out = &chan->pcm[AT3DEC_HISTORY];
+    s16 *diff;
+    s16 *sum;
     s32 i;
 
-    for (i = 0; i < 35; i++) {
-        at3decSplitSumDifference(&chan->band[0][i * 8], &chan->band[1][i * 8], diff + i * 8, sum + i * 8);
-        at3decSplitSumDifference(&chan->band[3][i * 8], &chan->band[2][i * 8], diff + 0x118 + i * 8,
-                                 sum + 0x118 + i * 8);
+    for (i = 0; i < 0x118; i += 8) {
+        at3decSplitSumDifference(&chan->band[0][i], &chan->band[1][i], &buf[i], &buf[0x230 + i]);
+        at3decSplitSumDifference(&chan->band[3][i], &chan->band[2][i], &buf[0x118 + i], &buf[0x348 + i]);
     }
-    out = &chan->pcm[AT3DEC_HISTORY];
-    for (i = 0; i < 32; i++) {
-        at3decSynthesizeHalfBand(out, diff + i * 8, 0);
-        at3decSynthesizeHalfBand(out + 2, sum + i * 8, 1);
-        out += 0x20;
-    }
-    for (p = chan->pcm; p < &chan->pcm[1024]; p += 8) {
-        at3decFilterOutput(p);
-    }
+    diff = buf;
+    sum = buf + 0x230;
+    do {
+        at3decSynthesizeHalfBand(out, diff, 0);
+        out += 2;
+        diff += 8;
+        at3decSynthesizeHalfBand(out, sum, 1);
+        out += 30;
+        sum += 8;
+    } while (out < &chan->pcm[AT3DEC_HISTORY + 1024]);
+    out = chan->pcm;
+    do {
+        at3decFilterOutput(out);
+        out += 8;
+    } while (out < &chan->pcm[1024]);
 }
-#else
-INCLUDE_ASM(const s32, "hand/at3dec", at3decSynthesizeQmf);
-#endif
 
 /* nbits plus the bit offset within the byte must not exceed 16. */
-#ifdef NON_MATCHING
 s32 at3decPeekBits(s32 nbits, at3decWork_t *w)
 {
+    s32 mask = (1 << nbits) - 1;
     s32 pos = w->bitPos;
     u8 *p = w->stream + (pos >> 3);
 
-    return ((p[0] << 8 | p[1]) >> (16 - (nbits + (pos & 7)))) & ((1 << nbits) - 1);
+    nbits += pos & 7;
+    return ((p[0] << 8 | p[1]) >> (16 - nbits)) & mask;
 }
-#else
-INCLUDE_ASM(const s32, "hand/at3dec", at3decPeekBits);
-#endif
 
 s32 at3decReadBits(s32 nbits, at3decWork_t *w)
 {
@@ -687,28 +697,19 @@ INCLUDE_ASM(const s32, "hand/at3dec", at3decDecodeSpectrum);
 
 /* A silent band: carry the history down and window out the pending overlap
  * half of the band buffer, clearing it. */
-#ifdef NON_MATCHING
 void at3decCarrySilentBand(at3decChannel_t *chan, s32 band)
 {
-    s32 *b = chan->band[band];
-    s32 *src = b + 0x117;
-    s32 *dst = b + 0x96;
     s32 i;
 
-    memcpy(b, b + 0x100, 0x5C);
+    *(at3decHistory_t *)&chan->band[band][0] = *(at3decHistory_t *)&chan->band[band][0x100];
     for (i = 0; i < 0x80; i++) {
-        s32 v = *src;
+        s32 v = chan->band[band][0x117 + i];
 
-        *dst = v >> 4;
-        *src = 0;
-        src[-0x80] = ((v >> 14) * at3decFallingWindow[i]) >> 5;
-        src++;
-        dst--;
+        chan->band[band][0x96 - i] = v >> 4;
+        chan->band[band][0x117 + i] = 0;
+        chan->band[band][0x97 + i] = ((v >> 14) * at3decFallingWindow[i]) >> 5;
     }
 }
-#else
-INCLUDE_ASM(const s32, "hand/at3dec", at3decCarrySilentBand);
-#endif
 
 /* Parse and reconstruct one channel's sound unit. second is set for the
  * reversed second unit of format 0x12, which starts with a joint stereo
@@ -1050,7 +1051,6 @@ INCLUDE_ASM(const s32, "hand/at3dec", at3decCopyBlock);
 
 /* Unity mixing and a terminating gain point (location 0xFF, level 4) at the
  * head of every band's gain table. */
-#ifdef NON_MATCHING
 void at3decInitDefaults(s32 nch, s32 format, s32 unit, at3decWork_t *w)
 {
     s32 band;
@@ -1070,9 +1070,6 @@ void at3decInitDefaults(s32 nch, s32 format, s32 unit, at3decWork_t *w)
     }
     w->prev = w->cur;
 }
-#else
-INCLUDE_ASM(const s32, "hand/at3dec", at3decInitDefaults);
-#endif
 
 INCLUDE_ASM(const s32, "hand/at3dec", func_00352A08);
 

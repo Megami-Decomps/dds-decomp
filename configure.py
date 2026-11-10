@@ -133,6 +133,17 @@ def unit_cflags(version: str) -> dict[str, str]:
     return out
 
 
+def unit_asflags(cflags: str) -> str:
+    """Assembler flags for a unit, as the gcc driver derives them: its -G, and no -g under -g0."""
+    flags = EE_AS_FLAGS.split()
+    for f in cflags.split():
+        if f.startswith("-G"):
+            flags = [x for x in flags if not x.startswith("-G")] + [f]
+        elif f == "-g0":
+            flags = [x for x in flags if x != "-g"]
+    return " ".join(flags)
+
+
 def missing_field_archive_bases(version: str, sources: list[Path]) -> list[Path]:
     """Return the retail LB bases unavailable for the discovered sources."""
 
@@ -524,7 +535,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
         "cc",
         f"cpp -MM -MG -MF $out.d -MT $out -nostdinc {INCLUDES} $cdefs $in && "
         f"{prefix}{CC1} {CC1_DEFINES} {INCLUDES} $cdefs {CC1_FLAGS} $cflags $in -o $out.s && "
-        f"{prefix}{EE_AS} {EE_AS_FLAGS} -o $out $out.s && "
+        f"{prefix}{EE_AS} $asflags -o $out $out.s && "
         f"{sys.executable} tools/production_report.py record-object $in $out",
         description="cc $in",
         depfile="$out.d",
@@ -663,11 +674,11 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                 flags = unit_cflags(version).get(src.relative_to(Path("src") / version).with_suffix("").as_posix(), "")
                 n.build(str(obj), "cc", str(src), implicit=eeasm + ["include/macro.inc", f"config/{version}/cflags.txt", "tools/production_report.py"],
                         implicit_outputs=[str(obj) + ".s", str(obj) + ".proof.json"],
-                        variables={"cdefs": cdefs, "cflags": flags})
+                        variables={"cdefs": cdefs, "cflags": flags, "asflags": unit_asflags(flags)})
                 # objdiff base: the same unit without its INCLUDE_ASM fallbacks, so only C counts.
                 base = Path("build") / version / "base" / src.with_suffix(".o")
                 n.build(str(base), "cc", str(src), implicit=["tools/production_report.py", f"config/{version}/cflags.txt"],
-                        implicit_outputs=[str(base) + ".s", str(base) + ".proof.json"], variables={"cdefs": f"{cdefs} -DSKIP_ASM", "cflags": flags})
+                        implicit_outputs=[str(base) + ".s", str(base) + ".proof.json"], variables={"cdefs": f"{cdefs} -DSKIP_ASM", "cflags": flags, "asflags": unit_asflags(flags)})
                 # objdiff target: splat's full disassembly of this C unit, assembled as-is.
                 full = Path("asm") / version / src.relative_to(Path("src") / version).with_suffix(".s")
                 target = Path("build") / version / "target" / full.with_suffix(".o")
