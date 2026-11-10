@@ -631,7 +631,7 @@ void evtRefreshUnitEndpointWork(evtUnitHandle_t *unit) {
     unit->value = (u32)unit->endpointWork;
 }
 
-void evtSetUnitValueTransition(evtUnitHandle_t *unit, dds3Basic_t *target, s32 duration) {
+void evtLinkLightObjectBasic(evtUnitHandle_t *unit, dds3Basic_t *target, s32 duration) {
     unit->flags |= EVT_UNIT_FLAG_TARGET_TRANSITION;
     unit->previousTransitionTarget = unit->currentTransitionTarget;
     unit->currentTransitionTarget = target;
@@ -648,7 +648,7 @@ void evtSetUnitValueTransition(evtUnitHandle_t *unit, dds3Basic_t *target, s32 d
     }
 }
 
-void evtEndUnitValueTransition(evtUnitHandle_t *unit, s32 duration) {
+void evtUnlinkLightObjectBasic(evtUnitHandle_t *unit, s32 duration) {
     if (unit->currentTransitionTarget != 0) {
         if (duration == 0) {
             unit->flags &= ~EVT_UNIT_FLAG_TARGET_TRANSITION;
@@ -1192,7 +1192,7 @@ extern u8 D_00421B70[];
 
 extern void evtUnitLightOff(evtUnitHandle_t *unit, s32 duration);
 
-extern void evtEndUnitValueTransition(evtUnitHandle_t *unit, s32 duration);
+extern void evtUnlinkLightObjectBasic(evtUnitHandle_t *unit, s32 duration);
 
 extern void datDebugPrintf(const char *fmt, ...);
 
@@ -2582,7 +2582,7 @@ ScrCommandResult evtCommand_MODEL_LIGHT_LINK(void) {
     if (target == NULL) {
         return 1;
     }
-    evtSetUnitValueTransition(unit, target, scrGetIntPara(1));
+    evtLinkLightObjectBasic(unit, target, scrGetIntPara(1));
     return 1;
 }
 
@@ -2594,7 +2594,7 @@ ScrCommandResult evtCommand_MODEL_LIGHT_UNLINK(void) {
     worldObjectKey = scrGetIntPara(0);
     unit = evtGetUnitHandle(worldObjectKey);
     duration = scrGetIntPara(1);
-    evtEndUnitValueTransition(unit, duration);
+    evtUnlinkLightObjectBasic(unit, duration);
     return 1;
 }
 

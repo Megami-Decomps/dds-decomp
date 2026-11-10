@@ -200,7 +200,7 @@ s32 effObjInitializeFollowModelData(dds3Basic_t *object) {
     object->workdata = work;
     memset(work, 0, sizeof(EffectObjectData));
     data = object->workdata;
-    data->modelHolder = dds3CreateSlotResourceState(object);
+    data->modelHolder = dds3ObjectBaseInitControlWorkData(object);
     data->transitionWork = NULL;
     data->activeId = -1;
     data->followParameterIndex = -1;
@@ -549,7 +549,7 @@ s32 dds3MatterObjectBasicConstructor(dds3Basic_t *object) {
     object->workdata = work;
     memset(work, 0, sizeof(EffectTransformData));
     data = object->workdata;
-    data->baseControlWorkData = dds3CreateSlotResourceState(object);
+    data->baseControlWorkData = dds3ObjectBaseInitControlWorkData(object);
     data->roomNumber = 0;
     data->opacityMode = EFFECT_OPACITY_MODE_INITIAL;
     data->activeId = -1;
@@ -829,7 +829,7 @@ s32 dds3EffectObjectBasicConstructor(dds3Basic_t *obj) {
     obj->workdata = sdfChipAllocDirect(0x50);
     memset(obj->workdata, 0, 0x50);
     data = obj->workdata;
-    data->objectHandle = dds3CreateSlotResourceState(obj);
+    data->objectHandle = dds3ObjectBaseInitControlWorkData(obj);
     dds3ObjectBaseOnFlag(obj, 0x60);
     return 1;
 }

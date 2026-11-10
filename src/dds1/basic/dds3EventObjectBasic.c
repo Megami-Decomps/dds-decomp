@@ -14,7 +14,7 @@ Dds3BasicCreateResult EventObjectBasicConstructor(dds3Basic_t *object) {
     dds3InitPoseSet(object);
     resource = (DdsSlotResourceBlock *)sdfChipAllocDirect(sizeof(DdsSlotResourceBlock));
     object->workdata = resource;
-    handle = dds3CreateSlotResourceState(object);
+    handle = dds3ObjectBaseInitControlWorkData(object);
     resource->baseControlWorkData = handle;
     return DDS3_BASIC_CREATE_ACCEPTED;
 }

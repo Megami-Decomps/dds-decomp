@@ -126,7 +126,7 @@ Dds3ObjectControlSlotIndex BasicTypeToItemType(u32 kind)
 
 /* Initialize a kind-3 slot state and its index node.
  * Every slot and currentSlot start unused (-1). */
-dds3ObjectBaseControlWorkData_t *dds3CreateSlotResourceState(dds3Basic_t *owner) {
+dds3ObjectBaseControlWorkData_t *dds3ObjectBaseInitControlWorkData(dds3Basic_t *owner) {
     dds3ObjectBaseControlWorkData_t *state = sdfChipAllocDirect(sizeof(dds3ObjectBaseControlWorkData_t));
     s32 i;
     WorldIndexNode *node;

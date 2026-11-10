@@ -224,7 +224,7 @@ evtUnitHandle_t *evtCreateUnitTransitionWork(dds3Basic_t *effObj, struct dds3Mod
  * handle; owner and effObj are not freed. NULL is a no-op; always returns 1. */
 s32 evtDeleteUnitHandle(evtUnitHandle_t *work);
 
-void evtSetUnitValueTransition(evtUnitHandle_t *unit, dds3Basic_t *target, s32 duration);
+void evtLinkLightObjectBasic(evtUnitHandle_t *unit, dds3Basic_t *target, s32 duration);
 void evtSetUnitLightDir(evtUnitHandle_t *unit, EvtUnitDirectionTransitionFrames durationFrames);
 void evtSetUnitColorRGB(evtUnitHandle_t *unit, s32 duration, u32 color);
 void evtSetUnitColorA(evtUnitHandle_t *unit, s32 duration, u32 color);

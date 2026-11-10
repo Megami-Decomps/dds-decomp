@@ -1466,7 +1466,7 @@ void evtViewerUpdateTimelineGroupState(EvtRuntimeGroup *group, EvtRuntimeChild *
 }
 
 
-extern void evtEndUnitValueTransition(evtUnitHandle_t *unit, s32 duration);
+extern void evtUnlinkLightObjectBasic(evtUnitHandle_t *unit, s32 duration);
 
 /* At timelineTime, selects each named unit's latest kind-9 transition key and starts,
  * ends or leaves its value transition according to the selected key flags. */
@@ -1509,18 +1509,18 @@ void evtEventViewerUpdateUnitTransitions(s32 timelineTime, evtViewerInfo_t *view
                 if (selectedKey != NULL) {
                     if (selectedKey->p08.sh[1] != 0) {
                         if (eventUnit->currentTransitionTarget != transitionValue || !(eventUnit->flags & 0x40000)) {
-                            evtSetUnitValueTransition(eventUnit, transitionValue, selectedKey->duration);
+                            evtLinkLightObjectBasic(eventUnit, transitionValue, selectedKey->duration);
                         }
                     } else {
                         if (eventUnit->flags & 0x40000) {
                             if (!(eventUnit->flags & 0x100000)) {
-                                evtEndUnitValueTransition(eventUnit, selectedKey->duration);
+                                evtUnlinkLightObjectBasic(eventUnit, selectedKey->duration);
                             }
                         }
                     }
                 } else {
                     if (eventUnit->currentTransitionTarget != 0) {
-                        evtEndUnitValueTransition(eventUnit, 0);
+                        evtUnlinkLightObjectBasic(eventUnit, 0);
                     }
                 }
             }
@@ -4036,7 +4036,7 @@ extern s32 evtEventViewerAddName(const char *name, evtViewerInfo_t *viewer);
 extern u16 evtViewerPopHistory(evtViewerInfo_t *viewer);
 
 extern s8 evtViewerFrameColumnCategories[];
-extern void evtEndUnitValueTransition(evtUnitHandle_t *unit, s32 duration);
+extern void evtUnlinkLightObjectBasic(evtUnitHandle_t *unit, s32 duration);
 
 /* Assign the selected world object's name to the pending key field that the
  * current command kind and frame group type select (-1 when nothing is chosen). */
@@ -4104,7 +4104,7 @@ s32 evtViewCmdSetObjectTarget(s32 unused0, s32 unused1, evtViewerInfo_t *viewer)
             node = dds3SceneBasicSearchNameAndType(dds3GetActiveScene(), EVT_WORLD_SLOT_UNIT,
                                                         viewer->entryName[entry->p08.sh[0]]);
             if (node != NULL) {
-                evtEndUnitValueTransition(evtGetUnitHandle2(node), 0);
+                evtUnlinkLightObjectBasic(evtGetUnitHandle2(node), 0);
             }
             if (object == NULL) {
                 entry->p08.sh[0] = -1;

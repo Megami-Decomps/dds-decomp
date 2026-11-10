@@ -574,7 +574,7 @@
 0x00111730	dds3MoverBasicGetPathControl	inferred	SMT3HD name via SLUS_209.11 0x0010FF68, shared-hash-in-run; was dds3GetObjectResourceHandle
 0x00111740	dds3MoverBasicUpdate	inferred	SMT3HD name via SLUS_209.11 0x0010FF78, shared-hash-in-run; was dds3InvokeMoverUpdate
 0x00111758	BasicTypeToItemType	inferred	SMT3HD name via SLUS_209.11 0x0010FF90, reloc-identical; was dds3SelectSlotForObjectKind
-0x001117A8	dds3CreateSlotResourceState	inferred	confidence=high; src/dds1/game/code_00111610.c:142:func_001117A8; Allocates/clears slot resource state, attaches world index node, and initializes slot indices to empty.; sources=names_M143.tsv; twin=0x001119D0, input-family pairing. [names_qp10.tsv]
+0x001117A8	dds3ObjectBaseInitControlWorkData	inferred	confidence=high; src/dds1/game/code_00111610.c:142:func_001117A8; Allocates/clears slot resource state, attaches world index node, and initializes slot indices to empty.; sources=names_M143.tsv; twin=0x001119D0, input-family pairing. [names_qp10.tsv]
 0x00111840	dds3ObjectBaseFreeControlWorkData	inferred	SMT3HD name via SLUS_209.11 0x00110070, reloc-identical; was dds3DestroyObjectBase
 0x00111908	dds3ObjectBaseOnFlag	inferred	ORs the supplied flag mask into the object-base flags.
 0x00111938	dds3ObjectBaseOffFlag	inferred	Clears the supplied flag mask from the object-base flags.
@@ -5015,8 +5015,8 @@
 0x00221940	GetBaseAmbientRGB	inferred	SMT3HD name via SLUS_209.11 0x001E3248, unique-masked-hash; was evtLoadUnitSecondColorVectorVU
 0x002219F8	GetBaseLightDir	inferred	SMT3HD name via SLUS_209.11 0x001E3300, unique-masked-hash; was evtLoadUnitDirectionVectorVU
 0x00221A80	evtRefreshUnitEndpointWork	inferred	Refreshes endpoint render work after the value-change flag is cleared; uses the matching-slot selector when no target or color transition is active.
-0x00221BE0	evtSetUnitValueTransition	inferred	Saves the previous unit value, installs a new value, and sets elapsed/duration and transition flags.
-0x00221C50	evtEndUnitValueTransition	inferred	Clears the current unit transition immediately or switches to its timed ending mode.
+0x00221BE0	evtLinkLightObjectBasic	inferred	Saves the previous unit value, installs a new value, and sets elapsed/duration and transition flags.
+0x00221C50	evtUnlinkLightObjectBasic	inferred	Clears the current unit transition immediately or switches to its timed ending mode.
 0x00221CB8	evtUnitSetValueAndFlag	inferred	Byte-identical dds2 twin 0x0023C828; Writes a unit value at offset 0x6c and sets the 0x20000 flag. [names_conflicts.tsv]
 0x00221CD0	evtUnlinkExternalLightPacket	inferred	SMT3HD name via SLUS_209.11 0x001E35C8, unique-masked-hash; was evtClearUnitValueChangeFlag
 0x00221D00	evtSetUnitLightAndAmbient	inferred	SMT3HD name via SLUS_209.11 0x001E35F8, unique-masked-hash; was evtInitializeUnitColorTransition

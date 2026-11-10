@@ -562,7 +562,7 @@
 0x00111958	dds3MoverBasicGetPathControl	inferred	SMT3HD name via SLUS_209.11 0x0010FF68, shared-hash-in-run; was dds3GetObjectResourceHandle
 0x00111968	dds3MoverBasicUpdate	inferred	SMT3HD name via SLUS_209.11 0x0010FF78, shared-hash-in-run; was dds3InvokeMoverUpdate
 0x00111980	BasicTypeToItemType	inferred	SMT3HD name via SLUS_209.11 0x0010FF90, reloc-identical; was dds3SelectSlotForObjectKind
-0x001119D0	dds3CreateSlotResourceState	inferred	confidence=high; Paired slot-state constructor; allocates/clears state, attaches world index node and initializes empty slot indices.; sources=names_M143.tsv; twin=0x001117A8, input-family pairing. [names_qp10.tsv]
+0x001119D0	dds3ObjectBaseInitControlWorkData	inferred	confidence=high; Paired slot-state constructor; allocates/clears state, attaches world index node and initializes empty slot indices.; sources=names_M143.tsv; twin=0x001117A8, input-family pairing. [names_qp10.tsv]
 0x00111A68	dds3ObjectBaseFreeControlWorkData	inferred	SMT3HD name via SLUS_209.11 0x00110070, reloc-identical; was dds3DestroyObjectBase
 0x00111B30	dds3ObjectBaseOnFlag	inferred	ORs selected flag bits into object-base flags; mirrors DDS1 dds3ObjectBaseOnFlag.
 0x00111B60	dds3ObjectBaseOffFlag	inferred	Clears selected flag bits from object-base flags; mirrors DDS1 dds3ObjectBaseOffFlag.
