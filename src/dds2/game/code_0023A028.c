@@ -83,16 +83,16 @@ extern char D_00436FF8[];
 
 extern char D_004370C0[]; /* "%5.2f" */
 
-extern struct sdfMemHandle_t *D_00436FAC;
+extern struct sdfMemHandle_t *mdlHddFileIndexHandle;
 
-extern struct sdfMemHandle_t *D_00436FB0;
+extern struct sdfMemHandle_t *mdlHddFileListHandle;
 
 /* Five-character device prefix copied in front of each work-file path. */
 typedef struct {
     char text[5];
 } DebugWorkPrefix;
 
-extern DebugWorkPrefix D_00436FB8[];
+extern DebugWorkPrefix mdlWorkPathPrefix[];
 
 typedef struct MdlItemCfg {
     u8 pad0;

@@ -4,12 +4,12 @@
 #include "draw3d.h"
 #include "ps2asm.h"
 
-#define D_0054F628 D_003BBB60
-#define D_0054F630 D_003BBB68
-#define D_0054F634 D_003BBB6C
-#define D_0054F638 D_003BBB70
-#define D_0054F640 D_003BBB78
-#define D_00551F04 D_003BD880
+#define D_0054F628 mdlModelPathPrefix
+#define D_0054F630 mdlPackedBundleExt
+#define D_0054F634 mdlHddFileIndexHandle
+#define D_0054F638 mdlHddFileListHandle
+#define D_0054F640 mdlWorkPathPrefix
+#define D_00551F04 mdlHddFileIndex
 #define D_002FA240 sdfViewMatrix
 #define fileHandleFree fileRequestFreeIfComplete
 #define mdl_1DD9C0 mdlProjectPoints
@@ -1874,13 +1874,13 @@ void mdlMakeHddFileList(void) {
     mdlMakeHddFileListDummy();
 }
 
-INCLUDE_SDATA(const s32, "model/mdlManager", D_003BBB60);
+INCLUDE_SDATA(const s32, "model/mdlManager", mdlModelPathPrefix);
 
-INCLUDE_SDATA(const s32, "model/mdlManager", D_003BBB68);
+INCLUDE_SDATA(const s32, "model/mdlManager", mdlPackedBundleExt);
 
-INCLUDE_SDATA(const s32, "model/mdlManager", D_003BBB6C);
+INCLUDE_SDATA(const s32, "model/mdlManager", mdlHddFileIndexHandle);
 
-INCLUDE_SDATA(const s32, "model/mdlManager", D_003BBB70);
+INCLUDE_SDATA(const s32, "model/mdlManager", mdlHddFileListHandle);
 
-INCLUDE_SDATA(const s32, "model/mdlManager", D_003BBB78);
+INCLUDE_SDATA(const s32, "model/mdlManager", mdlWorkPathPrefix);
 

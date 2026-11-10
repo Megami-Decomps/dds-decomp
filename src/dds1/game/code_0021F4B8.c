@@ -75,16 +75,16 @@ extern char D_003BBC80[]; /* "%5.2f" */
 
 extern char D_003BBC28[]; /* "" */
 
-extern struct sdfMemHandle_t *D_003BBB6C;
+extern struct sdfMemHandle_t *mdlHddFileIndexHandle;
 
-extern struct sdfMemHandle_t *D_003BBB70;
+extern struct sdfMemHandle_t *mdlHddFileListHandle;
 
 /* Five-character device prefix copied in front of each work-file path. */
 typedef struct {
     char text[5];
 } DebugWorkPrefix;
 
-extern DebugWorkPrefix D_003BBB78[];
+extern DebugWorkPrefix mdlWorkPathPrefix[];
 
 extern char D_003BBB80[], D_003BBB88[];
 

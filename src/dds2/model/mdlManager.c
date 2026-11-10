@@ -4,12 +4,12 @@
 #include "draw3d.h"
 #include "ps2asm.h"
 
-#define D_0054F628 D_00436FA0
-#define D_0054F630 D_00436FA8
-#define D_0054F634 D_00436FAC
-#define D_0054F638 D_00436FB0
-#define D_0054F640 D_00436FB8
-#define D_00551F04 D_00438F98
+#define D_0054F628 mdlModelPathPrefix
+#define D_0054F630 mdlPackedBundleExt
+#define D_0054F634 mdlHddFileIndexHandle
+#define D_0054F638 mdlHddFileListHandle
+#define D_0054F640 mdlWorkPathPrefix
+#define D_00551F04 mdlHddFileIndex
 #define pacLoadEx fileCreatePacLoadWork
 #define D_002FA240 sdfViewMatrix
 #define fileHandleFree fileRequestFreeIfComplete
@@ -1892,13 +1892,13 @@ s32 mdlSetViewerSlotResourceHandles(s32 aMajor, s32 aMinor, char *aTexFile, char
     return 1;
 }
 
-INCLUDE_SDATA(const s32, "model/mdlManager", D_00436FA0);
+INCLUDE_SDATA(const s32, "model/mdlManager", mdlModelPathPrefix);
 
-INCLUDE_SDATA(const s32, "model/mdlManager", D_00436FA8);
+INCLUDE_SDATA(const s32, "model/mdlManager", mdlPackedBundleExt);
 
-INCLUDE_SDATA(const s32, "model/mdlManager", D_00436FAC);
+INCLUDE_SDATA(const s32, "model/mdlManager", mdlHddFileIndexHandle);
 
-INCLUDE_SDATA(const s32, "model/mdlManager", D_00436FB0);
+INCLUDE_SDATA(const s32, "model/mdlManager", mdlHddFileListHandle);
 
-INCLUDE_SDATA(const s32, "model/mdlManager", D_00436FB8);
+INCLUDE_SDATA(const s32, "model/mdlManager", mdlWorkPathPrefix);
 
