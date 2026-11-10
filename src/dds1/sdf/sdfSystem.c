@@ -1,88 +1,209 @@
-#include "sdk_ps2.h"
-#include "sdf_line_pair_packet_api.h"
-#include "dsp_name.h"
-#include "sdf_packet_list.h"
+#include "fpu.h"
 #include "common.h"
-#include "sdf_vu0.h"
-#include "sdf_kernel_thread_param.h"
-#include "sdf_thread_workspace_api.h"
-#include "eff_random.h"
-#include "sdf_heap_api.h"
-#include "sdf_vu_matrix.h"
-#include "sdf.h"
-#include "sdf_semaphore_api.h"
-#include "eff_curve.h"
-#include "sdf_projection.h"
-#include "pcp_vu0.h"
-#include "itf.h"
-#include "fr_font.h"
-#include "dat_state.h"
-#include "pty_profile_record_value.h"
-#include "pty_skill_nibble_state.h"
-#include "file.h"
-#include "prf_profile_cap.h"
-#include "prf_requirement.h"
-#include "prf_requirement_fallback.h"
-#include "prf_fallback_item_requirement.h"
-#include "mdl_flag_api.h"
-#include "script_flag_slot.h"
-#include "pty_preset_record.h"
-#include "prf_profile_parameters.h"
-#include "prf_current_record_view.h"
-#include "sdf_packet_alloc.h"
-#include "sdf_chip.h"
-#include "sdf_chip_range_api.h"
-#include "sdf_handler_node.h"
-#include "sdf_mem_free_pointer_api.h"
 #include "eeregs.h"
-#include "sdf_timer.h"
-#include "sdf_alarm.h"
-#include "sdf_thread.h"
-#include "ee_mmi.h"
-#include "sdf_chip_page_link_view.h"
-#include "sdf_thread_sleep.h"
+#include "ps2asm.h"
+#include "basic.h"
+#include "motion.h"
 
-extern s32 sdfVblankFlag;
+#define D_00551824 D_003BD2D0
+#define D_00552040 D_003BD990
+#define D_005756C0 D_003DFEF0
+#define D_005776C0 D_003E1EF0
+#define D_00551828 sdfTickCallback
+#define D_00552054 sdfSleepThreadId
+#define sdf_2A8258 sdfFreeMemorySlotFromEitherHeap
+#define sdf_2A84D8 sdfDrainPendingHandlers
+#define func_002A8758 sdfDeleteTrackedThread
+#define func_002A87F0 sdfFindThreadNode
+#define sdf_2A8858 sdfUnlinkAndDeleteCurrentThread
 
-extern void memset(void *dst, s32 value, s32 size);
+/* Native 0x30-byte EE thread descriptor passed to CreateThread. */
+typedef struct {
+    s32 status;
+    void (*entry)(void);
+    void *stack;
+    s32 stackSize;
+    void *gp;
+    s32 priority;
+    u8 unk18[0x18];
+} sdfKernelThreadParam_t;
 
-extern void (*sdfTickCallback)(void);
+typedef struct sdfHandlerNode_t {
+    struct sdfHandlerNode_t *next;
+    s32 handlerKind;
+    s32 channel;
+    s32 handlerId;
+} sdfHandlerNode_t;
 
-extern s32 CreateThreadSimple(void (*entryAddress)(), void *workspace, s32 stackBytes, s32 priority);
+extern s32 _gp, sdfThreadSema, sdfVblankFlag, D_00551824;
 
-extern u32 D_003BD2C8;
+extern u8 sdfPadManagerMode, D_005756C0[], D_005776C0[];
 
-extern char sdfDebugLogAppendMode[];
+extern void (*D_00551828)(void);
 
-extern char sdfDebugLogPairFormat[];
+extern sdfThCB_t *sdfVblankThreadId;
 
-void sdfDummyFunc(u32 callbackArg) {
+extern sdfThCB_t D_00552040;
+
+extern s32 CreateThread(sdfKernelThreadParam_t *parameter);
+
+extern s32 AddIntcHandler2(s32 channel, s32 handler, s32 argument, s32 next);
+
+#define SDK_SKIP_ChangeThreadPriority
+#define SDK_SKIP_CreateSema
+#define SDK_SKIP_CreateThread
+#define SDK_SKIP_DeleteThread
+#define SDK_SKIP_RemoveDmacHandler
+#define SDK_SKIP_RemoveIntcHandler
+#define SDK_SKIP_RemoveSbusIntcHandler
+#define SDK_SKIP_SetAlarm
+#define SDK_SKIP_TerminateThread
+#define SDK_SKIP_WakeupThread
+#include "sdk_libkernl.h"
+
+extern s32 AddSbusIntcHandler(s32 channel, s32 handler);
+
+extern void DisableIntc(s32 channel);
+
+extern void RemoveIntcHandler(s32 channel, s32 handlerId);
+
+extern void RemoveDmacHandler(s32 channel, s32 handlerId);
+
+extern void RemoveSbusIntcHandler(s32 channel);
+
+extern s32 SetAlarm(u16 delay, void (*callback)(s32, s32, s32), void *argument);
+
+extern s32 WaitSema(s32 semaphore);
+
+extern s32 SignalSema(s32 semaphore);
+
+extern void ExitDeleteThread(void);
+
+extern void TerminateThread(s32 threadId);
+
+extern void DeleteThread(s32 threadId);
+
+extern void EnableIntc(s32 channel);
+
+extern void WakeupThread(s32 threadId);
+
+extern s32 InitThread(void);
+
+extern void sdfPadManager(void);
+
+extern void sdfPadWork(void);
+
+extern void sdfFileCmdThreadCheckPrio(void);
+
+extern void sdfChipInit(u32 aSize);
+
+extern void sdfMemInit(u32 aSize);
+
+extern void sdfGsMemInit(void);
+
+extern void sdfImageSetInit(void);
+
+extern void sdfTexInit(void);
+
+extern void sdfPadInitManager(void);
+
+extern void sdfGrInit(u32 aPacketBuffSize);
+
+extern void sdf3DInit(s32 aNestLevelLimit);
+
+extern void sdfCoreDrawInit(s32 buffSize);
+
+extern void sdfRandomizeByTime(void *aCB);
+
+extern void *memset(void *a, s32 b, u32 c);
+
+void FatalError(const char *format, ...) __attribute__((noreturn));
+
+s32 CreateThreadSimple(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
+
+void *sdfAllocAuto(s32 bytes);
+
+s32 sdfFreeAuto(void *allocation);
+
+void sdfAlarmWakeup(s32 unused0, s32 unused1, s32 threadId);
+
+void sdfWaitVblank(s32 count);
+
+s32 sdfInitThreadSystem(void);
+
+s32 VblankIntcHandler(s32 cause);
+
+typedef struct sdfSemaParam_t {
+    s32 count;
+    s32 maxCount;
+    s32 initCount;
+    s32 waitThreads;
+    u32 attr;
+    u32 option;
+} sdfSemaParam_t;
+
+extern s32 sdfChipCheck(void *aPtr);
+
+extern void sdfChipFreeDirect(void *aPtr);
+
+extern void sdfChipFreeDelayedDirect(void *aPtr);
+
+extern void sdfMemFreePtrDirect(void *aPtr);
+
+extern void *sdfMemGetHandleByPtr(void *aPtr);
+
+extern sdfHandlerNode_t *sdfDmacHandlerTable;
+
+extern s32 D_00552054;
+
+extern u8 sdfCdClock;
+
+extern s32 sdfVblankSema;
+
+extern s32 CreateSema(sdfSemaParam_t *param);
+
+extern s32 iWakeupThread(s32 thid);
+
+extern void sdfMemFreeDelayedDirect(void *aHandle);
+
+extern sdfThCB_t *func_002A87F0(s32 threadId);
+
+extern s32 GetThreadId(void);
+
+extern void ChangeThreadPriority(s32 thid, s32 prio);
+
+extern s32 SleepThread(void);
+
+extern void sdfIpuRemoveHandler(sdfHandlerNode_t *handler);
+
+extern void func_002A8758(sdfThCB_t *node);
+
+extern void *sdfMemAllocDirect(s32 aSize);
+
+extern void *sdfMemLock(void *aHandle);
+
+extern void *sdfChipAllocDirect(s32 aSize);
+
+extern s32 CancelWakeupThread(s32 thid);
+
+void sdfDummyFunc(void) {
 }
 
-s32 sdfCreateSema(u32 initial, u32 option, u32 maximum) {
-    struct {
-        u32 attr;
-        u32 option;
-        u32 initial;
-        u32 reserved[2];
-        u32 maximum;
-    } sema;
+s32 sdfCreateSema(s32 initCount, s32 maxCount, u32 option)
+{
+    sdfSemaParam_t param;
 
-    sema.initial = initial;
-    sema.option = option;
-    sema.maximum = maximum;
-    return CreateSema(&sema);
+    param.initCount = initCount;
+    param.maxCount = maxCount;
+    param.option = option;
+    return CreateSema(&param);
 }
 
-extern void *_gp;
-
-/* Create a kernel thread from a zeroed descriptor that uses the caller's
- * workspace as its stack and the program's GP. */
-s32 CreateThreadSimple(void (*entryAddress)(), void *workspace, s32 stackBytes, s32 priority) {
-    SdfKernelThreadParam param;
+s32 CreateThreadSimple(void *entryAddress, void *workspace, s32 stackBytes, s32 priority) {
+    sdfKernelThreadParam_t param;
 
     memset(&param, 0, sizeof(param));
-    param.entry = (void (*)(void))entryAddress;
+    param.entry = entryAddress;
     param.stack = workspace;
     param.stackSize = stackBytes;
     param.priority = priority;
@@ -94,14 +215,11 @@ s32 sdfCreateThreadWithStack(void (*entryAddress)(), s32 stackBytes, s32 priorit
     void *workspace;
 
     workspace = sdfAllocAuto(stackBytes);
-    return CreateThreadSimple(entryAddress, workspace, stackBytes, priority);
+    return CreateThreadSimple((void *)entryAddress, workspace, stackBytes, priority);
 }
 
-extern SdfHandlerNode *sdfDmacHandlerTable;
-
-extern s32 DisableIntc(s32);
-
-void *sdfAllocAuto(s32 size) {
+void *sdfAllocAuto(s32 size)
+{
     void *p;
 
     if (size > 0x400) {
@@ -114,7 +232,8 @@ void *sdfAllocAuto(s32 size) {
     return p;
 }
 
-s32 sdfFreeAuto(void *allocation) {
+s32 sdfFreeAuto(void *allocation)
+{
     if (allocation != NULL) {
         if (sdfChipCheck(allocation)) {
             sdfChipFreeDirect(allocation);
@@ -124,7 +243,8 @@ s32 sdfFreeAuto(void *allocation) {
     }
 }
 
-s32 sdfFreeAutoDelayed(void *allocation) {
+s32 sdfFreeAutoDelayed(void *allocation)
+{
     if (allocation != NULL) {
         if (sdfChipCheck(allocation)) {
             sdfChipFreeDelayedDirect(allocation);
@@ -134,7 +254,8 @@ s32 sdfFreeAutoDelayed(void *allocation) {
     }
 }
 
-s32 sdfFreeMemorySlotFromEitherHeap(void **slot) {
+s32 sdf_2A8258(void **slot)
+{
     void *allocation = *slot;
 
     if (allocation != NULL) {
@@ -152,25 +273,19 @@ void FatalError(const char *format, ...) {
     }
 }
 
-extern void FatalError(const char *format, ...) __attribute__((noreturn));
-
-extern s32 AddIntcHandler2(s32, s32, s32, s32);
-
-extern s32 AddDmacHandler2(s32, s32, s32, s32);
-
-SdfHandlerNode *DmacAddHandler(SdfHandlerKind kind, s32 channel, SdfHandlerCallback handler, s32 arg, s32 next) {
-    SdfHandlerNode *node;
+sdfHandlerNode_t *DmacAddHandler(s32 kind, s32 channel, s32 handler, s32 arg, s32 next) {
+    sdfHandlerNode_t *node;
     s32 id;
 
-    switch ((s32)kind) {
-    case SDF_HANDLER_KIND_INTERRUPT:
-        id = AddIntcHandler2(channel, (s32)handler, arg, next);
+    switch (kind) {
+    case 0:
+        id = AddIntcHandler2(channel, handler, arg, next);
         break;
-    case SDF_HANDLER_KIND_DMA:
-        id = AddDmacHandler2(channel, (s32)handler, arg, next);
+    case 1:
+        id = AddDmacHandler2(channel, (s32 (*)(s32, void *, void *))handler, arg, (void *)next);
         break;
-    case SDF_HANDLER_KIND_SBUS:
-        id = AddSbusIntcHandler(channel, (s32)handler);
+    case 2:
+        id = AddSbusIntcHandler(channel, handler);
         break;
     default:
         FatalError("sdfAddHandler : unknown type %d\n", kind);
@@ -185,22 +300,22 @@ SdfHandlerNode *DmacAddHandler(SdfHandlerKind kind, s32 channel, SdfHandlerCallb
     return node;
 }
 
-void sdfIpuRemoveHandler(SdfHandlerNode *target) {
-    SdfHandlerNode **link = &sdfDmacHandlerTable;
-    SdfHandlerNode *node = *link;
+void sdfIpuRemoveHandler(sdfHandlerNode_t *target) {
+    sdfHandlerNode_t **link = &sdfDmacHandlerTable;
+    sdfHandlerNode_t *node = *link;
 
     while (node != NULL) {
         if (node == target) {
             *link = node->next;
-            switch ((s32)node->handlerKind) {
-            case SDF_HANDLER_KIND_INTERRUPT:
+            switch (node->handlerKind) {
+            case 0:
                 DisableIntc(node->channel);
                 RemoveIntcHandler(node->channel, node->handlerId);
                 break;
-            case SDF_HANDLER_KIND_DMA:
+            case 1:
                 RemoveDmacHandler(node->channel, node->handlerId);
                 break;
-            case SDF_HANDLER_KIND_SBUS:
+            case 2:
                 RemoveSbusIntcHandler(node->channel);
                 break;
             }
@@ -213,61 +328,26 @@ void sdfIpuRemoveHandler(SdfHandlerNode *target) {
     }
 }
 
-void sdfDrainPendingHandlers(void) {
-    SdfHandlerNode *current;
-    while ((current = sdfDmacHandlerTable) != 0) {
-        sdfIpuRemoveHandler(current);
+void sdf_2A84D8(void)
+{
+    void *handler;
+
+    while ((handler = sdfDmacHandlerTable) != NULL) {
+        sdfIpuRemoveHandler(handler);
     }
 }
 
-SdfHandlerNode *sdfDmacHandlerTable __attribute__((section(".sdata"))) = NULL;
+/* DDS1 defines this unit's .sdata here; DDS2 places the first three words in
+ * the unit before. */
+sdfHandlerNode_t *sdfDmacHandlerTable __attribute__((section(".sdata"))) = NULL;
+s32 D_00551824 __attribute__((section(".sdata"))) = 0x100000;
+void (*D_00551828)(void) __attribute__((section(".sdata"))) = NULL;
 
-extern u8 sdfPadManagerMode;
-
-/* Workspace bytes passed to the console DMA setup allocation. */
-s32 D_003BD2D0 __attribute__((section(".sdata"))) = 0x100000;
-
-void (*sdfTickCallback)(void) __attribute__((section(".sdata"))) = NULL;
-
-extern void sdfWaitVblank(s32 count);
-
-extern void sdfPadManager(void);
-
-extern void sdfPadWork(void);
-
-extern void sdfFileCmdThreadCheckPrio(void);
-
-extern void sdfChipInit(u32 heapSize);
-
-extern void sdfGrInit(u32 packetBufferBytes);
-
-extern void sdfMemInit(u32 heapSize);
-
-extern void sdfGsMemInit(void);
-
-extern void sdfImageSetInit(void);
-
-extern void sdfTexInit(void);
-
-extern void sdfPadInitManager(void);
-
-extern s32 sdfInitThreadSystem(void);
-
-extern void sdf3DInit();
-
-extern void sdfCoreDrawInit(s32 size);
-
-extern void sdfSystemThreadProc(void);
-
-extern SdfThreadNode D_003BD990;
-
-extern u8 D_003DFEF0[0x2000];
-
-void sdfAlarmWakeup(s32 unused0, u16 unused1, void *threadId) {
-    iWakeupThread((s32)threadId);
+void sdfAlarmWakeup(s32 arg0, s32 arg1, s32 thid)
+{
+    iWakeupThread(thid);
 }
 
-/* Clear any pending wakeup before arming a 16-bit delay for this thread. */
 void sdfDelayThread(u32 delay) {
     s32 threadId = GetThreadId();
     CancelWakeupThread(threadId);
@@ -275,18 +355,14 @@ void sdfDelayThread(u32 delay) {
     SleepThread();
 }
 
-/* Read EE timer 0's free-running count register. */
-u32 sdfGetRunTimeCountBase(void) {
+s32 sdfGetRunTimeCountBase(void)
+{
     return HW_READ(T0_COUNT);
 }
 
-/* EE timer 0 count register; subtraction is reduced modulo 2^16 so
- * wraparound does not make short elapsed intervals negative. */
-u32 sdfGetRunTimeCount(u32 previousTick) {
-    u32 current;
-
-    current = HW_READ(T0_COUNT);
-    return (current - previousTick) & 0xFFFF;
+s32 sdfGetRunTimeCount(s32 aBaseTime)
+{
+    return (HW_READ(T0_COUNT) - aBaseTime) & 0xFFFF;
 }
 
 void sdfSystemThreadProc(void) {
@@ -297,13 +373,12 @@ void sdfSystemThreadProc(void) {
             sdfPadWork();
         }
         sdfFileCmdThreadCheckPrio();
-        if (sdfTickCallback != NULL) {
-            sdfTickCallback();
+        if (D_00551828 != NULL) {
+            D_00551828();
         }
     }
 }
 
-/* Initialize heaps, textures, pad, graphics/resource services and the tick worker. */
 void dds3InitSubsystems(u32 heapSize, u32 initialHeapSize, u32 packetBufferBytes) {
     HW_WRITE(T0_MODE, 0x83);
     HW_WRITE(T0_COUNT, 0);
@@ -316,39 +391,33 @@ void dds3InitSubsystems(u32 heapSize, u32 initialHeapSize, u32 packetBufferBytes
     sdfInitThreadSystem();
     sdfGrInit(packetBufferBytes);
     sdf3DInit(0x40);
-    sdfCoreDrawInit(D_003BD2D0);
+    sdfCoreDrawInit(D_00551824);
     sdfRandomizeByTime(NULL);
-    sdfStartThreadAndWait(&D_003BD990, sdfSystemThreadProc, D_003DFEF0, 0x2000, 0x4C, 0);
+    sdfStartThreadAndWait(&D_00552040, sdfSystemThreadProc, D_005756C0, 0x2000, 0x4C, 0);
 }
 
-/* Register the thread under the list semaphore before starting it. */
-void sdfStartThreadAndWait(SdfThreadNode *node, void (*entry)(void), void *stack, s64 stackSize, s32 priority, s32 threadArgument) {
-    node->threadId = CreateThreadSimple(entry, stack, (s32)stackSize, priority);
+void sdfStartThreadAndWait(sdfThCB_t *node, void (*entry)(void), void *stack, s64 stackSize, s32 priority, s32 threadArgument) {
+    node->thId = CreateThreadSimple((void *)entry, stack, (s32)stackSize, priority);
     WaitSema(sdfThreadSema);
     node->next = sdfVblankThreadId;
     sdfVblankThreadId = node;
     SignalSema(sdfThreadSema);
-    _StartThread(node->threadId, threadArgument);
+    _StartThread(node->thId, (void *)threadArgument);
 }
 
-/* A previously queued wakeup counts toward the requested sleep count. */
-void sdfWaitVblank(s32 requestedSleepCount) {
-    s32 threadId;
-    s32 cancelledWakeup;
+void sdfWaitVblank(s32 count)
+{
+    s32 rest = count - CancelWakeupThread(GetThreadId());
 
-    threadId = GetThreadId();
-    cancelledWakeup = CancelWakeupThread(threadId);
-    requestedSleepCount = requestedSleepCount - cancelledWakeup;
     do {
-        requestedSleepCount = requestedSleepCount - 1;
         SleepThread();
-    } while (0 < requestedSleepCount);
+        rest--;
+    } while (rest > 0);
 }
 
-/* Unlink the tracked thread, then delete self or terminate/delete another thread. */
-void sdfDeleteTrackedThread(SdfThreadNode *node) {
-    SdfThreadNode **link;
-    SdfThreadNode *current;
+void func_002A8758(sdfThCB_t *node) {
+    sdfThCB_t **link;
+    sdfThCB_t *current;
     s32 threadId;
 
     WaitSema(sdfThreadSema);
@@ -360,7 +429,7 @@ void sdfDeleteTrackedThread(SdfThreadNode *node) {
     }
     *link = node->next;
     SignalSema(sdfThreadSema);
-    threadId = node->threadId;
+    threadId = node->thId;
     if (threadId == GetThreadId()) {
         ExitDeleteThread();
         return;
@@ -370,12 +439,10 @@ void sdfDeleteTrackedThread(SdfThreadNode *node) {
 }
 
 s32 sdfThreadSema __attribute__((section(".sbss")));
+sdfThCB_t *sdfVblankThreadId __attribute__((section(".sbss")));
 
-SdfThreadNode *sdfVblankThreadId __attribute__((section(".sbss")));
-
-/* A negative ID means the calling thread; search under the list semaphore. */
-SdfThreadNode *sdfFindThreadNode(s32 threadId) {
-    SdfThreadNode *node;
+sdfThCB_t *func_002A87F0(s32 threadId) {
+    sdfThCB_t *node;
 
     if (threadId < 0) {
         threadId = GetThreadId();
@@ -383,7 +450,7 @@ SdfThreadNode *sdfFindThreadNode(s32 threadId) {
     WaitSema(sdfThreadSema);
     node = sdfVblankThreadId;
     while (node != NULL) {
-        if (node->threadId == threadId) {
+        if (node->thId == threadId) {
             break;
         }
         node = node->next;
@@ -392,67 +459,41 @@ SdfThreadNode *sdfFindThreadNode(s32 threadId) {
     return node;
 }
 
-#define SDF_CURRENT_THREAD_SELECTOR 0xffffffffffffffff
-
-#define SDF_THREAD_COMPLETION_EVENT 2
-
-#define SDF_WAKE_WORKER_STACK_BYTES 0x800
-
-#define SDF_WAKE_WORKER_PRIORITY 0x3E
-
-#define SDF_SLEEP_THREAD_PRIORITY 0x7C
-
-extern void sdfDeleteTrackedThread(SdfThreadNode *node);
-
-/* The negative lookup selector selects the calling thread's tracked entry. */
-void sdfUnlinkAndDeleteCurrentThread(void) {
-    SdfThreadNode *threadNode;
-
-    threadNode = sdfFindThreadNode(SDF_CURRENT_THREAD_SELECTOR);
-    sdfDeleteTrackedThread(threadNode);
+void sdf_2A8858(void)
+{
+    func_002A8758(func_002A87F0(-1));
 }
 
-extern s32 sdfSleepThreadId;
+s32 VblankIntcHandler(s32 cause)
+{
+    u8 clock;
 
-extern s32 sdfVblankSema;
-
-extern u8 sdfCdClock;
-
-/* Wake the worker only for its registered event; the byte counter never underflows. */
-s32 VblankIntcHandler(s32 eventId) {
-    if (eventId == SDF_THREAD_COMPLETION_EVENT) {
+    if (cause == 2) {
         iWakeupThread(sdfVblankSema);
-        if (sdfCdClock != 0) {
-            sdfCdClock--;
+        clock = sdfCdClock;
+        if (clock != 0) {
+            sdfCdClock = clock - 1;
         }
     }
     return 0;
 }
 
-extern SdfHandlerNode *DmacAddHandler(SdfHandlerKind, s32, SdfHandlerCallback, s32, s32);
-
-/* Each wake-up broadcasts to every tracked thread under the list semaphore. */
 void VblankThreadProc(void) {
-    SdfThreadNode *threadEntry;
+    sdfThCB_t *threadEntry;
 
-    DmacAddHandler(SDF_HANDLER_KIND_INTERRUPT, SDF_THREAD_COMPLETION_EVENT, VblankIntcHandler, -1, 0);
-    EnableIntc(SDF_THREAD_COMPLETION_EVENT);
+    DmacAddHandler(0, 2, (s32)VblankIntcHandler, -1, 0);
+    EnableIntc(2);
     for (;;) {
         SleepThread();
         sdfVblankFlag++;
         WaitSema(sdfThreadSema);
         for (threadEntry = sdfVblankThreadId; threadEntry != NULL; threadEntry = threadEntry->next) {
-            WakeupThread(threadEntry->threadId);
+            WakeupThread(threadEntry->thId);
         }
         SignalSema(sdfThreadSema);
     }
 }
 
-extern void InitThread(void);
-
-extern char D_003E1EF0[];
-
-/* Initialize the tracked-thread list and its semaphore before starting the wake worker. */
 s32 sdfInitThreadSystem(void) {
     s32 threadId;
 
@@ -460,18 +501,18 @@ s32 sdfInitThreadSystem(void) {
     sdfVblankFlag = 0;
     sdfVblankThreadId = NULL;
     sdfThreadSema = sdfCreateSema(1, 1, 0);
-    threadId = CreateThreadSimple(VblankThreadProc, D_003E1EF0, SDF_WAKE_WORKER_STACK_BYTES, SDF_WAKE_WORKER_PRIORITY);
+    threadId = CreateThreadSimple((void *)VblankThreadProc, D_005776C0, 0x800, 0x3E);
     sdfVblankSema = threadId;
     return _StartThread(threadId, 0);
 }
 
-/* Record the calling thread, set its sleep priority, then return the SDK sleep result. */
-s32 sdfSetMainThreadPriority(void) {
-    s32 threadId = GetThreadId();
+void sdfSetMainThreadPriority(void)
+{
+    s32 thid = GetThreadId();
 
-    sdfSleepThreadId = threadId;
-    ChangeThreadPriority(threadId, SDF_SLEEP_THREAD_PRIORITY);
-    return SleepThread();
+    D_00552054 = thid;
+    ChangeThreadPriority(thid, 0x7C);
+    SleepThread();
 }
 
 INCLUDE_SDATA(const s32, "sdf/sdfSystem", sdfVblankFlag);

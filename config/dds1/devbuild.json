@@ -162,7 +162,7 @@
           "storage": "file",
           "expected_symbols": 4,
           "expected_retail_gp_references": 10,
-          "expected_gp_references": 1,
+          "expected_gp_references": 0,
           "allow_shifted_gp_reference_offsets": true
         },
         {
@@ -337,7 +337,7 @@
       "old_size": "0x948",
       "alignment": 8,
       "old_vaddr": "0x002CF438",
-      "expected_relocations": 148
+      "expected_relocations": 149
     },
     {
       "object": "build/dds1/src/dds1/sdf/sdfSystem.o",
