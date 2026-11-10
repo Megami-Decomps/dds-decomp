@@ -1,7 +1,11 @@
 #include "common.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
 #include "sdf_lighting.h"
 #include "sdf_resource.h"
+
+/* Declared here because no header carries these. */
+extern void *memset(void *a, s32 b, size_t c);
 
 struct sdfPadCb_t;
 
@@ -61,27 +65,23 @@ extern u64 sdf3DRefMapParam;
 
 extern u8 sdfPadCb_0[];
 
-#define D_005518D8 sdfPadButtons
-#define D_005298A0 sdfPadBitMask
-#define D_005298E8 sdfPadPressure
 #define D_005518E0 sdfPadAnalogSticks
-#define D_0058F0C0 sdfPadPortBuffers
 
 extern u8 D_005518E0[8];
 
 extern s8 dds3PadBitTable[0x20];
 
-extern u8 D_005298E8[0x18];
+extern u8 sdfPadPressure[0x18];
 
-extern u16 D_005518D8[2];
+extern u16 sdfPadButtons[2];
 
-extern u16 D_005298A0[0x10];
+extern u16 sdfPadBitMask[0x10];
 
 extern s32 sdfVblankFlag;
 
 extern u8 sdfPadPortSlotPairs[4];
 
-extern u8 D_0058F0C0[];
+extern u8 sdfPadPortBuffers[];
 
 extern u8 sdfPadManagerMode;
 
@@ -103,11 +103,11 @@ typedef struct sdfTexPacket_t {
 
 
 
-extern sdfTexHandle_t *D_005518B8;
+extern sdfTexHandle_t *sdf3DSlot2Tex;
 
 extern sdfTexHandle_t *sdf3DSpecularTex;
 
-extern sdfTexHandle_t *D_005518C8;
+extern sdfTexHandle_t *sdf3DSlot1Tex;
 
 extern s32 scePadGetState(s32 port, s32 slot);
 
@@ -127,7 +127,7 @@ extern s32 scePadInit(s32);
 
 extern s32 scePadPortOpen(s32 port, s32 slot, void *buffer);
 
-extern void *memcpy(void *, const void *, unsigned int);
+extern void *memcpy(void *, const void *, size_t);
 
 void sdfPadControl(sdfPadCb_t *entry);
 
@@ -306,11 +306,11 @@ void sdfPadWork(void) {
         u16 pressed;
         u16 repeat;
 
-        D_005518D8[padIndex] = current;
+        sdfPadButtons[padIndex] = current;
         pressed = changed & current;
         entry->lastPadData = current;
         if (current != previous) {
-            entry->repeatDeadline = vblank + 15;
+            entry->repeatDeadline = vblank + SDF_FRAMES(15);
             repeat = pressed;
         } else {
             repeat = 0;
@@ -319,12 +319,12 @@ void sdfPadWork(void) {
 
                 if (elapsed >= 0) {
                     repeat = current;
-                    entry->repeatDeadline = vblank + elapsed + 4;
+                    entry->repeatDeadline = vblank + elapsed + SDF_FRAMES(4);
                 }
             }
         }
         for (bitIndex = 0; bitIndex != 0x10; bitIndex++) {
-            u16 mask = D_005298A0[bitIndex];
+            u16 mask = sdfPadBitMask[bitIndex];
             s32 state = (current & mask) != 0;
 
             if (repeat & mask) {
@@ -336,7 +336,7 @@ void sdfPadWork(void) {
             dds3PadBitTable[padIndex * 0x10 + bitIndex] = state;
         }
         memcpy(&D_005518E0[padIndex * 4], entry->stick, 4);
-        memcpy(&D_005298E8[padIndex * SDF_PAD_PRESSURE_COUNT], entry->pressure,
+        memcpy(&sdfPadPressure[padIndex * SDF_PAD_PRESSURE_COUNT], entry->pressure,
                SDF_PAD_PRESSURE_COUNT);
     }
 }
@@ -368,7 +368,7 @@ void sdfPadInitManager(void) {
         s32 slot = sdfPadPortSlotPairs[padIndex * 2 + 1];
         sdfPadCb_t *entry;
 
-        scePadPortOpen(port, slot, &D_0058F0C0[padIndex * SDF_PAD_PORT_BUFFER_BYTES]);
+        scePadPortOpen(port, slot, &sdfPadPortBuffers[padIndex * SDF_PAD_PORT_BUFFER_BYTES]);
         entry = &sdfPadCb[padIndex];
         entry->port = port;
         entry->slot = slot;
@@ -382,11 +382,9 @@ void sdfPadInitManager(void) {
     }
     memset(dds3PadBitTable, 0, SDF_PAD_BUTTON_STATE_BYTES);
     memset(D_005518E0, SDF_PAD_STICK_CENTER, SDF_PAD_STICK_STATE_BYTES);
-    memset(D_005298E8, 0, SDF_PAD_PRESSURE_STATE_BYTES);
+    memset(sdfPadPressure, 0, SDF_PAD_PRESSURE_STATE_BYTES);
     sdfPadManagerMode = 0;
 }
-
-INCLUDE_RODATA(const s32, "sdf/sdf_PadManager", D_0042E258);
 
 INCLUDE_SDATA(const s32, "sdf/sdf_PadManager", sdfPadManagerMode);
 
@@ -395,3 +393,4 @@ INCLUDE_SDATA(const s32, "sdf/sdf_PadManager", sdfPadButtons);
 INCLUDE_SDATA(const s32, "sdf/sdf_PadManager", sdfPadAnalogSticks);
 
 INCLUDE_SDATA(const s32, "sdf/sdf_PadManager", D_00438A99);
+
