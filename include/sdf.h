@@ -674,9 +674,9 @@ extern SdfThreadNode *sdfVblankThreadId;
 typedef struct sdfMemHandle_t {
     struct sdfMemHandle_t *prev; /* 0x00 */
     struct sdfMemHandle_t *next; /* 0x04 */
-    s32 ptr;              /* 0x08: start of represented span */
+    void *ptr;              /* 0x08: start of represented span */
     u16 stat;                /* 0x0C: free, used, or end sentinel */
-    s16 mlock;       /* 0x0E: -1 for sentinels */
+    u16 mlock;       /* 0x0E: -1 for sentinels */
 } sdfMemHandle_t;
 
 /* Embedded end sentinels and backing-span metadata for the general heap (0x28). */

@@ -9612,6 +9612,8 @@ void effSharedAssetReferenceRelease(EffRibbonWork *work) {
     sdfMemFreeDirect(work->allocation);
 }
 
+extern sdfGrOt_t *D_0037ED78[];
+
 EffRibbonWork *effCloneRibbonWithSharedResource(EffRibbonWork *source) {
     EffRibbonWork *node = effCreateRibbonWork(source->count, source->repeat);
     RefObj *texture = source->resource;
@@ -9625,7 +9627,6 @@ EffRibbonWork *effCloneRibbonWithSharedResource(EffRibbonWork *source) {
     return node;
 }
 
-extern sdfGrOt_t *D_0037ED78[];
 static inline void unpackNormalizedColor(u32 color) {
     u32 rgba[4];
     rgba[0] = color;
