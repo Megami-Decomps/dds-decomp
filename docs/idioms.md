@@ -14581,7 +14581,7 @@ client prefix; naming introduces no alternate RPC layout.
 `sdfCdSectorBuf`, `sdfCdImageOffset` and
 `sdfCdImageCurrActive` retain partial reads from the same 0x800-byte
 disc sector. Keep the existing signed byte-count arithmetic and transfer
-calls. `sdfDevHddModuleArguments` and `sdfDevPfsModuleArguments` are packed
+calls. `sdfHddIrxArgs` and `sdfHddPfsIrxArgs` are packed
 NUL-separated arguments, not format strings: the loader consumes 0xC bytes
 for `-o`, `18`, `-n`, `32`, and 0x12 bytes for `-m`, `18`, `-o`, `10`,
 `-n`, `64`, respectively. All native zeros, imports, declarations, casts,

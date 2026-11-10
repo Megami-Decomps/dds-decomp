@@ -10487,8 +10487,8 @@
 0x0040B990	sdfDevConsColorTable	inferred	SMT3HD data name via SLUS_209.11 0x00529A80, 1 agreeing references; was sdfDevConsColorTable
 0x0040B9D0	sdfFileHostRootPath	inferred	SMT3HD data name via SLUS_209.11 0x00529AC0, 3 agreeing references; was sdfFileHostRootPath
 0x0040BA10	sdfFileDeviceCB	inferred	SMT3HD data name via SLUS_209.11 0x00529B00, 4 agreeing references; was sdfFileDeviceCB
-0x0040BA70	sdfDevHddModuleArguments	inferred	confidence=high; HDD.IRX load consumes exactly0xC bytes: embedded-NUL argv -o,18,-n,32. Retail16-byte window is identical across games including four zero alignment bytes; existing char[] kept. Same role in DDS1 at 0x003988C0. Preserve prior Cedar data-ownership credit; no new function/data-ownership credit. [PurC5 readability data b8; matched-C/native-twin evidence; identifier-only]
-0x0040BA80	sdfDevPfsModuleArguments	inferred	confidence=high; PFS.IRX load consumes exactly0x12 bytes: embedded-NUL argv -m,18,-o,10,-n,64. Retail32-byte window identical across games with zero tail; do not turn this blob into one formatted string. Same role in DDS1 at 0x003988D0. Preserve prior Cedar data-ownership credit; no new function/data-ownership credit. [PurC5 readability data b8; matched-C/native-twin evidence; identifier-only]
+0x0040BA70	sdfHddIrxArgs	inferred	SMT3HD name via SLUS_209.11 0x00529B60, sdf/sdfHdd SMT3 rename; was sdfDevHddModuleArguments
+0x0040BA80	sdfHddPfsIrxArgs	inferred	SMT3HD name via SLUS_209.11 0x00529B70, sdf/sdfHdd SMT3 rename; was sdfDevPfsModuleArguments
 0x0040BAE8	sdfDefaultRandCB	inferred	SMT3HD data name via SLUS_209.11 0x00529BD8, sdfRandomize twin reference; was sdfDefaultRandCB
 0x0040BB18	sdfDmaTagNameTable	inferred	SMT3HD name via SLUS_209.11 0x00529C08, sdfSound data twin; was D_0040BB18
 0x0040BBF8	sdfIpuAudioModeIdecBits	inferred	Per stream audio mode, IDEC's OFM bit then its DTE bit, which sdfIpuDecode sets. DDS1 twin 0x00398A48.
@@ -10956,6 +10956,9 @@
 0x00438B38	sdfFileCmdPfsPrefix	inferred	SMT3HD name via SLUS_209.11 0x00551978, sdf/sdfFileIO SMT3 rename; was D_00438B38
 0x00438B40	sdfFileCmdMoviePath	inferred	SMT3HD name via SLUS_209.11 0x00551980, sdf/sdfFileIO SMT3 rename; was D_00438B40
 0x00438B48	sdfFileCmdCdimgPrefix	inferred	SMT3HD name via SLUS_209.11 0x00551988, sdf/sdfFileIO SMT3 rename; was D_00438B48
+0x00438B50	sdfHddDevPfs	inferred	SMT3HD name via SLUS_209.11 0x00551990, sdf/sdfHdd SMT3 rename; was D_00438B50
+0x00438B58	sdfHddDevHdd	inferred	SMT3HD name via SLUS_209.11 0x00551998, sdf/sdfHdd SMT3 rename; was D_00438B58
+0x00438B60	sdfHddMountPoint	inferred	SMT3HD name via SLUS_209.11 0x005519A0, sdf/sdfHdd SMT3 rename; was D_00438B60
 0x00438B66	sdfHddValid	inferred	SMT3HD data name via SLUS_209.11 0x005519A6, 6 agreeing references; was sdfHddValid
 0x00438B67	sdfDev9LoadFlag	inferred	SMT3HD data name via SLUS_209.11 0x005519A7, 2 agreeing references; was sdfDev9LoadFlag
 0x00438B68	sdfDev9Ready	inferred	SMT3HD name via SLUS_209.11 0x005519A8, sdfHdd twin; was D_00438B68
@@ -11305,6 +11308,7 @@
 0x00476510	sdfPrintRpcBuff	inferred	SMT3HD data name via SLUS_209.11 0x0058F350, 1 agreeing references; was sdfPrintRpcBuff
 0x00476940	sdfCdImageSearchFileDirect_ent	inferred	SMT3HD name via SLUS_209.11 0x0058F780, sdfCd data twin, the record sdfCdImageSearchFileDirect returns; was D_00476940
 0x00476980	sdfCdSectorBuf	inferred	SMT3HD name via SLUS_209.11 0x0058F7C0, sdf/sdfCd SMT3 rename; was sdfDevReadSectorBuffer
+0x00477180	sdfHddPowerOffStack	inferred	SMT3HD name via SLUS_209.11 0x0058FFC0, sdf/sdfHdd SMT3 rename; was D_00477180
 0x00477980	sndCommandThreadParameters	inferred	confidence=high; Sound startup fills entry, stack, stackSize0x1000, priority0x42 and gp, then passes this0x30 SdfKernelThreadParam to CreateThread. Opaque descriptor bytes stay untouched. Same role in DDS1 at 0x003FB000. No source-owned import or native ASM root/interior reference. [PurC5 readability data b7; matched-C/native-twin evidence; identifier-only]
 0x004779B0	sndCachedListenerState	inferred	confidence=high; p2sdSetStandPos compares all six scaled integer values, sends command0x160 on change and copies the local state into this cache. Existing opaque two-word prefix and32-byte copy remain. Same role in DDS1 at 0x003FB030. No source-owned import or native ASM root/interior reference. [PurC5 readability data b7; matched-C/native-twin evidence; identifier-only]
 0x00477A00	sndCommandRing	inferred	confidence=high; Producer and worker index this32-entry SndRingPacket bank; native entry/header owner is0x80 bytes. Existing bounds, payload copies and length packing remain unchanged. Same role in DDS1 at 0x003FB080. No source-owned import or native ASM root/interior reference. [PurC5 readability data b7; matched-C/native-twin evidence; identifier-only]

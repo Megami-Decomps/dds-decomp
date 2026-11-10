@@ -49,9 +49,9 @@ extern u8 sdfFileHddPrefix[];
 
 extern u32 sdfCdTrayMode;
 
-extern u8 D_003BD460[];
+extern u8 sdfHddDevPfs[];
 
-extern u8 D_003BD468[];
+extern u8 sdfHddDevHdd[];
 
 extern u16 sdfFileCmdDefaultCreateMode;
 
@@ -93,7 +93,7 @@ extern char sdfFileCmdMoviePath[]; /* /movie/ */
 
 extern char sdfFileCmdCdimgPrefix[]; /* cdimg: */
 
-extern char D_003BD470[];
+extern char sdfHddMountPoint[];
 
 extern void sdfDev9LoadModule(void);
 

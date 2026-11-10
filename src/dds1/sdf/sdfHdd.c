@@ -58,12 +58,12 @@ extern u8 sdfHddValid;
 
 extern u8 sdfDev9Ready;
 
-#define D_00551990 D_003BD460
-#define D_00551998 D_003BD468
-#define D_005519A0 D_003BD470
-#define D_0058FFC0 D_003FA800
-#define D_00529B60 sdfDevHddModuleArguments
-#define D_00529B70 sdfDevPfsModuleArguments
+#define D_00551990 sdfHddDevPfs
+#define D_00551998 sdfHddDevHdd
+#define D_005519A0 sdfHddMountPoint
+#define D_0058FFC0 sdfHddPowerOffStack
+#define D_00529B60 sdfHddIrxArgs
+#define D_00529B70 sdfHddPfsIrxArgs
 
 extern char D_00551990[];
 
@@ -156,11 +156,11 @@ void sdfHddInit(char *aPath)
     sdfHddValid = 1;
 }
 
-INCLUDE_SDATA(const s32, "sdf/sdfHdd", D_003BD460);
+INCLUDE_SDATA(const s32, "sdf/sdfHdd", sdfHddDevPfs);
 
-INCLUDE_SDATA(const s32, "sdf/sdfHdd", D_003BD468);
+INCLUDE_SDATA(const s32, "sdf/sdfHdd", sdfHddDevHdd);
 
-INCLUDE_SDATA(const s32, "sdf/sdfHdd", D_003BD470);
+INCLUDE_SDATA(const s32, "sdf/sdfHdd", sdfHddMountPoint);
 
 INCLUDE_SDATA(const s32, "sdf/sdfHdd", sdfDev9Ready);
 
