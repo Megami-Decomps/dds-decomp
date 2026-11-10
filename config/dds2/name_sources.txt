@@ -11153,6 +11153,7 @@
 0x00439214	sdfIpuDecodeThId	inferred	SMT3HD name via SLUS_209.11 0x00552164, sdfIpu reference; was D_00439214
 0x00439218	movieSemaId	inferred	SMT3HD data name via SLUS_209.11 0x00552168, 1 agreeing references; was movieSemaId
 0x0043921C	movieSemaCount	inferred	SMT3HD data name via SLUS_209.11 0x0055216C, 3 agreeing references; was movieSemaCount
+0x00439220	sdfDecompHistoryIndex	inferred	SMT3HD name via SLUS_209.11 0x00552170, sdf/sdf_Decomp SMT3 rename; was D_00439220
 0x00439224	sdfFileRpcThreadId	inferred	SMT3HD name via SLUS_209.11 0x00552174, sdfTmx twin; was D_00439224
 0x004393C8	dds3ProcessTreeDepth	inferred	SMT3HD data name via SLUS_209.11 0x005522C8, 2 agreeing references; was dds3ProcessTreeDepth
 0x0043DC90	key2	inferred	SMT3HD data name via SLUS_209.11 0x00556B90, 2 agreeing references; was key2
@@ -11299,5 +11300,6 @@
 0x0047B418	p2sdPcmBuffer	inferred	SMT3HD name via SLUS_209.11 0x00593F28, sdfSound data twin; was D_0047B418
 0x0047B440	sdfFileRpcQueue	inferred	SMT3HD name via SLUS_209.11 0x00593F40, sdfSound data twin; was D_0047B440
 0x0047B480	sdfIpuDecodeThStack	inferred	SMT3HD data name via SLUS_209.11 0x00593F80, 1 agreeing references; was sdfIpuDecodeThStack
+0x0047BC80	sdfDecompHistory	inferred	SMT3HD name via SLUS_209.11 0x00594780, sdf/sdf_Decomp SMT3 rename; was D_0047BC80
 0x0047BCC0	sdfFileRpcState	inferred	SMT3HD name via SLUS_209.11 0x005947C0, sdfTmx twin; was D_0047BCC0
 0x0047BE00	sdfFileRpcBuf	inferred	SMT3HD name via SLUS_209.11 0x00594900, sdfTmx twin; was D_0047BE00

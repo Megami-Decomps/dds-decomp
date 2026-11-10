@@ -8732,6 +8732,7 @@ sdfIpuQueueTail = 0x003BDAB0;
 sdfIpuDecodeThId = 0x003BDAB4;
 movieSemaId = 0x003BDAB8; // type:u32 size:0x4
 movieSemaCount = 0x003BDABC; // type:s32 size:0x4
+sdfDecompHistoryIndex = 0x003BDAC0;
 sdfFileRpcThreadId = 0x003BDAC4;
 dds3ProcessTreeDepth = 0x003BDC48;
 key2 = 0x003C2510;
@@ -8821,6 +8822,7 @@ LastLoad = 0x003FE250;
 p2sdPcmBuffer = 0x003FEA98;
 sdfFileRpcQueue = 0x003FEAC0;
 sdfIpuDecodeThStack = 0x003FEB00;
+sdfDecompHistory = 0x003FF300;
 sdfFileRpcState = 0x003FF340;
 sdfFileRpcBuf = 0x003FF480;
 // BEGIN shared (tools/shared_funcs.py names; curate names in either version's block above)

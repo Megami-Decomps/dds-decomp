@@ -38,8 +38,8 @@ struct sdfDecompCb_t;
 /* Load matrix into the VU0 scratch bank and postmultiply the primary bank. */
 void MultMatrixRev(const void *aMatrix);
 
-#define D_00594780 D_0047BC80
-#define D_00552170 D_00439220
+#define D_00594780 sdfDecompHistory
+#define D_00552170 sdfDecompHistoryIndex
 
 extern const u8 *D_00594780[16];
 
