@@ -175,7 +175,7 @@ void dds3SoftResetOff(void) {
 extern s16 D_00435BA8;
 extern u16 D_00435BAA;
 extern FldFileIoPriorityState D_00435BB4;
-extern u16 D_00438A1E;
+extern u16 sdfDrawFrameCounter;
 extern u16 sdfReqDrawDelaySleepCount;
 extern u16 dds3VblanksPerFrame;
 extern void sdfWaitVblank(s32 count);
@@ -207,7 +207,7 @@ void dds3KernelMain(void) {
             D_00435B80++;
             D_00435BA8 = sdfGetRunTimeCount(startTick) - sdfReqDrawDelaySleepCount;
             D_00438D80 ^= 1;
-            D_00435BAA = D_00438A1E;
+            D_00435BAA = sdfDrawFrameCounter;
         } else if (D_00435B90 > 0) {
             D_00435B90--;
             if (D_00435B90 == 0) {

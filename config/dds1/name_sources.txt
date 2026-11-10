@@ -8185,7 +8185,7 @@
 0x002D1318	sdfDeliverDrawStart	inferred	replaces buffer index in the two slot bytes with its complement
 0x002D1350	sdfDeliverDrawEnd	inferred	sets both or one slot byte and arms the vsync flag
 0x002D1380	sdfDrawThread	inferred	SMT3HD name via SLUS_209.11 0x002A9FF8, reloc-identical; was sdfRunGraphicsTransferWorker
-0x002D14C8	sdfServiceGraphicsBuffers	inferred	R_Names32
+0x002D14C8	sdfDispThread	inferred	SMT3HD name via SLUS_209.11 0x002AA140, sdfGraph twin; was sdfServiceGraphicsBuffers
 0x002D1590	sdfGrInit	inferred	SMT3HD name via SLUS_209.11 0x002AA1F0, reloc-identical; was sdfInitializeGraphicsWorkers
 0x002D1698	sdfGrInitNewFrame	inferred	SMT3HD name via SLUS_209.11 0x002AA2F8, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfWaitAndSelectBuffer
 0x002D16F0	sdfGsMemGetBitCount	inferred	SMT3HD name via SLUS_209.11 0x002AA350, reloc-identical; was sdfFormatBitsPerPixelA
@@ -10222,6 +10222,7 @@
 0x003BD2E0	sdfGrDrawFirstFlag	inferred	SMT3HD data name via SLUS_209.11 0x00551838, 3 agreeing references; was sdfGrDrawFirstFlag
 0x003BD2E1	sdfFrameEvenOdd	inferred	SMT3HD data name via SLUS_209.11 0x00551839, 1 agreeing references; was sdfFrameEvenOdd
 0x003BD2E8	sdfGrScreenMode	inferred	SMT3HD data name via SLUS_209.11 0x00551840, 3 agreeing references; was sdfGrScreenMode
+0x003BD2E9	sdfGrGsResetDone	inferred	SMT3HD name via SLUS_209.11 0x00551841, sdfGraph twin; was D_003BD2E9
 0x003BD2EA	sdfFrameId	inferred	SMT3HD data name via SLUS_209.11 0x00551842, 6 agreeing references; was sdfFrameId
 0x003BD2EC	dds3GsSema	inferred	SMT3HD data name via SLUS_209.11 0x00551844, 5 agreeing references; was dds3GsSema
 0x003BD2F0	sdfGrCaptureBuff	inferred	SMT3HD data name via SLUS_209.11 0x00551848, 3 agreeing references; was sdfGrCaptureBuff
@@ -10241,6 +10242,7 @@
 0x003BD324	sdfGrPacketBuffLimit	inferred	SMT3HD data name via SLUS_209.11 0x0055187C, 2 agreeing references; was sdfGrPacketBuffLimit
 0x003BD32C	sdfDrawFrameFlag	inferred	SMT3HD data name via SLUS_209.11 0x00551884, 8 agreeing references; was sdfDrawFrameFlag
 0x003BD32D	sdfDrawSyncFlag	inferred	SMT3HD name via SLUS_209.11 0x00551885, sdfDraw reference; was D_003BD32D
+0x003BD32E	sdfDrawFrameCounter	inferred	SMT3HD name via SLUS_209.11 0x00551886, sdfGraph twin; was D_003BD32E
 0x003BD330	sdfDrawPublishFlag	inferred	SMT3HD name via SLUS_209.11 0x00551888, sdf/sdfDraw SMT3 rename; was sdfGrFrameComplete
 0x003BD331	sdfGrDrawFrameId	inferred	SMT3HD data name via SLUS_209.11 0x00551889, 3 agreeing references; was sdfGrDrawFrameId
 0x003BD332	sdfGrBufferSlot	inferred	SMT3HD name via SLUS_209.11 0x0055188A, sdf/sdfDraw SMT3 rename; was sdfGrBufferSlotIndex
@@ -10459,7 +10461,7 @@
 0x003BD9B8	sdfChipPageCount	inferred	confidence=high; the exact initializer stores the usable 4 KiB page count and statistics traverses that many descriptors.
 0x003BD9C0	dds3CleanupList	inferred	SMT3HD data name via SLUS_209.11 0x00552070, 2 agreeing references; was dds3CleanupList
 0x003BD9C8	sdfMemDelayedResrcCB	inferred	SMT3HD data name via SLUS_209.11 0x00552078, 2 agreeing references; was sdfMemDelayedResrcCB
-0x003BD9D0	sdfGraphicsBufferThread	inferred	confidence=high; sdfGrInit passes this SdfThreadNode to sdfStartThreadAndWait with sdfServiceGraphicsBuffers; native node extent is eight bytes. Same role in DDS2 at 0x00439130. Preserve all types, declarations, bounds, data and control flow. [PurC5 readability data b6; native/matched-C twin evidence; identifier-only]
+0x003BD9D0	sdfGraphicsBufferThread	inferred	confidence=high; sdfGrInit passes this SdfThreadNode to sdfStartThreadAndWait with sdfDispThread; native node extent is eight bytes. Same role in DDS2 at 0x00439130. Preserve all types, declarations, bounds, data and control flow. [PurC5 readability data b6; native/matched-C twin evidence; identifier-only]
 0x003BD9D8	sdfDrawThreadId	inferred	SMT3HD data name via SLUS_209.11 0x00552088, 2 agreeing references; was sdfDrawThreadId
 0x003BD9DC	reqMakeFrameBuff	inferred	SMT3HD data name via SLUS_209.11 0x0055208C, 3 agreeing references; was reqMakeFrameBuff
 0x003BD9DD	reqGsReset	inferred	SMT3HD data name via SLUS_209.11 0x0055208D, 3 agreeing references; was reqGsReset

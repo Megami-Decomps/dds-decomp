@@ -8758,7 +8758,7 @@
 0x0032A1C8	sdfDeliverDrawStart	inferred	Inspected frame delivery state: Start changes any matching frame IDs to frameId^1 and sets lock buffer; End updates both frame IDs or one half-offset and clears lock. Two versus three parameter signatures distinguish these from one-argument packet-buffer Setup.
 0x0032A200	sdfDeliverDrawEnd	inferred	Inspected frame delivery state: Start changes any matching frame IDs to frameId^1 and sets lock buffer; End updates both frame IDs or one half-offset and clears lock. Two versus three parameter signatures distinguish these from one-argument packet-buffer Setup.
 0x0032A230	sdfDrawThread	inferred	SMT3HD name via SLUS_209.11 0x002A9FF8, reloc-identical; was sdfRunGraphicsTransferWorker
-0x0032A378	sdfServiceGraphicsBuffers	inferred	R_Names32
+0x0032A378	sdfDispThread	inferred	SMT3HD name via SLUS_209.11 0x002AA140, sdfGraph twin; was sdfServiceGraphicsBuffers
 0x0032A440	sdfGrInit	inferred	SMT3HD name via SLUS_209.11 0x002AA1F0, reloc-identical; was sdfInitializeGraphicsWorkers
 0x0032A548	sdfGrInitNewFrame	inferred	SMT3HD name via SLUS_209.11 0x002AA2F8, identical twin in its sdf unit run (sdf-decomp tools/twins.py renames); was sdfWaitAndSelectBuffer
 0x0032A5A0	sdfGsMemGetBitCount	inferred	SMT3HD name via SLUS_209.11 0x002AA350, reloc-identical; was sdfFormatBitsPerPixelA
@@ -10904,6 +10904,7 @@
 0x004389D0	sdfGrDrawFirstFlag	inferred	SMT3HD data name via SLUS_209.11 0x00551838, 3 agreeing references; was sdfGrDrawFirstFlag
 0x004389D1	sdfFrameEvenOdd	inferred	SMT3HD data name via SLUS_209.11 0x00551839, 1 agreeing references; was sdfFrameEvenOdd
 0x004389D8	sdfGrScreenMode	inferred	SMT3HD data name via SLUS_209.11 0x00551840, 3 agreeing references; was sdfGrScreenMode
+0x004389D9	sdfGrGsResetDone	inferred	SMT3HD name via SLUS_209.11 0x00551841, sdfGraph twin; was D_004389D9
 0x004389DA	sdfFrameId	inferred	SMT3HD data name via SLUS_209.11 0x00551842, 6 agreeing references; was sdfFrameId
 0x004389DC	dds3GsSema	inferred	SMT3HD data name via SLUS_209.11 0x00551844, 5 agreeing references; was dds3GsSema
 0x004389E0	sdfGrCaptureBuff	inferred	SMT3HD data name via SLUS_209.11 0x00551848, 3 agreeing references; was sdfGrCaptureBuff
@@ -10923,6 +10924,7 @@
 0x00438A14	sdfGrPacketBuffLimit	inferred	SMT3HD data name via SLUS_209.11 0x0055187C, 2 agreeing references; was sdfGrPacketBuffLimit
 0x00438A1C	sdfDrawFrameFlag	inferred	SMT3HD data name via SLUS_209.11 0x00551884, 8 agreeing references; was sdfDrawFrameFlag
 0x00438A1D	sdfDrawSyncFlag	inferred	SMT3HD name via SLUS_209.11 0x00551885, sdfDraw reference; was D_00438A1D
+0x00438A1E	sdfDrawFrameCounter	inferred	SMT3HD name via SLUS_209.11 0x00551886, sdfGraph twin; was D_00438A1E
 0x00438A20	sdfDrawPublishFlag	inferred	SMT3HD name via SLUS_209.11 0x00551888, sdf/sdfDraw SMT3 rename; was sdfGrFrameComplete
 0x00438A21	sdfGrDrawFrameId	inferred	SMT3HD data name via SLUS_209.11 0x00551889, 3 agreeing references; was sdfGrDrawFrameId
 0x00438A22	sdfGrBufferSlot	inferred	SMT3HD name via SLUS_209.11 0x0055188A, sdf/sdfDraw SMT3 rename; was sdfGrBufferSlotIndex
@@ -11152,7 +11154,7 @@
 0x00439118	sdfChipPageCount	inferred	confidence=high; the exact initializer stores the usable 4 KiB page count and statistics traverses that many descriptors; paired with DDS1.
 0x00439120	dds3CleanupList	inferred	SMT3HD data name via SLUS_209.11 0x00552070, 2 agreeing references; was dds3CleanupList
 0x00439128	sdfMemDelayedResrcCB	inferred	SMT3HD data name via SLUS_209.11 0x00552078, 2 agreeing references; was sdfMemDelayedResrcCB
-0x00439130	sdfGraphicsBufferThread	inferred	confidence=high; sdfGrInit passes this SdfThreadNode to sdfStartThreadAndWait with sdfServiceGraphicsBuffers; native node extent is eight bytes. Same role in DDS1 at 0x003BD9D0. Preserve all types, declarations, bounds, data and control flow. [PurC5 readability data b6; native/matched-C twin evidence; identifier-only]
+0x00439130	sdfGraphicsBufferThread	inferred	confidence=high; sdfGrInit passes this SdfThreadNode to sdfStartThreadAndWait with sdfDispThread; native node extent is eight bytes. Same role in DDS1 at 0x003BD9D0. Preserve all types, declarations, bounds, data and control flow. [PurC5 readability data b6; native/matched-C twin evidence; identifier-only]
 0x00439138	sdfDrawThreadId	inferred	SMT3HD data name via SLUS_209.11 0x00552088, 2 agreeing references; was sdfDrawThreadId
 0x0043913C	reqMakeFrameBuff	inferred	SMT3HD data name via SLUS_209.11 0x0055208C, 3 agreeing references; was reqMakeFrameBuff
 0x0043913D	reqGsReset	inferred	SMT3HD data name via SLUS_209.11 0x0055208D, 3 agreeing references; was reqGsReset

@@ -732,7 +732,7 @@ void dds3InitRandCB(void) {
 }
 
 extern s16 D_003BA728;
-extern u16 D_003BD32E;
+extern u16 sdfDrawFrameCounter;
 extern u16 D_003BA880;
 extern u16 D_003BA882;
 extern u16 D_003BA884;
@@ -756,7 +756,7 @@ s32 kwlnDebugGraphUpdate(dds3ProcessID_t *task) {
     sdfDrawTagLink(packetList, (u32)sdfDevPrintf(originX,
                     0x85C0, 0xFFFF80, 0, D_003BA888, (u16)D_003BA728));
     sdfDrawTagLink(packetList, (u32)sdfDevPrintf(originX,
-                    0x8620, 0xFFFF80, 0, D_003BA888, D_003BD32E));
+                    0x8620, 0xFFFF80, 0, D_003BA888, sdfDrawFrameCounter));
     sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x8080,
                     0x85C0, 0xFFFF80, 6, D_003BA888, D_003BA880));
     sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x8080,
@@ -765,7 +765,7 @@ s32 kwlnDebugGraphUpdate(dds3ProcessID_t *task) {
     sdfPrimLinkRect(packetList, 0x8000C000, 0, 0x73A0, 0x85F0,
                     originX + ((pixels + 0x2A) << 4),
                     0x8600, 0xFF0000, NULL);
-    pixels = (s32)((f32)D_003BD32E / 224.0f * 200.0f);
+    pixels = (s32)((f32)sdfDrawFrameCounter / 224.0f * 200.0f);
     sdfPrimLinkRect(packetList, 0x80000080, 0, 0x73A0, 0x8650,
                     originX + ((pixels + 0x2A) << 4),
                     0x8660, 0xFF0000, NULL);
@@ -788,8 +788,8 @@ s32 kwlnDebugGraphUpdate(dds3ProcessID_t *task) {
     } else {
         D_003BA884++;
     }
-    if (D_003BA886 >= 0x47 || D_003BA882 < D_003BD32E) {
-        D_003BA882 = D_003BD32E;
+    if (D_003BA886 >= 0x47 || D_003BA882 < sdfDrawFrameCounter) {
+        D_003BA882 = sdfDrawFrameCounter;
         D_003BA886 = 0;
     } else {
         D_003BA886++;
