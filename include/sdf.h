@@ -570,55 +570,49 @@ typedef char SdfSubParam_size_must_be_0x18[
 
 /* Asset holding texture and resource entries (0x48); DDS1/2 game/code_002D9748/003325F8.c. */
 typedef struct sdfMat_t {
-    u32 unk00; /* Word from the serialized asset-parameter header. */
-    u16 unk04; /* Halfword from the serialized asset-parameter header. */
-    u8 dirtyFlags; /* 0x06: pending state-group changes for the two draw entries */
-    u8 pad07;
-    struct SdfAssetEntry *drawEntries[2]; /* 0x08: owned 0xA0-byte draw entries */
-    u32 primaryStateWordFirst; /* 0x10: first word set by primary-state updates */
-    u32 primaryStateWordSecond; /* 0x14: second word set by primary-state updates */
-    u32 secondaryColor; /* 0x18 */
-    f32 primaryStateFloat; /* 0x1C: interpolated primary-state float */
-    u32 primaryStateWordThird; /* 0x20 */
-    u32 unk24;
-    u32 primaryStateWordFourth; /* 0x28: retained as raw bits */
-    sdfTexHandle_t *texture;
-    sdfTexHandle_t *secondaryTexture; /* 0x30 */
-    u32 secondaryMode;       /* 0x34: secondary packet and palette selector */
-    SdfSubParam *primarySubParam; /* 0x38 */
-    SdfSubParam *secondarySubParam; /* 0x3C */
-    f32 scalarPairFirst; /* 0x40 */
-    f32 scalarPairSecond; /* 0x44 */
+    u32 id; /* Word from the serialized asset-parameter header. */
+    u16 flags; /* Halfword from the serialized asset-parameter header. */
+    u8 duty; /* 0x06: pending state-group changes for the two draw entries */
+    u8 pad;
+    struct SdfAssetEntry *packet[2]; /* 0x08: owned 0xA0-byte draw entries */
+    u32 ambient; /* 0x10: first word set by primary-state updates */
+    u32 diffuse; /* 0x14: second word set by primary-state updates */
+    u32 multiTexDiffuse; /* 0x18 */
+    f32 constant; /* 0x1C: interpolated primary-state float */
+    u32 specular; /* 0x20 */
+    u32 specularParm;
+    u32 refmap; /* 0x28: retained as raw bits */
+    sdfTexHandle_t *texHandle;
+    sdfTexHandle_t *multiTexHandle; /* 0x30 */
+    u32 multiTexMethod;       /* 0x34: secondary packet and palette selector */
+    SdfSubParam *uvwParm; /* 0x38 */
+    SdfSubParam *multiTexUvwParm; /* 0x3C */
+    f32 fdBias; /* 0x40 */
+    f32 fdSoften; /* 0x44 */
 } sdfMat_t;
 
 typedef char SdfAsset_size_must_be_0x48[
     (sizeof(sdfMat_t) == 0x48) ? 1 : -1];
-typedef char SdfAsset_unk04_at_4[
-    ((u32)&((sdfMat_t *)0)->unk04 == 4) ? 1 : -1];
-typedef char SdfAsset_dirtyFlags_at_6[
-    ((u32)&((sdfMat_t *)0)->dirtyFlags == 6) ? 1 : -1];
-typedef char SdfAsset_drawEntries_offset_must_be_0x08[
-    ((u32)&((sdfMat_t *)0)->drawEntries == 0x08) ? 1 : -1];
-typedef char SdfAsset_primaryStateWordFirst_offset_must_be_0x10[
-    ((u32)&((sdfMat_t *)0)->primaryStateWordFirst == 0x10) ? 1 : -1];
-typedef char SdfAsset_primaryStateWordSecond_offset_must_be_0x14[
-    ((u32)&((sdfMat_t *)0)->primaryStateWordSecond == 0x14) ? 1 : -1];
-typedef char SdfAsset_primaryStateFloat_offset_must_be_0x1C[
-    ((u32)&((sdfMat_t *)0)->primaryStateFloat == 0x1C) ? 1 : -1];
-typedef char SdfAsset_primaryStateWordThird_offset_must_be_0x20[
-    ((u32)&((sdfMat_t *)0)->primaryStateWordThird == 0x20) ? 1 : -1];
-typedef char SdfAsset_primaryStateWordFourth_offset_must_be_0x28[
-    ((u32)&((sdfMat_t *)0)->primaryStateWordFourth == 0x28) ? 1 : -1];
-typedef char SdfAsset_dirtyFlags_offset_must_be_0x06[
-    ((u32)&((sdfMat_t *)0)->dirtyFlags == 0x06) ? 1 : -1];
-typedef char SdfAsset_primarySubParam_offset_must_be_0x38[
-    ((u32)&((sdfMat_t *)0)->primarySubParam == 0x38) ? 1 : -1];
-typedef char SdfAsset_secondarySubParam_offset_must_be_0x3C[
-    ((u32)&((sdfMat_t *)0)->secondarySubParam == 0x3C) ? 1 : -1];
-typedef char SdfAsset_scalarPairFirst_offset_must_be_0x40[
-    ((u32)&((sdfMat_t *)0)->scalarPairFirst == 0x40) ? 1 : -1];
-typedef char SdfAsset_scalarPairSecond_offset_must_be_0x44[
-    ((u32)&((sdfMat_t *)0)->scalarPairSecond == 0x44) ? 1 : -1];
+typedef char sdfMat_t_flags_at_0x04[
+    ((u32)&((sdfMat_t *)0)->flags == 0x04) ? 1 : -1];
+typedef char sdfMat_t_ambient_at_0x10[
+    ((u32)&((sdfMat_t *)0)->ambient == 0x10) ? 1 : -1];
+typedef char sdfMat_t_diffuse_at_0x14[
+    ((u32)&((sdfMat_t *)0)->diffuse == 0x14) ? 1 : -1];
+typedef char sdfMat_t_specularParm_at_0x24[
+    ((u32)&((sdfMat_t *)0)->specularParm == 0x24) ? 1 : -1];
+typedef char sdfMat_t_refmap_at_0x28[
+    ((u32)&((sdfMat_t *)0)->refmap == 0x28) ? 1 : -1];
+typedef char sdfMat_t_texHandle_at_0x2C[
+    ((u32)&((sdfMat_t *)0)->texHandle == 0x2C) ? 1 : -1];
+typedef char sdfMat_t_multiTexHandle_at_0x30[
+    ((u32)&((sdfMat_t *)0)->multiTexHandle == 0x30) ? 1 : -1];
+typedef char sdfMat_t_uvwParm_at_0x38[
+    ((u32)&((sdfMat_t *)0)->uvwParm == 0x38) ? 1 : -1];
+typedef char sdfMat_t_multiTexUvwParm_at_0x3C[
+    ((u32)&((sdfMat_t *)0)->multiTexUvwParm == 0x3C) ? 1 : -1];
+typedef char sdfMat_t_fdBias_at_0x40[
+    ((u32)&((sdfMat_t *)0)->fdBias == 0x40) ? 1 : -1];
 
 /* Draw entries store six transform floats and expose the same bytes as three qwords. */
 typedef union SdfDrawTransform {

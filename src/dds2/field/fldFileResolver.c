@@ -2154,7 +2154,7 @@ void fldDrawInit(void) {
         D_00436064 = 1;
         object = sdfMatNew();
         D_0043607C = (u32)object;
-        object->primaryStateFloat = 1.0f;
+        object->constant = 1.0f;
         D_00438EC8 = (u32)sdfMatNew();
         fldMarkerTexture = sdfTexSet((SdfTextureFileHeader *)(D_0038A700));
     }

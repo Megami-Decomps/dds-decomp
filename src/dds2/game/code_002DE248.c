@@ -11453,7 +11453,7 @@ void effDrawScalyTexturedStrip(u8 *owner, void *matrix) {
     sdfMatSetMultiMethod((sdfMat_t *)work->handle, mode);
     row = 0;
     sdfMatUpdatePacket((sdfMat_t *)work->handle, (s8)sdfFrameId);
-    entry = (SdfAssetEntry *)((sdfMat_t *)work->handle)->drawEntries[(s8)sdfFrameId];
+    entry = (SdfAssetEntry *)((sdfMat_t *)work->handle)->packet[(s8)sdfFrameId];
     entry->secondaryTextureState.clamp = 0x7F000FFF;
     entry->primaryTextureState.clamp = 0x02007F000FFFULL;
     entry->secondaryMode = mode;
@@ -13736,7 +13736,7 @@ EffDrawableAssetWork *effCreateDrawableAssetWithDefaultOpacity() {
     work->state = 0;
     asset = sdfMatNew();
     work->asset = asset;
-    asset->primaryStateFloat = 1.0f;
+    asset->constant = 1.0f;
     return work;
 }
 
