@@ -72,7 +72,7 @@ typedef char SdfTaskEntry_size_must_be_0x1C[
      (u32)&((SdfTaskEntry *)0)->initResult == 0x18)
         ? 1 : -1];
 
-/* Backing owner passed through the Kwln task's user-value word (0x14). */
+/* Backing owner passed through the dds3 task's user-value word (0x14). */
 typedef struct TaskWork {
     struct sdfMemHandle_t *allocation; /* 0x00 */
     char *primaryTaskName;          /* 0x04 */
