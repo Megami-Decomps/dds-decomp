@@ -344,6 +344,8 @@ segments:
       # .ctors, .dtors, .reginfo
       - [0x280330, databin, ctors_dtors_reginfo]
       - [0x280380, data, data]
+      - [0x30C358, .data, sdf/sdfMotion]
+      - [0x30C530, data, data_after_sdfMotion]
       - [0x30C810, .data, sdf/sdfDevCons]
       - [0x30C9D0, .data, sdf/sdfFile]
       - [0x30CA10, data, data_after_console_glyph_uv]

@@ -1,14 +1,11 @@
 #include "common.h"
 #include "ps2asm.h"
+#include "sdfFrame.h"
 #include "libsdf.h"
 #include "model.h"
 #include "motion.h"
 
 #define sdfMatSetRefMap sdfSetPrimaryStateWordFourth
-#define D_00529600 sdfMotGenMorphTable
-#define D_00529448 sdfMotGenNodeTable
-#define D_00529470 sdfMotModelLinerPosTable
-
 
 typedef struct
 {
@@ -53,12 +50,12 @@ extern f32 sdfMotInterpolateKeyFloat(sdfMotGetKeyIf_t *aItf);
 extern void sdfMotInterpolateKeyUvw(sdfMotGetKeyIf_t *aItf, void *aDst);
 extern void sdfMotInterpolateKeyUvwSub(f32 *aDst, f32 *aSrc0, f32 *aSrc1, f32 aRate);
 
-extern sdfMotGenNodeFunc D_00529448[];
+extern sdfMotGenNodeFunc sdfMotGenNodeTable[];
 extern sdfMotGenNodeFunc sdfMotGenNodeDef[];
 extern sdfMotGenNodeFunc sdfMotGenMatTable[];
-extern sdfMotGenNodeFunc D_00529600[];
+extern sdfMotGenNodeFunc sdfMotGenMorphTable[];
 
-extern sdfMotionNodeVTBL_t D_00529470; /* model liner pos */
+extern sdfMotionNodeVTBL_t sdfMotModelLinerPosTable; /* model liner pos */
 extern sdfMotionNodeVTBL_t sdfMotModelLinerRotXYZTable;
 extern sdfMotionNodeVTBL_t sdfMotModelLinerScaleTable;
 extern sdfMotionNodeVTBL_t sdfMotModelLerpRotQuatTable;
@@ -112,12 +109,12 @@ extern sdfMotionNodeVTBL_t sdfMotMatMultiUvw2Table;
 
 sdfMotionNode_t *sdfMotionNodeNew(sdfMotionCtrlr_t *aCtrlr, u32 aTypeId, u32 aNodeId)
 {
-    return D_00529448[aTypeId >> 16](aCtrlr, aTypeId, aNodeId);
+    return sdfMotGenNodeTable[aTypeId >> 16](aCtrlr, aTypeId, aNodeId);
 }
 
 void sdfMotionNodeFree(sdfMotionNode_t *aNode)
 {
-    ((void (*)(sdfMotionNode_t *))aNode->vtbl->destroy)(aNode);
+    aNode->vtbl->destroy(aNode);
 }
 
 void sdfMotionNodeBaseInit(sdfMotionNode_t *aNode, sdfMotionCtrlr_t *aCtrlr, sdfMotionNodeVTBL_t *aVTBL)
@@ -199,7 +196,7 @@ void sdfMotionChangeBlend(sdfMotionCtrlr_t *aCtrlr, s32 aCutNum, s32 aType, f32 
         aCtrlr->blendPreLength = -aPreFrame;
         for (i = 0; i < aCtrlr->nodeList->count; i++) {
             node = aCtrlr->nodeList->items[i];
-            ((void (*)(sdfMotionNode_t *))node->vtbl->initBlend)(node);
+            node->vtbl->initBlend(node);
         }
     } else {
         aCtrlr->blendLength = 0.0f;
@@ -218,7 +215,7 @@ void sdfMotionChangeBlend(sdfMotionCtrlr_t *aCtrlr, s32 aCutNum, s32 aType, f32 
     chunk = cut->chunk;
     for (i = 0; i < aCtrlr->nodeList->count; i++) {
         node = aCtrlr->nodeList->items[i];
-        ((void (*)(sdfMotionNode_t *, sdfMotionCutChunk_t *))node->vtbl->setCut)(node, chunk);
+        node->vtbl->setCut(node, chunk);
         chunk = (sdfMotionCutChunk_t *)((u8 *)chunk + chunk->size);
     }
 }
@@ -251,13 +248,13 @@ void sdfMotionSeek(sdfMotionCtrlr_t *aCtrlr, f32 aFrame) {
         }
         for (i = 0; i < aCtrlr->nodeList->count; i++) {
             binding = aCtrlr->nodeList->items[i];
-            ((void (*)(sdfMotionNode_t *, f32, f32))binding->vtbl->blendSeek)(binding, aFrame, weight);
+            binding->vtbl->blendSeek(binding, aFrame, weight);
         }
     } else {
         count = aCtrlr->nodeList->count;
         for (i = 0; i < count; i++) {
             binding = aCtrlr->nodeList->items[i];
-            ((void (*)(sdfMotionNode_t *, f32))binding->vtbl->seek)(binding, aFrame);
+            binding->vtbl->seek(binding, aFrame);
         }
     }
 }
@@ -279,7 +276,7 @@ s32 sdfMotionNext(sdfMotionCtrlr_t *aCtrlr) {
         sdfMotionSeek(aCtrlr, aCtrlr->blendPreLength);
         break;
     case SDF_MOTION_STAT_SEEK:
-        frame = aCtrlr->frame + aCtrlr->speed;
+        frame = aCtrlr->frame + SDF_FRAME_STEP(aCtrlr->speed);
         frameLength = aCtrlr->frameLength;
         if (aCtrlr->playType == 0) {
             if (frameLength <= frame) {
@@ -450,7 +447,7 @@ sdfMotionNode_t *sdfMotGenModelLinerPos(sdfMotionCtrlr_t *aCtrlr, u32 aTypeId, u
     sdfMotNodeModelVec_t *node;
 
     node = sdfChipAllocDirect(sizeof(sdfMotNodeModelVec_t));
-    sdfMotGenModelInit(&node->modelBase, aCtrlr, &D_00529470, aNodeId);
+    sdfMotGenModelInit(&node->modelBase, aCtrlr, &sdfMotModelLinerPosTable, aNodeId);
     return &node->modelBase.nodeBase;
 }
 
@@ -1033,7 +1030,7 @@ void sdfMotCLBK_matMultiUvw2InitBlend(void) {
 
 sdfMotionNode_t *sdfMotGenMorphNode(sdfMotionCtrlr_t *aCtrlr, u32 aTypeId, u32 aNodeId)
 {
-    return D_00529600[aTypeId & 0xFFFF](aCtrlr, aTypeId, aNodeId);
+    return sdfMotGenMorphTable[aTypeId & 0xFFFF](aCtrlr, aTypeId, aNodeId);
 }
 
 void sdfMotGenMorphInit(sdfMotNodeMorph_t *aBase,
@@ -1165,3 +1162,24 @@ void sdfMotCLBK_morphBlendSeek(sdfMotNodeMorph_t *aThis, f32 aFrame, f32 aBlendR
 void sdfMotCLBK_morphInitBlend(sdfMotNodeMorph_t *aThis) {
     aThis->blendSrc = *aThis->morphNode;
 }
+
+sdfMotGenNodeFunc sdfMotGenNodeTable[4] = { sdfMotGenNode, sdfMotGenMatNode, sdfMotGenMorphNode, NULL };
+sdfMotGenNodeFunc sdfMotGenNodeDef[5] = { sdfMotGenModelLinerPos, sdfMotGenModelLinerRotXYZ, sdfMotGenModelLinerScale, sdfMotGenModelLerpRotQuat, sdfMotGenModelVisible };
+sdfMotionNodeVTBL_t sdfMotModelLinerPosTable = { sdfMotCLBK_Destroy, sdfMotCLBK_SetCut, (void (*)(sdfMotionNode_t *, f32))sdfMotCLBK_modelLinerPosSeek, (void (*)(sdfMotionNode_t *))sdfMotCLBK_modelPosInitBlend, (void (*)(sdfMotionNode_t *, f32, f32))sdfMotCLBK_modelLinerPosBlendSeek };
+sdfMotionNodeVTBL_t sdfMotModelLinerRotXYZTable = { sdfMotCLBK_Destroy, sdfMotCLBK_SetCut, (void (*)(sdfMotionNode_t *, f32))sdfMotCLBK_modelLinerRotXYZSeek, (void (*)(sdfMotionNode_t *))sdfMotCLBK_modelRotInitBlend, (void (*)(sdfMotionNode_t *, f32, f32))sdfMotCLBK_modelLinerRotXYZBlendSeek };
+sdfMotionNodeVTBL_t sdfMotModelLinerScaleTable = { sdfMotCLBK_Destroy, sdfMotCLBK_SetCut, (void (*)(sdfMotionNode_t *, f32))sdfMotCLBK_modelLinerScaleSeek, (void (*)(sdfMotionNode_t *))sdfMotCLBK_modelScaleInitBlend, (void (*)(sdfMotionNode_t *, f32, f32))sdfMotCLBK_modelLinerScaleBlendSeek };
+sdfMotionNodeVTBL_t sdfMotModelLerpRotQuatTable = { sdfMotCLBK_Destroy, sdfMotCLBK_SetCut, (void (*)(sdfMotionNode_t *, f32))sdfMotCLBK_modelLerpRotQuatSeek, (void (*)(sdfMotionNode_t *))sdfMotCLBK_modelRotInitBlend, (void (*)(sdfMotionNode_t *, f32, f32))sdfMotCLBK_modelLerpRotQuatBlendSeek };
+sdfMotionNodeVTBL_t sdfMotModelVisibleTable = { sdfMotCLBK_Destroy, sdfMotCLBK_SetCut, (void (*)(sdfMotionNode_t *, f32))sdfMotCLBK_modelVisibleSeek, (void (*)(sdfMotionNode_t *))sdfMotCLBK_modelVisibleInitBlend, (void (*)(sdfMotionNode_t *, f32, f32))sdfMotCLBK_modelVisibleBlendSeek };
+sdfMotGenNodeFunc sdfMotGenMatTable[10] = { sdfMotGenMatDiffuse, sdfMotGenMatAmbient, sdfMotGenMatUvw, sdfMotGenMatMultiUvw, sdfMotGenMatMultiDiffuse, sdfMotGenMatConstant, sdfMotGenMatUvw2, sdfMotGenMatMultiUvw2, sdfMotGenMatSpecular, sdfMotGenMatRefMap };
+sdfMotionNodeVTBL_t sdfMotMatDiffuseTable = { sdfMotCLBK_Destroy, sdfMotCLBK_SetCut, (void (*)(sdfMotionNode_t *, f32))sdfMotCLBK_matDiffuseSeek, (void (*)(sdfMotionNode_t *))sdfMotCLBK_matDiffuseInitBlend, (void (*)(sdfMotionNode_t *, f32, f32))sdfMotCLBK_matDiffuseBlendSeek };
+sdfMotionNodeVTBL_t sdfMotMatAmbientTable = { sdfMotCLBK_Destroy, sdfMotCLBK_SetCut, (void (*)(sdfMotionNode_t *, f32))sdfMotCLBK_matAmbientSeek, (void (*)(sdfMotionNode_t *))sdfMotCLBK_matAmbientInitBlend, (void (*)(sdfMotionNode_t *, f32, f32))sdfMotCLBK_matAmbientBlendSeek };
+sdfMotionNodeVTBL_t sdfMotMatSpecularTable = { sdfMotCLBK_Destroy, sdfMotCLBK_SetCut, (void (*)(sdfMotionNode_t *, f32))sdfMotCLBK_matSpecularSeek, (void (*)(sdfMotionNode_t *))sdfMotCLBK_matSpecularInitBlend, (void (*)(sdfMotionNode_t *, f32, f32))sdfMotCLBK_matSpecularBlendSeek };
+sdfMotionNodeVTBL_t sdfMotMatRefMapTable = { sdfMotCLBK_Destroy, sdfMotCLBK_SetCut, (void (*)(sdfMotionNode_t *, f32))sdfMotCLBK_matRefMapSeek, (void (*)(sdfMotionNode_t *))sdfMotCLBK_matRefMapInitBlend, (void (*)(sdfMotionNode_t *, f32, f32))sdfMotCLBK_matRefMapBlendSeek };
+sdfMotionNodeVTBL_t sdfMotMatConstantTable = { sdfMotCLBK_Destroy, sdfMotCLBK_SetCut, (void (*)(sdfMotionNode_t *, f32))sdfMotCLBK_matConstantSeek, (void (*)(sdfMotionNode_t *))sdfMotCLBK_matConstantInitBlend, (void (*)(sdfMotionNode_t *, f32, f32))sdfMotCLBK_matConstantBlendSeek };
+sdfMotionNodeVTBL_t sdfMotMatUvwTable = { sdfMotCLBK_Destroy, sdfMotCLBK_SetCut, (void (*)(sdfMotionNode_t *, f32))sdfMotCLBK_matUvwSeek, (void (*)(sdfMotionNode_t *))sdfMotCLBK_matUvwInitBlend, (void (*)(sdfMotionNode_t *, f32, f32))sdfMotCLBK_matUvwBlendSeek };
+sdfMotionNodeVTBL_t sdfMotMatMultiUvwTable = { sdfMotCLBK_Destroy, sdfMotCLBK_SetCut, (void (*)(sdfMotionNode_t *, f32))sdfMotCLBK_matMultiUvwSeek, (void (*)(sdfMotionNode_t *))sdfMotCLBK_matMultiUvwInitBlend, (void (*)(sdfMotionNode_t *, f32, f32))sdfMotCLBK_matMultiUvwBlendSeek };
+sdfMotionNodeVTBL_t sdfMotMatMultiDiffuseTable = { sdfMotCLBK_Destroy, sdfMotCLBK_SetCut, (void (*)(sdfMotionNode_t *, f32))sdfMotCLBK_matMultiDiffuseSeek, (void (*)(sdfMotionNode_t *))sdfMotCLBK_matMultiDiffuseInitBlend, (void (*)(sdfMotionNode_t *, f32, f32))sdfMotCLBK_matMultiDiffuseBlendSeek };
+sdfMotionNodeVTBL_t sdfMotMatUvw2Table = { sdfMotCLBK_Destroy, sdfMotCLBK_SetCut, (void (*)(sdfMotionNode_t *, f32))sdfMotCLBK_matUvw2Seek, (void (*)(sdfMotionNode_t *))sdfMotCLBK_matUvw2InitBlend, (void (*)(sdfMotionNode_t *, f32, f32))sdfMotCLBK_matUvw2BlendSeek };
+sdfMotionNodeVTBL_t sdfMotMatMultiUvw2Table = { sdfMotCLBK_Destroy, sdfMotCLBK_SetCut, (void (*)(sdfMotionNode_t *, f32))sdfMotCLBK_matMultiUvw2Seek, (void (*)(sdfMotionNode_t *))sdfMotCLBK_matMultiUvw2InitBlend, (void (*)(sdfMotionNode_t *, f32, f32))sdfMotCLBK_matMultiUvw2BlendSeek };
+sdfMotGenNodeFunc sdfMotGenMorphTable[2] __attribute__((section(".data"))) = { (sdfMotGenNodeFunc)sdfMotGenMorph, NULL };
+sdfMotionNodeVTBL_t sdfMotMorphTable = { sdfMotCLBK_Destroy, sdfMotCLBK_SetCut, (void (*)(sdfMotionNode_t *, f32))sdfMotCLBK_morphSeek, (void (*)(sdfMotionNode_t *))sdfMotCLBK_morphInitBlend, (void (*)(sdfMotionNode_t *, f32, f32))sdfMotCLBK_morphBlendSeek };
