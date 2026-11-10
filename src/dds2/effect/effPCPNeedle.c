@@ -3,16 +3,16 @@
 #include "ps2asm.h"
 
 /* DDS's names for the same objects. */
-#define D_0031F460 effResourceDefaultTrianglePoints
-#define D_0031F520 effResourceDefaultTriangleColors
-#define D_0031F550 effResourceDrawSurfaces
-#define D_0056AD88 effResourceDrawParams
+#define D_0031F460 dds3NeedleModelDefaultPoints
+#define D_0031F520 dds3NeedleModelDefaultColors
+#define D_0031F550 dds3NeedleModelDrawSurfaces
+#define D_0056AD88 dds3NeedleModelPrimParam
 #define aViewEye sdfViewTargetVector
 #define dds3EffectBase effDefaultRandomState
 #define effBTLModelGetSphereCenter btlUnitGetMuzzlePosVU
 #define effBTLSkillCheckRun effBTLFieldColorUsesActorSelectors
 #define effBTLSkillGetInvokeFormation effBTLFieldColorGetOriginalSelector
-#define D_0031F450 D_003B1530
+#define D_0031F450 dds3NeedleModelUpVector
 
 
 /* One needle instance: position plus the colour the draw loop stamps. */

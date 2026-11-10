@@ -14386,11 +14386,11 @@ these are plain NUL-terminated strings, not MSG1 packs or new C literals.
 
 ## Resource fallbacks and parameter-work defaults
 
-`effResourceDrawParams` is the descriptor filled by instanced triangle
+`dds3NeedleModelPrimParam` is the descriptor filled by instanced triangle
 drawing. When no private streams exist, it uses twelve vertices from
-`effResourceDefaultTrianglePoints` and the twelve packed entries in
-`effResourceDefaultTriangleColors`, then submits through the mode-indexed
-`effResourceDrawSurfaces` bank. Keep the existing array views, shared descriptor
+`dds3NeedleModelDefaultPoints` and the twelve packed entries in
+`dds3NeedleModelDefaultColors`, then submits through the mode-indexed
+`dds3NeedleModelDrawSurfaces` bank. Keep the existing array views, shared descriptor
 reset and native color triplets; do not invent a new shape or normalize alpha.
 
 `effModelDefaultPosition`, `effModelDefaultQuaternion` and
