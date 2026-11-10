@@ -10030,6 +10030,8 @@
 0x003AAAB0	dds3ParticleNegOneVec	inferred	SMT3HD name via SLUS_209.11 0x003171A0, effect/parManager SMT3 rename; was D_003AAAB0
 0x003AAAC0	dds3ParticleSparkOffsetDirTable	inferred	SMT3HD name via SLUS_209.11 0x003171B0, effect/parManager SMT3 rename; was D_003AAAC0
 0x003AAB80	dds3ParticleFuncTable	inferred	SMT3HD data name via SLUS_209.11 0x00317270, 5 agreeing references; was dds3ParticleFuncTable
+0x003AAC20	dds3ParticleAllBuffInitTable	inferred	SMT3HD name via SLUS_209.11 0x00317310, effect/parManager SMT3 rename; was D_003AAC20
+0x003AAC58	dds3ParticleSetScaleTable	inferred	SMT3HD name via SLUS_209.11 0x00317348, effect/parManager SMT3 rename; was D_003AAC58
 0x003AAC90	dds3TrackPolyPairFaceIndex	inferred	SMT3HD name via SLUS_209.11 0x317380, effect/polyManager SMT3 rename; was D_003AAC90
 0x003AAD10	dds3TrackPolyTriangleFaceIndex	inferred	SMT3HD name via SLUS_209.11 0x00317400, effect/polyManager SMT3 rename; was D_003AAD10
 0x003AAD80	dds3TrackPolySixVectorFaceIndex	inferred	SMT3HD name via SLUS_209.11 0x00317470, effect/polyManager SMT3 rename; was D_003AAD80
