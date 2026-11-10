@@ -6,7 +6,7 @@
 
 #define func_002BFF98 sdfDevResizeBufferedRequest
 #define func_002B2628 sdfChunkFindById
-#define D_00529428 sdfModelDefaultName
+#include "eeregs.h"
 
 /* Audited SDK COP2/MMI operations: ee-gcc cannot express packed
  * vector transfers or the implicit VU matrix-register convention in C. */
@@ -49,10 +49,10 @@ extern sdfDmaTag_t *sdfMatMakePacket(sdfMat_t *aMat, sdfDmaTag_t *aBuffer, s32 a
 extern volatile u8 sdfFrameId;
 extern f32 sdfFaceDivSoften;
 extern f32 sdfFaceDivBias;
-extern const char D_00529428[];
+extern const char sdfModelDefaultName[];
 
 extern void *sdfGrAllocPacketBuff(s32 aSize);
-extern void sdfDrawTagLink2(sdfDrawTag_t *aTag, u32 aHeadPacket, u32 aTailPacket);
+extern void sdfDrawTagLink2(sdfDrawTag_t *aTag, addr_t aHeadPacket, addr_t aTailPacket);
 
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 extern void *sdfMemLock(sdfMemHandle_t *aHandle);
@@ -69,7 +69,7 @@ extern sdfModelRootNode_t *sdfModelRootNew(void);
 extern void sdfModelAllocNodeList(sdfModelRootNode_t *aRoot, s32 aLeng);
 
 extern void sdfDrawTagInit(sdfDrawTag_t *a);
-extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, addr_t aPacket);
 extern void sdfPrimSetOpaquePacket(sdfPrimTransPacket_t *aPkt);
 extern void sdfPrimSetSemiTransPacket(sdfPrimTransPacket_t *aPkt);
 extern void sdfPrimSetAddTransPacket(sdfPrimTransPacket_t *aPkt);
@@ -87,6 +87,8 @@ typedef struct QWORD_ALIGNED
 
 /* One frame's 128-byte VU1 transform packet. The 4-aligned element type is
  * what gives retail's runtime 8-byte-alignment dispatch over the copy. */
+/* sdfModelCopyStat below keeps its stride as (frame << 7) rather than a
+ * sizeof: the multiply there changes two words of the copy's addressing. */
 typedef struct
 {
     s32 words[0x80 / 4];
@@ -381,7 +383,7 @@ sdfModelNode_t *sdfModelSearchNode(sdfModelRootNode_t *aRoot, s32 aId)
 
 sdfDmaTag_t *sdfModelSetTmRefPacket(sdfModelNode_t *aNode, sdfDmaTag_t *aBuffer, s32 aId)
 {
-    u32 addr = (u32)((u8 *)aNode->tmPacket + (aId << 7)) & 0x0FFFFFFF;
+    addr_t addr = EE_PHYSICAL(EE_ADDR((u8 *)aNode->tmPacket + aId * sizeof(sdfModelTmImage_t)));
 
     *(u64 *)aBuffer = ((u64)addr << 32) | 0x30000008;
     aBuffer->dat1 = 0x6C07C000;
@@ -423,7 +425,7 @@ s32 sdfModelGetDrawPacketSize(const u32 *aList, s32 *aShapeCount, s32 *aExtSize)
     tempQwc = 0;
     if (count != 0) {
         do {
-            packet = (const sdfShapePacket_t *)*aList;
+            packet = EE_ADDR_AS(const sdfShapePacket_t *, *aList);
             aList++;
             switch (packet->packetType) {
             case 1:
@@ -464,7 +466,7 @@ sdfDmaTag_t *sdfModelSetNormalDrawPacket(sdfModelNode_t *aNode, sdfShapePacket_t
     body = sdfModelSetMatRefPacket(aNode->root, matIndex, aBuffer, aId);
     body->id = 0x30;
     body->qwc = qwc;
-    body->addr = (void *)((u32)aDataPtr->dataBody & 0x0FFFFFFF);
+    body->addr = (void *)EE_PHYSICAL(EE_ADDR(aDataPtr->dataBody));
     body->dat0 = 0;
     body->dat1 = 0;
     return body + 1;
@@ -472,11 +474,13 @@ sdfDmaTag_t *sdfModelSetNormalDrawPacket(sdfModelNode_t *aNode, sdfShapePacket_t
 
 /* NON_MATCHING: 82 of 96 words match at the exact size (first differing word
  * at +0x38); aDataPtr and the 0x6C07C000 constant swap $23 and $30. */
+/* NON_MATCHING. Behaviour checked against retail: 4 PCSX2 call vectors give the same return and memory,
+ * battle_0_1, seq28, seq32, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 sdfDmaTag_t *sdfModelSetOneSkinDrawPacket(sdfModelNode_t *aNode, sdfShapeOneSkinPacket_t *aDataPtr,
                                           sdfDmaTag_t *aBuffer, s32 aId)
 {
-    u32 mask = 0x0FFFFFFF;
     u32 packed = *(u32 *)&aDataPtr->packetSize;
     u16 matIndex = packed >> 16;
     s32 ofs;
@@ -500,10 +504,10 @@ sdfDmaTag_t *sdfModelSetOneSkinDrawPacket(sdfModelNode_t *aNode, sdfShapeOneSkin
         i++;
         tag->qwc = 7;
         tag->id = 0x30;
-        addr = (u32)sdfModelAllocTmPacket(node);
+        addr = EE_ADDR(sdfModelAllocTmPacket(node));
         tag->dat0 = 0;
         tag->dat1 = vuAddr | 0x6C07C000;
-        tag->addr = (void *)((addr + ofs) & mask);
+        tag->addr = EE_ADDR_AS(void *, EE_PHYSICAL(addr + ofs));
         vuAddr += 7;
         tag++;
     } while (i != count);
@@ -521,7 +525,7 @@ sdfDmaTag_t *sdfModelSetOneSkinDrawPacket(sdfModelNode_t *aNode, sdfShapeOneSkin
     tag->id = 0x30;
     tag->dat0 = 0;
     tag->dat1 = 0;
-    tag->addr = (void *)((u32)aDataPtr->dataBody & 0x0FFFFFFF);
+    tag->addr = (void *)EE_PHYSICAL(EE_ADDR(aDataPtr->dataBody));
     return tag + 1;
 }
 #else
@@ -530,6 +534,9 @@ INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelSetOneSkinDrawPacket);
 
 /* NON_MATCHING: 63 of 150 words match (first differing word at +0x0); eight
  * saved registers where retail fits seven. */
+/* NON_MATCHING. Behaviour checked against retail: 3 PCSX2 call vectors give the same return and memory,
+ * capture_009, covering only the paths those calls took.
+ * (sdfport 73e010f, tools/funcvec, tests/funcvec.sh). */
 #ifdef NON_MATCHING
 void sdfModelLinkShapedDrawPacket(sdfModelNode_t *aNode, sdfShapeShapedPacket_t *aDataPtr,
                                   sdfDrawTag_t *aDrawTag, s32 aId)
@@ -580,21 +587,20 @@ void sdfModelLinkShapedDrawPacket(sdfModelNode_t *aNode, sdfShapeShapedPacket_t 
 
         for (m = 0; m < used; m++) {
             sdfModelShapeEntry_t *entry =
-                (sdfModelShapeEntry_t *)((u8 *)(out[m].targetId * 8) + (u32)list);
+                (sdfModelShapeEntry_t *)(EE_ADDR_AS(u8 *, (out[m].targetId * 8)) + EE_ADDR(list));
 
             *(u64 *)&tag->dat0 = 0;
-            *(u64 *)tag = (entry[1].qwc | 0x30000000) |
-                          ((u64)((u32)entry[1].dataPtr & 0x0FFFFFFF) << 32);
+            *(u64 *)tag = SDF_DMA_TAG(EE_ADDR(entry[1].dataPtr),
+                                      entry[1].qwc | 0x30000000);
             tag++;
         }
         *(u64 *)&tag->dat0 = 0;
-        *(u64 *)tag = (list->count | 0x30000000) |
-                      ((u64)((u32)list->next & 0x0FFFFFFF) << 32);
+        *(u64 *)tag = SDF_DMA_TAG(EE_ADDR(list->next), list->count | 0x30000000);
         tag++;
         i++;
     } while (i != listCount);
     QUAD_ZERO(*(u128 *)tag);
-    sdfDrawTagLink2(aDrawTag, (u32)buf, (u32)tag);
+    sdfDrawTagLink2(aDrawTag, EE_ADDR(buf), EE_ADDR(tag));
 }
 #else
 INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelLinkShapedDrawPacket);
@@ -604,7 +610,7 @@ sdfModelPacketHeader_tag *sdfModelNewPacketHeader(sdfModelNode_t *aNode, s32 aOt
 {
     sdfModelPacketHeader_tag *packet = sdfChipAllocDirect(sizeof(*packet));
     sdfModelPacketHeader_tag **head =
-        (sdfModelPacketHeader_tag **)((u32)aId * sizeof(*aNode->drawPacket) + (u32)aNode +
+        (sdfModelPacketHeader_tag **)((u32)aId * sizeof(*aNode->drawPacket) + EE_ADDR(aNode) +
                                     (u32)&((sdfModelNode_t *)0)->drawPacket);
     sdfModelPacketHeader_tag *next = *head;
 
@@ -616,51 +622,56 @@ sdfModelPacketHeader_tag *sdfModelNewPacketHeader(sdfModelNode_t *aNode, s32 aOt
     return packet;
 }
 
+/* NON_MATCHING: 104 of 122 words differ (first at +0x14).
+ * Behaviour checked against retail: 34 PCSX2 call vectors give the same return and memory,
+ * a battle, field and event scenes, covering only the paths those calls took.
+ * (sdfport a0afdc1, tools/funcvec, tests/funcvec.sh). */
+#ifdef NON_MATCHING
 void sdfModelLinkDrawPacket(sdfModelNode_t *aNode, void *aShape, s32 aOtIndex, s32 aIndexFrom, s32 aId)
 {
     s32 numOfSkin;
     s32 tempQwc;
     s32 bytes;
-    u32 count;
-    sdfModelPacketHeader_tag *header;
+    u32 *cursor;
+    u32 packed;
+    s32 count;
     sdfDmaTag_t *tag = NULL;
-    const u32 *cursor;
     sdfShapePacket_t *packet;
-    sdfMemHandle_t *handle;
-    void *next;
-    void **head;
+    sdfModelPacketHeader_tag *header;
 
+    /* BUG: the callee adds to numOfSkin and the caller never clears it, so retail reads stack garbage. */
+#ifdef FIX_BUGS
+    numOfSkin = 0;
+#endif
     bytes = sdfModelGetDrawPacketSize(aShape, &numOfSkin, &tempQwc);
+    cursor = aShape;
     if (bytes == 0 && numOfSkin == 0 && tempQwc == 0) {
         return;
     }
-    cursor = aShape;
     sdfModelAllocTmPacket(aNode);
-    count = *cursor++;
+    packed = *cursor++;
+    count = packed & 0xFFFF;
     if (aIndexFrom != 0) {
-        u16 otIndex = count >> 16;
-        aOtIndex = otIndex;
+        aOtIndex = packed >> 16;
     }
-    count &= 0xFFFF;
     if (bytes != 0) {
-        handle = sdfMemAllocDirect(bytes);
-        header = (sdfModelPacketHeader_tag *)sdfMemLock(handle);
-        /* void ** so its alias set conflicts with the dataPtr store; that keeps
-         * retail's store order. */
-        head = (void **)((u32)aId * sizeof(*aNode->drawPacket) + (u32)aNode +
-                         (u32)&((sdfModelNode_t *)0)->drawPacket);
-        next = *head;
-        tag = (sdfDmaTag_t *)(header + 1);
-        header->type = 1;
-        header->otIndex = aOtIndex;
-        header->dataPtr = tag;
-        header->size = (bytes + 0xF) >> 4;
-        header->next = next;
-        header->memHandle = handle;
-        *head = header;
+        sdfMemHandle_t *handle = sdfMemAllocDirect(bytes);
+        sdfModelPacketHeader_tag *chunk = (sdfModelPacketHeader_tag *)sdfMemLock(handle);
+        sdfModelPacketHeader_tag **head =
+            (sdfModelPacketHeader_tag **)((u32)aId * sizeof(*aNode->drawPacket) + EE_ADDR(aNode) +
+                                        (u32)&((sdfModelNode_t *)0)->drawPacket);
+
+        tag = (sdfDmaTag_t *)(chunk + 1);
+        chunk->otIndex = aOtIndex;
+        chunk->dataPtr = tag;
+        chunk->size = (bytes + 0xF) >> 4;
+        chunk->next = *head;
+        chunk->memHandle = handle;
+        *head = chunk;
+        chunk->type = 1;
     }
     do {
-        packet = (sdfShapePacket_t *)*cursor++;
+        packet = EE_ADDR_AS(sdfShapePacket_t *, *cursor++);
         switch (packet->packetType) {
         case 1:
             tag = sdfModelSetNormalDrawPacket(aNode, packet, tag, aId);
@@ -688,12 +699,14 @@ void sdfModelLinkDrawPacket(sdfModelNode_t *aNode, void *aShape, s32 aOtIndex, s
             header->dataPtr = packet;
             break;
         }
-        count--;
-    } while (count != 0);
+    } while (--count != 0);
     if (bytes != 0) {
         sdfModelSetTermPacket(tag);
     }
 }
+#else
+INCLUDE_ASM(const s32, "sdf/sdfModel", sdfModelLinkDrawPacket);
+#endif
 
 /* vu0 routine: native SDK vector/matrix operations around model state. */
 void sdfModelMakeLocalTm(sdfModelNode_t *aNode) {
@@ -881,7 +894,7 @@ void sdfModelEvalNode(sdfModelNode_t *aNode, const f32 (*aParentTm)[4], s32 aFra
     SDF_VU0_STOREMATRIX(transformed);
     workspace = aNode->tmPacket;
     if (workspace != NULL) {
-        sdf3DPrimSetTmPacket((void *)(workspace + (aFrameId << 7)));
+        sdf3DPrimSetTmPacket((void *)(workspace + aFrameId * sizeof(sdfModelTmImage_t)));
     }
     child = aNode->children;
     if (child == 0) {
@@ -944,8 +957,8 @@ extern void *sdf3DFogDefault;
 extern u8 corePktSoftenBias;
 extern u8 sdf3DScreenTm[];
 extern sdfDrawTag_t *sdfPrimAllocDrawTag(s32 (*aAllocator)(s32));
-extern void sdfDrawTagLinkRef(sdfDrawTag_t *aTag, u32 aPacket);
-extern void sdfDrawTagLinkCall(sdfDrawTag_t *aTag, u32 aPacket);
+extern void sdfDrawTagLinkRef(sdfDrawTag_t *aTag, addr_t aPacket);
+extern void sdfDrawTagLinkCall(sdfDrawTag_t *aTag, addr_t aPacket);
 extern void sdfCoreDrawSetZBias(f32 z);
 extern void sdfCoreDrawSetLight(void *light);
 extern void sdfCoreDrawSetFog(void *fog);
@@ -1067,8 +1080,8 @@ void sdfModelTempPacketLinkOt(sdfGrOt_t **ot, sdfModelRootNode_t *root)
 
                 tag = sdfPrimAllocDrawTag(NULL);
                 *(f32 *)&tag->z = zValue;
-                tag->lightPacket = (u32)light;
-                tag->fogPacket = (u32)fog;
+                tag->lightPacket = EE_ADDR(light);
+                tag->fogPacket = EE_ADDR(fog);
                 tags[otIndex] = tag;
                 buf = sdfGrAllocPacketBuff(sizeof(*buf));
                 *(u64 *)&buf->tmTag = 0x10000008;
@@ -1085,7 +1098,7 @@ void sdfModelTempPacketLinkOt(sdfGrOt_t **ot, sdfModelRootNode_t *root)
                 buf->parm.itop = 0x04000004;
                 buf->parm.mscal = 0x14000000;
                 *(u64 *)&buf->parm.next.dat0 = parmTag;
-                sdfDrawTagLink2(tag, (u32)buf, (u32)&buf->parm);
+                sdfDrawTagLink2(tag, EE_ADDR(buf), EE_ADDR(&buf->parm));
             }
             packets = (sdfShapePacket_t **)header->packet;
             while ((pkt = *packets++) != NULL) {
@@ -1101,12 +1114,12 @@ void sdfModelTempPacketLinkOt(sdfGrOt_t **ot, sdfModelRootNode_t *root)
                     packed &= 0xFFFF;
                     body = sdfModelSetMatRefPacket(root, matIndex, buf, frame);
                     *(u64 *)&body->dat0 = 0;
-                    *(u64 *)body = (packed | 0x30000000) |
-                                   ((u64)((u32)pkt->dataBody & 0x0FFFFFFF) << 32);
+                    *(u64 *)body = SDF_DMA_TAG(EE_ADDR(pkt->dataBody),
+                                               packed | 0x30000000);
                     body++;
                     *(u64 *)body = 0x20000000;
                     *(u64 *)&body->dat0 = 0;
-                    sdfDrawTagLink2(tag, (u32)buf, (u32)body);
+                    sdfDrawTagLink2(tag, EE_ADDR(buf), EE_ADDR(body));
                 }
             }
         }
@@ -1241,9 +1254,9 @@ void sdfModelLinkOt(sdfGrOt_t **aOt, sdfModelRootNode_t *aRoot)
 
                 tag = sdfPrimAllocDrawTag(NULL);
                 *(f32 *)&tag->z = zValue;
-                tag->lightPacket = (u32)light;
+                tag->lightPacket = EE_ADDR(light);
                 tags[j] = tag;
-                tag->fogPacket = (u32)fog;
+                tag->fogPacket = EE_ADDR(fog);
                 buf = sdfGrAllocPacketBuff(sizeof(*buf));
                 sdfModelSetTmRefPacket(node, &buf->tmRef, frame);
                 *(u64 *)&buf->parm.next = 0x20000002;
@@ -1256,7 +1269,7 @@ void sdfModelLinkOt(sdfGrOt_t **aOt, sdfModelRootNode_t *aRoot)
                 buf->parm.faceDivBias = bias;
                 buf->parm.itop = 0x04000004;
                 buf->parm.mscal = 0x14000000;
-                sdfDrawTagLinkRef(tag, (u32)buf);
+                sdfDrawTagLinkRef(tag, EE_ADDR(buf));
             }
             switch (header->type) {
             case MODEL_PACKET_HEADER_TYPE_NORMAL:
@@ -1265,9 +1278,9 @@ void sdfModelLinkOt(sdfGrOt_t **aOt, sdfModelRootNode_t *aRoot)
 
                     QUAD_ZERO(*(u128 *)&ref[1]);
                     ref->qwc = 0;
-                    ref->addr = (void *)((u32)(header + 1) & 0x0FFFFFFF);
+                    ref->addr = (void *)EE_PHYSICAL(EE_ADDR(header + 1));
                     *(u64 *)&ref->dat0 = 0;
-                    sdfDrawTagLinkCall(tag, (u32)ref);
+                    sdfDrawTagLinkCall(tag, EE_ADDR(ref));
                 }
                 break;
             case MODEL_PACKET_HEADER_TYPE_SHAPE:
@@ -1283,7 +1296,7 @@ void sdfModelLinkOt(sdfGrOt_t **aOt, sdfModelRootNode_t *aRoot)
                 gen = sdfCorePacketGen(node, header->dataPtr, attr, color, soften, bias, frame,
                                        reverse);
                 if (gen != NULL) {
-                    sdfDrawTagLink(tag, (u32)gen);
+                    sdfDrawTagLink(tag, EE_ADDR(gen));
                 }
                 break;
             }
@@ -1307,7 +1320,7 @@ void sdfModelLinkOt(sdfGrOt_t **aOt, sdfModelRootNode_t *aRoot)
 }
 
 #ifdef NON_MATCHING
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, size_t c);
 #endif
 
 void sdfModelMorphListCopyStat(sdfModelMorphList_t *aDst, sdfModelMorphList_t *aSrc)
@@ -1382,13 +1395,13 @@ void sdfModelSetDrawEnv(sdfModelDrawEnv_t *aEnv)
     for (i = 0; i != 4; i++) {
         set->transPacket.header.dmatag.dat0 = 0x11000000;
         sdfDrawTagInit(&set->drawTag);
-        sdfDrawTagLink(&set->drawTag, (u32)&set->transPacket);
+        sdfDrawTagLink(&set->drawTag, EE_ADDR(&set->transPacket));
         set++;
     }
     sdfDrawTagInit(&aEnv->term.drawTag);
     *(u64 *)&aEnv->term.footer = 0;
     *(u64 *)&aEnv->term.footer.dat0 = 0x13000000;
-    sdfDrawTagLink(&aEnv->term.drawTag, (u32)&aEnv->term.footer);
+    sdfDrawTagLink(&aEnv->term.drawTag, EE_ADDR(&aEnv->term.footer));
 }
 
 void sdfModelDrawEnvLinkOt(sdfGrOt_t **aOt, sdfModelDrawEnv_t *aEnv)
@@ -1426,7 +1439,7 @@ void *sdfModelGetExtraChunk(sdfModelRootNode_t *aRoot, u32 aChunkId)
 }
 
 #ifdef NON_MATCHING
-extern s32 memcmp(const void *first, const void *second, u32 size);
+extern s32 memcmp(const void *first, const void *second, size_t size);
 extern u32 strlen(const char *text);
 #endif
 
@@ -1445,7 +1458,7 @@ s32 sdfModelGetNodeIndexByName(sdfModelRootNode_t *aRoot, const char *aName)
     len = strlen(aName);
     do {
         u32 entryLen = strlen((char *)entry);
-        u8 *id = (u8 *)(((u32)(entry + entryLen + 4)) & ~3U);
+        u8 *id = EE_ADDR_AS(u8 *, ((EE_ADDR((entry + entryLen + 4))) & ~3U));
 
         if (entryLen == len && memcmp(entry, aName, len) == 0) {
             return *(s32 *)id;
@@ -1460,7 +1473,7 @@ const char *sdfModelGetNodeName(sdfModelRootNode_t *aRoot, s32 aIndex) {
     const u8 *name;
     const u8 *end;
     if (chunk == NULL) {
-        return D_00529428;
+        return sdfModelDefaultName;
     }
     name = (const u8 *)(chunk + 1);
     end = (const u8 *)chunk + chunk->size;
@@ -1469,13 +1482,13 @@ const char *sdfModelGetNodeName(sdfModelRootNode_t *aRoot, s32 aIndex) {
         const s32 *id;
         while (*cursor++ != 0) {
         }
-        id = (const s32 *)(((u32)cursor + 3) & ~3U);
+        id = EE_ADDR_AS(const s32 *, ((EE_ADDR(cursor) + 3) & ~3U));
         if (*id == aIndex) {
             return (const char *)name;
         }
         name = (const u8 *)(id + 1);
         if (name >= end) {
-            return D_00529428;
+            return sdfModelDefaultName;
         }
     } while (1);
 }
@@ -1609,5 +1622,6 @@ f32 sdfModelGetFaceDivBias(sdfModelRootNode_t *aRoot)
     }
     return sdfFaceDivBias;
 }
+
 INCLUDE_SDATA(const s32, "sdf/sdfModel", corePktSoftenBias);
 
