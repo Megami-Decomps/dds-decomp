@@ -18,7 +18,7 @@ typedef void (*dds3ProcessShutdownFunc_t)(dds3ProcessID_t *task);
 
 struct dds3ProcessID_t {
     char name[0x18];          /* 0x00: NUL-padded task name, compared byte-wise */
-    s32 namehash;             /* 0x18 */
+    u32 namehash;             /* 0x18: sum of name's bytes */
     u32 flag;               /* 0x1C */
     u32 priority;            /* 0x20: ascending task queue priority. */
     u32 starttime;
@@ -27,7 +27,7 @@ struct dds3ProcessID_t {
     s16 shutdowntimer;   /* 0x2E: signed; positive values count down, zero destroys, negatives stay pending. */
     dds3ProcessFunc_t processfunc; /* 0x30 */
     dds3ProcessShutdownFunc_t shutdownfunc; /* 0x34 */
-    u32 workdata;           /* 0x38: caller-supplied value exposed by accessors. */
+    void *workdata;         /* 0x38: caller-supplied value exposed by accessors. */
     dds3ProcessID_t *next;      /* 0x3C */
     dds3ProcessID_t *prev;      /* 0x40 */
     dds3ProcessID_t *parent;        /* 0x44 */

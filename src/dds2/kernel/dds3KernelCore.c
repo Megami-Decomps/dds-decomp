@@ -482,7 +482,7 @@ dds3ProcessID_t *dds3StartProcess(const char *name, u32 priority, s32 startDelay
     task->shutdowntimer = destroyDelay;
     task->processfunc = update;
     task->shutdownfunc = destroy;
-    task->workdata = userValue;
+    task->workdata = (void *)userValue;
     task->name[0x17] = 0;
     task->starttime = 0;
     task->runtime = 0;
@@ -692,12 +692,12 @@ dds3TaskUpdateCount_t dds3GetProcessRunTime(const dds3ProcessID_t* task)
 
 void dds3SetProcessData(dds3ProcessID_t* task, u32 userValue)
 {
-    task->workdata = userValue;
+    task->workdata = (void *)userValue;
 }
 
 u32 dds3GetProcessData(const dds3ProcessID_t* task)
 {
-    return task->workdata;
+    return (u32)task->workdata;
 }
 
 void func_00101960(void) {
