@@ -308,7 +308,7 @@ void fldLmapSubmitPositionedCommandPacket(s32 x, s32 y, s32 z,
     sdfDevSetPrintCB(&packetHeader, x + 0x7000, y + 0x7900, z, colorTableIndex);
     sdfDrawTagLink(packetList, (u32)sdfDevPrintfEx(&packetHeader, command));
     drawSurface = &sdfGrOtTable[surfaceIndex];
-    drawSurface->append(drawSurface, packetList);
+    drawSurface->regFunc(drawSurface, packetList);
 }
 
 /* Build an untextured rectangle with a separate outline color. */
@@ -319,7 +319,7 @@ void fldLmapSubmitScaledSpritePacket(s32 x, s32 y, s32 z, s32 width, s32 height,
     sdfDrawTagInit(packetList);
     sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(x + 0x7000, y + 0x7900, z, width * 16, height * 8, fillColor, borderColor));
     drawSurface = &sdfGrOtTable[surfaceIndex];
-    drawSurface->append(drawSurface, packetList);
+    drawSurface->regFunc(drawSurface, packetList);
 }
 
 extern u8 fldUpdateLmapResourceLoad(LmapTaskState *);

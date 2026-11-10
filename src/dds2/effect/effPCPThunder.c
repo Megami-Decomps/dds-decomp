@@ -2881,5 +2881,5 @@ void dds3BezierTrackPolyDraw(EffPcpThunderFragmentResources *history) {
     dds3BezierTrackPolyVertex.color = history->color;
     sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&dds3BezierTrackPolyVertex));
     surface = dds3BezierTrackPolyParam[history->surfaceIndex];
-    surface->append(surface, list);
+    surface->regFunc(surface, list);
 }

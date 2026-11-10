@@ -1107,7 +1107,7 @@ s32 itfMesMngDebugProc(void) {
                                                  bounds[1] >> 3,
                                                  bounds[2] >> 4,
                                                  bounds[3] >> 3));
-    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, packetList);
+    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, packetList);
     return 0;
 }
 
@@ -2287,7 +2287,7 @@ void itfDrawSelectedSoundRow(instanceMes_tag *panel) {
         itfMiscDrawAlphaPrim(list, 0, 0);
     }
     surface = &sdfGrOtTable[panel->drawSurfaceIndex];
-    surface->append(surface, list);
+    surface->regFunc(surface, list);
 }
 
 #ifdef NON_MATCHING
@@ -2466,7 +2466,7 @@ void itfDrawSoundSelectorFadeLayers(instanceMes_tag *panel) {
         itfMiscDrawAlphaPrim(packet, 0, 0);
     }
     surface = &sdfGrOtTable[panel->drawSurfaceIndex];
-    surface->append(surface, packet);
+    surface->regFunc(surface, packet);
 }
 
 KwlnTaskUpdateResult CalcMsgMng_Process(dds3ProcessID_t *task) {
@@ -2526,7 +2526,7 @@ void DebugDrawWindowLine(itfpanel_t *sprite) {
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     itfMiscDrawLineStripPrim((DrawVertex *)vertices, (DrawColorRec *)D_003B4A18, D_00436630, D_00436638, 5, 0xFFFFFF, list);
-    D_00380708.append(&D_00380708, list);
+    D_00380708.regFunc(&D_00380708, list);
 }
 
 void DebugMoveWinVert(ItfMesBlkA4 *panel, s32 boundsMode) {
@@ -2745,7 +2745,7 @@ void itfMesDrawWindowBackground(s32 mode) {
 
     sdfSubmitGsTestOneRegisterPacket(0x5101B, 0x53);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, 0x53);
-    D_003805A8.append(&D_003805A8, packet);
+    D_003805A8.regFunc(&D_003805A8, packet);
 
     packet = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packet);
@@ -2757,7 +2757,7 @@ void itfMesDrawWindowBackground(s32 mode) {
         alpha = (D_00438F38 * D_00438F34) / 128;
         itfQueueOffsetTexturedRect(rectangleData[2], textureData[1],
                                   25 * D_00438F30, 0, alpha, texture, packet);
-        D_003805A8.append(&D_003805A8, packet);
+        D_003805A8.regFunc(&D_003805A8, packet);
     }
 }
 

@@ -2805,7 +2805,7 @@ void evtViewerUpdateWindowShadeFade(evtViewerInfo_t *viewer) {
         evtWindowShadePackets[buffer].regs[9].value = 0x00FEFFFF87009000ULL;
         list = dds3FontReqAllocDrawTag();
         sdfDrawTagLink(list, (u32)&evtWindowShadePackets[buffer]);
-        D_00325448.append(&D_00325448, list);
+        D_00325448.regFunc(&D_00325448, list);
     }
 }
 

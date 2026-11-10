@@ -1090,7 +1090,7 @@ void itfDrawTexturedSpriteRect(s32 x, s32 y, u32 depth, s32 width, s32 height,
     sdf2DLinkTexPacket(packetList, texture, SDF_GS_CONTEXT_1);
     sdfDrawTagLink(packetList, (u32)packet);
     drawSurface = &sdfGrOtTable[surfaceId];
-    drawSurface->append(drawSurface, packetList);
+    drawSurface->regFunc(drawSurface, packetList);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, surfaceId);
 }
 
@@ -1245,7 +1245,7 @@ void sdfDrawTexturedQuad(s32 x, s32 y, u32 depth, s32 width, s32 height,
     sdf2DLinkTexPacket(packetList, texture, SDF_GS_CONTEXT_1);
     sdfDrawTagLink(packetList, (u32)packet);
     drawSurface = &sdfGrOtTable[surfaceId];
-    drawSurface->append(drawSurface, packetList);
+    drawSurface->regFunc(drawSurface, packetList);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, surfaceId);
 }
 

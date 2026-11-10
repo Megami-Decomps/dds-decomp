@@ -17,7 +17,7 @@ void dds3FontReqDrawBoxLine(const Dds3IntrusiveNode *owner)
     sdfPrimLinkBoxLine(list, rect->color, 0, rect->left, rect->top,
                   rect->left + rect->width, rect->top + rect->height,
                   rect->depth, 0);
-    D_003255A8.append(&D_003255A8, list);
+    D_003255A8.regFunc(&D_003255A8, list);
 }
 
 extern Dds3IntrusiveNodeCallbacks D_003BAAD8;

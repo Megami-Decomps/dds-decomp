@@ -1781,7 +1781,7 @@ void mnuSubmitMovieDrawPacket(movieStream_t *movie, sdfGrOt_t *pool) {
     packet->vertexExtent.registerId = SDF_GS_XYZ2;
     list = sdfPrimAllocDrawTag(0);
     sdfDrawTagLink(list, (u32)packet);
-    pool->append(pool, list);
+    pool->regFunc(pool, list);
 }
 
 extern char D_0042A348[];

@@ -128,7 +128,7 @@ s32 pbDebugPrintPanel3(void) {
         }
         y += 0x60;
     }
-    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
+    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, list);
     pbDebugPanel3State += itfTestOverlayPhaseStep;
     pbDrawRotatedPrim(0x52);
     if ((s8)dds3PadButtonState.secondaryTriangle < 0) {
@@ -257,7 +257,7 @@ void pbDrawRotatedPrim(s32 surfaceIndex) {
     sdfDrawTagLink(list, (u32)pbMakePrimPacket(6, 0));
     sdfDrawTagLink(list, (u32)pbAllocPrimPacket(0x7000, 0x7900, 0xFEFFFF, 0x2000, 0xE00, color, color));
     surface = &sdfGrOtTable[surfaceIndex];
-    surface->append(surface, list);
+    surface->regFunc(surface, list);
 }
 
 void btlResetRuntimeSequenceCounter(void) {

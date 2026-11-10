@@ -2440,7 +2440,7 @@ void func_00148188(f32 centerX, f32 centerY, f32 angle) {
         (s32)(corners[2][0] + 28672.0f), (s32)(corners[2][2] + 30976.0f), u2, v2,
         (s32)(corners[3][0] + 28672.0f), (s32)(corners[3][2] + 30976.0f), u3, v3,
         0, 0);
-    fldDrawGetOt()->append(fldDrawGetOt(), packet);
+    fldDrawGetOt()->regFunc(fldDrawGetOt(), packet);
 }
 
 extern f32 D_004362B0;

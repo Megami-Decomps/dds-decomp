@@ -2428,7 +2428,7 @@ void mdlSubmitViewerIntermediateDrawPacket(void) {
             packetList = dds3FontReqAllocDrawTag();
             SDF_VU0_LOADIDENTITY();
             sdfDrawTagLink(packetList, (u32)sdfDrawRotatedModel(D_003C8930, D_003C8990, 6, 0x80));
-            D_00380048.append(&D_00380048, packetList);
+            D_00380048.regFunc(&D_00380048, packetList);
         }
     }
 }
@@ -2457,7 +2457,7 @@ void mdlSubmitViewerResourceDrawPacket(void) {
             sdfDumpHexLine(drawPacket, 0x100);
         }
         sdfDrawTagLink(packetList, (u32)drawPacket);
-        D_00380048.append(&D_00380048, packetList);
+        D_00380048.regFunc(&D_00380048, packetList);
     }
 }
 
@@ -2587,7 +2587,7 @@ void mdlDrawMapPositionRecords(dds3ModelHandle_t *resource) {
             sdfModelMakeMarkPosMatrix(resource->inner, currentRecord);
             sdfDrawTagLink(packetList, (u32)sdfDrawRotatedModel(D_003C8A00, D_003C8A60, 6, 0x80));
         } while (recordIndex != recordCount);
-        D_00380048.append(&D_00380048, packetList);
+        D_00380048.regFunc(&D_00380048, packetList);
     }
 }
 
@@ -2664,7 +2664,7 @@ s32 mdlViewerEnd(dds3ProcessID_t *task)
     }
     while (i != MDL_VIEWER_RESOURCE_SLOTS);
   }
-  D_003805A8.append(&D_003805A8, mdlViewerState.packetList);
+  D_003805A8.regFunc(&D_003805A8, mdlViewerState.packetList);
   return 0;
 }
 
@@ -3059,7 +3059,7 @@ s32 mdlDebugPrintEffectScale(dds3ProcessID_t *task) {
     }
     dds3PrimDebugTextBox(state->packetList, 0x8740, 0x8320,
                       state->editing == 1 ? state->selection - 12 : -1, state->ambient);
-    D_00380708.append(&D_00380708, state->packetList);
+    D_00380708.regFunc(&D_00380708, state->packetList);
     return 0;
 }
 
@@ -3262,7 +3262,7 @@ s32 mdlDebugPrintEffectScale2(dds3ProcessID_t *task) {
                                                           D_003C8B08[i].format, value));
     }
     mdlDebugTextBox(0x8680, 0x7C60, kwlnDrawVector.fogColor, mdlDebugScaleWork.selection - 4);
-    D_00380708.append(&D_00380708, mdlDebugScaleWork.packetList);
+    D_00380708.regFunc(&D_00380708, mdlDebugScaleWork.packetList);
     return 0;
 }
 
@@ -3401,7 +3401,7 @@ s32 soften_bias_Process(dds3ProcessID_t *task) {
     sdfDrawTagLink(D_00453660.packetList,
                     (u32)sdfDevPrintf(0x8B00, 0x7BA0, 0xFF0080,
                                                      0, format));
-    D_00380708.append(&D_00380708,
+    D_00380708.regFunc(&D_00380708,
                       D_00453660.packetList);
     sdfFaceDivSoften = D_00453660.value;
     sdfFaceDivBias = D_00453660.adjustment;

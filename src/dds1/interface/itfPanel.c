@@ -74,5 +74,5 @@ void itfPnlDraw(itfpanel_t *panel, sdfGrOt_t *packetOwner) {
     sdfDrawTagInit(packetList);
     DrawTestAlphaPrim(packetList);
     itfPnlDrawTag(panel, packetList);
-    packetOwner->append(packetOwner, packetList);
+    packetOwner->regFunc(packetOwner, packetList);
 }

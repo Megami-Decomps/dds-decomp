@@ -62,7 +62,7 @@ s32 EventDebugProcess1(dds3ProcessID_t *task) {
     sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7900, 0x7E40, 0xFEFFFF, 0, "RL   = SET E600"));
     sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7900, 0x7EA0, 0xFEFFFF, 0, "RD   = RESET FLAG"));
     sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7900, 0x7F00, 0xFEFFFF, 0, "L1R1 = +-100"));
-    D_00325708.append(&D_00325708, list);
+    D_00325708.regFunc(&D_00325708, list);
 
     if ((s8)dds3PadButtonState[1][0][1] < 0) {
         sprintf(path, "/event/e%03d/e%03d/scr/e%03d.bf",

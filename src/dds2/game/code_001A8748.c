@@ -255,7 +255,7 @@ s32 TestMsgMngD_Process(dds3ProcessID_t *task) {
         sdfDrawTagInit(mem);
         itfMiscDrawAlphaPrim(mem, 0, 0);
         itfMiscDrawSpritePrim((DrawVertex *)D_003B4D08, (DrawColorRec *)D_003B4D18, (DrawColorRec *)D_003B4D28, 0xFFF, sndTestMessageTexture, 0, mem);
-        D_003805A8.append(&D_003805A8, mem);
+        D_003805A8.regFunc(&D_003805A8, mem);
         return 0;
     }
     return 0;
@@ -302,7 +302,7 @@ s32 pbDebugPrintPanel(void) {
     sdfDrawTagLink(list,
                     (u32)sdfDevPrintfEx(&packet, "FOVY: %6.2f",
                         dds3ScreenParam.camera.fov * radiansToDegrees));
-    D_00380708.append(&D_00380708, list);
+    D_00380708.regFunc(&D_00380708, list);
     if (D_0037F543[0] < 0) {
         return -1;
     }
@@ -466,7 +466,7 @@ s32 pbDebugPrintPanel2(void) {
     sdfDrawTagLink(list,
         (u32)dds3PrimFrameRect((D_00435CE0[0] * 16) + 0x7FC0, (D_00435CE0[1] * 8) + 0x7FE0,
             0xFF0000, 0x80, 0x40, 0x80008080, 0x80000000));
-    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
+    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, list);
 
     if ((s8)dds3PadButtonState.secondaryTriangle < 0) {
         dds3ScreenBlurFlag ^= 1;
@@ -621,7 +621,7 @@ s32 pbDebugPrintPanel3(void) {
         }
         y += 0x60;
     }
-    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
+    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, list);
     pbDebugPanel3State += itfTestOverlayPhaseStep;
     pbDrawRotatedPrim(0x52);
     if ((s8)dds3PadButtonState.secondaryTriangle < 0) {
@@ -752,7 +752,7 @@ void pbDrawRotatedPrim(s32 surfaceIndex) {
     sdfDrawTagLink(list, (u32)pbMakePrimPacket(6, 0));
     sdfDrawTagLink(list, (u32)pbAllocPrimPacket(0x7000, 0x7900, 0xFEFFFF, 0x2000, 0xE00, color, color));
     surface = &sdfGrOtTable[surfaceIndex];
-    surface->append(surface, list);
+    surface->regFunc(surface, list);
 }
 
 void btlResetRuntimeSequenceCounter(void) {

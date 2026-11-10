@@ -1643,7 +1643,7 @@ BtlRuntimeFadeStepResult btlDrawCapturedScreenTileOverlay(
         packet->registers.alpha.registerId = 0x42;
         sdfDrawTagLink(list, (u32)packet);
         btlBuildOverlayQuadPacket(list, 0x40, backgroundColor, -0x100);
-        D_00380708.append(&D_00380708, list);
+        D_00380708.regFunc(&D_00380708, list);
     }
     if (btlRuntimeState.options & 1) {
         list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
@@ -1659,7 +1659,7 @@ BtlRuntimeFadeStepResult btlDrawCapturedScreenTileOverlay(
         packet->registers.alpha.registerId = 0x42;
         sdfDrawTagLink(list, (u32)packet);
         btlDrawScaledHeldTextureQuad(list, 0x40, color, -0x100, 1.0f);
-        D_00380608.append(&D_00380608, list);
+        D_00380608.regFunc(&D_00380608, list);
         if (D_00436D10 == NULL) {
             D_00436D10 = sdfMatNew();
             btlInitLightParams();
@@ -1821,7 +1821,7 @@ draw_tile:
         packet->registers.alpha.value = 0x44;
         packet->registers.alpha.registerId = 0x42;
         sdfDrawTagLink(tiles, (u32)packet);
-        D_00380628.append(&D_00380628, tiles);
+        D_00380628.regFunc(&D_00380628, tiles);
     }
     return complete;
 }
@@ -1899,7 +1899,7 @@ void btlInitializeGraphicsRuntime(void) {
     sdfPreDrawTagInit(context);
     sdfLinkStoreFrameImage(packetList, context, 0, 0, 0x200, 0xe0, (s32)runtime->frameBuffer, 0, 0, 0);
     sdfPreDrawChainLink((SdfPacketChain *)D_00380860, context);
-    D_00380608.append(&D_00380608, packetList);
+    D_00380608.regFunc(&D_00380608, packetList);
 }
 
 void btlSubmitFrameAndQueueRuntimeHandle(void) {
@@ -1907,7 +1907,7 @@ void btlSubmitFrameAndQueueRuntimeHandle(void) {
     sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfPrimAllocDrawTag(0);
     sdfLinkLoadImage(packetList, dds3RenderTexture->pixelGsHandle,
                               0, 0, 0x200, 0xe0, (s32)runtime->frameBuffer, 0);
-    D_00380608.append(&D_00380608, packetList);
+    D_00380608.regFunc(&D_00380608, packetList);
     sdfMemFreeDelayedDirect(runtime->frameBufferAllocation);
     runtime->frameBufferAllocation = 0;
     runtime->frameBuffer = 0;
@@ -1920,7 +1920,7 @@ void btlInitializeOverlayGraphics(void) {
     sdfPreDrawTagInit(context);
     sdfPrimLinkFrameMovePacket(packetList, context, dds3RenderTexture->pixelGsHandle, 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
     sdfPreDrawChainLink((SdfPacketChain *)D_00380860, context);
-    D_00380608.append(&D_00380608, packetList);
+    D_00380608.regFunc(&D_00380608, packetList);
     btlRuntimeState.options |= 1;
 }
 
@@ -2352,7 +2352,7 @@ s32 mnuDrawSelectableMenuRows(s32 x, s32 y, s32 frameWidth, MenuList *selectionS
             rowY += MNU_LIST_FIXED_ROW_HEIGHT;
         }
     }
-    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, (sdfDrawTag_t *)indexPackets);
+    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, (sdfDrawTag_t *)indexPackets);
     return btlDrawSelectableListRows(x + MNU_LIST_LABEL_OFFSET, y, frameWidth, selectionState, rowTexts);
 }
 

@@ -580,7 +580,7 @@ void evtSubmitPrimaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s3
     sdfDrawTagLink(list, (u32)packet);
     {
         sdfGrOt_t *surface = &sdfGrOtTable[egl_OT_Offset];
-        surface->append(surface, list);
+        surface->regFunc(surface, list);
     }
 }
 
@@ -597,7 +597,7 @@ void evtSubmitSecondaryGsTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, 
     sdfDrawTagLink(list, (u32)packet);
     {
         sdfGrOt_t *surface = &sdfGrOtTable[egl_OT_Offset];
-        surface->append(surface, list);
+        surface->regFunc(surface, list);
     }
 }
 
@@ -643,7 +643,7 @@ void evtSubmitPrimaryAlphaBlendMode(s32 blendMode) {
     sdfDrawTagLink(list, (u32)packet);
     {
         sdfGrOt_t *surface = &sdfGrOtTable[egl_OT_Offset];
-        surface->append(surface, list);
+        surface->regFunc(surface, list);
     }
 }
 
@@ -660,7 +660,7 @@ void evtSubmitFixedAlphaBlend(s32 fixedAlpha) {
     sdfDrawTagLink(list, (u32)packet);
     {
         sdfGrOt_t *surface = &sdfGrOtTable[egl_OT_Offset];
-        surface->append(surface, list);
+        surface->regFunc(surface, list);
     }
 }
 
@@ -673,7 +673,7 @@ void evtSubmitPrimaryFramePacket(void) {
     sdfDrawTagLinkRefGif(list, (u32)framePacket);
     {
         sdfGrOt_t *surface = &sdfGrOtTable[egl_OT_Offset];
-        surface->append(surface, list);
+        surface->regFunc(surface, list);
     }
 }
 
@@ -686,7 +686,7 @@ void evtSubmitAlternateFramePacket(void) {
     sdfDrawTagLinkRefGif(list, (u32)framePacket);
     {
         sdfGrOt_t *surface = &sdfGrOtTable[egl_OT_Offset];
-        surface->append(surface, list);
+        surface->regFunc(surface, list);
     }
 }
 
@@ -716,7 +716,7 @@ void evtSubmitTexturedGradientQuad(s32 x, s32 y, s32 width, s32 height,
         right, bottom, uRight, vBottom, color2,
         -1, NULL);
     surface = &sdfGrOtTable[egl_OT_Offset];
-    surface->append(surface, list);
+    surface->regFunc(surface, list);
 }
 
 #ifdef NON_MATCHING
@@ -833,7 +833,7 @@ void evtSubmitGradientRectAtDepth(s32 x, s32 y, s32 w, s32 h, u32 depth, s32 col
     }
     sdfDrawTagLink(command, packet);
     descriptor = &sdfGrOtTable[egl_OT_Offset];
-    descriptor->append(descriptor, command);
+    descriptor->regFunc(descriptor, command);
 }
 
 /* Submit the four-corner gradient rectangle with the native default depth.
@@ -892,7 +892,7 @@ void eglLinkTri(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s32 color0, s32 
     }
     sdfDrawTagLink(command, (u32)packet);
     descriptor = &sdfGrOtTable[egl_OT_Offset];
-    descriptor->append(descriptor, command);
+    descriptor->regFunc(descriptor, command);
 }
 
 
@@ -938,7 +938,7 @@ void eglLinkPoly4(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2
     strip[0] = D_0037F5A0[0];
     sdfDrawTagLink(list, (u32)sdf3DPrimMakePoly(&desc));
     surface = &sdfGrOtTable[egl_OT_Offset];
-    surface->append(surface, list);
+    surface->regFunc(surface, list);
 }
 
 /* Submit the same native vertex permutation with rectangular UVs, then queue asset release. */
@@ -993,7 +993,7 @@ void eglLinkTexPoly4(s32 i0, f32 x0, f32 y0, f32 z0, s32 i1, f32 x1, f32 y1, f32
     uvs[7] = v0;
     sdfDrawTagLink(list, (u32)sdf3DPrimMakePoly(&desc));
     surface = &sdfGrOtTable[egl_OT_Offset];
-    surface->append(surface, list);
+    surface->regFunc(surface, list);
     sdfMatFreeDelayed((sdfMat_t *)asset);
 }
 
@@ -1012,7 +1012,7 @@ void eglLinkLine(f32 x, f32 y, f32 z, f32 u, f32 v, f32 w, u32 first, u32 second
     sdfDrawTagLink(list, (u32)effDebugDrawWireModel(D_0037F5B0, D_0037F5D0, 2, 0x80));
     {
         sdfGrOt_t *surface = &sdfGrOtTable[egl_OT_Offset];
-        surface->append(surface, list);
+        surface->regFunc(surface, list);
     }
 }
 
@@ -1030,7 +1030,7 @@ void eglLinkPrint(s32 x, s32 y, s32 packetArg, s32 drawArg) {
     sdfDevSetPrintCB(&sifParameters, x * 16 + 0x7000, y * 8 + 0x7900, 0x0FFFFF80, packetArg);
     sdfDrawTagLink(list, (u32)sdfDevPrintfEx(&sifParameters, (const char *)drawArg));
     surface = &kwlnPositionedTextSurface;
-    surface->append(surface, list);
+    surface->regFunc(surface, list);
 }
 
 void eglLinkKanji(s32 width, s32 height, s32 colors, const char *text) {
@@ -1860,7 +1860,7 @@ s32 evtDrawGeneralHeapUsageGraph(struct dds3ProcessID_t *task) {
     sdfPrimLinkRect(list, 0x8000C000, 0, 0x73A0, 0x85F0, currentColumn * 16 + originX, 0x8600, 0xFF0000, 0);
     peakColumn = (s32)((f32)D_00435D40 / 100.0f * 200.0f) + 0x2B;
     sdfPrimLinkRect(list, 0x8000FFFF, 0, peakColumn * 16 + originX, 0x85D0, (peakColumn + 2) * 16 + originX, 0x8610, 0xFF0000, 0);
-    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
+    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, list);
     if (D_00435D42 >= 0x47 || D_00435D40 < freePercent) {
         D_00435D40 = freePercent;
         D_00435D42 = 0;
@@ -2037,7 +2037,7 @@ void evtDrawHeapUsageOverlay(sdfGrOt_t *surface) {
     sprintf(statusText, D_00435D58, chipHeapStats.freeBytes);
     sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x86C0,
         (D_00435D4C / (D_00435D4C >> 8)) * 8 + 0x7A60, 0x0FFFFF80, 0, statusText));
-    surface->append(surface, packetList);
+    surface->regFunc(surface, packetList);
 }
 
 /* Draw the overlay only when the control byte is zero; return zero in either case. */
@@ -2078,7 +2078,7 @@ s32 evtDrawResourceCountDebugTask(dds3ProcessID_t *task) {
     gsCount = effGetFontListCount();
     sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7100, 0x7980,
                     0xffff80, 0, D_004113A0, fontCount, textCount, gsCount));
-    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
+    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, list);
     return 0;
 }
 

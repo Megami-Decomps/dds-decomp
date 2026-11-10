@@ -264,7 +264,7 @@ s32 dds3BitEditorProcess(void) {
                 0x7A90 + (row + 3) * cellHeight, 0xFF0000, style, glyph));
         }
     }
-    D_00325708.append(&D_00325708, packets);
+    D_00325708.regFunc(&D_00325708, packets);
     if ((dds3PadBitTable[24] & 2) && D_003BBD80 > 0) {
         D_003BBD80 -= 16;
         if (D_003BBD80 < 0) D_003BBD80 = 0;

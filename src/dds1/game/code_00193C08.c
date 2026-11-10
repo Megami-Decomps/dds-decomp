@@ -173,7 +173,7 @@ void frFontDrawAtlasGlyph(s32 x, s32 y, s32 width, s32 height, u8 style,
     sdfDrawTagInit(list);
     sdfDrawTagLink(list, (u32)packet);
     drawSurface = &sdfGrOtTable[surface];
-    drawSurface->append(drawSurface, list);
+    drawSurface->regFunc(drawSurface, list);
 }
 
 

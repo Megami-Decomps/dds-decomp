@@ -757,7 +757,7 @@ void itfDrawSelectedSoundRow(instanceMes_tag *panel) {
         itfMiscDrawAlphaPrim(list, 0, 0);
     }
     surface = &sdfGrOtTable[panel->drawSurfaceIndex];
-    surface->append(surface, list);
+    surface->regFunc(surface, list);
 }
 
 #ifdef NON_MATCHING
@@ -951,7 +951,7 @@ void itfDrawSoundSelectorFadeLayers(instanceMes_tag *panel) {
         itfMiscDrawAlphaPrim(packet, 0, 0);
     }
     surface = &sdfGrOtTable[panel->drawSurfaceIndex];
-    surface->append(surface, packet);
+    surface->regFunc(surface, packet);
 }
 
 
@@ -1011,7 +1011,7 @@ void DebugDrawWindowLine(itfpanel_t *sprite) {
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     itfMiscDrawLineStripPrim((DrawVertex *)vertices, (DrawColorRec *)D_00358028, D_003BB230, D_003BB238, 5, 0xFFFFFF, list);
-    D_00325708.append(&D_00325708, list);
+    D_00325708.regFunc(&D_00325708, list);
 }
 
 void DebugMoveWinVert(ItfMesBlkA4 *panel, s32 boundsMode) {
@@ -1176,7 +1176,7 @@ s32 TestMsgMngD_Process(dds3ProcessID_t *task) {
         sdfDrawTagInit(mem);
         itfMiscDrawAlphaPrim(mem, 0, 0);
         itfMiscDrawSpritePrim((DrawVertex *)D_00358318, (DrawColorRec *)D_00358328, (DrawColorRec *)D_00358338, 0xFFF, sndTestMessageTexture, 0, mem);
-        D_003255A8.append(&D_003255A8, mem);
+        D_003255A8.regFunc(&D_003255A8, mem);
         return 0;
     }
     return 0;
@@ -1219,7 +1219,7 @@ s32 pbDebugPrintPanel(void) {
     sdfDrawTagLink(list,
                     (u32)sdfDevPrintfEx(&packet, "FOVY: %6.2f",
                         dds3ScreenParam.camera.fov * radiansToDegrees));
-    D_00325708.append(&D_00325708, list);
+    D_00325708.regFunc(&D_00325708, list);
     if (dds3PadButtonState.secondaryCancel < 0) {
         return -1;
     }
@@ -1371,7 +1371,7 @@ s32 pbDebugPrintPanel2(void) {
     sdfDrawTagLink(list,
         (u32)dds3PrimFrameRect((D_003BA910[0] * 16) + 0x7FC0, (D_003BA910[1] * 8) + 0x7FE0,
             0xFF0000, 0x80, 0x40, 0x80008080, 0x80000000));
-    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, list);
+    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, list);
 
     if ((s8)dds3PadButtonState.secondaryTriangle < 0) {
         dds3ScreenBlurFlag ^= 1;

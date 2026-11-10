@@ -1370,7 +1370,7 @@ void btlDrawButtonIconFixed64(sdfGrOt_t *surface, s32 x, s32 y,
         xFixed + 0x7400, yFixed + 0x7B00,
         btlIndexedIconUvOrigins[uvIndex] * 16 + 0x400, btlIndexedIconUvOrigins[uvIndex + 1] * 16 + 0x400, bottomRightColor,
         0xFF0000, 0);
-    surface->append(surface, packet);
+    surface->regFunc(surface, packet);
 }
 
 typedef struct BtnUv {
@@ -1436,7 +1436,7 @@ void btlDrawButtonIcon(sdfGrOt_t *surface, s32 x, s32 y, s32 topLeftColor, s32 t
                       xFixed + 0x7000, yFixed + 0x7A00, uv->u * 0x10, uv->v * 0x10 + 0x200, bottomLeftColor,
                       xFixed + 0x7200, yFixed + 0x7A00, uv->u * 0x10 + 0x200, uv->v * 0x10 + 0x200, bottomRightColor,
                       0xFF0000, 0);
-        surface->append(surface, packet);
+        surface->regFunc(surface, packet);
     }
 }
 
@@ -3460,7 +3460,7 @@ s32 btlUpdateAndDrawResourceBrowser(BtlResourceDescriptor *descriptor) {
     }
 
     surface = &sdfGrOtTable[descriptor->drawSurfaceIndex];
-    surface->append(surface, packetList);
+    surface->regFunc(surface, packetList);
     return descriptor->selectionStatus;
 }
 
@@ -3582,7 +3582,7 @@ void btlDrawResourcePreview(BtlResourceDescriptor *descriptor) {
         sdf2DLinkTexPacket(list, texture, SDF_GS_CONTEXT_1);
         sdfDrawTagLink(list, (u32)sprite);
         surface = &sdfGrOtTable[descriptor->drawSurfaceIndex];
-        surface->append(surface, list);
+        surface->regFunc(surface, list);
     }
 }
 

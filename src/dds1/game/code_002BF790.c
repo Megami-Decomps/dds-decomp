@@ -576,7 +576,7 @@ void cmpDrawSpriteFlag(u8 enabled, s32 alternate, s32 kind) {
     sdfDrawTagInit(context);
     sdfDrawTagLink(context, (u32)packet);
     entry = &sdfGrOtTable[kind];
-    entry->append(entry, context);
+    entry->regFunc(entry, context);
 }
 
 void itfSetPrimaryFramebufferAlphaFlag(u8 value, u32 kind) {
@@ -601,7 +601,7 @@ void cmpDrawSprite(u64 data, s32 alternate, s32 kind) {
     sdfDrawTagInit(context);
     sdfDrawTagLink(context, (u32)packet);
     entry = &sdfGrOtTable[kind];
-    entry->append(entry, context);
+    entry->regFunc(entry, context);
 }
 
 void sdfSubmitGsTestOneRegisterPacket(u64 data, u32 kind) {
@@ -626,7 +626,7 @@ void cmpDrawSprite2(s32 data, s32 alternate, s32 kind) {
     sdfDrawTagInit(context);
     sdfDrawTagLink(context, (u32)packet);
     entry = &sdfGrOtTable[kind];
-    entry->append(entry, context);
+    entry->regFunc(entry, context);
 }
 
 void sdfSubmitGsAlphaOneRegisterPacket(u32 data, u32 kind) {
@@ -647,7 +647,7 @@ void cmpDrawSpriteIndexed(s32 data, s32 kind) {
     sdfDrawTagInit(context);
     sdfDrawTagLink(context, (u32)packet);
     entry = &sdfGrOtTable[kind];
-    entry->append(entry, context);
+    entry->regFunc(entry, context);
 }
 
 void cmpDrawSpriteIndexed2(s32 data, s32 kind) {
@@ -664,7 +664,7 @@ void cmpDrawSpriteIndexed2(s32 data, s32 kind) {
     sdfDrawTagInit(context);
     sdfDrawTagLink(context, (u32)packet);
     entry = &sdfGrOtTable[kind];
-    entry->append(entry, context);
+    entry->regFunc(entry, context);
 }
 
 /* Fill all four words with value without assigning a corner or channel order. */
@@ -706,7 +706,7 @@ void cmpDrawTriG(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 sur
     sdfDrawTagInit(list);
     sdfDrawTagLink(list, (u32)packet);
     surface = &sdfGrOtTable[surfaceIndex];
-    surface->append(surface, list);
+    surface->regFunc(surface, list);
 }
 
 extern void itfDrawColoredRectangle(u32, u32, u32, u32, u32, const u32 *, u32, u32);
@@ -752,7 +752,7 @@ void itfDrawColoredRectangle(u32 x, u32 y, u32 z, u32 width, u32 height, const u
     sdfDrawTagInit(list);
     sdfDrawTagLink(list, (u32)packet);
     surface = &sdfGrOtTable[surfaceIndex];
-    surface->append(surface, list);
+    surface->regFunc(surface, list);
 }
 
 void uiDrawGradientColorRect(u32 x, u32 y, u32 z, u32 width, u32 height, const u32 *vertexColors, u32 surfaceIndex) {
@@ -798,7 +798,7 @@ void cmpDrawBoxLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
     sdfDrawTagInit(list);
     sdfDrawTagLink(list, (u32)packet);
     surface = &sdfGrOtTable[surfaceIndex];
-    surface->append(surface, list);
+    surface->regFunc(surface, list);
 }
 
 
@@ -845,7 +845,7 @@ void cmpDraw3DPoly(const f32 *first, const f32 *second, const f32 *third,
     textureCoordinates[2][1] = 0.0f;
     sdfDrawTagLink(list, (u32)sdf3DPrimMakePoly(&request));
     surface = &sdfGrOtTable[surfaceIndex];
-    surface->append(surface, list);
+    surface->regFunc(surface, list);
 }
 
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
@@ -863,7 +863,7 @@ void uiDrawActiveSurfaceRegion(s32 surfaceIndex) {
     sdfDrawTagLinkRefGif(list, (u32)texture);
     {
         sdfGrOt_t *surface = &sdfGrOtTable[surfaceIndex];
-        surface->append(surface, list);
+        surface->regFunc(surface, list);
     }
 }
 
@@ -876,7 +876,7 @@ void sdfDispatchSurfaceWithPreparedTexturePacket(s32 surfaceIndex) {
     sdfDrawTagLinkRefGif(list, (u32)texture);
     {
         sdfGrOt_t *surface = &sdfGrOtTable[surfaceIndex];
-        surface->append(surface, list);
+        surface->regFunc(surface, list);
     }
 }
 

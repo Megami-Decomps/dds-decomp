@@ -304,7 +304,7 @@ void effDrawBlurRectangle(const dds3Effect_Blur_t *source)
         drawPacket = effPkt2DAllocTriStrip(1, 0);
         effBuildBlurTransformedQuad(source, effPkt2DGetPrimPtr(drawPacket), 0);
         sdfDrawTagLink(list, (u32)drawPacket);
-        D_003253E8.append(&D_003253E8, list);
+        D_003253E8.regFunc(&D_003253E8, list);
     }
 }
 
@@ -403,7 +403,7 @@ void effDrawBlurListWithFramePacket(struct sdfDrawTag_t *list) {
 
     sdfGrSetFrameMaskReset(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes, packet, 1);
     sdfDrawTagLinkRefGif(list, (u32)packet);
-    D_003253E8.append(&D_003253E8, list);
+    D_003253E8.regFunc(&D_003253E8, list);
 }
 
 extern u32 dds3NullDrawProc(void);

@@ -1104,7 +1104,7 @@ s32 itfMesMngDebugProc(void) {
                                                  bounds[1] >> 3,
                                                  bounds[2] >> 4,
                                                  bounds[3] >> 3));
-    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, packetList);
+    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, packetList);
     return 0;
 }
 

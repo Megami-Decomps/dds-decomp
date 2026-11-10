@@ -105,7 +105,7 @@ extern void mnuRecordSetVector(FileSlotTable *record, const void *src);
 
 
 static inline void effSubmitSurfacePacket(sdfGrOt_t *surface, sdfDrawTag_t *list) {
-    surface->append(surface, list);
+    surface->regFunc(surface, list);
 }
 
 #include "sdf_packet_alloc.h"
@@ -7943,7 +7943,7 @@ void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix) {
             packet->registerAddress = 0x47;
             sdfDrawTagLink(list, (u32)packet);
         }
-        D_0037ECF0[set->type]->append(D_0037ECF0[set->type], list);
+        D_0037ECF0[set->type]->regFunc(D_0037ECF0[set->type], list);
     }
 }
 
@@ -9749,7 +9749,7 @@ void effDrawRibbon(EffRibbonWork *work, const Matrix4 *matrix) {
         packet->registerAddress = 0x47;
         sdfDrawTagLink(list, (u32)packet);
     }
-    surface->append(surface, (sdfDrawTag_t *)list);
+    surface->regFunc(surface, (sdfDrawTag_t *)list);
 }
 
 void effLoadWindTexture(void) {
@@ -11010,7 +11010,7 @@ void effDrawScalyTexturedStrip(EffStripWork *work, void *matrix) {
     packet->secondValue = restoreValue;
     packet->secondAddress = 0x42;
     sdfDrawTagLink(list, packet);
-    surface->append((sdfDrawTag_t *)surface, list);
+    surface->regFunc((sdfDrawTag_t *)surface, list);
 }
 
 void effLoadScalyTexture(void) {
@@ -11710,7 +11710,7 @@ void effDrawThreePointGroups(EffPointSet *set, Matrix4 *matrix) {
             packet->registerAddress = 0x47;
             sdfDrawTagLink(list, (u32)packet);
         }
-        D_0037EE68[set->type]->append(D_0037EE68[set->type], list);
+        D_0037EE68[set->type]->regFunc(D_0037EE68[set->type], list);
     }
 }
 
@@ -13033,7 +13033,7 @@ void effDrawAndAdvanceSharedParticleFrame(EffParticleSharedResource *work) {
         (s32)((f32)(corners[0][0] + 0x7000) + coordX), (s32)((f32)((corners[0][1] >> 1) + 0x7900) + coordY),
         snapshot.uv.components[4], snapshot.uv.components[5], packed,
         0xFF0000, NULL);
-    surface->append(surface, list);
+    surface->regFunc(surface, list);
     work->state++;
 }
 

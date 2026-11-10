@@ -226,7 +226,7 @@ void effBlurDrawFramebufferQuad(const dds3Effect_Blur_t *source)
         drawPacket = effPkt2DAllocTriStrip(1, 0);
         effBlurBuildSamplingQuad(source, (EffBlurDrawData *)effPkt2DGetPrimPtr(drawPacket), 0);
         sdfDrawTagLink(list, (u32)drawPacket);
-        D_003803E8.append(&D_003803E8, list);
+        D_003803E8.regFunc(&D_003803E8, list);
     }
 }
 
@@ -275,5 +275,5 @@ void dds3EffectFilter(dds3Effect_Filter_t *source) {
     drawPacket[10] = 0xFF000000000000ULL | topRight;
     drawPacket[12] = 0xFF000000000000ULL | bottomRight;
     sdfDrawTagLink(list, (u32)drawPacket);
-    D_003803C8.append(&D_003803C8, list);
+    D_003803C8.regFunc(&D_003803C8, list);
 }

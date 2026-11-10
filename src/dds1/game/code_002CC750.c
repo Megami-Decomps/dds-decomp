@@ -1505,7 +1505,7 @@ void sdfDrawFlagListVertices(SdfFlagListWork *work) {
     sdfDrawTagInit(packetList);
     sdfDrawTagLink(packetList, (u32)effDebugDrawWireModel(copiedVertices, work->colors, work->params.count * SDF_FLAG_LIST_VERTICES_PER_ENTRY, 0x40));
     surface = D_00398098[work->params.alpha.surfaceIndex];
-    surface->append(surface, packetList);
+    surface->regFunc(surface, packetList);
     sdfMemFreeDirect(vertexAllocation);
 }
 

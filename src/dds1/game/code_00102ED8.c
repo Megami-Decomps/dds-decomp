@@ -781,7 +781,7 @@ s32 kwlnDebugGraphUpdate(dds3ProcessID_t *task) {
                     0x8630,
                     originX + 0x20 + ((pixels + 0x2B) << 4),
                     0x8670, 0xFF0000, NULL);
-    kwlnPositionedTextSurface.append(&kwlnPositionedTextSurface, packetList);
+    kwlnPositionedTextSurface.regFunc(&kwlnPositionedTextSurface, packetList);
     if (D_003BA884 >= 0x47 || D_003BA880 < (u16)D_003BA728) {
         D_003BA880 = D_003BA728;
         D_003BA884 = 0;
@@ -1012,7 +1012,7 @@ void kwlnDrawTextureViewerFrame(sdfGrOt_t *surface, sdfTexHandle_t *image) {
         }
         D_003BA8E0++;
     }
-    surface->append(surface, packetList);
+    surface->regFunc(surface, packetList);
 }
 
 /* With a nonempty list, invoke its renderer even when input reports exit.
@@ -1147,7 +1147,7 @@ void kwlnTextureAttachTask(sdfGrOt_t *surface) {
     sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(KWLN_DIAG_PACKET_LIST_BYTES);
     sdfDrawTagInit(packetList);
     kwlnDrawTextureListDiagnostic(packetList, 0x7180, 0x79C0);
-    surface->append(surface, packetList);
+    surface->regFunc(surface, packetList);
 }
 
 /* Submit the default surface's map only when the control array's first byte is zero. */
@@ -1607,7 +1607,7 @@ void dds3DrawDistRipOverError(void) {
             if (ripblurovercnt > 0) {
                 sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x73C0, 0x7B40, 0xFEFFFF, 4, D_0039E188, ripblurovercnt));
             }
-            D_00325708.append(&D_00325708, packetList);
+            D_00325708.regFunc(&D_00325708, packetList);
         }
     }
 }

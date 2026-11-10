@@ -111,7 +111,7 @@ s32 dds3FirstProcess(dds3ProcessID_t *task) {
         packetGroups++;
     }
     drawSink = sdfGrOtTable;
-    drawSink->append(drawSink, &dds3DrawEnv[bufferIndex].initialList);
+    drawSink->regFunc(drawSink, &dds3DrawEnv[bufferIndex].initialList);
     return 0;
 }
 
@@ -209,13 +209,13 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
             sdf3DMakeViewportPacket((struct ConsMatrixPacket *)(kwlnHeldTextureMatrixPackets + bufferIndex * KWLN_FRAME_BUFFER_BYTES),
                 &D_0037F7B0, &kwlnHeldTextureViewMatrix);
             sceneNode = &sdfGrOtTable[1];
-            sceneNode->append(sceneNode,
+            sceneNode->regFunc(sceneNode,
                 (sdfDrawTag_t *)(kwlnHeldTextureMatrixPackets - 0x190 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
             sceneList = dds3FontReqAllocDrawTag();
             sceneFrustum = (u64 *)sdfGrAllocPacketBuff(0x50);
             sdf3DMakeFogPacket((struct ConsFrustumPacket *)sceneFrustum, &kwlnHeldTextureFrustumParameters);
             sdfDrawTagLink(sceneList, (u32)sceneFrustum);
-            sceneNode->append(sceneNode, sceneList);
+            sceneNode->regFunc(sceneNode, sceneList);
         }
     }
     {
@@ -229,12 +229,12 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
         VU0_STORE_MATRIX_UNCLOBBERED(&D_00384790);
         sdf3DMakeViewportPacket((struct ConsMatrixPacket *)(kwlnOverlayMatrixPackets + bufferIndex * KWLN_FRAME_BUFFER_BYTES), &D_0037F980, &D_00384790);
         overlayNode = &sdfGrOtTable[85];
-        overlayNode->append(overlayNode, (sdfDrawTag_t *)(kwlnOverlayMatrixPackets - 0x20 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
+        overlayNode->regFunc(overlayNode, (sdfDrawTag_t *)(kwlnOverlayMatrixPackets - 0x20 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
         overlayList = dds3FontReqAllocDrawTag();
         overlayFrustum = (u64 *)sdfGrAllocPacketBuff(0x50);
         sdf3DMakeFogPacket((struct ConsFrustumPacket *)overlayFrustum, &kwlnOverlayFrustumParameters);
         sdfDrawTagLink(overlayList, (u32)overlayFrustum);
-        overlayNode->append(overlayNode, overlayList);
+        overlayNode->regFunc(overlayNode, overlayList);
 
         sdf3DMakeLightParallelPacket((SdfLightingPacketStorage *)(kwlnOverlayMatrixPackets - 0x440 + bufferIndex * KWLN_FRAME_BUFFER_BYTES), D_0037F770, kwlnDefaultColorVector);
         *(u32 *)(kwlnOverlayMatrixPackets - 0x620 + bufferIndex * KWLN_FRAME_BUFFER_BYTES) = D_00435CBC;
@@ -262,12 +262,12 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
             &dds3ScreenParam, &sdfViewMatrix);
         sdf3DSetCamera(&dds3ScreenParam, &sdfViewMatrix);
         viewNode = &sdfGrOtTable[7];
-        viewNode->append(viewNode, (sdfDrawTag_t *)(D_003820F0 - 0x250 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
+        viewNode->regFunc(viewNode, (sdfDrawTag_t *)(D_003820F0 - 0x250 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
         viewList = dds3FontReqAllocDrawTag();
         viewFrustum = (u64 *)sdfGrAllocPacketBuff(0x50);
         sdf3DMakeFogPacket((struct ConsFrustumPacket *)viewFrustum, &kwlnDrawVector);
         sdfDrawTagLink(viewList, (u32)viewFrustum);
-        viewNode->append(viewNode, viewList);
+        viewNode->regFunc(viewNode, viewList);
 
         sdfPreDrawChainLink((SdfPacketChain *)D_00380860,
             (sdfPreDrawTag_t *)(D_003820F0 - 0x230 + bufferIndex * KWLN_FRAME_BUFFER_BYTES));
@@ -304,17 +304,17 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
     {
         sdfDrawTag_t *stateList = dds3LinkZClearDrawTag(0);
         sdfGrOt_t *const state0 = &sdfGrOtTable[81];
-        state0->append(state0, stateList);
+        state0->regFunc(state0, stateList);
     }
     {
         sdfDrawTag_t *stateList = dds3LinkZClearDrawTag(1);
         sdfGrOt_t *const state1 = &sdfGrOtTable[93];
-        state1->append(state1, stateList);
+        state1->regFunc(state1, stateList);
     }
     {
         sdfDrawTag_t *stateList = dds3LinkZClearDrawTag(2);
         sdfGrOt_t *const state2 = &sdfGrOtTable[95];
-        state2->append(state2, stateList);
+        state2->regFunc(state2, stateList);
     }
 
     eglSetOt(0x2C);
@@ -452,7 +452,7 @@ s32 dds3DrawProcess(dds3ProcessID_t *task) {
         vertex->corner[1].mask = 0;
         vertex->corner[1].flag = 0;
         sdfDrawTagLink(packetList, (u32)spritePacket);
-        D_00380708.append(&D_00380708, packetList);
+        D_00380708.regFunc(&D_00380708, packetList);
     }
     poolHead = sdfGrOtClose(sdfGrOtTable);
     D_00435C14 = poolHead;

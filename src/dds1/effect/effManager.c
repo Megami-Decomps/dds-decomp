@@ -49,7 +49,7 @@ KwlnTaskUpdateResult effSubmitFieldBlendStateTask(dds3ProcessID_t *task) {
     state->registers.alpha.registerId = 0x42;
     sdfDrawTagLink(list, (u32)state);
     surface = &sdfGrOtTable[51];
-    surface->append(surface, list);
+    surface->regFunc(surface, list);
 
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
@@ -64,7 +64,7 @@ KwlnTaskUpdateResult effSubmitFieldBlendStateTask(dds3ProcessID_t *task) {
     state->registers.alpha.registerId = 0x42;
     sdfDrawTagLink(list, (u32)state);
     surface++;
-    surface->append(surface, list);
+    surface->regFunc(surface, list);
 
     effObjectListCountersReset();
     return KWLN_TASK_UPDATE_RETAIN_CALLBACK;

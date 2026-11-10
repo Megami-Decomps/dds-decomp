@@ -301,7 +301,7 @@ void effRenderModelOwnerWithGsTests(EffModelOwner *owner) {
         packet[5] = 0x47;
         sdfDrawTagLink(list, (u32)packet);
         surface = kwlnSceneSurfaceSets[1][index];
-        surface->append(surface, list);
+        surface->regFunc(surface, list);
     }
 
     if (effComputeLightDirectionVU(owner->model, owner->ownedBuffer)) {
@@ -322,7 +322,7 @@ void effRenderModelOwnerWithGsTests(EffModelOwner *owner) {
         packet[5] = 0x47;
         sdfDrawTagLink(list, (u32)packet);
         surface = kwlnSceneSurfaceSets[1][index];
-        surface->append(surface, list);
+        surface->regFunc(surface, list);
     }
 }
 
@@ -836,7 +836,7 @@ sdfTexHandle_t *sdfGetOrCreateTextureForReference(sdfGrOt_t *surface, RefObj *so
     sdfDrawTagInit(list);
     sdfLinkLoadImage(list, D_003BC958->clutGsHandle, 0, 0, source->paletteWidth, source->paletteHeight, (s32)source->palette, 0);
     sdfLinkLoadImage(list, D_003BC958->pixelGsHandle, 0, 0, ((SdfTextureFileHeader *)source->base)->width, ((SdfTextureFileHeader *)source->base)->height, (s32)source->pixels, 0);
-    surface->append(surface, list);
+    surface->regFunc(surface, list);
     texture = D_003BC958;
     width = ((SdfTextureFileHeader *)source->base)->width;
     texture->width = width;

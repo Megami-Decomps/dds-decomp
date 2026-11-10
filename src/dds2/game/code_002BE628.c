@@ -4589,9 +4589,9 @@ void evtStageTestDrawCameraTransformDebug(void) {
                                                            camera->poseset->rotation[1],
                                                            camera->poseset->rotation[2]));
     surface = &sdfGrOtTable[96];
-    surface->append(surface, list);
+    surface->regFunc(surface, list);
     list = dds3FontReqAllocDrawTag();
-    (&sdfGrOtTable[40])->append(&sdfGrOtTable[40], list);
+    (&sdfGrOtTable[40])->regFunc(&sdfGrOtTable[40], list);
 }
 
 u32 evtStageTestCameraUpdate(void) {
@@ -4620,7 +4620,7 @@ s32 evtBattleStageTestScreen(dds3ProcessID_t *task) {
     sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x7A80, 0x7C60, 0xFEFFFF, 6, "F%03d_%03d", D_00437CB8, D_00437CBC));
     sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x7900, 0x7D20, 0xFEFFFF, 0, "L,R = EVENT SELECT"));
     sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x7900, 0x7D80, 0xFEFFFF, 0, "RR  = ENTER"));
-    D_00380708.append(&D_00380708, packetList);
+    D_00380708.regFunc(&D_00380708, packetList);
     if (dds3PadButtonState[0x21] < 0) {
         evtLoadArea(D_00437CB8, D_00437CBC);
         return (s32)evtCreateBattleStageTestCamera;

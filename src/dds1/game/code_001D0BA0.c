@@ -3235,7 +3235,7 @@ void btlDrawUnitTransparencyPasses(BtlUnit *unit, dds3ModelHandle_t *model, sdfM
         packet[4] = 0x72801;
         packet[5] = 0x47;
         sdfDrawTagLink(list, (u32)packet);
-        surfaces[i]->append(surfaces[i], list);
+        surfaces[i]->regFunc(surfaces[i], list);
     }
     savedFlags = model->inner->drawFlags;
     model->flags |= MDL_SKIP_ANCHORS;
@@ -3254,7 +3254,7 @@ void btlDrawUnitTransparencyPasses(BtlUnit *unit, dds3ModelHandle_t *model, sdfM
         packet[4] = 0x51801;
         packet[5] = 0x47;
         sdfDrawTagLink(list, (u32)packet);
-        surfaces[i]->append(surfaces[i], list);
+        surfaces[i]->regFunc(surfaces[i], list);
     }
     sdfModelCopyStat(overlay, model->inner);
     if (unit->status.flags & 2) {
@@ -3274,7 +3274,7 @@ void btlDrawUnitTransparencyPasses(BtlUnit *unit, dds3ModelHandle_t *model, sdfM
         packet[4] = btlTransparencySurfaceTestValues[i];
         packet[5] = 0x47;
         sdfDrawTagLink(list, (u32)packet);
-        surfaces[i]->append(surfaces[i], list);
+        surfaces[i]->regFunc(surfaces[i], list);
     }
     mdlSetEffectColor(model, color);
     for (item = model->resourceItems; item != NULL; item = item->next) {
@@ -3367,7 +3367,7 @@ void btlDrawUnitMirrorTransparency(BtlUnit *unit) {
     list = sdfPrimAllocDrawTag(0);
     sdfLinkStoreImage(list, sdfGrFrameSet.buffers[2],
                             0, 0, 0x200, 0xE0, unit->mirror->transparencyBuffer, 0, 0, 0);
-    btlMirrorSourceTransparencySurfaces[0]->append(btlMirrorSourceTransparencySurfaces[0], list);
+    btlMirrorSourceTransparencySurfaces[0]->regFunc(btlMirrorSourceTransparencySurfaces[0], list);
     info = unit->ext->owner;
     if (unit->transparencyModel == 0) {
         unit->transparencyModel = sdfModelMake(info->sub->resourceList, info->sub->itemList);
@@ -3384,7 +3384,7 @@ void btlDrawUnitMirrorTransparency(BtlUnit *unit) {
     list = sdfPrimAllocDrawTag(0);
     sdfLinkLoadImage(list, sdfGrFrameSet.buffers[2],
                               0, 0, 0x200, 0xE0, unit->mirror->transparencyBuffer, 0);
-    btlMirrorTargetTransparencySurfaces[0]->append(btlMirrorTargetTransparencySurfaces[0], list);
+    btlMirrorTargetTransparencySurfaces[0]->regFunc(btlMirrorTargetTransparencySurfaces[0], list);
     btlDrawUnitTransparencyPasses(unit->mirror, info, unit->mirror->transparencyModel, btlMirrorTargetTransparencySurfaces, unit->mirror->overlayColor);
 }
 

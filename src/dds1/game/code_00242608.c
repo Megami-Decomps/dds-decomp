@@ -745,7 +745,7 @@ void mnuDrawCampScaledTexture(sdfTexHandle_t *texture, CampDisplayDefaults *disp
         }
         itfMiscDrawSpritePrim((DrawVertex *)mnuCampQuadBounds, (DrawColorRec *)mnuCampQuadTexcoords, (DrawColorRec *)mnuCampQuadColor,
                                       0xFF, texture, 0, packetList);
-        D_003255A8.append(&D_003255A8, packetList);
+        D_003255A8.regFunc(&D_003255A8, packetList);
     }
 }
 
@@ -945,7 +945,7 @@ void mnuShopCreateDescriptorSurface(evtViewerInfo_t *scene) {
     sdfLinkStoreFrameImage(surface, context, 0, 0, 0x200, 0xE0,
                                     (s32)scene->pendingFrameBuffer, 0, 0, 0);
     sdfPreDrawChainLink((SdfPacketChain *)D_00325860, context);
-    D_00325708.append(&D_00325708, surface);
+    D_00325708.regFunc(&D_00325708, surface);
 }
 
 void mnuShopSubmitDescriptor(evtViewerInfo_t *scene) {
@@ -957,7 +957,7 @@ void mnuShopSubmitDescriptor(evtViewerInfo_t *scene) {
                                   dds3RenderTexture->pixelGsHandle, 0, 0,
                                   CAMP_DESCRIPTOR_WIDTH, CAMP_DESCRIPTOR_HEIGHT,
                                   (s32)scene->pendingFrameBuffer, 0);
-        D_00325708.append(&D_00325708, drawPacket);
+        D_00325708.regFunc(&D_00325708, drawPacket);
     }
 }
 
@@ -1006,7 +1006,7 @@ void mnuShopQueueAuxiliaryTexturePacket(s32 alpha) {
     sdfDrawTagLink(list, (u32)packet);
     itfMiscDrawSpritePrim((DrawVertex *)D_00368C10, (DrawColorRec *)D_00368C20, (DrawColorRec *)D_00368C30,
                                   0xFEFF9B, dds3RenderTexture, 0, list);
-    D_003255A8.append(&D_003255A8, list);
+    D_003255A8.regFunc(&D_003255A8, list);
 }
 
 void mnuShopQueueAuxiliaryTexture(evtViewerInfo_t *scene) {

@@ -580,7 +580,7 @@ EffResourceBrowserResult dds3EffectFileListWindowDraw(EffResourceDescriptor *des
         visibleEntry = visibleEntry->next;
     }
     surface = &sdfGrOtTable[descriptor->drawSurface];
-    surface->append(surface, packetList);
+    surface->regFunc(surface, packetList);
     return descriptor->selectionResult;
 }
 
@@ -685,7 +685,7 @@ void dds3EffectFileListWindowDrawSprite(EffResourceDescriptor *overlay) {
         vertex->corner[1].mask = 0xFF0000;
         sdf2DLinkTexPacket(list, texture, SDF_GS_CONTEXT_1);
         sdfDrawTagLink(list, (u32)sprite);
-        D_003805A8.append(&D_003805A8, list);
+        D_003805A8.regFunc(&D_003805A8, list);
     }
 }
 

@@ -4019,7 +4019,7 @@ void dds3RingPolyExpListDraw(EffPCPBeamNode *node) {
         sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&effBeamDrawParams));
     }
     entry = effBeamDrawSurfaces[node->drawKind];
-    entry->append(entry, list);
+    entry->regFunc(entry, list);
 }
 
 void effPCPRingPolyExpSetVertex(f32 radius, EffPCPBeamWork *work) {

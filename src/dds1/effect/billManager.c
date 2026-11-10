@@ -169,7 +169,7 @@ void billFlushPendingChildPackets(void) {
                 sdfDrawTag_t *value = node->pendingLists[listIndex];
 
                 if (value != NULL) {
-                    D_0034E030[listIndex]->append(D_0034E030[listIndex], value);
+                    D_0034E030[listIndex]->regFunc(D_0034E030[listIndex], value);
                     node->pendingLists[listIndex] = 0;
                 }
             }
@@ -400,7 +400,7 @@ void billFlushPendingRenderPairs(void) {
             if (work->count != 0) {
                 dds3MultiBillboardPktLink(node);
             }
-            D_00325228.append(&D_00325228, node->packetList);
+            D_00325228.regFunc(&D_00325228, node->packetList);
             node->packetList = NULL;
             node = node->next;
         } while (node != NULL);
@@ -420,7 +420,7 @@ void billFlushPendingRenderPairs(void) {
     packet->alpha = 0x48;
     packet->alphaRegister = 0x42;
     sdfDrawTagLink(list, (u32)packet);
-    D_00325228.append(&D_00325228, list);
+    D_00325228.regFunc(&D_00325228, list);
     billPendingRenderPairList = NULL;
 }
 

@@ -376,7 +376,7 @@ KwlnTaskUpdateResult mnuMovieViewer(dds3ProcessID_t *task) {
     mnuMovieList.packets = (sdfDrawTag_t *)sdfPrimAllocDrawTag(0);
     movieDebugDrawInfo();
     MovieViewerDrawFrameInfo();
-    D_003255A8.append(&D_003255A8, mnuMovieList.packets);
+    D_003255A8.regFunc(&D_003255A8, mnuMovieList.packets);
     D_003BD8E4 = sdfPadButtons[0];
     return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
 }
@@ -490,7 +490,7 @@ s32 movieViewerDebugDraw(void) {
             }
         }
     }
-    D_00325708.append(&D_00325708, packets);
+    D_00325708.regFunc(&D_00325708, packets);
     return 0;
 }
 

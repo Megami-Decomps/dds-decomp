@@ -71,7 +71,7 @@ void dds3EffectFilterDrawTexQuad(EffResourceRectDrawParams *params, sdfTexHandle
     quad->vertices[3].depth = 0;
     quad->vertices[3].xyzControl = 0;
     sdfDrawTagLink(list, (u32)drawPacket);
-    D_003803C8.append(&D_003803C8, list);
+    D_003803C8.regFunc(&D_003803C8, list);
 }
 
 

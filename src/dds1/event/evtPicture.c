@@ -19,7 +19,7 @@ void evtSubmitPictureDrawPacket(const struct sdfTexHandle_t *borrowedTexture) {
     sdfDrawTagInit(packet);
     itfMiscDrawAlphaPrim(packet, 0, 0);
     itfMiscDrawSpritePrim((DrawVertex *)evtPictureQuadBounds, (DrawColorRec *)evtPictureQuadTexcoords, (DrawColorRec *)evtPictureQuadColor, 0xFFF, borrowedTexture, 0, packet);
-    D_003255A8.append(&D_003255A8, packet);
+    D_003255A8.regFunc(&D_003255A8, packet);
 }
 
 /* This recurring task keeps its callback installed while drawing or idle. */

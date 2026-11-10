@@ -132,7 +132,7 @@ extern void btlBeginSceneLightColorTransition(f32 *, f32 *, s32);
 
 
 static inline void effSubmitSurfacePacket(sdfGrOt_t *surface, sdfDrawTag_t *list) {
-    surface->append(surface, list);
+    surface->regFunc(surface, list);
 }
 
 #include "sdf_packet_alloc.h"
@@ -8572,7 +8572,7 @@ void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix) {
             packet->registerAddress = 0x47;
             sdfDrawTagLink(list, (u32)packet);
         }
-        D_003E9DC0[set->type]->append(D_003E9DC0[set->type], list);
+        D_003E9DC0[set->type]->regFunc(D_003E9DC0[set->type], list);
     }
 }
 
@@ -10298,7 +10298,7 @@ void effDrawRibbon(EffRibbonWork *work, const Matrix4 *matrix) {
         packet->registerAddress = 0x47;
         sdfDrawTagLink(list, (u32)packet);
     }
-    surface->append(surface, (sdfDrawTag_t *)list);
+    surface->regFunc(surface, (sdfDrawTag_t *)list);
 }
 
 void effLoadWindTexture(void) {
@@ -11547,7 +11547,7 @@ void effDrawScalyTexturedStrip(u8 *owner, void *matrix) {
     packet->secondValue = restoreValue;
     packet->secondAddress = 0x42;
     sdfDrawTagLink(list, packet);
-    surface->append(surface, list);
+    surface->regFunc(surface, list);
 }
 
 void effLoadScalyTexture(void) {
@@ -12234,7 +12234,7 @@ void effDrawThreePointGroups(EffPointSet *set, Matrix4 *matrix) {
             packet->registerAddress = 0x47;
             sdfDrawTagLink(list, (u32)packet);
         }
-        D_003E9F38[set->type]->append(D_003E9F38[set->type], list);
+        D_003E9F38[set->type]->regFunc(D_003E9F38[set->type], list);
     }
 }
 
@@ -13928,7 +13928,7 @@ void effDrawMovingRadialCylinder(EffActiveResource *work) {
     }
 
     drawNode = &D_0037FF48;
-    drawNode->append(drawNode, list);
+    drawNode->regFunc(drawNode, list);
     gs = (EffGsPacket *)sdfGrAllocPacketBuff(0x30);
     gs->dmaTag = 2;
     gs->vifTag = ((u64)0x50000002 << 16 | 0x1000) << 16;
@@ -13937,7 +13937,7 @@ void effDrawMovingRadialCylinder(EffActiveResource *work) {
     gs->registerValue = 0x717FB;
     gs->registerAddress = 0x47;
     sdfDrawTagLink(list, (u32)gs);
-    drawNode->append(drawNode, list);
+    drawNode->regFunc(drawNode, list);
 
     if ((s32)D_00437EB4 != (s32)surface) {
         eglSetOt(0x2C);
@@ -14205,7 +14205,7 @@ void effDrawGrowingTexturedStrip(EffActiveResource *work) {
     sdf3DPrimLinkMat(packet, resource->asset, 0);
     sdfDrawTagLink(packet, effPkt3DPrimMakePoly(&D_004584C0));
     surface = D_003EA000[config->alphaTrack.surfaceIndex];
-    surface->append(surface, packet);
+    surface->regFunc(surface, packet);
 }
 
 
@@ -14523,7 +14523,7 @@ void effDrawAndAdvanceSharedParticleFrame(EffParticleSharedResource *work) {
         (s32)((f32)(corners[0][0] + 0x7000) + coordX), (s32)((f32)((corners[0][1] >> 1) + 0x7900) + coordY),
         snapshot.uv.components[4], snapshot.uv.components[5], packed,
         0xFF0000, NULL);
-    surface->append(surface, list);
+    surface->regFunc(surface, list);
     work->state++;
 }
 
@@ -15298,7 +15298,7 @@ void func_002FB998(EffSharedEffectWork *work) {
         packet->registerAddress = 0x47;
         sdfDrawTagLink(list, (u32)packet);
         surface = kwlnSceneSurfaceSets[0][i];
-        surface->append(surface, list);
+        surface->regFunc(surface, list);
     }
     model = work->resource->model;
     model->flags |= MDL_SKIP_ANCHORS;
@@ -15319,7 +15319,7 @@ void func_002FB998(EffSharedEffectWork *work) {
         packet->registerAddress = 0x47;
         sdfDrawTagLink(list, (u32)packet);
         surface = kwlnSceneSurfaceSets[0][i];
-        surface->append(surface, list);
+        surface->regFunc(surface, list);
     }
     baseColor[0] = work->data.frame;
     unit = 0x3C000000;
@@ -15346,7 +15346,7 @@ void func_002FB998(EffSharedEffectWork *work) {
         packet->registerAddress = 0x47;
         sdfDrawTagLink(list, (u32)packet);
         surface = kwlnSceneSurfaceSets[8][i];
-        surface->append(surface, list);
+        surface->regFunc(surface, list);
     }
     sdfModelCopyStat((sdfModelRootNode_t *)work->resource->deviceSlot, work->resource->model->inner);
     if (effComputeLightDirectionVU(work->resource->model, work->resource->data)) {
@@ -15368,7 +15368,7 @@ void func_002FB998(EffSharedEffectWork *work) {
         packet->registerAddress = 0x47;
         sdfDrawTagLink(list, (u32)packet);
         surface = kwlnSceneSurfaceSets[8][i];
-        surface->append(surface, list);
+        surface->regFunc(surface, list);
     }
 }
 

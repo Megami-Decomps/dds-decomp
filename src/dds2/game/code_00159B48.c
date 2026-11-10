@@ -593,7 +593,7 @@ void dds3P2APolygonDraw(EffInstance *instance) {
     sdf3DPrimLinkMat((sdfDrawTag_t *)list, instance->material, 0);
     sdfDrawTagLink((sdfDrawTag_t *)list, (u32)effPkt3DPrimMakePoly(&params));
     surface = D_003AA9E0[instance->billboard->requestedPacketListIndex];
-    surface->append(surface, (sdfDrawTag_t *)list);
+    surface->regFunc(surface, (sdfDrawTag_t *)list);
 }
 
 extern void sdfBillBoardMakeTMPacket(u8 *, const f32 *);
@@ -682,7 +682,7 @@ void effSubmitGeneratedTexturePacket(sdfGrOt_t *surface, EffGeneratedTextureDesc
 
     sdfDrawTagInit(packetList);
     effDrawGeneratedTextureQuad(packetList, source);
-    surface->append(surface, packetList);
+    surface->regFunc(surface, packetList);
 }
 
 extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
@@ -839,5 +839,5 @@ void effSubmitCompositeGsPacket(sdfGrOt_t *surface, EffCompositeGsDescriptor *so
 
     sdfDrawTagInit(packetList);
     effDrawCompositeTextureQuad(packetList, source);
-    surface->append(surface, packetList);
+    surface->regFunc(surface, packetList);
 }

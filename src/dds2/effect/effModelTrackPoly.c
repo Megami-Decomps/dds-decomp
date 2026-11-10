@@ -472,7 +472,7 @@ void dds3HermitianTrackPolyDraw(dds3HermitianTrackPoly_tag *data) {
         }
     }
     if (data->drawTarget < 4) {
-        effTrackPolyDrawSurfaces[data->drawTarget]->append(effTrackPolyDrawSurfaces[data->drawTarget], list);
+        effTrackPolyDrawSurfaces[data->drawTarget]->regFunc(effTrackPolyDrawSurfaces[data->drawTarget], list);
     } else {
         list2 = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list2);
@@ -484,7 +484,7 @@ void dds3HermitianTrackPolyDraw(dds3HermitianTrackPoly_tag *data) {
         packet[4] = 6;
         packet[5] = 0x42;
         sdfDrawTagLink(list2, (u32)packet);
-        D_00380248.append(&D_00380248, list2);
+        D_00380248.regFunc(&D_00380248, list2);
         packet = (u64 *)sdfGrAllocPacketBuff(0x30);
         packet[0] = 2;
         packet[1] = ((u64)0x50000002 << 16 | 0x1000) << 16;
@@ -493,6 +493,6 @@ void dds3HermitianTrackPolyDraw(dds3HermitianTrackPoly_tag *data) {
         packet[4] = 0x42;
         packet[5] = 0x42;
         sdfDrawTagLink(list, (u32)packet);
-        D_00380248.append(&D_00380248, list);
+        D_00380248.regFunc(&D_00380248, list);
     }
 }

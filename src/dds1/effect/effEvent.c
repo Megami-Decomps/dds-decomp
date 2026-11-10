@@ -1388,7 +1388,7 @@ void effEVECombParSmokeDraw(EffEventBillSet *work) {
     statePacket->registers.alpha.value = 0x44;
     statePacket->registers.alpha.registerId = SDF_GS_ALPHA_1;
     sdfDrawTagLink(stateList, (u32)statePacket);
-    D_003252A8.append(&D_003252A8, stateList);
+    D_003252A8.regFunc(&D_003252A8, stateList);
     stateList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(stateList);
     statePacket = (sdfPrimTransPacket_t *)sdfGrAllocPacketBuff(0x40);
@@ -1403,9 +1403,9 @@ void effEVECombParSmokeDraw(EffEventBillSet *work) {
     statePacket->registers.alpha.registerId = SDF_GS_ALPHA_1;
     sdfDrawTagLink(stateList, (u32)statePacket);
     surface = &sdfGrOtTable[60];
-    surface->append(surface, stateList);
-    (surface - 1)->append(surface - 1, primaryList);
-    surface->append(surface, secondaryList);
+    surface->regFunc(surface, stateList);
+    (surface - 1)->regFunc(surface - 1, primaryList);
+    surface->regFunc(surface, secondaryList);
 }
 
 /* Copy one full vector quadword through vf10, including its fourth component. */

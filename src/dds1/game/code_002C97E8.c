@@ -463,7 +463,7 @@ void sdfDrawColoredTriangleFan(s32 *points, u32 tail, u32 *colors, s32 count,
     }
     sdfDrawTagLink(list, (u32)packet);
     surface = &sdfGrOtTable[surfaceIndex];
-    surface->append(surface, list);
+    surface->regFunc(surface, list);
 }
 
 

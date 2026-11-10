@@ -1039,7 +1039,7 @@ static inline sdfGrOt_t *fldGetDisplaySurfaceBase(void) {
 static inline void fldAppendToDisplaySurface(sdfDrawTag_t *list) {
     sdfGrOt_t *surface = &fldGetDisplaySurfaceBase()[rsetFrameMaskOtOffset];
 
-    surface->append(surface, list);
+    surface->regFunc(surface, list);
 }
 
 INCLUDE_RODATA(const s32, "game/code_0011D3A0", D_0039FA28);
