@@ -654,12 +654,12 @@ void btlPrepareHeightScaledActionCameraPose(BtlLinkedCommand *action, BtlCamStat
         to->fov = fov;
         if (btlIsCurrentValueBelowQuarterThreshold(unit) == BTL_QUARTER_HEALTH_NOT_BELOW || !(unit->status.flags & 0x200)) {
             if (btlSampleActorModelPositionVU(unit, 1) == 0) {
-                btlUnitGetMuzzlePosVU(unit);
+                effBTLModelGetSphereCenter(unit);
             }
             SDF_VU0_STOREVECTOR(from->position);
             SDF_VU0_STOREVECTOR(to->position);
         } else {
-            btlUnitGetMuzzlePosVU(unit);
+            effBTLModelGetSphereCenter(unit);
             SDF_VU0_STOREVECTOR(from->position);
             SDF_VU0_STOREVECTOR(to->position);
             from->position[1] -= unit->height * unit->scale * 0.25f;
@@ -730,7 +730,7 @@ void btlPrepareRandomizedActionCameraPose(BtlLinkedCommand *action, BtlCamState 
         span = btlMeasureFilteredUnitGroupBounds(flags & 0x600, 0, 0) * 1.25f;
         SDF_VU0_STOREVECTOR(from->position);
         if (btlSampleActorModelPositionVU(unit, 1) == 0) {
-            btlUnitGetMuzzlePosVU(unit);
+            effBTLModelGetSphereCenter(unit);
         }
         SDF_VU0_STOREVECTOR(to->position);
         SDF_VU0_LOADVECTOR_B(from->position);
@@ -766,7 +766,7 @@ void btlAimEffectPoseAtUnit(u8 *fx) {
     BtlUnit *unit = ((BtlLinkedCommand *)fx)->link->unit;
     if (unit->status.flags & 2) {
         if (btlSetActorEffectParameter(unit, 1) == BTL_ACTOR_EFFECT_POSITION_UNAVAILABLE) {
-            btlUnitGetMuzzlePosVU(unit);
+            effBTLModelGetSphereCenter(unit);
         }
         SDF_VU0_STOREVECTOR_NOMEM(&((BtlLinkedCommand *)fx)->backCamera);
         btlAdjustCameraDirectionForDefaultPlane(&((BtlLinkedCommand *)fx)->backCamera);
@@ -798,7 +798,7 @@ void btlBuildSideSelectedActorCameraBlend(BtlLinkedCommand *action, BtlCamState 
             btlBuildActorPairFramingCameraPose(action, from, 1);
         }
         btlCopyUnitRotationQuaternion(unit, quat);
-        btlUnitGetMuzzlePosVU(unit);
+        effBTLModelGetSphereCenter(unit);
         SDF_VU0_STOREVECTOR(muzzle);
         SDF_VU0_LOADVECTOR(muzzle);
         SDF_VU0_LOADVECTOR_B(from->position);
@@ -812,7 +812,7 @@ void btlBuildSideSelectedActorCameraBlend(BtlLinkedCommand *action, BtlCamState 
         fov = action->camera.fov;
         to->fov = fov;
         if (btlSampleActorModelPositionVU(unit, 1) == 0) {
-            btlUnitGetMuzzlePosVU(unit);
+            effBTLModelGetSphereCenter(unit);
         }
         SDF_VU0_STOREVECTOR(to->position);
         to->position[1] *= poses[pose].heightScale;
@@ -870,7 +870,7 @@ void btlBuildDistanceClampedActionCameraBlend(BtlLinkedCommand *action, BtlCamSt
             btlInterpolateVectorStep(from);
             SDF_VU0_STOREVECTOR(targetPosition);
             if (btlSampleActorModelPositionVU(unit, 1) == 0) {
-                btlUnitGetMuzzlePosVU(unit);
+                effBTLModelGetSphereCenter(unit);
             }
             SDF_VU0_STOREVECTOR(to->position);
             SDF_VU0_LOADVECTOR_B(targetPosition);
@@ -961,7 +961,7 @@ void btlSetupCameraPoseAimUnit(BtlLinkedCommand *action, BtlCamState *from, BtlC
     fov = action->camera.fov;
     from->fov = fov;
     if (btlSampleActorModelPositionVU(unit, 1) == 0) {
-        btlUnitGetMuzzlePosVU(unit);
+        effBTLModelGetSphereCenter(unit);
     }
     SDF_VU0_STOREVECTOR(from->position);
         from->distance = unit->cameraRadius * unit->scale / tanf(fov * 0.5f);
@@ -1027,7 +1027,7 @@ void btlBuildRandomTargetCameraStates(BtlLinkedCommand *action, BtlCamState *fro
     fov = action->camera.fov;
     from->fov = fov;
     to->fov = fov;
-    btlUnitGetMuzzlePosVU(unit);
+    effBTLModelGetSphereCenter(unit);
     SDF_VU0_STOREVECTOR_NOMEM(position);
     position[1] -= height * 0.25f;
     SDF_VU0_LOADVECTOR(position);
@@ -1139,7 +1139,7 @@ void btlBuildFilteredGroupCameraPair(BtlLinkedCommand *action, BtlCamState *from
         if (!(flags & mask)) {
             continue;
         }
-        btlUnitGetMuzzlePosVU(unit);
+        effBTLModelGetSphereCenter(unit);
         SDF_VU0_STOREVECTOR(muzzle);
         muzzleHeight += muzzle[1];
         count++;
@@ -1234,7 +1234,7 @@ void btlBuildGroupSizeActionCameraPair(BtlLinkedCommand *command, BtlCamState *f
     user = task->unit;
     btlClearAllUnitDefeatCandidates();
     btlFlagMatchingUnitsDefeatCandidate(user->status.flags & 0x600);
-    btlUnitGetMuzzlePosVU(user);
+    effBTLModelGetSphereCenter(user);
     VU0_STORE_VF_PTR(vf10, position);
     if (user->status.flags & 0x200) {
         mode = position[0] < 0.0f ? 2 : 3;
@@ -1295,7 +1295,7 @@ f32 angle, f32 blend) {
         if (!(flags & groups)) {
             continue;
         }
-        btlUnitGetMuzzlePosVU(unit);
+        effBTLModelGetSphereCenter(unit);
         SDF_VU0_STOREVECTOR(point);
         totalReach += unit->reach * unit->scale;
         if (first == NULL) {
@@ -1481,10 +1481,10 @@ void btlBuildActorPairFramingCameraPose(BtlLinkedCommand *action, BtlCamState *p
 
     pose->fov = action->camera.fov;
     scaledReach = actor->reach * actor->scale;
-    btlUnitGetMuzzlePosVU(actor);
+    effBTLModelGetSphereCenter(actor);
     scaledReach *= reachScale;
     SDF_VU0_STOREVECTOR(actorMuzzle);
-    btlUnitGetMuzzlePosVU(target);
+    effBTLModelGetSphereCenter(target);
     SDF_VU0_STOREVECTOR(targetMuzzle);
 
     if (btlUnitGetTopY(target) < 600.0f) {
@@ -1622,7 +1622,7 @@ void btlBuildTargetGroupFramingCameraPose(BtlLinkedCommand *command, BtlCamState
         if (unitFlags & 1) {
             if (!(unitFlags & 0xC0)) {
                 if (unitFlags & flags) {
-                    btlUnitGetMuzzlePosVU(unit);
+                    effBTLModelGetSphereCenter(unit);
                     SDF_VU0_STOREVECTOR(currentMuzzle);
                     if (firstActor == 0) {
                         firstActor = unit;
@@ -1659,7 +1659,7 @@ void btlBuildTargetGroupFramingCameraPose(BtlLinkedCommand *command, BtlCamState
         fldCamUpdateDefault(command, pose);
         return;
     }
-    btlUnitGetMuzzlePosVU(actor);
+    effBTLModelGetSphereCenter(actor);
     SDF_VU0_STOREVECTOR(actorPoint);
     actorPoint[1] = -btlUnitGetTopY(actor);
     fieldOfView = pose->fov;
@@ -1776,7 +1776,7 @@ void btlFrameSingleTargetActionCamera(BtlLinkedCommand *action, BtlCamState *out
     span = btlMeasureFilteredUnitGroupBounds(user->status.flags & 0x600, 0, &height);
     SDF_VU0_STOREVECTOR_NOMEM(center);
     center[1] = -height * 0.5f;
-    btlUnitGetMuzzlePosVU(target);
+    effBTLModelGetSphereCenter(target);
     SDF_VU0_STOREVECTOR_NOMEM(targetPosition);
     targetPosition[1] = -btlUnitGetTopY(target);
     halfFov = out->fov * 1.3333333f * 0.5f;
@@ -1870,7 +1870,7 @@ s32 btlBuildMaskedGroupFramingCameraPose(BtlLinkedCommand *command, BtlCamState 
         if (flags & 1) {
             if ((flags & 0xC0) == 0) {
                 if (flags & (u32)mask) {
-                    btlUnitGetMuzzlePosVU(unit);
+                    effBTLModelGetSphereCenter(unit);
                     VU0_STORE_VF_TO_MEMORY(vf10, *(PcpVectorCopyF32 *)point);
                     if (!leftActor) {
                         leftActor = unit;
@@ -2083,9 +2083,9 @@ void btlFlagUserAndTargetDefeat(BtlLinkedCommand *command, BtlLinkedCommand *unu
         btlFlagUnitDefeatCandidate(user);
         btlFlagUnitDefeatCandidate(target);
     }
-    btlUnitGetMuzzlePosVU(user);
+    effBTLModelGetSphereCenter(user);
     SDF_VU0_STOREVECTOR_NOMEM(userPos);
-    btlUnitGetMuzzlePosVU(target);
+    effBTLModelGetSphereCenter(target);
     SDF_VU0_STOREVECTOR_NOMEM(targetPos);
     btlUnitFaceTarget(target, user);
     if (userPos[0] < targetPos[0]) {
@@ -2130,10 +2130,10 @@ void btlBuildApproachCamera(BtlLinkedCommand *action, BtlCamState *out) {
         ratio = 1.0f;
     }
     out->fov = action->camera.fov;
-    btlUnitGetMuzzlePosVU(user);
+    effBTLModelGetSphereCenter(user);
     SDF_VU0_STOREVECTOR(userPos);
     userPos[1] -= user->height * user->scale * 0.25f;
-    btlUnitGetMuzzlePosVU(target);
+    effBTLModelGetSphereCenter(target);
     SDF_VU0_STOREVECTOR_NOMEM(targetPos);
     SDF_VU0_LOADVECTOR_B(userPos);
     SDF_VU0_SUBVECTOR();
@@ -2178,9 +2178,9 @@ void btlSetupActionCameraPair(BtlLinkedCommand *command) {
         return;
     }
     btlFrameSingleTargetActionCamera(command, command->frontCamera.position);
-    btlUnitGetMuzzlePosVU(user);
+    effBTLModelGetSphereCenter(user);
     SDF_VU0_STOREVECTOR_NOMEM(userPos);
-    btlUnitGetMuzzlePosVU(target);
+    effBTLModelGetSphereCenter(target);
     SDF_VU0_STOREVECTOR_NOMEM(targetPos);
     if (userPos[0] < targetPos[0]) {
         command->flags |= 0x200;
@@ -2192,7 +2192,7 @@ void btlSetupActionCameraPair(BtlLinkedCommand *command) {
     command->motionParameter = 15.0f;
     btlInterpolateVectorStep(&command->frontCamera);
     SDF_VU0_STOREVECTOR_NOMEM(lookPos);
-    btlUnitGetMuzzlePosVU(user);
+    effBTLModelGetSphereCenter(user);
     SDF_VU0_COPYVECTOR_A_TO_B();
     SDF_VU0_LOADVECTOR(command->frontCamera.position);
     VU0_LERP_VF10(0.25f);
@@ -2247,10 +2247,10 @@ void btlUpdateActionTargetCameraPose(BtlLinkedCommand *action) {
     } else {
         extent = target->reach * target->scale * 2.25f;
         out->fov = action->camera.fov;
-        btlUnitGetMuzzlePosVU(target);
+        effBTLModelGetSphereCenter(target);
         SDF_VU0_STOREVECTOR(targetPos);
         targetPos[1] -= target->height * target->scale * 0.2f;
-        btlUnitGetMuzzlePosVU(user);
+        effBTLModelGetSphereCenter(user);
         SDF_VU0_STOREVECTOR_NOMEM(userPos);
         SDF_VU0_LOADVECTOR_B(targetPos);
         SDF_VU0_SUBVECTOR();
@@ -2317,7 +2317,7 @@ void btlFrameCommandTargetGroups(BtlLinkedCommand *action) {
     if (unit == 0) {
         return;
     }
-    btlUnitGetMuzzlePosVU(unit);
+    effBTLModelGetSphereCenter(unit);
     SDF_VU0_STOREVECTOR(focus);
     cameraPosition = action->camera.position;
 
@@ -2336,7 +2336,7 @@ void btlFrameCommandTargetGroups(BtlLinkedCommand *action) {
         if (flags & 1) {
             if (!(flags & 0xC0)) {
                 if (flags & groups) {
-                    btlUnitGetMuzzlePosVU(actor);
+                    effBTLModelGetSphereCenter(actor);
                     SDF_VU0_STOREVECTOR(heightPosition);
                     height += heightPosition[1];
                     count++;
@@ -2442,7 +2442,7 @@ void btlBuildActorGroupProjectionCameraPose(BtlLinkedCommand *source, BtlCamStat
         center[1] = y;
     }
 
-    btlUnitGetMuzzlePosVU(actor);
+    effBTLModelGetSphereCenter(actor);
     VU0_STORE_VF_PTR(vf10, point);
     point[1] = -btlUnitGetTopY(actor) * 0.77499998f;
     if (actor->battleSideSlotIndex != 1) {
@@ -2488,7 +2488,7 @@ void btlBuildActorGroupProjectionCameraPose(BtlLinkedCommand *source, BtlCamStat
     }
 
     farthestUnit = btlFindFarthestUnit(0x200, point);
-    btlUnitGetMuzzlePosVU(farthestUnit);
+    effBTLModelGetSphereCenter(farthestUnit);
     VU0_STORE_VF_PTR(vf10, farthestPos);
     farthestPos[2] -= farthestUnit->reach * farthestUnit->scale;
     if (actor->battleSideSlotIndex != 1 && side != 0) {
@@ -2564,7 +2564,7 @@ void btlBuildShoulderActionCamera(BtlLinkedCommand *action, BtlCamState *pose, B
         f32 distance;
 
         refReach = ref->reach * ref->scale;
-        btlUnitGetMuzzlePosVU(ref);
+        effBTLModelGetSphereCenter(ref);
         VU0_SCALAR_OP_CLOBBER(focus[1] * heightScale, "vaddx.y vf10, vf0, vf2x");
         SDF_VU0_STOREVECTOR(mirror);
         SDF_VU0_LOADVECTOR_B(focus);
@@ -2599,7 +2599,7 @@ void btlBuildShoulderActionCamera(BtlLinkedCommand *action, BtlCamState *pose, B
 
         pose->fov = action->camera.fov;
         unitExtent = unit->reach * unit->scale;
-        btlUnitGetMuzzlePosVU(unit);
+        effBTLModelGetSphereCenter(unit);
         SDF_VU0_STOREVECTOR(focus);
         btlMeasureFilteredUnitGroupBounds(0x200, &span[0], NULL);
         focus[1] = -span[0];
@@ -2608,7 +2608,7 @@ void btlBuildShoulderActionCamera(BtlLinkedCommand *action, BtlCamState *pose, B
         eye[0] = 0.0f;
         ref = btlFindFarthestUnit(0x400, eye);
         if (ref != NULL) {
-            btlUnitGetMuzzlePosVU(ref);
+            effBTLModelGetSphereCenter(ref);
             SDF_VU0_STOREVECTOR(farMuzzle);
             fit = ffabsf(farMuzzle[0]) + ref->reach * ref->scale - eye[0];
         }
@@ -2989,7 +2989,7 @@ void btlPrepareActionCameraPoseWithActorClearance(BtlLinkedCommand *command, Btl
     pose->position[0] -= span;
     out->position[0] += span;
     out->distance *= 0.8f;
-    btlUnitGetMuzzlePosVU(actor);
+    effBTLModelGetSphereCenter(actor);
     VU0_SET_VF10_COMPONENT(y, -btlUnitGetTopY(actor));
     SDF_VU0_LOADVECTOR_B(out);
     SDF_VU0_SUBVECTOR();
@@ -3034,7 +3034,7 @@ void btlFrameLeftmostUnitCameraPair(BtlCamState *source, BtlCamState *from, BtlC
         flags = unit->status.flags;
         if (flags & 1) {
             if (flags & 0x200) {
-                btlUnitGetMuzzlePosVU(unit);
+                effBTLModelGetSphereCenter(unit);
                 SDF_VU0_STOREVECTOR(point);
                 if (first) {
                     selected = unit;
@@ -3047,7 +3047,7 @@ void btlFrameLeftmostUnitCameraPair(BtlCamState *source, BtlCamState *from, BtlC
             }
         }
     }
-    btlUnitGetMuzzlePosVU(selected);
+    effBTLModelGetSphereCenter(selected);
     SDF_VU0_STOREVECTOR(point);
     point[1] = -btlUnitGetTopY(selected);
     SDF_VU0_LOADVECTOR(center);
@@ -3115,7 +3115,7 @@ void func_001F2308(BtlCamState *source, BtlCamState *from, BtlCamState *to) {
         flags = unit->status.flags;
         if (flags & 1) {
             if (flags & 0x200) {
-                btlUnitGetMuzzlePosVU(unit);
+                effBTLModelGetSphereCenter(unit);
                 SDF_VU0_STOREVECTOR(point);
                 if (first) {
                     selected = unit;
@@ -3132,7 +3132,7 @@ void func_001F2308(BtlCamState *source, BtlCamState *from, BtlCamState *to) {
             }
         }
     }
-    btlUnitGetMuzzlePosVU(selected);
+    effBTLModelGetSphereCenter(selected);
     SDF_VU0_STOREVECTOR(point);
     point[1] = -bounds[0];
     point[0] += selected->reach * selected->scale * 0.25f;
@@ -3260,7 +3260,7 @@ void btlFrameEarliestAnimatedUnitCameraPair(BtlLinkedCommand *action, BtlCamStat
     from->fov = halfFov;
     to->fov = halfFov;
     halfFov *= 0.5f;
-    btlUnitGetMuzzlePosVU(selected);
+    effBTLModelGetSphereCenter(selected);
     SDF_VU0_STOREVECTOR(position);
     if (btlSampleActorModelPositionVU(selected, 1) == 0) {
         SDF_VU0_LOADVECTOR(position);
@@ -3324,7 +3324,7 @@ void btlStepUnitHeightFramedCamera(BtlLinkedCommand *action) {
     saved = &action->backCamera;
     if (action->state < endFrame) {
         if (btlSetActorEffectParameter(unit, 1) == BTL_ACTOR_EFFECT_POSITION_UNAVAILABLE) {
-            btlUnitGetMuzzlePosVU(unit);
+            effBTLModelGetSphereCenter(unit);
         }
         SDF_VU0_STOREVECTOR_NOMEM(from->position);
         if (saved->position[1] < from->position[1]) {
@@ -3443,7 +3443,7 @@ void btlBuildSpeciesFramedCameraPair(BtlLinkedCommand *action, BtlCamState *from
     fov = action->camera.fov;
     from->fov = fov;
     to->fov = fov;
-    btlUnitGetMuzzlePosVU(unit);
+    effBTLModelGetSphereCenter(unit);
     SDF_VU0_STOREVECTOR_NOMEM(position);
     SDF_VU0_LOADVECTOR(position);
     SDF_VU0_STOREVECTOR(from->position);
@@ -3533,10 +3533,10 @@ void btlBuildHeightClampedApproachCamera(BtlLinkedCommand *action, BtlCamState *
     }
     out->fov = action->camera.fov;
     height = btlUnitGetTopY(target);
-    btlUnitGetMuzzlePosVU(user);
+    effBTLModelGetSphereCenter(user);
     SDF_VU0_STOREVECTOR(userPos);
     userPos[1] += user->height * user->scale * 0.5f;
-    btlUnitGetMuzzlePosVU(target);
+    effBTLModelGetSphereCenter(target);
     SDF_VU0_STOREVECTOR_NOMEM(targetPos);
     if (height < 600.0f) {
         targetPos[1] -= target->height * target->scale * 0.15f;
@@ -3630,7 +3630,7 @@ void btlBuildActorRotatedCameraPresets(BtlLinkedCommand *action, BtlCamState *fr
         from->fov = fov;
         to->fov = fov;
         if (btlSampleActorModelPositionVU(unit, 1) == 0) {
-            btlUnitGetMuzzlePosVU(unit);
+            effBTLModelGetSphereCenter(unit);
         }
         SDF_VU0_STOREVECTOR(from->position);
         SDF_VU0_STOREVECTOR(to->position);
@@ -3737,7 +3737,7 @@ void btlInitializeActorClearanceCameraPair(BtlLinkedCommand *action, BtlCamState
         btlClearAllUnitDefeatCandidates();
         btlFlagMatchingUnitsDefeatCandidate(unit->status.flags & 0x600);
         out->distance = ((resource->cameraRadius * resource->actorScale) / tanf(action->camera.fov * 0.5f)) * 4.0f;
-        if (btlSampleActorModelPositionVU(unit, 1) == 0) btlUnitGetMuzzlePosVU(unit);
+        if (btlSampleActorModelPositionVU(unit, 1) == 0) effBTLModelGetSphereCenter(unit);
         SDF_VU0_STOREVECTOR(out->position);
         btlAdjustCameraDirectionForDefaultPlane(out);
     }
@@ -4598,7 +4598,7 @@ void btlUnitGetPosVU(BtlUnit *unit, u8 mode) {
         break;
     case 0:
     default:
-        btlUnitGetMuzzlePosVU(unit);
+        effBTLModelGetSphereCenter(unit);
         SDF_VU0_STOREVECTOR(&pos);
         break;
     }
@@ -8681,7 +8681,7 @@ f32 btlMeasureBattleSideBoundsWithSeed(s32 sides, f32 *top, f32 *bottom, const f
                 if (flags & 1) {
                     if ((flags & 0xC0) == 0) {
                         if (flags & sides) {
-                            btlUnitGetMuzzlePosVU(unit);
+                            effBTLModelGetSphereCenter(unit);
                             VU0_STORE_VF_PTR(vf10, pos);
                             radius = unit->reach * unit->scale;
                             height = unit->height * unit->scale * 0.5f - pos[1];
@@ -8907,7 +8907,7 @@ f32 btlMeasureFilteredActorBounds(s32 mask, BtlUnit *included, BtlUnit *excluded
             radius = unit->cameraRadius * unit->scale;
             verticalOffset = radius * 0.5f;
         } else {
-            btlUnitGetMuzzlePosVU(unit);
+            effBTLModelGetSphereCenter(unit);
             SDF_VU0_STOREVECTOR(center);
             verticalOffset = (unit->height * unit->scale) * 0.5f;
             radius = unit->reach * unit->scale;
@@ -9032,7 +9032,7 @@ f32 btlMeasureFilteredActorBounds(s32 mask, BtlUnit *included, BtlUnit *excluded
             SDF_VU0_STOREVECTOR(edge);
             extent = unit->cameraRadius * unit->scale;
         } else {
-            btlUnitGetMuzzlePosVU(unit);
+            effBTLModelGetSphereCenter(unit);
             SDF_VU0_STOREVECTOR(edge);
             extent = unit->reach * unit->scale;
         }
@@ -9128,7 +9128,7 @@ f32 btlMeasureSideFilteredActorBounds(s32 mask, BtlUnit *included, BtlUnit *excl
             radius = unit->cameraRadius * unit->scale;
             verticalOffset = radius * 0.5f;
         } else {
-            btlUnitGetMuzzlePosVU(unit);
+            effBTLModelGetSphereCenter(unit);
             SDF_VU0_STOREVECTOR(center);
             verticalOffset = (unit->height * unit->scale) * 0.5f;
             radius = unit->reach * unit->scale;
@@ -9312,7 +9312,7 @@ f32 btlBuildProjectedActorPairBoundsVU(s32 mask, BtlUnit *first, BtlUnit *second
             radius = unit->cameraRadius * unit->scale;
             halfHeight = radius * 0.5f;
         } else {
-            btlUnitGetMuzzlePosVU(unit);
+            effBTLModelGetSphereCenter(unit);
             radius = unit->reach * unit->scale;
             halfHeight = unit->height * unit->scale * 0.5f;
         }

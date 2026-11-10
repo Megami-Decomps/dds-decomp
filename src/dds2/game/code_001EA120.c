@@ -1170,7 +1170,7 @@ void btlUpdateActionCameraFromTargetPolicy(BtlLinkedCommand *action) {
              * "Camera target dispatcher: two retained position samples". */
             f32 positions[2][4];
 
-            btlUnitGetMuzzlePosVU(link->unit);
+            effBTLModelGetSphereCenter(link->unit);
             /* Retail 001EBF84 keeps this SDK snapshot at SP+0x10. */
             SDF_VU0_STOREVECTOR(positions[1]);
             for (unit = runtime->units; unit != 0; unit = unit->next) {
@@ -1178,7 +1178,7 @@ void btlUpdateActionCameraFromTargetPolicy(BtlLinkedCommand *action) {
                     u32 flags = unit->status.flags;
                     if ((flags & BTL_UNIT_STATUS_FLAG_ACTIVE) != 0) {
                         if ((flags & BTL_UNIT_STATUS_FLAG_ALLY) != 0) {
-                            btlUnitGetMuzzlePosVU(unit);
+                            effBTLModelGetSphereCenter(unit);
                             /* Retail 001EBFCC keeps the ally snapshot at SP+0. */
                             SDF_VU0_STOREVECTOR(positions[0]);
                         }

@@ -256,7 +256,7 @@ extern u32 effBTLFieldColorGetOverrideSelector(void);
 
 extern u32 effBTLFieldColorGetFinalSelector(void);
 
-extern u32 effBTLFieldColorGetOriginalSelector(void);
+extern u32 effBTLSkillGetInvokeFormation(void);
 
 extern u8 effSelectedJobHeader[];
 
@@ -5900,7 +5900,7 @@ void effSetSurfaceRetainedResource(EffectSurfaceNode *node, s32 resourceId) {
     if (node->resource != 0) {
         dds3BillboardDelete(node->resource);
     }
-    node->resource = effCreateBillboardSharingIndexedResource(resourceId);
+    node->resource = dds3BillboardGeneral(resourceId);
     if (node->record != 0) {
         dds3BillboardSetMode(node->resource, (s16)((FileKeyBlock *)node->record->data0)->alphaTrack.surfaceIndex);
     }
@@ -6798,7 +6798,7 @@ EffQuadWork *effCreateQuadWork(FileJobPayload *job) {
             work->billHandle = dds3BillboardCreate(1, (u32)buffer);
             break;
         case 4:
-            work->billHandle = effCreateBillboardSharingIndexedResource(*(s32 *)buffer);
+            work->billHandle = dds3BillboardGeneral(*(s32 *)buffer);
             break;
         case 7:
             work->reference = effCreateTextureAnimationSet((u32)buffer);
@@ -8583,7 +8583,7 @@ EffectStripNode *effCreateStripNode(u32 percent) {
     node->opacity = 1.0f;
     node->active = 0;
     node->trackSet = effCreateTrackSetWithSharedReferences(percent * 4, 2, 0);
-    node->resource = effCreateBillboardSharingIndexedResource(0);
+    node->resource = dds3BillboardGeneral(0);
     node->count = 1;
     return node;
 }
@@ -12241,7 +12241,7 @@ void effDrawThreePointGroups(EffPointSet *set, Matrix4 *matrix) {
 void effGetWorldVector(u32 which) {
     EffectVectorRequest request;
     u128 result;
-    u32 handle = effBTLFieldColorGetOriginalSelector();
+    u32 handle = effBTLSkillGetInvokeFormation();
 
     request.kind = 0xB;
     request.count = 1;
@@ -12251,7 +12251,7 @@ void effGetWorldVector(u32 which) {
     case 0:
         break;
     case 1:
-        handle = effBTLFieldColorGetOriginalSelector();
+        handle = effBTLSkillGetInvokeFormation();
         request.kind = 0;
         break;
     case 2:
@@ -12295,7 +12295,7 @@ s32 effResolveRequestPositionIntoVu(EffectVectorRequest *source, s16 index) {
         switch (source->kind) {
         case 0:
         case 1:
-            handle = effBTLFieldColorGetOriginalSelector();
+            handle = effBTLSkillGetInvokeFormation();
             request.kind = 0;
             break;
         case 2:
@@ -12303,7 +12303,7 @@ s32 effResolveRequestPositionIntoVu(EffectVectorRequest *source, s16 index) {
             request.kind = 0;
             break;
         case 3:
-            handle = effBTLFieldColorGetOriginalSelector();
+            handle = effBTLSkillGetInvokeFormation();
             request.kind = 1;
             break;
         case 4:
@@ -12328,7 +12328,7 @@ s32 effResolveRequestPositionIntoVu(EffectVectorRequest *source, s16 index) {
         switch (source->kind) {
         case 0:
         case 1:
-            handle = effBTLFieldColorGetOriginalSelector();
+            handle = effBTLSkillGetInvokeFormation();
             break;
         case 2:
             handle = effBTLFieldColorGetVariantSelector();
@@ -12377,7 +12377,7 @@ s32 effCollectModelEffectActors(BtlUnit **out, u32 kind) {
     s32 count = 0;
     u32 mask = 0;
     u8 *state = (u8 *)btlGetRuntime();
-    u8 *actor = (u8 *)effBTLFieldColorGetOriginalSelector();
+    u8 *actor = (u8 *)effBTLSkillGetInvokeFormation();
     u8 *other = (u8 *)effBTLFieldColorGetVariantSelector();
 
     switch (kind) {
@@ -12516,7 +12516,7 @@ void effUpdateBattleActorLighting(EffActiveResource *work) {
         break;
     case 1:
         {
-            void *owner = (void *)effBTLFieldColorGetOriginalSelector();
+            void *owner = (void *)effBTLSkillGetInvokeFormation();
             request.kind = 0;
             effBTLPartGetPositionPtr(owner, &request, (u128 *)origin);
             request.kind = 0xB;
@@ -12569,7 +12569,7 @@ void effUpdateBattleActorLighting(EffActiveResource *work) {
                         if (actors[index]->status.stateFlags & 0x8000) {
                             btlUnitGetEffectPosVU(actors[index]);
                         } else {
-                            btlUnitGetMuzzlePosVU(actors[index]);
+                            effBTLModelGetSphereCenter(actors[index]);
                         }
                         VU0_LOAD_VF(vf11, work->position);
                         VU0_SUB(vf10, vf10, vf11);
@@ -12581,7 +12581,7 @@ void effUpdateBattleActorLighting(EffActiveResource *work) {
                         if (actors[index]->status.stateFlags & 0x8000) {
                             btlUnitGetEffectPosVU(actors[index]);
                         } else {
-                            btlUnitGetMuzzlePosVU(actors[index]);
+                            effBTLModelGetSphereCenter(actors[index]);
                         }
                         VU0_LOAD_VF(vf11, origin);
                         VU0_SUB(vf10, vf10, vf11);
@@ -12763,7 +12763,7 @@ void effInitializeFieldLightColors(EffActiveResource *work) {
         switch (config->direction.kind) {
         case 0:
         case 1:
-            handle = effBTLFieldColorGetOriginalSelector();
+            handle = effBTLSkillGetInvokeFormation();
             request.kind = 0;
             break;
         case 2:
@@ -12771,7 +12771,7 @@ void effInitializeFieldLightColors(EffActiveResource *work) {
             request.kind = 0;
             break;
         case 3:
-            handle = effBTLFieldColorGetOriginalSelector();
+            handle = effBTLSkillGetInvokeFormation();
             request.kind = 1;
             break;
         case 4:
@@ -12957,7 +12957,7 @@ s32 func_002F6D00(EffActiveResource *owner) {
                 btlFlagUnitDefeatCandidate((BtlUnit *)effBTLFieldColorGetVariantSelector());
                 break;
             case 1:
-                btlFlagUnitDefeatCandidate((BtlUnit *)effBTLFieldColorGetOriginalSelector());
+                btlFlagUnitDefeatCandidate((BtlUnit *)effBTLSkillGetInvokeFormation());
                 break;
             case 4:
                 btlFlagMatchingUnitsDefeatCandidate(
@@ -12965,7 +12965,7 @@ s32 func_002F6D00(EffActiveResource *owner) {
                 break;
             case 3:
                 btlFlagMatchingUnitsDefeatCandidate(
-                    ((BtlUnit *)effBTLFieldColorGetOriginalSelector())->status.flags & 0x600);
+                    ((BtlUnit *)effBTLSkillGetInvokeFormation())->status.flags & 0x600);
                 break;
             case 5:
                 btlFlagAllUnitsDefeatCandidate();
@@ -12988,7 +12988,7 @@ s32 func_002F6D00(EffActiveResource *owner) {
     switch (config->actorSelection) {
     case 0:
     case 1:
-        actor = (BtlUnit *)effBTLFieldColorGetOriginalSelector();
+        actor = (BtlUnit *)effBTLSkillGetInvokeFormation();
         request.kind = 0;
         break;
     case 2:
@@ -12996,7 +12996,7 @@ s32 func_002F6D00(EffActiveResource *owner) {
         request.kind = 0;
         break;
     case 3:
-        actor = (BtlUnit *)effBTLFieldColorGetOriginalSelector();
+        actor = (BtlUnit *)effBTLSkillGetInvokeFormation();
         request.kind = 1;
         break;
     case 4:
@@ -13004,7 +13004,7 @@ s32 func_002F6D00(EffActiveResource *owner) {
         request.kind = 2;
         break;
     case 5:
-        actor = (BtlUnit *)effBTLFieldColorGetOriginalSelector();
+        actor = (BtlUnit *)effBTLSkillGetInvokeFormation();
         request.kind = 3;
         break;
     case 6:
@@ -13568,7 +13568,7 @@ void effUpdateActorPoseFromModelResource(EffActiveResource *resource)
         case 1:
         case 3:
         case 5:
-            unit = (BtlUnit *)effBTLFieldColorGetOriginalSelector();
+            unit = (BtlUnit *)effBTLSkillGetInvokeFormation();
             break;
         case 2:
         case 4:
@@ -14071,7 +14071,7 @@ EffMotionResource *effBillboardMotionResourceCreate(EffMotionResourceConfig *con
         resource->billboard = dds3BillboardCreate(1, (u32)source);
         break;
     case 4:
-        resource->billboard = effCreateBillboardSharingIndexedResource(source[0]);
+        resource->billboard = dds3BillboardGeneral(source[0]);
         break;
     }
     dds3BillboardSetAnimColorAdvMode(resource->billboard);
@@ -14351,7 +14351,7 @@ EffParticleSharedResource *effCreateParticleSharedResourceFromFile(FileJobPayloa
             work->billHandle = dds3BillboardCreate(1, (u32)buffer);
             break;
         case 4:
-            work->billHandle = effCreateBillboardSharingIndexedResource(*(s32 *)buffer);
+            work->billHandle = dds3BillboardGeneral(*(s32 *)buffer);
             break;
         case 7:
             work->reference = effCreateTextureAnimationSet((u32)buffer);

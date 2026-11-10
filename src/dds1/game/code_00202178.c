@@ -1212,9 +1212,9 @@ void btlFaceLinkedTargetAndFlagDirection(BtlLinkedCommand *command, void *unused
         btlFlagUnitDefeatCandidate(user);
         btlFlagUnitDefeatCandidate(target);
     }
-    btlUnitGetMuzzlePosVU(user);
+    effBTLModelGetSphereCenter(user);
     SDF_VU0_STOREVECTOR(userPos);
-    btlUnitGetMuzzlePosVU(target);
+    effBTLModelGetSphereCenter(target);
     SDF_VU0_STOREVECTOR(targetPos);
     btlUnitFaceTarget(target, user);
     if (userPos[0] < targetPos[0]) {
@@ -1258,10 +1258,10 @@ void btlBuildProgressiveApproachCameraPose(BtlLinkedCommand *command, BtlCamStat
         ratio = 1.0f;
     }
     out->fov = command->camera.fov;
-    btlUnitGetMuzzlePosVU(user);
+    effBTLModelGetSphereCenter(user);
     SDF_VU0_STOREVECTOR(userPos);
     userPos[1] += user->height * user->scale * frontLift;
-    btlUnitGetMuzzlePosVU(target);
+    effBTLModelGetSphereCenter(target);
     SDF_VU0_STOREVECTOR_NOMEM(targetPos);
     targetPos[1] += target->height * target->scale * backLift;
     SDF_VU0_LOADVECTOR(targetPos);
@@ -1317,10 +1317,10 @@ void btlBuildLinkedCommandCameraPair(BtlLinkedCommand *command, BtlCamState *fro
     }
     userExtent = user->reach * user->scale;
     targetExtent = target->reach * target->scale;
-    btlUnitGetMuzzlePosVU(user);
+    effBTLModelGetSphereCenter(user);
     SDF_VU0_STOREVECTOR(userPos);
     userPos[1] += user->height * user->scale * frontLift;
-    btlUnitGetMuzzlePosVU(target);
+    effBTLModelGetSphereCenter(target);
     SDF_VU0_STOREVECTOR(targetPos);
     targetPos[1] += target->height * target->scale * backLift;
     if (targetPos[0] <= userPos[0]) {

@@ -590,9 +590,9 @@ void btlSortActorMuzzleDirections(BtlUnit *unit, BtlIndexList *targets, s32 acti
             for (i = 0; i < last; i++) {
                 pair[0] = btlGetIndexListEntry(targets, i);
                 pair[1] = btlGetIndexListEntry(targets, i + 1);
-                btlUnitGetMuzzlePosVU(pair[0]);
+                effBTLModelGetSphereCenter(pair[0]);
                 SDF_VU0_STOREVECTOR(muzzle[0]);
-                btlUnitGetMuzzlePosVU(pair[1]);
+                effBTLModelGetSphereCenter(pair[1]);
                 SDF_VU0_STOREVECTOR(muzzle[1]);
                 if ((pair[0]->status.flags & 0x400) && (pair[1]->status.flags & 0x400)) {
                     if (mode == 1) {

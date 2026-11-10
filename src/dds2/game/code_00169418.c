@@ -31,7 +31,7 @@ void effBTLFieldColorSetSelectors(s32 baseId, u32 variant, s32 overrideId, s32 f
     effFieldColorFinalSelector = (s32)baseId;
 }
 
-u32 effBTLFieldColorGetOriginalSelector(void) {
+u32 effBTLSkillGetInvokeFormation(void) {
     return effFieldColorOriginalSelector;
 }
 
@@ -91,7 +91,7 @@ u32 effBTLFieldColorGetEntryWord(s32 index) {
 }
 
 /* Enable actor-selector paths in effect consumers; retail always returns one. */
-u32 effBTLFieldColorUsesActorSelectors(void) {
+u32 effBTLSkillCheckRun(void) {
     return 1;
 }
 

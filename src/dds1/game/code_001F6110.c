@@ -302,7 +302,7 @@ s32 nbClipEffectNum(s32 screenPosition[4]) {
     return 1;
 }
 
-void btlUnitGetMuzzlePosVU(BtlUnit *unit) {
+void effBTLModelGetSphereCenter(BtlUnit *unit) {
     f32 pos[4];
     btlGetUnitWorldPos(unit, pos);
     pos[2] += unit->positionZOffset;
@@ -336,7 +336,7 @@ void btlUnitGetBodyPosVU(const BtlUnit *unit) {
 void btlUnitGetEffectPosVU(BtlUnit *unit) {
     f32 pos[4];
     if (!(unit->status.flags & 2)) {
-        btlUnitGetMuzzlePosVU(unit);
+        effBTLModelGetSphereCenter(unit);
         return;
     }
     dds3GetPosPoseSet(unit->effectObject);
@@ -368,7 +368,7 @@ f32 btlUnitGetLargestScaledExtent(BtlUnit *unit) {
 /* Upper Y bound: scaled half-height minus the sampled position's Y. */
 f32 btlUnitGetTopY(BtlUnit *unit) {
     f32 position[4];
-    btlUnitGetMuzzlePosVU(unit);
+    effBTLModelGetSphereCenter(unit);
     SDF_VU0_STOREVECTOR(position);
     return unit->height * unit->scale * 0.5f - position[1];
 }
@@ -377,7 +377,7 @@ f32 btlUnitGetTopY(BtlUnit *unit) {
 /* Lower Y bound uses the same negated position Y and scaled half-height. */
 f32 btlUnitGetBottomY(BtlUnit *unit) {
     f32 position[4];
-    btlUnitGetMuzzlePosVU(unit);
+    effBTLModelGetSphereCenter(unit);
     SDF_VU0_STOREVECTOR(position);
     return -position[1] - unit->height * unit->scale * 0.5f;
 }
@@ -420,7 +420,7 @@ f32 btlMeasureMaskedUnitBounds(s32 mask, f32 *outMaxTop, f32 *outMinTop) {
         if (status & 1) {
             if (!(status & 0xC0)) {
                 if (status & mask) {
-                    btlUnitGetMuzzlePosVU(unit);
+                    effBTLModelGetSphereCenter(unit);
                     SDF_VU0_STOREVECTOR(position);
                     scale = unit->scale;
                     reach = unit->reach * scale;
@@ -551,7 +551,7 @@ f32 btlMeasureEffectTargetGroupBounds(s32 mask, f32 *outMaxTop, f32 *outMinTop) 
         if (!(btlUnitStatusPair(unit) & 0x21) || !(unit->status.flags & mask)) {
             continue;
         }
-        btlUnitGetMuzzlePosVU(unit);
+        effBTLModelGetSphereCenter(unit);
         SDF_VU0_STOREVECTOR(position);
         scale = unit->scale;
         reach = unit->reach * scale;
@@ -696,7 +696,7 @@ f32 btlGetExtremeUnitY(u32 mask) {
     f32 edgeZ;
     while (unit != NULL) {
         if ((unit->status.flags & 1) && (unit->status.flags & mask)) {
-            btlUnitGetMuzzlePosVU(unit);
+            effBTLModelGetSphereCenter(unit);
             SDF_VU0_STOREVECTOR(position);
             if (mask & 0x200) {
                 edgeZ = position[2] + unit->reach * unit->scale;
@@ -759,7 +759,7 @@ f32 btlMeasureIndexListBounds(BtlIndexList *list, f32 *maxTop, f32 *minTop) {
     if (count != 0) {
         do {
             unit = btlGetIndexListEntry(list, (s32)index);
-            btlUnitGetMuzzlePosVU(unit);
+            effBTLModelGetSphereCenter(unit);
             SDF_VU0_STOREVECTOR(position);
             scale = unit->scale;
             reach = unit->reach * scale;
@@ -862,7 +862,7 @@ BtlUnit *btlFindNearestUnit(u32 mask, BtlUnit *target) {
     f32 nearestDistance;
     f32 distance;
     BtlVec4 targetPos;
-    btlUnitGetMuzzlePosVU(target);
+    effBTLModelGetSphereCenter(target);
     SDF_VU0_STOREVECTOR(&targetPos);
     unit = state->units;
     nearest = NULL;
@@ -873,7 +873,7 @@ BtlUnit *btlFindNearestUnit(u32 mask, BtlUnit *target) {
             if (!(unit->status.flags & 0xC0)) {
                 if (target != unit) {
                     if (unit->status.flags & mask) {
-                        btlUnitGetMuzzlePosVU(unit);
+                        effBTLModelGetSphereCenter(unit);
                         VU0_SCALAR_OP(targetPos.f[1], "vaddx.y vf10, vf0, vf2x");
                         VU0_LOAD_VF($vf11, &targetPos);
                         SDF_VU0_SUBVECTOR();
@@ -906,7 +906,7 @@ BtlUnit *btlFindFarthestUnit(u32 mask, f32 *point) {
         if (unit->status.flags & 1) {
             if (!(unit->status.flags & 0xC0)) {
                 if (unit->status.flags & mask) {
-                    btlUnitGetMuzzlePosVU(unit);
+                    effBTLModelGetSphereCenter(unit);
                     VU0_SCALAR_OP(point[1], "vaddx.y vf10, vf0, vf2x");
                     SDF_VU0_LOADVECTOR_B(point);
                     SDF_VU0_SUBVECTOR();
@@ -936,7 +936,7 @@ BtlUnit *btlSelectUnitAtExtremeX(BtlUnit *reference, BtlIndexList *list) {
 
     for (; entryIndex < entryCount; entryIndex++) {
         unit = btlGetIndexListEntry(list, entryIndex);
-        btlUnitGetMuzzlePosVU(unit);
+        effBTLModelGetSphereCenter(unit);
         if (selected == NULL) {
             selected = unit;
             SDF_VU0_STOREVECTOR(&selectedPosition);

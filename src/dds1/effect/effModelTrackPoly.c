@@ -120,7 +120,7 @@ void Eff_ModelTrackPolyListReset(effMTPolyListHandle_t *list, s32 index) {
     effTrackPolyReset(list->items[index]);
 }
 
-void effTrackPolySetIndexedColor(effMTPolyListHandle_t *list, s32 index, u32 color) {
+void Eff_ModelTrackPolyListColorSet(effMTPolyListHandle_t *list, s32 index, u32 color) {
     effTrackPolySetColor(list->items[index], color);
 }
 

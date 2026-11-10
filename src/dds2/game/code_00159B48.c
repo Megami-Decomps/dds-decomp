@@ -66,7 +66,7 @@ extern EffectConfig D_003AA884[];
 
 /* Create a billboard sharing the indexed entry's resource. Word two of the
  * resource stores the reference count; the billHandle_t payload is not an emitter. */
-billHandle_t *effCreateBillboardSharingIndexedResource(s32 index) {
+billHandle_t *dds3BillboardGeneral(s32 index) {
     billHandle_t *effect = dds3BillboardCreate(D_003AA884[index].billboardKind, 0);
     BillChildPayload *resource = hGeneralBillboard[index]->child;
     s32 references = resource->refCount;

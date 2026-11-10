@@ -9463,7 +9463,7 @@ void btlAdvanceTargetPanelAnimation(SceneAiWork *work, s32 mode) {
     }
 }
 
-extern void btlUnitGetMuzzlePosVU(BtlUnit *);
+extern void effBTLModelGetSphereCenter(BtlUnit *);
 
 void btlDrawTargetMarker(BtlUnit *unit, SceneAiWork *work, u32 index) {
     BtlProjectedScreenPoint screenPoint;
@@ -9483,9 +9483,9 @@ void btlDrawTargetMarker(BtlUnit *unit, SceneAiWork *work, u32 index) {
 
     btlGetRuntime();
     if (btlSetActorEffectParameter(unit, 0) == BTL_ACTOR_EFFECT_POSITION_UNAVAILABLE) {
-        btlUnitGetMuzzlePosVU(unit);
+        effBTLModelGetSphereCenter(unit);
     } else if ((unit->status.flags & 0x8000000) != 0) {
-        btlUnitGetMuzzlePosVU(unit);
+        effBTLModelGetSphereCenter(unit);
         SDF_VU0_STOREVECTOR_NOMEM(muzzle);
         muzzle[1] = -24.0f;
         SDF_VU0_LOADVECTOR(muzzle);

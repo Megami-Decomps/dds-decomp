@@ -15,7 +15,7 @@
 
 extern u32 effBTLFieldColorGetVariantSelector(void);
 
-extern u32 effBTLFieldColorGetOriginalSelector(void);
+extern u32 effBTLSkillGetInvokeFormation(void);
 
 
 extern void (*GetPositionPtrTable[])();
@@ -85,7 +85,7 @@ void effBattleComputeTargetPosition(BtlUnit *unit, EffectVectorRequest *request)
     if (unit->status.stateFlags & 0x8000) {
         btlUnitGetEffectPosVU(unit);
     } else {
-        btlUnitGetMuzzlePosVU(unit);
+        effBTLModelGetSphereCenter(unit);
     }
     SDF_VU0_STOREVECTOR(pos);
     if (anchorKind == 5) {
@@ -216,7 +216,7 @@ void effBattleMiscQueryMaskedTargetPosition(u32 actorFlagsMask, EffectVectorRequ
 }
 
 void effBattleMiscQueryOriginalTargetPosition(u32 unused, EffectVectorRequest *request) {
-    BtlUnit *ctx = (BtlUnit *)effBTLFieldColorGetOriginalSelector();
+    BtlUnit *ctx = (BtlUnit *)effBTLSkillGetInvokeFormation();
 
     (void)unused;
     effBattleMiscQueryMaskedTargetPosition(ctx->status.flags & 0xE00, request);
@@ -300,7 +300,7 @@ f32 effBattleMiscQueryScalar(const BtlUnit *unit, const EffectVectorRequest *req
         result = unit->reach * unit->scale;
         break;
     case 1:
-        other = (BtlUnit *)effBTLFieldColorGetOriginalSelector();
+        other = (BtlUnit *)effBTLSkillGetInvokeFormation();
         result = btlMeasureEffectTargetGroupBounds(other->status.flags & 0x600, 0, 0);
         break;
     case 2:
@@ -330,7 +330,7 @@ void effBattleMiscDirectionTo(BtlUnit *unit, EffectVectorRequest *request, f32 *
     if (unit->status.stateFlags & 0x8000) {
         btlUnitGetEffectPosVU(unit);
     } else {
-        btlUnitGetMuzzlePosVU(unit);
+        effBTLModelGetSphereCenter(unit);
     }
     SDF_VU0_LOADVECTOR_B(origin);
     SDF_VU0_SUBVECTOR();

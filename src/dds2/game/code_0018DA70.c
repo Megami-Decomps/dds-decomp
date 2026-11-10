@@ -28,14 +28,14 @@ void effPCPBossMETATOBeamDelete(PairedEffectResources *pair) {
     sdfChipFreeDirect(pair);
 }
 
-extern u32 effBTLFieldColorGetOriginalSelector(void);
+extern u32 effBTLSkillGetInvokeFormation(void);
 
 void effUpdatePairedResources(PairedEffectResources *work) {
     s32 total = work->total;
     s32 frame = work->frame;
     s32 fadeIn = work->fadeIn;
     s32 fadeOut = work->fadeOut;
-    u32 actor = effBTLFieldColorGetOriginalSelector();
+    u32 actor = effBTLSkillGetInvokeFormation();
     s32 remain;
     f32 t;
     u32 blendColor;

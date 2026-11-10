@@ -3096,7 +3096,7 @@ BtlActorEffectPositionResult btlSetActorEffectParameter(BtlUnit *unit, s32 mode)
 
 void effBTLModelGetMarkPosition2(BtlUnit *unit, s32 mode) {
     if (btlSetActorEffectParameter(unit, mode) == BTL_ACTOR_EFFECT_POSITION_UNAVAILABLE) {
-        btlUnitGetMuzzlePosVU(unit);
+        effBTLModelGetSphereCenter(unit);
     }
 }
 
@@ -3524,7 +3524,7 @@ void btlWarpUnitToMotionReach(BtlUnit *unit, BtlUnit *target, s32 index) {
     btlUnitGetBodyPosVU(unit);
     SDF_VU0_STOREVECTOR(bodyPos);
     if (target != NULL) {
-        btlUnitGetMuzzlePosVU(target);
+        effBTLModelGetSphereCenter(target);
         SDF_VU0_STOREVECTOR_NOMEM(muzzlePos);
         muzzlePos[1] = bodyPos[1];
         SDF_VU0_LOADVECTOR(muzzlePos);
@@ -3683,9 +3683,9 @@ s32 btlApproachTargetTask(BtlApproachTaskArgs *args) {
         args->motionReachOffset = table->nodes[unit->motionId].reachOffset * unit->scale;
     }
     reach = args->motionReachOffset + target->reach * target->scale;
-    btlUnitGetMuzzlePosVU(unit);
+    effBTLModelGetSphereCenter(unit);
     SDF_VU0_STOREVECTOR(fromPos);
-    btlUnitGetMuzzlePosVU(target);
+    effBTLModelGetSphereCenter(target);
     SDF_VU0_STOREVECTOR_NOMEM(toPos);
     toPos[1] = fromPos[1];
     SDF_VU0_LOADVECTOR(fromPos);
@@ -6302,14 +6302,14 @@ void btlFaceActionParticipantsTowardLinkedTarget(BtlLinkedCommand *action) {
             if (target != 0 && (target->status.flags & 0x600) == (first->status.flags & 0x600)) {
                 return;
             }
-            btlUnitGetMuzzlePosVU(first);
+            effBTLModelGetSphereCenter(first);
         } else {
             btlMeasureUnitIndexListBounds(action->targetList, 0, 0);
         }
         pos = vec[1];
         SDF_VU0_STOREVECTOR(pos);
         if (target != 0) {
-            btlUnitGetMuzzlePosVU(target);
+            effBTLModelGetSphereCenter(target);
             SDF_VU0_STOREVECTOR(vec[0]);
             if (target->status.flags & 0x80000) {
                 if (btlAimHorizontalDirectionVU(vec[0], pos) != 0) {
@@ -6333,14 +6333,14 @@ void btlAimLinkedUnitAtMuzzle(BtlLinkedCommand *action) {
     if (count != 0) {
         target = action->link->unit;
         if (count == 1) {
-            btlUnitGetMuzzlePosVU((BtlUnit *)btlGetIndexListEntry(action->targetList, 0));
+            effBTLModelGetSphereCenter((BtlUnit *)btlGetIndexListEntry(action->targetList, 0));
         } else {
             btlMeasureUnitIndexListBounds(action->targetList, 0, 0);
         }
         pos = vec[1];
         SDF_VU0_STOREVECTOR(pos);
         if (target != 0) {
-            btlUnitGetMuzzlePosVU(target);
+            effBTLModelGetSphereCenter(target);
             SDF_VU0_STOREVECTOR(vec[0]);
             if (target->status.flags & 0x80000) {
                 if (btlAimHorizontalDirectionVU(vec[0], pos) != 0) {

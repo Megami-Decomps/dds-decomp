@@ -762,7 +762,7 @@ s32 btlFrameMarkedTargetDefeatCamera(BtlLinkedCommand *command) {
                 btlClearAllUnitDefeatCandidates();
                 btlFlagUnitDefeatCandidate(task->unit);
                 btlFlagUnitDefeatCandidate(target);
-                btlUnitGetMuzzlePosVU(task->unit);
+                effBTLModelGetSphereCenter(task->unit);
                 SDF_VU0_STOREVECTOR(position);
                 if (position[0] < 0.0f) {
                     btlSetEffectCameraKeys(command,

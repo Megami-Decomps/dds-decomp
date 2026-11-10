@@ -23,7 +23,7 @@ extern void effPCPCrackSetPosition(f32 *dst, const f32 *src);
 extern PairedEffectResources *effPCPBossMETATOBeamCreate(PairedEffectParams *src);
 extern EffThunderGroup *effPCP_ThunderPolyListCreate(EffThunderGroupParams *src);
 
-extern u32 effBTLFieldColorUsesActorSelectors(void);
+extern u32 effBTLSkillCheckRun(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
 extern f32 effBossLookAtReferenceAxis[4];
 
@@ -523,9 +523,9 @@ void effBossBeamUpdate(EffPCPBossWork *work) {
     u128 matrix[4];
     f32 *direction;
 
-    if (effBTLFieldColorUsesActorSelectors() != 0) {
+    if (effBTLSkillCheckRun() != 0) {
         if (work->frame == 0) {
-            btlUnitGetMuzzlePosVU((struct BtlUnit *)effBTLFieldColorGetVariantSelector());
+            effBTLModelGetSphereCenter((struct BtlUnit *)effBTLFieldColorGetVariantSelector());
             SDF_VU0_STOREVECTOR(work->position);
         }
         direction = work->parameterVector;

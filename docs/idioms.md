@@ -12246,7 +12246,7 @@ remain intact; only the four accessor/mode function names and callers change.
 
 ## Actor selectors, task hooks and surface-alpha modes
 
-`effBTLFieldColorUsesActorSelectors` returns one in both games. Its real effect
+`effBTLSkillCheckRun` returns one in both games. Its real effect
 consumers select original/variant actor muzzle positions and status flags
 instead of fixed positions or existing resource matrices. This is not a
 battle-active check, nor does it validate either stored selector.

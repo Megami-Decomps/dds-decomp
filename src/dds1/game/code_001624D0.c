@@ -18,7 +18,7 @@
 #include "mdl.h"
 #include "bill_object_api.h"
 
-extern u32 effBTLFieldColorGetOriginalSelector(void);
+extern u32 effBTLSkillGetInvokeFormation(void);
 
 extern u32 effBTLFieldColorGetVariantSelector(void);
 
@@ -70,7 +70,7 @@ void effBattleApplyUnitColorDirection(BtlUnit *unit, EffBattleUnitColorCommand *
         count = 1;
         break;
     case 1:
-        mask = ((BtlUnit *)effBTLFieldColorGetOriginalSelector())->status.flags & 0xE00;
+        mask = ((BtlUnit *)effBTLSkillGetInvokeFormation())->status.flags & 0xE00;
         break;
     case 2:
         mask = ((BtlUnit *)effBTLFieldColorGetVariantSelector())->status.flags & 0xE00;

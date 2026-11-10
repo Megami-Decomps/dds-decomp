@@ -6232,7 +6232,7 @@ void fileLoadObjectOpenNamedDevice(EffectSurfaceNode *node, u32 resourceId) {
     if (resource != 0) {
         dds3BillboardDelete(resource);
     }
-    resource = effCreateBillboardSharingIndexedResource(resourceId);
+    resource = dds3BillboardGeneral(resourceId);
     node->resource = resource;
     if (node->record != 0) {
         dds3BillboardSetMode(resource, (s16)((FileKeyBlock *)node->record->data0)->alphaTrack.surfaceIndex);

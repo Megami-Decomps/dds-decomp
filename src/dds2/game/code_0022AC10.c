@@ -2786,7 +2786,7 @@ s32 btlUpdateBattleModelDebugEditor(void) {
             battle->runtimeFlags &= ~0x200;
         }
         if (btlDebugActorStatusEditorRows[btlDebugActorStatusEditor.cursor].valueAddress == (u32)&btlDebugEditorMotionSlot.muzzleGuideScale) {
-            btlUnitGetMuzzlePosVU(unit);
+            effBTLModelGetSphereCenter(unit);
             SDF_VU0_STOREVECTOR_NOMEM(position);
             btlDebugDrawScaledPositionGuide(position, 0x10106020, 0, btlDebugEditorMotionSlot.muzzleGuideScale * btlDebugEditorActorStatus.scale);
         }

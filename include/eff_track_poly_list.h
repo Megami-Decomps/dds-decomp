@@ -22,7 +22,7 @@ void Eff_ModelTrackPolyListDelete(effMTPolyListHandle_t *list);
 /* Read two caller-owned 128-bit endpoint vectors. */
 void Eff_ModelTrackPolyListVertexSet(effMTPolyListHandle_t *list, s32 index, const u128 *endpoints);
 void Eff_ModelTrackPolyListReset(effMTPolyListHandle_t *list, s32 index);
-void effTrackPolySetIndexedColor(effMTPolyListHandle_t *list, s32 index, u32 color);
+void Eff_ModelTrackPolyListColorSet(effMTPolyListHandle_t *list, s32 index, u32 color);
 void Eff_ModelTrackPolyListDrawOnly(effMTPolyListHandle_t *list);
 void dds3Particle_Track3Set(effMTPolyListHandle_t *list, s32 index, u32 color);
 

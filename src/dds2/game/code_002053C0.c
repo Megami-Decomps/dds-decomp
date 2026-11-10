@@ -374,7 +374,7 @@ s32 btlExpandPartyFormationAroundCenter(f32 *center) {
         } else if (unit->status.flags & 0xE0) {
             SDF_VU0_COPYVECTOR(unit->rotation, D_003BE070);
         } else {
-            btlUnitGetMuzzlePosVU(unit);
+            effBTLModelGetSphereCenter(unit);
             SDF_VU0_STOREVECTOR_NOMEM(position);
             if (btlAimHorizontalDirectionVU(position, target) != 0) {
                 SDF_VU0_STOREVECTOR_NOMEM(direction);
@@ -625,7 +625,7 @@ void btlPlaceTripleFormationAroundTarget(ActionStateLink *link, BtlUnit *first, 
         slot[link->unit->battleSideSlotIndex] = link->unit;
         slot[first->battleSideSlotIndex] = first;
         slot[second->battleSideSlotIndex] = second;
-        btlUnitGetMuzzlePosVU(target);
+        effBTLModelGetSphereCenter(target);
         SDF_VU0_STOREVECTOR(center);
         center[1] = 0.0f;
         radius = target->bodyRadius * target->scale;
@@ -705,7 +705,7 @@ void btlPlaceTripleFormationAroundMiddleActor(ActionStateLink *link, BtlUnit *fi
         radius += 100.0f;
         VU0_SCALAR_OP(radius, "vmulx.xyzw vf10, vf10, vf2x");
         SDF_VU0_STOREVECTOR_NOMEM(center);
-        btlUnitGetMuzzlePosVU(slot[1]);
+        effBTLModelGetSphereCenter(slot[1]);
         SDF_VU0_LOADVECTOR_B(center);
         SDF_VU0_ADDVECTOR();
         SDF_VU0_STOREVECTOR_NOMEM(center);
@@ -777,7 +777,7 @@ void btlOrientFrontAndBackUnitsTowardTargets(ActionStateLink *link, BtlUnit *a, 
     if (count == 1) {
         btlUnitFaceTarget(front, target);
     } else {
-        btlUnitGetMuzzlePosVU(front);
+        effBTLModelGetSphereCenter(front);
         SDF_VU0_STOREVECTOR(vec[0]);
         btlMeasureFilteredUnitGroupBounds(target->status.flags & 0x600, 0, 0);
         SDF_VU0_STOREVECTOR_NOMEM(vec[1]);
@@ -855,9 +855,9 @@ void btlAlignTripleFormationWithTarget(ActionStateLink *link, BtlUnit *first, Bt
                 return;
             }
         }
-        btlUnitGetMuzzlePosVU(slot[1]);
+        effBTLModelGetSphereCenter(slot[1]);
         SDF_VU0_STOREVECTOR_NOMEM(position);
-        btlUnitGetMuzzlePosVU(target);
+        effBTLModelGetSphereCenter(target);
         SDF_VU0_STOREVECTOR_NOMEM(targetPosition);
         SDF_VU0_LOADVECTOR_B(position);
         SDF_VU0_SUBVECTOR();
@@ -918,7 +918,7 @@ void btlPlacePairedFormationAtFixedCenter(ActionStateLink *link, BtlUnit *other)
         }
     }
     if (btlGetIndexListCount(link->indexWork.indices) == 1) {
-        btlUnitGetMuzzlePosVU((BtlUnit *)btlGetIndexListEntry(link->indexWork.indices, 0));
+        effBTLModelGetSphereCenter((BtlUnit *)btlGetIndexListEntry(link->indexWork.indices, 0));
     } else {
         btlMeasureUnitIndexListBounds(link->indexWork.indices, 0, 0);
     }
@@ -1013,7 +1013,7 @@ void btlPlacePairedFormationNearTarget(ActionStateLink *link, BtlUnit *other) {
     if (!special) {
         if (btlGetIndexListCount(link->indexWork.indices) == 1) {
             unit = (BtlUnit *)btlGetIndexListEntry(link->indexWork.indices, 0);
-            btlUnitGetMuzzlePosVU(unit);
+            effBTLModelGetSphereCenter(unit);
             reach = unit->reach * unit->scale;
         } else {
             btlMeasureUnitIndexListBounds(link->indexWork.indices, 0, 0);
@@ -1098,7 +1098,7 @@ void btlApplyRadialLinkageFormation(BtlLinkedCommand *command) {
         return;
     }
     target = btlGetIndexListEntry(command->targetList, 0);
-    btlUnitGetMuzzlePosVU(target);
+    effBTLModelGetSphereCenter(target);
     /* Audited SDK store: this vector is read only by the VU load below. */
     SDF_VU0_STOREVECTOR_NOMEM(targetPosition);
     participants[0] = command->linkedA;
@@ -1122,7 +1122,7 @@ void btlApplyRadialLinkageFormation(BtlLinkedCommand *command) {
         spacing = (const BtlFormationSpacingCell *)(selector * sizeof(BtlFormationSpacingCell) + (s32)(u32)actorStatusAddress + 0x38);
         distance = spacing->spacing * participants[i]->scale + target->reach * target->scale;
         btlCopyUnitCurrentPosition(participants[i], oldPosition);
-        btlUnitGetMuzzlePosVU(participants[i]);
+        effBTLModelGetSphereCenter(participants[i]);
         SDF_VU0_LOADVECTOR_B(targetPosition);
         SDF_VU0_SUBVECTOR();
         VU0_SET_VF10_COMPONENT(y, flatY);

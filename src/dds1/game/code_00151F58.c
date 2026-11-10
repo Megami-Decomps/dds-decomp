@@ -53,7 +53,7 @@ void effDrawCompositeTextureQuad(sdfDrawTag_t *packet, EffCompositeGsDescriptor 
 
 /* Create a billboard sharing the indexed entry's resource. Word two of the
  * resource stores the reference count; the billHandle_t payload is not an emitter. */
-billHandle_t *effCreateBillboardSharingIndexedResource(s32 index) {
+billHandle_t *dds3BillboardGeneral(s32 index) {
     billHandle_t *effect = dds3BillboardCreate(D_0034DF54[index].billboardKind, 0);
     BillChildPayload *resource = hGeneralBillboard[index]->child;
     s32 references = resource->refCount;

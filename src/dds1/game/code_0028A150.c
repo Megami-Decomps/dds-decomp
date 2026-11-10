@@ -5723,7 +5723,7 @@ void fileLoadObjectOpenNamedDevice(LoadObj *obj, s32 resourceIndex) {
     if (obj->deviceHandle != NULL) {
         dds3BillboardDelete(obj->deviceHandle);
     }
-    handle = effCreateBillboardSharingIndexedResource(resourceIndex);
+    handle = dds3BillboardGeneral(resourceIndex);
     obj->deviceHandle = handle;
     if (obj->recordWork != NULL) {
         FileKeyBlock *record = (FileKeyBlock *)obj->recordWork->data0;

@@ -2249,8 +2249,8 @@ typedef struct {
     u8 bytes[0x30];
 } __attribute__((packed)) FileRecordHeader;
 
-extern u32 effBTLFieldColorUsesActorSelectors(void);
-extern u32 effBTLFieldColorGetOriginalSelector(void);
+extern u32 effBTLSkillCheckRun(void);
+extern u32 effBTLSkillGetInvokeFormation(void);
 extern u32 effBTLFieldColorGetVariantSelector(void);
 extern void dds3BezierTrackPolyReset(EffPcpThunderFragmentResources *history);
 extern void dds3BezierTrackPolySetVC(EffPcpThunderFragmentResources *history, const u128 *source);
@@ -2310,11 +2310,11 @@ void effThunderUpdateCurveGroup(EffPcpThunderGroup *group) {
     place.payload[8] = 100.0f;
     place.payload[9] = 100.0f;
     place.payload[10] = 1.0f;
-    if (effBTLFieldColorUsesActorSelectors()) {
+    if (effBTLSkillCheckRun()) {
         u32 actor;
         if (mode == 3) actor = effBTLFieldColorGetVariantSelector();
-        else actor = effBTLFieldColorGetOriginalSelector();
-        btlUnitGetMuzzlePosVU((struct BtlUnit *)actor);
+        else actor = effBTLSkillGetInvokeFormation();
+        effBTLModelGetSphereCenter((struct BtlUnit *)actor);
         SDF_VU0_STOREVECTOR_NOMEM(start);
     } else {
         start[0] = 0.0f;

@@ -6,9 +6,6 @@
 
 /* DDS's names for the same objects. */
 #define dds3EffectBase effDefaultRandomState
-#define effBTLModelGetSphereCenter btlUnitGetMuzzlePosVU
-#define effBTLSkillCheckRun effBTLFieldColorUsesActorSelectors
-#define effBTLSkillGetInvokeFormation effBTLFieldColorGetOriginalSelector
 
 
 /* One needle instance: position plus the colour the draw loop stamps. */

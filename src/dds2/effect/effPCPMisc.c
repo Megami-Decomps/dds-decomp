@@ -80,7 +80,7 @@ EffBillboardSetWork *effPCPSparkleSphereCreate(EffBillboardSetParams *params) {
     EffBillboardSetWork *billboard = (EffBillboardSetWork *)sdfChipAllocDirect(0x20);
 
     billboard->mode = params->mode;
-    billboard->handle = effCreateBillboardSharingIndexedResource(2);
+    billboard->handle = dds3BillboardGeneral(2);
     dds3BillboardSetMode(billboard->handle, 2);
     billboard->color = 0x80808080;
     billboard->scale = 100.0f;
@@ -2643,11 +2643,11 @@ void effPCPBreathDelete(EffPCPSpanWork *work) {
 
 extern u32 effBTLFieldColorGetVariantSelector(void);
 
-extern u32 effBTLFieldColorUsesActorSelectors(void);
+extern u32 effBTLSkillCheckRun(void);
 
 extern f32 btlMeasureFilteredUnitGroupBounds(s32 mask, f32 *maxTop, f32 *minTop);
 
-extern u32 effBTLFieldColorGetOriginalSelector(void);
+extern u32 effBTLSkillGetInvokeFormation(void);
 
 /* On the first frame, center the sweep on the battle group's direction.
    Place the optional node around the anchor, then fade its final frames. */
@@ -2668,10 +2668,10 @@ void effPcpUpdateOrbitingAimNode(EffPCPSpanWork *work) {
     if (end < frame) {
         return;
     }
-    if (effBTLFieldColorUsesActorSelectors() && work->frame == 0) {
+    if (effBTLSkillCheckRun() && work->frame == 0) {
         btlMeasureFilteredUnitGroupBounds(((BtlUnit *)effBTLFieldColorGetVariantSelector())->status.flags & 0x600, NULL, NULL);
         SDF_VU0_STOREVECTOR(center);
-        btlUnitGetMuzzlePosVU((BtlUnit *)effBTLFieldColorGetOriginalSelector());
+        effBTLModelGetSphereCenter((BtlUnit *)effBTLSkillGetInvokeFormation());
         SDF_VU0_STOREVECTOR(muzzle);
         look[0] = center[0] - muzzle[0];
         look[2] = center[2] - muzzle[2];
@@ -3034,8 +3034,8 @@ void effPcpBlockSetUpdate(EffPCPBlockSetWork *work) {
     model = dds3EffectPartGetHandle(work->headHandle);
     if (work->mode == EFF_PCP_BLOCK_SET_MODE_DEFAULT) {
         dds3EffectPartSetPosition(work->headHandle, work->params.position);
-        if (effBTLFieldColorUsesActorSelectors()) {
-            btlUnitGetMuzzlePosVU((void *)effBTLFieldColorGetOriginalSelector());
+        if (effBTLSkillCheckRun()) {
+            effBTLModelGetSphereCenter((void *)effBTLSkillGetInvokeFormation());
             SDF_VU0_STOREVECTOR_NOMEM(muzzle);
             LookAtMatrix(work->params.position, muzzle, D_003B1AE0);
             ReverseMatrix();
@@ -3782,8 +3782,8 @@ void effPcpUpdateMuzzleThunderRay(EffPCPBurstWork *work) {
     f32 distance;
     EffThunderFragmentParams *params;
 
-    if (effBTLFieldColorUsesActorSelectors() != 0) {
-        btlUnitGetMuzzlePosVU((BtlUnit *)effBTLFieldColorGetVariantSelector());
+    if (effBTLSkillCheckRun() != 0) {
+        effBTLModelGetSphereCenter((BtlUnit *)effBTLFieldColorGetVariantSelector());
         SDF_VU0_LOADVECTOR_B(work->position);
         SDF_VU0_SUBVECTOR();
         SDF_VU0_NORMALIZE();
@@ -4751,7 +4751,7 @@ void effPcpUpdateStaggeredPulseModels(EffPCPSprayWork *work) {
         }
         data = dds3EffectPartGetHandle(work->handle[i]);
         FromEuler(0.0f, work->rotationY[i], 0.0f);
-        if (effBTLFieldColorUsesActorSelectors() && (((BtlUnit *)effBTLFieldColorGetVariantSelector())->status.flags & 0x400)) {
+        if (effBTLSkillCheckRun() && (((BtlUnit *)effBTLFieldColorGetVariantSelector())->status.flags & 0x400)) {
             SDF_VU0_LOADVECTOR_B(D_00414610);
             Mult();
         }

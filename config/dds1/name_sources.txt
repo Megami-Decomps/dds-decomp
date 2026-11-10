@@ -1547,7 +1547,7 @@
 0x00151E60	dds3BillboardCopy	inferred	SMT3HD name via SLUS_209.11 0x0015CEA0, reloc-identical; was billCloneObjectRetainingSharedData
 0x00151F00	dds3BillboardDelete	inferred	SMT3HD name via SLUS_209.11 0x0015CF40, reloc-identical; was billDispatchByKind
 0x00151F38	dds3BillboardDraw	inferred	SMT3HD name via SLUS_209.11 0x0015CF78, byte-identical; was billInvokeCallback
-0x00151F58	effCreateBillboardSharingIndexedResource	inferred	Creates a billboard for the catalog entry kind, shares its child payload, and increments the child reference count.
+0x00151F58	dds3BillboardGeneral	inferred	SMT3HD name via SLUS_209.11 0x0015CF98, SMT3 name (was effCreateBillboardSharingIndexedResource); was dds3BillboardGeneral
 0x00151FC0	dds3BillboardGeneralNumber	inferred	SMT3HD name via SLUS_209.11 0x0015CFF8, shared-hash-in-run; was effGetGeneralResourceCount
 0x00151FC8	dds3BillboardGetGeneralTex	inferred	SMT3HD name via SLUS_209.11 0x0015D000, reloc-identical; was effGetBillResourceTexture
 0x00151FF8	dds3BillboardSetRotate	inferred	SMT3HD name via SLUS_209.11 0x0015D030, shared-hash-in-run; was billSetRotationAngle
@@ -1837,7 +1837,7 @@
 0x00161650	effBTLPartCreate	inferred	SMT3HD name via SLUS_209.11 0x0016B588, reloc-identical; was effBattleRebuildClonedParameterBanks
 0x00161790	effBTLPartDelete	inferred	SMT3HD name via SLUS_209.11 0x0016B6C8, reloc-identical; was effBattleReleaseParameterBanks
 0x00161838	effBTLFieldColorSetSelectors	inferred	Stores base id twice, optionally substitutes an override id and final id, and records variant separately.
-0x00161858	effBTLFieldColorGetOriginalSelector	inferred	Reads original field-color base selector preserved before optional override is applied. [names_reviewed18.tsv]
+0x00161858	effBTLSkillGetInvokeFormation	inferred	SMT3HD name via SLUS_209.11 0x0016B940, SMT3 name (was effBTLFieldColorGetOriginalSelector); was effBTLSkillGetInvokeFormation
 0x00161860	effBTLFieldColorGetVariantSelector	inferred	Reads field-color variant selector stored by effBTLFieldColorSetSelectors. [names_reviewed18.tsv]
 0x00161868	effBTLFieldColorGetOverrideSelector	inferred	Reads base field-color selector with optional override selector applied. [names_reviewed18.tsv]
 0x00161870	effBTLFieldColorGetFinalSelector	inferred	Reads final field-color selector chosen by optional finalId in effBTLFieldColorSetSelectors. [names_reviewed18.tsv]
@@ -1845,7 +1845,7 @@
 0x00161898	effBTLFieldColorGetBaseColor	evidence	its message "effBTLFieldColorGetBaseColor:DummyColorLoad"
 0x001619A0	effBTLFieldColorLookupNarrowSelectors	inferred	R_Names31 B90
 0x001619C8	effBTLFieldColorGetEntryWord	inferred	Indexes the 0x14-stride field-color entry table and returns its first word.
-0x001619E8	effBTLFieldColorUsesActorSelectors	inferred	confidence=high; Returns1; boss/needle/thunder/misc consumers select original/variant actor muzzle positions and status flags instead of fixed/resource-matrix paths. No battle-active or actor-validity test claimed. DDS2 001695C8 twin. [Namer1 b63]
+0x001619E8	effBTLSkillCheckRun	inferred	SMT3HD name via SLUS_209.11 0x0016BA38, SMT3 name (was effBTLFieldColorUsesActorSelectors); was effBTLSkillCheckRun
 0x00161A00	effBTLFieldColorClearFlags	inferred	Clears the supplied flag bits from the battle field color state.
 0x00161A18	effBTLFieldColorResetFlags	inferred	Zeros all flag bits in the battle field color state.
 0x00161A20	effBTLFieldColorGetActorScale	inferred	R_Names31 B90
@@ -2728,7 +2728,7 @@
 0x00188480	Eff_ModelTrackPolyListDelete	inferred	SMT3HD name via SLUS_209.11 0x001A35B0, reloc-identical; was effTrackPolyDestroyModelWorkList
 0x001884E8	Eff_ModelTrackPolyListVertexSet	inferred	SMT3HD name via SLUS_209.11 0x001A3618, shared-hash-in-run; was effTrackPolyPushIndexedWorkEndpoints
 0x00188510	Eff_ModelTrackPolyListReset	inferred	SMT3HD name via SLUS_209.11 0x001A3640, reloc-identical; was effTrackPolyResetIndexedWork
-0x00188538	effTrackPolySetIndexedColor	inferred	Selects indexed track polygon work then sets its color. [names_reviewed6.tsv]
+0x00188538	Eff_ModelTrackPolyListColorSet	inferred	SMT3HD name via SLUS_209.11 0x001A3668, SMT3 name (was effTrackPolySetIndexedColor); was Eff_ModelTrackPolyListColorSet
 0x00188560	Eff_ModelTrackPolyListDrawOnly	inferred	SMT3HD name via SLUS_209.11 0x001A3690, reloc-identical; was effTrackPolyDrawModelWorkList
 0x001885C0	Eff_HermitianSpline	inferred	SMT3HD name via SLUS_209.11 0x001A36F0, shared-hash-in-run; was effTrackPolyInterpolateCatmullRomPoint
 0x00188738	dds3HermitianTrackPolyCreate	inferred	SMT3HD name via SLUS_209.11 0x001A3868, reloc-identical; was effTrackPolyAllocateHistoryData
@@ -4198,7 +4198,7 @@
 0x001F6110	btlCreateControlObject	inferred	btl battle control and actor operations in game/code_001F6110.c
 0x001F6158	btlProjectForwardPositionToScreen	inferred	readability/matching review (QP16)
 0x001F6300	nbClipEffectNum	inferred	SMT3HD name via SLUS_209.11 0x00258538, reloc-identical; was btlProjectForwardPositionToPackedScreen
-0x001F6498	btlUnitGetMuzzlePosVU	inferred	VU0 transform of unit vec 0x70 by unit matrix, result in vf10
+0x001F6498	effBTLModelGetSphereCenter	inferred	SMT3HD name via SLUS_209.11 0x0016C5E8, SMT3 name (was btlUnitGetMuzzlePosVU); was effBTLModelGetSphereCenter
 0x001F6510	btlUnitGetBodyPosVU	inferred	same as 6498 with vec at 0xA0
 0x001F6588	btlUnitGetEffectPosVU	inferred	selects fetch inner vec or unit pos by flag 2
 0x001F6618	btlUnitGetLargestScaledExtent	inferred	Byte-identical dds2 twin 0x00207F40; Returns the greater of the unit height and reach, multiplied by its size scale. [names_conflicts.tsv]
@@ -10140,7 +10140,7 @@
 0x003BB01C	dds3CrossfadeFrame	inferred	SMT3HD name via SLUS_209.11 0x0054F0C4, effect/effPacket SMT3 rename; was D_003BB01C
 0x003BB020	dds3CrossfadeFrameMax	inferred	SMT3HD name via SLUS_209.11 0x0054F0C8, effect/effPacket SMT3 rename; was D_003BB020
 0x003BB024	effFieldColorFlags	inferred	confidence=high; matched_users=src/dds1/game/code_00161838.c:effBTLFieldColorClearFlags, src/dds1/game/code_00161838.c:effBTLFieldColorSetFlags; Field-color flag APIs add or remove requested bits in this shared word. [names_qp9.tsv]
-0x003BB028	effFieldColorOriginalSelector	inferred	confidence=high; data D_003BB028; matched-C-users=2; src/dds1/game/code_00161838.c:16:effBTLFieldColorSetSelectors; src/dds1/game/code_00161838.c:28:effBTLFieldColorGetOriginalSelector; Color selector setup captures the original base selector here; its getter returns it; data-twin=D_00436418, supported by 2 independently paired matched functions.; retail-data-start=asm/dds1/data/game/code_00161838.sdata.s:9.; seed-placeholder=D_003BB028; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
+0x003BB028	effFieldColorOriginalSelector	inferred	confidence=high; data D_003BB028; matched-C-users=2; src/dds1/game/code_00161838.c:16:effBTLFieldColorSetSelectors; src/dds1/game/code_00161838.c:28:effBTLSkillGetInvokeFormation; Color selector setup captures the original base selector here; its getter returns it; data-twin=D_00436418, supported by 2 independently paired matched functions.; retail-data-start=asm/dds1/data/game/code_00161838.sdata.s:9.; seed-placeholder=D_003BB028; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
 0x003BB02C	effBTLSkillState	inferred	SMT3HD data name via SLUS_209.11 0x00551D80, 1 agreeing references; was effBTLSkillState
 0x003BB030	effBTLSkillID	inferred	SMT3HD data name via SLUS_209.11 0x00551D7C, 1 agreeing references; was effBTLSkillID
 0x003BB034	effFieldColorFinalSelector	inferred	confidence=high; data D_003BB034; matched-C-users=2; src/dds1/game/code_00161838.c:16:effBTLFieldColorSetSelectors; src/dds1/game/code_00161838.c:40:effBTLFieldColorGetFinalSelector; Color selector setup stores final-or-base selector here; final getter returns it; data-twin=D_00436424, supported by 2 independently paired matched functions.; retail-data-start=asm/dds1/data/game/code_00161838.sdata.s:27.; seed-placeholder=D_003BB034; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
