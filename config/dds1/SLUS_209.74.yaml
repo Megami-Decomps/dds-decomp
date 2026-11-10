@@ -297,7 +297,7 @@ segments:
       - [0x1E81A0, c, sdf/sdfHdd]  # SMT3 unit (sdf-decomp tools/twins.py runs)
       - [0x1E8370, c, sdf/sdfDev9]  # SMT3 unit (sdf-decomp tools/twins.py runs)
       - [0x1E83F0, asm, hand/mem/sdfMemClearBlocks]
-      - [0x1E8480, c, game/code_002E7480]
+      - [0x1E8480, c, sdf/sdfDev9_2]
       - [0x1E85F0, c, sdf/sdfMisc]  # SMT3 unit (sdf-decomp tools/twins.py runs)
       - [0x1E87F8, c, sdf/sdfMath]  # SMT3 unit (sdf-decomp tools/twins.py runs)
       - [0x1E8C20, c, sdf/sdfQuat]  # SMT3 unit (sdf-decomp tools/twins.py runs)

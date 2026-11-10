@@ -1,48 +1,62 @@
-#include "sdk_ps2.h"
-#include "sdf_request.h"
+#include "fpu.h"
 #include "common.h"
-#include "sdf_file_existence_api.h"
-#include "sdf_console_packet.h"
-#include "sif_rpc_client_prefix.h"
-#include "sdf_thread_workspace_api.h"
-#include "sdf_alarm.h"
-#include "sdf.h"
-#include "sdf_semaphore_api.h"
-#include "sdf_timer.h"
-#include "sdf_chip.h"
-#include "sdf_heap_api.h"
-#include "sdf_draw.h"
-#include "sdf_packet_alloc.h"
-#include "sdf_sif_command.h"
-#include "sdf_dev_event.h"
-#include "sdf_dev_protocol.h"
-#include "sdf_dev_state.h"
-#include "sdf_dev_path_prefix.h"
-#include "sdf_dev_worker.h"
-#include "sdf_dev_start_load_api.h"
-#include "sdf_disc_file_record.h"
-#include "btl.h"
-#include "sdf_debug_api.h"
+#include "libsdf.h"
+#include "ps2asm.h"
 
-extern u8 sdfFileCmdThreadPrioCheckCounter;
+s32 strlen(const char *aStr);
 
-extern s32 sdfDiscRequestPending;
+enum SdfFileIOCmdStat {
+    SDF_FILE_CMD_STAT_INIT = 0,
+    SDF_FILE_CMD_STAT_DORMANT = 1,
+    SDF_FILE_CMD_STAT_OPEN = 2,
+    SDF_FILE_CMD_STAT_SEEK = 3,
+    SDF_FILE_CMD_STAT_READ = 4,
+    SDF_FILE_CMD_STAT_WRITE = 5,
+    SDF_FILE_CMD_STAT_CLOSE = 6,
+    SDF_FILE_CMD_STAT_SUSPEND = 7,
+    SDF_FILE_CMD_STAT_DONE = 8,
+    SDF_FILE_CMD_STAT_ERROR = 9,
+    SDF_FILE_CMD_STAT_CANCEL = 10
+};
 
-extern char sdfFileHostRootPath[];
+enum SdfFileIOCmd {
+    SDF_FILE_CMD_NONE = 0,
+    SDF_FILE_CMD_READOPEN = 1,
+    SDF_FILE_CMD_WRITEOPEN = 2,
+    SDF_FILE_CMD_SEEK = 3,
+    SDF_FILE_CMD_FILESIZE = 4,
+    SDF_FILE_CMD_READ = 5,
+    SDF_FILE_CMD_WRITE = 6,
+    SDF_FILE_CMD_CLOSE = 7,
+    SDF_FILE_CMD_READFILE = 8,
+    SDF_FILE_CMD_WRITEFILE = 9
+};
 
-extern s32 sdfFileCmdThreadPrio;
+enum sdf_tex_resource {
+    SDF_TEX_RESOURCE_FREE = 0,
+    SDF_TEX_RESOURCE_FRAME = 1,
+    SDF_TEX_RESOURCE_TEXTURE = 2,
+    SDF_TEX_RESOURCE_CLUT = 3,
+    SDF_TEX_RESOURCE_KNOWN_MODE_COUNT = 4
+};
 
-extern u8 sdfHddDevPfs[];
+enum sdf_stream_output {
+    SDF_STREAM_OUTPUT_RGBA32 = 0,
+    SDF_STREAM_OUTPUT_RGBA16 = 1,
+    SDF_STREAM_OUTPUT_RGBA16_DITHERED = 2
+};
 
-extern u8 sdfHddDevHdd[];
+enum sdf_stream_playback {
+    SDF_STREAM_PLAYBACK_INITIAL = 0,
+    SDF_STREAM_PLAYBACK_FIRST_COMPLETION = 1,
+    SDF_STREAM_PLAYBACK_CADENCED = 2
+};
 
-extern u32 sdfCdTrayMode;
+extern void *memcpy(void *, const void *, size_t);
 
-extern u16 sdfFileCmdDefaultCreateMode;
+void *sdfChipAllocDirect(s32 aSize);
 
-extern s32 sdfFileSemaId;
-
-extern char D_0042E3A0[]; /* "cdrom0:\\IRX\\DEV9.IRX;1 resident fail.\n", followed by padding no C emits */
+extern char sdfDev9ResidentFailMsg[];
 
 extern u8 sdfDev9LoadFlag;
 
@@ -50,57 +64,9 @@ extern u8 sdfDev9Ready;
 
 extern s32 sceSifLoadStartModule(const char *modulePath, s32 flags, void *moduleArguments, s32 *resident);
 
-typedef struct Bytes7 {
-    s8 b[7];
-} Bytes7;
+#include "sdk_libc.h"
 
-extern Bytes7 sdfFileHostPrefix[];
-
-extern s8 sdfPrintIopFlag;
-
-extern char sdfPrintStrFmt[];
-
-extern char sdfCdDirectPrefix[]; /* cdrom */
-
-extern char sdfFileCdromPrefix[];
-
-typedef struct Bytes6 {
-    s8 b[6];
-} Bytes6;
-
-extern Bytes6 sdfFileHddPrefix[];
-
-extern char sdfFileCdromName[]; /* cdrom */
-
-extern u8 sdfFileDefaultSrcType;
-
-extern u8 sdfFileCmdDefaultDevice;
-
-extern sdfFileCmdHandle_t *sdfFileCmdActiveHead;
-
-extern sdfFileCmdHandle_t *sdfFileCmdFreeList;
-
-extern s16 sdfFileCmdFreeCount;
-
-extern sdfFileCmdHandle_t *sdfFileCmdCacheHead;
-
-extern sdfFileCmdHandle_t *sdfFileCmdCacheTail;
-
-extern s16 sdfFileCmdCount;
-
-extern char sdfFileCmdCdromPrefix[]; /* cdrom0: */
-
-extern char sdfFileCmdHostPrefix[]; /* host0: */
-
-extern char sdfFileCmdPfsPrefix[]; /* pfs0: */
-
-extern char sdfFileCmdMoviePath[]; /* /movie/ */
-
-extern char sdfFileCmdCdimgPrefix[]; /* cdimg: */
-
-extern char sdfHddMountPoint[];
-
-extern void sdfDev9LoadModule(void);
+extern s32 (*p2sdSmgBuf)(void);
 
 void sdfDev9LoadModule(void) {
     s32 resident;
@@ -111,7 +77,7 @@ void sdfDev9LoadModule(void) {
             return;
         }
         if (resident != 0) {
-            printf(D_0042E3A0);
+            printf(sdfDev9ResidentFailMsg);
             return;
         }
         sdfDev9Ready = 1;
@@ -119,5 +85,5 @@ void sdfDev9LoadModule(void) {
     }
 }
 
-INCLUDE_RODATA(const s32, "sdf/sdfDev9", D_0042E3A0);
+INCLUDE_RODATA(const s32, "sdf/sdfDev9", sdfDev9ResidentFailMsg);
 

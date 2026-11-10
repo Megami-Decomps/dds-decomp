@@ -8964,6 +8964,7 @@ sdfHddMountPoint = 0x00438B60;
 sdfHddValid = 0x00438B66;
 sdfDev9LoadFlag = 0x00438B67; // dds1 0x003BD477
 sdfDev9Ready = 0x00438B68;
+sdfDev9ResidentFailMsg = 0x0042E3A0; // dds1 0x003B4690
 sdfCdClock = 0x00438B70;
 sdfCdClockCache = 0x00438B78;
 p2sdSmgHandle = 0x00438B80;
