@@ -1675,7 +1675,7 @@ BtlRuntimeFadeStepResult btlDrawCapturedScreenTileOverlay(
         ReverseMatrix();
         waveRadius = 640.0f;
         sdf3DPrimLinkTm(tiles, NULL);
-        dds3RenderTexture->primaryBuffer->clampState = 0x37C00000008ULL;
+        dds3RenderTexture->packet->clampState = 0x37C00000008ULL;
         sdfMatSetTex(D_00436D10, dds3RenderTexture);
         sdf3DPrimLinkMat(tiles, D_00436D10, NULL);
         btlCapturedScreenTileDrawParams.color = 0x80808080;
@@ -1905,7 +1905,7 @@ void btlInitializeGraphicsRuntime(void) {
 void btlSubmitFrameAndQueueRuntimeHandle(void) {
     BattleRuntimeState *runtime = &btlRuntimeState;
     sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfPrimAllocDrawTag(0);
-    sdfLinkLoadImage(packetList, dds3RenderTexture->primaryResource,
+    sdfLinkLoadImage(packetList, dds3RenderTexture->pixelGsHandle,
                               0, 0, 0x200, 0xe0, (s32)runtime->frameBuffer, 0);
     D_00380608.append(&D_00380608, packetList);
     sdfMemFreeDelayedDirect(runtime->frameBufferAllocation);
@@ -1918,7 +1918,7 @@ void btlInitializeOverlayGraphics(void) {
     sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfPrimAllocDrawTag(0);
     sdfPreDrawTag_t *context = (sdfPreDrawTag_t *)sdfGrAllocPacketBuff(16);
     sdfPreDrawTagInit(context);
-    sdfPrimLinkFrameMovePacket(packetList, context, dds3RenderTexture->primaryResource, 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
+    sdfPrimLinkFrameMovePacket(packetList, context, dds3RenderTexture->pixelGsHandle, 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
     sdfPreDrawChainLink((SdfPacketChain *)D_00380860, context);
     D_00380608.append(&D_00380608, packetList);
     btlRuntimeState.options |= 1;

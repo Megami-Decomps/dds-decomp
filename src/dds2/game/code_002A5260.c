@@ -1852,7 +1852,7 @@ dds3ProcessID_t *mnuRequestMoviePlayback(const char *file, const SdfMovieDescrip
         strcpy(mnuMovieRestartFileNameBuffer, file);
         context->soundNode.textureHead = 0;
         movieCloseStream(context);
-        mnuMoviePlaybackDescriptor.source = D_00437AD8->word;
+        mnuMoviePlaybackDescriptor.source = D_00437AD8->addr;
         D_00437AD0 = 0;
         return dds3StartProcess(D_0042A3B0, 0x2AFB, 0, 0, mnuRestartMovieStreamAfterStop, 0, 0);
     } else {

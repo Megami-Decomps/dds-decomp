@@ -877,7 +877,7 @@ void kwlnDrawTextureResourceDetails(sdfDrawTag_t *packetList, sdfTexHandle_t *te
     }
     sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x7180, 0x8300, 0x0FFFFF80,
                                                                 formatMode, D_00324560[formatIndex]));
-    sprintf(text, "ID[%2d,%2d]", texture->resourceKey, texture->battleTextureSlot);
+    sprintf(text, "ID[%2d,%2d]", texture->texId, texture->clutId);
     sdfDrawTagLink(packetList, (u32)sdfDevPrintf(0x77C0, 0x8300, 0x0FFFFF80, 0, text));
 }
 
@@ -907,15 +907,15 @@ s32 kwlnTextureCountIncompleteResources(void) {
     sdfTexHandle_t *previousTexture;
     s32 incompleteCount = 0;
     while (texture != NULL) {
-        while (texture->reference != NULL && texture->reference->cloneSource != NULL) {
-            previousTexture = texture->prev;
+        while (texture->ref != NULL && texture->ref->origin != NULL) {
+            previousTexture = texture->next;
             if (previousTexture == NULL) {
                 return incompleteCount;
             }
             texture = previousTexture;
         }
         incompleteCount++;
-        texture = texture->prev;
+        texture = texture->next;
     }
     return incompleteCount;
 }
@@ -936,14 +936,14 @@ s32 kwlnSelectIncompleteResourceAtPageIndex(s32 requestedIndex) {
     }
     while (texture != NULL && visitedIndex != requestedIndex) {
         kwlnCurrentIncompleteResource = texture;
-        while (texture->reference != NULL && texture->reference->cloneSource != NULL) {
-            previousTexture = texture->prev;
+        while (texture->ref != NULL && texture->ref->origin != NULL) {
+            previousTexture = texture->next;
             if (previousTexture == NULL) {
                 return visitedIndex;
             }
             texture = previousTexture;
         }
-        previousTexture = texture->prev;
+        previousTexture = texture->next;
         if (previousTexture == NULL) {
             return visitedIndex;
         }
@@ -1001,14 +1001,14 @@ void kwlnDrawTextureViewerFrame(sdfGrOt_t *surface, sdfTexHandle_t *image) {
         kwlnDrawTextureListDiagnostic(packetList, 0x8240, 0x7A60);
         counter = D_003BA8E0;
         mode = (counter >> 4) & 1;
-        if (image->primaryResource != NULL) {
-            kwlnDrawTextureAllocationMapBlock(packetList, 0x8240, 0x7A60, image->primaryResource, mode);
+        if (image->pixelGsHandle != NULL) {
+            kwlnDrawTextureAllocationMapBlock(packetList, 0x8240, 0x7A60, image->pixelGsHandle, mode);
         }
         counter = D_003BA8E0;
         /* Boolean highlight selection; see docs/idioms.md, "Trace-justified boolean extraction: texture viewer highlight". */
         mode = (counter & 0x10) ? 2 : 0;
-        if (image->secondaryResource != NULL) {
-            kwlnDrawTextureAllocationMapBlock(packetList, 0x8240, 0x7A60, image->secondaryResource, mode);
+        if (image->clutGsHandle != NULL) {
+            kwlnDrawTextureAllocationMapBlock(packetList, 0x8240, 0x7A60, image->clutGsHandle, mode);
         }
         D_003BA8E0++;
     }
@@ -1050,8 +1050,8 @@ s32 (*kwlnTextureFindIncompleteResource(void))(void) {
     kwlnCurrentIncompleteResource = texture;
     D_003BA890 = 1;
     kwlnTextureViewerPageIndex = 0;
-    while (texture->reference != NULL && texture->reference->cloneSource != NULL) {
-        texture = kwlnCurrentIncompleteResource->prev;
+    while (texture->ref != NULL && texture->ref->origin != NULL) {
+        texture = kwlnCurrentIncompleteResource->next;
         if (texture == NULL) {
             return NULL;
         }
@@ -1073,7 +1073,7 @@ void kwlnDrawTextureAllocationMapBlock(void *packetList, s32 x, s32 y, sdfGsMemS
     s32 cellCount;
 
     if (mode == 0) {
-        switch ((s32)block->allocationMode) {
+        switch ((s32)block->type) {
         case 1:
             color = KWLN_MAP_GREEN;
             break;
@@ -1091,8 +1091,8 @@ void kwlnDrawTextureAllocationMapBlock(void *packetList, s32 x, s32 y, sdfGsMemS
         color = mode == 1 ? KWLN_MAP_BLUE : KWLN_MAP_CYAN;
     }
     remainingUnits = block->size;
-    topY = y + (block->word >> KWLN_MAP_ROW_SHIFT) * KWLN_MAP_ROW_Y_STEP;
-    columnIndex = (block->word & KWLN_MAP_ROW_MASK) >> KWLN_MAP_COLUMN_SHIFT;
+    topY = y + (block->addr >> KWLN_MAP_ROW_SHIFT) * KWLN_MAP_ROW_Y_STEP;
+    columnIndex = (block->addr & KWLN_MAP_ROW_MASK) >> KWLN_MAP_COLUMN_SHIFT;
     leftX = x + columnIndex * KWLN_MAP_CELL_X_STEP;
     if (columnIndex > 0) {
         rowUnits = (KWLN_MAP_COLUMN_COUNT - columnIndex) * KWLN_MAP_COLUMN_UNITS;
@@ -1137,7 +1137,7 @@ void kwlnDrawTextureListDiagnostic(sdfDrawTag_t *packetList, s32 x, s32 y) {
                                           0x80000000, 0x80806020));
         do {
             kwlnDrawTextureAllocationMapBlock(packetList, x, y, block, 0);
-            block = block->prev;
+            block = block->next;
         } while (block != NULL);
     }
 }

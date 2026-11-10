@@ -1031,7 +1031,7 @@ void mnuShopSubmitDescriptor(evtViewerInfo_t *scene) {
     if (scene->pendingFrameBuffer != NULL) {
         drawPacket = sdfPrimAllocDrawTag(0);
         sdfLinkLoadImage(drawPacket,
-                                  dds3RenderTexture->primaryResource, 0, 0,
+                                  dds3RenderTexture->pixelGsHandle, 0, 0,
                                   CAMP_DESCRIPTOR_WIDTH, CAMP_DESCRIPTOR_HEIGHT,
                                   (s32)scene->pendingFrameBuffer, 0);
         D_00380708.append(&D_00380708, drawPacket);

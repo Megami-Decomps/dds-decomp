@@ -1894,7 +1894,7 @@ void btlInitializeGraphicsRuntime(void) {
 void btlSubmitFrameAndQueueRuntimeHandle(void) {
     BattleRuntimeState *runtime = &btlRuntimeState;
     sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfPrimAllocDrawTag(0);
-    sdfLinkLoadImage(packetList, dds3RenderTexture->primaryResource,
+    sdfLinkLoadImage(packetList, dds3RenderTexture->pixelGsHandle,
                               0, 0, 0x200, 0xe0, (s32)runtime->frameBuffer, 0);
     D_00325708.append(&D_00325708, packetList);
     sdfMemFreeDelayedDirect(runtime->frameBufferAllocation);
@@ -1907,7 +1907,7 @@ void btlInitializeOverlayGraphics(void) {
     sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfPrimAllocDrawTag(0);
     sdfPreDrawTag_t *context = (sdfPreDrawTag_t *)sdfGrAllocPacketBuff(16);
     sdfPreDrawTagInit(context);
-    sdfPrimLinkFrameMovePacket(packetList, context, dds3RenderTexture->primaryResource, 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
+    sdfPrimLinkFrameMovePacket(packetList, context, dds3RenderTexture->pixelGsHandle, 0, 0, 0, 0, 0x200, 0xe0, 0, 0);
     sdfPreDrawChainLink((SdfPacketChain *)D_00325860, context);
     D_00325708.append(&D_00325708, packetList);
     btlRuntimeState.options |= 1;

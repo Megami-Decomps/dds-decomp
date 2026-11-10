@@ -93,10 +93,10 @@ typedef struct SdfQuad {
 } SdfQuad;
 
 /* Per-texture reference count and non-owning clone source (0x8). */
-typedef struct SdfTexRef {
-    struct sdfTexHandle_t *cloneSource; /* Borrowed source pointer; marks the shared-primary clone path. */
+typedef struct sdfTexRef_t {
+    struct sdfTexHandle_t *origin; /* Borrowed source pointer; marks the shared-primary clone path. */
     s32 refCount;
-} SdfTexRef;
+} sdfTexRef_t;
 
 /* Texture buffer GPU command words (0x40); DDS1/2 game/code_002D10B0/00329F60.c. */
 typedef struct sdfTexPacket_t {
@@ -130,14 +130,14 @@ enum SdfTexResourceAllocationMode {
 
 /* Native VRAM range descriptor (0x1C), shared by textures, graph buffers and streams. */
 typedef struct sdfGsMemSlice_t {
-    struct sdfGsMemSlice_t *next; /* 0x00 */
-    struct sdfGsMemSlice_t *prev; /* 0x04 */
-    u32 allocationMode;         /* 0x08: known categories above; unknown values remain valid */
-    u32 word;                   /* 0x0C: VRAM offset in 32-bit words */
+    struct sdfGsMemSlice_t *prev; /* 0x00 */
+    struct sdfGsMemSlice_t *next; /* 0x04 */
+    u32 type;         /* 0x08: known categories above; unknown values remain valid */
+    u32 addr;                   /* 0x0C: VRAM offset in 32-bit words */
     s32 size;                   /* 0x10: range length in 32-bit words */
-    s16 width;                  /* 0x14 */
-    s16 height;                 /* 0x16 */
-    s32 format;                 /* 0x18: GS pixel-storage mode */
+    s16 w;                  /* 0x14 */
+    s16 h;                 /* 0x16 */
+    s32 pixelFormat;                 /* 0x18: GS pixel-storage mode */
 } sdfGsMemSlice_t;
 
 typedef char SdfTexResource_size_must_be_0x1C[
@@ -359,34 +359,34 @@ typedef char SdfGraphModeDefaults_interlace_must_be_at_0xA[
 
 /* Linked texture and its two buffers/resources (0x40); DDS1/2 sdf/sdfTex.c and game texture units. */
 typedef struct sdfTexHandle_t {
-    struct sdfTexHandle_t *next;
     struct sdfTexHandle_t *prev;
-    SdfTexRef *reference;
+    struct sdfTexHandle_t *next;
+    sdfTexRef_t *ref;
     s16 width;
     s16 height;
-    sdfGsMemSlice_t *primaryResource;
-    sdfGsMemSlice_t *secondaryResource;
-    u8 paletteCount;
-    u8 clutFormat;
+    sdfGsMemSlice_t *pixelGsHandle;
+    sdfGsMemSlice_t *clutGsHandle;
+    u8 numOfCLUT;
+    u8 CLUTFormat;
     u8 pixelFormat;
-    u8 maxMipLevel;
-    u16 lodParameters; /* Packed GS TEX1 L/K parameters. */
-    u8 unk1E;
-    SdfTextureClampMode clampMode; /* 0x1F: 0xFF leaves GS CLAMP state zero; otherwise low nibble is copied. */
-    s32 resourceKey;
-    s32 battleTextureSlot;
-    sdfTexPacket_t *primaryBuffer;
-    sdfTexPacket_t *secondaryBuffer;
-    u8 *paletteData; /* 0x30: retained copy of the texture's palette colors. */
-    s32 paletteDataSize; /* 0x34: palette byte count from sdfTexGetClutDataSize. */
-    s32 unk38;
-    u8 *intensityMap; /* 0x3C: lazily generated weighted-RGB intensity bytes. */
+    u8 numOfMipmap;
+    u16 mipmapParam; /* Packed GS TEX1 L/K parameters. */
+    u8 flags;
+    SdfTextureClampMode texWrapMode; /* 0x1F: 0xFF leaves GS CLAMP state zero; otherwise low nibble is copied. */
+    s32 texId;
+    s32 clutId;
+    sdfTexPacket_t *packet;
+    sdfTexPacket_t *packetCtx2;
+    u8 *clutData; /* 0x30: retained copy of the texture's palette colors. */
+    s32 clutDataSize; /* 0x34: palette byte count from sdfTexGetClutDataSize. */
+    s32 clutColor;
+    u8 *monoClutData; /* 0x3C: lazily generated weighted-RGB intensity bytes. */
 } sdfTexHandle_t;
 
 typedef char SdfTex_size_must_be_0x40[
     (sizeof(sdfTexHandle_t) == 0x40) ? 1 : -1];
 typedef char SdfTex_clampMode_offset_must_be_0x1F[
-    ((u32)&((sdfTexHandle_t *)0)->clampMode == 0x1F) ? 1 : -1];
+    ((u32)&((sdfTexHandle_t *)0)->texWrapMode == 0x1F) ? 1 : -1];
 
 /* Release one caller-owned texture reference. The direct form releases the
  * texture immediately when this is the last reference; the handler form queues
@@ -681,9 +681,9 @@ extern SdfThreadNode *sdfVblankThreadId;
 typedef struct sdfMemHandle_t {
     struct sdfMemHandle_t *prev; /* 0x00 */
     struct sdfMemHandle_t *next; /* 0x04 */
-    s32 address;              /* 0x08: start of represented span */
-    u16 state;                /* 0x0C: free, used, or end sentinel */
-    s16 referenceCount;       /* 0x0E: -1 for sentinels */
+    s32 ptr;              /* 0x08: start of represented span */
+    u16 stat;                /* 0x0C: free, used, or end sentinel */
+    s16 mlock;       /* 0x0E: -1 for sentinels */
 } sdfMemHandle_t;
 
 /* Embedded end sentinels and backing-span metadata for the general heap (0x28). */

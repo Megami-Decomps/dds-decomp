@@ -232,7 +232,7 @@ void effUploadModelTextures(EffModelOwner *owner) {
         s16 height;
         u8 format;
 
-        switch (tex->battleTextureSlot) {
+        switch (tex->clutId) {
         case SDF_TEXTURE_BATTLE_SLOT_ONE:
             header = battle->slot1;
             break;
@@ -905,9 +905,9 @@ sdfTexHandle_t *sdfGetOrCreateTextureForReference(sdfGrOt_t *surface, RefObj *so
     D_00437E3C = surface;
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
-    sdfLinkLoadImage(list, D_00437E40->secondaryResource, 0, 0,
+    sdfLinkLoadImage(list, D_00437E40->clutGsHandle, 0, 0,
         source->paletteWidth, source->paletteHeight, (s32)source->palette, 0);
-    sdfLinkLoadImage(list, D_00437E40->primaryResource, 0, 0,
+    sdfLinkLoadImage(list, D_00437E40->pixelGsHandle, 0, 0,
         ((SdfTextureFileHeader *)source->base)->width,
         ((SdfTextureFileHeader *)source->base)->height, (s32)source->pixels, 0);
     surface->append(surface, list);
@@ -915,17 +915,17 @@ sdfTexHandle_t *sdfGetOrCreateTextureForReference(sdfGrOt_t *surface, RefObj *so
     width = ((SdfTextureFileHeader *)source->base)->width;
     texture->width = width;
     widthLog2 = (s16)width - 1;
-    primary = texture->primaryResource->word >> 6;
+    primary = texture->pixelGsHandle->addr >> 6;
     height = ((SdfTextureFileHeader *)source->base)->height;
     texture->height = height;
-    clutFormat = texture->clutFormat;
-    secondary = texture->secondaryResource->word;
+    clutFormat = texture->CLUTFormat;
+    secondary = texture->clutGsHandle->addr;
     pixelFormat = texture->pixelFormat;
     heightLog2 = (s16)height - 1;
     EE_MMI_BIT_LENGTH(heightLog2);
     EE_MMI_BIT_LENGTH(widthLog2);
     secondary >>= 6;
-    texture->primaryBuffer->textureState =
+    texture->packet->textureState =
         ((u64)2 << 61) |
         ((u64)clutFormat << 51) |
         ((u64)secondary << 37) |

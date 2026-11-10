@@ -277,11 +277,11 @@ void frInitFontTable(s32 rowBudget, s32 poolCount) {
     frFontWork.atlas.heightExponent = frConvertVal2N(frFontWork.atlas.height);
     frFontWork.textureHead1 = sdfGsMemAllocFromTail(0x180, 3);
     for (i = 0; i < 6; i++) {
-        frFontWork.imageBuffers[i] = (frFontWork.textureHead1->word >> 6) + i;
+        frFontWork.imageBuffers[i] = (frFontWork.textureHead1->addr >> 6) + i;
     }
     atlasHead = sdfGsMemAllocFromTail((u32)(frFontWork.atlas.width * frFontWork.atlas.height) >> 3, 2);
     frFontWork.textureHead0 = atlasHead;
-    frFontWork.atlas.bufferBase = atlasHead->word >> 6;
+    frFontWork.atlas.bufferBase = atlasHead->addr >> 6;
     frFontWork.atlas.bufferWidth = (u32)frFontWork.atlas.width >> 6;
     for (i = 0; i < 2; i++) {
         frFontWork.glyphSlots[i] = NULL;
