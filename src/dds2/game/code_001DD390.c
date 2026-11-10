@@ -2421,7 +2421,7 @@ void btlInheritActorModelState(BtlUnit *dst, BtlUnit *src) {
 }
 
 /* Native actor-model setup providers used by btlBindUnitModel. */
-extern s32 mdlSpawnCameraSlotViewerObject(s32 kind, s32 id);
+extern s32 evtSetRegistUnit(s32 kind, s32 id);
 
 #include "dds3_world_primary.h"
 
@@ -2453,7 +2453,7 @@ void btlBindUnitModel(BtlUnit *unit, u32 kind, u32 index) {
         reused = battle->findModelActor(kind, index);
         if (reused != NULL) {
             if (reused->resourceKind != kind || reused->resourceIndex != index) {
-                key = mdlSpawnCameraSlotViewerObject(kind, index);
+                key = evtSetRegistUnit(kind, index);
                 object = dds3SearchSceneBasic(
                     (dds3Basic_t *)dds3GetActiveScene(), (u32)key, 5);
                 dds3DeleteSceneBasicData(object);
@@ -2465,7 +2465,7 @@ void btlBindUnitModel(BtlUnit *unit, u32 kind, u32 index) {
         battle->beforeActorModelReady(unit);
     }
     if (reused == NULL) {
-        key = mdlSpawnCameraSlotViewerObject(kind, index);
+        key = evtSetRegistUnit(kind, index);
         unit->effectObject = dds3SearchSceneBasic(
             (dds3Basic_t *)dds3GetActiveScene(), (u32)key, 5);
         objectData = (EffectObjectData *)unit->effectObject->workdata;

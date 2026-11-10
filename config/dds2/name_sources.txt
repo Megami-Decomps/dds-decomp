@@ -5023,7 +5023,7 @@
 0x0023A170	evtBitCheck	inferred	SMT3HD name via SLUS_209.11 0x001E0F50, reloc-identical; was mdlFlagTest
 0x0023A1A0	dds3BitEditorProcess	inferred	SMT3HD name via SLUS_209.11 0x001E0F80, unique-masked-hash; was mdlUpdateFlagBitEditor
 0x0023A5E8	evtSetTestCamera	inferred	SMT3HD name via SLUS_209.11 0x001E13C8, reloc-identical; was mdlSpawnViewerWorldObject
-0x0023A6A0	mdlSpawnCameraSlotViewerObject	inferred	Spawns camera-slot world object, attaches supplied resource and registers initial entry. [names_reviewed7.tsv]
+0x0023A6A0	evtSetRegistUnit	inferred	SMT3HD name via SLUS_209.11 0x001E1480, same body at SMT3 evtStage position; DDS rebuilds the model context instead of MakeUnit; was mdlSpawnCameraSlotViewerObject
 0x0023A7A0	evtLoadUnit	inferred	SMT3HD name via SLUS_209.11 0x001E1568, reloc-identical; was mdlSpawnLinkedCameraSlotViewerObject
 0x0023A8C0	evtSetUnitPos	inferred	SMT3HD name via SLUS_209.11 0x001E1688, reloc-identical; was mdlAttachWorldObjectToSourceVector
 0x0023A9A8	evtFreeStage	inferred	SMT3HD name via SLUS_209.11 0x001E1770, shared-hash-in-run; was evtDestroySecondaryWorldNode

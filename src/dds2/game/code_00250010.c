@@ -4854,7 +4854,7 @@ typedef struct EvtPmdRuntimeHeader {
 } EvtPmdRuntimeHeader;
 extern s32 evtLoadArea_FromMemory(s32 area, s32 room, u8 *resource0Data, u8 *resource1Data, const SdfTextureOffsetListHeader *textureOffsets, s32 flags);
 extern void mdlPackDecode(s32, s32, s32, const u8 *, s32);
-extern s32 mdlSpawnCameraSlotViewerObject(s32, s32);
+extern s32 evtSetRegistUnit(s32, s32);
 extern evtUnitHandle_t *evtGetUnitHandle(EvtUnitObjectKey worldObjectKey);
 extern EvtPathLinkResult evtPathLinkAndMake(dds3Basic_t *object, dds3Basic_t *owner);
 extern EvtRuntimeGroup *evtEventViewerCreateEntry(s32, evtViewerInfo_t *);
@@ -4924,7 +4924,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
             mdlPackDecode(resourceGroup, resourceId, 0x103,
                 (const u8 *)work->data + ((EvtPmdModelResource *)work->mainEntry3Data)[row].dataOffset,
                 ((EvtPmdModelResource *)work->mainEntry3Data)[row].dataSize);
-            objectId = mdlSpawnCameraSlotViewerObject(resourceGroup, resourceId);
+            objectId = evtSetRegistUnit(resourceGroup, resourceId);
             group = evtEventViewerCreateEntry(1, runtime);
             group->info = dds3SearchSceneBasic(dds3GetControlScene(), objectId, 5);
             group->entryHeader = evtEventViewerAddName((char *)work->mainEntry1Data +

@@ -177,10 +177,10 @@ segments:
       - [0x110C48, c, game/code_0020FC48]
       - [0x1176A8, c, model/mdlManager]  # Nocturne __FILE__
       - [0x11A2C0, c, model/mdlEffect]
-      - [0x1204B8, c, game/code_0021F4B8]
-      - [0x120E38, c, event/evtStage]  # Nocturne __FILE__
-      - [0x1213B0, c, game/code_002203B0]
-      - [0x121830, c, event/evtUnitManager]  # Nocturne __FILE__
+      - [0x1204B8, c, event/EventBit]
+      - [0x120630, c, event/evtBitEditor]
+      - [0x120A78, c, event/evtStage]  # Nocturne __FILE__
+      - [0x1215D8, c, event/evtUnitManager]  # Nocturne __FILE__
       - [0x1270C0, c, event/evtCommand]  # Nocturne __FILE__
       - [0x129058, c, game/code_00228058]
       - [0x129B38, c, game/code_00228B38]
@@ -397,8 +397,8 @@ segments:
       - [0x2A7700, .rodata, game/code_0020FC48]
       - [0x2ACA68, .rodata, model/mdlManager]
       - [0x2ACA80, .rodata, model/mdlEffect]
-      - [0x2ACFB8, .rodata, game/code_0021F4B8]
-      - [0x2AD008, .rodata, event/evtStage]
+      - [0x2ACFB8, .rodata, event/evtBitEditor]
+      - [0x2ACFE8, .rodata, event/evtStage]
       - [0x2AD060, .rodata, event/evtUnitManager]
       - [0x2AD650, .rodata, event/evtCommand]
       - [0x2ADA78, .rodata, game/code_00228058]
@@ -513,8 +513,7 @@ segments:
       - [0x2BB0B4, .lit4, game/code_0020FC48]
       - [0x2BB0CC, .lit4, model/mdlManager]
       - [0x2BB0D0, .lit4, model/mdlEffect]
-      - [0x2BB124, .lit4, game/code_0021F4B8]
-      - [0x2BB128, .lit4, event/evtStage]
+      - [0x2BB124, .lit4, event/evtStage]
       - [0x2BB134, .lit4, event/evtUnitManager]
       - [0x2BB180, .lit4, event/evtCommand]
       - [0x2BB184, .lit4, game/code_00228058]
@@ -608,7 +607,7 @@ segments:
       - [0x2BC8A8, .sdata, game/code_0020CB38]
       - [0x2BCB60, .sdata, model/mdlManager]
       - [0x2BCB80, .sdata, model/mdlEffect]
-      - [0x2BCD80, .sdata, game/code_0021F4B8]
+      - [0x2BCD80, .sdata, event/evtBitEditor]
       - [0x2BCDAC, .sdata, event/evtUnitManager]
       - [0x2BCDB8, .sdata, game/code_00228058]
       - [0x2BCDD0, .sdata, game/code_00228B38]

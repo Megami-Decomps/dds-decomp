@@ -2345,7 +2345,7 @@ typedef struct EventUnitData {
     evtUnitHandle_t *unit;
 } EventUnitData;
 
-extern s32 mdlSpawnCameraSlotViewerObject(s32, s32);
+extern s32 evtSetRegistUnit(s32, s32);
 
 #include "dds3_world_primary.h"
 
@@ -2378,7 +2378,7 @@ void btlBindActorModel(BtlUnit *unit, u32 kind, u32 id) {
         reused = battle->findReusableUnit(kind, id);
         if (reused) {
             if (reused->resourceKind != kind || reused->species != id) {
-                key = mdlSpawnCameraSlotViewerObject(kind, id);
+                key = evtSetRegistUnit(kind, id);
                 dds3DeleteSceneBasicData(dds3SearchSceneBasic(dds3GetActiveScene(), key, 5));
             }
             btlInheritActorModelState(unit, reused);
@@ -2388,7 +2388,7 @@ void btlBindActorModel(BtlUnit *unit, u32 kind, u32 id) {
         battle->prepareModelUnit(unit);
     }
     if (reused == NULL) {
-        key = mdlSpawnCameraSlotViewerObject(kind, id);
+        key = evtSetRegistUnit(kind, id);
         unit->effectObject = dds3SearchSceneBasic(dds3GetActiveScene(), key, 5);
         data = unit->effectObject->workdata;
         unit->ext = data->unit;

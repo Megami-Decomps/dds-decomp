@@ -4616,7 +4616,7 @@ extern s32 evtLoadArea_FromMemory(s32 area, s32 room, u8 *resource0Data, u8 *res
 extern EvtRuntimeGroup *evtEventViewerCreateEntry(s32 kind, evtViewerInfo_t *runtime);
 extern EvtViewerNameIndex evtEventViewerAddName(const char *name, evtViewerInfo_t *runtime);
 extern void mdlPackDecode(s32 packageId, s32 partId, s32 flags, const u8 *data, s32 length);
-extern s32 mdlSpawnCameraSlotViewerObject(s32 packageId, s32 partId);
+extern s32 evtSetRegistUnit(s32 packageId, s32 partId);
 extern evtUnitHandle_t *evtGetUnitHandle(EvtUnitObjectKey worldObjectKey);
 extern EvtPathLinkResult evtPathLinkAndMake(dds3Basic_t *object, dds3Basic_t *owner);
 extern EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, evtViewerInfo_t *runtime);
@@ -4697,7 +4697,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
                 mdlPackDecode(packageId, partId, 0x103,
                     (u8 *)work->data + ((EvtViewerPackageRecord *)work->mainEntry3Data)[row].offset,
                     ((EvtViewerPackageRecord *)work->mainEntry3Data)[row].length);
-                objectKey = mdlSpawnCameraSlotViewerObject(packageId, partId);
+                objectKey = evtSetRegistUnit(packageId, partId);
                 group = evtEventViewerCreateEntry(1, runtime);
                 {
                     dds3Basic_t *modelObject;

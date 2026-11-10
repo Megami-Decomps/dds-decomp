@@ -1,27 +1,27 @@
+#include "common.h"
+#include "ps2asm.h"
+#include "dds3_path.h"
+#include "evt_world.h"
+#include "evt_path_direction.h"
+#include "evt_unit_move_end_api.h"
+#include "evt_unit_path_advance_api.h"
+#include "sdf_vu_matrix.h"
 #include "sdk_ps2.h"
-struct sdfGrOt_t;
+
 struct EffNodeDescriptor;
 
 #include "common.h"
-#include "scr_command_result.h"
 #include "sdf_map_position_api.h"
 #include "scr_integer_parameter_api.h"
 #include "dds3_object_flags.h"
-#include "ps2asm.h"
 #include "btl_model_record.h"
 #include "sdf_model_scalars.h"
-#include "sdf_motion.h"
 #include "sdf_chip.h"
-#include "dds3_path.h"
-#include "evt_unit.h"
 #include "evt_unit_object_key.h"
 #include "evt_unit_path_mode.h"
-#include "evt_path_direction.h"
 #include "evt_unit_motion_api.h"
 #include "evt_unit_motion_callback_result.h"
 #include "evt_unit_motion_step_result.h"
-#include "evt_unit_move_end_api.h"
-#include "evt_unit_path_advance_api.h"
 #include "evt_unit_wait_api.h"
 #include "evt_unit_facing_result_api.h"
 #include "evt_unit_light_animation_status.h"
@@ -30,24 +30,102 @@ struct EffNodeDescriptor;
 #include "evt_unit_transition_flags.h"
 #include "evt_effect_scale_object.h"
 #include "evt_unit_motion_setup.h"
-#include "sdf_float_counter.h"
 #include "evt_unit_motion_slot.h"
-#include "evt_unit_color_transition.h"
 #include "evt_unit_vertical_move.h"
-#include "eff_transform.h"
 #include "eff_object.h"
-#include "dds3obj.h"
 #include "mdl.h"
-#include "sdf_draw.h"
-#include "sdf_vu_matrix.h"
 #include "eff_quaternion_nlerp.h"
-
-
 
 extern f32 *dds3LightParam[];
 extern u8 dds3AmbientColor[];
 
 extern void evtGetUnitDirVector(evtUnitHandle_t *unit);
+
+/* vf10 = (a - b) with y replaced by 0 */
+void evtVu0SubVectorXZAxis(f32 *a, f32 *b) {
+    SDF_VU0_LOADVECTOR(a);
+    SDF_VU0_LOADVECTOR_B(b);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_SETVECTOR_Y_V0(0.0f);
+}
+
+/* vf10 = the unit's rotated y axis flattened to the ground plane, negated */
+void evtGetUnitDirVector(evtUnitHandle_t *unit) {
+    f32 v[4];
+
+    SDF_VU0_LOADVECTOR(unit->effObj->poseset->rotation);
+    ToMatrix();
+    SDF_VU0_STORE_ROW2(v);
+    v[1] = 0.0f;
+    v[3] = 1.0f;
+    SDF_VU0_LOADVECTOR(v);
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_SCALEVECTOR_V0(-1.0f);
+}
+
+/* vu0 routine: test target range or the selected path endpoint. */
+EvtUnitMoveEndResult evtCheckMoveEnd(evtUnitHandle_t *unit) {
+    f32 value;
+
+    switch (unit->motionSubmode) {
+    case EVT_UNIT_MOTION_SUBMODE_TARGET_XZ:
+    case EVT_UNIT_MOTION_SUBMODE_TARGET_XZ_WITH_VERTICAL_STEP:
+    case 2:
+        evtVu0SubVectorXZAxis(unit->targetVector, unit->effObj->poseset->pos);
+        SDF_VU0_GETLENGTH(value);
+        if (value <= 20.0f) {
+            return EVT_UNIT_MOVE_END_REACHED;
+        }
+        break;
+    case EVT_UNIT_MOTION_SUBMODE_PATH_ENDPOINT:
+        value = dds3PathBasicControlGetRatio(&unit->pathControl->counter);
+        if (unit->flags & EVT_UNIT_FLAG_PATH_REVERSE) {
+            if (value == 0.0f) {
+                return EVT_UNIT_MOVE_END_REACHED;
+            }
+        } else if (value == 1.0f) {
+            return EVT_UNIT_MOVE_END_REACHED;
+        }
+        break;
+    }
+    return EVT_UNIT_MOVE_END_NOT_REACHED;
+}
+
+EvtUnitPathAdvanceResult evtGetNextMovePos(evtUnitHandle_t *unit) {
+    f32 t;
+
+    if (unit->motionState != EVT_UNIT_MOTION_STATE_SOURCE) {
+        return 0;
+    }
+    switch (unit->transitionSourceKind) {
+    case EVT_UNIT_TRANSITION_SOURCE_COPIED_VECTOR:
+    case EVT_UNIT_TRANSITION_SOURCE_WORLD_NODE:
+        break;
+    case EVT_UNIT_TRANSITION_SOURCE_PATH_CURVE:
+        t = dds3PathBasicControlGetRatio(&unit->pathControl->counter);
+        if (unit->flags & EVT_UNIT_FLAG_PATH_REVERSE) {
+            if (t == 0.0f) {
+                return 0;
+            }
+        } else {
+            if (t == 1.0f) {
+                return 0;
+            }
+        }
+        t += unit->pathSpeed;
+        if (t < 0.0f) {
+            t = 0.0f;
+        }
+        if (1.0f < t) {
+            t = 1.0f;
+        }
+        dds3PathBasicControlSetRatio(&unit->pathControl->counter, t);
+        dds3PathBasicControlGetPos(unit->pathControl);
+        SDF_VU0_STOREVECTOR(unit->targetVector);
+        return EVT_UNIT_PATH_ADVANCED;
+    }
+    return EVT_UNIT_PATH_NOT_ADVANCED;
+}
 
 /* Length of the path's vec4 trajectory sampled at 20 steps of the value multiplier. */
 f32 GetSplineLength(dds3PathBasicControl_t *path) {
@@ -79,7 +157,6 @@ extern f32 sdfFaceDivSoften, sdfFaceDivBias;
 #include "dds3_world_primary.h"
 #include "dds3_scene_membership.h"
 extern void dds3RotationArc(void);
-
 
 /* Advance the model, light-colour and directional transitions for one event unit. */
 void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
@@ -505,7 +582,6 @@ void evtAdvanceUnitVisualTransitions(evtUnitHandle_t *unit) {
     }
 }
 
-
 /* vu0 routine: load vf10 with the unit's colour (flag 0x100), its target's vector, or the default */
 void GetBaseLightRGB(evtUnitHandle_t *unit) {
     EvtTargetInfo *info = 0;
@@ -571,8 +647,6 @@ void GetBaseLightDir(evtUnitHandle_t *unit) {
                 SDF_VU0_LOADVECTOR(dds3LightParam[0] + 4);
     }
 }
-
-
 
 extern void evtApplyMatchingUnitSlotEndpoints(evtUnitHandle_t *unit);
 
@@ -701,8 +775,6 @@ void evtSetUnitLightDir(evtUnitHandle_t *unit, EvtUnitDirectionTransitionFrames 
                   ~EVT_UNIT_FLAG_DISABLE_DIRECTION_HOLD_ON_TRANSITION_END;
 }
 
-
-
 void evtSetUnitColorRGB(evtUnitHandle_t *unit, s32 duration, u32 color) {
     unit->rgbDuration = duration;
     unit->rgbElapsed = 0;
@@ -781,7 +853,6 @@ evtUnitHandle_t *evtGetUnitHandle2(dds3Basic_t *obj) {
 }
 
 extern const s32 D_003AC060[];
-
 
 evtUnitHandle_t *evtCreateUnitTransitionWork(dds3Basic_t *effObj, dds3ModelHandle_t *owner) {
     evtUnitHandle_t *work;
@@ -984,8 +1055,6 @@ EvtUnitFacingTargetResult evtRotateUnitTowardTarget(evtUnitHandle_t *unit, f32 *
     return EVT_UNIT_ROTATION_STEP_APPLIED;
 }
 
-
-
 /* Flat, negated direction of the rotation in quat, offset by the effect object's point, aimed with evtRotateUnitTowardTarget. */
 EvtUnitFacingTargetResult evtUnitRotationQuat(evtUnitHandle_t *unit, f32 *quat, f32 angle) {
     f32 v[4];
@@ -1025,10 +1094,10 @@ EvtUnitMotionStepResult evtUnitMoveType0(evtUnitHandle_t *unit) {
     return EVT_UNIT_MOTION_STEP_APPLIED;
 }
 
-
 #include "sdf_debug_api.h"
 
 /* Run a copy of the unit until evtCheckMoveEnd reports done, and derive its per-step Y speed. */
+
 INCLUDE_RODATA(const s32, "event/evtUnitManager", D_003AC060);
 
 INCLUDE_RODATA(const s32, "event/evtUnitManager", D_003AC070);
@@ -1100,18 +1169,13 @@ void evtCopyUnitTargetVector(evtUnitHandle_t *work, const f32 src[4]) {
 #include "sdf_unique_chunk_value_api.h"
 #include "dds3_task_add_child.h"
 #include "fpu.h"
-#include "mdl_motion_api.h"
 #include "mdl_motion_end_status.h"
 #include "mdl_world_object_source_vector_api.h"
 #include "itf_mes_window.h"
-#include "evt_world.h"
 #include "evt_world_source_transform.h"
 #include "evt_model_header.h"
 #include "evt_lips_link.h"
-#include "evt_reset_unit_vector_slots_api.h"
 #include "evt_task.h"
-#include "evt_event_pack.h"
-#include "eff_object.h"
 #include "eff_object_dispatch_api.h"
 #include "eff_event.h"
 #include "scr.h"
@@ -1122,17 +1186,11 @@ struct SoundMixer;
 extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(struct SoundMixer *resource, const void *position, const void *scale);
 /* Original-style implicit int, kept: matched code depends on it: dds3AddMG12EffectObjectBasic2. */
 
-
-
 extern EvtUnitVectorSlot D_003D7BD8[7];
-
-
 
 extern BtlActorStatusRecord *D_003BAA20;
 
-
 extern evtUnitHandle_t *evtGetUnitHandle(EvtUnitObjectKey worldObjectKey);
-
 
 extern evtUnitHandle_t *evtWindowMotionUnit;
 extern s32 D_003BBDB0;
@@ -1146,7 +1204,6 @@ extern void datDebugPrintf(const char *fmt, ...);
 extern u8 D_003AC480[];
 
 extern void dds3StartBEDEffectObjectBasic(dds3Basic_t *effectObject, u32 entryId);
-
 
 /* World object views used by the model-parameter opcodes. */
 extern char D_003AC588[];
@@ -2239,7 +2296,6 @@ f32 evtGetShortestAngleDelta(f32 fromDegrees, f32 toDegrees) {
     return toDegrees - fromDegrees;
 }
 
-
 extern f32 EulerAngleAxisY(void);
 
 ScrCommandResult evtOpTurnUnitRelativeToWorldNode(void) {
@@ -2324,7 +2380,6 @@ ScrCommandResult evtOpTurnUnitRelativeToWorldNode(void) {
     return 1;
 }
 
-
 ScrCommandResult evtOpRestoreUnitReferenceAngle(void) {
     evtUnitHandle_t *unit;
     dds3Basic_t *actor;
@@ -2376,7 +2431,6 @@ ScrCommandResult evtOpRestoreUnitReferenceAngle(void) {
     evtResetObjectPendingValue(actor);
     return 1;
 }
-
 
 ScrCommandResult evtCommand_MODEL_ON(void) {
     s32 worldObjectKey;
@@ -2483,7 +2537,6 @@ ScrCommandResult evtCommand_MODEL_LIGHT_DIR(void) {
     evtSetUnitLightDir(unit, scrGetIntPara(1));
     return 1;
 }
-
 
 ScrCommandResult evtCommand_MODEL_RGB(void) {
     evtUnitHandle_t *unit;
