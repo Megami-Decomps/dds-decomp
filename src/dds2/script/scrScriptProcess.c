@@ -12,10 +12,6 @@ extern dds3GlobalWork_t *DDS3_GBWK;
 
 #define datDebugPrintf evtPrintDeveloperConsoleMessage
 #define scrPrintProcedureStart bfContextCreate
-#define scr_109D80 scrCreateProcessWithDefaultOption
-#define scr_109DD0 scrCreateTaskWithDefaultOption
-#define scr_109E38 scrCreateProcessAtFirstProcedure
-#define func_00109FD0 scrStartProcessProcedure
 extern s32 scrIsCurrentWorkTask(scrProcessWork_s *pw);
 
 extern s32 scrHandleCount;
@@ -86,7 +82,7 @@ dds3ProcessID_t *scrStartScriptByName(s32 priority, char *name, s32 messageHandl
     return scrStartScriptProcess(priority, scrLoadScriptFile(name, messageHandle));
 }
 
-scrProcessWork_s *scr_109D80(char *name)
+scrProcessWork_s *scrCreateProcessWithDefaultOption(char *name)
 {
     return scrLoadScriptFile(name, 0);
 }
@@ -96,7 +92,7 @@ dds3ProcessID_t *scrStartScript2(s32 priority, void *scrdata, s32 startproc)
     return scrStartScriptProcess(priority, fldFlowParse(scrdata, startproc));
 }
 
-scrProcessWork_s *scr_109DD0(void *data)
+scrProcessWork_s *scrCreateTaskWithDefaultOption(void *data)
 {
     return fldFlowParse(data, 0);
 }
@@ -109,7 +105,7 @@ dds3ProcessID_t *scrRunScriptEx(s32 priority, scrHeader_t *header, scrTypeTable_
                                                            code, messageData, stringData, procNo));
 }
 
-scrProcessWork_s *scr_109E38(scrHeader_t *header, scrTypeTable_t *typeTable,
+scrProcessWork_s *scrCreateProcessAtFirstProcedure(scrHeader_t *header, scrTypeTable_t *typeTable,
                              scrProcTable_t *procTable, scrLabelTable_t *labelTable,
                              scrCode_u *code, u8 *messageData, u8 *stringData)
 {
@@ -165,7 +161,7 @@ void scrAllReleaseScript(void)
 }
 
 /* Restart a procedure with an empty operand stack and fresh timers. */
-s32 func_00109FD0(scrProcessWork_s *pw, s32 procNo)
+s32 scrStartProcessProcedure(scrProcessWork_s *pw, s32 procNo)
 {
     s32 cursor;
 
