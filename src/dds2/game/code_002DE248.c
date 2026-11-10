@@ -20129,35 +20129,3 @@ INCLUDE_SDATA(const s32, "game/code_002DE248", D_004387D8);
 
 INCLUDE_SDATA(const s32, "game/code_002DE248", D_004387E0);
 
-INCLUDE_SDATA(const s32, "game/code_002DE248", D_004387E8);
-
-INCLUDE_SDATA(const s32, "game/code_002DE248", D_004387F0);
-
-INCLUDE_SDATA(const s32, "game/code_002DE248", D_004387F8);
-
-INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438800);
-
-INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438808);
-
-INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438810);
-
-INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438818);
-
-INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438820);
-
-INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438828);
-
-INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438830);
-
-INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438838);
-
-INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438840);
-
-INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438848);
-
-INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438850);
-
-INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438858);
-
-INCLUDE_SDATA(const s32, "game/code_002DE248", D_00438860);
-

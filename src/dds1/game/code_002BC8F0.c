@@ -1258,3 +1258,36 @@ void effSelectPresetAndDispatch(u32 x, u32 y, u32 z, u32 width,
     uiDrawGradientColorRect(x, y, z, width, height, (const u32 *)vertexColors, presetValue);
     sdfSubmitGsAlphaOneRegisterPacket(0x44, presetValue);
 }
+
+INCLUDE_SDATA(const s32, "game/code_002BC8F0", D_003BD198);
+
+INCLUDE_SDATA(const s32, "game/code_002BC8F0", D_003BD1A0);
+
+INCLUDE_SDATA(const s32, "game/code_002BC8F0", D_003BD1A8);
+
+INCLUDE_SDATA(const s32, "game/code_002BC8F0", D_003BD1B0);
+
+INCLUDE_SDATA(const s32, "game/code_002BC8F0", D_003BD1B8);
+
+INCLUDE_SDATA(const s32, "game/code_002BC8F0", D_003BD1C0);
+
+INCLUDE_SDATA(const s32, "game/code_002BC8F0", D_003BD1C8);
+
+INCLUDE_SDATA(const s32, "game/code_002BC8F0", D_003BD1D0);
+
+INCLUDE_SDATA(const s32, "game/code_002BC8F0", D_003BD1D8);
+
+INCLUDE_SDATA(const s32, "game/code_002BC8F0", D_003BD1E0);
+
+INCLUDE_SDATA(const s32, "game/code_002BC8F0", D_003BD1E8);
+
+INCLUDE_SDATA(const s32, "game/code_002BC8F0", D_003BD1F0);
+
+INCLUDE_SDATA(const s32, "game/code_002BC8F0", D_003BD1F8);
+
+INCLUDE_SDATA(const s32, "game/code_002BC8F0", D_003BD200);
+
+INCLUDE_SDATA(const s32, "game/code_002BC8F0", D_003BD208);
+
+INCLUDE_SDATA(const s32, "game/code_002BC8F0", D_003BD210);
+

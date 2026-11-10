@@ -644,6 +644,7 @@ segments:
       - [0x2BD7E8, .sdata, game/code_0028A150]
       - [0x2BD944, .sdata, game/code_0029A840]
       - [0x2BD960, .sdata, game/code_0029C530]
+      - [0x2BE198, .sdata, game/code_002BC8F0]
       - [0x2BE218, .sdata, game/code_002C1588]
       - [0x2BE238, .sdata, game/code_002C2620]
       - [0x2BE264, .sdata, game/code_002C3800]
