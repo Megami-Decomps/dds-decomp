@@ -2798,7 +2798,6 @@ MnuMantraDrawUpdateResult mnuUpdateMantraUnitPanelFade(struct MantraDrawPool *po
     return MNU_MANTRA_DRAW_UPDATE_CONTINUE;
 }
 
-#ifdef NON_MATCHING
 #include "sdf_trig.h"
 #include "mnu_mantra_draw.h"
 
@@ -2812,21 +2811,32 @@ extern s32 mnuDrawMantraSelectionListAndCost(s32 x, s32 y, s32 depth, MantraList
  * 16..20; the alpha follows the lamp's fade and, while its hold countdown
  * runs, that countdown over 5. */
 s32 mnuDrawMantraUnitPanel(struct MantraDrawPool *unused, MantraDrawItem *item) {
-    MantraLampState *lamp = item->data;
+    MantraLampState *lamp;
     s32 sprite = 0;
+    s16 status;
     f32 visibility;
+    f32 value;
     f32 position;
     f32 opacity;
     s32 alpha;
     s32 clock;
     s32 duration;
 
+    {
+        /* The real owner transfer keeps the native s1 copy preference. Stock
+         * 19.lreg/20.greg otherwise rank this owner ahead of the sprite local
+         * and exchange their saved-register homes. The binding ends before
+         * any call; see docs/matching/mantra-unit-panel.md. */
+        register MantraLampState *loadedLamp __asm__("$17") = item->data;
+        lamp = loadedLamp;
+    }
     if (lamp->reverse) {
         visibility = (f32)lamp->countdown / 5.0f;
     } else {
         visibility = 1.0f;
     }
-    alpha = (s32)(lamp->value * 128.0f * visibility);
+    value = lamp->value;
+    alpha = (s32)(value * 128.0f * visibility);
     switch (lamp->state) {
     case 1:
     case 6:
@@ -2844,7 +2854,8 @@ s32 mnuDrawMantraUnitPanel(struct MantraDrawPool *unused, MantraDrawItem *item) 
             if (clock < duration) opacity = (f32)clock / (f32)duration;
             else opacity = 1.0f;
         }
-        alpha = (s32)((f32)alpha * (sdfSin(-1.5707963f - opacity * 1.5707963f) + 1.0f));
+        opacity = sdfSin(-1.5707963f - opacity * 1.5707963f) + 1.0f;
+        alpha = (s32)((f32)alpha * opacity);
         mnuDrawMantraSelectionListAndCost((s32)((1.0f - position) * 64.0f), 0, 0, &lamp->list, alpha, 0x53);
         switch (lamp->status) {
         case 4: sprite = 0x49; break;
@@ -2873,9 +2884,28 @@ s32 mnuDrawMantraUnitPanel(struct MantraDrawPool *unused, MantraDrawItem *item) 
         }
         break;
     case 3:
-    case 5:
-        mnuDrawMantraSelectionListAndCost(0, 0, 0, &lamp->list, alpha, 0x53);
-        switch (lamp->status) {
+    case 5: {
+        /* Keep the already captured lamp value at its actual comparison
+         * boundary. Stock allocation otherwise gives f1 to visibility and
+         * f2 to this value. The tied operand preserves the value, emits no
+         * instruction, and has no memory effect or intervening call.
+         * These are compiler-allocation reconstructions, not hardware needs
+         * or recovered original source spelling. */
+        __asm__("" : "+f"(value));
+        /* Retail retains this comparison after its branch has disappeared.
+         * Both arms perform the same real draw and its post-call status
+         * read. Keeping that continuation lets jump2 merge the equal tails
+         * after liveness, leaving the native comparison at 0x00274CD4.
+         * This is a trace-backed mechanistic reconstruction; see
+         * docs/matching/mantra-unit-panel.md. */
+        if (value < 0.3f) {
+            mnuDrawMantraSelectionListAndCost(0, 0, 0, &lamp->list, alpha, 0x53);
+            status = lamp->status;
+        } else {
+            mnuDrawMantraSelectionListAndCost(0, 0, 0, &lamp->list, alpha, 0x53);
+            status = lamp->status;
+        }
+        switch (status) {
         case 4: sprite = 0x49; break;
         case 3: sprite = 0x4A; break;
         case 1: sprite = 0x47; break;
@@ -2888,11 +2918,10 @@ s32 mnuDrawMantraUnitPanel(struct MantraDrawPool *unused, MantraDrawItem *item) 
         }
         break;
     }
+    }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "game/code_0026DBF8", mnuDrawMantraUnitPanel);
-#endif
+
 
 MantraDrawItem *mnuRegisterMantraTypeOnePanelDraw(MantraDrawPool *pool) {
     return mnuRegisterMantraDrawItem(pool, 10, mnuUpdateMantraRecordPanelFade, mnuDrawMantraRecordPanel,
