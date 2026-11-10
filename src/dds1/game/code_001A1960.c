@@ -93,7 +93,7 @@ extern char D_003A1A40[];
 
 extern datUnitWork_t *btlGetIndexedPartyEntryRecord(s32);
 
-extern EffRandState effSharedRandomState[];
+extern EffRandState dds3RandCB[];
 
 /* Clear the supplied party-record status mask. */
 void btlClearPartyRecordStatusBits(datUnitWork_t *record, s32 mask) {
@@ -1135,7 +1135,7 @@ BtlSpecialAbilityAvailability btlCheckSpecialAbility(
     }
 }
 
-extern EffRandState effSharedRandomState[];
+extern EffRandState dds3RandCB[];
 
 extern BtlEnemySelectionResult btlSelectEnemyDropItem(
     BtlUnit *actor, BtlEnemySelectionContext selectionContext);
@@ -1144,7 +1144,7 @@ s32 btlSelectActorAction(BtlUnit *actor) {
     s32 result = btlSelectEnemyDropItem(
         actor, BTL_ENEMY_SELECTION_CONTEXT_ACTOR_ACTION);
     if (result == BTL_ENEMY_SELECTION_NONE) {
-        result = (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) != 0 ? 2 : 7;
+        result = (dds3GetRandA((EffRandState *)dds3RandCB) & 1) != 0 ? 2 : 7;
     }
     return result;
 }

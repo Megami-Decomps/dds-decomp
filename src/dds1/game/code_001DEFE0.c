@@ -206,7 +206,7 @@ extern u8 *datActionAnimationRecords;
 
 extern s32 btlArrangeFormationSlots(s32 filter);
 
-extern EffRandState effSharedRandomState[];
+extern EffRandState dds3RandCB[];
 
 extern void sndResetTransition(void);
 
@@ -216,7 +216,7 @@ extern void btlResetFieldColorAndSweepFlags(void);
 
 extern void btlRefreshSoundEntries(void);
 
-extern EffRandState effSharedRandomState[];
+extern EffRandState dds3RandCB[];
 
 extern void sndSetStationedSeVolume(u32 sequence);
 
@@ -1234,7 +1234,7 @@ f32 angle, f32 blend) {
         fldCamUpdateDefault(command, pose);
         return;
     }
-    if (mode == 3 || (mode == 1 && (dds3GetRandA((EffRandState *)effSharedRandomState) & 1))) {
+    if (mode == 3 || (mode == 1 && (dds3GetRandA((EffRandState *)dds3RandCB) & 1))) {
         unit = first;
         first = last;
         last = unit;

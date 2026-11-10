@@ -1716,7 +1716,7 @@ s32 fldGetSceneGroupIndexByActorFlags(u8 *task) {
     return groupId;
 }
 
-extern struct EffRandState effSharedRandomState;
+extern struct EffRandState dds3RandCB;
 extern void fldInitSceneFadeRecords(void);
 
 /* Initialize scene slots from selected actors and mode-specific modifiers. */
@@ -1788,7 +1788,7 @@ void fldInitializeSceneSlots(void) {
                     bonus++;
                 }
                 if (btlDoesEnabledStatusMatchCurrentId(&task->unit->partyRecord, 0xEA) != 0) {
-                    if (dds3GetRandA(&effSharedRandomState) & 1) {
+                    if (dds3GetRandA(&dds3RandCB) & 1) {
                         actionTotal += dds3GetRandIntA(NULL, 2);
                     } else {
                         actionTotal -= dds3GetRandIntA(NULL, 2);

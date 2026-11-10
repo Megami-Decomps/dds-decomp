@@ -126,7 +126,7 @@ extern s32 btlIsUnitInActiveList(BtlUnit *unit);
 extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
 
 
-extern EffRandState effSharedRandomState[];
+extern EffRandState dds3RandCB[];
 
 extern void btlDrawUnitTransparencyPasses(BtlUnit *, dds3ModelHandle_t *, sdfModelRootNode_t *, sdfGrOt_t **, u32);
 
@@ -4627,7 +4627,7 @@ u32 btlStiffenDamageShakeStep(BtlStiffenTaskArgs *args) {
     }
     if (0.5f < args->scale) {
         BtlUnit *actor;
-        scale = args->scale * (dds3GetRandFloatA(effSharedRandomState) * 0.5f + 0.5f);
+        scale = args->scale * (dds3GetRandFloatA(dds3RandCB) * 0.5f + 0.5f);
         if (args->count & 1) {
             scale = -scale;
         }

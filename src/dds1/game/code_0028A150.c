@@ -6459,7 +6459,7 @@ void effUpdateGridRecordSlotHistory(FileSlotTable *record, FileSlot *slot) {
 }
 
 
-extern struct EffRandState effSharedRandomState;
+extern struct EffRandState dds3RandCB;
 extern f32 fabsf(f32);
 extern void effUpdateGridRecordSlotHistory(FileSlotTable *, FileSlot *);
 
@@ -6526,13 +6526,13 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
                     toSpawn = record->instances;
                 } else {
                     toSpawn = (s32)((f32)record->instances *
-                        (dds3GetRandFloatA(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance)));
+                        (dds3GetRandFloatA(&dds3RandCB) * (1.0999999046325684f - keys->spawnVariance)));
                 }
             } else {
                 prewarm = 0;
                 if (keys->spawnVariance > 0.0f) {
                     record->spawnRemainder += (f32)keys->spawnRate *
-                        (dds3GetRandFloatA(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance));
+                        (dds3GetRandFloatA(&dds3RandCB) * (1.0999999046325684f - keys->spawnVariance));
                 } else {
                     record->spawnRemainder += (f32)keys->spawnRate;
                 }
@@ -6568,9 +6568,9 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
                                 motion->axis[1] = direction[1];
                                 motion->axis[2] = direction[2];
                             }
-                            direction[0] = (dds3GetRandFloatA(&effSharedRandomState) - 0.5f) * 2.0f;
+                            direction[0] = (dds3GetRandFloatA(&dds3RandCB) - 0.5f) * 2.0f;
                             direction[1] = 0.0f;
-                            direction[2] = (dds3GetRandFloatA(&effSharedRandomState) - 0.5f) * 2.0f;
+                            direction[2] = (dds3GetRandFloatA(&dds3RandCB) - 0.5f) * 2.0f;
                             direction[3] = 0.0f;
                             SDF_VU0_LOADVECTOR(direction);
                             SDF_VU0_NORMALIZE();
@@ -6582,23 +6582,23 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
                             motion->swayDirection[1] = direction[1];
                             motion->swayDirection[2] = direction[2];
                             motion->speed = keys->emitter.wave.axialSpeed *
-                                (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.wave.axialSpeedRandomness +
+                                (dds3GetRandFloatA(&dds3RandCB) * keys->emitter.wave.axialSpeedRandomness +
                                  (1.0f - keys->emitter.wave.axialSpeedRandomness));
                             initialAmplitude = keys->emitter.wave.initialAmplitude *
-                                (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.wave.initialAmplitudeRandomness +
+                                (dds3GetRandFloatA(&dds3RandCB) * keys->emitter.wave.initialAmplitudeRandomness +
                                  (1.0f - keys->emitter.wave.initialAmplitudeRandomness));
                             finalAmplitude = keys->emitter.wave.finalAmplitude *
-                                (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.wave.finalAmplitudeRandomness +
+                                (dds3GetRandFloatA(&dds3RandCB) * keys->emitter.wave.finalAmplitudeRandomness +
                                  (1.0f - keys->emitter.wave.finalAmplitudeRandomness));
                             motion->amplitude = initialAmplitude;
                             motion->amplitudeStep = (finalAmplitude - initialAmplitude) / (f32)length;
                             motion->phaseStep = keys->emitter.wave.phaseStep *
-                                (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.wave.phaseStepRandomness +
+                                (dds3GetRandFloatA(&dds3RandCB) * keys->emitter.wave.phaseStepRandomness +
                                  (1.0f - keys->emitter.wave.phaseStepRandomness));
-                            motion->phase = dds3GetRandFloatA(&effSharedRandomState) * 6.2831850051879883f;
+                            motion->phase = dds3GetRandFloatA(&dds3RandCB) * 6.2831850051879883f;
                             motion->previousSine = sdfSin(motion->phase);
                             radius = keys->emitter.wave.initialRadius *
-                                ((dds3GetRandFloatA(&effSharedRandomState) - 0.5f) * 2.0f);
+                                ((dds3GetRandFloatA(&dds3RandCB) - 0.5f) * 2.0f);
                             VEC3_SPLAT(radiusVector, radius);
                             if (localSpace != 0) {
                                 SDF_VU0_LOADVECTOR(direction);
@@ -6612,14 +6612,14 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
                                 SDF_VU0_ADDVECTOR();
                             }
                             SDF_VU0_STOREVECTOR(slot->pos);
-                            motion->scaleMultiplier = dds3GetRandFloatA(&effSharedRandomState) * keys->scale.emitter.randomness +
+                            motion->scaleMultiplier = dds3GetRandFloatA(&dds3RandCB) * keys->scale.emitter.randomness +
                                 (1.0f - keys->scale.emitter.randomness);
                             if (mode != 2) {
-                                motion->angleMultiplier = dds3GetRandFloatA(&effSharedRandomState) * keys->heading.emitter.randomness +
+                                motion->angleMultiplier = dds3GetRandFloatA(&dds3RandCB) * keys->heading.emitter.randomness +
                                     (1.0f - keys->heading.emitter.randomness);
                                 if (mode == 1) {
-                                    motion->angle = dds3GetRandFloatA(&effSharedRandomState) * 6.2831850051879883f;
-                                    if (dds3GetRandA(&effSharedRandomState) & 1) {
+                                    motion->angle = dds3GetRandFloatA(&dds3RandCB) * 6.2831850051879883f;
+                                    if (dds3GetRandA(&dds3RandCB) & 1) {
                                         motion->angleMultiplier = -motion->angleMultiplier;
                                     }
                                 } else {
@@ -6632,7 +6632,7 @@ void effUpdateWaveEmitterSlots(FileSlotTable *record) {
                             FILE_SLOT_FRAME(slot) = 0;
                             SDF_VU0_COPYVECTOR(previousPosition, slot->pos);
                             if (prewarm != 0) {
-                                f32 age = (f32)(dds3GetRandA(&effSharedRandomState) % prewarmLength);
+                                f32 age = (f32)(dds3GetRandA(&dds3RandCB) % prewarmLength);
                                 distance = motion->speed * age;
                                 distance -= speedDecrease * age * age * 0.5f;
                                 slot->pos[0] += motion->axis[0] * distance;
@@ -6763,13 +6763,13 @@ void effUpdateRadialEmitterSlots(FileSlotTable *record) {
                 toSpawn = count;
                 if (keys->spawnVariance > 0.0f) {
                     toSpawn = (s32)((f32)record->instances *
-                        (dds3GetRandFloatA(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance)));
+                        (dds3GetRandFloatA(&dds3RandCB) * (1.0999999046325684f - keys->spawnVariance)));
                 }
             } else {
                 prewarm = 0;
                 if (keys->spawnVariance > 0.0f) {
                     record->spawnRemainder += (f32)keys->spawnRate *
-                        (dds3GetRandFloatA(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance));
+                        (dds3GetRandFloatA(&dds3RandCB) * (1.0999999046325684f - keys->spawnVariance));
                 } else {
                     record->spawnRemainder += (f32)keys->spawnRate;
                 }
@@ -6788,9 +6788,9 @@ void effUpdateRadialEmitterSlots(FileSlotTable *record) {
                 if (frame != -2) {
                     if (frame == -1) {
                         if (toSpawn != 0) {
-                            delta[0] = (dds3GetRandFloatA(&effSharedRandomState) - 0.5f) * 2.0f;
-                            delta[1] = (dds3GetRandFloatA(&effSharedRandomState) - 0.5f) * 2.0f;
-                            delta[2] = (dds3GetRandFloatA(&effSharedRandomState) - 0.5f) * 2.0f;
+                            delta[0] = (dds3GetRandFloatA(&dds3RandCB) - 0.5f) * 2.0f;
+                            delta[1] = (dds3GetRandFloatA(&dds3RandCB) - 0.5f) * 2.0f;
+                            delta[2] = (dds3GetRandFloatA(&dds3RandCB) - 0.5f) * 2.0f;
                             SDF_VU0_LOADVECTOR(delta);
                             SDF_VU0_NORMALIZE();
                             SDF_VU0_STOREVECTOR(delta);
@@ -6798,10 +6798,10 @@ void effUpdateRadialEmitterSlots(FileSlotTable *record) {
                             motion->direction[1] = delta[1];
                             motion->direction[2] = delta[2];
                             motion->speed = fabsf(keys->emitter.radial.speed *
-                                (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.radial.speedRandomness + (1.0f - keys->emitter.radial.speedRandomness)));
+                                (dds3GetRandFloatA(&dds3RandCB) * keys->emitter.radial.speedRandomness + (1.0f - keys->emitter.radial.speedRandomness)));
                             {
                                 f32 radius = keys->emitter.radial.radius *
-                                    (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.radial.radiusRandomness + (1.0f - keys->emitter.radial.radiusRandomness));
+                                    (dds3GetRandFloatA(&dds3RandCB) * keys->emitter.radial.radiusRandomness + (1.0f - keys->emitter.radial.radiusRandomness));
                                 VEC3_SPLAT(radiusVector, radius);
                             }
                             /* Retail initializes only XYZ of this radius vector; W is left untouched. */
@@ -6819,14 +6819,14 @@ void effUpdateRadialEmitterSlots(FileSlotTable *record) {
                                 SDF_VU0_ADDVECTOR();
                             }
                             SDF_VU0_STOREVECTOR(slot->pos);
-                            motion->scaleMultiplier = dds3GetRandFloatA(&effSharedRandomState) * keys->scale.emitter.randomness +
+                            motion->scaleMultiplier = dds3GetRandFloatA(&dds3RandCB) * keys->scale.emitter.randomness +
                                 (1.0f - keys->scale.emitter.randomness);
                             if (mode != 2) {
-                                motion->angleMultiplier = dds3GetRandFloatA(&effSharedRandomState) * keys->heading.emitter.randomness +
+                                motion->angleMultiplier = dds3GetRandFloatA(&dds3RandCB) * keys->heading.emitter.randomness +
                                     (1.0f - keys->heading.emitter.randomness);
                                 if (mode == 1) {
-                                    motion->angle = dds3GetRandFloatA(&effSharedRandomState) * 6.2831850051879883f;
-                                    if (dds3GetRandA(&effSharedRandomState) & 1) {
+                                    motion->angle = dds3GetRandFloatA(&dds3RandCB) * 6.2831850051879883f;
+                                    if (dds3GetRandA(&dds3RandCB) & 1) {
                                         motion->angleMultiplier = -motion->angleMultiplier;
                                     }
                                 } else {
@@ -6839,7 +6839,7 @@ void effUpdateRadialEmitterSlots(FileSlotTable *record) {
                             FILE_SLOT_FRAME(slot) = 0;
                             SDF_VU0_COPYVECTOR(previousPosition, slot->pos);
                             if (prewarm != 0) {
-                                f32 age = (f32)(dds3GetRandA(&effSharedRandomState) % prewarmLength);
+                                f32 age = (f32)(dds3GetRandA(&dds3RandCB) % prewarmLength);
                                 SDF_VU0_LOADVECTOR_B(slot->pos);
                                 distance = motion->speed * age;
                                 distance += acceleration * age * age * 0.5f;
@@ -6983,13 +6983,13 @@ void effUpdateCircularEmitterSlots(FileSlotTable *record) {
                 toSpawn = count;
                 if (keys->spawnVariance > 0.0f) {
                     toSpawn = (s32)((f32)record->instances *
-                        (dds3GetRandFloatA(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance)));
+                        (dds3GetRandFloatA(&dds3RandCB) * (1.0999999046325684f - keys->spawnVariance)));
                 }
             } else {
                 prewarm = 0;
                 if (keys->spawnVariance > 0.0f) {
                     record->spawnRemainder += (f32)keys->spawnRate *
-                        (dds3GetRandFloatA(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance));
+                        (dds3GetRandFloatA(&dds3RandCB) * (1.0999999046325684f - keys->spawnVariance));
                 } else {
                     record->spawnRemainder += (f32)keys->spawnRate;
                 }
@@ -7013,24 +7013,24 @@ void effUpdateCircularEmitterSlots(FileSlotTable *record) {
                             s32 localSpace;
 
                             initialRadius = keys->emitter.circular.initialRadius *
-                                (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.circular.initialRadiusRandomness +
+                                (dds3GetRandFloatA(&dds3RandCB) * keys->emitter.circular.initialRadiusRandomness +
                                  (1.0f - keys->emitter.circular.initialRadiusRandomness));
                             finalRadius = keys->emitter.circular.finalRadius *
-                                (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.circular.finalRadiusRandomness +
+                                (dds3GetRandFloatA(&dds3RandCB) * keys->emitter.circular.finalRadiusRandomness +
                                  (1.0f - keys->emitter.circular.finalRadiusRandomness));
                             motion->radius = initialRadius;
                             motion->radiusStep = (finalRadius - initialRadius) / (f32)length;
-                            motion->initialPhase = dds3GetRandFloatA(&effSharedRandomState) * 6.2831850051879883f;
+                            motion->initialPhase = dds3GetRandFloatA(&dds3RandCB) * 6.2831850051879883f;
                             motion->angularSpeed = keys->emitter.circular.angularSpeed *
-                                (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.circular.angularSpeedRandomness +
+                                (dds3GetRandFloatA(&dds3RandCB) * keys->emitter.circular.angularSpeedRandomness +
                                  (1.0f - keys->emitter.circular.angularSpeedRandomness));
                             motion->axialSpeed = keys->emitter.circular.axialSpeed *
-                                (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.circular.axialSpeedRandomness +
+                                (dds3GetRandFloatA(&dds3RandCB) * keys->emitter.circular.axialSpeedRandomness +
                                  (1.0f - keys->emitter.circular.axialSpeedRandomness));
                             direction[0] = sdfCos(motion->initialPhase);
                             direction[1] = 0.0f;
                             direction[2] = sdfSin(motion->initialPhase);
-                            motion->height = -keys->emitter.circular.initialAxialExtent * dds3GetRandFloatA(&effSharedRandomState);
+                            motion->height = -keys->emitter.circular.initialAxialExtent * dds3GetRandFloatA(&dds3RandCB);
                             VEC3_SPLAT(radiusVector, initialRadius);
                             SDF_VU0_LOADVECTOR(direction);
                             SDF_VU0_LOADVECTOR_B(radiusVector);
@@ -7049,14 +7049,14 @@ void effUpdateCircularEmitterSlots(FileSlotTable *record) {
                                 SDF_VU0_ADDVECTOR();
                             }
                             SDF_VU0_STOREVECTOR(slot->pos);
-                            motion->scaleMultiplier = dds3GetRandFloatA(&effSharedRandomState) * keys->scale.emitter.randomness +
+                            motion->scaleMultiplier = dds3GetRandFloatA(&dds3RandCB) * keys->scale.emitter.randomness +
                                 (1.0f - keys->scale.emitter.randomness);
                             if (mode != 2) {
-                                motion->angleMultiplier = dds3GetRandFloatA(&effSharedRandomState) * keys->heading.emitter.randomness +
+                                motion->angleMultiplier = dds3GetRandFloatA(&dds3RandCB) * keys->heading.emitter.randomness +
                                     (1.0f - keys->heading.emitter.randomness);
                                 if (mode == 1) {
-                                    motion->angle = dds3GetRandFloatA(&effSharedRandomState) * 6.2831850051879883f;
-                                    if (dds3GetRandA(&effSharedRandomState) & 1) {
+                                    motion->angle = dds3GetRandFloatA(&dds3RandCB) * 6.2831850051879883f;
+                                    if (dds3GetRandA(&dds3RandCB) & 1) {
                                         motion->angleMultiplier = -motion->angleMultiplier;
                                     }
                                 } else {
@@ -7069,7 +7069,7 @@ void effUpdateCircularEmitterSlots(FileSlotTable *record) {
                             FILE_SLOT_FRAME(slot) = 0;
                             SDF_VU0_COPYVECTOR(previousPosition, slot->pos);
                             if (prewarm != 0) {
-                                age = (f32)(dds3GetRandA(&effSharedRandomState) % prewarmLength);
+                                age = (f32)(dds3GetRandA(&dds3RandCB) % prewarmLength);
                                 motion->height = motion->height - motion->axialSpeed * age + gravity * age * age * 0.5f;
                                 motion->radius += motion->radiusStep * age;
                                 position[0] = sdfCos(motion->initialPhase) * motion->radius;
@@ -7225,13 +7225,13 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
                 toSpawn = count;
                 if (keys->spawnVariance > 0.0f) {
                     toSpawn = (s32)((f32)record->instances *
-                        (dds3GetRandFloatA(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance)));
+                        (dds3GetRandFloatA(&dds3RandCB) * (1.0999999046325684f - keys->spawnVariance)));
                 }
             } else {
                 prewarm = 0;
                 if (keys->spawnVariance > 0.0f) {
                     record->spawnRemainder += (f32)keys->spawnRate *
-                        (dds3GetRandFloatA(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance));
+                        (dds3GetRandFloatA(&dds3RandCB) * (1.0999999046325684f - keys->spawnVariance));
                 } else {
                     record->spawnRemainder += (f32)keys->spawnRate;
                 }
@@ -7255,20 +7255,20 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
                             s32 localSpace;
 
                             initialRadius = keys->emitter.orientedRing.initialRadius *
-                                (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.orientedRing.initialRadiusRandomness +
+                                (dds3GetRandFloatA(&dds3RandCB) * keys->emitter.orientedRing.initialRadiusRandomness +
                                  (1.0f - keys->emitter.orientedRing.initialRadiusRandomness));
                             finalRadius = keys->emitter.orientedRing.finalRadius *
-                                (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.orientedRing.finalRadiusRandomness +
+                                (dds3GetRandFloatA(&dds3RandCB) * keys->emitter.orientedRing.finalRadiusRandomness +
                                  (1.0f - keys->emitter.orientedRing.finalRadiusRandomness));
                             motion->radius = initialRadius;
                             motion->radiusStep = (finalRadius - initialRadius) / (f32)length;
                             motion->angularSpeed = keys->emitter.orientedRing.angularSpeed *
-                                (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.orientedRing.angularSpeedRandomness +
+                                (dds3GetRandFloatA(&dds3RandCB) * keys->emitter.orientedRing.angularSpeedRandomness +
                                  (1.0f - keys->emitter.orientedRing.angularSpeedRandomness));
-                            motion->initialPhase = dds3GetRandFloatA(&effSharedRandomState) * 1.5707962512969971f;
+                            motion->initialPhase = dds3GetRandFloatA(&dds3RandCB) * 1.5707962512969971f;
                             motion->height = 0.0f;
-                            motion->orientationAngle = (dds3GetRandFloatA(&effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
-                            motion->tiltAngle = (dds3GetRandFloatA(&effSharedRandomState) - 0.5f) * 2.0f * 3.14159265f;
+                            motion->orientationAngle = (dds3GetRandFloatA(&dds3RandCB) - 0.5f) * 2.0f * 3.14159265f;
+                            motion->tiltAngle = (dds3GetRandFloatA(&dds3RandCB) - 0.5f) * 2.0f * 3.14159265f;
                             SetRotateMatrixX(motion->orientationAngle);
                             SetRotateMatrixY_B(motion->tiltAngle);
                             MultMatrixRevNoArg();
@@ -7286,14 +7286,14 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
                                 SDF_VU0_ADDVECTOR();
                             }
                             SDF_VU0_STOREVECTOR(slot->pos);
-                            motion->scaleMultiplier = dds3GetRandFloatA(&effSharedRandomState) * keys->scale.emitter.randomness +
+                            motion->scaleMultiplier = dds3GetRandFloatA(&dds3RandCB) * keys->scale.emitter.randomness +
                                 (1.0f - keys->scale.emitter.randomness);
                             if (mode != 2) {
-                                motion->angleMultiplier = dds3GetRandFloatA(&effSharedRandomState) * keys->heading.emitter.randomness +
+                                motion->angleMultiplier = dds3GetRandFloatA(&dds3RandCB) * keys->heading.emitter.randomness +
                                     (1.0f - keys->heading.emitter.randomness);
                                 if (mode == 1) {
-                                    motion->angle = dds3GetRandFloatA(&effSharedRandomState) * 6.2831850051879883f;
-                                    if (dds3GetRandA(&effSharedRandomState) & 1) {
+                                    motion->angle = dds3GetRandFloatA(&dds3RandCB) * 6.2831850051879883f;
+                                    if (dds3GetRandA(&dds3RandCB) & 1) {
                                         motion->angleMultiplier = -motion->angleMultiplier;
                                     }
                                 } else {
@@ -7306,7 +7306,7 @@ void effUpdateOrientedRingEmitterSlots(FileSlotTable *record) {
                             FILE_SLOT_FRAME(slot) = 0;
                             SDF_VU0_COPYVECTOR(previousPosition, slot->pos);
                             if (prewarm != 0) {
-                                age = (f32)(dds3GetRandA(&effSharedRandomState) % prewarmLength);
+                                age = (f32)(dds3GetRandA(&dds3RandCB) % prewarmLength);
                                 motion->height += gravity * age * age * 0.5f;
                                 motion->radius += motion->radiusStep * age;
                                 radius = motion->radius;
@@ -7438,13 +7438,13 @@ void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
                     toSpawn = record->instances;
                 } else {
                     toSpawn = (s32)((f32)record->instances *
-                        (dds3GetRandFloatA(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance)));
+                        (dds3GetRandFloatA(&dds3RandCB) * (1.0999999046325684f - keys->spawnVariance)));
                 }
             } else {
                 prewarm = 0;
                 if (keys->spawnVariance > 0.0f) {
                     record->spawnRemainder += (f32)keys->spawnRate *
-                        (dds3GetRandFloatA(&effSharedRandomState) * (1.0999999046325684f - keys->spawnVariance));
+                        (dds3GetRandFloatA(&dds3RandCB) * (1.0999999046325684f - keys->spawnVariance));
                 } else {
                     record->spawnRemainder += (f32)keys->spawnRate;
                 }
@@ -7467,11 +7467,11 @@ void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
                             s32 localSpace;
 
                             spread = keys->emitter.directed.spread *
-                                (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.directed.spreadRandomness +
+                                (dds3GetRandFloatA(&dds3RandCB) * keys->emitter.directed.spreadRandomness +
                                  (1.0f - keys->emitter.directed.spreadRandomness));
-                            delta[0] = (dds3GetRandFloatA(&effSharedRandomState) - 0.5f) * 2.0f * spread;
+                            delta[0] = (dds3GetRandFloatA(&dds3RandCB) - 0.5f) * 2.0f * spread;
                             delta[1] = -(1.0f - spread);
-                            delta[2] = (dds3GetRandFloatA(&effSharedRandomState) - 0.5f) * 2.0f * spread;
+                            delta[2] = (dds3GetRandFloatA(&dds3RandCB) - 0.5f) * 2.0f * spread;
                             SDF_VU0_LOADVECTOR(delta);
                             SDF_VU0_NORMALIZE();
                             localSpace = flags & 1;
@@ -7483,10 +7483,10 @@ void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
                             motion->direction[1] = delta[1];
                             motion->direction[2] = delta[2];
                             motion->speed = fabsf(keys->emitter.directed.speed *
-                                (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.directed.speedRandomness + (1.0f - keys->emitter.directed.speedRandomness)));
+                                (dds3GetRandFloatA(&dds3RandCB) * keys->emitter.directed.speedRandomness + (1.0f - keys->emitter.directed.speedRandomness)));
                             {
                                 f32 radius = keys->emitter.directed.radius *
-                                    (dds3GetRandFloatA(&effSharedRandomState) * keys->emitter.directed.radiusRandomness + (1.0f - keys->emitter.directed.radiusRandomness));
+                                    (dds3GetRandFloatA(&dds3RandCB) * keys->emitter.directed.radiusRandomness + (1.0f - keys->emitter.directed.radiusRandomness));
                                 VEC3_SPLAT(radiusVector, radius);
                             }
                             /* Retail initializes only XYZ of this radius vector; W is left untouched. */
@@ -7504,14 +7504,14 @@ void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
                                 SDF_VU0_ADDVECTOR();
                             }
                             SDF_VU0_STOREVECTOR(slot->pos);
-                            motion->scaleMultiplier = dds3GetRandFloatA(&effSharedRandomState) * keys->scale.emitter.randomness +
+                            motion->scaleMultiplier = dds3GetRandFloatA(&dds3RandCB) * keys->scale.emitter.randomness +
                                 (1.0f - keys->scale.emitter.randomness);
                             if (mode != 2) {
-                                motion->angleMultiplier = dds3GetRandFloatA(&effSharedRandomState) * keys->heading.emitter.randomness +
+                                motion->angleMultiplier = dds3GetRandFloatA(&dds3RandCB) * keys->heading.emitter.randomness +
                                     (1.0f - keys->heading.emitter.randomness);
                                 if (mode == 1) {
-                                    motion->angle = dds3GetRandFloatA(&effSharedRandomState) * 6.2831850051879883f;
-                                    if (dds3GetRandA(&effSharedRandomState) & 1) {
+                                    motion->angle = dds3GetRandFloatA(&dds3RandCB) * 6.2831850051879883f;
+                                    if (dds3GetRandA(&dds3RandCB) & 1) {
                                         motion->angleMultiplier = -motion->angleMultiplier;
                                     }
                                 } else {
@@ -7524,7 +7524,7 @@ void effUpdateDirectedEmitterSlots(FileSlotTable *record) {
                             FILE_SLOT_FRAME(slot) = 0;
                             SDF_VU0_COPYVECTOR(previousPosition, slot->pos);
                             if (prewarm != 0) {
-                                f32 age = (f32)(dds3GetRandA(&effSharedRandomState) % prewarmLength);
+                                f32 age = (f32)(dds3GetRandA(&dds3RandCB) % prewarmLength);
                                 SDF_VU0_LOADVECTOR_B(slot->pos);
                                 distance = motion->speed * age;
                                 distance += acceleration * age * age * 0.5f;

@@ -564,7 +564,7 @@ BtlIndexList *btlBuildActorIndexListAndCount(ActionStateLink *actor, BtlCommandT
 #include "dds3_object_payload.h"
 
 
-extern EffRandState effSharedRandomState[];
+extern EffRandState dds3RandCB[];
 extern s32 btlDoesEnabledStatusMatchCurrentId(datUnitWork_t *, u32);
 extern char D_00419EA0[]; /* "%d 災いリング所持!!!!!!!!!!!\n" (EUC-JP): "%d holds a calamity ring" */
 extern s32 btlRollAiBucket(void);
@@ -736,7 +736,7 @@ s32 func_002152D8(ActionStateLink *actor, s32 unused) {
             }
         }
     } else if (datCommandSelectors[commandId].stat == 17) {
-        selectedIndex = dds3GetRandA(effSharedRandomState) % count;
+        selectedIndex = dds3GetRandA(dds3RandCB) % count;
     } else {
         priority = 0;
         if (command->options & 2) {
@@ -766,7 +766,7 @@ s32 func_002152D8(ActionStateLink *actor, s32 unused) {
             }
         }
         if (priority == 0) {
-            selectedIndex = dds3GetRandA(effSharedRandomState) % count;
+            selectedIndex = dds3GetRandA(dds3RandCB) % count;
         } else if (count != 1) {
             s32 hpInserted = 0;
             s16 hpEligible = 0;
@@ -4445,7 +4445,7 @@ extern void btlBuildTargetGroupFramingCameraPose(BtlLinkedCommand *, BtlCamState
 extern void btlBuildRandomizedActionCameraPosePair(BtlLinkedCommand *, BtlCamState *, BtlCamState *);
 extern s32 btlHasSingleLinkedResource(BtlLinkedCommand *);
 extern void btlApplyCombinedActorFlags(BtlLinkedCommand *);
-extern EffRandState effSharedRandomState[];
+extern EffRandState dds3RandCB[];
 extern char D_0041A5E0[], D_0041A5F8[];
 
 /* VURI camera selection retains the command link and mode payload across
@@ -4715,7 +4715,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
             if (link->unit->partyRecord.unitId == 0x111) {
                 switch (targetSlot) {
                 case 0:
-                    if (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) {
+                    if (dds3GetRandA((EffRandState *)dds3RandCB) & 1) {
                         btlBossDebugPrintf("VURI_A:ATTACK-0-down ++++\n");
                         btlSetEffectCameraKeys((s32)command,
                             -523.6f, -141.7f, -1094.1f, -0.041f, -0.102f, -0.005f, 0.985f, -568.6f,
@@ -4728,7 +4728,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
                     }
                     return 1;
                 case 1:
-                    if (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) {
+                    if (dds3GetRandA((EffRandState *)dds3RandCB) & 1) {
                         btlBossDebugPrintf("VURI_A:ATTACK-1-down ++++\n");
                         btlSetEffectCameraKeys((s32)command,
                             -300.6f, -113.2f, -1052.8f, -0.053f, -0.154f, 0.0f, 0.978f, -329.1f,
@@ -4741,7 +4741,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
                     }
                     return 1;
                 case 2:
-                    if (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) {
+                    if (dds3GetRandA((EffRandState *)dds3RandCB) & 1) {
                         btlBossDebugPrintf("VURI_A:ATTACK-2-down ++++\n");
                         btlSetEffectCameraKeys((s32)command,
                             -13.6f, -225.4f, -1001.0f, 0.029f, -0.156f, -0.01f, 0.978f, -47.7f,
@@ -4757,7 +4757,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
             } else {
                 switch (targetSlot) {
                 case 0:
-                    if (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) {
+                    if (dds3GetRandA((EffRandState *)dds3RandCB) & 1) {
                         btlBossDebugPrintf("VURI_B:ATTACK-0-down ++++\n");
                         btlSetEffectCameraKeys((s32)command,
                             129.6f, -149.0f, -921.7f, -0.014f, 0.231f, -0.008f, 0.963f, 179.3f,
@@ -4770,7 +4770,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
                     }
                     return 1;
                 case 1:
-                    if (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) {
+                    if (dds3GetRandA((EffRandState *)dds3RandCB) & 1) {
                         btlBossDebugPrintf("VURI_B:ATTACK-1-down ++++\n");
                         btlSetEffectCameraKeys((s32)command,
                             256.7f, -83.8f, -943.7f, -0.084f, 0.146f, -0.017f, 0.976f, 317.2f,
@@ -4783,7 +4783,7 @@ s32 btlSelectVritraActorCategoryCamera(BtlLinkedCommand *command, s8 side, s8 ta
                     }
                     return 1;
                 case 2:
-                    if (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) {
+                    if (dds3GetRandA((EffRandState *)dds3RandCB) & 1) {
                         btlBossDebugPrintf("VURI_B:ATTACK-2-down ++++\n");
                         btlSetEffectCameraKeys((s32)command,
                             400.8f, -282.1f, -874.3f, 0.128f, 0.121f, 0.014f, 0.975f, 438.3f,

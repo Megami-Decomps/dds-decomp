@@ -181,7 +181,7 @@ extern ItfMesSub D_0032A520;
 
 extern ItfMesSub D_0032A210;
 
-extern EffRandState effSharedRandomState[];
+extern EffRandState dds3RandCB[];
 
 extern void sdfRandomize(s8 *, s32);
 
@@ -239,7 +239,7 @@ void btlInitializeBattleRuntime(void) {
     ((BattleInitState *)btlRuntime)->backgroundB = 1;
     ((BattleInitState *)btlRuntime)->unk28C = 0;
 
-    sdfRandomize(effSharedRandomState, dds3GetKernelCount());
+    sdfRandomize(dds3RandCB, dds3GetKernelCount());
     btlResetActorEntryState();
     ((BattleInitState *)btlRuntime)->messageWindows[0] =
         itfMesMngInitialize(datStatusHelpMessages);

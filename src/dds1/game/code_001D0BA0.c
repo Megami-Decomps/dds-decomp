@@ -166,7 +166,7 @@ extern DatEnemyRecord *datEnemyRecords;
 extern void btlApplyScaledUnitEffectParameter(BtlUnit *, s32, s32, f32);
 extern BtlActionAnimationRecord *datActionAnimationRecords;
 
-extern EffRandState effSharedRandomState[];
+extern EffRandState dds3RandCB[];
 
 extern void btlResetDeferredTaskQueue(void);
 
@@ -179,7 +179,7 @@ u16 btlRefreshUnitMaximumHpAndClampCurrentHp(datUnitWork_t *object);
 u16 btlRefreshUnitMaximumMpAndClampCurrentMp(datUnitWork_t *object);
 
 
-extern EffRandState effSharedRandomState[];
+extern EffRandState dds3RandCB[];
 
 extern SndPad dds3PadButtonState;
 
@@ -4579,7 +4579,7 @@ u32 btlStiffenDamageShakeStep(BtlDamageShakeArgs *task) {
     }
     if (0.5f < task->amplitude) {
         BtlUnit *actor;
-        scale = task->amplitude * (dds3GetRandFloatA(effSharedRandomState) * 0.5f + 0.5f);
+        scale = task->amplitude * (dds3GetRandFloatA(dds3RandCB) * 0.5f + 0.5f);
         if (task->tick & 1) {
             scale = -scale;
         }

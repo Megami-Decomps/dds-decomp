@@ -164,13 +164,13 @@ extern EventRosterStat *datRosterDetails;
 
 
 
-extern EffRandState effSharedRandomState[];
+extern EffRandState dds3RandCB[];
 
 extern void btlAllocatePanelTaskWork(void);
 
 extern void itfMesMngRelease(ItfMesWindowIndex window);
 
-extern EffRandState effSharedRandomState[];
+extern EffRandState dds3RandCB[];
 
 void btlClearAllActorEntrySlots(BtlUnit *unit);
 
@@ -467,7 +467,7 @@ u32 btlGetHuntPenaltyFlags(BtlUnit *unit, BtlUnit *enemy) {
     }
     flags = record->huntPenaltyFlags;
     if (flags == 0x18) {
-        return (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) ? 0x10 : 8;
+        return (dds3GetRandA((EffRandState *)dds3RandCB) & 1) ? 0x10 : 8;
     }
     return flags & 0x18;
 }

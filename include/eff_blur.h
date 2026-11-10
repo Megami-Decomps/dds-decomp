@@ -132,14 +132,14 @@ SdfDrawPacket *effPkt2DAllocTriStrip(s32 height, s32 flags);
 /* Factories accept the serialized parameter prefix used by effect callbacks. */
 EffBlurScatterWork *dds3EffectDistortionBlurCreate(dds3Effect_DistortionBlurParam_t *params);
 void dds3EffectDistortionBlurDelete(EffBlurScatterWork *work);
-void effBlurStepScatterSlotsAndDraw(EffBlurScatterWork *work);
+void dds3EffectDistortionBlurDraw(EffBlurScatterWork *work);
 EffBlurScaleWork *dds3EffectRippleBlurCreate(dds3Effect_RippleBlurParam_t *params);
 void dds3EffectRippleBlurDelete(EffBlurScaleWork *work);
 
-void effAppendBlurRectanglePackets(struct sdfDrawTag_t *list, const dds3Effect_Blur_t *source,
+void dds3EffectBlurDrawAlphaMulti(struct sdfDrawTag_t *list, const dds3Effect_Blur_t *source,
                                    u8 fixedPointCoordinates);
-void effDrawBlurSource(const dds3Effect_Blur_t *source, struct sdfTexHandle_t *resource, u8 fixedPointCoordinates);
-void effDrawBlurRectangle(const dds3Effect_Blur_t *source);
+void dds3EffectBlurDraw(const dds3Effect_Blur_t *source, struct sdfTexHandle_t *resource, u8 fixedPointCoordinates);
+void dds3EffectBlur(const dds3Effect_Blur_t *source);
 void effBlurDrawFramebufferQuad(const dds3Effect_Blur_t *source);
 void effDrawBlurFixedPointRectangle(EffBlurTemplate *owner);
 /* Borrow the live textured-blur owner; callers do not acquire or release it. */
@@ -151,6 +151,6 @@ void Eve_PartialMultiBlurSetParam(dds3Effect_PartialMultiBlurParam_t *parameters
 void Eve_DistortionBlurSetParam(dds3Effect_DistortionBlurParam_t *parameters);
 void Eve_RippleBlurSetParam(dds3Effect_RippleBlurParam_t *parameters);
 void dds3EffectPartialMultiBlurDelete(EffBlurTemplate *owner);
-void effDrawBlurPixelRectWithResource(EffBlurTemplate *owner);
+void dds3EffectPartialMultiBlurDraw(EffBlurTemplate *owner);
 
 #endif

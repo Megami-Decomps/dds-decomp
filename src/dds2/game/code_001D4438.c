@@ -276,7 +276,7 @@ extern void datAddHp();
 extern s32 mnuGetSoundBufferStateLocked(void);
 extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
 extern f32 dds3GetRandFloatA(EffRandState *state);
-extern EffRandState effSharedRandomState[];
+extern EffRandState dds3RandCB[];
 extern void btlAdvanceActionSkillCamera(BtlLinkedCommand *);
 extern void btlBuildTargetGroupFramingCameraPose(BtlLinkedCommand *, BtlCamState *);
 struct dds3ModelHandle_t;

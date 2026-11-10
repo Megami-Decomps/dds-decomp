@@ -1517,7 +1517,7 @@ void btlInitLightParams(void) {
     dds3AmbientColor2.b = 1.15f;
 }
 
-extern EffRandState effSharedRandomState[];
+extern EffRandState dds3RandCB[];
 void func_0022D040(void) {
     s32 row;
     s32 column;
@@ -1539,18 +1539,18 @@ void func_0022D040(void) {
 
     for (row = 0; row < btlRuntimeState.particleRowCount; row++) {
         for (column = 0; column < btlRuntimeState.particlesPerRow; column++) {
-            direction[0] = (dds3GetRandFloatA(effSharedRandomState) - 0.5f) * 2.0f;
-            direction[1] = (dds3GetRandFloatA(effSharedRandomState) - 0.5f) * 2.0f;
-            direction[2] = (dds3GetRandFloatA(effSharedRandomState) - 0.5f) * 2.0f;
+            direction[0] = (dds3GetRandFloatA(dds3RandCB) - 0.5f) * 2.0f;
+            direction[1] = (dds3GetRandFloatA(dds3RandCB) - 0.5f) * 2.0f;
+            direction[2] = (dds3GetRandFloatA(dds3RandCB) - 0.5f) * 2.0f;
             VU0_NORMALIZE_PACKED_VECTOR(direction);
             btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].direction[0] = direction[0];
             btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].direction[1] = direction[1];
             btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].direction[2] = direction[2];
             btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].rotationAngle = 0;
-            value = dds3GetRandFloatA(effSharedRandomState);
+            value = dds3GetRandFloatA(dds3RandCB);
             btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].rotationSpeed = (value * 0.5f + 0.5f) * 0.31415925f;
             btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].displacement = 0;
-            value = dds3GetRandFloatA(effSharedRandomState);
+            value = dds3GetRandFloatA(dds3RandCB);
             btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].displacementSpeed = (value * 0.5f + 0.5f) * 9.999998093f;
             btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].alpha = 0x80;
             btlRuntimeState.ownedData[row * btlRuntimeState.particlesPerRow + column].age = 0;

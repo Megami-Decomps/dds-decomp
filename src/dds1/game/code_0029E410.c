@@ -1,0 +1,15882 @@
+#include "sdk_ps2.h"
+#include "eff_block128.h"
+#include "eff_editor_menu.h"
+#include "eff_surface_grid_node.h"
+#include "eff_surface_node.h"
+#include "eff_animation_state.h"
+#include "eff_model_resource.h"
+#include "eff_gs_packet.h"
+#include "eff_packet_params.h"
+#include "eff_copied_payload.h"
+#include "eff_class_ops.h"
+#include "eff_particle_shared_resource.h"
+#include "eff_camera_create_request.h"
+#include "eff_file_job_request.h"
+#include "eff_emitter_row.h"
+#include "fld.h"
+#include "btl_command.h"
+#include "sdf_quaternion.h"
+#include "btl_motion_transform.h"
+#include "sdf_asset_state.h"
+#include "btl_resource_browser.h"
+#include "sdf_packet_list.h"
+#include "eff_bill.h"
+#include "eff_anim.h"
+#include "eff_bill_column_particle.h"
+#include "eff_ribbon_work.h"
+#include "eff_class_work_api.h"
+#include "eff_scaled_class_frame_rows.h"
+#include "fld_transfer_chunk.h"
+#include "eff_point_set.h"
+#include "eff_point_set_table.h"
+#include "eff_span_work.h"
+#include "common.h"
+#include "dds3_camera_update_flags.h"
+#include "ps2asm.h"
+#include "eff_emitter_type.h"
+#include "sdf_vu_rotation_axes.h"
+#include "file_pac.h"
+#include "eff_resource_bank_slot.h"
+#include "eff_matrix4.h"
+#include "eff_active_resource.h"
+#include "eff_frame_asset.h"
+#include "eff_actor_transition_config.h"
+#include "eff_object_node.h"
+#include "eff_random_mod.h"
+#include "sdf_trig.h"
+#include "eff_random.h"
+#include "dds3_fade.h"
+#include "btl_stage_task_cleanup.h"
+#include "dds3obj.h"
+#include "dds3_world_primary.h"
+#include "sdf_packet_append.h"
+#include "sdf_dev_state.h"
+#include "sdf_chip.h"
+#include "eff_ref_obj.h"
+#include "sdf_heap_api.h"
+#include "eff_resource_slots.h"
+#include "eff_resource_source_lifetime.h"
+#include "dds3_path.h"
+#include "eff_transform.h"
+#include "btl_state.h"
+#include "evt_unit.h"
+#include "evt_unit_color_transition.h"
+#include "eff_blur.h"
+#include "eff_event_draw.h"
+#include "eff_curve.h"
+#include "file.h"
+#include "file_slot.h"
+#include "eff_queue.h"
+#include "btl_resource_name.h"
+#include "mdl.h"
+#include "sdf.h"
+#include "sdf_draw.h"
+#include "fpu.h"
+#include "eff.h"
+#include "eff_billboard_work.h"
+#include "eff_resource_list.h"
+#include "file_request_api.h"
+#include "sdf_texture_file.h"
+#include "sdf_vu_matrix.h"
+#include "sdf_vu_matrix_multiply_api.h"
+#include "dds3_fade_timing.h"
+#include "sdf_asset_packets.h"
+#include "sdf_chunk.h"
+#include "sdf_packet_alloc.h"
+#include "bill_object_api.h"
+#include "dds3_effect_sprite.h"
+#include "sdf_column_packet_api.h"
+#include "eff_frame_state.h"
+#include "eff_bill_cell_draw_work.h"
+#include "eff_generated_texture_descriptor.h"
+#include "eff_animation_uv_config.h"
+#include "eff_composite_gs_descriptor.h"
+#include "dds3_draw_buffer.h"
+#include "dds3_frame_draw_buffer.h"
+#include "sdf_gs_header.h"
+#include "sdf_map_position_api.h"
+#include "btl_effect_position.h"
+#include "eff_camera_path_parameters.h"
+#include "effect_asset_link.h"
+#include "sdk_libc.h"
+
+#define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
+
+static inline void UnpackRGBAWord(u32 color, u32 unitBits) {
+    u32 rgba[4];
+    rgba[0] = color;
+    EE_MMI_RGBA_UNPACK_READONLY(rgba, unitBits);
+}
+
+static inline void UnpackRGBAWordFloat(u32 color, f32 unit) {
+    u32 rgba[4];
+    rgba[0] = color;
+    EE_MMI_RGBA_UNPACK(rgba, unit);
+}
+
+static inline u32 PackRGBAWord(f32 unit) {
+    u32 rgba[4];
+    MMI_RGBA_PACK_UNIT(rgba[0], unit);
+    return rgba[0];
+}
+
+#ifdef NON_MATCHING
+
+extern s32 effUpdatePartsListEditor(s32 unused);
+
+#endif
+
+/* Declared before first use (were implicit int). */
+extern void btlBeginSceneLightColorTransition(f32 *lightColor, f32 *ambientColor, s32 frames);
+
+extern void btlInitTintTransitionDefault(u16 soundId);
+
+extern void btlInitTintTransitionResource(u32 resource, u16 soundId);
+
+extern void fileReadRecordSecondVector(FileSlotTable *record, u128 *out);
+
+extern void fileReadVectorPtr20(FileSlotTable *record, u128 *out);
+
+extern void fileSetRecordSecondVector(FileSlotTable *record, const void *src);
+
+extern void dds3PadVibrationReset(void);
+
+extern void mnuRecordSetVector(FileSlotTable *record, const void *src);
+
+static inline void effSubmitSurfacePacket(sdfGrOt_t *surface, sdfDrawTag_t *list) {
+    surface->regFunc(surface, list);
+}
+
+extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *);
+
+extern u32 D_0037ECB0[];
+
+extern sdfGrOt_t *D_0037ECF0[];
+
+extern sdfGrOt_t *D_0037EE68[];
+
+extern u32 D_0037EB30[];
+
+extern sdfGrOt_t *D_0037EB78[];
+
+extern sdfGrOt_t sdfGrOtTable[];
+
+extern char D_003B39C8[]; /* "/tool/effect/ep/" */
+
+extern char D_003B39E0[]; /* "/tool/effect/" */
+
+extern char D_003B3B88[]; /* "/tool/effect/mat/" */
+
+extern char D_003B3BA0[]; /* "/tool/effect/hlp/" */
+
+extern f32 effComputeProjectedOffsetAngle(const void *position, const void *offset);
+
+extern f32 dds3BillboardGetDirectionScale(u8 *, void *);
+
+extern void dds3BillboardDraw(billHandle_t *);
+
+extern u8 D_003B2B10[];
+
+extern u32 effColorEditRgbMenuOpen;
+
+extern u32 effColorEditSelectedKey;
+
+extern u32 effColorEditPage;
+
+extern u32 D_003BD158;
+
+extern u32 D_003BD15C;
+
+extern u32 D_003BD160;
+
+extern u32 effColorEditSelectedAlphaKey;
+
+extern struct BtlResourceEntryList *effResourceBankEntries;
+
+extern struct BtlResourceDescriptor *effResourceBankDescriptor;
+
+extern s32 effEditorCurrentMenu;
+
+extern void *effQueuedFileObject;
+
+extern u8 effPartsListExitRequested;
+
+extern FileJobPayload *effTemporaryFileJob;
+
+extern FileQueue *effAuxiliaryFileQueue;
+
+extern FileQueue *effFileQueue;
+
+extern void dds3PadVibrationSet(s32, u8, s32);
+
+extern u8 *effAllocateTexturedStripWork(u32 count, u32 repeat);
+
+extern u32 effScalyTextureHandle;
+
+extern s32 effSharedStripReferenceCount;
+
+extern RefObj *effSharedScalyStripResource;
+
+extern u32 effWindTextureHandle;
+
+extern struct sdfMemHandle_t *D_003BC984;
+
+extern struct sdfMemHandle_t *D_003BC994;
+
+extern u8 D_0038E000[];
+
+extern u8 D_0038E570[];
+
+extern u8 *D_0037EBF8[];
+
+extern FileJobPayload *effQueuedFileHandle;
+
+extern struct sdfDrawTag_t *effCurrentRenderPacket;
+
+extern s32 effSharedRibbonReferenceCount;
+
+extern u32 D_003BC990;
+
+extern struct EffExpandedList *effCreateTextureAnimationSet(u32);
+
+extern struct SdfTextureFileHeader *effFlashTextureHandles;
+
+extern struct EffModelResource *effCreateModelResourceWithInlineData(u16, void *, void *, u32);
+
+extern EffSurfaceGridNode *effCreateSurfaceGridNode(u32, u32);
+
+extern void effFillSurfaceGridColorGradient(EffSurfaceGridNode *, u32 *);
+
+extern void effReleaseSurfaceGridBuffers(EffSurfaceGridNode *);
+
+extern s32 dds3BillboardGeneralNumber(void);
+
+extern sdfMat_t *sdfMatNew(void);
+
+extern sdf3DPrimPolyParm_t D_003DC9E0;
+
+extern EffTrackSet *effCreateTrackSetWithSharedReferences(u32, u32, u32);
+
+extern void effReleaseResourceRefs(EffTrackSet *);
+
+extern s32 effRequestResourceByMode(u32, u32, u32, void **);
+
+typedef struct EffectObjectFlag {
+    u32 state;
+    u8 pad04[8];
+    u32 flags;
+} EffectObjectFlag;
+
+extern u8 btlIsRuntimeAllocated(void);
+
+void effDrawThreePointGroups(EffPointSet *, Matrix4 *);
+
+extern u32 effPartsListScroll;
+
+extern u32 D_0038F2FC[];
+
+extern s32 D_003BC970[2];
+
+extern RefObj *D_003BC978[2];
+
+extern s32 D_003BC9B0[2];
+
+extern s32 D_003BC9B8[2];
+
+extern u8 D_003BC9C0[2];
+
+extern u8 D_003BC9C8[2];
+
+/* Native resource operations add cloning before the frame callbacks.
+ * The final word is the copied payload size, not another callback.
+ * Factories retain this unit's existing address-word interface. */
+typedef struct EffResourceOps {
+    void (*initialize)();      /* 0x00 */
+    u32 (*createResource)();    /* 0x04 */
+    void (*destroyResource)(); /* 0x08 */
+    u32 (*cloneResource)(void *); /* 0x0C */
+    void (*update)();          /* 0x10 */
+    void (*draw)();            /* 0x14 */
+    u32 payloadSize;           /* 0x18 */
+} EffResourceOps;
+
+/* Active frame callbacks receive the parent; destruction receives its child. */
+typedef struct EffActiveInstanceOps {
+    void (*initialize)(EffClassWork *); /* 0x00 */
+    u32 (*createResource)(); /* 0x04 */
+    void (*destroyResource)(void *); /* 0x08 */
+    u32 (*cloneResource)(void *); /* 0x0C */
+    void (*update)(EffClassWork *); /* 0x10 */
+    void (*draw)(EffClassWork *); /* 0x14 */
+    u32 payloadSize; /* 0x18 */
+} EffActiveInstanceOps;
+
+/* Class-resource callbacks operate on the parent class-work owner. */
+typedef struct EffClassResourceOps {
+    void (*initialize)(EffClassWork *); /* 0x00 */
+    void *(*createResource)(EffBillPointConfig *); /* 0x04 */
+    void (*destroyResource)(EffClassWork *); /* 0x08 */
+    void (*update)(EffClassWork *); /* 0x0C */
+    void (*draw)(EffClassWork *); /* 0x10 */
+    u32 payloadSize; /* 0x14 */
+} EffClassResourceOps;
+
+/* Block-resource callbacks receive the owning class work, not the payload. */
+typedef struct EffBlockOps {
+    void (*initialize)(EffClassWork *); /* 0x00 */
+    u32 (*createResource)(); /* 0x04: preserve the existing generic result ABI */
+    void (*destroyResource)(EffClassWork *); /* 0x08 */
+    u32 (*cloneResource)(void *); /* 0x0C: preserve the existing generic result ABI */
+    void (*update)(EffClassWork *); /* 0x10 */
+    void (*draw)(EffClassWork *); /* 0x14 */
+    u32 payloadSize; /* 0x18 */
+} EffBlockOps;
+
+struct EffModelResource;
+
+struct EffSpanConfig;
+
+struct EffSpanTable;
+
+/* This table has a single populated kind with span-resource callbacks. */
+typedef struct EffModelResourceOps {
+    void (*initialize)(struct EffModelResource *); /* 0x00 */
+    struct EffSpanTable *(*createResource)(struct EffSpanConfig *, dds3ModelHandle_t *); /* 0x04 */
+    void (*destroyResource)(struct EffSpanTable *); /* 0x08 */
+    void (*update)(struct EffModelResource *); /* 0x0C */
+    void (*draw)(struct EffModelResource *); /* 0x10 */
+    u32 payloadSize; /* 0x14 */
+} EffModelResourceOps;
+
+extern EffActiveInstanceOps effActiveInstanceOperations[];
+
+extern EffClassOps effClassWorkOperations[];
+
+extern EffClassResourceOps effClassResourceWorkOperations[];
+
+extern EffBlockOps effBlockResourceOperations[];
+
+extern EffBlockOps effModelBlockOperations[];
+
+extern EffResourceOps effRuntimeResourceOperations[];
+
+extern EffModelResourceOps effModelResourceOperations[];
+
+/* Shared work object for the effEditScalarTrack helpers (layout inferred). */
+typedef struct BaObj {
+    u8 pad_0x00[0x0C]; // 0x00
+    u8 *x0C;           // 0x0C
+} BaObj; // 0x10
+
+extern s32 effEditScalarTrack(EffScalarTrack *, u32, void *, void *);
+
+extern u8 D_0038F9D0[];
+
+extern u8 D_0038FAD0[];
+
+extern u8 D_0038F8E8[];
+
+extern u8 D_0038FA20[];
+
+extern u8 D_0038F938[];
+
+extern struct BtlResourceNameRecord *effQueuedResourceNameRecord;
+
+extern void effReleaseQueuedResourceName(void);
+
+extern const char D_003BD088[];
+
+extern const char D_003BD090[];
+
+extern char D_003DF8D0[];
+
+extern u8 D_0038F2B8[];
+
+extern u8 effBattleOffset[];
+
+extern u8 *D_003BD074;
+
+extern void effDrawSurfaceNode(s32);
+
+struct EffCameraCreateRow;
+
+extern u32 effSelectCameraFileJobFromRows(const char *, const struct EffCameraCreateRow *, u32);
+
+extern char D_003B3968[];
+
+extern char D_003B3958[];
+
+extern char D_003BCA40[];
+
+extern char D_003BD050[];
+
+extern char D_003B38C8[];
+
+extern char D_003B3938[];
+
+extern char D_003B3928[];
+
+extern char D_003B3918[];
+
+extern char D_003B3908[];
+
+extern char D_003B38F8[];
+
+extern char D_003B38E8[];
+
+extern char D_003B38D8[];
+
+extern char D_003B3888[];
+
+extern char D_003BD000[];
+
+extern u8 D_0038DE70[];
+
+extern u8 D_0038DF50[];
+
+extern u8 D_0038E0F0[];
+
+extern u8 D_0038E1A0[];
+
+extern u8 D_0038E280[];
+
+extern u8 D_0038E240[];
+
+extern u8 D_0038E310[];
+
+extern u8 D_0038E450[];
+
+extern u8 D_0038E500[];
+
+extern u8 D_0038E620[];
+
+extern u8 D_0038E6F0[];
+
+extern u8 D_0038E7C0[];
+
+extern u8 D_0038E800[];
+
+extern u8 D_0038E9A0[];
+
+extern u8 D_003DF840[];
+
+extern u8 D_003DFA30[];
+
+extern u8 D_003BD108;
+
+extern u8 D_003BD109;
+
+extern u8 D_003BD10A;
+
+extern s32 effEditColorTrack(s32, s32, s32);
+
+extern u8 D_003DE148[] __attribute__((aligned(4)));
+
+/* Value holder with a float field and a u16 data pointer (layout inferred). */
+typedef struct ValPtr44 {
+    u8 pad_0x00[0x08]; // 0x00
+    float f08;         // 0x08
+    u8 pad_0x0C[0x38]; // 0x0C
+    u16 *p44;          // 0x44
+} ValPtr44; // 0x48
+
+extern s32 effPollFileRecord(char *, s32);
+
+/* VU0 model helpers consume vf10 directly, matching the original macro-mode setup. */
+extern void effDrawScalyTexturedStrip(EffStripWork *, void *);
+
+extern void effInitModelVUState(dds3ModelHandle_t *);
+
+extern s32 effComputeLightDirectionVU(dds3ModelHandle_t *, sdf3DLightParallelPacket_t *);
+
+void effDestroyModelContext(dds3ModelHandle_t *model);
+
+dds3ModelHandle_t *effLoadViewerModelWithVUState(void *modelData, u32 modelDataSize);
+
+typedef struct EffFadeHeaderWork {
+    s32 frame;
+    s32 payload[2];
+} EffFadeHeaderWork;
+
+typedef char EffFadeHeaderWorkSizeCheck[(sizeof(EffFadeHeaderWork) == 0x0C) ? 1 : -1];
+
+#ifdef NON_MATCHING
+
+extern sdfGrOt_t D_003255A8;
+
+#else
+
+#endif
+
+u8 *effCreateBillboardWork(FileJobPayload *source) {
+    u8 *work = (u8 *)sdfChipAllocDirect(0x68);
+    memset(work, 0, 0x68);
+    ((EffBillboardWork *)work)->frame = 0;
+    ((EffBillboardWork *)work)->color = 0x80808080;
+    ((EffBillboardWork *)work)->scale = 1.0f;
+    SDF_VU0_STOREIDENTITYVECTOR(work);
+    SDF_VU0_STOREIDENTITYVECTOR(work + 0x10);
+    if (source == NULL) {
+        return work;
+    }
+    memcpy(work + 0x2C, fileResolvePrimaryBuffer(source),
+           source->primary.size);
+    ((EffBillboardWork *)work)->billboard =
+        dds3BillboardCreate(1, (u32)fileResolveSecondaryBuffer(source));
+    return work;
+}
+
+void effBillboardWorkRelease(EffBillboardWork *work) {
+    billHandle_t *billboard;
+
+    billboard = work->billboard;
+    if (billboard != 0) {
+        dds3BillboardDelete(billboard);
+    }
+    sdfChipFreeDirect(work);
+}
+
+void effReplaceBillboardClone(s32 dst, s32 src);
+
+u8 *effDuplicateBillState(const u8 *source) {
+    u8 *effect = (u8 *)effCreateBillboardWork(NULL);
+    memcpy(effect + 0x2C, source + 0x2C, 0x38);
+    effReplaceBillboardClone((s32)effect, (s32)source);
+    return effect;
+}
+
+void effReplaceBillboardClone(s32 dst, s32 src) {
+    billHandle_t *billboard;
+
+    if (((EffBillboardWork *)dst)->billboard != 0) {
+        dds3BillboardDelete(((EffBillboardWork *)dst)->billboard);
+    }
+    billboard = dds3BillboardCopy(((EffBillboardWork *)src)->billboard);
+    ((EffBillboardWork *)dst)->billboard = billboard;
+}
+
+void effBillboardEntryFrameReset(EffBillboardWork *work) {
+    dds3BillboardSetAnimKey2(work->billboard, 0);
+    work->frame = 0;
+}
+
+/* Update a live billboard frame's projected scale, rotation, and position before its callback. */
+void effUpdateScaledBillboardFrame(EffBillboardWork *work) {
+    u128 vec;
+    f32 angle;
+    f32 scale;
+    f32 width;
+    f32 height;
+    s32 frame;
+    s32 limit;
+
+    limit = dds3BillboardGetAnimFrame(work->billboard);
+    frame = work->frame;
+    if (frame < limit) {
+        dds3BillboardSetAnimKey2(work->billboard, frame);
+        SDF_VU0_LOADVECTOR(work->rotation);
+        ToMatrix();
+        SDF_VU0_LOADVECTOR(D_003B2B10);
+        SDF_VU0_APPLYMATRIX_XYZ();
+        SDF_VU0_STOREVECTOR(&vec);
+        angle = effComputeProjectedOffsetAngle((u8 *)work, &vec);
+        scale = dds3BillboardGetDirectionScale((u8 *)work, &vec);
+        if (scale < 0.3f) {
+            scale = 0.3f;
+        }
+        scale *= work->scale;
+        width = scale * work->widthScale;
+        height = work->heightScale * work->scale;
+        dds3BillboardSetScale(work->billboard, width, height);
+        dds3BillboardSetRotate(work->billboard, angle);
+        effCopyVector(work->billboard->position, work->position);
+        dds3BillboardDraw(work->billboard);
+        work->frame++;
+    }
+}
+
+void effCopyBillboardPosition(void *dst, void *src) {
+    SDF_VU0_COPYVECTOR(dst, src);
+}
+
+void effCopyBillboardOrientation(void *work, void *src) {
+    SDF_VU0_COPYVECTOR(((EffBillboardWork *)work)->rotation, src);
+}
+
+void effSetBillboardColor(s32 work, u32 color) {
+    ((EffBillboardWork *)work)->color = color;
+}
+
+/* Set the billboard's scalar scale; the leading vectors are not a Matrix4. */
+void effSetBillboardMatrixComponent(EffBillboardWork *work, float value) {
+    work->scale = value;
+}
+
+void effClearBillFrames(u8 *work) {
+    u8 *state = (u8 *)((EffClassWork *)work)->resource;
+    u8 *config = ((EffClassWork *)work)->payload;
+    EffTrackSet *asset = ((EffBillFrameState *)state)->asset;
+    s32 remaining = ((EffBillTimedHeader *)config)->count;
+    u8 *entry = ((EffBillFrameState *)state)->entries;
+
+    memset(asset->buffer, 0, asset->rows * 0x10);
+    if (remaining > 0) {
+        s32 i;
+        for (i = remaining; i != 0; --i) {
+            *(s32 *)entry = -1;
+            entry += 0x18;
+        }
+    }
+}
+
+u8 *effCreateBillFrameNode(EffBillFrameConfig *config, u32 resource) {
+    s32 count = config->frame.output.timed.count;
+    u32 headerSize = 0x10;
+    struct sdfMemHandle_t *base = sdfMemAllocDirect(count * 0x18 + headerSize);
+    u8 *body = (u8 *)sdfMemLock(base);
+    u8 *node = body;
+
+    body += headerSize;
+    ((EffBillFrameState *)node)->allocation = base;
+    *(u8 **)node = body;
+    ((EffBillFrameState *)node)->asset = effCreateTrackSetWithSharedReferences(count, 0, resource);
+    return node;
+}
+
+/* Release the frame node's shared tracks and backing allocation. */
+void effReleaseBillFrameNode(s32 work) {
+    effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
+    sdfMemFreeDirect(((EffBillFrameState *)work)->allocation);
+}
+
+typedef struct EffBillFrameEntry {
+    s32 age;
+    f32 spin;
+    f32 angle;
+    f32 radius;
+    f32 innerWidth;
+    f32 outerWidth;
+} EffBillFrameEntry;
+
+typedef char EffBillFrameEntrySizeCheck[(sizeof(EffBillFrameEntry) == 0x18) ? 1 : -1];
+
+typedef char EffBillFrameEntry_age_offset_check[((u32)&((EffBillFrameEntry *)0)->age == 0x0) ? 1 : -1];
+
+typedef char EffBillFrameEntry_spin_offset_check[((u32)&((EffBillFrameEntry *)0)->spin == 0x4) ? 1 : -1];
+
+typedef char EffBillFrameEntry_angle_offset_check[((u32)&((EffBillFrameEntry *)0)->angle == 0x8) ? 1 : -1];
+
+typedef char EffBillFrameEntry_radius_offset_check[((u32)&((EffBillFrameEntry *)0)->radius == 0xC) ? 1 : -1];
+
+typedef char EffBillFrameEntry_innerWidth_offset_check[((u32)&((EffBillFrameEntry *)0)->innerWidth == 0x10) ? 1 : -1];
+
+typedef char EffBillFrameEntry_outerWidth_offset_check[((u32)&((EffBillFrameEntry *)0)->outerWidth == 0x14) ? 1 : -1];
+
+extern EffRandState dds3RandCB[];
+
+extern u8 effOnesVector[];
+
+void billAdvanceFrameInstances(EffClassWork *work) {
+    EffBillFrameConfig *config = (EffBillFrameConfig *)work->payload;
+    EffBillFrameState *resource;
+    EffTrackSet *asset;
+    EffBillFrameEntry *entries;
+    s32 lifetime;
+    s32 remainingSpawn;
+    u32 randomAge;
+    s32 item;
+    s32 itemCount;
+    s32 fadeStart;
+    s32 fadeEnd;
+    s32 retiredState;
+    s32 waitingState;
+    s32 inactiveState;
+    u32 respawn;
+    u32 innerColor;
+    u32 outerColor;
+    u32 *colors;
+    u128 *vertices;
+    f32 innerVector[4];
+    f32 outerVector[4];
+    f32 direction[4];
+    f32 radius[4];
+    f32 innerWidth[4];
+    f32 outerWidth[4];
+    f32 acceleration;
+
+    if (config->frame.output.timed.time.progress < work->frame &&
+        config->frame.output.timed.time.progress != 0) return;
+    resource = (EffBillFrameState *)work->resource;
+    lifetime = config->frame.lifetime;
+    entries = (EffBillFrameEntry *)resource->entries;
+    asset = resource->asset;
+    itemCount = (s32)config->frame.output.timed.count;
+    if (lifetime == 0) return;
+    if (config->frame.spawnAllOnStart != 0 && work->frame == 0) {
+        remainingSpawn = itemCount;
+        randomAge = 1;
+    } else {
+        remainingSpawn = config->frame.spawnCount;
+        randomAge = 0;
+    }
+    innerColor = config->innerColor & 0xFFFFFF;
+    vertices = (u128 *)asset->buffer;
+    colors = (u32 *)asset->tail;
+    direction[1] = 0.0f;
+    direction[3] = 0.0f;
+    UnpackRGBAWordFloat(innerColor, 1.0f / 128.0f);
+    SDF_VU0_STOREVECTOR_NOMEM(innerVector);
+    outerColor = config->outerColor & 0xFFFFFF;
+    UnpackRGBAWordFloat(outerColor, 1.0f / 128.0f);
+    SDF_VU0_STOREVECTOR_NOMEM(outerVector);
+    fadeStart = (s32)(config->frame.fadeInFraction * (f32)lifetime);
+    fadeEnd = (s32)(config->frame.fadeOutFraction * (f32)lifetime);
+    acceleration = config->spinAccel;
+    respawn = config->frame.respawn;
+    item = 0;
+    if (itemCount <= 0) return;
+    waitingState = -1;
+    inactiveState = -2;
+    retiredState = respawn != 0 ? waitingState : inactiveState;
+    for (; item < itemCount; item++, entries++, vertices += 5, colors += 5) {
+        EffBillFrameEntry *entry = entries;
+        s32 age = entry->age;
+        if (age == inactiveState) continue;
+        if (age == waitingState) {
+            if (remainingSpawn != 0) {
+                f32 randomValue;
+                f32 factor;
+                entry->angle = dds3GetRandFloatA(dds3RandCB) * 6.28318500518798828125f;
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                entry->spin = config->spin * (randomValue * config->spinJitter + (1.0f - config->spinJitter));
+                if (dds3GetRandA((EffRandState *)dds3RandCB) & 1) entry->spin = -entry->spin;
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                entry->radius = config->radius * (randomValue * config->radiusJitter + (1.0f - config->radiusJitter));
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                factor = randomValue * config->widthJitter + (1.0f - config->widthJitter);
+                entry->innerWidth = config->innerWidth * factor;
+                entry->outerWidth = config->outerWidth * factor;
+                if (randomAge != 0) entry->age = (s32)(dds3GetRandA((EffRandState *)dds3RandCB) % (u32)lifetime);
+                else entry->age = 0;
+                remainingSpawn = (s32)((u32)remainingSpawn - 1u);
+            }
+        } else if (age >= lifetime) {
+            u32 *color = colors;
+            u128 *position = vertices;
+            s32 count = 4;
+            do {
+                SDF_VU0_STOREIDENTITYVECTOR(position);
+                *color = 0;
+                position++;
+                color++;
+            } while (--count >= 0);
+            entry->age = retiredState;
+        } else {
+            f32 spin = entry->spin;
+            f32 time = (f32)age;
+            f32 angle;
+            f32 cosine;
+            f32 sine;
+            f32 alpha;
+            u32 outerPacked;
+            u32 innerPacked;
+            if (spin > 0.0f) angle = (spin + (acceleration * time) * 0.5f) * time;
+            else angle = (spin - (acceleration * time) * 0.5f) * time;
+            angle += entry->angle;
+            SDF_VU0_LOADVECTOR(effOnesVector);
+            SDF_VU0_COPYVECTOR_A_TO_B();
+            SDF_VU0_SCALEVECTOR_BITS(entry->radius);
+            SDF_VU0_STOREVECTOR_NOMEM(radius);
+            SDF_VU0_COPYVECTOR_B_TO_A();
+            SDF_VU0_SCALEVECTOR_BITS(entry->innerWidth);
+            SDF_VU0_SCALEVECTOR_B_BITS(entry->outerWidth);
+            SDF_VU0_STOREVECTOR_NOMEM(innerWidth);
+            SDF_VU0_STOREVECTOR_B_NOMEM(outerWidth);
+            direction[0] = sdfCos(angle);
+            direction[2] = sdfSin(angle);
+            SDF_VU0_LOADVECTOR(direction);
+            SDF_VU0_COPYVECTOR_A_TO_C();
+            SDF_VU0_GETVECTOR_X(cosine);
+            SDF_VU0_GETVECTOR_Z(sine);
+            SDF_VU0_SETVECTOR_X_V0(sine);
+            cosine = -cosine;
+            SDF_VU0_SETVECTOR_Z_V0(cosine);
+            SDF_VU0_COPYVECTOR_A_TO_B();
+            SDF_VU0_LOADVECTOR(innerWidth);
+            SDF_VU0_MULVECTOR();
+            SDF_VU0_STOREVECTOR_NOMEM(innerWidth);
+            SDF_VU0_LOADVECTOR(outerWidth);
+            SDF_VU0_MULVECTOR();
+            SDF_VU0_STOREVECTOR_NOMEM(outerWidth);
+            SDF_VU0_COPYVECTOR_C_TO_A();
+            SDF_VU0_LOADVECTOR_B(radius);
+            SDF_VU0_MULVECTOR();
+            SDF_VU0_COPYVECTOR_A_TO_C();
+            SDF_VU0_LOADVECTOR(innerWidth);
+            SDF_VU0_COPYVECTOR_A_TO_B();
+            SDF_VU0_STOREVECTOR(vertices + 2);
+            SDF_VU0_NEGVECTOR_B_XYZ();
+            SDF_VU0_STOREVECTOR_B(vertices + 4);
+            SDF_VU0_LOADVECTOR(outerWidth);
+            SDF_VU0_COPYVECTOR_A_TO_B();
+            SDF_VU0_ADDVECTOR_A_C();
+            SDF_VU0_NEGVECTOR_B_XYZ();
+            SDF_VU0_STOREVECTOR(vertices);
+            SDF_VU0_ADDVECTOR_B_C();
+            SDF_VU0_STOREVECTOR_B(vertices + 1);
+            if (age < fadeStart) alpha = time / (f32)fadeStart;
+            else if (fadeEnd < age) alpha = (f32)(s32)((u32)lifetime - (u32)age) / (f32)(s32)((u32)lifetime - (u32)fadeEnd);
+            else alpha = 1.0f;
+            SDF_VU0_LOADVECTOR_B(effOnesVector);
+            SDF_VU0_SCALEVECTOR_B_BITS(alpha);
+            SDF_VU0_LOADVECTOR(outerVector);
+            SDF_VU0_MULVECTOR();
+            outerPacked = PackRGBAWord(128.0f);
+            colors[0] = outerPacked;
+            colors[1] = outerPacked;
+            SDF_VU0_LOADVECTOR(innerVector);
+            SDF_VU0_MULVECTOR();
+            innerPacked = PackRGBAWord(128.0f);
+            if (item & 1) {
+                colors[3] = innerPacked | 0xFF000000;
+                innerPacked = (u32)(alpha * 128.0f) << 24;
+                colors[2] = innerPacked;
+                colors[4] = innerPacked;
+            } else {
+                colors[3] = innerPacked | 0x40000000;
+                innerPacked = (u32)(alpha * 255.0f) << 24;
+                colors[2] = innerPacked;
+                colors[4] = innerPacked;
+            }
+            entry->age = (s32)((u32)age + 1u);
+        }
+    }
+}
+
+extern u8 effOnesVector[];
+
+extern void effDrawTrackSet(EffTrackSet *, const Matrix4 *);
+
+void billUpdateFrameDrawColorAndTransform(BillCellDrawWork *work) {
+    u8 *config = work->config;
+    u32 limit = work->frameLimit;
+    u32 progress = ((EffBillTimedHeader *)config)->time.progress;
+    u32 *list = work->instances;
+    EffTrackSet *out = (EffTrackSet *)list[1];
+    u128 mtx[4];
+    u32 packed;
+    u32 unit;
+    u32 second;
+
+    if (progress < limit && progress != 0) {
+        return;
+    }
+    second = effSampleColorAlphaTracks(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
+    unit = 0x3C000000;
+    UnpackRGBAWord(work->baseColor, unit);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    UnpackRGBAWord(second, unit);
+    SDF_VU0_MULVECTOR();
+    packed = PackRGBAWord(128.0f);
+    out->color = packed;
+    out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
+    out->flag = ((EffBillFrameHeader *)config)->mode;
+    SDF_VU0_LOADVECTOR(work->transform);
+    ToMatrix();
+    SDF_VU0_LOADVECTOR(effOnesVector);
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(work->scale);
+    SDF_VU0_SCALE_XYZ();
+    SDF_VU0_LOADVECTOR(work);
+    SDF_VU0_VECTOR_W_SET_ONE();
+    SDF_VU0_SET_ROW3();
+    SDF_VU0_STOREMATRIX(mtx);
+    effDrawTrackSet(out, (Matrix4 *)mtx);
+}
+
+void billResetCellIndices(u8 *work) {
+    u8 *state = (u8 *)((EffClassWork *)work)->resource;
+    u8 *config = ((EffClassWork *)work)->payload;
+    EffTrackSet *asset = ((EffBillFrameState *)state)->asset;
+    s32 remaining = ((EffBillTimedHeader *)config)->count;
+    u8 *entry = ((EffBillFrameState *)state)->entries;
+
+    memset(asset->buffer, 0, asset->rows * 0x10);
+    if (remaining > 0) {
+        s32 i;
+        for (i = remaining; i != 0; --i) {
+            *(s32 *)entry = -1;
+            entry += 0x1C;
+        }
+    }
+}
+
+u8 *billCreateCellNode(EffBillCellConfig *config, u32 resource) {
+    s32 count = config->frame.output.timed.count;
+    u32 headerSize = 0x10;
+    struct sdfMemHandle_t *base = sdfMemAllocDirect(count * 0x1C + headerSize);
+    u8 *body = (u8 *)sdfMemLock(base);
+    u8 *node = body;
+
+    body += headerSize;
+    ((EffBillFrameState *)node)->allocation = base;
+    *(u8 **)node = body;
+    ((EffBillFrameState *)node)->asset = effCreateTrackSetWithSharedReferences(count, 1, resource);
+    return node;
+}
+
+void billReleaseCellNode(s32 work) {
+    effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
+    sdfMemFreeDirect(((EffBillFrameState *)work)->allocation);
+}
+
+extern f32 billRingCosines[12];
+
+extern f32 billRingSines[12];
+
+/* Spawn and advance the kind-2 cell instances: each live cell moves out
+ * along its heading and is drawn as a 13-vertex fan (center plus two
+ * six-step rings of radii A and B), faded in and out over its lifetime. */
+void billAdvanceCellInstances(EffClassWork *work) {
+    EffBillCellConfig *config = (EffBillCellConfig *)work->payload;
+    EffBillFrameState *resource;
+    EffTrackSet *asset;
+    EffBillCellEntry *entries;
+    s32 lifetime;
+    s32 remainingSpawn;
+    u32 randomAge;
+    s32 item;
+    s32 itemCount;
+    s32 outputCount;
+    s32 fadeStart;
+    s32 fadeEnd;
+    s32 startAge;
+    s32 endAge;
+    s32 ageStep;
+    s32 retiredState;
+    s32 waitingState;
+    s32 inactiveState;
+    u32 firstColor;
+    u32 secondColor;
+    u32 respawn;
+    u32 *colors;
+    u128 *vertices;
+    f32 firstVector[4];
+    f32 secondVector[4];
+    f32 center[4];
+    f32 direction[4];
+    f32 width[4];
+    f32 radialA[4];
+    f32 radialB[4];
+    f32 acceleration;
+
+    if (config->frame.output.timed.time.progress < work->frame &&
+        config->frame.output.timed.time.progress != 0) return;
+    resource = (EffBillFrameState *)work->resource;
+    lifetime = config->frame.lifetime;
+    entries = (EffBillCellEntry *)resource->entries;
+    asset = resource->asset;
+    itemCount = (s32)config->frame.output.timed.count;
+    if (lifetime == 0) return;
+    if (config->reverse != 0) {
+        fadeStart = (s32)((1.0f - config->frame.fadeOutFraction) * (f32)lifetime);
+        fadeEnd = (s32)((1.0f - config->frame.fadeInFraction) * (f32)lifetime);
+        startAge = lifetime;
+        endAge = 0;
+        ageStep = -1;
+    } else {
+        fadeStart = (s32)(config->frame.fadeInFraction * (f32)lifetime);
+        fadeEnd = (s32)(config->frame.fadeOutFraction * (f32)lifetime);
+        startAge = 0;
+        endAge = lifetime;
+        ageStep = 1;
+    }
+    if (config->frame.spawnAllOnStart != 0 && work->frame == 0) {
+        remainingSpawn = itemCount;
+        randomAge = 1;
+    } else {
+        remainingSpawn = config->frame.spawnCount;
+        randomAge = 0;
+    }
+    firstColor = config->colorA & 0xFFFFFF;
+    vertices = (u128 *)asset->buffer;
+    colors = (u32 *)asset->tail;
+    direction[1] = 0.0f;
+    direction[3] = 0.0f;
+    UnpackRGBAWordFloat(firstColor, 1.0f / 128.0f);
+    SDF_VU0_STOREVECTOR_NOMEM(firstVector);
+    secondColor = config->colorB & 0xFFFFFF;
+    UnpackRGBAWordFloat(secondColor, 1.0f / 128.0f);
+    SDF_VU0_STOREVECTOR_NOMEM(secondVector);
+    acceleration = config->acceleration;
+    respawn = config->frame.respawn;
+    if (itemCount <= 0) return;
+    waitingState = -1;
+    inactiveState = -2;
+    retiredState = respawn != 0 ? waitingState : inactiveState;
+    item = itemCount;
+    for (; item != 0; item--, entries++, vertices += 13, colors += 13) {
+        EffBillCellEntry *entry = entries;
+        s32 age = entry->age;
+        if (age == inactiveState) continue;
+        if (age == waitingState) {
+            if (remainingSpawn != 0) {
+                f32 randomValue;
+                f32 jitter;
+                f32 base;
+                entry->angle = dds3GetRandFloatA(dds3RandCB) * 6.28318500518798828125f;
+                jitter = config->radiusJitter;
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                base = 1.0f - jitter;
+                entry->radiusA = config->radius * (randomValue * jitter + base);
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                entry->radiusB = config->radius * (randomValue * jitter + base);
+                jitter = config->centerOffsetJitter;
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                entry->centerOffset = config->centerOffset * (randomValue * jitter + (1.0f - jitter));
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                entry->velocity = config->velocity * (randomValue * config->velocityJitter + (1.0f - config->velocityJitter));
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                jitter = randomValue * config->extentJitter + (1.0f - config->extentJitter);
+                entry->extent = config->extent * jitter;
+                if (randomAge != 0) entry->age = (s32)(dds3GetRandA((EffRandState *)dds3RandCB) % (u32)lifetime);
+                else entry->age = startAge;
+                remainingSpawn = (s32)((u32)remainingSpawn - 1u);
+            }
+        } else if (age == endAge) {
+            u32 *color = colors;
+            u128 *position = vertices;
+            outputCount = 12;
+            do {
+                SDF_VU0_STOREIDENTITYVECTOR(position);
+                *color = 0;
+                position++;
+                color++;
+            } while (--outputCount >= 0);
+            entry->age = retiredState;
+        } else {
+            f32 time = (f32)age;
+            f32 motionTime = time;
+            f32 speed;
+            f32 angle = entry->angle;
+            f32 distance;
+            f32 cosine;
+            f32 sine;
+            f32 alpha;
+            u32 secondPacked;
+            u32 firstPacked;
+            f32 *ringA;
+            f32 *ringB;
+            u128 *position;
+            u32 *color;
+            if (acceleration < 0.0f) {
+                f32 stopTime;
+                speed = entry->velocity;
+                stopTime = (-speed / (acceleration * 0.5f)) * 0.5f;
+                if (stopTime < time) motionTime = stopTime;
+            } else {
+                speed = entry->velocity;
+            }
+            distance = (speed + (acceleration * motionTime) * 0.5f) * motionTime;
+            distance += entry->centerOffset;
+            SDF_VU0_LOADVECTOR(effOnesVector);
+            SDF_VU0_SCALEVECTOR_BITS(entry->extent);
+            SDF_VU0_STOREVECTOR_NOMEM(width);
+            direction[0] = sdfCos(angle);
+            direction[2] = sdfSin(angle);
+            SDF_VU0_LOADVECTOR(direction);
+            SDF_VU0_COPYVECTOR_A_TO_C();
+            SDF_VU0_SCALEVECTOR_BITS(entry->radiusA);
+            SDF_VU0_COPYVECTOR_C_TO_B();
+            SDF_VU0_STOREVECTOR_NOMEM(radialA);
+            SDF_VU0_SCALEVECTOR_B_BITS(entry->radiusB);
+            SDF_VU0_STOREVECTOR_B_NOMEM(radialB);
+            SDF_VU0_COPYVECTOR_C_TO_A();
+            SDF_VU0_SCALEVECTOR_BITS(distance);
+            SDF_VU0_STOREVECTOR_NOMEM(center);
+            SDF_VU0_SWAPVECTOR_A_C();
+            SDF_VU0_GETVECTOR_X(cosine);
+            SDF_VU0_GETVECTOR_Z(sine);
+            SDF_VU0_SETVECTOR_X(sine);
+            cosine = -cosine;
+            SDF_VU0_SETVECTOR_Z(cosine);
+            SDF_VU0_LOADVECTOR_B(width);
+            SDF_VU0_MULVECTOR();
+            SDF_VU0_STOREVECTOR_NOMEM(width);
+            SDF_VU0_STOREVECTOR_C(vertices);
+            for (outputCount = 0; outputCount < 6; outputCount++) {
+                SDF_VU0_LOADVECTOR(radialA);
+                SDF_VU0_SCALEVECTOR_BITS(billRingSines[outputCount]);
+                SDF_VU0_ADDVECTOR_A_C();
+                SDF_VU0_LOADVECTOR_B(width);
+                SDF_VU0_SCALEVECTOR_B_BITS(billRingCosines[outputCount]);
+                SDF_VU0_ADDVECTOR();
+                SDF_VU0_STOREVECTOR(vertices + 1 + outputCount);
+            }
+            for (outputCount = 0; outputCount < 6; outputCount++) {
+                SDF_VU0_LOADVECTOR(radialB);
+                SDF_VU0_SCALEVECTOR_BITS(billRingSines[outputCount + 6]);
+                SDF_VU0_ADDVECTOR_A_C();
+                SDF_VU0_LOADVECTOR_B(width);
+                SDF_VU0_SCALEVECTOR_B_BITS(billRingCosines[outputCount + 6]);
+                SDF_VU0_ADDVECTOR();
+                SDF_VU0_STOREVECTOR(vertices + 7 + outputCount);
+            }
+            if (age < fadeStart) alpha = time / (f32)fadeStart;
+            else if (fadeEnd < age) alpha = (f32)(s32)((u32)lifetime - (u32)age) / (f32)(s32)((u32)lifetime - (u32)fadeEnd);
+            else alpha = 1.0f;
+            SDF_VU0_LOADVECTOR_B(effOnesVector);
+            SDF_VU0_SCALEVECTOR_B_BITS(alpha);
+            SDF_VU0_LOADVECTOR(secondVector);
+            SDF_VU0_MULVECTOR();
+            secondPacked = PackRGBAWord(128.0f);
+            color = colors + 1;
+            outputCount = 11;
+            do {
+                *color = secondPacked;
+                color++;
+            } while (--outputCount >= 0);
+            SDF_VU0_LOADVECTOR(firstVector);
+            SDF_VU0_MULVECTOR();
+            firstPacked = PackRGBAWord(128.0f);
+            colors[0] = firstPacked | ((u32)(alpha * 128.0f) << 24);
+            entry->age = (s32)((u32)age + (u32)ageStep);
+        }
+    }
+}
+
+void billUpdateCellDrawColorAndTransform(BillCellDrawWork *work) {
+    u8 *config = work->config;
+    u32 limit = work->frameLimit;
+    u32 progress = ((EffBillTimedHeader *)config)->time.progress;
+    u32 *list = work->instances;
+    EffTrackSet *out = (EffTrackSet *)list[1];
+    u128 mtx[4];
+    u32 packed;
+    u32 unit;
+    u32 second;
+
+    if (progress < limit && progress != 0) {
+        return;
+    }
+    second = effSampleColorAlphaTracks(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
+    unit = 0x3C000000;
+    UnpackRGBAWord(work->baseColor, unit);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    UnpackRGBAWord(second, unit);
+    SDF_VU0_MULVECTOR();
+    packed = PackRGBAWord(128.0f);
+    out->color = packed;
+    out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
+    out->flag = ((EffBillFrameHeader *)config)->mode;
+    SDF_VU0_LOADVECTOR(work->transform);
+    ToMatrix();
+    SDF_VU0_LOADVECTOR(effOnesVector);
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(work->scale);
+    SDF_VU0_SCALE_XYZ();
+    SDF_VU0_LOADVECTOR(work);
+    SDF_VU0_VECTOR_W_SET_ONE();
+    SDF_VU0_SET_ROW3();
+    SDF_VU0_STOREMATRIX(mtx);
+    effDrawTrackSet(out, (Matrix4 *)mtx);
+}
+
+void billResetParticleIndices(u8 *work) {
+    u8 *state = (u8 *)((EffClassWork *)work)->resource;
+    u8 *config = ((EffClassWork *)work)->payload;
+    EffTrackSet *asset = ((EffBillFrameState *)state)->asset;
+    s32 remaining = ((EffBillTimedHeader *)config)->count;
+    EffBillParticleEntry *entry = (EffBillParticleEntry *)((EffBillFrameState *)state)->entries;
+
+    memset(asset->buffer, 0, asset->rows * 0x10);
+    if (remaining > 0) {
+        s32 i;
+        for (i = remaining; i != 0; --i) {
+            entry->age = -1;
+            ++entry;
+        }
+    }
+}
+
+u8 *billCreateParticleNode(EffBillParticleConfig *config, u32 resource) {
+    s32 count = config->frame.output.timed.count;
+    u32 headerSize = 0x10;
+    struct sdfMemHandle_t *base = sdfMemAllocDirect(count * 0x2C + headerSize);
+    u8 *body = (u8 *)sdfMemLock(base);
+    u8 *node = body;
+
+    body += headerSize;
+    ((EffBillFrameState *)node)->allocation = base;
+    *(u8 **)node = body;
+    ((EffBillFrameState *)node)->asset = effCreateTrackSetWithSharedReferences(count, 1, resource);
+    return node;
+}
+
+void billReleaseParticleNode(s32 work) {
+    effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
+    sdfMemFreeDirect(((EffBillFrameState *)work)->allocation);
+}
+
+#ifdef NON_MATCHING
+
+extern EffRandState dds3RandCB[];
+
+extern u8 effOnesVector[];
+
+extern f32 billRingCosines[12];
+
+extern f32 billRingSines[12];
+
+/* Advances the particle instances of a kind-3 billboard effect by one frame:
+ * spawns waiting entries with randomized angle, radii, offsets, rise, spin and
+ * size (up to the per-frame spawn count, or all at once on frame 0 with random
+ * ages), retires entries that outlive the lifetime, and for live ones rebuilds
+ * the 13 vertices (the center and two six-step half rings) and their colors
+ * from the spin, rise and gravity motion and the fade-in and fade-out alpha.
+ * Upstream: INCLUDE_ASM in DDS1's game/code_0029E410 and DDS2's
+ * game/code_002E0478, the same routine; written from the retail routine. */
+void billAdvanceParticleInstances(EffClassWork *work) {
+    EffBillParticleConfig *config = (EffBillParticleConfig *)work->payload;
+    EffBillFrameState *resource;
+    EffTrackSet *asset;
+    EffBillParticleEntry *entry;
+    s32 lifetime;
+    s32 remainingSpawn;
+    u32 randomAge;
+    s32 item;
+    u32 frame;
+    s32 itemCount;
+    s32 outputCount;
+    s32 fadeStart;
+    s32 fadeEnd;
+    s32 retiredState;
+    u32 firstColor;
+    u32 secondColor;
+    u32 respawn;
+    u32 *colors;
+    u128 *vertices;
+    f32 lifetimeF;
+    f32 firstVector[4];
+    f32 secondVector[4];
+    f32 direction[4];
+    f32 width[4];
+    f32 radialA[4];
+    f32 radialB[4];
+    f32 acceleration;
+    f32 gravity;
+
+    frame = work->frame;
+    if (config->frame.output.timed.time.progress < frame &&
+        config->frame.output.timed.time.progress != 0) {
+        return;
+    }
+    itemCount = (s32)config->frame.output.timed.count;
+    resource = (EffBillFrameState *)work->resource;
+    lifetime = config->frame.lifetime;
+    entry = (EffBillParticleEntry *)resource->entries;
+    asset = resource->asset;
+    if (lifetime == 0) {
+        return;
+    }
+    lifetimeF = (f32)lifetime;
+    fadeStart = (s32)(config->frame.fadeInFraction * lifetimeF);
+    fadeEnd = (s32)(config->frame.fadeOutFraction * lifetimeF);
+    if (config->frame.spawnAllOnStart != 0 && frame == 0) {
+        remainingSpawn = itemCount;
+        randomAge = 1;
+    } else {
+        remainingSpawn = config->frame.spawnCount;
+        randomAge = 0;
+    }
+    firstColor = config->colorA & 0xFFFFFF;
+    vertices = (u128 *)asset->buffer;
+    colors = (u32 *)asset->tail;
+    direction[1] = 0.0f;
+    direction[3] = 0.0f;
+    UnpackRGBAWordFloat(firstColor, 1.0f / 128.0f);
+    SDF_VU0_STOREVECTOR_NOMEM(firstVector);
+    secondColor = config->colorB & 0xFFFFFF;
+    UnpackRGBAWordFloat(secondColor, 1.0f / 128.0f);
+    SDF_VU0_STOREVECTOR_NOMEM(secondVector);
+    acceleration = config->acceleration;
+    SDF_VU0_STOREIDENTITYVECTOR(radialA);
+    respawn = config->frame.respawn;
+    SDF_VU0_STOREIDENTITYVECTOR(radialB);
+    if (itemCount <= 0) {
+        return;
+    }
+    gravity = config->gravity;
+    item = itemCount;
+    retiredState = respawn != 0 ? -1 : -2;
+    for (; item != 0; item--, entry++, vertices += 13, colors += 13) {
+        s32 age = entry->age;
+
+        if (age == -2) {
+            continue;
+        }
+        if (age == -1) {
+            if (remainingSpawn != 0) {
+                f32 randomValue;
+                f32 jitter;
+                f32 base;
+                f32 offset;
+                f32 endJitter;
+                f32 endOffset;
+
+                entry->angle = dds3GetRandFloatA(dds3RandCB) * 6.2831853f;
+                jitter = config->radiusJitter;
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                base = 1.0f - jitter;
+                entry->radiusA = config->radius * (randomValue * jitter + base);
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                entry->radiusB = config->radius * (randomValue * jitter + base);
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                offset = config->offset * (randomValue * config->offsetJitter + (1.0f - config->offsetJitter));
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                endJitter = config->endOffsetJitter;
+                endOffset = config->endOffset;
+                entry->offset = offset;
+                entry->offsetStep = (endOffset * (randomValue * endJitter + (1.0f - endJitter)) - offset) / lifetimeF;
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                entry->rise = -config->rise * (randomValue * config->riseJitter + (1.0f - config->riseJitter));
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                entry->spinRate = config->spinRate * (randomValue * config->spinRateJitter + (1.0f - config->spinRateJitter));
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                jitter = randomValue * config->extentJitter + (1.0f - config->extentJitter);
+                entry->extent = config->extent * jitter;
+                if (randomAge != 0) {
+                    entry->age = (s32)(dds3GetRandA(dds3RandCB) % (u32)lifetime);
+                } else {
+                    entry->age = 0;
+                }
+                remainingSpawn--;
+            }
+        } else if (age >= lifetime) {
+            for (outputCount = 0; outputCount < 13; outputCount++) {
+                SDF_VU0_STOREIDENTITYVECTOR(vertices + outputCount);
+                colors[outputCount] = 0;
+            }
+            entry->age = retiredState;
+        } else {
+            f32 time = (f32)age;
+            f32 half;
+            f32 angle;
+            f32 height;
+            f32 offset;
+            f32 cosine;
+            f32 sine;
+            f32 alpha;
+            u32 secondPacked;
+            u32 firstPacked;
+
+            half = acceleration * time * 0.5f;
+            angle = (entry->spinRate + half) * time + entry->angle;
+            offset = entry->offset + entry->offsetStep * time;
+            height = (entry->rise + half) * time + gravity * time * time * 0.5f;
+            radialA[1] = entry->radiusA;
+            radialB[1] = entry->radiusB;
+            SDF_VU0_LOADVECTOR(effOnesVector);
+            SDF_VU0_SCALEVECTOR_BITS(entry->extent);
+            SDF_VU0_STOREVECTOR_NOMEM(width);
+            /* The heading; the center lies an offset out along it, raised
+             * by the height, and the lateral axis is the heading turned a
+             * quarter, scaled by the extent. */
+            direction[0] = sdfCos(angle);
+            direction[2] = sdfSin(angle);
+            SDF_VU0_LOADVECTOR(direction);
+            SDF_VU0_COPYVECTOR_A_TO_C();
+            SDF_VU0_SCALEVECTOR_BITS(offset);
+            SDF_VU0_SETVECTOR_Y(height);
+            SDF_VU0_SWAPVECTOR_A_C();
+            SDF_VU0_GETVECTOR_X(cosine);
+            SDF_VU0_GETVECTOR_Z(sine);
+            SDF_VU0_SETVECTOR_X(sine);
+            cosine = -cosine;
+            SDF_VU0_SETVECTOR_Z(cosine);
+            SDF_VU0_LOADVECTOR_B(width);
+            SDF_VU0_MULVECTOR();
+            SDF_VU0_STOREVECTOR_NOMEM(width);
+            /* The center, then two six-step half rings around it of radii A
+             * and B. */
+            SDF_VU0_STOREVECTOR_C(vertices);
+            for (outputCount = 0; outputCount < 6; outputCount++) {
+                SDF_VU0_LOADVECTOR(radialA);
+                SDF_VU0_SCALEVECTOR_BITS(billRingSines[outputCount]);
+                SDF_VU0_ADDVECTOR_A_C();
+                SDF_VU0_LOADVECTOR_B(width);
+                SDF_VU0_SCALEVECTOR_B_BITS(billRingCosines[outputCount]);
+                SDF_VU0_ADDVECTOR();
+                SDF_VU0_STOREVECTOR(vertices + 1 + outputCount);
+            }
+            for (outputCount = 0; outputCount < 6; outputCount++) {
+                SDF_VU0_LOADVECTOR(radialB);
+                SDF_VU0_SCALEVECTOR_BITS(billRingSines[outputCount + 6]);
+                SDF_VU0_ADDVECTOR_A_C();
+                SDF_VU0_LOADVECTOR_B(width);
+                SDF_VU0_SCALEVECTOR_B_BITS(billRingCosines[outputCount + 6]);
+                SDF_VU0_ADDVECTOR();
+                SDF_VU0_STOREVECTOR(vertices + 7 + outputCount);
+            }
+            if (age < fadeStart) {
+                alpha = time / (f32)fadeStart;
+            } else if (fadeEnd < age) {
+                alpha = (f32)(lifetime - age) / (f32)(lifetime - fadeEnd);
+            } else {
+                alpha = 1.0f;
+            }
+            /* Both colors fade by the alpha: the rim takes color B with a
+             * zero alpha byte, the center color A with the alpha's. */
+            SDF_VU0_LOADVECTOR_B(effOnesVector);
+            SDF_VU0_SCALEVECTOR_B_BITS(alpha);
+            SDF_VU0_LOADVECTOR(secondVector);
+            SDF_VU0_MULVECTOR();
+            secondPacked = PackRGBAWord(128.0f);
+            for (outputCount = 1; outputCount < 13; outputCount++) {
+                colors[outputCount] = secondPacked;
+            }
+            SDF_VU0_LOADVECTOR(firstVector);
+            SDF_VU0_MULVECTOR();
+            firstPacked = PackRGBAWord(128.0f);
+            colors[0] = firstPacked | ((u32)(alpha * 128.0f) << 24);
+            entry->age = age + 1;
+        }
+    }
+}
+
+#else
+
+INCLUDE_ASM(const s32, "game/code_0029E410", billAdvanceParticleInstances);
+
+#endif
+
+void billUpdateParticleDrawColorAndTransform(BillCellDrawWork *work) {
+    u8 *config = work->config;
+    u32 limit = work->frameLimit;
+    u32 progress = ((EffBillTimedHeader *)config)->time.progress;
+    u32 *list = work->instances;
+    EffTrackSet *out = (EffTrackSet *)list[1];
+    u128 mtx[4];
+    u32 packed;
+    u32 unit;
+    u32 second;
+
+    if (progress < limit && progress != 0) {
+        return;
+    }
+    second = effSampleColorAlphaTracks(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
+    unit = 0x3C000000;
+    UnpackRGBAWord(work->baseColor, unit);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    UnpackRGBAWord(second, unit);
+    SDF_VU0_MULVECTOR();
+    packed = PackRGBAWord(128.0f);
+    out->color = packed;
+    out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
+    out->flag = ((EffBillFrameHeader *)config)->mode;
+    SDF_VU0_LOADVECTOR(work->transform);
+    ToMatrix();
+    SDF_VU0_LOADVECTOR(effOnesVector);
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(work->scale);
+    SDF_VU0_SCALE_XYZ();
+    SDF_VU0_LOADVECTOR(work);
+    SDF_VU0_VECTOR_W_SET_ONE();
+    SDF_VU0_SET_ROW3();
+    SDF_VU0_STOREMATRIX(mtx);
+    effDrawTrackSet(out, (Matrix4 *)mtx);
+}
+
+void effClearAnimatedFrames(u8 *work) {
+    u8 *state = (u8 *)((EffClassWork *)work)->resource;
+    u8 *config = ((EffClassWork *)work)->payload;
+    EffTrackSet *asset = ((EffBillFrameState *)state)->asset;
+    s32 remaining = ((EffBillTimedHeader *)config)->count;
+    u8 *entry = ((EffBillFrameState *)state)->entries;
+
+    memset(asset->buffer, 0, asset->rows * 0x10);
+    if (remaining > 0) {
+        s32 i;
+        for (i = remaining; i != 0; --i) {
+            *(s32 *)entry = -1;
+            entry += 0x18;
+        }
+    }
+}
+
+u8 *billAllocateAnimatedTransformEntries(EffBillAnimatedFrameConfig *config) {
+    u32 headerSize = 0x10;
+    struct sdfMemHandle_t *base = sdfMemAllocDirect(config->frame.output.timed.count * 0x18 + headerSize);
+    u8 *node = (u8 *)sdfMemLock(base);
+    u8 *entries = node + headerSize;
+
+    ((EffBillFrameState *)node)->allocation = base;
+    *(u8 **)node = entries;
+    if (config->drawProgress == 0) {
+        config->drawProgress = 1;
+    }
+    return node;
+}
+
+void effInitializeAlternatingTransformRows(u8 *node, u8 *config) {
+    u32 count = ((EffBillTimedHeader *)config)->count;
+    u32 index;
+    f32 *transform;
+
+    if (count == 0) {
+        return;
+    }
+    transform = (f32 *)((EffBillFrameState *)node)->asset->columns;
+    index = 0;
+    for (; index < count; index++, transform += 8) {
+        if (index & 1) {
+            transform[0] = 0.0f;
+            transform[1] = 0.0f;
+            transform[2] = 0.5f;
+            transform[3] = 0.0f;
+            transform[4] = 0.0f;
+            transform[5] = 1.0f;
+            transform[6] = 0.5f;
+        } else {
+            transform[0] = 0.5f;
+            transform[1] = 0.0f;
+            transform[2] = 1.0f;
+            transform[3] = 0.0f;
+            transform[4] = 0.5f;
+            transform[5] = 1.0f;
+            transform[6] = 1.0f;
+        }
+        transform[7] = 1.0f;
+    }
+}
+
+u8 *billCreateAnimatedTransform(EffBillAnimatedFrameConfig *config, u32 resource) {
+    u8 *node = billAllocateAnimatedTransformEntries(config);
+    ((EffBillFrameState *)node)->asset = effCreateTrackSetWithSharedReferences(config->frame.output.timed.count, 3, resource);
+    effInitializeAlternatingTransformRows(node, config);
+    return node;
+}
+
+extern u8 *billAllocEmitterNode(u8 *);
+
+extern u8 *billAllocQuadNode(u8 *);
+
+extern EffTrackSet *effDuplicateResourceRefs(const EffTrackSet *);
+
+extern void billInitializeEmitterRows(u8 *work, u8 *descriptor);
+
+extern void billInitializeQuadRows(u8 *work, u8 *descriptor);
+
+u8 *billCloneAnimatedTransform(u8 *work) {
+    u8 *config = ((EffClassWork *)work)->payload;
+    u8 *state = (u8 *)((EffClassWork *)work)->resource;
+    u8 *node = billAllocateAnimatedTransformEntries(config);
+    ((EffBillFrameState *)node)->asset = effDuplicateResourceRefs(((EffBillFrameState *)state)->asset);
+    effInitializeAlternatingTransformRows(node, config);
+    return node;
+}
+
+void billReleaseAlternatingTransformNode(s32 work) {
+    effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
+    sdfMemFreeDirect(((EffBillFrameState *)work)->allocation);
+}
+
+/* Kind-4 animated frame entry: the radius grows by radiusStep each frame
+ * for the config's drawProgress frames. */
+typedef struct EffBillAnimatedEntry {
+    s32 age;
+    f32 spin;
+    f32 angle;
+    f32 radius;
+    f32 radiusStep;
+    f32 width;
+} EffBillAnimatedEntry;
+
+/* Spawn and advance the kind-4 animated frames: each live entry spins with
+ * an accelerating rate, grows its radius over drawProgress frames and is
+ * drawn as a four-vertex frame, faded in and out over its lifetime. */
+void billAdvanceAnimatedFrameTransforms(EffClassWork *work) {
+    EffBillAnimatedFrameConfig *config = (EffBillAnimatedFrameConfig *)work->payload;
+    EffBillFrameState *resource;
+    EffTrackSet *asset;
+    EffBillAnimatedEntry *entries;
+    s32 lifetime;
+    s32 remainingSpawn;
+    u32 randomAge;
+    s32 item;
+    s32 itemCount;
+    s32 fadeStart;
+    s32 fadeEnd;
+    s32 frames;
+    s32 retiredState;
+    s32 waitingState;
+    s32 inactiveState;
+    u32 respawn;
+    u32 firstColor;
+    u32 secondColor;
+    u32 *colors;
+    u128 *vertices;
+    f32 firstVector[4];
+    f32 secondVector[4];
+    f32 direction[4];
+    f32 radius[4];
+    f32 width[4];
+    f32 acceleration;
+
+    if (config->frame.output.timed.time.progress < work->frame &&
+        config->frame.output.timed.time.progress != 0) return;
+    resource = (EffBillFrameState *)work->resource;
+    lifetime = config->frame.lifetime;
+    entries = (EffBillAnimatedEntry *)resource->entries;
+    asset = resource->asset;
+    itemCount = (s32)config->frame.output.timed.count;
+    if (lifetime == 0) return;
+    if (config->frame.spawnAllOnStart != 0 && work->frame == 0) {
+        remainingSpawn = itemCount;
+        randomAge = 1;
+    } else {
+        remainingSpawn = config->frame.spawnCount;
+        randomAge = 0;
+    }
+    firstColor = config->colorA;
+    vertices = (u128 *)asset->buffer;
+    colors = (u32 *)asset->tail;
+    direction[1] = 0.0f;
+    direction[3] = 0.0f;
+    UnpackRGBAWordFloat(firstColor, 1.0f / 128.0f);
+    SDF_VU0_STOREVECTOR_NOMEM(firstVector);
+    secondColor = config->colorB;
+    UnpackRGBAWordFloat(secondColor, 1.0f / 128.0f);
+    SDF_VU0_STOREVECTOR_NOMEM(secondVector);
+    fadeStart = (s32)(config->frame.fadeInFraction * (f32)lifetime);
+    fadeEnd = (s32)(config->frame.fadeOutFraction * (f32)lifetime);
+    acceleration = config->spinAccel;
+    frames = config->drawProgress;
+    respawn = config->frame.respawn;
+    if (itemCount <= 0) return;
+    waitingState = -1;
+    inactiveState = -2;
+    retiredState = respawn != 0 ? waitingState : inactiveState;
+    item = itemCount;
+    for (; item != 0; item--, entries++, vertices += 4, colors += 4) {
+        EffBillAnimatedEntry *entry = entries;
+        s32 age = entry->age;
+        if (age == inactiveState) continue;
+        if (age == waitingState) {
+            if (remainingSpawn != 0) {
+                f32 randomValue;
+                entry->angle = dds3GetRandFloatA(dds3RandCB) * 6.28318500518798828125f;
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                entry->spin = config->spin * (randomValue * config->spinJitter + (1.0f - config->spinJitter));
+                if (dds3GetRandA((EffRandState *)dds3RandCB) & 1) entry->spin = -entry->spin;
+                entry->radius = 0.0f;
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                entry->radiusStep = config->radius * (randomValue * config->radiusJitter + (1.0f - config->radiusJitter)) / (f32)frames;
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                entry->width = config->width * (randomValue * config->widthJitter + (1.0f - config->widthJitter));
+                if (randomAge != 0) {
+                    entry->age = (s32)(dds3GetRandA((EffRandState *)dds3RandCB) % (u32)lifetime);
+                    entry->radius += entry->radiusStep * (f32)(entry->age % frames);
+                } else {
+                    entry->age = 0;
+                }
+                remainingSpawn = (s32)((u32)remainingSpawn - 1u);
+            }
+        } else if (age >= lifetime) {
+            u32 *color = colors;
+            u128 *position = vertices;
+            s32 count = 3;
+            do {
+                SDF_VU0_STOREIDENTITYVECTOR(position);
+                *color = 0;
+                position++;
+                color++;
+            } while (--count >= 0);
+            entry->age = retiredState;
+        } else {
+            f32 spin = entry->spin;
+            f32 time = (f32)age;
+            f32 angle;
+            f32 cosine;
+            f32 sine;
+            f32 alpha;
+            u32 secondPacked;
+            u32 firstPacked;
+            if (spin > 0.0f) angle = (spin + (acceleration * time) * 0.5f) * time;
+            else angle = (spin - (acceleration * time) * 0.5f) * time;
+            angle += entry->angle;
+            if (age < frames) entry->radius += entry->radiusStep;
+            SDF_VU0_LOADVECTOR(effOnesVector);
+            SDF_VU0_COPYVECTOR_A_TO_B();
+            SDF_VU0_SCALEVECTOR_BITS(entry->radius);
+            SDF_VU0_STOREVECTOR_NOMEM(radius);
+            SDF_VU0_COPYVECTOR_B_TO_A();
+            SDF_VU0_SCALEVECTOR_BITS(entry->width);
+            SDF_VU0_STOREVECTOR_NOMEM(width);
+            direction[0] = sdfCos(angle);
+            direction[2] = sdfSin(angle);
+            SDF_VU0_LOADVECTOR(direction);
+            SDF_VU0_COPYVECTOR_A_TO_C();
+            SDF_VU0_GETVECTOR_X(cosine);
+            SDF_VU0_GETVECTOR_Z(sine);
+            SDF_VU0_SETVECTOR_X_V0(sine);
+            cosine = -cosine;
+            SDF_VU0_SETVECTOR_Z_V0(cosine);
+            SDF_VU0_COPYVECTOR_A_TO_B();
+            SDF_VU0_LOADVECTOR(width);
+            SDF_VU0_MULVECTOR();
+            SDF_VU0_STOREVECTOR_NOMEM(width);
+            SDF_VU0_COPYVECTOR_C_TO_A();
+            SDF_VU0_LOADVECTOR_B(radius);
+            SDF_VU0_MULVECTOR();
+            SDF_VU0_COPYVECTOR_A_TO_C();
+            SDF_VU0_LOADVECTOR(width);
+            SDF_VU0_COPYVECTOR_A_TO_B();
+            SDF_VU0_STOREVECTOR(vertices + 2);
+            SDF_VU0_NEGVECTOR_B_XYZ();
+            SDF_VU0_STOREVECTOR_B(vertices + 3);
+            SDF_VU0_LOADVECTOR(width);
+            SDF_VU0_COPYVECTOR_A_TO_B();
+            SDF_VU0_ADDVECTOR_A_C();
+            SDF_VU0_NEGVECTOR_B_XYZ();
+            SDF_VU0_STOREVECTOR(vertices);
+            SDF_VU0_ADDVECTOR_B_C();
+            SDF_VU0_STOREVECTOR_B(vertices + 1);
+            if (age < fadeStart) alpha = time / (f32)fadeStart;
+            else if (fadeEnd < age) alpha = (f32)(s32)((u32)lifetime - (u32)age) / (f32)(s32)((u32)lifetime - (u32)fadeEnd);
+            else alpha = 1.0f;
+            SDF_VU0_LOADVECTOR_B(effOnesVector);
+            SDF_VU0_SCALEVECTOR_B_BITS(alpha);
+            SDF_VU0_LOADVECTOR(secondVector);
+            SDF_VU0_MULVECTOR();
+            secondPacked = PackRGBAWord(128.0f);
+            colors[0] = secondPacked;
+            colors[1] = secondPacked;
+            SDF_VU0_LOADVECTOR(firstVector);
+            SDF_VU0_MULVECTOR();
+            firstPacked = PackRGBAWord(128.0f);
+            colors[2] = firstPacked;
+            colors[3] = firstPacked;
+            entry->age = (s32)((u32)age + 1u);
+        }
+    }
+}
+
+void billUpdateAlternatingDrawColorAndTransform(BillCellDrawWork *work) {
+    u8 *config = work->config;
+    u32 limit = work->frameLimit;
+    u32 progress = ((EffBillTimedHeader *)config)->time.progress;
+    u32 *list = work->instances;
+    EffTrackSet *out = (EffTrackSet *)list[1];
+    u128 mtx[4];
+    u32 packed;
+    u32 unit;
+    u32 second;
+
+    if (progress < limit && progress != 0) {
+        return;
+    }
+    second = effSampleColorAlphaTracks(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
+    unit = 0x3C000000;
+    UnpackRGBAWord(work->baseColor, unit);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    UnpackRGBAWord(second, unit);
+    SDF_VU0_MULVECTOR();
+    packed = PackRGBAWord(128.0f);
+    out->color = packed;
+    out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
+    out->flag = ((EffBillFrameHeader *)config)->mode;
+    SDF_VU0_LOADVECTOR(work->transform);
+    ToMatrix();
+    SDF_VU0_LOADVECTOR(effOnesVector);
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(work->scale);
+    SDF_VU0_SCALE_XYZ();
+    SDF_VU0_LOADVECTOR(work);
+    SDF_VU0_VECTOR_W_SET_ONE();
+    SDF_VU0_SET_ROW3();
+    SDF_VU0_STOREMATRIX(mtx);
+    effDrawTrackSet(out, (Matrix4 *)mtx);
+}
+
+void billResetEmitterIndices(u8 *work) {
+    u8 *state = (u8 *)((EffClassWork *)work)->resource;
+    u8 *config = ((EffClassWork *)work)->payload;
+    EffTrackSet *asset = ((EffBillFrameState *)state)->asset;
+    s32 remaining = ((EffBillTimedHeader *)config)->count;
+    u8 *entry = ((EffBillFrameState *)state)->entries;
+
+    memset(asset->buffer, 0, asset->rows * 0x10);
+    if (remaining > 0) {
+        s32 i;
+        for (i = remaining; i != 0; --i) {
+            *(s32 *)entry = -1;
+            entry += 0x18;
+        }
+    }
+}
+
+u8 *billAllocEmitterNode(u8 *config) {
+    u32 headerSize = 0x10;
+    struct sdfMemHandle_t *base = sdfMemAllocDirect(((EffBillTimedHeader *)config)->count * 0x18 + headerSize);
+    u8 *body = (u8 *)sdfMemLock(base);
+    u8 *node = body;
+
+    body += headerSize;
+    ((EffBillFrameState *)node)->allocation = base;
+    *(u8 **)node = body;
+    return node;
+}
+
+void billInitializeEmitterRows(u8 *work, u8 *descriptor) {
+    u32 count = ((EffBillTimedHeader *)descriptor)->count;
+    u32 index;
+    f32 *transform;
+
+    if (count == 0) {
+        return;
+    }
+    transform = (f32 *)((EffBillFrameState *)work)->asset->columns;
+    index = 0;
+    for (; index < count; index++, transform += 8) {
+        if (index & 1) {
+            transform[0] = 0.0f;
+            transform[1] = 0.0f;
+            transform[2] = 0.5f;
+            transform[3] = 0.0f;
+            transform[4] = 0.0f;
+            transform[5] = 1.0f;
+            transform[6] = 0.5f;
+        } else {
+            transform[0] = 0.5f;
+            transform[1] = 0.0f;
+            transform[2] = 1.0f;
+            transform[3] = 0.0f;
+            transform[4] = 0.5f;
+            transform[5] = 1.0f;
+            transform[6] = 1.0f;
+        }
+        transform[7] = 1.0f;
+    }
+}
+
+u8 *billCreateEmitterTransform(EffBillEmitterFrameConfig *config, u32 resource) {
+    u8 *node = billAllocEmitterNode(config);
+    ((EffBillFrameState *)node)->asset = effCreateTrackSetWithSharedReferences(config->frame.output.timed.count, 4, resource);
+    billInitializeEmitterRows(node, config);
+    return node;
+}
+
+u8 *billCloneEmitterTransform(u8 *work) {
+    u8 *config = ((EffClassWork *)work)->payload;
+    u8 *state = (u8 *)((EffClassWork *)work)->resource;
+    u8 *node = billAllocEmitterNode(config);
+    ((EffBillFrameState *)node)->asset = effDuplicateResourceRefs(((EffBillFrameState *)state)->asset);
+    billInitializeEmitterRows(node, config);
+    return node;
+}
+
+void billReleaseEmitterNode(s32 work) {
+    effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
+    sdfMemFreeDirect(((EffBillFrameState *)work)->allocation);
+}
+
+extern EffRandState dds3RandCB[];
+
+void billAdvanceEmitterInstances(EffClassWork *work) {
+    EffBillEmitterFrameConfig *config = (EffBillEmitterFrameConfig *)work->payload;
+    EffBillFrameState *resource;
+    EffTrackSet *asset;
+    EffEmitterRow *entries;
+    s32 lifetime;
+    s32 remainingSpawn;
+    u32 randomAge;
+    s32 item;
+    s32 itemCount;
+    s32 fadeStart;
+    s32 fadeEnd;
+    s32 startAge;
+    s32 endAge;
+    s32 ageStep;
+    s32 retiredState;
+    s32 waitingState;
+    s32 inactiveState;
+    u32 firstColor;
+    u32 secondColor;
+    u32 respawn;
+    u32 *colors;
+    u128 *vertices;
+    f32 firstVector[4];
+    f32 secondVector[4];
+    f32 direction[4];
+    f32 width[4];
+    f32 radial[4];
+    f32 acceleration;
+
+    if (config->frame.output.timed.time.progress < work->frame &&
+        config->frame.output.timed.time.progress != 0) return;
+    resource = (EffBillFrameState *)work->resource;
+    lifetime = config->frame.lifetime;
+    entries = (EffEmitterRow *)resource->entries;
+    asset = resource->asset;
+    itemCount = (s32)config->frame.output.timed.count;
+    if (lifetime == 0) return;
+    if (config->reverse != 0) {
+        fadeStart = (s32)((1.0f - config->frame.fadeOutFraction) * (f32)lifetime);
+        fadeEnd = (s32)((1.0f - config->frame.fadeInFraction) * (f32)lifetime);
+        startAge = lifetime;
+        endAge = 0;
+        ageStep = -1;
+    } else {
+        fadeStart = (s32)(config->frame.fadeInFraction * (f32)lifetime);
+        fadeEnd = (s32)(config->frame.fadeOutFraction * (f32)lifetime);
+        startAge = 0;
+        endAge = lifetime;
+        ageStep = 1;
+    }
+    if (config->frame.spawnAllOnStart != 0 && work->frame == 0) {
+        remainingSpawn = itemCount;
+        randomAge = 1;
+    } else {
+        remainingSpawn = config->frame.spawnCount;
+        randomAge = 0;
+    }
+    firstColor = config->firstColor;
+    vertices = (u128 *)asset->buffer;
+    colors = (u32 *)asset->tail;
+    direction[1] = 0.0f;
+    direction[3] = 0.0f;
+    UnpackRGBAWordFloat(firstColor, 1.0f / 128.0f);
+    SDF_VU0_STOREVECTOR_NOMEM(firstVector);
+    secondColor = config->secondColor;
+    UnpackRGBAWordFloat(secondColor, 1.0f / 128.0f);
+    SDF_VU0_STOREVECTOR_NOMEM(secondVector);
+    acceleration = config->acceleration;
+    respawn = config->frame.respawn;
+    if (itemCount <= 0) return;
+    waitingState = -1;
+    inactiveState = -2;
+    retiredState = respawn != 0 ? waitingState : inactiveState;
+    item = itemCount;
+    for (; item != 0; item--, entries++, vertices += 4, colors += 4) {
+        EffEmitterRow *entry = entries;
+        s32 age = entry->age;
+        if (age == inactiveState) continue;
+        if (age == waitingState) {
+            if (remainingSpawn != 0) {
+                f32 randomValue;
+                f32 jitter;
+                entry->angle = dds3GetRandFloatA(dds3RandCB) * 6.28318500518798828125f;
+                jitter = config->radiusJitter;
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                entry->radius = config->radius * (randomValue * jitter + (1.0f - jitter));
+                jitter = config->offsetJitter;
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                entry->offset = config->offset * (randomValue * jitter + (1.0f - jitter));
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                entry->speed = config->speed * (randomValue * config->speedJitter + (1.0f - config->speedJitter));
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                jitter = randomValue * config->widthJitter + (1.0f - config->widthJitter);
+                entry->width = config->width * jitter;
+                if (randomAge != 0) entry->age = (s32)(dds3GetRandA((EffRandState *)dds3RandCB) % (u32)lifetime);
+                else entry->age = startAge;
+                remainingSpawn = (s32)((u32)remainingSpawn - 1u);
+            }
+        } else if (age == endAge) {
+            u32 *color = colors;
+            u128 *position = vertices;
+            s32 count = 3;
+            do {
+                SDF_VU0_STOREIDENTITYVECTOR(position);
+                *color = 0;
+                position++;
+                color++;
+            } while (--count >= 0);
+            entry->age = retiredState;
+        } else {
+            f32 time = (f32)age;
+            f32 motionTime = time;
+            f32 speed;
+            f32 angle = entry->angle;
+            f32 distance;
+            f32 cosine;
+            f32 sine;
+            f32 alpha;
+            u32 secondPacked;
+            u32 firstPacked;
+            if (acceleration < 0.0f) {
+                f32 stopTime;
+                speed = entry->speed;
+                stopTime = (-speed / (acceleration * 0.5f)) * 0.5f;
+                if (stopTime < time) motionTime = stopTime;
+            } else {
+                speed = entry->speed;
+            }
+            distance = (speed + (acceleration * motionTime) * 0.5f) * motionTime;
+            distance += entry->offset;
+            direction[0] = sdfCos(angle);
+            direction[2] = sdfSin(angle);
+            SDF_VU0_LOADVECTOR(direction);
+            SDF_VU0_COPYVECTOR_A_TO_B();
+            SDF_VU0_SCALEVECTOR_BITS(entry->radius);
+            SDF_VU0_STOREVECTOR_NOMEM(radial);
+            SDF_VU0_COPYVECTOR_B_TO_A();
+            SDF_VU0_SCALEVECTOR_BITS(distance);
+            SDF_VU0_COPYVECTOR_A_TO_C();
+            SDF_VU0_COPYVECTOR_B_TO_A();
+            SDF_VU0_GETVECTOR_X(cosine);
+            SDF_VU0_GETVECTOR_Z(sine);
+            SDF_VU0_SETVECTOR_X_V0(sine);
+            cosine = -cosine;
+            SDF_VU0_SETVECTOR_Z_V0(cosine);
+            SDF_VU0_SCALEVECTOR_BITS(entry->width);
+            SDF_VU0_STOREVECTOR_NOMEM(width);
+            SDF_VU0_LOADVECTOR(radial);
+            SDF_VU0_ADDVECTOR_A_C();
+            SDF_VU0_LOADVECTOR_B(width);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR(vertices);
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_STOREVECTOR(vertices + 1);
+            SDF_VU0_LOADVECTOR(radial);
+            SDF_VU0_NEGVECTOR_XYZ();
+            SDF_VU0_ADDVECTOR_A_C();
+            SDF_VU0_LOADVECTOR_B(width);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR(vertices + 2);
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_STOREVECTOR(vertices + 3);
+            if (age < fadeStart) alpha = time / (f32)fadeStart;
+            else if (fadeEnd < age) alpha = (f32)(s32)((u32)lifetime - (u32)age) / (f32)(s32)((u32)lifetime - (u32)fadeEnd);
+            else alpha = 1.0f;
+            SDF_VU0_LOADVECTOR_B(effOnesVector);
+            SDF_VU0_SCALEVECTOR_B_BITS(alpha);
+            SDF_VU0_LOADVECTOR(secondVector);
+            SDF_VU0_MULVECTOR();
+            secondPacked = PackRGBAWord(128.0f);
+            colors[0] = secondPacked;
+            colors[1] = secondPacked;
+            SDF_VU0_LOADVECTOR(firstVector);
+            SDF_VU0_MULVECTOR();
+            firstPacked = PackRGBAWord(128.0f);
+            colors[2] = firstPacked;
+            colors[3] = firstPacked;
+            entry->age = (s32)((u32)age + (u32)ageStep);
+        }
+    }
+}
+
+void billUpdateEmitterDrawColorAndTransform(u8 *work) {
+    u8 *config = ((BillCellDrawWork *)work)->config;
+    u32 limit = ((BillCellDrawWork *)work)->frameLimit;
+    u32 progress = ((EffBillTimedHeader *)config)->time.progress;
+    u32 *list = ((BillCellDrawWork *)work)->instances;
+    EffTrackSet *out = (EffTrackSet *)list[1];
+    u128 mtx[4];
+    u32 packed;
+    u32 unit;
+    u32 second;
+
+    if (progress < limit && progress != 0) {
+        return;
+    }
+    second = effSampleColorAlphaTracks(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
+    unit = 0x3C000000;
+    UnpackRGBAWord(((BillCellDrawWork *)work)->baseColor, unit);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    UnpackRGBAWord(second, unit);
+    SDF_VU0_MULVECTOR();
+    packed = PackRGBAWord(128.0f);
+    out->color = packed;
+    out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
+    out->flag = ((EffBillFrameHeader *)config)->mode;
+    SDF_VU0_LOADVECTOR(work + 0x10);
+    ToMatrix();
+    SDF_VU0_LOADVECTOR(effOnesVector);
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(((BillCellDrawWork *)work)->scale);
+    SDF_VU0_SCALE_XYZ();
+    SDF_VU0_LOADVECTOR(work);
+    SDF_VU0_VECTOR_W_SET_ONE();
+    SDF_VU0_SET_ROW3();
+    SDF_VU0_STOREMATRIX(mtx);
+    effDrawTrackSet(out, (Matrix4 *)mtx);
+}
+
+void effClearStripFrames(u8 *work) {
+    u8 *state = (u8 *)((EffClassWork *)work)->resource;
+    u8 *config = ((EffClassWork *)work)->payload;
+    EffTrackSet *asset = ((EffBillFrameState *)state)->asset;
+    s32 remaining = ((EffBillTimedHeader *)config)->count;
+    u8 *entry = ((EffBillFrameState *)state)->entries;
+
+    memset(asset->buffer, 0, asset->rows * 0x10);
+    if (remaining > 0) {
+        s32 i;
+        for (i = remaining; i != 0; --i) {
+            *(s32 *)entry = -1;
+            entry += 0x28;
+        }
+    }
+}
+
+u8 *billAllocStripNode(u8 *config) {
+    u32 headerSize = 0x10;
+    struct sdfMemHandle_t *base = sdfMemAllocDirect(((EffBillTimedHeader *)config)->count * 0x28 + headerSize);
+    u8 *body = (u8 *)sdfMemLock((struct sdfMemHandle_t *)((u32)base));
+    u8 *node = body;
+
+    body += headerSize;
+    ((EffBillFrameState *)node)->allocation = base;
+    *(u8 **)node = body;
+    return node;
+}
+
+void billInitializeStripRows(u8 *node, u8 *config) {
+    u32 count = ((EffBillTimedHeader *)config)->count;
+    u32 index;
+    f32 *transform;
+
+    if (count == 0) {
+        return;
+    }
+    transform = (f32 *)((EffBillFrameState *)node)->asset->columns;
+    index = 0;
+    for (; index < count; index++, transform += 8) {
+        if (index & 1) {
+            transform[0] = 0.0f;
+            transform[1] = 0.0f;
+            transform[2] = 0.5f;
+            transform[3] = 0.0f;
+            transform[4] = 0.0f;
+            transform[5] = 1.0f;
+            transform[6] = 0.5f;
+        } else {
+            transform[0] = 0.5f;
+            transform[1] = 0.0f;
+            transform[2] = 1.0f;
+            transform[3] = 0.0f;
+            transform[4] = 0.5f;
+            transform[5] = 1.0f;
+            transform[6] = 1.0f;
+        }
+        transform[7] = 1.0f;
+    }
+}
+
+extern u8 *billAllocStripNode(u8 *);
+
+u8 *billCreateStripTransform(EffBillStripFrameConfig *config, u32 resource) {
+    u8 *node = billAllocStripNode(config);
+
+    ((EffBillFrameState *)node)->asset = effCreateTrackSetWithSharedReferences(config->frame.output.timed.count, 3, resource);
+    billInitializeStripRows(node, config);
+    return node;
+}
+
+u8 *billCloneStripTransform(u8 *work) {
+    u8 *config = ((EffClassWork *)work)->payload;
+    u8 *state = (u8 *)((EffClassWork *)work)->resource;
+    u8 *node = billAllocStripNode(config);
+    ((EffBillFrameState *)node)->asset = effDuplicateResourceRefs(((EffBillFrameState *)state)->asset);
+    billInitializeStripRows(node, config);
+    return node;
+}
+
+void billReleaseStripNode(s32 work) {
+    effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
+    sdfMemFreeDirect(((EffBillFrameState *)work)->allocation);
+}
+
+extern EffRandState dds3RandCB[];
+
+void billAdvanceStripInstances(EffClassWork *work) {
+    EffBillStripFrameConfig *config = (EffBillStripFrameConfig *)work->payload;
+    EffBillFrameState *resource;
+    EffBillStripEntry *entries;
+    EffTrackSet *asset;
+    s32 lifetime;
+    s32 itemCount;
+    s32 remainingSpawn;
+    u32 randomAge;
+    s32 remainingItems;
+    s32 fadeStart;
+    s32 fadeEnd;
+    s32 waitingState;
+    s32 inactiveState;
+    s32 retiredState;
+    u32 respawn;
+    u32 colorA;
+    u32 colorB;
+    u32 *colors;
+    u128 *vertices;
+    f32 colorVectorA[4];
+    f32 colorVectorB[4];
+    f32 center[4];
+    f32 direction[4];
+    f32 lateral[4];
+    f32 acceleration;
+
+    if (config->frame.output.timed.time.progress < work->frame &&
+        config->frame.output.timed.time.progress != 0) {
+        return;
+    }
+    lifetime = config->frame.lifetime;
+    resource = (EffBillFrameState *)work->resource;
+    entries = (EffBillStripEntry *)resource->entries;
+    asset = resource->asset;
+    itemCount = (s32)config->frame.output.timed.count;
+    if (lifetime == 0) {
+        return;
+    }
+    if (config->frame.spawnAllOnStart != 0 && work->frame == 0) {
+        remainingSpawn = itemCount;
+        randomAge = 1;
+    } else {
+        remainingSpawn = config->frame.spawnCount;
+        randomAge = 0;
+    }
+
+    colorA = config->colorA;
+    vertices = (u128 *)asset->buffer;
+    colors = (u32 *)asset->tail;
+    center[1] = 0.0f;
+    center[3] = 0.0f;
+    UnpackRGBAWordFloat(colorA, 1.0f / 128.0f);
+    SDF_VU0_STOREVECTOR_NOMEM(colorVectorA);
+    colorB = config->colorB;
+    UnpackRGBAWordFloat(colorB, 1.0f / 128.0f);
+    SDF_VU0_STOREVECTOR_NOMEM(colorVectorB);
+    fadeStart = (s32)(config->frame.fadeInFraction * (f32)lifetime);
+    fadeEnd = (s32)(config->frame.fadeOutFraction * (f32)lifetime);
+    acceleration = config->spinAccel;
+    respawn = config->frame.respawn;
+    waitingState = -1;
+    inactiveState = -2;
+    {
+    u32 packedB[4];
+    u32 packedA[4];
+
+    for (remainingItems = 0; remainingItems < itemCount; remainingItems++, entries++, vertices += 4, colors += 4) {
+        EffBillStripEntry *entry = entries;
+        s32 age = entry->age;
+        f32 time;
+
+        retiredState = respawn != 0 ? waitingState : inactiveState;
+        if (age == inactiveState) {
+            continue;
+        }
+        if (age == waitingState) {
+            if (remainingSpawn != 0) {
+                f32 randomValue;
+                f32 start;
+                f32 end;
+
+                entry->angle = dds3GetRandFloatA(dds3RandCB) * 6.28318500518798828125f;
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                start = config->lengthStart * (randomValue * config->lengthStartJitter + (1.0f - config->lengthStartJitter));
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                end = config->lengthEnd * (randomValue * config->lengthEndJitter + (1.0f - config->lengthEndJitter));
+                entry->length = start;
+                entry->lengthStep = (end - start) / (f32)lifetime;
+
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                start = config->radiusStart * (randomValue * config->radiusStartJitter + (1.0f - config->radiusStartJitter));
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                end = config->radiusEnd * (randomValue * config->radiusEndJitter + (1.0f - config->radiusEndJitter));
+                entry->radius = start;
+                entry->radiusStep = (end - start) / (f32)lifetime;
+
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                start = config->tiltStart * (randomValue * config->tiltStartJitter + (1.0f - config->tiltStartJitter));
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                end = config->tiltEnd * (randomValue * config->tiltEndJitter + (1.0f - config->tiltEndJitter));
+                entry->tilt = start;
+                entry->tiltStep = (end - start) / (f32)lifetime;
+
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                entry->width = config->width * (randomValue * config->widthJitter + (1.0f - config->widthJitter));
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                entry->spin = config->spin * (randomValue * config->spinJitter + (1.0f - config->spinJitter));
+                if (randomAge != 0) {
+                    time = (f32)(dds3GetRandA((struct EffRandState *)dds3RandCB) % (u32)lifetime);
+                    entry->age = (s32)time;
+                    entry->length += entry->lengthStep * time;
+                    entry->radius += entry->radiusStep * time;
+                    entry->tilt += entry->tiltStep * time;
+                } else {
+                    entry->age = 0;
+                }
+                remainingSpawn = (s32)((u32)remainingSpawn - 1);
+            }
+        } else if (age >= lifetime) {
+            u32 *color = colors;
+            u128 *position = vertices;
+            s32 count = 3;
+            do {
+                SDF_VU0_STOREIDENTITYVECTOR(position);
+                *color = 0;
+                position++;
+                color++;
+            } while (--count >= 0);
+            entry->age = retiredState;
+        } else {
+            f32 angle;
+            f32 radius;
+            f32 tilt;
+            f32 cosine;
+            f32 sine;
+            f32 alpha;
+            u32 packedColor;
+
+            time = (f32)age;
+            angle = (entry->spin + (acceleration * time) * 0.5f) * time + entry->angle;
+            radius = entry->radius;
+            tilt = entry->tilt;
+            cosine = sdfCos(angle);
+            sine = sdfSin(angle);
+
+            center[0] = cosine * radius;
+            center[2] = sine * radius;
+            direction[0] = cosine * tilt;
+            direction[1] = tilt + -1.0f;
+            direction[2] = sine * tilt;
+            SDF_VU0_LOADVECTOR(direction);
+            SDF_VU0_NORMALIZE();
+            SDF_VU0_COPYVECTOR_A_TO_C();
+
+            direction[0] = sine;
+            direction[1] = 0.0f;
+            cosine = -cosine;
+            direction[2] = cosine;
+            SDF_VU0_LOADVECTOR(direction);
+            SDF_VU0_SCALEVECTOR_BITS(entry->width);
+            SDF_VU0_STOREVECTOR_NOMEM(lateral);
+            SDF_VU0_LOADVECTOR(center);
+            SDF_VU0_LOADVECTOR_B(lateral);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR(vertices + 2);
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_STOREVECTOR(vertices + 3);
+            SDF_VU0_COPYVECTOR_C_TO_B();
+            SDF_VU0_SCALEVECTOR_B_BITS(entry->length);
+            SDF_VU0_LOADVECTOR(center);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_LOADVECTOR_B(lateral);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR(vertices + 0);
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_STOREVECTOR(vertices + 1);
+
+            entry->length += entry->lengthStep;
+            entry->tilt += entry->tiltStep;
+            entry->radius += entry->radiusStep;
+            if (age < fadeStart) {
+                alpha = time / (f32)fadeStart;
+            } else if (fadeEnd < age) {
+                alpha = (f32)(s32)((u32)lifetime - (u32)age) / (f32)(s32)((u32)lifetime - (u32)fadeEnd);
+            } else {
+                alpha = 1.0f;
+            }
+            SDF_VU0_LOADVECTOR_B(effOnesVector);
+            SDF_VU0_SCALEVECTOR_B_BITS(alpha);
+            SDF_VU0_LOADVECTOR(colorVectorB);
+            SDF_VU0_MULVECTOR();
+            {
+                MMI_RGBA_PACK_UNIT(packedB[0], 128.0f);
+                packedColor = packedB[0];
+                colors[0] = packedColor;
+                colors[1] = packedColor;
+            }
+            SDF_VU0_LOADVECTOR(colorVectorA);
+            SDF_VU0_MULVECTOR();
+            {
+                MMI_RGBA_PACK_UNIT(packedA[0], 128.0f);
+                packedColor = packedA[0];
+                colors[2] = packedColor;
+                colors[3] = packedColor;
+            }
+            entry->age = (s32)((u32)age + 1);
+        }
+    }
+    }
+}
+
+void billUpdateStripDrawColorAndTransform(u8 *work) {
+    u8 *config = ((BillCellDrawWork *)work)->config;
+    u32 limit = ((BillCellDrawWork *)work)->frameLimit;
+    u32 progress = ((EffBillTimedHeader *)config)->time.progress;
+    u32 *list = ((BillCellDrawWork *)work)->instances;
+    EffTrackSet *out = (EffTrackSet *)list[1];
+    u128 mtx[4];
+    u32 packed;
+    u32 unit;
+    u32 second;
+
+    if (progress < limit && progress != 0) {
+        return;
+    }
+    second = effSampleColorAlphaTracks(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
+    unit = 0x3C000000;
+    UnpackRGBAWord(((BillCellDrawWork *)work)->baseColor, unit);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    UnpackRGBAWord(second, unit);
+    SDF_VU0_MULVECTOR();
+    packed = PackRGBAWord(128.0f);
+    out->color = packed;
+    out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
+    out->flag = ((EffBillFrameHeader *)config)->mode;
+    SDF_VU0_LOADVECTOR(work + 0x10);
+    ToMatrix();
+    SDF_VU0_LOADVECTOR(effOnesVector);
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(((BillCellDrawWork *)work)->scale);
+    SDF_VU0_SCALE_XYZ();
+    SDF_VU0_LOADVECTOR(work);
+    SDF_VU0_VECTOR_W_SET_ONE();
+    SDF_VU0_SET_ROW3();
+    SDF_VU0_STOREMATRIX(mtx);
+    effDrawTrackSet(out, (Matrix4 *)mtx);
+}
+
+void billResetTrailIndices(u8 *work) {
+    u8 *state = (u8 *)((EffClassWork *)work)->resource;
+    u8 *config = ((EffClassWork *)work)->payload;
+    EffTrackSet *asset = ((EffBillFrameState *)state)->asset;
+    s32 remaining = ((EffBillTimedHeader *)config)->count;
+    u8 *entry = ((EffBillFrameState *)state)->entries;
+
+    memset(asset->buffer, 0, asset->rows * 0x10);
+    if (remaining > 0) {
+        s32 i;
+        for (i = remaining; i != 0; --i) {
+            *(s32 *)entry = -1;
+            entry += 0x2C;
+        }
+    }
+}
+
+u8 *billCreateTrailNode(EffBillTrailFrameConfig *config, u32 resource) {
+    u32 headerSize = 0x10;
+    struct sdfMemHandle_t *base = sdfMemAllocDirect(config->frame.output.timed.count * 0x2C + headerSize);
+    u8 *cursor = (u8 *)sdfMemLock((struct sdfMemHandle_t *)((u32)base));
+    u8 *header = cursor;
+    /* Read the configured count before writing the retained header. */
+    u32 frameCount = config->frame.output.timed.count;
+
+    cursor += headerSize;
+    ((EffBillFrameState *)header)->allocation = base;
+    *(u8 **)header = cursor;
+    ((EffBillFrameState *)header)->asset = effCreateTrackSetWithSharedReferences(frameCount, 0, resource);
+    return header;
+}
+
+void billReleaseTrailNode(s32 work) {
+    effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
+    sdfMemFreeDirect(((EffBillFrameState *)work)->allocation);
+}
+
+#ifdef NON_MATCHING
+
+extern EffRandState dds3RandCB[];
+
+extern u8 effOnesVector[];
+
+/* Advances a trail billboard effect's instances by a frame: spawns waiting
+ * ones (each length, radius and tilt randomized at its start and end, with a
+ * per-frame step between), ages, moves and spins live ones, writes their five
+ * vertices (a spoke from the ring's center out along the tilted direction,
+ * widened at both ends) and colors with the fade-in and fade-out alpha, and
+ * retires expired ones (to wait for a respawn, or to rest). On a burst start
+ * an entry takes a random age, which retail passes through a float before
+ * storing it. Upstream: INCLUDE_ASM in DDS1's game/code_0029E410 and DDS2's
+ * game/code_002E0478, the same routine; written from the retail routine. */
+void billAdvanceTrailInstances(EffClassWork *work) {
+    EffBillTrailFrameConfig *config = (EffBillTrailFrameConfig *)work->payload;
+    EffBillFrameState *resource;
+    EffBillTrailEntry *entry;
+    EffTrackSet *asset;
+    s32 lifetime;
+    u32 randomAge;
+    s32 itemCount;
+    s32 remainingSpawn;
+    s32 item;
+    s32 fadeStart;
+    s32 fadeEnd;
+    u32 respawn;
+    u32 *colors;
+    u128 *vertices;
+    f32 colorVectorA[4];
+    f32 colorVectorB[4];
+    f32 center[4];
+    f32 direction[4];
+    f32 lateralA[4];
+    f32 lateralB[4];
+    f32 acceleration;
+    f32 scale;
+
+    if (config->frame.output.timed.time.progress < work->frame &&
+        config->frame.output.timed.time.progress != 0) {
+        return;
+    }
+    lifetime = config->frame.lifetime;
+    resource = (EffBillFrameState *)work->resource;
+    entry = (EffBillTrailEntry *)resource->entries;
+    asset = resource->asset;
+    itemCount = (s32)config->frame.output.timed.count;
+    if (lifetime == 0) {
+        return;
+    }
+    if (config->frame.spawnAllOnStart != 0 && work->frame == 0) {
+        remainingSpawn = itemCount;
+        randomAge = 1;
+    } else {
+        remainingSpawn = config->frame.spawnCount;
+        randomAge = 0;
+    }
+
+    vertices = (u128 *)asset->buffer;
+    colors = (u32 *)asset->tail;
+    center[1] = 0.0f;
+    center[3] = 0.0f;
+    UnpackRGBAWordFloat(config->colorA & 0xFFFFFF, 1.0f / 128.0f);
+    SDF_VU0_STOREVECTOR_NOMEM(colorVectorA);
+    UnpackRGBAWordFloat(config->colorB & 0xFFFFFF, 1.0f / 128.0f);
+    SDF_VU0_STOREVECTOR_NOMEM(colorVectorB);
+    fadeStart = (s32)(config->frame.fadeInFraction * (f32)lifetime);
+    fadeEnd = (s32)(config->frame.fadeOutFraction * (f32)lifetime);
+    acceleration = config->spinAccel;
+    respawn = config->frame.respawn;
+
+    for (item = 0; item < itemCount; item++, entry++, vertices += 5, colors += 5) {
+        s32 age = entry->age;
+        f32 time;
+
+        if (age == -2) {
+            continue;
+        }
+        if (age == -1) {
+            if (remainingSpawn != 0) {
+                f32 random;
+                f32 start;
+                f32 end;
+
+                entry->angle = dds3GetRandFloatA(dds3RandCB) * 6.2831853f;
+                random = dds3GetRandFloatA(dds3RandCB);
+                start = config->lengthStart * (random * config->lengthStartJitter + (1.0f - config->lengthStartJitter));
+                random = dds3GetRandFloatA(dds3RandCB);
+                end = config->lengthEnd * (random * config->lengthEndJitter + (1.0f - config->lengthEndJitter));
+                entry->length = start;
+                entry->lengthStep = (end - start) / (f32)lifetime;
+
+                random = dds3GetRandFloatA(dds3RandCB);
+                start = config->radiusStart * (random * config->radiusStartJitter + (1.0f - config->radiusStartJitter));
+                random = dds3GetRandFloatA(dds3RandCB);
+                end = config->radiusEnd * (random * config->radiusEndJitter + (1.0f - config->radiusEndJitter));
+                entry->radius = start;
+                entry->radiusStep = (end - start) / (f32)lifetime;
+
+                random = dds3GetRandFloatA(dds3RandCB);
+                start = config->tiltStart * (random * config->tiltStartJitter + (1.0f - config->tiltStartJitter));
+                random = dds3GetRandFloatA(dds3RandCB);
+                end = config->tiltEnd * (random * config->tiltEndJitter + (1.0f - config->tiltEndJitter));
+                entry->tilt = start;
+                entry->tiltStep = (end - start) / (f32)lifetime;
+
+                random = dds3GetRandFloatA(dds3RandCB);
+                scale = random * config->widthJitter + (1.0f - config->widthJitter);
+                entry->widthA = config->widthA * scale;
+                entry->widthB = config->widthB * scale;
+                random = dds3GetRandFloatA(dds3RandCB);
+                entry->spin = config->spin * (random * config->spinJitter + (1.0f - config->spinJitter));
+                if (randomAge != 0) {
+                    time = (f32)(dds3GetRandA(dds3RandCB) % (u32)lifetime);
+                    entry->age = (s32)time;
+                    entry->length += entry->lengthStep * time;
+                    entry->radius += entry->radiusStep * time;
+                    entry->tilt += entry->tiltStep * time;
+                } else {
+                    entry->age = 0;
+                }
+                remainingSpawn--;
+            }
+        } else if (age >= lifetime) {
+            s32 vertex;
+
+            for (vertex = 0; vertex < 5; vertex++) {
+                SDF_VU0_STOREIDENTITYVECTOR(vertices + vertex);
+                colors[vertex] = 0;
+            }
+            entry->age = respawn != 0 ? -1 : -2;
+        } else {
+            f32 angle;
+            f32 radius;
+            f32 tilt;
+            f32 cosine;
+            f32 sine;
+            u32 packed;
+
+            time = (f32)age;
+            angle = (entry->spin + (acceleration * time) * 0.5f) * time + entry->angle;
+            radius = entry->radius;
+            tilt = entry->tilt;
+            cosine = sdfCos(angle);
+            sine = sdfSin(angle);
+
+            /* The spoke's root on the ring, and its unit direction out and down. */
+            center[0] = cosine * radius;
+            center[2] = sine * radius;
+            direction[0] = cosine * tilt;
+            direction[1] = tilt + -1.0f;
+            direction[2] = sine * tilt;
+            SDF_VU0_LOADVECTOR(direction);
+            SDF_VU0_NORMALIZE();
+            SDF_VU0_COPYVECTOR_A_TO_C();
+
+            /* The tangent, scaled to each end's half width. */
+            direction[0] = sine;
+            direction[1] = 0.0f;
+            cosine = -cosine;
+            direction[2] = cosine;
+            SDF_VU0_LOADVECTOR(direction);
+            SDF_VU0_COPYVECTOR_A_TO_B();
+            SDF_VU0_SCALEVECTOR_BITS(entry->widthA);
+            SDF_VU0_SCALEVECTOR_B_BITS(entry->widthB);
+            SDF_VU0_STOREVECTOR_NOMEM(lateralA);
+            SDF_VU0_STOREVECTOR_B_NOMEM(lateralB);
+
+            /* The root end: its center, then either side. */
+            SDF_VU0_LOADVECTOR(center);
+            SDF_VU0_STOREVECTOR(vertices + 3);
+            SDF_VU0_LOADVECTOR_B(lateralA);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR(vertices + 2);
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_STOREVECTOR(vertices + 4);
+
+            /* The far end, a length out along the direction, either side. */
+            SDF_VU0_COPYVECTOR_C_TO_B();
+            SDF_VU0_SCALEVECTOR_B_BITS(entry->length);
+            SDF_VU0_LOADVECTOR(center);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_LOADVECTOR_B(lateralB);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR(vertices + 0);
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_STOREVECTOR(vertices + 1);
+
+            entry->length += entry->lengthStep;
+            entry->tilt += entry->tiltStep;
+            entry->radius += entry->radiusStep;
+            if (age < fadeStart) {
+                scale = time / (f32)fadeStart;
+            } else if (fadeEnd < age) {
+                scale = (f32)(lifetime - age) / (f32)(lifetime - fadeEnd);
+            } else {
+                scale = 1.0f;
+            }
+            SDF_VU0_LOADVECTOR_B(effOnesVector);
+            SDF_VU0_SCALEVECTOR_B_BITS(scale);
+            SDF_VU0_LOADVECTOR(colorVectorB);
+            SDF_VU0_MULVECTOR();
+            packed = PackRGBAWord(128.0f);
+            colors[0] = packed;
+            colors[1] = packed;
+            SDF_VU0_LOADVECTOR(colorVectorA);
+            SDF_VU0_MULVECTOR();
+            packed = PackRGBAWord(128.0f);
+            /* The far end takes color B with a zero alpha byte; the root's
+             * center color A with alpha 0xFF on odd entries and 0x40 on even
+             * ones, and its sides only the fade alpha, of 128 or of 255. */
+            if (item & 1) {
+                colors[3] = packed | 0xFF000000;
+                packed = (u32)(scale * 128.0f) << 24;
+            } else {
+                colors[3] = packed | 0x40000000;
+                packed = (u32)(scale * 255.0f) << 24;
+            }
+            colors[2] = packed;
+            colors[4] = packed;
+            entry->age = age + 1;
+        }
+    }
+}
+
+#else
+
+INCLUDE_ASM(const s32, "game/code_0029E410", billAdvanceTrailInstances);
+
+#endif
+
+void billUpdateTrailDrawColorAndTransform(u8 *work) {
+    u8 *config = ((BillCellDrawWork *)work)->config;
+    u32 limit = ((BillCellDrawWork *)work)->frameLimit;
+    u32 progress = ((EffBillTimedHeader *)config)->time.progress;
+    u32 *list = ((BillCellDrawWork *)work)->instances;
+    EffTrackSet *out = (EffTrackSet *)list[1];
+    u128 mtx[4];
+    u32 packed;
+    u32 unit;
+    u32 second;
+
+    if (progress < limit && progress != 0) {
+        return;
+    }
+    second = effSampleColorAlphaTracks(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
+    unit = 0x3C000000;
+    UnpackRGBAWord(((BillCellDrawWork *)work)->baseColor, unit);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    UnpackRGBAWord(second, unit);
+    SDF_VU0_MULVECTOR();
+    packed = PackRGBAWord(128.0f);
+    out->color = packed;
+    out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
+    out->flag = ((EffBillFrameHeader *)config)->mode;
+    SDF_VU0_LOADVECTOR(work + 0x10);
+    ToMatrix();
+    SDF_VU0_LOADVECTOR(effOnesVector);
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(((BillCellDrawWork *)work)->scale);
+    SDF_VU0_SCALE_XYZ();
+    SDF_VU0_LOADVECTOR(work);
+    SDF_VU0_VECTOR_W_SET_ONE();
+    SDF_VU0_SET_ROW3();
+    SDF_VU0_STOREMATRIX(mtx);
+    effDrawTrackSet(out, (Matrix4 *)mtx);
+}
+
+void billResetQuadIndices(u8 *work) {
+    u8 *state = (u8 *)((EffClassWork *)work)->resource;
+    u8 *config = ((EffClassWork *)work)->payload;
+    EffTrackSet *asset = ((EffBillFrameState *)state)->asset;
+    s32 remaining = ((EffBillTimedHeader *)config)->count;
+    EffBillQuadEntry *entry = (EffBillQuadEntry *)((EffBillFrameState *)state)->entries;
+
+    memset(asset->buffer, 0, asset->rows * 0x10);
+    if (remaining > 0) {
+        s32 i;
+        for (i = remaining; i != 0; --i) {
+            entry->timer = -1;
+            entry++;
+        }
+    }
+}
+
+u8 *billAllocQuadNode(u8 *config) {
+    u32 headerSize = 0x10;
+    struct sdfMemHandle_t *base = sdfMemAllocDirect(((EffBillTimedHeader *)config)->count * sizeof(EffBillQuadEntry) + headerSize);
+    u8 *body = (u8 *)sdfMemLock((struct sdfMemHandle_t *)((u32)base));
+    u8 *node = body;
+
+    body += headerSize;
+    ((EffBillFrameState *)node)->allocation = base;
+    *(u8 **)node = body;
+    return node;
+}
+
+void billInitializeQuadRows(u8 *work, u8 *descriptor) {
+    u32 count = ((EffBillTimedHeader *)descriptor)->count;
+    u32 index;
+    f32 *transform;
+
+    if (count == 0) {
+        return;
+    }
+    transform = (f32 *)((EffBillFrameState *)work)->asset->columns;
+    index = 0;
+    for (; index < count; index++, transform += 8) {
+        if (index & 1) {
+            transform[0] = 0.0f;
+            transform[1] = 0.0f;
+            transform[2] = 0.5f;
+            transform[3] = 0.0f;
+            transform[4] = 0.0f;
+            transform[5] = 1.0f;
+            transform[6] = 0.5f;
+        } else {
+            transform[0] = 0.5f;
+            transform[1] = 0.0f;
+            transform[2] = 1.0f;
+            transform[3] = 0.0f;
+            transform[4] = 0.5f;
+            transform[5] = 1.0f;
+            transform[6] = 1.0f;
+        }
+        transform[7] = 1.0f;
+    }
+}
+
+u8 *billCreateQuadTransform(EffBillQuadFrameConfig *config, u32 resource) {
+    u8 *node = billAllocQuadNode(config);
+    ((EffBillFrameState *)node)->asset = effCreateTrackSetWithSharedReferences(config->frame.output.timed.count, 4, resource);
+    billInitializeQuadRows(node, config);
+    return node;
+}
+
+u8 *billCloneQuadTransform(u8 *work) {
+    u8 *config = ((EffClassWork *)work)->payload;
+    u8 *state = (u8 *)((EffClassWork *)work)->resource;
+    u8 *node = billAllocQuadNode(config);
+    ((EffBillFrameState *)node)->asset = effDuplicateResourceRefs(((EffBillFrameState *)state)->asset);
+    billInitializeQuadRows(node, config);
+    return node;
+}
+
+void billReleaseQuadNode(s32 work) {
+    effReleaseResourceRefs(((EffBillFrameState *)work)->asset);
+    sdfMemFreeDirect(((EffBillFrameState *)work)->allocation);
+}
+
+extern EffRandState dds3RandCB[];
+
+void billAdvanceQuadInstances(EffClassWork *work) {
+    EffBillQuadFrameConfig *config = (EffBillQuadFrameConfig *)work->payload;
+    EffBillFrameState *resource;
+    EffBillQuadEntry *entries;
+    EffTrackSet *asset;
+    s32 lifetime;
+    s32 itemCount;
+    s32 remainingSpawn;
+    u32 randomAge;
+    s32 remainingItems;
+    s32 fadeStart;
+    s32 fadeEnd;
+    s32 startFrame;
+    s32 stopFrame;
+    s32 frameStep;
+    s32 stopEntry;
+    s32 waitingState;
+    s32 inactiveState;
+    u32 respawn;
+    u32 colorA;
+    u32 colorB;
+    f32 colorVectorA[4];
+    f32 colorVectorB[4];
+    f32 center[4];
+    f32 lateral[4];
+    f32 basis[4];
+    f32 acceleration;
+    u32 *colors;
+    u128 *vertices;
+
+    if (config->frame.output.timed.time.progress < work->frame &&
+        config->frame.output.timed.time.progress != 0) {
+        return;
+    }
+
+    lifetime = config->frame.lifetime;
+    resource = (EffBillFrameState *)work->resource;
+    entries = (EffBillQuadEntry *)resource->entries;
+    asset = resource->asset;
+    itemCount = (s32)config->frame.output.timed.count;
+    if (lifetime == 0) {
+        return;
+    }
+
+    if (config->reverse != 0) {
+        startFrame = lifetime;
+        stopFrame = 0;
+        frameStep = -1;
+        fadeStart = (s32)((1.0f - config->frame.fadeOutFraction) * (f32)lifetime);
+        fadeEnd = (s32)((1.0f - config->frame.fadeInFraction) * (f32)lifetime);
+    } else {
+        startFrame = 0;
+        stopFrame = lifetime;
+        frameStep = 1;
+        fadeStart = (s32)(config->frame.fadeInFraction * (f32)lifetime);
+        fadeEnd = (s32)(config->frame.fadeOutFraction * (f32)lifetime);
+    }
+    if (config->frame.spawnAllOnStart != 0 && work->frame == 0) {
+        remainingSpawn = itemCount;
+        randomAge = 1;
+    } else {
+        remainingSpawn = config->frame.spawnCount;
+        randomAge = 0;
+    }
+
+    colorA = config->colorA;
+    vertices = (u128 *)asset->buffer;
+    colors = (u32 *)asset->tail;
+    center[1] = 0.0f;
+    center[3] = 0.0f;
+    UnpackRGBAWordFloat(colorA, 1.0f / 128.0f);
+    SDF_VU0_STOREVECTOR_NOMEM(colorVectorA);
+    colorB = config->colorB;
+    UnpackRGBAWordFloat(colorB, 1.0f / 128.0f);
+    SDF_VU0_STOREVECTOR_NOMEM(colorVectorB);
+
+    acceleration = config->acceleration;
+    respawn = config->frame.respawn;
+    if (itemCount <= 0) {
+        return;
+    }
+
+    waitingState = -1;
+    inactiveState = -2;
+    stopEntry = respawn != 0 ? waitingState : inactiveState;
+    remainingItems = itemCount;
+    for (; remainingItems != 0; remainingItems--, entries++, vertices += 4, colors += 4) {
+        EffBillQuadEntry *entry = entries;
+        s32 frame = entry->timer;
+
+        if (frame == inactiveState) {
+            continue;
+        }
+        if (frame == waitingState) {
+            if (remainingSpawn != 0) {
+                f32 randomValue;
+                f32 randomFactor;
+                f32 heightStartJitter;
+                f32 heightEndJitter;
+                f32 velocityJitter;
+                f32 widthJitter;
+                f32 tiltJitter;
+                f32 radialStart;
+                f32 radialEnd;
+
+                entry->angle = dds3GetRandFloatA(dds3RandCB) * 6.28318500518798828125f;
+                randomFactor = config->radiusJitter;
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                entry->radius = config->radius * (randomValue * randomFactor + (1.0f - randomFactor));
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                heightStartJitter = config->heightStartJitter;
+                radialStart = config->heightStart * (randomValue * heightStartJitter + (1.0f - heightStartJitter));
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                heightEndJitter = config->heightEndJitter;
+                radialEnd = config->heightEnd * (randomValue * heightEndJitter + (1.0f - heightEndJitter));
+                entry->height = radialStart;
+                entry->heightStep = (radialEnd - radialStart) / (f32)lifetime;
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                velocityJitter = config->velocityJitter;
+                entry->velocity = config->velocity * (randomValue * velocityJitter + (1.0f - velocityJitter));
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                widthJitter = config->widthJitter;
+                randomFactor = randomValue * widthJitter + (1.0f - widthJitter);
+                entry->width = config->width * randomFactor;
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                tiltJitter = config->tiltJitter;
+                entry->tilt = config->tilt * (randomValue * tiltJitter + (1.0f - tiltJitter));
+                if (randomAge != 0) {
+                    entry->timer = (s32)(dds3GetRandA((struct EffRandState *)dds3RandCB) % (u32)lifetime);
+                } else {
+                    entry->timer = startFrame;
+                }
+                remainingSpawn = (s32)((u32)remainingSpawn - 1u);
+            }
+            continue;
+        }
+        if (frame == stopFrame) {
+            {
+                s32 corner;
+                for (corner = 0; corner < 4; corner++) {
+                    SDF_VU0_STOREIDENTITYVECTOR(vertices + corner);
+                    colors[corner] = 0;
+                }
+            }
+            entry->timer = stopEntry;
+            continue;
+        }
+
+        {
+            f32 angle = entry->angle;
+            f32 time = (f32)frame;
+            f32 velocity;
+            f32 shapeFactor;
+            f32 motionDistance;
+            f32 radialOffset;
+            f32 cosine;
+            f32 sine;
+            f32 alpha;
+            u32 packedColor;
+
+            if (acceleration < 0.0f) {
+                f32 maxTime;
+                velocity = entry->velocity;
+                maxTime = ((-velocity) / (acceleration * 0.5f)) * 0.5f;
+                if (maxTime < time) {
+                    time = maxTime;
+                }
+            } else {
+                velocity = entry->velocity;
+            }
+            motionDistance = (velocity + (acceleration * time) * 0.5f) * time;
+            radialOffset = entry->height + entry->heightStep * time;
+            shapeFactor = entry->tilt;
+            cosine = sdfCos(angle);
+            sine = sdfSin(angle);
+
+            center[0] = cosine * shapeFactor;
+            center[1] = shapeFactor + -1.0f;
+            center[2] = sine * shapeFactor;
+            SDF_VU0_LOADVECTOR(center);
+            SDF_VU0_COPYVECTOR_A_TO_B();
+            SDF_VU0_SCALEVECTOR_BITS(entry->radius);
+            SDF_VU0_STOREVECTOR(basis);
+            SDF_VU0_COPYVECTOR_B_TO_A();
+            SDF_VU0_SCALEVECTOR_BITS(motionDistance);
+            SDF_VU0_STOREVECTOR(center);
+            center[0] += cosine * radialOffset;
+            center[2] += sine * radialOffset;
+
+            SDF_VU0_SETVECTOR_X_V0(sine);
+            SDF_VU0_SETVECTOR_Y_V0(0.0f);
+            cosine = -cosine;
+            SDF_VU0_SETVECTOR_Z_V0(cosine);
+            SDF_VU0_SCALEVECTOR_BITS(entry->width);
+            SDF_VU0_STOREVECTOR(lateral);
+
+            SDF_VU0_LOADVECTOR_C(center);
+            SDF_VU0_LOADVECTOR(basis);
+            SDF_VU0_ADDVECTOR_A_C();
+            SDF_VU0_LOADVECTOR_B(lateral);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR(vertices + 0);
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_STOREVECTOR(vertices + 1);
+            SDF_VU0_LOADVECTOR(basis);
+            SDF_VU0_NEGVECTOR_XYZ();
+            SDF_VU0_ADDVECTOR_A_C();
+            SDF_VU0_LOADVECTOR_B(lateral);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR(vertices + 2);
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_STOREVECTOR(vertices + 3);
+
+            if (frame < fadeStart) {
+                alpha = (f32)frame / (f32)fadeStart;
+            } else if (fadeEnd < frame) {
+                alpha = (f32)(lifetime - frame) / (f32)(lifetime - fadeEnd);
+            } else {
+                alpha = 1.0f;
+            }
+            SDF_VU0_LOADVECTOR_B(effOnesVector);
+            SDF_VU0_SCALEVECTOR_B_BITS(alpha);
+            SDF_VU0_LOADVECTOR(colorVectorB);
+            SDF_VU0_MULVECTOR();
+            packedColor = PackRGBAWord(128.0f);
+            colors[0] = packedColor;
+            colors[1] = packedColor;
+            SDF_VU0_LOADVECTOR(colorVectorA);
+            SDF_VU0_MULVECTOR();
+            packedColor = PackRGBAWord(128.0f);
+            colors[2] = packedColor;
+            colors[3] = packedColor;
+            entry->timer = (s32)((u32)frame + (u32)frameStep);
+        }
+    }
+}
+
+void billUpdateQuadDrawColorAndTransform(u8 *work) {
+    u8 *config = ((BillCellDrawWork *)work)->config;
+    u32 limit = ((BillCellDrawWork *)work)->frameLimit;
+    u32 progress = ((EffBillTimedHeader *)config)->time.progress;
+    u32 *list = ((BillCellDrawWork *)work)->instances;
+    EffTrackSet *out = (EffTrackSet *)list[1];
+    u128 mtx[4];
+    u32 packed;
+    u32 unit;
+    u32 second;
+
+    if (progress < limit && progress != 0) {
+        return;
+    }
+    second = effSampleColorAlphaTracks(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
+    unit = 0x3C000000;
+    UnpackRGBAWord(((BillCellDrawWork *)work)->baseColor, unit);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    UnpackRGBAWord(second, unit);
+    SDF_VU0_MULVECTOR();
+    packed = PackRGBAWord(128.0f);
+    out->color = packed;
+    out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
+    out->flag = ((EffBillFrameHeader *)config)->mode;
+    SDF_VU0_LOADVECTOR(work + 0x10);
+    ToMatrix();
+    SDF_VU0_LOADVECTOR(effOnesVector);
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(((BillCellDrawWork *)work)->scale);
+    SDF_VU0_SCALE_XYZ();
+    SDF_VU0_LOADVECTOR(work);
+    SDF_VU0_VECTOR_W_SET_ONE();
+    SDF_VU0_SET_ROW3();
+    SDF_VU0_STOREMATRIX(mtx);
+    effDrawTrackSet(out, (Matrix4 *)mtx);
+}
+
+/* Four-byte owner header followed by its class-work pointer array. */
+typedef struct EffClassWorkList {
+    EffClassWork **entries;
+} EffClassWorkList;
+
+EffClassWork *effAllocateActiveInstanceWork(u16 kind, void *source) {
+    u32 headerSize = 0x40;
+    u32 size = effActiveInstanceOperations[kind].payloadSize;
+    u8 *effect = sdfChipAllocDirect(size + headerSize);
+    ((EffClassWork *)effect)->payload = effect + headerSize;
+    ((EffClassWork *)effect)->color = 0x80808080;
+    ((EffClassWork *)effect)->scale = 1.0f;
+    ((EffClassWork *)effect)->kind = kind;
+    ((EffClassWork *)effect)->frame = 0;
+    SDF_VU0_STOREIDENTITYVECTOR(effect);
+    SDF_VU0_STOREIDENTITYVECTOR(effect + 0x10);
+    memcpy(((EffClassWork *)effect)->payload, source, size);
+    return (EffClassWork *)effect;
+}
+
+/* The ring source selects a minimum of three segments and repeats its three colors. */
+typedef struct EffRingSource {
+    u8 pad_00[0x38];
+    u32 segments;       // 0x38
+    u8 pad_3C[8];
+    u32 firstColor;     // 0x44
+    u32 middleColor;    // 0x48
+    u32 lastColor;      // 0x4C
+} EffRingSource;
+
+/* Class kind 3 copies this complete 0x68-byte serialized parameter record.
+ * The color/alpha prefix is the existing interpolation provider's layout;
+ * alphaTrack.surfaceIndex at 0x28 also selects the point-set draw type. */
+typedef struct EffRadialRingParams {
+    SdfColorTrack colorTrack; /* 0x00 */
+    SdfAlphaTrack alphaTrack; /* 0x24 */
+    u32 duration;            /* 0x34 */
+    u32 segments;            /* 0x38 */
+    u8 flag;                 /* 0x3C */
+    u8 pad3D[3];
+    f32 baseRadius;          /* 0x40 */
+    u32 firstColor;          /* 0x44 */
+    u32 middleColor;         /* 0x48 */
+    u32 lastColor;           /* 0x4C */
+    f32 widths[3];           /* 0x50 */
+    f32 speed;               /* 0x5C */
+    f32 acceleration;        /* 0x60 */
+    u8 reverseTime;          /* 0x64 */
+    u8 pad65[3];
+} EffRadialRingParams;
+
+typedef char EffRadialRingParams_size_must_be_0x68[(sizeof(EffRadialRingParams) == 0x68) ? 1 : -1];
+
+EffClassWork *effCreateResourceInstanceA(u16 kind, void *source, u32 option) {
+    EffClassWork *effect = effAllocateActiveInstanceWork(kind, source);
+    effect->resource = (void *)effActiveInstanceOperations[kind].createResource(source, option);
+    effActiveInstanceOperations[kind].initialize(effect);
+    return effect;
+}
+
+EffClassWork *effCreateActiveInstanceFromFile(FileJobPayload *request) {
+    u32 *secondary = fileResolveSecondaryBuffer(request);
+    void *source;
+    switch (request->primary.selector) {
+    case 1:
+        break;
+    case 4:
+        secondary = NULL;
+        break;
+    }
+    source = fileResolvePrimaryBuffer(request);
+    return effCreateResourceInstanceA(request->option, source, (u32)secondary);
+}
+
+void effDestroyActiveInstanceWork(EffClassWork *work) {
+    effActiveInstanceOperations[work->kind].destroyResource(work->resource);
+    sdfChipFreeDirect(work);
+}
+
+EffClassWork *effCreateActiveResource(EffClassWork *work) {
+    EffClassWork *effect;
+    if (effActiveInstanceOperations[work->kind].cloneResource == NULL) {
+        effect = effCreateResourceInstanceA(work->kind, work->payload, 0);
+    } else {
+        void *clonedResource;
+        s32 kind;
+        effect = effAllocateActiveInstanceWork(work->kind, work->payload);
+        clonedResource = (void *)effActiveInstanceOperations[work->kind].cloneResource(work);
+        /* Capture the clone's class before publishing its resource. */
+        kind = work->kind;
+        effect->resource = clonedResource;
+        effActiveInstanceOperations[kind].initialize(effect);
+    }
+    return effect;
+}
+
+void effResetActiveInstanceFrame(EffClassWork *work) {
+    effActiveInstanceOperations[work->kind].initialize(work);
+    work->frame = 0;
+}
+
+void effAdvanceActiveInstanceFrame(EffClassWork *work) {
+    effActiveInstanceOperations[work->kind].update(work);
+    work->frame = work->frame + 1;
+}
+
+void effDispatchActiveInstanceDraw(EffClassWork *work) {
+    effActiveInstanceOperations[work->kind].draw(work);
+}
+
+void effUpdateAndDrawActiveInstance(EffClassWork *work) {
+    effAdvanceActiveInstanceFrame(work);
+    effDispatchActiveInstanceDraw(work);
+}
+
+void effCopyActiveInstancePosition(void *dst, void *src) {
+    SDF_VU0_COPYVECTOR(dst, src);
+}
+
+void effCopyActiveInstanceOrientation(void *work, void *src) {
+    SDF_VU0_COPYVECTOR(((EffClassWork *)work)->vectors.orientation, src);
+}
+
+void effSetActiveInstanceColor(EffClassWork *work, u32 color) {
+    work->color = color;
+}
+
+void effSetActiveInstanceMatrixComponent(EffClassWork *work, float value) {
+    work->scale = value;
+}
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2B10);
+
+EffTrackSet *effCreateTrackSet(s32 count, u16 kind) {
+    s32 rows;
+    s32 cols;
+    s32 size;
+    struct sdfMemHandle_t *base;
+    u8 *trackStorage;
+    EffTrackSet *set;
+
+    switch (kind) {
+    case 0:
+        cols = 0;
+        rows = count * 5;
+        break;
+    case 1:
+        cols = 0;
+        rows = count * 13;
+        break;
+    case 2:
+        rows = count * 4;
+        cols = 0;
+        break;
+    case 3:
+        rows = count * 4;
+        cols = rows;
+        break;
+    case 4:
+        rows = count * 4;
+        cols = rows;
+        break;
+    default:
+        rows = 0;
+        cols = 0;
+        break;
+    }
+    size = ((rows * 2 + cols) * 2 + rows) * 4;
+    size = (((size >> 4) + ((size & 0xF) != 0)) << 4);
+    base = sdfMemAllocDirect(size + 0x30);
+    trackStorage = (u8 *)sdfMemLock(base);
+    set = (EffTrackSet *)(trackStorage + size);
+    set->buffer = trackStorage;
+    trackStorage += rows * 16;
+    if (cols > 0) {
+        set->columns = trackStorage;
+        trackStorage += cols * 8;
+    } else {
+        set->columns = 0;
+    }
+    set->color = 0x80808080;
+    set->type = 2;
+    set->tail = trackStorage;
+    set->rows = rows;
+    set->kind = kind;
+    set->count = count;
+    set->allocation = base;
+    set->flag = 0;
+    set->shared = 0;
+    set->handle = sdfMatNew();
+    sdfMatSetConstant(set->handle, 1.0f);
+    memset(&D_003DC9E0, 0, 0x2C);
+    D_003DC9E0.attr = 0x4000;
+    return set;
+}
+
+extern struct SdfTextureFileHeader *D_003BC96C;
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BC960);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", effFlashTextureHandles);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BC96C);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BC970);
+
+EffTrackSet *effCreateTrackSetWithSharedReferences(u32 count, u32 kind, u32 sharedRef) {
+    EffTrackSet *effect = effCreateTrackSet(count, (u16)kind);
+
+    if (effect->columns != 0) {
+        if (sharedRef == 0) {
+            switch (effect->kind) {
+            case 3:
+                if (D_003BC970[0] == 0) {
+                    D_003BC978[0] = effCloneSharedReferenceWithValue(effFlashTextureHandles, 0x100);
+                }
+                D_003BC970[0]++;
+                break;
+            case 4:
+                if (D_003BC970[1] == 0) {
+                    D_003BC978[1] = effCloneSharedReferenceWithValue(D_003BC96C, 0x101);
+                }
+                D_003BC970[1]++;
+                break;
+            }
+        } else {
+            effect->shared = effCreateSharedTextureReference((struct SdfTextureFileHeader *)sharedRef);
+        }
+    }
+    return effect;
+}
+
+/* Release the track set's retained reference, draw asset, and allocation. */
+void effReleaseResourceRefs(EffTrackSet *refs) {
+    if (refs->columns != 0) {
+        RefObj *ref = refs->shared;
+        if (ref == NULL) {
+            switch (refs->kind) {
+            case 3:
+                if (--D_003BC970[0] == 0) {
+                    effReleaseSharedReference(D_003BC978[0]);
+                    D_003BC978[0] = NULL;
+                }
+                break;
+            case 4:
+                if (--D_003BC970[1] == 0) {
+                    effReleaseSharedReference(D_003BC978[1]);
+                    D_003BC978[1] = NULL;
+                }
+                break;
+            }
+        } else {
+            effReleaseSharedReference(ref);
+        }
+    }
+    sdfMatFreeDelayed(refs->handle);
+    sdfMemFreeDirect(refs->allocation);
+}
+
+/* Copy a track set: same size and kind, retaining the source's shared reference (or counting one more user of the built-in one). */
+EffTrackSet *effDuplicateResourceRefs(const EffTrackSet *original) {
+    EffTrackSet *effect = effCreateTrackSet(original->count, original->kind);
+
+    if (effect->columns != 0) {
+        if (original->shared != 0) {
+            effect->shared = effRetainSharedReference(original->shared);
+        } else {
+            switch (effect->kind) {
+            case 3:
+                D_003BC970[0]++;
+                break;
+            case 4:
+                D_003BC970[1]++;
+                break;
+            }
+        }
+    }
+    return effect;
+}
+
+extern sdfGrOt_t *D_0037EAB0[8];
+
+extern u32 D_0037E9A0[20];
+
+extern u32 D_0037E9F0[12];
+
+extern u32 D_0037EA20[20];
+
+extern u32 D_0037EA70[16];
+
+extern sdfTexHandle_t *sdfGetOrCreateTextureForReference(sdfGrOt_t *, RefObj *);
+
+struct sdfMat_t;
+
+/* Draw track-set positions/colors/UVs; a null matrix selects the identity transform. */
+void effDrawTrackSet(EffTrackSet *track, const Matrix4 *matrix) {
+    sdfGrOt_t *surface;
+    void *list;
+    EffGsPacket *packet;
+    s32 remaining;
+    u32 kind;
+    u32 *colors;
+    u128 *positions;
+    u32 *texcoords;
+    u32 color;
+
+    if ((track->color & 0xFF000000) == 0) {
+        return;
+    }
+
+    surface = D_0037EAB0[track->type];
+    list = (void *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
+    if (matrix == NULL) {
+        SDF_VU0_LOADIDENTITY();
+    } else {
+        SDF_VU0_LOADMATRIX(matrix);
+    }
+    sdf3DPrimLinkTm(list, 0);
+
+    if (track->columns != NULL) {
+        RefObj *reference = track->shared;
+        sdfTexHandle_t *texture;
+
+        if (reference == NULL) {
+            switch (track->kind) {
+            case 3:
+                reference = D_003BC978[0];
+                texture = sdfGetOrCreateTextureForReference(surface, reference);
+                break;
+            case 4:
+                reference = D_003BC978[1];
+                texture = sdfGetOrCreateTextureForReference(surface, reference);
+                break;
+            default:
+                texture = NULL;
+                break;
+            }
+        } else {
+            texture = sdfGetOrCreateTextureForReference(surface, reference);
+        }
+        sdfMatSetTex(track->handle, texture);
+    }
+    sdf3DPrimLinkMat(list, track->handle, 0);
+
+    if (track->flag == 0) {
+        packet = (EffGsPacket *)sdfGrAllocPacketBuff(0x30);
+        packet->dmaTag = 2;
+        packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
+        packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
+        packet->registerList = 0xE;
+        packet->registerValue = 0x31801;
+        packet->registerAddress = 0x47;
+        sdfDrawTagLink(list, (u32)packet);
+    }
+
+    kind = track->kind;
+    colors = (u32 *)track->tail;
+    positions = (u128 *)track->buffer;
+    texcoords = (u32 *)track->columns;
+    color = track->color;
+    remaining = track->rows;
+    D_003DC9E0.vertexColor = colors;
+    D_003DC9E0.vertex = positions;
+    D_003DC9E0.uv = texcoords;
+    D_003DC9E0.color = color;
+
+    switch (kind) {
+    case 0:
+        D_003DC9E0.faceCount = 15;
+        D_003DC9E0.pointCount = 25;
+        D_003DC9E0.faceIndex = D_0037E9A0;
+        while (remaining >= 25) {
+            remaining -= 25;
+            sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DC9E0));
+            D_003DC9E0.vertex += 25;
+            D_003DC9E0.vertexColor += 25;
+        }
+        if (remaining >= 5) {
+            D_003DC9E0.faceCount = (s16)((remaining / 5) * 3);
+            D_003DC9E0.pointCount = (s16)remaining;
+            sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DC9E0));
+        }
+        break;
+    case 1:
+        D_003DC9E0.faceCount = 12;
+        D_003DC9E0.pointCount = 13;
+        D_003DC9E0.faceIndex = D_0037E9F0;
+        while (remaining >= 13) {
+            remaining -= 13;
+            sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DC9E0));
+            D_003DC9E0.vertex += 13;
+            D_003DC9E0.vertexColor += 13;
+        }
+        break;
+    case 2:
+        D_003DC9E0.faceCount = 16;
+        D_003DC9E0.pointCount = 32;
+        D_003DC9E0.faceIndex = D_0037EA20;
+        while (remaining >= 32) {
+            remaining -= 32;
+            sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DC9E0));
+            D_003DC9E0.vertex += 32;
+            D_003DC9E0.vertexColor += 32;
+        }
+        if (remaining >= 4) {
+            D_003DC9E0.faceCount = (s16)((remaining / 4) * 2);
+            D_003DC9E0.pointCount = (s16)remaining;
+            sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DC9E0));
+        }
+        break;
+    case 3:
+    case 4:
+        D_003DC9E0.faceCount = 16;
+        D_003DC9E0.pointCount = 32;
+        D_003DC9E0.faceIndex = D_0037EA70;
+        while (remaining >= 32) {
+            remaining -= 32;
+            sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DC9E0));
+            D_003DC9E0.vertex += 32;
+            D_003DC9E0.uv += 32;
+            D_003DC9E0.vertexColor += 32;
+        }
+        if (remaining >= 4) {
+            D_003DC9E0.faceCount = (s16)((remaining / 4) * 2);
+            D_003DC9E0.pointCount = (s16)remaining;
+            sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DC9E0));
+        }
+        break;
+    default:
+        break;
+    }
+
+    if (track->flag == 0) {
+        packet = (EffGsPacket *)sdfGrAllocPacketBuff(0x30);
+        packet->dmaTag = 2;
+        packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
+        packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
+        packet->registerList = 0xE;
+        packet->registerValue = 0x51801;
+        packet->registerAddress = 0x47;
+        sdfDrawTagLink(list, (u32)packet);
+    }
+    effSubmitSurfacePacket(surface, list);
+}
+
+extern struct sdfMemHandle_t *D_003BC960[2];
+
+void effLoadFlashTextures(void) {
+    D_003BC960[0] = sdfDevLoadFileEx("/effect/flash00.tmx", (u32 *)&effFlashTextureHandles, 0);
+    D_003BC960[1] = sdfDevLoadFileEx("/effect/flash01.tmx", (u32 *)(&effFlashTextureHandles + 1), 0);
+}
+
+u32 effGetFlashTextureHandle(s32 flashTextureIndex) {
+    return (u32)(&effFlashTextureHandles)[flashTextureIndex];
+}
+
+typedef struct EffCounterHeader {
+    u32 unk00;
+    u32 frame;
+} EffCounterHeader;
+
+/* Class draw modes own either a counter header or per-segment scales. */
+typedef struct EffClassDrawState {
+    union {
+        EffCounterHeader *ring;
+        f32 *scales;
+    };
+    EffClassWork *effect;
+    EffTrackSet *trackSet;
+    struct sdfMemHandle_t *allocation;
+} EffClassDrawState;
+
+void effResetRingResourceFrame(s32 work) {
+    ((EffClassDrawState *)((EffClassWork *)work)->resource)->ring->frame = 0;
+}
+
+/* Create a point-set reference and initialize four colors per segment. */
+u32 *effSegmentPointerSet(u8 *work) {
+    u32 *pointSetRef = sdfChipAllocDirect(4);
+    u32 segments = ((EffRingSource *)work)->segments;
+    EffPointSet *pointSet;
+    u32 *entry;
+    u32 groups;
+    u32 i;
+    u32 first;
+    u32 second;
+    u32 third;
+
+    if (segments < 3) {
+        ((EffRingSource *)work)->segments = 3;
+        segments = 3;
+    }
+    pointSet = effCreatePointSet4(segments);
+    first = ((EffRingSource *)work)->firstColor;
+    groups = pointSet->rows / 4;
+    *pointSetRef = (u32)pointSet;
+    entry = (u32 *)pointSet->tail;
+    second = ((EffRingSource *)work)->middleColor;
+    third = ((EffRingSource *)work)->lastColor;
+    for (i = 0; i < groups; i++) {
+        entry[0] = first;
+        entry[1] = second;
+        entry[2] = second;
+        entry[3] = third;
+        entry += 4;
+    }
+    return pointSetRef;
+}
+
+extern void effAssetQueueRelease(EffPointSet *);
+
+void effReleaseRingResourceHandle(u32 *handle) {
+    effAssetQueueRelease((EffPointSet *)*handle);
+    sdfChipFreeDirect(handle);
+}
+
+/* Class 1 ring parameters have a distinct 0x6C-byte copied layout. */
+typedef struct EffExpandingRingParams {
+    SdfColorTrack colorTrack;
+    SdfAlphaTrack alphaTrack;
+    s32 duration;
+    u32 segments;
+    u8 flag;
+    u8 pad3D[3];
+    f32 baseRadius;
+    u32 colors[3];
+    f32 widths[3];
+    u32 unk5C;
+    f32 speed;
+    f32 acceleration;
+    u8 reverseTime;
+    u8 pad69[3];
+} EffExpandingRingParams;
+
+typedef char EffExpandingRingParams_size[(sizeof(EffExpandingRingParams) == 0x6C) ? 1 : -1];
+
+/* Generate the timed ring's four radial point bands; reverse-time mode is retained. */
+void effUpdateExpandingRingPoints(EffClassWork *work) {
+    EffExpandingRingParams *config = work->payload;
+    EffPointSet *points = ((EffRingResource *)work->resource)->pointSet;
+    f32 direction[4];
+    f32 bands[3][4];
+    f32 time;
+    f32 speed;
+    f32 acceleration;
+    f32 radius;
+    f32 angle;
+    f32 angleStep;
+    f32 limit;
+    f32 firstBand;
+    f32 secondBand;
+    f32 thirdBand;
+    f32 (*out)[4];
+    u32 groups;
+    u32 i;
+
+    if (config->duration < (s32)work->frame && config->duration != 0) {
+        return;
+    }
+    if (config->reverseTime != 0) {
+        time = (f32)(s32)((u32)config->duration - work->frame);
+    } else {
+        time = (f32)(s32)work->frame;
+    }
+    speed = ffabsf(config->speed);
+    acceleration = config->acceleration;
+    if (acceleration < 0.0f) {
+        limit = -speed / (acceleration * 0.5f) * 0.5f;
+        if (limit < time) {
+            time = limit;
+        }
+    }
+    radius = (speed + acceleration * time * 0.5f) * time;
+    radius += config->baseRadius;
+    groups = (u32)(points->rows / 4);
+    out = (f32 (*)[4])points->buffer;
+    angle = 0.0f;
+    angleStep = EFFECT_RING_FULL_TURN / (f32)config->segments;
+    direction[1] = 0.0f;
+    direction[3] = 1.0f;
+    firstBand = config->widths[0] + radius;
+    secondBand = firstBand + config->widths[1];
+    thirdBand = secondBand + config->widths[2];
+    SDF_VU0_LOADVECTOR(effOnesVector);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(firstBand);
+    SDF_VU0_STOREVECTOR(bands[0]);
+    SDF_VU0_COPYVECTOR_B_TO_A();
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(secondBand);
+    SDF_VU0_SCALEVECTOR_B_V0_CLOBBER(thirdBand);
+    SDF_VU0_STOREVECTOR(bands[1]);
+    SDF_VU0_STOREVECTOR_B(bands[2]);
+    for (i = 0; i < groups; i++) {
+        direction[0] = sdfCos(angle);
+        direction[2] = sdfSin(angle);
+        SDF_VU0_LOADVECTOR(direction);
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        SDF_VU0_SCALEVECTOR_V0_CLOBBER(radius);
+        SDF_VU0_STOREVECTOR(out[0]);
+        SDF_VU0_LOADVECTOR(bands[0]);
+        SDF_VU0_MULVECTOR();
+        SDF_VU0_STOREVECTOR(out[1]);
+        SDF_VU0_LOADVECTOR(bands[1]);
+        SDF_VU0_MULVECTOR();
+        SDF_VU0_STOREVECTOR(out[2]);
+        SDF_VU0_LOADVECTOR(bands[2]);
+        SDF_VU0_MULVECTOR();
+        SDF_VU0_STOREVECTOR(out[3]);
+        angle += angleStep;
+        out += 4;
+    }
+}
+
+extern void effDrawFourPointGroups(EffPointSet *, const Matrix4 *);
+
+void billDrawCellBlendA(BillCellDrawWork *work) {
+    u8 *config = work->config;
+    u32 limit = work->frameLimit;
+    u32 progress = ((EffBillTimedHeader *)config)->time.progress;
+    u32 *list = work->instances;
+    EffPointSet *out = (EffPointSet *)(u32)list[0];
+    u128 mtx[4];
+    u32 packed;
+    u32 unit;
+    u32 second;
+
+    if (progress < limit && progress != 0) {
+        return;
+    }
+    second = effSampleColorAlphaTracks(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
+    unit = 0x3C000000;
+    UnpackRGBAWord(work->baseColor, unit);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    UnpackRGBAWord(second, unit);
+    SDF_VU0_MULVECTOR();
+    packed = PackRGBAWord(128.0f);
+    out->color = packed;
+    if ((packed & 0xFF000000) != 0) {
+        out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
+        out->flag = ((EffBillOutputHeader *)config)->outputMode;
+        SDF_VU0_LOADVECTOR(work->transform);
+        ToMatrix();
+        SDF_VU0_LOADVECTOR(effOnesVector);
+        SDF_VU0_SCALEVECTOR_V0_CLOBBER(work->scale);
+        SDF_VU0_SCALE_XYZ();
+        SDF_VU0_LOADVECTOR(work);
+        SDF_VU0_VECTOR_W_SET_ONE();
+        SDF_VU0_SET_ROW3();
+        SDF_VU0_STOREMATRIX(mtx);
+        effDrawFourPointGroups(out, (Matrix4 *)mtx);
+    }
+}
+
+void effResetClassFrameAndFlags(s32 work) {
+    EffClassWork *effect;
+
+    effect = ((EffClassDrawState *)((EffClassWork *)work)->resource)->effect;
+    ((EffCounterHeader *)((EffClassDrawState *)((EffClassWork *)work)->resource)->trackSet)->frame = 0;
+    effInitializeClassFrame(effect);
+}
+
+extern EffRandState dds3RandCB[];
+
+/* The cached class payload is copied from the 0x5C-byte source prefix. */
+typedef struct EffRingClassConfig {
+    EffRingSource ring;
+    u8 pad50[0xC];
+    u8 classConfig[0x5C];
+    u8 padB8[0x10];
+    f32 scale;
+    f32 scaleRand;
+} EffRingClassConfig;
+
+EffClassDrawState *effCreateScaledClassDrawState(EffRingClassConfig *source) {
+    u32 count = source->ring.segments;
+    u32 size;
+    struct sdfMemHandle_t *allocation;
+    f32 *scales;
+    EffClassDrawState *state;
+    EffTrackSet *tracks;
+    u32 *colors;
+    u32 first;
+    u32 second;
+    u32 i;
+
+    if (count < 3) {
+        source->ring.segments = 3;
+        count = 3;
+    }
+    size = count * sizeof(f32);
+    allocation = sdfMemAllocDirect(size + sizeof(EffClassDrawState));
+    scales = (f32 *)sdfMemLock(allocation);
+    state = (EffClassDrawState *)((u8 *)scales + size);
+    state->allocation = allocation;
+    state->scales = scales;
+    memcpy(source->classConfig, source, sizeof(source->classConfig));
+    state->effect = effCreateClassWork(1, source->classConfig);
+    tracks = effCreateTrackSetWithSharedReferences(count, 2, 0);
+    first = source->ring.firstColor;
+    state->trackSet = tracks;
+    colors = (u32 *)tracks->tail;
+    second = source->ring.middleColor;
+    for (i = 0; i < count; i++) {
+        colors[0] = first;
+        colors[1] = first;
+        colors[2] = (first & second) + (((first ^ second) & 0xFEFEFEFE) >> 1);
+        colors[3] = first;
+        colors += 4;
+        *scales++ = source->scale * (dds3GetRandFloatA(dds3RandCB) * source->scaleRand + (1.0f - source->scaleRand));
+    }
+    return state;
+}
+
+void effReleaseClassDrawResources(s32 work) {
+    effReleaseResourceRefs(((EffClassDrawState *)work)->trackSet);
+    effDestroyClassWork(((EffClassDrawState *)work)->effect);
+    sdfMemFreeDirect(((EffClassDrawState *)work)->allocation);
+}
+
+extern void effAdvanceClassFrame(EffClassWork *);
+
+/* Advance frame geometry and rebuild scaled row offsets with predecessor wrapping. */
+void effUpdateScaledClassFrameRows(BillCellDrawWork *work) {
+    u8 *config = work->config;
+    s32 limit = work->frameLimit;
+    s32 progress = ((EffBillTimedHeader *)config)->time.progress;
+    u32 *list = work->instances;
+    EffClassWork *classWork;
+    f32 *scales;
+    EffClassFrameResource **resource;
+    EffClassRowOutput *output;
+    EffClassFrameResource *frames;
+    u8 *src;
+    u8 *dst;
+    u8 *wrap;
+    u32 count;
+    u32 lastFrame;
+    u32 i;
+
+    classWork = (EffClassWork *)list[1];
+    resource = (EffClassFrameResource **)classWork->resource;
+    output = (EffClassRowOutput *)list[2];
+    scales = (f32 *)list[0];
+
+    if (progress < limit && progress != 0) {
+        return;
+    }
+    effAdvanceClassFrame(classWork);
+    count = ((EffBillTimedHeader *)config)->count;
+    frames = *resource;
+    lastFrame = frames->frameCount - 1;
+    dst = output->rows;
+    src = frames->rows;
+    if (config[0xC4] != 0) {
+        return;
+    }
+    i = 0;
+    if (count == 0) {
+        return;
+    }
+    wrap = src + lastFrame * 0x10 - 0x60;
+    do {
+        SDF_VU0_LOADVECTOR(src + 0x10);
+        SDF_VU0_COPYVECTOR_A_TO_C();
+        SDF_VU0_LOADVECTOR_B(src + 0x30);
+        SDF_VU0_STOREVECTOR(dst + 0x20);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_SCALEVECTOR_V0(*scales);
+        SDF_VU0_ADDVECTOR_A_C();
+        SDF_VU0_STOREVECTOR(dst);
+        SDF_VU0_COPYVECTOR(dst + 0x10, src + 0x50);
+        if (i == 0) {
+            SDF_VU0_COPYVECTOR(dst + 0x30, wrap);
+        } else {
+            SDF_VU0_COPYVECTOR(dst + 0x30, src - 0x30);
+        }
+        i++;
+        dst += 0x40;
+        wrap += 0x40;
+        src += 0x40;
+        scales++;
+    } while (i < count);
+}
+
+extern void effRunClassPostFrame(EffClassWork *);
+
+void billDrawClassUpdatedCellBlend(BillCellDrawWork *work) {
+    u8 *config = work->config;
+    u32 limit = work->frameLimit;
+    u32 progress = ((EffBillTimedHeader *)config)->time.progress;
+    u32 *list = work->instances;
+    EffTrackSet *out = (EffTrackSet *)list[2];
+    u128 mtx[4];
+    s32 color1[4];
+    s32 color2[4];
+    s32 blended[4];
+    u32 packed;
+    u32 unit;
+    u32 second;
+
+    if (progress < limit && progress != 0) {
+        return;
+    }
+    second = effSampleColorAlphaTracks(&((EffBillTimedHeader *)config)->colorTrack, &((EffBillTimedHeader *)config)->alphaTrack, limit, progress);
+    unit = 0x3C000000;
+    color1[0] = work->baseColor;
+    EE_MMI_RGBA_UNPACK(color1, unit);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    color2[0] = second;
+    EE_MMI_RGBA_UNPACK(color2, unit);
+    SDF_VU0_MULVECTOR();
+    MMI_RGBA_PACK_128(packed);
+    blended[0] = packed;
+    out->color = packed;
+    if (packed & 0xFF000000) {
+        EffClassWork *dst = (EffClassWork *)list[1];
+
+        dst->color = work->baseColor;
+        dst->scale = work->scale;
+        SDF_VU0_COPYVECTOR(dst->transform, work);
+        SDF_VU0_COPYVECTOR(dst->transform + 0x10, work->transform);
+        effRunClassPostFrame((s32)dst);
+        out->type = ((EffBillTimedHeader *)config)->alphaTrack.surfaceIndex;
+        out->flag = ((EffBillOutputHeader *)config)->outputMode;
+        SDF_VU0_LOADVECTOR(work->transform);
+        ToMatrix();
+        SDF_VU0_LOADVECTOR(effOnesVector);
+        SDF_VU0_SCALEVECTOR_V0(work->scale);
+        SDF_VU0_SCALE_XYZ();
+        SDF_VU0_LOADVECTOR(work);
+        SDF_VU0_VECTOR_W_SET_ONE();
+        SDF_VU0_SET_ROW3();
+        SDF_VU0_STOREMATRIX(mtx);
+        effDrawTrackSet(out, (Matrix4 *)mtx);
+    }
+}
+
+void effResetClassRingFrame(EffClassWork *work) {
+    ((EffRingResource *)work->resource)->pointSet->color = 0;
+}
+
+/* Create a point-set reference and initialize four colors per segment. */
+EffRingResource *effCreateRingHandle(EffRadialRingParams *work) {
+    EffRingResource *pointSetRef = sdfChipAllocDirect(sizeof(EffRingResource));
+    u32 segments = work->segments;
+    EffPointSet *pointSet;
+    u32 *entry;
+    u32 groups;
+    u32 i;
+    u32 first;
+    u32 second;
+    u32 third;
+
+    if (segments < 3) {
+        work->segments = 3;
+        segments = 3;
+    }
+    pointSet = effCreatePointSet4(segments);
+    first = work->firstColor;
+    groups = pointSet->rows / 4;
+    pointSetRef->pointSet = pointSet;
+    entry = (u32 *)pointSet->tail;
+    second = work->middleColor;
+    third = work->lastColor;
+    for (i = 0; i < groups; i++) {
+        entry[0] = first;
+        entry[1] = second;
+        entry[2] = second;
+        entry[3] = third;
+        entry += 4;
+    }
+    return pointSetRef;
+}
+
+void effReleaseRingHandle(EffRingResource *handle) {
+    effAssetQueueRelease(handle->pointSet);
+    sdfChipFreeDirect(handle);
+}
+
+void effUpdateCenteredRadialRingVertices(EffClassWork *work) {
+    EffRadialRingParams *config = work->payload;
+    EffPointSet *points = ((EffRingResource *)work->resource)->pointSet;
+    f32 direction[4];
+    f32 bands[3][4];
+    f32 time;
+    f32 speed;
+    f32 acceleration;
+    f32 radius;
+    f32 angle;
+    f32 angleStep;
+    f32 limit;
+    f32 firstBand;
+    f32 secondBand;
+    f32 thirdBand;
+    f32 (*out)[4];
+    u32 groups;
+    u32 i;
+
+    if ((s32)config->duration < (s32)work->frame && config->duration != 0) {
+        return;
+    }
+    if (config->reverseTime != 0) {
+        time = (f32)(s32)((u32)config->duration - work->frame);
+    } else {
+        time = (f32)(s32)work->frame;
+    }
+    speed = ffabsf(config->speed);
+    acceleration = config->acceleration;
+    if (acceleration < 0.0f) {
+        limit = -speed / (acceleration * 0.5f) * 0.5f;
+        if (limit < time) {
+            time = limit;
+        }
+    }
+    radius = (speed + acceleration * time * 0.5f) * time;
+    radius += config->baseRadius;
+    groups = (u32)(points->rows / 4);
+    out = (f32 (*)[4])points->buffer;
+    angle = 0.0f;
+    angleStep = EFFECT_RING_FULL_TURN / (f32)config->segments;
+    direction[1] = 0.0f;
+    direction[3] = 1.0f;
+    firstBand = config->widths[0] + radius;
+    secondBand = firstBand + config->widths[1];
+    thirdBand = secondBand + config->widths[2];
+    SDF_VU0_LOADVECTOR(effOnesVector);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(firstBand);
+    SDF_VU0_STOREVECTOR(bands[0]);
+    SDF_VU0_COPYVECTOR_B_TO_A();
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(secondBand);
+    SDF_VU0_SCALEVECTOR_B_V0_CLOBBER(thirdBand);
+    SDF_VU0_STOREVECTOR(bands[1]);
+    SDF_VU0_STOREVECTOR_B(bands[2]);
+    for (i = 0; i < groups; i++) {
+        direction[0] = sdfCos(angle);
+        direction[2] = sdfSin(angle);
+        SDF_VU0_STOREIDENTITYVECTOR(out[0]);
+        SDF_VU0_LOADVECTOR_B(direction);
+        SDF_VU0_LOADVECTOR(bands[0]);
+        SDF_VU0_MULVECTOR();
+        SDF_VU0_STOREVECTOR(out[1]);
+        SDF_VU0_LOADVECTOR(bands[1]);
+        SDF_VU0_MULVECTOR();
+        SDF_VU0_STOREVECTOR(out[2]);
+        SDF_VU0_LOADVECTOR(bands[2]);
+        SDF_VU0_MULVECTOR();
+        SDF_VU0_STOREVECTOR(out[3]);
+        angle += angleStep;
+        out += 4;
+    }
+}
+
+void billDrawCellBlendB(EffClassWork *work) {
+    EffRadialRingParams *config = work->payload;
+    u32 limit = work->frame;
+    u32 progress = config->duration;
+    EffRingResource *list = (EffRingResource *)work->resource;
+    EffPointSet *out = list->pointSet;
+    u128 mtx[4];
+    u32 packed;
+    u32 unit;
+    u32 second;
+
+    if (progress < limit && progress != 0) {
+        return;
+    }
+    second = effSampleColorAlphaTracks(&config->colorTrack, &config->alphaTrack, limit, progress);
+    unit = 0x3C000000;
+    UnpackRGBAWord(work->color, unit);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    UnpackRGBAWord(second, unit);
+    SDF_VU0_MULVECTOR();
+    packed = PackRGBAWord(128.0f);
+    out->color = packed;
+    if ((packed & 0xFF000000) != 0) {
+        out->type = config->alphaTrack.surfaceIndex;
+        out->flag = config->flag;
+        SDF_VU0_LOADVECTOR(work->vectors.orientation);
+        ToMatrix();
+        SDF_VU0_LOADVECTOR(effOnesVector);
+        SDF_VU0_SCALEVECTOR_V0_CLOBBER(work->scale);
+        SDF_VU0_SCALE_XYZ();
+        SDF_VU0_LOADVECTOR(work);
+        SDF_VU0_VECTOR_W_SET_ONE();
+        SDF_VU0_SET_ROW3();
+        SDF_VU0_STOREMATRIX(mtx);
+        effDrawFourPointGroups(out, (Matrix4 *)mtx);
+    }
+}
+
+EffClassWork *effCreateClassWork(u16 kind, void *source) {
+    u32 headerSize = 0x40;
+    u32 size = effClassWorkOperations[kind].payloadSize;
+    u8 *effect = sdfChipAllocDirect(size + headerSize);
+    ((EffClassWork *)effect)->payload = effect + headerSize;
+    ((EffClassWork *)effect)->color = 0x80808080;
+    ((EffClassWork *)effect)->scale = 1.0f;
+    ((EffClassWork *)effect)->frame = 0;
+    ((EffClassWork *)effect)->kind = kind;
+    SDF_VU0_STOREIDENTITYVECTOR_NOMEM(effect);
+    SDF_VU0_STOREIDENTITYVECTOR_NOMEM(effect + 0x10);
+    memcpy(((EffClassWork *)effect)->payload, source, size);
+    ((EffClassWork *)effect)->resource = effClassWorkOperations[kind].createResource(source);
+    effClassWorkOperations[kind].initialize(effect);
+    return (EffClassWork *)effect;
+}
+
+EffClassWork *effCreateClassWorkFromFile(FileJobPayload *request) {
+    void *source;
+
+    source = fileResolvePrimaryBuffer(request);
+    return effCreateClassWork(request->option, source);
+}
+
+void effDestroyClassWork(EffClassWork *work) {
+    effClassWorkOperations[work->kind].destroyResource(work->resource);
+    sdfChipFreeDirect(work);
+}
+
+EffClassWork *effCloneClassWork(EffClassWork *work) {
+    return effCreateClassWork(work->kind, work->payload);
+}
+
+void effInitializeClassFrame(EffClassWork *work) {
+    effClassWorkOperations[work->kind].initialize(work);
+    work->frame = 0;
+}
+
+void effAdvanceClassFrame(EffClassWork *work) {
+    effClassWorkOperations[work->kind].update(work);
+    work->frame = work->frame + 1;
+}
+
+void effRunClassPostFrame(EffClassWork *work) {
+    effClassWorkOperations[work->kind].draw(work);
+}
+
+void effUpdateClassFrame(EffClassWork *work) {
+    effAdvanceClassFrame(work);
+    effRunClassPostFrame(work);
+}
+
+void effSetClassWorkPrimaryTransformVector(s128 *dst, const s128 *src) {
+    SDF_VU0_COPYVECTOR(dst, src);
+}
+
+void effSetClassWorkSecondaryTransformVector(EffClassWork *work, const s128 *src) {
+    SDF_VU0_COPYVECTOR(work->vectors.orientation, src);
+}
+
+void effSetClassWorkColor(EffClassWork *work, u32 color) {
+    work->color = color;
+}
+
+void effSetClassWorkScale(EffClassWork *work, float value) {
+    work->scale = value;
+}
+
+extern sdf3DPrimPolyParm_t D_003DCA10[];
+
+EffPointSet *effCreatePointSet4(u32 count) {
+    s32 rows = count * 4 + 4;
+    s32 size = rows * 20;
+    struct sdfMemHandle_t *base;
+    u8 *data;
+    EffPointSet *set;
+
+    size = ((size >> 4) + ((size & 0xF) != 0)) << 4;
+    base = sdfMemAllocDirect(size + 0x20);
+    data = (u8 *)sdfMemLock(base);
+    set = (EffPointSet *)(data + size);
+    set->buffer = data;
+    data += rows * 16;
+    set->color = 0x80808080;
+    set->type = 2;
+    set->rows = rows;
+    set->allocation = base;
+    set->tail = data;
+    set->flag = 0;
+    set->handle = sdfMatNew();
+    sdfMatSetConstant(set->handle, 1.0f);
+    memset(D_003DCA10, 0, 0x2C);
+    D_003DCA10[0].attr = 0x4000;
+    return set;
+}
+
+/* Queue the draw asset for release and return the backing allocation. */
+void effAssetQueueRelease(EffPointSet *set) {
+    sdfMatFreeDelayed(set->handle);
+    sdfMemFreeDirect(set->allocation);
+}
+
+/* vu0 routine: SDK loads the supplied transform or constructs identity. */
+void effDrawFourPointGroups(EffPointSet *set, const Matrix4 *matrix) {
+    void *list;
+    void *setup;
+    EffGsPacket *packet;
+    s32 remaining;
+    s32 surfaceId;
+
+    if (set->color & 0xFF000000) {
+        list = (void *)sdfGrAllocPacketBuff(0x20);
+        sdfDrawTagInit(list);
+        if (matrix == NULL) {
+            SDF_VU0_LOADIDENTITY();
+        } else {
+            SDF_VU0_LOADMATRIX(matrix);
+        }
+        sdf3DPrimLinkTm(list, 0);
+        sdf3DPrimLinkMat(list, set->handle, 0);
+        if (set->flag == 0) {
+            packet = (EffGsPacket *)sdfGrAllocPacketBuff(0x30);
+            packet->dmaTag = 2;
+            packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
+            packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
+            packet->registerList = 0xE;
+            packet->registerValue = 0x31801;
+            packet->registerAddress = 0x47;
+            sdfDrawTagLink(list, (u32)packet);
+        }
+        remaining = set->rows;
+        D_003DCA10[0].vertexColor = (u32 *)set->tail;
+        D_003DCA10[0].vertex = (u128 *)set->buffer;
+        D_003DCA10[0].color = set->color;
+        D_003DCA10[0].faceCount = 12;
+        D_003DCA10[0].pointCount = 12;
+        D_003DCA10[0].faceIndex = D_0037EB30;
+        while (remaining >= 12) {
+            remaining -= 8;
+            sdfDrawTagLink(list, effPkt3DPrimMakePoly(D_003DCA10));
+            D_003DCA10[0].vertex += 8;
+            D_003DCA10[0].vertexColor += 8;
+        }
+        if (remaining >= 8) {
+            D_003DCA10[0].faceCount = 6;
+            D_003DCA10[0].pointCount = remaining;
+            sdfDrawTagLink(list, effPkt3DPrimMakePoly(D_003DCA10));
+        }
+        if (set->flag == 0) {
+            packet = (EffGsPacket *)sdfGrAllocPacketBuff(0x30);
+            packet->dmaTag = 2;
+            packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
+            packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
+            packet->registerList = 0xE;
+            packet->registerValue = 0x51801;
+            packet->registerAddress = 0x47;
+            sdfDrawTagLink(list, (u32)packet);
+        }
+        if (set->type < 5) {
+            effSubmitSurfacePacket(D_0037EB78[set->type], list);
+        } else {
+            EffGsPacket *blendPacket;
+
+            surfaceId = set->type == 5 ? 51 : 56;
+            setup = (void *)sdfGrAllocPacketBuff(0x20);
+            sdfDrawTagInit(setup);
+            blendPacket = (EffGsPacket *)sdfGrAllocPacketBuff(0x30);
+            blendPacket->registerValue = 6;
+            blendPacket->dmaTag = 2;
+            blendPacket->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
+            blendPacket->gifTag = ((u64)0x10000000 << 32) | 0x8001;
+            blendPacket->registerList = 0xE;
+            blendPacket->registerAddress = 0x42;
+            sdfDrawTagLink(setup, (u32)blendPacket);
+            effSubmitSurfacePacket(&sdfGrOtTable[surfaceId], setup);
+            blendPacket = (EffGsPacket *)sdfGrAllocPacketBuff(0x30);
+            blendPacket->dmaTag = 2;
+            blendPacket->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
+            blendPacket->gifTag = ((u64)0x10000000 << 32) | 0x8001;
+            blendPacket->registerList = 0xE;
+            switch (surfaceId) {
+            case 51:
+                blendPacket->registerValue = 0x44;
+                break;
+            case 56:
+                blendPacket->registerValue = 0x42;
+                break;
+            }
+            blendPacket->registerAddress = 0x42;
+            sdfDrawTagLink(list, (u32)blendPacket);
+            effSubmitSurfacePacket(&sdfGrOtTable[surfaceId], list);
+        }
+    }
+}
+
+/* Create an empty surface node for handleCount grid cells; no handles are allocated yet. */
+EffectSurfaceNode *effCreateSurfaceNode(u32 handleCount) {
+    EffectSurfaceNode *node = sdfChipAllocZeroDirect(sizeof(EffectSurfaceNode));
+    node->handleCount = handleCount;
+    node->color = 0x80808080;
+    node->opacity = 1.0f;
+    node->index = 0;
+    node->record = 0;
+    node->count = 1;
+    return node;
+}
+
+EffectSurfaceNode *effCreateSurfaceNodeForGrid(FileKeyBlock *grid) {
+    u32 n;
+    s32 w = grid->emissionDuration;
+    /* Retail 002A5A58 interprets the capacity factors signed (MULT). */
+    n = (w ? w : (s32)grid->spawnRate) * (w ? (s32)grid->spawnRate : grid->length);
+    return effCreateSurfaceNode(n > 100 ? 100 : n);
+}
+
+extern void effRebuildSurfaceHandles(EffectSurfaceNode *, u16, void *);
+
+void effReplaceResourceRef(EffectSurfaceNode *node, u32 entryId, const void *resource);
+
+EffectSurfaceNode *effResourceReferenceReplaceFromFile(FileJobPayload *work) {
+    u8 *source = fileResolvePrimaryBuffer(work);
+    FileKeyBlock *params = (FileKeyBlock *)(source + 0x1C);
+    EffectSurfaceNode *node = effCreateSurfaceNodeForGrid(params);
+
+    effRebuildSurfaceHandles(node, work->option, source);
+    effReplaceResourceRef(node, work->option, params);
+    return node;
+}
+
+extern void effRebuildSurfaceJobs(EffectSurfaceNode *, void *);
+
+extern void effReplaceSurfaceResourceHolder(EffectSurfaceNode *node, u32 resource);
+
+void effReplaceSurfacePrimaryBillboard(EffectSurfaceNode *node, u32 resourceId);
+
+void effReplaceSurfaceFlaggedBillboard(EffectSurfaceNode *node, u32 resourceId);
+
+void effSetSurfaceRetainedResource(EffectSurfaceNode *node, u32 resourceId);
+
+EffectSurfaceNode *effInitializeSurfaceForKind(FileJobPayload *work) {
+    EffectSurfaceNode *node = effResourceReferenceReplaceFromFile(work);
+    u32 *secondary = fileResolveSecondaryBuffer(work);
+
+    if (secondary == NULL) {
+        return node;
+    }
+    switch (work->primary.selector) {
+    case 1:
+        effReplaceSurfacePrimaryBillboard(node, (u32)secondary);
+        break;
+    case 2:
+        effReplaceSurfaceFlaggedBillboard(node, (u32)secondary);
+        break;
+    case 3:
+        break;
+    case 4:
+        effSetSurfaceRetainedResource(node, *secondary);
+        break;
+    case 5:
+        effRebuildSurfaceJobs(node, secondary);
+        break;
+    case 6:
+        break;
+    case 7:
+        effReplaceSurfaceResourceHolder(node, (u32)secondary);
+        break;
+    }
+    node->kind = work->primary.selector;
+    return node;
+}
+
+void effDestroySurfaceNode(EffectSurfaceNode *node) {
+    u32 i;
+    u32 count;
+
+    if (node->resource != NULL) {
+        dds3BillboardDelete(node->resource);
+    }
+    if (node->jobAllocation != 0) {
+        count = node->record->count;
+        for (i = 0; i < count; i++) {
+            fileJobDestroy(node->jobs[i]);
+        }
+        sdfMemFreeDirect(node->jobAllocation);
+    }
+    if (node->index != 0) {
+        for (i = 0; i < node->handleCount; i++) {
+            effReleaseSurfaceGridBuffers((EffSurfaceGridNode *)((u32 *)node->index)[i]);
+        }
+        sdfMemFreeDirect(node->handleBuffer);
+    }
+    if (node->resourceHolder != 0) {
+        effReleaseReferenceHolder(node->resourceHolder);
+    }
+    if (node->record != 0) {
+        effPCPHelperBEDGetModel(node->record);
+    }
+    sdfChipFreeDirect(node);
+}
+
+EffectSurfaceNode *effRecreateSurfaceNodeFromWork(u8 *work) {
+    FileKeyBlock *params = (FileKeyBlock *)((EffectSurfaceNode *)work)->record->data1;
+    EffectSurfaceNode *node = effCreateSurfaceNodeForGrid(params);
+    effRebuildSurfaceHandles(node, ((EffectSurfaceNode *)work)->record->type, &((EffectSurfaceNode *)work)->params);
+    effReplaceResourceRef(node, ((EffectSurfaceNode *)work)->record->type, params);
+    return node;
+}
+
+extern void effCloneSurfaceGridResources(EffectSurfaceNode *, u8 *);
+
+EffectSurfaceNode *effCreateSurfaceGridWithConfiguration(u8 *work) {
+    FileKeyBlock *params = (FileKeyBlock *)((EffectSurfaceNode *)work)->record->data1;
+    EffectSurfaceNode *node = effCreateSurfaceNodeForGrid(params);
+    effRebuildSurfaceHandles(node, ((EffectSurfaceNode *)work)->record->type, &((EffectSurfaceNode *)work)->params);
+    effReplaceResourceRef(node, ((EffectSurfaceNode *)work)->record->type, params);
+    effCloneSurfaceGridResources(node, work);
+    return node;
+}
+
+/* Replace the destination's kind-selected resources with clones or retained references. */
+void effCloneSurfaceGridResources(EffectSurfaceNode *dst, u8 *work) {
+    EffectSurfaceNode *src = (EffectSurfaceNode *)work;
+    u32 selector = src->kind;
+
+    switch (selector) {
+    case 1:
+    case 2:
+    case 4:
+        if (dst->resource != NULL) {
+            dds3BillboardDelete(dst->resource);
+        }
+        dst->resource = dds3BillboardCopy(src->resource);
+        dds3BillboardSetAnimColorAdvMode(dst->resource);
+        if (dst->record != 0) {
+            FileSlotTable *record = dst->record;
+            dds3BillboardSetMode(dst->resource, (s16)((FileKeyBlock *)record->data0)->alphaTrack.surfaceIndex);
+        }
+        break;
+    case 5: {
+        u32 count = src->record->count;
+        s32 size;
+        u32 i;
+
+        if (dst->jobAllocation != 0) {
+            for (i = 0; i < count; i++) {
+                fileJobDestroy(dst->jobs[i]);
+            }
+            sdfMemFreeDirect(dst->jobAllocation);
+            dst->jobs = 0;
+            dst->jobAllocation = 0;
+        }
+        size = count * 4;
+        if (size == 0) {
+            return;
+        }
+        dst->jobAllocation = sdfMemAllocDirect(size);
+        dst->jobs = (FileJobPayload **)sdfMemLock(dst->jobAllocation);
+        for (i = 0; i < count; i++) {
+            dst->jobs[i] = fileJobCreateChild(src->jobs[0]);
+        }
+        break;
+    }
+    case 7:
+        if (dst->resourceHolder != 0) {
+            effReleaseReferenceHolder(dst->resourceHolder);
+        }
+        dst->resourceHolder = effReferenceObjectRetain(src->resourceHolder);
+        break;
+    }
+    dst->kind = src->kind;
+}
+
+/* Replace the per-cell grid handles from the copied source header. kind is unused here. */
+void effRebuildSurfaceHandles(EffectSurfaceNode *node, u16 kind, void *source) {
+    EffSurfaceParams *params = source;
+    u32 size;
+    u32 i;
+    EffSurfaceGridNode *handle;
+
+    node->params = *params;
+    size = node->handleCount * 4;
+    if (size == 0) {
+        return;
+    }
+    if (node->index != 0) {
+        for (i = 0; i < node->handleCount; i++) {
+            effReleaseSurfaceGridBuffers((EffSurfaceGridNode *)((u32 *)node->index)[i]);
+        }
+        sdfMemFreeDirect(node->handleBuffer);
+    }
+    node->handleBuffer = sdfMemAllocDirect(size);
+    node->index = sdfMemLock(node->handleBuffer);
+    for (i = 0; i < node->handleCount; i++) {
+        handle = effCreateSurfaceGridNode(params->opaque00[0], params->opaque00[1]);
+        ((u32 *)node->index)[i] = (u32)handle;
+        effFillSurfaceGridColorGradient(handle, params->opaque00 + 2);
+    }
+}
+
+void effReplaceResourceRef(EffectSurfaceNode *node, u32 entryId, const void *resource) {
+    if (node->record != NULL) {
+        effPCPHelperBEDGetModel(node->record);
+    }
+    node->record = fileAllocateGridRecordSlots((u16)entryId, node->handleCount, resource);
+}
+
+void effSetSurfaceRetainedResource(EffectSurfaceNode *node, u32 resourceId) {
+    billHandle_t *resource = node->resource;
+    if (resource != 0) {
+        dds3BillboardDelete(resource);
+    }
+    resource = dds3BillboardGeneral(resourceId);
+    node->resource = resource;
+    if (node->record != 0) {
+        dds3BillboardSetMode(resource, (s16)((FileKeyBlock *)node->record->data0)->alphaTrack.surfaceIndex);
+    }
+}
+
+void effReplaceSurfacePrimaryBillboard(EffectSurfaceNode *node, u32 resourceId) {
+    billHandle_t *resource = node->resource;
+    if (resource != 0) {
+        dds3BillboardDelete(resource);
+    }
+    resource = dds3BillboardCreate(0, resourceId);
+    node->resource = resource;
+    if (node->record != 0) {
+        dds3BillboardSetMode(resource, (s16)((FileKeyBlock *)node->record->data0)->alphaTrack.surfaceIndex);
+    }
+}
+
+void effReplaceSurfaceFlaggedBillboard(EffectSurfaceNode *node, u32 resourceId) {
+    billHandle_t *resource = node->resource;
+    if (resource != 0) {
+        dds3BillboardDelete(resource);
+    }
+    resource = dds3BillboardCreate(1, resourceId);
+    node->resource = resource;
+    dds3BillboardSetAnimColorAdvMode(resource);
+    if (node->record != 0) {
+        dds3BillboardSetMode(node->resource, (s16)((FileKeyBlock *)node->record->data0)->alphaTrack.surfaceIndex);
+    }
+}
+
+void effRebuildSurfaceJobs(EffectSurfaceNode *node, void *source) {
+    u32 count = node->record->count;
+    u32 i;
+    u32 size;
+
+    if (node->jobAllocation != 0) {
+        for (i = 0; i < count; i++) {
+            fileJobDestroy(node->jobs[i]);
+        }
+        sdfMemFreeDirect(node->jobAllocation);
+        node->jobs = 0;
+        node->jobAllocation = 0;
+    }
+    size = count * 4;
+    if (size != 0) {
+        node->jobAllocation = sdfMemAllocDirect(size);
+        node->jobs = (FileJobPayload **)sdfMemLock(node->jobAllocation);
+        node->jobs[0] = fileJobCreateFromJob((FileJobPayload *)source);
+        for (i = 1; i < count; i++) {
+            node->jobs[i] = fileJobCreateChild(node->jobs[0]);
+        }
+    }
+}
+
+void effReplaceSurfaceResourceHolder(EffectSurfaceNode *node, u32 resource) {
+    struct EffExpandedList *holder;
+
+    if (node->resourceHolder != 0) {
+        effReleaseReferenceHolder(node->resourceHolder);
+    }
+    holder = effCreateTextureAnimationSet(resource);
+    node->resourceHolder = holder;
+}
+
+void effClearSurfaceNodeRecordReferences(s32 node) {
+    if (((EffectSurfaceNode *)node)->record != 0) {
+        fileClearRecordReferences(((EffectSurfaceNode *)node)->record);
+        return;
+    }
+}
+
+void effAcquireSurfaceRecord(s32 node) {
+    if (((EffectSurfaceNode *)node)->record != 0) {
+        fileAcquireRecord(((EffectSurfaceNode *)node)->record);
+        return;
+    }
+}
+
+#ifdef NON_MATCHING
+
+extern void dds3BillboardDraw(billHandle_t *);
+
+extern void effDrawSurfaceNode(s32);
+
+extern void effCopyRingFrameVectors(EffSurfaceGridNode *, u128 *, s32);
+
+extern void effInterpolateSurfaceGridVectors(EffSurfaceGridNode *work, const f32 (*vectors)[4]);
+
+extern void effBeginMatrixVuDrawPacket(const Matrix4 *);
+
+extern f32 aViewTarget[4], aViewEye[4], aViewDown[4];
+
+extern sdfGrOt_t *effGetPacketSubmissionSurface(s32);
+
+extern void effSubmitIndexedRenderPacket(u32);
+
+extern void effSubmitGeneratedTexturePacket(sdfGrOt_t *, EffGeneratedTextureDescriptor *);
+
+extern void effResetSurfaceGridFrame(EffSurfaceGridNode *);
+
+struct EffSurfaceTrailHistory;
+
+extern void effDrawSurfaceTrailHistory(struct EffSurfaceTrailHistory *, u32);
+
+static inline u32 effMultiplySurfaceRowColor(u32 color, f32 *baseColor) {
+    UnpackRGBAWordFloat(color, 0.0078125f);
+    SDF_VU0_LOADVECTOR_B(baseColor);
+    SDF_VU0_MULVECTOR();
+    return PackRGBAWord(128.0f);
+}
+
+/* Keep each atlas conversion's SDK containers in its own inline instance. */
+static inline s32 effPrepareSurfaceAtlasColorFrame(FileSlot *row, f32 *baseColor, u32 *colorDestination) {
+    u32 packed;
+    s32 frame;
+
+    UnpackRGBAWordFloat(row->color, 0.0078125f);
+    SDF_VU0_LOADVECTOR_B(baseColor);
+    SDF_VU0_MULVECTOR();
+    packed = PackRGBAWord(128.0f);
+    frame = row->state;
+    *colorDestination = packed;
+    return frame;
+}
+
+/* Per-frame update of a surface effect node: rebuilds each live row's trail
+ * grid (a view-aligned ribbon through the row position) and draws its trail
+ * history, then submits the rows by kind: billboard children (kinds 1, 2, 4),
+ * file job callbacks (kind 5) or sampled-atlas generated textures (kind 7);
+ * kinds 0, 3 and 6 submit nothing more. Rows are transformed by the record's
+ * initial pose when it has one. Upstream: INCLUDE_ASM in game/code_0029E410;
+ * written from the retail routine. It differs from retail only in the
+ * scheduling of two loads, a nop, the jump table label and the pool offsets of
+ * two float constants. Decimal constants that ee-gcc truncated are written with
+ * retail's exact float values (clang rounds a decimal literal to nearest, which
+ * is one ulp off). */
+void effDrawSurfaceNode(s32 nodeAddress) {
+
+    EffGeneratedTextureDescriptor draw __attribute__((aligned(16)));
+    EffAnimSample sample;
+    Matrix4 initialMatrix;
+    f32 baseColor[4];
+    f32 viewDifference[4];
+    f32 width[4];
+    f32 endpoints[3][4];
+    f32 transformedPosition[4];
+    f32 translation[4];
+    f32 quaternion[4];
+    f32 direction[4];
+    f32 oppositeDirection[4];
+    f32 tangent[4];
+    Matrix4 drawMatrix;
+    EffectSurfaceNode *node = (EffectSurfaceNode *)nodeAddress;
+    FileKeyBlock *reference = (FileKeyBlock *)node->record->data0;
+    FileSlotTable *record;
+    FileSlot *row;
+    s32 count;
+    s32 rowIndex;
+    f32 nodeScale;
+    f32 renderedScale;
+    s32 currentFrame;
+
+    UnpackRGBAWordFloat(node->color, 0.0078125f);
+    SDF_VU0_STOREVECTOR(baseColor);
+    record = node->record;
+    if (!(record->flags & 1)) {
+        SDF_VU0_STOREIDENTITY(&initialMatrix);
+    } else {
+        fileReadRecordSecondVector(record, (u128 *)quaternion);
+        fileReadVectorPtr20(node->record, (u128 *)translation);
+        SDF_VU0_LOADVECTOR(quaternion);
+        ToMatrix();
+        SDF_VU0_LOADVECTOR(translation);
+        SDF_VU0_VECTOR_W_SET_ONE();
+        SDF_VU0_SET_ROW3();
+        SDF_VU0_STOREMATRIX(&initialMatrix);
+        record = node->record;
+    }
+    SDF_VU0_LOADVECTOR(aViewTarget);
+    SDF_VU0_LOADVECTOR_B(aViewEye);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_STOREVECTOR(viewDifference);
+    count = (s32)node->handleCount;
+    row = record->slots;
+    effBeginMatrixVuDrawPacket(&initialMatrix);
+
+    for (rowIndex = 0; rowIndex < count; rowIndex++, row++) {
+        currentFrame = row->state;
+        if (currentFrame != -2) {
+            EffSurfaceGridNode *grid = ((EffSurfaceGridNode **)(u32)node->index)[rowIndex];
+            if (currentFrame == 0) {
+                effResetSurfaceGridFrame(grid);
+                currentFrame = row->state;
+            }
+            if (currentFrame >= 0) {
+                u128 *vertices;
+                f32 viewDot;
+                f32 upDot;
+                f32 widthValue;
+
+                widthValue = row->scale;
+                VEC3_SPLAT(width, widthValue);
+                SDF_VU0_LOADVECTOR(row->pos);
+                SDF_VU0_LOADVECTOR_B(grid);
+                SDF_VU0_SUBVECTOR();
+                SDF_VU0_NORMALIZE();
+                SDF_VU0_LOADVECTOR_B(viewDifference);
+                SDF_VU0_INNERPRODUCT(viewDot);
+                SDF_VU0_COPYVECTOR_B_TO_C();
+                SDF_VU0_LOADVECTOR_B(aViewDown);
+                SDF_VU0_STOREVECTOR(tangent);
+                SDF_VU0_INNERPRODUCT(upDot);
+                if (ffabsf(upDot) < 0.849999964237213134765625f) {
+                    SDF_VU0_OUTERPRODUCT();
+                }
+                SDF_VU0_COPYVECTOR_C_TO_B();
+                SDF_VU0_OUTERPRODUCT();
+                SDF_VU0_NORMALIZE();
+                if (viewDot < 0.0f) {
+                    SDF_VU0_NEGVECTOR_XYZ();
+                }
+                SDF_VU0_STOREVECTOR(direction);
+                SDF_VU0_LOADVECTOR_B(width);
+                SDF_VU0_MULVECTOR();
+                SDF_VU0_COPYVECTOR_A_TO_B();
+                SDF_VU0_LOADVECTOR(row->pos);
+                SDF_VU0_STOREVECTOR(endpoints[1]);
+                SDF_VU0_ADDVECTOR();
+                SDF_VU0_STOREVECTOR(endpoints[0]);
+                SDF_VU0_SUBVECTOR();
+                SDF_VU0_SUBVECTOR();
+                SDF_VU0_STOREVECTOR(endpoints[2]);
+                effInterpolateSurfaceGridVectors(grid, endpoints);
+                effCopyRingFrameVectors(grid, (u128 *)endpoints, 1);
+                vertices = grid->queueA;
+                oppositeDirection[0] = -direction[0];
+                oppositeDirection[1] = -direction[1];
+                oppositeDirection[2] = -direction[2];
+                oppositeDirection[3] = -direction[3];
+                SDF_VU0_COPYVECTOR(vertices + 1, endpoints[0]);
+                SDF_VU0_COPYVECTOR(vertices + 7, endpoints[2]);
+                SDF_VU0_LOADVECTOR_C(endpoints[1]);
+                SDF_VU0_STOREVECTOR_C(vertices);
+                SDF_VU0_LOADVECTOR(direction);
+                SDF_VU0_LOADVECTOR_B(tangent);
+                SDF_VU0_INTERPOLATE(0.333333313465118408203125f);
+                SDF_VU0_NORMALIZE();
+                SDF_VU0_LOADVECTOR_B(width);
+                SDF_VU0_MULVECTOR();
+                SDF_VU0_ADDVECTOR_A_C();
+                SDF_VU0_STOREVECTOR(vertices + 2);
+                SDF_VU0_LOADVECTOR(direction);
+                SDF_VU0_LOADVECTOR_B(tangent);
+                SDF_VU0_INTERPOLATE(0.66666662693023681640625f);
+                SDF_VU0_NORMALIZE();
+                SDF_VU0_LOADVECTOR_B(width);
+                SDF_VU0_MULVECTOR();
+                SDF_VU0_ADDVECTOR_A_C();
+                SDF_VU0_STOREVECTOR(vertices + 3);
+                SDF_VU0_LOADVECTOR(tangent);
+                SDF_VU0_MULVECTOR();
+                SDF_VU0_ADDVECTOR_A_C();
+                SDF_VU0_STOREVECTOR(vertices + 4);
+                SDF_VU0_LOADVECTOR(oppositeDirection);
+                SDF_VU0_LOADVECTOR_B(tangent);
+                SDF_VU0_INTERPOLATE(0.66666662693023681640625f);
+                SDF_VU0_NORMALIZE();
+                SDF_VU0_LOADVECTOR_B(width);
+                SDF_VU0_MULVECTOR();
+                SDF_VU0_ADDVECTOR_A_C();
+                SDF_VU0_STOREVECTOR(vertices + 5);
+                SDF_VU0_LOADVECTOR(oppositeDirection);
+                SDF_VU0_LOADVECTOR_B(tangent);
+                SDF_VU0_INTERPOLATE(0.333333313465118408203125f);
+                SDF_VU0_NORMALIZE();
+                SDF_VU0_LOADVECTOR_B(width);
+                SDF_VU0_MULVECTOR();
+                SDF_VU0_ADDVECTOR_A_C();
+                SDF_VU0_STOREVECTOR(vertices + 6);
+            }
+            SDF_VU0_COPYVECTOR(grid, row->pos);
+            effDrawSurfaceTrailHistory((struct EffSurfaceTrailHistory *)grid, effMultiplySurfaceRowColor(row->color, baseColor));
+        }
+    }
+
+    effSubmitIndexedRenderPacket(reference->alphaTrack.surfaceIndex);
+    switch (node->kind) {
+    case 0:
+    case 3:
+    case 6:
+        break;
+    case 1:
+    case 2:
+    case 4: {
+        billHandle_t *billboard = node->resource;
+        FileSlotTable *table = node->record;
+        u32 color;
+        nodeScale = node->params.scale;
+        record = table;
+        row = record->slots;
+        if (!(record->flags & 1)) {
+            for (rowIndex = 0; rowIndex < count; rowIndex++, row++) {
+                if (row->state >= 0) {
+                    color = effMultiplySurfaceRowColor(row->color, baseColor);
+                    renderedScale = row->scale * nodeScale;
+                    dds3BillboardSetRGBA(billboard, color);
+                    dds3BillboardSetScale(billboard, renderedScale, renderedScale);
+                    dds3BillboardSetRotate(billboard, row->angle);
+                    effCopyVector(billboard, row->pos);
+                    currentFrame = row->state;
+                    dds3BillboardSetAnimKey(billboard, currentFrame);
+                    dds3BillboardDraw(billboard);
+                }
+            }
+        } else {
+            fileReadRecordSecondVector(record, (u128 *)quaternion);
+            fileReadVectorPtr20(node->record, (u128 *)translation);
+            SDF_VU0_LOADVECTOR(quaternion);
+            ToMatrix();
+            SDF_VU0_LOAD_ROW3(translation);
+            SDF_VU0_STOREMATRIX(&drawMatrix);
+            for (rowIndex = 0; rowIndex < count; rowIndex++, row++) {
+                if (row->state >= 0) {
+                    SDF_VU0_LOADMATRIX(&drawMatrix);
+                    SDF_VU0_LOADVECTOR(row->pos);
+                    SDF_VU0_APPLYMATRIX_XYZ1();
+                    SDF_VU0_STOREVECTOR(transformedPosition);
+                    color = effMultiplySurfaceRowColor(row->color, baseColor);
+                    renderedScale = row->scale * nodeScale;
+                    dds3BillboardSetRGBA(billboard, color);
+                    dds3BillboardSetScale(billboard, renderedScale, renderedScale);
+                    dds3BillboardSetRotate(billboard, row->angle);
+                    effCopyVector(billboard, transformedPosition);
+                    currentFrame = row->state;
+                    dds3BillboardSetAnimKey(billboard, currentFrame);
+                    dds3BillboardDraw(billboard);
+                }
+            }
+        }
+        break;
+    }
+    case 5: {
+        FileJobPayload **job = node->jobs;
+        nodeScale = node->params.scale;
+        record = node->record;
+        if (!(record->flags & 1)) {
+            row = record->slots;
+            for (rowIndex = 0; rowIndex < count; rowIndex++, row++, job++) {
+                currentFrame = row->state;
+                if (currentFrame == 0) {
+                    fileJobNotifyComplete(*job);
+                    currentFrame = row->state;
+                }
+                if (currentFrame >= 0) {
+                    u32 color;
+                    color = effMultiplySurfaceRowColor(row->color, baseColor);
+                    fileDispatchJobTypeCallback(*job, color);
+                    fileJobInvokeScaleCallback(*job, row->scale * nodeScale);
+                    fileJobInvokePositionCallback(*job, row->pos);
+                    fileJobInvokeTypeCallback(*job);
+                }
+            }
+        } else {
+            row = record->slots;
+            fileReadRecordSecondVector(record, (u128 *)quaternion);
+            fileReadVectorPtr20(node->record, (u128 *)translation);
+            SDF_VU0_LOADVECTOR(quaternion);
+            ToMatrix();
+            SDF_VU0_LOAD_ROW3(translation);
+            SDF_VU0_STOREMATRIX(&drawMatrix);
+            for (rowIndex = 0; rowIndex < count; rowIndex++, row++, job++) {
+                currentFrame = row->state;
+                if (currentFrame == 0) {
+                    fileJobNotifyComplete(*job);
+                    currentFrame = row->state;
+                }
+                if (currentFrame >= 0) {
+                    u32 color;
+                    SDF_VU0_LOADMATRIX(&drawMatrix);
+                    SDF_VU0_LOADVECTOR(row->pos);
+                    SDF_VU0_APPLYMATRIX_XYZ1();
+                    SDF_VU0_STOREVECTOR(transformedPosition);
+                    color = effMultiplySurfaceRowColor(row->color, baseColor);
+                    fileDispatchJobTypeCallback(*job, color);
+                    fileJobInvokeScaleCallback(*job, row->scale * nodeScale);
+                    fileJobInvokePositionCallback(*job, transformedPosition);
+                    fileJobInvokeTypeCallback(*job);
+                }
+            }
+        }
+        break;
+    }
+    case 7: {
+        FileSlotTable *record;
+        EffExpandedList *holder = node->resourceHolder;
+        sdfGrOt_t *surface;
+        s32 cachedSegment;
+        nodeScale = node->params.scale;
+        cachedSegment = -1;
+        row = node->record->slots;
+        surface = effGetPacketSubmissionSurface(reference->alphaTrack.surfaceIndex);
+        record = node->record;
+        if (!(record->flags & 1)) {
+            for (rowIndex = 0; rowIndex < count; rowIndex++, row++) {
+                if (row->state >= 0) {
+                    currentFrame = effPrepareSurfaceAtlasColorFrame(row, baseColor, &draw.color);
+                    effSampleAnimSet(holder, currentFrame, &sample);
+                    if (cachedSegment != sample.segment) {
+                        draw.texture = effAssignSampledSegmentReference(holder, surface, &sample);
+                        cachedSegment = sample.segment;
+                    }
+                    renderedScale = row->scale * nodeScale;
+                    draw.scaleX = renderedScale * sample.scaleX;
+                    draw.scaleY = renderedScale * sample.scaleY;
+                    draw.angle = row->angle + sample.angle;
+                    SDF_VU0_COPYVECTOR(draw.position, row->pos);
+                    effSubmitGeneratedTexturePacket(surface, &draw);
+                }
+            }
+        } else {
+            fileReadRecordSecondVector(record, (u128 *)quaternion);
+            fileReadVectorPtr20(node->record, (u128 *)translation);
+            SDF_VU0_LOADVECTOR(quaternion);
+            ToMatrix();
+            SDF_VU0_LOAD_ROW3(translation);
+            SDF_VU0_STOREMATRIX(&drawMatrix);
+            for (rowIndex = 0; rowIndex < count; rowIndex++, row++) {
+                if (row->state >= 0) {
+                    SDF_VU0_LOADMATRIX(&drawMatrix);
+                    SDF_VU0_LOADVECTOR(row->pos);
+                    SDF_VU0_APPLYMATRIX_XYZ1();
+                    SDF_VU0_STOREVECTOR(draw.position);
+                    currentFrame = effPrepareSurfaceAtlasColorFrame(row, baseColor, &draw.color);
+                    effSampleAnimSet(holder, currentFrame, &sample);
+                    if (cachedSegment != sample.segment) {
+                        draw.texture = effAssignSampledSegmentReference(holder, surface, &sample);
+                        cachedSegment = sample.segment;
+                    }
+                    renderedScale = row->scale * nodeScale;
+                    draw.scaleX = renderedScale * sample.scaleX;
+                    draw.scaleY = renderedScale * sample.scaleY;
+                    draw.angle = row->angle + sample.angle;
+                    effSubmitGeneratedTexturePacket(surface, &draw);
+                }
+            }
+        }
+        break;
+    }
+    }
+}
+
+#else
+
+INCLUDE_ASM(const s32, "game/code_0029E410", effDrawSurfaceNode);
+
+#endif
+
+void effUpdateSurfaceRecordAndDraw(s32 node) {
+    effAcquireSurfaceRecord(node);
+    effDrawSurfaceNode(node);
+}
+
+void effMenuRecordVectorSet(s32 node, const u128 *value) {
+    mnuRecordSetVector(((EffectSurfaceNode *)node)->record, value);
+}
+
+void effSetSurfaceRecordSecondaryVector(s32 node, const u128 *value) {
+    fileSetRecordSecondVector(((EffectSurfaceNode *)node)->record, value);
+}
+
+void effSetSurfaceNodeColor(s32 node, u32 value) {
+    ((EffectSurfaceNode *)node)->color = value;
+}
+
+void effIndexedFloatCallbackDispatch(ValPtr44 *p, float v) {
+    p->f08 = v;
+    dds3DispatchIndexedCallback(p->p44, v);
+}
+
+extern sdf3DPrimPolyParm_t D_003DCA40;
+
+extern sdf3DPrimPolyParm_t D_003DCA70;
+
+extern u8 D_0037EB90[];
+
+extern u8 D_0037EBE0[];
+
+/* vu0 routine: grid surface node with rows of three vertex columns */
+EffSurfaceGridNode *effCreateSurfaceGridNode(u32 count, u32 columns) {
+    s32 rows = count * columns * 3 + 6;
+    s32 size = rows * 20 + 0xA0;
+    struct sdfMemHandle_t *base;
+    u8 *data;
+    EffSurfaceGridNode *node;
+
+    size = ((size >> 4) + ((size & 0xF) != 0)) << 4;
+    base = sdfMemAllocDirect(size + 0x3C);
+    data = (u8 *)sdfMemLock((struct sdfMemHandle_t *)((u32)base));
+    node = (EffSurfaceGridNode *)(data + size);
+    node->type = 2;
+    node->buffer = (u128 *)data;
+    data += rows * 16;
+    node->queueA = (u128 *)data;
+    data += 0x80;
+    node->queueB = (u32 *)data;
+    data += 0x20;
+    node->field_18 = 3;
+    node->rows = rows;
+    node->columns = columns;
+    node->allocation = base;
+    node->tail = (u32 *)data;
+    node->field_14 = 0;
+    node->material = sdfMatNew();
+    sdfMatSetConstant(node->material, 1.0f);
+    memset(&D_003DCA40, 0, sizeof(sdf3DPrimPolyParm_t));
+    D_003DCA40.attr = 0x4000;
+    D_003DCA40.faceIndex = (u32 *)D_0037EB90;
+    memset(&D_003DCA70, 0, sizeof(sdf3DPrimPolyParm_t));
+    D_003DCA70.attr = 0x4000;
+    D_003DCA70.faceIndex = (u32 *)D_0037EBE0;
+    D_003DCA70.faceCount = 6;
+    D_003DCA70.pointCount = 8;
+    return node;
+}
+
+/* vu0 routine: fade-blended vertex colours written into the surface node's tail */
+void effFillSurfaceGridColorGradient(EffSurfaceGridNode *node, u32 *colors) {
+    u32 count = node->rows / 3;
+    u32 *out = node->tail;
+    f32 step = 1.0f / count;
+    f32 t = 0.0f;
+    f32 corner0[4];
+    f32 corner2[4];
+    f32 corner1[4];
+    f32 corner3[4];
+    s32 color0[4];
+    s32 color1[4];
+    s32 color2[4];
+    s32 color3[4];
+    s32 blendedA[4];
+    s32 blendedB[4];
+    u32 packedA;
+    u32 packedB;
+    u32 i;
+
+    color0[0] = colors[0];
+    EE_MMI_RGBA_UNPACK(color0, 1.0f / 128.0f);
+    SDF_VU0_STOREVECTOR_NOMEM(corner0);
+    color1[0] = colors[1];
+    EE_MMI_RGBA_UNPACK(color1, 1.0f / 128.0f);
+    SDF_VU0_STOREVECTOR_NOMEM(corner1);
+    color2[0] = colors[2];
+    EE_MMI_RGBA_UNPACK(color2, 1.0f / 128.0f);
+    SDF_VU0_STOREVECTOR_NOMEM(corner2);
+    color3[0] = colors[3];
+    EE_MMI_RGBA_UNPACK(color3, 1.0f / 128.0f);
+    SDF_VU0_STOREVECTOR_NOMEM(corner3);
+    for (i = 0; i < count; i++) {
+        SDF_VU0_LOADVECTOR(corner0);
+        SDF_VU0_LOADVECTOR_B(corner2);
+        SDF_VU0_SCALEVECTOR_V0(t);
+        SDF_VU0_SCALEVECTOR_B_V0(1.0f - t);
+        SDF_VU0_ADDVECTOR();
+        MMI_RGBA_PACK_UNIT(packedA, 128.0f);
+        blendedA[0] = packedA;
+        out[1] = blendedA[0];
+        SDF_VU0_LOADVECTOR(corner1);
+        SDF_VU0_LOADVECTOR_B(corner3);
+        SDF_VU0_SCALEVECTOR_V0(t);
+        SDF_VU0_SCALEVECTOR_B_V0(1.0f - t);
+        SDF_VU0_ADDVECTOR();
+        MMI_RGBA_PACK_UNIT(packedB, 128.0f);
+        blendedB[0] = packedB;
+        out[2] = out[0] = blendedB[0];
+        t += step;
+        out += 3;
+    }
+}
+
+void effReleaseSurfaceGridBuffers(EffSurfaceGridNode *node) {
+    sdfMatFreeDelayed(node->material);
+    sdfMemFreeDirect(node->allocation);
+}
+
+void effResetSurfaceGridFrame(EffSurfaceGridNode *node) {
+    node->field_14 = 0;
+    node->field_18 = 3;
+}
+
+/* Three-vector sampler reads the primary surface ring counters. */
+void effCopyRingFrameVectors(EffSurfaceGridNode *node, u128 *destination, s32 frame) {
+    s32 index = node->field_18 - 3 * (node->columns * (frame - 1) + frame);
+    u128 *source;
+    s32 i;
+
+    if (index < 3) {
+        index += node->rows - 3;
+    }
+    source = node->buffer + index;
+    for (i = 0; i < 3; i++) {
+        SDF_VU0_COPYVECTOR(destination + i, source + i);
+    }
+}
+
+/* data holds two vector addresses: the ring head, then the input frame.
+ * ring_mirror_pointer_epochs_probe (hooked==unhooked): GCSE preserves the
+ * head-to-mirror copy; separate append/mirror lifetimes keep native allocation. */
+void effAppendSurfaceGridVectors(EffSurfaceGridNode *work, const f32 (*source)[4]) {
+    s32 index = work->field_18;
+    const u128 *data = work->buffer;
+    u128 *destination = (u128 *)data + index;
+    s32 capacity;
+    s32 i;
+
+    for (i = 0; i < 3; i++) {
+        SDF_VU0_COPYVECTOR(destination + i, source + i);
+    }
+    capacity = work->rows;
+    work->field_18 = index + 3;
+    if (work->field_18 == capacity) {
+        u128 *mirror = (u128 *)data;
+        data = (const u128 *)source;
+        for (i = 0; i < 3; i++) {
+            SDF_VU0_COPYVECTOR(mirror + i, data + i);
+        }
+        work->field_18 = 3;
+    }
+    if (work->field_14 < capacity - 3) {
+        work->field_14 += 3;
+    }
+}
+
+extern void vuCatmullRomPoint(f32 (*)[4], f32);
+
+/* vu0 routine: interpolate three-vector ring frames with SDK spline and lerp operations. */
+void effInterpolateSurfaceGridVectors(EffSurfaceGridNode *work, const f32 (*vectors)[4]) {
+    f32 frames[4][3][4];
+    f32 controlVectors[4][4];
+    f32 output[3][4];
+    s32 count = work->columns;
+    s32 retainedVectors = work->field_14;
+    s32 i;
+    s32 j;
+    f32 step;
+    f32 t;
+
+    if (count == 1 || retainedVectors == 0) {
+        effAppendSurfaceGridVectors(work, vectors);
+        return;
+    }
+    if (retainedVectors >= count * 6) {
+        effCopyRingFrameVectors(work, (u128 *)frames[0], 2);
+        effCopyRingFrameVectors(work, (u128 *)frames[1], 1);
+        for (j = 0; j < 3; j++) {
+            SDF_VU0_COPYVECTOR(frames[2][j], vectors[j]);
+            SDF_VU0_COPYVECTOR(frames[3][j], vectors[j]);
+        }
+        step = 1.0f / count;
+        t = 0.0f;
+        for (i = 0; i < count; i++) {
+            t += step;
+            for (j = 0; j < 3; j++) {
+                SDF_VU0_COPYVECTOR(controlVectors[0], frames[0][j]);
+                SDF_VU0_COPYVECTOR(controlVectors[1], frames[1][j]);
+                SDF_VU0_COPYVECTOR(controlVectors[2], frames[2][j]);
+                SDF_VU0_COPYVECTOR(controlVectors[3], frames[3][j]);
+                vuCatmullRomPoint(controlVectors, t);
+                SDF_VU0_STOREVECTOR(output[j]);
+            }
+            effAppendSurfaceGridVectors(work, output);
+        }
+    } else {
+        effCopyRingFrameVectors(work, (u128 *)controlVectors, 1);
+        step = 1.0f / count;
+        t = 0.0f;
+        for (i = 0; i < count; i++) {
+            t += step;
+            for (j = 0; j < 3; j++) {
+                SDF_VU0_LOADVECTOR(controlVectors[j]);
+                SDF_VU0_LOADVECTOR_B(vectors[j]);
+                SDF_VU0_INTERPOLATE(t);
+                SDF_VU0_STOREVECTOR(output[j]);
+            }
+            effAppendSurfaceGridVectors(work, output);
+        }
+    }
+}
+
+void effBeginMatrixVuDrawPacket(const Matrix4 *matrix) {
+    struct sdfDrawTag_t *work = (struct sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    effCurrentRenderPacket = work;
+    sdfDrawTagInit(work);
+    SDF_VU0_LOADMATRIX(matrix);
+    sdf3DPrimLinkTm(effCurrentRenderPacket, 0);
+}
+
+/* Point history of a grid-surface trail: a ring of 16-byte points with packed colors,
+ * drawn as triangle strips into the current render packet, then a fixed end cap. */
+typedef struct EffSurfaceTrailHistory {
+    u8 pad00[0x10];
+    s32 pointCapacity;        /* 0x10 */
+    s32 activePointCount;     /* 0x14 */
+    s32 nextPointWriteIndex;  /* 0x18 */
+    u8 pad1C[0x08];
+    u128 *points;             /* 0x24 */
+    u32 *colors;              /* 0x28 */
+    s32 resourceHandle;       /* 0x2C */
+    u128 *endPoints;          /* 0x30 */
+    u32 *endColors;           /* 0x34 */
+} EffSurfaceTrailHistory;
+
+void effDrawSurfaceTrailHistory(EffSurfaceTrailHistory *history, u32 color) {
+    s32 start[4];
+    s32 length[4];
+    s32 recent;
+    s32 wrapped;
+    s32 i;
+    s32 remaining;
+    sdf3DPrimPolyParm_t *draw;
+    u32 *colors;
+    sdfDrawTag_t *list;
+
+    if ((color & 0xFF000000) == 0) {
+        return;
+    }
+    if (history->activePointCount < 6) {
+        return;
+    }
+    sdf3DPrimLinkMat(effCurrentRenderPacket, history->resourceHandle, 0);
+    recent = history->activePointCount;
+    start[0] = history->nextPointWriteIndex - recent;
+    if (start[0] < 3) {
+        wrapped = start[0] - 3;
+        start[1] = 0;
+        start[0] = wrapped + history->pointCapacity;
+        length[0] = -wrapped;
+        length[1] = recent - length[0] + 3;
+    } else {
+        length[0] = recent;
+        length[1] = 0;
+    }
+    D_003DCA40.vertexColor = history->colors;
+    for (i = 0; i < 2; i++) {
+        draw = &D_003DCA40;
+        draw->vertex = history->points + start[i];
+        draw->color = color;
+        draw->faceCount = 16;
+        remaining = length[i];
+        draw->pointCount = 15;
+        while (remaining >= 15) {
+            remaining -= 12;
+            list = effCurrentRenderPacket;
+            sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DCA40));
+            D_003DCA40.vertex += 12;
+            D_003DCA40.vertexColor += 12;
+        }
+        if (remaining >= 6) {
+            draw->faceCount = (remaining / 3) * 4 - 4;
+            draw->pointCount = remaining;
+            list = effCurrentRenderPacket;
+            sdfDrawTagLink(list, effPkt3DPrimMakePoly(draw));
+            draw->vertexColor += remaining;
+        }
+    }
+    colors = history->endColors;
+    D_003DCA70.vertex = history->endPoints;
+    colors[0] = D_003DCA40.vertexColor[-2];
+    D_003DCA70.vertexColor = colors;
+    colors[7] = colors[6] = colors[5] = colors[4] =
+        colors[3] = colors[2] = colors[1] = D_003DCA40.vertexColor[-3];
+    D_003DCA70.color = color;
+    list = effCurrentRenderPacket;
+    sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DCA70));
+}
+
+typedef struct EffDrawEntry {
+    u32 handle;
+    s32 frame;
+    u8 pad08[8];
+    void (*draw)(u8 *, struct sdfDrawTag_t *);
+} EffDrawEntry;
+
+void effSubmitIndexedRenderPacket(u32 index) {
+    u8 *entry = D_0037EBF8[index];
+    ((EffDrawEntry *)entry)->draw(entry, effCurrentRenderPacket);
+    effCurrentRenderPacket = NULL;
+}
+
+extern EffQuadWork *effCreateQuadWork(FileJobPayload *job);
+
+void effDuplicateRenderResourceOwner(EffQuadWork *work, const EffQuadWork *source);
+
+extern sdf3DPrimPolyParm_t effQuadPacketParams;
+
+extern u32 D_0037EC10[];
+
+extern u32 D_0037EC20[];
+
+EffQuadWork *effCreateQuadWork(FileJobPayload *job) {
+    EffQuadWork *work = sdfChipAllocDirect(sizeof(EffQuadWork));
+    void *buffer;
+
+    memset(work, 0, sizeof(EffQuadWork));
+    SDF_VU0_STOREIDENTITYVECTOR(work->position);
+    SDF_VU0_STOREIDENTITYVECTOR(work->orientation);
+    work->scale = 1.0f;
+    work->color = 0x80808080;
+    work->billHandle = NULL;
+    work->reference = NULL;
+    work->assetHandle = sdfMatNew();
+    sdfMatSetConstant(work->assetHandle, 1.0f);
+    memset(&effQuadPacketParams, 0, sizeof(sdf3DPrimPolyParm_t));
+    effQuadPacketParams.attr = 0x4000;
+    effQuadPacketParams.faceIndex = D_0037EC10;
+    effQuadPacketParams.vertexColor = D_0037EC20;
+    effQuadPacketParams.faceCount = 2;
+    effQuadPacketParams.pointCount = 4;
+    if (job == NULL) {
+        return work;
+    }
+    work->sourceKind = job->option;
+    buffer = fileResolvePrimaryBuffer(job);
+    memcpy(&work->source, buffer, sizeof(work->source));
+    buffer = fileResolveSecondaryBuffer(job);
+    if (buffer != NULL) {
+        switch (job->primary.selector) {
+        case 1:
+            work->billHandle = dds3BillboardCreate(0, (u32)buffer);
+            break;
+        case 2:
+            work->billHandle = dds3BillboardCreate(1, (u32)buffer);
+            break;
+        case 4:
+            work->billHandle = dds3BillboardGeneral(*(s32 *)buffer);
+            break;
+        case 7:
+            work->reference = effCreateTextureAnimationSet((u32)buffer);
+            break;
+        }
+        if (work->billHandle != NULL) {
+            dds3BillboardSetAnimColorAdvMode(work->billHandle);
+            dds3BillboardSetMode(work->billHandle, (s16)work->source.alphaTrack.surfaceIndex);
+        }
+    }
+    return work;
+}
+
+void effReleaseRenderResources(EffQuadWork *work) {
+    if (work->billHandle != 0) {
+        dds3BillboardDelete(work->billHandle);
+    }
+    if (work->reference != NULL) {
+        effReleaseReferenceHolder(work->reference);
+    }
+    if (work->assetHandle != 0) {
+        sdfMatFreeDelayed(work->assetHandle);
+    }
+    sdfChipFreeDirect(work);
+}
+
+EffQuadWork *effCloneRenderResourceWork(const EffQuadWork *source) {
+    EffQuadWork *effect = effCreateQuadWork(NULL);
+    memcpy(&effect->source, &source->source, sizeof(effect->source));
+    effDuplicateRenderResourceOwner(effect, source);
+    return effect;
+}
+
+void effDuplicateRenderResourceOwner(EffQuadWork *work, const EffQuadWork *source) {
+    struct billHandle_t *resource;
+
+    if (source->billHandle != 0) {
+        if (work->billHandle != 0) {
+            dds3BillboardDelete(work->billHandle);
+        }
+        resource = dds3BillboardCopy(source->billHandle);
+        work->billHandle = resource;
+        dds3BillboardSetAnimColorAdvMode(resource);
+        dds3BillboardSetMode(work->billHandle, (s16)work->source.alphaTrack.surfaceIndex);
+        return;
+    }
+    if (work->reference != NULL) {
+        effReleaseReferenceHolder(work->reference);
+    }
+    work->reference = effReferenceObjectRetain(source->reference);
+}
+
+void effResetRenderResourceKind(EffQuadWork *work) {
+    work->frame = 0;
+}
+
+#ifdef NON_MATCHING
+
+extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *);
+
+extern sdf3DPrimPolyParm_t effQuadPacketParams;
+
+extern sdfGrOt_t *effLayerSurfaces[];
+
+/* Per-frame draw of a textured effect quad: samples the color, alpha, size and
+ * angle tracks at the current frame, takes the rectangle and texture
+ * coordinates from the billboard handle or, without one, from the sampled
+ * animation segment, builds the four rotated corners in the XZ plane at the
+ * work's position and orientation, and submits the asset, optional GS test
+ * setup and restore packets and the vertex draw packet to the surface; then
+ * advances the frame. Upstream: INCLUDE_ASM in game/code_0029E410; written from
+ * the retail routine. It differs from retail in floating-point register
+ * allocation and moves, in the placement of one constant load, and in clearing
+ * the shared draw parameters' pointers to its arrays once the draw packet holds
+ * copies: retail leaves them pointing into the dead frame, whose place natively
+ * differs between builds. */
+void effDrawQuadWork(EffQuadWork *work) {
+    BillSnapshot snapshot;
+    f32 positions[4][4];
+    f32 texcoords[4][2];
+    EffAnimSample sample;
+    sdfDrawTag_t *list;
+    s32 duration, frame;
+    u32 color;
+    f32 scale, angle, x, y, halfWidth, halfHeight, cosine, sine;
+    f32 right, bottom, top, left;
+    f32 invHeight, invWidth;
+    EffGsPacket *packet;
+    sdfTexHandle_t *texture;
+    s32 width, height;
+    duration = work->source.duration;
+    frame = work->frame;
+    if (frame >= duration) return;
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
+    SDF_VU0_LOADVECTOR(work->orientation);
+    ToMatrix();
+    SDF_VU0_LOADVECTOR(work->position);
+    SDF_VU0_VECTOR_W_SET_ONE();
+    SDF_VU0_SET_ROW3();
+    sdf3DPrimLinkTm(list, 0);
+    effQuadPacketParams.uv = (u32 *)texcoords;
+    effQuadPacketParams.vertex = (u128 *)positions;
+    color = effSampleColorAlphaTracks(&work->source.colorTrack, &work->source.alphaTrack, frame, duration);
+    UnpackRGBAWord(work->color, 0x3C000000);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    UnpackRGBAWord(color, 0x3C000000);
+    SDF_VU0_MULVECTOR();
+    effQuadPacketParams.color = PackRGBAWord(128.0f);
+    scale = effSampleScalarCurve(&work->source.sizeTrack.curve, frame, duration) * (work->source.sizeScale * work->scale);
+    angle = effSampleScalarCurve(&work->source.angleTrack.curve, frame, duration);
+    if (work->billHandle != NULL) {
+        dds3BillboardSetAnimKey(work->billHandle, frame);
+        billCopyCurrentRecordToSnapshot(work->billHandle, &snapshot);
+    } else {
+        effSampleAnimSet(work->reference, frame, &sample);
+        texture = effAssignSampledSegmentReference(work->reference, effLayerSurfaces[work->source.alphaTrack.surfaceIndex], &sample);
+        height = texture->height << 4;
+        width = texture->width << 4;
+        snapshot.texture = texture;
+        snapshot.uv.components[2] = width;
+        snapshot.uv.components[4] = width;
+        snapshot.uv.components[5] = height;
+        angle += sample.angle;
+        snapshot.uv.components[7] = height;
+        snapshot.uv.components[0] = 0;
+        snapshot.uv.components[1] = 0;
+        snapshot.uv.components[3] = 0;
+        snapshot.uv.components[6] = 0;
+        snapshot.x = 0.0f;
+        snapshot.y = 0.0f;
+        snapshot.halfHeight = ((s32)(height * sample.scaleY) >> 5) * 0.0625f;
+        snapshot.halfWidth = ((s32)(width * sample.scaleX) >> 5) * 0.0625f;
+    }
+    halfWidth = snapshot.halfWidth * scale;
+    x = snapshot.x * scale;
+    y = snapshot.y * scale;
+    halfHeight = snapshot.halfHeight * scale;
+    cosine = sdfCos(angle);
+    sine = sdfSin(angle);
+    right = x + halfWidth;
+    bottom = y + halfHeight;
+    top = y - halfHeight;
+    left = x - halfWidth;
+    invHeight = 1.0f / (snapshot.texture->height << 4);
+    invWidth = 1.0f / (snapshot.texture->width << 4);
+    positions[0][1] = 0.0f;
+    positions[1][1] = 0.0f;
+    positions[3][1] = 0.0f;
+    positions[2][1] = 0.0f;
+    positions[0][0] = right * cosine - bottom * sine;
+    positions[0][2] = right * sine + bottom * cosine;
+    positions[1][0] = left * cosine - bottom * sine;
+    positions[1][2] = left * sine + bottom * cosine;
+    positions[2][0] = right * cosine - top * sine;
+    positions[2][2] = right * sine + top * cosine;
+    positions[3][0] = left * cosine - top * sine;
+    positions[3][2] = left * sine + top * cosine;
+    texcoords[0][0] = snapshot.uv.components[2] * invWidth;
+    texcoords[0][1] = snapshot.uv.components[3] * invHeight;
+    texcoords[1][0] = snapshot.uv.components[0] * invWidth;
+    texcoords[1][1] = snapshot.uv.components[1] * invHeight;
+    texcoords[2][0] = snapshot.uv.components[4] * invWidth;
+    texcoords[2][1] = snapshot.uv.components[5] * invHeight;
+    texcoords[3][0] = snapshot.uv.components[6] * invWidth;
+    texcoords[3][1] = snapshot.uv.components[7] * invHeight;
+    sdfMatSetTex(work->assetHandle, snapshot.texture);
+    sdf3DPrimLinkMat(list, work->assetHandle, 0);
+    if (work->source.noSetup == 0) {
+        packet = sdfGrAllocPacketBuff(0x30);
+        packet->vifTag = 0x5000000210000000ULL;
+        packet->dmaTag = 2;
+        packet->gifTag = 0x1000000000008001ULL;
+        packet->registerList = 0xE;
+        packet->registerValue = 0x31801;
+        packet->registerAddress = 0x47;
+        sdfDrawTagLink(list, (u32)packet);
+    }
+    sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&effQuadPacketParams));
+    /* Only the call above reads them (see the header). */
+    effQuadPacketParams.uv = NULL;
+    effQuadPacketParams.vertex = NULL;
+    if (work->source.noSetup == 0) {
+        packet = sdfGrAllocPacketBuff(0x30);
+        packet->vifTag = 0x5000000210000000ULL;
+        packet->dmaTag = 2;
+        packet->gifTag = 0x1000000000008001ULL;
+        packet->registerList = 0xE;
+        packet->registerValue = 0x51801;
+        packet->registerAddress = 0x47;
+        sdfDrawTagLink(list, (u32)packet);
+    }
+    effLayerSurfaces[work->source.alphaTrack.surfaceIndex]->regFunc(effLayerSurfaces[work->source.alphaTrack.surfaceIndex], list);
+    work->frame++;
+}
+
+#else
+
+INCLUDE_ASM(const s32, "game/code_0029E410", effDrawQuadWork);
+
+#endif
+
+void effCopyRenderResourcePosition(EffQuadWork *work, const f32 *source) {
+    SDF_VU0_COPYVECTOR(work->position, source);
+}
+
+void effCopyRenderResourceOrientation(EffQuadWork *work, const f32 *source) {
+    SDF_VU0_COPYVECTOR(work->orientation, source);
+}
+
+void effSetRenderResourceColor(EffQuadWork *work, u32 color) {
+    work->color = color;
+}
+
+void effSetRenderResourceMatrixComponent(EffQuadWork *work, f32 value) {
+    work->scale = value;
+}
+
+void effRandomizeParticleFields(EffClassWork *work) {
+    u32 index = 0;
+    u32 count = ((EffBillTimedHeader *)work->payload)->count;
+    EffPointSetRow *entry = ((EffPointSetTable *)work->resource)->rows;
+
+    if (count != 0) {
+        do {
+            entry->key = -1 - (dds3GetRandA((struct EffRandState *)dds3RandCB) & 3);
+            entry++;
+            index++;
+        } while (index < count);
+    }
+}
+
+EffPointSetTable *effCreateAlphaRampPointSetRows(EffBillPointConfig *src) {
+    u32 count = src->timed.count;
+    EffPointSetTable *table;
+    EffPointSetRow *row;
+    u32 i;
+    u32 alphaA;
+    u32 alphaB;
+    u32 alphaC;
+    u32 lowA;
+    u32 lowB;
+    u32 lowC;
+    s32 rampIn;
+    s32 rampOut;
+
+    table = sdfChipAllocDirect(count * sizeof(EffPointSetRow) + 4);
+    table->rows = (EffPointSetRow *)(table + 1);
+    if ((u32)src->layers < 3) {
+        src->layers = 3;
+    }
+    lowA = src->colorA & 0xFFFFFF;
+    lowB = src->colorB & 0xFFFFFF;
+    lowC = src->colorC & 0xFFFFFF;
+    alphaA = src->colorA >> 24;
+    alphaB = src->colorB >> 24;
+    alphaC = src->colorC >> 24;
+    rampIn = (s32)(src->rangeFadeInEnd * (f32)(src->layers + 1));
+    rampOut = (s32)(src->rangeFadeOutStart * (f32)(src->layers + 1));
+    row = table->rows;
+    for (i = 0; i < count; i++) {
+        EffPointSet *set = effCreatePointSet5(src->layers);
+        u32 n;
+        u32 *rec;
+        u32 j;
+
+        row->set = set;
+        n = set->rows / 5;
+        rec = (u32 *)set->tail;
+        for (j = 0; j < n; j++) {
+            f32 ratio;
+
+            if (j < rampIn) {
+                ratio = (f32)j / (f32)rampIn;
+            } else if (j <= rampOut) {
+                ratio = 1.0f;
+            } else {
+                ratio = (f32)(n - j) / (f32)(n - rampOut);
+            }
+            rec[0] = lowC | ((u32)((f32)alphaC * ratio) << 24);
+            rec[1] = lowB | ((u32)((f32)alphaB * ratio) << 24);
+            rec[2] = lowA | ((u32)((f32)alphaA * ratio) << 24);
+            rec[3] = rec[1];
+            rec[4] = rec[0];
+            rec += 5;
+        }
+        row->key = ~(i * 4);
+        row->angle = 0.0f;
+        row++;
+    }
+    return table;
+}
+
+void effFreeIndexedEntries(EffClassWork *work) {
+    u32 index = 0;
+    u32 count = ((EffBillTimedHeader *)work->payload)->count;
+    EffPointSetTable *table = (EffPointSetTable *)work->resource;
+    EffPointSetRow *entry = table->rows;
+
+    if (count != 0) {
+        do {
+            effReleasePointSetAsset(entry->set);
+            entry++;
+            index++;
+        } while (index < count);
+    }
+    sdfChipFreeDirect(table);
+}
+
+extern f32 effWorldUpVector[4];
+
+extern f32 aViewEye[4];
+
+extern f32 aViewTarget[4];
+
+/* Advance radial five-point wave strips from the class orientation. */
+void effUpdateRadialWavePointRows(EffClassWork *work) {
+    f32 offsets[5];
+    f32 widths[5];
+    f32 direction[4];
+    f32 view[4];
+    f32 axis[4];
+    EffBillPointConfig *config = work->payload;
+    EffPointSetRow *entry = ((EffPointSetTable *)work->resource)->rows;
+    u32 progress = config->timed.time.progress;
+    s32 count;
+    s32 remaining;
+    s32 respawnDelay;
+    f32 layers;
+    f32 step;
+    f32 waveStep;
+    f32 amplitude;
+    f32 bendScale;
+    f32 phase;
+    f32 speed;
+    f32 speedJitter;
+
+    if (progress < work->frame && progress != 0) {
+        return;
+    }
+    count = config->timed.count;
+    respawnDelay = config->respawnDelay;
+    speed = config->speed;
+    speedJitter = config->speedJitter;
+    layers = (f32)(u32)config->layers;
+    step = config->totalLength / layers;
+    waveStep = ((f32)config->periods * 3.14159265f) / layers;
+    amplitude = config->amplitude;
+    if (step <= 0.0f) {
+        return;
+    }
+    SDF_VU0_LOADVECTOR(aViewEye);
+    SDF_VU0_LOADVECTOR_B(aViewTarget);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_STOREVECTOR(view);
+    SDF_VU0_LOADVECTOR(work->vectors.orientation);
+    ToMatrix();
+    SDF_VU0_LOADVECTOR(effWorldUpVector);
+    SDF_VU0_APPLYMATRIX_XYZ();
+    SDF_VU0_STOREVECTOR(direction);
+    bendScale = 0.26179933547973633f;
+    widths[0] = 0;
+    widths[1] = config->edgeWidth;
+    widths[2] = widths[1] + config->halfWidth;
+    widths[3] = widths[2] + config->halfWidth;
+    widths[4] = widths[3] + config->edgeWidth;
+    if (count > 0) {
+        remaining = count;
+        for (; remaining != 0; remaining--, entry++) {
+            if (entry->key == -1) {
+                entry->color = 0xA0808080;
+            } else {
+                f32 r = dds3GetRandFloatA(dds3RandCB);
+                f32 bendStep = speed * (r * speedJitter + (1.0f - speedJitter));
+                f32 bend;
+
+                phase = entry->angle;
+                bendStep /= layers;
+                if (dds3GetRandA((struct EffRandState *)dds3RandCB) & 1) {
+                    bendStep = -bendStep;
+                }
+                bend = bendStep;
+                if (entry->color & 0xFF000000) {
+                    entry->color += 0xE0000000;
+                } else {
+                    entry->key = -1;
+                    if (respawnDelay > 0) {
+                        entry->key -= (u32)dds3GetRandA((struct EffRandState *)dds3RandCB) % (u32)respawnDelay;
+                    }
+                    continue;
+                }
+                {
+                    EffPointSet *set = entry->set;
+                    f32 *vertices = (f32 *)set->buffer;
+                    s32 rows = set->rows / 5;
+                    f32 stepSquared;
+                    f32 waveAngle;
+                    f32 waveHeight;
+                    f32 waveRadius;
+                    f32 oldSlope;
+                    f32 inner;
+                    f32 width;
+                    f32 newHeight;
+                    f32 delta;
+                    f32 segmentLength;
+                    s32 j;
+                    s32 k;
+
+                    if (dds3GetRandA((struct EffRandState *)dds3RandCB) & 1) {
+                        amplitude = -amplitude;
+                    }
+                    stepSquared = step * step;
+                    waveAngle = dds3GetRandFloatA(dds3RandCB) * 3.14159265f;
+                    waveRadius = amplitude * (dds3GetRandFloatA(dds3RandCB) * 0.9f + (1.0f - 0.9f));
+                    waveHeight = sdfSin(waveAngle) * waveRadius;
+                    waveAngle += waveStep;
+                    newHeight = sdfSin(waveAngle) * waveRadius;
+                    delta = newHeight - waveHeight;
+                    waveHeight = newHeight;
+                    segmentLength = fsqrtf(delta * delta + stepSquared);
+                    oldSlope = asinf(delta / segmentLength) + phase;
+                    inner = config->halfWidth;
+                    width = inner + config->edgeWidth;
+                    SDF_VU0_LOADVECTOR(direction);
+                    SDF_VU0_LOADVECTOR_B(view);
+                    SDF_VU0_OUTERPRODUCT();
+                    SDF_VU0_NORMALIZE();
+                    SDF_VU0_COPYVECTOR_A_TO_C();
+                    SDF_VU0_LOADVECTOR_B(direction);
+                    SDF_VU0_OUTERPRODUCT();
+                    SDF_VU0_STOREVECTOR(axis);
+                    SDF_VU0_COPYVECTOR_C_TO_A();
+                    SDF_VU0_COPYVECTOR_C_TO_B();
+                    SDF_VU0_SCALEVECTOR_BITS(width);
+                    SDF_VU0_STOREVECTOR(vertices);
+                    SDF_VU0_NEGVECTOR_XYZ();
+                    SDF_VU0_STOREVECTOR(vertices + 16);
+                    SDF_VU0_SCALEVECTOR_B_BITS(inner);
+                    SDF_VU0_STOREVECTOR_B(vertices + 4);
+                    SDF_VU0_NEGVECTOR_B_XYZ();
+                    SDF_VU0_STOREVECTOR_B(vertices + 12);
+                    SDF_VU0_STOREIDENTITYVECTOR(vertices + 8);
+                    SDF_VU0_COPYVECTOR_C_TO_B();
+                    SDF_VU0_SCALEVECTOR_B_BITS(waveHeight);
+                    for (j = 0; j < 5; j++) {
+                        SDF_VU0_LOADVECTOR(vertices + j * 4);
+                        SDF_VU0_ADDVECTOR();
+                        SDF_VU0_STOREVECTOR(vertices + j * 4);
+                        offsets[j] = 0;
+                    }
+                    vertices += 20;
+                    for (k = 1; k < rows; k++) {
+                        f32 tilt = bendScale * (dds3GetRandFloatA(dds3RandCB) * 0.75 + 0.25);
+                        f32 slope;
+                        f32 tangentScale;
+                        f32 sine;
+
+                        if (dds3GetRandA((struct EffRandState *)dds3RandCB) & 1) {
+                            bendScale = -bendScale;
+                        }
+                        waveAngle += waveStep;
+                        if (waveAngle >= 3.14159265f) {
+                            waveAngle -= 3.14159265f;
+                            amplitude = -amplitude;
+                            waveRadius = amplitude * (dds3GetRandFloatA(dds3RandCB) * 0.9f + (1.0f - 0.9f));
+                        }
+                        newHeight = sdfSin(waveAngle) * waveRadius;
+                        delta = newHeight - waveHeight;
+                        segmentLength = fsqrtf(delta * delta + stepSquared);
+                        slope = asinf(delta / segmentLength) + (tilt + bend);
+                        SetRotateMatrixAxis(oldSlope, (const struct RwV3d *)axis);
+                        slope += phase;
+                        SDF_VU0_LOADVECTOR(direction);
+                        SDF_VU0_APPLYMATRIX_XYZ();
+                        delta = (slope - oldSlope) * 0.5f;
+                        oldSlope = slope;
+                        waveHeight = newHeight;
+                        bend += bendStep;
+                        sine = sdfSin(delta);
+                        tangentScale = sine / sdfCos(delta);
+                        SDF_VU0_COPYVECTOR_A_TO_C();
+                        for (j = 0; j < 5; j++) {
+                            f32 extra = widths[j] * tangentScale;
+                            f32 length;
+                            offsets[j] += extra;
+                            SDF_VU0_COPYVECTOR_C_TO_B();
+                            SDF_VU0_LOADVECTOR(vertices + j * 4 - 20);
+                            length = segmentLength + offsets[j];
+                            SDF_VU0_SCALEVECTOR_B_BITS(length);
+                            SDF_VU0_ADDVECTOR();
+                            SDF_VU0_STOREVECTOR(vertices + j * 4);
+                            offsets[j] = extra;
+                        }
+                        vertices += 20;
+                    }
+                }
+            }
+            entry->key = (s32)((u32)entry->key + 1);
+        }
+    }
+}
+
+typedef struct Matrix4 Matrix4;
+
+void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix);
+
+/* Per-frame update of a five-point-group class: tint every active set and draw it under the class transform. */
+void effDrawTintedFivePointGroupRows(EffClassWork *work) {
+    EffBillPointConfig *config = (EffBillPointConfig *)work->payload;
+    EffBillTimedHeader *header = &config->timed;
+    EffPointSetRow *row = ((EffPointSetTable *)work->resource)->rows;
+    s32 frame = work->frame;
+    s32 time = header->time.duration;
+    s32 count;
+    s32 i;
+    f32 tint[4];
+    u128 mtx[4];
+    s32 color1[4];
+    s32 color2[4];
+    s32 rowColor[4];
+    s32 blended[4];
+    u32 packed;
+    u32 unit;
+    u32 second;
+
+    if (time < frame && time != 0) {
+        return;
+    }
+    count = header->count;
+    second = effSampleColorAlphaTracks(&header->colorTrack, &header->alphaTrack, frame, time);
+    color1[0] = work->color;
+    unit = 0x3C000000;
+    EE_MMI_RGBA_UNPACK(color1, unit);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    color2[0] = second;
+    EE_MMI_RGBA_UNPACK(color2, unit);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_STOREVECTOR_NOMEM(tint);
+    SDF_VU0_LOADIDENTITY();
+    SDF_VU0_LOADVECTOR(effOnesVector);
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(work->scale);
+    SDF_VU0_SCALE_XYZ();
+    SDF_VU0_LOADVECTOR(work);
+    SDF_VU0_VECTOR_W_SET_ONE();
+    SDF_VU0_SET_ROW3();
+    SDF_VU0_STOREMATRIX(mtx);
+    for (i = 0; i < count; i++, row++) {
+        if (row->key > 0) {
+            EffPointSet *set = row->set;
+
+            rowColor[0] = row->color;
+            EE_MMI_RGBA_UNPACK(rowColor, 1.0f / 128.0f);
+            SDF_VU0_LOADVECTOR_B(tint);
+            SDF_VU0_MULVECTOR();
+            MMI_RGBA_PACK_UNIT(packed, 128.0f);
+            blended[0] = packed;
+            set->color = blended[0];
+            set->type = header->alphaTrack.surfaceIndex;
+            set->flag = config->drawFlag;
+            effDrawFivePointGroups(set, mtx);
+        }
+    }
+}
+
+extern void effResetDispatchCounter(EffClassWork *);
+
+void effResetRadialClassResourceFrames(EffClassWork *work) {
+    u32 index = 0;
+    u32 count = ((EffBillTimedHeader *)work->payload)->count;
+    EffClassWork **entry = ((EffClassWorkList *)work->resource)->entries;
+
+    if (count != 0) {
+        do {
+            effResetDispatchCounter(*entry);
+            entry++;
+            index++;
+        } while (index < count);
+    }
+}
+
+extern EffClassWork *effCreateClassResourceWork(u16, void *);
+
+EffClassWorkList *effCreateRadialClassResourceEntries(EffBillPointConfig *config) {
+    u32 count = config->timed.count;
+    EffClassWorkList *allocation = sdfChipAllocDirect(count * 4 + 4);
+    EffClassWork **entries = (EffClassWork **)(allocation + 1);
+    EffBillPointConfig copy;
+    u32 index;
+    f32 step;
+    f32 position;
+    f32 offset;
+
+    allocation->entries = entries;
+    if ((u32)config->layers < 3) {
+        config->layers = 3;
+    }
+    if (count == 0) {
+        return allocation;
+    }
+    memcpy(&copy, config, 0x84);
+    copy.timed.count = 1;
+    copy.totalLength = config->totalLength;
+    step = 6.2831852f / (f32)count;
+    position = step * ((dds3GetRandFloatA(dds3RandCB) - 0.5f) * 2.0f);
+    for (index = 0; index < count; index++) {
+        EffClassWork *resourceWork = effCreateClassResourceWork(1, &copy);
+        u8 **resourceSlot = (u8 **)resourceWork->resource;
+
+        *entries++ = resourceWork;
+        *(f32 *)(*resourceSlot + 0xC) = position;
+        offset = (dds3GetRandFloatA(dds3RandCB) - 0.5f) * 2.0f;
+        position += step + step * offset * 0.25f;
+    }
+    return allocation;
+}
+
+extern void effDestroyClassResourceWork(EffClassWork *);
+
+void effDestroyRadialClassResourceEntries(EffClassWork *work) {
+    u8 *config = work->payload;
+    EffClassWorkList *state = (EffClassWorkList *)work->resource;
+    u32 count = ((EffBillTimedHeader *)config)->count;
+    u32 index = 0;
+    EffClassWork **entry = state->entries;
+
+    if (count != 0) {
+        do {
+            effDestroyClassResourceWork(*entry);
+            entry++;
+        } while (++index < count);
+    }
+    sdfChipFreeDirect(state);
+}
+
+extern void effAdvanceClassResourceFrame(EffClassWork *);
+
+void effAdvanceRadialClassResourceFrames(EffClassWork *work) {
+    u32 index = 0;
+    u32 count = ((EffBillTimedHeader *)work->payload)->count;
+    EffClassWork **entry = ((EffClassWorkList *)work->resource)->entries;
+
+    if (count != 0) {
+        do {
+            effAdvanceClassResourceFrame(*entry);
+            entry++;
+            index++;
+        } while (index < count);
+    }
+}
+
+extern void effCopyClassResourcePosition(void *, void *);
+
+extern void effCopyClassResourceOrientation(void *, void *);
+
+extern void effSetClassResourceMatrixComponent(EffClassWork *, f32);
+
+extern void effSetClassResourceColor(EffClassWork *, u32);
+
+extern void effDrawClassResourceWork(EffClassWork *);
+
+/* vu0 routine: packed color blend and SDK vector copies. */
+void effUpdateRadialClassInstances(EffClassWork *work) {
+    EffBillRadialConfig *config = work->payload;
+    s32 frame = work->frame;
+    s32 progress = config->point.timed.time.duration;
+    EffClassWork **entries = ((EffClassWorkList *)work->resource)->entries;
+    f32 position[4];
+    f32 orientation[4];
+    u32 unit;
+    u32 second;
+    u32 color;
+    u32 count;
+    u32 i;
+    f32 radius;
+    f32 scale;
+
+    if (progress < frame && progress != 0) {
+        return;
+    }
+    count = config->point.timed.count;
+    radius = config->radius;
+    second = effSampleColorAlphaTracks(&config->point.timed.colorTrack, &config->point.timed.alphaTrack, frame, progress);
+    unit = 0x3C000000;
+    UnpackRGBAWord(work->color, unit);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    UnpackRGBAWord(second, unit);
+    SDF_VU0_MULVECTOR();
+    color = PackRGBAWord(128.0f);
+    scale = work->scale;
+    SDF_VU0_COPYVECTOR(position, work->vectors.position);
+    SDF_VU0_COPYVECTOR(orientation, work->vectors.orientation);
+    for (i = 0; i < count; i++, entries++) {
+        EffClassWork *entry = *entries;
+        EffPointSetTable *points = (EffPointSetTable *)entry->resource;
+        f32 angle = points->rows->angle;
+
+        position[0] = work->vectors.position[0] - sdfSin(angle) * radius;
+        position[1] = work->vectors.position[1] - sdfCos(angle) * radius;
+        effCopyClassResourcePosition(*entries, position);
+        effCopyClassResourceOrientation(*entries, orientation);
+        effSetClassResourceMatrixComponent(*entries, scale);
+        effSetClassResourceColor(*entries, color);
+        effDrawClassResourceWork(*entries);
+    }
+}
+
+typedef struct EffScaleRange {
+    EffScaleRangeEntry *entries;
+    f32 start;
+    f32 delta;
+    struct sdfMemHandle_t *allocation;
+} EffScaleRange;
+
+void effSeedBillScaleRange(EffClassWork *work) {
+    EffBillRangeConfig *config = work->payload;
+    EffScaleRange *range = (EffScaleRange *)work->resource;
+    s32 steps = config->point.timed.time.duration;
+    EffScaleRangeEntry *entry = range->entries;
+    f32 start = config->startBase * (dds3GetRandFloatA(dds3RandCB) * config->startRand + (1.0f - config->startRand));
+    u32 index;
+    u32 count;
+
+    if (steps > 0) {
+        f32 end = config->endBase * (dds3GetRandFloatA(dds3RandCB) * config->endRand + (1.0f - config->endRand));
+        range->start = start;
+        range->delta = (end - start) / (f32)steps;
+    } else {
+        range->start = start;
+        range->delta = 0.0f;
+    }
+    count = config->point.timed.count;
+    index = 0;
+    if (count != 0) {
+        do {
+            index++;
+            entry->negativeSeed = -1 - (dds3GetRandA((struct EffRandState *)dds3RandCB) & 7);
+            entry++;
+        } while (index < count);
+    }
+}
+
+EffScaleRange *effCreateRetainedPointSetColorRows(EffBillPointConfig *src) {
+    u32 count = src->timed.count;
+    struct sdfMemHandle_t *allocation;
+    EffScaleRange *table;
+    EffScaleRangeEntry *row;
+    u32 i;
+    u32 alphaA;
+    u32 alphaB;
+    u32 alphaC;
+    u32 lowA;
+    u32 lowB;
+    u32 lowC;
+    s32 rampIn;
+    s32 rampOut;
+
+    allocation = sdfMemAllocDirect(count * sizeof(EffScaleRangeEntry) + sizeof(EffScaleRange));
+    table = (EffScaleRange *)sdfMemLock((struct sdfMemHandle_t *)((u32)allocation));
+    table->allocation = allocation;
+    table->entries = (EffScaleRangeEntry *)(table + 1);
+    if ((u32)src->layers < 3) {
+        src->layers = 3;
+    }
+    lowA = src->colorA & 0xFFFFFF;
+    lowB = src->colorB & 0xFFFFFF;
+    lowC = src->colorC & 0xFFFFFF;
+    alphaA = src->colorA >> 24;
+    alphaB = src->colorB >> 24;
+    alphaC = src->colorC >> 24;
+    rampIn = (s32)(src->rangeFadeInEnd * (f32)(src->layers + 1));
+    rampOut = (s32)(src->rangeFadeOutStart * (f32)(src->layers + 1));
+    row = table->entries;
+    for (i = 0; i < count; i++) {
+        EffPointSet *set = effCreatePointSet5(src->layers);
+        u32 n;
+        u32 *rec;
+        u32 j;
+
+        row->set = set;
+        n = set->rows / 5;
+        rec = (u32 *)set->tail;
+        for (j = 0; j < n; j++) {
+            f32 ratio;
+            if (j < rampIn) {
+                ratio = (f32)j / (f32)rampIn;
+            } else if (j <= rampOut) {
+                ratio = 1.0f;
+            } else {
+                ratio = (f32)(n - j) / (f32)(n - rampOut);
+            }
+            rec[0] = lowC | ((u32)((f32)alphaC * ratio) << 24);
+            rec[1] = lowB | ((u32)((f32)alphaB * ratio) << 24);
+            rec[2] = lowA | ((u32)((f32)alphaA * ratio) << 24);
+            rec[3] = rec[1];
+            rec[4] = rec[0];
+            rec += 5;
+        }
+        row->negativeSeed = ~(i * 4);
+        row++;
+    }
+    return table;
+}
+
+void effReleaseBillPointEntries(EffClassWork *work) {
+    EffBillTimedHeader *config = work->payload;
+    EffScaleRange *range = (EffScaleRange *)work->resource;
+    u32 count = config->count;
+    u32 index = 0;
+    EffScaleRangeEntry *entry = range->entries;
+
+    if (count != 0) {
+        do {
+            effReleasePointSetAsset(entry->set);
+            entry++;
+        } while (++index < count);
+    }
+    sdfMemFreeDirect(range->allocation);
+}
+
+/* Actual same-title provider contracts; full four-float VU buffers remain. */
+extern f32 aViewEye[4];
+
+extern f32 aViewTarget[4];
+
+/* Advance orbiting entries and rebuild their camera-facing, wavy point spans. */
+void effUpdateOrbitalPointSpanWaves(EffClassWork *work) {
+    f32 offsets[5];
+    f32 widths[5];
+    f32 direction[4];
+    f32 radial[4];
+    f32 tangent[4];
+    f32 view[4];
+    f32 position[4];
+    f32 previous[4];
+    f32 rotated[4];
+    EffBillRangeConfig *config = work->payload;
+    EffScaleRange *range = (EffScaleRange *)work->resource;
+    EffScaleRangeEntry *entry = (EffScaleRangeEntry *)range->entries;
+    u32 progress = config->point.timed.time.progress;
+    s32 count;
+    u8 useHeight;
+    s32 respawnDelay;
+    s32 remaining;
+    f32 step;
+    f32 layers;
+    f32 phase;
+    f32 waveStep;
+    f32 amplitude;
+    f32 bendScale;
+    f32 acceleration;
+    f32 bendStep;
+    f32 radius;
+    if (progress < work->frame && progress != 0) {
+        return;
+    }
+    count = config->point.timed.count;
+    respawnDelay = config->point.respawnDelay;
+    layers = (f32)(u32)config->point.layers;
+    step = config->point.totalLength / layers;
+    waveStep = ((f32)config->point.periods * 3.14159265f) / layers;
+    amplitude = config->point.amplitude;
+    acceleration = config->angularAcceleration;
+    useHeight = config->tilted;
+    if (step <= 0.0f) {
+        return;
+    }
+    SDF_VU0_LOADVECTOR(aViewEye);
+    SDF_VU0_LOADVECTOR_B(aViewTarget);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_STOREVECTOR(view);
+    widths[0] = 0;
+    widths[1] = config->point.edgeWidth;
+    widths[2] = widths[1] + config->point.halfWidth;
+    widths[3] = widths[2] + config->point.halfWidth;
+    widths[4] = widths[3] + config->point.edgeWidth;
+    position[3] = direction[3] = 1.0f;
+    bendStep = -((step / 10.0f) * (5.0f * (3.14159265f / 180.0f)));
+    bendScale = (20.0f * (3.14159265f / 180.0f));
+    radius = range->start;
+    range->start = radius + range->delta;
+    if (count > 0) {
+    remaining = count;
+    for (; remaining != 0; remaining--, entry++) {
+        if (entry->negativeSeed == -1) {
+            f32 r = dds3GetRandFloatA(dds3RandCB);
+            f32 jitter = config->angularRand;
+            f32 baseSpeed = config->angularBase;
+            entry->phase = 0;
+            entry->angularRate = baseSpeed * (r * jitter + (1.0f - jitter));
+            if (!useHeight) {
+                entry->yaw = (dds3GetRandFloatA(dds3RandCB) - 0.5f) * 2.0f * 3.14159265f;
+                entry->height = 0;
+            } else {
+                entry->yaw = (dds3GetRandFloatA(dds3RandCB) - 0.5f) * 2.0f * (45.0f * (3.14159265f / 180.0f));
+                entry->height = -config->heightScale * dds3GetRandFloatA(dds3RandCB);
+            }
+            entry->pitch = (dds3GetRandFloatA(dds3RandCB) - 0.5f) * 2.0f * 3.14159265f;
+            SetRotateMatrixX(entry->yaw);
+            SetRotateMatrixY_B(entry->pitch);
+            MultMatrixRevNoArg();
+            phase = entry->phase;
+            position[0] = sdfCos(phase) * radius;
+            position[1] = 0;
+            position[2] = sdfSin(phase) * radius;
+            SDF_VU0_LOADVECTOR(position);
+            SDF_VU0_APPLYMATRIX_XYZ();
+            SDF_VU0_STOREVECTOR(position);
+            entry->position[0] = position[0];
+            entry->color = 0xA0808080;
+            entry->position[1] = position[1];
+            entry->position[2] = position[2];
+        } else {
+            if (entry->color & 0xFF000000) {
+                entry->color += 0xE0000000;
+            } else {
+                entry->negativeSeed = -1;
+                if (respawnDelay > 0) {
+                    entry->negativeSeed -= (u32)dds3GetRandA((struct EffRandState *)dds3RandCB) % (u32)respawnDelay;
+                }
+                continue;
+            }
+            {
+                EffPointSet *set = entry->set;
+                f32 *vertices = (f32 *)set->buffer;
+                s32 rows = set->rows / 5;
+                f32 stepSquared;
+                f32 waveAngle;
+                f32 waveHeight;
+                f32 waveRadius;
+                f32 oldSlope;
+                f32 inner;
+                f32 edgeWidth;
+                f32 width;
+                f32 curve;
+                f32 curveSample;
+                f32 newHeight;
+                f32 delta;
+                f32 segmentLength;
+                s32 j;
+                s32 k;
+                if (dds3GetRandA((struct EffRandState *)dds3RandCB) & 1) {
+                    amplitude = -amplitude;
+                }
+                stepSquared = step * step;
+                waveAngle = dds3GetRandFloatA(dds3RandCB) * 3.14159265f;
+                waveRadius = amplitude * (dds3GetRandFloatA(dds3RandCB) * 0.95f + (1.0f - 0.95f));
+                waveHeight = sdfSin(waveAngle) * waveRadius;
+                waveAngle += waveStep;
+                newHeight = sdfSin(waveAngle) * waveRadius;
+                delta = newHeight - waveHeight;
+                waveHeight = newHeight;
+                segmentLength = fsqrtf(delta * delta + stepSquared);
+                oldSlope = asinf(delta / segmentLength);
+                inner = config->point.halfWidth;
+                edgeWidth = config->point.edgeWidth;
+                curveSample = dds3GetRandFloatA(dds3RandCB);
+                width = inner + edgeWidth;
+                phase = (entry->angularRate + acceleration * (f32)(entry->negativeSeed + 1) * 0.5f) * (f32)(entry->negativeSeed + 1);
+                phase = phase + entry->phase;
+                curve = bendStep * (curveSample * 0.7f + (1.0f - 0.7f));
+                SetRotateMatrixX(entry->yaw);
+                SetRotateMatrixY_B(entry->pitch);
+                MultMatrixRevNoArg();
+                position[0] = sdfCos(phase) * radius;
+                position[1] = 0;
+                position[2] = sdfSin(phase) * radius;
+                SDF_VU0_LOADVECTOR(position);
+                SDF_VU0_APPLYMATRIX_XYZ();
+                SDF_VU0_STOREVECTOR(position);
+                SDF_VU0_STOREVECTOR(previous);
+                SDF_VU0_NORMALIZE();
+                SDF_VU0_STOREVECTOR(radial);
+                direction[0] = previous[0] - entry->position[0];
+                direction[1] = previous[1] - entry->position[1];
+                direction[2] = previous[2] - entry->position[2];
+                SDF_VU0_LOADVECTOR(direction);
+                SDF_VU0_NORMALIZE();
+                SDF_VU0_COPYVECTOR_A_TO_C();
+                SDF_VU0_LOADVECTOR_B(radial);
+                SDF_VU0_STOREVECTOR(direction);
+                SDF_VU0_OUTERPRODUCT();
+                SDF_VU0_STOREVECTOR(tangent);
+                SDF_VU0_LOADVECTOR_B(view);
+                SDF_VU0_COPYVECTOR_C_TO_A();
+                SDF_VU0_OUTERPRODUCT();
+                SDF_VU0_NORMALIZE();
+                SDF_VU0_COPYVECTOR_A_TO_C();
+                SDF_VU0_COPYVECTOR_A_TO_B();
+                SDF_VU0_SCALEVECTOR_BITS(width);
+                SDF_VU0_STOREVECTOR(vertices);
+                SDF_VU0_NEGVECTOR_XYZ();
+                SDF_VU0_STOREVECTOR(vertices + 16);
+                SDF_VU0_SCALEVECTOR_B_BITS(inner);
+                SDF_VU0_STOREVECTOR_B(vertices + 4);
+                SDF_VU0_NEGVECTOR_B_XYZ();
+                SDF_VU0_STOREVECTOR_B(vertices + 12);
+                SDF_VU0_STOREIDENTITYVECTOR(vertices + 8);
+                position[1] += entry->height;
+                SDF_VU0_LOADVECTOR_B(position);
+                for (j = 0; j < 5; j++) {
+                    SDF_VU0_LOADVECTOR(vertices + j * 4);
+                    SDF_VU0_ADDVECTOR();
+                    SDF_VU0_STOREVECTOR(vertices + j * 4);
+                    offsets[j] = 0;
+                }
+                entry->position[0] = previous[0];
+                entry->position[1] = previous[1];
+                entry->position[2] = previous[2];
+                vertices += 20;
+                for (k = 1; k < rows; k++) {
+                    f32 tilt = bendScale * (dds3GetRandFloatA(dds3RandCB) * 0.75 + 0.25);
+                    f32 slope;
+                    f32 distance;
+                    f32 tangentScale;
+                    if (dds3GetRandA((struct EffRandState *)dds3RandCB) & 1) {
+                        bendScale = -bendScale;
+                    }
+                    waveAngle += waveStep;
+                    if (waveAngle >= 3.14159265f) {
+                        waveAngle -= 3.14159265f;
+                        amplitude = -amplitude;
+                        waveRadius = amplitude * (dds3GetRandFloatA(dds3RandCB) * 0.95f + (1.0f - 0.95f));
+                        curve = bendStep * (dds3GetRandFloatA(dds3RandCB) * 0.7f + (1.0f - 0.7f));
+                    }
+                    newHeight = sdfSin(waveAngle) * waveRadius;
+                    delta = newHeight - waveHeight;
+                    segmentLength = fsqrtf(delta * delta + stepSquared);
+                    slope = asinf(delta / segmentLength) + tilt;
+                    SetRotateMatrixAxis(oldSlope, (const struct RwV3d *)radial);
+                    SDF_VU0_LOADVECTOR(direction);
+                    SDF_VU0_APPLYMATRIX_XYZ();
+                    SDF_VU0_STOREVECTOR(rotated);
+                    SetRotateMatrixAxis(curve, (const struct RwV3d *)tangent);
+                    SDF_VU0_LOADVECTOR(direction);
+                    SDF_VU0_APPLYMATRIX_XYZ();
+                    SDF_VU0_STOREVECTOR(direction);
+                    SDF_VU0_LOADVECTOR(previous);
+                    SDF_VU0_COPYVECTOR_A_TO_B();
+                    SDF_VU0_APPLYMATRIX_XYZ();
+                    SDF_VU0_STOREVECTOR(previous);
+                    SDF_VU0_SUBVECTOR();
+                    SDF_VU0_GETLENGTH(distance);
+                    tangentScale = atanf((slope - oldSlope) * 0.5f);
+                    oldSlope = slope;
+                    waveHeight = newHeight;
+                    SDF_VU0_LOADVECTOR_C(rotated);
+                    for (j = 0; j < 5; j++) {
+                        f32 extra = widths[j] * tangentScale;
+                        f32 length;
+                        offsets[j] += extra;
+                        SDF_VU0_COPYVECTOR_C_TO_B();
+                        SDF_VU0_LOADVECTOR(vertices + j * 4 - 20);
+                        length = distance + offsets[j];
+                        SDF_VU0_SCALEVECTOR_B_BITS(length);
+                        SDF_VU0_ADDVECTOR();
+                        SDF_VU0_STOREVECTOR(vertices + j * 4);
+                        offsets[j] = extra;
+                    }
+                    vertices += 20;
+                }
+            }
+        }
+        entry->negativeSeed++;
+    }
+    }
+}
+
+/* vu0 routine: tint point sets and draw under the class quaternion transform.
+ * Retail color homes +0x50/+0x60/+0x70/+0x80 are 16-byte SDK-sized locals. */
+void effDrawRetainedPointSetRows(EffClassWork *work) {
+    EffBillRangeConfig *config = work->payload;
+    s32 frame = work->frame;
+    s32 duration = config->point.timed.time.duration;
+    EffScaleRangeEntry *row = ((EffScaleRange *)work->resource)->entries;
+    s32 count;
+    f32 colorFactor[4];
+    Matrix4 matrix;
+    s32 classColor[4];
+    s32 fadeColor[4];
+    s32 entryColor[4];
+    s32 blended[4];
+    u32 fade;
+    u32 packed;
+    u32 unit;
+
+    if (duration < frame && duration != 0) {
+        return;
+    }
+    count = config->point.timed.count;
+    fade = effSampleColorAlphaTracks(&config->point.timed.colorTrack,
+        &config->point.timed.alphaTrack, frame, duration);
+    classColor[0] = work->color;
+    unit = 0x3C000000;
+    EE_MMI_RGBA_UNPACK(classColor, unit);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    fadeColor[0] = fade;
+    EE_MMI_RGBA_UNPACK(fadeColor, unit);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_STOREVECTOR_NOMEM(colorFactor);
+    SDF_VU0_LOADVECTOR(work->vectors.orientation);
+    ToMatrix();
+    SDF_VU0_LOADVECTOR(effOnesVector);
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(work->scale);
+    SDF_VU0_SCALE_XYZ();
+    SDF_VU0_LOADVECTOR(work->vectors.position);
+    SDF_VU0_VECTOR_W_SET_ONE();
+    SDF_VU0_SET_ROW3();
+    SDF_VU0_STOREMATRIX(&matrix);
+    if (count > 0) {
+        s32 remaining = count;
+        do {
+            if (row->negativeSeed > 0) {
+                EffPointSet *set = row->set;
+                entryColor[0] = row->color;
+                EE_MMI_RGBA_UNPACK(entryColor, 1.0f / 128.0f);
+                SDF_VU0_LOADVECTOR_B(colorFactor);
+                SDF_VU0_MULVECTOR();
+                MMI_RGBA_PACK_UNIT(packed, 128.0f);
+                blended[0] = packed;
+                set->color = blended[0];
+                set->type = config->point.timed.alphaTrack.surfaceIndex;
+                set->flag = config->point.drawFlag;
+                effDrawFivePointGroups(set, &matrix);
+            }
+            remaining--;
+            row++;
+        } while (remaining != 0);
+    }
+}
+
+EffClassWork *effCreateClassResourceWork(u16 kind, void *source) {
+    u32 headerSize = 0x40;
+    u32 size = effClassResourceWorkOperations[kind].payloadSize;
+    EffClassWork *effect = sdfChipAllocDirect(size + headerSize);
+    effect->payload = (u8 *)effect + headerSize;
+    effect->color = 0x80808080;
+    effect->scale = 1.0f;
+    effect->frame = 0;
+    effect->kind = kind;
+    SDF_VU0_STOREIDENTITYVECTOR_NOMEM(effect);
+    SDF_VU0_STOREIDENTITYVECTOR_NOMEM(effect->vectors.orientation);
+    memcpy(effect->payload, source, size);
+    effect->resource = effClassResourceWorkOperations[kind].createResource(source);
+    effClassResourceWorkOperations[kind].initialize(effect);
+    return effect;
+}
+
+EffClassWork *effCreateClassResourceFromFile(FileJobPayload *request) {
+    void *source;
+
+    source = fileResolvePrimaryBuffer(request);
+    return effCreateClassResourceWork(request->option, source);
+}
+
+void effDestroyClassResourceWork(EffClassWork *work) {
+    effClassResourceWorkOperations[work->kind].destroyResource(work);
+    sdfChipFreeDirect(work);
+}
+
+EffClassWork *effCloneClassResourceWork(EffClassWork *work) {
+    return effCreateClassResourceWork((u16)work->kind, work->payload);
+}
+
+void effResetDispatchCounter(EffClassWork *work) {
+    effClassResourceWorkOperations[work->kind].initialize(work);
+    work->frame = 0;
+}
+
+void effAdvanceClassResourceFrame(EffClassWork *work) {
+    effClassResourceWorkOperations[work->kind].update(work);
+    work->frame = work->frame + 1;
+}
+
+void effDrawClassResourceWork(EffClassWork *work) {
+    effClassResourceWorkOperations[work->kind].draw(work);
+}
+
+void effUpdateAndDrawClassResource(EffClassWork *work) {
+    effAdvanceClassResourceFrame(work);
+    effDrawClassResourceWork(work);
+}
+
+void effCopyClassResourcePosition(void *dst, void *src) {
+    SDF_VU0_COPYVECTOR(dst, src);
+}
+
+void effCopyClassResourceOrientation(void *work, void *src) {
+    SDF_VU0_COPYVECTOR(((EffClassWork *)work)->vectors.orientation, src);
+}
+
+void effSetClassResourceColor(EffClassWork *work, u32 color) {
+    work->color = color;
+}
+
+void effSetClassResourceMatrixComponent(EffClassWork *work, float value) {
+    work->scale = value;
+}
+
+extern sdf3DPrimPolyParm_t D_003DCAD0[];
+
+EffPointSet *effCreatePointSet5(s32 count) {
+    s32 rows = count * 5 + 5;
+    s32 size = rows * 20;
+    struct sdfMemHandle_t *base;
+    u8 *data;
+    EffPointSet *set;
+
+    size = ((size >> 4) + ((size & 0xF) != 0)) << 4;
+    base = sdfMemAllocDirect(size + 0x20);
+    data = (u8 *)sdfMemLock(base);
+    set = (EffPointSet *)(data + size);
+    set->buffer = data;
+    data += rows * 16;
+    set->color = 0x80808080;
+    set->type = 2;
+    set->rows = rows;
+    set->allocation = base;
+    set->tail = data;
+    set->flag = 0;
+    set->handle = sdfMatNew();
+    sdfMatSetConstant(set->handle, 1.0f);
+    memset(D_003DCAD0, 0, 0x2C);
+    D_003DCAD0[0].attr = 0x4000;
+    return set;
+}
+
+/* Queue the draw asset for release and return the backing allocation. */
+void effReleasePointSetAsset(EffPointSet *set) {
+    sdfMatFreeDelayed(set->handle);
+    sdfMemFreeDirect(set->allocation);
+}
+
+void effDrawFivePointGroups(EffPointSet *set, Matrix4 *matrix) {
+    void *list;
+    EffGsPacket *packet;
+    s32 remaining;
+
+    if (set->color & 0xFF000000) {
+        list = (void *)sdfGrAllocPacketBuff(0x20);
+        sdfDrawTagInit(list);
+        if (matrix == NULL) {
+            SDF_VU0_LOADIDENTITY();
+        } else {
+            SDF_VU0_LOADMATRIX(matrix);
+        }
+        sdf3DPrimLinkTm(list, 0);
+        sdf3DPrimLinkMat(list, set->handle, 0);
+        if (set->flag == 0) {
+            packet = (EffGsPacket *)sdfGrAllocPacketBuff(0x30);
+            packet->dmaTag = 2;
+            packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
+            packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
+            packet->registerList = 0xE;
+            packet->registerValue = 0x31801;
+            packet->registerAddress = 0x47;
+            sdfDrawTagLink(list, (u32)packet);
+        }
+        remaining = set->rows;
+        D_003DCAD0[0].vertexColor = (u32 *)set->tail;
+        D_003DCAD0[0].vertex = (u128 *)set->buffer;
+        D_003DCAD0[0].color = set->color;
+        D_003DCAD0[0].faceCount = 0x10;
+        D_003DCAD0[0].pointCount = 0xF;
+        D_003DCAD0[0].faceIndex = D_0037ECB0;
+        while (remaining >= 0xF) {
+            remaining -= 0xA;
+            sdfDrawTagLink(list, effPkt3DPrimMakePoly(D_003DCAD0));
+            D_003DCAD0[0].vertex += 0xA;
+            D_003DCAD0[0].vertexColor += 0xA;
+        }
+        if (remaining >= 0xA) {
+            D_003DCAD0[0].faceCount = 8;
+            D_003DCAD0[0].pointCount = remaining;
+            sdfDrawTagLink(list, effPkt3DPrimMakePoly(D_003DCAD0));
+        }
+        if (set->flag == 0) {
+            packet = (EffGsPacket *)sdfGrAllocPacketBuff(0x30);
+            packet->dmaTag = 2;
+            packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
+            packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
+            packet->registerList = 0xE;
+            packet->registerValue = 0x51801;
+            packet->registerAddress = 0x47;
+            sdfDrawTagLink(list, (u32)packet);
+        }
+        D_0037ECF0[set->type]->regFunc(D_0037ECF0[set->type], list);
+    }
+}
+
+EffectStripNode *effCreateStripNode(u32 percent) {
+    EffectStripNode *node = sdfChipAllocZeroDirect(sizeof(EffectStripNode));
+    node->percent = percent;
+    node->color = 0x80808080;
+    node->opacity = 1.0f;
+    node->active = 0;
+    node->trackSet = effCreateTrackSetWithSharedReferences(percent * 4, 2, 0);
+    node->resource = dds3BillboardGeneral(0);
+    node->count = 1;
+    return node;
+}
+
+EffectStripNode *effCreateStripNodeFromGrid(FileKeyBlock *grid) {
+    u32 n;
+    s32 w = grid->emissionDuration;
+    /* The strip capacity uses the same signed product as 002A5A58. */
+    n = (w ? w : (s32)grid->spawnRate) * (w ? (s32)grid->spawnRate : grid->length);
+    return effCreateStripNode(n > 100 ? 100 : n);
+}
+
+extern void effReplaceFileResourceRef(EffectStripNode *, u32, const void *);
+
+EffectStripNode *effFileResourceReferenceReplace(FileJobPayload *work) {
+    u8 *source = fileResolvePrimaryBuffer(work);
+    FileKeyBlock *params = (FileKeyBlock *)(source + 0x20);
+    EffectStripNode *node = effCreateStripNodeFromGrid(params);
+
+    memcpy(&node->copiedHeader, source, sizeof(node->copiedHeader));
+    effReplaceFileResourceRef(node, work->option, params);
+    return node;
+}
+
+void effReleaseModelResources(EffectStripNode *work) {
+    if (work->resource != NULL) {
+        dds3BillboardDelete(work->resource);
+    }
+    if (work->trackSet != NULL) {
+        effReleaseResourceRefs(work->trackSet);
+    }
+    if (work->active != 0) {
+        effPCPHelperBEDGetModel(work->active);
+    }
+    sdfChipFreeDirect(work);
+}
+
+EffectStripNode *effCloneStripResourceFromOwner(EffectStripNode *work) {
+    FileKeyBlock *params = (FileKeyBlock *)work->active->data1;
+    EffectStripNode *node = effCreateStripNodeFromGrid(params);
+    memcpy(&node->copiedHeader, params, sizeof(node->copiedHeader));
+    effReplaceFileResourceRef(node, work->active->type, params);
+    return node;
+}
+
+void effReplaceFileResourceRef(EffectStripNode *node, u32 entryId, const void *resource) {
+    if (node->active != 0) {
+        effPCPHelperBEDGetModel(node->active);
+    }
+    node->active = fileAllocateGridRecordSlots((u16)entryId, node->percent, resource);
+}
+
+void effClearStripRecordReferences(EffectStripNode *node) {
+    if (node->active != 0) {
+        fileClearRecordReferences(node->active);
+        return;
+    }
+}
+
+void effAcquireStripRecord(EffectStripNode *node) {
+    if (node->active != 0) {
+        fileAcquireRecord(node->active);
+        return;
+    }
+}
+
+extern f32 aViewDown[4];
+
+void effDrawEffectStrip(EffectStripNode *node) {
+    Matrix4 matrix;
+    f32 nodeTint[4];
+    f32 tint[4];
+    u128 translation[1];
+    u128 rotation[1];
+    f32 view[4];
+    f32 rightAxis[4];
+    f32 viewUp[4];
+    f32 right[4];
+    f32 up[4];
+    f32 position[4];
+    f32 innerTint[4];
+    f32 outerTint[4];
+    u32 packedInnerColor;
+    u32 packedOuterColor;
+    u32 childColor;
+    FileKeyBlock *info;
+    EffTrackSet *output;
+    FileSlot *entry;
+    f32 (*positions)[4];
+    f32 (*quad)[4];
+    u32 *colors;
+    u32 *quadColors;
+    struct billHandle_t *billboard;
+    s32 count;
+    s32 remaining;
+    u32 hasTransform;
+    s32 i;
+    f32 opacity;
+    f32 billSize;
+    f32 crossSize;
+    f32 longSize;
+    f32 sideSize;
+    f32 scale;
+    f32 cross;
+    f32 billExtent;
+    f32 along;
+    f32 side;
+
+    info = (FileKeyBlock *)node->active->data0;
+    UnpackRGBAWordFloat(node->color, 1.0f / 128.0f);
+    SDF_VU0_STOREVECTOR_NOMEM(nodeTint);
+    UnpackRGBAWordFloat(node->copiedHeader.tint, 1.0f / 128.0f);
+    SDF_VU0_LOADVECTOR_B(nodeTint);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_STOREVECTOR_NOMEM(tint);
+    hasTransform = node->active->flags & 1;
+    if (!hasTransform) {
+        SDF_VU0_STOREIDENTITY(&matrix);
+    } else {
+        fileReadRecordSecondVector(node->active, rotation);
+        fileReadVectorPtr20(node->active, translation);
+        SDF_VU0_LOADVECTOR(rotation);
+        ToMatrix();
+        SDF_VU0_LOADVECTOR(translation);
+        SDF_VU0_VECTOR_W_SET_ONE();
+        SDF_VU0_SET_ROW3();
+        SDF_VU0_STOREMATRIX(&matrix);
+    }
+    billboard = node->resource;
+    opacity = node->opacity;
+    billSize = node->copiedHeader.billSize;
+    dds3BillboardSetMode(billboard, (s16)info->alphaTrack.surfaceIndex);
+    SDF_VU0_LOADVECTOR(aViewTarget);
+    SDF_VU0_LOADVECTOR_B(aViewEye);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR_NOMEM(view);
+    SDF_VU0_LOADVECTOR_B(aViewDown);
+    SDF_VU0_STOREVECTOR_B_NOMEM(up);
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_STOREVECTOR_NOMEM(right);
+    output = node->trackSet;
+    entry = node->active->slots;
+    count = node->percent;
+    positions = (f32 (*)[4])output->buffer;
+    colors = (u32 *)output->tail;
+    if (info->length <= 0 || count == 0) {
+        return;
+    }
+    longSize = node->copiedHeader.longSize;
+    sideSize = node->copiedHeader.sideSize;
+    crossSize = node->copiedHeader.crossSize;
+    UnpackRGBAWordFloat(node->copiedHeader.innerColor, 1.0f / 128.0f);
+    SDF_VU0_STOREVECTOR_NOMEM(innerTint);
+    UnpackRGBAWordFloat(node->copiedHeader.outerColor, 1.0f / 128.0f);
+    SDF_VU0_STOREVECTOR_NOMEM(outerTint);
+    if (count > 0) {
+        remaining = count;
+        do {
+            if ((u32)(FILE_SLOT_FRAME(entry) + 2) < 2) {
+                quad = positions;
+                for (i = 0; i < 4; i++, quad += 4) {
+                    SDF_VU0_STOREIDENTITYVECTOR(quad[0]);
+                    SDF_VU0_STOREIDENTITYVECTOR(quad[1]);
+                    SDF_VU0_STOREIDENTITYVECTOR(quad[2]);
+                    SDF_VU0_STOREIDENTITYVECTOR(quad[3]);
+                }
+            } else if (FILE_SLOT_FRAME(entry) > 0) {
+                scale = entry->scale * opacity;
+                if (hasTransform) {
+                    SDF_VU0_LOADMATRIX(&matrix);
+                    SDF_VU0_LOADVECTOR(entry->pos);
+                    SDF_VU0_APPLYMATRIX_XYZ1();
+                    SDF_VU0_STOREVECTOR(position);
+                } else {
+                    SDF_VU0_COPYVECTOR(position, entry->pos);
+                }
+                UnpackRGBAWordFloat(entry->color, 1.0f / 128.0f);
+                SDF_VU0_LOADVECTOR_B(tint);
+                SDF_VU0_MULVECTOR();
+                childColor = PackRGBAWord(128.0f);
+                cross = crossSize * scale;
+                billExtent = billSize * scale;
+                dds3BillboardSetRGBA(billboard, childColor);
+                dds3BillboardSetScale(billboard, billExtent, billExtent);
+                dds3BillboardSetRotate(billboard, entry->angle);
+                effCopyVector(billboard->position, position);
+                dds3BillboardDraw(billboard);
+                along = longSize * scale * 1.5f;
+                side = sideSize * scale * 1.5f;
+                SetRotateMatrixAxis(entry->angle, (const RwV3d *)view);
+                SDF_VU0_LOADVECTOR(right);
+                SDF_VU0_APPLYMATRIX_XYZ();
+                SDF_VU0_STOREVECTOR_NOMEM(rightAxis);
+                SDF_VU0_LOADVECTOR(up);
+                SDF_VU0_APPLYMATRIX_XYZ();
+                SDF_VU0_STOREVECTOR_NOMEM(viewUp);
+                SDF_VU0_LOADVECTOR_C(entry->pos);
+                SDF_VU0_STOREVECTOR_C(positions[2]);
+                SDF_VU0_STOREVECTOR_C(positions[6]);
+                SDF_VU0_LOADVECTOR(rightAxis);
+                SDF_VU0_SCALEVECTOR_BITS(along);
+                SDF_VU0_COPYVECTOR_A_TO_B();
+                SDF_VU0_ADDVECTOR_A_C();
+                SDF_VU0_STOREVECTOR(positions[0]);
+                SDF_VU0_NEGVECTOR_B_XYZ();
+                SDF_VU0_ADDVECTOR_B_C();
+                SDF_VU0_STOREVECTOR_B(positions[4]);
+                SDF_VU0_LOADVECTOR(viewUp);
+                SDF_VU0_SCALEVECTOR_BITS(cross);
+                SDF_VU0_COPYVECTOR_A_TO_B();
+                SDF_VU0_ADDVECTOR_A_C();
+                SDF_VU0_STOREVECTOR(positions[1]);
+                SDF_VU0_STOREVECTOR(positions[5]);
+                SDF_VU0_NEGVECTOR_B_XYZ();
+                SDF_VU0_ADDVECTOR_B_C();
+                SDF_VU0_STOREVECTOR_B(positions[3]);
+                SDF_VU0_STOREVECTOR_B(positions[7]);
+                quad = positions + 8;
+                /* Retail addresses this store from positions (+0xA0) but the next one from quad (+0x60):
+                 * a bare volatile asm (no memory clobber) flushes cse's table, so the second address is not
+                 * folded (cc1probe --cse, hooked==unhooked: uid599 stays quad+96). */
+                SDF_VU0_STOREVECTOR_C_NOMEM(quad[2]);
+                SDF_VU0_STOREVECTOR_C(quad[6]);
+                SDF_VU0_LOADVECTOR(viewUp);
+                SDF_VU0_SCALEVECTOR_BITS(side);
+                SDF_VU0_COPYVECTOR_A_TO_B();
+                SDF_VU0_ADDVECTOR_A_C();
+                SDF_VU0_STOREVECTOR(quad[0]);
+                SDF_VU0_NEGVECTOR_B_XYZ();
+                SDF_VU0_ADDVECTOR_B_C();
+                SDF_VU0_STOREVECTOR_B(quad[4]);
+                SDF_VU0_LOADVECTOR(rightAxis);
+                SDF_VU0_SCALEVECTOR_BITS(cross);
+                SDF_VU0_COPYVECTOR_A_TO_B();
+                SDF_VU0_ADDVECTOR_A_C();
+                SDF_VU0_STOREVECTOR(quad[1]);
+                SDF_VU0_STOREVECTOR(quad[5]);
+                SDF_VU0_NEGVECTOR_B_XYZ();
+                SDF_VU0_ADDVECTOR_B_C();
+                SDF_VU0_STOREVECTOR_B(quad[3]);
+                SDF_VU0_STOREVECTOR_B(quad[7]);
+                UnpackRGBAWordFloat((entry->color & 0xFF000000) | 0x808080, 1.0f / 128.0f);
+                SDF_VU0_COPYVECTOR_A_TO_B();
+                SDF_VU0_LOADVECTOR(innerTint);
+                SDF_VU0_MULVECTOR();
+                packedInnerColor = PackRGBAWord(128.0f);
+                SDF_VU0_LOADVECTOR(outerTint);
+                SDF_VU0_MULVECTOR();
+                packedOuterColor = PackRGBAWord(128.0f);
+                quadColors = colors;
+                for (i = 3; i >= 0; i--, quadColors += 4) {
+                    quadColors[0] = packedOuterColor;
+                    quadColors[1] = packedOuterColor;
+                    quadColors[2] = packedInnerColor;
+                    quadColors[3] = packedOuterColor;
+                }
+            }
+            entry++;
+            positions += 16;
+            colors += 16;
+        } while (--remaining != 0);
+    }
+    output->color = node->color;
+    output->flag = node->copiedHeader.flag;
+    output->type = info->alphaTrack.surfaceIndex;
+    effDrawTrackSet(output, &matrix);
+}
+
+/* Advance the active strip record, rebuild its geometry, and submit its tracks. */
+void effUpdateAndDrawStripRecord(EffectStripNode *node) {
+    effAcquireStripRecord(node);
+    effDrawEffectStrip(node);
+}
+
+void effSetStripRecordVector(EffectStripNode *node, const u128 *value) {
+    mnuRecordSetVector(node->active, value);
+}
+
+void effSetStripRecordSecondaryVector(EffectStripNode *node, const u128 *value) {
+    fileSetRecordSecondVector(node->active, value);
+}
+
+void effSetStripRecordColor(EffectStripNode *node, u32 value) {
+    node->color = value;
+}
+
+/* Store opacity and notify the strip's active-record callback. */
+void effSetStripOpacity(EffectStripNode *p, f32 v) {
+    p->opacity = v;
+    dds3DispatchIndexedCallback((u16 *)p->active, v);
+}
+
+void effResetBillTable(u8 *work) {
+    u32 index = 0;
+    u8 *state = (u8 *)((EffClassWork *)work)->resource;
+    u32 count = ((EffBillEmitterCommon *)((EffClassWork *)work)->payload)->header.timed.count;
+    EffBillEmitterEntry *entry = (EffBillEmitterEntry *)((EffFrameState *)state)->entries;
+    u32 *flags = ((EffRibbonWork *)((EffFrameState *)state)->asset)->colors;
+
+    if (count != 0) {
+        do {
+            index++;
+            *flags++ = 0;
+            entry->timer = -1;
+            entry++;
+        } while (index < count);
+    }
+}
+
+u8 *effAllocateRingFadeEntries(EffBillVortexConfig *config) {
+    struct sdfMemHandle_t *base = sdfMemAllocDirect(config->common.header.timed.count * sizeof(EffBillEmitterEntry) + 0xC);
+    EffFrameState *node = (EffFrameState *)sdfMemLock(base);
+    u32 count = config->common.header.segments;
+    u8 *entries = (u8 *)(node + 1);
+
+    node->entries = entries;
+    node->allocation = base;
+    if (count < 3) {
+        config->common.header.segments = 3;
+    }
+    return (u8 *)node;
+}
+
+/* Ring fade tables of the ring effects: `segments + 1` entries of colors
+ * (4 words each) and radii (8 words each). The alpha fades in over the first
+ * fadeIn fraction of the entries and out from the fadeOut fraction; the table
+ * is then copied for every remaining layer. */
+void effFillRingFadeGradient(u8 *node, EffBillEmitterCommon *config) {
+    EffBillEmitterCommon *cfg = config;
+    EffRibbonWork *table;
+    u32 *colors;
+    f32 *radii;
+    u32 *colorsStart;
+    f32 *radiiStart;
+    u32 layers;
+    s32 segments;
+    s32 fadeInEnd;
+    s32 fadeOutStart;
+    u32 entries;
+    u32 words;
+    f32 radius;
+    f32 fadeIn;
+    f32 fadeOut;
+    f32 fade;
+    u32 alpha;
+    u32 color;
+    u32 i;
+
+    layers = cfg->header.timed.count;
+    if (layers == 0) {
+        return;
+    }
+    segments = cfg->header.segments;
+    entries = segments + 1;
+    words = entries * 4;
+    table = (EffRibbonWork *)((EffFrameState *)node)->asset;
+    colors = (u32 *)table->extra;
+    radii = (f32 *)table->uvs;
+    colorsStart = colors;
+    radiiStart = radii;
+    fadeOut = cfg->header.fadeOut;
+    fadeIn = cfg->header.fadeIn;
+    fadeInEnd = (s32)(fadeIn * (f32)segments);
+    fadeOutStart = (s32)(fadeOut * (f32)segments);
+    radius = cfg->rowRadius / 3.0f;
+    for (i = 0; i < entries; i++) {
+        if (i < fadeInEnd) {
+            fade = (f32)i / (f32)fadeInEnd;
+        } else {
+            fade = 1.0f;
+            if (fadeOutStart < i) {
+                fade = (f32)(segments - i) / (f32)(segments - fadeOutStart);
+            }
+        }
+        alpha = (u32)(fade * 128.0f);
+        color = (alpha << 24) | 0x808080;
+        colors[0] = 0x808080;
+        colors[1] = color;
+        colors[2] = color;
+        colors[3] = 0x808080;
+        radii[0] = 0.0f;
+        radii[2] = radius;
+        radii[4] = radius * 2.0f;
+        radii[6] = radius * 3.0f;
+        colors += 4;
+        radii += 8;
+    }
+    for (i = 1; i < layers; i++) {
+        memcpy(colors, colorsStart, words * 4);
+        colors += words;
+        memcpy(radii, radiiStart, words * 8);
+        radii += words * 2;
+    }
+}
+
+u8 *effCreateRingFadeTable(EffBillVortexConfig *config, u32 resource) {
+    u8 *node = effAllocateRingFadeEntries(config);
+
+    ((EffFrameState *)node)->asset = (u8 *)effCreateRibbonWithSharedResource(config->common.header.timed.count, config->common.header.segments, (struct SdfTextureFileHeader *)(u32)resource);
+    effFillRingFadeGradient(node, &config->common);
+    return node;
+}
+
+u8 *effAssetPointerSet(u8 *work) {
+    EffBillVortexConfig *config = ((EffClassWork *)work)->payload;
+    u8 *state = (u8 *)((EffClassWork *)work)->resource;
+    u8 *node = effAllocateRingFadeEntries(config);
+    ((EffFrameState *)node)->asset = (u8 *)effCloneRibbonWithSharedResource((EffRibbonWork *)((EffFrameState *)state)->asset);
+    effFillRingFadeGradient(node, &config->common);
+    return node;
+}
+
+void effReleaseRingFadeTable(s32 work) {
+    EffFrameState *state;
+
+    state = (EffFrameState *)((EffClassWork *)work)->resource;
+    effSharedAssetReferenceRelease((EffRibbonWork *)state->asset);
+    sdfMemFreeDirect(state->allocation);
+}
+
+#ifdef NON_MATCHING
+
+extern EffRandState dds3RandCB[];
+
+/* Advances a vortex-style billboard emitter by one frame: spawns waiting
+ * particles with randomized radius, climb, flare, spin, width, size and height
+ * (all at once with random ages on the first frame when the burst flag is set),
+ * retires particles at the end of their life, and for live particles rebuilds
+ * the ribbon rows (four vertices per segment flaring and twisting around the
+ * axis, with texture rows scrolling by the rise) and samples the emitter color
+ * and alpha tracks. Upstream: INCLUDE_ASM in game/code_0029E410; written from
+ * the retail routine. It differs from retail only in register allocation and
+ * the pool offset of one float constant. Decimal constants that ee-gcc
+ * truncated are written with retail's exact float values (clang rounds a
+ * decimal literal to nearest, which is one ulp off). */
+void func_002ABDE0(EffClassWork *work) {
+    EffBillVortexConfig *config = (EffBillVortexConfig *)work->payload;
+    u32 frame = work->frame;
+    u32 timeLimit = config->common.header.timed.time.progress;
+    u32 life;
+    u32 *colors;
+    u32 index;
+    u32 entryCount;
+    s32 rowStride;
+    u32 segmentCount;
+    s32 initialBurst;
+    u32 spawnBudget;
+    u8 respawn;
+    f32 rise;
+    f32 spinAccel;
+    f32 height;
+    f32 segmentCountFloat;
+    f32 flareCenter;
+    EffBillFrameState *state;
+    EffRibbonWork *ribbon;
+    EffBillEmitterEntry *entry;
+    u8 *positions;
+    f32 *uvs;
+
+    if (timeLimit < frame && timeLimit != 0) {
+        return;
+    }
+    life = config->common.header.life;
+    entryCount = config->common.header.timed.count;
+    if (life == 0) {
+        return;
+    }
+
+    if (config->common.burst != 0 && frame == 0) {
+        initialBurst = 1;
+        spawnBudget = entryCount;
+    } else {
+        initialBurst = 0;
+        spawnBudget = config->common.header.spawnRate;
+    }
+
+    segmentCount = config->common.header.segments + 1;
+    state = (EffBillFrameState *)work->resource;
+    ribbon = (EffRibbonWork *)state->asset;
+    entry = (EffBillEmitterEntry *)state->entries;
+    respawn = config->common.header.respawn;
+    spinAccel = config->spinAccel;
+    positions = ribbon->positions;
+    uvs = (f32 *)ribbon->uvs;
+    colors = ribbon->colors;
+    rowStride = ribbon->rowStride;
+    segmentCountFloat = (f32)segmentCount;
+    height = config->common.height;
+    flareCenter = config->flareCenter;
+    rise = config->common.rise;
+
+    for (index = 0; index < entryCount; index++, entry++) {
+        u32 age = entry->timer;
+
+        if (age == (u32)-2) {
+            /* Disabled entries retain their stream slots. */
+        } else if (age == (u32)-1) {
+            if (spawnBudget != 0) {
+                f32 randomValue;
+                f32 variation;
+                f32 radiusStart;
+                f32 climbStart;
+                f32 radiusStep;
+                f32 climbStep;
+
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                variation = randomValue * config->common.radiusStartJitter +
+                            (1.0f - config->common.radiusStartJitter);
+                radiusStart = config->common.radiusStart * variation;
+
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                variation = randomValue * config->common.radiusEndJitter +
+                            (1.0f - config->common.radiusEndJitter);
+                radiusStep =
+                    (config->common.radiusEnd * variation - radiusStart) / (f32)life;
+                entry->radius = radiusStart;
+                entry->radiusStep = radiusStep;
+
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                variation = randomValue * config->climbStartJitter +
+                            (1.0f - config->climbStartJitter);
+                climbStart = -config->climbStart * variation;
+
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                variation = randomValue * config->climbEndJitter +
+                            (1.0f - config->climbEndJitter);
+                climbStep = (-config->climbEnd * variation - climbStart) / (f32)life;
+                entry->vertical.vortex.climb = climbStart;
+                entry->vertical.vortex.climbStep = climbStep;
+
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                variation = randomValue * config->flareJitter +
+                            (1.0f - config->flareJitter);
+                entry->geometry.vortex.flare = config->flare * variation;
+
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                entry->angle = randomValue * 6.28318500518798828125f;
+
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                variation = randomValue * config->spinJitter +
+                            (1.0f - config->spinJitter);
+                entry->spin = config->spin * variation;
+
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                variation = randomValue * config->common.widthJitter +
+                            (1.0f - config->common.widthJitter);
+                entry->width = config->common.width * variation;
+
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                variation = randomValue * config->common.extentJitter +
+                            (1.0f - config->common.extentJitter);
+                entry->geometry.vortex.sweep = config->common.extent * variation;
+
+                randomValue = dds3GetRandFloatA(dds3RandCB);
+                variation = randomValue * config->common.heightJitter +
+                            (1.0f - config->common.heightJitter);
+                *colors = 0;
+                entry->geometry.vortex.height = config->common.height * variation;
+
+                if (initialBurst != 0) {
+                    u32 randomAge = dds3GetRandA(dds3RandCB) % life;
+                    f32 ageAsFloat = (f32)(s32)randomAge;
+
+                    entry->timer = randomAge;
+                    entry->radius += entry->radiusStep * ageAsFloat;
+                    entry->vertical.vortex.climb += entry->vertical.vortex.climbStep * ageAsFloat;
+                } else {
+                    entry->timer = 0;
+                }
+                spawnBudget--;
+            }
+        } else if (age >= life) {
+            *colors = 0;
+            entry->timer = respawn ? (u32)-1 : (u32)-2;
+        } else {
+            f32 ageAsFloat = (f32)(s32)age;
+            f32 spin = entry->spin;
+            f32 rowHeight = 0.0f;
+            f32 climb = entry->vertical.vortex.climb + entry->vertical.vortex.climbStep;
+            f32 radius = entry->radius + entry->radiusStep;
+            f32 phase = entry->angle;
+            f32 quarterWidth = entry->width * 0.25f;
+            f32 climbStep;
+            f32 angle;
+            f32 twistStep;
+            f32 flare;
+            f32 oldV;
+            f32 center[4];
+            f32 radial[4];
+            u32 row;
+
+            entry->vertical.vortex.climb = climb;
+            climbStep = climb / segmentCountFloat;
+            entry->radius = radius;
+            angle = (spin + spinAccel * ageAsFloat * 0.5f) * ageAsFloat + phase;
+            twistStep = (0.0f <= spin ? entry->geometry.vortex.sweep :
+                         -entry->geometry.vortex.sweep) / segmentCountFloat;
+            radial[1] = climbStep;
+            flare = entry->geometry.vortex.flare;
+            oldV = entry->geometry.vortex.height;
+
+            for (row = 0; row < segmentCount; row++) {
+                f32 rowFraction = (f32)row / segmentCountFloat;
+                f32 angleCos = sdfCos(angle);
+                f32 angleSin = sdfSin(angle);
+                f32 flareDelta = rowFraction - flareCenter;
+                f32 expanded = flareDelta * flareDelta * flare;
+                f32 centerRadius = radius + expanded;
+                f32 rowV;
+
+                center[0] = angleCos * centerRadius;
+                center[1] = rowHeight;
+                center[2] = angleSin * centerRadius;
+                radial[0] = angleCos * expanded;
+                radial[2] = angleSin * expanded;
+
+                SDF_VU0_LOADVECTOR(radial);
+                SDF_VU0_NORMALIZE();
+                SDF_VU0_SCALEVECTOR_BITS(quarterWidth);
+                SDF_VU0_COPYVECTOR_A_TO_B();
+                SDF_VU0_LOADVECTOR(center);
+                SDF_VU0_COPYVECTOR_A_TO_C();
+                SDF_VU0_ADDVECTOR();
+                SDF_VU0_STOREVECTOR(positions + 0x10);
+                SDF_VU0_ADDVECTOR();
+                SDF_VU0_STOREVECTOR(positions);
+                SDF_VU0_COPYVECTOR_C_TO_A();
+                SDF_VU0_SUBVECTOR();
+                SDF_VU0_STOREVECTOR(positions + 0x20);
+                SDF_VU0_SUBVECTOR();
+                SDF_VU0_STOREVECTOR(positions + 0x30);
+
+                angle += twistStep;
+                rowHeight += climbStep;
+                positions += 0x40;
+                rowV = height * ((f32)row / segmentCountFloat) + oldV;
+                uvs[1] = rowV;
+                uvs[3] = rowV;
+                uvs[5] = rowV;
+                uvs[7] = rowV;
+                uvs += 8;
+            }
+
+            *colors = effSampleColorAlphaTracks(&config->common.header.emitterColorTrack,
+                                                &config->common.header.emitterAlphaTrack,
+                                                (s32)age, (s32)life);
+            entry->timer++;
+            entry->geometry.vortex.height += rise;
+            colors++;
+            continue;
+        }
+
+        colors++;
+        positions += rowStride * 0x10;
+        uvs += rowStride * 2;
+    }
+}
+
+#else
+
+INCLUDE_ASM(const s32, "game/code_0029E410", func_002ABDE0);
+
+#endif
+
+extern void effDrawRibbon(EffRibbonWork *, const Matrix4 *);
+
+void effBlendBillboardInstanceColorsAndTransforms(u8 *work) {
+    EffBillVortexConfig *config = (EffBillVortexConfig *)((BillCellDrawWork *)work)->config;
+    u32 limit = ((BillCellDrawWork *)work)->frameLimit;
+    u32 progress = config->common.header.timed.time.progress;
+    u32 *list = ((BillCellDrawWork *)work)->instances;
+    EffRibbonWork *out = (EffRibbonWork *)(u32)list[1];
+    u128 mtx[4];
+    u32 packed;
+    u32 unit;
+    u32 second;
+
+    if (progress < limit && progress != 0) {
+        return;
+    }
+    second = effSampleColorAlphaTracks(&config->common.header.timed.colorTrack, &config->common.header.timed.alphaTrack, limit, progress);
+    unit = 0x3C000000;
+    UnpackRGBAWord(((BillCellDrawWork *)work)->baseColor, unit);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    UnpackRGBAWord(second, unit);
+    SDF_VU0_MULVECTOR();
+    packed = PackRGBAWord(128.0f);
+    out->color = packed;
+    out->surfaceIndex = config->common.header.timed.alphaTrack.surfaceIndex;
+    out->drawMode = config->common.drawMode;
+    SDF_VU0_LOADVECTOR(work + 0x10);
+    ToMatrix();
+    SDF_VU0_LOADVECTOR(effOnesVector);
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(((BillCellDrawWork *)work)->scale);
+    SDF_VU0_SCALE_XYZ();
+    SDF_VU0_LOADVECTOR(work);
+    SDF_VU0_VECTOR_W_SET_ONE();
+    SDF_VU0_SET_ROW3();
+    SDF_VU0_STOREMATRIX(mtx);
+    effDrawRibbon(out, (Matrix4 *)mtx);
+}
+
+void effResetBillboardFrameInstanceCounters(u8 *work) {
+    u32 index = 0;
+    u8 *state = (u8 *)((EffClassWork *)work)->resource;
+    u32 count = ((EffBillEmitterCommon *)((EffClassWork *)work)->payload)->header.timed.count;
+    EffBillEmitterEntry *entry = (EffBillEmitterEntry *)((EffFrameState *)state)->entries;
+    u32 *flags = ((EffRibbonWork *)((EffFrameState *)state)->asset)->colors;
+
+    if (count != 0) {
+        do {
+            index++;
+            *flags++ = 0;
+            entry->timer = -1;
+            entry++;
+        } while (index < count);
+    }
+}
+
+u8 *effAllocateBillFadeFrameEntries(EffBillColumnConfig *config) {
+    struct sdfMemHandle_t *base = sdfMemAllocDirect(config->common.header.timed.count * sizeof(EffBillEmitterEntry) + 0xC);
+    EffFrameState *node = (EffFrameState *)sdfMemLock(base);
+    u32 count = config->common.header.segments;
+    u8 *entries = (u8 *)(node + 1);
+
+    node->entries = entries;
+    node->allocation = base;
+    if (count < 3) {
+        config->common.header.segments = 3;
+    }
+    return (u8 *)node;
+}
+
+void effFillBillFadeGradient(u8 *node, EffBillEmitterCommon *config) {
+    EffBillEmitterCommon *cfg = config;
+    EffRibbonWork *table;
+    u32 *colors;
+    f32 *radii;
+    u32 *colorsStart;
+    f32 *radiiStart;
+    u32 layers;
+    s32 segments;
+    s32 fadeInEnd;
+    s32 fadeOutStart;
+    u32 entries;
+    u32 words;
+    f32 radius;
+    f32 fadeIn;
+    f32 fadeOut;
+    f32 fade;
+    u32 alpha;
+    u32 color;
+    u32 i;
+
+    layers = cfg->header.timed.count;
+    if (layers == 0) {
+        return;
+    }
+    segments = cfg->header.segments;
+    entries = segments + 1;
+    words = entries * 4;
+    table = (EffRibbonWork *)((EffFrameState *)node)->asset;
+    colors = (u32 *)table->extra;
+    radii = (f32 *)table->uvs;
+    colorsStart = colors;
+    radiiStart = radii;
+    fadeOut = cfg->header.fadeOut;
+    fadeIn = cfg->header.fadeIn;
+    fadeInEnd = (s32)(fadeIn * (f32)segments);
+    fadeOutStart = (s32)(fadeOut * (f32)segments);
+    radius = cfg->rowRadius / 3.0f;
+    for (i = 0; i < entries; i++) {
+        if (i < fadeInEnd) {
+            fade = (f32)i / (f32)fadeInEnd;
+        } else {
+            fade = 1.0f;
+            if (fadeOutStart < i) {
+                fade = (f32)(segments - i) / (f32)(segments - fadeOutStart);
+            }
+        }
+        alpha = (u32)(fade * 128.0f);
+        color = (alpha << 24) | 0x808080;
+        colors[0] = 0x808080;
+        colors[1] = color;
+        colors[2] = color;
+        colors[3] = 0x808080;
+        radii[0] = 0.0f;
+        radii[2] = radius;
+        radii[4] = radius * 2.0f;
+        radii[6] = radius * 3.0f;
+        colors += 4;
+        radii += 8;
+    }
+    for (i = 1; i < layers; i++) {
+        memcpy(colors, colorsStart, words * 4);
+        colors += words;
+        memcpy(radii, radiiStart, words * 8);
+        radii += words * 2;
+    }
+}
+
+u8 *effCreateBillFadeTable(EffBillColumnConfig *config, u32 resource) {
+    u8 *node = effAllocateBillFadeFrameEntries(config);
+
+    ((EffFrameState *)node)->asset = (u8 *)effCreateRibbonWithSharedResource(config->common.header.timed.count, config->common.header.segments, (struct SdfTextureFileHeader *)(u32)resource);
+    effFillBillFadeGradient(node, &config->common);
+    return node;
+}
+
+u8 *effCloneBillFadeTable(u8 *work) {
+    EffBillColumnConfig *config = ((EffClassWork *)work)->payload;
+    u8 *state = (u8 *)((EffClassWork *)work)->resource;
+    u8 *node = effAllocateBillFadeFrameEntries(config);
+    ((EffFrameState *)node)->asset = (u8 *)effCloneRibbonWithSharedResource((EffRibbonWork *)((EffFrameState *)state)->asset);
+    effFillBillFadeGradient(node, &config->common);
+    return node;
+}
+
+void effReleaseBillFadeTable(s32 work) {
+    EffFrameState *state;
+
+    state = (EffFrameState *)((EffClassWork *)work)->resource;
+    effSharedAssetReferenceRelease((EffRibbonWork *)state->asset);
+    sdfMemFreeDirect(state->allocation);
+}
+
+/* Update the column's particle records and the ribbon vertices for this frame. */
+void effUpdateColumnParticlesAndRibbons(EffClassWork *work) {
+    EffBillColumnConfig *config = (EffBillColumnConfig *)work->payload;
+    EffBillEmitterCommon *common = &config->common;
+    u32 frameLimit = work->frame;
+    u32 progress = common->header.timed.time.progress;
+    u32 layer;
+    u32 particleCount;
+    s32 vertexStride;
+    s32 spawnAll;
+    u8 respawn;
+    f32 rise;
+    f32 spinAccel;
+    f32 gravity;
+    f32 flareCenter;
+    f32 columnHeight;
+    u32 life;
+    u32 segmentCount;
+    f32 segmentCountAsFloat;
+    u32 spawnRemaining;
+    EffFrameState *frameState;
+    EffBillColumnParticle *particles;
+    EffRibbonWork *asset;
+    u32 *colors;
+    f32 *vertices;
+    f32 *heightRows;
+
+    if (progress < frameLimit && progress != 0) {
+        return;
+    }
+    particleCount = common->header.timed.count;
+    life = common->header.life;
+    if (life == 0) {
+        return;
+    }
+
+    if (common->burst != 0 && frameLimit == 0) {
+        spawnAll = 1;
+        spawnRemaining = particleCount;
+    } else {
+        spawnAll = 0;
+        spawnRemaining = common->header.spawnRate;
+    }
+    frameState = (EffFrameState *)work->resource;
+    particles = (EffBillColumnParticle *)frameState->entries;
+    asset = (EffRibbonWork *)frameState->asset;
+    segmentCount = common->header.segments + 1;
+    respawn = common->header.respawn;
+    spinAccel = config->spinAccel;
+    gravity = config->gravity;
+    vertices = (f32 *)asset->positions;
+    heightRows = (f32 *)asset->uvs;
+    colors = asset->colors;
+    vertexStride = asset->rowStride;
+    segmentCountAsFloat = (f32)segmentCount;
+    columnHeight = common->height;
+    layer = 0;
+    flareCenter = config->flareCenter;
+    rise = common->rise;
+
+    for (; layer < particleCount; layer++, particles++) {
+        EffBillColumnParticle *particle = particles;
+        s32 age = particle->age;
+        f32 ageF;
+
+        if (age != -2) {
+            if (age == -1) {
+                f32 radius;
+                f32 radiusStep;
+
+                if (spawnRemaining != 0) {
+                    radius = common->radiusStart *
+                        (dds3GetRandFloatA(dds3RandCB) * common->radiusStartJitter +
+                         (1.0f - common->radiusStartJitter));
+                    radiusStep =
+                        (common->radiusEnd * (dds3GetRandFloatA(dds3RandCB) * common->radiusEndJitter +
+                                              (1.0f - common->radiusEndJitter)) - radius) /
+                        (f32)life;
+                    particle->radius = radius;
+                    particle->radiusStep = radiusStep;
+                    particle->drag = config->drag *
+                        (dds3GetRandFloatA(dds3RandCB) * config->dragJitter +
+                         (1.0f - config->dragJitter));
+                    particle->verticalOffset = -config->velocity * dds3GetRandFloatA(dds3RandCB);
+                    particle->flare = config->flare *
+                        (dds3GetRandFloatA(dds3RandCB) * config->flareJitter +
+                         (1.0f - config->flareJitter));
+                    particle->spinPhase = dds3GetRandFloatA(dds3RandCB) * 6.2831853f;
+                    particle->spin = config->spin *
+                        (dds3GetRandFloatA(dds3RandCB) * config->spinJitter +
+                         (1.0f - config->spinJitter));
+                    particle->width = common->width *
+                        (dds3GetRandFloatA(dds3RandCB) * common->widthJitter +
+                         (1.0f - common->widthJitter));
+                    particle->extent = common->extent *
+                        (dds3GetRandFloatA(dds3RandCB) * common->extentJitter +
+                         (1.0f - common->extentJitter)) * 10.0f;
+                    {
+                        f32 random = dds3GetRandFloatA(dds3RandCB);
+                        f32 height = common->height *
+                            (random * common->heightJitter + (1.0f - common->heightJitter));
+                        colors[0] = 0;
+                        particle->height = height;
+                    }
+
+                    if (spawnAll) {
+                        s32 birthAge = dds3GetRandA((EffRandState *)dds3RandCB) % life;
+                        f32 gravityDisplacement;
+                        ageF = (f32)birthAge;
+                        gravityDisplacement = gravity * ageF * ageF * 0.5f;
+                        particle->age = birthAge;
+                        particle->radius += particle->radiusStep * ageF;
+                        particle->verticalOffset -= particle->drag * ageF;
+                        particle->verticalOffset += gravityDisplacement;
+                    } else {
+                        particle->age = 0;
+                    }
+                    spawnRemaining--;
+                }
+            } else if ((u32)age >= life) {
+                colors[0] = 0;
+                particle->age = respawn ? -1 : -2;
+            } else {
+                ageF = (f32)age;
+                {
+                    f32 angularStep = particle->spin + spinAccel * ageF * 0.5f;
+                    f32 angle = angularStep * ageF;
+                    f32 oldHeight;
+                    f32 radius;
+                    f32 currentY;
+                    f32 flare;
+                    f32 phaseOffset;
+                    f32 center[4];
+                    f32 direction[4];
+                    f32 width;
+                    f32 extentStep;
+                    f32 cosine;
+                    f32 sine;
+                    u32 segment;
+
+                    angle += particle->spinPhase;
+                    oldHeight = particle->height;
+                    radius = particle->radius;
+                    currentY = particle->verticalOffset;
+                    flare = particle->flare;
+                    phaseOffset = ageF / (f32)life - flareCenter;
+                    radius += phaseOffset * phaseOffset * flare;
+                    cosine = sdfCos(angle);
+                    sine = sdfSin(angle);
+                    center[0] = cosine * radius;
+                    center[1] = currentY;
+                    center[2] = sine * radius;
+                    SDF_VU0_LOADVECTOR_B(center);
+                    SDF_VU0_COPYVECTOR_B_TO_C();
+
+                    currentY -= particle->drag;
+                    currentY += gravity * ageF;
+                    radius = particle->radius + particle->radiusStep;
+                    {
+                        f32 nextPhaseOffset = (ageF + 1.0f) / (f32)life - flareCenter;
+                        radius += nextPhaseOffset * nextPhaseOffset * flare;
+                    }
+
+                    center[0] = cosine * radius;
+                    center[1] = currentY;
+                    center[2] = sine * radius;
+                    SDF_VU0_LOADVECTOR(center);
+                    SDF_VU0_SUBVECTOR_EXTENDED();
+                    SDF_VU0_NORMALIZE_EXTENDED();
+                    SDF_VU0_STOREVECTOR(direction);
+
+                    width = particle->width * 0.25f;
+                    extentStep = particle->extent / segmentCountAsFloat;
+                    particle->verticalOffset = currentY;
+                    particle->radius += particle->radiusStep;
+                    center[0] = cosine;
+                    center[1] = 0.0f;
+                    center[2] = sine;
+                    SDF_VU0_LOADVECTOR_B(center);
+                    SDF_VU0_OUTERPRODUCT_EXTENDED();
+                    SDF_VU0_SCALEVECTOR_BITS(width);
+                    SDF_VU0_COPYVECTOR_A_TO_B_EXTENDED();
+
+                    for (segment = 0; segment < segmentCount; segment++) {
+                        f32 fraction;
+                        f32 pointY;
+                        SDF_VU0_COPYVECTOR_C_TO_A_EXTENDED();
+                        SDF_VU0_ADDVECTOR();
+                        SDF_VU0_STOREVECTOR(vertices + 4);
+                        SDF_VU0_ADDVECTOR();
+                        SDF_VU0_STOREVECTOR(vertices);
+                        SDF_VU0_COPYVECTOR_C_TO_A_EXTENDED();
+                        SDF_VU0_SUBVECTOR_EXTENDED();
+                        SDF_VU0_STOREVECTOR(vertices + 8);
+                        SDF_VU0_SUBVECTOR_EXTENDED();
+                        SDF_VU0_STOREVECTOR(vertices + 12);
+                        vertices += 16;
+                        fraction = (f32)segment / segmentCountAsFloat;
+                        pointY = columnHeight * fraction + oldHeight;
+                        heightRows[1] = pointY;
+                        heightRows[3] = pointY;
+                        heightRows[5] = pointY;
+                        heightRows[7] = pointY;
+                        heightRows += 8;
+
+                        SDF_VU0_LOADVECTOR(direction);
+                        SDF_VU0_SCALEVECTOR_BITS(extentStep);
+                        SDF_VU0_ADDVECTOR_C_A();
+                    }
+
+                    *colors++ = effSampleColorAlphaTracks(&common->header.emitterColorTrack,
+                                                           &common->header.emitterAlphaTrack, age, life);
+                    particle->age = (s32)((u32)particle->age + 1U);
+                    particle->height += rise;
+                }
+                continue;
+            }
+        }
+        colors++;
+        vertices += vertexStride * 4;
+        heightRows += vertexStride * 2;
+    }
+}
+
+void effBillBlendCellColorAndUpdateTransform(BillCellDrawWork *work) {
+    EffBillColumnConfig *config = (EffBillColumnConfig *)work->config;
+    u32 limit = work->frameLimit;
+    u32 progress = config->common.header.timed.time.progress;
+    u32 *list = work->instances;
+    EffRibbonWork *out = (EffRibbonWork *)(u32)list[1];
+    u128 mtx[4];
+    u32 packed;
+    u32 unit;
+    u32 second;
+
+    if (progress < limit && progress != 0) {
+        return;
+    }
+    second = effSampleColorAlphaTracks(&config->common.header.timed.colorTrack, &config->common.header.timed.alphaTrack, limit, progress);
+    unit = 0x3C000000;
+    UnpackRGBAWord(work->baseColor, unit);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    UnpackRGBAWord(second, unit);
+    SDF_VU0_MULVECTOR();
+    packed = PackRGBAWord(128.0f);
+    out->color = packed;
+    out->surfaceIndex = config->common.header.timed.alphaTrack.surfaceIndex;
+    out->drawMode = config->common.drawMode;
+    SDF_VU0_LOADVECTOR(work->transform);
+    ToMatrix();
+    SDF_VU0_LOADVECTOR(effOnesVector);
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(work->scale);
+    SDF_VU0_SCALE_XYZ();
+    SDF_VU0_LOADVECTOR(work);
+    SDF_VU0_VECTOR_W_SET_ONE();
+    SDF_VU0_SET_ROW3();
+    SDF_VU0_STOREMATRIX(mtx);
+    effDrawRibbon(out, (Matrix4 *)mtx);
+}
+
+void effResetParticleBillFrameCounters(u8 *work) {
+    u32 index = 0;
+    u8 *state = (u8 *)((EffClassWork *)work)->resource;
+    u32 count = ((EffBillEmitterCommon *)((EffClassWork *)work)->payload)->header.timed.count;
+    s32 *entry = *(s32 **)state;
+    u32 *frameCounters = ((EffFrameAsset *)((EffFrameState *)state)->asset)->frameStorage;
+
+    if (count != 0) {
+        do {
+            index++;
+            *frameCounters++ = 0;
+            *entry = -1;
+            entry = (s32 *)((u8 *)entry + 0x2C);
+        } while (index < count);
+    }
+}
+
+u8 *effAllocateCompactRingFadeEntries(EffBillSpiralConfig *config) {
+    struct sdfMemHandle_t *base = sdfMemAllocDirect(config->common.header.timed.count * 0x2C + 0xC);
+    EffFrameState *node = (EffFrameState *)sdfMemLock(base);
+    u32 count = config->common.header.segments;
+    u8 *entries = (u8 *)(node + 1);
+
+    node->entries = entries;
+    node->allocation = base;
+    if (count < 3) {
+        config->common.header.segments = 3;
+    }
+    return (u8 *)node;
+}
+
+void effFillCompactRingFadeGradient(u8 *node, EffBillEmitterCommon *config) {
+    EffBillEmitterCommon *cfg = config;
+    EffRibbonWork *table;
+    u32 *colors;
+    f32 *radii;
+    u32 *colorsStart;
+    f32 *radiiStart;
+    u32 layers;
+    s32 segments;
+    s32 fadeInEnd;
+    s32 fadeOutStart;
+    u32 entries;
+    u32 words;
+    f32 radius;
+    f32 fadeIn;
+    f32 fadeOut;
+    f32 fade;
+    u32 alpha;
+    u32 color;
+    u32 i;
+
+    layers = cfg->header.timed.count;
+    if (layers == 0) {
+        return;
+    }
+    segments = cfg->header.segments;
+    entries = segments + 1;
+    words = entries * 4;
+    table = (EffRibbonWork *)((EffFrameState *)node)->asset;
+    colors = (u32 *)table->extra;
+    radii = (f32 *)table->uvs;
+    colorsStart = colors;
+    radiiStart = radii;
+    fadeOut = cfg->header.fadeOut;
+    fadeIn = cfg->header.fadeIn;
+    fadeInEnd = (s32)(fadeIn * (f32)segments);
+    fadeOutStart = (s32)(fadeOut * (f32)segments);
+    radius = cfg->rowRadius / 3.0f;
+    for (i = 0; i < entries; i++) {
+        if (i < fadeInEnd) {
+            fade = (f32)i / (f32)fadeInEnd;
+        } else {
+            fade = 1.0f;
+            if (fadeOutStart < i) {
+                fade = (f32)(segments - i) / (f32)(segments - fadeOutStart);
+            }
+        }
+        alpha = (u32)(fade * 128.0f);
+        color = (alpha << 24) | 0x808080;
+        colors[0] = 0x808080;
+        colors[1] = color;
+        colors[2] = color;
+        colors[3] = 0x808080;
+        radii[0] = 0.0f;
+        radii[2] = radius;
+        radii[4] = radius * 2.0f;
+        radii[6] = radius * 3.0f;
+        colors += 4;
+        radii += 8;
+    }
+    for (i = 1; i < layers; i++) {
+        memcpy(colors, colorsStart, words * 4);
+        colors += words;
+        memcpy(radii, radiiStart, words * 8);
+        radii += words * 2;
+    }
+}
+
+u8 *effCreateCompactRingFadeTable(EffBillSpiralConfig *config, u32 resource) {
+    u8 *node = effAllocateCompactRingFadeEntries(config);
+
+    ((EffFrameState *)node)->asset = (u8 *)effCreateRibbonWithSharedResource(config->common.header.timed.count, config->common.header.segments, (struct SdfTextureFileHeader *)(u32)resource);
+    effFillCompactRingFadeGradient(node, &config->common);
+    return node;
+}
+
+u8 *effCloneBillboardFrameAsset(u8 *work) {
+    EffBillSpiralConfig *config = ((EffClassWork *)work)->payload;
+    u8 *state = (u8 *)((EffClassWork *)work)->resource;
+    u8 *node = effAllocateCompactRingFadeEntries(config);
+
+    ((EffFrameState *)node)->asset = (u8 *)effCloneRibbonWithSharedResource((EffRibbonWork *)((EffFrameState *)state)->asset);
+    effFillCompactRingFadeGradient(node, &config->common);
+    return node;
+}
+
+void effReleaseCompactRingFadeTable(s32 work) {
+    EffFrameState *state;
+
+    state = (EffFrameState *)((EffClassWork *)work)->resource;
+    effSharedAssetReferenceRelease((EffRibbonWork *)state->asset);
+    sdfMemFreeDirect(state->allocation);
+}
+
+typedef struct EffSpiralParticle {
+    s32 timer;      /* -1 free, -2 retired */
+    u8 pad04[4];
+    f32 tiltX;      /* 0x08 */
+    f32 tiltY;      /* 0x0C */
+    f32 radius;     /* 0x10 */
+    f32 radiusStep; /* 0x14 */
+    f32 spin;       /* 0x18 */
+    f32 phase;      /* 0x1C */
+    f32 width;      /* 0x20 */
+    f32 sweep;      /* 0x24 */
+    f32 height;     /* 0x28 */
+} EffSpiralParticle;
+
+/* vu0 routine: native matrix, cross/normalize and ribbon extrusion. */
+void effUpdateBillSpiral(EffClassWork *work) {
+    EffBillSpiralConfig *config = (EffBillSpiralConfig *)work->payload;
+    EffFrameState *state;
+    EffRibbonWork *asset;
+    EffSpiralParticle *particle;
+    f32 pos[4];
+    u32 *colors;
+    u32 i;
+    u32 count;
+    u32 stride;
+    u32 segments;
+    s32 burst;
+    u32 spawn;
+    u8 respawn;
+    u32 life;
+    f32 (*positions)[4];
+    f32 *heights;
+    u32 j;
+    s32 timer;
+    f32 segmentCount;
+    f32 spinAccel;
+    f32 heightScale;
+    f32 rise;
+    f32 radius;
+    f32 width;
+    f32 angle;
+    f32 step;
+    f32 height;
+    f32 start;
+    f32 time;
+
+    if (config->common.header.timed.time.progress < work->frame && config->common.header.timed.time.progress != 0) {
+        return;
+    }
+    life = config->common.header.life;
+    count = config->common.header.timed.count;
+    if (life == 0) {
+        return;
+    }
+    if (config->common.burst != 0 && work->frame == 0) {
+        burst = 1;
+        spawn = count;
+    } else {
+        burst = 0;
+        spawn = config->common.header.spawnRate;
+    }
+    segments = config->common.header.segments + 1;
+    state = (EffFrameState *)work->resource;
+    /* The creator stores the ribbon address in this actual 12-byte header. */
+    asset = (EffRibbonWork *)state->asset;
+    particle = (EffSpiralParticle *)state->entries;
+    respawn = config->common.header.respawn;
+    /* Config reads before the ribbon's buffer loads: in retail the spin acceleration load (+0xD4) precedes the
+     * asset+0x1C positions load (cc1probe --sched, sched1 equal-priority ties decide@luid), which keeps the
+     * positions spill store behind it in sched2. */
+    spinAccel = config->spinAccel;
+    positions = (f32 (*)[4])asset->positions;
+    heights = (f32 *)asset->uvs;
+    colors = asset->colors;
+    stride = asset->rowStride;
+    segmentCount = segments;
+    heightScale = config->common.height;
+    rise = config->common.rise;
+    for (i = 0; i < count; i++, particle++) {
+        timer = particle->timer;
+        if (timer != -2) {
+            if (timer == -1) {
+                if (spawn != 0) {
+                    f32 radiusDelta;
+                    start = config->common.radiusStart * (dds3GetRandFloatA(dds3RandCB) * config->common.radiusStartJitter + (1.0f - config->common.radiusStartJitter));
+                    radiusDelta = (config->common.radiusEnd * (dds3GetRandFloatA(dds3RandCB) * config->common.radiusEndJitter + (1.0f - config->common.radiusEndJitter)) - start) / (f32)life;
+                    particle->radius = start;
+                    particle->radiusStep = radiusDelta;
+                    particle->tiltX = (dds3GetRandFloatA(dds3RandCB) - 0.5f) * 2.0f * 3.14159265f;
+                    particle->tiltY = (dds3GetRandFloatA(dds3RandCB) - 0.5f) * 2.0f * 3.14159265f;
+                    particle->phase = dds3GetRandFloatA(dds3RandCB) * 6.2831853f;
+                    particle->spin = config->spin * (dds3GetRandFloatA(dds3RandCB) * config->spinJitter + (1.0f - config->spinJitter));
+                    particle->width = config->common.width * (dds3GetRandFloatA(dds3RandCB) * config->common.widthJitter + (1.0f - config->common.widthJitter));
+                    particle->sweep = config->common.extent * (dds3GetRandFloatA(dds3RandCB) * config->common.extentJitter + (1.0f - config->common.extentJitter));
+                    particle->height = config->common.height * (dds3GetRandFloatA(dds3RandCB) * config->common.heightJitter + (1.0f - config->common.heightJitter));
+                    *colors = 0;
+                    if (burst != 0) {
+                        particle->timer = dds3GetRandA(dds3RandCB) % life;
+                        time = (f32)particle->timer;
+                        particle->radius += particle->radiusStep * time;
+                    } else {
+                        particle->timer = 0;
+                    }
+                    spawn--;
+                }
+            } else if ((u32)timer >= life) {
+                *colors = 0;
+                particle->timer = respawn ? -1 : -2;
+            } else {
+                particle->radius += particle->radiusStep;
+                radius = particle->radius;
+                time = (f32)timer;
+                angle = (particle->spin + spinAccel * time * 0.5f) * time;
+                angle += particle->phase;
+                width = particle->width * 0.25f;
+                if (particle->spin >= 0.0f) {
+                    step = particle->sweep / segmentCount;
+                } else {
+                    step = -particle->sweep / segmentCount;
+                }
+                height = particle->height;
+                SetRotateMatrixX(particle->tiltX);
+                SetRotateMatrixY_B(particle->tiltY);
+                MultMatrixRevNoArg();
+                pos[0] = sdfCos(angle);
+                pos[1] = 0.0f;
+                pos[2] = sdfSin(angle);
+                for (j = 0; j < segments; j++) {
+                    f32 rowHeight;
+                    SDF_VU0_LOADVECTOR(pos);
+                    SDF_VU0_APPLYMATRIX_XYZ();
+                    SDF_VU0_SCALEVECTOR_BITS(radius);
+                    SDF_VU0_COPYVECTOR_A_TO_C();
+                    angle += step;
+                    pos[0] = sdfCos(angle);
+                    pos[1] = 0.0f;
+                    pos[2] = sdfSin(angle);
+                    SDF_VU0_LOADVECTOR(pos);
+                    SDF_VU0_APPLYMATRIX_XYZ();
+                    SDF_VU0_SCALEVECTOR_BITS(radius);
+                    SDF_VU0_COPYVECTOR_C_TO_B();
+                    SDF_VU0_SUBVECTOR();
+                    SDF_VU0_OUTERPRODUCT();
+                    SDF_VU0_NORMALIZE();
+                    SDF_VU0_SCALEVECTOR_BITS(width);
+                    SDF_VU0_COPYVECTOR_A_TO_B();
+                    SDF_VU0_COPYVECTOR_C_TO_A();
+                    SDF_VU0_ADDVECTOR();
+                    SDF_VU0_STOREVECTOR(positions[1]);
+                    SDF_VU0_ADDVECTOR();
+                    SDF_VU0_STOREVECTOR(positions[0]);
+                    SDF_VU0_COPYVECTOR_C_TO_A();
+                    SDF_VU0_SUBVECTOR();
+                    SDF_VU0_STOREVECTOR(positions[2]);
+                    SDF_VU0_SUBVECTOR();
+                    SDF_VU0_STOREVECTOR(positions[3]);
+                    positions += 4;
+                    rowHeight = heightScale * ((f32)j / segmentCount) + height;
+                    heights[1] = rowHeight;
+                    heights[3] = rowHeight;
+                    heights[5] = rowHeight;
+                    heights[7] = rowHeight;
+                    heights += 8;
+                }
+                *colors++ = effSampleColorAlphaTracks(&config->common.header.emitterColorTrack, &config->common.header.emitterAlphaTrack, timer, life);
+                particle->height += rise;
+                particle->timer++;
+                continue;
+            }
+        }
+        colors++;
+        positions += stride;
+        heights += stride * 2;
+    }
+}
+
+void effUpdateCompactRingDrawColorAndTransform(u8 *work) {
+    EffBillSpiralConfig *config = (EffBillSpiralConfig *)((BillCellDrawWork *)work)->config;
+    u32 limit = ((BillCellDrawWork *)work)->frameLimit;
+    u32 progress = config->common.header.timed.time.progress;
+    u32 *list = ((BillCellDrawWork *)work)->instances;
+    EffRibbonWork *out = (EffRibbonWork *)(u32)list[1];
+    u128 mtx[4];
+    u32 packed;
+    u32 unit;
+    u32 second;
+
+    if (progress < limit && progress != 0) {
+        return;
+    }
+    second = effSampleColorAlphaTracks(&config->common.header.timed.colorTrack, &config->common.header.timed.alphaTrack, limit, progress);
+    unit = 0x3C000000;
+    UnpackRGBAWord(((BillCellDrawWork *)work)->baseColor, unit);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    UnpackRGBAWord(second, unit);
+    SDF_VU0_MULVECTOR();
+    packed = PackRGBAWord(128.0f);
+    out->color = packed;
+    out->surfaceIndex = config->common.header.timed.alphaTrack.surfaceIndex;
+    out->drawMode = config->common.drawMode;
+    SDF_VU0_LOADVECTOR(work + 0x10);
+    ToMatrix();
+    SDF_VU0_LOADVECTOR(effOnesVector);
+    SDF_VU0_SCALEVECTOR_V0_CLOBBER(((BillCellDrawWork *)work)->scale);
+    SDF_VU0_SCALE_XYZ();
+    SDF_VU0_LOADVECTOR(work);
+    SDF_VU0_VECTOR_W_SET_ONE();
+    SDF_VU0_SET_ROW3();
+    SDF_VU0_STOREMATRIX(mtx);
+    effDrawRibbon(out, (Matrix4 *)mtx);
+}
+
+EffClassWork *effAllocateBlock(u16 kind, void *source) {
+    u32 headerSize = 0x40;
+    u32 size = effBlockResourceOperations[kind].payloadSize;
+    EffClassWork *effect = sdfChipAllocDirect(size + headerSize);
+    effect->payload = (u8 *)effect + headerSize;
+    effect->color = 0x80808080;
+    effect->scale = 1.0f;
+    effect->kind = kind;
+    effect->frame = 0;
+    SDF_VU0_STOREIDENTITYVECTOR(effect);
+    SDF_VU0_STOREIDENTITYVECTOR((u8 *)effect + 0x10);
+    memcpy(effect->payload, source, size);
+    return effect;
+}
+
+extern EffClassWork *effAllocateBlock(u16, void *);
+
+EffClassWork *effCreateResourceInstanceB(u16 kind, void *source, u32 option) {
+    EffClassWork *effect = effAllocateBlock(kind, source);
+    effect->resource = (void *)effBlockResourceOperations[kind].createResource(source, option);
+    effBlockResourceOperations[kind].initialize(effect);
+    return effect;
+}
+
+EffClassWork *effCreateBlockResourceFromFile(FileJobPayload *request) {
+    u32 *secondary = fileResolveSecondaryBuffer(request);
+    void *source;
+    switch (request->primary.selector) {
+    case 1:
+        break;
+    case 4:
+        secondary = NULL;
+        break;
+    }
+    source = fileResolvePrimaryBuffer(request);
+    return effCreateResourceInstanceB(request->option, source, (u32)secondary);
+}
+
+void effDestroyBlockResourceWork(EffClassWork *work) {
+    effBlockResourceOperations[work->kind].destroyResource(work);
+    sdfChipFreeDirect(work);
+}
+
+EffClassWork *effDuplicateActiveResourceB(EffClassWork *work) {
+    EffClassWork *effect = effAllocateBlock(work->kind, work->payload);
+    void *active = (void *)effBlockResourceOperations[work->kind].cloneResource(work);
+    s32 kind = work->kind;
+    effect->resource = active;
+    effBlockResourceOperations[kind].initialize(effect);
+    return effect;
+}
+
+void effResetBlockResourceFrame(EffClassWork *work) {
+    effBlockResourceOperations[work->kind].initialize(work);
+    work->frame = 0;
+}
+
+void effAdvanceBlockResourceFrame(EffClassWork *work) {
+    effBlockResourceOperations[work->kind].update(work);
+    work->frame = work->frame + 1;
+}
+
+void effDrawBlockResourceWork(EffClassWork *work) {
+    effBlockResourceOperations[work->kind].draw(work);
+}
+
+void effUpdateAndDrawBlockResource(EffClassWork *work) {
+    effAdvanceBlockResourceFrame(work);
+    effDrawBlockResourceWork(work);
+}
+
+void effCopyBlockResourcePosition(void *dst, void *src) {
+    SDF_VU0_COPYVECTOR(dst, src);
+}
+
+void effCopyBlockResourceOrientation(void *work, void *src) {
+    SDF_VU0_COPYVECTOR(((EffClassWork *)work)->vectors.orientation, src);
+}
+
+void effSetBlockResourceColor(EffClassWork *work, u32 color) {
+    work->color = color;
+}
+
+void effSetBlockResourceMatrixComponent(EffClassWork *work, float value) {
+    work->scale = value;
+}
+
+extern sdf3DPrimPolyParm_t D_003DCB00;
+
+EffRibbonWork *effCreateRibbonWork(u32 count, u32 repeat) {
+    u32 rowStride = repeat * 4 + 4;
+    u32 size = (rowStride * 0x1C + 4) * count;
+    u32 cells = rowStride * count;
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(size + 0x34);
+    u8 *p = (u8 *)sdfMemLock((struct sdfMemHandle_t *)((u32)allocation));
+    EffRibbonWork *work = (EffRibbonWork *)(p + size);
+    u32 i;
+
+    work->positions = p;
+    p += cells * 16;
+    work->uvs = p;
+    p += cells * 8;
+    work->extra = p;
+    p += cells * 4;
+    work->surfaceIndex = 2;
+    work->color = 0x80808080;
+    work->rowStride = rowStride;
+    work->repeat = repeat;
+    work->allocation = allocation;
+    work->colors = (u32 *)p;
+    work->count = count;
+    work->drawMode = 0;
+    for (i = 0; i < count; i++) {
+        ((u32 *)p)[i] = 0x80808080;
+    }
+    work->handle = sdfMatNew();
+    sdfMatSetConstant(work->handle, 1.0f);
+    memset(&D_003DCB00, 0, sizeof(sdf3DPrimPolyParm_t));
+    D_003DCB00.attr = 0x4000;
+    return work;
+}
+
+EffRibbonWork *effCreateRibbonWithSharedResource(u32 count, u32 repeat, struct SdfTextureFileHeader *resource) {
+    EffRibbonWork *node = effCreateRibbonWork(count, repeat);
+
+    if (resource == 0) {
+        s32 references = effSharedRibbonReferenceCount;
+        node->resource = NULL;
+        if (references == 0) {
+            D_003BC990 = (u32)effCloneSharedReferenceWithValue((struct SdfTextureFileHeader *)effWindTextureHandle, 0x300);
+            references = effSharedRibbonReferenceCount;
+        }
+        references++;
+        effSharedRibbonReferenceCount = references;
+    } else {
+        node->resource = effCreateSharedTextureReference(resource);
+    }
+    return node;
+}
+
+void effSharedAssetReferenceRelease(EffRibbonWork *work) {
+    if (work->resource == NULL) {
+        effSharedRibbonReferenceCount = effSharedRibbonReferenceCount - 1;
+        if (effSharedRibbonReferenceCount == 0) {
+            effReleaseSharedReference((RefObj *)D_003BC990);
+            D_003BC990 = 0;
+        }
+    }
+    else {
+        effReleaseSharedReference(work->resource);
+    }
+    sdfMatFreeDelayed(work->handle);
+    sdfMemFreeDirect(work->allocation);
+}
+
+extern sdfGrOt_t *D_0037ED78[];
+
+EffRibbonWork *effCloneRibbonWithSharedResource(EffRibbonWork *source) {
+    EffRibbonWork *node = effCreateRibbonWork(source->count, source->repeat);
+    RefObj *texture = source->resource;
+
+    if (texture != NULL) {
+        node->resource = effRetainSharedReference(texture);
+    } else {
+        effSharedRibbonReferenceCount++;
+        node->resource = NULL;
+    }
+    return node;
+}
+
+static inline void unpackNormalizedColor(u32 color) {
+    u32 rgba[4];
+    rgba[0] = color;
+    EE_MMI_RGBA_UNPACK(rgba, 1.0f / 128.0f);
+}
+
+static inline u32 packNormalizedColor(void) {
+    u32 rgba[4];
+    MMI_RGBA_PACK_UNIT(rgba[0], 128.0f);
+    return rgba[0];
+}
+
+void effDrawRibbon(EffRibbonWork *work, const Matrix4 *matrix) {
+    sdfGrOt_t *surface;
+    void *list;
+    EffGsPacket *packet;
+    u32 segment;
+    u32 count;
+    s32 rowStride;
+    s32 remaining;
+    u32 *colors;
+    u8 *positions;
+    u8 *uvs;
+    u8 *extra;
+    u32 color;
+    u32 segmentColor;
+    f32 baseVector[4];
+    sdfTexHandle_t *texture;
+
+    count = work->count;
+    if (count == 0) {
+        return;
+    }
+    color = work->color;
+    if ((color & 0xFF000000) == 0) {
+        return;
+    }
+    surface = D_0037ED78[work->surfaceIndex];
+    UnpackRGBAWordFloat(color, 1.0f / 128.0f);
+    SDF_VU0_STOREVECTOR(baseVector);
+    list = (void *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
+    if (matrix == NULL) {
+        SDF_VU0_LOADIDENTITY();
+    } else {
+        SDF_VU0_LOADMATRIX(matrix);
+    }
+    sdf3DPrimLinkTm(list, 0);
+    if (work->resource == NULL) {
+        texture = sdfGetOrCreateTextureForReference(surface, (RefObj *)D_003BC990);
+    } else {
+        texture = sdfGetOrCreateTextureForReference(surface, work->resource);
+    }
+    sdfMatSetTex(work->handle, texture);
+    sdf3DPrimLinkMat(list, work->handle, 0);
+    if (work->drawMode == 0) {
+        packet = (EffGsPacket *)sdfGrAllocPacketBuff(0x30);
+        packet->dmaTag = 2;
+        packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
+        packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
+        packet->registerList = 0xE;
+        packet->registerValue = 0x31801;
+        packet->registerAddress = 0x47;
+        sdfDrawTagLink(list, (u32)packet);
+    }
+    positions = work->positions;
+    uvs = work->uvs;
+    extra = work->extra;
+    colors = work->colors;
+    rowStride = work->rowStride;
+    segment = 0;
+    if (count != 0) {
+        s32 extraStep;
+        s32 uvStep;
+        s32 positionStep;
+
+        positionStep = rowStride * 16;
+        uvStep = rowStride * 8;
+        extraStep = rowStride * 4;
+
+        do {
+            segmentColor = *colors;
+            if (segmentColor & 0xFF000000) {
+                remaining = rowStride;
+                D_003DCB00.vertexColor = (u32 *)extra;
+                D_003DCB00.vertex = (u128 *)positions;
+                D_003DCB00.uv = (f32 *)uvs;
+                unpackNormalizedColor(segmentColor);
+                SDF_VU0_LOADVECTOR_B(baseVector);
+                SDF_VU0_MULVECTOR();
+                D_003DCB00.color = packNormalizedColor();
+                D_003DCB00.faceCount = 12;
+                D_003DCB00.pointCount = 12;
+                D_003DCB00.faceIndex = D_0037EB30;
+                while (remaining >= 12) {
+                    remaining -= 8;
+                    sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DCB00));
+                    D_003DCB00.vertex += 8;
+                    D_003DCB00.vertexColor += 8;
+                    D_003DCB00.uv += 8;
+                }
+                if (remaining >= 8) {
+                    D_003DCB00.faceCount = 6;
+                    D_003DCB00.pointCount = remaining;
+                    sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DCB00));
+                }
+            }
+            positions += positionStep;
+            colors++;
+            segment++;
+            uvs += uvStep;
+            extra += extraStep;
+        } while (segment < count);
+    }
+    if (work->drawMode == 0) {
+        packet = (EffGsPacket *)sdfGrAllocPacketBuff(0x30);
+        packet->dmaTag = 2;
+        packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
+        packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
+        packet->registerList = 0xE;
+        packet->registerValue = 0x51801;
+        packet->registerAddress = 0x47;
+        sdfDrawTagLink(list, (u32)packet);
+    }
+    surface->regFunc(surface, (sdfDrawTag_t *)list);
+}
+
+void effLoadWindTexture(void) {
+    D_003BC984 = (u32)sdfDevLoadFileEx("/effect/wind00.tmx", &effWindTextureHandle, 0);
+}
+
+u32 effGetWindTextureHandle(void) {
+    return effWindTextureHandle;
+}
+
+void effResetAnimationFrameEntries(u8 *work) {
+    u32 index = 0;
+    u8 *state = (u8 *)((EffClassWork *)work)->resource;
+    u32 count = ((EffBillFlameConfig *)((EffClassWork *)work)->payload)->header.timed.count;
+    EffBillEmitterEntry *entry = (EffBillEmitterEntry *)((EffFrameState *)state)->entries;
+    u32 *flags = ((EffStripWork *)((EffFrameState *)state)->asset)->colors;
+
+    if (count != 0) {
+        do {
+            index++;
+            *flags++ = 0;
+            entry->timer = -1;
+            entry++;
+        } while (index < count);
+    }
+}
+
+u32 *effAllocateAnimationBuffer(EffBillFlameConfig *work) {
+    u32 age;
+    u32 *buffer;
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(work->header.timed.count * sizeof(EffBillEmitterEntry) + 0xC);
+
+    buffer = (u32 *)sdfMemLock(allocation);
+    age = work->header.segments;
+
+    buffer[0] = (u32)(buffer + 3);
+    buffer[2] = (u32)allocation;
+    if (age < 3) {
+        work->header.segments = 3;
+    }
+    return buffer;
+}
+
+void effFillFadeColorRows(u8 *work, u8 *config) {
+    EffBillFlameConfig *cfg = (EffBillFlameConfig *)config;
+    u32 rows = cfg->header.timed.count;
+    u32 i;
+
+    if (rows != 0) {
+        s32 width = cfg->header.segments;
+        f32 fw = width;
+        s32 fadeInEnd = cfg->header.fadeIn * fw;
+        s32 fadeOutStart = cfg->header.fadeOut * fw;
+        u32 cols = width + 1;
+        u32 stride = cols * 4;
+        u32 *color = ((EffFrameAsset *)((EffFrameState *)work)->asset)->colorRows;
+        u32 *first = color;
+
+        for (i = 0; i < cols; i++) {
+            f32 t;
+            u32 alpha;
+
+            if (i < fadeInEnd) {
+                t = (f32)i / (f32)fadeInEnd;
+            } else if (fadeOutStart < i) {
+                t = (f32)(width - i) / (f32)(width - fadeOutStart);
+            } else {
+                t = 1.0f;
+            }
+            alpha = (u32)(t * 128.0f) << 24;
+            color[0] = 0x808080;
+            color[1] = alpha | 0x808080;
+            color[2] = alpha | 0x808080;
+            color[3] = 0x808080;
+            color += 4;
+        }
+        for (i = 1; i < rows; i++) {
+            memcpy(color, first, stride * 4);
+            color += stride;
+        }
+    }
+}
+
+extern u32 effCreateTexturedStripWithSharedTexture(u32, u32);
+
+u32 *effPrepareTextureAnimation(EffBillFlameConfig *work) {
+    u32 *buffer = effAllocateAnimationBuffer(work);
+
+    buffer[1] = effCreateTexturedStripWithSharedTexture(work->header.timed.count, work->header.segments);
+    effFillFadeColorRows(buffer, work);
+    return buffer;
+}
+
+extern u32 effAllocateStripFromWorkAndRetainTexture(u8 *);
+
+u32 *effPrepareOwnedTextureAnimation(u8 *work) {
+    u8 *anim = ((EffClassWork *)work)->payload;
+    u8 *owner = (u8 *)((EffClassWork *)work)->resource;
+    u32 *buffer = effAllocateAnimationBuffer(anim);
+
+    buffer[1] = effAllocateStripFromWorkAndRetainTexture(((EffFrameState *)owner)->asset);
+    effFillFadeColorRows(buffer, anim);
+    return buffer;
+}
+
+void effReleaseScalyStripResources(u8 *work);
+
+void effReleaseTextureAnimationWork(s32 work) {
+    EffFrameState *state;
+
+    state = (EffFrameState *)((EffClassWork *)work)->resource;
+    effReleaseScalyStripResources((u8 *)state->asset);
+    sdfMemFreeDirect(state->allocation);
+}
+
+#ifdef NON_MATCHING
+
+extern EffRandState dds3RandCB[];
+
+extern f32 effWorldUpVector[4];
+
+/* Advances a flame billboard emitter by one frame: spawns waiting particles
+ * with randomized radius, drag, velocity, angle, spin, width, length and
+ * texture offsets (all at once with random ages on the first frame when the
+ * burst flag is set), retires particles at the end of their life, and for live
+ * particles rebuilds the strip rows (four vertices and two texture-coordinate
+ * sets per segment, spiralling by the spin and the segment length) and samples
+ * the emitter color and alpha tracks. As in retail, the row point's w lane is
+ * never written, so the vertices' w lanes carry stack contents. Upstream:
+ * INCLUDE_ASM in DDS1's game/code_0029E410 and DDS2's game/code_002E0478, the
+ * same routine; written from the retail routine. */
+void effUpdateBillFlame(EffClassWork *work) {
+    EffBillFlameConfig *config = work->payload;
+    EffBillFrameState *state;
+    EffStripWork *strip;
+    EffBillEmitterEntry *particle;
+    f32 point[4];
+    f32 *position;
+    f32 *uvA;
+    f32 *uvB;
+    u32 *colors;
+    u32 progress;
+    u32 frame;
+    u32 life;
+    u32 index;
+    u32 rowCount;
+    s32 rowStride;
+    u32 segmentCount;
+    u32 burst;
+    u32 spawnCount;
+    u32 respawn;
+    f32 spinAccel;
+    f32 gravity;
+    f32 segmentFloat;
+    f32 spreadA;
+    f32 spreadB;
+    f32 driftA;
+    f32 driftB;
+
+    frame = work->frame;
+    progress = config->header.timed.time.progress;
+    if (progress < frame && progress != 0) {
+        return;
+    }
+    life = config->header.life;
+    rowCount = config->header.timed.count;
+    if (life == 0) {
+        return;
+    }
+    if (config->burst != 0 && frame == 0) {
+        burst = 1;
+        spawnCount = rowCount;
+    } else {
+        burst = 0;
+        spawnCount = config->header.spawnRate;
+    }
+    segmentCount = config->header.segments + 1;
+    state = (EffBillFrameState *)work->resource;
+    strip = (EffStripWork *)state->asset;
+    particle = (EffBillEmitterEntry *)state->entries;
+    respawn = config->header.respawn;
+    spinAccel = config->spinAccel;
+    gravity = config->gravity;
+    position = (f32 *)strip->positions;
+    uvA = (f32 *)strip->uvsA;
+    uvB = (f32 *)strip->uvsB;
+    colors = strip->colors;
+    rowStride = strip->rowStride;
+    segmentFloat = (f32)segmentCount;
+    spreadA = config->spreadA;
+    spreadB = config->spreadB;
+    driftA = config->driftA;
+    driftB = config->driftB;
+
+    for (index = 0; index < rowCount; index++, particle++) {
+        u32 age = (u32)particle->timer;
+
+        if (age == (u32)-2) {
+            /* Retired: nothing to draw. */
+        } else if (age == (u32)-1) {
+            /* Waiting: spawn while the per-frame budget lasts. */
+            if (spawnCount != 0) {
+                f32 random;
+                f32 start;
+                f32 end;
+
+                random = dds3GetRandFloatA(dds3RandCB);
+                start = config->radiusStart *
+                    (random * config->radiusStartJitter + (1.0f - config->radiusStartJitter));
+                random = dds3GetRandFloatA(dds3RandCB);
+                end = config->radiusEnd *
+                    (random * config->radiusEndJitter + (1.0f - config->radiusEndJitter));
+                particle->radiusStep = (end - start) / (f32)life;
+                particle->radius = start;
+                random = dds3GetRandFloatA(dds3RandCB);
+                particle->vertical.flame.drag = config->drag *
+                    (random * config->dragJitter + (1.0f - config->dragJitter));
+                random = dds3GetRandFloatA(dds3RandCB);
+                particle->vertical.flame.velocity = -config->velocity * random;
+                random = dds3GetRandFloatA(dds3RandCB);
+                particle->angle = random * 6.2831853f;
+                random = dds3GetRandFloatA(dds3RandCB);
+                particle->spin = config->spin *
+                    (random * config->spinJitter + (1.0f - config->spinJitter));
+                random = dds3GetRandFloatA(dds3RandCB);
+                particle->width = config->width *
+                    (random * config->widthJitter + (1.0f - config->widthJitter));
+                random = dds3GetRandFloatA(dds3RandCB);
+                particle->geometry.flame.length = config->length *
+                    (random * config->lengthJitter + (1.0f - config->lengthJitter)) * 10.0f;
+                particle->geometry.flame.baseA = dds3GetRandFloatA(dds3RandCB);
+                random = dds3GetRandFloatA(dds3RandCB);
+                *colors = 0;
+                particle->geometry.flame.baseB = random;
+                if (burst != 0) {
+                    u32 initialFrame;
+                    f32 initialAge;
+                    f32 gravityDisplacement;
+
+                    initialFrame = dds3GetRandA(dds3RandCB) % life;
+                    particle->timer = initialFrame;
+                    initialAge = (f32)(s32)initialFrame;
+                    gravityDisplacement = gravity * initialAge * initialAge * 0.5f;
+                    particle->radius += particle->radiusStep * initialAge;
+                    particle->vertical.flame.velocity = particle->vertical.flame.velocity -
+                        particle->vertical.flame.drag * initialAge + gravityDisplacement;
+                } else {
+                    particle->timer = 0;
+                }
+                spawnCount--;
+            }
+        } else if (age >= life) {
+            *colors = 0;
+            particle->timer = respawn ? (u32)-1 : (u32)-2;
+        } else {
+            f32 curve = effSampleScalarCurve(&config->scaleCurve, age, life);
+            f32 ageFloat = (f32)(s32)age;
+            f32 before = curve - 1.0f;
+            f32 oldU = particle->geometry.flame.baseA;
+            f32 oldV = particle->geometry.flame.baseB;
+            f32 speed = particle->spin + (spinAccel * ageFloat) * 0.5f;
+            f32 height = particle->vertical.flame.velocity;
+            f32 radius = particle->radius + particle->radiusStep;
+            f32 angle = speed * ageFloat + particle->angle;
+            f32 uShift = -(spreadA * before) * 0.25f;
+            f32 vShift = -(spreadB * before) * 0.5f;
+            f32 uWidth = (spreadA * curve) * 0.5f;
+            f32 vHeight = spreadB * curve;
+            f32 uStart = oldU + uShift;
+            f32 vStart = oldV + vShift;
+            f32 uEnd = uWidth + uStart;
+            f32 rawUEnd = uWidth + uShift;
+            f32 width = particle->width * 0.25f;
+            f32 angleStep;
+            u32 segment;
+
+            particle->geometry.flame.baseB = oldV + driftB * curve;
+            particle->geometry.flame.baseA = oldU + driftA * curve;
+            height -= particle->vertical.flame.drag;
+            height += gravity * ageFloat;
+            SDF_VU0_LOADVECTOR(effWorldUpVector);
+            SDF_VU0_SCALEVECTOR_V0(width);
+            SDF_VU0_COPYVECTOR_A_TO_B();
+            particle->vertical.flame.velocity = height;
+            particle->radius = radius;
+            angleStep = particle->geometry.flame.length / segmentFloat;
+
+            for (segment = 0; segment < segmentCount; segment++) {
+                f32 third;
+                f32 twoThirds;
+                f32 v;
+
+                point[0] = sdfCos(angle) * radius;
+                point[1] = height;
+                point[2] = sdfSin(angle) * radius;
+                SDF_VU0_LOADVECTOR(point);
+                SDF_VU0_COPYVECTOR_A_TO_C();
+                SDF_VU0_ADDVECTOR();
+                SDF_VU0_STOREVECTOR(position + 4);
+                SDF_VU0_ADDVECTOR();
+                SDF_VU0_STOREVECTOR(position);
+                SDF_VU0_COPYVECTOR_C_TO_A();
+                SDF_VU0_SUBVECTOR();
+                SDF_VU0_STOREVECTOR(position + 8);
+                SDF_VU0_SUBVECTOR();
+                SDF_VU0_STOREVECTOR(position + 12);
+                position += 16;
+                third = uWidth * 0.33333333f;
+                twoThirds = uWidth * 0.66666667f;
+                angle += angleStep;
+                v = vHeight * ((f32)segment / segmentFloat);
+                uvB[1] = uStart;
+                uvB[7] = uEnd;
+                uvB[3] = third + uStart;
+                uvB[5] = twoThirds + uStart;
+                uvB[6] = uvB[0] = uvB[2] = uvB[4] = v + vStart;
+                uvB += 8;
+                uvA[3] = third + uShift;
+                uvA[5] = twoThirds + uShift;
+                uvA[1] = uShift;
+                uvA[7] = rawUEnd;
+                uvA[6] = uvA[0] = uvA[2] = uvA[4] = v + vShift;
+                uvA += 8;
+            }
+            *colors++ = effSampleColorAlphaTracks(&config->header.emitterColorTrack,
+                &config->header.emitterAlphaTrack, age, life);
+            particle->timer++;
+            continue;
+        }
+        colors++;
+        position += rowStride * 4;
+        uvB += rowStride * 2;
+        uvA += rowStride * 2;
+    }
+}
+
+#else
+
+INCLUDE_ASM(const s32, "game/code_0029E410", effUpdateBillFlame);
+
+#endif
+
+/* vu0 routine: fade-blended colour and scaled transform of a mesh draw record */
+void effUpdateTintedScaledMesh(BillCellDrawWork *work) {
+    u8 *config = work->config;
+    u32 limit = work->frameLimit;
+    u32 progress = ((EffBillFlameConfig *)config)->header.timed.time.progress;
+    u32 *list = work->instances;
+    u8 *out = (u8 *)list[1];
+    u128 mtx[4];
+    u32 packed;
+    u32 unit;
+    u32 second;
+
+    if (progress < limit && progress != 0) {
+        return;
+    }
+    second = effSampleColorAlphaTracks(&((EffBillFlameConfig *)config)->header.timed.colorTrack, &((EffBillFlameConfig *)config)->header.timed.alphaTrack, limit, progress);
+    unit = 0x3C000000;
+    UnpackRGBAWord(work->baseColor, unit);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    UnpackRGBAWord(second, unit);
+    SDF_VU0_MULVECTOR();
+    packed = PackRGBAWord(128.0f);
+    ((EffStripWork *)out)->color = packed;
+    ((EffStripWork *)out)->type = ((EffBillFlameConfig *)config)->header.timed.alphaTrack.surfaceIndex;
+    ((EffStripWork *)out)->flag = ((EffBillFlameConfig *)config)->meshMode;
+    SDF_VU0_LOADVECTOR(work->transform);
+    ToMatrix();
+    SDF_VU0_LOADVECTOR(effOnesVector);
+    SDF_VU0_SCALEVECTOR_V0(work->scale);
+    SDF_VU0_SCALE_XYZ();
+    SDF_VU0_LOADVECTOR(work);
+    SDF_VU0_VECTOR_W_SET_ONE();
+    SDF_VU0_SET_ROW3();
+    SDF_VU0_STOREMATRIX(mtx);
+    effDrawScalyTexturedStrip(out, mtx);
+}
+
+void effInitializeAnimationPositions(EffClassWork *work) {
+    EffAnimationState *state = (EffAnimationState *)work->resource;
+    FileSlotTable *record = state->record;
+    float *positions = state->positions;
+    u32 count = record->count;
+    u32 i = 0;
+
+    fileClearRecordReferences(record);
+    for (; i < count; i++) {
+        positions[0] = dds3GetRandFloatA(dds3RandCB);
+        positions[1] = dds3GetRandFloatA(dds3RandCB);
+        positions += 2;
+    }
+}
+
+u32 effClampSlotCount(FileKeyBlock *grid) {
+    u32 n;
+    s32 w = grid->emissionDuration;
+    /* Retail 002AF560 uses signed capacity factors before the unsigned cap. */
+    n = (w ? w : (s32)grid->spawnRate) * (w ? (s32)grid->spawnRate : grid->length);
+    return n > 200 ? 200 : n;
+}
+
+extern u32 effRetainScalyTextureReference(void);
+
+EffAnimationState *effCreateAnimationState(u32 unused, u32 count) {
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(count * 8 + 0x10);
+    EffAnimationState *state = (EffAnimationState *)sdfMemLock(allocation);
+
+    state->allocation = allocation;
+    state->positions = (f32 *)(state + 1);
+    state->record = 0;
+    state->textureHandle = effRetainScalyTextureReference();
+    return state;
+}
+
+EffAnimationState *effActivateAnimationState(s32 work) {
+    EffAnimationState *owner = (EffAnimationState *)((EffClassWork *)work)->resource;
+    FileSlotTable *resource = owner->record;
+    EffAnimationState *state = effCreateAnimationState((u32)((EffClassWork *)work)->payload, resource->count);
+
+    resource = owner->record;
+    state->record = fileAllocateGridRecordSlots(resource->type, resource->count,
+                               resource->data1);
+    return state;
+}
+
+extern void effReleaseScalyTextureReference(s32);
+
+void effReleaseAnimationFrameResources(u8 *work) {
+    EffAnimationState *state = (EffAnimationState *)((EffClassWork *)work)->resource;
+
+    effReleaseScalyTextureReference(state->textureHandle);
+    if (state->record != 0) {
+        effPCPHelperBEDGetModel(state->record);
+    }
+    sdfMemFreeDirect(state->allocation);
+}
+
+void effSynchronizeFileTransform(u8 *work) {
+    EffAnimationState *state = (EffAnimationState *)((EffClassWork *)work)->resource;
+    FileSlotTable *record = state->record;
+
+    if (record != 0) {
+        mnuRecordSetVector(record, work);
+        fileSetRecordSecondVector(state->record, work + 0x10);
+        dds3DispatchIndexedCallback((u16 *)state->record, ((EffClassWork *)work)->scale);
+        fileAcquireRecord(state->record);
+    }
+}
+
+#ifdef NON_MATCHING
+
+extern sdfGrOt_t *effGetPacketSubmissionSurface(s32);
+
+void effSubmitCompositeGsPacket(sdfGrOt_t *, EffCompositeGsDescriptor *);
+
+/* Draws one frame of a scrolling-texture effect: each live slot samples its
+ * scale curve, then submits a two-layer composite GS packet whose second
+ * layer's UV window scrolls (and wraps) across the texture, tinted by the slot
+ * and effect colors; slots are positioned directly or through the record's
+ * initial pose. Upstream: INCLUDE_ASM in game/code_0029E410; written from the
+ * retail routine. It differs from retail only in register allocation and
+ * scheduling, and in two spills of the color-scale constants that retail keeps
+ * in one register. */
+void func_002AF6F8(EffClassWork *work) {
+    EffCompositeGsDescriptor draw;
+    f32 origin[4] __attribute__((aligned(16)));
+    f32 orientation[4] __attribute__((aligned(16)));
+    f32 matrix[4][4] __attribute__((aligned(16)));
+    f32 baseColor[4] __attribute__((aligned(16)));
+    EffAnimationState *state = (EffAnimationState *)work->resource;
+    EffAnimationUvConfig *config = work->payload;
+    FileSlotTable *records = (FileSlotTable *)state->record;
+    s32 count = (s32)records->count;
+    f32 *position = state->positions;
+    FileKeyBlock *keys;
+    FileSlot *slot;
+    sdfGrOt_t *surface;
+    sdfTexHandle_t *texture;
+    s32 duration, i;
+    u16 textureWidth, textureHeight;
+    f32 uExtent, vExtent, uStep, vStep;
+    f32 factor;
+    u16 u, v, width, height;
+
+    if (count > 0) {
+        UnpackRGBAWordFloat(work->color, 0.0078125f);
+        SDF_VU0_STOREVECTOR_NOMEM(baseColor);
+        keys = (FileKeyBlock *)records->data0;
+        slot = records->slots;
+        surface = effGetPacketSubmissionSurface(keys->alphaTrack.surfaceIndex);
+        duration = keys->length;
+        draw.blendMode = keys->alphaTrack.surfaceIndex;
+        uExtent = config->uExtent;
+        vExtent = config->vExtent;
+        uStep = config->uStep;
+        vStep = config->vStep;
+        texture = sdfGetOrCreateTextureForReference(surface, (RefObj *)state->textureHandle);
+        textureHeight = (u16)texture->height * 8;
+        textureWidth = (u16)texture->width * 16;
+        draw.primaryClamp = 0x7F000FFFULL;
+        draw.secondaryClamp = 0x2007F000FFFULL;
+        draw.primaryTexture = draw.secondaryTexture = texture;
+        draw.primaryUv.components[0] = 0;
+        draw.primaryUv.components[1] = 0;
+        draw.primaryUv.components[2] = textureWidth;
+        draw.primaryUv.components[3] = 0;
+        draw.primaryUv.components[4] = textureWidth;
+        draw.primaryUv.components[5] = textureHeight;
+        draw.primaryUv.components[6] = 0;
+        draw.primaryUv.components[7] = textureHeight;
+        if (!(((FileSlotTable *)state->record)->flags & 1)) {
+            for (i = 0; i < count; i++, slot++, position += 2) {
+                if (slot->state >= 0) {
+                    f32 uBias, vBias;
+                    UnpackRGBAWordFloat(slot->color, 0.0078125f);
+                    SDF_VU0_LOADVECTOR_B(baseColor);
+                    SDF_VU0_MULVECTOR();
+                    draw.color = PackRGBAWord(128.0f);
+                    factor = effSampleScalarCurve(&config->scale.curve, slot->state, duration);
+                    width = (u32)(uExtent * factor * textureWidth);
+                    height = (u32)(vExtent * factor * textureHeight);
+                    uBias = -(uExtent * (factor - 1.0f)) * 0.5f;
+                    vBias = -(vExtent * (factor - 1.0f)) * 0.5f;
+                    u = (u32)((position[0] + uBias) * textureWidth);
+                    v = (u32)((position[1] + vBias) * textureHeight);
+                    u %= textureWidth;
+                    v %= textureHeight;
+                    position[0] += uStep * factor;
+                    position[1] += vStep * factor;
+                    draw.scaleX = draw.scaleY = slot->scale;
+                    draw.angle = slot->angle;
+                    draw.secondaryUv.components[0] = u;
+                    draw.secondaryUv.components[1] = v;
+                    draw.secondaryUv.components[2] = width + u;
+                    draw.secondaryUv.components[3] = v;
+                    draw.secondaryUv.components[4] = width + u;
+                    draw.secondaryUv.components[5] = height + v;
+                    draw.secondaryUv.components[6] = u;
+                    draw.secondaryUv.components[7] = height + v;
+                    SDF_VU0_COPYVECTOR(draw.position, slot->pos);
+                    effSubmitCompositeGsPacket(surface, &draw);
+                }
+            }
+        } else {
+            fileReadRecordSecondVector(state->record, (u128 *)orientation);
+            fileReadVectorPtr20(state->record, (u128 *)origin);
+            SDF_VU0_LOADVECTOR(orientation);
+            ToMatrix();
+            SDF_VU0_LOAD_ROW3(origin);
+            SDF_VU0_STOREMATRIX(matrix);
+            for (i = 0; i < count; i++, slot++, position += 2) {
+                if (slot->state >= 0) {
+                    f32 uBias, vBias;
+                    SDF_VU0_LOADMATRIX(matrix);
+                    SDF_VU0_LOADVECTOR(slot->pos);
+                    SDF_VU0_APPLYMATRIX_XYZ1();
+                    SDF_VU0_STOREVECTOR(draw.position);
+                    UnpackRGBAWordFloat(slot->color, 0.0078125f);
+                    SDF_VU0_LOADVECTOR_B(baseColor);
+                    SDF_VU0_MULVECTOR();
+                    draw.color = PackRGBAWord(128.0f);
+                    factor = effSampleScalarCurve(&config->scale.curve, slot->state, duration);
+                    width = (s32)(uExtent * factor * textureWidth);
+                    height = (s32)(vExtent * factor * textureHeight);
+                    uBias = -(uExtent * (factor - 1.0f)) * 0.5f;
+                    vBias = -(vExtent * (factor - 1.0f)) * 0.5f;
+                    u = (s32)((position[0] + uBias) * textureWidth);
+                    v = (s32)((position[1] + vBias) * textureHeight);
+                    u %= textureWidth;
+                    v %= textureHeight;
+                    position[0] += uStep * factor;
+                    position[1] += vStep * factor;
+                    draw.scaleX = draw.scaleY = slot->scale;
+                    draw.angle = slot->angle;
+                    draw.secondaryUv.components[0] = u;
+                    draw.secondaryUv.components[1] = v;
+                    draw.secondaryUv.components[2] = width + u;
+                    draw.secondaryUv.components[3] = v;
+                    draw.secondaryUv.components[4] = width + u;
+                    draw.secondaryUv.components[5] = height + v;
+                    draw.secondaryUv.components[6] = u;
+                    draw.secondaryUv.components[7] = height + v;
+                    effSubmitCompositeGsPacket(surface, &draw);
+                }
+            }
+        }
+    }
+}
+
+#else
+
+INCLUDE_ASM(const s32, "game/code_0029E410", func_002AF6F8);
+
+#endif
+
+extern u32 effClampSlotCount(FileKeyBlock *);
+
+EffAnimationState *effCreatePrimarySlotAnimationState(u8 *work) {
+    FileKeyBlock *mapping = (FileKeyBlock *)(work + 0x3C);
+    u32 count = effClampSlotCount(mapping);
+    EffAnimationState *state = effCreateAnimationState((u32)work, count);
+
+    state->record = fileAllocateGridRecordSlots(1, count, mapping);
+    return state;
+}
+
+EffAnimationState *effCreateAlternateSlotAnimationState(u8 *work) {
+    FileKeyBlock *mapping = (FileKeyBlock *)(work + 0x3C);
+    u32 count = effClampSlotCount(mapping);
+    EffAnimationState *state = effCreateAnimationState((u32)work, count);
+
+    state->record = fileAllocateGridRecordSlots(3, count, mapping);
+    return state;
+}
+
+void effResetSlotAnimationRecord(s32 work) {
+    ((EffFrameAsset *)((EffFrameState *)((EffClassWork *)work)->resource)->asset)->frameCount = 0;
+}
+
+u32 *effAllocateQuantizedBuffer(EffBillQuantizedConfig *work) {
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(0xC);
+    u32 *buffer = (u32 *)sdfMemLock(allocation);
+    u32 count = work->samples.quantizedSamples;
+
+    buffer[2] = (u32)allocation;
+    if (count < 4) {
+        work->samples.quantizedSamples = 4;
+        count = 4;
+    }
+    buffer[0] = count >> 2;
+    if ((work->samples.quantizedSamples & 3) != 0) {
+        buffer[0] = (count >> 2) + 1;
+    }
+    return buffer;
+}
+
+void effBuildQuantizedTexturedStrip(u32 *buffer, EffBillQuantizedConfig *config) {
+    f32 radii[4];
+    f32 heights[4];
+    s32 segment;
+    s32 segmentCount;
+    f32 rowStep;
+    f32 angleStep;
+    f32 rowScaleB;
+    f32 rowScaleA;
+    s32 fadeOutLimit;
+    s32 vertexCount;
+    u32 *colors;
+    s32 rowCount;
+    s32 fadeInLimit;
+    EffStripWork *strip;
+    f32 *positions;
+    u32 *vertexColors;
+    f32 *uvA;
+    f32 *uvB;
+    f32 sampleStep;
+    f32 radius;
+    f32 vertexScaleB;
+    f32 vertexScaleA;
+    f32 segmentAngle;
+    f32 angle;
+    f32 rowAngle;
+    s32 row;
+    s32 sample;
+    f32 cosine;
+    f32 sine;
+    f32 fraction;
+    f32 fractionStep;
+    f32 rowFraction;
+    f32 alpha;
+
+    segmentCount = (s32)buffer[0];
+    vertexCount = segmentCount * 4;
+    angle = config->angularSpanDegrees * 0.017453292f;
+    angleStep = angle / segmentCount;
+    rowCount = config->samples.signedRows;
+    rowStep = 6.2831852f / rowCount;
+    rowCount++;
+    strip = (EffStripWork *)buffer[1];
+    vertexColors = (u32 *)strip->extra;
+    uvA = (f32 *)strip->uvsA;
+    uvB = (f32 *)strip->uvsB;
+    colors = strip->colors;
+    positions = (f32 *)strip->positions;
+    sampleStep = angleStep / 3.0f;
+    radius = config->radius;
+    rowScaleB = config->fadeInEnd;
+    vertexScaleB = config->fadeOutStart;
+    rowScaleA = config->uvARowScale;
+    vertexScaleA = config->uvBVertexScale;
+    fadeInLimit = config->alphaFadeInFraction * vertexCount;
+    fadeOutLimit = config->alphaFadeOutFraction * vertexCount;
+    segmentAngle = 0.0f;
+
+    for (segment = 0; segment < segmentCount; segment++) {
+        angle = segmentAngle;
+        for (sample = 0; sample < 4; sample++) {
+            radii[sample] = radius * sdfSin(angle);
+            heights[sample] = -radius * sdfCos(angle);
+            angle += sampleStep;
+        }
+        segmentAngle += angleStep;
+        rowAngle = 0.0f;
+        /* Retail keeps this unused sample (DDS1 002B0008 / DDS2 002F33F8). */
+        sdfSin(segmentAngle);
+        for (row = 0; row < rowCount; row++) {
+            f32 *position;
+            f32 *texA;
+            f32 *texB;
+            cosine = sdfCos(rowAngle);
+            sine = sdfSin(rowAngle);
+            rowFraction = (f32)row / rowCount;
+            fraction = (f32)segment / segmentCount;
+            fractionStep = (1.0f / segmentCount) / 3.0f;
+            texB = uvB;
+            texA = uvA;
+            position = positions;
+            for (sample = 0; sample < 4; sample++) {
+                s32 index;
+                position[0] = cosine * radii[sample];
+                position[1] = heights[sample];
+                position[2] = sine * radii[sample];
+                position += 4;
+                texA[1] = fraction * vertexScaleA;
+                texA[0] = rowFraction * rowScaleA;
+                texA += 2;
+                texB[1] = fraction * vertexScaleB;
+                texB[0] = rowFraction * rowScaleB;
+                texB += 2;
+                fraction += fractionStep;
+                index = segment * 4 + sample;
+                if (index < fadeInLimit) {
+                    alpha = (f32)index / fadeInLimit;
+                } else if (index > fadeOutLimit) {
+                    alpha = (f32)(vertexCount - index) / (vertexCount - fadeOutLimit);
+                } else {
+                    alpha = 1.0f;
+                }
+                vertexColors[sample] = 0x00808080 | ((u32)(alpha * 128.0f) << 24);
+            }
+            rowAngle += rowStep;
+            positions += 16;
+            vertexColors += 4;
+            uvA += 8;
+            uvB += 8;
+        }
+        *colors++ = 0x80808080;
+    }
+}
+
+extern void effBuildQuantizedTexturedStrip(u32 *, EffBillQuantizedConfig *);
+
+u32 *effPrepareQuantizedTexture(EffBillQuantizedConfig *work) {
+    u32 *buffer = effAllocateQuantizedBuffer(work);
+
+    buffer[1] = effCreateTexturedStripWithSharedTexture(buffer[0], work->samples.quantizedSamples);
+    effBuildQuantizedTexturedStrip(buffer, work);
+    return buffer;
+}
+
+u32 *effPrepareOwnedQuantizedTexture(u8 *work) {
+    EffBillQuantizedConfig *anim = (EffBillQuantizedConfig *)((EffClassWork *)work)->payload;
+    u8 *owner = (u8 *)((EffClassWork *)work)->resource;
+    u32 *buffer = effAllocateQuantizedBuffer(anim);
+
+    buffer[1] = effAllocateStripFromWorkAndRetainTexture(((EffFrameState *)owner)->asset);
+    effBuildQuantizedTexturedStrip(buffer, anim);
+    return buffer;
+}
+
+void effReleaseBillboardFrameAsset(s32 work) {
+    EffFrameState *state;
+
+    state = (EffFrameState *)((EffClassWork *)work)->resource;
+    effReleaseScalyStripResources((u8 *)state->asset);
+    sdfMemFreeDirect(state->allocation);
+}
+
+void effOffsetNodeRowsVU(u8 *work) {
+    s32 *list = (s32 *)((EffClassWork *)work)->resource;
+    u8 *config = ((EffClassWork *)work)->payload;
+    s32 rows = ((EffBillQuantizedConfig *)config)->samples.signedRows + 1;
+    s32 count = list[0];
+    u8 *node = *(u8 **)&list[1];
+    u8 *entry = ((EffStripWork *)node)->uvsB;
+    s32 i;
+    s32 j;
+    s32 k;
+    f32 *v;
+
+    for (i = 0; i < count; i++) {
+        for (j = 0; j < rows; j++) {
+            v = (f32 *)entry + 1;
+            for (k = 0; k < 4; k++) {
+                *v += ((EffBillQuantizedConfig *)config)->rowOffset;
+                v += 2;
+            }
+            entry += 0x20;
+        }
+    }
+}
+
+/* vu0 routine: fade-blended colour and scaled transform of a mesh draw record */
+void effUpdateFadedMeshTransform(BillCellDrawWork *work) {
+    u8 *config = work->config;
+    u32 limit = work->frameLimit;
+    u32 progress = ((EffBillQuantizedConfig *)config)->drawProgress;
+    u32 *list = work->instances;
+    u8 *out = (u8 *)list[1];
+    u128 mtx[4];
+    s32 color1[4];
+    s32 color2[4];
+    s32 blended[4];
+    u32 packed;
+    u32 unit;
+    u32 second;
+    f32 scale;
+
+    if (progress < limit && progress != 0) {
+        return;
+    }
+    second = effSampleColorAlphaTracks(&((EffBillQuantizedConfig *)config)->colorTrack, &((EffBillQuantizedConfig *)config)->alphaTrack, limit, progress);
+    unit = 0x3C000000;
+    color1[0] = work->baseColor;
+    EE_MMI_RGBA_UNPACK(color1, unit);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    color2[0] = second;
+    EE_MMI_RGBA_UNPACK(color2, unit);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_dds3ColorFtoI(packed, 128.0f);
+    blended[0] = packed;
+    ((EffStripWork *)out)->color = blended[0];
+    ((EffStripWork *)out)->type = ((EffBillQuantizedConfig *)config)->alphaTrack.surfaceIndex;
+    ((EffStripWork *)out)->flag = ((EffBillQuantizedConfig *)config)->meshMode;
+    scale = effSampleScalarCurve(&((EffBillQuantizedConfig *)config)->scaleCurve, limit, progress) * work->scale;
+    SDF_VU0_LOADVECTOR(work->transform);
+    ToMatrix();
+    SDF_VU0_LOADVECTOR(effOnesVector);
+    SDF_VU0_SCALEVECTOR_V0(scale);
+    SDF_VU0_SCALE_XYZ();
+    SDF_VU0_LOADVECTOR(work);
+    SDF_VU0_VECTOR_W_SET_ONE();
+    SDF_VU0_SET_ROW3();
+    SDF_VU0_STOREMATRIX(mtx);
+    effDrawScalyTexturedStrip(out, mtx);
+}
+
+EffClassWork *effAllocateBlockWithModel(u16 kind, void *source) {
+    u32 headerSize = 0x40;
+    u32 size = effModelBlockOperations[kind].payloadSize;
+    EffClassWork *effect = sdfChipAllocDirect(size + headerSize);
+    effect->payload = (u8 *)effect + headerSize;
+    effect->color = 0x80808080;
+    effect->scale = 1.0f;
+    effect->kind = kind;
+    effect->frame = 0;
+    SDF_VU0_STOREIDENTITYVECTOR(effect);
+    SDF_VU0_STOREIDENTITYVECTOR(effect->vectors.orientation);
+    memcpy(effect->payload, source, size);
+    return effect;
+}
+
+extern EffClassWork *effAllocateBlockWithModel(u16, void *);
+
+EffClassWork *effCreateResourceInstanceC(u16 kind, void *source) {
+    EffClassWork *effect = effAllocateBlockWithModel(kind, source);
+    effect->resource = (void *)effModelBlockOperations[kind].createResource(source);
+    effModelBlockOperations[kind].initialize(effect);
+    return effect;
+}
+
+EffClassWork *effCreateModelBlockFromFile(FileJobPayload *request) {
+    void *source;
+
+    source = fileResolvePrimaryBuffer(request);
+    return effCreateResourceInstanceC(request->option, source);
+}
+
+void effDestroyModelBlockWork(EffClassWork *work) {
+    effModelBlockOperations[work->kind].destroyResource(work);
+    sdfChipFreeDirect(work);
+}
+
+EffClassWork *effRecreateActiveByClass(EffClassWork *work) {
+    EffClassWork *effect = effAllocateBlockWithModel(work->kind, work->payload);
+    void *resource = (void *)effModelBlockOperations[work->kind].cloneResource(work);
+    s32 kind = work->kind;
+    effect->resource = resource;
+    effModelBlockOperations[kind].initialize(effect);
+    return effect;
+}
+
+void effResetModelBlockFrame(EffClassWork *work) {
+    effModelBlockOperations[work->kind].initialize(work);
+    work->frame = 0;
+}
+
+void effAdvanceDispatchCounter(EffClassWork *work) {
+    effModelBlockOperations[work->kind].update(work);
+    work->frame++;
+}
+
+void effDrawModelBlock(EffClassWork *work) {
+    effModelBlockOperations[work->kind].draw(work);
+}
+
+void effUpdateAndDrawModelBlock(EffClassWork *work) {
+    effAdvanceDispatchCounter(work);
+    effDrawModelBlock(work);
+}
+
+void effCopyModelBlockPosition(void *dst, void *src) {
+    SDF_VU0_COPYVECTOR(dst, src);
+}
+
+void effCopyModelBlockOrientation(void *work, void *src) {
+    SDF_VU0_COPYVECTOR(((EffClassWork *)work)->vectors.orientation, src);
+}
+
+void effSetModelBlockColor(EffClassWork *work, u32 color) {
+    work->color = color;
+}
+
+void effSetModelBlockMatrixComponent(EffClassWork *work, float value) {
+    work->scale = value;
+}
+
+/* Retain and return the lazy shared reference to /effect/scaly00.tmx. */
+u32 effRetainScalyTextureReference(void) {
+    if (effSharedStripReferenceCount == 0) {
+        effSharedScalyStripResource = effCloneSharedReferenceWithValue((struct SdfTextureFileHeader *)effScalyTextureHandle, 0x200);
+    }
+    effSharedStripReferenceCount = effSharedStripReferenceCount + 1;
+    return (u32)effSharedScalyStripResource;
+}
+
+/* Drop a scaly texture reference; unused is ignored and the last owner releases the clone. */
+void effReleaseScalyTextureReference(s32 unused) {
+    effSharedStripReferenceCount = effSharedStripReferenceCount - 1;
+    if (effSharedStripReferenceCount == 0) {
+        effReleaseSharedReference(effSharedScalyStripResource);
+        effSharedScalyStripResource = 0;
+    }
+}
+
+extern sdf3DPrimPolyParm_t D_003DCB30;
+
+/* Allocate position/UV/color rows and a draw handle using count and repeat. */
+u8 *effAllocateTexturedStripWork(count, repeat)
+u32 count;
+u32 repeat;
+{
+    u32 rowStride = repeat * 4 + 4;
+    u32 size = (rowStride * 0x24 + 4) * count;
+    u32 cells = rowStride * count;
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(size + 0x34);
+    u8 *p = (u8 *)sdfMemLock((struct sdfMemHandle_t *)((u32)allocation));
+    EffStripWork *work = (EffStripWork *)(p + size);
+    u32 i;
+
+    work->positions = p;
+    p += cells * 16;
+    work->uvsA = p;
+    p += cells * 8;
+    work->uvsB = p;
+    p += cells * 8;
+    work->extra = p;
+    p += cells * 4;
+    work->type = 2;
+    work->color = 0x80808080;
+    work->rowStride = rowStride;
+    work->repeat = repeat;
+    work->allocation = allocation;
+    work->colors = (u32 *)p;
+    work->count = count;
+    work->flag = 0;
+    for (i = 0; i < count; i++) {
+        ((u32 *)p)[i] = 0x80808080;
+    }
+    work->handle = sdfMatNew();
+    sdfMatSetConstant(work->handle, 1.0f);
+    memset(&D_003DCB30, 0, sizeof(sdf3DPrimPolyParm_t));
+    D_003DCB30.attr = 0x4000;
+    return (u8 *)work;
+}
+
+/* Create a scaly strip and retain its shared texture reference. */
+u32 effCreateTexturedStripWithSharedTexture(u32 count, u32 repeat) {
+    u32 strip = effAllocateTexturedStripWork(count, repeat);
+    effRetainScalyTextureReference();
+    return strip;
+}
+
+void effReleaseScalyStripResources(u8 *work) {
+    effReleaseScalyTextureReference((s32)effSharedScalyStripResource);
+    sdfMatFreeDelayed(((EffStripWork *)work)->handle);
+    sdfMemFreeDirect(((EffStripWork *)work)->allocation);
+}
+
+/* Recreate the source strip's dimensions and retain another shared texture reference. */
+u32 effAllocateStripFromWorkAndRetainTexture(u8 *work) {
+    u32 strip = effAllocateTexturedStripWork(((EffStripWork *)work)->count, ((EffStripWork *)work)->repeat);
+    effSharedStripReferenceCount++;
+    return strip;
+}
+
+/* Port of DDS2 func_002F3F70, matched by redthing1 in 8e07bae59.
+ * The 1,536-byte retail bodies differ only in real address relocations. */
+
+extern sdfGrOt_t *D_0037EE20[];
+
+extern vu8 sdfFrameId;
+
+extern dds3FrameDrawBuffer_t dds3FrameDrawPacketRecords[];
+
+extern void sdfGrSetFrameMaskRGB(const u8 *, SdfDmaReferenceChainPacket *, s32);
+
+extern void sdfGrSetFrameMaskReset(const u8 *, SdfDmaReferenceChainPacket *, s32);
+
+void effDrawScalyTexturedStrip(EffStripWork *work, void *matrix) {
+    f32 normalizedColor[4];
+    s32 baseColor[4];
+    u32 packedColor;
+    sdfGrOt_t *surface;
+    void *list;
+    sdfTexHandle_t *texture;
+    sdfMatPacket_t *entry;
+    u128 *referencePacket;
+    SdfDmaReferenceChainPacket *dmaPacket;
+    EffGsPairPacket *packet;
+    u32 row;
+    u32 count;
+    u128 *positions;
+    f32 (*uvsA)[2];
+    f32 (*uvsB)[2];
+    u32 *extra;
+    u32 *colors;
+    s32 stride;
+    s32 remaining;
+    u32 mode;
+    u32 registerId;
+    u64 restoreValue;
+    u64 restoreAddress;
+
+    count = work->count;
+    if (count == 0) {
+        return;
+    }
+    if ((work->color & 0xFF000000) == 0) {
+        return;
+    }
+    mode = 0;
+    registerId = 0;
+    restoreValue = 0;
+    restoreAddress = 0;
+    surface = D_0037EE20[work->type];
+    switch (work->type) {
+    case 2:
+        registerId = 0x58; restoreValue = 0x48; restoreAddress = 0x71801; mode = 1;
+        break;
+    case 3:
+    case 4:
+        registerId = 0x52; restoreValue = 0x42; restoreAddress = 0x71801; mode = 2;
+        break;
+    case 0:
+    case 1:
+        registerId = 0x54; restoreValue = 0x44; restoreAddress = 0x717FB; mode = 0;
+        break;
+    }
+    baseColor[0] = work->color;
+    EE_MMI_RGBA_UNPACK(baseColor, 1.0f / 128.0f);
+    SDF_VU0_STOREVECTOR(normalizedColor);
+    list = sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
+    if (matrix == NULL) {
+        SDF_VU0_LOADIDENTITY();
+    } else {
+        SDF_VU0_LOADMATRIX(matrix);
+    }
+    sdf3DPrimLinkTm(list, 0);
+    texture = sdfGetOrCreateTextureForReference(surface, (RefObj *)effSharedScalyStripResource);
+    sdfMatSetTex((sdfMat_t *)work->handle, texture);
+    sdfMatSetMultiTex((sdfMat_t *)work->handle, texture);
+    sdfMatSetMultiMethod((sdfMat_t *)work->handle, mode);
+    row = 0;
+    sdfMatUpdatePacket((sdfMat_t *)work->handle, (s8)sdfFrameId);
+    entry = ((sdfMat_t *)work->handle)->packet[(s8)sdfFrameId];
+    entry->mtexClampData = 0x7F000FFF;
+    entry->clampData = 0x02007F000FFFULL;
+    entry->mtexAlgo = mode;
+    entry->mtexAlpha = registerId;
+    referencePacket = sdfGrAllocPacketBuff(0x20);
+    sdfMatMakePacket((sdfMat_t *)work->handle, (SdfDmaTagHeader *)referencePacket,
+                                       (s8)sdfFrameId);
+    QUAD_ZERO(referencePacket[1]);
+    sdfDrawTagLinkRef(list, (u32)referencePacket);
+    dmaPacket = sdfGrAllocPacketBuff(0x40);
+    sdfGrSetFrameMaskRGB(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, dmaPacket, 0);
+    sdfDrawTagLinkRefGif(list, (u32)dmaPacket);
+    packet = sdfGrAllocPacketBuff(0x40);
+    packet->dmaTag = 3;
+    packet->vifTag = (((u64)0x50000003 << 16) | 0x1000) << 16;
+    packet->gifTag = ((u64)0x10000000 << 32) | 0x8002;
+    packet->registerList = 0xE;
+    packet->firstValue = 0x51001;
+    packet->firstAddress = 0x47;
+    packet->secondValue = 0x44;
+    packet->secondAddress = 0x42;
+    sdfDrawTagLink(list, packet);
+    packet = sdfGrAllocPacketBuff(0x40);
+    packet->dmaTag = 3;
+    packet->vifTag = (((u64)0x50000003 << 16) | 0x1000) << 16;
+    packet->gifTag = ((u64)0x10000000 << 32) | 0x8002;
+    packet->registerList = 0xE;
+    packet->firstValue = 0x51001;
+    packet->firstAddress = 0x48;
+    packet->secondValue = registerId;
+    packet->secondAddress = 0x43;
+    sdfDrawTagLink(list, packet);
+    positions = (u128 *)work->positions;
+    uvsA = (f32 (*)[2])work->uvsA;
+    uvsB = (f32 (*)[2])work->uvsB;
+    extra = (u32 *)work->extra;
+    colors = work->colors;
+    stride = work->rowStride;
+    for (; row < count; row++) {
+        if (*colors & 0xFF000000) {
+            f32 unit;
+            remaining = stride;
+            D_003DCB30.vertexColor = extra;
+            D_003DCB30.vertex = positions;
+            D_003DCB30.uv = (u32 *)uvsA;
+            D_003DCB30.multiUv = (u32 *)uvsB;
+            unit = 1.0f / 128.0f;
+            UnpackRGBAWordFloat(*colors, unit);
+            SDF_VU0_LOADVECTOR_B(normalizedColor);
+            SDF_VU0_MULVECTOR();
+            unit = 128.0f;
+            packedColor = PackRGBAWord(unit);
+            D_003DCB30.color = packedColor;
+            D_003DCB30.faceCount = 12;
+            D_003DCB30.pointCount = 12;
+            D_003DCB30.faceIndex = D_0037EB30;
+            while (remaining >= 12) {
+                remaining -= 8;
+                sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DCB30));
+                D_003DCB30.vertex += 8;
+                D_003DCB30.vertexColor += 8;
+                D_003DCB30.uv += 8;
+                D_003DCB30.multiUv += 8;
+            }
+            if (remaining >= 8) {
+                D_003DCB30.pointCount = remaining;
+                D_003DCB30.faceCount = 6;
+                sdfDrawTagLink(list, effPkt3DPrimMakePoly(&D_003DCB30));
+            }
+        }
+        positions += stride;
+        uvsA += stride;
+        extra += stride;
+        uvsB += stride;
+        colors++;
+    }
+    dmaPacket = sdfGrAllocPacketBuff(0x40);
+    sdfGrSetFrameMaskReset(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, dmaPacket, 0);
+    sdfDrawTagLinkRefGif(list, (u32)dmaPacket);
+    packet = sdfGrAllocPacketBuff(0x40);
+    packet->dmaTag = 3;
+    packet->vifTag = (((u64)0x50000003 << 16) | 0x1000) << 16;
+    packet->gifTag = ((u64)0x10000000 << 32) | 0x8002;
+    packet->registerList = 0xE;
+    packet->firstValue = restoreAddress;
+    packet->firstAddress = 0x47;
+    packet->secondValue = restoreValue;
+    packet->secondAddress = 0x42;
+    sdfDrawTagLink(list, packet);
+    surface->regFunc((sdfDrawTag_t *)surface, list);
+}
+
+void effLoadScalyTexture(void) {
+    D_003BC994 = (u32)sdfDevLoadFileEx("/effect/scaly00.tmx", &effScalyTextureHandle, 0);
+}
+
+u32 effGetScalyTextureHandle(void) {
+    return effScalyTextureHandle;
+}
+
+typedef char EffModelResource_size_must_be_0x40[
+    (sizeof(EffModelResource) == 0x40) ? 1 : -1];
+
+void effSeedParticleSpanParameters(EffModelResource *work) {
+    u32 index = 0;
+    EffSpanTable *table = work->childResource;
+    EffSpanConfig *config = work->source;
+    u32 total = table->total;
+    u32 per = config->perSpan;
+    u32 spans = total / per;
+    EffSpanRecord *record = table->records;
+    u32 span;
+    EffSpanEntry *entry;
+
+    if (total % per != 0) {
+        spans++;
+    }
+    if (table->count != 0) {
+        do {
+            record->pointCount = 0;
+            entry = record->entries;
+            span = 0;
+            if (spans != 0) {
+                do {
+                    span++;
+                    entry->first = dds3GetRandFloatA(dds3RandCB) * config->firstRand + (1.0f - config->firstRand);
+                    entry->second = config->secondBase * (dds3GetRandFloatA(dds3RandCB) * config->rangeRand + (1.0f - config->rangeRand));
+                    entry->referenceAge = 0;
+                    entry++;
+                } while (span < spans);
+            }
+            index++;
+            record++;
+        } while (index < table->count);
+    }
+}
+
+extern EffPointSet *effCreatePointSet3(s32 count);
+
+/* Build the point and reference sets for each model map-position record. */
+EffSpanTable *effCreateParticleSpanTable(EffSpanConfig *config, dds3ModelHandle_t *model) {
+    u32 total = model->first->frameCount;
+    u32 count = sdfModelGetMarkPosCount(model->inner);
+    u32 spans;
+    u32 partialSpan;
+    struct sdfMemHandle_t *allocation;
+    EffSpanTable *table;
+    EffSpanRecord *record;
+    EffSpanEntry *entries;
+    u32 i;
+    u32 j;
+    u32 triplets;
+    u32 *colors;
+    u32 middleColor;
+    u32 edgeColor;
+    EffTrackSet *tracks;
+
+    model->first->frameStep = 1.0f;
+    mdlSingleMotion(model, 0, 0);
+    if (config->perSpan == 0) {
+        config->perSpan = 1;
+    }
+    partialSpan = total % config->perSpan != 0;
+    spans = partialSpan + total / config->perSpan;
+    if (config->referenceRampDuration == 0) {
+        config->referenceRampDuration = 1;
+    }
+    allocation = sdfMemAllocDirect(sizeof(EffSpanTable) +
+                 count * sizeof(EffSpanRecord) + count * spans * sizeof(EffSpanEntry));
+    table = (EffSpanTable *)sdfMemLock(allocation);
+    table->allocation = allocation;
+    table->records = (EffSpanRecord *)(table + 1);
+    entries = (EffSpanEntry *)(table->records + count);
+    table->total = total;
+    table->count = count;
+    for (i = 0, record = table->records; i < count; i++, record++) {
+        record->pointSet = effCreatePointSet3(total);
+        record->pointSet->type = (u32)config->pointAlphaTrack.surfaceIndex;
+        record->pointSet->flag = config->pointSetFlag;
+        if (config->drawPoints) {
+            triplets = record->pointSet->rows / 3;
+            colors = (u32 *)record->pointSet->tail;
+            middleColor = config->middleColor;
+            edgeColor = config->edgeColor;
+            for (j = 0; j < triplets; j++, colors += 3) {
+                colors[0] = edgeColor;
+                colors[1] = middleColor;
+                colors[2] = edgeColor;
+            }
+        }
+        record->entries = entries;
+        entries += spans;
+        if (config->drawReferences) {
+            tracks = effCreateTrackSetWithSharedReferences(spans, 0, 0);
+            record->references = tracks;
+            tracks->type = (u32)config->referenceAlphaTrack.surfaceIndex;
+            tracks->flag = config->pointSetFlag;
+        } else {
+            record->references = 0;
+        }
+    }
+    return table;
+}
+
+extern void effReleaseModelPointSetAsset(EffPointSet *);
+
+void effReleaseParticleList(EffSpanTable *list) {
+    u32 i;
+    EffSpanRecord *entry = list->records;
+
+    for (i = 0; i < list->count; i++, entry++) {
+        effReleaseModelPointSetAsset(entry->pointSet);
+        if (entry->references != 0) {
+            effReleaseResourceRefs(entry->references);
+        }
+    }
+    sdfMemFreeDirect(list->allocation);
+}
+
+#ifdef NON_MATCHING
+
+extern f32 effWorldUpVector[4];
+
+extern struct sdfGrOt_t *sdfModelOtTable[13][4];
+
+/* Updates the span geometry of a model-attached particle effect after its model
+ * is posed: for each map-position record it appends the model's look-at point
+ * to the record's point set and rebuilds the tapered two-edge ribbon around the
+ * points (widening by the half-width, narrowing frame by frame, oriented by a
+ * cross product with the world up vector or by the previous normal), then, when
+ * references are drawn, refreshes each active span's reference quad (rotated by
+ * an animated angle, scaled by the ramp-in, colored from the sampled track) and
+ * zeroes the unused ones. Upstream: INCLUDE_ASM in DDS1's game/code_0029E410
+ * and DDS2's game/code_002E0478; written from the retail routine. It differs from retail only in one register move and
+ * stack spills of the color carriers. */
+void effUpdateParticleSpanGeometry(EffModelResource *work) {
+    f32 fallbackNormal[4];
+    f32 axis[4];
+    EffSpanTable *table = work->childResource;
+    dds3ModelHandle_t *model = work->model;
+    EffSpanConfig *config = work->source;
+    s32 frame = work->updateCount;
+    s32 rampDuration;
+    sdfModelRootNode_t *inner = model->inner;
+    u32 count = table->count;
+    EffSpanRecord *record;
+    f32 (*pointCursor)[4];
+    u32 recordIndex;
+    u32 elementIndex;
+    f32 scale;
+    f32 taperStep;
+    f32 pointHalfWidth;
+
+    mdlLink(model, sdfModelOtTable[10]);
+    SDF_VU0_STOREIDENTITYVECTOR_NOMEM(fallbackNormal);
+    taperStep = -1.0f / (f32)frame;
+    pointHalfWidth = config->pointHalfWidth;
+    if (frame <= (s32)table->total) {
+        record = table->records;
+        for (recordIndex = 0; recordIndex < count; recordIndex++, record++) {
+            f32 (*points)[4] = (f32 (*)[4])record->pointSet->buffer;
+
+            sdfModelGetMarkPosMatrix(inner, recordIndex);
+            SDF_VU0_GET_ROW3();
+            pointCursor = points + record->pointCount;
+            SDF_VU0_STOREVECTOR(pointCursor[0]);
+            SDF_VU0_STOREVECTOR(pointCursor[1]);
+            SDF_VU0_STOREVECTOR(pointCursor[2]);
+            record->pointCount += 3;
+            if (frame != 0) {
+                scale = 1.0f;
+                SDF_VU0_LOADVECTOR_C(effWorldUpVector);
+                for (elementIndex = 0; elementIndex < (u32)frame; elementIndex++, points += 3) {
+                    f32 length;
+                    f32 *farEdge;
+                    SDF_VU0_LOADVECTOR(points[4]);
+                    SDF_VU0_LOADVECTOR_B(points[1]);
+                    SDF_VU0_SUBVECTOR();
+                    SDF_VU0_GETLENGTH(length);
+                    if (1.0f < length) {
+                        SDF_VU0_COPYVECTOR_C_TO_B();
+                        SDF_VU0_OUTERPRODUCT();
+                        SDF_VU0_NORMALIZE();
+                        SDF_VU0_STOREVECTOR_NOMEM(fallbackNormal);
+                    } else {
+                        SDF_VU0_LOADVECTOR(fallbackNormal);
+                    }
+                    farEdge = points[2];
+                    SDF_VU0_SCALEVECTOR_BITS(pointHalfWidth * scale);
+                    SDF_VU0_COPYVECTOR_A_TO_B();
+                    SDF_VU0_LOADVECTOR(points[1]);
+                    SDF_VU0_ADDVECTOR();
+                    SDF_VU0_STOREVECTOR(points[0]);
+                    SDF_VU0_SUBVECTOR();
+                    SDF_VU0_SUBVECTOR();
+                    SDF_VU0_STOREVECTOR(farEdge);
+                    scale += taperStep;
+                }
+            }
+        }
+    }
+
+    if (config->drawReferences != 0) {
+        u32 perSpan;
+        u32 total;
+        u32 spanCount;
+        u32 activeSpans;
+        u32 colorA;
+        u32 colorB;
+        u32 allowMultiple;
+        f32 positionScaleA;
+        f32 positionScaleB;
+        f32 angularVelocity;
+        f32 angularAcceleration;
+        s32 lifetime;
+        s32 startFrame;
+
+        perSpan = config->perSpan;
+        total = table->total;
+        spanCount = total / perSpan + (total % perSpan != 0);
+        rampDuration = config->referenceRampDuration;
+        colorA = config->referenceColorA & 0x00FFFFFF;
+        colorB = config->referenceColorB & 0x00FFFFFF;
+        allowMultiple = config->allowMultipleReferenceStarts;
+        positionScaleA = config->positionScaleA;
+        positionScaleB = config->positionScaleB;
+        angularVelocity = config->rotationAngularVelocity;
+        angularAcceleration = config->rotationAngularAcceleration;
+        lifetime = config->referenceLifetime;
+        startFrame = config->geometryStartUpdateCount;
+
+        total = (s32)total < frame ? total : (u32)frame;
+        activeSpans = total / perSpan + (total % perSpan != 0);
+        record = table->records;
+        for (recordIndex = 0; recordIndex < count; recordIndex++, record++) {
+            u32 fixedEdgeColor = colorA | 0x40000000;
+            EffTrackSet *references = record->references;
+            EffSpanEntry *entry = record->entries;
+            u32 *colors;
+            f32 (*vertices)[4] = (f32 (*)[4])references->buffer;
+            pointCursor = (f32 (*)[4])record->pointSet->buffer;
+            colors = (u32 *)references->tail;
+            elementIndex = 0;
+
+            if (frame >= startFrame) {
+                s32 stop = 0;
+                if (activeSpans != 0) {
+                do {
+                    s32 age = (s32)entry->referenceAge;
+                    if (age <= lifetime) {
+                        f32 length;
+                        SDF_VU0_LOADVECTOR(pointCursor[4]);
+                        SDF_VU0_LOADVECTOR_B(pointCursor[1]);
+                        SDF_VU0_SUBVECTOR();
+                        SDF_VU0_GETLENGTH(length);
+                        if (1.0f < length && age != lifetime) {
+                            u32 sampled;
+                            u32 packed;
+
+                            SDF_VU0_NORMALIZE();
+                            SDF_VU0_STOREVECTOR_NOMEM(axis);
+                            if (age < rampDuration) {
+                                scale = (f32)age / (f32)rampDuration;
+                            } else {
+                                scale = 1.0f;
+                            }
+                            if (angularVelocity != 0.0f) {
+                                f32 time = (f32)age;
+                                f32 angle = (angularVelocity + angularAcceleration * time * 0.5f) * time;
+                                SetRotateMatrixAxis(angle, (const RwV3d *)axis);
+                                SDF_VU0_LOADVECTOR_B(effWorldUpVector);
+                                SDF_VU0_APPLYMATRIX_XYZ_B();
+                                age = (s32)entry->referenceAge;
+                            } else {
+                                SDF_VU0_LOADVECTOR_B(effWorldUpVector);
+                            }
+                            SDF_VU0_SCALEVECTOR_B_BITS(entry->second * scale);
+                            SDF_VU0_COPYVECTOR_B_TO_C();
+                            scale = entry->first;
+                            SDF_VU0_LOADVECTOR_B(axis);
+                            SDF_VU0_COPYVECTOR_A_TO_B();
+                            SDF_VU0_SCALEVECTOR_B_BITS(scale * positionScaleA);
+                            SDF_VU0_LOADVECTOR(pointCursor[1]);
+                            SDF_VU0_STOREVECTOR(vertices[3]);
+                            SDF_VU0_ADDVECTOR();
+                            SDF_VU0_STOREVECTOR(vertices[2]);
+                            SDF_VU0_SUBVECTOR();
+                            SDF_VU0_SUBVECTOR();
+                            SDF_VU0_STOREVECTOR(vertices[4]);
+                            SDF_VU0_LOADVECTOR_B(axis);
+                            SDF_VU0_SCALEVECTOR_B_BITS(scale * positionScaleB);
+                            SDF_VU0_LOADVECTOR(pointCursor[1]);
+                            SDF_VU0_ADDVECTOR_A_C();
+                            SDF_VU0_ADDVECTOR();
+                            SDF_VU0_STOREVECTOR(vertices[0]);
+                            SDF_VU0_SUBVECTOR();
+                            SDF_VU0_SUBVECTOR();
+                            SDF_VU0_STOREVECTOR(vertices[1]);
+
+                            sampled = effSampleColorAlphaTracks(&config->referenceColorTrack,
+                                        &config->referenceAlphaTrack, age, lifetime);
+                            UnpackRGBAWordFloat(sampled, 0.0078125f);
+                            SDF_VU0_COPYVECTOR_A_TO_B();
+                            UnpackRGBAWordFloat(colorB, 0.0078125f);
+                            SDF_VU0_MULVECTOR();
+                            packed = PackRGBAWord(128.0f);
+                            colors[0] = packed;
+                            colors[1] = packed;
+                            if (elementIndex & 1) {
+                                UnpackRGBAWordFloat(colorA | 0xFF000000, 0.0078125f);
+                                SDF_VU0_MULVECTOR();
+                                colors[3] = PackRGBAWord(128.0f);
+                                packed = sampled & 0xFF000000;
+                                colors[2] = packed;
+                                colors[4] = packed;
+                            } else {
+                                UnpackRGBAWordFloat(fixedEdgeColor, 0.0078125f);
+                                SDF_VU0_MULVECTOR();
+                                colors[3] = PackRGBAWord(128.0f);
+                                UnpackRGBAWordFloat(0xFF000000, 0.0078125f);
+                                SDF_VU0_MULVECTOR();
+                                packed = PackRGBAWord(128.0f);
+                                colors[2] = packed;
+                                colors[4] = packed;
+                            }
+                            age = (s32)entry->referenceAge;
+                        } else {
+                            SDF_VU0_LOADIDENTITYVECTOR();
+                            SDF_VU0_STOREVECTOR(vertices[0]);
+                            SDF_VU0_STOREVECTOR(vertices[1]);
+                            SDF_VU0_STOREVECTOR(vertices[2]);
+                            SDF_VU0_STOREVECTOR(vertices[3]);
+                            SDF_VU0_STOREVECTOR(vertices[4]);
+                        }
+                        {
+                            u32 updatedAge = (u32)age + 1;
+                            entry->referenceAge = updatedAge;
+                            if (updatedAge == 1 && allowMultiple == 0) {
+                                stop = updatedAge;
+                            }
+                        }
+                    }
+                    elementIndex++;
+                    vertices += 5;
+                    colors += 5;
+                    pointCursor += perSpan * 3;
+                    entry++;
+                    if (elementIndex >= activeSpans) {
+                        break;
+                    }
+                } while (!stop);
+                }
+            }
+            for (; elementIndex < spanCount; elementIndex++, vertices += 5) {
+                SDF_VU0_LOADIDENTITYVECTOR();
+                SDF_VU0_STOREVECTOR(vertices[0]);
+                SDF_VU0_STOREVECTOR(vertices[1]);
+                SDF_VU0_STOREVECTOR(vertices[2]);
+                SDF_VU0_STOREVECTOR(vertices[3]);
+                SDF_VU0_STOREVECTOR(vertices[4]);
+            }
+        }
+    }
+}
+
+#else
+
+INCLUDE_ASM(const s32, "game/code_0029E410", effUpdateParticleSpanGeometry);
+
+#endif
+
+/* vu0 routine: quaternion matrix and SDK RGBA modulation. */
+void effDrawParticleSpanPointsAndReferences(EffModelResource *work) {
+    Matrix4 matrix;
+    u32 color1[4];
+    u32 color2[4];
+    u32 blended[4];
+    EffSpanConfig *config = work->source;
+    EffSpanTable *table = work->childResource;
+    f32 scale = work->scale * config->drawScale;
+    u32 count;
+    u32 i;
+    u32 color;
+    EffSpanRecord *record;
+
+    SDF_VU0_LOADVECTOR(work->orientation);
+    ToMatrix();
+    SDF_VU0_LOADVECTOR(effOnesVector);
+    SDF_VU0_SCALEVECTOR_V0(scale);
+    SDF_VU0_SCALE_XYZ();
+    SDF_VU0_LOADVECTOR(work->position);
+    SDF_VU0_VECTOR_W_SET_ONE();
+    SDF_VU0_SET_ROW3();
+    SDF_VU0_STOREMATRIX_MEMOPS(matrix.u.rows[0], matrix.u.rows[1], matrix.u.rows[2], matrix.u.rows[3]);
+    count = table->count;
+
+    if (config->drawPoints != 0 && work->updateCount < config->progress) {
+        color = effSampleColorAlphaTracks(&config->pointColorTrack, &config->pointAlphaTrack, work->updateCount, config->progress);
+        color1[0] = work->color;
+        EE_MMI_RGBA_UNPACK(color1, 0.0078125f);
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        color2[0] = color;
+        EE_MMI_RGBA_UNPACK(color2, 0.0078125f);
+        SDF_VU0_MULVECTOR();
+        MMI_RGBA_PACK_128_S2(blended[0]);
+        color = blended[0];
+
+        record = table->records;
+        for (i = 0; i < count; i++, record++) {
+            if (record->pointCount != 0) {
+                record->pointSet->rows = record->pointCount;
+                record->pointSet->color = color;
+                effDrawThreePointGroups(record->pointSet, &matrix);
+            }
+        }
+    }
+
+    if (config->drawReferences != 0) {
+        color = work->color;
+        record = table->records;
+        for (i = 0; i < count; i++, record++) {
+            EffTrackSet *references = record->references;
+
+            references->color = color;
+            effDrawTrackSet(references, &matrix);
+        }
+    }
+}
+
+EffModelResource *effCreateModelResourceWithInlineData(u16 kind, void *source, void *secondary, u32 param) {
+    u32 headerSize = 0x40;
+    u32 size = effModelResourceOperations[kind].payloadSize;
+    EffModelResource *effect = (EffModelResource *)sdfChipAllocDirect(size + headerSize);
+
+    effect->source = (EffSpanConfig *)((u8 *)effect + headerSize);
+    effect->color = 0x80808080;
+    effect->scale = 1.0f;
+    effect->updateCount = 0;
+    effect->kind = kind;
+    SDF_VU0_STOREIDENTITYVECTOR_NOMEM(effect->position);
+    SDF_VU0_STOREIDENTITYVECTOR_NOMEM(effect->orientation);
+    memcpy(effect->source, source, size);
+    if (secondary != NULL) {
+        effect->model = effLoadViewerModelWithVUState(secondary, param);
+        effect->attributes = param;
+        effect->childResource = effModelResourceOperations[kind].createResource(effect->source, effect->model);
+        effModelResourceOperations[kind].initialize(effect);
+    }
+    return effect;
+}
+
+u32 effCreateModelResourceFromFile(FileJobPayload *work) {
+    void *first = fileResolvePrimaryBuffer(work);
+    void *second = fileResolveSecondaryBuffer(work);
+    return (u32)effCreateModelResourceWithInlineData(work->option, first, second, work->secondary.size);
+}
+
+typedef struct EffModelCreateRequest {
+    u8 pad0[0x2C];
+    u16 kind;
+    u8 pad2E[2];
+    dds3ModelHandle_t *assetId;
+    u32 attributes;
+    u8 pad38[4];
+    void *source;
+} EffModelCreateRequest;
+
+/* Battle actor subset used by effect filters (matches the battle unit offsets). */
+
+void effDestroyModelResource(EffModelResource *effect) {
+    effModelResourceOperations[effect->kind].destroyResource(effect->childResource);
+    effDestroyModelContext(effect->model);
+    sdfChipFreeDirect(effect);
+}
+
+EffModelResource *effCreateModelResource(EffModelCreateRequest *work) {
+    EffModelResource *effect = effCreateModelResourceWithInlineData(work->kind, work->source, 0, 0);
+    s32 x = mdlGetMajorNum(work->assetId);
+    s32 y = mdlGetMinorNum(work->assetId);
+    dds3ModelHandle_t *model = mdlLoad(x, y);
+
+    effect->model = model;
+    effInitModelVUState(model);
+    effect->attributes = work->attributes;
+    effect->childResource = effModelResourceOperations[effect->kind].createResource(effect->source, effect->model);
+    effModelResourceOperations[effect->kind].initialize(effect);
+    return effect;
+}
+
+void effResetModelResourceUpdateCount(EffModelResource *effect) {
+    effModelResourceOperations[effect->kind].initialize(effect);
+    effect->updateCount = 0;
+}
+
+void effAdvanceModelResourceUpdateCount(EffModelResource *effect) {
+    effModelResourceOperations[effect->kind].update(effect);
+    effect->updateCount = effect->updateCount + 1;
+}
+
+void effDispatchModelResourceCallback(EffModelResource *effect) {
+    effModelResourceOperations[effect->kind].draw(effect);
+}
+
+void effStepModelResourceCallbacks(EffModelResource *effect) {
+    effAdvanceModelResourceUpdateCount(effect);
+    effDispatchModelResourceCallback(effect);
+}
+
+void effSetModelResourcePrimaryTransformVector(EffModelResource *effect, const f32 *position) {
+    SDF_VU0_COPYVECTOR(effect->position, position);
+}
+
+void effSetModelResourceSecondaryTransformVector(EffModelResource *effect, const f32 *orientation) {
+    SDF_VU0_COPYVECTOR(effect->orientation, orientation);
+}
+
+void effSetModelResourceColor(EffModelResource *effect, u32 color) {
+    effect->color = color;
+}
+
+void effSetModelResourceScale(EffModelResource *effect, f32 scale) {
+    effect->scale = scale;
+}
+
+extern sdf3DPrimPolyParm_t D_003DCB60[];
+
+EffPointSet *effCreatePointSet3(s32 count) {
+    s32 rows = count * 3 + 3;
+    s32 size = rows * 20;
+    struct sdfMemHandle_t *base;
+    u8 *data;
+    EffPointSet *set;
+
+    size = ((size >> 4) + ((size & 0xF) != 0)) << 4;
+    base = sdfMemAllocDirect(size + 0x20);
+    data = (u8 *)sdfMemLock(base);
+    set = (EffPointSet *)(data + size);
+    set->buffer = data;
+    data += rows * 16;
+    set->color = 0x80808080;
+    set->type = 2;
+    set->rows = rows;
+    set->allocation = base;
+    set->tail = data;
+    set->flag = 0;
+    set->handle = sdfMatNew();
+    sdfMatSetConstant(set->handle, 1.0f);
+    memset(D_003DCB60, 0, 0x2C);
+    D_003DCB60[0].attr = 0x4000;
+    return set;
+}
+
+/* Queue the draw asset for release and return the backing allocation. */
+void effReleaseModelPointSetAsset(EffPointSet *set) {
+    sdfMatFreeDelayed(set->handle);
+    sdfMemFreeDirect(set->allocation);
+}
+
+void effDrawThreePointGroups(EffPointSet *set, Matrix4 *matrix) {
+    void *list;
+    EffGsPacket *packet;
+    s32 remaining;
+
+    if (set->color & 0xFF000000) {
+        list = (void *)sdfGrAllocPacketBuff(0x20);
+        sdfDrawTagInit(list);
+        if (matrix == NULL) {
+            SDF_VU0_LOADIDENTITY();
+        } else {
+            SDF_VU0_LOADMATRIX(matrix);
+        }
+        sdf3DPrimLinkTm(list, 0);
+        sdf3DPrimLinkMat(list, set->handle, 0);
+        if (set->flag == 0) {
+            packet = (EffGsPacket *)sdfGrAllocPacketBuff(0x30);
+            packet->dmaTag = 2;
+            packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
+            packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
+            packet->registerList = 0xE;
+            packet->registerValue = 0x31801;
+            packet->registerAddress = 0x47;
+            sdfDrawTagLink(list, (u32)packet);
+        }
+        remaining = set->rows;
+        D_003DCB60[0].vertexColor = (u32 *)set->tail;
+        D_003DCB60[0].vertex = (u128 *)set->buffer;
+        D_003DCB60[0].color = set->color;
+        D_003DCB60[0].faceCount = 0x10;
+        D_003DCB60[0].pointCount = 0xF;
+        D_003DCB60[0].faceIndex = (u32 *)D_0037EB90;
+        while (remaining >= 0xF) {
+            remaining -= 0xC;
+            sdfDrawTagLink(list, effPkt3DPrimMakePoly(D_003DCB60));
+            D_003DCB60[0].vertex += 0xC;
+            D_003DCB60[0].vertexColor += 0xC;
+        }
+        if (remaining >= 6) {
+            D_003DCB60[0].faceCount = 4;
+            D_003DCB60[0].pointCount = remaining;
+            sdfDrawTagLink(list, effPkt3DPrimMakePoly(D_003DCB60));
+        }
+        if (set->flag == 0) {
+            packet = (EffGsPacket *)sdfGrAllocPacketBuff(0x30);
+            packet->dmaTag = 2;
+            packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
+            packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
+            packet->registerList = 0xE;
+            packet->registerValue = 0x51801;
+            packet->registerAddress = 0x47;
+            sdfDrawTagLink(list, (u32)packet);
+        }
+        D_0037EE68[set->type]->regFunc(D_0037EE68[set->type], list);
+    }
+}
+
+extern u32 effBTLSkillGetInvokeFormation(void);
+
+extern u32 effBTLFieldColorGetVariantSelector(void);
+
+extern u32 effBTLFieldColorGetOverrideSelector(void);
+
+extern u32 effBTLFieldColorGetFinalSelector(void);
+
+extern void effBTLPartGetPositionPtr(BtlUnit *owner, EffectVectorRequest *request, u128 *out);
+
+void effGetWorldVector(u32 which) {
+    EffectVectorRequest request;
+    u128 result;
+    u32 handle = effBTLSkillGetInvokeFormation();
+
+    request.kind = 0xB;
+    request.count = 1;
+    request.directionMode = 8;
+    request.extentOverride = 0;
+    switch (which) {
+    case 0:
+        break;
+    case 1:
+        handle = effBTLSkillGetInvokeFormation();
+        request.kind = 0;
+        break;
+    case 2:
+        handle = effBTLFieldColorGetVariantSelector();
+        request.kind = 0;
+        break;
+    case 3:
+        request.kind = 1;
+        break;
+    case 4:
+        request.kind = 2;
+        break;
+    case 5:
+        request.kind = 3;
+        break;
+    case 6:
+        handle = effBTLFieldColorGetOverrideSelector();
+        request.kind = 6;
+        break;
+    case 7:
+        handle = effBTLFieldColorGetFinalSelector();
+        request.kind = 7;
+        break;
+    }
+    if (request.kind != 0xB) {
+        u128 *vec = &result;
+
+        effBTLPartGetPositionPtr((void *)handle, &request, vec);
+        SDF_VU0_LOADVECTOR_BARRIER(vec);
+    } else {
+        SDF_VU0_LOADIDENTITYVECTOR();
+    }
+}
+
+#define EFF_COLLECT_ACTORS_VARIANT_SELECTOR 0
+
+#define EFF_COLLECT_ACTORS_ORIGINAL_SELECTOR 1
+
+#define EFF_COLLECT_ACTORS_VARIANT_SELECTOR_ALIAS 2
+
+#define EFF_COLLECT_ACTORS_ORIGINAL_GROUP 3
+
+#define EFF_COLLECT_ACTORS_VARIANT_GROUP 4
+
+#define EFF_COLLECT_ACTORS_EITHER_GROUP 5
+
+#define EFF_COLLECT_ACTORS_OVERRIDE_SELECTOR 6
+
+#define EFF_COLLECT_ACTORS_FINAL_SELECTOR 7
+
+s32 effCollectModelEffectActors(BtlUnit **out, u32 kind) {
+    s32 count = 0;
+    u32 mask = 0;
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    BtlUnit *actor = (BtlUnit *)effBTLSkillGetInvokeFormation();
+    BtlUnit *other = (BtlUnit *)effBTLFieldColorGetVariantSelector();
+
+    switch (kind) {
+    case EFF_COLLECT_ACTORS_ORIGINAL_SELECTOR:
+        if ((actor->status.flags & 2) && actor->ext != 0) {
+            out[0] = actor;
+            count = 1;
+        }
+        break;
+    case EFF_COLLECT_ACTORS_VARIANT_GROUP:
+        mask = other->status.flags & 0x600;
+        break;
+    case EFF_COLLECT_ACTORS_ORIGINAL_GROUP:
+        mask = actor->status.flags & 0x600;
+        break;
+    case EFF_COLLECT_ACTORS_EITHER_GROUP:
+        mask = 0x600;
+        break;
+    case EFF_COLLECT_ACTORS_OVERRIDE_SELECTOR:
+        other = (BtlUnit *)effBTLFieldColorGetOverrideSelector();
+        if ((other->status.flags & 2) && other->ext != 0) {
+            out[0] = other;
+            count = 1;
+        }
+        break;
+    case EFF_COLLECT_ACTORS_FINAL_SELECTOR:
+        other = (BtlUnit *)effBTLFieldColorGetFinalSelector();
+        if ((other->status.flags & 2) && other->ext != 0) {
+            out[0] = other;
+            count = 1;
+        }
+        break;
+    case EFF_COLLECT_ACTORS_VARIANT_SELECTOR:
+    case EFF_COLLECT_ACTORS_VARIANT_SELECTOR_ALIAS:
+        if ((other->status.flags & 2) && other->ext != 0) {
+            out[0] = other;
+            count = 1;
+        }
+        break;
+    }
+    if (mask != 0) {
+        BtlUnit *link;
+
+        for (link = battle->units; link != NULL; link = link->next) {
+            u32 flags = link->status.flags;
+
+            if (flags & 1) {
+                if (flags & 2) {
+                    if (link->ext != 0) {
+                        if (flags & mask) {
+                            out[count++] = link;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return count;
+}
+
+#undef EFF_COLLECT_ACTORS_VARIANT_SELECTOR
+
+#undef EFF_COLLECT_ACTORS_ORIGINAL_SELECTOR
+
+#undef EFF_COLLECT_ACTORS_VARIANT_SELECTOR_ALIAS
+
+#undef EFF_COLLECT_ACTORS_ORIGINAL_GROUP
+
+#undef EFF_COLLECT_ACTORS_VARIANT_GROUP
+
+#undef EFF_COLLECT_ACTORS_EITHER_GROUP
+
+#undef EFF_COLLECT_ACTORS_OVERRIDE_SELECTOR
+
+#undef EFF_COLLECT_ACTORS_FINAL_SELECTOR
+
+extern void evtUnitLightOff(evtUnitHandle_t *, s32);
+
+/* Restore actor light endpoints and directions when the field-light effect ends. */
+void effRestoreBattleActorLighting(u32 unusedResource) {
+    BtlState *state = (BtlState *)btlGetRuntime();
+    BtlUnit *unit;
+    u32 first[4];
+    u32 second[4];
+
+    if ((state->battleFlags & 0x6000000) == 0) {
+        return;
+    }
+    unit = state->units;
+    while (unit != NULL) {
+        if (unit->status.flags & 2) {
+            evtUnitHandle_t *effect = unit->ext;
+
+            if (effect != NULL) {
+                u32 firstColor;
+                u32 secondColor;
+
+                SDF_VU0_LOADVECTOR(unit->colorStart);
+                MMI_RGBA_PACK_UNIT(first[0], 128.0f);
+                firstColor = first[0];
+                SDF_VU0_LOADVECTOR(unit->colorEnd);
+                MMI_RGBA_PACK_UNIT(second[0], 128.0f);
+                secondColor = second[0];
+                effect->color0C = effect->firstCurrent = effect->color = firstColor;
+                effect->color5C = effect->color54 = effect->color50 = secondColor;
+                SDF_VU0_LOADVECTOR(unit->lightDirection);
+                SDF_VU0_STOREVECTOR(unit->ext->vec10);
+                SDF_VU0_STOREVECTOR(unit->ext->vec20);
+                SDF_VU0_STOREVECTOR(unit->ext->vec40);
+                evtUnitLightOff(unit->ext, 0);
+            }
+        }
+        unit = unit->next;
+    }
+}
+
+extern void effBattleMiscDirectionTo(BtlUnit *, EffectVectorRequest *, f32 *);
+
+extern u32 btlCameraVectorHasNaN(void);
+
+extern u32 btlBlendColorVec(f32 *, f32 *, f32);
+
+/* Apply timed actor light transitions, then fade back to the original colors/directions. */
+void effUpdateBattleActorLighting(EffActiveResource *work) {
+    EffectVectorRequest request;
+    BtlUnit *actors[16];
+    f32 direction[4];
+    f32 origin[4];
+    u32 packedStart[4];
+    u32 packedEnd[4];
+    BtlState *battle = (BtlState *)btlGetRuntime();
+    EffActorLightConfig *config = work->payload;
+    u32 frame = work->frame;
+    u32 count = effCollectModelEffectActors(actors, config->actorSelection);
+    u32 index;
+    evtUnitHandle_t *effect;
+
+    request.count = config->direction.count;
+    request.directionMode = config->direction.directionMode;
+    request.extentOverride = config->direction.extentOverride;
+    switch (config->direction.kind) {
+    case 0:
+        request.kind = 0;
+        break;
+    case 1:
+        {
+            void *owner = (void *)effBTLSkillGetInvokeFormation();
+            request.kind = 0;
+            effBTLPartGetPositionPtr(owner, &request, (u128 *)origin);
+            request.kind = 0xB;
+        }
+        break;
+    case 2:
+        {
+            void *owner = (void *)effBTLFieldColorGetVariantSelector();
+            request.kind = 0;
+            effBTLPartGetPositionPtr(owner, &request, (u128 *)origin);
+            request.kind = 0xB;
+        }
+        break;
+    case 3:
+        request.kind = 1;
+        break;
+    case 4:
+        request.kind = 2;
+        break;
+    case 5:
+        request.kind = 3;
+        break;
+    case 6:
+        {
+            void *owner = (void *)effBTLFieldColorGetOverrideSelector();
+            request.kind = 6;
+            effBTLPartGetPositionPtr(owner, &request, (u128 *)origin);
+            request.kind = 0xB;
+        }
+        break;
+    case 7:
+        {
+            void *owner = (void *)effBTLFieldColorGetFinalSelector();
+            request.kind = 7;
+            effBTLPartGetPositionPtr(owner, &request, (u128 *)origin);
+            request.kind = 0xB;
+        }
+        break;
+    }
+    if (frame == 0) {
+        for (index = 0; index < count; index++) {
+            if (actors[index]->status.stateFlags & 0x10) {
+                effect = actors[index]->ext;
+                evtUnitLightOn(effect);
+                if (config->colorFadeIn != -1 && config->colorFadeOut != -1) {
+                    evtSetUnitLightAndAmbient(effect, config->colorFadeIn, config->firstColor, config->secondColor);
+                }
+                if (config->directionFadeIn != -1 && config->directionFadeOut != -1) {
+                    if (request.kind == 3) {
+                        if (actors[index]->status.stateFlags & 0x8000) {
+                            btlUnitGetEffectPosVU(actors[index]);
+                        } else {
+                            effBTLModelGetSphereCenter(actors[index]);
+                        }
+                        SDF_VU0_LOADVECTOR_B(work->position);
+                        SDF_VU0_SUBVECTOR();
+                        SDF_VU0_NORMALIZE();
+                    } else if (request.kind < 0xB) {
+                        effBattleMiscDirectionTo(actors[index], &request, direction);
+                        SDF_VU0_LOADVECTOR(direction);
+                    } else {
+                        if (actors[index]->status.stateFlags & 0x8000) {
+                            btlUnitGetEffectPosVU(actors[index]);
+                        } else {
+                            effBTLModelGetSphereCenter(actors[index]);
+                        }
+                        SDF_VU0_LOADVECTOR_B(origin);
+                        SDF_VU0_SUBVECTOR();
+                        SDF_VU0_NORMALIZE();
+                    }
+                    evtSetUnitLightDir(effect, config->directionFadeIn);
+                }
+            }
+        }
+    }
+    if (config->duration != 0 && frame == config->duration - config->colorFadeOut) {
+        for (index = 0; index < count; index++) {
+            if (actors[index]->status.stateFlags & 0x10) {
+                u32 firstColor;
+                u32 secondColor;
+                effect = actors[index]->ext;
+                if (btlCameraVectorHasNaN()) {
+                    firstColor = btlBlendColorVec(battle->lightColor, actors[index]->colorStart, 0.3f);
+                    secondColor = btlBlendColorVec(battle->ambientColor, actors[index]->colorEnd, 0.3f);
+                } else {
+                    SDF_VU0_LOADVECTOR(actors[index]->colorStart);
+                    MMI_RGBA_PACK_UNIT(packedStart[0], 128.0f);
+                    firstColor = packedStart[0];
+                    SDF_VU0_LOADVECTOR(actors[index]->colorEnd);
+                    MMI_RGBA_PACK_UNIT(packedEnd[0], 128.0f);
+                    secondColor = packedEnd[0];
+                }
+                evtSetUnitLightAndAmbient(effect, config->colorFadeOut, firstColor, secondColor);
+            }
+        }
+    }
+    if (config->duration != 0 && frame == config->duration - config->directionFadeOut) {
+        for (index = 0; index < count; index++) {
+            if (actors[index]->status.stateFlags & 0x10) {
+                effect = actors[index]->ext;
+                SDF_VU0_LOADVECTOR(actors[index]->lightDirection);
+                evtSetUnitLightDir(effect, config->directionFadeOut);
+            }
+        }
+    }
+}
+
+void effSyncLinkedActorChildParameter(void) {
+    BtlState *state = (BtlState *)btlGetRuntime();
+    BtlUnit *unit;
+
+    if ((state->battleFlags & 0x6000000) == 0) {
+        return;
+    }
+    unit = state->units;
+    while (unit != NULL) {
+        if (unit->status.flags & 2) {
+            evtUnitHandle_t *effect = unit->ext;
+            if (effect != NULL) {
+                effect->color60 = unit->baseColor;
+                evtSetUnitColorRGB(effect, 0, unit->baseColor);
+            }
+        }
+        unit = unit->next;
+    }
+}
+
+/* Apply a temporary tint to eligible actors, then restore their original RGB. */
+void effTransitionSelectedActorRgbColors(EffActiveResource *work) {
+    BtlUnit *actors[16];
+    EffActorTintConfig *config = work->payload;
+    u32 frame = work->frame;
+    u32 color = config->color;
+    u32 count = effCollectModelEffectActors(actors, config->actorSelection);
+    u32 i;
+
+    if (frame == 0) {
+        for (i = 0; i < count; i++) {
+            u32 flags = actors[i]->status.flags;
+
+            if (flags & 2) {
+                if ((flags & 0xE0) == 0) {
+                    u32 baseColor = actors[i]->baseColor;
+                    evtUnitHandle_t *effect = actors[i]->ext;
+                    u32 blended;
+
+                    if ((baseColor & 0xFFFFFF) != 0x808080) {
+                        blended = (color & baseColor) + (((color ^ baseColor) & 0xFEFEFEFE) >> 1);
+                    } else {
+                        blended = color;
+                    }
+                    evtSetUnitColorRGB(effect, config->fadeIn, blended);
+                }
+            }
+        }
+    }
+    if (config->duration != 0 && frame == config->duration - config->fadeOut) {
+        for (i = 0; i < count; i++) {
+            u32 flags = actors[i]->status.flags;
+
+            if (flags & 2) {
+                if ((flags & 0xE0) == 0) {
+                    evtSetUnitColorRGB(actors[i]->ext, config->fadeOut, actors[i]->baseColor);
+                }
+            }
+        }
+    }
+}
+
+extern u128 D_003DCBD0[];
+
+extern s8 D_003BC9AC;
+
+extern u128 D_003DCBE0[];
+
+extern u128 D_003DCBA0[];
+
+extern sdf3DLight_t *D_0037EE80[3];
+
+s32 effComputeLightDirectionVU(dds3ModelHandle_t *vector, sdf3DLightParallelPacket_t *target) {
+    s32 result = btlIsRuntimeAllocated();
+
+    if (result != 0) {
+        if (D_003BC9AC == 0) {
+            return 0;
+        }
+        mdlGetPosition(vector);
+        SDF_VU0_LOADVECTOR_B(D_003DCBE0);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_VECTOR_W_SET_ZERO();
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_STOREVECTOR(D_003DCBA0);
+        sdf3DMakeLightParallelPacket(target, D_0037EE80, D_003DCBD0);
+        return 1;
+    }
+    return result;
+}
+
+extern u128 *dds3LightParam[];
+
+extern u128 D_003DCB90[];
+
+extern u128 dds3AmbientColor[];
+
+void effResetDefaultColorTables(void) {
+    u128 *dst = D_003DCB90;
+    u128 *src = dds3LightParam[0];
+    SDF_VU0_COPYVECTOR(dst, src);
+    dst++;
+    src++;
+    SDF_VU0_COPYVECTOR(dst, src);
+    SDF_VU0_COPYVECTOR(D_003DCBD0, dds3AmbientColor);
+    D_003BC9AC = 0;
+}
+
+/* Payload of resource kind 2: two colours plus the position request that feeds the shared light vector. */
+typedef struct EffFieldColorConfig {
+    u32 firstColor;   /* 0x00 */
+    u32 secondColor;  /* 0x04 */
+    EffectVectorRequest direction; /* 0x08 */
+} EffFieldColorConfig;
+
+void effInitializeFieldLightColors(EffActiveResource *work) {
+    EffectVectorRequest request;
+    EffFieldColorConfig *config;
+    u32 handle;
+
+    btlGetRuntime();
+    config = work->payload;
+    if (work->frame == 0) {
+        request.count = config->direction.count;
+        request.directionMode = config->direction.directionMode;
+        request.extentOverride = config->direction.extentOverride;
+        handle = 0;
+        switch (config->direction.kind) {
+        case 0:
+        case 1:
+            handle = effBTLSkillGetInvokeFormation();
+            request.kind = 0;
+            break;
+        case 2:
+            handle = effBTLFieldColorGetVariantSelector();
+            request.kind = 0;
+            break;
+        case 3:
+            handle = effBTLSkillGetInvokeFormation();
+            request.kind = 1;
+            break;
+        case 4:
+            handle = effBTLFieldColorGetVariantSelector();
+            request.kind = 2;
+            break;
+        case 5:
+            SDF_VU0_COPYVECTOR(D_003DCBE0, work);
+            break;
+        case 6:
+            handle = effBTLFieldColorGetOverrideSelector();
+            request.kind = 6;
+            break;
+        case 7:
+            handle = effBTLFieldColorGetFinalSelector();
+            request.kind = 7;
+            break;
+        }
+        if (handle != 0) {
+            effBTLPartGetPositionPtr((void *)handle, &request, D_003DCBE0);
+        }
+        UnpackRGBAWordFloat(config->firstColor, 1.0f / 128.0f);
+        SDF_VU0_STOREVECTOR_NOMEM(D_003DCB90);
+        ((f32 *)D_003DCB90)[3] = 1.0f;
+        UnpackRGBAWordFloat(config->secondColor, 1.0f / 128.0f);
+        SDF_VU0_STOREVECTOR_NOMEM(D_003DCBD0);
+        ((f32 *)D_003DCBD0)[3] = 1.0f;
+        D_003BC9AC = 1;
+    }
+}
+
+void effResetCopiedPayloadTargets(EffCopiedPayloadWork *work) {
+    dds3PathBasicControl_t **objects = work->payload->targets;
+    u32 i;
+    for (i = 0; i < 5; i++) {
+        dds3PathBasicControl_t *object = objects[i];
+        if (object != 0) {
+            object->counter.direction = 0;
+            object->counter.time = 0.0f;
+        }
+    }
+}
+
+EffCopiedPayload *effAllocateCopiedEffectPayload(u32 owner, const void *source, s32 size) {
+    u32 headerSize = 0x40;
+    sdfMemHandle_t *base = sdfMemAllocDirect(size + headerSize);
+    u8 *body = (u8 *)sdfMemLock((struct sdfMemHandle_t *)((u32)base));
+    EffCopiedPayload *node = (EffCopiedPayload *)body;
+
+    body += headerSize;
+    if (size <= 0) {
+        body = 0;
+    }
+    node->allocation = base;
+    node->size = size;
+    node->body = body;
+    node->slotCount = 0;
+    memcpy(body, source, size);
+    return node;
+}
+
+typedef struct EffCopiedSpawnList {
+    u32 count;
+    FldSpawnBatch *groups;
+} EffCopiedSpawnList;
+
+extern dds3Basic_t *dds3AddPathBasic(s32 key, Dds3PathCurveTable *work, const char *name);
+
+/* Capture constructor arguments before consuming the entry; see
+ * docs/idioms.md, "Trace-justified cursor consumption: copied payload slots". */
+void effInitializeCopiedPayloadSlots(EffCopiedPayload *payload) {
+    EffCopiedSpawnList *list = (EffCopiedSpawnList *)(payload->body + 0x14);
+    u32 groupCount = list->count;
+    FldSpawnBatch *group = list->groups;
+    u32 count = 0;
+    u32 i;
+
+    for (i = 0; i < groupCount; i++, group++) {
+        FldFileResource *entry = group->entries;
+        u32 entryCount = group->count;
+        u32 j;
+
+        if (group->kind == FLD_SPAWN_BATCH_KIND_PATH) {
+            for (j = 0; j < entryCount; j++, count++) {
+                void *data = entry->data;
+                u32 id = entry->id;
+                const char *name = entry->name;
+
+                entry++;
+                payload->effects[count] = dds3AddPathBasic(id, data, name);
+                payload->targets[count] = dds3AllocPathBasicWorkData(payload->effects[count]);
+            }
+        }
+    }
+    for (i = count; i < ARRAY_COUNT(payload->effects); i++) {
+        payload->effects[i] = NULL;
+        payload->targets[i] = NULL;
+    }
+    payload->slotCount = count;
+    payload->selectedTargetIndex = dds3GetRandIntA(0, count);
+}
+
+EffCopiedPayload *effCreateAndInitializeCopiedPayload(u32 type, const void *source, s32 size) {
+    EffCopiedPayload *effect = effAllocateCopiedEffectPayload(type, source, size);
+    fldAddressResolver(effect->body,
+                       (const struct FldTransferChunk *)(effect->body + 8));
+    effInitializeCopiedPayloadSlots(effect);
+    return effect;
+}
+
+EffCopiedPayload *effCloneEffectPayloadFromOwner(EffCopiedPayloadWork *work) {
+    EffCopiedPayload *effect;
+
+    effect = effAllocateCopiedEffectPayload(work->parameter, work->payload->body,
+                                             work->payload->size);
+    effInitializeCopiedPayloadSlots(effect);
+    return effect;
+}
+
+void effDestroyCopiedEffectPayload(EffCopiedPayload *payload) {
+    dds3Basic_t **effects = payload->effects;
+    dds3PathBasicControl_t **targets = payload->targets;
+    u32 i;
+
+    for (i = 0; i < 5; i++) {
+        if (*targets != 0) {
+            dds3DeletePathControl(*targets);
+        }
+        targets++;
+        if (*effects != 0) {
+            dds3DeleteSceneBasicData(*effects);
+        }
+        effects++;
+    }
+    sdfMemFreeDirect(payload->allocation);
+}
+
+extern void btlSetRuntimeFlag2000(void);
+
+extern u32 btlIsRuntimeFlag2000Clear(void);
+
+extern void btlClearAllUnitDefeatCandidates(void);
+
+extern void btlFlagMatchingUnitsDefeatCandidate(s32);
+
+extern void btlFlagAllUnitsDefeatCandidate(void);
+
+extern void btlFlagUnitDefeatCandidate(BtlUnit *);
+
+extern void btlCopyUnitRotationQuaternion(BtlUnit *, f32 dst[4]);
+
+extern void dds3CameraObjectBasicSetFovy(dds3Basic_t *, f32);
+
+extern f32 D_003BC9A8;
+
+extern u128 D_0037EE90, D_0037EEA0, D_0037EEB0, D_0037EEC0, D_0037EED0;
+
+extern u128 D_0037E110;
+
+/* vu0 routine: follow the selected actor with the active camera path. */
+s32 func_002B3698(EffActiveResource *owner) {
+    f32 position[4];
+    f32 actorPosition[4];
+    f32 eyeOffset[4];
+    f32 actorRotation[4];
+    EffectVectorRequest request;
+    EffCameraPathParameters *config = owner->payload;
+    EffCopiedPayload *slots = owner->resource;
+    dds3Basic_t *camera;
+    CameraData *data;
+    BtlUnit *actor;
+    dds3PathBasicControl_t *path;
+
+    if (config->startFrame < owner->frame && config->startFrame != 0) {
+        return;
+    }
+    camera = dds3GetActiveCameraSceneBasic(dds3GetActiveScene());
+    if (camera == NULL || camera->name == NULL) {
+        return;
+    }
+    if (owner->frame == 0) {
+        btlSetRuntimeFlag2000();
+        D_003BC9A8 = 0.6981317f;
+        if (config->defeatSelection < 8) {
+            btlClearAllUnitDefeatCandidates();
+            switch (config->defeatSelection) {
+            case 0:
+            case 2:
+                btlFlagUnitDefeatCandidate((BtlUnit *)effBTLFieldColorGetVariantSelector());
+                break;
+            case 1:
+                btlFlagUnitDefeatCandidate((BtlUnit *)effBTLSkillGetInvokeFormation());
+                break;
+            case 4:
+                btlFlagMatchingUnitsDefeatCandidate(
+                    ((BtlUnit *)effBTLFieldColorGetVariantSelector())->status.flags & 0x600);
+                break;
+            case 3:
+                btlFlagMatchingUnitsDefeatCandidate(
+                    ((BtlUnit *)effBTLSkillGetInvokeFormation())->status.flags & 0x600);
+                break;
+            case 5:
+                btlFlagAllUnitsDefeatCandidate();
+                break;
+            case 6:
+                btlFlagUnitDefeatCandidate((BtlUnit *)effBTLFieldColorGetOverrideSelector());
+                break;
+            case 7:
+                btlFlagUnitDefeatCandidate((BtlUnit *)effBTLFieldColorGetFinalSelector());
+                break;
+            }
+        }
+    }
+    if (btlIsRuntimeFlag2000Clear()) {
+        return;
+    }
+    request.count = config->count;
+    request.directionMode = config->directionMode;
+    request.extentOverride = 0;
+    switch (config->actorSelection) {
+    case 0:
+    case 1:
+        actor = (BtlUnit *)effBTLSkillGetInvokeFormation();
+        request.kind = 0;
+        break;
+    case 2:
+        actor = (BtlUnit *)effBTLFieldColorGetVariantSelector();
+        request.kind = 0;
+        break;
+    case 3:
+        actor = (BtlUnit *)effBTLSkillGetInvokeFormation();
+        request.kind = 1;
+        break;
+    case 4:
+        actor = (BtlUnit *)effBTLFieldColorGetVariantSelector();
+        request.kind = 2;
+        break;
+    case 5:
+        actor = (BtlUnit *)effBTLSkillGetInvokeFormation();
+        request.kind = 3;
+        break;
+    case 6:
+        actor = (BtlUnit *)effBTLFieldColorGetOverrideSelector();
+        request.kind = 6;
+        break;
+    case 7:
+        actor = (BtlUnit *)effBTLFieldColorGetFinalSelector();
+        request.kind = 7;
+        break;
+    default:
+        actor = NULL;
+        break;
+    }
+    effBTLPartGetPositionPtr(actor, &request, (u128 *)actorPosition);
+    path = slots->targets[slots->selectedTargetIndex];
+    dds3PathBasicControlGetPos(path);
+    if (config->actorSelection != 5) {
+        SDF_VU0_STOREVECTOR(position);
+        switch (config->actorSelection) {
+        case 3:
+        case 4:
+            if (actor->status.flags & 0x200) {
+                SDF_VU0_LOADVECTOR(&D_0037EEC0);
+            } else {
+                SDF_VU0_LOADVECTOR(&D_0037EED0);
+            }
+            SDF_VU0_STOREVECTOR(actorRotation);
+            break;
+        default:
+            btlCopyUnitRotationQuaternion(actor, actorRotation);
+            SDF_VU0_LOADVECTOR(actorRotation);
+            SDF_VU0_LOADVECTOR_B(&D_0037EEA0);
+            Mult();
+            SDF_VU0_STOREVECTOR(actorRotation);
+            break;
+        }
+        ToMatrix();
+        SDF_VU0_LOADVECTOR(position);
+        SDF_VU0_APPLYMATRIX_XYZ();
+    }
+    SDF_VU0_LOADVECTOR_B(actorPosition);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(position);
+    data = camera->workdata;
+    dds3PathBasicControlGetRot(path);
+    if (config->actorSelection != 5) {
+        SDF_VU0_LOADVECTOR_B_BARRIER(actorRotation);
+        Mult();
+    }
+    ToMatrix();
+    SDF_VU0_LOADVECTOR(&D_0037E110);
+    SDF_VU0_APPLYMATRIX_XYZ();
+    SDF_VU0_STOREVECTOR(eyeOffset);
+    SDF_VU0_LOADVECTOR(&D_0037EE90);
+    SDF_VU0_APPLYMATRIX_XYZ();
+    SDF_VU0_STOREVECTOR(&data->localUp);
+    dds3SetPosPoseSet(camera, position);
+    SDF_VU0_LOADVECTOR(eyeOffset);
+    SDF_VU0_COPYVECTOR(&data->localEyeOffset, eyeOffset);
+    SDF_VU0_SCALEVECTOR_V0(1.0f);
+    SDF_VU0_STOREVECTOR(&data->worldEye);
+    dds3CameraObjectBasicSetFovy(camera, D_003BC9A8);
+    data->fovUpdatePending |= DDS3_CAMERA_UPDATE_FOV_BIT;
+    dds3SetRotPoseSet(camera, &D_0037EEB0);
+    return dds3PathBasicControlIsFinished(&path->counter);
+}
+
+extern void btlApplyScaledUnitEffectParameter(BtlUnit *, s32, s32, f32);
+
+extern void btlStartMoveOtherUnitsTask(BtlUnit *, s32);
+
+typedef struct EffAnimInfo {
+    u16 id;
+    u16 flags;
+    u8 actorSelection;
+    u8 unk05;
+    u16 loop;
+} EffAnimInfo;
+
+void effApplyOverlaySpecs(u8 *work) {
+    BtlUnit *objects[16];
+    u16 *spec;
+    u32 count;
+    u32 i;
+
+    if ((s32)((EffActiveResource *)work)->frame > 0) {
+        return;
+    }
+    spec = ((EffActiveResource *)work)->payload;
+    count = effCollectModelEffectActors(objects, ((EffAnimInfo *)spec)->actorSelection);
+    for (i = 0; i < count; i++) {
+        u32 flags = ((BtlUnit *)objects[i])->status.flags;
+        if (flags & 2) {
+            if ((flags & 0x20) == 0) {
+                if ((((BtlUnit *)objects[i])->effectLink.flags & 0x10) == 0) {
+                    if (mdlGetNumOfCut(objects[i]->ext->owner, 0) > ((EffAnimInfo *)spec)->id) {
+                        btlApplyScaledUnitEffectParameter(objects[i], ((EffAnimInfo *)spec)->id, ((EffAnimInfo *)spec)->flags | 0x100, 1.0f);
+                        if (((EffAnimInfo *)spec)->loop == 0) {
+                            btlStartMoveOtherUnitsTask(objects[i], ((EffAnimInfo *)spec)->id);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+extern void sndLoadAndPlayStationedSe(u32);
+
+void effReportResourceStatus(EffActiveResource *work) {
+    u32 status;
+
+    if ((s32)work->frame > 0) {
+        return;
+    }
+    status = *(u32 *)work->payload;
+    switch (status) {
+    case 0:
+        sndLoadAndPlayStationedSe(0x1000A);
+        break;
+    case 1:
+        sndLoadAndPlayStationedSe(0x1000B);
+        break;
+    }
+}
+
+/* Apply the selected battle state's stored tint vectors immediately when its mask is set. */
+void effApplyBattleStateTint(void) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+
+    if ((battle->battleFlags & 0x6000000) != 0) {
+        btlBeginSceneLightColorTransition(battle->lightColor, battle->ambientColor, 0);
+        return;
+    }
+}
+
+/* Start the payload's packed-color tint transition on frame zero. */
+void effStartTintTransitionFromColors(EffActiveResource *work) {
+    f32 from[3];
+    f32 to[3];
+    u32 *colors;
+    u32 c;
+
+    btlGetRuntime();
+    colors = work->payload;
+    if ((s32)work->frame == 0) {
+        c = colors[0];
+        from[0] = (c & 0xFF) / 255.0f;
+        from[1] = ((c >> 8) & 0xFF) / 255.0f;
+        from[2] = ((c >> 16) & 0xFF) / 255.0f;
+        c = colors[1];
+        to[0] = (c & 0xFF) / 255.0f;
+        to[1] = ((c >> 8) & 0xFF) / 255.0f;
+        to[2] = ((c >> 16) & 0xFF) / 255.0f;
+        btlBeginSceneLightColorTransition(from, to, colors[2]);
+    }
+}
+
+void effResetSlots(void) {
+    D_003BC9B0[0] = 0;
+    D_003BC9B8[0] = 0;
+    D_003BC9C0[0] = 0;
+    D_003BC9C8[0] = 0;
+    D_003BC9B0[1] = 0;
+    D_003BC9B8[1] = 0;
+    D_003BC9C0[1] = 0;
+    D_003BC9C8[1] = 0;
+    dds3PadVibrationReset();
+}
+
+void effTickSlotVolumeFade(void) {
+    s32 i;
+
+    for (i = 0; i < 2; i++) {
+        if (D_003BC9C0[i] != 0) {
+            if (D_003BC9B8[i] > 0 && D_003BC9B0[i] > 0) {
+                f32 ratio = (f32)D_003BC9B8[i] / (f32)D_003BC9B0[i];
+
+                if (D_003BC9C8[i] != 0) {
+                    ratio = 1.0f - ratio;
+                }
+                dds3PadVibrationSet(i, (u8)(D_003BC9C0[i] * ratio), 100);
+                D_003BC9B8[i] -= 1;
+            } else if (D_003BC9C8[i] == 1) {
+                dds3PadVibrationSet(i, D_003BC9C0[i], 100);
+            } else {
+                dds3PadVibrationSet(i, 0, 0);
+                D_003BC9B0[i] = 0;
+            }
+        }
+    }
+}
+
+void effSetDormantSlot(u32 index, u8 color, u32 value) {
+    if (index < 2) {
+        D_003BC9B0[index] = value;
+        D_003BC9C0[index] = color;
+        D_003BC9C8[index] = 0;
+        D_003BC9B8[index] = value;
+    }
+}
+
+void effSetActiveSlot(u32 index, u8 color, u32 value) {
+    if (index < 2) {
+        D_003BC9B0[index] = value;
+        D_003BC9C0[index] = color;
+        D_003BC9C8[index] = 1;
+        D_003BC9B8[index] = value;
+    }
+}
+
+void effResetActiveEffectSlots(void) {
+    BtlState *battle = (BtlState *)btlGetRuntime();
+
+    if ((battle->battleFlags & 0x6000000) != 0) {
+        effResetSlots();
+        return;
+    }
+}
+
+void effUpdateEffectSlotTransitions(EffActiveResource *work) {
+    s32 elapsed;
+    u32 duration;
+    u32 *slotData;
+    u8 *slotColor;
+    u32 index;
+
+    index = 0;
+    btlGetRuntime();
+    elapsed = (s32)work->frame;
+    slotColor = work->payload + 0x18;
+    slotData = (u32 *)(work->payload + 0x10);
+    do {
+        duration = slotData[-4];
+        if (duration < *slotData) {
+            return;
+        }
+        if (elapsed == 0) {
+            effSetActiveSlot(index, *slotColor, slotData[-2]);
+            duration = slotData[-4];
+        }
+        if ((duration != 0) && (elapsed == duration - *slotData)) {
+            effSetDormantSlot(index, *slotColor, *slotData);
+        }
+        index = index + 1;
+        slotColor = slotColor + 1;
+        slotData = slotData + 1;
+    } while (index < 2);
+}
+
+void effBattleTintTransitionInitialize(void) {
+    btlInitTintTransitionDefault(0xc);
+}
+
+/* The final timer word also supplies the default tint's halfword ID. */
+typedef struct EffTintTransitionParams {
+    u32 duration;
+    u32 resourceArgument;
+    u16 resourceKind;
+    u16 unk0A;
+    union {
+        u32 delay;
+        struct {
+            u16 defaultKind;
+            u16 unk0E;
+        } ids;
+    } tail;
+} EffTintTransitionParams;
+
+void effUpdateSlotTimerPair(EffActiveResource *work) {
+    EffTintTransitionParams *slotData;
+    u32 elapsed;
+    u32 duration;
+
+    btlGetRuntime();
+    elapsed = work->frame;
+    slotData = (EffTintTransitionParams *)work->payload;
+    duration = slotData->duration;
+    if (duration < slotData->tail.delay) {
+        return;
+    }
+    if (elapsed == 0) {
+        btlInitTintTransitionResource(slotData->resourceArgument, slotData->resourceKind);
+        duration = slotData->duration;
+    }
+    if (duration != 0 && elapsed == duration - slotData->tail.delay) {
+        btlInitTintTransitionDefault(slotData->tail.ids.defaultKind);
+    }
+}
+
+extern f32 D_003BC9A8;
+
+/* Interpolates camera field of view in degrees and stores it in radians. */
+void effApplyKeyframeAngle(EffActiveResource *work) {
+    u8 *state = (u8 *)btlGetRuntime();
+    f32 *span = (f32 *)work->payload;
+    u32 count = *(u32 *)span;
+    f32 value;
+
+    if (count != 0 && count >= work->frame) {
+        f32 t = (f32)(s32)work->frame / (f32)count;
+        value = ((span[2] - span[1]) * t + span[1]) * 0.017453293f;
+        btlSetMotionTransformFieldOfView(&((BtlState *)state)->cameraCommand.camera, value);
+        D_003BC9A8 = value;
+    }
+}
+
+EffActiveResource *effAllocateResourcePayload(u16 kind, void *source) {
+    u32 headerSize = 0x40;
+    u32 size = effRuntimeResourceOperations[kind].payloadSize;
+    EffActiveResource *effect = sdfChipAllocDirect(size + headerSize);
+    effect->payload = (u8 *)effect + headerSize;
+    effect->color = 0x80808080;
+    effect->scale = 1.0f;
+    effect->kind.index = kind;
+    effect->frame = 0;
+    SDF_VU0_STOREIDENTITYVECTOR(effect);
+    SDF_VU0_STOREIDENTITYVECTOR((u8 *)effect + 0x10);
+    memcpy(effect->payload, source, size);
+    return effect;
+}
+
+EffActiveResource *effCreateResourceInstance(u16 kind, void *source, void *secondary, u32 param) {
+    EffActiveResource *effect = effAllocateResourcePayload(kind, source);
+
+    if (btlIsRuntimeAllocated() != 0) {
+        if (effRuntimeResourceOperations[kind].createResource != NULL) {
+            effect->resource = (void *)effRuntimeResourceOperations[kind].createResource(source, secondary, param);
+        }
+        if (effRuntimeResourceOperations[kind].initialize != NULL) {
+            effRuntimeResourceOperations[kind].initialize(effect);
+        }
+    }
+    return effect;
+}
+
+EffActiveResource *effCreateActiveResourceFromFile(FileJobPayload *request) {
+    void *first = fileResolvePrimaryBuffer(request);
+    void *second = fileResolveSecondaryBuffer(request);
+    return effCreateResourceInstance(request->option, first, second, request->secondary.size);
+}
+
+void effDestroyResourceInstance(EffActiveResource *work) {
+    if (btlIsRuntimeAllocated() != 0) {
+        void (*callback)(void *) = effRuntimeResourceOperations[work->kind.signedIndex].destroyResource;
+        if (callback != NULL) {
+            callback(work->resource);
+        }
+    }
+    sdfChipFreeDirect(work);
+}
+
+EffActiveResource *effDuplicateActiveResource(EffActiveResource *source) {
+    EffActiveResource *effect;
+    u32 kind = source->kind.index;
+
+    if (effRuntimeResourceOperations[kind].cloneResource == NULL) {
+        effect = effCreateResourceInstance(source->kind.shortIndex, source->payload, 0, 0);
+    } else {
+        void *resource;
+        u32 activeKind;
+        effect = effAllocateResourcePayload(source->kind.shortIndex, source->payload);
+        resource = (void *)effRuntimeResourceOperations[source->kind.signedIndex].cloneResource(source);
+        activeKind = source->kind.index;
+        effect->resource = resource;
+        if (effRuntimeResourceOperations[activeKind].initialize != NULL) {
+            effRuntimeResourceOperations[activeKind].initialize(effect);
+        }
+    }
+    return effect;
+}
+
+void effClearCallbackFrame(EffActiveResource *work) {
+    if (btlIsRuntimeAllocated() != 0) {
+        void (*callback)(void *) = effRuntimeResourceOperations[work->kind.signedIndex].initialize;
+        if (callback != NULL) {
+            callback(work);
+        }
+        work->frame = 0;
+    }
+}
+
+void effDispatchIndexedCallback(EffActiveResource *work) {
+    if (btlIsRuntimeAllocated() != 0) {
+        void (*callback)(void *) = effRuntimeResourceOperations[work->kind.signedIndex].update;
+        if (callback != NULL) {
+            callback(work);
+        }
+        work->frame = (s32)work->frame + 1;
+    }
+}
+
+void effDispatchEnabledCallback(EffActiveResource *work) {
+    if (btlIsRuntimeAllocated() != 0) {
+        void (*callback)(void *) = effRuntimeResourceOperations[work->kind.signedIndex].draw;
+        if (callback != NULL) {
+            callback(work);
+        }
+    }
+}
+
+void effAdvanceActiveResourceCallbacks(EffActiveResource *work) {
+    effDispatchIndexedCallback(work);
+    effDispatchEnabledCallback(work);
+}
+
+void effCopyActiveResourceVector(EffActiveResource *dst, const void *src) {
+    SDF_VU0_COPYVECTOR(dst, src);
+}
+
+void effCopyActiveResourceSecondaryVector(EffActiveResource *work, const void *src) {
+    SDF_VU0_COPYVECTOR(work->orientation, src);
+}
+
+void effSetActiveResourceColor(EffActiveResource *work, u32 color) {
+    work->color = color;
+}
+
+void effSetActiveResourceScale(EffActiveResource *work, f32 value) {
+    work->scale = value;
+}
+
+/* Alternate particle handles share a header but occupy distinct slots. */
+EffParticleSharedResource *effCreateParticleSharedResourceFromFile(FileJobPayload *source) {
+    EffParticleSharedResource *work = sdfChipAllocDirect(sizeof(EffParticleSharedResource));
+    void *buffer;
+
+    memset(work, 0, sizeof(EffParticleSharedResource));
+    work->color = 0x80808080;
+    work->billHandle = NULL;
+    work->reference = NULL;
+    if (source == NULL) {
+        return work;
+    }
+    work->option = source->option;
+    buffer = fileResolvePrimaryBuffer(source);
+    memcpy(&work->colorTrack, buffer, EFF_PARTICLE_SHARED_PAYLOAD_BYTES);
+    buffer = fileResolveSecondaryBuffer(source);
+    if (buffer != NULL) {
+        switch (source->primary.selector) {
+        case 1:
+            work->billHandle = dds3BillboardCreate(0, (u32)buffer);
+            break;
+        case 2:
+            work->billHandle = dds3BillboardCreate(1, (u32)buffer);
+            break;
+        case 4:
+            work->billHandle = dds3BillboardGeneral(*(s32 *)buffer);
+            break;
+        case 7:
+            work->reference = effCreateTextureAnimationSet((u32)buffer);
+            break;
+        }
+        if (work->billHandle != NULL) {
+            dds3BillboardSetAnimColorAdvMode(work->billHandle);
+        }
+    }
+    return work;
+}
+
+void effReleaseParticleResources(EffParticleSharedResource *work) {
+    billHandle_t *particle = work->billHandle;
+    if (particle != NULL) {
+        dds3BillboardDelete(particle);
+    }
+    if (work->reference != NULL) {
+        effReleaseReferenceHolder(work->reference);
+    }
+    sdfChipFreeDirect(work);
+}
+
+void effReplaceSharedResource(EffParticleSharedResource *, EffParticleSharedResource *);
+
+EffParticleSharedResource *effCloneParticleSharedResource(EffParticleSharedResource *source) {
+    EffParticleSharedResource *effect = effCreateParticleSharedResourceFromFile(NULL);
+    memcpy(&effect->colorTrack, &source->colorTrack, EFF_PARTICLE_SHARED_PAYLOAD_BYTES);
+    effReplaceSharedResource(effect, source);
+    return effect;
+}
+
+void effReplaceSharedResource(EffParticleSharedResource *work, EffParticleSharedResource *source) {
+    billHandle_t *billboard;
+    if (source->billHandle != 0) {
+        if (work->billHandle != 0) {
+            dds3BillboardDelete(work->billHandle);
+        }
+        billboard = dds3BillboardCopy(
+            source->billHandle);
+        work->billHandle = billboard;
+        dds3BillboardSetAnimColorAdvMode(billboard);
+        return;
+    }
+    if (work->reference != NULL) {
+        effReleaseReferenceHolder(work->reference);
+    }
+    work->reference = effReferenceObjectRetain(source->reference);
+}
+
+void effResetParticleStateWord(EffParticleSharedResource *work) {
+    /* Restart the shared animation at its first sample. */
+    work->state = 0;
+}
+
+extern sdfGrOt_t D_003255A8;
+
+extern void sdfPrimLinkGt4(sdfDrawTag_t *list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0, s32 color0, s32 x1, s32 y1, s32 u1, s32 v1, s32 color1, s32 x2, s32 y2, s32 u2, s32 v2, s32 color2, s32 x3, s32 y3, s32 u3, s32 v3, s32 color3, s32 depth, s32 (*alloc)(s32));
+
+/* Submit frames below the exclusive limit; zero leaves the cursor unbounded. */
+void effDrawAndAdvanceSharedParticleFrame(EffParticleSharedResource *work) {
+    s32 limit = work->limit;
+    s32 frame = work->state;
+    BillSnapshot snapshot;
+    s32 corners[4][2];
+    EffAnimSample sample;
+    sdfDrawTag_t *list;
+    EffGsPacket *packet;
+    sdfGrOt_t *surface;
+    f32 size, angle, halfWidth, halfHeight, centerX, centerY, cosine, sine, coordX, coordY;
+    u32 color, packed;
+
+    if (limit <= frame && limit != 0) {
+        return;
+    }
+    surface = &D_003255A8;
+    color = effSampleColorAlphaTracks(&work->colorTrack, &work->alphaTrack, frame, limit);
+    UnpackRGBAWordFloat(work->color, 1.0f / 128.0f);
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    UnpackRGBAWordFloat(color, 1.0f / 128.0f);
+    SDF_VU0_MULVECTOR();
+    packed = PackRGBAWord(128.0f);
+    size = effSampleScalarCurve(&work->scaleTrack.curve, frame, limit);
+    angle = effSampleScalarCurve(&work->rotationTrack.curve, frame, limit);
+    if (work->billHandle != NULL) {
+        dds3BillboardSetAnimKey(work->billHandle, frame);
+        billCopyCurrentRecordToSnapshot(work->billHandle, &snapshot);
+    } else {
+        s32 width, height;
+
+        effSampleAnimSet(work->reference, frame, &sample);
+        snapshot.texture = effAssignSampledSegmentReference(work->reference, surface, &sample);
+        width = snapshot.texture->width << 4;
+        height = snapshot.texture->height << 4;
+        angle += sample.angle;
+        snapshot.uv.components[0] = 0;
+        snapshot.uv.components[1] = 0;
+        snapshot.uv.components[2] = width;
+        snapshot.uv.components[3] = 0;
+        snapshot.uv.components[4] = width;
+        snapshot.uv.components[5] = height;
+        snapshot.uv.components[6] = 0;
+        snapshot.uv.components[7] = height;
+        snapshot.x = 0;
+        snapshot.y = 0;
+        width = (s32)((f32)width * sample.scaleX);
+        height = (s32)((f32)height * sample.scaleY);
+        snapshot.halfHeight = (f32)(height >> 5) * 0.0625f;
+        snapshot.halfWidth = (f32)(width >> 5) * 0.0625f;
+    }
+    centerX = snapshot.x * 16.0f * size;
+    centerY = snapshot.y * 16.0f * size;
+    halfWidth = snapshot.halfWidth * 16.0f * size;
+    halfHeight = snapshot.halfHeight * 16.0f * size;
+    cosine = sdfCos(angle);
+    sine = sdfSin(angle);
+    coordX = centerX + halfWidth;
+    coordY = centerY + halfHeight;
+    corners[0][0] = (s32)(coordX * cosine - coordY * sine);
+    corners[0][1] = (s32)(coordX * sine + coordY * cosine);
+    coordX = centerX - halfWidth;
+    corners[1][0] = (s32)(coordX * cosine - coordY * sine);
+    corners[1][1] = (s32)(coordX * sine + coordY * cosine);
+    coordY = centerY - halfHeight;
+    corners[3][0] = (s32)(coordX * cosine - coordY * sine);
+    corners[3][1] = (s32)(coordX * sine + coordY * cosine);
+    coordX = centerX + halfWidth;
+    corners[2][0] = (s32)(coordX * cosine - coordY * sine);
+    corners[2][1] = (s32)(coordX * sine + coordY * cosine);
+    coordX = (f32)(work->x << 4);
+    coordY = (f32)(work->y << 3);
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
+    packet = (EffGsPacket *)sdfGrAllocPacketBuff(0x30);
+    packet->dmaTag = 2;
+    packet->vifTag = (((u64)0x50000002 << 16) | 0x1000) << 16;
+    packet->gifTag = ((u64)0x10000000 << 32) | 0x8001;
+    packet->registerList = 0xE;
+    switch (work->alphaTrack.surfaceIndex) {
+    case 2:
+        packet->registerValue = 0x48;
+        break;
+    case 3:
+    case 4:
+        packet->registerValue = 0x42;
+        break;
+    case 5:
+    case 6:
+        packet->registerValue = 6;
+        break;
+    case 0:
+    case 1:
+        packet->registerValue = 0x44;
+        break;
+    }
+    packet->registerAddress = 0x42;
+    sdfDrawTagLink(list, (u32)packet);
+    sdf2DLinkTexPacket(list, snapshot.texture, SDF_GS_CONTEXT_1);
+    sdfPrimLinkGt4(list, 0x40,
+        (s32)((f32)(corners[3][0] + 0x7000) + coordX), (s32)((f32)((corners[3][1] >> 1) + 0x7900) + coordY),
+        snapshot.uv.components[0], snapshot.uv.components[1], packed,
+        (s32)((f32)(corners[2][0] + 0x7000) + coordX), (s32)((f32)((corners[2][1] >> 1) + 0x7900) + coordY),
+        snapshot.uv.components[2], snapshot.uv.components[3], packed,
+        (s32)((f32)(corners[1][0] + 0x7000) + coordX), (s32)((f32)((corners[1][1] >> 1) + 0x7900) + coordY),
+        snapshot.uv.components[6], snapshot.uv.components[7], packed,
+        (s32)((f32)(corners[0][0] + 0x7000) + coordX), (s32)((f32)((corners[0][1] >> 1) + 0x7900) + coordY),
+        snapshot.uv.components[4], snapshot.uv.components[5], packed,
+        0xFF0000, NULL);
+    surface->regFunc(surface, list);
+    work->state++;
+}
+
+/* The shared particle header keeps its packed color in its first word. */
+void effSetParticleSharedColor(u32 *dst, u32 value) {
+    *dst = value;
+}
+
+void btlInitializeEffectWork(void) {
+    D_003BD074 = D_0038F2B8;
+    D_003DF8D0[0] = 0;
+    effPartsListScroll = 0;
+    effPartsListExitRequested = 0;
+    SDF_VU0_STOREIDENTITYVECTOR(effBattleOffset);
+}
+
+void effResetFileResourceStores(void);
+
+s32 btlUpdateEffectWork(void) {
+    if (D_003BD074 != NULL) {
+        if ((effUpdatePartsListEditor(0) & 1) == 0) {
+            effResetFileResourceStores();
+            return 0;
+        }
+    }
+    return 1;
+}
+
+void func_002B51A8(void) {
+}
+
+void effResetFileResources(void);
+
+extern void effResetFileResourceManager(void);
+
+void effResetFileResourceStores(void) {
+    effResetFileResources();
+    effResetFileResourceManager();
+}
+
+void effSetBattleOffset(void *src) {
+    SDF_VU0_COPYVECTOR(effBattleOffset, src);
+}
+
+extern void camFollowOffsetVec(u8 *, void *);
+
+void effComputeBattleCameraPositionVU(u8 *effect) {
+    u128 direction;
+    u32 flags = ((FileJob *)effect)->xformFlags;
+
+    if ((flags & 0x18) != 0) {
+        camFollowOffsetVec(effect, &direction);
+        SDF_VU0_LOADVECTOR(&direction);
+        flags = ((FileJob *)effect)->xformFlags;
+    } else {
+        SDF_VU0_LOADVECTOR(((FileJob *)effect)->offset);
+    }
+    if ((flags & 0x80) != 0) {
+        SDF_VU0_SCALEVECTOR_V0_CLOBBER(effFileQueue->scaleMultiplier);
+    }
+    SDF_VU0_LOADVECTOR_B(effBattleOffset);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_LOADVECTOR_B(effFileQueue);
+    SDF_VU0_ADDVECTOR();
+    if ((flags & 4) != 0) {
+        SDF_VU0_SETVECTOR_Y(-5.0f);
+    }
+}
+
+extern void camAimRotation(void *, void *);
+
+void effMultiplyQuatWithFlag(u8 *effect) {
+    if ((((FileJob *)effect)->xformFlags & 0x60) != 0) {
+        u128 quaternion;
+        camAimRotation(effect, &quaternion);
+        SDF_VU0_LOADVECTOR(effFileQueue->quat);
+        SDF_VU0_LOADVECTOR_B(&quaternion);
+        Mult();
+    } else {
+        SDF_VU0_LOADVECTOR(effFileQueue->quat);
+        SDF_VU0_LOADVECTOR_B(((FileJob *)effect)->quat);
+        Mult();
+    }
+}
+
+extern u8 effSelectedJobHeader[];
+
+extern void effComputeBattleCameraPositionVU(u8 *);
+
+void effApplyBattleCameraToObject(work)
+    void *work;
+{
+    f32 rotation[2][4] __attribute__((aligned(16)));
+
+    effComputeBattleCameraPositionVU(effSelectedJobHeader);
+    SDF_VU0_STOREVECTOR_NOMEM(rotation[0]);
+    fileJobInvokePositionCallback(work, rotation[0]);
+    effMultiplyQuatWithFlag(effSelectedJobHeader);
+    SDF_VU0_STOREVECTOR_NOMEM(rotation[1]);
+    fileJobInvokeRotationCallback(work, rotation[1]);
+    fileJobInvokeScaleCallback(work, ((FileJob *)effSelectedJobHeader)->scale * effFileQueue->scaleMultiplier);
+    fileDispatchJobTypeCallback(work, ((FileJob *)effSelectedJobHeader)->color);
+}
+
+u32 effCreateBattleCameraJob(u8 *request) {
+    u8 *outputBuffer = ((EffFileJobRequest *)request)->outputBuffer;
+    u32 job;
+
+    if (outputBuffer != NULL) {
+        if (((EffFileJobRequest *)request)->fileKind == 6) {
+            memcpy(outputBuffer, D_003DE148, 0x3C);
+            outputBuffer = ((EffFileJobRequest *)request)->outputBuffer;
+        }
+        fileJobSetPrimaryData(effQueuedFileHandle, outputBuffer, ((EffFileJobRequest *)request)->size, ((EffFileJobRequest *)request)->transferMode);
+    }
+    job = (u32)fileJobCreateFromJob(effQueuedFileHandle);
+    effApplyBattleCameraToObject(job);
+    return job;
+}
+
+FileJobPayload *effLoadFileJobPayload(EffFileJobRequest *request, u32 existingJob) {
+    FileJobPayload *job;
+    if (existingJob != 0) {
+        void *source;
+        job = fileJobCreateFromCommandState((const char *)existingJob);
+        source = fileResolvePrimaryBuffer(job);
+        memcpy(request->outputBuffer, source, request->size);
+    } else {
+        job = fileCreateJob(request->fileKind);
+        if (request->outputBuffer != NULL) {
+            fileJobSetPrimaryData(job, request->outputBuffer, request->size, request->transferMode);
+        }
+        if (request->secondaryCommandPath != 0) {
+            fileJobCopyCommandIntoSecondaryData(job, request->secondaryCommandPath, request->resourceMode);
+        } else {
+            u32 value = 0;
+            fileJobSetSecondaryData(job, &value, 4, 4);
+        }
+    }
+    effResetFileResourceManager();
+    return job;
+}
+
+void effInvokeFileJobWithBattleCamera(u32 job) {
+    if (effAuxiliaryFileQueue == 0) {
+        effApplyBattleCameraToObject((void *)job);
+        fileJobInvokeTypeCallback((FileJobPayload *)job);
+        return;
+    }
+}
+
+void effFileJobQueueRelease(u32 job) {
+    if (effAuxiliaryFileQueue != 0) {
+        fileQueueDestroy(effAuxiliaryFileQueue);
+        effAuxiliaryFileQueue = 0;
+    }
+    if (effTemporaryFileJob != 0) {
+        fileJobDestroy(effTemporaryFileJob);
+        effTemporaryFileJob = 0;
+    }
+    fileJobDestroy((FileJobPayload *)job);
+}
+
+extern char D_003BD080[];
+
+extern const char D_003BD078[];
+
+/* Payload option (+0x0C) selects the asset identifier at +0x08. */
+typedef struct EffAssetIdentifier {
+    u8 pad_00[4];
+    u16 type;       // 0x04
+    u8 pad_06[2];
+    u16 id;         // 0x08
+} EffAssetIdentifier;
+
+u32 effPollPrimaryFile(void) {
+    EffQueueRecord record;
+    char path[0x70];
+    u32 state;
+    u32 result = 0x400001;
+
+    effUpdateResourceQueue(D_003B39C8, D_003BD078, &record);
+    state = record.completion.state;
+    if (state == BTL_RESOURCE_SELECTION_CANCELED) {
+        result = 0x400000;
+    } else if (state == BTL_RESOURCE_SELECTION_ACCEPTED) {
+        if (effQueuedFileHandle != 0) {
+            sprintf(path, D_003BD080, D_003B39C8, record.nameWithExtension);
+            fileWriteToPfs(effQueuedFileHandle, path);
+            result = 0x400002;
+        }
+    }
+    return result;
+}
+
+void effQueueNamedResourceRequest(void) {
+    effReleaseQueuedResourceName();
+    effQueueResource(D_003BD088, D_003DF8D0);
+}
+
+u32 effPollNamedFile(void) {
+    EffQueueRecord record;
+    char path[0x70];
+    u32 state;
+    u32 result = 0x400001;
+
+    effUpdateResourceQueue(D_003B39E0, D_003BD088, &record);
+    state = record.completion.state;
+    if (state == BTL_RESOURCE_SELECTION_CANCELED) {
+        result = 0x400000;
+    } else if (state == BTL_RESOURCE_SELECTION_ACCEPTED) {
+        if (effFileQueue != 0) {
+            strcpy(D_003DF8D0, record.name);
+            sprintf(path, D_003BD080, D_003B39E0, record.nameWithExtension);
+            fileQueueSaveImage(effFileQueue, path);
+            result = 0x400002;
+        }
+    }
+    return result;
+}
+
+void effQueueAttachedResourceRequest(void) {
+    effReleaseQueuedResourceName();
+    effQueueResource(D_003BD090, D_003DF8D0);
+}
+
+u32 effPollAttachedFile(void) {
+    EffQueueRecord record;
+    char path[0x70];
+    u32 state;
+    u32 result = 0x400001;
+
+    effUpdateResourceQueue(D_003B39E0, D_003BD090, &record);
+    state = record.completion.state;
+    if (state == BTL_RESOURCE_SELECTION_CANCELED) {
+        result = 0x400000;
+    } else if (state == BTL_RESOURCE_SELECTION_ACCEPTED) {
+        if (effFileQueue != 0) {
+            strcpy(D_003DF8D0, record.name);
+            sprintf(path, D_003BD080, D_003B39E0, record.nameWithExtension);
+            fileQueueSaveVersionedImage(effFileQueue, path);
+            result = 0x400002;
+        }
+    }
+    return result;
+}
+
+extern EffectAssetLink *D_0038E9D8[22];
+
+u8 *effFindAssetData(FileJob *entry) {
+    FileJobPayload *requested = (FileJobPayload *)entry->id;
+    u16 type = requested->type;
+    u16 option = requested->option;
+    u16 i;
+    for (i = 0; i < 22; i++) {
+        EffectAssetLink *links = D_0038E9D8[i];
+        if (links != NULL) {
+            EffectAssetLink *current = links;
+            if (current->asset != NULL) {
+                do {
+                    u8 *asset = current->asset;
+                    if (((EffAssetIdentifier *)asset)->type == type && ((EffAssetIdentifier *)asset)->id == option) {
+                        return asset;
+                    }
+                    current++;
+                } while (current->asset != NULL);
+            }
+        }
+    }
+    return NULL;
+}
+
+EffQueuedFileObject *effFindAssetObject(FileJob *entry) {
+    FileJobPayload *requested = (FileJobPayload *)entry->id;
+    u16 type = requested->type;
+    u16 option = requested->option;
+    u16 i;
+    for (i = 0; i < 22; i++) {
+        EffectAssetLink *links = D_0038E9D8[i];
+        if (links != NULL) {
+            EffectAssetLink *current = links;
+            if (current->asset != NULL) {
+                do {
+                    u8 *asset = current->asset;
+                    if (((EffAssetIdentifier *)asset)->type == type && ((EffAssetIdentifier *)asset)->id == option) {
+                        return current->object;
+                    }
+                    current++;
+                } while (current->asset != NULL);
+            }
+        }
+    }
+    return NULL;
+}
+
+/* Return the selected queue row plus the offset of its visible window. */
+u32 effGetSelectedFileQueueIndex(void) {
+    return D_0038F2FC[0] + effPartsListScroll;
+}
+
+extern EffectBlock128 effEditedQueueHeader;
+
+#ifdef NON_MATCHING
+
+extern u8 *effFindAssetData(FileJob *entry);
+
+extern u32 effGetSelectedFileQueueIndex(void);
+
+extern s32 effEditorCurrentMenu;
+
+extern void *effQueuedFileObject;
+
+extern u8 effPartsListExitRequested;
+
+extern FileJobPayload *effTemporaryFileJob;
+
+extern FileQueue *effAuxiliaryFileQueue;
+
+extern FileQueue *effFileQueue;
+
+extern u32 effPartsListScroll;
+
+extern u8 effBattleOffset[];
+
+extern u8 effSelectedJobHeader[];
+
+extern s32 fileQueueCountLinkedJobs(FileQueue *);
+
+extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
+
+extern u32 btlDebugMenuSetupNoOp(void *);
+
+extern void btlDebugMenuBeforeRecordNoOp(void);
+
+extern void btlDebugMenuAfterRecordNoOp(void);
+
+extern void btlDebugMenuRecordNoOp(void *);
+
+extern s8 dds3PadBitTable[];
+
+extern u8 effPartsPreviewReload;
+
+extern void effApplyBattleCameraToObject(void *);
+
+extern char D_0038F3D8[], D_0038F3E8[], D_0038F3F8[], D_0038F408[], D_0038F418[];
+
+extern char D_003BD0A0[4], D_003BD0A8[5];
+
+extern const char D_003BD0B0[], D_003BD0B8[], D_003BD0C0[];
+
+extern const char D_003BD0C8[], D_003BD0D0[], D_003BD0D8[], D_003BD0E0[];
+
+extern char D_003B3878[];
+
+extern u32 effPollPartResource(void);
+
+extern u32 effPollNamedFileJob(void);
+
+extern void effBattleResourceDescriptorRelease(void);
+
+extern u32 effPollNamedFile(void);
+
+extern u32 effPollAttachedFile(void);
+
+extern void effQueueNamedResourceRequest(void);
+
+extern void effQueueAttachedResourceRequest(void);
+
+extern EffQueuedFileObject effPartsListMenu;
+
+extern EffQueuedFileObject effResetConfirmMenu;
+
+extern EffQueuedFileObject effExitConfirmMenu;
+
+extern EffQueuedFileObject effPartEntryMenu;
+
+extern EffQueuedFileObject effAttachedPartEntryMenu;
+
+extern EffQueuedFileObject effNewPartsMenu;
+
+extern EffQueuedFileObject effQueuePostureMenu;
+
+/* Per-frame update of the effect editor's file-queue page: it scrolls and edits
+ * the queue entries from the pad (start frame, enable toggle), rebuilds the
+ * menu rows for the visible entries plus the load, save, new-part and exit
+ * commands, runs the menu, and then previews either the selected entry or, in
+ * the all-parts view, the whole queue; it returns the menu result flags
+ * (0x800001 while open). Upstream: INCLUDE_ASM in game/code_0029E410; written
+ * from the retail routine. It differs from retail in the order of the stores
+ * that fill each menu row, the all-parts view rebuild flag (retail uses a
+ * branch-likely with a reload where this keeps the choice in a local), the
+ * string and jump table address forms, and the gp- relative address of two row
+ * labels. */
+extern EffectBlock128 effEditedQueueHeader;
+
+s32 effUpdatePartsListEditor(s32 unused) {
+    sdfMemHandle_t *allocation;
+    s32 scrolled;
+    s32 selectionChanged;
+    s32 changed = 0;
+    s32 hasJob;
+    u32 count;
+    u32 visible;
+    u32 capacity;
+    u32 index;
+    u32 frame;
+    u32 previousCursor;
+    s32 result;
+    EffEditorRow *rows;
+    FileJob *job;
+    EffFileJobRequest *asset;
+    char *text;
+    f32 previousScale;
+
+    selectionChanged = 0;
+    if ((EffQueuedFileObject *)(u32)effEditorCurrentMenu == &effPartsListMenu) {
+        effPartsListMenu.flags &= ~1;
+    }
+    if (effFileQueue == NULL) {
+        effFileQueue = fileQueueCreate();
+    }
+    scrolled = 0;
+    count = fileQueueCountLinkedJobs(effFileQueue);
+    if ((EffQueuedFileObject *)(u32)effEditorCurrentMenu == &effPartsListMenu) {
+        if (((EffQueuedFileObject *)(u32)effEditorCurrentMenu)->cursor == 0) {
+            if ((dds3PadBitTable[6] & 2) && effPartsListScroll != 0) {
+                scrolled = 1;
+                effPartsListScroll--;
+                selectionChanged = 1;
+            }
+        } else if (((EffQueuedFileObject *)(u32)effEditorCurrentMenu)->cursor == 20 &&
+                   (dds3PadBitTable[7] & 2) &&
+                   (u32)(effPartsListScroll + 21) < count) {
+            scrolled = 1;
+            effPartsListScroll++;
+            selectionChanged = 1;
+        }
+        index = effGetSelectedFileQueueIndex();
+        hasJob = index < count;
+        if (hasJob) {
+            job = fileQueueGetAt(effFileQueue, index);
+            frame = job->startFrame;
+            if ((dds3PadBitTable[4] & 2) && frame != 0) {
+                changed = 1;
+                frame--;
+            } else if (dds3PadBitTable[5] & 2) {
+                changed = 1;
+                frame++;
+            } else if ((dds3PadBitTable[9] & 2) && frame != 0) {
+                changed = 1;
+                frame = frame < 10 ? 0 : frame - 10;
+            } else if (dds3PadBitTable[11] & 2) {
+                changed = 1;
+                frame += 10;
+            }
+            job->startFrame = frame;
+        }
+        if (dds3PadBitTable[0] < 0 && hasJob) {
+            job = fileQueueGetAt(effFileQueue, index);
+            job->updateFlags ^= 2;
+        }
+    }
+    visible = count < 22 ? count : 21;
+    capacity = visible + 10;
+    allocation = sdfMemAllocDirect(capacity * (sizeof(EffEditorRow) + 20));
+    rows = (EffEditorRow *)sdfMemLock(allocation);
+    text = (char *)(rows + capacity);
+    memcpy(&effEditedQueueHeader, effFileQueue, 0x80);
+    for (index = 0; index < visible; index++) {
+        s32 disabled;
+        job = fileQueueGetAt(effFileQueue, index + effPartsListScroll);
+        asset = (EffFileJobRequest *)effFindAssetData(job);
+        disabled = job->updateFlags & 2;
+        if (!(job->flags & 1)) {
+            if (asset->fileKind != 20) {
+                sprintf(text, "%-11s%3d", job->name, job->startFrame);
+            } else {
+                sprintf(text, "%-10s*%3d", job->name, job->startFrame);
+            }
+            rows[index].payload.submenu.editor = &effPartEntryMenu;
+            rows[index].payload.submenu.attributes = disabled ? 0xFFFFFE : 0xFFFFFF;
+        } else {
+            if (asset->fileKind != 20) {
+                sprintf(text, " %-10s%3d", job->name, job->startFrame);
+            } else {
+                sprintf(text, " %-9s*%3d", job->name, job->startFrame);
+            }
+            rows[index].payload.submenu.editor = &effAttachedPartEntryMenu;
+            rows[index].payload.submenu.attributes = disabled ? 0xFFFFFE : 0xFFFFFF;
+        }
+        rows[index].text = text;
+        text += 20;
+        rows[index].kind = 0x16;
+        rows[index].payload.submenu.control = 0;
+        rows[index].payload.submenu.step = 0;
+    }
+    if (visible != 0) {
+        rows[index].text = NULL;
+        rows[index].kind = 0x15;
+        rows[index].payload.numeric.target = NULL;
+        rows[index].payload.numeric.lower = 0;
+        rows[index].payload.numeric.upper = 0;
+        rows[index].payload.numeric.step = 0;
+        index++;
+        rows[index].text = D_003B3878;
+        rows[index].kind = 0x16;
+        rows[index].payload.submenu.editor = &effQueuePostureMenu;
+        rows[index].payload.submenu.attributes = 0;
+        rows[index].payload.submenu.control = 0;
+        rows[index].payload.submenu.step = 0;
+        index++;
+    }
+    rows[index].text = D_0038F3E8;
+    rows[index].kind = 0x18;
+    rows[index].payload.submenu.editor = &effNewPartsMenu;
+    rows[index].payload.submenu.attributes = 0;
+    rows[index].payload.submenu.control = 0;
+    rows[index].payload.submenu.step = 0;
+    index++;
+    rows[index].text = D_0038F3D8;
+    rows[index].kind = 0x1A;
+    rows[index].payload.callbacks.poll.unsignedPoll = effPollPartResource;
+    rows[index].payload.callbacks.action.action = effBattleResourceDescriptorRelease;
+    rows[index].payload.callbacks.control = 0;
+    rows[index].payload.callbacks.step = 0;
+    index++;
+    rows[index++].kind = 0x14;
+    if (visible != 0) {
+        rows[index].text = D_0038F3F8;
+        rows[index].kind = 0x1A;
+        rows[index].payload.callbacks.poll.unsignedPoll = effPollNamedFile;
+        rows[index].payload.callbacks.action.action = effQueueNamedResourceRequest;
+        rows[index].payload.callbacks.control = 0;
+        rows[index].payload.callbacks.step = 0;
+        index++;
+    }
+    rows[index].text = D_0038F408;
+    rows[index].kind = 0x1A;
+    rows[index].payload.callbacks.poll.unsignedPoll = effPollNamedFileJob;
+    rows[index].payload.callbacks.action.action = effBattleResourceDescriptorRelease;
+    rows[index].payload.callbacks.control = 0;
+    rows[index].payload.callbacks.step = 0;
+    index++;
+    if (visible != 0) {
+        rows[index].text = D_0038F418;
+        rows[index].kind = 0x1A;
+        rows[index].payload.callbacks.poll.unsignedPoll = effPollAttachedFile;
+        rows[index].payload.callbacks.action.action = effQueueAttachedResourceRequest;
+        rows[index].payload.callbacks.control = 0;
+        rows[index].payload.callbacks.step = 0;
+        index++;
+        rows[index].text = D_003BD0A0;
+        rows[index].kind = 0x16;
+        rows[index].payload.submenu.editor = &effResetConfirmMenu;
+        rows[index].payload.submenu.attributes = 0;
+        rows[index].payload.submenu.control = 0;
+        rows[index].payload.submenu.step = 0;
+        index++;
+    }
+    rows[index].text = D_003BD0A8;
+    rows[index].kind = 0x16;
+    rows[index].payload.submenu.editor = &effExitConfirmMenu;
+    rows[index].payload.submenu.attributes = 0;
+    rows[index].payload.submenu.control = 0;
+    rows[index].payload.submenu.step = 0;
+    index++;
+    previousCursor = effPartsListMenu.cursor;
+    effPartsListMenu.rows = rows;
+    effPartsListMenu.count = index;
+    if (previousCursor >= capacity) {
+        effPartsListMenu.cursor = capacity - 1;
+        previousCursor = capacity - 1;
+    }
+    previousScale = effFileQueue->scaleMultiplier;
+    btlDebugMenuSetupNoOp((void *)(u32)effEditorCurrentMenu);
+    /* The stub is empty: retail stores the v0 it leaves, the effFileQueue
+     * just loaded for the scale (0x002B6094). */
+    effEditorCurrentMenu = (s32)(u32)effFileQueue;
+    if ((EffQueuedFileObject *)(u32)effEditorCurrentMenu == &effQueuePostureMenu) {
+        if (((EffQueuedFileObject *)(u32)effEditorCurrentMenu)->flags & 8) {
+            changed = 1;
+        }
+    }
+    if (scrolled) {
+        if (effPartsListMenu.cursor == effPartsListMenu.count - 1) {
+            effPartsListMenu.cursor = 0;
+        } else if (effPartsListMenu.cursor == 22 && count >= (u32)(effPartsListScroll + 21)) {
+            effPartsListMenu.cursor = 20;
+        }
+    }
+    if (previousCursor == effPartsListMenu.count - 1 && effPartsListMenu.cursor == 0) {
+        effPartsListScroll = 0;
+    }
+    btlDebugMenuBeforeRecordNoOp();
+    btlDebugMenuRecordNoOp((void *)(u32)effEditorCurrentMenu);
+    btlDebugMenuAfterRecordNoOp();
+    if (previousScale != effFileQueue->scaleMultiplier) {
+        changed = 1;
+    }
+    if (effQueuedFileObject != NULL) {
+        effEditorCurrentMenu = (s32)(u32)effQueuedFileObject;
+        effQueuedFileObject = NULL;
+    }
+    sdfMemFreeDirect(allocation);
+    if (effPartsListExitRequested != 0) {
+        result = 0;
+        effPartsListMenu.cursor = 0;
+        effPartsListExitRequested = 0;
+        effPartsListScroll = 0;
+    } else {
+        result = 0x800001;
+    }
+    memcpy(effFileQueue, &effEditedQueueHeader, 0x80);
+    if (effPartsPreviewReload || ((EffQueuedFileObject *)(u32)effEditorCurrentMenu == &effPartsListMenu &&
+        (((EffQueuedFileObject *)(u32)effEditorCurrentMenu)->cursor != previousCursor || selectionChanged))) {
+        if (effTemporaryFileJob != 0) {
+            fileJobDestroy(effTemporaryFileJob);
+            effTemporaryFileJob = 0;
+        }
+        index = effGetSelectedFileQueueIndex();
+        if (index >= fileQueueCountLinkedJobs(effFileQueue)) {
+            effPartsPreviewReload = 0;
+        } else {
+            if (effAuxiliaryFileQueue != NULL) {
+                fileQueueDestroy(effAuxiliaryFileQueue);
+                effAuxiliaryFileQueue = NULL;
+            }
+            job = fileQueueGetAt(effFileQueue, index);
+            effTemporaryFileJob = fileJobCreateFromJob((FileJobPayload *)job->id);
+            memcpy(effSelectedJobHeader, job, 0x80);
+            effPartsPreviewReload = 0;
+        }
+    } else if (dds3PadBitTable[2] < 0 || changed) {
+        s32 rebuild = 1;
+
+        if (effAuxiliaryFileQueue != NULL) {
+            fileQueueDestroy(effAuxiliaryFileQueue);
+            effAuxiliaryFileQueue = NULL;
+            rebuild = changed;
+        }
+        if (rebuild) {
+            effAuxiliaryFileQueue = fileCloneQueueEntries(effFileQueue);
+            fileQueueSetRotation(effAuxiliaryFileQueue, ((FileQueue *)&effEditedQueueHeader)->quat);
+            fileQueueSetPosition(effAuxiliaryFileQueue, (f32 *)effBattleOffset);
+            fileQueueSetScale(effAuxiliaryFileQueue, 1.0f);
+            fileQueueSetColor(effAuxiliaryFileQueue, ((FileQueue *)&effEditedQueueHeader)->color);
+        }
+    }
+    if (effAuxiliaryFileQueue != NULL) {
+        fileQueueUpdate(effAuxiliaryFileQueue);
+        btlBossDebugPrintfN(324, 10, 6, "ALL PARTS VIEW");
+    } else if (effTemporaryFileJob != 0) {
+        effApplyBattleCameraToObject(effTemporaryFileJob);
+        fileJobInvokeTypeCallback(effTemporaryFileJob);
+    }
+    if (effAuxiliaryFileQueue == NULL) {
+        index = effGetSelectedFileQueueIndex();
+        if (index < fileQueueCountLinkedJobs(effFileQueue)) {
+            job = fileQueueGetAt(effFileQueue, index);
+            asset = (EffFileJobRequest *)effFindAssetData(job);
+            switch (((FileJobPayload *)job->id)->primary.selector) {
+            case 1: btlBossDebugPrintfN(336, 10, 0, D_003BD0B0, asset->name); break;
+            case 2: btlBossDebugPrintfN(336, 10, 0, D_003BD0B8, asset->name); break;
+            case 3: btlBossDebugPrintfN(336, 10, 0, D_003BD0C0, asset->name); break;
+            case 0:
+            case 4: btlBossDebugPrintfN(336, 10, 0, D_003BD0C8, asset->name); break;
+            case 5: btlBossDebugPrintfN(336, 10, 0, D_003BD0D0, asset->name); break;
+            case 6: btlBossDebugPrintfN(336, 10, 0, D_003BD0D8, asset->name); break;
+            case 7: btlBossDebugPrintfN(336, 10, 0, D_003BD0E0, asset->name); break;
+            }
+        }
+    }
+    return result;
+}
+
+#else
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2D20);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2D30);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2D40);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2D50);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2D60);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2D70);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2D80);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2D90);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2DA0);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2DB0);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2DC0);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2DD0);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2DE0);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2DF0);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2E00);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2E10);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2E20);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2E30);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2E40);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2E50);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2E60);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2E70);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2E80);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2E90);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2EB0);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2ED0);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2EF0);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2F10);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2F30);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2F50);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2F70);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2F90);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2FB0);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2FD0);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B2FF0);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3010);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3030);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3050);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3070);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3090);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B30B0);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B30D0);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B30F0);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3110);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3130);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3150);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3170);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3190);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B31B0);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B31D8);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B31F8);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3218);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3238);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3258);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3278);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3298);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B32B8);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B32D8);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B32F8);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3318);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3338);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3358);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3378);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3398);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B33B8);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B33D8);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B33F8);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3418);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3438);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3458);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3478);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3498);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B34B8);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B34D8);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B34F8);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3518);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3538);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3558);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3578);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3598);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B35B8);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B35D8);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B35F8);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3618);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3638);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3658);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3678);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3698);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B36B8);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B36D8);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B36F8);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3718);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3738);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3758);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3778);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3798);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B37B8);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B37C8);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B37D8);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B37E8);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B37F8);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3808);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3818);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3828);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3838);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3848);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3858);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3868);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3878);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3888);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3898);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B38A8);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B38B8);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B38C8);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B38D8);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B38E8);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B38F8);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3908);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3918);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3928);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3938);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3948);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3958);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3968);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3978);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3988);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3998);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B39A8);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B39B8);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B39C8);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B39E0);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B39F0);
+
+INCLUDE_ASM(const s32, "game/code_0029E410", effUpdatePartsListEditor);
+
+#endif
+
+extern EffQueuedFileObject D_0038F428;
+
+extern s8 dds3PadBitTable[];
+
+extern const char D_003BD0E8[];
+
+extern u32 btlDebugMenuSetupNoOp(void *context);
+
+extern void btlDebugMenuBeforeRecordNoOp(void);
+
+extern void btlDebugMenuRecordNoOp(void *context);
+
+extern void btlDebugMenuAfterRecordNoOp(void);
+
+typedef struct EffCameraCreateRow {
+    EffCameraCreateRequest request;
+    u32 sourceTail;
+} EffCameraCreateRow;
+
+typedef char EffCameraCreateRowSizeCheck[(sizeof(EffCameraCreateRow) == 0x1C) ? 1 : -1];
+
+extern void fileQueueInitTransform(void *);
+
+extern FileJob *fileAppendJob(FileQueue *, u32);
+
+extern s32 fileQueueCountLinkedJobs(FileQueue *);
+
+extern FileJob *effCurrentFileQueueEntry;
+
+extern u32 D_003BD064;
+
+extern EffQueuedFileObject effPartsListMenu;
+
+u32 effAppendPositionedCameraFileJob(const EffCameraCreateRequest *request) {
+    FileJob *entry;
+    u32 count;
+
+    fileQueueInitTransform(effSelectedJobHeader);
+    entry = fileAppendJob(effFileQueue, (u32)effLoadFileJobPayload(request->resource, request->existingJob));
+    effCurrentFileQueueEntry = entry;
+    strcpy(entry->name, request->resource->name);
+    entry->offset[0] = request->position[0];
+    entry->offset[1] = request->position[1];
+    entry->offset[2] = request->position[2];
+    entry->unk88[0] = 8;
+    entry->unk88[1] = 0;
+    entry->unk88[2] = 0;
+    memcpy(effSelectedJobHeader, entry, 0x80);
+    effQueuedFileHandle = (FileJobPayload *)entry->id;
+    D_003BD064 = effCreateBattleCameraJob((u8 *)request->resource);
+    effQueuedFileObject = request->object;
+    count = fileQueueCountLinkedJobs(effFileQueue);
+    if (count > 21) {
+        effPartsListMenu.cursor = 20;
+        effPartsListScroll = count - 21;
+    } else {
+        effPartsListScroll = 0;
+        effPartsListMenu.cursor = count - 1;
+    }
+    request->object->linkedState = (u8 *)&effPartsListMenu;
+    effResetFileResourceManager();
+    return 0x800000;
+}
+
+/* Load the selected job's payload and camera snapshots; return the refresh status. */
+u32 effLoadSelectedFileJob(void) {
+    FileJob *entry = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
+    EffFileJobRequest *request;
+    u8 *fileData;
+    u32 job;
+
+    effCurrentFileQueueEntry = entry;
+
+    /* These independent snapshots cover the queue header and camera transform. */
+    memcpy(D_003DF840, entry, 0x90);
+    memcpy(effSelectedJobHeader, entry, 0x80);
+
+    effQueuedFileHandle = (FileJobPayload *)entry->id;
+    request = (EffFileJobRequest *)effFindAssetData(entry);
+    if (request->fileKind != 6) {
+        fileData = (u8 *)fileResolvePrimaryBuffer(effQueuedFileHandle);
+        memcpy(request->outputBuffer, fileData, request->size);
+    } else {
+        FileJobPayload *payload;
+        u32 transferMode;
+        u32 payloadSize;
+
+        if (request->allocation != NULL) {
+            sdfMemFreeDirect(request->allocation);
+        }
+        request->allocation = sdfMemAllocDirect(
+            effQueuedFileHandle->primary.size);
+        {
+            void *output = sdfMemLock(request->allocation);
+            payload = effQueuedFileHandle;
+            /* Publish the retained pointer through its object representation. */
+            memcpy(&request->outputBuffer, &output, sizeof(request->outputBuffer));
+        }
+        payloadSize = payload->primary.size;
+        transferMode = payload->option;
+        request->transferMode = transferMode;
+        request->size = payloadSize;
+        fileData = (u8 *)fileResolvePrimaryBuffer(payload);
+        memcpy(request->outputBuffer, fileData,
+               effQueuedFileHandle->primary.size);
+        memcpy(D_003DE148, fileData, 0x3C);
+    }
+
+    job = effCreateBattleCameraJob((u8 *)request);
+    D_003BD064 = job;
+    effQueuedFileObject = effFindAssetObject(entry);
+    ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = (u8 *)&effPartsListMenu;
+    effResetFileResourceManager();
+    if (effTemporaryFileJob != 0) {
+        fileJobDestroy(effTemporaryFileJob);
+        effTemporaryFileJob = 0;
+    }
+    return 0x800000;
+}
+
+extern u32 D_0038EA6C[];
+
+u32 effReinitializeFileQueue(void) {
+    if (effTemporaryFileJob != 0) {
+        fileQueueDestroy(effAuxiliaryFileQueue);
+        effAuxiliaryFileQueue = 0;
+    }
+    if (effTemporaryFileJob != 0) {
+        fileJobDestroy(effTemporaryFileJob);
+        effTemporaryFileJob = 0;
+    }
+    if (effFileQueue != 0) {
+        fileQueueDestroy(effFileQueue);
+    }
+    effFileQueue = fileQueueCreate();
+    D_0038EA6C[0] = 0;
+    D_003DF8D0[0] = 0;
+    effPartsListScroll = 0;
+    effPartsListMenu.cursor = 0;
+    effQueuedFileObject = &effPartsListMenu;
+    return 0;
+}
+
+extern u32 D_0038EB3C[];
+
+u32 effResetFileQueueState(void) {
+    fileQueueRemoveAndDestroyJob(effFileQueue, fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex()));
+    D_0038EB3C[0] = 0;
+    effPartsListScroll = 0;
+    effPartsListMenu.cursor = 0;
+    effQueuedFileObject = &effPartsListMenu;
+    return 0;
+}
+
+extern u32 D_0038EAD4[];
+
+u32 effFinalizeQueuedFile(void) {
+    s32 index = effGetSelectedFileQueueIndex();
+    FileJob *record = fileQueueGetAt(effFileQueue, index);
+    FileJob *copy = fileJobDuplicateAfter(effFileQueue, record);
+    D_0038EAD4[0] = 0;
+    fileJobCopyHeader(copy, record);
+    effQueuedFileObject = &effPartsListMenu;
+    return 0;
+}
+
+extern FileJob *fileDuplicateAndAppendJob(FileQueue *, FileJobPayload *);
+
+extern FileJob *fileQueueFindById(FileQueue *, u32);
+
+/* Clone the selected job, preserve its sector leader, and refresh the selected asset. */
+u32 effCloneSelectedFileJob(void) {
+    FileJob *source;
+    FileJob *entry;
+    FileJob *leader;
+    EffFileJobRequest *resource;
+    void *fileData;
+    s32 linkedCount;
+
+    source = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
+    entry = fileDuplicateAndAppendJob(effFileQueue,
+                                      (FileJobPayload *)source->id);
+    effCurrentFileQueueEntry = entry;
+    fileJobCopyHeader(entry, source);
+
+    if ((source->flags & 2) != 0) {
+        leader = fileQueueFindById(effFileQueue, source->sector);
+    } else {
+        leader = source;
+    }
+    fileQueueLinkJobToSectorLeader(effFileQueue, entry, leader);
+
+    memcpy(D_003DF840, entry, 0x90);
+    memcpy(effSelectedJobHeader, entry, 0x80);
+
+    effQueuedFileHandle = (FileJobPayload *)entry->id;
+    resource = (EffFileJobRequest *)effFindAssetData(entry);
+    strcpy(entry->name, resource->name);
+
+    if (resource->fileKind != 6) {
+        fileData = fileResolvePrimaryBuffer(effQueuedFileHandle);
+        memcpy(resource->outputBuffer, fileData, resource->size);
+    } else {
+        if (resource->allocation != 0) {
+            sdfMemFreeDirect(resource->allocation);
+        }
+        resource->allocation = sdfMemAllocDirect(
+            effQueuedFileHandle->primary.size);
+        {
+            void *buffer = sdfMemLock(resource->allocation);
+            FileJobPayload *payload = effQueuedFileHandle;
+            s32 option;
+            u32 primarySize;
+            /* Publish the retained pointer through its object representation. */
+            memcpy(&resource->outputBuffer, &buffer, sizeof(resource->outputBuffer));
+            primarySize = payload->primary.size;
+            option = payload->option;
+            resource->transferMode = option;
+            resource->size = primarySize;
+            fileData = fileResolvePrimaryBuffer(payload);
+        }
+        memcpy(resource->outputBuffer, fileData,
+               effQueuedFileHandle->primary.size);
+        memcpy(D_003DE148, fileData, 0x3C);
+    }
+
+    D_003BD064 = effCreateBattleCameraJob((u8 *)resource);
+    effQueuedFileObject = effFindAssetObject(entry);
+    ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = (u8 *)&effPartsListMenu;
+
+    linkedCount = fileQueueCountLinkedJobs(effFileQueue);
+    if ((u32)linkedCount >= 22) {
+        effPartsListMenu.cursor = 20;
+        effPartsListScroll = linkedCount - 21;
+    } else {
+        effPartsListScroll = 0;
+        effPartsListMenu.cursor = linkedCount - 1;
+    }
+
+    effResetFileResourceManager();
+    if (effTemporaryFileJob != 0) {
+        fileJobDestroy(effTemporaryFileJob);
+        effTemporaryFileJob = 0;
+    }
+    return 0x800000;
+}
+
+extern u32 effSelectLinkedFileState();
+
+u32 effFlagFileQueueActive(void) {
+    effPartsListExitRequested = 1;
+    effSelectLinkedFileState(0);
+    return 0;
+}
+
+/* Select the queued file object's linked state when present; return zero in either case. */
+u32 effSelectLinkedFileState(void) {
+    if (((EffQueuedFileObject *)effEditorCurrentMenu)->linkedState != NULL) {
+        effQueuedFileObject = ((EffQueuedFileObject *)effEditorCurrentMenu)->linkedState;
+    }
+    return 0;
+}
+
+typedef struct EffectBlock90 {
+    u32 word[36];
+} EffectBlock90;
+
+typedef struct EffectAlignedBlock128 {
+    u64 word[16];
+} EffectAlignedBlock128;
+
+extern EffQueuedFileObject effBattleCameraSnapshotSelection;
+
+extern EffEditorRow D_0038EC38[];
+
+extern EffEditorRow D_0038EC80[];
+
+extern u8 effPartsPreviewReload;
+
+u32 effLoadBattleCameraSnapshot(u32 value) {
+    FileJob *record = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
+
+    *(EffectBlock90 *)D_003DF840 = *(EffectBlock90 *)record;
+    *(EffectAlignedBlock128 *)D_003DF840 = *(EffectAlignedBlock128 *)effSelectedJobHeader;
+    if (((EffectBlock90 *)D_003DF840)->word[26] & 2) {
+        effBattleCameraSnapshotSelection.rows = D_0038EC38;
+        effBattleCameraSnapshotSelection.count = 3;
+        if (effBattleCameraSnapshotSelection.cursor > effBattleCameraSnapshotSelection.count) {
+            effBattleCameraSnapshotSelection.cursor = 0;
+        }
+    } else {
+        effBattleCameraSnapshotSelection.rows = D_0038EC80;
+        effBattleCameraSnapshotSelection.count = 9;
+        if (effBattleCameraSnapshotSelection.cursor == 0) {
+            effBattleCameraSnapshotSelection.cursor = 1;
+        }
+    }
+    return value;
+}
+
+u32 effStoreBattleCameraSnapshot(u32 value) {
+    FileJob *record = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
+
+    *(EffectBlock90 *)record = *(EffectBlock90 *)D_003DF840;
+    *(EffectAlignedBlock128 *)effSelectedJobHeader = *(EffectAlignedBlock128 *)D_003DF840;
+    effPartsPreviewReload = 1;
+    if (((EffectBlock90 *)D_003DF840)->word[26] & 2) {
+        effBattleCameraSnapshotSelection.rows = D_0038EC38;
+        effBattleCameraSnapshotSelection.count = 3;
+        if (effBattleCameraSnapshotSelection.cursor > effBattleCameraSnapshotSelection.count) {
+            effBattleCameraSnapshotSelection.cursor = 0;
+        }
+    } else {
+        effBattleCameraSnapshotSelection.rows = D_0038EC80;
+        effBattleCameraSnapshotSelection.count = 9;
+        if (effBattleCameraSnapshotSelection.cursor == 0) {
+            effBattleCameraSnapshotSelection.cursor = 1;
+        }
+    }
+    return value;
+}
+
+/* Present named camera/file requests, maintaining a preview job and returning selection status. */
+u32 effSelectCameraFileJobFromRows(const char *nameKey, const EffCameraCreateRow *requests, u32 sourceCount) {
+    EffQueuedFileObject *menuObject;
+    EffQueuedFileObject *state;
+    EffEditorRow *entries;
+    char *nameBuffer;
+    struct sdfMemHandle_t *allocation;
+    u32 capacity = sourceCount;
+    u32 i;
+    u32 count = 0;
+    u32 oldIndex;
+    u32 result;
+    u32 requestIndex;
+
+    allocation = sdfMemAllocDirect(capacity * (sizeof(EffEditorRow) + 0x14));
+    entries = (EffEditorRow *)sdfMemLock(allocation);
+    nameBuffer = (char *)(entries + capacity);
+    for (i = 0; i < capacity; i++) {
+        const EffCameraCreateRequest *request = &requests[i].request;
+        if (request->resource != NULL) {
+            sprintf(nameBuffer, D_003BD0E8, request->resource->name);
+            entries[count].text = nameBuffer;
+            entries[count].kind = 0;
+            entries[count].payload.numeric.target = 0;
+            entries[count].payload.numeric.upper = 0;
+            entries[count].payload.numeric.lower = 0;
+            entries[count].payload.numeric.step = (f32)i;
+            nameBuffer += 0x14;
+            count++;
+        }
+    }
+
+    menuObject = (EffQueuedFileObject *)effEditorCurrentMenu;
+    state = &D_0038F428;
+    state->count = count;
+    oldIndex = state->cursor;
+    state->rows = entries;
+    state->originX = menuObject->originX;
+    state->originY = menuObject->originY;
+    if (oldIndex >= count) {
+        state->cursor = count - 1;
+        oldIndex = state->cursor;
+    }
+    state->title = nameKey;
+    btlDebugMenuSetupNoOp(state);
+    btlDebugMenuBeforeRecordNoOp();
+    btlDebugMenuRecordNoOp(state);
+    btlDebugMenuAfterRecordNoOp();
+    sdfMemFreeDirect(allocation);
+
+    if (dds3PadBitTable[1] < 0 && count != 0) {
+        u32 selected = D_0038F428.cursor;
+        requestIndex = (u32)entries[selected].payload.numeric.step;
+        effAppendPositionedCameraFileJob(&requests[requestIndex].request);
+        result = 0x800000;
+    } else {
+        result = 0;
+        if (dds3PadBitTable[3] >= 0) {
+            result = 0x200001;
+        }
+    }
+    if ((result & 1) == 0) {
+        if (effTemporaryFileJob != 0) {
+            fileJobDestroy((FileJobPayload *)effTemporaryFileJob);
+            effTemporaryFileJob = 0;
+        }
+        return result;
+    }
+    if (count != 0) {
+        const EffCameraCreateRequest *request;
+        EffFileJobRequest *requestResource;
+        u32 selected = D_0038F428.cursor;
+        requestIndex = (u32)entries[selected].payload.numeric.step;
+
+        requestResource = ((const EffCameraCreateRow *)(requestIndex * sizeof(EffCameraCreateRow) + (u32)requests))->request.resource;
+        if (effTemporaryFileJob == NULL || oldIndex != D_0038F428.cursor ||
+            requestResource->fileKind != effTemporaryFileJob->type ||
+            requestResource->transferMode != effTemporaryFileJob->option) {
+            if (effTemporaryFileJob != NULL) {
+                fileJobDestroy(effTemporaryFileJob);
+                effTemporaryFileJob = 0;
+            }
+            request = &((const EffCameraCreateRow *)(requestIndex * sizeof(EffCameraCreateRow) + (u32)requests))->request;
+            if (request->existingJob != 0) {
+                FileJobPayload *sourceJob;
+                if (effAuxiliaryFileQueue != 0) {
+                    fileQueueDestroy(effAuxiliaryFileQueue);
+                    effAuxiliaryFileQueue = 0;
+                }
+                fileQueueInitTransform(effSelectedJobHeader);
+                ((FileJob *)effSelectedJobHeader)->offset[0] = request->position[0];
+                ((FileJob *)effSelectedJobHeader)->offset[1] = request->position[1];
+                ((FileJob *)effSelectedJobHeader)->offset[2] = request->position[2];
+                sourceJob = fileJobCreateFromCommandState((const char *)request->existingJob);
+                effTemporaryFileJob = fileJobCreateFromJob(sourceJob);
+                fileJobDestroy(sourceJob);
+            }
+        }
+    }
+    return result;
+}
+
+s32 effCreateParticleTask(void) {
+    return effSelectCameraFileJobFromRows(D_003B3968, D_0038DE70, 8);
+}
+
+s32 effCreatePolyTrackControlTask(void) {
+    return effSelectCameraFileJobFromRows(D_003B3958, D_0038DF50, 6);
+}
+
+s32 effCreatePolyTrackTask(void) {
+    return effSelectCameraFileJobFromRows("POLY TRACK S", D_0038E000, 6);
+}
+
+s32 effCreateBlurTask(void) {
+    return effSelectCameraFileJobFromRows(D_003BCA40, D_0038E0F0, 6);
+}
+
+s32 effCreateFilterTask(void) {
+    return effSelectCameraFileJobFromRows(D_003BD050, D_0038E1A0, 3);
+}
+
+s32 effCreateEnvironmentTask(void) {
+    return effSelectCameraFileJobFromRows(D_003B38C8, D_0038E280, 5);
+}
+
+s32 effCreatePolyTextureTask(void) {
+    return effSelectCameraFileJobFromRows(D_003B3938, D_0038E240, 2);
+}
+
+s32 effCreatePolyFlashTask(void) {
+    return effSelectCameraFileJobFromRows(D_003B3928, D_0038E310, 0xB);
+}
+
+s32 effCreatePolyRingTask(void) {
+    return effSelectCameraFileJobFromRows(D_003B3918, D_0038E450, 6);
+}
+
+s32 effCreatePolyThunderTask(void) {
+    return effSelectCameraFileJobFromRows(D_003B3908, D_0038E500, 4);
+}
+
+s32 effCreatePolyTwinkleTask(void) {
+    return effSelectCameraFileJobFromRows("POLY TWINKLE", D_0038E570, 6);
+}
+
+s32 effCreatePolyWindTask(void) {
+    return effSelectCameraFileJobFromRows(D_003B38F8, D_0038E620, 7);
+}
+
+s32 effCreatePolyScalyTask(void) {
+    return effSelectCameraFileJobFromRows(D_003B38E8, D_0038E6F0, 5);
+}
+
+s32 effCreatePolyCrackTask(void) {
+    return effSelectCameraFileJobFromRows(D_003B38D8, D_0038E7C0, 2);
+}
+
+s32 effCreateBattleOnlyTask(void) {
+    return effSelectCameraFileJobFromRows(D_003B3888, D_0038E800, 0xA);
+}
+
+s32 effCreateTwoDimensionalTask(void) {
+    return effSelectCameraFileJobFromRows(D_003BD000, D_0038E9A0, 2);
+}
+
+/* Resource-bank request shared with the DDS2 effect loader. */
+
+extern void effPollResourceBankSlot(char *, u32, EffResourceBankSlot *);
+
+u32 effPollPartResource(void) {
+    EffResourceBankSlot record;
+    u32 state;
+    u32 result = 0x400001;
+
+    effPollResourceBankSlot(D_003B39C8, BTL_RESOURCE_SCAN_EP, &record);
+    state = record.selectionStatus;
+    if (state == BTL_RESOURCE_SELECTION_CANCELED) {
+        result = 0x400000;
+    } else if (state == BTL_RESOURCE_SELECTION_ACCEPTED) {
+        if (effFileQueue != 0) {
+            FileJob *job = fileAppendJobFromCommandPath(effFileQueue, (const char *)&record);
+            u8 *asset = effFindAssetData(job);
+            strcpy(job->name, *(char **)asset);
+        }
+        result = 0x400002;
+    }
+    return result;
+}
+
+u32 effPollNamedFileJob(void) {
+    EffResourceBankSlot record;
+    u32 state;
+    u32 result = 0x400001;
+
+    effPollResourceBankSlot(D_003B39E0, BTL_RESOURCE_SCAN_EPL, &record);
+    state = record.selectionStatus;
+    if (state == BTL_RESOURCE_SELECTION_CANCELED) {
+        result = 0x400000;
+    } else if (state == BTL_RESOURCE_SELECTION_ACCEPTED) {
+        if (effFileQueue != 0) {
+            fileQueueDestroy(effFileQueue);
+        }
+        strcpy(D_003DF8D0, record.name);
+        effFileQueue = fileQueueCreateFromCommandState((const char *)&record);
+        effEditedQueueHeader = *(EffectBlock128 *)effFileQueue;
+        effPartsListScroll = 0;
+        D_0038F2FC[0] = 0;
+        result = 0x400002;
+    }
+    return result;
+}
+
+extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
+
+extern void SetRotateMatrixY(f32);
+
+extern char D_003B3A90[], D_003B3AA8[];
+
+extern s8 dds3PadBitTable[];
+
+extern f32 D_0038F530[4];
+
+extern f32 D_003DFA20[4];
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3A90);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3AA8);
+
+s32 effHandleDebugOrbitInput(void) {
+    f32 vector[4];
+    f32 step;
+    f32 length;
+    f32 angle;
+    s32 flags = 1;
+
+    btlBossDebugPrintfN(8, 8, 0, D_003B3A90);
+    btlBossDebugPrintfN(8, 20, 0, D_003B3AA8);
+    btlBossDebugPrintfN(8, 32, 0, "R2   & L2   : RADIUS");
+    if (dds3PadBitTable[6] & 2) {
+        D_003DFA20[1] -= 10.0f;
+        flags = 3;
+    } else if (dds3PadBitTable[7] & 2) {
+        D_003DFA20[1] += 10.0f;
+        flags = 3;
+    }
+    if (dds3PadBitTable[11] & 2) {
+        step = -10.0f;
+        flags |= 2;
+    } else if (dds3PadBitTable[9] & 2) {
+        step = 10.0f;
+        flags |= 2;
+    } else {
+        step = 0.0f;
+    }
+    /* Project onto the horizontal plane to find the movement direction. */
+    vector[0] = D_003DFA20[0];
+    vector[1] = 0.0f;
+    vector[2] = D_003DFA20[2];
+    vector[3] = 0.0f;
+    if (vector[0] != 0.0f || vector[2] != 0.0f) {
+        SDF_VU0_LOADVECTOR(vector);
+        SDF_VU0_GETLENGTH(length);
+        angle = 0.0f;
+        if (dds3PadBitTable[5] & 2) {
+            angle = (100.0f / length) * 0.08726646f;
+            flags |= 2;
+        } else if (dds3PadBitTable[4] & 2) {
+            angle = (100.0f / length) * -0.08726646f;
+            flags |= 2;
+        }
+        if (angle != 0.0f) {
+            SetRotateMatrixY(angle);
+            SDF_VU0_LOADVECTOR(vector);
+            SDF_VU0_APPLYMATRIX_XYZ();
+            SDF_VU0_STOREVECTOR(vector);
+        } else {
+            SDF_VU0_LOADVECTOR(vector);
+        }
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_STOREVECTOR(D_0038F530);
+    }
+    vector[0] += D_0038F530[0] * step;
+    vector[2] += D_0038F530[2] * step;
+    D_003DFA20[0] = vector[0];
+    D_003DFA20[2] = vector[2];
+    if (dds3PadBitTable[3] < 0) {
+        flags &= ~1;
+    } else {
+        flags |= 0x200000;
+    }
+    return flags;
+}
+
+s32 effResetStaticState(void) {
+    D_003DFA20[0] = 0;
+    D_003DFA20[1] = 0;
+    D_003DFA20[2] = 0;
+    D_003DFA20[3] = 0;
+    D_003DF840[0x88] = 8;
+    D_003DF840[0x89] = 0;
+    D_003DF840[0x8A] = 0;
+    return 0;
+}
+
+typedef struct EffectStateSnapshot {
+    s128 vectors[4];
+    f32 position[4]; /* 0x40: copied to the debug camera position and follow offset. */
+    s128 unused50;
+    u8 pad60[8];
+    u32 flags; /* 0x68: transform flags tested by the camera diagnostic. */
+    u8 pad6C[0x14];
+} EffectStateSnapshot;
+
+typedef char EffectStateSnapshotSizeCheck[(sizeof(EffectStateSnapshot) == 0x80) ? 1 : -1];
+
+extern s32 effUpdateCameraDiagnostics(EffectStateSnapshot *, s8);
+
+extern u8 D_0038F4F0[];
+
+extern s8 D_0039862B[];
+
+extern void btlDebugDrawPoint(f32 *position);
+
+extern void btlDebugDrawRadiusGuide(f32 *center, f32 radius, u32 color, s32 flags);
+
+extern void btlDebugDrawSegment(f32 *from, f32 *to, u32 color);
+
+extern void btlDebugMenuBeforeRecordNoOp(void);
+
+extern void btlDebugMenuAfterRecordNoOp(void);
+
+extern u32 btlDebugMenuSetupNoOp(void *camera);
+
+extern void btlDebugMenuRecordNoOp(void *camera);
+
+extern void camFollowOffsetVec(u8 *camera, void *destination);
+
+extern void effComputeBattleCameraPositionVU(u8 *snapshot);
+
+/* Synchronize the diagnostic camera position and calculate its positional guides.
+ * Return input flags; the native diagnostic drawing providers are retail stubs. */
+s32 effUpdateCameraDiagnostics(EffectStateSnapshot *snapshot, s8 mode) {
+    u8 *camera = D_0038F4F0;
+    f32 vectors[6][4] __attribute__((aligned(16)));
+    f32 length;
+    f32 deltaY;
+    s32 result = 1;
+
+    if ((*(u32 *)(camera + 0x10) & 2) == 0) {
+        if (D_0039862B[0] < 0) {
+            result = 0;
+        }
+    }
+
+    SDF_VU0_COPYVECTOR(D_003DFA20, snapshot->position);
+    btlDebugMenuSetupNoOp(camera);
+    btlDebugMenuBeforeRecordNoOp();
+    btlDebugMenuRecordNoOp(camera);
+    btlDebugMenuAfterRecordNoOp();
+    SDF_VU0_COPYVECTOR(snapshot->position, D_003DFA20);
+
+    if ((*(u32 *)(camera + 0x10) & 8) != 0) {
+        result |= 2;
+    }
+    if ((result & 2) != 0 && (snapshot->flags & 0x18) != 0) {
+        camFollowOffsetVec((u8 *)snapshot, vectors[0]);
+        SDF_VU0_COPYVECTOR(snapshot->position, vectors[0]);
+    }
+
+    if (mode != 0) {
+        effComputeBattleCameraPositionVU((u8 *)snapshot);
+        SDF_VU0_LOADVECTOR_B(&effEditedQueueHeader);
+        SDF_VU0_SUBVECTOR();
+    } else {
+        SDF_VU0_LOADVECTOR(snapshot->position);
+    }
+    SDF_VU0_STOREVECTOR(vectors[1]);
+    SDF_VU0_SETVECTOR_Y(0.0f);
+    SDF_VU0_GETLENGTH(length);
+    SDF_VU0_LOADVECTOR(effBattleOffset);
+    if (mode != 0) {
+        SDF_VU0_LOADVECTOR_B(&effEditedQueueHeader);
+        SDF_VU0_ADDVECTOR();
+    }
+    SDF_VU0_STOREVECTOR(vectors[5]);
+    SDF_VU0_STOREVECTOR(vectors[3]);
+    deltaY = vectors[1][1];
+    vectors[3][1] += deltaY;
+    if (vectors[3][1] == 0.0f) {
+        vectors[3][1] = vectors[5][1] + (-2.0f);
+    }
+    if (length > 0.0f) {
+        btlDebugDrawRadiusGuide(vectors[3], length, 0x80006060, 0);
+        deltaY = vectors[1][1];
+    }
+
+    SDF_VU0_COPYVECTOR_F32(vectors[2], vectors[3]);
+    vectors[2][1] = vectors[5][1] + (-2.0f);
+    if (deltaY != vectors[5][1]) {
+        btlDebugDrawRadiusGuide(vectors[2], length, 0x80404040, 0);
+        btlDebugDrawSegment(vectors[2], vectors[3], 0x80006060);
+    }
+
+    SDF_VU0_LOADVECTOR(vectors[1]);
+    SDF_VU0_LOADVECTOR_B(vectors[5]);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR_NOMEM(vectors[4]);
+    btlDebugDrawSegment(vectors[3], vectors[4], 0x80006060);
+    btlDebugDrawSegment(vectors[2], vectors[4], 0x80006060);
+    btlDebugDrawPoint(vectors[4]);
+    return result;
+}
+
+void effCopyCameraSnapshotSelection(void) {
+    D_003BD108 = D_003DF840[0x88];
+    D_003BD109 = D_003DF840[0x89];
+    D_003BD10A = D_003DF840[0x8A];
+}
+
+extern u8 D_003BD10B;
+
+s32 func_002B8108(void) {
+    f32 center[4];
+    f32 point[4];
+    f32 selected[4];
+    f32 direction[4];
+    f32 radius;
+    f32 angle;
+    f32 length;
+    f32 pitch;
+    s32 flags = 1;
+    s32 i;
+
+    btlBossDebugPrintfN(8, 8, 0, D_003B3A90);
+    btlBossDebugPrintfN(8, 20, 0, D_003B3AA8);
+    btlBossDebugPrintfN(8, 32, 0, "R2   & L2   : ROLL");
+    if (dds3PadBitTable[6] & 2) {
+        if ((s8)D_003BD108 == 8) {
+            D_003BD10B = -1;
+            D_003BD109 += 8;
+            if ((s8)D_003BD109 >= 16) {
+                D_003BD109 = (s8)D_003BD109 - 16;
+            }
+        } else if ((s8)D_003BD108 == -8) {
+            D_003BD10B = 1;
+            D_003BD109 += 8;
+            if ((s8)D_003BD109 >= 16) {
+                D_003BD109 = (s8)D_003BD109 - 16;
+            }
+        }
+        D_003BD108 += D_003BD10B;
+        flags = 3;
+    } else if (dds3PadBitTable[7] & 2) {
+        if ((s8)D_003BD108 == 8) {
+            D_003BD10B = 1;
+            D_003BD109 += 8;
+            if ((s8)D_003BD109 >= 16) {
+                D_003BD109 = (s8)D_003BD109 - 16;
+            }
+        } else if ((s8)D_003BD108 == -8) {
+            D_003BD10B = -1;
+            D_003BD109 += 8;
+            if ((s8)D_003BD109 >= 16) {
+                D_003BD109 = (s8)D_003BD109 - 16;
+            }
+        }
+        D_003BD108 -= D_003BD10B;
+        flags = 3;
+    }
+    /* At either pole, directional input changes roll instead of azimuth.
+     * It consumes this tick's roll input as well. */
+    if (dds3PadBitTable[5] & 2) {
+        if ((s8)D_003BD108 == 8 || (s8)D_003BD108 == -8) {
+            /* Retail 0x002B829C and 0x002B82A4 beq .L002B8320: increaseRoll is
+             * also entered by fall-through from the beql at 0x002B8318. */
+            goto increaseRoll;
+        }
+        if ((s8)D_003BD109 == 15) {
+            D_003BD109 = 0;
+        } else {
+            D_003BD109++;
+        }
+        flags |= 2;
+    } else if (dds3PadBitTable[4] & 2) {
+        if ((s8)D_003BD108 == 8 || (s8)D_003BD108 == -8) {
+            /* Retail 0x002B82DC and 0x002B82E4 beq .L002B834C: decreaseRoll is
+             * also entered by fall-through from the beqz at 0x002B8344. */
+            goto decreaseRoll;
+        }
+        {
+            s32 heading = (s8)D_003BD109;
+            s32 encoded = D_003BD109;
+            if (heading == 0) {
+                D_003BD109 = 15;
+            } else {
+                D_003BD109 = encoded - 1;
+            }
+        }
+        flags |= 2;
+    }
+    if (dds3PadBitTable[11] & 2) {
+increaseRoll:
+        if ((s8)D_003BD10A == 15) {
+            D_003BD10A = 0;
+        } else {
+            D_003BD10A++;
+        }
+        flags |= 2;
+    } else if (dds3PadBitTable[9] & 2) {
+decreaseRoll:
+        {
+            s32 roll = (s8)D_003BD10A;
+            s32 encoded = D_003BD10A;
+            if (roll == 0) {
+                D_003BD10A = 15;
+            } else {
+                D_003BD10A = encoded - 1;
+            }
+        }
+        flags |= 2;
+    }
+    SDF_VU0_LOADVECTOR(D_003DFA20);
+    SDF_VU0_LOADVECTOR_B(effBattleOffset);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(center);
+    SDF_VU0_STOREVECTOR(point);
+    radius = 0.0f;
+    for (i = -8; i < 9; i++) {
+        f32 sampleRadius;
+        angle = (f32)i * 0.19634954f;
+        point[1] = sdfSin(angle) * -200.0f + center[1];
+        sampleRadius = sdfCos(angle) * 200.0f;
+        if ((s8)D_003BD108 == i) {
+            radius = sampleRadius;
+            SDF_VU0_COPYVECTOR(selected, point);
+            btlDebugDrawRadiusGuide(point, sampleRadius, 0x80004040, 0);
+        } else {
+            btlDebugDrawRadiusGuide(point, sampleRadius, 0x80404040, 0);
+        }
+    }
+    btlDebugDrawSegment(selected, center, 0x80006060);
+    angle = (f32)(s8)D_003BD109 * 0.39269908f;
+    point[0] = selected[0] + sdfCos(angle) * radius;
+    point[1] = selected[1];
+    point[2] = selected[2] + sdfSin(angle) * radius;
+    btlDebugDrawSegment(point, selected, 0x80006060);
+    SDF_VU0_LOADVECTOR(point);
+    SDF_VU0_LOADVECTOR_B(center);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_GETLENGTH(length);
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR_NOMEM(direction);
+    if (flags & 2) {
+        pitch = -acosf(-direction[1]);
+        FromEuler(pitch, atan2f(direction[0], direction[2]), 0.0f);
+        SDF_VU0_STOREVECTOR_NOMEM(direction);
+        FromEuler(0.0f, (f32)(s8)D_003BD10A * 0.39269908f, 0.0f);
+        SDF_VU0_LOADVECTOR_B(direction);
+        Mult();
+        SDF_VU0_STOREVECTOR(D_003DFA30);
+    }
+    btlBossDebugPrintfN(8, 48, 0, "H:%2d,D:%2d,R:%2d",
+                       (s32)(s8)D_003BD108 + 8,
+                       (s32)(s8)D_003BD109, (s32)(s8)D_003BD10A);
+    D_003DF840[0x88] = D_003BD108;
+    D_003DF840[0x89] = D_003BD109;
+    D_003DF840[0x8A] = D_003BD10A;
+    if (dds3PadBitTable[3] < 0) {
+        flags &= ~1;
+    } else {
+        flags |= 0x200000;
+    }
+    return flags;
+}
+
+s32 effResetCameraSnapshotSelection(void) {
+    D_003DF840[0x88] = 8;
+    D_003DF840[0x89] = 0;
+    D_003DF840[0x8a] = 0;
+    SDF_VU0_STOREIDENTITYVECTOR(D_003DFA30);
+    return 0;
+}
+
+/* The camera snapshot payload is the 0x90-byte record consumed by this updater. */
+typedef union EffectCameraSnapshotView {
+    u32 word[36];
+    struct {
+        u8 pad00[0x40];
+        f32 offset[4];
+        f32 quat[4];
+        u8 pad60[0x30];
+    } camera;
+} EffectCameraSnapshotView;
+
+typedef struct EffectCameraDebugState {
+    u32 unknown00[4];
+    u32 flags;
+    u32 unknown14[9];
+} EffectCameraDebugState;
+
+extern EffectCameraDebugState D_0038F588;
+
+extern s8 D_0039862B[];
+
+extern f32 effWorldUpVector[4];
+
+extern void btlDebugDrawOrientedExtentGuide(f32 *, f32, f32, u32, f32 (*)[4]);
+
+extern void btlDebugDrawPoint(f32 *);
+
+typedef struct EffectCameraDebugScratch {
+    s128 basePosition;
+    s128 segmentStart;
+    s128 segmentEnd;
+    s128 rotationMatrix[4];
+} EffectCameraDebugScratch;
+
+u32 effUpdateCameraSnapshotGuides(EffectCameraSnapshotView *state, s8 useBattlePosition) {
+    EffectCameraDebugScratch scratch;
+    u32 result = 1;
+
+    if ((D_0038F588.flags & 2) == 0) {
+        if (D_0039862B[0] < 0) {
+            result = 0;
+        }
+    }
+
+    SDF_VU0_COPYVECTOR(D_003DFA30, state->camera.quat);
+    if (useBattlePosition != 0) {
+        effComputeBattleCameraPositionVU((u8 *)state);
+    } else {
+        SDF_VU0_LOADVECTOR(state->camera.offset);
+    }
+    SDF_VU0_STOREVECTOR_NOMEM(&scratch.basePosition);
+    SDF_VU0_STOREVECTOR(D_003DFA20);
+
+    btlDebugMenuSetupNoOp(&D_0038F588);
+    btlDebugMenuBeforeRecordNoOp();
+    btlDebugMenuRecordNoOp(&D_0038F588);
+    btlDebugMenuAfterRecordNoOp();
+    SDF_VU0_COPYVECTOR(state->camera.quat, D_003DFA30);
+    if (D_0038F588.flags & 8) {
+        result |= 2;
+    }
+    SDF_VU0_LOADVECTOR(&scratch.basePosition);
+    SDF_VU0_LOADVECTOR_B(effBattleOffset);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR_NOMEM(&scratch.segmentStart);
+
+    SDF_VU0_LOADVECTOR(state->camera.quat);
+    ToMatrix();
+    SDF_VU0_STOREMATRIX_NOMEM(scratch.rotationMatrix);
+
+    SDF_VU0_LOADVECTOR(effWorldUpVector);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_SCALEVECTOR_BITS(250.0f);
+    SDF_VU0_LOADVECTOR_B(&scratch.segmentStart);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR_NOMEM(&scratch.segmentEnd);
+
+    btlDebugDrawOrientedExtentGuide((f32 *)&scratch.segmentStart, 30.0f, -50.0f, 0x80006060, (f32 (*)[4])scratch.rotationMatrix);
+    btlDebugDrawSegment((f32 *)&scratch.segmentStart, (f32 *)&scratch.segmentEnd, 0x80000080);
+    btlDebugDrawPoint((f32 *)&scratch.segmentStart);
+
+    SDF_VU0_LOADVECTOR_B(effBattleOffset);
+    SDF_VU0_LOADMATRIX(scratch.rotationMatrix);
+    SDF_VU0_LOAD_ROW3(&scratch.basePosition);
+    SDF_VU0_LOADIDENTITYVECTOR();
+    SDF_VU0_SETVECTOR_X(100.0f);
+    SDF_VU0_APPLYMATRIX_XYZ1();
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR_NOMEM(&scratch.segmentStart);
+    SDF_VU0_LOADIDENTITYVECTOR();
+    SDF_VU0_SETVECTOR_X(-100.0f);
+    SDF_VU0_APPLYMATRIX_XYZ1();
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR_NOMEM(&scratch.segmentEnd);
+    btlDebugDrawSegment((f32 *)&scratch.segmentStart, (f32 *)&scratch.segmentEnd, 0x80006060);
+
+    SDF_VU0_LOADVECTOR_B(effBattleOffset);
+    SDF_VU0_LOADMATRIX(scratch.rotationMatrix);
+    SDF_VU0_LOAD_ROW3(&scratch.basePosition);
+    SDF_VU0_LOADIDENTITYVECTOR();
+    SDF_VU0_SETVECTOR_Z(25.0f);
+    SDF_VU0_APPLYMATRIX_XYZ1();
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR_NOMEM(&scratch.segmentStart);
+    SDF_VU0_LOADIDENTITYVECTOR();
+    SDF_VU0_SETVECTOR_Z(-25.0f);
+    SDF_VU0_APPLYMATRIX_XYZ1();
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR_NOMEM(&scratch.segmentEnd);
+    btlDebugDrawSegment((f32 *)&scratch.segmentStart, (f32 *)&scratch.segmentEnd, 0x80006060);
+
+    return result;
+}
+
+u32 effLoadFileSlotAndPoll(void) {
+    FileJob *file = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
+    u32 result;
+
+    memcpy(D_003DF840, file, 0x90);
+    result = effUpdateCameraDiagnostics((EffectStateSnapshot *)D_003DF840, 1);
+    memcpy(file, D_003DF840, 0x90);
+    if (result & 1) {
+        result |= 0x800000;
+    }
+    return result;
+}
+
+s32 effRunWithStateBackup(void) {
+    EffectStateSnapshot snapshot = *(EffectStateSnapshot *)&effEditedQueueHeader;
+    f32 *backup = snapshot.position;
+    s32 result;
+
+    SDF_VU0_COPYVECTOR(backup, &effEditedQueueHeader);
+    result = effUpdateCameraDiagnostics(&snapshot, 0);
+    SDF_VU0_COPYVECTOR(&effEditedQueueHeader, backup);
+    if (result & 1) {
+        result |= 0x800000;
+    }
+    return result;
+}
+
+extern u32 effUpdateCameraSnapshotGuides(EffectCameraSnapshotView *, s8);
+
+u32 effProcessQueuedFileRecordAndPersistChanges(void) {
+    FileJob *file = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
+    u32 result;
+
+    memcpy(D_003DF840, file, 0x90);
+    result = effUpdateCameraSnapshotGuides((EffectCameraSnapshotView *)D_003DF840, 1);
+    memcpy(file, D_003DF840, 0x90);
+    if (result & 1) {
+        result |= 0x800000;
+    }
+    return result;
+}
+
+extern u8 effPartsPreviewReload;
+
+void effResetFileResources(void) {
+    D_0038F2FC[0] = 0;
+    effPartsPreviewReload = 0;
+    effPartsListScroll = 0;
+    if (effFileQueue != 0) {
+        fileQueueDestroy(effFileQueue);
+        effFileQueue = 0;
+    }
+    if (effAuxiliaryFileQueue != 0) {
+        fileQueueDestroy(effAuxiliaryFileQueue);
+        effAuxiliaryFileQueue = 0;
+    }
+    if (effTemporaryFileJob != 0) {
+        fileJobDestroy(effTemporaryFileJob);
+        effTemporaryFileJob = 0;
+    }
+}
+
+void effBattleResourceDescriptorRelease(void) {
+    if (effResourceBankDescriptor != 0) {
+        btlDestroyResourceDescriptor(effResourceBankDescriptor);
+        effResourceBankDescriptor = 0;
+    }
+    if (effResourceBankEntries != 0) {
+        btlDestroyEntryList(effResourceBankEntries);
+        effResourceBankEntries = 0;
+    }
+}
+
+void effPollResourceBankSlot(char *path, u32 flags, EffResourceBankSlot *selection) {
+
+    if (effResourceBankEntries == 0) {
+        effResourceBankEntries = btlScanDirectory(path, flags);
+        effResourceBankDescriptor = btlCreateResourceDescriptor(effResourceBankEntries);
+        btlSetResourceBrowserPosition(effResourceBankDescriptor, 0xBA, 0x1C);
+        return;
+    }
+    btlUpdateAndDrawResourceBrowser(effResourceBankDescriptor);
+    selection->selectionStatus = btlGetResourceBrowserSelectionStatus(effResourceBankDescriptor);
+    selection->type = btlFormatSelectedResourceName(effResourceBankDescriptor, selection->fullName);
+    selection->pathVariant = btlGetResourcePathVariant(effResourceBankDescriptor);
+    btlTrimResourceName(effResourceBankDescriptor, selection->name);
+    if (selection->selectionStatus == BTL_RESOURCE_SELECTION_ACCEPTED) {
+        btlDestroyResourceDescriptor(effResourceBankDescriptor);
+        effResourceBankDescriptor = 0;
+        btlDestroyEntryList(effResourceBankEntries);
+        effResourceBankEntries = 0;
+    }
+}
+
+extern struct BtlResourceNameRecord *effFileQueueNameRecord;
+
+extern const char D_003BCF30[];
+
+void effInitializeResourceQueue(void) {
+    FileJob *record;
+
+    if (effFileQueueNameRecord != 0) {
+        btlDestroyResourceNameRecord(effFileQueueNameRecord);
+    }
+    effFileQueueNameRecord = btlCreateResourceNameRecord(D_003BCF30);
+    btlSetResourceNamePosition(effFileQueueNameRecord, 0xC2, 0xC8);
+    btlSetResourceNameLengthLimit(effFileQueueNameRecord, 9);
+    record = fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex());
+    btlResourceRecordSetName(effFileQueueNameRecord, record->name);
+}
+
+u32 effPollResourceQueue(void) {
+    u32 state;
+
+    btlUpdateResourceNameEditor(effFileQueueNameRecord);
+    btlFormatResourceNameWithoutExtension(effFileQueueNameRecord, fileQueueGetAt(effFileQueue, effGetSelectedFileQueueIndex())->name);
+    state = btlGetResourceNameSelectionStatus(effFileQueueNameRecord);
+    if ((u32)(state - BTL_RESOURCE_SELECTION_ACCEPTED) < 2) {
+        btlDestroyResourceNameRecord(effFileQueueNameRecord);
+        effFileQueueNameRecord = 0;
+        return 0;
+    }
+    return 0x200001;
+}
+
+void effReleaseQueuedResourceName(void) {
+    if (effQueuedResourceNameRecord != 0) {
+        btlDestroyResourceNameRecord(effQueuedResourceNameRecord);
+        effQueuedResourceNameRecord = 0;
+    }
+}
+
+void effQueueResource(const char *extension, const char *resourceName) {
+    if (effQueuedResourceNameRecord == 0) {
+        effQueuedResourceNameRecord = btlCreateResourceNameRecord(extension);
+        btlSetResourceNamePosition(effQueuedResourceNameRecord, 0xC2, 0xC8);
+    }
+    btlResourceRecordSetName(effQueuedResourceNameRecord, resourceName);
+}
+
+void effUpdateResourceQueue(const char *directoryPath, const char *extension, EffQueueRecord *record) {
+    u32 state;
+
+    if (effQueuedResourceNameRecord == 0) {
+        effQueuedResourceNameRecord = btlCreateResourceNameRecord(extension);
+        btlSetResourceNamePosition(effQueuedResourceNameRecord, 0xC2, 0xC8);
+        return;
+    }
+    btlUpdateResourceNameEditor(effQueuedResourceNameRecord);
+    btlFormatResourceNameWithExtension(effQueuedResourceNameRecord, record->nameWithExtension);
+    btlFormatResourceNameWithoutExtension(effQueuedResourceNameRecord, record->name);
+    state = btlGetResourceNameSelectionStatus(effQueuedResourceNameRecord);
+    record->completion.state = state;
+    if (state == BTL_RESOURCE_SELECTION_ACCEPTED) {
+        if (btlPollResourceNameOverwrite(effQueuedResourceNameRecord, directoryPath) !=
+            BTL_RESOURCE_WRITE_PERMISSION_NOT_GRANTED) {
+            btlDestroyResourceNameRecord(effQueuedResourceNameRecord);
+            effQueuedResourceNameRecord = 0;
+        } else {
+            record->completion.state = BTL_RESOURCE_SELECTION_PENDING;
+        }
+    }
+}
+
+void effReleaseResourceBankDescriptors(void) {
+    if (effResourceBankDescriptor != 0) {
+        btlDestroyResourceDescriptor(effResourceBankDescriptor);
+        effResourceBankDescriptor = 0;
+    }
+    if (effResourceBankEntries != 0) {
+        btlDestroyEntryList(effResourceBankEntries);
+        effResourceBankEntries = 0;
+    }
+}
+
+typedef struct EffectPollRecord {
+    char fullName[0xC8]; /* Formatted path or selected built-in name. */
+    s32 type;   // 0xC8
+    s32 selectionStatus;  // 0xCC
+    s32 pathVariant; // 0xD0
+} EffectPollRecord;
+
+void effPollResourceBank(s32 flags, EffectPollRecord *record) {
+    if (effResourceBankEntries == 0) {
+        effResourceBankEntries = btlScanDirectory(0, flags);
+        if (flags & BTL_RESOURCE_SCAN_GENERAL) {
+            u32 i = 0;
+            u32 count = dds3BillboardGeneralNumber();
+            if (count != 0) {
+                do {
+                    char name[0x70];
+                    sprintf(name, "GENERAL %d", i);
+                    btlAppendEntry(effResourceBankEntries, name, BTL_RESOURCE_ENTRY_CATEGORY_GENERAL, i, 0);
+                    i++;
+                } while (i < count);
+            }
+        }
+        effResourceBankDescriptor = btlCreateResourceDescriptor(effResourceBankEntries);
+        btlSetResourceBrowserPosition(effResourceBankDescriptor, 0xBA, 0x1C);
+    } else {
+        btlUpdateAndDrawResourceBrowser(effResourceBankDescriptor);
+        record->selectionStatus = btlGetResourceBrowserSelectionStatus(effResourceBankDescriptor);
+        record->type = btlFormatSelectedResourceName(effResourceBankDescriptor, record->fullName);
+        record->pathVariant = btlGetResourcePathVariant(effResourceBankDescriptor);
+        if (record->selectionStatus == BTL_RESOURCE_SELECTION_ACCEPTED) {
+            btlDestroyResourceDescriptor(effResourceBankDescriptor);
+            effResourceBankDescriptor = 0;
+            btlDestroyEntryList(effResourceBankEntries);
+            effResourceBankEntries = 0;
+        }
+    }
+}
+
+extern EffQueuedFileObject effMappingState;
+
+void effResetMappingFlags(void) {
+    effColorEditRgbMenuOpen = 0;
+    effColorEditPage = 0;
+    effColorEditSelectedKey = 0;
+    effColorEditSelectedAlphaKey = 1;
+    effMappingState.cursor = 1;
+    effMappingState.flags |= 0x10;
+}
+
+#ifdef NON_MATCHING
+
+extern u32 effColorEditRgbMenuOpen;
+
+extern u32 effColorEditSelectedKey;
+
+extern u32 effColorEditPage;
+
+extern u32 effColorEditSelectedAlphaKey;
+
+extern s32 effEditColorTrack(s32, s32, s32);
+
+extern s8 dds3PadBitTable[];
+
+extern u32 btlDebugMenuSetupNoOp(void *context);
+
+extern void btlDebugMenuRecordNoOp(void *context);
+
+extern u32 btlDebugMenuSetupNoOp(void *camera);
+
+extern void btlDebugMenuRecordNoOp(void *camera);
+
+extern EffQueuedFileObject effMappingState;
+
+extern SdfColorTrack effColorEditColorTrack;
+
+extern SdfAlphaTrack effColorEditAlphaTrack;
+
+extern u32 effColorEditKeyColor;
+
+extern u32 D_0038F630;
+
+extern f32 effColorEditKeyFraction;
+
+extern s32 effColorEditKeyFrame, effColorEditFadeInFrame, effColorEditFadeOutFrame;
+
+extern u8 effColorEditRgbMenu[];
+
+extern char effColorEditFrameCountFormat[];
+
+extern u32 btlDebugMenuSetupNoOp(void *);
+
+extern void btlDebugMenuBeforeRecordNoOp(void);
+
+extern void btlDebugMenuRecordNoOp(void *);
+
+extern void btlDebugMenuAfterRecordNoOp(void);
+
+extern void btlDebugDrawRectangle(s32, s32, s32, s32);
+
+extern void btlDebugDrawTwoColorRectangle();
+
+extern void btlDebugDrawMappingColorSpan(s32, s32, s32, s32, u32, u32);
+
+extern void btlDebugDrawLine2D();
+
+extern void btlBossDebugPrintfN(s32, s32, s32, const char *, ...);
+
+/* Runs the effect editor's color-and-alpha track page: it reads the pad to move
+ * the selected color key, the fade-in or fade-out boundary or the menu cursor
+ * across its three pages (keys, alpha fades, sub-menu), keeps the keys ordered
+ * and clamped to 0..1, writes the edited track back, draws the two gradient
+ * bars and returns the update flags (0x400003 when a value changed, bit 0
+ * cleared when the page is left). Upstream: INCLUDE_ASM in game/code_0029E410;
+ * written from the retail routine. It is not structurally close to retail: the
+ * control flow, the stack layout and the register allocation differ throughout
+ * (the behavior was checked path by path against the retail asm). */
+s32 effEditColorTrack(s32 colorTrackAddr, s32 alphaTrackAddr, s32 frameCount) {
+    SdfColorTrack *colorTrack = (SdfColorTrack *)(u32)colorTrackAddr;
+    SdfAlphaTrack *alphaTrack = (SdfAlphaTrack *)(u32)alphaTrackAddr;
+    u32 colors[4];
+    f32 fractions[4];
+    u32 last = 1;
+    u32 selectedKey;
+    u32 newSelection;
+    u32 keyIndex;
+    f32 frameCountFloat = (f32)frameCount;
+    f32 frameStep = 1.0f / frameCountFloat;
+    s32 resultFlags = 0x400001;
+
+    colors[0] = colorTrack->initialColor;
+    fractions[0] = 0.0f;
+    switch (colorTrack->segmentMode) {
+    case 1:
+        fractions[1] = colorTrack->keys[0].fraction;
+        colors[1] = colorTrack->keys[0].color;
+        if (fractions[1] > 1.0f) {
+            fractions[1] = colorTrack->keys[0].fraction = 1.0f;
+        }
+        last = 2;
+        break;
+    case 2:
+        fractions[1] = colorTrack->keys[0].fraction;
+        fractions[2] = colorTrack->keys[1].fraction;
+        colors[1] = colorTrack->keys[0].color;
+        colors[2] = colorTrack->keys[1].color;
+        if (fractions[1] > 1.0f) {
+            fractions[1] = colorTrack->keys[0].fraction = 1.0f;
+        }
+        if (fractions[2] > 1.0f) {
+            fractions[2] = colorTrack->keys[1].fraction = 1.0f;
+        }
+        last = 3;
+        break;
+    default:
+        colorTrack->segmentMode = 0;
+        break;
+    }
+    selectedKey = last >= effColorEditSelectedKey ? effColorEditSelectedKey : last;
+    colors[last] = colorTrack->finalColor;
+    fractions[last] = 1.0f;
+    effColorEditSelectedKey = selectedKey;
+    effColorEditKeyFraction = fractions[selectedKey];
+    effColorEditKeyColor = (colors[selectedKey] & 0xFFFFFF) | 0x80000000;
+    effColorEditColorTrack = *colorTrack;
+    effColorEditAlphaTrack = *alphaTrack;
+
+    btlDebugMenuSetupNoOp(&effMappingState);
+    if (effColorEditRgbMenuOpen == 1) {
+        btlDebugMenuSetupNoOp(effColorEditRgbMenu);
+    }
+    newSelection = effColorEditSelectedKey;
+    if (effColorEditRgbMenuOpen == 0) {
+        if (effColorEditPage == 1) {
+            f32 *fade = effColorEditSelectedAlphaKey == 1 ? &effColorEditAlphaTrack.fadeInFraction : &effColorEditAlphaTrack.fadeOutFraction;
+
+            if (dds3PadBitTable[11] & 2) {
+                resultFlags = 0x400003;
+                *fade += frameStep * 10.0f;
+            } else if (dds3PadBitTable[9] & 2) {
+                resultFlags = 0x400003;
+                *fade -= frameStep * 10.0f;
+            } else if (dds3PadBitTable[5] & 2) {
+                resultFlags = 0x400003;
+                *fade += frameStep;
+            } else if (dds3PadBitTable[4] & 2) {
+                resultFlags = 0x400003;
+                *fade -= frameStep;
+            } else if (dds3PadBitTable[6] & 2) {
+                if (effColorEditSelectedAlphaKey != 2) {
+                    effColorEditPage = 0;
+                } else {
+                    effColorEditSelectedAlphaKey = 1;
+                }
+            } else if (dds3PadBitTable[7] & 2) {
+                if (effColorEditSelectedAlphaKey != 1) {
+                    effMappingState.cursor = 1;
+                    effColorEditPage = 2;
+                    effMappingState.flags &= ~0x10;
+                } else {
+                    effColorEditSelectedAlphaKey = 2;
+                }
+            }
+        } else if (effColorEditPage == 0) {
+            if (selectedKey != 0 && selectedKey != last) {
+                if (dds3PadBitTable[11] & 2) {
+                    resultFlags = 0x400003;
+                    effColorEditKeyFraction += frameStep * 10.0f;
+                } else if (dds3PadBitTable[9] & 2) {
+                    resultFlags = 0x400003;
+                    effColorEditKeyFraction -= frameStep * 10.0f;
+                } else if (dds3PadBitTable[5] & 2) {
+                    resultFlags = 0x400003;
+                    effColorEditKeyFraction += frameStep;
+                } else if (dds3PadBitTable[4] & 2) {
+                    resultFlags = 0x400003;
+                    effColorEditKeyFraction -= frameStep;
+                }
+            }
+            if (dds3PadBitTable[6] & 2) {
+                if ((s32)newSelection > 0) {
+                    effColorEditSelectedKey = --newSelection;
+                }
+            } else if (dds3PadBitTable[7] & 2) {
+                if (newSelection < last) {
+                    effColorEditSelectedKey = ++newSelection;
+                } else {
+                    effColorEditPage = effColorEditPage + 1;
+                }
+            } else if (dds3PadBitTable[1] < 0) {
+                effColorEditRgbMenuOpen = 1;
+            }
+        } else if (effColorEditPage == 2) {
+            if (dds3PadBitTable[6] & 2) {
+                if (effMappingState.flags & 0x20) {
+                    effColorEditPage = 1;
+                    effMappingState.flags |= 0x10;
+                }
+            } else if (dds3PadBitTable[7] & 2) {
+                if (effMappingState.flags & 0x20) {
+                    effColorEditSelectedAlphaKey = 1;
+                    effMappingState.flags |= 0x10;
+                    effColorEditPage = 0;
+                    effColorEditSelectedKey = 0;
+                    newSelection = 0;
+                }
+            }
+        }
+    }
+    if ((s32)newSelection < 0) {
+        effColorEditSelectedKey = 0;
+    } else {
+        effColorEditSelectedKey = last < newSelection ? last : newSelection;
+    }
+    if (effColorEditKeyFraction < 0.0f) {
+        effColorEditKeyFraction = 0.0f;
+    } else if (effColorEditKeyFraction > 1.0f) {
+        effColorEditKeyFraction = 1.0f;
+    }
+    if (effColorEditAlphaTrack.fadeInFraction < 0.0f) {
+        effColorEditAlphaTrack.fadeInFraction = 0.0f;
+    } else if (effColorEditAlphaTrack.fadeInFraction > 1.0f) {
+        effColorEditAlphaTrack.fadeInFraction = 1.0f;
+    }
+    if (effColorEditAlphaTrack.fadeOutFraction < 0.0f) {
+        effColorEditAlphaTrack.fadeOutFraction = 0.0f;
+    } else if (effColorEditAlphaTrack.fadeOutFraction > 1.0f) {
+        effColorEditAlphaTrack.fadeOutFraction = 1.0f;
+    }
+    if (effColorEditAlphaTrack.fadeOutFraction < effColorEditAlphaTrack.fadeInFraction) {
+        if (effMappingState.rows[effMappingState.cursor].payload.numeric.target == &effColorEditAlphaTrack.fadeInFraction ||
+            (effColorEditPage == 1 && effColorEditSelectedAlphaKey == effColorEditPage)) {
+            effColorEditAlphaTrack.fadeOutFraction = effColorEditAlphaTrack.fadeInFraction;
+        } else {
+            effColorEditAlphaTrack.fadeInFraction = effColorEditAlphaTrack.fadeOutFraction;
+        }
+    }
+    if (effColorEditColorTrack.segmentMode != last - 1) {
+        switch (effColorEditColorTrack.segmentMode) {
+        case 1:
+            effColorEditColorTrack.keys[0].fraction = 0.5f;
+            break;
+        case 2:
+            effColorEditColorTrack.keys[1].fraction = (effColorEditColorTrack.keys[0].fraction + 1.0f) * 0.5f;
+            break;
+        }
+    }
+    *alphaTrack = effColorEditAlphaTrack;
+    *colorTrack = effColorEditColorTrack;
+    if (selectedKey == 0) {
+        colorTrack->initialColor = effColorEditKeyColor;
+    } else if (selectedKey == last) {
+        colorTrack->finalColor = effColorEditKeyColor;
+    } else if (selectedKey == 1) {
+        colorTrack->keys[0].color = effColorEditKeyColor;
+        colorTrack->keys[0].fraction = effColorEditKeyFraction;
+        if (last >= 3 && colorTrack->keys[1].fraction < effColorEditKeyFraction) {
+            colorTrack->keys[1].fraction = effColorEditKeyFraction;
+            fractions[2] = effColorEditKeyFraction;
+        }
+    } else {
+        colorTrack->keys[1].color = effColorEditKeyColor;
+        colorTrack->keys[1].fraction = effColorEditKeyFraction;
+        if (last >= 3 && effColorEditKeyFraction < colorTrack->keys[0].fraction) {
+            colorTrack->keys[0].fraction = effColorEditKeyFraction;
+            fractions[1] = effColorEditKeyFraction;
+        }
+    }
+    colors[selectedKey] = effColorEditKeyColor;
+    fractions[selectedKey] = effColorEditKeyFraction;
+    effColorEditKeyFrame = (s32)(effColorEditKeyFraction * frameCountFloat);
+    effColorEditFadeInFrame = (s32)(effColorEditAlphaTrack.fadeInFraction * frameCountFloat);
+    effColorEditFadeOutFrame = (s32)(effColorEditAlphaTrack.fadeOutFraction * frameCountFloat);
+
+    btlDebugDrawRectangle(8, 0x100, 0xC8, 0xB0);
+    btlDebugMenuBeforeRecordNoOp();
+    btlDebugMenuRecordNoOp(&effMappingState);
+    if (effColorEditRgbMenuOpen == 1) {
+        btlDebugMenuRecordNoOp(effColorEditRgbMenu);
+    }
+    btlDebugMenuAfterRecordNoOp();
+    btlDebugDrawTwoColorRectangle(0x10, 0x108, 0xB8, 0x10, 0x40404040, 0x80000000);
+    for (keyIndex = 0; keyIndex < last; keyIndex++) {
+        s32 x0 = (s32)(fractions[keyIndex] * 184.0f);
+        s32 x1 = (s32)(fractions[keyIndex + 1] * 184.0f);
+        s32 x = x0 + 0x10;
+
+        btlDebugDrawMappingColorSpan(x, 0x108, x1 - x0, 0x10, (colors[keyIndex] & 0xFFFFFF) | 0x80000000,
+                                     (colors[keyIndex + 1] & 0xFFFFFF) | 0x80000000);
+        if (keyIndex == effColorEditSelectedKey && effColorEditPage == 0) {
+            btlDebugDrawLine2D(x0 + 0xF, 0x104, x0 + 0xF, 0x11C, 0x8000FF00);
+            btlDebugDrawLine2D(x, 0x104, x, 0x11C, 0x8000FF00);
+        } else {
+            btlDebugDrawLine2D(x, 0x104, x, 0x11C, 0x80808080);
+        }
+    }
+    if (last == effColorEditSelectedKey && effColorEditPage == 0) {
+        btlDebugDrawLine2D(0xC9, 0x104, 0xC9, 0x11C, 0x8000FF00);
+        btlDebugDrawLine2D(0xC8, 0x104, 0xC8, 0x11C, 0x8000FF00);
+    } else {
+        btlDebugDrawLine2D(0xC8, 0x104, 0xC8, 0x11C, 0x80808080);
+    }
+
+    fractions[0] = 0.0f;
+    fractions[1] = alphaTrack->fadeInFraction;
+    fractions[2] = alphaTrack->fadeOutFraction;
+    fractions[3] = 1.0f;
+    colors[0] = 0;
+    colors[1] = alphaTrack->alpha;
+    colors[2] = alphaTrack->alpha;
+    colors[3] = 0;
+    btlDebugDrawTwoColorRectangle(0x10, 0x124, 0xB8, 0x10, 0x40404040, 0x80000000);
+    for (keyIndex = 0; keyIndex < 3; keyIndex++) {
+        s32 x0 = (s32)(fractions[keyIndex] * 184.0f);
+        s32 x1 = (s32)(fractions[keyIndex + 1] * 184.0f);
+        s32 x = x0 + 0x10;
+        u32 from = colors[keyIndex];
+        u32 to = colors[keyIndex + 1];
+
+        btlDebugDrawMappingColorSpan(x, 0x124, x1 - x0, 0x10, (from << 16) | (from << 8) | from | 0x80000000,
+                                     (to << 16) | (to << 8) | to | 0x80000000);
+        if (keyIndex == effColorEditSelectedAlphaKey && effColorEditPage == 1) {
+            btlDebugDrawLine2D(x0 + 0xF, 0x120, x0 + 0xF, 0x138, 0x8000FF00);
+            btlDebugDrawLine2D(x, 0x120, x, 0x138, 0x8000FF00);
+        } else {
+            btlDebugDrawLine2D(x, 0x120, x, 0x138, 0x80808080);
+        }
+    }
+    btlDebugDrawLine2D(0xC8, 0x120, 0xC8, 0x138, 0x80808080);
+    btlBossDebugPrintfN(0xC, 0x13C, 8, effColorEditFrameCountFormat, frameCount);
+    if (dds3PadBitTable[3] < 0) {
+        if (effColorEditRgbMenuOpen != 0) {
+            effColorEditRgbMenuOpen = 0;
+        } else {
+            resultFlags &= ~1;
+        }
+    }
+    if (effColorEditRgbMenuOpen == 0) {
+        if (effMappingState.flags & 8) {
+            resultFlags |= 2;
+        }
+    } else if (D_0038F630 & 8) {
+        resultFlags |= 2;
+    }
+    return resultFlags;
+}
+
+#else
+
+INCLUDE_ASM(const s32, "game/code_0029E410", effEditColorTrack);
+
+#endif
+
+extern EffEditorRow D_0038F7D8[];
+
+extern EffEditorRow D_0038F718[];
+
+extern EffEditorRow D_0038F658[];
+
+/* The effect mapping dispatcher stores its data pointer at +0x0C. */
+typedef struct EffMappingRequest {
+    u8 pad_00[0x0C];
+    s32 object;          // 0x0C
+} EffMappingRequest;
+
+/* Parameters passed to the mapping dispatcher from distinct object channels. */
+typedef struct EffMappingObject {
+    u8 pad_00[0x34];
+    s32 value34;       // 0x34
+    u32 value38;       // 0x38
+    s32 value3C;
+    u8 pad40[0xC];
+    u32 value4C;
+    u8 pad50[0x20];
+    u32 value70;       // 0x70
+    s32 value74;
+    u8 pad78[8];
+    u32 value80;       // 0x80
+    u32 value84;       // 0x84
+    u8 pad_88[4];
+    s32 value8C;       // 0x8C
+    u8 pad_90[0x28];
+    u32 valueB8;       // 0xB8
+    u8 pad_BC[0x18];
+    s32 valueD4;       // 0xD4
+    s32 valueD8;       // 0xD8
+    u8 pad_DC[0x18];
+    s32 valueF4;       // 0xF4
+} EffMappingObject;
+
+s32 effMapObjectWithTemporaryMappingTable(s32 request) {
+    s32 result;
+    s32 object = ((EffMappingRequest *)request)->object;
+
+    effMappingState.rows = D_0038F7D8;
+    effMappingState.count = 8;
+    result = effEditColorTrack(object + 0x2c, object + 0x50, ((EffMappingObject *)object)->valueB8);
+    effMappingState.rows = D_0038F658;
+    effMappingState.count = 8;
+    return result;
+}
+
+/* Edit the request's G-/K-family COLOR tracks; return the native editor status. */
+s32 effEditGkColorTrack(s32 request) {
+    s32 result;
+    s32 object = ((EffMappingRequest *)request)->object;
+
+    effMappingState.rows = D_0038F7D8;
+    effMappingState.count = 8;
+    result = effEditColorTrack(object + 0x48, object + 0x6c, ((EffMappingObject *)object)->valueD4);
+    effMappingState.rows = D_0038F658;
+    effMappingState.count = 8;
+    return result;
+}
+
+/* B-/F-family COLOR callback: edit the request's color and adjacent alpha tracks. */
+s32 effEditBfColorTrack(s32 request) {
+    s32 object;
+
+    object = ((EffMappingRequest *)request)->object;
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->valueB8);
+}
+
+/* HELPER's COLOR callback edits the shared default color/alpha data. */
+s32 effEditHlpColorTrack(void) {
+    return effEditColorTrack((s32)D_003DE148, (s32)D_003DE148 + 0x24, ((EffMappingObject *)D_003DE148)->value34);
+}
+
+/* Edit T-BOARD color/alpha tracks using the alternate property-option table. */
+s32 effEditTBoardColorTrack(s32 request) {
+    s32 result;
+    s32 object = ((EffMappingRequest *)request)->object;
+
+    effMappingState.rows = D_0038F7D8;
+    effMappingState.count = 8;
+    result = effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value8C);
+    effMappingState.rows = D_0038F658;
+    effMappingState.count = 8;
+    return result;
+}
+
+/* Pass the E-RAIN request's color/alpha tracks and frame bound to the editor. */
+s32 effEditRainColorTrack(s32 request) {
+    s32 object;
+
+    object = ((EffMappingRequest *)request)->object;
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34);
+}
+
+/* Pass the E-FLARE request's color/alpha tracks and frame bound to the editor. */
+s32 effEditFlareColorTrack(s32 request) {
+    s32 object;
+
+    object = ((EffMappingRequest *)request)->object;
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value38);
+}
+
+/* COLOR property callback shared by the native S-family descriptors. */
+s32 effEditSColorTrack(s32 request) {
+    s32 object;
+
+    object = ((EffMappingRequest *)request)->object;
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34);
+}
+
+/* Edit R-NOMAL/R-CRCLE COLOR tracks, then restore the default option table. */
+s32 effEditRColorTrack(s32 request) {
+    s32 result;
+    s32 object = ((EffMappingRequest *)request)->object;
+
+    effMappingState.rows = D_0038F718;
+    effMappingState.count = 8;
+    result = effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34);
+    effMappingState.rows = D_0038F658;
+    effMappingState.count = 8;
+    return result;
+}
+
+/* COLOR property callback for the native R-TRACK descriptor. */
+s32 effEditRTrackColorTrack(s32 request) {
+    s32 object;
+
+    object = ((EffMappingRequest *)request)->object;
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34);
+}
+
+/* D-family COLOR callback; its DDS2 twin also serves O-family descriptors. */
+s32 effEditDoColorTrack(s32 request) {
+    s32 object;
+
+    object = ((EffMappingRequest *)request)->object;
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34);
+}
+
+s32 effResolveMappingWithTemporaryTable(s32 request) {
+    s32 result;
+    s32 object = ((EffMappingRequest *)request)->object;
+
+    effMappingState.rows = D_0038F7D8;
+    effMappingState.count = 8;
+    result = effEditColorTrack(object + 0x4c, object + 0x70, ((EffMappingObject *)object)->valueD8);
+    effMappingState.rows = D_0038F658;
+    effMappingState.count = 8;
+    return result;
+}
+
+/* COLOR callback shared by the native N-SPIRL/N-CYLND/N-SPHRE descriptors. */
+s32 effEditNColorTrack(s32 request) {
+    s32 object;
+
+    object = ((EffMappingRequest *)request)->object;
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34);
+}
+
+/* Edit COLOR in the N-family descriptors' nested POLYGON data. */
+s32 effEditNPolygonColorTrack(s32 request) {
+    s32 object;
+
+    object = ((EffMappingRequest *)request)->object;
+    return effEditColorTrack(object + 0x3c, object + 0x60, ((EffMappingObject *)object)->value80);
+}
+
+/* Edit the root U-CYLND color and alpha tracks selected by the request. */
+s32 effEditUCylinderColorTrack(s32 request) {
+    s32 object;
+
+    object = ((EffMappingRequest *)request)->object;
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34);
+}
+
+/* Edit COLOR in U-CYLND's nested POLYGON data. */
+s32 effEditUCylinderPolygonColorTrack(s32 request) {
+    s32 object;
+
+    object = ((EffMappingRequest *)request)->object;
+    return effEditColorTrack(object + 0x3c, object + 0x60, ((EffMappingObject *)object)->value80);
+}
+
+/* U-SMOKE/U-SPIRL COLOR uses its own property options; forward editor status. */
+s32 effEditUSmokeSpiralColorTrack(s32 request) {
+    s32 result;
+    s32 object = ((EffMappingRequest *)request)->object;
+
+    effMappingState.rows = D_0038F7D8;
+    effMappingState.count = 8;
+    result = effEditColorTrack(object + 0x68, object + 0x8c, ((EffMappingObject *)object)->valueF4);
+    effMappingState.rows = D_0038F658;
+    effMappingState.count = 8;
+    return result;
+}
+
+/* Edit U-SPHRE's root COLOR tracks using its frame bound. */
+s32 effEditUSphereColorTrack(s32 request) {
+    s32 object;
+
+    object = ((EffMappingRequest *)request)->object;
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value70);
+}
+
+/* COLOR callback for the CRACK polygon descriptor. */
+s32 effEditCrackPolygonColorTrack(s32 request) {
+    s32 object;
+
+    object = ((EffMappingRequest *)request)->object;
+    return effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value34);
+}
+
+/* COLOR callback for the FLASH polygon descriptor. */
+s32 effEditFlashPolygonColorTrack(s32 request) {
+    s32 object;
+
+    object = ((EffMappingRequest *)request)->object;
+    return effEditColorTrack(object + 0x50, object + 0x74, ((EffMappingObject *)object)->value84);
+}
+
+/* 2D's COLOR callback restores its property options and forwards editor status. */
+s32 effEditTwoDimensionalColorTrack(s32 request) {
+    s32 result;
+    s32 object = ((EffMappingRequest *)request)->object;
+
+    effMappingState.rows = D_0038F718;
+    effMappingState.count = 8;
+    result = effEditColorTrack(object, object + 0x24, ((EffMappingObject *)object)->value8C);
+    effMappingState.rows = D_0038F658;
+    effMappingState.count = 8;
+    return result;
+}
+
+void btlResetEffectWork(void) {
+    u8 *first = D_0038F9D0;
+    u8 *second = D_0038FAD0;
+
+    ((EffQueuedFileObject *)first)->flags |= 0x10;
+    ((EffQueuedFileObject *)first)->cursor = 0;
+    ((EffQueuedFileObject *)second)->flags |= 0x10;
+    ((EffQueuedFileObject *)second)->cursor = 0;
+    D_003BD158 = 0;
+    D_003BD15C = 0;
+    D_003BD160 = 0;
+}
+
+extern s8 dds3PadBitTable[];
+
+extern EffScalarTrack D_003DFA78;
+
+extern f32 D_003BD164;
+
+extern f32 D_003BD168;
+
+extern s32 D_003BD16C;
+
+extern char D_003BD190[];
+
+extern void btlDebugDrawRectangle(s32, s32, s32, s32);
+
+extern void btlDebugDrawTwoColorRectangle(s32 x, s32 y, s32 width, s32 height, u32 color0, u32 color1);
+
+extern void btlDebugDrawMappingColorSpan(s32 x, s32 y, s32 width, s32 height, u32 color0, u32 color1);
+
+extern void btlDebugDrawLine2D(s32 x0, s32 y0, s32 x1, s32 y1, u32 color);
+
+extern void btlDebugDrawPoint2DNoOp();
+
+s32 effEditScalarTrack(EffScalarTrack *track, u32 frames, void *panelWork, void *subPanelWork) {
+    EffQueuedFileObject *panel = panelWork;
+    EffQueuedFileObject *subPanel = subPanelWork;
+    f32 values[8];
+    f32 positions[8];
+    f32 step;
+    f32 position;
+    f32 selectedValue;
+    f32 peak;
+    f32 magnitude;
+    f32 *sample;
+    f32 *value;
+    f32 *fraction;
+    f32 *firstFraction;
+    f32 *secondFraction;
+    f32 firstValue, secondValue;
+    f32 firstPosition, secondPosition;
+    u32 count;
+    u32 cursor;
+    u32 i;
+    s32 status = 0x400001;
+    s32 x0;
+    s32 y0;
+    s32 x1;
+    s32 y1;
+
+    step = 1.0f / (f32)frames;
+    count = 1;
+    values[0] = track->curve.initialValue;
+    positions[0] = 0.0f;
+    switch (track->curve.mode) {
+    case 1: {
+        f32 *keyFraction = positions + 1;
+        values[1] = track->curve.keys[0].value;
+        *keyFraction = track->curve.keys[0].fraction;
+        if (*keyFraction > 1.0f) {
+            *keyFraction = 1.0f;
+            track->curve.keys[0].fraction = 1.0f;
+        }
+        count = 2;
+        break;
+    }
+    case 2:
+        firstFraction = positions + 1;
+        secondFraction = positions + 2;
+        firstValue = track->curve.keys[0].value;
+        firstPosition = track->curve.keys[0].fraction;
+        secondValue = track->curve.keys[1].value;
+        secondPosition = track->curve.keys[1].fraction;
+        values[1] = firstValue;
+        *firstFraction = firstPosition;
+        values[2] = secondValue;
+        *secondFraction = secondPosition;
+        if (*firstFraction > 1.0f) {
+            *firstFraction = 1.0f;
+            track->curve.keys[0].fraction = 1.0f;
+        }
+        if (*secondFraction > 1.0f) {
+            *secondFraction = 1.0f;
+            track->curve.keys[1].fraction = 1.0f;
+        }
+        count = 3;
+        break;
+    default:
+        track->curve.mode = 0;
+        break;
+    }
+    values[count] = track->curve.finalValue;
+    positions[count] = 1.0f;
+    cursor = D_003BD15C;
+    selectedValue = values[cursor];
+    position = positions[cursor];
+    D_003DFA78 = *track;
+    D_003BD164 = selectedValue;
+    D_003BD168 = position;
+    btlDebugMenuSetupNoOp(panel);
+    if (D_003BD158 == 1) {
+        btlDebugMenuSetupNoOp(subPanel);
+    }
+    if (D_003BD158 == 0) {
+        switch (D_003BD160) {
+        case 0:
+            if (cursor != 0 && cursor != count) {
+                if (dds3PadBitTable[0xB] & 2) {
+                    status = 0x400003;
+                    position = D_003BD168 + step * 10.0f;
+                    D_003BD168 = position;
+                } else if (dds3PadBitTable[9] & 2) {
+                    status = 0x400003;
+                    position = D_003BD168 - step * 10.0f;
+                    D_003BD168 = position;
+                } else if (dds3PadBitTable[5] & 2) {
+                    status = 0x400003;
+                    position = D_003BD168 + step;
+                    D_003BD168 = position;
+                } else if (dds3PadBitTable[4] & 2) {
+                    status = 0x400003;
+                    position = D_003BD168 - step;
+                    D_003BD168 = position;
+                }
+            }
+            if (dds3PadBitTable[6] & 2) {
+                if ((s32)D_003BD15C > 0) {
+                    D_003BD15C--;
+                }
+            } else if (dds3PadBitTable[7] & 2) {
+                if (D_003BD15C < count) {
+                    D_003BD15C++;
+                } else {
+                    D_003BD160++;
+                    panel->flags &= ~0x10;
+                }
+            } else if (dds3PadBitTable[1] < 0) {
+                D_003BD158 = 1;
+            }
+            break;
+        case 1:
+            if (dds3PadBitTable[6] & 2) {
+                if (panel->flags & 0x20) {
+                    D_003BD160 = 0;
+                    panel->flags |= 0x10;
+                }
+            } else if (dds3PadBitTable[7] & 2) {
+                if (panel->flags & 0x20) {
+                    D_003BD160 = 0;
+                    D_003BD15C = 0;
+                    panel->flags |= 0x10;
+                }
+            }
+            break;
+        }
+    }
+    position = D_003BD168;
+    if (position < 0.0f) {
+        position = 0.0f;
+        D_003BD168 = position;
+    } else if (position > 1.0f) {
+        position = 1.0f;
+        D_003BD168 = position;
+    }
+    values[cursor] = D_003BD164;
+    positions[cursor] = position;
+    if (D_003DFA78.curve.mode != count - 1) {
+        switch (D_003DFA78.curve.mode) {
+        case 1:
+            D_003DFA78.curve.keys[0].fraction = 0.5f;
+            break;
+        case 2:
+            D_003DFA78.curve.keys[1].fraction = (1.0f - D_003DFA78.curve.keys[0].fraction) * 0.5f;
+            break;
+        }
+    }
+    *track = D_003DFA78;
+    if (cursor == 0) {
+        track->curve.initialValue = values[0];
+    } else if (cursor == count) {
+        track->curve.finalValue = values[cursor];
+    } else {
+        track->curve.keys[cursor - 1].value = values[cursor];
+        track->curve.keys[cursor - 1].fraction = positions[cursor];
+        if (count >= 3) {
+            if (cursor >= 2) {
+                if (positions[cursor] < track->curve.keys[cursor - 2].fraction) {
+                    track->curve.keys[cursor - 2].fraction = positions[cursor];
+                    positions[cursor - 1] = positions[cursor];
+                }
+            } else if (track->curve.keys[cursor].fraction < positions[cursor]) {
+                track->curve.keys[cursor].fraction = positions[cursor];
+                positions[cursor + 1] = positions[cursor];
+            }
+        }
+    }
+    D_003BD16C = (s32)(positions[cursor] * (f32)frames);
+    btlDebugDrawRectangle(8, 0xF6, 0xDC, 0xBA);
+    btlDebugMenuBeforeRecordNoOp();
+    btlDebugMenuRecordNoOp(panel);
+    if (D_003BD158 == 1) {
+        btlDebugMenuRecordNoOp(subPanel);
+    }
+    btlDebugMenuAfterRecordNoOp();
+    peak = 0.0f;
+    sample = values;
+    for (i = 0; i <= count; i++) {
+        magnitude = ffabsf(*sample++);
+        if (peak < magnitude) {
+            peak = magnitude;
+        }
+    }
+    if (peak == 0.0f) {
+        peak = 1.0f;
+    }
+    btlDebugDrawLine2D(0x10, 0xFE, 0x10, 0x158, 0x40404040);
+    btlDebugDrawLine2D(0x10, 0x12B, 0xDC, 0x12B, 0x80202020);
+    btlDebugDrawTwoColorRectangle(0x10, 0xFE, 0xCC, 0x5A, 0, 0x80000000);
+    x1 = 0x10;
+    y1 = 0xFE;
+    i = 0;
+    if (count != 0) {
+        fraction = positions;
+        value = values;
+        do {
+            x0 = (s32)(fraction[0] * 204.0f) + 0x10;
+            y0 = 0x12B - (s32)(value[0] / peak * 45.0f);
+            x1 = (s32)(fraction[1] * 204.0f) + 0x10;
+            y1 = 0x12B - (s32)(value[1] / peak * 45.0f);
+            value++;
+            fraction++;
+            btlDebugDrawLine2D(x0, y0, x1, y1, 0x80808080);
+            if (i == cursor && D_003BD160 == 0) {
+                btlDebugDrawPoint2DNoOp(x0, y0, 0x80008000);
+            } else {
+                btlDebugDrawPoint2DNoOp(x0, y0, 0x80008080);
+            }
+            i++;
+        } while (i < count);
+    }
+    if (count == cursor && D_003BD160 == 0) {
+        btlDebugDrawPoint2DNoOp(x1, y1, 0x80008000);
+    } else {
+        btlDebugDrawPoint2DNoOp(x1, y1, 0x80008080);
+    }
+    btlBossDebugPrintfN(0xC, 0x15C, 8, D_003BD190, frames);
+    if (dds3PadBitTable[3] < 0) {
+        if (D_003BD158 == 0) {
+            status &= ~1;
+        } else {
+            D_003BD158 = 0;
+        }
+    }
+    if (D_003BD158 == 0) {
+        /* One-pass primary completion preserves the retail exit boundary
+         * (DDS1 002BADAC / DDS2 0030213C). Qualified cc1probe 22.ce2:
+         * scalar_tail_probe/decisions.log:269-271 hoists the unchanged-status
+         * return into the flags test; scalar_exact_probe:267-269 retains it. */
+        do {
+            if (panel->flags & 8) {
+                status |= 2;
+                break;
+            }
+            return status;
+        } while (0);
+    } else if (subPanel->flags & 8) {
+        status |= 2;
+    }
+    return status;
+}
+
+/* Edit the requested P-family SCALE track; return the native editor status. */
+s32 effEditPScaleTrack(BaObj *p) {
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x60), ((EffMappingObject *)p->x0C)->valueB8, D_0038F9D0, D_0038F8E8);
+}
+
+/* Edit the requested P-family ROTATE track with its independent editor state. */
+s32 effEditPRotationTrack(BaObj *p) {
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x8C), ((EffMappingObject *)p->x0C)->valueB8, D_0038FAD0, D_0038FA20);
+}
+
+/* SCALE property callback shared by native G-/K-family descriptors. */
+s32 effEditGkScaleTrack(BaObj *p) {
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x7C), ((EffMappingObject *)p->x0C)->valueD4, D_0038F9D0, D_0038F8E8);
+}
+
+/* ROTATE property callback for native K-family descriptors. */
+s32 effEditKRotationTrack(BaObj *p) {
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0xA8), ((EffMappingObject *)p->x0C)->valueD4, D_0038FAD0, D_0038FA20);
+}
+
+/* SCALE property callback for native B-family descriptors. */
+s32 effEditBScaleTrack(BaObj *p) {
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x34), ((EffMappingObject *)p->x0C)->valueB8, D_0038F9D0, D_0038F8E8);
+}
+
+/* B-family ROTATE callback; identical forwarding code does not imply P-family SCALE. */
+s32 effEditBRotationTrack(BaObj *p) {
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x60), ((EffMappingObject *)p->x0C)->valueB8, D_0038F9D0, D_0038F8E8);
+}
+
+/* AREA property callback shared by B-/F-family descriptors. */
+s32 effEditBfAreaTrack(BaObj *p) {
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x8C), ((EffMappingObject *)p->x0C)->valueB8, D_0038F9D0, D_0038F8E8);
+}
+
+/* Pass the requested T-BOARD SCALE track and its frame bound to the editor. */
+s32 effEditTBoardScaleTrack(BaObj *p) {
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x34), ((EffMappingObject *)p->x0C)->value8C, D_0038F9D0, D_0038F8E8);
+}
+
+/* Pass the requested T-BOARD ROTATE track and its frame bound to the editor. */
+s32 effEditTBoardRotationTrack(BaObj *p) {
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x60), ((EffMappingObject *)p->x0C)->value8C, D_0038F9D0, D_0038F8E8);
+}
+
+/* SCALE property callback for native W-family descriptors. */
+s32 effEditWScaleTrack(BaObj *p) {
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x80), ((EffMappingObject *)p->x0C)->valueD8, D_0038F9D0, D_0038F8E8);
+}
+
+/* ROTATE property callback for native W-family descriptors. */
+s32 effEditWRotationTrack(BaObj *p) {
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0xAC), ((EffMappingObject *)p->x0C)->valueD8, D_0038FAD0, D_0038FA20);
+}
+
+/* Edit the SCALE_UV curve in U-CYLND's POLYGON child; forward editor status. */
+s32 effEditUCylinderPolygonUvScaleTrack(BaObj *p) {
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x90), ((EffMappingObject *)p->x0C)->value80, D_0038F9D0, D_0038F938);
+}
+
+/* Edit the shared U-SMOKE/U-SPIRL root SCALE curve; forward editor status. */
+s32 effEditUSmokeSpiralScaleTrack(BaObj *p) {
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x9C), ((EffMappingObject *)p->x0C)->valueF4, D_0038F9D0, D_0038F8E8);
+}
+
+/* Edit the shared U-SMOKE/U-SPIRL root ROTATE curve; forward editor status. */
+s32 effEditUSmokeSpiralRotationTrack(BaObj *p) {
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0xC8), ((EffMappingObject *)p->x0C)->valueF4, D_0038FAD0, D_0038FA20);
+}
+
+/* Edit SCALE_UV in their POLYGON children; forward the numeric editor's status. */
+s32 effEditUSmokeSpiralPolygonUvScaleTrack(BaObj *p) {
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C), ((EffMappingObject *)p->x0C)->valueF4, D_0038F9D0, D_0038F938);
+}
+
+/* Edit the native U-SPHRE root SCALE curve; forward editor status. */
+s32 effEditUSphereScaleTrack(BaObj *p) {
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x34), ((EffMappingObject *)p->x0C)->value70, D_0038F9D0, D_0038F938);
+}
+
+/* Edit the native 2D root SCALE curve; forward editor status. */
+s32 effEditTwoDimensionalScaleTrack(BaObj *p) {
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x34), ((EffMappingObject *)p->x0C)->value8C, D_0038F9D0, D_0038F8E8);
+}
+
+/* Edit the native 2D root ROTATE curve; forward editor status. */
+s32 effEditTwoDimensionalRotationTrack(BaObj *p) {
+    return effEditScalarTrack((EffScalarTrack *)(p->x0C + 0x60), ((EffMappingObject *)p->x0C)->value8C, D_0038F9D0, D_0038F8E8);
+}
+
+/* Reset the color/alpha editor's selected curve key to one, not a pending flag. */
+void effResetCurveEditorSelection(void) {
+    effColorEditSelectedAlphaKey = 1;
+}
+
+extern SdfAlphaTrack effColorEditAlphaTrack;
+
+extern u8 D_0038FB38[];
+
+extern s32 effColorEditFadeInFrame;
+
+extern s32 effColorEditFadeOutFrame;
+
+extern char effColorEditFrameCountFormat[];
+
+extern void btlDebugDrawMappingColorSpan(s32, s32, s32, s32, u32, u32);
+
+/* Edit the alpha fade interval and its four-breakpoint graph. */
+s32 func_002BB188(SdfAlphaTrack *range, s32 frames) {
+    u32 shades[8];
+    f32 marks[8];
+    u32 *shade;
+    f32 *mark;
+    f32 step = 1.0f / frames;
+    s32 flags = 0x400001;
+    s32 graphY;
+    s32 x0;
+    s32 x1;
+    u32 c0;
+    u32 c1;
+    u32 i;
+
+    effColorEditAlphaTrack = *range;
+    btlDebugMenuSetupNoOp(D_0038FB38);
+    if (dds3PadBitTable[0xB] & 2) {
+        if (effColorEditSelectedAlphaKey == 1) {
+            effColorEditAlphaTrack.fadeInFraction += step * 10.0f;
+        } else {
+            effColorEditAlphaTrack.fadeOutFraction += step * 10.0f;
+        }
+        flags = 0x400003;
+    } else if (dds3PadBitTable[9] & 2) {
+        if (effColorEditSelectedAlphaKey == 1) {
+            effColorEditAlphaTrack.fadeInFraction -= step * 10.0f;
+        } else {
+            effColorEditAlphaTrack.fadeOutFraction -= step * 10.0f;
+        }
+        flags = 0x400003;
+    } else if (dds3PadBitTable[5] & 2) {
+        if (effColorEditSelectedAlphaKey == 1) {
+            effColorEditAlphaTrack.fadeInFraction += step;
+        } else {
+            effColorEditAlphaTrack.fadeOutFraction += step;
+        }
+        flags = 0x400003;
+    } else if (dds3PadBitTable[4] & 2) {
+        if (effColorEditSelectedAlphaKey == 1) {
+            effColorEditAlphaTrack.fadeInFraction -= step;
+        } else {
+            effColorEditAlphaTrack.fadeOutFraction -= step;
+        }
+        flags = 0x400003;
+    } else if ((dds3PadBitTable[6] & 2) || (dds3PadBitTable[7] & 2)) {
+        if (effColorEditSelectedAlphaKey == 1) {
+            effColorEditSelectedAlphaKey = 2;
+        } else {
+            effColorEditSelectedAlphaKey = 1;
+        }
+    }
+    if (effColorEditAlphaTrack.fadeInFraction < 0.0f) {
+        effColorEditAlphaTrack.fadeInFraction = 0.0f;
+    } else if (1.0f < effColorEditAlphaTrack.fadeInFraction) {
+        effColorEditAlphaTrack.fadeInFraction = 1.0f;
+    }
+    if (effColorEditAlphaTrack.fadeOutFraction < 0.0f) {
+        effColorEditAlphaTrack.fadeOutFraction = 0.0f;
+    } else if (1.0f < effColorEditAlphaTrack.fadeOutFraction) {
+        effColorEditAlphaTrack.fadeOutFraction = 1.0f;
+    }
+    if (effColorEditAlphaTrack.fadeInFraction > effColorEditAlphaTrack.fadeOutFraction) {
+        if (effMappingState.rows[effMappingState.cursor].payload.numeric.target == &effColorEditAlphaTrack.fadeInFraction ||
+            (effColorEditPage == 1 && effColorEditSelectedAlphaKey == effColorEditPage)) {
+            effColorEditAlphaTrack.fadeOutFraction = effColorEditAlphaTrack.fadeInFraction;
+        } else {
+            effColorEditAlphaTrack.fadeInFraction = effColorEditAlphaTrack.fadeOutFraction;
+        }
+    }
+    effColorEditFadeInFrame = effColorEditAlphaTrack.fadeInFraction * frames;
+    effColorEditFadeOutFrame = effColorEditAlphaTrack.fadeOutFraction * frames;
+    *range = effColorEditAlphaTrack;
+    btlDebugDrawRectangle(8, 0x164, 0xDC, 0x4C);
+    btlDebugMenuBeforeRecordNoOp();
+    btlDebugMenuRecordNoOp(D_0038FB38);
+    btlDebugMenuAfterRecordNoOp();
+    shades[0] = 0;
+    marks[0] = 0.0f;
+    shades[1] = 0x80;
+    marks[1] = range->fadeInFraction;
+    shades[2] = 0x80;
+    marks[2] = range->fadeOutFraction;
+    shades[3] = 0;
+    marks[3] = 1.0f;
+    graphY = 364;
+    btlDebugDrawTwoColorRectangle(0x10, graphY, 0xB8, 0x10, 0x40404040, 0x80000000);
+    for (i = 0, shade = shades, mark = marks; i < 3; i++, shade++, mark++) {
+        x0 = mark[0] * 184.0f;
+        x1 = mark[1] * 184.0f;
+        c0 = shade[0];
+        c1 = shade[1];
+        btlDebugDrawMappingColorSpan(x0 + 0x10, graphY, x1 - x0, 0x10, (c0 << 16) | (c0 | (c0 << 8)) | 0x80000000,
+                      (c1 << 16) | (c1 | (c1 << 8)) | 0x80000000);
+        if (i == effColorEditSelectedAlphaKey) {
+            btlDebugDrawLine2D(x0 + 0xF, graphY - 4, x0 + 0xF, graphY + 20, 0x8000FF00);
+            btlDebugDrawLine2D(x0 + 0x10, graphY - 4, x0 + 0x10, graphY + 20, 0x8000FF00);
+        } else {
+            btlDebugDrawLine2D(x0 + 0x10, graphY - 4, x0 + 0x10, graphY + 20, 0x80808080);
+        }
+    }
+    btlDebugDrawLine2D(0xC8, graphY - 4, 0xC8, graphY + 20, 0x80808080);
+    btlBossDebugPrintfN(0xC, graphY + 24, 8, effColorEditFrameCountFormat, frames);
+    if (dds3PadBitTable[3] < 0) {
+        flags &= ~1;
+    }
+    return flags;
+}
+
+/* ALPHA callback for POLYGON children of the native S-family descriptors. */
+s32 effEditSPolygonAlphaTrack(s32 work) {
+    return func_002BB188((SdfAlphaTrack *)(((BaObj *)work)->x0C + 0x3c), ((EffMappingObject *)((BaObj *)work)->x0C)->value4C);
+}
+
+/* D-family POLYGON FADE callback, shared with O in DDS2; retain bound plus one. */
+s32 effEditDoPolygonFadeTrack(s32 work) {
+    return func_002BB188((SdfAlphaTrack *)(((BaObj *)work)->x0C + 0x60), ((EffMappingObject *)((BaObj *)work)->x0C)->value3C + 1);
+}
+
+/* FADE callback for N-family POLYGON children; preserve bound plus one. */
+s32 effEditNPolygonFadeTrack(s32 work) {
+    return func_002BB188((SdfAlphaTrack *)(((BaObj *)work)->x0C + 0x70), ((EffMappingObject *)((BaObj *)work)->x0C)->value8C + 1);
+}
+
+/* FADE callback for the native U-CYLND POLYGON child. */
+s32 effEditUCylinderPolygonFadeTrack(s32 work) {
+    return func_002BB188((SdfAlphaTrack *)(((BaObj *)work)->x0C + 0x70), ((EffMappingObject *)((BaObj *)work)->x0C)->value8C + 1);
+}
+
+/* FADE callback for the native U-SPHRE POLYGON child. */
+s32 effEditUSpherePolygonFadeTrack(s32 work) {
+    return func_002BB188((SdfAlphaTrack *)(((BaObj *)work)->x0C + 0x60), ((EffMappingObject *)((BaObj *)work)->x0C)->value74 + 1);
+}
+
+/* Poll record from the resource-bank queue; the path variant selects its entry. */
+extern void effPollResourceBank(s32, EffectPollRecord *);
+
+s32 effPollFileQueueRecord(s32 request) {
+    u8 record[0xE0];
+    EffectPollRecord *status = (EffectPollRecord *)record;
+    s32 selectionStatus;
+    s32 result = 0x600001;
+
+    effPollResourceBank(request, status);
+    selectionStatus = status->selectionStatus;
+    if (selectionStatus == BTL_RESOURCE_SELECTION_CANCELED) {
+        result = 0x400000;
+    } else if (selectionStatus == BTL_RESOURCE_SELECTION_ACCEPTED) {
+        if (status->type != 8) {
+            FileJob *entry = fileQueueGetAt(effFileQueue, -status->pathVariant);
+            if (effCurrentFileQueueEntry != entry) {
+                fileQueueDetachSectorFollower(effFileQueue, effCurrentFileQueueEntry);
+                fileQueueLinkJobToSectorLeader(effFileQueue, effCurrentFileQueueEntry, entry);
+            }
+        } else {
+            fileQueueDetachSectorFollower(effFileQueue, effCurrentFileQueueEntry);
+            fileJobSetSecondaryData(effQueuedFileHandle, &status->pathVariant, 4, 4);
+        }
+        result = 0x400002;
+    }
+    return result;
+}
+
+/* Poll queued TMX/P2A/general resources with the TLP format enabled. */
+s32 effPollResourceQueueWithTlp(void) {
+    return effPollFileQueueRecord(BTL_RESOURCE_SCAN_TMX | BTL_RESOURCE_SCAN_P2A | BTL_RESOURCE_SCAN_GENERAL | BTL_RESOURCE_SCAN_TLP);
+}
+
+/* Separate native descriptor callback with the same TLP-enabled queue filter. */
+s32 effPollAlternateResourceQueueWithTlp(void) {
+    return effPollFileQueueRecord(BTL_RESOURCE_SCAN_TMX | BTL_RESOURCE_SCAN_P2A | BTL_RESOURCE_SCAN_GENERAL | BTL_RESOURCE_SCAN_TLP);
+}
+
+/* Poll the queue without adding the TLP flag to its format mask. */
+s32 effPollResourceQueueWithoutTlp(void) {
+    return effPollFileQueueRecord(BTL_RESOURCE_SCAN_TMX | BTL_RESOURCE_SCAN_P2A | BTL_RESOURCE_SCAN_GENERAL);
+}
+
+extern u16 effClassifyResourceMask(s32);
+
+typedef struct EffFileResourceRecord {
+    char *name;
+    u8 pad4[4];
+    u16 mode;
+    u8 padA[2];
+    u8 *buffer;
+    u32 size;
+    struct sdfMemHandle_t *allocation;
+} EffFileResourceRecord;
+
+s32 effPollFileRecord(char *path, s32 flags) {
+    EffResourceBankSlot record;
+    s32 kind;
+    s32 result = 0x600001;
+
+    effPollResourceBankSlot(path, flags, &record);
+    kind = record.selectionStatus;
+    if (kind == BTL_RESOURCE_SELECTION_CANCELED) {
+        result = 0x400000;
+    } else if (kind == BTL_RESOURCE_SELECTION_ACCEPTED) {
+        s32 type;
+        fileQueueDetachSectorFollower(effFileQueue, effCurrentFileQueueEntry);
+        type = record.type;
+        if (type != 8) {
+            fileJobCopyCommandIntoSecondaryData(effQueuedFileHandle,
+                                                (const char *)&record, effClassifyResourceMask(type));
+        } else {
+            fileJobSetSecondaryData(effQueuedFileHandle, &record.pathVariant, 4, 4);
+        }
+        result = 0x400002;
+    }
+    return result;
+}
+
+/* Poll the TEXTURE property chooser in /tool/effect/mat/ and return its status. */
+s32 effPollTextureResourceFile(void) {
+    return effPollFileRecord(D_003B3B88, BTL_RESOURCE_SCAN_TMX | BTL_RESOURCE_SCAN_P2A | BTL_RESOURCE_SCAN_TLP);
+}
+
+/* Alternate descriptor family's TEXTURE callback; retain its separate entrypoint. */
+s32 effPollAlternateTextureResourceFile(void) {
+    return effPollFileRecord(D_003B3B88, BTL_RESOURCE_SCAN_TMX | BTL_RESOURCE_SCAN_P2A | BTL_RESOURCE_SCAN_TLP);
+}
+
+/* Poll EP resources from /tool/effect/ep/ and return the chooser status. */
+s32 effPollEpResourceFile(void) {
+    return effPollFileRecord(D_003B39C8, BTL_RESOURCE_SCAN_EP);
+}
+
+/* Poll EPL resources from /tool/effect/ and return the chooser status. */
+s32 effPollEplResourceFile(void) {
+    return effPollFileRecord(D_003B39E0, BTL_RESOURCE_SCAN_EPL);
+}
+
+/* Separate native EP descriptor callback using the same directory and format. */
+s32 effPollAlternateEpResourceFile(void) {
+    return effPollFileRecord(D_003B39C8, BTL_RESOURCE_SCAN_EP);
+}
+
+/* TMX-only TEXTURE chooser for B-/F-family MATERIAL groups. */
+s32 effPollBfMaterialTmxFile(void) {
+    return effPollFileRecord(D_003B3B88, BTL_RESOURCE_SCAN_TMX);
+}
+
+/* TMX-only TEXTURE chooser for N-family MATERIAL groups. */
+s32 effPollNMaterialTmxFile(void) {
+    return effPollFileRecord(D_003B3B88, BTL_RESOURCE_SCAN_TMX);
+}
+
+/* TMX-only TEXTURE chooser for S-RAD_T/SPK_T/RNG_T/SCT_T MATERIAL groups. */
+s32 effPollSTMaterialTmxFile(void) {
+    return effPollFileRecord(D_003B3B88, BTL_RESOURCE_SCAN_TMX);
+}
+
+u32 effFileJobSecondaryDataSet(void) {
+    u32 zero = 0;
+    fileJobSetSecondaryData(effQueuedFileHandle, &zero, 4, 4);
+    return 0x400002;
+}
+
+/* Poll PB resources from /tool/effect/hlp/ and return the chooser status. */
+s32 effPollHlpPbResourceFile(void) {
+    return effPollFileRecord(D_003B3BA0, BTL_RESOURCE_SCAN_PB);
+}
+
+typedef struct EffectFileHeader {
+    u8 unk_00[8];
+    u16 mode;
+    u8 unk_0A[2];
+    u32 start;
+    u32 length;
+} EffectFileHeader;
+
+extern void effResetFileResourceManager(void);
+
+extern EffectFileHeader D_0038DC08;
+
+extern EffectFileHeader D_00383F18;
+
+extern EffectFileHeader D_0038C758;
+
+u32 fileLoadEffectSlotA(void) {
+    EffResourceBankSlot fileInfo;
+    FileJobPayload *job;
+    FileJob *entry;
+    EffFileResourceRecord *resource;
+    void *fileData;
+    s32 status;
+    u32 result;
+
+    effPollResourceBankSlot(D_003B3B88, BTL_RESOURCE_SCAN_PB, &fileInfo);
+    status = fileInfo.selectionStatus;
+    result = 0x600001;
+    if (status == BTL_RESOURCE_SELECTION_CANCELED) {
+        result = 0x400000;
+    } else if (status == BTL_RESOURCE_SELECTION_ACCEPTED) {
+        job = fileCreateJob(3);
+        fileJobSetPrimaryData(job, D_00383F18.start, D_00383F18.length,
+                      D_00383F18.mode);
+        fileJobCopyCommandIntoSecondaryData(job, (const char *)&fileInfo,
+                      effClassifyResourceMask(fileInfo.type));
+        entry = fileAppendJob(effFileQueue, (u32)job);
+        effCurrentFileQueueEntry = entry;
+        memcpy(effSelectedJobHeader, entry, 0x80);
+        effQueuedFileHandle = (FileJobPayload *)entry->id;
+        resource = (EffFileResourceRecord *)effFindAssetData(entry);
+        strcpy(entry->name, resource->name);
+        fileData = fileResolvePrimaryBuffer(effQueuedFileHandle);
+        memcpy(resource->buffer, fileData, resource->size);
+        D_003BD064 = effCreateBattleCameraJob((u8 *)resource);
+        effQueuedFileObject = effFindAssetObject(entry);
+        ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = (u8 *)&effPartsListMenu;
+        effResetFileResourceManager();
+        if (effTemporaryFileJob != 0) {
+            fileJobDestroy(effTemporaryFileJob);
+            effTemporaryFileJob = 0;
+        }
+        result = 0x800002;
+    }
+    return result;
+}
+
+extern u8 D_00384A08[] __attribute__((aligned(4)));
+
+u32 fileLoadEffectSlotHelp(void) {
+    EffResourceBankSlot fileInfo;
+    u32 result;
+    s32 status;
+    FileJobPayload *job;
+    FileJob *entry;
+    EffFileResourceRecord *resource;
+    u8 *buffer;
+    sdfFileCmdHandle_t *command;
+    u32 totalLength;
+    u32 dataLength;
+    struct sdfMemHandle_t *allocation;
+
+    effPollResourceBankSlot(D_003B3BA0, BTL_RESOURCE_SCAN_PB, &fileInfo);
+    status = fileInfo.selectionStatus;
+    result = 0x600001;
+    if (status == BTL_RESOURCE_SELECTION_CANCELED) {
+        result = 0x400000;
+    } else if (status == BTL_RESOURCE_SELECTION_ACCEPTED) {
+        u32 headerBytes = 0x40;
+        struct sdfMemHandle_t *oldAllocation;
+        u32 queuedFile;
+        job = fileCreateJob(6);
+        command = sdfFileOpen(&fileInfo);
+        dataLength = sdfFileLength(command);
+        totalLength = dataLength + headerBytes;
+        allocation = sdfMemAllocDirect(totalLength);
+        buffer = (u8 *)sdfMemLock(allocation);
+        memset(buffer, 0, headerBytes);
+        sdfFileRead(command, buffer + headerBytes, dataLength);
+        sdfFileClose(command);
+        fileJobSetPrimaryData(job, buffer, totalLength, 0);
+        entry = fileAppendJob(effFileQueue, (u32)job);
+        effCurrentFileQueueEntry = entry;
+        resource = (EffFileResourceRecord *)effFindAssetData(entry);
+        strcpy(entry->name, resource->name);
+        memcpy(effSelectedJobHeader, entry, 0x80);
+        queuedFile = entry->id;
+        oldAllocation = resource->allocation;
+        effQueuedFileHandle = (FileJobPayload *)queuedFile;
+        if (oldAllocation != 0) {
+            sdfMemFreeDirect(oldAllocation);
+        }
+        resource->allocation = allocation;
+        resource->buffer = buffer;
+        resource->size = dataLength + headerBytes;
+        resource->mode = 0;
+        memcpy(D_003DE148, D_00384A08, 0x3C);
+        D_003BD064 = effCreateBattleCameraJob(resource);
+        effQueuedFileObject = effFindAssetObject(entry);
+        ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = (u8 *)&effPartsListMenu;
+        effResetFileResourceManager();
+        if (effTemporaryFileJob != 0) {
+            fileJobDestroy(effTemporaryFileJob);
+            effTemporaryFileJob = 0;
+        }
+        result = 0x800002;
+    }
+    return result;
+}
+
+u32 fileLoadEffectSlotB(void) {
+    EffResourceBankSlot fileInfo;
+    FileJobPayload *job;
+    FileJob *entry;
+    EffFileResourceRecord *resource;
+    void *fileData;
+    s32 status;
+    u32 result;
+
+    effPollResourceBankSlot(D_003B3B88, BTL_RESOURCE_SCAN_PB, &fileInfo);
+    status = fileInfo.selectionStatus;
+    result = 0x600001;
+    if (status == BTL_RESOURCE_SELECTION_CANCELED) {
+        result = 0x400000;
+    } else if (status == BTL_RESOURCE_SELECTION_ACCEPTED) {
+        job = fileCreateJob(18);
+        fileJobSetPrimaryData(job, D_0038C758.start, D_0038C758.length,
+                      D_0038C758.mode);
+        fileJobCopyCommandIntoSecondaryData(job, (const char *)&fileInfo,
+                      effClassifyResourceMask(fileInfo.type));
+        entry = fileAppendJob(effFileQueue, (u32)job);
+        effCurrentFileQueueEntry = entry;
+        memcpy(effSelectedJobHeader, entry, 0x80);
+        effQueuedFileHandle = (FileJobPayload *)entry->id;
+        resource = (EffFileResourceRecord *)effFindAssetData(entry);
+        strcpy(entry->name, resource->name);
+        fileData = fileResolvePrimaryBuffer(effQueuedFileHandle);
+        memcpy(resource->buffer, fileData, resource->size);
+        D_003BD064 = effCreateBattleCameraJob(resource);
+        effQueuedFileObject = effFindAssetObject(entry);
+        ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = (u8 *)&effPartsListMenu;
+        effResetFileResourceManager();
+        if (effTemporaryFileJob != 0) {
+            fileJobDestroy(effTemporaryFileJob);
+            effTemporaryFileJob = 0;
+        }
+        result = 0x800002;
+    }
+    return result;
+}
+
+extern EffectFileHeader D_0038D470;
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3B18);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3B28);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3B38);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3B48);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3B58);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3B68);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3B78);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3B88);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3BA0);
+
+u32 effLoadFileSlotF2(void) {
+    EffResourceBankSlot fileInfo;
+    FileJobPayload *job;
+    FileJob *entry;
+    EffFileResourceRecord *resource;
+    void *fileData;
+    s32 status;
+    u32 result;
+
+    effPollResourceBankSlot("/tool/effect/f2/", BTL_RESOURCE_SCAN_F2, &fileInfo);
+    status = fileInfo.selectionStatus;
+    result = 0x600001;
+    if (status == BTL_RESOURCE_SELECTION_CANCELED) {
+        result = 0x400000;
+    } else if (status == BTL_RESOURCE_SELECTION_ACCEPTED) {
+        job = fileCreateJob(0x14);
+        fileJobSetPrimaryData(job, D_0038D470.start, D_0038D470.length,
+                      D_0038D470.mode);
+        fileJobCopyCommandIntoSecondaryData(job, (const char *)&fileInfo,
+                      effClassifyResourceMask(fileInfo.type));
+        entry = fileAppendJob(effFileQueue, (u32)job);
+        effCurrentFileQueueEntry = entry;
+        memcpy(effSelectedJobHeader, entry, 0x80);
+        effQueuedFileHandle = (FileJobPayload *)entry->id;
+        resource = (EffFileResourceRecord *)effFindAssetData(entry);
+        strcpy(entry->name, resource->name);
+        fileData = fileResolvePrimaryBuffer(effQueuedFileHandle);
+        memcpy(resource->buffer, fileData, resource->size);
+        D_003BD064 = effCreateBattleCameraJob(resource);
+        effQueuedFileObject = effFindAssetObject(entry);
+        ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = (u8 *)&effPartsListMenu;
+        effResetFileResourceManager();
+        if (effTemporaryFileJob != 0) {
+            fileJobDestroy(effTemporaryFileJob);
+            effTemporaryFileJob = 0;
+        }
+        result = 0x800002;
+    }
+    return result;
+}
+
+u32 effLoadMaterialFile(void) {
+    EffResourceBankSlot fileInfo;
+    FileJobPayload *job;
+    FileJob *entry;
+    EffFileResourceRecord *resource;
+    void *fileData;
+    s32 status;
+    u32 result;
+
+    effPollResourceBankSlot(D_003B3B88, BTL_RESOURCE_SCAN_P2A, &fileInfo);
+    status = fileInfo.selectionStatus;
+    result = 0x600001;
+    if (status == BTL_RESOURCE_SELECTION_CANCELED) {
+        result = 0x400000;
+    } else if (status == BTL_RESOURCE_SELECTION_ACCEPTED) {
+        job = fileCreateJob(0x16);
+        fileJobSetPrimaryData(job, D_0038DC08.start, D_0038DC08.length,
+                      D_0038DC08.mode);
+        fileJobCopyCommandIntoSecondaryData(job, (const char *)&fileInfo,
+                      effClassifyResourceMask(fileInfo.type));
+        entry = fileAppendJob(effFileQueue, (u32)job);
+        effCurrentFileQueueEntry = entry;
+        memcpy(effSelectedJobHeader, entry, 0x80);
+        effQueuedFileHandle = (FileJobPayload *)entry->id;
+        resource = (EffFileResourceRecord *)effFindAssetData(entry);
+        strcpy(entry->name, resource->name);
+        fileData = fileResolvePrimaryBuffer(effQueuedFileHandle);
+        memcpy(resource->buffer, fileData, resource->size);
+        D_003BD064 = effCreateBattleCameraJob(resource);
+        effQueuedFileObject = effFindAssetObject(entry);
+        ((EffQueuedFileObject *)effQueuedFileObject)->linkedState = (u8 *)&effPartsListMenu;
+        effResetFileResourceManager();
+        if (effTemporaryFileJob != 0) {
+            fileJobDestroy(effTemporaryFileJob);
+            effTemporaryFileJob = 0;
+        }
+        result = 0x800002;
+    }
+    return result;
+}
+
+void effResetFileResourceManager(void) {
+    effColorEditRgbMenuOpen = 0;
+    effColorEditSelectedAlphaKey = 1;
+    effColorEditSelectedKey = 0;
+    effColorEditPage = 0;
+    D_003BD158 = 0;
+    D_003BD15C = 0;
+    D_003BD160 = 0;
+}
+
+u16 effClassifyResourceMask(s32 flags) {
+    switch (flags) {
+        case 1:   return 1;
+        case 2:   return 2;
+        case 4:   return 3;
+        case 8:   return 4;
+        case 16:  return 6;
+        case 32:  return 5;
+        case 64:  return 7;
+        case 128: return 8;
+        default:  return 0;
+    }
+}
+
+EffectList *mnuAllocateValueRecord(u32 mode) {
+    EffectList *list = sdfChipAllocDirect(sizeof(EffectList));
+    memset(list, 0, sizeof(EffectList));
+    list->mode = mode;
+    list->count = 0;
+    list->first = NULL;
+    list->last = NULL;
+    return list;
+}
+
+void effDestroyEffectList(EffectList *list) {
+    sdfChipFreeDirect(list);
+}
+
+u32 mnuGetValueRecordOwner(const EffectList *list) {
+    return list->mode;
+}
+
+s32 effAppendListEntry(EffectList *list, u32 value, u32 length,
+                          u32 kind, u32 reference) {
+    EffectListNode *node = sdfChipAllocDirect(sizeof(EffectListNode));
+    memset(node, 0, sizeof(EffectListNode));
+    node->next = NULL;
+    node->kind = kind;
+    node->value = value;
+    node->length = length;
+    node->reference = (void **)reference;
+    if (list->last == NULL) {
+        list->first = node;
+        list->last = node;
+    } else {
+        list->last->next = node;
+        list->last = node;
+    }
+    return ++list->count;
+}
+
+s32 effRemoveListEntry(EffectList *list) {
+    EffectListNode *node = list->first;
+    EffectListNode *next = node->next;
+    sdfChipFreeDirect(node);
+    list->first = next;
+    if (--list->count == 0) {
+        list->last = NULL;
+    }
+    return list->count;
+}
+
+/* Drives the head request of the list: mode 0 asks for a resource by name, modes 1 and 2 stream a package and hand each
+ * finished job's buffer to the entry's destination. Returns the remaining entry count. */
+s32 effPollResourceList(EffectList *list) {
+    EffectListNode *node = list->first;
+    PacWork *item;
+    struct sdfMemHandle_t *allocation;
+
+    if (node != NULL) {
+        switch (list->mode) {
+        case 0:
+            if (node->state == 0) {
+                effRequestResourceByMode(node->value, node->length, node->kind, node->reference);
+                node->state = 1;
+            } else if (*node->reference != NULL) {
+                effRemoveListEntry(list);
+            }
+            break;
+        case 1:
+        case 2:
+            if (node->state == 0 && node->length != 0) {
+                if (list->request != NULL) {
+                    pacFileHandleFree_(list->request);
+                }
+                list->request = (FilePacRequest *)pacLoad((const char *)node->length);
+                if (list->mode == 2) {
+                    pacSync((struct FileRequest *)list->request);
+                }
+                node->state = 1;
+            } else if (pacCheckEnd((struct FileRequest *)list->request) != 0) {
+                for (item = list->request->packet.queueHead; item != NULL; item = item->next) {
+                    if (((SdfPacStreamPacketHeader *)item->packet)->command == 1) {
+                        node = list->first;
+                        allocation = PAC_WORK_ALLOCATION(item);
+                        *node->reference = effCreateResourceSlotSetFromAllocation(allocation, node->kind);
+                        if (node->kind == EFF_RESOURCE_SOURCE_TRANSIENT) {
+                            sdfMemFreeDirect(allocation);
+                        }
+                        effRemoveListEntry(list);
+                    }
+                }
+            }
+            if (list->count == 0) {
+                pacFileHandleFree_(list->request);
+                list->request = NULL;
+            }
+            break;
+        }
+    }
+    return list->count;
+}
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3BD0);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3BE0);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3BF0);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3C00);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3C10);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3C20);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3C30);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3C40);
+
+INCLUDE_RODATA(const s32, "game/code_0029E410", D_003B3C50);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BC978);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BC97C);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", effCurrentRenderPacket);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BC984);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", effWindTextureHandle);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", effSharedRibbonReferenceCount);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BC990);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BC994);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", effScalyTextureHandle);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", effSharedStripReferenceCount);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", effSharedScalyStripResource);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BC9A8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BC9AC);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BC9B0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BC9B8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BC9C0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BC9C8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BC9D0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BC9D8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BC9E0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BC9E8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BC9F0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BC9F8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCA00);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCA08);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCA10);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCA18);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCA20);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCA28);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCA30);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCA38);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCA40);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCA48);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCA50);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCA58);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCA60);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCA68);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCA70);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCA78);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCA80);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCA88);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCA90);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCA98);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCAA0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCAA8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCAB0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCAB8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCAC0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCAC8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCAD0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCAD8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCAE0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCAE8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCAF0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCAF8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCB00);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCB08);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCB10);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCB18);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCB20);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCB28);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCB30);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCB38);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCB40);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCB48);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCB50);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCB58);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCB60);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCB68);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCB70);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCB78);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCB80);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCB88);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCB90);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCB98);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCBA0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCBA8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCBB0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCBB8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCBC0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCBC8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCBD0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCBD8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCBE0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCBE8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCBF0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCBF8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCC00);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCC08);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCC10);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCC18);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCC20);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCC28);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCC30);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCC38);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCC40);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCC48);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCC50);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCC58);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCC60);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCC68);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCC70);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCC78);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCC80);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCC88);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCC90);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCC98);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCCA0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCCA8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCCB0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCCB8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCCC0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCCC8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCCD0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCCD8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCCE0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCCE8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCCF0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCCF8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCD00);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCD08);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCD10);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCD18);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCD20);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCD28);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCD30);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCD38);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCD40);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCD48);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCD50);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCD58);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCD60);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCD68);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCD70);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCD78);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCD80);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCD88);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCD90);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCD98);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCDA0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCDA8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCDB0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCDB8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCDC0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCDC8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCDD0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCDD8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCDE0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCDE8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCDF0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCDF8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCE00);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCE08);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCE10);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCE18);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCE20);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCE28);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCE30);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCE38);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCE40);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCE48);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCE50);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCE58);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCE60);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCE68);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCE70);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCE78);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCE80);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCE88);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCE90);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCE98);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCEA0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCEA8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCEB0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCEB8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCEC0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCEC8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCED0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCED8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCEE0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCEE8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCEF0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCEF8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCF00);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCF08);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCF10);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCF18);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCF20);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCF28);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCF30);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCF38);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCF40);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCF48);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCF50);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCF58);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCF60);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCF68);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCF70);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCF78);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCF80);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCF88);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCF90);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCF98);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCFA0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCFA8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCFB0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCFB8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCFC0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCFC8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCFD0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCFD8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCFE0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCFE8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCFF0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BCFF8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD000);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD008);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD010);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD018);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD020);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD028);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD030);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD038);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD040);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD048);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD050);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", effPartsListScroll);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", effAuxiliaryFileQueue);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", effFileQueue);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD064);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", effQueuedFileHandle);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", effTemporaryFileJob);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", effCurrentFileQueueEntry);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD074);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD078);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD080);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD088);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD090);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", effEditorCurrentMenu);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", effQueuedFileObject);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD0A0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD0A8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD0B0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD0B8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD0C0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD0C8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD0D0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD0D8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD0E0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD0E8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD0F0);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD0F8);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD100);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD108);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD109);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD10A);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD10B);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", effResourceBankEntries);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", effResourceBankDescriptor);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", effFileQueueNameRecord);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", effQueuedResourceNameRecord);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", effColorEditRgbMenuOpen);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", effColorEditSelectedKey);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", effColorEditSelectedAlphaKey);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", effColorEditPage);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", effColorEditKeyColor);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD130);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD138);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD140);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD148);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", effColorEditFrameCountFormat);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD158);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD15C);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD160);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD164);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD168);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD16C);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD170);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD178);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD180);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD188);
+
+INCLUDE_SDATA(const s32, "game/code_0029E410", D_003BD190);
+

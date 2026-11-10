@@ -76,7 +76,7 @@ extern DatEnemyRecord *datEnemyRecords;
 extern char D_00415158[];
 extern char D_004150B0[]; /* "btl:hunt ep=%d[id=%X]\n" */
 extern void btlBossDebugPrintf(const char *, ...);
-extern EffRandState effSharedRandomState[];
+extern EffRandState dds3RandCB[];
 extern void *btlCommandAttributeNames[];
 extern f32 btlActiveGroupCountMultipliers[];
 extern DatAssignedItemId mnuGetPartyEntryCurrentId(datUnitWork_t *);
@@ -1199,7 +1199,7 @@ s32 btlSelectActorAction(BtlUnit *actor) {
     s32 selection = btlSelectEnemyDropItem(
         actor, BTL_ENEMY_SELECTION_CONTEXT_ACTOR_ACTION);
     if (selection == BTL_ENEMY_SELECTION_NONE) {
-        selection = (dds3GetRandA((EffRandState *)effSharedRandomState) & 1) ? 2 : 9;
+        selection = (dds3GetRandA((EffRandState *)dds3RandCB) & 1) ? 2 : 9;
     }
     return selection;
 }

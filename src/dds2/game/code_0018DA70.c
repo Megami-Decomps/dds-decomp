@@ -239,7 +239,7 @@ void effBuildBlurUnitTextureQuad(const BlurSource *source, BlurPacketQuad *quad,
 }
 
 
-void effDrawBlurRectangle(const dds3Effect_Blur_t *source)
+void dds3EffectBlur(const dds3Effect_Blur_t *source)
 {
     sdfDrawTag_t *list;
     void *tag;
@@ -374,7 +374,7 @@ void dds3EffectBlurDrawFrameMask(struct sdfDrawTag_t *list, s32 blendControl, sd
 
 
 /* Build the two draw packets for `source` and append them to `list`. */
-void effAppendBlurRectanglePackets(struct sdfDrawTag_t *list, const BlurSource *source,
+void dds3EffectBlurDrawAlphaMulti(struct sdfDrawTag_t *list, const BlurSource *source,
                                    u8 fixedPointCoordinates) {
     SdfDrawPacket *packet;
 
@@ -400,14 +400,14 @@ extern u32 dds3NullDrawProc(void);
 extern void dds3EffectBlurDrawFrameMask(struct sdfDrawTag_t *list, s32 blendControl, sdfTexHandle_t *resource);
 
 /* Queue blend setup and both rectangle packets, then finish with the filter draw. */
-void effDrawBlurSource(const BlurSource *source, sdfTexHandle_t *resource, u8 fixedPointCoordinates) {
+void dds3EffectBlurDraw(const BlurSource *source, sdfTexHandle_t *resource, u8 fixedPointCoordinates) {
     struct sdfDrawTag_t *list;
 
     if (dds3NullDrawProc() == 0) {
         list = (void *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
         dds3EffectBlurDrawFrameMask(list, source->blendControl, resource);
-        effAppendBlurRectanglePackets(list, source, fixedPointCoordinates);
+        dds3EffectBlurDrawAlphaMulti(list, source, fixedPointCoordinates);
         dds3EffectBlurDrawFrameMaskReset(list);
     }
 }
@@ -421,7 +421,7 @@ void dds3EffectBlurSetRect(dds3Effect_PartialMultiBlurParam_t *work) {
     work->source.corners[0][1] = y - extent;
     work->source.corners[1][0] = x + extent;
     work->source.corners[1][1] = y + extent;
-    effDrawBlurRectangle(&work->source);
+    dds3EffectBlur(&work->source);
 }
 
 

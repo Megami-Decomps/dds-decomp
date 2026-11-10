@@ -10784,7 +10784,7 @@ caller resets it before polling.
 DDS1 also has `btlDrawScaledFrameBufferQuad` (`00211B88`), which references the
 current draw-buffer frame texture packet via `sdfGrLinkDispFrameTex` (record
 offset `0x1A0`) before its scaled quad. The same frame sampling path is used by
-`effDrawBlurRectangle`; the framebuffer interpretation has medium confidence.
+`dds3EffectBlur`; the framebuffer interpretation has medium confidence.
 `btlDrawWindOverlay` (`002121E8`) obtains the wind texture, draws three tinted
 sweeps interleaved with grey frame quads, restores frame packets and advances
 the sweep. `btlDrawFlatGridCell` (`00212680`) draws the six flat triangles using

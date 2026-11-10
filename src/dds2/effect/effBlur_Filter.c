@@ -19,7 +19,7 @@ void dds3EffectPartialMultiBlurDelete(EffBlurTemplate *owner) {
 extern u32 dds3NullDrawProc(void);
 
 /* Update pixel-coordinate edges and draw only when the eligibility check allows. */
-void effDrawBlurPixelRectWithResource(EffBlurTemplate *rect) {
+void dds3EffectPartialMultiBlurDraw(EffBlurTemplate *rect) {
     s32 x, y, w;
 
     if (dds3NullDrawProc() == 0) {
@@ -30,7 +30,7 @@ void effDrawBlurPixelRectWithResource(EffBlurTemplate *rect) {
         rect->body.source.corners[0][1] = y - w;
         rect->body.source.corners[1][0] = x + w;
         rect->body.source.corners[1][1] = y + w;
-        effDrawBlurSource(&rect->body.source, rect->texture, 0);
+        dds3EffectBlurDraw(&rect->body.source, rect->texture, 0);
     }
 }
 
@@ -47,7 +47,7 @@ void effDrawBlurFixedPointRectangle(EffBlurTemplate *owner) {
         w >>= 1;
         owner->body.source.corners[0][1] = y - w;
         owner->body.source.corners[1][1] = y + w;
-        effDrawBlurSource(&owner->body.source, owner->texture, 1);
+        dds3EffectBlurDraw(&owner->body.source, owner->texture, 1);
     }
 }
 
@@ -122,12 +122,12 @@ void dds3EffectDistortionBlurDelete(EffBlurScatterWork *work) {
 #include "sdf_packet_alloc.h"
 struct sdfDrawTag_t;
 extern void dds3EffectBlurDrawFrameMask(struct sdfDrawTag_t *list, s32 blendControl, struct sdfTexHandle_t *resource);
-extern void effAppendBlurRectanglePackets(struct sdfDrawTag_t *list,
+extern void dds3EffectBlurDrawAlphaMulti(struct sdfDrawTag_t *list,
                                           const dds3Effect_Blur_t *quad, u8 fixedPoint);
 extern void dds3EffectBlurDrawFrameMaskReset(struct sdfDrawTag_t *list);
 extern f64 fabs(f64 value);
 
-void effBlurStepScatterSlotsAndDraw(EffBlurScatterWork *work)
+void dds3EffectDistortionBlurDraw(EffBlurScatterWork *work)
 {
     struct sdfDrawTag_t *list;
     EffBlurScatterSlot *slot;
@@ -150,7 +150,7 @@ void effBlurStepScatterSlotsAndDraw(EffBlurScatterWork *work)
                     alpha = (u32)((f32)(work->params.color >> 24) *
                                   (3.14159265f - fabs(slot->angle)) * (1.0f / 3.14159265f));
                     slot->quad.color = (slot->quad.color & 0xFFFFFF) | (alpha << 24);
-                    effAppendBlurRectanglePackets(list, &slot->quad, 0);
+                    dds3EffectBlurDrawAlphaMulti(list, &slot->quad, 0);
                     slot->angle += work->params.angleStep;
                 } else {
                     slot->delay--;

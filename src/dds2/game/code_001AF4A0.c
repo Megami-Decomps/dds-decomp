@@ -134,7 +134,7 @@ extern char D_004150B0[]; /* "btl:hunt ep=%d[id=%X]\n" */
 
 extern void btlBossDebugPrintf(const char *, ...);
 
-extern EffRandState effSharedRandomState[];
+extern EffRandState dds3RandCB[];
 
 extern void *btlCommandAttributeNames[];
 
@@ -347,7 +347,7 @@ s32 btlCalculateHpActionAmount(BtlUnit *source, BtlUnit *target, BtlCommandId co
         btlDoesEnabledStatusMatchCurrentId(&source->partyRecord, 0xE7) &&
         datCommandRecords[command].hpType != 8 &&
         datCommandRecords[command].hpType != 10) {
-        f32 varied = ((dds3GetRandFloatA(effSharedRandomState) - 0.5f) * 2.0f) *
+        f32 varied = ((dds3GetRandFloatA(dds3RandCB) - 0.5f) * 2.0f) *
                      0.5f * automatic + automatic;
         automatic = varied;
     }

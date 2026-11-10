@@ -2692,15 +2692,15 @@
 0x00186040	effSetPairedResourceColor	inferred	High: assigns the packed color whose top byte is interpolated by the paired-resource update. [names_reviewed23.tsv]
 0x00186048	dds3EffectBlurDrawQuad	inferred	SMT3HD name via SLUS_209.11 0x001A1678, draw producer, was effBuildBlurTransformedQuad (dds-port names-for-conform); was effBuildBlurTransformedQuad
 0x00186398	effBuildBlurUnitTextureQuad	inferred	High: fills quad positions and alpha with neutral RGB and unit-square texture coordinates, supporting pixel or fixed-point input coordinates. [names_reviewed23.tsv]
-0x00186498	effDrawBlurRectangle	inferred	High: queues frame-buffer and GS state packets plus a transformed quad, then invokes the blur filter draw slot. [names_reviewed23.tsv]
+0x00186498	dds3EffectBlur	inferred	SMT3HD name via SLUS_209.11 0x001A19B0, draw producer, was effDrawBlurRectangle (dds-port names-for-conform); was effDrawBlurRectangle
 0x00186718	dds3EffectBlurDrawFrameMask	inferred	SMT3HD name via SLUS_209.11 0x001A1BB0, draw producer, was effAppendBlurRenderState (dds-port names-for-conform); was effAppendBlurRenderState
-0x001869F0	effAppendBlurRectanglePackets	inferred	High: creates and appends a unit-texture quad packet and a transformed quad packet from one blur source. [names_reviewed23.tsv]
+0x001869F0	dds3EffectBlurDrawAlphaMulti	inferred	SMT3HD name via SLUS_209.11 0x001A1E00, draw producer, was effAppendBlurRectanglePackets (dds-port names-for-conform); was effAppendBlurRectanglePackets
 0x00186A98	dds3EffectBlurDrawFrameMaskReset	inferred	SMT3HD name via SLUS_209.11 0x001A1E90, draw producer, was effDrawBlurListWithFramePacket (dds-port names-for-conform); was effDrawBlurListWithFramePacket
-0x00186B20	effDrawBlurSource	inferred	High: creates a packet list for a drawable blur source, queues render state and both quads, and finishes with the filter draw. [names_reviewed23.tsv]
+0x00186B20	dds3EffectBlurDraw	inferred	SMT3HD name via SLUS_209.11 0x001A1F18, draw producer, was effDrawBlurSource (dds-port names-for-conform); was effDrawBlurSource
 0x00186BC8	dds3EffectBlurSetRect	inferred	SMT3HD name via SLUS_209.11 0x001A1FA8, reloc-identical; was effDrawBlurPixelRectangle
 0x00186C18	dds3EffectPartialMultiBlurCreate	inferred	SMT3HD name via SLUS_209.11 0x001A1FF8, reloc-identical; was effCloneBlurTemplate
 0x00186CB8	dds3EffectPartialMultiBlurDelete	inferred	SMT3HD name via SLUS_209.11 0x001A2098, shared-hash-in-run; was effReleaseBlurTemplate
-0x00186CD0	effDrawBlurPixelRectWithResource	inferred	High: checks draw eligibility, calculates pixel-space rectangle bounds, and queues the blur source with its stored resource. [names_reviewed23.tsv]
+0x00186CD0	dds3EffectPartialMultiBlurDraw	inferred	SMT3HD name via SLUS_209.11 0x001A20B0, draw producer, was effDrawBlurPixelRectWithResource (dds-port names-for-conform); was effDrawBlurPixelRectWithResource
 0x00186D48	effDrawBlurFixedPointRectangle	inferred	High: computes GS-space bounds with half-height Y and passes the fixed-point-coordinate flag to blur source drawing. [names_reviewed23.tsv]
 0x00186DC8	dds3EffectPartialMultiBlurSetParam	inferred	SMT3HD name via SLUS_209.11 0x001A2128, byte-identical; was effBlurCopyParams
 0x00186E28	dds3EffectPartialMultiBlurSetTex	inferred	SMT3HD name via SLUS_209.11 0x001A2188, shared-hash-in-run; was effBlurSetHandle
@@ -2708,7 +2708,7 @@
 0x00186E60	dds3EffectDistBlurPartInit	inferred	SMT3HD name via SLUS_209.11 0x001A21C0, reloc-identical; was effBlurInitializeScatterSlot
 0x00186F90	dds3EffectDistortionBlurCreate	inferred	SMT3HD name via SLUS_209.11 0x001A22F0, reloc-identical; was effBlurCreateScatterWork
 0x00187080	dds3EffectDistortionBlurDelete	inferred	SMT3HD name via SLUS_209.11 0x001A23E0, shared-hash-in-run; was effBlurReleaseFirstResource
-0x00187098	effBlurStepScatterSlotsAndDraw	inferred	Updates delay and angle state, computes UV displacement and alpha, appends active rectangle packets, and submits the list.
+0x00187098	dds3EffectDistortionBlurDraw	inferred	SMT3HD name via SLUS_209.11 0x001A23F8, draw producer, was effBlurStepScatterSlotsAndDraw (dds-port names-for-conform); was effBlurStepScatterSlotsAndDraw
 0x001872A0	dds3EffectDistortionBlurSetParam	inferred	SMT3HD name via SLUS_209.11 0x001A2600, byte-identical; was effBlurCopyParamsKeepHeader
 0x00187308	effBlurSetSecondSetting	inferred	Sets the 0x2c work setting for the second blur-filter variant.
 0x00187310	dds3EffectDistortionBlurSetTex	inferred	SMT3HD name via SLUS_209.11 0x001A2670, shared-hash-in-run; was effBlurAcquireSecondHandle
@@ -2717,7 +2717,7 @@
 0x001873E0	dds3EffectRippleBlurReset	inferred	SMT3HD name via SLUS_209.11 0x001A2728, reloc-identical; was effBlurSecondInitSlots
 0x00187460	dds3EffectRippleBlurCreate	inferred	SMT3HD name via SLUS_209.11 0x001A27A8, reloc-identical; was effCloneBlurWorkWithSlots
 0x00187580	dds3EffectRippleBlurDelete	inferred	SMT3HD name via SLUS_209.11 0x001A28C8, shared-hash-in-run; was effBlurReleaseSecondResource
-0x00187598	effBlurStepScaleSlotsAndDraw	inferred	Fam_Mid3
+0x00187598	dds3EffectRippleBlurDraw	inferred	SMT3HD name via SLUS_209.11 0x001A28E0, draw producer, was effBlurStepScaleSlotsAndDraw (dds-port names-for-conform); was effBlurStepScaleSlotsAndDraw
 0x00187988	effBlurDrawFramebufferQuad	inferred	confidence=high; matched-C; src/dds1/game/code_001873E0.c:125:func_00187988; Builds a frame-buffer texture quad packet list with source DMA, sampling, texture-alpha, blend and overlay-sensitive clamp state, then submits the draw packet.; source=fresh-R_Names31-today [names_qp11.tsv]
 0x00187C08	dds3EffectFilter	inferred	SMT3HD name via SLUS_209.11 0x001A2AC8, reloc-identical; was effDrawSolidRectangle
 0x00187DB0	dds3EffectFilterDrawTexQuad	inferred	Existing descriptive name, shared by audited native identity; was effResourceQuadDraw.
@@ -4769,7 +4769,7 @@
 0x002119A8	btlMulColor	inferred	channel-wise product of two packed RGBA colors
 0x00211A28	btlCopyPaletteLowByteToAlpha	inferred	Loops over 256 packed colors and copies each low byte into its high alpha byte without altering RGB. [names_reviewed18.tsv]
 0x00211A60	btlDrawScaledHeldTextureQuad	inferred	Binds dds3RenderTexture and queues centered scaled textured quad with supplied primitive, color and depth. DDS2 twin0x0022CE30. [Namer1 batch33 high]
-0x00211B88	btlDrawScaledFrameBufferQuad	inferred	Queues a scaled quad after referencing current draw-buffer frame texture packet at record+0x1A0; same sampling path in effDrawBlurRectangle supports framebuffer role. [Namer1 batch33 medium]
+0x00211B88	btlDrawScaledFrameBufferQuad	inferred	Queues a scaled quad after referencing current draw-buffer frame texture packet at record+0x1A0; same sampling path in dds3EffectBlur supports framebuffer role. [Namer1 batch33 medium]
 0x00211CE8	btlBuildOverlayQuadPacket	inferred	Builds a fixed-vertex overlay packet with supplied color. [names_reviewed8.tsv]
 0x00211D40	btlDrawWindOverlaySweep	inferred	confidence=high; Called three times by btlDrawWindOverlay with distinct length/scale pairs while it composites the animated wind effect. Generates a repeated trigonometric textured-strip sweep and submits its geometry through the textured-quad helper. [BN SLUS_209.74 HLIL; btlDrawWindOverlay caller and wind-texture setup, 2026-10-14]
 0x002121E8	btlDrawWindOverlay	inferred	Loads wind texture, interleaves three tinted sweeps and grey frame quads, restores frame packets and advances phase. [Namer1 batch33 high]
@@ -9381,7 +9381,7 @@
 0x003244C0	dds3PadStickHoldCounters	inferred	confidence=high; Per-port/per-stick hold durations, incremented while magnitude >=64 and reset inside the dead zone; first-frame and even-frame repeat flags use the counter. DDS2 twin 0x0037F4C0; existing u32[2][2], native 0x10-byte allocation and padding unchanged. No import or active ASM reader. [PurD readability data b5; native/matched-C twin; identifier-only]; was dds3PadStickHoldCounters
 0x003244D0	dds3PadButtonPrev	inferred	SMT3HD data name via SLUS_209.11 0x002F57D0, 2 agreeing references; was dds3PadButtonPrev
 0x00324510	dds3PadButtonState	inferred	SMT3HD data name via SLUS_209.11 0x002F5810, 60 agreeing references; was dds3PadButtonState
-0x00324550	effSharedRandomState	inferred	confidence=high; src/dds1/game/code_00102ED8.c:D_00324550; type=PRNG state storage (u8[]); refs=dds3InitRandCB,btlSelectActorAction; Seeded with a fixed value and passed to random generators for effect frame, position and scale variation. [names_qp9.tsv]
+0x00324550	dds3RandCB	inferred	SMT3HD name via SLUS_209.11 0x2F5948, dds3InitRandCB passes it to sdfRandomize in both games; was effSharedRandomState
 0x00324590	dds3QuakeOffset	inferred	SMT3HD name via SLUS_209.11 0x2F5960, SMT3 kernel/dds3KernelDraw name, same offset in the unit's data; was sdfViewShakeVector
 0x003245A0	eglPolyStripWord	inferred	SMT3HD name via SLUS_209.11 0x2F5970, SMT3 kernel/dds3KernelDraw name, same offset in the unit's data; was D_003245A0
 0x003245B0	eglLineVerts	inferred	SMT3HD name via SLUS_209.11 0x2F5980, SMT3 kernel/dds3KernelDraw name, same offset in the unit's data; was D_003245B0

@@ -138,7 +138,7 @@ typedef struct {
 
 extern void dds3EffectRippleBlurReset(EffBlurScaleWork *work);
 
-extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work);
+extern void dds3EffectRippleBlurDraw(EffBlurScaleWork *work);
 
 extern u8 effOffsetMuzzleThunderRayParams[];
 
@@ -1835,7 +1835,7 @@ void effPCPBlinkMultiBlurDraw(ref)
             obj->body.extent = EFF_SHARED_TRAIL->minSize;
         }
         obj->body.source.color = effMagaCylinderCalcColor(EFF_SHARED_TRAIL->flags, EFF_SHARED_TRAIL->color);
-        effDrawBlurPixelRectWithResource(obj);
+        dds3EffectPartialMultiBlurDraw(obj);
         EFF_SHARED_TRAIL->frame++;
     }
 }
@@ -1898,7 +1898,7 @@ void effPCPMultiBlurExpDraw(EffPCPTrailWork *work) {
     }
     work->frame++;
     obj->body.source.color = effMagaCylinderCalcColor(work->flags, work->color);
-    effDrawBlurPixelRectWithResource(obj);
+    dds3EffectPartialMultiBlurDraw(obj);
 }
 
 void effPCPMultiBlurExpSetPosition(void *dst, const f32 sourcePosition[4]) {
@@ -2095,7 +2095,7 @@ void effPCPMultiBlurExp2Draw(EffPCPCompactFadeWork *work) {
         color = work->color;
         rect->body.source.color = effMagaCylinderCalcColor(
             effColorBlend(color & 0xFFFFFF, color, opacity), work->baseColor);
-        effDrawBlurPixelRectWithResource(rect);
+        dds3EffectPartialMultiBlurDraw(rect);
         work->frame++;
     }
 }
@@ -2228,7 +2228,7 @@ void effPCPBlurExpDraw(EffPCPFadeTimerLong *work) {
         t = 1.0f;
     }
     work->params.source.color = effMagaCylinderCalcColor(effColorBlend(work->colorFrom & 0xFFFFFF, work->colorFrom, t), work->colorTo);
-    effDrawBlurRectangle(&work->params.source);
+    dds3EffectBlur(&work->params.source);
     work->frame++;
 }
 
@@ -2324,7 +2324,7 @@ void effPCPDistortionBlurExpDraw(EffPCPCompactWork *work) {
         effColorBlend(color & 0xFFFFFF, color, opacity), work->baseColor);
     resource = work->resource.scatter;
     resource->params.color = color;
-    effBlurStepScatterSlotsAndDraw(resource);
+    dds3EffectDistortionBlurDraw(resource);
     work->frame++;
 }
 
@@ -2430,7 +2430,7 @@ void effPCPRippleBlurExpDraw(EffPCPCompactWork *work) {
         effColorBlend(color & 0xFFFFFF, color, opacity), work->baseColor);
     resource = work->resource.scale;
     resource->params.color = color;
-    effBlurStepScaleSlotsAndDraw(resource);
+    dds3EffectRippleBlurDraw(resource);
     work->frame++;
 }
 

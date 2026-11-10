@@ -68,7 +68,7 @@ extern void dds3EffectBlurDrawFrameMask(void *list, s32 blendControl, sdfTexHand
 extern void dds3EffectBlurDrawFrameMaskReset(struct sdfDrawTag_t *);
 extern void effBlurSecondUpdateSlotRect(EffBlurScaleWork *, EffBlurScaleSlot *);
 
-void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work) {
+void dds3EffectRippleBlurDraw(EffBlurScaleWork *work) {
     struct sdfDrawTag_t *list;
     EffBlurScaleSlot *slot;
     s32 count;
@@ -90,7 +90,7 @@ void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work) {
                     alpha = (u32)((f32)(sourceColor >> 24) * (1.0f - slot->phase));
                     slot->quad.color = (sourceColor & 0xFFFFFF) | (alpha << 24);
                     effBlurSecondUpdateSlotRect(work, slot);
-                    effAppendBlurRectanglePackets(list, &slot->quad, 1);
+                    dds3EffectBlurDrawAlphaMulti(list, &slot->quad, 1);
                     slot->angle += work->params.angleStep;
                     slot->phase += work->params.phaseStep;
                     if (slot->phase > 1.0f) {

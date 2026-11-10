@@ -680,7 +680,7 @@ extern dds3Effect_PartialMultiFilterParam_t *mfilterGetParam(void);
 
 void evtEventViewerApplyEffectToggles(evtViewerInfo_t *viewer) {
     if (viewer->blurRectangleEnabled != 0) {
-        effDrawBlurRectangle(&effGetLoadDescA()->source);
+        dds3EffectBlur(&effGetLoadDescA()->source);
     }
     if (viewer->texturedBlurEnabled != 0) {
         Eve_PartialMultiBlurON();

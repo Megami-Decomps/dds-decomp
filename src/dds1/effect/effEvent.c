@@ -117,7 +117,7 @@ extern u8 D_00355948[];
 
 extern u8 D_00355970[];
 
-extern void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *arg);
+extern void dds3EffectRippleBlurDraw(EffBlurScaleWork *arg);
 
 extern void dds3EffectFilter(dds3Effect_Filter_t *arg);
 
@@ -301,16 +301,16 @@ void Eve_EffectInit(void) {
 /* Dispatch enabled draw families independently, in their native order. */
 void effDispatchActive(void) {
     if (Eve_BlurShow) {
-        effDrawBlurRectangle(&Eve_Blur.source);
+        dds3EffectBlur(&Eve_Blur.source);
     }
     if (Eve_PartialMultiBlurShow) {
-        effDrawBlurPixelRectWithResource(hEve_PartialMultiBlur);
+        dds3EffectPartialMultiBlurDraw(hEve_PartialMultiBlur);
     }
     if (Eve_DistortionBlurShow) {
-        effBlurStepScatterSlotsAndDraw(hEve_DistortionBlur);
+        dds3EffectDistortionBlurDraw(hEve_DistortionBlur);
     }
     if (Eve_RippleBlurShow) {
-        effBlurStepScaleSlotsAndDraw(hEve_RippleBlur);
+        dds3EffectRippleBlurDraw(hEve_RippleBlur);
     }
     if (D_003BB073) {
         effBlurDrawFramebufferQuad(&D_00355908.source);

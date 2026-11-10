@@ -107,7 +107,7 @@ extern char D_003A1A40[];
 
 extern datUnitWork_t *btlGetIndexedPartyEntryRecord(s32);
 
-extern EffRandState effSharedRandomState[];
+extern EffRandState dds3RandCB[];
 
 extern s32 sdfCalculateCommandVitalDelta(s32, datUnitWork_t *, datUnitWork_t *, u32, u8);
 

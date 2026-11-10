@@ -141,7 +141,7 @@ extern void btlInitializeActorCameraPreset(BtlLinkedCommand *action);
 
 extern void SetRotateMatrixX(f32);
 
-extern EffRandState effSharedRandomState[];
+extern EffRandState dds3RandCB[];
 
 extern void btlAdvanceActionSkillCamera(BtlLinkedCommand *);
 
@@ -1332,7 +1332,7 @@ f32 angle, f32 blend) {
         fldCamUpdateDefault(command, pose);
         return;
     }
-    if (mode == 3 || (mode == 1 && (dds3GetRandA((EffRandState *)effSharedRandomState) & 1))) {
+    if (mode == 3 || (mode == 1 && (dds3GetRandA((EffRandState *)dds3RandCB) & 1))) {
         unit = first;
         first = last;
         last = unit;

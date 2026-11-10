@@ -85,7 +85,7 @@ extern void dds3EffectBlurDrawFrameMask(struct sdfDrawTag_t *list, s32 blendCont
 extern void dds3EffectBlurDrawFrameMaskReset(struct sdfDrawTag_t *list);
 extern f64 fabs(f64 value);
 
-void effBlurStepScatterSlotsAndDraw(EffBlurScatterWork *work)
+void dds3EffectDistortionBlurDraw(EffBlurScatterWork *work)
 {
     struct sdfDrawTag_t *list;
     EffBlurScatterSlot *slot;
@@ -108,7 +108,7 @@ void effBlurStepScatterSlotsAndDraw(EffBlurScatterWork *work)
                     alpha = (u32)((f32)(work->params.color >> 24) *
                                   (3.14159265f - fabs(slot->angle)) * (1.0f / 3.14159265f));
                     slot->quad.color = (slot->quad.color & 0xFFFFFF) | (alpha << 24);
-                    effAppendBlurRectanglePackets(list, &slot->quad, 0);
+                    dds3EffectBlurDrawAlphaMulti(list, &slot->quad, 0);
                     slot->angle += work->params.angleStep;
                 } else {
                     slot->delay--;

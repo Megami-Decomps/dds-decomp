@@ -55,7 +55,7 @@ typedef struct BattleController {
 } BattleController;
 extern char D_004150B0[]; /* "btl:hunt ep=%d[id=%X]\n" */
 extern void btlBossDebugPrintf(const char *, ...);
-extern EffRandState effSharedRandomState[];
+extern EffRandState dds3RandCB[];
 #define BTL_ENTRY_STATUS_MASK 0x7FFF
 extern u32 datComputeSkillBoostedMaxHp(datUnitWork_t *);
 extern u32 datComputeSkillBoostedMaxMp(datUnitWork_t *);
@@ -296,7 +296,7 @@ void btlInitializeBattleRuntime(void) {
     ((BattleInitState *)btlRuntime)->unk2B0 = 0;
     ((BattleInitState *)btlRuntime)->unk2B4 = btlIsCurrentDarkZone();
     seed = dds3GetKernelCount();
-    sdfRandomize(effSharedRandomState, seed);
+    sdfRandomize(dds3RandCB, seed);
     btlResetActorEntryState();
 
     ((BattleInitState *)btlRuntime)->messageWindows[0] =

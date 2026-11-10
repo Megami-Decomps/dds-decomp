@@ -1467,7 +1467,7 @@ void sdfReleaseFlagListResource(SdfFlagListWork *work) {
 extern f32 aViewEye[4];
 extern u32 D_00438918;
 extern f32 sdfAtan(f32 ratio);
-extern EffRandState effSharedRandomState[];
+extern EffRandState dds3RandCB[];
 
 /* Advance the drop list: respawn a random number of free drops around the camera, move live drops along their
  * own direction, and fade them over their last ten frames. */
@@ -1516,18 +1516,18 @@ void sdfUpdateFlagListEntries(SdfFlagListWork *work) {
     sdfAtan(dds3ScreenParam.camera.fov);
     sdfAtan(3.14159265f / 4.0f);
     if (spawnRange != 0) {
-        spawn = dds3GetRandA((EffRandState *)effSharedRandomState) % spawnRange + 1;
+        spawn = dds3GetRandA((EffRandState *)dds3RandCB) % spawnRange + 1;
     }
     for (i = 0; i < count; i++, mark++, vertices += 2, colors += 2) {
         timer = mark->timer;
         if (timer == -1) {
             if (spawn != 0) {
                 spawn--;
-                near = dds3GetRandFloatA(effSharedRandomState);
-                lateral = (dds3GetRandFloatA(effSharedRandomState) - 0.5f) * 2.0f;
-                if (dds3GetRandFloatA(effSharedRandomState) > 0.5f) {
+                near = dds3GetRandFloatA(dds3RandCB);
+                lateral = (dds3GetRandFloatA(dds3RandCB) - 0.5f) * 2.0f;
+                if (dds3GetRandFloatA(dds3RandCB) > 0.5f) {
                     depth = near * 2000.0f + 1000.0f;
-                    pos[0] = depth * spreadX * ((dds3GetRandFloatA(effSharedRandomState) - 0.5f) * 2.0f);
+                    pos[0] = depth * spreadX * ((dds3GetRandFloatA(dds3RandCB) - 0.5f) * 2.0f);
                     pos[1] = depth * spreadY * lateral;
                     pos[2] = depth;
                     SDF_VU0_LOADVECTOR(pos);
@@ -1545,8 +1545,8 @@ void sdfUpdateFlagListEntries(SdfFlagListWork *work) {
                     }
                 } else {
                     depth = 0.0f;
-                    pos[0] = (dds3GetRandFloatA(effSharedRandomState) - 0.5f) * 2.0f * 1000.0f;
-                    pos[2] = (dds3GetRandFloatA(effSharedRandomState) - 0.5f) * 2.0f * 1000.0f;
+                    pos[0] = (dds3GetRandFloatA(dds3RandCB) - 0.5f) * 2.0f * 1000.0f;
+                    pos[2] = (dds3GetRandFloatA(dds3RandCB) - 0.5f) * 2.0f * 1000.0f;
                     pos[1] = lateral * 100.0f + -200.0f;
                     SDF_VU0_LOADVECTOR(pos);
                     SDF_VU0_LOADVECTOR_B(aViewEye);

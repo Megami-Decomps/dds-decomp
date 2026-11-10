@@ -2498,11 +2498,11 @@ dds3TaskUpdateResult_t fldProcDraw(dds3ProcessID_t *task) {
         fldGetEncounterRuntimeResult() == FLD_ENCOUNTER_RESULT_NONE) {
     flags = fldGetLocationCoordinateFlags(fldGlobalBase.area, fldGlobalBase.floor + 1);
     if (flags & FLD_LOCATION_COORDINATE_FLAG_FIELD_EFFECT_TEXTURES) {
-        effBlurStepScatterSlotsAndDraw(D_00435F74);
+        dds3EffectDistortionBlurDraw(D_00435F74);
         return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
     }
     if (flags & 0x80) {
-        effBlurStepScatterSlotsAndDraw(D_00435F74);
+        dds3EffectDistortionBlurDraw(D_00435F74);
     }
     }
     return DDS3_TASK_UPDATE_RETAIN_CALLBACK;

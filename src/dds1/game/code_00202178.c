@@ -322,7 +322,7 @@ BtlIndexList *btlBuildActorIndexListAndCount(BtlTask *actor, BtlCommandTargetPol
 #include "sdf_debug_api.h"
 
 
-extern EffRandState effSharedRandomState;
+extern EffRandState dds3RandCB;
 extern s32 btlRollAiBucket(void);
 
 typedef struct BtlSelectorRank {
@@ -485,7 +485,7 @@ s32 func_00202668(BtlTask *actor, s32 unused) {
             }
         }
     } else if (datCommandSelectors[commandId].stat == 17) {
-        selectedIndex = dds3GetRandA(&effSharedRandomState) % count;
+        selectedIndex = dds3GetRandA(&dds3RandCB) % count;
     } else {
         priority = 0;
         if (command->options & 2) {
@@ -515,7 +515,7 @@ s32 func_00202668(BtlTask *actor, s32 unused) {
             }
         }
         if (priority == 0) {
-            selectedIndex = dds3GetRandA(&effSharedRandomState) % count;
+            selectedIndex = dds3GetRandA(&dds3RandCB) % count;
         } else if (count != 1) {
             s32 hpInserted = 0;
             s16 hpEligible = 0;
@@ -3032,7 +3032,7 @@ s32 btlTryScheduleMarkedUnitTask(BtlUnit *unit) {
 }
 
 extern void btlSetEffectCameraKeys(void *, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
-extern struct EffRandState effSharedRandomState;
+extern struct EffRandState dds3RandCB;
 extern void btlClearAllUnitDefeatCandidatesTask(void);
 extern void btlFlagLinkedGroupDefeatCandidatesTask(BtlLinkedCommand *);
 extern void btlUpdateActionPoseForLinkedTarget(BtlLinkedCommand *);
@@ -3063,7 +3063,7 @@ u8 btlSetLinkedPairActionCamera(BtlLinkedCommand *command, s8 unused1, s8 unused
         } else {
             btlClearAllUnitDefeatCandidatesTask();
             btlFlagLinkedGroupDefeatCandidatesTask(command);
-            if (dds3GetRandA(&effSharedRandomState) & 1) {
+            if (dds3GetRandA(&dds3RandCB) & 1) {
                 btlSetEffectCameraKeys(command, 237.1f, -287.8f, -460.5f, 0.021f, -0.127f, -0.022f, -0.982f, 841.4f,
                                        -406.5f, -442.7f, 0.108f, 0.293f, 0.013f, 0.94f, 40.0f, 30.0f);
             } else {
@@ -3896,14 +3896,14 @@ void btlTriggerSpecialUnitAction(void) {
 
 extern char D_003A5D98[];
 
-extern struct EffRandState effSharedRandomState;
+extern struct EffRandState dds3RandCB;
 
 
 void btlInitRandomBossSelection(void) {
     u8 *data = (u8 *)((BtlState *)btlGetRuntime())->effect;
     ((BtlBossEffectPayload *)data)->color = 0x80808080;
     ((BtlBossEffectPayload *)data)->options = 0;
-    ((BtlBossEffectPayload *)data)->selectedId = dds3GetRandA(&effSharedRandomState) % 6;
+    ((BtlBossEffectPayload *)data)->selectedId = dds3GetRandA(&dds3RandCB) % 6;
     btlBossDebugPrintf(D_003A5D98, ((BtlBossEffectPayload *)data)->selectedId);
 }
 
@@ -4118,7 +4118,7 @@ s32 btlSwapRandomBossSelection(void) {
         return -1;
     }
 
-    newId = dds3GetRandA(&effSharedRandomState) % 6;
+    newId = dds3GetRandA(&dds3RandCB) % 6;
     if (newId == effect->selectedId) {
         newId = (newId + 1) % 6;
     }
@@ -4796,7 +4796,7 @@ s32 btlSelectMissingHariSummon(void) {
     if (count == 0) {
         return -1;
     }
-    selected = dds3GetRandA(&effSharedRandomState) % count;
+    selected = dds3GetRandA(&dds3RandCB) % count;
     btlBossDebugPrintf("btl:HARI2 summon=%X\n", missing[selected]);
     return missing[selected];
 }
