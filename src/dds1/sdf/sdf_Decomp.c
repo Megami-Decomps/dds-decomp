@@ -1,6 +1,10 @@
 #include "common.h"
 #include "ps2asm.h"
 #include "sdf_types.h"
+#include "eeregs.h"
+
+/* Declared here because no header carries these. */
+extern void *memset(void *a, s32 b, size_t c);
 
 enum sdfDecomp_enum {
     SDF_DECOMP_STAT_END = 0,
@@ -38,14 +42,11 @@ struct sdfDecompCb_t;
 /* Load matrix into the VU0 scratch bank and postmultiply the primary bank. */
 void MultMatrixRev(const void *aMatrix);
 
-#define D_00594780 sdfDecompHistory
-#define D_00552170 sdfDecompHistoryIndex
+extern const u8 *sdfDecompHistory[16];
 
-extern const u8 *D_00594780[16];
-
-/* DDS has no symbol for the face list parameters, at sdf3DScreenParam + 0x70. */
+/* sdf3DScreenParam + 0x70: the scale and trans rows. */
+/* Shared byte-storage view: the local screen structs are not compatible C types. */
 extern u8 sdf3DScreenParam[];
-#define sdfDrawFaceListParam ((f32 (*)[4])(sdf3DScreenParam + 0x70))
 
 extern u8 sdf3DScreenTm[];
 
@@ -66,11 +67,11 @@ typedef struct sdfDecompCb_t {
 /* Read the active packet cursor or restore it at a quadword boundary. */
 s32 sdfGrOpenPacketBuff(void);
 
-void sdfGrClosePacketBuff(s32 aBuffPtr);
+void sdfGrClosePacketBuff(saddr_t aBuffPtr);
 
-extern s32 D_00552170;
+extern s32 sdfDecompHistoryIndex;
 
-extern void *memcpy(void *, const void *, unsigned int);
+extern void *memcpy(void *, const void *, size_t);
 
 s32 sdfDecomp(sdfDecompCb_t *cb, const u8 *src, s32 length);
 
@@ -78,7 +79,7 @@ void sdfDecompInit(sdfDecompCb_t *cb, u8 *dst);
 
 sdfGrPacketHeader_t *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags);
 
-sdfGrPacketHeader_t *effDebugDrawWireModel(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags);
+sdfGrPacketHeader_t *effDebugDrawWireModel(const sdfVector4_t *vertices, const u32 *colors, s32 vertexCount, u32 primitiveFlags);
 
 sdfGrPacketHeader_t *sdfDrawRotatedModel(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags);
 
@@ -86,13 +87,13 @@ s32 sdfDecomp(sdfDecompCb_t *cb, const u8 *src, s32 length) {
     s32 count;
     s32 offset;
     u8 *output;
-    u32 sourceAddress;
+    addr_t sourceAddress;
 
     if (cb->stat == 0) {
         return 1;
     }
 
-    D_00552170 = 0;
+    sdfDecompHistoryIndex = 0;
     output = cb->dstPtr;
     if (length > 0) {
         do {
@@ -100,11 +101,11 @@ s32 sdfDecomp(sdfDecompCb_t *cb, const u8 *src, s32 length) {
                 case SDF_DECOMP_STAT_IDLE: {
                     u8 command;
                     s32 commandBytes;
-                    s32 historyIndex = D_00552170;
+                    s32 historyIndex = sdfDecompHistoryIndex;
 
                     length--;
-                    D_00594780[historyIndex] = src;
-                    D_00552170 = (historyIndex + 1) & 0xF;
+                    sdfDecompHistory[historyIndex] = src;
+                    sdfDecompHistoryIndex = (historyIndex + 1) & 0xF;
                     command = *src++;
                     if (command >= SDF_DECOMP_DIRECTIVE_CMD) {
                         if (command == SDF_DECOMP_CMD_END) {
@@ -183,11 +184,11 @@ s32 sdfDecomp(sdfDecompCb_t *cb, const u8 *src, s32 length) {
                     cb->stat = SDF_DECOMP_STAT_IDLE;
                     break;
                 case SDF_DECOMP_STAT_DEC_SD_STEP0:
-                    sourceAddress = (u32)(output - *src++);
+                    sourceAddress = EE_ADDR((output - *src++));
                     count = cb->direcLeng;
                     length--;
                     do {
-                        *output++ = *(u8 *)sourceAddress++;
+                        *output++ = *EE_ADDR_AS(u8 *, sourceAddress++);
                     } while (--count != 0);
                     cb->stat = SDF_DECOMP_STAT_IDLE;
                     break;
@@ -206,10 +207,10 @@ s32 sdfDecomp(sdfDecompCb_t *cb, const u8 *src, s32 length) {
                     sourceAddress = cb->sdOfs;
                     length--;
                     combinedOffset = sourceAddress | offset;
-                    sourceAddress = (u32)(output - combinedOffset);
+                    sourceAddress = EE_ADDR((output - combinedOffset));
                     count = cb->direcLeng;
                     do {
-                        *output++ = *(u8 *)sourceAddress++;
+                        *output++ = *EE_ADDR_AS(u8 *, sourceAddress++);
                     } while (--count != 0);
                     cb->stat = SDF_DECOMP_STAT_IDLE;
                     break;
@@ -256,9 +257,9 @@ sdfGrPacketHeader_t *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *
     u32 secondClip;
     u32 quadwordCount;
 
-    packet = (sdfGrPacketHeader_t *)sdfGrOpenPacketBuff();
+    packet = EE_ADDR_AS(sdfGrPacketHeader_t *, sdfGrOpenPacketBuff());
     cursor = (u128 *)(packet + 1);
-    viewport = sdfDrawFaceListParam;
+    viewport = (f32 (*)[4])(sdf3DScreenParam + 0x70);
     VU0_LOAD_VF14(viewport);
     VU0_LOAD_VF15_AT16(viewport);
     emitted = 0;
@@ -346,7 +347,7 @@ sdfGrPacketHeader_t *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *
         cursor += 4;
         emitted += 2;
     }
-    sdfGrClosePacketBuff((s32)cursor & 0x0FFFFFFF);
+    sdfGrClosePacketBuff(EE_PHYSICAL(EE_ADDR_S(cursor)));
     quadwordCount = emitted * 2 + 1;
     packet->dmaWords.tag = (quadwordCount & 0xFFFF) | 0x20000000;
     packet->dmaWords.vif = ((u64)(quadwordCount | 0x50000000) << 32) | 0x10000000;
@@ -355,9 +356,9 @@ sdfGrPacketHeader_t *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *
     return packet;
 }
 
-sdfGrPacketHeader_t *effDebugDrawWireModel(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
+sdfGrPacketHeader_t *effDebugDrawWireModel(const sdfVector4_t *vertices, const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
     SDF_VU0_LOADMATRIX(sdf3DScreenTm);
-    return sdfDrawModelWithMatrix(vertices, colors, vertexCount, primitiveFlags);
+    return sdfDrawModelWithMatrix((const f32 (*)[4])vertices, colors, vertexCount, primitiveFlags);
 }
 
 sdfGrPacketHeader_t *sdfDrawRotatedModel(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
