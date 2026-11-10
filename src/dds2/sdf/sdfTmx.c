@@ -57,10 +57,7 @@ enum SdfFileIOCmdClbk {
     SDF_FILE_CMD_CLBK_FREE = 9
 };
 
-#define D_00594940 sdfFileRpcReadBuf
-#define D_00594800 sdfFileRpcRecvBuf
-
-extern u8 D_00594940[];
+extern u8 sdfFileRpcReadBuf[];
 
 extern void SleepThread(void);
 
@@ -98,7 +95,7 @@ typedef struct sdfFileCmdHandle_t {
     s32 errorCode; /* 0x2C */
     s32 currentOffset; /* 0x30 */
     u8 remainder[4]; /* 0x34 */
-    void (*callback)(struct sdfFileCmdHandle_t *, s32, s32, s32, s32); /* 0x38 */
+    void (*callback)(struct sdfFileCmdHandle_t *, s32, saddr_t, s32, s32); /* 0x38 */
     s32 userData; /* 0x3C: opaque callback-context word */
 } sdfFileCmdHandle_t;
 
@@ -130,7 +127,7 @@ extern sdfFileRpcCb_t sdfFileRpcState;
 extern s32 sdfFileRpcBuf[];
 
 extern sdfFileCmdHandle_t *sdfFileCmdReadOpen(const char *path,
-                                          s32 (*callback)(sdfFileCmdHandle_t *, s32, s32, s32, s32),
+                                          s32 (*callback)(sdfFileCmdHandle_t *, s32, saddr_t, s32, s32),
                                           s32 callbackContext);
 
 extern s32 sdfFileCmdFileSize();
@@ -142,6 +139,9 @@ extern void FlushCache(s32);
 extern s32 SignalSema(s32);
 
 #include "sdk_libkernl.h"
+
+/* Declared here because no header carries these. */
+extern void *memset(void *a, s32 b, size_t c);
 
 extern s32 sceSifDmaStat(s32);
 
@@ -181,7 +181,7 @@ void sdfFileRpcContinueRead(void) {
     if (chunkBytes > SDF_STREAM_CHUNK_BYTES) {
         chunkBytes = SDF_STREAM_CHUNK_BYTES;
     }
-    sdfFileCmdRead(sdfFileRpcState.deviceState, D_00594940, chunkBytes);
+    sdfFileCmdRead(sdfFileRpcState.deviceState, sdfFileRpcReadBuf, chunkBytes);
 }
 
 s32 sdfFileRpcReadCallback(sdfFileCmdHandle_t *deviceState, s32 command, s32 sourceAddress,
@@ -205,7 +205,7 @@ s32 sdfFileRpcReadCallback(sdfFileCmdHandle_t *deviceState, s32 command, s32 sou
 
         FlushCache(0);
         transfer.source = sourceAddress;
-        transfer.destination = (s32)stream->destination;
+        transfer.destination = EE_ADDR_S(stream->destination);
         transfer.size = byteCount;
         transfer.attributes = 0;
         dmaId = sceSifSetDma(&transfer, 1);
@@ -258,17 +258,17 @@ void *sdfFileRpcHandler(s32 function, void *request, s32 requestSize) {
         } else {
             deviceState = 0;
         }
-        sdfFileRpcBuf[0] = (s32)deviceState;
+        sdfFileRpcBuf[0] = EE_ADDR_S(deviceState);
         break;
     case SDF_STREAM_COMMAND_CONTROL:
-        sdfFileCmdFileSize(state->deviceState, (s32)request, (s32)request);
+        sdfFileCmdFileSize(state->deviceState, EE_ADDR_S(request), EE_ADDR_S(request));
         WaitSema(state->semaphore);
         sdfFileRpcBuf[0] = state->readResult;
         break;
     case SDF_STREAM_COMMAND_READ:
         state->remainingBytes = ((sdfFileRpcReadReq_t *)request)->byteCount;
         state->transferredBytes = 0;
-        state->destination = (u8 *)((sdfFileRpcReadReq_t *)request)->destinationAddress;
+        state->destination = EE_ADDR_AS(u8 *, ((sdfFileRpcReadReq_t *)request)->destinationAddress);
         sdfFileRpcContinueRead();
         WaitSema(state->semaphore);
         sdfFileRpcBuf[0] = state->transferredBytes;
@@ -417,15 +417,15 @@ extern s32 raise(s32 sig);
 
 extern void func_001001C8(s32 code) __attribute__((noreturn));
 
-extern u8 D_0054B8D8[] __attribute__((section(".data")));
+extern u8 localeconvData[] __attribute__((section(".data")));
 
 extern s32 D_00552178 __attribute__((section(".data")));
 
-extern s32 D_0052C28C __attribute__((section(".data")));
+extern s32 mallocLockCount __attribute__((section(".data")));
 
-extern s32 D_0052C288 __attribute__((section(".data")));
+extern s32 mallocLockOwner __attribute__((section(".data")));
 
-extern s32 D_0052C378 __attribute__((section(".data")));
+extern s32 mallocSema __attribute__((section(".data")));
 
 extern s32 _init_signal_r(_reent *r);
 
@@ -439,7 +439,7 @@ extern void *__deregister_frame_info(void *fn);
 
 extern void free(void *ptr);
 
-extern void *malloc(u32 size);
+extern void *malloc(size_t size);
 
 extern void __malloc_lock(_reent *r);
 
@@ -457,7 +457,7 @@ extern s32 close(s32 fd);
 
 extern _Bigint *_Balloc(_reent *r, s32 k);
 
-extern s32 __register_frame_info(void *fn, void *entry);
+extern void __register_frame_info(void *fn, void *entry);
 
 extern s32 __register_frame_info_table(void *fn, void *entry);
 
@@ -493,15 +493,15 @@ extern s32 WaitSema(s32 sema);
 
 extern s32 vfprintf(FILE *fp, const char *fmt, va_list ap);
 
-extern void *memset(void *a, s32 b, u32 c);
+extern void *memset(void *a, s32 b, size_t c);
 
 extern void *_calloc_r(_reent *r, u32 n, u32 size);
 
-extern const double D_0054B930[];
+extern const double pow10Table[];
 
 extern void abort(void);
 
-extern s32 __do_global_ctors(void);
+extern void __do_global_ctors(void);
 
 extern s32 atexit(void (*fn)(void));
 
@@ -532,7 +532,7 @@ extern void sdfUnpackFloat(const void *x, fp_number_type *u);
 
 extern f32 sdfPackFloat(const fp_number_type *u);
 
-extern long __make_dp(s32 kind, s32 sign, s32 exp, long mant);
+extern f64 __make_dp(s32 kind, s32 sign, s32 exp, s64 mant);
 
 #define va_start(ap, last) __builtin_stdarg_start((ap), last)
 
@@ -553,7 +553,7 @@ typedef struct fp_number_type_df {
     long fraction;
 } fp_number_type_df;
 
-extern long __pack_df(const fp_number_type_df *u);
+extern f64 __pack_df(const fp_number_type_df *u);
 
 extern void sdfUnpackDouble(const double *x, fp_number_type_df *u);
 
@@ -576,8 +576,7 @@ typedef struct {
     u32 privateData[6];
 } sdfSceIoStat_t;
 
-typedef char sdfSceIoStat_size_must_be_0x40[
-    sizeof(sdfSceIoStat_t) == 0x40 ? 1 : -1];
+SIZE_CHECK(sdfSceIoStat_size_must_be_0x40, sdfSceIoStat_t, 0x40);
 
 extern s32 sdfCreateSema(s32 initCount, s32 maxCount, s32 option);
 extern s32 sceGetstat(const char *path, sdfSceIoStat_t *stat);
@@ -585,9 +584,9 @@ extern s32 SdfIopFileRpc(const char *name, s32 dataSize, const void *data, s32 *
 extern s32 WakeupThread(s32 threadId);
 extern u8 sdfHddValid;
 /* DDS compiles the two module paths from string literals. */
-#define D_0054A360 "cdrom0:\\USERIRX\\SDFIOPFL.IRX;1"
-#define D_0054A380 "pfs0:/userirx/sdfiopfl.irx"
-extern u8 D_00594800[];
+#define sdfIopModulePathCdrom "cdrom0:\\USERIRX\\SDFIOPFL.IRX;1"
+#define sdfIopModulePathHost "pfs0:/userirx/sdfiopfl.irx"
+extern u8 sdfFileRpcRecvBuf[];
 
 void SdfFileRpcServerThreadProc(void)
 {
@@ -599,12 +598,12 @@ void SdfFileRpcServerThreadProc(void)
 
     state->semaphore = sdfCreateSema(0, 1, 0);
     sceSifSetRpcQueue(&queue, GetThreadId());
-    sceSifRegisterRpc((struct sifRpcServerData_t *)&server, 0x66504F49, (sceSifRpcFunc)sdfFileRpcHandler, D_00594800, NULL, NULL, (struct sifRpcDataQueue_t *)&queue);
-    modulePath = D_0054A360;
+    sceSifRegisterRpc((struct sifRpcServerData_t *)&server, 0x66504F49, (sceSifRpcFunc)sdfFileRpcHandler, sdfFileRpcRecvBuf, NULL, NULL, (struct sifRpcDataQueue_t *)&queue);
+    modulePath = sdfIopModulePathCdrom;
     if (sdfHddValid != 0) {
-        if (sceGetstat(D_0054A380, &stat) == 0) {
+        if (sceGetstat(sdfIopModulePathHost, &stat) == 0) {
             if ((stat.mode & 0xF000) == 0x2000) {
-                modulePath = D_0054A380;
+                modulePath = sdfIopModulePathHost;
             }
         }
     }
@@ -642,3 +641,4 @@ INCLUDE_RODATA(const s32, "sdf/sdfTmx", D_0042EDE0);
 INCLUDE_RODATA(const s32, "sdf/sdfTmx", D_0042EDF0);
 
 INCLUDE_RODATA(const s32, "sdf/sdfTmx", D_0042EE00);
+
