@@ -14453,7 +14453,7 @@ reset. `sdfGsCaptureStoreImage` is the existing SDK descriptor reused for
 both color-buffer captures; its existing uncached-address expression stays
 unchanged, not a new alias view.
 
-`sdfMotionCommandHandlers` retains the native constructor pointer followed
+`sdfMotGenMorphTable` retains the native constructor pointer followed
 by a null entry and the existing unchecked low-halfword index dispatch.
 `sdfMotMorphTable` binds model slot indices and weights; its five
 release/bind/sample/capture/blend callbacks and final opaque word are kept.

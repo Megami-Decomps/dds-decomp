@@ -5,9 +5,9 @@
 #include "motion.h"
 
 #define sdfMatSetRefMap sdfSetPrimaryStateWordFourth
-#define D_00529600 sdfMotionCommandHandlers
-#define D_00529448 D_0040B358
-#define D_00529470 D_0040B380
+#define D_00529600 sdfMotGenMorphTable
+#define D_00529448 sdfMotGenNodeTable
+#define D_00529470 sdfMotModelLinerPosTable
 
 
 typedef struct

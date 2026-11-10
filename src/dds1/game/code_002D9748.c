@@ -981,10 +981,10 @@ void sdfMatListCopyStat(DevRequest *destination, const DevRequest *source) {
     }
 }
 
-extern SdfMotionBindingFactory D_003981A8[];
+extern SdfMotionBindingFactory sdfMotGenNodeTable[];
 
 /* The high halfword selects the handler, which receives the complete command word unchanged. */
 struct SdfMotionBindingHead *sdfMotionNodeNew(sdfMotionCtrlr_t *motion, u32 commandWord, s32 targetIndex) {
-    return D_003981A8[commandWord >> 16](motion, commandWord, targetIndex);
+    return sdfMotGenNodeTable[commandWord >> 16](motion, commandWord, targetIndex);
 }
 
