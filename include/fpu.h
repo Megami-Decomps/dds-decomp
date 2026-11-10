@@ -30,7 +30,7 @@ static inline float frsqrtf(float numerator, float x) {
 
 /*
  * Absolute value with a single abs.s, the counterpart of fsqrtf. Most of the
- * game code uses this form; the kwln kernel code uses the builtin fabsf.
+ * game code uses this form; the dds3 kernel code uses the builtin fabsf.
  */
 static inline float ffabsf(float x) {
     float r;
