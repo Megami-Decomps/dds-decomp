@@ -2332,28 +2332,28 @@ void fldMarkStageExplorationCellsAroundPosition(s32 room, s32 stage, f32 x, f32 
     }
 }
 
-#ifdef NON_MATCHING
-#include "common.h"
-#include "fld_area_work.h"
-#include "dat_state.h"
-
-extern u32 fldFindStageCoordinateIndex(s32 x, s32 y);
-extern u32 fldFindStageCoordinateRowOffset(s32 x, s32 y);
-
 /* Mark a rectangle of the exploration map as visited: one bit a cell, ten
  * bytes a row. DDS2 keeps every stage's rows in one bitmap, the stage's first
  * row given by its row offset. Retail still looks up the stage's index, as
  * DDS1 did to pick its 800-byte map, and discards it; and it takes the row
  * offset for the current area (fldGlobalBase.area), not the area passed in.
- * Upstream: INCLUDE_ASM in game/code_0011F208. */
+ */
 void fldMarkStageExplorationBitmapRegion(s32 area, s32 floor, s32 x, s32 z, s32 width, s32 height) {
+    fldAreaWork_t *work;
     u32 rowOffset;
     s32 row;
     s32 column;
     s32 cellX;
 
     fldFindStageCoordinateIndex(area, floor);
-    rowOffset = fldFindStageCoordinateRowOffset(fldGlobalBase.area, floor);
+    work = &fldGlobalBase;
+    /* Preserve the initialized owner base for the native +0x10 area load.
+     * Qualified pass 14.combine dumps show that ordinary C instead folds
+     * this sole use into a fldGlobalBase+0x10 HI/LO load. The tied operand
+     * retains the real pointer, emits no instruction and adds no memory effect.
+     * This reconstructs the compiler boundary, not original source spelling. */
+    __asm__("" : "+r"(work));
+    rowOffset = fldFindStageCoordinateRowOffset(work->area, floor);
     for (row = 0; row < height; row++) {
         for (column = 0; column < width; column++) {
             cellX = x + column;
@@ -2361,9 +2361,7 @@ void fldMarkStageExplorationBitmapRegion(s32 area, s32 floor, s32 x, s32 z, s32 
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "game/code_0011F208", fldMarkStageExplorationBitmapRegion);
-#endif
+
 
 u8 fldIsStageExplorationCellMarked(s32 floor, f32 x, f32 z) {
     FieldStageCoordinate *record = fldFindStageCoordinateRecord(fldGlobalBase.area, floor);
