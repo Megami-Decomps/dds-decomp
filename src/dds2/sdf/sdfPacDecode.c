@@ -1,6 +1,10 @@
 #include "common.h"
 #include "libsdf.h"
 
+/* Declared here because no header carries these. */
+extern void *memcpy(void *a, const void *b, size_t c);
+extern void *memset(void *a, s32 b, size_t c);
+
 extern void *sdfChipAllocDirect(s32 aSize);
 extern void *sdfChipAllocZeroDirect(s32 aSize);
 extern void sdfChipFreeDirect(void *aPtr);
@@ -16,7 +20,7 @@ extern sdfItemArray_t *sdfTexListNew(s32 aInitCapa);
 
 extern void sdfDecompInit(struct sdfDecomp_t *cb, u8 *dst);
 extern s32 sdfDecomp(struct sdfDecomp_t *cb, const u8 *src, s32 length);
-extern void sdfAddressResolver(s32 *aDataBody, s32 aOffset, u8 *aAddrInfoPtr, s32 aAddrInfoLeng);
+extern void sdfAddressResolver(s32 *aDataBody, saddr_t aOffset, u8 *aAddrInfoPtr, s32 aAddrInfoLeng);
 
 s32 sdfPacStdCallback(sdfPacDecodeCb_t *cb, s32 cause, sdfPacStdBlockHeader_t *hdr);
 void sdfPacNewBlock(sdfPacDecodeCb_t *cb);
@@ -373,7 +377,7 @@ void sdfPacModelDecoderEndFunc(sdfPacDecodeCb_t *cb)
 
     aWork->data = payload;
     if (bytes != 0) {
-        sdfAddressResolver((s32 *)payload, (s32)payload, payload + reloc->tableOffset, bytes);
+        sdfAddressResolver((s32 *)payload, EE_ADDR_S(payload), payload + reloc->tableOffset, bytes);
         reloc->tableBytes = 0;
     }
     sdfPacEndBlock(cb);
@@ -394,7 +398,7 @@ void sdfPacMotionDecoderEndFunc(sdfPacDecodeCb_t *cb)
 
     aWork->data = payload;
     if (bytes != 0) {
-        sdfAddressResolver((s32 *)payload, (s32)payload, payload + reloc->tableOffset, bytes);
+        sdfAddressResolver((s32 *)payload, EE_ADDR_S(payload), payload + reloc->tableOffset, bytes);
         reloc->tableBytes = 0;
     }
     sdfPacEndBlock(cb);
