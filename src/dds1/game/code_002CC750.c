@@ -1,3 +1,4 @@
+#define SDK_SKIP_memset
 #include "sdk_ps2.h"
 #include "sdf_line_pair_packet_api.h"
 #include "dsp_name.h"

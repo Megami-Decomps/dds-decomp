@@ -1,3 +1,4 @@
+#define SDK_SKIP_strlen
 #include "fpu.h"
 #include "common.h"
 #include "libsdf.h"
