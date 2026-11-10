@@ -3,10 +3,6 @@
 #include "libsdf.h"
 #include "ps2asm.h"
 
-#define D_00551910 sdfCdDirectPrefix
-#define D_0055210C sdfCdCurrLsn
-#define D_00552110 sdfCdImageMode
-#define D_0058F7C0 sdfCdSectorBuf
 
 typedef struct
 {
@@ -89,15 +85,15 @@ enum sdf_stream_playback {
     SDF_STREAM_PLAYBACK_CADENCED = 2
 };
 
-extern void *memcpy(void *, const void *, unsigned int);
+extern void *memcpy(void *, const void *, size_t);
 
 extern void sdfDelayThread(s32 delay);
 
 void sdfCdWaitTrayClose(void);
 
-extern u8 D_00552110;
+extern u8 sdfCdImageMode;
 
-extern s32 D_0055210C;
+extern s32 sdfCdCurrLsn;
 
 extern s32 sceCdStStart(s32 arg, u8 *options);
 
@@ -109,15 +105,15 @@ extern s32 sdfCdImageCurrActive;
 
 extern u8 *sdfCdImageOffset;
 
-extern u8 D_0058F7C0[0x800];
+extern u8 sdfCdSectorBuf[0x800];
 
 #include "sdk_libkernl.h"
 
 extern s32 sceLseek(s32 fileHandle, s32 offset, s32 origin);
 
-extern void *malloc(u32 size);
+extern void *malloc(size_t size);
 
-extern s32 sceRead(s32 fileHandle, s32 buffer, s32 byteCount);
+extern s32 sceRead(s32 fileHandle, saddr_t buffer, s32 byteCount);
 
 extern const char *dds3ImgPath;
 
@@ -145,9 +141,9 @@ void *sdfCdImageGetDirData(void)
 
 extern s32 sceCdDiskReady(s32 mode);
 extern s32 sceCdGetDiskType(void);
-extern char D_005495D8[]; /* "wait tray close.\n" */
-extern char D_005495F0[]; /* "tray close.\n" */
-extern char D_00549600[]; /* "CD read restart.\n" */
+extern char sdfCdMsgWaitTrayClose[]; /* "wait tray close.\n" */
+extern char sdfCdMsgTrayClose[]; /* "tray close.\n" */
+extern char sdfCdMsgReadRestart[]; /* "CD read restart.\n" */
 
 void sdfCdWaitTrayClose(void)
 {
@@ -177,7 +173,7 @@ void sdfCdStStart(s32 lsn) {
     u8 options[4];
     s32 ready;
     options[0] = 0;
-    if (D_00552110 == 1) {
+    if (sdfCdImageMode == 1) {
         options[1] = 0;
     } else {
         options[1] = 1;
@@ -197,7 +193,7 @@ void sdfCdStStart(s32 lsn) {
             sdfDelayThread(100);
         }
     }
-    D_0055210C = lsn;
+    sdfCdCurrLsn = lsn;
 }
 
 
@@ -218,7 +214,7 @@ void sdfDevSeekDiscWithRequestGate(s32 lsn)
     s32 ready;
 
     options[0] = 0;
-    if (D_00552110 == 1) {
+    if (sdfCdImageMode == 1) {
         options[1] = 0;
     } else {
         options[1] = 1;
@@ -240,7 +236,7 @@ void sdfDevSeekDiscWithRequestGate(s32 lsn)
             sdfDelayThread(100);
         }
     }
-    D_0055210C = lsn;
+    sdfCdCurrLsn = lsn;
 }
 
 void sdfCdStRead(s32 sectors, void *buffer)
@@ -257,15 +253,15 @@ void sdfCdStRead(s32 sectors, void *buffer)
         }
         if (sceCdStatus() == 1) {
             sdfCdWaitTrayClose();
-            sdfCdStStart(D_0055210C);
+            sdfCdStStart(sdfCdCurrLsn);
         } else {
             WaitSema(sdfCdImageFd);
             sceCdStStop();
             SignalSema(sdfCdImageFd);
-            sdfCdStStart(D_0055210C);
+            sdfCdStStart(sdfCdCurrLsn);
         }
     }
-    D_0055210C += sectors;
+    sdfCdCurrLsn += sectors;
 }
 
 extern char *strcpy(char *destination, const char *source);
@@ -328,8 +324,8 @@ sdfCdImageDirEntry_t *sdfCdImageSearchFileDirect(const char *filename, s32 *lsn,
     return &sdfCdImageSearchFileDirect_ent;
 }
 
-extern char D_00551910[]; /* "cdrom" */
-extern s32 memcmp(const void *left, const void *right, u32 size);
+extern char sdfCdDirectPrefix[]; /* "cdrom" */
+extern s32 memcmp(const void *left, const void *right, size_t size);
 extern s32 strcmp(const char *left, const char *right);
 
 sdfCdImageDirEntry_t *sdfCdImageSearchFile(const char *path, s32 *lsn, u8 *mode)
@@ -347,7 +343,7 @@ sdfCdImageDirEntry_t *sdfCdImageSearchFile(const char *path, s32 *lsn, u8 *mode)
     s32 mid;
     s32 order;
 
-    if (memcmp(path, D_00551910, 5) == 0) {
+    if (memcmp(path, sdfCdDirectPrefix, 5) == 0) {
         return sdfCdImageSearchFileDirect(path, lsn, mode);
     }
     base = sdfCdImageDirData;
@@ -402,7 +398,7 @@ s32 sdfCdImageLoadStart(const char *filename)
     s32 lsn[4];
     sdfCdImageDirEntry_t *entry;
 
-    entry = sdfCdImageSearchFile(filename, lsn, &D_00552110);
+    entry = sdfCdImageSearchFile(filename, lsn, &sdfCdImageMode);
     result = -1;
     if (entry != NULL) {
         sdfCdImageCurrRemain = entry->size_;
@@ -448,7 +444,7 @@ s32 sdfCdImageRead(void *buff, s32 length) {
     }
     if (bytes > 0) {
         transferBytes = bytes;
-        if (((u32)destination & 15) == 0) {
+        if ((EE_ADDR(destination) & 15) == 0) {
             t = transferBytes >> 11;
             t = transferBytes - t * 0x800;
             transferBytes -= t;
@@ -456,22 +452,22 @@ s32 sdfCdImageRead(void *buff, s32 length) {
                 sdfCdStRead(transferBytes >> 11, destination);
             }
             if (t > 0) {
-                sdfCdStRead(1, D_0058F7C0);
-                memcpy(destination + transferBytes, D_0058F7C0, t);
-                sdfCdImageOffset = D_0058F7C0 + t;
+                sdfCdStRead(1, sdfCdSectorBuf);
+                memcpy(destination + transferBytes, sdfCdSectorBuf, t);
+                sdfCdImageOffset = sdfCdSectorBuf + t;
                 sdfCdImageCurrActive = 0x800 - t;
             }
         } else {
             while (transferBytes >= 0x800) {
-                sdfCdStRead(1, D_0058F7C0);
-                memcpy(destination, D_0058F7C0, 0x800);
+                sdfCdStRead(1, sdfCdSectorBuf);
+                memcpy(destination, sdfCdSectorBuf, 0x800);
                 transferBytes -= 0x800;
                 destination += 0x800;
             }
             if (transferBytes > 0) {
-                sdfCdStRead(1, D_0058F7C0);
-                memcpy(destination, D_0058F7C0, transferBytes);
-                sdfCdImageOffset = D_0058F7C0 + transferBytes;
+                sdfCdStRead(1, sdfCdSectorBuf);
+                memcpy(destination, sdfCdSectorBuf, transferBytes);
+                sdfCdImageOffset = sdfCdSectorBuf + transferBytes;
                 sdfCdImageCurrActive = 0x800 - transferBytes;
             }
         }
@@ -533,7 +529,7 @@ void sdfCdImageLoadDir(const char *dirFile) {
     sceLseek(fileHandle, 0, 0);
     buffer = malloc(fileBytes);
     sdfCdImageDirData = buffer;
-    sceRead(fileHandle, (s32)buffer, fileBytes);
+    sceRead(fileHandle, EE_ADDR_S(buffer), fileBytes);
     sceClose(fileHandle);
 }
 
