@@ -31,11 +31,11 @@ void Normalize(void)
     VU0_NORMALIZE_XYZW_VF10();
 }
 
-/* Retail reduction: (x*x)*(y*y) + z*z + w*w from vf10, not the usual squared length. */
-f32 effMiscQuatLengthSqVU(void)
+/* Squared length, but retail's vmulay multiplies x*x by y*y instead of adding them. */
+f32 LengthSq(void)
 {
     f32 componentMetric;
-    VU0_SEQ_SDF_2_C0510(componentMetric);
+    VU0_QUAT_LENGTHSQ(componentMetric);
     return componentMetric;
 }
 

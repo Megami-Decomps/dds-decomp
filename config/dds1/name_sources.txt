@@ -8800,7 +8800,7 @@
 0x002E7C20	Mult	inferred	SMT3HD name via SLUS_209.11 0x002C0488, sdfQuat twin; was effMiscQuatMultiplyVU
 0x002E7C50	Inverse	inferred	SMT3HD name via SLUS_209.11 0x002C04B8, byte-identical; was effMiscInvertQuaternionVU
 0x002E7C80	Normalize	inferred	SMT3HD name via SLUS_209.11 0x002C04E8, byte-identical; was effMiscNormalizeVU
-0x002E7CA8	effMiscQuatLengthSqVU	inferred	Sums all four squares of vf10
+0x002E7CA8	LengthSq	inferred	SMT3HD name via SLUS_209.11 0x002C0510, SMT3 sdfQuat method name (was effMiscQuatLengthSqVU); was effMiscQuatLengthSqVU
 0x002E7CD0	SDF_QUAT_INNERPRODUCT	inferred	SMT3HD name via SLUS_209.11 0x002C0538, byte-identical; was effMiscQuaternionDotVU
 0x002E7CF8	FromRotation	inferred	SMT3HD name via SLUS_209.11 0x002C0560, reloc-identical; was effMiscAxisAngleToQuaternionVU
 0x002E7D48	FromRotation_B	inferred	SMT3HD name via SLUS_209.11 0x002C05B0, reloc-identical; was effMiscAxisAngleToQuaternionVf11

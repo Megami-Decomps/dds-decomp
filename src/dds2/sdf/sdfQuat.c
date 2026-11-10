@@ -91,13 +91,12 @@ void Normalize(void)
     VU0_SEQ_NORMALIZE();
 }
 
-#define sdf_2C0510 effMiscQuatLengthSqVU
 
-/* vu0 routine: retail reduces (x*x)*(y*y) + z*z + w*w, not squared length. */
-f32 sdf_2C0510(void)
+/* Squared length, but retail's vmulay multiplies x*x by y*y instead of adding them. */
+f32 LengthSq(void)
 {
     f32 componentMetric;
-    VU0_SEQ_SDF_2_C0510(componentMetric);
+    VU0_QUAT_LENGTHSQ(componentMetric);
     return componentMetric;
 }
 

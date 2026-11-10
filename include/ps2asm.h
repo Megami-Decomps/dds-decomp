@@ -1501,7 +1501,7 @@ __asm__ volatile ( \
     "\t.set reorder")
 
 /* From src/smt3/code_002BD340.c. */
-#define VU0_SEQ_SDF_2_C0510(componentMetric) __asm__ volatile ( \
+#define VU0_QUAT_LENGTHSQ(componentMetric) __asm__ volatile ( \
     ".set noreorder\n" \
     "\tvaddw.xyz vf1, vf0, vf0w\n" \
     "\tvmul.xyzw vf2, vf10, vf10\n" \
