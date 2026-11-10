@@ -81,7 +81,7 @@ extern s32 prfResolveMantraNameOrFallback(u16, u8 **);
 
 extern void frFontCenterGlyphChainAt(s32 x, s32 y, _FRQ *glyphChain);
 
-extern s32 frFontDrawGlyphChain(struct _FRQ *, s8, u32);
+extern s32 frDrawFontOt(struct _FRQ *, s8, u32);
 typedef struct MenuListNode MenuListNode;
 
 extern void qsort(MenuListNode **, s32, s32, s32 (*)(MenuListNode **, MenuListNode **));
@@ -232,7 +232,7 @@ void mnuDrawWindowListEntries(s32 x, s32 y, s32 depth, s32 xOffset, s32 yOffset,
             }
         }
         if (glyph != NULL) {
-            frFontDrawGlyphChain(glyph, 1, (u32)drawArg);
+            frDrawFontOt(glyph, 1, (u32)drawArg);
             frDestroyFontRequestAfter(glyph);
         }
         if (list->drawCallback != NULL) {
@@ -1419,7 +1419,7 @@ void mnuDrawPartyPageContents(s32 x, s32 y, s32 z, s32 layout, MenuPageResources
         glyph = itfCreateFont2TextGlyph(x + 0x710, y + 0x90, z, 0xA09DC380, text, glyph);
     } while (0);
 draw:
-    frFontDrawGlyphChain(glyph, 1, drawArg);
+    frDrawFontOt(glyph, 1, drawArg);
     frDestroyFontRequestAfter(glyph);
 }
 
@@ -2316,7 +2316,7 @@ void mnuDrawPartyPageEntry(s32 x, s32 y, s32 z, s32 partyIndex, MenuSprites *pag
         glyph = itfCreateConvertedTextGlyph(x + 0x6F0, y + 0x330, z, color, D_003BC730, 0);
         glyph = itfCreateFont2TextGlyph(x + 0xF70, y + 0x348, z, color, D_003BC738, glyph);
     }
-    frFontDrawGlyphChain(glyph, 1, surface);
+    frDrawFontOt(glyph, 1, surface);
     frDestroyFontRequestAfter(glyph);
     if (page->fadeOut == 0) {
         if (page->drawAlpha < 256) {
@@ -2360,7 +2360,7 @@ void mnuDrawCenteredLabel(s32 x, s32 y, s32 unused, s32 color, s32 textId, s32 s
     frSetFontColor(glyph, color);
     width = frGetStrWidth(glyph) + 8;
     frSetDrawPosition(glyph, x - (width * 0x10 >> 1) + 0x5F0, y);
-    frFontDrawGlyphChain(glyph, 1, surface);
+    frDrawFontOt(glyph, 1, surface);
     frDestroyFontRequestAfter(glyph);
 }
 
@@ -2381,7 +2381,7 @@ void mnuDrawSelectedPartyProfileLabel(s32 unusedX, s32 unusedY, s32 depth, s32 f
         }
         glyph = itfCreateConvertedTextGlyph(0, 0, depth, color, outValue, 0);
         frFontCenterGlyphChainAt(0x1710, 0x5F0, glyph);
-        frFontDrawGlyphChain(glyph, 1, surface);
+        frDrawFontOt(glyph, 1, surface);
         frDestroyFontRequestAfter(glyph);
     }
 }
@@ -2407,7 +2407,7 @@ void mnuDrawPartyProfileAndExpOverlay(s32 x, s32 y, s32 depth, MenuPageSlot *slo
             sprintf(text, D_003BC740, remainingExp);
             glyph = itfCreateFont2TextGlyph(x + 0xDF0,
                 0x160, depth, color, text, 0);
-            frFontDrawGlyphChain(glyph, 1, surface);
+            frDrawFontOt(glyph, 1, surface);
             frDestroyFontRequestAfter(glyph);
         }
     }

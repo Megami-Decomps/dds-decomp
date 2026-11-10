@@ -37,7 +37,7 @@ extern void itfSetGridEntryQuantizedAndRefresh(EffectSlotSet *, s32, s32, s32, s
 
 extern u8 *datSkillMessages;
 
-extern s32 frFontDrawGlyphChain(struct _FRQ *, s8, u32);
+extern s32 frDrawFontOt(struct _FRQ *, s8, u32);
 extern _FRQ *itfDrawTextWithSelectedFontMode(s32, s32, s32, s8, u16, s32);
 
 
@@ -229,7 +229,7 @@ s32 mnuStepSkillDetailControl(dds3ProcessID_t *callback) {
 void mnuDrawSelectionLabel(s32 selection) {
     _FRQ *item = itfDrawTextWithSelectedFontMode(0xCB0, 0xA80, 0, 0, selection & 0xFFFF, 1);
     frSetFontColor(item, 0xA09DC366);
-    frFontDrawGlyphChain(item, 1, 0x53);
+    frDrawFontOt(item, 1, 0x53);
     frDestroyFontRequestAfter(item);
 }
 
@@ -277,7 +277,7 @@ void mnuDrawAffinityParticipantLabels(u16 affinityId, s32 placeholderResource, s
         }
 
         if (glyph != 0) {
-            frFontDrawGlyphChain(glyph, 1, 0x53);
+            frDrawFontOt(glyph, 1, 0x53);
             frDestroyFontRequestAfter(glyph);
         }
     }

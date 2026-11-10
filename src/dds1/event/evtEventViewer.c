@@ -70,7 +70,7 @@ extern void rblurSetParam(dds3Effect_RippleBlurParam_t *parameters);
 extern void effEventSetScatterBlurParameters(dds3Effect_DistortionBlurParam_t *parameters);
 extern void effSetLoadDescA(const dds3Effect_Blur_t *parameters);
 extern void effSetLoadDescD(const dds3Effect_Blur_t *parameters);
-extern u8 fldTitleIsActive(void);
+extern u8 fldTitleChk(void);
 extern s32 mnuGetSelectedTableValue(evtViewerInfo_t *runtime);
 struct evtViewerInfo_t;
 
@@ -990,7 +990,7 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
         }
         break;
     case 0x1E:
-        if (currentFrame != key->frame || fldTitleIsActive() != 1) {
+        if (currentFrame != key->frame || fldTitleChk() != 1) {
             break;
         }
         if (key->p08.sh[1] != 0) {
@@ -2166,7 +2166,7 @@ void evtEventViewerStartEndCountdown(evtViewerInfo_t *viewer) {
     } else if (viewer->timedActive == 1) {
         sdfSndSetChannelCount(10);
     }
-    if (fldTitleIsActive() == 1) {
+    if (fldTitleChk() == 1) {
         fldSetTitleDrawMode(0);
     }
     evtViewerCleanupMessageWindow(viewer);
@@ -2431,7 +2431,7 @@ void evtViewerAdvanceGlyphTick(evtViewerInfo_t *viewer) {
 
     if ((viewer->nowframe < viewer->frameRange.word - 3) && (0 < viewer->glyphTickCount))
     {
-        frFontDrawGlyphInDefaultMode(viewer->glyph);
+        frDrawFont(viewer->glyph);
         nextTick = viewer->glyphTickCount + 1;
         viewer->glyphTickCount = nextTick;
         if (0x1d < nextTick) {

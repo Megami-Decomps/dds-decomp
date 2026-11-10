@@ -258,7 +258,7 @@ extern s32 itfCreateTightFont3TextGlyph(s32, s32, s32, u32, u32, s32);
 
 typedef struct _FRQ _FRQ;
 
-extern s32 frFontDrawGlyphChain(_FRQ *, s8, u32);
+extern s32 frDrawFontOt(_FRQ *, s8, u32);
 
 extern char D_003BC6C0[];
 
@@ -271,7 +271,7 @@ void mnuDrawStaffCampSlotsAndCurrency(s32 unused0, s32 unused1, s32 z, s32 first
     itfDrawGridWithResolvedSlot(0x2B0, 0xCE8, 0, 1, (EffectSlotSet *)(u32)secondSlot, 3, drawFlags);
     sprintf(text, D_003BC6C0, DDS3_GBWK->header.currency);
     glyph = itfCreateTightFont3TextGlyph(0x4B0, 0xCD8, z, 0x80808080, (u32)text, 0);
-    frFontDrawGlyphChain((_FRQ *)glyph, 1, drawFlags);
+    frDrawFontOt((_FRQ *)glyph, 1, drawFlags);
     frDestroyFontRequestAfter((_FRQ *)glyph);
 }
 
@@ -281,7 +281,7 @@ extern u8 *mnuCampSelectionPromptTexts[];
 void mnuCreateStaffImageSprite(s32 imageIndex) {
     _FRQ *sprite = itfCreateConvertedTextGlyph(0x2F0, 0x1E0, 0, 0xa09dc35a,
                                       mnuCampSelectionPromptTexts[imageIndex], 0);
-    frFontDrawGlyphChain(sprite, 1, 0x54);
+    frDrawFontOt(sprite, 1, 0x54);
     frDestroyFontRequestAfter(sprite);
 }
 
@@ -317,7 +317,7 @@ void mnuDrawCampGridAndLabel(s32 kind, s32 labelIndex, s32 textTable, s32 contex
     if (textTable != 0) {
         glyph = itfDrawBankTextWithLayoutFlags(0x2C0, 0xA70, 0, labelIndex, textTable, textOption);
         frSetFontColor(glyph, 0xA09DC366);
-        frFontDrawGlyphChain(glyph, 0, layer);
+        frDrawFontOt(glyph, 0, layer);
         frDestroyFontRequestAfter(glyph);
     }
 }

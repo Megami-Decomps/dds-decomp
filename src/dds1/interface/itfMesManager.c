@@ -2348,26 +2348,26 @@ void CalcCurCtr(instanceMes_tag *panel) {
     }
 }
 
-extern void itfMesRenderActivePanelSprites(instanceMes_tag *);
+extern void DrawWindow(instanceMes_tag *);
 extern void itfDrawSoundSelectorFadeLayers(instanceMes_tag *);
 extern void itfDrawSelectedSoundRow(instanceMes_tag *);
 extern void itfDrawSoundSelectorOptionPanel(instanceMes_tag *);
 
 /* Draw the panel's glyph layers, advance its selection state and fade. */
-void itfUpdateSoundSelectorPanel(instanceMes_tag *panel) {
+void DrawMesFlow(instanceMes_tag *panel) {
     u32 flags = panel->flags;
     ItfMesBlk40 *selection;
     _FRQ *glyph;
 
     itfMesMngManager.flags &= ~2;
-    itfMesRenderActivePanelSprites(panel);
+    DrawWindow(panel);
     glyph = panel->blk14.glyphChain;
     if (!(flags & 0x10000) && glyph != 0) {
-        frFontDrawGlyphInDefaultMode(glyph);
+        frDrawFont(glyph);
     }
     glyph = panel->entryBlock.glyphChain;
     if (!(flags & 0x20000) && (flags & 7) >= 3) {
-        if (frFontDrawGlyphInDefaultMode(glyph) > 0) {
+        if (frDrawFont(glyph) > 0) {
             if ((panel->flags & 7) != 4) {
                 panel->fade.textAdvanceFrameCount = 0;
                 panel->flags = (panel->flags & ~7) | 4;
@@ -2377,7 +2377,7 @@ void itfUpdateSoundSelectorPanel(instanceMes_tag *panel) {
     glyph = panel->blk40.glyphChain;
     if (!(flags & 0x40000)) {
         flags &= 0x38;
-        if (flags >= 0x18 && frFontDrawGlyphWithSharedFlags(glyph, 1) > 0) {
+        if (flags >= 0x18 && frDrawFontEx(glyph, 1) > 0) {
             if (flags == 0x18) {
                 selection = &panel->blk40;
                 if (selection->selectedIndex == -1) {
@@ -2402,7 +2402,7 @@ void itfUpdateSoundSelectorPanel(instanceMes_tag *panel) {
     }
 }
 
-void itfMesRenderActivePanelSprites(instanceMes_tag *panel) {
+void DrawWindow(instanceMes_tag *panel) {
     ItfMesBlkA4 *place;
     if (panel->flags & 0x80000) {
         return;
@@ -2710,7 +2710,7 @@ dds3TaskUpdateResult_t DrawMsgMng_Process(dds3ProcessID_t *task) {
         return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
     }
     for (node = itfMesMngManager.pool.activeHead; node != NULL; node = node->next) {
-        itfUpdateSoundSelectorPanel(node->state);
+        DrawMesFlow(node->state);
     }
     itfMesMngManager.drawTickCount++;
     return DDS3_TASK_UPDATE_RETAIN_CALLBACK;

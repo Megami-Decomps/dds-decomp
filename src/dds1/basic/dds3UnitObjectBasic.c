@@ -347,7 +347,7 @@ s32 dds3UnitObjectBasicMainProcedure(dds3Basic_t *obj) {
 }
 
 extern void effObjApplyTransformParameters(sdfGrOt_t **, dds3Basic_t *);
-extern void fldDrawEffectObjectShadow(dds3Basic_t *);
+extern void fldSdwDraw(dds3Basic_t *);
 extern void dds3DrawUnitObjectShadow(f32, f32, f32, f32, s32);
 extern sdfGrOt_t *sdfModelOtTable[13][4];
 
@@ -365,7 +365,7 @@ s32 dds3UnitObjectBasicDrawProcedure(dds3Basic_t *obj) {
     }
     target = dds3GetUnitHandleObjectBasic(obj);
     if (dds3ObjectBaseCheckFlag(obj, 0x200) && target != NULL && !(target->owner->flags & MDL_SKIP_TRANSFORMS)) {
-        fldDrawEffectObjectShadow(obj);
+        fldSdwDraw(obj);
     }
     if (((EffectObjectData *)obj->workdata)->followParameterIndex == -1) {
         effObjApplyTransformParameters(sdfModelOtTable[0], obj);

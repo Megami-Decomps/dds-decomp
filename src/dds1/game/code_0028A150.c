@@ -563,7 +563,7 @@ u8 fileIsLoadedWithActiveFlow(s32 loaded) {
 
 void mnuDrawAndStoreTextGlyphHandle(s32 x, s32 y, u32 colors, const u8 *text) {
     fileMenuConvertedTextGlyph = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
-    frFontDrawGlyphWithSharedFlags(fileMenuConvertedTextGlyph, 1);
+    frDrawFontEx(fileMenuConvertedTextGlyph, 1);
     frDestroyFontRequestAfter(fileMenuConvertedTextGlyph);
 }
 
@@ -576,7 +576,7 @@ void mcdCreateFontDrawHandle(s32 x, s32 y, u32 color, const char *text) {
     frSetFontSpace(fileMenuStringGlyph, 1);
     frSetDrawPosition(fileMenuStringGlyph, x << 4, y << 3);
     frSetFontColor(fileMenuStringGlyph, color);
-    frFontDrawGlyphChain(fileMenuStringGlyph, 0, 0x56);
+    frDrawFontOt(fileMenuStringGlyph, 0, 0x56);
     frDestroyFontRequestAfter(fileMenuStringGlyph);
     frSetFontDrawOT(0x54);
 }
@@ -585,7 +585,7 @@ void fileDrawMenuImageAtPoint(s32 x, s32 y, u32 colors, char *text) {
     struct _FRQ *imageHandle;
 
     imageHandle = itfCreateFont2TextGlyph(x << 4, y << 3, 0, colors, text, 0);
-    frFontDrawGlyphWithSharedFlags(imageHandle, 1);
+    frDrawFontEx(imageHandle, 1);
     frDestroyFontRequestAfter(imageHandle);
 }
 
@@ -2874,7 +2874,7 @@ u32 fileMenuOperationSucceeded(void) {
     return 1;
 }
 
-s32 fileMenuTaskExists(void) {
+s32 fmProcessChk(void) {
     return dds3SearchProcessName("FileMentCalc") != NULL;
 }
 

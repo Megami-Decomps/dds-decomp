@@ -563,7 +563,7 @@ u8 fileIsLoadedWithActiveFlow(s32 condition) {
 void mnuDrawAndStoreTextGlyphHandle(s32 x, s32 y, u32 colors, const u8 *text) {
     struct _FRQ *handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
     fileMenuConvertedTextGlyph = handle;
-    frFontDrawGlyphWithSharedFlags(handle, 1);
+    frDrawFontEx(handle, 1);
     frDestroyFontRequestAfter(fileMenuConvertedTextGlyph);
 }
 
@@ -571,7 +571,7 @@ void mcdCreateConfiguredDrawHandle(s32 x, s32 y, u32 colors, const u8 *text) {
     struct _FRQ *handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
     fileMenuConfiguredTextGlyph = handle;
     frSetFontColorNo(handle, 3);
-    frFontDrawGlyphWithSharedFlags(fileMenuConfiguredTextGlyph, 1);
+    frDrawFontEx(fileMenuConfiguredTextGlyph, 1);
     frDestroyFontRequestAfter(fileMenuConfiguredTextGlyph);
 }
 
@@ -582,7 +582,7 @@ void mcdCreateFontDrawHandle(s32 x, s32 y, u32 colors, const char *text) {
     frSetFontSpace(fileMenuStringGlyph, 1);
     frSetDrawPosition(fileMenuStringGlyph, x << 4, y << 3);
     frSetFontColor(fileMenuStringGlyph, colors);
-    frFontDrawGlyphChain(fileMenuStringGlyph, 0, 0x56);
+    frDrawFontOt(fileMenuStringGlyph, 0, 0x56);
     frDestroyFontRequestAfter(fileMenuStringGlyph);
     frSetFontDrawOT(0x54);
 }
@@ -591,7 +591,7 @@ void fileDrawMenuImageAtPoint(s32 x, s32 y, u32 colors, char *text) {
     u32 handle;
 
     handle = itfCreateFont2TextGlyph(x << 4, y << 3, 0, colors, text, 0);
-    frFontDrawGlyphWithSharedFlags(handle, 1);
+    frDrawFontEx(handle, 1);
     frDestroyFontRequestAfter((struct _FRQ *)(u32)handle);
 }
 
@@ -2877,7 +2877,7 @@ u32 fileMenuOperationSucceeded(void) {
     return 1;
 }
 
-s32 fileMenuTaskExists(void) {
+s32 fmProcessChk(void) {
     return dds3SearchProcessName("FileMentCalc") != NULL;
 }
 

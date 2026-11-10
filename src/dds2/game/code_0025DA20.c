@@ -185,7 +185,7 @@ extern u8 mnuCampWideRewardEntries[];
 extern struct _FRQ *itfDrawBankTextWithLayoutFlags(s32 x, s32 y, s32 depth, u16 textId, struct FrFontTextBank *bank, s32 flags);
 
 
-extern s32 frFontDrawGlyphChain(struct _FRQ *, s8, u32);
+extern s32 frDrawFontOt(struct _FRQ *, s8, u32);
 
 extern f32 mnuShopSavedLastTransformVector[];
 extern f32 mnuShopSavedMiddleTransformVector[];
@@ -2516,7 +2516,7 @@ void mnuQueueCampTextGlyphWithChildColor(s32 fontValue, s32 enabled, s32 unused2
     if (enabled != 0) {
         handle = itfDrawBankTextWithLayoutFlags(0x970, 0xB58, 1, (u16)fontValue, (struct FrFontTextBank *)enabled, fontArg);
         frSetFontColor(handle, 0x80808040);
-        frFontDrawGlyphChain(handle, 0, flags);
+        frDrawFontOt(handle, 0, flags);
         frDestroyFontRequestAfter(handle);
     }
 }

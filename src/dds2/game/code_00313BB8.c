@@ -152,7 +152,7 @@ void ptyRebuildProfileSkills(s32 useCurrentProfile, datUnitWork_t *unit);
 extern _FRQ *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
 
 
-extern s32 frFontDrawGlyphChain(_FRQ *, s8, u32);
+extern s32 frDrawFontOt(_FRQ *, s8, u32);
 
 
 void sdfAppendFormattedDebugLogPair(s32 left, s32 right) {
@@ -1402,7 +1402,7 @@ u16 scrGetEntryLowFlags(datUnitWork_t *context, u16 entryId) {
 void frFontQueueColoredGlyph(s32 x, s32 y, u32 first, u16 width, u32 second, s32 option) {
     _FRQ *handle = itfDrawBankTextWithLayoutFlags(x, y, first, width, &frFontColoredGlyphResource, 0);
     frSetFontColor(handle, second);
-    frFontDrawGlyphChain(handle, 1, option);
+    frDrawFontOt(handle, 1, option);
     frDestroyFontRequestAfter(handle);
 }
 

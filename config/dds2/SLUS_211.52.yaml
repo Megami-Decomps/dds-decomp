@@ -74,7 +74,7 @@ segments:
       - [0x5150, c, kernel/dds3StartMenu]  # SMT3 unit; DDS keeps only dds3StartMenuProcess
       - [0x5158, c, kernel/dds3Randomize]  # SMT3 unit
       - [0x5180, c, game/code_00104180]  # DDS-only debug graph and texture viewer
-      - [0x6070, c, kernel/dds3KernelDraw]  # Nocturne __FILE__; SMT3 unit starts at dds3InitializeFrameDrawPackets
+      - [0x6070, c, kernel/dds3KernelDraw]  # Nocturne __FILE__; SMT3 unit starts at dds3InitDrawEnvSub
       - [0xB2F0, c, kernel/dds3SequenceList]
       - [0xCD50, c, script/scrScriptProcess]  # Nocturne __FILE__
       - [0xD348, c, script/scrTraceCode]  # Nocturne __FILE__

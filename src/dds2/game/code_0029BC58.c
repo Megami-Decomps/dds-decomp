@@ -360,14 +360,14 @@ void brsDrawRewardEntryRows(s32 x, s32 y, s32 z, u32 alpha, BrsRewardSummary *re
         if (id != 0) {
             packed = (alpha & 0xFF) | 0x96FF9B00;
             glyph = itfCreateConvertedTextGlyph(x, y, z, packed, D_00435E5C[id], 0);
-            frFontDrawGlyphChain(glyph, 1, surface);
+            frDrawFontOt(glyph, 1, surface);
             frDestroyFontRequestAfter((struct _FRQ *)(u32)glyph);
             effDrawSpriteWithCornerColors(x + 0x720, y + 0x20, 0, labelColor, 0, work->teardownResource, 0x20, 0x53);
             sprintf(name, D_004379C0, param);
             packed = (alpha & 0xFF) | 0xA09DC300;
             glyph = itfCreateFont3TextGlyph(x + 0x900, y, z, packed, name, 0);
             frSetFontColorNo(glyph, 3);
-            frFontDrawGlyphChain(glyph, 1, surface);
+            frDrawFontOt(glyph, 1, surface);
             frDestroyFontRequestAfter(glyph);
             effDrawSpriteWithCornerColors(x + 0x6E0, y + 0x88, 0, valueColor, 0, work->teardownResource, 0x1B, 0x53);
             y += 0xB8;
@@ -389,7 +389,7 @@ void mnuCampDrawMenuIconLayer(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSum
     sprintf(name, D_004379C8, res->totalExp);
     sprite = itfCreateFont3TextGlyph(x, y, z, packed, name, 0);
     frSetFontColorNo(sprite, 3);
-    frFontDrawGlyphChain(sprite, 1, flags);
+    frDrawFontOt(sprite, 1, flags);
     frDestroyFontRequestAfter(sprite);
     color[0] = alpha;
     color[1] = alpha;
@@ -410,7 +410,7 @@ void brsDrawMaccaRewardTotal(s32 x, s32 y, s32 z, u32 alpha, const BrsRewardSumm
         sprintf(name, D_004379C8, res->macca);
         sprite = itfCreateFont3TextGlyph(x, y, z, packed, name, 0);
         frSetFontColorNo(sprite, 3);
-        frFontDrawGlyphChain(sprite, 1, flags);
+        frDrawFontOt(sprite, 1, flags);
         frDestroyFontRequestAfter(sprite);
         color[0] = alpha;
         color[1] = alpha;

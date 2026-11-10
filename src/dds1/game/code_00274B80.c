@@ -46,7 +46,7 @@ extern u16 mnuGetAdjustedEntryValue(s32, datUnitWork_t *);
 extern u16 mnuGetAdjustedPartyRangeValue(s32);
 extern u8 mnuGetRangeEntryKind(u32);
 extern _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, _FRQ *);
-extern s32 frFontDrawGlyphChain(_FRQ *, s8, u32);
+extern s32 frDrawFontOt(_FRQ *, s8, u32);
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, u32, s32, EffectSlotSet *, s32, u32);
 extern s32 ptyGetCurrentProfileId(const datUnitWork_t *);
 extern s32 prfResolveMantraNameOrFallback(u16, u8 **);
@@ -250,7 +250,7 @@ void mnuDrawPartySelectionListEntry(s32 x, s32 y, s32 z, struct MenuList *list, 
         posX = x + 0x7D0;
         sprintf(text, D_003BC6E0, level);
         glyph = itfCreateFont2TextGlyph(posX, y, 0, 0xA09DC380, text, NULL);
-        frFontDrawGlyphChain(glyph, 1, 0x53);
+        frDrawFontOt(glyph, 1, 0x53);
         frDestroyFontRequestAfter(glyph);
         break;
     case MNU_PARTY_SELECTION_CONFIRM_ROW:
@@ -600,7 +600,7 @@ void mnuDrawPartyVitalsAndProfile(EffectSlotSet **sets, MenuEffectPair *hpBar, M
             glyph = itfCreateConvertedTextGlyph(
                 0x640, 0xBE8, 0, color, name, 0);
             frFontCenterGlyphChainAt(0xD20, 0xBE8, glyph);
-            frFontDrawGlyphChain(glyph, 1, 0x53);
+            frDrawFontOt(glyph, 1, 0x53);
             frDestroyFontRequestAfter(glyph);
         }
     } else {
@@ -608,7 +608,7 @@ void mnuDrawPartyVitalsAndProfile(EffectSlotSet **sets, MenuEffectPair *hpBar, M
             0x640, 0xBE8, 0, color, (const u8 *)D_003BC6F0, 0);
         glyph = itfCreateConvertedTextGlyph(
             0xB50, 0xBF0, 0, color, (const u8 *)D_003BC6F8, glyph);
-        frFontDrawGlyphChain(glyph, 1, 0x53);
+        frDrawFontOt(glyph, 1, 0x53);
         frDestroyFontRequestAfter(glyph);
     }
     if (marker) {
@@ -1128,7 +1128,7 @@ void mnuDrawSlotIcons(s32 x, MenuPageWindow *page) {
     for (i = 0; i < 3; i++, y += 0xa8) {
         handle = itfDrawUnderscoreTextSegment(0x190, y, 0, 0xa09dc359, (const u8 *)(D_003BAA7C + slot->unitId * 45), i);
         if (handle != 0) {
-            frFontDrawGlyphChain(handle, 1, 0x53);
+            frDrawFontOt(handle, 1, 0x53);
             frDestroyFontRequestAfter(handle);
         }
     }
@@ -1187,7 +1187,7 @@ void mnuDrawTextSprite(s32 x, s32 y, s32 scale, s32 color, s32 textId, s32 param
     frSetPriority(item, scale * 0x10);
     frSetFontColor(item, color);
     frDisableMode(1);
-    frFontDrawGlyphChain(item, 1, param);
+    frDrawFontOt(item, 1, param);
     frDestroyFontRequestAfter(item);
 }
 
@@ -1321,7 +1321,7 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
     glyph = itfCreateFont2TextGlyph(x - 0x90, y, depth, color, text, 0);
     x += 0x140;
     frSetFontColorNo(glyph, chainFlag);
-    frFontDrawGlyphChain(glyph, 1, texture);
+    frDrawFontOt(glyph, 1, texture);
     frDestroyFontRequestAfter(glyph);
     switch (mnuGetRangeEntryKind(rangeId)) {
     case 1:

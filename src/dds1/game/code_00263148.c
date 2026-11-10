@@ -328,7 +328,7 @@ void mnuDrawItemPanelBackdrop(BrsSkillPackageWork *scene) {
 }
 
 extern void effDrawSpriteWithCornerFade(s32, s32, s32, s32, s32, u32, s32, s32);
-extern s32 frFontDrawGlyphChain(struct _FRQ *, s8, u32);
+extern s32 frDrawFontOt(struct _FRQ *, s8, u32);
 void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *scene) {
     char text[16];
     datUnitWork_t *item = scene->selectedRewardRow->unit;
@@ -351,7 +351,7 @@ void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *scene) {
     color = fclBlendColor(0xFFF06480, 0xFFF06400, fade);
     sprintf(text, D_003BC550, delta);
     glyph = itfCreateFont3TextGlyph(x, 0x408, 0, color, text, 0);
-    frFontDrawGlyphChain(glyph, 1, 0x53);
+    frDrawFontOt(glyph, 1, 0x53);
     frDestroyFontRequestAfter(glyph);
 
     if (item->unitId == 1) {

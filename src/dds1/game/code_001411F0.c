@@ -230,7 +230,7 @@ extern void p2sdStopSe(u32 soundId);
 
 
 
-extern dds3TaskUpdateResult_t fldFieldTaskUpdate(dds3ProcessID_t *task);
+extern dds3TaskUpdateResult_t fldAddressProcess2(dds3ProcessID_t *task);
 
 extern s32 D_0032E3C0[];
 
@@ -299,7 +299,7 @@ extern void DrwSprite2D(s32, s32, s32, s32, s32, s32, s32, s32, s32, sdfTexHandl
 extern dds3ProcessID_t *inputpanel_id;
 extern u32 fldRunDanteGunFlag[];
 extern s32 gFldInf_WpExit;
-extern s32 fileMenuTaskExists(void);
+extern s32 fmProcessChk(void);
 extern u8 fldHasKiretaLabelProcess(void);
 extern u8 fldProcKiretaChk(void);
 extern u8 fldProcHirakenaiChk(void);
@@ -319,7 +319,7 @@ FldTitleBannerResult fldResolvePendingTitleBanner(void) {
     if (fldRunDanteGunFlag[0] != 0) {
         return FLD_TITLE_BANNER_UNRESOLVED;
     }
-    if (fileMenuTaskExists() != 0) {
+    if (fmProcessChk() != 0) {
         return FLD_TITLE_BANNER_UNRESOLVED;
     }
     if (fldHasKiretaLabelProcess() != 0) {
@@ -355,7 +355,7 @@ FldTitleBannerResult fldResolvePendingTitleBanner(void) {
     return FLD_TITLE_BANNER_UNRESOLVED;
 }
 
-extern u8 fldTitleIsActive(void);
+extern u8 fldTitleChk(void);
 
 extern void fldDrawAnimatedFieldBanner(s32, s32, s32);
 
@@ -363,17 +363,17 @@ extern void fldDrawMapLabelBanner(s32);
 
 extern s32 gFldElvFloorNow;
 
-dds3TaskUpdateResult_t fldFieldTaskUpdate(dds3ProcessID_t *task) {
+dds3TaskUpdateResult_t fldAddressProcess2(dds3ProcessID_t *task) {
     if (fldProcCampChk() != FLD_CAMP_CHECK_STATE_ENCOUNTER_FLAG_SET) {
         return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
     }
     if (fldProcAmChk() != FLD_SCENE_TRANSITION_GATE_PROCEED) {
         return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
     }
-    if (fileMenuTaskExists() != 0) {
+    if (fmProcessChk() != 0) {
         return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
     }
-    if (fldTitleIsActive() != 0) {
+    if (fldTitleChk() != 0) {
         return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
     }
     if (gFldElvFloorNow != -999) {
@@ -393,7 +393,7 @@ dds3TaskUpdateResult_t fldAddressProcess1(dds3ProcessID_t *task) {
     work[2] = 0;
     work[3] = 0;
     dds3SetProcessData(task, (u32)work);
-    return (dds3TaskUpdateResult_t)(u32)fldFieldTaskUpdate;
+    return (dds3TaskUpdateResult_t)(u32)fldAddressProcess2;
 }
 
 void fldAddressShutdown(dds3ProcessID_t *task) {
@@ -1382,7 +1382,7 @@ extern void fldPoint3To2H(f32 *, f32 *, f32, f32, f32);
 extern void fldAutoMapDrawIconOfsRF(s32, f32, f32, f32);
 extern void fldAutoMapGetBBox(f32 *, f32 *, f32 *, f32 *);
 extern void frSetPriority(_FRQ *, u32);
-extern s32 frFontDrawGlyphWithSharedFlags(_FRQ *, s8);
+extern s32 frDrawFontEx(_FRQ *, s8);
 extern s32 frDestroyFontRequestAfter(_FRQ *);
 
 
@@ -1894,7 +1894,7 @@ void fldDrawAutomapScene(void) {
             (450 - D_003BD7D0 * 6) << 4, 112, 0, 0xA09DC380,
             title, 0);
         frSetPriority(D_003BD7CC, 0xFFFFFF);
-        frFontDrawGlyphInDefaultMode(D_003BD7CC);
+        frDrawFont(D_003BD7CC);
         frDestroyFontRequestAfter(D_003BD7CC);
     }
 
@@ -1922,7 +1922,7 @@ void fldDrawAutomapScene(void) {
             (D_003BAF08 + 42) << 3, 0, labelColor,
             D_00346068[labelIndex].name, 0);
         frSetPriority(D_003BD7CC, 0xFFFFFF);
-        frFontDrawGlyphWithSharedFlags(D_003BD7CC, 1);
+        frDrawFontEx(D_003BD7CC, 1);
         frDestroyFontRequestAfter(D_003BD7CC);
     }
 
@@ -1944,7 +1944,7 @@ void fldDrawAutomapScene(void) {
             (D_003BAF04 << 3) + 332, 0, labelColor,
             D_00346068[labelIndex].name, 0);
         frSetPriority(D_003BD7CC, 0xFFFFFF);
-        frFontDrawGlyphWithSharedFlags(D_003BD7CC, 1);
+        frDrawFontEx(D_003BD7CC, 1);
         frDestroyFontRequestAfter(D_003BD7CC);
     }
 
@@ -4282,7 +4282,7 @@ void fldDrawInputCursor(s32 x, s32 y) {
 
 extern FldSparkDialogPhase fldGetSparkDialogPhase(void);
 extern const s16 *fldFindLocationCoordinateRecord(s32 area, s32 locationIndex);
-extern void fldSubmitGsGradientQuad(s32, s32, s32, s32, u32, u32, u32, u32,
+extern void aDrawBoxG(s32, s32, s32, s32, u32, u32, u32, u32,
     u32, u32, u32, u32, u32, u32, u32, u32, u32, u32, u32, u32);
 
 void fldDrawLocationPanel(void) {
@@ -4314,14 +4314,14 @@ void fldDrawLocationPanel(void) {
         rsetOtOfs(0x53);
         rsetAlpha(0);
         rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
-        fldSubmitGsGradientQuad(0x194, 0x91, 0x5F, 0x47, 0, 0, 0, 0x26,
+        aDrawBoxG(0x194, 0x91, 0x5F, 0x47, 0, 0, 0, 0x26,
             0, 0, 0, 0x26, 0, 0, 0, 0x26, 0, 0, 0, 0x26);
         DrwSprite2D(0x188, 0x117, 0x78, 0x80, 1, 0, 0x78, 0x80, color, D_003BAF34);
         DrwSprite2D(0x188, 0x197, 0x78, 0x1C, 1, 0x7F, 0x78, 1, color, D_003BAF34);
         rsetAlpha(0);
-        fldSubmitGsGradientQuad(0x190, 0x8F, 0x70, 0x49, 0, 0xD, 0xA2, 0x18,
+        aDrawBoxG(0x190, 0x8F, 0x70, 0x49, 0, 0xD, 0xA2, 0x18,
             0, 0xD, 0xA2, 0, 0, 0xD, 0xA2, 0, 0, 0xD, 0xA2, 0);
-        fldSubmitGsGradientQuad(0x193, 0x90, 0x6D, 0x4E, 0, 0, 0, 0,
+        aDrawBoxG(0x193, 0x90, 0x6D, 0x4E, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x18);
         DrwSprite2D(0x1B4, 0x112, 0x1F, 0x10, 1, 1, 0x1F, 0x10, color, D_003BAF38);
         rsetAlpha(0);
@@ -4639,7 +4639,7 @@ void fldSetTitleDrawMode(u32 value) {
     D_003BAFB0 = value;
 }
 
-u8 fldTitleIsActive(void) {
+u8 fldTitleChk(void) {
     return dds3SearchProcessName(fldTitleTaskName) != 0;
 }
 
@@ -4680,7 +4680,7 @@ dds3TaskUpdateResult_t fldTitle(dds3ProcessID_t *task) {
             if (alpha > 0x80) {
                 alpha = 0x80;
             }
-            fldSubmitGsGradientQuad(0x175, 0x74, 0x8B, 0x45, 0, 0, 0, 0, 0, 0, 0, alpha * 12 / 128, 0, 0, 0,
+            aDrawBoxG(0x175, 0x74, 0x8B, 0x45, 0, 0, 0, 0, 0, 0, 0, alpha * 12 / 128, 0, 0, 0,
                                     alpha / 64, 0, 0, 0, alpha / 2);
             DrwSprite2D(0x100, 0x12C, 0xFE, 0x45, 1, 1, 0xFE, 0x45, (alpha << 24) | 0x808080, D_003BAFB4);
         }
@@ -4693,7 +4693,7 @@ dds3TaskUpdateResult_t fldTitle(dds3ProcessID_t *task) {
             if (alpha < 0) {
                 alpha = 0;
             }
-            fldSubmitGsGradientQuad(0x175, 0x74, 0x8B, 0x45, 0, 0, 0, 0, 0, 0, 0, alpha * 12 / 128, 0, 0, 0,
+            aDrawBoxG(0x175, 0x74, 0x8B, 0x45, 0, 0, 0, 0, 0, 0, 0, alpha * 12 / 128, 0, 0, 0,
                                     alpha / 64, 0, 0, 0, alpha / 2);
             DrwSprite2D(0x100, 0x12C, 0xFE, 0x45, 1, 1, 0xFE, 0x45, (alpha << 24) | 0x807060, D_003BAFB4);
             rsetAlpha(0);
@@ -4707,7 +4707,7 @@ dds3TaskUpdateResult_t fldTitle(dds3ProcessID_t *task) {
             if (alpha < 0) {
                 alpha = 0;
             }
-            fldSubmitGsGradientQuad(0x175, 0x74, 0x8B, 0x45, 0, 0, 0, 0, 0, 0, 0, alpha * 12 / 128, 0, 0, 0,
+            aDrawBoxG(0x175, 0x74, 0x8B, 0x45, 0, 0, 0, 0, 0, 0, 0, alpha * 12 / 128, 0, 0, 0,
                                     alpha / 64, 0, 0, 0, alpha / 2);
             DrwSprite2D(0x100, 0x12C, 0xFE, 0x45, 1, 1, 0xFE, 0x45, (alpha << 24) | 0x807060, D_003BAFB4);
             rsetAlpha(0);
@@ -4721,7 +4721,7 @@ dds3TaskUpdateResult_t fldTitle(dds3ProcessID_t *task) {
         }
         break;
     case 2:
-        fldSubmitGsGradientQuad(0x175, 0x74, 0x8B, 0x45, 0, 0, 0, 0, 0, 0, 0, 0xC, 0, 0, 0, 2, 0, 0, 0, 0x40);
+        aDrawBoxG(0x175, 0x74, 0x8B, 0x45, 0, 0, 0, 0, 0, 0, 0, 0xC, 0, 0, 0, 2, 0, 0, 0, 0x40);
         DrwSprite2D(0x100, 0x12C, 0xFE, 0x45, 1, 1, 0xFE, 0x45, 0x80808080, D_003BAFB4);
         nextFrame = D_003BAF9C + 1;
         if (nextFrame > 60) {
@@ -4739,7 +4739,7 @@ dds3TaskUpdateResult_t fldTitle(dds3ProcessID_t *task) {
         if (alpha > 0x80) {
             alpha = 0x80;
         }
-        fldSubmitGsGradientQuad(0x175, 0x74, 0x8B, 0x45, 0, 0, 0, 0, 0, 0, 0, alpha * 12 / 128, 0, 0, 0,
+        aDrawBoxG(0x175, 0x74, 0x8B, 0x45, 0, 0, 0, 0, 0, 0, 0, alpha * 12 / 128, 0, 0, 0,
                                 alpha / 64, 0, 0, 0, alpha / 2);
         DrwSprite2D(0x100, 0x12C, 0xFE, 0x45, 1, 1, 0xFE, 0x45, (alpha << 24) | 0x808080, D_003BAFB4);
         nextFrame = D_003BAF9C + 1;
@@ -4788,13 +4788,13 @@ void fldStartTitle(s32 field, s32 mode, s32 option) {
     allocation = sdfDevLoadFileEx(path, (u32 *)&resourceAddress, 0);
     D_003BAFB4 = sdfTexSet((SdfTextureFileHeader *)(resourceAddress));
     sdfMemFreeDirect(allocation);
-    if (fldTitleIsActive() == 0) {
+    if (fldTitleChk() == 0) {
         dds3StartProcess(fldTitleTaskName, 0x2B0A, 0, 1, fldTitle, fldReleaseTitleTextureReference, 0);
     }
 }
 
 void fldDestroyTitleTask(void) {
-    if (fldTitleIsActive() != 0) {
+    if (fldTitleChk() != 0) {
         dds3KillProcessName(fldTitleTaskName, 1);
     }
 }
@@ -4833,9 +4833,9 @@ s32 fldTitleMini(dds3ProcessID_t *task) {
     case 1:
         if (D_003BAFB8 >= 8) {
             alpha = (D_003BAFB8 - 8) * 16;
-            fldSubmitGsGradientQuad(0x4C, 0xB1, 0xB4, 2, 0, 0, 0, 0,
+            aDrawBoxG(0x4C, 0xB1, 0xB4, 2, 0, 0, 0, 0,
                 0, 0, 0, alpha * 0x33 / 128, 0, 0, 0, 0, 0, 0, 0, alpha * 0x33 / 128);
-            fldSubmitGsGradientQuad(0x100, 0xB1, 0xB4, 2, 0, 0, 0, alpha * 0x33 / 128,
+            aDrawBoxG(0x100, 0xB1, 0xB4, 2, 0, 0, 0, alpha * 0x33 / 128,
                 0, 0, 0, 0, 0, 0, 0, alpha * 0x33 / 128, 0, 0, 0, 0);
         }
         alpha = D_003BAFB8 * 128 / 10;
@@ -4874,9 +4874,9 @@ s32 fldTitleMini(dds3ProcessID_t *task) {
         break;
     case 2:
         alpha = 128;
-        fldSubmitGsGradientQuad(0x4C, 0xB1, 0xB4, 2, 0, 0, 0, 0,
+        aDrawBoxG(0x4C, 0xB1, 0xB4, 2, 0, 0, 0, 0,
             0, 0, 0, alpha * 0x33 / 128, 0, 0, 0, 0, 0, 0, 0, alpha * 0x33 / 128);
-        fldSubmitGsGradientQuad(0x100, 0xB1, 0xB4, 2, 0, 0, 0, alpha * 0x33 / 128,
+        aDrawBoxG(0x100, 0xB1, 0xB4, 2, 0, 0, 0, alpha * 0x33 / 128,
             0, 0, 0, 0, 0, 0, 0, alpha * 0x33 / 128, 0, 0, 0, 0);
         alpha -= D_003BAFB8 * 8;
         if (alpha > 0) {
@@ -4918,9 +4918,9 @@ s32 fldTitleMini(dds3ProcessID_t *task) {
             alpha = 128 - (D_003BAFB8 - 5) * 12;
         }
         if (alpha > 0) {
-            fldSubmitGsGradientQuad(0x4C, 0xB1, 0xB4, 2, 0, 0, 0, 0,
+            aDrawBoxG(0x4C, 0xB1, 0xB4, 2, 0, 0, 0, 0,
                 0, 0, 0, alpha * 0x33 / 128, 0, 0, 0, 0, 0, 0, 0, alpha * 0x33 / 128);
-            fldSubmitGsGradientQuad(0x100, 0xB1, 0xB4, 2, 0, 0, 0, alpha * 0x33 / 128,
+            aDrawBoxG(0x100, 0xB1, 0xB4, 2, 0, 0, 0, alpha * 0x33 / 128,
                 0, 0, 0, 0, 0, 0, 0, alpha * 0x33 / 128, 0, 0, 0, 0);
         }
         if (D_003BAFB8 < 10) {
@@ -5074,7 +5074,7 @@ void fldStartMiniTitleForUnlock(s32 id) {
     allocation = sdfDevLoadFileEx(path, (u32 *)&data, 0);
     D_003BAFC4 = sdfTexSet((SdfTextureFileHeader *)(data));
     sdfMemFreeDirect(allocation);
-    if (fldTitleIsActive() == 0) {
+    if (fldTitleChk() == 0) {
         dds3StartProcess(D_003A0828, 0x2B0A, 0, 1, fldTitleMini, fldReleaseTitleMiniTexture, 0);
     }
 }

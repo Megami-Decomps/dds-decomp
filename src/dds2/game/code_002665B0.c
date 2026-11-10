@@ -352,7 +352,7 @@ void mnuQueueFontGlyphFromSelectedAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32
         text = D_003A47E8[slot].encodedText;
     }
     handle = itfCreateConvertedTextGlyph(gridX - 0x120, gridY, depth, colors, text, 0);
-    frFontDrawGlyphChain(handle, 1, MNU_TEXT_DRAW_PRIORITY);
+    frDrawFontOt(handle, 1, MNU_TEXT_DRAW_PRIORITY);
     frDestroyFontRequestAfter(handle);
 }
 
@@ -406,7 +406,7 @@ void mnuCreateNumberSprite(s32 x, s32 y, s32 layer, s32 blendWeight, s32 number,
 
     sprintf(text, mnuNumberSpriteFormat, number);
     sprite = itfCreateFont2TextGlyph(x, y, layer, fclBlendColor(color, color & ~MNU_COLOR_LOW_BYTE_MASK, blendWeight), text, 0);
-    frFontDrawGlyphChain(sprite, 1, priority);
+    frDrawFontOt(sprite, 1, priority);
     frDestroyFontRequestAfter(sprite);
 }
 
@@ -436,7 +436,7 @@ void mnuDrawTerminalRecoveryListEntry(s32 unused, s32 rowY, s32 depth, MenuList 
         glyph = itfCreateFont3TextGlyph(0x1810, 0x268, depth,
             fclBlendColor(0xA09DC380, 0xA09DC300, scale), text, 0);
         frSetFontColorNo(glyph, 4);
-        frFontDrawGlyphChain(glyph, 1, priority);
+        frDrawFontOt(glyph, 1, priority);
         frDestroyFontRequestAfter(glyph);
         selected = 1;
     }
@@ -576,7 +576,7 @@ void mnuDrawEligibleTerminalSlotEntry(s32 x, s32 y, s32 unused, MenuList *list, 
     color = fclBlendColor(color, color & ~0xFF, width);
     glyph = itfCreateConvertedTextGlyph(x + 0xF0, y, 0, color, (const u8 *)node->title, 0);
     frSetFontColorNo(glyph, chainFlags);
-    frFontDrawGlyphChain(glyph, 1, priority);
+    frDrawFontOt(glyph, 1, priority);
     frDestroyFontRequestAfter(glyph);
 }
 
@@ -2014,7 +2014,7 @@ s32 evtBeginSelectionExitFade(dds3ProcessID_t *task) {
     dds3FadeIn(0, 0, 0, 15);
     return 1;
 }
-extern s32 fileMenuTaskExists(void);
+extern s32 fmProcessChk(void);
 extern void fileStartMemoryCardMenuForMode(FileMenuStartMode mode);
 extern void slSetTmnlID(s32 x, s32 y);
 
@@ -2036,7 +2036,7 @@ s32 mnuOpenFileMenuFromTerminal(dds3ProcessID_t *request) {
         fileStartMemoryCardMenuForMode(FILE_MENU_START_MODE_LOAD);
         state->fileTaskActive = 1;
     }
-    if (state->popupState == 0 && fileMenuTaskExists() == 0 &&
+    if (state->popupState == 0 && fmProcessChk() == 0 &&
         sdfDelayedResrcCheck() == 0) {
         state->fileTaskActive = 0;
         mnuSetPopupEntryFlagged(dispatch, mnuTerminalPopupEntries);
@@ -2228,7 +2228,7 @@ void mnuQueueTerminalCurrencyLabel(s32 fading, s32 state) {
         color = fclBlendColor(0xA09DC380, 0xA09DC300, work->progressList->scale);
     }
     font = itfCreateFont3TextGlyph(0x1810, 0x1C8, 0, color, text, 0);
-    frFontDrawGlyphChain(font, 1, 0x52);
+    frDrawFontOt(font, 1, 0x52);
     frDestroyFontRequestAfter(font);
 }
 

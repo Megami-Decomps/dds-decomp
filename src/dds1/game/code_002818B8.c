@@ -200,7 +200,7 @@ void mnuDrawPartyMemberCommandPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     level = menu->records->slots[panelIndex].level;
     sprintf(text, D_003BC760, level);
     glyph = itfCreateFont2TextGlyph(labelX + 0x150, labelY, z, color, text, NULL);
-    frFontDrawGlyphChain(glyph, 1, surface);
+    frDrawFontOt(glyph, 1, surface);
     frDestroyFontRequestAfter(glyph);
     uiDrawActiveSurfaceRegion(surface);
     mnuDrawPartyPanelSlotWithBlend(x + framePositions[4], y + framePositions[5], 0xFFFFFF,
@@ -283,7 +283,7 @@ void mnuDrawPartyMemberStatusPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     level = menu->records->slots[panelIndex].level;
     sprintf(text, D_003BC760, level);
     glyph = itfCreateFont2TextGlyph(labelX + 0x170, labelY, z, textColor, text, NULL);
-    frFontDrawGlyphChain(glyph, 1, surface);
+    frDrawFontOt(glyph, 1, surface);
     frDestroyFontRequestAfter(glyph);
     uiDrawActiveSurfaceRegion(surface);
     effDrawSpriteWithCornerFade(x + framePositions[0], y + framePositions[1], 0xFFFFFF,

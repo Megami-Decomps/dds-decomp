@@ -7,7 +7,7 @@
 
 extern u8 *datItemMessages;
 extern _FRQ *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
-extern s32 frFontDrawGlyphChain(_FRQ *, s8, u32);
+extern s32 frDrawFontOt(_FRQ *, s8, u32);
 
 
 void itfEmitSelectedGlyph(MenuTerminalContext *context, s32 unused, s32 layoutFlags,
@@ -29,7 +29,7 @@ void itfEmitSelectedGlyph(MenuTerminalContext *context, s32 unused, s32 layoutFl
         }
         glyph = itfDrawBankTextWithLayoutFlags(0x600, y, 1, code, (FrFontTextBank *)datItemMessages, layoutFlags);
         frSetFontColor(glyph, color);
-        frFontDrawGlyphChain(glyph, 1, renderFlags);
+        frDrawFontOt(glyph, 1, renderFlags);
         frDestroyFontRequestAfter(glyph);
         return;
     }

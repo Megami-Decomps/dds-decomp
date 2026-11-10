@@ -136,7 +136,7 @@ void dds3FontReqDestroy(Dds3IntrusiveNode *owner) {
 void dds3FontReqDrawFont(const Dds3IntrusiveNode *owner) {
     const Dds3FontNode *node = (const Dds3FontNode *)owner;
 
-    frFontDrawGlyphInDefaultMode(node->glyph);
+    frDrawFont(node->glyph);
 }
 
 extern _FRQ * frFontBuildGlyphChain(const char *text, s8 fontIndex, s8 firstOption, s8 secondOption, _FRQ *existingGlyph);

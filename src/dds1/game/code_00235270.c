@@ -71,7 +71,7 @@ extern s16 fldSkyGetAlphaOfs(void);
 extern void fldSetFadeTarget(s32 area, s32 value, s32 duration);
 extern void fldSkyDrawFilter(void);
 extern void rsetOtOfs(s32 id);
-extern void fldSubmitTexturedOverlaySprite(void);
+extern void fldDrawBokasi(void);
 extern void p2sdPlayBGMFade(s32 track);
 extern void p2sdSetBgmTrack(s32 sequence);
 #include "sdf_debug_api.h"
@@ -185,7 +185,7 @@ s32 evtSkyProcess1(dds3ProcessID_t *task) {
     fldSkyDrawFilter();
     if (fldbokasi != 0) {
         rsetOtOfs(0x53);
-        fldSubmitTexturedOverlaySprite();
+        fldDrawBokasi();
     }
     return 0;
 }
@@ -4622,7 +4622,7 @@ extern EvtPathLinkResult evtPathLinkAndMake(dds3Basic_t *object, dds3Basic_t *ow
 extern EvtRuntimeChild *evtCreateTrackKeyAtFrame(EvtRuntimeGroup *group, s32 frame, evtViewerInfo_t *runtime);
 extern EvtPackedSoundTrackId evtLoadEventBgm(s32 eventId);
 extern EvtEventBgmReadiness evtCheckEventBgmLoaded(s32 eventId);
-extern u8 fldTitleIsActive(void);
+extern u8 fldTitleChk(void);
 extern void fldStartTitle(s32 field, s32 mode, s32 option);
 extern void dds3FadeBackgroundStartIn(s32 frames);
 
@@ -5450,7 +5450,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
         printf("smg file load :eventViewer\n");
     }
     if (timeiId != -1) {
-        if (!fldTitleIsActive()) {
+        if (!fldTitleChk()) {
             fldStartTitle(timeiId, -1, 30);
             printf("timei file load=%d\n", timeiId);
         } else {

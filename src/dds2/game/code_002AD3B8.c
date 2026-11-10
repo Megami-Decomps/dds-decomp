@@ -51,7 +51,7 @@ extern char D_00437BD8[];
 extern s32 mnuRingCustomizationStatLabels[];
 extern s32 itfCreateFont2TextGlyph(s32, s32, s32, s32, s32, s32);
 typedef struct _FRQ _FRQ;
-extern s32 frFontDrawGlyphChain(_FRQ *, s8, u32);
+extern s32 frDrawFontOt(_FRQ *, s8, u32);
 extern DatCommandRecordIndex evtGetIndexedEventRecordId(s32);
 extern u8 *D_00435E5C;
 extern u8 *datUnitNames;
@@ -641,7 +641,7 @@ void mnuDrawStaffCaption(s32 entryId, u8 *panel) {
         sprintf(captionText, D_00437BD0, datCommandRecords[evtGetIndexedEventRecordId(entryId)].hpPower);
         fontHandle = itfCreateFont2TextGlyph(0x620, 0xA20, 0, 0xA09DC380, (s32)captionText, 0);
         frSetFontColorNo((struct _FRQ *)(u32)fontHandle, 4);
-        frFontDrawGlyphChain((_FRQ *)fontHandle, 1, 0x53);
+        frDrawFontOt((_FRQ *)fontHandle, 1, 0x53);
         frDestroyFontRequestAfter((_FRQ *)fontHandle);
     }
 }
@@ -966,7 +966,7 @@ void mnuDrawStaffValueGrid(s32 x, s32 y, s32 itemId, MenuStaffContext *context) 
             if (bonus) {
                 frSetFontColorNo(glyph, 3);
             }
-            frFontDrawGlyphChain(glyph, 1, 0x53);
+            frDrawFontOt(glyph, 1, 0x53);
             frDestroyFontRequestAfter(glyph);
         }
     }
@@ -1013,7 +1013,7 @@ s32 mnuDrawStaffValuePage(dds3ProcessID_t *task) {
         mnuDrawStaffValueGrid(0, 0, selectionId, context);
         if (owned != 0 && evtBitCheck(0x990) != 0) {
             glyph = itfCreateConvertedTextGlyph(0x2B0, 0xB80, 0, 0xA09DC340, slotsCaption, 0);
-            frFontDrawGlyphChain(glyph, 1, 0x53);
+            frDrawFontOt(glyph, 1, 0x53);
             frDestroyFontRequestAfter(glyph);
             mnuDrawRemainingAndTotalCounts(0x770, 0xB98, 0x100, selectionId, context->resources.baseResources[1], 0x2C);
         }

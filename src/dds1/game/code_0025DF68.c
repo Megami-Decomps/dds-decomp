@@ -194,7 +194,7 @@ void mnuDrawShopItemQuantity(s32 x, s32 y, s32 depth, ShopScene *scene, s32 alph
         }
         sprintf(text, D_003BC4F0, quantity);
         glyph = itfCreateTightFont3TextGlyph(0x1A70, 0xAA0, depth, style, text, 0);
-        frFontDrawGlyphChain(glyph, 1, mode);
+        frDrawFontOt(glyph, 1, mode);
         frDestroyFontRequestAfter(glyph);
     }
 }
@@ -349,7 +349,7 @@ void mnuDrawCampItemListRow(s32 x, s32 y, s32 z, struct MenuList *list, struct M
             frSetFontColorNo(glyph, 4);
         }
     }
-    frFontDrawGlyphChain(glyph, 1, mode);
+    frDrawFontOt(glyph, 1, mode);
     frDestroyFontRequestAfter(glyph);
 }
 
@@ -397,7 +397,7 @@ void mnuDrawShopRowTextAndValue(s32 x, s32 y, s32 z, struct MenuList *list,
     if (selected) {
         frSetFontColorNo(glyph, 4);
     }
-    frFontDrawGlyphChain(glyph, 1, drawArg);
+    frDrawFontOt(glyph, 1, drawArg);
     frDestroyFontRequestAfter(glyph);
 
     if ((list->id & 1) == 0) {
@@ -413,7 +413,7 @@ void mnuDrawShopRowTextAndValue(s32 x, s32 y, s32 z, struct MenuList *list,
     if (selected) {
         frSetFontColorNo(glyph, 4);
     }
-    frFontDrawGlyphChain(glyph, 1, drawArg);
+    frDrawFontOt(glyph, 1, drawArg);
     frDestroyFontRequestAfter(glyph);
 }
 
@@ -507,7 +507,7 @@ void mnuDrawShopSelectedRowDetails(s32 x, s32 y, s32 depth, ShopScene *scene, s3
         glyph = itfCreateTightFont3TextGlyph(0xDD0, (155 + row * 21) << 3, depth,
                               0xA09DC380, text, 0);
         frSetFontColorNo(glyph, 4);
-        frFontDrawGlyphChain(glyph, 1, option);
+        frDrawFontOt(glyph, 1, option);
         frDestroyFontRequestAfter(glyph);
     }
 }
@@ -545,7 +545,7 @@ void mnuDrawShopSelectedRowDetailsWithAlpha(s32 x, s32 y, s32 depth, ShopScene *
         glyph = itfCreateTightFont3TextGlyph(0xDD0, (155 + row * 21) << 3, depth,
                               color, text, 0);
         frSetFontColorNo(glyph, 4);
-        frFontDrawGlyphChain(glyph, 1, option);
+        frDrawFontOt(glyph, 1, option);
         frDestroyFontRequestAfter(glyph);
     }
 }
@@ -598,7 +598,7 @@ void mnuDrawShopPricePlaceholder(s32 x, s32 y, s32 depth, ShopScene *panel, s32 
         sprintf(text, D_003BC508, 0);
         glyph = itfCreateTightFont3TextGlyph(0x17C0, 0x380, depth, 0xA09DC380, text, 0);
         frSetFontColorNo(glyph, 4);
-        frFontDrawGlyphChain(glyph, 1, option);
+        frDrawFontOt(glyph, 1, option);
         frDestroyFontRequestAfter(glyph);
     }
 }
@@ -616,7 +616,7 @@ void mnuDrawIconFixedEntryWithBadge(s32 x, s32 y, s32 z, s32 unused, s32 scale, 
     sprintf(text, D_003BC508, 0);
     glyph = itfCreateTightFont3TextGlyph(x + 0x17C0, y + 0x380, z, value, text, 0);
     frSetFontColorNo(glyph, 4);
-    frFontDrawGlyphChain(glyph, 1, option);
+    frDrawFontOt(glyph, 1, option);
     frDestroyFontRequestAfter(glyph);
 }
 
@@ -636,7 +636,7 @@ void mnuDrawShopSelectedRowTotal(s32 x, s32 y, s32 depth, ShopScene *panel, s32 
         sprintf(text, D_003BC508, inner->cursor->camp.value * panel->counter);
         glyph = itfCreateTightFont3TextGlyph(0x17C0, 0x380, depth, 0xA09DC380, text, 0);
         frSetFontColorNo(glyph, 4);
-        frFontDrawGlyphChain(glyph, 1, option);
+        frDrawFontOt(glyph, 1, option);
         frDestroyFontRequestAfter(glyph);
     }
 }
@@ -666,7 +666,7 @@ void mnuDrawShopCurrencyBalance(ShopScene *state, s32 style) {
     {
         _FRQ *glyph = itfCreateTightFont3TextGlyph(0x17C0, 0x2B8, 0, style, text, 0);
 
-        frFontDrawGlyphChain(glyph, 1, 0x53);
+        frDrawFontOt(glyph, 1, 0x53);
         frDestroyFontRequestAfter(glyph);
     }
 }

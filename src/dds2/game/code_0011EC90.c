@@ -160,7 +160,7 @@ void dds3FontReqDestroy(Dds3IntrusiveNode *owner) {
 void dds3FontReqDrawFont(const Dds3IntrusiveNode *owner) {
     const Dds3FontNode *node = (const Dds3FontNode *)owner;
 
-    frFontDrawGlyphInDefaultMode(node->glyph);
+    frDrawFont(node->glyph);
 }
 
 Dds3FontNode *dds3CreateFontNode(s32 x, s32 y, const char *text) {

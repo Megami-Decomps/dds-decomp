@@ -82,7 +82,7 @@ enum {
 extern s32 mdlViewerPackageTaskExists(void);
 extern u32 D_00435D28;
 extern s32 fileMenuOperationSucceeded(void);
-extern s32 fileMenuTaskExists(void);
+extern s32 fmProcessChk(void);
 extern void fileStartMemoryCardMenuForMode(FileMenuStartMode mode);
 extern u32 D_00435BB0;
 extern s32 checkConfigState(void);
@@ -147,7 +147,7 @@ u32 ExitBootMc(void) {
 u8 CheckBootMc(void) {
     s32 operationResult;
 
-    operationResult = fileMenuTaskExists();
+    operationResult = fmProcessChk();
     return operationResult == 0;
 }
 
@@ -185,7 +185,7 @@ s32 ExitLoad(void) {
 u8 CheckLoad_dds3SequenceList(void) {
     s32 operationResult;
 
-    operationResult = fileMenuTaskExists();
+    operationResult = fmProcessChk();
     return operationResult == 0;
 }
 
@@ -224,7 +224,7 @@ u32 ExitEndSave(void) {
 u8 CheckEndSave(void) {
     s32 operationResult;
 
-    operationResult = fileMenuTaskExists();
+    operationResult = fmProcessChk();
     return operationResult == 0;
 }
 
@@ -682,7 +682,7 @@ s32 evtPollFileMenuAndRelease(void) {
 u8 evtWaitFileMenuTaskFour(void) {
     s32 operationResult;
 
-    operationResult = fileMenuTaskExists();
+    operationResult = fmProcessChk();
     return operationResult == 0;
 }
 

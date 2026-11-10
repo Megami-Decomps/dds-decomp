@@ -2369,7 +2369,7 @@ void CalcCurCtr(instanceMes_tag *panel) {
     }
 }
 
-extern void itfMesRenderActivePanelSprites(instanceMes_tag *);
+extern void DrawWindow(instanceMes_tag *);
 
 extern void itfDrawSoundSelectorFadeLayers(instanceMes_tag *);
 
@@ -2377,20 +2377,20 @@ extern void itfDrawSoundSelectorOptionPanel(instanceMes_tag *);
 
 extern void itfDrawSelectedSoundRow(instanceMes_tag *);
 
-void itfUpdateSoundSelectorPanel(instanceMes_tag *panel) {
+void DrawMesFlow(instanceMes_tag *panel) {
     u32 flags = panel->flags;
     ItfMesBlk40 *selection;
     _FRQ *glyph;
 
     itfMesMngManager.flags &= ~2;
-    itfMesRenderActivePanelSprites(panel);
+    DrawWindow(panel);
     glyph = panel->blk14.glyphChain;
     if (!(flags & 0x10000) && glyph != 0) {
-        frFontDrawGlyphInDefaultMode(glyph);
+        frDrawFont(glyph);
     }
     glyph = panel->entryBlock.glyphChain;
     if (!(flags & 0x20000) && (flags & 7) >= 3) {
-        if (frFontDrawGlyphInDefaultMode(glyph) > 0) {
+        if (frDrawFont(glyph) > 0) {
             if ((panel->flags & 7) != 4) {
                 panel->fade.textAdvanceFrameCount = 0;
                 panel->flags = (panel->flags & ~7) | 4;
@@ -2400,7 +2400,7 @@ void itfUpdateSoundSelectorPanel(instanceMes_tag *panel) {
     glyph = panel->blk40.glyphChain;
     if (!(flags & 0x40000)) {
         flags &= 0x38;
-        if (flags >= 0x18 && frFontDrawGlyphWithSharedFlags(glyph, 1) > 0) {
+        if (flags >= 0x18 && frDrawFontEx(glyph, 1) > 0) {
             if (flags == 0x18) {
                 selection = &panel->blk40;
                 if (selection->selectedIndex == -1) {
@@ -2425,7 +2425,7 @@ void itfUpdateSoundSelectorPanel(instanceMes_tag *panel) {
     }
 }
 
-void itfMesRenderActivePanelSprites(instanceMes_tag *panel) {
+void DrawWindow(instanceMes_tag *panel) {
     ItfMesBlkA4 *place;
     if (panel->flags & 0x80000) {
         return;
@@ -2720,7 +2720,7 @@ dds3TaskUpdateResult_t DrawMsgMng_Process(dds3ProcessID_t *task) {
         return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
     }
     for (node = itfMesMngManager.pool.activeHead; node != NULL; node = node->next) {
-        itfUpdateSoundSelectorPanel(node->state);
+        DrawMesFlow(node->state);
     }
     itfMesMngManager.drawTickCount++;
     return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
@@ -3038,10 +3038,10 @@ void itfUpdateSoundSelectorOptions(void) {
         sprintf(text, D_004365F0, value % 10);
         glyph = itfCreateFont3TextGlyph(left, 0x8E8, 0, fade | 0xA09DC300, text, NULL);
         frSetFontColorNo(glyph, 4);
-        frFontDrawGlyphChain(glyph, 1, 0x53);
+        frDrawFontOt(glyph, 1, 0x53);
         frSetFontColor(glyph, ((u32)(D_00452E60[digit] * fade) >> 7) | 0xA09DC300);
         frSetFontColorNo(glyph, 3);
-        frFontDrawGlyphChain(glyph, 1, 0x53);
+        frDrawFontOt(glyph, 1, 0x53);
         frDestroyFontRequestAfter(glyph);
         if (D_00438F30 < digit) {
             step *= 10;

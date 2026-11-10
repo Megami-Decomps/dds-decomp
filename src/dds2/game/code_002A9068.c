@@ -40,7 +40,7 @@ extern u32 mnuMovieShutdownCounter;
 
 
 typedef struct _FRQ _FRQ;
-extern s32 frFontDrawGlyphChain(_FRQ *, s8, u32);
+extern s32 frDrawFontOt(_FRQ *, s8, u32);
 extern char mnuCampInputTaskName[]; /* "camp" */
 
 extern char mnuCampDrawTaskName[]; /* "camp_draw" */
@@ -1030,7 +1030,7 @@ void mnuDrawCampTitleCurrencyAndFade(s32 unused0, s32 unused1, s32 textParam, st
     /* Keep the RGB channels fixed while the opacity byte fades from 0x80 to zero. */
     object = itfCreateTightFont3TextGlyph((visual->titleSlide + 0x33) << 4, 0xCD8, textParam,
                            fclBlendColor(0xA09DC380, 0xA09DC300, visual->titleOpacity), buffer, 0);
-    frFontDrawGlyphChain((_FRQ *)object, 1, layer);
+    frDrawFontOt((_FRQ *)object, 1, layer);
     frDestroyFontRequestAfter((_FRQ *)object);
     offset = visual->titleSlide;
     magnitude = offset;
@@ -1066,7 +1066,7 @@ extern u8 *mnuCampSelectionPromptTexts[];
 void mnuCreateStaffImageSprite(s32 imageIndex) {
     _FRQ *sprite = itfCreateConvertedTextGlyph(0x340, 0x148, 0, 0xa09dc35a,
                                       mnuCampSelectionPromptTexts[imageIndex], 0);
-    frFontDrawGlyphChain(sprite, 1, 0x54);
+    frDrawFontOt(sprite, 1, 0x54);
     frDestroyFontRequestAfter(sprite);
 }
 
@@ -1149,7 +1149,7 @@ void mnuDrawCampGridFrameAndLabel(s32 kind, u32 labelIndex, u32 textTable, u32 c
         glyph = itfDrawBankTextWithLayoutFlags(textPosition[0], textPosition[1] + 0x918,
                                              0, labelIndex, textTable, textOption);
         frSetFontColor(glyph, 0xA09DC35A);
-        frFontDrawGlyphChain(glyph, 1, layer);
+        frDrawFontOt(glyph, 1, layer);
         frDestroyFontRequestAfter(glyph);
     }
 }

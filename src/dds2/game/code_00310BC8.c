@@ -31,8 +31,8 @@ extern s8 dds3PadButtonState[];
 extern _FRQ *itfCreateTightFont3TextGlyph(s32, s32, s32, u32, char *, _FRQ *);
 extern _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, _FRQ *);
 extern _FRQ *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
-extern s32 frFontDrawGlyphWithSharedFlags(_FRQ *, s8);
-extern s32 frFontDrawGlyphChain(_FRQ *, s8, u32);
+extern s32 frDrawFontEx(_FRQ *, s8);
+extern s32 frDrawFontOt(_FRQ *, s8, u32);
 
 
 
@@ -337,14 +337,14 @@ void sdfFontRegisterShort(s32 x, s32 y, u32 colors, const u8 *text) {
     _FRQ *handle;
 
     handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
-    frFontDrawGlyphWithSharedFlags(handle, 1);
+    frDrawFontEx(handle, 1);
     frDestroyFontRequestAfter(handle);
 }
 
 s32 frFontMeasureAndQueueGlyph(s32 x, s32 y, s32 depth, u32 colors, const u8 *text, s32 option) {
     _FRQ *handle = itfCreateConvertedTextGlyph(x << 4, y << 3, depth, colors, text, 0);
     s32 result = frGetStrWidth(handle);
-    frFontDrawGlyphChain(handle, 1, option);
+    frDrawFontOt(handle, 1, option);
     frDestroyFontRequestAfter(handle);
     return result;
 }
@@ -361,7 +361,7 @@ s32 frFontQueueTextAndOptionallyMeasure(s32 x, s32 y, u32 depth, u32 colors, s8 
     if (flag < 0) {
         result = frGetStrWidth(handle);
     }
-    frFontDrawGlyphChain(handle, 1, option);
+    frDrawFontOt(handle, 1, option);
     frDestroyFontRequestAfter(handle);
     return result;
 }
@@ -376,7 +376,7 @@ s32 frFontDrawStyledGlyphChainAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, c
     if (flag < 0) {
         result = frGetStrWidth(handle);
     }
-    frFontDrawGlyphChain(handle, 1, option);
+    frDrawFontOt(handle, 1, option);
     frDestroyFontRequestAfter(handle);
     return result;
 }
@@ -391,7 +391,7 @@ s32 frFontDrawTextVariantAAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, char 
     if (flag < 0) {
         result = frGetStrWidth(handle);
     }
-    frFontDrawGlyphChain(handle, 1, option);
+    frDrawFontOt(handle, 1, option);
     frDestroyFontRequestAfter(handle);
     return result;
 }
@@ -406,7 +406,7 @@ s32 frFontDrawTextVariantBAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, char 
     if (flag < 0) {
         result = frGetStrWidth(handle);
     }
-    frFontDrawGlyphChain(handle, 1, option);
+    frDrawFontOt(handle, 1, option);
     frDestroyFontRequestAfter(handle);
     return result;
 }
@@ -422,7 +422,7 @@ s32 frFontQueueTintedGlyphChainAndMeasure(s32 x, s32 y, s32 depth, u32 colors, u
     if (flag < 0) {
         result = frGetStrWidth(handle);
     }
-    frFontDrawGlyphChain(handle, 1, option);
+    frDrawFontOt(handle, 1, option);
     frDestroyFontRequestAfter(handle);
     return result;
 }

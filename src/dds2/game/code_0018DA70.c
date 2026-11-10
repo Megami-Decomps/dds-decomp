@@ -100,7 +100,7 @@ extern void sdfGrSetFrameMaskReset(const u8 *source, SdfDmaReferenceChainPacket 
 extern u32 dds3NullDrawProc(void);
 
 
-void effBuildBlurTransformedQuad(const BlurSource *source, BlurPacketQuad *quad, u8 fixedPointCoordinates)
+void dds3EffectBlurDrawQuad(const BlurSource *source, BlurPacketQuad *quad, u8 fixedPointCoordinates)
 {
     f32 centerX, centerY, scale, cosine, sine;
     f32 scaledU, scaledV, u, v;
@@ -292,7 +292,7 @@ void effDrawBlurRectangle(const dds3Effect_Blur_t *source)
         clampPacket[5] = 8;
         sdfDrawTagLink(list, (u32)clampPacket);
         drawPacket = effPkt2DAllocTriStrip(1, 0);
-        effBuildBlurTransformedQuad(source, effPkt2DGetPrimPtr(drawPacket), 0);
+        dds3EffectBlurDrawQuad(source, effPkt2DGetPrimPtr(drawPacket), 0);
         sdfDrawTagLink(list, (u32)drawPacket);
         D_003803E8.regFunc(&D_003803E8, list);
     }
@@ -300,7 +300,7 @@ void effDrawBlurRectangle(const dds3Effect_Blur_t *source)
 
 extern void sdfGrSetFrameMaskRGB(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext);
 
-void effAppendBlurRenderState(struct sdfDrawTag_t *list, s32 blendControl, sdfTexHandle_t *resource)
+void dds3EffectBlurDrawFrameMask(struct sdfDrawTag_t *list, s32 blendControl, sdfTexHandle_t *resource)
 {
     SdfDmaReferenceChainPacket *framePacket;
     u64 *blendPacket;
@@ -382,13 +382,13 @@ void effAppendBlurRectanglePackets(struct sdfDrawTag_t *list, const BlurSource *
     effBuildBlurUnitTextureQuad(source, effPkt2DGetPrimPtr(packet), fixedPointCoordinates);
     sdfDrawTagLink(list, (u32)packet);
     packet = effPkt2DAllocTriStrip(1, 0);
-    effBuildBlurTransformedQuad(source, effPkt2DGetPrimPtr(packet), fixedPointCoordinates);
+    dds3EffectBlurDrawQuad(source, effPkt2DGetPrimPtr(packet), fixedPointCoordinates);
     sdfDrawTagLink(list, (u32)packet);
 }
 
 
 /* Queue a 0x40-byte textured packet for the current frame buffer onto `list`, then let the filter ops draw it. */
-void effDrawBlurListWithFramePacket(struct sdfDrawTag_t *list) {
+void dds3EffectBlurDrawFrameMaskReset(struct sdfDrawTag_t *list) {
     SdfDmaReferenceChainPacket *packet = (SdfDmaReferenceChainPacket *)sdfGrAllocPacketBuff(0x40);
 
     sdfGrSetFrameMaskReset(dds3FrameDrawPacketRecords[dds3GetFrameID()].baseBytes, packet, 1);
@@ -397,7 +397,7 @@ void effDrawBlurListWithFramePacket(struct sdfDrawTag_t *list) {
 }
 
 extern u32 dds3NullDrawProc(void);
-extern void effAppendBlurRenderState(struct sdfDrawTag_t *list, s32 blendControl, sdfTexHandle_t *resource);
+extern void dds3EffectBlurDrawFrameMask(struct sdfDrawTag_t *list, s32 blendControl, sdfTexHandle_t *resource);
 
 /* Queue blend setup and both rectangle packets, then finish with the filter draw. */
 void effDrawBlurSource(const BlurSource *source, sdfTexHandle_t *resource, u8 fixedPointCoordinates) {
@@ -406,9 +406,9 @@ void effDrawBlurSource(const BlurSource *source, sdfTexHandle_t *resource, u8 fi
     if (dds3NullDrawProc() == 0) {
         list = (void *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
-        effAppendBlurRenderState(list, source->blendControl, resource);
+        dds3EffectBlurDrawFrameMask(list, source->blendControl, resource);
         effAppendBlurRectanglePackets(list, source, fixedPointCoordinates);
-        effDrawBlurListWithFramePacket(list);
+        dds3EffectBlurDrawFrameMaskReset(list);
     }
 }
 

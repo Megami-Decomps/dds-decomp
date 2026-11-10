@@ -1208,7 +1208,7 @@ than manufacture effects. Whole-unit and complete-build acceptance still apply.
 ## Shared text submission and declarations before first use
 
 DDS1 `func_001BDF60` (`0x001BDF60`, 1584 bytes) shares the sequence
-`frFontDrawGlyphWithSharedFlags(glyph, 1)` followed by
+`frDrawFontEx(glyph, 1)` followed by
 `frDestroyFontRequestAfter(glyph)` with nine other native sites.
 A plain `btlSubmitSharedTextGlyph` static inline is used at all ten sites,
 across seven functions in `game/code_001A9780.c`; this is a recurring text
@@ -6879,7 +6879,7 @@ claim that the remaining banner controller has matched.
 
 DDS2's command-list text helpers receive a 32-bit handle from
 `itfCreateConvertedTextGlyph`, then pass its glyph pointer to
-`frFontDrawGlyphWithSharedFlags(_FRQ *, s8)`. The provider in
+`frDrawFontEx(_FRQ *, s8)`. The provider in
 `interface/frFont.c` forwards that pointer and mode to the chain renderer.
 Use the same explicit word-to-pointer boundary as the adjacent
 `frDestroyFontRequestAfter` call, rather than relying on an
@@ -7127,7 +7127,7 @@ integer adapter, and this closure does not claim a parser-body match.
 DDS1 `code_00248580`'s atlas-slot and number-sprite clients return and queue
 `struct _FRQ *` from the existing text providers; their handles are
 not integer IDs. The local declarations now agree with the providers,
-including `frFontDrawGlyphChain`'s `s8` option and `u32` priority. No provider
+including `frDrawFontOt`'s `s8` option and `u32` priority. No provider
 or shared header changes are needed. The selected-row candidate at
 `0x248E68` remains ASM: its two independent instructions at `+0x9C/+0xA0`
 are still exchanged, so this adapter retirement claims no new body match.

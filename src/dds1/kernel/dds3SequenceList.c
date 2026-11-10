@@ -83,7 +83,7 @@ extern s32 mnuPollTaskState(void);
 extern u32 D_003BA958;
 extern s32 checkConfigState(void);
 extern u32 D_003BA730;
-extern s32 fileMenuTaskExists(void);
+extern s32 fmProcessChk(void);
 extern void fileEnterMcPackScene(FileMenuStartMode mode);
 extern s32 fileMenuOperationSucceeded(void);
 extern s32 dds3StartMenuProcess(dds3ProcessID_t *task);
@@ -148,7 +148,7 @@ u32 ExitBootMc(void) {
 u8 CheckBootMc(void) {
     s32 operationResult;
 
-    operationResult = fileMenuTaskExists();
+    operationResult = fmProcessChk();
     return operationResult == 0;
 }
 
@@ -186,7 +186,7 @@ s32 ExitLoad(void) {
 u8 CheckLoad_dds3SequenceList(void) {
     s32 operationResult;
 
-    operationResult = fileMenuTaskExists();
+    operationResult = fmProcessChk();
     return operationResult == 0;
 }
 
@@ -225,7 +225,7 @@ u32 ExitEndSave(void) {
 u8 CheckEndSave(void) {
     s32 operationResult;
 
-    operationResult = fileMenuTaskExists();
+    operationResult = fmProcessChk();
     return operationResult == 0;
 }
 

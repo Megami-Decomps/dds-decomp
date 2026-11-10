@@ -1234,19 +1234,19 @@ s32 frFontAdvanceChildFadeAndGetJitter(_FRQ *parent, _TEXT *glyph, u8 threshold,
 }
 
 /* Draw through the shared render flags with mode zero. */
-s32 frFontDrawGlyphInDefaultMode(_FRQ *glyph) {
-    return frFontDrawGlyphWithSharedFlags(glyph, 0);
+s32 frDrawFont(_FRQ *glyph) {
+    return frDrawFontEx(glyph, 0);
 }
 
 /* Pass the selected mode and current shared render-flag word to the renderer. */
-s32 frFontDrawGlyphWithSharedFlags(_FRQ *glyph, s8 mode) {
-    return frFontDrawGlyphChain(glyph, mode, gFontDrawOT);
+s32 frDrawFontEx(_FRQ *glyph, s8 mode) {
+    return frDrawFontOt(glyph, mode, gFontDrawOT);
 }
 
 /* Draw every child glyph, advance each parent chain, and report its total
  * child-glyph count only while all control/fade conditions remain ready. DDS2 additionally
  * suppresses one result per positive draw-delay count. */
-s32 frFontDrawGlyphChain(_FRQ *glyph, s8 mode, u32 renderFlags) {
+s32 frDrawFontOt(_FRQ *glyph, s8 mode, u32 renderFlags) {
     _TEXT *child;
     s32 ready = 1;
     s32 enabled = 1;

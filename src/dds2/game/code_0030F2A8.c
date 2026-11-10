@@ -19,13 +19,13 @@ extern f32 vecLength(f32 *);
 
 
 struct _FRQ;
-extern s32 frFontDrawGlyphWithSharedFlags(struct _FRQ *glyph, s8 mode);
+extern s32 frDrawFontEx(struct _FRQ *glyph, s8 mode);
 
 void sdfCounterDrawGlyphAtGridCell(s32 x, s32 y, u32 colors, const u8 *text) {
     struct _FRQ *handle;
 
     handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
-    frFontDrawGlyphWithSharedFlags(handle, 1);
+    frDrawFontEx(handle, 1);
     frDestroyFontRequestAfter(handle);
 }
 

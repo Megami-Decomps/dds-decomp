@@ -246,7 +246,7 @@ s32 mnuDrawStaffRollText(f32 x, f32 y, s32 alternate, u32 color, const char *sou
             (s32)(x * 16.0f), (s32)(y * 8.0f), 0, 0, 1, (u64)8, color, source, 0);
     }
     frGetStrWidth2(glyph);
-    frFontDrawGlyphWithSharedFlags(glyph, 1);
+    frDrawFontEx(glyph, 1);
     return frDestroyFontRequestAfter(glyph);
 }
 

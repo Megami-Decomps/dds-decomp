@@ -232,7 +232,7 @@ extern u16 dds3BackgroundFadeCounter;
 extern u16 dds3BackgroundFadeDuration;
 extern s16 dds3BackgroundFadeFirstRamp;
 extern s16 dds3BackgroundFadeSecondRamp;
-extern void dds3InitializeFrameDrawPackets(s32 bufferIndex);
+extern void dds3InitDrawEnvSub(s32 bufferIndex);
 extern void dds3InitZClearDrawTag(void);
 extern void eglInit(void);
 extern void sdfGrSetScreen(s32 displayModeIndex);
@@ -250,7 +250,7 @@ extern sdfVector4_t dds3AmbientColor2;
 extern void sdf3DLinkInitPacket(sdfDrawTag_t *, DmaPacketHeader *);
 
 /* Initialize the selected frame bank's scene and overlay packet chains. */
-void dds3InitializeFrameDrawPackets(s32 bufferIndex) {
+void dds3InitDrawEnvSub(s32 bufferIndex) {
     sdfDrawTagInit(&dds3DrawEnv[bufferIndex].initialList);
     sdf3DLinkInitPacket(&dds3DrawEnv[bufferIndex].initialList,
                                         &dds3DrawEnv[bufferIndex].programReference);
@@ -293,8 +293,8 @@ void dds3InitDrawEnv(void) {
     sdfGrSetScreen(1);
     sdf3DMakeScreenParam(&dds3ScreenParam.camera);
     sdf3DMakeScreenParam(&D_00324980.camera);
-    dds3InitializeFrameDrawPackets(0);
-    dds3InitializeFrameDrawPackets(1);
+    dds3InitDrawEnvSub(0);
+    dds3InitDrawEnvSub(1);
     dds3InitZClearDrawTag();
     D_003BA7FC = 0;
     eglInit();
@@ -2483,7 +2483,7 @@ void eglLinkKanji(s32 width, s32 height, s32 colors, const char *text) {
     struct _FRQ *glyph;
 
     glyph = itfCreateMeasuredTextGlyph(width << 4, height << 3, 0, colors, text, NULL);
-    frFontDrawGlyphInDefaultMode(glyph);
+    frDrawFont(glyph);
     frDestroyFontRequestAfter(glyph);
 }
 

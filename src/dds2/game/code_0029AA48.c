@@ -26,7 +26,7 @@ struct _FRQ;
 
 extern void effDrawTextureSlotWithBlendedCornerColors(s32, s32, s32, u32, s32,
                                                       struct EffectSlotSet *, s32, s32);
-extern s32 frFontDrawGlyphChain(struct _FRQ *, s8, u32);
+extern s32 frDrawFontOt(struct _FRQ *, s8, u32);
 extern u32 mnuKindIsSelectable(u32);
 extern char D_004379B0[];
 
@@ -54,7 +54,7 @@ void mnuDrawRemainingSelectionExtent(BrsSkillPackageWork *context) {
     sprintf(text, D_004379B0, delta);
     glyph = itfCreateFont3TextGlyph(x, 0x8E8, 0, color, text, 0);
     frSetFontColorNo(glyph, 3);
-    frFontDrawGlyphChain(glyph, 1, 0x53);
+    frDrawFontOt(glyph, 1, 0x53);
     frDestroyFontRequestAfter(glyph);
     if (mnuKindIsSelectable(item->unitId) != 0) {
         if (context->iconFade < 0x100) {

@@ -325,7 +325,7 @@ void mnuDrawCampGridEntry(s32 x, s32 y, s32 depth, s32 offset, struct MenuList *
         frSetFontColorNo(glyph, 0);
         sprintf(buffer, D_00437BC0, DDS3_GBWK->inventory.counts[node->sortKeySecondary]);
         glyph = itfCreateFont2TextGlyph(x + offset + 0x910, y + 0x20, depth, color, buffer, glyph);
-        frFontDrawGlyphChain(glyph, 1, texture);
+        frDrawFontOt(glyph, 1, texture);
         frDestroyFontRequestAfter(glyph);
     } else {
         EffectSlotSet *resource = context->resources.baseResources[1];

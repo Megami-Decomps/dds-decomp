@@ -64,8 +64,8 @@ extern dds3FrameDrawBuffer_t dds3FrameDrawPacketRecords[];
 extern u32 dds3NullDrawProc();
 extern u64 *effPkt2DAllocF4(u32 flags);
 
-extern void effAppendBlurRenderState(void *list, s32 blendControl, sdfTexHandle_t *resource);
-extern void effDrawBlurListWithFramePacket(struct sdfDrawTag_t *);
+extern void dds3EffectBlurDrawFrameMask(void *list, s32 blendControl, sdfTexHandle_t *resource);
+extern void dds3EffectBlurDrawFrameMaskReset(struct sdfDrawTag_t *);
 extern void effBlurSecondUpdateSlotRect(EffBlurScaleWork *, EffBlurScaleSlot *);
 
 void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work) {
@@ -78,7 +78,7 @@ void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work) {
     if (dds3NullDrawProc() == 0) {
         list = (void *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
-        effAppendBlurRenderState(list, work->params.blendControl, work->texture);
+        dds3EffectBlurDrawFrameMask(list, work->params.blendControl, work->texture);
         slot = work->slots;
         if (work->params.count > 0) {
             count = work->params.count;
@@ -103,7 +103,7 @@ void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work) {
                 slot++;
             } while (count != 0);
         }
-        effDrawBlurListWithFramePacket(list);
+        dds3EffectBlurDrawFrameMaskReset(list);
     }
 }
 

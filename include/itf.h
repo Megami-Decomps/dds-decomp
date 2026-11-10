@@ -349,8 +349,8 @@ _FRQ *itfDrawColor(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1,
 _FRQ *itfDrawPlainEncodedTextWithByteColors(s32 x, s32 y, s32 depth,
     s32 channel0, s32 channel1, s32 channel2, s32 channel3,
     const u8 *encodedText, _FRQ *unusedSub);
-s32 frFontDrawGlyphInDefaultMode(_FRQ *glyph);
-s32 frFontDrawGlyphWithSharedFlags(_FRQ *glyph, s8 mode);
+s32 frDrawFont(_FRQ *glyph);
+s32 frDrawFontEx(_FRQ *glyph, s8 mode);
 
 /* The message manager owns a fixed pool of 64 windows in this 0x520-byte bank. */
 typedef struct mesflow_tag {

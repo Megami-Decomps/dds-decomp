@@ -745,7 +745,7 @@ extern void p2sdBgmVolUp(void);
 extern void p2sdStopAllBgm(void);
 extern void dds3PadVibrationSet(u32 motor, u8 level, s32 duration);
 extern void dds3PlayMovieByIndex(s32 value);
-extern u8 fldTitleIsActive(void);
+extern u8 fldTitleChk(void);
 extern void fldSetTitleDrawMode(u32 enabled);
 extern void nbPanelAnalyzeStart(void);
 extern void dds3FadeBackgroundStartIn(s32 duration);
@@ -933,7 +933,7 @@ void evtEventViewerApplyTimelineKey(EvtRuntimeGroup *track, EvtRuntimeChild *key
         viewer->timedActive = 1;
         break;
     case 30:
-        if (currentFrame == key->frame && fldTitleIsActive() == 1) {
+        if (currentFrame == key->frame && fldTitleChk() == 1) {
             if (key->p08.sh[1] != 0) {
                 fldSetTitleDrawMode(1);
             } else {
@@ -2340,7 +2340,7 @@ extern ScrCommandResult scrCommandIsProcessControlFlagClear(void);
 extern void mnuReleaseCampSceneRegisteredIds(evtViewerInfo_t *viewer);
 extern void mnuStopTitleVoicePlayback(void);
 extern void sdfSndSetChannelCount(u32 channels);
-extern u8 fldTitleIsActive(void);
+extern u8 fldTitleChk(void);
 extern void fldSetTitleDrawMode(u32 active);
 void evtViewerCleanupMessageWindow(evtViewerInfo_t *viewer);
 
@@ -2371,7 +2371,7 @@ void evtEventViewerStartEndCountdown(evtViewerInfo_t *viewer) {
     } else if (viewer->timedActive == 1) {
         sdfSndSetChannelCount(10);
     }
-    if (fldTitleIsActive() == 1) {
+    if (fldTitleChk() == 1) {
         fldSetTitleDrawMode(0);
     }
     evtViewerCleanupMessageWindow(viewer);
@@ -2637,7 +2637,7 @@ void evtViewerAdvanceGlyphTick(evtViewerInfo_t *viewer) {
 
     if ((viewer->nowframe < viewer->frameRange.word - 3) && (0 < viewer->glyphTickCount))
     {
-        frFontDrawGlyphInDefaultMode(viewer->glyph);
+        frDrawFont(viewer->glyph);
         nextTick = viewer->glyphTickCount + 1;
         viewer->glyphTickCount = nextTick;
         if (0x1d < nextTick) {

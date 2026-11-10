@@ -2013,7 +2013,7 @@ s32 fldDispatchPendingSceneResource(void) {
 
 extern void evtEnableMoonCalc(void);
 
-extern s32 fileMenuTaskExists(void);
+extern s32 fmProcessChk(void);
 
 
 extern void fldCheckSceneReady(void);
@@ -2111,7 +2111,7 @@ dds3TaskUpdateResult_t fldProcSequence(dds3ProcessID_t *task) {
     FldLocationCoordinateFlags coordinateFlags;
 
     if (dds3AdminiGetNextSequence() != -1) return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
-    if (fileMenuTaskExists() != 0) return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
+    if (fmProcessChk() != 0) return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
     fldPollAreaResourceLoad();
     if (controller->phase == FLD_SEQUENCE_PHASE_INITIALIZE) {
         if (fldGetNextFileLoadState() == FLD_NEXT_FILE_LOAD_PENDING) return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
@@ -2342,7 +2342,7 @@ dds3TaskUpdateResult_t fldProcDraw(dds3ProcessID_t *task) {
     if (fldGetEncounterRuntimeResult() != FLD_ENCOUNTER_RESULT_NONE) {
         return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
     }
-    if (fileMenuTaskExists() != 0) {
+    if (fmProcessChk() != 0) {
         return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
     }
     if (fldProcCampChk() == FLD_CAMP_CHECK_STATE_MENU_ACTIVE) {

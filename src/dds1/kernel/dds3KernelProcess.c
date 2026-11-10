@@ -41,7 +41,7 @@ extern void sdfGrInitNewFrame(void);
 
 extern void sdfGrOtInit(sdfGrOt_t *, s32);
 
-extern void dds3InitializeFrameDrawPackets(s32 bufferIndex);
+extern void dds3InitDrawEnvSub(s32 bufferIndex);
 
 #define DDS3_FRAME_BUFFER_BYTES 0x1F40
 
@@ -104,7 +104,7 @@ s32 dds3FirstProcess(dds3ProcessID_t *task) {
     sdfGrInitNewFrame();
     sdfGrOtInit(sdfGrOtTable, DDS3_FRAME_POOL_NODE_COUNT);
     sdfPreDrawChainInit((SdfPacketChain *)D_00325860);
-    dds3InitializeFrameDrawPackets(bufferIndex);
+    dds3InitDrawEnvSub(bufferIndex);
     packetGroups = dds3DrawEnv[bufferIndex].packetGroups;
     for (groupIndex = DDS3_FRAME_LAST_GROUP_INDEX; groupIndex >= 0; groupIndex--) {
         sdfModelSetDrawEnv(packetGroups);

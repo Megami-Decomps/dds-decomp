@@ -120,7 +120,7 @@ extern struct _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct _
 
 extern char mnuNumberSpriteFormat[];
 
-extern s32 frFontDrawGlyphChain(struct _FRQ *, s8, u32);
+extern s32 frDrawFontOt(struct _FRQ *, s8, u32);
 extern EffectPair D_003BC400[];
 extern void mnuDrawTerminalAmountText(s32, s32);
 extern char D_003BC3F0[];
@@ -152,7 +152,7 @@ void mnuQueueFontGlyphFromAtlasSlot(s32 gridX, s32 gridY, s32 depth, s32 colors,
         text = D_003482A8[slot].encodedText;
     }
     handle = itfCreateConvertedTextGlyph(gridX, gridY, depth, colors, text, 0);
-    frFontDrawGlyphChain(handle, 1, MNU_TEXT_DRAW_PRIORITY);
+    frDrawFontOt(handle, 1, MNU_TEXT_DRAW_PRIORITY);
     frDestroyFontRequestAfter(handle);
 }
 
@@ -206,7 +206,7 @@ void mnuCreateNumberSprite(s32 x, s32 y, s32 layer, s32 blendWeight, s32 number,
 
     sprintf(text, mnuNumberSpriteFormat, number);
     sprite = itfCreateFont2TextGlyph(x, y, layer, fclBlendColor(color, color & ~MNU_COLOR_LOW_BYTE_MASK, blendWeight), text, 0);
-    frFontDrawGlyphChain(sprite, 1, priority);
+    frDrawFontOt(sprite, 1, priority);
     frDestroyFontRequestAfter(sprite);
 }
 
@@ -236,7 +236,7 @@ void mnuDrawTerminalRecoveryListEntry(s32 unused, s32 rowY, s32 depth, struct Me
         glyph = itfCreateFont3TextGlyph(0x1740, 0x2D8, depth,
             fclBlendColor(0xA09DC380, 0xA09DC300, scale), text, 0);
         frSetFontColorNo(glyph, 4);
-        frFontDrawGlyphChain(glyph, 1, priority);
+        frDrawFontOt(glyph, 1, priority);
         frDestroyFontRequestAfter(glyph);
         selected = 1;
     }
@@ -392,7 +392,7 @@ void mnuDrawTerminalListEntry(s32 x, s32 y, s32 unused, struct MenuList *list,
     color = fclBlendColor(color, color & ~0xFF, list->scale);
     glyph = itfCreateConvertedTextGlyph(x + 0x1C0, y + 0xD0, 0, color, node->title, 0);
     frSetFontColorNo(glyph, chainFlags);
-    frFontDrawGlyphChain(glyph, 1, priority);
+    frDrawFontOt(glyph, 1, priority);
     frDestroyFontRequestAfter(glyph);
 }
 
@@ -1808,7 +1808,7 @@ u32 evtBeginSelectionExitFade(dds3ProcessID_t *task) {
     dds3FadeIn(0, 0, 0, 15);
     return 1;
 }
-extern s32 fileMenuTaskExists(void);
+extern s32 fmProcessChk(void);
 extern void fileEnterMcPackScene(FileMenuStartMode mode);
 extern void slSetTmnlID(s32 x, s32 y);
 
@@ -1831,7 +1831,7 @@ s32 mnuOpenFileMenuFromTerminal(dds3ProcessID_t *request) {
         fileEnterMcPackScene(FILE_MENU_START_MODE_LOAD);
         *(s32 *)(context + 0x94) = 1;
     }
-    if (work->popupState == 0 && fileMenuTaskExists() == 0 &&
+    if (work->popupState == 0 && fmProcessChk() == 0 &&
         sdfDelayedResrcCheck() == 0) {
         *(s32 *)(context + 0x94) = 0;
         mnuSetPopupEntryFlagged(dispatch, mnuTerminalPopupEntries);
@@ -2033,7 +2033,7 @@ void mnuDrawTerminalAmountText(s32 fading, s32 state) {
         color = fclBlendColor(0xA09DC380, 0xA09DC300, work->list->scale);
     }
     sprite = itfCreateFont3TextGlyph(0x1740, 0x210, 0, color, text, 0);
-    frFontDrawGlyphChain(sprite, 1, 0x53);
+    frDrawFontOt(sprite, 1, 0x53);
     frDestroyFontRequestAfter(sprite);
 }
 

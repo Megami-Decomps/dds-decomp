@@ -2278,7 +2278,7 @@ s32 mnuListMoveCursor(BtlDebugMenuCursor *menuList) {
 s32 mnuQueueColoredGlyphAtPosition(s32 x, s32 y, s32 text) {
     struct _FRQ *textGlyph = itfCreateMeasuredTextGlyph(x << 4, y << 3, MNU_LIST_TEXT_DEPTH,
         MNU_LIST_NORMAL_COLOR, (const char *)(u32)text, NULL);
-    frFontDrawGlyphChain(textGlyph, 0, 0x60);
+    frDrawFontOt(textGlyph, 0, 0x60);
     return frDestroyFontRequestAfter(textGlyph);
 }
 
@@ -2301,7 +2301,7 @@ s32 btlDrawSelectableListRows(s32 x, s32 y, s32 unusedMode, BtlDebugMenuCursor *
             MNU_LIST_TEXT_DEPTH,
             itemIndex == selectedIndex ? MNU_LIST_SELECTED_COLOR : MNU_LIST_NORMAL_COLOR,
             (const char *)(u32)rowTexts[itemIndex], NULL);
-        frFontDrawGlyphChain(textGlyph, 0, 0x60);
+        frDrawFontOt(textGlyph, 0, 0x60);
         frDestroyFontRequestAfter(textGlyph);
         rowY += MNU_LIST_ROW_HEIGHT;
     }
@@ -3033,7 +3033,7 @@ s32 btlUpdateDebugEncounterSelector(void) {
                     glyph = itfCreateConvertedTextGlyph((btlDebugEncounterWindowView.x + 185) << 4,
                         (btlDebugEncounterWindowView.y + i * 24) << 3, 0, MNU_LIST_NORMAL_COLOR,
                         D_003BAA74 + enemy * 17, NULL);
-                    frFontDrawGlyphChain(glyph, 1, 0x53);
+                    frDrawFontOt(glyph, 1, 0x53);
                     frDestroyFontRequestAfter(glyph);
                 }
             }

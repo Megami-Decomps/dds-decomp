@@ -166,7 +166,7 @@ extern u8 D_00399EA0[][16];
 
 
 
-extern s32 fileMenuTaskExists(void);
+extern s32 fmProcessChk(void);
 
 extern s32 fldHasKiretaLabelProcess(void);
 
@@ -4027,7 +4027,7 @@ s32 fldUpdateTitleBannerTask(dds3ProcessID_t *task) {
     if (fldProcAmChk() != FLD_SCENE_TRANSITION_GATE_PROCEED) {
         return 0;
     }
-    if (fileMenuTaskExists() != 0) {
+    if (fmProcessChk() != 0) {
         return 0;
     }
     if (fldHasKiretaLabelProcess() != 0) {

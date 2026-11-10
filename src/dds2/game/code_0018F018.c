@@ -68,9 +68,9 @@ extern u64 *effPkt2DAllocF4(u32 flags);
 extern void effBlurBuildSamplingQuad(const dds3Effect_Blur_t *source, EffBlurDrawData *data,
                                      u8 fixedPoint);
 
-extern void effAppendBlurRenderState(struct sdfDrawTag_t *, s32, sdfTexHandle_t *);
+extern void dds3EffectBlurDrawFrameMask(struct sdfDrawTag_t *, s32, sdfTexHandle_t *);
 extern void effAppendBlurRectanglePackets(struct sdfDrawTag_t *, const dds3Effect_Blur_t *, u8);
-extern void effDrawBlurListWithFramePacket(struct sdfDrawTag_t *);
+extern void dds3EffectBlurDrawFrameMaskReset(struct sdfDrawTag_t *);
 extern void effBlurSecondUpdateSlotRect(EffBlurScaleWork *, EffBlurScaleSlot *);
 
 
@@ -84,7 +84,7 @@ void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work) {
     if (dds3NullDrawProc() == 0) {
         list = (void *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
-        effAppendBlurRenderState(list, work->params.blendControl, work->texture);
+        dds3EffectBlurDrawFrameMask(list, work->params.blendControl, work->texture);
         slot = work->slots;
         if (work->params.count > 0) {
             count = work->params.count;
@@ -109,7 +109,7 @@ void effBlurStepScaleSlotsAndDraw(EffBlurScaleWork *work) {
                 slot++;
             } while (count != 0);
         }
-        effDrawBlurListWithFramePacket(list);
+        dds3EffectBlurDrawFrameMaskReset(list);
     }
 }
 

@@ -2667,7 +2667,7 @@ void aDrawTriG(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, u32 r0, u32 g0, u
     descriptor->regFunc(descriptor, command);
 }
 
-void fldSubmitGsGradientQuad(s32 x, s32 y, s32 w, s32 h, u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a1, u32 r2, u32 g2, u32 b2, u32 a2, u32 r3, u32 g3, u32 b3, u32 a3) {
+void aDrawBoxG(s32 x, s32 y, s32 w, s32 h, u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a1, u32 r2, u32 g2, u32 b2, u32 a2, u32 r3, u32 g3, u32 b3, u32 a3) {
     s32 coords[8];
     sdfDrawTag_t *command;
     SdfDrawPacket *packet;
@@ -2910,7 +2910,7 @@ void fldDrawPoly3(s32 color0, s32 color1, s32 color2,
     descriptor->regFunc(descriptor, command);
 }
 
-void fldSubmitTexturedOverlaySprite(void) {
+void fldDrawBokasi(void) {
     sdfDrawTag_t *packetList;
     sdfGrRefPacketHeader_t *dmaPacket;
     s32 drawBufferIndex;
@@ -3045,7 +3045,7 @@ void fldSubmitOverlaySpriteWithRenderState(s32 mode) {
     surface->regFunc(surface, packetList);
 }
 
-void fldSubmitOverlayStateAndSprite(s32 alpha) {
+void fldDrawFrameSpriteAlpha(s32 alpha) {
     sdfDrawTag_t *packetList;
     sdfGrRefPacketHeader_t *dmaPacket;
     s32 drawBufferIndex;
@@ -3217,7 +3217,7 @@ void fldKanjiDraw(s32 x, s32 y, u32 colors, const u8 *text) {
     struct _FRQ *object;
 
     object = itfCreateConvertedTextGlyph(x << 4, y << 4, 0, colors, text, 0);
-    frFontDrawGlyphInDefaultMode(object);
+    frDrawFont(object);
     frDestroyFontRequestAfter(object);
 }
 
@@ -6349,7 +6349,7 @@ void fldSkyDrawFilter(void) {
                 b3 = b3 * (s32)gFilterAlpha / 128;
                 a3 = a3 * (s32)gFilterAlpha / 128;
             }
-            fldSubmitGsGradientQuad(column * 64, row * 32, 64, 32,
+            aDrawBoxG(column * 64, row * 32, 64, 32,
                 r0, g0, b0, a0, r1, g1, b1, a1,
                 r2, g2, b2, a2, r3, g3, b3, a3);
         }

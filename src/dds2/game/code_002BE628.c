@@ -866,7 +866,7 @@ void mnuDrawPartyMemberCommandPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
         struct _FRQ *glyph = itfCreateFont2TextGlyph(labelX + 0x140, labelY - 0x10, z,
                           fclBlendColor(0xA09DC380, 0xA09DC300, bundleFade), text, NULL);
         frSetFontColorNo(glyph, 3);
-        frFontDrawGlyphChain(glyph, 1, surface);
+        frDrawFontOt(glyph, 1, surface);
         frDestroyFontRequestAfter(glyph);
         alpha = 0x100 - panel->iconBundle->fade;
     } else {
@@ -877,7 +877,7 @@ void mnuDrawPartyMemberCommandPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     {
         struct _FRQ *glyph = itfCreateFont2TextGlyph(labelX + 0x140, labelY - 0x10, z,
                           fclBlendColor(0xA09DC380, 0xA09DC300, alpha), text, NULL);
-        frFontDrawGlyphChain(glyph, 1, surface);
+        frDrawFontOt(glyph, 1, surface);
         frDestroyFontRequestAfter(glyph);
     }
 
@@ -934,7 +934,7 @@ typedef struct _FRQ _FRQ;
 
 extern _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, _FRQ *);
 
-extern s32 frFontDrawGlyphChain(_FRQ *, s8, u32);
+extern s32 frDrawFontOt(_FRQ *, s8, u32);
 
 /* Draw one party page: queued commands, level text, selection and HP/MP bars. */
 void mnuDrawPartyMemberStatusPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
@@ -996,7 +996,7 @@ void mnuDrawPartyMemberStatusPanel(s32 x, s32 y, s32 z, MenuPageWindow *menu,
     sprintf(text, D_00437C68, level);
     glyph = itfCreateFont2TextGlyph(labelX + 0x140, labelY - 8,
                                        z, textColor, text, 0);
-    frFontDrawGlyphChain(glyph, 1, surface);
+    frDrawFontOt(glyph, 1, surface);
     frDestroyFontRequestAfter(glyph);
     if (panel->frame[7] == NULL) {
         effDrawTextureSlotWithBlendedCornerColors(x + framePositions[0], y + framePositions[1], z,
@@ -1556,7 +1556,7 @@ void mnuDrawPartySkillListPanel(s32 x, s32 y, s32 depth, datUnitWork_t *record, 
             if (skillId != 0) {
                 glyph = itfCreateConvertedTextGlyph(x + text[column].x, y + text[column].y + rowOffset, depth,
                                                     0xA09DC380, datSkillNames[skillId], NULL);
-                frFontDrawGlyphChain(glyph, 1, surface);
+                frDrawFontOt(glyph, 1, surface);
                 frDestroyFontRequestAfter(glyph);
             } else {
                 mnuDrawRepeatedPanelSprites(x + text[2 + column].x, y + (rowOffset + text[2 + column].y) + 0x18, depth,
@@ -1668,7 +1668,7 @@ void mnuDrawPartyProfilePanelContents(s32 x, s32 y, s32 depth, datUnitWork_t *ac
                                       panel->resourceSets[1], surface);
             glyph = itfCreateConvertedTextGlyph(x + rows[1].x, y + rows[1].y + rowOffset, depth, 0xA09DC380,
                                                 datSkillNames[skillId], NULL);
-            frFontDrawGlyphChain(glyph, 1, surface);
+            frDrawFontOt(glyph, 1, surface);
             frDestroyFontRequestAfter(glyph);
             mnuDrawRangeCostAndIcon(x + rows[2].x, y + rows[2].y + rowOffset, depth, 0x1F0, fade, actor, skillId, 0, 0,
                                     panel->resourceSets[0], surface);
@@ -1935,17 +1935,17 @@ void mnuDrawRatioPanelContents(s32 x, s32 y, s32 depth, u32 color, u32 fade,
             effDrawTextureSlotWithBlendedCornerColors(x + 0x6C0, y, depth, fade, 1, pair->textures[6], 0, flags);
             sprintf(text, "%3d", value);
             glyph = itfCreateFont2TextGlyph(x + 0x520, y, depth, color, text, NULL);
-            frFontDrawGlyphChain(glyph, 1, flags);
+            frDrawFontOt(glyph, 1, flags);
             frDestroyFontRequestAfter(glyph);
             sprintf(text, "%3d", total);
             glyph = itfCreateFont2TextGlyph(x + 0x7A0, y, depth, totalColor, text, NULL);
-            frFontDrawGlyphChain(glyph, 1, flags);
+            frDrawFontOt(glyph, 1, flags);
             frDestroyFontRequestAfter(glyph);
         } else {
             effDrawTextureSlotWithBlendedCornerColors(x + 0x6D0, y + 8, depth, fade, 1, pair->textures[5], 0, flags);
             sprintf(text, "%3d", value);
             glyph = itfCreateFont2TextGlyph(x + 0x520, y, depth, color, text, NULL);
-            frFontDrawGlyphChain(glyph, 1, flags);
+            frDrawFontOt(glyph, 1, flags);
             frDestroyFontRequestAfter(glyph);
         }
     }
@@ -2222,7 +2222,7 @@ void mnuDrawPanelItemDetail(s32 x, s32 y, s32 depth, s32 opacity, s32 mode, Menu
         sprintf(text, "%d", item->selection);
         glyph = itfCreateFont2TextGlyph(x + ((offset + gainOffset + 0x64) << 4), y, depth, color, text, NULL);
         frSetFontColorNo(glyph, 3);
-        frFontDrawGlyphChain(glyph, 1, layer);
+        frDrawFontOt(glyph, 1, layer);
         frDestroyFontRequestAfter(glyph);
     }
 }
@@ -2278,7 +2278,7 @@ void mnuDrawAndAdvancePanelItem(s32 x, s32 y, s32 depth, s32 mode, u32 textMode,
     sprintf(text, D_00437C88, value);
     glyph = itfCreateFont2TextGlyph(x + 0x2D0, y, depth, color, text, 0);
     frSetFontColorNo(glyph, fontFlags);
-    frFontDrawGlyphChain(glyph, 1, flags);
+    frDrawFontOt(glyph, 1, flags);
     frDestroyFontRequestAfter(glyph);
     item->phase += 24;
     if (item->phase > 512) {

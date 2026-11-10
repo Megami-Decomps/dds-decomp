@@ -2023,14 +2023,14 @@ s32 mnuBuildCampItemList(ShopScene *scene) {
 extern struct _FRQ *itfDrawBankTextWithLayoutFlags(s32, s32, s32, s32, s32, s32);
 
 
-extern s32 frFontDrawGlyphChain(struct _FRQ *, s8, u32);
+extern s32 frDrawFontOt(struct _FRQ *, s8, u32);
 void mnuQueueCampTextGlyphWithChildColor(s32 fontValue, s32 enabled, s32 unused2, s32 unused3, s32 fontArg, s32 flags) {
     struct _FRQ *handle;
 
     if (enabled != 0) {
         handle = itfDrawBankTextWithLayoutFlags(0x970, 0xB58, 1, (u16)fontValue, enabled, fontArg);
         frSetFontColor(handle, 0x80808040);
-        frFontDrawGlyphChain(handle, 0, flags);
+        frDrawFontOt(handle, 0, flags);
         frDestroyFontRequestAfter(handle);
     }
 }

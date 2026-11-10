@@ -105,7 +105,7 @@
 0x00105010	dds3DrawTextureListDiagnostic	inferred	confidence=high; matched-C; src/dds1/game/code_00104290.c:428:func_00105010; Draws background then walks texture-list prev links and appends each texture diagnostic row.; twin=0x00104F30, anchored ordered retail pairing.; sources=names_M143.tsv,names_R_Names35.tsv [names_qp10.tsv]; was dds3DrawTextureListDiagnostic
 0x001050B8	dds3TextureAttachTask	inferred	allocates and initializes task then invokes scene attach callback; was dds3TextureAttachTask
 0x00105118	dds3EnsureDefaultResource	inferred	initializes D_00325748 when readiness byte is clear; was dds3EnsureDefaultResource
-0x00105150	dds3InitializeFrameDrawPackets	inferred	Inferred from the current C implementation in kernel/dds3KernelDraw.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).; was dds3InitializeFrameDrawPackets
+0x00105150	dds3InitDrawEnvSub	inferred	SMT3HD name via SLUS_209.11 0x00104698, draw producer, was dds3InitializeFrameDrawPackets (dds-port names-for-conform); was dds3InitializeFrameDrawPackets
 0x00105320	dds3InitDrawEnv	inferred	SMT3HD name via SLUS_209.11 0x00104820, reloc-identical; was evtResetDisplayProjectionAndVectorState
 0x00105370	dds3InitRenderDrawEnv	inferred	SMT3HD name via SLUS_209.11 0x00104870, unique-masked-hash; was kwlnInitHeldTextureScenePackets
 0x001054D0	dds3AllocRenderTexture	inferred	SMT3HD name via SLUS_209.11 0x001049D0, reloc-identical; was kwlnCreateHeldTextureBuffer
@@ -925,7 +925,7 @@
 0x0011E998	fldEvaluateCameraMoveTracking	inferred	Reports camera-tracking mode pending (2), starts the requested camera move and returns 1 when the target floor is reached, or returns 0 when no action is due. SMT3HD equivalent fldElvCheckEnd at SLUS_209.11 0x001190B8 is reloc-identical. [paired provider behavior and script-result use]
 0x0011EA10	fldElvDrawFloorNum	inferred	SMT3HD name via SLUS_209.11 0x00119130, unique-masked-hash; was fldUpdateCameraMoveTracking
 0x0011EBC8	drawSceneBasicList	inferred	SMT3HD name via SLUS_209.11 0x001192E8, reloc-identical; was fldSubmitVisibleWorldBackground
-0x0011ECC8	fldDrawEffectObjectShadow	inferred	Builds shadow triangles from the effect model silhouette, extrudes boundary edges along the selected ground/view direction, and submits projected shadow geometry. Called by dds3UpdateEffectObjectFollowParameters only when the shadow/update flags and transition owner permit it; paired DDS2 implementation at 0x00120B88.
+0x0011ECC8	fldSdwDraw	inferred	SMT3HD name via SLUS_209.11 0x001193E8, draw producer, was fldDrawEffectObjectShadow (dds-port names-for-conform); was fldDrawEffectObjectShadow
 0x00120968	fldLoadFieldTables	inferred	loads /fld/f/bin/FLDALL.TBL into seventeen global tables with fixed sizes
 0x00120AE8	fldResetFieldMapState	inferred	Clears activation flags, every map-slot flag bank and value, all area-floor flags, and the DDS1 map-exploration padding bytes. The field-runtime initializer calls it in reset mode before resetting other field globals. Paired DDS2 provider clears its map banks and stage-exploration bitmap. [provider and caller analysis]
 0x00120C08	fldResetFieldRuntimeState	inferred	Resets the shared field-runtime globals. Mode 0 additionally resets the persistent game-state header/version block; mode 1 preserves it when sequence recording begins. Used by full runtime reset paths and field sequence recording. [BN provider and caller analysis]
@@ -1087,6 +1087,7 @@
 0x00129E30	aDrawBoxFZ	inferred	SMT3HD name via SLUS_209.11 0x001296E0, reloc-identical; was fldSubmitPackedRectangleGsPacket
 0x00129FC0	aDrawBoxF_Direct	inferred	SMT3HD name via SLUS_209.11 0x00129870, reloc-identical; was fldSubmitGsRect
 0x0012A120	aDrawTriG	inferred	SMT3HD name via SLUS_209.11 0x001299D0, reloc-identical; was fldSubmitGsGradientTriangle
+0x0012A358	aDrawBoxG	inferred	SMT3HD name via SLUS_209.11 0x00129C08, draw producer, was fldSubmitGsGradientQuad (dds-port names-for-conform); was fldSubmitGsGradientQuad
 0x0012A5D8	aDrawBoxGF	inferred	SMT3HD name via SLUS_209.11 0x00129E88, reloc-identical; was fldSubmitGsGradientQuadFloatRect
 0x0012A890	fldSubmitTaggedGsRectangle	inferred	confidence=high; matched-C; src/dds1/field/fldFileResolver.c:2508; Submits a fixed-point rectangle with four GS words and a caller-supplied vertex tag. twin=0x0012CDC0 (DDS2). LiteG batch 5.
 0x0012AA20	drawSprite3D	inferred	SMT3HD name via SLUS_209.11 0x0012A2D0, reloc-identical; was fldSubmitModelPacket
@@ -1094,9 +1095,9 @@
 0x0012ABE0	fldSubmitAlternateFramePacket	inferred	confidence=medium; matched-C; src/dds1/field/fldFileResolver.c:3028:func_0012ABE0; Allocates an alternate frame-texture packet and submits it to the selected display descriptor.; source=revalidated-unapplied-names_R_Names16.tsv:2 [names_qp12_apply.tsv]
 0x0012AC80	ooyTestLine3D	inferred	SMT3HD name via SLUS_209.11 0x0012A530, shared-hash-in-run; was fldSubmitVectorColorPacket
 0x0012AD30	fldDrawPoly3	inferred	SMT3HD name via SLUS_209.11 0x0012A5E0, reloc-identical; was fldSubmitGsTriangle
-0x0012AEB0	fldSubmitTexturedOverlaySprite	inferred	confidence=high; matched-C; Submits the field's fixed textured overlay sprite packet; DDS2 twin 0x0012D3E0. LiteG field naming batch.
+0x0012AEB0	fldDrawBokasi	inferred	SMT3HD name via SLUS_209.11 0x0012ADE8, draw producer, was fldSubmitTexturedOverlaySprite (dds-port names-for-conform); was fldSubmitTexturedOverlaySprite
 0x0012B090	fldSubmitOverlaySpriteWithRenderState	inferred	Inferred from the current C implementation in field/fldFileResolver.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
-0x0012B2B0	fldSubmitOverlayStateAndSprite	inferred	Inferred from the current C implementation in field/fldFileResolver.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x0012B2B0	fldDrawFrameSpriteAlpha	inferred	SMT3HD name via SLUS_209.11 0x0012AFD0, draw producer, was fldSubmitOverlayStateAndSprite (dds-port names-for-conform); was fldSubmitOverlayStateAndSprite
 0x0012B4A0	fldDrawPos	inferred	SMT3HD name via SLUS_209.11 0x0012B1C0, unique-masked-hash; was fldDrawMarkerQuad
 0x0012B638	fldDraw2DBar	inferred	SMT3HD name via SLUS_209.11 0x0012B358, reloc-identical; was fldDrawStretchableFrame
 0x0012B740	fldDrwZAlloc	inferred	SMT3HD name via SLUS_209.11 0x0012B460, reloc-identical; was fldAllocateBackgroundBuffer
@@ -1288,7 +1289,7 @@
 0x00141190	fldInputPanelSetDraw	inferred	SMT3HD name via SLUS_209.11 0x001444A8, reloc-identical; was fldSetTitleBannerPending
 0x001411C0	fldInputPanelSetMessage	inferred	SMT3HD name via SLUS_209.11 0x001444D8, reloc-identical; was fldSetTitleBannerChoice
 0x001411F0	fldResolvePendingTitleBanner	inferred	Inferred from the current C implementation in game/code_001411F0.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
-0x00141320	fldFieldTaskUpdate	inferred	Field task callback draws field overlays only when menus, title and camp control are inactive. [names_reviewed13.tsv]
+0x00141320	fldAddressProcess2	inferred	SMT3HD name via SLUS_209.11 0x00144618, draw producer, was fldFieldTaskUpdate (dds-port names-for-conform); was fldFieldTaskUpdate
 0x001413A8	fldAddressProcess1	inferred	SMT3HD name via SLUS_209.11 0x00144698, reloc-identical; was fldFieldTaskCreate
 0x001413F8	fldAddressShutdown	inferred	SMT3HD name via SLUS_209.11 0x001446E8, shared-hash-in-run; was fldFieldTaskDestroy
 0x00141420	fldInitAddressProcess	inferred	SMT3HD name via SLUS_209.11 0x00144710, reloc-identical; was fldEnsureTask
@@ -1382,11 +1383,11 @@
 0x0014A1A0	fldFindEffectByName	inferred	linear strcmp over D_003D46A0 entries (name at +0x40), returns unk20[1]
 0x0014A250	fldGetCurrentSceneSelectionResource	inferred	Returns the selected field entry resource or zero when none is selected. [names_reviewed12.tsv]
 0x0014A298	fldSetTitleDrawMode	inferred	confidence=high; Stores the title draw mode selecting display buffer53 versus5E in fldTitle; event timeline track1E supplies the mode. DDS2 14E668 counterpart. [PurC readability b1]
-0x0014A2A0	fldTitleIsActive	inferred	returns whether the fldTitle task exists
+0x0014A2A0	fldTitleChk	inferred	SMT3HD name via SLUS_209.11 0x0014F148, draw producer, was fldTitleIsActive (dds-port names-for-conform); was fldTitleIsActive
 0x0014A2C8	nbPanelAnalyzeStart	inferred	SMT3HD name via SLUS_209.11 0x00280518, reloc-identical; was fldBeginTitleAnimation
 0x0014A2D8	fldTitle	inferred	update proc of the task registered as "fldTitle" (a task label, not proof of the function's name)
 0x0014A930	fldReleaseTitleTextureReference	inferred	Title task cleanup releases the retained title texture and clears its handle. [names_reviewed13.tsv]
-0x0014A960	fldStartTitle	inferred	formats /fld/f/pnl/df%03d.tmx, loads it and creates the "fldTitle" task unless fldTitleIsActive
+0x0014A960	fldStartTitle	inferred	formats /fld/f/pnl/df%03d.tmx, loads it and creates the "fldTitle" task unless fldTitleChk
 0x0014AA10	fldDestroyTitleTask	inferred	destroys fldTitle task by name if present
 0x0014AA50	fldTitleMiniIsActive	inferred	returns whether the fldTitleMini task exists
 0x0014AA78	fldTitleMini	inferred	update proc of the task registered as "fldTitleMini" (a task label, not proof of the function's name)
@@ -2689,12 +2690,12 @@
 0x00185E50	effUpdatePairedResources	inferred	per-frame fade (in/out ratio) of the two paired resources: blended colour plus lerped vectors [names_M83_Lerp.tsv]
 0x00186030	effCopyPairedResourceEndpoint	inferred	High: copies only the leading vector used as the paired resources' interpolation endpoint. [names_reviewed23.tsv]
 0x00186040	effSetPairedResourceColor	inferred	High: assigns the packed color whose top byte is interpolated by the paired-resource update. [names_reviewed23.tsv]
-0x00186048	effBuildBlurTransformedQuad	inferred	High: fills quad color/coordinates and rotates and scales texture coordinates about the supplied rectangle center. [names_reviewed23.tsv]
+0x00186048	dds3EffectBlurDrawQuad	inferred	SMT3HD name via SLUS_209.11 0x001A1678, draw producer, was effBuildBlurTransformedQuad (dds-port names-for-conform); was effBuildBlurTransformedQuad
 0x00186398	effBuildBlurUnitTextureQuad	inferred	High: fills quad positions and alpha with neutral RGB and unit-square texture coordinates, supporting pixel or fixed-point input coordinates. [names_reviewed23.tsv]
 0x00186498	effDrawBlurRectangle	inferred	High: queues frame-buffer and GS state packets plus a transformed quad, then invokes the blur filter draw slot. [names_reviewed23.tsv]
-0x00186718	effAppendBlurRenderState	inferred	High: appends frame-buffer, texture/resource, alpha blend, test, and fade-dependent clamp state to an existing packet list. [names_reviewed23.tsv]
+0x00186718	dds3EffectBlurDrawFrameMask	inferred	SMT3HD name via SLUS_209.11 0x001A1BB0, draw producer, was effAppendBlurRenderState (dds-port names-for-conform); was effAppendBlurRenderState
 0x001869F0	effAppendBlurRectanglePackets	inferred	High: creates and appends a unit-texture quad packet and a transformed quad packet from one blur source. [names_reviewed23.tsv]
-0x00186A98	effDrawBlurListWithFramePacket	inferred	High: adds the current frame's leading DMA packet to a supplied list, then invokes the filter draw slot. [names_reviewed23.tsv]
+0x00186A98	dds3EffectBlurDrawFrameMaskReset	inferred	SMT3HD name via SLUS_209.11 0x001A1E90, draw producer, was effDrawBlurListWithFramePacket (dds-port names-for-conform); was effDrawBlurListWithFramePacket
 0x00186B20	effDrawBlurSource	inferred	High: creates a packet list for a drawable blur source, queues render state and both quads, and finishes with the filter draw. [names_reviewed23.tsv]
 0x00186BC8	dds3EffectBlurSetRect	inferred	SMT3HD name via SLUS_209.11 0x001A1FA8, reloc-identical; was effDrawBlurPixelRectangle
 0x00186C18	dds3EffectPartialMultiBlurCreate	inferred	SMT3HD name via SLUS_209.11 0x001A1FF8, reloc-identical; was effCloneBlurTemplate
@@ -3023,9 +3024,9 @@
 0x00195548	frSetFontDrawOT	inferred	stores render flags used when drawing glyphs [names_reviewed5.tsv]
 0x00195550	frEraseEffect	inferred	SMT3HD name via SLUS_209.11 0x001C7C30, byte-identical; was frFontAdvanceGlyphFade
 0x001955D8	frFontAdvanceChildFadeAndGetJitter	inferred	Gates child fade on predecessor/control state, advances its low byte up to 0x80 and returns the transient X jitter.
-0x00195868	frFontDrawGlyphInDefaultMode	inferred	confidence=high; matched-C; src/dds1/interface/frFont.c:488:func_00195868; Uses shared font render flags with draw mode zero, not an override flag mask.; source=revalidated-unapplied-names_R_Names31.tsv:19 [names_qp12_apply.tsv]
-0x00195880	frFontDrawGlyphWithSharedFlags	inferred	forwards glyph and mode with shared render flags to drawing routine [names_reviewed5.tsv]
-0x001958A0	frFontDrawGlyphChain	inferred	Draws parent/child chains with fade and wait control, returning their total child-glyph count only when ready; DDS2 also gates the result on a positive delay counter.
+0x00195868	frDrawFont	inferred	SMT3HD name via SLUS_209.11 0x001C7E00, draw producer, was frFontDrawGlyphInDefaultMode (dds-port names-for-conform); was frFontDrawGlyphInDefaultMode
+0x00195880	frDrawFontEx	inferred	SMT3HD name via SLUS_209.11 0x001C7E18, draw producer, was frFontDrawGlyphWithSharedFlags (dds-port names-for-conform); was frFontDrawGlyphWithSharedFlags
+0x001958A0	frDrawFontOt	inferred	SMT3HD name via SLUS_209.11 0x001C7E38, SMT3 frDrawFontEx callee (named upstream 804311e8), was frFontDrawGlyphChain; was frFontDrawGlyphChain
 0x00195B10	frFlipPacketBuf	inferred	Releases slot 1 when the current draw-buffer selector low byte is zero, otherwise slot 0; returns signed zero.
 0x00195B60	frCombineFontRequest	inferred	SMT3HD name via SLUS_209.11 0x001C8108, shared-hash-in-run; was frFontLinkGlyphAfterPrevious
 0x00195B78	frFontLinkGlyph	inferred	splices a glyph record into another's list with optional pos copy
@@ -3275,9 +3276,10 @@
 0x0019E9D8	SelectItemMove	inferred	SMT3HD name via SLUS_209.11 0x001D0740, reloc-identical; was sndStepSequenceIndex
 0x0019EA88	SelectItemDefKey	inferred	SMT3HD name via SLUS_209.11 0x001D07F0, unique-masked-hash; was itfMesFindPressedOptionRank
 0x0019EB18	CalcCurCtr	inferred	SMT3HD name via SLUS_209.11 0x001D0880, shared-hash-in-run; was btlUpdateFadeIndicator
-0x0019ED78	itfMesRenderActivePanelSprites	inferred	Queues active panel sprite layers and refreshes the selected panel. [names_reviewed11.tsv]
+0x0019EBC8	DrawMesFlow	inferred	SMT3HD name via SLUS_209.11 0x001D0930, draw producer, was itfUpdateSoundSelectorPanel (dds-port names-for-conform); was itfUpdateSoundSelectorPanel
+0x0019ED78	DrawWindow	inferred	SMT3HD name via SLUS_209.11 0x001D0AC0, draw producer, was itfMesRenderActivePanelSprites (dds-port names-for-conform); was itfMesRenderActivePanelSprites
 0x0019EE58	itfDrawSelectedSoundRow	inferred	Inferred from the current C implementation in interface/itfMesManager.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
-0x0019F0F8	itfDrawSoundSelectorOptionPanel	inferred	Mode-3 path in itfUpdateSoundSelectorPanel; emits option-row geometry and panel quads for the selector.
+0x0019F0F8	itfDrawSoundSelectorOptionPanel	inferred	Mode-3 path in DrawMesFlow; emits option-row geometry and panel quads for the selector.
 0x0019F4C8	itfDrawSoundSelectorFadeLayers	inferred	U3
 0x0019F660	CalcMsgMng_Process	inferred	SMT3HD name via SLUS_209.11 0x001D0FF8, reloc-identical; was itfUpdateActiveMessageWindows
 0x0019F6A0	DrawMsgMng_Process	inferred	SMT3HD name via SLUS_209.11 0x001D1038, unique-masked-hash; was itfUpdateSoundSelectorPanels
@@ -7002,7 +7004,7 @@
 0x0028F458	fileMenuReleaseNoOp	inferred	Empty file-menu completion callback invoked before fileReleaseMenuResources by event mode pollers; DDS2 twin 0x002CE750. [LiteH-2]
 0x0028F460	fileReleaseMenuResources	inferred	DDS2 002CE758 twin; releases textures, buffers, resource slot and menu task [names_R_FuncNames2.tsv]
 0x0028F5F8	fileMenuOperationSucceeded	inferred	Returns 1; file-menu event pollers treat nonzero as operation success. DDS2 twin 0x002CE920. [LiteH-2]
-0x0028F600	fileMenuTaskExists	inferred	DDS2 002CE928 candidate twin (tentative score 1.000); looks up file menu task by name and returns whether present [names_R_FuncNames2.tsv]
+0x0028F600	fmProcessChk	inferred	SMT3HD name via SLUS_209.11 0x00157130, draw producer, was fileMenuTaskExists (dds-port names-for-conform); was fileMenuTaskExists
 0x0028F628	fileGetSelectionPendingFlag	inferred	DDS2 002CE950 twin; reads selection flag D_00437D34 set by selected-file flow [names_R_FuncNames2.tsv]
 0x0028F630	fileUpdatePromptDialog	inferred	Asynchronous prompt-dialog state handler: slQueryYesNo stores start/finish callbacks and mode, begins the memory-card request when needed, and returns this handler; it polls request/readiness state, updates prompt audio, invokes the selected continuation, and resumes slot selection on errors. Paired with DDS2 0x002CE958; both handlers have the same prompt-dialog callback role.
 0x0028FB48	slQueryYesNo	inferred	SMT3HD name via SLUS_209.11 0x001576B8, reloc-identical; was fileBeginPromptDialog
@@ -7777,7 +7779,7 @@
 0x002C0340	itfGridApplyLinearZoomBoundsAndFadeAlpha	inferred	linear fixed-point delta times phase updates symmetric bounds, scales four corner alpha bytes, and returns cycle step
 0x002C04C8	itfGridApplyLinearBoundsAndColorScale	inferred	Inferred from the current C implementation in game/code_002BF790.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
 0x002C05F0	cmpExpandColor	inferred	SMT3HD name via SLUS_209.11 0x002399A0, byte-identical; was itfGridUnpackColorChannels
-0x002C0628	itfInitDoubleBufferedScenePackets	inferred	Inferred from the current C implementation in game/code_002BF790.c; agent-proposed name checked against its owner, fields and callees (R1 finite names pass).
+0x002C0628	cmpDrawSetup3DView	inferred	SMT3HD name via SLUS_209.11 0x002399D8, draw producer, was itfInitDoubleBufferedScenePackets (dds-port names-for-conform); was itfInitDoubleBufferedScenePackets
 0x002C0778	cmpDrawSpriteFlag	inferred	SMT3HD name via SLUS_209.11 0x00239B28, reloc-identical; was itfGridDrawBooleanDescriptor
 0x002C0858	itfSetPrimaryFramebufferAlphaFlag	inferred	confidence=high; matched-C; src/dds1/game/code_002BF790.c:242:func_002C0858; Normalizes the byte flag to zero/one and submits GS FBA_1 (0x4A) through the requested draw surface.; source=fresh-R_Names31-QP12 [names_qp12_apply.tsv]
 0x002C0878	cmpDrawSprite	inferred	SMT3HD name via SLUS_209.11 0x00239C28, reloc-identical; was itfSubmitToggledGridWord
@@ -9407,7 +9409,7 @@
 0x00325748	sdfDebugGrOt	inferred	SMT3HD name via SLUS_209.11 0x002F6978, kwln rename; was kwlnPositionedTextSurface; was kwlnPositionedTextSurface
 0x00325788	sdfModelOtTable	inferred	SMT3HD name via SLUS_209.11 0x002F69B8 (SMT3 11 entries, DDS 13); Thirteen sets of four draw surfaces (SdfPoolNode *[13][4]) that kwlnBuildFrameScenePackets stores each frame; a model draws through the set of its pass. DDS2 twin 0x00380788.
 0x00325870	dds3DrawEnv	inferred	SMT3HD name via SLUS_209.11 0x002F6A80, effect/effPacket SMT3 rename; was D_00325870
-0x00326ED0	dds3FrameDrawPacketRecords	inferred	confidence=high; src/dds1/game/code_00185E18.c:D_00326ED0; type=frame DMA record[]; refs=effDrawBlurListWithFramePacket,uiDrawActiveSurfaceRegion; Selected by the active frame-buffer index to append primary DMA and texture-state packets. [names_qp9.tsv]; was dds3FrameDrawPacketRecords
+0x00326ED0	dds3FrameDrawPacketRecords	inferred	confidence=high; src/dds1/game/code_00185E18.c:D_00326ED0; type=frame DMA record[]; refs=dds3EffectBlurDrawFrameMaskReset,uiDrawActiveSurfaceRegion; Selected by the active frame-buffer index to append primary DMA and texture-state packets. [names_qp9.tsv]; was dds3FrameDrawPacketRecords
 0x003272A0	dds3HeldTexturePacketBanks	inferred	confidence=high; Existing dds3TextureBank_t[2] work views initialized by dds3InitRenderDrawEnv; 0x1F40 stride and padding unchanged, list/scene/matrix/lighting payload 0x340 per slot. No new view or ownership extent inferred. DDS2 twin 0x003822A0; all selected root/interior/addend instruction readers already C, no import/active ASM reader. Parent frame banks/canonical dds3FrameDrawPacketRecords unchanged. [PurD readability data b11; identifier-only]; was dds3HeldTexturePacketBanks
 0x00327430	dds3HeldTextureMatrixPackets	inferred	confidence=high; Existing unsized u8 alias at held-texture bank+0x190, selected with native 0x1F40 frame stride; ConsMatrixPacket payload 0xD0. Existing -0x190 list expression and declarations unchanged. DDS2 twin 0x00382430; all selected root/interior/addend instruction readers already C, no import/active ASM reader. Parent frame banks/canonical dds3FrameDrawPacketRecords unchanged. [PurD readability data b11; identifier-only]; was dds3HeldTextureMatrixPackets
 0x00327500	dds3HeldTextureLightingPackets	inferred	confidence=high; Existing unsized u8 alias at held-texture bank+0x260, selected with native 0x1F40 frame stride; SDK lighting payload 0xE0. Existing relative centered-bounds color access unchanged. DDS2 twin 0x00382500; all selected root/interior/addend instruction readers already C, no import/active ASM reader. Parent frame banks/canonical dds3FrameDrawPacketRecords unchanged. [PurD readability data b11; identifier-only]; was dds3HeldTextureLightingPackets
@@ -9927,7 +9929,7 @@
 0x0039E288	scrCommandTable	inferred	SMT3HD name via SLUS_209.11 0x0052E350, script/scrScriptProcess SMT3 rename; was D_0039E288
 0x0039F508	scrSceneLightDirectionZeroWarning	inferred	confidence=high; Existing C-defined WARNING: SCENE_LIGHT_DIR length zero string, emitted when all direction components have abs<=0.01; native allocation40B including padding, C literal38B including NUL. DDS2 twin 0x00412688; existing const char[], native 0x28-byte allocation and padding unchanged. No import or active ASM reader. [PurD readability data b7; native/matched-C twin; identifier-only]
 0x0039F640	dds3PlayerModelName	inferred	confidence=high; Existing C-defined player_a selector string with explicit16-byte storage; chooses the p_a chunk family. DDS2 twin 0x004127C0; existing const char[16], native 0x10-byte allocation and padding unchanged. No import or active ASM reader. [PurD readability data b6; native/matched-C twin; identifier-only]
-0x003A0800	fldTitleTaskName	inferred	confidence=high; data D_003A0800; matched-C-users=3; src/dds1/game/code_001411F0.c:1993:fldTitleIsActive; src/dds1/game/code_001411F0.c:2025:fldStartTitle; src/dds1/game/code_001411F0.c:2045:fldDestroyTitleTask; Title existence, creation and teardown use same task-name string; data-twin=D_00413C10, supported by 2 independently paired matched functions.; retail-data-start=asm/dds1/data/game/code_001411F0.rodata.s:433.; seed-placeholder=D_003A0800; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
+0x003A0800	fldTitleTaskName	inferred	confidence=high; data D_003A0800; matched-C-users=3; src/dds1/game/code_001411F0.c:1993:fldTitleChk; src/dds1/game/code_001411F0.c:2025:fldStartTitle; src/dds1/game/code_001411F0.c:2045:fldDestroyTitleTask; Title existence, creation and teardown use same task-name string; data-twin=D_00413C10, supported by 2 independently paired matched functions.; retail-data-start=asm/dds1/data/game/code_001411F0.rodata.s:433.; seed-placeholder=D_003A0800; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
 0x003A0D70	dds3CrossfadeEndMessage	inferred	SMT3HD name via SLUS_209.11 ?, effect/effPacket DDS-only data, name from its use; was D_003A0D70
 0x003A1FD8	btlActorIdsByClass	inferred	confidence=high; src/dds1/game/code_001A1960.c:btlGetActorIdForClass; Class-indexed actor ID table copied by the class lookup. [names_qp9.tsv]
 0x003A1FE8	btlActorClassPairs	inferred	confidence=high; src/dds1/game/code_001A1960.c:btlGetActorClassPair; Class-indexed pairs copied and returned through two outputs. [names_qp9.tsv]

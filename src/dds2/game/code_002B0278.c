@@ -342,7 +342,7 @@ extern void ptyRecomputeMaxHpMp(datUnitWork_t *unit);
 
 extern void scrClearSecondaryScriptFlag(datUnitWork_t *unit, u16 flagId);
 
-extern s32 frFontDrawGlyphChain(_FRQ *, s8, u32);
+extern s32 frDrawFontOt(_FRQ *, s8, u32);
 
 
 
@@ -398,7 +398,7 @@ void mnuDrawStaffPartySelectionPanel(dds3ProcessID_t *task) {
         } else {
             glyph = itfCreateConvertedTextGlyph(0x2B0, 0xA20, 0, 0xA09DC380, (const u8 *)D_003E78D0[0], 0);
             frSetFontColorNo(glyph, 4);
-            frFontDrawGlyphChain(glyph, 1, 0x53);
+            frDrawFontOt(glyph, 1, 0x53);
             frDestroyFontRequestAfter(glyph);
             selection = mnuGetPartyEntryCurrentId(unit);
             if (selection != 0) {
@@ -685,7 +685,7 @@ void mnuDrawPartySelectionListEntry(s32 x, s32 y, s32 depth, struct MenuList *li
         posX = x + 0x7D0;
         sprintf(text, "%2d", level);
         glyph = itfCreateFont2TextGlyph(posX, y, 0, 0xA09DC380, text, NULL);
-        frFontDrawGlyphChain(glyph, 1, 0x53);
+        frDrawFontOt(glyph, 1, 0x53);
         frDestroyFontRequestAfter(glyph);
         break;
     case 1:
@@ -1098,12 +1098,12 @@ void mnuDrawPartySelectionPreviewPanel(MenuContext *context, MenuPageBar *hpBar,
         } else {
             glyph = itfCreateConvertedTextGlyph(0xE10, 0xBB0, 0, textColor,
                                                 textAddress, 0);
-            frFontDrawGlyphChain(glyph, 1, 0x53);
+            frDrawFontOt(glyph, 1, 0x53);
             frDestroyFontRequestAfter(glyph);
         }
     } else {
         glyph = itfCreateConvertedTextGlyph(0xE10, 0xBB0, 0, textColor, D_00437BF0, 0);
-        frFontDrawGlyphChain(glyph, 1, 0x53);
+        frDrawFontOt(glyph, 1, 0x53);
         frDestroyFontRequestAfter(glyph);
     }
 
@@ -1626,7 +1626,7 @@ void mnuDrawSlotIcons(s32 x, MenuPageWindow *page) {
     for (i = 0; i < 2; i++, y += 0xb8) {
         handle = itfDrawUnderscoreTextSegment(0x3c0, y, 0, 0xa09dc359, (const u8 *)(D_00435E54 + slot->unitId * 45), i);
         if (handle != 0) {
-            frFontDrawGlyphChain(handle, 1, 0x53);
+            frDrawFontOt(handle, 1, 0x53);
             frDestroyFontRequestAfter(handle);
         }
     }
@@ -1649,7 +1649,7 @@ void mnuDrawTextSprite(s32 x, s32 y, s32 width, u32 color, const char *text, s32
     frSetPriority(handle, width << 4);
     frSetFontColor(handle, color);
     frDisableMode(1);
-    frFontDrawGlyphChain(handle, 1, flags);
+    frDrawFontOt(handle, 1, flags);
     frDestroyFontRequestAfter(handle);
 }
 
@@ -1783,7 +1783,7 @@ void mnuDrawRangeCostAndIcon(s32 x, s32 y, s32 depth, s32 xOffset, u32 fade,
         sprintf(text, D_00437BF8, value);
         glyph = itfCreateFont2TextGlyph(x + hpOffset, y - 8, depth, color, text, 0);
         frSetFontColorNo(glyph, chainFlag);
-        frFontDrawGlyphChain(glyph, 1, texture);
+        frDrawFontOt(glyph, 1, texture);
         frDestroyFontRequestAfter(glyph);
     } else {
         mnuDrawRepeatedPanelSprites(x, y, depth, 0x100, 3, costResource, 0x1B, texture);
@@ -2980,7 +2980,7 @@ void mnuDrawSelectionLabel(u16 id) {
     _FRQ *label = itfDrawTextWithSelectedFontMode(0x11B0, 0xA88, 0, 0, id, 1);
 
     frSetFontColor(label, 0xA09DC35A);
-    frFontDrawGlyphChain(label, 1, 0x53);
+    frDrawFontOt(label, 1, 0x53);
     frDestroyFontRequestAfter(label);
 }
 
@@ -3031,7 +3031,7 @@ void mnuDrawAffinityParticipantLabels(u16 affinity, s32 resource, s32 labels) {
                                        0, 1, (EffectSlotSet *)(u32)resource, 0xA, 0x53);
         }
         if (glyph != 0) {
-            frFontDrawGlyphChain(glyph, 1, 0x53);
+            frDrawFontOt(glyph, 1, 0x53);
             frDestroyFontRequestAfter(glyph);
         }
     }

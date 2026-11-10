@@ -829,7 +829,7 @@ void mnuDrawWindowListEntries(s32 x, s32 y, s32 depth, s32 xOffset, s32 yOffset,
             }
         }
         if (glyph != NULL) {
-            frFontDrawGlyphChain(glyph, 1, drawArg);
+            frDrawFontOt(glyph, 1, drawArg);
             frDestroyFontRequestAfter(glyph);
         }
         if (list->drawCallback != NULL) {

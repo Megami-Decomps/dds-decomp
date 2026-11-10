@@ -642,7 +642,7 @@ extern f32 aViewDown[4];
 extern void sdf3DLinkInitPacket(sdfDrawTag_t *, DmaPacketHeader *);
 
 /* Rebuild the view matrix and both frame banks' matrix and lighting packet lists. */
-void itfInitDoubleBufferedScenePackets(void) {
+void cmpDrawSetup3DView(void) {
     s32 i;
 
     sdf3DMakeScreenParam(&dds3ScreenParam.camera);

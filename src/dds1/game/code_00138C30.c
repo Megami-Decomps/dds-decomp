@@ -4463,7 +4463,7 @@ FldActorMotionStepResult fldStepActorMotionByKey(u32 key, f32 *x, f32 *y, f32 *z
 void func_00140F68(void) {
 }
 
-extern s32 fileMenuTaskExists(void);
+extern s32 fmProcessChk(void);
 
 extern u8 fldHasKiretaLabelProcess(void), fldProcKiretaChk(void), fldProcHirakenaiChk(void);
 
@@ -4489,7 +4489,7 @@ s32 fldUpdateTitleBannerTask(dds3ProcessID_t *task) {
     if (fldProcAmChk() != FLD_SCENE_TRANSITION_GATE_PROCEED) {
         return 0;
     }
-    if (fileMenuTaskExists() != 0) {
+    if (fmProcessChk() != 0) {
         return 0;
     }
     if (fldHasKiretaLabelProcess() != 0) {

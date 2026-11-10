@@ -225,7 +225,7 @@ extern u32 itfCreateTightFont3TextGlyph(s32, s32, s32, u32, char *, s32);
 extern char D_00437968[];
 
 extern struct _FRQ *itfCreateFont2TextGlyph(s32, s32, s32, u32, char *, struct _FRQ *);
-extern s32 frFontDrawGlyphChain(struct _FRQ *, s8, u32);
+extern s32 frDrawFontOt(struct _FRQ *, s8, u32);
 
 /* Draw the terminal value panel for the selected item: its frames, then by
  * item kind its power (kind 1) or per-stat bonuses (kind 3), and the count. */
@@ -271,7 +271,7 @@ void mnuDrawTerminalPanelValues(s32 x, s32 y, s32 z, MenuTerminalContext *object
             left = 0x9D0;
         }
         glyph = itfCreateFont2TextGlyph(left, 0xB18, z, color, text, NULL);
-        frFontDrawGlyphChain(glyph, 1, option);
+        frDrawFontOt(glyph, 1, option);
         frDestroyFontRequestAfter(glyph);
         break;
     }
@@ -285,7 +285,7 @@ void mnuDrawTerminalPanelValues(s32 x, s32 y, s32 z, MenuTerminalContext *object
                                                           mnuCommonIconPlacements[row][BRS_ICON_ID], option);
                 sprintf(text, D_00437968, value);
                 glyph = itfCreateFont2TextGlyph(textX, 0xB18, z, color, text, NULL);
-                frFontDrawGlyphChain(glyph, 1, option);
+                frDrawFontOt(glyph, 1, option);
                 frDestroyFontRequestAfter(glyph);
             } else {
                 row = 45 + i * 2;
@@ -302,7 +302,7 @@ void mnuDrawTerminalPanelValues(s32 x, s32 y, s32 z, MenuTerminalContext *object
     }
     sprintf(text, D_00437968, count);
     glyph = (struct _FRQ *)itfCreateTightFont3TextGlyph(0x1700, 0xA58, z, color, text, 0);
-    frFontDrawGlyphChain(glyph, 1, option);
+    frDrawFontOt(glyph, 1, option);
     frDestroyFontRequestAfter(glyph);
 }
 
@@ -462,7 +462,7 @@ void mnuDrawCampItemListRow(s32 x, s32 y, s32 z, struct MenuList *list,
             frSetFontColorNo(glyph, 4);
         }
     }
-    frFontDrawGlyphChain(glyph, 1, mode);
+    frDrawFontOt(glyph, 1, mode);
     frDestroyFontRequestAfter(glyph);
 }
 
@@ -520,7 +520,7 @@ void mnuDrawFadingValueListRow(s32 x, s32 y, s32 z, struct MenuList *list,
     if (selected) {
         frSetFontColorNo(glyph, 4);
     }
-    frFontDrawGlyphChain(glyph, 1, drawArg);
+    frDrawFontOt(glyph, 1, drawArg);
     frDestroyFontRequestAfter(glyph);
     itfSetTextDrawLimit(-1);
 
@@ -537,7 +537,7 @@ void mnuDrawFadingValueListRow(s32 x, s32 y, s32 z, struct MenuList *list,
     if (selected) {
         frSetFontColorNo(glyph, 4);
     }
-    frFontDrawGlyphChain(glyph, 1, drawArg);
+    frDrawFontOt(glyph, 1, drawArg);
     frDestroyFontRequestAfter(glyph);
 }
 
@@ -641,7 +641,7 @@ void mnuDrawShopSelectedRowDetails(s32 x, s32 y, s32 depth, MenuTerminalContext 
         glyph = (struct _FRQ *)itfCreateTightFont3TextGlyph(
             0xD30 + textOffset, (135 + row * 22) << 3, depth, 0xA09DC380, text, 0);
         frSetFontColorNo(glyph, 4);
-        frFontDrawGlyphChain(glyph, 1, option);
+        frDrawFontOt(glyph, 1, option);
         frDestroyFontRequestAfter(glyph);
     }
 }
@@ -686,7 +686,7 @@ void mnuDrawShopSelectedRowDetailsWithAlpha(s32 x, s32 y, s32 depth, MenuTermina
         glyph = (struct _FRQ *)itfCreateTightFont3TextGlyph(
             0xD30 + textOffset, (135 + row * 22) << 3, depth, color, text, 0);
         frSetFontColorNo(glyph, 4);
-        frFontDrawGlyphChain(glyph, 1, option);
+        frDrawFontOt(glyph, 1, option);
         frDestroyFontRequestAfter(glyph);
     }
 }
@@ -744,7 +744,7 @@ void mnuDrawShopPricePlaceholder(s32 x, s32 y, s32 depth, MenuTerminalContext *p
         sprintf(text, D_00437980, 0);
         glyph = (struct _FRQ *)itfCreateTightFont3TextGlyph(0x1910, 0x290, depth, 0xA09DC380, text, 0);
         frSetFontColorNo(glyph, 4);
-        frFontDrawGlyphChain(glyph, 1, option);
+        frDrawFontOt(glyph, 1, option);
         frDestroyFontRequestAfter(glyph);
     }
 }
@@ -772,7 +772,7 @@ void mnuDrawShopZeroValueIconAndText(s32 x, s32 y, s32 z, s32 unused, s32 scale,
     sprintf(text, D_00437980, 0);
     glyph = (struct _FRQ *)itfCreateTightFont3TextGlyph(x + 0x1910, y + 0x290, z, value, text, 0);
     frSetFontColorNo(glyph, 4);
-    frFontDrawGlyphChain(glyph, 1, option);
+    frDrawFontOt(glyph, 1, option);
     frDestroyFontRequestAfter(glyph);
 }
 
@@ -792,7 +792,7 @@ void mnuDrawShopSelectedRowTotal(s32 x, s32 y, s32 depth, MenuTerminalContext *p
         sprintf(text, D_00437980, inner->cursor->camp.value * panel->multiplier);
         glyph = (struct _FRQ *)itfCreateTightFont3TextGlyph(0x1910, 0x290, depth, 0xA09DC380, text, 0);
         frSetFontColorNo(glyph, 4);
-        frFontDrawGlyphChain(glyph, 1, option);
+        frDrawFontOt(glyph, 1, option);
         frDestroyFontRequestAfter(glyph);
     }
 }
@@ -822,7 +822,7 @@ void mnuDrawShopCurrencyBalance(MenuTerminalContext *state, s32 style) {
     {
         struct _FRQ *glyph = (struct _FRQ *)itfCreateTightFont3TextGlyph(0x1910, 0x1D0, 0, style, text, 0);
 
-        frFontDrawGlyphChain(glyph, 1, 0x53);
+        frDrawFontOt(glyph, 1, 0x53);
         frDestroyFontRequestAfter(glyph);
     }
 }

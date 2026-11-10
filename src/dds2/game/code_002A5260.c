@@ -1009,7 +1009,7 @@ void mnuReleaseStaffRollText(void) {
 struct _FRQ;
 /* This legacy call supplies an unused ninth word to the eight-word builder. */
 extern struct _FRQ *frwGetStaffFontFRQ();
-extern s32 frFontDrawGlyphWithSharedFlags(struct _FRQ *, s8);
+extern s32 frDrawFontEx(struct _FRQ *, s8);
 s32 mnuDrawStaffRollText(f32 x, f32 y, s32 font, u32 color, const char *text) {
     s32 byteAlpha = color & 0xFF;
     f32 alpha = byteAlpha;
@@ -1031,7 +1031,7 @@ s32 mnuDrawStaffRollText(f32 x, f32 y, s32 font, u32 color, const char *text) {
             (s32)(y * 8.0f), 0, 0, 1, 8, color, text, 0);
     }
     frGetStrWidth2(glyph);
-    frFontDrawGlyphWithSharedFlags(glyph, 1);
+    frDrawFontEx(glyph, 1);
     return frDestroyFontRequestAfter(glyph);
 }
 

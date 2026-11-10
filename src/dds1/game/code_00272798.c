@@ -189,7 +189,7 @@ void mnuDrawStaffItemListEntry(s32 x, s32 y, s32 z, struct MenuList *list,
                        DDS3_GBWK->inventory.counts[node->sortKeySecondary]);
         count = (_FRQ *)itfCreateFont2TextGlyph(x + 0x910, y + 0x20, z, color,
                                           buffer, (s32)label);
-        frFontDrawGlyphChain(count, 1, drawArg);
+        frDrawFontOt(count, 1, drawArg);
         frDestroyFontRequestAfter(count);
     } else {
         s32 selected = (list->cursor == node);

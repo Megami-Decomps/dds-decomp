@@ -22,13 +22,13 @@ extern float vecLength(float *vector);
 
 
 struct _FRQ;
-extern s32 frFontDrawGlyphWithSharedFlags(struct _FRQ *glyph, s8 mode);
+extern s32 frDrawFontEx(struct _FRQ *glyph, s8 mode);
 
 void sdfCounterDrawGlyphAtGridCell(s32 gridX, s32 gridY, u32 style, const u8 *text) {
     struct _FRQ *glyph;
 
     glyph = itfCreateConvertedTextGlyph(gridX << 4, gridY << 3, 0, style, text, 0);
-    frFontDrawGlyphWithSharedFlags(glyph, 1);
+    frDrawFontEx(glyph, 1);
     frDestroyFontRequestAfter(glyph);
 }
 

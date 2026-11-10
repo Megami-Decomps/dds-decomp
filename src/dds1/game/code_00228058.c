@@ -25,7 +25,7 @@
 
 extern char D_003ACAE0[];
 
-extern s32 fileMenuTaskExists(void);
+extern s32 fmProcessChk(void);
 extern u32 dds3NullDrawProc(void);
 extern void rsetOtOfs(u32 row);
 extern void rsetAlpha(s32 arg);
@@ -378,7 +378,7 @@ dds3TaskUpdateResult_t evtUpdateSolarOverlayFade(dds3ProcessID_t *task) {
     f32 f;
 
     f = 0.0f;
-    if ((fileMenuTaskExists() != 0) || (dds3NullDrawProc() != 0)) {
+    if ((fmProcessChk() != 0) || (dds3NullDrawProc() != 0)) {
         return DDS3_TASK_UPDATE_RETAIN_CALLBACK;
     }
     overlay = (SolarOverlayWork *)dds3GetProcessData(task);

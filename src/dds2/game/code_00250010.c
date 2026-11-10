@@ -77,7 +77,7 @@ extern void fldSkyDrawFilter(void);
 
 extern void rsetOtOfs(s32 id);
 
-extern void fldSubmitTexturedOverlaySprite(void);
+extern void fldDrawBokasi(void);
 
 
 
@@ -200,7 +200,7 @@ s32 evtSkyProcess1(dds3ProcessID_t *task) {
     fldSkyDrawFilter();
     if (fldbokasi != 0) {
         rsetOtOfs(0x53);
-        fldSubmitTexturedOverlaySprite();
+        fldDrawBokasi();
     }
     return 0;
 }
@@ -4864,7 +4864,7 @@ extern void dds3CameraObjectBasicSetFovy(dds3Basic_t *, f32);
 extern EvtViewerNameIndex mnuCampFindMatchingEntryIndex(PolyMovieWork *, evtViewerInfo_t *, s32);
 extern EvtPackedSoundTrackId evtLoadEventBgm(s32 eventId);
 extern EvtEventBgmReadiness evtCheckEventBgmLoaded(s32 eventId);
-extern u8 fldTitleIsActive(void);
+extern u8 fldTitleChk(void);
 extern void fldStartTitle(s32 field, s32 mode, s32 option);
 extern void dds3FadeBackgroundStartIn(s32);
 
@@ -5536,7 +5536,7 @@ s32 evtPopulateViewerTimelineFromMovie(PolyMovieWork *work, evtViewerInfo_t *run
         printf("smg file load :eventViewer\n");
     }
     if (title != -1) {
-        if (fldTitleIsActive() == 0) {
+        if (fldTitleChk() == 0) {
             fldStartTitle(title, -1, 30);
             printf("timei file load=%d\n", title);
         } else {

@@ -22,8 +22,8 @@
 
 extern s8 dds3PadButtonState[];
 
-extern s32 frFontDrawGlyphWithSharedFlags(_FRQ *, s8);
-extern s32 frFontDrawGlyphChain(_FRQ *, s8, u32);
+extern s32 frDrawFontEx(_FRQ *, s8);
+extern s32 frDrawFontOt(_FRQ *, s8, u32);
 
 extern _FRQ *itfDrawBankTextWithLayoutFlags(s32, s32, s32, u16, FrFontTextBank *, s32);
 
@@ -328,14 +328,14 @@ void sdfRayPlaneHit(f32 *plane, f32 *rotation, f32 *out) {
 
 void sdfFontRegisterShort(s32 x, s32 y, u32 colors, const u8 *text) {
     _FRQ *handle = itfCreateConvertedTextGlyph(x << 4, y << 3, 0, colors, text, 0);
-    frFontDrawGlyphWithSharedFlags(handle, 1);
+    frDrawFontEx(handle, 1);
     frDestroyFontRequestAfter(handle);
 }
 
 s32 frFontMeasureAndQueueGlyph(s32 x, s32 y, s32 depth, u32 colors, const u8 *text, s32 option) {
     _FRQ *handle = itfCreateConvertedTextGlyph(x << 4, y << 3, depth, colors, text, 0);
     s32 result = frGetStrWidth(handle);
-    frFontDrawGlyphChain(handle, 1, option);
+    frDrawFontOt(handle, 1, option);
     frDestroyFontRequestAfter(handle);
     return result;
 }
@@ -351,7 +351,7 @@ s32 frFontQueueTextAndOptionallyMeasure(s32 x, s32 y, u32 first, u32 second, s8 
     if (flag < 0) {
         result = frGetStrWidth(handle);
     }
-    frFontDrawGlyphChain(handle, 1, option);
+    frDrawFontOt(handle, 1, option);
     frDestroyFontRequestAfter(handle);
     return result;
 }
@@ -366,7 +366,7 @@ s32 frFontDrawStyledGlyphChainAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, c
     } else {
         result = frGetStrWidth(handle);
     }
-    frFontDrawGlyphChain(handle, 1, color);
+    frDrawFontOt(handle, 1, color);
     frDestroyFontRequestAfter(handle);
     return result;
 }
@@ -383,7 +383,7 @@ s32 itfDrawGlyphChainWithWidthQuery(s32 x, s32 y, s32 z, u32 w, u8 flags, char *
     } else {
         result = frGetStrWidth(handle);
     }
-    frFontDrawGlyphChain(handle, 1, color);
+    frDrawFontOt(handle, 1, color);
     frDestroyFontRequestAfter(handle);
     return result;
 }
@@ -400,7 +400,7 @@ s32 frFontQueueFlaggedGlyphAndMeasure(s32 x, s32 y, s32 z, u32 w, u8 flags, char
     } else {
         result = frGetStrWidth(handle);
     }
-    frFontDrawGlyphChain(handle, 1, color);
+    frDrawFontOt(handle, 1, color);
     frDestroyFontRequestAfter(handle);
     return result;
 }
@@ -413,7 +413,7 @@ s32 frFontDrawColoredGlyphChainAndMeasure(s32 x, s32 y, u32 first, u32 second, u
     if (flag < 0) {
         result = frGetStrWidth(handle);
     }
-    frFontDrawGlyphChain(handle, 1, option);
+    frDrawFontOt(handle, 1, option);
     frDestroyFontRequestAfter(handle);
     return result;
 }

@@ -590,7 +590,7 @@ void brsNoOpMessageInputCallback(void *work) {
 
 extern u8 *D_003BAA84;
 extern char D_003BC560[];
-extern s32 frFontDrawGlyphChain(_FRQ *, s8, u32);
+extern s32 frDrawFontOt(_FRQ *, s8, u32);
 extern char D_003BC568[];
 
 /* Draw each nonempty reward icon row with its name and formatted parameter. */
@@ -621,7 +621,7 @@ void brsDrawRewardEntryRows(s32 x, s32 y, s32 depth, u32 color, BrsRewardSummary
             sprintf(formatted, D_003BC560, parameter);
             valueGlyph = itfCreateFont3TextGlyph(x + 0xC60, y + 0x18, depth, color,
                                        formatted, iconGlyph);
-            frFontDrawGlyphChain(valueGlyph, 1, textStyle);
+            frDrawFontOt(valueGlyph, 1, textStyle);
             frDestroyFontRequestAfter(valueGlyph);
             y += 0xB0;
         }
@@ -635,7 +635,7 @@ void itfDrawCountText(s32 x, s32 y, s32 z, s32 w, const BrsRewardSummary *info, 
     sprintf(text, D_003BC568, info->totalExp);
     glyph = itfCreateFont3TextGlyph(x, y, z, w, text, 0);
     frSetDrawPosition(glyph, x + ((0xBE - frGetStrWidth2(glyph)) << 4), y);
-    frFontDrawGlyphChain(glyph, 1, flags);
+    frDrawFontOt(glyph, 1, flags);
     frDestroyFontRequestAfter(glyph);
 }
 
@@ -646,7 +646,7 @@ void brsDrawMaccaRewardTotal(s32 x, s32 y, s32 z, s32 w, const BrsRewardSummary 
     sprintf(text, D_003BC568, info->macca);
     glyph = itfCreateFont3TextGlyph(x, y, z, w, text, 0);
     frSetDrawPosition(glyph, x + ((0xBE - frGetStrWidth2(glyph)) << 4), y);
-    frFontDrawGlyphChain(glyph, 1, flags);
+    frDrawFontOt(glyph, 1, flags);
     frDestroyFontRequestAfter(glyph);
 }
 

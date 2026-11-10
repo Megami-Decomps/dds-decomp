@@ -152,10 +152,10 @@ void brsDrawProgressRowUnitInfo(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
     }
     sprintf(buffer, "%2d", work->levelAnimation[index].level);
     glyph = itfCreateFont2TextGlyph(x + 0x440, y + 0xD8, 0xFF0000, color, buffer, NULL);
-    frFontDrawGlyphChain(glyph, 1, context);
+    frDrawFontOt(glyph, 1, context);
     frDestroyFontRequestAfter(glyph);
     glyph = itfCreateConvertedTextGlyph(x + 0x600, y + 0xB8, z, color, D_003BAA70 + unit->unitId * 17, NULL);
-    frFontDrawGlyphChain(glyph, 1, context);
+    frDrawFontOt(glyph, 1, context);
     mnuSetFontChainDimensionsAndMeasure((u32)glyph);
     frDestroyFontRequestAfter(glyph);
 }
@@ -413,7 +413,7 @@ void brsDrawLevelProgressDetails(s32 x, s32 y, s32 z, BrsSkillPackageWork *work,
         }
         sprintf(text, D_003BC578, required - progress);
         glyph = itfCreateFont2TextGlyph(x + 0xC10, y + 0x98, z, color, text, NULL);
-        frFontDrawGlyphChain(glyph, 1, context);
+        frDrawFontOt(glyph, 1, context);
         frDestroyFontRequestAfter(glyph);
         if (progress > 0) {
             if (required != 0) {
@@ -1055,7 +1055,7 @@ void brsDrawProfileProgressDetails(s32 x, s32 y, s32 depth, BrsSkillPackageWork 
         textOffset <<= 4;
         glyph = itfCreateConvertedTextGlyph(x + textOffset,
                                             textY, depth, color, text, NULL);
-        frFontDrawGlyphChain(glyph, 1, context);
+        frDrawFontOt(glyph, 1, context);
         frDestroyFontRequestAfter(glyph);
     } else {
         cap = 0;

@@ -96,7 +96,7 @@ extern void fldDrawCameraColorScrollingGradient(void);
 
 extern void fldSkyDrawFilter(void);
 
-extern void fldSubmitTexturedOverlaySprite(void);
+extern void fldDrawBokasi(void);
 
 extern u32 fldRunDanteGunFlag[];
 
@@ -708,7 +708,7 @@ s32 fldTestDrawUpdate(dds3ProcessID_t *task) {
         } else {
             rsetOtOfs(0x5E);
         }
-        fldSubmitTexturedOverlaySprite();
+        fldDrawBokasi();
     }
     rsetOtOfs(0x27);
     rsetTest(1, 5, 0x80, 1, 0, 0, 1, 2);
@@ -1039,7 +1039,7 @@ static inline void fldAppendToDisplaySurface(sdfDrawTag_t *list) {
 
 INCLUDE_RODATA(const s32, "game/code_0011F208", D_00412BB8);
 
-void fldDrawEffectObjectShadow(dds3Basic_t *object) {
+void fldSdwDraw(dds3Basic_t *object) {
     f32 anchorPosition[4];
     f32 edgeStart[4];
     f32 edgeEnd[4];
