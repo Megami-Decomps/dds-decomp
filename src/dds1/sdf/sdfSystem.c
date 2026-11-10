@@ -156,7 +156,7 @@ extern u16 myStatus;
 
 extern u8 camMode, CameraAction, offsetStep, offsetStepCount;
 
-extern s32 D_00551738, D_0055173C, D_00551744, D_00551748;
+extern s32 pipeClearedOnStart, pipePartsFrame, pipeTiltHorizontal, pipeTiltVertical;
 
 extern void *pipeObjList, *pipeObjTail;
 
@@ -216,9 +216,9 @@ extern void *slLoadProcId;
 
 extern s32 sdfMainThreadId;
 
-extern char D_00551700[];
+extern char dds3ConfigProcName[];
 
-extern char D_00551808[];
+extern char pipeMessNumFmt[];
 
 extern s32 dds3ConfigValue[2];
 
