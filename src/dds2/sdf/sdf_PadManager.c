@@ -61,9 +61,9 @@ extern u64 sdf3DRefMapParam;
 
 extern u8 sdfPadCb_0[];
 
-#define D_005518D8 D_00438A90
-#define D_005298A0 sdfPadButtonMasks
-#define D_005298E8 sdfPadButtonPressure
+#define D_005518D8 sdfPadButtons
+#define D_005298A0 sdfPadBitMask
+#define D_005298E8 sdfPadPressure
 #define D_005518E0 sdfPadAnalogSticks
 #define D_0058F0C0 sdfPadPortBuffers
 
@@ -390,7 +390,7 @@ INCLUDE_RODATA(const s32, "sdf/sdf_PadManager", D_0042E258);
 
 INCLUDE_SDATA(const s32, "sdf/sdf_PadManager", sdfPadManagerMode);
 
-INCLUDE_SDATA(const s32, "sdf/sdf_PadManager", D_00438A90);
+INCLUDE_SDATA(const s32, "sdf/sdf_PadManager", sdfPadButtons);
 
 INCLUDE_SDATA(const s32, "sdf/sdf_PadManager", sdfPadAnalogSticks);
 

@@ -39,7 +39,7 @@ extern u64 *dds3PrimFrameRect(s32, s32, s32, s32, s32, u32, u32);
 extern s8 dds3PadBitTable[32];
 extern s8 dds3PadButtonState[64];
 extern SdfMovieDescriptor mnuMovieViewerDrawDescriptor;
-extern u16 D_00438A90[4];
+extern u16 sdfPadButtons[4];
 extern u16 D_00438FF0;
 extern sdfGrOt_t D_003805A8;
 extern sdfGrOt_t D_00380708;
@@ -339,7 +339,7 @@ KwlnTaskUpdateResult mnuMovieViewer(dds3ProcessID_t *task) {
             mnuMovieList.playing = 0;
         } else {
             s32 previousButtons = D_00438FF0;
-            if (((D_00438A90[0] ^ previousButtons) & D_00438A90[0]) != 0) {
+            if (((sdfPadButtons[0] ^ previousButtons) & sdfPadButtons[0]) != 0) {
                 mnuMovieList.playing = 0;
             }
         }
@@ -370,7 +370,7 @@ KwlnTaskUpdateResult mnuMovieViewer(dds3ProcessID_t *task) {
     movieDebugDrawInfo();
     MovieViewerDrawFrameInfo();
     D_003805A8.append(&D_003805A8, mnuMovieList.packets);
-    D_00438FF0 = D_00438A90[0];
+    D_00438FF0 = sdfPadButtons[0];
     return KWLN_TASK_UPDATE_RETAIN_CALLBACK;
 }
 
