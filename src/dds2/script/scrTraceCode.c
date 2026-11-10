@@ -16,26 +16,26 @@
 #include "mdl_flag_api.h"
 
 void PushInt(scrProcessWork_s *script, ScrVmInteger integerValue) {
-    script->stackTypes[script->sp] = SCR_STACK_TYPE_INTEGER;
-    script->stackValues[script->sp].integer = integerValue;
+    script->stackTypes[script->sp] = SCR_STACK_TYPE_INT;
+    script->stackValues[script->sp].i = integerValue;
     script->sp = script->sp + 1;
 }
 
 void PushFloat(scrProcessWork_s *script, f32 floatValue) {
     script->stackTypes[script->sp] = SCR_STACK_TYPE_FLOAT;
-    script->stackValues[script->sp].floating = floatValue;
+    script->stackValues[script->sp].f = floatValue;
     script->sp = script->sp + 1;
 }
 
 void PushStr(scrProcessWork_s *script, const char *string) {
     script->stackTypes[script->sp] = SCR_STACK_TYPE_STRING;
-    script->stackValues[script->sp].string = string;
+    script->stackValues[script->sp].i = EE_ADDR_S(string);
     script->sp = script->sp + 1;
 }
 
 void PushRet(scrProcessWork_s *script, ScrProgramCounter returnAddress) {
-    script->stackTypes[script->sp] = SCR_STACK_TYPE_RETURN_ADDRESS;
-    script->stackValues[script->sp].returnAddress = returnAddress;
+    script->stackTypes[script->sp] = SCR_STACK_TYPE_RET;
+    script->stackValues[script->sp].i = returnAddress;
     script->sp = script->sp + 1;
 }
 
@@ -45,16 +45,16 @@ ScrVmInteger PopInt(scrProcessWork_s *script) {
 
     script->sp = stackDepth - 1;
     switch (script->stackTypes[stackDepth - 1]) {
-    case SCR_STACK_TYPE_INTEGER:
-        return script->stackValues[script->sp].integer;
-    case SCR_STACK_TYPE_RETURN_ADDRESS:
-        return script->stackValues[script->sp].returnAddress;
+    case SCR_STACK_TYPE_INT:
+        return script->stackValues[script->sp].i;
+    case SCR_STACK_TYPE_RET:
+        return script->stackValues[script->sp].i;
     case SCR_STACK_TYPE_FLOAT:
-        return script->stackValues[script->sp].floating;
-    case SCR_STACK_TYPE_INTEGER_REFERENCE:
-        return DDS3_GBWK->script.ints[script->stackValues[script->sp].globalIntegerIndex];
-    case SCR_STACK_TYPE_FLOAT_REFERENCE:
-        return DDS3_GBWK->script.floats[script->stackValues[script->sp].globalFloatIndex];
+        return script->stackValues[script->sp].f;
+    case SCR_STACK_TYPE_INTVAR:
+        return DDS3_GBWK->script.ints[script->stackValues[script->sp].i];
+    case SCR_STACK_TYPE_FLOATVAR:
+        return DDS3_GBWK->script.floats[script->stackValues[script->sp].i];
     }
     return 0;
 }
@@ -64,16 +64,16 @@ f32 PopFloat(scrProcessWork_s *script) {
 
     script->sp = stackDepth - 1;
     switch (script->stackTypes[stackDepth - 1]) {
-    case SCR_STACK_TYPE_INTEGER:
-        return (f32)script->stackValues[script->sp].integer;
-    case SCR_STACK_TYPE_RETURN_ADDRESS:
+    case SCR_STACK_TYPE_INT:
+        return (f32)script->stackValues[script->sp].i;
+    case SCR_STACK_TYPE_RET:
         return 0.0f;
     case SCR_STACK_TYPE_FLOAT:
-        return script->stackValues[script->sp].floating;
-    case SCR_STACK_TYPE_INTEGER_REFERENCE:
-        return (f32)DDS3_GBWK->script.ints[script->stackValues[script->sp].globalIntegerIndex];
-    case SCR_STACK_TYPE_FLOAT_REFERENCE:
-        return DDS3_GBWK->script.floats[script->stackValues[script->sp].globalFloatIndex];
+        return script->stackValues[script->sp].f;
+    case SCR_STACK_TYPE_INTVAR:
+        return (f32)DDS3_GBWK->script.ints[script->stackValues[script->sp].i];
+    case SCR_STACK_TYPE_FLOATVAR:
+        return DDS3_GBWK->script.floats[script->stackValues[script->sp].i];
     }
     return 0.0f;
 }
@@ -138,7 +138,7 @@ ScrOpcodeHandlerResult CodeFunc_PushSTR(scrProcessWork_s *scr) {
 /* Copy the VM's reserved return slot back onto its active operand stack. */
 ScrOpcodeHandlerResult CodeFunc_PushReg(scrProcessWork_s *scr) {
     scr->stackTypes[scr->sp] = scr->stackTypes[SCR_STACK_RETURN_VALUE_SLOT];
-    scr->stackValues[scr->sp].bits = scr->stackValues[SCR_STACK_RETURN_VALUE_SLOT].bits;
+    scr->stackValues[scr->sp].i = scr->stackValues[SCR_STACK_RETURN_VALUE_SLOT].i;
     scr->sp++;
     scr->pc++;
     return SCR_OPCODE_HANDLER_RESULT_CONTINUE;
@@ -251,10 +251,10 @@ void CodeFunc_2Operation(scrProcessWork_s *scr, ScrBinaryOperator operatorCode)
 {
     CodeFunc_2Operation_t1 = scr->stackTypes[scr->sp - 1];
     CodeFunc_2Operation_t2 = scr->stackTypes[scr->sp - 2];
-    if ((CodeFunc_2Operation_t1 == SCR_STACK_TYPE_INTEGER ||
-         CodeFunc_2Operation_t1 == SCR_STACK_TYPE_INTEGER_REFERENCE) &&
-        (CodeFunc_2Operation_t2 == SCR_STACK_TYPE_INTEGER ||
-         CodeFunc_2Operation_t2 == SCR_STACK_TYPE_INTEGER_REFERENCE)) {
+    if ((CodeFunc_2Operation_t1 == SCR_STACK_TYPE_INT ||
+         CodeFunc_2Operation_t1 == SCR_STACK_TYPE_INTVAR) &&
+        (CodeFunc_2Operation_t2 == SCR_STACK_TYPE_INT ||
+         CodeFunc_2Operation_t2 == SCR_STACK_TYPE_INTVAR)) {
         CodeFunc_2Operation_i1 = PopInt(scr);
         CodeFunc_2Operation_i2 = PopInt(scr);
         switch (operatorCode) {
@@ -439,21 +439,21 @@ ScrOpcodeHandlerResult CodeFunc_Div(scrProcessWork_s *scr) {
 
 ScrOpcodeHandlerResult CodeFunc_Minus(scrProcessWork_s *scr) {
     switch (scr->stackTypes[scr->sp - 1]) {
-    case SCR_STACK_TYPE_INTEGER:
-        scr->stackValues[scr->sp - 1].integer = -scr->stackValues[scr->sp - 1].integer;
+    case SCR_STACK_TYPE_INT:
+        scr->stackValues[scr->sp - 1].i = -scr->stackValues[scr->sp - 1].i;
         break;
     case SCR_STACK_TYPE_FLOAT:
-        scr->stackValues[scr->sp - 1].floating = -scr->stackValues[scr->sp - 1].floating;
+        scr->stackValues[scr->sp - 1].f = -scr->stackValues[scr->sp - 1].f;
         break;
-    case SCR_STACK_TYPE_INTEGER_REFERENCE:
-        DDS3_GBWK->script.ints[scr->stackValues[scr->sp - 1].globalIntegerIndex] =
-            -DDS3_GBWK->script.ints[scr->stackValues[scr->sp - 1].globalIntegerIndex];
+    case SCR_STACK_TYPE_INTVAR:
+        DDS3_GBWK->script.ints[scr->stackValues[scr->sp - 1].i] =
+            -DDS3_GBWK->script.ints[scr->stackValues[scr->sp - 1].i];
         break;
-    case SCR_STACK_TYPE_FLOAT_REFERENCE:
-        DDS3_GBWK->script.floats[scr->stackValues[scr->sp - 1].globalFloatIndex] =
-            -DDS3_GBWK->script.floats[scr->stackValues[scr->sp - 1].globalFloatIndex];
+    case SCR_STACK_TYPE_FLOATVAR:
+        DDS3_GBWK->script.floats[scr->stackValues[scr->sp - 1].i] =
+            -DDS3_GBWK->script.floats[scr->stackValues[scr->sp - 1].i];
         break;
-    case SCR_STACK_TYPE_RETURN_ADDRESS:
+    case SCR_STACK_TYPE_RET:
         break;
     }
     scr->pc++;
@@ -462,15 +462,15 @@ ScrOpcodeHandlerResult CodeFunc_Minus(scrProcessWork_s *scr) {
 
 ScrOpcodeHandlerResult CodeFunc_Not(scrProcessWork_s *scr) {
     switch (scr->stackTypes[scr->sp - 1]) {
-    case SCR_STACK_TYPE_INTEGER:
-    case SCR_STACK_TYPE_INTEGER_REFERENCE:
+    case SCR_STACK_TYPE_INT:
+    case SCR_STACK_TYPE_INTVAR:
         PushInt(scr, PopInt(scr) == 0);
         break;
     case SCR_STACK_TYPE_FLOAT:
-    case SCR_STACK_TYPE_FLOAT_REFERENCE:
+    case SCR_STACK_TYPE_FLOATVAR:
         PushInt(scr, PopFloat(scr) == 0.0f);
         break;
-    case SCR_STACK_TYPE_RETURN_ADDRESS:
+    case SCR_STACK_TYPE_RET:
         break;
     }
     scr->pc++;
@@ -530,15 +530,15 @@ ScrOpcodeHandlerResult CodeFunc_IF(scrProcessWork_s *scr)
     s32 conditionIsTruthy;
 
     switch (scr->stackTypes[scr->sp - 1]) {
-    case SCR_STACK_TYPE_INTEGER:
-    case SCR_STACK_TYPE_INTEGER_REFERENCE:
+    case SCR_STACK_TYPE_INT:
+    case SCR_STACK_TYPE_INTVAR:
         conditionIsTruthy = PopInt(scr);
         break;
     case SCR_STACK_TYPE_FLOAT:
-    case SCR_STACK_TYPE_FLOAT_REFERENCE:
+    case SCR_STACK_TYPE_FLOATVAR:
         conditionIsTruthy = (PopFloat(scr) != 0.0f);
         break;
-    case SCR_STACK_TYPE_RETURN_ADDRESS:
+    case SCR_STACK_TYPE_RET:
         conditionIsTruthy = 0;
         break;
     default:
@@ -582,16 +582,16 @@ ScrVmInteger scrGetIntPara(ScrCommandParameterIndex parameterIndex) {
     ScrStackValueIndex stackIndex = scr->sp - parameterIndex - 1;
 
     switch (scr->stackTypes[stackIndex]) {
-    case SCR_STACK_TYPE_INTEGER:
-        return scr->stackValues[stackIndex].integer;
-    case SCR_STACK_TYPE_RETURN_ADDRESS:
-        return scr->stackValues[stackIndex].returnAddress;
+    case SCR_STACK_TYPE_INT:
+        return scr->stackValues[stackIndex].i;
+    case SCR_STACK_TYPE_RET:
+        return scr->stackValues[stackIndex].i;
     case SCR_STACK_TYPE_FLOAT:
-        return scr->stackValues[stackIndex].floating;
-    case SCR_STACK_TYPE_INTEGER_REFERENCE:
-        return DDS3_GBWK->script.ints[scr->stackValues[stackIndex].globalIntegerIndex];
-    case SCR_STACK_TYPE_FLOAT_REFERENCE:
-        return DDS3_GBWK->script.floats[scr->stackValues[stackIndex].globalFloatIndex];
+        return scr->stackValues[stackIndex].f;
+    case SCR_STACK_TYPE_INTVAR:
+        return DDS3_GBWK->script.ints[scr->stackValues[stackIndex].i];
+    case SCR_STACK_TYPE_FLOATVAR:
+        return DDS3_GBWK->script.floats[scr->stackValues[stackIndex].i];
     }
     return 0;
 }
@@ -602,16 +602,16 @@ f32 scrGetFloatPara(ScrCommandParameterIndex parameterIndex)
     ScrStackValueIndex stackIndex = scr->sp - parameterIndex - 1;
 
     switch (scr->stackTypes[stackIndex]) {
-    case SCR_STACK_TYPE_INTEGER:
-        return (f32)scr->stackValues[stackIndex].integer;
-    case SCR_STACK_TYPE_RETURN_ADDRESS:
-        return (f32)scr->stackValues[stackIndex].returnAddress;
+    case SCR_STACK_TYPE_INT:
+        return (f32)scr->stackValues[stackIndex].i;
+    case SCR_STACK_TYPE_RET:
+        return (f32)scr->stackValues[stackIndex].i;
     case SCR_STACK_TYPE_FLOAT:
-        return scr->stackValues[stackIndex].floating;
-    case SCR_STACK_TYPE_INTEGER_REFERENCE:
-        return (f32)DDS3_GBWK->script.ints[scr->stackValues[stackIndex].globalIntegerIndex];
-    case SCR_STACK_TYPE_FLOAT_REFERENCE:
-        return DDS3_GBWK->script.floats[scr->stackValues[stackIndex].globalFloatIndex];
+        return scr->stackValues[stackIndex].f;
+    case SCR_STACK_TYPE_INTVAR:
+        return (f32)DDS3_GBWK->script.ints[scr->stackValues[stackIndex].i];
+    case SCR_STACK_TYPE_FLOATVAR:
+        return DDS3_GBWK->script.floats[scr->stackValues[stackIndex].i];
     }
     return 0.0f;
 }
@@ -626,7 +626,7 @@ const char *scrGetStrPara(ScrCommandParameterIndex parameterIndex)
     if (stackType >= 0) {
         if (stackType >= SCR_STACK_TYPE_STRING) {
             if (stackType == SCR_STACK_TYPE_STRING) {
-                return scr->stackValues[stackIndex].string;
+                return EE_ADDR_AS(const char *, scr->stackValues[stackIndex].i);
             }
         }
     }
@@ -650,14 +650,14 @@ const char *scrGetStrPara(ScrCommandParameterIndex parameterIndex)
 scrProcessWork_s *scrSetIntReturnValue(ScrVmInteger retVal)
 {
     scrProcessWork_s *scr = nowpwork;
-    SCR_SET_RETURN_VALUE(scr, SCR_STACK_TYPE_INTEGER, integer, retVal);
+    SCR_SET_RETURN_VALUE(scr, SCR_STACK_TYPE_INT, i, retVal);
     return scr;
 }
 
 scrProcessWork_s *scrSetFloatReturnValue(f32 retVal)
 {
     scrProcessWork_s *scr = nowpwork;
-    SCR_SET_RETURN_VALUE(scr, SCR_STACK_TYPE_FLOAT, floating, retVal);
+    SCR_SET_RETURN_VALUE(scr, SCR_STACK_TYPE_FLOAT, f, retVal);
     return scr;
 }
 

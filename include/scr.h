@@ -32,17 +32,25 @@ typedef s32 ScrStackValueIndex;
 #define SCR_STACK_STORAGE_SLOT_COUNT 28
 #define SCR_STACK_RETURN_VALUE_SLOT 27
 
-/* One 4-byte script operand slot; the type tag determines whether a word is
- * a scalar, a global-register index, a return address, or a borrowed string. */
-typedef union ScrStackValue {
-    u32 bits; /* raw slot copy, preserving the separately stored type tag */
-    ScrVmInteger integer;
-    f32 floating;
-    ScrGlobalIntegerIndex globalIntegerIndex;
-    ScrGlobalFloatIndex globalFloatIndex;
-    ScrProgramCounter returnAddress;
-    const char *string; /* borrowed read-only pointer into source FLW0 string section */
-} ScrStackValue;
+/* One stack slot, tagged by the matching scrProcessWork_s.StackType byte. */
+typedef union scrStackData_u scrStackData_u;
+union scrStackData_u
+{
+    s32 i;
+    f32 f;
+    struct
+    {
+        s16 s0;
+        s16 s1;
+    } s;
+    struct
+    {
+        u8 c0;
+        u8 c1;
+        u8 c2;
+        u8 c3;
+    } c;
+};
 
 typedef s8 ScrStackValueType;
 
@@ -114,7 +122,7 @@ typedef struct scrProcessWork_s {
     ScrProgramCounter pc;
     ScrStackDepth sp; /* live stack depth; the next push writes at this index */
     ScrStackValueType stackTypes[SCR_STACK_STORAGE_SLOT_COUNT];
-    ScrStackValue stackValues[SCR_STACK_STORAGE_SLOT_COUNT];
+    scrStackData_u stackValues[SCR_STACK_STORAGE_SLOT_COUNT];
     /* Borrowed FLW0 source views; the VM reads them but does not edit them. */
     const struct BfFlw0Header *scriptHeader;
     const ScrSection *procedureSection; /* FLW0 descriptor; count bounds the procedure table */
@@ -192,14 +200,16 @@ typedef struct {
 
 /* ScrVmOperand is intentionally local: DDS1's +0x04 is u16, DDS2's is u8. */
 
-/* Script VM stack value tags stored in ScrData.stackTypes. */
-enum {
-    SCR_STACK_TYPE_INTEGER = 0,
+enum scr_stack_type
+{
+    SCR_STACK_TYPE_INT = 0,
     SCR_STACK_TYPE_FLOAT = 1,
-    SCR_STACK_TYPE_INTEGER_REFERENCE = 2,
-    SCR_STACK_TYPE_FLOAT_REFERENCE = 3,
-    SCR_STACK_TYPE_RETURN_ADDRESS = 4,
-    SCR_STACK_TYPE_STRING = 5
+    SCR_STACK_TYPE_INTVAR = 2,
+    SCR_STACK_TYPE_FLOATVAR = 3,
+    SCR_STACK_TYPE_RET = 4,
+    SCR_STACK_TYPE_STRING = 5,
+    SCR_STACK_TYPE_EMPTY = 6,
+    SCR_STACK_TYPE_MAX = 7
 };
 
 /* Bytecode opcodes, the index into scrTraceCode's codefunc table. */

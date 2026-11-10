@@ -53,6 +53,7 @@
 #include "fpu.h"
 #include "sdf_texture_file.h"
 #include "sdf_vu_matrix.h"
+#include "kernel_draw.h"
 
 
 extern u64 btlStartTask(BtlRuntimeTask *taskObject);
@@ -3584,7 +3585,6 @@ BtlResourceDescriptor *btlCreateResourceDescriptor(BtlResourceEntryList *list) {
 
 extern s8 dds3PadBitTable[0x20];
 extern s8 D_0040B7DB[];
-extern sdfGrOt_t sdfGrOtTable[];
 extern u64 *dds3PrimFrameRect(s32, s32, s32, s32, s32, u32, u32);
 s32 btlFormatSelectedResourceName(BtlResourceDescriptor *, char *);
 void btlLoadAndReplaceResourceHandle(BtlResourceDescriptor *, const char *);

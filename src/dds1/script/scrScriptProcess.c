@@ -159,12 +159,12 @@ ScrProcedureStartResult scrStartProcessProcedure(scrProcessWork_s *process,
     process->pc = process->procedures[procedureIndex].addr;
     process->sp = 0;
     {
-        ScrStackValue *stackValue = process->stackValues;
+        scrStackData_u *stackValue = process->stackValues;
         ScrStackValueType *stackType = process->stackTypes;
 
         for (cursor = SCR_STACK_RETURN_VALUE_SLOT; cursor >= 0; cursor--) {
             *stackType++ = 0;
-            stackValue++->bits = 0;
+            stackValue++->i = 0;
         }
     }
     process->procedureIndex = procedureIndex;

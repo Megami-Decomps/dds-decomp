@@ -2149,7 +2149,7 @@ scrProcessWork_s *bfContextCreate(const BfFlw0Header *header, const ScrSection *
     scrProcessWork_s *process;
     s32 i;
     ScrStackValueType *types;
-    ScrStackValue *values;
+    scrStackData_u *values;
 
     if (header == NULL || procedureSection == NULL || procedures == NULL ||
         instructions == NULL || procedureIndex < 0 ||
@@ -2170,7 +2170,7 @@ scrProcessWork_s *bfContextCreate(const BfFlw0Header *header, const ScrSection *
     types = process->stackTypes;
     for (i = SCR_STACK_RETURN_VALUE_SLOT; i >= 0; i--) {
         *types++ = 0;
-        values++->bits = 0;
+        values++->i = 0;
     }
     process->procedureSection = procedureSection;
     process->labels = labels;
