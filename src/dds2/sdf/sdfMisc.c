@@ -71,7 +71,7 @@ sdfItemArray_t *sdfItemArrayNew(s32 aInitCapa, s32 aElemSize, s32 aGrowStep) {
     request->elemSize = aElemSize;
     if (aInitCapa != 0) {
         request->memHandle = sdfMemAllocDirect(aElemSize * aInitCapa);
-        request->items = (void *)sdfMemLock(request->memHandle);
+        request->items = EE_ADDR_AS(void *, sdfMemLock(request->memHandle));
     } else {
         request->memHandle = 0;
         request->items = 0;
@@ -102,7 +102,7 @@ void sdfItemArrayGrow(sdfItemArray_t *aArray)
     sdfMemUnlock(aArray->memHandle);
     aArray->capacity = aArray->capacity + aArray->growStep;
     sdfMemReallocRecord(aArray->memHandle, aArray->capacity * aArray->elemSize);
-    aArray->items = (void *)sdfMemLock(aArray->memHandle);
+    aArray->items = EE_ADDR_AS(void *, sdfMemLock(aArray->memHandle));
 }
 
 void func_002BFF98(sdfItemArray_t *aArray, s32 aCapacity)
@@ -111,7 +111,7 @@ void func_002BFF98(sdfItemArray_t *aArray, s32 aCapacity)
         if (aCapacity > 0) {
             aArray->capacity = aCapacity;
             aArray->memHandle = sdfMemAllocDirect(aArray->elemSize * aCapacity);
-            aArray->items = (void *)sdfMemLock(aArray->memHandle);
+            aArray->items = EE_ADDR_AS(void *, sdfMemLock(aArray->memHandle));
         }
     } else if (aCapacity <= 0) {
         sdfMemFreeDirect(aArray->memHandle);
@@ -123,7 +123,7 @@ void func_002BFF98(sdfItemArray_t *aArray, s32 aCapacity)
         sdfMemUnlock(aArray->memHandle);
         aArray->capacity = aCapacity;
         sdfMemReallocRecord(aArray->memHandle, aArray->elemSize * aCapacity);
-        aArray->items = (void *)sdfMemLock(aArray->memHandle);
+        aArray->items = EE_ADDR_AS(void *, sdfMemLock(aArray->memHandle));
         if (aCapacity < aArray->count) {
             aArray->count = aCapacity;
         }
