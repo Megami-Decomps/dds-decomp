@@ -4002,7 +4002,7 @@ void func_0012CED0(void) {
     backZ = referencePoint.f[2] - projectedPoint.f[2];
     {
         /* Allocation aid on the real z delta, not a hardware register (see landing note). */
-        register f32 dz __asm__("$f1") = projectedPoint.f[2] - referencePoint.f[2];
+        FAKEMATCH_ASM_REG(f32, dz, "$f1") = projectedPoint.f[2] - referencePoint.f[2];
 
         distance = fsqrtf(dx * dx + dy * dy + dz * dz);
     }

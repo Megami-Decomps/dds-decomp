@@ -6567,7 +6567,7 @@ case 0x2b: {
         /* Compiler copy-preference aid, not a hardware-required register:
          * ordinary/probed global-allocation tracing qualifies this F21 boundary.
          * The real measured distance is consumed immediately; no call intervenes. */
-        register f32 fittedPublication __asm__("$f21") = measuredDistance;
+        FAKEMATCH_ASM_REG(f32, fittedPublication, "$f21") = measuredDistance;
         VU0_SCALE_VF(vf10, fittedPublication);
     }
     VU0_LOAD_VF(vf11, position);
@@ -6626,7 +6626,7 @@ case 0x0f: {
         /* Compiler copy-preference aid, not a hardware-required register:
          * ordinary/probed global-allocation tracing qualifies this F21 boundary.
          * The real measured distance is consumed immediately; no call intervenes. */
-        register f32 fittedPublication __asm__("$f21") = measuredDistance;
+        FAKEMATCH_ASM_REG(f32, fittedPublication, "$f21") = measuredDistance;
         VU0_SCALE_VF(vf10, fittedPublication);
     }
     VU0_LOAD_VF(vf11, pose->position);
