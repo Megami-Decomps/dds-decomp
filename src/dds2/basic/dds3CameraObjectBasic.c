@@ -186,7 +186,7 @@ void dds3DeleteCameraObjectBasic(dds3Basic_t *node) {
 }
 
 /* Load the owned look-at matrix into vf28-vf31. */
-void dds3LoadObjectMatrixPointerIntoVu(dds3Basic_t *camera) {
+void dds3CameraObjectBasicLoadCameraTM(dds3Basic_t *camera) {
     SDF_VU0_LOADMATRIX(((CameraData *)camera->workdata)->matrix);
 }
 
@@ -256,7 +256,7 @@ CameraEyePositionMode dds3CameraObjectBasicGetMode(dds3Basic_t *object) {
     return ((CameraData *)object->workdata)->eyeIsRelative;
 }
 
-void dds3SetCameraMode(dds3Basic_t *camera, CameraEyePositionMode mode) {
+void dds3CameraObjectBasicSetMode(dds3Basic_t *camera, CameraEyePositionMode mode) {
     if (((CameraData *)camera->workdata)->eyeIsRelative != mode) {
         ((CameraData *)camera->workdata)->eyeIsRelative = mode;
     }

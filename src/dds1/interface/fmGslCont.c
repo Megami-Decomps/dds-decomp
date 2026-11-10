@@ -9,11 +9,11 @@ extern s32 fmInitFontMemControl(u32 bufferBase, s32 columns, s32 rows, s32 cellW
 extern void fmRetFontMem(FntNode *node);
 extern FntNode *fmRentFontMem(void);
 
-FntList *effGetFontListHead(void) {
+FntList *fmGetInternalFGC(void) {
     return &gFGC;
 }
 
-s32 effGetFontListCount(void) {
+s32 fmGetRestBufNum(void) {
     return gFGC.count;
 }
 

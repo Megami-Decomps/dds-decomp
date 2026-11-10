@@ -613,14 +613,14 @@
 0x00112D00	dds3AddCameraObjectBasicTypeLookAt	inferred	SMT3HD name via SLUS_209.11 0x00112718, reloc-identical; was dds3CreateConfiguredCameraObject
 0x00112D98	dds3AddCameraObjectBasic	inferred	SMT3HD name via SLUS_209.11 0x001127B0, reloc-identical; was dds3CreateCameraObjectWithVectors
 0x00112E58	dds3DeleteCameraObjectBasic	inferred	SMT3HD name via SLUS_209.11 0x00112870, shared-hash-in-run; was dds3ReleaseCameraWorldNode
-0x00112E70	dds3LoadObjectMatrixPointerIntoVu	inferred	confidence=high; src/dds1/basic/dds3CameraObjectBasic.c:func_00112E70; Loads the matrix from the pointer stored in the object into VU registers. [names_qp9.tsv]
+0x00112E70	dds3CameraObjectBasicLoadCameraTM	inferred	SMT3HD name via SLUS_209.11 0x112888, named in both games; loads the camera matrix into vf28-vf31; was dds3LoadObjectMatrixPointerIntoVu
 0x00112E90	dds3CameraObjectBasicGetCameraTM	inferred	SMT3HD name via SLUS_209.11 0x001128A8, SMT3 name for the identical function (was dds3CameraObjectBasicSetWorldEye); was dds3CameraObjectBasicSetWorldEye
 0x00112EA8	dds3CameraObjectBasicGetTargetPos	inferred	SMT3HD name via SLUS_209.11 0x001128C0, SMT3 name for the identical function (was dds3CameraObjectBasicLoadWorldEyeIntoVu); was dds3CameraObjectBasicLoadWorldEyeIntoVu
 0x00112EC0	dds3CameraObjectBasicSetFovy	inferred	SMT3HD name via SLUS_209.11 0x001128D8, byte-identical; was dds3SetCameraFieldOfView
 0x00112ED8	dds3CameraObjectBasicGetFovy	inferred	SMT3HD name via SLUS_209.11 0x00112900, shared-hash-in-run; was dds3GetCameraFieldOfView
 0x00112EE8	dds3CameraObjectBasicGetTgtCam	inferred	SMT3HD name via SLUS_209.11 0x00112910, reloc-identical; was dds3TransformCameraVectorsByInnerRotation
 0x00112FE0	dds3CameraObjectBasicGetMode	inferred	SMT3HD name via SLUS_209.11 0x00112A08, shared-hash-in-run; was dds3GetCameraMode
-0x00112FF0	dds3SetCameraMode	inferred	Stores the supplied mode at camera data offset 0x84 only when changed.
+0x00112FF0	dds3CameraObjectBasicSetMode	inferred	SMT3HD name via SLUS_209.11 0x112A18, named in both games; setter twin of dds3CameraObjectBasicGetMode; was dds3SetCameraMode
 0x00113008	dds3UnitObjectBasicGetControlWorkData	inferred	SMT3HD name via SLUS_209.11 0x00112A30, shared-hash-in-run; was dds3GetEffectObjectModelHolder
 0x00113018	dds3AddUnitObjectBasic	inferred	SMT3HD name via SLUS_209.11 0x00112A40, reloc-identical; was dds3SpawnCameraSlotObj5
 0x001130C8	dds3DeleteUnitObjectBasic	inferred	SMT3HD name via SLUS_209.11 0x00112AF0, shared-hash-in-run; was ddsReleaseUnitObject
@@ -2970,8 +2970,8 @@
 0x001937E0	effSampleChannelBezier	inferred	confidence=high; matched-C; src/dds1/effect/effSpline.c:356:func_001937E0; Uses cubic Bernstein weights on four channel control points, writes xyz to vf10, advances the primitive record cursor, and wraps the three-record output ring.; source=names_P5.tsv:1 [names_qp11.tsv]
 0x001938E8	effClearChanCursor	inferred	zeroes channel-A idx/pos at +0xC/+0x10
 0x001938F8	effSetChanStep	inferred	stores channel-A step float at +0x14
-0x00193900	effGetFontListHead	inferred	returns address of D_003D68C0 font list header
-0x00193910	effGetFontListCount	inferred	returns word at D_003D68D8, the +0x18 count of the font list
+0x00193900	fmGetInternalFGC	inferred	SMT3HD name via SLUS_209.11 0x1C5D60, SMT3 interface/fmGslCont name; identical code at the same unit position; was effGetFontListHead
+0x00193910	fmGetRestBufNum	inferred	SMT3HD name via SLUS_209.11 0x1C5D70, SMT3 interface/fmGslCont name; identical code at the same unit position; was effGetFontListCount
 0x00193920	fmInitFontMemControl	inferred	SMT3HD name via SLUS_209.11 0x001C5D80, unique-masked-hash; was frFontInitializeGlyphAtlas
 0x00193B70	fmDestroyFontMemControl	inferred	SMT3HD name via SLUS_209.11 0x001C5FD0, reloc-identical; was fmGslReleaseActiveResourceBuffers
 0x00193BB8	fmRentFontMem	inferred	SMT3HD name via SLUS_209.11 0x001C6018, reloc-identical; was frFontDetachFirstResourceNode

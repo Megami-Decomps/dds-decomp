@@ -940,7 +940,7 @@ s32 evtDrawConditionalHeapUsageOverlay(void) {
 
 extern s32 frGetFontHandleNum(void);
 extern s32 frGetTextHandleNum(void);
-extern s32 effGetFontListCount(void);
+extern s32 fmGetRestBufNum(void);
 extern const char D_004113A0[];
 
 s32 evtDrawResourceCountDebugTask(dds3ProcessID_t *task) {
@@ -964,7 +964,7 @@ s32 evtDrawResourceCountDebugTask(dds3ProcessID_t *task) {
                                           0xf70, 0x98, 0x20000000, 0x40806040));
     fontCount = frGetFontHandleNum();
     textCount = frGetTextHandleNum();
-    gsCount = effGetFontListCount();
+    gsCount = fmGetRestBufNum();
     sdfDrawTagLink(list, (u32)sdfDevPrintf(0x7100, 0x7980,
                     0xffff80, 0, D_004113A0, fontCount, textCount, gsCount));
     sdfDebugGrOt.regFunc(&sdfDebugGrOt, list);
