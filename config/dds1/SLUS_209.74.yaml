@@ -315,7 +315,10 @@ segments:
       - [0x1F6310, asm, sdk/libipu]  # first signature hit 0x002F5310
       - [0x1F68F8, asm, sdk/libsdr]  # first signature hit 0x002F58F8
       - [0x1F7300, asm, sdk/libmc]  # first signature hit 0x002F6300
-      - [0x200F58, asm, sdk/libc]  # first signature hit 0x002FFF58
+      - [0x1F8628, asm, hand/at3dec]
+      - [0x1FACD0, asm, sdk/libm]
+      - [0x1FCF58, asm, sdk/libgcc]
+      - [0x1FF248, asm, sdk/libc]
       - [0x20B600, asm, sdk/libkernl]  # first signature hit 0x0030A600
       # .vutext: VU1 microcode (no VU disassembler in splat yet).
       - [0x216BA0, textbin, vutext]
