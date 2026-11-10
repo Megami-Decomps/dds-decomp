@@ -1645,9 +1645,11 @@
 0x00162958	dds3ParticleExpSetPosition	inferred	SMT3HD name via SLUS_209.11 0x00165580, shared-hash-in-run; was parCopyVector
 0x00162968	dds3ParticleExpSetRotateMatrix	inferred	SMT3HD name via SLUS_209.11 0x00165590, shared-hash-in-run; was parRebuildInstanceTransforms
 0x00162980	dds3ParticleExpSetRGBA	inferred	SMT3HD name via SLUS_209.11 0x001655A8, shared-hash-in-run; was effParSetInstanceParameterWord
-0x00162988	parChangeInstanceMode	inferred	confidence=high; matched-C; src/dds2/game/code_00162348.c:290:func_00162988; Particle operation callback forwards new mode byte to object-mode routine.; twin=0x0015AD98, anchored ordered retail pairing.; sources=names_R_Names35.tsv [names_qp10.tsv]
+0x00162988	dds3ParticleExpSetLoop	inferred	SMT3HD name via SLUS_209.11 0x001655B0, effect/parManager SMT3 rename; was parChangeInstanceMode
 0x001629A0	dds3ParticleExpGetLoop	inferred	SMT3HD name via SLUS_209.11 0x001655C8, shared-hash-in-run; was effParGetInstanceMode
 0x001629C0	dds3Particle_EffectInit	inferred	SMT3HD name via SLUS_209.11 0x001655E8, reloc-identical; was parUpdateSharedScaleAndDelta
+0x00162A30	dds3Particle_EffectSet	inferred	SMT3HD name via SLUS_209.11 0x00165658, effect/parManager SMT3 rename; was parDispatchKindUpdate
+0x00162AC8	dds3Particle_EffectReset	inferred	SMT3HD name via SLUS_209.11 0x001656F0, effect/parManager SMT3 rename; was parDispatchKindInit
 0x00162B60	dds3Particle_TrackSet	inferred	SMT3HD name via SLUS_209.11 0x00165788, reloc-identical; was parUpdateBillboardCrossStrip
 0x00162C48	dds3Particle_Track2Set	inferred	SMT3HD name via SLUS_209.11 0x00165870, reloc-identical; was parUpdateBillboardCrossTriangle
 0x00162D38	dds3Particle_Track3Set	inferred	SMT3HD name via SLUS_209.11 0x00165960, reloc-identical; was parUpdateTrackPolygonCrossAxes
