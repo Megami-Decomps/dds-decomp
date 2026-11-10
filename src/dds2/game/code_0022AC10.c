@@ -185,7 +185,7 @@ extern sdfGrOt_t D_00380608;
 
 extern u8 D_00380860[];
 
-extern u8 D_00380870[];
+extern u8 dds3DrawEnv[];
 
 extern sdfTexHandle_t *dds3RenderTexture;
 
@@ -1867,7 +1867,7 @@ void btlClearOverlayBuffers(void) {
     u64 clearValue;
     dds3AllocRenderTexture(0x200, 0xe0, 0.0f);
     dds3RenderTextureON();
-    entry = D_00380870;
+    entry = dds3DrawEnv;
     i = 0;
     clearValue = 0x80008000ULL;
     entry += 0x1b70;

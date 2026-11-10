@@ -9862,7 +9862,7 @@ the parameter, position, optional normal, UV and color streams. Preserve vec3
 MMI packing, the optional allocator, UV packing paths, termination and alignment.
 
 `dds3UpdateCrossfade` captures the first frame and draws the held texture with
-decreasing alpha; `dds3EndCrossfade` releases it and clears the active state.
+decreasing alpha; `dds3CrossfadeEnd` releases it and clears the active state.
 The native start/end strings explicitly identify crossfade. The previous DDS1
 textured-quad name described a drawing detail rather than this lifecycle.
 

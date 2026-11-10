@@ -1809,7 +1809,7 @@
 0x0015FE20	effPkt3DPrimMakePoly	inferred	SMT3HD name via SLUS_209.11 0x0016A120, reloc-identical; was effCreateVertexDrawPacket
 0x00160210	dds3CrossfadeStart	inferred	SMT3HD name via SLUS_209.11 0x0016A510, unique-masked-hash; was dds3StartCrossfade
 0x001602F8	dds3CrossfadeRun	inferred	HD original name, shared by audited native identity; was dds3UpdateCrossfade.
-0x00160690	dds3EndCrossfade	inferred	confidence=high; matched-C; Clears/releases held texture and active state; native rodata says dds3CrossfadeEnd. DDS2 twin0x00168280. Namer1 batch21.
+0x00160690	dds3CrossfadeEnd	inferred	SMT3HD name via SLUS_209.11 0x0016A990, effect/effPacket SMT3 rename; was dds3EndCrossfade
 0x001606C0	sndMixerClone	inferred	Copies source mixer state into a new mixer and initializes it. [names_qp9.tsv]
 0x00160800	sndMixerDestroy	inferred	Destroys an owned clone: deletes linked voices, releases both banks' parameter work, and frees the retained mixer allocation; DDS2 twin.
 0x00160858	effBTLGetMotionChangeFrame	inferred	SMT3HD name via SLUS_209.11 0x0016AB70, shared-hash-in-run; was sndGetMixerBankCallbackFrame
@@ -9390,6 +9390,7 @@
 0x00324B48	sdfGrOtTable	inferred	SMT3HD data name via SLUS_209.11 0x002F5F18, 29 agreeing references; was sdfGrOtTable
 0x00325748	kwlnPositionedTextSurface	inferred	confidence=medium; matched_users=src/dds1/game/code_0018E218.c:effDebugStringDraw, src/dds1/game/code_0018E218.c:effDebugWindowDraw; Shared callback-bearing draw surface consumes positioned and sized text packets. [names_qp9.tsv]
 0x00325788	kwlnSceneSurfaceSets	inferred	Thirteen sets of four draw surfaces (SdfPoolNode *[13][4]) that kwlnBuildFrameScenePackets stores each frame; a model draws through the set of its pass. DDS2 twin 0x00380788.
+0x00325870	dds3DrawEnv	inferred	SMT3HD name via SLUS_209.11 0x002F6A80, effect/effPacket SMT3 rename; was D_00325870
 0x00326ED0	kwlnFrameDrawPacketRecords	inferred	confidence=high; src/dds1/game/code_00185E18.c:D_00326ED0; type=frame DMA record[]; refs=effDrawBlurListWithFramePacket,uiDrawActiveSurfaceRegion; Selected by the active frame-buffer index to append primary DMA and texture-state packets. [names_qp9.tsv]
 0x003272A0	kwlnHeldTexturePacketBanks	inferred	confidence=high; Existing KwlnTextureBank[2] work views initialized by dds3InitRenderDrawEnv; 0x1F40 stride and padding unchanged, list/scene/matrix/lighting payload 0x340 per slot. No new view or ownership extent inferred. DDS2 twin 0x003822A0; all selected root/interior/addend instruction readers already C, no import/active ASM reader. Parent frame banks/canonical kwlnFrameDrawPacketRecords unchanged. [PurD readability data b11; identifier-only]
 0x00327430	kwlnHeldTextureMatrixPackets	inferred	confidence=high; Existing unsized u8 alias at held-texture bank+0x190, selected with native 0x1F40 frame stride; ConsMatrixPacket payload 0xD0. Existing -0x190 list expression and declarations unchanged. DDS2 twin 0x00382430; all selected root/interior/addend instruction readers already C, no import/active ASM reader. Parent frame banks/canonical kwlnFrameDrawPacketRecords unchanged. [PurD readability data b11; identifier-only]
@@ -9971,6 +9972,7 @@
 0x003BA8E8	egl_OT_Offset	inferred	SMT3HD data name via SLUS_209.11 0x0054E940, 8 agreeing references; was egl_OT_Offset
 0x003BA8F0	dds3RenderTex	inferred	SMT3HD data name via SLUS_209.11 0x0054E948, 5 agreeing references; was dds3RenderTex
 0x003BA8F8	dds3RenderTexture	inferred	SMT3HD data name via SLUS_209.11 0x0054E950, 6 agreeing references; was dds3RenderTexture
+0x003BA900	dds3RenderDrawEnv	inferred	SMT3HD name via SLUS_209.11 0x0054E958, effect/effPacket SMT3 rename; was D_003BA900
 0x003BA904	dds3DrawFlag	inferred	SMT3HD data name via SLUS_209.11 0x0054E95C, 165 agreeing references; was dds3DrawFlag
 0x003BA908	dds3ScreenBlurFlag	inferred	SMT3HD data name via SLUS_209.11 0x0054E960, 7 agreeing references; was dds3ScreenBlurFlag
 0x003BA90A	dds3ScreenBlurAlpha	inferred	SMT3HD data name via SLUS_209.11 0x0054E962, 10 agreeing references; was dds3ScreenBlurAlpha
@@ -10124,6 +10126,9 @@
 0x003BAFF8	fldRoomNameSentinel	inferred	confidence=medium; src/dds1/game/code_0014D110.c:fldCommand_GetHojiID; Special room-name string compared before parsing a numeric room suffix. [names_qp9.tsv]
 0x003BB010	hDrawListTop	inferred	SMT3HD data name via SLUS_209.11 0x0054F0B8, 5 agreeing references; was hDrawListTop
 0x003BB014	dds3TrackPolyTag	inferred	SMT3HD name via SLUS_209.11 0x0054F0BC, effect/polyManager SMT3 rename; was D_003BB014
+0x003BB018	dds3CrossfadeRunFlag	inferred	SMT3HD name via SLUS_209.11 0x0054F0C0, effect/effPacket SMT3 rename; was D_003BB018
+0x003BB01C	dds3CrossfadeFrame	inferred	SMT3HD name via SLUS_209.11 0x0054F0C4, effect/effPacket SMT3 rename; was D_003BB01C
+0x003BB020	dds3CrossfadeFrameMax	inferred	SMT3HD name via SLUS_209.11 0x0054F0C8, effect/effPacket SMT3 rename; was D_003BB020
 0x003BB024	effFieldColorFlags	inferred	confidence=high; matched_users=src/dds1/game/code_00161838.c:effBTLFieldColorClearFlags, src/dds1/game/code_00161838.c:effBTLFieldColorSetFlags; Field-color flag APIs add or remove requested bits in this shared word. [names_qp9.tsv]
 0x003BB028	effFieldColorOriginalSelector	inferred	confidence=high; data D_003BB028; matched-C-users=2; src/dds1/game/code_00161838.c:16:effBTLFieldColorSetSelectors; src/dds1/game/code_00161838.c:28:effBTLFieldColorGetOriginalSelector; Color selector setup captures the original base selector here; its getter returns it; data-twin=D_00436418, supported by 2 independently paired matched functions.; retail-data-start=asm/dds1/data/game/code_00161838.sdata.s:9.; seed-placeholder=D_003BB028; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
 0x003BB02C	effBTLSkillState	inferred	SMT3HD data name via SLUS_209.11 0x00551D80, 1 agreeing references; was effBTLSkillState

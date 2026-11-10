@@ -35,7 +35,7 @@ extern sdfGrOt_t sdfGrOtTable[KWLN_FRAME_POOL_NODE_COUNT];
 
 extern u8 D_00380860[];
 
-extern KwlnFrameDrawBank D_00380870[2];
+extern KwlnFrameDrawBank dds3DrawEnv[2];
 
 extern void sdfGrInitNewFrame(void);
 
@@ -105,13 +105,13 @@ s32 dds3FirstProcess(dds3ProcessID_t *task) {
     sdfGrOtInit(sdfGrOtTable, KWLN_FRAME_POOL_NODE_COUNT);
     sdfPreDrawChainInit((SdfPacketChain *)D_00380860);
     kwlnInitializeFrameDrawPackets(bufferIndex);
-    packetGroups = D_00380870[bufferIndex].packetGroups;
+    packetGroups = dds3DrawEnv[bufferIndex].packetGroups;
     for (groupIndex = KWLN_FRAME_LAST_GROUP_INDEX; groupIndex >= 0; groupIndex--) {
         sdfModelSetDrawEnv(packetGroups);
         packetGroups++;
     }
     drawSink = sdfGrOtTable;
-    drawSink->append(drawSink, &D_00380870[bufferIndex].initialList);
+    drawSink->append(drawSink, &dds3DrawEnv[bufferIndex].initialList);
     return 0;
 }
 
@@ -119,7 +119,7 @@ struct ConsFrustumPacket;
 
 extern u32 dds3RenderTex;
 
-extern u32 D_00435CD0;
+extern u32 dds3RenderDrawEnv;
 
 extern u32 D_00435CBC;
 
@@ -198,7 +198,7 @@ s32 dds3DrawFirstProcess(dds3ProcessID_t *task) {
     if (dds3RenderTex != 0) {
         sdf3DMakeLightParallelPacket((SdfLightingPacketStorage *)(kwlnHeldTextureLightingPackets + bufferIndex * KWLN_FRAME_BUFFER_BYTES),
             kwlnHeldTextureLightSources, kwlnHeldTextureAmbientColor);
-        *(u32 *)(kwlnHeldTextureLightingPackets - 0x140 + bufferIndex * KWLN_FRAME_BUFFER_BYTES) = D_00435CD0;
+        *(u32 *)(kwlnHeldTextureLightingPackets - 0x140 + bufferIndex * KWLN_FRAME_BUFFER_BYTES) = dds3RenderDrawEnv;
         if (dds3RenderTex != 0) {
             sdfGrOt_t *sceneNode;
             sdfDrawTag_t *sceneList;
@@ -394,7 +394,7 @@ s32 dds3DrawProcess(dds3ProcessID_t *task) {
     kwlnQueueBackgroundFadeOverlayPacket();
     dds3BlurUpdate();
     groupHeads = kwlnSceneSurfaceSets;
-    packetGroups = D_00380870[bufferIndex].packetGroups;
+    packetGroups = dds3DrawEnv[bufferIndex].packetGroups;
     for (i = KWLN_FRAME_LAST_GROUP_INDEX; i >= 0; i--) {
         sdfModelDrawEnvLinkOt(*groupHeads, packetGroups);
         groupHeads++;

@@ -1,84 +1,53 @@
-#include "sdk_ps2.h"
-#include "eff_packet_params.h"
-#include "sdf_packet_header.h"
 #include "common.h"
-#include "bill_work.h"
-#include "eff_blur.h"
-#include "kwln_draw_buffer.h"
-#include "kwln_frame_draw_buffer.h"
-#include "sdf_packet_list.h"
-#include "sdf_column_packet_api.h"
-#include "sdf_heap_api.h"
-#include "btl_sound.h"
-#include "eff_param.h"
-#include "kwln_sprite.h"
-#include "pcp_vu0.h"
-#include "sdf_vu_matrix.h"
-#include "ee_mmi.h"
-#include "eff.h"
-#include "par_cell_api.h"
-#include "eff_dispatch_state.h"
-#include "eff_offset_triangle.h"
-#include "sdf_packet_alloc.h"
-#include "kwln_texture_reference_flag_api.h"
-#include "sdf_debug_api.h"
+#include "draw3d.h"
+#include "ps2asm.h"
 
-extern u8 *sdf2DGetPrimPtr(SdfDrawPacket *packet);
+/* DDS's names for the same objects. */
+#define D_002F5C20 kwlnHeldTextureTargetVector
+#define D_002F5C30 kwlnHeldTextureEyeVector
+#define D_003176C0 D_0034E6A0
+#define dds3CrossfadeEndMessage D_003A0D70
 
+/* DDS keeps the end message as data: its rodata block has 8 more bytes than
+ * the literal emits. */
+extern const char dds3CrossfadeEndMessage[];
+
+/* The native end message is padded to a 0x20-byte rodata block. */
+extern s8 dds3CrossfadeRunFlag;
+extern u32 dds3CrossfadeFrame;
+extern u32 dds3CrossfadeFrameMax;
+extern sdfGrOt_t sdfGrOtTable[];
+extern void sdfDrawTagInit(sdfDrawTag_t *a);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
+extern void sdfGrLinkDispFrameTex(sdfDrawTag_t *aTag, u32 aEnv, void *aPkt);
+extern void sdf2DLinkTexPacket(sdfDrawTag_t *aTag, sdfTexHandle_t *aTexHndl, s32 aCtx);
+extern void *sdf2DAllocSprite(s32 aNumOfSpr);
+extern void *sdf2DGetPrimPtr(void *aPacketPtr);
+extern u32 dds3GetFrameID(void);
 extern sdfTexHandle_t *dds3GetRenderTexture(void);
-
-extern KwlnFrameDrawBuffer kwlnFrameDrawPacketRecords[];
-
-extern sdfGrOt_t D_00324B88;
-
-extern sdfGrOt_t D_00325588;
-
-extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
-
-/* Node restarts and scales: retail leaves the dispatch state in a0 (and the
- * factor in f12) for them. */
-extern void (*dds3SpPolyResetTable[])(EffectDispatchState *);
-
-extern void (*dds3SpPolySetScaleTable[])(f32, EffectDispatchState *);
-
-extern void dds3EndCrossfade(void);
-
-extern const char D_003A0D70[];
-
-extern s32 dds3AllocRenderTexture(u16 width, u16 height, f32 value);
-
+extern u32 dds3RenderDrawEnv;
+extern f32 D_002F5C20[];
+extern f32 D_002F5C30[];
+extern void dds3CrossfadeEnd(void);
+extern s32 dds3AllocRenderTexture(u16 sx, u16 sy, f32 aspect);
+extern s32 dds3RenderTextureON(void);
+extern u32 D_003176C0[];
+extern s32 sdf2DGetPrimPacketSize(s32 aNumOfRegs, s32 aNumOfPrim);
+extern void *sdfGrAllocPacketBuff(s32 aSize);
+extern sdfGrPacketHeader_t *sdf2DMakePrimPacketHeader(sdfGrPacketHeader_t *aPacketPtr, s32 aPrimReg, s32 aNumOfRegs, s64 aGifRegs, s32 aNumOfPrim);
 extern void dds3RenderTextureOFF(void);
-
 extern void dds3FreeRenderTexture(void);
+extern void *memcpy(void *a, const void *b, u32 c);
+#include "sdk_libc.h"
 
-extern f32 kwlnHeldTextureTargetVector[];
-
-extern f32 kwlnHeldTextureEyeVector[];
-
-extern u8 D_00325870[];
-
-extern s32 D_003BA900;
-
-#define crossfadeActive D_003BB018
-
-#define crossfadeElapsedFrames D_003BB01C
-
-#define crossfadeDurationFrames D_003BB020
-
-extern s8 crossfadeActive;
-
-extern u32 crossfadeElapsedFrames;
-
-extern u32 crossfadeDurationFrames;
-
-BlurPacketQuad *effPkt2DGetPrimPtr(SdfDrawPacket *packet) {
-    return (BlurPacketQuad *)(packet + 1);
+void *effPkt2DGetPrimPtr(void *pPkt) {
+    return (void *)((u8 *)pPkt + 0x20);
 }
 
-SdfDrawPacket *effPkt2DAllocTriStrip(s32 height, s32 flags) {
-    SdfDrawPacket *packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(9, height));
+sdfGrPacketHeader_t *effPkt2DAllocTriStrip(s32 num, s32 prim) {
+    sdfGrPacketHeader_t *packet = (sdfGrPacketHeader_t *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(9, num));
 
-    sdf2DMakePrimPacketHeader(packet, flags | 0x54, 9, 0x525252521, height);
+    sdf2DMakePrimPacketHeader(packet, prim | 0x54, 9, 0x525252521, num);
     return packet;
 }
 
@@ -159,27 +128,24 @@ void effAppendTexturedTrianglePacket(sdfDrawTag_t *chain, s32 color, s32 primiti
     sdfDrawTagLink(chain, (u32)packet);
 }
 
-u64 *effPkt2DAllocF4(u32 flags) {
+u64 *effPkt2DAllocF4(u32 prim) {
     u64 *packet = (u64 *)sdfGrAllocPacketBuff(0x80);
 
     packet[0] = 7;
     packet[1] = 0x5000000700000000ULL;
     packet[2] = 0xB400000000008001ULL;
     packet[3] = 0xFF515151510ULL;
-    packet[4] = flags | 0x14C;
+    packet[4] = prim | 0x14C;
     packet[15] = 0;
     packet[14] = 0;
     packet[13] = 0;
     return packet;
 }
 
-extern u32 D_0034E6A0[];
-
-/* Allocate and build a VIF vertex packet; optional streams and legacy bounds are unchanged. */
-void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *params) {
-    s32 parameterCount = params->faceCount;
-    s32 vertexCount = params->pointCount;
-    u32 primitive = params->attr | 0x48;
+void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *aParm) {
+    s32 parameterCount = aParm->faceCount;
+    s32 vertexCount = aParm->pointCount;
+    u32 primitive = aParm->attr | 0x48;
     u32 mode = 0x60;
     s32 stride = 3;
     s32 overhead = 16;
@@ -194,22 +160,22 @@ void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *params) {
     u32 countCode;
     u32 *stream2;
 
-    if (params->normal != NULL) {
+    if (aParm->normal != NULL) {
         mode = 0xE0;
         overhead = 17;
         stride = 6;
     }
-    if (params->uv != NULL) {
+    if (aParm->uv != NULL) {
         mode |= 0x100;
         primitive |= 0x10;
         overhead++;
         stride += 2;
-        if (params->multiUv != NULL) {
+        if (aParm->multiUv != NULL) {
             primitive |= 0x1000;
             stride += 2;
         }
     }
-    if (params->vertexColor != NULL) {
+    if (aParm->vertexColor != NULL) {
         mode |= 0x200;
         primitive |= 0x800;
         overhead++;
@@ -217,7 +183,7 @@ void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *params) {
     }
     allocationSize = (overhead + parameterCount + stride * vertexCount) * 4;
     allocationSize = (allocationSize + 15) & ~15;
-    allocate = params->allocator;
+    allocate = (void *(*)(s32))aParm->allocator;
     if (allocate == NULL) {
         allocate = sdfGrAllocPacketBuff;
     }
@@ -225,12 +191,12 @@ void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *params) {
 
     *(u64 *)packet = (u64)(u16)((allocationSize >> 4) - 1) | 0x20000000ULL;
     ((u32 *)packet)[2] = 0x6102C000;
-    ((u32 *)packet)[3] = (~params->attrInhibit) & 0xFFFF;
+    ((u32 *)packet)[3] = (~aParm->attrInhibit) & 0xFFFF;
     ((u32 *)packet)[4] = 0x6E01C002;
-    ((u32 *)packet)[5] = params->color;
+    ((u32 *)packet)[5] = aParm->color;
     ((u32 *)packet)[6] = 0x6001C003;
     cursor = (u32 *)packet + 7;
-    *cursor++ = (u32)params->zBias;
+    *cursor++ = (u32)aParm->zBias;
     *cursor++ = 0x04000004;
     *cursor++ = 0x14000000;
     *cursor++ = 0x6D01C000;
@@ -238,40 +204,40 @@ void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *params) {
     *cursor++ = (primitive & 0xFFFF) | (mode << 16);
     *cursor++ = 0x6E00C001 | ((u32)parameterCount << 16);
 
-    if (params->faceIndex == NULL) {
-        memcpy(cursor, D_0034E6A0, parameterCount * 4);
+    if (aParm->faceIndex == NULL) {
+        memcpy(cursor, D_003176C0, parameterCount * 4);
     } else {
-        memcpy(cursor, params->faceIndex, parameterCount * 4);
+        memcpy(cursor, aParm->faceIndex, parameterCount * 4);
     }
     cursor += parameterCount;
     offset = parameterCount + 1;
     countCode = vertexCount << 16;
     *cursor++ = countCode | offset | 0x6800C000;
-    vector = params->vertex;
+    vector = (u128 *)aParm->vertex;
     i = 0;
     do {
-        EE_MMI_STORE_VEC3_VALUE(cursor, *vector);
+        MMI_STORE_VEC3_VALUE(cursor, *vector);
         i++;
         cursor += 3;
         vector++;
     } while (i != vertexCount);
     offset += vertexCount;
 
-    vector = params->normal;
+    vector = (u128 *)aParm->normal;
     if (vector != NULL) {
         *cursor++ = countCode | offset | 0x6800C000;
         i = 0;
         do {
-            EE_MMI_STORE_VEC3_VALUE(cursor, *vector);
+            MMI_STORE_VEC3_VALUE(cursor, *vector);
             i++;
             cursor += 3;
             vector++;
         } while (i != vertexCount);
         offset += vertexCount;
     }
-    stream = (u32 *)params->uv;
+    stream = (u32 *)aParm->uv;
     if (stream != NULL) {
-        stream2 = params->multiUv;
+        stream2 = (u32 *)aParm->multiUv;
         if (stream2 == NULL) {
             *cursor++ = countCode | offset | 0x6400C000;
             memcpy(cursor, stream, vertexCount * 8);
@@ -289,7 +255,7 @@ void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *params) {
         }
         offset += vertexCount;
     }
-    stream = params->vertexColor;
+    stream = aParm->vertexColor;
     if (stream != NULL) {
         *cursor++ = countCode | offset | 0x6E00C000;
         memcpy(cursor, stream, vertexCount * 4);
@@ -302,87 +268,129 @@ void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *params) {
     return packet;
 }
 
-void dds3CrossfadeStart(s32 frames) {
-    u8 *entry;
-    s32 i;
-    u64 clearValue;
+/* The render draw env's clear sprite, 0x1800 into each 0x1BE0 draw bank (DDS:
+ * 0x1B60 into 0x1F40): both XYZ corners go to the GS coordinate bias, which
+ * clears nothing. */
+#define EFF_PACKET_DRAW_BANK_HEAD 0x1660
 
-    if (crossfadeActive != 0) {
-        dds3EndCrossfade();
+typedef struct
+{
+    u8 unk0000[EFF_PACKET_DRAW_BANK_HEAD];
+    u8 frameMaskSource[0x500];
+    u64 clearXyzA;
+    u64 unk1808;
+    u64 clearXyzB;
+    u8 unk1818[0x3C8];
+} effPacketDrawBank_t;
+
+/* One textureless sprite as sdf2D lays it out: the colour, then two corners
+ * of 0x20 bytes each. */
+typedef struct
+{
+    s32 u;
+    s32 v;
+    u8 pad08[8];
+    s32 x;
+    s32 y;
+    s32 mask;
+    s16 flag;
+    u8 pad1E[2];
+} effPacketSpriteCorner_t;
+
+typedef struct
+{
+    s32 r;
+    s32 g;
+    s32 b;
+    s32 a;
+    effPacketSpriteCorner_t corner[2];
+} effPacketSpriteVertex_t;
+
+extern effPacketDrawBank_t dds3DrawEnv[];
+
+void dds3CrossfadeStart(s32 frame)
+{
+    s32 i;
+
+    if (dds3CrossfadeRunFlag != 0) {
+        dds3CrossfadeEnd();
     }
-    if (frames != 0) {
-        kwlnHeldTextureTargetVector[0] = 0.0f;
-        kwlnHeldTextureTargetVector[1] = 0.0f;
-        kwlnHeldTextureTargetVector[2] = 0.0f;
-        kwlnHeldTextureEyeVector[0] = 0.0f;
-        kwlnHeldTextureEyeVector[1] = 0.0f;
-        kwlnHeldTextureEyeVector[2] = 0.0f;
-        D_003BA900 = 0x80808080;
-        dds3AllocRenderTexture(0x100, 0xE0, kwlnHeldTextureTargetVector[0]);
-        dds3RenderTextureON();
-        i = 0;
-        entry = D_00325870;
-        clearValue = 0x80008000ULL;
-        entry += 0x1b70;
-        do {
-            i++;
-            *(u64 *)(entry - 0x10) = clearValue;
-            *(u64 *)entry = clearValue;
-            entry += 0x1f40;
-        } while (i != 2);
-        crossfadeDurationFrames = frames;
-        crossfadeActive = 1;
-        crossfadeElapsedFrames = 0;
-        printf("dds3CrossfadeStart\n");
+    if (frame == 0) {
+        return;
     }
+    D_002F5C20[0] = 0.0f;
+    D_002F5C20[1] = 0.0f;
+    D_002F5C20[2] = 0.0f;
+    D_002F5C30[0] = 0.0f;
+    D_002F5C30[1] = 0.0f;
+    D_002F5C30[2] = 0.0f;
+    dds3RenderDrawEnv = 0x80808080;
+    dds3AllocRenderTexture(0x100, 0xE0, 0.0f);
+    dds3RenderTextureON();
+    for (i = 0; i != 2; i++) {
+        dds3DrawEnv[i].clearXyzA = 0x80008000;
+        dds3DrawEnv[i].clearXyzB = 0x80008000;
+    }
+    dds3CrossfadeFrameMax = frame;
+    dds3CrossfadeRunFlag = 1;
+    dds3CrossfadeFrame = 0;
+    printf("dds3CrossfadeStart\n");
 }
 
-/* Capture the first frame, then draw the held texture with a decreasing alpha. */
-void dds3CrossfadeRun(void) {
-    sdfDrawTag_t *list;
-    sdfGrRefPacketHeader_t *reference;
-    u64 *texturePacket;
-    u64 *blendPacket;
-    void *sprite;
-    KwlnSpriteVertex *vertex;
-    u32 alpha;
+#define EFF_PACKET_CROSSFADE_OT 82
 
-    if (crossfadeActive == 0) {
+void dds3CrossfadeRun(void)
+{
+    sdfDrawTag_t *list;
+    void *reference;
+    u32 frame;
+    void *sprite;
+    effPacketSpriteVertex_t *vertex;
+    s32 color;
+    s32 alpha;
+    u32 level;
+
+    if (dds3CrossfadeRunFlag == 0) {
         return;
     }
-    if (crossfadeElapsedFrames == crossfadeDurationFrames) {
-        dds3EndCrossfade();
+    if (dds3CrossfadeFrame == dds3CrossfadeFrameMax) {
+        dds3CrossfadeEnd();
         return;
     }
-    if (crossfadeElapsedFrames == 0) {
+    if (dds3CrossfadeFrame == 0) {
         list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
         sdfDrawTagInit(list);
-        reference = (sdfGrRefPacketHeader_t *)sdfGrAllocPacketBuff(0x20);
-        sdfGrLinkDispFrameTex(list,
-            (u32)(kwlnFrameDrawPacketRecords[dds3GetFrameID()].baseBytes),
-            reference);
-        texturePacket = (u64 *)sdfGrAllocPacketBuff(0x40);
-        texturePacket[0] = 3;
-        texturePacket[1] = 0x5000000310000000ULL;
-        texturePacket[2] = 0x1000000000008002ULL;
-        texturePacket[3] = 0xE;
-        texturePacket[4] = 0x8000000080ULL;
-        texturePacket[5] = 0x3B;
-        texturePacket[6] = 0;
-        texturePacket[7] = 0x3F;
-        sdfDrawTagLink(list, (u32)texturePacket);
-        blendPacket = (u64 *)sdfGrAllocPacketBuff(0x40);
-        blendPacket[0] = 3;
-        blendPacket[1] = 0x5000000310000000ULL;
-        blendPacket[2] = 0x1000000000008002ULL;
-        blendPacket[3] = 0xE;
-        blendPacket[4] = 0x31001;
-        blendPacket[5] = 0x47;
-        blendPacket[6] = 0x44;
-        blendPacket[7] = 0x42;
-        sdfDrawTagLink(list, (u32)blendPacket);
+        reference = (void *)sdfGrAllocPacketBuff(0x20);
+        frame = dds3GetFrameID();
+        sdfGrLinkDispFrameTex(list, (u32)dds3DrawEnv[frame].frameMaskSource, reference);
+        {
+            u64 *packet = (u64 *)sdfGrAllocPacketBuff(0x40);
+
+            packet[0] = 3;
+            packet[1] = 0x5000000310000000ULL;
+            packet[2] = 0x1000000000008002ULL;
+            packet[3] = 0xE;
+            packet[4] = 0x8000000080ULL;
+            packet[5] = 0x3B;
+            packet[6] = 0;
+            packet[7] = 0x3F;
+            sdfDrawTagLink(list, (u32)packet);
+        }
+        {
+            u64 *packet = (u64 *)sdfGrAllocPacketBuff(0x40);
+
+            packet[0] = 3;
+            packet[1] = 0x5000000310000000ULL;
+            packet[2] = 0x1000000000008002ULL;
+            packet[3] = 0xE;
+            packet[4] = 0x31001;
+            packet[5] = 0x47;
+            packet[6] = 0x44;
+            packet[7] = 0x42;
+            sdfDrawTagLink(list, (u32)packet);
+        }
         sprite = sdf2DAllocSprite(1);
-        vertex = (KwlnSpriteVertex *)sdf2DGetPrimPtr(sprite);
+        vertex = (effPacketSpriteVertex_t *)sdf2DGetPrimPtr(sprite);
         vertex->r = 0x80;
         vertex->g = 0x80;
         vertex->b = 0x80;
@@ -400,19 +408,24 @@ void dds3CrossfadeRun(void) {
         vertex->corner[1].mask = 0xFF0000;
         vertex->corner[1].flag = 0;
         sdfDrawTagLink(list, (u32)sprite);
-        D_00324B88.append(&D_00324B88, list);
+        {
+            sdfGrOt_t *ot = &sdfGrOtTable[2];
+
+            ot->regFunc(ot, list);
+        }
     }
-    crossfadeElapsedFrames = (u32)crossfadeElapsedFrames + 1;
-    alpha = (128 - (u32)((f32)(u32)crossfadeElapsedFrames * 128.0f /
-                       (f32)(u32)crossfadeDurationFrames)) & 0xFF;
+    dds3CrossfadeFrame++;
+    level = (u32)(dds3CrossfadeFrame * 128.0f / dds3CrossfadeFrameMax);
+    color = 0x80;
+    alpha = (color - level) & 0xFF;
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
-    sdf2DLinkTexPacket(list, dds3GetRenderTexture(), SDF_GS_CONTEXT_1);
+    sdf2DLinkTexPacket(list, dds3GetRenderTexture(), 0);
     sprite = sdf2DAllocSprite(1);
-    vertex = (KwlnSpriteVertex *)sdf2DGetPrimPtr(sprite);
-    vertex->r = 0x80;
-    vertex->g = 0x80;
-    vertex->b = 0x80;
+    vertex = (effPacketSpriteVertex_t *)sdf2DGetPrimPtr(sprite);
+    vertex->r = color;
+    vertex->g = color;
+    vertex->b = color;
     vertex->a = alpha;
     vertex->corner[0].u = 0;
     vertex->corner[0].v = 0;
@@ -427,22 +440,25 @@ void dds3CrossfadeRun(void) {
     vertex->corner[1].mask = 0xFF0000;
     vertex->corner[1].flag = 0;
     sdfDrawTagLink(list, (u32)sprite);
-    D_00325588.append(&D_00325588, list);
+    {
+        sdfGrOt_t *ot = &sdfGrOtTable[EFF_PACKET_CROSSFADE_OT];
+
+        ot->regFunc(ot, list);
+    }
 }
 
-/* Release the captured texture and clear the active crossfade state. */
-void dds3EndCrossfade(void) {
+void dds3CrossfadeEnd(void) {
     dds3RenderTextureOFF();
     dds3FreeRenderTexture();
-    crossfadeActive = 0;
-    printf(D_003A0D70);
+    dds3CrossfadeRunFlag = 0;
+    printf(dds3CrossfadeEndMessage);
 }
 
 INCLUDE_RODATA(const s32, "effect/effPacket", D_003A0D70);
 
-INCLUDE_SDATA(const s32, "effect/effPacket", D_003BB018);
+INCLUDE_SDATA(const s32, "effect/effPacket", dds3CrossfadeRunFlag);
 
-INCLUDE_SDATA(const s32, "effect/effPacket", D_003BB01C);
+INCLUDE_SDATA(const s32, "effect/effPacket", dds3CrossfadeFrame);
 
-INCLUDE_SDATA(const s32, "effect/effPacket", D_003BB020);
+INCLUDE_SDATA(const s32, "effect/effPacket", dds3CrossfadeFrameMax);
 

@@ -1162,7 +1162,7 @@ s32 kwlnEnsureDefaultResource(void) {
 #include "kwln_frame_draw_bank.h"
 
 
-extern KwlnFrameDrawBank D_00325870[2];
+extern KwlnFrameDrawBank dds3DrawEnv[2];
 extern u32 D_003BA8EC;
 extern sdfGrFrameSet_t sdfGrFrameSet;
 extern SdfLightSources D_00324770;
@@ -1175,41 +1175,41 @@ extern void sdf3DLinkInitPacket(sdfDrawTag_t *, DmaPacketHeader *);
 
 /* Initialize the selected frame bank's scene and overlay packet chains. */
 void kwlnInitializeFrameDrawPackets(s32 bufferIndex) {
-    sdfDrawTagInit(&D_00325870[bufferIndex].initialList);
-    sdf3DLinkInitPacket(&D_00325870[bufferIndex].initialList,
-                                        &D_00325870[bufferIndex].programReference);
-    sdfDrawTagInit(&D_00325870[bufferIndex].sceneList);
-    sdfPreDrawTagInit(&D_00325870[bufferIndex].linkedList);
-    sdfGrSetStdDrawEnv(&D_00325870[bufferIndex].scene, &sdfGrFrameSet);
+    sdfDrawTagInit(&dds3DrawEnv[bufferIndex].initialList);
+    sdf3DLinkInitPacket(&dds3DrawEnv[bufferIndex].initialList,
+                                        &dds3DrawEnv[bufferIndex].programReference);
+    sdfDrawTagInit(&dds3DrawEnv[bufferIndex].sceneList);
+    sdfPreDrawTagInit(&dds3DrawEnv[bufferIndex].linkedList);
+    sdfGrSetStdDrawEnv(&dds3DrawEnv[bufferIndex].scene, &sdfGrFrameSet);
     /* Update the RGBAQ color word while retaining its floating-point Q word. */
-    *(u32 *)&D_00325870[bufferIndex].scene.centeredBounds.rgbaq.value = D_003BA8EC;
+    *(u32 *)&dds3DrawEnv[bufferIndex].scene.centeredBounds.rgbaq.value = D_003BA8EC;
     if (dds3DrawFlag & 0x10000000) {
-        sdfGrSetClearPacket(&D_00325870[bufferIndex].scene.centeredBounds, 0, 0,
+        sdfGrSetClearPacket(&dds3DrawEnv[bufferIndex].scene.centeredBounds, 0, 0,
                                          sdfGrFrameSet.bufferFormat,
                                          sdfGrFrameSet.auxiliaryFormat);
         dds3DrawFlag &= 0xEFFFFFFF;
     }
-    sdfGrLinkStdDrawEnv(&D_00325870[bufferIndex].sceneList,
-                                 &D_00325870[bufferIndex].linkedList,
-                                 &D_00325870[bufferIndex].scene.link);
-    sdf3DMakeViewportPacket(&D_00325870[bufferIndex].sceneMatrix,
+    sdfGrLinkStdDrawEnv(&dds3DrawEnv[bufferIndex].sceneList,
+                                 &dds3DrawEnv[bufferIndex].linkedList,
+                                 &dds3DrawEnv[bufferIndex].scene.link);
+    sdf3DMakeViewportPacket(&dds3DrawEnv[bufferIndex].sceneMatrix,
                              &dds3ScreenParam, &sdfViewMatrix);
-    sdfDrawTagLink(&D_00325870[bufferIndex].sceneList,
-                    (u32)&D_00325870[bufferIndex].sceneMatrix);
-    sdf3DMakeLightParallelPacket(&D_00325870[bufferIndex].scenePacketStorage,
+    sdfDrawTagLink(&dds3DrawEnv[bufferIndex].sceneList,
+                    (u32)&dds3DrawEnv[bufferIndex].sceneMatrix);
+    sdf3DMakeLightParallelPacket(&dds3DrawEnv[bufferIndex].scenePacketStorage,
                   D_00324770, kwlnDefaultColorVector);
-    sdfDrawTagLink(&D_00325870[bufferIndex].sceneList,
-                    (u32)&D_00325870[bufferIndex].scenePacketStorage);
+    sdfDrawTagLink(&dds3DrawEnv[bufferIndex].sceneList,
+                    (u32)&dds3DrawEnv[bufferIndex].scenePacketStorage);
 
-    sdfDrawTagInit(&D_00325870[bufferIndex].thirdList);
-    sdf3DMakeViewportPacket(&D_00325870[bufferIndex].thirdMatrix,
+    sdfDrawTagInit(&dds3DrawEnv[bufferIndex].thirdList);
+    sdf3DMakeViewportPacket(&dds3DrawEnv[bufferIndex].thirdMatrix,
                              &D_00324980, &D_00329790);
-    sdfDrawTagLink(&D_00325870[bufferIndex].thirdList,
-                    (u32)&D_00325870[bufferIndex].thirdMatrix);
-    sdf3DMakeLightParallelPacket(&D_00325870[bufferIndex].overlayLightPacket,
+    sdfDrawTagLink(&dds3DrawEnv[bufferIndex].thirdList,
+                    (u32)&dds3DrawEnv[bufferIndex].thirdMatrix);
+    sdf3DMakeLightParallelPacket(&dds3DrawEnv[bufferIndex].overlayLightPacket,
                   kwlnOverlayLightSources, kwlnOverlayAmbientColor);
-    sdfDrawTagLink(&D_00325870[bufferIndex].thirdList,
-                    (u32)&D_00325870[bufferIndex].overlayLightPacket);
+    sdfDrawTagLink(&dds3DrawEnv[bufferIndex].thirdList,
+                    (u32)&dds3DrawEnv[bufferIndex].overlayLightPacket);
 }
 
 /* Select display mode 1, rebuild both projection blocks and reset draw-vector state. */
@@ -1230,7 +1230,7 @@ void dds3InitDrawEnv(void) {
 extern sdfGrFrameSet_t dds3RenderTexId;
 extern u16 D_003BA8FC;
 extern u16 D_003BA8FE;
-extern u32 D_003BA900;
+extern u32 dds3RenderDrawEnv;
 extern SdfLightSources kwlnHeldTextureLightSources;
 extern f32 kwlnHeldTextureAmbientColor[4];
 extern Matrix4 kwlnHeldTextureViewMatrix;
@@ -1249,14 +1249,14 @@ void dds3InitRenderDrawEnv(void) {
     dds3RenderTexId.buffers[2] = sdfGrFrameSet.buffers[2];
     sdf3DMakeScreenParam(&D_003247B0.camera);
     for (i = 0; i != 2; i++) {
-        sdfDrawTagInit(&D_00325870[i].heldTexture.list);
-        sdfGrSetDrawEnv(&D_00325870[i].heldTexture.scene, &dds3RenderTexId, 0);
-        *(u32 *)&D_00325870[i].heldTexture.scene.centeredBounds.rgbaq.value = D_003BA900;
-        sdfDrawTagLink(&D_00325870[i].heldTexture.list, (u32)&D_00325870[i].heldTexture.scene);
-        sdf3DMakeViewportPacket(&D_00325870[i].heldTexture.matrix, &D_003247B0, &kwlnHeldTextureViewMatrix);
-        sdfDrawTagLink(&D_00325870[i].heldTexture.list, (u32)&D_00325870[i].heldTexture.matrix);
-        sdf3DMakeLightParallelPacket(&D_00325870[i].heldTexture.lighting, kwlnHeldTextureLightSources, kwlnHeldTextureAmbientColor);
-        sdfDrawTagLink(&D_00325870[i].heldTexture.list, (u32)&D_00325870[i].heldTexture.lighting);
+        sdfDrawTagInit(&dds3DrawEnv[i].heldTexture.list);
+        sdfGrSetDrawEnv(&dds3DrawEnv[i].heldTexture.scene, &dds3RenderTexId, 0);
+        *(u32 *)&dds3DrawEnv[i].heldTexture.scene.centeredBounds.rgbaq.value = dds3RenderDrawEnv;
+        sdfDrawTagLink(&dds3DrawEnv[i].heldTexture.list, (u32)&dds3DrawEnv[i].heldTexture.scene);
+        sdf3DMakeViewportPacket(&dds3DrawEnv[i].heldTexture.matrix, &D_003247B0, &kwlnHeldTextureViewMatrix);
+        sdfDrawTagLink(&dds3DrawEnv[i].heldTexture.list, (u32)&dds3DrawEnv[i].heldTexture.matrix);
+        sdf3DMakeLightParallelPacket(&dds3DrawEnv[i].heldTexture.lighting, kwlnHeldTextureLightSources, kwlnHeldTextureAmbientColor);
+        sdfDrawTagLink(&dds3DrawEnv[i].heldTexture.list, (u32)&dds3DrawEnv[i].heldTexture.lighting);
     }
 }
 
@@ -1918,7 +1918,7 @@ INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA8FC);
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA8FE);
 
-INCLUDE_SDATA(const s32, "game/code_00102ED8", D_003BA900);
+INCLUDE_SDATA(const s32, "game/code_00102ED8", dds3RenderDrawEnv);
 
 INCLUDE_SDATA(const s32, "game/code_00102ED8", dds3DrawFlag);
 

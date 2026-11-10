@@ -1841,7 +1841,7 @@ BtlRuntimeFadeStepResult btlUpdateFadeOut(void) {
 
 extern s32 dds3AllocRenderTexture(u16 width, u16 height, f32 value);
 
-extern u8 D_00325870[];
+extern u8 dds3DrawEnv[];
 
 #include "kwln_texture_reference_flag_api.h"
 
@@ -1851,7 +1851,7 @@ void btlClearOverlayBuffers(void) {
     u64 clearValue;
     dds3AllocRenderTexture(0x200, 0xe0, 0.0f);
     dds3RenderTextureON();
-    entry = D_00325870;
+    entry = dds3DrawEnv;
     i = 0;
     clearValue = 0x80008000ULL;
     entry += 0x1b70;

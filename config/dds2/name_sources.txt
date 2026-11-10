@@ -1751,7 +1751,7 @@
 0x00167A10	effPkt3DPrimMakePoly	inferred	SMT3HD name via SLUS_209.11 0x0016A120, reloc-identical; was effCreateVertexDrawPacket
 0x00167E00	dds3CrossfadeStart	inferred	SMT3HD name via SLUS_209.11 0x0016A510, unique-masked-hash; was dds3StartCrossfade
 0x00167EE8	dds3CrossfadeRun	inferred	HD original name, shared by audited native identity; was dds3UpdateCrossfade.
-0x00168280	dds3EndCrossfade	inferred	confidence=high; matched-C; Clears/releases held texture and active state; native rodata says dds3CrossfadeEnd. DDS1 twin0x00160690. Namer1 batch21.
+0x00168280	dds3CrossfadeEnd	inferred	SMT3HD name via SLUS_209.11 0x0016A990, effect/effPacket SMT3 rename; was dds3EndCrossfade
 0x001682B0	sndMixerClone	inferred	Copies source mixer state into a new mixer and initializes it; DDS1 twin. [names_qp9.tsv]
 0x001683F0	sndMixerDestroy	inferred	Destroys an owned clone: deletes linked voices, releases both banks' parameter work, and frees the retained mixer allocation; DDS1 twin.
 0x00168448	effBTLGetMotionChangeFrame	inferred	SMT3HD name via SLUS_209.11 0x0016AB70, shared-hash-in-run; was sndGetMixerBankCallbackFrame
@@ -9976,6 +9976,7 @@
 0x0037FB48	sdfGrOtTable	inferred	SMT3HD data name via SLUS_209.11 0x002F5F18, 28 agreeing references; was sdfGrOtTable
 0x00380748	kwlnPositionedTextSurface	inferred	confidence=medium; matched_users=src/dds2/game/code_00195E50.c:effDebugStringDraw, src/dds2/game/code_00195E50.c:effDebugWindowDraw; Shared callback-bearing draw surface consumes positioned and sized text packets. Retail address correspondence is independently corroborated by at least two paired functions. [names_qp9.tsv]
 0x00380788	kwlnSceneSurfaceSets	inferred	Thirteen sets of four draw surfaces (SdfPoolNode *[13][4]) that kwlnBuildFrameScenePackets stores each frame; a model draws through the set of its pass. DDS1 twin 0x00325788.
+0x00380870	dds3DrawEnv	inferred	SMT3HD name via SLUS_209.11 0x002F6A80, effect/effPacket SMT3 rename; was D_00380870
 0x00381ED0	kwlnFrameDrawPacketRecords	inferred	confidence=high; src/dds2/game/code_0018DA70.c:D_00381ED0; type=frame DMA record[]; refs=effDrawBlurListWithFramePacket,uiDrawActiveSurfaceRegion; Selected by the active frame-buffer index to append primary DMA and texture-state packets. [names_qp9.tsv]
 0x003822A0	kwlnHeldTexturePacketBanks	inferred	confidence=high; Existing KwlnTextureBank[2] work views initialized by dds3InitRenderDrawEnv; 0x1F40 stride and padding unchanged, list/scene/matrix/lighting payload 0x340 per slot. No new view or ownership extent inferred. DDS1 twin 0x003272A0; all selected root/interior/addend instruction readers already C, no import/active ASM reader. Parent frame banks/canonical kwlnFrameDrawPacketRecords unchanged. [PurD readability data b11; identifier-only]
 0x00382430	kwlnHeldTextureMatrixPackets	inferred	confidence=high; Existing unsized u8 alias at held-texture bank+0x190, selected with native 0x1F40 frame stride; ConsMatrixPacket payload 0xD0. Existing -0x190 list expression and declarations unchanged. DDS1 twin 0x00327430; all selected root/interior/addend instruction readers already C, no import/active ASM reader. Parent frame banks/canonical kwlnFrameDrawPacketRecords unchanged. [PurD readability data b11; identifier-only]
@@ -10639,6 +10640,7 @@
 0x00435CB8	egl_OT_Offset	inferred	SMT3HD data name via SLUS_209.11 0x0054E940, 8 agreeing references; was egl_OT_Offset
 0x00435CC0	dds3RenderTex	inferred	SMT3HD data name via SLUS_209.11 0x0054E948, 5 agreeing references; was dds3RenderTex
 0x00435CC8	dds3RenderTexture	inferred	SMT3HD data name via SLUS_209.11 0x0054E950, 6 agreeing references; was dds3RenderTexture
+0x00435CD0	dds3RenderDrawEnv	inferred	SMT3HD name via SLUS_209.11 0x0054E958, effect/effPacket SMT3 rename; was D_00435CD0
 0x00435CD4	dds3DrawFlag	inferred	SMT3HD data name via SLUS_209.11 0x0054E95C, 165 agreeing references; was dds3DrawFlag
 0x00435CD8	dds3ScreenBlurFlag	inferred	SMT3HD data name via SLUS_209.11 0x0054E960, 7 agreeing references; was dds3ScreenBlurFlag
 0x00435CDA	dds3ScreenBlurAlpha	inferred	SMT3HD data name via SLUS_209.11 0x0054E962, 10 agreeing references; was dds3ScreenBlurAlpha
@@ -10787,6 +10789,9 @@
 0x0043639C	fldYukEffectPositioned	inferred	high confidence; src/dds2/game/code_001442D0.c fldSetWeatherEffectPos(): D_0043639C = 1; Instruction-aligned data counterpart of DDS1 D_003BAFE4 in the matched fldSetWeatherEffectPos() twin. Marks that the YUK effect was positioned; weather updates test it before updating the node. [names_reviewed26.tsv]
 0x00436400	hDrawListTop	inferred	SMT3HD data name via SLUS_209.11 0x0054F0B8, 5 agreeing references; was hDrawListTop
 0x00436404	dds3TrackPolyTag	inferred	SMT3HD name via SLUS_209.11 0x0054F0BC, effect/polyManager SMT3 rename; was D_00436404
+0x00436408	dds3CrossfadeRunFlag	inferred	SMT3HD name via SLUS_209.11 0x0054F0C0, effect/effPacket SMT3 rename; was D_00436408
+0x0043640C	dds3CrossfadeFrame	inferred	SMT3HD name via SLUS_209.11 0x0054F0C4, effect/effPacket SMT3 rename; was D_0043640C
+0x00436410	dds3CrossfadeFrameMax	inferred	SMT3HD name via SLUS_209.11 0x0054F0C8, effect/effPacket SMT3 rename; was D_00436410
 0x00436414	effFieldColorFlags	inferred	confidence=high; matched_users=src/dds2/game/code_00169418.c:effBTLFieldColorClearFlags, src/dds2/game/code_00169418.c:effBTLFieldColorSetFlags; Field-color APIs add and remove bits in this shared mask; same DDS1 role. [names_qp9.tsv]
 0x00436418	effFieldColorOriginalSelector	inferred	confidence=high; data D_00436418; matched-C-users=2; src/dds2/game/code_00169418.c:22:effBTLFieldColorSetSelectors; src/dds2/game/code_00169418.c:35:effBTLFieldColorGetOriginalSelector; Color selector setup captures the original base selector here; its getter returns it; data-twin=D_003BB028, supported by 2 independently paired matched functions.; retail-data-start=asm/dds2/data/game/code_00169418.sdata.s:15.; seed-placeholder=D_00436418; current asm label and source default identifier verified; source=names_reviewed36.tsv. [names_qp10_seed.tsv]
 0x0043641C	effBTLSkillState	inferred	SMT3HD data name via SLUS_209.11 0x00551D80, 1 agreeing references; was effBTLSkillState
