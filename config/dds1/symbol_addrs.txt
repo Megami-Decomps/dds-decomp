@@ -8513,6 +8513,7 @@ sdfDebugLogPairFormat = 0x003BD2C0;
 sdfDmacHandlerTable = 0x003BD2CC;
 sdfTickCallback = 0x003BD2D4;
 sdfVblankFlag = 0x003BD2D8;
+sdfMemFullCallback = 0x003BD2DC;
 sdfGrDrawFirstFlag = 0x003BD2E0; // type:u8 size:0x1
 sdfFrameEvenOdd = 0x003BD2E1; // type:u8 size:0x1
 sdfGrScreenMode = 0x003BD2E8; // type:u8 size:0x1

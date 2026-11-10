@@ -10899,6 +10899,7 @@
 0x004389B0	mnuRuntimeRecordPairCallback	inferred	Callback stored by mnuSetRuntimeRecordPairCallback and invoked for a runtime-record pair; default points to mnuRuntimeRecordPairNoOp.
 0x004389BC	sdfDmacHandlerTable	inferred	SMT3HD data name via SLUS_209.11 0x00551820, 5 agreeing references; was sdfDmacHandlerTable
 0x004389C8	sdfVblankFlag	inferred	SMT3HD data name via SLUS_209.11 0x0055182C, 3 agreeing references; was sdfVblankFlag
+0x004389CC	sdfMemFullCallback	inferred	SMT3HD name via SLUS_209.11 0x00551830, sdf/sdfMemory SMT3 name; was D_004389CC
 0x004389D0	sdfGrDrawFirstFlag	inferred	SMT3HD data name via SLUS_209.11 0x00551838, 3 agreeing references; was sdfGrDrawFirstFlag
 0x004389D1	sdfFrameEvenOdd	inferred	SMT3HD data name via SLUS_209.11 0x00551839, 1 agreeing references; was sdfFrameEvenOdd
 0x004389D8	sdfGrScreenMode	inferred	SMT3HD data name via SLUS_209.11 0x00551840, 3 agreeing references; was sdfGrScreenMode

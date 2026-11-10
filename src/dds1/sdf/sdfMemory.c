@@ -1,477 +1,511 @@
 #include "common.h"
-#include "sdf_chip.h"
-#include "sdf_heap_api.h"
-#include "sdf_general_heap_api.h"
-#include "sdf.h"
-#include "sdf_chip_page_link_view.h"
-#include "sdf_pending.h"
-#include "sdk_ps2.h"
-#include "sdf_timer.h"
-#include "sdf_named_resource_request_api.h"
-#include "sif_rpc_client_prefix.h"
-#include "sdf_mem_block_state.h"
+#include "libsdf.h"
 
-#define SDF_MEM_ALIGNMENT_MASK 0x7F
+/* The SDK multi-RPC client; only its byte span matters here. */
+typedef struct
+{
+    u8 opaque00[0x24];
+} sdfIopRpcClient_t;
+
+/* Allocations round up to this many bytes. */
+#define SDF_MEM_ALIGN_MASK 0x7F
+/* The request header: two length words plus the name's terminator. */
+#define SDF_IOP_FILE_RPC_OVERHEAD 0xC
+#define SDF_IOP_FILE_RPC_REPLY_ALIGN_MASK 0x3F
 
 extern void *malloc(u32 size);
+extern s32 DIntr(void);
+extern void EIntr(void);
+extern void *memcpy(void *a, const void *b, u32 c);
+extern u32 strlen(const char *s);
+extern void *sdfChipAllocDirect(u32 aSize);
+extern void sdfChipFreeDirect(void *aPtr);
+extern void sdfDelayedResrcInitCB(sdfDelayedResrcCB_t *aCB, sdfDelayedResrcFreeFunc aFreeFunc);
+extern void sdfDelayedResrcEntry(sdfDelayedResrcCB_t *aCB, void *aItem);
+#include "sdk_libmrpc.h"
 
-extern void (*D_003BD2DC)(s32);
+extern sdfMemHandleCB_tag sdfMemCB;
+extern sdfIopRpcClient_t sdfIopRpcClient;
+extern sdfDelayedResrcCB_t sdfMemDelayedResrcCB;
+/* Called when the heap cannot satisfy a request; the unit's .sdata holds it. */
+extern void (*sdfMemFullCallback)(s32 size);
 
-extern SdfPendingRequest sdfMemDelayedResrcCB;
+sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
+void sdfMemFreeMerge(sdfMemHandle_t *aHandle);
+void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
+sdfMemHandle_t *sdfMemGetHandleByPtr(void *aPtr);
 
-/* Align the usable span to 128 bytes and link one free block between sentinels. */
-void sdfMemInit(u32 heapSize) {
-    SdfMemHeap *heap = &sdfMemCB;
-    sdfMemHandle_t *freeBlock;
-    u32 alignedStart;
+/* Align the usable span to 128 bytes and link one free handle between the guards. */
+void sdfMemInit(u32 aSize)
+{
+    sdfMemHandleCB_tag *cb = &sdfMemCB;
+    sdfMemHandle_t *freeHandle;
+    u32 alignedTop;
     u32 alignedEnd;
 
-    heap->base = (u32)malloc(heapSize);
-    heap->size = heapSize;
-    freeBlock = sdfChipAllocDirect(sizeof(sdfMemHandle_t));
-    alignedStart = (heap->base + SDF_MEM_ALIGNMENT_MASK) & ~SDF_MEM_ALIGNMENT_MASK;
-    alignedEnd = (heap->base + heapSize) & ~SDF_MEM_ALIGNMENT_MASK;
-    heap->head.prev = NULL;
-    heap->head.next = freeBlock;
-    heap->head.state = SDF_MEM_BLOCK_STATE_END_SENTINEL;
-    heap->head.referenceCount = -1;
-    heap->tail.state = SDF_MEM_BLOCK_STATE_END_SENTINEL;
-    heap->tail.referenceCount = -1;
-    heap->tail.address = alignedEnd;
-    heap->tail.prev = freeBlock;
-    heap->tail.next = NULL;
-    heap->head.address = alignedStart;
-    freeBlock->prev = &heap->head;
-    freeBlock->state = SDF_MEM_BLOCK_STATE_FREE;
-    freeBlock->next = &heap->tail;
-    freeBlock->address = alignedStart;
-    freeBlock->referenceCount = 0;
-    D_003BD2DC = 0;
-    sdfDelayedResrcInitCB(&sdfMemDelayedResrcCB, (SdfPendingEntryCallback)sdfMemFreeDirect);
+    cb->allocPtr = malloc(aSize);
+    cb->allocSize = aSize;
+    freeHandle = sdfChipAllocDirect(sizeof(sdfMemHandle_t));
+    alignedTop = ((u32)cb->allocPtr + SDF_MEM_ALIGN_MASK) & ~SDF_MEM_ALIGN_MASK;
+    alignedEnd = ((u32)cb->allocPtr + aSize) & ~SDF_MEM_ALIGN_MASK;
+    cb->headGuard.prev = NULL;
+    cb->headGuard.next = freeHandle;
+    cb->headGuard.stat = SDF_MEM_STAT_END;
+    cb->headGuard.mlock = -1;
+    cb->tailGuard.stat = SDF_MEM_STAT_END;
+    cb->tailGuard.mlock = -1;
+    cb->tailGuard.ptr = (void *)alignedEnd;
+    cb->tailGuard.prev = freeHandle;
+    cb->tailGuard.next = NULL;
+    cb->headGuard.ptr = (void *)alignedTop;
+    freeHandle->prev = &cb->headGuard;
+    freeHandle->stat = SDF_MEM_STAT_FREE;
+    freeHandle->next = &cb->tailGuard;
+    freeHandle->ptr = (void *)alignedTop;
+    freeHandle->mlock = 0;
+    sdfMemFullCallback = NULL;
+    sdfDelayedResrcInitCB(&sdfMemDelayedResrcCB, (sdfDelayedResrcFreeFunc)sdfMemFreeDirect);
 }
 
-SdfMemBlockState sdfMemGetType(const sdfMemHandle_t *block) {
-    return block->state;
+u16 sdfMemGetType(sdfMemHandle_t *aHandle)
+{
+    return aHandle->stat;
 }
 
-/* Return the first general-heap allocation descriptor. */
-const sdfMemHandle_t *sdfMemGetTop(void) {
-    return sdfMemCB.head.next;
+sdfMemHandle_t *sdfMemGetTop(void)
+{
+    return sdfMemCB.headGuard.next;
 }
 
-#define SDF_HEAP_ALIGNMENT_MASK 0x7F
+/* The next handle, or NULL when that is the end sentinel. */
+sdfMemHandle_t *sdfMemGetNext(sdfMemHandle_t *aHandle)
+{
+    sdfMemHandle_t *next = aHandle->next;
 
-SdfMemHeap sdfMemCB __attribute__((section(".bss"), aligned(8)));
-
-/* Return the next descriptor unless it is the end marker; used blocks are not filtered. */
-const sdfMemHandle_t *sdfMemGetNext(const sdfMemHandle_t *block) {
-    const sdfMemHandle_t *nextBlock = block->next;
-    if (nextBlock->state == SDF_MEM_BLOCK_STATE_END_SENTINEL) {
+    if (next->stat == SDF_MEM_STAT_END) {
         return NULL;
     }
-    return nextBlock;
+    return next;
 }
 
-/* Derive the byte count from adjacent addresses while preserving the interrupt state. */
-s32 sdfMemGetSize(const sdfMemHandle_t *block) {
-    const sdfMemHandle_t *nextBlock;
-    s32 blockBytes;
-    s32 interruptsWereEnabled;
+/* A handle's span runs to the next handle's start. */
+s32 sdfMemGetSize(const sdfMemHandle_t *aHandle)
+{
+    const sdfMemHandle_t *next;
+    s32 size;
+    s32 intrEnabled;
 
-    interruptsWereEnabled = DIntr();
-    nextBlock = block->next;
-    blockBytes = nextBlock->address - block->address;
-    if (interruptsWereEnabled) {
+    intrEnabled = DIntr();
+    next = aHandle->next;
+    size = (s32)next->ptr - (s32)aHandle->ptr;
+    if (intrEnabled) {
         EIntr();
     }
-    return blockBytes;
+    return size;
 }
 
-/* Return the represented address, not the allocation descriptor's address. */
-u8 *sdfMemGetPtr(const sdfMemHandle_t *block) {
-    return (u8 *)(u32)block->address;
+void *sdfMemGetPtr(sdfMemHandle_t *aHandle)
+{
+    return aHandle->ptr;
 }
 
-/* Low-end first-fit with 128-byte rounding; returns an allocation handle.
- * At the end marker, call the optional out-of-memory hook and continue searching. */
-sdfMemHandle_t *sdfMemAllocDirect(s32 requestedBytes) {
-    SdfMemHeap *heap = &sdfMemCB;
-    s32 alignedBytes = (requestedBytes + SDF_HEAP_ALIGNMENT_MASK) & ~SDF_HEAP_ALIGNMENT_MASK;
-    s32 interruptsWereEnabled;
-    sdfMemHandle_t *block;
+/* First-fit from the low end, splitting the handle it lands in. Never returns
+ * empty-handed: when the walk reaches the end sentinel it reports the failure
+ * and keeps walking. */
+sdfMemHandle_t *sdfMemAllocDirect(s32 aSize)
+{
+    sdfMemHandleCB_tag *cb = &sdfMemCB;
+    s32 want = (aSize + SDF_MEM_ALIGN_MASK) & ~SDF_MEM_ALIGN_MASK;
+    s32 intrEnabled;
+    sdfMemHandle_t *handle;
 
-    interruptsWereEnabled = DIntr();
-    for (block = heap->head.next;; block = block->next) {
-        if (block->state != SDF_MEM_BLOCK_STATE_FREE) {
-            if (block->state == SDF_MEM_BLOCK_STATE_END_SENTINEL) {
-                if (interruptsWereEnabled != 0) {
+    intrEnabled = DIntr();
+    for (handle = cb->headGuard.next;; handle = handle->next) {
+        if (handle->stat != SDF_MEM_STAT_FREE) {
+            if (handle->stat == SDF_MEM_STAT_END) {
+                if (intrEnabled != 0) {
                     EIntr();
                 }
-                if (D_003BD2DC != NULL) {
-                    D_003BD2DC(alignedBytes);
+                if (sdfMemFullCallback != NULL) {
+                    sdfMemFullCallback(want);
                 }
             }
         } else {
-            s32 availableBytes = block->next->address - block->address;
+            s32 have = (s32)handle->next->ptr - (s32)handle->ptr;
 
-            if (availableBytes >= alignedBytes) {
-                if (alignedBytes < availableBytes) {
-                    sdfMemHandle_t *splitBlock = sdfChipAllocDirect(sizeof(sdfMemHandle_t));
+            if (have >= want) {
+                if (want < have) {
+                    sdfMemHandle_t *split = sdfChipAllocDirect(sizeof(sdfMemHandle_t));
 
-                    splitBlock->prev = block;
-                    splitBlock->address = block->address + alignedBytes;
-                    splitBlock->state = SDF_MEM_BLOCK_STATE_FREE;
-                    splitBlock->next = block->next;
-                    splitBlock->referenceCount = 0;
-                    block->next->prev = splitBlock;
-                    block->next = splitBlock;
+                    split->prev = handle;
+                    split->ptr = (void *)((s32)handle->ptr + want);
+                    split->stat = SDF_MEM_STAT_FREE;
+                    split->next = handle->next;
+                    split->mlock = 0;
+                    handle->next->prev = split;
+                    handle->next = split;
                 }
-                block->state = SDF_MEM_BLOCK_STATE_USED;
-                if (interruptsWereEnabled != 0) {
+                handle->stat = SDF_MEM_STAT_USED;
+                if (intrEnabled != 0) {
                     EIntr();
                 }
-                return block;
+                return handle;
             }
         }
     }
 }
 
-/* Search backward and carve the upper end of a free span with 128-byte rounding.
- * End markers restore interrupts but do not terminate the search or invoke the hook. */
-sdfMemHandle_t *sdfMemAllocFromTailDirect(s32 requestedBytes) {
-    SdfMemHeap *heap = &sdfMemCB;
-    s32 alignedBytes = (requestedBytes + SDF_HEAP_ALIGNMENT_MASK) & ~SDF_HEAP_ALIGNMENT_MASK;
-    s32 interruptsWereEnabled;
-    sdfMemHandle_t *block;
+/* First-fit from the high end: the handle keeps its tail and the remainder
+ * becomes a new free handle in front of it. */
+sdfMemHandle_t *sdfMemAllocFromTailDirect(s32 aSize)
+{
+    sdfMemHandleCB_tag *cb = &sdfMemCB;
+    s32 want = (aSize + SDF_MEM_ALIGN_MASK) & ~SDF_MEM_ALIGN_MASK;
+    s32 intrEnabled;
+    sdfMemHandle_t *handle;
 
-    interruptsWereEnabled = DIntr();
-    for (block = heap->tail.prev;; block = block->prev) {
-        if (block->state != SDF_MEM_BLOCK_STATE_FREE) {
-            if (block->state == SDF_MEM_BLOCK_STATE_END_SENTINEL) {
-                if (interruptsWereEnabled != 0) {
+    intrEnabled = DIntr();
+    for (handle = cb->tailGuard.prev;; handle = handle->prev) {
+        if (handle->stat != SDF_MEM_STAT_FREE) {
+            if (handle->stat == SDF_MEM_STAT_END) {
+                if (intrEnabled != 0) {
                     EIntr();
                 }
             }
         } else {
-            s32 availableBytes = block->next->address - block->address;
+            s32 have = (s32)handle->next->ptr - (s32)handle->ptr;
 
-            if (availableBytes >= alignedBytes) {
-                if (alignedBytes < availableBytes) {
-                    sdfMemHandle_t *splitBlock = sdfChipAllocDirect(sizeof(sdfMemHandle_t));
+            if (have >= want) {
+                if (want < have) {
+                    sdfMemHandle_t *split = sdfChipAllocDirect(sizeof(sdfMemHandle_t));
 
-                    splitBlock->prev = block;
-                    splitBlock->address = block->address + (availableBytes - alignedBytes);
-                    splitBlock->state = SDF_MEM_BLOCK_STATE_FREE;
-                    splitBlock->next = block->next;
-                    splitBlock->referenceCount = 0;
-                    block->next->prev = splitBlock;
-                    block->next = splitBlock;
-                    /* This new upper descriptor becomes the allocation, not the free remainder. */
-                    block = splitBlock;
+                    split->prev = handle;
+                    split->next = handle->next;
+                    split->ptr = (void *)((s32)handle->ptr + (have - want));
+                    split->stat = SDF_MEM_STAT_FREE;
+                    split->mlock = 0;
+                    handle->next->prev = split;
+                    handle->next = split;
+                    handle = split;
                 }
-                block->state = SDF_MEM_BLOCK_STATE_USED;
-                if (interruptsWereEnabled != 0) {
+                handle->stat = SDF_MEM_STAT_USED;
+                if (intrEnabled != 0) {
                     EIntr();
                 }
-                return block;
+                return handle;
             }
         }
     }
 }
 
-/* Low-end first-fit without the out-of-memory hook; return NULL at the end marker.
- * Rounding and split layout are the same as the normal low-end allocator. */
-sdfMemHandle_t *sdfMemAlloc2Direct(s32 requestedBytes) {
-    SdfMemHeap *heap = &sdfMemCB;
-    s32 alignedBytes = (requestedBytes + SDF_HEAP_ALIGNMENT_MASK) & ~SDF_HEAP_ALIGNMENT_MASK;
-    s32 interruptsWereEnabled;
-    sdfMemHandle_t *block;
+/* sdfMemAllocDirect without the full-heap callback: returns NULL instead. */
+sdfMemHandle_t *sdfMemAlloc2Direct(s32 aSize)
+{
+    sdfMemHandleCB_tag *cb = &sdfMemCB;
+    s32 want = (aSize + SDF_MEM_ALIGN_MASK) & ~SDF_MEM_ALIGN_MASK;
+    s32 intrEnabled;
+    sdfMemHandle_t *handle;
 
-    interruptsWereEnabled = DIntr();
-    for (block = heap->head.next;; block = block->next) {
-        if (block->state != SDF_MEM_BLOCK_STATE_FREE) {
-            if (block->state == SDF_MEM_BLOCK_STATE_END_SENTINEL) {
-                if (interruptsWereEnabled != 0) {
+    intrEnabled = DIntr();
+    for (handle = cb->headGuard.next;; handle = handle->next) {
+        if (handle->stat != SDF_MEM_STAT_FREE) {
+            if (handle->stat == SDF_MEM_STAT_END) {
+                if (intrEnabled != 0) {
                     EIntr();
                 }
                 return NULL;
             }
         } else {
-            s32 availableBytes = block->next->address - block->address;
+            s32 have = (s32)handle->next->ptr - (s32)handle->ptr;
 
-            if (availableBytes >= alignedBytes) {
-                if (alignedBytes < availableBytes) {
-                    sdfMemHandle_t *splitBlock = sdfChipAllocDirect(sizeof(sdfMemHandle_t));
+            if (have >= want) {
+                if (want < have) {
+                    sdfMemHandle_t *split = sdfChipAllocDirect(sizeof(sdfMemHandle_t));
 
-                    splitBlock->prev = block;
-                    splitBlock->address = block->address + alignedBytes;
-                    splitBlock->state = SDF_MEM_BLOCK_STATE_FREE;
-                    splitBlock->next = block->next;
-                    splitBlock->referenceCount = 0;
-                    block->next->prev = splitBlock;
-                    block->next = splitBlock;
+                    split->prev = handle;
+                    split->ptr = (void *)((s32)handle->ptr + want);
+                    split->stat = SDF_MEM_STAT_FREE;
+                    split->next = handle->next;
+                    split->mlock = 0;
+                    handle->next->prev = split;
+                    handle->next = split;
                 }
-                block->state = SDF_MEM_BLOCK_STATE_USED;
-                if (interruptsWereEnabled != 0) {
+                handle->stat = SDF_MEM_STAT_USED;
+                if (intrEnabled != 0) {
                     EIntr();
                 }
-                return block;
+                return handle;
             }
         }
     }
 }
 
-#define SDF_NAMED_REQUEST_OVERHEAD_BYTES 0xC
-
-#define SDF_RPC_REPLY_ALIGNMENT_MASK 0x3F
-
-/* Resize backing storage while preserving this resource's allocation descriptor. */
-void sdfMemReallocRecord(sdfMemHandle_t *allocation, s32 size) {
-    sdfMemHandle_t *nextBlock;
+/* Resize the span a handle owns, keeping the handle itself. Growing absorbs or
+ * trims the free neighbour when it can, and otherwise moves the data and swaps
+ * the two handles' contents so the caller's handle survives. */
+void sdfMemReallocRecord(sdfMemHandle_t *aHandle, s32 aSize)
+{
+    sdfMemHandle_t *next;
     sdfMemHandle_t *replacement;
-    s32 temporaryAddress;
-    s32 interruptsDisabled;
+    s32 ptr;
+    s32 intrEnabled;
     s32 currentSize;
     s32 available;
 
-    interruptsDisabled = DIntr();
-    nextBlock = allocation->next;
-    temporaryAddress = allocation->address;
-    currentSize = nextBlock->address - temporaryAddress;
-    size = (size + 0x7F) & -0x80;
-    if (size == currentSize) {
-        if (interruptsDisabled != 0) {
+    intrEnabled = DIntr();
+    next = aHandle->next;
+    ptr = (s32)aHandle->ptr;
+    currentSize = (s32)next->ptr - ptr;
+    aSize = (aSize + SDF_MEM_ALIGN_MASK) & ~SDF_MEM_ALIGN_MASK;
+    if (aSize == currentSize) {
+        if (intrEnabled != 0) {
             EIntr();
         }
         return;
     }
-    if (currentSize < size) {
-        available = nextBlock->next->address - nextBlock->address + currentSize;
-        if (nextBlock->state == SDF_MEM_BLOCK_STATE_FREE && available >= size) {
-            if (available == size) {
-                nextBlock->next->prev = allocation;
-                allocation->next = nextBlock->next;
-                sdfChipFreeDirect(nextBlock);
+    if (currentSize < aSize) {
+        available = (s32)next->next->ptr - (s32)next->ptr + currentSize;
+        if (next->stat == SDF_MEM_STAT_FREE && available >= aSize) {
+            if (available == aSize) {
+                next->next->prev = aHandle;
+                aHandle->next = next->next;
+                sdfChipFreeDirect(next);
             } else {
-                nextBlock->address = temporaryAddress + size;
+                next->ptr = (void *)(ptr + aSize);
             }
         } else {
-            s32 oldAddress;
+            s32 oldPtr;
 
-            replacement = sdfMemAllocDirect(size);
-            memcpy((void *)replacement->address, (void *)allocation->address, currentSize);
-            temporaryAddress = (s32)allocation->prev;
-            oldAddress = allocation->address;
-            allocation->prev = replacement->prev;
-            allocation->address = replacement->address;
-            allocation->next = replacement->next;
-            replacement->prev = (sdfMemHandle_t *)temporaryAddress;
-            replacement->next = nextBlock;
-            replacement->address = oldAddress;
-            allocation->prev->next = allocation;
-            allocation->next->prev = allocation;
+            replacement = sdfMemAllocDirect(aSize);
+            memcpy(replacement->ptr, aHandle->ptr, currentSize);
+            ptr = (s32)aHandle->prev;
+            oldPtr = (s32)aHandle->ptr;
+            aHandle->prev = replacement->prev;
+            aHandle->ptr = replacement->ptr;
+            aHandle->next = replacement->next;
+            replacement->prev = (sdfMemHandle_t *)ptr;
+            replacement->next = next;
+            replacement->ptr = (void *)oldPtr;
+            aHandle->prev->next = aHandle;
+            aHandle->next->prev = aHandle;
             replacement->prev->next = replacement;
             replacement->next->prev = replacement;
             sdfMemFreeDirect(replacement);
         }
-    } else if (nextBlock->state == SDF_MEM_BLOCK_STATE_FREE) {
-        nextBlock->address = temporaryAddress + size;
+    } else if (next->stat == SDF_MEM_STAT_FREE) {
+        next->ptr = (void *)(ptr + aSize);
     } else {
-        temporaryAddress = (s32)sdfChipAllocDirect(0x10);
-        ((sdfMemHandle_t *)temporaryAddress)->prev = allocation;
-        ((sdfMemHandle_t *)temporaryAddress)->next = nextBlock;
-        nextBlock->prev = (sdfMemHandle_t *)temporaryAddress;
-        ((sdfMemHandle_t *)temporaryAddress)->state = SDF_MEM_BLOCK_STATE_FREE;
-        allocation->next = (sdfMemHandle_t *)temporaryAddress;
-        ((sdfMemHandle_t *)temporaryAddress)->referenceCount = 0;
-        ((sdfMemHandle_t *)temporaryAddress)->address = allocation->address + size;
+        ptr = (s32)sdfChipAllocDirect(sizeof(sdfMemHandle_t));
+        ((sdfMemHandle_t *)ptr)->prev = aHandle;
+        ((sdfMemHandle_t *)ptr)->next = next;
+        next->prev = (sdfMemHandle_t *)ptr;
+        ((sdfMemHandle_t *)ptr)->stat = SDF_MEM_STAT_FREE;
+        aHandle->next = (sdfMemHandle_t *)ptr;
+        ((sdfMemHandle_t *)ptr)->mlock = 0;
+        ((sdfMemHandle_t *)ptr)->ptr = (void *)((s32)aHandle->ptr + aSize);
     }
-    if (interruptsDisabled != 0) {
+    if (intrEnabled != 0) {
         EIntr();
     }
 }
 
-/* Unlink the successor, not node itself, and reconnect both neighboring links. */
-void sdfMemFreeMerge(sdfMemHandle_t *node) {
-    sdfMemHandle_t *followingNode = node->next->next;
-    followingNode->prev = node;
-    node->next = followingNode;
+/* Unlink the successor, not the handle itself, and reconnect both links. */
+void sdfMemFreeMerge(sdfMemHandle_t *aHandle)
+{
+    sdfMemHandle_t *following = aHandle->next->next;
+
+    following->prev = aHandle;
+    aHandle->next = following;
 }
 
-/* Coalesce adjacent free records, then recycle this record or mark it free. */
-void sdfMemFreeDirect(struct sdfMemHandle_t *allocation) {
-    sdfMemHandle_t *nextBlock;
-    s32 interruptsDisabled;
+/* Coalesce adjacent free handles, then recycle this handle or mark it free. */
+void sdfMemFreeDirect(sdfMemHandle_t *aHandle)
+{
+    sdfMemHandle_t *next;
+    s32 intrEnabled;
 
-    if (allocation == NULL) {
+    if (aHandle == NULL) {
         return;
     }
-    interruptsDisabled = DIntr();
-    nextBlock = allocation->next;
-    if (nextBlock->state == SDF_MEM_BLOCK_STATE_FREE) {
-        sdfMemFreeMerge(allocation);
-        sdfChipFreeDirect(nextBlock);
+    intrEnabled = DIntr();
+    next = aHandle->next;
+    if (next->stat == SDF_MEM_STAT_FREE) {
+        sdfMemFreeMerge(aHandle);
+        sdfChipFreeDirect(next);
     }
-    if (allocation->prev->state == SDF_MEM_BLOCK_STATE_FREE) {
-        sdfMemFreeMerge(allocation->prev);
-        sdfChipFreeDirect(allocation);
+    if (aHandle->prev->stat == SDF_MEM_STAT_FREE) {
+        sdfMemFreeMerge(aHandle->prev);
+        sdfChipFreeDirect(aHandle);
     } else {
-        allocation->state = SDF_MEM_BLOCK_STATE_FREE;
-        allocation->referenceCount = 0;
+        aHandle->stat = SDF_MEM_STAT_FREE;
+        aHandle->mlock = 0;
     }
-    if (interruptsDisabled != 0) {
+    if (intrEnabled != 0) {
         EIntr();
     }
 }
 
-/* Resolve a data address to its allocation record before releasing it. */
-void sdfMemFreePtrDirect(const void *address) {
-    sdfMemHandle_t *allocation;
+/* Resolve a data address to its handle before releasing it. */
+void sdfMemFreePtrDirect(void *aPtr)
+{
+    sdfMemHandle_t *handle;
 
-    allocation = sdfMemGetHandleByPtr(address);
-    sdfMemFreeDirect(allocation);
+    handle = sdfMemGetHandleByPtr(aPtr);
+    sdfMemFreeDirect(handle);
 }
 
-/* Clear the owner's handle before releasing the allocation it contained. */
-void sdfMemFreeHandleDirect(struct sdfMemHandle_t **handleSlot) {
-    struct sdfMemHandle_t *allocationHandle;
+/* Clear the owner's slot before releasing the handle it held. */
+void sdfMemFreeHandleDirect(sdfMemHandle_t **aHandlePtr)
+{
+    sdfMemHandle_t *handle;
 
-    allocationHandle = *handleSlot;
-    if (allocationHandle != NULL) {
-        *handleSlot = NULL;
-        sdfMemFreeDirect(allocationHandle);
+    handle = *aHandlePtr;
+    if (handle != NULL) {
+        *aHandlePtr = NULL;
+        sdfMemFreeDirect(handle);
         return;
     }
 }
 
-/* Zero is a sentinel and is never submitted to the pending queue. */
-void sdfMemFreeDelayedDirect(struct sdfMemHandle_t *allocation) {
-    if (allocation != NULL) {
-        sdfDelayedResrcEntry(&sdfMemDelayedResrcCB, allocation);
+/* NULL is a sentinel and is never queued. */
+void sdfMemFreeDelayedDirect(sdfMemHandle_t *aHandle)
+{
+    if (aHandle != NULL) {
+        sdfDelayedResrcEntry(&sdfMemDelayedResrcCB, aHandle);
     }
 }
 
-/* Increment the signed reference count and return the stored data address. */
-void *sdfMemLock(sdfMemHandle_t *allocation) {
-    allocation->referenceCount = allocation->referenceCount + 1;
-    return (void *)allocation->address;
+void *sdfMemLock(sdfMemHandle_t *aHandle)
+{
+    aHandle->mlock = aHandle->mlock + 1;
+    return aHandle->ptr;
 }
 
-/* This path reads the same reference-count storage unsigned and never decrements zero. */
-void sdfMemUnlock(sdfMemHandle_t *allocation) {
-    u16 referenceCount = (u16)allocation->referenceCount;
-    if (referenceCount != 0) {
-        allocation->referenceCount = (s16)(referenceCount - 1);
+/* Never decrements zero. */
+void sdfMemUnlock(sdfMemHandle_t *aHandle)
+{
+    u16 mlock = aHandle->mlock;
+
+    if (mlock != 0) {
+        aHandle->mlock = mlock - 1;
     }
 }
 
-/* The address must belong to an existing used block: the end-marker path does not end this scan. */
-sdfMemHandle_t *sdfMemGetHandleByPtr(const void *address) {
-    SdfMemHeap *heap = &sdfMemCB;
-    sdfMemHandle_t *block;
-    s32 interruptsDisabled;
+/* The address must belong to an existing used handle: the end-sentinel path
+ * does not end this scan. */
+sdfMemHandle_t *sdfMemGetHandleByPtr(void *aPtr)
+{
+    sdfMemHandleCB_tag *cb = &sdfMemCB;
+    sdfMemHandle_t *handle;
+    s32 intrEnabled;
 
-    interruptsDisabled = DIntr();
-    for (block = heap->head.next;; block = block->next) {
-        if (block->state != SDF_MEM_BLOCK_STATE_USED) {
-            if (block->state == SDF_MEM_BLOCK_STATE_END_SENTINEL) {
-                if (interruptsDisabled != 0) {
+    intrEnabled = DIntr();
+    for (handle = cb->headGuard.next;; handle = handle->next) {
+        if (handle->stat != SDF_MEM_STAT_USED) {
+            if (handle->stat == SDF_MEM_STAT_END) {
+                if (intrEnabled != 0) {
                     EIntr();
                 }
             }
-        } else if (block->address == (u32)address) {
-            if (interruptsDisabled != 0) {
+        } else if (handle->ptr == aPtr) {
+            if (intrEnabled != 0) {
                 EIntr();
             }
-            return block;
+            return handle;
         }
     }
 }
 
-/* Walk the general heap's block list and write its statistics: total bytes, free bytes, largest and smallest free block, block count and free block count. */
-void sdfMemGetInfo(SdfGeneralHeapStats *stats) {
-    sdfMemHandle_t *block = sdfMemCB.head.next;
-    s32 totalBytes = 0;
-    s32 freeBytes = 0;
-    s32 largestFreeBytes = 0;
-    s32 smallestFreeBytes = 0;
-    s32 blockCount = 0;
-    s32 freeBlockCount = 0;
-    s32 blockBytes;
-    SdfMemBlockState state;
+void sdfMemGetInfo(sdfMemInfo_t *aInfo)
+{
+    sdfMemHandle_t *handle = sdfMemCB.headGuard.next;
+    s32 total = 0;
+    s32 freeSize = 0;
+    s32 maxFreeSize = 0;
+    s32 minFreeSize = 0;
+    s32 handleCount = 0;
+    s32 freeHandleCount = 0;
+    s32 size;
+    u16 stat;
 
-    for (; block->state != SDF_MEM_BLOCK_STATE_END_SENTINEL; block = block->next) {
-        blockBytes = block->next->address - block->address;
-        state = block->state;
-        blockCount++;
-        totalBytes += blockBytes;
-        if (state == SDF_MEM_BLOCK_STATE_FREE) {
-            if (smallestFreeBytes == 0 || blockBytes < smallestFreeBytes) {
-                smallestFreeBytes = blockBytes;
+    for (; handle->stat != SDF_MEM_STAT_END; handle = handle->next) {
+        size = (s32)handle->next->ptr - (s32)handle->ptr;
+        stat = handle->stat;
+        handleCount++;
+        total += size;
+        if (stat == SDF_MEM_STAT_FREE) {
+            if (minFreeSize == 0 || size < minFreeSize) {
+                minFreeSize = size;
             }
-            if (largestFreeBytes < blockBytes) {
-                largestFreeBytes = blockBytes;
+            if (maxFreeSize < size) {
+                maxFreeSize = size;
             }
-            freeBytes += blockBytes;
-            freeBlockCount++;
+            freeSize += size;
+            freeHandleCount++;
         }
     }
-    stats->totalBytes = totalBytes;
-    stats->freeBytes = freeBytes;
-    stats->smallestFreeBytes = smallestFreeBytes;
-    stats->largestFreeBytes = largestFreeBytes;
-    stats->blockCount = blockCount;
-    stats->freeBlockCount = freeBlockCount;
+    aInfo->total = total;
+    aInfo->freeSize = freeSize;
+    aInfo->minFreeSize = minFreeSize;
+    aInfo->maxFreeSize = maxFreeSize;
+    aInfo->handleCount = handleCount;
+    aInfo->freeHandleCount = freeHandleCount;
 }
 
-/* Find the used heap block that contains `address`; NULL when the end marker is reached. */
-sdfMemHandle_t *sdfMemSearchHandle(s32 address) {
-    sdfMemHandle_t *block = sdfMemCB.head.next;
-    sdfMemHandle_t *nextBlock;
+/* The used handle whose span contains `aAddr`; NULL at the end sentinel. */
+sdfMemHandle_t *sdfMemSearchHandle(s32 ptr)
+{
+    sdfMemHandle_t *handle = sdfMemCB.headGuard.next;
+    sdfMemHandle_t *next;
 
-    for (;; block = nextBlock) {
-        nextBlock = block->next;
-        if (block->state != SDF_MEM_BLOCK_STATE_USED) {
-            if (block->state == SDF_MEM_BLOCK_STATE_END_SENTINEL) {
+    for (;; handle = next) {
+        next = handle->next;
+        if (handle->stat != SDF_MEM_STAT_USED) {
+            if (handle->stat == SDF_MEM_STAT_END) {
                 return NULL;
             }
-        } else if (address >= block->address && address < nextBlock->address) {
-            return block;
+        } else if (ptr >= (s32)handle->ptr && ptr < (s32)next->ptr) {
+            return handle;
         }
     }
 }
 
-extern SifRpcClientDataPrefix sdfIopRpcClient;
-
-/* Pack name/data lengths, a terminated name and optional data; return transport error or server result. */
-s32 SdfIopFileRpc(const char *name, s32 dataSize, const void *data, s32 *outSize) {
+/* Pack the two lengths, the terminated name and the optional payload, then
+ * return the transport error or the server's result. */
+s32 SdfIopFileRpc(const char *aName, s32 aDataSize, const void *aData, s32 *aOutSize)
+{
     u8 replyScratch[0x50];
-    s32 nameLength = strlen(name);
-    s32 requestBytes = nameLength + dataSize + SDF_NAMED_REQUEST_OVERHEAD_BYTES;
-    u32 *requestWords = (u32 *)sdfMemLock((struct sdfMemHandle_t *)sdfMemAllocDirect(requestBytes));
-    u32 *replyWords;
+    s32 nameLength = strlen(aName);
+    s32 requestBytes = nameLength + aDataSize + SDF_IOP_FILE_RPC_OVERHEAD;
+    u32 *request = (u32 *)sdfMemLock(sdfMemAllocDirect(requestBytes));
+    u32 *reply;
     s32 result;
 
-    requestWords[0] = nameLength;
-    requestWords[1] = dataSize;
-    memcpy(requestWords + 2, name, nameLength + 1);
-    if (dataSize != 0) {
-        memcpy((u8 *)requestWords + nameLength + 9, data, dataSize);
+    request[0] = nameLength;
+    request[1] = aDataSize;
+    memcpy(request + 2, aName, nameLength + 1);
+    if (aDataSize != 0) {
+        memcpy((u8 *)request + nameLength + 9, aData, aDataSize);
     }
-    /* Align the two-word reply within the stack scratch buffer to 64 bytes. */
-    replyWords = (u32 *)(((u32)replyScratch + SDF_RPC_REPLY_ALIGNMENT_MASK) & ~SDF_RPC_REPLY_ALIGNMENT_MASK);
-    result = sceSifMCallRpc(&sdfIopRpcClient, 1, 0, requestWords, requestBytes, replyWords, 8, NULL, NULL);
+    /* The two-word reply has to start on a 64-byte boundary for the SIF. */
+    reply = (u32 *)(((u32)replyScratch + SDF_IOP_FILE_RPC_REPLY_ALIGN_MASK) &
+                    ~SDF_IOP_FILE_RPC_REPLY_ALIGN_MASK);
+    result = sceSifMCallRpc((sceSifMClientData *)&sdfIopRpcClient, 1, 0, request, requestBytes, reply, 8, NULL, NULL);
     if (result >= 0) {
-        if (outSize != NULL) {
-            *outSize = replyWords[1];
+        if (aOutSize != NULL) {
+            *aOutSize = reply[1];
         }
-        result = replyWords[0];
+        result = reply[0];
     }
     return result;
 }
-INCLUDE_SDATA(const s32, "sdf/sdfMemory", D_003BD2DC);
+
+INCLUDE_SDATA(const s32, "sdf/sdfMemory", sdfMemFullCallback);
 
 INCLUDE_SDATA(const s32, "sdf/sdfMemory", sdfGrDrawFirstFlag);
 
 INCLUDE_SDATA(const s32, "sdf/sdfMemory", sdfFrameEvenOdd);
 
+
+/* DDS's build defines the heap root in this unit. */
+sdfMemHandleCB_tag sdfMemCB __attribute__((section(".bss"), aligned(8)));

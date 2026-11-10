@@ -10217,6 +10217,7 @@
 0x003BD2CC	sdfDmacHandlerTable	inferred	SMT3HD data name via SLUS_209.11 0x00551820, 5 agreeing references; was sdfDmacHandlerTable
 0x003BD2D4	sdfTickCallback	inferred	confidence=high; src/dds1/game/code_002CF8C8.c:sdfSystemThreadProc; Optional no-argument callback invoked by the recurring tick worker thread. [names_qp9.tsv]
 0x003BD2D8	sdfVblankFlag	inferred	SMT3HD data name via SLUS_209.11 0x0055182C, 3 agreeing references; was sdfVblankFlag
+0x003BD2DC	sdfMemFullCallback	inferred	SMT3HD name via SLUS_209.11 0x00551830, sdf/sdfMemory SMT3 name; was D_003BD2DC
 0x003BD2E0	sdfGrDrawFirstFlag	inferred	SMT3HD data name via SLUS_209.11 0x00551838, 3 agreeing references; was sdfGrDrawFirstFlag
 0x003BD2E1	sdfFrameEvenOdd	inferred	SMT3HD data name via SLUS_209.11 0x00551839, 1 agreeing references; was sdfFrameEvenOdd
 0x003BD2E8	sdfGrScreenMode	inferred	SMT3HD data name via SLUS_209.11 0x00551840, 3 agreeing references; was sdfGrScreenMode
