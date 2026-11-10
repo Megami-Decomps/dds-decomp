@@ -4,7 +4,6 @@
 #include "kwln.h"
 
 #define fileHandleFree fileRequestFreeIfComplete
-#define D_00551650 fileManagerProcName
 #define pacLoadEx fileCreatePacLoadWork
 #include "fileManager.h"
 
@@ -25,8 +24,8 @@ typedef void (*fileTransferCallback_t)(void *request, u32 arg);
     Callback callback; \
     void *arg; \
     sdfMemHandle_t *handle; \
-    u32 top; \
-    u32 ptr; \
+    addr_t top; \
+    addr_t ptr; \
     Link *donenext; \
     sdfPacDecodeCb_t pac; \
     u16 pacrest; \
@@ -68,7 +67,7 @@ typedef struct fileQueue {
 extern fileMngCb_tag fileQueueHead;
 extern u32 fileCallbackStatus;
 extern s32 (*p2sdSmgBuf)(void);
-extern char D_00551650[];
+extern char fileManagerProcName[];
 
 void fileLinkQueue(fileRequest_t *req, s32 kind, const char *name, void *callback, void *arg);
 void fileLinkCloseWait(fileMngCb_tag *cb, fileRequest_t *fileHandle);
@@ -105,9 +104,13 @@ s32 sdfFileCmdWrite(void *aHandle, void *aBuffer, s32 aLength);
 s32 sdfFileCmdClose(void *aHandle);
 s32 sdfFileCmdFree(void *aHandle);
 void sdfFileCmdThreadSetHiPrio(void);
+#ifdef FIX_BUGS
+s32 DIntr(void);
+s32 EIntr(void);
+#endif
 s32 sdfPrintf(const char *str, ...);
 s32 printf(const char *str, ...);
-void *memset(void *a, s32 b, u32 c);
+void *memset(void *a, s32 b, size_t c);
 void sdfChipFreeDirect(void *aPtr);
 void sdfPacFree(sdfPacDecodeCb_t *cb);
 s32 sdfPacDecode(sdfPacDecodeCb_t *cb, const u8 *data, s32 length);
@@ -228,11 +231,11 @@ fileRequest_t *pacLoadEx(const char *filename, u32 headOrTail, u32 callback, u32
 
     printf("pac load %s\n", filename);
     req = sdfChipAllocZeroDirect(sizeof(fileRequest_t));
-    sdfPacInit(&req->pac, (void *)callback);
+    sdfPacInit(&req->pac, EE_ADDR_AS(void *, callback));
     if (headOrTail != 0) {
         sdfPacSetFromTail(&req->pac);
     }
-    fileLinkQueue(req, 1, filename, (void *)pendCallback, (void *)callbackParm);
+    fileLinkQueue(req, 1, filename, EE_ADDR_AS(void *, pendCallback), EE_ADDR_AS(void *, callbackParm));
     return req;
 }
 
@@ -244,13 +247,13 @@ fileRequest_t *pacLoadUseTail(const char *filename) {
     return pacLoadEx(filename, 1, 0, 0, 0);
 }
 
-fileRequest_t *fileLoadEx(const char *filename, u32 headOrTail, u32 endCallback, u32 callbackParm) {
+fileRequest_t *fileLoadEx(const char *filename, u32 headOrTail, addr_t endCallback, addr_t callbackParm) {
     fileRequest_t *req;
 
     printf("file load %s\n", filename);
     req = sdfChipAllocZeroDirect(0x30);
     req->mode = headOrTail;
-    fileLinkQueue(req, 0, filename, (void *)endCallback, (void *)callbackParm);
+    fileLinkQueue(req, 0, filename, EE_ADDR_AS(void *, endCallback), EE_ADDR_AS(void *, callbackParm));
     return req;
 }
 
@@ -267,7 +270,7 @@ sdfMemHandle_t *fileGetMemHandle(const fileRequest_t *fileHandle) {
 }
 
 u8 *fileGetLoadPtr(const fileRequest_t *fileHandle) {
-    return (u8 *)fileHandle->top;
+    return EE_ADDR_AS(u8 *, fileHandle->top);
 }
 
 u32 fileGetLoadSize(const fileRequest_t *fileHandle) {
@@ -321,11 +324,11 @@ void fileSyncAll(void) {
 fileRequest_t *fileSaveEx(const char *filename, const void *buff, s32 size, s32 endCallback, s32 callbackParm) {
     fileRequest_t *req = sdfChipAllocZeroDirect(0x30);
 
-    req->top = (u32)buff;
-    req->ptr = (u32)buff;
+    req->top = EE_ADDR(buff);
+    req->ptr = EE_ADDR(buff);
     req->size = size;
     req->rest = size;
-    fileLinkQueue(req, 2, filename, (void *)endCallback, (void *)callbackParm);
+    fileLinkQueue(req, 2, filename, EE_ADDR_AS(void *, endCallback), EE_ADDR_AS(void *, callbackParm));
     return req;
 }
 
@@ -434,7 +437,7 @@ void fileRead(fileCb_t *fileHandle) {
     }
     fileHandle->state = 4;
     SignalSema(q->semaId);
-    sdfFileCmdRead(fileHandle->dev, (void *)fileHandle->ptr, fileHandle->rest <= 0x8000 ? fileHandle->rest : 0x8000);
+    sdfFileCmdRead(fileHandle->dev, EE_ADDR_AS(void *, fileHandle->ptr), fileHandle->rest <= 0x8000 ? fileHandle->rest : 0x8000);
 }
 
 s32 fileLoadCallback(void *fileHandle, s32 cause, s32 buffer, s32 length, fileCb_t *data) {
@@ -533,7 +536,7 @@ void fileWrite(fileCb_t *fileHandle) {
     }
     fileHandle->state = 4;
     SignalSema(q->semaId);
-    sdfFileCmdWrite(fileHandle->dev, (void *)fileHandle->ptr, fileHandle->rest <= 0x8000 ? fileHandle->rest : 0x8000);
+    sdfFileCmdWrite(fileHandle->dev, EE_ADDR_AS(void *, fileHandle->ptr), fileHandle->rest <= 0x8000 ? fileHandle->rest : 0x8000);
 }
 
 s32 fileSaveCallback(void *fileHandle, s32 cause, s32 buffer, s32 length, fileCb_t *data) {
@@ -638,7 +641,20 @@ void fileExecQueue(void) {
             job->state = 1;
             locked = 0;
             SignalSema(work->semaId);
+#ifdef FIX_BUGS
+            /* Retail's file thread runs at lower priority, so the callback that frees
+             * the request cannot run before dev is stored. Hold it off here. */
+            {
+                s32 intrEnabled = DIntr();
+
+                job->dev = sdfFileCmdReadOpen(job->name, pacLoadCallback, job);
+                if (intrEnabled != 0) {
+                    EIntr();
+                }
+            }
+#else
             job->dev = sdfFileCmdReadOpen(job->name, pacLoadCallback, job);
+#endif
             break;
         case 3:
             locked = 0;
@@ -652,7 +668,20 @@ void fileExecQueue(void) {
             job->state = 1;
             locked = 0;
             SignalSema(work->semaId);
+#ifdef FIX_BUGS
+            /* Retail's file thread runs at lower priority, so the callback that frees
+             * the request cannot run before dev is stored. Hold it off here. */
+            {
+                s32 intrEnabled = DIntr();
+
+                job->dev = sdfFileCmdWriteOpen(job->name, fileSaveCallback, job, 0x180);
+                if (intrEnabled != 0) {
+                    EIntr();
+                }
+            }
+#else
             job->dev = sdfFileCmdWriteOpen(job->name, fileSaveCallback, job, 0x180);
+#endif
         }
         break;
     }
@@ -669,7 +698,7 @@ void fileExecCallback(void) {
     while ((node = work->endCallbackLink) != NULL) {
         work->endCallbackLink = node->donenext;
         SignalSema(work->semaId);
-        node->callback(node, (u32)node->arg);
+        node->callback(node, EE_ADDR(node->arg));
         WaitSema(work->semaId);
     }
     SignalSema(work->semaId);
@@ -739,8 +768,8 @@ void fileSysInit(void) {
     memset(&fileQueueHead, 0, 0x40);
     fileQueueHead.freeCount = 4;
     fileQueueHead.semaId = sdfCreateSema(1, 0x7F, 0);
-    fileQueueHead.buffer = (u8 *)sdfMemLock(sdfMemAllocDirect(0x40000));
-    dds3StartProcess(D_00551650, 0x384, 1, 0, fileManagerProc, 0, 0);
+    fileQueueHead.buffer = EE_ADDR_AS(u8 *, sdfMemLock(sdfMemAllocDirect(0x40000)));
+    dds3StartProcess(fileManagerProcName, 0x384, 1, 0, fileManagerProc, 0, 0);
     p2sdSmgBuf = fileManager;
 }
 
@@ -748,4 +777,4 @@ fileMngCb_tag fileQueueHead __attribute__((section(".bss")));
 
 u32 fileCallbackStatus __attribute__((section(".sdata"))) = 0;
 
-char D_00551650[8] __attribute__((section(".sdata"))) = "fileMan";
+char fileManagerProcName[8] __attribute__((section(".sdata"))) = "fileMan";
