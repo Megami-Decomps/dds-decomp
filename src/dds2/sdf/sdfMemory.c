@@ -13,10 +13,10 @@ typedef struct
 #define SDF_IOP_FILE_RPC_OVERHEAD 0xC
 #define SDF_IOP_FILE_RPC_REPLY_ALIGN_MASK 0x3F
 
-extern void *malloc(u32 size);
+extern void *malloc(size_t size);
 extern s32 DIntr(void);
 extern void EIntr(void);
-extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memcpy(void *a, const void *b, size_t c);
 extern u32 strlen(const char *s);
 extern void *sdfChipAllocDirect(u32 aSize);
 extern void sdfChipFreeDirect(void *aPtr);
@@ -40,28 +40,28 @@ void sdfMemInit(u32 aSize)
 {
     sdfMemHandleCB_tag *cb = &sdfMemCB;
     sdfMemHandle_t *freeHandle;
-    u32 alignedTop;
-    u32 alignedEnd;
+    addr_t alignedTop;
+    addr_t alignedEnd;
 
     cb->allocPtr = malloc(aSize);
     cb->allocSize = aSize;
     freeHandle = sdfChipAllocDirect(sizeof(sdfMemHandle_t));
-    alignedTop = ((u32)cb->allocPtr + SDF_MEM_ALIGN_MASK) & ~SDF_MEM_ALIGN_MASK;
-    alignedEnd = ((u32)cb->allocPtr + aSize) & ~SDF_MEM_ALIGN_MASK;
+    alignedTop = (EE_ADDR(cb->allocPtr) + SDF_MEM_ALIGN_MASK) & ~SDF_MEM_ALIGN_MASK;
+    alignedEnd = (EE_ADDR(cb->allocPtr) + aSize) & ~SDF_MEM_ALIGN_MASK;
     cb->headGuard.prev = NULL;
     cb->headGuard.next = freeHandle;
     cb->headGuard.stat = SDF_MEM_STAT_END;
     cb->headGuard.mlock = -1;
     cb->tailGuard.stat = SDF_MEM_STAT_END;
     cb->tailGuard.mlock = -1;
-    cb->tailGuard.ptr = (void *)alignedEnd;
+    cb->tailGuard.ptr = EE_ADDR_AS(void *, alignedEnd);
     cb->tailGuard.prev = freeHandle;
     cb->tailGuard.next = NULL;
-    cb->headGuard.ptr = (void *)alignedTop;
+    cb->headGuard.ptr = EE_ADDR_AS(void *, alignedTop);
     freeHandle->prev = &cb->headGuard;
     freeHandle->stat = SDF_MEM_STAT_FREE;
     freeHandle->next = &cb->tailGuard;
-    freeHandle->ptr = (void *)alignedTop;
+    freeHandle->ptr = EE_ADDR_AS(void *, alignedTop);
     freeHandle->mlock = 0;
     sdfMemFullCallback = NULL;
     sdfDelayedResrcInitCB(&sdfMemDelayedResrcCB, (sdfDelayedResrcFreeFunc)sdfMemFreeDirect);
@@ -92,12 +92,12 @@ sdfMemHandle_t *sdfMemGetNext(sdfMemHandle_t *aHandle)
 s32 sdfMemGetSize(const sdfMemHandle_t *aHandle)
 {
     const sdfMemHandle_t *next;
-    s32 size;
+    saddr_t size;
     s32 intrEnabled;
 
     intrEnabled = DIntr();
     next = aHandle->next;
-    size = (s32)next->ptr - (s32)aHandle->ptr;
+    size = EE_ADDR_S(next->ptr) - EE_ADDR_S(aHandle->ptr);
     if (intrEnabled) {
         EIntr();
     }
@@ -131,14 +131,14 @@ sdfMemHandle_t *sdfMemAllocDirect(s32 aSize)
                 }
             }
         } else {
-            s32 have = (s32)handle->next->ptr - (s32)handle->ptr;
+            saddr_t have = EE_ADDR_S(handle->next->ptr) - EE_ADDR_S(handle->ptr);
 
             if (have >= want) {
                 if (want < have) {
                     sdfMemHandle_t *split = sdfChipAllocDirect(sizeof(sdfMemHandle_t));
 
                     split->prev = handle;
-                    split->ptr = (void *)((s32)handle->ptr + want);
+                    split->ptr = EE_ADDR_AS(void *, (EE_ADDR_S(handle->ptr) + want));
                     split->stat = SDF_MEM_STAT_FREE;
                     split->next = handle->next;
                     split->mlock = 0;
@@ -173,7 +173,7 @@ sdfMemHandle_t *sdfMemAllocFromTailDirect(s32 aSize)
                 }
             }
         } else {
-            s32 have = (s32)handle->next->ptr - (s32)handle->ptr;
+            saddr_t have = EE_ADDR_S(handle->next->ptr) - EE_ADDR_S(handle->ptr);
 
             if (have >= want) {
                 if (want < have) {
@@ -181,7 +181,7 @@ sdfMemHandle_t *sdfMemAllocFromTailDirect(s32 aSize)
 
                     split->prev = handle;
                     split->next = handle->next;
-                    split->ptr = (void *)((s32)handle->ptr + (have - want));
+                    split->ptr = EE_ADDR_AS(void *, (EE_ADDR_S(handle->ptr) + (have - want)));
                     split->stat = SDF_MEM_STAT_FREE;
                     split->mlock = 0;
                     handle->next->prev = split;
@@ -216,14 +216,14 @@ sdfMemHandle_t *sdfMemAlloc2Direct(s32 aSize)
                 return NULL;
             }
         } else {
-            s32 have = (s32)handle->next->ptr - (s32)handle->ptr;
+            saddr_t have = EE_ADDR_S(handle->next->ptr) - EE_ADDR_S(handle->ptr);
 
             if (have >= want) {
                 if (want < have) {
                     sdfMemHandle_t *split = sdfChipAllocDirect(sizeof(sdfMemHandle_t));
 
                     split->prev = handle;
-                    split->ptr = (void *)((s32)handle->ptr + want);
+                    split->ptr = EE_ADDR_AS(void *, (EE_ADDR_S(handle->ptr) + want));
                     split->stat = SDF_MEM_STAT_FREE;
                     split->next = handle->next;
                     split->mlock = 0;
@@ -247,15 +247,15 @@ void sdfMemReallocRecord(sdfMemHandle_t *aHandle, s32 aSize)
 {
     sdfMemHandle_t *next;
     sdfMemHandle_t *replacement;
-    s32 ptr;
+    saddr_t ptr;
     s32 intrEnabled;
-    s32 currentSize;
-    s32 available;
+    saddr_t currentSize;
+    saddr_t available;
 
     intrEnabled = DIntr();
     next = aHandle->next;
-    ptr = (s32)aHandle->ptr;
-    currentSize = (s32)next->ptr - ptr;
+    ptr = EE_ADDR_S(aHandle->ptr);
+    currentSize = EE_ADDR_S(next->ptr) - ptr;
     aSize = (aSize + SDF_MEM_ALIGN_MASK) & ~SDF_MEM_ALIGN_MASK;
     if (aSize == currentSize) {
         if (intrEnabled != 0) {
@@ -264,28 +264,28 @@ void sdfMemReallocRecord(sdfMemHandle_t *aHandle, s32 aSize)
         return;
     }
     if (currentSize < aSize) {
-        available = (s32)next->next->ptr - (s32)next->ptr + currentSize;
+        available = EE_ADDR_S(next->next->ptr) - EE_ADDR_S(next->ptr) + currentSize;
         if (next->stat == SDF_MEM_STAT_FREE && available >= aSize) {
             if (available == aSize) {
                 next->next->prev = aHandle;
                 aHandle->next = next->next;
                 sdfChipFreeDirect(next);
             } else {
-                next->ptr = (void *)(ptr + aSize);
+                next->ptr = EE_ADDR_AS(void *, (ptr + aSize));
             }
         } else {
-            s32 oldPtr;
+            saddr_t oldPtr;
 
             replacement = sdfMemAllocDirect(aSize);
             memcpy(replacement->ptr, aHandle->ptr, currentSize);
-            ptr = (s32)aHandle->prev;
-            oldPtr = (s32)aHandle->ptr;
+            ptr = EE_ADDR_S(aHandle->prev);
+            oldPtr = EE_ADDR_S(aHandle->ptr);
             aHandle->prev = replacement->prev;
             aHandle->ptr = replacement->ptr;
             aHandle->next = replacement->next;
-            replacement->prev = (sdfMemHandle_t *)ptr;
+            replacement->prev = EE_ADDR_AS(sdfMemHandle_t *, ptr);
             replacement->next = next;
-            replacement->ptr = (void *)oldPtr;
+            replacement->ptr = EE_ADDR_AS(void *, oldPtr);
             aHandle->prev->next = aHandle;
             aHandle->next->prev = aHandle;
             replacement->prev->next = replacement;
@@ -293,16 +293,16 @@ void sdfMemReallocRecord(sdfMemHandle_t *aHandle, s32 aSize)
             sdfMemFreeDirect(replacement);
         }
     } else if (next->stat == SDF_MEM_STAT_FREE) {
-        next->ptr = (void *)(ptr + aSize);
+        next->ptr = EE_ADDR_AS(void *, (ptr + aSize));
     } else {
-        ptr = (s32)sdfChipAllocDirect(sizeof(sdfMemHandle_t));
-        ((sdfMemHandle_t *)ptr)->prev = aHandle;
-        ((sdfMemHandle_t *)ptr)->next = next;
-        next->prev = (sdfMemHandle_t *)ptr;
-        ((sdfMemHandle_t *)ptr)->stat = SDF_MEM_STAT_FREE;
-        aHandle->next = (sdfMemHandle_t *)ptr;
-        ((sdfMemHandle_t *)ptr)->mlock = 0;
-        ((sdfMemHandle_t *)ptr)->ptr = (void *)((s32)aHandle->ptr + aSize);
+        ptr = EE_ADDR_S(sdfChipAllocDirect(sizeof(sdfMemHandle_t)));
+        (EE_ADDR_AS(sdfMemHandle_t *, ptr))->prev = aHandle;
+        (EE_ADDR_AS(sdfMemHandle_t *, ptr))->next = next;
+        next->prev = EE_ADDR_AS(sdfMemHandle_t *, ptr);
+        (EE_ADDR_AS(sdfMemHandle_t *, ptr))->stat = SDF_MEM_STAT_FREE;
+        aHandle->next = EE_ADDR_AS(sdfMemHandle_t *, ptr);
+        (EE_ADDR_AS(sdfMemHandle_t *, ptr))->mlock = 0;
+        (EE_ADDR_AS(sdfMemHandle_t *, ptr))->ptr = EE_ADDR_AS(void *, (EE_ADDR_S(aHandle->ptr) + aSize));
     }
     if (intrEnabled != 0) {
         EIntr();
@@ -425,11 +425,11 @@ void sdfMemGetInfo(sdfMemInfo_t *aInfo)
     s32 minFreeSize = 0;
     s32 handleCount = 0;
     s32 freeHandleCount = 0;
-    s32 size;
+    saddr_t size;
     u16 stat;
 
     for (; handle->stat != SDF_MEM_STAT_END; handle = handle->next) {
-        size = (s32)handle->next->ptr - (s32)handle->ptr;
+        size = EE_ADDR_S(handle->next->ptr) - EE_ADDR_S(handle->ptr);
         stat = handle->stat;
         handleCount++;
         total += size;
@@ -464,7 +464,7 @@ sdfMemHandle_t *sdfMemSearchHandle(s32 ptr)
             if (handle->stat == SDF_MEM_STAT_END) {
                 return NULL;
             }
-        } else if (ptr >= (s32)handle->ptr && ptr < (s32)next->ptr) {
+        } else if (ptr >= EE_ADDR_S(handle->ptr) && ptr < EE_ADDR_S(next->ptr)) {
             return handle;
         }
     }
@@ -488,7 +488,7 @@ s32 SdfIopFileRpc(const char *aName, s32 aDataSize, const void *aData, s32 *aOut
         memcpy((u8 *)request + nameLength + 9, aData, aDataSize);
     }
     /* The two-word reply has to start on a 64-byte boundary for the SIF. */
-    reply = (u32 *)(((u32)replyScratch + SDF_IOP_FILE_RPC_REPLY_ALIGN_MASK) &
+    reply = (u32 *)((EE_ADDR(replyScratch) + SDF_IOP_FILE_RPC_REPLY_ALIGN_MASK) &
                     ~SDF_IOP_FILE_RPC_REPLY_ALIGN_MASK);
     result = sceSifMCallRpc((sceSifMClientData *)&sdfIopRpcClient, 1, 0, request, requestBytes, reply, 8, NULL, NULL);
     if (result >= 0) {
@@ -500,12 +500,12 @@ s32 SdfIopFileRpc(const char *aName, s32 aDataSize, const void *aData, s32 *aOut
     return result;
 }
 
+
+/* DDS's build defines the heap root in this unit. */
+sdfMemHandleCB_tag sdfMemCB __attribute__((section(".bss"), aligned(8)));
 INCLUDE_SDATA(const s32, "sdf/sdfMemory", sdfMemFullCallback);
 
 INCLUDE_SDATA(const s32, "sdf/sdfMemory", sdfGrDrawFirstFlag);
 
 INCLUDE_SDATA(const s32, "sdf/sdfMemory", sdfFrameEvenOdd);
 
-
-/* DDS's build defines the heap root in this unit. */
-sdfMemHandleCB_tag sdfMemCB __attribute__((section(".bss"), aligned(8)));
