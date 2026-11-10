@@ -1,6 +1,7 @@
 #include "fpu.h"
 #include "common.h"
 #include "libsdf.h"
+#include "ps2asm.h"
 
 void sdfAddressResolver(void *aDataBody, void *aOffset, void *aAddrInfoPtr, s32 aAddrInfoLeng);
 
@@ -59,7 +60,7 @@ extern s32 (*p2sdSmgBuf)(void);
  */
 void sdfAddressResolver(void *aDataBody, void *aOffset, void *aAddrInfoPtr, s32 aAddrInfoLeng) {
     s32 *words = aDataBody;
-    s32 relocationBase = (s32)aOffset;
+    saddr_t relocationBase = EE_ADDR_S(aOffset);
     const u8 *table = aAddrInfoPtr;
     const u8 *commandCursor = table;
     s32 value;
